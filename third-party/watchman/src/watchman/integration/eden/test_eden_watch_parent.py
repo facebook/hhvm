@@ -8,8 +8,7 @@
 
 import os
 
-from facebook.eden.constants import STATS_MOUNTS_STATS
-from facebook.eden.ttypes import GetStatInfoParams
+from eden.fs.service.eden.thrift_types import GetStatInfoParams, STATS_MOUNTS_STATS
 from watchman.integration.lib import WatchmanEdenTestCase
 
 
@@ -22,7 +21,7 @@ class TestEdenWatchParent(WatchmanEdenTestCase.WatchmanEdenTestCase):
         def get_loaded_count() -> int:
             with self.eden.get_thrift_client_legacy() as client:
                 stats = client.getStatInfo(
-                    GetStatInfoParams(statsMask=STATS_MOUNTS_STATS)
+                    GetStatInfoParams(statsMask=STATS_MOUNTS_STATS)._to_py_deprecated()
                 )
             mountPointInfo = stats.mountPointInfo
             if mountPointInfo is None:

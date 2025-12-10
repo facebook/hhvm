@@ -14,6 +14,7 @@ path = "lib.rs"
 heapless = "0.9.1"
 operator = { version = "0.0.0", path = "../cargo/operator" }
 parser_core_types = { version = "0.0.0", path = "../cargo/core_types" }
+smallvec = { version = "1.15", features = ["impl_bincode", "serde", "specialization", "union"] }
 smart_constructors = { version = "0.0.0", path = "../cargo/smart_constructors" }
 stack_limit = { version = "0.0.0", path = "../../utils/stack_limit" }
 static_assertions = "1.1.0"

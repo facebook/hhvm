@@ -9,6 +9,7 @@ use parser_core_types::syntax_error::SyntaxError;
 use parser_core_types::syntax_error::{self as Errors};
 use parser_core_types::token_kind::TokenKind;
 use parser_core_types::trivia_kind::TriviaKind;
+use smallvec::SmallVec;
 
 use crate::declaration_parser::DeclarationParser;
 use crate::expression_parser::ExpressionParser;
@@ -575,17 +576,6 @@ where
         )
     }
 
-    // do not eat token and return Missing if first token is not Else
-    fn parse_else_opt(&mut self) -> S::Output {
-        let else_token = self.optional_token(TokenKind::Else);
-        if else_token.is_missing() {
-            else_token
-        } else {
-            let else_consequence = self.parse_statement();
-            self.sc_mut().make_else_clause(else_token, else_consequence)
-        }
-    }
-
     fn parse_if_statement(&mut self) -> S::Output {
         // SPEC:
         // if-statement:
@@ -593,16 +583,87 @@ where
         //
         // else-clause:
         //   else   statement
-        let if_keyword_token = self.assert_token(TokenKind::If);
-        let (if_left_paren, if_expr, if_right_paren, if_consequence) = self.parse_if_body_helper();
-        let else_syntax = self.parse_else_opt();
+
+        // To avoid recursing deeply for long else-if chains, we actually parse it as follows:
+        //
+        // if-statement:
+        //   if-header   else-if-clause*   else-footer-opt
+        //
+        // if-header:
+        //   if   (   expression   )   statement
+        //
+        // else-if-clause:
+        //   else   if   (   expression   )   statement
+        //
+        // else-footer: (where statement is not an if statement):
+        //   else   statement
+
+        struct ElseIfClause<T> {
+            else_token: T,
+            if_token: T,
+            if_left_paren: T,
+            if_expr: T,
+            if_right_paren: T,
+            if_stmt: T,
+        }
+
+        // parse if-header
+        let if_header_token = self.assert_token(TokenKind::If);
+        let (if_header_left_paren, if_header_expr, if_header_right_paren, if_header_stmt) =
+            self.parse_if_body_helper();
+
+        let mut parts = SmallVec::<[ElseIfClause<S::Output>; 8]>::new();
+
+        // parse else-if-clauses and else-footer-opt:
+        let else_footer_opt = loop {
+            let else_token = self.optional_token(TokenKind::Else);
+
+            if else_token.is_missing() {
+                break else_token;
+            } else if self.peek_token_kind() != TokenKind::If {
+                let else_consequence = self.parse_statement();
+                break self.sc_mut().make_else_clause(else_token, else_consequence);
+            }
+
+            let if_token = self.assert_token(TokenKind::If);
+            let (if_left_paren, if_expr, if_right_paren, if_stmt) = self.parse_if_body_helper();
+
+            parts.push(ElseIfClause {
+                else_token,
+                if_token,
+                if_left_paren,
+                if_expr,
+                if_right_paren,
+                if_stmt,
+            });
+        };
+
+        // Build the chain from the bottom up
+        let else_clause =
+            parts
+                .into_iter()
+                .rev()
+                .fold(else_footer_opt, |prev_else_clause, part| {
+                    let else_statement = self.sc_mut().make_if_statement(
+                        part.if_token,
+                        part.if_left_paren,
+                        part.if_expr,
+                        part.if_right_paren,
+                        part.if_stmt,
+                        prev_else_clause,
+                    );
+                    self.sc_mut()
+                        .make_else_clause(part.else_token, else_statement)
+                });
+
+        // Join the else clause with header
         self.sc_mut().make_if_statement(
-            if_keyword_token,
-            if_left_paren,
-            if_expr,
-            if_right_paren,
-            if_consequence,
-            else_syntax,
+            if_header_token,
+            if_header_left_paren,
+            if_header_expr,
+            if_header_right_paren,
+            if_header_stmt,
+            else_clause,
         )
     }
 

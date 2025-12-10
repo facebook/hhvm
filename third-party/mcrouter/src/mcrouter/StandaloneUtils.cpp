@@ -350,7 +350,7 @@ CmdLineOptions parseCmdLineOptions(int argc, char** argv, std::string pkgName) {
           res.unrecognizedOptions.insert(argv[optind - 1]);
         } else if (strcmp("proxy-threads", longOptions[longIndex].name) == 0) {
           if (strcmp(optarg, "auto") == 0) {
-            int nprocs = sysconf(_SC_NPROCESSORS_ONLN);
+            int nprocs = folly::available_concurrency();
             if (nprocs > 0) {
               res.libmcrouterOptionsOverrides["num_proxies"] =
                   std::to_string(nprocs);

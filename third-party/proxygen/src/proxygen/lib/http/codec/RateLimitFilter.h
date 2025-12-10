@@ -46,7 +46,7 @@ class RateLimiter : public folly::HHWheelTimer::Callback {
 
   virtual void recordRateLimitBreached() = 0;
 
-  virtual uint32_t getMaxEventsPerInvervalLowerBound() const = 0;
+  [[nodiscard]] virtual uint32_t getMaxEventsPerInvervalLowerBound() const = 0;
 
   void setSessionStats(HTTPSessionStats* httpSessionStats);
 

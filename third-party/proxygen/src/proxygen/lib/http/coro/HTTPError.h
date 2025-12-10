@@ -198,12 +198,12 @@ struct HTTPError : public std::exception {
     return *this;
   }
 
-  std::string describe() const {
+  [[nodiscard]] std::string describe() const {
     return folly::to<std::string>(
         "error=", getErrorString(code), "(", code, ") msg=", msg);
   }
 
-  const char* what() const noexcept override {
+  [[nodiscard]] const char* what() const noexcept override {
     return msg.c_str();
   }
 };

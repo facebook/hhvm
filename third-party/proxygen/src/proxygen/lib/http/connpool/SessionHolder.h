@@ -76,7 +76,7 @@ class SessionHolder : private HTTPSessionBase::InfoCallback {
    */
   static bool isPoolable(const HTTPSessionBase*);
 
-  const HTTPSessionBase& getSession() const;
+  [[nodiscard]] const HTTPSessionBase& getSession() const;
   HTTPTransaction* newTransaction(HTTPTransaction::Handler* upstreamHandler);
   void drain();
 
@@ -86,7 +86,7 @@ class SessionHolder : private HTTPSessionBase::InfoCallback {
    */
   void closeWithReset();
 
-  std::chrono::steady_clock::time_point getLastUseTime() const;
+  [[nodiscard]] std::chrono::steady_clock::time_point getLastUseTime() const;
 
   /**
    * Unlink this session holder instance from the necessary session lists..
@@ -100,7 +100,7 @@ class SessionHolder : private HTTPSessionBase::InfoCallback {
    */
   void link();
 
-  bool shouldAgeOut(std::chrono::milliseconds maxAge) const;
+  [[nodiscard]] bool shouldAgeOut(std::chrono::milliseconds maxAge) const;
   void describe(std::ostream& os) const;
 
   Endpoint getEndpoint() {

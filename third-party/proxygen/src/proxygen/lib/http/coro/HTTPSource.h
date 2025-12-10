@@ -78,7 +78,7 @@ class HTTPSource {
   virtual void stopReading(
       folly::Optional<const HTTPErrorCode> = folly::none) = 0;
 
-  virtual folly::Optional<uint64_t> getStreamID() const {
+  [[nodiscard]] virtual folly::Optional<uint64_t> getStreamID() const {
     return folly::none;
   }
 

@@ -28,11 +28,11 @@ class HPACKDecoderBase {
 
   using headers_t = std::vector<HPACKHeader>;
 
-  HPACK::DecodeError getError() const {
+  [[nodiscard]] HPACK::DecodeError getError() const {
     return err_;
   }
 
-  bool hasError() const {
+  [[nodiscard]] bool hasError() const {
     return err_ != HPACK::DecodeError::NONE;
   }
 

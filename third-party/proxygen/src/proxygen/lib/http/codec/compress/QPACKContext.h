@@ -28,35 +28,35 @@ class QPACKContext {
                                uint32_t base,
                                bool aboveBase);
 
-  const QPACKHeaderTable& getTable() const {
+  [[nodiscard]] const QPACKHeaderTable& getTable() const {
     return table_;
   }
 
-  uint32_t getTableSize() const {
+  [[nodiscard]] uint32_t getTableSize() const {
     return table_.capacity();
   }
 
-  uint32_t getBytesStored() const {
+  [[nodiscard]] uint32_t getBytesStored() const {
     return table_.bytes();
   }
 
-  uint32_t getHeadersStored() const {
+  [[nodiscard]] uint32_t getHeadersStored() const {
     return table_.size();
   }
 
-  uint32_t getInsertCount() const {
+  [[nodiscard]] uint32_t getInsertCount() const {
     return table_.getInsertCount();
   }
 
-  uint32_t getBlockedInserts() const {
+  [[nodiscard]] uint32_t getBlockedInserts() const {
     return blockedInsertions_;
   }
 
-  uint32_t getDuplications() const {
+  [[nodiscard]] uint32_t getDuplications() const {
     return duplications_;
   }
 
-  uint32_t getStaticRefs() const {
+  [[nodiscard]] uint32_t getStaticRefs() const {
     return staticRefs_;
   }
 
@@ -69,7 +69,7 @@ class QPACKContext {
     return tableSize / HPACKHeader::kMinLength;
   }
 
-  const StaticHeaderTable& getStaticTable() const {
+  [[nodiscard]] const StaticHeaderTable& getStaticTable() const {
     return QPACKStaticHeaderTable::get();
   }
 

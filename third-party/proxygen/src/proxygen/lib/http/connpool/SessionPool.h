@@ -76,49 +76,49 @@ class SessionPool : private SessionHolder::Callback {
    * sessions.
    */
   void setMaxIdleSessions(uint32_t num);
-  uint32_t getMaxIdleSessions() const;
+  [[nodiscard]] uint32_t getMaxIdleSessions() const;
 
   /**
    * Set/get the number of milliseconds that a session must remain
    * unused before it may be purged.
    */
   void setTimeout(std::chrono::milliseconds);
-  std::chrono::milliseconds getTimeout() const;
+  [[nodiscard]] std::chrono::milliseconds getTimeout() const;
 
   /**
    * Returns the number of idle sessions. That is, sessions with no open
    * outgoing transactions.
    */
-  uint32_t getNumIdleSessions() const;
+  [[nodiscard]] uint32_t getNumIdleSessions() const;
 
   /**
    * Returns the number of sessions that already have at least one
    * outgoing transaction open yet still support opening at least one more
    * outgoing transaction.
    */
-  uint32_t getNumActiveNonFullSessions() const;
+  [[nodiscard]] uint32_t getNumActiveNonFullSessions() const;
 
   /**
    * Returns the number of sessions that already have the maximum number
    * of outgoing transactions open on them.
    */
-  uint32_t getNumFullSessions() const;
+  [[nodiscard]] uint32_t getNumFullSessions() const;
 
   /**
    * Returns the number of active sessions (txns > 0).
    */
-  uint32_t getNumActiveSessions() const;
+  [[nodiscard]] uint32_t getNumActiveSessions() const;
 
   /**
    * Returns the total number of pooled sessions, regardless of activity.
    */
-  uint32_t getNumSessions() const;
+  [[nodiscard]] uint32_t getNumSessions() const;
 
   /**
    * Returns true if this SessionPool has no sessions in it. This implies
    * getNumSessions() == 0
    */
-  bool empty() const;
+  [[nodiscard]] bool empty() const;
 
   /**
    * Call this function to add a newly-created session to this

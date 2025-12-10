@@ -62,7 +62,7 @@ class HTTPSourceFilter : public HTTPSource {
   void stopReading(
       folly::Optional<const HTTPErrorCode> error = folly::none) override;
 
-  folly::Optional<uint64_t> getStreamID() const override {
+  [[nodiscard]] folly::Optional<uint64_t> getStreamID() const override {
     XCHECK(source_);
     return source_->getStreamID();
   }

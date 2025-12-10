@@ -43,7 +43,7 @@ class HeaderPiece {
     }
   }
 
-  bool isMultiValued() const {
+  [[nodiscard]] bool isMultiValued() const {
     return multiValued;
   }
 

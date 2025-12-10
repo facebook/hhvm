@@ -29,19 +29,19 @@ class Endpoint {
       : Endpoint(addr.getAddressStr(), addr.getPort(), isSecure) {
   }
 
-  const std::string& getHostname() const {
+  [[nodiscard]] const std::string& getHostname() const {
     return hostname_;
   }
 
-  uint16_t getPort() const {
+  [[nodiscard]] uint16_t getPort() const {
     return port_;
   }
 
-  bool isSecure() const {
+  [[nodiscard]] bool isSecure() const {
     return isSecure_;
   }
 
-  size_t getHash() const {
+  [[nodiscard]] size_t getHash() const {
     return hash_;
   }
 

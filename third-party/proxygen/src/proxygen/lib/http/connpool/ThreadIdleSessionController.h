@@ -54,7 +54,7 @@ class ThreadIdleSessionController {
   /**
    * Get the number of total idle sessions.
    */
-  uint32_t getTotalIdleSessions() const;
+  [[nodiscard]] uint32_t getTotalIdleSessions() const;
 
  private:
   uint32_t totalIdleSessions_;

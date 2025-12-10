@@ -43,11 +43,11 @@ class HPACKDecodeBuffer {
     remainingBytes_ = totalBytes;
   }
 
-  uint32_t consumedBytes() const {
+  [[nodiscard]] uint32_t consumedBytes() const {
     return totalBytes_ - remainingBytes_;
   }
 
-  const folly::io::Cursor& cursor() const {
+  [[nodiscard]] const folly::io::Cursor& cursor() const {
     return cursor_;
   }
 

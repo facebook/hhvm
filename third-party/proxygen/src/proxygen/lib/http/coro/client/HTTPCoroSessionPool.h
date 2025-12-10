@@ -161,17 +161,17 @@ class HTTPCoroSessionPool {
     poolParams_.maxAge = maxAge;
   }
 
-  bool full() const {
+  [[nodiscard]] bool full() const {
     return idleSessions_.size() + availableSessions_.size() +
                fullSessions_.size() + connectsInProgress_ >=
            poolParams_.maxConnections;
   }
 
-  bool hasAvailableSessions() const {
+  [[nodiscard]] bool hasAvailableSessions() const {
     return availableSessions_.size() + idleSessions_.size();
   }
 
-  bool hasIdleSessions() const {
+  [[nodiscard]] bool hasIdleSessions() const {
     return idleSessions_.size();
   }
 
@@ -262,9 +262,9 @@ class HTTPCoroSessionPool {
   folly::coro::Task<void> addNewConnection();
   void signalWaiters(uint32_t n);
   void cancelWaiters(Exception ex);
-  bool hasSession() const;
+  [[nodiscard]] bool hasSession() const;
   void setSslManager();
-  bool isDraining() const {
+  [[nodiscard]] bool isDraining() const {
     return cancellationSource_.isCancellationRequested();
   }
 

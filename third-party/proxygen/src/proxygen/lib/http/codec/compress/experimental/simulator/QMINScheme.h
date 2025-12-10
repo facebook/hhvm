@@ -415,7 +415,7 @@ class QMINScheme : public CompressionScheme {
     callback.onHeadersComplete(sz, true);
   }
 
-  uint32_t getHolBlockCount() const override {
+  [[nodiscard]] uint32_t getHolBlockCount() const override {
     return 0;
   }
 

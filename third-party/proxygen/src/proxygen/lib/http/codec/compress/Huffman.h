@@ -39,7 +39,7 @@ struct HuffNode {
     bool isSuperNode : 1;
   } metadata{.bits = 0, .isSuperNode = false};
 
-  bool isLeaf() const {
+  [[nodiscard]] bool isLeaf() const {
     return !metadata.isSuperNode;
   }
 };
@@ -121,7 +121,7 @@ class HuffTree {
    * @param literal string literal
    * @return size how many bytes it will take to encode the given string
    */
-  uint32_t getEncodeSize(folly::StringPiece literal) const;
+  [[nodiscard]] uint32_t getEncodeSize(folly::StringPiece literal) const;
 
   /**
    * get the binary representation for a given character, as a 32-bit word and
@@ -133,11 +133,11 @@ class HuffTree {
    * Example:
    * 'e' will be encoded as 1 using 4 bits: 0001
    */
-  std::pair<uint32_t, uint8_t> getCode(uint8_t ch) const;
+  [[nodiscard]] std::pair<uint32_t, uint8_t> getCode(uint8_t ch) const;
 
   // get internal tables for codes and bit lengths, useful for testing
-  const uint32_t* codesTable() const;
-  const uint8_t* bitsTable() const;
+  [[nodiscard]] const uint32_t* codesTable() const;
+  [[nodiscard]] const uint8_t* bitsTable() const;
 
  private:
   void fillIndex(SuperHuffNode& snode,

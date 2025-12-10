@@ -54,7 +54,7 @@ class CompressionScheme : public folly::EventBase::LoopCallback {
                       SimStreamingCallback& cb) = 0;
 
   /* Return the number of times the decoder was head-of-line blocked */
-  virtual uint32_t getHolBlockCount() const = 0;
+  [[nodiscard]] virtual uint32_t getHolBlockCount() const = 0;
 
   /* Loop callback simulates packet flushing once per loop*/
   void runLoopCallback() noexcept override;

@@ -42,7 +42,7 @@ class HeaderTable {
    * Return Insert Count - the total number of headers inserted to this table,
    * including evictions
    */
-  uint32_t getInsertCount() const {
+  [[nodiscard]] uint32_t getInsertCount() const {
     return insertCount_;
   }
 
@@ -80,12 +80,12 @@ class HeaderTable {
    *
    * @return the header entry
    */
-  const HPACKHeader& getHeader(uint32_t index) const;
+  [[nodiscard]] const HPACKHeader& getHeader(uint32_t index) const;
 
   /**
    * Checks if an external index is valid.
    */
-  bool isValid(uint32_t index) const;
+  [[nodiscard]] bool isValid(uint32_t index) const;
 
   /**
    * @return true if there is at least one header with the given name
@@ -95,7 +95,7 @@ class HeaderTable {
   /**
    * @return the map holding the indexed names
    */
-  const names_map& names() const {
+  [[nodiscard]] const names_map& names() const {
     return names_;
   }
 
@@ -104,12 +104,12 @@ class HeaderTable {
    * headers with the given name we pick the last one added to the header
    * table, but the way we pick the header can be arbitrary.
    */
-  uint32_t nameIndex(const HPACKHeaderName& headerName) const;
+  [[nodiscard]] uint32_t nameIndex(const HPACKHeaderName& headerName) const;
 
   /**
    * Table capacity, or maximum number of bytes we can hold.
    */
-  uint32_t capacity() const {
+  [[nodiscard]] uint32_t capacity() const {
     return capacity_;
   }
 
@@ -117,7 +117,7 @@ class HeaderTable {
    * Returns the maximum table length required to support HPACK headers given
    * the specified capacity bytes
    */
-  uint32_t getMaxTableLength(uint32_t capacityVal) const;
+  [[nodiscard]] uint32_t getMaxTableLength(uint32_t capacityVal) const;
 
   /**
    * Sets the current capacity of the header table, and evicts entries
@@ -128,21 +128,21 @@ class HeaderTable {
   /**
    * @return number of valid entries
    */
-  uint32_t size() const {
+  [[nodiscard]] uint32_t size() const {
     return size_;
   }
 
   /**
    * @return size in bytes, the sum of the size of all entries
    */
-  uint32_t bytes() const {
+  [[nodiscard]] uint32_t bytes() const {
     return bytes_;
   }
 
   /**
    * @return how many slots we have in the table
    */
-  size_t length() const {
+  [[nodiscard]] size_t length() const {
     return table_.size();
   }
 
@@ -196,22 +196,22 @@ class HeaderTable {
   /**
    * Move the index to the right.
    */
-  uint32_t next(uint32_t i) const;
+  [[nodiscard]] uint32_t next(uint32_t i) const;
 
   /**
    * Get the index of the tail element of the table.
    */
-  uint32_t tail() const;
+  [[nodiscard]] uint32_t tail() const;
 
   /**
    * Translate internal index to external one, including a static version.
    */
-  uint32_t toExternal(uint32_t internalIndex) const;
+  [[nodiscard]] uint32_t toExternal(uint32_t internalIndex) const;
 
   /**
    * Translate external index to internal one.
    */
-  uint32_t toInternal(uint32_t externalIndex) const;
+  [[nodiscard]] uint32_t toInternal(uint32_t externalIndex) const;
 
   uint32_t capacity_{0};
   uint32_t bytes_{0}; // size in bytes of the current entries

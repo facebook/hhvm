@@ -99,7 +99,7 @@ class HTTPClientConnectionCache : public HTTPSessionFactory {
       const HTTPCoroConnector::ConnectionParams* connParams,
       folly::Optional<std::string> serverAddress = folly::none);
 
-  size_t getNumPools() const {
+  [[nodiscard]] size_t getNumPools() const {
     return pools_.size();
   }
 

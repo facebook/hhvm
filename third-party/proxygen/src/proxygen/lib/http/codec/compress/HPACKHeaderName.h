@@ -112,14 +112,14 @@ class HPACKHeaderName {
   /*
    * Return std::string stored in HPACKHeaderName
    */
-  const std::string& get() const {
+  [[nodiscard]] const std::string& get() const {
     return *address_;
   }
 
   /*
    * Returns the HTTPHeaderCode associated with the wrapped address_
    */
-  HTTPHeaderCode getHeaderCode() const {
+  [[nodiscard]] HTTPHeaderCode getHeaderCode() const {
     return HTTPCommonHeaders::getCodeFromTableName(
         address_, HTTPCommonHeaderTableType::TABLE_LOWERCASE);
   }
@@ -127,7 +127,7 @@ class HPACKHeaderName {
   /*
    * Returns whether the name pointed to by this instance is a common header
    */
-  bool isCommonHeader() const {
+  [[nodiscard]] bool isCommonHeader() const {
     return HTTPCommonHeaders::isNameFromTable(
         address_, HTTPCommonHeaderTableType::TABLE_LOWERCASE);
   }
@@ -135,10 +135,10 @@ class HPACKHeaderName {
   /*
    * Exposing wrapped std::string member properties
    */
-  uint32_t size() const {
+  [[nodiscard]] uint32_t size() const {
     return (uint32_t)(address_->size());
   }
-  const char* c_str() const {
+  [[nodiscard]] const char* c_str() const {
     return address_->c_str();
   }
 
@@ -193,7 +193,7 @@ class HPACKHeaderName {
    * Returns whether the underlying address_ points to a string that was
    * allocated (memory) by this instance
    */
-  bool isAllocated() const {
+  [[nodiscard]] bool isAllocated() const {
     if (address_ == nullptr) {
       return false;
     } else {

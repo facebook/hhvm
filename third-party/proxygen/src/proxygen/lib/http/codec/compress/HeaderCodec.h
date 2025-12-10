@@ -72,7 +72,7 @@ class HeaderCodec {
     maxUncompressed_ = maxUncompressed;
   }
 
-  uint64_t getMaxUncompressed() const {
+  [[nodiscard]] uint64_t getMaxUncompressed() const {
     return maxUncompressed_;
   }
 

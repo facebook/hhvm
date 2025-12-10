@@ -61,7 +61,7 @@ class HPACKHeader {
   /**
    * size of usable bytes of the header entry, does not include overhead
    */
-  uint32_t realBytes() const {
+  [[nodiscard]] uint32_t realBytes() const {
     return realBytes(name.size(), value.size());
   }
 
@@ -74,7 +74,7 @@ class HPACKHeader {
   /**
    * size in bytes of the header entry, as defined in the HPACK spec
    */
-  uint32_t bytes() const {
+  [[nodiscard]] uint32_t bytes() const {
     return kMinLength + realBytes();
   }
 
@@ -103,14 +103,14 @@ class HPACKHeader {
     return value > other.value;
   }
 
-  HPACKHeader copy() const {
+  [[nodiscard]] HPACKHeader copy() const {
     return HPACKHeader(name, value);
   }
 
   /**
    * Some header entries don't have a value, see StaticHeaderTable
    */
-  bool hasValue() const {
+  [[nodiscard]] bool hasValue() const {
     return !value.empty();
   }
 

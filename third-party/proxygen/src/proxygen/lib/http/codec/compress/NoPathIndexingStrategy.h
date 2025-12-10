@@ -20,9 +20,9 @@ class NoPathIndexingStrategy : public HeaderIndexingStrategy {
   }
 
   // For compression simulations we do not want to index :path headers
-  bool indexHeader(const HPACKHeaderName& name,
-                   folly::StringPiece value,
-                   bool) const override {
+  [[nodiscard]] bool indexHeader(const HPACKHeaderName& name,
+                                 folly::StringPiece value,
+                                 bool) const override {
     if (name.getHeaderCode() == HTTP_HEADER_COLON_PATH) {
       return false;
     } else {

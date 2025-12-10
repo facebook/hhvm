@@ -36,7 +36,7 @@ class QPACKHeaderTable : public HeaderTable {
   /**
    * Returns true if the absolute index has not been ack'ed yet.
    */
-  bool isVulnerable(uint32_t absIndex) const {
+  [[nodiscard]] bool isVulnerable(uint32_t absIndex) const {
     return (absIndex > ackedInsertCount_);
   }
 
@@ -90,12 +90,12 @@ class QPACKHeaderTable : public HeaderTable {
    *
    * @return 0 in case the header is not found
    */
-  uint32_t getIndex(const HPACKHeader& header,
-                    bool allowVulnerable = true) const;
+  [[nodiscard]] uint32_t getIndex(const HPACKHeader& header,
+                                  bool allowVulnerable = true) const;
 
-  uint32_t getIndex(const HPACKHeaderName& name,
-                    folly::StringPiece value,
-                    bool allowVulnerable = true) const;
+  [[nodiscard]] uint32_t getIndex(const HPACKHeaderName& name,
+                                  folly::StringPiece value,
+                                  bool allowVulnerable = true) const;
 
   /**
    * Get the table entry at the given external index.  If base is 0,
@@ -104,14 +104,15 @@ class QPACKHeaderTable : public HeaderTable {
    *
    * @return the header entry
    */
-  const HPACKHeader& getHeader(uint32_t index, uint32_t base = 0) const;
+  [[nodiscard]] const HPACKHeader& getHeader(uint32_t index,
+                                             uint32_t base = 0) const;
 
   /**
    * Checks if an external index is valid.  If base is 0,
    * index is relative to head/insertCount.  If base is non-zero, index is
    * relative to base.
    */
-  bool isValid(uint32_t index, uint32_t base = 0) const;
+  [[nodiscard]] bool isValid(uint32_t index, uint32_t base = 0) const;
 
   /**
    * Get any index of a header that has the given name. From all the
@@ -120,8 +121,8 @@ class QPACKHeaderTable : public HeaderTable {
    *
    * See getIndex for a description of base/allowVulnerable
    */
-  uint32_t nameIndex(const HPACKHeaderName& headerName,
-                     bool allowVulnerable = true) const;
+  [[nodiscard]] uint32_t nameIndex(const HPACKHeaderName& headerName,
+                                   bool allowVulnerable = true) const;
 
   bool onInsertCountIncrement(uint32_t numInserts) {
     // compare this way to avoid overflow
@@ -148,7 +149,7 @@ class QPACKHeaderTable : public HeaderTable {
   /**
    * Convert a relative index to an absolute index
    */
-  uint32_t relativeToAbsolute(uint32_t relativeIndex) const {
+  [[nodiscard]] uint32_t relativeToAbsolute(uint32_t relativeIndex) const {
     DCHECK(isValid(relativeIndex, 0));
     return insertCount_ - relativeIndex + 1;
   }
@@ -156,7 +157,7 @@ class QPACKHeaderTable : public HeaderTable {
   /**
    * Convert an absolute index to a relative index
    */
-  uint32_t absoluteToRelative(uint32_t absIndex) const {
+  [[nodiscard]] uint32_t absoluteToRelative(uint32_t absIndex) const {
     CHECK_LE(absIndex, insertCount_);
     return insertCount_ - absIndex + 1;
   }
@@ -170,10 +171,10 @@ class QPACKHeaderTable : public HeaderTable {
   /*
    * Shared implementation for getIndex and nameIndex
    */
-  uint32_t getIndexImpl(const HPACKHeaderName& header,
-                        folly::StringPiece value,
-                        bool nameOnly,
-                        bool allowVulnerable = true) const;
+  [[nodiscard]] uint32_t getIndexImpl(const HPACKHeaderName& header,
+                                      folly::StringPiece value,
+                                      bool nameOnly,
+                                      bool allowVulnerable = true) const;
 
   /*
    * Increase table length to newLength
@@ -198,10 +199,11 @@ class QPACKHeaderTable : public HeaderTable {
   /**
    * Translate external index to internal one.
    */
-  uint32_t toInternal(uint32_t externalIndex, uint32_t base) const;
+  [[nodiscard]] uint32_t toInternal(uint32_t externalIndex,
+                                    uint32_t base) const;
 
-  uint32_t internalToAbsolute(uint32_t internalIndex) const;
-  uint32_t absoluteToInternal(uint32_t absoluteIndex) const;
+  [[nodiscard]] uint32_t internalToAbsolute(uint32_t internalIndex) const;
+  [[nodiscard]] uint32_t absoluteToInternal(uint32_t absoluteIndex) const;
 
   uint32_t drainedBytes_{0};
   uint32_t minUsable_{1};

@@ -288,7 +288,7 @@ void CAresResolver::Query::queryCallback(
       ares_addrttl ttls[kMaxRecords];
       int nttls = kMaxRecords;
 
-      hostent* hst;
+      hostent* hst = nullptr;
       status = ares_parse_a_reply(abuf, alen, &hst, ttls, &nttls);
       unique_ptr<hostent, HostentDeleter> host(hst);
 
@@ -325,7 +325,7 @@ void CAresResolver::Query::queryCallback(
       ares_addr6ttl ttls[kMaxRecords];
       int nttls = kMaxRecords;
 
-      hostent* hst;
+      hostent* hst = nullptr;
       status = ares_parse_aaaa_reply(abuf, alen, &hst, ttls, &nttls);
       unique_ptr<hostent, HostentDeleter> host(hst);
 

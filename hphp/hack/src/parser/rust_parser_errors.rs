@@ -1057,7 +1057,11 @@ fn get_positions_binop_allows_await(t: S<'_>) -> BinopAllowsAwaitInPositions {
     match token_kind(t) {
         None => BinopAllowAwaitNone,
         Some(t) => match t {
-            BarBar | AmpersandAmpersand | QuestionColon | QuestionQuestion => BinopAllowAwaitLeft,
+            BarBar
+            | AmpersandAmpersand
+            | QuestionColon
+            | QuestionQuestion
+            | BarQuestionGreaterThan => BinopAllowAwaitLeft,
             Equal
             | BarEqual
             | PlusEqual
@@ -1092,8 +1096,7 @@ fn get_positions_binop_allows_await(t: S<'_>) -> BinopAllowsAwaitInPositions {
             | LessThanLessThan
             | GreaterThanGreaterThan
             | Carat
-            | BarGreaterThan
-            | BarQuestionGreaterThan => BinopAllowAwaitBoth,
+            | BarGreaterThan => BinopAllowAwaitBoth,
             _ => BinopAllowAwaitNone,
         },
     }
@@ -3004,9 +3007,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 // Special case the pipe operator error message
                 BinaryExpression(x)
                     if std::ptr::eq(node, &x.right_operand)
-                        && (token_kind(&x.operator) == Some(TokenKind::BarGreaterThan)
-                            || token_kind(&x.operator)
-                                == Some(TokenKind::BarQuestionGreaterThan)) =>
+                        && token_kind(&x.operator) == Some(TokenKind::BarGreaterThan) =>
                 {
                     let (feature, enabled) = self.is_pipe_await_enabled();
                     if !enabled {

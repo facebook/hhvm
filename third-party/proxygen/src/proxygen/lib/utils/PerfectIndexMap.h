@@ -54,7 +54,7 @@ class PerfectIndexMap {
 
   // Getters into the underlying map.
 
-  folly::Optional<std::string> getSingleOrNone(
+  [[nodiscard]] folly::Optional<std::string> getSingleOrNone(
       const std::string &keyStr) const {
     auto key = PerfectHashStrToKey(keyStr);
     if (key == OtherKey) {
@@ -66,7 +66,7 @@ class PerfectIndexMap {
     }
   }
 
-  folly::Optional<std::string> getSingleOtherKeyOrNone(
+  [[nodiscard]] folly::Optional<std::string> getSingleOtherKeyOrNone(
       const std::string &keyStr) const {
     CHECK(PerfectHashStrToKey(keyStr) == OtherKey);
     const std::string *result = getSingleOtherKey(keyStr);
@@ -173,7 +173,8 @@ class PerfectIndexMap {
  private:
   // Utility method for comparing strings private to this class as specified
   // by template parameters.
-  bool stringsEqual(const std::string &strA, const std::string &strB) const {
+  [[nodiscard]] bool stringsEqual(const std::string &strA,
+                                  const std::string &strB) const {
     if (CaseInsensitive) {
       // One might be tempted to merge this statement with that above
       // but that would be wrong.  If CaseInsensitive is true, we do not
@@ -202,7 +203,8 @@ class PerfectIndexMap {
     }
     return nullptr;
   }
-  const std::string *getSingleOtherKey(const std::string &keyStr) const {
+  [[nodiscard]] const std::string *getSingleOtherKey(
+      const std::string &keyStr) const {
     size_t searchIndex = 0;
     auto index = searchForOtherKey(keyStr, searchIndex);
     if (index != -1) {

@@ -39,7 +39,7 @@ class ConditionalGate {
 
  public:
   /* Return where this gate is open */
-  bool allConditionsMet() const {
+  [[nodiscard]] bool allConditionsMet() const {
     return conditions_.all();
   }
 
@@ -69,7 +69,7 @@ class ConditionalGate {
   bool get(E e) const {
     return get(static_cast<size_t>(e));
   }
-  bool get(size_t i = 0) const {
+  [[nodiscard]] bool get(size_t i = 0) const {
     CHECK_LT(i, conditions_.size());
     return conditions_[i];
   }

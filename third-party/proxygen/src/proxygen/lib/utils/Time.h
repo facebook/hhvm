@@ -170,7 +170,7 @@ class TimeUtilGeneric {
   virtual ~TimeUtilGeneric() {
   }
 
-  virtual std::chrono::time_point<ClockType> now() const {
+  [[nodiscard]] virtual std::chrono::time_point<ClockType> now() const {
     return getCurrentTime<ClockType>();
   }
 
@@ -247,7 +247,7 @@ class StopWatch {
     running_ = false;
   }
 
-  bool running() const {
+  [[nodiscard]] bool running() const {
     return running_;
   }
 

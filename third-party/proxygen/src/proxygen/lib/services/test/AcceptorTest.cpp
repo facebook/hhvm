@@ -21,7 +21,7 @@ class TestConnection : public wangle::ManagedConnection {
   }
   void describe(std::ostream& /*os*/) const override {
   }
-  bool isBusy() const override {
+  [[nodiscard]] bool isBusy() const override {
     return false;
   }
   void notifyPendingShutdown() override {

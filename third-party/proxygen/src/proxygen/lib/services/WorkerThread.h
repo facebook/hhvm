@@ -97,7 +97,7 @@ class WorkerThread {
    * Get ID of the underlying thread objects
    * (valid only when the thread is running).
    */
-  std::thread::id getThreadId() const noexcept {
+  [[nodiscard]] std::thread::id getThreadId() const noexcept {
     return thread_.get_id();
   }
 

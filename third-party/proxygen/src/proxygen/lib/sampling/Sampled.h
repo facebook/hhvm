@@ -35,11 +35,11 @@ class Sampled {
     }
   }
 
-  uint32_t getSamplingWeight() const {
+  [[nodiscard]] uint32_t getSamplingWeight() const {
     return samplingWeight_;
   }
 
-  bool isSampled() const {
+  [[nodiscard]] bool isSampled() const {
     return samplingWeight_ > 0;
   }
 

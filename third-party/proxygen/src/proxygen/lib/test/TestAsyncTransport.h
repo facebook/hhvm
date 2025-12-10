@@ -24,13 +24,13 @@ class TestAsyncTransport
     static std::shared_ptr<WriteEvent> newEvent(const struct iovec* vec,
                                                 size_t count);
 
-    proxygen::TimePoint getTime() const {
+    [[nodiscard]] proxygen::TimePoint getTime() const {
       return time_;
     }
-    const struct iovec* getIoVec() const {
+    [[nodiscard]] const struct iovec* getIoVec() const {
       return vec_;
     }
-    size_t getCount() const {
+    [[nodiscard]] size_t getCount() const {
       return count_;
     }
 
@@ -49,7 +49,7 @@ class TestAsyncTransport
 
   // AsyncTransport methods
   void setReadCB(folly::AsyncTransport::ReadCallback* callback) override;
-  ReadCallback* getReadCallback() const override;
+  [[nodiscard]] ReadCallback* getReadCallback() const override;
   void write(folly::AsyncTransport::WriteCallback* callback,
              const void* buf,
              size_t bytes,
@@ -67,16 +67,16 @@ class TestAsyncTransport
   void shutdownWriteNow() override;
   void getPeerAddress(folly::SocketAddress* addr) const override;
   void getLocalAddress(folly::SocketAddress* addr) const override;
-  bool good() const override;
-  bool readable() const override;
-  bool connecting() const override;
-  bool error() const override;
+  [[nodiscard]] bool good() const override;
+  [[nodiscard]] bool readable() const override;
+  [[nodiscard]] bool connecting() const override;
+  [[nodiscard]] bool error() const override;
   void attachEventBase(folly::EventBase* eventBase) override;
   void detachEventBase() override;
-  bool isDetachable() const override;
-  folly::EventBase* getEventBase() const override;
+  [[nodiscard]] bool isDetachable() const override;
+  [[nodiscard]] folly::EventBase* getEventBase() const override;
   void setSendTimeout(uint32_t milliseconds) override;
-  uint32_t getSendTimeout() const override;
+  [[nodiscard]] uint32_t getSendTimeout() const override;
 
   // Methods to control read events
   void addReadEvent(const void* buf,
@@ -118,19 +118,19 @@ class TestAsyncTransport
     rawBytesWritten_ = bytes;
   }
 
-  size_t getAppBytesWritten() const override {
+  [[nodiscard]] size_t getAppBytesWritten() const override {
     return appBytesWritten_;
   }
-  size_t getRawBytesWritten() const override {
+  [[nodiscard]] size_t getRawBytesWritten() const override {
     return rawBytesWritten_;
   }
-  size_t getAppBytesReceived() const override {
+  [[nodiscard]] size_t getAppBytesReceived() const override {
     return 0;
   }
-  size_t getRawBytesReceived() const override {
+  [[nodiscard]] size_t getRawBytesReceived() const override {
     return 0;
   }
-  bool isEorTrackingEnabled() const override {
+  [[nodiscard]] bool isEorTrackingEnabled() const override {
     return eorTrackingEnabled_;
   }
   void setEorTracking(bool flag) override {
@@ -147,7 +147,7 @@ class TestAsyncTransport
 
   class ReadEvent;
 
-  bool writesAllowed() const {
+  [[nodiscard]] bool writesAllowed() const {
     return writeState_ == kStateOpen || writeState_ == kStatePaused;
   }
 

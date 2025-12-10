@@ -77,19 +77,19 @@ class TestAsyncTransport::ReadEvent {
     free(buffer_);
   }
 
-  std::chrono::milliseconds getDelay() const {
+  [[nodiscard]] std::chrono::milliseconds getDelay() const {
     return delay_;
   }
 
-  bool isFinalEvent() const {
+  [[nodiscard]] bool isFinalEvent() const {
     return buffer_ == nullptr && movableBuffer_.get() == nullptr;
   }
 
-  const char* getBuffer() const {
+  [[nodiscard]] const char* getBuffer() const {
     return readStart_;
   }
 
-  size_t getLength() const {
+  [[nodiscard]] size_t getLength() const {
     return (dataEnd_ - readStart_);
   }
 
@@ -98,15 +98,15 @@ class TestAsyncTransport::ReadEvent {
     readStart_ += length;
   }
 
-  bool isError() const {
+  [[nodiscard]] bool isError() const {
     return isError_;
   }
 
-  const folly::AsyncSocketException& getException() const {
+  [[nodiscard]] const folly::AsyncSocketException& getException() const {
     return exception_;
   }
 
-  bool isMovableBuffer() const {
+  [[nodiscard]] bool isMovableBuffer() const {
     return movableBuffer_.get() != nullptr;
   }
 

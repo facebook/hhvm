@@ -22,7 +22,7 @@ namespace proxygen {
  */
 class RendezvousHash : public ConsistentHash {
  public:
-  double getMaxErrorRate() const override;
+  [[nodiscard]] double getMaxErrorRate() const override;
 
   // Build the list of possible candidates' hash weight and their input weight.
   // Hash weight is taken as the hash(candidate id), whereas input weight is
@@ -33,10 +33,11 @@ class RendezvousHash : public ConsistentHash {
   // beforehand and each candidate has the same relative weight.
   void buildEqualWeights(std::vector<uint64_t>&);
 
-  size_t get(const uint64_t key, const size_t rank = 0) const override;
+  [[nodiscard]] size_t get(const uint64_t key,
+                           const size_t rank = 0) const override;
 
-  std::vector<size_t> selectNUnweighted(const uint64_t key,
-                                        const size_t rank) const;
+  [[nodiscard]] std::vector<size_t> selectNUnweighted(const uint64_t key,
+                                                      const size_t rank) const;
 
  protected:
   size_t getNthByWeightedHash(const uint64_t key,
@@ -45,7 +46,7 @@ class RendezvousHash : public ConsistentHash {
 
   uint64_t computeHash(const char* data, size_t len) const;
 
-  uint64_t computeHash(uint64_t i) const;
+  [[nodiscard]] uint64_t computeHash(uint64_t i) const;
 
   std::vector<std::pair<uint64_t, uint64_t>> weights_;
 };

@@ -262,13 +262,13 @@ struct WtStreamManager {
    * nextWritable() returns the next writable stream **if exists and there is
    * available connection flow control**. Otherwise, returns nullptr
    */
-  WtWriteHandle* nextWritable() const noexcept;
+  [[nodiscard]] WtWriteHandle* nextWritable() const noexcept;
 
-  bool hasStreams() const noexcept {
+  [[nodiscard]] bool hasStreams() const noexcept {
     return !streams_.empty();
   }
 
-  bool isClosed() const noexcept {
+  [[nodiscard]] bool isClosed() const noexcept {
     return shutdown_ && !hasStreams();
   }
 
@@ -289,8 +289,8 @@ struct WtStreamManager {
   void shutdown(CloseSession) noexcept;
 
   // returns true iff we can create self-initiated uni/bidi streams
-  bool canCreateUni() const noexcept;
-  bool canCreateBidi() const noexcept;
+  [[nodiscard]] bool canCreateUni() const noexcept;
+  [[nodiscard]] bool canCreateBidi() const noexcept;
 
  private:
   [[nodiscard]] bool isSelf(uint64_t streamId) const;
@@ -301,7 +301,7 @@ struct WtStreamManager {
   [[nodiscard]] bool isBidi(uint64_t streamId) const;
   void enqueueEvent(Event&& ev) noexcept;
   void onStreamWritable(WtWriteHandle& wh) noexcept;
-  bool hasEvent() const noexcept;
+  [[nodiscard]] bool hasEvent() const noexcept;
   struct BidiHandle;
   friend struct BidiHandle;
   BidiHandle* getOrCreateBidiHandleImpl(uint64_t streamId) noexcept;
@@ -319,7 +319,7 @@ struct WtStreamManager {
   };
   // value maps to second lsb as per rfc-9000
   enum WtStreamDir : uint8_t { Bidi = 0x00, Uni = 0x01 };
-  bool streamLimitExceeded(uint64_t streamId) const noexcept;
+  [[nodiscard]] bool streamLimitExceeded(uint64_t streamId) const noexcept;
 
   const WtDir dir_;
 
@@ -341,7 +341,8 @@ struct WtStreamManager {
     using Type = std::array<StreamsCounter, StreamType::Max>;
     explicit StreamsCounterContainer() noexcept = default;
     StreamsCounter& getCounter(uint64_t streamId) noexcept;
-    const StreamsCounter& getCounter(uint64_t streamId) const noexcept;
+    [[nodiscard]] const StreamsCounter& getCounter(
+        uint64_t streamId) const noexcept;
 
    private:
     Type streamsCounter_;
@@ -351,7 +352,7 @@ struct WtStreamManager {
     using Type = std::array<uint64_t, StreamType::Max>;
     explicit MaxStreamsContainer(Type maxStreams) noexcept;
     uint64_t& getMaxStreams(uint64_t streamId) noexcept;
-    uint64_t getMaxStreams(uint64_t streamId) const noexcept;
+    [[nodiscard]] uint64_t getMaxStreams(uint64_t streamId) const noexcept;
 
    private:
     Type maxStreams_;

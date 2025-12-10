@@ -27,7 +27,7 @@ class ServiceConfiguration {
   void setTakeoverEnabled(bool enabled) {
     takeoverEnabled_ = enabled;
   }
-  bool takeoverEnabled() const {
+  [[nodiscard]] bool takeoverEnabled() const {
     return takeoverEnabled_;
   }
 

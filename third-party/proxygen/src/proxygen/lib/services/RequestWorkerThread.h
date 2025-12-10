@@ -53,7 +53,7 @@ class RequestWorkerThread {
   /**
    * Return unique 8bit worker ID.
    */
-  uint8_t getWorkerId() const;
+  [[nodiscard]] uint8_t getWorkerId() const;
 
   static RequestWorkerThread* getRequestWorkerThread() {
     return currentRequestWorker_;
@@ -83,8 +83,8 @@ class RequestWorkerThread {
    * the use of swapping such that threads will automatically see updated
    * fields on update.
    */
-  std::shared_ptr<const wangle::LoadShedConfiguration> getLoadShedConfig()
-      const {
+  [[nodiscard]] std::shared_ptr<const wangle::LoadShedConfiguration>
+  getLoadShedConfig() const {
     return loadShedConfig_;
   }
   void setLoadShedConfig(

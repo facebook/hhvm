@@ -180,7 +180,8 @@ class Service {
   /**
    * List of workers
    */
-  const std::list<std::unique_ptr<ServiceWorker>>& getServiceWorkers() const {
+  [[nodiscard]] const std::list<std::unique_ptr<ServiceWorker>>&
+  getServiceWorkers() const {
     return workers_;
   }
 

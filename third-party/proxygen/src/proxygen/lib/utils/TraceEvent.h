@@ -73,7 +73,7 @@ class TraceEvent {
       return boost::apply_visitor(visitor, value_);
     }
 
-    const std::type_info& type() const {
+    [[nodiscard]] const std::type_info& type() const {
       return value_.type();
     }
 
@@ -107,11 +107,11 @@ class TraceEvent {
       ++itr_;
     }
 
-    bool isValid() const {
+    [[nodiscard]] bool isValid() const {
       return itr_ != event_.metaData_.end();
     }
 
-    TraceFieldType getKey() const {
+    [[nodiscard]] TraceFieldType getKey() const {
       return itr_->first;
     }
 
@@ -120,7 +120,7 @@ class TraceEvent {
       return itr_->second.getValueAs<T>();
     }
 
-    const std::type_info& type() const {
+    [[nodiscard]] const std::type_info& type() const {
       return itr_->second.type();
     }
 
@@ -154,26 +154,26 @@ class TraceEvent {
   /**
    * @Returns true iff start() has been called on this TraceEvent.
    */
-  bool hasStarted() const;
+  [[nodiscard]] bool hasStarted() const;
 
   /**
    * @Returns true iff end() has been called on this TraceEvent.
    */
-  bool hasEnded() const;
+  [[nodiscard]] bool hasEnded() const;
 
-  TimePoint getStartTime() const {
+  [[nodiscard]] TimePoint getStartTime() const {
     return start_;
   }
 
-  TimePoint getEndTime() const {
+  [[nodiscard]] TimePoint getEndTime() const {
     return end_;
   }
 
-  TraceEventType getType() const {
+  [[nodiscard]] TraceEventType getType() const {
     return type_;
   }
 
-  uint32_t getID() const {
+  [[nodiscard]] uint32_t getID() const {
     return id_;
   }
 
@@ -181,11 +181,11 @@ class TraceEvent {
     parentID_ = parent;
   }
 
-  uint32_t getParentID() const {
+  [[nodiscard]] uint32_t getParentID() const {
     return parentID_;
   }
 
-  bool hasTraceField(TraceFieldType field) const {
+  [[nodiscard]] bool hasTraceField(TraceFieldType field) const {
     return metaData_.count(field);
   }
 
@@ -200,11 +200,11 @@ class TraceEvent {
     metaData_ = std::move(input);
   }
 
-  const MetaDataMap& getMetaData() const {
+  [[nodiscard]] const MetaDataMap& getMetaData() const {
     return metaData_;
   }
 
-  Iterator getMetaDataItr() const {
+  [[nodiscard]] Iterator getMetaDataItr() const {
     return Iterator(*this);
   }
 
@@ -231,7 +231,7 @@ class TraceEvent {
 
   bool readStrMeta(TraceFieldType key, std::string& dest) const;
 
-  std::string toString() const;
+  [[nodiscard]] std::string toString() const;
 
   friend std::ostream& operator<<(std::ostream& out, const TraceEvent& event);
 

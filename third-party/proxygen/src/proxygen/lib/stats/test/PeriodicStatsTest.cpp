@@ -18,7 +18,7 @@ using namespace proxygen;
 // Test container for use as PeriodicStats template type in tests.
 class PeriodicStatsData {
  public:
-  std::chrono::milliseconds getLastUpdateTime() const {
+  [[nodiscard]] std::chrono::milliseconds getLastUpdateTime() const {
     return time_;
   }
 

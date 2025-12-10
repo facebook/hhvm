@@ -31,18 +31,18 @@ class Sampling {
 
   static bool isLucky(uint32_t samplingKey);
 
-  bool isLucky() const;
+  [[nodiscard]] bool isLucky() const;
 
-  bool isLucky(const std::string& key) const;
-  bool isLucky(folly::StringPiece key) const;
+  [[nodiscard]] bool isLucky(const std::string& key) const;
+  [[nodiscard]] bool isLucky(folly::StringPiece key) const;
 
-  uint32_t getWeight() const {
+  [[nodiscard]] uint32_t getWeight() const {
     return weight_;
   }
 
   void updateRate(double rate);
 
-  uint32_t getIntRate() const;
+  [[nodiscard]] uint32_t getIntRate() const;
 
   void runSampled(folly::FunctionRef<void()> func) {
     if (isLucky()) {

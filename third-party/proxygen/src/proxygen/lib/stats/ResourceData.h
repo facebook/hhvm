@@ -44,7 +44,7 @@ struct ResourceData : public PeriodicStatsDataBase {
    * utilized should it not be idle (i.e. excludes both idle and iowait
    * proc stats).
    */
-  double getCpuRatioUtil(bool normalized = true) const {
+  [[nodiscard]] double getCpuRatioUtil(bool normalized = true) const {
     return normalized ? std::min(1.0, cpuRatioUtil_) : cpuRatioUtil_;
   }
 
@@ -59,7 +59,7 @@ struct ResourceData : public PeriodicStatsDataBase {
    * you want to see values above 100, for example if you aggregate values over
    * some window.
    */
-  double getCpuPctUtil(bool normalized = true) const {
+  [[nodiscard]] double getCpuPctUtil(bool normalized = true) const {
     return getPctFromRatio(getCpuRatioUtil(normalized));
   }
 
@@ -104,7 +104,7 @@ struct ResourceData : public PeriodicStatsDataBase {
    * Gets the average soft cpu ratio utilization (0, 1.0 over the last update
    * interval).
    */
-  double getSoftIrqCpuRatioUtil() const {
+  [[nodiscard]] double getSoftIrqCpuRatioUtil() const {
     return cpuSoftIrqRatioUtil_;
   }
 
@@ -114,7 +114,7 @@ struct ResourceData : public PeriodicStatsDataBase {
    * implementation, a core is considered utilized should it not be idle
    * (i.e. excludes both idle and iowait proc stats).
    */
-  const std::vector<double>& getSoftIrqCpuCoreRatioUtils() const {
+  [[nodiscard]] const std::vector<double>& getSoftIrqCpuCoreRatioUtils() const {
     return softIrqCpuCoreRatioUtils_;
   }
 
@@ -122,7 +122,7 @@ struct ResourceData : public PeriodicStatsDataBase {
    * Gets the number of employed cpu cores as inferred by the length of the
    * per core soft utilization data already queried.
    */
-  uint64_t getNumLogicalCpuCores() const {
+  [[nodiscard]] uint64_t getNumLogicalCpuCores() const {
     return softIrqCpuCoreRatioUtils_.size();
   }
 
@@ -135,12 +135,12 @@ struct ResourceData : public PeriodicStatsDataBase {
   }
 
   // Gets the unused memory (free/available) of the system in bytes
-  uint64_t getUnusedMemBytes() const {
+  [[nodiscard]] uint64_t getUnusedMemBytes() const {
     return totalMemBytes_ - usedMemBytes_;
   }
 
   // Gets the used memory of the system in bytes
-  uint64_t getUsedMemBytes() const {
+  [[nodiscard]] uint64_t getUsedMemBytes() const {
     return usedMemBytes_;
   }
 
@@ -181,7 +181,7 @@ struct ResourceData : public PeriodicStatsDataBase {
   }
 
   // Gets the total memory of the system in bytes
-  uint64_t getTotalMemBytes() const {
+  [[nodiscard]] uint64_t getTotalMemBytes() const {
     return totalMemBytes_;
   }
 
@@ -189,136 +189,136 @@ struct ResourceData : public PeriodicStatsDataBase {
    * Gets the unused memory (0-100 Free/available) of the system as a
    * percent
    */
-  double getFreeMemPct() const {
+  [[nodiscard]] double getFreeMemPct() const {
     return 100 - getUsedMemPct();
   }
 
   // Gets the used memory (0-100) of the system as a percent
-  double getUsedMemPct() const {
+  [[nodiscard]] double getUsedMemPct() const {
     return ((double)usedMemBytes_) / totalMemBytes_ * 100;
   }
 
   // Gets the used anonymous memory (0-1.0) of the system as a ratio
-  double getUsedMemRatio() const {
+  [[nodiscard]] double getUsedMemRatio() const {
     return ((double)usedMemBytes_) / totalMemBytes_;
   }
 
   // Returns current level of TCP memory consumption
   // measured in memory pages
-  uint64_t getTcpMemPages() const {
+  [[nodiscard]] uint64_t getTcpMemPages() const {
     return tcpMemoryPages_;
   }
 
   // Returns Low TCP Memory threshold measured in memory pages
-  uint64_t getLowTcpMemLimitPages() const {
+  [[nodiscard]] uint64_t getLowTcpMemLimitPages() const {
     return minTcpMemLimit_;
   }
 
   // Returns Pressure TCP Memory threshold measured in memory pages
-  uint64_t getPressureTcpMemLimitPages() const {
+  [[nodiscard]] uint64_t getPressureTcpMemLimitPages() const {
     return pressureTcpMemLimit_;
   }
 
   // Returns Low TCP Memory threshold measured in memory pages
-  uint64_t getMaxTcpMemLimitPages() const {
+  [[nodiscard]] uint64_t getMaxTcpMemLimitPages() const {
     return maxTcpMemLimit_;
   }
 
   // Gets the used TCP memory (0-1.0) as a ratio to max TCP mem limit
-  double getTcpMemRatio() const {
+  [[nodiscard]] double getTcpMemRatio() const {
     return calculateRatio(tcpMemoryPages_, maxTcpMemLimit_);
   }
 
   // Gets the low TCP memory threshold (0-1.0) as a ratio to
   // max TCP mem limit
-  double getLowTcpMemLimitRatio() const {
+  [[nodiscard]] double getLowTcpMemLimitRatio() const {
     return calculateRatio(minTcpMemLimit_, maxTcpMemLimit_);
   }
 
   // Gets the TCP memory pressure threshold (0-1.0) as a ratio to
   // max TCP mem limit
-  double getPressureTcpMemLimitRatio() const {
+  [[nodiscard]] double getPressureTcpMemLimitRatio() const {
     return calculateRatio(pressureTcpMemLimit_, maxTcpMemLimit_);
   }
 
   // Gets the used TCP memory (0-100) of the system as a percent
-  double getUsedTcpMemPct() const {
+  [[nodiscard]] double getUsedTcpMemPct() const {
     return getTcpMemRatio() * 100;
   }
 
   // Gets the low TCP memory threshold (0-100) of the system as a percent
-  double getLowTcpMemThresholdPct() const {
+  [[nodiscard]] double getLowTcpMemThresholdPct() const {
     return getLowTcpMemLimitRatio() * 100;
   }
 
   // Gets the Pressure TCP memory threshold (0-100) of the system as a percent
-  double getPressureTcpMemThresholdPct() const {
+  [[nodiscard]] double getPressureTcpMemThresholdPct() const {
     return getPressureTcpMemLimitRatio() * 100;
   }
 
   // Returns True if TCP memory fields were initialized successfully,
   // returns False otherwise
-  bool tcpMemoryStatsCollected() const {
+  [[nodiscard]] bool tcpMemoryStatsCollected() const {
     return tcpMemoryPages_ != 0 && maxTcpMemLimit_ != 0 &&
            pressureTcpMemLimit_ != 0 && minTcpMemLimit_ != 0;
   }
 
   // Returns current level of UDP memory consumption
   // measured in memory pages
-  uint64_t getUdpMemPages() const {
+  [[nodiscard]] uint64_t getUdpMemPages() const {
     return udpMemoryPages_;
   }
 
   // Returns Low UDP Memory threshold measured in memory pages
-  uint64_t getLowUdpMemLimitPages() const {
+  [[nodiscard]] uint64_t getLowUdpMemLimitPages() const {
     return minUdpMemLimit_;
   }
 
   // Returns Pressure UDP Memory threshold measured in memory pages
-  uint64_t getPressureUdpMemLimitPages() const {
+  [[nodiscard]] uint64_t getPressureUdpMemLimitPages() const {
     return pressureUdpMemLimit_;
   }
 
   // Returns Low UDP Memory threshold measured in memory pages
-  uint64_t getMaxUdpMemLimitPages() const {
+  [[nodiscard]] uint64_t getMaxUdpMemLimitPages() const {
     return maxUdpMemLimit_;
   }
 
   // Gets the used UDP memory (0-1.0) as a ratio to max UDP mem limit
-  double getUdpMemRatio() const {
+  [[nodiscard]] double getUdpMemRatio() const {
     return calculateRatio(udpMemoryPages_, maxUdpMemLimit_);
   }
 
   // Gets the low UDP memory threshold (0-1.0) as a ratio to
   // max UDP mem limit
-  double getLowUdpMemLimitRatio() const {
+  [[nodiscard]] double getLowUdpMemLimitRatio() const {
     return calculateRatio(minUdpMemLimit_, maxUdpMemLimit_);
   }
 
   // Gets the UDP memory pressure threshold (0-1.0) as a ratio to
   // max UDP mem limit
-  double getPressureUdpMemLimitRatio() const {
+  [[nodiscard]] double getPressureUdpMemLimitRatio() const {
     return calculateRatio(pressureUdpMemLimit_, maxUdpMemLimit_);
   }
 
   // Gets the used UDP memory (0-100) of the system as a percent
-  double getUsedUdpMemPct() const {
+  [[nodiscard]] double getUsedUdpMemPct() const {
     return getUdpMemRatio() * 100;
   }
 
   // Gets the low UDP memory threshold (0-100) of the system as a percent
-  double getLowUdpMemThresholdPct() const {
+  [[nodiscard]] double getLowUdpMemThresholdPct() const {
     return getLowUdpMemLimitRatio() * 100;
   }
 
   // Gets the Pressure UDP memory threshold (0-100) of the system as a percent
-  double getPressureUdpMemThresholdPct() const {
+  [[nodiscard]] double getPressureUdpMemThresholdPct() const {
     return getPressureUdpMemLimitRatio() * 100;
   }
 
   // Returns True if UDP memory fields were initialized successfully,
   // returns False otherwise
-  bool udpMemoryStatsCollected() const {
+  [[nodiscard]] bool udpMemoryStatsCollected() const {
     return udpMemoryPages_ != 0 && maxUdpMemLimit_ != 0 &&
            pressureUdpMemLimit_ != 0 && minUdpMemLimit_ != 0;
   }
@@ -383,7 +383,7 @@ struct ResourceData : public PeriodicStatsDataBase {
 
  protected:
   // Convert an absolute integer value and max limit to a float point ratio.
-  double calculateRatio(uint64_t value, uint64_t maxLimit) const {
+  [[nodiscard]] double calculateRatio(uint64_t value, uint64_t maxLimit) const {
     if (maxLimit != 0) {
       return double(value) / maxLimit;
     }

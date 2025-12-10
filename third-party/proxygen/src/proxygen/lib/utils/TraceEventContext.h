@@ -40,7 +40,7 @@ class TraceEventContext {
 
   void traceEventAvailable(const TraceEvent& event);
 
-  bool isAllTraceEventNeeded() const;
+  [[nodiscard]] bool isAllTraceEventNeeded() const;
 
  private:
   // Observer vector to observe all trace events about to occur

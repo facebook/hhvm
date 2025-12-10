@@ -35,12 +35,13 @@ class ConsistentHash {
    *
    * The returning value is the node's index in the input vector of build().
    */
-  virtual size_t get(const uint64_t key, const size_t rank = 0) const = 0;
+  [[nodiscard]] virtual size_t get(const uint64_t key,
+                                   const size_t rank = 0) const = 0;
 
   /**
    * get max error rate the current hashing space
    *
    */
-  virtual double getMaxErrorRate() const = 0;
+  [[nodiscard]] virtual double getMaxErrorRate() const = 0;
 };
 } // namespace proxygen

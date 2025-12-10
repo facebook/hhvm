@@ -44,7 +44,7 @@ class PeriodicStatsDataBase {
    * Gets the time (from epoch) when this record was created (so for
    * which the utilization metrics are valid).
    */
-  std::chrono::milliseconds getLastUpdateTime() const {
+  [[nodiscard]] std::chrono::milliseconds getLastUpdateTime() const {
     return time_;
   }
 

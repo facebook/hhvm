@@ -86,8 +86,10 @@ class WebTransportImpl : public WebTransport {
     virtual folly::Expected<folly::Unit, WebTransport::ErrorCode> sendDatagram(
         std::unique_ptr<folly::IOBuf> /*datagram*/) = 0;
 
-    virtual const folly::SocketAddress& getLocalAddress() const = 0;
-    virtual const folly::SocketAddress& getPeerAddress() const = 0;
+    [[nodiscard]] virtual const folly::SocketAddress& getLocalAddress()
+        const = 0;
+    [[nodiscard]] virtual const folly::SocketAddress& getPeerAddress()
+        const = 0;
 
     [[nodiscard]] virtual quic::TransportInfo getTransportInfo() const {
       return {};
@@ -95,7 +97,7 @@ class WebTransportImpl : public WebTransport {
 
     virtual bool usesEncodedApplicationErrorCodes() = 0;
 
-    virtual uint64_t getWTInitialSendWindow() const {
+    [[nodiscard]] virtual uint64_t getWTInitialSendWindow() const {
       return quic::kMaxVarInt;
     }
   };
@@ -199,11 +201,11 @@ class WebTransportImpl : public WebTransport {
     return folly::unit;
   }
 
-  const folly::SocketAddress& getLocalAddress() const override {
+  [[nodiscard]] const folly::SocketAddress& getLocalAddress() const override {
     return tp_.getLocalAddress();
   }
 
-  const folly::SocketAddress& getPeerAddress() const override {
+  [[nodiscard]] const folly::SocketAddress& getPeerAddress() const override {
     return tp_.getPeerAddress();
   }
 
@@ -401,7 +403,7 @@ class WebTransportImpl : public WebTransport {
   void closeEgressStream(HTTPCodec::StreamID id);
   void closeIngressStream(HTTPCodec::StreamID id);
 
-  bool isBidirectional(HTTPCodec::StreamID id) const {
+  [[nodiscard]] bool isBidirectional(HTTPCodec::StreamID id) const {
     return (id & 0b10) == 0;
   }
 

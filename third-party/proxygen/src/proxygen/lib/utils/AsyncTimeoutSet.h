@@ -79,13 +79,13 @@ class AsyncTimeoutSet
     /**
      * Return true if this timeout is currently scheduled, and false otherwise.
      */
-    bool isScheduled() const {
+    [[nodiscard]] bool isScheduled() const {
       return timeoutSet_ != nullptr;
     }
 
    private:
     // Get the time remaining until this timeout expires
-    std::chrono::milliseconds getTimeRemaining(
+    [[nodiscard]] std::chrono::milliseconds getTimeRemaining(
         std::chrono::milliseconds now) const {
       if (now >= expiration_) {
         return std::chrono::milliseconds(0);
@@ -163,7 +163,7 @@ class AsyncTimeoutSet
    * with scheduleTimeout() will be invoked after this amount of time has
    * passed since the call to scheduleTimeout().
    */
-  std::chrono::milliseconds getInterval() const {
+  [[nodiscard]] std::chrono::milliseconds getInterval() const {
     return interval_;
   }
 
@@ -189,7 +189,7 @@ class AsyncTimeoutSet
   Callback* front() {
     return head_;
   }
-  const Callback* front() const {
+  [[nodiscard]] const Callback* front() const {
     return head_;
   }
 

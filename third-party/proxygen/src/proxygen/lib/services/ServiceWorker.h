@@ -47,7 +47,7 @@ class ServiceWorker {
   virtual ~ServiceWorker() {
   }
 
-  Service* getService() const {
+  [[nodiscard]] Service* getService() const {
     return service_;
   }
 
@@ -80,7 +80,7 @@ class ServiceWorker {
     }
   }
 
-  RequestWorkerThread* getRequestWorkerThread() const {
+  [[nodiscard]] RequestWorkerThread* getRequestWorkerThread() const {
     return worker_;
   }
 
@@ -91,7 +91,7 @@ class ServiceWorker {
   /**
    * Find an acceptor by name running in the same request worker.
    */
-  wangle::Acceptor* getAcceptorByName(std::string name) const {
+  [[nodiscard]] wangle::Acceptor* getAcceptorByName(std::string name) const {
     auto it = namedAddress_.find(name);
     if (it != namedAddress_.end()) {
       auto it2 = acceptors_.find(it->second);

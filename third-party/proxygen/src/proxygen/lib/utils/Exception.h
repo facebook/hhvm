@@ -40,19 +40,19 @@ class Exception : public std::exception {
   }
 
   // std::exception methods
-  const char* what(void) const noexcept override;
+  [[nodiscard]] const char* what(void) const noexcept override;
 
   // Accessors for code
   void setCode(int code) {
     code_ = code;
   }
 
-  int getCode() const {
+  [[nodiscard]] int getCode() const {
     return code_;
   }
 
   // Accessors for ProxygenError
-  bool hasProxygenError() const {
+  [[nodiscard]] bool hasProxygenError() const {
     return (proxygenError_ != kErrorNone);
   }
 
@@ -60,7 +60,7 @@ class Exception : public std::exception {
     proxygenError_ = proxygenError;
   }
 
-  ProxygenError getProxygenError() const {
+  [[nodiscard]] ProxygenError getProxygenError() const {
     return proxygenError_;
   }
 

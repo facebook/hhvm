@@ -29,7 +29,7 @@ class MultiSampled {
     }
   }
 
-  int getSamplingWeight(const std::string& tag) const {
+  [[nodiscard]] int getSamplingWeight(const std::string& tag) const {
     auto it = weights_.find(tag);
     if (it == weights_.end()) {
       return 0;
@@ -37,12 +37,12 @@ class MultiSampled {
     return it->second;
   }
 
-  bool isSampled() const {
+  [[nodiscard]] bool isSampled() const {
     // we are sampled if we have at least a non-zero weight
     return weights_.size() > 0;
   }
 
-  bool isSampled(const std::string& tag) const {
+  [[nodiscard]] bool isSampled(const std::string& tag) const {
     return getSamplingWeight(tag) > 0;
   }
 

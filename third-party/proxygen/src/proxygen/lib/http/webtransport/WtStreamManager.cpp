@@ -478,6 +478,17 @@ WebTransport::BidiStreamHandle WtStreamManager::getOrCreateBidiHandle(
   return res;
 }
 
+WebTransport::BidiStreamHandle WtStreamManager::getBidiHandle(
+    uint64_t streamId) const noexcept {
+  WebTransport::BidiStreamHandle res{nullptr, nullptr};
+  auto it = streams_.find(streamId);
+  if (it != streams_.end()) {
+    res.readHandle = isIngress(streamId) ? &it->second->rh : nullptr;
+    res.writeHandle = isEgress(streamId) ? &it->second->wh : nullptr;
+  }
+  return res;
+}
+
 WtStreamManager::WtWriteHandle* WtStreamManager::createEgressHandle() noexcept {
   auto* handle = getOrCreateEgressHandle(nextStreamIds_.uni);
   nextStreamIds_.uni += (handle ? kStreamIdInc : 0);
@@ -509,14 +520,14 @@ WtStreamManager::Result WtStreamManager::onMaxData(
   // TODO(@damlaj): connection-level err if not egress stream?
   XLOG(DBG9) << __func__ << "; id=" << data.streamId
              << "; maxData=" << data.maxData;
-  auto* eh = writehandle_ptr_cast(getOrCreateEgressHandle(data.streamId));
+  auto* eh = writehandle_ptr_cast(getEgressHandle(data.streamId));
   return (eh && eh->onMaxData(data.maxData)) ? Ok : Fail;
 }
 
 WtStreamManager::Result WtStreamManager::onStopSending(
     StopSending data) noexcept {
   XLOG(DBG9) << __func__ << "; id=" << data.streamId << "; err=" << data.err;
-  if (auto* eh = writehandle_ptr_cast(getOrCreateEgressHandle(data.streamId))) {
+  if (auto* eh = writehandle_ptr_cast(getEgressHandle(data.streamId))) {
     auto ex = folly::make_exception_wrapper<WtException>(uint32_t(data.err),
                                                          "rx stop_sending");
     eh->cancel(std::move(ex));
@@ -528,7 +539,7 @@ WtStreamManager::Result WtStreamManager::onStopSending(
 WtStreamManager::Result WtStreamManager::onResetStream(
     ResetStream data) noexcept {
   XLOG(DBG9) << __func__ << "; id=" << data.streamId << "; err=" << data.err;
-  if (auto* rh = readhandle_ptr_cast(getOrCreateIngressHandle(data.streamId))) {
+  if (auto* rh = readhandle_ptr_cast(getIngressHandle(data.streamId))) {
     auto ex = folly::make_exception_wrapper<WtException>(uint32_t(data.err),
                                                          "rx reset_stream");
     rh->cancel(std::move(ex), data.reliableSize);
@@ -675,6 +686,16 @@ void WtStreamManager::erase(uint64_t streamId) noexcept {
                        : enqueueEvent(MaxStreamsUni{maxStreams});
     }
   }
+}
+
+WtStreamManager::WtWriteHandle* WtStreamManager::getEgressHandle(
+    uint64_t streamId) const noexcept {
+  return getBidiHandle(streamId).writeHandle;
+}
+
+WtStreamManager::WtReadHandle* WtStreamManager::getIngressHandle(
+    uint64_t streamId) const noexcept {
+  return getBidiHandle(streamId).readHandle;
 }
 
 } // namespace proxygen::coro::detail

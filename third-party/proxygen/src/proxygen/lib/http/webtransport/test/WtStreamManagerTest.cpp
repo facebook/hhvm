@@ -841,6 +841,36 @@ TEST(WtStreamManager, ShutdownOpenStreams) {
   streamManager.shutdown(CloseSession{});
 }
 
+TEST(WtStreamManager, NoopNonExistentStreams) {
+  WtConfig config{.peerMaxStreamsBidi = 2, .peerMaxStreamsUni = 2};
+  WtSmEgressCb egressCb;
+  WtSmIngressCb ingressCb;
+  WtStreamManager streamManager{
+      detail::WtDir::Client, config, egressCb, ingressCb};
+
+  streamManager.onStopSending({.streamId = 0});
+  streamManager.onResetStream({.streamId = 1});
+  streamManager.onMaxData({.streamId = 2});
+
+  {
+    // no stream state expected
+    auto handle = streamManager.getBidiHandle(0);
+    EXPECT_FALSE(handle.readHandle || handle.writeHandle);
+  }
+
+  {
+    // no stream state expected
+    auto handle = streamManager.getBidiHandle(1);
+    EXPECT_FALSE(handle.readHandle || handle.writeHandle);
+  }
+
+  {
+    // no stream state expected
+    auto handle = streamManager.getBidiHandle(2);
+    EXPECT_FALSE(handle.readHandle || handle.writeHandle);
+  }
+}
+
 TEST(WtStreamManager, OnlyFinPending) {
   WtConfig config{.peerMaxStreamsUni = 2};
   WtSmEgressCb egressCb;

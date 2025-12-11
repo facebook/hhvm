@@ -132,17 +132,19 @@ struct WtStreamManager {
   using ReadPromise = folly::Promise<StreamData>;
   using ReadFut = folly::SemiFuture<StreamData>;
   /**
-   * a bit of an odd api, but:
-   *  - Gets the stream if already present
-   *  - Otherwise if equals next expected stream, creates it (ordered delivery
-   *  - property of wt over http/2, http/3 requires a mapping of transport id ->
-   *    logical id)
-   *  - Otherwise nullptr
+   * - Gets the stream if it exists
+   * - Otherwise attempts to create the stream if sufficient stream credit
+   *   exists & not shutdown
+   * - Otherwise returns nullptr
    */
   WtWriteHandle* getOrCreateEgressHandle(uint64_t streamId) noexcept;
   WtReadHandle* getOrCreateIngressHandle(uint64_t streamId) noexcept;
   WebTransport::BidiStreamHandle getOrCreateBidiHandle(
       uint64_t streamId) noexcept;
+
+  // Gets a stream if it already exists, otherwise nullptr
+  [[nodiscard]] WebTransport::BidiStreamHandle getBidiHandle(
+      uint64_t streamId) const noexcept;
 
   /**
    * Initiators of streams should use this api, attempts to create the next
@@ -299,6 +301,11 @@ struct WtStreamManager {
   [[nodiscard]] bool isIngress(uint64_t streamId) const;
   [[nodiscard]] bool isUni(uint64_t streamId) const;
   [[nodiscard]] bool isBidi(uint64_t streamId) const;
+  [[nodiscard]] WtWriteHandle* getEgressHandle(
+      uint64_t streamId) const noexcept;
+  [[nodiscard]] WtReadHandle* getIngressHandle(
+      uint64_t streamId) const noexcept;
+
   void enqueueEvent(Event&& ev) noexcept;
   void onStreamWritable(WtWriteHandle& wh) noexcept;
   [[nodiscard]] bool hasEvent() const noexcept;

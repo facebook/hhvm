@@ -1,12 +1,13 @@
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
-type USELESS_TYPE_ACTUALLY_MIXED<T> = T;
+namespace HH_FIXME {
+  type MISSING_TYPE_IN_HIERARCHY = mixed;
+}
 
-/* HH_FIXME[4101] Sadly, yes */
-type TEMPORARY_MISSING_TYPE_MARKER = USELESS_TYPE_ACTUALLY_MIXED;
+namespace Test {
 
-function return_any():TEMPORARY_MISSING_TYPE_MARKER {
+function return_any():\HH_FIXME\MISSING_TYPE_IN_HIERARCHY {
   return 1;
 }
 
@@ -19,4 +20,5 @@ function test():void {
   );
   $x = idx($any, 'result');
   expect_nullable_int($x);
-}
+  }
+  }

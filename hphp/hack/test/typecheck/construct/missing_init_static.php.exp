@@ -1,2 +1,2 @@
-ERROR: File "missing_init_static.php", line 20, characters 22-24:
+ERROR: File "missing_init_static.php", line 14, characters 24-26:
 Please assign a value (Typing[4055])

@@ -1,8 +1,8 @@
-ERROR: File "tany_ambiguous.php", line 39, characters 12-27:
+ERROR: File "tany_ambiguous.php", line 43, characters 12-27:
 Invalid return type (Typing[4110])
-  File "tany_ambiguous.php", line 38, characters 27-29:
+  File "tany_ambiguous.php", line 42, characters 27-29:
   Expected `int`
-  File "tany_ambiguous.php", line 18, characters 23-28:
+  File "tany_ambiguous.php", line 22, characters 23-28:
   But got `string`
-  File "tany_ambiguous.php", line 12, characters 39-49:
+  File "tany_ambiguous.php", line 15, characters 39-49:
     resulting from expanding the type constant `this::TData`

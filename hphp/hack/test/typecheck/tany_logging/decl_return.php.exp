@@ -1,4 +1,4 @@
-[Tany][context:\h][position:decl_return.php:14:15][decl][return]
-[Tany][context:\C::f][position:decl_return.php:7:31][decl][return]
-[Tany][context:\C::g][position:decl_return.php:10:24][decl][return]
+[Tany][context:\Test\h][position:decl_return.php:15:17][decl][return]
+[Tany][context:\Test\C::f][position:decl_return.php:10:33][decl][return]
+[Tany][context:\Test\C::g][position:decl_return.php:12:26][decl][return]
 No errors

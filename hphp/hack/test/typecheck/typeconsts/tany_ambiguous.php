@@ -1,8 +1,11 @@
 <?hh
 
-type ANY<T> = T;
-/* HH_FIXME[4101] trick to create Tany type */
-type TANY = ANY;
+namespace HH_FIXME {
+  type MISSING_TYPE_IN_HIERARCHY = mixed;
+}
+namespace Test {
+
+  type TANY = \HH_FIXME\MISSING_TYPE_IN_HIERARCHY;
 
 abstract class Base {
   const type TData = TANY;
@@ -13,6 +16,7 @@ abstract class Base {
     return $this->data;
   }
 }
+
 
 abstract class Middle extends Base {
   const type TData  = string;
@@ -38,4 +42,5 @@ final class Child extends Middle {
   public function test(): int {
     return $this->getData();
   }
+}
 }

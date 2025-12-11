@@ -72,7 +72,8 @@ void WebTransportImpl::onMaxData(uint64_t maxData) noexcept {
 }
 
 void WebTransportImpl::onMaxStreams(uint64_t maxStreams, bool isBidi) noexcept {
-  auto& flowControl = isBidi ? bidiStreamFlowControl_ : uniStreamFlowControl_;
+  auto& flowControl =
+      isBidi ? selfBidiStreamFlowControl_ : selfUniStreamFlowControl_;
   if (maxStreams < flowControl.maxStreamID || maxStreams > kMaxWTStreams) {
     // TODO(@joannajo): Return a protocol error once it's supported in the
     // draft.
@@ -541,9 +542,9 @@ void WebTransportImpl::maybeGrantStreamCredit(HTTPCodec::StreamID id,
     canGrantCredit = closingReadHandle && wtIngressStreams_.contains(id);
   }
 
-  if (canGrantCredit) {
+  if (canGrantCredit && tp_.isPeerInitiatedStream(id)) {
     auto& streamLimits =
-        isBidi ? bidiStreamFlowControl_ : uniStreamFlowControl_;
+        isBidi ? peerBidiStreamFlowControl_ : peerUniStreamFlowControl_;
     streamLimits.numClosedStreams++;
     if (shouldGrantStreamCredit(isBidi)) {
       streamLimits.maxStreamID += streamLimits.targetConcurrentStreams / 2;
@@ -558,7 +559,8 @@ bool WebTransportImpl::shouldGrantFlowControl() const {
 }
 
 bool WebTransportImpl::shouldGrantStreamCredit(bool isBidi) const {
-  auto& streamLimits = isBidi ? bidiStreamFlowControl_ : uniStreamFlowControl_;
+  auto& streamLimits =
+      isBidi ? peerBidiStreamFlowControl_ : peerUniStreamFlowControl_;
   CHECK(streamLimits.numClosedStreams <= streamLimits.maxStreamID);
   return streamLimits.maxStreamID - streamLimits.numClosedStreams <
          (streamLimits.targetConcurrentStreams / 2);

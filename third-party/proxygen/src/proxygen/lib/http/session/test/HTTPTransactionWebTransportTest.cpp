@@ -38,6 +38,21 @@ class HTTPTransactionWebTransportTest : public testing::Test {
         .WillRepeatedly(Return(true));
     EXPECT_CALL(transport_, canCreateUniStream()).WillRepeatedly(Return(true));
     EXPECT_CALL(transport_, canCreateBidiStream()).WillRepeatedly(Return(true));
+    // Set up isPeerInitiatedStream for mock test stream ids
+    // In these tests:
+    //   id 0: self-initiated bidi stream
+    //   id 1: peer-initiated bidi stream
+    //   id 2: used for both peer-initiated AND self-initiated uni streams
+    //
+    // We return true for ids 1 and 2. This works because:
+    // - For id 1: correctly identifies peer-initiated bidi streams
+    // - For id 2: correctly identifies peer-initiated uni streams
+    // - For id 2: incorrectly returns true for self-initiated uni streams,
+    //   but self-initiated egress-only streams should never trigger the credit
+    //   granting logic (which only runs when ingress/read handles close)
+    EXPECT_CALL(transport_, isPeerInitiatedStream(_))
+        .WillRepeatedly(
+            [](HTTPCodec::StreamID id) { return id == 1 || id == 2; });
     if (withHandler) {
       handler_.expectTransaction();
       txn_->setHandler(&handler_);
@@ -1098,23 +1113,76 @@ TEST_F(HTTPTransactionWebTransportTest, BidiStreamCredit) {
   EXPECT_TRUE(fut.isReady());
 }
 
-TEST_F(HTTPTransactionWebTransportTest, MaxStreams) {
+TEST_F(HTTPTransactionWebTransportTest, SelfMaxStreams) {
+  auto wtImpl = dynamic_cast<WebTransportImpl*>(wt_);
+  ASSERT_NE(wtImpl, nullptr);
+  WTMaxStreamsCapsule capsule{1};
+  wtImpl->onMaxStreams(capsule.maximumStreams, true);
+
+  // We should be able to create 1 stream successfully
+  EXPECT_CALL(transport_, newWebTransportBidiStream()).WillOnce(Return(0));
+  EXPECT_CALL(transport_, initiateReadOnBidiStream(0, _));
+  auto result1 = wt_->createBidiStream();
+  EXPECT_FALSE(result1.hasError());
+
+  // Trying to create a second stream should fail (we've reached the limit)
+  EXPECT_CALL(transport_, newWebTransportBidiStream())
+      .WillOnce(Return(folly::makeUnexpected(
+          WebTransport::ErrorCode::STREAM_CREATION_ERROR)));
+  auto result2 = wt_->createBidiStream();
+  EXPECT_TRUE(result2.hasError());
+  EXPECT_EQ(result2.error(), WebTransport::ErrorCode::STREAM_CREATION_ERROR);
+
+  EXPECT_CALL(transport_, stopReadingWebTransportIngress(0, _))
+      .WillRepeatedly(Return(folly::unit));
+  EXPECT_CALL(transport_, resetWebTransportEgress(0, _));
+}
+
+TEST_F(HTTPTransactionWebTransportTest, PeerMaxStreams) {
   auto wtImpl = dynamic_cast<WebTransportImpl*>(wt_);
   ASSERT_NE(wtImpl, nullptr);
 
-  // Set initial bidi stream flow control state where we need more stream credit
-  // maxStreamID = 1, targetConcurrentStreams = 4
-  // 1 - 0 = 1, and 4 / 2 = 2, so 1 < 2 is true (should grant credit)
+  // Set peer flow control:
+  // maxStreamID = 2, targetConcurrentStreams = 4
+  // 2 - 0 = 2, and 4 / 2 = 2, so 2 >= 2 is true (should NOT grant credit yet)
   wtImpl->setBidiStreamFlowControl(
-      /*maxStreamId=*/1,
+      /*maxStreamId=*/2,
       /*targetConcurrentStreams=*/4);
-  EXPECT_TRUE(wtImpl->shouldGrantStreamCredit(true));
+  EXPECT_FALSE(wtImpl->shouldGrantStreamCredit(true));
 
-  WTMaxStreamsCapsule capsule{10};
-  wtImpl->onMaxStreams(capsule.maximumStreams, true);
+  WebTransport::BidiStreamHandle bidiHandle{};
+  EXPECT_CALL(handler_, onWebTransportBidiStream(_, _))
+      .WillOnce(SaveArg<1>(&bidiHandle));
+  auto implHandle = txn_->onWebTransportBidiStream(1);
+  EXPECT_NE(bidiHandle.readHandle, nullptr);
+  EXPECT_NE(bidiHandle.writeHandle, nullptr);
 
-  // After onMaxStreams, maxStreamID should be updated to 10
-  // Now: 10 - 0 = 10, and 4 / 2 = 2, so 10 > 2 (should NOT grant credit)
+  // Close both sides of the bidi stream to simulate peer closing it.
+  // First reset the write side, this closes the egress stream
+  EXPECT_CALL(transport_,
+              resetWebTransportEgress(1, WebTransport::kInternalError));
+  bidiHandle.writeHandle->resetStream(WebTransport::kInternalError);
+
+  // Now close the read side. Since egress is already closed, this should
+  // trigger sendWTMaxStreams
+  EXPECT_CALL(transport_, stopReadingWebTransportIngress(1, _))
+      .WillRepeatedly(Return(folly::unit));
+  EXPECT_CALL(transport_, sendWTMaxStreams(4, true));
+
+  // Directly deliver an error to close the ingress stream
+  implHandle.readHandle->deliverReadError(
+      WebTransport::Exception(WebTransport::kInternalError, "test"));
+
+  auto readFuture = bidiHandle.readHandle->readStreamData()
+                        .via(&eventBase_)
+                        .thenTry([](auto streamData) {
+                          EXPECT_TRUE(streamData.hasException());
+                        });
+  eventBase_.loopOnce();
+  EXPECT_TRUE(readFuture.isReady());
+
+  // After closing one stream: 2 - 1 = 1, and 4 / 2 = 2, so 1 < 2 (credit was
+  // granted)
   EXPECT_FALSE(wtImpl->shouldGrantStreamCredit(true));
 }
 

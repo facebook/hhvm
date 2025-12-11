@@ -591,6 +591,11 @@ class HTTPTransaction
       return true;
     }
 
+    bool isPeerInitiatedStream(HTTPCodec::StreamID /*id*/) override {
+      LOG(FATAL) << __func__ << " not supported";
+      folly::assume_unreachable();
+    }
+
     [[nodiscard]] virtual bool supportsWebTransport() const {
       return false;
     }

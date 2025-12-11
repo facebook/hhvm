@@ -269,6 +269,8 @@ class MockHTTPTransactionTransport : public HTTPTransaction::Transport {
 
   MOCK_METHOD(bool, usesEncodedApplicationErrorCodes, ());
 
+  MOCK_METHOD(bool, isPeerInitiatedStream, (HTTPCodec::StreamID), (override));
+
   MOCK_METHOD(void, trackEgressBodyOffset, (uint64_t, ByteEvent::EventFlags));
 
   MockHTTPCodec mockCodec_;

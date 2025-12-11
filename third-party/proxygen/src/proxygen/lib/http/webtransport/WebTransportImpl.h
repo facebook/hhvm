@@ -97,7 +97,10 @@ class WebTransportImpl : public WebTransport {
 
     virtual bool usesEncodedApplicationErrorCodes() = 0;
 
-    [[nodiscard]] virtual uint64_t getWTInitialSendWindow() const {
+    [[nodiscard]] virtual bool isPeerInitiatedStream(
+        HTTPCodec::StreamID id) = 0;
+
+    virtual uint64_t getWTInitialSendWindow() const {
       return quic::kMaxVarInt;
     }
   };
@@ -356,8 +359,10 @@ class WebTransportImpl : public WebTransport {
     uint64_t targetConcurrentStreams{kDefaultTargetConcurrentStreams};
   };
 
-  StreamFlowControl uniStreamFlowControl_;
-  StreamFlowControl bidiStreamFlowControl_;
+  StreamFlowControl peerUniStreamFlowControl_;
+  StreamFlowControl selfUniStreamFlowControl_;
+  StreamFlowControl peerBidiStreamFlowControl_;
+  StreamFlowControl selfBidiStreamFlowControl_;
 
  public:
   [[nodiscard]] bool isSessionTerminated() const {
@@ -415,14 +420,15 @@ class WebTransportImpl : public WebTransport {
 
   void setUniStreamFlowControl(uint64_t maxStreamId,
                                uint64_t targetConcurrentStreams) {
-    uniStreamFlowControl_.maxStreamID = maxStreamId;
-    uniStreamFlowControl_.targetConcurrentStreams = targetConcurrentStreams;
+    peerUniStreamFlowControl_.maxStreamID = maxStreamId;
+    peerUniStreamFlowControl_.targetConcurrentStreams = targetConcurrentStreams;
   }
 
   void setBidiStreamFlowControl(uint64_t maxStreamId,
                                 uint64_t targetConcurrentStreams) {
-    bidiStreamFlowControl_.maxStreamID = maxStreamId;
-    bidiStreamFlowControl_.targetConcurrentStreams = targetConcurrentStreams;
+    peerBidiStreamFlowControl_.maxStreamID = maxStreamId;
+    peerBidiStreamFlowControl_.targetConcurrentStreams =
+        targetConcurrentStreams;
   }
 };
 

@@ -158,6 +158,10 @@ class QuicWebTransport
     return false;
   }
 
+  bool isPeerInitiatedStream(HTTPCodec::StreamID id) override {
+    return quicSocket_->getStreamInitiator(id) == quic::StreamInitiator::Remote;
+  }
+
   folly::Expected<folly::Unit, WebTransport::ErrorCode> closeSession(
       folly::Optional<uint32_t> error) override {
     return closeSessionImpl(std::move(error));

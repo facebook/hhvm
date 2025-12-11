@@ -1830,6 +1830,14 @@ class HQSession
       return session_.wtInitialSendWindow_;
     }
 
+    bool isPeerInitiatedStream(HTTPCodec::StreamID id) override {
+      bool isClientStream = session_.sock_->isClientStream(id);
+      return (session_.direction_ == TransportDirection::DOWNSTREAM &&
+              isClientStream) ||
+             (session_.direction_ == TransportDirection::UPSTREAM &&
+              !isClientStream);
+    }
+
     [[nodiscard]] bool supportsWebTransport() const override {
       return session_.supportsWebTransport();
     }

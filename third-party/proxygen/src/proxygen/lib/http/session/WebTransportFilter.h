@@ -295,6 +295,14 @@ class WebTransportFilter
     return h3Tp_ ? h3Tp_->getWTInitialSendWindow() : quic::kMaxVarInt;
   }
 
+  bool isPeerInitiatedStream(HTTPCodec::StreamID id) override {
+    if (h3Tp_) {
+      return h3Tp_->isPeerInitiatedStream(id);
+    }
+    bool isClientStream = (id & 0b01) == 0;
+    return txn_->isDownstream() ? isClientStream : !isClientStream;
+  }
+
   const folly::SocketAddress& getLocalAddress() const override {
     return txn_->getLocalAddress();
   }

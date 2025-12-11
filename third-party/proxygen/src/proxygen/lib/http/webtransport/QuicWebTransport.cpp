@@ -220,6 +220,11 @@ QuicWebTransport::sendWTStreamsBlocked(uint64_t /*maxStreams*/,
 }
 
 folly::Expected<folly::Unit, WebTransport::ErrorCode>
+QuicWebTransport::sendWTDataBlocked(uint64_t /*maxData*/) {
+  return folly::unit;
+}
+
+folly::Expected<folly::Unit, WebTransport::ErrorCode>
 QuicWebTransport::closeSessionImpl(folly::Optional<uint32_t> error) {
   handler_ = nullptr; // no need to deliver callbacks/onSessionEnd
   if (quicSocket_) {

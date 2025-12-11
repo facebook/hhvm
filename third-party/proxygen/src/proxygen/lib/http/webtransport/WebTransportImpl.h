@@ -57,6 +57,9 @@ class WebTransportImpl : public WebTransport {
     sendWTStreamsBlocked(uint64_t maxStreams, bool isBidi) = 0;
 
     virtual folly::Expected<folly::Unit, WebTransport::ErrorCode>
+    sendWTDataBlocked(uint64_t maxData) = 0;
+
+    virtual folly::Expected<folly::Unit, WebTransport::ErrorCode>
     notifyPendingWriteOnStream(HTTPCodec::StreamID,
                                quic::StreamWriteCallback* wcb) = 0;
 

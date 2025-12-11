@@ -487,6 +487,8 @@ class HTTPSession
       uint64_t maxStreams, bool isBidi) override;
   folly::Expected<folly::Unit, WebTransport::ErrorCode> sendWTStreamsBlocked(
       uint64_t maxStreams, bool isBidi) override;
+  folly::Expected<folly::Unit, WebTransport::ErrorCode> sendWTDataBlocked(
+      uint64_t maxData) override;
   bool usesEncodedApplicationErrorCodes() override;
   void notifyPendingEgress() noexcept override;
   void notifyIngressBodyProcessed(uint32_t bytes) noexcept override;

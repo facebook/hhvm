@@ -1515,6 +1515,11 @@ class HQSession
       return folly::unit;
     }
 
+    folly::Expected<folly::Unit, WebTransport::ErrorCode> sendWTDataBlocked(
+        uint64_t /*maxData*/) override {
+      return folly::unit;
+    }
+
     /**
      * Returns whether or no we have any body bytes buffered in the stream, or
      * the txn has any body bytes buffered.

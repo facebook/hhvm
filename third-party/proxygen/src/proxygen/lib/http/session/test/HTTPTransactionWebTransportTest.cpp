@@ -723,6 +723,7 @@ TEST_F(HTTPTransactionWebTransportTest, WriteBufferingBasic) {
   EXPECT_FALSE(writeHandle.hasError());
 
   // no flow control space initially, writes should be buffered
+  EXPECT_CALL(transport_, sendWTDataBlocked(0));
   auto res = writeHandle.value()->writeStreamData(makeBuf(100), false, nullptr);
   EXPECT_TRUE(res.hasValue());
   EXPECT_EQ(*res, WTFCState::BLOCKED);
@@ -755,6 +756,7 @@ TEST_F(HTTPTransactionWebTransportTest, WriteBufferingEOF) {
   EXPECT_FALSE(writeHandle.hasError());
 
   // write data with EOF but no flow control, should buffer
+  EXPECT_CALL(transport_, sendWTDataBlocked(0));
   auto res = writeHandle.value()->writeStreamData(makeBuf(100), true, nullptr);
   EXPECT_TRUE(res.hasValue());
   EXPECT_EQ(*res, WTFCState::BLOCKED);
@@ -778,6 +780,7 @@ TEST_F(HTTPTransactionWebTransportTest, WriteBufferingPartialSend) {
   EXPECT_FALSE(writeHandle.hasError());
 
   // write large data without flow control, should buffer
+  EXPECT_CALL(transport_, sendWTDataBlocked(0));
   auto res =
       writeHandle.value()->writeStreamData(makeBuf(1000), false, nullptr);
   EXPECT_TRUE(res.hasValue());
@@ -787,6 +790,7 @@ TEST_F(HTTPTransactionWebTransportTest, WriteBufferingPartialSend) {
   EXPECT_CALL(transport_,
               sendWebTransportStreamData(2, testing::_, false, nullptr))
       .WillOnce(Return(WTFCState::UNBLOCKED));
+  EXPECT_CALL(transport_, sendWTDataBlocked(500));
   wtImpl->onMaxData(500);
 
   // grant more flow control, should flush remaining buffered data
@@ -809,6 +813,7 @@ TEST_F(HTTPTransactionWebTransportTest, StreamWriteReadyCallback) {
   EXPECT_FALSE(writeHandle.hasError());
 
   // write data without flow control, should buffer
+  EXPECT_CALL(transport_, sendWTDataBlocked(0));
   auto res = writeHandle.value()->writeStreamData(makeBuf(100), false, nullptr);
   EXPECT_TRUE(res.hasValue());
   EXPECT_EQ(*res, WTFCState::BLOCKED);
@@ -856,16 +861,19 @@ TEST_F(HTTPTransactionWebTransportTest, FlushBufferedWritesMultiple) {
 
   // write multiple chunks without flow control, should buffer into three
   // entries
+  EXPECT_CALL(transport_, sendWTDataBlocked(0));
   auto res1 =
       writeHandle.value()->writeStreamData(makeBuf(100), false, dcb1.get());
   EXPECT_TRUE(res1.hasValue());
   EXPECT_EQ(*res1, WTFCState::BLOCKED);
 
+  EXPECT_CALL(transport_, sendWTDataBlocked(0));
   auto res2 =
       writeHandle.value()->writeStreamData(makeBuf(200), false, dcb2.get());
   EXPECT_TRUE(res2.hasValue());
   EXPECT_EQ(*res2, WTFCState::BLOCKED);
 
+  EXPECT_CALL(transport_, sendWTDataBlocked(0));
   auto res3 =
       writeHandle.value()->writeStreamData(makeBuf(150), false, dcb3.get());
   EXPECT_TRUE(res3.hasValue());
@@ -875,12 +883,14 @@ TEST_F(HTTPTransactionWebTransportTest, FlushBufferedWritesMultiple) {
   EXPECT_CALL(transport_,
               sendWebTransportStreamData(2, testing::_, false, dcb1.get()))
       .WillOnce(Return(WTFCState::UNBLOCKED));
+  EXPECT_CALL(transport_, sendWTDataBlocked(100));
   wtImpl->onMaxData(100);
 
   // grant more flow control, should flush second buffered entry
   EXPECT_CALL(transport_,
               sendWebTransportStreamData(2, testing::_, false, dcb2.get()))
       .WillOnce(Return(WTFCState::UNBLOCKED));
+  EXPECT_CALL(transport_, sendWTDataBlocked(300));
   wtImpl->onMaxData(300);
 
   // grant more flow control, should flush third buffered entry
@@ -904,16 +914,19 @@ TEST_F(HTTPTransactionWebTransportTest, CoalescedWrites) {
 
   // write multiple chunks without flow control, should buffer all into one
   // coalesced entry because of no delivery callbacks
+  EXPECT_CALL(transport_, sendWTDataBlocked(0));
   auto res1 =
       writeHandle.value()->writeStreamData(makeBuf(100), false, nullptr);
   EXPECT_TRUE(res1.hasValue());
   EXPECT_EQ(*res1, WTFCState::BLOCKED);
 
+  EXPECT_CALL(transport_, sendWTDataBlocked(0));
   auto res2 =
       writeHandle.value()->writeStreamData(makeBuf(200), false, nullptr);
   EXPECT_TRUE(res2.hasValue());
   EXPECT_EQ(*res2, WTFCState::BLOCKED);
 
+  EXPECT_CALL(transport_, sendWTDataBlocked(0));
   auto res3 =
       writeHandle.value()->writeStreamData(makeBuf(150), false, nullptr);
   EXPECT_TRUE(res3.hasValue());
@@ -938,16 +951,19 @@ TEST_F(HTTPTransactionWebTransportTest, CoalescedWritesPartialFlowControl) {
   auto writeHandle = wt_->createUniStream();
   EXPECT_FALSE(writeHandle.hasError());
 
+  EXPECT_CALL(transport_, sendWTDataBlocked(0));
   auto res1 =
       writeHandle.value()->writeStreamData(makeBuf(100), false, nullptr);
   EXPECT_TRUE(res1.hasValue());
   EXPECT_EQ(*res1, WTFCState::BLOCKED);
 
+  EXPECT_CALL(transport_, sendWTDataBlocked(0));
   auto res2 =
       writeHandle.value()->writeStreamData(makeBuf(200), false, nullptr);
   EXPECT_TRUE(res2.hasValue());
   EXPECT_EQ(*res2, WTFCState::BLOCKED);
 
+  EXPECT_CALL(transport_, sendWTDataBlocked(0));
   auto res3 =
       writeHandle.value()->writeStreamData(makeBuf(150), false, nullptr);
   EXPECT_TRUE(res3.hasValue());
@@ -958,6 +974,7 @@ TEST_F(HTTPTransactionWebTransportTest, CoalescedWritesPartialFlowControl) {
   EXPECT_CALL(transport_,
               sendWebTransportStreamData(2, testing::_, false, nullptr))
       .WillOnce(Return(WTFCState::UNBLOCKED));
+  EXPECT_CALL(transport_, sendWTDataBlocked(250));
   wtImpl->onMaxData(250);
 
   EXPECT_CALL(transport_,

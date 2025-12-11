@@ -1983,6 +1983,11 @@ HTTPSession::sendWTStreamsBlocked(uint64_t /*maxStreams*/, bool /*isBidi*/) {
   return folly::unit;
 }
 
+folly::Expected<folly::Unit, WebTransport::ErrorCode>
+HTTPSession::sendWTDataBlocked(uint64_t /*maxData*/) {
+  return folly::unit;
+}
+
 bool HTTPSession::usesEncodedApplicationErrorCodes() {
   return true;
 }

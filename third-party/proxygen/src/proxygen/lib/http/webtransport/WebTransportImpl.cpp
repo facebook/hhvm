@@ -180,6 +180,7 @@ WebTransportImpl::sendWebTransportStreamData(
   auto res = tp_.sendWebTransportStreamData(
       id, std::move(data), eof, deliveryCallback);
   if (blocked) {
+    // call sendWTDataBlocked() here?
     res = WebTransport::FCState::BLOCKED;
   }
   if (eof || res.hasError()) {
@@ -361,8 +362,13 @@ WebTransportImpl::StreamWriteHandle::flushBufferedWrites() {
 
   VLOG(4) << __func__
           << " Done, bufferedWrites_.empty()=" << bufferedWrites_.empty();
-  return bufferedWrites_.empty() ? WebTransport::FCState::UNBLOCKED
-                                 : WebTransport::FCState::BLOCKED;
+
+  if (!bufferedWrites_.empty()) {
+    impl_.tp_.sendWTDataBlocked(impl_.sendFlowController_.getMaxOffset());
+    return WebTransport::FCState::BLOCKED;
+  }
+
+  return WebTransport::FCState::UNBLOCKED;
 }
 
 /**

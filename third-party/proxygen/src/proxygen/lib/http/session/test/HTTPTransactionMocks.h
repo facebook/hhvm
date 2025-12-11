@@ -271,6 +271,10 @@ class MockHTTPTransactionTransport : public HTTPTransaction::Transport {
               sendWTStreamsBlocked,
               (uint64_t, bool));
 
+  MOCK_METHOD((folly::Expected<folly::Unit, WebTransport::ErrorCode>),
+              sendWTDataBlocked,
+              (uint64_t));
+
   MOCK_METHOD(bool, usesEncodedApplicationErrorCodes, ());
 
   MOCK_METHOD(bool, isPeerInitiatedStream, (HTTPCodec::StreamID), (override));

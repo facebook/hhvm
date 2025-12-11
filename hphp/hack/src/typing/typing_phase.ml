@@ -933,7 +933,12 @@ and localize_ft
           None
       in
       let tvarl = List.map ~f:fst explicit_targs in
-      let ft_subst = Subst.make_locl ft.ft_tparams tvarl in
+      let ft_subst =
+        if List.is_empty explicit_targs then
+          SMap.empty
+        else
+          Subst.make_locl ft.ft_tparams tvarl
+      in
       ((env, ty_err_opt), SMap.union ft_subst ety_env.substs)
     | None -> ((env, None), ety_env.substs)
   in

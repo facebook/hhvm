@@ -78,8 +78,20 @@ let lookup_magic_type (env : env) use_pos (class_ : locl_ty) (fname : string) :
           }
         in
         let ety_env = empty_expand_env in
+        (* Generate fresh type variables (and assert constraints, if any) for generic parameters on the format method *)
+        let ((env, _ty_err_opt1), explicit_targs) =
+          Typing_phase.localize_targs
+            ~check_type_integrity:true
+            ~is_method:true
+            ~def_pos:pos
+            ~use_pos
+            ~use_name:fname
+            env
+            fty.ft_tparams
+            []
+        in
         let instantiation =
-          Typing_phase.{ use_pos; use_name = fname; explicit_targs = [] }
+          Typing_phase.{ use_pos; use_name = fname; explicit_targs }
         in
         Some
           (Typing_phase.localize_ft

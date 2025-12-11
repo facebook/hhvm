@@ -24,7 +24,12 @@ struct stat_t;
 
 class AdditionalLoggerIf {
  public:
-  virtual ~AdditionalLoggerIf() {}
+  AdditionalLoggerIf() = default;
+  virtual ~AdditionalLoggerIf() = default;
+  AdditionalLoggerIf(const AdditionalLoggerIf&) = delete;
+  AdditionalLoggerIf& operator=(const AdditionalLoggerIf&) = delete;
+  AdditionalLoggerIf(AdditionalLoggerIf&&) = delete;
+  AdditionalLoggerIf& operator=(AdditionalLoggerIf&&) = delete;
 
   virtual void log(const std::vector<stat_t>& stats) = 0;
 };

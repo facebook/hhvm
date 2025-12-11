@@ -54,9 +54,9 @@ void StaticHandler::onRequest(std::unique_ptr<HTTPMessage> headers) noexcept {
   // use a CPU executor since read(2) of a file can block
   readFileScheduled_ = true;
   folly::getUnsafeMutableGlobalCPUExecutor()->add(
-      std::bind(&StaticHandler::readFile,
-                this,
-                folly::EventBaseManager::get()->getEventBase()));
+      [this, evb = folly::EventBaseManager::get()->getEventBase()] {
+        readFile(evb);
+      });
 }
 
 void StaticHandler::readFile(folly::EventBase* evb) {
@@ -117,9 +117,9 @@ void StaticHandler::onEgressResumed() noexcept {
   if (!readFileScheduled_ && file_) {
     readFileScheduled_ = true;
     folly::getUnsafeMutableGlobalCPUExecutor()->add(
-        std::bind(&StaticHandler::readFile,
-                  this,
-                  folly::EventBaseManager::get()->getEventBase()));
+        [this, evb = folly::EventBaseManager::get()->getEventBase()] {
+          readFile(evb);
+        });
   } else {
     VLOG(4) << "Deferred scheduling readFile";
   }

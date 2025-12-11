@@ -1,8 +1,11 @@
 # Thrift Streaming in Go
 
-This document explains how to use Thrift Streaming in Go, both from the client side and server side.
+This document explains how to use Thrift Streaming in Go, both from the client
+side and server side.
 
-For general information about Thrift Streaming concepts and how to define streaming services in Thrift IDL, please refer to the [Thrift Streaming Wiki](https://www.internalfb.com/intern/staticdocs/thrift/docs/fb/features/streaming/).
+For general information about Thrift Streaming concepts and how to define
+streaming services in Thrift IDL, please refer to the
+[Thrift Streaming Wiki](https://www.internalfb.com/intern/staticdocs/thrift/docs/fb/features/streaming/).
 
 ## Table of Contents
 
@@ -13,11 +16,16 @@ For general information about Thrift Streaming concepts and how to define stream
 
 ## Overview
 
-Thrift Streaming allows the server to stream data to the client (server-to-client streaming), enabling efficient handling of large datasets or real-time data feeds. The server produces a stream of elements that the client consumes. Go's implementation uses channels to provide an idiomatic API for streaming functionality.
+Thrift Streaming allows the server to stream data to the client
+(server-to-client streaming), enabling efficient handling of large datasets or
+real-time data feeds. The server produces a stream of elements that the client
+consumes. Go's implementation uses channels to provide an idiomatic API for
+streaming functionality.
 
 ## Defining Streaming Services
 
-Define streaming methods in your Thrift IDL file using the `stream<T>` return type:
+Define streaming methods in your Thrift IDL file using the `stream<T>` return
+type:
 
 ```thrift
 // Stream-only response (no initial response)
@@ -43,9 +51,11 @@ service FileService {
 
 ### API Signature
 
-The generated client API returns different values depending on whether the stream has an initial response:
+The generated client API returns different values depending on whether the
+stream has an initial response:
 
 **Stream-only (no initial response):**
+
 ```go
 func (c *Client) StreamMethod(ctx context.Context, args...) (
     <-chan ElemType,  // Element channel
@@ -55,6 +65,7 @@ func (c *Client) StreamMethod(ctx context.Context, args...) (
 ```
 
 **Response and stream (with initial response):**
+
 ```go
 func (c *Client) StreamMethod(ctx context.Context, args...) (
     *InitialResponse, // First response
@@ -66,15 +77,22 @@ func (c *Client) StreamMethod(ctx context.Context, args...) (
 
 ### Usage Guidelines
 
-1. **Context is Required**: The API REQUIRES a context with a timeout, deadline, or manual cancel to ensure background goroutines are terminated (avoid leaks).
+1. **Context is Required**: The API REQUIRES a context with a timeout, deadline,
+   or manual cancel to ensure background goroutines are terminated (avoid
+   leaks).
 
-2. **Check Initial Error**: Always check the initial error first. If non-nil, no stream follows.
+2. **Check Initial Error**: Always check the initial error first. If non-nil, no
+   stream follows.
 
-3. **Consume Element Channel**: Consume elements from the element channel until it's exhausted (closed).
+3. **Consume Element Channel**: Consume elements from the element channel until
+   it's exhausted (closed).
 
-4. **Check Stream Error**: After consuming all elements, check the error channel once to determine if the stream terminated gracefully or encountered an error.
+4. **Check Stream Error**: After consuming all elements, check the error channel
+   once to determine if the stream terminated gracefully or encountered an
+   error.
 
-5. **Cleanup**: You should NOT worry about cleaning up channels/resources besides providing a reasonable context timeout/cancellation.
+5. **Cleanup**: You should NOT worry about cleaning up channels/resources
+   besides providing a reasonable context timeout/cancellation.
 
 ### Example: Stream-Only Response
 
@@ -132,9 +150,11 @@ func main() {
 
 ### API Signature
 
-Server-side streaming methods have a different signature that returns a producer function:
+Server-side streaming methods have a different signature that returns a producer
+function:
 
 **Stream-only (no initial response):**
+
 ```go
 func (h *Handler) StreamMethod(ctx context.Context, args...) (
     func(context.Context, chan<- ElemType) error, // Producer function
@@ -143,6 +163,7 @@ func (h *Handler) StreamMethod(ctx context.Context, args...) (
 ```
 
 **Response and stream (with initial response):**
+
 ```go
 func (h *Handler) StreamMethod(ctx context.Context, args...) (
     *InitialResponse,                              // First response
@@ -153,19 +174,26 @@ func (h *Handler) StreamMethod(ctx context.Context, args...) (
 
 ### Implementation Guidelines
 
-1. **Return Initial Response/Error First**: Return the initial response and/or error before streaming begins.
+1. **Return Initial Response/Error First**: Return the initial response and/or
+   error before streaming begins.
 
-2. **Producer Function**: Return a producer function that will be invoked by the Thrift library to generate stream elements.
+2. **Producer Function**: Return a producer function that will be invoked by the
+   Thrift library to generate stream elements.
 
-3. **Use Context for Cancellation**: The context passed to the producer function should be used to detect stream interruption (e.g. client disconnected).
+3. **Use Context for Cancellation**: The context passed to the producer function
+   should be used to detect stream interruption (e.g. client disconnected).
 
-4. **Send Elements via Channel**: Use the provided channel to send stream elements.
+4. **Send Elements via Channel**: Use the provided channel to send stream
+   elements.
 
-5. **Return Error for Stream Errors**: Return an error from the producer function to signal a streaming error.
+5. **Return Error for Stream Errors**: Return an error from the producer
+   function to signal a streaming error.
 
-6. **Return nil for Successful Completion**: Return `nil` to indicate successful stream completion.
+6. **Return nil for Successful Completion**: Return `nil` to indicate successful
+   stream completion.
 
-7. **Cleanup Resources**: The producer function should clean up all resources before returning.
+7. **Cleanup Resources**: The producer function should clean up all resources
+   before returning.
 
 ### Example: Stream-Only Response
 

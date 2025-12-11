@@ -82,7 +82,11 @@ struct FilteringOptions {
  */
 class CompressionCodec {
  public:
-  virtual ~CompressionCodec() {}
+  virtual ~CompressionCodec() = default;
+  CompressionCodec(const CompressionCodec&) = delete;
+  CompressionCodec& operator=(const CompressionCodec&) = delete;
+  CompressionCodec(CompressionCodec&&) = delete;
+  CompressionCodec& operator=(CompressionCodec&&) = delete;
 
   /**
    * Compress data.

@@ -1,0 +1,29 @@
+> lines and columns in ranges are 1-indexed
+received code:
+1 <?hh
+2 // Formatting an otherwise-correctly formatted file with trailing newlines
+3 // should not devour the last line before the newlines.
+4 class A {
+5   public function baz(): int {
+6     return 5;
+7   }
+8 }
+9 
+10 
+
+New text at range 9:1-11:1 (1-indexed) is
+'
+'
+
+Code after applying language server edits:
+'<?hh
+// Formatting an otherwise-correctly formatted file with trailing newlines
+// should not devour the last line before the newlines.
+class A {
+  public function baz(): int {
+    return 5;
+  }
+}
+'
+
+Matched Hackfmt result

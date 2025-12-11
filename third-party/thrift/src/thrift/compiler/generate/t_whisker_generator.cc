@@ -1157,23 +1157,25 @@ void whisker_generator_context::visit_const_value(
   }
 
   const_value_types_[value] = expected_type;
-  if (const auto* map = expected_type->try_as<t_map>();
+  if (const auto* map = expected_type->get_true_type()->try_as<t_map>();
       map != nullptr && value->kind() == t_const_value::CV_MAP) {
     for (const auto& [key, val] : value->get_map()) {
       visit_const_value(key, map->key_type());
       visit_const_value(val, map->val_type());
     }
-  } else if (const auto* list = expected_type->try_as<t_list>();
+  } else if (const auto* list =
+                 expected_type->get_true_type()->try_as<t_list>();
              list != nullptr && value->kind() == t_const_value::CV_LIST) {
     for (const t_const_value* val : value->get_list()) {
       visit_const_value(val, list->elem_type());
     }
-  } else if (const auto* set = expected_type->try_as<t_set>();
+  } else if (const auto* set = expected_type->get_true_type()->try_as<t_set>();
              set != nullptr && value->kind() == t_const_value::CV_LIST) {
     for (const t_const_value* val : value->get_list()) {
       visit_const_value(val, set->elem_type());
     }
-  } else if (const auto* structured = expected_type->try_as<t_structured>();
+  } else if (const auto* structured =
+                 expected_type->get_true_type()->try_as<t_structured>();
              structured != nullptr && value->kind() == t_const_value::CV_MAP) {
     for (const auto& [key, val] : value->get_map()) {
       if (const t_field* field = key->kind() == t_const_value::CV_STRING

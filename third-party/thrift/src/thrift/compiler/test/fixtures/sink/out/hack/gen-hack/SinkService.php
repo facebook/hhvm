@@ -16,14 +16,14 @@ interface SinkServiceAsyncIf extends \IThriftAsyncIf {
    * void, sink<SinkPayload, FinalResponse>
    *   method();
    */
-  public function method(): Awaitable<\ResponseAndClientSink<null, SinkPayload, FinalResponse>>;
+  public function method(): Awaitable<\ResponseAndSink<null, SinkPayload, FinalResponse>>;
 
   /**
    * Original thrift definition:-
    * InitialResponse, sink<SinkPayload, FinalResponse>
    *   methodAndReponse();
    */
-  public function methodAndReponse(): Awaitable<\ResponseAndClientSink<InitialResponse, SinkPayload, FinalResponse>>;
+  public function methodAndReponse(): Awaitable<\ResponseAndSink<InitialResponse, SinkPayload, FinalResponse>>;
 
   /**
    * Original thrift definition:-
@@ -31,35 +31,35 @@ interface SinkServiceAsyncIf extends \IThriftAsyncIf {
    *   methodThrow()
    *   throws (1: InitialException ex);
    */
-  public function methodThrow(): Awaitable<\ResponseAndClientSink<null, SinkPayload, FinalResponse>>;
+  public function methodThrow(): Awaitable<\ResponseAndSink<null, SinkPayload, FinalResponse>>;
 
   /**
    * Original thrift definition:-
    * void, sink<SinkPayload, throws (1: SinkException1 ex), FinalResponse>
    *   methodSinkThrow();
    */
-  public function methodSinkThrow(): Awaitable<\ResponseAndClientSink<null, SinkPayload, FinalResponse>>;
+  public function methodSinkThrow(): Awaitable<\ResponseAndSink<null, SinkPayload, FinalResponse>>;
 
   /**
    * Original thrift definition:-
    * void, sink<SinkPayload, FinalResponse, throws (1: SinkException2 ex)>
    *   methodFinalThrow();
    */
-  public function methodFinalThrow(): Awaitable<\ResponseAndClientSink<null, SinkPayload, FinalResponse>>;
+  public function methodFinalThrow(): Awaitable<\ResponseAndSink<null, SinkPayload, FinalResponse>>;
 
   /**
    * Original thrift definition:-
    * void, sink<SinkPayload, throws (1: SinkException1 ex), FinalResponse, throws (1: SinkException2 ex)>
    *   methodBothThrow();
    */
-  public function methodBothThrow(): Awaitable<\ResponseAndClientSink<null, SinkPayload, FinalResponse>>;
+  public function methodBothThrow(): Awaitable<\ResponseAndSink<null, SinkPayload, FinalResponse>>;
 
   /**
    * Original thrift definition:-
    * void, sink<SinkPayload, FinalResponse>
    *   methodFast();
    */
-  public function methodFast(): Awaitable<\ResponseAndClientSink<null, SinkPayload, FinalResponse>>;
+  public function methodFast(): Awaitable<\ResponseAndSink<null, SinkPayload, FinalResponse>>;
 }
 
 /**
@@ -79,14 +79,14 @@ interface SinkServiceClientIf extends \IThriftSyncIf {
    * void, sink<SinkPayload, FinalResponse>
    *   method();
    */
-  public function method(): Awaitable<\ResponseAndClientSink<null, SinkPayload, FinalResponse>>;
+  public function method(): Awaitable<\ResponseAndSink<null, SinkPayload, FinalResponse>>;
 
   /**
    * Original thrift definition:-
    * InitialResponse, sink<SinkPayload, FinalResponse>
    *   methodAndReponse();
    */
-  public function methodAndReponse(): Awaitable<\ResponseAndClientSink<InitialResponse, SinkPayload, FinalResponse>>;
+  public function methodAndReponse(): Awaitable<\ResponseAndSink<InitialResponse, SinkPayload, FinalResponse>>;
 
   /**
    * Original thrift definition:-
@@ -94,35 +94,35 @@ interface SinkServiceClientIf extends \IThriftSyncIf {
    *   methodThrow()
    *   throws (1: InitialException ex);
    */
-  public function methodThrow(): Awaitable<\ResponseAndClientSink<null, SinkPayload, FinalResponse>>;
+  public function methodThrow(): Awaitable<\ResponseAndSink<null, SinkPayload, FinalResponse>>;
 
   /**
    * Original thrift definition:-
    * void, sink<SinkPayload, throws (1: SinkException1 ex), FinalResponse>
    *   methodSinkThrow();
    */
-  public function methodSinkThrow(): Awaitable<\ResponseAndClientSink<null, SinkPayload, FinalResponse>>;
+  public function methodSinkThrow(): Awaitable<\ResponseAndSink<null, SinkPayload, FinalResponse>>;
 
   /**
    * Original thrift definition:-
    * void, sink<SinkPayload, FinalResponse, throws (1: SinkException2 ex)>
    *   methodFinalThrow();
    */
-  public function methodFinalThrow(): Awaitable<\ResponseAndClientSink<null, SinkPayload, FinalResponse>>;
+  public function methodFinalThrow(): Awaitable<\ResponseAndSink<null, SinkPayload, FinalResponse>>;
 
   /**
    * Original thrift definition:-
    * void, sink<SinkPayload, throws (1: SinkException1 ex), FinalResponse, throws (1: SinkException2 ex)>
    *   methodBothThrow();
    */
-  public function methodBothThrow(): Awaitable<\ResponseAndClientSink<null, SinkPayload, FinalResponse>>;
+  public function methodBothThrow(): Awaitable<\ResponseAndSink<null, SinkPayload, FinalResponse>>;
 
   /**
    * Original thrift definition:-
    * void, sink<SinkPayload, FinalResponse>
    *   methodFast();
    */
-  public function methodFast(): Awaitable<\ResponseAndClientSink<null, SinkPayload, FinalResponse>>;
+  public function methodFast(): Awaitable<\ResponseAndSink<null, SinkPayload, FinalResponse>>;
 }
 
 /**
@@ -137,7 +137,7 @@ trait SinkServiceClientBase {
    * void, sink<SinkPayload, FinalResponse>
    *   method();
    */
-  public async function method(): Awaitable<\ResponseAndClientSink<null, SinkPayload, FinalResponse>> {
+  public async function method(): Awaitable<\ResponseAndSink<null, SinkPayload, FinalResponse>> {
     $hh_frame_metadata = $this->getHHFrameMetadata();
     if ($hh_frame_metadata !== null) {
       \HH\set_frame_metadata($hh_frame_metadata);
@@ -154,7 +154,7 @@ trait SinkServiceClientBase {
    * InitialResponse, sink<SinkPayload, FinalResponse>
    *   methodAndReponse();
    */
-  public async function methodAndReponse(): Awaitable<\ResponseAndClientSink<InitialResponse, SinkPayload, FinalResponse>> {
+  public async function methodAndReponse(): Awaitable<\ResponseAndSink<InitialResponse, SinkPayload, FinalResponse>> {
     $hh_frame_metadata = $this->getHHFrameMetadata();
     if ($hh_frame_metadata !== null) {
       \HH\set_frame_metadata($hh_frame_metadata);
@@ -172,7 +172,7 @@ trait SinkServiceClientBase {
    *   methodThrow()
    *   throws (1: InitialException ex);
    */
-  public async function methodThrow(): Awaitable<\ResponseAndClientSink<null, SinkPayload, FinalResponse>> {
+  public async function methodThrow(): Awaitable<\ResponseAndSink<null, SinkPayload, FinalResponse>> {
     $hh_frame_metadata = $this->getHHFrameMetadata();
     if ($hh_frame_metadata !== null) {
       \HH\set_frame_metadata($hh_frame_metadata);
@@ -189,7 +189,7 @@ trait SinkServiceClientBase {
    * void, sink<SinkPayload, throws (1: SinkException1 ex), FinalResponse>
    *   methodSinkThrow();
    */
-  public async function methodSinkThrow(): Awaitable<\ResponseAndClientSink<null, SinkPayload, FinalResponse>> {
+  public async function methodSinkThrow(): Awaitable<\ResponseAndSink<null, SinkPayload, FinalResponse>> {
     $hh_frame_metadata = $this->getHHFrameMetadata();
     if ($hh_frame_metadata !== null) {
       \HH\set_frame_metadata($hh_frame_metadata);
@@ -206,7 +206,7 @@ trait SinkServiceClientBase {
    * void, sink<SinkPayload, FinalResponse, throws (1: SinkException2 ex)>
    *   methodFinalThrow();
    */
-  public async function methodFinalThrow(): Awaitable<\ResponseAndClientSink<null, SinkPayload, FinalResponse>> {
+  public async function methodFinalThrow(): Awaitable<\ResponseAndSink<null, SinkPayload, FinalResponse>> {
     $hh_frame_metadata = $this->getHHFrameMetadata();
     if ($hh_frame_metadata !== null) {
       \HH\set_frame_metadata($hh_frame_metadata);
@@ -223,7 +223,7 @@ trait SinkServiceClientBase {
    * void, sink<SinkPayload, throws (1: SinkException1 ex), FinalResponse, throws (1: SinkException2 ex)>
    *   methodBothThrow();
    */
-  public async function methodBothThrow(): Awaitable<\ResponseAndClientSink<null, SinkPayload, FinalResponse>> {
+  public async function methodBothThrow(): Awaitable<\ResponseAndSink<null, SinkPayload, FinalResponse>> {
     $hh_frame_metadata = $this->getHHFrameMetadata();
     if ($hh_frame_metadata !== null) {
       \HH\set_frame_metadata($hh_frame_metadata);
@@ -240,7 +240,7 @@ trait SinkServiceClientBase {
    * void, sink<SinkPayload, FinalResponse>
    *   methodFast();
    */
-  public async function methodFast(): Awaitable<\ResponseAndClientSink<null, SinkPayload, FinalResponse>> {
+  public async function methodFast(): Awaitable<\ResponseAndSink<null, SinkPayload, FinalResponse>> {
     $hh_frame_metadata = $this->getHHFrameMetadata();
     if ($hh_frame_metadata !== null) {
       \HH\set_frame_metadata($hh_frame_metadata);

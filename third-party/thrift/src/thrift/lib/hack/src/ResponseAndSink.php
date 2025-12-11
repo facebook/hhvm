@@ -16,11 +16,7 @@
  *
  */
 
-final class ResponseAndClientSink<
-  TFirstResponse,
-  TSinkType,
-  TFinalResponseType,
-> {
+final class ResponseAndSink<TFirstResponse, TSinkType, TFinalResponseType> {
   public function __construct(
     public ?TFirstResponse $response,
     public (function(
@@ -28,3 +24,6 @@ final class ResponseAndClientSink<
     ): Awaitable<TFinalResponseType>) $genSink,
   ) {}
 }
+
+type ResponseAndClientSink<TFirstResponse, TSinkType, TFinalResponseType> =
+  ResponseAndSink<TFirstResponse, TSinkType, TFinalResponseType>;

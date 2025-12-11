@@ -6743,11 +6743,11 @@ std::string t_hack_generator::get_sink_function_return_typehint(
       ", " + type_to_typehint(sink->final_response_type().get_type()) + ">";
 
   if (function->has_void_initial_response()) {
-    return "\\ResponseAndClientSink<null, " + return_typehint;
+    return "\\ResponseAndSink<null, " + return_typehint;
   }
   auto first_response_type_hint =
       type_to_typehint(function->return_type().get_type());
-  return "\\ResponseAndClientSink<" + first_response_type_hint + ", " +
+  return "\\ResponseAndSink<" + first_response_type_hint + ", " +
       return_typehint;
 }
 /**

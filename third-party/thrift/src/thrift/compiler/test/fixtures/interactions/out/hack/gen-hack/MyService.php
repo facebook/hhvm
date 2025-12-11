@@ -276,7 +276,7 @@ class MyService_MyInteraction extends \ThriftClientBase {
    * set<i32>, sink<string, binary>
    *   encode();
    */
-  public async function encode(): Awaitable<\ResponseAndClientSink<Set<int>, string, string>> {
+  public async function encode(): Awaitable<\ResponseAndSink<Set<int>, string, string>> {
     $hh_frame_metadata = $this->getHHFrameMetadata();
     if ($hh_frame_metadata !== null) {
       \HH\set_frame_metadata($hh_frame_metadata);
@@ -508,7 +508,7 @@ class MyService_MyInteractionFast extends \ThriftClientBase {
    * set<i32>, sink<string, binary>
    *   encode();
    */
-  public async function encode(): Awaitable<\ResponseAndClientSink<Set<int>, string, string>> {
+  public async function encode(): Awaitable<\ResponseAndSink<Set<int>, string, string>> {
     $hh_frame_metadata = $this->getHHFrameMetadata();
     if ($hh_frame_metadata !== null) {
       \HH\set_frame_metadata($hh_frame_metadata);

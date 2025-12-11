@@ -503,10 +503,9 @@ abstract class ThriftClientBase implements IThriftClient {
 
     await $this->asyncHandler_
       ->genAfter<TSinkFirstType>($name, $first_response);
-    return new \ResponseAndClientSink<
-      TSinkFirstType,
-      TSinkType,
-      TSinkFinalType,
-    >($first_response, $client_sink_func);
+    return new \ResponseAndSink<TSinkFirstType, TSinkType, TSinkFinalType>(
+      $first_response,
+      $client_sink_func,
+    );
   }
 }

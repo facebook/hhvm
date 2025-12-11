@@ -19,5 +19,6 @@ oxidized = { version = "0.0.0", path = "../../../../oxidized" }
 serde = { version = "1.0.219", features = ["derive", "rc"] }
 
 [build-dependencies]
+generate_configs_lib = { version = "0.0.0", path = "../../../../../../tools/configs" }
 nom = "8"
 nom-language = "0.1"

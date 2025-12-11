@@ -20,6 +20,7 @@
 #include <proxygen/lib/http/HTTPMethod.h>
 #include <proxygen/lib/http/session/HQSession.h>
 #include <quic/QuicConstants.h>
+#include <quic/congestion_control/CongestionControllerFactory.h>
 #include <quic/fizz/client/handshake/QuicPskCache.h>
 #include <quic/state/TransportSettings.h>
 
@@ -59,6 +60,8 @@ struct HQBaseParams {
   quic::TransportSettings transportSettings;
   std::string congestionControlName;
   std::optional<quic::CongestionControlType> congestionControl;
+  std::shared_ptr<quic::CongestionControllerFactory>
+      congestionControllerFactory;
   bool sendKnobFrame{false};
 
   // HTTP section

@@ -269,8 +269,13 @@ HQServer::HQServer(
   server_ = quic::QuicServer::createQuicServer(params_.transportSettings);
 
   server_->setBindV6Only(false);
-  server_->setCongestionControllerFactory(
-      std::make_shared<ServerCongestionControllerFactory>());
+  if (params_.congestionControllerFactory) {
+    server_->setCongestionControllerFactory(
+        params_.congestionControllerFactory);
+  } else {
+    server_->setCongestionControllerFactory(
+        std::make_shared<ServerCongestionControllerFactory>());
+  }
 
   server_->setQuicServerTransportFactory(std::move(factory));
   server_->setQuicUDPSocketFactory(

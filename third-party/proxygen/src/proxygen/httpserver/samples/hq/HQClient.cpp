@@ -311,8 +311,12 @@ void HQClient::initializeQuicClient(const folly::SocketAddress& remoteAddress,
   client->setHostname(params_.host);
   client->addNewPeerAddress(remoteAddress);
   client->setLocalAddress(localAddress);
-  client->setCongestionControllerFactory(
-      std::make_shared<quic::DefaultCongestionControllerFactory>());
+  if (params_.congestionControllerFactory) {
+    client->setCongestionControllerFactory(params_.congestionControllerFactory);
+  } else {
+    client->setCongestionControllerFactory(
+        std::make_shared<quic::DefaultCongestionControllerFactory>());
+  }
   client->setTransportSettings(params_.transportSettings);
   client->setSupportedVersions(params_.quicVersions);
 

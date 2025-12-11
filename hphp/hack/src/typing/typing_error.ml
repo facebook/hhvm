@@ -1339,6 +1339,7 @@ module Primary = struct
         decl_pos: Pos_or_decl.t;
         actual: int;
         expected: int;
+        hint_missing_optional: Pos_or_decl.t option;
       }
     | Missing_named_args of {
         pos: Pos.t;

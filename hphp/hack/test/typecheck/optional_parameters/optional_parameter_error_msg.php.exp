@@ -14,3 +14,5 @@ ERROR: File "optional_parameter_error_msg.php", line 9, characters 34-44:
 Too few positional arguments (required 2 but got 1) (Typing[4104])
   File "optional_parameter_error_msg.php", line 4, characters 3-37:
   Definition is here
+  File "optional_parameter_error_msg.php", line 4, characters 27-29:
+  Optional arguments are missing

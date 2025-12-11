@@ -1317,6 +1317,9 @@ module Primary : sig
         decl_pos: Pos_or_decl.t;
         actual: int;
         expected: int;
+        (* Hint for adding missing optional arguments, takes positions of
+           declaration for optional arguments *)
+        hint_missing_optional: Pos_or_decl.t option;
       }
     | Missing_named_args of {
         pos: Pos.t;

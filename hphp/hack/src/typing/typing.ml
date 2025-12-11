@@ -1835,7 +1835,14 @@ let check_arity_and_names
         Typing_error.(
           primary
           @@ Primary.Typing_too_few_args
-               { expected = exp_min; actual = arity; pos; decl_pos = pos_def });
+               {
+                 expected = exp_min;
+                 actual = arity;
+                 pos;
+                 decl_pos = pos_def;
+                 (* It's fine to not provide optional arguments here, don't provide any hints *)
+                 hint_missing_optional = None;
+               });
     if not is_variadic_or_splat then
       let exp_max = List.length positional_params in
       let arity =
@@ -1939,6 +1946,7 @@ let check_lambda_arity env lambda_pos def_pos lambda_ft expected_ft =
     let optional_params_of ft =
       List.filter ft.ft_params ~f:Typing_defs_core.get_fp_is_optional
     in
+    let optional_params = optional_params_of expected_ft in
     (* what's the most arguments this type can take (assuming no splat or variadics) *)
     let expected_max = List.length (positional_params_of expected_ft) in
     let actual_max = List.length (positional_params_of lambda_ft) in
@@ -1946,7 +1954,21 @@ let check_lambda_arity env lambda_pos def_pos lambda_ft expected_ft =
      * and require no more than expected requires *)
     let too_few = actual_max < expected_max in
     let too_many = actual_min > expected_min in
-    if too_few then
+    (if too_few then
+      (* If all the required arguments are provided, but not the optional ones,
+         provide a more specific hint *)
+      let should_show_hint_for_missing_optional =
+        List.length optional_params > 0
+        && actual_max + List.length optional_params = expected_max
+      in
+      let hint_missing_optional =
+        if should_show_hint_for_missing_optional then
+          let first_pos = (List.hd_exn optional_params).fp_pos in
+          let last_pos = (List.last_exn optional_params).fp_pos in
+          Some (Pos_or_decl.merge first_pos last_pos)
+        else
+          None
+      in
       Typing_error_utils.add_typing_error ~env
       @@ Typing_error.primary
            (Typing_error.Primary.Typing_too_few_args
@@ -1955,12 +1977,13 @@ let check_lambda_arity env lambda_pos def_pos lambda_ft expected_ft =
                 actual = actual_max;
                 pos = lambda_pos;
                 decl_pos = def_pos;
-              });
+                hint_missing_optional;
+              }));
     (if too_many then
       let should_show_hint_for_convert_to_optional =
         (* If the function has optional parameters, and the optional
            paramaters are provided as if they are mandatory, provide a hint *)
-        actual_min = expected_min + List.length (optional_params_of expected_ft)
+        actual_min = expected_min + List.length optional_params
       in
       let hint_convert_to_optional =
         if should_show_hint_for_convert_to_optional then

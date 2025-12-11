@@ -47,7 +47,7 @@ module Common = struct
     in
     (Error_code.TypingTooManyArgs, claim, reasons)
 
-  let typing_too_few_args pos decl_pos actual expected =
+  let typing_too_few_args pos decl_pos actual expected ~hint_missing_optional =
     let claim =
       lazy
         ( pos,
@@ -55,7 +55,12 @@ module Common = struct
             "Too few positional arguments (required %d but got %d)"
             expected
             actual )
-    and reasons = lazy [(decl_pos, "Definition is here")] in
+    and reasons =
+      lazy
+        ((decl_pos, "Definition is here")
+        :: Option.value_map hint_missing_optional ~default:[] ~f:(fun pos ->
+               [(pos, "Optional arguments are missing")]))
+    in
     (Error_code.TypingTooFewArgs, claim, reasons)
 
   let missing_named_args pos decl_pos missing_names =
@@ -2066,9 +2071,14 @@ end = struct
     in
     create ~code ~claim ~reasons ()
 
-  let typing_too_few_args pos decl_pos actual expected =
+  let typing_too_few_args pos decl_pos actual expected ~hint_missing_optional =
     let (code, claim, reasons) =
-      Common.typing_too_few_args pos decl_pos actual expected
+      Common.typing_too_few_args
+        pos
+        decl_pos
+        actual
+        expected
+        ~hint_missing_optional
     in
     create ~code ~claim ~reasons ()
 
@@ -4726,8 +4736,9 @@ end = struct
         actual
         expected
         ~hint_convert_to_optional
-    | Typing_too_few_args { pos; decl_pos; actual; expected } ->
-      typing_too_few_args pos decl_pos actual expected
+    | Typing_too_few_args
+        { pos; decl_pos; actual; expected; hint_missing_optional } ->
+      typing_too_few_args pos decl_pos actual expected ~hint_missing_optional
     | Missing_named_args { pos; decl_pos; missing_names } ->
       missing_named_args pos decl_pos missing_names
     | Unexpected_named_args { pos; decl_pos; unexpected_names } ->
@@ -6199,9 +6210,14 @@ end = struct
     in
     create ~code ~reasons ()
 
-  let typing_too_few_args pos decl_pos actual expected =
+  let typing_too_few_args pos decl_pos actual expected ~hint_missing_optional =
     let (code, claim, reasons) =
-      Common.typing_too_few_args pos decl_pos actual expected
+      Common.typing_too_few_args
+        pos
+        decl_pos
+        actual
+        expected
+        ~hint_missing_optional
     in
     let reasons =
       Lazy.(
@@ -6656,7 +6672,13 @@ end = struct
            expected
            ~hint_convert_to_optional:None)
     | Typing_too_few_args { pos; decl_pos; actual; expected } ->
-      Eval_result.single (typing_too_few_args pos decl_pos actual expected)
+      Eval_result.single
+        (typing_too_few_args
+           pos
+           decl_pos
+           actual
+           expected
+           ~hint_missing_optional:None)
     | Non_object_member { pos; ctxt; ty_name; member_name; kind; decl_pos } ->
       Eval_result.single
         (non_object_member pos ctxt ty_name member_name kind decl_pos)

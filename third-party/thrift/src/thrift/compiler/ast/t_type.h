@@ -146,38 +146,71 @@ class t_type : public t_named {
 };
 
 /**
- * A reference to a thrift type.
+ * A reference to a Thrift type in IDL code.
+ *
+ * For example, in the following struct definition:
+ *
+ * ```
+ * struct Foo {
+ *   1: i32 a;
+ * }
+ * ```
+ *
+ * The field type "i32" in `1: i32 a;` is a *reference* to a type (in this case,
+ * the primitive built-in type `i32`).
  *
  * Type references are different from other references because they can be
  * annotated and unresolved.
  *
- * TODO(T244601847): Make an unresolved reference directly representable in the
- * AST, merging `t_placeholder_typedef` into `t_type_ref`.
+ * Instances of `t_type_ref` provide pass-through dereference semantics (i.e.,
+ * `->` and `*` operators) to the underlying referenced `t_type`.
+ *
+ * Note that this type (`t_type_ref`) does not represent an AST node (unlike
+ * `t_type`, `t_typedef`, etc.).
  */
 class t_type_ref final {
  public:
   t_type_ref() = default;
+
   /* implicit */ t_type_ref(const t_type& type, source_range range = {})
       : t_type_ref(&type, range) {}
+
   /* implicit */ t_type_ref(t_type&&, source_range = {}) = delete;
 
-  // Returns the type being referenced, resolving it if need be.
-  //
-  // Throws a std::runtime_error if the type has not been set could not be
-  // resolved.
+  /**
+   * Returns the type being referenced, resolving it if need be.
+   *
+   * Throws a std::runtime_error if the referenced type has not been set (i.e.,
+   * this instance is `empty()`) or could not be resolved.
+   */
   const t_type& deref();
 
-  // Returns the resolved type being referenced.
-  //
-  // Throws a std::runtime_error if the type has not been set, or an unresolved
-  // t_placeholder_typedef is encountered.
+  /**
+   * Returns the resolved type being referenced.
+   *
+   * Throws a std::runtime_error if the type has not been set, or an unresolved
+   * t_placeholder_typedef is encountered.
+   */
   const t_type& deref() const { return deref_or_throw(); }
 
   // Returns true the type reference has not been initalized.
   bool empty() const noexcept { return type_ == nullptr; }
+
+  /**
+   * Boolean operator is equivalent to "not empty".
+   */
   explicit operator bool() const { return !empty(); }
-  // Returns true if the type has been resolved.
+
+  /**
+   * Returns true if this reference has been initialized (i.e., is not
+   * `empty()`) and any previously unresolved "placeholder typedef" has been
+   * resolved.
+   */
   bool resolved() const noexcept;
+
+  /**
+   * Attempts to resolve the underlying unresolved "placholder typedef", if any.
+   */
   bool resolve();
 
   source_range src_range() const { return range_; }
@@ -202,31 +235,50 @@ class t_type_ref final {
   static const t_type_ref& none();
 
  private:
+  /**
+   * The resolved underlying type being referred to by this t_type_ref, if any.
+   *
+   * `type == nullptr`  <=> `this->empty()` <=> `!bool(*this)`
+   */
   const t_type* type_ = nullptr;
+
   source_range range_;
   // The placeholder we have write access to, if we need to resolve the type
   // before derefing.
   // Note: It is not thread safe to access this value if 'this' is const.s
-  t_placeholder_typedef* unresolved_type_ = nullptr;
+  //
+  // TODO(T244601847): Make an unresolved reference directly representable in
+  // the AST, merging `t_placeholder_typedef` into `t_type_ref`.
+  t_placeholder_typedef* unresolved_typedef_ = nullptr;
+
   explicit t_type_ref(
       const t_type& type,
       t_placeholder_typedef& unresolved_type,
       source_range range)
-      : type_(&type), range_(range), unresolved_type_(&unresolved_type) {}
+      : type_(&type), range_(range), unresolved_typedef_(&unresolved_type) {}
 
   // Note: Use from_ptr or from_req_ptr for public access.
   explicit t_type_ref(const t_type* type, source_range range)
       : type_(type), range_(range) {}
 
+  /**
+   * Returns the resolved underlying type being referred to, or throws an
+   * exception.
+   */
   const t_type& deref_or_throw() const;
 
+ public:
   // TODO(T244601847): Remove get_type() once t_placeholder_typedef, at which
   // point resolved() and deref() are all that's necessary
- public:
   const t_type* get_type() const { return type_; }
 
   static t_type_ref for_placeholder(t_placeholder_typedef& unresolved_type);
 
+  // TODO(T244601847): unresolved_type() and t_placeholder_typedef will
+  // eventually be removed, and instead unresolved types will be represented by
+  // a t_type_ref with NO underlying type (placeholder or otherwise). Such a
+  // t_type_ref will be identifiable by calling the `resolved()` method
+  // (returning false).
   /**
    * When we parse an AST, `t_type_ref` represents all type references. E.g. the
    * type of a field `1: Foo myField` is a type-ref to the AST type `Foo`.
@@ -239,14 +291,8 @@ class t_type_ref final {
    * After parsing completes, we attempt deferred resolution for placeholder
    * typedefs to resolve types which were declared after their use, and emit
    * errors for types not found even during deferred resolution.
-   *
-   * TODO(T244601847): unresolved_type() and t_placeholder_typedef will
-   * eventually be removed, and instead unresolved types will be represented by
-   * a t_type_ref with NO underlying type (placeholder or otherwise). Such a
-   * t_type_ref will be identifiable by calling the `resolved()` method
-   * (returning false).
    */
-  t_placeholder_typedef* unresolved_type() { return unresolved_type_; }
+  t_placeholder_typedef* unresolved_type() { return unresolved_typedef_; }
 };
 
 bool is_scalar(const t_type& type);

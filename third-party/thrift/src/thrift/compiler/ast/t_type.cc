@@ -32,27 +32,34 @@ const t_type* t_type::get_true_type() const {
 
 bool t_type_ref::resolved() const noexcept {
   return !empty() &&
-      (unresolved_type_ == nullptr || unresolved_type_->type().resolved());
+      (unresolved_typedef_ == nullptr ||
+       unresolved_typedef_->type().resolved());
 }
 
 bool t_type_ref::resolve() {
-  if (unresolved_type_ != nullptr) { // Try to resolve.
-    if (!unresolved_type_->resolve()) {
-      return false;
-    }
-    // Try to excise the placeholder typedef so dynamic_cast works.
-    if (unresolved_type_->unstructured_annotations().empty()) {
-      type_ = unresolved_type_->type().get_type();
-    }
-    unresolved_type_ = nullptr;
+  if (unresolved_typedef_ == nullptr) {
+    // Already resolved
+    return true;
   }
+
+  // Try to resolve.
+  if (!unresolved_typedef_->resolve()) {
+    return false;
+  }
+
+  // Try to excise the placeholder typedef so dynamic_cast works.
+  if (unresolved_typedef_->unstructured_annotations().empty()) {
+    type_ = unresolved_typedef_->type().get_type();
+  }
+  unresolved_typedef_ = nullptr;
+
   return true;
 }
 
 const t_type& t_type_ref::deref() {
   if (!resolve()) {
     throw std::runtime_error(
-        "Could not resolve type: " + unresolved_type_->get_full_name());
+        "Could not resolve type: " + unresolved_typedef_->get_full_name());
   }
   return deref_or_throw();
 }

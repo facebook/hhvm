@@ -58,18 +58,25 @@ std::unique_ptr<t_typedef> t_typedef::make_unnamed(
 }
 
 bool t_placeholder_typedef::resolve() {
-  if (type_.empty()) {
-    type_ = t_type_ref::from_ptr(
-        program()->find<t_type>(scope::identifier{name(), src_range()}));
-    if (!type_.empty()) {
-      // Update the type to mirror the underlying one.
-      // TODO(afuller): Update codegen to always skip over placeholders via
-      // type_ref instead.
-      set_name(type_->name());
-      set_program(type_->program());
-    }
+  if (!aliased_type_ref_.empty()) {
+    // Already resolved
+    return true;
   }
-  return !type_.empty();
+
+  aliased_type_ref_ = t_type_ref::from_ptr(
+      program()->find<t_type>(scope::identifier{name(), src_range()}));
+  if (aliased_type_ref_.empty()) {
+    // Could not resolve
+    return false;
+  }
+
+  // Update the type to mirror the underlying one.
+  // TODO(afuller): Update codegen to always skip over placeholders via
+  // type_ref instead.
+  set_name(aliased_type_ref_->name());
+  set_program(aliased_type_ref_->program());
+  // Successfully resolved, and updated name, program.
+  return true;
 }
 
 } // namespace apache::thrift::compiler

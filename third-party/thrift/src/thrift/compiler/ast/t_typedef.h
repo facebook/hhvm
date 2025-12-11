@@ -27,7 +27,13 @@ namespace apache::thrift::compiler {
 /**
  * Represents a typedef definition.
  *
- * A typedef introduces a named alias of a type.
+ * A typedef introduces a named IDL alias of a type.
+ *
+ * Note that IDL typedefs are *not* a Thrift Object Model (TOM) concept, and in
+ * particular they do not represent TOM's "Opaque Alias Types".
+ * The IDL typedefs represented by this type are pure IDL-level aliases, and
+ * must (eventually) resolve to an underlying TOM type (eg. a struct, primitive,
+ * etc.). They are *transparent* aliases.
  */
 class t_typedef : public t_type {
  public:
@@ -38,10 +44,10 @@ class t_typedef : public t_type {
   };
 
   t_typedef(const t_program* program, std::string name, t_type_ref type)
-      : t_type(program, std::move(name)), type_(type) {}
+      : t_type(program, std::move(name)), aliased_type_ref_(type) {}
 
-  const t_type_ref& type() const { return type_; }
-  void set_type(t_type_ref type) { type_ = type; }
+  const t_type_ref& type() const { return aliased_type_ref_; }
+  void set_type(t_type_ref type) { aliased_type_ref_ = type; }
 
   kind typedef_kind() const;
 
@@ -92,7 +98,10 @@ class t_typedef : public t_type {
       const t_program* program, std::string name, t_type_ref type);
 
  protected:
-  t_type_ref type_;
+  /**
+   * Reference to the IDL type being transparently aliased by this typedef.
+   */
+  t_type_ref aliased_type_ref_;
 
  private:
   bool unnamed_{false};
@@ -118,7 +127,7 @@ class t_placeholder_typedef final : public t_typedef {
   bool resolve();
 
   std::string get_full_name() const override {
-    return type_ ? type_->get_full_name() : name();
+    return aliased_type_ref_ ? aliased_type_ref_->get_full_name() : name();
   }
 };
 

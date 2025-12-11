@@ -552,7 +552,7 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
     auto base = t_whisker_generator::make_prototype_for_typedef(proto);
     auto def = whisker::dsl::prototype_builder<h_typedef>::extends(base);
 
-    def.property("cpp_type", [&](const t_typedef& t) {
+    def.property("cpp_underlying_type", [&](const t_typedef& t) {
       return cpp_context_->resolver().get_underlying_type_name(t);
     });
 
@@ -714,11 +714,19 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
     def.property("external?", [this](const t_const& self) {
       return self.program() != program_;
     });
+    def.property("outline_init?", [this](const t_const& self) {
+      return resolves_to_container_or_struct(self.type()->get_true_type()) ||
+          cpp_context_->resolver().find_structured_adapter_annotation(self) ||
+          cpp_context_->resolver().find_first_adapter(*self.type());
+    });
     def.property("cpp_adapter", [this](const t_const& self) {
       const std::string* adapter =
           cpp_context_->resolver().find_structured_adapter_annotation(self);
       return adapter == nullptr ? whisker::make::null
                                 : whisker::make::string(*adapter);
+    });
+    def.property("cpp_type", [this](const t_const& self) {
+      return cpp_context_->resolver().get_native_type(self);
     });
     return std::move(def).make();
   }
@@ -1329,7 +1337,6 @@ class cpp_mstch_function : public mstch_function {
         this,
         {
             {"function:eb", &cpp_mstch_function::event_based},
-            {"function:stack_arguments?", &cpp_mstch_function::stack_arguments},
             {"function:sync_returns_by_outparam?",
              &cpp_mstch_function::sync_returns_by_outparam},
             {"function:prefixed_name", &cpp_mstch_function::prefixed_name},
@@ -1346,9 +1353,6 @@ class cpp_mstch_function : public mstch_function {
         function_->has_structured_annotation(kCppProcessInEbThreadUri) ||
         interface().has_unstructured_annotation("process_in_event_base") ||
         interface().has_structured_annotation(kCppProcessInEbThreadUri);
-  }
-  mstch::node stack_arguments() {
-    return cpp2::is_stack_arguments(*context_.options, *function_);
   }
   mstch::node sync_returns_by_outparam() {
     return is_complex_return(function_->return_type()->get_true_type()) &&
@@ -1455,7 +1459,6 @@ class cpp_mstch_type : public mstch_type {
             {"type:transitively_refers_to_struct?",
              &cpp_mstch_type::transitively_refers_to_struct},
             {"type:cpp_fullname", &cpp_mstch_type::cpp_fullname},
-            {"type:cpp_standard_type", &cpp_mstch_type::cpp_standard_type},
             {"type:string_or_binary?", &cpp_mstch_type::is_string_or_binary},
             {"type:non_empty_struct?", &cpp_mstch_type::is_non_empty_struct},
             {"type:cpp_declare_hash", &cpp_mstch_type::cpp_declare_hash},
@@ -1532,9 +1535,6 @@ class cpp_mstch_type : public mstch_type {
   mstch::node cpp_fullname() {
     return cpp_context_->resolver().get_namespaced_name(
         *type_->program(), *type_);
-  }
-  mstch::node cpp_standard_type() {
-    return cpp_context_->resolver().get_standard_type(*type_);
   }
   mstch::node is_string_or_binary() {
     return resolved_type_->is_string_or_binary();
@@ -2572,15 +2572,10 @@ class cpp_mstch_const : public mstch_const {
     register_methods(
         this,
         {
-            {"constant:cpp_type", &cpp_mstch_const::cpp_type},
             {"constant:has_extra_arg?", &cpp_mstch_const::has_extra_arg},
             {"constant:extra_arg", &cpp_mstch_const::extra_arg},
             {"constant:extra_arg_type", &cpp_mstch_const::extra_arg_type},
-            {"constant:outline_init?", &cpp_mstch_const::outline_init},
         });
-  }
-  mstch::node cpp_type() {
-    return cpp_context_->resolver().get_native_type(*const_);
   }
   mstch::node has_extra_arg() {
     return cpp2::get_transitive_annotation_of_adapter_or_null(*const_) !=
@@ -2595,11 +2590,6 @@ class cpp_mstch_const : public mstch_const {
     auto anno = cpp2::get_transitive_annotation_of_adapter_or_null(*const_);
     return std::shared_ptr<mstch_base>(std::make_shared<cpp_mstch_type>(
         &*anno->type(), context_, pos_, cpp_context_));
-  }
-  mstch::node outline_init() {
-    return resolves_to_container_or_struct(const_->type()->get_true_type()) ||
-        cpp_context_->resolver().find_structured_adapter_annotation(*const_) ||
-        cpp_context_->resolver().find_first_adapter(*const_->type());
   }
 
  private:

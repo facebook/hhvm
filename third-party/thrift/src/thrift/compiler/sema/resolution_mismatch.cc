@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#include <algorithm>
+
 #include <thrift/compiler/sema/resolution_mismatch.h>
 
 namespace apache::thrift::compiler {
@@ -41,10 +43,10 @@ std::string generate_alias(const t_program& program) {
 const t_include* find_include_for_program(
     const t_program& program, const t_program& target) {
   const auto& includes = program.includes();
-  auto target_include = std::find_if(
-      includes.begin(), includes.end(), [&](const t_include* incl) {
-        return incl->get_program() == &target;
-      });
+  auto target_include = std::ranges::find_if(
+      includes,
+      [&](const t_include* incl) { return incl->get_program() == &target; });
+
   if (target_include != includes.end()) {
     return *target_include;
   } else {
@@ -74,6 +76,16 @@ const t_enum* find_enum_of_value(
     }
   }
   return nullptr;
+}
+
+// Counts the number of includes in `program` that have the same scope name
+// (i.e., same program name) as `scope_name` and are not aliased.
+unsigned int count_same_scope_includes(
+    const t_program& program, std::string_view scope_name) {
+  return std::ranges::count_if(program.includes(), [&](const t_include* incl) {
+    return incl->get_program()->name() == scope_name &&
+        !incl->alias().has_value();
+  });
 }
 
 void report_resolution_mismatch(
@@ -123,15 +135,11 @@ void report_resolution_mismatch(
           return;
         }
 
-        const auto& includes = mismatch.program->includes();
-        const auto same_scope_includes = std::count_if(
-            includes.begin(), includes.end(), [&](const t_include* incl) {
-              return incl->get_program()->name() == mismatch.program->name() &&
-                  !incl->alias().has_value();
-            });
+        const auto same_scope_include_count = count_same_scope_includes(
+            *mismatch.program, mismatch.program->name());
 
         bool use_alias = false;
-        if (same_scope_includes > 1) {
+        if (same_scope_include_count > 1) {
           // We have multiple direct includes with the required scope name,
           // so we need to alias the correct one.
           const t_include* target_include = find_include_for_program(
@@ -176,11 +184,121 @@ void report_resolution_mismatch(
             "Identifier '{}' refers to a definition in another thrift program. Use an explicit scoped identifier.",
             mismatch.id);
       },
-      [&](scope::scoped_id) {
-        // TODO (sadroeck): Handle scoped_id mismatch
+      [&](scope::scoped_id scoped_id) {
+        // A scoped_id like `foo.Bar` is ambiguous because it could mean:
+        // 1. Definition `Bar` from a program with scope `foo`
+        // 2. Enum value `Bar` from a local enum named `foo`
+        // 3. A definition from the local program if the program is named `foo`
+
+        // Case 1: Local resolution found a local enum value, but global
+        // resolution found an external definition with the same scoped name.
+        if (mismatch.local_node &&
+            mismatch.local_node->program() == mismatch.program) {
+          if (const auto* enum_val = try_as_enum_value(*mismatch.local_node)) {
+            // The local resolution found an enum value (e.g., `Foo.Bar` where
+            // `Foo` is a local enum). The global resolution found something
+            // different (e.g., a definition from `Foo.thrift`).
+            //
+            // The identifier is already correctly referencing the local enum
+            // value. Warn about the ambiguity but don't suggest changing
+            // the identifier since the local resolution is correct.
+            if (const auto* enum_ = find_enum_of_value(
+                    *mismatch.local_node->program(), *enum_val)) {
+              ctx.report(
+                  mismatch.id_loc.begin,
+                  std::string{IMPLICIT_SCOPE_USAGE_LINT},
+                  diagnostic_level::warning,
+                  "Scoped identifier '{}' is ambiguous: it refers to local "
+                  "enum value '{}.{}' but could be confused with a definition "
+                  "from '{}.thrift'. Consider renaming the enum to avoid "
+                  "confusion.",
+                  mismatch.id,
+                  enum_->name(),
+                  scoped_id.name,
+                  scoped_id.scope);
+            }
+            return;
+          }
+
+          // The local resolution found a local definition, but the global
+          // resolution found something else. This happens when a program
+          // `foo.thrift` has a local definition `Bar` and uses `foo.Bar` to
+          // refer to it, but another included `foo.thrift` also has `Bar`.
+          //
+          // Recommend using the unscoped name for local definitions.
+          ctx.report(
+              mismatch.id_loc.begin,
+              std::string{IMPLICIT_SCOPE_USAGE_LINT},
+              fixit{
+                  mismatch.id,
+                  std::string{scoped_id.name},
+                  mismatch.id_loc.begin},
+              diagnostic_level::warning,
+              "Scoped identifier '{}' refers to a local definition. Use the "
+              "unscoped name '{}' instead to avoid ambiguity with definitions "
+              "from other programs.",
+              mismatch.id,
+              scoped_id.name);
+          return;
+        }
+
+        // Case 2: Local resolution found nothing or found something in an
+        // included program, but global resolution found something different.
+        // This typically happens when multiple programs share the same scope
+        // name. Warn about using an ambiguous scoped identifier.
+        if (mismatch.global_node) {
+          const auto same_scope_includes =
+              count_same_scope_includes(*mismatch.program, scoped_id.scope);
+
+          if (same_scope_includes > 1) {
+            // Multiple programs with the same scope name are included.
+            // The ambiguous_include lint already warns on the includes,
+            // so here we warn about using the ambiguous identifier.
+            ctx.report(
+                mismatch.id_loc.begin,
+                std::string{IMPLICIT_SCOPE_USAGE_LINT},
+                fixit{
+                    mismatch.id,
+                    fmt::format(
+                        "{}.{}",
+                        generate_alias(*mismatch.global_node->program()),
+                        scoped_id.name),
+                    mismatch.id_loc.begin},
+                diagnostic_level::warning,
+                "Scoped identifier '{}' is ambiguous due to multiple programs "
+                "with the same name. Use an aliased scope.",
+                mismatch.id);
+          }
+        }
       },
-      [&](scope::enum_id) {
-        // TODO (sadroeck): Handle enum_id mismatch
+      [&](scope::enum_id enum_id) {
+        // A fully qualified enum_id like `foo.Bar.BAZ` is ambiguous when
+        // multiple programs with scope `foo` define an enum `Bar` with value
+        // `BAZ`.
+        if (mismatch.global_node) {
+          const auto same_scope_includes =
+              count_same_scope_includes(*mismatch.program, enum_id.scope);
+
+          if (same_scope_includes > 1) {
+            // Multiple programs with the same scope name are included.
+            // Warn about using the ambiguous enum identifier.
+            ctx.report(
+                mismatch.id_loc.begin,
+                std::string{IMPLICIT_SCOPE_USAGE_LINT},
+                fixit{
+                    mismatch.id,
+                    fmt::format(
+                        "{}.{}.{}",
+                        generate_alias(*mismatch.global_node->program()),
+                        enum_id.enum_name,
+                        enum_id.value_name),
+                    mismatch.id_loc.begin},
+                diagnostic_level::warning,
+                "Enum identifier '{}' is ambiguous due to multiple programs "
+                "with the same name. Use an aliased scope.",
+                mismatch.id);
+          }
+        }
       });
 }
 

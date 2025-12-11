@@ -3582,3 +3582,197 @@ TEST(CompilerTest, unscoped_enum_values) {
   )";
   check_compile(name_contents_map, "foo.thrift");
 }
+
+TEST(CompilerTest, scoped_id_multiple_programs_with_same_name) {
+  std::map<std::string, std::string> name_contents_map;
+  name_contents_map["a/foo.thrift"] = R"(
+    package "facebook.com/thrift/test/a"
+    struct Bar {
+      1: i32 x;
+    }
+  )";
+
+  name_contents_map["b/foo.thrift"] = R"(
+    package "facebook.com/thrift/test/b"
+    struct Bar {
+      1: string y;
+    }
+  )";
+
+  // main.thrift includes both foo.thrift files. When the scoped identifier
+  // `foo.Bar` is used, both programs are candidates for resolution.
+  name_contents_map["main.thrift"] = R"(
+    package "facebook.com/thrift/test"
+    include "a/foo.thrift"
+    include "b/foo.thrift"
+
+    struct Container {
+      1: foo.Bar field;
+    }
+  )";
+  check_compile(name_contents_map, "main.thrift");
+}
+
+// When using include aliases, the scoped identifier should resolve
+// unambiguously to the aliased program's definition.
+TEST(CompilerTest, scoped_id_with_include_alias_no_ambiguity) {
+  std::map<std::string, std::string> name_contents_map;
+  name_contents_map["a/foo.thrift"] = R"(
+    package "facebook.com/thrift/test/a"
+    struct Bar {
+      1: i32 x;
+    }
+  )";
+
+  name_contents_map["b/foo.thrift"] = R"(
+    package "facebook.com/thrift/test/b"
+    struct Bar {
+      1: string y;
+    }
+  )";
+
+  // Using aliases removes ambiguity
+  name_contents_map["main.thrift"] = R"(
+    package "facebook.com/thrift/test"
+    include "a/foo.thrift" as a_foo
+    include "b/foo.thrift" as b_foo
+
+    struct Container {
+      1: a_foo.Bar field_a;
+      2: b_foo.Bar field_b;
+    }
+  )";
+  check_compile(name_contents_map, "main.thrift");
+}
+
+TEST(CompilerTest, scoped_id_local_enum_vs_external_definition) {
+  std::map<std::string, std::string> name_contents_map;
+  name_contents_map["Foo.thrift"] = R"(
+    package "facebook.com/thrift/test/external"
+    const i32 Bar = 42;
+  )";
+
+  // The `Foo.Bar` identifier is ambiguous: it could mean:
+  // 1. Local enum `Foo` with value `Bar`
+  // 2. External constant `Bar` from `Foo.thrift`
+  // The scoped_id handler detects this ambiguity and warns about it.
+  // Additionally, since global resolution picks the external constant (:= i32),
+  // we get a second warning about the enum field having a non-enum value.
+  //
+  // DEVNOTE: No fixit for this, since we can't use a fully qualified name for
+  // the local program. Local definitions should ALWAYS have priority.
+  name_contents_map["main.thrift"] = R"(
+    package "facebook.com/thrift/test"
+    include "Foo.thrift"
+
+    enum Foo {
+      Bar = 1,
+      Baz = 2,
+    }
+
+    struct Container {
+      1: Foo enum_field = Foo.Bar; # expected-warning@11: Scoped identifier 'Foo.Bar' is ambiguous: it refers to local enum value 'Foo.Bar' but could be confused with a definition from 'Foo.thrift'. Consider renaming the enum to avoid confusion. [implicit_scope_usage]
+                                   # expected-warning@-1: const `enum_field` is defined as enum `Foo` with a value not of that enum
+    }
+  )";
+  check_compile(name_contents_map, "main.thrift");
+}
+
+// A program `foo.thrift` that includes another `foo.thrift` and uses
+// `foo.[Pre|Post]Bar` creates a self-referential scope ambiguity - it could
+// mean the local `[Pre|Post]Bar` or the included program's `[Pre|Post]Bar`.
+TEST(CompilerTest, scoped_id_self_referential_scope) {
+  std::map<std::string, std::string> name_contents_map;
+  name_contents_map["other/foo.thrift"] = R"(
+    package "facebook.com/thrift/test/other"
+    struct PreBar {
+      1: i32 local_val;
+    }
+
+    struct PostBar {
+      1: string local_val;
+    }
+  )";
+
+  name_contents_map["foo.thrift"] = R"(
+    package "facebook.com/thrift/test"
+    include "other/foo.thrift"
+
+    struct PreBar {
+      1: i32 local_val;
+    }
+
+    struct Container {
+      1: foo.PreBar field1;
+      2: foo.PostBar field2;
+    }
+
+    struct PostBar {
+      1: string local_val;
+    }
+  )";
+  check_compile(name_contents_map, "foo.thrift");
+}
+
+// When a scoped identifier matches both a local enum value and an external
+// program's enum value, the resolution should prefer local definitions.
+TEST(CompilerTest, scoped_id_enum_value_local_vs_external) {
+  std::map<std::string, std::string> name_contents_map;
+  name_contents_map["types.thrift"] = R"(
+    package "facebook.com/thrift/test/types"
+    enum Status {
+      ACTIVE = 1,
+      INACTIVE = 2,
+    }
+  )";
+
+  name_contents_map["main.thrift"] = R"(
+    package "facebook.com/thrift/test"
+    include "types.thrift"
+
+    enum Status {
+      ACTIVE = 10,
+      INACTIVE = 20,
+    }
+
+    struct Container {
+      1: Status local_status = Status.ACTIVE;
+      2: types.Status external_status = types.Status.ACTIVE;
+    }
+  )";
+  check_compile(name_contents_map, "main.thrift");
+}
+
+// When a program's scope name conflicts with a local type name, scoped access
+// can become ambiguous. This tests the case where `common.Value` could mean
+// either an enum value or a type from common.thrift.
+TEST(CompilerTest, scoped_id_scope_name_conflicts_with_local_type) {
+  std::map<std::string, std::string> name_contents_map;
+  name_contents_map["common.thrift"] = R"(
+    package "facebook.com/thrift/test/common"
+    struct Value {
+      1: i32 data;
+    }
+  )";
+
+  // The `common.Value` identifier is ambiguous:
+  // 1. Local enum `common` with value `Value`
+  // 2. External struct `Value` from `common.thrift`
+  // Both usages trigger a warning about the ambiguity but no fix is suggested
+  // since the local resolution is correct.
+  name_contents_map["main.thrift"] = R"(
+    package "facebook.com/thrift/test"
+    include "common.thrift"
+
+    enum common {
+      Value = 1,
+      Other = 2,
+    }
+
+    struct Container {
+      1: common.Value struct_field; # expected-warning@11: Scoped identifier 'common.Value' is ambiguous: it refers to local enum value 'common.Value' but could be confused with a definition from 'common.thrift'. Consider renaming the enum to avoid confusion. [implicit_scope_usage]
+      2: common enum_field = common.Value; # expected-warning@12: Scoped identifier 'common.Value' is ambiguous: it refers to local enum value 'common.Value' but could be confused with a definition from 'common.thrift'. Consider renaming the enum to avoid confusion. [implicit_scope_usage]
+    }
+  )";
+  check_compile(name_contents_map, "main.thrift");
+}

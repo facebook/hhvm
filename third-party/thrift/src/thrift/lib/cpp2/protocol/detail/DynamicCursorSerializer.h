@@ -320,6 +320,13 @@ class ContainerDynamicCursorReader : detail::BaseCursorReader<ProtocolReader> {
     return std::nullopt;
   }
 
+  protocol::TType nextTType() {
+    if (keyType_ && !partialRead_) {
+      return *keyType_;
+    }
+    return valueType_;
+  }
+
   // For maps, the caller is responsible for alternating between reading keys
   // and values.
   template <typename Tag>
@@ -491,12 +498,6 @@ class ContainerDynamicCursorReader : detail::BaseCursorReader<ProtocolReader> {
     } else {
       remaining_--;
     }
-  }
-  protocol::TType nextTType() {
-    if (keyType_ && !partialRead_) {
-      return *keyType_;
-    }
-    return valueType_;
   }
 
   ContainerDynamicCursorReader(

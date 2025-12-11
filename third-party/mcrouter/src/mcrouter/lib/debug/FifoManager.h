@@ -29,6 +29,10 @@ namespace memcache {
 class FifoManager {
  public:
   ~FifoManager();
+  FifoManager(const FifoManager&) = delete;
+  FifoManager& operator=(const FifoManager&) = delete;
+  FifoManager(FifoManager&&) = delete;
+  FifoManager& operator=(FifoManager&&) = delete;
 
   /**
    * Fetches (creates if not found) a fifo by its full base path + threadId.

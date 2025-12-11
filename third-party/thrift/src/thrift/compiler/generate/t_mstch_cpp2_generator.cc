@@ -2617,9 +2617,7 @@ void t_mstch_cpp2_generator::generate_program() {
   const auto* program = get_program();
   set_mstch_factories();
 
-  if (has_option("any")) {
-    generate_sinit(program);
-  }
+  generate_sinit(program);
   if (has_option("reflection")) {
     generate_reflection(program);
   }

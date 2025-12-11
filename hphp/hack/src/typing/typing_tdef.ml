@@ -127,27 +127,42 @@ let expand_typedef_ ~force_expand ety_env env r (x : string) argl :
         x
         td
     in
-    let substs = Subst.make_locl tparams argl in
-    let ety_env = { ety_env with substs } in
-    let ((env, err, cycles), expanded_ty, bound) =
-      match expansion with
-      | Rhs ty ->
-        let ((env, err, cycles), ty) = Phase.localize_rec ~ety_env env ty in
-        ((env, err, cycles), ty, ty)
-      | Opaque cstr_ty ->
-        let ((env, err, cycles), cstr_ty) =
-          (* Special case for supportdyn<T> defined with "as T" in order to
-           * avoid supportdynamic.hhi appearing in reason *)
-          if String.equal x SN.Classes.cSupportDyn then
-            ((env, None, []), List.hd_exn argl)
-          else
-            Phase.localize_rec ~ety_env env cstr_ty
-        in
-        let ty = mk (r, Tnewtype (x, argl, cstr_ty)) in
-        ((env, err, cycles), ty, cstr_ty)
-    in
-    ( { env; ty_err_opt = err; cycles; ty = with_reason expanded_ty r; bound },
-      ety_env )
+    if List.length argl <> List.length tparams then
+      let (env, ty) =
+        Typing_env.fresh_type_error
+          env
+          (Pos_or_decl.unsafe_to_raw_pos (Reason.to_pos r))
+      in
+      ( {
+          env;
+          ty_err_opt = None;
+          cycles = [];
+          ty;
+          bound = Typing_make_type.mixed r;
+        },
+        ety_env )
+    else
+      let substs = Subst.make_locl tparams argl in
+      let ety_env = { ety_env with substs } in
+      let ((env, err, cycles), expanded_ty, bound) =
+        match expansion with
+        | Rhs ty ->
+          let ((env, err, cycles), ty) = Phase.localize_rec ~ety_env env ty in
+          ((env, err, cycles), ty, ty)
+        | Opaque cstr_ty ->
+          let ((env, err, cycles), cstr_ty) =
+            (* Special case for supportdyn<T> defined with "as T" in order to
+             * avoid supportdynamic.hhi appearing in reason *)
+            if String.equal x SN.Classes.cSupportDyn then
+              ((env, None, []), List.hd_exn argl)
+            else
+              Phase.localize_rec ~ety_env env cstr_ty
+          in
+          let ty = mk (r, Tnewtype (x, argl, cstr_ty)) in
+          ((env, err, cycles), ty, cstr_ty)
+      in
+      ( { env; ty_err_opt = err; cycles; ty = with_reason expanded_ty r; bound },
+        ety_env )
 
 let expand_typedef ety_env env r type_name argl =
   let (res, _ety_env) =

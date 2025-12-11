@@ -300,3 +300,29 @@ TEST(StandardValidatorTest, ErrorInvalidPackageAndUris) {
     struct ValidUriStruct {}
   )");
 }
+
+TEST(StandardValidatorTest, ValidateFunctionParamId) {
+  check_compile(R"(
+    package "facebook.com/thrift/test"
+
+    service MyService {
+      // Function with explicit param ids - no warning
+      void explicitIds(1: i32 a, 2: string b);
+
+      // Function with implicit param ids - warning expected
+      void implicitIds(i32 x, string y);
+      # expected-warning@-1: No param id specified for `x`
+      # expected-warning@-2: No param id specified for `y`
+
+      // Mixed explicit and implicit param ids
+      void mixedIds(1: i32 a, string b, 3: bool c);
+      # expected-warning@-1: No param id specified for `b`
+    }
+
+    interaction MyInteraction {
+      // Function with implicit param ids in interaction
+      void interactionMethod(i32 p);
+      # expected-warning@-1: No param id specified for `p`
+    }
+  )");
+}

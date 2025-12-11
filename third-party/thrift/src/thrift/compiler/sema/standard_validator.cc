@@ -1034,6 +1034,13 @@ void validate_explicit_uri_value(sema_context& ctx, const t_named& node) {
   }
 }
 
+void validate_function_param_id(sema_context& ctx, const t_field& node) {
+  if (node.explicit_id() != node.id()) {
+    ctx.warning(
+        node.src_range().begin, "No param id specified for `{}`", node.name());
+  }
+}
+
 void validate_field_id(sema_context& ctx, const t_field& node) {
   ctx.check(
       node.explicit_id() == node.id(),
@@ -2004,6 +2011,7 @@ ast_validator standard_validator() {
   validator.add_function_param_visitor(
       &detail::validate_annotation_scopes<
           detail::scope_check_type::function_parameter>);
+  validator.add_function_param_visitor(&validate_function_param_id);
 
   validator.add_typedef_visitor(&validate_cpp_type_annotation<t_typedef>);
   validator.add_typedef_visitor(&validate_py3_enable_cpp_adapter);

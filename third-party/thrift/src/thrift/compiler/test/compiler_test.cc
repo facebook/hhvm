@@ -2034,7 +2034,7 @@ TEST(CompilerTest, invalid_param_type_for_hack_codegen) {
       R"(
       package "facebook.com/thrift/test"
       service Foo {
-        void invalid_rpc_param(set<float> arg1);
+        void invalid_rpc_param(1: set<float> arg1);
         # expected-error@-1: `float` cannot be used as a set element in Hack because it is not integer, string, binary or enum
       }
       )",

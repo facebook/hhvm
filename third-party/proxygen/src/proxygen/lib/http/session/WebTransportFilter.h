@@ -381,9 +381,11 @@ class WebTransportFilter
       wtImpl_->onMaxStreams(capsule.maximumStreams, false);
     }
   }
-  void onWTDataBlockedCapsule(
-      WTDataBlockedCapsule /*capsule*/) noexcept override {
+  void onWTDataBlockedCapsule(WTDataBlockedCapsule capsule) noexcept override {
     XLOG(DBG1) << __func__;
+    if (wtImpl_) {
+      wtImpl_->onDataBlocked(capsule.maximumData);
+    }
   }
   void onWTStreamDataBlockedCapsule(
       WTStreamDataBlockedCapsule /*capsule*/) noexcept override {

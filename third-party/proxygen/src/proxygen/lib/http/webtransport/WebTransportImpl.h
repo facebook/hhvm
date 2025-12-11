@@ -409,6 +409,7 @@ class WebTransportImpl : public WebTransport {
   void onMaxData(uint64_t maxData) noexcept;
   void onMaxStreams(uint64_t maxStreams, bool isBidi) noexcept;
   void onStreamsBlocked(uint64_t maxStreams, bool isBidi) noexcept;
+  void onDataBlocked(uint64_t maxData) noexcept;
 
   void maybeGrantFlowControl(uint64_t bytesRead);
   void maybeGrantStreamCredit(HTTPCodec::StreamID id,

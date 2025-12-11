@@ -1305,4 +1305,66 @@ TEST_F(HTTPTransactionWebTransportTest, ReceiveWTStreamsBlockedCapsule) {
   EXPECT_FALSE(wtImpl->shouldGrantStreamCredit(true));
 }
 
+TEST_F(HTTPTransactionWebTransportTest, ReceiveWTDataBlockedCapsule) {
+  auto wtImpl = dynamic_cast<WebTransportImpl*>(wt_);
+  ASSERT_NE(wtImpl, nullptr);
+
+  // Simulate having kDefaultWTReceiveWindow bytes
+  // available, and the peer has consumed most of it. To trigger
+  // shouldGrantFlowControl(), we need bufferedBytes < kDefaultWTReceiveWindow /
+  // 2. This means the application needs to read enough data.
+  WebTransport::StreamReadHandle* readHandle{nullptr};
+  EXPECT_CALL(handler_, onWebTransportUniStream(_, _))
+      .WillOnce(SaveArg<1>(&readHandle));
+
+  txn_->onWebTransportUniStream(0);
+  EXPECT_NE(readHandle, nullptr);
+
+  // Get the implementation handle to use dataAvailable
+  auto implHandle =
+      dynamic_cast<WebTransportImpl::StreamReadHandle*>(readHandle);
+  ASSERT_NE(implHandle, nullptr);
+
+  // Deliver data close to our window limit to put peer in blocked state.
+  // We'll deliver (kDefaultWTReceiveWindow - 100) bytes.
+  EXPECT_CALL(
+      transport_,
+      sendWTMaxData(kDefaultWTReceiveWindow + kDefaultWTReceiveWindow - 100))
+      .WillOnce(Return(folly::unit));
+  auto fcState =
+      implHandle->dataAvailable(makeBuf(kDefaultWTReceiveWindow - 100), false);
+  EXPECT_EQ(fcState, WebTransport::FCState::BLOCKED);
+
+  // Read the data to consume it, making room in our flow control window.
+  EXPECT_CALL(transport_, resumeWebTransportIngress(0));
+  auto fut = readHandle->readStreamData()
+                 .via(&eventBase_)
+                 .thenTry([](auto streamData) {
+                   readCallback(std::move(streamData),
+                                false,
+                                kDefaultWTReceiveWindow - 100,
+                                false);
+                 });
+  eventBase_.loopOnce();
+  EXPECT_TRUE(fut.isReady());
+
+  // Now buffered bytes should be low enough (< kDefaultWTReceiveWindow / 2)
+  // for shouldGrantFlowControl() to return true.
+  EXPECT_TRUE(wtImpl->shouldGrantFlowControl());
+
+  // When we receive a WT_DATA_BLOCKED capsule with maxData matching our current
+  // limit (which is now kDefaultWTReceiveWindow + kDefaultWTReceiveWindow -
+  // 100), we should send WT_MAX_DATA with increased limit newMaxData = (2 *
+  // kDefaultWTReceiveWindow - 100) + kDefaultWTReceiveWindow
+  const uint64_t currentMaxData = 2 * kDefaultWTReceiveWindow - 100;
+  EXPECT_CALL(transport_,
+              sendWTMaxData(currentMaxData + kDefaultWTReceiveWindow))
+      .WillOnce(Return(folly::unit));
+
+  wtImpl->onDataBlocked(currentMaxData);
+
+  EXPECT_CALL(transport_, stopReadingWebTransportIngress(0, _))
+      .WillRepeatedly(Return(folly::unit));
+}
+
 } // namespace proxygen::test

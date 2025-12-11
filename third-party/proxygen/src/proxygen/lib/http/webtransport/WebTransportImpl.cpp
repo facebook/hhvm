@@ -94,6 +94,20 @@ void WebTransportImpl::onStreamsBlocked(uint64_t maxStreams,
   }
 }
 
+void WebTransportImpl::onDataBlocked(uint64_t maxData) noexcept {
+  if (maxData > recvFlowController_.getMaxOffset()) {
+    return;
+  }
+  if (shouldGrantFlowControl()) {
+    LOG(ERROR) << __func__ << " maxData=" << maxData
+               << "; shouldGrantFlowControl";
+    auto newMaxData =
+        recvFlowController_.getMaxOffset() + kDefaultWTReceiveWindow;
+    recvFlowController_.grant(newMaxData);
+    tp_.sendWTMaxData(newMaxData);
+  }
+}
+
 folly::Expected<WebTransport::StreamWriteHandle*, WebTransport::ErrorCode>
 WebTransportImpl::newWebTransportUniStream() {
   if (sessionCloseError_.has_value()) {

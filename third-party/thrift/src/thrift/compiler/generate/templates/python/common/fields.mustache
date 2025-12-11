@@ -24,9 +24,6 @@ Mangles exception field name in generated response struct, so bad user input
 doesn't cause bugs. Example bugs from bad user input:
   a. user calls an exception field "success"
   b. user provides multiple fields with the same name
-
-Whisker partial equivalent to the macro `fields/exception_field_name`, without
-a dependency on mstch implicit index property.
 }}
 {{#let export partial exception_field_name |field index|}}
 {{#pragma ignore-newlines}}

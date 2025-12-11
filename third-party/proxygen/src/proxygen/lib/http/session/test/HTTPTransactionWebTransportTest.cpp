@@ -153,6 +153,14 @@ class MockDeliveryCallback : public WebTransport::ByteEventCallback {
 TEST_F(HTTPTransactionWebTransportTest, CreateStreams) {
   auto wtImpl = dynamic_cast<WebTransportImpl*>(wt_);
   ASSERT_NE(wtImpl, nullptr);
+
+  // Initialize self flow control to 0, then set to 4
+  wtImpl->setSelfBidiStreamFlowControl(0);
+  wtImpl->setSelfUniStreamFlowControl(0);
+  wtImpl->onMaxStreams(4, true);
+  wtImpl->onMaxStreams(4, false);
+
+  // Set peer flow control (for granting credit to peer)
   wtImpl->setBidiStreamFlowControl(
       /*maxStreamId=*/4,
       /*targetConcurrentStreams=*/4);
@@ -187,11 +195,13 @@ TEST_F(HTTPTransactionWebTransportTest, CreateStreams) {
   EXPECT_CALL(transport_, newWebTransportBidiStream())
       .WillOnce(Return(folly::makeUnexpected(
           WebTransport::ErrorCode::STREAM_CREATION_ERROR)));
+  EXPECT_CALL(transport_, sendWTStreamsBlocked(4, true));
   EXPECT_EQ(wt_->createBidiStream().error(),
             WebTransport::ErrorCode::STREAM_CREATION_ERROR);
   EXPECT_CALL(transport_, newWebTransportUniStream())
       .WillOnce(Return(folly::makeUnexpected(
           WebTransport::ErrorCode::STREAM_CREATION_ERROR)));
+  EXPECT_CALL(transport_, sendWTStreamsBlocked(4, false));
   EXPECT_EQ(wt_->createUniStream().error(),
             WebTransport::ErrorCode::STREAM_CREATION_ERROR);
 
@@ -1116,6 +1126,10 @@ TEST_F(HTTPTransactionWebTransportTest, BidiStreamCredit) {
 TEST_F(HTTPTransactionWebTransportTest, SelfMaxStreams) {
   auto wtImpl = dynamic_cast<WebTransportImpl*>(wt_);
   ASSERT_NE(wtImpl, nullptr);
+
+  // Initialize self flow control to 0 for this test
+  wtImpl->setSelfBidiStreamFlowControl(0);
+
   WTMaxStreamsCapsule capsule{1};
   wtImpl->onMaxStreams(capsule.maximumStreams, true);
 
@@ -1129,6 +1143,7 @@ TEST_F(HTTPTransactionWebTransportTest, SelfMaxStreams) {
   EXPECT_CALL(transport_, newWebTransportBidiStream())
       .WillOnce(Return(folly::makeUnexpected(
           WebTransport::ErrorCode::STREAM_CREATION_ERROR)));
+  EXPECT_CALL(transport_, sendWTStreamsBlocked(1, true));
   auto result2 = wt_->createBidiStream();
   EXPECT_TRUE(result2.hasError());
   EXPECT_EQ(result2.error(), WebTransport::ErrorCode::STREAM_CREATION_ERROR);
@@ -1210,9 +1225,16 @@ TEST_F(HTTPTransactionWebTransportTest, NewBidiStreamFailsAtMaxStreamID) {
   auto wtImpl = dynamic_cast<WebTransportImpl*>(wt_);
   ASSERT_NE(wtImpl, nullptr);
 
+  // Set peer flow control
   wtImpl->setBidiStreamFlowControl(
       /*maxStreamId=*/4,
       /*targetConcurrentStreams=*/10);
+
+  // Initialize self flow control to 0, then set to 4
+  wtImpl->setSelfBidiStreamFlowControl(0);
+  wtImpl->onMaxStreams(4, true);
+
+  EXPECT_CALL(transport_, sendWTStreamsBlocked(4, true));
   EXPECT_CALL(transport_, newWebTransportBidiStream())
       .WillOnce(Return(folly::makeUnexpected(
           WebTransport::ErrorCode::STREAM_CREATION_ERROR)));
@@ -1226,9 +1248,16 @@ TEST_F(HTTPTransactionWebTransportTest, NewUniStreamFailsAtMaxStreamID) {
   auto wtImpl = dynamic_cast<WebTransportImpl*>(wt_);
   ASSERT_NE(wtImpl, nullptr);
 
+  // Set peer flow control
   wtImpl->setUniStreamFlowControl(
       /*maxStreamId=*/4,
       /*targetConcurrentStreams=*/10);
+
+  // Initialize self flow control to 0, then set to 4
+  wtImpl->setSelfUniStreamFlowControl(0);
+  wtImpl->onMaxStreams(4, false);
+
+  EXPECT_CALL(transport_, sendWTStreamsBlocked(4, false));
   EXPECT_CALL(transport_, newWebTransportUniStream())
       .WillOnce(Return(folly::makeUnexpected(
           WebTransport::ErrorCode::STREAM_CREATION_ERROR)));

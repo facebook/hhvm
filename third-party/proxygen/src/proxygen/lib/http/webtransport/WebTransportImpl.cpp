@@ -92,6 +92,7 @@ WebTransportImpl::newWebTransportUniStream() {
   }
   auto id = tp_.newWebTransportUniStream();
   if (!id) {
+    tp_.sendWTStreamsBlocked(selfUniStreamFlowControl_.maxStreamID, false);
     return folly::makeUnexpected(
         WebTransport::ErrorCode::STREAM_CREATION_ERROR);
   }
@@ -112,6 +113,7 @@ WebTransportImpl::newWebTransportBidiStream() {
   }
   auto id = tp_.newWebTransportBidiStream();
   if (!id) {
+    tp_.sendWTStreamsBlocked(selfBidiStreamFlowControl_.maxStreamID, true);
     return folly::makeUnexpected(
         WebTransport::ErrorCode::STREAM_CREATION_ERROR);
   }

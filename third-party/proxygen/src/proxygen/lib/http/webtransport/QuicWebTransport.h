@@ -154,6 +154,9 @@ class QuicWebTransport
   folly::Expected<folly::Unit, WebTransport::ErrorCode> sendWTMaxStreams(
       uint64_t /*maxStreams*/, bool /*isBidi*/) override;
 
+  folly::Expected<folly::Unit, WebTransport::ErrorCode> sendWTStreamsBlocked(
+      uint64_t /*maxStreams*/, bool /*isBidi*/) override;
+
   bool usesEncodedApplicationErrorCodes() override {
     return false;
   }

@@ -54,6 +54,9 @@ class WebTransportImpl : public WebTransport {
     sendWTMaxStreams(uint64_t maxStreams, bool isBidi) = 0;
 
     virtual folly::Expected<folly::Unit, WebTransport::ErrorCode>
+    sendWTStreamsBlocked(uint64_t maxStreams, bool isBidi) = 0;
+
+    virtual folly::Expected<folly::Unit, WebTransport::ErrorCode>
     notifyPendingWriteOnStream(HTTPCodec::StreamID,
                                quic::StreamWriteCallback* wcb) = 0;
 
@@ -359,9 +362,14 @@ class WebTransportImpl : public WebTransport {
     uint64_t targetConcurrentStreams{kDefaultTargetConcurrentStreams};
   };
 
+  // Peer flow control: limits for streams peer can create (set by us)
   StreamFlowControl peerUniStreamFlowControl_;
-  StreamFlowControl selfUniStreamFlowControl_;
   StreamFlowControl peerBidiStreamFlowControl_;
+
+  // Self flow control: limits for streams we can create (set by peer)
+  // Initialize to kMaxVarInt for backward compatibility when flow control is
+  // not used
+  StreamFlowControl selfUniStreamFlowControl_;
   StreamFlowControl selfBidiStreamFlowControl_;
 
  public:
@@ -429,6 +437,15 @@ class WebTransportImpl : public WebTransport {
     peerBidiStreamFlowControl_.maxStreamID = maxStreamId;
     peerBidiStreamFlowControl_.targetConcurrentStreams =
         targetConcurrentStreams;
+  }
+
+  // Test-only methods to set self stream flow control limits
+  void setSelfUniStreamFlowControl(uint64_t maxStreamId) {
+    selfUniStreamFlowControl_.maxStreamID = maxStreamId;
+  }
+
+  void setSelfBidiStreamFlowControl(uint64_t maxStreamId) {
+    selfBidiStreamFlowControl_.maxStreamID = maxStreamId;
   }
 };
 

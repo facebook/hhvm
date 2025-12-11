@@ -35,10 +35,8 @@ file.
 }}{{/value:integer?}}{{!
 }}{{#value:double?}}{{value:double_value}}{{/value:double?}}{{!
 }}{{#value:structured?}}{{!
-    }}{{#value:const_struct_type}}{{!
-    }}{{#type:need_module_path?}}{{type:module_path_period_separated}}.{{/type:need_module_path?}}{{!
-    }}{{#type:structured}}{{struct:name}}{{/type:structured}}{{!
-    }}{{/value:const_struct_type}}{{!
+    }}{{#let ttype = value:type.true_type}}{{!
+    }}{{#if ttype.need_module_path?}}{{ttype.module_path_period_separated}}.{{/if}}{{ttype.name}}{{!
     }}({{#value:const_struct}}{{!
         }}{{constant:name}}={{#constant:type}}{{#constant:value}}{{!
             }}{{> inplace/constant_value_py }}{{!

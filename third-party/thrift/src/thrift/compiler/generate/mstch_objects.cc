@@ -205,19 +205,6 @@ mstch::node mstch_const_value::map_elems() {
       expected_types);
 }
 
-mstch::node mstch_const_value::const_struct_type() {
-  if (!const_value_->ttype()) {
-    return {};
-  }
-
-  const auto* type = const_value_->ttype()->get_true_type();
-  if (type->is<t_structured>()) {
-    return context_.type_factory->make_mstch_object(type, context_);
-  }
-
-  return {};
-}
-
 mstch::node mstch_const_value::const_struct() {
   std::vector<t_const*> constants;
   std::vector<const t_field*> fields;

@@ -35,10 +35,10 @@ file.
 }}{{/value:integer?}}{{!
 }}{{#value:double?}}{{value:double_value}}{{/value:double?}}{{!
 }}{{#value:structured?}}{{!
-    }}{{#value:const_struct_type}}{{!
+    }}{{#value:type.true_type}}{{!
     }}{{> types/cython_python_type}}._create_FBTHRIFT_ONLY_DO_NOT_USE(constant_shared_ptr({{!
         }}{{> types/current_module_cbindings}}.{{> types/c_constant }}())){{!
-    }}{{/value:const_struct_type}}{{!
+    }}{{/value:type.true_type}}{{!
 }}{{/value:structured?}}{{!
 }}{{#value:string?}}{{!
     }}{{#value:py3_binary?}}b"{{value:string_value}}"{{/value:py3_binary?}}{{!

@@ -15,7 +15,7 @@
   limitations under the License.
 
 }}{{#value:structured?}}cvStruct({{!
-}}{{#value:const_struct_type}}{{#type:structured}}"{{type:program_name}}.{{struct:name}}"{{/type:structured}}{{/value:const_struct_type}}, {{!
+}}{{#let ttype = value:type.true_type}}"{{ttype.program_name}}.{{ttype.name}}", {{!
 }}{ {{#value:const_struct}}{"{{constant:name}}", {{#constant:value}}{{> metadata/const_value}}{{/constant:value}} }{{^last?}}, {{/last?}}{{!
 }}{{/value:const_struct}} }{{!
 }}){{/value:structured?}}{{!

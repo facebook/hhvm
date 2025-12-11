@@ -514,6 +514,10 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
     auto base = t_whisker_generator::make_prototype_for_type(proto);
     auto def = whisker::dsl::prototype_builder<h_type>::extends(base);
 
+    def.property("program_name", [](const t_type& type) {
+      return type.program() ? type.program()->name() : "";
+    });
+
     def.property("qualified_namespace", [](const t_type& type) {
       return cpp2::get_gen_unprefixed_namespace(*type.program());
     });
@@ -1205,7 +1209,6 @@ class cpp_mstch_service : public mstch_service {
     register_methods(
         this,
         {
-            {"service:program_name", &cpp_mstch_service::program_name},
             {"service:program_qualified_name",
              &cpp_mstch_service::program_qualified_name},
             {"service:autogen_path", &cpp_mstch_service::autogen_path},
@@ -1234,7 +1237,6 @@ class cpp_mstch_service : public mstch_service {
   std::string get_service_namespace(const t_program* program) override {
     return t_mstch_cpp2_generator::get_cpp2_namespace(program);
   }
-  mstch::node program_name() { return service_->program()->name(); }
   mstch::node program_qualified_name() {
     return get_service_namespace(service_->program()) +
         "::" + service_->program()->name();
@@ -1461,7 +1463,6 @@ class cpp_mstch_type : public mstch_type {
              &cpp_mstch_type::cpp_declare_equal_to},
             {"type:type_class", &cpp_mstch_type::type_class},
             {"type:type_tag", &cpp_mstch_type::type_tag},
-            {"type:program_name", &cpp_mstch_type::program_name},
             {"type:cpp_use_allocator?", &cpp_mstch_type::cpp_use_allocator},
             {"type:use_op_encode?", &cpp_mstch_type::use_op_encode},
         });
@@ -1561,13 +1562,6 @@ class cpp_mstch_type : public mstch_type {
   mstch::node type_class() { return cpp2::get_gen_type_class(*resolved_type_); }
   mstch::node type_tag() {
     return cpp_context_->resolver().get_type_tag(*type_);
-  }
-  mstch::node program_name() {
-    std::string name;
-    if (auto prog = type_->program()) {
-      name = prog->name();
-    }
-    return name;
   }
   mstch::node use_op_encode() { return needs_op_encode(*type_); }
 

@@ -186,7 +186,6 @@ class py3_mstch_program : public mstch_program {
             {"program:filtered_structs", &py3_mstch_program::filtered_objects},
             {"program:filtered_typedefs",
              &py3_mstch_program::filtered_typedefs},
-            {"program:inplace_migrate?", &py3_mstch_program::inplace_migrate},
             {"program:gen_py3_cython?", &py3_mstch_program::gen_py3_cython},
         });
     gather_included_program_namespaces();
@@ -325,10 +324,6 @@ class py3_mstch_program : public mstch_program {
   mstch::node gen_py3_cython() {
     return !(has_option("auto_migrate") || has_option("inplace_migrate"));
   }
-
-  // this option triggers generation of py3 structs as wrappers around
-  // thrift-python structs
-  mstch::node inplace_migrate() { return has_option("inplace_migrate"); }
 
   mstch::node legacy_container_converters() {
     return has_option("gen_legacy_container_converters");
@@ -584,7 +579,6 @@ class py3_mstch_function : public mstch_function {
         {
             {"function:eb", &py3_mstch_function::event_based},
             {"function:stack_arguments?", &py3_mstch_function::stack_arguments},
-            {"function:modulePath", &py3_mstch_function::modulePath},
         });
   }
 
@@ -597,12 +591,6 @@ class py3_mstch_function : public mstch_function {
 
   mstch::node stack_arguments() {
     return cpp2::is_stack_arguments(*context_.options, *function_);
-  }
-
-  mstch::node modulePath() {
-    return fmt::format(
-        "_{}",
-        fmt::join(get_type_py3_namespace(function_->program(), "types"), "_"));
   }
 };
 
@@ -619,7 +607,8 @@ class py3_mstch_type : public mstch_type {
     const FileType* file_type;
   };
 
-  cached_properties& get_cached_props(const t_type* type, const context& c);
+  static cached_properties& get_cached_props(
+      const t_type* type, const context& c);
 
   py3_mstch_type(
       const t_type* type,
@@ -633,9 +622,6 @@ class py3_mstch_type : public mstch_type {
     register_methods(
         this,
         {
-            {"type:modulePath", &py3_mstch_type::modulePath},
-            {"type:module_path_period_separated",
-             &py3_mstch_type::module_path_period_separated},
             {"type:module_auto_migrate_path",
              &py3_mstch_type::moduleAutoMigratePath},
             {"type:cbinding_path", &py3_mstch_type::cbinding_path},
@@ -655,7 +641,6 @@ class py3_mstch_type : public mstch_type {
             {"type:hasCythonType?", &py3_mstch_type::hasCythonType},
             {"type:iobuf?", &py3_mstch_type::isIOBuf},
             {"type:iobufRef?", &py3_mstch_type::isIOBufRef},
-            {"type:iobufWrapper?", &py3_mstch_type::isIOBufWrapper},
             {"type:flexibleBinary?", &py3_mstch_type::isFlexibleBinary},
             {"type:customBinaryType?", &py3_mstch_type::isCustomBinaryType},
             {"type:simple?", &py3_mstch_type::isSimple},
@@ -670,18 +655,9 @@ class py3_mstch_type : public mstch_type {
             {"type:resolves_to_complex_return?",
              &py3_mstch_type::resolves_to_complex_return},
 
-            {"type:need_module_path?",
-             {with_no_caching, &py3_mstch_type::need_module_path}},
             {"type:need_cbinding_path?",
              {with_no_caching, &py3_mstch_type::need_cbinding_path}},
         });
-  }
-
-  mstch::node need_module_path() {
-    // Need import if in a different declaration file, or type originated in a
-    // different Thrift program
-    return *file_type_ == FileType::NotTypesFile ||
-        (type_->program() != nullptr && type_->program() != prog_);
   }
 
   mstch::node need_cbinding_path() {
@@ -689,18 +665,6 @@ class py3_mstch_type : public mstch_type {
     // different Thrift program
     return *file_type_ != FileType::CBindingsFile ||
         (type_->program() != nullptr && type_->program() != prog_);
-  }
-
-  mstch::node modulePath() {
-    return fmt::format(
-        "_{}",
-        fmt::join(get_type_py3_namespace(get_type_program(), "types"), "_"));
-  }
-
-  mstch::node module_path_period_separated() {
-    return fmt::format(
-        "{}",
-        fmt::join(get_type_py3_namespace(get_type_program(), "types"), "."));
   }
 
   mstch::node cbinding_path() {
@@ -760,8 +724,6 @@ class py3_mstch_type : public mstch_type {
   mstch::node isIOBuf() { return is_iobuf(); }
 
   mstch::node isIOBufRef() { return is_iobuf_ref(); }
-
-  mstch::node isIOBufWrapper() { return is_iobuf() || is_iobuf_ref(); }
 
   mstch::node isFlexibleBinary() { return is_flexible_binary(); }
 
@@ -1461,6 +1423,8 @@ class t_mstch_py3_generator : public t_mstch_generator {
       type_props_cache_;
   cpp_name_resolver cpp_name_resolver_;
   FileType file_type_ = FileType::NotTypesFile;
+  py3_mstch_type::context type_context_{
+      program_, &type_props_cache_, &cpp_name_resolver_, &file_type_};
 
   whisker::map::raw globals(prototype_database& proto) const override {
     whisker::map::raw globals = t_mstch_generator::globals(proto);
@@ -1496,6 +1460,53 @@ class t_mstch_py3_generator : public t_mstch_generator {
     });
     def.property(
         "cppName", [](const t_named& self) { return cpp2::get_name(&self); });
+    def.property("modulePath", [this](const t_named& self) {
+      const t_program* program =
+          self.program() == nullptr ? get_program() : self.program();
+      return fmt::format(
+          "_{}", fmt::join(get_type_py3_namespace(program, "types"), "_"));
+    });
+    return std::move(def).make();
+  }
+
+  prototype<t_program>::ptr make_prototype_for_program(
+      const prototype_database& proto) const override {
+    auto base = t_whisker_generator::make_prototype_for_program(proto);
+    auto def = whisker::dsl::prototype_builder<h_program>::extends(base);
+
+    // this option triggers generation of py3 structs as wrappers around
+    // thrift-python structs
+    def.property("inplace_migrate?", [this](const t_program&) {
+      return has_compiler_option("inplace_migrate");
+    });
+
+    return std::move(def).make();
+  }
+
+  prototype<t_type>::ptr make_prototype_for_type(
+      const prototype_database& proto) const override {
+    auto base = t_whisker_generator::make_prototype_for_type(proto);
+    auto def = whisker::dsl::prototype_builder<h_type>::extends(base);
+
+    def.property("module_path_period_separated", [this](const t_type& self) {
+      const t_program* program =
+          self.program() == nullptr ? get_program() : self.program();
+      return fmt::format(
+          "{}", fmt::join(get_type_py3_namespace(program, "types"), "."));
+    });
+
+    def.property("need_module_path?", [this](const t_type& self) {
+      return file_type_ == FileType::NotTypesFile ||
+          (self.program() != nullptr && self.program() != get_program());
+    });
+
+    def.property("iobufWrapper?", [this](const t_type& self) {
+      const py3_mstch_type::cached_properties& cached_props =
+          py3_mstch_type::get_cached_props(&self, type_context_);
+      return cached_props.cpp_type() == "folly::IOBuf" ||
+          cached_props.cpp_type() == "std::unique_ptr<folly::IOBuf>";
+    });
+
     return std::move(def).make();
   }
 };
@@ -1534,8 +1545,7 @@ void t_mstch_py3_generator::set_mstch_factories() {
   mstch_context_.add<py3_mstch_service>(program_);
   mstch_context_.add<py3_mstch_interaction>(program_);
   mstch_context_.add<py3_mstch_function>();
-  mstch_context_.add<py3_mstch_type>(py3_mstch_type::context{
-      program_, &type_props_cache_, &cpp_name_resolver_, &file_type_});
+  mstch_context_.add<py3_mstch_type>(type_context_);
   mstch_context_.add<py3_mstch_typedef>();
   mstch_context_.add<py3_mstch_struct>();
   mstch_context_.add<py3_mstch_field>();

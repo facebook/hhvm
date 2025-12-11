@@ -67,7 +67,7 @@ fn is_cookie<T: AsRef<Path>>(name: T) -> bool {
     name.as_ref()
         .file_name()
         .and_then(|s| s.to_str())
-        .map_or(false, |s| s.starts_with(".watchman-cookie-"))
+        .is_some_and(|s| s.starts_with(".watchman-cookie-"))
 }
 
 #[cfg(windows)]

@@ -82,6 +82,18 @@ void WebTransportImpl::onMaxStreams(uint64_t maxStreams, bool isBidi) noexcept {
   flowControl.maxStreamID = maxStreams;
 }
 
+void WebTransportImpl::onStreamsBlocked(uint64_t maxStreams,
+                                        bool isBidi) noexcept {
+  if (shouldGrantStreamCredit(isBidi)) {
+    LOG(ERROR) << __func__ << " maxStreams=" << maxStreams
+               << "; shouldGrantStreamCredit";
+    auto& flowControl =
+        isBidi ? peerBidiStreamFlowControl_ : peerUniStreamFlowControl_;
+    flowControl.maxStreamID += flowControl.targetConcurrentStreams / 2;
+    tp_.sendWTMaxStreams(flowControl.maxStreamID, isBidi);
+  }
+}
+
 folly::Expected<WebTransport::StreamWriteHandle*, WebTransport::ErrorCode>
 WebTransportImpl::newWebTransportUniStream() {
   if (sessionCloseError_.has_value()) {

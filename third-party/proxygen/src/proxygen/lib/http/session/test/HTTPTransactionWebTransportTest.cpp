@@ -1267,4 +1267,25 @@ TEST_F(HTTPTransactionWebTransportTest, NewUniStreamFailsAtMaxStreamID) {
   EXPECT_EQ(result.error(), WebTransport::ErrorCode::STREAM_CREATION_ERROR);
 }
 
+TEST_F(HTTPTransactionWebTransportTest, ReceiveWTStreamsBlockedCapsule) {
+  auto wtImpl = dynamic_cast<WebTransportImpl*>(wt_);
+  ASSERT_NE(wtImpl, nullptr);
+
+  wtImpl->setBidiStreamFlowControl(
+      /*maxStreamId=*/2,
+      /*targetConcurrentStreams=*/8);
+  EXPECT_TRUE(wtImpl->shouldGrantStreamCredit(true));
+
+  // When we receive a WT_STREAMS_BLOCKED capsule, we should call
+  // sendWTMaxStreams. The new maxStreamID should be: 2 + (8 / 2) = 6
+  EXPECT_CALL(transport_, sendWTMaxStreams(6, true))
+      .WillOnce(Return(folly::unit));
+
+  wtImpl->onStreamsBlocked(2, true);
+
+  // After granting credit, shouldGrantStreamCredit should return false
+  // because maxStreamID is now 6: 6 - 0 = 6, and 8 / 2 = 4, so 6 >= 4
+  EXPECT_FALSE(wtImpl->shouldGrantStreamCredit(true));
+}
+
 } // namespace proxygen::test

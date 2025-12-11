@@ -376,12 +376,18 @@ class WebTransportFilter
     XLOG(DBG1) << __func__;
   }
   void onWTStreamsBlockedBidiCapsule(
-      WTStreamsBlockedCapsule /*capsule*/) noexcept override {
+      WTStreamsBlockedCapsule capsule) noexcept override {
     XLOG(DBG1) << __func__;
+    if (wtImpl_) {
+      wtImpl_->onStreamsBlocked(capsule.maximumStreams, true);
+    }
   }
   void onWTStreamsBlockedUniCapsule(
-      WTStreamsBlockedCapsule /*capsule*/) noexcept override {
+      WTStreamsBlockedCapsule capsule) noexcept override {
     XLOG(DBG1) << __func__;
+    if (wtImpl_) {
+      wtImpl_->onStreamsBlocked(capsule.maximumStreams, false);
+    }
   }
   void onDatagramCapsule(DatagramCapsule /*capsule*/) noexcept override {
     XLOG(DBG1) << __func__;

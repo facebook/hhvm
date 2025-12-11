@@ -2760,6 +2760,47 @@ TEST_P(HQUpstreamSessionTestWebTransport, SessionFlowControlExceedLimit) {
   closeWTSession();
 }
 
+TEST_P(HQUpstreamSessionTestWebTransport, ReceiveWTStreamsBlockedCapsule) {
+  InSequence enforceOrder;
+
+  auto* wtImpl = dynamic_cast<WebTransportImpl*>(wt_);
+  ASSERT_NE(wtImpl, nullptr);
+
+  // Set maxStreamID=2 and targetConcurrentStreams=8 for bidi streams
+  // This means shouldGrantStreamCredit should return true
+  wtImpl->setBidiStreamFlowControl(
+      /*maxStreamId=*/2,
+      /*targetConcurrentStreams=*/8);
+
+  // Verify we should grant credit before receiving WT_STREAMS_BLOCKED
+  EXPECT_TRUE(wtImpl->shouldGrantStreamCredit(true));
+
+  // Create and send a WT_STREAMS_BLOCKED_BIDI capsule from server to client
+  folly::IOBufQueue capsuleQueue;
+  WTStreamsBlockedCapsule capsule{.maximumStreams = 2};
+  auto writeResult = writeWTStreamsBlocked(capsuleQueue, capsule, true);
+  EXPECT_TRUE(writeResult.has_value());
+  auto capsuleData = capsuleQueue.move();
+  EXPECT_GT(capsuleData->computeChainDataLength(), 0);
+
+  sendPartialBody(sessionId_, std::move(capsuleData), false);
+
+  // Process the capsule - this should trigger onStreamsBlocked
+  // which should grant credit and send a WT_MAX_STREAMS capsule back
+  // Expected new maxStreamID: 2 + (8 / 2) = 6
+  flushAndLoopN(2);
+
+  // Verify that a WT_MAX_STREAMS capsule was sent in the response
+  // by checking that the write buffer contains data
+  EXPECT_GT(socketDriver_->streams_[sessionId_].writeBuf.chainLength(), 0);
+
+  // After granting credit, shouldGrantStreamCredit should return false
+  // because maxStreamID is now 6: 6 - 0 = 6, and 8 / 2 = 4, so 6 >= 4
+  EXPECT_FALSE(wtImpl->shouldGrantStreamCredit(true));
+
+  closeWTSession();
+}
+
 /**
  * Instantiate the Parametrized test cases
  */

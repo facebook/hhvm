@@ -2,6 +2,8 @@
 #include <fmt/format.h>
 #include <folly/io/Cursor.h>
 #include <folly/io/async/AsyncSocket.h>
+#include <folly/io/async/EventBase.h>
+#include <memory>
 
 namespace fizz::psp {
 
@@ -107,25 +109,63 @@ class AsyncPSPUpgradeImpl : public ::fizz::psp::AsyncPSPUpgradeFrame,
   }
 
  private:
+  // AsyncState is meant to be held as a weak_ptr in future closures.
+  //
+  // AsyncPSPUpgradeImpl keeps a strong reference to AsyncState. Consequently
+  // if attempting to upgrade the weak_ptr fails, this implies that the
+  // original asynchronous operation was cancelled.
+  struct AsyncState : public std::enable_shared_from_this<AsyncState> {
+    explicit AsyncState(AsyncPSPUpgradeImpl* self) : this_(self) {}
+
+    folly::Try<SA> sa;
+    folly::Try<folly::Unit> txAssocResult;
+
+    void resume() {
+      return this_->resume();
+    }
+
+   private:
+    AsyncPSPUpgradeImpl* this_;
+  };
+
   void resume() {
     switch (state_) {
       case State::Init: {
+        asyncState_ = std::make_shared<AsyncState>(this);
+
         transport_->setReadCB(nullptr);
         if (fd_ < 0) {
           return error(
               "psp upgrade failure: invalid socket", ErrorCode::Internal);
         }
 
-        auto sa = ops_->rxAssoc(version_, fd_);
-        if (sa.hasError()) {
+        auto evb = transport_->getEventBase();
+        evb->dcheckIsInEventBaseThread();
+
+        state_ = State::RxAssocCompleted;
+        std::weak_ptr<AsyncState> astate(asyncState_);
+
+        ops_->rxAssoc(version_, fd_)
+            .via(evb)
+            .thenTry([astate = std::move(astate)](folly::Try<SA>&& sa) {
+              if (auto aself = astate.lock()) {
+                aself->sa = std::move(sa);
+                aself->resume();
+                return;
+              }
+            });
+        return;
+      }
+      case State::RxAssocCompleted: {
+        auto& sa = asyncState_->sa;
+        if (sa.hasException()) {
           return error(
               fmt::format(
                   "psp upgrade failure: psp_rx_assoc failed: {}",
-                  sa.error().message()),
+                  sa.exception().get_exception()->what()),
               ErrorCode::PSPRXAssoc);
         }
-
-        auto saMsg = detail::encodeTLV(sa.value());
+        auto saMsg = detail::encodeTLV(*sa);
 
         state_ = State::WriteSACompleted;
         return transport_->writeChain(this, std::move(saMsg));
@@ -183,14 +223,28 @@ class AsyncPSPUpgradeImpl : public ::fizz::psp::AsyncPSPUpgradeFrame,
                   sa.error().what()));
         }
 
-        auto ec = ops_->txAssoc(*sa, fd_);
-        if (ec) {
+        std::weak_ptr<AsyncState> astate(asyncState_);
+
+        state_ = State::TxAssocCompleted;
+        ops_->txAssoc(*sa, fd_)
+            .via(transport_->getEventBase())
+            .thenTry([astate = std::move(astate)](folly::Try<folly::Unit>&& t) {
+              if (auto aself = astate.lock()) {
+                aself->txAssocResult = std::move(t);
+                aself->resume();
+                return;
+              }
+            });
+        return;
+      }
+      case State::TxAssocCompleted: {
+        auto& result = asyncState_->txAssocResult;
+        if (result.hasException()) {
           return error(
               fmt::format(
                   "psp upgrade failure: psp_tx_assoc failure: {}",
-                  ec.message()));
+                  result.exception().get_exception()->what()));
         }
-
         return prepareForTerminalCallback()->pspSuccess(
             folly::NetworkSocket::fromFd(fd_));
       }
@@ -252,12 +306,17 @@ class AsyncPSPUpgradeImpl : public ::fizz::psp::AsyncPSPUpgradeFrame,
       transport_->setReadCB(nullptr);
       transport_ = nullptr;
     }
+    if (asyncState_) {
+      asyncState_.reset();
+    }
     return std::exchange(awaiter_, nullptr);
   }
   enum class State {
     Init,
+    RxAssocCompleted,
     WriteSACompleted,
     ReadData,
+    TxAssocCompleted,
   };
   Callback* awaiter_{nullptr};
   folly::AsyncTransport* transport_;
@@ -267,6 +326,7 @@ class AsyncPSPUpgradeImpl : public ::fizz::psp::AsyncPSPUpgradeFrame,
   folly::IOBufQueue readBuf_{folly::IOBufQueue::cacheChainLength()};
   std::optional<folly::AsyncSocketException> ioErr_;
   int fd_{-1};
+  std::shared_ptr<AsyncState> asyncState_;
 };
 } // namespace
 

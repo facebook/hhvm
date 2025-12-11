@@ -1,6 +1,9 @@
 #pragma once
 
 #include <folly/ExceptionWrapper.h>
+#include <folly/Executor.h>
+#include <folly/Unit.h>
+#include <folly/futures/Future.h>
 #include <folly/io/IOBufQueue.h>
 #include <folly/io/async/AsyncTransport.h>
 #include <optional>
@@ -40,13 +43,21 @@ struct SA {
  */
 class KernelPSP {
  public:
-  virtual folly::Expected<SA, std::error_code> rxAssoc(
+  virtual folly::SemiFuture<SA> rxAssoc(
       PSPVersion version,
       int fd) noexcept = 0;
-  virtual std::error_code txAssoc(const struct SA& sa, int fd) noexcept = 0;
+  virtual folly::SemiFuture<folly::Unit> txAssoc(
+      const struct SA& sa,
+      int fd) noexcept = 0;
   virtual ~KernelPSP();
 
-  static std::shared_ptr<KernelPSP> make();
+  /**
+   * Constructs an instance of `KernelPSP`.
+   *
+   * PSP configuration is a potentially blocking operation. `executor` will be
+   * used to delegate PSP configuration netlink calls.
+   */
+  static std::shared_ptr<KernelPSP> make(folly::Executor::KeepAlive<> executor);
 };
 
 /**

@@ -1,4 +1,5 @@
 #include <fizz/experimental/psp/PSP.h>
+#include <folly/futures/Future.h>
 #include <folly/io/async/AsyncSocket.h>
 #include <folly/io/async/AsyncTransport.h>
 #include <folly/io/async/test/MockAsyncSocket.h>
@@ -13,12 +14,12 @@ using namespace testing;
 class MockKernelPSP : public ::fizz::psp::KernelPSP {
  public:
   MOCK_METHOD(
-      (folly::Expected<::fizz::psp::SA, std::error_code>),
+      folly::SemiFuture<::fizz::psp::SA>,
       rxAssoc,
       (fizz::psp::PSPVersion version, int fd),
       (noexcept, override));
   MOCK_METHOD(
-      std::error_code,
+      folly::SemiFuture<folly::Unit>,
       txAssoc,
       (const struct ::fizz::psp::SA& sa, int fd),
       (noexcept, override));
@@ -64,6 +65,7 @@ class AsyncPSPUpgradeTest : public ::testing::Test {
     // succeeds and returns a file descriptor
     ON_CALL(transport, getWrappedTransport())
         .WillByDefault(Return(mockAsyncSocket_.get()));
+    ON_CALL(transport, getEventBase()).WillByDefault(Return(&evb_));
   }
 
   void expectSuccessfulRxAssoc() {
@@ -74,16 +76,40 @@ class AsyncPSPUpgradeTest : public ::testing::Test {
     memset(sa.key.data(), 0xFE, 16);
 
     EXPECT_CALL(mockKernelPSP_, rxAssoc(fizz::psp::PSPVersion::VER0, serverFd_))
-        .WillOnce(Return(sa));
+        .WillOnce(Return(folly::makeSemiFuture(sa)));
+  }
+
+  folly::Function<void()> expectSuccessfulRxAssocAsync() {
+    auto contract = folly::makePromiseContract<fizz::psp::SA>();
+
+    EXPECT_CALL(mockKernelPSP_, rxAssoc(fizz::psp::PSPVersion::VER0, serverFd_))
+        .WillOnce([f = std::move(contract.future)]() mutable {
+          return std::move(f);
+        });
+    return [p = std::move(contract.promise)]() mutable {
+      fizz::psp::SA sa;
+      sa.psp_version = static_cast<uint8_t>(fizz::psp::PSPVersion::VER0);
+      sa.spi = 0xdeadbeef;
+      sa.key.resize(16);
+      memset(sa.key.data(), 0xFE, 16);
+      p.setValue(std::move(sa));
+    };
   }
 
   void setupLocalAwaitsPeerMessage(
       folly::AsyncTransport::ReadCallback*& readCallback,
       folly::test::MockAsyncTransport& mockTransport,
-      std::unique_ptr<fizz::psp::AsyncPSPUpgradeFrame>& upgradeFrame) {
+      std::unique_ptr<fizz::psp::AsyncPSPUpgradeFrame>& upgradeFrame,
+      bool asyncRxAssoc) {
     setupMockTransport(mockTransport);
 
-    expectSuccessfulRxAssoc();
+    folly::Function<void()> completeRxAssoc;
+
+    if (asyncRxAssoc) {
+      completeRxAssoc = expectSuccessfulRxAssocAsync();
+    } else {
+      expectSuccessfulRxAssoc();
+    }
     EXPECT_CALL(mockTransport, writeChain(_, _, _))
         .WillOnce([&](auto&& cb, auto&& buf, auto&&) {
           ASSERT_NE(cb, nullptr);
@@ -104,6 +130,11 @@ class AsyncPSPUpgradeTest : public ::testing::Test {
     upgradeFrame = fizz::psp::pspUpgradeV0(
         &mockTransport, fizz::psp::PSPVersion::VER0, kernelPSP());
     upgradeFrame->start(&mockCallback_);
+
+    if (asyncRxAssoc) {
+      completeRxAssoc();
+    }
+    evb_.loop();
   }
 
   folly::EventBase evb_;
@@ -154,8 +185,9 @@ TEST_F(AsyncPSPUpgradeTest, RxAssocFails) {
       });
   EXPECT_CALL(mockKernelPSP_, rxAssoc(fizz::psp::PSPVersion::VER0, serverFd_))
       .WillOnce(Return(
-          folly::makeUnexpected<std::error_code>(
-              std::error_code(1, std::system_category()))));
+          folly::makeSemiFuture<fizz::psp::SA>(
+              folly::make_exception_wrapper<std::runtime_error>(
+                  std::runtime_error("dummy failure")))));
 
   folly::test::MockAsyncTransport mockTransport;
   setupMockTransport(mockTransport);
@@ -169,6 +201,7 @@ TEST_F(AsyncPSPUpgradeTest, RxAssocFails) {
   auto upgradeFrame = fizz::psp::pspUpgradeV0(
       &mockTransport, fizz::psp::PSPVersion::VER0, kernelPSP());
   upgradeFrame->start(&mockCallback_);
+  evb_.loop();
 }
 
 TEST_F(AsyncPSPUpgradeTest, RxAssocSucceedsButWriteFails) {
@@ -197,6 +230,7 @@ TEST_F(AsyncPSPUpgradeTest, RxAssocSucceedsButWriteFails) {
   auto upgradeFrame = fizz::psp::pspUpgradeV0(
       &mockTransport, fizz::psp::PSPVersion::VER0, kernelPSP());
   upgradeFrame->start(&mockCallback_);
+  evb_.loop();
 }
 
 TEST_F(AsyncPSPUpgradeTest, PeerSendsFailure) {
@@ -212,7 +246,8 @@ TEST_F(AsyncPSPUpgradeTest, PeerSendsFailure) {
         ew.get_exception()->what(), HasSubstr("peer signaled error: 125"));
   });
 
-  setupLocalAwaitsPeerMessage(readCallback, mockTransport, upgradeFrame);
+  setupLocalAwaitsPeerMessage(
+      readCallback, mockTransport, upgradeFrame, /*asyncRxAssoc=*/false);
   ASSERT_NE(upgradeFrame.get(), nullptr);
   ASSERT_NE(readCallback, nullptr);
 
@@ -238,7 +273,8 @@ TEST_F(AsyncPSPUpgradeTest, PeerEOF) {
     EXPECT_THAT(ew.get_exception()->what(), HasSubstr("readEOF"));
   });
 
-  setupLocalAwaitsPeerMessage(readCallback, mockTransport, upgradeFrame);
+  setupLocalAwaitsPeerMessage(
+      readCallback, mockTransport, upgradeFrame, /*asyncRxAssoc=*/false);
   ASSERT_NE(upgradeFrame.get(), nullptr);
   ASSERT_NE(readCallback, nullptr);
 
@@ -258,7 +294,8 @@ TEST_F(AsyncPSPUpgradeTest, PeerReadErr) {
     EXPECT_THAT(ew.get_exception()->what(), HasSubstr("TLS alert number 123"));
   });
 
-  setupLocalAwaitsPeerMessage(readCallback, mockTransport, upgradeFrame);
+  setupLocalAwaitsPeerMessage(
+      readCallback, mockTransport, upgradeFrame, /*asyncRxAssoc=*/false);
   ASSERT_NE(upgradeFrame.get(), nullptr);
   ASSERT_NE(readCallback, nullptr);
 
@@ -279,7 +316,8 @@ TEST_F(AsyncPSPUpgradeTest, PeerReadTimeout) {
     EXPECT_THAT(ew.get_exception()->what(), HasSubstr("psp upgrade cancelled"));
   });
 
-  setupLocalAwaitsPeerMessage(readCallback, mockTransport, upgradeFrame);
+  setupLocalAwaitsPeerMessage(
+      readCallback, mockTransport, upgradeFrame, /*asyncRxAssoc=*/false);
   ASSERT_NE(upgradeFrame.get(), nullptr);
   ASSERT_NE(readCallback, nullptr);
 
@@ -306,7 +344,8 @@ TEST_F(AsyncPSPUpgradeTest, PeerSendsInvalidMessage) {
         HasSubstr("peer sent unknown protocol message"));
   });
 
-  setupLocalAwaitsPeerMessage(readCallback, mockTransport, upgradeFrame);
+  setupLocalAwaitsPeerMessage(
+      readCallback, mockTransport, upgradeFrame, /*asyncRxAssoc=*/false);
   ASSERT_NE(upgradeFrame.get(), nullptr);
   ASSERT_NE(readCallback, nullptr);
 
@@ -329,7 +368,8 @@ TEST_F(AsyncPSPUpgradeTest, PeerSendsInvalidErrorMessage) {
         HasSubstr("peer sent invalid error message"));
   });
 
-  setupLocalAwaitsPeerMessage(readCallback, mockTransport, upgradeFrame);
+  setupLocalAwaitsPeerMessage(
+      readCallback, mockTransport, upgradeFrame, /*asyncRxAssoc=*/false);
   ASSERT_NE(upgradeFrame.get(), nullptr);
   ASSERT_NE(readCallback, nullptr);
 
@@ -353,7 +393,8 @@ TEST_F(AsyncPSPUpgradeTest, PeerSendsInvalidSAMessage) {
         HasSubstr("invalid or unsupported psp version"));
   });
 
-  setupLocalAwaitsPeerMessage(readCallback, mockTransport, upgradeFrame);
+  setupLocalAwaitsPeerMessage(
+      readCallback, mockTransport, upgradeFrame, /*asyncRxAssoc=*/false);
   ASSERT_NE(upgradeFrame.get(), nullptr);
   ASSERT_NE(readCallback, nullptr);
 
@@ -374,7 +415,7 @@ TEST_F(AsyncPSPUpgradeTest, PeerSendsValidMessageTxAssocFails) {
   std::unique_ptr<fizz::psp::AsyncPSPUpgradeFrame> upgradeFrame;
 
   EXPECT_CALL(mockKernelPSP_, txAssoc(_, _))
-      .WillOnce([](const auto& sa, int) -> std::error_code {
+      .WillOnce([](const auto& sa, int) -> folly::SemiFuture<folly::Unit> {
         EXPECT_EQ(sa.psp_version, 0);
         EXPECT_EQ(sa.spi, 0x11223344);
         EXPECT_EQ(sa.key.size(), 16);
@@ -382,14 +423,17 @@ TEST_F(AsyncPSPUpgradeTest, PeerSendsValidMessageTxAssocFails) {
         memset(expectedKey.data(), 0xfe, 16);
         EXPECT_EQ(memcmp(sa.key.data(), expectedKey.data(), 16), 0);
 
-        return std::error_code(10, std::system_category());
+        return folly::makeSemiFuture<folly::Unit>(
+            folly::make_exception_wrapper<std::runtime_error>(
+                "hardware blew up"));
       });
 
   EXPECT_CALL(mockCallback_, pspError(_)).WillOnce([](auto& ew) {
     EXPECT_THAT(ew.get_exception()->what(), HasSubstr("psp_tx_assoc failure"));
   });
 
-  setupLocalAwaitsPeerMessage(readCallback, mockTransport, upgradeFrame);
+  setupLocalAwaitsPeerMessage(
+      readCallback, mockTransport, upgradeFrame, /*asyncRxAssoc=*/false);
   ASSERT_NE(upgradeFrame.get(), nullptr);
   ASSERT_NE(readCallback, nullptr);
 
@@ -401,6 +445,7 @@ TEST_F(AsyncPSPUpgradeTest, PeerSendsValidMessageTxAssocFails) {
 
   auto msg = fizz::psp::detail::encodeTLV(sa);
   readCallback->readBufferAvailable(std::move(msg));
+  evb_.loop();
 }
 
 TEST_F(AsyncPSPUpgradeTest, SuccessfulNegotiation) {
@@ -410,7 +455,7 @@ TEST_F(AsyncPSPUpgradeTest, SuccessfulNegotiation) {
   std::unique_ptr<fizz::psp::AsyncPSPUpgradeFrame> upgradeFrame;
 
   EXPECT_CALL(mockKernelPSP_, txAssoc(_, _))
-      .WillOnce([](const auto& sa, int) -> std::error_code {
+      .WillOnce([](const auto& sa, int) -> folly::SemiFuture<folly::Unit> {
         EXPECT_EQ(sa.psp_version, 0);
         EXPECT_EQ(sa.spi, 0x11223344);
         EXPECT_EQ(sa.key.size(), 16);
@@ -418,13 +463,14 @@ TEST_F(AsyncPSPUpgradeTest, SuccessfulNegotiation) {
         memset(expectedKey.data(), 0xfe, 16);
         EXPECT_EQ(memcmp(sa.key.data(), expectedKey.data(), 16), 0);
 
-        return std::error_code{};
+        return folly::makeSemiFuture(folly::unit);
       });
 
   EXPECT_CALL(
       mockCallback_, pspSuccess(Eq(folly::NetworkSocket::fromFd(serverFd_))));
 
-  setupLocalAwaitsPeerMessage(readCallback, mockTransport, upgradeFrame);
+  setupLocalAwaitsPeerMessage(
+      readCallback, mockTransport, upgradeFrame, /*asyncRxAssoc=*/false);
   ASSERT_NE(upgradeFrame.get(), nullptr);
   ASSERT_NE(readCallback, nullptr);
 
@@ -436,6 +482,51 @@ TEST_F(AsyncPSPUpgradeTest, SuccessfulNegotiation) {
 
   auto msg = fizz::psp::detail::encodeTLV(sa);
   readCallback->readBufferAvailable(std::move(msg));
+  evb_.loop();
+}
+
+TEST_F(AsyncPSPUpgradeTest, SuccessfulNegotiationAsync) {
+  // The same as SuccessfulNegotiation, except the `rxAssoc` and the `txAssoc`
+  // calls complete asynchronously
+  folly::test::MockAsyncTransport mockTransport;
+  folly::AsyncTransport::ReadCallback* readCallback{};
+  std::unique_ptr<fizz::psp::AsyncPSPUpgradeFrame> upgradeFrame;
+
+  auto contract = folly::makePromiseContract<folly::Unit>();
+  EXPECT_CALL(mockKernelPSP_, txAssoc(_, _))
+      .WillOnce(
+          [f = std::move(contract.future)](
+              const auto& sa, int) mutable -> folly::SemiFuture<folly::Unit> {
+            EXPECT_EQ(sa.psp_version, 0);
+            EXPECT_EQ(sa.spi, 0x11223344);
+            EXPECT_EQ(sa.key.size(), 16);
+            auto expectedKey = std::array<uint8_t, 16>{};
+            memset(expectedKey.data(), 0xfe, 16);
+            EXPECT_EQ(memcmp(sa.key.data(), expectedKey.data(), 16), 0);
+
+            return std::move(f);
+          });
+
+  EXPECT_CALL(
+      mockCallback_, pspSuccess(Eq(folly::NetworkSocket::fromFd(serverFd_))));
+
+  setupLocalAwaitsPeerMessage(
+      readCallback, mockTransport, upgradeFrame, /*asyncRxAssoc=*/true);
+  ASSERT_NE(upgradeFrame.get(), nullptr);
+  ASSERT_NE(readCallback, nullptr);
+
+  struct fizz::psp::SA sa {};
+  sa.psp_version = 0;
+  sa.key.resize(16);
+  memset(sa.key.data(), 0xfe, 16);
+  sa.spi = 0x11223344;
+
+  auto msg = fizz::psp::detail::encodeTLV(sa);
+  readCallback->readBufferAvailable(std::move(msg));
+
+  // Complete the tx assoc
+  contract.promise.setValue(folly::unit);
+  evb_.loop();
 }
 
 TEST_F(AsyncPSPUpgradeTest, SuccessfulNegotiationReadDataAvailableAPI) {
@@ -445,7 +536,7 @@ TEST_F(AsyncPSPUpgradeTest, SuccessfulNegotiationReadDataAvailableAPI) {
   std::unique_ptr<fizz::psp::AsyncPSPUpgradeFrame> upgradeFrame;
 
   EXPECT_CALL(mockKernelPSP_, txAssoc(_, _))
-      .WillOnce([](const auto& sa, int) -> std::error_code {
+      .WillOnce([](const auto& sa, int) -> folly::SemiFuture<folly::Unit> {
         EXPECT_EQ(sa.psp_version, 0);
         EXPECT_EQ(sa.spi, 0x11223344);
         EXPECT_EQ(sa.key.size(), 16);
@@ -453,13 +544,14 @@ TEST_F(AsyncPSPUpgradeTest, SuccessfulNegotiationReadDataAvailableAPI) {
         memset(expectedKey.data(), 0xfe, 16);
         EXPECT_EQ(memcmp(sa.key.data(), expectedKey.data(), 16), 0);
 
-        return std::error_code{};
+        return folly::makeSemiFuture(folly::unit);
       });
 
   EXPECT_CALL(
       mockCallback_, pspSuccess(Eq(folly::NetworkSocket::fromFd(serverFd_))));
 
-  setupLocalAwaitsPeerMessage(readCallback, mockTransport, upgradeFrame);
+  setupLocalAwaitsPeerMessage(
+      readCallback, mockTransport, upgradeFrame, /*asyncRxAssoc=*/false);
   ASSERT_NE(upgradeFrame.get(), nullptr);
   ASSERT_NE(readCallback, nullptr);
 
@@ -481,6 +573,7 @@ TEST_F(AsyncPSPUpgradeTest, SuccessfulNegotiationReadDataAvailableAPI) {
   memcpy(buf, br.data(), br.size());
 
   readCallback->readDataAvailable(br.size());
+  evb_.loop();
 }
 
 TEST_F(AsyncPSPUpgradeTest, SuccessfulNegotiationMultipleParts) {
@@ -491,7 +584,7 @@ TEST_F(AsyncPSPUpgradeTest, SuccessfulNegotiationMultipleParts) {
   std::unique_ptr<fizz::psp::AsyncPSPUpgradeFrame> upgradeFrame;
 
   EXPECT_CALL(mockKernelPSP_, txAssoc(_, _))
-      .WillOnce([](const auto& sa, int) -> std::error_code {
+      .WillOnce([](const auto& sa, int) -> folly::SemiFuture<folly::Unit> {
         EXPECT_EQ(sa.psp_version, 0);
         EXPECT_EQ(sa.spi, 0x11223344);
         EXPECT_EQ(sa.key.size(), 16);
@@ -499,13 +592,14 @@ TEST_F(AsyncPSPUpgradeTest, SuccessfulNegotiationMultipleParts) {
         memset(expectedKey.data(), 0xfe, 16);
         EXPECT_EQ(memcmp(sa.key.data(), expectedKey.data(), 16), 0);
 
-        return std::error_code{};
+        return folly::makeSemiFuture(folly::unit);
       });
 
   EXPECT_CALL(
       mockCallback_, pspSuccess(Eq(folly::NetworkSocket::fromFd(serverFd_))));
 
-  setupLocalAwaitsPeerMessage(readCallback, mockTransport, upgradeFrame);
+  setupLocalAwaitsPeerMessage(
+      readCallback, mockTransport, upgradeFrame, /*asyncRxAssoc=*/false);
   ASSERT_NE(upgradeFrame.get(), nullptr);
   ASSERT_NE(readCallback, nullptr);
 
@@ -524,4 +618,72 @@ TEST_F(AsyncPSPUpgradeTest, SuccessfulNegotiationMultipleParts) {
 
   readCallback->readBufferAvailable(std::move(part1));
   readCallback->readBufferAvailable(std::move(part2));
+  evb_.loop();
+}
+
+TEST_F(AsyncPSPUpgradeTest, CanceledWhileAwaitingRxAssoc) {
+  auto contract = folly::makePromiseContract<fizz::psp::SA>();
+  EXPECT_CALL(mockKernelPSP_, rxAssoc(fizz::psp::PSPVersion::VER0, serverFd_))
+      .WillOnce([f = std::move(contract.future)](auto&&, auto&&) mutable {
+        return std::move(f);
+      });
+  EXPECT_CALL(mockCallback_, pspError(_))
+      .WillOnce([](const folly::exception_wrapper& ew) {
+        EXPECT_THAT(
+            ew.get_exception()->what(), HasSubstr("psp upgrade cancelled"));
+      });
+  folly::test::MockAsyncTransport mockTransport;
+  setupMockTransport(mockTransport);
+  {
+    auto upgradeFrame = fizz::psp::pspUpgradeV0(
+        &mockTransport, fizz::psp::PSPVersion::VER0, kernelPSP());
+    upgradeFrame->start(&mockCallback_);
+  }
+  contract.promise.setValue(fizz::psp::SA{});
+  evb_.loop();
+}
+
+TEST_F(AsyncPSPUpgradeTest, CanceledWhileAwaitingTxAssoc) {
+  auto contract = folly::makePromiseContract<folly::Unit>();
+  folly::test::MockAsyncTransport mockTransport;
+  folly::AsyncTransport::ReadCallback* readCallback{};
+  std::unique_ptr<fizz::psp::AsyncPSPUpgradeFrame> upgradeFrame;
+
+  EXPECT_CALL(mockKernelPSP_, txAssoc(_, _))
+      .WillOnce(
+          [f = std::move(contract.future)](
+              const auto& sa, int) mutable -> folly::SemiFuture<folly::Unit> {
+            EXPECT_EQ(sa.psp_version, 0);
+            EXPECT_EQ(sa.spi, 0x11223344);
+            EXPECT_EQ(sa.key.size(), 16);
+            auto expectedKey = std::array<uint8_t, 16>{};
+            memset(expectedKey.data(), 0xfe, 16);
+            EXPECT_EQ(memcmp(sa.key.data(), expectedKey.data(), 16), 0);
+
+            return std::move(f);
+          });
+
+  EXPECT_CALL(mockCallback_, pspError(_))
+      .WillOnce([](const folly::exception_wrapper& ew) {
+        EXPECT_THAT(
+            ew.get_exception()->what(), HasSubstr("psp upgrade cancelled"));
+      });
+
+  setupLocalAwaitsPeerMessage(
+      readCallback, mockTransport, upgradeFrame, /*asyncRxAssoc=*/false);
+  ASSERT_NE(upgradeFrame.get(), nullptr);
+  ASSERT_NE(readCallback, nullptr);
+
+  struct fizz::psp::SA sa {};
+  sa.psp_version = 0;
+  sa.key.resize(16);
+  memset(sa.key.data(), 0xfe, 16);
+  sa.spi = 0x11223344;
+
+  auto msg = fizz::psp::detail::encodeTLV(sa);
+  readCallback->readBufferAvailable(std::move(msg));
+  upgradeFrame.reset();
+
+  contract.promise.setValue(folly::unit);
+  evb_.loop();
 }

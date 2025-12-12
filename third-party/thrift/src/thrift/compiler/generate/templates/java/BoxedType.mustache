@@ -14,8 +14,51 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}
-{{#pragma ignore-newlines}}
-{{! Shim to redirect pre-existing macro usages to Whisker partial }}
-{{#partial types.boxed_type type=type:self
-    type_isAdapterSet=type:isAdapterSet? field_hasAdapter=field:hasAdapter?}}
+}}{{#type:javaType}}{{!
+  }}{{type:javaType}}{{!
+}}{{/type:javaType}}{{!
+}}{{^type:javaType}}{{!
+  }}{{#type:hasAdapter?}}{{!
+    }}{{type:typeClassName}}{{!
+  }}{{/type:hasAdapter?}}{{!
+  }}{{^type:hasAdapter?}}{{!
+    }}{{#type:typedef?}}{{!
+      }}{{#type:typedef_type}}{{> BoxedType}}{{/type:typedef_type}}{{!
+    }}{{/type:typedef?}}{{!
+    }}{{^type:typedef?}}{{!
+      }}{{#type:void?}}Void{{/type:void?}}{{!
+      }}{{#type:bool?}}Boolean{{/type:bool?}}{{!
+      }}{{#type:byte?}}Byte{{/type:byte?}}{{!
+      }}{{#type:i16?}}Short{{/type:i16?}}{{!
+      }}{{#type:i32?}}Integer{{/type:i32?}}{{!
+      }}{{#type:i64?}}Long{{/type:i64?}}{{!
+      }}{{#type:double?}}Double{{/type:double?}}{{!
+      }}{{#type:float?}}Float{{/type:float?}}{{!
+      }}{{#type:string?}}{{!
+        }}{{#type:isBinaryString?}}{{#type:isAdapterSet?}}io.netty.buffer.ByteBuf{{/type:isAdapterSet?}}{{^type:isAdapterSet?}}{{#field:hasAdapter?}}io.netty.buffer.ByteBuf{{/field:hasAdapter?}}{{^field:hasAdapter?}}byte[]{{/field:hasAdapter?}}{{/type:isAdapterSet?}}{{/type:isBinaryString?}}{{!
+        }}{{^type:isBinaryString?}}String{{/type:isBinaryString?}}{{!
+      }}{{/type:string?}}{{!
+      }}{{#type:binary?}}{{#type:isAdapterSet?}}io.netty.buffer.ByteBuf{{/type:isAdapterSet?}}{{^type:isAdapterSet?}}{{#field:hasAdapter?}}io.netty.buffer.ByteBuf{{/field:hasAdapter?}}{{^field:hasAdapter?}}byte[]{{/field:hasAdapter?}}{{/type:isAdapterSet?}}{{/type:binary?}}{{!
+
+      }}{{#type:map?}}{{!
+        }}Map<{{#type:key_type}}{{> BoxedType}}{{/type:key_type}}, {{#type:value_type}}{{> BoxedType}}{{/type:value_type}}>{{!
+      }}{{/type:map?}}{{!
+
+      }}{{#type:list?}}{{!
+        }}List<{{#type:list_elem_type}}{{> BoxedType}}{{/type:list_elem_type}}>{{!
+      }}{{/type:list?}}{{!
+
+      }}{{#type:set?}}{{!
+        }}Set<{{#type:set_elem_type}}{{> BoxedType}}{{/type:set_elem_type}}>{{!
+      }}{{/type:set?}}{{!
+
+      }}{{#type:structured?}}{{!
+        }}{{#type:structured}}{{struct:javaPackage}}.{{struct:javaCapitalName}}{{/type:structured}}{{!
+      }}{{/type:structured?}}{{!
+
+      }}{{#type:enum?}}{{!
+        }}{{#type:enum}}{{enum:javaPackage}}.{{enum:javaCapitalName}}{{/type:enum}}{{!
+      }}{{/type:enum?}}{{!
+    }}{{/type:typedef?}}{{!
+  }}{{/type:hasAdapter?}}{{!
+}}{{/type:javaType}}

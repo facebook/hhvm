@@ -61,11 +61,11 @@
     }}{{/type:set?}}{{!
 
     }}{{#type:structured?}}{{!
-        }}{{#type:structured}}{{struct:program.javaPackage}}.{{struct:javaCapitalName}}{{/type:structured}}{{!
+        }}{{#type:structured}}{{struct:javaPackage}}.{{struct:javaCapitalName}}{{/type:structured}}{{!
     }}{{/type:structured?}}{{!
 
     }}{{#type:enum?}}{{!
-        }}{{#type:enum}}{{enum:program.javaPackage}}.{{enum:javaCapitalName}}{{/type:enum}}{{!
+        }}{{#type:enum}}{{enum:javaPackage}}.{{enum:javaCapitalName}}{{/type:enum}}{{!
     }}{{/type:enum?}}{{!
   }}{{/type:typedef?}}{{!
 }}{{/type:javaType}}

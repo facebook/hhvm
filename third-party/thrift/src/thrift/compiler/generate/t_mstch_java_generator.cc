@@ -221,65 +221,6 @@ class t_mstch_java_generator : public t_mstch_generator {
     return std::move(def).make();
   }
 
-  prototype<t_program>::ptr make_prototype_for_program(
-      const prototype_database& proto) const override {
-    auto base = t_whisker_generator::make_prototype_for_program(proto);
-    auto def = whisker::dsl::prototype_builder<h_program>::extends(base);
-    def.property("javaPackage", &get_namespace_or_default);
-    return std::move(def).make();
-  }
-
-  prototype<t_type>::ptr make_prototype_for_type(
-      const prototype_database& proto) const override {
-    auto base = t_whisker_generator::make_prototype_for_type(proto);
-    auto def = whisker::dsl::prototype_builder<h_type>::extends(base);
-
-    def.property("javaCapitalName", [](const t_type& self) {
-      return java::mangle_java_name(self.name(), true);
-    });
-    def.property("hasAdapter?", [](const t_type& self) {
-      return self.is<t_typedef>() &&
-          t_typedef::get_first_structured_annotation_or_null(
-              &self, kJavaAdapterUri) != nullptr;
-    });
-    def.property("javaType", [](const t_type& self) {
-      return self.get_true_type()->get_unstructured_annotation(
-          "java.swift.type");
-    });
-    def.property("isBinaryString?", [](const t_type& self) {
-      return self.get_true_type()->get_unstructured_annotation(
-          "java.swift.binary_string");
-    });
-    def.property("adapterClassName", [](const t_type& self) {
-      if (const t_const* annotation =
-              t_typedef::get_first_structured_annotation_or_null(
-                  &self, kJavaAdapterUri);
-          annotation != nullptr && self.is<t_typedef>()) {
-        for (const auto& item : annotation->value()->get_map()) {
-          if (item.first->get_string() == "adapterClassName") {
-            return whisker::make::string(item.second->get_string());
-          }
-        }
-      }
-      return whisker::make::null;
-    });
-    def.property("typeClassName", [](const t_type& self) {
-      if (const t_const* annotation =
-              t_typedef::get_first_structured_annotation_or_null(
-                  &self, kJavaAdapterUri);
-          annotation != nullptr && self.is<t_typedef>()) {
-        for (const auto& item : annotation->value()->get_map()) {
-          if (item.first->get_string() == "typeClassName") {
-            return whisker::make::string(item.second->get_string());
-          }
-        }
-      }
-      return whisker::make::null;
-    });
-
-    return std::move(def).make();
-  }
-
   /*
    * Generate multiple Java items according to the given template. Writes
    * output to package_dir underneath the global output directory.
@@ -557,12 +498,14 @@ class mstch_java_program : public mstch_program {
     register_methods(
         this,
         {
+            {"program:javaPackage", &mstch_java_program::java_package},
             {"program:constantClassName",
              &mstch_java_program::constant_class_name},
             {"program:typeList", &mstch_java_program::list},
             {"program:typeListHash", &mstch_java_program::list_hash},
         });
   }
+  mstch::node java_package() { return get_namespace_or_default(*program_); }
   mstch::node constant_class_name() {
     return get_constants_class_name(*program_);
   }
@@ -606,10 +549,12 @@ class mstch_java_struct : public mstch_struct {
     register_methods(
         this,
         {
+            {"struct:javaPackage", &mstch_java_struct::java_package},
             {"struct:unionFieldTypeUnique?",
              &mstch_java_struct::is_union_field_type_unique},
             {"struct:asBean?", &mstch_java_struct::is_as_bean},
             {"struct:isBigStruct?", &mstch_java_struct::is_BigStruct},
+            {"struct:javaCapitalName", &mstch_java_struct::java_capital_name},
             {"struct:javaAnnotations?",
              &mstch_java_struct::has_java_annotations},
             {"struct:isUnion?", &mstch_java_struct::is_struct_union},
@@ -621,6 +566,9 @@ class mstch_java_struct : public mstch_struct {
             {"struct:hasWrapper?", &mstch_java_struct::has_wrapper},
             {"struct:clearAdapter", &mstch_java_struct::clear_adapter},
         });
+  }
+  mstch::node java_package() {
+    return get_namespace_or_default(*struct_->program());
   }
   mstch::node is_struct_union() { return struct_->is<t_union>(); }
   mstch::node is_union_field_type_unique() {
@@ -671,6 +619,10 @@ class mstch_java_struct : public mstch_struct {
         (struct_->is<t_struct>() || struct_->is<t_union>()) &&
         struct_->fields().size() > bigStructThreshold);
   }
+
+  mstch::node java_capital_name() {
+    return java::mangle_java_name(struct_->name(), true);
+  }
   mstch::node has_java_annotations() {
     return struct_->has_unstructured_annotation("java.swift.annotations") ||
         struct_->has_structured_annotation(kJavaAnnotationUri);
@@ -712,6 +664,8 @@ class mstch_java_service : public mstch_service {
     register_methods(
         this,
         {
+            {"service:javaPackage", &mstch_java_service::java_package},
+            {"service:javaCapitalName", &mstch_java_service::java_capital_name},
             {"service:onewayFunctions",
              &mstch_java_service::get_oneway_functions},
             {"service:requestResponseFunctions",
@@ -722,6 +676,12 @@ class mstch_java_service : public mstch_service {
              &mstch_java_service::get_streaming_functions},
             {"service:sinkFunctions", &mstch_java_service::get_sink_functions},
         });
+  }
+  mstch::node java_package() {
+    return get_namespace_or_default(*(service_->program()));
+  }
+  mstch::node java_capital_name() {
+    return java::mangle_java_name(service_->name(), true);
   }
   mstch::node get_oneway_functions() {
     std::vector<const t_function*> funcs;
@@ -1225,6 +1185,8 @@ class mstch_java_enum : public mstch_enum {
     register_methods(
         this,
         {
+            {"enum:javaPackage", &mstch_java_enum::java_package},
+            {"enum:javaCapitalName", &mstch_java_enum::java_capital_name},
             {"enum:skipEnumNameMap?",
              &mstch_java_enum::java_skip_enum_name_map},
             {"enum:numValues", &mstch_java_enum::num_values},
@@ -1232,6 +1194,12 @@ class mstch_java_enum : public mstch_enum {
              &mstch_java_enum::use_intrinsic_default},
             {"enum:findValueZero", &mstch_java_enum::find_value_zero},
         });
+  }
+  mstch::node java_package() {
+    return get_namespace_or_default(*enum_->program());
+  }
+  mstch::node java_capital_name() {
+    return java::mangle_java_name(enum_->name(), true);
   }
   mstch::node java_skip_enum_name_map() {
     return enum_->has_unstructured_annotation("java.swift.skip_enum_name_map");
@@ -1354,6 +1322,14 @@ class mstch_java_type : public mstch_type {
     register_methods(
         this,
         {
+            {"type:javaType", &mstch_java_type::java_type},
+            {"type:isBinaryString?", &mstch_java_type::is_binary_string},
+            {"type:hasAdapter?", &mstch_java_type::has_type_adapter},
+            {"type:adapterClassName",
+             &mstch_java_type::get_structured_adapter_class_name},
+            {"type:typeClassName",
+             &mstch_java_type::get_structured_type_class_name},
+
             {"type:setIsMapKey",
              {with_no_caching, &mstch_java_type::set_is_map_key}},
             {"type:isMapKey?",
@@ -1400,6 +1376,53 @@ class mstch_java_type : public mstch_type {
   mstch::node set_is_map_key() {
     isMapKeyFlag = true;
     return mstch::node();
+  }
+
+  mstch::node java_type() {
+    return type_->get_true_type()->get_unstructured_annotation(
+        "java.swift.type");
+  }
+  mstch::node is_binary_string() {
+    return type_->get_true_type()->get_unstructured_annotation(
+        "java.swift.binary_string");
+  }
+
+  mstch::node has_type_adapter() {
+    return has_structured_annotation(kJavaAdapterUri);
+  }
+
+  mstch::node has_structured_annotation(const char* uri) {
+    if (type_->is<t_typedef>()) {
+      if (t_typedef::get_first_structured_annotation_or_null(type_, uri)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  mstch::node get_structured_adapter_class_name() {
+    return get_structed_annotation_attribute(
+        kJavaAdapterUri, "adapterClassName");
+  }
+
+  mstch::node get_structured_type_class_name() {
+    return get_structed_annotation_attribute(kJavaAdapterUri, "typeClassName");
+  }
+
+  mstch::node get_structed_annotation_attribute(
+      const char* uri, const std::string& field) {
+    if (type_->is<t_typedef>()) {
+      if (auto annotation =
+              t_typedef::get_first_structured_annotation_or_null(type_, uri)) {
+        for (const auto& item : annotation->value()->get_map()) {
+          if (item.first->get_string() == field) {
+            return item.second->get_string();
+          }
+        }
+      }
+    }
+
+    return nullptr;
   }
 
   mstch::node set_adapter() {

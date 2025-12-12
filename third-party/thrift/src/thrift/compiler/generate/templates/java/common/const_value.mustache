@@ -1,0 +1,155 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}
+{{#import "common/types" as types}}
+
+{{!
+  Recursively render a const value - either a Thrift constant value, or a field
+  default value.
+
+  `as_bean` and `field_hasAdapter` are artefacts of mstch implicit context being
+  used in const value codegen.
+  This partial isolates that behavior outside the Whisker layer, into the
+  non-migrated context. We capture and propagate `field_hasAdapter` recursively,
+  as the same `field:hasAdapter?` would be resolved in mstch.
+}}
+{{#let export partial const_value |value root_const as_bean field_hasAdapter| captures |types|}}
+{{#pragma ignore-newlines}}
+{{#let type = value.type}}
+
+{{!
+  Nested partials for collections - these need to render line breaks, while the
+  bulk of the template doesn't. By encapsulating these in nested partials, the
+  main content can use `#pragma ignore-newlines` for readability.
+  The partials must be nested to support circular references
+  (const_value -> collection -> const_value for collection elements).
+}}
+{{#let partial collection_element |element| captures |const_value types root_const as_bean field_hasAdapter|}}
+{{#pragma ignore-newlines}}
+{{#if element.type.hasAdapter?}}__{{element.type.name}}_Adapter.fromThrift({{/if}}
+{{#partial const_value value=element root_const=root_const as_bean=as_bean field_hasAdapter=field_hasAdapter}}
+{{#if element.type.hasAdapter?}}){{/if}}
+{{/let partial}}{{! End of `collection_element` }}
+
+{{#let partial map_value captures |collection_element types value as_bean field_hasAdapter|}}
+{{#if as_bean}}com.google.common.collect.Maps.newHashMap({{/if}}ImmutableMap.<{{!
+  }}{{#partial types.boxed_type type=value.type.true_type.key_type type_isAdapterSet=false field_hasAdapter=field_hasAdapter}}, {{!
+  }}{{#partial types.boxed_type type=value.type.true_type.val_type type_isAdapterSet=false field_hasAdapter=field_hasAdapter}}>builder()
+        {{#each value.map_elements as |elem|}}
+        .put({{#partial collection_element element=elem.key}}, {{#partial collection_element element=elem.value}})
+        {{/each}}
+        .build(){{#if as_bean}}){{/if}}{{! No trailing newline
+}}{{/let partial}}{{! End of `map_value` }}
+
+{{#let partial list_value captures |collection_element types value as_bean field_hasAdapter|}}
+{{#if as_bean}}com.google.common.collect.Lists.newArrayList({{/if}}ImmutableList.<{{!
+  }}{{#partial types.boxed_type type=value.type.true_type.elem_type type_isAdapterSet=false field_hasAdapter=field_hasAdapter}}>builder()
+        {{#each value.list_elements as |elem|}}
+        .add({{#partial collection_element element=elem}})
+        {{/each}}
+        .build(){{#if as_bean}}){{/if}}{{! No trailing newline
+}}{{/let partial}}{{! End of `list_value` }}
+
+{{#let partial set_value captures |collection_element types value as_bean field_hasAdapter|}}
+{{#if as_bean}}com.google.common.collect.Sets.newHashSet({{/if}}ImmutableSet.<{{!
+  }}{{#partial types.boxed_type type=value.type.true_type.elem_type type_isAdapterSet=false field_hasAdapter=field_hasAdapter}}>builder()
+        {{#each value.list_elements as |elem|}}
+        .add({{#partial collection_element element=elem}})
+        {{/each}}
+        .build(){{#if as_bean}}){{/if}}{{! No trailing newline
+}}{{/let partial}}{{! End of `set_value` }}
+
+{{! END NESTED PARTIALS; Begin main `const_value` content }}
+{{#if type.bool?}}{{#if value.nonzero?}}true{{#else}}false{{/if}}
+{{#else if type.string?}}{{value.quotedString}}
+
+{{! Integer constants }}
+{{#else if type.byte?}}(byte){{value.integer_value}}
+{{#else if type.i16?}}(short){{value.integer_value}}
+{{#else if type.i32?}}{{value.integer_value}}
+{{#else if type.i64?}}{{value.integer_value}}L
+
+{{! Container types }}
+{{#else if type.map?}}{{#partial map_value}}
+{{#else if type.set?}}{{#partial set_value}}
+{{#else if type.list?}}{{#partial list_value}}
+
+{{! Floating point constants }}
+  {{#else if type.double?}}
+    {{#if value.double?}}
+(double){{value.double_value}}
+    {{#else if value.integer?}}
+{{value.integer_value}}.0
+    {{/if value.double?}}
+  {{#else if type.float?}}
+    {{#if value.double?}}
+(float){{value.double_value}}
+    {{#else if value.integer?}}
+(float){{value.integer_value}}.0
+    {{/if value.double?}}
+
+{{! Other types }}
+  {{#else if type.binary?}}
+    {{#if field_hasAdapter}}
+io.netty.buffer.Unpooled.wrappedBuffer({{value.quotedString}}.getBytes())
+    {{#else}}
+{{value.quotedString}}.getBytes()
+    {{/if field_hasAdapter}}
+  {{#else if type.enum?}}
+{{#partial types.boxed_type type=type.true_type type_isAdapterSet=false field_hasAdapter=field_hasAdapter}}.
+    {{#if value.enum_value?}}
+{{value.enum_value.javaConstantName}}
+    {{#else}}
+fromInteger({{value.integer_value}})
+    {{/if value.enum_value?}}
+
+{{! Structured types }}
+  {{#else if type.structured?}}
+    {{#if (value.referenceable_from? root_const)}}
+{{value.owner.program.javaPackage}}.Constants.{{value.owner.javaCapitalName}}
+    {{#else if type.union?}}
+      {{#if (object.notnull? value.structured_elements)}}
+        {{#each value.structured_elements as |elem|}}
+{{#partial types.boxed_type type=type.true_type type_isAdapterSet=false field_hasAdapter=field_hasAdapter}}
+.from{{elem.field.javaCapitalName}}(
+{{#partial const_value value=elem.value root_const=root_const as_bean=type.true_type.asBean? field_hasAdapter=field_hasAdapter}}
+)
+          {{#else}}
+            {{! For an empty element list, render the same content as null }}
+new {{#partial types.boxed_type type=type.true_type type_isAdapterSet=false field_hasAdapter=field_hasAdapter}}()
+        {{/each}}
+      {{#else}}
+new {{#partial types.boxed_type type=type.true_type type_isAdapterSet=false field_hasAdapter=field_hasAdapter}}()
+      {{/if (object.notnull? value.structured_elements)}}
+    {{#else}}
+{{! NOTE: It is impossible to have constants if structs are created in mutable
+          bean style. If customer specify a constant of mutable struct type.
+          Build will fail.
+}}
+new {{#partial types.boxed_type type=type.true_type type_isAdapterSet=false field_hasAdapter=field_hasAdapter}}
+.Builder()
+      {{#if (object.notnull? value.structured_elements)}}
+        {{#each value.structured_elements as |elem|}}
+.set{{elem.field.javaCapitalName}}(
+{{#partial const_value value=elem.value root_const=root_const as_bean=type.true_type.asBean? field_hasAdapter=field_hasAdapter}}
+)
+        {{/each}}
+      {{/if (object.notnull? value.structured_elements)}}
+.build()
+    {{/if (value.referenceable_from? root_const)}}
+  {{/if type.bool?}}
+{{/let partial}}

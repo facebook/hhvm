@@ -76,6 +76,7 @@ enum class VariantControllerHackArraysMode {
 template <VariantControllerHackArraysMode HackArraysMode>
 struct VariantControllerImpl {
   using VariantType = Variant;
+  using VariantTypeReference = const Variant&;
   using MapType = Array;
   using VectorType = Array;
   using SetType = Array;

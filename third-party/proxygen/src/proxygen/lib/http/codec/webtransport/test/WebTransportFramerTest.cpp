@@ -10,7 +10,6 @@
 #include <folly/portability/GTest.h>
 #include <proxygen/lib/http/codec/CapsuleCodec.h>
 #include <proxygen/lib/http/codec/webtransport/WebTransportFramer.h>
-#include <quic/folly_utils/Utils.h>
 
 using namespace proxygen;
 using namespace testing;

@@ -9,6 +9,7 @@
 #pragma once
 
 #include <proxygen/lib/http/codec/CapsuleCodec.h>
+#include <quic/folly_utils/Utils.h>
 
 namespace proxygen {
 

@@ -78,8 +78,6 @@ set(
   mvfst_events
   mvfst_async_udp_socket
   mvfst_cc_algo
-  mvfst_dsr_types
-  mvfst_dsr_frontend
   mvfst_fizz_client
   mvfst_fizz_handshake
   mvfst_flowcontrol

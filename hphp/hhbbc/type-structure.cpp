@@ -572,7 +572,7 @@ Resolution resolve_tuple(ResolveCtx& ctx, SArray ts) {
     .resolve(s_elem_types, get_ts_elem_types(ts), ctx, resolve_list)
     .resolve(s_optional_elem_types, get_ts_optional_elem_types_opt(ts),
              ctx, resolve_list)
-    .resolve(s_variadic_type, get_ts_variadic_type_opt(ts), ctx, 
+    .resolve(s_variadic_type, get_ts_variadic_type_opt(ts), ctx,
              resolve_bespoke)
     .optCopy(s_typevars, ts)
     .optCopy(s_alias, ts)
@@ -980,6 +980,7 @@ Resolution resolve_unresolved(ResolveCtx& ctx, SArray ts) {
 Resolution resolve_union(ResolveCtx& ctx, SArray ts) {
   return Builder::copy(ts, TS::Kind::T_union)
     .resolve(s_union_types, get_ts_union_types(ts), ctx, resolve_list)
+    .optCopy(s_typevars, ts)
     .finish();
 }
 

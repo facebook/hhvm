@@ -6,6 +6,7 @@ use std::ffi::OsString;
 use std::fs;
 use std::fs::File;
 use std::io;
+use std::io::{Error, ErrorKind};
 use std::path::Path;
 use std::path::PathBuf;
 use std::sync::atomic::AtomicUsize;
@@ -353,10 +354,16 @@ pub fn build(
 ) -> io::Result<()> {
     let all_edges = match (new_edges_dir, delta_file) {
         (None, None) => {
-            panic!("build: at least one of --edges-dir or --delta-file flags should be passed")
+            return Err(Error::new(
+                ErrorKind::InvalidInput,
+                "build: at least one of --edges-dir or --delta-file flags should be passed",
+            ));
         }
         (Some(_), Some(_)) => {
-            panic!("build: cannot specify both --edges-dir and --delta-file")
+            return Err(Error::new(
+                ErrorKind::InvalidInput,
+                "build: cannot specify both --edges-dir and --delta-file",
+            ));
         }
         (Some(new_edges_dir), None) => {
             info!("Opening binary files in {:?}", new_edges_dir);
@@ -402,7 +409,10 @@ pub fn build(
     info!("Converting to structured_edges & unique hashes done");
 
     if !allow_empty && mem_dep_graph.edge_lists.iter().all(|list| list.is_empty()) {
-        panic!("No input edges. Refusing to build as --allow-empty not set.");
+        return Err(Error::new(
+            ErrorKind::InvalidInput,
+            "No input edges. Refusing to build as --allow-empty not set.",
+        ));
     }
 
     info!("Registering {} unique hashes", mem_dep_graph.hashes.len());

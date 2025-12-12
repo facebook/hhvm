@@ -174,6 +174,7 @@ class t_mstch_java_generator : public t_mstch_generator {
     opts.allowed_undefined_variables = {
         "type:typedef_type", // in UnionWrite.mustache
         "struct:isUnion?", // in WriteResponseType.mustache
+        "struct:asBean?", // in DefaultValue.mustache
         "field:hasAdapter?", // in BoxedType.mustache
     };
     return opts;
@@ -185,30 +186,6 @@ class t_mstch_java_generator : public t_mstch_generator {
 
  private:
   void set_mstch_factories();
-
-  prototype<t_const>::ptr make_prototype_for_const(
-      const prototype_database& proto) const override {
-    auto base = t_whisker_generator::make_prototype_for_const(proto);
-    auto def = whisker::dsl::prototype_builder<h_const>::extends(base);
-
-    def.property("javaCapitalName", [](const t_const& self) {
-      return java::mangle_java_constant_name(self.name());
-    });
-
-    return std::move(def).make();
-  }
-
-  prototype<t_const_value>::ptr make_prototype_for_const_value(
-      const prototype_database& proto) const override {
-    auto base = t_whisker_generator::make_prototype_for_const_value(proto);
-    auto def = whisker::dsl::prototype_builder<h_const_value>::extends(base);
-
-    def.property("quotedString", [](const t_const_value& self) {
-      return java::quote_java_string(self.get_string());
-    });
-
-    return std::move(def).make();
-  }
 
   prototype<t_enum>::ptr make_prototype_for_enum(
       const prototype_database& proto) const override {
@@ -244,37 +221,11 @@ class t_mstch_java_generator : public t_mstch_generator {
     return std::move(def).make();
   }
 
-  prototype<t_field>::ptr make_prototype_for_field(
-      const prototype_database& proto) const override {
-    auto base = t_whisker_generator::make_prototype_for_field(proto);
-    auto def = whisker::dsl::prototype_builder<h_field>::extends(base);
-
-    def.property("javaCapitalName", [](const t_field& self) {
-      return java::mangle_java_name(get_java_swift_name(&self), true);
-    });
-
-    return std::move(def).make();
-  }
-
   prototype<t_program>::ptr make_prototype_for_program(
       const prototype_database& proto) const override {
     auto base = t_whisker_generator::make_prototype_for_program(proto);
     auto def = whisker::dsl::prototype_builder<h_program>::extends(base);
     def.property("javaPackage", &get_namespace_or_default);
-    return std::move(def).make();
-  }
-
-  prototype<t_structured>::ptr make_prototype_for_structured(
-      const prototype_database& proto) const override {
-    auto base = t_whisker_generator::make_prototype_for_structured(proto);
-    auto def = whisker::dsl::prototype_builder<h_structured>::extends(base);
-
-    def.property("asBean?", [](const t_structured& self) {
-      return self.is<t_struct>() &&
-          (self.get_unstructured_annotation("java.swift.mutable") == "true" ||
-           self.has_structured_annotation(kJavaMutableUri));
-    });
-
     return std::move(def).make();
   }
 
@@ -657,6 +608,7 @@ class mstch_java_struct : public mstch_struct {
         {
             {"struct:unionFieldTypeUnique?",
              &mstch_java_struct::is_union_field_type_unique},
+            {"struct:asBean?", &mstch_java_struct::is_as_bean},
             {"struct:isBigStruct?", &mstch_java_struct::is_BigStruct},
             {"struct:javaAnnotations?",
              &mstch_java_struct::has_java_annotations},
@@ -703,6 +655,15 @@ class mstch_java_struct : public mstch_struct {
       }
     }
     return false;
+  }
+  mstch::node is_as_bean() {
+    if (!struct_->is<t_exception>() && !struct_->is<t_union>()) {
+      return struct_->get_unstructured_annotation("java.swift.mutable") ==
+          "true" ||
+          struct_->has_structured_annotation(kJavaMutableUri);
+    } else {
+      return false;
+    }
   }
 
   mstch::node is_BigStruct() {
@@ -907,6 +868,7 @@ class mstch_java_field : public mstch_field {
         this,
         {
             {"field:javaName", &mstch_java_field::java_name},
+            {"field:javaCapitalName", &mstch_java_field::java_capital_name},
             {"field:javaConstantName", &mstch_java_field::java_constant_name},
             {"field:javaDefaultValue", &mstch_java_field::java_default_value},
             {"field:javaAllCapsName", &mstch_java_field::java_all_caps_name},
@@ -1117,6 +1079,9 @@ class mstch_java_field : public mstch_field {
   mstch::node java_tfield_name() {
     return constant_name(get_java_swift_name(field_)) + "_FIELD_DESC";
   }
+  mstch::node java_capital_name() {
+    return java::mangle_java_name(get_java_swift_name(field_), true);
+  }
   mstch::node java_constant_name() {
     return constant_name(get_java_swift_name(field_));
   }
@@ -1304,9 +1269,17 @@ class mstch_java_const : public mstch_const {
     register_methods(
         this,
         {
+            {"constant:javaCapitalName", &mstch_java_const::java_capital_name},
+            {"constant:javaFieldName", &mstch_java_const::java_field_name},
             {"constant:javaIgnoreConstant?",
              &mstch_java_const::java_ignore_constant},
         });
+  }
+  mstch::node java_capital_name() {
+    return java::mangle_java_constant_name(const_->name());
+  }
+  mstch::node java_field_name() {
+    return java::mangle_java_name(field_->name(), true);
   }
   mstch::node java_ignore_constant() {
     // we have to ignore constants if they are enums that we handled as ints, as
@@ -1338,6 +1311,39 @@ class mstch_java_const : public mstch_const {
     }
     return mstch::node();
   }
+};
+
+class mstch_java_const_value : public mstch_const_value {
+ public:
+  mstch_java_const_value(
+      const t_const_value* cv,
+      mstch_context& ctx,
+      mstch_element_position pos,
+      const t_const* current_const,
+      const t_type* expected_type)
+      : mstch_const_value(cv, ctx, pos, current_const, expected_type) {
+    register_methods(
+        this,
+        {
+            {"value:quotedString", &mstch_java_const_value::quote_java_string},
+            {"value:javaEnumValueName",
+             &mstch_java_const_value::java_enum_value_name},
+        });
+  }
+  mstch::node quote_java_string() {
+    return java::quote_java_string(const_value_->get_string());
+  }
+  mstch::node java_enum_value_name() {
+    if (type_ == cv::CV_INTEGER && const_value_->is_enum()) {
+      const t_enum_value* enum_value = const_value_->get_enum_value();
+      if (enum_value != nullptr) {
+        return java::mangle_java_constant_name(enum_value->name());
+      }
+      return "fromInteger(" + std::to_string(const_value_->get_integer()) + ")";
+    }
+    return mstch::node();
+  }
+  bool same_type_as_expected() const override { return true; }
 };
 
 class mstch_java_type : public mstch_type {
@@ -1494,6 +1500,7 @@ void t_mstch_java_generator::set_mstch_factories() {
   mstch_context_.add<mstch_java_field>();
   mstch_context_.add<mstch_java_enum>();
   mstch_context_.add<mstch_java_const>();
+  mstch_context_.add<mstch_java_const_value>();
 }
 
 THRIFT_REGISTER_GENERATOR(mstch_java, "Java", "");

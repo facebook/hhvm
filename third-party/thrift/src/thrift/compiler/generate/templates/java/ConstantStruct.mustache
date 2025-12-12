@@ -14,9 +14,15 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}{{#pragma ignore-newlines}}
-{{#import "common/types" as types}}
-{{#if struct:union?}}{{> Union}}
-{{#else if struct:exception?}}{{> Exception}}
-{{#else}}{{> Struct}}
-{{/if struct:union?}}
+}}
+{{! NOTE: It is impossible to have constants if structs are created in mutable
+          bean style. If customer specify a constant of mutable struct type.
+          Build will fail.
+}}
+new {{> BoxedType}}.Builder(){{!
+}}{{#value:const_struct}}{{!
+  }}{{#constant:type}}{{!
+    }}{{#constant:value}}.set{{constant:javaFieldName}}({{> DefaultValue}}){{!
+    }}{{/constant:value}}{{!
+  }}{{/constant:type}}{{!
+}}{{/value:const_struct}}.build()

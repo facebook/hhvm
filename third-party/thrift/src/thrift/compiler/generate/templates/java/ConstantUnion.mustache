@@ -14,9 +14,11 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}{{#pragma ignore-newlines}}
-{{#import "common/types" as types}}
-{{#if struct:union?}}{{> Union}}
-{{#else if struct:exception?}}{{> Exception}}
-{{#else}}{{> Struct}}
-{{/if struct:union?}}
+}}{{#value:const_struct}}{{!
+}}{{> BoxedType}}{{#constant:type}}{{!
+  }}.from{{constant:javaFieldName}}({{#constant:value}}{{> DefaultValue}}{{/constant:value}}){{!
+}}{{/constant:type}}{{!
+}}{{/value:const_struct}}{{!
+}}{{^value:const_struct}}{{!
+}}new {{> BoxedType}}(){{!
+}}{{/value:const_struct}}

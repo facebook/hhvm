@@ -347,7 +347,7 @@ let insert_text_for_ty
   | Tfun ft -> insert_text_for_fun_call env autocomplete_context label ft
   | _ -> InsertLiterally label
 
-let autocomplete_shape_key autocomplete_context env fields id =
+let autocomplete_shape_key autocomplete_context fields id =
   if is_auto_complete (snd id) then
     (* not the same as `prefix == ""` in namespaces *)
     let have_prefix =
@@ -355,31 +355,22 @@ let autocomplete_shape_key autocomplete_context env fields id =
     in
     let prefix = strip_suffix (snd id) in
     let add (name : Typing_defs.tshape_field_name) =
-      let (code, kind, ty) =
+      let (code, kind, pos) =
         match name with
         | Typing_defs.TSFregex_group (pos, str) ->
-          let reason = Typing_reason.witness_from_decl pos in
-          let ty = Typing_defs.Tprim Aast_defs.Tint in
-          (str, FileInfo.SI_Literal, Typing_defs.mk (reason, ty))
+          (str, FileInfo.SI_Literal, pos)
         | Typing_defs.TSFlit_str (pos, str) ->
-          let reason = Typing_reason.witness_from_decl pos in
-          let ty = Typing_make_type.decl_string reason in
           let quote =
             if have_prefix then
               Str.first_chars prefix 1
             else
               "'"
           in
-          (quote ^ str ^ quote, FileInfo.SI_Literal, ty)
+          (quote ^ str ^ quote, FileInfo.SI_Literal, pos)
         | Typing_defs.TSFclass_const ((pos, cid), (_, mid)) ->
-          ( Printf.sprintf "%s::%s" cid mid,
-            FileInfo.SI_ClassConstant,
-            Typing_defs.mk
-              (Reason.witness_from_decl pos, Typing_defs.make_tany ()) )
+          (Printf.sprintf "%s::%s" cid mid, FileInfo.SI_ClassConstant, pos)
       in
       if (not have_prefix) || String.is_prefix code ~prefix then
-        let ty = Phase.decl ty in
-        let pos = get_pos_for env ty in
         let res_insert_text =
           if autocomplete_context.is_before_apostrophe then
             rstrip code "'"
@@ -388,7 +379,7 @@ let autocomplete_shape_key autocomplete_context env fields id =
         in
         let complete =
           {
-            res_decl_pos = pos;
+            res_decl_pos = Pos.to_absolute (Pos_or_decl.unsafe_to_raw_pos pos);
             res_replace_pos = replace_pos_of_id id;
             res_base_class = None;
             res_detail = kind_to_string kind;
@@ -2024,7 +2015,7 @@ let visitor
           | Tshape { s_fields = fields; _ } ->
             (match key with
             | Aast.Id (_, mid) ->
-              autocomplete_shape_key autocomplete_context env fields (pos, mid)
+              autocomplete_shape_key autocomplete_context fields (pos, mid)
             | Aast.String mid ->
               (* autocomplete generally assumes that there's a token ending with the suffix; *)
               (* This isn't the case for `$shape['a`, unless it's at the end of the file *)
@@ -2034,7 +2025,7 @@ let visitor
                   mid
               in
               if Int.equal offset (-1) then
-                autocomplete_shape_key autocomplete_context env fields (pos, mid)
+                autocomplete_shape_key autocomplete_context fields (pos, mid)
               else
                 let mid =
                   Str.string_before
@@ -2053,7 +2044,7 @@ let visitor
                         + offset
                         + AutocompleteTypes.autocomplete_token_length )
                 in
-                autocomplete_shape_key autocomplete_context env fields (pos, mid)
+                autocomplete_shape_key autocomplete_context fields (pos, mid)
             | _ -> ())
           | _ -> ()
         end

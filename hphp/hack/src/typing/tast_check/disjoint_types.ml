@@ -114,7 +114,7 @@ let get_origin_info env class_id class_type class_tyargs origin =
               empty_expand_env with
               substs =
                 Typing_utils.make_locl_subst_for_class_tparams
-                  origin_class_type
+                  class_type
                   class_tyargs;
             }
           in

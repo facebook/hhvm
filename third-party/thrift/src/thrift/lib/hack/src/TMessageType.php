@@ -16,7 +16,7 @@
  *
  */
 
-// @oss-enable: use namespace FlibSL\{C, Math, Str, Vec};
+use namespace FlibSL\{C, Math, Str, Vec}; // @oss-enable
 
 /**
  * Message types for RPC

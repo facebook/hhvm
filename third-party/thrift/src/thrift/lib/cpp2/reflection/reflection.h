@@ -414,7 +414,7 @@ struct reflected_annotations {
 template <typename Traits>
 struct [[deprecated(
     "Deprecated in favor of "
-    "https://www.internalfb.com/intern/staticdocs/thrift/docs/fb/languages/cpp/reflection and " // @oss-disable
+    // @oss-disable: "https://www.internalfb.com/intern/staticdocs/thrift/docs/fb/languages/cpp/reflection and "
     "https://github.com/facebook/fbthrift/blob/main/thrift/lib/cpp2/op/Get.h")]]
 reflected_struct {
   /**
@@ -887,7 +887,7 @@ struct reflected_struct_data_member {
 template <typename Struct>
 using reflect_struct [[deprecated(
     "Deprecated in favor of "
-    "https://www.internalfb.com/intern/staticdocs/thrift/docs/fb/languages/cpp/reflection and " // @oss-disable
+    // @oss-disable: "https://www.internalfb.com/intern/staticdocs/thrift/docs/fb/languages/cpp/reflection and "
     "https://github.com/facebook/fbthrift/blob/main/thrift/lib/cpp2/op/Get.h")]] =
     fatal::registry_lookup<
         apache::thrift::detail::struct_traits_metadata_tag,
@@ -930,7 +930,7 @@ using reflect_struct [[deprecated(
 template <typename Struct, typename Default = void>
 using try_reflect_struct [[deprecated(
     "Deprecated in favor of "
-    "https://www.internalfb.com/intern/staticdocs/thrift/docs/fb/languages/cpp/reflection and " // @oss-disable
+    // @oss-disable: "https://www.internalfb.com/intern/staticdocs/thrift/docs/fb/languages/cpp/reflection and "
     "https://github.com/facebook/fbthrift/blob/main/thrift/lib/cpp2/op/Get.h")]] =
     fatal::try_registry_lookup<
         apache::thrift::detail::struct_traits_metadata_tag,
@@ -974,7 +974,7 @@ using try_reflect_struct [[deprecated(
 template <typename T>
 using is_reflectable_struct [[deprecated(
     "Deprecated in favor of "
-    "https://www.internalfb.com/intern/staticdocs/thrift/docs/fb/languages/cpp/reflection and " // @oss-disable
+    // @oss-disable: "https://www.internalfb.com/intern/staticdocs/thrift/docs/fb/languages/cpp/reflection and "
     "https://github.com/facebook/fbthrift/blob/main/thrift/lib/cpp2/op/Get.h")]] =
     std::integral_constant<
         bool,
@@ -1012,7 +1012,7 @@ using is_reflectable_struct [[deprecated(
 template <typename T>
 struct [[deprecated(
     "Deprecated in favor of "
-    "https://www.internalfb.com/intern/staticdocs/thrift/docs/fb/languages/cpp/reflection and " // @oss-disable
+    // @oss-disable: "https://www.internalfb.com/intern/staticdocs/thrift/docs/fb/languages/cpp/reflection and "
     "https://github.com/facebook/fbthrift/blob/main/thrift/lib/cpp2/op/Get.h")]]
 reflected_variant {
   /**
@@ -1178,7 +1178,7 @@ reflected_variant {
 template <typename T>
 using reflect_variant [[deprecated(
     "Deprecated in favor of "
-    "https://www.internalfb.com/intern/staticdocs/thrift/docs/fb/languages/cpp/reflection and " // @oss-disable
+    // @oss-disable: "https://www.internalfb.com/intern/staticdocs/thrift/docs/fb/languages/cpp/reflection and "
     "https://github.com/facebook/fbthrift/blob/main/thrift/lib/cpp2/op/Get.h")]] =
     reflected_variant<T>;
 
@@ -1301,7 +1301,7 @@ struct reflected_variant_member_metadata {
 template <typename T>
 using is_reflectable_union [[deprecated(
     "Deprecated in favor of "
-    "https://www.internalfb.com/intern/staticdocs/thrift/docs/fb/languages/cpp/reflection and " // @oss-disable
+    // @oss-disable: "https://www.internalfb.com/intern/staticdocs/thrift/docs/fb/languages/cpp/reflection and "
     "https://github.com/facebook/fbthrift/blob/main/thrift/lib/cpp2/op/Get.h")]] =
     fatal::has_variant_traits<T>;
 } // namespace apache::thrift

@@ -16,7 +16,7 @@
  *
  */
 
-// @oss-enable: use namespace FlibSL\{C, Math, Str, Vec};
+use namespace FlibSL\{C, Math, Str, Vec}; // @oss-enable
 
 /**
  * Can be called with standard Exception constructor (message, code) or with
@@ -25,7 +25,7 @@
  * @param mixed $p1 Message (string) or type-spec (array)
  * @param mixed $p2 Code (integer) or values (array)
  */
-<<Oncalls('thrift')>> // @oss-disable
+// @oss-disable: <<Oncalls('thrift')>>
 class TException extends ExceptionWithPureGetMessage {
 
   public string $message = '';

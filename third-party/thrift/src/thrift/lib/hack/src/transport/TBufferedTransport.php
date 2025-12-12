@@ -16,7 +16,7 @@
  *
  */
 
-// @oss-enable: use namespace FlibSL\{C, Math, Str, Vec};
+use namespace FlibSL\{C, Math, Str, Vec}; // @oss-enable
 
 /**
  * Buffered transport. Stores data to an internal buffer that it doesn't
@@ -25,7 +25,7 @@
  *
  * @package thrift.transport
  */
-<<Oncalls('thrift')>> // @oss-disable
+// @oss-disable: <<Oncalls('thrift')>>
 final class TBufferedTransport<<<__Soft>> reify TTrans as TTransport>
   extends TTransport
   implements TTransportStatus, IThriftBufferedTransport {

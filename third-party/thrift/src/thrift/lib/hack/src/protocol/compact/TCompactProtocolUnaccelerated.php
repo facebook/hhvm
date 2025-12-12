@@ -16,11 +16,11 @@
  *
  */
 
-// @oss-enable: use namespace FlibSL\{C, Math, Str, Vec};
+use namespace FlibSL\{C, Math, Str, Vec}; // @oss-enable
 
 /**
  * Old slow unaccelerated protocol.
  */
-<<Oncalls('thrift')>> // @oss-disable
+// @oss-disable: <<Oncalls('thrift')>>
 final class TCompactProtocolUnaccelerated extends TCompactProtocolBase {
 }

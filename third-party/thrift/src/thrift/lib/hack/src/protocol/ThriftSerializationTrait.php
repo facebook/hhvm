@@ -16,12 +16,12 @@
  *
  */
 
-// @oss-enable: use namespace FlibSL\{C, Math, Str, Vec};
+use namespace FlibSL\{C, Math, Str, Vec}; // @oss-enable
 
 /**
  * Trait for Thrift Structs to call into the Serialization Helper
  */
-<<Oncalls('thrift')>> // @oss-disable
+// @oss-disable: <<Oncalls('thrift')>>
 trait ThriftSerializationTrait implements IThriftStruct {
 
   public function read(

@@ -39,7 +39,7 @@
     IThriftStructWrapper::class,
   ),
   Oncalls('thrift'),
->> // @oss-disable
+// @oss-disable: >>
 abstract class IThriftWrapper<TThriftType> {
   protected function __construct(protected TThriftType $value)[] {}
 
@@ -69,7 +69,7 @@ abstract class IThriftWrapper<TThriftType> {
   )[zoned_local]: Awaitable<void>;
 }
 
-<<__ConsistentConstruct, Oncalls('thrift')>> // @oss-disable
+// @oss-disable: <<__ConsistentConstruct, Oncalls('thrift')>>
 // @oss-enable << __ConsistentConstruct>>
 abstract class IThriftFieldWrapper<
   TThriftType,
@@ -98,7 +98,7 @@ abstract class IThriftFieldWrapper<
   ]: Awaitable<IThriftFieldWrapper<TThriftType__, TThriftStruct__>>;
 }
 
-<<__ConsistentConstruct, Oncalls('thrift')>> // @oss-disable
+// @oss-disable: <<__ConsistentConstruct, Oncalls('thrift')>>
 // @oss-enable << __ConsistentConstruct>>
 abstract class IThriftTypeWrapper<TThriftType>
   extends IThriftWrapper<TThriftType> {
@@ -117,7 +117,7 @@ abstract class IThriftTypeWrapper<TThriftType>
   )[zoned_shallow]: Awaitable<IThriftTypeWrapper<TThriftType__>>;
 }
 
-<<__ConsistentConstruct, Oncalls('thrift')>> // @oss-disable
+// @oss-disable: <<__ConsistentConstruct, Oncalls('thrift')>>
 // @oss-enable << __ConsistentConstruct>>
 abstract class IThriftStructWrapper<TThriftStructType as ?IThriftStruct>
   extends IThriftWrapper<TThriftStructType> {

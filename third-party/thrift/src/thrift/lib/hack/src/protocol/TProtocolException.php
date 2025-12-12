@@ -16,7 +16,7 @@
  *
  */
 
-// @oss-enable: use namespace FlibSL\{C, Math, Str, Vec};
+use namespace FlibSL\{C, Math, Str, Vec}; // @oss-enable
 
 /**
  * Protocol module. Contains all the types and definitions needed to implement
@@ -28,7 +28,7 @@
 /**
  * Protocol exceptions
  */
-<<Oncalls('thrift')>> // @oss-disable
+// @oss-disable: <<Oncalls('thrift')>>
 final class TProtocolException extends TException {
   const UNKNOWN = 0;
   const INVALID_DATA = 1;

@@ -3291,6 +3291,7 @@ folly::coro::Task<void> HTTPQuicCoroSession::writeLoop() noexcept {
                                 std::move(fieldSectionInfo),
                                 stream->observedBodyLength(),
                                 stream->getWriteBuf().chainLength());
+        stream->onWindowUpdate(bytesWritten); // simulate window update
       }
       XLOG(DBG4) << "Egressed len=" << bytesWritten << " id=" << stream->getID()
                  << " sess=" << *this;

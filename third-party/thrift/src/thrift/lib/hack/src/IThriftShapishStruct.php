@@ -16,17 +16,17 @@
  *
  */
 
-// @oss-enable: use namespace FlibSL\{C, Math, Str, Vec};
+use namespace FlibSL\{C, Math, Str, Vec}; // @oss-enable
 
 /**
  * Interface for Thrift structs that support conversions to shapes
  */
-<<Oncalls('thrift')>> // @oss-disable
+// @oss-disable: <<Oncalls('thrift')>>
 interface IThriftShapishStruct extends IThriftStruct {
   abstract const type TShape as shape(...);
 }
 
-<<Oncalls('thrift')>> // @oss-disable
+// @oss-disable: <<Oncalls('thrift')>>
 interface IThriftShapishSyncStruct extends IThriftShapishStruct {
   abstract const type TShape as shape(...);
 
@@ -42,7 +42,7 @@ interface IThriftShapishSyncStruct extends IThriftShapishStruct {
  * indirectly have a field that is wrapped using FieldWrapper annotation.
  *
  */
-<<Oncalls('thrift')>> // @oss-disable
+// @oss-disable: <<Oncalls('thrift')>>
 interface IThriftShapishAsyncStruct extends IThriftShapishStruct {
 
   abstract const type TShape as shape(...);

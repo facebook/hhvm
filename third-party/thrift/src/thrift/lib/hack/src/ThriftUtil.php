@@ -16,9 +16,9 @@
  *
  */
 
-// @oss-enable: use namespace FlibSL\{C, Math, Str, Vec};
+use namespace FlibSL\{C, Math, Str, Vec}; // @oss-enable
 
-<<Oncalls('thrift')>> // @oss-disable
+// @oss-disable: <<Oncalls('thrift')>>
 abstract final class ThriftUtil {
 
   const keyset<classname<IThriftShapishStruct>> INTISH_CAST_STRUCTS = keyset[

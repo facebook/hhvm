@@ -16,12 +16,12 @@
  *
  */
 
-// @oss-enable: use namespace FlibSL\{C, Math, Str, Vec};
+use namespace FlibSL\{C, Math, Str, Vec}; // @oss-enable
 
 /**
  * Base interface for Thrift processors
  */
-<<Oncalls('thrift')>> // @oss-disable
+// @oss-disable: <<Oncalls('thrift')>>
 interface IThriftProcessor {
   abstract const class<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS;
   abstract const string THRIFT_SVC_NAME;

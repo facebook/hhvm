@@ -16,7 +16,7 @@
  *
  */
 
-// @oss-enable: use namespace FlibSL\{C, Math, Str, Vec};
+use namespace FlibSL\{C, Math, Str, Vec}; // @oss-enable
 
 /**
  * Transport exceptions
@@ -30,7 +30,7 @@
  * @param mixed  $code Code (integer) or values (array)
  * @param string $shortMessage (string)
  */
-<<Oncalls('thrift')>> // @oss-disable
+// @oss-disable: <<Oncalls('thrift')>>
 final class TTransportException extends TException {
 
   const UNKNOWN = 0;

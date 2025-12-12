@@ -16,9 +16,9 @@
  *
  */
 
-// @oss-enable: use namespace FlibSL\{C, Math, Str, Vec};
+use namespace FlibSL\{C, Math, Str, Vec}; // @oss-enable
 
-<<Oncalls('thrift')>> // @oss-disable
+// @oss-disable: <<Oncalls('thrift')>>
 interface IThriftMigrationAsyncChannel extends IThriftAsyncChannel {
   public function getTTransport()[]: TTransport;
   public function createInteraction(

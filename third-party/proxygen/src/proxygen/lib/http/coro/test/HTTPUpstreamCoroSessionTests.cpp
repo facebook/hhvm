@@ -1804,6 +1804,52 @@ CO_TEST_P_X(HQUpstreamSessionTest, QPACKQueuedOnCloseNoEncoderStream) {
             HTTPErrorCode::QPACK_DECOMPRESSION_FAILED);
 }
 
+CO_TEST_P_X(HQUpstreamSessionTest, LargeRequest) {
+  if (folly::kIsDebug) { // skip test in debug modes; will take too long to run
+    co_return;
+  }
+  // reserve request successfully
+  auto reservation = session_->reserveRequest();
+  XCHECK(reservation.hasValue());
+
+  struct SourceCallback : public HTTPStreamSource::Callback {
+    void bytesProcessed(HTTPCodec::StreamID, size_t, size_t) override {
+      b.post();
+      b.reset();
+    }
+    void sourceComplete(HTTPCodec::StreamID,
+                        folly::Optional<HTTPError>) override {
+      done = true;
+    }
+    folly::coro::Baton b;
+    bool done{false};
+  } sourceCallback;
+  HTTPStreamSource reqSource{&evb_, folly::none, &sourceCallback};
+
+  constexpr uint32_t kReqSize =
+      (1ull << 16) + std::numeric_limits<int32_t>::max();
+  reqSource.headers(makePostRequest(kReqSize));
+
+  auto responseSource = co_await co_awaitTry(session_->sendRequest(&reqSource));
+  XCHECK(responseSource.hasValue());
+
+  uint32_t egressed = 0;
+  constexpr auto kChunkSize = std::numeric_limits<uint16_t>::max();
+  while (!sourceCallback.done) {
+    uint32_t chunkSize = std::min<uint32_t>(kReqSize - egressed, kChunkSize);
+    egressed += chunkSize;
+    reqSource.body(
+        makeBuf(chunkSize), /*padding=*/0, /*eom=*/egressed == kReqSize);
+    // simulate window updates
+    windowUpdate(chunkSize);
+    windowUpdate(0, chunkSize);
+    co_await sourceCallback.b;
+  }
+  while (!sourceCallback.done) {
+    co_await folly::coro::co_reschedule_on_current_executor;
+  }
+}
+
 INSTANTIATE_TEST_SUITE_P(
     HTTPUpstreamSessionTest,
     HTTPUpstreamSessionTest,

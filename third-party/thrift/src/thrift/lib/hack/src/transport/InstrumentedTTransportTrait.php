@@ -16,13 +16,13 @@
  *
  */
 
-// @oss-enable: use namespace FlibSL\{C, Math, Str, Vec};
+use namespace FlibSL\{C, Math, Str, Vec}; // @oss-enable
 
 /**
  * TTransport subclasses that implement InstrumentedTTransport and use
  * InstrumentedTTransportTrait have a simple set of counters available.
  */
-<<Oncalls('thrift')>> // @oss-disable
+// @oss-disable: <<Oncalls('thrift')>>
 trait InstrumentedTTransportTrait {
   private int $bytesWritten = 0;
   private int $bytesRead = 0;

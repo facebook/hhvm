@@ -16,14 +16,14 @@
  *
  */
 
-// @oss-enable: use namespace FlibSL\{C, Math, Str, Vec};
+use namespace FlibSL\{C, Math, Str, Vec}; // @oss-enable
 
 /**
  * Accelerated compact protocol: used in conjunction with a Thrift HPHP
  * extension for faster serialization and deserialization. The generated Thrift
  * code uses instanceof to look for this class and call into the extension.
  */
-<<Oncalls('thrift')>> // @oss-disable
+// @oss-disable: <<Oncalls('thrift')>>
 class TCompactProtocolAccelerated extends TCompactProtocolBase {
   // The generated Thrift code calls this as a final check. If it returns true,
   // the HPHP extension will be used; if it returns false, the above PHP code is

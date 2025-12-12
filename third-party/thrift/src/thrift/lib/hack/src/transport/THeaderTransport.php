@@ -16,7 +16,7 @@
  *
  */
 
-// @oss-enable: use namespace FlibSL\{C, Math, Str, Vec};
+use namespace FlibSL\{C, Math, Str, Vec}; // @oss-enable
 
 /**
  * Header transport. Writes and reads data with
@@ -28,7 +28,7 @@
  *
  * @package thrift.transport
  */
-<<Oncalls('thrift')>> // @oss-disable
+// @oss-disable: <<Oncalls('thrift')>>
 final class THeaderTransport
   extends TFramedTransport
   implements TTransportSupportsHeaders {

@@ -16,7 +16,7 @@
  *
  */
 
-// @oss-enable: use namespace FlibSL\{C, Math, Str, Vec};
+use namespace FlibSL\{C, Math, Str, Vec}; // @oss-enable
 
 /**
  * Do not use this class.
@@ -25,6 +25,6 @@
  * or TBinaryProtocolUnaccelerated
  * @deprecated
  */
-<<Oncalls('thrift')>> // @oss-disable
+// @oss-disable: <<Oncalls('thrift')>>
 final class TBinaryProtocol extends TBinaryProtocolAccelerated {
 }

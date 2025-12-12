@@ -16,7 +16,7 @@
  *
  */
 
-// @oss-enable: use namespace FlibSL\{C, Math, Str, Vec};
+use namespace FlibSL\{C, Math, Str, Vec}; // @oss-enable
 
 /**
  * Utility class for serializing
@@ -24,6 +24,6 @@
  *
  * DEPRECATED: Use JSONThriftSerializer instead. It's faster.
  */
-<<Oncalls('thrift')>> // @oss-disable
+// @oss-disable: <<Oncalls('thrift')>>
 final class TSimpleJSONSerializer {
 }

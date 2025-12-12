@@ -46,7 +46,7 @@ template <typename T, typename F>
 [[deprecated(
     "Deprecated in favor of apache::thrift::op::for_each_field_id. "
     "See "
-    "https://www.internalfb.com/intern/staticdocs/thrift/docs/fb/languages/cpp/reflection and " // @oss-disable
+    // @oss-disable: "https://www.internalfb.com/intern/staticdocs/thrift/docs/fb/languages/cpp/reflection and "
     "https://github.com/facebook/fbthrift/blob/main/thrift/lib/cpp2/op/Get.h")]]
 void for_each_field(T&& t, F f) {
   apache::thrift::detail::ForEachField<folly::remove_cvref_t<T>>()(
@@ -66,7 +66,7 @@ template <typename T1, typename T2, typename F>
 [[deprecated(
     "Deprecated in favor of apache::thrift::op::for_each_field_id. "
     "See "
-    "https://www.internalfb.com/intern/staticdocs/thrift/docs/fb/languages/cpp/reflection and " // @oss-disable
+    // @oss-disable: "https://www.internalfb.com/intern/staticdocs/thrift/docs/fb/languages/cpp/reflection and "
     "https://github.com/facebook/fbthrift/blob/main/thrift/lib/cpp2/op/Get.h")]]
 void for_each_field(T1&& t1, T2&& t2, F f) {
   static_assert(

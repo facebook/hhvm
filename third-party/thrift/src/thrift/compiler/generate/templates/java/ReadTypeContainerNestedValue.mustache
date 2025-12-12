@@ -31,14 +31,14 @@
             for (int _i{{field:nestedDepth}} = 0; (_set{{field:nestedDepth}}.size < 0) ? oprot.peekSet() : (_i{{field:nestedDepth}} < _set{{field:nestedDepth}}.size); _i{{field:nestedDepth}}++) {
                 {{field:setIsNested}}
                 {{#type:set_elem_type}}
-                {{#type:isContainer?}}
+                {{#type:container?}}
                 {{field:nestedDepth++}}{{> ReadTypeContainerNestedValue }}{{field:nestedDepth--}}
-                {{/type:isContainer?}}
-                {{^type:isContainer?}}
+                {{/type:container?}}
+                {{^type:container?}}
                 {{field:nestedDepth++}}
                 {{#type:hasAdapter?}}{{> ThriftType}}{{/type:hasAdapter?}}{{^type:hasAdapter?}}{{> Type}}{{/type:hasAdapter?}} _value{{field:nestedDepth}} = {{#type:hasAdapter?}}{{type:setAdapter}}{{/type:hasAdapter?}}{{> ReadType}};
                 {{field:nestedDepth--}}
-                {{/type:isContainer?}}
+                {{/type:container?}}
                 {{field:nestedDepth++}}
                 _value{{field:prevNestedDepth}}.add({{#type:hasAdapter?}}__{{type:name}}_Adapter.fromThrift({{/type:hasAdapter?}}_value{{field:nestedDepth}}){{#type:hasAdapter?}}){{/type:hasAdapter?}};
                 {{field:nestedDepth--}}
@@ -58,14 +58,14 @@
             for (int _i{{field:nestedDepth}} = 0; (_list{{field:nestedDepth}}.size < 0) ? oprot.peekList() : (_i{{field:nestedDepth}} < _list{{field:nestedDepth}}.size); _i{{field:nestedDepth}}++) {
                 {{field:setIsNested}}
                 {{#type:list_elem_type}}
-                {{#type:isContainer?}}
+                {{#type:container?}}
                 {{field:nestedDepth++}}{{> ReadTypeContainerNestedValue }}{{field:nestedDepth--}}
-                {{/type:isContainer?}}
-                {{^type:isContainer?}}
+                {{/type:container?}}
+                {{^type:container?}}
                 {{field:nestedDepth++}}
                 {{#type:hasAdapter?}}{{> ThriftType}}{{/type:hasAdapter?}}{{^type:hasAdapter?}}{{> Type}}{{/type:hasAdapter?}} _value{{field:nestedDepth}} = {{#type:hasAdapter?}}{{type:setAdapter}}{{/type:hasAdapter?}}{{> ReadType}};
                 {{field:nestedDepth--}}
-                {{/type:isContainer?}}
+                {{/type:container?}}
                 {{field:nestedDepth++}}
                 _value{{field:prevNestedDepth}}.add({{#type:hasAdapter?}}__{{type:name}}_Adapter.fromThrift({{/type:hasAdapter?}}_value{{field:nestedDepth}}){{#type:hasAdapter?}}){{/type:hasAdapter?}};
                 {{field:nestedDepth--}}
@@ -85,25 +85,25 @@
             for (int _i{{field:nestedDepth}} = 0; (_map{{field:nestedDepth}}.size < 0) ? oprot.peekMap() : (_i{{field:nestedDepth}} < _map{{field:nestedDepth}}.size); _i{{field:nestedDepth}}++) {
                 {{field:setIsNested}}
                 {{#type:key_type}}
-                {{#type:isContainer?}}
+                {{#type:container?}}
                 {{field:nestedDepth++}}{{> ReadTypeContainerNestedKey }}{{field:nestedDepth--}}
-                {{/type:isContainer?}}
-                {{^type:isContainer?}}
+                {{/type:container?}}
+                {{^type:container?}}
                 {{field:nestedDepth++}}
                 {{#type:hasAdapter?}}{{> ThriftType}}{{/type:hasAdapter?}}{{^type:hasAdapter?}}{{> Type}}{{/type:hasAdapter?}} _key{{field:nestedDepth}} = {{#type:hasAdapter?}}{{type:setAdapter}}{{/type:hasAdapter?}}{{> ReadType}};
                 {{field:nestedDepth--}}
-                {{/type:isContainer?}}
+                {{/type:container?}}
                 {{/type:key_type}}
 
                 {{#type:value_type}}
-                {{#type:isContainer?}}
+                {{#type:container?}}
                 {{field:nestedDepth++}}{{> ReadTypeContainerNestedValue }}{{field:nestedDepth--}}
-                {{/type:isContainer?}}
-                {{^type:isContainer?}}
+                {{/type:container?}}
+                {{^type:container?}}
                 {{field:nestedDepth++}}
                 {{#type:hasAdapter?}}{{> ThriftType}}{{/type:hasAdapter?}}{{^type:hasAdapter?}}{{> Type}}{{/type:hasAdapter?}} _value{{field:nestedDepth}} = {{#type:hasAdapter?}}{{type:setAdapter}}{{/type:hasAdapter?}}{{> ReadType}};
                 {{field:nestedDepth--}}
-                {{/type:isContainer?}}
+                {{/type:container?}}
                 {{/type:value_type}}
                 {{field:nestedDepth++}}
                 _value{{field:prevNestedDepth}}.put({{!

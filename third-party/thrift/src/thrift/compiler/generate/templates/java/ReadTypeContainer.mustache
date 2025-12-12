@@ -31,12 +31,12 @@
             for (int _i = 0; (_set.size < 0) ? oprot.peekSet() : (_i < _set.size); _i++) {
                 {{field:setIsNested}}
                 {{#type:set_elem_type}}
-                {{#type:isContainer?}}
+                {{#type:container?}}
                 {{> ReadTypeContainerNestedValue }}
-                {{/type:isContainer?}}
-                {{^type:isContainer?}}
+                {{/type:container?}}
+                {{^type:container?}}
                 {{#type:hasAdapter?}}{{> ThriftType}}{{/type:hasAdapter?}}{{^type:hasAdapter?}}{{> Type}}{{/type:hasAdapter?}} _value1 = {{#type:hasAdapter?}}{{type:setAdapter}}{{/type:hasAdapter?}}{{> ReadType}};
-                {{/type:isContainer?}}{{!
+                {{/type:container?}}{{!
                 }}{{field:javaName}}.add({{#type:hasAdapter?}}__{{type:name}}_Adapter.fromThrift({{/type:hasAdapter?}}_value1){{#type:hasAdapter?}}){{/type:hasAdapter?}};
                 {{/type:set_elem_type}}
             }
@@ -54,12 +54,12 @@
             for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
                 {{field:setIsNested}}
                 {{#type:list_elem_type}}
-                {{#type:isContainer?}}
+                {{#type:container?}}
                 {{> ReadTypeContainerNestedValue }}
-                {{/type:isContainer?}}
-                {{^type:isContainer?}}
+                {{/type:container?}}
+                {{^type:container?}}
                 {{#type:hasAdapter?}}{{> ThriftType}}{{/type:hasAdapter?}}{{^type:hasAdapter?}}{{> Type}}{{/type:hasAdapter?}} _value1 = {{#type:hasAdapter?}}{{type:setAdapter}}{{/type:hasAdapter?}}{{> ReadType}};
-                {{/type:isContainer?}}{{!
+                {{/type:container?}}{{!
                 }}{{field:javaName}}.add({{#type:hasAdapter?}}__{{type:name}}_Adapter.fromThrift({{/type:hasAdapter?}}_value1){{#type:hasAdapter?}}){{/type:hasAdapter?}};
                 {{/type:list_elem_type}}
             }
@@ -77,20 +77,20 @@
             for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
                 {{field:setIsNested}}
                 {{#type:key_type}}
-                {{#type:isContainer?}}
+                {{#type:container?}}
                 {{> ReadTypeContainerNestedKey }}
-                {{/type:isContainer?}}
-                {{^type:isContainer?}}
+                {{/type:container?}}
+                {{^type:container?}}
                 {{#type:hasAdapter?}}{{> ThriftType}}{{/type:hasAdapter?}}{{^type:hasAdapter?}}{{> Type}}{{/type:hasAdapter?}} _key1 = {{#type:hasAdapter?}}{{type:setAdapter}}{{/type:hasAdapter?}}{{> ReadType}};
-                {{/type:isContainer?}}
+                {{/type:container?}}
                 {{/type:key_type}}
                 {{#type:value_type}}
-                {{#type:isContainer?}}
+                {{#type:container?}}
                 {{> ReadTypeContainerNestedValue }}
-                {{/type:isContainer?}}
-                {{^type:isContainer?}}
+                {{/type:container?}}
+                {{^type:container?}}
                 {{#type:hasAdapter?}}{{> ThriftType}}{{/type:hasAdapter?}}{{^type:hasAdapter?}}{{> Type}}{{/type:hasAdapter?}} _value1 = {{#type:hasAdapter?}}{{type:setAdapter}}{{/type:hasAdapter?}}{{> ReadType}};
-                {{/type:isContainer?}}
+                {{/type:container?}}
                 {{/type:value_type}}
                 {{field:javaName}}.put({{!
                 }}{{#type:key_type}}{{#type:hasAdapter?}}__{{type:name}}_Adapter.fromThrift({{/type:hasAdapter?}}_key1{{#type:hasAdapter?}}){{/type:hasAdapter?}}, {{/type:key_type}}{{!

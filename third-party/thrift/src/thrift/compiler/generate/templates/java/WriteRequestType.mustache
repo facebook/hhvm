@@ -24,11 +24,11 @@
         for ({{#type:set_elem_type}}{{> Type}}{{/type:set_elem_type}} _iter{{field:nestedDepth}} : _iter{{field:prevNestedDepth}}{{#type:isMapKey?}}.getKey(){{/type:isMapKey?}}{{#type:isMapValue?}}.getValue(){{/type:isMapValue?}}) {
           {{field:setIsNested}}{{type:setIsNotMap}}{{!
           }}{{#type:set_elem_type}}{{!
-          }}{{#type:isContainer?}}{{!
+          }}{{#type:container?}}{{!
           }}{{field:nestedDepth++}}{{> WriteRequestType}}{{field:nestedDepth--}}
-          {{/type:isContainer?}}{{!
-          }}{{^type:isContainer?}}{{> WriteRequestType}}
-          {{/type:isContainer?}}{{/type:set_elem_type}}
+          {{/type:container?}}{{!
+          }}{{^type:container?}}{{> WriteRequestType}}
+          {{/type:container?}}{{/type:set_elem_type}}
         }
         oprot.writeSetEnd();{{!
 }}{{/type:set?}}{{!
@@ -38,11 +38,11 @@
         for ({{#type:list_elem_type}}{{> Type}}{{/type:list_elem_type}} _iter{{field:nestedDepth}} : _iter{{field:prevNestedDepth}}{{#type:isMapKey?}}.getKey(){{/type:isMapKey?}}{{#type:isMapValue?}}.getValue(){{/type:isMapValue?}}) {
           {{field:setIsNested}}{{type:setIsNotMap}}{{!
           }}{{#type:list_elem_type}}{{!
-          }}{{#type:isContainer?}}{{!
+          }}{{#type:container?}}{{!
           }}{{field:nestedDepth++}}{{> WriteRequestType}}{{field:nestedDepth--}}
-          {{/type:isContainer?}}{{!
-          }}{{^type:isContainer?}}{{> WriteRequestType}}
-          {{/type:isContainer?}}{{/type:list_elem_type}}
+          {{/type:container?}}{{!
+          }}{{^type:container?}}{{> WriteRequestType}}
+          {{/type:container?}}{{/type:list_elem_type}}
         }
         oprot.writeListEnd();{{!
 }}{{/type:list?}}{{!
@@ -53,18 +53,18 @@
           {{field:setIsNested}}{{!
 
           }}{{#type:key_type}}{{type:setIsMapKey}}{{!
-          }}{{#type:isContainer?}}{{!
+          }}{{#type:container?}}{{!
           }}{{field:nestedDepth++}}{{> WriteRequestType}}{{field:nestedDepth--}}
-          {{/type:isContainer?}}{{!
-          }}{{^type:isContainer?}}{{> WriteRequestType}}
-          {{/type:isContainer?}}{{/type:key_type}}{{!
+          {{/type:container?}}{{!
+          }}{{^type:container?}}{{> WriteRequestType}}
+          {{/type:container?}}{{/type:key_type}}{{!
 
           }}{{#type:value_type}}{{type:setIsMapValue}}{{!
-          }}{{#type:isContainer?}}
+          }}{{#type:container?}}
           {{field:nestedDepth++}}{{> WriteRequestType}}{{field:nestedDepth--}}
-          {{/type:isContainer?}}{{!
-          }}{{^type:isContainer?}}{{> WriteRequestType}}{{!
-          }}{{/type:isContainer?}}{{/type:value_type}}
+          {{/type:container?}}{{!
+          }}{{^type:container?}}{{> WriteRequestType}}{{!
+          }}{{/type:container?}}{{/type:value_type}}
         }
         oprot.writeMapEnd();{{!
 }}{{/type:map?}}{{!

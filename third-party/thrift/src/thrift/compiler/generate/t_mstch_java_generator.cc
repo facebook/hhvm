@@ -842,7 +842,6 @@ class mstch_java_field : public mstch_field {
             {"field:isEnum?", &mstch_java_field::is_enum},
             {"field:isObject?", &mstch_java_field::is_object},
             {"field:isUnion?", &mstch_java_field::is_union},
-            {"field:isContainer?", &mstch_java_field::is_container},
             {"field:typeFieldName", &mstch_java_field::type_field_name},
             {"field:isSensitive?", &mstch_java_field::is_sensitive},
             {"field:hasInitialValue?", &mstch_java_field::has_initial_value},
@@ -1030,9 +1029,6 @@ class mstch_java_field : public mstch_field {
     return field_type->is<t_union>();
   }
 
-  mstch::node is_container() {
-    return field_->type()->get_true_type()->is<t_container>();
-  }
   mstch::node java_name() { return get_java_swift_name(field_); }
 
   mstch::node type_field_name() {
@@ -1326,7 +1322,6 @@ class mstch_java_type : public mstch_type {
     register_methods(
         this,
         {
-            {"type:isContainer?", &mstch_java_type::is_container_type},
             {"type:javaType", &mstch_java_type::java_type},
             {"type:isBinaryString?", &mstch_java_type::is_binary_string},
             {"type:hasAdapter?", &mstch_java_type::has_type_adapter},
@@ -1381,10 +1376,6 @@ class mstch_java_type : public mstch_type {
   mstch::node set_is_map_key() {
     isMapKeyFlag = true;
     return mstch::node();
-  }
-
-  mstch::node is_container_type() {
-    return type_->get_true_type()->is<t_container>();
   }
 
   mstch::node java_type() {

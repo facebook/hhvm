@@ -32,16 +32,16 @@ public void write0(TProtocol oprot) throws TException {
     {{#field:type}}{{> AdaptedBoxedType}}{{/field:type}} {{field:javaName}} = {{> ToThriftStart}}({{> FieldType}})this.value{{> ToThriftEnd}};
     if ({{field:javaName}} != null) {
       oprot.writeFieldBegin({{field:javaTFieldName}});
-      {{#field:isContainer?}}
+      {{#field:self.type.container?}}
       {{> ThriftFieldType}} _iter{{field:nestedDepth}} = {{field:javaName}};
-      {{/field:isContainer?}}{{!
+      {{/field:self.type.container?}}{{!
 
       }}{{#type:typedef_type}}
       {{> ThriftFieldType}} _iter{{field:nestedDepth}} = {{field:javaName}};
       {{/type:typedef_type}}{{!
 
-      }}{{^field:isContainer?}}{{^type:typedef_type}}{{!
-      }}{{/type:typedef_type}}{{/field:isContainer?}}{{!
+      }}{{^field:self.type.container?}}{{^type:typedef_type}}{{!
+      }}{{/type:typedef_type}}{{/field:self.type.container?}}{{!
 
       }}{{#field:type}}
       {{field:nestedDepth++}}{{> WriteType }}{{field:nestedDepth--}}
@@ -51,17 +51,17 @@ public void write0(TProtocol oprot) throws TException {
     {{/field:hasAdapter?}}
     {{^field:hasAdapter?}}
     oprot.writeFieldBegin({{field:javaTFieldName}});
-    {{#field:isContainer?}}
+    {{#field:self.type.container?}}
     {{> FieldType}} _iter{{field:nestedDepth}} = ({{> FieldType}})this.value;
-    {{/field:isContainer?}}{{!
+    {{/field:self.type.container?}}{{!
 
     }}{{#type:typedef_type}}
     {{> FieldType}} _iter{{field:nestedDepth}} = ({{> FieldType}})this.value;
     {{/type:typedef_type}}{{!
 
-    }}{{^field:isContainer?}}{{^type:typedef_type}}
+    }}{{^field:self.type.container?}}{{^type:typedef_type}}
     {{> FieldType}} {{field:javaName}} = ({{> FieldType}})this.value;
-    {{/type:typedef_type}}{{/field:isContainer?}}{{!
+    {{/type:typedef_type}}{{/field:self.type.container?}}{{!
 
     }}{{#field:type}}
     {{field:nestedDepth++}}{{> WriteType }}{{field:nestedDepth--}}

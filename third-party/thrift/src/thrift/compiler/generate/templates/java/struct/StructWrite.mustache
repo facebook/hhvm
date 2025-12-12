@@ -34,9 +34,9 @@ public void write0(TProtocol oprot) throws TException {
   if (!com.facebook.thrift.util.IntrinsicDefaults.isDefault({{field:javaName}})) {
   {{/field:isObject?}}
     oprot.writeFieldBegin({{field:javaTFieldName}});
-    {{#field:isContainer?}}
+    {{#field:self.type.container?}}
     {{> ThriftFieldType}} _iter{{field:nestedDepth}} = {{field:javaName}};
-    {{/field:isContainer?}}{{!
+    {{/field:self.type.container?}}{{!
 
     }}{{#type:typedef_type}}
     {{> ThriftFieldType}} _iter{{field:nestedDepth}} = {{field:javaName}};
@@ -66,9 +66,9 @@ public void write0(TProtocol oprot) throws TException {
   {{^field:terse?}}
   if ({{field:javaName}} != null) {
     oprot.writeFieldBegin({{field:javaTFieldName}});
-    {{#field:isContainer?}}
+    {{#field:self.type.container?}}
     {{> ThriftFieldType}} _iter{{field:nestedDepth}} = {{field:javaName}};
-    {{/field:isContainer?}}{{!
+    {{/field:self.type.container?}}{{!
 
     }}{{#type:typedef_type}}
     {{> ThriftFieldType}} _iter{{field:nestedDepth}} = {{field:javaName}};

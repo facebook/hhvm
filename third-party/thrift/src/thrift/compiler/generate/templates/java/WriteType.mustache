@@ -33,9 +33,9 @@
         for ({{#type:set_elem_type}}{{> AdaptedType}}{{/type:set_elem_type}} _iter{{field:nestedDepth}} : _iter{{field:prevNestedDepth}}{{> KeyValue}}) {
           {{field:setIsNested}}{{type:setIsNotMap}}{{!
           }}{{#type:set_elem_type}}{{!
-          }}{{#type:isContainer?}}{{> WriteTypeAdapter}}{{/type:isContainer?}}{{!
-          }}{{^type:isContainer?}}{{#type:hasAdapter?}}{{type:setAdapter}}{{/type:hasAdapter?}}{{> WriteType}}{{!
-          }}{{/type:isContainer?}}{{/type:set_elem_type}}
+          }}{{#type:container?}}{{> WriteTypeAdapter}}{{/type:container?}}{{!
+          }}{{^type:container?}}{{#type:hasAdapter?}}{{type:setAdapter}}{{/type:hasAdapter?}}{{> WriteType}}{{!
+          }}{{/type:container?}}{{/type:set_elem_type}}
         }
         oprot.writeSetEnd();{{!
 }}{{/type:set?}}{{!
@@ -45,9 +45,9 @@
         for ({{#type:list_elem_type}}{{> AdaptedType}}{{/type:list_elem_type}} _iter{{field:nestedDepth}} : _iter{{field:prevNestedDepth}}{{> KeyValue}}) {
           {{field:setIsNested}}{{type:setIsNotMap}}{{!
           }}{{#type:list_elem_type}}{{!
-          }}{{#type:isContainer?}}{{> WriteTypeAdapter}}{{/type:isContainer?}}{{!
-          }}{{^type:isContainer?}}{{#type:hasAdapter?}}{{type:setAdapter}}{{/type:hasAdapter?}}{{> WriteType}}{{!
-          }}{{/type:isContainer?}}{{/type:list_elem_type}}
+          }}{{#type:container?}}{{> WriteTypeAdapter}}{{/type:container?}}{{!
+          }}{{^type:container?}}{{#type:hasAdapter?}}{{type:setAdapter}}{{/type:hasAdapter?}}{{> WriteType}}{{!
+          }}{{/type:container?}}{{/type:list_elem_type}}
         }
         oprot.writeListEnd();{{!
 }}{{/type:list?}}{{!
@@ -58,14 +58,14 @@
           {{field:setIsNested}}{{!
 
           }}{{#type:key_type}}{{type:setIsMapKey}}{{!
-          }}{{#type:isContainer?}}{{> WriteTypeAdapter}}{{/type:isContainer?}}{{!
-          }}{{^type:isContainer?}}{{#type:hasAdapter?}}{{type:setAdapter}}{{/type:hasAdapter?}}{{> WriteType}}{{!
-          }}{{/type:isContainer?}}{{/type:key_type}}
+          }}{{#type:container?}}{{> WriteTypeAdapter}}{{/type:container?}}{{!
+          }}{{^type:container?}}{{#type:hasAdapter?}}{{type:setAdapter}}{{/type:hasAdapter?}}{{> WriteType}}{{!
+          }}{{/type:container?}}{{/type:key_type}}
           {{!
           }}{{#type:value_type}}{{type:setIsMapValue}}{{!
-          }}{{#type:isContainer?}}{{> WriteTypeAdapter}}{{/type:isContainer?}}{{!
-          }}{{^type:isContainer?}}{{#type:hasAdapter?}}{{type:setAdapter}}{{/type:hasAdapter?}}{{> WriteType}}{{!
-          }}{{/type:isContainer?}}{{/type:value_type}}
+          }}{{#type:container?}}{{> WriteTypeAdapter}}{{/type:container?}}{{!
+          }}{{^type:container?}}{{#type:hasAdapter?}}{{type:setAdapter}}{{/type:hasAdapter?}}{{> WriteType}}{{!
+          }}{{/type:container?}}{{/type:value_type}}
         }
         oprot.writeMapEnd();{{!
 }}{{/type:map?}}{{!

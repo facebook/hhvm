@@ -266,6 +266,16 @@ class Cpp2ConnContext : public apache::thrift::server::TConnectionContext {
     return transportInfo_.peerIdentities.get();
   }
 
+  void* getAuthnIdentities() const {
+    return transportInfo_.authnIdentities.get();
+  }
+
+  void* setAuthnIdentities(folly::erased_unique_ptr data) {
+    auto oldData = transportInfo_.authnIdentities.release();
+    transportInfo_.authnIdentities = std::move(data);
+    return oldData;
+  }
+
   const X509* FOLLY_NULLABLE getPeerCertificate() const {
     return transportInfo_.peerCertificate.get();
   }
@@ -551,6 +561,7 @@ class Cpp2ConnContext : public apache::thrift::server::TConnectionContext {
     std::string securityProtocol;
     std::shared_ptr<X509> peerCertificate;
     std::vector<detail::EkmInfo> cachedEkms;
+    folly::erased_unique_ptr authnIdentities{folly::empty_erased_unique_ptr()};
     // We may not save the peer cert in this object and we may still
     // need some signal as to whether a cert was received
     bool receivedCert{false};

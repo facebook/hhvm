@@ -64,3 +64,6 @@ target_link_libraries(hphp_util brotli folly zstd)
 if (LIBNUMA_LIBRARIES)
   target_link_libraries(hphp_util ${LIBNUMA_LIBRARIES})
 endif()
+
+# Allow accessing unstable zstd APIs.
+target_compile_definitions(hphp_util PUBLIC ZSTD_STATIC_LINKING_ONLY)

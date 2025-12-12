@@ -19,14 +19,28 @@
 #include "hphp/util/alloc.h"
 #include "hphp/util/assertions.h"
 #include "hphp/util/jemalloc-util.h"
+#include "hphp/util/roar.h"
 
 #include <cinttypes>
 #include <folly/portability/SysMman.h>
 
 namespace HPHP {
 
-HHVM_ATTRIBUTE_WEAK uintptr_t lowArenaMinAddr() {
-  return 1ull << 30;
+uintptr_t lowArenaMinAddr() {
+  const char* str = getenv("HHVM_LOW_ARENA_START");
+  if (str == nullptr) {
+    if (use_roar && use_lowptr) return 0x50000000; // 1GB + 256MB
+#if !defined(INSTRUMENTED_BUILD) && defined(USE_LOWPTR)
+    return 1u << 30;
+#else
+    return 1u << 31;
+#endif
+  }
+  uintptr_t start = 0;
+  if (sscanf(str, "0x%lx", &start) == 1) return start;
+  if (sscanf(str, "%lu", &start) == 1) return start;
+  fprintf(stderr, "Bad environment variable HHVM_LOW_ARENA_START: %s\n", str);
+  abort();
 }
 
 namespace alloc {

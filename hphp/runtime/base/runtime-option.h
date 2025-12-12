@@ -468,7 +468,5 @@ inline StringToIntMap coeffectEnforcementLevelsDefaults() {
 #endif
 }
 
-uintptr_t lowArenaMinAddr();
-
 ///////////////////////////////////////////////////////////////////////////////
 }

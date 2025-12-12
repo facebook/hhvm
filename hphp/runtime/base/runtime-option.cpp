@@ -1784,23 +1784,4 @@ ServiceData::CounterCallback s_build_info([](ServiceData::CounterMap& counters) 
 
 ///////////////////////////////////////////////////////////////////////////////
 
-uintptr_t lowArenaMinAddr() {
-  const char* str = getenv("HHVM_LOW_ARENA_START");
-  if (str == nullptr) {
-    if (use_roar && use_lowptr) return 0x50000000; // 1GB + 256MB
-#if !defined(INSTRUMENTED_BUILD) && defined(USE_LOWPTR)
-   return 1u << 30;
-#else
-   return 1u << 31;
-#endif
-  }
-  uintptr_t start = 0;
-  if (sscanf(str, "0x%lx", &start) == 1) return start;
-  if (sscanf(str, "%lu", &start) == 1) return start;
-  fprintf(stderr, "Bad environment variable HHVM_LOW_ARENA_START: %s\n", str);
-  abort();
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
 }

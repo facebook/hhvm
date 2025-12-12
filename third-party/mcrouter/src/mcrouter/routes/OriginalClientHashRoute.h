@@ -29,7 +29,7 @@ namespace memcache {
 namespace mcrouter {
 
 struct StableHasher {
-  constexpr size_t operator()(folly::StringPiece sp) const {
+  size_t operator()(folly::StringPiece sp) const {
     constexpr uint64_t kSeed = 0;
     return static_cast<size_t>(
         folly::hash::SpookyHashV2::Hash64(sp.begin(), sp.size(), kSeed));

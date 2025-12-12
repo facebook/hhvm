@@ -52,6 +52,13 @@ class TestServiceServerMock
       semifuture_noResponse,
       (int64_t),
       (override));
+#if FOLLY_HAS_COROUTINES
+  MOCK_METHOD(
+      (folly::coro::Task<apache::thrift::SinkConsumer<int32_t, int32_t>>),
+      co_sumSink,
+      (),
+      (override));
+#endif
 };
 
 struct CalculatorHandler : apache::thrift::ServiceHandler<Calculator> {
@@ -179,6 +186,65 @@ TEST_F(GuardedRequestChannelTest, streamErrorFromServer) {
     EXPECT_THAT(exception->what(), HasSubstr("std::runtime_error"));
   });
 }
+
+#if FOLLY_HAS_COROUTINES
+TEST_F(GuardedRequestChannelTest, normalSinkResponseAndComplete) {
+  EXPECT_CALL(*handler, co_sumSink()).WillOnce(Invoke([]() {
+    return [&]() -> folly::coro::Task<SinkConsumer<int32_t, int32_t>> {
+      SinkConsumer<int32_t, int32_t> sink;
+      sink.consumer = [](folly::coro::AsyncGenerator<int32_t&&> gen)
+          -> folly::coro::Task<int32_t> {
+        int32_t sum = 0;
+        while (auto val = co_await gen.next()) {
+          sum += *val;
+        }
+        co_return sum;
+      };
+      sink.bufferSize = 10;
+      co_return sink;
+    }();
+  }));
+
+  folly::coro::blockingWait([&]() -> folly::coro::Task<void> {
+    auto sinkConsumer = co_await testClient.co_sumSink();
+    auto result = co_await sinkConsumer.sink(
+        []() -> folly::coro::AsyncGenerator<int32_t&&> {
+          for (int32_t i = 1; i <= 10; ++i) {
+            co_yield static_cast<int32_t&&>(i);
+          }
+        }());
+    EXPECT_EQ(result, 55); // 1+2+3+...+10 = 55
+  }());
+}
+
+TEST_F(GuardedRequestChannelTest, sinkErrorFromServer) {
+  EXPECT_CALL(*handler, co_sumSink()).WillOnce(Invoke([]() {
+    return [&]() -> folly::coro::Task<SinkConsumer<int32_t, int32_t>> {
+      SinkConsumer<int32_t, int32_t> sink;
+      sink.consumer = [](folly::coro::AsyncGenerator<int32_t&&> /*gen*/)
+          -> folly::coro::Task<int32_t> {
+        throw std::runtime_error("sink processing failed");
+      };
+      sink.bufferSize = 10;
+      co_return sink;
+    }();
+  }));
+
+  folly::coro::blockingWait([&]() -> folly::coro::Task<void> {
+    auto sinkConsumer = co_await testClient.co_sumSink();
+    bool exceptionCaught = false;
+    try {
+      co_await sinkConsumer.sink(
+          []() -> folly::coro::AsyncGenerator<int32_t&&> { co_yield 1; }());
+    } catch (const apache::thrift::TApplicationException& ex) {
+      exceptionCaught = true;
+      EXPECT_THAT(ex.what(), HasSubstr("sink processing failed"));
+      EXPECT_THAT(ex.what(), HasSubstr("std::runtime_error"));
+    }
+    EXPECT_TRUE(exceptionCaught);
+  }());
+}
+#endif
 
 TEST_F(GuardedRequestChannelTest, createInteractionTest) {
   ScopedServerInterfaceThread runner{std::make_shared<CalculatorHandler>()};

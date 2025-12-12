@@ -70,6 +70,14 @@ class GuardedRequestChannel : public RequestChannel {
       RequestClientCallback::Ptr cob,
       std::unique_ptr<folly::IOBuf> frameworkMetadata) override;
 
+  void sendRequestSink(
+      RpcOptions&& options,
+      MethodMetadata&& methodMetadata,
+      SerializedRequest&& request,
+      std::shared_ptr<transport::THeader> header,
+      SinkClientCallback* cob,
+      std::unique_ptr<folly::IOBuf> frameworkMetadata) override;
+
  private:
   GuardedRequestChannel(ImplPtr impl) : impl_{std::move(impl)} {}
   ImplPtr impl_;

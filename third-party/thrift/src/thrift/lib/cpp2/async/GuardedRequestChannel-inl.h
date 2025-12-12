@@ -141,6 +141,92 @@ class GuardedStreamCallback : public StreamClientCallback,
   RequestGuardType guard_;
 };
 
+template <class RequestGuardType>
+class GuardedSinkCallback : public SinkClientCallback,
+                            public SinkServerCallback {
+ public:
+  explicit GuardedSinkCallback(SinkClientCallback* callback)
+      : clientCallback_(std::move(callback)) {}
+
+  ~GuardedSinkCallback() override {
+    DCHECK(!!clientCallback_ == !!serverCallback_);
+    if (clientCallback_ && serverCallback_) {
+      clientCallback_->resetServerCallback(*serverCallback_);
+      serverCallback_->resetClientCallback(*clientCallback_);
+    }
+  }
+
+  bool onFirstResponse(
+      FirstResponsePayload&& firstResponsePayload,
+      folly::EventBase* evb,
+      SinkServerCallback* serverCallback) override {
+    DCHECK(clientCallback_);
+    DCHECK(!serverCallback_);
+    serverCallback_ = serverCallback;
+    return clientCallback_->onFirstResponse(
+        std::move(firstResponsePayload), evb, this);
+  }
+
+  void onFirstResponseError(folly::exception_wrapper ew) override {
+    DCHECK(clientCallback_);
+    DCHECK(!serverCallback_);
+    std::exchange(clientCallback_, nullptr)
+        ->onFirstResponseError(std::move(ew));
+    delete this;
+  }
+
+  void onFinalResponse(StreamPayload&& payload) override {
+    DCHECK(clientCallback_);
+    serverCallback_ = nullptr;
+    std::exchange(clientCallback_, nullptr)
+        ->onFinalResponse(std::move(payload));
+    delete this;
+  }
+
+  void onFinalResponseError(folly::exception_wrapper ew) override {
+    DCHECK(clientCallback_);
+    serverCallback_ = nullptr;
+    std::exchange(clientCallback_, nullptr)
+        ->onFinalResponseError(std::move(ew));
+    delete this;
+  }
+
+  bool onSinkRequestN(uint64_t n) override {
+    DCHECK(clientCallback_);
+    return clientCallback_->onSinkRequestN(n);
+  }
+
+  void resetServerCallback(SinkServerCallback& callback) override {
+    serverCallback_ = &callback;
+  }
+
+  bool onSinkNext(StreamPayload&& payload) override {
+    DCHECK(serverCallback_);
+    return serverCallback_->onSinkNext(std::move(payload));
+  }
+
+  void onSinkError(folly::exception_wrapper ex) override {
+    DCHECK(serverCallback_);
+    clientCallback_ = nullptr;
+    std::exchange(serverCallback_, nullptr)->onSinkError(std::move(ex));
+    delete this;
+  }
+
+  bool onSinkComplete() override {
+    DCHECK(serverCallback_);
+    return serverCallback_->onSinkComplete();
+  }
+
+  void resetClientCallback(SinkClientCallback& clientCallback) override {
+    clientCallback_ = &clientCallback;
+  }
+
+ private:
+  SinkClientCallback* clientCallback_{nullptr};
+  SinkServerCallback* serverCallback_{nullptr};
+  RequestGuardType guard_;
+};
+
 template <class RequestGuardType, class ChannelGuardType>
 void GuardedRequestChannel<RequestGuardType, ChannelGuardType>::
     setCloseCallback(CloseCallback* callback) {
@@ -239,6 +325,25 @@ void GuardedRequestChannel<RequestGuardType, ChannelGuardType>::
       std::move(serializedRequest),
       std::move(header),
       std::move(wrappedCb),
+      std::move(frameworkMetadata));
+}
+
+template <class RequestGuardType, class ChannelGuardType>
+void GuardedRequestChannel<RequestGuardType, ChannelGuardType>::sendRequestSink(
+    RpcOptions&& rpcOptions,
+    MethodMetadata&& methodMetadata,
+    SerializedRequest&& serializedRequest,
+    std::shared_ptr<transport::THeader> header,
+    SinkClientCallback* cob,
+    std::unique_ptr<folly::IOBuf> frameworkMetadata) {
+  auto wrappedCb = new GuardedSinkCallback<RequestGuardType>(std::move(cob));
+
+  impl_->sendRequestSink(
+      std::move(rpcOptions),
+      std::move(methodMetadata),
+      std::move(serializedRequest),
+      std::move(header),
+      wrappedCb,
       std::move(frameworkMetadata));
 }
 

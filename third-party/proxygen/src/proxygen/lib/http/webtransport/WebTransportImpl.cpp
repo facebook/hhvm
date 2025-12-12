@@ -243,6 +243,7 @@ WebTransportImpl::StreamWriteHandle::writeStreamData(
     return folly::makeUnexpected(WebTransport::ErrorCode::STOP_SENDING);
   }
   if (!data && !fin) {
+    LOG(ERROR) << "Empty write with no FIN";
     return folly::makeUnexpected(WebTransport::ErrorCode::GENERIC_ERROR);
   }
 
@@ -254,7 +255,8 @@ WebTransportImpl::StreamWriteHandle::writeStreamData(
   } else {
     auto& last = bufferedWrites_.back();
     if (last.fin) {
-      VLOG(4) << __func__ << " Last buffered write has FIN, ret=GENERIC_ERROR";
+      LOG(ERROR) << __func__
+                 << " Last buffered write has FIN, ret=GENERIC_ERROR";
       return folly::makeUnexpected(WebTransport::ErrorCode::GENERIC_ERROR);
     }
     if (last.deliveryCallback == nullptr) {

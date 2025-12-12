@@ -105,6 +105,7 @@ QuicWebTransport::sendWebTransportStreamData(
   auto res =
       quicSocket_->writeChain(id, std::move(data), eof, deliveryCallback);
   if (!res) {
+    LOG(ERROR) << "Failed to write WT stream data, res=" << res.error();
     return folly::makeUnexpected(WebTransport::ErrorCode::GENERIC_ERROR);
   }
   auto flowControl = quicSocket_->getStreamFlowControl(id);

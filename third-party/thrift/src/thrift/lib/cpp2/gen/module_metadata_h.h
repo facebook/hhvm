@@ -19,6 +19,7 @@
 #include <vector>
 
 #include <folly/Indestructible.h>
+#include <thrift/lib/cpp2/util/SchemaToMetadata.h>
 #include <thrift/lib/thrift/gen-cpp2/metadata_types.h>
 
 namespace apache::thrift {

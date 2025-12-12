@@ -21,7 +21,7 @@ include "thrift/annotation/thrift.thrift"
 
 cpp_include "thrift/lib/cpp2/type/Any.h"
 
-package "facebook.com/thrift/test"
+package "facebook.com/thrift/test/debug_tree"
 
 namespace cpp2 apache.thrift.test
 

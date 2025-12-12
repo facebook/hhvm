@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package "facebook.com/thrift/test"
+package "facebook.com/thrift/test/mixin_strict"
 
 namespace cpp2 thrift.test.strict
 

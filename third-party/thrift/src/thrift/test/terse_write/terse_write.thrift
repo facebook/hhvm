@@ -21,7 +21,7 @@ include "thrift/annotation/python.thrift"
 cpp_include "thrift/test/AdapterTest.h"
 
 @thrift.Experimental
-package "facebook.com/thrift/test"
+package "facebook.com/thrift/test/terse_write"
 
 namespace cpp2 apache.thrift.test.terse_write
 namespace py3 apache.thrift.test.terse_write

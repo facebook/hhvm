@@ -15,6 +15,7 @@
   limitations under the License.
 
 }}{{#pragma ignore-newlines}}
+{{#import "common/types" as types}}
 {{#if struct:union?}}{{> Union}}
 {{#else if struct:exception?}}{{> Exception}}
 {{#else}}{{> Struct}}

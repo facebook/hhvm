@@ -16,7 +16,7 @@
  *
  */
 
-<<Oncalls('thrift')>> // @oss-disable
+// @oss-disable: <<Oncalls('thrift')>>
 interface IThriftAdapter {
   abstract const type THackType;
   abstract const type TThriftType;

@@ -16,13 +16,13 @@
  *
  */
 
-// @oss-enable: use namespace FlibSL\{C, Math, Str, Vec};
+use namespace FlibSL\{C, Math, Str, Vec}; // @oss-enable
 
 /**
  * Accelerated binary protocol: used in conjunction with the thrift_protocol
  * extension for faster deserialization
  */
-<<Oncalls('thrift')>> // @oss-disable
+// @oss-disable: <<Oncalls('thrift')>>
 class TBinaryProtocolAccelerated extends TBinaryProtocolBase {
 
   public function __construct(

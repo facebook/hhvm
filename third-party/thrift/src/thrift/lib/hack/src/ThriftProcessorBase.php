@@ -16,9 +16,9 @@
  *
  */
 
-// @oss-enable: use namespace FlibSL\{C, Math, Str, Vec};
+use namespace FlibSL\{C, Math, Str, Vec}; // @oss-enable
 
-<<Oncalls('thrift')>> // @oss-disable
+// @oss-disable: <<Oncalls('thrift')>>
 abstract class ThriftProcessorBase implements IThriftProcessor {
   abstract const type TThriftIf as IThriftIf;
   abstract const string THRIFT_SVC_NAME;

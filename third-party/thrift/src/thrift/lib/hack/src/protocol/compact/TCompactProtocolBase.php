@@ -16,13 +16,13 @@
  *
  */
 
-// @oss-enable: use namespace FlibSL\{C, Math, Str, Vec};
+use namespace FlibSL\{C, Math, Str, Vec}; // @oss-enable
 
 /**
  * Compact implementation of the Thrift protocol.
  *
  */
-<<Oncalls('thrift')>> // @oss-disable
+// @oss-disable: <<Oncalls('thrift')>>
 abstract class TCompactProtocolBase extends TProtocol {
   const ctx CReadWriteDefault = [zoned_shallow];
 

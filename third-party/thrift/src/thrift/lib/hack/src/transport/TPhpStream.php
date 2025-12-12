@@ -16,7 +16,7 @@
  *
  */
 
-// @oss-enable: use namespace FlibSL\{C, Math, Str, Vec};
+use namespace FlibSL\{C, Math, Str, Vec}; // @oss-enable
 
 /**
  * Php stream transport. Reads to and writes from the php standard streams
@@ -24,7 +24,7 @@
  *
  * @package thrift.transport
  */
-<<Oncalls('thrift')>> // @oss-disable
+// @oss-disable: <<Oncalls('thrift')>>
 final class TPhpStream extends TTransport {
 
   const int MODE_R = 1;

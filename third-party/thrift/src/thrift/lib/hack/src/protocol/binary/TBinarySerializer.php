@@ -16,13 +16,13 @@
  *
  */
 
-// @oss-enable: use namespace FlibSL\{C, Math, Str, Vec};
+use namespace FlibSL\{C, Math, Str, Vec}; // @oss-enable
 
 /**
  * Utility class for serializing and deserializing
  * a thrift object using TBinaryProtocolAccelerated.
  */
-<<Oncalls('thrift')>> // @oss-disable
+// @oss-disable: <<Oncalls('thrift')>>
 final class TBinarySerializer extends TProtocolSerializer {
 
   // NOTE(rmarin): Because thrift_protocol_write_binary

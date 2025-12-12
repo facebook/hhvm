@@ -16,7 +16,7 @@
  *
  */
 
-// @oss-enable: use namespace FlibSL\{C, Math, Str, Vec};
+use namespace FlibSL\{C, Math, Str, Vec}; // @oss-enable
 
 /**
  * Framed transport. Writes and reads data in chunks that are stamped with
@@ -24,7 +24,7 @@
  *
  * @package thrift.transport
  */
-<<Oncalls('thrift')>> // @oss-disable
+// @oss-disable: <<Oncalls('thrift')>>
 class TFramedTransport
   extends TTransport
   implements TTransportStatus, IThriftBufferedTransport {

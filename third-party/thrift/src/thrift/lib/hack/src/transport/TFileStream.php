@@ -16,7 +16,7 @@
  *
  */
 
-// @oss-enable: use namespace FlibSL\{C, Math, Str, Vec};
+use namespace FlibSL\{C, Math, Str, Vec}; // @oss-enable
 
 final class TFileStreamBuffer {
   private string $buffer = '';
@@ -81,7 +81,7 @@ enum TFileStreamMode: int {
  *
  * @package thrift.transport
  */
-<<Oncalls('thrift')>> // @oss-disable
+// @oss-disable: <<Oncalls('thrift')>>
 final class TFileStream extends TTransport implements IThriftBufferedTransport {
 
   private ?resource $inStream = null;

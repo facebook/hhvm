@@ -16,14 +16,14 @@
  *
  */
 
-// @oss-enable: use namespace FlibSL\{C, Math, Str, Vec};
+use namespace FlibSL\{C, Math, Str, Vec}; // @oss-enable
 
 /**
  * Sockets implementation of the TTransport interface.
  *
  * @package thrift.transport
  */
-<<Oncalls('thrift')>> // @oss-disable
+// @oss-disable: <<Oncalls('thrift')>>
 class TSocket
   extends TTransport
   implements TTransportStatus, InstrumentedTTransport, IThriftRemoteConn {

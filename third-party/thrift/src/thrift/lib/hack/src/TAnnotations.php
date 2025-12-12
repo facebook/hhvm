@@ -16,7 +16,7 @@
  *
  */
 
-// @oss-enable: use namespace FlibSL\{C, Math, Str, Vec};
+use namespace FlibSL\{C, Math, Str, Vec}; // @oss-enable
 
 type TStructFieldAnnotations = shape(
   'field' => dict<string, \IThriftStruct>,
@@ -38,7 +38,7 @@ type TEnumAnnotations = shape(
   'constants' => dict<string, dict<string, \IThriftStruct>>,
 );
 
-<<Oncalls('thrift')>> // @oss-disable
+// @oss-disable: <<Oncalls('thrift')>>
 interface IThriftServiceStaticMetadata {
   public static function getAllStructuredAnnotations(
   )[write_props]: \TServiceAnnotations;
@@ -47,7 +47,7 @@ interface IThriftServiceStaticMetadata {
   )[]: \tmeta_ThriftServiceMetadataResponse;
 }
 
-<<Oncalls('thrift')>> // @oss-disable
+// @oss-disable: <<Oncalls('thrift')>>
 interface IThriftEnumStaticMetadata {
   public static function getAllStructuredAnnotations(
   )[write_props]: \TEnumAnnotations;
@@ -55,18 +55,18 @@ interface IThriftEnumStaticMetadata {
   public static function getEnumMetadata()[]: \tmeta_ThriftEnum;
 }
 
-<<Oncalls('thrift')>> // @oss-disable
+// @oss-disable: <<Oncalls('thrift')>>
 interface IThriftConstants {
   public static function getAllStructuredAnnotations(
   )[write_props]: dict<string, dict<string, \IThriftStruct>>;
 }
 
-<<Oncalls('thrift')>> // @oss-disable
+// @oss-disable: <<Oncalls('thrift')>>
 interface IThriftExceptionMetadata {
   public static function getExceptionMetadata()[]: \tmeta_ThriftException;
 }
 
-<<Oncalls('thrift')>> // @oss-disable
+// @oss-disable: <<Oncalls('thrift')>>
 interface IThriftStructMetadata extends IThriftStruct {
   public static function getStructMetadata()[]: \tmeta_ThriftStruct;
 }

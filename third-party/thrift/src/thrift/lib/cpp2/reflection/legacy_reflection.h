@@ -52,7 +52,7 @@ using legacy_reflection_schema_t = reflection::Schema;
 template <typename T>
 struct [[deprecated(
     "Deprecated in favor of "
-    "https://www.internalfb.com/intern/staticdocs/thrift/docs/fb/languages/cpp/reflection and " // @oss-disable
+    // @oss-disable: "https://www.internalfb.com/intern/staticdocs/thrift/docs/fb/languages/cpp/reflection and "
     "https://github.com/facebook/fbthrift/blob/main/thrift/lib/cpp2/op/Get.h")]]
 legacy_reflection {
   /***

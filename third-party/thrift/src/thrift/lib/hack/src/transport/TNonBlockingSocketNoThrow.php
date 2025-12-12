@@ -16,7 +16,7 @@
  *
  */
 
-// @oss-enable: use namespace FlibSL\{C, Math, Str, Vec};
+use namespace FlibSL\{C, Math, Str, Vec}; // @oss-enable
 
 /**
  * Wrapper class over TNonBlockingSocket that suppresses
@@ -24,7 +24,7 @@
  * is called. This is helpful for classes that don't
  * handle properly this event. Ie. TFramedTransport.
  */
-<<Oncalls('thrift')>> // @oss-disable
+// @oss-disable: <<Oncalls('thrift')>>
 final class TNonBlockingSocketNoThrow extends TNonBlockingSocket {
   <<__Override>>
   public function open()[leak_safe]: void {

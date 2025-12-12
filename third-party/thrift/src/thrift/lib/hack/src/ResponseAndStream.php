@@ -16,7 +16,7 @@
  *
  */
 
-<<Oncalls('thrift')>> // @oss-disable
+// @oss-disable: <<Oncalls('thrift')>>
 class ResponseAndStream<TResponse, TStreamResult> {
   public function __construct(
     public ?TResponse $response,

@@ -49,7 +49,7 @@ struct type_common_metadata_impl {
 template <typename T>
 struct [[deprecated(
     "Deprecated in favor of "
-    "https://www.internalfb.com/intern/staticdocs/thrift/docs/fb/languages/cpp/reflection and " // @oss-disable
+    // @oss-disable: "https://www.internalfb.com/intern/staticdocs/thrift/docs/fb/languages/cpp/reflection and "
     "https://github.com/facebook/fbthrift/blob/main/thrift/lib/cpp2/op/Get.h")]]
 reflect_type_class_of_thrift_class_impl {
   using type = fatal::conditional<
@@ -74,7 +74,7 @@ struct reflect_module_tag_selector<type_class::variant, T, IsTry> {
 template <typename T, bool IsTry>
 struct [[deprecated(
     "Deprecated in favor of "
-    "https://www.internalfb.com/intern/staticdocs/thrift/docs/fb/languages/cpp/reflection and " // @oss-disable
+    // @oss-disable: "https://www.internalfb.com/intern/staticdocs/thrift/docs/fb/languages/cpp/reflection and "
     "https://github.com/facebook/fbthrift/blob/main/thrift/lib/cpp2/op/Get.h")]]
 reflect_module_tag_selector<type_class::structure, T, IsTry> {
   using type = typename reflect_struct<T>::module;

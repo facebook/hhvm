@@ -36,7 +36,7 @@ namespace HH {
   } // namespace ImplicitContext
 
   // Avoid referencing an internal class in OSS.
-  <<__Sealed(FBMemoAgnosticImplicitContext::class)>> // @oss-disable
+  // @oss-disable: <<__Sealed(FBMemoAgnosticImplicitContext::class)>>
   abstract class MemoAgnosticImplicitContext extends ImplicitContextBase {
     final protected static async function runWithAsync<Tout>(
       this::TData $context,
@@ -50,7 +50,7 @@ namespace HH {
   }
 
   // Avoid referencing an internal class in OSS.
-  <<__Sealed(FBMemoSensitiveImplicitContext::class)>> // @oss-disable
+  // @oss-disable: <<__Sealed(FBMemoSensitiveImplicitContext::class)>>
   abstract class MemoSensitiveImplicitContext extends ImplicitContextBase {
     abstract const type TData as IPureMemoizeParam;
 

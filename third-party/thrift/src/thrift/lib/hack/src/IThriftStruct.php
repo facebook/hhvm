@@ -16,9 +16,9 @@
  *
  */
 
-// @oss-enable: use namespace FlibSL\{C, Math, Str, Vec};
+use namespace FlibSL\{C, Math, Str, Vec}; // @oss-enable
 
-<<Oncalls('thrift')>> // @oss-disable
+// @oss-disable: <<Oncalls('thrift')>>
 interface IThriftStructWithClearTerseFields {
   public function clearTerseFields()[write_props]: void;
 }
@@ -26,7 +26,7 @@ interface IThriftStructWithClearTerseFields {
 /**
  * Base interface for Thrift structs
  */
-<<__ConsistentConstruct, Oncalls('thrift')>> // @oss-disable
+// @oss-disable: <<__ConsistentConstruct, Oncalls('thrift')>>
 // @oss-enable <<__ConsistentConstruct>>
 interface IThriftStruct extends \HH\IMemoizeParam {
 
@@ -52,7 +52,7 @@ interface IThriftStruct extends \HH\IMemoizeParam {
 /**
  * Base interface for Thrift structs with Sync APIs
  */
-<<__ConsistentConstruct, Oncalls('thrift')>> // @oss-disable
+// @oss-disable: <<__ConsistentConstruct, Oncalls('thrift')>>
 // @oss-enable <<__ConsistentConstruct>>
 interface IThriftSyncStruct extends IThriftStruct {
   public static function fromShape(this::TConstructorShape $shape)[]: this;
@@ -72,7 +72,7 @@ interface IThriftSyncStruct extends IThriftStruct {
  * that itself has a wrapped field or is dependent on a struct with wrapped
  * fields.
  */
-<<__ConsistentConstruct, Oncalls('thrift')>> // @oss-disable
+// @oss-disable: <<__ConsistentConstruct, Oncalls('thrift')>>
 // @oss-enable <<__ConsistentConstruct>>
 interface IThriftAsyncStruct extends IThriftStruct {
   public static function genFromShape(

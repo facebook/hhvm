@@ -16,13 +16,13 @@
  *
  */
 
-// @oss-enable: use namespace FlibSL\{C, Math, Str, Vec};
+use namespace FlibSL\{C, Math, Str, Vec}; // @oss-enable
 
 /**
  * Utility class for serializing and deserializing
  * a thrift object using TCompactProtocol.
  */
-<<Oncalls('thrift')>> // @oss-disable
+// @oss-disable: <<Oncalls('thrift')>>
 final class TCompactSerializer extends TProtocolWritePropsSerializer {
 
   <<__Memoize>>

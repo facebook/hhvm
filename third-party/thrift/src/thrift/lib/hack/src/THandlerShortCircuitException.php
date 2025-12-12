@@ -16,9 +16,9 @@
  *
  */
 
-// @oss-enable: use namespace FlibSL\{C, Math, Str, Vec};
+use namespace FlibSL\{C, Math, Str, Vec}; // @oss-enable
 
-<<Oncalls('thrift')>> // @oss-disable
+// @oss-disable: <<Oncalls('thrift')>>
 final class THandlerShortCircuitException<T>
   extends ExceptionWithPureGetMessage {
   const int R_SUCCESS = 0;

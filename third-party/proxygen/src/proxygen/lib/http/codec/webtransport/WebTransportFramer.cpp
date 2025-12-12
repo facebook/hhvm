@@ -6,10 +6,13 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+#include <proxygen/lib/http/codec/webtransport/WebTransportFramer.h>
+
 #include <folly/io/Cursor.h>
 #include <folly/io/IOBufQueue.h>
-#include <proxygen/lib/http/codec/webtransport/WebTransportFramer.h>
+
 #include <quic/codec/QuicInteger.h>
+#include <quic/folly_utils/Utils.h>
 
 namespace {
 const size_t kDefaultBufferGrowth = 32;

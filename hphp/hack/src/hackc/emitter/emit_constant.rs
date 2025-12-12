@@ -15,6 +15,7 @@ use hhbc::Function;
 use hhbc::FunctionFlags;
 use hhbc::Span;
 use hhbc::TypedValue;
+use hhbc::VerifyKind;
 use hhbc_string_utils::strip_global_ns;
 use hhvm_types_ffi::ffi::Attr;
 use instruction_sequence::InstrSeq;
@@ -47,11 +48,11 @@ fn emit_constant_cinit<'a>(
         })
         .transpose()?;
     init.map(|instrs| {
-        let verify_instr = match return_type {
-            None => instr::empty(),
-            Some(_) => instr::verify_ret_type_c(),
+        let verify_kind = match return_type {
+            None => VerifyKind::None,
+            Some(_) => VerifyKind::All,
         };
-        let instrs = InstrSeq::gather(vec![instrs, verify_instr, instr::ret_c()]);
+        let instrs = InstrSeq::gather(vec![instrs, instr::ret_c(verify_kind)]);
         let mut attrs = Attr::AttrNoInjection;
         attrs.set(Attr::AttrPersistent, e.systemlib());
         attrs.set(Attr::AttrBuiltin, e.systemlib());

@@ -9,7 +9,7 @@
 // CHECK: // .column 3
 // CHECK:   n0 = $builtins.hhbc_print($builtins.hack_string("Hello, World!\n"))
 // CHECK: // .column 2
-// CHECK:   ret null
+// CHECK:   ret none null
 // CHECK: }
 function main(): void {
   echo "Hello, World!\n";
@@ -21,7 +21,7 @@ function main(): void {
 // CHECK: // .column 3
 // CHECK:   n0 = $builtins.hhbc_print($builtins.hack_string("This string has \042 a quote"))
 // CHECK: // .column 2
-// CHECK:   ret null
+// CHECK:   ret none null
 // CHECK: }
 function escaped_string(): void {
   echo 'This string has " a quote';
@@ -54,7 +54,7 @@ function escaped_string(): void {
 // CHECK:   jmp b3
 // CHECK: #b3:
 // CHECK: // .column 2
-// CHECK:   ret null
+// CHECK:   ret none null
 // CHECK: }
 function cmp(mixed $a, mixed $b): void {
   if ($a == $b) {
@@ -91,7 +91,7 @@ function cmp(mixed $a, mixed $b): void {
 // CHECK:   jmp b3
 // CHECK: #b3:
 // CHECK: // .column 2
-// CHECK:   ret null
+// CHECK:   ret none null
 // CHECK: }
 function cmp2(int $a, int $b): void {
   if ($a == $b) {
@@ -105,11 +105,7 @@ function cmp2(int $a, int $b): void {
 // CHECK: define $root.ret_str($this: *void) : .notnull *HackString {
 // CHECK: #b0:
 // CHECK: // .column 3
-// CHECK:   n0 = $builtins.hhbc_is_type_str($builtins.hack_string("hello, world\n"))
-// CHECK: // .column 3
-// CHECK:   n1 = $builtins.hhbc_verify_type_pred($builtins.hack_string("hello, world\n"), n0)
-// CHECK: // .column 3
-// CHECK:   ret $builtins.hack_string("hello, world\n")
+// CHECK:   ret all $builtins.hack_string("hello, world\n")
 // CHECK: }
 function ret_str(): string {
   return "hello, world\n";
@@ -123,7 +119,7 @@ function ret_str(): string {
 // CHECK: // .column 3
 // CHECK:   n1 = $root.f_bool(null, $builtins.hack_bool(true))
 // CHECK: // .column 2
-// CHECK:   ret null
+// CHECK:   ret none null
 // CHECK: }
 function bool_call(): void {
   f_bool(false);
@@ -144,7 +140,7 @@ function bool_call(): void {
 // CHECK: // .column 3
 // CHECK:   store &$c <- n1: *HackMixed
 // CHECK: // .column 2
-// CHECK:   ret null
+// CHECK:   ret none null
 // CHECK: }
 function test_const(): void {
   $a = vec["x", 2.0, 3, true];
@@ -160,7 +156,7 @@ function test_const(): void {
 // CHECK: // .column 3
 // CHECK:   n1 = $root.f_float(null, $builtins.hack_float(3.0))
 // CHECK: // .column 2
-// CHECK:   ret null
+// CHECK:   ret none null
 // CHECK: }
 function float_arg(): void {
   f_float(3.14);
@@ -171,7 +167,7 @@ function float_arg(): void {
 // CHECK: define $root.check_param_types($this: *void, $a: .notnull *HackInt, $b: .notnull *HackFloat, $c: .notnull *HackString) : *void {
 // CHECK: #b0:
 // CHECK: // .column 2
-// CHECK:   ret null
+// CHECK:   ret none null
 // CHECK: }
 function check_param_types(int $a, float $b, string $c): void {
 }
@@ -184,11 +180,7 @@ function check_param_types(int $a, float $b, string $c): void {
 // CHECK: // .column 10
 // CHECK:   n1 = $builtins.hack_bool(__sil_instanceof(n0, <C>, 0))
 // CHECK: // .column 3
-// CHECK:   n2 = $builtins.hhbc_is_type_bool(n1)
-// CHECK: // .column 3
-// CHECK:   n3 = $builtins.hhbc_verify_type_pred(n1, n2)
-// CHECK: // .column 3
-// CHECK:   ret n1
+// CHECK:   ret all n1
 // CHECK: }
 function check_is_class(mixed $a): bool {
   return $a is C;
@@ -202,11 +194,7 @@ function check_is_class(mixed $a): bool {
 // CHECK: // .column 10
 // CHECK:   n1 = $builtins.hack_bool(__sil_instanceof(n0, <C>, 1))
 // CHECK: // .column 3
-// CHECK:   n2 = $builtins.hhbc_is_type_bool(n1)
-// CHECK: // .column 3
-// CHECK:   n3 = $builtins.hhbc_verify_type_pred(n1, n2)
-// CHECK: // .column 3
-// CHECK:   ret n1
+// CHECK:   ret all n1
 // CHECK: }
 function check_is_class_nullable(mixed $a): bool {
   return $a is ?C;
@@ -224,7 +212,7 @@ function check_is_class_nullable(mixed $a): bool {
 // CHECK: // .column 3
 // CHECK:   n2 = $root.sink(null, n1)
 // CHECK: // .column 2
-// CHECK:   ret null
+// CHECK:   ret none null
 // CHECK: }
 function check_global(): void {
   $global_server = HH\global_get('_SERVER');
@@ -238,7 +226,7 @@ function check_global(): void {
 // CHECK: // .column 3
 // CHECK:   n1 = $builtins.hhbc_print(n0)
 // CHECK: // .column 2
-// CHECK:   ret null
+// CHECK:   ret none null
 // CHECK: }
 function check_constant(): void {
   echo GLOBAL_CONSTANT;
@@ -250,7 +238,7 @@ function check_constant(): void {
 // CHECK: // .column 3
 // CHECK:   n0 = $root.printf(null, $builtins.hack_string("FILE: %s\n"), $builtins.hack_string("__FILE__"))
 // CHECK: // .column 2
-// CHECK:   ret null
+// CHECK:   ret none null
 // CHECK: }
 function check_file(): void {
   printf("FILE: %s\n", __FILE__);
@@ -289,7 +277,7 @@ function check_nothing(): nothing {
 // CHECK: // .column 3
 // CHECK:   n7 = $root.printf(null, n0, n1, n2, n3, n4, n5, n6)
 // CHECK: // .column 2
-// CHECK:   ret null
+// CHECK:   ret none null
 // CHECK: }
 function check_nullable_types(int $i, ?int $j, float $f, ?float $g, string $u, ?string $v): void {
   printf("i: %d, j: %d, f: %f, g: %f, u: %s, v: %s\n", $i, $j, $f, $g, $u, $v);

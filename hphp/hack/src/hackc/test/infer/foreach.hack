@@ -90,7 +90,7 @@
 // CHECK: // .column 3
 // CHECK:   store &$0 <- null: *HackMixed
 // CHECK: // .column 2
-// CHECK:   ret null
+// CHECK:   ret none null
 // CHECK: }
 function check_foreach(vec<string> $x): void {
   foreach ($x as $index) {

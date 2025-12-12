@@ -117,8 +117,10 @@ namespace HPHP {
   O(Switch,          THREE(OA(SwitchKind),I64A,BLA),                    \
                                        ONE(CV),         NOV,        CF_TF) \
   O(SSwitch,         ONE(SLA),         ONE(CV),         NOV,        CF_TF) \
-  O(RetC,            NA,               ONE(CV),         NOV,        CF_TF) \
-  O(RetM,            ONE(IVA),         CMANY,           NOV,        CF_TF) \
+  O(RetC,            ONE(OA(VerifyKind)),                                  \
+                                       ONE(CV),         NOV,        CF_TF) \
+  O(RetM,            TWO(IVA, OA(VerifyKind)),                             \
+                                       CMANY,           NOV,        CF_TF) \
   O(RetCSuspended,   NA,               ONE(CV),         NOV,        CF_TF) \
   O(Throw,           NA,               ONE(CV),         NOV,        CF_TF) \
   O(CGetL,           ONE(NLA),         NOV,             ONE(CV),    NF) \
@@ -221,9 +223,7 @@ namespace HPHP {
   O(VerifyOutType,   ONE(ILA),         ONE(CV),         ONE(CV),    NF) \
   O(VerifyParamType, ONE(ILA),         ONE(CV),         ONE(CV),    NF) \
   O(VerifyParamTypeTS, ONE(ILA),       ONE(CV),         NOV,        NF) \
-  O(VerifyRetTypeC,  NA,               ONE(CV),         ONE(CV),    NF) \
   O(VerifyRetTypeTS, NA,               TWO(CV,CV),      ONE(CV),    NF) \
-  O(VerifyRetNonNullC, NA,             ONE(CV),         ONE(CV),    NF) \
   O(VerifyTypeTS,    NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(SelfCls,         NA,               NOV,             ONE(CV),    NF) \
   O(ParentCls,       NA,               NOV,             ONE(CV),    NF) \

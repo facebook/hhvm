@@ -944,6 +944,12 @@ static const char* TypeStructResolveOp_names[] = {
 #undef OP
 };
 
+static const char* VerifyKind_names[] = {
+#define OP(x) #x,
+  VERIFY_KIND
+#undef OP
+};
+
 static const char* TypeStructEnforceKind_names[] = {
 #define KIND(x) #x,
   TYPE_STRUCT_ENFORCE_KINDS
@@ -1058,6 +1064,8 @@ X(QueryMOp,       static_cast<int>(QueryMOp::CGet))
 X(SetRangeOp,     static_cast<int>(SetRangeOp::Forward))
 X(TypeStructResolveOp,
                   static_cast<int>(TypeStructResolveOp::Resolve))
+X(VerifyKind,
+                  static_cast<int>(VerifyKind::None))
 X(TypeStructEnforceKind,
                   static_cast<int>(TypeStructEnforceKind::Deep))
 X(AsTypeStructExceptionKind,
@@ -1108,8 +1116,8 @@ bool instrMayVMCall(Op opcode) {
 }
 
 bool instrIsNonCallControlFlow(Op opcode) {
-  if (!instrIsControlFlow(opcode) || 
-      instrIsVMCall(opcode) || 
+  if (!instrIsControlFlow(opcode) ||
+      instrIsVMCall(opcode) ||
       isAwait(opcode)) {
     return false;
   }

@@ -231,7 +231,10 @@ impl ComputeStackDepth<'_> {
                 }
 
                 match opcode {
-                    Opcode::RetC | Opcode::RetCSuspended | Opcode::RetM(_) | Opcode::NativeImpl => {
+                    Opcode::RetC(_)
+                    | Opcode::RetCSuspended
+                    | Opcode::RetM(_, _)
+                    | Opcode::NativeImpl => {
                         // Stack depth should be 0 after RetC or RetM.
                         if self.cur_depth != 0 {
                             return Err(Error::UnexpectedExitWithStack);

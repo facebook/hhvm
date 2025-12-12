@@ -6,6 +6,7 @@
 use ir::BareThisOp;
 use ir::Call;
 use ir::FCallArgsFlags;
+use ir::Func;
 use ir::FuncBuilder;
 use ir::FuncBuilderEx as _;
 use ir::GlobalId;
@@ -28,6 +29,7 @@ use ir::StringId;
 use ir::TypeStructEnforceKind;
 use ir::TypeStructResolveOp;
 use ir::ValueId;
+use ir::VerifyKind;
 use ir::func_builder::TransformInstr;
 use ir::func_builder::TransformState;
 use ir::instr::CallDetail;
@@ -452,21 +454,22 @@ impl LowerInstrs<'_> {
         Instr::tombstone()
     }
 
-    fn verify_ret_type_c(&self, builder: &mut FuncBuilder, obj: ValueId, loc: LocId) -> Instr {
-        let return_type = ir::EnforceableType::from_type_info(&builder.func.return_type());
-        if return_type
-            .modifiers
-            .contains(ir::TypeConstraintFlags::TypeVar)
-        {
-            // TypeVars are unenforcible because they're erased.
-            return Instr::copy(obj);
+    fn get_verify_kind(&self, func: &Func, kind: VerifyKind) -> VerifyKind {
+        match kind {
+            VerifyKind::None => kind,
+            VerifyKind::All => {
+                let return_type = ir::EnforceableType::from_type_info(&func.return_type());
+                if return_type
+                    .modifiers
+                    .contains(ir::TypeConstraintFlags::TypeVar)
+                    || return_type.ty == ir::BaseType::Noreturn
+                {
+                    return VerifyKind::None;
+                }
+                kind
+            }
+            _ => unreachable!(),
         }
-        let pred = match return_type.ty {
-            ir::BaseType::Noreturn => builder.emit_imm(Immediate::Bool(false)),
-            _ => builder.emit_is(obj, &return_type, loc),
-        };
-        builder.emit_hack_builtin(hack::Builtin::VerifyTypePred, &[obj, pred], loc);
-        Instr::copy(obj)
     }
 
     fn verify_ret_type_ts(
@@ -763,9 +766,6 @@ impl TransformInstr for LowerInstrs<'_> {
             Instr::Hhbc(Hhbc::VerifyParamTypeTS(ts, lid, loc)) => {
                 self.verify_param_type_ts(builder, lid, ts, loc)
             }
-            Instr::Hhbc(Hhbc::VerifyRetTypeC(vid, loc)) => {
-                self.verify_ret_type_c(builder, vid, loc)
-            }
             Instr::Hhbc(Hhbc::VerifyRetTypeTS([obj, ts], loc)) => {
                 self.verify_ret_type_ts(builder, obj, ts, loc)
             }
@@ -824,13 +824,20 @@ impl TransformInstr for LowerInstrs<'_> {
             Instr::Terminator(Terminator::IterNext(args)) => self.iter_next(builder, args),
             Instr::Terminator(Terminator::MemoGet(memo)) => self.memo_get(builder, memo),
             Instr::Terminator(Terminator::MemoGetEager(memo)) => self.memo_get_eager(builder, memo),
-            Instr::Terminator(Terminator::RetM(ops, loc)) => {
+            Instr::Terminator(Terminator::RetM(ops, verify, loc)) => {
                 // ret a, b;
                 // =>
                 // ret vec[a, b];
                 let builtin = hack::Hhbc::NewVec;
                 let vec = builder.emit_hhbc_builtin(builtin, &ops, loc);
-                Instr::ret(vec, loc)
+                Instr::ret(vec, self.get_verify_kind(&builder.func, verify), loc)
+            }
+            Instr::Terminator(Terminator::Ret(vid, verify, loc)) => {
+                let update = self.get_verify_kind(&builder.func, verify);
+                if update != verify {
+                    return Instr::ret(vid, update, loc);
+                }
+                return instr;
             }
             Instr::Terminator(Terminator::SSwitch {
                 cond,

@@ -107,6 +107,7 @@ use crate::parse::parse_type_struct_resolve_op;
 use crate::parse::parse_u32;
 use crate::parse::parse_user_id;
 use crate::parse::parse_usize;
+use crate::parse::parse_verify_kind;
 use crate::parse::parse_visibility;
 use crate::tokenizer::Token;
 use crate::tokenizer::TokenLoc;
@@ -821,10 +822,11 @@ impl FunctionParser<'_> {
 
     fn parse_ret(&mut self, tokenizer: &mut Tokenizer<'_>, loc: LocId) -> Result<Instr> {
         Ok(if tokenizer.next_is_identifier("[")? {
-            parse!(tokenizer, <params:self.vid,*> "]");
-            Instr::Terminator(Terminator::RetM(params.into(), loc))
+            parse!(tokenizer, <params:self.vid,*> "]" <kind:parse_verify_kind>);
+            Instr::Terminator(Terminator::RetM(params.into(), kind, loc))
         } else {
-            Instr::ret(self.vid(tokenizer)?, loc)
+            parse!(tokenizer, <vid:self.vid> <kind:parse_verify_kind>);
+            Instr::ret(vid, kind, loc)
         })
     }
 
@@ -1468,7 +1470,6 @@ impl FunctionParser<'_> {
             "verify_out_type" => parse_instr!(tok, I::Hhbc(Hhbc::VerifyOutType(p0, p1, loc)), <p0:self.vid> "," <p1:self.lid>),
             "verify_param_type" => parse_instr!(tok, I::Hhbc(Hhbc::VerifyParamType(p0, p1, loc)), <p0:self.vid> "," <p1:self.lid>),
             "verify_param_type_ts" => parse_instr!(tok, I::Hhbc(Hhbc::VerifyParamTypeTS(p0, p1, loc)), <p0:self.vid> "," <p1:self.lid>),
-            "verify_ret_type_c" => I::Hhbc(H::VerifyRetTypeC(self.vid(tok)?, loc)),
             "verify_ret_type_ts" => I::Hhbc(H::VerifyRetTypeTS(self.vid2(tok)?, loc)),
             "verify_type_ts" => I::Hhbc(H::VerifyTypeTS(self.vid2(tok)?, loc)),
             "wh_result" => I::Hhbc(H::WHResult(self.vid(tok)?, loc)),

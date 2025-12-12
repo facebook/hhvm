@@ -1238,9 +1238,11 @@ SSwitch <litstr id/offset vector>    [C]  ->  []
   found, control is transferred to the location specified by the final element
   in the vector, which must have a litstr id of -1.
 
-RetC    [C]  ->  []
+RetC <verification kind> [C]  ->  []
 
-  Return a cell. Returns $1 to the caller.
+  Returns $1 to the caller after performing return type checks based on the
+  specified verification kind immediate. Verification kind can be specified to
+  do all or no type checks, or check for non-nullability.
 
   If this instruction is used inside an async function executed in an "eager
   execution" mode, the $1 is wrapped into a StaticResultWaitHandle prior to
@@ -1258,7 +1260,7 @@ RetCSuspended   [C]  ->  []
   meant to be used within memoized async functions where the memoized value to
   be returned is already wrapped in a wait-handle.
 
-RetM <num returns> [C..C] -> []
+RetM <num returns> <verification kind> [C..C] -> []
 
   RetM is a variant of RetC that allows multiple cells to be returned. The RetM
   bytecode must be the only form of return used in a single function, and all
@@ -2846,19 +2848,6 @@ VerifyParamType <parameter id>    [C]  ->  [C]
   VerifyParamType checks the type of the parameter in $1 against the enclosing
   function's corresponding parameter constraints for `parameter id`. In case
   of a mismatch, a recoverable error is raised.
-
-VerifyRetTypeC    [C] -> [C]
-
-  Verify return type. This instruction pops $1 off of the stack, checks if $1
-  is compatible with the current function's return type annotation and raises
-  a warning if there is a mismatch, and then it pushes $1 back onto the stack.
-
-VerifyRetNonNullC [C] -> [C]
-
-  This is intended to provide the same behavior as VerifyRetTypeC, except in
-  only checks that $1 is non null. This should only be emitted by HHBBC if it
-  can statically verify that return value will pass the function's type
-  annotation if it is non null.
 
 VerifyParamTypeTS <parameter id>    [C]  ->  []
 

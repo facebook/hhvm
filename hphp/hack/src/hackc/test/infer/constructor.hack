@@ -54,7 +54,7 @@ class A {
 // CHECK: // .column 3
 // CHECK:   n10 = n6.?.a()
 // CHECK: // .column 2
-// CHECK:   ret null
+// CHECK:   ret none null
 // CHECK: }
 function f1() : void {
   (new A())->a();

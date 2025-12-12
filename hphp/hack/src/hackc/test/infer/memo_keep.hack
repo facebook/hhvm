@@ -37,7 +37,7 @@ class C {
   // CHECK: // .column 10
   // CHECK:   n10 = $builtins.hack_memo_get(&memocache::_C_2ememometh__inst, n6, n7, n8)
   // CHECK: // .column 10
-  // CHECK:   ret n10
+  // CHECK:   ret none n10
   // CHECK: #b2:
   // CHECK: // .column 10
   // CHECK:   prune ! $builtins.hack_is_true(n9)
@@ -58,7 +58,7 @@ class C {
   // CHECK: // .column 10
   // CHECK:   n18 = $builtins.hhbc_memo_set(&memocache::_C_2ememometh__inst, n15, n16, n17, n14)
   // CHECK: // .column 10
-  // CHECK:   ret n18
+  // CHECK:   ret none n18
   // CHECK: }
   <<__Memoize>>
   public function memometh_inst(int $a, int $b)[]: int {
@@ -97,7 +97,7 @@ class C {
   // CHECK: // .column 17
   // CHECK:   n8 = $builtins.hack_memo_get(&memocache::_C$static_2ememometh__static, n4, n5, n6)
   // CHECK: // .column 17
-  // CHECK:   ret n8
+  // CHECK:   ret none n8
   // CHECK: #b2:
   // CHECK: // .column 17
   // CHECK:   prune ! $builtins.hack_is_true(n7)
@@ -117,7 +117,7 @@ class C {
   // CHECK: // .column 17
   // CHECK:   n16 = $builtins.hhbc_memo_set(&memocache::_C$static_2ememometh__static, n13, n14, n15, n12)
   // CHECK: // .column 17
-  // CHECK:   ret n16
+  // CHECK:   ret none n16
   // CHECK: }
   <<__Memoize>>
   public static function memometh_static(int $a, int $b)[]: int {
@@ -159,7 +159,7 @@ class C {
   // CHECK: // .column 17
   // CHECK:   n8 = $builtins.hack_memo_get(&memocache::_C$static_2ememometh__lsb, n4, n5, n6)
   // CHECK: // .column 17
-  // CHECK:   ret n8
+  // CHECK:   ret none n8
   // CHECK: #b2:
   // CHECK: // .column 17
   // CHECK:   prune ! $builtins.hack_is_true(n7)
@@ -179,7 +179,7 @@ class C {
   // CHECK: // .column 17
   // CHECK:   n16 = $builtins.hhbc_memo_set(&memocache::_C$static_2ememometh__lsb, n13, n14, n15, n12)
   // CHECK: // .column 17
-  // CHECK:   ret n16
+  // CHECK:   ret none n16
   // CHECK: }
   <<__MemoizeLSB>>
   public static function memometh_lsb(int $a, int $b)[]: int {
@@ -220,7 +220,7 @@ class C {
 // CHECK: // .column 1
 // CHECK:   n7 = $builtins.hack_memo_get(&memocache::_$root_2ememofunc, n4, n5)
 // CHECK: // .column 1
-// CHECK:   ret n7
+// CHECK:   ret none n7
 // CHECK: #b2:
 // CHECK: // .column 1
 // CHECK:   prune ! $builtins.hack_is_true(n6)
@@ -237,7 +237,7 @@ class C {
 // CHECK: // .column 1
 // CHECK:   n13 = $builtins.hhbc_memo_set(&memocache::_$root_2ememofunc, n11, n12, n10)
 // CHECK: // .column 1
-// CHECK:   ret n13
+// CHECK:   ret none n13
 // CHECK: }
 
 <<__Memoize>>
@@ -278,7 +278,7 @@ function memofunc(int $a, int $b)[]: int {
 // CHECK: // .column 7
 // CHECK:   n7 = $builtins.hack_memo_get(&memocache::_$root_2ememo__async__func, n4, n5)
 // CHECK: // .column 7
-// CHECK:   ret n7
+// CHECK:   ret none n7
 // CHECK: #b2:
 // CHECK: // .column 7
 // CHECK:   prune ! $builtins.hack_is_true(n6)
@@ -296,7 +296,7 @@ function memofunc(int $a, int $b)[]: int {
 // CHECK: // .column 7
 // CHECK:   n14 = $builtins.hhbc_memo_set(&memocache::_$root_2ememo__async__func, n12, n13, n11)
 // CHECK: // .column 7
-// CHECK:   ret n14
+// CHECK:   ret none n14
 // CHECK: }
 
 <<__Memoize>>
@@ -322,7 +322,7 @@ async function memo_async_func(int $a, int $b)[]: Awaitable<int> {
 // CHECK: // .column 1
 // CHECK:   n1 = $builtins.hack_memo_get(&memocache::_$root_2ememo__with__pure__zero__param)
 // CHECK: // .column 1
-// CHECK:   ret n1
+// CHECK:   ret none n1
 // CHECK: #b2:
 // CHECK: // .column 1
 // CHECK:   prune ! $builtins.hack_is_true(n0)
@@ -331,7 +331,7 @@ async function memo_async_func(int $a, int $b)[]: Awaitable<int> {
 // CHECK: // .column 1
 // CHECK:   n3 = $builtins.hhbc_memo_set(&memocache::_$root_2ememo__with__pure__zero__param, n2)
 // CHECK: // .column 1
-// CHECK:   ret n3
+// CHECK:   ret none n3
 // CHECK: }
 
 

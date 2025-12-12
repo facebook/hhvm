@@ -18,7 +18,7 @@
 // CHECK: // .column 38
 // CHECK:   n4 = $builtins.hack_new_dict($builtins.hack_string("var"), $builtins.hack_string("id"), $builtins.hack_string("type"), n3)
 // CHECK: // .column 1
-// CHECK:   ret n4
+// CHECK:   ret none n4
 // CHECK: #b2:
 // CHECK: // .column 1
 // CHECK:   prune ! $builtins.hack_is_true(n1)

@@ -20,11 +20,7 @@ abstract class C {
   // CHECK: // .column 12
   // CHECK:   n2 = $builtins.hhbc_is_type_struct_c(n1, n0, $builtins.hack_int(1), $builtins.hack_int(0))
   // CHECK: // .column 5
-  // CHECK:   n3 = $builtins.hhbc_is_type_bool(n2)
-  // CHECK: // .column 5
-  // CHECK:   n4 = $builtins.hhbc_verify_type_pred(n2, n3)
-  // CHECK: // .column 5
-  // CHECK:   ret n2
+  // CHECK:   ret all n2
   // CHECK: }
   public static function check2(mixed $a): bool {
     return $a is self::TMyShape;
@@ -48,7 +44,7 @@ class D extends C {
   // CHECK: define D$static.check3($this: .notnull *D$static, $shape: .const_type="self::TMyShape" *HackMixed) : *void {
   // CHECK: #b0:
   // CHECK: // .column 4
-  // CHECK:   ret null
+  // CHECK:   ret none null
   // CHECK: }
   public static function check3(self::TMyShape $shape)[]: void {
   }
@@ -64,11 +60,7 @@ class D extends C {
 // CHECK: // .column 10
 // CHECK:   n2 = $builtins.hhbc_is_type_struct_c(n1, n0, $builtins.hack_int(1), $builtins.hack_int(0))
 // CHECK: // .column 3
-// CHECK:   n3 = $builtins.hhbc_is_type_bool(n2)
-// CHECK: // .column 3
-// CHECK:   n4 = $builtins.hhbc_verify_type_pred(n2, n3)
-// CHECK: // .column 3
-// CHECK:   ret n2
+// CHECK:   ret all n2
 // CHECK: }
 function check1(mixed $a): bool {
   return $a is D::TMyShape;
@@ -97,18 +89,16 @@ function check1(mixed $a): bool {
 // CHECK: // .column 10
 // CHECK:   store &$1 <- null: *HackMixed
 // CHECK: // .column 3
-// CHECK:   n4 = $builtins.hhbc_verify_type_pred(n3, $builtins.hack_bool(true))
-// CHECK: // .column 3
-// CHECK:   ret n3
+// CHECK:   ret all n3
 // CHECK: #b2:
 // CHECK: // .column 10
 // CHECK:   prune ! $builtins.hack_is_true(n2)
 // CHECK: // .column 10
-// CHECK:   n5: *HackMixed = load &$0
+// CHECK:   n4: *HackMixed = load &$0
 // CHECK: // .column 10
-// CHECK:   n6: *HackMixed = load &$1
+// CHECK:   n5: *HackMixed = load &$1
 // CHECK: // .column 10
-// CHECK:   n7 = $builtins.hhbc_throw_as_type_struct_exception(n5, n6)
+// CHECK:   n6 = $builtins.hhbc_throw_as_type_struct_exception(n4, n5)
 // CHECK:   unreachable
 // CHECK: }
 function check2(): D::TMyShape {
@@ -124,7 +114,7 @@ function check2(): D::TMyShape {
 // CHECK:   n1 = __sil_lazy_class_initialize(<D>)
 // CHECK:   n2 = D$static.check2(n1, $builtins.hack_int(5))
 // CHECK: // .column 2
-// CHECK:   ret null
+// CHECK:   ret none null
 // CHECK: }
 <<__EntryPoint>>
 function main(): void {

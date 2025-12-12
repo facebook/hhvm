@@ -605,7 +605,6 @@ impl<'b> InstrEmitter<'b> {
                 let local = self.lookup_local(pid);
                 Opcode::VerifyParamTypeTS(local)
             }
-            Hhbc::VerifyRetTypeC(..) => Opcode::VerifyRetTypeC,
             Hhbc::VerifyRetTypeTS(..) => Opcode::VerifyRetTypeTS,
             Hhbc::VerifyTypeTS(..) => Opcode::VerifyTypeTS,
             Hhbc::WHResult(..) => Opcode::WHResult,
@@ -933,14 +932,14 @@ impl<'b> InstrEmitter<'b> {
             Terminator::NativeImpl(_) => {
                 self.push_opcode(Opcode::NativeImpl);
             }
-            Terminator::Ret(_, _) => {
-                self.push_opcode(Opcode::RetC);
+            Terminator::Ret(_, kind, _) => {
+                self.push_opcode(Opcode::RetC(kind));
             }
             Terminator::RetCSuspended(_, _) => {
                 self.push_opcode(Opcode::RetCSuspended);
             }
-            Terminator::RetM(ref vids, _) => {
-                self.push_opcode(Opcode::RetM(vids.len() as u32));
+            Terminator::RetM(ref vids, kind, _) => {
+                self.push_opcode(Opcode::RetM(vids.len() as u32, kind));
             }
             Terminator::Switch {
                 bounded,

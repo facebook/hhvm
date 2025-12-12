@@ -16,6 +16,7 @@ use std::fmt::Error;
 use std::fmt::Result;
 use std::fmt::Write;
 
+use ir_core::VerifyKind;
 use ir_core::instr::BaseOp;
 use ir_core::instr::FinalOp;
 use ir_core::instr::HasLoc;
@@ -1276,9 +1277,6 @@ fn print_hhbc(w: &mut dyn Write, ctx: &FuncContext, func: &Func, hhbc: &Hhbc) ->
                 FmtLid(lid),
             )?;
         }
-        Hhbc::VerifyRetTypeC(op, _) => {
-            write!(w, "verify_ret_type_c {}", FmtVid(func, op, verbose))?;
-        }
         Hhbc::VerifyRetTypeTS(ops, _) => {
             write!(
                 w,
@@ -2037,17 +2035,23 @@ fn print_terminator(
         Terminator::NativeImpl(_) => {
             write!(w, "native_impl")?;
         }
-        Terminator::Ret(vid, _) => {
-            write!(w, "ret {}", FmtVid(func, *vid, verbose))?;
+        Terminator::Ret(vid, kind, _) => {
+            write!(
+                w,
+                "ret {} {}",
+                FmtVid(func, *vid, verbose),
+                print_verify_kind(kind)
+            )?;
         }
         Terminator::RetCSuspended(vid, _) => {
             write!(w, "ret_c_suspended {}", FmtVid(func, *vid, verbose))?;
         }
-        Terminator::RetM(vids, _) => {
+        Terminator::RetM(vids, kind, _) => {
             write!(
                 w,
-                "ret [{}]",
-                FmtSep::comma(vids.iter(), |w, vid| FmtVid(func, *vid, verbose).fmt(w))
+                "ret [{}] {}",
+                FmtSep::comma(vids.iter(), |w, vid| FmtVid(func, *vid, verbose).fmt(w)),
+                print_verify_kind(kind),
             )?;
         }
         Terminator::Switch {
@@ -2111,6 +2115,15 @@ fn print_terminator(
         Terminator::Unreachable => write!(w, "unreachable")?,
     }
     Ok(())
+}
+
+fn print_verify_kind(kind: &VerifyKind) -> &'static str {
+    match *kind {
+        VerifyKind::None => "none",
+        VerifyKind::All => "all",
+        VerifyKind::NonNull => "nonnull",
+        _ => "invalid",
+    }
 }
 
 fn print_type_constant(w: &mut dyn Write, tc: &TypeConstant) -> Result {

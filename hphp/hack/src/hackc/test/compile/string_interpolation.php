@@ -1,7 +1,7 @@
 <?hh
 // RUN: %hackc compile %s | FileCheck %s
 
-// CHECK: .function {} (19,23) <"HH\\string" "HH\\string" > small() {
+// CHECK: .function {} (18,22) <"HH\\string" "HH\\string" > small() {
 // CHECK:   .declvars $i $x;
 // CHECK:   String "world"
 // CHECK:   SetL $i
@@ -13,8 +13,7 @@
 // CHECK:   SetL $x
 // CHECK:   PopC
 // CHECK:   CGetL $x
-// CHECK:   VerifyRetTypeC
-// CHECK:   RetC
+// CHECK:   RetC All
 // CHECK: }
 function small(): string {
   $i = "world";
@@ -22,7 +21,7 @@ function small(): string {
   return $x;
 }
 
-// CHECK: .function {} (49,55) <"HH\\string" "HH\\string" > large() {
+// CHECK: .function {} (47,53) <"HH\\string" "HH\\string" > large() {
 // CHECK:   .declvars $a $b $c $d;
 // CHECK:   String "Hello"
 // CHECK:   SetL $a
@@ -43,8 +42,7 @@ function small(): string {
 // CHECK:   ConcatN 4
 // CHECK:   String "\n"
 // CHECK:   Concat
-// CHECK:   VerifyRetTypeC
-// CHECK:   RetC
+// CHECK:   RetC All
 // CHECK: }
 function large(): string {
   $a = "Hello";
@@ -54,7 +52,7 @@ function large(): string {
   return "$a$b$c$d\n"; // should concatN
 }
 
-// CHECK: .function {} (86,92) <"HH\\string" "HH\\string" > massive() {
+// CHECK: .function {} (83,89) <"HH\\string" "HH\\string" > massive() {
 // CHECK:   .declvars $a $b $c $d;
 // CHECK:   String "Hello"
 // CHECK:   SetL $a
@@ -80,8 +78,7 @@ function large(): string {
 // CHECK:   CGetL $d
 // CHECK:   String "\n"
 // CHECK:   ConcatN 3
-// CHECK:   VerifyRetTypeC
-// CHECK:   RetC
+// CHECK:   RetC All
 // CHECK: }
 function massive(): string {
   $a = "Hello";

@@ -17,6 +17,7 @@ use hhbc::IterId;
 use hhbc::Label;
 use hhbc::Opcode;
 use hhbc::Pseudo;
+use hhbc::VerifyKind;
 use indexmap::IndexSet;
 use instruction_sequence::InstrSeq;
 use instruction_sequence::instr;
@@ -41,7 +42,7 @@ impl<'i> JumpInstructions<'i> {
     ) -> JumpInstructions<'i> {
         JumpInstructions(instr_seq.iter().fold(LabelMap::new(), |mut acc, instr| {
             match *instr {
-                Instruct::Opcode(Opcode::RetC | Opcode::RetM(_)) => {
+                Instruct::Opcode(Opcode::RetC(_) | Opcode::RetM(_, _)) => {
                     acc.insert(jt_gen.get_id_for_return(), instr);
                 }
                 _ => {}
@@ -71,7 +72,7 @@ impl<'i> JumpInstructions<'i> {
                 Instruct::Pseudo(Pseudo::Continue) => {
                     acc.insert(get_label_id(jt_gen, false), instr);
                 }
-                Instruct::Opcode(Opcode::RetC | Opcode::RetCSuspended | Opcode::RetM(_)) => {
+                Instruct::Opcode(Opcode::RetC(_) | Opcode::RetCSuspended | Opcode::RetM(_, _)) => {
                     acc.insert(jt_gen.get_id_for_return(), instr);
                 }
                 _ => {}
@@ -83,7 +84,7 @@ impl<'i> JumpInstructions<'i> {
 
 /// Delete Ret* instructions from the foreach body
 pub(super) fn cleanup_iterate_body(mut is: InstrSeq) -> InstrSeq {
-    is.retain(|instr| !matches!(instr, Instruct::Opcode(Opcode::RetC | Opcode::RetM(_))));
+    is.retain(|instr| !matches!(instr, Instruct::Opcode(Opcode::RetC(..) | Opcode::RetM(..))));
     is
 }
 
@@ -93,7 +94,7 @@ pub(super) fn cleanup_try_body(mut is: InstrSeq) -> InstrSeq {
         !matches!(
             instr,
             Instruct::Pseudo(Pseudo::Continue | Pseudo::Break)
-                | Instruct::Opcode(Opcode::RetC | Opcode::RetCSuspended | Opcode::RetM(_))
+                | Instruct::Opcode(Opcode::RetC(_) | Opcode::RetCSuspended | Opcode::RetM(_, _))
         )
     });
     is
@@ -138,53 +139,56 @@ pub(super) fn emit_return<'a>(
                 let load_retval_instr = instr::c_get_l(e.local_gen_mut().get_retval().clone());
                 instrs.push(load_retval_instr);
             }
-            let verify_return_instr = verify_return.map_or_else(
-                || Ok(instr::empty()),
+            let verify_return = verify_return.map_or_else(
+                || Ok((instr::empty(), VerifyKind::None)),
                 |h| {
                     use reified::ReificationLevel;
                     let h = reified::convert_awaitable(env, h);
                     let h = reified::remove_erased_generics(env, h);
                     match reified::has_reified_type_constraint(env, &h) {
-                        ReificationLevel::Unconstrained => Ok(instr::empty()),
-                        ReificationLevel::Not => Ok(instr::verify_ret_type_c()),
-                        ReificationLevel::Maybe => Ok(InstrSeq::gather(vec![
-                            emit_expression::get_type_structure_for_hint(
-                                e,
-                                &[],
-                                &IndexSet::new(),
-                                TypeRefinementInHint::Allowed,
-                                &h,
-                            )?,
-                            instr::verify_ret_type_ts(),
-                            instr::verify_ret_type_c(),
-                        ])),
+                        ReificationLevel::Unconstrained => Ok((instr::empty(), VerifyKind::None)),
+                        ReificationLevel::Not => Ok((instr::empty(), VerifyKind::All)),
+                        ReificationLevel::Maybe => Ok((
+                            InstrSeq::gather(vec![
+                                emit_expression::get_type_structure_for_hint(
+                                    e,
+                                    &[],
+                                    &IndexSet::new(),
+                                    TypeRefinementInHint::Allowed,
+                                    &h,
+                                )?,
+                                instr::verify_ret_type_ts(),
+                            ]),
+                            VerifyKind::All,
+                        )),
                         ReificationLevel::Definitely => {
                             let check = InstrSeq::gather(vec![
                                 instr::dup(),
                                 instr::is_type_c(IsTypeOp::Null),
                             ]);
-                            reified::simplify_verify_type(
-                                e,
-                                env,
-                                &Pos::NONE,
-                                check,
-                                &h,
-                                InstrSeq::gather(vec![
+                            Ok((
+                                reified::simplify_verify_type(
+                                    e,
+                                    env,
+                                    &Pos::NONE,
+                                    check,
+                                    &h,
                                     instr::verify_ret_type_ts(),
-                                    instr::verify_ret_type_c(),
-                                ]),
-                            )
+                                )?,
+                                VerifyKind::All,
+                            ))
                         }
                     }
                 },
             )?;
+            let (verify_ret_instr, kind) = verify_return;
             instrs.extend(vec![
-                verify_return_instr,
+                verify_ret_instr,
                 verify_out,
                 if num_out != 0 {
-                    instr::ret_m(num_out as u32 + 1)
+                    instr::ret_m(num_out as u32 + 1, kind)
                 } else {
-                    instr::ret_c()
+                    instr::ret_c(kind)
                 },
             ]);
             Ok(InstrSeq::gather(instrs))
@@ -208,7 +212,12 @@ pub(super) fn emit_return<'a>(
                 emit_jump_to_label(target_label, iterator.map_or(vec![], |x| vec![x])),
                 // emit ret instr as an indicator for try/finally rewriter to generate
                 // finally epilogue, try/finally rewriter will remove it.
-                instr::ret_c(),
+                //
+                // Note: The VerifyKind immediate specified here is not final.
+                // The correct flavor of verification will be read from ctx
+                // and emitted in the block above. Use VerifyKind::All to be
+                // conservative.
+                instr::ret_c(VerifyKind::All),
             ]))
         }
     }
@@ -289,7 +298,7 @@ pub(super) fn emit_finally_epilogue<'a>(
             panic!("unexpected instruction: only Ret* or Break/Continue/Jmp(Named) are expected")
         };
         match *i {
-            Instruct::Opcode(Opcode::RetC | Opcode::RetCSuspended | Opcode::RetM(_)) => {
+            Instruct::Opcode(Opcode::RetC(_) | Opcode::RetCSuspended | Opcode::RetM(_, _)) => {
                 emit_return(e, true, env)
             }
             Instruct::Pseudo(Pseudo::Break) => Ok(emit_break_or_continue(

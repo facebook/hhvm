@@ -10775,6 +10775,62 @@ size_t color_block_initialize(
   };
   jit::vector<Adjustment> penaltyAdjustments;
 
+  auto const clonePenaltyVectorFor = [&] (Vreg r) {
+    auto& info = reg_info(state, r);
+    assertx(info.penaltyIdx > 0 && info.penaltyIdx < state.penalties.size());
+    auto const& original = state.penalties[info.penaltyIdx];
+    state.penalties.emplace_back(original);
+    auto const newIdx = state.penalties.size() - 1;
+    info.penaltyIdx = newIdx;
+  };
+
+  auto const splitPenaltyVectors = [&] () {
+    // Live-ins with the same penaltyIdx share a penalty vector, but if processed
+    // predecessors already picked different phys regs for them, the bias we add
+    // below becomes contradictory: for the first reg we increase the weight of
+    // every phys register except the chosen one, then the second reg does the
+    // same for a different phys register, and so on. Whether the allocator keeps
+    // the prior assignments becomes pure luck and we emit avoidable edge copies.
+    // Clone the vector as soon as we detect conflicting consensus assignments so
+    // each live-in keeps its own bias.
+    jit::fast_map<size_t, PhysReg> keepConsensus;
+    size_t assignmentIdx = 0;
+    for (auto const r : state.liveIn[b]) {
+      if (r.isPhys()) continue;
+      auto const& info = reg_info(state, r);
+      if (!is_colorable_reg(info.regClass)) continue;
+
+      Optional<PhysReg> consensus;
+      for (auto const pred : preds) {
+        if (!processed[pred]) continue;
+        auto const& predAssignment = assignments[pred];
+        assertx(assignmentIdx < predAssignment.size());
+        assertx(predAssignment[assignmentIdx].first == r);
+        auto const phys = predAssignment[assignmentIdx].second;
+        if (!consensus) {
+          consensus = phys;
+        } else if (*consensus != phys) {
+          consensus.reset();
+          break;
+        }
+      }
+
+      if (consensus) {
+        auto const it = keepConsensus.find(info.penaltyIdx);
+        if (it == keepConsensus.end()) {
+          keepConsensus.emplace(info.penaltyIdx, *consensus);
+        } else if (it->second != *consensus) {
+          clonePenaltyVectorFor(r);
+        }
+      }
+
+      ++assignmentIdx;
+    }
+  };
+
+  if (arch() == Arch::ARM)
+    splitPenaltyVectors();
+
   size_t assignmentIdx = 0;
   for (auto const r : state.liveIn[b]) {
     if (r.isPhys()) continue;

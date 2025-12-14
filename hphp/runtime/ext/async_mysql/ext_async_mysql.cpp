@@ -1601,6 +1601,29 @@ static Object HHVM_METHOD(AsyncMysqlQueryResult, responseAttributes) {
   return Object{std::move(ret)};
 }
 
+static Variant HHVM_METHOD(AsyncMysqlQueryResult, mysqlInfo) {
+  auto* data = Native::data<AsyncMysqlQueryResult>(this_);
+  const auto& mysqlInfo = data->m_query_result->mysqlInfo();
+  if (mysqlInfo) {
+    return String(*mysqlInfo, CopyString);
+  }
+  return init_null();
+}
+
+static Variant HHVM_METHOD(AsyncMysqlQueryResult, rowsMatched) {
+  auto* data = Native::data<AsyncMysqlQueryResult>(this_);
+  const auto& rowsMatched = data->m_query_result->rowsMatched();
+  if (rowsMatched) {
+    return static_cast<int64_t>(*rowsMatched);
+  }
+  return init_null();
+}
+
+static int64_t HHVM_METHOD(AsyncMysqlQueryResult, warningsCount) {
+  auto* data = Native::data<AsyncMysqlQueryResult>(this_);
+  return data->m_query_result->warningsCount();
+}
+
 namespace {
 Variant buildTypedValue(const am::RowFields* row_fields,
                         const am::Row& row,
@@ -2117,7 +2140,7 @@ static struct AsyncMysqlExtension final : Extension {
   // bump the version number and use a version guard in www:
   //   $ext = new ReflectionExtension("async_mysql");
   //   $version = (float) $ext->getVersion();
-  AsyncMysqlExtension() : Extension("async_mysql", "7.0", "mysql_gateway") {}
+  AsyncMysqlExtension() : Extension("async_mysql", "8.0", "mysql_gateway") {}
   void moduleRegisterNative() override {
     // expose the mysql flags
     HHVM_RC_INT_SAME(NOT_NULL_FLAG);
@@ -2254,6 +2277,9 @@ static struct AsyncMysqlExtension final : Extension {
     HHVM_ME(AsyncMysqlQueryResult, recvGtid);
     HHVM_ME(AsyncMysqlQueryResult, responseAttributes);
     HHVM_ME(AsyncMysqlQueryResult, resultSizeBytes);
+    HHVM_ME(AsyncMysqlQueryResult, mysqlInfo);
+    HHVM_ME(AsyncMysqlQueryResult, rowsMatched);
+    HHVM_ME(AsyncMysqlQueryResult, warningsCount);
     Native::registerNativeDataInfo<AsyncMysqlQueryResult>(
       Native::NDIFlags::NO_COPY);
 

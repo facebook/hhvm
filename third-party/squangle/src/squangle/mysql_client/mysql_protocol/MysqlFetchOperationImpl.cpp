@@ -411,7 +411,10 @@ void MysqlFetchOperationImpl::specializedCompleteOperation() {
       readResponseAttributes(),
       getMaxThreadBlockTime(),
       getTotalThreadBlockTime(),
-      was_slow_);
+      was_slow_,
+      current_warnings_count_,
+      current_rows_matched_,
+      current_affected_rows_);
 
   // Stats for query
   if (result() == OperationResult::Succeeded) {

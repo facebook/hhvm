@@ -176,7 +176,9 @@ struct QueryLoggingData : CommonLoggingData {
       Duration maxThreadBlockTime = Duration(0),
       Duration totalThreadBlockTime = Duration(0),
       bool wasSlow = false,
-      unsigned int warningsCount = 0)
+      unsigned int warningsCount = 0,
+      std::optional<uint64_t> rowsMatched = std::nullopt,
+      uint64_t rowsAffected = 0)
       : CommonLoggingData(
             op,
             duration,
@@ -194,7 +196,9 @@ struct QueryLoggingData : CommonLoggingData {
         query_attributes(queryAttributes),
         response_attributes(std::move(responseAttributes)),
         was_slow(wasSlow),
-        warnings_count(warningsCount) {}
+        warnings_count(warningsCount),
+        rows_matched(rowsMatched),
+        rows_affected(rowsAffected) {}
   int queries_executed;
   std::shared_ptr<folly::fbstring> query;
   common::mysql_client::LoggingFuncsPtr loggingFuncs;
@@ -207,6 +211,8 @@ struct QueryLoggingData : CommonLoggingData {
   bool was_slow;
   unsigned int warnings_count;
   std::optional<int> thrift_rpc_priority;
+  std::optional<uint64_t> rows_matched;
+  uint64_t rows_affected;
 };
 
 // Base class for logging events of db client apis. This should be used as an

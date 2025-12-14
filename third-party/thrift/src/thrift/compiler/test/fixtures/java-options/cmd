@@ -1,1 +1,2 @@
 java: mstch_java:separate_data_type_from_services src/module.thrift
+java_legacy_client: mstch_java:deprecated_allow_leagcy_reflection_client src/module.thrift

@@ -140,6 +140,12 @@ class FetchOperationImpl : virtual public OperationBase {
   const std::string& currentRecvGtid() const;
   const std::optional<std::string>& currentMysqlInfo() const;
   const std::optional<uint64_t> currentRowsMatched() const;
+
+  // Parses the "Rows matched: X" value from MySQL info string.
+  // Returns std::nullopt if the info string is empty or doesn't contain the
+  // pattern.
+  static std::optional<uint64_t> parseRowsMatchedFromMysqlInfo(
+      const std::optional<std::string>& mysqlInfo);
   const RespAttrs& currentRespAttrs() const;
   unsigned int currentWarningsCount() const;
 

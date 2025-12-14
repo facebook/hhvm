@@ -9,6 +9,8 @@
 #include "squangle/mysql_client/FetchOperation.h"
 #include "squangle/mysql_client/Connection.h"
 
+#include <re2/re2.h>
+
 namespace facebook::common::mysql_client {
 
 FetchOperation::FetchOperation(
@@ -148,6 +150,19 @@ const std::optional<std::string>& FetchOperationImpl::currentMysqlInfo() const {
 const std::optional<uint64_t> FetchOperationImpl::currentRowsMatched() const {
   CHECK_THROW(isStreamAccessAllowed(), db::OperationStateException);
   return current_rows_matched_;
+}
+
+std::optional<uint64_t> FetchOperationImpl::parseRowsMatchedFromMysqlInfo(
+    const std::optional<std::string>& mysqlInfo) {
+  if (!mysqlInfo || mysqlInfo->empty()) {
+    return std::nullopt;
+  }
+  int matched_count = 0;
+  static const re2::RE2 rowsMatchedRegex("Rows matched: (\\d+)\\s+");
+  if (re2::RE2::PartialMatch(*mysqlInfo, rowsMatchedRegex, &matched_count)) {
+    return matched_count;
+  }
+  return std::nullopt;
 }
 
 const AttributeMap& FetchOperationImpl::currentRespAttrs() const {

@@ -179,7 +179,7 @@ class IRocketServerConnection : public ManagedConnectionIf,
   // AsyncTransport::WriteCallback implementation
   void writeStarting() noexcept override = 0;
   void writeSuccess() noexcept override = 0;
-  virtual void writeErr(
+  void writeErr(
       size_t bytesWritten,
       const folly::AsyncSocketException& ex) noexcept override = 0;
 
@@ -229,12 +229,11 @@ class IRocketServerConnection : public ManagedConnectionIf,
 
   virtual bool areStreamsPaused() const noexcept = 0;
 
-  virtual size_t getNumActiveRequests() const override = 0;
+  size_t getNumActiveRequests() const override = 0;
 
-  virtual size_t getNumPendingWrites() const override = 0;
+  size_t getNumPendingWrites() const override = 0;
 
-  virtual const folly::SocketAddress& getPeerAddress()
-      const noexcept override = 0;
+  const folly::SocketAddress& getPeerAddress() const noexcept override = 0;
 
   virtual folly::AsyncSocket* getRawSocket() const = 0;
 

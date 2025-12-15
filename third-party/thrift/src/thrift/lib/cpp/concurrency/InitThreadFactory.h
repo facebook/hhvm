@@ -44,7 +44,7 @@ class InitThreadFactory : public ThreadFactory {
       const std::shared_ptr<Runnable>& runnable,
       DetachState detachState) const override;
 
-  virtual Thread::id_t getCurrentThreadId() const override {
+  Thread::id_t getCurrentThreadId() const override {
     return threadFactory_->getCurrentThreadId();
   }
 

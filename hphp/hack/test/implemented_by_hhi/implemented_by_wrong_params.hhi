@@ -1,5 +1,5 @@
 <?hh
-function my_implementation(C $c, string $x): int;
+function my_implementation(C $c, ~string $x): int;
 
 final class C {
   <<__ImplementedBy('\my_implementation')>>

@@ -193,6 +193,7 @@ abstract class ThriftLazyAnyTestBase<T> extends WWWTest {
     return $test_cases;
   }
 
+  <<__NeedsConcrete>>
   public static function getBackwardsCompatibilityTestCases(
   ): dict<string, (IThriftStruct, string, string)> {
     $protocol_test_set = static::getProtocolDetails();

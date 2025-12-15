@@ -11,6 +11,9 @@ include "thrift/annotation/cpp.thrift"
 include "thrift/annotation/rust.thrift"
 include "thrift/annotation/thrift.thrift"
 
+@thrift.AllowLegacyMissingUris
+package;
+
 namespace cpp2 facebook.eden
 namespace java com.facebook.eden.thrift
 namespace java.swift com.facebook.eden.thrift

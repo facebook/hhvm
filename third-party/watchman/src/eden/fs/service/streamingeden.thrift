@@ -7,6 +7,10 @@
 
 include "eden/fs/service/eden.thrift"
 include "thrift/annotation/thrift.thrift"
+
+@thrift.AllowLegacyMissingUris
+package;
+
 namespace cpp2 facebook.eden
 namespace java.swift com.facebook.eden.thrift.streaming
 namespace py3 eden.fs.service

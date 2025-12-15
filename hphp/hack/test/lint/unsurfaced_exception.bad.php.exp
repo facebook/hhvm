@@ -1,8 +1,10 @@
 File "unsurfaced_exception.bad.php", line 9, characters 33-34:
-Blindly suppressing exceptions makes the system more difficult to debug.
+Blindly suppressing exceptions hides regressions and makes the system more difficult to debug.
 
-Use `ope($ex, $consequence)` to log how your program recovers. Create the $consequence input with the `causes_the(...)->to(...)` syntax.
+Use standard error logging (`ope($ex, $consequence)`) to record how your program recovers from errors. Create the $consequence input with the `causes_the(...)->to(...)` syntax.
 
 For example, if the `try` block was attempting to send a birthday notification, the `catch ($ex)` block would call `ope($ex, causes_the('birthday notification')->to('not be sent'))` since $ex prevents the birthday notification from being sent. This will create a log message like "FooException causes the birthday notification to not be sent..." that goes on to include the the exception message, trace, metadata and more. Opes makes it easy for you to discover, track, and debug these errors. https://fburl.com/opes-getting-started
+
+If the exception is not an actual error, but is intentionally thrown to control the flow of your code (sometimes called "GOTO programming"), you should exclude it from Opes logging. To do this, use `Ope::markClownyControlFlowException($e, $reason)`. This marks the exception as a control flow event, preventing it from being logged as an error by Opes.
 
 See https://fburl.com/hacklint5811 for guidance and caveats. (Lint[5811])

@@ -135,12 +135,10 @@ bool simplify(Env& env, const ldimmq& inst, Vlabel b, size_t i) {
 ///////////////////////////////////////////////////////////////////////////////
 
 bool simplify(Env& env, const movtqb& inst, Vlabel b, size_t i) {
-  if (env.use_counts[inst.d] != 1)
-    return false;
+  if (env.use_counts[inst.d] != 1) return false;
 
   if (if_inst<Vinstr::movzbq>(env, b, i + 1, [&](const movzbq& ext) {
-      if (ext.s != inst.d)
-        return false;
+      if (ext.s != inst.d) return false;
 
       return simplify_impl(env, b, i, [&] (Vout& v) {
         v << movzbq{Vreg8((Vreg)inst.s), ext.d};

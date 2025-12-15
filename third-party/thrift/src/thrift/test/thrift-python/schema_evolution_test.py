@@ -29,7 +29,7 @@ from schema_evolution_test.thrift_types import (
 from thrift.python.protocol import Protocol
 
 from thrift.python.serializer import deserialize, serialize
-from thrift.python.types import isset, StructOrUnion
+from thrift.python.types import isset_DEPRECATED, StructOrUnion
 
 
 @parameterized_class(
@@ -79,7 +79,7 @@ class TestEvolution(unittest.TestCase):
             self.assertEqual(new_struct.unqualified_new, "")
             self.assertEqual(new_struct.required_new, "")
 
-            self.assertFalse(isset(new_struct)["unqualified_new"])
+            self.assertFalse(isset_DEPRECATED(new_struct)["unqualified_new"])
             self.assertIsNone(new_struct.optional_new)
             self.assertIsNotNone(new_struct.required_new)
         else:
@@ -90,7 +90,7 @@ class TestEvolution(unittest.TestCase):
         self.assertEqual(new_struct.unqualified_added, "")
         self.assertEqual(new_struct.required_added, "")
 
-        self.assertFalse(isset(new_struct)["unqualified_added"])
+        self.assertFalse(isset_DEPRECATED(new_struct)["unqualified_added"])
         self.assertIsNone(new_struct.optional_added)
         self.assertIsNotNone(new_struct.required_added)
 

@@ -98,11 +98,9 @@ class StructMeta(type):
 
         return type.__new__(cls, name, bases, classdict)
 
-    """
-    We set helper functions here since they can't possibly confict with field names
-    """
+    # We set helper functions here since they can't possibly confict with field names
     @staticmethod
-    def isset(struct):
+    def isset_DEPRECATED(struct):
         if isinstance(struct, (_fbthrift_python_Struct, _fbthrift_python_GeneratedError, _fbthrift_python_Union)):
             return _IsSet(type(struct).__name__, _fbthrift_python_isset(struct))
         if hasattr(struct.__class__, "_FBTHRIFT__PYTHON_CLASS"):
@@ -111,6 +109,14 @@ class StructMeta(type):
             return (<Struct>struct)._fbthrift_isset()
         elif isinstance(struct, GeneratedError):
             return (<GeneratedError>struct)._fbthrift_isset()
+
+    @staticmethod
+    def isset(struct):
+        warnings.warn(
+            "isset is deprecated, check whether field equal to non-default value instead",
+            DeprecationWarning,
+        )
+        return StructMeta.isset_DEPRECATED(struct)
 
     @staticmethod
     def update_nested_field(obj, path_to_values):

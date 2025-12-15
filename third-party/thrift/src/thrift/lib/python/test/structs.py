@@ -86,7 +86,12 @@ from thrift.python.mutable_types import (
     to_thrift_set,
 )
 from thrift.python.protocol import Protocol
-from thrift.python.types import isset, Struct, StructOrUnion, update_nested_field
+from thrift.python.types import (
+    isset_DEPRECATED,
+    Struct,
+    StructOrUnion,
+    update_nested_field,
+)
 
 ListT = TypeVar("ListT")
 SetT = TypeVar("SetT")
@@ -135,7 +140,7 @@ class StructTestsParameterized(unittest.TestCase):
         self.serializer: types.ModuleType = self.serializer_module
         # pyre-ignore[8]: has no attribute `serializer_module`
         self.isset: Callable[[StructOrUnion | GeneratedError], dict[str, bool]] = (
-            mutable_isset if self.is_mutable_run else isset
+            mutable_isset if self.is_mutable_run else isset_DEPRECATED
         )
 
     def to_list(self, list_data: list[ListT]) -> list[ListT] | _ThriftListWrapper:
@@ -660,19 +665,23 @@ class StructTests(unittest.TestCase):
         self.assertEqual(len({s1, s2}), 1)
 
         # But isset flags should differ
-        self.assertNotEqual(isset(s1), isset(s2))
+        self.assertNotEqual(isset_DEPRECATED(s1), isset_DEPRECATED(s2))
 
         # s1 has fields explicitly set
-        self.assertTrue(isset(s1)["value"])
-        self.assertTrue(isset(s1)["name"])
-        self.assertTrue(isset(s1)["city"])
-        self.assertEqual(isset(s1), {"name": True, "value": True, "city": True})
+        self.assertTrue(isset_DEPRECATED(s1)["value"])
+        self.assertTrue(isset_DEPRECATED(s1)["name"])
+        self.assertTrue(isset_DEPRECATED(s1)["city"])
+        self.assertEqual(
+            isset_DEPRECATED(s1), {"name": True, "value": True, "city": True}
+        )
 
         # s2 has fields unset (using defaults)
-        self.assertFalse(isset(s2)["value"])
-        self.assertFalse(isset(s2)["name"])
-        self.assertTrue(isset(s2)["city"])
-        self.assertEqual(isset(s2), {"name": False, "value": False, "city": True})
+        self.assertFalse(isset_DEPRECATED(s2)["value"])
+        self.assertFalse(isset_DEPRECATED(s2)["name"])
+        self.assertTrue(isset_DEPRECATED(s2)["city"])
+        self.assertEqual(
+            isset_DEPRECATED(s2), {"name": False, "value": False, "city": True}
+        )
 
     def test_struct_with_map_field_insertion_order(self) -> None:
         """

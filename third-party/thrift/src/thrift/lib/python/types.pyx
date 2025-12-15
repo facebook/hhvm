@@ -2746,13 +2746,20 @@ def fill_specs(*structured_thrift_classes):
             cls._fbthrift_store_field_values()
 
 
-def isset(StructOrError struct):
+def isset_DEPRECATED(StructOrError struct):
     cdef StructInfo info = struct._fbthrift_struct_info
     isset_bytes = struct._fbthrift_data[0]
     return {
         name: bool(isset_bytes[index])
         for name, index in info.name_to_index.items()
     }
+
+def isset(StructOrError struct):
+    warnings.warn(
+        "isset is deprecated, check whether field equal to non-default value instead",
+        DeprecationWarning,
+    )
+    return isset_DEPRECATED(struct)
 
 
 def update_nested_field(Struct obj, path_to_values):

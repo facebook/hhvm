@@ -137,10 +137,10 @@ class PyDeprecatedToPy3ConverterTest(unittest.TestCase):
         converted = py_deprecated_types.OptionalDefaultsStruct()._to_py3()
         # pyre-fixme[6]: Expected `HasIsSet[Variable[thrift.py3.py3_types._T]]` for 1st
         #  param but got `OptionalDefaultsStruct`.
-        self.assertFalse(Struct.isset(converted).sillyString)
+        self.assertFalse(Struct.isset_DEPRECATED(converted).sillyString)
         # pyre-fixme[6]: Expected `HasIsSet[Variable[thrift.py3.py3_types._T]]` for 1st
         #  param but got `OptionalDefaultsStruct`.
-        self.assertFalse(Struct.isset(converted).sillyColor)
+        self.assertFalse(Struct.isset_DEPRECATED(converted).sillyColor)
 
     def test_struct_with_mismatching_field(self) -> None:
         tomayto = py_deprecated_types.Tomayto(
@@ -415,10 +415,10 @@ class PythonToPy3ConverterTest(unittest.TestCase):
         converted = python_types.OptionalDefaultsStruct()._to_py3()
         # pyre-fixme[6]: Expected `HasIsSet[Variable[thrift.py3.py3_types._T]]` for 1st
         #  param but got `OptionalDefaultsStruct`.
-        self.assertFalse(Struct.isset(converted).sillyString)
+        self.assertFalse(Struct.isset_DEPRECATED(converted).sillyString)
         # pyre-fixme[6]: Expected `HasIsSet[Variable[thrift.py3.py3_types._T]]` for 1st
         #  param but got `OptionalDefaultsStruct`.
-        self.assertFalse(Struct.isset(converted).sillyColor)
+        self.assertFalse(Struct.isset_DEPRECATED(converted).sillyColor)
 
     def test_struct_with_mismatching_field(self) -> None:
         tomayto = python_types.Tomayto(

@@ -68,21 +68,21 @@ class StructTests(unittest.TestCase):
         file = deserialize(File, serialized, protocol=Protocol.JSON)
         # pyre-fixme[6]: Expected `HasIsSet[Variable[thrift.py3.types._T]]` for 1st
         #  param but got `File`.
-        self.assertTrue(Struct.isset(file).type)
+        self.assertTrue(Struct.isset_DEPRECATED(file).type)
         # pyre-fixme[6]: Expected `HasIsSet[Variable[thrift.py3.types._T]]` for 1st
         #  param but got `File`.
-        self.assertFalse(Struct.isset(file).permissions)
+        self.assertFalse(Struct.isset_DEPRECATED(file).permissions)
         # required fields are always set
         # pyre-fixme[6]: Expected `HasIsSet[Variable[thrift.py3.types._T]]` for 1st
         #  param but got `File`.
-        self.assertTrue(Struct.isset(file).name)
+        self.assertTrue(Struct.isset_DEPRECATED(file).name)
 
         serialized = b'{"name":"/dev/null"}'
         file = deserialize(File, serialized, protocol=Protocol.JSON)
         self.assertEqual(file.type, Kind.REGULAR)
         # pyre-fixme[6]: Expected `HasIsSet[Variable[thrift.py3.types._T]]` for 1st
         #  param but got `File`.
-        self.assertFalse(Struct.isset(file).type)
+        self.assertFalse(Struct.isset_DEPRECATED(file).type)
 
     def test_property(self) -> None:
         r = Runtime(property="foo", int_list_val=[2, 3, 4])
@@ -96,13 +96,13 @@ class StructTests(unittest.TestCase):
             "Struct.isset(<File>, name=True, permissions=False, type=True)",
             # pyre-fixme[6]: Expected `HasIsSet[Variable[thrift.py3.types._T]]` for
             #  1st param but got `File`.
-            repr(Struct.isset(file)),
+            repr(Struct.isset_DEPRECATED(file)),
         )
         self.assertEqual(
             "Struct.isset(<File>, name=True, permissions=False, type=True)",
             # pyre-fixme[6]: Expected `HasIsSet[Variable[thrift.py3.types._T]]` for
             #  1st param but got `File`.
-            str(Struct.isset(file)),
+            str(Struct.isset_DEPRECATED(file)),
         )
 
     def test_isset_Union(self) -> None:
@@ -110,18 +110,18 @@ class StructTests(unittest.TestCase):
         with self.assertRaises(TypeError):
             # pyre-fixme[6]: Expected `HasIsSet[Variable[thrift.py3.types._T]]` for
             #  1st param but got `Integers`.
-            Struct.isset(i).large
+            Struct.isset_DEPRECATED(i).large
 
     def test_isset_Error(self) -> None:
         e = UnusedError()
         # pyre-fixme[6]: Expected `HasIsSet[Variable[thrift.py3.types._T]]` for 1st
         #  param but got `UnusedError`.
-        self.assertFalse(Struct.isset(e).message)
+        self.assertFalse(Struct.isset_DEPRECATED(e).message)
 
         e = UnusedError(message="ACK")
         # pyre-fixme[6]: Expected `HasIsSet[Variable[thrift.py3.types._T]]` for 1st
         #  param but got `UnusedError`.
-        self.assertTrue(Struct.isset(e).message)
+        self.assertTrue(Struct.isset_DEPRECATED(e).message)
 
     def test_copy(self) -> None:
         x = easy(val=1, an_int=Integers(small=300), name="foo", val_list=[1, 2, 3, 4])
@@ -565,7 +565,7 @@ class NumericalConversionsTests(unittest.TestCase):
 
         def assert_isset(m: mixed) -> None:
             # pyre-fixme[6]: the pyre typing for this is broken in thrift-py3
-            isset = Struct.isset(m)
+            isset = Struct.isset_DEPRECATED(m)
 
             for fld_name, _ in mixed:
                 if not fld_name.startswith("opt_") or "ref" in fld_name:
@@ -621,7 +621,7 @@ class NumericalConversionsTests(unittest.TestCase):
         self.assertEqual(non_opt.opt_pointless_default_str, "bar")
         self.assertEqual(non_opt.opt_pointless_default_int, 4)
         # pyre-fixme[6]: the pyre typing for this is broken in thrift-py3
-        non_opt_isset = Struct.isset(non_opt)
+        non_opt_isset = Struct.isset_DEPRECATED(non_opt)
         for field, field_value in non_opt:
             if not field.startswith("opt_"):
                 continue

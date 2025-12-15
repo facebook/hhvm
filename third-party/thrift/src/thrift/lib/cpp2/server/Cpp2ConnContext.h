@@ -512,8 +512,11 @@ class Cpp2ConnContext : public apache::thrift::server::TConnectionContext {
     };
 
     PeerCred() = default;
+    ~PeerCred() = default;
     PeerCred(const PeerCred&) = default;
     PeerCred& operator=(const PeerCred&) = default;
+    PeerCred(PeerCred&&) = default;
+    PeerCred& operator=(PeerCred&&) = default;
 
     /**
      * Query a socket for peer credentials.

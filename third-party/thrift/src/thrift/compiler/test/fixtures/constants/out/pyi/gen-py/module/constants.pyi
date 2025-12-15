@@ -25,6 +25,8 @@ mymap: __T.Dict[str, str]
 my_apps: __T.List[Company]
 instagram: Internship
 partial_const: Internship
+cities: __T.List[City]
+company_locations: __T.Dict[Company, __T.List[City]]
 kRanges: __T.List[Range]
 internList: __T.List[Internship]
 pod_0: struct1

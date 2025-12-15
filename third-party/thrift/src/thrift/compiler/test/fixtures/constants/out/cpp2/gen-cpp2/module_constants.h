@@ -113,6 +113,12 @@ namespace module_constants {
   /** Glean {"constant": "partial_const"} */
   ::cpp2::Internship const& partial_const();
 
+  /** Glean {"constant": "cities"} */
+  ::std::vector<::cpp2::City> const& cities();
+
+  /** Glean {"constant": "company_locations"} */
+  ::cpp2::CompanyLocationsMap const& company_locations();
+
   /** Glean {"constant": "kRanges"} */
   ::std::vector<::cpp2::Range> const& kRanges();
 
@@ -465,9 +471,9 @@ namespace module_constants {
   /** Glean {"constant": "set_map_initializer"} */
   ::std::set<::std::int32_t> const& set_map_initializer();
 
-  FOLLY_EXPORT ::std::string_view _fbthrift_schema_a9cd9bd2e43ed88c();
-  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_a9cd9bd2e43ed88c_includes();
-  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_a9cd9bd2e43ed88c_uris();
+  FOLLY_EXPORT ::std::string_view _fbthrift_schema_f0644e38f7f249b8();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_f0644e38f7f249b8_includes();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_f0644e38f7f249b8_uris();
 
 } // namespace module_constants
 } // namespace cpp2

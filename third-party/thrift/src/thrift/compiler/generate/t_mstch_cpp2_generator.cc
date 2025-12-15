@@ -299,7 +299,9 @@ struct cpp2_field_generator_context {
 
 class cpp2_generator_context {
  public:
-  static cpp2_generator_context create() { return cpp2_generator_context(); }
+  static cpp2_generator_context create(const t_program* root_program) {
+    return cpp2_generator_context(root_program);
+  }
 
   cpp2_generator_context(cpp2_generator_context&&) = default;
   cpp2_generator_context& operator=(cpp2_generator_context&&) = default;
@@ -321,10 +323,22 @@ class cpp2_generator_context {
     return it == field_context_map_.end() ? nullptr : &it->second;
   }
 
+  /**
+   * The set of included programs whose constants are referenced for field
+   * default values in the root program. These programs' `module_constants.h`
+   * needs to be included in the root program's `module_types.h` for const
+   * referencing.
+   */
+  const std::unordered_set<const t_program*>& field_default_const_ref_programs()
+      const {
+    return field_default_const_ref_programs_;
+  }
+
   void register_visitors(t_whisker_generator::context_visitor& visitor) {
     using context = t_whisker_generator::whisker_generator_visitor_context;
     // Compute field isset indexes and serialization order, which requires a
-    // back-reference to the parent structured definition
+    // back-reference to the parent structured definition. Not using field
+    // visitor here, since it requires forward/backward context.
     visitor.add_structured_definition_visitor(
         [this](const context&, const t_structured& node) {
           cpp2_field_generator_context field_ctx;
@@ -355,11 +369,35 @@ class cpp2_generator_context {
             }
           }
         });
+
+    visitor.add_field_visitor([this](const context& ctx, const t_field& node) {
+      // If this field is in our root program and its default value is a
+      // constant from an included program, track it so we can include the
+      // corresponding `module_constants.h` in `module_types.h`
+      // t_field program is always nullptr, so get it from the parent node
+      if (node.default_value() == nullptr ||
+          static_cast<const t_structured*>(ctx.parent())->program() !=
+              root_program_) {
+        // Field doesn't have a default or originates in an included program
+        return;
+      }
+      // The program the default_value's owning const originates from
+      const t_program* const_program =
+          node.default_value()->get_owner() == nullptr
+          ? nullptr
+          : node.default_value()->get_owner()->program();
+      if (const_program != nullptr && const_program != root_program_) {
+        // Default value is from an included program - track it
+        field_default_const_ref_programs_.emplace(const_program);
+      }
+    });
   }
 
  private:
-  cpp2_generator_context() = default;
+  explicit cpp2_generator_context(const t_program* root)
+      : root_program_{root} {}
 
+  const t_program* root_program_;
   std::unordered_map<const t_type*, bool> is_orderable_memo_;
   cpp_name_resolver resolver_;
 
@@ -372,6 +410,8 @@ class cpp2_generator_context {
   // field_generator_context.
   std::unordered_map<const t_field*, cpp2_field_generator_context>
       field_context_map_;
+
+  std::unordered_set<const t_program*> field_default_const_ref_programs_;
 };
 
 int checked_stoi(const std::string& s, const std::string& msg) {
@@ -450,7 +490,7 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
 
   void initialize_context(context_visitor& visitor) override {
     cpp_context_ = std::make_shared<cpp2_generator_context>(
-        cpp2_generator_context::create());
+        cpp2_generator_context::create(program_));
     cpp_context_->register_visitors(visitor);
   }
 
@@ -496,6 +536,11 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
     auto base = t_whisker_generator::make_prototype_for_program(proto);
     auto def = whisker::dsl::prototype_builder<h_program>::extends(base);
     def.property("qualified_namespace", &cpp2::get_gen_unprefixed_namespace);
+    def.property(
+        "const_referenced_in_field_default?", [this](const t_program& program) {
+          return cpp_context_->field_default_const_ref_programs().contains(
+              &program);
+        });
     return std::move(def).make();
   }
 

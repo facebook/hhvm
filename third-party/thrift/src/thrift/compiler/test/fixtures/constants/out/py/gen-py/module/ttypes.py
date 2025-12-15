@@ -48,7 +48,7 @@ class ThriftEnumWrapper(int):
 all_structs = []
 UTF8STRINGS = bool(0) or sys.version_info.major >= 3
 
-__all__ = ['UTF8STRINGS', 'EmptyEnum', 'City', 'Company', 'Internship', 'Range', 'struct1', 'struct2', 'struct3', 'struct4', 'union1', 'union2', 'MyCompany', 'MyStringIdentifier', 'MyIntIdentifier', 'MyMapIdentifier']
+__all__ = ['UTF8STRINGS', 'EmptyEnum', 'City', 'Company', 'Internship', 'Range', 'struct1', 'struct2', 'struct3', 'struct4', 'union1', 'union2', 'MyCompany', 'MyStringIdentifier', 'MyIntIdentifier', 'MyMapIdentifier', 'CompanyLocationsMap']
 
 class EmptyEnum:
   def __getattr__(self, name): raise AttributeError(name)
@@ -1227,6 +1227,7 @@ MyCompany = Company
 MyStringIdentifier = UnimplementedTypedef()
 MyIntIdentifier = UnimplementedTypedef()
 MyMapIdentifier = UnimplementedTypedef()
+CompanyLocationsMap = UnimplementedTypedef()
 all_structs.append(Internship)
 Internship.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.I32, 'weeks', None, None, 0, ), # 1

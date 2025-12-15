@@ -154,6 +154,36 @@ class module_CONSTANTS implements \IThriftConstants {
 
   /**
    * Original thrift constant:-
+   * list<module.City> cities
+   */
+  <<__Memoize>>
+  public static function cities()[write_props]: \ConstVector<City>{
+    return ImmVector {
+      City::NYC,
+      City::MPK,
+      City::SEA,
+      City::LON,
+    };
+  }
+
+  /**
+   * Original thrift constant:-
+   * module.CompanyLocationsMap company_locations
+   */
+  <<__Memoize>>
+  public static function company_locations()[write_props]: CompanyLocationsMap{
+    return ImmMap {
+      Company::FACEBOOK => ImmVector {
+        City::NYC,
+        City::MPK,
+        City::SEA,
+        City::LON,
+      },
+    };
+  }
+
+  /**
+   * Original thrift constant:-
    * list<module.Range> kRanges
    */
   <<__Memoize>>

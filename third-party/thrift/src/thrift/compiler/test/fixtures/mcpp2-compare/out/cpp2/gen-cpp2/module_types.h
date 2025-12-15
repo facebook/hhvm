@@ -9,6 +9,7 @@
 
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 #include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/includes_types.h"
+#include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/includes_constants.h"
 #include <folly/small_vector.h>
 
 namespace apache::thrift {

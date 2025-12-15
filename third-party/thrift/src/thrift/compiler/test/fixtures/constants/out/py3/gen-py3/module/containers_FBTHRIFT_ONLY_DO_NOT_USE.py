@@ -263,6 +263,102 @@ Sequence.register(List__Company)
 __all__.append('List__Company')
 
 
+class List__City(thrift.py3.types.List):
+    __module__ = _fbthrift__module_name__
+    __slots__ = ()
+
+    def __init__(self, items=None, private_ctor_token=None) -> None:
+        if private_ctor_token is thrift.py3.types._fbthrift_list_private_ctor:
+            _py_obj = items
+        elif isinstance(items, List__City):
+            _py_obj = list(items)
+        elif items is None:
+            _py_obj = []
+        else:
+            check_method = List__City._check_item_type_or_raise
+            _py_obj = [check_method(item) for item in items]
+
+        super().__init__(_py_obj, List__City)
+
+    @staticmethod
+    def _check_item_type_or_raise(item):
+        if not (
+            isinstance(item, _module_types.City) or
+            isinstance(item, thrift.py3.types.BadEnum)
+        ):
+            raise TypeError(f"{item!r} is not of type _module_types.City")
+        return item
+
+    @staticmethod
+    def _check_item_type_or_none(item):
+        if item is None:
+            return None
+        if isinstance(item, _module_types.City):
+            return item
+
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection__List__City()
+
+
+Sequence.register(List__City)
+
+__all__.append('List__City')
+
+
+class Map__Company_List__City(thrift.py3.types.Map):
+    __module__ = _fbthrift__module_name__
+    __slots__ = ()
+
+    _FBTHRIFT_USE_SORTED_REPR = True
+
+    def __init__(self, items=None, private_ctor_token=None) -> None:
+        if private_ctor_token is thrift.py3.types._fbthrift_map_private_ctor:
+            _py_obj = items
+        elif isinstance(items, Map__Company_List__City):
+            _py_obj = dict(items)
+        elif items is None:
+            _py_obj = dict()
+        else:
+            check_key = Map__Company_List__City._check_key_type_or_raise
+            check_val = Map__Company_List__City._check_val_type_or_raise
+            _py_obj = {check_key(k) : check_val(v) for k, v in items.items()}
+
+        super().__init__(_py_obj, Map__Company_List__City)
+
+    @staticmethod
+    def _check_key_type_or_raise(key):
+        if not (
+            isinstance(key, _module_types.Company) or
+            isinstance(key, thrift.py3.types.BadEnum)
+        ):
+            raise TypeError(f"{key!r} is not of type _module_types.Company")
+        return key
+
+    @staticmethod
+    def _check_key_type_or_none(key):
+        if key is None:
+            return None
+        if isinstance(key, _module_types.Company):
+            return key
+
+    @staticmethod
+    def _check_val_type_or_raise(item):
+        if item is None:
+            raise TypeError("None is not of the type _typing.Sequence[_module_types.City]")
+        if not isinstance(item, _module_types.List__City):
+            item = _module_types.List__City(item)
+        return item
+
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection__Map__Company_List__City()
+
+
+Mapping.register(Map__Company_List__City)
+__all__.append('Map__Company_List__City')
+
+
 class List__Range(thrift.py3.types.List):
     __module__ = _fbthrift__module_name__
     __slots__ = ()

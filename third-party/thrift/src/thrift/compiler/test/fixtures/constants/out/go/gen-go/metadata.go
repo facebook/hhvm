@@ -163,6 +163,29 @@ var (
                     UnderlyingType: premadeThriftType_map_string_string,
                 },
         }
+    premadeThriftType_list_module_City =
+        &metadata.ThriftType{
+            TList:
+                &metadata.ThriftListType{
+                    ValueType: premadeThriftType_module_City,
+                },
+        }
+    premadeThriftType_map_module_Company_list_module_City =
+        &metadata.ThriftType{
+            TMap:
+                &metadata.ThriftMapType{
+                    KeyType:   premadeThriftType_module_Company,
+                    ValueType: premadeThriftType_list_module_City,
+                },
+        }
+    premadeThriftType_module_CompanyLocationsMap =
+        &metadata.ThriftType{
+            TTypedef:
+                &metadata.ThriftTypedefType{
+                    Name:           "module.CompanyLocationsMap",
+                    UnderlyingType: premadeThriftType_map_module_Company_list_module_City,
+                },
+        }
 )
 
 // Premade struct metadatas
@@ -396,6 +419,7 @@ var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
     fbthriftThriftTypesMap["module.MyStringIdentifier"] = premadeThriftType_module_MyStringIdentifier
     fbthriftThriftTypesMap["module.MyIntIdentifier"] = premadeThriftType_module_MyIntIdentifier
     fbthriftThriftTypesMap["module.MyMapIdentifier"] = premadeThriftType_module_MyMapIdentifier
+    fbthriftThriftTypesMap["module.CompanyLocationsMap"] = premadeThriftType_module_CompanyLocationsMap
     return fbthriftThriftTypesMap
 }()
 

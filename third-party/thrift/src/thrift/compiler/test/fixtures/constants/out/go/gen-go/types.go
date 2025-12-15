@@ -189,6 +189,109 @@ func ReadMyMapIdentifier(p thrift.Decoder) (MyMapIdentifier, error) {
     return decodeResult, decodeErr
 }
 
+type CompanyLocationsMap = map[Company][]City
+
+func NewCompanyLocationsMap() CompanyLocationsMap {
+    return make(map[Company][]City)
+}
+
+func WriteCompanyLocationsMap(item CompanyLocationsMap, p thrift.Encoder) error {
+    if err := p.WriteMapBegin(thrift.I32, thrift.LIST, len(item)); err != nil {
+        return thrift.PrependError("error writing map begin: ", err)
+    }
+    for k, v := range item {
+        {
+            item := k
+            if err := p.WriteI32(int32(item)); err != nil {
+                return err
+            }
+        }
+    
+        {
+            item := v
+            if err := p.WriteListBegin(thrift.I32, len(item)); err != nil {
+                return thrift.PrependError("error writing list begin: ", err)
+            }
+            for _, v := range item {
+                {
+                    item := v
+                    if err := p.WriteI32(int32(item)); err != nil {
+                        return err
+                    }
+                }
+            }
+            if err := p.WriteListEnd(); err != nil {
+                return thrift.PrependError("error writing list end: ", err)
+            }
+        }
+    }
+    if err := p.WriteMapEnd(); err != nil {
+        return thrift.PrependError("error writing map end: ", err)
+    }
+    return nil
+}
+
+func ReadCompanyLocationsMap(p thrift.Decoder) (CompanyLocationsMap, error) {
+    var decodeResult CompanyLocationsMap
+    decodeErr := func() error {
+        _ /* keyType */, _ /* valueType */, size, err := p.ReadMapBegin()
+        if err != nil {
+            return thrift.PrependError("error reading map begin: ", err)
+        }
+        
+        mapResult := make(map[Company][]City, size)
+        for i := 0; i < size; i++ {
+            var key Company
+            {
+                enumResult, err := p.ReadI32()
+                if err != nil {
+                    return err
+                }
+                result := Company(enumResult)
+                key = result
+            }
+        
+            var value []City
+            {
+                _ /* elemType */, size, err := p.ReadListBegin()
+                if err != nil {
+                    return thrift.PrependError("error reading list begin: ", err)
+                }
+                
+                listResult := make([]City, 0, size)
+                for i := 0; i < size; i++ {
+                    var elem City
+                    {
+                        enumResult, err := p.ReadI32()
+                        if err != nil {
+                            return err
+                        }
+                        result := City(enumResult)
+                        elem = result
+                    }
+                    listResult = append(listResult, elem)
+                }
+                
+                if err := p.ReadListEnd(); err != nil {
+                    return thrift.PrependError("error reading list end: ", err)
+                }
+                result := listResult
+                value = result
+            }
+        
+            mapResult[key] = value
+        }
+        
+        if err := p.ReadMapEnd(); err != nil {
+            return thrift.PrependError("error reading map end: ", err)
+        }
+        result := mapResult
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
+}
+
 type EmptyEnum int32
 
 const (

@@ -185,6 +185,32 @@ var (
                 UnderlyingTypeSpec: premadeCodecTypeSpec_map_string_string,
             },
     }
+    premadeCodecTypeSpec_list_module_City = &thrift.TypeSpec{
+        FullName: "list<module.City>",
+        CodecListSpec:
+            &thrift.CodecListSpec{
+                ElementWireType: thrift.I32,
+                ElementTypeSpec: premadeCodecTypeSpec_module_City,
+            },
+    }
+    premadeCodecTypeSpec_map_module_Company_list_module_City = &thrift.TypeSpec{
+        FullName: "map<module.Company, list<module.City>>",
+        CodecMapSpec:
+            &thrift.CodecMapSpec{
+                KeyTypeSpec:   premadeCodecTypeSpec_module_Company,
+                ValueTypeSpec: premadeCodecTypeSpec_list_module_City,
+                KeyWireType:   thrift.I32,
+                ValueWireType: thrift.LIST,
+            },
+    }
+    premadeCodecTypeSpec_module_CompanyLocationsMap = &thrift.TypeSpec{
+        FullName: "module.CompanyLocationsMap",
+        CodecTypedefSpec:
+            &thrift.CodecTypedefSpec{
+                ScopedName:         "module.CompanyLocationsMap",
+                UnderlyingTypeSpec: premadeCodecTypeSpec_map_module_Company_list_module_City,
+            },
+    }
 )
 
 // Premade struct specs
@@ -591,6 +617,7 @@ var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_MyStringIdentifier.FullName] = premadeCodecTypeSpec_module_MyStringIdentifier
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_MyIntIdentifier.FullName] = premadeCodecTypeSpec_module_MyIntIdentifier
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_MyMapIdentifier.FullName] = premadeCodecTypeSpec_module_MyMapIdentifier
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_CompanyLocationsMap.FullName] = premadeCodecTypeSpec_module_CompanyLocationsMap
     return fbthriftTypeSpecsMap
 }()
 

@@ -14,6 +14,8 @@ from module.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
     List__Map__string_i32,
     Map__string_string,
     List__Company,
+    List__City,
+    Map__Company_List__City,
     List__Range,
     List__Internship,
     List__string,
@@ -41,6 +43,8 @@ mymap = Map__string_string( { "keys": "values" })
 my_apps = List__Company((module.types.Company.FACEBOOK, module.types.Company._Company__FRIEND__FEED, ))
 instagram = module.types.Internship(weeks=12, title="Software Engineer", employer=module.types.Company.INSTAGRAM, compensation=1200, school="Monters University")
 partial_const = module.types.Internship(weeks=8, title="Some Job")
+cities = List__City((module.types.City.NYC, module.types.City.MPK, module.types.City.SEA, module.types.City.LON, ))
+company_locations = Map__Company_List__City( { module.types.Company.FACEBOOK: List__City((module.types.City.NYC, module.types.City.MPK, module.types.City.SEA, module.types.City.LON, )) })
 kRanges = List__Range((module.types.Range(min=1, max=2), module.types.Range(min=5, max=6), ))
 internList = List__Internship((module.types.Internship(weeks=12, title="Software Engineer", employer=module.types.Company.INSTAGRAM, compensation=1200, school="Monters University"), module.types.Internship(weeks=10, title="Sales Intern", employer=module.types.Company.FACEBOOK, compensation=1000), ))
 pod_0 = module.types.struct1()

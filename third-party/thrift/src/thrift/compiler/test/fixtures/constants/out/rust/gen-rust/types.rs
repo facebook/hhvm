@@ -21,6 +21,8 @@ pub type MyIntIdentifier = ::std::primitive::i32;
 
 pub type MyMapIdentifier = ::std::collections::BTreeMap<::std::string::String, ::std::string::String>;
 
+pub type CompanyLocationsMap = ::std::collections::BTreeMap<crate::types::Company, ::std::vec::Vec<crate::types::City>>;
+
 #[derive(Clone, PartialEq)]
 pub struct Internship {
     pub weeks: ::std::primitive::i32,

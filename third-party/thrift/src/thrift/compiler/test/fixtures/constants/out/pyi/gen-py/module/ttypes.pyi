@@ -376,3 +376,4 @@ MyCompany = Company
 MyStringIdentifier = str
 MyIntIdentifier = int
 MyMapIdentifier = __T.Dict[str, str]
+CompanyLocationsMap = __T.Dict[Company, __T.List[City]]

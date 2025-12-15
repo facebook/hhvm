@@ -107,6 +107,7 @@ type MyCompany = Company;
 type MyStringIdentifier = string;
 type MyIntIdentifier = int;
 type MyMapIdentifier = Map<string, string>;
+type CompanyLocationsMap = Map<Company, Vector<City>>;
 /**
  * Original thrift struct:-
  * Internship

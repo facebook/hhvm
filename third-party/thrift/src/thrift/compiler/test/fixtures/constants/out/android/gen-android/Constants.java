@@ -81,37 +81,56 @@ public class Constants {
     partial_const.setTitle("Some Job");
   }
 
+  public static final List<City> cities = new ArrayList<City>();
+  static {
+    cities.add(City.NYC);
+    cities.add(City.MPK);
+    cities.add(City.SEA);
+    cities.add(City.LON);
+  }
+
+  public static final Map<Company,List<City>> company_locations = new HashMap<Company,List<City>>();
+  static {
+    List<City> tmp2 = new ArrayList<City>();
+    tmp2.add(City.NYC);
+    tmp2.add(City.MPK);
+    tmp2.add(City.SEA);
+    tmp2.add(City.LON);
+
+    company_locations.put(Company.FACEBOOK, tmp2);
+  }
+
   public static final List<Range> kRanges = new ArrayList<Range>();
   static {
-    Range tmp2 = new Range();
-    tmp2.setMin(1);
-    tmp2.setMax(2);
-
-    kRanges.add(tmp2);
     Range tmp3 = new Range();
-    tmp3.setMin(5);
-    tmp3.setMax(6);
+    tmp3.setMin(1);
+    tmp3.setMax(2);
 
     kRanges.add(tmp3);
+    Range tmp4 = new Range();
+    tmp4.setMin(5);
+    tmp4.setMax(6);
+
+    kRanges.add(tmp4);
   }
 
   public static final List<Internship> internList = new ArrayList<Internship>();
   static {
-    Internship tmp4 = new Internship();
-    tmp4.setWeeks(12);
-    tmp4.setTitle("Software Engineer");
-    tmp4.setEmployer(Company.INSTAGRAM);
-    tmp4.setCompensation(1200);
-    tmp4.setSchool("Monters University");
-
-    internList.add(tmp4);
     Internship tmp5 = new Internship();
-    tmp5.setWeeks(10);
-    tmp5.setTitle("Sales Intern");
-    tmp5.setEmployer(Company.FACEBOOK);
-    tmp5.setCompensation(1000);
+    tmp5.setWeeks(12);
+    tmp5.setTitle("Software Engineer");
+    tmp5.setEmployer(Company.INSTAGRAM);
+    tmp5.setCompensation(1200);
+    tmp5.setSchool("Monters University");
 
     internList.add(tmp5);
+    Internship tmp6 = new Internship();
+    tmp6.setWeeks(10);
+    tmp6.setTitle("Sales Intern");
+    tmp6.setEmployer(Company.FACEBOOK);
+    tmp6.setCompensation(1000);
+
+    internList.add(tmp6);
   }
 
   public static final struct1 pod_0 = new struct1();
@@ -138,91 +157,91 @@ public class Constants {
   static {
     pod_2.setA(98);
     pod_2.setB("gaz");
-    struct1 tmp6 = new struct1();
-    tmp6.setA(12);
-    tmp6.setB("bar");
+    struct1 tmp7 = new struct1();
+    tmp7.setA(12);
+    tmp7.setB("bar");
 
-    pod_2.setC(tmp6);
-    List<Integer> tmp7 = new ArrayList<Integer>();
-    tmp7.add(11);
-    tmp7.add(22);
-    tmp7.add(33);
+    pod_2.setC(tmp7);
+    List<Integer> tmp8 = new ArrayList<Integer>();
+    tmp8.add(11);
+    tmp8.add(22);
+    tmp8.add(33);
 
-    pod_2.setD(tmp7);
+    pod_2.setD(tmp8);
   }
 
   public static final struct2 pod_trailing_commas = new struct2();
   static {
     pod_trailing_commas.setA(98);
     pod_trailing_commas.setB("gaz");
-    struct1 tmp8 = new struct1();
-    tmp8.setA(12);
-    tmp8.setB("bar");
+    struct1 tmp9 = new struct1();
+    tmp9.setA(12);
+    tmp9.setB("bar");
 
-    pod_trailing_commas.setC(tmp8);
-    List<Integer> tmp9 = new ArrayList<Integer>();
-    tmp9.add(11);
-    tmp9.add(22);
-    tmp9.add(33);
+    pod_trailing_commas.setC(tmp9);
+    List<Integer> tmp10 = new ArrayList<Integer>();
+    tmp10.add(11);
+    tmp10.add(22);
+    tmp10.add(33);
 
-    pod_trailing_commas.setD(tmp9);
+    pod_trailing_commas.setD(tmp10);
   }
 
   public static final struct2 pod_s_2 = new struct2();
   static {
     pod_s_2.setA(98);
     pod_s_2.setB("gaz");
-    struct1 tmp10 = new struct1();
-    tmp10.setA(12);
-    tmp10.setB("bar");
+    struct1 tmp11 = new struct1();
+    tmp11.setA(12);
+    tmp11.setB("bar");
 
-    pod_s_2.setC(tmp10);
-    List<Integer> tmp11 = new ArrayList<Integer>();
-    tmp11.add(11);
-    tmp11.add(22);
-    tmp11.add(33);
+    pod_s_2.setC(tmp11);
+    List<Integer> tmp12 = new ArrayList<Integer>();
+    tmp12.add(11);
+    tmp12.add(22);
+    tmp12.add(33);
 
-    pod_s_2.setD(tmp11);
+    pod_s_2.setD(tmp12);
   }
 
   public static final struct3 pod_3 = new struct3();
   static {
     pod_3.setA("abc");
     pod_3.setB(456);
-    struct2 tmp12 = new struct2();
-    tmp12.setA(888);
-    struct1 tmp13 = new struct1();
-    tmp13.setB("gaz");
+    struct2 tmp13 = new struct2();
+    tmp13.setA(888);
+    struct1 tmp14 = new struct1();
+    tmp14.setB("gaz");
 
-    tmp12.setC(tmp13);
-    List<Integer> tmp14 = new ArrayList<Integer>();
-    tmp14.add(1);
-    tmp14.add(2);
-    tmp14.add(3);
+    tmp13.setC(tmp14);
+    List<Integer> tmp15 = new ArrayList<Integer>();
+    tmp15.add(1);
+    tmp15.add(2);
+    tmp15.add(3);
 
-    tmp12.setD(tmp14);
+    tmp13.setD(tmp15);
 
-    pod_3.setC(tmp12);
+    pod_3.setC(tmp13);
   }
 
   public static final struct3 pod_s_3 = new struct3();
   static {
     pod_s_3.setA("abc");
     pod_s_3.setB(456);
-    struct2 tmp15 = new struct2();
-    tmp15.setA(888);
-    struct1 tmp16 = new struct1();
-    tmp16.setB("gaz");
+    struct2 tmp16 = new struct2();
+    tmp16.setA(888);
+    struct1 tmp17 = new struct1();
+    tmp17.setB("gaz");
 
-    tmp15.setC(tmp16);
-    List<Integer> tmp17 = new ArrayList<Integer>();
-    tmp17.add(1);
-    tmp17.add(2);
-    tmp17.add(3);
+    tmp16.setC(tmp17);
+    List<Integer> tmp18 = new ArrayList<Integer>();
+    tmp18.add(1);
+    tmp18.add(2);
+    tmp18.add(3);
 
-    tmp15.setD(tmp17);
+    tmp16.setD(tmp18);
 
-    pod_s_3.setC(tmp15);
+    pod_s_3.setC(tmp16);
   }
 
   public static final struct4 pod_4 = new struct4();
@@ -258,34 +277,34 @@ public class Constants {
 
   public static final union2 u_2_3 = new union2();
   static {
-    struct1 tmp18 = new struct1();
-    tmp18.setA(8);
-    tmp18.setB("abacabb");
+    struct1 tmp19 = new struct1();
+    tmp19.setA(8);
+    tmp19.setB("abacabb");
 
-    u_2_3.setS(tmp18);
+    u_2_3.setS(tmp19);
   }
 
   public static final union2 u_2_4 = new union2();
   static {
-    union1 tmp19 = new union1();
-    tmp19.setI(43);
+    union1 tmp20 = new union1();
+    tmp20.setI(43);
 
-    u_2_4.setU(tmp19);
+    u_2_4.setU(tmp20);
   }
 
   public static final union2 u_2_5 = new union2();
   static {
-    union1 tmp20 = new union1();
-    tmp20.setD(9.8);
+    union1 tmp21 = new union1();
+    tmp21.setD(9.8);
 
-    u_2_5.setU(tmp20);
+    u_2_5.setU(tmp21);
   }
 
   public static final union2 u_2_6 = new union2();
   static {
-    union1 tmp21 = new union1();
+    union1 tmp22 = new union1();
 
-    u_2_6.setU(tmp21);
+    u_2_6.setU(tmp22);
   }
 
   public static final String apostrophe = "'";

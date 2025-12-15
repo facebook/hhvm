@@ -159,7 +159,11 @@ mstch::node mstch_field::value() {
     return mstch::node();
   }
   return context_.const_value_factory->make_mstch_object(
-      field_->default_value(), context_, pos_, nullptr, nullptr);
+      field_->default_value(),
+      context_,
+      pos_,
+      /*current_const=*/nullptr,
+      /*expected_type=*/&field_->type().deref());
 }
 
 mstch::node mstch_const_map_element::element_key() {

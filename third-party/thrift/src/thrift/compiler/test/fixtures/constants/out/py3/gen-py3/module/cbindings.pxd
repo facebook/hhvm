@@ -207,6 +207,8 @@ cdef extern from "thrift/compiler/test/fixtures/constants/gen-cpp2/module_consta
     cdef vector[cCompany] cmy_apps "::cpp2::module_constants::my_apps"()
     cdef cInternship cinstagram "::cpp2::module_constants::instagram"()
     cdef cInternship cpartial_const "::cpp2::module_constants::partial_const"()
+    cdef vector[cCity] ccities "::cpp2::module_constants::cities"()
+    cdef cmap[cCompany,vector[cCity]] ccompany_locations "::cpp2::module_constants::company_locations"()
     cdef vector[cRange] ckRanges "::cpp2::module_constants::kRanges"()
     cdef vector[cInternship] cinternList "::cpp2::module_constants::internList"()
     cdef cstruct1 cpod_0 "::cpp2::module_constants::pod_0"()

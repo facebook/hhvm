@@ -68,6 +68,8 @@ from module.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
     List__Map__string_i32,
     Map__string_string,
     List__Company,
+    List__City,
+    Map__Company_List__City,
     List__Range,
     List__Internship,
     List__string,
@@ -1398,6 +1400,50 @@ cdef object List__Company__from_cpp(const vector[_module_cbindings.cCompany]& c_
         py_list.append(translate_cpp_enum_to_python(Company, <int> c_vec[idx]))
     return List__Company(py_list, thrift.py3.types._fbthrift_list_private_ctor)
 
+cdef vector[_module_cbindings.cCity] List__City__make_instance(object items) except *:
+    cdef vector[_module_cbindings.cCity] c_inst
+    if items is None:
+        return cmove(c_inst)
+    for item in items:
+        if not isinstance(item, City):
+            raise TypeError(f"{item!r} is not of type City")
+        c_inst.push_back(<_module_cbindings.cCity><int>item)
+    return cmove(c_inst)
+
+cdef object List__City__from_cpp(const vector[_module_cbindings.cCity]& c_vec) except *:
+    cdef list py_list = []
+    cdef int idx = 0
+    for idx in range(c_vec.size()):
+        py_list.append(translate_cpp_enum_to_python(City, <int> c_vec[idx]))
+    return List__City(py_list, thrift.py3.types._fbthrift_list_private_ctor)
+
+cdef cmap[_module_cbindings.cCompany,vector[_module_cbindings.cCity]] Map__Company_List__City__make_instance(object items) except *:
+    cdef cmap[_module_cbindings.cCompany,vector[_module_cbindings.cCity]] c_inst
+    cdef _module_cbindings.cCompany c_key
+    if items is None:
+        return cmove(c_inst)
+    for key, item in items.items():
+        if not isinstance(key, Company):
+            raise TypeError(f"{key!r} is not of type Company")
+        c_key = <_module_cbindings.cCompany><int>key
+        if item is None:
+            raise TypeError("None is not of type _typing.Sequence[City]")
+        if not isinstance(item, List__City):
+            item = List__City(item)
+
+        c_inst[c_key] = List__City__make_instance(item)
+    return cmove(c_inst)
+
+cdef object Map__Company_List__City__from_cpp(const cmap[_module_cbindings.cCompany,vector[_module_cbindings.cCity]]& c_map) except *:
+    cdef dict py_items = {}
+    cdef __map_iter[cmap[_module_cbindings.cCompany,vector[_module_cbindings.cCity]]] iter = __map_iter[cmap[_module_cbindings.cCompany,vector[_module_cbindings.cCity]]](c_map)
+    cdef _module_cbindings.cCompany ckey
+    cdef vector[_module_cbindings.cCity] cval
+    for i in range(c_map.size()):
+        iter.genNextKeyVal(ckey, cval)
+        py_items[translate_cpp_enum_to_python(Company, <int> ckey)] = List__City__from_cpp(cval)
+    return Map__Company_List__City(py_items, private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor)
+
 cdef vector[_module_cbindings.cRange] List__Range__make_instance(object items) except *:
     cdef vector[_module_cbindings.cRange] c_inst
     if items is None:
@@ -1589,6 +1635,8 @@ mymap = Map__string_string__from_cpp(_module_cbindings.cmymap())
 my_apps = List__Company__from_cpp(_module_cbindings.cmy_apps())
 instagram = Internship._create_FBTHRIFT_ONLY_DO_NOT_USE(constant_shared_ptr(_module_cbindings.cinstagram()))
 partial_const = Internship._create_FBTHRIFT_ONLY_DO_NOT_USE(constant_shared_ptr(_module_cbindings.cpartial_const()))
+cities = List__City__from_cpp(_module_cbindings.ccities())
+company_locations = Map__Company_List__City__from_cpp(_module_cbindings.ccompany_locations())
 kRanges = List__Range__from_cpp(_module_cbindings.ckRanges())
 internList = List__Internship__from_cpp(_module_cbindings.cinternList())
 pod_0 = struct1._create_FBTHRIFT_ONLY_DO_NOT_USE(constant_shared_ptr(_module_cbindings.cpod_0()))
@@ -1665,3 +1713,4 @@ MyCompany = Company
 MyStringIdentifier = str
 MyIntIdentifier = int
 MyMapIdentifier = Map__string_string
+CompanyLocationsMap = Map__Company_List__City

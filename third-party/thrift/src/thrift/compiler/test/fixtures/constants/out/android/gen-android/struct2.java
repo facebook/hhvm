@@ -185,15 +185,15 @@ public class struct2 implements TBase, java.io.Serializable, Cloneable {
         case D:
           if (__field.type == TType.LIST) {
             {
-              TList _list22 = iprot.readListBegin();
-              tmp_d = new ArrayList<Integer>(Math.max(0, _list22.size));
-              for (int _i23 = 0; 
-                   (_list22.size < 0) ? iprot.peekList() : (_i23 < _list22.size); 
-                   ++_i23)
+              TList _list23 = iprot.readListBegin();
+              tmp_d = new ArrayList<Integer>(Math.max(0, _list23.size));
+              for (int _i24 = 0; 
+                   (_list23.size < 0) ? iprot.peekList() : (_i24 < _list23.size); 
+                   ++_i24)
               {
-                Integer _elem24;
-                _elem24 = iprot.readI32();
-                tmp_d.add(_elem24);
+                Integer _elem25;
+                _elem25 = iprot.readI32();
+                tmp_d.add(_elem25);
               }
               iprot.readListEnd();
             }
@@ -243,8 +243,8 @@ public class struct2 implements TBase, java.io.Serializable, Cloneable {
       oprot.writeFieldBegin(D_FIELD_DESC);
       {
         oprot.writeListBegin(new TList(TType.I32, this.d.size()));
-        for (Integer _iter25 : this.d)        {
-          oprot.writeI32(_iter25);
+        for (Integer _iter26 : this.d)        {
+          oprot.writeI32(_iter26);
         }
         oprot.writeListEnd();
       }

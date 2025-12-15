@@ -88,6 +88,30 @@ public final class ModuleConstants {
       return new test.fixtures.constants.Internship.Builder().setWeeks(8).setTitle("Some Job").build();
     }
 
+    public static final List<test.fixtures.constants.City> CITIES = construct_CITIES();
+
+    private static List<test.fixtures.constants.City> construct_CITIES() {
+      return ImmutableList.<test.fixtures.constants.City>builder()
+        .add(test.fixtures.constants.City.NYC)
+        .add(test.fixtures.constants.City.MPK)
+        .add(test.fixtures.constants.City.SEA)
+        .add(test.fixtures.constants.City.LON)
+        .build();
+    }
+
+    public static final Map<test.fixtures.constants.Company, List<test.fixtures.constants.City>> COMPANY_LOCATIONS = construct_COMPANY_LOCATIONS();
+
+    private static Map<test.fixtures.constants.Company, List<test.fixtures.constants.City>> construct_COMPANY_LOCATIONS() {
+      return ImmutableMap.<test.fixtures.constants.Company, List<test.fixtures.constants.City>>builder()
+        .put(test.fixtures.constants.Company.FACEBOOK, ImmutableList.<test.fixtures.constants.City>builder()
+        .add(test.fixtures.constants.City.NYC)
+        .add(test.fixtures.constants.City.MPK)
+        .add(test.fixtures.constants.City.SEA)
+        .add(test.fixtures.constants.City.LON)
+        .build())
+        .build();
+    }
+
     public static final List<test.fixtures.constants.Range> K_RANGES = construct_K_RANGES();
 
     private static List<test.fixtures.constants.Range> construct_K_RANGES() {

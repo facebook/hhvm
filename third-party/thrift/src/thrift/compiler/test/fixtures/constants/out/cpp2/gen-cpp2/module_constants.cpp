@@ -55,6 +55,22 @@ namespace module_constants {
   return *instance;
 }
 
+::std::vector<::cpp2::City> const& cities() {
+  static folly::Indestructible<::std::vector<::cpp2::City>> const instance{ std::initializer_list<::cpp2::City>{  ::cpp2::City::NYC,
+   ::cpp2::City::MPK,
+   ::cpp2::City::SEA,
+   ::cpp2::City::LON } };
+  return *instance;
+}
+
+::cpp2::CompanyLocationsMap const& company_locations() {
+  static folly::Indestructible<::cpp2::CompanyLocationsMap> const instance{ std::initializer_list<::cpp2::CompanyLocationsMap::value_type>{ {  ::cpp2::Company::FACEBOOK, std::initializer_list<::cpp2::City>{  ::cpp2::City::NYC,
+   ::cpp2::City::MPK,
+   ::cpp2::City::SEA,
+   ::cpp2::City::LON } } } };
+  return *instance;
+}
+
 ::std::vector<::cpp2::Range> const& kRanges() {
   static folly::Indestructible<::std::vector<::cpp2::Range>> const instance{ std::initializer_list<::cpp2::Range>{ ::apache::thrift::detail::make_structured_constant<::cpp2::Range>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::min>(static_cast<::std::int32_t>(1)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::max>(static_cast<::std::int32_t>(2))),
   ::apache::thrift::detail::make_structured_constant<::cpp2::Range>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::min>(static_cast<::std::int32_t>(5)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::max>(static_cast<::std::int32_t>(6))) } };
@@ -325,13 +341,13 @@ namespace module_constants {
 }
 
 
-::std::string_view _fbthrift_schema_a9cd9bd2e43ed88c() {
+::std::string_view _fbthrift_schema_f0644e38f7f249b8() {
   return "";
 }
-::folly::Range<const ::std::string_view*> _fbthrift_schema_a9cd9bd2e43ed88c_includes() {
+::folly::Range<const ::std::string_view*> _fbthrift_schema_f0644e38f7f249b8_includes() {
   return {};
 }
-::folly::Range<const ::std::string_view*> _fbthrift_schema_a9cd9bd2e43ed88c_uris() {
+::folly::Range<const ::std::string_view*> _fbthrift_schema_f0644e38f7f249b8_uris() {
   return {};
 }
 

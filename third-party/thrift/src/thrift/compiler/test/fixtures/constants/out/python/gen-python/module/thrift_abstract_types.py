@@ -263,3 +263,4 @@ _fbthrift_union2 = union2
 MyStringIdentifier = builtins.str
 MyIntIdentifier = builtins.int
 MyMapIdentifier = _typing.Mapping[builtins.str, builtins.str]
+CompanyLocationsMap = _typing.Mapping[_fbthrift_Company, _typing.Sequence[_fbthrift_City]]

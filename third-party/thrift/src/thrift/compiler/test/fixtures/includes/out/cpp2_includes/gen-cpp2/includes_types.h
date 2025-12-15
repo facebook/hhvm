@@ -9,6 +9,7 @@
 
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 #include "thrift/compiler/test/fixtures/includes/gen-cpp2/transitive_types.h"
+#include "thrift/compiler/test/fixtures/includes/gen-cpp2/transitive_constants.h"
 
 namespace apache::thrift {
 namespace ident {
@@ -95,7 +96,7 @@ class Included final  {
 
   Included() :
       __fbthrift_field_MyIntField(static_cast<::std::int64_t>(0)),
-      __fbthrift_field_MyTransitiveField(::apache::thrift::detail::make_structured_constant<::cpp2::Foo>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::a>(static_cast<::std::int64_t>(2)))) {
+      __fbthrift_field_MyTransitiveField(::cpp2::transitive_constants::ExampleFoo()) {
   }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]

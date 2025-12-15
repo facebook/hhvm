@@ -26,6 +26,9 @@
 {{/if (has_compiler_option? "frozen")}}
 {{#program:thrift_includes}}
 #include "{{program:include_prefix}}{{program:name}}_types.h"
+  {{#if program:const_referenced_in_field_default?}}
+#include "{{program:include_prefix}}{{program:name}}_constants.h"
+  {{/if program:const_referenced_in_field_default?}}
 {{/program:thrift_includes}}
 {{#each program:cpp_includes as |cpp_include|}}
 #include {{cpp_include}}

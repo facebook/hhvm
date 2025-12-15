@@ -84,6 +84,22 @@ my_apps = [
   Company.__FRIEND__FEED,
 ]
 
+cities = [
+  City.NYC,
+  City.MPK,
+  City.SEA,
+  City.LON,
+]
+
+company_locations = {
+  Company.FACEBOOK: [
+  City.NYC,
+  City.MPK,
+  City.SEA,
+  City.LON,
+],
+}
+
 apostrophe = "'"
 
 tripleApostrophe = "'''"

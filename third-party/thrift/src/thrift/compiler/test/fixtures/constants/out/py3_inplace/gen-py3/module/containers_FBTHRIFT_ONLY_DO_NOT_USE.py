@@ -10,6 +10,8 @@ from module.types_inplace_FBTHRIFT_ONLY_DO_NOT_USE import (
     List__Map__string_i32,
     Map__string_string,
     List__Company,
+    List__City,
+    Map__Company_List__City,
     List__Range,
     List__Internship,
     List__string,

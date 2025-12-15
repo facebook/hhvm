@@ -13,7 +13,7 @@ from thrift.protocol.TProtocol import TProtocolException
 
 
 
-from .ttypes import UTF8STRINGS, EmptyEnum, City, Company, Internship, Range, struct1, struct2, struct3, struct4, union1, union2, MyCompany, MyStringIdentifier, MyIntIdentifier, MyMapIdentifier
+from .ttypes import UTF8STRINGS, EmptyEnum, City, Company, Internship, Range, struct1, struct2, struct3, struct4, union1, union2, MyCompany, MyStringIdentifier, MyIntIdentifier, MyMapIdentifier, CompanyLocationsMap
 
 myInt = 1337
 
@@ -75,6 +75,22 @@ partial_const = Internship(**{
   "weeks" : 8,
   "title" : "Some Job",
 })
+
+cities = [
+    0,
+    1,
+    2,
+    3,
+]
+
+company_locations = {
+    0 : [
+        0,
+        1,
+        2,
+        3,
+  ],
+}
 
 kRanges = [
   Range(**{

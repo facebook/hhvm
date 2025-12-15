@@ -83,6 +83,12 @@ const Internship instagram = {
 
 const Internship partial_const = {"weeks": 8, "title": "Some Job"};
 
+const list<City> cities = [NYC, MPK, SEA, LON];
+typedef map<Company, list<City>> CompanyLocationsMap
+const CompanyLocationsMap company_locations = {
+  Company.FACEBOOK: cities,
+};
+
 struct Range {
   1: required i32 min;
   2: required i32 max;

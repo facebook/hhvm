@@ -368,6 +368,122 @@ Sequence.register(List__Company)
 
 __all__.append("List__Company")
 
+class List__City(thrift.py3.types.List):
+    __module__ = _fbthrift__module_name__
+    __slots__ = ()
+
+    def __init__(self, items=None, private_ctor_token=None) -> None:
+        if private_ctor_token is thrift.py3.types._fbthrift_list_private_ctor:
+            _py_obj = items
+        elif isinstance(items, List__City):
+            _py_obj = list(items)
+        elif items is None:
+            _py_obj = []
+        else:
+            check_method = List__City._check_item_type_or_raise
+            _py_obj = [check_method(item) for item in items]
+
+        super().__init__(_py_obj, List__City)
+
+    @staticmethod
+    def _check_item_type_or_raise(item):
+        if not (
+            isinstance(item, City) or
+            isinstance(item, thrift.py3.types.BadEnum)
+        ):
+            raise TypeError(f"{item!r} is not of type City")
+        return item
+
+    @staticmethod
+    def _check_item_type_or_none(item):
+        if item is None:
+            return None
+        if isinstance(item, City):
+            return item
+
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection__List__City()
+
+    @staticmethod
+    def from_python(python_list: thrift.python.types.List) -> List__City:
+        _items = list(python_list)
+        return List__City(
+            items=_items,
+            private_ctor_token=thrift.py3.types._fbthrift_list_private_ctor,
+        )
+
+
+Sequence.register(List__City)
+
+
+__all__.append("List__City")
+
+class Map__Company_List__City(thrift.py3.types.Map):
+    __module__ = _fbthrift__module_name__
+    __slots__ = ()
+
+    _FBTHRIFT_USE_SORTED_REPR = True
+
+    def __init__(self, items=None, private_ctor_token=None) -> None:
+        if private_ctor_token is thrift.py3.types._fbthrift_map_private_ctor:
+            _py_obj = items
+        elif isinstance(items, Map__Company_List__City):
+            _py_obj = dict(items)
+        elif items is None:
+            _py_obj = dict()
+        else:
+            check_key = Map__Company_List__City._check_key_type_or_raise
+            check_val = Map__Company_List__City._check_val_type_or_raise
+            _py_obj = {check_key(k) : check_val(v) for k, v in items.items()}
+
+        super().__init__(_py_obj, Map__Company_List__City)
+
+    @staticmethod
+    def _check_key_type_or_raise(key):
+        if not (
+            isinstance(key, Company) or
+            isinstance(key, thrift.py3.types.BadEnum)
+        ):
+            raise TypeError(f"{key!r} is not of type Company")
+        return key
+
+    @staticmethod
+    def _check_key_type_or_none(key):
+        if key is None:
+            return None
+        if isinstance(key, Company):
+            return key
+
+    @staticmethod
+    def _check_val_type_or_raise(item):
+        if item is None:
+            raise TypeError("None is not of the type _typing.Sequence[City]")
+        if not isinstance(item, List__City):
+            item = List__City(item)
+        return item
+
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection__Map__Company_List__City()
+
+    @staticmethod
+    def from_python(python_map: thrift.python.types.Map) -> Map__Company_List__City:
+        _keys = python_map.keys()
+        _values = (
+            List__City.from_python(item)
+            for item in python_map.values()
+        )
+        return Map__Company_List__City(
+            items=dict(zip(_keys, _values)),
+            private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor,
+        )
+
+
+Mapping.register(Map__Company_List__City)
+
+__all__.append("Map__Company_List__City")
+
 class List__Range(thrift.py3.types.List):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
@@ -1865,6 +1981,8 @@ mymap = Map__string_string( { "keys": "values" })
 my_apps = List__Company((Company.FACEBOOK, Company._Company__FRIEND__FEED, ))
 instagram = Internship(weeks=12, title="Software Engineer", employer=Company.INSTAGRAM, compensation=1200, school="Monters University")
 partial_const = Internship(weeks=8, title="Some Job")
+cities = List__City((City.NYC, City.MPK, City.SEA, City.LON, ))
+company_locations = Map__Company_List__City( { Company.FACEBOOK: List__City((City.NYC, City.MPK, City.SEA, City.LON, )) })
 kRanges = List__Range((Range(min=1, max=2), Range(min=5, max=6), ))
 internList = List__Internship((Internship(weeks=12, title="Software Engineer", employer=Company.INSTAGRAM, compensation=1200, school="Monters University"), Internship(weeks=10, title="Sales Intern", employer=Company.FACEBOOK, compensation=1000), ))
 pod_0 = struct1()

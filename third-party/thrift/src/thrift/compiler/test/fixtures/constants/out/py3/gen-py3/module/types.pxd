@@ -183,6 +183,12 @@ cdef object Map__string_string__from_cpp(const cmap[string,string]&) except *
 cdef vector[_module_cbindings.cCompany] List__Company__make_instance(object items) except *
 cdef object List__Company__from_cpp(const vector[_module_cbindings.cCompany]&) except *
 
+cdef vector[_module_cbindings.cCity] List__City__make_instance(object items) except *
+cdef object List__City__from_cpp(const vector[_module_cbindings.cCity]&) except *
+
+cdef cmap[_module_cbindings.cCompany,vector[_module_cbindings.cCity]] Map__Company_List__City__make_instance(object items) except *
+cdef object Map__Company_List__City__from_cpp(const cmap[_module_cbindings.cCompany,vector[_module_cbindings.cCity]]&) except *
+
 cdef vector[_module_cbindings.cRange] List__Range__make_instance(object items) except *
 cdef object List__Range__from_cpp(const vector[_module_cbindings.cRange]&) except *
 

@@ -451,6 +451,20 @@ def get_reflection__List__Company() -> __ListSpec :
         kind=__NumberType.NOT_A_NUMBER,
     )
 
+def get_reflection__List__City() -> __ListSpec :
+    return __ListSpec._fbthrift_create(
+        value=_module_types.City,
+        kind=__NumberType.NOT_A_NUMBER,
+    )
+
+def get_reflection__Map__Company_List__City() -> __MapSpec:
+    return __MapSpec._fbthrift_create(
+        key=_module_types.Company,
+        key_kind=__NumberType.NOT_A_NUMBER,
+        value=_module_types.List__City,
+        value_kind=__NumberType.NOT_A_NUMBER,
+    )
+
 def get_reflection__List__Range() -> __ListSpec :
     return __ListSpec._fbthrift_create(
         value=_module_types.Range,

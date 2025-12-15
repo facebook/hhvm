@@ -781,6 +781,10 @@ instagram = Internship(weeks=12, title="Software Engineer", employer=Company.INS
 
 partial_const = Internship(weeks=8, title="Some Job")
 
+cities = _fbthrift_python_types.List(_fbthrift_python_types.EnumTypeInfo(City), (City.NYC, City.MPK, City.SEA, City.LON, ))
+
+company_locations = _fbthrift_python_types.Map(_fbthrift_python_types.EnumTypeInfo(Company), _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.EnumTypeInfo(City)), { Company.FACEBOOK: _fbthrift_python_types.List(_fbthrift_python_types.EnumTypeInfo(City), (City.NYC, City.MPK, City.SEA, City.LON, ))})
+
 kRanges = _fbthrift_python_types.List(_fbthrift_python_types.StructTypeInfo(Range), (Range(min=1, max=2), Range(min=5, max=6), ))
 
 internList = _fbthrift_python_types.List(_fbthrift_python_types.StructTypeInfo(Internship), (Internship(weeks=12, title="Software Engineer", employer=Company.INSTAGRAM, compensation=float(1200), school="Monters University"), Internship(weeks=10, title="Sales Intern", employer=Company.FACEBOOK, compensation=float(1000)), ))
@@ -928,3 +932,4 @@ set_map_initializer = _fbthrift_python_types.Set(_fbthrift_python_types.typeinfo
 MyStringIdentifier = str
 MyIntIdentifier = int
 MyMapIdentifier = _fbthrift_python_types.MapTypeFactory(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_string)
+CompanyLocationsMap = _fbthrift_python_types.MapTypeFactory(_fbthrift_python_types.EnumTypeInfo(Company), _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.EnumTypeInfo(City)))

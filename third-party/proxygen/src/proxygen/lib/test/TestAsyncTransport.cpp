@@ -535,8 +535,7 @@ void TestAsyncTransport::fireNextReadEvent() {
 
   // Trigger fireNextReadEvent() to be called the next time around the event
   // loop.
-  eventBase_->runInLoop(
-      std::bind(&TestAsyncTransport::fireNextReadEvent, this));
+  eventBase_->runInLoop([this] { fireNextReadEvent(); });
 }
 
 void TestAsyncTransport::fireOneReadEvent() {

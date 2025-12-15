@@ -306,7 +306,7 @@ class FakeHTTPCodecCallback : public HTTPCodec::Callback {
   }
 
   std::function<bool()> getStopFn() {
-    return std::bind(&FakeHTTPCodecCallback::sessionError, this);
+    return [this] { return sessionError(); };
   }
 
   void setSessionStreamId(HTTPCodec::StreamID streamId) {

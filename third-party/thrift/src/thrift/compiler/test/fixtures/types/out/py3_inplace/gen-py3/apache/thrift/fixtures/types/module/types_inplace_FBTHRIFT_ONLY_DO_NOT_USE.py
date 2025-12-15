@@ -1324,6 +1324,9 @@ class decorated_struct(thrift.py3.types.Struct):
 
 
     def __init__(self, *args, **kwargs) -> None:
+        _fbthrift__maybe_str_enum = kwargs.get("field", None)
+        if isinstance(_fbthrift__maybe_str_enum, enum.Enum):
+            kwargs["field"] = _fbthrift__maybe_str_enum.value
         try:
             self._fbthrift__inner = _fbthrift_python_types.decorated_struct(*args, **kwargs)
         except TypeError:
@@ -2154,6 +2157,9 @@ class ComplexString(thrift.py3.types.Struct):
 
 
     def __init__(self, *args, **kwargs) -> None:
+        _fbthrift__maybe_str_enum = kwargs.get("a", None)
+        if isinstance(_fbthrift__maybe_str_enum, enum.Enum):
+            kwargs["a"] = _fbthrift__maybe_str_enum.value
         try:
             self._fbthrift__inner = _fbthrift_python_types.ComplexString(*args, **kwargs)
         except TypeError:
@@ -2267,6 +2273,9 @@ class ComplexNestedWithDefault(thrift.py3.types.Struct):
 
 
     def __init__(self, *args, **kwargs) -> None:
+        _fbthrift__maybe_str_enum = kwargs.get("z", None)
+        if isinstance(_fbthrift__maybe_str_enum, enum.Enum):
+            kwargs["z"] = _fbthrift__maybe_str_enum.value
         try:
             self._fbthrift__inner = _fbthrift_python_types.ComplexNestedWithDefault(*args, **kwargs)
         except TypeError:
@@ -2624,6 +2633,9 @@ class MyStruct(thrift.py3.types.Struct):
 
 
     def __init__(self, *args, **kwargs) -> None:
+        _fbthrift__maybe_str_enum = kwargs.get("MyStringField", None)
+        if isinstance(_fbthrift__maybe_str_enum, enum.Enum):
+            kwargs["MyStringField"] = _fbthrift__maybe_str_enum.value
         try:
             self._fbthrift__inner = _fbthrift_python_types.MyStruct(*args, **kwargs)
         except TypeError:
@@ -4452,6 +4464,9 @@ class AllocatorAware(thrift.py3.types.Struct):
 
 
     def __init__(self, *args, **kwargs) -> None:
+        _fbthrift__maybe_str_enum = kwargs.get("aa_string", None)
+        if isinstance(_fbthrift__maybe_str_enum, enum.Enum):
+            kwargs["aa_string"] = _fbthrift__maybe_str_enum.value
         try:
             self._fbthrift__inner = _fbthrift_python_types.AllocatorAware(*args, **kwargs)
         except TypeError:

@@ -61,6 +61,9 @@ class CustomException(thrift.py3.exceptions.GeneratedError):
 
 
     def __init__(self, *args, **kwargs) -> None:
+        _fbthrift__maybe_str_enum = kwargs.get("message", None)
+        if isinstance(_fbthrift__maybe_str_enum, enum.Enum):
+            kwargs["message"] = _fbthrift__maybe_str_enum.value
         try:
             self._fbthrift__inner = _fbthrift_python_types.CustomException(*args, **kwargs)
         except TypeError:
@@ -164,6 +167,9 @@ class ShouldBeBoxed(thrift.py3.types.Struct):
 
 
     def __init__(self, *args, **kwargs) -> None:
+        _fbthrift__maybe_str_enum = kwargs.get("sessionId", None)
+        if isinstance(_fbthrift__maybe_str_enum, enum.Enum):
+            kwargs["sessionId"] = _fbthrift__maybe_str_enum.value
         try:
             self._fbthrift__inner = _fbthrift_python_types.ShouldBeBoxed(*args, **kwargs)
         except TypeError:

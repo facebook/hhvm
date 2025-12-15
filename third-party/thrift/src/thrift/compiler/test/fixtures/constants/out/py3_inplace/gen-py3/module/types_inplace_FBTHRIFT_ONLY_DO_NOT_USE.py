@@ -830,6 +830,12 @@ class Internship(thrift.py3.types.Struct):
 
 
     def __init__(self, *args, **kwargs) -> None:
+        _fbthrift__maybe_str_enum = kwargs.get("title", None)
+        if isinstance(_fbthrift__maybe_str_enum, enum.Enum):
+            kwargs["title"] = _fbthrift__maybe_str_enum.value
+        _fbthrift__maybe_str_enum = kwargs.get("school", None)
+        if isinstance(_fbthrift__maybe_str_enum, enum.Enum):
+            kwargs["school"] = _fbthrift__maybe_str_enum.value
         try:
             self._fbthrift__inner = _fbthrift_python_types.Internship(*args, **kwargs)
         except TypeError:
@@ -1054,6 +1060,9 @@ class struct1(thrift.py3.types.Struct):
 
 
     def __init__(self, *args, **kwargs) -> None:
+        _fbthrift__maybe_str_enum = kwargs.get("b", None)
+        if isinstance(_fbthrift__maybe_str_enum, enum.Enum):
+            kwargs["b"] = _fbthrift__maybe_str_enum.value
         try:
             self._fbthrift__inner = _fbthrift_python_types.struct1(*args, **kwargs)
         except TypeError:
@@ -1166,6 +1175,9 @@ class struct2(thrift.py3.types.Struct):
 
 
     def __init__(self, *args, **kwargs) -> None:
+        _fbthrift__maybe_str_enum = kwargs.get("b", None)
+        if isinstance(_fbthrift__maybe_str_enum, enum.Enum):
+            kwargs["b"] = _fbthrift__maybe_str_enum.value
         try:
             self._fbthrift__inner = _fbthrift_python_types.struct2(*args, **kwargs)
         except TypeError:
@@ -1293,6 +1305,9 @@ class struct3(thrift.py3.types.Struct):
 
 
     def __init__(self, *args, **kwargs) -> None:
+        _fbthrift__maybe_str_enum = kwargs.get("a", None)
+        if isinstance(_fbthrift__maybe_str_enum, enum.Enum):
+            kwargs["a"] = _fbthrift__maybe_str_enum.value
         try:
             self._fbthrift__inner = _fbthrift_python_types.struct3(*args, **kwargs)
         except TypeError:

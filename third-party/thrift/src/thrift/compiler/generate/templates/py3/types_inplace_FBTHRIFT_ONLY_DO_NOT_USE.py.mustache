@@ -143,6 +143,14 @@ class {{struct:name}}({{> types/python_struct_class }}):
 
 
     def __init__(self, *args, **kwargs) -> None:
+        {{#struct:fields}}
+        {{#field:type}}{{#type:string?}}
+        {{! This fixes formatting change affecting MyEnum(str, enum.Enum)}}
+        _fbthrift__maybe_str_enum = kwargs.get("{{field:py_name}}", None)
+        if isinstance(_fbthrift__maybe_str_enum, enum.Enum):
+            kwargs["{{field:py_name}}"] = _fbthrift__maybe_str_enum.value
+        {{/type:string?}}{{/field:type}}
+        {{/struct:fields}}
         try:
             self._fbthrift__inner = _fbthrift_python_types.{{struct:name}}(*args, **kwargs)
         except TypeError:

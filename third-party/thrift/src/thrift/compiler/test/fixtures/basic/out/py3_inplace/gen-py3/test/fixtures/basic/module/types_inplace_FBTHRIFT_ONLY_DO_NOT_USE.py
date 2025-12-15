@@ -386,6 +386,12 @@ class MyStruct(thrift.py3.types.Struct):
 
 
     def __init__(self, *args, **kwargs) -> None:
+        _fbthrift__maybe_str_enum = kwargs.get("MyStringField", None)
+        if isinstance(_fbthrift__maybe_str_enum, enum.Enum):
+            kwargs["MyStringField"] = _fbthrift__maybe_str_enum.value
+        _fbthrift__maybe_str_enum = kwargs.get("no_hack_codegen_field", None)
+        if isinstance(_fbthrift__maybe_str_enum, enum.Enum):
+            kwargs["no_hack_codegen_field"] = _fbthrift__maybe_str_enum.value
         try:
             self._fbthrift__inner = _fbthrift_python_types.MyStruct(*args, **kwargs)
         except TypeError:
@@ -943,6 +949,9 @@ class MyException(thrift.py3.exceptions.GeneratedError):
 
 
     def __init__(self, *args, **kwargs) -> None:
+        _fbthrift__maybe_str_enum = kwargs.get("MyStringField", None)
+        if isinstance(_fbthrift__maybe_str_enum, enum.Enum):
+            kwargs["MyStringField"] = _fbthrift__maybe_str_enum.value
         try:
             self._fbthrift__inner = _fbthrift_python_types.MyException(*args, **kwargs)
         except TypeError:
@@ -1075,6 +1084,9 @@ class MyExceptionWithMessage(thrift.py3.exceptions.GeneratedError):
 
 
     def __init__(self, *args, **kwargs) -> None:
+        _fbthrift__maybe_str_enum = kwargs.get("MyStringField", None)
+        if isinstance(_fbthrift__maybe_str_enum, enum.Enum):
+            kwargs["MyStringField"] = _fbthrift__maybe_str_enum.value
         try:
             self._fbthrift__inner = _fbthrift_python_types.MyExceptionWithMessage(*args, **kwargs)
         except TypeError:

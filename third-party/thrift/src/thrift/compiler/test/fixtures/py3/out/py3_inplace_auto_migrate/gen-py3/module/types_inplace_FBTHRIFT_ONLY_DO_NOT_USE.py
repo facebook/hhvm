@@ -2152,6 +2152,9 @@ class SimpleStruct(thrift.py3.types.Struct):
 
 
     def __init__(self, *args, **kwargs) -> None:
+        _fbthrift__maybe_str_enum = kwargs.get("opt_default_str", None)
+        if isinstance(_fbthrift__maybe_str_enum, enum.Enum):
+            kwargs["opt_default_str"] = _fbthrift__maybe_str_enum.value
         try:
             self._fbthrift__inner = _fbthrift_python_types.SimpleStruct(*args, **kwargs)
         except TypeError:
@@ -2525,6 +2528,15 @@ class ComplexStruct(thrift.py3.types.Struct):
 
 
     def __init__(self, *args, **kwargs) -> None:
+        _fbthrift__maybe_str_enum = kwargs.get("name", None)
+        if isinstance(_fbthrift__maybe_str_enum, enum.Enum):
+            kwargs["name"] = _fbthrift__maybe_str_enum.value
+        _fbthrift__maybe_str_enum = kwargs.get("sender", None)
+        if isinstance(_fbthrift__maybe_str_enum, enum.Enum):
+            kwargs["sender"] = _fbthrift__maybe_str_enum.value
+        _fbthrift__maybe_str_enum = kwargs.get("cdef_", None)
+        if isinstance(_fbthrift__maybe_str_enum, enum.Enum):
+            kwargs["cdef_"] = _fbthrift__maybe_str_enum.value
         try:
             self._fbthrift__inner = _fbthrift_python_types.ComplexStruct(*args, **kwargs)
         except TypeError:
@@ -2907,6 +2919,9 @@ class CustomFields(thrift.py3.types.Struct):
 
 
     def __init__(self, *args, **kwargs) -> None:
+        _fbthrift__maybe_str_enum = kwargs.get("string_field", None)
+        if isinstance(_fbthrift__maybe_str_enum, enum.Enum):
+            kwargs["string_field"] = _fbthrift__maybe_str_enum.value
         try:
             self._fbthrift__inner = _fbthrift_python_types.CustomFields(*args, **kwargs)
         except TypeError:
@@ -3066,6 +3081,9 @@ class CustomTypedefFields(thrift.py3.types.Struct):
 
 
     def __init__(self, *args, **kwargs) -> None:
+        _fbthrift__maybe_str_enum = kwargs.get("string_field", None)
+        if isinstance(_fbthrift__maybe_str_enum, enum.Enum):
+            kwargs["string_field"] = _fbthrift__maybe_str_enum.value
         try:
             self._fbthrift__inner = _fbthrift_python_types.CustomTypedefFields(*args, **kwargs)
         except TypeError:
@@ -3225,6 +3243,9 @@ class AdaptedTypedefFields(thrift.py3.types.Struct):
 
 
     def __init__(self, *args, **kwargs) -> None:
+        _fbthrift__maybe_str_enum = kwargs.get("string_field", None)
+        if isinstance(_fbthrift__maybe_str_enum, enum.Enum):
+            kwargs["string_field"] = _fbthrift__maybe_str_enum.value
         try:
             self._fbthrift__inner = _fbthrift_python_types.AdaptedTypedefFields(*args, **kwargs)
         except TypeError:

@@ -61,6 +61,9 @@ class DoSomethingResult(thrift.py3.types.Struct):
 
 
     def __init__(self, *args, **kwargs) -> None:
+        _fbthrift__maybe_str_enum = kwargs.get("s_res", None)
+        if isinstance(_fbthrift__maybe_str_enum, enum.Enum):
+            kwargs["s_res"] = _fbthrift__maybe_str_enum.value
         try:
             self._fbthrift__inner = _fbthrift_python_types.DoSomethingResult(*args, **kwargs)
         except TypeError:

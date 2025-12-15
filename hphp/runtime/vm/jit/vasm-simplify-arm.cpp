@@ -110,8 +110,9 @@ bool simplify(Env& env, const shrqi& inst, Vlabel b, size_t i) {
     if (tstl.s1 != inst.d || env.use_counts[tstl.sf] != 1) return false;
 
     uint64_t Val;
-    if (!get_const_int(env, tstl.s0, Val) || folly::popcount(Val) != 1)
+    if (!get_const_int(env, tstl.s0, Val) || folly::popcount(Val) != 1) {
       return false;
+    }
 
     auto shift_amt = inst.s0.l();
     return simplify_impl(env, b, i, [&] (Vout& v) {
@@ -126,8 +127,9 @@ bool simplify(Env& env, const testq& inst, Vlabel b, size_t i) {
   if (env.use_counts[inst.sf] != 1) return false;
 
   uint64_t Val;
-  if (!get_const_int(env, inst.s0, Val) || Val != 0x8000000000000000ull)
+  if (!get_const_int(env, inst.s0, Val) || Val != 0x8000000000000000ull) {
     return false;
+  }
 
   return if_inst<Vinstr::jcc>(env, b, i + 1, [&] (const jcc& jcci) {
     if (jcci.sf != inst.sf || jcci.cc != CC_E) return false;

@@ -81,7 +81,6 @@ type feature_name =
   * function take((function(int, named int $b)) $f): void {}
   * ```
   *)
-  | NullsafePipe
   | XhpTypeConstants
       (** "xhp_type_constants": allows type constants in XHP attribute declarations
    * `attribute MyClass::TMyType attr;`

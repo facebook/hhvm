@@ -73,7 +73,6 @@ type feature_name =
   | ExpressionTreeNullsafeObjGet
   | NamedParameters
   | NamedParametersUse
-  | NullsafePipe
   | XhpTypeConstants
 [@@deriving eq, ord, show]
 
@@ -123,7 +122,6 @@ let feature_name_map =
       ("expression_tree_nullsafe_obj_get", ExpressionTreeNullsafeObjGet);
       ("named_parameters", NamedParameters);
       ("named_parameters_use", NamedParametersUse);
-      ("nullsafe_pipe", NullsafePipe);
       ("xhp_type_constants", XhpTypeConstants);
     ]
 

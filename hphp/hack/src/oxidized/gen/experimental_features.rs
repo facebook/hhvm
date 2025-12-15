@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<af4ae5cb7b4ce9ed022e17d068b5d680>>
+// @generated SignedSource<<740162ade9a7c9f0eacb2b63285157b5>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -140,7 +140,6 @@ pub enum FeatureName {
     /// function take((function(int, named int $b)) $f): void {}
     /// ```
     NamedParametersUse,
-    NullsafePipe,
     /// "xhp_type_constants": allows type constants in XHP attribute declarations
     /// `attribute MyClass::TMyType attr;`
     XhpTypeConstants,

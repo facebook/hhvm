@@ -5,6 +5,33 @@
 # LICENSE file in the root directory of this source tree.
 
 add_library(
+    wt_stream_manager
+    WtStreamManager.cpp
+    WtEgressContainer.cpp
+)
+add_dependencies(
+    wt_stream_manager
+    proxygen
+)
+target_include_directories(
+    wt_stream_manager PUBLIC
+    $<BUILD_INTERFACE:${PROXYGEN_FBCODE_ROOT}>
+    $<BUILD_INTERFACE:${PROXYGEN_GENERATED_ROOT}>
+    $<INSTALL_INTERFACE:include/>
+)
+target_compile_options(
+    wt_stream_manager PRIVATE
+    ${_PROXYGEN_COMMON_COMPILE_OPTIONS}
+)
+target_link_libraries(wt_stream_manager PUBLIC proxygen)
+install(
+    TARGETS wt_stream_manager
+    EXPORT proxygen-exports
+    ARCHIVE DESTINATION ${LIB_INSTALL_DIR}
+    LIBRARY DESTINATION ${LIB_INSTALL_DIR}
+)
+
+add_library(
     quicwebtransport
     QuicWebTransport.cpp
 )

@@ -23,3 +23,12 @@ proxygen_add_test(TARGET QuicWebTransportTest
     quicwebtransport
     testmain
 )
+
+proxygen_add_test(TARGET WtStreamManagerTest
+  SOURCES
+    WtStreamManagerTest.cpp
+  DEPENDS
+    codectestutils
+    wt_stream_manager
+    testmain
+)

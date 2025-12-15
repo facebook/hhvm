@@ -23,7 +23,9 @@ WtBufferedStreamData::FcRes WtBufferedStreamData::enqueue(
 WtBufferedStreamData::DequeueResult WtBufferedStreamData::dequeue(
     uint64_t atMost) noexcept {
   // min of maxBytes and how many bytes remaining in egress window
-  atMost = std::min({atMost, window_.getAvailable(), data_.chainLength()});
+  atMost = std::min({atMost,
+                     window_.getAvailable(),
+                     static_cast<uint64_t>(data_.chainLength())});
   DequeueResult res;
   res.data = data_.splitAtMost(atMost);
   res.fin = data_.empty() && std::exchange(fin_, false);

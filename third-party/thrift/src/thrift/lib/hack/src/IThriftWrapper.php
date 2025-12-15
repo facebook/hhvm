@@ -83,6 +83,7 @@ abstract class IThriftFieldWrapper<
     parent::__construct($value);
   }
 
+  <<__NeedsConcrete>>
   final public static function fromThrift_DO_NOT_USE_THRIFT_INTERNAL<
     <<__Explicit>> TThriftType__,
     <<__Explicit>> TThriftStruct__ as IThriftAsyncStruct,
@@ -106,6 +107,7 @@ abstract class IThriftTypeWrapper<TThriftType>
     parent::__construct($value);
   }
 
+  <<__NeedsConcrete>>
   final public static function fromThrift_DO_NOT_USE_THRIFT_INTERNAL<
     <<__Explicit>> TThriftType__,
   >(TThriftType__ $value)[]: this {
@@ -125,6 +127,7 @@ abstract class IThriftStructWrapper<TThriftStructType as ?IThriftStruct>
     parent::__construct($value);
   }
 
+  <<__NeedsConcrete>>
   final public static function fromThrift_DO_NOT_USE_THRIFT_INTERNAL<
     <<__Explicit>> TThriftType__ as ?IThriftStruct,
   >(TThriftType__ $value)[]: this {

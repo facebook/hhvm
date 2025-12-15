@@ -39,6 +39,7 @@ abstract class ThriftImmutableWrapper
 
   final public function __construct(protected this::TThrift $data) {}
 
+  <<__NeedsConcrete>>
   final public static function createInstance(?this::TThrift $data): ?this {
     return $data is null ? null : new static($data);
   }

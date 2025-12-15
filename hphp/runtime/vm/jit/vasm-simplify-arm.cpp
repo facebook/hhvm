@@ -104,14 +104,18 @@ bool simplify_load_ext(Env& env, const Load& inst, Vlabel b, size_t i) {
 }
 
 bool simplify(Env& env, const loadb& inst, Vlabel b, size_t i) {
-  if (simplify_load_ext<Vinstr::movzbl, movzbl, loadzbl>(env, inst, b, i))
+  if (simplify_load_ext<Vinstr::movzbl, movzbl, loadzbl>(env, inst, b, i)) {
     return true;
-  if (simplify_load_ext<Vinstr::movzbq, movzbq, loadzbq>(env, inst, b, i))
+  }
+  if (simplify_load_ext<Vinstr::movzbq, movzbq, loadzbq>(env, inst, b, i)) {
     return true;
-  if (simplify_load_ext<Vinstr::movsbl, movsbl, loadsbl>(env, inst, b, i))
+  }
+  if (simplify_load_ext<Vinstr::movsbl, movsbl, loadsbl>(env, inst, b, i)) {
     return true;
-  if (simplify_load_ext<Vinstr::movsbq, movsbq, loadsbq>(env, inst, b, i))
+  }
+  if (simplify_load_ext<Vinstr::movsbq, movsbq, loadsbq>(env, inst, b, i)) {
     return true;
+  }
   return false;
 }
 

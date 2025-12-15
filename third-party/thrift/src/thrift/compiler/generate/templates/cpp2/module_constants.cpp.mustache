@@ -15,6 +15,7 @@
   limitations under the License.
 
 }}
+{{#import "common/const_value" as const_value}}
 {{> Autogen}}
 
 #include "{{program:include_prefix}}{{program:name}}_constants.h"
@@ -28,31 +29,32 @@
 namespace {{program:qualified_namespace}} {
 namespace {{program:name}}_constants {
 
-{{#program:constants}}{{#constant:type}}{{#constant:value}}
-{{#constant:outline_init?}}
+{{#program:constants}}
+  {{#if constant:outline_init?}}
 {{constant:cpp_type}} const& {{constant:name}}() {
-{{^constant:cpp_adapter}}
-  static folly::Indestructible<{{type:cpp_type}}> const instance{ {{> common/iterate_const_values_adapted}} };
-{{/constant:cpp_adapter}}
-{{#constant:cpp_adapter}}
+    {{#if (object.eq? constant:cpp_adapter null)}}
+  static folly::Indestructible<{{constant:self.type.type:cpp_type}}> const instance{ {{!
+    }}{{#partial const_value.iterate_const_values_adapted value=constant:self.value root_const=constant:self}} };
+    {{#else}}
   static folly::Indestructible<{{constant:cpp_type}}> const instance{
-      folly::factory_constructor, [](){ return {{constant:cpp_adapter}}::fromThrift({{type:cpp_type}}({{> common/iterate_const_values}}){{#constant:has_extra_arg?}},
-                                            {{#constant:extra_arg}}{{#constant:extra_arg_type}}{{> common/iterate_const_values}}{{/constant:extra_arg_type}}{{/constant:extra_arg}},
-                                            "{{constant:uri}}"{{/constant:has_extra_arg?}}); }};
-{{/constant:cpp_adapter}}
+      folly::factory_constructor, [](){ return {{constant:cpp_adapter}}::fromThrift({{constant:self.type.type:cpp_type}}({{!
+        }}{{#partial const_value.iterate_const_values value=constant:self.value root_const=constant:self}}){{!
+        }}{{#let extra_arg=constant:extra_arg}}{{#if (object.notnull? extra_arg)}},
+                                            {{#partial const_value.iterate_const_values value=extra_arg.value root_const=extra_arg}},
+                                            "{{constant:uri}}"{{/if (object.notnull? extra_arg)}}); }};
+    {{/if (object.eq? constant:cpp_adapter null)}}
   return *instance;
 }
-{{/constant:outline_init?}}
-{{^constant:outline_init?}}{{#constant:generated?}}{{#type:binary?}}
+  {{#else if (and constant:generated? constant:self.type.binary?)}}
 ::std::string_view {{constant:name}}() {
   constexpr static ::std::string_view {{constant:name}}_{
-    /*@fbthrift_strip_from_fixtures*/"{{value:string_value}}",
-    {{value:string_length}}/*@fbthrift_strip_from_fixtures*/};
+    /*@fbthrift_strip_from_fixtures*/"{{constant:self.value.string_value}}",
+    {{constant:self.value.string_length}}/*@fbthrift_strip_from_fixtures*/};
   return {{constant:name}}_;
 }
-{{/type:binary?}}{{/constant:generated?}}{{/constant:outline_init?}}
+  {{/if constant:outline_init?}}
 
-{{/constant:value}}{{/constant:type}}{{/program:constants}}
+{{/program:constants}}
 
 {{^program:has_schema?}}
 ::std::string_view {{program:schema_name}}() {

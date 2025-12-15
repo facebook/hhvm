@@ -531,6 +531,22 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
     return globals;
   }
 
+  /**
+   * Get the type of a const value, prioritizing the inferred type from the
+   * owning const over AST t_const_value::ttype.
+   * t_whisker_generator's default t_const_value.type prioritizes AST ttype.
+   * Prioritizing the owning const inferred type here supports preserving
+   * typedefs, etc. The AST ttype is already fully resolved (i.e.
+   * typedef-erased). The inferred type from the owning const will use the
+   * relevant typedef in codegen where applicable.
+   */
+  const t_type* get_const_value_type(const t_const_value& value) const {
+    const t_type_ref& type = context().get_const_value_type(value).empty()
+        ? value.ttype()
+        : context().get_const_value_type(value);
+    return type.empty() ? nullptr : &type.deref();
+  }
+
   prototype<t_program>::ptr make_prototype_for_program(
       const prototype_database& proto) const override {
     auto base = t_whisker_generator::make_prototype_for_program(proto);
@@ -773,6 +789,46 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
     def.property("cpp_type", [this](const t_const& self) {
       return cpp_context_->resolver().get_native_type(self);
     });
+    def.property("extra_arg", [&proto](const t_const& self) {
+      return proto.create_nullable<t_const>(
+          cpp2::get_transitive_annotation_of_adapter_or_null(self));
+    });
+    return std::move(def).make();
+  }
+
+  prototype<t_const_value>::ptr make_prototype_for_const_value(
+      const prototype_database& proto) const override {
+    auto base = t_whisker_generator::make_prototype_for_const_value(proto);
+    auto def = whisker::dsl::prototype_builder<h_const_value>::extends(base);
+
+    // Get the value type, prioritizing the inferred type here preserving
+    // typedefs, etc.
+    def.property("const_type", [this, &proto](const t_const_value& self) {
+      const t_type* type = get_const_value_type(self);
+      return type != nullptr ? resolve_derived_t_type(proto, *type)
+                             : whisker::make::null;
+    });
+
+    // This is an override of referenceable_from? in the base whisker
+    // generator's t_const_value prototype, with an additional condition on the
+    // value type which is specific to the cpp2 generator
+    def.function(
+        "referenceable_from?",
+        [this](const t_const_value& self, whisker::dsl::function::context ctx) {
+          ctx.declare_arity(1);
+          ctx.declare_named_arguments({});
+          const t_const* from_const =
+              ctx.raw().positional_arguments()[0].is_null()
+              ? nullptr
+              : ctx.argument<whisker::native_handle<t_const>>(0).ptr().get();
+          const t_const* owner = self.get_owner();
+          // value can be referenced if it is not anonymous, and is being
+          // referenced from any const that's not the owner and the type is what
+          // we expect it to be
+          return owner != nullptr && owner != from_const &&
+              same_types(get_const_value_type(self), owner->type());
+        });
+
     return std::move(def).make();
   }
 
@@ -2602,62 +2658,6 @@ class cpp_mstch_field : public mstch_field {
   std::shared_ptr<cpp2_generator_context> cpp_context_;
 };
 
-class cpp_mstch_const : public mstch_const {
- public:
-  cpp_mstch_const(
-      const t_const* c,
-      mstch_context& ctx,
-      mstch_element_position pos,
-      const t_const* current_const,
-      const t_type* expected_type,
-      const t_field* field,
-      std::shared_ptr<cpp2_generator_context> cpp_ctx)
-      : mstch_const(c, ctx, pos, current_const, expected_type, field),
-        cpp_context_(std::move(cpp_ctx)) {
-    register_methods(
-        this,
-        {
-            {"constant:has_extra_arg?", &cpp_mstch_const::has_extra_arg},
-            {"constant:extra_arg", &cpp_mstch_const::extra_arg},
-            {"constant:extra_arg_type", &cpp_mstch_const::extra_arg_type},
-        });
-  }
-  mstch::node has_extra_arg() {
-    return cpp2::get_transitive_annotation_of_adapter_or_null(*const_) !=
-        nullptr;
-  }
-  mstch::node extra_arg() {
-    auto anno = cpp2::get_transitive_annotation_of_adapter_or_null(*const_);
-    return std::shared_ptr<mstch_base>(std::make_shared<mstch_const_value>(
-        anno->value(), context_, pos_, anno, &*anno->type()));
-  }
-  mstch::node extra_arg_type() {
-    auto anno = cpp2::get_transitive_annotation_of_adapter_or_null(*const_);
-    return std::shared_ptr<mstch_base>(std::make_shared<cpp_mstch_type>(
-        &*anno->type(), context_, pos_, cpp_context_));
-  }
-
- private:
-  std::shared_ptr<cpp2_generator_context> cpp_context_;
-};
-
-class cpp_mstch_const_value : public mstch_const_value {
- public:
-  cpp_mstch_const_value(
-      const t_const_value* cv,
-      mstch_context& ctx,
-      mstch_element_position pos,
-      const t_const* current_const,
-      const t_type* expected_type)
-      : mstch_const_value(cv, ctx, pos, current_const, expected_type) {}
-
- private:
-  bool same_type_as_expected() const override {
-    return const_value_->get_owner() &&
-        same_types(expected_type_, const_value_->get_owner()->type());
-  }
-};
-
 void t_mstch_cpp2_generator::generate_program() {
   const auto* program = get_program();
   set_mstch_factories();
@@ -2685,8 +2685,6 @@ void t_mstch_cpp2_generator::set_mstch_factories() {
   mstch_context_.add<cpp_mstch_type>(cpp_context_);
   mstch_context_.add<cpp_mstch_struct>(cpp_context_);
   mstch_context_.add<cpp_mstch_field>(cpp_context_);
-  mstch_context_.add<cpp_mstch_const>(cpp_context_);
-  mstch_context_.add<cpp_mstch_const_value>();
 }
 
 void t_mstch_cpp2_generator::generate_constants(const t_program* program) {

@@ -22,7 +22,7 @@
 }}{{#field:cpp_exactly_one_adapter?}}{{field:cpp_standard_type}}({{/field:cpp_exactly_one_adapter?}}{{!
 }}{{/field:cpp_first_adapter}}{{!
 }}{{#field:value}}{{!
-    }}{{> common/iterate_const_values}}{{!
+    }}{{#partial const_value.iterate_const_values value=field:self.default_value root_const=null}}{{!
 }}{{/field:value}}{{!
 }}{{^field:value}}{{!
   }}{{> field/intrinsic_default}}{{!

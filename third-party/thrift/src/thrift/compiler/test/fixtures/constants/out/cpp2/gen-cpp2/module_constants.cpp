@@ -64,10 +64,7 @@ namespace module_constants {
 }
 
 ::cpp2::CompanyLocationsMap const& company_locations() {
-  static folly::Indestructible<::cpp2::CompanyLocationsMap> const instance{ std::initializer_list<::cpp2::CompanyLocationsMap::value_type>{ {  ::cpp2::Company::FACEBOOK, std::initializer_list<::cpp2::City>{  ::cpp2::City::NYC,
-   ::cpp2::City::MPK,
-   ::cpp2::City::SEA,
-   ::cpp2::City::LON } } } };
+  static folly::Indestructible<::cpp2::CompanyLocationsMap> const instance{ std::initializer_list<::cpp2::CompanyLocationsMap::value_type>{ {  ::cpp2::Company::FACEBOOK, ::cpp2::module_constants::cities() } } };
   return *instance;
 }
 

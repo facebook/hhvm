@@ -15,6 +15,7 @@
   limitations under the License.
 
 }}
+{{#import "common/const_value" as const_value}}
 {{> Autogen}}
 #include "{{program:include_prefix}}{{program:name}}_types.tcc"
 #include "{{program:include_prefix}}{{program:name}}_constants.h"
@@ -264,11 +265,9 @@ template<> const std::vector<std::any>& field_annotation_values<{{struct:cpp_ful
       static const folly::Indestructible<std::vector<std::any>> ret = [] {
         std::vector<std::any> values;
   {{#field:structured_annotations}}
-  {{#constant:is_runtime_annotation?}}
-  {{#constant:type}}{{#constant:value}}
-        values.emplace_back({{> common/iterate_const_values}});
-  {{/constant:value}}{{/constant:type}}
-  {{/constant:is_runtime_annotation?}}
+    {{#if constant:is_runtime_annotation?}}
+        values.emplace_back({{#partial const_value.iterate_const_values value=constant:self.value root_const=constant:self}});
+    {{/if constant:is_runtime_annotation?}}
   {{/field:structured_annotations}}
         return values;
       }();
@@ -286,11 +285,9 @@ template<> const std::vector<std::any>& struct_annotation_values<{{struct:cpp_fu
   static const folly::Indestructible<std::vector<std::any>> ret = [] {
     std::vector<std::any> values;
 {{#struct:structured_annotations}}
-{{#constant:is_runtime_annotation?}}
-{{#constant:type}}{{#constant:value}}
-    values.emplace_back({{> common/iterate_const_values}});
-{{/constant:value}}{{/constant:type}}
-{{/constant:is_runtime_annotation?}}
+  {{#if constant:is_runtime_annotation?}}
+    values.emplace_back({{#partial const_value.iterate_const_values value=constant:self.value root_const=constant:self}});
+  {{/if constant:is_runtime_annotation?}}
 {{/struct:structured_annotations}}
     return values;
   }();

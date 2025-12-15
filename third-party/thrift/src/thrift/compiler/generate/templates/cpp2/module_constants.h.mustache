@@ -15,6 +15,7 @@
   limitations under the License.
 
 }}
+{{#import "common/const_value" as const_value}}
 {{> Autogen}}
 #pragma once
 
@@ -30,12 +31,11 @@ namespace {{program:name}}_constants {
 {{^constant:outline_init?}}
 {{! The generated constants check is intended to cover the schema constant, where the _sinit.cpp target has to use external linkage to break a dependency cycle. }}
 {{^constant:generated?}}
-{{^type:binary?}}
-{{> common/const_docblock}}  constexpr {{> types/const_value_type}} const {{constant:name}}_ = {{> common/const_value}};
-{{/type:binary?}}
-{{#type:binary?}}
+  {{#if (not type:binary?)}}
+{{> common/const_docblock}}  constexpr {{> types/const_value_type}} const {{constant:name}}_ = {{#partial const_value.primitive value=constant:self.value}};
+  {{#else}}
 {{> common/const_docblock}}  constexpr ::std::string_view {{constant:name}}_{"{{value:string_value}}", {{value:string_length}}};
-{{/type:binary?}}
+  {{/if (not type:binary?)}}
 {{> common/const_docblock}}  constexpr {{> types/const_value_type}} {{constant:name}}() {
     return {{constant:name}}_;
   }

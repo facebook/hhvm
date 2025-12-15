@@ -1905,6 +1905,7 @@ void HTTPUniplexTransportSession::registerByteEvents(
   auto sessionByteOffset = sessionBytesScheduled_ + writeBuf_.chainLength();
   byteEventObserver_.registerByteEvents(id,
                                         sessionByteOffset,
+                                        sessionBytesScheduled_,
                                         *streamByteOffset,
                                         fsInfo,
                                         bodyOffset,

@@ -7,6 +7,7 @@
  */
 
 #include "proxygen/lib/http/coro/HTTPFixedSource.h"
+#include "proxygen/lib/http/coro/HTTPStreamSourceHolder.h"
 #include "proxygen/lib/http/coro/test/HTTPCoroSessionTests.h"
 #include "proxygen/lib/http/coro/test/HTTPTestSources.h"
 #include "proxygen/lib/http/coro/test/Mocks.h"
@@ -683,6 +684,172 @@ TEST_P(HTTPDownstreamSessionTest, ByteEventsCancelOnWriteError) {
           }));
   evb_.loop();
   expectedError_ = TransportErrorCode::NETWORK_ERROR;
+}
+
+// Test that ACK events on zero-byte EOM (HTTP/1 with Content-Length: 1) fire
+// This reproduces the crash at HTTPCoroSession.cpp:3096 where
+// txAckEvent->sessionByteOffset == sessionBytesScheduled_.
+TEST_P(H1DownstreamSessionTest, ZeroByteEOMAckEventImmediate) {
+  auto id = sendRequest("/");
+  (void)id; // Unused in simplified test
+
+  // Enable fast ACK events to fire immediately
+  static_cast<TestUniplexTransport *>(transport_)->setFastTxAckEvents(true);
+
+  bool ackCallbackFired = false;
+  MockByteEventCallback mockByteEventCallback;
+  HTTPStreamSourceHolder::Ptr streamSource;
+
+  auto handler =
+      addSimpleStrictHandler([this, &mockByteEventCallback, &streamSource](
+                                 folly::EventBase *evb,
+                                 HTTPSessionContextPtr /*ctx*/,
+                                 HTTPSourceHolder requestSource)
+                                 -> folly::coro::Task<HTTPSourceHolder> {
+        co_await expectRequest(requestSource, HTTPMethod::GET, "/");
+
+        // Create HTTPStreamSource and save it for test to control
+        streamSource = HTTPStreamSourceHolder::make(evb);
+        streamSource->start();
+
+        // Wrap with ByteEventFilter to register for ACK events
+        auto *filter = new ByteEventFilter(
+            0,                                            // no header events
+            uint8_t(HTTPByteEvent::Type::CUMULATIVE_ACK), // body events
+            mockByteEventCallback.getWeakRefCountedPtr());
+        filter->setSource(streamSource->get());
+
+        co_return filter;
+      });
+
+  // Expect ACK events - one for body, one for EOM
+  EXPECT_CALL(mockByteEventCallback, onByteEvent(_))
+      .Times(AtLeast(1))
+      .WillRepeatedly([&ackCallbackFired](const HTTPByteEvent &event) {
+        EXPECT_EQ(event.type, HTTPByteEvent::Type::CUMULATIVE_ACK);
+        if (event.eom) {
+          ackCallbackFired = true;
+        }
+      });
+
+  evb_.loopOnce(); // Let handler run and return source
+
+  // Now enqueue headers and body
+  auto msg = std::make_unique<HTTPMessage>();
+  msg->setStatusCode(200);
+  msg->setStatusMessage("OK");
+  msg->setHTTPVersion(1, 1);
+  msg->getHeaders().set(HTTP_HEADER_CONTENT_LENGTH, "1");
+  streamSource->get()->headers(std::move(msg), false);
+
+  auto bodyBuf = folly::IOBuf::copyBuffer("x");
+  streamSource->get()->body(std::move(bodyBuf), false);
+
+  // Process headers+body write
+  evb_.loopOnce();
+  evb_.loopOnce();
+
+  // Now writeBuf_ should be empty, enqueue zero-byte EOM
+  streamSource->get()->eom();
+
+  // Send a second request to trigger more writes (to hit XCHECK without the
+  // fix)
+  sendRequest("/second");
+  addSimpleStrictHandler([this](folly::EventBase *evb,
+                                HTTPSessionContextPtr /*ctx*/,
+                                HTTPSourceHolder requestSource)
+                             -> folly::coro::Task<HTTPSourceHolder> {
+    co_await expectRequest(requestSource, HTTPMethod::GET, "/second");
+    co_return HTTPFixedSource::makeFixedResponse(200);
+  });
+
+  evb_.loop();
+
+  // Verify EOM ACK callback fired
+  EXPECT_TRUE(ackCallbackFired);
+}
+
+// Test that ACK events on zero-byte EOM work correctly when ACK arrives
+// after the EOM is processed (delayed ACK scenario).
+// With the fix, events fire immediately even without fastTxAck.
+TEST_P(H1DownstreamSessionTest, ZeroByteEOMAckEventDelayed) {
+  auto id = sendRequest("/");
+  (void)id; // Unused in simplified test
+
+  // Leave fastTxAck as false (default) to test non-fast path
+  bool ackCallbackFired = false;
+  MockByteEventCallback mockByteEventCallback;
+  HTTPStreamSourceHolder::Ptr streamSource;
+
+  auto handler =
+      addSimpleStrictHandler([this, &mockByteEventCallback, &streamSource](
+                                 folly::EventBase *evb,
+                                 HTTPSessionContextPtr /*ctx*/,
+                                 HTTPSourceHolder requestSource)
+                                 -> folly::coro::Task<HTTPSourceHolder> {
+        co_await expectRequest(requestSource, HTTPMethod::GET, "/");
+
+        // Create HTTPStreamSource and save it for test to control
+        streamSource = HTTPStreamSourceHolder::make(evb);
+        streamSource->start();
+
+        // Wrap with ByteEventFilter to register for ACK events
+        auto *filter = new ByteEventFilter(
+            0,                                            // no header events
+            uint8_t(HTTPByteEvent::Type::CUMULATIVE_ACK), // body events
+            mockByteEventCallback.getWeakRefCountedPtr());
+        filter->setSource(streamSource->get());
+
+        co_return filter;
+      });
+
+  // Expect ACK events - one for body, one for EOM (after delay since
+  // fastTxAck=false)
+  EXPECT_CALL(mockByteEventCallback, onByteEvent(_))
+      .Times(AtLeast(1))
+      .WillRepeatedly([&ackCallbackFired](const HTTPByteEvent &event) {
+        EXPECT_EQ(event.type, HTTPByteEvent::Type::CUMULATIVE_ACK);
+        if (event.eom) {
+          ackCallbackFired = true;
+        }
+      });
+
+  evb_.loopOnce(); // Let handler run and return source
+
+  // Now enqueue headers and body
+  auto msg = std::make_unique<HTTPMessage>();
+  msg->setStatusCode(200);
+  msg->setStatusMessage("OK");
+  msg->setHTTPVersion(1, 1);
+  msg->getHeaders().set(HTTP_HEADER_CONTENT_LENGTH, "1");
+  streamSource->get()->headers(std::move(msg), false);
+
+  auto bodyBuf = folly::IOBuf::copyBuffer("x");
+  streamSource->get()->body(std::move(bodyBuf), false);
+
+  // Process headers+body write
+  evb_.loopOnce();
+  evb_.loopOnce();
+
+  // Now writeBuf_ should be empty, enqueue zero-byte EOM
+  streamSource->get()->eom();
+
+  // Send a second request to trigger more writes (to hit XCHECK without the
+  // fix)
+  sendRequest("/second");
+  addSimpleStrictHandler([this](folly::EventBase *evb,
+                                HTTPSessionContextPtr /*ctx*/,
+                                HTTPSourceHolder requestSource)
+                             -> folly::coro::Task<HTTPSourceHolder> {
+    co_await expectRequest(requestSource, HTTPMethod::GET, "/second");
+    co_return HTTPFixedSource::makeFixedResponse(200);
+  });
+
+  // Run event loop - with the fix, ACK should fire immediately
+  evb_.loop();
+
+  // Verify EOM ACK callback fired
+  EXPECT_TRUE(ackCallbackFired);
 }
 
 TEST_P(H1DownstreamSessionTest, ReadDataAfterCancel) {

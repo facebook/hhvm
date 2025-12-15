@@ -151,6 +151,7 @@ void AsyncSocketByteEventObserver::scheduleOrFireTxAckEvent(
 void AsyncSocketByteEventObserver::registerByteEvents(
     uint64_t streamID,
     uint64_t sessionByteOffset,
+    uint64_t sessionBytesScheduled,
     uint64_t streamOffset,
     const folly::Optional<HTTPByteEvent::FieldSectionInfo>& fsInfo,
     uint64_t bodyOffset,
@@ -181,13 +182,20 @@ void AsyncSocketByteEventObserver::registerByteEvents(
     auto numEvents = numTxAckEventFlags(reg.events);
     if (numEvents > 0) {
       if (canRegister(numEvents)) {
-        if (txAckEvents_.empty() ||
-            txAckEvents_.back().sessionByteOffset != sessionByteOffset) {
-          txAckEvents_.emplace_back(sessionByteOffset);
+        // If writeBuf_ is empty (sessionByteOffset == sessionBytesScheduled),
+        // schedule or fire the event immediately instead of queueing it.
+        if (sessionByteOffset == sessionBytesScheduled) {
+          scheduleOrFireTxAckEvent(
+              RegAndEvent({.registration = std::move(reg), .byteEvent = ev}));
+        } else {
+          if (txAckEvents_.empty() ||
+              txAckEvents_.back().sessionByteOffset != sessionByteOffset) {
+            txAckEvents_.emplace_back(sessionByteOffset);
+          }
+          txAckEvents_.back().regAndEvents.emplace_back(
+              RegAndEvent({.registration = std::move(reg), .byteEvent = ev}));
+          numPendingTxAckEvents_ += numEvents;
         }
-        txAckEvents_.back().regAndEvents.emplace_back(
-            RegAndEvent({std::move(reg), ev}));
-        numPendingTxAckEvents_ += numEvents;
       } else {
         // Transport byte events not enabled, or at max TX/ACK events
         std::string errorMessage = !txAckByteEventsEnabled_

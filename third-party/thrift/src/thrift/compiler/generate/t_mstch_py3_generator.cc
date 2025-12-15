@@ -74,9 +74,7 @@ std::vector<std::string> get_py3_namespace_with_name(const t_program* program) {
 }
 
 bool type_needs_convert(const t_type* type) {
-  // NB: float32 has to be rounded by cython to maintain old py3 behavior
-  return type->is<t_structured>() || type->is<t_container>() ||
-      type->is_float();
+  return type->is<t_structured>() || type->is<t_container>();
 }
 
 bool container_needs_convert(const t_type* type) {

@@ -16,7 +16,6 @@ import typing as _typing
 import folly.iobuf as _fbthrift_iobuf
 import thrift.py3.types
 from thrift.py3.types import (
-    _fbthrift__round_float32,
     _fbthrift__is_float32,
     _fbthrift__filter_kwargs,
 )
@@ -125,13 +124,13 @@ class DoSomethingResult(thrift.py3.types.Struct):
         return 2
 
     def __eq__(self, other):
-        if type(self) != type(other):
-            return False
+        if type(self) == type(other):
+            return self._fbthrift__inner == other._fbthrift__inner
 
-        for (_, self_val), (_, other_val) in zip(self, other):
-            if self_val != other_val:
-                return False
-        return True
+        if type(other) is self._FBTHRIFT__PYTHON_CLASS:
+            return self._fbthrift__inner == other
+
+        return False
 
 
     def __lt__(self, other):

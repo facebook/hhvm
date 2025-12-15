@@ -34,7 +34,6 @@ import typing as _typing
 import folly.iobuf as _fbthrift_iobuf
 import thrift.py3.types
 from thrift.py3.types import (
-    _fbthrift__round_float32,
     _fbthrift__is_float32,
     _fbthrift__filter_kwargs,
 )
@@ -228,9 +227,7 @@ class {{struct:name}}({{> types/python_struct_class }}):
                 return None
             {{/struct:union?}}{{/field:optional?}}
             self._fbthrift_inner__{{field:py_name}} = {{!
-                }}{{^type:float?}}{{> types/python_type}}.from_python{{!
-                }}{{/type:float?}}{{#type:float?}}_fbthrift__round_float32{{!
-                }}{{/type:float?}}(__python_val)
+                }}{{> types/python_type}}.from_python(__python_val)
 
         return self._fbthrift_inner__{{field:py_name}}
 {{/type:needs_convert?}}{{^type:needs_convert?}}{{^field:optional_default?}}
@@ -275,18 +272,19 @@ class {{struct:name}}({{> types/python_struct_class }}):
 
     def __eq__(self, other):
     {{! when in-place migration complete, we can start ignoring cpp.noncomparable attribute }}
-        if type(self) != type(other):
-            return False
+        if type(self) == type(other):
+            return self._fbthrift__inner == other._fbthrift__inner
 
-    {{! if we didn't have to worry about float32, we could just compare the inner objects }}
-        {{#struct:union?}}
-        return self.type == other.type and self.value == other.value
-        {{/struct:union?}}{{^struct:union?}}
-        for (_, self_val), (_, other_val) in zip(self, other):
-            if self_val != other_val:
-                return False
-        return True
-        {{/struct:union?}}
+        {{! thrift-py3 vs thrift-python comparison}}
+        if type(other) is self._FBTHRIFT__PYTHON_CLASS:
+            return self._fbthrift__inner == other
+
+        {{#struct:allow_inheritance?}}
+        if isinstance(other, {{struct:name}}):
+            return self._fbthrift__inner == other._fbthrift__inner
+
+        {{/struct:allow_inheritance?}}
+        return False
 
 
     {{#struct:is_struct_orderable?}}

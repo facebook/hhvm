@@ -109,11 +109,7 @@ class {{type:flat_name}}(thrift.py3.types.List):
     {{/type:needs_convert?}}
     {{#type:needs_convert?}}
         _items = [
-            {{^type:float?}}
             {{> types/python_type}}.from_python(item)
-            {{/type:float?}}{{#type:float?}}
-            _fbthrift__round_float32(item)
-            {{/type:float?}}
             for item in python_list
         ]
     {{/type:needs_convert?}}
@@ -225,11 +221,7 @@ class {{type:flat_name}}(thrift.py3.types.Set):
     {{/type:needs_convert?}}
     {{#type:needs_convert?}}
         _items = frozenset(
-            {{^type:float?}}
             {{> types/python_type}}.from_python(item)
-            {{/type:float?}}{{#type:float?}}
-            _fbthrift__round_float32(item)
-            {{/type:float?}}
             for item in python_set
         )
     {{/type:needs_convert?}}
@@ -361,11 +353,7 @@ class {{type:flat_name}}(thrift.py3.types.Map):
     {{/type:needs_convert?}}
     {{#type:needs_convert?}}
         _keys = (
-            {{^type:float?}}
             {{> types/python_type}}.from_python(key)
-            {{/type:float?}}{{#type:float?}}
-            _fbthrift__round_float32(key)
-            {{/type:float?}}
             for key in python_map.keys()
         )
     {{/type:needs_convert?}}
@@ -376,11 +364,7 @@ class {{type:flat_name}}(thrift.py3.types.Map):
     {{/type:needs_convert?}}
     {{#type:needs_convert?}}
         _values = (
-            {{^type:float?}}
             {{> types/python_type}}.from_python(item)
-            {{/type:float?}}{{#type:float?}}
-            _fbthrift__round_float32(item)
-            {{/type:float?}}
             for item in python_map.values()
         )
     {{/type:needs_convert?}}

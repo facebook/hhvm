@@ -106,6 +106,7 @@ let parse_options () =
         disable_hh_ignore_error = 0;
         allowed_decl_fixme_codes =
           Option.value !allowed_decl_fixme_codes ~default:ISet.empty;
+        allow_unstable_features = true;
       }
   in
   let tcopt =

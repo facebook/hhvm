@@ -227,7 +227,8 @@ void HQServerTransportFactory::handleHQAlpn(
        {proxygen::SettingsId::_HQ_DATAGRAM_DRAFT_8, 1},
        {proxygen::SettingsId::_HQ_DATAGRAM, 1},
        {proxygen::SettingsId::_HQ_DATAGRAM_RFC, 1},
-       {proxygen::SettingsId::ENABLE_WEBTRANSPORT, 1}});
+       {proxygen::SettingsId::ENABLE_WEBTRANSPORT, 1},
+       {proxygen::SettingsId::H3_WT_MAX_SESSIONS, 1}});
 
   session->startNow();
   session->onTransportReady();

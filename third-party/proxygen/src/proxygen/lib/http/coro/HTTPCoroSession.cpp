@@ -3287,10 +3287,12 @@ folly::coro::Task<void> HTTPQuicCoroSession::writeLoop() noexcept {
           }
         }
         eom = bodyEvent.eom;
-        byteEvents.emplace_back(std::move(bodyEvent.byteEventRegistrations),
-                                std::move(fieldSectionInfo),
-                                stream->observedBodyLength(),
-                                stream->getWriteBuf().chainLength());
+        if (!bodyEvent.byteEventRegistrations.empty()) {
+          byteEvents.emplace_back(std::move(bodyEvent.byteEventRegistrations),
+                                  std::move(fieldSectionInfo),
+                                  stream->observedBodyLength(),
+                                  stream->getWriteBuf().chainLength());
+        }
         stream->onWindowUpdate(bytesWritten); // simulate window update
       }
       XLOG(DBG4) << "Egressed len=" << bytesWritten << " id=" << stream->getID()

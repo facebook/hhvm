@@ -24,6 +24,7 @@
 #include <folly/container/F14Set.h>
 
 #include <thrift/lib/cpp2/async/AsyncProcessorHelper.h>
+#include <thrift/lib/cpp2/async/processor/ServerRequestHelper.h>
 #include <thrift/lib/cpp2/schema/detail/Merge.h>
 #include <thrift/lib/cpp2/server/ServerFlags.h>
 
@@ -201,6 +202,17 @@ class MultiplexAsyncProcessor final : public AsyncProcessor {
       DCHECK(methodMetadata.sourceIndex < processors_.size());
       auto& processor = *processors_[methodMetadata.sourceIndex];
       maybeTrackInteraction(context, processor);
+      // Unwrap the metadata and update the processor pointer. When the
+      // sub-processor queues the request to a resource pool
+      // (GeneratedAsyncProcessorBase.cpp:67), the pool will later execute it
+      // by calling AsyncProcessorHelper::executeRequest(), which retrieves the
+      // processor from the ServerRequest (AsyncProcessorHelper.cpp:40) and
+      // calls processor->executeRequest(request, metadata)
+      // (AsyncProcessorHelper.cpp:45). We must ensure both the processor
+      // pointer and metadata point to the sub-processor's unwrapped values.
+      detail::ServerRequestHelper::setMethodMetadata(
+          req, methodMetadata.inner.get());
+      detail::ServerRequestHelper::setAsyncProcessor(req, &processor);
       processor.processInteraction(std::move(req));
       return;
     }

@@ -751,6 +751,125 @@ TEST_F(MultiplexAsyncProcessorServerTest, InteractionConflict) {
       ThrowsMessage<TApplicationException>("ConflictsInteraction1"));
 }
 
+namespace {
+
+class NonFlatteningMultiplexWrapper : public AsyncProcessorFactory {
+ public:
+  explicit NonFlatteningMultiplexWrapper(
+      std::shared_ptr<MultiplexAsyncProcessorFactory> inner)
+      : inner_(std::move(inner)) {}
+
+  std::unique_ptr<AsyncProcessor> getProcessor() override {
+    class WrapperProcessor : public AsyncProcessor {
+     public:
+      explicit WrapperProcessor(std::unique_ptr<AsyncProcessor> delegate)
+          : delegate_(std::move(delegate)) {}
+
+      void processSerializedCompressedRequestWithMetadata(
+          ResponseChannelRequest::UniquePtr req,
+          SerializedCompressedRequest&& serializedRequest,
+          const MethodMetadata& methodMetadata,
+          protocol::PROTOCOL_TYPES protocolType,
+          Cpp2RequestContext* context,
+          folly::EventBase* eb,
+          concurrency::ThreadManager* tm) override {
+        delegate_->processSerializedCompressedRequestWithMetadata(
+            std::move(req),
+            std::move(serializedRequest),
+            methodMetadata,
+            protocolType,
+            context,
+            eb,
+            tm);
+      }
+
+      void executeRequest(
+          ServerRequest&& request,
+          const AsyncProcessorFactory::MethodMetadata& methodMetadata)
+          override {
+        delegate_->executeRequest(std::move(request), methodMetadata);
+      }
+
+      void terminateInteraction(
+          int64_t id,
+          Cpp2ConnContext& ctx,
+          folly::EventBase& eb) noexcept override {
+        delegate_->terminateInteraction(id, ctx, eb);
+      }
+
+      void destroyAllInteractions(
+          Cpp2ConnContext& ctx, folly::EventBase& eb) noexcept override {
+        delegate_->destroyAllInteractions(ctx, eb);
+      }
+
+      void processInteraction(ServerRequest&& request) override {
+        delegate_->processInteraction(std::move(request));
+      }
+
+     private:
+      std::unique_ptr<AsyncProcessor> delegate_;
+    };
+    return std::make_unique<WrapperProcessor>(inner_->getProcessor());
+  }
+
+  CreateMethodMetadataResult createMethodMetadata() override {
+    return inner_->createMethodMetadata();
+  }
+
+  std::vector<ServiceHandlerBase*> getServiceHandlers() override {
+    return inner_->getServiceHandlers();
+  }
+
+ private:
+  std::shared_ptr<MultiplexAsyncProcessorFactory> inner_;
+};
+
+} // namespace
+
+TEST_F(MultiplexAsyncProcessorServerTest, NestedInteractionWithWrapper) {
+  using Counter = std::atomic<int>;
+
+  class Interaction1Handler
+      : public apache::thrift::ServiceHandler<Interaction1> {
+   public:
+    std::unique_ptr<Thing1If> createThing1() override {
+      class Thing1 : public Thing1If {
+       public:
+        void foo() override { ++numCalls_; }
+
+        explicit Thing1(Counter& numCalls) : numCalls_(numCalls) {}
+
+       private:
+        Counter& numCalls_;
+      };
+      return std::make_unique<Thing1>(numCalls);
+    }
+
+    Counter numCalls{0};
+  };
+
+  auto interaction1 = std::make_shared<Interaction1Handler>();
+  auto first = std::make_shared<FirstHandler>();
+
+  auto innerMultiplex = std::make_shared<MultiplexAsyncProcessorFactory>(
+      std::vector<std::shared_ptr<AsyncProcessorFactory>>{interaction1});
+  auto wrapper =
+      std::make_shared<NonFlatteningMultiplexWrapper>(innerMultiplex);
+
+  auto runner = runMultiplexedServices({first, wrapper});
+
+  auto client1 = runner->newClient<Interaction1AsyncClient>(
+      nullptr /* callbackExecutor */, makeRocketChannel);
+  auto client3 = runner->newClient<FirstAsyncClient>();
+
+  auto thing1 = client1->createThing1();
+  thing1.semifuture_foo().get();
+
+  EXPECT_EQ(interaction1->numCalls.load(), 1);
+
+  EXPECT_EQ(client3->semifuture_one().get(), 1);
+}
+
 TEST_F(MultiplexAsyncProcessorTest, ThriftGenerated) {
   auto generated = multiplex(
       {std::make_shared<FirstHandler>(),

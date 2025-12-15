@@ -189,6 +189,15 @@ class ServerRequest {
     sr.priority_ = priority;
   }
 
+  static void setMethodMetadata(
+      ServerRequest& sr, const AsyncProcessor::MethodMetadata* metadata) {
+    sr.methodMetadata_ = metadata;
+  }
+
+  static void setAsyncProcessor(ServerRequest& sr, AsyncProcessor* processor) {
+    sr.asyncProcessor_ = processor;
+  }
+
   static protocol::PROTOCOL_TYPES protocol(ServerRequest& sr) {
     return sr.protocol_;
   }

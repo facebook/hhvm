@@ -34,8 +34,10 @@ class ServerRequestHelper : public ServerRequest {
   using ServerRequest::request;
   using ServerRequest::requestContext;
   using ServerRequest::resourcePool;
+  using ServerRequest::setAsyncProcessor;
   using ServerRequest::setExecutor;
   using ServerRequest::setInternalPriority;
+  using ServerRequest::setMethodMetadata;
   using ServerRequest::setResourcePool;
 };
 

@@ -32,8 +32,7 @@ std::shared_ptr<const AcceptorConfiguration> HTTPServerAcceptor::makeConfig(
   conf->maxConcurrentIncomingStreams = opts.maxConcurrentIncomingStreams;
 
   if (opts.enableExHeaders) {
-    conf->egressSettings.push_back(
-        HTTPSetting(SettingsId::ENABLE_EX_HEADERS, 1));
+    conf->egressSettings.emplace_back(SettingsId::ENABLE_EX_HEADERS, 1);
   }
 
   if (ipConfig.protocol == HTTPServer::Protocol::HTTP2) {

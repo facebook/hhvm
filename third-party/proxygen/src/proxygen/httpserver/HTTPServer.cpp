@@ -149,7 +149,7 @@ folly::Expected<folly::Unit, std::exception_ptr> HTTPServer::startTcpServer(
                                     .codecFactory = std::move(codecFactory)})
               : std::make_shared<AcceptorFactory>(
                     options_, codecFactory, accConfig, sessionInfoCb_);
-      bootstrap_.push_back(wangle::ServerBootstrap<wangle::DefaultPipeline>());
+      bootstrap_.emplace_back();
       bootstrap_[i].childHandler(acceptorFactory);
       bootstrap_[i].useZeroCopy(options_->useZeroCopy);
       if (accConfig->enableTCPFastOpen) {

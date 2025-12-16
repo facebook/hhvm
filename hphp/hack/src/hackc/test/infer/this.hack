@@ -8,7 +8,7 @@ class ReturnType {
   // CHECK: // .column 12
   // CHECK:   n0: *HackMixed = load &$this
   // CHECK: // .column 5
-  // CHECK:   ret all n0
+  // CHECK:   ret n0
   // CHECK: }
   public function f(): this {
     return $this;

@@ -12,9 +12,11 @@
 // CHECK: // .column 3
 // CHECK:   n1 = $builtins.hhbc_is_type_int(n0)
 // CHECK: // .column 3
+// CHECK:   n2 = $builtins.hhbc_verify_type_pred(n0, n1)
+// CHECK: // .column 3
 // CHECK:   n3 = $builtins.hhbc_new_vec($builtins.hack_int(5), n0)
 // CHECK: // .column 3
-// CHECK:   ret all n3
+// CHECK:   ret n3
 // CHECK: }
 function multi_ret(inout int $a): int {
   $a = 7;
@@ -25,7 +27,7 @@ function multi_ret(inout int $a): int {
 // CHECK: define $root.softReturn($this: *void) : *HackMixed {
 // CHECK: #b0:
 // CHECK: // .column 3
-// CHECK:   ret all $builtins.hack_string("hello")
+// CHECK:   ret $builtins.hack_string("hello")
 // CHECK: }
 function softReturn(): <<__Soft>> string {
   return "hello";

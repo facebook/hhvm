@@ -42,7 +42,7 @@
 // CHECK: // .column 10
 // CHECK:   n10: *HackMixed = load &$b
 // CHECK: // .column 3
-// CHECK:   ret all n10
+// CHECK:   ret n10
 // CHECK: }
 async function test_async(): Awaitable<int> {
   $a = await bar();

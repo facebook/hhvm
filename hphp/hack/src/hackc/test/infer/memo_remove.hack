@@ -11,7 +11,7 @@ class C {
   // CHECK: // .column 17
   // CHECK:   n2 = $builtins.hhbc_add(n1, n0)
   // CHECK: // .column 5
-  // CHECK:   ret all n2
+  // CHECK:   ret n2
   // CHECK: }
   <<__Memoize>>
   public function memometh_inst(int $a, int $b)[]: int {
@@ -28,7 +28,7 @@ class C {
   // CHECK: // .column 17
   // CHECK:   n2 = $builtins.hhbc_add(n1, n0)
   // CHECK: // .column 5
-  // CHECK:   ret all n2
+  // CHECK:   ret n2
   // CHECK: }
   <<__Memoize>>
   public static function memometh_static(int $a, int $b)[]: int {
@@ -45,7 +45,7 @@ class C {
   // CHECK: // .column 17
   // CHECK:   n2 = $builtins.hhbc_add(n1, n0)
   // CHECK: // .column 5
-  // CHECK:   ret all n2
+  // CHECK:   ret n2
   // CHECK: }
   <<__MemoizeLSB>>
   public static function memometh_lsb(int $a, int $b)[]: int {
@@ -63,7 +63,7 @@ class C {
 // CHECK: // .column 15
 // CHECK:   n2 = $builtins.hhbc_add(n1, n0)
 // CHECK: // .column 3
-// CHECK:   ret all n2
+// CHECK:   ret n2
 // CHECK: }
 
 <<__Memoize>>
@@ -81,7 +81,7 @@ function memofunc(int $a, int $b)[]: int {
 // CHECK: // .column 15
 // CHECK:   n2 = $builtins.hhbc_add(n1, n0)
 // CHECK: // .column 3
-// CHECK:   ret all n2
+// CHECK:   ret n2
 // CHECK: }
 
 <<__Memoize>>

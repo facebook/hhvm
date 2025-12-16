@@ -13,7 +13,7 @@
 // CHECK: // .column 5
 // CHECK:   store n0.?.a <- $builtins.hack_int(6): *HackMixed
 // CHECK: // .column 4
-// CHECK:   ret none null
+// CHECK:   ret null
 // CHECK: }
 
 class C {

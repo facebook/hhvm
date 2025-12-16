@@ -19,7 +19,7 @@ class C {
   // CHECK: // .column 12
   // CHECK:   n6: *HackMixed = load &$this
   // CHECK: // .column 5
-  // CHECK:   ret all n6
+  // CHECK:   ret n6
   // CHECK: }
   public function test1(int $idx): this {
     unset($this->dict[$idx]);
@@ -41,7 +41,7 @@ class C {
 // CHECK:   n5 = $builtins.hack_array_cow_unset(n4, n3)
 // CHECK:   store &$dict <- n5: *HackMixed
 // CHECK: // .column 2
-// CHECK:   ret none null
+// CHECK:   ret null
 // CHECK: }
 function test2(dict<int, mixed> $dict, int $idx) : void  {
   unset($dict[$idx]);

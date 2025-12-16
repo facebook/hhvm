@@ -8,7 +8,7 @@ class D extends B {
   // CHECK:   n0: *D = load &$this
   // CHECK:   n1 = D.bar(n0)
   // CHECK: // .column 4
-  // CHECK:   ret none null
+  // CHECK:   ret null
   // CHECK: }
   public function inst_fcall_self(): void {
     self::bar();
@@ -21,7 +21,7 @@ class D extends B {
   // CHECK:   n0: *D$static = load &$this
   // CHECK:   n1 = D$static.bar(n0)
   // CHECK: // .column 4
-  // CHECK:   ret none null
+  // CHECK:   ret null
   // CHECK: }
   public static function static_fcall_self(): void {
     self::bar();
@@ -34,7 +34,7 @@ class D extends B {
   // CHECK:   n0: *D = load &$this
   // CHECK:   n1 = n0.?.bar()
   // CHECK: // .column 4
-  // CHECK:   ret none null
+  // CHECK:   ret null
   // CHECK: }
   public function inst_fcall_static(): void {
     static::bar();
@@ -47,7 +47,7 @@ class D extends B {
   // CHECK:   n0: *D$static = load &$this
   // CHECK:   n1 = n0.?.bar()
   // CHECK: // .column 4
-  // CHECK:   ret none null
+  // CHECK:   ret null
   // CHECK: }
   public static function static_fcall_static(): void {
     static::bar();
@@ -60,7 +60,7 @@ class D extends B {
   // CHECK:   n0: *D = load &$this
   // CHECK:   n1 = B.bar(n0)
   // CHECK: // .column 4
-  // CHECK:   ret none null
+  // CHECK:   ret null
   // CHECK: }
   public function inst_fcall_parent(): void {
     parent::bar();
@@ -73,7 +73,7 @@ class D extends B {
   // CHECK:   n0: *D$static = load &$this
   // CHECK:   n1 = B$static.bar(n0)
   // CHECK: // .column 4
-  // CHECK:   ret none null
+  // CHECK:   ret null
   // CHECK: }
   public static function static_fcall_parent(): void {
     parent::bar();
@@ -88,7 +88,7 @@ class D extends B {
 // CHECK: // .column 3
 // CHECK:   n0 = $root.f(null, $builtins.hack_int(1), $builtins.hack_int(2), $builtins.hack_int(3))
 // CHECK: // .column 2
-// CHECK:   ret none null
+// CHECK:   ret null
 // CHECK: }
 
 function fcall_func(): void {
@@ -102,7 +102,7 @@ function fcall_func(): void {
 // CHECK:   n0 = __sil_lazy_class_initialize(<C>)
 // CHECK:   n1 = C$static.f(n0, $builtins.hack_int(1), $builtins.hack_int(2), $builtins.hack_int(3))
 // CHECK: // .column 2
-// CHECK:   ret none null
+// CHECK:   ret null
 // CHECK: }
 function fcall_static(): void {
   C::f(1, 2, 3);
@@ -116,7 +116,7 @@ function fcall_static(): void {
 // CHECK: // .column 3
 // CHECK:   n1 = n0.?.b($builtins.hack_int(1), $builtins.hack_int(2), $builtins.hack_int(3))
 // CHECK: // .column 2
-// CHECK:   ret none null
+// CHECK:   ret null
 // CHECK: }
 function fcall_method(C $a): void {
   $a->b(1, 2, 3);
@@ -147,7 +147,7 @@ function fcall_method(C $a): void {
 // CHECK: // .column 3
 // CHECK:   n4 = $root.f(null, n3)
 // CHECK: // .column 2
-// CHECK:   ret none null
+// CHECK:   ret null
 // CHECK: }
 function fcall_nullsafe(?C $c): void {
   f($c?->g());
@@ -186,7 +186,7 @@ function fcall_nullsafe(?C $c): void {
 // CHECK: // .column 3
 // CHECK:   store &$0 <- null: *HackMixed
 // CHECK: // .column 2
-// CHECK:   ret none null
+// CHECK:   ret null
 // CHECK: }
 function fcall_class_meth(): void {
   $x = C::sb<>;
@@ -224,7 +224,7 @@ function fcall_class_meth(): void {
 // CHECK: // .column 3
 // CHECK:   store &$0 <- null: *HackMixed
 // CHECK: // .column 2
-// CHECK:   ret none null
+// CHECK:   ret null
 // CHECK: }
 function fcall_func_invoke(): void {
   $x = f<>;
@@ -244,7 +244,7 @@ function fcall_func_invoke(): void {
 // CHECK:   n2 = $builtins.__sil_splat(n1)
 // CHECK:   n3 = $root.f(null, $builtins.hack_int(1), n2)
 // CHECK: // .column 2
-// CHECK:   ret none null
+// CHECK:   ret null
 // CHECK: }
 function fcall_splat(): void {
   $x = vec[2, 3, 4];
@@ -284,7 +284,7 @@ function fcall_splat(): void {
 // CHECK: // .column 3
 // CHECK:   store &$0 <- null: *HackMixed
 // CHECK: // .column 2
-// CHECK:   ret none null
+// CHECK:   ret null
 // CHECK: }
 function fcall_meth_caller(C $b): void {
   $x = meth_caller(C::class, 'b');
@@ -304,7 +304,7 @@ function fcall_meth_caller(C $b): void {
 // CHECK: // .column 3
 // CHECK:   n4 = n3.?.static_fcall_self()
 // CHECK: // .column 2
-// CHECK:   ret none null
+// CHECK:   ret null
 // CHECK: }
 function fcall_cls_method(classname<D> $a): void {
   $a::static_fcall_self();
@@ -318,7 +318,7 @@ function fcall_cls_method(classname<D> $a): void {
 // CHECK: // .column 3
 // CHECK:   n1 = $root.readonly_param(null, $builtins.__sil_readonly(n0))
 // CHECK: // .column 2
-// CHECK:   ret none null
+// CHECK:   ret null
 // CHECK: }
 function fcall_readonly(): void {
   readonly_param(readonly g());
@@ -335,7 +335,7 @@ function fcall_readonly(): void {
 // CHECK:   n1: *HackVec = load &args
 // CHECK:   n2 = $builtins.__sil_splat(n1)
 // CHECK:   n3 = $root.f(null, n2)
-// CHECK:   ret none n3
+// CHECK:   ret n3
 // CHECK: }
 
 // TEST-CHECK-BAL: type C$static_sb$curry
@@ -351,7 +351,7 @@ function fcall_readonly(): void {
 // CHECK:   n2 = $builtins.__sil_splat(n1)
 // CHECK:   n3: *C$static = load n0.C$static_sb$curry.this
 // CHECK:   n4 = n3.C$static.sb(n2)
-// CHECK:   ret none n4
+// CHECK:   ret n4
 // CHECK: }
 
 // TEST-CHECK-1: declare C$static.f

@@ -76,7 +76,7 @@
 // CHECK: // .column 3
 // CHECK:   store &$f <- n23: *HackMixed
 // CHECK: // .column 2
-// CHECK:   ret none null
+// CHECK:   ret null
 // CHECK: }
 function setop_l(int $i, string $s, float $f): void {
   $i &= 5;

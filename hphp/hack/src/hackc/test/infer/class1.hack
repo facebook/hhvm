@@ -3,7 +3,7 @@
 // TEST-CHECK-BAL: define C._86pinit
 // CHECK: define C._86pinit($this: .notnull *C) : *HackMixed {
 // CHECK: #b0:
-// CHECK:   ret none null
+// CHECK:   ret null
 // CHECK: }
 
 class C {
@@ -15,7 +15,7 @@ class C {
 // CHECK: #b0:
 // CHECK:   n0: *D = load &$this
 // CHECK:   n1 = C._86pinit(n0)
-// CHECK:   ret none null
+// CHECK:   ret null
 // CHECK: }
 
 class D extends C { }
@@ -35,7 +35,7 @@ class D extends C { }
 // CHECK:   n6: *HackMixed = load &$this
 // CHECK:   store n6.?.prop <- n5: *HackMixed
 // CHECK: // .column 1
-// CHECK:   ret none null
+// CHECK:   ret null
 // CHECK: }
 
 class E extends D {

@@ -45,7 +45,7 @@ namespace Concurrent {
   // CHECK: // .column 16
   // CHECK:   n8 = $builtins.hhbc_concat(n7, n6)
   // CHECK: // .column 5
-  // CHECK:   ret all n8
+  // CHECK:   ret n8
   // CHECK: }
   async function genTest1(): Awaitable<string> {
     concurrent {
@@ -67,7 +67,7 @@ namespace Concurrent {
   // CHECK:   n2 = $root.Concurrent::genVoid2(null)
   // CHECK:   n3 = $builtins.hhbc_await(n2)
   // CHECK: // .column 4
-  // CHECK:   ret none null
+  // CHECK:   ret null
   // CHECK: }
   async function genTest2(): Awaitable<void> {
     concurrent {
@@ -127,7 +127,7 @@ namespace Concurrent {
   // CHECK: // .column 22
   // CHECK:   n15 = $builtins.hhbc_add(n13, n14)
   // CHECK: // .column 5
-  // CHECK:   ret all n15
+  // CHECK:   ret n15
   // CHECK: }
   async function genTest3(): Awaitable<int> {
     concurrent {
@@ -183,7 +183,7 @@ namespace Concurrent {
   // CHECK: // .column 15
   // CHECK:   n9 = $builtins.hhbc_concat(n8, n7)
   // CHECK: // .column 5
-  // CHECK:   ret all n9
+  // CHECK:   ret n9
   // CHECK: }
   async function genTest4(): Awaitable<string> {
     concurrent {

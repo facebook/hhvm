@@ -1178,15 +1178,9 @@ impl FuncBuilder<'_, '_> {
         Ok(())
     }
 
-    pub(crate) fn ret(&mut self, expr: impl Into<Expr>, kind: VerifyKind) -> Result {
+    pub(crate) fn ret(&mut self, expr: impl Into<Expr>, _kind: VerifyKind) -> Result {
         let expr = expr.into();
-        let verify = match kind {
-            VerifyKind::All => "all",
-            VerifyKind::None => "none",
-            VerifyKind::NonNull => "nonnull",
-            _ => "invalid",
-        };
-        write!(self.txf.w, "{INDENT}ret {} ", verify)?;
+        write!(self.txf.w, "{INDENT}ret ")?;
         self.write_expr(&expr)?;
         writeln!(self.txf.w)?;
         Ok(())

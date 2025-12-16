@@ -53,7 +53,7 @@ class InternalGeneric<T> {}
 // CHECK: // .column 10
 // CHECK:   n9 = $builtins.hhbc_lock_obj(n6)
 // CHECK: // .column 3
-// CHECK:   ret all n6
+// CHECK:   ret n6
 // CHECK: }
 function internalClassParam(int $a, Internal $b) : Internal {
   return new Internal();
@@ -107,7 +107,7 @@ function internalClassParam(int $a, Internal $b) : Internal {
 // CHECK: // .column 10
 // CHECK:   n9 = $builtins.hhbc_lock_obj(n6)
 // CHECK: // .column 3
-// CHECK:   ret all n6
+// CHECK:   ret n6
 // CHECK: }
 function externalClassParam(bool $a, External $b): External {
   return new External();
@@ -122,7 +122,7 @@ function externalClassParam(bool $a, External $b): External {
 // CHECK: // .column 7
 // CHECK:   n2 = $builtins.hhbc_verify_param_type_ts(n1, n0)
 // CHECK: // .column 3
-// CHECK:   ret all $builtins.hack_int(42)
+// CHECK:   ret $builtins.hack_int(42)
 // CHECK: }
 async function genericParams(string $a, InternalGeneric<string> $b): Awaitable<int> {
   return 42;
@@ -136,7 +136,7 @@ async function genericParams(string $a, InternalGeneric<string> $b): Awaitable<i
 // CHECK: // .column 3
 // CHECK:   n1 = $builtins.hhbc_print(n0)
 // CHECK: // .column 2
-// CHECK:   ret none null
+// CHECK:   ret null
 // CHECK: }
 function softParam(<<__Soft>> string $a): void {
   echo $a;
@@ -150,7 +150,7 @@ function softParam(<<__Soft>> string $a): void {
 // CHECK: // .column 3
 // CHECK:   n1 = $builtins.hhbc_print(n0)
 // CHECK: // .column 2
-// CHECK:   ret none null
+// CHECK:   ret null
 // CHECK: }
 function likeParam(~string $a): void {
   echo $a;
@@ -162,7 +162,7 @@ function likeParam(~string $a): void {
 // CHECK: // .column 10
 // CHECK:   n0: *HackMixed = load &$a
 // CHECK: // .column 3
-// CHECK:   ret none n0
+// CHECK:   ret n0
 // CHECK: }
 function genericRet<T>(T $a): T {
   return $a;
@@ -174,7 +174,7 @@ function genericRet<T>(T $a): T {
 // CHECK: // .column 10
 // CHECK:   n0: *HackMixed = load &$a
 // CHECK: // .column 3
-// CHECK:   ret none n0
+// CHECK:   ret n0
 // CHECK: }
 async function genericAsyncRet<T>(T $a): Awaitable<T> {
   return $a;

@@ -21,7 +21,7 @@ class A {
 // CHECK: // .column 7
 // CHECK:   prune ! $builtins.hack_is_true(n2)
 // CHECK: // .column 5
-// CHECK:   ret all $builtins.hack_string("default")
+// CHECK:   ret $builtins.hack_string("default")
 // CHECK: #b2:
 // CHECK: // .column 7
 // CHECK:   prune $builtins.hack_is_true(n2)
@@ -29,7 +29,7 @@ class A {
 // CHECK:   n3: *HackMixed = load &$arg
 // CHECK:   n4: *HackMixed = load n3.?.prop1
 // CHECK: // .column 5
-// CHECK:   ret all n4
+// CHECK:   ret n4
 // CHECK: }
 function f1_nonnull(?A $arg): string {
   if ($arg is nonnull) {
@@ -55,12 +55,12 @@ function f1_nonnull(?A $arg): string {
 // CHECK:   n2: *HackMixed = load &$arg
 // CHECK:   n3: *HackMixed = load n2.?.prop1
 // CHECK: // .column 5
-// CHECK:   ret all n3
+// CHECK:   ret n3
 // CHECK: #b2:
 // CHECK: // .column 7
 // CHECK:   prune $builtins.hack_is_true(n1)
 // CHECK: // .column 5
-// CHECK:   ret all $builtins.hack_string("default")
+// CHECK:   ret $builtins.hack_string("default")
 // CHECK: }
 function f2_null(?A $arg): string {
   if ($arg is null) {
@@ -97,7 +97,7 @@ function f2_null(?A $arg): string {
 // CHECK: // .column 11
 // CHECK:   n5: *HackMixed = load n4.?.prop1
 // CHECK: // .column 3
-// CHECK:   ret all n5
+// CHECK:   ret n5
 // CHECK: #b2:
 // CHECK: // .column 11
 // CHECK:   prune ! $builtins.hack_is_true(n3)

@@ -69,7 +69,7 @@ function unops(int $a): void {
 // CHECK: // .column 3
 // CHECK:   n3 = $root.f(null, n2)
 // CHECK: // .column 2
-// CHECK:   ret none null
+// CHECK:   ret null
 // CHECK: }
 function check_shape(): void {
   f(shape('a' => a(), 'b' => b()));
@@ -87,7 +87,7 @@ function check_shape(): void {
 // CHECK: // .column 3
 // CHECK:   store &$impl <- n1: *HackMixed
 // CHECK: // .column 2
-// CHECK:   ret none null
+// CHECK:   ret null
 // CHECK: }
 function check_closure(int $x): void {
   $impl = () ==> { return $x; };
@@ -110,7 +110,7 @@ function check_closure(int $x): void {
 // CHECK: // .column 3
 // CHECK:   store &$c <- n4: *HackMixed
 // CHECK: // .column 2
-// CHECK:   ret none null
+// CHECK:   ret null
 // CHECK: }
 function add_elem(string $s1, string $s2) : void {
   $c = dict [ $s1 => 0, $s2 => 1 ];
@@ -159,7 +159,7 @@ function add_elem(string $s1, string $s2) : void {
 // CHECK: // .column 3
 // CHECK:   store &$c3 <- n15: *HackMixed
 // CHECK: // .column 2
-// CHECK:   ret none null
+// CHECK:   ret null
 // CHECK: }
 function col_from_array(string $s1, string $s2) : void {
   $c1 = ImmSet { $s1, $s2 };
@@ -190,7 +190,7 @@ function col_from_array(string $s1, string $s2) : void {
 // CHECK:   jmp b3
 // CHECK: #b3:
 // CHECK: // .column 2
-// CHECK:   ret none null
+// CHECK:   ret null
 // CHECK: }
 function check_switch(int $x): void {
   switch ($x) {

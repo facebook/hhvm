@@ -39,6 +39,4 @@ Too few positional arguments (required 3 but got 1) (Typing[4104])
 ERROR: File "shape_put_wrong.php", line 25, characters 34-39:
 Shape access requires a string literal, integer literal, or a class constant (Typing[4051])
 ERROR: File "shape_put_wrong.php", line 28, characters 5-37:
-You are trying to access the method `__unwrap` but this is a string (Typing[4062])
-  File "expr_tree.php", line 153, characters 40-45:
-  Definition is here
+`HH\string` does not support this operator (it has no instance method named `__unwrap`) (Typing[4053])

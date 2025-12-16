@@ -3980,6 +3980,12 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
                         Some(x) => x,
                         None => return Node::Ignored(SK::FunctionDeclaration),
                     };
+                if self.state.opts.ignore_string_methods
+                    && pos.filename().is_hhi()
+                    && pos.filename().path_str() == "string.hhi"
+                {
+                    return Node::Ignored(SK::FunctionDeclaration);
+                }
                 let deprecated = parsed_attributes.deprecated.map(|msg| {
                     format!(
                         "The function {} is deprecated: {msg}",
@@ -4641,6 +4647,10 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
         let tparams = self.pop_type_params(tparams);
         let module = self.module.clone();
 
+        if self.opts.ignore_string_methods && name == naming_special_names::typehints::HH_STRING {
+            methods = vec![];
+            static_methods = vec![];
+        }
         let cls = shallow_decl_defs::ShallowClass {
             mode: self.file_mode,
             final_,

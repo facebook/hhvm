@@ -10,3 +10,9 @@ ERROR: File "string_no_members.php", line 6, characters 11-11:
 No static method `m` in `string` (Typing[4090])
   File "string.hhi", line 6, characters 15-20:
   Declaration of `string` is here
+ERROR: File "string_no_members.php", line 7, characters 7-12:
+No instance method `length` in `string` (Typing[4053])
+  File "string_no_members.php", line 3, characters 12-17:
+  This is why I think it is an object of type HH\string
+  File "string.hhi", line 6, characters 15-20:
+  Declaration of `string` is here

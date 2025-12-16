@@ -11,17 +11,23 @@ Typing error (Typing[4429])
   File "arities02.php", line 3, characters 35-40:
   But got `string`
 ERROR: File "arities02.php", line 34, characters 17-19:
-You are trying to access the method `bar` but this is a string (Typing[4062])
+No instance method `bar` in `string` (Typing[4053])
   File "arities02.php", line 3, characters 35-40:
-  Definition is here
+  This is why I think it is an object of type HH\string
+  File "string.hhi", line 6, characters 15-20:
+  Declaration of `string` is here
 ERROR: File "arities02.php", line 34, characters 17-19:
 You are trying to access the method `bar` but this is an int (Typing[4062])
   File "arities02.php", line 3, characters 51-53:
   Definition is here
 ERROR: File "arities02.php", line 40, characters 17-19:
-You are trying to access the method `bar` but this is a string (Typing[4062])
+No instance method `bar` in `string` (Typing[4053])
+  File "arities02.php", line 40, characters 10-14:
+  This is why I think it is an object of type HH\string
   File "arities02.php", line 39, characters 29-30:
-  Definition is here
+    from this definition (variadic argument)
+  File "string.hhi", line 6, characters 15-20:
+  Declaration of `string` is here
 ERROR: File "arities02.php", line 45, characters 13-48:
 Invalid argument (Typing[4042])
   File "arities02.php", line 45, characters 13-48:

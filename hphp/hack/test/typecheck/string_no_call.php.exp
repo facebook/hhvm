@@ -1,0 +1,4 @@
+ERROR: File "string_no_call.php", line 4, characters 3-31:
+Unbound name: `HH\String\__primitive_length` (a global function) (Naming[2049])
+ERROR: File "string_no_call.php", line 4, characters 3-31:
+Unbound name (typing): `HH\String\__primitive_length` (Typing[4107])

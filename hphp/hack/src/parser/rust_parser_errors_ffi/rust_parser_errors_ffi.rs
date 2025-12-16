@@ -61,6 +61,7 @@ unsafe fn parser_options_from_ocaml_only_for_parser_errors(
         let consider_unspecified_experimental_features_released =
             bool::from_ocaml(*ocaml_opts.add(20)).unwrap();
         let enable_class_pointer_hint = bool::from_ocaml(*ocaml_opts.add(21)).unwrap();
+        let ignore_string_methods = bool::from_ocaml(*ocaml_opts.add(22)).unwrap();
         parser_options.disable_lval_as_an_expression = po_disable_lval_as_an_expression;
         parser_options.disable_legacy_soft_typehints = po_disable_legacy_soft_typehints;
         parser_options.const_static_props = po_const_static_props;
@@ -83,6 +84,7 @@ unsafe fn parser_options_from_ocaml_only_for_parser_errors(
         parser_options.consider_unspecified_experimental_features_released =
             consider_unspecified_experimental_features_released;
         parser_options.enable_class_pointer_hint = enable_class_pointer_hint;
+        parser_options.ignore_string_methods = ignore_string_methods;
         (
             parser_options,
             (hhvm_compat_mode, hhi_mode, codegen, tco_is_systemlib),

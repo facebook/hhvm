@@ -82,6 +82,8 @@ type t = {
       (** When true, plain <<__Memoize>> will not be allowed. **)
   treat_non_annotated_memoize_as_kbic: bool;
       (** When true, plain <<__Memoize>> will be treated as <<__Memoize(#KeyedByIC)>>. **)
+  ignore_string_methods: bool;
+      (** Ignore the methods defined in the string class in string.hhi *)
 }
 [@@deriving show, eq]
 
@@ -109,6 +111,7 @@ type ffi_t =
   * bool
   * bool
   * Experimental_features.feature_status SMap.t
+  * bool
   * bool
   * bool
 

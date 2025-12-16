@@ -307,6 +307,8 @@ impl HhConfig {
                 "treat_non_annotated_memoize_as_kbic",
                 default.treat_non_annotated_memoize_as_kbic,
             )?,
+            ignore_string_methods: hhconfig
+                .get_bool_or("ignore_string_methods", default.ignore_string_methods)?,
         };
         let rollouts = SavedStateRollouts::make(
             current_rolled_out_flag_idx,

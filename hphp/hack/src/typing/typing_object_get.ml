@@ -430,8 +430,7 @@ let rec obj_get_concrete_ty
   let read_context = Option.is_none args.coerce_from_ty in
   let (env, concrete_ty) = Env.expand_type env concrete_ty in
   match deref concrete_ty with
-  | (r, Tclass ((_, class_name), _, paraml))
-    when not (String.equal SN.Classes.cString class_name) ->
+  | (r, Tclass ((_, class_name), _, paraml)) ->
     obj_get_concrete_class
       args
       env

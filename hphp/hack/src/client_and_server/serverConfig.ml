@@ -374,6 +374,9 @@ let load_config (config : Config_file_common.t) (options : GlobalOptions.t) :
         treat_non_annotated_memoize_as_kbic =
           bool_opt "treat_non_annotated_memoize_as_kbic" config
           >?? po_opt.treat_non_annotated_memoize_as_kbic;
+        ignore_string_methods =
+          bool_opt "ignore_string_methods" config
+          >?? po_opt.ignore_string_methods;
       }
   in
   GlobalOptions.set

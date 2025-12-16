@@ -23,6 +23,7 @@ type t = {
   enable_class_pointer_hint: bool;
   disallow_non_annotated_memoize: bool;
   treat_non_annotated_memoize_as_kbic: bool;
+  ignore_string_methods: bool;
 }
 [@@deriving show]
 

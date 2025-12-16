@@ -60,249 +60,257 @@ let check_if_this_def_is_the_winner ctx name_type (pos, name) : bool =
       false
 
 let fun_def ctx fd : Tast.fun_def Tast_with_dynamic.t option =
-  let tcopt = Provider_context.get_tcopt ctx in
-  Enable.if_matches_regexp tcopt None ~default:None fd.fd_name @@ fun () ->
-  let f = fd.fd_fun in
-  Profile.measure_elapsed_time_and_report tcopt None fd.fd_name @@ fun () ->
-  Counters.count Counters.Category.Typing_toplevel @@ fun () ->
-  Errors.run_with_span f.f_span @@ fun () ->
-  let (_ : bool) =
-    check_if_this_def_is_the_winner ctx FileInfo.Fun fd.fd_name
-  in
-  let env = EnvFromDef.fun_env ~origin:Decl_counters.TopLevel ctx fd in
-  with_timeout env fd.fd_name @@ fun env ->
-  let pos = fst fd.fd_name in
-  let env = Env.open_tyvars env (fst fd.fd_name) in
-  let env = Env.set_env_callable_pos env pos in
-  let env = Env.set_env_function_pos env f.f_span in
-  let (env, user_attributes) =
-    Typing.attributes_check_def env SN.AttributeKinds.fn f.f_user_attributes
-  in
-  let (env, file_attrs) = Typing.file_attributes env fd.fd_file_attributes in
-  let (env, cap_ty, unsafe_cap_ty) =
-    Typing_coeffects.type_capability
-      env
-      f.f_ctxs
-      f.f_unsafe_ctxs
-      (fst fd.fd_name)
-  in
-  let env = Env.set_current_module env fd.fd_module in
-  let env = Env.set_internal env fd.fd_internal in
-  let env = Env.set_current_package_membership env fd.fd_package in
-  let env =
-    if
-      Naming_attributes.mem
-        SN.UserAttributes.uaSupportDynamicType
+  let filename = Pos.filename (fst fd.fd_name) in
+  if
+    (Provider_context.get_popt ctx).ignore_string_methods
+    && Relative_path.(is_hhi (prefix filename))
+    && String.equal (Relative_path.suffix filename) "string.hhi"
+  then
+    None
+  else
+    let tcopt = Provider_context.get_tcopt ctx in
+    Enable.if_matches_regexp tcopt None ~default:None fd.fd_name @@ fun () ->
+    let f = fd.fd_fun in
+    Profile.measure_elapsed_time_and_report tcopt None fd.fd_name @@ fun () ->
+    Counters.count Counters.Category.Typing_toplevel @@ fun () ->
+    Errors.run_with_span f.f_span @@ fun () ->
+    let (_ : bool) =
+      check_if_this_def_is_the_winner ctx FileInfo.Fun fd.fd_name
+    in
+    let env = EnvFromDef.fun_env ~origin:Decl_counters.TopLevel ctx fd in
+    with_timeout env fd.fd_name @@ fun env ->
+    let pos = fst fd.fd_name in
+    let env = Env.open_tyvars env (fst fd.fd_name) in
+    let env = Env.set_env_callable_pos env pos in
+    let env = Env.set_env_function_pos env f.f_span in
+    let (env, user_attributes) =
+      Typing.attributes_check_def env SN.AttributeKinds.fn f.f_user_attributes
+    in
+    let (env, file_attrs) = Typing.file_attributes env fd.fd_file_attributes in
+    let (env, cap_ty, unsafe_cap_ty) =
+      Typing_coeffects.type_capability
+        env
+        f.f_ctxs
+        f.f_unsafe_ctxs
+        (fst fd.fd_name)
+    in
+    let env = Env.set_current_module env fd.fd_module in
+    let env = Env.set_internal env fd.fd_internal in
+    let env = Env.set_current_package_membership env fd.fd_package in
+    let env =
+      if
+        Naming_attributes.mem
+          SN.UserAttributes.uaSupportDynamicType
+          f.f_user_attributes
+        || Naming_attributes.mem
+             SN.UserAttributes.uaDynamicallyCallable
+             f.f_user_attributes
+      then
+        Env.set_support_dynamic_type env true
+      else
+        env
+    in
+    let no_auto_likes =
+      Naming_attributes.mem SN.UserAttributes.uaNoAutoLikes f.f_user_attributes
+    in
+    let env =
+      if no_auto_likes then
+        Env.set_no_auto_likes env true
+      else
+        env
+    in
+    let env = Env.load_cross_packages_from_attr env f.f_user_attributes in
+    (* Is sound dynamic enabled, and the function marked <<__SupportDynamicType>> explicitly or implicitly? *)
+    let sdt_function = Env.get_support_dynamic_type env in
+    List.iter ~f:(Typing_error_utils.add_typing_error ~env)
+    @@ Typing_type_wellformedness.fun_def env fd;
+    Env.make_depend_on_current_module env;
+    let (env, ty_err_opt) =
+      Phase.localize_and_add_ast_generic_parameters_and_where_constraints
+        env
+        ~ignore_errors:false
+        fd.fd_tparams
+        fd.fd_where_constraints
+    in
+    Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
+    let env = Env.set_fn_kind env f.f_fun_kind in
+    let (return_decl_ty, params_decl_ty) =
+      hint_fun_decl ~params:f.f_params ~ret:f.f_ret env
+    in
+    let hint_pos =
+      match f.f_ret with
+      | (_, None) -> fst fd.fd_name
+      | (_, Some (pos, _)) -> pos
+    in
+    (* Do we need to check the body of the function again, under dynamic assumptions? *)
+    let sdt_dynamic_check_required =
+      sdt_function
+      && not
+           (Typing_dynamic.function_parameters_safe_for_dynamic
+              ~this_class:None
+              env
+              params_decl_ty)
+    in
+    let ety_env =
+      empty_expand_env_with_on_error
+        (Typing_error.Reasons_callback.invalid_type_hint hint_pos)
+    in
+    let (env, return_ty) =
+      Typing_return.make_return_type
+        ~ety_env
+        ~this_class:None
+        env
+        ~supportdyn:(sdt_function && not sdt_dynamic_check_required)
+        ~hint_pos
+        ~explicit:return_decl_ty
+        ~default:None
+    in
+    let return =
+      Typing_return.make_info
+        hint_pos
+        f.f_fun_kind
         f.f_user_attributes
-      || Naming_attributes.mem
-           SN.UserAttributes.uaDynamicallyCallable
-           f.f_user_attributes
-    then
-      Env.set_support_dynamic_type env true
-    else
-      env
-  in
-  let no_auto_likes =
-    Naming_attributes.mem SN.UserAttributes.uaNoAutoLikes f.f_user_attributes
-  in
-  let env =
-    if no_auto_likes then
-      Env.set_no_auto_likes env true
-    else
-      env
-  in
-  let env = Env.load_cross_packages_from_attr env f.f_user_attributes in
-  (* Is sound dynamic enabled, and the function marked <<__SupportDynamicType>> explicitly or implicitly? *)
-  let sdt_function = Env.get_support_dynamic_type env in
-  List.iter ~f:(Typing_error_utils.add_typing_error ~env)
-  @@ Typing_type_wellformedness.fun_def env fd;
-  Env.make_depend_on_current_module env;
-  let (env, ty_err_opt) =
-    Phase.localize_and_add_ast_generic_parameters_and_where_constraints
-      env
-      ~ignore_errors:false
-      fd.fd_tparams
-      fd.fd_where_constraints
-  in
-  Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
-  let env = Env.set_fn_kind env f.f_fun_kind in
-  let (return_decl_ty, params_decl_ty) =
-    hint_fun_decl ~params:f.f_params ~ret:f.f_ret env
-  in
-  let hint_pos =
-    match f.f_ret with
-    | (_, None) -> fst fd.fd_name
-    | (_, Some (pos, _)) -> pos
-  in
-  (* Do we need to check the body of the function again, under dynamic assumptions? *)
-  let sdt_dynamic_check_required =
-    sdt_function
-    && not
-         (Typing_dynamic.function_parameters_safe_for_dynamic
-            ~this_class:None
+        env
+        return_ty
+    in
+    let (env, _) =
+      Typing_coeffects.register_capabilities env cap_ty unsafe_cap_ty
+    in
+    let sound_dynamic_check_saved_env = env in
+    let (env, param_tys) =
+      Typing_param.make_param_local_tys
+        ~dynamic_mode:false
+        ~no_auto_likes
+        env
+        params_decl_ty
+        f.f_params
+    in
+    let can_read_globals =
+      Typing_subtype.is_sub_type
+        env
+        cap_ty
+        (MakeType.capability (get_reason cap_ty) SN.Capabilities.accessGlobals)
+    in
+    let (env, typed_params) =
+      Typing.bind_params
+        env
+        ~can_read_globals
+        ~no_auto_likes
+        f.f_ctxs
+        param_tys
+        f.f_params
+    in
+    let env = set_tyvars_variance_in_callable env return_ty param_tys in
+    let local_tpenv = Env.get_tpenv env in
+    let disable =
+      Naming_attributes.mem
+        SN.UserAttributes.uaDisableTypecheckerInternal
+        f.f_user_attributes
+    in
+    Typing_memoize.check_function env f;
+    let ((env, tb), had_errors) =
+      Errors.run_and_check_for_errors (fun () ->
+          Typing.fun_
+            ~native:(Typing_native.is_native_fun ~env f)
+            ~disable
             env
-            params_decl_ty)
-  in
-  let ety_env =
-    empty_expand_env_with_on_error
-      (Typing_error.Reasons_callback.invalid_type_hint hint_pos)
-  in
-  let (env, return_ty) =
-    Typing_return.make_return_type
-      ~ety_env
-      ~this_class:None
-      env
-      ~supportdyn:(sdt_function && not sdt_dynamic_check_required)
-      ~hint_pos
-      ~explicit:return_decl_ty
-      ~default:None
-  in
-  let return =
-    Typing_return.make_info
-      hint_pos
-      f.f_fun_kind
-      f.f_user_attributes
-      env
-      return_ty
-  in
-  let (env, _) =
-    Typing_coeffects.register_capabilities env cap_ty unsafe_cap_ty
-  in
-  let sound_dynamic_check_saved_env = env in
-  let (env, param_tys) =
-    Typing_param.make_param_local_tys
-      ~dynamic_mode:false
-      ~no_auto_likes
-      env
-      params_decl_ty
-      f.f_params
-  in
-  let can_read_globals =
-    Typing_subtype.is_sub_type
-      env
-      cap_ty
-      (MakeType.capability (get_reason cap_ty) SN.Capabilities.accessGlobals)
-  in
-  let (env, typed_params) =
-    Typing.bind_params
-      env
-      ~can_read_globals
-      ~no_auto_likes
-      f.f_ctxs
-      param_tys
-      f.f_params
-  in
-  let env = set_tyvars_variance_in_callable env return_ty param_tys in
-  let local_tpenv = Env.get_tpenv env in
-  let disable =
-    Naming_attributes.mem
-      SN.UserAttributes.uaDisableTypecheckerInternal
-      f.f_user_attributes
-  in
-  Typing_memoize.check_function env f;
-  let ((env, tb), had_errors) =
-    Errors.run_and_check_for_errors (fun () ->
-        Typing.fun_
-          ~native:(Typing_native.is_native_fun ~env f)
-          ~disable
-          env
-          return
-          pos
-          f.f_body
-          f.f_fun_kind)
-  in
-  begin
-    match hint_of_type_hint f.f_ret with
-    | None ->
-      Typing_error_utils.add_typing_error
-        ~env
-        Typing_error.(primary @@ Primary.Expecting_return_type_hint pos)
-    | Some _ -> ()
-  end;
-  let (env, tparams) = List.map_env env fd.fd_tparams ~f:Typing.type_param in
-  let (env, e1) = Typing_solver.close_tyvars_and_solve env in
-  let (env, e2) = Typing_solver.solve_all_unsolved_tyvars env in
-  let ret_hint = hint_of_type_hint f.f_ret in
-  let fun_ =
-    {
-      Aast.f_annotation = Env.save local_tpenv env;
-      Aast.f_readonly_this = f.f_readonly_this;
-      Aast.f_tparams = [];
-      (* For function definitions the declared type parameters appear on the
-         definition rather then function - see [fd_tparams] below *)
-      Aast.f_span = f.f_span;
-      Aast.f_readonly_ret = f.f_readonly_ret;
-      Aast.f_ret = (return_ty, ret_hint);
-      Aast.f_params = typed_params;
-      Aast.f_ctxs = f.f_ctxs;
-      Aast.f_unsafe_ctxs = f.f_unsafe_ctxs;
-      Aast.f_fun_kind = f.f_fun_kind;
-      Aast.f_user_attributes = user_attributes;
-      Aast.f_body = { Aast.fb_ast = tb };
-      Aast.f_external = f.f_external;
-      Aast.f_doc_comment = f.f_doc_comment;
-    }
-  in
-  let under_normal_assumptions =
-    {
-      Aast.fd_mode = fd.fd_mode;
-      Aast.fd_name = fd.fd_name;
-      Aast.fd_fun = fun_;
-      Aast.fd_file_attributes = file_attrs;
-      Aast.fd_namespace = fd.fd_namespace;
-      Aast.fd_internal = fd.fd_internal;
-      Aast.fd_module = fd.fd_module;
-      Aast.fd_tparams = tparams;
-      Aast.fd_where_constraints = fd.fd_where_constraints;
-      Aast.fd_package = fd.fd_package;
-    }
-  in
-  let fundef_of_dynamic
-      (dynamic_env, dynamic_params, dynamic_body, dynamic_return_ty) =
-    let open Aast in
-    {
-      under_normal_assumptions with
-      fd_fun =
-        {
-          under_normal_assumptions.fd_fun with
-          f_annotation = Env.save local_tpenv dynamic_env;
-          f_ret = (dynamic_return_ty, ret_hint);
-          f_params = dynamic_params;
-          f_body = { fb_ast = dynamic_body };
-        };
-    }
-  in
-  let (under_normal_assumptions, under_dynamic_assumptions) =
-    if
-      sdt_dynamic_check_required
-      && (not had_errors)
-      && not (TCO.skip_check_under_dynamic tcopt)
-    then
-      let env = { env with checked = Tast.CUnderNormalAssumptions } in
-      let under_normal_assumptions =
-        let f_annotation = Env.save local_tpenv env in
-        Aast.
+            return
+            pos
+            f.f_body
+            f.f_fun_kind)
+    in
+    begin
+      match hint_of_type_hint f.f_ret with
+      | None ->
+        Typing_error_utils.add_typing_error
+          ~env
+          Typing_error.(primary @@ Primary.Expecting_return_type_hint pos)
+      | Some _ -> ()
+    end;
+    let (env, tparams) = List.map_env env fd.fd_tparams ~f:Typing.type_param in
+    let (env, e1) = Typing_solver.close_tyvars_and_solve env in
+    let (env, e2) = Typing_solver.solve_all_unsolved_tyvars env in
+    let ret_hint = hint_of_type_hint f.f_ret in
+    let fun_ =
+      {
+        Aast.f_annotation = Env.save local_tpenv env;
+        Aast.f_readonly_this = f.f_readonly_this;
+        Aast.f_tparams = [];
+        (* For function definitions the declared type parameters appear on the
+           definition rather then function - see [fd_tparams] below *)
+        Aast.f_span = f.f_span;
+        Aast.f_readonly_ret = f.f_readonly_ret;
+        Aast.f_ret = (return_ty, ret_hint);
+        Aast.f_params = typed_params;
+        Aast.f_ctxs = f.f_ctxs;
+        Aast.f_unsafe_ctxs = f.f_unsafe_ctxs;
+        Aast.f_fun_kind = f.f_fun_kind;
+        Aast.f_user_attributes = user_attributes;
+        Aast.f_body = { Aast.fb_ast = tb };
+        Aast.f_external = f.f_external;
+        Aast.f_doc_comment = f.f_doc_comment;
+      }
+    in
+    let under_normal_assumptions =
+      {
+        Aast.fd_mode = fd.fd_mode;
+        Aast.fd_name = fd.fd_name;
+        Aast.fd_fun = fun_;
+        Aast.fd_file_attributes = file_attrs;
+        Aast.fd_namespace = fd.fd_namespace;
+        Aast.fd_internal = fd.fd_internal;
+        Aast.fd_module = fd.fd_module;
+        Aast.fd_tparams = tparams;
+        Aast.fd_where_constraints = fd.fd_where_constraints;
+        Aast.fd_package = fd.fd_package;
+      }
+    in
+    let fundef_of_dynamic
+        (dynamic_env, dynamic_params, dynamic_body, dynamic_return_ty) =
+      let open Aast in
+      {
+        under_normal_assumptions with
+        fd_fun =
           {
-            under_normal_assumptions with
-            fd_fun = { under_normal_assumptions.fd_fun with f_annotation };
-          }
-      in
-      let dynamic_components =
-        Typing.check_function_dynamically_callable
-          ~this_class:None
-          sound_dynamic_check_saved_env
-          (Some fd.fd_name)
-          f
-          params_decl_ty
-          return_ty
-      in
-      (under_normal_assumptions, Some (fundef_of_dynamic dynamic_components))
-    else
-      (under_normal_assumptions, None)
-  in
-  let ty_err_opt = Option.merge e1 e2 ~f:Typing_error.both in
-  Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
-  { Tast_with_dynamic.under_normal_assumptions; under_dynamic_assumptions }
+            under_normal_assumptions.fd_fun with
+            f_annotation = Env.save local_tpenv dynamic_env;
+            f_ret = (dynamic_return_ty, ret_hint);
+            f_params = dynamic_params;
+            f_body = { fb_ast = dynamic_body };
+          };
+      }
+    in
+    let (under_normal_assumptions, under_dynamic_assumptions) =
+      if
+        sdt_dynamic_check_required
+        && (not had_errors)
+        && not (TCO.skip_check_under_dynamic tcopt)
+      then
+        let env = { env with checked = Tast.CUnderNormalAssumptions } in
+        let under_normal_assumptions =
+          let f_annotation = Env.save local_tpenv env in
+          Aast.
+            {
+              under_normal_assumptions with
+              fd_fun = { under_normal_assumptions.fd_fun with f_annotation };
+            }
+        in
+        let dynamic_components =
+          Typing.check_function_dynamically_callable
+            ~this_class:None
+            sound_dynamic_check_saved_env
+            (Some fd.fd_name)
+            f
+            params_decl_ty
+            return_ty
+        in
+        (under_normal_assumptions, Some (fundef_of_dynamic dynamic_components))
+      else
+        (under_normal_assumptions, None)
+    in
+    let ty_err_opt = Option.merge e1 e2 ~f:Typing_error.both in
+    Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
+    { Tast_with_dynamic.under_normal_assumptions; under_dynamic_assumptions }
 
 let class_def ctx class_ =
   Counters.count Counters.Category.Typing_toplevel @@ fun () ->
@@ -424,7 +432,7 @@ let module_def ctx md =
     Aast.md_file_attributes = file_attributes;
   }
 
-let nast_to_tast ~(do_tast_checks : bool) ctx nast :
+let nast_to_tast ~(do_tast_checks : bool) (ctx : Provider_context.t) nast :
     Tast.program Tast_with_dynamic.t =
   let convert_def def =
     WorkerCancel.raise_if_stop_requested ();

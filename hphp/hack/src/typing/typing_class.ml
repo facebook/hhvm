@@ -1930,7 +1930,13 @@ let class_def_ env c tc =
           typed_vars,
           typed_static_vars,
           typed_methods ) ) =
-    check_class_members env c tc
+    if
+      env.genv.tcopt.po.ignore_string_methods
+      && String.equal SN.Classes.cString (snd c.c_name)
+    then
+      (env, Tast_with_dynamic.([], [], [], [], mk_without_dynamic []))
+    else
+      check_class_members env c tc
   in
   let (env, tparams) = class_type_param env c.c_tparams in
   let (env, e1) = Typing_solver.solve_all_unsolved_tyvars env in

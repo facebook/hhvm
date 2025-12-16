@@ -910,6 +910,7 @@ let parse_options () =
         disallow_non_annotated_memoize = !disallow_non_annotated_memoize;
         treat_non_annotated_memoize_as_kbic =
           !treat_non_annotated_memoize_as_kbic;
+        ignore_string_methods = default.ignore_string_methods;
       }
   in
 

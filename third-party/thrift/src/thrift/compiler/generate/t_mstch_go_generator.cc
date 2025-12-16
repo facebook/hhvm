@@ -511,19 +511,6 @@ class mstch_go_program : public mstch_program {
   }
 };
 
-class mstch_go_const_value : public mstch_const_value {
- public:
-  mstch_go_const_value(
-      const t_const_value* cv,
-      mstch_context& ctx,
-      mstch_element_position pos,
-      const t_const* current_const,
-      const t_type* expected_type)
-      : mstch_const_value(cv, ctx, pos, current_const, expected_type) {}
-
-  bool same_type_as_expected() const override { return true; }
-};
-
 class mstch_go_struct : public mstch_struct {
  public:
   mstch_go_struct(
@@ -605,7 +592,6 @@ void t_mstch_go_generator::generate_program() {
 
   mstch_context_.add<mstch_go_program>(&data_);
   mstch_context_.add<mstch_go_struct>(&data_);
-  mstch_context_.add<mstch_go_const_value>();
 
   const auto& prog = cached_program(program_);
   render_to_file(prog, "const.go", "const.go");

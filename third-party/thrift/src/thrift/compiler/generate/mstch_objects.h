@@ -86,13 +86,10 @@ using mstch_field_factory = mstch_factory<t_field>;
 using mstch_enum_factory = mstch_factory<t_enum>;
 using mstch_enum_value_factory = mstch_factory<t_enum_value>;
 using mstch_const_factory =
-    mstch_factory<t_const, const t_const*, const t_type*, const t_field*>;
-using mstch_const_value_factory =
-    mstch_factory<t_const_value, const t_const*, const t_type*>;
-using mstch_const_map_element_factory = mstch_factory<
-    std::pair<t_const_value*, t_const_value*>,
-    const t_const*,
-    const std::pair<const t_type*, const t_type*>&>;
+    mstch_factory<t_const, const t_const*, const t_field*>;
+using mstch_const_value_factory = mstch_factory<t_const_value, const t_const*>;
+using mstch_const_map_element_factory =
+    mstch_factory<std::pair<t_const_value*, t_const_value*>, const t_const*>;
 using mstch_stream_factory = mstch_factory<t_stream>;
 
 class mstch_factories {
@@ -243,12 +240,7 @@ class mstch_base : public mstch::object {
     for (const t_const* annotation : annotations) {
       mstch_element_position pos(i, annotations.size());
       a.emplace_back(context_.const_factory->make_mstch_object(
-          annotation,
-          context_,
-          pos,
-          annotation,
-          annotation->type()->get_true_type(),
-          nullptr));
+          annotation, context_, pos, annotation, nullptr));
       ++i;
     }
     return a;
@@ -260,12 +252,7 @@ class mstch_base : public mstch::object {
     for (const t_const& annotation : annotated->structured_annotations()) {
       mstch_element_position pos(i, annotated->structured_annotations().size());
       a.emplace_back(context_.const_factory->make_mstch_object(
-          &annotation,
-          context_,
-          pos,
-          &annotation,
-          annotation.type()->get_true_type(),
-          nullptr));
+          &annotation, context_, pos, &annotation, nullptr));
       ++i;
     }
     return a;
@@ -842,12 +829,10 @@ class mstch_const : public mstch_base {
       mstch_context& ctx,
       mstch_element_position pos,
       const t_const* current_const,
-      const t_type* expected_type,
       const t_field* field)
       : mstch_base(ctx, pos),
         const_(c),
         current_const_(current_const),
-        expected_type_(expected_type),
         field_(field) {
     register_methods(
         this,
@@ -872,7 +857,6 @@ class mstch_const : public mstch_base {
  protected:
   const t_const* const_;
   const t_const* current_const_;
-  const t_type* expected_type_;
   const t_field* field_;
 };
 
@@ -885,12 +869,10 @@ class mstch_const_value : public mstch_base {
       const t_const_value* cv,
       mstch_context& ctx,
       mstch_element_position pos,
-      const t_const* current_const,
-      const t_type* expected_type)
+      const t_const* current_const)
       : mstch_base(ctx, pos),
         const_value_(cv),
         current_const_(current_const),
-        expected_type_(expected_type),
         type_(cv->kind()) {
     register_methods(
         this,
@@ -911,17 +893,14 @@ class mstch_const_value : public mstch_base {
   mstch::node const_struct();
   mstch::node referenceable() {
     return const_value_->get_owner() &&
-        current_const_ != const_value_->get_owner() && same_type_as_expected();
+        current_const_ != const_value_->get_owner();
   }
   mstch::node owning_const();
 
  protected:
   const t_const_value* const_value_;
   const t_const* current_const_;
-  const t_type* expected_type_;
   const cv type_;
-
-  virtual bool same_type_as_expected() const { return false; }
 };
 
 class mstch_const_map_element : public mstch_base {
@@ -932,12 +911,8 @@ class mstch_const_map_element : public mstch_base {
       const ast_type* e,
       mstch_context& ctx,
       mstch_element_position pos,
-      const t_const* current_const,
-      const std::pair<const t_type*, const t_type*>& expected_types)
-      : mstch_base(ctx, pos),
-        element_(*e),
-        current_const_(current_const),
-        expected_types_(expected_types) {
+      const t_const* current_const)
+      : mstch_base(ctx, pos), element_(*e), current_const_(current_const) {
     register_methods(
         this,
         {
@@ -955,7 +930,6 @@ class mstch_const_map_element : public mstch_base {
  protected:
   const std::pair<t_const_value*, t_const_value*> element_;
   const t_const* current_const_;
-  const std::pair<const t_type*, const t_type*> expected_types_;
 };
 
 } // namespace apache::thrift::compiler

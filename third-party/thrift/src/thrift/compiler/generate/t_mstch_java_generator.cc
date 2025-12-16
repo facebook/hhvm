@@ -1263,9 +1263,8 @@ class mstch_java_const : public mstch_const {
       mstch_context& ctx,
       mstch_element_position pos,
       const t_const* current_const,
-      const t_type* expected_type,
       const t_field* field)
-      : mstch_const(c, ctx, pos, current_const, expected_type, field) {
+      : mstch_const(c, ctx, pos, current_const, field) {
     register_methods(
         this,
         {
@@ -1319,9 +1318,8 @@ class mstch_java_const_value : public mstch_const_value {
       const t_const_value* cv,
       mstch_context& ctx,
       mstch_element_position pos,
-      const t_const* current_const,
-      const t_type* expected_type)
-      : mstch_const_value(cv, ctx, pos, current_const, expected_type) {
+      const t_const* current_const)
+      : mstch_const_value(cv, ctx, pos, current_const) {
     register_methods(
         this,
         {
@@ -1343,7 +1341,6 @@ class mstch_java_const_value : public mstch_const_value {
     }
     return mstch::node();
   }
-  bool same_type_as_expected() const override { return true; }
 };
 
 class mstch_java_type : public mstch_type {

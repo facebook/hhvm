@@ -2223,11 +2223,9 @@ class rust_mstch_const : public mstch_const {
       mstch_context& ctx,
       mstch_element_position pos,
       const t_const* current_const,
-      const t_type* expected_type,
       const t_field* field,
       const rust_codegen_options* options)
-      : mstch_const(c, ctx, pos, current_const, expected_type, field),
-        options_(*options) {
+      : mstch_const(c, ctx, pos, current_const, field), options_(*options) {
     register_methods(
         this,
         {

@@ -159,54 +159,31 @@ mstch::node mstch_field::value() {
     return mstch::node();
   }
   return context_.const_value_factory->make_mstch_object(
-      field_->default_value(),
-      context_,
-      pos_,
-      /*current_const=*/nullptr,
-      /*expected_type=*/&field_->type().deref());
+      field_->default_value(), context_, pos_, /*current_const=*/nullptr);
 }
 
 mstch::node mstch_const_map_element::element_key() {
   return context_.const_value_factory->make_mstch_object(
-      element_.first, context_, pos_, current_const_, expected_types_.first);
+      element_.first, context_, pos_, current_const_);
 }
 
 mstch::node mstch_const_map_element::element_value() {
   return context_.const_value_factory->make_mstch_object(
-      element_.second, context_, pos_, current_const_, expected_types_.second);
+      element_.second, context_, pos_, current_const_);
 }
 
 mstch::node mstch_const_value::list_elems() {
-  if (type_ == cv::CV_LIST) {
-    const t_type* expected_type = nullptr;
-    if (expected_type_) {
-      if (const t_list* list = expected_type_->try_as<t_list>()) {
-        expected_type = list->elem_type().get_type();
-      } else if (const t_set* set = expected_type_->try_as<t_set>()) {
-        expected_type = set->elem_type().get_type();
-      }
-    }
-    return make_mstch_consts(
-        const_value_->get_list(), current_const_, expected_type);
-  }
-  return mstch::node();
+  return type_ == cv::CV_LIST
+      ? make_mstch_consts(const_value_->get_list(), current_const_)
+      : mstch::node();
 }
 
 mstch::node mstch_const_value::map_elems() {
-  if (type_ != cv::CV_MAP) {
-    return mstch::node();
-  }
-  std::pair<const t_type*, const t_type*> expected_types;
-  if (const t_map* map =
-          expected_type_ == nullptr ? nullptr : expected_type_->try_as<t_map>();
-      map != nullptr) {
-    expected_types = {&map->key_type().deref(), &map->val_type().deref()};
-  }
-  return make_mstch_array(
-      const_value_->get_map(),
-      *context_.const_map_element_factory,
-      current_const_,
-      expected_types);
+  return type_ == cv::CV_MAP ? make_mstch_array(
+                                   const_value_->get_map(),
+                                   *context_.const_map_element_factory,
+                                   current_const_)
+                             : mstch::node();
 }
 
 mstch::node mstch_const_value::const_struct() {
@@ -234,7 +211,6 @@ mstch::node mstch_const_value::const_struct() {
         context_,
         mstch_element_position(i, size),
         current_const_,
-        constants[i]->type(),
         fields[i]));
   }
   return a;
@@ -242,7 +218,11 @@ mstch::node mstch_const_value::const_struct() {
 
 mstch::node mstch_const_value::owning_const() {
   return context_.const_factory->make_mstch_object(
-      const_value_->get_owner(), context_, pos_, nullptr, nullptr, nullptr);
+      const_value_->get_owner(),
+      context_,
+      pos_,
+      /*current_const=*/nullptr,
+      /*field=*/nullptr);
 }
 
 mstch::node mstch_field::type() {
@@ -363,7 +343,7 @@ mstch::node mstch_const::type() {
 
 mstch::node mstch_const::value() {
   return context_.const_value_factory->make_mstch_object(
-      const_->value(), context_, pos_, const_, expected_type_);
+      const_->value(), context_, pos_, const_);
 }
 
 mstch::node mstch_const::program() {
@@ -416,8 +396,7 @@ mstch::node mstch_program::constants() {
         context_,
         mstch_element_position(i, size),
         container[i],
-        container[i]->type(),
-        nullptr));
+        /*field=*/nullptr));
   }
   return a;
 }

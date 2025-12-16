@@ -1038,7 +1038,7 @@ class py3_mstch_field : public mstch_field {
     const t_const_value* value = field_->default_value();
     return value == nullptr ? mstch::node()
                             : context_.const_value_factory->make_mstch_object(
-                                  value, context_, pos_, nullptr, nullptr);
+                                  value, context_, pos_, nullptr);
   }
 
   mstch::node boxed_ref() {
@@ -1110,9 +1110,8 @@ class py3_mstch_const_value : public mstch_const_value {
       const t_const_value* cv,
       mstch_context& ctx,
       mstch_element_position pos,
-      const t_const* current_const,
-      const t_type* expected_type)
-      : mstch_const_value(cv, ctx, pos, current_const, expected_type) {
+      const t_const* current_const)
+      : mstch_const_value(cv, ctx, pos, current_const) {
     register_methods(
         this,
         {

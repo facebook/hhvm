@@ -17,7 +17,7 @@
 include "thrift/annotation/scope.thrift"
 include "thrift/annotation/cpp.thrift"
 
-package "facebook.com/thrift/test/schema"
+package "facebook.com/thrift/test/schema/cpp2"
 
 struct A {
   1: B field;

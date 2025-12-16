@@ -208,7 +208,7 @@ final class UpdateUniverseContextHandlerTest
     return await MockPZ2::genZoned(
       $f,
       PZ2AnnotationSimpleConcrete::get(
-        PZXSUPolicy::create(PZXSUPolicyState::FACEBOOK),
+        PZXSUPolicy::get(PZXSUPolicyState::FACEBOOK),
       ),
     );
   }

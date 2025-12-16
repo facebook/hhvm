@@ -134,6 +134,21 @@ bool simplify(Env& env, const ldimmq& inst, Vlabel b, size_t i) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+bool simplify(Env& env, const movtqb& inst, Vlabel b, size_t i) {
+  if (env.use_counts[inst.d] != 1) return false;
+
+  if (if_inst<Vinstr::movzbq>(env, b, i + 1, [&](const movzbq& ext) {
+      if (ext.s != inst.d) return false;
+
+      return simplify_impl(env, b, i, [&] (Vout& v) {
+        v << movzbq{Vreg8((Vreg)inst.s), ext.d};
+        return 2;
+      });
+    })) {
+  }
+  return false;
+}
+
 bool simplify(Env& env, const movzbl& inst, Vlabel b, size_t i) {
   // movzbl{s, d}; shrli{2, s, d} --> ubfmli{2, 7, s, d}
   return if_inst<Vinstr::shrli>(env, b, i + 1, [&](const shrli& sh) {

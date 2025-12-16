@@ -44,6 +44,10 @@ class PerturbSource {
     folly::coro::blockingWait(co_withExecutor(
         folly::getGlobalCPUExecutor(), asyncScope_.joinAsync()));
   }
+  PerturbSource(const PerturbSource&) = delete;
+  PerturbSource& operator=(const PerturbSource&) = delete;
+  PerturbSource(PerturbSource&&) = delete;
+  PerturbSource& operator=(PerturbSource&&) = delete;
 
   std::size_t perturbedId(std::size_t id) {
     return folly::hash::hash_combine(

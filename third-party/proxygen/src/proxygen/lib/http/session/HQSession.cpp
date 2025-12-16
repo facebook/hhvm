@@ -1959,7 +1959,6 @@ void HQSession::handleWriteError(HQStreamTransportBase* hqStream,
     }
     case quic::QuicErrorCode::Type::TransportErrorCode: {
       CHECK(false) << "Unexpected errorCode=" << *err.asTransportErrorCode();
-      break;
     }
   }
   // Do I need a dguard here?

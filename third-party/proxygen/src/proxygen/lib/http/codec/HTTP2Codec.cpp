@@ -1583,7 +1583,6 @@ size_t HTTP2Codec::generateGoaway(folly::IOBufQueue& writeBuf,
       break;
     case ClosingState::CLOSED:
       LOG(FATAL) << "unreachable";
-      break;
     default:
       LOG(FATAL) << "unhandled state";
   }

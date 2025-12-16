@@ -28,7 +28,7 @@ Exception::Exception(Exception&& other) noexcept
       proxygenError_(other.proxygenError_) {
 }
 
-const char* Exception::what(void) const noexcept {
+const char* Exception::what() const noexcept {
   return msg_.c_str();
 }
 

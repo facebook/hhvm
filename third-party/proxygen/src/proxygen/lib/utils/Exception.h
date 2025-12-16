@@ -36,11 +36,11 @@ class Exception : public std::exception {
       : msg_(folly::to<std::string>(std::forward<Args>(args)...)), code_(0) {
   }
 
-  ~Exception(void) noexcept override {
+  ~Exception() noexcept override {
   }
 
   // std::exception methods
-  [[nodiscard]] const char* what(void) const noexcept override;
+  [[nodiscard]] const char* what() const noexcept override;
 
   // Accessors for code
   void setCode(int code) {

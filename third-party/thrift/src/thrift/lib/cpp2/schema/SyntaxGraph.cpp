@@ -887,7 +887,6 @@ type_system::SerializableRecord toTypeSystemAnnotation(
                 static_cast<float>(data.asDouble()))};
           case Primitive::FLOAT:
             return {type_system::SerializableRecord::Float64(data.asDouble())};
-            break;
           case Primitive::STRING:
             return {type_system::SerializableRecord::Text(data.asString())};
           case Primitive::BINARY:

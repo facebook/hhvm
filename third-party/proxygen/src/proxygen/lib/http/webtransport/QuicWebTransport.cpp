@@ -20,13 +20,19 @@ void QuicWebTransport::onNewBidirectionalStream(quic::StreamId id) noexcept {
   XCHECK(quicSocket_);
   if (!handler_) {
     resetWebTransportEgress(id, WebTransport::kInternalError);
-    stopReadingWebTransportIngress(id, WebTransport::kInternalError);
+    // resetWebTransportEgress may have closed the session
+    if (quicSocket_) {
+      stopReadingWebTransportIngress(id, WebTransport::kInternalError);
+    }
     return;
   }
   auto handle = WebTransportImpl::onWebTransportBidiStream(id);
   handler_->onNewBidiStream(WebTransport::BidiStreamHandle(
       {.readHandle = handle.readHandle, .writeHandle = handle.writeHandle}));
-  quicSocket_->setReadCallback(id, handle.readHandle);
+  // Handler callback may have closed the session, check socket is still valid
+  if (quicSocket_) {
+    quicSocket_->setReadCallback(id, handle.readHandle);
+  }
 }
 
 void QuicWebTransport::onNewUnidirectionalStream(quic::StreamId id) noexcept {
@@ -38,7 +44,10 @@ void QuicWebTransport::onNewUnidirectionalStream(quic::StreamId id) noexcept {
   }
   auto readHandle = WebTransportImpl::onWebTransportUniStream(id);
   handler_->onNewUniStream(readHandle);
-  quicSocket_->setReadCallback(id, readHandle);
+  // Handler callback may have closed the session, check socket is still valid
+  if (quicSocket_) {
+    quicSocket_->setReadCallback(id, readHandle);
+  }
 }
 
 void QuicWebTransport::onStopSending(

@@ -69,6 +69,7 @@ abstract class ThriftLazyAnyTestBase<T> extends WWWTest {
     ];
   }
 
+  <<__NeedsConcrete>>
   protected static function getExpectedSerialized(
     self::TProtocolTestDetails $info,
   ): string {
@@ -108,6 +109,7 @@ abstract class ThriftLazyAnyTestBase<T> extends WWWTest {
     return $roundtrip_struct;
   }
 
+  <<__NeedsConcrete>>
   protected static function getInitializedTestStruct(
     self::TProtocolTestDetails $info,
   ): IThriftStruct {
@@ -141,6 +143,7 @@ abstract class ThriftLazyAnyTestBase<T> extends WWWTest {
 
   // ==================== Data Provider =====================
 
+  <<__NeedsConcrete>>
   public static function getTestCases(
   ): dict<string, (IThriftStruct, T, string, classname<TProtocolSerializer>)> {
     $protocol_test_set = static::getProtocolDetails();
@@ -180,6 +183,7 @@ abstract class ThriftLazyAnyTestBase<T> extends WWWTest {
     return $test_cases;
   }
 
+  <<__NeedsConcrete>>
   public static function getRoundTripTestCases(
   ): dict<string, (IThriftStruct, T)> {
     $protocol_test_set = static::getProtocolDetails();

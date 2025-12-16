@@ -41,7 +41,7 @@ from thrift.python.mutable_types import (
     to_thrift_set,
 )
 from thrift.python.types import (
-    isset as immutable_isset,
+    isset_DEPRECATED as immutable_isset,
     Struct as ImmutableStruct,
     StructMeta as ImmutableStructMeta,
     StructOrUnion as ImmutableStructOrUnion,

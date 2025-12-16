@@ -32,6 +32,7 @@ class KeepAliveHandler {
   KeepAliveHandler(KeepAliveHandler&&) = delete;
   KeepAliveHandler& operator=(const KeepAliveHandler&) = delete;
   KeepAliveHandler& operator=(KeepAliveHandler&&) = delete;
+  ~KeepAliveHandler() = default;
   explicit KeepAliveHandler(Connection& connection) noexcept
       : connection_(&connection) {}
 

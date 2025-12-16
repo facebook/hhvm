@@ -52,6 +52,7 @@ class ConnectionAdapter {
 
   explicit ConnectionAdapter(AdaptedConnectionT& connection)
       : connection_(&connection) {}
+  ~ConnectionAdapter() = default;
   ConnectionAdapter(const ConnectionAdapter&) = delete;
   ConnectionAdapter& operator=(const ConnectionAdapter&) = delete;
   ConnectionAdapter(ConnectionAdapter&&) noexcept = default;

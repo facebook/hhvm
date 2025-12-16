@@ -1938,8 +1938,13 @@ let extract_method fun_ty ~class_name ~folded_class ~env =
   in
 
   (* Get the class level generics; we need this to build a type for [this] and
-     to add to the function generics *)
-  let class_tparams = Folded_class.tparams folded_class in
+     to add to the function generics. We can set any reified type parameters to
+     be erased here since the requirement is met when the class is instantiated
+     and no longer necessary on type parameters in the function pointer *)
+  let class_tparams =
+    List.map (Folded_class.tparams folded_class) ~f:(fun tp ->
+        Typing_defs_core.{ tp with tp_reified = Erased })
+  in
 
   (* Build the type corresponding to [this] or its upper bound *)
   let this_ty =

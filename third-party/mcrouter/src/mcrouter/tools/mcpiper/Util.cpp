@@ -37,7 +37,7 @@ std::vector<std::string> describeFlags(uint64_t flags) {
   uint64_t f = 1;
   while (flags > 0) {
     if (flags & f) {
-      out.push_back(mc_flag_to_string(static_cast<enum mc_msg_flags_t>(f)));
+      out.emplace_back(mc_flag_to_string(static_cast<enum mc_msg_flags_t>(f)));
       flags &= ~f;
     }
     f <<= 1;

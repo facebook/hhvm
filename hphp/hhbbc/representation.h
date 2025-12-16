@@ -768,10 +768,10 @@ struct Unit {
   CompactVector<SrcLoc> srcLocs;
   UserAttributeMap metaData;
   UserAttributeMap fileAttributes;
-  LSString moduleName;
-  LSString extName;
+  LSString moduleName{nullptr};
+  LSString extName{nullptr};
   PackageInfo packageInfo;
-  bool softDeployed;
+  bool softDeployed{false};
 
   template <typename SerDe> void serde(SerDe& sd);
 };

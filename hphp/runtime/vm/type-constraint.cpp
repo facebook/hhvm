@@ -591,11 +591,15 @@ UnionConstraint::allocObjects(UnionClassList objects) {
   };
   static folly::Synchronized<Table> g_table;
 
-  std::sort(objects.m_list.begin(),
-            objects.m_list.end(),
-            [](const ClassConstraint& a, const ClassConstraint& b) {
-              return a.m_typeName < b.m_typeName;
-            });
+  // Sort by name to ensure a consistent ordering (important when they
+  // might be serialized).
+  std::sort(
+    objects.m_list.begin(),
+    objects.m_list.end(),
+    [] (const ClassConstraint& a, const ClassConstraint& b) {
+      return string_data_lt{}(a.m_typeName, b.m_typeName);
+    }
+  );
 
   {
     auto rlock = g_table.rlock();

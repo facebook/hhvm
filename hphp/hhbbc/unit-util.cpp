@@ -24,7 +24,26 @@ namespace HPHP::HHBBC {
 //////////////////////////////////////////////////////////////////////
 
 namespace {
+
 const StaticString s_nativeUnitName("/!native");
+
+const StaticString s_hhvmCompilerId{"HHVM_COMPILER_ID"};
+const StaticString s_hhvmCompilerTimestamp{"HHVM_COMPILER_TIMESTAMP"};
+const StaticString s_hhvmDebug{"HHVM_DEBUG"};
+const StaticString s_hhvmRepoSchema{"HHVM_REPO_SCHEMA"};
+
+// There's a few native constants we want to treat as having a dynamic
+// value (even though they're statically known). These constants can
+// change with every build, and since the native unit is a dependency
+// of nearly everything, it ruins caching.
+bool is_hidden_native_constant(SString name) {
+  return
+    name == s_hhvmCompilerId.get() ||
+    name == s_hhvmCompilerTimestamp.get() ||
+    name == s_hhvmDebug.get() ||
+    name == s_hhvmRepoSchema.get();
+}
+
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -57,6 +76,7 @@ std::unique_ptr<php::Unit> make_native_unit() {
     cns->name = name;
     cns->val = val;
     cns->attrs = AttrPersistent;
+    if (is_hidden_native_constant(name)) tvWriteConstValMissing(cns->val);
     unit->constants.emplace_back(std::move(cns));
   }
 

@@ -102,7 +102,6 @@ type t = {
   tco_log_inference_constraints: bool;
   tco_language_feature_logging: bool;
   tco_timeout: int;
-  tco_constraint_array_index: bool;
   tco_constraint_array_index_assign: bool;
   tco_constraint_method_call: bool;
   code_agnostic_fixme: bool;
@@ -226,7 +225,6 @@ let default =
     tco_log_inference_constraints = false;
     tco_language_feature_logging = false;
     tco_timeout = 0;
-    tco_constraint_array_index = true;
     tco_constraint_array_index_assign = false;
     tco_constraint_method_call = false;
     code_agnostic_fixme = false;
@@ -349,7 +347,6 @@ let set
     ?so_naming_sqlite_path
     ?tco_language_feature_logging
     ?tco_timeout
-    ?tco_constraint_array_index
     ?tco_constraint_array_index_assign
     ?tco_constraint_method_call
     ?code_agnostic_fixme
@@ -505,8 +502,6 @@ let set
     tco_language_feature_logging =
       setting tco_language_feature_logging options.tco_language_feature_logging;
     tco_timeout = setting tco_timeout options.tco_timeout;
-    tco_constraint_array_index =
-      setting tco_constraint_array_index options.tco_constraint_array_index;
     tco_constraint_array_index_assign =
       setting
         tco_constraint_array_index_assign

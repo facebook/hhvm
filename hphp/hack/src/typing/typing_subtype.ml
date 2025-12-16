@@ -6314,10 +6314,6 @@ end = struct
       let { env; prop = p2; likely = l2 } = f env in
       with_hint (env, TL.conj p1 p2) (l1 && l2)
 
-  (* Since array index constraint solving is under development,
-   * it is an experimental feature and will only be turned on
-   * if the flag constraint_array_index is set.
-   *)
   let rec simplify
       ~subtype_env
       ~this_ty

@@ -383,7 +383,6 @@ let load_config (config : Config_file_common.t) (options : GlobalOptions.t) :
     ~po
     ?tco_language_feature_logging:(bool_opt "language_feature_logging" config)
     ?tco_timeout:(int_opt "timeout" config)
-    ?tco_constraint_array_index:(bool_opt "constraint_array_index" config)
     ?tco_constraint_array_index_assign:
       (bool_opt "constraint_array_index_assign" config)
     ?tco_constraint_method_call:(bool_opt "constraint_method_call" config)

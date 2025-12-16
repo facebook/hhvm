@@ -2564,12 +2564,6 @@ module Valkind = struct
     | Lvalue_subexpr
     | Other
   [@@deriving show]
-
-  let is_lvalue = function
-    | Lvalue -> true
-    | Lvalue_subexpr
-    | Other ->
-      false
 end
 
 let check_bool_for_condition env pos ty_have =
@@ -4031,80 +4025,47 @@ end = struct
           e2
       in
       let env = might_throw ~join_pos:p env in
-      let is_lvalue = Valkind.is_lvalue valkind in
       let (_, p1, _) = e1 in
       let (_, p2, _) = e2 in
-      if TypecheckerOptions.constraint_array_index env.genv.tcopt then (
-        let (env, key_ty) = Env.fresh_type_invariant env p2 in
-        let key_ty =
-          Typing_env.update_reason env key_ty ~f:(fun _ -> get_reason ty2)
-        in
-        let (env, ty_err_opt) =
-          SubType.sub_type_i
-            env
-            (LoclType ty2)
-            (LoclType key_ty)
-            (Some (Typing_error.Reasons_callback.unify_error_at p))
-        in
-        Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
-        let (env, val_ty) = Env.fresh_type env p in
-        let (env, ty_err_opt) =
-          SubType.sub_type_i
-            env
-            (LoclType ty1)
-            (ConstraintType
-               (mk_constraint_type
-                  ( Reason.witness p,
-                    Tcan_index
-                      {
-                        ci_key = key_ty;
-                        ci_val = val_ty;
-                        ci_index_expr = e2;
-                        ci_lhs_of_null_coalesce = lhs_of_null_coalesce;
-                        ci_expr_pos = p;
-                        ci_array_pos = p1;
-                        ci_index_pos = p2;
-                      } )))
-            (Some (Typing_error.Reasons_callback.unify_error_at p))
-        in
-        Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
-        let val_ty =
-          Typing_env.update_reason env val_ty ~f:(fun def ->
-              Typing_reason.flow_array_get
-                ~def
-                ~access:(Typing_reason.witness p))
-        in
-        (* Note that we are no longer generating holes - it is unclear how to do so in subtyping. *)
-        make_result env p (Aast.Array_get (te1, Some te2)) val_ty
-      ) else
-        let (env, (ty, arr_ty_mismatch_opt, key_ty_mismatch_opt)) =
-          Typing_array_access.array_get
-            ~expr_ty:ty1
-            ~array_pos:p1
-            ~expr_pos:p
-            ~lhs_of_null_coalesce
-            is_lvalue
-            env
-            ty1
-            e2
-            ty2
-        in
-        let ty =
-          Typing_env.(
-            update_reason env ty ~f:(fun def ->
-                Typing_reason.flow_array_get
-                  ~def
-                  ~access:(Typing_reason.witness p)))
-        in
-        make_result
+      let (env, key_ty) = Env.fresh_type_invariant env p2 in
+      let key_ty =
+        Typing_env.update_reason env key_ty ~f:(fun _ -> get_reason ty2)
+      in
+      let (env, ty_err_opt) =
+        SubType.sub_type_i
           env
-          p
-          (Aast.Array_get
-             ( hole_on_ty_mismatch ~ty_mismatch_opt:arr_ty_mismatch_opt te1,
-               Some
-                 (hole_on_ty_mismatch ~ty_mismatch_opt:key_ty_mismatch_opt te2)
-             ))
-          ty
+          (LoclType ty2)
+          (LoclType key_ty)
+          (Some (Typing_error.Reasons_callback.unify_error_at p))
+      in
+      Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
+      let (env, val_ty) = Env.fresh_type env p in
+      let (env, ty_err_opt) =
+        SubType.sub_type_i
+          env
+          (LoclType ty1)
+          (ConstraintType
+             (mk_constraint_type
+                ( Reason.witness p,
+                  Tcan_index
+                    {
+                      ci_key = key_ty;
+                      ci_val = val_ty;
+                      ci_index_expr = e2;
+                      ci_lhs_of_null_coalesce = lhs_of_null_coalesce;
+                      ci_expr_pos = p;
+                      ci_array_pos = p1;
+                      ci_index_pos = p2;
+                    } )))
+          (Some (Typing_error.Reasons_callback.unify_error_at p))
+      in
+      Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
+      let val_ty =
+        Typing_env.update_reason env val_ty ~f:(fun def ->
+            Typing_reason.flow_array_get ~def ~access:(Typing_reason.witness p))
+      in
+      (* Note that we are no longer generating holes - it is unclear how to do so in subtyping. *)
+      make_result env p (Aast.Array_get (te1, Some te2)) val_ty
     | Call
         { func = (_, pos_id, Id (_, s)) as e; targs; args; unpacked_arg = None }
       when Hash_set.mem typing_env_pseudofunctions s ->

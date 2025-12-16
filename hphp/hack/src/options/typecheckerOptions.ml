@@ -89,8 +89,6 @@ let migration_flags_all = List.fold_right ~init:SSet.empty ~f:SSet.add []
 
 let timeout t = t.GlobalOptions.tco_timeout
 
-let constraint_array_index t = t.GlobalOptions.tco_constraint_array_index
-
 let constraint_array_index_assign t =
   t.GlobalOptions.tco_constraint_array_index_assign
 

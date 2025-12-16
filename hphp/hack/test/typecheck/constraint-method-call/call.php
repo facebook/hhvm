@@ -42,7 +42,7 @@ class D {
     $this->map(
       ($x ==> $x[0]),
       vec[vec[1], vec[2]],
-    ); // relies on constraint_array_index to check, or bidirectional
+    );
   }
 
   public function test4(dynamic $d): void {

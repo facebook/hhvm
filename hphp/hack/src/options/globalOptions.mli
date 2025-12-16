@@ -94,8 +94,6 @@ type t = {
         Currently used for lambdas. *)
   tco_timeout: int;
       (** If non-zero, give up type checking a class or function after this many seconds *)
-  tco_constraint_array_index: bool;
-      (** Flag to enable the constraint solver to infer that a type can be indexed *)
   tco_constraint_array_index_assign: bool;
       (** Flag to enable the constraint solver to infer that a type can be indexed then assigned *)
   tco_constraint_method_call: bool;
@@ -328,7 +326,6 @@ val set :
   ?so_naming_sqlite_path:string ->
   ?tco_language_feature_logging:bool ->
   ?tco_timeout:int ->
-  ?tco_constraint_array_index:bool ->
   ?tco_constraint_array_index_assign:bool ->
   ?tco_constraint_method_call:bool ->
   ?code_agnostic_fixme:bool ->

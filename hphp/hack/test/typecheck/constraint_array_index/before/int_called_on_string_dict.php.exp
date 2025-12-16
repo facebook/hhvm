@@ -1,6 +1,0 @@
-ERROR: File "int_called_on_string_dict.php", line 3, characters 6-6:
-Invalid index type for this dict (Typing[4449])
-  File "int_called_on_string_dict.php", line 2, characters 17-22:
-  This is a string
-  File "int_called_on_string_dict.php", line 3, characters 6-6:
-  It is incompatible with an int

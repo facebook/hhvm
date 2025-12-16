@@ -31,6 +31,8 @@ class ThriftTransactionHandler
 
   ThriftTransactionHandler(const ThriftTransactionHandler&) = delete;
   ThriftTransactionHandler& operator=(const ThriftTransactionHandler&) = delete;
+  ThriftTransactionHandler(ThriftTransactionHandler&&) = delete;
+  ThriftTransactionHandler& operator=(ThriftTransactionHandler&&) = delete;
 
   void setChannel(std::shared_ptr<H2Channel> channel);
 

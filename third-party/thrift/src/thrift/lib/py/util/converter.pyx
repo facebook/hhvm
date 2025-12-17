@@ -109,3 +109,9 @@ cdef object _to_py_field(object field_type, object type_args, object obj):
     if isinstance(obj, (Enum, BadEnum)):
         return obj.value
     return obj
+
+
+def fbthrift_name_or_key_error(enum_class, value):
+    if value in enum_class:
+        return enum_class(value).name
+    raise KeyError(value)

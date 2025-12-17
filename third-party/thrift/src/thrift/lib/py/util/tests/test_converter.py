@@ -26,7 +26,7 @@ import convertible.types as py3_types
 from parameterized import parameterized
 from thrift.python.mutable_types import to_thrift_list, to_thrift_map, to_thrift_set
 from thrift.python.types import BadEnum
-from thrift.util.converter import to_py_struct
+from thrift.util.converter import fbthrift_name_or_key_error, to_py_struct
 
 
 class Py3ToPyDeprecatedConverterTest(unittest.TestCase):
@@ -462,3 +462,27 @@ class PyDeprecatedToPyDeprecatedConverterTest(unittest.TestCase):
                 simple,
             ),
         )
+
+
+class PyDeprecatedToPythonConverterTest(unittest.TestCase):
+    def test_valid_enum_value_returns_name(self) -> None:
+        # GIVEN
+        expected = "RED"
+
+        # WHEN
+        actual = fbthrift_name_or_key_error(python_types.Color, 1)
+
+        # THEN
+        self.assertEqual(expected, actual)
+
+    def test_invalid_enum_value_raises_key_error(self) -> None:
+        # GIVEN
+        invalid_value = 999
+
+        # WHEN / THEN
+        with self.assertRaisesRegex(KeyError, "999"):
+            # pyre-ignore[6]: Deliberately pass invalid int to test KeyError
+            py_deprecated_types.Color._VALUES_TO_NAMES[invalid_value]
+
+        with self.assertRaisesRegex(KeyError, "999"):
+            fbthrift_name_or_key_error(python_types.Color, invalid_value)

@@ -16,7 +16,7 @@ import typing
 
 from thrift.py3.types import Struct as Py3Struct
 from thrift.python.mutable_types import MutableStructOrUnion as PythonMutableStruct
-from thrift.python.types import StructOrUnion as PythonStruct
+from thrift.python.types import Enum as PythonEnum, StructOrUnion as PythonStruct
 
 # thrift-py-deprecated struct doesn't have a base class,
 # thus this hacky way to do type checking
@@ -33,3 +33,7 @@ def to_py_struct(cls: typing.Type[T], obj: TObj) -> T: ...
 def to_py_struct(
     cls: typing.Type[T], obj: typing.Optional[TObj]
 ) -> typing.Optional[T]: ...
+
+TEnum = typing.TypeVar("TEnum", bound=PythonEnum)
+
+def fbthrift_name_or_key_error(enum_class: typing.Type[TEnum], value: int) -> str: ...

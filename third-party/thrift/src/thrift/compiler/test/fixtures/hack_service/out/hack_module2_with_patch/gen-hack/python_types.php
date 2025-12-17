@@ -1214,3 +1214,81 @@ class ConstrainedFloat32 implements \IThriftSyncStruct, \IThriftStructMetadata {
 
 }
 
+/**
+ * Enables the deprecated `isset` API for a struct.
+ * DO NOT ADD ANY NEW USAGE!
+ * The `isset` API is easy to use incorrectly and gives inconsistent
+ * results for `unqualified` fields depending on whether the struct
+ * was initialized from Python or deserialized. There are additional
+ * complexities arising from schema evolution.
+ * 
+ * In all cases, there are better, cleaner alternatives to using this API.
+ * For example, consider using `optional` to signify nullable fields.
+ * Alternatively, use a custom default (unqualified fields only) to provide
+ * a semantically meaningful default value that signifies the field is not set.
+ *
+ * Original thrift struct:-
+ * EnableUnsafeIssetInspection
+ */
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/annotation/python/EnableUnsafeIssetInspection'))>>
+class EnableUnsafeIssetInspection implements \IThriftSyncStruct, \IThriftStructMetadata {
+  use \ThriftSerializationTrait;
+
+  const \ThriftStructTypes::TSpec SPEC = dict[
+  ];
+  const dict<string, int> FIELDMAP = dict[
+  ];
+
+  const type TConstructorShape = shape(
+  );
+
+  const int STRUCTURAL_ID = 957977401221134810;
+
+  public function __construct()[] {
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+    );
+  }
+
+  public function getName()[]: string {
+    return 'EnableUnsafeIssetInspection';
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "python.EnableUnsafeIssetInspection",
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[
+        '\facebook\thrift\annotation\Struct' => \facebook\thrift\annotation\Struct::fromShape(
+          shape(
+          )
+        ),
+        '\facebook\thrift\annotation\Exception' => \facebook\thrift\annotation\Exception::fromShape(
+          shape(
+          )
+        ),
+      ],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+}
+

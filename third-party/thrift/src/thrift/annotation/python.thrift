@@ -251,3 +251,18 @@ struct ConstrainedFloat32 {
   ///     * REJECT: raises `TypeError`for `NaN` values.
   3: ConstraintLevel not_a_number;
 }
+
+/// Enables the deprecated `isset` API for a struct.
+/// DO NOT ADD ANY NEW USAGE!
+/// The `isset` API is easy to use incorrectly and gives inconsistent
+/// results for `unqualified` fields depending on whether the struct
+/// was initialized from Python or deserialized. There are additional
+/// complexities arising from schema evolution.
+///
+/// In all cases, there are better, cleaner alternatives to using this API.
+/// For example, consider using `optional` to signify nullable fields.
+/// Alternatively, use a custom default (unqualified fields only) to provide
+/// a semantically meaningful default value that signifies the field is not set.
+@scope.Struct
+@scope.Exception
+struct EnableUnsafeIssetInspection {}

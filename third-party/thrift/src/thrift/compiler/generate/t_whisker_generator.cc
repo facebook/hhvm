@@ -374,11 +374,13 @@ t_whisker_generator::make_prototype_for_const_value(
   def.property("type", [this, &proto](const t_const_value& self) {
     // Prioritize AST populated ttype, fallback to inferred expected type in
     // context
-    const t_type_ref& type = self.ttype().empty()
-        ? context().get_const_value_type(self)
-        : self.ttype();
-    return type.empty() ? whisker::make::null
-                        : resolve_derived_t_type(proto, type.deref());
+    const t_type* type = self.type().empty()
+        ? context().get_const_value_type(self).get_type()
+        // DO_BEFORE(hchok, 20251220): This is extremely temporary, to isolate
+        // AST t_const_value type changes from subsequent generator changes
+        : self.type()->get_true_type();
+    return type == nullptr ? whisker::make::null
+                           : resolve_derived_t_type(proto, *type);
   });
   def.property("bool?", [](const t_const_value& self) {
     return self.kind() == cv::CV_BOOL;
@@ -399,8 +401,8 @@ t_whisker_generator::make_prototype_for_const_value(
     return self.kind() == cv::CV_STRING;
   });
   def.property("map?", [](const t_const_value& self) {
-    return self.kind() == cv::CV_MAP && !self.ttype().empty() &&
-        self.ttype()->is<t_map>();
+    return self.kind() == cv::CV_MAP && !self.type().empty() &&
+        self.type()->get_true_type()->is<t_map>();
   });
   def.property("list?", [](const t_const_value& self) {
     return self.kind() == cv::CV_LIST;
@@ -414,8 +416,8 @@ t_whisker_generator::make_prototype_for_const_value(
         (self.kind() == cv::CV_LIST && self.get_list().empty());
   });
   def.property("structured?", [](const t_const_value& self) {
-    return self.kind() == cv::CV_MAP && !self.ttype().empty() &&
-        self.ttype()->get_true_type()->is<t_structured>();
+    return self.kind() == cv::CV_MAP && !self.type().empty() &&
+        self.type()->get_true_type()->is<t_structured>();
   });
   def.property("nonzero?", [](const t_const_value& self) {
     switch (self.kind()) {
@@ -463,9 +465,9 @@ t_whisker_generator::make_prototype_for_const_value(
   // Each array element is a map containing a reference to the corresponding
   // field ("field") and the const value being set ("value").
   def.property("structured_elements", [&proto](const t_const_value& self) {
-    const t_structured* strct = self.ttype().empty()
+    const t_structured* strct = self.type().empty()
         ? nullptr
-        : self.ttype()->get_true_type()->try_as<t_structured>();
+        : self.type()->get_true_type()->try_as<t_structured>();
     if (strct == nullptr) {
       return w::null;
     }

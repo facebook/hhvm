@@ -111,7 +111,7 @@ std::unique_ptr<t_const_value> schematizer::type_uri(const t_type& type) {
   auto ret = t_const_value::make_map();
   auto uri = calculate_uri(type, opts_.use_hash);
   ret->add_map(val(uri.uri_type), val(std::move(uri.value)));
-  ret->set_ttype(std_type("facebook.com/thrift/type/TypeUri"));
+  ret->set_type(std_type("facebook.com/thrift/type/TypeUri"));
   return ret;
 }
 
@@ -157,7 +157,7 @@ void schematizer::add_definition(
       // Double write to deprecated externed path. (T161963504)
       if (opts_.double_writes) {
         auto structured_annot = annot->clone();
-        structured_annot->set_ttype(
+        structured_annot->set_type(
             std_type("facebook.com/thrift/type/StructuredAnnotation"));
         structured_annot->add_map(val("type"), type_uri(*item.type()));
 
@@ -166,7 +166,7 @@ void schematizer::add_definition(
         structured_annots->add_list(val(id));
       }
 
-      annot->set_ttype(std_type("facebook.com/thrift/type/Annotation"));
+      annot->set_type(std_type("facebook.com/thrift/type/Annotation"));
       auto unhashed_uri = calculate_uri(*item.type(), false /*use_hash*/);
       // We're not hashing & ignoring the UriType here, as annotations are
       // stored as map<string, Annotation>.
@@ -447,7 +447,7 @@ void schematizer::add_fields(
     if (auto deflt = field.default_value()) {
       assert(program);
       auto clone = deflt->clone();
-      clone->set_ttype(field.type());
+      clone->set_type(field.type());
       auto id = intern_value(std::move(clone), const_cast<t_program*>(program));
       field_schema->add_map(val("customDefault"), val(id));
     }
@@ -666,7 +666,7 @@ std::unique_ptr<t_const_value> schematizer::gen_schema(const t_const& node) {
   schema->add_map(val("type"), gen_type(*node.type(), program));
 
   std::unique_ptr<t_const_value> clone = node.value()->clone();
-  clone->set_ttype(node.type_ref());
+  clone->set_type(node.type_ref());
   auto id =
       opts_.intern_value(std::move(clone), const_cast<t_program*>(program));
   schema->add_map(val("value"), val(id));
@@ -928,7 +928,7 @@ protocol_value_builder::to_labeled_value(
 std::unique_ptr<t_const_value> protocol_value_builder::wrap(
     const t_const_value& protocol_value, t_type_ref ttype) const {
   auto ret = t_const_value::make_map();
-  ret->set_ttype(ttype);
+  ret->set_type(ttype);
   switch (protocol_value.kind()) {
     case t_const_value::CV_BOOL:
     case t_const_value::CV_INTEGER:

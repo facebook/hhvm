@@ -541,10 +541,11 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
    * relevant typedef in codegen where applicable.
    */
   const t_type* get_const_value_type(const t_const_value& value) const {
-    const t_type_ref& type = context().get_const_value_type(value).empty()
-        ? value.ttype()
-        : context().get_const_value_type(value);
-    return type.empty() ? nullptr : &type.deref();
+    return context().get_const_value_type(value).empty()
+        // DO_BEFORE(hchok, 20251220): This is extremely temporary, to isolate
+        // AST t_const_value type changes from subsequent generator changes
+        ? value.type()->get_true_type()
+        : context().get_const_value_type(value).get_type();
   }
 
   prototype<t_program>::ptr make_prototype_for_program(

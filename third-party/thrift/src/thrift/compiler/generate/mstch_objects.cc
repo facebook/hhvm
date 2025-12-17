@@ -191,7 +191,7 @@ mstch::node mstch_const_value::const_struct() {
   std::vector<const t_field*> fields;
   mstch::array a;
 
-  const auto* type = const_value_->ttype()->get_true_type();
+  const auto* type = const_value_->type()->get_true_type();
   if (const t_structured* strct = type->try_as<t_structured>()) {
     for (auto member : const_value_->get_map()) {
       const auto* field = strct->get_field_by_name(member.first->get_string());

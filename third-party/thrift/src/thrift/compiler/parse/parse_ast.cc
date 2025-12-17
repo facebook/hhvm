@@ -549,13 +549,13 @@ class ast_builder : public parser_actions {
       source_range range, std::string_view name) override {
     auto const_value = t_const_value::make_map();
     t_type_ref type = new_type_ref(fmt::to_string(name), nullptr, range);
-    const_value->set_ttype(type);
+    const_value->set_type(type);
     return on_structured_annotation(range, std::move(const_value));
   }
 
   std::unique_ptr<t_const> on_structured_annotation(
       source_range range, std::unique_ptr<t_const_value> value) override {
-    auto ttype = value->ttype(); // Copy the t_type_ref.
+    auto ttype = value->type(); // Copy the t_type_ref.
     auto result =
         std::make_unique<t_const>(&program_, ttype, "", std::move(value));
     result->set_src_range(range);
@@ -897,7 +897,7 @@ class ast_builder : public parser_actions {
       auto result = constant->value()->clone();
       // We only want to clone the value, while discarding all real type
       // information.
-      result->set_ttype({});
+      result->set_type({});
       result->set_is_enum(false);
       result->set_enum(nullptr);
       result->set_enum_value(nullptr);
@@ -940,7 +940,7 @@ class ast_builder : public parser_actions {
   std::unique_ptr<t_const_value> on_struct_initializer(
       source_range range, std::string_view name) override {
     auto const_value = t_const_value::make_map();
-    const_value->set_ttype(new_type_ref(fmt::to_string(name), nullptr, range));
+    const_value->set_type(new_type_ref(fmt::to_string(name), nullptr, range));
     const_value->set_ref_range(range);
     const_value->set_is_struct_literal(true);
     return const_value;

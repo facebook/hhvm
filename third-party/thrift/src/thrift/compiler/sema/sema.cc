@@ -98,7 +98,7 @@ class type_ref_resolver {
   bool run() {
     ast_mutator mutator;
     auto resolve_const_value = [&](t_const_value& node, auto& recurse) -> void {
-      node.set_ttype(resolve(node.ttype()));
+      node.set_type(resolve(node.type()));
 
       if (node.kind() == t_const_value::CV_MAP) {
         for (auto& map_val : node.get_map()) {
@@ -303,7 +303,7 @@ void match_type_with_const_value(
       }
     }
   } else if (const t_structured* structured = type->try_as<t_structured>()) {
-    if (auto ttype = value->ttype()) {
+    if (auto ttype = value->type()) {
       if (!ttype.resolved()) {
         ctx.error(
             value->ref_range().begin,
@@ -369,7 +369,7 @@ void match_type_with_const_value(
     assert(false);
   }
 
-  value->set_ttype(t_type_ref::from_req_ptr(type));
+  value->set_type(t_type_ref::from_req_ptr(long_type));
 }
 
 void maybe_match_type_with_const_value(
@@ -825,7 +825,7 @@ void inject_schema_const(sema_context& ctx, mutator_context&, t_program& prog) {
       std::make_unique<t_const_value>(std::move(serialized)));
   // Since schema injection happens after 'match_const_type_with_value' mutator
   // we need to set the explicitly type to binary here.
-  cnst->value()->set_ttype(t_primitive_type::t_binary());
+  cnst->value()->set_type(t_primitive_type::t_binary());
   cnst->set_uri("");
   cnst->set_src_range(prog.src_range());
   cnst->set_generated();
@@ -883,6 +883,7 @@ std::vector<ast_mutator> pre_validation_standard_mutators() {
   main.add_struct_visitor(&mutate_inject_metadata_fields);
   main.add_const_visitor(&match_const_type_with_value);
   main.add_field_visitor(&match_field_type_with_default_value);
+  main.add_function_param_visitor(&match_field_type_with_default_value);
   main.add_named_visitor(&match_annotation_types_with_const_values);
   main.add_program_visitor(&deduplicate_thrift_includes);
   main.add_struct_visitor(&add_magic_annotations);

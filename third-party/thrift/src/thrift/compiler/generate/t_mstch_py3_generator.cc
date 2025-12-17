@@ -1130,21 +1130,21 @@ class py3_mstch_const_value : public mstch_const_value {
   }
 
   mstch::node is_bool_value() {
-    if (auto ttype = const_value_->ttype()) {
+    if (auto ttype = const_value_->type()) {
       return ttype->get_true_type()->is_bool();
     }
     return false;
   }
 
   mstch::node is_float_value() {
-    if (auto ttype = const_value_->ttype()) {
+    if (auto ttype = const_value_->type()) {
       return ttype->get_true_type()->is_floating_point();
     }
     return false;
   }
 
   mstch::node is_binary() {
-    auto& ttype = const_value_->ttype();
+    auto& ttype = const_value_->type();
     return type_ == cv::CV_STRING && ttype &&
         ttype->get_true_type()->is_binary();
   }
@@ -1173,11 +1173,11 @@ class py3_mstch_const_value : public mstch_const_value {
   }
 
   mstch::node const_enum_type() {
-    if (!const_value_->ttype() || type_ != cv::CV_INTEGER ||
+    if (!const_value_->type() || type_ != cv::CV_INTEGER ||
         !const_value_->is_enum()) {
       return {};
     }
-    const auto* type = const_value_->ttype()->get_true_type();
+    const auto* type = const_value_->type()->get_true_type();
     if (type->is<t_enum>()) {
       return context_.type_factory->make_mstch_object(type, context_);
     }
@@ -1185,10 +1185,10 @@ class py3_mstch_const_value : public mstch_const_value {
   }
 
   mstch::node const_container_type() {
-    if (!const_value_->ttype()) {
+    if (!const_value_->type()) {
       return {};
     }
-    const auto* type = const_value_->ttype()->get_true_type();
+    const auto* type = const_value_->type()->get_true_type();
     if (type->is<t_container>()) {
       return context_.type_factory->make_mstch_object(type, context_);
     }

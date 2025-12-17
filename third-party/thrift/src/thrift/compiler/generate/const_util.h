@@ -146,8 +146,8 @@ inline void hydrate_const(protocol::Object& out, const t_const_value& val) {
 inline protocol::Value const_to_value(const t_const_value& val) {
   protocol::Value ret;
   const t_type* ttype = [&]() -> const t_type* {
-    if (val.ttype()) {
-      return val.ttype()->get_true_type();
+    if (val.type()) {
+      return val.type()->get_true_type();
     }
     switch (val.kind()) {
       // Primitives have singleton instances, so we can unify the nullptr cases
@@ -199,7 +199,7 @@ inline protocol::Value const_to_value(const t_const_value& val) {
   }
 
   // After handling the list/map cases, either we assigned a primitive type
-  // pointer, or val.ttype() was non-null
+  // pointer, or val.type() was non-null
   assert(ttype != nullptr);
   if (const t_primitive_type* primitive = ttype->try_as<t_primitive_type>()) {
     switch (primitive->primitive_type()) {

@@ -216,8 +216,8 @@ class t_const_value {
 
   t_const* get_owner() const { return owner_; }
 
-  const t_type_ref& ttype() const { return ttype_; }
-  void set_ttype(t_type_ref type) { ttype_ = type; }
+  const t_type_ref& type() const { return type_; }
+  void set_type(t_type_ref type) { type_ = type; }
 
   void set_is_enum(bool value = true) { is_enum_ = value; }
 
@@ -309,7 +309,7 @@ class t_const_value {
   t_const* owner_ = nullptr;
   const t_program* program_ = nullptr; // If this is an identifier, the program
                                        // where the reference appears.
-  t_type_ref ttype_;
+  t_type_ref type_;
   // If this value is cloned from a referenced const, contains the range of that
   // reference.
   source_range ref_range_;

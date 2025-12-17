@@ -53,9 +53,7 @@ from apache.thrift.metadata.thrift_types import (
 from thrift.python.client import Client
 from thrift.python.exceptions import GeneratedError
 
-# pyre-fixme[21]: Could not find module `thrift.python.server`.
-from thrift.python.server import ServiceInterface
-from thrift.python.types import Enum as ThriftEnumClass, StructOrUnion
+from thrift.python.types import Enum as ThriftEnumClass, ServiceInterface, StructOrUnion
 
 class ThriftKind(Enum):
     PRIMITIVE: ThriftKind = ...
@@ -227,9 +225,7 @@ def gen_metadata(
 ) -> ThriftExceptionProxy: ...
 @overload
 def gen_metadata(
-    # pyre-fixme[11]: Annotation `ServiceInterface` is not defined as a type.
     cls: Union[ServiceInterface, Type[ServiceInterface], Client, Type[Client]],
 ) -> ThriftServiceProxy: ...
 @overload
-# pyre-fixme[43]: Signature of overloaded function `gen_metadata` will never be matched.
 def gen_metadata(cls: Union[ThriftEnumClass, Type[ThriftEnumClass]]) -> ThriftEnum: ...

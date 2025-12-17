@@ -118,18 +118,18 @@ TEST(JsonTest, needCommas) {
 TEST(JsonTest, needCommasContainers) {
   Containers outStruct;
 
-  std::string goodinput("{\"m\":{\"m1\":\"m1\",\"m2\":\"m2\"}}");
+  std::string goodinput(R"({"m":{"m1":"m1","m2":"m2"}})");
   // Note the missing comma
-  std::string badinput("{\"m\":{\"m1\":\"m1\"\"m2\":\"m2\"}}");
+  std::string badinput(R"({"m":{"m1":"m1""m2":"m2"}})");
   // we can serialize the good input
   apache::thrift::SimpleJSONSerializer::deserialize(goodinput, outStruct);
   EXPECT_THROW(
       apache::thrift::SimpleJSONSerializer::deserialize(badinput, outStruct),
       std::exception);
 
-  std::string goodinput2("{\"l\":[\"l1\",\"l2\"]}");
+  std::string goodinput2(R"({"l":["l1","l2"]})");
   // Note the missing comma
-  std::string badinput2("{\"l\":[\"l1\"\"l2\"]}");
+  std::string badinput2(R"({"l":["l1""l2"]})");
   // we can serialize the good input
   apache::thrift::SimpleJSONSerializer::deserialize(goodinput2, outStruct);
   EXPECT_THROW(

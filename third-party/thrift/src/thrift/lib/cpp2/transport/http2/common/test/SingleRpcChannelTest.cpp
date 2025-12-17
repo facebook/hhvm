@@ -117,7 +117,7 @@ TEST_F(ChannelTestFixture, BadHeaderFields) {
       {"good header2", "bad\x01\x02value\r\n"},
       {"bad\x01header", "good value"},
       {"header:with:colon", "bad value\r\n\r\n"},
-      {"asdf:gh", "{\"json\":\"data\"}"},
+      {"asdf:gh", R"({"json":"data"})"},
       {"bad header1", "good value"}};
   unordered_map<string, string> inputHeaders;
   inputHeaders.insert(

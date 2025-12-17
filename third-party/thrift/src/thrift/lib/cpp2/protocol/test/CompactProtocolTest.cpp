@@ -28,6 +28,7 @@ using namespace apache::thrift::test;
 
 FOLLY_DISABLE_UNDEFINED_BEHAVIOR_SANITIZER("undefined")
 bool makeInvalidBool() {
+  // NOLINTNEXTLINE(modernize-raw-string-literal)
   return *reinterpret_cast<const volatile bool*>("\x42");
 }
 

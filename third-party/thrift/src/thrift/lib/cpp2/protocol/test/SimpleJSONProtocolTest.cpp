@@ -120,7 +120,7 @@ TEST_F(SimpleJSONProtocolTest, roundtrip_binary) {
 TEST_F(SimpleJSONProtocolTest, roundtrip_binary_without_padding) {
   StructWithBinaryField orig;
   orig.field() = "0123";
-  const std::string serialized = "{\"field\":\"MDEyMw\"}";
+  const std::string serialized = R"({"field":"MDEyMw"})";
   StructWithBinaryField deserialized;
   const auto size = S::deserialize(serialized, deserialized);
   EXPECT_EQ(serialized.size(), size);
@@ -130,7 +130,7 @@ TEST_F(SimpleJSONProtocolTest, roundtrip_binary_without_padding) {
 TEST_F(SimpleJSONProtocolTest, roundtrip_binary_with_padding) {
   StructWithBinaryField orig;
   orig.field() = "0123";
-  const std::string serialized = "{\"field\":\"MDEyMw==\"}";
+  const std::string serialized = R"({"field":"MDEyMw=="})";
   StructWithBinaryField deserialized;
   const auto size = S::deserialize(serialized, deserialized);
   EXPECT_EQ(serialized.size(), size);

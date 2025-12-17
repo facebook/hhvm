@@ -52,7 +52,7 @@ class TestEventHandler : public TProcessorEventHandler {
       std::string_view fn_name,
       TConnectionContext* ctx) override {
     LOG(INFO) << fmt::format(
-        "getServiceContext(\"{}\", \"{}\")", service_name, fn_name);
+        R"(getServiceContext("{}", "{}"))", service_name, fn_name);
     return new EventHandlerContext(ctx);
   }
 

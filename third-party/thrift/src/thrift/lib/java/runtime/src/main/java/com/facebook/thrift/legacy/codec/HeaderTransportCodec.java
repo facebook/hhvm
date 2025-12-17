@@ -36,9 +36,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicLong;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import reactor.core.Exceptions;
 
 public final class HeaderTransportCodec extends ChannelDuplexHandler {
+  private static final Logger log = LoggerFactory.getLogger(HeaderTransportCodec.class);
+
   private static final int HEADER_MAGIC = 0x0FFF;
   private static final int ENCODED_INFO_SIZE = 2 * Byte.BYTES;
   private static final int FRAME_HEADER_SIZE =
@@ -315,7 +319,13 @@ public final class HeaderTransportCodec extends ChannelDuplexHandler {
     int headerCount = readVarInt32(messageHeader);
     for (int i = 0; i < headerCount; i++) {
       String key = readString(messageHeader);
-      String value = readString(messageHeader);
+      String value = null;
+      try {
+        value = readString(messageHeader);
+      } catch (Exception e) {
+        log.error("Failed to read header {}", key, e);
+        throw e;
+      }
       headers.put(key, value);
     }
     return headers.build();

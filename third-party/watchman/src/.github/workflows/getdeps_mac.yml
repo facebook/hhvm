@@ -17,7 +17,7 @@ jobs:
   build:
     runs-on: macOS-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
     - name: Show disk space at start
       run: df -h
     - name: Free up disk space
@@ -662,7 +662,7 @@ jobs:
       run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --src-dir=. watchman --project-install-prefix watchman:/usr/local
     - name: Copy artifacts
       run: python3 build/fbcode_builder/getdeps.py --allow-system-packages fixup-dyn-deps --src-dir=. watchman _artifacts/mac --project-install-prefix watchman:/usr/local --final-install-prefix /usr/local
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v6
       with:
         name: watchman
         path: _artifacts

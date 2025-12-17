@@ -47,7 +47,7 @@ var loadSheddingError = NewApplicationException(
 )
 
 var taskExpiredError = NewApplicationException(
-	UNKNOWN_APPLICATION_EXCEPTION,
+	types.TIMEOUT,
 	"Task Expired",
 )
 
@@ -194,6 +194,17 @@ func (s *rocketServer) isOverloaded() bool {
 	return countWithNewRequest > s.maxRequests
 }
 
+// getQueueTimeout returns the queue timeout duration from metadata, or max duration if not set
+func getQueueTimeout(metadata *rpcmetadata.RequestRpcMetadata) time.Duration {
+	if metadata.IsSetQueueTimeoutMs() {
+		queueTimeoutMs := metadata.GetQueueTimeoutMs()
+		if queueTimeoutMs > 0 {
+			return time.Duration(queueTimeoutMs) * time.Millisecond
+		}
+	}
+	return time.Duration(math.MaxInt64)
+}
+
 // This counter is what powers client side load balancing.
 // loadFn is a function that reports system load.  It must report the
 // server load as an unsigned integer.  Higher numbers mean the server
@@ -301,6 +312,11 @@ func (s *rocketServerSocket) requestResponse(msg payload.Payload) mono.Mono {
 		processStartTime := time.Now()
 		processDelay := processStartTime.Sub(requestReceivedTime)
 		s.observer.ProcessDelay(processDelay)
+
+		queueTimeout := getQueueTimeout(metadata)
+		if processDelay > queueTimeout {
+			return nil, taskExpiredError
+		}
 
 		processor := s.proc
 		if metadata.InteractionCreate != nil {
@@ -419,6 +435,12 @@ func (s *rocketServerSocket) fireAndForget(msg payload.Payload) {
 	processStartTime := time.Now()
 	processDelay := processStartTime.Sub(requestReceivedTime)
 	s.observer.ProcessDelay(processDelay)
+
+	queueTimeout := getQueueTimeout(metadata)
+	if processDelay > queueTimeout {
+		s.log("rocketServer fireAndForget: dropping request due to queue timeout")
+		return
+	}
 
 	if _, err := process(context.Background(), s.proc, protocol, s.pstats, s.observer); err != nil {
 		// Notify observer that connection was dropped due to unparseable message begin

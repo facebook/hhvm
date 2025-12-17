@@ -563,15 +563,35 @@ class NumericalConversionsTests(unittest.TestCase):
                 self.assertEqual(m.opt_pointless_default_str, "")
                 self.assertEqual(m.opt_pointless_default_int, 0)
 
-        def assert_isset(m: mixed) -> None:
+        def assert_isset(m: mixed, deserialized: bool = False) -> None:
             # pyre-fixme[6]: the pyre typing for this is broken in thrift-py3
             isset = Struct.isset_DEPRECATED(m)
 
-            for fld_name, _ in mixed:
-                if not fld_name.startswith("opt_") or "ref" in fld_name:
-                    continue
-
-                self.assertFalse(getattr(isset, fld_name), fld_name)
+            for fld_name, fld_val in m:
+                isset_val = getattr(isset, fld_name, None)
+                if fld_name.endswith("ref"):
+                    # in thrift-python, it's just a normal field
+                    # the `mixed` struct has one unqualified field and one `optional` field
+                    if is_auto_migrated():
+                        self.assertEqual(
+                            isset_val, deserialized and fld_val is not None, fld_name
+                        )
+                    else:
+                        # @Ref fields are excluded from isset in thrift-py3
+                        self.assertIsNone(isset_val, fld_name)
+                elif fld_name == "some_field_":
+                    self.assertEqual(
+                        isset_val, fld_val is not None, f"some_field_={fld_val}"
+                    )
+                elif fld_name.startswith("opt_"):
+                    expected = fld_val is not None if is_auto_migrated() else False
+                    self.assertEqual(
+                        isset_val,
+                        expected,
+                        fld_name,
+                    )
+                else:  # unqualified field
+                    self.assertEqual(isset_val, deserialized, fld_name)
 
         # constructor
         m = mixed()
@@ -580,13 +600,14 @@ class NumericalConversionsTests(unittest.TestCase):
 
         # call operator
         m = m(some_field_="don't care")
+        self.assertEqual(m.some_field_, "don't care")
         assert_mixed(m)
         assert_isset(m)
 
         # serialization round-trip
         m = deserialize(mixed, serialize(m))
         assert_mixed(m)
-        assert_isset(m)
+        assert_isset(m, deserialized=True)
 
         ### Now with explicit `None` set
         # in py3, even setting the field explicitly to None:
@@ -603,7 +624,7 @@ class NumericalConversionsTests(unittest.TestCase):
 
         m = deserialize(mixed, serialize(m))
         assert_mixed(m)
-        assert_isset(m)
+        assert_isset(m, deserialized=True)
 
         # basic sanity check for normal set behavior
         non_opt = mixed(

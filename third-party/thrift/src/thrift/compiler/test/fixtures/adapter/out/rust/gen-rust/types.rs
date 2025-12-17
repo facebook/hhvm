@@ -4303,12 +4303,26 @@ impl ::std::default::Default for self::AdaptTemplatedTestStruct {
             adaptedDoubleDefault: 5.0,
             adaptedStringDefault: "6".to_owned(),
             adaptedEnum: crate::types::AdaptedEnum::One,
-            adaptedListDefault: <::fbthrift_adapters::test::TestAdapter as ::fbthrift::adapter::ThriftAdapter>::from_thrift_default::<AdaptTemplatedTestStruct>(vec![
-                    1,
-                ], 19),
+            adaptedListDefault: <::fbthrift_adapters::test::TestAdapter as ::fbthrift::adapter::ThriftAdapter>::from_thrift_default::<AdaptTemplatedTestStruct>({
+                    let mut list = ::std::vec::Vec::new();
+                    {
+                        #[inline(never)]
+                        fn __do_push(list: &mut ::std::vec::Vec<::std::primitive::i64>) {
+                            list.push(1);
+                        }
+                        __do_push(&mut list);
+                    }
+                    list
+                }, 19),
             adaptedSetDefault: <::fbthrift_adapters::test::TestAdapter as ::fbthrift::adapter::ThriftAdapter>::from_thrift_default::<AdaptTemplatedTestStruct>({
                     let mut set = ::std::collections::BTreeSet::new();
-                    set.insert(1);
+                    {
+                        #[inline(never)]
+                        fn __do_insert(set: &mut ::std::collections::BTreeSet<::std::primitive::i64>) {
+                            set.insert(1);
+                        }
+                        __do_insert(&mut set);
+                    }
                     set
                 }, 20),
             adaptedMapDefault: <::fbthrift_adapters::test::TestAdapter as ::fbthrift::adapter::ThriftAdapter>::from_thrift_default::<AdaptTemplatedTestStruct>({

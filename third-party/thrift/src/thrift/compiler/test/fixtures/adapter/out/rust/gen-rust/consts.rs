@@ -11,8 +11,20 @@ pub static var3: ::std::sync::LazyLock<crate::types::MyStruct> = ::std::sync::La
             field: 30,
             set_string: <crate::types::adapters::SetWithAdapter as ::fbthrift::adapter::ThriftAdapter>::from_thrift_default::<crate::types::MyStruct>({
                 let mut set = ::std::collections::BTreeSet::new();
-                set.insert("10".to_owned());
-                set.insert("20".to_owned());
+                {
+                    #[inline(never)]
+                    fn __do_insert(set: &mut ::std::collections::BTreeSet<::std::string::String>) {
+                        set.insert("10".to_owned());
+                    }
+                    __do_insert(&mut set);
+                }
+                {
+                    #[inline(never)]
+                    fn __do_insert(set: &mut ::std::collections::BTreeSet<::std::string::String>) {
+                        set.insert("20".to_owned());
+                    }
+                    __do_insert(&mut set);
+                }
                 set
             }, 2),
             ..::std::default::Default::default()
@@ -26,8 +38,20 @@ pub static var6: ::std::sync::LazyLock<crate::types::MyStruct> = ::std::sync::La
             field: 60,
             set_string: <crate::types::adapters::SetWithAdapter as ::fbthrift::adapter::ThriftAdapter>::from_thrift_default::<crate::types::MyStruct>({
                 let mut set = ::std::collections::BTreeSet::new();
-                set.insert("30".to_owned());
-                set.insert("40".to_owned());
+                {
+                    #[inline(never)]
+                    fn __do_insert(set: &mut ::std::collections::BTreeSet<::std::string::String>) {
+                        set.insert("30".to_owned());
+                    }
+                    __do_insert(&mut set);
+                }
+                {
+                    #[inline(never)]
+                    fn __do_insert(set: &mut ::std::collections::BTreeSet<::std::string::String>) {
+                        set.insert("40".to_owned());
+                    }
+                    __do_insert(&mut set);
+                }
                 set
             }, 2),
             ..::std::default::Default::default()
@@ -60,9 +84,29 @@ pub static nested_adapted: ::std::sync::LazyLock<crate::types::MoveOnly> = ::std
             ..::std::default::Default::default()
         });
 
-pub static container_of_adapted: ::std::sync::LazyLock<::std::vec::Vec<crate::types::AdaptedByte>> = ::std::sync::LazyLock::new(|| vec![
-            1,
-            2,
-            3,
-        ]);
+pub static container_of_adapted: ::std::sync::LazyLock<::std::vec::Vec<crate::types::AdaptedByte>> = ::std::sync::LazyLock::new(|| {
+            let mut list = ::std::vec::Vec::new();
+            {
+                #[inline(never)]
+                fn __do_push(list: &mut ::std::vec::Vec<crate::types::AdaptedByte>) {
+                    list.push(1);
+                }
+                __do_push(&mut list);
+            }
+            {
+                #[inline(never)]
+                fn __do_push(list: &mut ::std::vec::Vec<crate::types::AdaptedByte>) {
+                    list.push(2);
+                }
+                __do_push(&mut list);
+            }
+            {
+                #[inline(never)]
+                fn __do_push(list: &mut ::std::vec::Vec<crate::types::AdaptedByte>) {
+                    list.push(3);
+                }
+                __do_push(&mut list);
+            }
+            list
+        });
 

@@ -831,9 +831,17 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyStruct {
 
         if type_id == ::std::any::TypeId::of::<hack__types::Attributes>() {
             let mut tmp = ::std::option::Option::Some(hack__types::Attributes {
-                attributes: vec![
-                    "\\SomeClass(\\AnotherClass::class)".to_owned(),
-                ],
+                attributes: {
+                    let mut list = ::std::vec::Vec::new();
+                    {
+                        #[inline(never)]
+                        fn __do_push(list: &mut ::std::vec::Vec<::std::string::String>) {
+                            list.push("\\SomeClass(\\AnotherClass::class)".to_owned());
+                        }
+                        __do_push(&mut list);
+                    }
+                    list
+                },
                 ..::std::default::Default::default()
             });
             let r: &mut dyn ::std::any::Any = &mut tmp;

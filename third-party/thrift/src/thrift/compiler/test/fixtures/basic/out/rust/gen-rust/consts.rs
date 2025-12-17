@@ -15,18 +15,62 @@ pub const E: ::std::primitive::f64 = 2.718281828459;
 
 pub const DATE: &::std::primitive::str = "June 28, 2017";
 
-pub static AList: ::std::sync::LazyLock<::std::vec::Vec<::std::primitive::i32>> = ::std::sync::LazyLock::new(|| vec![
-            2,
-            3,
-            5,
-            7,
-        ]);
+pub static AList: ::std::sync::LazyLock<::std::vec::Vec<::std::primitive::i32>> = ::std::sync::LazyLock::new(|| {
+            let mut list = ::std::vec::Vec::new();
+            {
+                #[inline(never)]
+                fn __do_push(list: &mut ::std::vec::Vec<::std::primitive::i32>) {
+                    list.push(2);
+                }
+                __do_push(&mut list);
+            }
+            {
+                #[inline(never)]
+                fn __do_push(list: &mut ::std::vec::Vec<::std::primitive::i32>) {
+                    list.push(3);
+                }
+                __do_push(&mut list);
+            }
+            {
+                #[inline(never)]
+                fn __do_push(list: &mut ::std::vec::Vec<::std::primitive::i32>) {
+                    list.push(5);
+                }
+                __do_push(&mut list);
+            }
+            {
+                #[inline(never)]
+                fn __do_push(list: &mut ::std::vec::Vec<::std::primitive::i32>) {
+                    list.push(7);
+                }
+                __do_push(&mut list);
+            }
+            list
+        });
 
 pub static ASet: ::std::sync::LazyLock<::std::collections::BTreeSet<::std::string::String>> = ::std::sync::LazyLock::new(|| {
             let mut set = ::std::collections::BTreeSet::new();
-            set.insert("foo".to_owned());
-            set.insert("bar".to_owned());
-            set.insert("baz".to_owned());
+            {
+                #[inline(never)]
+                fn __do_insert(set: &mut ::std::collections::BTreeSet<::std::string::String>) {
+                    set.insert("foo".to_owned());
+                }
+                __do_insert(&mut set);
+            }
+            {
+                #[inline(never)]
+                fn __do_insert(set: &mut ::std::collections::BTreeSet<::std::string::String>) {
+                    set.insert("bar".to_owned());
+                }
+                __do_insert(&mut set);
+            }
+            {
+                #[inline(never)]
+                fn __do_insert(set: &mut ::std::collections::BTreeSet<::std::string::String>) {
+                    set.insert("baz".to_owned());
+                }
+                __do_insert(&mut set);
+            }
             set
         });
 
@@ -35,23 +79,69 @@ pub static AMap: ::std::sync::LazyLock<::std::collections::BTreeMap<::std::strin
             {
                 #[inline(never)]
                 fn __do_insert(map: &mut ::std::collections::BTreeMap<::std::string::String, ::std::vec::Vec<::std::primitive::i32>>) {
-                    map.insert("foo".to_owned(), vec![
-                        1,
-                        2,
-                        3,
-                        4,
-                    ]);
+                    map.insert("foo".to_owned(), {
+                        let mut list = ::std::vec::Vec::new();
+                        {
+                            #[inline(never)]
+                            fn __do_push(list: &mut ::std::vec::Vec<::std::primitive::i32>) {
+                                list.push(1);
+                            }
+                            __do_push(&mut list);
+                        }
+                        {
+                            #[inline(never)]
+                            fn __do_push(list: &mut ::std::vec::Vec<::std::primitive::i32>) {
+                                list.push(2);
+                            }
+                            __do_push(&mut list);
+                        }
+                        {
+                            #[inline(never)]
+                            fn __do_push(list: &mut ::std::vec::Vec<::std::primitive::i32>) {
+                                list.push(3);
+                            }
+                            __do_push(&mut list);
+                        }
+                        {
+                            #[inline(never)]
+                            fn __do_push(list: &mut ::std::vec::Vec<::std::primitive::i32>) {
+                                list.push(4);
+                            }
+                            __do_push(&mut list);
+                        }
+                        list
+                    });
                 }
                 __do_insert(&mut map);
             }
             {
                 #[inline(never)]
                 fn __do_insert(map: &mut ::std::collections::BTreeMap<::std::string::String, ::std::vec::Vec<::std::primitive::i32>>) {
-                    map.insert("bar".to_owned(), vec![
-                        10,
-                        32,
-                        54,
-                    ]);
+                    map.insert("bar".to_owned(), {
+                        let mut list = ::std::vec::Vec::new();
+                        {
+                            #[inline(never)]
+                            fn __do_push(list: &mut ::std::vec::Vec<::std::primitive::i32>) {
+                                list.push(10);
+                            }
+                            __do_push(&mut list);
+                        }
+                        {
+                            #[inline(never)]
+                            fn __do_push(list: &mut ::std::vec::Vec<::std::primitive::i32>) {
+                                list.push(32);
+                            }
+                            __do_push(&mut list);
+                        }
+                        {
+                            #[inline(never)]
+                            fn __do_push(list: &mut ::std::vec::Vec<::std::primitive::i32>) {
+                                list.push(54);
+                            }
+                            __do_push(&mut list);
+                        }
+                        list
+                    });
                 }
                 __do_insert(&mut map);
             }

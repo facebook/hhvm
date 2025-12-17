@@ -2588,10 +2588,24 @@ impl ::fbthrift::metadata::ThriftAnnotations for TransitiveDerives {
 
         if type_id == ::std::any::TypeId::of::<rust__types::Derive>() {
             let mut tmp = ::std::option::Option::Some(rust__types::Derive {
-                derives: vec![
-                    "Foo".to_owned(),
-                    "crate::Bar".to_owned(),
-                ],
+                derives: {
+                    let mut list = ::std::vec::Vec::new();
+                    {
+                        #[inline(never)]
+                        fn __do_push(list: &mut ::std::vec::Vec<::std::string::String>) {
+                            list.push("Foo".to_owned());
+                        }
+                        __do_push(&mut list);
+                    }
+                    {
+                        #[inline(never)]
+                        fn __do_push(list: &mut ::std::vec::Vec<::std::string::String>) {
+                            list.push("crate::Bar".to_owned());
+                        }
+                        __do_push(&mut list);
+                    }
+                    list
+                },
                 ..::std::default::Default::default()
             });
             let r: &mut dyn ::std::any::Any = &mut tmp;

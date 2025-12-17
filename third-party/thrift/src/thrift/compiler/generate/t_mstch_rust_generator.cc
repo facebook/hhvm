@@ -1907,7 +1907,7 @@ class mstch_rust_value : public mstch_base {
     for (auto elem : const_value_->get_list()) {
       elements.emplace_back(
           std::make_shared<mstch_rust_value>(
-              elem, elem_type, depth_ + 1, context_, pos_, options_));
+              elem, elem_type, depth_ + 3, context_, pos_, options_));
     }
     return elements;
   }

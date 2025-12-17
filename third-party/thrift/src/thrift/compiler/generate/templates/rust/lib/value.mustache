@@ -43,11 +43,22 @@
 }}{{#value:list?}}{{!
     }}{{#value:empty?}}::std::vec::Vec::new(){{/value:empty?}}{{!
     }}{{^value:empty?}}{{!
-        }}vec![{{!
-        }}{{#value:list_elements}}
-        {{value:indent}}{{> lib/value}},{{!
-        }}{{/value:list_elements}}
-        {{value:indent}}]{{!
+        }}{
+            {{value:indent}}let mut list = ::std::vec::Vec::new();
+            {{#value:list_elements}}
+{{value:indent}}{
+    {{value:indent}}#[inline(never)]
+    {{value:indent}}fn __do_push(list: &mut {{!
+        }}{{#type:has_adapter?}}{{>lib/adapter/qualified}}::StandardType{{/type:has_adapter?}}{{!
+        }}{{^type:has_adapter?}}{{>lib/type}}{{/type:has_adapter?}}{{!
+    }}) {
+        {{value:indent}}list.push({{> lib/value}});
+    {{value:indent}}}
+    {{value:indent}}__do_push(&mut list);
+{{value:indent}}}
+            {{/value:list_elements}}
+            {{value:indent}}list
+        {{value:indent}}}{{!
     }}{{/value:empty?}}{{!
 }}{{/value:list?}}{{!
 }}{{#value:set?}}{{!
@@ -61,15 +72,24 @@
             {{value:indent}}let mut set = {{!
                 }}{{#type:rust}}::{{type:rust}}{{/type:rust}}{{!
                 }}{{^type:rust}}::std::collections::BTreeSet{{/type:rust}}{{!
-            }}::new();{{!
-            }}{{#value:setMembers}}
+            }}::new();
+            {{#value:setMembers}}
+{{value:indent}}{
+    {{value:indent}}#[inline(never)]
+    {{value:indent}}fn __do_insert(set: &mut {{!
+        }}{{#type:has_adapter?}}{{>lib/adapter/qualified}}::StandardType{{/type:has_adapter?}}{{!
+        }}{{^type:has_adapter?}}{{>lib/type}}{{/type:has_adapter?}}{{!
+    }}) {
         {{value:indent}}set.insert({{!
             }}{{#value:floatingPoint?}}{{!
                 }}::fbthrift::export::OrderedFloat({{> lib/value}}){{!
             }}{{/value:floatingPoint?}}{{!
             }}{{^value:floatingPoint?}}{{> lib/value}}{{/value:floatingPoint?}}{{!
-        }});{{!
-            }}{{/value:setMembers}}
+        }});
+    {{value:indent}}}
+    {{value:indent}}__do_insert(&mut set);
+{{value:indent}}}
+            {{/value:setMembers}}
             {{value:indent}}set
         {{value:indent}}}{{!
     }}{{/value:empty?}}{{!

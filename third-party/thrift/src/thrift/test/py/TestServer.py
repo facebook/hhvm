@@ -30,7 +30,7 @@ from thrift.Thrift import TProcessorEventHandler
 from thrift.transport import TSocket, TSSLSocket, TTransport
 from thrift.transport.THeaderTransport import CLIENT_TYPE
 from ThriftTest import SecondService, ThriftTest
-from ThriftTest.ttypes import *
+from ThriftTest.ttypes import Xception
 
 
 sys.path.insert(0, "./gen-py")

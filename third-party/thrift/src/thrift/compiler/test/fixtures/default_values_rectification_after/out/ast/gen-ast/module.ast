@@ -3,24 +3,24 @@ Schema {
     [0] = Program {
       1: attrs (struct) = DefinitionAttrs {
         1: name (string) = "module",
-        2: uri (string) = "facebook.com/thrift/compiler/test/fixtures/default_values_rectification",
+        2: uri (string) = "facebook.com/thrift/compiler/test/fixtures/default_values_rectification_after",
       },
-      2: id (i64) = -8019751949614625057,
+      2: id (i64) = -7327174818490624525,
       8: definitionKeys (list) = list<string>[2] {
-        [0] = ">\364\204\333\021k\245\343\272\021\231}\266l\332\212",
-        [1] = "\323\255\366\333\327\007\024\003\277|K\330\201dL\324",
+        [0] = "7{}\302\2265\?\212\246\007cM\?\207`\252",
+        [1] = "\200V}N\002r\345\2621\262F\212\rJ\337\215",
       },
       5: path (string) = "thrift/compiler/test/fixtures/default_values_rectification_after/src/module.thrift",
     },
   },
   8: definitionsMap (map) = map<string,struct>[2] {
-    ">\364\204\333\021k\245\343\272\021\231}\266l\332\212" -> Definition {
+    "7{}\302\2265\?\212\246\007cM\?\207`\252" -> Definition {
       1: structDef (struct) = Struct {
         1: attrs (struct) = DefinitionAttrs {
           1: name (string) = "EmptyStruct",
-          2: uri (string) = "facebook.com/thrift/compiler/test/fixtures/default_values_rectification/EmptyStruct",
+          2: uri (string) = "facebook.com/thrift/compiler/test/fixtures/default_values_rectification_after/EmptyStruct",
           7: sourceRange (struct) = SourceRange {
-            1: programId (i64) = -8019751949614625057,
+            1: programId (i64) = -7327174818490624525,
             2: beginLine (i32) = 19,
             3: beginColumn (i32) = 1,
             4: endLine (i32) = 19,
@@ -29,13 +29,13 @@ Schema {
         },
       },
     },
-    "\323\255\366\333\327\007\024\003\277|K\330\201dL\324" -> Definition {
+    "\200V}N\002r\345\2621\262F\212\rJ\337\215" -> Definition {
       1: structDef (struct) = Struct {
         1: attrs (struct) = DefinitionAttrs {
           1: name (string) = "TestStruct",
-          2: uri (string) = "facebook.com/thrift/compiler/test/fixtures/default_values_rectification/TestStruct",
+          2: uri (string) = "facebook.com/thrift/compiler/test/fixtures/default_values_rectification_after/TestStruct",
           7: sourceRange (struct) = SourceRange {
-            1: programId (i64) = -8019751949614625057,
+            1: programId (i64) = -7327174818490624525,
             2: beginLine (i32) = 21,
             3: beginColumn (i32) = 1,
             4: endLine (i32) = 37,
@@ -55,7 +55,7 @@ Schema {
             4: attrs (struct) = DefinitionAttrs {
               1: name (string) = "unqualified_int_field",
               7: sourceRange (struct) = SourceRange {
-                1: programId (i64) = -8019751949614625057,
+                1: programId (i64) = -7327174818490624525,
                 2: beginLine (i32) = 22,
                 3: beginColumn (i32) = 3,
                 4: endLine (i32) = 22,
@@ -75,7 +75,7 @@ Schema {
             4: attrs (struct) = DefinitionAttrs {
               1: name (string) = "unqualified_bool_field",
               7: sourceRange (struct) = SourceRange {
-                1: programId (i64) = -8019751949614625057,
+                1: programId (i64) = -7327174818490624525,
                 2: beginLine (i32) = 24,
                 3: beginColumn (i32) = 3,
                 4: endLine (i32) = 24,
@@ -102,7 +102,7 @@ Schema {
             4: attrs (struct) = DefinitionAttrs {
               1: name (string) = "unqualified_list_field",
               7: sourceRange (struct) = SourceRange {
-                1: programId (i64) = -8019751949614625057,
+                1: programId (i64) = -7327174818490624525,
                 2: beginLine (i32) = 26,
                 3: beginColumn (i32) = 3,
                 4: endLine (i32) = 26,
@@ -115,7 +115,7 @@ Schema {
             3: type (struct) = TypeStruct {
               1: name (struct) = TypeName {
                 11: structType (struct) = TypeUri {
-                  4: definitionKey (string) = ">\364\204\333\021k\245\343\272\021\231}\266l\332\212",
+                  4: definitionKey (string) = "7{}\302\2265\?\212\246\007cM\?\207`\252",
                 },
               },
               2: params (list) = list<struct>[0] {
@@ -124,7 +124,7 @@ Schema {
             4: attrs (struct) = DefinitionAttrs {
               1: name (string) = "unqualified_struct_field",
               7: sourceRange (struct) = SourceRange {
-                1: programId (i64) = -8019751949614625057,
+                1: programId (i64) = -7327174818490624525,
                 2: beginLine (i32) = 28,
                 3: beginColumn (i32) = 3,
                 4: endLine (i32) = 28,
@@ -145,7 +145,7 @@ Schema {
             4: attrs (struct) = DefinitionAttrs {
               1: name (string) = "optional_int_field",
               7: sourceRange (struct) = SourceRange {
-                1: programId (i64) = -8019751949614625057,
+                1: programId (i64) = -7327174818490624525,
                 2: beginLine (i32) = 30,
                 3: beginColumn (i32) = 3,
                 4: endLine (i32) = 30,
@@ -166,7 +166,7 @@ Schema {
             4: attrs (struct) = DefinitionAttrs {
               1: name (string) = "optional_bool_field",
               7: sourceRange (struct) = SourceRange {
-                1: programId (i64) = -8019751949614625057,
+                1: programId (i64) = -7327174818490624525,
                 2: beginLine (i32) = 32,
                 3: beginColumn (i32) = 3,
                 4: endLine (i32) = 32,
@@ -194,7 +194,7 @@ Schema {
             4: attrs (struct) = DefinitionAttrs {
               1: name (string) = "optional_list_field",
               7: sourceRange (struct) = SourceRange {
-                1: programId (i64) = -8019751949614625057,
+                1: programId (i64) = -7327174818490624525,
                 2: beginLine (i32) = 34,
                 3: beginColumn (i32) = 3,
                 4: endLine (i32) = 34,
@@ -208,7 +208,7 @@ Schema {
             3: type (struct) = TypeStruct {
               1: name (struct) = TypeName {
                 11: structType (struct) = TypeUri {
-                  4: definitionKey (string) = ">\364\204\333\021k\245\343\272\021\231}\266l\332\212",
+                  4: definitionKey (string) = "7{}\302\2265\?\212\246\007cM\?\207`\252",
                 },
               },
               2: params (list) = list<struct>[0] {
@@ -217,7 +217,7 @@ Schema {
             4: attrs (struct) = DefinitionAttrs {
               1: name (string) = "optional_struct_field",
               7: sourceRange (struct) = SourceRange {
-                1: programId (i64) = -8019751949614625057,
+                1: programId (i64) = -7327174818490624525,
                 2: beginLine (i32) = 36,
                 3: beginColumn (i32) = 3,
                 4: endLine (i32) = 36,

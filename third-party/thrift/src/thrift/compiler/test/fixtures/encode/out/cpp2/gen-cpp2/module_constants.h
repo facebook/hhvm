@@ -10,13 +10,13 @@
 
 #include "thrift/compiler/test/fixtures/encode/gen-cpp2/module_types.h"
 
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::encode {
 /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift"} */
 namespace module_constants {
 
-  FOLLY_EXPORT ::std::string_view _fbthrift_schema_7aaec4b35a3743aa();
-  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_7aaec4b35a3743aa_includes();
-  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_7aaec4b35a3743aa_uris();
+  FOLLY_EXPORT ::std::string_view _fbthrift_schema_92716d7e74c7f344();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_92716d7e74c7f344_includes();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_92716d7e74c7f344_uris();
 
 } // namespace module_constants
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::encode

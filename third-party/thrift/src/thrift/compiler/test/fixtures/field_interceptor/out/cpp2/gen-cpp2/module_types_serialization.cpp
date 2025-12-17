@@ -14,11 +14,11 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
-void TccStructTraits<::facebook::thrift::test::InterceptedFields>::translateFieldName(
+void TccStructTraits<::facebook::thrift::test::fixtures::field_interceptor::InterceptedFields>::translateFieldName(
     std::string_view _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::InterceptedFields>;
+  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::fixtures::field_interceptor::InterceptedFields>;
   static const st::translate_field_name_table table{
       data::fields_size,
       data::fields_names.data(),
@@ -31,9 +31,9 @@ void TccStructTraits<::facebook::thrift::test::InterceptedFields>::translateFiel
 } // namespace thrift
 } // namespace apache
 
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::field_interceptor {
 
 
 
 
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::field_interceptor

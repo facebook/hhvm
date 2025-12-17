@@ -491,7 +491,7 @@ public final class AdaptTemplatedTestStruct implements com.facebook.thrift.paylo
       THRIFT_NAMES_TO_IDS.put("doubleTypedefBool", 22);
       FIELD_METADATA.put(22, DOUBLE_TYPEDEF_BOOL_FIELD_DESC);
       com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
-        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/AdaptTemplatedTestStruct"),
+        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/fixtures/adapter/AdaptTemplatedTestStruct"),
         AdaptTemplatedTestStruct.class, AdaptTemplatedTestStruct::read0));
     }
     

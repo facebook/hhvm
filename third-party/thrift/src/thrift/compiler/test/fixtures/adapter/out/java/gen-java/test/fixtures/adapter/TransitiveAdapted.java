@@ -59,7 +59,7 @@ public final class TransitiveAdapted implements com.facebook.thrift.payload.Thri
     private static final TStruct STRUCT_DESC = new TStruct("TransitiveAdapted");
 static {
       com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
-        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/TransitiveAdapted"),
+        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/fixtures/adapter/TransitiveAdapted"),
         TransitiveAdapted.class, TransitiveAdapted::read0));
     }
     @java.lang.Override

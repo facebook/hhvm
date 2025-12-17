@@ -41,6 +41,9 @@ public enum MyUseIntrinsicDefaultEnum implements com.facebook.thrift.enums.BaseE
         }
     }
 
+    static {
+      com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/fixtures/basic_enum/MyUseIntrinsicDefaultEnum"), MyUseIntrinsicDefaultEnum.class, MyUseIntrinsicDefaultEnum::read0));
+    }
     public static com.facebook.thrift.payload.Reader<MyUseIntrinsicDefaultEnum> asReader() {
         return MyUseIntrinsicDefaultEnum::read0;
     }

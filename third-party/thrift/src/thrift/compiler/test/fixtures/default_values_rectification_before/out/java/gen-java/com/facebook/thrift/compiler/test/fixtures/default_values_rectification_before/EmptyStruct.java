@@ -5,7 +5,7 @@
  *  @generated
  */
 
-package com.facebook.thrift.compiler.test.fixtures.default_values_rectification;
+package com.facebook.thrift.compiler.test.fixtures.default_values_rectification_before;
 
 import com.facebook.swift.codec.*;
 import com.facebook.swift.codec.ThriftField.Requiredness;
@@ -59,7 +59,7 @@ public final class EmptyStruct implements com.facebook.thrift.payload.ThriftSeri
     private static final TStruct STRUCT_DESC = new TStruct("EmptyStruct");
 static {
       com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
-        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/compiler/test/fixtures/default_values_rectification/EmptyStruct"),
+        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/compiler/test/fixtures/default_values_rectification_before/EmptyStruct"),
         EmptyStruct.class, EmptyStruct::read0));
     }
     @java.lang.Override

@@ -23,14 +23,14 @@ namespace thrift {
 namespace detail {
 
 template <>
-struct TccStructTraits<::facebook::thrift::compiler::test::fixtures::default_values_rectification::EmptyStruct> {
+struct TccStructTraits<::facebook::thrift::compiler::test::fixtures::default_values_rectification_before::EmptyStruct> {
   static void translateFieldName(
       std::string_view _fname,
       int16_t& fid,
       apache::thrift::protocol::TType& _ftype) noexcept;
 };
 template <>
-struct TccStructTraits<::facebook::thrift::compiler::test::fixtures::default_values_rectification::TestStruct> {
+struct TccStructTraits<::facebook::thrift::compiler::test::fixtures::default_values_rectification_before::TestStruct> {
   static void translateFieldName(
       std::string_view _fname,
       int16_t& fid,
@@ -41,7 +41,7 @@ struct TccStructTraits<::facebook::thrift::compiler::test::fixtures::default_val
 } // namespace thrift
 } // namespace apache
 
-namespace facebook::thrift::compiler::test::fixtures::default_values_rectification {
+namespace facebook::thrift::compiler::test::fixtures::default_values_rectification_before {
 
 template <class Protocol_>
 void EmptyStruct::readNoXfer(Protocol_* iprot) {
@@ -187,7 +187,7 @@ _readField_unqualified_list_field:
 _readField_unqualified_struct_field:
   {
     _readState.beforeSubobject(iprot);
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::compiler::test::fixtures::default_values_rectification::EmptyStruct>::readWithContext(*iprot, this->__fbthrift_field_unqualified_struct_field, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::compiler::test::fixtures::default_values_rectification_before::EmptyStruct>::readWithContext(*iprot, this->__fbthrift_field_unqualified_struct_field, _readState);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(3, true);
@@ -244,7 +244,7 @@ _readField_optional_list_field:
 _readField_optional_struct_field:
   {
     _readState.beforeSubobject(iprot);
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::compiler::test::fixtures::default_values_rectification::EmptyStruct>::readWithContext(*iprot, this->__fbthrift_field_optional_struct_field, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::compiler::test::fixtures::default_values_rectification_before::EmptyStruct>::readWithContext(*iprot, this->__fbthrift_field_optional_struct_field, _readState);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(7, true);
@@ -367,7 +367,7 @@ uint32_t TestStruct::serializedSize(Protocol_ const* prot_) const {
   }
   {
     xfer += prot_->serializedFieldSize("unqualified_struct_field", apache::thrift::protocol::T_STRUCT, 4);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::compiler::test::fixtures::default_values_rectification::EmptyStruct>::serializedSize<false>(*prot_, this->__fbthrift_field_unqualified_struct_field);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::compiler::test::fixtures::default_values_rectification_before::EmptyStruct>::serializedSize<false>(*prot_, this->__fbthrift_field_unqualified_struct_field);
   }
   if (this->__isset.get(4)) {
     xfer += prot_->serializedFieldSize("optional_int_field", apache::thrift::protocol::T_I32, 5);
@@ -383,7 +383,7 @@ uint32_t TestStruct::serializedSize(Protocol_ const* prot_) const {
   }
   if (this->__isset.get(7)) {
     xfer += prot_->serializedFieldSize("optional_struct_field", apache::thrift::protocol::T_STRUCT, 8);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::compiler::test::fixtures::default_values_rectification::EmptyStruct>::serializedSize<false>(*prot_, this->__fbthrift_field_optional_struct_field);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::compiler::test::fixtures::default_values_rectification_before::EmptyStruct>::serializedSize<false>(*prot_, this->__fbthrift_field_optional_struct_field);
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -407,7 +407,7 @@ uint32_t TestStruct::serializedSizeZC(Protocol_ const* prot_) const {
   }
   {
     xfer += prot_->serializedFieldSize("unqualified_struct_field", apache::thrift::protocol::T_STRUCT, 4);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::compiler::test::fixtures::default_values_rectification::EmptyStruct>::serializedSize<true>(*prot_, this->__fbthrift_field_unqualified_struct_field);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::compiler::test::fixtures::default_values_rectification_before::EmptyStruct>::serializedSize<true>(*prot_, this->__fbthrift_field_unqualified_struct_field);
   }
   if (this->__isset.get(4)) {
     xfer += prot_->serializedFieldSize("optional_int_field", apache::thrift::protocol::T_I32, 5);
@@ -423,7 +423,7 @@ uint32_t TestStruct::serializedSizeZC(Protocol_ const* prot_) const {
   }
   if (this->__isset.get(7)) {
     xfer += prot_->serializedFieldSize("optional_struct_field", apache::thrift::protocol::T_STRUCT, 8);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::compiler::test::fixtures::default_values_rectification::EmptyStruct>::serializedSize<true>(*prot_, this->__fbthrift_field_optional_struct_field);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::compiler::test::fixtures::default_values_rectification_before::EmptyStruct>::serializedSize<true>(*prot_, this->__fbthrift_field_optional_struct_field);
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -459,7 +459,7 @@ uint32_t TestStruct::write(Protocol_* prot_) const {
     constexpr int16_t kPrevFieldId = 3;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 4, kPrevFieldId>(*prot_, "unqualified_struct_field", previousFieldHasValue);
     previousFieldHasValue = true;
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::compiler::test::fixtures::default_values_rectification::EmptyStruct>::write(*prot_, this->__fbthrift_field_unqualified_struct_field);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::compiler::test::fixtures::default_values_rectification_before::EmptyStruct>::write(*prot_, this->__fbthrift_field_unqualified_struct_field);
     xfer += prot_->writeFieldEnd();
   }
   if (this->__isset.get(4)) {
@@ -493,7 +493,7 @@ uint32_t TestStruct::write(Protocol_* prot_) const {
     constexpr int16_t kPrevFieldId = 7;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 8, kPrevFieldId>(*prot_, "optional_struct_field", previousFieldHasValue);
     previousFieldHasValue = true;
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::compiler::test::fixtures::default_values_rectification::EmptyStruct>::write(*prot_, this->__fbthrift_field_optional_struct_field);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::compiler::test::fixtures::default_values_rectification_before::EmptyStruct>::write(*prot_, this->__fbthrift_field_optional_struct_field);
     xfer += prot_->writeFieldEnd();
   } else {
     previousFieldHasValue = false;
@@ -513,4 +513,4 @@ extern template uint32_t TestStruct::serializedSize<>(apache::thrift::CompactPro
 extern template uint32_t TestStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // namespace facebook::thrift::compiler::test::fixtures::default_values_rectification
+} // namespace facebook::thrift::compiler::test::fixtures::default_values_rectification_before

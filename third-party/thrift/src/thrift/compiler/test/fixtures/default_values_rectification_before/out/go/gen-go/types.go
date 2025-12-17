@@ -694,7 +694,7 @@ func (x *TestStruct) GetThriftStructMetadata() *metadata.ThriftStruct {
 func RegisterTypes(registry interface {
   RegisterType(name string, initializer func() any)
 }) {
-    registry.RegisterType("facebook.com/thrift/compiler/test/fixtures/default_values_rectification/EmptyStruct", func() any { return NewEmptyStruct() })
-    registry.RegisterType("facebook.com/thrift/compiler/test/fixtures/default_values_rectification/TestStruct", func() any { return NewTestStruct() })
+    registry.RegisterType("facebook.com/thrift/compiler/test/fixtures/default_values_rectification_before/EmptyStruct", func() any { return NewEmptyStruct() })
+    registry.RegisterType("facebook.com/thrift/compiler/test/fixtures/default_values_rectification_before/TestStruct", func() any { return NewTestStruct() })
 
 }

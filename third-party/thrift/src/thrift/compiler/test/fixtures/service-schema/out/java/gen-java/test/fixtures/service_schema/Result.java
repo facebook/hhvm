@@ -42,7 +42,7 @@ public enum Result implements com.facebook.thrift.enums.BaseEnum, com.facebook.t
     }
 
     static {
-      com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/Result"), Result.class, Result::read0));
+      com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/fixtures/service_schema/Result"), Result.class, Result::read0));
     }
     public static com.facebook.thrift.payload.Reader<Result> asReader() {
         return Result::read0;

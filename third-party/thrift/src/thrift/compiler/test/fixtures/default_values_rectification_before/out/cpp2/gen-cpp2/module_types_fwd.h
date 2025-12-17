@@ -7,8 +7,8 @@
 #pragma once
 
 // BEGIN forward_declare
-namespace facebook::thrift::compiler::test::fixtures::default_values_rectification {
+namespace facebook::thrift::compiler::test::fixtures::default_values_rectification_before {
 class EmptyStruct;
 class TestStruct;
-} // namespace facebook::thrift::compiler::test::fixtures::default_values_rectification
+} // namespace facebook::thrift::compiler::test::fixtures::default_values_rectification_before
 // END forward_declare

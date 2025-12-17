@@ -6,7 +6,7 @@
  */
 #include "thrift/compiler/test/fixtures/encode/gen-cpp2/module_types_custom_protocol.h"
 
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::encode {
 
 template void Foo::readNoXfer<>(apache::thrift::CompactProtocolReader*);
 template uint32_t Foo::write<>(apache::thrift::CompactProtocolWriter*) const;
@@ -28,4 +28,4 @@ template uint32_t OpEncodeStruct::write<>(apache::thrift::CompactProtocolWriter*
 template uint32_t OpEncodeStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t OpEncodeStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::encode

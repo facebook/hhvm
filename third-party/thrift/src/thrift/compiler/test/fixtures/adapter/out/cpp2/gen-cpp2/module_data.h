@@ -12,8 +12,8 @@
 
 namespace apache { namespace thrift {
 
-template <> struct TEnumDataStorage<::facebook::thrift::test::Color> {
-  using type = ::facebook::thrift::test::Color;
+template <> struct TEnumDataStorage<::facebook::thrift::test::fixtures::adapter::Color> {
+  using type = ::facebook::thrift::test::fixtures::adapter::Color;
   static constexpr const std::size_t size = 4;
   static constexpr std::array<type, size> values = { {
       type::UNKNOWN,
@@ -29,8 +29,8 @@ template <> struct TEnumDataStorage<::facebook::thrift::test::Color> {
   }};
 };
 
-template <> struct TEnumDataStorage<::facebook::thrift::test::ThriftAdaptedEnum> {
-  using type = ::facebook::thrift::test::ThriftAdaptedEnum;
+template <> struct TEnumDataStorage<::facebook::thrift::test::fixtures::adapter::ThriftAdaptedEnum> {
+  using type = ::facebook::thrift::test::fixtures::adapter::ThriftAdaptedEnum;
   static constexpr const std::size_t size = 2;
   static constexpr std::array<type, size> values = { {
       type::Zero,
@@ -42,8 +42,8 @@ template <> struct TEnumDataStorage<::facebook::thrift::test::ThriftAdaptedEnum>
   }};
 };
 
-template <> struct TEnumDataStorage<::facebook::thrift::test::Baz::Type> {
-  using type = ::facebook::thrift::test::Baz::Type;
+template <> struct TEnumDataStorage<::facebook::thrift::test::fixtures::adapter::Baz::Type> {
+  using type = ::facebook::thrift::test::fixtures::adapter::Baz::Type;
   static constexpr const std::size_t size = 5;
   static constexpr std::array<type, size> values = { {
       type::intField,
@@ -61,8 +61,8 @@ template <> struct TEnumDataStorage<::facebook::thrift::test::Baz::Type> {
   }};
 };
 
-template <> struct TEnumDataStorage<::facebook::thrift::test::ThriftAdaptTestUnion::Type> {
-  using type = ::facebook::thrift::test::ThriftAdaptTestUnion::Type;
+template <> struct TEnumDataStorage<::facebook::thrift::test::fixtures::adapter::ThriftAdaptTestUnion::Type> {
+  using type = ::facebook::thrift::test::fixtures::adapter::ThriftAdaptTestUnion::Type;
   static constexpr const std::size_t size = 2;
   static constexpr std::array<type, size> values = { {
       type::delay,
@@ -74,7 +74,7 @@ template <> struct TEnumDataStorage<::facebook::thrift::test::ThriftAdaptTestUni
   }};
 };
 
-template <> struct TStructDataStorage<::facebook::thrift::test::MyAnnotation> {
+template <> struct TStructDataStorage<::facebook::thrift::test::fixtures::adapter::MyAnnotation> {
   static constexpr const std::size_t fields_size = 2;
   static const std::string_view name;
   static const std::array<std::string_view, fields_size> fields_names;
@@ -89,7 +89,7 @@ template <> struct TStructDataStorage<::facebook::thrift::test::MyAnnotation> {
   static const std::array<int, fields_size> isset_indexes;
 };
 
-template <> struct TStructDataStorage<::facebook::thrift::test::Foo> {
+template <> struct TStructDataStorage<::facebook::thrift::test::fixtures::adapter::Foo> {
   static constexpr const std::size_t fields_size = 15;
   static const std::string_view name;
   static const std::array<std::string_view, fields_size> fields_names;
@@ -104,7 +104,7 @@ template <> struct TStructDataStorage<::facebook::thrift::test::Foo> {
   static const std::array<int, fields_size> isset_indexes;
 };
 
-template <> struct TStructDataStorage<::facebook::thrift::test::Baz> {
+template <> struct TStructDataStorage<::facebook::thrift::test::fixtures::adapter::Baz> {
   static constexpr const std::size_t fields_size = 5;
   static const std::string_view name;
   static const std::array<std::string_view, fields_size> fields_names;
@@ -119,7 +119,7 @@ template <> struct TStructDataStorage<::facebook::thrift::test::Baz> {
   static const std::array<int, fields_size> isset_indexes;
 };
 
-template <> struct TStructDataStorage<::facebook::thrift::test::Bar> {
+template <> struct TStructDataStorage<::facebook::thrift::test::fixtures::adapter::Bar> {
   static constexpr const std::size_t fields_size = 8;
   static const std::string_view name;
   static const std::array<std::string_view, fields_size> fields_names;
@@ -134,7 +134,7 @@ template <> struct TStructDataStorage<::facebook::thrift::test::Bar> {
   static const std::array<int, fields_size> isset_indexes;
 };
 
-template <> struct TStructDataStorage<::facebook::thrift::test::detail::DirectlyAdapted> {
+template <> struct TStructDataStorage<::facebook::thrift::test::fixtures::adapter::detail::DirectlyAdapted> {
   static constexpr const std::size_t fields_size = 1;
   static const std::string_view name;
   static const std::array<std::string_view, fields_size> fields_names;
@@ -149,7 +149,7 @@ template <> struct TStructDataStorage<::facebook::thrift::test::detail::Directly
   static const std::array<int, fields_size> isset_indexes;
 };
 
-template <> struct TStructDataStorage<::facebook::thrift::test::detail::IndependentDirectlyAdapted> {
+template <> struct TStructDataStorage<::facebook::thrift::test::fixtures::adapter::detail::IndependentDirectlyAdapted> {
   static constexpr const std::size_t fields_size = 1;
   static const std::string_view name;
   static const std::array<std::string_view, fields_size> fields_names;
@@ -164,7 +164,7 @@ template <> struct TStructDataStorage<::facebook::thrift::test::detail::Independ
   static const std::array<int, fields_size> isset_indexes;
 };
 
-template <> struct TStructDataStorage<::facebook::thrift::test::StructWithFieldAdapter> {
+template <> struct TStructDataStorage<::facebook::thrift::test::fixtures::adapter::StructWithFieldAdapter> {
   static constexpr const std::size_t fields_size = 4;
   static const std::string_view name;
   static const std::array<std::string_view, fields_size> fields_names;
@@ -179,7 +179,7 @@ template <> struct TStructDataStorage<::facebook::thrift::test::StructWithFieldA
   static const std::array<int, fields_size> isset_indexes;
 };
 
-template <> struct TStructDataStorage<::facebook::thrift::test::TerseAdaptedFields> {
+template <> struct TStructDataStorage<::facebook::thrift::test::fixtures::adapter::TerseAdaptedFields> {
   static constexpr const std::size_t fields_size = 3;
   static const std::string_view name;
   static const std::array<std::string_view, fields_size> fields_names;
@@ -194,7 +194,7 @@ template <> struct TStructDataStorage<::facebook::thrift::test::TerseAdaptedFiel
   static const std::array<int, fields_size> isset_indexes;
 };
 
-template <> struct TStructDataStorage<::facebook::thrift::test::B> {
+template <> struct TStructDataStorage<::facebook::thrift::test::fixtures::adapter::B> {
   static constexpr const std::size_t fields_size = 1;
   static const std::string_view name;
   static const std::array<std::string_view, fields_size> fields_names;
@@ -209,7 +209,7 @@ template <> struct TStructDataStorage<::facebook::thrift::test::B> {
   static const std::array<int, fields_size> isset_indexes;
 };
 
-template <> struct TStructDataStorage<::facebook::thrift::test::A> {
+template <> struct TStructDataStorage<::facebook::thrift::test::fixtures::adapter::A> {
   static constexpr const std::size_t fields_size = 0;
   static const std::string_view name;
   static const std::array<std::string_view, fields_size> fields_names;
@@ -224,7 +224,7 @@ template <> struct TStructDataStorage<::facebook::thrift::test::A> {
   static const std::array<int, fields_size> isset_indexes;
 };
 
-template <> struct TStructDataStorage<::facebook::thrift::test::Config> {
+template <> struct TStructDataStorage<::facebook::thrift::test::fixtures::adapter::Config> {
   static constexpr const std::size_t fields_size = 1;
   static const std::string_view name;
   static const std::array<std::string_view, fields_size> fields_names;
@@ -239,7 +239,7 @@ template <> struct TStructDataStorage<::facebook::thrift::test::Config> {
   static const std::array<int, fields_size> isset_indexes;
 };
 
-template <> struct TStructDataStorage<::facebook::thrift::test::MyStruct> {
+template <> struct TStructDataStorage<::facebook::thrift::test::fixtures::adapter::MyStruct> {
   static constexpr const std::size_t fields_size = 2;
   static const std::string_view name;
   static const std::array<std::string_view, fields_size> fields_names;
@@ -254,7 +254,7 @@ template <> struct TStructDataStorage<::facebook::thrift::test::MyStruct> {
   static const std::array<int, fields_size> isset_indexes;
 };
 
-template <> struct TStructDataStorage<::facebook::thrift::test::AdaptTestStruct> {
+template <> struct TStructDataStorage<::facebook::thrift::test::fixtures::adapter::AdaptTestStruct> {
   static constexpr const std::size_t fields_size = 10;
   static const std::string_view name;
   static const std::array<std::string_view, fields_size> fields_names;
@@ -269,7 +269,7 @@ template <> struct TStructDataStorage<::facebook::thrift::test::AdaptTestStruct>
   static const std::array<int, fields_size> isset_indexes;
 };
 
-template <> struct TStructDataStorage<::facebook::thrift::test::AdaptTemplatedTestStruct> {
+template <> struct TStructDataStorage<::facebook::thrift::test::fixtures::adapter::AdaptTemplatedTestStruct> {
   static constexpr const std::size_t fields_size = 22;
   static const std::string_view name;
   static const std::array<std::string_view, fields_size> fields_names;
@@ -284,7 +284,7 @@ template <> struct TStructDataStorage<::facebook::thrift::test::AdaptTemplatedTe
   static const std::array<int, fields_size> isset_indexes;
 };
 
-template <> struct TStructDataStorage<::facebook::thrift::test::AdaptTemplatedNestedTestStruct> {
+template <> struct TStructDataStorage<::facebook::thrift::test::fixtures::adapter::AdaptTemplatedNestedTestStruct> {
   static constexpr const std::size_t fields_size = 1;
   static const std::string_view name;
   static const std::array<std::string_view, fields_size> fields_names;
@@ -299,7 +299,7 @@ template <> struct TStructDataStorage<::facebook::thrift::test::AdaptTemplatedNe
   static const std::array<int, fields_size> isset_indexes;
 };
 
-template <> struct TStructDataStorage<::facebook::thrift::test::ThriftAdaptTestUnion> {
+template <> struct TStructDataStorage<::facebook::thrift::test::fixtures::adapter::ThriftAdaptTestUnion> {
   static constexpr const std::size_t fields_size = 2;
   static const std::string_view name;
   static const std::array<std::string_view, fields_size> fields_names;
@@ -314,7 +314,7 @@ template <> struct TStructDataStorage<::facebook::thrift::test::ThriftAdaptTestU
   static const std::array<int, fields_size> isset_indexes;
 };
 
-template <> struct TStructDataStorage<::facebook::thrift::test::ThriftAdaptedStruct> {
+template <> struct TStructDataStorage<::facebook::thrift::test::fixtures::adapter::ThriftAdaptedStruct> {
   static constexpr const std::size_t fields_size = 1;
   static const std::string_view name;
   static const std::array<std::string_view, fields_size> fields_names;
@@ -329,7 +329,7 @@ template <> struct TStructDataStorage<::facebook::thrift::test::ThriftAdaptedStr
   static const std::array<int, fields_size> isset_indexes;
 };
 
-template <> struct TStructDataStorage<::facebook::thrift::test::detail::DirectlyAdaptedStruct> {
+template <> struct TStructDataStorage<::facebook::thrift::test::fixtures::adapter::detail::DirectlyAdaptedStruct> {
   static constexpr const std::size_t fields_size = 1;
   static const std::string_view name;
   static const std::array<std::string_view, fields_size> fields_names;
@@ -344,7 +344,7 @@ template <> struct TStructDataStorage<::facebook::thrift::test::detail::Directly
   static const std::array<int, fields_size> isset_indexes;
 };
 
-template <> struct TStructDataStorage<::facebook::thrift::test::StructFieldAdaptedStruct> {
+template <> struct TStructDataStorage<::facebook::thrift::test::fixtures::adapter::StructFieldAdaptedStruct> {
   static constexpr const std::size_t fields_size = 4;
   static const std::string_view name;
   static const std::array<std::string_view, fields_size> fields_names;
@@ -359,7 +359,7 @@ template <> struct TStructDataStorage<::facebook::thrift::test::StructFieldAdapt
   static const std::array<int, fields_size> isset_indexes;
 };
 
-template <> struct TStructDataStorage<::facebook::thrift::test::CircularAdaptee> {
+template <> struct TStructDataStorage<::facebook::thrift::test::fixtures::adapter::CircularAdaptee> {
   static constexpr const std::size_t fields_size = 1;
   static const std::string_view name;
   static const std::array<std::string_view, fields_size> fields_names;
@@ -374,7 +374,7 @@ template <> struct TStructDataStorage<::facebook::thrift::test::CircularAdaptee>
   static const std::array<int, fields_size> isset_indexes;
 };
 
-template <> struct TStructDataStorage<::facebook::thrift::test::CircularStruct> {
+template <> struct TStructDataStorage<::facebook::thrift::test::fixtures::adapter::CircularStruct> {
   static constexpr const std::size_t fields_size = 1;
   static const std::string_view name;
   static const std::array<std::string_view, fields_size> fields_names;
@@ -389,7 +389,7 @@ template <> struct TStructDataStorage<::facebook::thrift::test::CircularStruct> 
   static const std::array<int, fields_size> isset_indexes;
 };
 
-template <> struct TStructDataStorage<::facebook::thrift::test::ReorderedStruct> {
+template <> struct TStructDataStorage<::facebook::thrift::test::fixtures::adapter::ReorderedStruct> {
   static constexpr const std::size_t fields_size = 1;
   static const std::string_view name;
   static const std::array<std::string_view, fields_size> fields_names;
@@ -404,7 +404,7 @@ template <> struct TStructDataStorage<::facebook::thrift::test::ReorderedStruct>
   static const std::array<int, fields_size> isset_indexes;
 };
 
-template <> struct TStructDataStorage<::facebook::thrift::test::detail::DeclaredAfterStruct> {
+template <> struct TStructDataStorage<::facebook::thrift::test::fixtures::adapter::detail::DeclaredAfterStruct> {
   static constexpr const std::size_t fields_size = 0;
   static const std::string_view name;
   static const std::array<std::string_view, fields_size> fields_names;
@@ -419,7 +419,7 @@ template <> struct TStructDataStorage<::facebook::thrift::test::detail::Declared
   static const std::array<int, fields_size> isset_indexes;
 };
 
-template <> struct TStructDataStorage<::facebook::thrift::test::UnderlyingRenamedStruct> {
+template <> struct TStructDataStorage<::facebook::thrift::test::fixtures::adapter::UnderlyingRenamedStruct> {
   static constexpr const std::size_t fields_size = 1;
   static const std::string_view name;
   static const std::array<std::string_view, fields_size> fields_names;
@@ -434,7 +434,7 @@ template <> struct TStructDataStorage<::facebook::thrift::test::UnderlyingRename
   static const std::array<int, fields_size> isset_indexes;
 };
 
-template <> struct TStructDataStorage<::facebook::thrift::test::UnderlyingSameNamespaceStruct> {
+template <> struct TStructDataStorage<::facebook::thrift::test::fixtures::adapter::UnderlyingSameNamespaceStruct> {
   static constexpr const std::size_t fields_size = 1;
   static const std::string_view name;
   static const std::array<std::string_view, fields_size> fields_names;
@@ -449,7 +449,7 @@ template <> struct TStructDataStorage<::facebook::thrift::test::UnderlyingSameNa
   static const std::array<int, fields_size> isset_indexes;
 };
 
-template <> struct TStructDataStorage<::facebook::thrift::test::detail::HeapAllocated> {
+template <> struct TStructDataStorage<::facebook::thrift::test::fixtures::adapter::detail::HeapAllocated> {
   static constexpr const std::size_t fields_size = 0;
   static const std::string_view name;
   static const std::array<std::string_view, fields_size> fields_names;
@@ -464,7 +464,7 @@ template <> struct TStructDataStorage<::facebook::thrift::test::detail::HeapAllo
   static const std::array<int, fields_size> isset_indexes;
 };
 
-template <> struct TStructDataStorage<::facebook::thrift::test::MoveOnly> {
+template <> struct TStructDataStorage<::facebook::thrift::test::fixtures::adapter::MoveOnly> {
   static constexpr const std::size_t fields_size = 1;
   static const std::string_view name;
   static const std::array<std::string_view, fields_size> fields_names;
@@ -479,7 +479,7 @@ template <> struct TStructDataStorage<::facebook::thrift::test::MoveOnly> {
   static const std::array<int, fields_size> isset_indexes;
 };
 
-template <> struct TStructDataStorage<::facebook::thrift::test::AlsoMoveOnly> {
+template <> struct TStructDataStorage<::facebook::thrift::test::fixtures::adapter::AlsoMoveOnly> {
   static constexpr const std::size_t fields_size = 1;
   static const std::string_view name;
   static const std::array<std::string_view, fields_size> fields_names;
@@ -494,7 +494,7 @@ template <> struct TStructDataStorage<::facebook::thrift::test::AlsoMoveOnly> {
   static const std::array<int, fields_size> isset_indexes;
 };
 
-template <> struct TStructDataStorage<::facebook::thrift::test::ApplyAdapter> {
+template <> struct TStructDataStorage<::facebook::thrift::test::fixtures::adapter::ApplyAdapter> {
   static constexpr const std::size_t fields_size = 0;
   static const std::string_view name;
   static const std::array<std::string_view, fields_size> fields_names;
@@ -509,7 +509,7 @@ template <> struct TStructDataStorage<::facebook::thrift::test::ApplyAdapter> {
   static const std::array<int, fields_size> isset_indexes;
 };
 
-template <> struct TStructDataStorage<::facebook::thrift::test::detail::TransitiveAdapted> {
+template <> struct TStructDataStorage<::facebook::thrift::test::fixtures::adapter::detail::TransitiveAdapted> {
   static constexpr const std::size_t fields_size = 0;
   static const std::string_view name;
   static const std::array<std::string_view, fields_size> fields_names;
@@ -524,7 +524,7 @@ template <> struct TStructDataStorage<::facebook::thrift::test::detail::Transiti
   static const std::array<int, fields_size> isset_indexes;
 };
 
-template <> struct TStructDataStorage<::facebook::thrift::test::CountingStruct> {
+template <> struct TStructDataStorage<::facebook::thrift::test::fixtures::adapter::CountingStruct> {
   static constexpr const std::size_t fields_size = 3;
   static const std::string_view name;
   static const std::array<std::string_view, fields_size> fields_names;
@@ -539,7 +539,7 @@ template <> struct TStructDataStorage<::facebook::thrift::test::CountingStruct> 
   static const std::array<int, fields_size> isset_indexes;
 };
 
-template <> struct TStructDataStorage<::facebook::thrift::test::Person> {
+template <> struct TStructDataStorage<::facebook::thrift::test::fixtures::adapter::Person> {
   static constexpr const std::size_t fields_size = 1;
   static const std::string_view name;
   static const std::array<std::string_view, fields_size> fields_names;
@@ -554,7 +554,7 @@ template <> struct TStructDataStorage<::facebook::thrift::test::Person> {
   static const std::array<int, fields_size> isset_indexes;
 };
 
-template <> struct TStructDataStorage<::facebook::thrift::test::Person2> {
+template <> struct TStructDataStorage<::facebook::thrift::test::fixtures::adapter::Person2> {
   static constexpr const std::size_t fields_size = 1;
   static const std::string_view name;
   static const std::array<std::string_view, fields_size> fields_names;
@@ -569,7 +569,7 @@ template <> struct TStructDataStorage<::facebook::thrift::test::Person2> {
   static const std::array<int, fields_size> isset_indexes;
 };
 
-template <> struct TStructDataStorage<::facebook::thrift::test::Renamed> {
+template <> struct TStructDataStorage<::facebook::thrift::test::fixtures::adapter::Renamed> {
   static constexpr const std::size_t fields_size = 1;
   static const std::string_view name;
   static const std::array<std::string_view, fields_size> fields_names;

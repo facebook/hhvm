@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package "test.dev/fixtures/basic"
+package "test.dev/fixtures/java_options"
 
 namespace java.swift test.fixtures.basic
 

@@ -92,6 +92,9 @@ public enum MyBigEnum implements com.facebook.thrift.enums.BaseEnum, com.faceboo
         }
     }
 
+    static {
+      com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/fixtures/basic_enum/MyBigEnum"), MyBigEnum.class, MyBigEnum::read0));
+    }
     public static com.facebook.thrift.payload.Reader<MyBigEnum> asReader() {
         return MyBigEnum::read0;
     }

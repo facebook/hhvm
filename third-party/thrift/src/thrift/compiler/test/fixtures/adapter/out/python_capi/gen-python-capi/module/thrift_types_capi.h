@@ -14,1089 +14,1089 @@
 
 #include <thrift/compiler/test/fixtures/adapter/gen-cpp2/module_types.h>
 
-namespace facebook__thrift__test__module {
+namespace facebook__thrift__test__fixtures__adapter__module {
 
 struct NamespaceTag {};
 
-} // namespace facebook__thrift__test__module
+} // namespace facebook__thrift__test__fixtures__adapter__module
 
 namespace apache::thrift::python::capi {
 template <>
-struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::MyAnnotation, ::facebook__thrift__test__module::NamespaceTag>>
-    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::MyAnnotation, ::facebook__thrift__test__module::NamespaceTag>> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::MyAnnotation, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::MyAnnotation, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
-  ExtractorResult<::facebook::thrift::test::MyAnnotation> operator()(PyObject* obj);
+  ExtractorResult<::facebook::thrift::test::fixtures::adapter::MyAnnotation> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::MyAnnotation, ::facebook__thrift__test__module::NamespaceTag >>
+        ::facebook::thrift::test::fixtures::adapter::MyAnnotation, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::MyAnnotation, ::facebook__thrift__test__module::NamespaceTag>> {
-  ExtractorResult<::facebook::thrift::test::MyAnnotation> operator()(PyObject* obj);
+        ::facebook::thrift::test::fixtures::adapter::MyAnnotation, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
+  ExtractorResult<::facebook::thrift::test::fixtures::adapter::MyAnnotation> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::MyAnnotation, ::facebook__thrift__test__module::NamespaceTag>>
-    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::MyAnnotation, ::facebook__thrift__test__module::NamespaceTag>> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::MyAnnotation, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::MyAnnotation, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
-  PyObject* operator()(const ::facebook::thrift::test::MyAnnotation& val);
+  PyObject* operator()(const ::facebook::thrift::test::fixtures::adapter::MyAnnotation& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::MyAnnotation, ::facebook__thrift__test__module::NamespaceTag>>
+        ::facebook::thrift::test::fixtures::adapter::MyAnnotation, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::MyAnnotation, ::facebook__thrift__test__module::NamespaceTag>> {
-  PyObject* operator()(const ::facebook::thrift::test::MyAnnotation& val);
+        ::facebook::thrift::test::fixtures::adapter::MyAnnotation, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
+  PyObject* operator()(const ::facebook::thrift::test::fixtures::adapter::MyAnnotation& val);
 };
 
 template <>
-struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::Foo, ::facebook__thrift__test__module::NamespaceTag>>
-    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::Foo, ::facebook__thrift__test__module::NamespaceTag>> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::Foo, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::Foo, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
   static const bool kUsingMarshal = false;
-  ExtractorResult<::facebook::thrift::test::Foo> operator()(PyObject* obj);
+  ExtractorResult<::facebook::thrift::test::fixtures::adapter::Foo> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::Foo, ::facebook__thrift__test__module::NamespaceTag >>
+        ::facebook::thrift::test::fixtures::adapter::Foo, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::Foo, ::facebook__thrift__test__module::NamespaceTag>> {
-  ExtractorResult<::facebook::thrift::test::Foo> operator()(PyObject* obj);
+        ::facebook::thrift::test::fixtures::adapter::Foo, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
+  ExtractorResult<::facebook::thrift::test::fixtures::adapter::Foo> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::Foo, ::facebook__thrift__test__module::NamespaceTag>>
-    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::Foo, ::facebook__thrift__test__module::NamespaceTag>> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::Foo, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::Foo, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
   static const bool kUsingMarshal = false;
-  PyObject* operator()(const ::facebook::thrift::test::Foo& val);
+  PyObject* operator()(const ::facebook::thrift::test::fixtures::adapter::Foo& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::Foo, ::facebook__thrift__test__module::NamespaceTag>>
+        ::facebook::thrift::test::fixtures::adapter::Foo, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::Foo, ::facebook__thrift__test__module::NamespaceTag>> {
-  PyObject* operator()(const ::facebook::thrift::test::Foo& val);
+        ::facebook::thrift::test::fixtures::adapter::Foo, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
+  PyObject* operator()(const ::facebook::thrift::test::fixtures::adapter::Foo& val);
 };
 
 template <>
-struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::Baz, ::facebook__thrift__test__module::NamespaceTag>>
-    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::Baz, ::facebook__thrift__test__module::NamespaceTag>> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::Baz, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::Baz, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
   static const bool kUsingMarshal = false;
-  ExtractorResult<::facebook::thrift::test::Baz> operator()(PyObject* obj);
+  ExtractorResult<::facebook::thrift::test::fixtures::adapter::Baz> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::Baz, ::facebook__thrift__test__module::NamespaceTag >>
+        ::facebook::thrift::test::fixtures::adapter::Baz, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::Baz, ::facebook__thrift__test__module::NamespaceTag>> {
-  ExtractorResult<::facebook::thrift::test::Baz> operator()(PyObject* obj);
+        ::facebook::thrift::test::fixtures::adapter::Baz, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
+  ExtractorResult<::facebook::thrift::test::fixtures::adapter::Baz> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::Baz, ::facebook__thrift__test__module::NamespaceTag>>
-    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::Baz, ::facebook__thrift__test__module::NamespaceTag>> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::Baz, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::Baz, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
   static const bool kUsingMarshal = false;
-  PyObject* operator()(const ::facebook::thrift::test::Baz& val);
+  PyObject* operator()(const ::facebook::thrift::test::fixtures::adapter::Baz& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::Baz, ::facebook__thrift__test__module::NamespaceTag>>
+        ::facebook::thrift::test::fixtures::adapter::Baz, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::Baz, ::facebook__thrift__test__module::NamespaceTag>> {
-  PyObject* operator()(const ::facebook::thrift::test::Baz& val);
+        ::facebook::thrift::test::fixtures::adapter::Baz, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
+  PyObject* operator()(const ::facebook::thrift::test::fixtures::adapter::Baz& val);
 };
 
 template <>
-struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::Bar, ::facebook__thrift__test__module::NamespaceTag>>
-    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::Bar, ::facebook__thrift__test__module::NamespaceTag>> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::Bar, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::Bar, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
   static const bool kUsingMarshal = false;
-  ExtractorResult<::facebook::thrift::test::Bar> operator()(PyObject* obj);
+  ExtractorResult<::facebook::thrift::test::fixtures::adapter::Bar> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::Bar, ::facebook__thrift__test__module::NamespaceTag >>
+        ::facebook::thrift::test::fixtures::adapter::Bar, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::Bar, ::facebook__thrift__test__module::NamespaceTag>> {
-  ExtractorResult<::facebook::thrift::test::Bar> operator()(PyObject* obj);
+        ::facebook::thrift::test::fixtures::adapter::Bar, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
+  ExtractorResult<::facebook::thrift::test::fixtures::adapter::Bar> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::Bar, ::facebook__thrift__test__module::NamespaceTag>>
-    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::Bar, ::facebook__thrift__test__module::NamespaceTag>> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::Bar, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::Bar, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
   static const bool kUsingMarshal = false;
-  PyObject* operator()(const ::facebook::thrift::test::Bar& val);
+  PyObject* operator()(const ::facebook::thrift::test::fixtures::adapter::Bar& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::Bar, ::facebook__thrift__test__module::NamespaceTag>>
+        ::facebook::thrift::test::fixtures::adapter::Bar, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::Bar, ::facebook__thrift__test__module::NamespaceTag>> {
-  PyObject* operator()(const ::facebook::thrift::test::Bar& val);
+        ::facebook::thrift::test::fixtures::adapter::Bar, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
+  PyObject* operator()(const ::facebook::thrift::test::fixtures::adapter::Bar& val);
 };
 
 template <>
-struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::detail::DirectlyAdapted, ::facebook__thrift__test__module::NamespaceTag>>
-    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::detail::DirectlyAdapted, ::facebook__thrift__test__module::NamespaceTag>> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::detail::DirectlyAdapted, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::detail::DirectlyAdapted, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
-  ExtractorResult<::facebook::thrift::test::detail::DirectlyAdapted> operator()(PyObject* obj);
+  ExtractorResult<::facebook::thrift::test::fixtures::adapter::detail::DirectlyAdapted> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::detail::DirectlyAdapted, ::facebook__thrift__test__module::NamespaceTag >>
+        ::facebook::thrift::test::fixtures::adapter::detail::DirectlyAdapted, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::detail::DirectlyAdapted, ::facebook__thrift__test__module::NamespaceTag>> {
-  ExtractorResult<::facebook::thrift::test::detail::DirectlyAdapted> operator()(PyObject* obj);
+        ::facebook::thrift::test::fixtures::adapter::detail::DirectlyAdapted, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
+  ExtractorResult<::facebook::thrift::test::fixtures::adapter::detail::DirectlyAdapted> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::detail::DirectlyAdapted, ::facebook__thrift__test__module::NamespaceTag>>
-    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::detail::DirectlyAdapted, ::facebook__thrift__test__module::NamespaceTag>> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::detail::DirectlyAdapted, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::detail::DirectlyAdapted, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
-  PyObject* operator()(const ::facebook::thrift::test::detail::DirectlyAdapted& val);
+  PyObject* operator()(const ::facebook::thrift::test::fixtures::adapter::detail::DirectlyAdapted& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::detail::DirectlyAdapted, ::facebook__thrift__test__module::NamespaceTag>>
+        ::facebook::thrift::test::fixtures::adapter::detail::DirectlyAdapted, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::detail::DirectlyAdapted, ::facebook__thrift__test__module::NamespaceTag>> {
-  PyObject* operator()(const ::facebook::thrift::test::detail::DirectlyAdapted& val);
+        ::facebook::thrift::test::fixtures::adapter::detail::DirectlyAdapted, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
+  PyObject* operator()(const ::facebook::thrift::test::fixtures::adapter::detail::DirectlyAdapted& val);
 };
 
 template <>
-struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::detail::IndependentDirectlyAdapted, ::facebook__thrift__test__module::NamespaceTag>>
-    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::detail::IndependentDirectlyAdapted, ::facebook__thrift__test__module::NamespaceTag>> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::detail::IndependentDirectlyAdapted, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::detail::IndependentDirectlyAdapted, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
-  ExtractorResult<::facebook::thrift::test::detail::IndependentDirectlyAdapted> operator()(PyObject* obj);
+  ExtractorResult<::facebook::thrift::test::fixtures::adapter::detail::IndependentDirectlyAdapted> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::detail::IndependentDirectlyAdapted, ::facebook__thrift__test__module::NamespaceTag >>
+        ::facebook::thrift::test::fixtures::adapter::detail::IndependentDirectlyAdapted, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::detail::IndependentDirectlyAdapted, ::facebook__thrift__test__module::NamespaceTag>> {
-  ExtractorResult<::facebook::thrift::test::detail::IndependentDirectlyAdapted> operator()(PyObject* obj);
+        ::facebook::thrift::test::fixtures::adapter::detail::IndependentDirectlyAdapted, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
+  ExtractorResult<::facebook::thrift::test::fixtures::adapter::detail::IndependentDirectlyAdapted> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::detail::IndependentDirectlyAdapted, ::facebook__thrift__test__module::NamespaceTag>>
-    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::detail::IndependentDirectlyAdapted, ::facebook__thrift__test__module::NamespaceTag>> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::detail::IndependentDirectlyAdapted, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::detail::IndependentDirectlyAdapted, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
-  PyObject* operator()(const ::facebook::thrift::test::detail::IndependentDirectlyAdapted& val);
+  PyObject* operator()(const ::facebook::thrift::test::fixtures::adapter::detail::IndependentDirectlyAdapted& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::detail::IndependentDirectlyAdapted, ::facebook__thrift__test__module::NamespaceTag>>
+        ::facebook::thrift::test::fixtures::adapter::detail::IndependentDirectlyAdapted, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::detail::IndependentDirectlyAdapted, ::facebook__thrift__test__module::NamespaceTag>> {
-  PyObject* operator()(const ::facebook::thrift::test::detail::IndependentDirectlyAdapted& val);
+        ::facebook::thrift::test::fixtures::adapter::detail::IndependentDirectlyAdapted, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
+  PyObject* operator()(const ::facebook::thrift::test::fixtures::adapter::detail::IndependentDirectlyAdapted& val);
 };
 
 template <>
-struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::StructWithFieldAdapter, ::facebook__thrift__test__module::NamespaceTag>>
-    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::StructWithFieldAdapter, ::facebook__thrift__test__module::NamespaceTag>> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::StructWithFieldAdapter, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::StructWithFieldAdapter, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
   static const bool kUsingMarshal = false;
-  ExtractorResult<::facebook::thrift::test::StructWithFieldAdapter> operator()(PyObject* obj);
+  ExtractorResult<::facebook::thrift::test::fixtures::adapter::StructWithFieldAdapter> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::StructWithFieldAdapter, ::facebook__thrift__test__module::NamespaceTag >>
+        ::facebook::thrift::test::fixtures::adapter::StructWithFieldAdapter, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::StructWithFieldAdapter, ::facebook__thrift__test__module::NamespaceTag>> {
-  ExtractorResult<::facebook::thrift::test::StructWithFieldAdapter> operator()(PyObject* obj);
+        ::facebook::thrift::test::fixtures::adapter::StructWithFieldAdapter, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
+  ExtractorResult<::facebook::thrift::test::fixtures::adapter::StructWithFieldAdapter> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::StructWithFieldAdapter, ::facebook__thrift__test__module::NamespaceTag>>
-    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::StructWithFieldAdapter, ::facebook__thrift__test__module::NamespaceTag>> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::StructWithFieldAdapter, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::StructWithFieldAdapter, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
   static const bool kUsingMarshal = false;
-  PyObject* operator()(const ::facebook::thrift::test::StructWithFieldAdapter& val);
+  PyObject* operator()(const ::facebook::thrift::test::fixtures::adapter::StructWithFieldAdapter& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::StructWithFieldAdapter, ::facebook__thrift__test__module::NamespaceTag>>
+        ::facebook::thrift::test::fixtures::adapter::StructWithFieldAdapter, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::StructWithFieldAdapter, ::facebook__thrift__test__module::NamespaceTag>> {
-  PyObject* operator()(const ::facebook::thrift::test::StructWithFieldAdapter& val);
+        ::facebook::thrift::test::fixtures::adapter::StructWithFieldAdapter, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
+  PyObject* operator()(const ::facebook::thrift::test::fixtures::adapter::StructWithFieldAdapter& val);
 };
 
 template <>
-struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::TerseAdaptedFields, ::facebook__thrift__test__module::NamespaceTag>>
-    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::TerseAdaptedFields, ::facebook__thrift__test__module::NamespaceTag>> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::TerseAdaptedFields, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::TerseAdaptedFields, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
   static const bool kUsingMarshal = false;
-  ExtractorResult<::facebook::thrift::test::TerseAdaptedFields> operator()(PyObject* obj);
+  ExtractorResult<::facebook::thrift::test::fixtures::adapter::TerseAdaptedFields> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::TerseAdaptedFields, ::facebook__thrift__test__module::NamespaceTag >>
+        ::facebook::thrift::test::fixtures::adapter::TerseAdaptedFields, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::TerseAdaptedFields, ::facebook__thrift__test__module::NamespaceTag>> {
-  ExtractorResult<::facebook::thrift::test::TerseAdaptedFields> operator()(PyObject* obj);
+        ::facebook::thrift::test::fixtures::adapter::TerseAdaptedFields, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
+  ExtractorResult<::facebook::thrift::test::fixtures::adapter::TerseAdaptedFields> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::TerseAdaptedFields, ::facebook__thrift__test__module::NamespaceTag>>
-    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::TerseAdaptedFields, ::facebook__thrift__test__module::NamespaceTag>> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::TerseAdaptedFields, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::TerseAdaptedFields, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
   static const bool kUsingMarshal = false;
-  PyObject* operator()(const ::facebook::thrift::test::TerseAdaptedFields& val);
+  PyObject* operator()(const ::facebook::thrift::test::fixtures::adapter::TerseAdaptedFields& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::TerseAdaptedFields, ::facebook__thrift__test__module::NamespaceTag>>
+        ::facebook::thrift::test::fixtures::adapter::TerseAdaptedFields, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::TerseAdaptedFields, ::facebook__thrift__test__module::NamespaceTag>> {
-  PyObject* operator()(const ::facebook::thrift::test::TerseAdaptedFields& val);
+        ::facebook::thrift::test::fixtures::adapter::TerseAdaptedFields, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
+  PyObject* operator()(const ::facebook::thrift::test::fixtures::adapter::TerseAdaptedFields& val);
 };
 
 template <>
-struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::B, ::facebook__thrift__test__module::NamespaceTag>>
-    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::B, ::facebook__thrift__test__module::NamespaceTag>> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::B, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::B, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
   static const bool kUsingMarshal = false;
-  ExtractorResult<::facebook::thrift::test::B> operator()(PyObject* obj);
+  ExtractorResult<::facebook::thrift::test::fixtures::adapter::B> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::B, ::facebook__thrift__test__module::NamespaceTag >>
+        ::facebook::thrift::test::fixtures::adapter::B, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::B, ::facebook__thrift__test__module::NamespaceTag>> {
-  ExtractorResult<::facebook::thrift::test::B> operator()(PyObject* obj);
+        ::facebook::thrift::test::fixtures::adapter::B, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
+  ExtractorResult<::facebook::thrift::test::fixtures::adapter::B> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::B, ::facebook__thrift__test__module::NamespaceTag>>
-    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::B, ::facebook__thrift__test__module::NamespaceTag>> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::B, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::B, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
   static const bool kUsingMarshal = false;
-  PyObject* operator()(const ::facebook::thrift::test::B& val);
+  PyObject* operator()(const ::facebook::thrift::test::fixtures::adapter::B& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::B, ::facebook__thrift__test__module::NamespaceTag>>
+        ::facebook::thrift::test::fixtures::adapter::B, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::B, ::facebook__thrift__test__module::NamespaceTag>> {
-  PyObject* operator()(const ::facebook::thrift::test::B& val);
+        ::facebook::thrift::test::fixtures::adapter::B, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
+  PyObject* operator()(const ::facebook::thrift::test::fixtures::adapter::B& val);
 };
 
 template <>
-struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::A, ::facebook__thrift__test__module::NamespaceTag>>
-    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::A, ::facebook__thrift__test__module::NamespaceTag>> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::A, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::A, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
-  ExtractorResult<::facebook::thrift::test::A> operator()(PyObject* obj);
+  ExtractorResult<::facebook::thrift::test::fixtures::adapter::A> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::A, ::facebook__thrift__test__module::NamespaceTag >>
+        ::facebook::thrift::test::fixtures::adapter::A, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::A, ::facebook__thrift__test__module::NamespaceTag>> {
-  ExtractorResult<::facebook::thrift::test::A> operator()(PyObject* obj);
+        ::facebook::thrift::test::fixtures::adapter::A, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
+  ExtractorResult<::facebook::thrift::test::fixtures::adapter::A> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::A, ::facebook__thrift__test__module::NamespaceTag>>
-    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::A, ::facebook__thrift__test__module::NamespaceTag>> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::A, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::A, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
-  PyObject* operator()(const ::facebook::thrift::test::A& val);
+  PyObject* operator()(const ::facebook::thrift::test::fixtures::adapter::A& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::A, ::facebook__thrift__test__module::NamespaceTag>>
+        ::facebook::thrift::test::fixtures::adapter::A, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::A, ::facebook__thrift__test__module::NamespaceTag>> {
-  PyObject* operator()(const ::facebook::thrift::test::A& val);
+        ::facebook::thrift::test::fixtures::adapter::A, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
+  PyObject* operator()(const ::facebook::thrift::test::fixtures::adapter::A& val);
 };
 
 template <>
-struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::Config, ::facebook__thrift__test__module::NamespaceTag>>
-    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::Config, ::facebook__thrift__test__module::NamespaceTag>> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::Config, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::Config, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
-  ExtractorResult<::facebook::thrift::test::Config> operator()(PyObject* obj);
+  ExtractorResult<::facebook::thrift::test::fixtures::adapter::Config> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::Config, ::facebook__thrift__test__module::NamespaceTag >>
+        ::facebook::thrift::test::fixtures::adapter::Config, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::Config, ::facebook__thrift__test__module::NamespaceTag>> {
-  ExtractorResult<::facebook::thrift::test::Config> operator()(PyObject* obj);
+        ::facebook::thrift::test::fixtures::adapter::Config, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
+  ExtractorResult<::facebook::thrift::test::fixtures::adapter::Config> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::Config, ::facebook__thrift__test__module::NamespaceTag>>
-    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::Config, ::facebook__thrift__test__module::NamespaceTag>> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::Config, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::Config, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
-  PyObject* operator()(const ::facebook::thrift::test::Config& val);
+  PyObject* operator()(const ::facebook::thrift::test::fixtures::adapter::Config& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::Config, ::facebook__thrift__test__module::NamespaceTag>>
+        ::facebook::thrift::test::fixtures::adapter::Config, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::Config, ::facebook__thrift__test__module::NamespaceTag>> {
-  PyObject* operator()(const ::facebook::thrift::test::Config& val);
+        ::facebook::thrift::test::fixtures::adapter::Config, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
+  PyObject* operator()(const ::facebook::thrift::test::fixtures::adapter::Config& val);
 };
 
 template <>
-struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::MyStruct, ::facebook__thrift__test__module::NamespaceTag>>
-    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::MyStruct, ::facebook__thrift__test__module::NamespaceTag>> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::MyStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::MyStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
   static const bool kUsingMarshal = false;
-  ExtractorResult<::facebook::thrift::test::MyStruct> operator()(PyObject* obj);
+  ExtractorResult<::facebook::thrift::test::fixtures::adapter::MyStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::MyStruct, ::facebook__thrift__test__module::NamespaceTag >>
+        ::facebook::thrift::test::fixtures::adapter::MyStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::MyStruct, ::facebook__thrift__test__module::NamespaceTag>> {
-  ExtractorResult<::facebook::thrift::test::MyStruct> operator()(PyObject* obj);
+        ::facebook::thrift::test::fixtures::adapter::MyStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
+  ExtractorResult<::facebook::thrift::test::fixtures::adapter::MyStruct> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::MyStruct, ::facebook__thrift__test__module::NamespaceTag>>
-    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::MyStruct, ::facebook__thrift__test__module::NamespaceTag>> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::MyStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::MyStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
   static const bool kUsingMarshal = false;
-  PyObject* operator()(const ::facebook::thrift::test::MyStruct& val);
+  PyObject* operator()(const ::facebook::thrift::test::fixtures::adapter::MyStruct& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::MyStruct, ::facebook__thrift__test__module::NamespaceTag>>
+        ::facebook::thrift::test::fixtures::adapter::MyStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::MyStruct, ::facebook__thrift__test__module::NamespaceTag>> {
-  PyObject* operator()(const ::facebook::thrift::test::MyStruct& val);
+        ::facebook::thrift::test::fixtures::adapter::MyStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
+  PyObject* operator()(const ::facebook::thrift::test::fixtures::adapter::MyStruct& val);
 };
 
 template <>
-struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::AdaptTestStruct, ::facebook__thrift__test__module::NamespaceTag>>
-    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::AdaptTestStruct, ::facebook__thrift__test__module::NamespaceTag>> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::AdaptTestStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::AdaptTestStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
   static const bool kUsingMarshal = false;
-  ExtractorResult<::facebook::thrift::test::AdaptTestStruct> operator()(PyObject* obj);
+  ExtractorResult<::facebook::thrift::test::fixtures::adapter::AdaptTestStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::AdaptTestStruct, ::facebook__thrift__test__module::NamespaceTag >>
+        ::facebook::thrift::test::fixtures::adapter::AdaptTestStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::AdaptTestStruct, ::facebook__thrift__test__module::NamespaceTag>> {
-  ExtractorResult<::facebook::thrift::test::AdaptTestStruct> operator()(PyObject* obj);
+        ::facebook::thrift::test::fixtures::adapter::AdaptTestStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
+  ExtractorResult<::facebook::thrift::test::fixtures::adapter::AdaptTestStruct> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::AdaptTestStruct, ::facebook__thrift__test__module::NamespaceTag>>
-    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::AdaptTestStruct, ::facebook__thrift__test__module::NamespaceTag>> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::AdaptTestStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::AdaptTestStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
   static const bool kUsingMarshal = false;
-  PyObject* operator()(const ::facebook::thrift::test::AdaptTestStruct& val);
+  PyObject* operator()(const ::facebook::thrift::test::fixtures::adapter::AdaptTestStruct& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::AdaptTestStruct, ::facebook__thrift__test__module::NamespaceTag>>
+        ::facebook::thrift::test::fixtures::adapter::AdaptTestStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::AdaptTestStruct, ::facebook__thrift__test__module::NamespaceTag>> {
-  PyObject* operator()(const ::facebook::thrift::test::AdaptTestStruct& val);
+        ::facebook::thrift::test::fixtures::adapter::AdaptTestStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
+  PyObject* operator()(const ::facebook::thrift::test::fixtures::adapter::AdaptTestStruct& val);
 };
 
 template <>
-struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::AdaptTemplatedTestStruct, ::facebook__thrift__test__module::NamespaceTag>>
-    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::AdaptTemplatedTestStruct, ::facebook__thrift__test__module::NamespaceTag>> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::AdaptTemplatedTestStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::AdaptTemplatedTestStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
   static const bool kUsingMarshal = false;
-  ExtractorResult<::facebook::thrift::test::AdaptTemplatedTestStruct> operator()(PyObject* obj);
+  ExtractorResult<::facebook::thrift::test::fixtures::adapter::AdaptTemplatedTestStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::AdaptTemplatedTestStruct, ::facebook__thrift__test__module::NamespaceTag >>
+        ::facebook::thrift::test::fixtures::adapter::AdaptTemplatedTestStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::AdaptTemplatedTestStruct, ::facebook__thrift__test__module::NamespaceTag>> {
-  ExtractorResult<::facebook::thrift::test::AdaptTemplatedTestStruct> operator()(PyObject* obj);
+        ::facebook::thrift::test::fixtures::adapter::AdaptTemplatedTestStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
+  ExtractorResult<::facebook::thrift::test::fixtures::adapter::AdaptTemplatedTestStruct> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::AdaptTemplatedTestStruct, ::facebook__thrift__test__module::NamespaceTag>>
-    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::AdaptTemplatedTestStruct, ::facebook__thrift__test__module::NamespaceTag>> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::AdaptTemplatedTestStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::AdaptTemplatedTestStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
   static const bool kUsingMarshal = false;
-  PyObject* operator()(const ::facebook::thrift::test::AdaptTemplatedTestStruct& val);
+  PyObject* operator()(const ::facebook::thrift::test::fixtures::adapter::AdaptTemplatedTestStruct& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::AdaptTemplatedTestStruct, ::facebook__thrift__test__module::NamespaceTag>>
+        ::facebook::thrift::test::fixtures::adapter::AdaptTemplatedTestStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::AdaptTemplatedTestStruct, ::facebook__thrift__test__module::NamespaceTag>> {
-  PyObject* operator()(const ::facebook::thrift::test::AdaptTemplatedTestStruct& val);
+        ::facebook::thrift::test::fixtures::adapter::AdaptTemplatedTestStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
+  PyObject* operator()(const ::facebook::thrift::test::fixtures::adapter::AdaptTemplatedTestStruct& val);
 };
 
 template <>
-struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::AdaptTemplatedNestedTestStruct, ::facebook__thrift__test__module::NamespaceTag>>
-    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::AdaptTemplatedNestedTestStruct, ::facebook__thrift__test__module::NamespaceTag>> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::AdaptTemplatedNestedTestStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::AdaptTemplatedNestedTestStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
-  ExtractorResult<::facebook::thrift::test::AdaptTemplatedNestedTestStruct> operator()(PyObject* obj);
+  ExtractorResult<::facebook::thrift::test::fixtures::adapter::AdaptTemplatedNestedTestStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::AdaptTemplatedNestedTestStruct, ::facebook__thrift__test__module::NamespaceTag >>
+        ::facebook::thrift::test::fixtures::adapter::AdaptTemplatedNestedTestStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::AdaptTemplatedNestedTestStruct, ::facebook__thrift__test__module::NamespaceTag>> {
-  ExtractorResult<::facebook::thrift::test::AdaptTemplatedNestedTestStruct> operator()(PyObject* obj);
+        ::facebook::thrift::test::fixtures::adapter::AdaptTemplatedNestedTestStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
+  ExtractorResult<::facebook::thrift::test::fixtures::adapter::AdaptTemplatedNestedTestStruct> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::AdaptTemplatedNestedTestStruct, ::facebook__thrift__test__module::NamespaceTag>>
-    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::AdaptTemplatedNestedTestStruct, ::facebook__thrift__test__module::NamespaceTag>> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::AdaptTemplatedNestedTestStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::AdaptTemplatedNestedTestStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
-  PyObject* operator()(const ::facebook::thrift::test::AdaptTemplatedNestedTestStruct& val);
+  PyObject* operator()(const ::facebook::thrift::test::fixtures::adapter::AdaptTemplatedNestedTestStruct& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::AdaptTemplatedNestedTestStruct, ::facebook__thrift__test__module::NamespaceTag>>
+        ::facebook::thrift::test::fixtures::adapter::AdaptTemplatedNestedTestStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::AdaptTemplatedNestedTestStruct, ::facebook__thrift__test__module::NamespaceTag>> {
-  PyObject* operator()(const ::facebook::thrift::test::AdaptTemplatedNestedTestStruct& val);
+        ::facebook::thrift::test::fixtures::adapter::AdaptTemplatedNestedTestStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
+  PyObject* operator()(const ::facebook::thrift::test::fixtures::adapter::AdaptTemplatedNestedTestStruct& val);
 };
 
 template <>
-struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::ThriftAdaptTestUnion, ::facebook__thrift__test__module::NamespaceTag>>
-    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::ThriftAdaptTestUnion, ::facebook__thrift__test__module::NamespaceTag>> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::ThriftAdaptTestUnion, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::ThriftAdaptTestUnion, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
   static const bool kUsingMarshal = false;
-  ExtractorResult<::facebook::thrift::test::ThriftAdaptTestUnion> operator()(PyObject* obj);
+  ExtractorResult<::facebook::thrift::test::fixtures::adapter::ThriftAdaptTestUnion> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::ThriftAdaptTestUnion, ::facebook__thrift__test__module::NamespaceTag >>
+        ::facebook::thrift::test::fixtures::adapter::ThriftAdaptTestUnion, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::ThriftAdaptTestUnion, ::facebook__thrift__test__module::NamespaceTag>> {
-  ExtractorResult<::facebook::thrift::test::ThriftAdaptTestUnion> operator()(PyObject* obj);
+        ::facebook::thrift::test::fixtures::adapter::ThriftAdaptTestUnion, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
+  ExtractorResult<::facebook::thrift::test::fixtures::adapter::ThriftAdaptTestUnion> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::ThriftAdaptTestUnion, ::facebook__thrift__test__module::NamespaceTag>>
-    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::ThriftAdaptTestUnion, ::facebook__thrift__test__module::NamespaceTag>> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::ThriftAdaptTestUnion, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::ThriftAdaptTestUnion, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
   static const bool kUsingMarshal = false;
-  PyObject* operator()(const ::facebook::thrift::test::ThriftAdaptTestUnion& val);
+  PyObject* operator()(const ::facebook::thrift::test::fixtures::adapter::ThriftAdaptTestUnion& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::ThriftAdaptTestUnion, ::facebook__thrift__test__module::NamespaceTag>>
+        ::facebook::thrift::test::fixtures::adapter::ThriftAdaptTestUnion, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::ThriftAdaptTestUnion, ::facebook__thrift__test__module::NamespaceTag>> {
-  PyObject* operator()(const ::facebook::thrift::test::ThriftAdaptTestUnion& val);
+        ::facebook::thrift::test::fixtures::adapter::ThriftAdaptTestUnion, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
+  PyObject* operator()(const ::facebook::thrift::test::fixtures::adapter::ThriftAdaptTestUnion& val);
 };
 
 template <>
-struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::ThriftAdaptedStruct, ::facebook__thrift__test__module::NamespaceTag>>
-    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::ThriftAdaptedStruct, ::facebook__thrift__test__module::NamespaceTag>> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::ThriftAdaptedStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::ThriftAdaptedStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
-  ExtractorResult<::facebook::thrift::test::ThriftAdaptedStruct> operator()(PyObject* obj);
+  ExtractorResult<::facebook::thrift::test::fixtures::adapter::ThriftAdaptedStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::ThriftAdaptedStruct, ::facebook__thrift__test__module::NamespaceTag >>
+        ::facebook::thrift::test::fixtures::adapter::ThriftAdaptedStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::ThriftAdaptedStruct, ::facebook__thrift__test__module::NamespaceTag>> {
-  ExtractorResult<::facebook::thrift::test::ThriftAdaptedStruct> operator()(PyObject* obj);
+        ::facebook::thrift::test::fixtures::adapter::ThriftAdaptedStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
+  ExtractorResult<::facebook::thrift::test::fixtures::adapter::ThriftAdaptedStruct> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::ThriftAdaptedStruct, ::facebook__thrift__test__module::NamespaceTag>>
-    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::ThriftAdaptedStruct, ::facebook__thrift__test__module::NamespaceTag>> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::ThriftAdaptedStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::ThriftAdaptedStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
-  PyObject* operator()(const ::facebook::thrift::test::ThriftAdaptedStruct& val);
+  PyObject* operator()(const ::facebook::thrift::test::fixtures::adapter::ThriftAdaptedStruct& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::ThriftAdaptedStruct, ::facebook__thrift__test__module::NamespaceTag>>
+        ::facebook::thrift::test::fixtures::adapter::ThriftAdaptedStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::ThriftAdaptedStruct, ::facebook__thrift__test__module::NamespaceTag>> {
-  PyObject* operator()(const ::facebook::thrift::test::ThriftAdaptedStruct& val);
+        ::facebook::thrift::test::fixtures::adapter::ThriftAdaptedStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
+  PyObject* operator()(const ::facebook::thrift::test::fixtures::adapter::ThriftAdaptedStruct& val);
 };
 
 template <>
-struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::detail::DirectlyAdaptedStruct, ::facebook__thrift__test__module::NamespaceTag>>
-    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::detail::DirectlyAdaptedStruct, ::facebook__thrift__test__module::NamespaceTag>> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::detail::DirectlyAdaptedStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::detail::DirectlyAdaptedStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
-  ExtractorResult<::facebook::thrift::test::detail::DirectlyAdaptedStruct> operator()(PyObject* obj);
+  ExtractorResult<::facebook::thrift::test::fixtures::adapter::detail::DirectlyAdaptedStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::detail::DirectlyAdaptedStruct, ::facebook__thrift__test__module::NamespaceTag >>
+        ::facebook::thrift::test::fixtures::adapter::detail::DirectlyAdaptedStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::detail::DirectlyAdaptedStruct, ::facebook__thrift__test__module::NamespaceTag>> {
-  ExtractorResult<::facebook::thrift::test::detail::DirectlyAdaptedStruct> operator()(PyObject* obj);
+        ::facebook::thrift::test::fixtures::adapter::detail::DirectlyAdaptedStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
+  ExtractorResult<::facebook::thrift::test::fixtures::adapter::detail::DirectlyAdaptedStruct> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::detail::DirectlyAdaptedStruct, ::facebook__thrift__test__module::NamespaceTag>>
-    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::detail::DirectlyAdaptedStruct, ::facebook__thrift__test__module::NamespaceTag>> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::detail::DirectlyAdaptedStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::detail::DirectlyAdaptedStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
-  PyObject* operator()(const ::facebook::thrift::test::detail::DirectlyAdaptedStruct& val);
+  PyObject* operator()(const ::facebook::thrift::test::fixtures::adapter::detail::DirectlyAdaptedStruct& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::detail::DirectlyAdaptedStruct, ::facebook__thrift__test__module::NamespaceTag>>
+        ::facebook::thrift::test::fixtures::adapter::detail::DirectlyAdaptedStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::detail::DirectlyAdaptedStruct, ::facebook__thrift__test__module::NamespaceTag>> {
-  PyObject* operator()(const ::facebook::thrift::test::detail::DirectlyAdaptedStruct& val);
+        ::facebook::thrift::test::fixtures::adapter::detail::DirectlyAdaptedStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
+  PyObject* operator()(const ::facebook::thrift::test::fixtures::adapter::detail::DirectlyAdaptedStruct& val);
 };
 
 template <>
-struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::StructFieldAdaptedStruct, ::facebook__thrift__test__module::NamespaceTag>>
-    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::StructFieldAdaptedStruct, ::facebook__thrift__test__module::NamespaceTag>> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::StructFieldAdaptedStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::StructFieldAdaptedStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
   static const bool kUsingMarshal = false;
-  ExtractorResult<::facebook::thrift::test::StructFieldAdaptedStruct> operator()(PyObject* obj);
+  ExtractorResult<::facebook::thrift::test::fixtures::adapter::StructFieldAdaptedStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::StructFieldAdaptedStruct, ::facebook__thrift__test__module::NamespaceTag >>
+        ::facebook::thrift::test::fixtures::adapter::StructFieldAdaptedStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::StructFieldAdaptedStruct, ::facebook__thrift__test__module::NamespaceTag>> {
-  ExtractorResult<::facebook::thrift::test::StructFieldAdaptedStruct> operator()(PyObject* obj);
+        ::facebook::thrift::test::fixtures::adapter::StructFieldAdaptedStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
+  ExtractorResult<::facebook::thrift::test::fixtures::adapter::StructFieldAdaptedStruct> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::StructFieldAdaptedStruct, ::facebook__thrift__test__module::NamespaceTag>>
-    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::StructFieldAdaptedStruct, ::facebook__thrift__test__module::NamespaceTag>> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::StructFieldAdaptedStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::StructFieldAdaptedStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
   static const bool kUsingMarshal = false;
-  PyObject* operator()(const ::facebook::thrift::test::StructFieldAdaptedStruct& val);
+  PyObject* operator()(const ::facebook::thrift::test::fixtures::adapter::StructFieldAdaptedStruct& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::StructFieldAdaptedStruct, ::facebook__thrift__test__module::NamespaceTag>>
+        ::facebook::thrift::test::fixtures::adapter::StructFieldAdaptedStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::StructFieldAdaptedStruct, ::facebook__thrift__test__module::NamespaceTag>> {
-  PyObject* operator()(const ::facebook::thrift::test::StructFieldAdaptedStruct& val);
+        ::facebook::thrift::test::fixtures::adapter::StructFieldAdaptedStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
+  PyObject* operator()(const ::facebook::thrift::test::fixtures::adapter::StructFieldAdaptedStruct& val);
 };
 
 template <>
-struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::CircularAdaptee, ::facebook__thrift__test__module::NamespaceTag>>
-    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::CircularAdaptee, ::facebook__thrift__test__module::NamespaceTag>> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::CircularAdaptee, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::CircularAdaptee, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
-  ExtractorResult<::facebook::thrift::test::CircularAdaptee> operator()(PyObject* obj);
+  ExtractorResult<::facebook::thrift::test::fixtures::adapter::CircularAdaptee> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::CircularAdaptee, ::facebook__thrift__test__module::NamespaceTag >>
+        ::facebook::thrift::test::fixtures::adapter::CircularAdaptee, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::CircularAdaptee, ::facebook__thrift__test__module::NamespaceTag>> {
-  ExtractorResult<::facebook::thrift::test::CircularAdaptee> operator()(PyObject* obj);
+        ::facebook::thrift::test::fixtures::adapter::CircularAdaptee, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
+  ExtractorResult<::facebook::thrift::test::fixtures::adapter::CircularAdaptee> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::CircularAdaptee, ::facebook__thrift__test__module::NamespaceTag>>
-    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::CircularAdaptee, ::facebook__thrift__test__module::NamespaceTag>> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::CircularAdaptee, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::CircularAdaptee, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
-  PyObject* operator()(const ::facebook::thrift::test::CircularAdaptee& val);
+  PyObject* operator()(const ::facebook::thrift::test::fixtures::adapter::CircularAdaptee& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::CircularAdaptee, ::facebook__thrift__test__module::NamespaceTag>>
+        ::facebook::thrift::test::fixtures::adapter::CircularAdaptee, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::CircularAdaptee, ::facebook__thrift__test__module::NamespaceTag>> {
-  PyObject* operator()(const ::facebook::thrift::test::CircularAdaptee& val);
+        ::facebook::thrift::test::fixtures::adapter::CircularAdaptee, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
+  PyObject* operator()(const ::facebook::thrift::test::fixtures::adapter::CircularAdaptee& val);
 };
 
 template <>
-struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::CircularStruct, ::facebook__thrift__test__module::NamespaceTag>>
-    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::CircularStruct, ::facebook__thrift__test__module::NamespaceTag>> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::CircularStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::CircularStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
   static const bool kUsingMarshal = false;
-  ExtractorResult<::facebook::thrift::test::CircularStruct> operator()(PyObject* obj);
+  ExtractorResult<::facebook::thrift::test::fixtures::adapter::CircularStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::CircularStruct, ::facebook__thrift__test__module::NamespaceTag >>
+        ::facebook::thrift::test::fixtures::adapter::CircularStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::CircularStruct, ::facebook__thrift__test__module::NamespaceTag>> {
-  ExtractorResult<::facebook::thrift::test::CircularStruct> operator()(PyObject* obj);
+        ::facebook::thrift::test::fixtures::adapter::CircularStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
+  ExtractorResult<::facebook::thrift::test::fixtures::adapter::CircularStruct> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::CircularStruct, ::facebook__thrift__test__module::NamespaceTag>>
-    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::CircularStruct, ::facebook__thrift__test__module::NamespaceTag>> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::CircularStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::CircularStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
   static const bool kUsingMarshal = false;
-  PyObject* operator()(const ::facebook::thrift::test::CircularStruct& val);
+  PyObject* operator()(const ::facebook::thrift::test::fixtures::adapter::CircularStruct& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::CircularStruct, ::facebook__thrift__test__module::NamespaceTag>>
+        ::facebook::thrift::test::fixtures::adapter::CircularStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::CircularStruct, ::facebook__thrift__test__module::NamespaceTag>> {
-  PyObject* operator()(const ::facebook::thrift::test::CircularStruct& val);
+        ::facebook::thrift::test::fixtures::adapter::CircularStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
+  PyObject* operator()(const ::facebook::thrift::test::fixtures::adapter::CircularStruct& val);
 };
 
 template <>
-struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::ReorderedStruct, ::facebook__thrift__test__module::NamespaceTag>>
-    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::ReorderedStruct, ::facebook__thrift__test__module::NamespaceTag>> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::ReorderedStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::ReorderedStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
   static const bool kUsingMarshal = false;
-  ExtractorResult<::facebook::thrift::test::ReorderedStruct> operator()(PyObject* obj);
+  ExtractorResult<::facebook::thrift::test::fixtures::adapter::ReorderedStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::ReorderedStruct, ::facebook__thrift__test__module::NamespaceTag >>
+        ::facebook::thrift::test::fixtures::adapter::ReorderedStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::ReorderedStruct, ::facebook__thrift__test__module::NamespaceTag>> {
-  ExtractorResult<::facebook::thrift::test::ReorderedStruct> operator()(PyObject* obj);
+        ::facebook::thrift::test::fixtures::adapter::ReorderedStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
+  ExtractorResult<::facebook::thrift::test::fixtures::adapter::ReorderedStruct> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::ReorderedStruct, ::facebook__thrift__test__module::NamespaceTag>>
-    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::ReorderedStruct, ::facebook__thrift__test__module::NamespaceTag>> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::ReorderedStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::ReorderedStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
   static const bool kUsingMarshal = false;
-  PyObject* operator()(const ::facebook::thrift::test::ReorderedStruct& val);
+  PyObject* operator()(const ::facebook::thrift::test::fixtures::adapter::ReorderedStruct& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::ReorderedStruct, ::facebook__thrift__test__module::NamespaceTag>>
+        ::facebook::thrift::test::fixtures::adapter::ReorderedStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::ReorderedStruct, ::facebook__thrift__test__module::NamespaceTag>> {
-  PyObject* operator()(const ::facebook::thrift::test::ReorderedStruct& val);
+        ::facebook::thrift::test::fixtures::adapter::ReorderedStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
+  PyObject* operator()(const ::facebook::thrift::test::fixtures::adapter::ReorderedStruct& val);
 };
 
 template <>
-struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::detail::DeclaredAfterStruct, ::facebook__thrift__test__module::NamespaceTag>>
-    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::detail::DeclaredAfterStruct, ::facebook__thrift__test__module::NamespaceTag>> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::detail::DeclaredAfterStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::detail::DeclaredAfterStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
-  ExtractorResult<::facebook::thrift::test::detail::DeclaredAfterStruct> operator()(PyObject* obj);
+  ExtractorResult<::facebook::thrift::test::fixtures::adapter::detail::DeclaredAfterStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::detail::DeclaredAfterStruct, ::facebook__thrift__test__module::NamespaceTag >>
+        ::facebook::thrift::test::fixtures::adapter::detail::DeclaredAfterStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::detail::DeclaredAfterStruct, ::facebook__thrift__test__module::NamespaceTag>> {
-  ExtractorResult<::facebook::thrift::test::detail::DeclaredAfterStruct> operator()(PyObject* obj);
+        ::facebook::thrift::test::fixtures::adapter::detail::DeclaredAfterStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
+  ExtractorResult<::facebook::thrift::test::fixtures::adapter::detail::DeclaredAfterStruct> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::detail::DeclaredAfterStruct, ::facebook__thrift__test__module::NamespaceTag>>
-    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::detail::DeclaredAfterStruct, ::facebook__thrift__test__module::NamespaceTag>> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::detail::DeclaredAfterStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::detail::DeclaredAfterStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
-  PyObject* operator()(const ::facebook::thrift::test::detail::DeclaredAfterStruct& val);
+  PyObject* operator()(const ::facebook::thrift::test::fixtures::adapter::detail::DeclaredAfterStruct& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::detail::DeclaredAfterStruct, ::facebook__thrift__test__module::NamespaceTag>>
+        ::facebook::thrift::test::fixtures::adapter::detail::DeclaredAfterStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::detail::DeclaredAfterStruct, ::facebook__thrift__test__module::NamespaceTag>> {
-  PyObject* operator()(const ::facebook::thrift::test::detail::DeclaredAfterStruct& val);
+        ::facebook::thrift::test::fixtures::adapter::detail::DeclaredAfterStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
+  PyObject* operator()(const ::facebook::thrift::test::fixtures::adapter::detail::DeclaredAfterStruct& val);
 };
 
 template <>
-struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::UnderlyingRenamedStruct, ::facebook__thrift__test__module::NamespaceTag>>
-    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::UnderlyingRenamedStruct, ::facebook__thrift__test__module::NamespaceTag>> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::UnderlyingRenamedStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::UnderlyingRenamedStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
-  ExtractorResult<::facebook::thrift::test::UnderlyingRenamedStruct> operator()(PyObject* obj);
+  ExtractorResult<::facebook::thrift::test::fixtures::adapter::UnderlyingRenamedStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::UnderlyingRenamedStruct, ::facebook__thrift__test__module::NamespaceTag >>
+        ::facebook::thrift::test::fixtures::adapter::UnderlyingRenamedStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::UnderlyingRenamedStruct, ::facebook__thrift__test__module::NamespaceTag>> {
-  ExtractorResult<::facebook::thrift::test::UnderlyingRenamedStruct> operator()(PyObject* obj);
+        ::facebook::thrift::test::fixtures::adapter::UnderlyingRenamedStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
+  ExtractorResult<::facebook::thrift::test::fixtures::adapter::UnderlyingRenamedStruct> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::UnderlyingRenamedStruct, ::facebook__thrift__test__module::NamespaceTag>>
-    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::UnderlyingRenamedStruct, ::facebook__thrift__test__module::NamespaceTag>> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::UnderlyingRenamedStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::UnderlyingRenamedStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
-  PyObject* operator()(const ::facebook::thrift::test::UnderlyingRenamedStruct& val);
+  PyObject* operator()(const ::facebook::thrift::test::fixtures::adapter::UnderlyingRenamedStruct& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::UnderlyingRenamedStruct, ::facebook__thrift__test__module::NamespaceTag>>
+        ::facebook::thrift::test::fixtures::adapter::UnderlyingRenamedStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::UnderlyingRenamedStruct, ::facebook__thrift__test__module::NamespaceTag>> {
-  PyObject* operator()(const ::facebook::thrift::test::UnderlyingRenamedStruct& val);
+        ::facebook::thrift::test::fixtures::adapter::UnderlyingRenamedStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
+  PyObject* operator()(const ::facebook::thrift::test::fixtures::adapter::UnderlyingRenamedStruct& val);
 };
 
 template <>
-struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::UnderlyingSameNamespaceStruct, ::facebook__thrift__test__module::NamespaceTag>>
-    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::UnderlyingSameNamespaceStruct, ::facebook__thrift__test__module::NamespaceTag>> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::UnderlyingSameNamespaceStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::UnderlyingSameNamespaceStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
-  ExtractorResult<::facebook::thrift::test::UnderlyingSameNamespaceStruct> operator()(PyObject* obj);
+  ExtractorResult<::facebook::thrift::test::fixtures::adapter::UnderlyingSameNamespaceStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::UnderlyingSameNamespaceStruct, ::facebook__thrift__test__module::NamespaceTag >>
+        ::facebook::thrift::test::fixtures::adapter::UnderlyingSameNamespaceStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::UnderlyingSameNamespaceStruct, ::facebook__thrift__test__module::NamespaceTag>> {
-  ExtractorResult<::facebook::thrift::test::UnderlyingSameNamespaceStruct> operator()(PyObject* obj);
+        ::facebook::thrift::test::fixtures::adapter::UnderlyingSameNamespaceStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
+  ExtractorResult<::facebook::thrift::test::fixtures::adapter::UnderlyingSameNamespaceStruct> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::UnderlyingSameNamespaceStruct, ::facebook__thrift__test__module::NamespaceTag>>
-    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::UnderlyingSameNamespaceStruct, ::facebook__thrift__test__module::NamespaceTag>> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::UnderlyingSameNamespaceStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::UnderlyingSameNamespaceStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
-  PyObject* operator()(const ::facebook::thrift::test::UnderlyingSameNamespaceStruct& val);
+  PyObject* operator()(const ::facebook::thrift::test::fixtures::adapter::UnderlyingSameNamespaceStruct& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::UnderlyingSameNamespaceStruct, ::facebook__thrift__test__module::NamespaceTag>>
+        ::facebook::thrift::test::fixtures::adapter::UnderlyingSameNamespaceStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::UnderlyingSameNamespaceStruct, ::facebook__thrift__test__module::NamespaceTag>> {
-  PyObject* operator()(const ::facebook::thrift::test::UnderlyingSameNamespaceStruct& val);
+        ::facebook::thrift::test::fixtures::adapter::UnderlyingSameNamespaceStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
+  PyObject* operator()(const ::facebook::thrift::test::fixtures::adapter::UnderlyingSameNamespaceStruct& val);
 };
 
 template <>
-struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::detail::HeapAllocated, ::facebook__thrift__test__module::NamespaceTag>>
-    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::detail::HeapAllocated, ::facebook__thrift__test__module::NamespaceTag>> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::detail::HeapAllocated, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::detail::HeapAllocated, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
-  ExtractorResult<::facebook::thrift::test::detail::HeapAllocated> operator()(PyObject* obj);
+  ExtractorResult<::facebook::thrift::test::fixtures::adapter::detail::HeapAllocated> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::detail::HeapAllocated, ::facebook__thrift__test__module::NamespaceTag >>
+        ::facebook::thrift::test::fixtures::adapter::detail::HeapAllocated, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::detail::HeapAllocated, ::facebook__thrift__test__module::NamespaceTag>> {
-  ExtractorResult<::facebook::thrift::test::detail::HeapAllocated> operator()(PyObject* obj);
+        ::facebook::thrift::test::fixtures::adapter::detail::HeapAllocated, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
+  ExtractorResult<::facebook::thrift::test::fixtures::adapter::detail::HeapAllocated> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::detail::HeapAllocated, ::facebook__thrift__test__module::NamespaceTag>>
-    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::detail::HeapAllocated, ::facebook__thrift__test__module::NamespaceTag>> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::detail::HeapAllocated, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::detail::HeapAllocated, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
-  PyObject* operator()(const ::facebook::thrift::test::detail::HeapAllocated& val);
+  PyObject* operator()(const ::facebook::thrift::test::fixtures::adapter::detail::HeapAllocated& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::detail::HeapAllocated, ::facebook__thrift__test__module::NamespaceTag>>
+        ::facebook::thrift::test::fixtures::adapter::detail::HeapAllocated, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::detail::HeapAllocated, ::facebook__thrift__test__module::NamespaceTag>> {
-  PyObject* operator()(const ::facebook::thrift::test::detail::HeapAllocated& val);
+        ::facebook::thrift::test::fixtures::adapter::detail::HeapAllocated, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
+  PyObject* operator()(const ::facebook::thrift::test::fixtures::adapter::detail::HeapAllocated& val);
 };
 
 template <>
-struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::MoveOnly, ::facebook__thrift__test__module::NamespaceTag>>
-    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::MoveOnly, ::facebook__thrift__test__module::NamespaceTag>> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::MoveOnly, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::MoveOnly, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
   static const bool kUsingMarshal = false;
-  ExtractorResult<::facebook::thrift::test::MoveOnly> operator()(PyObject* obj);
+  ExtractorResult<::facebook::thrift::test::fixtures::adapter::MoveOnly> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::MoveOnly, ::facebook__thrift__test__module::NamespaceTag >>
+        ::facebook::thrift::test::fixtures::adapter::MoveOnly, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::MoveOnly, ::facebook__thrift__test__module::NamespaceTag>> {
-  ExtractorResult<::facebook::thrift::test::MoveOnly> operator()(PyObject* obj);
+        ::facebook::thrift::test::fixtures::adapter::MoveOnly, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
+  ExtractorResult<::facebook::thrift::test::fixtures::adapter::MoveOnly> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::MoveOnly, ::facebook__thrift__test__module::NamespaceTag>>
-    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::MoveOnly, ::facebook__thrift__test__module::NamespaceTag>> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::MoveOnly, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::MoveOnly, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
   static const bool kUsingMarshal = false;
-  PyObject* operator()(const ::facebook::thrift::test::MoveOnly& val);
+  PyObject* operator()(const ::facebook::thrift::test::fixtures::adapter::MoveOnly& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::MoveOnly, ::facebook__thrift__test__module::NamespaceTag>>
+        ::facebook::thrift::test::fixtures::adapter::MoveOnly, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::MoveOnly, ::facebook__thrift__test__module::NamespaceTag>> {
-  PyObject* operator()(const ::facebook::thrift::test::MoveOnly& val);
+        ::facebook::thrift::test::fixtures::adapter::MoveOnly, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
+  PyObject* operator()(const ::facebook::thrift::test::fixtures::adapter::MoveOnly& val);
 };
 
 template <>
-struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::AlsoMoveOnly, ::facebook__thrift__test__module::NamespaceTag>>
-    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::AlsoMoveOnly, ::facebook__thrift__test__module::NamespaceTag>> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::AlsoMoveOnly, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::AlsoMoveOnly, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
   static const bool kUsingMarshal = false;
-  ExtractorResult<::facebook::thrift::test::AlsoMoveOnly> operator()(PyObject* obj);
+  ExtractorResult<::facebook::thrift::test::fixtures::adapter::AlsoMoveOnly> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::AlsoMoveOnly, ::facebook__thrift__test__module::NamespaceTag >>
+        ::facebook::thrift::test::fixtures::adapter::AlsoMoveOnly, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::AlsoMoveOnly, ::facebook__thrift__test__module::NamespaceTag>> {
-  ExtractorResult<::facebook::thrift::test::AlsoMoveOnly> operator()(PyObject* obj);
+        ::facebook::thrift::test::fixtures::adapter::AlsoMoveOnly, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
+  ExtractorResult<::facebook::thrift::test::fixtures::adapter::AlsoMoveOnly> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::AlsoMoveOnly, ::facebook__thrift__test__module::NamespaceTag>>
-    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::AlsoMoveOnly, ::facebook__thrift__test__module::NamespaceTag>> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::AlsoMoveOnly, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::AlsoMoveOnly, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
   static const bool kUsingMarshal = false;
-  PyObject* operator()(const ::facebook::thrift::test::AlsoMoveOnly& val);
+  PyObject* operator()(const ::facebook::thrift::test::fixtures::adapter::AlsoMoveOnly& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::AlsoMoveOnly, ::facebook__thrift__test__module::NamespaceTag>>
+        ::facebook::thrift::test::fixtures::adapter::AlsoMoveOnly, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::AlsoMoveOnly, ::facebook__thrift__test__module::NamespaceTag>> {
-  PyObject* operator()(const ::facebook::thrift::test::AlsoMoveOnly& val);
+        ::facebook::thrift::test::fixtures::adapter::AlsoMoveOnly, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
+  PyObject* operator()(const ::facebook::thrift::test::fixtures::adapter::AlsoMoveOnly& val);
 };
 
 template <>
-struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::ApplyAdapter, ::facebook__thrift__test__module::NamespaceTag>>
-    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::ApplyAdapter, ::facebook__thrift__test__module::NamespaceTag>> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::ApplyAdapter, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::ApplyAdapter, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
-  ExtractorResult<::facebook::thrift::test::ApplyAdapter> operator()(PyObject* obj);
+  ExtractorResult<::facebook::thrift::test::fixtures::adapter::ApplyAdapter> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::ApplyAdapter, ::facebook__thrift__test__module::NamespaceTag >>
+        ::facebook::thrift::test::fixtures::adapter::ApplyAdapter, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::ApplyAdapter, ::facebook__thrift__test__module::NamespaceTag>> {
-  ExtractorResult<::facebook::thrift::test::ApplyAdapter> operator()(PyObject* obj);
+        ::facebook::thrift::test::fixtures::adapter::ApplyAdapter, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
+  ExtractorResult<::facebook::thrift::test::fixtures::adapter::ApplyAdapter> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::ApplyAdapter, ::facebook__thrift__test__module::NamespaceTag>>
-    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::ApplyAdapter, ::facebook__thrift__test__module::NamespaceTag>> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::ApplyAdapter, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::ApplyAdapter, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
-  PyObject* operator()(const ::facebook::thrift::test::ApplyAdapter& val);
+  PyObject* operator()(const ::facebook::thrift::test::fixtures::adapter::ApplyAdapter& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::ApplyAdapter, ::facebook__thrift__test__module::NamespaceTag>>
+        ::facebook::thrift::test::fixtures::adapter::ApplyAdapter, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::ApplyAdapter, ::facebook__thrift__test__module::NamespaceTag>> {
-  PyObject* operator()(const ::facebook::thrift::test::ApplyAdapter& val);
+        ::facebook::thrift::test::fixtures::adapter::ApplyAdapter, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
+  PyObject* operator()(const ::facebook::thrift::test::fixtures::adapter::ApplyAdapter& val);
 };
 
 template <>
-struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::detail::TransitiveAdapted, ::facebook__thrift__test__module::NamespaceTag>>
-    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::detail::TransitiveAdapted, ::facebook__thrift__test__module::NamespaceTag>> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::detail::TransitiveAdapted, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::detail::TransitiveAdapted, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
-  ExtractorResult<::facebook::thrift::test::detail::TransitiveAdapted> operator()(PyObject* obj);
+  ExtractorResult<::facebook::thrift::test::fixtures::adapter::detail::TransitiveAdapted> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::detail::TransitiveAdapted, ::facebook__thrift__test__module::NamespaceTag >>
+        ::facebook::thrift::test::fixtures::adapter::detail::TransitiveAdapted, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::detail::TransitiveAdapted, ::facebook__thrift__test__module::NamespaceTag>> {
-  ExtractorResult<::facebook::thrift::test::detail::TransitiveAdapted> operator()(PyObject* obj);
+        ::facebook::thrift::test::fixtures::adapter::detail::TransitiveAdapted, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
+  ExtractorResult<::facebook::thrift::test::fixtures::adapter::detail::TransitiveAdapted> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::detail::TransitiveAdapted, ::facebook__thrift__test__module::NamespaceTag>>
-    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::detail::TransitiveAdapted, ::facebook__thrift__test__module::NamespaceTag>> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::detail::TransitiveAdapted, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::detail::TransitiveAdapted, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
-  PyObject* operator()(const ::facebook::thrift::test::detail::TransitiveAdapted& val);
+  PyObject* operator()(const ::facebook::thrift::test::fixtures::adapter::detail::TransitiveAdapted& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::detail::TransitiveAdapted, ::facebook__thrift__test__module::NamespaceTag>>
+        ::facebook::thrift::test::fixtures::adapter::detail::TransitiveAdapted, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::detail::TransitiveAdapted, ::facebook__thrift__test__module::NamespaceTag>> {
-  PyObject* operator()(const ::facebook::thrift::test::detail::TransitiveAdapted& val);
+        ::facebook::thrift::test::fixtures::adapter::detail::TransitiveAdapted, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
+  PyObject* operator()(const ::facebook::thrift::test::fixtures::adapter::detail::TransitiveAdapted& val);
 };
 
 template <>
-struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::CountingStruct, ::facebook__thrift__test__module::NamespaceTag>>
-    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::CountingStruct, ::facebook__thrift__test__module::NamespaceTag>> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::CountingStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::CountingStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
   static const bool kUsingMarshal = false;
-  ExtractorResult<::facebook::thrift::test::CountingStruct> operator()(PyObject* obj);
+  ExtractorResult<::facebook::thrift::test::fixtures::adapter::CountingStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::CountingStruct, ::facebook__thrift__test__module::NamespaceTag >>
+        ::facebook::thrift::test::fixtures::adapter::CountingStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::CountingStruct, ::facebook__thrift__test__module::NamespaceTag>> {
-  ExtractorResult<::facebook::thrift::test::CountingStruct> operator()(PyObject* obj);
+        ::facebook::thrift::test::fixtures::adapter::CountingStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
+  ExtractorResult<::facebook::thrift::test::fixtures::adapter::CountingStruct> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::CountingStruct, ::facebook__thrift__test__module::NamespaceTag>>
-    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::CountingStruct, ::facebook__thrift__test__module::NamespaceTag>> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::CountingStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::CountingStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
   static const bool kUsingMarshal = false;
-  PyObject* operator()(const ::facebook::thrift::test::CountingStruct& val);
+  PyObject* operator()(const ::facebook::thrift::test::fixtures::adapter::CountingStruct& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::CountingStruct, ::facebook__thrift__test__module::NamespaceTag>>
+        ::facebook::thrift::test::fixtures::adapter::CountingStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::CountingStruct, ::facebook__thrift__test__module::NamespaceTag>> {
-  PyObject* operator()(const ::facebook::thrift::test::CountingStruct& val);
+        ::facebook::thrift::test::fixtures::adapter::CountingStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
+  PyObject* operator()(const ::facebook::thrift::test::fixtures::adapter::CountingStruct& val);
 };
 
 template <>
-struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::Person, ::facebook__thrift__test__module::NamespaceTag>>
-    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::Person, ::facebook__thrift__test__module::NamespaceTag>> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::Person, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::Person, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
-  ExtractorResult<::facebook::thrift::test::Person> operator()(PyObject* obj);
+  ExtractorResult<::facebook::thrift::test::fixtures::adapter::Person> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::Person, ::facebook__thrift__test__module::NamespaceTag >>
+        ::facebook::thrift::test::fixtures::adapter::Person, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::Person, ::facebook__thrift__test__module::NamespaceTag>> {
-  ExtractorResult<::facebook::thrift::test::Person> operator()(PyObject* obj);
+        ::facebook::thrift::test::fixtures::adapter::Person, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
+  ExtractorResult<::facebook::thrift::test::fixtures::adapter::Person> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::Person, ::facebook__thrift__test__module::NamespaceTag>>
-    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::Person, ::facebook__thrift__test__module::NamespaceTag>> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::Person, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::Person, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
-  PyObject* operator()(const ::facebook::thrift::test::Person& val);
+  PyObject* operator()(const ::facebook::thrift::test::fixtures::adapter::Person& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::Person, ::facebook__thrift__test__module::NamespaceTag>>
+        ::facebook::thrift::test::fixtures::adapter::Person, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::Person, ::facebook__thrift__test__module::NamespaceTag>> {
-  PyObject* operator()(const ::facebook::thrift::test::Person& val);
+        ::facebook::thrift::test::fixtures::adapter::Person, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
+  PyObject* operator()(const ::facebook::thrift::test::fixtures::adapter::Person& val);
 };
 
 template <>
-struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::Person2, ::facebook__thrift__test__module::NamespaceTag>>
-    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::Person2, ::facebook__thrift__test__module::NamespaceTag>> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::Person2, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::Person2, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
-  ExtractorResult<::facebook::thrift::test::Person2> operator()(PyObject* obj);
+  ExtractorResult<::facebook::thrift::test::fixtures::adapter::Person2> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::Person2, ::facebook__thrift__test__module::NamespaceTag >>
+        ::facebook::thrift::test::fixtures::adapter::Person2, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::Person2, ::facebook__thrift__test__module::NamespaceTag>> {
-  ExtractorResult<::facebook::thrift::test::Person2> operator()(PyObject* obj);
+        ::facebook::thrift::test::fixtures::adapter::Person2, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
+  ExtractorResult<::facebook::thrift::test::fixtures::adapter::Person2> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::Person2, ::facebook__thrift__test__module::NamespaceTag>>
-    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::Person2, ::facebook__thrift__test__module::NamespaceTag>> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::Person2, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::Person2, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
-  PyObject* operator()(const ::facebook::thrift::test::Person2& val);
+  PyObject* operator()(const ::facebook::thrift::test::fixtures::adapter::Person2& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::Person2, ::facebook__thrift__test__module::NamespaceTag>>
+        ::facebook::thrift::test::fixtures::adapter::Person2, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::Person2, ::facebook__thrift__test__module::NamespaceTag>> {
-  PyObject* operator()(const ::facebook::thrift::test::Person2& val);
+        ::facebook::thrift::test::fixtures::adapter::Person2, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
+  PyObject* operator()(const ::facebook::thrift::test::fixtures::adapter::Person2& val);
 };
 
 template <>
-struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::Renamed, ::facebook__thrift__test__module::NamespaceTag>>
-    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::Renamed, ::facebook__thrift__test__module::NamespaceTag>> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::Renamed, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::Renamed, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
   static const bool kUsingMarshal = false;
-  ExtractorResult<::facebook::thrift::test::Renamed> operator()(PyObject* obj);
+  ExtractorResult<::facebook::thrift::test::fixtures::adapter::Renamed> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::Renamed, ::facebook__thrift__test__module::NamespaceTag >>
+        ::facebook::thrift::test::fixtures::adapter::Renamed, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::Renamed, ::facebook__thrift__test__module::NamespaceTag>> {
-  ExtractorResult<::facebook::thrift::test::Renamed> operator()(PyObject* obj);
+        ::facebook::thrift::test::fixtures::adapter::Renamed, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
+  ExtractorResult<::facebook::thrift::test::fixtures::adapter::Renamed> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::Renamed, ::facebook__thrift__test__module::NamespaceTag>>
-    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::Renamed, ::facebook__thrift__test__module::NamespaceTag>> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::Renamed, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::Renamed, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
   static const bool kUsingMarshal = false;
-  PyObject* operator()(const ::facebook::thrift::test::Renamed& val);
+  PyObject* operator()(const ::facebook::thrift::test::fixtures::adapter::Renamed& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::Renamed, ::facebook__thrift__test__module::NamespaceTag>>
+        ::facebook::thrift::test::fixtures::adapter::Renamed, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::Renamed, ::facebook__thrift__test__module::NamespaceTag>> {
-  PyObject* operator()(const ::facebook::thrift::test::Renamed& val);
+        ::facebook::thrift::test::fixtures::adapter::Renamed, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
+  PyObject* operator()(const ::facebook::thrift::test::fixtures::adapter::Renamed& val);
 };
 
 template <>
-struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::Color, ::facebook__thrift__test__module::NamespaceTag>>
-    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::Color, ::facebook__thrift__test__module::NamespaceTag>> {
-  ExtractorResult<::facebook::thrift::test::Color> operator()(PyObject* obj);
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::Color, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::Color, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
+  ExtractorResult<::facebook::thrift::test::fixtures::adapter::Color> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
 
 template <>
-struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::Color, ::facebook__thrift__test__module::NamespaceTag>> {
-  PyObject* operator()(::facebook::thrift::test::Color val);
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::Color, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
+  PyObject* operator()(::facebook::thrift::test::fixtures::adapter::Color val);
 };
 
 template <>
-struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::ThriftAdaptedEnum, ::facebook__thrift__test__module::NamespaceTag>>
-    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::ThriftAdaptedEnum, ::facebook__thrift__test__module::NamespaceTag>> {
-  ExtractorResult<::facebook::thrift::test::ThriftAdaptedEnum> operator()(PyObject* obj);
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::ThriftAdaptedEnum, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::ThriftAdaptedEnum, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
+  ExtractorResult<::facebook::thrift::test::fixtures::adapter::ThriftAdaptedEnum> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
 
 template <>
-struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::ThriftAdaptedEnum, ::facebook__thrift__test__module::NamespaceTag>> {
-  PyObject* operator()(::facebook::thrift::test::ThriftAdaptedEnum val);
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::ThriftAdaptedEnum, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> {
+  PyObject* operator()(::facebook::thrift::test::fixtures::adapter::ThriftAdaptedEnum val);
 };
 
 } // namespace apache::thrift::python::capi

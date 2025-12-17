@@ -14,7 +14,7 @@ namespace thrift {
 namespace detail {
 
 template <>
-struct ForEachField<::facebook::thrift::test::CustomException> {
+struct ForEachField<::facebook::thrift::test::fixtures::service_schema::CustomException> {
   template <typename F, typename... T>
   void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).name_ref()...);

@@ -49,25 +49,25 @@ APACHE_THRIFT_DEFINE_ACCESSOR(access_optional_boxed_field);
 // BEGIN declare_enums
 // END declare_enums
 // BEGIN forward_declare
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::field_interceptor {
 class InterceptedFields;
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::field_interceptor
 // END forward_declare
 namespace apache::thrift::detail::annotation {
 } // namespace apache::thrift::detail::annotation
 
 namespace apache::thrift::detail::qualifier {
 template<>
-struct is_cpp_ref_field_optional<::facebook::thrift::test::InterceptedFields,::apache::thrift::type::field_id<3>> : std::true_type{};
+struct is_cpp_ref_field_optional<::facebook::thrift::test::fixtures::field_interceptor::InterceptedFields,::apache::thrift::type::field_id<3>> : std::true_type{};
 template<>
-struct is_cpp_ref_field_optional<::facebook::thrift::test::InterceptedFields,::apache::thrift::type::field_id<5>> : std::true_type{};
+struct is_cpp_ref_field_optional<::facebook::thrift::test::fixtures::field_interceptor::InterceptedFields,::apache::thrift::type::field_id<5>> : std::true_type{};
 template<>
-struct is_cpp_ref_field_optional<::facebook::thrift::test::InterceptedFields,::apache::thrift::type::field_id<6>> : std::true_type{};
+struct is_cpp_ref_field_optional<::facebook::thrift::test::fixtures::field_interceptor::InterceptedFields,::apache::thrift::type::field_id<6>> : std::true_type{};
 } // namespace apache::thrift::detail::qualifier
 
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::field_interceptor {
 using ::apache::thrift::detail::operator!=;
 using ::apache::thrift::detail::operator>;
 using ::apache::thrift::detail::operator<=;
@@ -83,7 +83,7 @@ class InterceptedFields final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
-  static constexpr folly::cstring_view __fbthrift_thrift_uri = "facebook.com/thrift/test/InterceptedFields";
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = "facebook.com/thrift/test/fixtures/field_interceptor/InterceptedFields";
   static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   static std::string_view __fbthrift_get_class_name();
   template <class ...>
@@ -456,12 +456,12 @@ unsigned long InterceptedFields::read(Protocol_* iprot) {
 }
 
 
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::field_interceptor
 
 namespace apache::thrift::detail {
-template <> struct TSchemaAssociation<::facebook::thrift::test::InterceptedFields, false> {
+template <> struct TSchemaAssociation<::facebook::thrift::test::fixtures::field_interceptor::InterceptedFields, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = -6573218540702524643;
-  static constexpr ::std::string_view definitionKey = {"\xc9\xa5\x23\x6e\xa3\x81\x1d\xb7\x78\xdb\x56\x1d\x43\xd3\x63\x8f", 16};
+  static constexpr int64_t programId = 8125577055159619761;
+  static constexpr ::std::string_view definitionKey = {"\xeb\xd5\xb5\x4d\xc6\x09\x4c\x74\x82\xa4\x4f\xb0\xbe\x4f\x05\x9a", 16};
 };
 } // namespace apache::thrift::detail

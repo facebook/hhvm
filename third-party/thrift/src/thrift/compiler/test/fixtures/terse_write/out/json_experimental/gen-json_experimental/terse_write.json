@@ -9,7 +9,7 @@
   "package": {
     "domain_prefix": "facebook",
     "domain_suffix": "com",
-    "path": "thrift/test/terse_write",
+    "path": "thrift/test/fixtures/terse_write",
     "filename": "terse_write"
   },
 

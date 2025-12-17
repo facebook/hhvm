@@ -14,7 +14,7 @@
 
 
 
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::field_interceptor {
 
 std::string_view InterceptedFields::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -106,11 +106,11 @@ void swap([[maybe_unused]] InterceptedFields& a, [[maybe_unused]] InterceptedFie
 }
 
 
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::field_interceptor
 
-namespace facebook::thrift::test { namespace {
+namespace facebook::thrift::test::fixtures::field_interceptor { namespace {
 [[maybe_unused]] FOLLY_ERASE void validateAdapters() {
 }
-}} // namespace facebook::thrift::test
+}} // namespace facebook::thrift::test::fixtures::field_interceptor
 namespace apache::thrift::detail::annotation {
 }

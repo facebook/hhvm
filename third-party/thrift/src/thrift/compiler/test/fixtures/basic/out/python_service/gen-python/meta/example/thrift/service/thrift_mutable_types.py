@@ -43,7 +43,7 @@ class EchoRequest(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
 
     @staticmethod
     def __get_thrift_uri__():
-        return None
+        return "test.dev/fixtures/basic/EchoRequest"
 
     @staticmethod
     def __get_metadata__():
@@ -99,7 +99,7 @@ class EchoResponse(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
 
     @staticmethod
     def __get_thrift_uri__():
-        return None
+        return "test.dev/fixtures/basic/EchoResponse"
 
     @staticmethod
     def __get_metadata__():
@@ -158,7 +158,7 @@ class WhisperException(metaclass=_fbthrift_python_mutable_exceptions.MutableGene
 
     @staticmethod
     def __get_thrift_uri__():
-        return None
+        return "test.dev/fixtures/basic/WhisperException"
 
     @staticmethod
     def __get_metadata__():

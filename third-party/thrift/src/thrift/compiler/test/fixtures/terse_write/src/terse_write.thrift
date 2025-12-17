@@ -19,7 +19,7 @@ include "thrift/annotation/hack.thrift"
 include "thrift/annotation/thrift.thrift"
 
 @thrift.Experimental
-package "facebook.com/thrift/test/terse_write"
+package "facebook.com/thrift/test/fixtures/terse_write"
 
 enum MyEnum {
   ME0 = 0,

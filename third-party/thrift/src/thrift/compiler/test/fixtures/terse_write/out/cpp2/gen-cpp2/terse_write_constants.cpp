@@ -10,19 +10,19 @@
 #include <thrift/lib/cpp2/gen/module_constants_cpp.h>
 
 
-namespace facebook::thrift::test::terse_write {
+namespace facebook::thrift::test::fixtures::terse_write {
 namespace terse_write_constants {
 
 
-::std::string_view _fbthrift_schema_1b60768cd8997ee0() {
+::std::string_view _fbthrift_schema_340b53b42d4cb6a7() {
   return "";
 }
-::folly::Range<const ::std::string_view*> _fbthrift_schema_1b60768cd8997ee0_includes() {
+::folly::Range<const ::std::string_view*> _fbthrift_schema_340b53b42d4cb6a7_includes() {
   return {};
 }
-::folly::Range<const ::std::string_view*> _fbthrift_schema_1b60768cd8997ee0_uris() {
+::folly::Range<const ::std::string_view*> _fbthrift_schema_340b53b42d4cb6a7_uris() {
   return {};
 }
 
 } // namespace terse_write_constants
-} // namespace facebook::thrift::test::terse_write
+} // namespace facebook::thrift::test::fixtures::terse_write

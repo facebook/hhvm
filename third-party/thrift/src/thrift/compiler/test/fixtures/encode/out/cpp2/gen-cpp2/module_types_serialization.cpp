@@ -14,11 +14,11 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
-void TccStructTraits<::facebook::thrift::test::Foo>::translateFieldName(
+void TccStructTraits<::facebook::thrift::test::fixtures::encode::Foo>::translateFieldName(
     std::string_view _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::Foo>;
+  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::fixtures::encode::Foo>;
   static const st::translate_field_name_table table{
       data::fields_size,
       data::fields_names.data(),
@@ -35,11 +35,11 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
-void TccStructTraits<::facebook::thrift::test::Bar>::translateFieldName(
+void TccStructTraits<::facebook::thrift::test::fixtures::encode::Bar>::translateFieldName(
     std::string_view _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::Bar>;
+  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::fixtures::encode::Bar>;
   static const st::translate_field_name_table table{
       data::fields_size,
       data::fields_names.data(),
@@ -56,11 +56,11 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
-void TccStructTraits<::facebook::thrift::test::Baz>::translateFieldName(
+void TccStructTraits<::facebook::thrift::test::fixtures::encode::Baz>::translateFieldName(
     std::string_view _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::Baz>;
+  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::fixtures::encode::Baz>;
   static const st::translate_field_name_table table{
       data::fields_size,
       data::fields_names.data(),
@@ -77,11 +77,11 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
-void TccStructTraits<::facebook::thrift::test::OpEncodeStruct>::translateFieldName(
+void TccStructTraits<::facebook::thrift::test::fixtures::encode::OpEncodeStruct>::translateFieldName(
     std::string_view _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::OpEncodeStruct>;
+  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::fixtures::encode::OpEncodeStruct>;
   static const st::translate_field_name_table table{
       data::fields_size,
       data::fields_names.data(),
@@ -94,7 +94,7 @@ void TccStructTraits<::facebook::thrift::test::OpEncodeStruct>::translateFieldNa
 } // namespace thrift
 } // namespace apache
 
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::encode {
 
 
 
@@ -108,4 +108,4 @@ namespace facebook::thrift::test {
 
 
 
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::encode

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package "facebook.com/thrift/compiler/test/fixtures/default_values_rectification"
+package "facebook.com/thrift/compiler/test/fixtures/default_values_rectification_before"
 
 include "thrift/annotation/thrift.thrift"
 

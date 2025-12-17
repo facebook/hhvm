@@ -12,7 +12,7 @@ namespace thrift {
 namespace compiler {
 namespace test {
 namespace fixtures {
-namespace default_values_rectification {
+namespace default_values_rectification_before {
 ::apache::thrift::metadata::ThriftMetadata module_getThriftModuleMetadata() {
   ::apache::thrift::metadata::ThriftServiceMetadataResponse response;
   ::apache::thrift::metadata::ThriftMetadata& metadata = *response.metadata();
@@ -25,4 +25,4 @@ namespace default_values_rectification {
 } // namespace compiler
 } // namespace test
 } // namespace fixtures
-} // namespace default_values_rectification
+} // namespace default_values_rectification_before

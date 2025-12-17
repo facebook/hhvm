@@ -14,240 +14,240 @@
 
 #include <thrift/compiler/test/fixtures/terse_write/gen-cpp2/terse_write_types.h>
 
-namespace facebook__thrift__test__terse_write {
+namespace facebook__thrift__test__fixtures__terse_write {
 
 struct NamespaceTag {};
 
-} // namespace facebook__thrift__test__terse_write
+} // namespace facebook__thrift__test__fixtures__terse_write
 
 namespace apache::thrift::python::capi {
 template <>
-struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::terse_write::MyStruct, ::facebook__thrift__test__terse_write::NamespaceTag>>
-    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::terse_write::MyStruct, ::facebook__thrift__test__terse_write::NamespaceTag>> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::terse_write::MyStruct, ::facebook__thrift__test__fixtures__terse_write::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::terse_write::MyStruct, ::facebook__thrift__test__fixtures__terse_write::NamespaceTag>> {
   static const bool kUsingMarshal = true;
-  ExtractorResult<::facebook::thrift::test::terse_write::MyStruct> operator()(PyObject* obj);
+  ExtractorResult<::facebook::thrift::test::fixtures::terse_write::MyStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::terse_write::MyStruct, ::facebook__thrift__test__terse_write::NamespaceTag >>
+        ::facebook::thrift::test::fixtures::terse_write::MyStruct, ::facebook__thrift__test__fixtures__terse_write::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::terse_write::MyStruct, ::facebook__thrift__test__terse_write::NamespaceTag>> {
-  ExtractorResult<::facebook::thrift::test::terse_write::MyStruct> operator()(PyObject* obj);
+        ::facebook::thrift::test::fixtures::terse_write::MyStruct, ::facebook__thrift__test__fixtures__terse_write::NamespaceTag>> {
+  ExtractorResult<::facebook::thrift::test::fixtures::terse_write::MyStruct> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::terse_write::MyStruct, ::facebook__thrift__test__terse_write::NamespaceTag>>
-    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::terse_write::MyStruct, ::facebook__thrift__test__terse_write::NamespaceTag>> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::terse_write::MyStruct, ::facebook__thrift__test__fixtures__terse_write::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::terse_write::MyStruct, ::facebook__thrift__test__fixtures__terse_write::NamespaceTag>> {
   static const bool kUsingMarshal = true;
-  PyObject* operator()(const ::facebook::thrift::test::terse_write::MyStruct& val);
+  PyObject* operator()(const ::facebook::thrift::test::fixtures::terse_write::MyStruct& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::terse_write::MyStruct, ::facebook__thrift__test__terse_write::NamespaceTag>>
+        ::facebook::thrift::test::fixtures::terse_write::MyStruct, ::facebook__thrift__test__fixtures__terse_write::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::terse_write::MyStruct, ::facebook__thrift__test__terse_write::NamespaceTag>> {
-  PyObject* operator()(const ::facebook::thrift::test::terse_write::MyStruct& val);
+        ::facebook::thrift::test::fixtures::terse_write::MyStruct, ::facebook__thrift__test__fixtures__terse_write::NamespaceTag>> {
+  PyObject* operator()(const ::facebook::thrift::test::fixtures::terse_write::MyStruct& val);
 };
 
 template <>
-struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::terse_write::MyUnion, ::facebook__thrift__test__terse_write::NamespaceTag>>
-    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::terse_write::MyUnion, ::facebook__thrift__test__terse_write::NamespaceTag>> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::terse_write::MyUnion, ::facebook__thrift__test__fixtures__terse_write::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::terse_write::MyUnion, ::facebook__thrift__test__fixtures__terse_write::NamespaceTag>> {
   static const bool kUsingMarshal = true;
-  ExtractorResult<::facebook::thrift::test::terse_write::MyUnion> operator()(PyObject* obj);
+  ExtractorResult<::facebook::thrift::test::fixtures::terse_write::MyUnion> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::terse_write::MyUnion, ::facebook__thrift__test__terse_write::NamespaceTag >>
+        ::facebook::thrift::test::fixtures::terse_write::MyUnion, ::facebook__thrift__test__fixtures__terse_write::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::terse_write::MyUnion, ::facebook__thrift__test__terse_write::NamespaceTag>> {
-  ExtractorResult<::facebook::thrift::test::terse_write::MyUnion> operator()(PyObject* obj);
+        ::facebook::thrift::test::fixtures::terse_write::MyUnion, ::facebook__thrift__test__fixtures__terse_write::NamespaceTag>> {
+  ExtractorResult<::facebook::thrift::test::fixtures::terse_write::MyUnion> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::terse_write::MyUnion, ::facebook__thrift__test__terse_write::NamespaceTag>>
-    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::terse_write::MyUnion, ::facebook__thrift__test__terse_write::NamespaceTag>> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::terse_write::MyUnion, ::facebook__thrift__test__fixtures__terse_write::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::terse_write::MyUnion, ::facebook__thrift__test__fixtures__terse_write::NamespaceTag>> {
   static const bool kUsingMarshal = true;
-  PyObject* operator()(const ::facebook::thrift::test::terse_write::MyUnion& val);
+  PyObject* operator()(const ::facebook::thrift::test::fixtures::terse_write::MyUnion& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::terse_write::MyUnion, ::facebook__thrift__test__terse_write::NamespaceTag>>
+        ::facebook::thrift::test::fixtures::terse_write::MyUnion, ::facebook__thrift__test__fixtures__terse_write::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::terse_write::MyUnion, ::facebook__thrift__test__terse_write::NamespaceTag>> {
-  PyObject* operator()(const ::facebook::thrift::test::terse_write::MyUnion& val);
+        ::facebook::thrift::test::fixtures::terse_write::MyUnion, ::facebook__thrift__test__fixtures__terse_write::NamespaceTag>> {
+  PyObject* operator()(const ::facebook::thrift::test::fixtures::terse_write::MyUnion& val);
 };
 
 template <>
-struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::terse_write::MyStructWithCustomDefault, ::facebook__thrift__test__terse_write::NamespaceTag>>
-    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::terse_write::MyStructWithCustomDefault, ::facebook__thrift__test__terse_write::NamespaceTag>> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::terse_write::MyStructWithCustomDefault, ::facebook__thrift__test__fixtures__terse_write::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::terse_write::MyStructWithCustomDefault, ::facebook__thrift__test__fixtures__terse_write::NamespaceTag>> {
   static const bool kUsingMarshal = true;
-  ExtractorResult<::facebook::thrift::test::terse_write::MyStructWithCustomDefault> operator()(PyObject* obj);
+  ExtractorResult<::facebook::thrift::test::fixtures::terse_write::MyStructWithCustomDefault> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::terse_write::MyStructWithCustomDefault, ::facebook__thrift__test__terse_write::NamespaceTag >>
+        ::facebook::thrift::test::fixtures::terse_write::MyStructWithCustomDefault, ::facebook__thrift__test__fixtures__terse_write::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::terse_write::MyStructWithCustomDefault, ::facebook__thrift__test__terse_write::NamespaceTag>> {
-  ExtractorResult<::facebook::thrift::test::terse_write::MyStructWithCustomDefault> operator()(PyObject* obj);
+        ::facebook::thrift::test::fixtures::terse_write::MyStructWithCustomDefault, ::facebook__thrift__test__fixtures__terse_write::NamespaceTag>> {
+  ExtractorResult<::facebook::thrift::test::fixtures::terse_write::MyStructWithCustomDefault> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::terse_write::MyStructWithCustomDefault, ::facebook__thrift__test__terse_write::NamespaceTag>>
-    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::terse_write::MyStructWithCustomDefault, ::facebook__thrift__test__terse_write::NamespaceTag>> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::terse_write::MyStructWithCustomDefault, ::facebook__thrift__test__fixtures__terse_write::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::terse_write::MyStructWithCustomDefault, ::facebook__thrift__test__fixtures__terse_write::NamespaceTag>> {
   static const bool kUsingMarshal = true;
-  PyObject* operator()(const ::facebook::thrift::test::terse_write::MyStructWithCustomDefault& val);
+  PyObject* operator()(const ::facebook::thrift::test::fixtures::terse_write::MyStructWithCustomDefault& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::terse_write::MyStructWithCustomDefault, ::facebook__thrift__test__terse_write::NamespaceTag>>
+        ::facebook::thrift::test::fixtures::terse_write::MyStructWithCustomDefault, ::facebook__thrift__test__fixtures__terse_write::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::terse_write::MyStructWithCustomDefault, ::facebook__thrift__test__terse_write::NamespaceTag>> {
-  PyObject* operator()(const ::facebook::thrift::test::terse_write::MyStructWithCustomDefault& val);
+        ::facebook::thrift::test::fixtures::terse_write::MyStructWithCustomDefault, ::facebook__thrift__test__fixtures__terse_write::NamespaceTag>> {
+  PyObject* operator()(const ::facebook::thrift::test::fixtures::terse_write::MyStructWithCustomDefault& val);
 };
 
 template <>
-struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::terse_write::StructLevelTerseStruct, ::facebook__thrift__test__terse_write::NamespaceTag>>
-    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::terse_write::StructLevelTerseStruct, ::facebook__thrift__test__terse_write::NamespaceTag>> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::terse_write::StructLevelTerseStruct, ::facebook__thrift__test__fixtures__terse_write::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::terse_write::StructLevelTerseStruct, ::facebook__thrift__test__fixtures__terse_write::NamespaceTag>> {
   static const bool kUsingMarshal = true;
-  ExtractorResult<::facebook::thrift::test::terse_write::StructLevelTerseStruct> operator()(PyObject* obj);
+  ExtractorResult<::facebook::thrift::test::fixtures::terse_write::StructLevelTerseStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::terse_write::StructLevelTerseStruct, ::facebook__thrift__test__terse_write::NamespaceTag >>
+        ::facebook::thrift::test::fixtures::terse_write::StructLevelTerseStruct, ::facebook__thrift__test__fixtures__terse_write::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::terse_write::StructLevelTerseStruct, ::facebook__thrift__test__terse_write::NamespaceTag>> {
-  ExtractorResult<::facebook::thrift::test::terse_write::StructLevelTerseStruct> operator()(PyObject* obj);
+        ::facebook::thrift::test::fixtures::terse_write::StructLevelTerseStruct, ::facebook__thrift__test__fixtures__terse_write::NamespaceTag>> {
+  ExtractorResult<::facebook::thrift::test::fixtures::terse_write::StructLevelTerseStruct> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::terse_write::StructLevelTerseStruct, ::facebook__thrift__test__terse_write::NamespaceTag>>
-    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::terse_write::StructLevelTerseStruct, ::facebook__thrift__test__terse_write::NamespaceTag>> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::terse_write::StructLevelTerseStruct, ::facebook__thrift__test__fixtures__terse_write::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::terse_write::StructLevelTerseStruct, ::facebook__thrift__test__fixtures__terse_write::NamespaceTag>> {
   static const bool kUsingMarshal = true;
-  PyObject* operator()(const ::facebook::thrift::test::terse_write::StructLevelTerseStruct& val);
+  PyObject* operator()(const ::facebook::thrift::test::fixtures::terse_write::StructLevelTerseStruct& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::terse_write::StructLevelTerseStruct, ::facebook__thrift__test__terse_write::NamespaceTag>>
+        ::facebook::thrift::test::fixtures::terse_write::StructLevelTerseStruct, ::facebook__thrift__test__fixtures__terse_write::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::terse_write::StructLevelTerseStruct, ::facebook__thrift__test__terse_write::NamespaceTag>> {
-  PyObject* operator()(const ::facebook::thrift::test::terse_write::StructLevelTerseStruct& val);
+        ::facebook::thrift::test::fixtures::terse_write::StructLevelTerseStruct, ::facebook__thrift__test__fixtures__terse_write::NamespaceTag>> {
+  PyObject* operator()(const ::facebook::thrift::test::fixtures::terse_write::StructLevelTerseStruct& val);
 };
 
 template <>
-struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::terse_write::FieldLevelTerseStruct, ::facebook__thrift__test__terse_write::NamespaceTag>>
-    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::terse_write::FieldLevelTerseStruct, ::facebook__thrift__test__terse_write::NamespaceTag>> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::terse_write::FieldLevelTerseStruct, ::facebook__thrift__test__fixtures__terse_write::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::terse_write::FieldLevelTerseStruct, ::facebook__thrift__test__fixtures__terse_write::NamespaceTag>> {
   static const bool kUsingMarshal = true;
-  ExtractorResult<::facebook::thrift::test::terse_write::FieldLevelTerseStruct> operator()(PyObject* obj);
+  ExtractorResult<::facebook::thrift::test::fixtures::terse_write::FieldLevelTerseStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::terse_write::FieldLevelTerseStruct, ::facebook__thrift__test__terse_write::NamespaceTag >>
+        ::facebook::thrift::test::fixtures::terse_write::FieldLevelTerseStruct, ::facebook__thrift__test__fixtures__terse_write::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::terse_write::FieldLevelTerseStruct, ::facebook__thrift__test__terse_write::NamespaceTag>> {
-  ExtractorResult<::facebook::thrift::test::terse_write::FieldLevelTerseStruct> operator()(PyObject* obj);
+        ::facebook::thrift::test::fixtures::terse_write::FieldLevelTerseStruct, ::facebook__thrift__test__fixtures__terse_write::NamespaceTag>> {
+  ExtractorResult<::facebook::thrift::test::fixtures::terse_write::FieldLevelTerseStruct> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::terse_write::FieldLevelTerseStruct, ::facebook__thrift__test__terse_write::NamespaceTag>>
-    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::terse_write::FieldLevelTerseStruct, ::facebook__thrift__test__terse_write::NamespaceTag>> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::terse_write::FieldLevelTerseStruct, ::facebook__thrift__test__fixtures__terse_write::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::terse_write::FieldLevelTerseStruct, ::facebook__thrift__test__fixtures__terse_write::NamespaceTag>> {
   static const bool kUsingMarshal = true;
-  PyObject* operator()(const ::facebook::thrift::test::terse_write::FieldLevelTerseStruct& val);
+  PyObject* operator()(const ::facebook::thrift::test::fixtures::terse_write::FieldLevelTerseStruct& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::terse_write::FieldLevelTerseStruct, ::facebook__thrift__test__terse_write::NamespaceTag>>
+        ::facebook::thrift::test::fixtures::terse_write::FieldLevelTerseStruct, ::facebook__thrift__test__fixtures__terse_write::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::terse_write::FieldLevelTerseStruct, ::facebook__thrift__test__terse_write::NamespaceTag>> {
-  PyObject* operator()(const ::facebook::thrift::test::terse_write::FieldLevelTerseStruct& val);
+        ::facebook::thrift::test::fixtures::terse_write::FieldLevelTerseStruct, ::facebook__thrift__test__fixtures__terse_write::NamespaceTag>> {
+  PyObject* operator()(const ::facebook::thrift::test::fixtures::terse_write::FieldLevelTerseStruct& val);
 };
 
 template <>
-struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::terse_write::AdaptedFields, ::facebook__thrift__test__terse_write::NamespaceTag>>
-    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::terse_write::AdaptedFields, ::facebook__thrift__test__terse_write::NamespaceTag>> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::terse_write::AdaptedFields, ::facebook__thrift__test__fixtures__terse_write::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::terse_write::AdaptedFields, ::facebook__thrift__test__fixtures__terse_write::NamespaceTag>> {
   static const bool kUsingMarshal = false;
-  ExtractorResult<::facebook::thrift::test::terse_write::AdaptedFields> operator()(PyObject* obj);
+  ExtractorResult<::facebook::thrift::test::fixtures::terse_write::AdaptedFields> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::terse_write::AdaptedFields, ::facebook__thrift__test__terse_write::NamespaceTag >>
+        ::facebook::thrift::test::fixtures::terse_write::AdaptedFields, ::facebook__thrift__test__fixtures__terse_write::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::terse_write::AdaptedFields, ::facebook__thrift__test__terse_write::NamespaceTag>> {
-  ExtractorResult<::facebook::thrift::test::terse_write::AdaptedFields> operator()(PyObject* obj);
+        ::facebook::thrift::test::fixtures::terse_write::AdaptedFields, ::facebook__thrift__test__fixtures__terse_write::NamespaceTag>> {
+  ExtractorResult<::facebook::thrift::test::fixtures::terse_write::AdaptedFields> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::terse_write::AdaptedFields, ::facebook__thrift__test__terse_write::NamespaceTag>>
-    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::terse_write::AdaptedFields, ::facebook__thrift__test__terse_write::NamespaceTag>> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::terse_write::AdaptedFields, ::facebook__thrift__test__fixtures__terse_write::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::terse_write::AdaptedFields, ::facebook__thrift__test__fixtures__terse_write::NamespaceTag>> {
   static const bool kUsingMarshal = false;
-  PyObject* operator()(const ::facebook::thrift::test::terse_write::AdaptedFields& val);
+  PyObject* operator()(const ::facebook::thrift::test::fixtures::terse_write::AdaptedFields& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::terse_write::AdaptedFields, ::facebook__thrift__test__terse_write::NamespaceTag>>
+        ::facebook::thrift::test::fixtures::terse_write::AdaptedFields, ::facebook__thrift__test__fixtures__terse_write::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::terse_write::AdaptedFields, ::facebook__thrift__test__terse_write::NamespaceTag>> {
-  PyObject* operator()(const ::facebook::thrift::test::terse_write::AdaptedFields& val);
+        ::facebook::thrift::test::fixtures::terse_write::AdaptedFields, ::facebook__thrift__test__fixtures__terse_write::NamespaceTag>> {
+  PyObject* operator()(const ::facebook::thrift::test::fixtures::terse_write::AdaptedFields& val);
 };
 
 template <>
-struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::terse_write::TerseException, ::facebook__thrift__test__terse_write::NamespaceTag>>
-    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::terse_write::TerseException, ::facebook__thrift__test__terse_write::NamespaceTag>> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::terse_write::TerseException, ::facebook__thrift__test__fixtures__terse_write::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::terse_write::TerseException, ::facebook__thrift__test__fixtures__terse_write::NamespaceTag>> {
   static const bool kUsingMarshal = true;
-  ExtractorResult<::facebook::thrift::test::terse_write::TerseException> operator()(PyObject* obj);
+  ExtractorResult<::facebook::thrift::test::fixtures::terse_write::TerseException> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::terse_write::TerseException, ::facebook__thrift__test__terse_write::NamespaceTag >>
+        ::facebook::thrift::test::fixtures::terse_write::TerseException, ::facebook__thrift__test__fixtures__terse_write::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::terse_write::TerseException, ::facebook__thrift__test__terse_write::NamespaceTag>> {
-  ExtractorResult<::facebook::thrift::test::terse_write::TerseException> operator()(PyObject* obj);
+        ::facebook::thrift::test::fixtures::terse_write::TerseException, ::facebook__thrift__test__fixtures__terse_write::NamespaceTag>> {
+  ExtractorResult<::facebook::thrift::test::fixtures::terse_write::TerseException> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::terse_write::TerseException, ::facebook__thrift__test__terse_write::NamespaceTag>>
-    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::terse_write::TerseException, ::facebook__thrift__test__terse_write::NamespaceTag>> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::terse_write::TerseException, ::facebook__thrift__test__fixtures__terse_write::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::terse_write::TerseException, ::facebook__thrift__test__fixtures__terse_write::NamespaceTag>> {
   static const bool kUsingMarshal = true;
-  PyObject* operator()(const ::facebook::thrift::test::terse_write::TerseException& val);
+  PyObject* operator()(const ::facebook::thrift::test::fixtures::terse_write::TerseException& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::terse_write::TerseException, ::facebook__thrift__test__terse_write::NamespaceTag>>
+        ::facebook::thrift::test::fixtures::terse_write::TerseException, ::facebook__thrift__test__fixtures__terse_write::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::terse_write::TerseException, ::facebook__thrift__test__terse_write::NamespaceTag>> {
-  PyObject* operator()(const ::facebook::thrift::test::terse_write::TerseException& val);
+        ::facebook::thrift::test::fixtures::terse_write::TerseException, ::facebook__thrift__test__fixtures__terse_write::NamespaceTag>> {
+  PyObject* operator()(const ::facebook::thrift::test::fixtures::terse_write::TerseException& val);
 };
 
 template <>
-struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::terse_write::MyEnum, ::facebook__thrift__test__terse_write::NamespaceTag>>
-    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::terse_write::MyEnum, ::facebook__thrift__test__terse_write::NamespaceTag>> {
-  ExtractorResult<::facebook::thrift::test::terse_write::MyEnum> operator()(PyObject* obj);
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::terse_write::MyEnum, ::facebook__thrift__test__fixtures__terse_write::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::terse_write::MyEnum, ::facebook__thrift__test__fixtures__terse_write::NamespaceTag>> {
+  ExtractorResult<::facebook::thrift::test::fixtures::terse_write::MyEnum> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
 
 template <>
-struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::terse_write::MyEnum, ::facebook__thrift__test__terse_write::NamespaceTag>> {
-  PyObject* operator()(::facebook::thrift::test::terse_write::MyEnum val);
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::terse_write::MyEnum, ::facebook__thrift__test__fixtures__terse_write::NamespaceTag>> {
+  PyObject* operator()(::facebook::thrift::test::fixtures::terse_write::MyEnum val);
 };
 
 } // namespace apache::thrift::python::capi

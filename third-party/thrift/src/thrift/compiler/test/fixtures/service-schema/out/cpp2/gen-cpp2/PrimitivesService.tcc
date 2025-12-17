@@ -10,11 +10,11 @@
 
 #include <thrift/lib/cpp2/gen/service_tcc.h>
 
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::service_schema {
 typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, ::apache::thrift::type_class::integral, ::std::int64_t*>, apache::thrift::FieldData<2, ::apache::thrift::type_class::integral, ::std::int64_t*>> PrimitivesService_init_pargs;
 typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::integral, ::std::int64_t*>> PrimitivesService_init_presult;
 typedef apache::thrift::ThriftPresult<false> PrimitivesService_method_that_throws_pargs;
-typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::enumeration, ::facebook::thrift::test::Result*>, apache::thrift::FieldData<1, ::apache::thrift::type_class::structure, ::facebook::thrift::test::CustomException>> PrimitivesService_method_that_throws_presult;
+typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::enumeration, ::facebook::thrift::test::fixtures::service_schema::Result*>, apache::thrift::FieldData<1, ::apache::thrift::type_class::structure, ::facebook::thrift::test::fixtures::service_schema::CustomException>> PrimitivesService_method_that_throws_presult;
 typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, ::apache::thrift::type_class::integral, ::std::int64_t*>, apache::thrift::FieldData<2, ::apache::thrift::type_class::structure, ::cpp2::I*>> PrimitivesService_return_void_method_pargs;
 typedef apache::thrift::ThriftPresult<true> PrimitivesService_return_void_method_presult;
 //
@@ -113,7 +113,7 @@ void PrimitivesServiceAsyncProcessor::executeRequest_init(
       /* .qualifiedMethodName =*/ "PrimitivesService.init"};
   apache::thrift::HandlerCallback<::std::int64_t>::DecoratorAfterCallback decoratorCallback{
     static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<::facebook::thrift::test::PrimitivesService>::fbthrift_invoke_decorator_after_init};
+    apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>::fbthrift_invoke_decorator_after_init};
  auto callback =
       apache::thrift::HandlerCallbackPtr<::std::int64_t>::make(
           apache::thrift::detail::ServerRequestHelper::request(
@@ -175,7 +175,7 @@ template <class ProtocolIn_, class ProtocolOut_>
     apache::thrift::ContextStack* ctx,
     ::std::int64_t const& _return) {
   ProtocolOut_ prot;
-  ::facebook::thrift::test::PrimitivesService_init_presult result;
+  ::facebook::thrift::test::fixtures::service_schema::PrimitivesService_init_presult result;
   result.get<0>().value = const_cast<::std::int64_t*>(&_return);
   result.setIsSet(0, true);
   return serializeResponse("init", &prot, ctx, result);
@@ -285,11 +285,11 @@ void PrimitivesServiceAsyncProcessor::executeRequest_method_that_throws(
       /* .definingServiceName =*/ "PrimitivesService",
       /* .methodName =*/ "method_that_throws",
       /* .qualifiedMethodName =*/ "PrimitivesService.method_that_throws"};
-  apache::thrift::HandlerCallback<::facebook::thrift::test::Result>::DecoratorAfterCallback decoratorCallback{
+  apache::thrift::HandlerCallback<::facebook::thrift::test::fixtures::service_schema::Result>::DecoratorAfterCallback decoratorCallback{
     static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<::facebook::thrift::test::PrimitivesService>::fbthrift_invoke_decorator_after_method_that_throws};
+    apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>::fbthrift_invoke_decorator_after_method_that_throws};
  auto callback =
-      apache::thrift::HandlerCallbackPtr<::facebook::thrift::test::Result>::make(
+      apache::thrift::HandlerCallbackPtr<::facebook::thrift::test::fixtures::service_schema::Result>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
           std::move(ctxStack),
@@ -347,10 +347,10 @@ void PrimitivesServiceAsyncProcessor::executeRequest_method_that_throws(
 template <class ProtocolIn_, class ProtocolOut_>
 /* static */ apache::thrift::SerializedResponse PrimitivesServiceAsyncProcessor::return_method_that_throws(
     apache::thrift::ContextStack* ctx,
-    ::facebook::thrift::test::Result const& _return) {
+    ::facebook::thrift::test::fixtures::service_schema::Result const& _return) {
   ProtocolOut_ prot;
-  ::facebook::thrift::test::PrimitivesService_method_that_throws_presult result;
-  result.get<0>().value = const_cast<::facebook::thrift::test::Result*>(&_return);
+  ::facebook::thrift::test::fixtures::service_schema::PrimitivesService_method_that_throws_presult result;
+  result.get<0>().value = const_cast<::facebook::thrift::test::fixtures::service_schema::Result*>(&_return);
   result.setIsSet(0, true);
   return serializeResponse("method_that_throws", &prot, ctx, result);
 }
@@ -365,7 +365,7 @@ void PrimitivesServiceAsyncProcessor::throw_wrapped_method_that_throws(
   if (!ew) {
     return;
   }
-  ::facebook::thrift::test::PrimitivesService_method_that_throws_presult result;
+  ::facebook::thrift::test::fixtures::service_schema::PrimitivesService_method_that_throws_presult result;
   constexpr bool kHasReturnType = true;
   if (!::apache::thrift::detail::ap::insert_exn<kHasReturnType>(result, ew, [&]<typename Ex>(Ex&){
     if (ctx) {
@@ -485,7 +485,7 @@ void PrimitivesServiceAsyncProcessor::executeRequest_return_void_method(
       /* .qualifiedMethodName =*/ "PrimitivesService.return_void_method"};
   apache::thrift::HandlerCallback<void>::DecoratorAfterCallback decoratorCallback{
     static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<::facebook::thrift::test::PrimitivesService>::fbthrift_invoke_decorator_after_return_void_method};
+    apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>::fbthrift_invoke_decorator_after_return_void_method};
  auto callback =
       apache::thrift::HandlerCallbackPtr<void>::make(
           apache::thrift::detail::ServerRequestHelper::request(
@@ -546,7 +546,7 @@ template <class ProtocolIn_, class ProtocolOut_>
 /* static */ apache::thrift::SerializedResponse PrimitivesServiceAsyncProcessor::return_return_void_method(
     apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
-  ::facebook::thrift::test::PrimitivesService_return_void_method_presult result;
+  ::facebook::thrift::test::fixtures::service_schema::PrimitivesService_return_void_method_presult result;
   return serializeResponse("return_void_method", &prot, ctx, result);
 }
 
@@ -574,4 +574,4 @@ void PrimitivesServiceAsyncProcessor::throw_wrapped_return_void_method(
 // End of Service Methods
 //
 
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::service_schema

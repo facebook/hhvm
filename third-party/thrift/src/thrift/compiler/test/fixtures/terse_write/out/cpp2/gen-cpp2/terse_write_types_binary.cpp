@@ -6,7 +6,7 @@
  */
 #include "thrift/compiler/test/fixtures/terse_write/gen-cpp2/terse_write_types_custom_protocol.h"
 
-namespace facebook::thrift::test::terse_write {
+namespace facebook::thrift::test::fixtures::terse_write {
 
 template void MyStruct::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
 template uint32_t MyStruct::write<>(apache::thrift::BinaryProtocolWriter*) const;
@@ -43,4 +43,4 @@ template uint32_t TerseException::write<>(apache::thrift::BinaryProtocolWriter*)
 template uint32_t TerseException::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
 template uint32_t TerseException::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
 
-} // namespace facebook::thrift::test::terse_write
+} // namespace facebook::thrift::test::fixtures::terse_write

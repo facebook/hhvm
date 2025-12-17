@@ -14,7 +14,7 @@ namespace thrift {
 namespace detail {
 
 template <>
-struct VisitByFieldId<::facebook::thrift::test::InterceptedFields> {
+struct VisitByFieldId<::facebook::thrift::test::fixtures::field_interceptor::InterceptedFields> {
   template <typename F, typename T>
   void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
@@ -31,7 +31,7 @@ struct VisitByFieldId<::facebook::thrift::test::InterceptedFields> {
     case 6:
       return f(5, static_cast<T&&>(t).access_optional_boxed_field_ref());
     default:
-      throwInvalidThriftId(fieldId, "::facebook::thrift::test::InterceptedFields");
+      throwInvalidThriftId(fieldId, "::facebook::thrift::test::fixtures::field_interceptor::InterceptedFields");
     }
   }
 };

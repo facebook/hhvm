@@ -18,7 +18,7 @@ namespace detail {
 namespace md {
 
 template <>
-class StructMetadata<::facebook::thrift::test::InterceptedFields> {
+class StructMetadata<::facebook::thrift::test::fixtures::field_interceptor::InterceptedFields> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };

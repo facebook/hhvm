@@ -6,34 +6,34 @@
  *  @generated
  */
 
-namespace facebook\thrift\test;
+namespace facebook\thrift\test\fixtures\adapter;
 
 /**
  * Original thrift service:-
  * AdapterService
  */
-<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/AdapterService'))>>
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/fixtures/adapter/AdapterService'))>>
 interface AdapterServiceAsyncIf extends \IThriftAsyncIf {
   /**
    * Original thrift definition:-
    * CountingStruct
    *   count();
    */
-  public function count(): Awaitable<\facebook\thrift\test\CountingStruct>;
+  public function count(): Awaitable<\facebook\thrift\test\fixtures\adapter\CountingStruct>;
 
   /**
    * Original thrift definition:-
    * HeapAllocated
    *   adaptedTypes(1: HeapAllocated arg);
    */
-  public function adaptedTypes(?\facebook\thrift\test\HeapAllocated $arg): Awaitable<\facebook\thrift\test\HeapAllocated>;
+  public function adaptedTypes(?\facebook\thrift\test\fixtures\adapter\HeapAllocated $arg): Awaitable<\facebook\thrift\test\fixtures\adapter\HeapAllocated>;
 }
 
 /**
  * Original thrift service:-
  * AdapterService
  */
-<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/AdapterService'))>>
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/fixtures/adapter/AdapterService'))>>
 interface AdapterServiceAsyncClientIf extends AdapterServiceAsyncIf {
 }
 
@@ -41,21 +41,21 @@ interface AdapterServiceAsyncClientIf extends AdapterServiceAsyncIf {
  * Original thrift service:-
  * AdapterService
  */
-<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/AdapterService'))>>
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/fixtures/adapter/AdapterService'))>>
 interface AdapterServiceClientIf extends \IThriftSyncIf {
   /**
    * Original thrift definition:-
    * CountingStruct
    *   count();
    */
-  public function count(): Awaitable<\facebook\thrift\test\CountingStruct>;
+  public function count(): Awaitable<\facebook\thrift\test\fixtures\adapter\CountingStruct>;
 
   /**
    * Original thrift definition:-
    * HeapAllocated
    *   adaptedTypes(1: HeapAllocated arg);
    */
-  public function adaptedTypes(?\facebook\thrift\test\HeapAllocated $arg): Awaitable<\facebook\thrift\test\HeapAllocated>;
+  public function adaptedTypes(?\facebook\thrift\test\fixtures\adapter\HeapAllocated $arg): Awaitable<\facebook\thrift\test\fixtures\adapter\HeapAllocated>;
 }
 
 /**
@@ -70,12 +70,12 @@ trait AdapterServiceClientBase {
    * CountingStruct
    *   count();
    */
-  public async function count(): Awaitable<\facebook\thrift\test\CountingStruct> {
+  public async function count(): Awaitable<\facebook\thrift\test\fixtures\adapter\CountingStruct> {
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \facebook\thrift\test\AdapterService_count_args::withDefaultValues();
+    $args = \facebook\thrift\test\fixtures\adapter\AdapterService_count_args::withDefaultValues();
     await $this->asyncHandler_->genBefore(AdapterServiceStaticMetadata::THRIFT_SVC_NAME, "count", $args);
     $currentseqid = $this->sendImplHelper($args, "count", false, AdapterServiceStaticMetadata::THRIFT_SVC_NAME );
-    return (await $this->genAwaitResponse(\facebook\thrift\test\AdapterService_count_result::class, "count", false, $currentseqid, $rpc_options))[0];
+    return (await $this->genAwaitResponse(\facebook\thrift\test\fixtures\adapter\AdapterService_count_result::class, "count", false, $currentseqid, $rpc_options))[0];
   }
 
   /**
@@ -83,14 +83,14 @@ trait AdapterServiceClientBase {
    * HeapAllocated
    *   adaptedTypes(1: HeapAllocated arg);
    */
-  public async function adaptedTypes(?\facebook\thrift\test\HeapAllocated $arg): Awaitable<\facebook\thrift\test\HeapAllocated> {
+  public async function adaptedTypes(?\facebook\thrift\test\fixtures\adapter\HeapAllocated $arg): Awaitable<\facebook\thrift\test\fixtures\adapter\HeapAllocated> {
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \facebook\thrift\test\AdapterService_adaptedTypes_args::fromShape(shape(
+    $args = \facebook\thrift\test\fixtures\adapter\AdapterService_adaptedTypes_args::fromShape(shape(
       'arg' => $arg,
     ));
     await $this->asyncHandler_->genBefore(AdapterServiceStaticMetadata::THRIFT_SVC_NAME, "adaptedTypes", $args);
     $currentseqid = $this->sendImplHelper($args, "adaptedTypes", false, AdapterServiceStaticMetadata::THRIFT_SVC_NAME );
-    return (await $this->genAwaitResponse(\facebook\thrift\test\AdapterService_adaptedTypes_result::class, "adaptedTypes", false, $currentseqid, $rpc_options))[0];
+    return (await $this->genAwaitResponse(\facebook\thrift\test\fixtures\adapter\AdapterService_adaptedTypes_result::class, "adaptedTypes", false, $currentseqid, $rpc_options))[0];
   }
 
 }
@@ -186,13 +186,13 @@ class AdapterService_count_args implements \IThriftSyncStruct, \IThriftStructMet
 class AdapterService_count_result extends \ThriftSyncStructWithResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const type TResult = \facebook\thrift\test\CountingStruct;
+  const type TResult = \facebook\thrift\test\fixtures\adapter\CountingStruct;
 
   const \ThriftStructTypes::TSpec SPEC = dict[
     0 => shape(
       'var' => 'success',
       'type' => \TType::STRUCT,
-      'class' => \facebook\thrift\test\CountingStruct::class,
+      'class' => \facebook\thrift\test\fixtures\adapter\CountingStruct::class,
     ),
   ];
   const dict<string, int> FIELDMAP = dict[
@@ -270,8 +270,8 @@ class AdapterService_count_result extends \ThriftSyncStructWithResult implements
     }
 
     if (idx($parsed, 'success') !== null) {
-      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\CountingStruct>($parsed['success']));
-      $_tmp1 = \facebook\thrift\test\CountingStruct::withDefaultValues();
+      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\fixtures\adapter\CountingStruct>($parsed['success']));
+      $_tmp1 = \facebook\thrift\test\fixtures\adapter\CountingStruct::withDefaultValues();
       $_tmp1->readFromJson($_tmp0);
       $this->success = $_tmp1;
     }
@@ -286,7 +286,7 @@ class AdapterService_adaptedTypes_args implements \IThriftSyncStruct, \IThriftSt
     1 => shape(
       'var' => 'arg',
       'type' => \TType::STRUCT,
-      'class' => \facebook\thrift\test\HeapAllocated::class,
+      'class' => \facebook\thrift\test\fixtures\adapter\HeapAllocated::class,
     ),
   ];
   const dict<string, int> FIELDMAP = dict[
@@ -294,16 +294,16 @@ class AdapterService_adaptedTypes_args implements \IThriftSyncStruct, \IThriftSt
   ];
 
   const type TConstructorShape = shape(
-    ?'arg' => ?\facebook\thrift\test\HeapAllocated,
+    ?'arg' => ?\facebook\thrift\test\fixtures\adapter\HeapAllocated,
   );
 
   const type TShape = shape(
-    ?'arg' => ?\facebook\thrift\test\HeapAllocated::TShape,
+    ?'arg' => ?\facebook\thrift\test\fixtures\adapter\HeapAllocated::TShape,
   );
   const int STRUCTURAL_ID = 992428035330363413;
-  public ?\facebook\thrift\test\HeapAllocated $arg;
+  public ?\facebook\thrift\test\fixtures\adapter\HeapAllocated $arg;
 
-  public function __construct(?\facebook\thrift\test\HeapAllocated $arg = null)[] {
+  public function __construct(?\facebook\thrift\test\fixtures\adapter\HeapAllocated $arg = null)[] {
     $this->arg = $arg;
   }
 
@@ -368,7 +368,7 @@ class AdapterService_adaptedTypes_args implements \IThriftSyncStruct, \IThriftSt
 
   public static function __fromShape(self::TShape $shape)[]: this {
     return new static(
-      Shapes::idx($shape, 'arg') |> $$ === null ? null : (\facebook\thrift\test\HeapAllocated::__fromShape($$)),
+      Shapes::idx($shape, 'arg') |> $$ === null ? null : (\facebook\thrift\test\fixtures\adapter\HeapAllocated::__fromShape($$)),
     );
   }
 
@@ -389,8 +389,8 @@ class AdapterService_adaptedTypes_args implements \IThriftSyncStruct, \IThriftSt
     }
 
     if (idx($parsed, 'arg') !== null) {
-      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\HeapAllocated>($parsed['arg']));
-      $_tmp1 = \facebook\thrift\test\HeapAllocated::withDefaultValues();
+      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\fixtures\adapter\HeapAllocated>($parsed['arg']));
+      $_tmp1 = \facebook\thrift\test\fixtures\adapter\HeapAllocated::withDefaultValues();
       $_tmp1->readFromJson($_tmp0);
       $this->arg = $_tmp1;
     }
@@ -401,13 +401,13 @@ class AdapterService_adaptedTypes_args implements \IThriftSyncStruct, \IThriftSt
 class AdapterService_adaptedTypes_result extends \ThriftSyncStructWithResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const type TResult = \facebook\thrift\test\HeapAllocated;
+  const type TResult = \facebook\thrift\test\fixtures\adapter\HeapAllocated;
 
   const \ThriftStructTypes::TSpec SPEC = dict[
     0 => shape(
       'var' => 'success',
       'type' => \TType::STRUCT,
-      'class' => \facebook\thrift\test\HeapAllocated::class,
+      'class' => \facebook\thrift\test\fixtures\adapter\HeapAllocated::class,
     ),
   ];
   const dict<string, int> FIELDMAP = dict[
@@ -496,8 +496,8 @@ class AdapterService_adaptedTypes_result extends \ThriftSyncStructWithResult imp
     }
 
     if (idx($parsed, 'success') !== null) {
-      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\HeapAllocated>($parsed['success']));
-      $_tmp1 = \facebook\thrift\test\HeapAllocated::withDefaultValues();
+      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\fixtures\adapter\HeapAllocated>($parsed['success']));
+      $_tmp1 = \facebook\thrift\test\fixtures\adapter\HeapAllocated::withDefaultValues();
       $_tmp1->readFromJson($_tmp0);
       $this->success = $_tmp1;
     }
@@ -581,8 +581,8 @@ class AdapterServiceStaticMetadata implements \IThriftServiceStaticMetadata {
             'enums' => dict[
             ],
             'structs' => dict[
-              'module.CountingStruct' => \facebook\thrift\test\CountingStruct::getStructMetadata(),
-              'module.HeapAllocated' => \facebook\thrift\test\HeapAllocated::getStructMetadata(),
+              'module.CountingStruct' => \facebook\thrift\test\fixtures\adapter\CountingStruct::getStructMetadata(),
+              'module.HeapAllocated' => \facebook\thrift\test\fixtures\adapter\HeapAllocated::getStructMetadata(),
             ],
             'exceptions' => dict[
             ],

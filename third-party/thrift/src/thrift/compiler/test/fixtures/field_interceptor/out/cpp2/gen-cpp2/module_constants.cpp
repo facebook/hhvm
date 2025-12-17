@@ -10,19 +10,19 @@
 #include <thrift/lib/cpp2/gen/module_constants_cpp.h>
 
 
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::field_interceptor {
 namespace module_constants {
 
 
-::std::string_view _fbthrift_schema_a4c73c904a6a1b1d() {
+::std::string_view _fbthrift_schema_70c3d947cfda90b1() {
   return "";
 }
-::folly::Range<const ::std::string_view*> _fbthrift_schema_a4c73c904a6a1b1d_includes() {
+::folly::Range<const ::std::string_view*> _fbthrift_schema_70c3d947cfda90b1_includes() {
   return {};
 }
-::folly::Range<const ::std::string_view*> _fbthrift_schema_a4c73c904a6a1b1d_uris() {
+::folly::Range<const ::std::string_view*> _fbthrift_schema_70c3d947cfda90b1_uris() {
   return {};
 }
 
 } // namespace module_constants
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::field_interceptor

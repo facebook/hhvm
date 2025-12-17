@@ -12,7 +12,7 @@
 
 namespace apache { namespace thrift {
 
-template <> struct TStructDataStorage<::facebook::thrift::test::InterceptedFields> {
+template <> struct TStructDataStorage<::facebook::thrift::test::fixtures::field_interceptor::InterceptedFields> {
   static constexpr const std::size_t fields_size = 6;
   static const std::string_view name;
   static const std::array<std::string_view, fields_size> fields_names;

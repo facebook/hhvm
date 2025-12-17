@@ -18,7 +18,7 @@ include "thrift/annotation/thrift.thrift"
 include "thrift/annotation/scope.thrift"
 
 @thrift.Experimental
-package "facebook.com/thrift/test"
+package "facebook.com/thrift/test/fixtures/runtime_annotations"
 
 @scope.Definition
 @thrift.RuntimeAnnotation

@@ -14,7 +14,11 @@
 namespace facebook {
 namespace thrift {
 namespace test {
+namespace fixtures {
+namespace adapter {
 ::apache::thrift::metadata::ThriftMetadata module_getThriftModuleMetadata();
 } // namespace facebook
 } // namespace thrift
 } // namespace test
+} // namespace fixtures
+} // namespace adapter

@@ -32,22 +32,22 @@ APACHE_THRIFT_DEFINE_ACCESSOR(field);
 } // namespace apache::thrift
 
 // BEGIN declare_enums
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::runtime_annotations {
 
 /** Glean {"file": "thrift/compiler/test/fixtures/runtime-annotations/src/module.thrift", "name": "MyEnum", "kind": "enum" } */
 enum class MyEnum {
   VALUE = 1,
 };
 
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::runtime_annotations
 
-template<> struct std::hash<::facebook::thrift::test::MyEnum> :
-  ::apache::thrift::detail::enum_hash<::facebook::thrift::test::MyEnum> {};
+template<> struct std::hash<::facebook::thrift::test::fixtures::runtime_annotations::MyEnum> :
+  ::apache::thrift::detail::enum_hash<::facebook::thrift::test::fixtures::runtime_annotations::MyEnum> {};
 
 namespace apache::thrift {
 
-template <> struct TEnumTraits<::facebook::thrift::test::MyEnum> {
-  using type = ::facebook::thrift::test::MyEnum;
+template <> struct TEnumTraits<::facebook::thrift::test::fixtures::runtime_annotations::MyEnum> {
+  using type = ::facebook::thrift::test::fixtures::runtime_annotations::MyEnum;
 
   static constexpr std::size_t const size = 1;
   static folly::Range<type const*> const values;
@@ -65,7 +65,7 @@ template <> struct TEnumTraits<::facebook::thrift::test::MyEnum> {
     return "module";
   }
 
-  static constexpr folly::cstring_view __fbthrift_thrift_uri = "facebook.com/thrift/test/MyEnum";
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = "facebook.com/thrift/test/fixtures/runtime_annotations/MyEnum";
 
   static char const* findName(type value) noexcept {
     std::string_view ret;
@@ -76,32 +76,32 @@ template <> struct TEnumTraits<::facebook::thrift::test::MyEnum> {
   static constexpr type max() { return type::VALUE; }
 
   static const std::vector<std::any>& annotations() noexcept;
-  static const std::vector<std::any>& enumValueAnnotations(::facebook::thrift::test::MyEnum) noexcept;
+  static const std::vector<std::any>& enumValueAnnotations(::facebook::thrift::test::fixtures::runtime_annotations::MyEnum) noexcept;
 };
 
 } // namespace apache::thrift
 // END declare_enums
 // BEGIN forward_declare
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::runtime_annotations {
 class MyAnnotation;
 class MyStruct;
 class MyUnion;
 class MyException;
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::runtime_annotations
 // END forward_declare
 namespace apache::thrift::detail::annotation {
 template<>
-const std::vector<std::any>& field_annotation_values<::facebook::thrift::test::MyStruct>(FieldId);
+const std::vector<std::any>& field_annotation_values<::facebook::thrift::test::fixtures::runtime_annotations::MyStruct>(FieldId);
 template<>
-const std::vector<std::any>& struct_annotation_values<::facebook::thrift::test::MyStruct>();
+const std::vector<std::any>& struct_annotation_values<::facebook::thrift::test::fixtures::runtime_annotations::MyStruct>();
 template<>
-const std::vector<std::any>& field_annotation_values<::facebook::thrift::test::MyUnion>(FieldId);
+const std::vector<std::any>& field_annotation_values<::facebook::thrift::test::fixtures::runtime_annotations::MyUnion>(FieldId);
 template<>
-const std::vector<std::any>& struct_annotation_values<::facebook::thrift::test::MyUnion>();
+const std::vector<std::any>& struct_annotation_values<::facebook::thrift::test::fixtures::runtime_annotations::MyUnion>();
 template<>
-const std::vector<std::any>& field_annotation_values<::facebook::thrift::test::MyException>(FieldId);
+const std::vector<std::any>& field_annotation_values<::facebook::thrift::test::fixtures::runtime_annotations::MyException>(FieldId);
 template<>
-const std::vector<std::any>& struct_annotation_values<::facebook::thrift::test::MyException>();
+const std::vector<std::any>& struct_annotation_values<::facebook::thrift::test::fixtures::runtime_annotations::MyException>();
 } // namespace apache::thrift::detail::annotation
 
 namespace apache::thrift::detail::qualifier {
@@ -109,7 +109,7 @@ namespace apache::thrift::detail::qualifier {
 
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::runtime_annotations {
 using ::apache::thrift::detail::operator!=;
 using ::apache::thrift::detail::operator>;
 using ::apache::thrift::detail::operator<=;
@@ -125,7 +125,7 @@ class MyAnnotation final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = true;
-  static constexpr folly::cstring_view __fbthrift_thrift_uri = "facebook.com/thrift/test/MyAnnotation";
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = "facebook.com/thrift/test/fixtures/runtime_annotations/MyAnnotation";
   static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   static std::string_view __fbthrift_get_class_name();
   template <class ...>
@@ -207,7 +207,7 @@ class MyStruct final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
-  static constexpr folly::cstring_view __fbthrift_thrift_uri = "facebook.com/thrift/test/MyStruct";
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = "facebook.com/thrift/test/fixtures/runtime_annotations/MyStruct";
   static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   static std::string_view __fbthrift_get_class_name();
   template <class ...>
@@ -215,14 +215,14 @@ class MyStruct final  {
     return "module";
   }
   using __fbthrift_struct_annotations = folly::tag_t<
-    ::facebook::thrift::test::MyAnnotation
+    ::facebook::thrift::test::fixtures::runtime_annotations::MyAnnotation
   >;
   using __fbthrift_list_of_field_with_annotation = folly::tag_t<
     ::apache::thrift::type::field_id<1>
   >;
   using __fbthrift_annotations_on_fields = folly::tag_t<
     folly::tag_t<
-      ::facebook::thrift::test::MyAnnotation
+      ::facebook::thrift::test::fixtures::runtime_annotations::MyAnnotation
     >
   >;
   static constexpr std::size_t __fbthrift_num_fields = 1;
@@ -351,7 +351,7 @@ class MyUnion final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
-  static constexpr folly::cstring_view __fbthrift_thrift_uri = "facebook.com/thrift/test/MyUnion";
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = "facebook.com/thrift/test/fixtures/runtime_annotations/MyUnion";
   static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   static std::string_view __fbthrift_get_class_name();
   template <class ...>
@@ -359,14 +359,14 @@ class MyUnion final  {
     return "module";
   }
   using __fbthrift_struct_annotations = folly::tag_t<
-    ::facebook::thrift::test::MyAnnotation
+    ::facebook::thrift::test::fixtures::runtime_annotations::MyAnnotation
   >;
   using __fbthrift_list_of_field_with_annotation = folly::tag_t<
     ::apache::thrift::type::field_id<1>
   >;
   using __fbthrift_annotations_on_fields = folly::tag_t<
     folly::tag_t<
-      ::facebook::thrift::test::MyAnnotation
+      ::facebook::thrift::test::fixtures::runtime_annotations::MyAnnotation
     >
   >;
   static constexpr std::size_t __fbthrift_num_fields = 1;
@@ -495,7 +495,7 @@ class FOLLY_EXPORT MyException : public virtual apache::thrift::TException {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
-  static constexpr folly::cstring_view __fbthrift_thrift_uri = "facebook.com/thrift/test/MyException";
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = "facebook.com/thrift/test/fixtures/runtime_annotations/MyException";
   static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   static std::string_view __fbthrift_get_class_name();
   template <class ...>
@@ -503,14 +503,14 @@ class FOLLY_EXPORT MyException : public virtual apache::thrift::TException {
     return "module";
   }
   using __fbthrift_struct_annotations = folly::tag_t<
-    ::facebook::thrift::test::MyAnnotation
+    ::facebook::thrift::test::fixtures::runtime_annotations::MyAnnotation
   >;
   using __fbthrift_list_of_field_with_annotation = folly::tag_t<
     ::apache::thrift::type::field_id<1>
   >;
   using __fbthrift_annotations_on_fields = folly::tag_t<
     folly::tag_t<
-      ::facebook::thrift::test::MyAnnotation
+      ::facebook::thrift::test::fixtures::runtime_annotations::MyAnnotation
     >
   >;
   static constexpr std::size_t __fbthrift_num_fields = 1;
@@ -622,7 +622,7 @@ class FOLLY_EXPORT MyException : public virtual apache::thrift::TException {
   uint32_t write(Protocol_* prot_) const;
 
   const char* what() const noexcept override {
-    return "::facebook::thrift::test::MyException";
+    return "::facebook::thrift::test::fixtures::runtime_annotations::MyException";
   }
 
  private:
@@ -641,32 +641,32 @@ unsigned long MyException::read(Protocol_* iprot) {
 }
 
 
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::runtime_annotations
 
 namespace apache::thrift::detail {
-template <> struct TSchemaAssociation<::facebook::thrift::test::MyAnnotation, false> {
+template <> struct TSchemaAssociation<::facebook::thrift::test::fixtures::runtime_annotations::MyAnnotation, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = 733069381331032895;
-  static constexpr ::std::string_view definitionKey = {"\x40\x4d\x6a\x8a\xe3\xcd\x77\x83\x4a\xd3\xd9\xd4\xaf\x89\x89\x81", 16};
+  static constexpr int64_t programId = -5122844582506064967;
+  static constexpr ::std::string_view definitionKey = {"\xe3\x1c\xd4\x1b\x27\xe0\xd6\xc7\x8b\x96\x7d\xa6\x55\x01\x2e\x6e", 16};
 };
-template <> struct TSchemaAssociation<::facebook::thrift::test::MyStruct, false> {
+template <> struct TSchemaAssociation<::facebook::thrift::test::fixtures::runtime_annotations::MyStruct, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = 733069381331032895;
-  static constexpr ::std::string_view definitionKey = {"\xfb\x46\xc2\x14\xc6\x53\x42\x84\xc5\x12\x2f\xd6\x0c\x65\x67\x47", 16};
+  static constexpr int64_t programId = -5122844582506064967;
+  static constexpr ::std::string_view definitionKey = {"\xcf\xd3\xe4\x85\x3f\xb2\x03\x7b\x07\xe6\xd6\x08\x3c\x3e\x2d\xf4", 16};
 };
-template <> struct TSchemaAssociation<::facebook::thrift::test::MyUnion, false> {
+template <> struct TSchemaAssociation<::facebook::thrift::test::fixtures::runtime_annotations::MyUnion, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = 733069381331032895;
-  static constexpr ::std::string_view definitionKey = {"\x31\xe8\x44\xc7\x8f\xbe\x51\x56\xaf\x6b\x26\xde\xe0\xf4\x33\x9d", 16};
+  static constexpr int64_t programId = -5122844582506064967;
+  static constexpr ::std::string_view definitionKey = {"\x39\x67\x1d\x1a\xc2\x82\x75\x2d\x77\x90\xa8\x43\xaf\x34\xb3\x59", 16};
 };
-template <> struct TSchemaAssociation<::facebook::thrift::test::MyException, false> {
+template <> struct TSchemaAssociation<::facebook::thrift::test::fixtures::runtime_annotations::MyException, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = 733069381331032895;
-  static constexpr ::std::string_view definitionKey = {"\x2c\xab\xdc\x8e\xc9\x8f\xdb\x14\x04\xfd\x9e\xe6\x6f\x19\x68\x8d", 16};
+  static constexpr int64_t programId = -5122844582506064967;
+  static constexpr ::std::string_view definitionKey = {"\x89\xbf\x17\x23\x35\xde\xc4\x84\x4e\x64\xaa\xed\xbc\x3d\x7a\x70", 16};
 };
-template <> struct TSchemaAssociation<::facebook::thrift::test::MyEnum, true> {
+template <> struct TSchemaAssociation<::facebook::thrift::test::fixtures::runtime_annotations::MyEnum, true> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = 733069381331032895;
-  static constexpr ::std::string_view definitionKey = {"\xab\x10\xf7\x52\x28\x3d\x3c\x17\xe3\x20\x7c\x66\xd1\x06\x58\xed", 16};
+  static constexpr int64_t programId = -5122844582506064967;
+  static constexpr ::std::string_view definitionKey = {"\xf7\x70\xbb\x42\x2f\x08\xdb\x53\x8c\x9f\xd4\x64\x98\xfe\x9a\xdb", 16};
 };
 } // namespace apache::thrift::detail

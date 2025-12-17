@@ -80,7 +80,7 @@ public final class B implements com.facebook.thrift.payload.ThriftSerializable {
       THRIFT_NAMES_TO_IDS.put("a", 1);
       FIELD_METADATA.put(1, A_FIELD_DESC);
       com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
-        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/B"),
+        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/fixtures/adapter/B"),
         B.class, B::read0));
     }
     

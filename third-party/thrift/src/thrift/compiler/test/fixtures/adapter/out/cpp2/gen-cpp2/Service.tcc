@@ -10,9 +10,9 @@
 
 #include <thrift/lib/cpp2/gen/service_tcc.h>
 
-namespace facebook::thrift::test {
-typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, ::apache::thrift::type_class::string, ::facebook::thrift::test::StringWithAdapter_7208*, ::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::string_t>>, apache::thrift::FieldData<2, ::apache::thrift::type_class::string, ::facebook::thrift::test::StringWithCppAdapter*, ::apache::thrift::type::adapted<::my::Adapter2, ::apache::thrift::type::string_t>>, apache::thrift::FieldData<3, ::apache::thrift::type_class::structure, ::facebook::thrift::test::Foo*>> Service_func_pargs;
-typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::integral, ::facebook::thrift::test::MyI32_4873*, ::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::i32_t>>> Service_func_presult;
+namespace facebook::thrift::test::fixtures::adapter {
+typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, ::apache::thrift::type_class::string, ::facebook::thrift::test::fixtures::adapter::StringWithAdapter_7208*, ::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::string_t>>, apache::thrift::FieldData<2, ::apache::thrift::type_class::string, ::facebook::thrift::test::fixtures::adapter::StringWithCppAdapter*, ::apache::thrift::type::adapted<::my::Adapter2, ::apache::thrift::type::string_t>>, apache::thrift::FieldData<3, ::apache::thrift::type_class::structure, ::facebook::thrift::test::fixtures::adapter::Foo*>> Service_func_pargs;
+typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::integral, ::facebook::thrift::test::fixtures::adapter::MyI32_4873*, ::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::i32_t>>> Service_func_presult;
 //
 // Service Methods
 //
@@ -53,9 +53,9 @@ void ServiceAsyncProcessor::executeRequest_func(
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   struct ArgsState {
-    std::unique_ptr<::facebook::thrift::test::StringWithAdapter_7208> uarg_arg1 = std::make_unique<::facebook::thrift::test::StringWithAdapter_7208>();
-    std::unique_ptr<::facebook::thrift::test::StringWithCppAdapter> uarg_arg2 = std::make_unique<::facebook::thrift::test::StringWithCppAdapter>();
-    std::unique_ptr<::facebook::thrift::test::Foo> uarg_arg3 = std::make_unique<::facebook::thrift::test::Foo>();
+    std::unique_ptr<::facebook::thrift::test::fixtures::adapter::StringWithAdapter_7208> uarg_arg1 = std::make_unique<::facebook::thrift::test::fixtures::adapter::StringWithAdapter_7208>();
+    std::unique_ptr<::facebook::thrift::test::fixtures::adapter::StringWithCppAdapter> uarg_arg2 = std::make_unique<::facebook::thrift::test::fixtures::adapter::StringWithCppAdapter>();
+    std::unique_ptr<::facebook::thrift::test::fixtures::adapter::Foo> uarg_arg3 = std::make_unique<::facebook::thrift::test::fixtures::adapter::Foo>();
     Service_func_pargs pargs() {
       Service_func_pargs args;
       args.get<0>().value = uarg_arg1.get();
@@ -110,11 +110,11 @@ void ServiceAsyncProcessor::executeRequest_func(
       /* .definingServiceName =*/ "Service",
       /* .methodName =*/ "func",
       /* .qualifiedMethodName =*/ "Service.func"};
-  apache::thrift::HandlerCallback<::facebook::thrift::test::MyI32_4873>::DecoratorAfterCallback decoratorCallback{
+  apache::thrift::HandlerCallback<::facebook::thrift::test::fixtures::adapter::MyI32_4873>::DecoratorAfterCallback decoratorCallback{
     static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<::facebook::thrift::test::Service>::fbthrift_invoke_decorator_after_func};
+    apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::adapter::Service>::fbthrift_invoke_decorator_after_func};
  auto callback =
-      apache::thrift::HandlerCallbackPtr<::facebook::thrift::test::MyI32_4873>::make(
+      apache::thrift::HandlerCallbackPtr<::facebook::thrift::test::fixtures::adapter::MyI32_4873>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
           std::move(ctxStack),
@@ -172,10 +172,10 @@ void ServiceAsyncProcessor::executeRequest_func(
 template <class ProtocolIn_, class ProtocolOut_>
 /* static */ apache::thrift::SerializedResponse ServiceAsyncProcessor::return_func(
     apache::thrift::ContextStack* ctx,
-    ::facebook::thrift::test::MyI32_4873 const& _return) {
+    ::facebook::thrift::test::fixtures::adapter::MyI32_4873 const& _return) {
   ProtocolOut_ prot;
-  ::facebook::thrift::test::Service_func_presult result;
-  result.get<0>().value = const_cast<::facebook::thrift::test::MyI32_4873*>(&_return);
+  ::facebook::thrift::test::fixtures::adapter::Service_func_presult result;
+  result.get<0>().value = const_cast<::facebook::thrift::test::fixtures::adapter::MyI32_4873*>(&_return);
   result.setIsSet(0, true);
   return serializeResponse("func", &prot, ctx, result);
 }
@@ -204,4 +204,4 @@ void ServiceAsyncProcessor::throw_wrapped_func(
 // End of Service Methods
 //
 
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::adapter

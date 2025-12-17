@@ -80,7 +80,7 @@ public final class Config implements com.facebook.thrift.payload.ThriftSerializa
       THRIFT_NAMES_TO_IDS.put("path", 1);
       FIELD_METADATA.put(1, PATH_FIELD_DESC);
       com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
-        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/Config"),
+        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/fixtures/adapter/Config"),
         Config.class, Config::read0));
     }
     

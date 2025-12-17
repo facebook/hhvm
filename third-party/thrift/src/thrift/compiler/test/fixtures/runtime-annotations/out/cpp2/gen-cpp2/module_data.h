@@ -12,8 +12,8 @@
 
 namespace apache { namespace thrift {
 
-template <> struct TEnumDataStorage<::facebook::thrift::test::MyEnum> {
-  using type = ::facebook::thrift::test::MyEnum;
+template <> struct TEnumDataStorage<::facebook::thrift::test::fixtures::runtime_annotations::MyEnum> {
+  using type = ::facebook::thrift::test::fixtures::runtime_annotations::MyEnum;
   static constexpr const std::size_t size = 1;
   static constexpr std::array<type, size> values = { {
       type::VALUE,
@@ -23,7 +23,7 @@ template <> struct TEnumDataStorage<::facebook::thrift::test::MyEnum> {
   }};
 };
 
-template <> struct TStructDataStorage<::facebook::thrift::test::MyAnnotation> {
+template <> struct TStructDataStorage<::facebook::thrift::test::fixtures::runtime_annotations::MyAnnotation> {
   static constexpr const std::size_t fields_size = 0;
   static const std::string_view name;
   static const std::array<std::string_view, fields_size> fields_names;
@@ -38,7 +38,7 @@ template <> struct TStructDataStorage<::facebook::thrift::test::MyAnnotation> {
   static const std::array<int, fields_size> isset_indexes;
 };
 
-template <> struct TStructDataStorage<::facebook::thrift::test::MyStruct> {
+template <> struct TStructDataStorage<::facebook::thrift::test::fixtures::runtime_annotations::MyStruct> {
   static constexpr const std::size_t fields_size = 1;
   static const std::string_view name;
   static const std::array<std::string_view, fields_size> fields_names;
@@ -53,7 +53,7 @@ template <> struct TStructDataStorage<::facebook::thrift::test::MyStruct> {
   static const std::array<int, fields_size> isset_indexes;
 };
 
-template <> struct TStructDataStorage<::facebook::thrift::test::MyUnion> {
+template <> struct TStructDataStorage<::facebook::thrift::test::fixtures::runtime_annotations::MyUnion> {
   static constexpr const std::size_t fields_size = 1;
   static const std::string_view name;
   static const std::array<std::string_view, fields_size> fields_names;
@@ -68,7 +68,7 @@ template <> struct TStructDataStorage<::facebook::thrift::test::MyUnion> {
   static const std::array<int, fields_size> isset_indexes;
 };
 
-template <> struct TStructDataStorage<::facebook::thrift::test::MyException> {
+template <> struct TStructDataStorage<::facebook::thrift::test::fixtures::runtime_annotations::MyException> {
   static constexpr const std::size_t fields_size = 1;
   static const std::string_view name;
   static const std::array<std::string_view, fields_size> fields_names;

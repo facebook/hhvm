@@ -5,7 +5,7 @@
  *  @generated
  */
 
-package com.facebook.thrift.test.terse_write;
+package com.facebook.thrift.test.fixtures.terse_write;
 
 import com.facebook.swift.codec.*;
 import com.facebook.swift.codec.ThriftField.Requiredness;
@@ -103,7 +103,7 @@ public final class MyUnion implements com.facebook.thrift.payload.ThriftSerializ
       THRIFT_NAMES_TO_IDS.put("struct_field", 14);
       FIELD_METADATA.put(14, STRUCT_FIELD_FIELD_DESC);
       com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
-        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/terse_write/MyUnion"),
+        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/fixtures/terse_write/MyUnion"),
         MyUnion.class, MyUnion::read0));
     }
 
@@ -180,7 +180,7 @@ public final class MyUnion implements com.facebook.thrift.payload.ThriftSerializ
                     return _u;
                 case 10:
                     _u.id = _id;
-                    _u.value = (com.facebook.thrift.test.terse_write.MyEnum) _field;
+                    _u.value = (com.facebook.thrift.test.fixtures.terse_write.MyEnum) _field;
                     return _u;
                 case 11:
                     _u.id = _id;
@@ -196,7 +196,7 @@ public final class MyUnion implements com.facebook.thrift.payload.ThriftSerializ
                     return _u;
                 case 14:
                     _u.id = _id;
-                    _u.value = (com.facebook.thrift.test.terse_write.MyStruct) _field;
+                    _u.value = (com.facebook.thrift.test.fixtures.terse_write.MyStruct) _field;
                     return _u;
                 default:
                 throw new IllegalArgumentException("invalid type " + _field.getClass().getName() + " for field " + _id);
@@ -281,7 +281,7 @@ public final class MyUnion implements com.facebook.thrift.payload.ThriftSerializ
     
     @ThriftConstructor
     @Deprecated
-    public MyUnion(final com.facebook.thrift.test.terse_write.MyEnum enumField) {
+    public MyUnion(final com.facebook.thrift.test.fixtures.terse_write.MyEnum enumField) {
         if (!MyUnion.allowNullFieldValues && enumField == null) {
             throw new TProtocolException("Cannot initialize Union field 'MyUnion.enumField' with null value!");
         }
@@ -321,7 +321,7 @@ public final class MyUnion implements com.facebook.thrift.payload.ThriftSerializ
     
     @ThriftConstructor
     @Deprecated
-    public MyUnion(final com.facebook.thrift.test.terse_write.MyStruct structField) {
+    public MyUnion(final com.facebook.thrift.test.fixtures.terse_write.MyStruct structField) {
         if (!MyUnion.allowNullFieldValues && structField == null) {
             throw new TProtocolException("Cannot initialize Union field 'MyUnion.structField' with null value!");
         }
@@ -398,7 +398,7 @@ public final class MyUnion implements com.facebook.thrift.payload.ThriftSerializ
         return res;
     }
     
-    public static MyUnion fromEnumField(final com.facebook.thrift.test.terse_write.MyEnum enumField) {
+    public static MyUnion fromEnumField(final com.facebook.thrift.test.fixtures.terse_write.MyEnum enumField) {
         MyUnion res = new MyUnion();
         if (!MyUnion.allowNullFieldValues && enumField == null) {
             throw new TProtocolException("Cannot initialize Union field 'MyUnion.enumField' with null value!");
@@ -438,7 +438,7 @@ public final class MyUnion implements com.facebook.thrift.payload.ThriftSerializ
         return res;
     }
     
-    public static MyUnion fromStructField(final com.facebook.thrift.test.terse_write.MyStruct structField) {
+    public static MyUnion fromStructField(final com.facebook.thrift.test.fixtures.terse_write.MyStruct structField) {
         MyUnion res = new MyUnion();
         if (!MyUnion.allowNullFieldValues && structField == null) {
             throw new TProtocolException("Cannot initialize Union field 'MyUnion.structField' with null value!");
@@ -559,11 +559,11 @@ public final class MyUnion implements com.facebook.thrift.payload.ThriftSerializ
     }
 
     @com.facebook.swift.codec.ThriftField(value=10, name="enum_field", requiredness=Requiredness.NONE)
-    public com.facebook.thrift.test.terse_write.MyEnum getEnumField() {
+    public com.facebook.thrift.test.fixtures.terse_write.MyEnum getEnumField() {
         if (this.id != 10) {
             throw new IllegalStateException("Not a enum_field element!");
         }
-        return (com.facebook.thrift.test.terse_write.MyEnum) value;
+        return (com.facebook.thrift.test.fixtures.terse_write.MyEnum) value;
     }
 
     public boolean isSetEnumField() {
@@ -607,11 +607,11 @@ public final class MyUnion implements com.facebook.thrift.payload.ThriftSerializ
     }
 
     @com.facebook.swift.codec.ThriftField(value=14, name="struct_field", requiredness=Requiredness.NONE)
-    public com.facebook.thrift.test.terse_write.MyStruct getStructField() {
+    public com.facebook.thrift.test.fixtures.terse_write.MyStruct getStructField() {
         if (this.id != 14) {
             throw new IllegalStateException("Not a struct_field element!");
         }
-        return (com.facebook.thrift.test.terse_write.MyStruct) value;
+        return (com.facebook.thrift.test.fixtures.terse_write.MyStruct) value;
     }
 
     public boolean isSetStructField() {
@@ -763,11 +763,11 @@ public final class MyUnion implements com.facebook.thrift.payload.ThriftSerializ
         T visitDoubleField(double doubleField);
         T visitStringField(String stringField);
         T visitBinaryField(byte[] binaryField);
-        T visitEnumField(com.facebook.thrift.test.terse_write.MyEnum enumField);
+        T visitEnumField(com.facebook.thrift.test.fixtures.terse_write.MyEnum enumField);
         T visitListField(List<Short> listField);
         T visitSetField(Set<Short> setField);
         T visitMapField(Map<Short, Short> mapField);
-        T visitStructField(com.facebook.thrift.test.terse_write.MyStruct structField);
+        T visitStructField(com.facebook.thrift.test.fixtures.terse_write.MyStruct structField);
     }
 
     public void write0(TProtocol oprot) throws TException {
@@ -846,7 +846,7 @@ public final class MyUnion implements com.facebook.thrift.payload.ThriftSerializ
       }
       case _ENUM_FIELD: {
         oprot.writeFieldBegin(ENUM_FIELD_FIELD_DESC);
-        com.facebook.thrift.test.terse_write.MyEnum enumField = (com.facebook.thrift.test.terse_write.MyEnum)this.value;
+        com.facebook.thrift.test.fixtures.terse_write.MyEnum enumField = (com.facebook.thrift.test.fixtures.terse_write.MyEnum)this.value;
         oprot.writeI32(enumField == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(enumField));
         oprot.writeFieldEnd();
         break;
@@ -887,7 +887,7 @@ public final class MyUnion implements com.facebook.thrift.payload.ThriftSerializ
       }
       case _STRUCT_FIELD: {
         oprot.writeFieldBegin(STRUCT_FIELD_FIELD_DESC);
-        com.facebook.thrift.test.terse_write.MyStruct structField = (com.facebook.thrift.test.terse_write.MyStruct)this.value;
+        com.facebook.thrift.test.fixtures.terse_write.MyStruct structField = (com.facebook.thrift.test.fixtures.terse_write.MyStruct)this.value;
         structField.write0(oprot);
         oprot.writeFieldEnd();
         break;
@@ -968,7 +968,7 @@ public final class MyUnion implements com.facebook.thrift.payload.ThriftSerializ
             break;
           case _ENUM_FIELD:
             if (__field.type == ENUM_FIELD_FIELD_DESC.type) {
-              com.facebook.thrift.test.terse_write.MyEnum enumField = com.facebook.thrift.test.terse_write.MyEnum.fromInteger(oprot.readI32());
+              com.facebook.thrift.test.fixtures.terse_write.MyEnum enumField = com.facebook.thrift.test.fixtures.terse_write.MyEnum.fromInteger(oprot.readI32());
               res.value = enumField;
             }
             break;
@@ -1023,7 +1023,7 @@ public final class MyUnion implements com.facebook.thrift.payload.ThriftSerializ
             break;
           case _STRUCT_FIELD:
             if (__field.type == STRUCT_FIELD_FIELD_DESC.type) {
-              com.facebook.thrift.test.terse_write.MyStruct structField = com.facebook.thrift.test.terse_write.MyStruct.read0(oprot);
+              com.facebook.thrift.test.fixtures.terse_write.MyStruct structField = com.facebook.thrift.test.fixtures.terse_write.MyStruct.read0(oprot);
               res.value = structField;
             }
             break;

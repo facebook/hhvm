@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package "facebook.com/thrift/test"
+package "facebook.com/thrift/test/fixtures/service_schema"
 
 service BaseService {
   void base_method();

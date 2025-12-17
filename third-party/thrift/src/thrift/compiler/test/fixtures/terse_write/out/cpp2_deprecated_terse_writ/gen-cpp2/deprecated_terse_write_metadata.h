@@ -18,42 +18,42 @@ namespace detail {
 namespace md {
 
 template <>
-class EnumMetadata<::facebook::thrift::test::terse_write::deprecated::MyEnum> {
+class EnumMetadata<::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum> {
  public:
   static void gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::facebook::thrift::test::terse_write::deprecated::MyStruct> {
+class StructMetadata<::facebook::thrift::test::fixtures::terse_write::deprecated::MyStruct> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::facebook::thrift::test::terse_write::deprecated::MyUnion> {
+class StructMetadata<::facebook::thrift::test::fixtures::terse_write::deprecated::MyUnion> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::facebook::thrift::test::terse_write::deprecated::StructLevelTerseStruct> {
+class StructMetadata<::facebook::thrift::test::fixtures::terse_write::deprecated::StructLevelTerseStruct> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::facebook::thrift::test::terse_write::deprecated::FieldLevelTerseStruct> {
+class StructMetadata<::facebook::thrift::test::fixtures::terse_write::deprecated::FieldLevelTerseStruct> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::facebook::thrift::test::terse_write::deprecated::CppRefStructFields> {
+class StructMetadata<::facebook::thrift::test::fixtures::terse_write::deprecated::CppRefStructFields> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::facebook::thrift::test::terse_write::deprecated::DeprecatedTerseWriteWithCustomDefault> {
+class StructMetadata<::facebook::thrift::test::fixtures::terse_write::deprecated::DeprecatedTerseWriteWithCustomDefault> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::facebook::thrift::test::terse_write::deprecated::DeprecatedTerseWriteWithRedundantCustomDefault> {
+class StructMetadata<::facebook::thrift::test::fixtures::terse_write::deprecated::DeprecatedTerseWriteWithRedundantCustomDefault> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };

@@ -80,7 +80,7 @@ public final class Person implements com.facebook.thrift.payload.ThriftSerializa
       THRIFT_NAMES_TO_IDS.put("name", 1);
       FIELD_METADATA.put(1, NAME_FIELD_DESC);
       com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
-        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/Person"),
+        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/fixtures/adapter/Person"),
         Person.class, Person::read0));
     }
     

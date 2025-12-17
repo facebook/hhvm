@@ -64,7 +64,7 @@ impl ::fbthrift::GetTType for self::EmptyStruct {
 
 impl ::fbthrift::GetUri for self::EmptyStruct {
     fn uri() -> &'static ::std::primitive::str {
-        "facebook.com/thrift/compiler/test/fixtures/default_values_rectification/EmptyStruct"
+        "facebook.com/thrift/compiler/test/fixtures/default_values_rectification_after/EmptyStruct"
     }
 }
 
@@ -189,7 +189,7 @@ impl ::fbthrift::GetTType for self::TestStruct {
 
 impl ::fbthrift::GetUri for self::TestStruct {
     fn uri() -> &'static ::std::primitive::str {
-        "facebook.com/thrift/compiler/test/fixtures/default_values_rectification/TestStruct"
+        "facebook.com/thrift/compiler/test/fixtures/default_values_rectification_after/TestStruct"
     }
 }
 

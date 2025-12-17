@@ -6,11 +6,11 @@
  */
 #include "thrift/compiler/test/fixtures/field_interceptor/gen-cpp2/module_types_custom_protocol.h"
 
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::field_interceptor {
 
 template void InterceptedFields::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
 template uint32_t InterceptedFields::write<>(apache::thrift::BinaryProtocolWriter*) const;
 template uint32_t InterceptedFields::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
 template uint32_t InterceptedFields::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
 
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::field_interceptor

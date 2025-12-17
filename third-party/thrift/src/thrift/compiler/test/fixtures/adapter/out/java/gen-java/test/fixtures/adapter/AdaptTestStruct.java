@@ -251,7 +251,7 @@ public final class AdaptTestStruct implements com.facebook.thrift.payload.Thrift
       THRIFT_NAMES_TO_IDS.put("binary_data", 10);
       FIELD_METADATA.put(10, BINARY_DATA_FIELD_DESC);
       com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
-        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/AdaptTestStruct"),
+        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/fixtures/adapter/AdaptTestStruct"),
         AdaptTestStruct.class, AdaptTestStruct::read0));
     }
     

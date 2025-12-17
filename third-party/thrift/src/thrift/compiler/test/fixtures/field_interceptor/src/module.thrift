@@ -18,7 +18,7 @@ include "thrift/annotation/cpp.thrift"
 include "thrift/annotation/thrift.thrift"
 
 @thrift.Experimental
-package "facebook.com/thrift/test"
+package "facebook.com/thrift/test/fixtures/field_interceptor"
 
 struct InterceptedFields {
   @cpp.FieldInterceptor{name = "my::FieldInterceptor", noinline = true}

@@ -18,12 +18,12 @@ namespace detail {
 namespace md {
 
 template <>
-class StructMetadata<::facebook::thrift::compiler::test::fixtures::default_values_rectification::EmptyStruct> {
+class StructMetadata<::facebook::thrift::compiler::test::fixtures::default_values_rectification_before::EmptyStruct> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::facebook::thrift::compiler::test::fixtures::default_values_rectification::TestStruct> {
+class StructMetadata<::facebook::thrift::compiler::test::fixtures::default_values_rectification_before::TestStruct> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };

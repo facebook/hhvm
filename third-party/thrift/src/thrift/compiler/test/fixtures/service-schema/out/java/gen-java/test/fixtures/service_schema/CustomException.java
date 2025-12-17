@@ -43,7 +43,7 @@ public final class CustomException extends org.apache.thrift.TBaseException impl
       THRIFT_NAMES_TO_IDS.put("result", 2);
       FIELD_METADATA.put(2, RESULT_FIELD_DESC);
       com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
-        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/CustomException"),
+        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/fixtures/service_schema/CustomException"),
         CustomException.class, CustomException::read0));
     }
 

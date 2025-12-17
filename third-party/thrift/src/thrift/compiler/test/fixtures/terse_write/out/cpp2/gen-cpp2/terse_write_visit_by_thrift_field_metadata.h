@@ -14,18 +14,18 @@ namespace thrift {
 namespace detail {
 
 template <>
-struct VisitByFieldId<::facebook::thrift::test::terse_write::MyStruct> {
+struct VisitByFieldId<::facebook::thrift::test::fixtures::terse_write::MyStruct> {
   template <typename F, typename T>
   void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     default:
-      throwInvalidThriftId(fieldId, "::facebook::thrift::test::terse_write::MyStruct");
+      throwInvalidThriftId(fieldId, "::facebook::thrift::test::fixtures::terse_write::MyStruct");
     }
   }
 };
 
 template <>
-struct VisitByFieldId<::facebook::thrift::test::terse_write::MyUnion> {
+struct VisitByFieldId<::facebook::thrift::test::fixtures::terse_write::MyUnion> {
   template <typename F, typename T>
   void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
@@ -58,26 +58,26 @@ struct VisitByFieldId<::facebook::thrift::test::terse_write::MyUnion> {
     case 14:
       return f(13, static_cast<T&&>(t).struct_field_ref());
     default:
-      throwInvalidThriftId(fieldId, "::facebook::thrift::test::terse_write::MyUnion");
+      throwInvalidThriftId(fieldId, "::facebook::thrift::test::fixtures::terse_write::MyUnion");
     }
   }
 };
 
 template <>
-struct VisitByFieldId<::facebook::thrift::test::terse_write::MyStructWithCustomDefault> {
+struct VisitByFieldId<::facebook::thrift::test::fixtures::terse_write::MyStructWithCustomDefault> {
   template <typename F, typename T>
   void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).field1_ref());
     default:
-      throwInvalidThriftId(fieldId, "::facebook::thrift::test::terse_write::MyStructWithCustomDefault");
+      throwInvalidThriftId(fieldId, "::facebook::thrift::test::fixtures::terse_write::MyStructWithCustomDefault");
     }
   }
 };
 
 template <>
-struct VisitByFieldId<::facebook::thrift::test::terse_write::StructLevelTerseStruct> {
+struct VisitByFieldId<::facebook::thrift::test::fixtures::terse_write::StructLevelTerseStruct> {
   template <typename F, typename T>
   void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
@@ -112,13 +112,13 @@ struct VisitByFieldId<::facebook::thrift::test::terse_write::StructLevelTerseStr
     case 15:
       return f(14, static_cast<T&&>(t).union_field_ref());
     default:
-      throwInvalidThriftId(fieldId, "::facebook::thrift::test::terse_write::StructLevelTerseStruct");
+      throwInvalidThriftId(fieldId, "::facebook::thrift::test::fixtures::terse_write::StructLevelTerseStruct");
     }
   }
 };
 
 template <>
-struct VisitByFieldId<::facebook::thrift::test::terse_write::FieldLevelTerseStruct> {
+struct VisitByFieldId<::facebook::thrift::test::fixtures::terse_write::FieldLevelTerseStruct> {
   template <typename F, typename T>
   void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
@@ -183,13 +183,13 @@ struct VisitByFieldId<::facebook::thrift::test::terse_write::FieldLevelTerseStru
     case 30:
       return f(29, static_cast<T&&>(t).union_field_ref());
     default:
-      throwInvalidThriftId(fieldId, "::facebook::thrift::test::terse_write::FieldLevelTerseStruct");
+      throwInvalidThriftId(fieldId, "::facebook::thrift::test::fixtures::terse_write::FieldLevelTerseStruct");
     }
   }
 };
 
 template <>
-struct VisitByFieldId<::facebook::thrift::test::terse_write::AdaptedFields> {
+struct VisitByFieldId<::facebook::thrift::test::fixtures::terse_write::AdaptedFields> {
   template <typename F, typename T>
   void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
@@ -200,20 +200,20 @@ struct VisitByFieldId<::facebook::thrift::test::terse_write::AdaptedFields> {
     case 3:
       return f(2, static_cast<T&&>(t).field3_ref());
     default:
-      throwInvalidThriftId(fieldId, "::facebook::thrift::test::terse_write::AdaptedFields");
+      throwInvalidThriftId(fieldId, "::facebook::thrift::test::fixtures::terse_write::AdaptedFields");
     }
   }
 };
 
 template <>
-struct VisitByFieldId<::facebook::thrift::test::terse_write::TerseException> {
+struct VisitByFieldId<::facebook::thrift::test::fixtures::terse_write::TerseException> {
   template <typename F, typename T>
   void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).msg_ref());
     default:
-      throwInvalidThriftId(fieldId, "::facebook::thrift::test::terse_write::TerseException");
+      throwInvalidThriftId(fieldId, "::facebook::thrift::test::fixtures::terse_write::TerseException");
     }
   }
 };

@@ -14,11 +14,11 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
-void TccStructTraits<::facebook::thrift::test::terse_write::MyStruct>::translateFieldName(
+void TccStructTraits<::facebook::thrift::test::fixtures::terse_write::MyStruct>::translateFieldName(
     std::string_view _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::terse_write::MyStruct>;
+  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::fixtures::terse_write::MyStruct>;
   static const st::translate_field_name_table table{
       data::fields_size,
       data::fields_names.data(),
@@ -35,11 +35,11 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
-void TccStructTraits<::facebook::thrift::test::terse_write::MyUnion>::translateFieldName(
+void TccStructTraits<::facebook::thrift::test::fixtures::terse_write::MyUnion>::translateFieldName(
     std::string_view _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::terse_write::MyUnion>;
+  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::fixtures::terse_write::MyUnion>;
   static const st::translate_field_name_table table{
       data::fields_size,
       data::fields_names.data(),
@@ -56,11 +56,11 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
-void TccStructTraits<::facebook::thrift::test::terse_write::MyStructWithCustomDefault>::translateFieldName(
+void TccStructTraits<::facebook::thrift::test::fixtures::terse_write::MyStructWithCustomDefault>::translateFieldName(
     std::string_view _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::terse_write::MyStructWithCustomDefault>;
+  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::fixtures::terse_write::MyStructWithCustomDefault>;
   static const st::translate_field_name_table table{
       data::fields_size,
       data::fields_names.data(),
@@ -77,11 +77,11 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
-void TccStructTraits<::facebook::thrift::test::terse_write::StructLevelTerseStruct>::translateFieldName(
+void TccStructTraits<::facebook::thrift::test::fixtures::terse_write::StructLevelTerseStruct>::translateFieldName(
     std::string_view _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::terse_write::StructLevelTerseStruct>;
+  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::fixtures::terse_write::StructLevelTerseStruct>;
   static const st::translate_field_name_table table{
       data::fields_size,
       data::fields_names.data(),
@@ -98,11 +98,11 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
-void TccStructTraits<::facebook::thrift::test::terse_write::FieldLevelTerseStruct>::translateFieldName(
+void TccStructTraits<::facebook::thrift::test::fixtures::terse_write::FieldLevelTerseStruct>::translateFieldName(
     std::string_view _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::terse_write::FieldLevelTerseStruct>;
+  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::fixtures::terse_write::FieldLevelTerseStruct>;
   static const st::translate_field_name_table table{
       data::fields_size,
       data::fields_names.data(),
@@ -119,11 +119,11 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
-void TccStructTraits<::facebook::thrift::test::terse_write::AdaptedFields>::translateFieldName(
+void TccStructTraits<::facebook::thrift::test::fixtures::terse_write::AdaptedFields>::translateFieldName(
     std::string_view _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::terse_write::AdaptedFields>;
+  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::fixtures::terse_write::AdaptedFields>;
   static const st::translate_field_name_table table{
       data::fields_size,
       data::fields_names.data(),
@@ -140,11 +140,11 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
-void TccStructTraits<::facebook::thrift::test::terse_write::TerseException>::translateFieldName(
+void TccStructTraits<::facebook::thrift::test::fixtures::terse_write::TerseException>::translateFieldName(
     std::string_view _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::terse_write::TerseException>;
+  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::fixtures::terse_write::TerseException>;
   static const st::translate_field_name_table table{
       data::fields_size,
       data::fields_names.data(),
@@ -157,7 +157,7 @@ void TccStructTraits<::facebook::thrift::test::terse_write::TerseException>::tra
 } // namespace thrift
 } // namespace apache
 
-namespace facebook::thrift::test::terse_write {
+namespace facebook::thrift::test::fixtures::terse_write {
 
 
 
@@ -180,4 +180,4 @@ namespace facebook::thrift::test::terse_write {
 
 
 
-} // namespace facebook::thrift::test::terse_write
+} // namespace facebook::thrift::test::fixtures::terse_write

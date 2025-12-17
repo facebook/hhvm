@@ -23,49 +23,49 @@ namespace thrift {
 namespace detail {
 
 template <>
-struct TccStructTraits<::facebook::thrift::test::terse_write::deprecated::MyStruct> {
+struct TccStructTraits<::facebook::thrift::test::fixtures::terse_write::deprecated::MyStruct> {
   static void translateFieldName(
       std::string_view _fname,
       int16_t& fid,
       apache::thrift::protocol::TType& _ftype) noexcept;
 };
 template <>
-struct TccStructTraits<::facebook::thrift::test::terse_write::deprecated::MyUnion> {
+struct TccStructTraits<::facebook::thrift::test::fixtures::terse_write::deprecated::MyUnion> {
   static void translateFieldName(
       std::string_view _fname,
       int16_t& fid,
       apache::thrift::protocol::TType& _ftype) noexcept;
 };
 template <>
-struct TccStructTraits<::facebook::thrift::test::terse_write::deprecated::StructLevelTerseStruct> {
+struct TccStructTraits<::facebook::thrift::test::fixtures::terse_write::deprecated::StructLevelTerseStruct> {
   static void translateFieldName(
       std::string_view _fname,
       int16_t& fid,
       apache::thrift::protocol::TType& _ftype) noexcept;
 };
 template <>
-struct TccStructTraits<::facebook::thrift::test::terse_write::deprecated::FieldLevelTerseStruct> {
+struct TccStructTraits<::facebook::thrift::test::fixtures::terse_write::deprecated::FieldLevelTerseStruct> {
   static void translateFieldName(
       std::string_view _fname,
       int16_t& fid,
       apache::thrift::protocol::TType& _ftype) noexcept;
 };
 template <>
-struct TccStructTraits<::facebook::thrift::test::terse_write::deprecated::CppRefStructFields> {
+struct TccStructTraits<::facebook::thrift::test::fixtures::terse_write::deprecated::CppRefStructFields> {
   static void translateFieldName(
       std::string_view _fname,
       int16_t& fid,
       apache::thrift::protocol::TType& _ftype) noexcept;
 };
 template <>
-struct TccStructTraits<::facebook::thrift::test::terse_write::deprecated::DeprecatedTerseWriteWithCustomDefault> {
+struct TccStructTraits<::facebook::thrift::test::fixtures::terse_write::deprecated::DeprecatedTerseWriteWithCustomDefault> {
   static void translateFieldName(
       std::string_view _fname,
       int16_t& fid,
       apache::thrift::protocol::TType& _ftype) noexcept;
 };
 template <>
-struct TccStructTraits<::facebook::thrift::test::terse_write::deprecated::DeprecatedTerseWriteWithRedundantCustomDefault> {
+struct TccStructTraits<::facebook::thrift::test::fixtures::terse_write::deprecated::DeprecatedTerseWriteWithRedundantCustomDefault> {
   static void translateFieldName(
       std::string_view _fname,
       int16_t& fid,
@@ -76,7 +76,7 @@ struct TccStructTraits<::facebook::thrift::test::terse_write::deprecated::Deprec
 } // namespace thrift
 } // namespace apache
 
-namespace facebook::thrift::test::terse_write::deprecated {
+namespace facebook::thrift::test::fixtures::terse_write::deprecated {
 
 template <class Protocol_>
 void MyStruct::readNoXfer(Protocol_* iprot) {
@@ -370,7 +370,7 @@ _readField_binary_field:
   }
 _readField_enum_field:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::facebook::thrift::test::terse_write::deprecated::MyEnum>::readWithContext(*iprot, this->__fbthrift_field_enum_field, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum>::readWithContext(*iprot, this->__fbthrift_field_enum_field, _readState);
   }
 
   if (UNLIKELY(!_readState.advanceToNextField(
@@ -428,7 +428,7 @@ _readField_map_field:
 _readField_struct_field:
   {
     _readState.beforeSubobject(iprot);
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::test::terse_write::deprecated::MyStruct>::readWithContext(*iprot, this->__fbthrift_field_struct_field, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::test::fixtures::terse_write::deprecated::MyStruct>::readWithContext(*iprot, this->__fbthrift_field_struct_field, _readState);
     _readState.afterSubobject(iprot);
   }
 
@@ -442,7 +442,7 @@ _readField_struct_field:
 _readField_union_field:
   {
     _readState.beforeSubobject(iprot);
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::variant, ::facebook::thrift::test::terse_write::deprecated::MyUnion>::readWithContext(*iprot, this->__fbthrift_field_union_field, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::variant, ::facebook::thrift::test::fixtures::terse_write::deprecated::MyUnion>::readWithContext(*iprot, this->__fbthrift_field_union_field, _readState);
     _readState.afterSubobject(iprot);
   }
 
@@ -642,9 +642,9 @@ uint32_t StructLevelTerseStruct::serializedSize(Protocol_ const* prot_) const {
     xfer += prot_->serializedFieldSize("binary_field", apache::thrift::protocol::T_STRING, 9);
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::std::string>::serializedSize<false>(*prot_, this->__fbthrift_field_binary_field);
   }
-  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::enum_t<::facebook::thrift::test::terse_write::deprecated::MyEnum>>(this->__fbthrift_field_enum_field))) {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::enum_t<::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum>>(this->__fbthrift_field_enum_field))) {
     xfer += prot_->serializedFieldSize("enum_field", apache::thrift::protocol::T_I32, 10);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::facebook::thrift::test::terse_write::deprecated::MyEnum>::serializedSize<false>(*prot_, this->__fbthrift_field_enum_field);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum>::serializedSize<false>(*prot_, this->__fbthrift_field_enum_field);
   }
   if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::i16_t>>(this->__fbthrift_field_list_field))) {
     xfer += prot_->serializedFieldSize("list_field", apache::thrift::protocol::T_LIST, 11);
@@ -658,13 +658,13 @@ uint32_t StructLevelTerseStruct::serializedSize(Protocol_ const* prot_) const {
     xfer += prot_->serializedFieldSize("map_field", apache::thrift::protocol::T_MAP, 13);
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::integral>, ::std::map<::std::int16_t, ::std::int16_t>>::serializedSize<false>(*prot_, this->__fbthrift_field_map_field);
   }
-  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::facebook::thrift::test::terse_write::deprecated::MyStruct>>(this->__fbthrift_field_struct_field))) {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::facebook::thrift::test::fixtures::terse_write::deprecated::MyStruct>>(this->__fbthrift_field_struct_field))) {
     xfer += prot_->serializedFieldSize("struct_field", apache::thrift::protocol::T_STRUCT, 14);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::test::terse_write::deprecated::MyStruct>::serializedSize<false>(*prot_, this->__fbthrift_field_struct_field);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::test::fixtures::terse_write::deprecated::MyStruct>::serializedSize<false>(*prot_, this->__fbthrift_field_struct_field);
   }
-  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::union_t<::facebook::thrift::test::terse_write::deprecated::MyUnion>>(this->__fbthrift_field_union_field))) {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::union_t<::facebook::thrift::test::fixtures::terse_write::deprecated::MyUnion>>(this->__fbthrift_field_union_field))) {
     xfer += prot_->serializedFieldSize("union_field", apache::thrift::protocol::T_STRUCT, 15);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::variant, ::facebook::thrift::test::terse_write::deprecated::MyUnion>::serializedSize<false>(*prot_, this->__fbthrift_field_union_field);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::variant, ::facebook::thrift::test::fixtures::terse_write::deprecated::MyUnion>::serializedSize<false>(*prot_, this->__fbthrift_field_union_field);
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -710,9 +710,9 @@ uint32_t StructLevelTerseStruct::serializedSizeZC(Protocol_ const* prot_) const 
     xfer += prot_->serializedFieldSize("binary_field", apache::thrift::protocol::T_STRING, 9);
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::std::string>::serializedSize<true>(*prot_, this->__fbthrift_field_binary_field);
   }
-  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::enum_t<::facebook::thrift::test::terse_write::deprecated::MyEnum>>(this->__fbthrift_field_enum_field))) {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::enum_t<::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum>>(this->__fbthrift_field_enum_field))) {
     xfer += prot_->serializedFieldSize("enum_field", apache::thrift::protocol::T_I32, 10);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::facebook::thrift::test::terse_write::deprecated::MyEnum>::serializedSize<false>(*prot_, this->__fbthrift_field_enum_field);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum>::serializedSize<false>(*prot_, this->__fbthrift_field_enum_field);
   }
   if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::i16_t>>(this->__fbthrift_field_list_field))) {
     xfer += prot_->serializedFieldSize("list_field", apache::thrift::protocol::T_LIST, 11);
@@ -726,13 +726,13 @@ uint32_t StructLevelTerseStruct::serializedSizeZC(Protocol_ const* prot_) const 
     xfer += prot_->serializedFieldSize("map_field", apache::thrift::protocol::T_MAP, 13);
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::integral>, ::std::map<::std::int16_t, ::std::int16_t>>::serializedSize<false>(*prot_, this->__fbthrift_field_map_field);
   }
-  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::facebook::thrift::test::terse_write::deprecated::MyStruct>>(this->__fbthrift_field_struct_field))) {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::facebook::thrift::test::fixtures::terse_write::deprecated::MyStruct>>(this->__fbthrift_field_struct_field))) {
     xfer += prot_->serializedFieldSize("struct_field", apache::thrift::protocol::T_STRUCT, 14);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::test::terse_write::deprecated::MyStruct>::serializedSize<true>(*prot_, this->__fbthrift_field_struct_field);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::test::fixtures::terse_write::deprecated::MyStruct>::serializedSize<true>(*prot_, this->__fbthrift_field_struct_field);
   }
-  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::union_t<::facebook::thrift::test::terse_write::deprecated::MyUnion>>(this->__fbthrift_field_union_field))) {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::union_t<::facebook::thrift::test::fixtures::terse_write::deprecated::MyUnion>>(this->__fbthrift_field_union_field))) {
     xfer += prot_->serializedFieldSize("union_field", apache::thrift::protocol::T_STRUCT, 15);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::variant, ::facebook::thrift::test::terse_write::deprecated::MyUnion>::serializedSize<true>(*prot_, this->__fbthrift_field_union_field);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::variant, ::facebook::thrift::test::fixtures::terse_write::deprecated::MyUnion>::serializedSize<true>(*prot_, this->__fbthrift_field_union_field);
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -824,11 +824,11 @@ uint32_t StructLevelTerseStruct::write(Protocol_* prot_) const {
   } else {
     previousFieldHasValue = false;
   }
-  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::enum_t<::facebook::thrift::test::terse_write::deprecated::MyEnum>>(this->__fbthrift_field_enum_field))) {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::enum_t<::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum>>(this->__fbthrift_field_enum_field))) {
     constexpr int16_t kPrevFieldId = 9;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_I32, 10, kPrevFieldId>(*prot_, "enum_field", previousFieldHasValue);
     previousFieldHasValue = true;
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::facebook::thrift::test::terse_write::deprecated::MyEnum>::write(*prot_, this->__fbthrift_field_enum_field);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum>::write(*prot_, this->__fbthrift_field_enum_field);
     xfer += prot_->writeFieldEnd();
   } else {
     previousFieldHasValue = false;
@@ -860,20 +860,20 @@ uint32_t StructLevelTerseStruct::write(Protocol_* prot_) const {
   } else {
     previousFieldHasValue = false;
   }
-  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::facebook::thrift::test::terse_write::deprecated::MyStruct>>(this->__fbthrift_field_struct_field))) {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::facebook::thrift::test::fixtures::terse_write::deprecated::MyStruct>>(this->__fbthrift_field_struct_field))) {
     constexpr int16_t kPrevFieldId = 13;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 14, kPrevFieldId>(*prot_, "struct_field", previousFieldHasValue);
     previousFieldHasValue = true;
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::test::terse_write::deprecated::MyStruct>::write(*prot_, this->__fbthrift_field_struct_field);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::test::fixtures::terse_write::deprecated::MyStruct>::write(*prot_, this->__fbthrift_field_struct_field);
     xfer += prot_->writeFieldEnd();
   } else {
     previousFieldHasValue = false;
   }
-  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::union_t<::facebook::thrift::test::terse_write::deprecated::MyUnion>>(this->__fbthrift_field_union_field))) {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::union_t<::facebook::thrift::test::fixtures::terse_write::deprecated::MyUnion>>(this->__fbthrift_field_union_field))) {
     constexpr int16_t kPrevFieldId = 14;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 15, kPrevFieldId>(*prot_, "union_field", previousFieldHasValue);
     previousFieldHasValue = true;
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::variant, ::facebook::thrift::test::terse_write::deprecated::MyUnion>::write(*prot_, this->__fbthrift_field_union_field);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::variant, ::facebook::thrift::test::fixtures::terse_write::deprecated::MyUnion>::write(*prot_, this->__fbthrift_field_union_field);
     xfer += prot_->writeFieldEnd();
   } else {
     previousFieldHasValue = false;
@@ -1021,7 +1021,7 @@ _readField_terse_binary_field:
   }
 _readField_terse_enum_field:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::facebook::thrift::test::terse_write::deprecated::MyEnum>::readWithContext(*iprot, this->__fbthrift_field_terse_enum_field, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum>::readWithContext(*iprot, this->__fbthrift_field_terse_enum_field, _readState);
   }
 
   if (UNLIKELY(!_readState.advanceToNextField(
@@ -1079,7 +1079,7 @@ _readField_terse_map_field:
 _readField_terse_struct_field:
   {
     _readState.beforeSubobject(iprot);
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::test::terse_write::deprecated::MyStruct>::readWithContext(*iprot, this->__fbthrift_field_terse_struct_field, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::test::fixtures::terse_write::deprecated::MyStruct>::readWithContext(*iprot, this->__fbthrift_field_terse_struct_field, _readState);
     _readState.afterSubobject(iprot);
   }
 
@@ -1209,7 +1209,7 @@ _readField_binary_field:
   }
 _readField_enum_field:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::facebook::thrift::test::terse_write::deprecated::MyEnum>::readWithContext(*iprot, this->__fbthrift_field_enum_field, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum>::readWithContext(*iprot, this->__fbthrift_field_enum_field, _readState);
   }
  this->__isset.set(9, true);
 
@@ -1271,7 +1271,7 @@ _readField_map_field:
 _readField_struct_field:
   {
     _readState.beforeSubobject(iprot);
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::test::terse_write::deprecated::MyStruct>::readWithContext(*iprot, this->__fbthrift_field_struct_field, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::test::fixtures::terse_write::deprecated::MyStruct>::readWithContext(*iprot, this->__fbthrift_field_struct_field, _readState);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(13, true);
@@ -1286,7 +1286,7 @@ _readField_struct_field:
 _readField_union_field:
   {
     _readState.beforeSubobject(iprot);
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::variant, ::facebook::thrift::test::terse_write::deprecated::MyUnion>::readWithContext(*iprot, this->__fbthrift_field_union_field, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::variant, ::facebook::thrift::test::fixtures::terse_write::deprecated::MyUnion>::readWithContext(*iprot, this->__fbthrift_field_union_field, _readState);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(14, true);
@@ -1620,9 +1620,9 @@ uint32_t FieldLevelTerseStruct::serializedSize(Protocol_ const* prot_) const {
     xfer += prot_->serializedFieldSize("terse_binary_field", apache::thrift::protocol::T_STRING, 9);
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::std::string>::serializedSize<false>(*prot_, this->__fbthrift_field_terse_binary_field);
   }
-  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::enum_t<::facebook::thrift::test::terse_write::deprecated::MyEnum>>(this->__fbthrift_field_terse_enum_field))) {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::enum_t<::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum>>(this->__fbthrift_field_terse_enum_field))) {
     xfer += prot_->serializedFieldSize("terse_enum_field", apache::thrift::protocol::T_I32, 10);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::facebook::thrift::test::terse_write::deprecated::MyEnum>::serializedSize<false>(*prot_, this->__fbthrift_field_terse_enum_field);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum>::serializedSize<false>(*prot_, this->__fbthrift_field_terse_enum_field);
   }
   if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::i16_t>>(this->__fbthrift_field_terse_list_field))) {
     xfer += prot_->serializedFieldSize("terse_list_field", apache::thrift::protocol::T_LIST, 11);
@@ -1636,9 +1636,9 @@ uint32_t FieldLevelTerseStruct::serializedSize(Protocol_ const* prot_) const {
     xfer += prot_->serializedFieldSize("terse_map_field", apache::thrift::protocol::T_MAP, 13);
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::integral>, ::std::map<::std::int16_t, ::std::int16_t>>::serializedSize<false>(*prot_, this->__fbthrift_field_terse_map_field);
   }
-  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::facebook::thrift::test::terse_write::deprecated::MyStruct>>(this->__fbthrift_field_terse_struct_field))) {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::facebook::thrift::test::fixtures::terse_write::deprecated::MyStruct>>(this->__fbthrift_field_terse_struct_field))) {
     xfer += prot_->serializedFieldSize("terse_struct_field", apache::thrift::protocol::T_STRUCT, 14);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::test::terse_write::deprecated::MyStruct>::serializedSize<false>(*prot_, this->__fbthrift_field_terse_struct_field);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::test::fixtures::terse_write::deprecated::MyStruct>::serializedSize<false>(*prot_, this->__fbthrift_field_terse_struct_field);
   }
   if (this->__fbthrift_field_bool_field != bool()) {
     xfer += prot_->serializedFieldSize("bool_field", apache::thrift::protocol::T_BOOL, 15);
@@ -1676,9 +1676,9 @@ uint32_t FieldLevelTerseStruct::serializedSize(Protocol_ const* prot_) const {
     xfer += prot_->serializedFieldSize("binary_field", apache::thrift::protocol::T_STRING, 23);
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::std::string>::serializedSize<false>(*prot_, this->__fbthrift_field_binary_field);
   }
-  if (this->__fbthrift_field_enum_field != ::facebook::thrift::test::terse_write::deprecated::MyEnum()) {
+  if (this->__fbthrift_field_enum_field != ::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum()) {
     xfer += prot_->serializedFieldSize("enum_field", apache::thrift::protocol::T_I32, 24);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::facebook::thrift::test::terse_write::deprecated::MyEnum>::serializedSize<false>(*prot_, this->__fbthrift_field_enum_field);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum>::serializedSize<false>(*prot_, this->__fbthrift_field_enum_field);
   }
   if (!::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::i16_t>>(this->__fbthrift_field_list_field)) {
     xfer += prot_->serializedFieldSize("list_field", apache::thrift::protocol::T_LIST, 25);
@@ -1694,11 +1694,11 @@ uint32_t FieldLevelTerseStruct::serializedSize(Protocol_ const* prot_) const {
   }
   {
     xfer += prot_->serializedFieldSize("struct_field", apache::thrift::protocol::T_STRUCT, 28);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::test::terse_write::deprecated::MyStruct>::serializedSize<false>(*prot_, this->__fbthrift_field_struct_field);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::test::fixtures::terse_write::deprecated::MyStruct>::serializedSize<false>(*prot_, this->__fbthrift_field_struct_field);
   }
   {
     xfer += prot_->serializedFieldSize("union_field", apache::thrift::protocol::T_STRUCT, 29);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::variant, ::facebook::thrift::test::terse_write::deprecated::MyUnion>::serializedSize<false>(*prot_, this->__fbthrift_field_union_field);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::variant, ::facebook::thrift::test::fixtures::terse_write::deprecated::MyUnion>::serializedSize<false>(*prot_, this->__fbthrift_field_union_field);
   }
   if (this->__fbthrift_field_iobuf_ptr_field != std::unique_ptr<folly::IOBuf>()) {
     xfer += prot_->serializedFieldSize("iobuf_ptr_field", apache::thrift::protocol::T_BYTE, 30);
@@ -1748,9 +1748,9 @@ uint32_t FieldLevelTerseStruct::serializedSizeZC(Protocol_ const* prot_) const {
     xfer += prot_->serializedFieldSize("terse_binary_field", apache::thrift::protocol::T_STRING, 9);
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::std::string>::serializedSize<true>(*prot_, this->__fbthrift_field_terse_binary_field);
   }
-  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::enum_t<::facebook::thrift::test::terse_write::deprecated::MyEnum>>(this->__fbthrift_field_terse_enum_field))) {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::enum_t<::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum>>(this->__fbthrift_field_terse_enum_field))) {
     xfer += prot_->serializedFieldSize("terse_enum_field", apache::thrift::protocol::T_I32, 10);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::facebook::thrift::test::terse_write::deprecated::MyEnum>::serializedSize<false>(*prot_, this->__fbthrift_field_terse_enum_field);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum>::serializedSize<false>(*prot_, this->__fbthrift_field_terse_enum_field);
   }
   if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::i16_t>>(this->__fbthrift_field_terse_list_field))) {
     xfer += prot_->serializedFieldSize("terse_list_field", apache::thrift::protocol::T_LIST, 11);
@@ -1764,9 +1764,9 @@ uint32_t FieldLevelTerseStruct::serializedSizeZC(Protocol_ const* prot_) const {
     xfer += prot_->serializedFieldSize("terse_map_field", apache::thrift::protocol::T_MAP, 13);
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::integral>, ::std::map<::std::int16_t, ::std::int16_t>>::serializedSize<false>(*prot_, this->__fbthrift_field_terse_map_field);
   }
-  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::facebook::thrift::test::terse_write::deprecated::MyStruct>>(this->__fbthrift_field_terse_struct_field))) {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::facebook::thrift::test::fixtures::terse_write::deprecated::MyStruct>>(this->__fbthrift_field_terse_struct_field))) {
     xfer += prot_->serializedFieldSize("terse_struct_field", apache::thrift::protocol::T_STRUCT, 14);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::test::terse_write::deprecated::MyStruct>::serializedSize<true>(*prot_, this->__fbthrift_field_terse_struct_field);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::test::fixtures::terse_write::deprecated::MyStruct>::serializedSize<true>(*prot_, this->__fbthrift_field_terse_struct_field);
   }
   if (this->__fbthrift_field_bool_field != bool()) {
     xfer += prot_->serializedFieldSize("bool_field", apache::thrift::protocol::T_BOOL, 15);
@@ -1804,9 +1804,9 @@ uint32_t FieldLevelTerseStruct::serializedSizeZC(Protocol_ const* prot_) const {
     xfer += prot_->serializedFieldSize("binary_field", apache::thrift::protocol::T_STRING, 23);
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::std::string>::serializedSize<true>(*prot_, this->__fbthrift_field_binary_field);
   }
-  if (this->__fbthrift_field_enum_field != ::facebook::thrift::test::terse_write::deprecated::MyEnum()) {
+  if (this->__fbthrift_field_enum_field != ::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum()) {
     xfer += prot_->serializedFieldSize("enum_field", apache::thrift::protocol::T_I32, 24);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::facebook::thrift::test::terse_write::deprecated::MyEnum>::serializedSize<false>(*prot_, this->__fbthrift_field_enum_field);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum>::serializedSize<false>(*prot_, this->__fbthrift_field_enum_field);
   }
   if (!::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::i16_t>>(this->__fbthrift_field_list_field)) {
     xfer += prot_->serializedFieldSize("list_field", apache::thrift::protocol::T_LIST, 25);
@@ -1822,11 +1822,11 @@ uint32_t FieldLevelTerseStruct::serializedSizeZC(Protocol_ const* prot_) const {
   }
   {
     xfer += prot_->serializedFieldSize("struct_field", apache::thrift::protocol::T_STRUCT, 28);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::test::terse_write::deprecated::MyStruct>::serializedSize<true>(*prot_, this->__fbthrift_field_struct_field);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::test::fixtures::terse_write::deprecated::MyStruct>::serializedSize<true>(*prot_, this->__fbthrift_field_struct_field);
   }
   {
     xfer += prot_->serializedFieldSize("union_field", apache::thrift::protocol::T_STRUCT, 29);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::variant, ::facebook::thrift::test::terse_write::deprecated::MyUnion>::serializedSize<true>(*prot_, this->__fbthrift_field_union_field);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::variant, ::facebook::thrift::test::fixtures::terse_write::deprecated::MyUnion>::serializedSize<true>(*prot_, this->__fbthrift_field_union_field);
   }
   if (this->__fbthrift_field_iobuf_ptr_field != std::unique_ptr<folly::IOBuf>()) {
     xfer += prot_->serializedFieldSize("iobuf_ptr_field", apache::thrift::protocol::T_BYTE, 30);
@@ -1922,11 +1922,11 @@ uint32_t FieldLevelTerseStruct::write(Protocol_* prot_) const {
   } else {
     previousFieldHasValue = false;
   }
-  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::enum_t<::facebook::thrift::test::terse_write::deprecated::MyEnum>>(this->__fbthrift_field_terse_enum_field))) {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::enum_t<::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum>>(this->__fbthrift_field_terse_enum_field))) {
     constexpr int16_t kPrevFieldId = 9;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_I32, 10, kPrevFieldId>(*prot_, "terse_enum_field", previousFieldHasValue);
     previousFieldHasValue = true;
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::facebook::thrift::test::terse_write::deprecated::MyEnum>::write(*prot_, this->__fbthrift_field_terse_enum_field);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum>::write(*prot_, this->__fbthrift_field_terse_enum_field);
     xfer += prot_->writeFieldEnd();
   } else {
     previousFieldHasValue = false;
@@ -1958,11 +1958,11 @@ uint32_t FieldLevelTerseStruct::write(Protocol_* prot_) const {
   } else {
     previousFieldHasValue = false;
   }
-  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::facebook::thrift::test::terse_write::deprecated::MyStruct>>(this->__fbthrift_field_terse_struct_field))) {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::facebook::thrift::test::fixtures::terse_write::deprecated::MyStruct>>(this->__fbthrift_field_terse_struct_field))) {
     constexpr int16_t kPrevFieldId = 13;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 14, kPrevFieldId>(*prot_, "terse_struct_field", previousFieldHasValue);
     previousFieldHasValue = true;
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::test::terse_write::deprecated::MyStruct>::write(*prot_, this->__fbthrift_field_terse_struct_field);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::test::fixtures::terse_write::deprecated::MyStruct>::write(*prot_, this->__fbthrift_field_terse_struct_field);
     xfer += prot_->writeFieldEnd();
   } else {
     previousFieldHasValue = false;
@@ -2048,11 +2048,11 @@ uint32_t FieldLevelTerseStruct::write(Protocol_* prot_) const {
   } else {
     previousFieldHasValue = false;
   }
-  if (this->__fbthrift_field_enum_field != ::facebook::thrift::test::terse_write::deprecated::MyEnum()) {
+  if (this->__fbthrift_field_enum_field != ::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum()) {
     constexpr int16_t kPrevFieldId = 23;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_I32, 24, kPrevFieldId>(*prot_, "enum_field", previousFieldHasValue);
     previousFieldHasValue = true;
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::facebook::thrift::test::terse_write::deprecated::MyEnum>::write(*prot_, this->__fbthrift_field_enum_field);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum>::write(*prot_, this->__fbthrift_field_enum_field);
     xfer += prot_->writeFieldEnd();
   } else {
     previousFieldHasValue = false;
@@ -2088,14 +2088,14 @@ uint32_t FieldLevelTerseStruct::write(Protocol_* prot_) const {
     constexpr int16_t kPrevFieldId = 27;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 28, kPrevFieldId>(*prot_, "struct_field", previousFieldHasValue);
     previousFieldHasValue = true;
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::test::terse_write::deprecated::MyStruct>::write(*prot_, this->__fbthrift_field_struct_field);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::test::fixtures::terse_write::deprecated::MyStruct>::write(*prot_, this->__fbthrift_field_struct_field);
     xfer += prot_->writeFieldEnd();
   }
   {
     constexpr int16_t kPrevFieldId = 28;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 29, kPrevFieldId>(*prot_, "union_field", previousFieldHasValue);
     previousFieldHasValue = true;
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::variant, ::facebook::thrift::test::terse_write::deprecated::MyUnion>::write(*prot_, this->__fbthrift_field_union_field);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::variant, ::facebook::thrift::test::fixtures::terse_write::deprecated::MyUnion>::write(*prot_, this->__fbthrift_field_union_field);
     xfer += prot_->writeFieldEnd();
   }
   if (this->__fbthrift_field_iobuf_ptr_field != std::unique_ptr<folly::IOBuf>()) {
@@ -2157,8 +2157,8 @@ _readField_primitive_ref_field:
 _readField_struct_ref_field:
   {
     _readState.beforeSubobject(iprot);
-    auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::std::unique_ptr<::facebook::thrift::test::terse_write::deprecated::MyStruct>>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::test::terse_write::deprecated::MyStruct>::readWithContext(*iprot, *ptr, _readState);
+    auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::std::unique_ptr<::facebook::thrift::test::fixtures::terse_write::deprecated::MyStruct>>();
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::test::fixtures::terse_write::deprecated::MyStruct>::readWithContext(*iprot, *ptr, _readState);
     this->__fbthrift_field_struct_ref_field = std::move(ptr);
     _readState.afterSubobject(iprot);
   }
@@ -2228,7 +2228,7 @@ uint32_t CppRefStructFields::serializedSize(Protocol_ const* prot_) const {
   if (this->__fbthrift_field_struct_ref_field) {
     xfer += prot_->serializedFieldSize("struct_ref_field", apache::thrift::protocol::T_STRUCT, 2);
     if (this->__fbthrift_field_struct_ref_field) {
-      xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::test::terse_write::deprecated::MyStruct>::serializedSize<false>(*prot_, *this->__fbthrift_field_struct_ref_field);
+      xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::test::fixtures::terse_write::deprecated::MyStruct>::serializedSize<false>(*prot_, *this->__fbthrift_field_struct_ref_field);
     } else {
       xfer += prot_->serializedStructSize("MyStruct");
       xfer += prot_->serializedSizeStop();
@@ -2251,7 +2251,7 @@ uint32_t CppRefStructFields::serializedSizeZC(Protocol_ const* prot_) const {
   if (this->__fbthrift_field_struct_ref_field) {
     xfer += prot_->serializedFieldSize("struct_ref_field", apache::thrift::protocol::T_STRUCT, 2);
     if (this->__fbthrift_field_struct_ref_field) {
-      xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::test::terse_write::deprecated::MyStruct>::serializedSize<true>(*prot_, *this->__fbthrift_field_struct_ref_field);
+      xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::test::fixtures::terse_write::deprecated::MyStruct>::serializedSize<true>(*prot_, *this->__fbthrift_field_struct_ref_field);
     } else {
       xfer += prot_->serializedStructSize("MyStruct");
       xfer += prot_->serializedSizeStop();
@@ -2282,7 +2282,7 @@ uint32_t CppRefStructFields::write(Protocol_* prot_) const {
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 2, kPrevFieldId>(*prot_, "struct_ref_field", previousFieldHasValue);
     previousFieldHasValue = true;
     if (this->__fbthrift_field_struct_ref_field) {
-      xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::test::terse_write::deprecated::MyStruct>::write(*prot_, *this->__fbthrift_field_struct_ref_field);
+      xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::test::fixtures::terse_write::deprecated::MyStruct>::write(*prot_, *this->__fbthrift_field_struct_ref_field);
     } else {
       xfer += prot_->writeStructBegin("MyStruct");
       xfer += prot_->writeFieldStop();
@@ -2444,7 +2444,7 @@ _readField_binary_field:
   }
 _readField_enum_field:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::facebook::thrift::test::terse_write::deprecated::MyEnum>::readWithContext(*iprot, this->__fbthrift_field_enum_field, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum>::readWithContext(*iprot, this->__fbthrift_field_enum_field, _readState);
   }
  this->__isset.set(9, true);
 
@@ -2676,9 +2676,9 @@ uint32_t DeprecatedTerseWriteWithCustomDefault::serializedSize(Protocol_ const* 
     xfer += prot_->serializedFieldSize("binary_field", apache::thrift::protocol::T_STRING, 9);
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::std::string>::serializedSize<false>(*prot_, this->__fbthrift_field_binary_field);
   }
-  if (this->__fbthrift_field_enum_field !=  ::facebook::thrift::test::terse_write::deprecated::MyEnum::ME1) {
+  if (this->__fbthrift_field_enum_field !=  ::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum::ME1) {
     xfer += prot_->serializedFieldSize("enum_field", apache::thrift::protocol::T_I32, 10);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::facebook::thrift::test::terse_write::deprecated::MyEnum>::serializedSize<false>(*prot_, this->__fbthrift_field_enum_field);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum>::serializedSize<false>(*prot_, this->__fbthrift_field_enum_field);
   }
   if (!::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::i16_t>>(this->__fbthrift_field_list_field)) {
     xfer += prot_->serializedFieldSize("list_field", apache::thrift::protocol::T_LIST, 11);
@@ -2736,9 +2736,9 @@ uint32_t DeprecatedTerseWriteWithCustomDefault::serializedSizeZC(Protocol_ const
     xfer += prot_->serializedFieldSize("binary_field", apache::thrift::protocol::T_STRING, 9);
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::std::string>::serializedSize<true>(*prot_, this->__fbthrift_field_binary_field);
   }
-  if (this->__fbthrift_field_enum_field !=  ::facebook::thrift::test::terse_write::deprecated::MyEnum::ME1) {
+  if (this->__fbthrift_field_enum_field !=  ::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum::ME1) {
     xfer += prot_->serializedFieldSize("enum_field", apache::thrift::protocol::T_I32, 10);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::facebook::thrift::test::terse_write::deprecated::MyEnum>::serializedSize<false>(*prot_, this->__fbthrift_field_enum_field);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum>::serializedSize<false>(*prot_, this->__fbthrift_field_enum_field);
   }
   if (!::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::i16_t>>(this->__fbthrift_field_list_field)) {
     xfer += prot_->serializedFieldSize("list_field", apache::thrift::protocol::T_LIST, 11);
@@ -2842,11 +2842,11 @@ uint32_t DeprecatedTerseWriteWithCustomDefault::write(Protocol_* prot_) const {
   } else {
     previousFieldHasValue = false;
   }
-  if (this->__fbthrift_field_enum_field !=  ::facebook::thrift::test::terse_write::deprecated::MyEnum::ME1) {
+  if (this->__fbthrift_field_enum_field !=  ::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum::ME1) {
     constexpr int16_t kPrevFieldId = 9;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_I32, 10, kPrevFieldId>(*prot_, "enum_field", previousFieldHasValue);
     previousFieldHasValue = true;
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::facebook::thrift::test::terse_write::deprecated::MyEnum>::write(*prot_, this->__fbthrift_field_enum_field);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum>::write(*prot_, this->__fbthrift_field_enum_field);
     xfer += prot_->writeFieldEnd();
   } else {
     previousFieldHasValue = false;
@@ -3030,7 +3030,7 @@ _readField_binary_field:
   }
 _readField_enum_field:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::facebook::thrift::test::terse_write::deprecated::MyEnum>::readWithContext(*iprot, this->__fbthrift_field_enum_field, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum>::readWithContext(*iprot, this->__fbthrift_field_enum_field, _readState);
   }
  this->__isset.set(9, true);
 
@@ -3262,9 +3262,9 @@ uint32_t DeprecatedTerseWriteWithRedundantCustomDefault::serializedSize(Protocol
     xfer += prot_->serializedFieldSize("binary_field", apache::thrift::protocol::T_STRING, 9);
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::std::string>::serializedSize<false>(*prot_, this->__fbthrift_field_binary_field);
   }
-  if (this->__fbthrift_field_enum_field !=  ::facebook::thrift::test::terse_write::deprecated::MyEnum::ME0) {
+  if (this->__fbthrift_field_enum_field !=  ::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum::ME0) {
     xfer += prot_->serializedFieldSize("enum_field", apache::thrift::protocol::T_I32, 10);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::facebook::thrift::test::terse_write::deprecated::MyEnum>::serializedSize<false>(*prot_, this->__fbthrift_field_enum_field);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum>::serializedSize<false>(*prot_, this->__fbthrift_field_enum_field);
   }
   if (!::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::i16_t>>(this->__fbthrift_field_list_field)) {
     xfer += prot_->serializedFieldSize("list_field", apache::thrift::protocol::T_LIST, 11);
@@ -3322,9 +3322,9 @@ uint32_t DeprecatedTerseWriteWithRedundantCustomDefault::serializedSizeZC(Protoc
     xfer += prot_->serializedFieldSize("binary_field", apache::thrift::protocol::T_STRING, 9);
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::std::string>::serializedSize<true>(*prot_, this->__fbthrift_field_binary_field);
   }
-  if (this->__fbthrift_field_enum_field !=  ::facebook::thrift::test::terse_write::deprecated::MyEnum::ME0) {
+  if (this->__fbthrift_field_enum_field !=  ::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum::ME0) {
     xfer += prot_->serializedFieldSize("enum_field", apache::thrift::protocol::T_I32, 10);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::facebook::thrift::test::terse_write::deprecated::MyEnum>::serializedSize<false>(*prot_, this->__fbthrift_field_enum_field);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum>::serializedSize<false>(*prot_, this->__fbthrift_field_enum_field);
   }
   if (!::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::i16_t>>(this->__fbthrift_field_list_field)) {
     xfer += prot_->serializedFieldSize("list_field", apache::thrift::protocol::T_LIST, 11);
@@ -3428,11 +3428,11 @@ uint32_t DeprecatedTerseWriteWithRedundantCustomDefault::write(Protocol_* prot_)
   } else {
     previousFieldHasValue = false;
   }
-  if (this->__fbthrift_field_enum_field !=  ::facebook::thrift::test::terse_write::deprecated::MyEnum::ME0) {
+  if (this->__fbthrift_field_enum_field !=  ::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum::ME0) {
     constexpr int16_t kPrevFieldId = 9;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_I32, 10, kPrevFieldId>(*prot_, "enum_field", previousFieldHasValue);
     previousFieldHasValue = true;
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::facebook::thrift::test::terse_write::deprecated::MyEnum>::write(*prot_, this->__fbthrift_field_enum_field);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum>::write(*prot_, this->__fbthrift_field_enum_field);
     xfer += prot_->writeFieldEnd();
   } else {
     previousFieldHasValue = false;
@@ -3479,4 +3479,4 @@ extern template uint32_t DeprecatedTerseWriteWithRedundantCustomDefault::seriali
 extern template uint32_t DeprecatedTerseWriteWithRedundantCustomDefault::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // namespace facebook::thrift::test::terse_write::deprecated
+} // namespace facebook::thrift::test::fixtures::terse_write::deprecated

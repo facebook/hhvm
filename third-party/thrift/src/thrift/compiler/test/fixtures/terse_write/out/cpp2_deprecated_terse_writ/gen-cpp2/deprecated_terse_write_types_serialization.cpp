@@ -14,11 +14,11 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
-void TccStructTraits<::facebook::thrift::test::terse_write::deprecated::MyStruct>::translateFieldName(
+void TccStructTraits<::facebook::thrift::test::fixtures::terse_write::deprecated::MyStruct>::translateFieldName(
     std::string_view _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::terse_write::deprecated::MyStruct>;
+  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::fixtures::terse_write::deprecated::MyStruct>;
   static const st::translate_field_name_table table{
       data::fields_size,
       data::fields_names.data(),
@@ -35,11 +35,11 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
-void TccStructTraits<::facebook::thrift::test::terse_write::deprecated::MyUnion>::translateFieldName(
+void TccStructTraits<::facebook::thrift::test::fixtures::terse_write::deprecated::MyUnion>::translateFieldName(
     std::string_view _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::terse_write::deprecated::MyUnion>;
+  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::fixtures::terse_write::deprecated::MyUnion>;
   static const st::translate_field_name_table table{
       data::fields_size,
       data::fields_names.data(),
@@ -56,11 +56,11 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
-void TccStructTraits<::facebook::thrift::test::terse_write::deprecated::StructLevelTerseStruct>::translateFieldName(
+void TccStructTraits<::facebook::thrift::test::fixtures::terse_write::deprecated::StructLevelTerseStruct>::translateFieldName(
     std::string_view _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::terse_write::deprecated::StructLevelTerseStruct>;
+  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::fixtures::terse_write::deprecated::StructLevelTerseStruct>;
   static const st::translate_field_name_table table{
       data::fields_size,
       data::fields_names.data(),
@@ -77,11 +77,11 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
-void TccStructTraits<::facebook::thrift::test::terse_write::deprecated::FieldLevelTerseStruct>::translateFieldName(
+void TccStructTraits<::facebook::thrift::test::fixtures::terse_write::deprecated::FieldLevelTerseStruct>::translateFieldName(
     std::string_view _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::terse_write::deprecated::FieldLevelTerseStruct>;
+  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::fixtures::terse_write::deprecated::FieldLevelTerseStruct>;
   static const st::translate_field_name_table table{
       data::fields_size,
       data::fields_names.data(),
@@ -98,11 +98,11 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
-void TccStructTraits<::facebook::thrift::test::terse_write::deprecated::CppRefStructFields>::translateFieldName(
+void TccStructTraits<::facebook::thrift::test::fixtures::terse_write::deprecated::CppRefStructFields>::translateFieldName(
     std::string_view _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::terse_write::deprecated::CppRefStructFields>;
+  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::fixtures::terse_write::deprecated::CppRefStructFields>;
   static const st::translate_field_name_table table{
       data::fields_size,
       data::fields_names.data(),
@@ -119,11 +119,11 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
-void TccStructTraits<::facebook::thrift::test::terse_write::deprecated::DeprecatedTerseWriteWithCustomDefault>::translateFieldName(
+void TccStructTraits<::facebook::thrift::test::fixtures::terse_write::deprecated::DeprecatedTerseWriteWithCustomDefault>::translateFieldName(
     std::string_view _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::terse_write::deprecated::DeprecatedTerseWriteWithCustomDefault>;
+  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::fixtures::terse_write::deprecated::DeprecatedTerseWriteWithCustomDefault>;
   static const st::translate_field_name_table table{
       data::fields_size,
       data::fields_names.data(),
@@ -140,11 +140,11 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
-void TccStructTraits<::facebook::thrift::test::terse_write::deprecated::DeprecatedTerseWriteWithRedundantCustomDefault>::translateFieldName(
+void TccStructTraits<::facebook::thrift::test::fixtures::terse_write::deprecated::DeprecatedTerseWriteWithRedundantCustomDefault>::translateFieldName(
     std::string_view _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::terse_write::deprecated::DeprecatedTerseWriteWithRedundantCustomDefault>;
+  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::fixtures::terse_write::deprecated::DeprecatedTerseWriteWithRedundantCustomDefault>;
   static const st::translate_field_name_table table{
       data::fields_size,
       data::fields_names.data(),
@@ -157,7 +157,7 @@ void TccStructTraits<::facebook::thrift::test::terse_write::deprecated::Deprecat
 } // namespace thrift
 } // namespace apache
 
-namespace facebook::thrift::test::terse_write::deprecated {
+namespace facebook::thrift::test::fixtures::terse_write::deprecated {
 
 
 
@@ -180,4 +180,4 @@ namespace facebook::thrift::test::terse_write::deprecated {
 
 
 
-} // namespace facebook::thrift::test::terse_write::deprecated
+} // namespace facebook::thrift::test::fixtures::terse_write::deprecated

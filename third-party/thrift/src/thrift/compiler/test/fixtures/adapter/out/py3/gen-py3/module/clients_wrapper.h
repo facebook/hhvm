@@ -33,6 +33,8 @@
 namespace facebook {
 namespace thrift {
 namespace test {
+namespace fixtures {
+namespace adapter {
 
 class ServiceClientWrapper : public ::thrift::py3::ClientWrapper {
   public:
@@ -42,7 +44,7 @@ class ServiceClientWrapper : public ::thrift::py3::ClientWrapper {
       apache::thrift::RpcOptions& rpcOptions,
       std::string arg_arg1,
       std::string arg_arg2,
-      ::facebook::thrift::test::Foo arg_arg3);
+      ::facebook::thrift::test::fixtures::adapter::Foo arg_arg3);
 };
 
 
@@ -50,14 +52,16 @@ class AdapterServiceClientWrapper : public ::thrift::py3::ClientWrapper {
   public:
     using ::thrift::py3::ClientWrapper::ClientWrapper;
 
-    folly::Future<::facebook::thrift::test::CountingStruct> count(
+    folly::Future<::facebook::thrift::test::fixtures::adapter::CountingStruct> count(
       apache::thrift::RpcOptions& rpcOptions);
-    folly::Future<::facebook::thrift::test::HeapAllocated> adaptedTypes(
+    folly::Future<::facebook::thrift::test::fixtures::adapter::HeapAllocated> adaptedTypes(
       apache::thrift::RpcOptions& rpcOptions,
-      ::facebook::thrift::test::HeapAllocated arg_arg);
+      ::facebook::thrift::test::fixtures::adapter::HeapAllocated arg_arg);
 };
 
 
 } // namespace facebook
 } // namespace thrift
 } // namespace test
+} // namespace fixtures
+} // namespace adapter

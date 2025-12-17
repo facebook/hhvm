@@ -10,57 +10,57 @@
 
 #include <thrift/lib/cpp2/gen/module_data_cpp.h>
 
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::service_schema {
 class PrimitivesService;
-} // namespace facebook::thrift::test
-namespace facebook::thrift::test {
+} // namespace facebook::thrift::test::fixtures::service_schema
+namespace facebook::thrift::test::fixtures::service_schema {
 class ExtendedService;
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::service_schema
 namespace apache::thrift {
 
-THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::facebook::thrift::test::CustomException>::name = "CustomException";
-THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 2> TStructDataStorage<::facebook::thrift::test::CustomException>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::facebook::thrift::test::fixtures::service_schema::CustomException>::name = "CustomException";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 2> TStructDataStorage<::facebook::thrift::test::fixtures::service_schema::CustomException>::fields_names = { {
   "name"sv,
   "result"sv,
 }};
-THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 2> TStructDataStorage<::facebook::thrift::test::CustomException>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 2> TStructDataStorage<::facebook::thrift::test::fixtures::service_schema::CustomException>::fields_ids = { {
   1,
   2,
 }};
-THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 2> TStructDataStorage<::facebook::thrift::test::CustomException>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 2> TStructDataStorage<::facebook::thrift::test::fixtures::service_schema::CustomException>::fields_types = { {
   TType::T_STRING,
   TType::T_I32,
 }};
-THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 2> TStructDataStorage<::facebook::thrift::test::CustomException>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 2> TStructDataStorage<::facebook::thrift::test::fixtures::service_schema::CustomException>::isset_indexes = { {
   0,
   1,
 }};
 
 namespace detail {
 
-::folly::Range<const ::std::string_view*> TSchemaAssociation<::facebook::thrift::test::CustomException, false>::bundle() {
-    return ::facebook::thrift::test::module_constants::_fbthrift_schema_bc0984a218954d47_includes();
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::facebook::thrift::test::fixtures::service_schema::CustomException, false>::bundle() {
+    return ::facebook::thrift::test::fixtures::service_schema::module_constants::_fbthrift_schema_db27c1f89cb27d2_includes();
 }
 
-::folly::Range<const ::std::string_view*> TSchemaAssociation<::facebook::thrift::test::Result, true>::bundle() {
-    return ::facebook::thrift::test::module_constants::_fbthrift_schema_bc0984a218954d47_includes();
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::facebook::thrift::test::fixtures::service_schema::Result, true>::bundle() {
+    return ::facebook::thrift::test::fixtures::service_schema::module_constants::_fbthrift_schema_db27c1f89cb27d2_includes();
 }
 
-template <> struct TSchemaAssociation<::facebook::thrift::test::PrimitivesService, false> {
+template <> struct TSchemaAssociation<::facebook::thrift::test::fixtures::service_schema::PrimitivesService, false> {
   static ::folly::Range<const ::std::string_view*> bundle();
-  static constexpr int64_t programId = -4897237288056697529;
-  static constexpr ::std::string_view definitionKey = {"\x8a\x6f\xcf\x1a\xc4\x7f\xef\xe9\xfc\xd0\xb5\xce\x3b\x5e\x14\xb4", 16};
+  static constexpr int64_t programId = 986987743245182930;
+  static constexpr ::std::string_view definitionKey = {"\x07\xc4\x0a\xe6\x37\xa8\x3b\x59\x57\x38\x32\x5c\xb2\xa7\x99\xc4", 16};
 };
-::folly::Range<const ::std::string_view*> TSchemaAssociation<::facebook::thrift::test::PrimitivesService, false>::bundle() {
-    return ::facebook::thrift::test::module_constants::_fbthrift_schema_bc0984a218954d47_includes();
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::facebook::thrift::test::fixtures::service_schema::PrimitivesService, false>::bundle() {
+    return ::facebook::thrift::test::fixtures::service_schema::module_constants::_fbthrift_schema_db27c1f89cb27d2_includes();
 }
-template <> struct TSchemaAssociation<::facebook::thrift::test::ExtendedService, false> {
+template <> struct TSchemaAssociation<::facebook::thrift::test::fixtures::service_schema::ExtendedService, false> {
   static ::folly::Range<const ::std::string_view*> bundle();
-  static constexpr int64_t programId = -4897237288056697529;
-  static constexpr ::std::string_view definitionKey = {"\x2f\x39\x63\x5e\x7a\x62\x4d\xa7\x6e\x69\x78\xae\x7e\x49\xe3\x79", 16};
+  static constexpr int64_t programId = 986987743245182930;
+  static constexpr ::std::string_view definitionKey = {"\x18\x6b\x65\x4f\x98\x6f\x7b\x04\xca\x95\xdf\xc9\xae\xff\xe8\x08", 16};
 };
-::folly::Range<const ::std::string_view*> TSchemaAssociation<::facebook::thrift::test::ExtendedService, false>::bundle() {
-    return ::facebook::thrift::test::module_constants::_fbthrift_schema_bc0984a218954d47_includes();
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::facebook::thrift::test::fixtures::service_schema::ExtendedService, false>::bundle() {
+    return ::facebook::thrift::test::fixtures::service_schema::module_constants::_fbthrift_schema_db27c1f89cb27d2_includes();
 }
 } // namespace detail
 } // namespace apache::thrift

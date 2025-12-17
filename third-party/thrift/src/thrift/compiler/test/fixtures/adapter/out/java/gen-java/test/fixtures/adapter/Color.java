@@ -45,7 +45,7 @@ public enum Color implements com.facebook.thrift.enums.BaseEnum, com.facebook.th
     }
 
     static {
-      com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/Color"), Color.class, Color::read0));
+      com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/fixtures/adapter/Color"), Color.class, Color::read0));
     }
     public static com.facebook.thrift.payload.Reader<Color> asReader() {
         return Color::read0;

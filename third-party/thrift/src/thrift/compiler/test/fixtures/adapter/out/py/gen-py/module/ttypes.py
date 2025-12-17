@@ -220,19 +220,19 @@ class MyAnnotation:
   def _to_python(self):
     import importlib
     import thrift.python.converter
-    python_types = importlib.import_module("facebook.thrift.test.module.thrift_types")
+    python_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.MyAnnotation, self)
 
   def _to_mutable_python(self):
     import importlib
     import thrift.python.mutable_converter
-    python_mutable_types = importlib.import_module("facebook.thrift.test.module.thrift_mutable_types")
+    python_mutable_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.thrift_mutable_types")
     return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.MyAnnotation, self)
 
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
-    py3_types = importlib.import_module("facebook.thrift.test.module.types")
+    py3_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.types")
     return thrift.py3.converter.to_py3_struct(py3_types.MyAnnotation, self)
 
   def _to_py_deprecated(self):
@@ -858,19 +858,19 @@ class Foo:
   def _to_python(self):
     import importlib
     import thrift.python.converter
-    python_types = importlib.import_module("facebook.thrift.test.module.thrift_types")
+    python_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.Foo, self)
 
   def _to_mutable_python(self):
     import importlib
     import thrift.python.mutable_converter
-    python_mutable_types = importlib.import_module("facebook.thrift.test.module.thrift_mutable_types")
+    python_mutable_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.thrift_mutable_types")
     return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.Foo, self)
 
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
-    py3_types = importlib.import_module("facebook.thrift.test.module.types")
+    py3_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.types")
     return thrift.py3.converter.to_py3_struct(py3_types.Foo, self)
 
   def _to_py_deprecated(self):
@@ -1172,19 +1172,19 @@ class Baz(object):
   def _to_python(self):
     import importlib
     import thrift.python.converter
-    python_types = importlib.import_module("facebook.thrift.test.module.thrift_types")
+    python_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.Baz, self)
 
   def _to_mutable_python(self):
     import importlib
     import thrift.python.mutable_converter
-    python_mutable_types = importlib.import_module("facebook.thrift.test.module.thrift_mutable_types")
+    python_mutable_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.thrift_mutable_types")
     return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.Baz, self)
 
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
-    py3_types = importlib.import_module("facebook.thrift.test.module.types")
+    py3_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.types")
     return thrift.py3.converter.to_py3_struct(py3_types.Baz, self)
 
   def _to_py_deprecated(self):
@@ -1490,19 +1490,19 @@ class Bar:
   def _to_python(self):
     import importlib
     import thrift.python.converter
-    python_types = importlib.import_module("facebook.thrift.test.module.thrift_types")
+    python_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.Bar, self)
 
   def _to_mutable_python(self):
     import importlib
     import thrift.python.mutable_converter
-    python_mutable_types = importlib.import_module("facebook.thrift.test.module.thrift_mutable_types")
+    python_mutable_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.thrift_mutable_types")
     return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.Bar, self)
 
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
-    py3_types = importlib.import_module("facebook.thrift.test.module.types")
+    py3_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.types")
     return thrift.py3.converter.to_py3_struct(py3_types.Bar, self)
 
   def _to_py_deprecated(self):
@@ -1610,19 +1610,19 @@ class DirectlyAdapted:
   def _to_python(self):
     import importlib
     import thrift.python.converter
-    python_types = importlib.import_module("facebook.thrift.test.module.thrift_types")
+    python_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.DirectlyAdapted, self)
 
   def _to_mutable_python(self):
     import importlib
     import thrift.python.mutable_converter
-    python_mutable_types = importlib.import_module("facebook.thrift.test.module.thrift_mutable_types")
+    python_mutable_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.thrift_mutable_types")
     return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.DirectlyAdapted, self)
 
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
-    py3_types = importlib.import_module("facebook.thrift.test.module.types")
+    py3_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.types")
     return thrift.py3.converter.to_py3_struct(py3_types.DirectlyAdapted, self)
 
   def _to_py_deprecated(self):
@@ -1730,19 +1730,19 @@ class IndependentDirectlyAdapted:
   def _to_python(self):
     import importlib
     import thrift.python.converter
-    python_types = importlib.import_module("facebook.thrift.test.module.thrift_types")
+    python_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.IndependentDirectlyAdapted, self)
 
   def _to_mutable_python(self):
     import importlib
     import thrift.python.mutable_converter
-    python_mutable_types = importlib.import_module("facebook.thrift.test.module.thrift_mutable_types")
+    python_mutable_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.thrift_mutable_types")
     return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.IndependentDirectlyAdapted, self)
 
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
-    py3_types = importlib.import_module("facebook.thrift.test.module.types")
+    py3_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.types")
     return thrift.py3.converter.to_py3_struct(py3_types.IndependentDirectlyAdapted, self)
 
   def _to_py_deprecated(self):
@@ -1907,19 +1907,19 @@ class StructWithFieldAdapter:
   def _to_python(self):
     import importlib
     import thrift.python.converter
-    python_types = importlib.import_module("facebook.thrift.test.module.thrift_types")
+    python_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.StructWithFieldAdapter, self)
 
   def _to_mutable_python(self):
     import importlib
     import thrift.python.mutable_converter
-    python_mutable_types = importlib.import_module("facebook.thrift.test.module.thrift_mutable_types")
+    python_mutable_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.thrift_mutable_types")
     return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.StructWithFieldAdapter, self)
 
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
-    py3_types = importlib.import_module("facebook.thrift.test.module.types")
+    py3_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.types")
     return thrift.py3.converter.to_py3_struct(py3_types.StructWithFieldAdapter, self)
 
   def _to_py_deprecated(self):
@@ -2078,19 +2078,19 @@ class TerseAdaptedFields:
   def _to_python(self):
     import importlib
     import thrift.python.converter
-    python_types = importlib.import_module("facebook.thrift.test.module.thrift_types")
+    python_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.TerseAdaptedFields, self)
 
   def _to_mutable_python(self):
     import importlib
     import thrift.python.mutable_converter
-    python_mutable_types = importlib.import_module("facebook.thrift.test.module.thrift_mutable_types")
+    python_mutable_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.thrift_mutable_types")
     return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.TerseAdaptedFields, self)
 
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
-    py3_types = importlib.import_module("facebook.thrift.test.module.types")
+    py3_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.types")
     return thrift.py3.converter.to_py3_struct(py3_types.TerseAdaptedFields, self)
 
   def _to_py_deprecated(self):
@@ -2198,19 +2198,19 @@ class B:
   def _to_python(self):
     import importlib
     import thrift.python.converter
-    python_types = importlib.import_module("facebook.thrift.test.module.thrift_types")
+    python_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.B, self)
 
   def _to_mutable_python(self):
     import importlib
     import thrift.python.mutable_converter
-    python_mutable_types = importlib.import_module("facebook.thrift.test.module.thrift_mutable_types")
+    python_mutable_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.thrift_mutable_types")
     return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.B, self)
 
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
-    py3_types = importlib.import_module("facebook.thrift.test.module.types")
+    py3_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.types")
     return thrift.py3.converter.to_py3_struct(py3_types.B, self)
 
   def _to_py_deprecated(self):
@@ -2295,19 +2295,19 @@ class A:
   def _to_python(self):
     import importlib
     import thrift.python.converter
-    python_types = importlib.import_module("facebook.thrift.test.module.thrift_types")
+    python_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.A, self)
 
   def _to_mutable_python(self):
     import importlib
     import thrift.python.mutable_converter
-    python_mutable_types = importlib.import_module("facebook.thrift.test.module.thrift_mutable_types")
+    python_mutable_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.thrift_mutable_types")
     return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.A, self)
 
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
-    py3_types = importlib.import_module("facebook.thrift.test.module.types")
+    py3_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.types")
     return thrift.py3.converter.to_py3_struct(py3_types.A, self)
 
   def _to_py_deprecated(self):
@@ -2413,19 +2413,19 @@ class Config:
   def _to_python(self):
     import importlib
     import thrift.python.converter
-    python_types = importlib.import_module("facebook.thrift.test.module.thrift_types")
+    python_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.Config, self)
 
   def _to_mutable_python(self):
     import importlib
     import thrift.python.mutable_converter
-    python_mutable_types = importlib.import_module("facebook.thrift.test.module.thrift_mutable_types")
+    python_mutable_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.thrift_mutable_types")
     return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.Config, self)
 
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
-    py3_types = importlib.import_module("facebook.thrift.test.module.types")
+    py3_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.types")
     return thrift.py3.converter.to_py3_struct(py3_types.Config, self)
 
   def _to_py_deprecated(self):
@@ -2565,19 +2565,19 @@ class MyStruct:
   def _to_python(self):
     import importlib
     import thrift.python.converter
-    python_types = importlib.import_module("facebook.thrift.test.module.thrift_types")
+    python_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.MyStruct, self)
 
   def _to_mutable_python(self):
     import importlib
     import thrift.python.mutable_converter
-    python_mutable_types = importlib.import_module("facebook.thrift.test.module.thrift_mutable_types")
+    python_mutable_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.thrift_mutable_types")
     return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.MyStruct, self)
 
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
-    py3_types = importlib.import_module("facebook.thrift.test.module.types")
+    py3_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.types")
     return thrift.py3.converter.to_py3_struct(py3_types.MyStruct, self)
 
   def _to_py_deprecated(self):
@@ -2838,19 +2838,19 @@ class AdaptTestStruct:
   def _to_python(self):
     import importlib
     import thrift.python.converter
-    python_types = importlib.import_module("facebook.thrift.test.module.thrift_types")
+    python_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.AdaptTestStruct, self)
 
   def _to_mutable_python(self):
     import importlib
     import thrift.python.mutable_converter
-    python_mutable_types = importlib.import_module("facebook.thrift.test.module.thrift_mutable_types")
+    python_mutable_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.thrift_mutable_types")
     return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.AdaptTestStruct, self)
 
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
-    py3_types = importlib.import_module("facebook.thrift.test.module.types")
+    py3_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.types")
     return thrift.py3.converter.to_py3_struct(py3_types.AdaptTestStruct, self)
 
   def _to_py_deprecated(self):
@@ -3431,19 +3431,19 @@ class AdaptTemplatedTestStruct:
   def _to_python(self):
     import importlib
     import thrift.python.converter
-    python_types = importlib.import_module("facebook.thrift.test.module.thrift_types")
+    python_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.AdaptTemplatedTestStruct, self)
 
   def _to_mutable_python(self):
     import importlib
     import thrift.python.mutable_converter
-    python_mutable_types = importlib.import_module("facebook.thrift.test.module.thrift_mutable_types")
+    python_mutable_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.thrift_mutable_types")
     return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.AdaptTemplatedTestStruct, self)
 
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
-    py3_types = importlib.import_module("facebook.thrift.test.module.types")
+    py3_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.types")
     return thrift.py3.converter.to_py3_struct(py3_types.AdaptTemplatedTestStruct, self)
 
   def _to_py_deprecated(self):
@@ -3551,19 +3551,19 @@ class AdaptTemplatedNestedTestStruct:
   def _to_python(self):
     import importlib
     import thrift.python.converter
-    python_types = importlib.import_module("facebook.thrift.test.module.thrift_types")
+    python_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.AdaptTemplatedNestedTestStruct, self)
 
   def _to_mutable_python(self):
     import importlib
     import thrift.python.mutable_converter
-    python_mutable_types = importlib.import_module("facebook.thrift.test.module.thrift_mutable_types")
+    python_mutable_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.thrift_mutable_types")
     return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.AdaptTemplatedNestedTestStruct, self)
 
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
-    py3_types = importlib.import_module("facebook.thrift.test.module.types")
+    py3_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.types")
     return thrift.py3.converter.to_py3_struct(py3_types.AdaptTemplatedNestedTestStruct, self)
 
   def _to_py_deprecated(self):
@@ -3716,19 +3716,19 @@ class AdaptTestUnion(object):
   def _to_python(self):
     import importlib
     import thrift.python.converter
-    python_types = importlib.import_module("facebook.thrift.test.module.thrift_types")
+    python_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.AdaptTestUnion, self)
 
   def _to_mutable_python(self):
     import importlib
     import thrift.python.mutable_converter
-    python_mutable_types = importlib.import_module("facebook.thrift.test.module.thrift_mutable_types")
+    python_mutable_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.thrift_mutable_types")
     return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.AdaptTestUnion, self)
 
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
-    py3_types = importlib.import_module("facebook.thrift.test.module.types")
+    py3_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.types")
     return thrift.py3.converter.to_py3_struct(py3_types.AdaptTestUnion, self)
 
   def _to_py_deprecated(self):
@@ -3834,19 +3834,19 @@ class AdaptedStruct:
   def _to_python(self):
     import importlib
     import thrift.python.converter
-    python_types = importlib.import_module("facebook.thrift.test.module.thrift_types")
+    python_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.AdaptedStruct, self)
 
   def _to_mutable_python(self):
     import importlib
     import thrift.python.mutable_converter
-    python_mutable_types = importlib.import_module("facebook.thrift.test.module.thrift_mutable_types")
+    python_mutable_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.thrift_mutable_types")
     return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.AdaptedStruct, self)
 
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
-    py3_types = importlib.import_module("facebook.thrift.test.module.types")
+    py3_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.types")
     return thrift.py3.converter.to_py3_struct(py3_types.AdaptedStruct, self)
 
   def _to_py_deprecated(self):
@@ -3952,19 +3952,19 @@ class DirectlyAdaptedStruct:
   def _to_python(self):
     import importlib
     import thrift.python.converter
-    python_types = importlib.import_module("facebook.thrift.test.module.thrift_types")
+    python_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.DirectlyAdaptedStruct, self)
 
   def _to_mutable_python(self):
     import importlib
     import thrift.python.mutable_converter
-    python_mutable_types = importlib.import_module("facebook.thrift.test.module.thrift_mutable_types")
+    python_mutable_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.thrift_mutable_types")
     return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.DirectlyAdaptedStruct, self)
 
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
-    py3_types = importlib.import_module("facebook.thrift.test.module.types")
+    py3_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.types")
     return thrift.py3.converter.to_py3_struct(py3_types.DirectlyAdaptedStruct, self)
 
   def _to_py_deprecated(self):
@@ -4129,19 +4129,19 @@ class StructFieldAdaptedStruct:
   def _to_python(self):
     import importlib
     import thrift.python.converter
-    python_types = importlib.import_module("facebook.thrift.test.module.thrift_types")
+    python_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.StructFieldAdaptedStruct, self)
 
   def _to_mutable_python(self):
     import importlib
     import thrift.python.mutable_converter
-    python_mutable_types = importlib.import_module("facebook.thrift.test.module.thrift_mutable_types")
+    python_mutable_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.thrift_mutable_types")
     return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.StructFieldAdaptedStruct, self)
 
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
-    py3_types = importlib.import_module("facebook.thrift.test.module.types")
+    py3_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.types")
     return thrift.py3.converter.to_py3_struct(py3_types.StructFieldAdaptedStruct, self)
 
   def _to_py_deprecated(self):
@@ -4249,19 +4249,19 @@ class CircularAdaptee:
   def _to_python(self):
     import importlib
     import thrift.python.converter
-    python_types = importlib.import_module("facebook.thrift.test.module.thrift_types")
+    python_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.CircularAdaptee, self)
 
   def _to_mutable_python(self):
     import importlib
     import thrift.python.mutable_converter
-    python_mutable_types = importlib.import_module("facebook.thrift.test.module.thrift_mutable_types")
+    python_mutable_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.thrift_mutable_types")
     return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.CircularAdaptee, self)
 
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
-    py3_types = importlib.import_module("facebook.thrift.test.module.types")
+    py3_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.types")
     return thrift.py3.converter.to_py3_struct(py3_types.CircularAdaptee, self)
 
   def _to_py_deprecated(self):
@@ -4369,19 +4369,19 @@ class CircularStruct:
   def _to_python(self):
     import importlib
     import thrift.python.converter
-    python_types = importlib.import_module("facebook.thrift.test.module.thrift_types")
+    python_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.CircularStruct, self)
 
   def _to_mutable_python(self):
     import importlib
     import thrift.python.mutable_converter
-    python_mutable_types = importlib.import_module("facebook.thrift.test.module.thrift_mutable_types")
+    python_mutable_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.thrift_mutable_types")
     return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.CircularStruct, self)
 
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
-    py3_types = importlib.import_module("facebook.thrift.test.module.types")
+    py3_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.types")
     return thrift.py3.converter.to_py3_struct(py3_types.CircularStruct, self)
 
   def _to_py_deprecated(self):
@@ -4489,19 +4489,19 @@ class ReorderedStruct:
   def _to_python(self):
     import importlib
     import thrift.python.converter
-    python_types = importlib.import_module("facebook.thrift.test.module.thrift_types")
+    python_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.ReorderedStruct, self)
 
   def _to_mutable_python(self):
     import importlib
     import thrift.python.mutable_converter
-    python_mutable_types = importlib.import_module("facebook.thrift.test.module.thrift_mutable_types")
+    python_mutable_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.thrift_mutable_types")
     return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.ReorderedStruct, self)
 
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
-    py3_types = importlib.import_module("facebook.thrift.test.module.types")
+    py3_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.types")
     return thrift.py3.converter.to_py3_struct(py3_types.ReorderedStruct, self)
 
   def _to_py_deprecated(self):
@@ -4586,19 +4586,19 @@ class DeclaredAfterStruct:
   def _to_python(self):
     import importlib
     import thrift.python.converter
-    python_types = importlib.import_module("facebook.thrift.test.module.thrift_types")
+    python_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.DeclaredAfterStruct, self)
 
   def _to_mutable_python(self):
     import importlib
     import thrift.python.mutable_converter
-    python_mutable_types = importlib.import_module("facebook.thrift.test.module.thrift_mutable_types")
+    python_mutable_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.thrift_mutable_types")
     return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.DeclaredAfterStruct, self)
 
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
-    py3_types = importlib.import_module("facebook.thrift.test.module.types")
+    py3_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.types")
     return thrift.py3.converter.to_py3_struct(py3_types.DeclaredAfterStruct, self)
 
   def _to_py_deprecated(self):
@@ -4704,19 +4704,19 @@ class RenamedStruct:
   def _to_python(self):
     import importlib
     import thrift.python.converter
-    python_types = importlib.import_module("facebook.thrift.test.module.thrift_types")
+    python_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.RenamedStruct, self)
 
   def _to_mutable_python(self):
     import importlib
     import thrift.python.mutable_converter
-    python_mutable_types = importlib.import_module("facebook.thrift.test.module.thrift_mutable_types")
+    python_mutable_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.thrift_mutable_types")
     return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.RenamedStruct, self)
 
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
-    py3_types = importlib.import_module("facebook.thrift.test.module.types")
+    py3_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.types")
     return thrift.py3.converter.to_py3_struct(py3_types.RenamedStruct, self)
 
   def _to_py_deprecated(self):
@@ -4822,19 +4822,19 @@ class SameNamespaceStruct:
   def _to_python(self):
     import importlib
     import thrift.python.converter
-    python_types = importlib.import_module("facebook.thrift.test.module.thrift_types")
+    python_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.SameNamespaceStruct, self)
 
   def _to_mutable_python(self):
     import importlib
     import thrift.python.mutable_converter
-    python_mutable_types = importlib.import_module("facebook.thrift.test.module.thrift_mutable_types")
+    python_mutable_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.thrift_mutable_types")
     return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.SameNamespaceStruct, self)
 
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
-    py3_types = importlib.import_module("facebook.thrift.test.module.types")
+    py3_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.types")
     return thrift.py3.converter.to_py3_struct(py3_types.SameNamespaceStruct, self)
 
   def _to_py_deprecated(self):
@@ -4919,19 +4919,19 @@ class HeapAllocated:
   def _to_python(self):
     import importlib
     import thrift.python.converter
-    python_types = importlib.import_module("facebook.thrift.test.module.thrift_types")
+    python_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.HeapAllocated, self)
 
   def _to_mutable_python(self):
     import importlib
     import thrift.python.mutable_converter
-    python_mutable_types = importlib.import_module("facebook.thrift.test.module.thrift_mutable_types")
+    python_mutable_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.thrift_mutable_types")
     return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.HeapAllocated, self)
 
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
-    py3_types = importlib.import_module("facebook.thrift.test.module.types")
+    py3_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.types")
     return thrift.py3.converter.to_py3_struct(py3_types.HeapAllocated, self)
 
   def _to_py_deprecated(self):
@@ -5039,19 +5039,19 @@ class MoveOnly:
   def _to_python(self):
     import importlib
     import thrift.python.converter
-    python_types = importlib.import_module("facebook.thrift.test.module.thrift_types")
+    python_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.MoveOnly, self)
 
   def _to_mutable_python(self):
     import importlib
     import thrift.python.mutable_converter
-    python_mutable_types = importlib.import_module("facebook.thrift.test.module.thrift_mutable_types")
+    python_mutable_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.thrift_mutable_types")
     return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.MoveOnly, self)
 
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
-    py3_types = importlib.import_module("facebook.thrift.test.module.types")
+    py3_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.types")
     return thrift.py3.converter.to_py3_struct(py3_types.MoveOnly, self)
 
   def _to_py_deprecated(self):
@@ -5157,19 +5157,19 @@ class AlsoMoveOnly:
   def _to_python(self):
     import importlib
     import thrift.python.converter
-    python_types = importlib.import_module("facebook.thrift.test.module.thrift_types")
+    python_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.AlsoMoveOnly, self)
 
   def _to_mutable_python(self):
     import importlib
     import thrift.python.mutable_converter
-    python_mutable_types = importlib.import_module("facebook.thrift.test.module.thrift_mutable_types")
+    python_mutable_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.thrift_mutable_types")
     return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.AlsoMoveOnly, self)
 
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
-    py3_types = importlib.import_module("facebook.thrift.test.module.types")
+    py3_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.types")
     return thrift.py3.converter.to_py3_struct(py3_types.AlsoMoveOnly, self)
 
   def _to_py_deprecated(self):
@@ -5254,19 +5254,19 @@ class ApplyAdapter:
   def _to_python(self):
     import importlib
     import thrift.python.converter
-    python_types = importlib.import_module("facebook.thrift.test.module.thrift_types")
+    python_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.ApplyAdapter, self)
 
   def _to_mutable_python(self):
     import importlib
     import thrift.python.mutable_converter
-    python_mutable_types = importlib.import_module("facebook.thrift.test.module.thrift_mutable_types")
+    python_mutable_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.thrift_mutable_types")
     return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.ApplyAdapter, self)
 
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
-    py3_types = importlib.import_module("facebook.thrift.test.module.types")
+    py3_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.types")
     return thrift.py3.converter.to_py3_struct(py3_types.ApplyAdapter, self)
 
   def _to_py_deprecated(self):
@@ -5351,19 +5351,19 @@ class TransitiveAdapted:
   def _to_python(self):
     import importlib
     import thrift.python.converter
-    python_types = importlib.import_module("facebook.thrift.test.module.thrift_types")
+    python_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.TransitiveAdapted, self)
 
   def _to_mutable_python(self):
     import importlib
     import thrift.python.mutable_converter
-    python_mutable_types = importlib.import_module("facebook.thrift.test.module.thrift_mutable_types")
+    python_mutable_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.thrift_mutable_types")
     return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.TransitiveAdapted, self)
 
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
-    py3_types = importlib.import_module("facebook.thrift.test.module.types")
+    py3_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.types")
     return thrift.py3.converter.to_py3_struct(py3_types.TransitiveAdapted, self)
 
   def _to_py_deprecated(self):
@@ -5503,19 +5503,19 @@ class CountingStruct:
   def _to_python(self):
     import importlib
     import thrift.python.converter
-    python_types = importlib.import_module("facebook.thrift.test.module.thrift_types")
+    python_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.CountingStruct, self)
 
   def _to_mutable_python(self):
     import importlib
     import thrift.python.mutable_converter
-    python_mutable_types = importlib.import_module("facebook.thrift.test.module.thrift_mutable_types")
+    python_mutable_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.thrift_mutable_types")
     return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.CountingStruct, self)
 
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
-    py3_types = importlib.import_module("facebook.thrift.test.module.types")
+    py3_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.types")
     return thrift.py3.converter.to_py3_struct(py3_types.CountingStruct, self)
 
   def _to_py_deprecated(self):
@@ -5621,19 +5621,19 @@ class Person:
   def _to_python(self):
     import importlib
     import thrift.python.converter
-    python_types = importlib.import_module("facebook.thrift.test.module.thrift_types")
+    python_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.Person, self)
 
   def _to_mutable_python(self):
     import importlib
     import thrift.python.mutable_converter
-    python_mutable_types = importlib.import_module("facebook.thrift.test.module.thrift_mutable_types")
+    python_mutable_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.thrift_mutable_types")
     return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.Person, self)
 
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
-    py3_types = importlib.import_module("facebook.thrift.test.module.types")
+    py3_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.types")
     return thrift.py3.converter.to_py3_struct(py3_types.Person, self)
 
   def _to_py_deprecated(self):
@@ -5739,19 +5739,19 @@ class Person2:
   def _to_python(self):
     import importlib
     import thrift.python.converter
-    python_types = importlib.import_module("facebook.thrift.test.module.thrift_types")
+    python_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.Person2, self)
 
   def _to_mutable_python(self):
     import importlib
     import thrift.python.mutable_converter
-    python_mutable_types = importlib.import_module("facebook.thrift.test.module.thrift_mutable_types")
+    python_mutable_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.thrift_mutable_types")
     return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.Person2, self)
 
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
-    py3_types = importlib.import_module("facebook.thrift.test.module.types")
+    py3_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.types")
     return thrift.py3.converter.to_py3_struct(py3_types.Person2, self)
 
   def _to_py_deprecated(self):
@@ -5859,19 +5859,19 @@ class RenamedStructWithStructAdapterAndFieldAdapter:
   def _to_python(self):
     import importlib
     import thrift.python.converter
-    python_types = importlib.import_module("facebook.thrift.test.module.thrift_types")
+    python_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.RenamedStructWithStructAdapterAndFieldAdapter, self)
 
   def _to_mutable_python(self):
     import importlib
     import thrift.python.mutable_converter
-    python_mutable_types = importlib.import_module("facebook.thrift.test.module.thrift_mutable_types")
+    python_mutable_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.thrift_mutable_types")
     return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.RenamedStructWithStructAdapterAndFieldAdapter, self)
 
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
-    py3_types = importlib.import_module("facebook.thrift.test.module.types")
+    py3_types = importlib.import_module("facebook.thrift.test.fixtures.adapter.module.types")
     return thrift.py3.converter.to_py3_struct(py3_types.RenamedStructWithStructAdapterAndFieldAdapter, self)
 
   def _to_py_deprecated(self):

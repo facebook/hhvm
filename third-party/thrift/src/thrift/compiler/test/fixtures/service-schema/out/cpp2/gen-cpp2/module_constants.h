@@ -10,14 +10,14 @@
 
 #include "thrift/compiler/test/fixtures/service-schema/gen-cpp2/module_types.h"
 
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::service_schema {
 /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift"} */
 namespace module_constants {
 
-  FOLLY_EXPORT ::std::string_view _fbthrift_schema_bc0984a218954d47();
+  FOLLY_EXPORT ::std::string_view _fbthrift_schema_db27c1f89cb27d2();
 
-  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_bc0984a218954d47_includes();
-  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_bc0984a218954d47_uris();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_db27c1f89cb27d2_includes();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_db27c1f89cb27d2_uris();
 
 } // namespace module_constants
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::service_schema

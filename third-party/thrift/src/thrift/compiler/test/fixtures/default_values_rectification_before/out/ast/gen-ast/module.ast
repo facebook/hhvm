@@ -3,15 +3,15 @@ Schema {
     [0] = Program {
       1: attrs (struct) = DefinitionAttrs {
         1: name (string) = "module",
-        2: uri (string) = "facebook.com/thrift/compiler/test/fixtures/default_values_rectification",
+        2: uri (string) = "facebook.com/thrift/compiler/test/fixtures/default_values_rectification_before",
       },
-      2: id (i64) = 4952383987043382979,
+      2: id (i64) = 6318900912073763317,
       3: includes (list) = list<i64>[1] {
         [0] = 9183676402141577639,
       },
       8: definitionKeys (list) = list<string>[2] {
-        [0] = "\005\214\017\305\207\367y\326\027\362\362\336\004m\206G",
-        [1] = "6&xk\026 Wo\216/\241\244\225H\266\350",
+        [0] = "s\033r\330^\364\206\253u \253}\250\235\270;",
+        [1] = "<\272\351\016t\227TT\022\351\244P\0301\234r",
       },
       5: path (string) = "thrift/compiler/test/fixtures/default_values_rectification_before/src/module.thrift",
     },
@@ -116,9 +116,9 @@ Schema {
     -7354011236927394272 -> Value {
       4: i32Value (i32) = 42,
     },
-    -6590636961672215483 -> Value {
+    -6184641776889516003 -> Value {
       11: objectValue (struct) = Object {
-        1: type (string) = "facebook.com/thrift/compiler/test/fixtures/default_values_rectification/EmptyStruct",
+        1: type (string) = "facebook.com/thrift/compiler/test/fixtures/default_values_rectification_before/EmptyStruct",
         2: members (map) = map<i16,struct>[0] {
         },
       },
@@ -145,28 +145,13 @@ Schema {
     },
   },
   8: definitionsMap (map) = map<string,struct>[2] {
-    "\005\214\017\305\207\367y\326\027\362\362\336\004m\206G" -> Definition {
-      1: structDef (struct) = Struct {
-        1: attrs (struct) = DefinitionAttrs {
-          1: name (string) = "EmptyStruct",
-          2: uri (string) = "facebook.com/thrift/compiler/test/fixtures/default_values_rectification/EmptyStruct",
-          7: sourceRange (struct) = SourceRange {
-            1: programId (i64) = 4952383987043382979,
-            2: beginLine (i32) = 21,
-            3: beginColumn (i32) = 1,
-            4: endLine (i32) = 21,
-            5: endColumn (i32) = 22,
-          },
-        },
-      },
-    },
-    "6&xk\026 Wo\216/\241\244\225H\266\350" -> Definition {
+    "<\272\351\016t\227TT\022\351\244P\0301\234r" -> Definition {
       1: structDef (struct) = Struct {
         1: attrs (struct) = DefinitionAttrs {
           1: name (string) = "TestStruct",
-          2: uri (string) = "facebook.com/thrift/compiler/test/fixtures/default_values_rectification/TestStruct",
+          2: uri (string) = "facebook.com/thrift/compiler/test/fixtures/default_values_rectification_before/TestStruct",
           7: sourceRange (struct) = SourceRange {
-            1: programId (i64) = 4952383987043382979,
+            1: programId (i64) = 6318900912073763317,
             2: beginLine (i32) = 23,
             3: beginColumn (i32) = 1,
             4: endLine (i32) = 43,
@@ -186,7 +171,7 @@ Schema {
             4: attrs (struct) = DefinitionAttrs {
               1: name (string) = "unqualified_int_field",
               7: sourceRange (struct) = SourceRange {
-                1: programId (i64) = 4952383987043382979,
+                1: programId (i64) = 6318900912073763317,
                 2: beginLine (i32) = 24,
                 3: beginColumn (i32) = 3,
                 4: endLine (i32) = 24,
@@ -207,7 +192,7 @@ Schema {
             4: attrs (struct) = DefinitionAttrs {
               1: name (string) = "unqualified_bool_field",
               7: sourceRange (struct) = SourceRange {
-                1: programId (i64) = 4952383987043382979,
+                1: programId (i64) = 6318900912073763317,
                 2: beginLine (i32) = 26,
                 3: beginColumn (i32) = 3,
                 4: endLine (i32) = 26,
@@ -235,7 +220,7 @@ Schema {
             4: attrs (struct) = DefinitionAttrs {
               1: name (string) = "unqualified_list_field",
               7: sourceRange (struct) = SourceRange {
-                1: programId (i64) = 4952383987043382979,
+                1: programId (i64) = 6318900912073763317,
                 2: beginLine (i32) = 28,
                 3: beginColumn (i32) = 3,
                 4: endLine (i32) = 28,
@@ -249,7 +234,7 @@ Schema {
             3: type (struct) = TypeStruct {
               1: name (struct) = TypeName {
                 11: structType (struct) = TypeUri {
-                  4: definitionKey (string) = "\005\214\017\305\207\367y\326\027\362\362\336\004m\206G",
+                  4: definitionKey (string) = "s\033r\330^\364\206\253u \253}\250\235\270;",
                 },
               },
               2: params (list) = list<struct>[0] {
@@ -258,14 +243,14 @@ Schema {
             4: attrs (struct) = DefinitionAttrs {
               1: name (string) = "unqualified_struct_field",
               7: sourceRange (struct) = SourceRange {
-                1: programId (i64) = 4952383987043382979,
+                1: programId (i64) = 6318900912073763317,
                 2: beginLine (i32) = 30,
                 3: beginColumn (i32) = 3,
                 4: endLine (i32) = 30,
                 5: endColumn (i32) = 48,
               },
             },
-            5: customDefault (i64) = -6590636961672215483,
+            5: customDefault (i64) = -6184641776889516003,
           },
           [4] = Field {
             1: id (i16) = 5,
@@ -288,7 +273,7 @@ Schema {
                 },
               },
               7: sourceRange (struct) = SourceRange {
-                1: programId (i64) = 4952383987043382979,
+                1: programId (i64) = 6318900912073763317,
                 2: beginLine (i32) = 32,
                 3: beginColumn (i32) = 3,
                 4: endLine (i32) = 33,
@@ -318,7 +303,7 @@ Schema {
                 },
               },
               7: sourceRange (struct) = SourceRange {
-                1: programId (i64) = 4952383987043382979,
+                1: programId (i64) = 6318900912073763317,
                 2: beginLine (i32) = 35,
                 3: beginColumn (i32) = 3,
                 4: endLine (i32) = 36,
@@ -355,7 +340,7 @@ Schema {
                 },
               },
               7: sourceRange (struct) = SourceRange {
-                1: programId (i64) = 4952383987043382979,
+                1: programId (i64) = 6318900912073763317,
                 2: beginLine (i32) = 38,
                 3: beginColumn (i32) = 3,
                 4: endLine (i32) = 39,
@@ -370,7 +355,7 @@ Schema {
             3: type (struct) = TypeStruct {
               1: name (struct) = TypeName {
                 11: structType (struct) = TypeUri {
-                  4: definitionKey (string) = "\005\214\017\305\207\367y\326\027\362\362\336\004m\206G",
+                  4: definitionKey (string) = "s\033r\330^\364\206\253u \253}\250\235\270;",
                 },
               },
               2: params (list) = list<struct>[0] {
@@ -387,14 +372,29 @@ Schema {
                 },
               },
               7: sourceRange (struct) = SourceRange {
-                1: programId (i64) = 4952383987043382979,
+                1: programId (i64) = 6318900912073763317,
                 2: beginLine (i32) = 41,
                 3: beginColumn (i32) = 3,
                 4: endLine (i32) = 42,
                 5: endColumn (i32) = 54,
               },
             },
-            5: customDefault (i64) = -6590636961672215483,
+            5: customDefault (i64) = -6184641776889516003,
+          },
+        },
+      },
+    },
+    "s\033r\330^\364\206\253u \253}\250\235\270;" -> Definition {
+      1: structDef (struct) = Struct {
+        1: attrs (struct) = DefinitionAttrs {
+          1: name (string) = "EmptyStruct",
+          2: uri (string) = "facebook.com/thrift/compiler/test/fixtures/default_values_rectification_before/EmptyStruct",
+          7: sourceRange (struct) = SourceRange {
+            1: programId (i64) = 6318900912073763317,
+            2: beginLine (i32) = 21,
+            3: beginColumn (i32) = 1,
+            4: endLine (i32) = 21,
+            5: endColumn (i32) = 22,
           },
         },
       },

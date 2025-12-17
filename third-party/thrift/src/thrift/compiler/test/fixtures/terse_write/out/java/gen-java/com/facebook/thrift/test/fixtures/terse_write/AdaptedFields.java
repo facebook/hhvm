@@ -5,7 +5,7 @@
  *  @generated
  */
 
-package com.facebook.thrift.test.terse_write;
+package com.facebook.thrift.test.fixtures.terse_write;
 
 import com.facebook.swift.codec.*;
 import com.facebook.swift.codec.ThriftField.Requiredness;
@@ -118,7 +118,7 @@ public final class AdaptedFields implements com.facebook.thrift.payload.ThriftSe
       THRIFT_NAMES_TO_IDS.put("field3", 3);
       FIELD_METADATA.put(3, FIELD3_FIELD_DESC);
       com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
-        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/terse_write/AdaptedFields"),
+        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/fixtures/terse_write/AdaptedFields"),
         AdaptedFields.class, AdaptedFields::read0));
     }
     

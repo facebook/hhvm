@@ -6,14 +6,14 @@
  *  @generated
  */
 
-namespace facebook\thrift\test;
+namespace facebook\thrift\test\fixtures\service_schema;
 
 /**
  * Original thrift service:-
  * ExtendedService
  */
-<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/ExtendedService'))>>
-interface ExtendedServiceAsyncIf extends \facebook\thrift\test\BaseServiceAsyncIf {
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/fixtures/service_schema/ExtendedService'))>>
+interface ExtendedServiceAsyncIf extends \facebook\thrift\test\fixtures\service_schema\BaseServiceAsyncIf {
   /**
    * Original thrift definition:-
    * i64
@@ -27,16 +27,16 @@ interface ExtendedServiceAsyncIf extends \facebook\thrift\test\BaseServiceAsyncI
  * Original thrift service:-
  * ExtendedService
  */
-<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/ExtendedService'))>>
-interface ExtendedServiceAsyncClientIf extends ExtendedServiceAsyncIf, \facebook\thrift\test\BaseServiceAsyncClientIf {
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/fixtures/service_schema/ExtendedService'))>>
+interface ExtendedServiceAsyncClientIf extends ExtendedServiceAsyncIf, \facebook\thrift\test\fixtures\service_schema\BaseServiceAsyncClientIf {
 }
 
 /**
  * Original thrift service:-
  * ExtendedService
  */
-<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/ExtendedService'))>>
-interface ExtendedServiceClientIf extends \facebook\thrift\test\BaseServiceClientIf {
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/fixtures/service_schema/ExtendedService'))>>
+interface ExtendedServiceClientIf extends \facebook\thrift\test\fixtures\service_schema\BaseServiceClientIf {
   /**
    * Original thrift definition:-
    * i64
@@ -61,25 +61,25 @@ trait ExtendedServiceClientBase {
    */
   public async function init(int $param0, int $param1): Awaitable<int> {
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \facebook\thrift\test\ExtendedService_init_args::fromShape(shape(
+    $args = \facebook\thrift\test\fixtures\service_schema\ExtendedService_init_args::fromShape(shape(
       'param0' => $param0,
       'param1' => $param1,
     ));
     await $this->asyncHandler_->genBefore(ExtendedServiceStaticMetadata::THRIFT_SVC_NAME, "init", $args);
     $currentseqid = $this->sendImplHelper($args, "init", false, ExtendedServiceStaticMetadata::THRIFT_SVC_NAME );
-    return (await $this->genAwaitResponse(\facebook\thrift\test\ExtendedService_init_result::class, "init", false, $currentseqid, $rpc_options))[0];
+    return (await $this->genAwaitResponse(\facebook\thrift\test\fixtures\service_schema\ExtendedService_init_result::class, "init", false, $currentseqid, $rpc_options))[0];
   }
 
 }
 
-class ExtendedServiceAsyncClient extends \facebook\thrift\test\BaseServiceAsyncClient implements ExtendedServiceAsyncClientIf {
+class ExtendedServiceAsyncClient extends \facebook\thrift\test\fixtures\service_schema\BaseServiceAsyncClient implements ExtendedServiceAsyncClientIf {
   use ExtendedServiceClientBase;
 
   const string THRIFT_SVC_NAME = ExtendedServiceStaticMetadata::THRIFT_SVC_NAME;
 
 }
 
-class ExtendedServiceClient extends \facebook\thrift\test\BaseServiceClient implements ExtendedServiceClientIf {
+class ExtendedServiceClient extends \facebook\thrift\test\fixtures\service_schema\BaseServiceClient implements ExtendedServiceClientIf {
   use ExtendedServiceClientBase;
 
   const string THRIFT_SVC_NAME = ExtendedServiceStaticMetadata::THRIFT_SVC_NAME;
@@ -328,7 +328,7 @@ class ExtendedServiceStaticMetadata implements \IThriftServiceStaticMetadata {
             'exceptions' => dict[
             ],
             'services' => dict[
-              'extend.BaseService' => \facebook\thrift\test\BaseServiceStaticMetadata::getServiceMetadata(),
+              'extend.BaseService' => \facebook\thrift\test\fixtures\service_schema\BaseServiceStaticMetadata::getServiceMetadata(),
             ],
           )
         ),

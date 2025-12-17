@@ -11,7 +11,7 @@
 
 #include <thrift/conformance/cpp2/AnyRegistry.h>
 
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::service_schema {
 // Static-init time registration for dynamically-linked libraries.
 //
 // To include in statically-linked libraries, link whole (e.g. --whole-archive)
@@ -29,17 +29,17 @@ void __fbthrift_static_init_CustomException() {
       apache::thrift::conformance::StandardProtocol::Compact,
       apache::thrift::conformance::StandardProtocol::Binary>();
 }
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::service_schema
 
 namespace apache {
 namespace thrift {
 namespace detail {
 
-void TccStructTraits<::facebook::thrift::test::CustomException>::translateFieldName(
+void TccStructTraits<::facebook::thrift::test::fixtures::service_schema::CustomException>::translateFieldName(
     std::string_view _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::CustomException>;
+  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::fixtures::service_schema::CustomException>;
   static const st::translate_field_name_table table{
       data::fields_size,
       data::fields_names.data(),
@@ -52,9 +52,9 @@ void TccStructTraits<::facebook::thrift::test::CustomException>::translateFieldN
 } // namespace thrift
 } // namespace apache
 
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::service_schema {
 
 
 
 
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::service_schema

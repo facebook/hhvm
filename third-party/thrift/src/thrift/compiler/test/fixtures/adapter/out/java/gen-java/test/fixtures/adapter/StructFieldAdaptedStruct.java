@@ -137,7 +137,7 @@ public final class StructFieldAdaptedStruct implements com.facebook.thrift.paylo
       THRIFT_NAMES_TO_IDS.put("typedefOfAdapted", 4);
       FIELD_METADATA.put(4, TYPEDEF_OF_ADAPTED_FIELD_DESC);
       com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
-        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/StructFieldAdaptedStruct"),
+        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/fixtures/adapter/StructFieldAdaptedStruct"),
         StructFieldAdaptedStruct.class, StructFieldAdaptedStruct::read0));
     }
     

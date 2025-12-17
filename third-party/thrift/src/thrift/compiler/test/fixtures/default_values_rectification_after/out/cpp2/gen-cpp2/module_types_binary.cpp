@@ -6,7 +6,7 @@
  */
 #include "thrift/compiler/test/fixtures/default_values_rectification_after/gen-cpp2/module_types_custom_protocol.h"
 
-namespace facebook::thrift::compiler::test::fixtures::default_values_rectification {
+namespace facebook::thrift::compiler::test::fixtures::default_values_rectification_after {
 
 template void EmptyStruct::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
 template uint32_t EmptyStruct::write<>(apache::thrift::BinaryProtocolWriter*) const;
@@ -18,4 +18,4 @@ template uint32_t TestStruct::write<>(apache::thrift::BinaryProtocolWriter*) con
 template uint32_t TestStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
 template uint32_t TestStruct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
 
-} // namespace facebook::thrift::compiler::test::fixtures::default_values_rectification
+} // namespace facebook::thrift::compiler::test::fixtures::default_values_rectification_after

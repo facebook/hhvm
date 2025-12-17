@@ -80,7 +80,7 @@ public final class CircularAdaptee implements com.facebook.thrift.payload.Thrift
       THRIFT_NAMES_TO_IDS.put("field", 1);
       FIELD_METADATA.put(1, FIELD_FIELD_DESC);
       com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
-        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/CircularAdaptee"),
+        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/fixtures/adapter/CircularAdaptee"),
         CircularAdaptee.class, CircularAdaptee::read0));
     }
     

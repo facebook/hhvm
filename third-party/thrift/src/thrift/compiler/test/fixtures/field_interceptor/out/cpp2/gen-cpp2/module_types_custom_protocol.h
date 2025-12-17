@@ -23,7 +23,7 @@ namespace thrift {
 namespace detail {
 
 template <>
-struct TccStructTraits<::facebook::thrift::test::InterceptedFields> {
+struct TccStructTraits<::facebook::thrift::test::fixtures::field_interceptor::InterceptedFields> {
   static void translateFieldName(
       std::string_view _fname,
       int16_t& fid,
@@ -34,7 +34,7 @@ struct TccStructTraits<::facebook::thrift::test::InterceptedFields> {
 } // namespace thrift
 } // namespace apache
 
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::field_interceptor {
 
 template <class Protocol_>
 void InterceptedFields::readNoXfer(Protocol_* iprot) {
@@ -358,4 +358,4 @@ extern template uint32_t InterceptedFields::serializedSize<>(apache::thrift::Com
 extern template uint32_t InterceptedFields::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::field_interceptor

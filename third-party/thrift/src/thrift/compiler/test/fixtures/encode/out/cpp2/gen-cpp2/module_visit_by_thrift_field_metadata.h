@@ -14,33 +14,33 @@ namespace thrift {
 namespace detail {
 
 template <>
-struct VisitByFieldId<::facebook::thrift::test::Foo> {
+struct VisitByFieldId<::facebook::thrift::test::fixtures::encode::Foo> {
   template <typename F, typename T>
   void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).field_ref());
     default:
-      throwInvalidThriftId(fieldId, "::facebook::thrift::test::Foo");
+      throwInvalidThriftId(fieldId, "::facebook::thrift::test::fixtures::encode::Foo");
     }
   }
 };
 
 template <>
-struct VisitByFieldId<::facebook::thrift::test::Bar> {
+struct VisitByFieldId<::facebook::thrift::test::fixtures::encode::Bar> {
   template <typename F, typename T>
   void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).list_field_ref());
     default:
-      throwInvalidThriftId(fieldId, "::facebook::thrift::test::Bar");
+      throwInvalidThriftId(fieldId, "::facebook::thrift::test::fixtures::encode::Bar");
     }
   }
 };
 
 template <>
-struct VisitByFieldId<::facebook::thrift::test::Baz> {
+struct VisitByFieldId<::facebook::thrift::test::fixtures::encode::Baz> {
   template <typename F, typename T>
   void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
@@ -49,13 +49,13 @@ struct VisitByFieldId<::facebook::thrift::test::Baz> {
     case 2:
       return f(1, static_cast<T&&>(t).nested_list_field_ref());
     default:
-      throwInvalidThriftId(fieldId, "::facebook::thrift::test::Baz");
+      throwInvalidThriftId(fieldId, "::facebook::thrift::test::fixtures::encode::Baz");
     }
   }
 };
 
 template <>
-struct VisitByFieldId<::facebook::thrift::test::OpEncodeStruct> {
+struct VisitByFieldId<::facebook::thrift::test::fixtures::encode::OpEncodeStruct> {
   template <typename F, typename T>
   void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
@@ -84,7 +84,7 @@ struct VisitByFieldId<::facebook::thrift::test::OpEncodeStruct> {
     case 12:
       return f(11, static_cast<T&&>(t).adapted_list_field_ref());
     default:
-      throwInvalidThriftId(fieldId, "::facebook::thrift::test::OpEncodeStruct");
+      throwInvalidThriftId(fieldId, "::facebook::thrift::test::fixtures::encode::OpEncodeStruct");
     }
   }
 };

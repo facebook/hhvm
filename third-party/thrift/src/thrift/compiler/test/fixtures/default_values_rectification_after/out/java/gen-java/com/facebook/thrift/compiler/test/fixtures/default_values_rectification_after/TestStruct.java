@@ -5,7 +5,7 @@
  *  @generated
  */
 
-package com.facebook.thrift.compiler.test.fixtures.default_values_rectification;
+package com.facebook.thrift.compiler.test.fixtures.default_values_rectification_after;
 
 import com.facebook.swift.codec.*;
 import com.facebook.swift.codec.ThriftField.Requiredness;
@@ -29,11 +29,11 @@ public final class TestStruct implements com.facebook.thrift.payload.ThriftSeria
         @com.facebook.swift.codec.ThriftField(value=1, name="unqualified_int_field", requiredness=Requiredness.NONE) final int unqualifiedIntField,
         @com.facebook.swift.codec.ThriftField(value=2, name="unqualified_bool_field", requiredness=Requiredness.NONE) final boolean unqualifiedBoolField,
         @com.facebook.swift.codec.ThriftField(value=3, name="unqualified_list_field", requiredness=Requiredness.NONE) final List<Integer> unqualifiedListField,
-        @com.facebook.swift.codec.ThriftField(value=4, name="unqualified_struct_field", requiredness=Requiredness.NONE) final com.facebook.thrift.compiler.test.fixtures.default_values_rectification.EmptyStruct unqualifiedStructField,
+        @com.facebook.swift.codec.ThriftField(value=4, name="unqualified_struct_field", requiredness=Requiredness.NONE) final com.facebook.thrift.compiler.test.fixtures.default_values_rectification_after.EmptyStruct unqualifiedStructField,
         @com.facebook.swift.codec.ThriftField(value=5, name="optional_int_field", requiredness=Requiredness.OPTIONAL) final Integer optionalIntField,
         @com.facebook.swift.codec.ThriftField(value=6, name="optional_bool_field", requiredness=Requiredness.OPTIONAL) final Boolean optionalBoolField,
         @com.facebook.swift.codec.ThriftField(value=7, name="optional_list_field", requiredness=Requiredness.OPTIONAL) final List<Integer> optionalListField,
-        @com.facebook.swift.codec.ThriftField(value=8, name="optional_struct_field", requiredness=Requiredness.OPTIONAL) final com.facebook.thrift.compiler.test.fixtures.default_values_rectification.EmptyStruct optionalStructField
+        @com.facebook.swift.codec.ThriftField(value=8, name="optional_struct_field", requiredness=Requiredness.OPTIONAL) final com.facebook.thrift.compiler.test.fixtures.default_values_rectification_after.EmptyStruct optionalStructField
     ) {
         this.unqualifiedIntField = unqualifiedIntField;
         this.unqualifiedBoolField = unqualifiedBoolField;
@@ -69,11 +69,11 @@ public final class TestStruct implements com.facebook.thrift.payload.ThriftSeria
         private int unqualifiedIntField = 0;
         private boolean unqualifiedBoolField = false;
         private List<Integer> unqualifiedListField = null;
-        private com.facebook.thrift.compiler.test.fixtures.default_values_rectification.EmptyStruct unqualifiedStructField = null;
+        private com.facebook.thrift.compiler.test.fixtures.default_values_rectification_after.EmptyStruct unqualifiedStructField = null;
         private Integer optionalIntField = null;
         private Boolean optionalBoolField = null;
         private List<Integer> optionalListField = null;
-        private com.facebook.thrift.compiler.test.fixtures.default_values_rectification.EmptyStruct optionalStructField = null;
+        private com.facebook.thrift.compiler.test.fixtures.default_values_rectification_after.EmptyStruct optionalStructField = null;
     
         @com.facebook.swift.codec.ThriftField(value=1, name="unqualified_int_field", requiredness=Requiredness.NONE)    public Builder setUnqualifiedIntField(int unqualifiedIntField) {
             this.unqualifiedIntField = unqualifiedIntField;
@@ -96,12 +96,12 @@ public final class TestStruct implements com.facebook.thrift.payload.ThriftSeria
     
         public List<Integer> getUnqualifiedListField() { return unqualifiedListField; }
     
-            @com.facebook.swift.codec.ThriftField(value=4, name="unqualified_struct_field", requiredness=Requiredness.NONE)    public Builder setUnqualifiedStructField(com.facebook.thrift.compiler.test.fixtures.default_values_rectification.EmptyStruct unqualifiedStructField) {
+            @com.facebook.swift.codec.ThriftField(value=4, name="unqualified_struct_field", requiredness=Requiredness.NONE)    public Builder setUnqualifiedStructField(com.facebook.thrift.compiler.test.fixtures.default_values_rectification_after.EmptyStruct unqualifiedStructField) {
             this.unqualifiedStructField = unqualifiedStructField;
             return this;
         }
     
-        public com.facebook.thrift.compiler.test.fixtures.default_values_rectification.EmptyStruct getUnqualifiedStructField() { return unqualifiedStructField; }
+        public com.facebook.thrift.compiler.test.fixtures.default_values_rectification_after.EmptyStruct getUnqualifiedStructField() { return unqualifiedStructField; }
     
             @com.facebook.swift.codec.ThriftField(value=5, name="optional_int_field", requiredness=Requiredness.OPTIONAL)    public Builder setOptionalIntField(Integer optionalIntField) {
             this.optionalIntField = optionalIntField;
@@ -124,12 +124,12 @@ public final class TestStruct implements com.facebook.thrift.payload.ThriftSeria
     
         public List<Integer> getOptionalListField() { return optionalListField; }
     
-            @com.facebook.swift.codec.ThriftField(value=8, name="optional_struct_field", requiredness=Requiredness.OPTIONAL)    public Builder setOptionalStructField(com.facebook.thrift.compiler.test.fixtures.default_values_rectification.EmptyStruct optionalStructField) {
+            @com.facebook.swift.codec.ThriftField(value=8, name="optional_struct_field", requiredness=Requiredness.OPTIONAL)    public Builder setOptionalStructField(com.facebook.thrift.compiler.test.fixtures.default_values_rectification_after.EmptyStruct optionalStructField) {
             this.optionalStructField = optionalStructField;
             return this;
         }
     
-        public com.facebook.thrift.compiler.test.fixtures.default_values_rectification.EmptyStruct getOptionalStructField() { return optionalStructField; }
+        public com.facebook.thrift.compiler.test.fixtures.default_values_rectification_after.EmptyStruct getOptionalStructField() { return optionalStructField; }
     
         public Builder() { }
         public Builder(TestStruct other) {
@@ -172,7 +172,7 @@ public final class TestStruct implements com.facebook.thrift.payload.ThriftSeria
         private final List<Integer> unqualifiedListField;
     public static final int _UNQUALIFIED_LIST_FIELD = 3;
     private static final TField UNQUALIFIED_LIST_FIELD_FIELD_DESC = new TField("unqualified_list_field", TType.LIST, (short)3);
-        private final com.facebook.thrift.compiler.test.fixtures.default_values_rectification.EmptyStruct unqualifiedStructField;
+        private final com.facebook.thrift.compiler.test.fixtures.default_values_rectification_after.EmptyStruct unqualifiedStructField;
     public static final int _UNQUALIFIED_STRUCT_FIELD = 4;
     private static final TField UNQUALIFIED_STRUCT_FIELD_FIELD_DESC = new TField("unqualified_struct_field", TType.STRUCT, (short)4);
         private final Integer optionalIntField;
@@ -184,7 +184,7 @@ public final class TestStruct implements com.facebook.thrift.payload.ThriftSeria
         private final List<Integer> optionalListField;
     public static final int _OPTIONAL_LIST_FIELD = 7;
     private static final TField OPTIONAL_LIST_FIELD_FIELD_DESC = new TField("optional_list_field", TType.LIST, (short)7);
-        private final com.facebook.thrift.compiler.test.fixtures.default_values_rectification.EmptyStruct optionalStructField;
+        private final com.facebook.thrift.compiler.test.fixtures.default_values_rectification_after.EmptyStruct optionalStructField;
     public static final int _OPTIONAL_STRUCT_FIELD = 8;
     private static final TField OPTIONAL_STRUCT_FIELD_FIELD_DESC = new TField("optional_struct_field", TType.STRUCT, (short)8);
     static {
@@ -213,7 +213,7 @@ public final class TestStruct implements com.facebook.thrift.payload.ThriftSeria
       THRIFT_NAMES_TO_IDS.put("optional_struct_field", 8);
       FIELD_METADATA.put(8, OPTIONAL_STRUCT_FIELD_FIELD_DESC);
       com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
-        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/compiler/test/fixtures/default_values_rectification/TestStruct"),
+        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/compiler/test/fixtures/default_values_rectification_after/TestStruct"),
         TestStruct.class, TestStruct::read0));
     }
     
@@ -234,7 +234,7 @@ public final class TestStruct implements com.facebook.thrift.payload.ThriftSeria
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=4, name="unqualified_struct_field", requiredness=Requiredness.NONE)
-    public com.facebook.thrift.compiler.test.fixtures.default_values_rectification.EmptyStruct getUnqualifiedStructField() { return unqualifiedStructField; }
+    public com.facebook.thrift.compiler.test.fixtures.default_values_rectification_after.EmptyStruct getUnqualifiedStructField() { return unqualifiedStructField; }
 
     
     @Nullable
@@ -254,7 +254,7 @@ public final class TestStruct implements com.facebook.thrift.payload.ThriftSeria
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=8, name="optional_struct_field", requiredness=Requiredness.OPTIONAL)
-    public com.facebook.thrift.compiler.test.fixtures.default_values_rectification.EmptyStruct getOptionalStructField() { return optionalStructField; }
+    public com.facebook.thrift.compiler.test.fixtures.default_values_rectification_after.EmptyStruct getOptionalStructField() { return optionalStructField; }
 
     @java.lang.Override
     public String toString() {
@@ -356,7 +356,7 @@ public final class TestStruct implements com.facebook.thrift.payload.ThriftSeria
           break;
         case _UNQUALIFIED_STRUCT_FIELD:
           if (__field.type == TType.STRUCT) {
-            com.facebook.thrift.compiler.test.fixtures.default_values_rectification.EmptyStruct unqualifiedStructField = com.facebook.thrift.compiler.test.fixtures.default_values_rectification.EmptyStruct.read0(oprot);
+            com.facebook.thrift.compiler.test.fixtures.default_values_rectification_after.EmptyStruct unqualifiedStructField = com.facebook.thrift.compiler.test.fixtures.default_values_rectification_after.EmptyStruct.read0(oprot);
             builder.setUnqualifiedStructField(unqualifiedStructField);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -398,7 +398,7 @@ public final class TestStruct implements com.facebook.thrift.payload.ThriftSeria
           break;
         case _OPTIONAL_STRUCT_FIELD:
           if (__field.type == TType.STRUCT) {
-            com.facebook.thrift.compiler.test.fixtures.default_values_rectification.EmptyStruct optionalStructField = com.facebook.thrift.compiler.test.fixtures.default_values_rectification.EmptyStruct.read0(oprot);
+            com.facebook.thrift.compiler.test.fixtures.default_values_rectification_after.EmptyStruct optionalStructField = com.facebook.thrift.compiler.test.fixtures.default_values_rectification_after.EmptyStruct.read0(oprot);
             builder.setOptionalStructField(optionalStructField);
           } else {
             TProtocolUtil.skip(oprot, __field.type);

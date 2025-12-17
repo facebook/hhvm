@@ -80,7 +80,7 @@ public final class RenamedStructWithStructAdapterAndFieldAdapter implements com.
       THRIFT_NAMES_TO_IDS.put("field", 1);
       FIELD_METADATA.put(1, FIELD_FIELD_DESC);
       com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
-        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/RenamedStructWithStructAdapterAndFieldAdapter"),
+        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/fixtures/adapter/RenamedStructWithStructAdapterAndFieldAdapter"),
         RenamedStructWithStructAdapterAndFieldAdapter.class, RenamedStructWithStructAdapterAndFieldAdapter::read0));
     }
     

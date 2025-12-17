@@ -18,15 +18,15 @@ FOLLY_CLANG_DISABLE_WARNING("-Wignored-optimization-argument")
 namespace apache {
 namespace thrift {
 namespace detail {
-template <> struct TSchemaAssociation<::facebook::thrift::test::PrimitivesService, false> {
+template <> struct TSchemaAssociation<::facebook::thrift::test::fixtures::service_schema::PrimitivesService, false> {
   static ::folly::Range<const ::std::string_view*> bundle();
-  static constexpr int64_t programId = -4897237288056697529;
-  static constexpr ::std::string_view definitionKey = {"\x8a\x6f\xcf\x1a\xc4\x7f\xef\xe9\xfc\xd0\xb5\xce\x3b\x5e\x14\xb4", 16};
+  static constexpr int64_t programId = 986987743245182930;
+  static constexpr ::std::string_view definitionKey = {"\x07\xc4\x0a\xe6\x37\xa8\x3b\x59\x57\x38\x32\x5c\xb2\xa7\x99\xc4", 16};
 };
-template <> struct TSchemaAssociation<::facebook::thrift::test::ExtendedService, false> {
+template <> struct TSchemaAssociation<::facebook::thrift::test::fixtures::service_schema::ExtendedService, false> {
   static ::folly::Range<const ::std::string_view*> bundle();
-  static constexpr int64_t programId = -4897237288056697529;
-  static constexpr ::std::string_view definitionKey = {"\x2f\x39\x63\x5e\x7a\x62\x4d\xa7\x6e\x69\x78\xae\x7e\x49\xe3\x79", 16};
+  static constexpr int64_t programId = 986987743245182930;
+  static constexpr ::std::string_view definitionKey = {"\x18\x6b\x65\x4f\x98\x6f\x7b\x04\xca\x95\xdf\xc9\xae\xff\xe8\x08", 16};
 };
 namespace md {
 using ThriftMetadata = ::apache::thrift::metadata::ThriftMetadata;
@@ -38,13 +38,13 @@ using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::s
 
 inline constexpr Options kGenerateAll = {.genAnnotations = true, .genNestedTypes = true};
 
-void EnumMetadata<::facebook::thrift::test::Result>::gen(ThriftMetadata& metadata) {
+void EnumMetadata<::facebook::thrift::test::fixtures::service_schema::Result>::gen(ThriftMetadata& metadata) {
   if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
-    genEnumMetadata<::facebook::thrift::test::Result>(metadata, kGenerateAll);
+    genEnumMetadata<::facebook::thrift::test::fixtures::service_schema::Result>(metadata, kGenerateAll);
     return;
   }
 
-  auto res = genEnumMetadata<::facebook::thrift::test::Result>(metadata, {.genAnnotations = folly::kIsDebug});
+  auto res = genEnumMetadata<::facebook::thrift::test::fixtures::service_schema::Result>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
   }
@@ -53,12 +53,12 @@ void EnumMetadata<::facebook::thrift::test::Result>::gen(ThriftMetadata& metadat
 }
 
 const ::apache::thrift::metadata::ThriftStruct&
-StructMetadata<::facebook::thrift::test::CustomException>::gen(ThriftMetadata& metadata) {
+StructMetadata<::facebook::thrift::test::fixtures::service_schema::CustomException>::gen(ThriftMetadata& metadata) {
   if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
-    return genStructMetadata<::facebook::thrift::test::CustomException>(metadata, kGenerateAll).metadata;
+    return genStructMetadata<::facebook::thrift::test::fixtures::service_schema::CustomException>(metadata, kGenerateAll).metadata;
   }
 
-  auto res = genStructMetadata<::facebook::thrift::test::CustomException>(metadata, {.genAnnotations = folly::kIsDebug});
+  auto res = genStructMetadata<::facebook::thrift::test::fixtures::service_schema::CustomException>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -66,10 +66,10 @@ StructMetadata<::facebook::thrift::test::CustomException>::gen(ThriftMetadata& m
   DCHECK_EQ(*module_CustomException.is_union(), false);
   static const auto* const
   module_CustomException_fields = new std::array<EncodedThriftField, 2>{ {
-    { 1, "name", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "result", false, std::make_unique<Enum<::facebook::thrift::test::Result>>("module.Result"), std::vector<ThriftConstStruct>{ }},  }};
+    { 1, "name", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "result", false, std::make_unique<Enum<::facebook::thrift::test::fixtures::service_schema::Result>>("module.Result"), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_CustomException_fields) {
-    genStructFieldMetadata<::facebook::thrift::test::CustomException>(module_CustomException.fields()[i], f, i);
+    genStructFieldMetadata<::facebook::thrift::test::fixtures::service_schema::CustomException>(module_CustomException.fields()[i], f, i);
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -82,20 +82,20 @@ StructMetadata<::facebook::thrift::test::CustomException>::gen(ThriftMetadata& m
   return res.metadata;
 }
 
-void ExceptionMetadata<::facebook::thrift::test::CustomException>::gen(ThriftMetadata& metadata) {
+void ExceptionMetadata<::facebook::thrift::test::fixtures::service_schema::CustomException>::gen(ThriftMetadata& metadata) {
   if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
-    genExceptionMetadata<::facebook::thrift::test::CustomException>(metadata, kGenerateAll);
+    genExceptionMetadata<::facebook::thrift::test::fixtures::service_schema::CustomException>(metadata, kGenerateAll);
     return;
   }
 
-  auto res = genExceptionMetadata<::facebook::thrift::test::CustomException>(metadata, {.genAnnotations = folly::kIsDebug});
+  auto res = genExceptionMetadata<::facebook::thrift::test::fixtures::service_schema::CustomException>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
   }
   [[maybe_unused]] ::apache::thrift::metadata::ThriftException& module_CustomException = res.metadata;
   static const auto* const
   module_CustomException_fields = new std::array<EncodedThriftField, 2>{ {
-    { 1, "name", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "result", false, std::make_unique<Enum<::facebook::thrift::test::Result>>("module.Result"), std::vector<ThriftConstStruct>{ }},  }};
+    { 1, "name", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "result", false, std::make_unique<Enum<::facebook::thrift::test::fixtures::service_schema::Result>>("module.Result"), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_CustomException_fields) {
     [[maybe_unused]] auto& field = module_CustomException.fields()[i];
@@ -112,7 +112,7 @@ void ExceptionMetadata<::facebook::thrift::test::CustomException>::gen(ThriftMet
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::PrimitivesService>>::gen_init([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>>::gen_init([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
   DCHECK_EQ(*func.name() , "init");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE);
@@ -137,10 +137,10 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::
   [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
   func.structured_annotations()->clear();
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::PrimitivesService>>::gen_method_that_throws([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>>::gen_method_that_throws([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
   DCHECK_EQ(*func.name() , "method_that_throws");
-  auto func_ret_type = std::make_unique<Enum<::facebook::thrift::test::Result>>("module.Result");
+  auto func_ret_type = std::make_unique<Enum<::facebook::thrift::test::fixtures::service_schema::Result>>("module.Result");
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   [[maybe_unused]] std::size_t argumentIndex = 0;
   [[maybe_unused]] std::size_t exceptionIndex = 0;
@@ -149,14 +149,14 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::
   module_PrimitivesService_method_that_throws_e_1.structured_annotations()->clear();
   DCHECK_EQ(*module_PrimitivesService_method_that_throws_e_1.id(), 1);
   DCHECK_EQ(*module_PrimitivesService_method_that_throws_e_1.name(), "e");
-  auto module_PrimitivesService_method_that_throws_e_1_type = std::make_unique<Struct<::facebook::thrift::test::CustomException>>("module.CustomException");
+  auto module_PrimitivesService_method_that_throws_e_1_type = std::make_unique<Struct<::facebook::thrift::test::fixtures::service_schema::CustomException>>("module.CustomException");
   module_PrimitivesService_method_that_throws_e_1_type->writeAndGenType(*module_PrimitivesService_method_that_throws_e_1.type(), metadata);
-  ExceptionMetadata<::facebook::thrift::test::CustomException>::gen(metadata);
+  ExceptionMetadata<::facebook::thrift::test::fixtures::service_schema::CustomException>::gen(metadata);
   DCHECK_EQ(*func.is_oneway(), false);
   [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
   func.structured_annotations()->clear();
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::PrimitivesService>>::gen_return_void_method([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>>::gen_return_void_method([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
   DCHECK_EQ(*func.name() , "return_void_method");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_VOID_TYPE);
@@ -182,9 +182,9 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::
   func.structured_annotations()->clear();
 }
 
-void ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::PrimitivesService>>::gen(::apache::thrift::metadata::ThriftServiceMetadataResponse& response) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>>::gen(::apache::thrift::metadata::ThriftServiceMetadataResponse& response) {
   if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
-    genServiceMetadataResponse<::facebook::thrift::test::PrimitivesService>(response);
+    genServiceMetadataResponse<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>(response);
     DCHECK_EQ(*response.context()->module()->name(), "module");
     DCHECK_EQ(*response.context()->service_info()->name(), "module.PrimitivesService");
     return;
@@ -199,21 +199,21 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::
   response.context() = std::move(context);
 }
 
-const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::PrimitivesService>>::genRecurse(ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
+const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>>::genRecurse(ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
   if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
-    const ThriftServiceContextRef* context = genServiceMetadataRecurse<::facebook::thrift::test::PrimitivesService>(metadata, services);
+    const ThriftServiceContextRef* context = genServiceMetadataRecurse<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>(metadata, services);
     DCHECK_EQ(*metadata.services()["module.PrimitivesService"].name(), "module.PrimitivesService");
     DCHECK_EQ(*context->service_name(), "module.PrimitivesService");
     DCHECK_EQ(*context->module()->name(), "module");
     return context;
   }
 
-  ::apache::thrift::metadata::ThriftService module_PrimitivesService = genServiceMetadata<::facebook::thrift::test::PrimitivesService>(metadata, {.genAnnotations = folly::kIsDebug});
-  DCHECK_EQ(*module_PrimitivesService.uri(), "facebook.com/thrift/test/PrimitivesService");
+  ::apache::thrift::metadata::ThriftService module_PrimitivesService = genServiceMetadata<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>(metadata, {.genAnnotations = folly::kIsDebug});
+  DCHECK_EQ(*module_PrimitivesService.uri(), "facebook.com/thrift/test/fixtures/service_schema/PrimitivesService");
   static const ThriftFunctionGenerator functions[] = {
-    ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::PrimitivesService>>::gen_init,
-    ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::PrimitivesService>>::gen_method_that_throws,
-    ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::PrimitivesService>>::gen_return_void_method,
+    ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>>::gen_init,
+    ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>>::gen_method_that_throws,
+    ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>>::gen_return_void_method,
   };
   static constexpr bool isPerforms [] = {
     false,
@@ -244,7 +244,7 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
   context.module() = std::move(module);
   return &context;
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::ExtendedService>>::gen_init([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::service_schema::ExtendedService>>::gen_init([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
   DCHECK_EQ(*func.name() , "init");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE);
@@ -270,9 +270,9 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::
   func.structured_annotations()->clear();
 }
 
-void ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::ExtendedService>>::gen(::apache::thrift::metadata::ThriftServiceMetadataResponse& response) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::service_schema::ExtendedService>>::gen(::apache::thrift::metadata::ThriftServiceMetadataResponse& response) {
   if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
-    genServiceMetadataResponse<::facebook::thrift::test::ExtendedService>(response);
+    genServiceMetadataResponse<::facebook::thrift::test::fixtures::service_schema::ExtendedService>(response);
     DCHECK_EQ(*response.context()->module()->name(), "module");
     DCHECK_EQ(*response.context()->service_info()->name(), "module.ExtendedService");
     return;
@@ -287,19 +287,19 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::
   response.context() = std::move(context);
 }
 
-const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::ExtendedService>>::genRecurse(ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
+const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::service_schema::ExtendedService>>::genRecurse(ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
   if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
-    const ThriftServiceContextRef* context = genServiceMetadataRecurse<::facebook::thrift::test::ExtendedService>(metadata, services);
+    const ThriftServiceContextRef* context = genServiceMetadataRecurse<::facebook::thrift::test::fixtures::service_schema::ExtendedService>(metadata, services);
     DCHECK_EQ(*metadata.services()["module.ExtendedService"].name(), "module.ExtendedService");
     DCHECK_EQ(*context->service_name(), "module.ExtendedService");
     DCHECK_EQ(*context->module()->name(), "module");
     return context;
   }
 
-  ::apache::thrift::metadata::ThriftService module_ExtendedService = genServiceMetadata<::facebook::thrift::test::ExtendedService>(metadata, {.genAnnotations = folly::kIsDebug});
-  DCHECK_EQ(*module_ExtendedService.uri(), "facebook.com/thrift/test/ExtendedService");
+  ::apache::thrift::metadata::ThriftService module_ExtendedService = genServiceMetadata<::facebook::thrift::test::fixtures::service_schema::ExtendedService>(metadata, {.genAnnotations = folly::kIsDebug});
+  DCHECK_EQ(*module_ExtendedService.uri(), "facebook.com/thrift/test/fixtures/service_schema/ExtendedService");
   static const ThriftFunctionGenerator functions[] = {
-    ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::ExtendedService>>::gen_init,
+    ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::service_schema::ExtendedService>>::gen_init,
   };
   static constexpr bool isPerforms [] = {
     false,
@@ -319,7 +319,7 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
   auto selfIndex = services.size();
   services.emplace_back();
   DCHECK_EQ(*module_ExtendedService.parent(), "extend.BaseService");
-  ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::BaseService>>::genRecurse(metadata, services);
+  ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::service_schema::BaseService>>::genRecurse(metadata, services);
   [[maybe_unused]] auto module_ExtendedServiceAnnotations = std::move(*module_ExtendedService.structured_annotations());
   module_ExtendedService.structured_annotations()->clear();
   ThriftServiceContextRef& context = services[selfIndex];

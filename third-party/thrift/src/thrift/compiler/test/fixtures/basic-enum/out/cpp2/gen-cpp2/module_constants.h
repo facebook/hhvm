@@ -24,9 +24,9 @@ namespace module_constants {
   /** Glean {"constant": "enumNames"} */
   ::std::map<::test::fixtures::enumstrict::MyEnum, ::std::string> const& enumNames();
 
-  FOLLY_EXPORT ::std::string_view _fbthrift_schema_42852c5394bb7dbf();
-  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_42852c5394bb7dbf_includes();
-  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_42852c5394bb7dbf_uris();
+  FOLLY_EXPORT ::std::string_view _fbthrift_schema_dc0496c24a31a50f();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_dc0496c24a31a50f_includes();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_dc0496c24a31a50f_uris();
 
 } // namespace module_constants
 } // namespace test::fixtures::enumstrict

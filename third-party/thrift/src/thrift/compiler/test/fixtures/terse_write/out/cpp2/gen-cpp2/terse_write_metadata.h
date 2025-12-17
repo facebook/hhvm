@@ -18,47 +18,47 @@ namespace detail {
 namespace md {
 
 template <>
-class EnumMetadata<::facebook::thrift::test::terse_write::MyEnum> {
+class EnumMetadata<::facebook::thrift::test::fixtures::terse_write::MyEnum> {
  public:
   static void gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::facebook::thrift::test::terse_write::MyStruct> {
+class StructMetadata<::facebook::thrift::test::fixtures::terse_write::MyStruct> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::facebook::thrift::test::terse_write::MyUnion> {
+class StructMetadata<::facebook::thrift::test::fixtures::terse_write::MyUnion> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::facebook::thrift::test::terse_write::MyStructWithCustomDefault> {
+class StructMetadata<::facebook::thrift::test::fixtures::terse_write::MyStructWithCustomDefault> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::facebook::thrift::test::terse_write::StructLevelTerseStruct> {
+class StructMetadata<::facebook::thrift::test::fixtures::terse_write::StructLevelTerseStruct> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::facebook::thrift::test::terse_write::FieldLevelTerseStruct> {
+class StructMetadata<::facebook::thrift::test::fixtures::terse_write::FieldLevelTerseStruct> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::facebook::thrift::test::terse_write::AdaptedFields> {
+class StructMetadata<::facebook::thrift::test::fixtures::terse_write::AdaptedFields> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::facebook::thrift::test::terse_write::TerseException> {
+class StructMetadata<::facebook::thrift::test::fixtures::terse_write::TerseException> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class ExceptionMetadata<::facebook::thrift::test::terse_write::TerseException> {
+class ExceptionMetadata<::facebook::thrift::test::fixtures::terse_write::TerseException> {
  public:
   static void gen(ThriftMetadata& metadata);
 };

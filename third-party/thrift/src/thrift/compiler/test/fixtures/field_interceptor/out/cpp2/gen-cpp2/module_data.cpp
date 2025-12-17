@@ -12,8 +12,8 @@
 
 namespace apache::thrift {
 
-THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::facebook::thrift::test::InterceptedFields>::name = "InterceptedFields";
-THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 6> TStructDataStorage<::facebook::thrift::test::InterceptedFields>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::facebook::thrift::test::fixtures::field_interceptor::InterceptedFields>::name = "InterceptedFields";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 6> TStructDataStorage<::facebook::thrift::test::fixtures::field_interceptor::InterceptedFields>::fields_names = { {
   "access_field"sv,
   "access_shared_field"sv,
   "access_optional_shared_field"sv,
@@ -21,7 +21,7 @@ THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 6> TStruct
   "access_optional_shared_const_field"sv,
   "access_optional_boxed_field"sv,
 }};
-THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 6> TStructDataStorage<::facebook::thrift::test::InterceptedFields>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 6> TStructDataStorage<::facebook::thrift::test::fixtures::field_interceptor::InterceptedFields>::fields_ids = { {
   1,
   2,
   3,
@@ -29,7 +29,7 @@ THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 6> TStructDataStora
   5,
   6,
 }};
-THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 6> TStructDataStorage<::facebook::thrift::test::InterceptedFields>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 6> TStructDataStorage<::facebook::thrift::test::fixtures::field_interceptor::InterceptedFields>::fields_types = { {
   TType::T_I32,
   TType::T_I32,
   TType::T_I32,
@@ -37,7 +37,7 @@ THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 6> TStructD
   TType::T_I32,
   TType::T_I32,
 }};
-THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 6> TStructDataStorage<::facebook::thrift::test::InterceptedFields>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 6> TStructDataStorage<::facebook::thrift::test::fixtures::field_interceptor::InterceptedFields>::isset_indexes = { {
   0,
   -1,
   -1,

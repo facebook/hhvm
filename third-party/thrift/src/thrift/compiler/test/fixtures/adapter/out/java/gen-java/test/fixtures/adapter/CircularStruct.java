@@ -80,7 +80,7 @@ public final class CircularStruct implements com.facebook.thrift.payload.ThriftS
       THRIFT_NAMES_TO_IDS.put("field", 1);
       FIELD_METADATA.put(1, FIELD_FIELD_DESC);
       com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
-        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/CircularStruct"),
+        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/fixtures/adapter/CircularStruct"),
         CircularStruct.class, CircularStruct::read0));
     }
     

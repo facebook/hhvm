@@ -11,12 +11,12 @@
 #include <thrift/lib/cpp2/gen/module_metadata_h.h>
 #include "thrift/compiler/test/fixtures/adapter/gen-cpp2/module_types.h"
 
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::adapter {
 class Service;
-} // namespace facebook::thrift::test
-namespace facebook::thrift::test {
+} // namespace facebook::thrift::test::fixtures::adapter
+namespace facebook::thrift::test::fixtures::adapter {
 class AdapterService;
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::adapter
 
 namespace apache {
 namespace thrift {
@@ -24,187 +24,187 @@ namespace detail {
 namespace md {
 
 template <>
-class EnumMetadata<::facebook::thrift::test::Color> {
+class EnumMetadata<::facebook::thrift::test::fixtures::adapter::Color> {
  public:
   static void gen(ThriftMetadata& metadata);
 };
 template <>
-class EnumMetadata<::facebook::thrift::test::ThriftAdaptedEnum> {
+class EnumMetadata<::facebook::thrift::test::fixtures::adapter::ThriftAdaptedEnum> {
  public:
   static void gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::facebook::thrift::test::MyAnnotation> {
+class StructMetadata<::facebook::thrift::test::fixtures::adapter::MyAnnotation> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::facebook::thrift::test::Foo> {
+class StructMetadata<::facebook::thrift::test::fixtures::adapter::Foo> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::facebook::thrift::test::Baz> {
+class StructMetadata<::facebook::thrift::test::fixtures::adapter::Baz> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::facebook::thrift::test::Bar> {
+class StructMetadata<::facebook::thrift::test::fixtures::adapter::Bar> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::facebook::thrift::test::detail::DirectlyAdapted> {
+class StructMetadata<::facebook::thrift::test::fixtures::adapter::detail::DirectlyAdapted> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::facebook::thrift::test::detail::IndependentDirectlyAdapted> {
+class StructMetadata<::facebook::thrift::test::fixtures::adapter::detail::IndependentDirectlyAdapted> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::facebook::thrift::test::StructWithFieldAdapter> {
+class StructMetadata<::facebook::thrift::test::fixtures::adapter::StructWithFieldAdapter> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::facebook::thrift::test::TerseAdaptedFields> {
+class StructMetadata<::facebook::thrift::test::fixtures::adapter::TerseAdaptedFields> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::facebook::thrift::test::B> {
+class StructMetadata<::facebook::thrift::test::fixtures::adapter::B> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::facebook::thrift::test::A> {
+class StructMetadata<::facebook::thrift::test::fixtures::adapter::A> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::facebook::thrift::test::Config> {
+class StructMetadata<::facebook::thrift::test::fixtures::adapter::Config> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::facebook::thrift::test::MyStruct> {
+class StructMetadata<::facebook::thrift::test::fixtures::adapter::MyStruct> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::facebook::thrift::test::AdaptTestStruct> {
+class StructMetadata<::facebook::thrift::test::fixtures::adapter::AdaptTestStruct> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::facebook::thrift::test::AdaptTemplatedTestStruct> {
+class StructMetadata<::facebook::thrift::test::fixtures::adapter::AdaptTemplatedTestStruct> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::facebook::thrift::test::AdaptTemplatedNestedTestStruct> {
+class StructMetadata<::facebook::thrift::test::fixtures::adapter::AdaptTemplatedNestedTestStruct> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::facebook::thrift::test::ThriftAdaptTestUnion> {
+class StructMetadata<::facebook::thrift::test::fixtures::adapter::ThriftAdaptTestUnion> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::facebook::thrift::test::ThriftAdaptedStruct> {
+class StructMetadata<::facebook::thrift::test::fixtures::adapter::ThriftAdaptedStruct> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::facebook::thrift::test::detail::DirectlyAdaptedStruct> {
+class StructMetadata<::facebook::thrift::test::fixtures::adapter::detail::DirectlyAdaptedStruct> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::facebook::thrift::test::StructFieldAdaptedStruct> {
+class StructMetadata<::facebook::thrift::test::fixtures::adapter::StructFieldAdaptedStruct> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::facebook::thrift::test::CircularAdaptee> {
+class StructMetadata<::facebook::thrift::test::fixtures::adapter::CircularAdaptee> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::facebook::thrift::test::CircularStruct> {
+class StructMetadata<::facebook::thrift::test::fixtures::adapter::CircularStruct> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::facebook::thrift::test::ReorderedStruct> {
+class StructMetadata<::facebook::thrift::test::fixtures::adapter::ReorderedStruct> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::facebook::thrift::test::detail::DeclaredAfterStruct> {
+class StructMetadata<::facebook::thrift::test::fixtures::adapter::detail::DeclaredAfterStruct> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::facebook::thrift::test::UnderlyingRenamedStruct> {
+class StructMetadata<::facebook::thrift::test::fixtures::adapter::UnderlyingRenamedStruct> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::facebook::thrift::test::UnderlyingSameNamespaceStruct> {
+class StructMetadata<::facebook::thrift::test::fixtures::adapter::UnderlyingSameNamespaceStruct> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::facebook::thrift::test::detail::HeapAllocated> {
+class StructMetadata<::facebook::thrift::test::fixtures::adapter::detail::HeapAllocated> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::facebook::thrift::test::MoveOnly> {
+class StructMetadata<::facebook::thrift::test::fixtures::adapter::MoveOnly> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::facebook::thrift::test::AlsoMoveOnly> {
+class StructMetadata<::facebook::thrift::test::fixtures::adapter::AlsoMoveOnly> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::facebook::thrift::test::ApplyAdapter> {
+class StructMetadata<::facebook::thrift::test::fixtures::adapter::ApplyAdapter> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::facebook::thrift::test::detail::TransitiveAdapted> {
+class StructMetadata<::facebook::thrift::test::fixtures::adapter::detail::TransitiveAdapted> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::facebook::thrift::test::CountingStruct> {
+class StructMetadata<::facebook::thrift::test::fixtures::adapter::CountingStruct> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::facebook::thrift::test::Person> {
+class StructMetadata<::facebook::thrift::test::fixtures::adapter::Person> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::facebook::thrift::test::Person2> {
+class StructMetadata<::facebook::thrift::test::fixtures::adapter::Person2> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::facebook::thrift::test::Renamed> {
+class StructMetadata<::facebook::thrift::test::fixtures::adapter::Renamed> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::Service>> {
+class ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::adapter::Service>> {
  public:
   static void gen(ThriftServiceMetadataResponse& response);
  private:
@@ -216,7 +216,7 @@ class ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test:
   static void gen_func(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
 };
 template <>
-class ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::AdapterService>> {
+class ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::adapter::AdapterService>> {
  public:
   static void gen(ThriftServiceMetadataResponse& response);
  private:

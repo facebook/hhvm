@@ -6,13 +6,13 @@
  *  @generated
  */
 
-namespace facebook\thrift\compiler\test\fixtures\default_values_rectification;
+namespace facebook\thrift\compiler\test\fixtures\default_values_rectification_after;
 
 /**
  * Original thrift struct:-
  * EmptyStruct
  */
-<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/compiler/test/fixtures/default_values_rectification/EmptyStruct'))>>
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/compiler/test/fixtures/default_values_rectification_after/EmptyStruct'))>>
 class EmptyStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
@@ -69,7 +69,7 @@ class EmptyStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
  * Original thrift struct:-
  * TestStruct
  */
-<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/compiler/test/fixtures/default_values_rectification/TestStruct'))>>
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/compiler/test/fixtures/default_values_rectification_after/TestStruct'))>>
 class TestStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
@@ -94,7 +94,7 @@ class TestStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
     4 => shape(
       'var' => 'unqualified_struct_field',
       'type' => \TType::STRUCT,
-      'class' => \facebook\thrift\compiler\test\fixtures\default_values_rectification\EmptyStruct::class,
+      'class' => \facebook\thrift\compiler\test\fixtures\default_values_rectification_after\EmptyStruct::class,
     ),
     5 => shape(
       'var' => 'optional_int_field',
@@ -116,7 +116,7 @@ class TestStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
     8 => shape(
       'var' => 'optional_struct_field',
       'type' => \TType::STRUCT,
-      'class' => \facebook\thrift\compiler\test\fixtures\default_values_rectification\EmptyStruct::class,
+      'class' => \facebook\thrift\compiler\test\fixtures\default_values_rectification_after\EmptyStruct::class,
     ),
   ];
   const dict<string, int> FIELDMAP = dict[
@@ -134,11 +134,11 @@ class TestStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'unqualified_int_field' => ?int,
     ?'unqualified_bool_field' => ?bool,
     ?'unqualified_list_field' => ?Vector<int>,
-    ?'unqualified_struct_field' => ?\facebook\thrift\compiler\test\fixtures\default_values_rectification\EmptyStruct,
+    ?'unqualified_struct_field' => ?\facebook\thrift\compiler\test\fixtures\default_values_rectification_after\EmptyStruct,
     ?'optional_int_field' => ?int,
     ?'optional_bool_field' => ?bool,
     ?'optional_list_field' => ?Vector<int>,
-    ?'optional_struct_field' => ?\facebook\thrift\compiler\test\fixtures\default_values_rectification\EmptyStruct,
+    ?'optional_struct_field' => ?\facebook\thrift\compiler\test\fixtures\default_values_rectification_after\EmptyStruct,
   );
 
   const int STRUCTURAL_ID = 3868425414146542049;
@@ -161,7 +161,7 @@ class TestStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
    * Original thrift field:-
    * 4: module.EmptyStruct unqualified_struct_field
    */
-  public ?\facebook\thrift\compiler\test\fixtures\default_values_rectification\EmptyStruct $unqualified_struct_field;
+  public ?\facebook\thrift\compiler\test\fixtures\default_values_rectification_after\EmptyStruct $unqualified_struct_field;
   /**
    * Original thrift field:-
    * 5: i32 optional_int_field
@@ -181,9 +181,9 @@ class TestStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
    * Original thrift field:-
    * 8: module.EmptyStruct optional_struct_field
    */
-  public ?\facebook\thrift\compiler\test\fixtures\default_values_rectification\EmptyStruct $optional_struct_field;
+  public ?\facebook\thrift\compiler\test\fixtures\default_values_rectification_after\EmptyStruct $optional_struct_field;
 
-  public function __construct(?int $unqualified_int_field = null, ?bool $unqualified_bool_field = null, ?Vector<int> $unqualified_list_field = null, ?\facebook\thrift\compiler\test\fixtures\default_values_rectification\EmptyStruct $unqualified_struct_field = null, ?int $optional_int_field = null, ?bool $optional_bool_field = null, ?Vector<int> $optional_list_field = null, ?\facebook\thrift\compiler\test\fixtures\default_values_rectification\EmptyStruct $optional_struct_field = null)[] {
+  public function __construct(?int $unqualified_int_field = null, ?bool $unqualified_bool_field = null, ?Vector<int> $unqualified_list_field = null, ?\facebook\thrift\compiler\test\fixtures\default_values_rectification_after\EmptyStruct $unqualified_struct_field = null, ?int $optional_int_field = null, ?bool $optional_bool_field = null, ?Vector<int> $optional_list_field = null, ?\facebook\thrift\compiler\test\fixtures\default_values_rectification_after\EmptyStruct $optional_struct_field = null)[] {
     $this->unqualified_int_field = $unqualified_int_field ?? 0;
     $this->unqualified_bool_field = $unqualified_bool_field ?? false;
     $this->unqualified_list_field = $unqualified_list_field ?? Vector {};

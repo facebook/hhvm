@@ -15,33 +15,33 @@
 
 namespace apache { namespace thrift {
 
-const std::string_view TEnumTraits<::facebook::thrift::test::MyEnum>::__fbthrift_module_name_internal_do_not_use = kModuleName;
-folly::Range<::facebook::thrift::test::MyEnum const*> const TEnumTraits<::facebook::thrift::test::MyEnum>::values = folly::range(TEnumDataStorage<::facebook::thrift::test::MyEnum>::values);
-folly::Range<std::string_view const*> const TEnumTraits<::facebook::thrift::test::MyEnum>::names = folly::range(TEnumDataStorage<::facebook::thrift::test::MyEnum>::names);
+const std::string_view TEnumTraits<::facebook::thrift::test::fixtures::runtime_annotations::MyEnum>::__fbthrift_module_name_internal_do_not_use = kModuleName;
+folly::Range<::facebook::thrift::test::fixtures::runtime_annotations::MyEnum const*> const TEnumTraits<::facebook::thrift::test::fixtures::runtime_annotations::MyEnum>::values = folly::range(TEnumDataStorage<::facebook::thrift::test::fixtures::runtime_annotations::MyEnum>::values);
+folly::Range<std::string_view const*> const TEnumTraits<::facebook::thrift::test::fixtures::runtime_annotations::MyEnum>::names = folly::range(TEnumDataStorage<::facebook::thrift::test::fixtures::runtime_annotations::MyEnum>::names);
 
-bool TEnumTraits<::facebook::thrift::test::MyEnum>::findName(type value, std::string_view* out) noexcept {
+bool TEnumTraits<::facebook::thrift::test::fixtures::runtime_annotations::MyEnum>::findName(type value, std::string_view* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_name(value, out);
 }
 
-bool TEnumTraits<::facebook::thrift::test::MyEnum>::findValue(std::string_view name, type* out) noexcept {
+bool TEnumTraits<::facebook::thrift::test::fixtures::runtime_annotations::MyEnum>::findValue(std::string_view name, type* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 
-const std::vector<std::any>& TEnumTraits<::facebook::thrift::test::MyEnum>::annotations() noexcept {
+const std::vector<std::any>& TEnumTraits<::facebook::thrift::test::fixtures::runtime_annotations::MyEnum>::annotations() noexcept {
   static const folly::Indestructible<std::vector<std::any>> ret = [] {
       std::vector<std::any> values;
-      values.emplace_back(::apache::thrift::detail::make_structured_constant<::facebook::thrift::test::MyAnnotation>());
+      values.emplace_back(::apache::thrift::detail::make_structured_constant<::facebook::thrift::test::fixtures::runtime_annotations::MyAnnotation>());
       return values;
     }();
   return *ret;
 }
 
-const std::vector<std::any>& TEnumTraits<::facebook::thrift::test::MyEnum>::enumValueAnnotations(::facebook::thrift::test::MyEnum value) noexcept {
+const std::vector<std::any>& TEnumTraits<::facebook::thrift::test::fixtures::runtime_annotations::MyEnum>::enumValueAnnotations(::facebook::thrift::test::fixtures::runtime_annotations::MyEnum value) noexcept {
   switch (static_cast<std::int32_t>(value)) {
     case 1: {
       static const folly::Indestructible<std::vector<std::any>> ret = [] {
           std::vector<std::any> values;
-          values.emplace_back(::apache::thrift::detail::make_structured_constant<::facebook::thrift::test::MyAnnotation>());
+          values.emplace_back(::apache::thrift::detail::make_structured_constant<::facebook::thrift::test::fixtures::runtime_annotations::MyAnnotation>());
           return values;
         }();
       return *ret;
@@ -56,7 +56,7 @@ const std::vector<std::any>& TEnumTraits<::facebook::thrift::test::MyEnum>::enum
 
 
 
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::runtime_annotations {
 
 std::string_view MyAnnotation::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -94,10 +94,10 @@ void swap([[maybe_unused]] MyAnnotation& a, [[maybe_unused]] MyAnnotation& b) {
 }
 
 
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::runtime_annotations
 
 
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::runtime_annotations {
 
 std::string_view MyStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -151,10 +151,10 @@ void swap([[maybe_unused]] MyStruct& a, [[maybe_unused]] MyStruct& b) {
 }
 
 
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::runtime_annotations
 
 
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::runtime_annotations {
 
 std::string_view MyUnion::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -208,10 +208,10 @@ void swap([[maybe_unused]] MyUnion& a, [[maybe_unused]] MyUnion& b) {
 }
 
 
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::runtime_annotations
 
 
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::runtime_annotations {
 
 std::string_view MyException::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -285,19 +285,19 @@ void swap([[maybe_unused]] MyException& a, [[maybe_unused]] MyException& b) {
 }
 
 
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::runtime_annotations
 
-namespace facebook::thrift::test { namespace {
+namespace facebook::thrift::test::fixtures::runtime_annotations { namespace {
 [[maybe_unused]] FOLLY_ERASE void validateAdapters() {
 }
-}} // namespace facebook::thrift::test
+}} // namespace facebook::thrift::test::fixtures::runtime_annotations
 namespace apache::thrift::detail::annotation {
-template<> const std::vector<std::any>& field_annotation_values<::facebook::thrift::test::MyStruct>(FieldId id) {
+template<> const std::vector<std::any>& field_annotation_values<::facebook::thrift::test::fixtures::runtime_annotations::MyStruct>(FieldId id) {
   switch (static_cast<int16_t>(id)) {
     case 1: {
       static const folly::Indestructible<std::vector<std::any>> ret = [] {
         std::vector<std::any> values;
-        values.emplace_back(::apache::thrift::detail::make_structured_constant<::facebook::thrift::test::MyAnnotation>());
+        values.emplace_back(::apache::thrift::detail::make_structured_constant<::facebook::thrift::test::fixtures::runtime_annotations::MyAnnotation>());
         return values;
       }();
       return *ret;
@@ -306,20 +306,20 @@ template<> const std::vector<std::any>& field_annotation_values<::facebook::thri
         return ::apache::thrift::detail::annotation::empty_annotations();
   };
 }
-template<> const std::vector<std::any>& struct_annotation_values<::facebook::thrift::test::MyStruct>() {
+template<> const std::vector<std::any>& struct_annotation_values<::facebook::thrift::test::fixtures::runtime_annotations::MyStruct>() {
   static const folly::Indestructible<std::vector<std::any>> ret = [] {
     std::vector<std::any> values;
-    values.emplace_back(::apache::thrift::detail::make_structured_constant<::facebook::thrift::test::MyAnnotation>());
+    values.emplace_back(::apache::thrift::detail::make_structured_constant<::facebook::thrift::test::fixtures::runtime_annotations::MyAnnotation>());
     return values;
   }();
   return *ret;
 }
-template<> const std::vector<std::any>& field_annotation_values<::facebook::thrift::test::MyUnion>(FieldId id) {
+template<> const std::vector<std::any>& field_annotation_values<::facebook::thrift::test::fixtures::runtime_annotations::MyUnion>(FieldId id) {
   switch (static_cast<int16_t>(id)) {
     case 1: {
       static const folly::Indestructible<std::vector<std::any>> ret = [] {
         std::vector<std::any> values;
-        values.emplace_back(::apache::thrift::detail::make_structured_constant<::facebook::thrift::test::MyAnnotation>());
+        values.emplace_back(::apache::thrift::detail::make_structured_constant<::facebook::thrift::test::fixtures::runtime_annotations::MyAnnotation>());
         return values;
       }();
       return *ret;
@@ -328,20 +328,20 @@ template<> const std::vector<std::any>& field_annotation_values<::facebook::thri
         return ::apache::thrift::detail::annotation::empty_annotations();
   };
 }
-template<> const std::vector<std::any>& struct_annotation_values<::facebook::thrift::test::MyUnion>() {
+template<> const std::vector<std::any>& struct_annotation_values<::facebook::thrift::test::fixtures::runtime_annotations::MyUnion>() {
   static const folly::Indestructible<std::vector<std::any>> ret = [] {
     std::vector<std::any> values;
-    values.emplace_back(::apache::thrift::detail::make_structured_constant<::facebook::thrift::test::MyAnnotation>());
+    values.emplace_back(::apache::thrift::detail::make_structured_constant<::facebook::thrift::test::fixtures::runtime_annotations::MyAnnotation>());
     return values;
   }();
   return *ret;
 }
-template<> const std::vector<std::any>& field_annotation_values<::facebook::thrift::test::MyException>(FieldId id) {
+template<> const std::vector<std::any>& field_annotation_values<::facebook::thrift::test::fixtures::runtime_annotations::MyException>(FieldId id) {
   switch (static_cast<int16_t>(id)) {
     case 1: {
       static const folly::Indestructible<std::vector<std::any>> ret = [] {
         std::vector<std::any> values;
-        values.emplace_back(::apache::thrift::detail::make_structured_constant<::facebook::thrift::test::MyAnnotation>());
+        values.emplace_back(::apache::thrift::detail::make_structured_constant<::facebook::thrift::test::fixtures::runtime_annotations::MyAnnotation>());
         return values;
       }();
       return *ret;
@@ -350,10 +350,10 @@ template<> const std::vector<std::any>& field_annotation_values<::facebook::thri
         return ::apache::thrift::detail::annotation::empty_annotations();
   };
 }
-template<> const std::vector<std::any>& struct_annotation_values<::facebook::thrift::test::MyException>() {
+template<> const std::vector<std::any>& struct_annotation_values<::facebook::thrift::test::fixtures::runtime_annotations::MyException>() {
   static const folly::Indestructible<std::vector<std::any>> ret = [] {
     std::vector<std::any> values;
-    values.emplace_back(::apache::thrift::detail::make_structured_constant<::facebook::thrift::test::MyAnnotation>());
+    values.emplace_back(::apache::thrift::detail::make_structured_constant<::facebook::thrift::test::fixtures::runtime_annotations::MyAnnotation>());
     return values;
   }();
   return *ret;

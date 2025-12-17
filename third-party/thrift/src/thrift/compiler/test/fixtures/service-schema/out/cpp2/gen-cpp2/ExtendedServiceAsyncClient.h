@@ -23,15 +23,15 @@ namespace apache { namespace thrift {
   namespace transport { class THeader; }
 }}
 
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::service_schema {
 class ExtendedService;
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::service_schema
 namespace apache::thrift {
 
 namespace detail {
 
 template<>
-struct ServiceMethodTypesFootprint<::facebook::thrift::test::ExtendedService> {
+struct ServiceMethodTypesFootprint<::facebook::thrift::test::fixtures::service_schema::ExtendedService> {
   // The types that appear in the definitions of service methods.
   // e.g. if it appears as a type of an input, output, exception sink or stream
   // parameter of a client stub, it appears here,
@@ -41,16 +41,16 @@ struct ServiceMethodTypesFootprint<::facebook::thrift::test::ExtendedService> {
 } // namespace detail
 
 template <>
-class Client<::facebook::thrift::test::ExtendedService> : public ::facebook::thrift::test::BaseServiceAsyncClient {
-  static_assert(!folly::is_detected_v<::apache::thrift::detail::st::detect_complete, ::facebook::thrift::test::ExtendedService>, "Definition collision with service tag. Either rename the Thrift service using @cpp.Name annotation or rename the conflicting C++ type.");
+class Client<::facebook::thrift::test::fixtures::service_schema::ExtendedService> : public ::facebook::thrift::test::fixtures::service_schema::BaseServiceAsyncClient {
+  static_assert(!folly::is_detected_v<::apache::thrift::detail::st::detect_complete, ::facebook::thrift::test::fixtures::service_schema::ExtendedService>, "Definition collision with service tag. Either rename the Thrift service using @cpp.Name annotation or rename the conflicting C++ type.");
  public:
-  using ::facebook::thrift::test::BaseServiceAsyncClient::BaseServiceAsyncClient;
+  using ::facebook::thrift::test::fixtures::service_schema::BaseServiceAsyncClient::BaseServiceAsyncClient;
 
   std::string_view getServiceName() const noexcept override {
     return "ExtendedService";
   }
 
-  static constexpr folly::cstring_view __fbthrift_thrift_uri = "facebook.com/thrift/test/ExtendedService";
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = "facebook.com/thrift/test/fixtures/service_schema/ExtendedService";
 
 
   /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "ExtendedService", "function": "init"} */
@@ -170,6 +170,6 @@ class Client<::facebook::thrift::test::ExtendedService> : public ::facebook::thr
 
 } // namespace apache::thrift
 
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::service_schema {
 using ExtendedServiceAsyncClient [[deprecated("Use apache::thrift::Client<ExtendedService> instead")]] = ::apache::thrift::Client<ExtendedService>;
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::service_schema

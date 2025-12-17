@@ -15,23 +15,23 @@
 
 namespace apache { namespace thrift {
 
-const std::string_view TEnumTraits<::facebook::thrift::test::Color>::__fbthrift_module_name_internal_do_not_use = kModuleName;
-folly::Range<::facebook::thrift::test::Color const*> const TEnumTraits<::facebook::thrift::test::Color>::values = folly::range(TEnumDataStorage<::facebook::thrift::test::Color>::values);
-folly::Range<std::string_view const*> const TEnumTraits<::facebook::thrift::test::Color>::names = folly::range(TEnumDataStorage<::facebook::thrift::test::Color>::names);
+const std::string_view TEnumTraits<::facebook::thrift::test::fixtures::adapter::Color>::__fbthrift_module_name_internal_do_not_use = kModuleName;
+folly::Range<::facebook::thrift::test::fixtures::adapter::Color const*> const TEnumTraits<::facebook::thrift::test::fixtures::adapter::Color>::values = folly::range(TEnumDataStorage<::facebook::thrift::test::fixtures::adapter::Color>::values);
+folly::Range<std::string_view const*> const TEnumTraits<::facebook::thrift::test::fixtures::adapter::Color>::names = folly::range(TEnumDataStorage<::facebook::thrift::test::fixtures::adapter::Color>::names);
 
-bool TEnumTraits<::facebook::thrift::test::Color>::findName(type value, std::string_view* out) noexcept {
+bool TEnumTraits<::facebook::thrift::test::fixtures::adapter::Color>::findName(type value, std::string_view* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_name(value, out);
 }
 
-bool TEnumTraits<::facebook::thrift::test::Color>::findValue(std::string_view name, type* out) noexcept {
+bool TEnumTraits<::facebook::thrift::test::fixtures::adapter::Color>::findValue(std::string_view name, type* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 
-const std::vector<std::any>& TEnumTraits<::facebook::thrift::test::Color>::annotations() noexcept {
+const std::vector<std::any>& TEnumTraits<::facebook::thrift::test::fixtures::adapter::Color>::annotations() noexcept {
   return ::apache::thrift::detail::annotation::empty_annotations();
 }
 
-const std::vector<std::any>& TEnumTraits<::facebook::thrift::test::Color>::enumValueAnnotations(::facebook::thrift::test::Color value) noexcept {
+const std::vector<std::any>& TEnumTraits<::facebook::thrift::test::fixtures::adapter::Color>::enumValueAnnotations(::facebook::thrift::test::fixtures::adapter::Color value) noexcept {
   switch (static_cast<std::int32_t>(value)) {
     default:
       return ::apache::thrift::detail::annotation::empty_annotations();
@@ -44,23 +44,23 @@ const std::vector<std::any>& TEnumTraits<::facebook::thrift::test::Color>::enumV
 
 namespace apache { namespace thrift {
 
-const std::string_view TEnumTraits<::facebook::thrift::test::ThriftAdaptedEnum>::__fbthrift_module_name_internal_do_not_use = kModuleName;
-folly::Range<::facebook::thrift::test::ThriftAdaptedEnum const*> const TEnumTraits<::facebook::thrift::test::ThriftAdaptedEnum>::values = folly::range(TEnumDataStorage<::facebook::thrift::test::ThriftAdaptedEnum>::values);
-folly::Range<std::string_view const*> const TEnumTraits<::facebook::thrift::test::ThriftAdaptedEnum>::names = folly::range(TEnumDataStorage<::facebook::thrift::test::ThriftAdaptedEnum>::names);
+const std::string_view TEnumTraits<::facebook::thrift::test::fixtures::adapter::ThriftAdaptedEnum>::__fbthrift_module_name_internal_do_not_use = kModuleName;
+folly::Range<::facebook::thrift::test::fixtures::adapter::ThriftAdaptedEnum const*> const TEnumTraits<::facebook::thrift::test::fixtures::adapter::ThriftAdaptedEnum>::values = folly::range(TEnumDataStorage<::facebook::thrift::test::fixtures::adapter::ThriftAdaptedEnum>::values);
+folly::Range<std::string_view const*> const TEnumTraits<::facebook::thrift::test::fixtures::adapter::ThriftAdaptedEnum>::names = folly::range(TEnumDataStorage<::facebook::thrift::test::fixtures::adapter::ThriftAdaptedEnum>::names);
 
-bool TEnumTraits<::facebook::thrift::test::ThriftAdaptedEnum>::findName(type value, std::string_view* out) noexcept {
+bool TEnumTraits<::facebook::thrift::test::fixtures::adapter::ThriftAdaptedEnum>::findName(type value, std::string_view* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_name(value, out);
 }
 
-bool TEnumTraits<::facebook::thrift::test::ThriftAdaptedEnum>::findValue(std::string_view name, type* out) noexcept {
+bool TEnumTraits<::facebook::thrift::test::fixtures::adapter::ThriftAdaptedEnum>::findValue(std::string_view name, type* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 
-const std::vector<std::any>& TEnumTraits<::facebook::thrift::test::ThriftAdaptedEnum>::annotations() noexcept {
+const std::vector<std::any>& TEnumTraits<::facebook::thrift::test::fixtures::adapter::ThriftAdaptedEnum>::annotations() noexcept {
   return ::apache::thrift::detail::annotation::empty_annotations();
 }
 
-const std::vector<std::any>& TEnumTraits<::facebook::thrift::test::ThriftAdaptedEnum>::enumValueAnnotations(::facebook::thrift::test::ThriftAdaptedEnum value) noexcept {
+const std::vector<std::any>& TEnumTraits<::facebook::thrift::test::fixtures::adapter::ThriftAdaptedEnum>::enumValueAnnotations(::facebook::thrift::test::fixtures::adapter::ThriftAdaptedEnum value) noexcept {
   switch (static_cast<std::int32_t>(value)) {
     default:
       return ::apache::thrift::detail::annotation::empty_annotations();
@@ -72,7 +72,7 @@ const std::vector<std::any>& TEnumTraits<::facebook::thrift::test::ThriftAdapted
 
 
 
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::adapter {
 
 std::string_view MyAnnotation::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -85,7 +85,7 @@ std::string_view MyAnnotation::__fbthrift_get_class_name() {
 MyAnnotation::MyAnnotation(const MyAnnotation&) = default;
 MyAnnotation& MyAnnotation::operator=(const MyAnnotation&) = default;
 MyAnnotation::MyAnnotation() :
-    __fbthrift_field_color( ::facebook::thrift::test::Color::RED) {
+    __fbthrift_field_color( ::facebook::thrift::test::fixtures::adapter::Color::RED) {
 }
 
 
@@ -105,7 +105,7 @@ MyAnnotation& MyAnnotation::operator=([[maybe_unused]] MyAnnotation&& other) noe
 }
 
 
-MyAnnotation::MyAnnotation(apache::thrift::FragileConstructor, ::std::string signature__arg, ::facebook::thrift::test::Color color__arg) :
+MyAnnotation::MyAnnotation(apache::thrift::FragileConstructor, ::std::string signature__arg, ::facebook::thrift::test::fixtures::adapter::Color color__arg) :
     __fbthrift_field_signature(std::move(signature__arg)),
     __fbthrift_field_color(std::move(color__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
@@ -115,7 +115,7 @@ MyAnnotation::MyAnnotation(apache::thrift::FragileConstructor, ::std::string sig
 void MyAnnotation::__fbthrift_clear() {
   // clear all fields
   this->__fbthrift_field_signature = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
-  this->__fbthrift_field_color = ::facebook::thrift::test::Color();
+  this->__fbthrift_field_color = ::facebook::thrift::test::fixtures::adapter::Color();
   __isset = {};
 }
 
@@ -135,11 +135,11 @@ bool MyAnnotation::operator<([[maybe_unused]] const MyAnnotation& rhs) const {
 }
 
 
-::facebook::thrift::test::Color MyAnnotation::get_color() const {
+::facebook::thrift::test::fixtures::adapter::Color MyAnnotation::get_color() const {
   return __fbthrift_field_color;
 }
 
-::facebook::thrift::test::Color& MyAnnotation::set_color(::facebook::thrift::test::Color color_) {
+::facebook::thrift::test::fixtures::adapter::Color& MyAnnotation::set_color(::facebook::thrift::test::fixtures::adapter::Color color_) {
   color_ref() = color_;
   return __fbthrift_field_color;
 }
@@ -152,10 +152,10 @@ void swap([[maybe_unused]] MyAnnotation& a, [[maybe_unused]] MyAnnotation& b) {
 }
 
 
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::adapter
 
 
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::adapter {
 
 std::string_view Foo::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -205,7 +205,7 @@ Foo& Foo::operator=(const Foo& other) {
 Foo::Foo() :
     __fbthrift_field_intField(),
     __fbthrift_field_optionalIntField(),
-    __fbthrift_field_intFieldWithDefault(::apache::thrift::adapt_detail::fromThriftField<::my::Adapter1, 3>(::facebook::thrift::test::i32_5137(static_cast<::facebook::thrift::test::i32_5137>(13)), *this)),
+    __fbthrift_field_intFieldWithDefault(::apache::thrift::adapt_detail::fromThriftField<::my::Adapter1, 3>(::facebook::thrift::test::fixtures::adapter::i32_5137(static_cast<::facebook::thrift::test::fixtures::adapter::i32_5137>(13)), *this)),
     __fbthrift_field_longField(),
     __fbthrift_field_adaptedLongField(),
     __fbthrift_field_doubleAdaptedField() {
@@ -276,7 +276,7 @@ Foo& Foo::operator=([[maybe_unused]] Foo&& other) noexcept {
 }
 
 
-Foo::Foo(apache::thrift::FragileConstructor, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::facebook::thrift::test::i32_5137, Foo> intField__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::facebook::thrift::test::i32_5137, Foo> optionalIntField__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 3, ::facebook::thrift::test::i32_5137, Foo> intFieldWithDefault__arg, ::facebook::thrift::test::SetWithAdapter setField__arg, ::facebook::thrift::test::SetWithAdapter optionalSetField__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter3, 6, ::facebook::thrift::test::map_string_ListWithElemAdapter_withAdapter_8454, Foo> mapField__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter3, 7, ::facebook::thrift::test::map_string_ListWithElemAdapter_withAdapter_8454, Foo> optionalMapField__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter3, 8, ::facebook::thrift::test::binary_5673, Foo> binaryField__arg, ::facebook::thrift::test::MyI64 longField__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter2, 10, ::facebook::thrift::test::MyI64, Foo> adaptedLongField__arg, ::facebook::thrift::test::DoubleTypedefI64 doubleAdaptedField__arg, ::std::vector<::std::int32_t> adapted_list__arg, ::std::set<::std::int32_t> adapted_set__arg, ::std::map<::std::string, ::std::int32_t> adapted_map__arg, ::std::vector<::std::vector<::std::map<::std::int32_t, ::std::int32_t>>> adapted_list_nested__arg) :
+Foo::Foo(apache::thrift::FragileConstructor, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::facebook::thrift::test::fixtures::adapter::i32_5137, Foo> intField__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::facebook::thrift::test::fixtures::adapter::i32_5137, Foo> optionalIntField__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 3, ::facebook::thrift::test::fixtures::adapter::i32_5137, Foo> intFieldWithDefault__arg, ::facebook::thrift::test::fixtures::adapter::SetWithAdapter setField__arg, ::facebook::thrift::test::fixtures::adapter::SetWithAdapter optionalSetField__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter3, 6, ::facebook::thrift::test::fixtures::adapter::map_string_ListWithElemAdapter_withAdapter_8454, Foo> mapField__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter3, 7, ::facebook::thrift::test::fixtures::adapter::map_string_ListWithElemAdapter_withAdapter_8454, Foo> optionalMapField__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter3, 8, ::facebook::thrift::test::fixtures::adapter::binary_5673, Foo> binaryField__arg, ::facebook::thrift::test::fixtures::adapter::MyI64 longField__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter2, 10, ::facebook::thrift::test::fixtures::adapter::MyI64, Foo> adaptedLongField__arg, ::facebook::thrift::test::fixtures::adapter::DoubleTypedefI64 doubleAdaptedField__arg, ::std::vector<::std::int32_t> adapted_list__arg, ::std::set<::std::int32_t> adapted_set__arg, ::std::map<::std::string, ::std::int32_t> adapted_map__arg, ::std::vector<::std::vector<::std::map<::std::int32_t, ::std::int32_t>>> adapted_list_nested__arg) :
     __fbthrift_field_intField(std::move(intField__arg)),
     __fbthrift_field_optionalIntField(std::move(optionalIntField__arg)),
     __fbthrift_field_intFieldWithDefault(std::move(intFieldWithDefault__arg)),
@@ -409,23 +409,23 @@ void swap([[maybe_unused]] Foo& a, [[maybe_unused]] Foo& b) {
 }
 
 
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::adapter
 
 
 namespace apache { namespace thrift {
 
-folly::Range<::facebook::thrift::test::Baz::Type const*> const TEnumTraits<::facebook::thrift::test::Baz::Type>::values = folly::range(TEnumDataStorage<::facebook::thrift::test::Baz::Type>::values);
-folly::Range<std::string_view const*> const TEnumTraits<::facebook::thrift::test::Baz::Type>::names = folly::range(TEnumDataStorage<::facebook::thrift::test::Baz::Type>::names);
+folly::Range<::facebook::thrift::test::fixtures::adapter::Baz::Type const*> const TEnumTraits<::facebook::thrift::test::fixtures::adapter::Baz::Type>::values = folly::range(TEnumDataStorage<::facebook::thrift::test::fixtures::adapter::Baz::Type>::values);
+folly::Range<std::string_view const*> const TEnumTraits<::facebook::thrift::test::fixtures::adapter::Baz::Type>::names = folly::range(TEnumDataStorage<::facebook::thrift::test::fixtures::adapter::Baz::Type>::names);
 
-bool TEnumTraits<::facebook::thrift::test::Baz::Type>::findName(type value, std::string_view* out) noexcept {
+bool TEnumTraits<::facebook::thrift::test::fixtures::adapter::Baz::Type>::findName(type value, std::string_view* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_name(value, out);
 }
 
-bool TEnumTraits<::facebook::thrift::test::Baz::Type>::findValue(std::string_view name, type* out) noexcept {
+bool TEnumTraits<::facebook::thrift::test::fixtures::adapter::Baz::Type>::findValue(std::string_view name, type* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 }} // apache::thrift
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::adapter {
 
 std::string_view Baz::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -541,10 +541,10 @@ void swap(Baz& a, Baz& b) {
 }
 
 
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::adapter
 
 
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::adapter {
 
 std::string_view Bar::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -620,7 +620,7 @@ Bar& Bar::operator=([[maybe_unused]] Bar&& other) noexcept {
 }
 
 
-Bar::Bar(apache::thrift::FragileConstructor, ::my::Cpp::Type1 structField__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::facebook::thrift::test::Foo_3943, Bar> optionalStructField__arg, ::std::vector<::facebook::thrift::test::FooWithAdapter_9317> structListField__arg, ::std::vector<::facebook::thrift::test::FooWithAdapter_9317> optionalStructListField__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 5, ::facebook::thrift::test::Baz_7352, Bar> unionField__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 6, ::facebook::thrift::test::Baz_7352, Bar> optionalUnionField__arg, ::facebook::thrift::test::DirectlyAdapted adaptedStructField__arg, ::facebook::thrift::test::ListOfFooTypedef structListFieldWithTypedef__arg) :
+Bar::Bar(apache::thrift::FragileConstructor, ::my::Cpp::Type1 structField__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::facebook::thrift::test::fixtures::adapter::Foo_3943, Bar> optionalStructField__arg, ::std::vector<::facebook::thrift::test::fixtures::adapter::FooWithAdapter_9317> structListField__arg, ::std::vector<::facebook::thrift::test::fixtures::adapter::FooWithAdapter_9317> optionalStructListField__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 5, ::facebook::thrift::test::fixtures::adapter::Baz_7352, Bar> unionField__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 6, ::facebook::thrift::test::fixtures::adapter::Baz_7352, Bar> optionalUnionField__arg, ::facebook::thrift::test::fixtures::adapter::DirectlyAdapted adaptedStructField__arg, ::facebook::thrift::test::fixtures::adapter::ListOfFooTypedef structListFieldWithTypedef__arg) :
     __fbthrift_field_structField(std::move(structField__arg)),
     __fbthrift_field_optionalStructField(std::move(optionalStructField__arg)),
     __fbthrift_field_structListField(std::move(structListField__arg)),
@@ -673,28 +673,28 @@ bool Bar::operator<([[maybe_unused]] const Bar& rhs) const {
 }
 
 
-const ::std::vector<::facebook::thrift::test::FooWithAdapter_9317>& Bar::get_structListField() const& {
+const ::std::vector<::facebook::thrift::test::fixtures::adapter::FooWithAdapter_9317>& Bar::get_structListField() const& {
   return __fbthrift_field_structListField;
 }
 
-::std::vector<::facebook::thrift::test::FooWithAdapter_9317> Bar::get_structListField() && {
-  return static_cast<::std::vector<::facebook::thrift::test::FooWithAdapter_9317>&&>(__fbthrift_field_structListField);
+::std::vector<::facebook::thrift::test::fixtures::adapter::FooWithAdapter_9317> Bar::get_structListField() && {
+  return static_cast<::std::vector<::facebook::thrift::test::fixtures::adapter::FooWithAdapter_9317>&&>(__fbthrift_field_structListField);
 }
 
-const ::std::vector<::facebook::thrift::test::FooWithAdapter_9317>* Bar::get_optionalStructListField() const& {
+const ::std::vector<::facebook::thrift::test::fixtures::adapter::FooWithAdapter_9317>* Bar::get_optionalStructListField() const& {
   return optionalStructListField_ref().has_value() ? std::addressof(__fbthrift_field_optionalStructListField) : nullptr;
 }
 
-::std::vector<::facebook::thrift::test::FooWithAdapter_9317>* Bar::get_optionalStructListField() & {
+::std::vector<::facebook::thrift::test::fixtures::adapter::FooWithAdapter_9317>* Bar::get_optionalStructListField() & {
   return optionalStructListField_ref().has_value() ? std::addressof(__fbthrift_field_optionalStructListField) : nullptr;
 }
 
-const ::facebook::thrift::test::ListOfFooTypedef& Bar::get_structListFieldWithTypedef() const& {
+const ::facebook::thrift::test::fixtures::adapter::ListOfFooTypedef& Bar::get_structListFieldWithTypedef() const& {
   return __fbthrift_field_structListFieldWithTypedef;
 }
 
-::facebook::thrift::test::ListOfFooTypedef Bar::get_structListFieldWithTypedef() && {
-  return static_cast<::facebook::thrift::test::ListOfFooTypedef&&>(__fbthrift_field_structListFieldWithTypedef);
+::facebook::thrift::test::fixtures::adapter::ListOfFooTypedef Bar::get_structListFieldWithTypedef() && {
+  return static_cast<::facebook::thrift::test::fixtures::adapter::ListOfFooTypedef&&>(__fbthrift_field_structListFieldWithTypedef);
 }
 
 void swap([[maybe_unused]] Bar& a, [[maybe_unused]] Bar& b) {
@@ -714,43 +714,43 @@ static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         Bar,
         ::apache::thrift::type_class::structure,
-        ::facebook::thrift::test::Foo_6868>,
+        ::facebook::thrift::test::fixtures::adapter::Foo_6868>,
     "inconsistent use of json option");
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         Bar,
         ::apache::thrift::type_class::structure,
-        ::facebook::thrift::test::Foo_3943>,
+        ::facebook::thrift::test::fixtures::adapter::Foo_3943>,
     "inconsistent use of json option");
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         Bar,
         ::apache::thrift::type_class::variant,
-        ::facebook::thrift::test::Baz_7352>,
+        ::facebook::thrift::test::fixtures::adapter::Baz_7352>,
     "inconsistent use of json option");
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         Bar,
         ::apache::thrift::type_class::variant,
-        ::facebook::thrift::test::Baz_7352>,
+        ::facebook::thrift::test::fixtures::adapter::Baz_7352>,
     "inconsistent use of json option");
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         Bar,
         ::apache::thrift::type_class::structure,
-        ::facebook::thrift::test::detail::DirectlyAdapted>,
+        ::facebook::thrift::test::fixtures::adapter::detail::DirectlyAdapted>,
     "inconsistent use of json option");
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         Bar,
         ::apache::thrift::type_class::list<::apache::thrift::type_class::structure>,
-        ::facebook::thrift::test::ListOfFooTypedef>,
+        ::facebook::thrift::test::fixtures::adapter::ListOfFooTypedef>,
     "inconsistent use of json option");
 
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::adapter
 
 
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::adapter {
 namespace detail {
 
 std::string_view DirectlyAdapted::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
@@ -806,10 +806,10 @@ void swap([[maybe_unused]] DirectlyAdapted& a, [[maybe_unused]] DirectlyAdapted&
 
 
 } // namespace detail
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::adapter
 
 
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::adapter {
 namespace detail {
 
 std::string_view IndependentDirectlyAdapted::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
@@ -865,10 +865,10 @@ void swap([[maybe_unused]] IndependentDirectlyAdapted& a, [[maybe_unused]] Indep
 
 
 } // namespace detail
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::adapter
 
 
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::adapter {
 
 std::string_view StructWithFieldAdapter::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -976,10 +976,10 @@ void swap([[maybe_unused]] StructWithFieldAdapter& a, [[maybe_unused]] StructWit
 }
 
 
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::adapter
 
 
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::adapter {
 
 std::string_view TerseAdaptedFields::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -1077,10 +1077,10 @@ void swap([[maybe_unused]] TerseAdaptedFields& a, [[maybe_unused]] TerseAdaptedF
 }
 
 
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::adapter
 
 
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::adapter {
 
 std::string_view B::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -1116,7 +1116,7 @@ B& B::operator=([[maybe_unused]] B&& other) noexcept {
 }
 
 
-B::B(apache::thrift::FragileConstructor, ::facebook::thrift::test::AdaptedA a__arg) :
+B::B(apache::thrift::FragileConstructor, ::facebook::thrift::test::fixtures::adapter::AdaptedA a__arg) :
     __fbthrift_field_a(std::move(a__arg)) { 
   ::apache::thrift::adapt_detail::construct<::my::Adapter, 1>(__fbthrift_field_a, *this);
   __isset.set(folly::index_constant<0>(), true);
@@ -1153,13 +1153,13 @@ static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         B,
         ::apache::thrift::type_class::structure,
-        ::facebook::thrift::test::A>,
+        ::facebook::thrift::test::fixtures::adapter::A>,
     "inconsistent use of json option");
 
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::adapter
 
 
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::adapter {
 
 std::string_view A::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -1197,10 +1197,10 @@ void swap([[maybe_unused]] A& a, [[maybe_unused]] A& b) {
 }
 
 
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::adapter
 
 
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::adapter {
 
 std::string_view Config::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -1264,10 +1264,10 @@ void swap([[maybe_unused]] Config& a, [[maybe_unused]] Config& b) {
 }
 
 
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::adapter
 
 
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::adapter {
 
 std::string_view MyStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -1314,7 +1314,7 @@ MyStruct& MyStruct::operator=([[maybe_unused]] MyStruct&& other) noexcept {
 }
 
 
-MyStruct::MyStruct(apache::thrift::FragileConstructor, ::std::int32_t field__arg, ::facebook::thrift::test::SetWithAdapter set_string__arg) :
+MyStruct::MyStruct(apache::thrift::FragileConstructor, ::std::int32_t field__arg, ::facebook::thrift::test::fixtures::adapter::SetWithAdapter set_string__arg) :
     __fbthrift_field_field(std::move(field__arg)),
     __fbthrift_field_set_string(std::move(set_string__arg)) { 
   ::apache::thrift::adapt_detail::construct<::my::Adapter2, 2>(__fbthrift_field_set_string, *this);
@@ -1362,10 +1362,10 @@ void swap([[maybe_unused]] MyStruct& a, [[maybe_unused]] MyStruct& b) {
 }
 
 
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::adapter
 
 
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::adapter {
 
 std::string_view AdaptTestStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -1464,7 +1464,7 @@ AdaptTestStruct& AdaptTestStruct::operator=([[maybe_unused]] AdaptTestStruct&& o
 }
 
 
-AdaptTestStruct::AdaptTestStruct(apache::thrift::FragileConstructor, ::facebook::thrift::test::DurationMs delay__arg, ::facebook::thrift::test::CustomProtocolType custom__arg, ::apache::thrift::adapt_detail::adapted_field_t<::apache::thrift::test::AdaptTestMsAdapter, 3, ::std::int64_t, AdaptTestStruct> timeout__arg, ::apache::thrift::adapt_detail::adapted_field_t<::apache::thrift::test::AdapterWithContext, 4, ::std::int64_t, AdaptTestStruct> data__arg, ::std::string meta__arg, ::facebook::thrift::test::IndirectionString indirectionString__arg, ::apache::thrift::adapt_detail::adapted_field_t<::apache::thrift::test::AdapterWithContext, 7, ::std::string, AdaptTestStruct> string_data__arg, ::apache::thrift::adapt_detail::adapted_field_t<::apache::thrift::test::TemplatedTestAdapter, 8, ::facebook::thrift::test::AdaptedBool, AdaptTestStruct> double_wrapped_bool__arg, ::apache::thrift::adapt_detail::adapted_field_t<::apache::thrift::test::AdapterWithContext, 9, ::facebook::thrift::test::AdaptedInteger, AdaptTestStruct> double_wrapped_integer__arg, ::apache::thrift::adapt_detail::adapted_field_t<::apache::thrift::test::AdapterWithContext, 10, ::std::string, AdaptTestStruct> binary_data__arg) :
+AdaptTestStruct::AdaptTestStruct(apache::thrift::FragileConstructor, ::facebook::thrift::test::fixtures::adapter::DurationMs delay__arg, ::facebook::thrift::test::fixtures::adapter::CustomProtocolType custom__arg, ::apache::thrift::adapt_detail::adapted_field_t<::apache::thrift::test::AdaptTestMsAdapter, 3, ::std::int64_t, AdaptTestStruct> timeout__arg, ::apache::thrift::adapt_detail::adapted_field_t<::apache::thrift::test::AdapterWithContext, 4, ::std::int64_t, AdaptTestStruct> data__arg, ::std::string meta__arg, ::facebook::thrift::test::fixtures::adapter::IndirectionString indirectionString__arg, ::apache::thrift::adapt_detail::adapted_field_t<::apache::thrift::test::AdapterWithContext, 7, ::std::string, AdaptTestStruct> string_data__arg, ::apache::thrift::adapt_detail::adapted_field_t<::apache::thrift::test::TemplatedTestAdapter, 8, ::facebook::thrift::test::fixtures::adapter::AdaptedBool, AdaptTestStruct> double_wrapped_bool__arg, ::apache::thrift::adapt_detail::adapted_field_t<::apache::thrift::test::AdapterWithContext, 9, ::facebook::thrift::test::fixtures::adapter::AdaptedInteger, AdaptTestStruct> double_wrapped_integer__arg, ::apache::thrift::adapt_detail::adapted_field_t<::apache::thrift::test::AdapterWithContext, 10, ::std::string, AdaptTestStruct> binary_data__arg) :
     __fbthrift_field_delay(std::move(delay__arg)),
     __fbthrift_field_custom(std::move(custom__arg)),
     __fbthrift_field_timeout(std::move(timeout__arg)),
@@ -1543,10 +1543,10 @@ void swap([[maybe_unused]] AdaptTestStruct& a, [[maybe_unused]] AdaptTestStruct&
 }
 
 
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::adapter
 
 
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::adapter {
 
 std::string_view AdaptTemplatedTestStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -1625,7 +1625,7 @@ AdaptTemplatedTestStruct::AdaptTemplatedTestStruct() :
     __fbthrift_field_adaptedLongDefault(::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::test::TemplatedTestAdapter, 15>(::std::int64_t(static_cast<::std::int64_t>(4)), *this)),
     __fbthrift_field_adaptedDoubleDefault(::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::test::TemplatedTestAdapter, 16>(double(static_cast<double>(5)), *this)),
     __fbthrift_field_adaptedStringDefault(::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::test::TemplatedTestAdapter, 17>(::std::string(apache::thrift::StringTraits<::std::string>::fromStringLiteral("6")), *this)),
-    __fbthrift_field_adaptedEnum(::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::StaticCastAdapter<::apache::thrift::test::basic::AdaptedEnum, ::apache::thrift::test::basic::ThriftAdaptedEnum>, 18>(::facebook::thrift::test::ThriftAdaptedEnum( ::facebook::thrift::test::AdaptedEnum::One), *this)),
+    __fbthrift_field_adaptedEnum(::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::StaticCastAdapter<::apache::thrift::test::basic::AdaptedEnum, ::apache::thrift::test::basic::ThriftAdaptedEnum>, 18>(::facebook::thrift::test::fixtures::adapter::ThriftAdaptedEnum( ::facebook::thrift::test::fixtures::adapter::AdaptedEnum::One), *this)),
     __fbthrift_field_adaptedListDefault(::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::test::TemplatedTestAdapter, 19>(::std::vector<::std::int64_t>(std::initializer_list<::std::int64_t>{ static_cast<::std::int64_t>(1) }), *this)),
     __fbthrift_field_adaptedSetDefault(::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::test::TemplatedTestAdapter, 20>(::std::set<::std::int64_t>(std::initializer_list<::std::int64_t>{ static_cast<::std::int64_t>(1) }), *this)),
     __fbthrift_field_adaptedMapDefault(::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::test::TemplatedTestAdapter, 21>(::std::map<::std::int64_t, ::std::int64_t>(std::initializer_list<::std::map<::std::int64_t, ::std::int64_t>::value_type>{ { static_cast<::std::int64_t>(1), static_cast<::std::int64_t>(1) } }), *this)),
@@ -1733,7 +1733,7 @@ AdaptTemplatedTestStruct& AdaptTemplatedTestStruct::operator=([[maybe_unused]] A
 }
 
 
-AdaptTemplatedTestStruct::AdaptTemplatedTestStruct(apache::thrift::FragileConstructor, ::facebook::thrift::test::AdaptedBool adaptedBool__arg, ::facebook::thrift::test::AdaptedByte adaptedByte__arg, ::facebook::thrift::test::AdaptedShort adaptedShort__arg, ::facebook::thrift::test::AdaptedInteger adaptedInteger__arg, ::facebook::thrift::test::AdaptedLong adaptedLong__arg, ::facebook::thrift::test::AdaptedDouble adaptedDouble__arg, ::facebook::thrift::test::AdaptedString adaptedString__arg, ::apache::thrift::adapt_detail::adapted_field_t<::apache::thrift::test::TemplatedTestAdapter, 8, ::std::vector<::std::int64_t>, AdaptTemplatedTestStruct> adaptedList__arg, ::apache::thrift::adapt_detail::adapted_field_t<::apache::thrift::test::TemplatedTestAdapter, 9, ::std::set<::std::int64_t>, AdaptTemplatedTestStruct> adaptedSet__arg, ::apache::thrift::adapt_detail::adapted_field_t<::apache::thrift::test::TemplatedTestAdapter, 10, ::std::map<::std::int64_t, ::std::int64_t>, AdaptTemplatedTestStruct> adaptedMap__arg, ::facebook::thrift::test::AdaptedBool adaptedBoolDefault__arg, ::facebook::thrift::test::AdaptedByte adaptedByteDefault__arg, ::facebook::thrift::test::AdaptedShort adaptedShortDefault__arg, ::facebook::thrift::test::AdaptedInteger adaptedIntegerDefault__arg, ::facebook::thrift::test::AdaptedLong adaptedLongDefault__arg, ::facebook::thrift::test::AdaptedDouble adaptedDoubleDefault__arg, ::facebook::thrift::test::AdaptedString adaptedStringDefault__arg, ::facebook::thrift::test::AdaptedEnum adaptedEnum__arg, ::apache::thrift::adapt_detail::adapted_field_t<::apache::thrift::test::TemplatedTestAdapter, 19, ::std::vector<::std::int64_t>, AdaptTemplatedTestStruct> adaptedListDefault__arg, ::apache::thrift::adapt_detail::adapted_field_t<::apache::thrift::test::TemplatedTestAdapter, 20, ::std::set<::std::int64_t>, AdaptTemplatedTestStruct> adaptedSetDefault__arg, ::apache::thrift::adapt_detail::adapted_field_t<::apache::thrift::test::TemplatedTestAdapter, 21, ::std::map<::std::int64_t, ::std::int64_t>, AdaptTemplatedTestStruct> adaptedMapDefault__arg, ::facebook::thrift::test::DoubleTypedefBool doubleTypedefBool__arg) :
+AdaptTemplatedTestStruct::AdaptTemplatedTestStruct(apache::thrift::FragileConstructor, ::facebook::thrift::test::fixtures::adapter::AdaptedBool adaptedBool__arg, ::facebook::thrift::test::fixtures::adapter::AdaptedByte adaptedByte__arg, ::facebook::thrift::test::fixtures::adapter::AdaptedShort adaptedShort__arg, ::facebook::thrift::test::fixtures::adapter::AdaptedInteger adaptedInteger__arg, ::facebook::thrift::test::fixtures::adapter::AdaptedLong adaptedLong__arg, ::facebook::thrift::test::fixtures::adapter::AdaptedDouble adaptedDouble__arg, ::facebook::thrift::test::fixtures::adapter::AdaptedString adaptedString__arg, ::apache::thrift::adapt_detail::adapted_field_t<::apache::thrift::test::TemplatedTestAdapter, 8, ::std::vector<::std::int64_t>, AdaptTemplatedTestStruct> adaptedList__arg, ::apache::thrift::adapt_detail::adapted_field_t<::apache::thrift::test::TemplatedTestAdapter, 9, ::std::set<::std::int64_t>, AdaptTemplatedTestStruct> adaptedSet__arg, ::apache::thrift::adapt_detail::adapted_field_t<::apache::thrift::test::TemplatedTestAdapter, 10, ::std::map<::std::int64_t, ::std::int64_t>, AdaptTemplatedTestStruct> adaptedMap__arg, ::facebook::thrift::test::fixtures::adapter::AdaptedBool adaptedBoolDefault__arg, ::facebook::thrift::test::fixtures::adapter::AdaptedByte adaptedByteDefault__arg, ::facebook::thrift::test::fixtures::adapter::AdaptedShort adaptedShortDefault__arg, ::facebook::thrift::test::fixtures::adapter::AdaptedInteger adaptedIntegerDefault__arg, ::facebook::thrift::test::fixtures::adapter::AdaptedLong adaptedLongDefault__arg, ::facebook::thrift::test::fixtures::adapter::AdaptedDouble adaptedDoubleDefault__arg, ::facebook::thrift::test::fixtures::adapter::AdaptedString adaptedStringDefault__arg, ::facebook::thrift::test::fixtures::adapter::AdaptedEnum adaptedEnum__arg, ::apache::thrift::adapt_detail::adapted_field_t<::apache::thrift::test::TemplatedTestAdapter, 19, ::std::vector<::std::int64_t>, AdaptTemplatedTestStruct> adaptedListDefault__arg, ::apache::thrift::adapt_detail::adapted_field_t<::apache::thrift::test::TemplatedTestAdapter, 20, ::std::set<::std::int64_t>, AdaptTemplatedTestStruct> adaptedSetDefault__arg, ::apache::thrift::adapt_detail::adapted_field_t<::apache::thrift::test::TemplatedTestAdapter, 21, ::std::map<::std::int64_t, ::std::int64_t>, AdaptTemplatedTestStruct> adaptedMapDefault__arg, ::facebook::thrift::test::fixtures::adapter::DoubleTypedefBool doubleTypedefBool__arg) :
     __fbthrift_field_adaptedBool(std::move(adaptedBool__arg)),
     __fbthrift_field_adaptedByte(std::move(adaptedByte__arg)),
     __fbthrift_field_adaptedShort(std::move(adaptedShort__arg)),
@@ -1873,10 +1873,10 @@ void swap([[maybe_unused]] AdaptTemplatedTestStruct& a, [[maybe_unused]] AdaptTe
 }
 
 
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::adapter
 
 
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::adapter {
 
 std::string_view AdaptTemplatedNestedTestStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -1900,7 +1900,7 @@ AdaptTemplatedNestedTestStruct& AdaptTemplatedNestedTestStruct::operator=([[mayb
 }
 
 
-AdaptTemplatedNestedTestStruct::AdaptTemplatedNestedTestStruct(apache::thrift::FragileConstructor, ::facebook::thrift::test::AdaptTemplatedTestStruct adaptedStruct__arg) :
+AdaptTemplatedNestedTestStruct::AdaptTemplatedNestedTestStruct(apache::thrift::FragileConstructor, ::facebook::thrift::test::fixtures::adapter::AdaptTemplatedTestStruct adaptedStruct__arg) :
     __fbthrift_field_adaptedStruct(std::move(adaptedStruct__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
 }
@@ -1927,12 +1927,12 @@ bool AdaptTemplatedNestedTestStruct::operator<([[maybe_unused]] const AdaptTempl
 }
 
 
-const ::facebook::thrift::test::AdaptTemplatedTestStruct& AdaptTemplatedNestedTestStruct::get_adaptedStruct() const& {
+const ::facebook::thrift::test::fixtures::adapter::AdaptTemplatedTestStruct& AdaptTemplatedNestedTestStruct::get_adaptedStruct() const& {
   return __fbthrift_field_adaptedStruct;
 }
 
-::facebook::thrift::test::AdaptTemplatedTestStruct AdaptTemplatedNestedTestStruct::get_adaptedStruct() && {
-  return static_cast<::facebook::thrift::test::AdaptTemplatedTestStruct&&>(__fbthrift_field_adaptedStruct);
+::facebook::thrift::test::fixtures::adapter::AdaptTemplatedTestStruct AdaptTemplatedNestedTestStruct::get_adaptedStruct() && {
+  return static_cast<::facebook::thrift::test::fixtures::adapter::AdaptTemplatedTestStruct&&>(__fbthrift_field_adaptedStruct);
 }
 
 void swap([[maybe_unused]] AdaptTemplatedNestedTestStruct& a, [[maybe_unused]] AdaptTemplatedNestedTestStruct& b) {
@@ -1945,26 +1945,26 @@ static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         AdaptTemplatedNestedTestStruct,
         ::apache::thrift::type_class::structure,
-        ::facebook::thrift::test::AdaptTemplatedTestStruct>,
+        ::facebook::thrift::test::fixtures::adapter::AdaptTemplatedTestStruct>,
     "inconsistent use of json option");
 
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::adapter
 
 
 namespace apache { namespace thrift {
 
-folly::Range<::facebook::thrift::test::ThriftAdaptTestUnion::Type const*> const TEnumTraits<::facebook::thrift::test::ThriftAdaptTestUnion::Type>::values = folly::range(TEnumDataStorage<::facebook::thrift::test::ThriftAdaptTestUnion::Type>::values);
-folly::Range<std::string_view const*> const TEnumTraits<::facebook::thrift::test::ThriftAdaptTestUnion::Type>::names = folly::range(TEnumDataStorage<::facebook::thrift::test::ThriftAdaptTestUnion::Type>::names);
+folly::Range<::facebook::thrift::test::fixtures::adapter::ThriftAdaptTestUnion::Type const*> const TEnumTraits<::facebook::thrift::test::fixtures::adapter::ThriftAdaptTestUnion::Type>::values = folly::range(TEnumDataStorage<::facebook::thrift::test::fixtures::adapter::ThriftAdaptTestUnion::Type>::values);
+folly::Range<std::string_view const*> const TEnumTraits<::facebook::thrift::test::fixtures::adapter::ThriftAdaptTestUnion::Type>::names = folly::range(TEnumDataStorage<::facebook::thrift::test::fixtures::adapter::ThriftAdaptTestUnion::Type>::names);
 
-bool TEnumTraits<::facebook::thrift::test::ThriftAdaptTestUnion::Type>::findName(type value, std::string_view* out) noexcept {
+bool TEnumTraits<::facebook::thrift::test::fixtures::adapter::ThriftAdaptTestUnion::Type>::findName(type value, std::string_view* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_name(value, out);
 }
 
-bool TEnumTraits<::facebook::thrift::test::ThriftAdaptTestUnion::Type>::findValue(std::string_view name, type* out) noexcept {
+bool TEnumTraits<::facebook::thrift::test::fixtures::adapter::ThriftAdaptTestUnion::Type>::findValue(std::string_view name, type* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 }} // apache::thrift
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::adapter {
 
 std::string_view ThriftAdaptTestUnion::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -2053,10 +2053,10 @@ void swap(ThriftAdaptTestUnion& a, ThriftAdaptTestUnion& b) {
 }
 
 
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::adapter
 
 
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::adapter {
 
 std::string_view ThriftAdaptedStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -2110,10 +2110,10 @@ void swap([[maybe_unused]] ThriftAdaptedStruct& a, [[maybe_unused]] ThriftAdapte
 }
 
 
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::adapter
 
 
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::adapter {
 namespace detail {
 
 std::string_view DirectlyAdaptedStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
@@ -2169,10 +2169,10 @@ void swap([[maybe_unused]] DirectlyAdaptedStruct& a, [[maybe_unused]] DirectlyAd
 
 
 } // namespace detail
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::adapter
 
 
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::adapter {
 
 std::string_view StructFieldAdaptedStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -2223,7 +2223,7 @@ StructFieldAdaptedStruct& StructFieldAdaptedStruct::operator=([[maybe_unused]] S
 }
 
 
-StructFieldAdaptedStruct::StructFieldAdaptedStruct(apache::thrift::FragileConstructor, ::apache::thrift::adapt_detail::adapted_field_t<::apache::thrift::test::TemplatedTestAdapter, 1, ::facebook::thrift::test::ThriftAdaptedStruct, StructFieldAdaptedStruct> adaptedStruct__arg, ::facebook::thrift::test::AdaptedTypedef adaptedTypedef__arg, ::facebook::thrift::test::DirectlyAdaptedStruct directlyAdapted__arg, ::facebook::thrift::test::TypedefOfDirect typedefOfAdapted__arg) :
+StructFieldAdaptedStruct::StructFieldAdaptedStruct(apache::thrift::FragileConstructor, ::apache::thrift::adapt_detail::adapted_field_t<::apache::thrift::test::TemplatedTestAdapter, 1, ::facebook::thrift::test::fixtures::adapter::ThriftAdaptedStruct, StructFieldAdaptedStruct> adaptedStruct__arg, ::facebook::thrift::test::fixtures::adapter::AdaptedTypedef adaptedTypedef__arg, ::facebook::thrift::test::fixtures::adapter::DirectlyAdaptedStruct directlyAdapted__arg, ::facebook::thrift::test::fixtures::adapter::TypedefOfDirect typedefOfAdapted__arg) :
     __fbthrift_field_adaptedStruct(std::move(adaptedStruct__arg)),
     __fbthrift_field_adaptedTypedef(std::move(adaptedTypedef__arg)),
     __fbthrift_field_directlyAdapted(std::move(directlyAdapted__arg)),
@@ -2276,31 +2276,31 @@ static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         StructFieldAdaptedStruct,
         ::apache::thrift::type_class::structure,
-        ::facebook::thrift::test::ThriftAdaptedStruct>,
+        ::facebook::thrift::test::fixtures::adapter::ThriftAdaptedStruct>,
     "inconsistent use of json option");
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         StructFieldAdaptedStruct,
         ::apache::thrift::type_class::structure,
-        ::facebook::thrift::test::ThriftAdaptedStruct>,
+        ::facebook::thrift::test::fixtures::adapter::ThriftAdaptedStruct>,
     "inconsistent use of json option");
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         StructFieldAdaptedStruct,
         ::apache::thrift::type_class::structure,
-        ::facebook::thrift::test::detail::DirectlyAdaptedStruct>,
+        ::facebook::thrift::test::fixtures::adapter::detail::DirectlyAdaptedStruct>,
     "inconsistent use of json option");
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         StructFieldAdaptedStruct,
         ::apache::thrift::type_class::structure,
-        ::facebook::thrift::test::detail::DirectlyAdaptedStruct>,
+        ::facebook::thrift::test::fixtures::adapter::detail::DirectlyAdaptedStruct>,
     "inconsistent use of json option");
 
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::adapter
 
 
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::adapter {
 
 std::string_view CircularAdaptee::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -2324,7 +2324,7 @@ CircularAdaptee& CircularAdaptee::operator=([[maybe_unused]] CircularAdaptee&& o
 }
 
 
-CircularAdaptee::CircularAdaptee(apache::thrift::FragileConstructor, ::facebook::thrift::test::CircularStruct field__arg) :
+CircularAdaptee::CircularAdaptee(apache::thrift::FragileConstructor, ::facebook::thrift::test::fixtures::adapter::CircularStruct field__arg) :
     __fbthrift_field_field(std::move(field__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
 }
@@ -2351,12 +2351,12 @@ bool CircularAdaptee::operator<([[maybe_unused]] const CircularAdaptee& rhs) con
 }
 
 
-const ::facebook::thrift::test::CircularStruct& CircularAdaptee::get_field() const& {
+const ::facebook::thrift::test::fixtures::adapter::CircularStruct& CircularAdaptee::get_field() const& {
   return __fbthrift_field_field;
 }
 
-::facebook::thrift::test::CircularStruct CircularAdaptee::get_field() && {
-  return static_cast<::facebook::thrift::test::CircularStruct&&>(__fbthrift_field_field);
+::facebook::thrift::test::fixtures::adapter::CircularStruct CircularAdaptee::get_field() && {
+  return static_cast<::facebook::thrift::test::fixtures::adapter::CircularStruct&&>(__fbthrift_field_field);
 }
 
 void swap([[maybe_unused]] CircularAdaptee& a, [[maybe_unused]] CircularAdaptee& b) {
@@ -2369,13 +2369,13 @@ static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         CircularAdaptee,
         ::apache::thrift::type_class::structure,
-        ::facebook::thrift::test::CircularStruct>,
+        ::facebook::thrift::test::fixtures::adapter::CircularStruct>,
     "inconsistent use of json option");
 
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::adapter
 
 
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::adapter {
 
 std::string_view CircularStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -2415,7 +2415,7 @@ CircularStruct& CircularStruct::operator=([[maybe_unused]] CircularStruct&& othe
 }
 
 
-CircularStruct::CircularStruct(apache::thrift::FragileConstructor, ::std::unique_ptr<::facebook::thrift::test::AdaptedCircularAdaptee> field__arg) :
+CircularStruct::CircularStruct(apache::thrift::FragileConstructor, ::std::unique_ptr<::facebook::thrift::test::fixtures::adapter::AdaptedCircularAdaptee> field__arg) :
     __fbthrift_field_field(std::move(field__arg)) { 
   if (__fbthrift_field_field) ::apache::thrift::adapt_detail::construct<::apache::thrift::test::MemberAccessAdapter, 1>(*__fbthrift_field_field, *this);
 }
@@ -2450,13 +2450,13 @@ static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         CircularStruct,
         ::apache::thrift::type_class::structure,
-        ::facebook::thrift::test::CircularAdaptee>,
+        ::facebook::thrift::test::fixtures::adapter::CircularAdaptee>,
     "inconsistent use of json option");
 
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::adapter
 
 
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::adapter {
 
 std::string_view ReorderedStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -2480,7 +2480,7 @@ ReorderedStruct& ReorderedStruct::operator=(const ReorderedStruct& other) {
 }
 
 ReorderedStruct::ReorderedStruct() :
-    __fbthrift_field_reordered_dependent_adapted(std::make_unique<::facebook::thrift::test::DeclaredAfterStruct>()) {
+    __fbthrift_field_reordered_dependent_adapted(std::make_unique<::facebook::thrift::test::fixtures::adapter::DeclaredAfterStruct>()) {
   ::apache::thrift::adapt_detail::construct<::apache::thrift::test::IdentityAdapter<detail::DeclaredAfterStruct>, 1>(*__fbthrift_field_reordered_dependent_adapted, *this);
 }
 
@@ -2498,7 +2498,7 @@ ReorderedStruct& ReorderedStruct::operator=([[maybe_unused]] ReorderedStruct&& o
 }
 
 
-ReorderedStruct::ReorderedStruct(apache::thrift::FragileConstructor, ::std::unique_ptr<::facebook::thrift::test::DeclaredAfterStruct> reordered_dependent_adapted__arg) :
+ReorderedStruct::ReorderedStruct(apache::thrift::FragileConstructor, ::std::unique_ptr<::facebook::thrift::test::fixtures::adapter::DeclaredAfterStruct> reordered_dependent_adapted__arg) :
     __fbthrift_field_reordered_dependent_adapted(std::move(reordered_dependent_adapted__arg)) { 
   ::apache::thrift::adapt_detail::construct<::apache::thrift::test::IdentityAdapter<detail::DeclaredAfterStruct>, 1>(*__fbthrift_field_reordered_dependent_adapted, *this);
 }
@@ -2532,13 +2532,13 @@ static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         ReorderedStruct,
         ::apache::thrift::type_class::structure,
-        ::facebook::thrift::test::detail::DeclaredAfterStruct>,
+        ::facebook::thrift::test::fixtures::adapter::detail::DeclaredAfterStruct>,
     "inconsistent use of json option");
 
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::adapter
 
 
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::adapter {
 namespace detail {
 
 std::string_view DeclaredAfterStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
@@ -2578,10 +2578,10 @@ void swap([[maybe_unused]] DeclaredAfterStruct& a, [[maybe_unused]] DeclaredAfte
 
 
 } // namespace detail
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::adapter
 
 
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::adapter {
 
 std::string_view UnderlyingRenamedStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -2635,10 +2635,10 @@ void swap([[maybe_unused]] UnderlyingRenamedStruct& a, [[maybe_unused]] Underlyi
 }
 
 
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::adapter
 
 
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::adapter {
 
 std::string_view UnderlyingSameNamespaceStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -2692,10 +2692,10 @@ void swap([[maybe_unused]] UnderlyingSameNamespaceStruct& a, [[maybe_unused]] Un
 }
 
 
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::adapter
 
 
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::adapter {
 namespace detail {
 
 std::string_view HeapAllocated::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
@@ -2735,10 +2735,10 @@ void swap([[maybe_unused]] HeapAllocated& a, [[maybe_unused]] HeapAllocated& b) 
 
 
 } // namespace detail
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::adapter
 
 
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::adapter {
 
 std::string_view MoveOnly::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -2762,7 +2762,7 @@ MoveOnly& MoveOnly::operator=(const MoveOnly& other) {
 }
 
 
-MoveOnly::MoveOnly(apache::thrift::FragileConstructor, ::facebook::thrift::test::HeapAllocated ptr__arg) :
+MoveOnly::MoveOnly(apache::thrift::FragileConstructor, ::facebook::thrift::test::fixtures::adapter::HeapAllocated ptr__arg) :
     __fbthrift_field_ptr(std::move(ptr__arg)) { 
   ::apache::thrift::adapt_detail::construct<::apache::thrift::test::MoveOnlyAdapter, 1>(__fbthrift_field_ptr, *this);
   __isset.set(folly::index_constant<0>(), true);
@@ -2799,13 +2799,13 @@ static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         MoveOnly,
         ::apache::thrift::type_class::structure,
-        ::facebook::thrift::test::detail::HeapAllocated>,
+        ::facebook::thrift::test::fixtures::adapter::detail::HeapAllocated>,
     "inconsistent use of json option");
 
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::adapter
 
 
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::adapter {
 
 std::string_view AlsoMoveOnly::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -2864,10 +2864,10 @@ void swap([[maybe_unused]] AlsoMoveOnly& a, [[maybe_unused]] AlsoMoveOnly& b) {
 }
 
 
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::adapter
 
 
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::adapter {
 
 std::string_view ApplyAdapter::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -2905,10 +2905,10 @@ void swap([[maybe_unused]] ApplyAdapter& a, [[maybe_unused]] ApplyAdapter& b) {
 }
 
 
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::adapter
 
 
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::adapter {
 namespace detail {
 
 std::string_view TransitiveAdapted::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
@@ -2948,10 +2948,10 @@ void swap([[maybe_unused]] TransitiveAdapted& a, [[maybe_unused]] TransitiveAdap
 
 
 } // namespace detail
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::adapter
 
 
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::adapter {
 
 std::string_view CountingStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -3008,7 +3008,7 @@ CountingStruct& CountingStruct::operator=([[maybe_unused]] CountingStruct&& othe
 }
 
 
-CountingStruct::CountingStruct(apache::thrift::FragileConstructor, ::apache::thrift::adapt_detail::adapted_field_t<::apache::thrift::test::CountingAdapter<false, int>, 1, ::std::int64_t, CountingStruct> regularInt__arg, ::facebook::thrift::test::CountingInt countingInt__arg, ::apache::thrift::adapt_detail::adapted_field_t<::apache::thrift::test::CountingAdapter<false, std::string>, 3, ::std::string, CountingStruct> regularString__arg) :
+CountingStruct::CountingStruct(apache::thrift::FragileConstructor, ::apache::thrift::adapt_detail::adapted_field_t<::apache::thrift::test::CountingAdapter<false, int>, 1, ::std::int64_t, CountingStruct> regularInt__arg, ::facebook::thrift::test::fixtures::adapter::CountingInt countingInt__arg, ::apache::thrift::adapt_detail::adapted_field_t<::apache::thrift::test::CountingAdapter<false, std::string>, 3, ::std::string, CountingStruct> regularString__arg) :
     __fbthrift_field_regularInt(std::move(regularInt__arg)),
     __fbthrift_field_countingInt(std::move(countingInt__arg)),
     __fbthrift_field_regularString(std::move(regularString__arg)) { 
@@ -3055,10 +3055,10 @@ void swap([[maybe_unused]] CountingStruct& a, [[maybe_unused]] CountingStruct& b
 }
 
 
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::adapter
 
 
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::adapter {
 
 std::string_view Person::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -3122,10 +3122,10 @@ void swap([[maybe_unused]] Person& a, [[maybe_unused]] Person& b) {
 }
 
 
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::adapter
 
 
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::adapter {
 
 std::string_view Person2::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -3189,10 +3189,10 @@ void swap([[maybe_unused]] Person2& a, [[maybe_unused]] Person2& b) {
 }
 
 
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::adapter
 
 
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::adapter {
 
 std::string_view Renamed::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -3251,93 +3251,93 @@ void swap([[maybe_unused]] Renamed& a, [[maybe_unused]] Renamed& b) {
 }
 
 
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::adapter
 
-namespace facebook::thrift::test { namespace {
+namespace facebook::thrift::test::fixtures::adapter { namespace {
 [[maybe_unused]] FOLLY_ERASE void validateAdapters() {
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 1, ::facebook::thrift::test::i32_5137, ::facebook::thrift::test::Foo>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 2, ::facebook::thrift::test::i32_5137, ::facebook::thrift::test::Foo>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 3, ::facebook::thrift::test::i32_5137, ::facebook::thrift::test::Foo>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter2, 4, ::std::set<::std::string>, ::facebook::thrift::test::Foo>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter2, 5, ::std::set<::std::string>, ::facebook::thrift::test::Foo>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter3, 6, ::facebook::thrift::test::map_string_ListWithElemAdapter_withAdapter_8454, ::facebook::thrift::test::Foo>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter3, 7, ::facebook::thrift::test::map_string_ListWithElemAdapter_withAdapter_8454, ::facebook::thrift::test::Foo>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter3, 8, ::facebook::thrift::test::binary_5673, ::facebook::thrift::test::Foo>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 9, ::std::int64_t, ::facebook::thrift::test::Foo>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter2, 10, ::std::int64_t, ::facebook::thrift::test::Foo>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 11, ::std::int64_t, ::facebook::thrift::test::Foo>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 1, ::facebook::thrift::test::i32_5137, ::facebook::thrift::test::Baz>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter2, 4, ::std::set<::std::string>, ::facebook::thrift::test::Baz>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter3, 6, ::facebook::thrift::test::map_string_ListWithElemAdapter_withAdapter_8454, ::facebook::thrift::test::Baz>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 8, ::facebook::thrift::test::binary_5673, ::facebook::thrift::test::Baz>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 9, ::std::int64_t, ::facebook::thrift::test::Baz>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 1, ::facebook::thrift::test::Foo_6868, ::facebook::thrift::test::Bar>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 2, ::facebook::thrift::test::Foo_3943, ::facebook::thrift::test::Bar>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 5, ::facebook::thrift::test::Baz_7352, ::facebook::thrift::test::Bar>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 6, ::facebook::thrift::test::Baz_7352, ::facebook::thrift::test::Bar>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter, 7, ::facebook::thrift::test::detail::DirectlyAdapted, ::facebook::thrift::test::Bar>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 1, ::std::int32_t, ::facebook::thrift::test::StructWithFieldAdapter>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 2, ::std::int32_t, ::facebook::thrift::test::StructWithFieldAdapter>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 3, ::std::int32_t, ::facebook::thrift::test::StructWithFieldAdapter>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 4, ::std::int32_t, ::facebook::thrift::test::StructWithFieldAdapter>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 1, ::std::int32_t, ::facebook::thrift::test::TerseAdaptedFields>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 2, ::std::string, ::facebook::thrift::test::TerseAdaptedFields>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 3, ::std::set<::std::int32_t>, ::facebook::thrift::test::TerseAdaptedFields>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter, 1, ::facebook::thrift::test::A, ::facebook::thrift::test::B>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter2, 2, ::std::set<::std::string>, ::facebook::thrift::test::MyStruct>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::AdaptTestMsAdapter, 1, ::std::int64_t, ::facebook::thrift::test::AdaptTestStruct>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::CustomProtocolAdapter, 2, ::facebook::thrift::test::IOBuf, ::facebook::thrift::test::AdaptTestStruct>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::AdaptTestMsAdapter, 3, ::std::int64_t, ::facebook::thrift::test::AdaptTestStruct>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::AdapterWithContext, 4, ::std::int64_t, ::facebook::thrift::test::AdaptTestStruct>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::IndirectionAdapter<::apache::thrift::test::IndirectionString>, 6, ::std::string, ::facebook::thrift::test::AdaptTestStruct>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::AdapterWithContext, 7, ::std::string, ::facebook::thrift::test::AdaptTestStruct>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::TemplatedTestAdapter, 8, bool, ::facebook::thrift::test::AdaptTestStruct>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::AdapterWithContext, 9, ::std::int32_t, ::facebook::thrift::test::AdaptTestStruct>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::AdapterWithContext, 10, ::std::string, ::facebook::thrift::test::AdaptTestStruct>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::TemplatedTestAdapter, 1, bool, ::facebook::thrift::test::AdaptTemplatedTestStruct>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::TemplatedTestAdapter, 2, ::std::int8_t, ::facebook::thrift::test::AdaptTemplatedTestStruct>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::TemplatedTestAdapter, 3, ::std::int16_t, ::facebook::thrift::test::AdaptTemplatedTestStruct>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::TemplatedTestAdapter, 4, ::std::int32_t, ::facebook::thrift::test::AdaptTemplatedTestStruct>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::TemplatedTestAdapter, 5, ::std::int64_t, ::facebook::thrift::test::AdaptTemplatedTestStruct>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::TemplatedTestAdapter, 6, double, ::facebook::thrift::test::AdaptTemplatedTestStruct>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::TemplatedTestAdapter, 7, ::std::string, ::facebook::thrift::test::AdaptTemplatedTestStruct>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::TemplatedTestAdapter, 8, ::std::vector<::std::int64_t>, ::facebook::thrift::test::AdaptTemplatedTestStruct>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::TemplatedTestAdapter, 9, ::std::set<::std::int64_t>, ::facebook::thrift::test::AdaptTemplatedTestStruct>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::TemplatedTestAdapter, 10, ::std::map<::std::int64_t, ::std::int64_t>, ::facebook::thrift::test::AdaptTemplatedTestStruct>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::TemplatedTestAdapter, 11, bool, ::facebook::thrift::test::AdaptTemplatedTestStruct>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::TemplatedTestAdapter, 12, ::std::int8_t, ::facebook::thrift::test::AdaptTemplatedTestStruct>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::TemplatedTestAdapter, 13, ::std::int16_t, ::facebook::thrift::test::AdaptTemplatedTestStruct>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::TemplatedTestAdapter, 14, ::std::int32_t, ::facebook::thrift::test::AdaptTemplatedTestStruct>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::TemplatedTestAdapter, 15, ::std::int64_t, ::facebook::thrift::test::AdaptTemplatedTestStruct>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::TemplatedTestAdapter, 16, double, ::facebook::thrift::test::AdaptTemplatedTestStruct>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::TemplatedTestAdapter, 17, ::std::string, ::facebook::thrift::test::AdaptTemplatedTestStruct>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::StaticCastAdapter<::apache::thrift::test::basic::AdaptedEnum, ::apache::thrift::test::basic::ThriftAdaptedEnum>, 18, ::facebook::thrift::test::ThriftAdaptedEnum, ::facebook::thrift::test::AdaptTemplatedTestStruct>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::TemplatedTestAdapter, 19, ::std::vector<::std::int64_t>, ::facebook::thrift::test::AdaptTemplatedTestStruct>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::TemplatedTestAdapter, 20, ::std::set<::std::int64_t>, ::facebook::thrift::test::AdaptTemplatedTestStruct>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::TemplatedTestAdapter, 21, ::std::map<::std::int64_t, ::std::int64_t>, ::facebook::thrift::test::AdaptTemplatedTestStruct>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::TemplatedTestAdapter, 22, bool, ::facebook::thrift::test::AdaptTemplatedTestStruct>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::AdaptTestMsAdapter, 1, ::std::int64_t, ::facebook::thrift::test::ThriftAdaptTestUnion>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::CustomProtocolAdapter, 2, ::facebook::thrift::test::IOBuf, ::facebook::thrift::test::ThriftAdaptTestUnion>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::TemplatedTestAdapter, 1, ::facebook::thrift::test::ThriftAdaptedStruct, ::facebook::thrift::test::StructFieldAdaptedStruct>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::TemplatedTestAdapter, 2, ::facebook::thrift::test::ThriftAdaptedStruct, ::facebook::thrift::test::StructFieldAdaptedStruct>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::TemplatedTestAdapter, 3, ::facebook::thrift::test::detail::DirectlyAdaptedStruct, ::facebook::thrift::test::StructFieldAdaptedStruct>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::TemplatedTestAdapter, 4, ::facebook::thrift::test::detail::DirectlyAdaptedStruct, ::facebook::thrift::test::StructFieldAdaptedStruct>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::MemberAccessAdapter, 1, ::facebook::thrift::test::CircularAdaptee, ::facebook::thrift::test::CircularStruct>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::IdentityAdapter<detail::DeclaredAfterStruct>, 1, ::facebook::thrift::test::detail::DeclaredAfterStruct, ::facebook::thrift::test::ReorderedStruct>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::MoveOnlyAdapter, 1, ::facebook::thrift::test::detail::HeapAllocated, ::facebook::thrift::test::MoveOnly>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::MoveOnlyAdapter, 1, ::std::int64_t, ::facebook::thrift::test::AlsoMoveOnly>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::CountingAdapter<false, int>, 1, ::std::int64_t, ::facebook::thrift::test::CountingStruct>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::CountingAdapter<true, int>, 2, ::std::int64_t, ::facebook::thrift::test::CountingStruct>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::CountingAdapter<false, std::string>, 3, ::std::string, ::facebook::thrift::test::CountingStruct>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::FieldAdapter, 1, ::std::int32_t, ::facebook::thrift::test::Renamed>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 1, ::facebook::thrift::test::fixtures::adapter::i32_5137, ::facebook::thrift::test::fixtures::adapter::Foo>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 2, ::facebook::thrift::test::fixtures::adapter::i32_5137, ::facebook::thrift::test::fixtures::adapter::Foo>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 3, ::facebook::thrift::test::fixtures::adapter::i32_5137, ::facebook::thrift::test::fixtures::adapter::Foo>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter2, 4, ::std::set<::std::string>, ::facebook::thrift::test::fixtures::adapter::Foo>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter2, 5, ::std::set<::std::string>, ::facebook::thrift::test::fixtures::adapter::Foo>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter3, 6, ::facebook::thrift::test::fixtures::adapter::map_string_ListWithElemAdapter_withAdapter_8454, ::facebook::thrift::test::fixtures::adapter::Foo>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter3, 7, ::facebook::thrift::test::fixtures::adapter::map_string_ListWithElemAdapter_withAdapter_8454, ::facebook::thrift::test::fixtures::adapter::Foo>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter3, 8, ::facebook::thrift::test::fixtures::adapter::binary_5673, ::facebook::thrift::test::fixtures::adapter::Foo>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 9, ::std::int64_t, ::facebook::thrift::test::fixtures::adapter::Foo>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter2, 10, ::std::int64_t, ::facebook::thrift::test::fixtures::adapter::Foo>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 11, ::std::int64_t, ::facebook::thrift::test::fixtures::adapter::Foo>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 1, ::facebook::thrift::test::fixtures::adapter::i32_5137, ::facebook::thrift::test::fixtures::adapter::Baz>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter2, 4, ::std::set<::std::string>, ::facebook::thrift::test::fixtures::adapter::Baz>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter3, 6, ::facebook::thrift::test::fixtures::adapter::map_string_ListWithElemAdapter_withAdapter_8454, ::facebook::thrift::test::fixtures::adapter::Baz>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 8, ::facebook::thrift::test::fixtures::adapter::binary_5673, ::facebook::thrift::test::fixtures::adapter::Baz>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 9, ::std::int64_t, ::facebook::thrift::test::fixtures::adapter::Baz>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 1, ::facebook::thrift::test::fixtures::adapter::Foo_6868, ::facebook::thrift::test::fixtures::adapter::Bar>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 2, ::facebook::thrift::test::fixtures::adapter::Foo_3943, ::facebook::thrift::test::fixtures::adapter::Bar>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 5, ::facebook::thrift::test::fixtures::adapter::Baz_7352, ::facebook::thrift::test::fixtures::adapter::Bar>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 6, ::facebook::thrift::test::fixtures::adapter::Baz_7352, ::facebook::thrift::test::fixtures::adapter::Bar>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter, 7, ::facebook::thrift::test::fixtures::adapter::detail::DirectlyAdapted, ::facebook::thrift::test::fixtures::adapter::Bar>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 1, ::std::int32_t, ::facebook::thrift::test::fixtures::adapter::StructWithFieldAdapter>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 2, ::std::int32_t, ::facebook::thrift::test::fixtures::adapter::StructWithFieldAdapter>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 3, ::std::int32_t, ::facebook::thrift::test::fixtures::adapter::StructWithFieldAdapter>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 4, ::std::int32_t, ::facebook::thrift::test::fixtures::adapter::StructWithFieldAdapter>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 1, ::std::int32_t, ::facebook::thrift::test::fixtures::adapter::TerseAdaptedFields>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 2, ::std::string, ::facebook::thrift::test::fixtures::adapter::TerseAdaptedFields>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 3, ::std::set<::std::int32_t>, ::facebook::thrift::test::fixtures::adapter::TerseAdaptedFields>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter, 1, ::facebook::thrift::test::fixtures::adapter::A, ::facebook::thrift::test::fixtures::adapter::B>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter2, 2, ::std::set<::std::string>, ::facebook::thrift::test::fixtures::adapter::MyStruct>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::AdaptTestMsAdapter, 1, ::std::int64_t, ::facebook::thrift::test::fixtures::adapter::AdaptTestStruct>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::CustomProtocolAdapter, 2, ::facebook::thrift::test::fixtures::adapter::IOBuf, ::facebook::thrift::test::fixtures::adapter::AdaptTestStruct>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::AdaptTestMsAdapter, 3, ::std::int64_t, ::facebook::thrift::test::fixtures::adapter::AdaptTestStruct>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::AdapterWithContext, 4, ::std::int64_t, ::facebook::thrift::test::fixtures::adapter::AdaptTestStruct>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::IndirectionAdapter<::apache::thrift::test::IndirectionString>, 6, ::std::string, ::facebook::thrift::test::fixtures::adapter::AdaptTestStruct>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::AdapterWithContext, 7, ::std::string, ::facebook::thrift::test::fixtures::adapter::AdaptTestStruct>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::TemplatedTestAdapter, 8, bool, ::facebook::thrift::test::fixtures::adapter::AdaptTestStruct>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::AdapterWithContext, 9, ::std::int32_t, ::facebook::thrift::test::fixtures::adapter::AdaptTestStruct>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::AdapterWithContext, 10, ::std::string, ::facebook::thrift::test::fixtures::adapter::AdaptTestStruct>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::TemplatedTestAdapter, 1, bool, ::facebook::thrift::test::fixtures::adapter::AdaptTemplatedTestStruct>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::TemplatedTestAdapter, 2, ::std::int8_t, ::facebook::thrift::test::fixtures::adapter::AdaptTemplatedTestStruct>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::TemplatedTestAdapter, 3, ::std::int16_t, ::facebook::thrift::test::fixtures::adapter::AdaptTemplatedTestStruct>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::TemplatedTestAdapter, 4, ::std::int32_t, ::facebook::thrift::test::fixtures::adapter::AdaptTemplatedTestStruct>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::TemplatedTestAdapter, 5, ::std::int64_t, ::facebook::thrift::test::fixtures::adapter::AdaptTemplatedTestStruct>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::TemplatedTestAdapter, 6, double, ::facebook::thrift::test::fixtures::adapter::AdaptTemplatedTestStruct>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::TemplatedTestAdapter, 7, ::std::string, ::facebook::thrift::test::fixtures::adapter::AdaptTemplatedTestStruct>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::TemplatedTestAdapter, 8, ::std::vector<::std::int64_t>, ::facebook::thrift::test::fixtures::adapter::AdaptTemplatedTestStruct>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::TemplatedTestAdapter, 9, ::std::set<::std::int64_t>, ::facebook::thrift::test::fixtures::adapter::AdaptTemplatedTestStruct>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::TemplatedTestAdapter, 10, ::std::map<::std::int64_t, ::std::int64_t>, ::facebook::thrift::test::fixtures::adapter::AdaptTemplatedTestStruct>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::TemplatedTestAdapter, 11, bool, ::facebook::thrift::test::fixtures::adapter::AdaptTemplatedTestStruct>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::TemplatedTestAdapter, 12, ::std::int8_t, ::facebook::thrift::test::fixtures::adapter::AdaptTemplatedTestStruct>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::TemplatedTestAdapter, 13, ::std::int16_t, ::facebook::thrift::test::fixtures::adapter::AdaptTemplatedTestStruct>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::TemplatedTestAdapter, 14, ::std::int32_t, ::facebook::thrift::test::fixtures::adapter::AdaptTemplatedTestStruct>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::TemplatedTestAdapter, 15, ::std::int64_t, ::facebook::thrift::test::fixtures::adapter::AdaptTemplatedTestStruct>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::TemplatedTestAdapter, 16, double, ::facebook::thrift::test::fixtures::adapter::AdaptTemplatedTestStruct>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::TemplatedTestAdapter, 17, ::std::string, ::facebook::thrift::test::fixtures::adapter::AdaptTemplatedTestStruct>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::StaticCastAdapter<::apache::thrift::test::basic::AdaptedEnum, ::apache::thrift::test::basic::ThriftAdaptedEnum>, 18, ::facebook::thrift::test::fixtures::adapter::ThriftAdaptedEnum, ::facebook::thrift::test::fixtures::adapter::AdaptTemplatedTestStruct>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::TemplatedTestAdapter, 19, ::std::vector<::std::int64_t>, ::facebook::thrift::test::fixtures::adapter::AdaptTemplatedTestStruct>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::TemplatedTestAdapter, 20, ::std::set<::std::int64_t>, ::facebook::thrift::test::fixtures::adapter::AdaptTemplatedTestStruct>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::TemplatedTestAdapter, 21, ::std::map<::std::int64_t, ::std::int64_t>, ::facebook::thrift::test::fixtures::adapter::AdaptTemplatedTestStruct>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::TemplatedTestAdapter, 22, bool, ::facebook::thrift::test::fixtures::adapter::AdaptTemplatedTestStruct>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::AdaptTestMsAdapter, 1, ::std::int64_t, ::facebook::thrift::test::fixtures::adapter::ThriftAdaptTestUnion>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::CustomProtocolAdapter, 2, ::facebook::thrift::test::fixtures::adapter::IOBuf, ::facebook::thrift::test::fixtures::adapter::ThriftAdaptTestUnion>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::TemplatedTestAdapter, 1, ::facebook::thrift::test::fixtures::adapter::ThriftAdaptedStruct, ::facebook::thrift::test::fixtures::adapter::StructFieldAdaptedStruct>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::TemplatedTestAdapter, 2, ::facebook::thrift::test::fixtures::adapter::ThriftAdaptedStruct, ::facebook::thrift::test::fixtures::adapter::StructFieldAdaptedStruct>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::TemplatedTestAdapter, 3, ::facebook::thrift::test::fixtures::adapter::detail::DirectlyAdaptedStruct, ::facebook::thrift::test::fixtures::adapter::StructFieldAdaptedStruct>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::TemplatedTestAdapter, 4, ::facebook::thrift::test::fixtures::adapter::detail::DirectlyAdaptedStruct, ::facebook::thrift::test::fixtures::adapter::StructFieldAdaptedStruct>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::MemberAccessAdapter, 1, ::facebook::thrift::test::fixtures::adapter::CircularAdaptee, ::facebook::thrift::test::fixtures::adapter::CircularStruct>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::IdentityAdapter<detail::DeclaredAfterStruct>, 1, ::facebook::thrift::test::fixtures::adapter::detail::DeclaredAfterStruct, ::facebook::thrift::test::fixtures::adapter::ReorderedStruct>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::MoveOnlyAdapter, 1, ::facebook::thrift::test::fixtures::adapter::detail::HeapAllocated, ::facebook::thrift::test::fixtures::adapter::MoveOnly>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::MoveOnlyAdapter, 1, ::std::int64_t, ::facebook::thrift::test::fixtures::adapter::AlsoMoveOnly>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::CountingAdapter<false, int>, 1, ::std::int64_t, ::facebook::thrift::test::fixtures::adapter::CountingStruct>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::CountingAdapter<true, int>, 2, ::std::int64_t, ::facebook::thrift::test::fixtures::adapter::CountingStruct>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::CountingAdapter<false, std::string>, 3, ::std::string, ::facebook::thrift::test::fixtures::adapter::CountingStruct>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::FieldAdapter, 1, ::std::int32_t, ::facebook::thrift::test::fixtures::adapter::Renamed>();
   ::apache::thrift::adapt_detail::validateAdapter<::my::Adapter1, ::std::int64_t>();
   ::apache::thrift::adapt_detail::validateAdapter<::apache::thrift::test::TemplatedTestAdapter, bool>();
-  ::apache::thrift::adapt_detail::validateAdapter<::apache::thrift::test::TemplatedTestAdapter, ::facebook::thrift::test::detail::DirectlyAdaptedStruct>();
-  ::apache::thrift::adapt_detail::validateAdapter<::my::Adapter1, ::facebook::thrift::test::Foo>();
-  ::apache::thrift::adapt_detail::validateAdapter<::my::Adapter2, ::facebook::thrift::test::ListWithElemAdapter>();
+  ::apache::thrift::adapt_detail::validateAdapter<::apache::thrift::test::TemplatedTestAdapter, ::facebook::thrift::test::fixtures::adapter::detail::DirectlyAdaptedStruct>();
+  ::apache::thrift::adapt_detail::validateAdapter<::my::Adapter1, ::facebook::thrift::test::fixtures::adapter::Foo>();
+  ::apache::thrift::adapt_detail::validateAdapter<::my::Adapter2, ::facebook::thrift::test::fixtures::adapter::ListWithElemAdapter>();
   ::apache::thrift::adapt_detail::validateAdapter<::my::Adapter1, ::std::int32_t>();
   ::apache::thrift::adapt_detail::validateAdapter<::my::Adapter1, ::std::string>();
 }
-}} // namespace facebook::thrift::test
+}} // namespace facebook::thrift::test::fixtures::adapter
 namespace apache::thrift::detail::annotation {
 }

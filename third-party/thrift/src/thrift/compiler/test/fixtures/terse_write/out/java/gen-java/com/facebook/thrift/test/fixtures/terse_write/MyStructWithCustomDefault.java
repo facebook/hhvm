@@ -5,7 +5,7 @@
  *  @generated
  */
 
-package com.facebook.thrift.test.terse_write;
+package com.facebook.thrift.test.fixtures.terse_write;
 
 import com.facebook.swift.codec.*;
 import com.facebook.swift.codec.ThriftField.Requiredness;
@@ -80,7 +80,7 @@ public final class MyStructWithCustomDefault implements com.facebook.thrift.payl
       THRIFT_NAMES_TO_IDS.put("field1", 1);
       FIELD_METADATA.put(1, FIELD1_FIELD_DESC);
       com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
-        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/terse_write/MyStructWithCustomDefault"),
+        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/fixtures/terse_write/MyStructWithCustomDefault"),
         MyStructWithCustomDefault.class, MyStructWithCustomDefault::read0));
     }
     

@@ -39,7 +39,7 @@ public enum ThriftAdaptedEnum implements com.facebook.thrift.enums.BaseEnum, com
     }
 
     static {
-      com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/ThriftAdaptedEnum"), ThriftAdaptedEnum.class, ThriftAdaptedEnum::read0));
+      com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/fixtures/adapter/ThriftAdaptedEnum"), ThriftAdaptedEnum.class, ThriftAdaptedEnum::read0));
     }
     public static com.facebook.thrift.payload.Reader<ThriftAdaptedEnum> asReader() {
         return ThriftAdaptedEnum::read0;

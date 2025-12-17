@@ -59,7 +59,7 @@ public final class DeclaredAfterStruct implements com.facebook.thrift.payload.Th
     private static final TStruct STRUCT_DESC = new TStruct("DeclaredAfterStruct");
 static {
       com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
-        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/DeclaredAfterStruct"),
+        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/fixtures/adapter/DeclaredAfterStruct"),
         DeclaredAfterStruct.class, DeclaredAfterStruct::read0));
     }
     @java.lang.Override

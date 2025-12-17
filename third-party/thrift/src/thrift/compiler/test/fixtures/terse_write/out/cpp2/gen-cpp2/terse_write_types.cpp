@@ -15,23 +15,23 @@
 
 namespace apache { namespace thrift {
 
-const std::string_view TEnumTraits<::facebook::thrift::test::terse_write::MyEnum>::__fbthrift_module_name_internal_do_not_use = kModuleName;
-folly::Range<::facebook::thrift::test::terse_write::MyEnum const*> const TEnumTraits<::facebook::thrift::test::terse_write::MyEnum>::values = folly::range(TEnumDataStorage<::facebook::thrift::test::terse_write::MyEnum>::values);
-folly::Range<std::string_view const*> const TEnumTraits<::facebook::thrift::test::terse_write::MyEnum>::names = folly::range(TEnumDataStorage<::facebook::thrift::test::terse_write::MyEnum>::names);
+const std::string_view TEnumTraits<::facebook::thrift::test::fixtures::terse_write::MyEnum>::__fbthrift_module_name_internal_do_not_use = kModuleName;
+folly::Range<::facebook::thrift::test::fixtures::terse_write::MyEnum const*> const TEnumTraits<::facebook::thrift::test::fixtures::terse_write::MyEnum>::values = folly::range(TEnumDataStorage<::facebook::thrift::test::fixtures::terse_write::MyEnum>::values);
+folly::Range<std::string_view const*> const TEnumTraits<::facebook::thrift::test::fixtures::terse_write::MyEnum>::names = folly::range(TEnumDataStorage<::facebook::thrift::test::fixtures::terse_write::MyEnum>::names);
 
-bool TEnumTraits<::facebook::thrift::test::terse_write::MyEnum>::findName(type value, std::string_view* out) noexcept {
+bool TEnumTraits<::facebook::thrift::test::fixtures::terse_write::MyEnum>::findName(type value, std::string_view* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_name(value, out);
 }
 
-bool TEnumTraits<::facebook::thrift::test::terse_write::MyEnum>::findValue(std::string_view name, type* out) noexcept {
+bool TEnumTraits<::facebook::thrift::test::fixtures::terse_write::MyEnum>::findValue(std::string_view name, type* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 
-const std::vector<std::any>& TEnumTraits<::facebook::thrift::test::terse_write::MyEnum>::annotations() noexcept {
+const std::vector<std::any>& TEnumTraits<::facebook::thrift::test::fixtures::terse_write::MyEnum>::annotations() noexcept {
   return ::apache::thrift::detail::annotation::empty_annotations();
 }
 
-const std::vector<std::any>& TEnumTraits<::facebook::thrift::test::terse_write::MyEnum>::enumValueAnnotations(::facebook::thrift::test::terse_write::MyEnum value) noexcept {
+const std::vector<std::any>& TEnumTraits<::facebook::thrift::test::fixtures::terse_write::MyEnum>::enumValueAnnotations(::facebook::thrift::test::fixtures::terse_write::MyEnum value) noexcept {
   switch (static_cast<std::int32_t>(value)) {
     default:
       return ::apache::thrift::detail::annotation::empty_annotations();
@@ -43,7 +43,7 @@ const std::vector<std::any>& TEnumTraits<::facebook::thrift::test::terse_write::
 
 
 
-namespace facebook::thrift::test::terse_write {
+namespace facebook::thrift::test::fixtures::terse_write {
 
 std::string_view MyStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -81,23 +81,23 @@ void swap([[maybe_unused]] MyStruct& a, [[maybe_unused]] MyStruct& b) {
 }
 
 
-} // namespace facebook::thrift::test::terse_write
+} // namespace facebook::thrift::test::fixtures::terse_write
 
 
 namespace apache { namespace thrift {
 
-folly::Range<::facebook::thrift::test::terse_write::MyUnion::Type const*> const TEnumTraits<::facebook::thrift::test::terse_write::MyUnion::Type>::values = folly::range(TEnumDataStorage<::facebook::thrift::test::terse_write::MyUnion::Type>::values);
-folly::Range<std::string_view const*> const TEnumTraits<::facebook::thrift::test::terse_write::MyUnion::Type>::names = folly::range(TEnumDataStorage<::facebook::thrift::test::terse_write::MyUnion::Type>::names);
+folly::Range<::facebook::thrift::test::fixtures::terse_write::MyUnion::Type const*> const TEnumTraits<::facebook::thrift::test::fixtures::terse_write::MyUnion::Type>::values = folly::range(TEnumDataStorage<::facebook::thrift::test::fixtures::terse_write::MyUnion::Type>::values);
+folly::Range<std::string_view const*> const TEnumTraits<::facebook::thrift::test::fixtures::terse_write::MyUnion::Type>::names = folly::range(TEnumDataStorage<::facebook::thrift::test::fixtures::terse_write::MyUnion::Type>::names);
 
-bool TEnumTraits<::facebook::thrift::test::terse_write::MyUnion::Type>::findName(type value, std::string_view* out) noexcept {
+bool TEnumTraits<::facebook::thrift::test::fixtures::terse_write::MyUnion::Type>::findName(type value, std::string_view* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_name(value, out);
 }
 
-bool TEnumTraits<::facebook::thrift::test::terse_write::MyUnion::Type>::findValue(std::string_view name, type* out) noexcept {
+bool TEnumTraits<::facebook::thrift::test::fixtures::terse_write::MyUnion::Type>::findValue(std::string_view name, type* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 }} // apache::thrift
-namespace facebook::thrift::test::terse_write {
+namespace facebook::thrift::test::fixtures::terse_write {
 
 std::string_view MyUnion::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -297,13 +297,13 @@ static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         MyUnion,
         ::apache::thrift::type_class::structure,
-        ::facebook::thrift::test::terse_write::MyStruct>,
+        ::facebook::thrift::test::fixtures::terse_write::MyStruct>,
     "inconsistent use of json option");
 
-} // namespace facebook::thrift::test::terse_write
+} // namespace facebook::thrift::test::fixtures::terse_write
 
 
-namespace facebook::thrift::test::terse_write {
+namespace facebook::thrift::test::fixtures::terse_write {
 
 std::string_view MyStructWithCustomDefault::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -357,10 +357,10 @@ void swap([[maybe_unused]] MyStructWithCustomDefault& a, [[maybe_unused]] MyStru
 }
 
 
-} // namespace facebook::thrift::test::terse_write
+} // namespace facebook::thrift::test::fixtures::terse_write
 
 
-namespace facebook::thrift::test::terse_write {
+namespace facebook::thrift::test::fixtures::terse_write {
 
 std::string_view StructLevelTerseStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -424,7 +424,7 @@ StructLevelTerseStruct& StructLevelTerseStruct::operator=([[maybe_unused]] Struc
 }
 
 
-StructLevelTerseStruct::StructLevelTerseStruct(apache::thrift::FragileConstructor, bool bool_field__arg, ::std::int8_t byte_field__arg, ::std::int16_t short_field__arg, ::std::int32_t int_field__arg, ::std::int64_t long_field__arg, float float_field__arg, double double_field__arg, ::std::string string_field__arg, ::std::string binary_field__arg, ::facebook::thrift::test::terse_write::MyEnum enum_field__arg, ::std::vector<::std::int16_t> list_field__arg, ::std::set<::std::int16_t> set_field__arg, ::std::map<::std::int16_t, ::std::int16_t> map_field__arg, ::facebook::thrift::test::terse_write::MyStruct struct_field__arg, ::facebook::thrift::test::terse_write::MyUnion union_field__arg) :
+StructLevelTerseStruct::StructLevelTerseStruct(apache::thrift::FragileConstructor, bool bool_field__arg, ::std::int8_t byte_field__arg, ::std::int16_t short_field__arg, ::std::int32_t int_field__arg, ::std::int64_t long_field__arg, float float_field__arg, double double_field__arg, ::std::string string_field__arg, ::std::string binary_field__arg, ::facebook::thrift::test::fixtures::terse_write::MyEnum enum_field__arg, ::std::vector<::std::int16_t> list_field__arg, ::std::set<::std::int16_t> set_field__arg, ::std::map<::std::int16_t, ::std::int16_t> map_field__arg, ::facebook::thrift::test::fixtures::terse_write::MyStruct struct_field__arg, ::facebook::thrift::test::fixtures::terse_write::MyUnion union_field__arg) :
     __fbthrift_field_bool_field(std::move(bool_field__arg)),
     __fbthrift_field_byte_field(std::move(byte_field__arg)),
     __fbthrift_field_short_field(std::move(short_field__arg)),
@@ -453,7 +453,7 @@ void StructLevelTerseStruct::__fbthrift_clear() {
   this->__fbthrift_field_double_field = double();
   this->__fbthrift_field_string_field = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
   this->__fbthrift_field_binary_field = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
-  this->__fbthrift_field_enum_field = ::facebook::thrift::test::terse_write::MyEnum();
+  this->__fbthrift_field_enum_field = ::facebook::thrift::test::fixtures::terse_write::MyEnum();
   this->__fbthrift_field_list_field.clear();
   this->__fbthrift_field_set_field.clear();
   this->__fbthrift_field_map_field.clear();
@@ -470,7 +470,7 @@ void StructLevelTerseStruct::__fbthrift_clear_terse_fields() {
   this->__fbthrift_field_double_field = double();
   this->__fbthrift_field_string_field = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
   this->__fbthrift_field_binary_field = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
-  this->__fbthrift_field_enum_field = ::facebook::thrift::test::terse_write::MyEnum();
+  this->__fbthrift_field_enum_field = ::facebook::thrift::test::fixtures::terse_write::MyEnum();
   this->__fbthrift_field_list_field.clear();
   this->__fbthrift_field_set_field.clear();
   this->__fbthrift_field_map_field.clear();
@@ -487,12 +487,12 @@ bool StructLevelTerseStruct::__fbthrift_is_empty() const {
  ::apache::thrift::op::isEmpty<::apache::thrift::type::double_t>(this->__fbthrift_field_double_field) &&
  ::apache::thrift::op::isEmpty<::apache::thrift::type::string_t>(this->__fbthrift_field_string_field) &&
  ::apache::thrift::op::isEmpty<::apache::thrift::type::binary_t>(this->__fbthrift_field_binary_field) &&
- ::apache::thrift::op::isEmpty<::apache::thrift::type::enum_t<::facebook::thrift::test::terse_write::MyEnum>>(this->__fbthrift_field_enum_field) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::enum_t<::facebook::thrift::test::fixtures::terse_write::MyEnum>>(this->__fbthrift_field_enum_field) &&
  ::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::i16_t>>(this->__fbthrift_field_list_field) &&
  ::apache::thrift::op::isEmpty<::apache::thrift::type::set<::apache::thrift::type::i16_t>>(this->__fbthrift_field_set_field) &&
  ::apache::thrift::op::isEmpty<::apache::thrift::type::map<::apache::thrift::type::i16_t, ::apache::thrift::type::i16_t>>(this->__fbthrift_field_map_field) &&
- ::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::facebook::thrift::test::terse_write::MyStruct>>(this->__fbthrift_field_struct_field) &&
- ::apache::thrift::op::isEmpty<::apache::thrift::type::union_t<::facebook::thrift::test::terse_write::MyUnion>>(this->__fbthrift_field_union_field);
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::facebook::thrift::test::fixtures::terse_write::MyStruct>>(this->__fbthrift_field_struct_field) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::union_t<::facebook::thrift::test::fixtures::terse_write::MyUnion>>(this->__fbthrift_field_union_field);
 }
 
 bool StructLevelTerseStruct::operator==([[maybe_unused]] const StructLevelTerseStruct& rhs) const {
@@ -527,19 +527,19 @@ static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         StructLevelTerseStruct,
         ::apache::thrift::type_class::structure,
-        ::facebook::thrift::test::terse_write::MyStruct>,
+        ::facebook::thrift::test::fixtures::terse_write::MyStruct>,
     "inconsistent use of json option");
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         StructLevelTerseStruct,
         ::apache::thrift::type_class::variant,
-        ::facebook::thrift::test::terse_write::MyUnion>,
+        ::facebook::thrift::test::fixtures::terse_write::MyUnion>,
     "inconsistent use of json option");
 
-} // namespace facebook::thrift::test::terse_write
+} // namespace facebook::thrift::test::fixtures::terse_write
 
 
-namespace facebook::thrift::test::terse_write {
+namespace facebook::thrift::test::fixtures::terse_write {
 
 std::string_view FieldLevelTerseStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -643,7 +643,7 @@ FieldLevelTerseStruct& FieldLevelTerseStruct::operator=([[maybe_unused]] FieldLe
 }
 
 
-FieldLevelTerseStruct::FieldLevelTerseStruct(apache::thrift::FragileConstructor, bool terse_bool_field__arg, ::std::int8_t terse_byte_field__arg, ::std::int16_t terse_short_field__arg, ::std::int32_t terse_int_field__arg, ::std::int64_t terse_long_field__arg, float terse_float_field__arg, double terse_double_field__arg, ::std::string terse_string_field__arg, ::std::string terse_binary_field__arg, ::facebook::thrift::test::terse_write::MyEnum terse_enum_field__arg, ::std::vector<::std::int16_t> terse_list_field__arg, ::std::set<::std::int16_t> terse_set_field__arg, ::std::map<::std::int16_t, ::std::int16_t> terse_map_field__arg, ::facebook::thrift::test::terse_write::MyStruct terse_struct_field__arg, ::facebook::thrift::test::terse_write::MyUnion terse_union_field__arg, bool bool_field__arg, ::std::int8_t byte_field__arg, ::std::int16_t short_field__arg, ::std::int32_t int_field__arg, ::std::int64_t long_field__arg, float float_field__arg, double double_field__arg, ::std::string string_field__arg, ::std::string binary_field__arg, ::facebook::thrift::test::terse_write::MyEnum enum_field__arg, ::std::vector<::std::int16_t> list_field__arg, ::std::set<::std::int16_t> set_field__arg, ::std::map<::std::int16_t, ::std::int16_t> map_field__arg, ::facebook::thrift::test::terse_write::MyStruct struct_field__arg, ::facebook::thrift::test::terse_write::MyUnion union_field__arg) :
+FieldLevelTerseStruct::FieldLevelTerseStruct(apache::thrift::FragileConstructor, bool terse_bool_field__arg, ::std::int8_t terse_byte_field__arg, ::std::int16_t terse_short_field__arg, ::std::int32_t terse_int_field__arg, ::std::int64_t terse_long_field__arg, float terse_float_field__arg, double terse_double_field__arg, ::std::string terse_string_field__arg, ::std::string terse_binary_field__arg, ::facebook::thrift::test::fixtures::terse_write::MyEnum terse_enum_field__arg, ::std::vector<::std::int16_t> terse_list_field__arg, ::std::set<::std::int16_t> terse_set_field__arg, ::std::map<::std::int16_t, ::std::int16_t> terse_map_field__arg, ::facebook::thrift::test::fixtures::terse_write::MyStruct terse_struct_field__arg, ::facebook::thrift::test::fixtures::terse_write::MyUnion terse_union_field__arg, bool bool_field__arg, ::std::int8_t byte_field__arg, ::std::int16_t short_field__arg, ::std::int32_t int_field__arg, ::std::int64_t long_field__arg, float float_field__arg, double double_field__arg, ::std::string string_field__arg, ::std::string binary_field__arg, ::facebook::thrift::test::fixtures::terse_write::MyEnum enum_field__arg, ::std::vector<::std::int16_t> list_field__arg, ::std::set<::std::int16_t> set_field__arg, ::std::map<::std::int16_t, ::std::int16_t> map_field__arg, ::facebook::thrift::test::fixtures::terse_write::MyStruct struct_field__arg, ::facebook::thrift::test::fixtures::terse_write::MyUnion union_field__arg) :
     __fbthrift_field_terse_bool_field(std::move(terse_bool_field__arg)),
     __fbthrift_field_terse_byte_field(std::move(terse_byte_field__arg)),
     __fbthrift_field_terse_short_field(std::move(terse_short_field__arg)),
@@ -702,7 +702,7 @@ void FieldLevelTerseStruct::__fbthrift_clear() {
   this->__fbthrift_field_terse_double_field = double();
   this->__fbthrift_field_terse_string_field = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
   this->__fbthrift_field_terse_binary_field = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
-  this->__fbthrift_field_terse_enum_field = ::facebook::thrift::test::terse_write::MyEnum();
+  this->__fbthrift_field_terse_enum_field = ::facebook::thrift::test::fixtures::terse_write::MyEnum();
   this->__fbthrift_field_terse_list_field.clear();
   this->__fbthrift_field_terse_set_field.clear();
   this->__fbthrift_field_terse_map_field.clear();
@@ -716,7 +716,7 @@ void FieldLevelTerseStruct::__fbthrift_clear() {
   this->__fbthrift_field_double_field = double();
   this->__fbthrift_field_string_field = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
   this->__fbthrift_field_binary_field = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
-  this->__fbthrift_field_enum_field = ::facebook::thrift::test::terse_write::MyEnum();
+  this->__fbthrift_field_enum_field = ::facebook::thrift::test::fixtures::terse_write::MyEnum();
   this->__fbthrift_field_list_field.clear();
   this->__fbthrift_field_set_field.clear();
   this->__fbthrift_field_map_field.clear();
@@ -734,7 +734,7 @@ void FieldLevelTerseStruct::__fbthrift_clear_terse_fields() {
   this->__fbthrift_field_terse_double_field = double();
   this->__fbthrift_field_terse_string_field = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
   this->__fbthrift_field_terse_binary_field = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
-  this->__fbthrift_field_terse_enum_field = ::facebook::thrift::test::terse_write::MyEnum();
+  this->__fbthrift_field_terse_enum_field = ::facebook::thrift::test::fixtures::terse_write::MyEnum();
   this->__fbthrift_field_terse_list_field.clear();
   this->__fbthrift_field_terse_set_field.clear();
   this->__fbthrift_field_terse_map_field.clear();
@@ -817,11 +817,11 @@ double& FieldLevelTerseStruct::set_double_field(double double_field_) {
   return __fbthrift_field_double_field;
 }
 
-::facebook::thrift::test::terse_write::MyEnum FieldLevelTerseStruct::get_enum_field() const {
+::facebook::thrift::test::fixtures::terse_write::MyEnum FieldLevelTerseStruct::get_enum_field() const {
   return __fbthrift_field_enum_field;
 }
 
-::facebook::thrift::test::terse_write::MyEnum& FieldLevelTerseStruct::set_enum_field(::facebook::thrift::test::terse_write::MyEnum enum_field_) {
+::facebook::thrift::test::fixtures::terse_write::MyEnum& FieldLevelTerseStruct::set_enum_field(::facebook::thrift::test::fixtures::terse_write::MyEnum enum_field_) {
   enum_field_ref() = enum_field_;
   return __fbthrift_field_enum_field;
 }
@@ -850,20 +850,20 @@ const ::std::map<::std::int16_t, ::std::int16_t>& FieldLevelTerseStruct::get_map
   return static_cast<::std::map<::std::int16_t, ::std::int16_t>&&>(__fbthrift_field_map_field);
 }
 
-const ::facebook::thrift::test::terse_write::MyStruct& FieldLevelTerseStruct::get_struct_field() const& {
+const ::facebook::thrift::test::fixtures::terse_write::MyStruct& FieldLevelTerseStruct::get_struct_field() const& {
   return __fbthrift_field_struct_field;
 }
 
-::facebook::thrift::test::terse_write::MyStruct FieldLevelTerseStruct::get_struct_field() && {
-  return static_cast<::facebook::thrift::test::terse_write::MyStruct&&>(__fbthrift_field_struct_field);
+::facebook::thrift::test::fixtures::terse_write::MyStruct FieldLevelTerseStruct::get_struct_field() && {
+  return static_cast<::facebook::thrift::test::fixtures::terse_write::MyStruct&&>(__fbthrift_field_struct_field);
 }
 
-const ::facebook::thrift::test::terse_write::MyUnion& FieldLevelTerseStruct::get_union_field() const& {
+const ::facebook::thrift::test::fixtures::terse_write::MyUnion& FieldLevelTerseStruct::get_union_field() const& {
   return __fbthrift_field_union_field;
 }
 
-::facebook::thrift::test::terse_write::MyUnion FieldLevelTerseStruct::get_union_field() && {
-  return static_cast<::facebook::thrift::test::terse_write::MyUnion&&>(__fbthrift_field_union_field);
+::facebook::thrift::test::fixtures::terse_write::MyUnion FieldLevelTerseStruct::get_union_field() && {
+  return static_cast<::facebook::thrift::test::fixtures::terse_write::MyUnion&&>(__fbthrift_field_union_field);
 }
 
 void swap([[maybe_unused]] FieldLevelTerseStruct& a, [[maybe_unused]] FieldLevelTerseStruct& b) {
@@ -905,31 +905,31 @@ static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         FieldLevelTerseStruct,
         ::apache::thrift::type_class::structure,
-        ::facebook::thrift::test::terse_write::MyStruct>,
+        ::facebook::thrift::test::fixtures::terse_write::MyStruct>,
     "inconsistent use of json option");
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         FieldLevelTerseStruct,
         ::apache::thrift::type_class::variant,
-        ::facebook::thrift::test::terse_write::MyUnion>,
+        ::facebook::thrift::test::fixtures::terse_write::MyUnion>,
     "inconsistent use of json option");
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         FieldLevelTerseStruct,
         ::apache::thrift::type_class::structure,
-        ::facebook::thrift::test::terse_write::MyStruct>,
+        ::facebook::thrift::test::fixtures::terse_write::MyStruct>,
     "inconsistent use of json option");
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         FieldLevelTerseStruct,
         ::apache::thrift::type_class::variant,
-        ::facebook::thrift::test::terse_write::MyUnion>,
+        ::facebook::thrift::test::fixtures::terse_write::MyUnion>,
     "inconsistent use of json option");
 
-} // namespace facebook::thrift::test::terse_write
+} // namespace facebook::thrift::test::fixtures::terse_write
 
 
-namespace facebook::thrift::test::terse_write {
+namespace facebook::thrift::test::fixtures::terse_write {
 
 std::string_view AdaptedFields::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -972,7 +972,7 @@ AdaptedFields& AdaptedFields::operator=([[maybe_unused]] AdaptedFields&& other) 
 }
 
 
-AdaptedFields::AdaptedFields(apache::thrift::FragileConstructor, ::facebook::thrift::test::terse_write::MyInteger field1__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter, 2, ::std::int32_t, AdaptedFields> field2__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter, 3, ::facebook::thrift::test::terse_write::MyInteger, AdaptedFields> field3__arg) :
+AdaptedFields::AdaptedFields(apache::thrift::FragileConstructor, ::facebook::thrift::test::fixtures::terse_write::MyInteger field1__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter, 2, ::std::int32_t, AdaptedFields> field2__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter, 3, ::facebook::thrift::test::fixtures::terse_write::MyInteger, AdaptedFields> field3__arg) :
     __fbthrift_field_field1(std::move(field1__arg)),
     __fbthrift_field_field2(std::move(field2__arg)),
     __fbthrift_field_field3(std::move(field3__arg)) { 
@@ -1017,10 +1017,10 @@ void swap([[maybe_unused]] AdaptedFields& a, [[maybe_unused]] AdaptedFields& b) 
 }
 
 
-} // namespace facebook::thrift::test::terse_write
+} // namespace facebook::thrift::test::fixtures::terse_write
 
 
-namespace facebook::thrift::test::terse_write {
+namespace facebook::thrift::test::fixtures::terse_write {
 
 std::string_view TerseException::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -1084,14 +1084,14 @@ void swap([[maybe_unused]] TerseException& a, [[maybe_unused]] TerseException& b
 }
 
 
-} // namespace facebook::thrift::test::terse_write
+} // namespace facebook::thrift::test::fixtures::terse_write
 
-namespace facebook::thrift::test::terse_write { namespace {
+namespace facebook::thrift::test::fixtures::terse_write { namespace {
 [[maybe_unused]] FOLLY_ERASE void validateAdapters() {
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter, 1, ::std::int32_t, ::facebook::thrift::test::terse_write::AdaptedFields>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter, 2, ::std::int32_t, ::facebook::thrift::test::terse_write::AdaptedFields>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter, 3, ::std::int32_t, ::facebook::thrift::test::terse_write::AdaptedFields>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter, 1, ::std::int32_t, ::facebook::thrift::test::fixtures::terse_write::AdaptedFields>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter, 2, ::std::int32_t, ::facebook::thrift::test::fixtures::terse_write::AdaptedFields>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter, 3, ::std::int32_t, ::facebook::thrift::test::fixtures::terse_write::AdaptedFields>();
 }
-}} // namespace facebook::thrift::test::terse_write
+}} // namespace facebook::thrift::test::fixtures::terse_write
 namespace apache::thrift::detail::annotation {
 }

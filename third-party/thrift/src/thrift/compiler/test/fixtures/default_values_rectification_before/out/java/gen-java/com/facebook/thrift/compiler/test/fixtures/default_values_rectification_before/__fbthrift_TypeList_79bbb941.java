@@ -5,13 +5,13 @@
  *  @generated
  */
 
-package com.facebook.thrift.compiler.test.fixtures.default_values_rectification;
+package com.facebook.thrift.compiler.test.fixtures.default_values_rectification_before;
 
 import com.facebook.thrift.type.TypeList;
 import java.util.ArrayList;
 import java.util.List;
 
-public class __fbthrift_TypeList_29830437 implements TypeList {
+public class __fbthrift_TypeList_79bbb941 implements TypeList {
 
   private static List<TypeMapping> list = new ArrayList<>();
 
@@ -20,8 +20,8 @@ public class __fbthrift_TypeList_29830437 implements TypeList {
   }
 
   private static void addToList0() {
-    add("facebook.com/thrift/compiler/test/fixtures/default_values_rectification/EmptyStruct", "com.facebook.thrift.compiler.test.fixtures.default_values_rectification.EmptyStruct");
-    add("facebook.com/thrift/compiler/test/fixtures/default_values_rectification/TestStruct", "com.facebook.thrift.compiler.test.fixtures.default_values_rectification.TestStruct");
+    add("facebook.com/thrift/compiler/test/fixtures/default_values_rectification_before/EmptyStruct", "com.facebook.thrift.compiler.test.fixtures.default_values_rectification_before.EmptyStruct");
+    add("facebook.com/thrift/compiler/test/fixtures/default_values_rectification_before/TestStruct", "com.facebook.thrift.compiler.test.fixtures.default_values_rectification_before.TestStruct");
   }
 
   static {

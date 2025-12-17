@@ -11,32 +11,32 @@
 #include "thrift/compiler/test/fixtures/service-schema/gen-cpp2/module_constants.h"
 #include <thrift/lib/cpp2/gen/service_cpp.h>
 
-std::unique_ptr<apache::thrift::AsyncProcessor> apache::thrift::ServiceHandler<::facebook::thrift::test::ExtendedService>::getProcessor() {
-  return std::make_unique<::facebook::thrift::test::ExtendedServiceAsyncProcessor>(this);
+std::unique_ptr<apache::thrift::AsyncProcessor> apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::service_schema::ExtendedService>::getProcessor() {
+  return std::make_unique<::facebook::thrift::test::fixtures::service_schema::ExtendedServiceAsyncProcessor>(this);
 }
 
-apache::thrift::ServiceHandler<::facebook::thrift::test::ExtendedService>::CreateMethodMetadataResult apache::thrift::ServiceHandler<::facebook::thrift::test::ExtendedService>::createMethodMetadata() {
-  return ::apache::thrift::detail::ap::createMethodMetadataMap<::facebook::thrift::test::ExtendedServiceAsyncProcessor>(getServiceRequestInfoMap().value().get());
+apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::service_schema::ExtendedService>::CreateMethodMetadataResult apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::service_schema::ExtendedService>::createMethodMetadata() {
+  return ::apache::thrift::detail::ap::createMethodMetadataMap<::facebook::thrift::test::fixtures::service_schema::ExtendedServiceAsyncProcessor>(getServiceRequestInfoMap().value().get());
 }
 
 #if defined(THRIFT_SCHEMA_AVAILABLE)
-std::optional<apache::thrift::schema::DefinitionsSchema> apache::thrift::ServiceHandler<::facebook::thrift::test::ExtendedService>::getServiceSchema() {
+std::optional<apache::thrift::schema::DefinitionsSchema> apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::service_schema::ExtendedService>::getServiceSchema() {
   std::optional<apache::thrift::schema::DefinitionsSchema> ret = schema::DefinitionsSchema{};
-  ret->schema = ::apache::thrift::schema::detail::loadBundledSchema(::facebook::thrift::test::module_constants::_fbthrift_schema_bc0984a218954d47_includes());
-  ret->definitions = { {"\x2f\x39\x63\x5e\x7a\x62\x4d\xa7\x6e\x69\x78\xae\x7e\x49\xe3\x79", 16} };
+  ret->schema = ::apache::thrift::schema::detail::loadBundledSchema(::facebook::thrift::test::fixtures::service_schema::module_constants::_fbthrift_schema_db27c1f89cb27d2_includes());
+  ret->definitions = { {"\x18\x6b\x65\x4f\x98\x6f\x7b\x04\xca\x95\xdf\xc9\xae\xff\xe8\x08", 16} };
   return ret;
 }
 
-std::vector<folly::not_null<const apache::thrift::syntax_graph::ServiceNode*>> apache::thrift::ServiceHandler<::facebook::thrift::test::ExtendedService>::getServiceSchemaNodes() {
-  return {&apache::thrift::SchemaRegistry::get().getNode<::facebook::thrift::test::ExtendedService>()};
+std::vector<folly::not_null<const apache::thrift::syntax_graph::ServiceNode*>> apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::service_schema::ExtendedService>::getServiceSchemaNodes() {
+  return {&apache::thrift::SchemaRegistry::get().getNode<::facebook::thrift::test::fixtures::service_schema::ExtendedService>()};
 }
 #endif
 
-std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const>> apache::thrift::ServiceHandler<::facebook::thrift::test::ExtendedService>::getServiceRequestInfoMap() const {
+std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const>> apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::service_schema::ExtendedService>::getServiceRequestInfoMap() const {
   return __fbthrift_serviceInfoHolder.requestInfoMap();
 }
 
-::facebook::thrift::test::ExtendedServiceServiceInfoHolder apache::thrift::ServiceHandler<::facebook::thrift::test::ExtendedService>::__fbthrift_serviceInfoHolder;
+::facebook::thrift::test::fixtures::service_schema::ExtendedServiceServiceInfoHolder apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::service_schema::ExtendedService>::__fbthrift_serviceInfoHolder;
 
 //
 // Service Methods
@@ -46,16 +46,16 @@ std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const
 // Method 'init'
 //
 
-::std::int64_t apache::thrift::ServiceHandler<::facebook::thrift::test::ExtendedService>::init(::std::int64_t /*param0*/, ::std::int64_t /*param1*/) {
+::std::int64_t apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::service_schema::ExtendedService>::init(::std::int64_t /*param0*/, ::std::int64_t /*param1*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("init");
 }
 
-::std::int64_t apache::thrift::ServiceHandler<::facebook::thrift::test::ExtendedService>::sync_init(::std::int64_t p_param0, ::std::int64_t p_param1) {
+::std::int64_t apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::service_schema::ExtendedService>::sync_init(::std::int64_t p_param0, ::std::int64_t p_param1) {
   return init(p_param0, p_param1);
 }
 
 folly::SemiFuture<::std::int64_t>
-apache::thrift::ServiceHandler<::facebook::thrift::test::ExtendedService>::semifuture_init(::std::int64_t p_param0, ::std::int64_t p_param1) {
+apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::service_schema::ExtendedService>::semifuture_init(::std::int64_t p_param0, ::std::int64_t p_param1) {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_init.compare_exchange_strong(
       expected,
@@ -65,7 +65,7 @@ apache::thrift::ServiceHandler<::facebook::thrift::test::ExtendedService>::semif
 }
 
 folly::Future<::std::int64_t>
-apache::thrift::ServiceHandler<::facebook::thrift::test::ExtendedService>::future_init(::std::int64_t p_param0, ::std::int64_t p_param1) {
+apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::service_schema::ExtendedService>::future_init(::std::int64_t p_param0, ::std::int64_t p_param1) {
   auto expected{apache::thrift::detail::si::InvocationType::Future};
   __fbthrift_invocation_init.compare_exchange_strong(
       expected,
@@ -78,7 +78,7 @@ apache::thrift::ServiceHandler<::facebook::thrift::test::ExtendedService>::futur
 
 #if FOLLY_HAS_COROUTINES
 folly::coro::Task<::std::int64_t>
-apache::thrift::ServiceHandler<::facebook::thrift::test::ExtendedService>::co_init(::std::int64_t p_param0, ::std::int64_t p_param1) {
+apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::service_schema::ExtendedService>::co_init(::std::int64_t p_param0, ::std::int64_t p_param1) {
   auto expected{apache::thrift::detail::si::InvocationType::Coro};
   __fbthrift_invocation_init.compare_exchange_strong(
       expected,
@@ -88,7 +88,7 @@ apache::thrift::ServiceHandler<::facebook::thrift::test::ExtendedService>::co_in
                              withCapturedArgs<::std::int64_t /*param0*/, ::std::int64_t /*param1*/>(p_param0, p_param1));
 }
 
-folly::coro::Task<::std::int64_t> apache::thrift::ServiceHandler<::facebook::thrift::test::ExtendedService>::co_init(
+folly::coro::Task<::std::int64_t> apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::service_schema::ExtendedService>::co_init(
     apache::thrift::RequestParams /* params */, ::std::int64_t p_param0, ::std::int64_t p_param1) {
   auto expected{apache::thrift::detail::si::InvocationType::CoroParam};
   __fbthrift_invocation_init.compare_exchange_strong(
@@ -99,7 +99,7 @@ folly::coro::Task<::std::int64_t> apache::thrift::ServiceHandler<::facebook::thr
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::facebook::thrift::test::ExtendedService>::async_tm_init(
+void apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::service_schema::ExtendedService>::async_tm_init(
     apache::thrift::HandlerCallbackPtr<::std::int64_t> callback, ::std::int64_t p_param0, ::std::int64_t p_param1) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
@@ -193,7 +193,7 @@ determineInvocationType:
 //
 
 
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::service_schema {
 
 ::std::int64_t ExtendedServiceSvNull::init(::std::int64_t /*param0*/, ::std::int64_t /*param1*/) { 
   return 0;
@@ -205,7 +205,7 @@ std::string_view ExtendedServiceAsyncProcessor::getServiceName() {
 }
 
 void ExtendedServiceAsyncProcessor::getServiceMetadata(apache::thrift::metadata::ThriftServiceMetadataResponse& response) {
-  ::apache::thrift::detail::md::ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::ExtendedService>>::gen(response);
+  ::apache::thrift::detail::md::ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::service_schema::ExtendedService>>::gen(response);
 }
 
 void ExtendedServiceAsyncProcessor::processSerializedCompressedRequestWithMetadata(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, const apache::thrift::AsyncProcessorFactory::MethodMetadata& methodMetadata, apache::thrift::protocol::PROTOCOL_TYPES protType, apache::thrift::Cpp2RequestContext* context, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
@@ -243,9 +243,9 @@ apache::thrift::ServiceRequestInfoMap ExtendedServiceServiceInfoHolder::staticRe
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
   };
-  apache::thrift::ServiceRequestInfoMap parentMap = ::facebook::thrift::test::BaseServiceServiceInfoHolder::staticRequestInfoMap();
+  apache::thrift::ServiceRequestInfoMap parentMap = ::facebook::thrift::test::fixtures::service_schema::BaseServiceServiceInfoHolder::staticRequestInfoMap();
   requestInfoMap.insert(std::begin(parentMap), std::end(parentMap));
 
   return requestInfoMap;
 }
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::service_schema

@@ -23,28 +23,28 @@ namespace thrift {
 namespace detail {
 
 template <>
-struct TccStructTraits<::facebook::thrift::test::MyAnnotation> {
+struct TccStructTraits<::facebook::thrift::test::fixtures::runtime_annotations::MyAnnotation> {
   static void translateFieldName(
       std::string_view _fname,
       int16_t& fid,
       apache::thrift::protocol::TType& _ftype) noexcept;
 };
 template <>
-struct TccStructTraits<::facebook::thrift::test::MyStruct> {
+struct TccStructTraits<::facebook::thrift::test::fixtures::runtime_annotations::MyStruct> {
   static void translateFieldName(
       std::string_view _fname,
       int16_t& fid,
       apache::thrift::protocol::TType& _ftype) noexcept;
 };
 template <>
-struct TccStructTraits<::facebook::thrift::test::MyUnion> {
+struct TccStructTraits<::facebook::thrift::test::fixtures::runtime_annotations::MyUnion> {
   static void translateFieldName(
       std::string_view _fname,
       int16_t& fid,
       apache::thrift::protocol::TType& _ftype) noexcept;
 };
 template <>
-struct TccStructTraits<::facebook::thrift::test::MyException> {
+struct TccStructTraits<::facebook::thrift::test::fixtures::runtime_annotations::MyException> {
   static void translateFieldName(
       std::string_view _fname,
       int16_t& fid,
@@ -55,7 +55,7 @@ struct TccStructTraits<::facebook::thrift::test::MyException> {
 } // namespace thrift
 } // namespace apache
 
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::runtime_annotations {
 
 template <class Protocol_>
 void MyAnnotation::readNoXfer(Protocol_* iprot) {
@@ -495,4 +495,4 @@ extern template uint32_t MyException::serializedSize<>(apache::thrift::CompactPr
 extern template uint32_t MyException::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::runtime_annotations

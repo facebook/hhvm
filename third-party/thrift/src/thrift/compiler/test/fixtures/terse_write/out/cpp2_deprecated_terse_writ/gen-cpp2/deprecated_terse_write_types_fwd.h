@@ -9,7 +9,7 @@
 #include <cstdint>
 
 // BEGIN forward_declare
-namespace facebook::thrift::test::terse_write::deprecated {
+namespace facebook::thrift::test::fixtures::terse_write::deprecated {
 class MyStruct;
 class MyUnion;
 class StructLevelTerseStruct;
@@ -17,11 +17,11 @@ class FieldLevelTerseStruct;
 class CppRefStructFields;
 class DeprecatedTerseWriteWithCustomDefault;
 class DeprecatedTerseWriteWithRedundantCustomDefault;
-} // namespace facebook::thrift::test::terse_write::deprecated
+} // namespace facebook::thrift::test::fixtures::terse_write::deprecated
 // END forward_declare
 
 // BEGIN forward_declare_enums
-namespace facebook::thrift::test::terse_write::deprecated {
+namespace facebook::thrift::test::fixtures::terse_write::deprecated {
 enum class MyEnum;
-} // namespace facebook::thrift::test::terse_write::deprecated
+} // namespace facebook::thrift::test::fixtures::terse_write::deprecated
 // END forward_declare_enums

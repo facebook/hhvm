@@ -12,8 +12,8 @@
 
 namespace apache { namespace thrift {
 
-template <> struct TEnumDataStorage<::facebook::thrift::test::Enum> {
-  using type = ::facebook::thrift::test::Enum;
+template <> struct TEnumDataStorage<::facebook::thrift::test::fixtures::encode::Enum> {
+  using type = ::facebook::thrift::test::fixtures::encode::Enum;
   static constexpr const std::size_t size = 2;
   static constexpr std::array<type, size> values = { {
       type::first,
@@ -25,7 +25,7 @@ template <> struct TEnumDataStorage<::facebook::thrift::test::Enum> {
   }};
 };
 
-template <> struct TStructDataStorage<::facebook::thrift::test::Foo> {
+template <> struct TStructDataStorage<::facebook::thrift::test::fixtures::encode::Foo> {
   static constexpr const std::size_t fields_size = 1;
   static const std::string_view name;
   static const std::array<std::string_view, fields_size> fields_names;
@@ -40,7 +40,7 @@ template <> struct TStructDataStorage<::facebook::thrift::test::Foo> {
   static const std::array<int, fields_size> isset_indexes;
 };
 
-template <> struct TStructDataStorage<::facebook::thrift::test::Bar> {
+template <> struct TStructDataStorage<::facebook::thrift::test::fixtures::encode::Bar> {
   static constexpr const std::size_t fields_size = 1;
   static const std::string_view name;
   static const std::array<std::string_view, fields_size> fields_names;
@@ -55,7 +55,7 @@ template <> struct TStructDataStorage<::facebook::thrift::test::Bar> {
   static const std::array<int, fields_size> isset_indexes;
 };
 
-template <> struct TStructDataStorage<::facebook::thrift::test::Baz> {
+template <> struct TStructDataStorage<::facebook::thrift::test::fixtures::encode::Baz> {
   static constexpr const std::size_t fields_size = 2;
   static const std::string_view name;
   static const std::array<std::string_view, fields_size> fields_names;
@@ -70,7 +70,7 @@ template <> struct TStructDataStorage<::facebook::thrift::test::Baz> {
   static const std::array<int, fields_size> isset_indexes;
 };
 
-template <> struct TStructDataStorage<::facebook::thrift::test::OpEncodeStruct> {
+template <> struct TStructDataStorage<::facebook::thrift::test::fixtures::encode::OpEncodeStruct> {
   static constexpr const std::size_t fields_size = 12;
   static const std::string_view name;
   static const std::array<std::string_view, fields_size> fields_names;

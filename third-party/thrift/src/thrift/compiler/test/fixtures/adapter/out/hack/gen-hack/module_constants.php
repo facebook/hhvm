@@ -6,7 +6,7 @@
  *  @generated
  */
 
-namespace facebook\thrift\test;
+namespace facebook\thrift\test\fixtures\adapter;
 
 class module_CONSTANTS implements \IThriftConstants {
   /**
@@ -26,8 +26,8 @@ class module_CONSTANTS implements \IThriftConstants {
    * module.MyStruct var3
    */
   <<__Memoize>>
-  public static function var3()[write_props]: \facebook\thrift\test\MyStruct{
-    return \facebook\thrift\test\MyStruct::fromShape(
+  public static function var3()[write_props]: \facebook\thrift\test\fixtures\adapter\MyStruct{
+    return \facebook\thrift\test\fixtures\adapter\MyStruct::fromShape(
       shape(
         "field" => 30,
         "set_string" => Set {
@@ -55,8 +55,8 @@ class module_CONSTANTS implements \IThriftConstants {
    * module.MyStruct var6
    */
   <<__Memoize>>
-  public static function var6()[write_props]: \facebook\thrift\test\MyStruct{
-    return \facebook\thrift\test\MyStruct::fromShape(
+  public static function var6()[write_props]: \facebook\thrift\test\fixtures\adapter\MyStruct{
+    return \facebook\thrift\test\fixtures\adapter\MyStruct::fromShape(
       shape(
         "field" => 60,
         "set_string" => Set {
@@ -84,8 +84,8 @@ class module_CONSTANTS implements \IThriftConstants {
    * module.Person2 person
    */
   <<__Memoize>>
-  public static function person()[write_props]: \facebook\thrift\test\Person2{
-    return \facebook\thrift\test\Person2::fromShape(
+  public static function person()[write_props]: \facebook\thrift\test\fixtures\adapter\Person2{
+    return \facebook\thrift\test\fixtures\adapter\Person2::fromShape(
       shape(
         "name" => "DefaultName",
       )
@@ -109,8 +109,8 @@ class module_CONSTANTS implements \IThriftConstants {
    * module.Person2 person_no_transitive
    */
   <<__Memoize>>
-  public static function person_no_transitive()[write_props]: \facebook\thrift\test\Person2{
-    return \facebook\thrift\test\Person2::fromShape(
+  public static function person_no_transitive()[write_props]: \facebook\thrift\test\fixtures\adapter\Person2{
+    return \facebook\thrift\test\fixtures\adapter\Person2::fromShape(
       shape(
         "name" => "DefaultName 2",
       )
@@ -121,17 +121,17 @@ class module_CONSTANTS implements \IThriftConstants {
    * Original thrift constant:-
    * module.AdaptedBool type_adapted
    */
-  const \facebook\thrift\test\AdaptedBool type_adapted = true;
+  const \facebook\thrift\test\fixtures\adapter\AdaptedBool type_adapted = true;
 
   /**
    * Original thrift constant:-
    * module.MoveOnly nested_adapted
    */
   <<__Memoize>>
-  public static function nested_adapted()[write_props]: \facebook\thrift\test\MoveOnly{
-    return \facebook\thrift\test\MoveOnly::fromShape(
+  public static function nested_adapted()[write_props]: \facebook\thrift\test\fixtures\adapter\MoveOnly{
+    return \facebook\thrift\test\fixtures\adapter\MoveOnly::fromShape(
       shape(
-        "ptr" => \facebook\thrift\test\HeapAllocated::fromShape(
+        "ptr" => \facebook\thrift\test\fixtures\adapter\HeapAllocated::fromShape(
           shape(
           )
         ),
@@ -144,7 +144,7 @@ class module_CONSTANTS implements \IThriftConstants {
    * list<module.AdaptedByte> container_of_adapted
    */
   <<__Memoize>>
-  public static function container_of_adapted()[write_props]: \ConstVector<\facebook\thrift\test\AdaptedByte>{
+  public static function container_of_adapted()[write_props]: \ConstVector<\facebook\thrift\test\fixtures\adapter\AdaptedByte>{
     return ImmVector {
       1,
       2,
@@ -156,63 +156,63 @@ class module_CONSTANTS implements \IThriftConstants {
   public static function getAllStructuredAnnotations()[write_props]: dict<string, dict<string, \IThriftStruct>> {
     return dict[
       'var1' => dict[
-        '\facebook\thrift\test\Config' => \facebook\thrift\test\Config::fromShape(
+        '\facebook\thrift\test\fixtures\adapter\Config' => \facebook\thrift\test\fixtures\adapter\Config::fromShape(
           shape(
             "path" => "foo",
           )
         ),
       ],
       'var2' => dict[
-        '\facebook\thrift\test\Config' => \facebook\thrift\test\Config::fromShape(
+        '\facebook\thrift\test\fixtures\adapter\Config' => \facebook\thrift\test\fixtures\adapter\Config::fromShape(
           shape(
             "path" => "bar",
           )
         ),
       ],
       'var3' => dict[
-        '\facebook\thrift\test\Config' => \facebook\thrift\test\Config::fromShape(
+        '\facebook\thrift\test\fixtures\adapter\Config' => \facebook\thrift\test\fixtures\adapter\Config::fromShape(
           shape(
             "path" => "baz",
           )
         ),
       ],
       'var4' => dict[
-        '\facebook\thrift\test\Config' => \facebook\thrift\test\Config::fromShape(
+        '\facebook\thrift\test\fixtures\adapter\Config' => \facebook\thrift\test\fixtures\adapter\Config::fromShape(
           shape(
             "path" => "foo2",
           )
         ),
       ],
       'var5' => dict[
-        '\facebook\thrift\test\Config' => \facebook\thrift\test\Config::fromShape(
+        '\facebook\thrift\test\fixtures\adapter\Config' => \facebook\thrift\test\fixtures\adapter\Config::fromShape(
           shape(
             "path" => "bar2",
           )
         ),
       ],
       'var6' => dict[
-        '\facebook\thrift\test\Config' => \facebook\thrift\test\Config::fromShape(
+        '\facebook\thrift\test\fixtures\adapter\Config' => \facebook\thrift\test\fixtures\adapter\Config::fromShape(
           shape(
             "path" => "baz2",
           )
         ),
       ],
       'timeout' => dict[
-        '\facebook\thrift\test\Person' => \facebook\thrift\test\Person::fromShape(
+        '\facebook\thrift\test\fixtures\adapter\Person' => \facebook\thrift\test\fixtures\adapter\Person::fromShape(
           shape(
             "name" => "Foo",
           )
         ),
       ],
       'msg' => dict[
-        '\facebook\thrift\test\Person' => \facebook\thrift\test\Person::fromShape(
+        '\facebook\thrift\test\fixtures\adapter\Person' => \facebook\thrift\test\fixtures\adapter\Person::fromShape(
           shape(
             "name" => "Bar",
           )
         ),
       ],
       'person' => dict[
-        '\facebook\thrift\test\Person' => \facebook\thrift\test\Person::fromShape(
+        '\facebook\thrift\test\fixtures\adapter\Person' => \facebook\thrift\test\fixtures\adapter\Person::fromShape(
           shape(
             "name" => "NameFromAnnotation",
           )

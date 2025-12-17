@@ -14,7 +14,7 @@ namespace thrift {
 namespace detail {
 
 template <>
-struct VisitByFieldId<::facebook::thrift::test::CustomException> {
+struct VisitByFieldId<::facebook::thrift::test::fixtures::service_schema::CustomException> {
   template <typename F, typename T>
   void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
@@ -23,7 +23,7 @@ struct VisitByFieldId<::facebook::thrift::test::CustomException> {
     case 2:
       return f(1, static_cast<T&&>(t).result_ref());
     default:
-      throwInvalidThriftId(fieldId, "::facebook::thrift::test::CustomException");
+      throwInvalidThriftId(fieldId, "::facebook::thrift::test::fixtures::service_schema::CustomException");
     }
   }
 };

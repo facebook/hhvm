@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-package;
+package "facebook.com/thrift/test/fixtures/basic_enum"
+
 namespace java.swift test.fixtures.swift.enumstrict
 namespace java test.fixtures.enumstrict
 namespace cpp2 test.fixtures.enumstrict

@@ -10,13 +10,13 @@
 
 #include "thrift/compiler/test/fixtures/default_values_rectification_before/gen-cpp2/module_types.h"
 
-namespace facebook::thrift::compiler::test::fixtures::default_values_rectification {
+namespace facebook::thrift::compiler::test::fixtures::default_values_rectification_before {
 /** Glean {"file": "thrift/compiler/test/fixtures/default_values_rectification_before/src/module.thrift"} */
 namespace module_constants {
 
-  FOLLY_EXPORT ::std::string_view _fbthrift_schema_44ba66ff530db6c3();
-  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_44ba66ff530db6c3_includes();
-  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_44ba66ff530db6c3_uris();
+  FOLLY_EXPORT ::std::string_view _fbthrift_schema_57b13ee68b0c69f5();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_57b13ee68b0c69f5_includes();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_57b13ee68b0c69f5_uris();
 
 } // namespace module_constants
-} // namespace facebook::thrift::compiler::test::fixtures::default_values_rectification
+} // namespace facebook::thrift::compiler::test::fixtures::default_values_rectification_before

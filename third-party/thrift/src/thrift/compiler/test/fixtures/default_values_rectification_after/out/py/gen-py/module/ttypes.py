@@ -110,19 +110,19 @@ class EmptyStruct:
   def _to_python(self):
     import importlib
     import thrift.python.converter
-    python_types = importlib.import_module("facebook.thrift.compiler.test.fixtures.default_values_rectification.module.thrift_types")
+    python_types = importlib.import_module("facebook.thrift.compiler.test.fixtures.default_values_rectification_after.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.EmptyStruct, self)
 
   def _to_mutable_python(self):
     import importlib
     import thrift.python.mutable_converter
-    python_mutable_types = importlib.import_module("facebook.thrift.compiler.test.fixtures.default_values_rectification.module.thrift_mutable_types")
+    python_mutable_types = importlib.import_module("facebook.thrift.compiler.test.fixtures.default_values_rectification_after.module.thrift_mutable_types")
     return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.EmptyStruct, self)
 
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
-    py3_types = importlib.import_module("facebook.thrift.compiler.test.fixtures.default_values_rectification.module.types")
+    py3_types = importlib.import_module("facebook.thrift.compiler.test.fixtures.default_values_rectification_after.module.types")
     return thrift.py3.converter.to_py3_struct(py3_types.EmptyStruct, self)
 
   def _to_py_deprecated(self):
@@ -340,19 +340,19 @@ class TestStruct:
   def _to_python(self):
     import importlib
     import thrift.python.converter
-    python_types = importlib.import_module("facebook.thrift.compiler.test.fixtures.default_values_rectification.module.thrift_types")
+    python_types = importlib.import_module("facebook.thrift.compiler.test.fixtures.default_values_rectification_after.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.TestStruct, self)
 
   def _to_mutable_python(self):
     import importlib
     import thrift.python.mutable_converter
-    python_mutable_types = importlib.import_module("facebook.thrift.compiler.test.fixtures.default_values_rectification.module.thrift_mutable_types")
+    python_mutable_types = importlib.import_module("facebook.thrift.compiler.test.fixtures.default_values_rectification_after.module.thrift_mutable_types")
     return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.TestStruct, self)
 
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
-    py3_types = importlib.import_module("facebook.thrift.compiler.test.fixtures.default_values_rectification.module.types")
+    py3_types = importlib.import_module("facebook.thrift.compiler.test.fixtures.default_values_rectification_after.module.types")
     return thrift.py3.converter.to_py3_struct(py3_types.TestStruct, self)
 
   def _to_py_deprecated(self):

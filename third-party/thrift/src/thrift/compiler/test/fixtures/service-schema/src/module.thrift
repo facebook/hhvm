@@ -17,7 +17,7 @@
 include "extend.thrift"
 include "include.thrift"
 
-package "facebook.com/thrift/test"
+package "facebook.com/thrift/test/fixtures/service_schema"
 
 namespace java.swift test.fixtures.service_schema
 

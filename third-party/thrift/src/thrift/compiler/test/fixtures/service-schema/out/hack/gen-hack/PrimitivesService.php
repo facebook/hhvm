@@ -6,13 +6,13 @@
  *  @generated
  */
 
-namespace facebook\thrift\test;
+namespace facebook\thrift\test\fixtures\service_schema;
 
 /**
  * Original thrift service:-
  * PrimitivesService
  */
-<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/PrimitivesService'))>>
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/fixtures/service_schema/PrimitivesService'))>>
 interface PrimitivesServiceAsyncIf extends \IThriftAsyncIf {
   /**
    * Original thrift definition:-
@@ -28,7 +28,7 @@ interface PrimitivesServiceAsyncIf extends \IThriftAsyncIf {
    *   method_that_throws()
    *   throws (1: CustomException e);
    */
-  public function method_that_throws(): Awaitable<\facebook\thrift\test\Result>;
+  public function method_that_throws(): Awaitable<\facebook\thrift\test\fixtures\service_schema\Result>;
 
   /**
    * Original thrift definition:-
@@ -43,7 +43,7 @@ interface PrimitivesServiceAsyncIf extends \IThriftAsyncIf {
  * Original thrift service:-
  * PrimitivesService
  */
-<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/PrimitivesService'))>>
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/fixtures/service_schema/PrimitivesService'))>>
 interface PrimitivesServiceAsyncClientIf extends PrimitivesServiceAsyncIf {
 }
 
@@ -51,7 +51,7 @@ interface PrimitivesServiceAsyncClientIf extends PrimitivesServiceAsyncIf {
  * Original thrift service:-
  * PrimitivesService
  */
-<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/PrimitivesService'))>>
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/fixtures/service_schema/PrimitivesService'))>>
 interface PrimitivesServiceClientIf extends \IThriftSyncIf {
   /**
    * Original thrift definition:-
@@ -67,7 +67,7 @@ interface PrimitivesServiceClientIf extends \IThriftSyncIf {
    *   method_that_throws()
    *   throws (1: CustomException e);
    */
-  public function method_that_throws(): Awaitable<\facebook\thrift\test\Result>;
+  public function method_that_throws(): Awaitable<\facebook\thrift\test\fixtures\service_schema\Result>;
 
   /**
    * Original thrift definition:-
@@ -93,13 +93,13 @@ trait PrimitivesServiceClientBase {
    */
   public async function init(int $param0, int $param1): Awaitable<int> {
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \facebook\thrift\test\PrimitivesService_init_args::fromShape(shape(
+    $args = \facebook\thrift\test\fixtures\service_schema\PrimitivesService_init_args::fromShape(shape(
       'param0' => $param0,
       'param1' => $param1,
     ));
     await $this->asyncHandler_->genBefore(PrimitivesServiceStaticMetadata::THRIFT_SVC_NAME, "init", $args);
     $currentseqid = $this->sendImplHelper($args, "init", false, PrimitivesServiceStaticMetadata::THRIFT_SVC_NAME );
-    return (await $this->genAwaitResponse(\facebook\thrift\test\PrimitivesService_init_result::class, "init", false, $currentseqid, $rpc_options))[0];
+    return (await $this->genAwaitResponse(\facebook\thrift\test\fixtures\service_schema\PrimitivesService_init_result::class, "init", false, $currentseqid, $rpc_options))[0];
   }
 
   /**
@@ -108,12 +108,12 @@ trait PrimitivesServiceClientBase {
    *   method_that_throws()
    *   throws (1: CustomException e);
    */
-  public async function method_that_throws(): Awaitable<\facebook\thrift\test\Result> {
+  public async function method_that_throws(): Awaitable<\facebook\thrift\test\fixtures\service_schema\Result> {
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \facebook\thrift\test\PrimitivesService_method_that_throws_args::withDefaultValues();
+    $args = \facebook\thrift\test\fixtures\service_schema\PrimitivesService_method_that_throws_args::withDefaultValues();
     await $this->asyncHandler_->genBefore(PrimitivesServiceStaticMetadata::THRIFT_SVC_NAME, "method_that_throws", $args);
     $currentseqid = $this->sendImplHelper($args, "method_that_throws", false, PrimitivesServiceStaticMetadata::THRIFT_SVC_NAME );
-    return (await $this->genAwaitResponse(\facebook\thrift\test\PrimitivesService_method_that_throws_result::class, "method_that_throws", false, $currentseqid, $rpc_options))[0];
+    return (await $this->genAwaitResponse(\facebook\thrift\test\fixtures\service_schema\PrimitivesService_method_that_throws_result::class, "method_that_throws", false, $currentseqid, $rpc_options))[0];
   }
 
   /**
@@ -124,13 +124,13 @@ trait PrimitivesServiceClientBase {
    */
   public async function return_void_method(int $id, ?\I $i): Awaitable<void> {
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \facebook\thrift\test\PrimitivesService_return_void_method_args::fromShape(shape(
+    $args = \facebook\thrift\test\fixtures\service_schema\PrimitivesService_return_void_method_args::fromShape(shape(
       'id' => $id,
       'i' => $i,
     ));
     await $this->asyncHandler_->genBefore(PrimitivesServiceStaticMetadata::THRIFT_SVC_NAME, "return_void_method", $args);
     $currentseqid = $this->sendImplHelper($args, "return_void_method", false, PrimitivesServiceStaticMetadata::THRIFT_SVC_NAME );
-    await $this->genAwaitResponse(\facebook\thrift\test\PrimitivesService_return_void_method_result::class, "return_void_method", true, $currentseqid, $rpc_options);
+    await $this->genAwaitResponse(\facebook\thrift\test\fixtures\service_schema\PrimitivesService_return_void_method_result::class, "return_void_method", true, $currentseqid, $rpc_options);
   }
 
 }
@@ -376,18 +376,18 @@ class PrimitivesService_method_that_throws_args implements \IThriftSyncStruct, \
 class PrimitivesService_method_that_throws_result extends \ThriftSyncStructWithResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const type TResult = \facebook\thrift\test\Result;
+  const type TResult = \facebook\thrift\test\fixtures\service_schema\Result;
 
   const \ThriftStructTypes::TSpec SPEC = dict[
     0 => shape(
       'var' => 'success',
       'type' => \TType::I32,
-      'enum' => \facebook\thrift\test\Result::class,
+      'enum' => \facebook\thrift\test\fixtures\service_schema\Result::class,
     ),
     1 => shape(
       'var' => 'e',
       'type' => \TType::STRUCT,
-      'class' => \facebook\thrift\test\CustomException::class,
+      'class' => \facebook\thrift\test\fixtures\service_schema\CustomException::class,
     ),
   ];
   const dict<string, int> FIELDMAP = dict[
@@ -397,14 +397,14 @@ class PrimitivesService_method_that_throws_result extends \ThriftSyncStructWithR
 
   const type TConstructorShape = shape(
     ?'success' => ?this::TResult,
-    ?'e' => ?\facebook\thrift\test\CustomException,
+    ?'e' => ?\facebook\thrift\test\fixtures\service_schema\CustomException,
   );
 
   const int STRUCTURAL_ID = 8052915316395929815;
   public ?this::TResult $success;
-  public ?\facebook\thrift\test\CustomException $e;
+  public ?\facebook\thrift\test\fixtures\service_schema\CustomException $e;
 
-  public function __construct(?this::TResult $success = null, ?\facebook\thrift\test\CustomException $e = null)[] {
+  public function __construct(?this::TResult $success = null, ?\facebook\thrift\test\fixtures\service_schema\CustomException $e = null)[] {
     $this->success = $success;
     $this->e = $e;
   }
@@ -485,7 +485,7 @@ class PrimitivesService_method_that_throws_result extends \ThriftSyncStructWithR
   }
   
   public function setException(\Exception $e): bool {
-    if ($e is \facebook\thrift\test\CustomException) {
+    if ($e is \facebook\thrift\test\fixtures\service_schema\CustomException) {
       $this->e = $e;
       return true;
     }
@@ -776,13 +776,13 @@ class PrimitivesServiceStaticMetadata implements \IThriftServiceStaticMetadata {
         'metadata' => \tmeta_ThriftMetadata::fromShape(
           shape(
             'enums' => dict[
-              'module.Result' => \facebook\thrift\test\Result_TEnumStaticMetadata::getEnumMetadata(),
+              'module.Result' => \facebook\thrift\test\fixtures\service_schema\Result_TEnumStaticMetadata::getEnumMetadata(),
             ],
             'structs' => dict[
               'include.I' => \I::getStructMetadata(),
             ],
             'exceptions' => dict[
-              'module.CustomException' => \facebook\thrift\test\CustomException::getExceptionMetadata(),
+              'module.CustomException' => \facebook\thrift\test\fixtures\service_schema\CustomException::getExceptionMetadata(),
             ],
             'services' => dict[
             ],

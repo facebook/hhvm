@@ -631,7 +631,7 @@ impl ::fbthrift::GetTType for Color {
 
 impl ::fbthrift::GetUri for self::Color {
     fn uri() -> &'static ::std::primitive::str {
-        "facebook.com/thrift/test/Color"
+        "facebook.com/thrift/test/fixtures/adapter/Color"
     }
 }
 
@@ -752,7 +752,7 @@ impl ::fbthrift::GetTType for ThriftAdaptedEnum {
 
 impl ::fbthrift::GetUri for self::ThriftAdaptedEnum {
     fn uri() -> &'static ::std::primitive::str {
-        "facebook.com/thrift/test/ThriftAdaptedEnum"
+        "facebook.com/thrift/test/fixtures/adapter/ThriftAdaptedEnum"
     }
 }
 
@@ -809,7 +809,7 @@ impl ::fbthrift::GetTType for self::MyAnnotation {
 
 impl ::fbthrift::GetUri for self::MyAnnotation {
     fn uri() -> &'static ::std::primitive::str {
-        "facebook.com/thrift/test/MyAnnotation"
+        "facebook.com/thrift/test/fixtures/adapter/MyAnnotation"
     }
 }
 
@@ -1758,7 +1758,7 @@ impl ::fbthrift::GetTType for Baz {
 
 impl ::fbthrift::GetUri for self::Baz {
     fn uri() -> &'static ::std::primitive::str {
-        "facebook.com/thrift/test/Baz"
+        "facebook.com/thrift/test/fixtures/adapter/Baz"
     }
 }
 
@@ -2135,7 +2135,7 @@ impl ::fbthrift::GetTType for self::Bar {
 
 impl ::fbthrift::GetUri for self::Bar {
     fn uri() -> &'static ::std::primitive::str {
-        "facebook.com/thrift/test/Bar"
+        "facebook.com/thrift/test/fixtures/adapter/Bar"
     }
 }
 
@@ -2476,7 +2476,7 @@ impl ::fbthrift::GetTType for self::DirectlyAdapted {
 
 impl ::fbthrift::GetUri for self::DirectlyAdapted {
     fn uri() -> &'static ::std::primitive::str {
-        "facebook.com/thrift/test/DirectlyAdapted"
+        "facebook.com/thrift/test/fixtures/adapter/DirectlyAdapted"
     }
 }
 
@@ -2634,7 +2634,7 @@ impl ::fbthrift::GetTType for self::IndependentDirectlyAdapted {
 
 impl ::fbthrift::GetUri for self::IndependentDirectlyAdapted {
     fn uri() -> &'static ::std::primitive::str {
-        "facebook.com/thrift/test/IndependentDirectlyAdapted"
+        "facebook.com/thrift/test/fixtures/adapter/IndependentDirectlyAdapted"
     }
 }
 
@@ -2783,7 +2783,7 @@ impl ::fbthrift::GetTType for self::StructWithFieldAdapter {
 
 impl ::fbthrift::GetUri for self::StructWithFieldAdapter {
     fn uri() -> &'static ::std::primitive::str {
-        "facebook.com/thrift/test/StructWithFieldAdapter"
+        "facebook.com/thrift/test/fixtures/adapter/StructWithFieldAdapter"
     }
 }
 
@@ -3133,7 +3133,7 @@ impl ::fbthrift::GetTType for self::TerseAdaptedFields {
 
 impl ::fbthrift::GetUri for self::TerseAdaptedFields {
     fn uri() -> &'static ::std::primitive::str {
-        "facebook.com/thrift/test/TerseAdaptedFields"
+        "facebook.com/thrift/test/fixtures/adapter/TerseAdaptedFields"
     }
 }
 
@@ -3367,7 +3367,7 @@ impl ::fbthrift::GetTType for self::B {
 
 impl ::fbthrift::GetUri for self::B {
     fn uri() -> &'static ::std::primitive::str {
-        "facebook.com/thrift/test/B"
+        "facebook.com/thrift/test/fixtures/adapter/B"
     }
 }
 
@@ -3490,7 +3490,7 @@ impl ::fbthrift::GetTType for self::A {
 
 impl ::fbthrift::GetUri for self::A {
     fn uri() -> &'static ::std::primitive::str {
-        "facebook.com/thrift/test/A"
+        "facebook.com/thrift/test/fixtures/adapter/A"
     }
 }
 
@@ -3601,7 +3601,7 @@ impl ::fbthrift::GetTType for self::Config {
 
 impl ::fbthrift::GetUri for self::Config {
     fn uri() -> &'static ::std::primitive::str {
-        "facebook.com/thrift/test/Config"
+        "facebook.com/thrift/test/fixtures/adapter/Config"
     }
 }
 
@@ -3783,7 +3783,7 @@ impl ::fbthrift::GetTType for self::MyStruct {
 
 impl ::fbthrift::GetUri for self::MyStruct {
     fn uri() -> &'static ::std::primitive::str {
-        "facebook.com/thrift/test/MyStruct"
+        "facebook.com/thrift/test/fixtures/adapter/MyStruct"
     }
 }
 
@@ -3953,7 +3953,7 @@ impl ::fbthrift::GetTType for self::AdaptTestStruct {
 
 impl ::fbthrift::GetUri for self::AdaptTestStruct {
     fn uri() -> &'static ::std::primitive::str {
-        "facebook.com/thrift/test/AdaptTestStruct"
+        "facebook.com/thrift/test/fixtures/adapter/AdaptTestStruct"
     }
 }
 
@@ -4384,7 +4384,7 @@ impl ::fbthrift::GetTType for self::AdaptTemplatedTestStruct {
 
 impl ::fbthrift::GetUri for self::AdaptTemplatedTestStruct {
     fn uri() -> &'static ::std::primitive::str {
-        "facebook.com/thrift/test/AdaptTemplatedTestStruct"
+        "facebook.com/thrift/test/fixtures/adapter/AdaptTemplatedTestStruct"
     }
 }
 
@@ -4941,7 +4941,7 @@ impl ::fbthrift::GetTType for self::AdaptTemplatedNestedTestStruct {
 
 impl ::fbthrift::GetUri for self::AdaptTemplatedNestedTestStruct {
     fn uri() -> &'static ::std::primitive::str {
-        "facebook.com/thrift/test/AdaptTemplatedNestedTestStruct"
+        "facebook.com/thrift/test/fixtures/adapter/AdaptTemplatedNestedTestStruct"
     }
 }
 
@@ -5048,7 +5048,7 @@ impl ::fbthrift::GetTType for AdaptTestUnion {
 
 impl ::fbthrift::GetUri for self::AdaptTestUnion {
     fn uri() -> &'static ::std::primitive::str {
-        "facebook.com/thrift/test/AdaptTestUnion"
+        "facebook.com/thrift/test/fixtures/adapter/AdaptTestUnion"
     }
 }
 
@@ -5211,7 +5211,7 @@ impl ::fbthrift::GetTType for self::AdaptedStruct {
 
 impl ::fbthrift::GetUri for self::AdaptedStruct {
     fn uri() -> &'static ::std::primitive::str {
-        "facebook.com/thrift/test/AdaptedStruct"
+        "facebook.com/thrift/test/fixtures/adapter/AdaptedStruct"
     }
 }
 
@@ -5350,7 +5350,7 @@ impl ::fbthrift::GetTType for self::DirectlyAdaptedStruct {
 
 impl ::fbthrift::GetUri for self::DirectlyAdaptedStruct {
     fn uri() -> &'static ::std::primitive::str {
-        "facebook.com/thrift/test/DirectlyAdaptedStruct"
+        "facebook.com/thrift/test/fixtures/adapter/DirectlyAdaptedStruct"
     }
 }
 
@@ -5499,7 +5499,7 @@ impl ::fbthrift::GetTType for self::StructFieldAdaptedStruct {
 
 impl ::fbthrift::GetUri for self::StructFieldAdaptedStruct {
     fn uri() -> &'static ::std::primitive::str {
-        "facebook.com/thrift/test/StructFieldAdaptedStruct"
+        "facebook.com/thrift/test/fixtures/adapter/StructFieldAdaptedStruct"
     }
 }
 
@@ -5684,7 +5684,7 @@ impl ::fbthrift::GetTType for self::CircularAdaptee {
 
 impl ::fbthrift::GetUri for self::CircularAdaptee {
     fn uri() -> &'static ::std::primitive::str {
-        "facebook.com/thrift/test/CircularAdaptee"
+        "facebook.com/thrift/test/fixtures/adapter/CircularAdaptee"
     }
 }
 
@@ -5809,7 +5809,7 @@ impl ::fbthrift::GetTType for self::CircularStruct {
 
 impl ::fbthrift::GetUri for self::CircularStruct {
     fn uri() -> &'static ::std::primitive::str {
-        "facebook.com/thrift/test/CircularStruct"
+        "facebook.com/thrift/test/fixtures/adapter/CircularStruct"
     }
 }
 
@@ -5946,7 +5946,7 @@ impl ::fbthrift::GetTType for self::ReorderedStruct {
 
 impl ::fbthrift::GetUri for self::ReorderedStruct {
     fn uri() -> &'static ::std::primitive::str {
-        "facebook.com/thrift/test/ReorderedStruct"
+        "facebook.com/thrift/test/fixtures/adapter/ReorderedStruct"
     }
 }
 
@@ -6088,7 +6088,7 @@ impl ::fbthrift::GetTType for self::DeclaredAfterStruct {
 
 impl ::fbthrift::GetUri for self::DeclaredAfterStruct {
     fn uri() -> &'static ::std::primitive::str {
-        "facebook.com/thrift/test/DeclaredAfterStruct"
+        "facebook.com/thrift/test/fixtures/adapter/DeclaredAfterStruct"
     }
 }
 
@@ -6217,7 +6217,7 @@ impl ::fbthrift::GetTType for self::RenamedStruct {
 
 impl ::fbthrift::GetUri for self::RenamedStruct {
     fn uri() -> &'static ::std::primitive::str {
-        "facebook.com/thrift/test/RenamedStruct"
+        "facebook.com/thrift/test/fixtures/adapter/RenamedStruct"
     }
 }
 
@@ -6360,7 +6360,7 @@ impl ::fbthrift::GetTType for self::SameNamespaceStruct {
 
 impl ::fbthrift::GetUri for self::SameNamespaceStruct {
     fn uri() -> &'static ::std::primitive::str {
-        "facebook.com/thrift/test/SameNamespaceStruct"
+        "facebook.com/thrift/test/fixtures/adapter/SameNamespaceStruct"
     }
 }
 
@@ -6501,7 +6501,7 @@ impl ::fbthrift::GetTType for self::HeapAllocated {
 
 impl ::fbthrift::GetUri for self::HeapAllocated {
     fn uri() -> &'static ::std::primitive::str {
-        "facebook.com/thrift/test/HeapAllocated"
+        "facebook.com/thrift/test/fixtures/adapter/HeapAllocated"
     }
 }
 
@@ -6630,7 +6630,7 @@ impl ::fbthrift::GetTType for self::MoveOnly {
 
 impl ::fbthrift::GetUri for self::MoveOnly {
     fn uri() -> &'static ::std::primitive::str {
-        "facebook.com/thrift/test/MoveOnly"
+        "facebook.com/thrift/test/fixtures/adapter/MoveOnly"
     }
 }
 
@@ -6755,7 +6755,7 @@ impl ::fbthrift::GetTType for self::AlsoMoveOnly {
 
 impl ::fbthrift::GetUri for self::AlsoMoveOnly {
     fn uri() -> &'static ::std::primitive::str {
-        "facebook.com/thrift/test/AlsoMoveOnly"
+        "facebook.com/thrift/test/fixtures/adapter/AlsoMoveOnly"
     }
 }
 
@@ -6896,7 +6896,7 @@ impl ::fbthrift::GetTType for self::ApplyAdapter {
 
 impl ::fbthrift::GetUri for self::ApplyAdapter {
     fn uri() -> &'static ::std::primitive::str {
-        "facebook.com/thrift/test/ApplyAdapter"
+        "facebook.com/thrift/test/fixtures/adapter/ApplyAdapter"
     }
 }
 
@@ -7032,7 +7032,7 @@ impl ::fbthrift::GetTType for self::TransitiveAdapted {
 
 impl ::fbthrift::GetUri for self::TransitiveAdapted {
     fn uri() -> &'static ::std::primitive::str {
-        "facebook.com/thrift/test/TransitiveAdapted"
+        "facebook.com/thrift/test/fixtures/adapter/TransitiveAdapted"
     }
 }
 
@@ -7160,7 +7160,7 @@ impl ::fbthrift::GetTType for self::CountingStruct {
 
 impl ::fbthrift::GetUri for self::CountingStruct {
     fn uri() -> &'static ::std::primitive::str {
-        "facebook.com/thrift/test/CountingStruct"
+        "facebook.com/thrift/test/fixtures/adapter/CountingStruct"
     }
 }
 
@@ -7355,7 +7355,7 @@ impl ::fbthrift::GetTType for self::Person {
 
 impl ::fbthrift::GetUri for self::Person {
     fn uri() -> &'static ::std::primitive::str {
-        "facebook.com/thrift/test/Person"
+        "facebook.com/thrift/test/fixtures/adapter/Person"
     }
 }
 
@@ -7507,7 +7507,7 @@ impl ::fbthrift::GetTType for self::Person2 {
 
 impl ::fbthrift::GetUri for self::Person2 {
     fn uri() -> &'static ::std::primitive::str {
-        "facebook.com/thrift/test/Person2"
+        "facebook.com/thrift/test/fixtures/adapter/Person2"
     }
 }
 
@@ -7632,7 +7632,7 @@ impl ::fbthrift::GetTType for self::RenamedStructWithStructAdapterAndFieldAdapte
 
 impl ::fbthrift::GetUri for self::RenamedStructWithStructAdapterAndFieldAdapter {
     fn uri() -> &'static ::std::primitive::str {
-        "facebook.com/thrift/test/RenamedStructWithStructAdapterAndFieldAdapter"
+        "facebook.com/thrift/test/fixtures/adapter/RenamedStructWithStructAdapterAndFieldAdapter"
     }
 }
 

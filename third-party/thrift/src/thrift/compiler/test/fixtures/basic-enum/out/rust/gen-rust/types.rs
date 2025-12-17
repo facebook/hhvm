@@ -106,6 +106,12 @@ impl ::fbthrift::GetTType for EmptyEnum {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::I32;
 }
 
+impl ::fbthrift::GetUri for self::EmptyEnum {
+    fn uri() -> &'static ::std::primitive::str {
+        "facebook.com/thrift/test/fixtures/basic_enum/EmptyEnum"
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for EmptyEnum
 where
     P: ::fbthrift::ProtocolWriter,
@@ -219,6 +225,12 @@ impl ::std::str::FromStr for MyEnum {
 
 impl ::fbthrift::GetTType for MyEnum {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::I32;
+}
+
+impl ::fbthrift::GetUri for self::MyEnum {
+    fn uri() -> &'static ::std::primitive::str {
+        "facebook.com/thrift/test/fixtures/basic_enum/MyEnum"
+    }
 }
 
 impl<P> ::fbthrift::Serialize<P> for MyEnum
@@ -340,6 +352,12 @@ impl ::std::str::FromStr for MyUseIntrinsicDefaultEnum {
 
 impl ::fbthrift::GetTType for MyUseIntrinsicDefaultEnum {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::I32;
+}
+
+impl ::fbthrift::GetUri for self::MyUseIntrinsicDefaultEnum {
+    fn uri() -> &'static ::std::primitive::str {
+        "facebook.com/thrift/test/fixtures/basic_enum/MyUseIntrinsicDefaultEnum"
+    }
 }
 
 impl<P> ::fbthrift::Serialize<P> for MyUseIntrinsicDefaultEnum
@@ -565,6 +583,12 @@ impl ::fbthrift::GetTType for MyBigEnum {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::I32;
 }
 
+impl ::fbthrift::GetUri for self::MyBigEnum {
+    fn uri() -> &'static ::std::primitive::str {
+        "facebook.com/thrift/test/fixtures/basic_enum/MyBigEnum"
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for MyBigEnum
 where
     P: ::fbthrift::ProtocolWriter,
@@ -614,6 +638,12 @@ impl ::std::panic::UnwindSafe for self::MyStruct {}
 
 impl ::fbthrift::GetTType for self::MyStruct {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetUri for self::MyStruct {
+    fn uri() -> &'static ::std::primitive::str {
+        "facebook.com/thrift/test/fixtures/basic_enum/MyStruct"
+    }
 }
 
 impl ::fbthrift::GetTypeNameType for self::MyStruct {

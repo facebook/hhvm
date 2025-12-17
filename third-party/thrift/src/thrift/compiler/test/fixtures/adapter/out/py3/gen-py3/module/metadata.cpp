@@ -10,6 +10,8 @@
 namespace facebook {
 namespace thrift {
 namespace test {
+namespace fixtures {
+namespace adapter {
 ::apache::thrift::metadata::ThriftMetadata module_getThriftModuleMetadata() {
   ::apache::thrift::metadata::ThriftServiceMetadataResponse response;
   ::apache::thrift::metadata::ThriftMetadata& metadata = *response.metadata();
@@ -40,10 +42,12 @@ namespace test {
   ::apache::thrift::detail::md::StructMetadata<CountingStruct>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<Person>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<Person2>::gen(metadata);
-  ::apache::thrift::detail::md::ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::Service>>::gen(response);
-  ::apache::thrift::detail::md::ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::AdapterService>>::gen(response);
+  ::apache::thrift::detail::md::ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::adapter::Service>>::gen(response);
+  ::apache::thrift::detail::md::ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::adapter::AdapterService>>::gen(response);
   return metadata;
 }
 } // namespace facebook
 } // namespace thrift
 } // namespace test
+} // namespace fixtures
+} // namespace adapter

@@ -10,6 +10,8 @@
 namespace facebook {
 namespace thrift {
 namespace test {
+namespace fixtures {
+namespace adapter {
 
 
 folly::Future<int32_t>
@@ -17,8 +19,8 @@ ServiceClientWrapper::func(
     apache::thrift::RpcOptions& rpcOptions,
     std::string arg_arg1,
     std::string arg_arg2,
-    ::facebook::thrift::test::Foo arg_arg3) {
-  auto* client = static_cast<::facebook::thrift::test::ServiceAsyncClient*>(async_client_.get());
+    ::facebook::thrift::test::fixtures::adapter::Foo arg_arg3) {
+  auto* client = static_cast<::facebook::thrift::test::fixtures::adapter::ServiceAsyncClient*>(async_client_.get());
   using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<int32_t>;
   folly::Promise<CallbackHelper::PromiseResult> _promise;
   auto _future = _promise.getFuture();
@@ -40,14 +42,14 @@ ServiceClientWrapper::func(
   return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
-folly::Future<::facebook::thrift::test::CountingStruct>
+folly::Future<::facebook::thrift::test::fixtures::adapter::CountingStruct>
 AdapterServiceClientWrapper::count(
     apache::thrift::RpcOptions& rpcOptions) {
-  auto* client = static_cast<::facebook::thrift::test::AdapterServiceAsyncClient*>(async_client_.get());
-  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<::facebook::thrift::test::CountingStruct>;
+  auto* client = static_cast<::facebook::thrift::test::fixtures::adapter::AdapterServiceAsyncClient*>(async_client_.get());
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<::facebook::thrift::test::fixtures::adapter::CountingStruct>;
   folly::Promise<CallbackHelper::PromiseResult> _promise;
   auto _future = _promise.getFuture();
-  auto callback = std::make_unique<::thrift::py3::FutureCallback<::facebook::thrift::test::CountingStruct>>(
+  auto callback = std::make_unique<::thrift::py3::FutureCallback<::facebook::thrift::test::fixtures::adapter::CountingStruct>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_count, channel_);
   try {
     client->count(
@@ -55,22 +57,22 @@ AdapterServiceClientWrapper::count(
       std::move(callback)
     );
   } catch (...) {
-    return folly::makeFuture<::facebook::thrift::test::CountingStruct>(folly::exception_wrapper(
+    return folly::makeFuture<::facebook::thrift::test::fixtures::adapter::CountingStruct>(folly::exception_wrapper(
       std::current_exception()
     ));
   }
   return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
-folly::Future<::facebook::thrift::test::HeapAllocated>
+folly::Future<::facebook::thrift::test::fixtures::adapter::HeapAllocated>
 AdapterServiceClientWrapper::adaptedTypes(
     apache::thrift::RpcOptions& rpcOptions,
-    ::facebook::thrift::test::HeapAllocated arg_arg) {
-  auto* client = static_cast<::facebook::thrift::test::AdapterServiceAsyncClient*>(async_client_.get());
-  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<::facebook::thrift::test::HeapAllocated>;
+    ::facebook::thrift::test::fixtures::adapter::HeapAllocated arg_arg) {
+  auto* client = static_cast<::facebook::thrift::test::fixtures::adapter::AdapterServiceAsyncClient*>(async_client_.get());
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<::facebook::thrift::test::fixtures::adapter::HeapAllocated>;
   folly::Promise<CallbackHelper::PromiseResult> _promise;
   auto _future = _promise.getFuture();
-  auto callback = std::make_unique<::thrift::py3::FutureCallback<::facebook::thrift::test::HeapAllocated>>(
+  auto callback = std::make_unique<::thrift::py3::FutureCallback<::facebook::thrift::test::fixtures::adapter::HeapAllocated>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_adaptedTypes, channel_);
   try {
     client->adaptedTypes(
@@ -79,7 +81,7 @@ AdapterServiceClientWrapper::adaptedTypes(
       arg_arg
     );
   } catch (...) {
-    return folly::makeFuture<::facebook::thrift::test::HeapAllocated>(folly::exception_wrapper(
+    return folly::makeFuture<::facebook::thrift::test::fixtures::adapter::HeapAllocated>(folly::exception_wrapper(
       std::current_exception()
     ));
   }
@@ -89,3 +91,5 @@ AdapterServiceClientWrapper::adaptedTypes(
 } // namespace facebook
 } // namespace thrift
 } // namespace test
+} // namespace fixtures
+} // namespace adapter

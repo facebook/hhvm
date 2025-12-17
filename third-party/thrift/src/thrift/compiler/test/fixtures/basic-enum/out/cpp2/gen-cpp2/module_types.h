@@ -102,6 +102,8 @@ template <> struct TEnumTraits<::test::fixtures::enumstrict::EmptyEnum> {
     return "module";
   }
 
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = "facebook.com/thrift/test/fixtures/basic_enum/EmptyEnum";
+
   static char const* findName(type value) noexcept {
     std::string_view ret;
     (void)findName(value, &ret);
@@ -130,6 +132,8 @@ template <> struct TEnumTraits<::test::fixtures::enumstrict::MyEnum> {
   FOLLY_ERASE static constexpr std::string_view moduleName() noexcept {
     return "module";
   }
+
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = "facebook.com/thrift/test/fixtures/basic_enum/MyEnum";
 
   static char const* findName(type value) noexcept {
     std::string_view ret;
@@ -162,6 +166,8 @@ template <> struct TEnumTraits<::test::fixtures::enumstrict::MyUseIntrinsicDefau
     return "module";
   }
 
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = "facebook.com/thrift/test/fixtures/basic_enum/MyUseIntrinsicDefaultEnum";
+
   static char const* findName(type value) noexcept {
     std::string_view ret;
     (void)findName(value, &ret);
@@ -192,6 +198,8 @@ template <> struct TEnumTraits<::test::fixtures::enumstrict::MyBigEnum> {
   FOLLY_ERASE static constexpr std::string_view moduleName() noexcept {
     return "module";
   }
+
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = "facebook.com/thrift/test/fixtures/basic_enum/MyBigEnum";
 
   static char const* findName(type value) noexcept {
     std::string_view ret;
@@ -236,6 +244,7 @@ class MyStruct final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = "facebook.com/thrift/test/fixtures/basic_enum/MyStruct";
   static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   static std::string_view __fbthrift_get_class_name();
   template <class ...>
@@ -413,27 +422,27 @@ unsigned long MyStruct::read(Protocol_* iprot) {
 namespace apache::thrift::detail {
 template <> struct TSchemaAssociation<::test::fixtures::enumstrict::MyStruct, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = 4793286115894984127;
-  static constexpr ::std::string_view definitionKey = {"\x4c\x93\xef\x2c\x54\xbb\x96\x74\x7d\xb9\x05\xfc\x55\x81\x02\xdc", 16};
+  static constexpr int64_t programId = -2592781724245973745;
+  static constexpr ::std::string_view definitionKey = {"\x7e\xd1\xdd\xc0\xd1\x34\x7c\xd7\x3f\x3e\xe9\x30\x37\x11\xd5\x9d", 16};
 };
 template <> struct TSchemaAssociation<::test::fixtures::enumstrict::EmptyEnum, true> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = 4793286115894984127;
-  static constexpr ::std::string_view definitionKey = {"\x6c\xfe\x24\xd7\xe6\x7e\x80\xc4\x7d\xb1\xdb\xa0\x10\x4a\x41\x18", 16};
+  static constexpr int64_t programId = -2592781724245973745;
+  static constexpr ::std::string_view definitionKey = {"\x11\x0a\xd7\x5c\xa8\x80\xa0\x4a\x5a\xf4\x93\x08\xad\x6d\xfe\xac", 16};
 };
 template <> struct TSchemaAssociation<::test::fixtures::enumstrict::MyEnum, true> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = 4793286115894984127;
-  static constexpr ::std::string_view definitionKey = {"\xa9\xb0\x64\x27\xe8\x75\xcb\xde\xf9\x80\x5f\xe1\xcd\xab\x7e\xb0", 16};
+  static constexpr int64_t programId = -2592781724245973745;
+  static constexpr ::std::string_view definitionKey = {"\xad\xf3\x46\x0c\x0a\x77\x95\xb1\xbd\xb4\x38\xe5\x8f\x87\xf9\x85", 16};
 };
 template <> struct TSchemaAssociation<::test::fixtures::enumstrict::MyUseIntrinsicDefaultEnum, true> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = 4793286115894984127;
-  static constexpr ::std::string_view definitionKey = {"\x85\x87\xce\x48\x6f\xf5\x3b\x78\x4a\x89\xb1\xcf\x2e\x41\xea\xd5", 16};
+  static constexpr int64_t programId = -2592781724245973745;
+  static constexpr ::std::string_view definitionKey = {"\x25\x93\xb3\x01\xfd\x66\x63\xd0\xd4\xc7\x9b\x8e\x64\x47\x04\xb6", 16};
 };
 template <> struct TSchemaAssociation<::test::fixtures::enumstrict::MyBigEnum, true> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = 4793286115894984127;
-  static constexpr ::std::string_view definitionKey = {"\xbb\x26\x78\x49\x25\xc3\x1f\x6d\x64\x84\xa0\x96\x70\xfd\xeb\xdc", 16};
+  static constexpr int64_t programId = -2592781724245973745;
+  static constexpr ::std::string_view definitionKey = {"\x7c\x09\xba\x26\x96\x9d\x5c\x14\x84\x53\x15\x89\xfe\x10\x48\x86", 16};
 };
 } // namespace apache::thrift::detail

@@ -20,7 +20,7 @@ import reactor.core.publisher.Mono;
 
 @SwiftGenerated
 @com.facebook.swift.service.ThriftService("ExtendedService")
-public interface ExtendedService extends java.io.Closeable, com.facebook.thrift.util.BlockingService, com.facebook.thrift.test.BaseService {
+public interface ExtendedService extends java.io.Closeable, com.facebook.thrift.util.BlockingService, com.facebook.thrift.test.fixtures.service_schema.BaseService {
     static com.facebook.thrift.server.RpcServerHandlerBuilder<ExtendedService> serverHandlerBuilder(ExtendedService _serverImpl) {
         return new com.facebook.thrift.server.RpcServerHandlerBuilder<ExtendedService>(_serverImpl) {
                 @java.lang.Override
@@ -42,7 +42,7 @@ public interface ExtendedService extends java.io.Closeable, com.facebook.thrift.
     }
 
     @com.facebook.swift.service.ThriftService("ExtendedService")
-    public interface Async extends java.io.Closeable, com.facebook.thrift.util.AsyncService, com.facebook.thrift.test.BaseService.Async {
+    public interface Async extends java.io.Closeable, com.facebook.thrift.util.AsyncService, com.facebook.thrift.test.fixtures.service_schema.BaseService.Async {
         static com.facebook.thrift.server.RpcServerHandlerBuilder<ExtendedService.Async> serverHandlerBuilder(ExtendedService.Async _serverImpl) {
             return new com.facebook.thrift.server.RpcServerHandlerBuilder<ExtendedService.Async>(_serverImpl) {
                 @java.lang.Override
@@ -106,7 +106,7 @@ public interface ExtendedService extends java.io.Closeable, com.facebook.thrift.
     }
 
     @com.facebook.swift.service.ThriftService("ExtendedService")
-    interface Reactive extends reactor.core.Disposable, com.facebook.thrift.util.ReactiveService, com.facebook.thrift.test.BaseService.Reactive {
+    interface Reactive extends reactor.core.Disposable, com.facebook.thrift.util.ReactiveService, com.facebook.thrift.test.fixtures.service_schema.BaseService.Reactive {
         static com.facebook.thrift.server.RpcServerHandlerBuilder<ExtendedService.Reactive> serverHandlerBuilder(ExtendedService.Reactive _serverImpl) {
             return new com.facebook.thrift.server.RpcServerHandlerBuilder<ExtendedService.Reactive>(_serverImpl) {
                 @java.lang.Override

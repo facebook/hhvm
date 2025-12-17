@@ -10,20 +10,20 @@
 #include "thrift/compiler/test/fixtures/adapter/gen-cpp2/module_metadata.h"
 #include <thrift/lib/cpp2/gen/service_cpp.h>
 
-std::unique_ptr<apache::thrift::AsyncProcessor> apache::thrift::ServiceHandler<::facebook::thrift::test::AdapterService>::getProcessor() {
-  return std::make_unique<::facebook::thrift::test::AdapterServiceAsyncProcessor>(this);
+std::unique_ptr<apache::thrift::AsyncProcessor> apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::adapter::AdapterService>::getProcessor() {
+  return std::make_unique<::facebook::thrift::test::fixtures::adapter::AdapterServiceAsyncProcessor>(this);
 }
 
-apache::thrift::ServiceHandler<::facebook::thrift::test::AdapterService>::CreateMethodMetadataResult apache::thrift::ServiceHandler<::facebook::thrift::test::AdapterService>::createMethodMetadata() {
-  return ::apache::thrift::detail::ap::createMethodMetadataMap<::facebook::thrift::test::AdapterServiceAsyncProcessor>(getServiceRequestInfoMap().value().get());
+apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::adapter::AdapterService>::CreateMethodMetadataResult apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::adapter::AdapterService>::createMethodMetadata() {
+  return ::apache::thrift::detail::ap::createMethodMetadataMap<::facebook::thrift::test::fixtures::adapter::AdapterServiceAsyncProcessor>(getServiceRequestInfoMap().value().get());
 }
 
 
-std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const>> apache::thrift::ServiceHandler<::facebook::thrift::test::AdapterService>::getServiceRequestInfoMap() const {
+std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const>> apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::adapter::AdapterService>::getServiceRequestInfoMap() const {
   return __fbthrift_serviceInfoHolder.requestInfoMap();
 }
 
-::facebook::thrift::test::AdapterServiceServiceInfoHolder apache::thrift::ServiceHandler<::facebook::thrift::test::AdapterService>::__fbthrift_serviceInfoHolder;
+::facebook::thrift::test::fixtures::adapter::AdapterServiceServiceInfoHolder apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::adapter::AdapterService>::__fbthrift_serviceInfoHolder;
 
 //
 // Service Methods
@@ -33,28 +33,28 @@ std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const
 // Method 'count'
 //
 
-void apache::thrift::ServiceHandler<::facebook::thrift::test::AdapterService>::count(::facebook::thrift::test::CountingStruct& /*_return*/) {
+void apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::adapter::AdapterService>::count(::facebook::thrift::test::fixtures::adapter::CountingStruct& /*_return*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("count");
 }
 
-void apache::thrift::ServiceHandler<::facebook::thrift::test::AdapterService>::sync_count(::facebook::thrift::test::CountingStruct& _return) {
+void apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::adapter::AdapterService>::sync_count(::facebook::thrift::test::fixtures::adapter::CountingStruct& _return) {
   return count(_return);
 }
 
-folly::SemiFuture<std::unique_ptr<::facebook::thrift::test::CountingStruct>>
-apache::thrift::ServiceHandler<::facebook::thrift::test::AdapterService>::semifuture_count() {
+folly::SemiFuture<std::unique_ptr<::facebook::thrift::test::fixtures::adapter::CountingStruct>>
+apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::adapter::AdapterService>::semifuture_count() {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_count.compare_exchange_strong(
       expected,
       apache::thrift::detail::si::InvocationType::Sync,
       std::memory_order_relaxed);
-  auto ret = std::make_unique<::facebook::thrift::test::CountingStruct>();
+  auto ret = std::make_unique<::facebook::thrift::test::fixtures::adapter::CountingStruct>();
   sync_count(*ret);
   return folly::makeSemiFuture(std::move(ret));
 }
 
-folly::Future<std::unique_ptr<::facebook::thrift::test::CountingStruct>>
-apache::thrift::ServiceHandler<::facebook::thrift::test::AdapterService>::future_count() {
+folly::Future<std::unique_ptr<::facebook::thrift::test::fixtures::adapter::CountingStruct>>
+apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::adapter::AdapterService>::future_count() {
   auto expected{apache::thrift::detail::si::InvocationType::Future};
   __fbthrift_invocation_count.compare_exchange_strong(
       expected,
@@ -66,8 +66,8 @@ apache::thrift::ServiceHandler<::facebook::thrift::test::AdapterService>::future
 }
 
 #if FOLLY_HAS_COROUTINES
-folly::coro::Task<std::unique_ptr<::facebook::thrift::test::CountingStruct>>
-apache::thrift::ServiceHandler<::facebook::thrift::test::AdapterService>::co_count() {
+folly::coro::Task<std::unique_ptr<::facebook::thrift::test::fixtures::adapter::CountingStruct>>
+apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::adapter::AdapterService>::co_count() {
   auto expected{apache::thrift::detail::si::InvocationType::Coro};
   __fbthrift_invocation_count.compare_exchange_strong(
       expected,
@@ -77,7 +77,7 @@ apache::thrift::ServiceHandler<::facebook::thrift::test::AdapterService>::co_cou
                              withCapturedArgs<>());
 }
 
-folly::coro::Task<std::unique_ptr<::facebook::thrift::test::CountingStruct>> apache::thrift::ServiceHandler<::facebook::thrift::test::AdapterService>::co_count(
+folly::coro::Task<std::unique_ptr<::facebook::thrift::test::fixtures::adapter::CountingStruct>> apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::adapter::AdapterService>::co_count(
     apache::thrift::RequestParams /* params */) {
   auto expected{apache::thrift::detail::si::InvocationType::CoroParam};
   __fbthrift_invocation_count.compare_exchange_strong(
@@ -88,8 +88,8 @@ folly::coro::Task<std::unique_ptr<::facebook::thrift::test::CountingStruct>> apa
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::facebook::thrift::test::AdapterService>::async_tm_count(
-    apache::thrift::HandlerCallbackPtr<std::unique_ptr<::facebook::thrift::test::CountingStruct>> callback) {
+void apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::adapter::AdapterService>::async_tm_count(
+    apache::thrift::HandlerCallbackPtr<std::unique_ptr<::facebook::thrift::test::fixtures::adapter::CountingStruct>> callback) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -157,7 +157,7 @@ determineInvocationType:
       }
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync: {
-        ::facebook::thrift::test::CountingStruct _return;
+        ::facebook::thrift::test::fixtures::adapter::CountingStruct _return;
         sync_count(_return);
         callback->result(std::move(_return));
         return;
@@ -183,28 +183,28 @@ determineInvocationType:
 // Method 'adaptedTypes'
 //
 
-void apache::thrift::ServiceHandler<::facebook::thrift::test::AdapterService>::adaptedTypes(::facebook::thrift::test::HeapAllocated& /*_return*/, std::unique_ptr<::facebook::thrift::test::HeapAllocated> /*arg*/) {
+void apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::adapter::AdapterService>::adaptedTypes(::facebook::thrift::test::fixtures::adapter::HeapAllocated& /*_return*/, std::unique_ptr<::facebook::thrift::test::fixtures::adapter::HeapAllocated> /*arg*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("adaptedTypes");
 }
 
-void apache::thrift::ServiceHandler<::facebook::thrift::test::AdapterService>::sync_adaptedTypes(::facebook::thrift::test::HeapAllocated& _return, std::unique_ptr<::facebook::thrift::test::HeapAllocated> p_arg) {
+void apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::adapter::AdapterService>::sync_adaptedTypes(::facebook::thrift::test::fixtures::adapter::HeapAllocated& _return, std::unique_ptr<::facebook::thrift::test::fixtures::adapter::HeapAllocated> p_arg) {
   return adaptedTypes(_return, std::move(p_arg));
 }
 
-folly::SemiFuture<std::unique_ptr<::facebook::thrift::test::HeapAllocated>>
-apache::thrift::ServiceHandler<::facebook::thrift::test::AdapterService>::semifuture_adaptedTypes(std::unique_ptr<::facebook::thrift::test::HeapAllocated> p_arg) {
+folly::SemiFuture<std::unique_ptr<::facebook::thrift::test::fixtures::adapter::HeapAllocated>>
+apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::adapter::AdapterService>::semifuture_adaptedTypes(std::unique_ptr<::facebook::thrift::test::fixtures::adapter::HeapAllocated> p_arg) {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_adaptedTypes.compare_exchange_strong(
       expected,
       apache::thrift::detail::si::InvocationType::Sync,
       std::memory_order_relaxed);
-  auto ret = std::make_unique<::facebook::thrift::test::HeapAllocated>();
+  auto ret = std::make_unique<::facebook::thrift::test::fixtures::adapter::HeapAllocated>();
   sync_adaptedTypes(*ret, std::move(p_arg));
   return folly::makeSemiFuture(std::move(ret));
 }
 
-folly::Future<std::unique_ptr<::facebook::thrift::test::HeapAllocated>>
-apache::thrift::ServiceHandler<::facebook::thrift::test::AdapterService>::future_adaptedTypes(std::unique_ptr<::facebook::thrift::test::HeapAllocated> p_arg) {
+folly::Future<std::unique_ptr<::facebook::thrift::test::fixtures::adapter::HeapAllocated>>
+apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::adapter::AdapterService>::future_adaptedTypes(std::unique_ptr<::facebook::thrift::test::fixtures::adapter::HeapAllocated> p_arg) {
   auto expected{apache::thrift::detail::si::InvocationType::Future};
   __fbthrift_invocation_adaptedTypes.compare_exchange_strong(
       expected,
@@ -216,19 +216,19 @@ apache::thrift::ServiceHandler<::facebook::thrift::test::AdapterService>::future
 }
 
 #if FOLLY_HAS_COROUTINES
-folly::coro::Task<std::unique_ptr<::facebook::thrift::test::HeapAllocated>>
-apache::thrift::ServiceHandler<::facebook::thrift::test::AdapterService>::co_adaptedTypes(std::unique_ptr<::facebook::thrift::test::HeapAllocated> p_arg) {
+folly::coro::Task<std::unique_ptr<::facebook::thrift::test::fixtures::adapter::HeapAllocated>>
+apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::adapter::AdapterService>::co_adaptedTypes(std::unique_ptr<::facebook::thrift::test::fixtures::adapter::HeapAllocated> p_arg) {
   auto expected{apache::thrift::detail::si::InvocationType::Coro};
   __fbthrift_invocation_adaptedTypes.compare_exchange_strong(
       expected,
       apache::thrift::detail::si::InvocationType::Future,
       std::memory_order_relaxed);
   folly::throw_exception(apache::thrift::detail::si::UnimplementedCoroMethod::
-                             withCapturedArgs<std::unique_ptr<::facebook::thrift::test::HeapAllocated> /*arg*/>(std::move(p_arg)));
+                             withCapturedArgs<std::unique_ptr<::facebook::thrift::test::fixtures::adapter::HeapAllocated> /*arg*/>(std::move(p_arg)));
 }
 
-folly::coro::Task<std::unique_ptr<::facebook::thrift::test::HeapAllocated>> apache::thrift::ServiceHandler<::facebook::thrift::test::AdapterService>::co_adaptedTypes(
-    apache::thrift::RequestParams /* params */, std::unique_ptr<::facebook::thrift::test::HeapAllocated> p_arg) {
+folly::coro::Task<std::unique_ptr<::facebook::thrift::test::fixtures::adapter::HeapAllocated>> apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::adapter::AdapterService>::co_adaptedTypes(
+    apache::thrift::RequestParams /* params */, std::unique_ptr<::facebook::thrift::test::fixtures::adapter::HeapAllocated> p_arg) {
   auto expected{apache::thrift::detail::si::InvocationType::CoroParam};
   __fbthrift_invocation_adaptedTypes.compare_exchange_strong(
       expected,
@@ -238,8 +238,8 @@ folly::coro::Task<std::unique_ptr<::facebook::thrift::test::HeapAllocated>> apac
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::facebook::thrift::test::AdapterService>::async_tm_adaptedTypes(
-    apache::thrift::HandlerCallbackPtr<std::unique_ptr<::facebook::thrift::test::HeapAllocated>> callback, std::unique_ptr<::facebook::thrift::test::HeapAllocated> p_arg) {
+void apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::adapter::AdapterService>::async_tm_adaptedTypes(
+    apache::thrift::HandlerCallbackPtr<std::unique_ptr<::facebook::thrift::test::fixtures::adapter::HeapAllocated>> callback, std::unique_ptr<::facebook::thrift::test::fixtures::adapter::HeapAllocated> p_arg) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -307,7 +307,7 @@ determineInvocationType:
       }
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync: {
-        ::facebook::thrift::test::HeapAllocated _return;
+        ::facebook::thrift::test::fixtures::adapter::HeapAllocated _return;
         sync_adaptedTypes(_return, std::move(p_arg));
         callback->result(std::move(_return));
         return;
@@ -318,7 +318,7 @@ determineInvocationType:
     }
 #if FOLLY_HAS_COROUTINES
   } catch (apache::thrift::detail::si::UnimplementedCoroMethod& ex) {
-    std::tie(p_arg) = std::move(ex).restoreArgs<std::unique_ptr<::facebook::thrift::test::HeapAllocated> /*arg*/>();
+    std::tie(p_arg) = std::move(ex).restoreArgs<std::unique_ptr<::facebook::thrift::test::fixtures::adapter::HeapAllocated> /*arg*/>();
     goto determineInvocationType;
 #endif // FOLLY_HAS_COROUTINES
   } catch (...) {
@@ -334,11 +334,11 @@ determineInvocationType:
 //
 
 
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::adapter {
 
-void AdapterServiceSvNull::count(::facebook::thrift::test::CountingStruct& /*_return*/) {  }
+void AdapterServiceSvNull::count(::facebook::thrift::test::fixtures::adapter::CountingStruct& /*_return*/) {  }
 
-void AdapterServiceSvNull::adaptedTypes(::facebook::thrift::test::HeapAllocated& /*_return*/, std::unique_ptr<::facebook::thrift::test::HeapAllocated> /*arg*/) {  }
+void AdapterServiceSvNull::adaptedTypes(::facebook::thrift::test::fixtures::adapter::HeapAllocated& /*_return*/, std::unique_ptr<::facebook::thrift::test::fixtures::adapter::HeapAllocated> /*arg*/) {  }
 
 
 std::string_view AdapterServiceAsyncProcessor::getServiceName() {
@@ -346,7 +346,7 @@ std::string_view AdapterServiceAsyncProcessor::getServiceName() {
 }
 
 void AdapterServiceAsyncProcessor::getServiceMetadata(apache::thrift::metadata::ThriftServiceMetadataResponse& response) {
-  ::apache::thrift::detail::md::ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::AdapterService>>::gen(response);
+  ::apache::thrift::detail::md::ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::adapter::AdapterService>>::gen(response);
 }
 
 void AdapterServiceAsyncProcessor::processSerializedCompressedRequestWithMetadata(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, const apache::thrift::AsyncProcessorFactory::MethodMetadata& methodMetadata, apache::thrift::protocol::PROTOCOL_TYPES protType, apache::thrift::Cpp2RequestContext* context, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
@@ -399,4 +399,4 @@ apache::thrift::ServiceRequestInfoMap AdapterServiceServiceInfoHolder::staticReq
 
   return requestInfoMap;
 }
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::adapter

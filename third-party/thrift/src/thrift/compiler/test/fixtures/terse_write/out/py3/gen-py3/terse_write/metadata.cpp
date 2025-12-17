@@ -10,6 +10,7 @@
 namespace facebook {
 namespace thrift {
 namespace test {
+namespace fixtures {
 namespace terse_write {
 ::apache::thrift::metadata::ThriftMetadata terse_write_getThriftModuleMetadata() {
   ::apache::thrift::metadata::ThriftServiceMetadataResponse response;
@@ -27,4 +28,5 @@ namespace terse_write {
 } // namespace facebook
 } // namespace thrift
 } // namespace test
+} // namespace fixtures
 } // namespace terse_write

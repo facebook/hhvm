@@ -15,23 +15,23 @@
 
 namespace apache { namespace thrift {
 
-const std::string_view TEnumTraits<::facebook::thrift::test::Enum>::__fbthrift_module_name_internal_do_not_use = kModuleName;
-folly::Range<::facebook::thrift::test::Enum const*> const TEnumTraits<::facebook::thrift::test::Enum>::values = folly::range(TEnumDataStorage<::facebook::thrift::test::Enum>::values);
-folly::Range<std::string_view const*> const TEnumTraits<::facebook::thrift::test::Enum>::names = folly::range(TEnumDataStorage<::facebook::thrift::test::Enum>::names);
+const std::string_view TEnumTraits<::facebook::thrift::test::fixtures::encode::Enum>::__fbthrift_module_name_internal_do_not_use = kModuleName;
+folly::Range<::facebook::thrift::test::fixtures::encode::Enum const*> const TEnumTraits<::facebook::thrift::test::fixtures::encode::Enum>::values = folly::range(TEnumDataStorage<::facebook::thrift::test::fixtures::encode::Enum>::values);
+folly::Range<std::string_view const*> const TEnumTraits<::facebook::thrift::test::fixtures::encode::Enum>::names = folly::range(TEnumDataStorage<::facebook::thrift::test::fixtures::encode::Enum>::names);
 
-bool TEnumTraits<::facebook::thrift::test::Enum>::findName(type value, std::string_view* out) noexcept {
+bool TEnumTraits<::facebook::thrift::test::fixtures::encode::Enum>::findName(type value, std::string_view* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_name(value, out);
 }
 
-bool TEnumTraits<::facebook::thrift::test::Enum>::findValue(std::string_view name, type* out) noexcept {
+bool TEnumTraits<::facebook::thrift::test::fixtures::encode::Enum>::findValue(std::string_view name, type* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 
-const std::vector<std::any>& TEnumTraits<::facebook::thrift::test::Enum>::annotations() noexcept {
+const std::vector<std::any>& TEnumTraits<::facebook::thrift::test::fixtures::encode::Enum>::annotations() noexcept {
   return ::apache::thrift::detail::annotation::empty_annotations();
 }
 
-const std::vector<std::any>& TEnumTraits<::facebook::thrift::test::Enum>::enumValueAnnotations(::facebook::thrift::test::Enum value) noexcept {
+const std::vector<std::any>& TEnumTraits<::facebook::thrift::test::fixtures::encode::Enum>::enumValueAnnotations(::facebook::thrift::test::fixtures::encode::Enum value) noexcept {
   switch (static_cast<std::int32_t>(value)) {
     default:
       return ::apache::thrift::detail::annotation::empty_annotations();
@@ -43,7 +43,7 @@ const std::vector<std::any>& TEnumTraits<::facebook::thrift::test::Enum>::enumVa
 
 
 
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::encode {
 
 std::string_view Foo::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -97,10 +97,10 @@ void swap([[maybe_unused]] Foo& a, [[maybe_unused]] Foo& b) {
 }
 
 
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::encode
 
 
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::encode {
 
 std::string_view Bar::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -130,7 +130,7 @@ Bar& Bar::operator=([[maybe_unused]] Bar&& other) noexcept {
 }
 
 
-Bar::Bar(apache::thrift::FragileConstructor, ::std::vector<::facebook::thrift::test::AdaptedFoo> list_field__arg) :
+Bar::Bar(apache::thrift::FragileConstructor, ::std::vector<::facebook::thrift::test::fixtures::encode::AdaptedFoo> list_field__arg) :
     __fbthrift_field_list_field(std::move(list_field__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
 }
@@ -157,12 +157,12 @@ bool Bar::operator<([[maybe_unused]] const Bar& rhs) const {
 }
 
 
-const ::std::vector<::facebook::thrift::test::AdaptedFoo>& Bar::get_list_field() const& {
+const ::std::vector<::facebook::thrift::test::fixtures::encode::AdaptedFoo>& Bar::get_list_field() const& {
   return __fbthrift_field_list_field;
 }
 
-::std::vector<::facebook::thrift::test::AdaptedFoo> Bar::get_list_field() && {
-  return static_cast<::std::vector<::facebook::thrift::test::AdaptedFoo>&&>(__fbthrift_field_list_field);
+::std::vector<::facebook::thrift::test::fixtures::encode::AdaptedFoo> Bar::get_list_field() && {
+  return static_cast<::std::vector<::facebook::thrift::test::fixtures::encode::AdaptedFoo>&&>(__fbthrift_field_list_field);
 }
 
 void swap([[maybe_unused]] Bar& a, [[maybe_unused]] Bar& b) {
@@ -172,10 +172,10 @@ void swap([[maybe_unused]] Bar& a, [[maybe_unused]] Bar& b) {
 }
 
 
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::encode
 
 
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::encode {
 
 std::string_view Baz::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -207,7 +207,7 @@ Baz& Baz::operator=([[maybe_unused]] Baz&& other) noexcept {
 }
 
 
-Baz::Baz(apache::thrift::FragileConstructor, ::std::vector<::facebook::thrift::test::AdaptedFoo> list_field__arg, ::std::vector<::std::vector<::facebook::thrift::test::AdaptedFoo>> nested_list_field__arg) :
+Baz::Baz(apache::thrift::FragileConstructor, ::std::vector<::facebook::thrift::test::fixtures::encode::AdaptedFoo> list_field__arg, ::std::vector<::std::vector<::facebook::thrift::test::fixtures::encode::AdaptedFoo>> nested_list_field__arg) :
     __fbthrift_field_list_field(std::move(list_field__arg)),
     __fbthrift_field_nested_list_field(std::move(nested_list_field__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
@@ -237,20 +237,20 @@ bool Baz::operator<([[maybe_unused]] const Baz& rhs) const {
 }
 
 
-const ::std::vector<::facebook::thrift::test::AdaptedFoo>& Baz::get_list_field() const& {
+const ::std::vector<::facebook::thrift::test::fixtures::encode::AdaptedFoo>& Baz::get_list_field() const& {
   return __fbthrift_field_list_field;
 }
 
-::std::vector<::facebook::thrift::test::AdaptedFoo> Baz::get_list_field() && {
-  return static_cast<::std::vector<::facebook::thrift::test::AdaptedFoo>&&>(__fbthrift_field_list_field);
+::std::vector<::facebook::thrift::test::fixtures::encode::AdaptedFoo> Baz::get_list_field() && {
+  return static_cast<::std::vector<::facebook::thrift::test::fixtures::encode::AdaptedFoo>&&>(__fbthrift_field_list_field);
 }
 
-const ::std::vector<::std::vector<::facebook::thrift::test::AdaptedFoo>>& Baz::get_nested_list_field() const& {
+const ::std::vector<::std::vector<::facebook::thrift::test::fixtures::encode::AdaptedFoo>>& Baz::get_nested_list_field() const& {
   return __fbthrift_field_nested_list_field;
 }
 
-::std::vector<::std::vector<::facebook::thrift::test::AdaptedFoo>> Baz::get_nested_list_field() && {
-  return static_cast<::std::vector<::std::vector<::facebook::thrift::test::AdaptedFoo>>&&>(__fbthrift_field_nested_list_field);
+::std::vector<::std::vector<::facebook::thrift::test::fixtures::encode::AdaptedFoo>> Baz::get_nested_list_field() && {
+  return static_cast<::std::vector<::std::vector<::facebook::thrift::test::fixtures::encode::AdaptedFoo>>&&>(__fbthrift_field_nested_list_field);
 }
 
 void swap([[maybe_unused]] Baz& a, [[maybe_unused]] Baz& b) {
@@ -261,10 +261,10 @@ void swap([[maybe_unused]] Baz& a, [[maybe_unused]] Baz& b) {
 }
 
 
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::encode
 
 
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::encode {
 
 std::string_view OpEncodeStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -345,7 +345,7 @@ OpEncodeStruct& OpEncodeStruct::operator=([[maybe_unused]] OpEncodeStruct&& othe
 }
 
 
-OpEncodeStruct::OpEncodeStruct(apache::thrift::FragileConstructor, ::std::int32_t int_field__arg, ::facebook::thrift::test::Enum enum_field__arg, ::facebook::thrift::test::Foo foo_field__arg, ::facebook::thrift::test::AdaptedFoo adapted_field__arg, ::std::vector<::facebook::thrift::test::AdaptedFoo> list_field__arg, ::std::shared_ptr<const ::std::vector<::facebook::thrift::test::AdaptedFoo>> list_shared_ptr_field__arg, ::std::vector<::facebook::thrift::test::AdaptedFoo> list_cpp_type_field__arg, ::std::set<::facebook::thrift::test::AdaptedFoo> set_field__arg, ::std::map<::facebook::thrift::test::AdaptedFoo, ::facebook::thrift::test::AdaptedFoo> map_field__arg, ::std::map<::std::int32_t, ::std::vector<::facebook::thrift::test::AdaptedFoo>> nested_field__arg, ::facebook::thrift::test::Bar bar_field__arg, ::apache::thrift::adapt_detail::adapted_field_t<::FieldAdapter, 12, ::std::vector<::facebook::thrift::test::AdaptedFoo>, OpEncodeStruct> adapted_list_field__arg) :
+OpEncodeStruct::OpEncodeStruct(apache::thrift::FragileConstructor, ::std::int32_t int_field__arg, ::facebook::thrift::test::fixtures::encode::Enum enum_field__arg, ::facebook::thrift::test::fixtures::encode::Foo foo_field__arg, ::facebook::thrift::test::fixtures::encode::AdaptedFoo adapted_field__arg, ::std::vector<::facebook::thrift::test::fixtures::encode::AdaptedFoo> list_field__arg, ::std::shared_ptr<const ::std::vector<::facebook::thrift::test::fixtures::encode::AdaptedFoo>> list_shared_ptr_field__arg, ::std::vector<::facebook::thrift::test::fixtures::encode::AdaptedFoo> list_cpp_type_field__arg, ::std::set<::facebook::thrift::test::fixtures::encode::AdaptedFoo> set_field__arg, ::std::map<::facebook::thrift::test::fixtures::encode::AdaptedFoo, ::facebook::thrift::test::fixtures::encode::AdaptedFoo> map_field__arg, ::std::map<::std::int32_t, ::std::vector<::facebook::thrift::test::fixtures::encode::AdaptedFoo>> nested_field__arg, ::facebook::thrift::test::fixtures::encode::Bar bar_field__arg, ::apache::thrift::adapt_detail::adapted_field_t<::FieldAdapter, 12, ::std::vector<::facebook::thrift::test::fixtures::encode::AdaptedFoo>, OpEncodeStruct> adapted_list_field__arg) :
     __fbthrift_field_int_field(std::move(int_field__arg)),
     __fbthrift_field_enum_field(std::move(enum_field__arg)),
     __fbthrift_field_foo_field(std::move(foo_field__arg)),
@@ -376,7 +376,7 @@ OpEncodeStruct::OpEncodeStruct(apache::thrift::FragileConstructor, ::std::int32_
 void OpEncodeStruct::__fbthrift_clear() {
   // clear all fields
   this->__fbthrift_field_int_field = ::std::int32_t();
-  this->__fbthrift_field_enum_field = ::facebook::thrift::test::Enum();
+  this->__fbthrift_field_enum_field = ::facebook::thrift::test::fixtures::encode::Enum();
   ::apache::thrift::clear(this->__fbthrift_field_foo_field);
   ::apache::thrift::adapt_detail::clear<::apache::thrift::test::TemplatedTestAdapter, 4>(__fbthrift_field_adapted_field, *this);
   this->__fbthrift_field_list_field.clear();
@@ -415,69 +415,69 @@ bool OpEncodeStruct::operator<([[maybe_unused]] const OpEncodeStruct& rhs) const
   return __fbthrift_field_int_field;
 }
 
-::facebook::thrift::test::Enum OpEncodeStruct::get_enum_field() const {
+::facebook::thrift::test::fixtures::encode::Enum OpEncodeStruct::get_enum_field() const {
   return __fbthrift_field_enum_field;
 }
 
-::facebook::thrift::test::Enum& OpEncodeStruct::set_enum_field(::facebook::thrift::test::Enum enum_field_) {
+::facebook::thrift::test::fixtures::encode::Enum& OpEncodeStruct::set_enum_field(::facebook::thrift::test::fixtures::encode::Enum enum_field_) {
   enum_field_ref() = enum_field_;
   return __fbthrift_field_enum_field;
 }
 
-const ::facebook::thrift::test::Foo& OpEncodeStruct::get_foo_field() const& {
+const ::facebook::thrift::test::fixtures::encode::Foo& OpEncodeStruct::get_foo_field() const& {
   return __fbthrift_field_foo_field;
 }
 
-::facebook::thrift::test::Foo OpEncodeStruct::get_foo_field() && {
-  return static_cast<::facebook::thrift::test::Foo&&>(__fbthrift_field_foo_field);
+::facebook::thrift::test::fixtures::encode::Foo OpEncodeStruct::get_foo_field() && {
+  return static_cast<::facebook::thrift::test::fixtures::encode::Foo&&>(__fbthrift_field_foo_field);
 }
 
-const ::std::vector<::facebook::thrift::test::AdaptedFoo>& OpEncodeStruct::get_list_field() const& {
+const ::std::vector<::facebook::thrift::test::fixtures::encode::AdaptedFoo>& OpEncodeStruct::get_list_field() const& {
   return __fbthrift_field_list_field;
 }
 
-::std::vector<::facebook::thrift::test::AdaptedFoo> OpEncodeStruct::get_list_field() && {
-  return static_cast<::std::vector<::facebook::thrift::test::AdaptedFoo>&&>(__fbthrift_field_list_field);
+::std::vector<::facebook::thrift::test::fixtures::encode::AdaptedFoo> OpEncodeStruct::get_list_field() && {
+  return static_cast<::std::vector<::facebook::thrift::test::fixtures::encode::AdaptedFoo>&&>(__fbthrift_field_list_field);
 }
 
-const ::std::vector<::facebook::thrift::test::AdaptedFoo>& OpEncodeStruct::get_list_cpp_type_field() const& {
+const ::std::vector<::facebook::thrift::test::fixtures::encode::AdaptedFoo>& OpEncodeStruct::get_list_cpp_type_field() const& {
   return __fbthrift_field_list_cpp_type_field;
 }
 
-::std::vector<::facebook::thrift::test::AdaptedFoo> OpEncodeStruct::get_list_cpp_type_field() && {
-  return static_cast<::std::vector<::facebook::thrift::test::AdaptedFoo>&&>(__fbthrift_field_list_cpp_type_field);
+::std::vector<::facebook::thrift::test::fixtures::encode::AdaptedFoo> OpEncodeStruct::get_list_cpp_type_field() && {
+  return static_cast<::std::vector<::facebook::thrift::test::fixtures::encode::AdaptedFoo>&&>(__fbthrift_field_list_cpp_type_field);
 }
 
-const ::std::set<::facebook::thrift::test::AdaptedFoo>& OpEncodeStruct::get_set_field() const& {
+const ::std::set<::facebook::thrift::test::fixtures::encode::AdaptedFoo>& OpEncodeStruct::get_set_field() const& {
   return __fbthrift_field_set_field;
 }
 
-::std::set<::facebook::thrift::test::AdaptedFoo> OpEncodeStruct::get_set_field() && {
-  return static_cast<::std::set<::facebook::thrift::test::AdaptedFoo>&&>(__fbthrift_field_set_field);
+::std::set<::facebook::thrift::test::fixtures::encode::AdaptedFoo> OpEncodeStruct::get_set_field() && {
+  return static_cast<::std::set<::facebook::thrift::test::fixtures::encode::AdaptedFoo>&&>(__fbthrift_field_set_field);
 }
 
-const ::std::map<::facebook::thrift::test::AdaptedFoo, ::facebook::thrift::test::AdaptedFoo>& OpEncodeStruct::get_map_field() const& {
+const ::std::map<::facebook::thrift::test::fixtures::encode::AdaptedFoo, ::facebook::thrift::test::fixtures::encode::AdaptedFoo>& OpEncodeStruct::get_map_field() const& {
   return __fbthrift_field_map_field;
 }
 
-::std::map<::facebook::thrift::test::AdaptedFoo, ::facebook::thrift::test::AdaptedFoo> OpEncodeStruct::get_map_field() && {
-  return static_cast<::std::map<::facebook::thrift::test::AdaptedFoo, ::facebook::thrift::test::AdaptedFoo>&&>(__fbthrift_field_map_field);
+::std::map<::facebook::thrift::test::fixtures::encode::AdaptedFoo, ::facebook::thrift::test::fixtures::encode::AdaptedFoo> OpEncodeStruct::get_map_field() && {
+  return static_cast<::std::map<::facebook::thrift::test::fixtures::encode::AdaptedFoo, ::facebook::thrift::test::fixtures::encode::AdaptedFoo>&&>(__fbthrift_field_map_field);
 }
 
-const ::std::map<::std::int32_t, ::std::vector<::facebook::thrift::test::AdaptedFoo>>& OpEncodeStruct::get_nested_field() const& {
+const ::std::map<::std::int32_t, ::std::vector<::facebook::thrift::test::fixtures::encode::AdaptedFoo>>& OpEncodeStruct::get_nested_field() const& {
   return __fbthrift_field_nested_field;
 }
 
-::std::map<::std::int32_t, ::std::vector<::facebook::thrift::test::AdaptedFoo>> OpEncodeStruct::get_nested_field() && {
-  return static_cast<::std::map<::std::int32_t, ::std::vector<::facebook::thrift::test::AdaptedFoo>>&&>(__fbthrift_field_nested_field);
+::std::map<::std::int32_t, ::std::vector<::facebook::thrift::test::fixtures::encode::AdaptedFoo>> OpEncodeStruct::get_nested_field() && {
+  return static_cast<::std::map<::std::int32_t, ::std::vector<::facebook::thrift::test::fixtures::encode::AdaptedFoo>>&&>(__fbthrift_field_nested_field);
 }
 
-const ::facebook::thrift::test::Bar& OpEncodeStruct::get_bar_field() const& {
+const ::facebook::thrift::test::fixtures::encode::Bar& OpEncodeStruct::get_bar_field() const& {
   return __fbthrift_field_bar_field;
 }
 
-::facebook::thrift::test::Bar OpEncodeStruct::get_bar_field() && {
-  return static_cast<::facebook::thrift::test::Bar&&>(__fbthrift_field_bar_field);
+::facebook::thrift::test::fixtures::encode::Bar OpEncodeStruct::get_bar_field() && {
+  return static_cast<::facebook::thrift::test::fixtures::encode::Bar&&>(__fbthrift_field_bar_field);
 }
 
 void swap([[maybe_unused]] OpEncodeStruct& a, [[maybe_unused]] OpEncodeStruct& b) {
@@ -501,28 +501,28 @@ static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         OpEncodeStruct,
         ::apache::thrift::type_class::structure,
-        ::facebook::thrift::test::Foo>,
+        ::facebook::thrift::test::fixtures::encode::Foo>,
     "inconsistent use of json option");
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         OpEncodeStruct,
         ::apache::thrift::type_class::structure,
-        ::facebook::thrift::test::Foo>,
+        ::facebook::thrift::test::fixtures::encode::Foo>,
     "inconsistent use of json option");
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         OpEncodeStruct,
         ::apache::thrift::type_class::structure,
-        ::facebook::thrift::test::Bar>,
+        ::facebook::thrift::test::fixtures::encode::Bar>,
     "inconsistent use of json option");
 
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::encode
 
-namespace facebook::thrift::test { namespace {
+namespace facebook::thrift::test::fixtures::encode { namespace {
 [[maybe_unused]] FOLLY_ERASE void validateAdapters() {
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::TemplatedTestAdapter, 4, ::facebook::thrift::test::Foo, ::facebook::thrift::test::OpEncodeStruct>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::FieldAdapter, 12, ::std::vector<::facebook::thrift::test::Foo>, ::facebook::thrift::test::OpEncodeStruct>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::TemplatedTestAdapter, 4, ::facebook::thrift::test::fixtures::encode::Foo, ::facebook::thrift::test::fixtures::encode::OpEncodeStruct>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::FieldAdapter, 12, ::std::vector<::facebook::thrift::test::fixtures::encode::Foo>, ::facebook::thrift::test::fixtures::encode::OpEncodeStruct>();
 }
-}} // namespace facebook::thrift::test
+}} // namespace facebook::thrift::test::fixtures::encode
 namespace apache::thrift::detail::annotation {
 }

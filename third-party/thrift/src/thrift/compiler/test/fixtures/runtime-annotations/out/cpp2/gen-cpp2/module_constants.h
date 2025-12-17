@@ -10,13 +10,13 @@
 
 #include "thrift/compiler/test/fixtures/runtime-annotations/gen-cpp2/module_types.h"
 
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::runtime_annotations {
 /** Glean {"file": "thrift/compiler/test/fixtures/runtime-annotations/src/module.thrift"} */
 namespace module_constants {
 
-  FOLLY_EXPORT ::std::string_view _fbthrift_schema_a2c62b7e5f39b3f();
-  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_a2c62b7e5f39b3f_includes();
-  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_a2c62b7e5f39b3f_uris();
+  FOLLY_EXPORT ::std::string_view _fbthrift_schema_b8e7fffe843113b9();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_b8e7fffe843113b9_includes();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_b8e7fffe843113b9_uris();
 
 } // namespace module_constants
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::runtime_annotations

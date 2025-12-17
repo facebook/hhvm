@@ -11,7 +11,7 @@ import java.util.*;
 import org.apache.thrift.protocol.*;
 import com.facebook.thrift.util.Readers;
 
-public class ExtendedServiceRpcServerHandler  extends com.facebook.thrift.test.BaseServiceRpcServerHandler
+public class ExtendedServiceRpcServerHandler  extends com.facebook.thrift.test.fixtures.service_schema.BaseServiceRpcServerHandler
   implements com.facebook.thrift.server.RpcServerHandler {
 
   private final java.util.Map<String, com.facebook.thrift.server.RpcServerHandler> _methodMap;

@@ -14,54 +14,54 @@
 
 #include <thrift/compiler/test/fixtures/service-schema/gen-cpp2/module_types.h>
 
-namespace facebook__thrift__test__module {
+namespace facebook__thrift__test__fixtures__service_schema__module {
 
 struct NamespaceTag {};
 
-} // namespace facebook__thrift__test__module
+} // namespace facebook__thrift__test__fixtures__service_schema__module
 
 namespace apache::thrift::python::capi {
 template <>
-struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::CustomException, ::facebook__thrift__test__module::NamespaceTag>>
-    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::CustomException, ::facebook__thrift__test__module::NamespaceTag>> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::service_schema::CustomException, ::facebook__thrift__test__fixtures__service_schema__module::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::service_schema::CustomException, ::facebook__thrift__test__fixtures__service_schema__module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
-  ExtractorResult<::facebook::thrift::test::CustomException> operator()(PyObject* obj);
+  ExtractorResult<::facebook::thrift::test::fixtures::service_schema::CustomException> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::CustomException, ::facebook__thrift__test__module::NamespaceTag >>
+        ::facebook::thrift::test::fixtures::service_schema::CustomException, ::facebook__thrift__test__fixtures__service_schema__module::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::CustomException, ::facebook__thrift__test__module::NamespaceTag>> {
-  ExtractorResult<::facebook::thrift::test::CustomException> operator()(PyObject* obj);
+        ::facebook::thrift::test::fixtures::service_schema::CustomException, ::facebook__thrift__test__fixtures__service_schema__module::NamespaceTag>> {
+  ExtractorResult<::facebook::thrift::test::fixtures::service_schema::CustomException> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::CustomException, ::facebook__thrift__test__module::NamespaceTag>>
-    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::CustomException, ::facebook__thrift__test__module::NamespaceTag>> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::service_schema::CustomException, ::facebook__thrift__test__fixtures__service_schema__module::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::service_schema::CustomException, ::facebook__thrift__test__fixtures__service_schema__module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
-  PyObject* operator()(const ::facebook::thrift::test::CustomException& val);
+  PyObject* operator()(const ::facebook::thrift::test::fixtures::service_schema::CustomException& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::CustomException, ::facebook__thrift__test__module::NamespaceTag>>
+        ::facebook::thrift::test::fixtures::service_schema::CustomException, ::facebook__thrift__test__fixtures__service_schema__module::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::CustomException, ::facebook__thrift__test__module::NamespaceTag>> {
-  PyObject* operator()(const ::facebook::thrift::test::CustomException& val);
+        ::facebook::thrift::test::fixtures::service_schema::CustomException, ::facebook__thrift__test__fixtures__service_schema__module::NamespaceTag>> {
+  PyObject* operator()(const ::facebook::thrift::test::fixtures::service_schema::CustomException& val);
 };
 
 template <>
-struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::Result, ::facebook__thrift__test__module::NamespaceTag>>
-    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::Result, ::facebook__thrift__test__module::NamespaceTag>> {
-  ExtractorResult<::facebook::thrift::test::Result> operator()(PyObject* obj);
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::service_schema::Result, ::facebook__thrift__test__fixtures__service_schema__module::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::service_schema::Result, ::facebook__thrift__test__fixtures__service_schema__module::NamespaceTag>> {
+  ExtractorResult<::facebook::thrift::test::fixtures::service_schema::Result> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
 
 template <>
-struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::Result, ::facebook__thrift__test__module::NamespaceTag>> {
-  PyObject* operator()(::facebook::thrift::test::Result val);
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::service_schema::Result, ::facebook__thrift__test__fixtures__service_schema__module::NamespaceTag>> {
+  PyObject* operator()(::facebook::thrift::test::fixtures::service_schema::Result val);
 };
 
 } // namespace apache::thrift::python::capi

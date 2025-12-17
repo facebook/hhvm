@@ -12,7 +12,7 @@
 
 namespace apache { namespace thrift {
 
-template <> struct TStructDataStorage<::facebook::thrift::compiler::test::fixtures::default_values_rectification::EmptyStruct> {
+template <> struct TStructDataStorage<::facebook::thrift::compiler::test::fixtures::default_values_rectification_after::EmptyStruct> {
   static constexpr const std::size_t fields_size = 0;
   static const std::string_view name;
   static const std::array<std::string_view, fields_size> fields_names;
@@ -27,7 +27,7 @@ template <> struct TStructDataStorage<::facebook::thrift::compiler::test::fixtur
   static const std::array<int, fields_size> isset_indexes;
 };
 
-template <> struct TStructDataStorage<::facebook::thrift::compiler::test::fixtures::default_values_rectification::TestStruct> {
+template <> struct TStructDataStorage<::facebook::thrift::compiler::test::fixtures::default_values_rectification_after::TestStruct> {
   static constexpr const std::size_t fields_size = 8;
   static const std::string_view name;
   static const std::array<std::string_view, fields_size> fields_names;

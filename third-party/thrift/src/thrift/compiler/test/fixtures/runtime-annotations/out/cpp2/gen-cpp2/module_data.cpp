@@ -12,55 +12,55 @@
 
 namespace apache::thrift {
 
-THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::facebook::thrift::test::MyAnnotation>::name = "MyAnnotation";
-THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 0> TStructDataStorage<::facebook::thrift::test::MyAnnotation>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::facebook::thrift::test::fixtures::runtime_annotations::MyAnnotation>::name = "MyAnnotation";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 0> TStructDataStorage<::facebook::thrift::test::fixtures::runtime_annotations::MyAnnotation>::fields_names = { {
 }};
-THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 0> TStructDataStorage<::facebook::thrift::test::MyAnnotation>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 0> TStructDataStorage<::facebook::thrift::test::fixtures::runtime_annotations::MyAnnotation>::fields_ids = { {
 }};
-THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 0> TStructDataStorage<::facebook::thrift::test::MyAnnotation>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 0> TStructDataStorage<::facebook::thrift::test::fixtures::runtime_annotations::MyAnnotation>::fields_types = { {
 }};
-THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 0> TStructDataStorage<::facebook::thrift::test::MyAnnotation>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 0> TStructDataStorage<::facebook::thrift::test::fixtures::runtime_annotations::MyAnnotation>::isset_indexes = { {
 }};
 
-THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::facebook::thrift::test::MyStruct>::name = "MyStruct";
-THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 1> TStructDataStorage<::facebook::thrift::test::MyStruct>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::facebook::thrift::test::fixtures::runtime_annotations::MyStruct>::name = "MyStruct";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 1> TStructDataStorage<::facebook::thrift::test::fixtures::runtime_annotations::MyStruct>::fields_names = { {
   "field"sv,
 }};
-THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 1> TStructDataStorage<::facebook::thrift::test::MyStruct>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 1> TStructDataStorage<::facebook::thrift::test::fixtures::runtime_annotations::MyStruct>::fields_ids = { {
   1,
 }};
-THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 1> TStructDataStorage<::facebook::thrift::test::MyStruct>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 1> TStructDataStorage<::facebook::thrift::test::fixtures::runtime_annotations::MyStruct>::fields_types = { {
   TType::T_I32,
 }};
-THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 1> TStructDataStorage<::facebook::thrift::test::MyStruct>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 1> TStructDataStorage<::facebook::thrift::test::fixtures::runtime_annotations::MyStruct>::isset_indexes = { {
   0,
 }};
 
-THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::facebook::thrift::test::MyUnion>::name = "MyUnion";
-THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 1> TStructDataStorage<::facebook::thrift::test::MyUnion>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::facebook::thrift::test::fixtures::runtime_annotations::MyUnion>::name = "MyUnion";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 1> TStructDataStorage<::facebook::thrift::test::fixtures::runtime_annotations::MyUnion>::fields_names = { {
   "field"sv,
 }};
-THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 1> TStructDataStorage<::facebook::thrift::test::MyUnion>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 1> TStructDataStorage<::facebook::thrift::test::fixtures::runtime_annotations::MyUnion>::fields_ids = { {
   1,
 }};
-THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 1> TStructDataStorage<::facebook::thrift::test::MyUnion>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 1> TStructDataStorage<::facebook::thrift::test::fixtures::runtime_annotations::MyUnion>::fields_types = { {
   TType::T_I32,
 }};
-THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 1> TStructDataStorage<::facebook::thrift::test::MyUnion>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 1> TStructDataStorage<::facebook::thrift::test::fixtures::runtime_annotations::MyUnion>::isset_indexes = { {
   0,
 }};
 
-THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::facebook::thrift::test::MyException>::name = "MyException";
-THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 1> TStructDataStorage<::facebook::thrift::test::MyException>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::facebook::thrift::test::fixtures::runtime_annotations::MyException>::name = "MyException";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 1> TStructDataStorage<::facebook::thrift::test::fixtures::runtime_annotations::MyException>::fields_names = { {
   "field"sv,
 }};
-THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 1> TStructDataStorage<::facebook::thrift::test::MyException>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 1> TStructDataStorage<::facebook::thrift::test::fixtures::runtime_annotations::MyException>::fields_ids = { {
   1,
 }};
-THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 1> TStructDataStorage<::facebook::thrift::test::MyException>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 1> TStructDataStorage<::facebook::thrift::test::fixtures::runtime_annotations::MyException>::fields_types = { {
   TType::T_I32,
 }};
-THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 1> TStructDataStorage<::facebook::thrift::test::MyException>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 1> TStructDataStorage<::facebook::thrift::test::fixtures::runtime_annotations::MyException>::isset_indexes = { {
   0,
 }};
 

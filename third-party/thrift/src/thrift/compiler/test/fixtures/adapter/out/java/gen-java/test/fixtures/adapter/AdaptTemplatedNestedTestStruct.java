@@ -80,7 +80,7 @@ public final class AdaptTemplatedNestedTestStruct implements com.facebook.thrift
       THRIFT_NAMES_TO_IDS.put("adaptedStruct", 1);
       FIELD_METADATA.put(1, ADAPTED_STRUCT_FIELD_DESC);
       com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
-        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/AdaptTemplatedNestedTestStruct"),
+        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/fixtures/adapter/AdaptTemplatedNestedTestStruct"),
         AdaptTemplatedNestedTestStruct.class, AdaptTemplatedNestedTestStruct::read0));
     }
     

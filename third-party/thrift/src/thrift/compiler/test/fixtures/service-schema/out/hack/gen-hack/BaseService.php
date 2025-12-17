@@ -6,13 +6,13 @@
  *  @generated
  */
 
-namespace facebook\thrift\test;
+namespace facebook\thrift\test\fixtures\service_schema;
 
 /**
  * Original thrift service:-
  * BaseService
  */
-<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/BaseService'))>>
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/fixtures/service_schema/BaseService'))>>
 interface BaseServiceAsyncIf extends \IThriftAsyncIf {
   /**
    * Original thrift definition:-
@@ -26,7 +26,7 @@ interface BaseServiceAsyncIf extends \IThriftAsyncIf {
  * Original thrift service:-
  * BaseService
  */
-<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/BaseService'))>>
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/fixtures/service_schema/BaseService'))>>
 interface BaseServiceAsyncClientIf extends BaseServiceAsyncIf {
 }
 
@@ -34,7 +34,7 @@ interface BaseServiceAsyncClientIf extends BaseServiceAsyncIf {
  * Original thrift service:-
  * BaseService
  */
-<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/BaseService'))>>
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/fixtures/service_schema/BaseService'))>>
 interface BaseServiceClientIf extends \IThriftSyncIf {
   /**
    * Original thrift definition:-
@@ -58,10 +58,10 @@ trait BaseServiceClientBase {
    */
   public async function base_method(): Awaitable<void> {
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \facebook\thrift\test\BaseService_base_method_args::withDefaultValues();
+    $args = \facebook\thrift\test\fixtures\service_schema\BaseService_base_method_args::withDefaultValues();
     await $this->asyncHandler_->genBefore(BaseServiceStaticMetadata::THRIFT_SVC_NAME, "base_method", $args);
     $currentseqid = $this->sendImplHelper($args, "base_method", false, BaseServiceStaticMetadata::THRIFT_SVC_NAME );
-    await $this->genAwaitResponse(\facebook\thrift\test\BaseService_base_method_result::class, "base_method", true, $currentseqid, $rpc_options);
+    await $this->genAwaitResponse(\facebook\thrift\test\fixtures\service_schema\BaseService_base_method_result::class, "base_method", true, $currentseqid, $rpc_options);
   }
 
 }

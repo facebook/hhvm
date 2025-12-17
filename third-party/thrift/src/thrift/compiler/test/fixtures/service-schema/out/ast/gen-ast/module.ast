@@ -3,18 +3,18 @@ Schema {
     [0] = Program {
       1: attrs (struct) = DefinitionAttrs {
         1: name (string) = "module",
-        2: uri (string) = "facebook.com/thrift/test",
+        2: uri (string) = "facebook.com/thrift/test/fixtures/service_schema",
       },
-      2: id (i64) = -4897237288056697529,
+      2: id (i64) = 986987743245182930,
       3: includes (list) = list<i64>[2] {
-        [0] = 8975069922921530736,
+        [0] = 3647982146561211874,
         [1] = -5500541977004985971,
       },
       8: definitionKeys (list) = list<string>[4] {
-        [0] = "\220\2011\222\217q\263\032\215\313\032\221N\260\203\250",
-        [1] = "4\207\215\212\270\277\260\216\"\314\245\334~\327'|",
-        [2] = "\212o\317\032\304\177\357\351\374\320\265\316;^\024\264",
-        [3] = "/9c^zbM\247nix\256~I\343y",
+        [0] = "\257\242\363\312(\261x~\016\336{\272v<ul",
+        [1] = "\302\345K\304=:G\177[y`n\037\002\304\356",
+        [2] = "\007\304\n\3467\250;YW82\\\262\247\231\304",
+        [3] = "\030keO\230o{\004\312\225\337\311\256\377\350\010",
       },
       5: path (string) = "thrift/compiler/test/fixtures/service-schema/src/module.thrift",
       7: namespaces (map) = map<string,string>[1] {
@@ -24,11 +24,11 @@ Schema {
     [1] = Program {
       1: attrs (struct) = DefinitionAttrs {
         1: name (string) = "extend",
-        2: uri (string) = "facebook.com/thrift/test",
+        2: uri (string) = "facebook.com/thrift/test/fixtures/service_schema",
       },
-      2: id (i64) = 8975069922921530736,
+      2: id (i64) = 3647982146561211874,
       8: definitionKeys (list) = list<string>[1] {
-        [0] = "(*\\\005d\244w\212\002\314\003\206\037\205\200G",
+        [0] = "S\306X\030\300v\362\004\271\3174z\347o4\342",
       },
       5: path (string) = "extend.thrift",
     },
@@ -52,144 +52,13 @@ Schema {
     },
   },
   8: definitionsMap (map) = map<string,struct>[4] {
-    "/9c^zbM\247nix\256~I\343y" -> Definition {
-      7: serviceDef (struct) = Service {
-        1: attrs (struct) = DefinitionAttrs {
-          1: name (string) = "ExtendedService",
-          2: uri (string) = "facebook.com/thrift/test/ExtendedService",
-          7: sourceRange (struct) = SourceRange {
-            1: programId (i64) = -4897237288056697529,
-            2: beginLine (i32) = 41,
-            3: beginColumn (i32) = 1,
-            4: endLine (i32) = 43,
-            5: endColumn (i32) = 2,
-          },
-        },
-        2: functions (list) = list<struct>[1] {
-          [0] = Function {
-            3: attrs (struct) = DefinitionAttrs {
-              1: name (string) = "init",
-              7: sourceRange (struct) = SourceRange {
-                1: programId (i64) = -4897237288056697529,
-                2: beginLine (i32) = 42,
-                3: beginColumn (i32) = 3,
-                4: endLine (i32) = 42,
-                5: endColumn (i32) = 42,
-              },
-            },
-            4: paramlist (struct) = Paramlist {
-              1: fields (list) = list<struct>[2] {
-                [0] = Field {
-                  1: id (i16) = 1,
-                  3: type (struct) = TypeStruct {
-                    1: name (struct) = TypeName {
-                      5: i64Type (i32) = 0,
-                    },
-                    2: params (list) = list<struct>[0] {
-                    },
-                  },
-                  4: attrs (struct) = DefinitionAttrs {
-                    1: name (string) = "param0",
-                  },
-                },
-                [1] = Field {
-                  1: id (i16) = 2,
-                  3: type (struct) = TypeStruct {
-                    1: name (struct) = TypeName {
-                      5: i64Type (i32) = 0,
-                    },
-                    2: params (list) = list<struct>[0] {
-                    },
-                  },
-                  4: attrs (struct) = DefinitionAttrs {
-                    1: name (string) = "param1",
-                  },
-                },
-              },
-            },
-            6: returnType (struct) = TypeStruct {
-              1: name (struct) = TypeName {
-                5: i64Type (i32) = 0,
-              },
-              2: params (list) = list<struct>[0] {
-              },
-            },
-          },
-        },
-        3: baseService (struct) = InterfaceRef {
-          1: uri (struct) = TypeUri {
-            4: definitionKey (string) = "(*\\\005d\244w\212\002\314\003\206\037\205\200G",
-          },
-        },
-      },
-    },
-    "4\207\215\212\270\277\260\216\"\314\245\334~\327'|" -> Definition {
-      3: exceptionDef (struct) = Exception {
-        1: attrs (struct) = DefinitionAttrs {
-          1: name (string) = "CustomException",
-          2: uri (string) = "facebook.com/thrift/test/CustomException",
-          7: sourceRange (struct) = SourceRange {
-            1: programId (i64) = -4897237288056697529,
-            2: beginLine (i32) = 30,
-            3: beginColumn (i32) = 1,
-            4: endLine (i32) = 33,
-            5: endColumn (i32) = 2,
-          },
-        },
-        2: fields (list) = list<struct>[2] {
-          [0] = Field {
-            1: id (i16) = 1,
-            3: type (struct) = TypeStruct {
-              1: name (struct) = TypeName {
-                8: stringType (i32) = 0,
-              },
-              2: params (list) = list<struct>[0] {
-              },
-            },
-            4: attrs (struct) = DefinitionAttrs {
-              1: name (string) = "name",
-              7: sourceRange (struct) = SourceRange {
-                1: programId (i64) = -4897237288056697529,
-                2: beginLine (i32) = 31,
-                3: beginColumn (i32) = 3,
-                4: endLine (i32) = 31,
-                5: endColumn (i32) = 18,
-              },
-            },
-          },
-          [1] = Field {
-            1: id (i16) = 2,
-            3: type (struct) = TypeStruct {
-              1: name (struct) = TypeName {
-                10: enumType (struct) = TypeUri {
-                  4: definitionKey (string) = "\220\2011\222\217q\263\032\215\313\032\221N\260\203\250",
-                },
-              },
-              2: params (list) = list<struct>[0] {
-              },
-            },
-            4: attrs (struct) = DefinitionAttrs {
-              1: name (string) = "result",
-              7: sourceRange (struct) = SourceRange {
-                1: programId (i64) = -4897237288056697529,
-                2: beginLine (i32) = 32,
-                3: beginColumn (i32) = 3,
-                4: endLine (i32) = 32,
-                5: endColumn (i32) = 35,
-              },
-            },
-            5: customDefault (i64) = -5721078285587364846,
-          },
-        },
-      },
-    },
-    "\212o\317\032\304\177\357\351\374\320\265\316;^\024\264" -> Definition {
+    "\007\304\n\3467\250;YW82\\\262\247\231\304" -> Definition {
       7: serviceDef (struct) = Service {
         1: attrs (struct) = DefinitionAttrs {
           1: name (string) = "PrimitivesService",
-          2: uri (string) = "facebook.com/thrift/test/PrimitivesService",
+          2: uri (string) = "facebook.com/thrift/test/fixtures/service_schema/PrimitivesService",
           7: sourceRange (struct) = SourceRange {
-            1: programId (i64) = -4897237288056697529,
+            1: programId (i64) = 986987743245182930,
             2: beginLine (i32) = 35,
             3: beginColumn (i32) = 1,
             4: endLine (i32) = 39,
@@ -201,7 +70,7 @@ Schema {
             3: attrs (struct) = DefinitionAttrs {
               1: name (string) = "init",
               7: sourceRange (struct) = SourceRange {
-                1: programId (i64) = -4897237288056697529,
+                1: programId (i64) = 986987743245182930,
                 2: beginLine (i32) = 36,
                 3: beginColumn (i32) = 3,
                 4: endLine (i32) = 36,
@@ -250,7 +119,7 @@ Schema {
             3: attrs (struct) = DefinitionAttrs {
               1: name (string) = "method_that_throws",
               7: sourceRange (struct) = SourceRange {
-                1: programId (i64) = -4897237288056697529,
+                1: programId (i64) = 986987743245182930,
                 2: beginLine (i32) = 37,
                 3: beginColumn (i32) = 3,
                 4: endLine (i32) = 37,
@@ -263,7 +132,7 @@ Schema {
                 3: type (struct) = TypeStruct {
                   1: name (struct) = TypeName {
                     13: exceptionType (struct) = TypeUri {
-                      4: definitionKey (string) = "4\207\215\212\270\277\260\216\"\314\245\334~\327'|",
+                      4: definitionKey (string) = "\302\345K\304=:G\177[y`n\037\002\304\356",
                     },
                   },
                   2: params (list) = list<struct>[0] {
@@ -277,7 +146,7 @@ Schema {
             6: returnType (struct) = TypeStruct {
               1: name (struct) = TypeName {
                 10: enumType (struct) = TypeUri {
-                  4: definitionKey (string) = "\220\2011\222\217q\263\032\215\313\032\221N\260\203\250",
+                  4: definitionKey (string) = "\257\242\363\312(\261x~\016\336{\272v<ul",
                 },
               },
               2: params (list) = list<struct>[0] {
@@ -288,7 +157,7 @@ Schema {
             3: attrs (struct) = DefinitionAttrs {
               1: name (string) = "return_void_method",
               7: sourceRange (struct) = SourceRange {
-                1: programId (i64) = -4897237288056697529,
+                1: programId (i64) = 986987743245182930,
                 2: beginLine (i32) = 38,
                 3: beginColumn (i32) = 3,
                 4: endLine (i32) = 38,
@@ -337,13 +206,84 @@ Schema {
         },
       },
     },
-    "\220\2011\222\217q\263\032\215\313\032\221N\260\203\250" -> Definition {
+    "\030keO\230o{\004\312\225\337\311\256\377\350\010" -> Definition {
+      7: serviceDef (struct) = Service {
+        1: attrs (struct) = DefinitionAttrs {
+          1: name (string) = "ExtendedService",
+          2: uri (string) = "facebook.com/thrift/test/fixtures/service_schema/ExtendedService",
+          7: sourceRange (struct) = SourceRange {
+            1: programId (i64) = 986987743245182930,
+            2: beginLine (i32) = 41,
+            3: beginColumn (i32) = 1,
+            4: endLine (i32) = 43,
+            5: endColumn (i32) = 2,
+          },
+        },
+        2: functions (list) = list<struct>[1] {
+          [0] = Function {
+            3: attrs (struct) = DefinitionAttrs {
+              1: name (string) = "init",
+              7: sourceRange (struct) = SourceRange {
+                1: programId (i64) = 986987743245182930,
+                2: beginLine (i32) = 42,
+                3: beginColumn (i32) = 3,
+                4: endLine (i32) = 42,
+                5: endColumn (i32) = 42,
+              },
+            },
+            4: paramlist (struct) = Paramlist {
+              1: fields (list) = list<struct>[2] {
+                [0] = Field {
+                  1: id (i16) = 1,
+                  3: type (struct) = TypeStruct {
+                    1: name (struct) = TypeName {
+                      5: i64Type (i32) = 0,
+                    },
+                    2: params (list) = list<struct>[0] {
+                    },
+                  },
+                  4: attrs (struct) = DefinitionAttrs {
+                    1: name (string) = "param0",
+                  },
+                },
+                [1] = Field {
+                  1: id (i16) = 2,
+                  3: type (struct) = TypeStruct {
+                    1: name (struct) = TypeName {
+                      5: i64Type (i32) = 0,
+                    },
+                    2: params (list) = list<struct>[0] {
+                    },
+                  },
+                  4: attrs (struct) = DefinitionAttrs {
+                    1: name (string) = "param1",
+                  },
+                },
+              },
+            },
+            6: returnType (struct) = TypeStruct {
+              1: name (struct) = TypeName {
+                5: i64Type (i32) = 0,
+              },
+              2: params (list) = list<struct>[0] {
+              },
+            },
+          },
+        },
+        3: baseService (struct) = InterfaceRef {
+          1: uri (struct) = TypeUri {
+            4: definitionKey (string) = "S\306X\030\300v\362\004\271\3174z\347o4\342",
+          },
+        },
+      },
+    },
+    "\257\242\363\312(\261x~\016\336{\272v<ul" -> Definition {
       4: enumDef (struct) = Enum {
         1: attrs (struct) = DefinitionAttrs {
           1: name (string) = "Result",
-          2: uri (string) = "facebook.com/thrift/test/Result",
+          2: uri (string) = "facebook.com/thrift/test/fixtures/service_schema/Result",
           7: sourceRange (struct) = SourceRange {
-            1: programId (i64) = -4897237288056697529,
+            1: programId (i64) = 986987743245182930,
             2: beginLine (i32) = 24,
             3: beginColumn (i32) = 1,
             4: endLine (i32) = 28,
@@ -355,7 +295,7 @@ Schema {
             1: attrs (struct) = DefinitionAttrs {
               1: name (string) = "OK",
               7: sourceRange (struct) = SourceRange {
-                1: programId (i64) = -4897237288056697529,
+                1: programId (i64) = 986987743245182930,
                 2: beginLine (i32) = 25,
                 3: beginColumn (i32) = 3,
                 4: endLine (i32) = 25,
@@ -367,7 +307,7 @@ Schema {
             1: attrs (struct) = DefinitionAttrs {
               1: name (string) = "SO_SO",
               7: sourceRange (struct) = SourceRange {
-                1: programId (i64) = -4897237288056697529,
+                1: programId (i64) = 986987743245182930,
                 2: beginLine (i32) = 26,
                 3: beginColumn (i32) = 3,
                 4: endLine (i32) = 26,
@@ -380,7 +320,7 @@ Schema {
             1: attrs (struct) = DefinitionAttrs {
               1: name (string) = "GOOD",
               7: sourceRange (struct) = SourceRange {
-                1: programId (i64) = -4897237288056697529,
+                1: programId (i64) = 986987743245182930,
                 2: beginLine (i32) = 27,
                 3: beginColumn (i32) = 3,
                 4: endLine (i32) = 27,
@@ -388,6 +328,66 @@ Schema {
               },
             },
             2: value (i32) = 2,
+          },
+        },
+      },
+    },
+    "\302\345K\304=:G\177[y`n\037\002\304\356" -> Definition {
+      3: exceptionDef (struct) = Exception {
+        1: attrs (struct) = DefinitionAttrs {
+          1: name (string) = "CustomException",
+          2: uri (string) = "facebook.com/thrift/test/fixtures/service_schema/CustomException",
+          7: sourceRange (struct) = SourceRange {
+            1: programId (i64) = 986987743245182930,
+            2: beginLine (i32) = 30,
+            3: beginColumn (i32) = 1,
+            4: endLine (i32) = 33,
+            5: endColumn (i32) = 2,
+          },
+        },
+        2: fields (list) = list<struct>[2] {
+          [0] = Field {
+            1: id (i16) = 1,
+            3: type (struct) = TypeStruct {
+              1: name (struct) = TypeName {
+                8: stringType (i32) = 0,
+              },
+              2: params (list) = list<struct>[0] {
+              },
+            },
+            4: attrs (struct) = DefinitionAttrs {
+              1: name (string) = "name",
+              7: sourceRange (struct) = SourceRange {
+                1: programId (i64) = 986987743245182930,
+                2: beginLine (i32) = 31,
+                3: beginColumn (i32) = 3,
+                4: endLine (i32) = 31,
+                5: endColumn (i32) = 18,
+              },
+            },
+          },
+          [1] = Field {
+            1: id (i16) = 2,
+            3: type (struct) = TypeStruct {
+              1: name (struct) = TypeName {
+                10: enumType (struct) = TypeUri {
+                  4: definitionKey (string) = "\257\242\363\312(\261x~\016\336{\272v<ul",
+                },
+              },
+              2: params (list) = list<struct>[0] {
+              },
+            },
+            4: attrs (struct) = DefinitionAttrs {
+              1: name (string) = "result",
+              7: sourceRange (struct) = SourceRange {
+                1: programId (i64) = 986987743245182930,
+                2: beginLine (i32) = 32,
+                3: beginColumn (i32) = 3,
+                4: endLine (i32) = 32,
+                5: endColumn (i32) = 35,
+              },
+            },
+            5: customDefault (i64) = -5721078285587364846,
           },
         },
       },

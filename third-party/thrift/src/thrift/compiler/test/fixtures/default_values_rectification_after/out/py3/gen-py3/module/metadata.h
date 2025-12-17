@@ -16,11 +16,11 @@ namespace thrift {
 namespace compiler {
 namespace test {
 namespace fixtures {
-namespace default_values_rectification {
+namespace default_values_rectification_after {
 ::apache::thrift::metadata::ThriftMetadata module_getThriftModuleMetadata();
 } // namespace facebook
 } // namespace thrift
 } // namespace compiler
 } // namespace test
 } // namespace fixtures
-} // namespace default_values_rectification
+} // namespace default_values_rectification_after

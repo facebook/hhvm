@@ -6,11 +6,11 @@
  */
 #include "thrift/compiler/test/fixtures/service-schema/gen-cpp2/module_types_custom_protocol.h"
 
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::service_schema {
 
 template void CustomException::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
 template uint32_t CustomException::write<>(apache::thrift::BinaryProtocolWriter*) const;
 template uint32_t CustomException::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
 template uint32_t CustomException::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
 
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::service_schema

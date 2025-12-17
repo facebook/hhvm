@@ -5,7 +5,7 @@
  *  @generated
  */
 
-package com.facebook.thrift.test.terse_write;
+package com.facebook.thrift.test.fixtures.terse_write;
 
 import com.facebook.swift.codec.*;
 import org.apache.thrift.TException;
@@ -39,7 +39,7 @@ public enum MyEnum implements com.facebook.thrift.enums.BaseEnum, com.facebook.t
     }
 
     static {
-      com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/terse_write/MyEnum"), MyEnum.class, MyEnum::read0));
+      com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/fixtures/terse_write/MyEnum"), MyEnum.class, MyEnum::read0));
     }
     public static com.facebook.thrift.payload.Reader<MyEnum> asReader() {
         return MyEnum::read0;

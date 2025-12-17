@@ -5,13 +5,13 @@
  *  @generated
  */
 
-package test.fixtures.basic;
+package test.fixtures.service_schema;
 
 import com.facebook.thrift.type.TypeList;
 import java.util.ArrayList;
 import java.util.List;
 
-public class __fbthrift_TypeList_296c0e35 implements TypeList {
+public class __fbthrift_TypeList_e0f484b9 implements TypeList {
 
   private static List<TypeMapping> list = new ArrayList<>();
 
@@ -20,10 +20,8 @@ public class __fbthrift_TypeList_296c0e35 implements TypeList {
   }
 
   private static void addToList0() {
-    add("test.dev/fixtures/basic/MyStruct", "test.fixtures.basic.MyStruct");
-    add("test.dev/fixtures/basic/MyDataItem", "test.fixtures.basic.MyDataItem");
-    add("test.dev/fixtures/basic/MyUnion", "test.fixtures.basic.MyUnion");
-    add("test.dev/fixtures/basic/MyEnum", "test.fixtures.basic.MyEnum");
+    add("facebook.com/thrift/test/fixtures/service_schema/CustomException", "test.fixtures.service_schema.CustomException");
+    add("facebook.com/thrift/test/fixtures/service_schema/Result", "test.fixtures.service_schema.Result");
   }
 
   static {

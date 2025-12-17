@@ -6,13 +6,13 @@
  *  @generated
  */
 
-namespace facebook\thrift\test;
+namespace facebook\thrift\test\fixtures\service_schema;
 
 /**
  * Original thrift enum:-
  * Result
  */
-<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/Result'))>>
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/fixtures/service_schema/Result'))>>
 enum Result: int {
   OK = 0;
   SO_SO = 1;
@@ -46,7 +46,7 @@ class Result_TEnumStaticMetadata implements \IThriftEnumStaticMetadata {
  * Original thrift exception:-
  * CustomException
  */
-<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/CustomException'))>>
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/fixtures/service_schema/CustomException'))>>
 class CustomException extends \TException implements \IThriftSyncStruct, \IThriftExceptionMetadata {
   use \ThriftSerializationTrait;
 
@@ -58,7 +58,7 @@ class CustomException extends \TException implements \IThriftSyncStruct, \IThrif
     2 => shape(
       'var' => 'result',
       'type' => \TType::I32,
-      'enum' => \facebook\thrift\test\Result::class,
+      'enum' => \facebook\thrift\test\fixtures\service_schema\Result::class,
     ),
   ];
   const dict<string, int> FIELDMAP = dict[
@@ -68,7 +68,7 @@ class CustomException extends \TException implements \IThriftSyncStruct, \IThrif
 
   const type TConstructorShape = shape(
     ?'name' => ?string,
-    ?'result' => ?\facebook\thrift\test\Result,
+    ?'result' => ?\facebook\thrift\test\fixtures\service_schema\Result,
   );
 
   const int STRUCTURAL_ID = 669503619523194995;
@@ -81,12 +81,12 @@ class CustomException extends \TException implements \IThriftSyncStruct, \IThrif
    * Original thrift field:-
    * 2: module.Result result
    */
-  public ?\facebook\thrift\test\Result $result;
+  public ?\facebook\thrift\test\fixtures\service_schema\Result $result;
 
-  public function __construct(?string $name = null, ?\facebook\thrift\test\Result $result = null)[] {
+  public function __construct(?string $name = null, ?\facebook\thrift\test\fixtures\service_schema\Result $result = null)[] {
     parent::__construct();
     $this->name = $name ?? '';
-    $this->result = $result ?? \facebook\thrift\test\Result::SO_SO;
+    $this->result = $result ?? \facebook\thrift\test\fixtures\service_schema\Result::SO_SO;
   }
 
   public static function withDefaultValues()[]: this {

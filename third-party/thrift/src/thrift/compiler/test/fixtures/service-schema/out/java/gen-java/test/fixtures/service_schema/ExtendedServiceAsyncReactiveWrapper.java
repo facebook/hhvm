@@ -10,7 +10,7 @@ package test.fixtures.service_schema;
 import com.facebook.thrift.client.*;
 import java.util.*;
 
-public class ExtendedServiceAsyncReactiveWrapper  extends com.facebook.thrift.test.BaseServiceAsyncReactiveWrapper
+public class ExtendedServiceAsyncReactiveWrapper  extends com.facebook.thrift.test.fixtures.service_schema.BaseServiceAsyncReactiveWrapper
     implements ExtendedService.Reactive {
     private final ExtendedService.Async _delegate;
 

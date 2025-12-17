@@ -19,46 +19,46 @@ namespace py3 {
 
 
 template<>
-inline void reset_field<::facebook::thrift::compiler::test::fixtures::default_values_rectification::EmptyStruct>(
-    ::facebook::thrift::compiler::test::fixtures::default_values_rectification::EmptyStruct& obj, uint16_t index) {
+inline void reset_field<::facebook::thrift::compiler::test::fixtures::default_values_rectification_before::EmptyStruct>(
+    ::facebook::thrift::compiler::test::fixtures::default_values_rectification_before::EmptyStruct& obj, uint16_t index) {
   switch (index) {
   }
 }
 
 template<>
-inline void reset_field<::facebook::thrift::compiler::test::fixtures::default_values_rectification::TestStruct>(
-    ::facebook::thrift::compiler::test::fixtures::default_values_rectification::TestStruct& obj, uint16_t index) {
+inline void reset_field<::facebook::thrift::compiler::test::fixtures::default_values_rectification_before::TestStruct>(
+    ::facebook::thrift::compiler::test::fixtures::default_values_rectification_before::TestStruct& obj, uint16_t index) {
   switch (index) {
     case 0:
-      obj.unqualified_int_field_ref().copy_from(default_inst<::facebook::thrift::compiler::test::fixtures::default_values_rectification::TestStruct>().unqualified_int_field_ref());
+      obj.unqualified_int_field_ref().copy_from(default_inst<::facebook::thrift::compiler::test::fixtures::default_values_rectification_before::TestStruct>().unqualified_int_field_ref());
       return;
     case 1:
-      obj.unqualified_bool_field_ref().copy_from(default_inst<::facebook::thrift::compiler::test::fixtures::default_values_rectification::TestStruct>().unqualified_bool_field_ref());
+      obj.unqualified_bool_field_ref().copy_from(default_inst<::facebook::thrift::compiler::test::fixtures::default_values_rectification_before::TestStruct>().unqualified_bool_field_ref());
       return;
     case 2:
-      obj.unqualified_list_field_ref().copy_from(default_inst<::facebook::thrift::compiler::test::fixtures::default_values_rectification::TestStruct>().unqualified_list_field_ref());
+      obj.unqualified_list_field_ref().copy_from(default_inst<::facebook::thrift::compiler::test::fixtures::default_values_rectification_before::TestStruct>().unqualified_list_field_ref());
       return;
     case 3:
-      obj.unqualified_struct_field_ref().copy_from(default_inst<::facebook::thrift::compiler::test::fixtures::default_values_rectification::TestStruct>().unqualified_struct_field_ref());
+      obj.unqualified_struct_field_ref().copy_from(default_inst<::facebook::thrift::compiler::test::fixtures::default_values_rectification_before::TestStruct>().unqualified_struct_field_ref());
       return;
     case 4:
-      obj.optional_int_field_ref().copy_from(default_inst<::facebook::thrift::compiler::test::fixtures::default_values_rectification::TestStruct>().optional_int_field_ref());
+      obj.optional_int_field_ref().copy_from(default_inst<::facebook::thrift::compiler::test::fixtures::default_values_rectification_before::TestStruct>().optional_int_field_ref());
       return;
     case 5:
-      obj.optional_bool_field_ref().copy_from(default_inst<::facebook::thrift::compiler::test::fixtures::default_values_rectification::TestStruct>().optional_bool_field_ref());
+      obj.optional_bool_field_ref().copy_from(default_inst<::facebook::thrift::compiler::test::fixtures::default_values_rectification_before::TestStruct>().optional_bool_field_ref());
       return;
     case 6:
-      obj.optional_list_field_ref().copy_from(default_inst<::facebook::thrift::compiler::test::fixtures::default_values_rectification::TestStruct>().optional_list_field_ref());
+      obj.optional_list_field_ref().copy_from(default_inst<::facebook::thrift::compiler::test::fixtures::default_values_rectification_before::TestStruct>().optional_list_field_ref());
       return;
     case 7:
-      obj.optional_struct_field_ref().copy_from(default_inst<::facebook::thrift::compiler::test::fixtures::default_values_rectification::TestStruct>().optional_struct_field_ref());
+      obj.optional_struct_field_ref().copy_from(default_inst<::facebook::thrift::compiler::test::fixtures::default_values_rectification_before::TestStruct>().optional_struct_field_ref());
       return;
   }
 }
 
 template<>
 inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
-    ::facebook::thrift::compiler::test::fixtures::default_values_rectification::EmptyStruct>::namesmap() {
+    ::facebook::thrift::compiler::test::fixtures::default_values_rectification_before::EmptyStruct>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
     }
@@ -68,7 +68,7 @@ inline const std::unordered_map<std::string_view, std::string_view>& PyStructTra
 
 template<>
 inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
-    ::facebook::thrift::compiler::test::fixtures::default_values_rectification::TestStruct>::namesmap() {
+    ::facebook::thrift::compiler::test::fixtures::default_values_rectification_before::TestStruct>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
     }

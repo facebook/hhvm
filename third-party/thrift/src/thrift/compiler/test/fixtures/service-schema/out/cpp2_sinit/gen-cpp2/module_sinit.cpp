@@ -8,7 +8,7 @@
 
 #include <thrift/lib/cpp2/gen/module_sinit_cpp.h>
 
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::service_schema {
 // Call all static init functions.
 //
 // If this file is always linked (e.g. link_whole), it will force
@@ -17,8 +17,8 @@ namespace facebook::thrift::test {
 void __fbthrift_static_init_CustomException();
 
 namespace module_constants {
-extern ::folly::Range<const ::std::string_view*> _fbthrift_schema_bc0984a218954d47_includes();
-extern ::folly::Range<const ::std::string_view*> _fbthrift_schema_bc0984a218954d47_uris();
+extern ::folly::Range<const ::std::string_view*> _fbthrift_schema_db27c1f89cb27d2_includes();
+extern ::folly::Range<const ::std::string_view*> _fbthrift_schema_db27c1f89cb27d2_uris();
 }
 
 namespace {
@@ -28,11 +28,11 @@ struct StaticInit {
     __fbthrift_static_init_CustomException();
 
     ::apache::thrift::BaseSchemaRegistry::get().registerSchema(
-      "_fbthrift_schema_bc0984a218954d47",
-      module_constants::_fbthrift_schema_bc0984a218954d47_includes(),
+      "_fbthrift_schema_db27c1f89cb27d2",
+      module_constants::_fbthrift_schema_db27c1f89cb27d2_includes(),
       "thrift/compiler/test/fixtures/service-schema/src/module.thrift",
-      -4897237288056697529,
-      module_constants::_fbthrift_schema_bc0984a218954d47_uris()
+      986987743245182930,
+      module_constants::_fbthrift_schema_db27c1f89cb27d2_uris()
     );
   }
 };
@@ -40,4 +40,4 @@ struct StaticInit {
 StaticInit staticInit;
 
 }
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::service_schema

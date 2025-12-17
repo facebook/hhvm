@@ -232,7 +232,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
       THRIFT_NAMES_TO_IDS.put("no_hack_codegen_field", 9);
       FIELD_METADATA.put(9, NO_HACK_CODEGEN_FIELD_FIELD_DESC);
       com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
-        new com.facebook.thrift.type.UniversalName("test.dev/fixtures/basic/MyStruct"),
+        new com.facebook.thrift.type.UniversalName("test.dev/fixtures/java_options/MyStruct"),
         MyStruct.class, MyStruct::read0));
     }
     

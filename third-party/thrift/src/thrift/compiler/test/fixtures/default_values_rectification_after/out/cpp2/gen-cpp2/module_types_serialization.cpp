@@ -14,11 +14,11 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
-void TccStructTraits<::facebook::thrift::compiler::test::fixtures::default_values_rectification::EmptyStruct>::translateFieldName(
+void TccStructTraits<::facebook::thrift::compiler::test::fixtures::default_values_rectification_after::EmptyStruct>::translateFieldName(
     std::string_view _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::facebook::thrift::compiler::test::fixtures::default_values_rectification::EmptyStruct>;
+  using data = apache::thrift::TStructDataStorage<::facebook::thrift::compiler::test::fixtures::default_values_rectification_after::EmptyStruct>;
   static const st::translate_field_name_table table{
       data::fields_size,
       data::fields_names.data(),
@@ -35,11 +35,11 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
-void TccStructTraits<::facebook::thrift::compiler::test::fixtures::default_values_rectification::TestStruct>::translateFieldName(
+void TccStructTraits<::facebook::thrift::compiler::test::fixtures::default_values_rectification_after::TestStruct>::translateFieldName(
     std::string_view _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::facebook::thrift::compiler::test::fixtures::default_values_rectification::TestStruct>;
+  using data = apache::thrift::TStructDataStorage<::facebook::thrift::compiler::test::fixtures::default_values_rectification_after::TestStruct>;
   static const st::translate_field_name_table table{
       data::fields_size,
       data::fields_names.data(),
@@ -52,7 +52,7 @@ void TccStructTraits<::facebook::thrift::compiler::test::fixtures::default_value
 } // namespace thrift
 } // namespace apache
 
-namespace facebook::thrift::compiler::test::fixtures::default_values_rectification {
+namespace facebook::thrift::compiler::test::fixtures::default_values_rectification_after {
 
 
 
@@ -60,4 +60,4 @@ namespace facebook::thrift::compiler::test::fixtures::default_values_rectificati
 
 
 
-} // namespace facebook::thrift::compiler::test::fixtures::default_values_rectification
+} // namespace facebook::thrift::compiler::test::fixtures::default_values_rectification_after

@@ -19,200 +19,200 @@ namespace py3 {
 
 
 template<>
-inline void reset_field<::facebook::thrift::test::terse_write::MyStruct>(
-    ::facebook::thrift::test::terse_write::MyStruct& obj, uint16_t index) {
+inline void reset_field<::facebook::thrift::test::fixtures::terse_write::MyStruct>(
+    ::facebook::thrift::test::fixtures::terse_write::MyStruct& obj, uint16_t index) {
   switch (index) {
   }
 }
 
 template<>
-inline void reset_field<::facebook::thrift::test::terse_write::MyStructWithCustomDefault>(
-    ::facebook::thrift::test::terse_write::MyStructWithCustomDefault& obj, uint16_t index) {
+inline void reset_field<::facebook::thrift::test::fixtures::terse_write::MyStructWithCustomDefault>(
+    ::facebook::thrift::test::fixtures::terse_write::MyStructWithCustomDefault& obj, uint16_t index) {
   switch (index) {
     case 0:
-      obj.field1_ref().copy_from(default_inst<::facebook::thrift::test::terse_write::MyStructWithCustomDefault>().field1_ref());
+      obj.field1_ref().copy_from(default_inst<::facebook::thrift::test::fixtures::terse_write::MyStructWithCustomDefault>().field1_ref());
       return;
   }
 }
 
 template<>
-inline void reset_field<::facebook::thrift::test::terse_write::StructLevelTerseStruct>(
-    ::facebook::thrift::test::terse_write::StructLevelTerseStruct& obj, uint16_t index) {
+inline void reset_field<::facebook::thrift::test::fixtures::terse_write::StructLevelTerseStruct>(
+    ::facebook::thrift::test::fixtures::terse_write::StructLevelTerseStruct& obj, uint16_t index) {
   switch (index) {
     case 0:
-      obj.bool_field_ref().copy_from(default_inst<::facebook::thrift::test::terse_write::StructLevelTerseStruct>().bool_field_ref());
+      obj.bool_field_ref().copy_from(default_inst<::facebook::thrift::test::fixtures::terse_write::StructLevelTerseStruct>().bool_field_ref());
       return;
     case 1:
-      obj.byte_field_ref().copy_from(default_inst<::facebook::thrift::test::terse_write::StructLevelTerseStruct>().byte_field_ref());
+      obj.byte_field_ref().copy_from(default_inst<::facebook::thrift::test::fixtures::terse_write::StructLevelTerseStruct>().byte_field_ref());
       return;
     case 2:
-      obj.short_field_ref().copy_from(default_inst<::facebook::thrift::test::terse_write::StructLevelTerseStruct>().short_field_ref());
+      obj.short_field_ref().copy_from(default_inst<::facebook::thrift::test::fixtures::terse_write::StructLevelTerseStruct>().short_field_ref());
       return;
     case 3:
-      obj.int_field_ref().copy_from(default_inst<::facebook::thrift::test::terse_write::StructLevelTerseStruct>().int_field_ref());
+      obj.int_field_ref().copy_from(default_inst<::facebook::thrift::test::fixtures::terse_write::StructLevelTerseStruct>().int_field_ref());
       return;
     case 4:
-      obj.long_field_ref().copy_from(default_inst<::facebook::thrift::test::terse_write::StructLevelTerseStruct>().long_field_ref());
+      obj.long_field_ref().copy_from(default_inst<::facebook::thrift::test::fixtures::terse_write::StructLevelTerseStruct>().long_field_ref());
       return;
     case 5:
-      obj.float_field_ref().copy_from(default_inst<::facebook::thrift::test::terse_write::StructLevelTerseStruct>().float_field_ref());
+      obj.float_field_ref().copy_from(default_inst<::facebook::thrift::test::fixtures::terse_write::StructLevelTerseStruct>().float_field_ref());
       return;
     case 6:
-      obj.double_field_ref().copy_from(default_inst<::facebook::thrift::test::terse_write::StructLevelTerseStruct>().double_field_ref());
+      obj.double_field_ref().copy_from(default_inst<::facebook::thrift::test::fixtures::terse_write::StructLevelTerseStruct>().double_field_ref());
       return;
     case 7:
-      obj.string_field_ref().copy_from(default_inst<::facebook::thrift::test::terse_write::StructLevelTerseStruct>().string_field_ref());
+      obj.string_field_ref().copy_from(default_inst<::facebook::thrift::test::fixtures::terse_write::StructLevelTerseStruct>().string_field_ref());
       return;
     case 8:
-      obj.binary_field_ref().copy_from(default_inst<::facebook::thrift::test::terse_write::StructLevelTerseStruct>().binary_field_ref());
+      obj.binary_field_ref().copy_from(default_inst<::facebook::thrift::test::fixtures::terse_write::StructLevelTerseStruct>().binary_field_ref());
       return;
     case 9:
-      obj.enum_field_ref().copy_from(default_inst<::facebook::thrift::test::terse_write::StructLevelTerseStruct>().enum_field_ref());
+      obj.enum_field_ref().copy_from(default_inst<::facebook::thrift::test::fixtures::terse_write::StructLevelTerseStruct>().enum_field_ref());
       return;
     case 10:
-      obj.list_field_ref().copy_from(default_inst<::facebook::thrift::test::terse_write::StructLevelTerseStruct>().list_field_ref());
+      obj.list_field_ref().copy_from(default_inst<::facebook::thrift::test::fixtures::terse_write::StructLevelTerseStruct>().list_field_ref());
       return;
     case 11:
-      obj.set_field_ref().copy_from(default_inst<::facebook::thrift::test::terse_write::StructLevelTerseStruct>().set_field_ref());
+      obj.set_field_ref().copy_from(default_inst<::facebook::thrift::test::fixtures::terse_write::StructLevelTerseStruct>().set_field_ref());
       return;
     case 12:
-      obj.map_field_ref().copy_from(default_inst<::facebook::thrift::test::terse_write::StructLevelTerseStruct>().map_field_ref());
+      obj.map_field_ref().copy_from(default_inst<::facebook::thrift::test::fixtures::terse_write::StructLevelTerseStruct>().map_field_ref());
       return;
     case 13:
-      obj.struct_field_ref().copy_from(default_inst<::facebook::thrift::test::terse_write::StructLevelTerseStruct>().struct_field_ref());
+      obj.struct_field_ref().copy_from(default_inst<::facebook::thrift::test::fixtures::terse_write::StructLevelTerseStruct>().struct_field_ref());
       return;
     case 14:
-      obj.union_field_ref().copy_from(default_inst<::facebook::thrift::test::terse_write::StructLevelTerseStruct>().union_field_ref());
+      obj.union_field_ref().copy_from(default_inst<::facebook::thrift::test::fixtures::terse_write::StructLevelTerseStruct>().union_field_ref());
       return;
   }
 }
 
 template<>
-inline void reset_field<::facebook::thrift::test::terse_write::FieldLevelTerseStruct>(
-    ::facebook::thrift::test::terse_write::FieldLevelTerseStruct& obj, uint16_t index) {
+inline void reset_field<::facebook::thrift::test::fixtures::terse_write::FieldLevelTerseStruct>(
+    ::facebook::thrift::test::fixtures::terse_write::FieldLevelTerseStruct& obj, uint16_t index) {
   switch (index) {
     case 0:
-      obj.terse_bool_field_ref().copy_from(default_inst<::facebook::thrift::test::terse_write::FieldLevelTerseStruct>().terse_bool_field_ref());
+      obj.terse_bool_field_ref().copy_from(default_inst<::facebook::thrift::test::fixtures::terse_write::FieldLevelTerseStruct>().terse_bool_field_ref());
       return;
     case 1:
-      obj.terse_byte_field_ref().copy_from(default_inst<::facebook::thrift::test::terse_write::FieldLevelTerseStruct>().terse_byte_field_ref());
+      obj.terse_byte_field_ref().copy_from(default_inst<::facebook::thrift::test::fixtures::terse_write::FieldLevelTerseStruct>().terse_byte_field_ref());
       return;
     case 2:
-      obj.terse_short_field_ref().copy_from(default_inst<::facebook::thrift::test::terse_write::FieldLevelTerseStruct>().terse_short_field_ref());
+      obj.terse_short_field_ref().copy_from(default_inst<::facebook::thrift::test::fixtures::terse_write::FieldLevelTerseStruct>().terse_short_field_ref());
       return;
     case 3:
-      obj.terse_int_field_ref().copy_from(default_inst<::facebook::thrift::test::terse_write::FieldLevelTerseStruct>().terse_int_field_ref());
+      obj.terse_int_field_ref().copy_from(default_inst<::facebook::thrift::test::fixtures::terse_write::FieldLevelTerseStruct>().terse_int_field_ref());
       return;
     case 4:
-      obj.terse_long_field_ref().copy_from(default_inst<::facebook::thrift::test::terse_write::FieldLevelTerseStruct>().terse_long_field_ref());
+      obj.terse_long_field_ref().copy_from(default_inst<::facebook::thrift::test::fixtures::terse_write::FieldLevelTerseStruct>().terse_long_field_ref());
       return;
     case 5:
-      obj.terse_float_field_ref().copy_from(default_inst<::facebook::thrift::test::terse_write::FieldLevelTerseStruct>().terse_float_field_ref());
+      obj.terse_float_field_ref().copy_from(default_inst<::facebook::thrift::test::fixtures::terse_write::FieldLevelTerseStruct>().terse_float_field_ref());
       return;
     case 6:
-      obj.terse_double_field_ref().copy_from(default_inst<::facebook::thrift::test::terse_write::FieldLevelTerseStruct>().terse_double_field_ref());
+      obj.terse_double_field_ref().copy_from(default_inst<::facebook::thrift::test::fixtures::terse_write::FieldLevelTerseStruct>().terse_double_field_ref());
       return;
     case 7:
-      obj.terse_string_field_ref().copy_from(default_inst<::facebook::thrift::test::terse_write::FieldLevelTerseStruct>().terse_string_field_ref());
+      obj.terse_string_field_ref().copy_from(default_inst<::facebook::thrift::test::fixtures::terse_write::FieldLevelTerseStruct>().terse_string_field_ref());
       return;
     case 8:
-      obj.terse_binary_field_ref().copy_from(default_inst<::facebook::thrift::test::terse_write::FieldLevelTerseStruct>().terse_binary_field_ref());
+      obj.terse_binary_field_ref().copy_from(default_inst<::facebook::thrift::test::fixtures::terse_write::FieldLevelTerseStruct>().terse_binary_field_ref());
       return;
     case 9:
-      obj.terse_enum_field_ref().copy_from(default_inst<::facebook::thrift::test::terse_write::FieldLevelTerseStruct>().terse_enum_field_ref());
+      obj.terse_enum_field_ref().copy_from(default_inst<::facebook::thrift::test::fixtures::terse_write::FieldLevelTerseStruct>().terse_enum_field_ref());
       return;
     case 10:
-      obj.terse_list_field_ref().copy_from(default_inst<::facebook::thrift::test::terse_write::FieldLevelTerseStruct>().terse_list_field_ref());
+      obj.terse_list_field_ref().copy_from(default_inst<::facebook::thrift::test::fixtures::terse_write::FieldLevelTerseStruct>().terse_list_field_ref());
       return;
     case 11:
-      obj.terse_set_field_ref().copy_from(default_inst<::facebook::thrift::test::terse_write::FieldLevelTerseStruct>().terse_set_field_ref());
+      obj.terse_set_field_ref().copy_from(default_inst<::facebook::thrift::test::fixtures::terse_write::FieldLevelTerseStruct>().terse_set_field_ref());
       return;
     case 12:
-      obj.terse_map_field_ref().copy_from(default_inst<::facebook::thrift::test::terse_write::FieldLevelTerseStruct>().terse_map_field_ref());
+      obj.terse_map_field_ref().copy_from(default_inst<::facebook::thrift::test::fixtures::terse_write::FieldLevelTerseStruct>().terse_map_field_ref());
       return;
     case 13:
-      obj.terse_struct_field_ref().copy_from(default_inst<::facebook::thrift::test::terse_write::FieldLevelTerseStruct>().terse_struct_field_ref());
+      obj.terse_struct_field_ref().copy_from(default_inst<::facebook::thrift::test::fixtures::terse_write::FieldLevelTerseStruct>().terse_struct_field_ref());
       return;
     case 14:
-      obj.terse_union_field_ref().copy_from(default_inst<::facebook::thrift::test::terse_write::FieldLevelTerseStruct>().terse_union_field_ref());
+      obj.terse_union_field_ref().copy_from(default_inst<::facebook::thrift::test::fixtures::terse_write::FieldLevelTerseStruct>().terse_union_field_ref());
       return;
     case 15:
-      obj.bool_field_ref().copy_from(default_inst<::facebook::thrift::test::terse_write::FieldLevelTerseStruct>().bool_field_ref());
+      obj.bool_field_ref().copy_from(default_inst<::facebook::thrift::test::fixtures::terse_write::FieldLevelTerseStruct>().bool_field_ref());
       return;
     case 16:
-      obj.byte_field_ref().copy_from(default_inst<::facebook::thrift::test::terse_write::FieldLevelTerseStruct>().byte_field_ref());
+      obj.byte_field_ref().copy_from(default_inst<::facebook::thrift::test::fixtures::terse_write::FieldLevelTerseStruct>().byte_field_ref());
       return;
     case 17:
-      obj.short_field_ref().copy_from(default_inst<::facebook::thrift::test::terse_write::FieldLevelTerseStruct>().short_field_ref());
+      obj.short_field_ref().copy_from(default_inst<::facebook::thrift::test::fixtures::terse_write::FieldLevelTerseStruct>().short_field_ref());
       return;
     case 18:
-      obj.int_field_ref().copy_from(default_inst<::facebook::thrift::test::terse_write::FieldLevelTerseStruct>().int_field_ref());
+      obj.int_field_ref().copy_from(default_inst<::facebook::thrift::test::fixtures::terse_write::FieldLevelTerseStruct>().int_field_ref());
       return;
     case 19:
-      obj.long_field_ref().copy_from(default_inst<::facebook::thrift::test::terse_write::FieldLevelTerseStruct>().long_field_ref());
+      obj.long_field_ref().copy_from(default_inst<::facebook::thrift::test::fixtures::terse_write::FieldLevelTerseStruct>().long_field_ref());
       return;
     case 20:
-      obj.float_field_ref().copy_from(default_inst<::facebook::thrift::test::terse_write::FieldLevelTerseStruct>().float_field_ref());
+      obj.float_field_ref().copy_from(default_inst<::facebook::thrift::test::fixtures::terse_write::FieldLevelTerseStruct>().float_field_ref());
       return;
     case 21:
-      obj.double_field_ref().copy_from(default_inst<::facebook::thrift::test::terse_write::FieldLevelTerseStruct>().double_field_ref());
+      obj.double_field_ref().copy_from(default_inst<::facebook::thrift::test::fixtures::terse_write::FieldLevelTerseStruct>().double_field_ref());
       return;
     case 22:
-      obj.string_field_ref().copy_from(default_inst<::facebook::thrift::test::terse_write::FieldLevelTerseStruct>().string_field_ref());
+      obj.string_field_ref().copy_from(default_inst<::facebook::thrift::test::fixtures::terse_write::FieldLevelTerseStruct>().string_field_ref());
       return;
     case 23:
-      obj.binary_field_ref().copy_from(default_inst<::facebook::thrift::test::terse_write::FieldLevelTerseStruct>().binary_field_ref());
+      obj.binary_field_ref().copy_from(default_inst<::facebook::thrift::test::fixtures::terse_write::FieldLevelTerseStruct>().binary_field_ref());
       return;
     case 24:
-      obj.enum_field_ref().copy_from(default_inst<::facebook::thrift::test::terse_write::FieldLevelTerseStruct>().enum_field_ref());
+      obj.enum_field_ref().copy_from(default_inst<::facebook::thrift::test::fixtures::terse_write::FieldLevelTerseStruct>().enum_field_ref());
       return;
     case 25:
-      obj.list_field_ref().copy_from(default_inst<::facebook::thrift::test::terse_write::FieldLevelTerseStruct>().list_field_ref());
+      obj.list_field_ref().copy_from(default_inst<::facebook::thrift::test::fixtures::terse_write::FieldLevelTerseStruct>().list_field_ref());
       return;
     case 26:
-      obj.set_field_ref().copy_from(default_inst<::facebook::thrift::test::terse_write::FieldLevelTerseStruct>().set_field_ref());
+      obj.set_field_ref().copy_from(default_inst<::facebook::thrift::test::fixtures::terse_write::FieldLevelTerseStruct>().set_field_ref());
       return;
     case 27:
-      obj.map_field_ref().copy_from(default_inst<::facebook::thrift::test::terse_write::FieldLevelTerseStruct>().map_field_ref());
+      obj.map_field_ref().copy_from(default_inst<::facebook::thrift::test::fixtures::terse_write::FieldLevelTerseStruct>().map_field_ref());
       return;
     case 28:
-      obj.struct_field_ref().copy_from(default_inst<::facebook::thrift::test::terse_write::FieldLevelTerseStruct>().struct_field_ref());
+      obj.struct_field_ref().copy_from(default_inst<::facebook::thrift::test::fixtures::terse_write::FieldLevelTerseStruct>().struct_field_ref());
       return;
     case 29:
-      obj.union_field_ref().copy_from(default_inst<::facebook::thrift::test::terse_write::FieldLevelTerseStruct>().union_field_ref());
+      obj.union_field_ref().copy_from(default_inst<::facebook::thrift::test::fixtures::terse_write::FieldLevelTerseStruct>().union_field_ref());
       return;
   }
 }
 
 template<>
-inline void reset_field<::facebook::thrift::test::terse_write::AdaptedFields>(
-    ::facebook::thrift::test::terse_write::AdaptedFields& obj, uint16_t index) {
+inline void reset_field<::facebook::thrift::test::fixtures::terse_write::AdaptedFields>(
+    ::facebook::thrift::test::fixtures::terse_write::AdaptedFields& obj, uint16_t index) {
   switch (index) {
     case 0:
-      obj.field1_ref().copy_from(default_inst<::facebook::thrift::test::terse_write::AdaptedFields>().field1_ref());
+      obj.field1_ref().copy_from(default_inst<::facebook::thrift::test::fixtures::terse_write::AdaptedFields>().field1_ref());
       return;
     case 1:
-      obj.field2_ref().copy_from(default_inst<::facebook::thrift::test::terse_write::AdaptedFields>().field2_ref());
+      obj.field2_ref().copy_from(default_inst<::facebook::thrift::test::fixtures::terse_write::AdaptedFields>().field2_ref());
       return;
     case 2:
-      obj.field3_ref().copy_from(default_inst<::facebook::thrift::test::terse_write::AdaptedFields>().field3_ref());
+      obj.field3_ref().copy_from(default_inst<::facebook::thrift::test::fixtures::terse_write::AdaptedFields>().field3_ref());
       return;
   }
 }
 
 template<>
-inline void reset_field<::facebook::thrift::test::terse_write::TerseException>(
-    ::facebook::thrift::test::terse_write::TerseException& obj, uint16_t index) {
+inline void reset_field<::facebook::thrift::test::fixtures::terse_write::TerseException>(
+    ::facebook::thrift::test::fixtures::terse_write::TerseException& obj, uint16_t index) {
   switch (index) {
     case 0:
-      obj.msg_ref().copy_from(default_inst<::facebook::thrift::test::terse_write::TerseException>().msg_ref());
+      obj.msg_ref().copy_from(default_inst<::facebook::thrift::test::fixtures::terse_write::TerseException>().msg_ref());
       return;
   }
 }
 
 template<>
 inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
-    ::facebook::thrift::test::terse_write::MyStruct>::namesmap() {
+    ::facebook::thrift::test::fixtures::terse_write::MyStruct>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
     }
@@ -222,7 +222,7 @@ inline const std::unordered_map<std::string_view, std::string_view>& PyStructTra
 
 template<>
 inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
-    ::facebook::thrift::test::terse_write::MyUnion>::namesmap() {
+    ::facebook::thrift::test::fixtures::terse_write::MyUnion>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
     }
@@ -232,7 +232,7 @@ inline const std::unordered_map<std::string_view, std::string_view>& PyStructTra
 
 template<>
 inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
-    ::facebook::thrift::test::terse_write::MyStructWithCustomDefault>::namesmap() {
+    ::facebook::thrift::test::fixtures::terse_write::MyStructWithCustomDefault>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
     }
@@ -242,7 +242,7 @@ inline const std::unordered_map<std::string_view, std::string_view>& PyStructTra
 
 template<>
 inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
-    ::facebook::thrift::test::terse_write::StructLevelTerseStruct>::namesmap() {
+    ::facebook::thrift::test::fixtures::terse_write::StructLevelTerseStruct>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
     }
@@ -252,7 +252,7 @@ inline const std::unordered_map<std::string_view, std::string_view>& PyStructTra
 
 template<>
 inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
-    ::facebook::thrift::test::terse_write::FieldLevelTerseStruct>::namesmap() {
+    ::facebook::thrift::test::fixtures::terse_write::FieldLevelTerseStruct>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
     }
@@ -262,7 +262,7 @@ inline const std::unordered_map<std::string_view, std::string_view>& PyStructTra
 
 template<>
 inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
-    ::facebook::thrift::test::terse_write::AdaptedFields>::namesmap() {
+    ::facebook::thrift::test::fixtures::terse_write::AdaptedFields>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
     }
@@ -272,7 +272,7 @@ inline const std::unordered_map<std::string_view, std::string_view>& PyStructTra
 
 template<>
 inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
-    ::facebook::thrift::test::terse_write::TerseException>::namesmap() {
+    ::facebook::thrift::test::fixtures::terse_write::TerseException>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
     }

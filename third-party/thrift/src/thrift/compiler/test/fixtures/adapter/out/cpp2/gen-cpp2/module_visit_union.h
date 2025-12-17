@@ -14,7 +14,7 @@ namespace thrift {
 namespace detail {
 
 template <>
-struct VisitUnion<::facebook::thrift::test::Baz> {
+struct VisitUnion<::facebook::thrift::test::fixtures::adapter::Baz> {
 
   template <typename F, typename T>
   decltype(auto) operator()([[maybe_unused]] F&& f, T&& t) const {
@@ -41,7 +41,7 @@ struct VisitUnion<::facebook::thrift::test::Baz> {
   }
 };
 template <>
-struct VisitUnion<::facebook::thrift::test::ThriftAdaptTestUnion> {
+struct VisitUnion<::facebook::thrift::test::fixtures::adapter::ThriftAdaptTestUnion> {
 
   template <typename F, typename T>
   decltype(auto) operator()([[maybe_unused]] F&& f, T&& t) const {

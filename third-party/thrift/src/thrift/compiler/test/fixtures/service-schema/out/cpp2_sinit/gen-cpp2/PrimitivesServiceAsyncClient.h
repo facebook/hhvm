@@ -18,30 +18,30 @@ namespace apache { namespace thrift {
   namespace transport { class THeader; }
 }}
 
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::service_schema {
 class PrimitivesService;
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::service_schema
 namespace apache::thrift {
 
 namespace detail {
 
 template<>
-struct ServiceMethodTypesFootprint<::facebook::thrift::test::PrimitivesService> {
+struct ServiceMethodTypesFootprint<::facebook::thrift::test::fixtures::service_schema::PrimitivesService> {
   // The types that appear in the definitions of service methods.
   // e.g. if it appears as a type of an input, output, exception sink or stream
   // parameter of a client stub, it appears here,
   using TypesInMethods = folly::tag_t<
   ::std::int64_t,
-  ::facebook::thrift::test::CustomException,
-  ::facebook::thrift::test::Result,
+  ::facebook::thrift::test::fixtures::service_schema::CustomException,
+  ::facebook::thrift::test::fixtures::service_schema::Result,
   ::cpp2::I,
   void>;
 };
 } // namespace detail
 
 template <>
-class Client<::facebook::thrift::test::PrimitivesService> : public apache::thrift::GeneratedAsyncClient {
-  static_assert(!folly::is_detected_v<::apache::thrift::detail::st::detect_complete, ::facebook::thrift::test::PrimitivesService>, "Definition collision with service tag. Either rename the Thrift service using @cpp.Name annotation or rename the conflicting C++ type.");
+class Client<::facebook::thrift::test::fixtures::service_schema::PrimitivesService> : public apache::thrift::GeneratedAsyncClient {
+  static_assert(!folly::is_detected_v<::apache::thrift::detail::st::detect_complete, ::facebook::thrift::test::fixtures::service_schema::PrimitivesService>, "Definition collision with service tag. Either rename the Thrift service using @cpp.Name annotation or rename the conflicting C++ type.");
  public:
   using apache::thrift::GeneratedAsyncClient::GeneratedAsyncClient;
 
@@ -49,7 +49,7 @@ class Client<::facebook::thrift::test::PrimitivesService> : public apache::thrif
     return "PrimitivesService";
   }
 
-  static constexpr folly::cstring_view __fbthrift_thrift_uri = "facebook.com/thrift/test/PrimitivesService";
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = "facebook.com/thrift/test/fixtures/service_schema/PrimitivesService";
 
 
   /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "init"} */
@@ -174,33 +174,33 @@ class Client<::facebook::thrift::test::PrimitivesService> : public apache::thrif
  public:
 
   /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "method_that_throws"} */
-  virtual ::facebook::thrift::test::Result sync_method_that_throws();
+  virtual ::facebook::thrift::test::fixtures::service_schema::Result sync_method_that_throws();
   /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "method_that_throws"} */
-  virtual ::facebook::thrift::test::Result sync_method_that_throws(apache::thrift::RpcOptions& rpcOptions);
+  virtual ::facebook::thrift::test::fixtures::service_schema::Result sync_method_that_throws(apache::thrift::RpcOptions& rpcOptions);
 
   /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "method_that_throws"} */
-  virtual folly::Future<::facebook::thrift::test::Result> future_method_that_throws();
+  virtual folly::Future<::facebook::thrift::test::fixtures::service_schema::Result> future_method_that_throws();
   /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "method_that_throws"} */
-  virtual folly::SemiFuture<::facebook::thrift::test::Result> semifuture_method_that_throws();
+  virtual folly::SemiFuture<::facebook::thrift::test::fixtures::service_schema::Result> semifuture_method_that_throws();
   /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "method_that_throws"} */
-  virtual folly::Future<::facebook::thrift::test::Result> future_method_that_throws(apache::thrift::RpcOptions& rpcOptions);
+  virtual folly::Future<::facebook::thrift::test::fixtures::service_schema::Result> future_method_that_throws(apache::thrift::RpcOptions& rpcOptions);
   /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "method_that_throws"} */
-  virtual folly::SemiFuture<::facebook::thrift::test::Result> semifuture_method_that_throws(apache::thrift::RpcOptions& rpcOptions);
+  virtual folly::SemiFuture<::facebook::thrift::test::fixtures::service_schema::Result> semifuture_method_that_throws(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
   /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "method_that_throws"} */
   template <int = 0>
-  folly::coro::Task<::facebook::thrift::test::Result> co_method_that_throws() {
+  folly::coro::Task<::facebook::thrift::test::fixtures::service_schema::Result> co_method_that_throws() {
     return co_method_that_throws<false>(nullptr);
   }
   /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "method_that_throws"} */
   template <int = 0>
-  folly::coro::Task<::facebook::thrift::test::Result> co_method_that_throws(apache::thrift::RpcOptions& rpcOptions) {
+  folly::coro::Task<::facebook::thrift::test::fixtures::service_schema::Result> co_method_that_throws(apache::thrift::RpcOptions& rpcOptions) {
     return co_method_that_throws<true>(&rpcOptions);
   }
  private:
   template <bool hasRpcOptions>
-  folly::coro::Task<::facebook::thrift::test::Result> co_method_that_throws(apache::thrift::RpcOptions* rpcOptions) {
+  folly::coro::Task<::facebook::thrift::test::fixtures::service_schema::Result> co_method_that_throws(apache::thrift::RpcOptions* rpcOptions) {
     const folly::CancellationToken& cancelToken =
         co_await folly::coro::co_current_cancellation_token;
     const bool cancellable = cancelToken.canBeCancelled();
@@ -235,7 +235,7 @@ class Client<::facebook::thrift::test::PrimitivesService> : public apache::thrif
     }
     returnState.resetProtocolId(protocolId);
     returnState.resetCtx(std::move(ctx));
-    ::facebook::thrift::test::Result _return;
+    ::facebook::thrift::test::fixtures::service_schema::Result _return;
     SCOPE_EXIT {
       if (hasRpcOptions && returnState.header()) {
         auto* rheader = returnState.header();
@@ -262,21 +262,21 @@ class Client<::facebook::thrift::test::PrimitivesService> : public apache::thrif
 
 
   /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "method_that_throws"} */
-  static folly::exception_wrapper recv_wrapped_method_that_throws(::facebook::thrift::test::Result& _return, ::apache::thrift::ClientReceiveState& state);
+  static folly::exception_wrapper recv_wrapped_method_that_throws(::facebook::thrift::test::fixtures::service_schema::Result& _return, ::apache::thrift::ClientReceiveState& state);
   /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "method_that_throws"} */
-  static ::facebook::thrift::test::Result recv_method_that_throws(::apache::thrift::ClientReceiveState& state);
+  static ::facebook::thrift::test::fixtures::service_schema::Result recv_method_that_throws(::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
   /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "method_that_throws"} */
-  virtual ::facebook::thrift::test::Result recv_instance_method_that_throws(::apache::thrift::ClientReceiveState& state);
+  virtual ::facebook::thrift::test::fixtures::service_schema::Result recv_instance_method_that_throws(::apache::thrift::ClientReceiveState& state);
   /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "method_that_throws"} */
-  virtual folly::exception_wrapper recv_instance_wrapped_method_that_throws(::facebook::thrift::test::Result& _return, ::apache::thrift::ClientReceiveState& state);
+  virtual folly::exception_wrapper recv_instance_wrapped_method_that_throws(::facebook::thrift::test::fixtures::service_schema::Result& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   apache::thrift::SerializedRequest fbthrift_serialize_method_that_throws(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack);
   template <typename RpcOptions>
   void fbthrift_send_method_that_throws(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback, std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> method_that_throwsCtx(apache::thrift::RpcOptions* rpcOptions);
   template <typename CallbackType>
-  folly::SemiFuture<::facebook::thrift::test::Result> fbthrift_semifuture_method_that_throws(apache::thrift::RpcOptions& rpcOptions);
+  folly::SemiFuture<::facebook::thrift::test::fixtures::service_schema::Result> fbthrift_semifuture_method_that_throws(apache::thrift::RpcOptions& rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "return_void_method"} */
   virtual void return_void_method(std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int64_t p_id, const ::cpp2::I& p_i);
@@ -396,6 +396,6 @@ class Client<::facebook::thrift::test::PrimitivesService> : public apache::thrif
 
 } // namespace apache::thrift
 
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::service_schema {
 using PrimitivesServiceAsyncClient [[deprecated("Use apache::thrift::Client<PrimitivesService> instead")]] = ::apache::thrift::Client<PrimitivesService>;
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::service_schema

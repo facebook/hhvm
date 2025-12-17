@@ -20,7 +20,7 @@ import com.facebook.thrift.client.ResponseWrapper;
 import com.facebook.thrift.client.RpcOptions;
 import com.facebook.thrift.util.Readers;
 
-public class ExtendedServiceReactiveClient extends com.facebook.thrift.test.BaseServiceReactiveClient
+public class ExtendedServiceReactiveClient extends com.facebook.thrift.test.fixtures.service_schema.BaseServiceReactiveClient
   implements ExtendedService.Reactive {
   private static final AtomicLong _interactionCounter = new AtomicLong(0);
 

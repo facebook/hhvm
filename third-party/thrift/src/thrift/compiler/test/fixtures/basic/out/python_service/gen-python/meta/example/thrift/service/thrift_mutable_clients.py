@@ -40,7 +40,7 @@ class EchoService(_fbthrift_python_Client["EchoService.Async", "EchoService.Sync
     
     @staticmethod
     def __get_thrift_uri__() -> _typing.Optional[str]:
-        return None
+        return "test.dev/fixtures/basic/EchoService"
     
     @staticmethod
     def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
@@ -58,7 +58,7 @@ class EchoService(_fbthrift_python_Client["EchoService.Async", "EchoService.Sync
     
         @staticmethod
         def __get_thrift_uri__() -> _typing.Optional[str]:
-            return None
+            return "test.dev/fixtures/basic/EchoService"
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
@@ -77,7 +77,7 @@ class EchoService(_fbthrift_python_Client["EchoService.Async", "EchoService.Sync
                     request=request,),
                 _fbthrift__meta__example__thrift__service__thrift_mutable_types._fbthrift_EchoService_echo_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
-                uri_or_name="EchoService",
+                uri_or_name="test.dev/fixtures/basic/EchoService",
                 rpc_options=rpc_options,
                 is_mutable_types=True,
             )
@@ -103,7 +103,7 @@ class EchoService(_fbthrift_python_Client["EchoService.Async", "EchoService.Sync
     
         @staticmethod
         def __get_thrift_uri__() -> _typing.Optional[str]:
-            return None
+            return "test.dev/fixtures/basic/EchoService"
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
@@ -121,7 +121,7 @@ class EchoService(_fbthrift_python_Client["EchoService.Async", "EchoService.Sync
                 _fbthrift__meta__example__thrift__service__thrift_mutable_types._fbthrift_EchoService_echo_args(
                     request=request,),
                 _fbthrift__meta__example__thrift__service__thrift_mutable_types._fbthrift_EchoService_echo_result,
-                uri_or_name="EchoService",
+                uri_or_name="test.dev/fixtures/basic/EchoService",
                 rpc_options=rpc_options,
                 is_mutable_types=True,
             )
@@ -146,7 +146,7 @@ class ExtendedEchoService(_fbthrift_python_Client["ExtendedEchoService.Async", "
     
     @staticmethod
     def __get_thrift_uri__() -> _typing.Optional[str]:
-        return None
+        return "test.dev/fixtures/basic/ExtendedEchoService"
     
     @staticmethod
     def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
@@ -164,7 +164,7 @@ class ExtendedEchoService(_fbthrift_python_Client["ExtendedEchoService.Async", "
     
         @staticmethod
         def __get_thrift_uri__() -> _typing.Optional[str]:
-            return None
+            return "test.dev/fixtures/basic/ExtendedEchoService"
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
@@ -183,7 +183,7 @@ class ExtendedEchoService(_fbthrift_python_Client["ExtendedEchoService.Async", "
                     request=request,),
                 _fbthrift__meta__example__thrift__service__thrift_mutable_types._fbthrift_ExtendedEchoService_echo_2_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
-                uri_or_name="ExtendedEchoService",
+                uri_or_name="test.dev/fixtures/basic/ExtendedEchoService",
                 rpc_options=rpc_options,
                 is_mutable_types=True,
             )
@@ -209,7 +209,7 @@ class ExtendedEchoService(_fbthrift_python_Client["ExtendedEchoService.Async", "
     
         @staticmethod
         def __get_thrift_uri__() -> _typing.Optional[str]:
-            return None
+            return "test.dev/fixtures/basic/ExtendedEchoService"
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
@@ -227,7 +227,7 @@ class ExtendedEchoService(_fbthrift_python_Client["ExtendedEchoService.Async", "
                 _fbthrift__meta__example__thrift__service__thrift_mutable_types._fbthrift_ExtendedEchoService_echo_2_args(
                     request=request,),
                 _fbthrift__meta__example__thrift__service__thrift_mutable_types._fbthrift_ExtendedEchoService_echo_2_result,
-                uri_or_name="ExtendedEchoService",
+                uri_or_name="test.dev/fixtures/basic/ExtendedEchoService",
                 rpc_options=rpc_options,
                 is_mutable_types=True,
             )
@@ -252,7 +252,7 @@ class ExtendedMyService(_fbthrift_python_Client["ExtendedMyService.Async", "Exte
     
     @staticmethod
     def __get_thrift_uri__() -> _typing.Optional[str]:
-        return None
+        return "test.dev/fixtures/basic/ExtendedMyService"
     
     @staticmethod
     def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
@@ -270,7 +270,7 @@ class ExtendedMyService(_fbthrift_python_Client["ExtendedMyService.Async", "Exte
     
         @staticmethod
         def __get_thrift_uri__() -> _typing.Optional[str]:
-            return None
+            return "test.dev/fixtures/basic/ExtendedMyService"
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
@@ -291,7 +291,7 @@ class ExtendedMyService(_fbthrift_python_Client["ExtendedMyService.Async", "Exte
                     data=data,),
                 _fbthrift__meta__example__thrift__service__thrift_mutable_types._fbthrift_ExtendedMyService_putDataById_2_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
-                uri_or_name="ExtendedMyService",
+                uri_or_name="test.dev/fixtures/basic/ExtendedMyService",
                 rpc_options=rpc_options,
                 is_mutable_types=True,
             )
@@ -307,7 +307,7 @@ class ExtendedMyService(_fbthrift_python_Client["ExtendedMyService.Async", "Exte
     
         @staticmethod
         def __get_thrift_uri__() -> _typing.Optional[str]:
-            return None
+            return "test.dev/fixtures/basic/ExtendedMyService"
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
@@ -327,7 +327,7 @@ class ExtendedMyService(_fbthrift_python_Client["ExtendedMyService.Async", "Exte
                     id=id,
                     data=data,),
                 _fbthrift__meta__example__thrift__service__thrift_mutable_types._fbthrift_ExtendedMyService_putDataById_2_result,
-                uri_or_name="ExtendedMyService",
+                uri_or_name="test.dev/fixtures/basic/ExtendedMyService",
                 rpc_options=rpc_options,
                 is_mutable_types=True,
             )

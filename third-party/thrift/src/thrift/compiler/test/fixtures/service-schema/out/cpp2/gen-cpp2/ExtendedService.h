@@ -29,7 +29,7 @@ namespace apache { namespace thrift {
   namespace transport { class THeader; }
 }}
 
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::service_schema {
 class ExtendedService;
 class ExtendedServiceAsyncProcessor;
 
@@ -38,19 +38,19 @@ class ExtendedServiceServiceInfoHolder : public apache::thrift::ServiceInfoHolde
    apache::thrift::ServiceRequestInfoMap const& requestInfoMap() const override;
    static apache::thrift::ServiceRequestInfoMap staticRequestInfoMap();
 };
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::service_schema
 
 namespace apache::thrift {
 template <>
-class ServiceHandler<::facebook::thrift::test::ExtendedService> : virtual public ::facebook::thrift::test::BaseServiceSvIf {
-  static_assert(!folly::is_detected_v<::apache::thrift::detail::st::detect_complete, ::facebook::thrift::test::ExtendedService>, "Definition collision with service tag. Either rename the Thrift service using @cpp.Name annotation or rename the conflicting C++ type.");
+class ServiceHandler<::facebook::thrift::test::fixtures::service_schema::ExtendedService> : virtual public ::facebook::thrift::test::fixtures::service_schema::BaseServiceSvIf {
+  static_assert(!folly::is_detected_v<::apache::thrift::detail::st::detect_complete, ::facebook::thrift::test::fixtures::service_schema::ExtendedService>, "Definition collision with service tag. Either rename the Thrift service using @cpp.Name annotation or rename the conflicting C++ type.");
 
  public:
   std::string_view getGeneratedName() const override { return "ExtendedService"; }
 
-  static constexpr folly::cstring_view __fbthrift_thrift_uri = "facebook.com/thrift/test/ExtendedService";
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = "facebook.com/thrift/test/fixtures/service_schema/ExtendedService";
 
-  typedef ::facebook::thrift::test::ExtendedServiceAsyncProcessor ProcessorType;
+  typedef ::facebook::thrift::test::fixtures::service_schema::ExtendedServiceAsyncProcessor ProcessorType;
   std::unique_ptr<apache::thrift::AsyncProcessor> getProcessor() override;
   CreateMethodMetadataResult createMethodMetadata() override;
   #if defined(THRIFT_SCHEMA_AVAILABLE)
@@ -71,7 +71,7 @@ class ServiceHandler<::facebook::thrift::test::ExtendedService> : virtual public
 #endif
   virtual void async_tm_init(apache::thrift::HandlerCallbackPtr<::std::int64_t> callback, ::std::int64_t p_param0, ::std::int64_t p_param1);
  private:
-  static ::facebook::thrift::test::ExtendedServiceServiceInfoHolder __fbthrift_serviceInfoHolder;
+  static ::facebook::thrift::test::fixtures::service_schema::ExtendedServiceServiceInfoHolder __fbthrift_serviceInfoHolder;
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_init{apache::thrift::detail::si::InvocationType::AsyncTm};
  public:
   void fbthrift_execute_decorators_before_base_method(apache::thrift::Cpp2RequestContext& /*requestCtx*/) override {}
@@ -80,36 +80,36 @@ class ServiceHandler<::facebook::thrift::test::ExtendedService> : virtual public
   virtual void fbthrift_execute_decorators_before_init(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::int64_t>::type /*p_param0*/, apache::thrift::detail::DecoratorArgType<::std::int64_t>::type /*p_param1*/) {}
   virtual void fbthrift_execute_decorators_after_init(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::std::int64_t>::type /*result*/) {}
   static void fbthrift_invoke_decorator_after_init(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::std::int64_t>::type result) {
-    static_cast<ServiceHandler<::facebook::thrift::test::ExtendedService>*>(iface)->fbthrift_execute_decorators_after_init(*ctx, result);
+    static_cast<ServiceHandler<::facebook::thrift::test::fixtures::service_schema::ExtendedService>*>(iface)->fbthrift_execute_decorators_after_init(*ctx, result);
   }
 };
 
 namespace detail {
-template <> struct TSchemaAssociation<::facebook::thrift::test::ExtendedService, false> {
+template <> struct TSchemaAssociation<::facebook::thrift::test::fixtures::service_schema::ExtendedService, false> {
   static ::folly::Range<const ::std::string_view*> bundle();
-  static constexpr int64_t programId = -4897237288056697529;
-  static constexpr ::std::string_view definitionKey = {"\x2f\x39\x63\x5e\x7a\x62\x4d\xa7\x6e\x69\x78\xae\x7e\x49\xe3\x79", 16};
+  static constexpr int64_t programId = 986987743245182930;
+  static constexpr ::std::string_view definitionKey = {"\x18\x6b\x65\x4f\x98\x6f\x7b\x04\xca\x95\xdf\xc9\xae\xff\xe8\x08", 16};
 };
 }
 } // namespace apache::thrift
 
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::service_schema {
 using ExtendedServiceSvIf [[deprecated("Use apache::thrift::ServiceHandler<ExtendedService> instead")]] = ::apache::thrift::ServiceHandler<ExtendedService>;
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::service_schema
 
-namespace facebook::thrift::test {
-class ExtendedServiceSvNull : public ::apache::thrift::ServiceHandler<ExtendedService>, virtual public ::apache::thrift::ServiceHandler<::facebook::thrift::test::BaseService> {
+namespace facebook::thrift::test::fixtures::service_schema {
+class ExtendedServiceSvNull : public ::apache::thrift::ServiceHandler<ExtendedService>, virtual public ::apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::service_schema::BaseService> {
  public:
   ::std::int64_t init(::std::int64_t /*param0*/, ::std::int64_t /*param1*/) override;
 };
 
-class ExtendedServiceAsyncProcessor : public ::facebook::thrift::test::BaseServiceAsyncProcessor {
+class ExtendedServiceAsyncProcessor : public ::facebook::thrift::test::fixtures::service_schema::BaseServiceAsyncProcessor {
  public:
   std::string_view getServiceName() override;
   void getServiceMetadata(apache::thrift::metadata::ThriftServiceMetadataResponse& response) override;
-  using BaseAsyncProcessor = ::facebook::thrift::test::BaseServiceAsyncProcessor;
+  using BaseAsyncProcessor = ::facebook::thrift::test::fixtures::service_schema::BaseServiceAsyncProcessor;
  protected:
-  ::apache::thrift::ServiceHandler<::facebook::thrift::test::ExtendedService>* iface_;
+  ::apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::service_schema::ExtendedService>* iface_;
  public:
   void processSerializedCompressedRequestWithMetadata(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, const apache::thrift::AsyncProcessorFactory::MethodMetadata& methodMetadata, apache::thrift::protocol::PROTOCOL_TYPES protType, apache::thrift::Cpp2RequestContext* context, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) override;
   void executeRequest(apache::thrift::ServerRequest&& serverRequest, const apache::thrift::AsyncProcessorFactory::MethodMetadata& methodMetadata) override;
@@ -158,10 +158,10 @@ class ExtendedServiceAsyncProcessor : public ::facebook::thrift::test::BaseServi
   // End of Service Methods
   //
  public:
-  ExtendedServiceAsyncProcessor(::apache::thrift::ServiceHandler<::facebook::thrift::test::ExtendedService>* iface) :
-      ::facebook::thrift::test::BaseServiceAsyncProcessor(iface),
+  ExtendedServiceAsyncProcessor(::apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::service_schema::ExtendedService>* iface) :
+      ::facebook::thrift::test::fixtures::service_schema::BaseServiceAsyncProcessor(iface),
       iface_(iface) {}
   ~ExtendedServiceAsyncProcessor() override {}
 };
 
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::service_schema

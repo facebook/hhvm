@@ -43,7 +43,7 @@ public final class AdaptTestUnion implements com.facebook.thrift.payload.ThriftS
       THRIFT_NAMES_TO_IDS.put("custom", 2);
       FIELD_METADATA.put(2, CUSTOM_FIELD_DESC);
       com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
-        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/AdaptTestUnion"),
+        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/fixtures/adapter/AdaptTestUnion"),
         AdaptTestUnion.class, AdaptTestUnion::read0));
     }
 

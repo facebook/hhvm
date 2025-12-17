@@ -6,7 +6,7 @@
  */
 #include "thrift/compiler/test/fixtures/runtime-annotations/gen-cpp2/module_types_custom_protocol.h"
 
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::runtime_annotations {
 
 template void MyAnnotation::readNoXfer<>(apache::thrift::CompactProtocolReader*);
 template uint32_t MyAnnotation::write<>(apache::thrift::CompactProtocolWriter*) const;
@@ -28,4 +28,4 @@ template uint32_t MyException::write<>(apache::thrift::CompactProtocolWriter*) c
 template uint32_t MyException::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t MyException::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::runtime_annotations

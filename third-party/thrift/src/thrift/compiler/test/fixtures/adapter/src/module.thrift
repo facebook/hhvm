@@ -27,7 +27,7 @@ include "thrift/annotation/java.thrift"
 include "thrift/annotation/rust.thrift"
 
 @thrift.Experimental
-package "facebook.com/thrift/test"
+package "facebook.com/thrift/test/fixtures/adapter"
 
 @thrift.AllowLegacyTypedefUri
 @hack.Adapter{name = '\\Adapter2'}

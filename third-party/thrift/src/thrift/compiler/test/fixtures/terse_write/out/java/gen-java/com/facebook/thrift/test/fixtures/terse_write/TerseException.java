@@ -5,7 +5,7 @@
  *  @generated
  */
 
-package com.facebook.thrift.test.terse_write;
+package com.facebook.thrift.test.fixtures.terse_write;
 
 import com.facebook.swift.codec.*;
 import com.facebook.swift.codec.ThriftField.Requiredness;
@@ -37,7 +37,7 @@ public final class TerseException extends org.apache.thrift.TBaseException imple
       THRIFT_NAMES_TO_IDS.put("msg", 1);
       FIELD_METADATA.put(1, MSG_FIELD_DESC);
       com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
-        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/terse_write/TerseException"),
+        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/fixtures/terse_write/TerseException"),
         TerseException.class, TerseException::read0));
     }
 

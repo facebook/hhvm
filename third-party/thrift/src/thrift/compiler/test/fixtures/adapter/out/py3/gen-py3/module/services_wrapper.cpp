@@ -12,11 +12,13 @@
 namespace facebook {
 namespace thrift {
 namespace test {
+namespace fixtures {
+namespace adapter {
 
 ServiceWrapper::ServiceWrapper(PyObject *obj, folly::Executor* exc)
   : if_object(obj), executor(exc)
   {
-    import_facebook__thrift__test__module__services();
+    import_facebook__thrift__test__fixtures__adapter__module__services();
   }
 
 
@@ -24,7 +26,7 @@ void ServiceWrapper::async_tm_func(
   apache::thrift::HandlerCallbackPtr<int32_t> callback
     , std::unique_ptr<std::string> arg1
     , std::unique_ptr<std::string> arg2
-    , std::unique_ptr<::facebook::thrift::test::Foo> arg3
+    , std::unique_ptr<::facebook::thrift::test::fixtures::adapter::Foo> arg3
 ) {
   auto ctx = callback->getRequestContext();
   folly::via(
@@ -73,32 +75,32 @@ folly::SemiFuture<folly::Unit> ServiceWrapper::semifuture_onStopRequested() {
 AdapterServiceWrapper::AdapterServiceWrapper(PyObject *obj, folly::Executor* exc)
   : if_object(obj), executor(exc)
   {
-    import_facebook__thrift__test__module__services();
+    import_facebook__thrift__test__fixtures__adapter__module__services();
   }
 
 
 void AdapterServiceWrapper::async_tm_count(
-  apache::thrift::HandlerCallbackPtr<std::unique_ptr<::facebook::thrift::test::CountingStruct>> callback) {
+  apache::thrift::HandlerCallbackPtr<std::unique_ptr<::facebook::thrift::test::fixtures::adapter::CountingStruct>> callback) {
   auto ctx = callback->getRequestContext();
   folly::via(
     this->executor,
     [this, ctx,
      callback = std::move(callback)
     ]() mutable {
-        auto [promise, future] = folly::makePromiseContract<std::unique_ptr<::facebook::thrift::test::CountingStruct>>();
+        auto [promise, future] = folly::makePromiseContract<std::unique_ptr<::facebook::thrift::test::fixtures::adapter::CountingStruct>>();
         call_cy_AdapterService_count(
             this->if_object,
             ctx,
             std::move(promise)        );
-        std::move(future).via(this->executor).thenTry([callback = std::move(callback)](folly::Try<std::unique_ptr<::facebook::thrift::test::CountingStruct>>&& t) {
+        std::move(future).via(this->executor).thenTry([callback = std::move(callback)](folly::Try<std::unique_ptr<::facebook::thrift::test::fixtures::adapter::CountingStruct>>&& t) {
           (void)t;
           callback->complete(std::move(t));
         });
     });
 }
 void AdapterServiceWrapper::async_tm_adaptedTypes(
-  apache::thrift::HandlerCallbackPtr<std::unique_ptr<::facebook::thrift::test::HeapAllocated>> callback
-    , std::unique_ptr<::facebook::thrift::test::HeapAllocated> arg
+  apache::thrift::HandlerCallbackPtr<std::unique_ptr<::facebook::thrift::test::fixtures::adapter::HeapAllocated>> callback
+    , std::unique_ptr<::facebook::thrift::test::fixtures::adapter::HeapAllocated> arg
 ) {
   auto ctx = callback->getRequestContext();
   folly::via(
@@ -107,13 +109,13 @@ void AdapterServiceWrapper::async_tm_adaptedTypes(
      callback = std::move(callback),
      arg = std::move(arg)
     ]() mutable {
-        auto [promise, future] = folly::makePromiseContract<std::unique_ptr<::facebook::thrift::test::HeapAllocated>>();
+        auto [promise, future] = folly::makePromiseContract<std::unique_ptr<::facebook::thrift::test::fixtures::adapter::HeapAllocated>>();
         call_cy_AdapterService_adaptedTypes(
             this->if_object,
             ctx,
             std::move(promise),
             std::move(arg)        );
-        std::move(future).via(this->executor).thenTry([callback = std::move(callback)](folly::Try<std::unique_ptr<::facebook::thrift::test::HeapAllocated>>&& t) {
+        std::move(future).via(this->executor).thenTry([callback = std::move(callback)](folly::Try<std::unique_ptr<::facebook::thrift::test::fixtures::adapter::HeapAllocated>>&& t) {
           (void)t;
           callback->complete(std::move(t));
         });
@@ -141,3 +143,5 @@ folly::SemiFuture<folly::Unit> AdapterServiceWrapper::semifuture_onStopRequested
 } // namespace facebook
 } // namespace thrift
 } // namespace test
+} // namespace fixtures
+} // namespace adapter

@@ -5,7 +5,7 @@
  *  @generated
  */
 
-package com.facebook.thrift.compiler.test.fixtures.default_values_rectification;
+package com.facebook.thrift.test.fixtures.terse_write;
 
 import com.facebook.swift.codec.*;
 import com.facebook.swift.codec.ThriftField.Requiredness;
@@ -22,10 +22,10 @@ import static com.google.common.base.MoreObjects.toStringHelper;
 import static com.google.common.base.MoreObjects.ToStringHelper;
 
 @SwiftGenerated
-@com.facebook.swift.codec.ThriftStruct(value="EmptyStruct", builder=EmptyStruct.Builder.class)
-public final class EmptyStruct implements com.facebook.thrift.payload.ThriftSerializable {
+@com.facebook.swift.codec.ThriftStruct(value="MyStruct", builder=MyStruct.Builder.class)
+public final class MyStruct implements com.facebook.thrift.payload.ThriftSerializable {
     @ThriftConstructor
-    public EmptyStruct(
+    public MyStruct(
     ) {
     }
     
@@ -35,19 +35,19 @@ public final class EmptyStruct implements com.facebook.thrift.payload.ThriftSeri
       return new Builder();
     }
 
-    public static Builder builder(EmptyStruct other) {
+    public static Builder builder(MyStruct other) {
       return new Builder(other);
     }
 
     public static class Builder {
     
     public Builder() { }
-        public Builder(EmptyStruct other) {
+        public Builder(MyStruct other) {
         }
     
         @ThriftConstructor
-        public EmptyStruct build() {
-            EmptyStruct result = new EmptyStruct (
+        public MyStruct build() {
+            MyStruct result = new MyStruct (
             );
             return result;
         }
@@ -56,11 +56,11 @@ public final class EmptyStruct implements com.facebook.thrift.payload.ThriftSeri
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
-    private static final TStruct STRUCT_DESC = new TStruct("EmptyStruct");
+    private static final TStruct STRUCT_DESC = new TStruct("MyStruct");
 static {
       com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
-        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/compiler/test/fixtures/default_values_rectification/EmptyStruct"),
-        EmptyStruct.class, EmptyStruct::read0));
+        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/fixtures/terse_write/MyStruct"),
+        MyStruct.class, MyStruct::read0));
     }
     @java.lang.Override
     public String toString() {
@@ -77,7 +77,7 @@ static {
             return false;
         }
     
-        EmptyStruct other = (EmptyStruct)o;
+        MyStruct other = (MyStruct)o;
     
         return
             true;
@@ -90,14 +90,14 @@ static {
     }
 
     
-    public static com.facebook.thrift.payload.Reader<EmptyStruct> asReader() {
-      return EmptyStruct::read0;
+    public static com.facebook.thrift.payload.Reader<MyStruct> asReader() {
+      return MyStruct::read0;
     }
     
-    public static EmptyStruct read0(TProtocol oprot) throws TException {
+    public static MyStruct read0(TProtocol oprot) throws TException {
       TField __field;
-      oprot.readStructBegin(EmptyStruct.NAMES_TO_IDS, EmptyStruct.THRIFT_NAMES_TO_IDS, EmptyStruct.FIELD_METADATA);
-      EmptyStruct.Builder builder = new EmptyStruct.Builder();
+      oprot.readStructBegin(MyStruct.NAMES_TO_IDS, MyStruct.THRIFT_NAMES_TO_IDS, MyStruct.FIELD_METADATA);
+      MyStruct.Builder builder = new MyStruct.Builder();
       while (true) {
         __field = oprot.readFieldBegin();
         if (__field.type == TType.STOP) { break; }
@@ -118,11 +118,11 @@ static {
       oprot.writeStructEnd();
     }
 
-    private static class _EmptyStructLazy {
-        private static final EmptyStruct _DEFAULT = new EmptyStruct.Builder().build();
+    private static class _MyStructLazy {
+        private static final MyStruct _DEFAULT = new MyStruct.Builder().build();
     }
     
-    public static EmptyStruct defaultInstance() {
-        return  _EmptyStructLazy._DEFAULT;
+    public static MyStruct defaultInstance() {
+        return  _MyStructLazy._DEFAULT;
     }
 }

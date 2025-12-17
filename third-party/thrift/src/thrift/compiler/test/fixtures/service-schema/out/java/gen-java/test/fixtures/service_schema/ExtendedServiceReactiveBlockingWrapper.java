@@ -9,7 +9,7 @@ package test.fixtures.service_schema;
 
 import java.util.*;
 
-public class ExtendedServiceReactiveBlockingWrapper  extends com.facebook.thrift.test.BaseServiceReactiveBlockingWrapper
+public class ExtendedServiceReactiveBlockingWrapper  extends com.facebook.thrift.test.fixtures.service_schema.BaseServiceReactiveBlockingWrapper
   implements ExtendedService {
   private final ExtendedService.Reactive _delegate;
 

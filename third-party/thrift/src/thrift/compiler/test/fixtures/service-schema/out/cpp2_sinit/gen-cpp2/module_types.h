@@ -29,7 +29,7 @@ APACHE_THRIFT_DEFINE_ACCESSOR(result);
 } // namespace apache::thrift
 
 // BEGIN declare_enums
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::service_schema {
 
 /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "name": "Result", "kind": "enum" } */
 enum class Result {
@@ -38,15 +38,15 @@ enum class Result {
   GOOD = 2,
 };
 
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::service_schema
 
-template<> struct std::hash<::facebook::thrift::test::Result> :
-  ::apache::thrift::detail::enum_hash<::facebook::thrift::test::Result> {};
+template<> struct std::hash<::facebook::thrift::test::fixtures::service_schema::Result> :
+  ::apache::thrift::detail::enum_hash<::facebook::thrift::test::fixtures::service_schema::Result> {};
 
 namespace apache::thrift {
 
-template <> struct TEnumTraits<::facebook::thrift::test::Result> {
-  using type = ::facebook::thrift::test::Result;
+template <> struct TEnumTraits<::facebook::thrift::test::fixtures::service_schema::Result> {
+  using type = ::facebook::thrift::test::fixtures::service_schema::Result;
 
   static constexpr std::size_t const size = 3;
   static folly::Range<type const*> const values;
@@ -64,7 +64,7 @@ template <> struct TEnumTraits<::facebook::thrift::test::Result> {
     return "module";
   }
 
-  static constexpr folly::cstring_view __fbthrift_thrift_uri = "facebook.com/thrift/test/Result";
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = "facebook.com/thrift/test/fixtures/service_schema/Result";
 
   static char const* findName(type value) noexcept {
     std::string_view ret;
@@ -75,15 +75,15 @@ template <> struct TEnumTraits<::facebook::thrift::test::Result> {
   static constexpr type max() { return type::GOOD; }
 
   static const std::vector<std::any>& annotations() noexcept;
-  static const std::vector<std::any>& enumValueAnnotations(::facebook::thrift::test::Result) noexcept;
+  static const std::vector<std::any>& enumValueAnnotations(::facebook::thrift::test::fixtures::service_schema::Result) noexcept;
 };
 
 } // namespace apache::thrift
 // END declare_enums
 // BEGIN forward_declare
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::service_schema {
 class CustomException;
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::service_schema
 // END forward_declare
 namespace apache::thrift::detail::annotation {
 } // namespace apache::thrift::detail::annotation
@@ -93,7 +93,7 @@ namespace apache::thrift::detail::qualifier {
 
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::service_schema {
 using ::apache::thrift::detail::operator!=;
 using ::apache::thrift::detail::operator>;
 using ::apache::thrift::detail::operator<=;
@@ -109,7 +109,7 @@ class FOLLY_EXPORT CustomException : public virtual apache::thrift::TException {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
-  static constexpr folly::cstring_view __fbthrift_thrift_uri = "facebook.com/thrift/test/CustomException";
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = "facebook.com/thrift/test/fixtures/service_schema/CustomException";
   static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   static std::string_view __fbthrift_get_class_name();
   template <class ...>
@@ -127,7 +127,7 @@ class FOLLY_EXPORT CustomException : public virtual apache::thrift::TException {
 
   using __fbthrift_reflection_type_tags = folly::tag_t<
     ::apache::thrift::type::string_t,
-    ::apache::thrift::type::enum_t<::facebook::thrift::test::Result>
+    ::apache::thrift::type::enum_t<::facebook::thrift::test::fixtures::service_schema::Result>
   >;
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
@@ -151,7 +151,7 @@ class FOLLY_EXPORT CustomException : public virtual apache::thrift::TException {
 
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  CustomException(apache::thrift::FragileConstructor, ::std::string name__arg, ::facebook::thrift::test::Result result__arg);
+  CustomException(apache::thrift::FragileConstructor, ::std::string name__arg, ::facebook::thrift::test::fixtures::service_schema::Result result__arg);
 
   CustomException(CustomException&&) noexcept;
 
@@ -166,7 +166,7 @@ class FOLLY_EXPORT CustomException : public virtual apache::thrift::TException {
  private:
   ::std::string __fbthrift_field_name;
  private:
-  ::facebook::thrift::test::Result __fbthrift_field_result;
+  ::facebook::thrift::test::fixtures::service_schema::Result __fbthrift_field_result;
  private:
   apache::thrift::detail::isset_bitset<2, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
 
@@ -212,37 +212,37 @@ class FOLLY_EXPORT CustomException : public virtual apache::thrift::TException {
   }
 
   /** Glean { "field": "result" } */
-  template <typename..., typename fbthrift_T = ::facebook::thrift::test::Result>
+  template <typename..., typename fbthrift_T = ::facebook::thrift::test::fixtures::service_schema::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> result_ref() const& {
     return {this->__fbthrift_field_result, __isset.at(1), __isset.bit(1)};
   }
 
   /** Glean { "field": "result" } */
-  template <typename..., typename fbthrift_T = ::facebook::thrift::test::Result>
+  template <typename..., typename fbthrift_T = ::facebook::thrift::test::fixtures::service_schema::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> result_ref() & {
     return {this->__fbthrift_field_result, __isset.at(1), __isset.bit(1)};
   }
 
   /** Glean { "field": "result" } */
-  template <typename..., typename fbthrift_T = ::facebook::thrift::test::Result>
+  template <typename..., typename fbthrift_T = ::facebook::thrift::test::fixtures::service_schema::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> result_ref() && {
     return {static_cast<fbthrift_T&&>(this->__fbthrift_field_result), __isset.at(1), __isset.bit(1)};
   }
 
   /** Glean { "field": "result" } */
-  template <typename..., typename fbthrift_T = ::facebook::thrift::test::Result>
+  template <typename..., typename fbthrift_T = ::facebook::thrift::test::fixtures::service_schema::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> result() const& {
     return {this->__fbthrift_field_result, __isset.at(1), __isset.bit(1)};
   }
 
   /** Glean { "field": "result" } */
-  template <typename..., typename fbthrift_T = ::facebook::thrift::test::Result>
+  template <typename..., typename fbthrift_T = ::facebook::thrift::test::fixtures::service_schema::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> result() & {
     return {this->__fbthrift_field_result, __isset.at(1), __isset.bit(1)};
   }
 
   /** Glean { "field": "result" } */
-  template <typename..., typename fbthrift_T = ::facebook::thrift::test::Result>
+  template <typename..., typename fbthrift_T = ::facebook::thrift::test::fixtures::service_schema::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> result() && {
     return {static_cast<fbthrift_T&&>(this->__fbthrift_field_result), __isset.at(1), __isset.bit(1)};
   }
@@ -269,11 +269,11 @@ class FOLLY_EXPORT CustomException : public virtual apache::thrift::TException {
 
   /** Glean { "field": "result" } */
   [[deprecated("Use `FOO.result().value()` instead of `FOO.get_result()`")]]
-  ::facebook::thrift::test::Result get_result() const;
+  ::facebook::thrift::test::fixtures::service_schema::Result get_result() const;
 
   /** Glean { "field": "result" } */
   [[deprecated("Use `FOO.result() = BAR` instead of `FOO.set_result(BAR)`")]]
-  ::facebook::thrift::test::Result& set_result(::facebook::thrift::test::Result result_);
+  ::facebook::thrift::test::fixtures::service_schema::Result& set_result(::facebook::thrift::test::fixtures::service_schema::Result result_);
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);
@@ -285,7 +285,7 @@ class FOLLY_EXPORT CustomException : public virtual apache::thrift::TException {
   uint32_t write(Protocol_* prot_) const;
 
   const char* what() const noexcept override {
-    return "::facebook::thrift::test::CustomException";
+    return "::facebook::thrift::test::fixtures::service_schema::CustomException";
   }
 
  private:
@@ -304,17 +304,17 @@ unsigned long CustomException::read(Protocol_* iprot) {
 }
 
 
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::service_schema
 
 namespace apache::thrift::detail {
-template <> struct TSchemaAssociation<::facebook::thrift::test::CustomException, false> {
+template <> struct TSchemaAssociation<::facebook::thrift::test::fixtures::service_schema::CustomException, false> {
   static ::folly::Range<const ::std::string_view*> bundle();
-  static constexpr int64_t programId = -4897237288056697529;
-  static constexpr ::std::string_view definitionKey = {"\x34\x87\x8d\x8a\xb8\xbf\xb0\x8e\x22\xcc\xa5\xdc\x7e\xd7\x27\x7c", 16};
+  static constexpr int64_t programId = 986987743245182930;
+  static constexpr ::std::string_view definitionKey = {"\xc2\xe5\x4b\xc4\x3d\x3a\x47\x7f\x5b\x79\x60\x6e\x1f\x02\xc4\xee", 16};
 };
-template <> struct TSchemaAssociation<::facebook::thrift::test::Result, true> {
+template <> struct TSchemaAssociation<::facebook::thrift::test::fixtures::service_schema::Result, true> {
   static ::folly::Range<const ::std::string_view*> bundle();
-  static constexpr int64_t programId = -4897237288056697529;
-  static constexpr ::std::string_view definitionKey = {"\x90\x81\x31\x92\x8f\x71\xb3\x1a\x8d\xcb\x1a\x91\x4e\xb0\x83\xa8", 16};
+  static constexpr int64_t programId = 986987743245182930;
+  static constexpr ::std::string_view definitionKey = {"\xaf\xa2\xf3\xca\x28\xb1\x78\x7e\x0e\xde\x7b\xba\x76\x3c\x75\x6c", 16};
 };
 } // namespace apache::thrift::detail

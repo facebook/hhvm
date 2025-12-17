@@ -12,31 +12,31 @@
 #include "thrift/compiler/test/fixtures/service-schema/gen-cpp2/extend_constants.h"
 #include "thrift/compiler/test/fixtures/service-schema/gen-cpp2/include_constants.h"
 
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::service_schema {
 namespace module_constants {
 
-::std::string_view _fbthrift_schema_bc0984a218954d47() {
-  constexpr static ::std::string_view _fbthrift_schema_bc0984a218954d47_{
+::std::string_view _fbthrift_schema_db27c1f89cb27d2() {
+  constexpr static ::std::string_view _fbthrift_schema_db27c1f89cb27d2_{
     /*<truncated>*/};
-  return _fbthrift_schema_bc0984a218954d47_;
+  return _fbthrift_schema_db27c1f89cb27d2_;
 }
 
 
-::folly::Range<const ::std::string_view*> _fbthrift_schema_bc0984a218954d47_includes() {
+::folly::Range<const ::std::string_view*> _fbthrift_schema_db27c1f89cb27d2_includes() {
   static const ::std::array<::std::string_view, 3> includes = {
-    _fbthrift_schema_bc0984a218954d47(),
-    ::apache::thrift::detail::mc::readSchema(::facebook::thrift::test::extend_constants::_fbthrift_schema_7c8dda8afe07c570),
+    _fbthrift_schema_db27c1f89cb27d2(),
+    ::apache::thrift::detail::mc::readSchema(::facebook::thrift::test::fixtures::service_schema::extend_constants::_fbthrift_schema_32a03c6f38bf7de2),
     ::apache::thrift::detail::mc::readSchema(::cpp2::include_constants::_fbthrift_schema_b3aa26370c7e318d),
   };
   return ::folly::range(includes);
 }
-::folly::Range<const ::std::string_view*> _fbthrift_schema_bc0984a218954d47_uris() {
+::folly::Range<const ::std::string_view*> _fbthrift_schema_db27c1f89cb27d2_uris() {
   static const ::std::array<::std::string_view, 2> uris = {
-    "facebook.com/thrift/test/CustomException",
-    "facebook.com/thrift/test/Result",
+    "facebook.com/thrift/test/fixtures/service_schema/CustomException",
+    "facebook.com/thrift/test/fixtures/service_schema/Result",
   };
   return ::folly::range(uris);
 }
 
 } // namespace module_constants
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::service_schema

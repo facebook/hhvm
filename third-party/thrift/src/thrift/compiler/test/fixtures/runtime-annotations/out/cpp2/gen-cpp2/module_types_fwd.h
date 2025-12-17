@@ -9,16 +9,16 @@
 #include <cstdint>
 
 // BEGIN forward_declare
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::runtime_annotations {
 class MyAnnotation;
 class MyStruct;
 class MyUnion;
 class MyException;
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::runtime_annotations
 // END forward_declare
 
 // BEGIN forward_declare_enums
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::runtime_annotations {
 enum class MyEnum;
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::runtime_annotations
 // END forward_declare_enums

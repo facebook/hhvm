@@ -28,13 +28,13 @@ using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::s
 
 inline constexpr Options kGenerateAll = {.genAnnotations = true, .genNestedTypes = true};
 
-void EnumMetadata<::facebook::thrift::test::MyEnum>::gen(ThriftMetadata& metadata) {
+void EnumMetadata<::facebook::thrift::test::fixtures::runtime_annotations::MyEnum>::gen(ThriftMetadata& metadata) {
   if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
-    genEnumMetadata<::facebook::thrift::test::MyEnum>(metadata, kGenerateAll);
+    genEnumMetadata<::facebook::thrift::test::fixtures::runtime_annotations::MyEnum>(metadata, kGenerateAll);
     return;
   }
 
-  auto res = genEnumMetadata<::facebook::thrift::test::MyEnum>(metadata, {.genAnnotations = folly::kIsDebug});
+  auto res = genEnumMetadata<::facebook::thrift::test::fixtures::runtime_annotations::MyEnum>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
   }
@@ -44,12 +44,12 @@ void EnumMetadata<::facebook::thrift::test::MyEnum>::gen(ThriftMetadata& metadat
 }
 
 const ::apache::thrift::metadata::ThriftStruct&
-StructMetadata<::facebook::thrift::test::MyAnnotation>::gen(ThriftMetadata& metadata) {
+StructMetadata<::facebook::thrift::test::fixtures::runtime_annotations::MyAnnotation>::gen(ThriftMetadata& metadata) {
   if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
-    return genStructMetadata<::facebook::thrift::test::MyAnnotation>(metadata, kGenerateAll).metadata;
+    return genStructMetadata<::facebook::thrift::test::fixtures::runtime_annotations::MyAnnotation>(metadata, kGenerateAll).metadata;
   }
 
-  auto res = genStructMetadata<::facebook::thrift::test::MyAnnotation>(metadata, {.genAnnotations = folly::kIsDebug});
+  auto res = genStructMetadata<::facebook::thrift::test::fixtures::runtime_annotations::MyAnnotation>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -62,12 +62,12 @@ StructMetadata<::facebook::thrift::test::MyAnnotation>::gen(ThriftMetadata& meta
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
-StructMetadata<::facebook::thrift::test::MyStruct>::gen(ThriftMetadata& metadata) {
+StructMetadata<::facebook::thrift::test::fixtures::runtime_annotations::MyStruct>::gen(ThriftMetadata& metadata) {
   if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
-    return genStructMetadata<::facebook::thrift::test::MyStruct>(metadata, kGenerateAll).metadata;
+    return genStructMetadata<::facebook::thrift::test::fixtures::runtime_annotations::MyStruct>(metadata, kGenerateAll).metadata;
   }
 
-  auto res = genStructMetadata<::facebook::thrift::test::MyStruct>(metadata, {.genAnnotations = folly::kIsDebug});
+  auto res = genStructMetadata<::facebook::thrift::test::fixtures::runtime_annotations::MyStruct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -78,7 +78,7 @@ StructMetadata<::facebook::thrift::test::MyStruct>::gen(ThriftMetadata& metadata
     { 1, "field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("module.MyAnnotation", {  }).cv_struct(), }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_MyStruct_fields) {
-    genStructFieldMetadata<::facebook::thrift::test::MyStruct>(module_MyStruct.fields()[i], f, i);
+    genStructFieldMetadata<::facebook::thrift::test::fixtures::runtime_annotations::MyStruct>(module_MyStruct.fields()[i], f, i);
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -92,12 +92,12 @@ StructMetadata<::facebook::thrift::test::MyStruct>::gen(ThriftMetadata& metadata
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
-StructMetadata<::facebook::thrift::test::MyUnion>::gen(ThriftMetadata& metadata) {
+StructMetadata<::facebook::thrift::test::fixtures::runtime_annotations::MyUnion>::gen(ThriftMetadata& metadata) {
   if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
-    return genStructMetadata<::facebook::thrift::test::MyUnion>(metadata, kGenerateAll).metadata;
+    return genStructMetadata<::facebook::thrift::test::fixtures::runtime_annotations::MyUnion>(metadata, kGenerateAll).metadata;
   }
 
-  auto res = genStructMetadata<::facebook::thrift::test::MyUnion>(metadata, {.genAnnotations = folly::kIsDebug});
+  auto res = genStructMetadata<::facebook::thrift::test::fixtures::runtime_annotations::MyUnion>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -108,7 +108,7 @@ StructMetadata<::facebook::thrift::test::MyUnion>::gen(ThriftMetadata& metadata)
     { 1, "field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("module.MyAnnotation", {  }).cv_struct(), }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_MyUnion_fields) {
-    genStructFieldMetadata<::facebook::thrift::test::MyUnion>(module_MyUnion.fields()[i], f, i);
+    genStructFieldMetadata<::facebook::thrift::test::fixtures::runtime_annotations::MyUnion>(module_MyUnion.fields()[i], f, i);
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -122,12 +122,12 @@ StructMetadata<::facebook::thrift::test::MyUnion>::gen(ThriftMetadata& metadata)
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
-StructMetadata<::facebook::thrift::test::MyException>::gen(ThriftMetadata& metadata) {
+StructMetadata<::facebook::thrift::test::fixtures::runtime_annotations::MyException>::gen(ThriftMetadata& metadata) {
   if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
-    return genStructMetadata<::facebook::thrift::test::MyException>(metadata, kGenerateAll).metadata;
+    return genStructMetadata<::facebook::thrift::test::fixtures::runtime_annotations::MyException>(metadata, kGenerateAll).metadata;
   }
 
-  auto res = genStructMetadata<::facebook::thrift::test::MyException>(metadata, {.genAnnotations = folly::kIsDebug});
+  auto res = genStructMetadata<::facebook::thrift::test::fixtures::runtime_annotations::MyException>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -138,7 +138,7 @@ StructMetadata<::facebook::thrift::test::MyException>::gen(ThriftMetadata& metad
     { 1, "field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("module.MyAnnotation", {  }).cv_struct(), }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_MyException_fields) {
-    genStructFieldMetadata<::facebook::thrift::test::MyException>(module_MyException.fields()[i], f, i);
+    genStructFieldMetadata<::facebook::thrift::test::fixtures::runtime_annotations::MyException>(module_MyException.fields()[i], f, i);
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -152,13 +152,13 @@ StructMetadata<::facebook::thrift::test::MyException>::gen(ThriftMetadata& metad
   return res.metadata;
 }
 
-void ExceptionMetadata<::facebook::thrift::test::MyException>::gen(ThriftMetadata& metadata) {
+void ExceptionMetadata<::facebook::thrift::test::fixtures::runtime_annotations::MyException>::gen(ThriftMetadata& metadata) {
   if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
-    genExceptionMetadata<::facebook::thrift::test::MyException>(metadata, kGenerateAll);
+    genExceptionMetadata<::facebook::thrift::test::fixtures::runtime_annotations::MyException>(metadata, kGenerateAll);
     return;
   }
 
-  auto res = genExceptionMetadata<::facebook::thrift::test::MyException>(metadata, {.genAnnotations = folly::kIsDebug});
+  auto res = genExceptionMetadata<::facebook::thrift::test::fixtures::runtime_annotations::MyException>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
   }

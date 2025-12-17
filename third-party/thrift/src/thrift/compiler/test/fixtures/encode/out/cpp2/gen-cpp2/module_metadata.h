@@ -18,27 +18,27 @@ namespace detail {
 namespace md {
 
 template <>
-class EnumMetadata<::facebook::thrift::test::Enum> {
+class EnumMetadata<::facebook::thrift::test::fixtures::encode::Enum> {
  public:
   static void gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::facebook::thrift::test::Foo> {
+class StructMetadata<::facebook::thrift::test::fixtures::encode::Foo> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::facebook::thrift::test::Bar> {
+class StructMetadata<::facebook::thrift::test::fixtures::encode::Bar> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::facebook::thrift::test::Baz> {
+class StructMetadata<::facebook::thrift::test::fixtures::encode::Baz> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::facebook::thrift::test::OpEncodeStruct> {
+class StructMetadata<::facebook::thrift::test::fixtures::encode::OpEncodeStruct> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };

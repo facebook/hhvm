@@ -9,7 +9,7 @@
 #include <cstdint>
 
 // BEGIN forward_declare
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::adapter {
 class MyAnnotation;
 class Foo;
 class Baz;
@@ -56,12 +56,12 @@ class CountingStruct;
 class Person;
 class Person2;
 class Renamed;
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::adapter
 // END forward_declare
 
 // BEGIN forward_declare_enums
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::adapter {
 enum class Color;
 enum class ThriftAdaptedEnum;
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::adapter
 // END forward_declare_enums

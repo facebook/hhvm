@@ -19,7 +19,7 @@ namespace apache::thrift::python::capi {
 namespace {
 bool ensure_module_imported() {
   static ::folly::python::import_cache_nocapture import((
-      ::import_facebook__thrift__test__module__thrift_types_capi));
+      ::import_facebook__thrift__test__fixtures__adapter__module__thrift_types_capi));
   return import();
 }
   static constexpr std::int16_t _fbthrift__MyAnnotation__tuple_pos[2] = {
@@ -60,31 +60,31 @@ bool ensure_module_imported() {
   };
 } // namespace
 
-ExtractorResult<::facebook::thrift::test::MyAnnotation>
-Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::MyAnnotation, ::facebook__thrift__test__module::NamespaceTag>>::operator()(PyObject* obj) {
+ExtractorResult<::facebook::thrift::test::fixtures::adapter::MyAnnotation>
+Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::MyAnnotation, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(PyObject* obj) {
   int tCheckResult = typeCheck(obj);
   if (tCheckResult != 1) {
       if (tCheckResult == 0) {
         PyErr_SetString(PyExc_TypeError, "Not a MyAnnotation");
       }
-      return extractorError<::facebook::thrift::test::MyAnnotation>(
+      return extractorError<::facebook::thrift::test::fixtures::adapter::MyAnnotation>(
           "Marshal error: MyAnnotation");
   }
   StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
-      ::facebook::thrift::test::MyAnnotation, ::facebook__thrift__test__module::NamespaceTag>>{}(*fbThriftData);
+      ::facebook::thrift::test::fixtures::adapter::MyAnnotation, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>{}(*fbThriftData);
 }
 
-ExtractorResult<::facebook::thrift::test::MyAnnotation>
+ExtractorResult<::facebook::thrift::test::fixtures::adapter::MyAnnotation>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::facebook::thrift::test::MyAnnotation, ::facebook__thrift__test__module::NamespaceTag>>::operator()(PyObject* fbThriftData) {
-  ::facebook::thrift::test::MyAnnotation cpp;
+    ::facebook::thrift::test::fixtures::adapter::MyAnnotation, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(PyObject* fbThriftData) {
+  ::facebook::thrift::test::fixtures::adapter::MyAnnotation cpp;
   std::optional<std::string_view> error;
   Extractor<::apache::thrift::python::capi::FallibleString>{}.extractInto(
       cpp.signature_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__MyAnnotation__tuple_pos[0]),
       error);
-  Extractor<::apache::thrift::python::capi::ComposedEnum<::facebook::thrift::test::Color>>{}.extractInto(
+  Extractor<::apache::thrift::python::capi::ComposedEnum<::facebook::thrift::test::fixtures::adapter::Color>>{}.extractInto(
       cpp.color_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__MyAnnotation__tuple_pos[1]),
       error);
@@ -95,13 +95,13 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
 }
 
 
-int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::MyAnnotation, ::facebook__thrift__test__module::NamespaceTag>>::typeCheck(PyObject* obj) {
+int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::MyAnnotation, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
-      "Module facebook.thrift.test.module import error");
+      "Module facebook.thrift.test.fixtures.adapter.module import error");
   }
   int result =
-      can_extract__facebook__thrift__test__module__MyAnnotation(obj);
+      can_extract__facebook__thrift__test__fixtures__adapter__module__MyAnnotation(obj);
   if (result < 0) {
     ::folly::python::handlePythonError(
       "Unexpected type check error: MyAnnotation");
@@ -110,24 +110,24 @@ int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrif
 }
 
 
-PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::MyAnnotation, ::facebook__thrift__test__module::NamespaceTag>>::operator()(
-    const ::facebook::thrift::test::MyAnnotation& val) {
+PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::MyAnnotation, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(
+    const ::facebook::thrift::test::fixtures::adapter::MyAnnotation& val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
   Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::MyAnnotation, ::facebook__thrift__test__module::NamespaceTag>> ctor;
+        ::facebook::thrift::test::fixtures::adapter::MyAnnotation, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> ctor;
   StrongRef fbthrift_data(ctor(val));
   if (!fbthrift_data) {
     return nullptr;
   }
-  return init__facebook__thrift__test__module__MyAnnotation(*fbthrift_data);
+  return init__facebook__thrift__test__fixtures__adapter__module__MyAnnotation(*fbthrift_data);
 }
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::MyAnnotation, ::facebook__thrift__test__module::NamespaceTag>>::operator()(
-    [[maybe_unused]] const ::facebook::thrift::test::MyAnnotation& val) {
+        ::facebook::thrift::test::fixtures::adapter::MyAnnotation, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(
+    [[maybe_unused]] const ::facebook::thrift::test::fixtures::adapter::MyAnnotation& val) {
   StrongRef fbthrift_data(createStructTuple(2));
   StrongRef _fbthrift__signature(
     Constructor<::apache::thrift::python::capi::FallibleString>{}
@@ -140,7 +140,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     return nullptr;
   }
   StrongRef _fbthrift__color(
-    Constructor<::apache::thrift::python::capi::ComposedEnum<::facebook::thrift::test::Color>>{}
+    Constructor<::apache::thrift::python::capi::ComposedEnum<::facebook::thrift::test::fixtures::adapter::Color>>{}
     .constructFrom(val.color_ref()));
   if (!_fbthrift__color ||
       setStructField(
@@ -153,47 +153,47 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
 }
 
 
-ExtractorResult<::facebook::thrift::test::Foo>
-Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::Foo, ::facebook__thrift__test__module::NamespaceTag>>::operator()(PyObject* obj) {
+ExtractorResult<::facebook::thrift::test::fixtures::adapter::Foo>
+Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::Foo, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(PyObject* obj) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::facebook::thrift::test::Foo>(
-      "Module facebook.thrift.test.module import error");
+    return extractorError<::facebook::thrift::test::fixtures::adapter::Foo>(
+      "Module facebook.thrift.test.fixtures.adapter.module import error");
   }
   std::unique_ptr<folly::IOBuf> val(
-      extract__facebook__thrift__test__module__Foo(obj));
+      extract__facebook__thrift__test__fixtures__adapter__module__Foo(obj));
   if (!val) {
     CHECK(PyErr_Occurred());
-    return extractorError<::facebook::thrift::test::Foo>(
+    return extractorError<::facebook::thrift::test::fixtures::adapter::Foo>(
         "Thrift serialize error: Foo");
   }
-  return detail::deserialize_iobuf<::facebook::thrift::test::Foo>(std::move(val));
+  return detail::deserialize_iobuf<::facebook::thrift::test::fixtures::adapter::Foo>(std::move(val));
 }
 
 
-ExtractorResult<::facebook::thrift::test::Foo>
+ExtractorResult<::facebook::thrift::test::fixtures::adapter::Foo>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::facebook::thrift::test::Foo, ::facebook__thrift__test__module::NamespaceTag>>::operator()(PyObject* fbthrift_data) {
+    ::facebook::thrift::test::fixtures::adapter::Foo, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(PyObject* fbthrift_data) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::facebook::thrift::test::Foo>(
-      "Module facebook.thrift.test.module import error");
+    return extractorError<::facebook::thrift::test::fixtures::adapter::Foo>(
+      "Module facebook.thrift.test.fixtures.adapter.module import error");
   }
-  auto obj = StrongRef(init__facebook__thrift__test__module__Foo(fbthrift_data));
+  auto obj = StrongRef(init__facebook__thrift__test__fixtures__adapter__module__Foo(fbthrift_data));
   if (!obj) {
-      return extractorError<::facebook::thrift::test::Foo>(
+      return extractorError<::facebook::thrift::test::fixtures::adapter::Foo>(
           "Init from fbthrift error: Foo");
   }
-  return Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::Foo, ::facebook__thrift__test__module::NamespaceTag>>{}(*obj);
+  return Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::Foo, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>{}(*obj);
 }
 
-int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::Foo, ::facebook__thrift__test__module::NamespaceTag>>::typeCheck(PyObject* obj) {
+int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::Foo, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
-      "Module facebook.thrift.test.module import error");
+      "Module facebook.thrift.test.fixtures.adapter.module import error");
   }
   int result =
-      can_extract__facebook__thrift__test__module__Foo(obj);
+      can_extract__facebook__thrift__test__fixtures__adapter__module__Foo(obj);
   if (result < 0) {
     ::folly::python::handlePythonError(
       "Unexpected type check error: Foo");
@@ -202,8 +202,8 @@ int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrif
 }
 
 
-PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::Foo, ::facebook__thrift__test__module::NamespaceTag>>::operator()(
-    const ::facebook::thrift::test::Foo& val) {
+PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::Foo, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(
+    const ::facebook::thrift::test::fixtures::adapter::Foo& val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
@@ -216,7 +216,7 @@ PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::faceboo
     return nullptr;
   }
   DCHECK(serialized);
-  auto ptr = construct__facebook__thrift__test__module__Foo(std::move(serialized));
+  auto ptr = construct__facebook__thrift__test__fixtures__adapter__module__Foo(std::move(serialized));
   if (!ptr) {
     CHECK(PyErr_Occurred());
   }
@@ -225,56 +225,56 @@ PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::faceboo
 
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::Foo, ::facebook__thrift__test__module::NamespaceTag>>::operator()(
-    const ::facebook::thrift::test::Foo& val) {
-  auto obj = StrongRef(Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::Foo, ::facebook__thrift__test__module::NamespaceTag>>{}(val));
+        ::facebook::thrift::test::fixtures::adapter::Foo, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(
+    const ::facebook::thrift::test::fixtures::adapter::Foo& val) {
+  auto obj = StrongRef(Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::Foo, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>{}(val));
   if (!obj) {
     return nullptr;
   }
   return getThriftStructFieldData(*obj);
 }
 
-ExtractorResult<::facebook::thrift::test::Baz>
-Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::Baz, ::facebook__thrift__test__module::NamespaceTag>>::operator()(PyObject* obj) {
+ExtractorResult<::facebook::thrift::test::fixtures::adapter::Baz>
+Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::Baz, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(PyObject* obj) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::facebook::thrift::test::Baz>(
-      "Module facebook.thrift.test.module import error");
+    return extractorError<::facebook::thrift::test::fixtures::adapter::Baz>(
+      "Module facebook.thrift.test.fixtures.adapter.module import error");
   }
   std::unique_ptr<folly::IOBuf> val(
-      extract__facebook__thrift__test__module__Baz(obj));
+      extract__facebook__thrift__test__fixtures__adapter__module__Baz(obj));
   if (!val) {
     CHECK(PyErr_Occurred());
-    return extractorError<::facebook::thrift::test::Baz>(
+    return extractorError<::facebook::thrift::test::fixtures::adapter::Baz>(
         "Thrift serialize error: Baz");
   }
-  return detail::deserialize_iobuf<::facebook::thrift::test::Baz>(std::move(val));
+  return detail::deserialize_iobuf<::facebook::thrift::test::fixtures::adapter::Baz>(std::move(val));
 }
 
 
-ExtractorResult<::facebook::thrift::test::Baz>
+ExtractorResult<::facebook::thrift::test::fixtures::adapter::Baz>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::facebook::thrift::test::Baz, ::facebook__thrift__test__module::NamespaceTag>>::operator()(PyObject* fbthrift_data) {
+    ::facebook::thrift::test::fixtures::adapter::Baz, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(PyObject* fbthrift_data) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::facebook::thrift::test::Baz>(
-      "Module facebook.thrift.test.module import error");
+    return extractorError<::facebook::thrift::test::fixtures::adapter::Baz>(
+      "Module facebook.thrift.test.fixtures.adapter.module import error");
   }
-  auto obj = StrongRef(init__facebook__thrift__test__module__Baz(fbthrift_data));
+  auto obj = StrongRef(init__facebook__thrift__test__fixtures__adapter__module__Baz(fbthrift_data));
   if (!obj) {
-      return extractorError<::facebook::thrift::test::Baz>(
+      return extractorError<::facebook::thrift::test::fixtures::adapter::Baz>(
           "Init from fbthrift error: Baz");
   }
-  return Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::Baz, ::facebook__thrift__test__module::NamespaceTag>>{}(*obj);
+  return Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::Baz, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>{}(*obj);
 }
 
-int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::Baz, ::facebook__thrift__test__module::NamespaceTag>>::typeCheck(PyObject* obj) {
+int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::Baz, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
-      "Module facebook.thrift.test.module import error");
+      "Module facebook.thrift.test.fixtures.adapter.module import error");
   }
   int result =
-      can_extract__facebook__thrift__test__module__Baz(obj);
+      can_extract__facebook__thrift__test__fixtures__adapter__module__Baz(obj);
   if (result < 0) {
     ::folly::python::handlePythonError(
       "Unexpected type check error: Baz");
@@ -283,8 +283,8 @@ int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrif
 }
 
 
-PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::Baz, ::facebook__thrift__test__module::NamespaceTag>>::operator()(
-    const ::facebook::thrift::test::Baz& val) {
+PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::Baz, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(
+    const ::facebook::thrift::test::fixtures::adapter::Baz& val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
@@ -297,7 +297,7 @@ PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::faceboo
     return nullptr;
   }
   DCHECK(serialized);
-  auto ptr = construct__facebook__thrift__test__module__Baz(std::move(serialized));
+  auto ptr = construct__facebook__thrift__test__fixtures__adapter__module__Baz(std::move(serialized));
   if (!ptr) {
     CHECK(PyErr_Occurred());
   }
@@ -306,56 +306,56 @@ PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::faceboo
 
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::Baz, ::facebook__thrift__test__module::NamespaceTag>>::operator()(
-    const ::facebook::thrift::test::Baz& val) {
-  auto obj = StrongRef(Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::Baz, ::facebook__thrift__test__module::NamespaceTag>>{}(val));
+        ::facebook::thrift::test::fixtures::adapter::Baz, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(
+    const ::facebook::thrift::test::fixtures::adapter::Baz& val) {
+  auto obj = StrongRef(Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::Baz, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>{}(val));
   if (!obj) {
     return nullptr;
   }
   return getThriftUnionFieldData(*obj);
 }
 
-ExtractorResult<::facebook::thrift::test::Bar>
-Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::Bar, ::facebook__thrift__test__module::NamespaceTag>>::operator()(PyObject* obj) {
+ExtractorResult<::facebook::thrift::test::fixtures::adapter::Bar>
+Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::Bar, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(PyObject* obj) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::facebook::thrift::test::Bar>(
-      "Module facebook.thrift.test.module import error");
+    return extractorError<::facebook::thrift::test::fixtures::adapter::Bar>(
+      "Module facebook.thrift.test.fixtures.adapter.module import error");
   }
   std::unique_ptr<folly::IOBuf> val(
-      extract__facebook__thrift__test__module__Bar(obj));
+      extract__facebook__thrift__test__fixtures__adapter__module__Bar(obj));
   if (!val) {
     CHECK(PyErr_Occurred());
-    return extractorError<::facebook::thrift::test::Bar>(
+    return extractorError<::facebook::thrift::test::fixtures::adapter::Bar>(
         "Thrift serialize error: Bar");
   }
-  return detail::deserialize_iobuf<::facebook::thrift::test::Bar>(std::move(val));
+  return detail::deserialize_iobuf<::facebook::thrift::test::fixtures::adapter::Bar>(std::move(val));
 }
 
 
-ExtractorResult<::facebook::thrift::test::Bar>
+ExtractorResult<::facebook::thrift::test::fixtures::adapter::Bar>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::facebook::thrift::test::Bar, ::facebook__thrift__test__module::NamespaceTag>>::operator()(PyObject* fbthrift_data) {
+    ::facebook::thrift::test::fixtures::adapter::Bar, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(PyObject* fbthrift_data) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::facebook::thrift::test::Bar>(
-      "Module facebook.thrift.test.module import error");
+    return extractorError<::facebook::thrift::test::fixtures::adapter::Bar>(
+      "Module facebook.thrift.test.fixtures.adapter.module import error");
   }
-  auto obj = StrongRef(init__facebook__thrift__test__module__Bar(fbthrift_data));
+  auto obj = StrongRef(init__facebook__thrift__test__fixtures__adapter__module__Bar(fbthrift_data));
   if (!obj) {
-      return extractorError<::facebook::thrift::test::Bar>(
+      return extractorError<::facebook::thrift::test::fixtures::adapter::Bar>(
           "Init from fbthrift error: Bar");
   }
-  return Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::Bar, ::facebook__thrift__test__module::NamespaceTag>>{}(*obj);
+  return Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::Bar, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>{}(*obj);
 }
 
-int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::Bar, ::facebook__thrift__test__module::NamespaceTag>>::typeCheck(PyObject* obj) {
+int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::Bar, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
-      "Module facebook.thrift.test.module import error");
+      "Module facebook.thrift.test.fixtures.adapter.module import error");
   }
   int result =
-      can_extract__facebook__thrift__test__module__Bar(obj);
+      can_extract__facebook__thrift__test__fixtures__adapter__module__Bar(obj);
   if (result < 0) {
     ::folly::python::handlePythonError(
       "Unexpected type check error: Bar");
@@ -364,8 +364,8 @@ int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrif
 }
 
 
-PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::Bar, ::facebook__thrift__test__module::NamespaceTag>>::operator()(
-    const ::facebook::thrift::test::Bar& val) {
+PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::Bar, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(
+    const ::facebook::thrift::test::fixtures::adapter::Bar& val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
@@ -378,7 +378,7 @@ PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::faceboo
     return nullptr;
   }
   DCHECK(serialized);
-  auto ptr = construct__facebook__thrift__test__module__Bar(std::move(serialized));
+  auto ptr = construct__facebook__thrift__test__fixtures__adapter__module__Bar(std::move(serialized));
   if (!ptr) {
     CHECK(PyErr_Occurred());
   }
@@ -387,34 +387,34 @@ PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::faceboo
 
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::Bar, ::facebook__thrift__test__module::NamespaceTag>>::operator()(
-    const ::facebook::thrift::test::Bar& val) {
-  auto obj = StrongRef(Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::Bar, ::facebook__thrift__test__module::NamespaceTag>>{}(val));
+        ::facebook::thrift::test::fixtures::adapter::Bar, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(
+    const ::facebook::thrift::test::fixtures::adapter::Bar& val) {
+  auto obj = StrongRef(Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::Bar, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>{}(val));
   if (!obj) {
     return nullptr;
   }
   return getThriftStructFieldData(*obj);
 }
 
-ExtractorResult<::facebook::thrift::test::detail::DirectlyAdapted>
-Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::detail::DirectlyAdapted, ::facebook__thrift__test__module::NamespaceTag>>::operator()(PyObject* obj) {
+ExtractorResult<::facebook::thrift::test::fixtures::adapter::detail::DirectlyAdapted>
+Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::detail::DirectlyAdapted, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(PyObject* obj) {
   int tCheckResult = typeCheck(obj);
   if (tCheckResult != 1) {
       if (tCheckResult == 0) {
         PyErr_SetString(PyExc_TypeError, "Not a DirectlyAdapted");
       }
-      return extractorError<::facebook::thrift::test::detail::DirectlyAdapted>(
+      return extractorError<::facebook::thrift::test::fixtures::adapter::detail::DirectlyAdapted>(
           "Marshal error: DirectlyAdapted");
   }
   StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
-      ::facebook::thrift::test::detail::DirectlyAdapted, ::facebook__thrift__test__module::NamespaceTag>>{}(*fbThriftData);
+      ::facebook::thrift::test::fixtures::adapter::detail::DirectlyAdapted, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>{}(*fbThriftData);
 }
 
-ExtractorResult<::facebook::thrift::test::detail::DirectlyAdapted>
+ExtractorResult<::facebook::thrift::test::fixtures::adapter::detail::DirectlyAdapted>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::facebook::thrift::test::detail::DirectlyAdapted, ::facebook__thrift__test__module::NamespaceTag>>::operator()(PyObject* fbThriftData) {
-  ::facebook::thrift::test::detail::DirectlyAdapted cpp;
+    ::facebook::thrift::test::fixtures::adapter::detail::DirectlyAdapted, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(PyObject* fbThriftData) {
+  ::facebook::thrift::test::fixtures::adapter::detail::DirectlyAdapted cpp;
   std::optional<std::string_view> error;
   Extractor<int32_t>{}.extractInto(
       cpp.field_ref(),
@@ -427,13 +427,13 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
 }
 
 
-int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::detail::DirectlyAdapted, ::facebook__thrift__test__module::NamespaceTag>>::typeCheck(PyObject* obj) {
+int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::detail::DirectlyAdapted, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
-      "Module facebook.thrift.test.module import error");
+      "Module facebook.thrift.test.fixtures.adapter.module import error");
   }
   int result =
-      can_extract__facebook__thrift__test__module__DirectlyAdapted(obj);
+      can_extract__facebook__thrift__test__fixtures__adapter__module__DirectlyAdapted(obj);
   if (result < 0) {
     ::folly::python::handlePythonError(
       "Unexpected type check error: DirectlyAdapted");
@@ -442,24 +442,24 @@ int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrif
 }
 
 
-PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::detail::DirectlyAdapted, ::facebook__thrift__test__module::NamespaceTag>>::operator()(
-    const ::facebook::thrift::test::detail::DirectlyAdapted& val) {
+PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::detail::DirectlyAdapted, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(
+    const ::facebook::thrift::test::fixtures::adapter::detail::DirectlyAdapted& val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
   Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::detail::DirectlyAdapted, ::facebook__thrift__test__module::NamespaceTag>> ctor;
+        ::facebook::thrift::test::fixtures::adapter::detail::DirectlyAdapted, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> ctor;
   StrongRef fbthrift_data(ctor(val));
   if (!fbthrift_data) {
     return nullptr;
   }
-  return init__facebook__thrift__test__module__DirectlyAdapted(*fbthrift_data);
+  return init__facebook__thrift__test__fixtures__adapter__module__DirectlyAdapted(*fbthrift_data);
 }
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::detail::DirectlyAdapted, ::facebook__thrift__test__module::NamespaceTag>>::operator()(
-    [[maybe_unused]] const ::facebook::thrift::test::detail::DirectlyAdapted& val) {
+        ::facebook::thrift::test::fixtures::adapter::detail::DirectlyAdapted, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(
+    [[maybe_unused]] const ::facebook::thrift::test::fixtures::adapter::detail::DirectlyAdapted& val) {
   StrongRef fbthrift_data(createStructTuple(1));
   StrongRef _fbthrift__field(
     Constructor<int32_t>{}
@@ -475,25 +475,25 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
 }
 
 
-ExtractorResult<::facebook::thrift::test::detail::IndependentDirectlyAdapted>
-Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::detail::IndependentDirectlyAdapted, ::facebook__thrift__test__module::NamespaceTag>>::operator()(PyObject* obj) {
+ExtractorResult<::facebook::thrift::test::fixtures::adapter::detail::IndependentDirectlyAdapted>
+Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::detail::IndependentDirectlyAdapted, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(PyObject* obj) {
   int tCheckResult = typeCheck(obj);
   if (tCheckResult != 1) {
       if (tCheckResult == 0) {
         PyErr_SetString(PyExc_TypeError, "Not a IndependentDirectlyAdapted");
       }
-      return extractorError<::facebook::thrift::test::detail::IndependentDirectlyAdapted>(
+      return extractorError<::facebook::thrift::test::fixtures::adapter::detail::IndependentDirectlyAdapted>(
           "Marshal error: IndependentDirectlyAdapted");
   }
   StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
-      ::facebook::thrift::test::detail::IndependentDirectlyAdapted, ::facebook__thrift__test__module::NamespaceTag>>{}(*fbThriftData);
+      ::facebook::thrift::test::fixtures::adapter::detail::IndependentDirectlyAdapted, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>{}(*fbThriftData);
 }
 
-ExtractorResult<::facebook::thrift::test::detail::IndependentDirectlyAdapted>
+ExtractorResult<::facebook::thrift::test::fixtures::adapter::detail::IndependentDirectlyAdapted>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::facebook::thrift::test::detail::IndependentDirectlyAdapted, ::facebook__thrift__test__module::NamespaceTag>>::operator()(PyObject* fbThriftData) {
-  ::facebook::thrift::test::detail::IndependentDirectlyAdapted cpp;
+    ::facebook::thrift::test::fixtures::adapter::detail::IndependentDirectlyAdapted, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(PyObject* fbThriftData) {
+  ::facebook::thrift::test::fixtures::adapter::detail::IndependentDirectlyAdapted cpp;
   std::optional<std::string_view> error;
   Extractor<int32_t>{}.extractInto(
       cpp.field_ref(),
@@ -506,13 +506,13 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
 }
 
 
-int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::detail::IndependentDirectlyAdapted, ::facebook__thrift__test__module::NamespaceTag>>::typeCheck(PyObject* obj) {
+int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::detail::IndependentDirectlyAdapted, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
-      "Module facebook.thrift.test.module import error");
+      "Module facebook.thrift.test.fixtures.adapter.module import error");
   }
   int result =
-      can_extract__facebook__thrift__test__module__IndependentDirectlyAdapted(obj);
+      can_extract__facebook__thrift__test__fixtures__adapter__module__IndependentDirectlyAdapted(obj);
   if (result < 0) {
     ::folly::python::handlePythonError(
       "Unexpected type check error: IndependentDirectlyAdapted");
@@ -521,24 +521,24 @@ int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrif
 }
 
 
-PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::detail::IndependentDirectlyAdapted, ::facebook__thrift__test__module::NamespaceTag>>::operator()(
-    const ::facebook::thrift::test::detail::IndependentDirectlyAdapted& val) {
+PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::detail::IndependentDirectlyAdapted, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(
+    const ::facebook::thrift::test::fixtures::adapter::detail::IndependentDirectlyAdapted& val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
   Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::detail::IndependentDirectlyAdapted, ::facebook__thrift__test__module::NamespaceTag>> ctor;
+        ::facebook::thrift::test::fixtures::adapter::detail::IndependentDirectlyAdapted, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> ctor;
   StrongRef fbthrift_data(ctor(val));
   if (!fbthrift_data) {
     return nullptr;
   }
-  return init__facebook__thrift__test__module__IndependentDirectlyAdapted(*fbthrift_data);
+  return init__facebook__thrift__test__fixtures__adapter__module__IndependentDirectlyAdapted(*fbthrift_data);
 }
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::detail::IndependentDirectlyAdapted, ::facebook__thrift__test__module::NamespaceTag>>::operator()(
-    [[maybe_unused]] const ::facebook::thrift::test::detail::IndependentDirectlyAdapted& val) {
+        ::facebook::thrift::test::fixtures::adapter::detail::IndependentDirectlyAdapted, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(
+    [[maybe_unused]] const ::facebook::thrift::test::fixtures::adapter::detail::IndependentDirectlyAdapted& val) {
   StrongRef fbthrift_data(createStructTuple(1));
   StrongRef _fbthrift__field(
     Constructor<int32_t>{}
@@ -554,47 +554,47 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
 }
 
 
-ExtractorResult<::facebook::thrift::test::StructWithFieldAdapter>
-Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::StructWithFieldAdapter, ::facebook__thrift__test__module::NamespaceTag>>::operator()(PyObject* obj) {
+ExtractorResult<::facebook::thrift::test::fixtures::adapter::StructWithFieldAdapter>
+Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::StructWithFieldAdapter, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(PyObject* obj) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::facebook::thrift::test::StructWithFieldAdapter>(
-      "Module facebook.thrift.test.module import error");
+    return extractorError<::facebook::thrift::test::fixtures::adapter::StructWithFieldAdapter>(
+      "Module facebook.thrift.test.fixtures.adapter.module import error");
   }
   std::unique_ptr<folly::IOBuf> val(
-      extract__facebook__thrift__test__module__StructWithFieldAdapter(obj));
+      extract__facebook__thrift__test__fixtures__adapter__module__StructWithFieldAdapter(obj));
   if (!val) {
     CHECK(PyErr_Occurred());
-    return extractorError<::facebook::thrift::test::StructWithFieldAdapter>(
+    return extractorError<::facebook::thrift::test::fixtures::adapter::StructWithFieldAdapter>(
         "Thrift serialize error: StructWithFieldAdapter");
   }
-  return detail::deserialize_iobuf<::facebook::thrift::test::StructWithFieldAdapter>(std::move(val));
+  return detail::deserialize_iobuf<::facebook::thrift::test::fixtures::adapter::StructWithFieldAdapter>(std::move(val));
 }
 
 
-ExtractorResult<::facebook::thrift::test::StructWithFieldAdapter>
+ExtractorResult<::facebook::thrift::test::fixtures::adapter::StructWithFieldAdapter>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::facebook::thrift::test::StructWithFieldAdapter, ::facebook__thrift__test__module::NamespaceTag>>::operator()(PyObject* fbthrift_data) {
+    ::facebook::thrift::test::fixtures::adapter::StructWithFieldAdapter, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(PyObject* fbthrift_data) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::facebook::thrift::test::StructWithFieldAdapter>(
-      "Module facebook.thrift.test.module import error");
+    return extractorError<::facebook::thrift::test::fixtures::adapter::StructWithFieldAdapter>(
+      "Module facebook.thrift.test.fixtures.adapter.module import error");
   }
-  auto obj = StrongRef(init__facebook__thrift__test__module__StructWithFieldAdapter(fbthrift_data));
+  auto obj = StrongRef(init__facebook__thrift__test__fixtures__adapter__module__StructWithFieldAdapter(fbthrift_data));
   if (!obj) {
-      return extractorError<::facebook::thrift::test::StructWithFieldAdapter>(
+      return extractorError<::facebook::thrift::test::fixtures::adapter::StructWithFieldAdapter>(
           "Init from fbthrift error: StructWithFieldAdapter");
   }
-  return Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::StructWithFieldAdapter, ::facebook__thrift__test__module::NamespaceTag>>{}(*obj);
+  return Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::StructWithFieldAdapter, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>{}(*obj);
 }
 
-int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::StructWithFieldAdapter, ::facebook__thrift__test__module::NamespaceTag>>::typeCheck(PyObject* obj) {
+int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::StructWithFieldAdapter, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
-      "Module facebook.thrift.test.module import error");
+      "Module facebook.thrift.test.fixtures.adapter.module import error");
   }
   int result =
-      can_extract__facebook__thrift__test__module__StructWithFieldAdapter(obj);
+      can_extract__facebook__thrift__test__fixtures__adapter__module__StructWithFieldAdapter(obj);
   if (result < 0) {
     ::folly::python::handlePythonError(
       "Unexpected type check error: StructWithFieldAdapter");
@@ -603,8 +603,8 @@ int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrif
 }
 
 
-PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::StructWithFieldAdapter, ::facebook__thrift__test__module::NamespaceTag>>::operator()(
-    const ::facebook::thrift::test::StructWithFieldAdapter& val) {
+PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::StructWithFieldAdapter, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(
+    const ::facebook::thrift::test::fixtures::adapter::StructWithFieldAdapter& val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
@@ -617,7 +617,7 @@ PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::faceboo
     return nullptr;
   }
   DCHECK(serialized);
-  auto ptr = construct__facebook__thrift__test__module__StructWithFieldAdapter(std::move(serialized));
+  auto ptr = construct__facebook__thrift__test__fixtures__adapter__module__StructWithFieldAdapter(std::move(serialized));
   if (!ptr) {
     CHECK(PyErr_Occurred());
   }
@@ -626,56 +626,56 @@ PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::faceboo
 
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::StructWithFieldAdapter, ::facebook__thrift__test__module::NamespaceTag>>::operator()(
-    const ::facebook::thrift::test::StructWithFieldAdapter& val) {
-  auto obj = StrongRef(Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::StructWithFieldAdapter, ::facebook__thrift__test__module::NamespaceTag>>{}(val));
+        ::facebook::thrift::test::fixtures::adapter::StructWithFieldAdapter, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(
+    const ::facebook::thrift::test::fixtures::adapter::StructWithFieldAdapter& val) {
+  auto obj = StrongRef(Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::StructWithFieldAdapter, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>{}(val));
   if (!obj) {
     return nullptr;
   }
   return getThriftStructFieldData(*obj);
 }
 
-ExtractorResult<::facebook::thrift::test::TerseAdaptedFields>
-Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::TerseAdaptedFields, ::facebook__thrift__test__module::NamespaceTag>>::operator()(PyObject* obj) {
+ExtractorResult<::facebook::thrift::test::fixtures::adapter::TerseAdaptedFields>
+Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::TerseAdaptedFields, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(PyObject* obj) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::facebook::thrift::test::TerseAdaptedFields>(
-      "Module facebook.thrift.test.module import error");
+    return extractorError<::facebook::thrift::test::fixtures::adapter::TerseAdaptedFields>(
+      "Module facebook.thrift.test.fixtures.adapter.module import error");
   }
   std::unique_ptr<folly::IOBuf> val(
-      extract__facebook__thrift__test__module__TerseAdaptedFields(obj));
+      extract__facebook__thrift__test__fixtures__adapter__module__TerseAdaptedFields(obj));
   if (!val) {
     CHECK(PyErr_Occurred());
-    return extractorError<::facebook::thrift::test::TerseAdaptedFields>(
+    return extractorError<::facebook::thrift::test::fixtures::adapter::TerseAdaptedFields>(
         "Thrift serialize error: TerseAdaptedFields");
   }
-  return detail::deserialize_iobuf<::facebook::thrift::test::TerseAdaptedFields>(std::move(val));
+  return detail::deserialize_iobuf<::facebook::thrift::test::fixtures::adapter::TerseAdaptedFields>(std::move(val));
 }
 
 
-ExtractorResult<::facebook::thrift::test::TerseAdaptedFields>
+ExtractorResult<::facebook::thrift::test::fixtures::adapter::TerseAdaptedFields>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::facebook::thrift::test::TerseAdaptedFields, ::facebook__thrift__test__module::NamespaceTag>>::operator()(PyObject* fbthrift_data) {
+    ::facebook::thrift::test::fixtures::adapter::TerseAdaptedFields, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(PyObject* fbthrift_data) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::facebook::thrift::test::TerseAdaptedFields>(
-      "Module facebook.thrift.test.module import error");
+    return extractorError<::facebook::thrift::test::fixtures::adapter::TerseAdaptedFields>(
+      "Module facebook.thrift.test.fixtures.adapter.module import error");
   }
-  auto obj = StrongRef(init__facebook__thrift__test__module__TerseAdaptedFields(fbthrift_data));
+  auto obj = StrongRef(init__facebook__thrift__test__fixtures__adapter__module__TerseAdaptedFields(fbthrift_data));
   if (!obj) {
-      return extractorError<::facebook::thrift::test::TerseAdaptedFields>(
+      return extractorError<::facebook::thrift::test::fixtures::adapter::TerseAdaptedFields>(
           "Init from fbthrift error: TerseAdaptedFields");
   }
-  return Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::TerseAdaptedFields, ::facebook__thrift__test__module::NamespaceTag>>{}(*obj);
+  return Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::TerseAdaptedFields, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>{}(*obj);
 }
 
-int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::TerseAdaptedFields, ::facebook__thrift__test__module::NamespaceTag>>::typeCheck(PyObject* obj) {
+int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::TerseAdaptedFields, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
-      "Module facebook.thrift.test.module import error");
+      "Module facebook.thrift.test.fixtures.adapter.module import error");
   }
   int result =
-      can_extract__facebook__thrift__test__module__TerseAdaptedFields(obj);
+      can_extract__facebook__thrift__test__fixtures__adapter__module__TerseAdaptedFields(obj);
   if (result < 0) {
     ::folly::python::handlePythonError(
       "Unexpected type check error: TerseAdaptedFields");
@@ -684,8 +684,8 @@ int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrif
 }
 
 
-PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::TerseAdaptedFields, ::facebook__thrift__test__module::NamespaceTag>>::operator()(
-    const ::facebook::thrift::test::TerseAdaptedFields& val) {
+PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::TerseAdaptedFields, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(
+    const ::facebook::thrift::test::fixtures::adapter::TerseAdaptedFields& val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
@@ -698,7 +698,7 @@ PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::faceboo
     return nullptr;
   }
   DCHECK(serialized);
-  auto ptr = construct__facebook__thrift__test__module__TerseAdaptedFields(std::move(serialized));
+  auto ptr = construct__facebook__thrift__test__fixtures__adapter__module__TerseAdaptedFields(std::move(serialized));
   if (!ptr) {
     CHECK(PyErr_Occurred());
   }
@@ -707,56 +707,56 @@ PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::faceboo
 
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::TerseAdaptedFields, ::facebook__thrift__test__module::NamespaceTag>>::operator()(
-    const ::facebook::thrift::test::TerseAdaptedFields& val) {
-  auto obj = StrongRef(Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::TerseAdaptedFields, ::facebook__thrift__test__module::NamespaceTag>>{}(val));
+        ::facebook::thrift::test::fixtures::adapter::TerseAdaptedFields, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(
+    const ::facebook::thrift::test::fixtures::adapter::TerseAdaptedFields& val) {
+  auto obj = StrongRef(Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::TerseAdaptedFields, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>{}(val));
   if (!obj) {
     return nullptr;
   }
   return getThriftStructFieldData(*obj);
 }
 
-ExtractorResult<::facebook::thrift::test::B>
-Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::B, ::facebook__thrift__test__module::NamespaceTag>>::operator()(PyObject* obj) {
+ExtractorResult<::facebook::thrift::test::fixtures::adapter::B>
+Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::B, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(PyObject* obj) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::facebook::thrift::test::B>(
-      "Module facebook.thrift.test.module import error");
+    return extractorError<::facebook::thrift::test::fixtures::adapter::B>(
+      "Module facebook.thrift.test.fixtures.adapter.module import error");
   }
   std::unique_ptr<folly::IOBuf> val(
-      extract__facebook__thrift__test__module__B(obj));
+      extract__facebook__thrift__test__fixtures__adapter__module__B(obj));
   if (!val) {
     CHECK(PyErr_Occurred());
-    return extractorError<::facebook::thrift::test::B>(
+    return extractorError<::facebook::thrift::test::fixtures::adapter::B>(
         "Thrift serialize error: B");
   }
-  return detail::deserialize_iobuf<::facebook::thrift::test::B>(std::move(val));
+  return detail::deserialize_iobuf<::facebook::thrift::test::fixtures::adapter::B>(std::move(val));
 }
 
 
-ExtractorResult<::facebook::thrift::test::B>
+ExtractorResult<::facebook::thrift::test::fixtures::adapter::B>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::facebook::thrift::test::B, ::facebook__thrift__test__module::NamespaceTag>>::operator()(PyObject* fbthrift_data) {
+    ::facebook::thrift::test::fixtures::adapter::B, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(PyObject* fbthrift_data) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::facebook::thrift::test::B>(
-      "Module facebook.thrift.test.module import error");
+    return extractorError<::facebook::thrift::test::fixtures::adapter::B>(
+      "Module facebook.thrift.test.fixtures.adapter.module import error");
   }
-  auto obj = StrongRef(init__facebook__thrift__test__module__B(fbthrift_data));
+  auto obj = StrongRef(init__facebook__thrift__test__fixtures__adapter__module__B(fbthrift_data));
   if (!obj) {
-      return extractorError<::facebook::thrift::test::B>(
+      return extractorError<::facebook::thrift::test::fixtures::adapter::B>(
           "Init from fbthrift error: B");
   }
-  return Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::B, ::facebook__thrift__test__module::NamespaceTag>>{}(*obj);
+  return Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::B, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>{}(*obj);
 }
 
-int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::B, ::facebook__thrift__test__module::NamespaceTag>>::typeCheck(PyObject* obj) {
+int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::B, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
-      "Module facebook.thrift.test.module import error");
+      "Module facebook.thrift.test.fixtures.adapter.module import error");
   }
   int result =
-      can_extract__facebook__thrift__test__module__B(obj);
+      can_extract__facebook__thrift__test__fixtures__adapter__module__B(obj);
   if (result < 0) {
     ::folly::python::handlePythonError(
       "Unexpected type check error: B");
@@ -765,8 +765,8 @@ int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrif
 }
 
 
-PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::B, ::facebook__thrift__test__module::NamespaceTag>>::operator()(
-    const ::facebook::thrift::test::B& val) {
+PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::B, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(
+    const ::facebook::thrift::test::fixtures::adapter::B& val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
@@ -779,7 +779,7 @@ PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::faceboo
     return nullptr;
   }
   DCHECK(serialized);
-  auto ptr = construct__facebook__thrift__test__module__B(std::move(serialized));
+  auto ptr = construct__facebook__thrift__test__fixtures__adapter__module__B(std::move(serialized));
   if (!ptr) {
     CHECK(PyErr_Occurred());
   }
@@ -788,44 +788,44 @@ PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::faceboo
 
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::B, ::facebook__thrift__test__module::NamespaceTag>>::operator()(
-    const ::facebook::thrift::test::B& val) {
-  auto obj = StrongRef(Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::B, ::facebook__thrift__test__module::NamespaceTag>>{}(val));
+        ::facebook::thrift::test::fixtures::adapter::B, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(
+    const ::facebook::thrift::test::fixtures::adapter::B& val) {
+  auto obj = StrongRef(Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::B, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>{}(val));
   if (!obj) {
     return nullptr;
   }
   return getThriftStructFieldData(*obj);
 }
 
-ExtractorResult<::facebook::thrift::test::A>
-Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::A, ::facebook__thrift__test__module::NamespaceTag>>::operator()(PyObject* obj) {
+ExtractorResult<::facebook::thrift::test::fixtures::adapter::A>
+Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::A, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(PyObject* obj) {
   int tCheckResult = typeCheck(obj);
   if (tCheckResult != 1) {
       if (tCheckResult == 0) {
         PyErr_SetString(PyExc_TypeError, "Not a A");
       }
-      return extractorError<::facebook::thrift::test::A>(
+      return extractorError<::facebook::thrift::test::fixtures::adapter::A>(
           "Marshal error: A");
   }
-  return ::facebook::thrift::test::A{};
+  return ::facebook::thrift::test::fixtures::adapter::A{};
 }
 
-ExtractorResult<::facebook::thrift::test::A>
+ExtractorResult<::facebook::thrift::test::fixtures::adapter::A>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::facebook::thrift::test::A, ::facebook__thrift__test__module::NamespaceTag>>::operator()(PyObject* fbThriftData) {
-  ::facebook::thrift::test::A cpp;
+    ::facebook::thrift::test::fixtures::adapter::A, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(PyObject* fbThriftData) {
+  ::facebook::thrift::test::fixtures::adapter::A cpp;
   (void)fbThriftData;
   return cpp;
 }
 
 
-int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::A, ::facebook__thrift__test__module::NamespaceTag>>::typeCheck(PyObject* obj) {
+int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::A, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
-      "Module facebook.thrift.test.module import error");
+      "Module facebook.thrift.test.fixtures.adapter.module import error");
   }
   int result =
-      can_extract__facebook__thrift__test__module__A(obj);
+      can_extract__facebook__thrift__test__fixtures__adapter__module__A(obj);
   if (result < 0) {
     ::folly::python::handlePythonError(
       "Unexpected type check error: A");
@@ -834,48 +834,48 @@ int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrif
 }
 
 
-PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::A, ::facebook__thrift__test__module::NamespaceTag>>::operator()(
-    const ::facebook::thrift::test::A& val) {
+PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::A, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(
+    const ::facebook::thrift::test::fixtures::adapter::A& val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
   Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::A, ::facebook__thrift__test__module::NamespaceTag>> ctor;
+        ::facebook::thrift::test::fixtures::adapter::A, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> ctor;
   StrongRef fbthrift_data(ctor(val));
   if (!fbthrift_data) {
     return nullptr;
   }
-  return init__facebook__thrift__test__module__A(*fbthrift_data);
+  return init__facebook__thrift__test__fixtures__adapter__module__A(*fbthrift_data);
 }
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::A, ::facebook__thrift__test__module::NamespaceTag>>::operator()(
-    [[maybe_unused]] const ::facebook::thrift::test::A& val) {
+        ::facebook::thrift::test::fixtures::adapter::A, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(
+    [[maybe_unused]] const ::facebook::thrift::test::fixtures::adapter::A& val) {
   StrongRef fbthrift_data(createStructTuple(0));
   return std::move(fbthrift_data).release();
 }
 
 
-ExtractorResult<::facebook::thrift::test::Config>
-Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::Config, ::facebook__thrift__test__module::NamespaceTag>>::operator()(PyObject* obj) {
+ExtractorResult<::facebook::thrift::test::fixtures::adapter::Config>
+Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::Config, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(PyObject* obj) {
   int tCheckResult = typeCheck(obj);
   if (tCheckResult != 1) {
       if (tCheckResult == 0) {
         PyErr_SetString(PyExc_TypeError, "Not a Config");
       }
-      return extractorError<::facebook::thrift::test::Config>(
+      return extractorError<::facebook::thrift::test::fixtures::adapter::Config>(
           "Marshal error: Config");
   }
   StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
-      ::facebook::thrift::test::Config, ::facebook__thrift__test__module::NamespaceTag>>{}(*fbThriftData);
+      ::facebook::thrift::test::fixtures::adapter::Config, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>{}(*fbThriftData);
 }
 
-ExtractorResult<::facebook::thrift::test::Config>
+ExtractorResult<::facebook::thrift::test::fixtures::adapter::Config>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::facebook::thrift::test::Config, ::facebook__thrift__test__module::NamespaceTag>>::operator()(PyObject* fbThriftData) {
-  ::facebook::thrift::test::Config cpp;
+    ::facebook::thrift::test::fixtures::adapter::Config, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(PyObject* fbThriftData) {
+  ::facebook::thrift::test::fixtures::adapter::Config cpp;
   std::optional<std::string_view> error;
   Extractor<::apache::thrift::python::capi::FallibleString>{}.extractInto(
       cpp.path_ref(),
@@ -888,13 +888,13 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
 }
 
 
-int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::Config, ::facebook__thrift__test__module::NamespaceTag>>::typeCheck(PyObject* obj) {
+int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::Config, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
-      "Module facebook.thrift.test.module import error");
+      "Module facebook.thrift.test.fixtures.adapter.module import error");
   }
   int result =
-      can_extract__facebook__thrift__test__module__Config(obj);
+      can_extract__facebook__thrift__test__fixtures__adapter__module__Config(obj);
   if (result < 0) {
     ::folly::python::handlePythonError(
       "Unexpected type check error: Config");
@@ -903,24 +903,24 @@ int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrif
 }
 
 
-PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::Config, ::facebook__thrift__test__module::NamespaceTag>>::operator()(
-    const ::facebook::thrift::test::Config& val) {
+PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::Config, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(
+    const ::facebook::thrift::test::fixtures::adapter::Config& val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
   Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::Config, ::facebook__thrift__test__module::NamespaceTag>> ctor;
+        ::facebook::thrift::test::fixtures::adapter::Config, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> ctor;
   StrongRef fbthrift_data(ctor(val));
   if (!fbthrift_data) {
     return nullptr;
   }
-  return init__facebook__thrift__test__module__Config(*fbthrift_data);
+  return init__facebook__thrift__test__fixtures__adapter__module__Config(*fbthrift_data);
 }
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::Config, ::facebook__thrift__test__module::NamespaceTag>>::operator()(
-    [[maybe_unused]] const ::facebook::thrift::test::Config& val) {
+        ::facebook::thrift::test::fixtures::adapter::Config, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(
+    [[maybe_unused]] const ::facebook::thrift::test::fixtures::adapter::Config& val) {
   StrongRef fbthrift_data(createStructTuple(1));
   StrongRef _fbthrift__path(
     Constructor<::apache::thrift::python::capi::FallibleString>{}
@@ -936,47 +936,47 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
 }
 
 
-ExtractorResult<::facebook::thrift::test::MyStruct>
-Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::MyStruct, ::facebook__thrift__test__module::NamespaceTag>>::operator()(PyObject* obj) {
+ExtractorResult<::facebook::thrift::test::fixtures::adapter::MyStruct>
+Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::MyStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(PyObject* obj) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::facebook::thrift::test::MyStruct>(
-      "Module facebook.thrift.test.module import error");
+    return extractorError<::facebook::thrift::test::fixtures::adapter::MyStruct>(
+      "Module facebook.thrift.test.fixtures.adapter.module import error");
   }
   std::unique_ptr<folly::IOBuf> val(
-      extract__facebook__thrift__test__module__MyStruct(obj));
+      extract__facebook__thrift__test__fixtures__adapter__module__MyStruct(obj));
   if (!val) {
     CHECK(PyErr_Occurred());
-    return extractorError<::facebook::thrift::test::MyStruct>(
+    return extractorError<::facebook::thrift::test::fixtures::adapter::MyStruct>(
         "Thrift serialize error: MyStruct");
   }
-  return detail::deserialize_iobuf<::facebook::thrift::test::MyStruct>(std::move(val));
+  return detail::deserialize_iobuf<::facebook::thrift::test::fixtures::adapter::MyStruct>(std::move(val));
 }
 
 
-ExtractorResult<::facebook::thrift::test::MyStruct>
+ExtractorResult<::facebook::thrift::test::fixtures::adapter::MyStruct>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::facebook::thrift::test::MyStruct, ::facebook__thrift__test__module::NamespaceTag>>::operator()(PyObject* fbthrift_data) {
+    ::facebook::thrift::test::fixtures::adapter::MyStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(PyObject* fbthrift_data) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::facebook::thrift::test::MyStruct>(
-      "Module facebook.thrift.test.module import error");
+    return extractorError<::facebook::thrift::test::fixtures::adapter::MyStruct>(
+      "Module facebook.thrift.test.fixtures.adapter.module import error");
   }
-  auto obj = StrongRef(init__facebook__thrift__test__module__MyStruct(fbthrift_data));
+  auto obj = StrongRef(init__facebook__thrift__test__fixtures__adapter__module__MyStruct(fbthrift_data));
   if (!obj) {
-      return extractorError<::facebook::thrift::test::MyStruct>(
+      return extractorError<::facebook::thrift::test::fixtures::adapter::MyStruct>(
           "Init from fbthrift error: MyStruct");
   }
-  return Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::MyStruct, ::facebook__thrift__test__module::NamespaceTag>>{}(*obj);
+  return Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::MyStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>{}(*obj);
 }
 
-int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::MyStruct, ::facebook__thrift__test__module::NamespaceTag>>::typeCheck(PyObject* obj) {
+int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::MyStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
-      "Module facebook.thrift.test.module import error");
+      "Module facebook.thrift.test.fixtures.adapter.module import error");
   }
   int result =
-      can_extract__facebook__thrift__test__module__MyStruct(obj);
+      can_extract__facebook__thrift__test__fixtures__adapter__module__MyStruct(obj);
   if (result < 0) {
     ::folly::python::handlePythonError(
       "Unexpected type check error: MyStruct");
@@ -985,8 +985,8 @@ int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrif
 }
 
 
-PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::MyStruct, ::facebook__thrift__test__module::NamespaceTag>>::operator()(
-    const ::facebook::thrift::test::MyStruct& val) {
+PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::MyStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(
+    const ::facebook::thrift::test::fixtures::adapter::MyStruct& val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
@@ -999,7 +999,7 @@ PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::faceboo
     return nullptr;
   }
   DCHECK(serialized);
-  auto ptr = construct__facebook__thrift__test__module__MyStruct(std::move(serialized));
+  auto ptr = construct__facebook__thrift__test__fixtures__adapter__module__MyStruct(std::move(serialized));
   if (!ptr) {
     CHECK(PyErr_Occurred());
   }
@@ -1008,56 +1008,56 @@ PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::faceboo
 
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::MyStruct, ::facebook__thrift__test__module::NamespaceTag>>::operator()(
-    const ::facebook::thrift::test::MyStruct& val) {
-  auto obj = StrongRef(Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::MyStruct, ::facebook__thrift__test__module::NamespaceTag>>{}(val));
+        ::facebook::thrift::test::fixtures::adapter::MyStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(
+    const ::facebook::thrift::test::fixtures::adapter::MyStruct& val) {
+  auto obj = StrongRef(Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::MyStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>{}(val));
   if (!obj) {
     return nullptr;
   }
   return getThriftStructFieldData(*obj);
 }
 
-ExtractorResult<::facebook::thrift::test::AdaptTestStruct>
-Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::AdaptTestStruct, ::facebook__thrift__test__module::NamespaceTag>>::operator()(PyObject* obj) {
+ExtractorResult<::facebook::thrift::test::fixtures::adapter::AdaptTestStruct>
+Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::AdaptTestStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(PyObject* obj) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::facebook::thrift::test::AdaptTestStruct>(
-      "Module facebook.thrift.test.module import error");
+    return extractorError<::facebook::thrift::test::fixtures::adapter::AdaptTestStruct>(
+      "Module facebook.thrift.test.fixtures.adapter.module import error");
   }
   std::unique_ptr<folly::IOBuf> val(
-      extract__facebook__thrift__test__module__AdaptTestStruct(obj));
+      extract__facebook__thrift__test__fixtures__adapter__module__AdaptTestStruct(obj));
   if (!val) {
     CHECK(PyErr_Occurred());
-    return extractorError<::facebook::thrift::test::AdaptTestStruct>(
+    return extractorError<::facebook::thrift::test::fixtures::adapter::AdaptTestStruct>(
         "Thrift serialize error: AdaptTestStruct");
   }
-  return detail::deserialize_iobuf<::facebook::thrift::test::AdaptTestStruct>(std::move(val));
+  return detail::deserialize_iobuf<::facebook::thrift::test::fixtures::adapter::AdaptTestStruct>(std::move(val));
 }
 
 
-ExtractorResult<::facebook::thrift::test::AdaptTestStruct>
+ExtractorResult<::facebook::thrift::test::fixtures::adapter::AdaptTestStruct>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::facebook::thrift::test::AdaptTestStruct, ::facebook__thrift__test__module::NamespaceTag>>::operator()(PyObject* fbthrift_data) {
+    ::facebook::thrift::test::fixtures::adapter::AdaptTestStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(PyObject* fbthrift_data) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::facebook::thrift::test::AdaptTestStruct>(
-      "Module facebook.thrift.test.module import error");
+    return extractorError<::facebook::thrift::test::fixtures::adapter::AdaptTestStruct>(
+      "Module facebook.thrift.test.fixtures.adapter.module import error");
   }
-  auto obj = StrongRef(init__facebook__thrift__test__module__AdaptTestStruct(fbthrift_data));
+  auto obj = StrongRef(init__facebook__thrift__test__fixtures__adapter__module__AdaptTestStruct(fbthrift_data));
   if (!obj) {
-      return extractorError<::facebook::thrift::test::AdaptTestStruct>(
+      return extractorError<::facebook::thrift::test::fixtures::adapter::AdaptTestStruct>(
           "Init from fbthrift error: AdaptTestStruct");
   }
-  return Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::AdaptTestStruct, ::facebook__thrift__test__module::NamespaceTag>>{}(*obj);
+  return Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::AdaptTestStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>{}(*obj);
 }
 
-int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::AdaptTestStruct, ::facebook__thrift__test__module::NamespaceTag>>::typeCheck(PyObject* obj) {
+int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::AdaptTestStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
-      "Module facebook.thrift.test.module import error");
+      "Module facebook.thrift.test.fixtures.adapter.module import error");
   }
   int result =
-      can_extract__facebook__thrift__test__module__AdaptTestStruct(obj);
+      can_extract__facebook__thrift__test__fixtures__adapter__module__AdaptTestStruct(obj);
   if (result < 0) {
     ::folly::python::handlePythonError(
       "Unexpected type check error: AdaptTestStruct");
@@ -1066,8 +1066,8 @@ int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrif
 }
 
 
-PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::AdaptTestStruct, ::facebook__thrift__test__module::NamespaceTag>>::operator()(
-    const ::facebook::thrift::test::AdaptTestStruct& val) {
+PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::AdaptTestStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(
+    const ::facebook::thrift::test::fixtures::adapter::AdaptTestStruct& val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
@@ -1080,7 +1080,7 @@ PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::faceboo
     return nullptr;
   }
   DCHECK(serialized);
-  auto ptr = construct__facebook__thrift__test__module__AdaptTestStruct(std::move(serialized));
+  auto ptr = construct__facebook__thrift__test__fixtures__adapter__module__AdaptTestStruct(std::move(serialized));
   if (!ptr) {
     CHECK(PyErr_Occurred());
   }
@@ -1089,56 +1089,56 @@ PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::faceboo
 
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::AdaptTestStruct, ::facebook__thrift__test__module::NamespaceTag>>::operator()(
-    const ::facebook::thrift::test::AdaptTestStruct& val) {
-  auto obj = StrongRef(Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::AdaptTestStruct, ::facebook__thrift__test__module::NamespaceTag>>{}(val));
+        ::facebook::thrift::test::fixtures::adapter::AdaptTestStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(
+    const ::facebook::thrift::test::fixtures::adapter::AdaptTestStruct& val) {
+  auto obj = StrongRef(Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::AdaptTestStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>{}(val));
   if (!obj) {
     return nullptr;
   }
   return getThriftStructFieldData(*obj);
 }
 
-ExtractorResult<::facebook::thrift::test::AdaptTemplatedTestStruct>
-Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::AdaptTemplatedTestStruct, ::facebook__thrift__test__module::NamespaceTag>>::operator()(PyObject* obj) {
+ExtractorResult<::facebook::thrift::test::fixtures::adapter::AdaptTemplatedTestStruct>
+Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::AdaptTemplatedTestStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(PyObject* obj) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::facebook::thrift::test::AdaptTemplatedTestStruct>(
-      "Module facebook.thrift.test.module import error");
+    return extractorError<::facebook::thrift::test::fixtures::adapter::AdaptTemplatedTestStruct>(
+      "Module facebook.thrift.test.fixtures.adapter.module import error");
   }
   std::unique_ptr<folly::IOBuf> val(
-      extract__facebook__thrift__test__module__AdaptTemplatedTestStruct(obj));
+      extract__facebook__thrift__test__fixtures__adapter__module__AdaptTemplatedTestStruct(obj));
   if (!val) {
     CHECK(PyErr_Occurred());
-    return extractorError<::facebook::thrift::test::AdaptTemplatedTestStruct>(
+    return extractorError<::facebook::thrift::test::fixtures::adapter::AdaptTemplatedTestStruct>(
         "Thrift serialize error: AdaptTemplatedTestStruct");
   }
-  return detail::deserialize_iobuf<::facebook::thrift::test::AdaptTemplatedTestStruct>(std::move(val));
+  return detail::deserialize_iobuf<::facebook::thrift::test::fixtures::adapter::AdaptTemplatedTestStruct>(std::move(val));
 }
 
 
-ExtractorResult<::facebook::thrift::test::AdaptTemplatedTestStruct>
+ExtractorResult<::facebook::thrift::test::fixtures::adapter::AdaptTemplatedTestStruct>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::facebook::thrift::test::AdaptTemplatedTestStruct, ::facebook__thrift__test__module::NamespaceTag>>::operator()(PyObject* fbthrift_data) {
+    ::facebook::thrift::test::fixtures::adapter::AdaptTemplatedTestStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(PyObject* fbthrift_data) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::facebook::thrift::test::AdaptTemplatedTestStruct>(
-      "Module facebook.thrift.test.module import error");
+    return extractorError<::facebook::thrift::test::fixtures::adapter::AdaptTemplatedTestStruct>(
+      "Module facebook.thrift.test.fixtures.adapter.module import error");
   }
-  auto obj = StrongRef(init__facebook__thrift__test__module__AdaptTemplatedTestStruct(fbthrift_data));
+  auto obj = StrongRef(init__facebook__thrift__test__fixtures__adapter__module__AdaptTemplatedTestStruct(fbthrift_data));
   if (!obj) {
-      return extractorError<::facebook::thrift::test::AdaptTemplatedTestStruct>(
+      return extractorError<::facebook::thrift::test::fixtures::adapter::AdaptTemplatedTestStruct>(
           "Init from fbthrift error: AdaptTemplatedTestStruct");
   }
-  return Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::AdaptTemplatedTestStruct, ::facebook__thrift__test__module::NamespaceTag>>{}(*obj);
+  return Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::AdaptTemplatedTestStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>{}(*obj);
 }
 
-int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::AdaptTemplatedTestStruct, ::facebook__thrift__test__module::NamespaceTag>>::typeCheck(PyObject* obj) {
+int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::AdaptTemplatedTestStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
-      "Module facebook.thrift.test.module import error");
+      "Module facebook.thrift.test.fixtures.adapter.module import error");
   }
   int result =
-      can_extract__facebook__thrift__test__module__AdaptTemplatedTestStruct(obj);
+      can_extract__facebook__thrift__test__fixtures__adapter__module__AdaptTemplatedTestStruct(obj);
   if (result < 0) {
     ::folly::python::handlePythonError(
       "Unexpected type check error: AdaptTemplatedTestStruct");
@@ -1147,8 +1147,8 @@ int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrif
 }
 
 
-PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::AdaptTemplatedTestStruct, ::facebook__thrift__test__module::NamespaceTag>>::operator()(
-    const ::facebook::thrift::test::AdaptTemplatedTestStruct& val) {
+PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::AdaptTemplatedTestStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(
+    const ::facebook::thrift::test::fixtures::adapter::AdaptTemplatedTestStruct& val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
@@ -1161,7 +1161,7 @@ PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::faceboo
     return nullptr;
   }
   DCHECK(serialized);
-  auto ptr = construct__facebook__thrift__test__module__AdaptTemplatedTestStruct(std::move(serialized));
+  auto ptr = construct__facebook__thrift__test__fixtures__adapter__module__AdaptTemplatedTestStruct(std::move(serialized));
   if (!ptr) {
     CHECK(PyErr_Occurred());
   }
@@ -1170,36 +1170,36 @@ PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::faceboo
 
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::AdaptTemplatedTestStruct, ::facebook__thrift__test__module::NamespaceTag>>::operator()(
-    const ::facebook::thrift::test::AdaptTemplatedTestStruct& val) {
-  auto obj = StrongRef(Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::AdaptTemplatedTestStruct, ::facebook__thrift__test__module::NamespaceTag>>{}(val));
+        ::facebook::thrift::test::fixtures::adapter::AdaptTemplatedTestStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(
+    const ::facebook::thrift::test::fixtures::adapter::AdaptTemplatedTestStruct& val) {
+  auto obj = StrongRef(Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::AdaptTemplatedTestStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>{}(val));
   if (!obj) {
     return nullptr;
   }
   return getThriftStructFieldData(*obj);
 }
 
-ExtractorResult<::facebook::thrift::test::AdaptTemplatedNestedTestStruct>
-Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::AdaptTemplatedNestedTestStruct, ::facebook__thrift__test__module::NamespaceTag>>::operator()(PyObject* obj) {
+ExtractorResult<::facebook::thrift::test::fixtures::adapter::AdaptTemplatedNestedTestStruct>
+Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::AdaptTemplatedNestedTestStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(PyObject* obj) {
   int tCheckResult = typeCheck(obj);
   if (tCheckResult != 1) {
       if (tCheckResult == 0) {
         PyErr_SetString(PyExc_TypeError, "Not a AdaptTemplatedNestedTestStruct");
       }
-      return extractorError<::facebook::thrift::test::AdaptTemplatedNestedTestStruct>(
+      return extractorError<::facebook::thrift::test::fixtures::adapter::AdaptTemplatedNestedTestStruct>(
           "Marshal error: AdaptTemplatedNestedTestStruct");
   }
   StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
-      ::facebook::thrift::test::AdaptTemplatedNestedTestStruct, ::facebook__thrift__test__module::NamespaceTag>>{}(*fbThriftData);
+      ::facebook::thrift::test::fixtures::adapter::AdaptTemplatedNestedTestStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>{}(*fbThriftData);
 }
 
-ExtractorResult<::facebook::thrift::test::AdaptTemplatedNestedTestStruct>
+ExtractorResult<::facebook::thrift::test::fixtures::adapter::AdaptTemplatedNestedTestStruct>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::facebook::thrift::test::AdaptTemplatedNestedTestStruct, ::facebook__thrift__test__module::NamespaceTag>>::operator()(PyObject* fbThriftData) {
-  ::facebook::thrift::test::AdaptTemplatedNestedTestStruct cpp;
+    ::facebook::thrift::test::fixtures::adapter::AdaptTemplatedNestedTestStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(PyObject* fbThriftData) {
+  ::facebook::thrift::test::fixtures::adapter::AdaptTemplatedNestedTestStruct cpp;
   std::optional<std::string_view> error;
-  Extractor<::apache::thrift::python::capi::ComposedStruct<::facebook::thrift::test::AdaptTemplatedTestStruct, ::facebook__thrift__test__module::NamespaceTag>>{}.extractInto(
+  Extractor<::apache::thrift::python::capi::ComposedStruct<::facebook::thrift::test::fixtures::adapter::AdaptTemplatedTestStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>{}.extractInto(
       cpp.adaptedStruct_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__AdaptTemplatedNestedTestStruct__tuple_pos[0]),
       error);
@@ -1210,13 +1210,13 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
 }
 
 
-int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::AdaptTemplatedNestedTestStruct, ::facebook__thrift__test__module::NamespaceTag>>::typeCheck(PyObject* obj) {
+int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::AdaptTemplatedNestedTestStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
-      "Module facebook.thrift.test.module import error");
+      "Module facebook.thrift.test.fixtures.adapter.module import error");
   }
   int result =
-      can_extract__facebook__thrift__test__module__AdaptTemplatedNestedTestStruct(obj);
+      can_extract__facebook__thrift__test__fixtures__adapter__module__AdaptTemplatedNestedTestStruct(obj);
   if (result < 0) {
     ::folly::python::handlePythonError(
       "Unexpected type check error: AdaptTemplatedNestedTestStruct");
@@ -1225,27 +1225,27 @@ int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrif
 }
 
 
-PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::AdaptTemplatedNestedTestStruct, ::facebook__thrift__test__module::NamespaceTag>>::operator()(
-    const ::facebook::thrift::test::AdaptTemplatedNestedTestStruct& val) {
+PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::AdaptTemplatedNestedTestStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(
+    const ::facebook::thrift::test::fixtures::adapter::AdaptTemplatedNestedTestStruct& val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
   Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::AdaptTemplatedNestedTestStruct, ::facebook__thrift__test__module::NamespaceTag>> ctor;
+        ::facebook::thrift::test::fixtures::adapter::AdaptTemplatedNestedTestStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> ctor;
   StrongRef fbthrift_data(ctor(val));
   if (!fbthrift_data) {
     return nullptr;
   }
-  return init__facebook__thrift__test__module__AdaptTemplatedNestedTestStruct(*fbthrift_data);
+  return init__facebook__thrift__test__fixtures__adapter__module__AdaptTemplatedNestedTestStruct(*fbthrift_data);
 }
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::AdaptTemplatedNestedTestStruct, ::facebook__thrift__test__module::NamespaceTag>>::operator()(
-    [[maybe_unused]] const ::facebook::thrift::test::AdaptTemplatedNestedTestStruct& val) {
+        ::facebook::thrift::test::fixtures::adapter::AdaptTemplatedNestedTestStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(
+    [[maybe_unused]] const ::facebook::thrift::test::fixtures::adapter::AdaptTemplatedNestedTestStruct& val) {
   StrongRef fbthrift_data(createStructTuple(1));
   StrongRef _fbthrift__adaptedStruct(
-    Constructor<::apache::thrift::python::capi::ComposedStruct<::facebook::thrift::test::AdaptTemplatedTestStruct, ::facebook__thrift__test__module::NamespaceTag>>{}
+    Constructor<::apache::thrift::python::capi::ComposedStruct<::facebook::thrift::test::fixtures::adapter::AdaptTemplatedTestStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>{}
     .constructFrom(val.adaptedStruct_ref()));
   if (!_fbthrift__adaptedStruct ||
       setStructField(
@@ -1258,47 +1258,47 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
 }
 
 
-ExtractorResult<::facebook::thrift::test::ThriftAdaptTestUnion>
-Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::ThriftAdaptTestUnion, ::facebook__thrift__test__module::NamespaceTag>>::operator()(PyObject* obj) {
+ExtractorResult<::facebook::thrift::test::fixtures::adapter::ThriftAdaptTestUnion>
+Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::ThriftAdaptTestUnion, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(PyObject* obj) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::facebook::thrift::test::ThriftAdaptTestUnion>(
-      "Module facebook.thrift.test.module import error");
+    return extractorError<::facebook::thrift::test::fixtures::adapter::ThriftAdaptTestUnion>(
+      "Module facebook.thrift.test.fixtures.adapter.module import error");
   }
   std::unique_ptr<folly::IOBuf> val(
-      extract__facebook__thrift__test__module__AdaptTestUnion(obj));
+      extract__facebook__thrift__test__fixtures__adapter__module__AdaptTestUnion(obj));
   if (!val) {
     CHECK(PyErr_Occurred());
-    return extractorError<::facebook::thrift::test::ThriftAdaptTestUnion>(
+    return extractorError<::facebook::thrift::test::fixtures::adapter::ThriftAdaptTestUnion>(
         "Thrift serialize error: AdaptTestUnion");
   }
-  return detail::deserialize_iobuf<::facebook::thrift::test::ThriftAdaptTestUnion>(std::move(val));
+  return detail::deserialize_iobuf<::facebook::thrift::test::fixtures::adapter::ThriftAdaptTestUnion>(std::move(val));
 }
 
 
-ExtractorResult<::facebook::thrift::test::ThriftAdaptTestUnion>
+ExtractorResult<::facebook::thrift::test::fixtures::adapter::ThriftAdaptTestUnion>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::facebook::thrift::test::ThriftAdaptTestUnion, ::facebook__thrift__test__module::NamespaceTag>>::operator()(PyObject* fbthrift_data) {
+    ::facebook::thrift::test::fixtures::adapter::ThriftAdaptTestUnion, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(PyObject* fbthrift_data) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::facebook::thrift::test::ThriftAdaptTestUnion>(
-      "Module facebook.thrift.test.module import error");
+    return extractorError<::facebook::thrift::test::fixtures::adapter::ThriftAdaptTestUnion>(
+      "Module facebook.thrift.test.fixtures.adapter.module import error");
   }
-  auto obj = StrongRef(init__facebook__thrift__test__module__AdaptTestUnion(fbthrift_data));
+  auto obj = StrongRef(init__facebook__thrift__test__fixtures__adapter__module__AdaptTestUnion(fbthrift_data));
   if (!obj) {
-      return extractorError<::facebook::thrift::test::ThriftAdaptTestUnion>(
+      return extractorError<::facebook::thrift::test::fixtures::adapter::ThriftAdaptTestUnion>(
           "Init from fbthrift error: AdaptTestUnion");
   }
-  return Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::ThriftAdaptTestUnion, ::facebook__thrift__test__module::NamespaceTag>>{}(*obj);
+  return Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::ThriftAdaptTestUnion, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>{}(*obj);
 }
 
-int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::ThriftAdaptTestUnion, ::facebook__thrift__test__module::NamespaceTag>>::typeCheck(PyObject* obj) {
+int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::ThriftAdaptTestUnion, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
-      "Module facebook.thrift.test.module import error");
+      "Module facebook.thrift.test.fixtures.adapter.module import error");
   }
   int result =
-      can_extract__facebook__thrift__test__module__AdaptTestUnion(obj);
+      can_extract__facebook__thrift__test__fixtures__adapter__module__AdaptTestUnion(obj);
   if (result < 0) {
     ::folly::python::handlePythonError(
       "Unexpected type check error: AdaptTestUnion");
@@ -1307,8 +1307,8 @@ int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrif
 }
 
 
-PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::ThriftAdaptTestUnion, ::facebook__thrift__test__module::NamespaceTag>>::operator()(
-    const ::facebook::thrift::test::ThriftAdaptTestUnion& val) {
+PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::ThriftAdaptTestUnion, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(
+    const ::facebook::thrift::test::fixtures::adapter::ThriftAdaptTestUnion& val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
@@ -1321,7 +1321,7 @@ PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::faceboo
     return nullptr;
   }
   DCHECK(serialized);
-  auto ptr = construct__facebook__thrift__test__module__AdaptTestUnion(std::move(serialized));
+  auto ptr = construct__facebook__thrift__test__fixtures__adapter__module__AdaptTestUnion(std::move(serialized));
   if (!ptr) {
     CHECK(PyErr_Occurred());
   }
@@ -1330,34 +1330,34 @@ PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::faceboo
 
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::ThriftAdaptTestUnion, ::facebook__thrift__test__module::NamespaceTag>>::operator()(
-    const ::facebook::thrift::test::ThriftAdaptTestUnion& val) {
-  auto obj = StrongRef(Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::ThriftAdaptTestUnion, ::facebook__thrift__test__module::NamespaceTag>>{}(val));
+        ::facebook::thrift::test::fixtures::adapter::ThriftAdaptTestUnion, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(
+    const ::facebook::thrift::test::fixtures::adapter::ThriftAdaptTestUnion& val) {
+  auto obj = StrongRef(Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::ThriftAdaptTestUnion, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>{}(val));
   if (!obj) {
     return nullptr;
   }
   return getThriftUnionFieldData(*obj);
 }
 
-ExtractorResult<::facebook::thrift::test::ThriftAdaptedStruct>
-Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::ThriftAdaptedStruct, ::facebook__thrift__test__module::NamespaceTag>>::operator()(PyObject* obj) {
+ExtractorResult<::facebook::thrift::test::fixtures::adapter::ThriftAdaptedStruct>
+Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::ThriftAdaptedStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(PyObject* obj) {
   int tCheckResult = typeCheck(obj);
   if (tCheckResult != 1) {
       if (tCheckResult == 0) {
         PyErr_SetString(PyExc_TypeError, "Not a AdaptedStruct");
       }
-      return extractorError<::facebook::thrift::test::ThriftAdaptedStruct>(
+      return extractorError<::facebook::thrift::test::fixtures::adapter::ThriftAdaptedStruct>(
           "Marshal error: AdaptedStruct");
   }
   StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
-      ::facebook::thrift::test::ThriftAdaptedStruct, ::facebook__thrift__test__module::NamespaceTag>>{}(*fbThriftData);
+      ::facebook::thrift::test::fixtures::adapter::ThriftAdaptedStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>{}(*fbThriftData);
 }
 
-ExtractorResult<::facebook::thrift::test::ThriftAdaptedStruct>
+ExtractorResult<::facebook::thrift::test::fixtures::adapter::ThriftAdaptedStruct>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::facebook::thrift::test::ThriftAdaptedStruct, ::facebook__thrift__test__module::NamespaceTag>>::operator()(PyObject* fbThriftData) {
-  ::facebook::thrift::test::ThriftAdaptedStruct cpp;
+    ::facebook::thrift::test::fixtures::adapter::ThriftAdaptedStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(PyObject* fbThriftData) {
+  ::facebook::thrift::test::fixtures::adapter::ThriftAdaptedStruct cpp;
   std::optional<std::string_view> error;
   Extractor<int64_t>{}.extractInto(
       cpp.data_ref(),
@@ -1370,13 +1370,13 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
 }
 
 
-int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::ThriftAdaptedStruct, ::facebook__thrift__test__module::NamespaceTag>>::typeCheck(PyObject* obj) {
+int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::ThriftAdaptedStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
-      "Module facebook.thrift.test.module import error");
+      "Module facebook.thrift.test.fixtures.adapter.module import error");
   }
   int result =
-      can_extract__facebook__thrift__test__module__AdaptedStruct(obj);
+      can_extract__facebook__thrift__test__fixtures__adapter__module__AdaptedStruct(obj);
   if (result < 0) {
     ::folly::python::handlePythonError(
       "Unexpected type check error: AdaptedStruct");
@@ -1385,24 +1385,24 @@ int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrif
 }
 
 
-PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::ThriftAdaptedStruct, ::facebook__thrift__test__module::NamespaceTag>>::operator()(
-    const ::facebook::thrift::test::ThriftAdaptedStruct& val) {
+PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::ThriftAdaptedStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(
+    const ::facebook::thrift::test::fixtures::adapter::ThriftAdaptedStruct& val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
   Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::ThriftAdaptedStruct, ::facebook__thrift__test__module::NamespaceTag>> ctor;
+        ::facebook::thrift::test::fixtures::adapter::ThriftAdaptedStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> ctor;
   StrongRef fbthrift_data(ctor(val));
   if (!fbthrift_data) {
     return nullptr;
   }
-  return init__facebook__thrift__test__module__AdaptedStruct(*fbthrift_data);
+  return init__facebook__thrift__test__fixtures__adapter__module__AdaptedStruct(*fbthrift_data);
 }
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::ThriftAdaptedStruct, ::facebook__thrift__test__module::NamespaceTag>>::operator()(
-    [[maybe_unused]] const ::facebook::thrift::test::ThriftAdaptedStruct& val) {
+        ::facebook::thrift::test::fixtures::adapter::ThriftAdaptedStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(
+    [[maybe_unused]] const ::facebook::thrift::test::fixtures::adapter::ThriftAdaptedStruct& val) {
   StrongRef fbthrift_data(createStructTuple(1));
   StrongRef _fbthrift__data(
     Constructor<int64_t>{}
@@ -1418,25 +1418,25 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
 }
 
 
-ExtractorResult<::facebook::thrift::test::detail::DirectlyAdaptedStruct>
-Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::detail::DirectlyAdaptedStruct, ::facebook__thrift__test__module::NamespaceTag>>::operator()(PyObject* obj) {
+ExtractorResult<::facebook::thrift::test::fixtures::adapter::detail::DirectlyAdaptedStruct>
+Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::detail::DirectlyAdaptedStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(PyObject* obj) {
   int tCheckResult = typeCheck(obj);
   if (tCheckResult != 1) {
       if (tCheckResult == 0) {
         PyErr_SetString(PyExc_TypeError, "Not a DirectlyAdaptedStruct");
       }
-      return extractorError<::facebook::thrift::test::detail::DirectlyAdaptedStruct>(
+      return extractorError<::facebook::thrift::test::fixtures::adapter::detail::DirectlyAdaptedStruct>(
           "Marshal error: DirectlyAdaptedStruct");
   }
   StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
-      ::facebook::thrift::test::detail::DirectlyAdaptedStruct, ::facebook__thrift__test__module::NamespaceTag>>{}(*fbThriftData);
+      ::facebook::thrift::test::fixtures::adapter::detail::DirectlyAdaptedStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>{}(*fbThriftData);
 }
 
-ExtractorResult<::facebook::thrift::test::detail::DirectlyAdaptedStruct>
+ExtractorResult<::facebook::thrift::test::fixtures::adapter::detail::DirectlyAdaptedStruct>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::facebook::thrift::test::detail::DirectlyAdaptedStruct, ::facebook__thrift__test__module::NamespaceTag>>::operator()(PyObject* fbThriftData) {
-  ::facebook::thrift::test::detail::DirectlyAdaptedStruct cpp;
+    ::facebook::thrift::test::fixtures::adapter::detail::DirectlyAdaptedStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(PyObject* fbThriftData) {
+  ::facebook::thrift::test::fixtures::adapter::detail::DirectlyAdaptedStruct cpp;
   std::optional<std::string_view> error;
   Extractor<int64_t>{}.extractInto(
       cpp.data_ref(),
@@ -1449,13 +1449,13 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
 }
 
 
-int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::detail::DirectlyAdaptedStruct, ::facebook__thrift__test__module::NamespaceTag>>::typeCheck(PyObject* obj) {
+int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::detail::DirectlyAdaptedStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
-      "Module facebook.thrift.test.module import error");
+      "Module facebook.thrift.test.fixtures.adapter.module import error");
   }
   int result =
-      can_extract__facebook__thrift__test__module__DirectlyAdaptedStruct(obj);
+      can_extract__facebook__thrift__test__fixtures__adapter__module__DirectlyAdaptedStruct(obj);
   if (result < 0) {
     ::folly::python::handlePythonError(
       "Unexpected type check error: DirectlyAdaptedStruct");
@@ -1464,24 +1464,24 @@ int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrif
 }
 
 
-PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::detail::DirectlyAdaptedStruct, ::facebook__thrift__test__module::NamespaceTag>>::operator()(
-    const ::facebook::thrift::test::detail::DirectlyAdaptedStruct& val) {
+PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::detail::DirectlyAdaptedStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(
+    const ::facebook::thrift::test::fixtures::adapter::detail::DirectlyAdaptedStruct& val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
   Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::detail::DirectlyAdaptedStruct, ::facebook__thrift__test__module::NamespaceTag>> ctor;
+        ::facebook::thrift::test::fixtures::adapter::detail::DirectlyAdaptedStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> ctor;
   StrongRef fbthrift_data(ctor(val));
   if (!fbthrift_data) {
     return nullptr;
   }
-  return init__facebook__thrift__test__module__DirectlyAdaptedStruct(*fbthrift_data);
+  return init__facebook__thrift__test__fixtures__adapter__module__DirectlyAdaptedStruct(*fbthrift_data);
 }
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::detail::DirectlyAdaptedStruct, ::facebook__thrift__test__module::NamespaceTag>>::operator()(
-    [[maybe_unused]] const ::facebook::thrift::test::detail::DirectlyAdaptedStruct& val) {
+        ::facebook::thrift::test::fixtures::adapter::detail::DirectlyAdaptedStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(
+    [[maybe_unused]] const ::facebook::thrift::test::fixtures::adapter::detail::DirectlyAdaptedStruct& val) {
   StrongRef fbthrift_data(createStructTuple(1));
   StrongRef _fbthrift__data(
     Constructor<int64_t>{}
@@ -1497,47 +1497,47 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
 }
 
 
-ExtractorResult<::facebook::thrift::test::StructFieldAdaptedStruct>
-Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::StructFieldAdaptedStruct, ::facebook__thrift__test__module::NamespaceTag>>::operator()(PyObject* obj) {
+ExtractorResult<::facebook::thrift::test::fixtures::adapter::StructFieldAdaptedStruct>
+Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::StructFieldAdaptedStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(PyObject* obj) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::facebook::thrift::test::StructFieldAdaptedStruct>(
-      "Module facebook.thrift.test.module import error");
+    return extractorError<::facebook::thrift::test::fixtures::adapter::StructFieldAdaptedStruct>(
+      "Module facebook.thrift.test.fixtures.adapter.module import error");
   }
   std::unique_ptr<folly::IOBuf> val(
-      extract__facebook__thrift__test__module__StructFieldAdaptedStruct(obj));
+      extract__facebook__thrift__test__fixtures__adapter__module__StructFieldAdaptedStruct(obj));
   if (!val) {
     CHECK(PyErr_Occurred());
-    return extractorError<::facebook::thrift::test::StructFieldAdaptedStruct>(
+    return extractorError<::facebook::thrift::test::fixtures::adapter::StructFieldAdaptedStruct>(
         "Thrift serialize error: StructFieldAdaptedStruct");
   }
-  return detail::deserialize_iobuf<::facebook::thrift::test::StructFieldAdaptedStruct>(std::move(val));
+  return detail::deserialize_iobuf<::facebook::thrift::test::fixtures::adapter::StructFieldAdaptedStruct>(std::move(val));
 }
 
 
-ExtractorResult<::facebook::thrift::test::StructFieldAdaptedStruct>
+ExtractorResult<::facebook::thrift::test::fixtures::adapter::StructFieldAdaptedStruct>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::facebook::thrift::test::StructFieldAdaptedStruct, ::facebook__thrift__test__module::NamespaceTag>>::operator()(PyObject* fbthrift_data) {
+    ::facebook::thrift::test::fixtures::adapter::StructFieldAdaptedStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(PyObject* fbthrift_data) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::facebook::thrift::test::StructFieldAdaptedStruct>(
-      "Module facebook.thrift.test.module import error");
+    return extractorError<::facebook::thrift::test::fixtures::adapter::StructFieldAdaptedStruct>(
+      "Module facebook.thrift.test.fixtures.adapter.module import error");
   }
-  auto obj = StrongRef(init__facebook__thrift__test__module__StructFieldAdaptedStruct(fbthrift_data));
+  auto obj = StrongRef(init__facebook__thrift__test__fixtures__adapter__module__StructFieldAdaptedStruct(fbthrift_data));
   if (!obj) {
-      return extractorError<::facebook::thrift::test::StructFieldAdaptedStruct>(
+      return extractorError<::facebook::thrift::test::fixtures::adapter::StructFieldAdaptedStruct>(
           "Init from fbthrift error: StructFieldAdaptedStruct");
   }
-  return Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::StructFieldAdaptedStruct, ::facebook__thrift__test__module::NamespaceTag>>{}(*obj);
+  return Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::StructFieldAdaptedStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>{}(*obj);
 }
 
-int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::StructFieldAdaptedStruct, ::facebook__thrift__test__module::NamespaceTag>>::typeCheck(PyObject* obj) {
+int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::StructFieldAdaptedStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
-      "Module facebook.thrift.test.module import error");
+      "Module facebook.thrift.test.fixtures.adapter.module import error");
   }
   int result =
-      can_extract__facebook__thrift__test__module__StructFieldAdaptedStruct(obj);
+      can_extract__facebook__thrift__test__fixtures__adapter__module__StructFieldAdaptedStruct(obj);
   if (result < 0) {
     ::folly::python::handlePythonError(
       "Unexpected type check error: StructFieldAdaptedStruct");
@@ -1546,8 +1546,8 @@ int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrif
 }
 
 
-PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::StructFieldAdaptedStruct, ::facebook__thrift__test__module::NamespaceTag>>::operator()(
-    const ::facebook::thrift::test::StructFieldAdaptedStruct& val) {
+PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::StructFieldAdaptedStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(
+    const ::facebook::thrift::test::fixtures::adapter::StructFieldAdaptedStruct& val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
@@ -1560,7 +1560,7 @@ PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::faceboo
     return nullptr;
   }
   DCHECK(serialized);
-  auto ptr = construct__facebook__thrift__test__module__StructFieldAdaptedStruct(std::move(serialized));
+  auto ptr = construct__facebook__thrift__test__fixtures__adapter__module__StructFieldAdaptedStruct(std::move(serialized));
   if (!ptr) {
     CHECK(PyErr_Occurred());
   }
@@ -1569,36 +1569,36 @@ PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::faceboo
 
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::StructFieldAdaptedStruct, ::facebook__thrift__test__module::NamespaceTag>>::operator()(
-    const ::facebook::thrift::test::StructFieldAdaptedStruct& val) {
-  auto obj = StrongRef(Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::StructFieldAdaptedStruct, ::facebook__thrift__test__module::NamespaceTag>>{}(val));
+        ::facebook::thrift::test::fixtures::adapter::StructFieldAdaptedStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(
+    const ::facebook::thrift::test::fixtures::adapter::StructFieldAdaptedStruct& val) {
+  auto obj = StrongRef(Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::StructFieldAdaptedStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>{}(val));
   if (!obj) {
     return nullptr;
   }
   return getThriftStructFieldData(*obj);
 }
 
-ExtractorResult<::facebook::thrift::test::CircularAdaptee>
-Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::CircularAdaptee, ::facebook__thrift__test__module::NamespaceTag>>::operator()(PyObject* obj) {
+ExtractorResult<::facebook::thrift::test::fixtures::adapter::CircularAdaptee>
+Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::CircularAdaptee, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(PyObject* obj) {
   int tCheckResult = typeCheck(obj);
   if (tCheckResult != 1) {
       if (tCheckResult == 0) {
         PyErr_SetString(PyExc_TypeError, "Not a CircularAdaptee");
       }
-      return extractorError<::facebook::thrift::test::CircularAdaptee>(
+      return extractorError<::facebook::thrift::test::fixtures::adapter::CircularAdaptee>(
           "Marshal error: CircularAdaptee");
   }
   StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
-      ::facebook::thrift::test::CircularAdaptee, ::facebook__thrift__test__module::NamespaceTag>>{}(*fbThriftData);
+      ::facebook::thrift::test::fixtures::adapter::CircularAdaptee, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>{}(*fbThriftData);
 }
 
-ExtractorResult<::facebook::thrift::test::CircularAdaptee>
+ExtractorResult<::facebook::thrift::test::fixtures::adapter::CircularAdaptee>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::facebook::thrift::test::CircularAdaptee, ::facebook__thrift__test__module::NamespaceTag>>::operator()(PyObject* fbThriftData) {
-  ::facebook::thrift::test::CircularAdaptee cpp;
+    ::facebook::thrift::test::fixtures::adapter::CircularAdaptee, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(PyObject* fbThriftData) {
+  ::facebook::thrift::test::fixtures::adapter::CircularAdaptee cpp;
   std::optional<std::string_view> error;
-  Extractor<::apache::thrift::python::capi::ComposedStruct<::facebook::thrift::test::CircularStruct, ::facebook__thrift__test__module::NamespaceTag>>{}.extractInto(
+  Extractor<::apache::thrift::python::capi::ComposedStruct<::facebook::thrift::test::fixtures::adapter::CircularStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>{}.extractInto(
       cpp.field_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__CircularAdaptee__tuple_pos[0]),
       error);
@@ -1609,13 +1609,13 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
 }
 
 
-int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::CircularAdaptee, ::facebook__thrift__test__module::NamespaceTag>>::typeCheck(PyObject* obj) {
+int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::CircularAdaptee, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
-      "Module facebook.thrift.test.module import error");
+      "Module facebook.thrift.test.fixtures.adapter.module import error");
   }
   int result =
-      can_extract__facebook__thrift__test__module__CircularAdaptee(obj);
+      can_extract__facebook__thrift__test__fixtures__adapter__module__CircularAdaptee(obj);
   if (result < 0) {
     ::folly::python::handlePythonError(
       "Unexpected type check error: CircularAdaptee");
@@ -1624,27 +1624,27 @@ int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrif
 }
 
 
-PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::CircularAdaptee, ::facebook__thrift__test__module::NamespaceTag>>::operator()(
-    const ::facebook::thrift::test::CircularAdaptee& val) {
+PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::CircularAdaptee, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(
+    const ::facebook::thrift::test::fixtures::adapter::CircularAdaptee& val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
   Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::CircularAdaptee, ::facebook__thrift__test__module::NamespaceTag>> ctor;
+        ::facebook::thrift::test::fixtures::adapter::CircularAdaptee, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> ctor;
   StrongRef fbthrift_data(ctor(val));
   if (!fbthrift_data) {
     return nullptr;
   }
-  return init__facebook__thrift__test__module__CircularAdaptee(*fbthrift_data);
+  return init__facebook__thrift__test__fixtures__adapter__module__CircularAdaptee(*fbthrift_data);
 }
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::CircularAdaptee, ::facebook__thrift__test__module::NamespaceTag>>::operator()(
-    [[maybe_unused]] const ::facebook::thrift::test::CircularAdaptee& val) {
+        ::facebook::thrift::test::fixtures::adapter::CircularAdaptee, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(
+    [[maybe_unused]] const ::facebook::thrift::test::fixtures::adapter::CircularAdaptee& val) {
   StrongRef fbthrift_data(createStructTuple(1));
   StrongRef _fbthrift__field(
-    Constructor<::apache::thrift::python::capi::ComposedStruct<::facebook::thrift::test::CircularStruct, ::facebook__thrift__test__module::NamespaceTag>>{}
+    Constructor<::apache::thrift::python::capi::ComposedStruct<::facebook::thrift::test::fixtures::adapter::CircularStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>{}
     .constructFrom(val.field_ref()));
   if (!_fbthrift__field ||
       setStructField(
@@ -1657,47 +1657,47 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
 }
 
 
-ExtractorResult<::facebook::thrift::test::CircularStruct>
-Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::CircularStruct, ::facebook__thrift__test__module::NamespaceTag>>::operator()(PyObject* obj) {
+ExtractorResult<::facebook::thrift::test::fixtures::adapter::CircularStruct>
+Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::CircularStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(PyObject* obj) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::facebook::thrift::test::CircularStruct>(
-      "Module facebook.thrift.test.module import error");
+    return extractorError<::facebook::thrift::test::fixtures::adapter::CircularStruct>(
+      "Module facebook.thrift.test.fixtures.adapter.module import error");
   }
   std::unique_ptr<folly::IOBuf> val(
-      extract__facebook__thrift__test__module__CircularStruct(obj));
+      extract__facebook__thrift__test__fixtures__adapter__module__CircularStruct(obj));
   if (!val) {
     CHECK(PyErr_Occurred());
-    return extractorError<::facebook::thrift::test::CircularStruct>(
+    return extractorError<::facebook::thrift::test::fixtures::adapter::CircularStruct>(
         "Thrift serialize error: CircularStruct");
   }
-  return detail::deserialize_iobuf<::facebook::thrift::test::CircularStruct>(std::move(val));
+  return detail::deserialize_iobuf<::facebook::thrift::test::fixtures::adapter::CircularStruct>(std::move(val));
 }
 
 
-ExtractorResult<::facebook::thrift::test::CircularStruct>
+ExtractorResult<::facebook::thrift::test::fixtures::adapter::CircularStruct>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::facebook::thrift::test::CircularStruct, ::facebook__thrift__test__module::NamespaceTag>>::operator()(PyObject* fbthrift_data) {
+    ::facebook::thrift::test::fixtures::adapter::CircularStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(PyObject* fbthrift_data) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::facebook::thrift::test::CircularStruct>(
-      "Module facebook.thrift.test.module import error");
+    return extractorError<::facebook::thrift::test::fixtures::adapter::CircularStruct>(
+      "Module facebook.thrift.test.fixtures.adapter.module import error");
   }
-  auto obj = StrongRef(init__facebook__thrift__test__module__CircularStruct(fbthrift_data));
+  auto obj = StrongRef(init__facebook__thrift__test__fixtures__adapter__module__CircularStruct(fbthrift_data));
   if (!obj) {
-      return extractorError<::facebook::thrift::test::CircularStruct>(
+      return extractorError<::facebook::thrift::test::fixtures::adapter::CircularStruct>(
           "Init from fbthrift error: CircularStruct");
   }
-  return Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::CircularStruct, ::facebook__thrift__test__module::NamespaceTag>>{}(*obj);
+  return Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::CircularStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>{}(*obj);
 }
 
-int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::CircularStruct, ::facebook__thrift__test__module::NamespaceTag>>::typeCheck(PyObject* obj) {
+int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::CircularStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
-      "Module facebook.thrift.test.module import error");
+      "Module facebook.thrift.test.fixtures.adapter.module import error");
   }
   int result =
-      can_extract__facebook__thrift__test__module__CircularStruct(obj);
+      can_extract__facebook__thrift__test__fixtures__adapter__module__CircularStruct(obj);
   if (result < 0) {
     ::folly::python::handlePythonError(
       "Unexpected type check error: CircularStruct");
@@ -1706,8 +1706,8 @@ int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrif
 }
 
 
-PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::CircularStruct, ::facebook__thrift__test__module::NamespaceTag>>::operator()(
-    const ::facebook::thrift::test::CircularStruct& val) {
+PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::CircularStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(
+    const ::facebook::thrift::test::fixtures::adapter::CircularStruct& val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
@@ -1720,7 +1720,7 @@ PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::faceboo
     return nullptr;
   }
   DCHECK(serialized);
-  auto ptr = construct__facebook__thrift__test__module__CircularStruct(std::move(serialized));
+  auto ptr = construct__facebook__thrift__test__fixtures__adapter__module__CircularStruct(std::move(serialized));
   if (!ptr) {
     CHECK(PyErr_Occurred());
   }
@@ -1729,56 +1729,56 @@ PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::faceboo
 
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::CircularStruct, ::facebook__thrift__test__module::NamespaceTag>>::operator()(
-    const ::facebook::thrift::test::CircularStruct& val) {
-  auto obj = StrongRef(Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::CircularStruct, ::facebook__thrift__test__module::NamespaceTag>>{}(val));
+        ::facebook::thrift::test::fixtures::adapter::CircularStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(
+    const ::facebook::thrift::test::fixtures::adapter::CircularStruct& val) {
+  auto obj = StrongRef(Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::CircularStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>{}(val));
   if (!obj) {
     return nullptr;
   }
   return getThriftStructFieldData(*obj);
 }
 
-ExtractorResult<::facebook::thrift::test::ReorderedStruct>
-Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::ReorderedStruct, ::facebook__thrift__test__module::NamespaceTag>>::operator()(PyObject* obj) {
+ExtractorResult<::facebook::thrift::test::fixtures::adapter::ReorderedStruct>
+Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::ReorderedStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(PyObject* obj) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::facebook::thrift::test::ReorderedStruct>(
-      "Module facebook.thrift.test.module import error");
+    return extractorError<::facebook::thrift::test::fixtures::adapter::ReorderedStruct>(
+      "Module facebook.thrift.test.fixtures.adapter.module import error");
   }
   std::unique_ptr<folly::IOBuf> val(
-      extract__facebook__thrift__test__module__ReorderedStruct(obj));
+      extract__facebook__thrift__test__fixtures__adapter__module__ReorderedStruct(obj));
   if (!val) {
     CHECK(PyErr_Occurred());
-    return extractorError<::facebook::thrift::test::ReorderedStruct>(
+    return extractorError<::facebook::thrift::test::fixtures::adapter::ReorderedStruct>(
         "Thrift serialize error: ReorderedStruct");
   }
-  return detail::deserialize_iobuf<::facebook::thrift::test::ReorderedStruct>(std::move(val));
+  return detail::deserialize_iobuf<::facebook::thrift::test::fixtures::adapter::ReorderedStruct>(std::move(val));
 }
 
 
-ExtractorResult<::facebook::thrift::test::ReorderedStruct>
+ExtractorResult<::facebook::thrift::test::fixtures::adapter::ReorderedStruct>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::facebook::thrift::test::ReorderedStruct, ::facebook__thrift__test__module::NamespaceTag>>::operator()(PyObject* fbthrift_data) {
+    ::facebook::thrift::test::fixtures::adapter::ReorderedStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(PyObject* fbthrift_data) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::facebook::thrift::test::ReorderedStruct>(
-      "Module facebook.thrift.test.module import error");
+    return extractorError<::facebook::thrift::test::fixtures::adapter::ReorderedStruct>(
+      "Module facebook.thrift.test.fixtures.adapter.module import error");
   }
-  auto obj = StrongRef(init__facebook__thrift__test__module__ReorderedStruct(fbthrift_data));
+  auto obj = StrongRef(init__facebook__thrift__test__fixtures__adapter__module__ReorderedStruct(fbthrift_data));
   if (!obj) {
-      return extractorError<::facebook::thrift::test::ReorderedStruct>(
+      return extractorError<::facebook::thrift::test::fixtures::adapter::ReorderedStruct>(
           "Init from fbthrift error: ReorderedStruct");
   }
-  return Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::ReorderedStruct, ::facebook__thrift__test__module::NamespaceTag>>{}(*obj);
+  return Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::ReorderedStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>{}(*obj);
 }
 
-int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::ReorderedStruct, ::facebook__thrift__test__module::NamespaceTag>>::typeCheck(PyObject* obj) {
+int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::ReorderedStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
-      "Module facebook.thrift.test.module import error");
+      "Module facebook.thrift.test.fixtures.adapter.module import error");
   }
   int result =
-      can_extract__facebook__thrift__test__module__ReorderedStruct(obj);
+      can_extract__facebook__thrift__test__fixtures__adapter__module__ReorderedStruct(obj);
   if (result < 0) {
     ::folly::python::handlePythonError(
       "Unexpected type check error: ReorderedStruct");
@@ -1787,8 +1787,8 @@ int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrif
 }
 
 
-PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::ReorderedStruct, ::facebook__thrift__test__module::NamespaceTag>>::operator()(
-    const ::facebook::thrift::test::ReorderedStruct& val) {
+PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::ReorderedStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(
+    const ::facebook::thrift::test::fixtures::adapter::ReorderedStruct& val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
@@ -1801,7 +1801,7 @@ PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::faceboo
     return nullptr;
   }
   DCHECK(serialized);
-  auto ptr = construct__facebook__thrift__test__module__ReorderedStruct(std::move(serialized));
+  auto ptr = construct__facebook__thrift__test__fixtures__adapter__module__ReorderedStruct(std::move(serialized));
   if (!ptr) {
     CHECK(PyErr_Occurred());
   }
@@ -1810,44 +1810,44 @@ PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::faceboo
 
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::ReorderedStruct, ::facebook__thrift__test__module::NamespaceTag>>::operator()(
-    const ::facebook::thrift::test::ReorderedStruct& val) {
-  auto obj = StrongRef(Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::ReorderedStruct, ::facebook__thrift__test__module::NamespaceTag>>{}(val));
+        ::facebook::thrift::test::fixtures::adapter::ReorderedStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(
+    const ::facebook::thrift::test::fixtures::adapter::ReorderedStruct& val) {
+  auto obj = StrongRef(Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::ReorderedStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>{}(val));
   if (!obj) {
     return nullptr;
   }
   return getThriftStructFieldData(*obj);
 }
 
-ExtractorResult<::facebook::thrift::test::detail::DeclaredAfterStruct>
-Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::detail::DeclaredAfterStruct, ::facebook__thrift__test__module::NamespaceTag>>::operator()(PyObject* obj) {
+ExtractorResult<::facebook::thrift::test::fixtures::adapter::detail::DeclaredAfterStruct>
+Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::detail::DeclaredAfterStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(PyObject* obj) {
   int tCheckResult = typeCheck(obj);
   if (tCheckResult != 1) {
       if (tCheckResult == 0) {
         PyErr_SetString(PyExc_TypeError, "Not a DeclaredAfterStruct");
       }
-      return extractorError<::facebook::thrift::test::detail::DeclaredAfterStruct>(
+      return extractorError<::facebook::thrift::test::fixtures::adapter::detail::DeclaredAfterStruct>(
           "Marshal error: DeclaredAfterStruct");
   }
-  return ::facebook::thrift::test::detail::DeclaredAfterStruct{};
+  return ::facebook::thrift::test::fixtures::adapter::detail::DeclaredAfterStruct{};
 }
 
-ExtractorResult<::facebook::thrift::test::detail::DeclaredAfterStruct>
+ExtractorResult<::facebook::thrift::test::fixtures::adapter::detail::DeclaredAfterStruct>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::facebook::thrift::test::detail::DeclaredAfterStruct, ::facebook__thrift__test__module::NamespaceTag>>::operator()(PyObject* fbThriftData) {
-  ::facebook::thrift::test::detail::DeclaredAfterStruct cpp;
+    ::facebook::thrift::test::fixtures::adapter::detail::DeclaredAfterStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(PyObject* fbThriftData) {
+  ::facebook::thrift::test::fixtures::adapter::detail::DeclaredAfterStruct cpp;
   (void)fbThriftData;
   return cpp;
 }
 
 
-int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::detail::DeclaredAfterStruct, ::facebook__thrift__test__module::NamespaceTag>>::typeCheck(PyObject* obj) {
+int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::detail::DeclaredAfterStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
-      "Module facebook.thrift.test.module import error");
+      "Module facebook.thrift.test.fixtures.adapter.module import error");
   }
   int result =
-      can_extract__facebook__thrift__test__module__DeclaredAfterStruct(obj);
+      can_extract__facebook__thrift__test__fixtures__adapter__module__DeclaredAfterStruct(obj);
   if (result < 0) {
     ::folly::python::handlePythonError(
       "Unexpected type check error: DeclaredAfterStruct");
@@ -1856,48 +1856,48 @@ int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrif
 }
 
 
-PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::detail::DeclaredAfterStruct, ::facebook__thrift__test__module::NamespaceTag>>::operator()(
-    const ::facebook::thrift::test::detail::DeclaredAfterStruct& val) {
+PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::detail::DeclaredAfterStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(
+    const ::facebook::thrift::test::fixtures::adapter::detail::DeclaredAfterStruct& val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
   Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::detail::DeclaredAfterStruct, ::facebook__thrift__test__module::NamespaceTag>> ctor;
+        ::facebook::thrift::test::fixtures::adapter::detail::DeclaredAfterStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> ctor;
   StrongRef fbthrift_data(ctor(val));
   if (!fbthrift_data) {
     return nullptr;
   }
-  return init__facebook__thrift__test__module__DeclaredAfterStruct(*fbthrift_data);
+  return init__facebook__thrift__test__fixtures__adapter__module__DeclaredAfterStruct(*fbthrift_data);
 }
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::detail::DeclaredAfterStruct, ::facebook__thrift__test__module::NamespaceTag>>::operator()(
-    [[maybe_unused]] const ::facebook::thrift::test::detail::DeclaredAfterStruct& val) {
+        ::facebook::thrift::test::fixtures::adapter::detail::DeclaredAfterStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(
+    [[maybe_unused]] const ::facebook::thrift::test::fixtures::adapter::detail::DeclaredAfterStruct& val) {
   StrongRef fbthrift_data(createStructTuple(0));
   return std::move(fbthrift_data).release();
 }
 
 
-ExtractorResult<::facebook::thrift::test::UnderlyingRenamedStruct>
-Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::UnderlyingRenamedStruct, ::facebook__thrift__test__module::NamespaceTag>>::operator()(PyObject* obj) {
+ExtractorResult<::facebook::thrift::test::fixtures::adapter::UnderlyingRenamedStruct>
+Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::UnderlyingRenamedStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(PyObject* obj) {
   int tCheckResult = typeCheck(obj);
   if (tCheckResult != 1) {
       if (tCheckResult == 0) {
         PyErr_SetString(PyExc_TypeError, "Not a RenamedStruct");
       }
-      return extractorError<::facebook::thrift::test::UnderlyingRenamedStruct>(
+      return extractorError<::facebook::thrift::test::fixtures::adapter::UnderlyingRenamedStruct>(
           "Marshal error: RenamedStruct");
   }
   StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
-      ::facebook::thrift::test::UnderlyingRenamedStruct, ::facebook__thrift__test__module::NamespaceTag>>{}(*fbThriftData);
+      ::facebook::thrift::test::fixtures::adapter::UnderlyingRenamedStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>{}(*fbThriftData);
 }
 
-ExtractorResult<::facebook::thrift::test::UnderlyingRenamedStruct>
+ExtractorResult<::facebook::thrift::test::fixtures::adapter::UnderlyingRenamedStruct>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::facebook::thrift::test::UnderlyingRenamedStruct, ::facebook__thrift__test__module::NamespaceTag>>::operator()(PyObject* fbThriftData) {
-  ::facebook::thrift::test::UnderlyingRenamedStruct cpp;
+    ::facebook::thrift::test::fixtures::adapter::UnderlyingRenamedStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(PyObject* fbThriftData) {
+  ::facebook::thrift::test::fixtures::adapter::UnderlyingRenamedStruct cpp;
   std::optional<std::string_view> error;
   Extractor<int64_t>{}.extractInto(
       cpp.data_ref(),
@@ -1910,13 +1910,13 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
 }
 
 
-int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::UnderlyingRenamedStruct, ::facebook__thrift__test__module::NamespaceTag>>::typeCheck(PyObject* obj) {
+int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::UnderlyingRenamedStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
-      "Module facebook.thrift.test.module import error");
+      "Module facebook.thrift.test.fixtures.adapter.module import error");
   }
   int result =
-      can_extract__facebook__thrift__test__module__RenamedStruct(obj);
+      can_extract__facebook__thrift__test__fixtures__adapter__module__RenamedStruct(obj);
   if (result < 0) {
     ::folly::python::handlePythonError(
       "Unexpected type check error: RenamedStruct");
@@ -1925,24 +1925,24 @@ int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrif
 }
 
 
-PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::UnderlyingRenamedStruct, ::facebook__thrift__test__module::NamespaceTag>>::operator()(
-    const ::facebook::thrift::test::UnderlyingRenamedStruct& val) {
+PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::UnderlyingRenamedStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(
+    const ::facebook::thrift::test::fixtures::adapter::UnderlyingRenamedStruct& val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
   Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::UnderlyingRenamedStruct, ::facebook__thrift__test__module::NamespaceTag>> ctor;
+        ::facebook::thrift::test::fixtures::adapter::UnderlyingRenamedStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> ctor;
   StrongRef fbthrift_data(ctor(val));
   if (!fbthrift_data) {
     return nullptr;
   }
-  return init__facebook__thrift__test__module__RenamedStruct(*fbthrift_data);
+  return init__facebook__thrift__test__fixtures__adapter__module__RenamedStruct(*fbthrift_data);
 }
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::UnderlyingRenamedStruct, ::facebook__thrift__test__module::NamespaceTag>>::operator()(
-    [[maybe_unused]] const ::facebook::thrift::test::UnderlyingRenamedStruct& val) {
+        ::facebook::thrift::test::fixtures::adapter::UnderlyingRenamedStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(
+    [[maybe_unused]] const ::facebook::thrift::test::fixtures::adapter::UnderlyingRenamedStruct& val) {
   StrongRef fbthrift_data(createStructTuple(1));
   StrongRef _fbthrift__data(
     Constructor<int64_t>{}
@@ -1958,25 +1958,25 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
 }
 
 
-ExtractorResult<::facebook::thrift::test::UnderlyingSameNamespaceStruct>
-Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::UnderlyingSameNamespaceStruct, ::facebook__thrift__test__module::NamespaceTag>>::operator()(PyObject* obj) {
+ExtractorResult<::facebook::thrift::test::fixtures::adapter::UnderlyingSameNamespaceStruct>
+Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::UnderlyingSameNamespaceStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(PyObject* obj) {
   int tCheckResult = typeCheck(obj);
   if (tCheckResult != 1) {
       if (tCheckResult == 0) {
         PyErr_SetString(PyExc_TypeError, "Not a SameNamespaceStruct");
       }
-      return extractorError<::facebook::thrift::test::UnderlyingSameNamespaceStruct>(
+      return extractorError<::facebook::thrift::test::fixtures::adapter::UnderlyingSameNamespaceStruct>(
           "Marshal error: SameNamespaceStruct");
   }
   StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
-      ::facebook::thrift::test::UnderlyingSameNamespaceStruct, ::facebook__thrift__test__module::NamespaceTag>>{}(*fbThriftData);
+      ::facebook::thrift::test::fixtures::adapter::UnderlyingSameNamespaceStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>{}(*fbThriftData);
 }
 
-ExtractorResult<::facebook::thrift::test::UnderlyingSameNamespaceStruct>
+ExtractorResult<::facebook::thrift::test::fixtures::adapter::UnderlyingSameNamespaceStruct>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::facebook::thrift::test::UnderlyingSameNamespaceStruct, ::facebook__thrift__test__module::NamespaceTag>>::operator()(PyObject* fbThriftData) {
-  ::facebook::thrift::test::UnderlyingSameNamespaceStruct cpp;
+    ::facebook::thrift::test::fixtures::adapter::UnderlyingSameNamespaceStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(PyObject* fbThriftData) {
+  ::facebook::thrift::test::fixtures::adapter::UnderlyingSameNamespaceStruct cpp;
   std::optional<std::string_view> error;
   Extractor<int64_t>{}.extractInto(
       cpp.data_ref(),
@@ -1989,13 +1989,13 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
 }
 
 
-int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::UnderlyingSameNamespaceStruct, ::facebook__thrift__test__module::NamespaceTag>>::typeCheck(PyObject* obj) {
+int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::UnderlyingSameNamespaceStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
-      "Module facebook.thrift.test.module import error");
+      "Module facebook.thrift.test.fixtures.adapter.module import error");
   }
   int result =
-      can_extract__facebook__thrift__test__module__SameNamespaceStruct(obj);
+      can_extract__facebook__thrift__test__fixtures__adapter__module__SameNamespaceStruct(obj);
   if (result < 0) {
     ::folly::python::handlePythonError(
       "Unexpected type check error: SameNamespaceStruct");
@@ -2004,24 +2004,24 @@ int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrif
 }
 
 
-PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::UnderlyingSameNamespaceStruct, ::facebook__thrift__test__module::NamespaceTag>>::operator()(
-    const ::facebook::thrift::test::UnderlyingSameNamespaceStruct& val) {
+PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::UnderlyingSameNamespaceStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(
+    const ::facebook::thrift::test::fixtures::adapter::UnderlyingSameNamespaceStruct& val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
   Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::UnderlyingSameNamespaceStruct, ::facebook__thrift__test__module::NamespaceTag>> ctor;
+        ::facebook::thrift::test::fixtures::adapter::UnderlyingSameNamespaceStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> ctor;
   StrongRef fbthrift_data(ctor(val));
   if (!fbthrift_data) {
     return nullptr;
   }
-  return init__facebook__thrift__test__module__SameNamespaceStruct(*fbthrift_data);
+  return init__facebook__thrift__test__fixtures__adapter__module__SameNamespaceStruct(*fbthrift_data);
 }
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::UnderlyingSameNamespaceStruct, ::facebook__thrift__test__module::NamespaceTag>>::operator()(
-    [[maybe_unused]] const ::facebook::thrift::test::UnderlyingSameNamespaceStruct& val) {
+        ::facebook::thrift::test::fixtures::adapter::UnderlyingSameNamespaceStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(
+    [[maybe_unused]] const ::facebook::thrift::test::fixtures::adapter::UnderlyingSameNamespaceStruct& val) {
   StrongRef fbthrift_data(createStructTuple(1));
   StrongRef _fbthrift__data(
     Constructor<int64_t>{}
@@ -2037,35 +2037,35 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
 }
 
 
-ExtractorResult<::facebook::thrift::test::detail::HeapAllocated>
-Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::detail::HeapAllocated, ::facebook__thrift__test__module::NamespaceTag>>::operator()(PyObject* obj) {
+ExtractorResult<::facebook::thrift::test::fixtures::adapter::detail::HeapAllocated>
+Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::detail::HeapAllocated, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(PyObject* obj) {
   int tCheckResult = typeCheck(obj);
   if (tCheckResult != 1) {
       if (tCheckResult == 0) {
         PyErr_SetString(PyExc_TypeError, "Not a HeapAllocated");
       }
-      return extractorError<::facebook::thrift::test::detail::HeapAllocated>(
+      return extractorError<::facebook::thrift::test::fixtures::adapter::detail::HeapAllocated>(
           "Marshal error: HeapAllocated");
   }
-  return ::facebook::thrift::test::detail::HeapAllocated{};
+  return ::facebook::thrift::test::fixtures::adapter::detail::HeapAllocated{};
 }
 
-ExtractorResult<::facebook::thrift::test::detail::HeapAllocated>
+ExtractorResult<::facebook::thrift::test::fixtures::adapter::detail::HeapAllocated>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::facebook::thrift::test::detail::HeapAllocated, ::facebook__thrift__test__module::NamespaceTag>>::operator()(PyObject* fbThriftData) {
-  ::facebook::thrift::test::detail::HeapAllocated cpp;
+    ::facebook::thrift::test::fixtures::adapter::detail::HeapAllocated, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(PyObject* fbThriftData) {
+  ::facebook::thrift::test::fixtures::adapter::detail::HeapAllocated cpp;
   (void)fbThriftData;
   return cpp;
 }
 
 
-int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::detail::HeapAllocated, ::facebook__thrift__test__module::NamespaceTag>>::typeCheck(PyObject* obj) {
+int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::detail::HeapAllocated, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
-      "Module facebook.thrift.test.module import error");
+      "Module facebook.thrift.test.fixtures.adapter.module import error");
   }
   int result =
-      can_extract__facebook__thrift__test__module__HeapAllocated(obj);
+      can_extract__facebook__thrift__test__fixtures__adapter__module__HeapAllocated(obj);
   if (result < 0) {
     ::folly::python::handlePythonError(
       "Unexpected type check error: HeapAllocated");
@@ -2074,70 +2074,70 @@ int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrif
 }
 
 
-PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::detail::HeapAllocated, ::facebook__thrift__test__module::NamespaceTag>>::operator()(
-    const ::facebook::thrift::test::detail::HeapAllocated& val) {
+PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::detail::HeapAllocated, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(
+    const ::facebook::thrift::test::fixtures::adapter::detail::HeapAllocated& val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
   Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::detail::HeapAllocated, ::facebook__thrift__test__module::NamespaceTag>> ctor;
+        ::facebook::thrift::test::fixtures::adapter::detail::HeapAllocated, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> ctor;
   StrongRef fbthrift_data(ctor(val));
   if (!fbthrift_data) {
     return nullptr;
   }
-  return init__facebook__thrift__test__module__HeapAllocated(*fbthrift_data);
+  return init__facebook__thrift__test__fixtures__adapter__module__HeapAllocated(*fbthrift_data);
 }
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::detail::HeapAllocated, ::facebook__thrift__test__module::NamespaceTag>>::operator()(
-    [[maybe_unused]] const ::facebook::thrift::test::detail::HeapAllocated& val) {
+        ::facebook::thrift::test::fixtures::adapter::detail::HeapAllocated, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(
+    [[maybe_unused]] const ::facebook::thrift::test::fixtures::adapter::detail::HeapAllocated& val) {
   StrongRef fbthrift_data(createStructTuple(0));
   return std::move(fbthrift_data).release();
 }
 
 
-ExtractorResult<::facebook::thrift::test::MoveOnly>
-Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::MoveOnly, ::facebook__thrift__test__module::NamespaceTag>>::operator()(PyObject* obj) {
+ExtractorResult<::facebook::thrift::test::fixtures::adapter::MoveOnly>
+Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::MoveOnly, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(PyObject* obj) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::facebook::thrift::test::MoveOnly>(
-      "Module facebook.thrift.test.module import error");
+    return extractorError<::facebook::thrift::test::fixtures::adapter::MoveOnly>(
+      "Module facebook.thrift.test.fixtures.adapter.module import error");
   }
   std::unique_ptr<folly::IOBuf> val(
-      extract__facebook__thrift__test__module__MoveOnly(obj));
+      extract__facebook__thrift__test__fixtures__adapter__module__MoveOnly(obj));
   if (!val) {
     CHECK(PyErr_Occurred());
-    return extractorError<::facebook::thrift::test::MoveOnly>(
+    return extractorError<::facebook::thrift::test::fixtures::adapter::MoveOnly>(
         "Thrift serialize error: MoveOnly");
   }
-  return detail::deserialize_iobuf<::facebook::thrift::test::MoveOnly>(std::move(val));
+  return detail::deserialize_iobuf<::facebook::thrift::test::fixtures::adapter::MoveOnly>(std::move(val));
 }
 
 
-ExtractorResult<::facebook::thrift::test::MoveOnly>
+ExtractorResult<::facebook::thrift::test::fixtures::adapter::MoveOnly>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::facebook::thrift::test::MoveOnly, ::facebook__thrift__test__module::NamespaceTag>>::operator()(PyObject* fbthrift_data) {
+    ::facebook::thrift::test::fixtures::adapter::MoveOnly, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(PyObject* fbthrift_data) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::facebook::thrift::test::MoveOnly>(
-      "Module facebook.thrift.test.module import error");
+    return extractorError<::facebook::thrift::test::fixtures::adapter::MoveOnly>(
+      "Module facebook.thrift.test.fixtures.adapter.module import error");
   }
-  auto obj = StrongRef(init__facebook__thrift__test__module__MoveOnly(fbthrift_data));
+  auto obj = StrongRef(init__facebook__thrift__test__fixtures__adapter__module__MoveOnly(fbthrift_data));
   if (!obj) {
-      return extractorError<::facebook::thrift::test::MoveOnly>(
+      return extractorError<::facebook::thrift::test::fixtures::adapter::MoveOnly>(
           "Init from fbthrift error: MoveOnly");
   }
-  return Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::MoveOnly, ::facebook__thrift__test__module::NamespaceTag>>{}(*obj);
+  return Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::MoveOnly, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>{}(*obj);
 }
 
-int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::MoveOnly, ::facebook__thrift__test__module::NamespaceTag>>::typeCheck(PyObject* obj) {
+int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::MoveOnly, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
-      "Module facebook.thrift.test.module import error");
+      "Module facebook.thrift.test.fixtures.adapter.module import error");
   }
   int result =
-      can_extract__facebook__thrift__test__module__MoveOnly(obj);
+      can_extract__facebook__thrift__test__fixtures__adapter__module__MoveOnly(obj);
   if (result < 0) {
     ::folly::python::handlePythonError(
       "Unexpected type check error: MoveOnly");
@@ -2146,8 +2146,8 @@ int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrif
 }
 
 
-PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::MoveOnly, ::facebook__thrift__test__module::NamespaceTag>>::operator()(
-    const ::facebook::thrift::test::MoveOnly& val) {
+PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::MoveOnly, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(
+    const ::facebook::thrift::test::fixtures::adapter::MoveOnly& val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
@@ -2160,7 +2160,7 @@ PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::faceboo
     return nullptr;
   }
   DCHECK(serialized);
-  auto ptr = construct__facebook__thrift__test__module__MoveOnly(std::move(serialized));
+  auto ptr = construct__facebook__thrift__test__fixtures__adapter__module__MoveOnly(std::move(serialized));
   if (!ptr) {
     CHECK(PyErr_Occurred());
   }
@@ -2169,56 +2169,56 @@ PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::faceboo
 
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::MoveOnly, ::facebook__thrift__test__module::NamespaceTag>>::operator()(
-    const ::facebook::thrift::test::MoveOnly& val) {
-  auto obj = StrongRef(Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::MoveOnly, ::facebook__thrift__test__module::NamespaceTag>>{}(val));
+        ::facebook::thrift::test::fixtures::adapter::MoveOnly, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(
+    const ::facebook::thrift::test::fixtures::adapter::MoveOnly& val) {
+  auto obj = StrongRef(Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::MoveOnly, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>{}(val));
   if (!obj) {
     return nullptr;
   }
   return getThriftStructFieldData(*obj);
 }
 
-ExtractorResult<::facebook::thrift::test::AlsoMoveOnly>
-Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::AlsoMoveOnly, ::facebook__thrift__test__module::NamespaceTag>>::operator()(PyObject* obj) {
+ExtractorResult<::facebook::thrift::test::fixtures::adapter::AlsoMoveOnly>
+Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::AlsoMoveOnly, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(PyObject* obj) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::facebook::thrift::test::AlsoMoveOnly>(
-      "Module facebook.thrift.test.module import error");
+    return extractorError<::facebook::thrift::test::fixtures::adapter::AlsoMoveOnly>(
+      "Module facebook.thrift.test.fixtures.adapter.module import error");
   }
   std::unique_ptr<folly::IOBuf> val(
-      extract__facebook__thrift__test__module__AlsoMoveOnly(obj));
+      extract__facebook__thrift__test__fixtures__adapter__module__AlsoMoveOnly(obj));
   if (!val) {
     CHECK(PyErr_Occurred());
-    return extractorError<::facebook::thrift::test::AlsoMoveOnly>(
+    return extractorError<::facebook::thrift::test::fixtures::adapter::AlsoMoveOnly>(
         "Thrift serialize error: AlsoMoveOnly");
   }
-  return detail::deserialize_iobuf<::facebook::thrift::test::AlsoMoveOnly>(std::move(val));
+  return detail::deserialize_iobuf<::facebook::thrift::test::fixtures::adapter::AlsoMoveOnly>(std::move(val));
 }
 
 
-ExtractorResult<::facebook::thrift::test::AlsoMoveOnly>
+ExtractorResult<::facebook::thrift::test::fixtures::adapter::AlsoMoveOnly>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::facebook::thrift::test::AlsoMoveOnly, ::facebook__thrift__test__module::NamespaceTag>>::operator()(PyObject* fbthrift_data) {
+    ::facebook::thrift::test::fixtures::adapter::AlsoMoveOnly, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(PyObject* fbthrift_data) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::facebook::thrift::test::AlsoMoveOnly>(
-      "Module facebook.thrift.test.module import error");
+    return extractorError<::facebook::thrift::test::fixtures::adapter::AlsoMoveOnly>(
+      "Module facebook.thrift.test.fixtures.adapter.module import error");
   }
-  auto obj = StrongRef(init__facebook__thrift__test__module__AlsoMoveOnly(fbthrift_data));
+  auto obj = StrongRef(init__facebook__thrift__test__fixtures__adapter__module__AlsoMoveOnly(fbthrift_data));
   if (!obj) {
-      return extractorError<::facebook::thrift::test::AlsoMoveOnly>(
+      return extractorError<::facebook::thrift::test::fixtures::adapter::AlsoMoveOnly>(
           "Init from fbthrift error: AlsoMoveOnly");
   }
-  return Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::AlsoMoveOnly, ::facebook__thrift__test__module::NamespaceTag>>{}(*obj);
+  return Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::AlsoMoveOnly, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>{}(*obj);
 }
 
-int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::AlsoMoveOnly, ::facebook__thrift__test__module::NamespaceTag>>::typeCheck(PyObject* obj) {
+int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::AlsoMoveOnly, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
-      "Module facebook.thrift.test.module import error");
+      "Module facebook.thrift.test.fixtures.adapter.module import error");
   }
   int result =
-      can_extract__facebook__thrift__test__module__AlsoMoveOnly(obj);
+      can_extract__facebook__thrift__test__fixtures__adapter__module__AlsoMoveOnly(obj);
   if (result < 0) {
     ::folly::python::handlePythonError(
       "Unexpected type check error: AlsoMoveOnly");
@@ -2227,8 +2227,8 @@ int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrif
 }
 
 
-PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::AlsoMoveOnly, ::facebook__thrift__test__module::NamespaceTag>>::operator()(
-    const ::facebook::thrift::test::AlsoMoveOnly& val) {
+PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::AlsoMoveOnly, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(
+    const ::facebook::thrift::test::fixtures::adapter::AlsoMoveOnly& val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
@@ -2241,7 +2241,7 @@ PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::faceboo
     return nullptr;
   }
   DCHECK(serialized);
-  auto ptr = construct__facebook__thrift__test__module__AlsoMoveOnly(std::move(serialized));
+  auto ptr = construct__facebook__thrift__test__fixtures__adapter__module__AlsoMoveOnly(std::move(serialized));
   if (!ptr) {
     CHECK(PyErr_Occurred());
   }
@@ -2250,44 +2250,44 @@ PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::faceboo
 
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::AlsoMoveOnly, ::facebook__thrift__test__module::NamespaceTag>>::operator()(
-    const ::facebook::thrift::test::AlsoMoveOnly& val) {
-  auto obj = StrongRef(Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::AlsoMoveOnly, ::facebook__thrift__test__module::NamespaceTag>>{}(val));
+        ::facebook::thrift::test::fixtures::adapter::AlsoMoveOnly, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(
+    const ::facebook::thrift::test::fixtures::adapter::AlsoMoveOnly& val) {
+  auto obj = StrongRef(Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::AlsoMoveOnly, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>{}(val));
   if (!obj) {
     return nullptr;
   }
   return getThriftStructFieldData(*obj);
 }
 
-ExtractorResult<::facebook::thrift::test::ApplyAdapter>
-Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::ApplyAdapter, ::facebook__thrift__test__module::NamespaceTag>>::operator()(PyObject* obj) {
+ExtractorResult<::facebook::thrift::test::fixtures::adapter::ApplyAdapter>
+Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::ApplyAdapter, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(PyObject* obj) {
   int tCheckResult = typeCheck(obj);
   if (tCheckResult != 1) {
       if (tCheckResult == 0) {
         PyErr_SetString(PyExc_TypeError, "Not a ApplyAdapter");
       }
-      return extractorError<::facebook::thrift::test::ApplyAdapter>(
+      return extractorError<::facebook::thrift::test::fixtures::adapter::ApplyAdapter>(
           "Marshal error: ApplyAdapter");
   }
-  return ::facebook::thrift::test::ApplyAdapter{};
+  return ::facebook::thrift::test::fixtures::adapter::ApplyAdapter{};
 }
 
-ExtractorResult<::facebook::thrift::test::ApplyAdapter>
+ExtractorResult<::facebook::thrift::test::fixtures::adapter::ApplyAdapter>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::facebook::thrift::test::ApplyAdapter, ::facebook__thrift__test__module::NamespaceTag>>::operator()(PyObject* fbThriftData) {
-  ::facebook::thrift::test::ApplyAdapter cpp;
+    ::facebook::thrift::test::fixtures::adapter::ApplyAdapter, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(PyObject* fbThriftData) {
+  ::facebook::thrift::test::fixtures::adapter::ApplyAdapter cpp;
   (void)fbThriftData;
   return cpp;
 }
 
 
-int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::ApplyAdapter, ::facebook__thrift__test__module::NamespaceTag>>::typeCheck(PyObject* obj) {
+int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::ApplyAdapter, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
-      "Module facebook.thrift.test.module import error");
+      "Module facebook.thrift.test.fixtures.adapter.module import error");
   }
   int result =
-      can_extract__facebook__thrift__test__module__ApplyAdapter(obj);
+      can_extract__facebook__thrift__test__fixtures__adapter__module__ApplyAdapter(obj);
   if (result < 0) {
     ::folly::python::handlePythonError(
       "Unexpected type check error: ApplyAdapter");
@@ -2296,58 +2296,58 @@ int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrif
 }
 
 
-PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::ApplyAdapter, ::facebook__thrift__test__module::NamespaceTag>>::operator()(
-    const ::facebook::thrift::test::ApplyAdapter& val) {
+PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::ApplyAdapter, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(
+    const ::facebook::thrift::test::fixtures::adapter::ApplyAdapter& val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
   Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::ApplyAdapter, ::facebook__thrift__test__module::NamespaceTag>> ctor;
+        ::facebook::thrift::test::fixtures::adapter::ApplyAdapter, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> ctor;
   StrongRef fbthrift_data(ctor(val));
   if (!fbthrift_data) {
     return nullptr;
   }
-  return init__facebook__thrift__test__module__ApplyAdapter(*fbthrift_data);
+  return init__facebook__thrift__test__fixtures__adapter__module__ApplyAdapter(*fbthrift_data);
 }
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::ApplyAdapter, ::facebook__thrift__test__module::NamespaceTag>>::operator()(
-    [[maybe_unused]] const ::facebook::thrift::test::ApplyAdapter& val) {
+        ::facebook::thrift::test::fixtures::adapter::ApplyAdapter, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(
+    [[maybe_unused]] const ::facebook::thrift::test::fixtures::adapter::ApplyAdapter& val) {
   StrongRef fbthrift_data(createStructTuple(0));
   return std::move(fbthrift_data).release();
 }
 
 
-ExtractorResult<::facebook::thrift::test::detail::TransitiveAdapted>
-Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::detail::TransitiveAdapted, ::facebook__thrift__test__module::NamespaceTag>>::operator()(PyObject* obj) {
+ExtractorResult<::facebook::thrift::test::fixtures::adapter::detail::TransitiveAdapted>
+Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::detail::TransitiveAdapted, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(PyObject* obj) {
   int tCheckResult = typeCheck(obj);
   if (tCheckResult != 1) {
       if (tCheckResult == 0) {
         PyErr_SetString(PyExc_TypeError, "Not a TransitiveAdapted");
       }
-      return extractorError<::facebook::thrift::test::detail::TransitiveAdapted>(
+      return extractorError<::facebook::thrift::test::fixtures::adapter::detail::TransitiveAdapted>(
           "Marshal error: TransitiveAdapted");
   }
-  return ::facebook::thrift::test::detail::TransitiveAdapted{};
+  return ::facebook::thrift::test::fixtures::adapter::detail::TransitiveAdapted{};
 }
 
-ExtractorResult<::facebook::thrift::test::detail::TransitiveAdapted>
+ExtractorResult<::facebook::thrift::test::fixtures::adapter::detail::TransitiveAdapted>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::facebook::thrift::test::detail::TransitiveAdapted, ::facebook__thrift__test__module::NamespaceTag>>::operator()(PyObject* fbThriftData) {
-  ::facebook::thrift::test::detail::TransitiveAdapted cpp;
+    ::facebook::thrift::test::fixtures::adapter::detail::TransitiveAdapted, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(PyObject* fbThriftData) {
+  ::facebook::thrift::test::fixtures::adapter::detail::TransitiveAdapted cpp;
   (void)fbThriftData;
   return cpp;
 }
 
 
-int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::detail::TransitiveAdapted, ::facebook__thrift__test__module::NamespaceTag>>::typeCheck(PyObject* obj) {
+int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::detail::TransitiveAdapted, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
-      "Module facebook.thrift.test.module import error");
+      "Module facebook.thrift.test.fixtures.adapter.module import error");
   }
   int result =
-      can_extract__facebook__thrift__test__module__TransitiveAdapted(obj);
+      can_extract__facebook__thrift__test__fixtures__adapter__module__TransitiveAdapted(obj);
   if (result < 0) {
     ::folly::python::handlePythonError(
       "Unexpected type check error: TransitiveAdapted");
@@ -2356,70 +2356,70 @@ int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrif
 }
 
 
-PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::detail::TransitiveAdapted, ::facebook__thrift__test__module::NamespaceTag>>::operator()(
-    const ::facebook::thrift::test::detail::TransitiveAdapted& val) {
+PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::detail::TransitiveAdapted, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(
+    const ::facebook::thrift::test::fixtures::adapter::detail::TransitiveAdapted& val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
   Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::detail::TransitiveAdapted, ::facebook__thrift__test__module::NamespaceTag>> ctor;
+        ::facebook::thrift::test::fixtures::adapter::detail::TransitiveAdapted, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> ctor;
   StrongRef fbthrift_data(ctor(val));
   if (!fbthrift_data) {
     return nullptr;
   }
-  return init__facebook__thrift__test__module__TransitiveAdapted(*fbthrift_data);
+  return init__facebook__thrift__test__fixtures__adapter__module__TransitiveAdapted(*fbthrift_data);
 }
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::detail::TransitiveAdapted, ::facebook__thrift__test__module::NamespaceTag>>::operator()(
-    [[maybe_unused]] const ::facebook::thrift::test::detail::TransitiveAdapted& val) {
+        ::facebook::thrift::test::fixtures::adapter::detail::TransitiveAdapted, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(
+    [[maybe_unused]] const ::facebook::thrift::test::fixtures::adapter::detail::TransitiveAdapted& val) {
   StrongRef fbthrift_data(createStructTuple(0));
   return std::move(fbthrift_data).release();
 }
 
 
-ExtractorResult<::facebook::thrift::test::CountingStruct>
-Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::CountingStruct, ::facebook__thrift__test__module::NamespaceTag>>::operator()(PyObject* obj) {
+ExtractorResult<::facebook::thrift::test::fixtures::adapter::CountingStruct>
+Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::CountingStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(PyObject* obj) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::facebook::thrift::test::CountingStruct>(
-      "Module facebook.thrift.test.module import error");
+    return extractorError<::facebook::thrift::test::fixtures::adapter::CountingStruct>(
+      "Module facebook.thrift.test.fixtures.adapter.module import error");
   }
   std::unique_ptr<folly::IOBuf> val(
-      extract__facebook__thrift__test__module__CountingStruct(obj));
+      extract__facebook__thrift__test__fixtures__adapter__module__CountingStruct(obj));
   if (!val) {
     CHECK(PyErr_Occurred());
-    return extractorError<::facebook::thrift::test::CountingStruct>(
+    return extractorError<::facebook::thrift::test::fixtures::adapter::CountingStruct>(
         "Thrift serialize error: CountingStruct");
   }
-  return detail::deserialize_iobuf<::facebook::thrift::test::CountingStruct>(std::move(val));
+  return detail::deserialize_iobuf<::facebook::thrift::test::fixtures::adapter::CountingStruct>(std::move(val));
 }
 
 
-ExtractorResult<::facebook::thrift::test::CountingStruct>
+ExtractorResult<::facebook::thrift::test::fixtures::adapter::CountingStruct>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::facebook::thrift::test::CountingStruct, ::facebook__thrift__test__module::NamespaceTag>>::operator()(PyObject* fbthrift_data) {
+    ::facebook::thrift::test::fixtures::adapter::CountingStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(PyObject* fbthrift_data) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::facebook::thrift::test::CountingStruct>(
-      "Module facebook.thrift.test.module import error");
+    return extractorError<::facebook::thrift::test::fixtures::adapter::CountingStruct>(
+      "Module facebook.thrift.test.fixtures.adapter.module import error");
   }
-  auto obj = StrongRef(init__facebook__thrift__test__module__CountingStruct(fbthrift_data));
+  auto obj = StrongRef(init__facebook__thrift__test__fixtures__adapter__module__CountingStruct(fbthrift_data));
   if (!obj) {
-      return extractorError<::facebook::thrift::test::CountingStruct>(
+      return extractorError<::facebook::thrift::test::fixtures::adapter::CountingStruct>(
           "Init from fbthrift error: CountingStruct");
   }
-  return Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::CountingStruct, ::facebook__thrift__test__module::NamespaceTag>>{}(*obj);
+  return Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::CountingStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>{}(*obj);
 }
 
-int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::CountingStruct, ::facebook__thrift__test__module::NamespaceTag>>::typeCheck(PyObject* obj) {
+int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::CountingStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
-      "Module facebook.thrift.test.module import error");
+      "Module facebook.thrift.test.fixtures.adapter.module import error");
   }
   int result =
-      can_extract__facebook__thrift__test__module__CountingStruct(obj);
+      can_extract__facebook__thrift__test__fixtures__adapter__module__CountingStruct(obj);
   if (result < 0) {
     ::folly::python::handlePythonError(
       "Unexpected type check error: CountingStruct");
@@ -2428,8 +2428,8 @@ int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrif
 }
 
 
-PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::CountingStruct, ::facebook__thrift__test__module::NamespaceTag>>::operator()(
-    const ::facebook::thrift::test::CountingStruct& val) {
+PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::CountingStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(
+    const ::facebook::thrift::test::fixtures::adapter::CountingStruct& val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
@@ -2442,7 +2442,7 @@ PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::faceboo
     return nullptr;
   }
   DCHECK(serialized);
-  auto ptr = construct__facebook__thrift__test__module__CountingStruct(std::move(serialized));
+  auto ptr = construct__facebook__thrift__test__fixtures__adapter__module__CountingStruct(std::move(serialized));
   if (!ptr) {
     CHECK(PyErr_Occurred());
   }
@@ -2451,34 +2451,34 @@ PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::faceboo
 
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::CountingStruct, ::facebook__thrift__test__module::NamespaceTag>>::operator()(
-    const ::facebook::thrift::test::CountingStruct& val) {
-  auto obj = StrongRef(Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::CountingStruct, ::facebook__thrift__test__module::NamespaceTag>>{}(val));
+        ::facebook::thrift::test::fixtures::adapter::CountingStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(
+    const ::facebook::thrift::test::fixtures::adapter::CountingStruct& val) {
+  auto obj = StrongRef(Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::CountingStruct, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>{}(val));
   if (!obj) {
     return nullptr;
   }
   return getThriftStructFieldData(*obj);
 }
 
-ExtractorResult<::facebook::thrift::test::Person>
-Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::Person, ::facebook__thrift__test__module::NamespaceTag>>::operator()(PyObject* obj) {
+ExtractorResult<::facebook::thrift::test::fixtures::adapter::Person>
+Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::Person, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(PyObject* obj) {
   int tCheckResult = typeCheck(obj);
   if (tCheckResult != 1) {
       if (tCheckResult == 0) {
         PyErr_SetString(PyExc_TypeError, "Not a Person");
       }
-      return extractorError<::facebook::thrift::test::Person>(
+      return extractorError<::facebook::thrift::test::fixtures::adapter::Person>(
           "Marshal error: Person");
   }
   StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
-      ::facebook::thrift::test::Person, ::facebook__thrift__test__module::NamespaceTag>>{}(*fbThriftData);
+      ::facebook::thrift::test::fixtures::adapter::Person, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>{}(*fbThriftData);
 }
 
-ExtractorResult<::facebook::thrift::test::Person>
+ExtractorResult<::facebook::thrift::test::fixtures::adapter::Person>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::facebook::thrift::test::Person, ::facebook__thrift__test__module::NamespaceTag>>::operator()(PyObject* fbThriftData) {
-  ::facebook::thrift::test::Person cpp;
+    ::facebook::thrift::test::fixtures::adapter::Person, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(PyObject* fbThriftData) {
+  ::facebook::thrift::test::fixtures::adapter::Person cpp;
   std::optional<std::string_view> error;
   Extractor<::apache::thrift::python::capi::FallibleString>{}.extractInto(
       cpp.name_ref(),
@@ -2491,13 +2491,13 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
 }
 
 
-int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::Person, ::facebook__thrift__test__module::NamespaceTag>>::typeCheck(PyObject* obj) {
+int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::Person, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
-      "Module facebook.thrift.test.module import error");
+      "Module facebook.thrift.test.fixtures.adapter.module import error");
   }
   int result =
-      can_extract__facebook__thrift__test__module__Person(obj);
+      can_extract__facebook__thrift__test__fixtures__adapter__module__Person(obj);
   if (result < 0) {
     ::folly::python::handlePythonError(
       "Unexpected type check error: Person");
@@ -2506,24 +2506,24 @@ int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrif
 }
 
 
-PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::Person, ::facebook__thrift__test__module::NamespaceTag>>::operator()(
-    const ::facebook::thrift::test::Person& val) {
+PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::Person, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(
+    const ::facebook::thrift::test::fixtures::adapter::Person& val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
   Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::Person, ::facebook__thrift__test__module::NamespaceTag>> ctor;
+        ::facebook::thrift::test::fixtures::adapter::Person, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> ctor;
   StrongRef fbthrift_data(ctor(val));
   if (!fbthrift_data) {
     return nullptr;
   }
-  return init__facebook__thrift__test__module__Person(*fbthrift_data);
+  return init__facebook__thrift__test__fixtures__adapter__module__Person(*fbthrift_data);
 }
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::Person, ::facebook__thrift__test__module::NamespaceTag>>::operator()(
-    [[maybe_unused]] const ::facebook::thrift::test::Person& val) {
+        ::facebook::thrift::test::fixtures::adapter::Person, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(
+    [[maybe_unused]] const ::facebook::thrift::test::fixtures::adapter::Person& val) {
   StrongRef fbthrift_data(createStructTuple(1));
   StrongRef _fbthrift__name(
     Constructor<::apache::thrift::python::capi::FallibleString>{}
@@ -2539,25 +2539,25 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
 }
 
 
-ExtractorResult<::facebook::thrift::test::Person2>
-Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::Person2, ::facebook__thrift__test__module::NamespaceTag>>::operator()(PyObject* obj) {
+ExtractorResult<::facebook::thrift::test::fixtures::adapter::Person2>
+Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::Person2, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(PyObject* obj) {
   int tCheckResult = typeCheck(obj);
   if (tCheckResult != 1) {
       if (tCheckResult == 0) {
         PyErr_SetString(PyExc_TypeError, "Not a Person2");
       }
-      return extractorError<::facebook::thrift::test::Person2>(
+      return extractorError<::facebook::thrift::test::fixtures::adapter::Person2>(
           "Marshal error: Person2");
   }
   StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
-      ::facebook::thrift::test::Person2, ::facebook__thrift__test__module::NamespaceTag>>{}(*fbThriftData);
+      ::facebook::thrift::test::fixtures::adapter::Person2, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>{}(*fbThriftData);
 }
 
-ExtractorResult<::facebook::thrift::test::Person2>
+ExtractorResult<::facebook::thrift::test::fixtures::adapter::Person2>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::facebook::thrift::test::Person2, ::facebook__thrift__test__module::NamespaceTag>>::operator()(PyObject* fbThriftData) {
-  ::facebook::thrift::test::Person2 cpp;
+    ::facebook::thrift::test::fixtures::adapter::Person2, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(PyObject* fbThriftData) {
+  ::facebook::thrift::test::fixtures::adapter::Person2 cpp;
   std::optional<std::string_view> error;
   Extractor<::apache::thrift::python::capi::FallibleString>{}.extractInto(
       cpp.name_ref(),
@@ -2570,13 +2570,13 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
 }
 
 
-int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::Person2, ::facebook__thrift__test__module::NamespaceTag>>::typeCheck(PyObject* obj) {
+int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::Person2, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
-      "Module facebook.thrift.test.module import error");
+      "Module facebook.thrift.test.fixtures.adapter.module import error");
   }
   int result =
-      can_extract__facebook__thrift__test__module__Person2(obj);
+      can_extract__facebook__thrift__test__fixtures__adapter__module__Person2(obj);
   if (result < 0) {
     ::folly::python::handlePythonError(
       "Unexpected type check error: Person2");
@@ -2585,24 +2585,24 @@ int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrif
 }
 
 
-PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::Person2, ::facebook__thrift__test__module::NamespaceTag>>::operator()(
-    const ::facebook::thrift::test::Person2& val) {
+PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::Person2, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(
+    const ::facebook::thrift::test::fixtures::adapter::Person2& val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
   Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::Person2, ::facebook__thrift__test__module::NamespaceTag>> ctor;
+        ::facebook::thrift::test::fixtures::adapter::Person2, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>> ctor;
   StrongRef fbthrift_data(ctor(val));
   if (!fbthrift_data) {
     return nullptr;
   }
-  return init__facebook__thrift__test__module__Person2(*fbthrift_data);
+  return init__facebook__thrift__test__fixtures__adapter__module__Person2(*fbthrift_data);
 }
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::Person2, ::facebook__thrift__test__module::NamespaceTag>>::operator()(
-    [[maybe_unused]] const ::facebook::thrift::test::Person2& val) {
+        ::facebook::thrift::test::fixtures::adapter::Person2, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(
+    [[maybe_unused]] const ::facebook::thrift::test::fixtures::adapter::Person2& val) {
   StrongRef fbthrift_data(createStructTuple(1));
   StrongRef _fbthrift__name(
     Constructor<::apache::thrift::python::capi::FallibleString>{}
@@ -2618,49 +2618,49 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
 }
 
 
-ExtractorResult<::facebook::thrift::test::Renamed>
-Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::Renamed, ::facebook__thrift__test__module::NamespaceTag>>::operator()(PyObject* obj) {
+ExtractorResult<::facebook::thrift::test::fixtures::adapter::Renamed>
+Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::Renamed, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(PyObject* obj) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::facebook::thrift::test::Renamed>(
-      "Module facebook.thrift.test.module import error");
+    return extractorError<::facebook::thrift::test::fixtures::adapter::Renamed>(
+      "Module facebook.thrift.test.fixtures.adapter.module import error");
   }
   std::unique_ptr<folly::IOBuf> val(
-      extract__facebook__thrift__test__module__RenamedStructWithStructAdapterAndFieldAdapter(obj));
+      extract__facebook__thrift__test__fixtures__adapter__module__RenamedStructWithStructAdapterAndFieldAdapter(obj));
   if (!val) {
     CHECK(PyErr_Occurred());
-    return extractorError<::facebook::thrift::test::Renamed>(
+    return extractorError<::facebook::thrift::test::fixtures::adapter::Renamed>(
         "Thrift serialize error: RenamedStructWithStructAdapterAndFieldAdapter");
   }
   return detail::deserialize_iobuf_to_adapted<
-      ::facebook::thrift::test::Renamed, ::apache::thrift::test::StructAdapter
+      ::facebook::thrift::test::fixtures::adapter::Renamed, ::apache::thrift::test::StructAdapter
     >(std::move(val));
 }
 
 
-ExtractorResult<::facebook::thrift::test::Renamed>
+ExtractorResult<::facebook::thrift::test::fixtures::adapter::Renamed>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::facebook::thrift::test::Renamed, ::facebook__thrift__test__module::NamespaceTag>>::operator()(PyObject* fbthrift_data) {
+    ::facebook::thrift::test::fixtures::adapter::Renamed, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(PyObject* fbthrift_data) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::facebook::thrift::test::Renamed>(
-      "Module facebook.thrift.test.module import error");
+    return extractorError<::facebook::thrift::test::fixtures::adapter::Renamed>(
+      "Module facebook.thrift.test.fixtures.adapter.module import error");
   }
-  auto obj = StrongRef(init__facebook__thrift__test__module__RenamedStructWithStructAdapterAndFieldAdapter(fbthrift_data));
+  auto obj = StrongRef(init__facebook__thrift__test__fixtures__adapter__module__RenamedStructWithStructAdapterAndFieldAdapter(fbthrift_data));
   if (!obj) {
-      return extractorError<::facebook::thrift::test::Renamed>(
+      return extractorError<::facebook::thrift::test::fixtures::adapter::Renamed>(
           "Init from fbthrift error: RenamedStructWithStructAdapterAndFieldAdapter");
   }
-  return Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::Renamed, ::facebook__thrift__test__module::NamespaceTag>>{}(*obj);
+  return Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::Renamed, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>{}(*obj);
 }
 
-int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::Renamed, ::facebook__thrift__test__module::NamespaceTag>>::typeCheck(PyObject* obj) {
+int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::Renamed, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
-      "Module facebook.thrift.test.module import error");
+      "Module facebook.thrift.test.fixtures.adapter.module import error");
   }
   int result =
-      can_extract__facebook__thrift__test__module__RenamedStructWithStructAdapterAndFieldAdapter(obj);
+      can_extract__facebook__thrift__test__fixtures__adapter__module__RenamedStructWithStructAdapterAndFieldAdapter(obj);
   if (result < 0) {
     ::folly::python::handlePythonError(
       "Unexpected type check error: RenamedStructWithStructAdapterAndFieldAdapter");
@@ -2669,8 +2669,8 @@ int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrif
 }
 
 
-PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::Renamed, ::facebook__thrift__test__module::NamespaceTag>>::operator()(
-    const ::facebook::thrift::test::Renamed& val) {
+PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::Renamed, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(
+    const ::facebook::thrift::test::fixtures::adapter::Renamed& val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
@@ -2683,7 +2683,7 @@ PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::faceboo
     return nullptr;
   }
   DCHECK(serialized);
-  auto ptr = construct__facebook__thrift__test__module__RenamedStructWithStructAdapterAndFieldAdapter(std::move(serialized));
+  auto ptr = construct__facebook__thrift__test__fixtures__adapter__module__RenamedStructWithStructAdapterAndFieldAdapter(std::move(serialized));
   if (!ptr) {
     CHECK(PyErr_Occurred());
   }
@@ -2692,32 +2692,32 @@ PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::faceboo
 
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::Renamed, ::facebook__thrift__test__module::NamespaceTag>>::operator()(
-    const ::facebook::thrift::test::Renamed& val) {
-  auto obj = StrongRef(Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::Renamed, ::facebook__thrift__test__module::NamespaceTag>>{}(val));
+        ::facebook::thrift::test::fixtures::adapter::Renamed, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(
+    const ::facebook::thrift::test::fixtures::adapter::Renamed& val) {
+  auto obj = StrongRef(Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::Renamed, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>{}(val));
   if (!obj) {
     return nullptr;
   }
   return getThriftStructFieldData(*obj);
 }
 
-ExtractorResult<::facebook::thrift::test::Color>
-Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::Color, ::facebook__thrift__test__module::NamespaceTag>>::operator()(PyObject* obj) {
+ExtractorResult<::facebook::thrift::test::fixtures::adapter::Color>
+Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::Color, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(PyObject* obj) {
   long val = PyLong_AsLong(obj);
   if (val == -1 && PyErr_Occurred()) {
-    return extractorError<::facebook::thrift::test::Color>(
+    return extractorError<::facebook::thrift::test::fixtures::adapter::Color>(
         "Error getting python int value: Color");
   }
-  return static_cast<::facebook::thrift::test::Color>(val);
+  return static_cast<::facebook::thrift::test::fixtures::adapter::Color>(val);
 }
 
-int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::Color, ::facebook__thrift__test__module::NamespaceTag>>::typeCheck(PyObject* obj) {
+int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::Color, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
-      "Module facebook.thrift.test.module import error");
+      "Module facebook.thrift.test.fixtures.adapter.module import error");
   }
   int result =
-      can_extract__facebook__thrift__test__module__Color(obj);
+      can_extract__facebook__thrift__test__fixtures__adapter__module__Color(obj);
   if (result < 0) {
     ::folly::python::handlePythonError(
       "Unexpected type check error: Color");
@@ -2726,13 +2726,13 @@ int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrif
 }
 
 
-PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::Color, ::facebook__thrift__test__module::NamespaceTag>>::operator()(
-    ::facebook::thrift::test::Color val) {
+PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::Color, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(
+    ::facebook::thrift::test::fixtures::adapter::Color val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
-  auto ptr = construct__facebook__thrift__test__module__Color(
+  auto ptr = construct__facebook__thrift__test__fixtures__adapter__module__Color(
       static_cast<int64_t>(val));
   if (!ptr) {
     CHECK(PyErr_Occurred());
@@ -2740,23 +2740,23 @@ PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::faceboo
   return ptr;
 }
 
-ExtractorResult<::facebook::thrift::test::ThriftAdaptedEnum>
-Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::ThriftAdaptedEnum, ::facebook__thrift__test__module::NamespaceTag>>::operator()(PyObject* obj) {
+ExtractorResult<::facebook::thrift::test::fixtures::adapter::ThriftAdaptedEnum>
+Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::ThriftAdaptedEnum, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(PyObject* obj) {
   long val = PyLong_AsLong(obj);
   if (val == -1 && PyErr_Occurred()) {
-    return extractorError<::facebook::thrift::test::ThriftAdaptedEnum>(
+    return extractorError<::facebook::thrift::test::fixtures::adapter::ThriftAdaptedEnum>(
         "Error getting python int value: ThriftAdaptedEnum");
   }
-  return static_cast<::facebook::thrift::test::ThriftAdaptedEnum>(val);
+  return static_cast<::facebook::thrift::test::fixtures::adapter::ThriftAdaptedEnum>(val);
 }
 
-int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::ThriftAdaptedEnum, ::facebook__thrift__test__module::NamespaceTag>>::typeCheck(PyObject* obj) {
+int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::ThriftAdaptedEnum, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
-      "Module facebook.thrift.test.module import error");
+      "Module facebook.thrift.test.fixtures.adapter.module import error");
   }
   int result =
-      can_extract__facebook__thrift__test__module__ThriftAdaptedEnum(obj);
+      can_extract__facebook__thrift__test__fixtures__adapter__module__ThriftAdaptedEnum(obj);
   if (result < 0) {
     ::folly::python::handlePythonError(
       "Unexpected type check error: ThriftAdaptedEnum");
@@ -2765,13 +2765,13 @@ int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrif
 }
 
 
-PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::ThriftAdaptedEnum, ::facebook__thrift__test__module::NamespaceTag>>::operator()(
-    ::facebook::thrift::test::ThriftAdaptedEnum val) {
+PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::fixtures::adapter::ThriftAdaptedEnum, ::facebook__thrift__test__fixtures__adapter__module::NamespaceTag>>::operator()(
+    ::facebook::thrift::test::fixtures::adapter::ThriftAdaptedEnum val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
-  auto ptr = construct__facebook__thrift__test__module__ThriftAdaptedEnum(
+  auto ptr = construct__facebook__thrift__test__fixtures__adapter__module__ThriftAdaptedEnum(
       static_cast<int64_t>(val));
   if (!ptr) {
     CHECK(PyErr_Occurred());

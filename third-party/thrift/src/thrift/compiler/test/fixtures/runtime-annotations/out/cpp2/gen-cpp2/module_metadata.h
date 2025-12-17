@@ -18,32 +18,32 @@ namespace detail {
 namespace md {
 
 template <>
-class EnumMetadata<::facebook::thrift::test::MyEnum> {
+class EnumMetadata<::facebook::thrift::test::fixtures::runtime_annotations::MyEnum> {
  public:
   static void gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::facebook::thrift::test::MyAnnotation> {
+class StructMetadata<::facebook::thrift::test::fixtures::runtime_annotations::MyAnnotation> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::facebook::thrift::test::MyStruct> {
+class StructMetadata<::facebook::thrift::test::fixtures::runtime_annotations::MyStruct> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::facebook::thrift::test::MyUnion> {
+class StructMetadata<::facebook::thrift::test::fixtures::runtime_annotations::MyUnion> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::facebook::thrift::test::MyException> {
+class StructMetadata<::facebook::thrift::test::fixtures::runtime_annotations::MyException> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class ExceptionMetadata<::facebook::thrift::test::MyException> {
+class ExceptionMetadata<::facebook::thrift::test::fixtures::runtime_annotations::MyException> {
  public:
   static void gen(ThriftMetadata& metadata);
 };

@@ -9,13 +9,13 @@
 #include <cstdint>
 
 // BEGIN forward_declare
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::service_schema {
 class CustomException;
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::service_schema
 // END forward_declare
 
 // BEGIN forward_declare_enums
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::service_schema {
 enum class Result;
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::service_schema
 // END forward_declare_enums

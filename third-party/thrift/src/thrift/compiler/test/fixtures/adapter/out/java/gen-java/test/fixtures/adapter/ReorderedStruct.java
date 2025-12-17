@@ -80,7 +80,7 @@ public final class ReorderedStruct implements com.facebook.thrift.payload.Thrift
       THRIFT_NAMES_TO_IDS.put("reordered_dependent_adapted", 1);
       FIELD_METADATA.put(1, REORDERED_DEPENDENT_ADAPTED_FIELD_DESC);
       com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
-        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/ReorderedStruct"),
+        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/fixtures/adapter/ReorderedStruct"),
         ReorderedStruct.class, ReorderedStruct::read0));
     }
     

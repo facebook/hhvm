@@ -6,13 +6,13 @@
  *  @generated
  */
 
-namespace facebook\thrift\test\terse_write;
+namespace facebook\thrift\test\fixtures\terse_write;
 
 /**
  * Original thrift enum:-
  * MyEnum
  */
-<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/terse_write/MyEnum'))>>
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/fixtures/terse_write/MyEnum'))>>
 enum MyEnum: int {
   ME0 = 0;
   ME1 = 1;
@@ -44,7 +44,7 @@ class MyEnum_TEnumStaticMetadata implements \IThriftEnumStaticMetadata {
  * Original thrift struct:-
  * MyStruct
  */
-<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/terse_write/MyStruct'))>>
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/fixtures/terse_write/MyStruct'))>>
 class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
@@ -140,8 +140,8 @@ enum MyUnionEnum: int {
  * Original thrift union:-
  * MyUnion
  */
-<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/terse_write/MyUnion'))>>
-class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<\facebook\thrift\test\terse_write\MyUnionEnum>, \IThriftShapishSyncStruct {
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/fixtures/terse_write/MyUnion'))>>
+class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<\facebook\thrift\test\fixtures\terse_write\MyUnionEnum>, \IThriftShapishSyncStruct {
   use \ThriftUnionSerializationTrait;
 
   const \ThriftStructTypes::TSpec SPEC = dict[
@@ -195,7 +195,7 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
       'var' => 'enum_field',
       'union' => true,
       'type' => \TType::I32,
-      'enum' => \facebook\thrift\test\terse_write\MyEnum::class,
+      'enum' => \facebook\thrift\test\fixtures\terse_write\MyEnum::class,
     ),
     11 => shape(
       'var' => 'list_field',
@@ -235,7 +235,7 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
       'var' => 'struct_field',
       'union' => true,
       'type' => \TType::STRUCT,
-      'class' => \facebook\thrift\test\terse_write\MyStruct::class,
+      'class' => \facebook\thrift\test\fixtures\terse_write\MyStruct::class,
     ),
   ];
   const dict<string, int> FIELDMAP = dict[
@@ -265,11 +265,11 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
     ?'double_field' => ?float,
     ?'string_field' => ?string,
     ?'binary_field' => ?string,
-    ?'enum_field' => ?\facebook\thrift\test\terse_write\MyEnum,
+    ?'enum_field' => ?\facebook\thrift\test\fixtures\terse_write\MyEnum,
     ?'list_field' => ?Vector<int>,
     ?'set_field' => ?Set<int>,
     ?'map_field' => ?Map<int, int>,
-    ?'struct_field' => ?\facebook\thrift\test\terse_write\MyStruct,
+    ?'struct_field' => ?\facebook\thrift\test\fixtures\terse_write\MyStruct,
   );
 
   const type TShape = shape(
@@ -282,11 +282,11 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
     ?'double_field' => ?float,
     ?'string_field' => ?string,
     ?'binary_field' => ?string,
-    ?'enum_field' => ?\facebook\thrift\test\terse_write\MyEnum,
+    ?'enum_field' => ?\facebook\thrift\test\fixtures\terse_write\MyEnum,
     ?'list_field' => ?vec<int>,
     ?'set_field' => ?dict<int, bool>,
     ?'map_field' => ?dict<int, int>,
-    ?'struct_field' => ?\facebook\thrift\test\terse_write\MyStruct::TShape,
+    ?'struct_field' => ?\facebook\thrift\test\fixtures\terse_write\MyStruct::TShape,
     ...
   );
   const int STRUCTURAL_ID = 5963440583402393530;
@@ -339,7 +339,7 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
    * Original thrift field:-
    * 10: terse_write.MyEnum enum_field
    */
-  public ?\facebook\thrift\test\terse_write\MyEnum $enum_field;
+  public ?\facebook\thrift\test\fixtures\terse_write\MyEnum $enum_field;
   /**
    * Original thrift field:-
    * 11: list<i16> list_field
@@ -359,66 +359,66 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
    * Original thrift field:-
    * 14: terse_write.MyStruct struct_field
    */
-  public ?\facebook\thrift\test\terse_write\MyStruct $struct_field;
-  protected \facebook\thrift\test\terse_write\MyUnionEnum $_type = \facebook\thrift\test\terse_write\MyUnionEnum::_EMPTY_;
+  public ?\facebook\thrift\test\fixtures\terse_write\MyStruct $struct_field;
+  protected \facebook\thrift\test\fixtures\terse_write\MyUnionEnum $_type = \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::_EMPTY_;
 
-  public function __construct(?bool $bool_field = null, ?int $byte_field = null, ?int $short_field = null, ?int $int_field = null, ?int $long_field = null, ?float $float_field = null, ?float $double_field = null, ?string $string_field = null, ?string $binary_field = null, ?\facebook\thrift\test\terse_write\MyEnum $enum_field = null, ?Vector<int> $list_field = null, ?Set<int> $set_field = null, ?Map<int, int> $map_field = null, ?\facebook\thrift\test\terse_write\MyStruct $struct_field = null)[] {
-    $this->_type = \facebook\thrift\test\terse_write\MyUnionEnum::_EMPTY_;
+  public function __construct(?bool $bool_field = null, ?int $byte_field = null, ?int $short_field = null, ?int $int_field = null, ?int $long_field = null, ?float $float_field = null, ?float $double_field = null, ?string $string_field = null, ?string $binary_field = null, ?\facebook\thrift\test\fixtures\terse_write\MyEnum $enum_field = null, ?Vector<int> $list_field = null, ?Set<int> $set_field = null, ?Map<int, int> $map_field = null, ?\facebook\thrift\test\fixtures\terse_write\MyStruct $struct_field = null)[] {
+    $this->_type = \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::_EMPTY_;
     if ($bool_field !== null) {
       $this->bool_field = $bool_field;
-      $this->_type = \facebook\thrift\test\terse_write\MyUnionEnum::bool_field;
+      $this->_type = \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::bool_field;
     }
     if ($byte_field !== null) {
       $this->byte_field = $byte_field;
-      $this->_type = \facebook\thrift\test\terse_write\MyUnionEnum::byte_field;
+      $this->_type = \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::byte_field;
     }
     if ($short_field !== null) {
       $this->short_field = $short_field;
-      $this->_type = \facebook\thrift\test\terse_write\MyUnionEnum::short_field;
+      $this->_type = \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::short_field;
     }
     if ($int_field !== null) {
       $this->int_field = $int_field;
-      $this->_type = \facebook\thrift\test\terse_write\MyUnionEnum::int_field;
+      $this->_type = \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::int_field;
     }
     if ($long_field !== null) {
       $this->long_field = $long_field;
-      $this->_type = \facebook\thrift\test\terse_write\MyUnionEnum::long_field;
+      $this->_type = \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::long_field;
     }
     if ($float_field !== null) {
       $this->float_field = $float_field;
-      $this->_type = \facebook\thrift\test\terse_write\MyUnionEnum::float_field;
+      $this->_type = \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::float_field;
     }
     if ($double_field !== null) {
       $this->double_field = $double_field;
-      $this->_type = \facebook\thrift\test\terse_write\MyUnionEnum::double_field;
+      $this->_type = \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::double_field;
     }
     if ($string_field !== null) {
       $this->string_field = $string_field;
-      $this->_type = \facebook\thrift\test\terse_write\MyUnionEnum::string_field;
+      $this->_type = \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::string_field;
     }
     if ($binary_field !== null) {
       $this->binary_field = $binary_field;
-      $this->_type = \facebook\thrift\test\terse_write\MyUnionEnum::binary_field;
+      $this->_type = \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::binary_field;
     }
     if ($enum_field !== null) {
       $this->enum_field = $enum_field;
-      $this->_type = \facebook\thrift\test\terse_write\MyUnionEnum::enum_field;
+      $this->_type = \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::enum_field;
     }
     if ($list_field !== null) {
       $this->list_field = $list_field;
-      $this->_type = \facebook\thrift\test\terse_write\MyUnionEnum::list_field;
+      $this->_type = \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::list_field;
     }
     if ($set_field !== null) {
       $this->set_field = $set_field;
-      $this->_type = \facebook\thrift\test\terse_write\MyUnionEnum::set_field;
+      $this->_type = \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::set_field;
     }
     if ($map_field !== null) {
       $this->map_field = $map_field;
-      $this->_type = \facebook\thrift\test\terse_write\MyUnionEnum::map_field;
+      $this->_type = \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::map_field;
     }
     if ($struct_field !== null) {
       $this->struct_field = $struct_field;
-      $this->_type = \facebook\thrift\test\terse_write\MyUnionEnum::struct_field;
+      $this->_type = \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::struct_field;
     }
   }
 
@@ -449,63 +449,63 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
     return 'MyUnion';
   }
 
-  public function getType()[]: \facebook\thrift\test\terse_write\MyUnionEnum {
+  public function getType()[]: \facebook\thrift\test\fixtures\terse_write\MyUnionEnum {
     return $this->_type;
   }
 
   public function reset()[write_props]: void {
     switch ($this->_type) {
-      case \facebook\thrift\test\terse_write\MyUnionEnum::bool_field:
+      case \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::bool_field:
         $this->bool_field = null;
         break;
-      case \facebook\thrift\test\terse_write\MyUnionEnum::byte_field:
+      case \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::byte_field:
         $this->byte_field = null;
         break;
-      case \facebook\thrift\test\terse_write\MyUnionEnum::short_field:
+      case \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::short_field:
         $this->short_field = null;
         break;
-      case \facebook\thrift\test\terse_write\MyUnionEnum::int_field:
+      case \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::int_field:
         $this->int_field = null;
         break;
-      case \facebook\thrift\test\terse_write\MyUnionEnum::long_field:
+      case \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::long_field:
         $this->long_field = null;
         break;
-      case \facebook\thrift\test\terse_write\MyUnionEnum::float_field:
+      case \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::float_field:
         $this->float_field = null;
         break;
-      case \facebook\thrift\test\terse_write\MyUnionEnum::double_field:
+      case \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::double_field:
         $this->double_field = null;
         break;
-      case \facebook\thrift\test\terse_write\MyUnionEnum::string_field:
+      case \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::string_field:
         $this->string_field = null;
         break;
-      case \facebook\thrift\test\terse_write\MyUnionEnum::binary_field:
+      case \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::binary_field:
         $this->binary_field = null;
         break;
-      case \facebook\thrift\test\terse_write\MyUnionEnum::enum_field:
+      case \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::enum_field:
         $this->enum_field = null;
         break;
-      case \facebook\thrift\test\terse_write\MyUnionEnum::list_field:
+      case \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::list_field:
         $this->list_field = null;
         break;
-      case \facebook\thrift\test\terse_write\MyUnionEnum::set_field:
+      case \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::set_field:
         $this->set_field = null;
         break;
-      case \facebook\thrift\test\terse_write\MyUnionEnum::map_field:
+      case \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::map_field:
         $this->map_field = null;
         break;
-      case \facebook\thrift\test\terse_write\MyUnionEnum::struct_field:
+      case \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::struct_field:
         $this->struct_field = null;
         break;
-      case \facebook\thrift\test\terse_write\MyUnionEnum::_EMPTY_:
+      case \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::_EMPTY_:
         break;
     }
-    $this->_type = \facebook\thrift\test\terse_write\MyUnionEnum::_EMPTY_;
+    $this->_type = \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::_EMPTY_;
   }
 
   public function set_bool_field(bool $bool_field)[write_props]: this {
     $this->reset();
-    $this->_type = \facebook\thrift\test\terse_write\MyUnionEnum::bool_field;
+    $this->_type = \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::bool_field;
     $this->bool_field = $bool_field;
     return $this;
   }
@@ -513,14 +513,14 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
   public function get_bool_field()[]: ?bool {
     $this->logIncorrectFieldAccessed(
       $this->_type,
-      \facebook\thrift\test\terse_write\MyUnionEnum::bool_field,
+      \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::bool_field,
     );
     return $this->bool_field;
   }
 
   public function getx_bool_field()[]: bool {
     invariant(
-      $this->_type === \facebook\thrift\test\terse_write\MyUnionEnum::bool_field,
+      $this->_type === \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::bool_field,
       'get_bool_field called on an instance of MyUnion whose current type is %s',
       (string)$this->_type,
     );
@@ -529,7 +529,7 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
 
   public function set_byte_field(int $byte_field)[write_props]: this {
     $this->reset();
-    $this->_type = \facebook\thrift\test\terse_write\MyUnionEnum::byte_field;
+    $this->_type = \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::byte_field;
     $this->byte_field = $byte_field;
     return $this;
   }
@@ -537,14 +537,14 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
   public function get_byte_field()[]: ?int {
     $this->logIncorrectFieldAccessed(
       $this->_type,
-      \facebook\thrift\test\terse_write\MyUnionEnum::byte_field,
+      \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::byte_field,
     );
     return $this->byte_field;
   }
 
   public function getx_byte_field()[]: int {
     invariant(
-      $this->_type === \facebook\thrift\test\terse_write\MyUnionEnum::byte_field,
+      $this->_type === \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::byte_field,
       'get_byte_field called on an instance of MyUnion whose current type is %s',
       (string)$this->_type,
     );
@@ -553,7 +553,7 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
 
   public function set_short_field(int $short_field)[write_props]: this {
     $this->reset();
-    $this->_type = \facebook\thrift\test\terse_write\MyUnionEnum::short_field;
+    $this->_type = \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::short_field;
     $this->short_field = $short_field;
     return $this;
   }
@@ -561,14 +561,14 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
   public function get_short_field()[]: ?int {
     $this->logIncorrectFieldAccessed(
       $this->_type,
-      \facebook\thrift\test\terse_write\MyUnionEnum::short_field,
+      \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::short_field,
     );
     return $this->short_field;
   }
 
   public function getx_short_field()[]: int {
     invariant(
-      $this->_type === \facebook\thrift\test\terse_write\MyUnionEnum::short_field,
+      $this->_type === \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::short_field,
       'get_short_field called on an instance of MyUnion whose current type is %s',
       (string)$this->_type,
     );
@@ -577,7 +577,7 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
 
   public function set_int_field(int $int_field)[write_props]: this {
     $this->reset();
-    $this->_type = \facebook\thrift\test\terse_write\MyUnionEnum::int_field;
+    $this->_type = \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::int_field;
     $this->int_field = $int_field;
     return $this;
   }
@@ -585,14 +585,14 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
   public function get_int_field()[]: ?int {
     $this->logIncorrectFieldAccessed(
       $this->_type,
-      \facebook\thrift\test\terse_write\MyUnionEnum::int_field,
+      \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::int_field,
     );
     return $this->int_field;
   }
 
   public function getx_int_field()[]: int {
     invariant(
-      $this->_type === \facebook\thrift\test\terse_write\MyUnionEnum::int_field,
+      $this->_type === \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::int_field,
       'get_int_field called on an instance of MyUnion whose current type is %s',
       (string)$this->_type,
     );
@@ -601,7 +601,7 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
 
   public function set_long_field(int $long_field)[write_props]: this {
     $this->reset();
-    $this->_type = \facebook\thrift\test\terse_write\MyUnionEnum::long_field;
+    $this->_type = \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::long_field;
     $this->long_field = $long_field;
     return $this;
   }
@@ -609,14 +609,14 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
   public function get_long_field()[]: ?int {
     $this->logIncorrectFieldAccessed(
       $this->_type,
-      \facebook\thrift\test\terse_write\MyUnionEnum::long_field,
+      \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::long_field,
     );
     return $this->long_field;
   }
 
   public function getx_long_field()[]: int {
     invariant(
-      $this->_type === \facebook\thrift\test\terse_write\MyUnionEnum::long_field,
+      $this->_type === \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::long_field,
       'get_long_field called on an instance of MyUnion whose current type is %s',
       (string)$this->_type,
     );
@@ -625,7 +625,7 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
 
   public function set_float_field(float $float_field)[write_props]: this {
     $this->reset();
-    $this->_type = \facebook\thrift\test\terse_write\MyUnionEnum::float_field;
+    $this->_type = \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::float_field;
     $this->float_field = $float_field;
     return $this;
   }
@@ -633,14 +633,14 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
   public function get_float_field()[]: ?float {
     $this->logIncorrectFieldAccessed(
       $this->_type,
-      \facebook\thrift\test\terse_write\MyUnionEnum::float_field,
+      \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::float_field,
     );
     return $this->float_field;
   }
 
   public function getx_float_field()[]: float {
     invariant(
-      $this->_type === \facebook\thrift\test\terse_write\MyUnionEnum::float_field,
+      $this->_type === \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::float_field,
       'get_float_field called on an instance of MyUnion whose current type is %s',
       (string)$this->_type,
     );
@@ -649,7 +649,7 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
 
   public function set_double_field(float $double_field)[write_props]: this {
     $this->reset();
-    $this->_type = \facebook\thrift\test\terse_write\MyUnionEnum::double_field;
+    $this->_type = \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::double_field;
     $this->double_field = $double_field;
     return $this;
   }
@@ -657,14 +657,14 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
   public function get_double_field()[]: ?float {
     $this->logIncorrectFieldAccessed(
       $this->_type,
-      \facebook\thrift\test\terse_write\MyUnionEnum::double_field,
+      \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::double_field,
     );
     return $this->double_field;
   }
 
   public function getx_double_field()[]: float {
     invariant(
-      $this->_type === \facebook\thrift\test\terse_write\MyUnionEnum::double_field,
+      $this->_type === \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::double_field,
       'get_double_field called on an instance of MyUnion whose current type is %s',
       (string)$this->_type,
     );
@@ -673,7 +673,7 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
 
   public function set_string_field(string $string_field)[write_props]: this {
     $this->reset();
-    $this->_type = \facebook\thrift\test\terse_write\MyUnionEnum::string_field;
+    $this->_type = \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::string_field;
     $this->string_field = $string_field;
     return $this;
   }
@@ -681,14 +681,14 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
   public function get_string_field()[]: ?string {
     $this->logIncorrectFieldAccessed(
       $this->_type,
-      \facebook\thrift\test\terse_write\MyUnionEnum::string_field,
+      \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::string_field,
     );
     return $this->string_field;
   }
 
   public function getx_string_field()[]: string {
     invariant(
-      $this->_type === \facebook\thrift\test\terse_write\MyUnionEnum::string_field,
+      $this->_type === \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::string_field,
       'get_string_field called on an instance of MyUnion whose current type is %s',
       (string)$this->_type,
     );
@@ -697,7 +697,7 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
 
   public function set_binary_field(string $binary_field)[write_props]: this {
     $this->reset();
-    $this->_type = \facebook\thrift\test\terse_write\MyUnionEnum::binary_field;
+    $this->_type = \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::binary_field;
     $this->binary_field = $binary_field;
     return $this;
   }
@@ -705,38 +705,38 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
   public function get_binary_field()[]: ?string {
     $this->logIncorrectFieldAccessed(
       $this->_type,
-      \facebook\thrift\test\terse_write\MyUnionEnum::binary_field,
+      \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::binary_field,
     );
     return $this->binary_field;
   }
 
   public function getx_binary_field()[]: string {
     invariant(
-      $this->_type === \facebook\thrift\test\terse_write\MyUnionEnum::binary_field,
+      $this->_type === \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::binary_field,
       'get_binary_field called on an instance of MyUnion whose current type is %s',
       (string)$this->_type,
     );
     return $this->binary_field as nonnull;
   }
 
-  public function set_enum_field(\facebook\thrift\test\terse_write\MyEnum $enum_field)[write_props]: this {
+  public function set_enum_field(\facebook\thrift\test\fixtures\terse_write\MyEnum $enum_field)[write_props]: this {
     $this->reset();
-    $this->_type = \facebook\thrift\test\terse_write\MyUnionEnum::enum_field;
+    $this->_type = \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::enum_field;
     $this->enum_field = $enum_field;
     return $this;
   }
 
-  public function get_enum_field()[]: ?\facebook\thrift\test\terse_write\MyEnum {
+  public function get_enum_field()[]: ?\facebook\thrift\test\fixtures\terse_write\MyEnum {
     $this->logIncorrectFieldAccessed(
       $this->_type,
-      \facebook\thrift\test\terse_write\MyUnionEnum::enum_field,
+      \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::enum_field,
     );
     return $this->enum_field;
   }
 
-  public function getx_enum_field()[]: \facebook\thrift\test\terse_write\MyEnum {
+  public function getx_enum_field()[]: \facebook\thrift\test\fixtures\terse_write\MyEnum {
     invariant(
-      $this->_type === \facebook\thrift\test\terse_write\MyUnionEnum::enum_field,
+      $this->_type === \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::enum_field,
       'get_enum_field called on an instance of MyUnion whose current type is %s',
       (string)$this->_type,
     );
@@ -745,7 +745,7 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
 
   public function set_list_field(Vector<int> $list_field)[write_props]: this {
     $this->reset();
-    $this->_type = \facebook\thrift\test\terse_write\MyUnionEnum::list_field;
+    $this->_type = \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::list_field;
     $this->list_field = $list_field;
     return $this;
   }
@@ -753,14 +753,14 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
   public function get_list_field()[]: ?Vector<int> {
     $this->logIncorrectFieldAccessed(
       $this->_type,
-      \facebook\thrift\test\terse_write\MyUnionEnum::list_field,
+      \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::list_field,
     );
     return $this->list_field;
   }
 
   public function getx_list_field()[]: Vector<int> {
     invariant(
-      $this->_type === \facebook\thrift\test\terse_write\MyUnionEnum::list_field,
+      $this->_type === \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::list_field,
       'get_list_field called on an instance of MyUnion whose current type is %s',
       (string)$this->_type,
     );
@@ -769,7 +769,7 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
 
   public function set_set_field(Set<int> $set_field)[write_props]: this {
     $this->reset();
-    $this->_type = \facebook\thrift\test\terse_write\MyUnionEnum::set_field;
+    $this->_type = \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::set_field;
     $this->set_field = new Set(Keyset\keys($set_field));
     return $this;
   }
@@ -777,14 +777,14 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
   public function get_set_field()[]: ?Set<int> {
     $this->logIncorrectFieldAccessed(
       $this->_type,
-      \facebook\thrift\test\terse_write\MyUnionEnum::set_field,
+      \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::set_field,
     );
     return $this->set_field;
   }
 
   public function getx_set_field()[]: Set<int> {
     invariant(
-      $this->_type === \facebook\thrift\test\terse_write\MyUnionEnum::set_field,
+      $this->_type === \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::set_field,
       'get_set_field called on an instance of MyUnion whose current type is %s',
       (string)$this->_type,
     );
@@ -793,7 +793,7 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
 
   public function set_map_field(Map<int, int> $map_field)[write_props]: this {
     $this->reset();
-    $this->_type = \facebook\thrift\test\terse_write\MyUnionEnum::map_field;
+    $this->_type = \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::map_field;
     $this->map_field = $map_field;
     return $this;
   }
@@ -801,38 +801,38 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
   public function get_map_field()[]: ?Map<int, int> {
     $this->logIncorrectFieldAccessed(
       $this->_type,
-      \facebook\thrift\test\terse_write\MyUnionEnum::map_field,
+      \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::map_field,
     );
     return $this->map_field;
   }
 
   public function getx_map_field()[]: Map<int, int> {
     invariant(
-      $this->_type === \facebook\thrift\test\terse_write\MyUnionEnum::map_field,
+      $this->_type === \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::map_field,
       'get_map_field called on an instance of MyUnion whose current type is %s',
       (string)$this->_type,
     );
     return $this->map_field as nonnull;
   }
 
-  public function set_struct_field(\facebook\thrift\test\terse_write\MyStruct $struct_field)[write_props]: this {
+  public function set_struct_field(\facebook\thrift\test\fixtures\terse_write\MyStruct $struct_field)[write_props]: this {
     $this->reset();
-    $this->_type = \facebook\thrift\test\terse_write\MyUnionEnum::struct_field;
+    $this->_type = \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::struct_field;
     $this->struct_field = $struct_field;
     return $this;
   }
 
-  public function get_struct_field()[]: ?\facebook\thrift\test\terse_write\MyStruct {
+  public function get_struct_field()[]: ?\facebook\thrift\test\fixtures\terse_write\MyStruct {
     $this->logIncorrectFieldAccessed(
       $this->_type,
-      \facebook\thrift\test\terse_write\MyUnionEnum::struct_field,
+      \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::struct_field,
     );
     return $this->struct_field;
   }
 
-  public function getx_struct_field()[]: \facebook\thrift\test\terse_write\MyStruct {
+  public function getx_struct_field()[]: \facebook\thrift\test\fixtures\terse_write\MyStruct {
     invariant(
-      $this->_type === \facebook\thrift\test\terse_write\MyUnionEnum::struct_field,
+      $this->_type === \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::struct_field,
       'get_struct_field called on an instance of MyUnion whose current type is %s',
       (string)$this->_type,
     );
@@ -1064,7 +1064,7 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
       Shapes::idx($shape, 'list_field') |> $$ === null ? null : ($$ |> new Vector($$)),
       Shapes::idx($shape, 'set_field') |> $$ === null ? null : (new Set(Keyset\keys($$))),
       Shapes::idx($shape, 'map_field') |> $$ === null ? null : ($$ |> new Map($$)),
-      Shapes::idx($shape, 'struct_field') |> $$ === null ? null : (\facebook\thrift\test\terse_write\MyStruct::__fromShape($$)),
+      Shapes::idx($shape, 'struct_field') |> $$ === null ? null : (\facebook\thrift\test\fixtures\terse_write\MyStruct::__fromShape($$)),
     );
   }
 
@@ -1094,7 +1094,7 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
   }
 
   public function readFromJson(string $jsonText): void {
-    $this->_type = \facebook\thrift\test\terse_write\MyUnionEnum::_EMPTY_;
+    $this->_type = \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::_EMPTY_;
     $parsed = json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
@@ -1103,7 +1103,7 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
 
     if (idx($parsed, 'bool_field') !== null) {
       $this->bool_field = HH\FIXME\UNSAFE_CAST<mixed, bool>($parsed['bool_field']);
-      $this->_type = \facebook\thrift\test\terse_write\MyUnionEnum::bool_field;
+      $this->_type = \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::bool_field;
     }
     if (idx($parsed, 'byte_field') !== null) {
       $_tmp0 = (int)HH\FIXME\UNSAFE_CAST<mixed, int>($parsed['byte_field']);
@@ -1112,7 +1112,7 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
       } else {
         $this->byte_field = (int)$_tmp0;
       }
-      $this->_type = \facebook\thrift\test\terse_write\MyUnionEnum::byte_field;
+      $this->_type = \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::byte_field;
     }
     if (idx($parsed, 'short_field') !== null) {
       $_tmp1 = (int)HH\FIXME\UNSAFE_CAST<mixed, int>($parsed['short_field']);
@@ -1121,7 +1121,7 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
       } else {
         $this->short_field = (int)$_tmp1;
       }
-      $this->_type = \facebook\thrift\test\terse_write\MyUnionEnum::short_field;
+      $this->_type = \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::short_field;
     }
     if (idx($parsed, 'int_field') !== null) {
       $_tmp2 = (int)HH\FIXME\UNSAFE_CAST<mixed, int>($parsed['int_field']);
@@ -1130,31 +1130,31 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
       } else {
         $this->int_field = (int)$_tmp2;
       }
-      $this->_type = \facebook\thrift\test\terse_write\MyUnionEnum::int_field;
+      $this->_type = \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::int_field;
     }
     if (idx($parsed, 'long_field') !== null) {
       $this->long_field = HH\FIXME\UNSAFE_CAST<mixed, int>($parsed['long_field']);
-      $this->_type = \facebook\thrift\test\terse_write\MyUnionEnum::long_field;
+      $this->_type = \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::long_field;
     }
     if (idx($parsed, 'float_field') !== null) {
       $this->float_field = HH\FIXME\UNSAFE_CAST<mixed, float>($parsed['float_field']);
-      $this->_type = \facebook\thrift\test\terse_write\MyUnionEnum::float_field;
+      $this->_type = \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::float_field;
     }
     if (idx($parsed, 'double_field') !== null) {
       $this->double_field = HH\FIXME\UNSAFE_CAST<mixed, float>($parsed['double_field']);
-      $this->_type = \facebook\thrift\test\terse_write\MyUnionEnum::double_field;
+      $this->_type = \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::double_field;
     }
     if (idx($parsed, 'string_field') !== null) {
       $this->string_field = HH\FIXME\UNSAFE_CAST<mixed, string>($parsed['string_field']);
-      $this->_type = \facebook\thrift\test\terse_write\MyUnionEnum::string_field;
+      $this->_type = \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::string_field;
     }
     if (idx($parsed, 'binary_field') !== null) {
       $this->binary_field = HH\FIXME\UNSAFE_CAST<mixed, string>($parsed['binary_field']);
-      $this->_type = \facebook\thrift\test\terse_write\MyUnionEnum::binary_field;
+      $this->_type = \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::binary_field;
     }
     if (idx($parsed, 'enum_field') !== null) {
-      $this->enum_field = \facebook\thrift\test\terse_write\MyEnum::coerce(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\terse_write\MyEnum>($parsed['enum_field']));
-      $this->_type = \facebook\thrift\test\terse_write\MyUnionEnum::enum_field;
+      $this->enum_field = \facebook\thrift\test\fixtures\terse_write\MyEnum::coerce(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\fixtures\terse_write\MyEnum>($parsed['enum_field']));
+      $this->_type = \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::enum_field;
     }
     if (idx($parsed, 'list_field') !== null) {
       $_json6 = HH\FIXME\UNSAFE_CAST<mixed, Vector<int>>($parsed['list_field']);
@@ -1170,7 +1170,7 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
         $_container7 []= $_elem8;
       }
       $this->list_field = $_container7;
-      $this->_type = \facebook\thrift\test\terse_write\MyUnionEnum::list_field;
+      $this->_type = \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::list_field;
     }
     if (idx($parsed, 'set_field') !== null) {
       $_json13 = HH\FIXME\UNSAFE_CAST<mixed, Set<int>>($parsed['set_field']);
@@ -1186,7 +1186,7 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
         $_container14->add($_elem15);
       }
       $this->set_field = $_container14;
-      $this->_type = \facebook\thrift\test\terse_write\MyUnionEnum::set_field;
+      $this->_type = \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::set_field;
     }
     if (idx($parsed, 'map_field') !== null) {
       $_json20 = HH\FIXME\UNSAFE_CAST<mixed, Map<int, int>>($parsed['map_field']);
@@ -1202,14 +1202,14 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
         $_container21[$_key18] = $_value22;
       }
       $this->map_field = $_container21;
-      $this->_type = \facebook\thrift\test\terse_write\MyUnionEnum::map_field;
+      $this->_type = \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::map_field;
     }
     if (idx($parsed, 'struct_field') !== null) {
-      $_tmp24 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\terse_write\MyStruct>($parsed['struct_field']));
-      $_tmp25 = \facebook\thrift\test\terse_write\MyStruct::withDefaultValues();
+      $_tmp24 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\fixtures\terse_write\MyStruct>($parsed['struct_field']));
+      $_tmp25 = \facebook\thrift\test\fixtures\terse_write\MyStruct::withDefaultValues();
       $_tmp25->readFromJson($_tmp24);
       $this->struct_field = $_tmp25;
-      $this->_type = \facebook\thrift\test\terse_write\MyUnionEnum::struct_field;
+      $this->_type = \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::struct_field;
     }
   }
 
@@ -1219,7 +1219,7 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
  * Original thrift struct:-
  * MyStructWithCustomDefault
  */
-<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/terse_write/MyStructWithCustomDefault'))>>
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/fixtures/terse_write/MyStructWithCustomDefault'))>>
 class MyStructWithCustomDefault implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
@@ -1329,7 +1329,7 @@ class MyStructWithCustomDefault implements \IThriftSyncStruct, \IThriftStructMet
  * Original thrift struct:-
  * StructLevelTerseStruct
  */
-<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/terse_write/StructLevelTerseStruct'))>>
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/fixtures/terse_write/StructLevelTerseStruct'))>>
 class StructLevelTerseStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct, \IThriftStructWithClearTerseFields {
   use \ThriftSerializationTrait;
 
@@ -1384,7 +1384,7 @@ class StructLevelTerseStruct implements \IThriftSyncStruct, \IThriftStructMetada
       'var' => 'enum_field',
       'is_terse' => true,
       'type' => \TType::I32,
-      'enum' => \facebook\thrift\test\terse_write\MyEnum::class,
+      'enum' => \facebook\thrift\test\fixtures\terse_write\MyEnum::class,
     ),
     11 => shape(
       'var' => 'list_field',
@@ -1424,13 +1424,13 @@ class StructLevelTerseStruct implements \IThriftSyncStruct, \IThriftStructMetada
       'var' => 'struct_field',
       'is_terse' => true,
       'type' => \TType::STRUCT,
-      'class' => \facebook\thrift\test\terse_write\MyStruct::class,
+      'class' => \facebook\thrift\test\fixtures\terse_write\MyStruct::class,
     ),
     15 => shape(
       'var' => 'union_field',
       'is_terse' => true,
       'type' => \TType::STRUCT,
-      'class' => \facebook\thrift\test\terse_write\MyUnion::class,
+      'class' => \facebook\thrift\test\fixtures\terse_write\MyUnion::class,
     ),
   ];
   const dict<string, int> FIELDMAP = dict[
@@ -1461,12 +1461,12 @@ class StructLevelTerseStruct implements \IThriftSyncStruct, \IThriftStructMetada
     ?'double_field' => ?float,
     ?'string_field' => ?string,
     ?'binary_field' => ?string,
-    ?'enum_field' => ?\facebook\thrift\test\terse_write\MyEnum,
+    ?'enum_field' => ?\facebook\thrift\test\fixtures\terse_write\MyEnum,
     ?'list_field' => ?Vector<int>,
     ?'set_field' => ?Set<int>,
     ?'map_field' => ?Map<int, int>,
-    ?'struct_field' => ?\facebook\thrift\test\terse_write\MyStruct,
-    ?'union_field' => ?\facebook\thrift\test\terse_write\MyUnion,
+    ?'struct_field' => ?\facebook\thrift\test\fixtures\terse_write\MyStruct,
+    ?'union_field' => ?\facebook\thrift\test\fixtures\terse_write\MyUnion,
   );
 
   const type TShape = shape(
@@ -1479,12 +1479,12 @@ class StructLevelTerseStruct implements \IThriftSyncStruct, \IThriftStructMetada
     'double_field' => float,
     'string_field' => string,
     'binary_field' => string,
-    ?'enum_field' => ?\facebook\thrift\test\terse_write\MyEnum,
+    ?'enum_field' => ?\facebook\thrift\test\fixtures\terse_write\MyEnum,
     'list_field' => vec<int>,
     'set_field' => dict<int, bool>,
     'map_field' => dict<int, int>,
-    ?'struct_field' => ?\facebook\thrift\test\terse_write\MyStruct::TShape,
-    ?'union_field' => ?\facebook\thrift\test\terse_write\MyUnion::TShape,
+    ?'struct_field' => ?\facebook\thrift\test\fixtures\terse_write\MyStruct::TShape,
+    ?'union_field' => ?\facebook\thrift\test\fixtures\terse_write\MyUnion::TShape,
     ...
   );
   const int STRUCTURAL_ID = 2694004664947653464;
@@ -1537,7 +1537,7 @@ class StructLevelTerseStruct implements \IThriftSyncStruct, \IThriftStructMetada
    * Original thrift field:-
    * 10: terse_write.MyEnum enum_field
    */
-  public ?\facebook\thrift\test\terse_write\MyEnum $enum_field;
+  public ?\facebook\thrift\test\fixtures\terse_write\MyEnum $enum_field;
   /**
    * Original thrift field:-
    * 11: list<i16> list_field
@@ -1557,14 +1557,14 @@ class StructLevelTerseStruct implements \IThriftSyncStruct, \IThriftStructMetada
    * Original thrift field:-
    * 14: terse_write.MyStruct struct_field
    */
-  public ?\facebook\thrift\test\terse_write\MyStruct $struct_field;
+  public ?\facebook\thrift\test\fixtures\terse_write\MyStruct $struct_field;
   /**
    * Original thrift field:-
    * 15: terse_write.MyUnion union_field
    */
-  public ?\facebook\thrift\test\terse_write\MyUnion $union_field;
+  public ?\facebook\thrift\test\fixtures\terse_write\MyUnion $union_field;
 
-  public function __construct(?bool $bool_field = null, ?int $byte_field = null, ?int $short_field = null, ?int $int_field = null, ?int $long_field = null, ?float $float_field = null, ?float $double_field = null, ?string $string_field = null, ?string $binary_field = null, ?\facebook\thrift\test\terse_write\MyEnum $enum_field = null, ?Vector<int> $list_field = null, ?Set<int> $set_field = null, ?Map<int, int> $map_field = null, ?\facebook\thrift\test\terse_write\MyStruct $struct_field = null, ?\facebook\thrift\test\terse_write\MyUnion $union_field = null)[] {
+  public function __construct(?bool $bool_field = null, ?int $byte_field = null, ?int $short_field = null, ?int $int_field = null, ?int $long_field = null, ?float $float_field = null, ?float $double_field = null, ?string $string_field = null, ?string $binary_field = null, ?\facebook\thrift\test\fixtures\terse_write\MyEnum $enum_field = null, ?Vector<int> $list_field = null, ?Set<int> $set_field = null, ?Map<int, int> $map_field = null, ?\facebook\thrift\test\fixtures\terse_write\MyStruct $struct_field = null, ?\facebook\thrift\test\fixtures\terse_write\MyUnion $union_field = null)[] {
     $this->bool_field = $bool_field ?? false;
     $this->byte_field = $byte_field ?? 0;
     $this->short_field = $short_field ?? 0;
@@ -1873,8 +1873,8 @@ class StructLevelTerseStruct implements \IThriftSyncStruct, \IThriftStructMetada
       $shape['list_field'] |> new Vector($$),
       new Set(Keyset\keys($shape['set_field'])),
       $shape['map_field'] |> new Map($$),
-      Shapes::idx($shape, 'struct_field') |> $$ === null ? null : (\facebook\thrift\test\terse_write\MyStruct::__fromShape($$)),
-      Shapes::idx($shape, 'union_field') |> $$ === null ? null : (\facebook\thrift\test\terse_write\MyUnion::__fromShape($$)),
+      Shapes::idx($shape, 'struct_field') |> $$ === null ? null : (\facebook\thrift\test\fixtures\terse_write\MyStruct::__fromShape($$)),
+      Shapes::idx($shape, 'union_field') |> $$ === null ? null : (\facebook\thrift\test\fixtures\terse_write\MyUnion::__fromShape($$)),
     );
   }
 
@@ -1951,7 +1951,7 @@ class StructLevelTerseStruct implements \IThriftSyncStruct, \IThriftStructMetada
       $this->binary_field = HH\FIXME\UNSAFE_CAST<mixed, string>($parsed['binary_field']);
     }
     if (idx($parsed, 'enum_field') !== null) {
-      $this->enum_field = \facebook\thrift\test\terse_write\MyEnum::coerce(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\terse_write\MyEnum>($parsed['enum_field']));
+      $this->enum_field = \facebook\thrift\test\fixtures\terse_write\MyEnum::coerce(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\fixtures\terse_write\MyEnum>($parsed['enum_field']));
     }
     if (idx($parsed, 'list_field') !== null) {
       $_json6 = HH\FIXME\UNSAFE_CAST<mixed, Vector<int>>($parsed['list_field']);
@@ -1999,14 +1999,14 @@ class StructLevelTerseStruct implements \IThriftSyncStruct, \IThriftStructMetada
       $this->map_field = $_container21;
     }
     if (idx($parsed, 'struct_field') !== null) {
-      $_tmp24 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\terse_write\MyStruct>($parsed['struct_field']));
-      $_tmp25 = \facebook\thrift\test\terse_write\MyStruct::withDefaultValues();
+      $_tmp24 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\fixtures\terse_write\MyStruct>($parsed['struct_field']));
+      $_tmp25 = \facebook\thrift\test\fixtures\terse_write\MyStruct::withDefaultValues();
       $_tmp25->readFromJson($_tmp24);
       $this->struct_field = $_tmp25;
     }
     if (idx($parsed, 'union_field') !== null) {
-      $_tmp26 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\terse_write\MyUnion>($parsed['union_field']));
-      $_tmp27 = \facebook\thrift\test\terse_write\MyUnion::withDefaultValues();
+      $_tmp26 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\fixtures\terse_write\MyUnion>($parsed['union_field']));
+      $_tmp27 = \facebook\thrift\test\fixtures\terse_write\MyUnion::withDefaultValues();
       $_tmp27->readFromJson($_tmp26);
       $this->union_field = $_tmp27;
     }
@@ -2018,7 +2018,7 @@ class StructLevelTerseStruct implements \IThriftSyncStruct, \IThriftStructMetada
  * Original thrift struct:-
  * FieldLevelTerseStruct
  */
-<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/terse_write/FieldLevelTerseStruct'))>>
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/fixtures/terse_write/FieldLevelTerseStruct'))>>
 class FieldLevelTerseStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct, \IThriftStructWithClearTerseFields {
   use \ThriftSerializationTrait;
 
@@ -2073,7 +2073,7 @@ class FieldLevelTerseStruct implements \IThriftSyncStruct, \IThriftStructMetadat
       'var' => 'terse_enum_field',
       'is_terse' => true,
       'type' => \TType::I32,
-      'enum' => \facebook\thrift\test\terse_write\MyEnum::class,
+      'enum' => \facebook\thrift\test\fixtures\terse_write\MyEnum::class,
     ),
     11 => shape(
       'var' => 'terse_list_field',
@@ -2113,13 +2113,13 @@ class FieldLevelTerseStruct implements \IThriftSyncStruct, \IThriftStructMetadat
       'var' => 'terse_struct_field',
       'is_terse' => true,
       'type' => \TType::STRUCT,
-      'class' => \facebook\thrift\test\terse_write\MyStruct::class,
+      'class' => \facebook\thrift\test\fixtures\terse_write\MyStruct::class,
     ),
     29 => shape(
       'var' => 'terse_union_field',
       'is_terse' => true,
       'type' => \TType::STRUCT,
-      'class' => \facebook\thrift\test\terse_write\MyUnion::class,
+      'class' => \facebook\thrift\test\fixtures\terse_write\MyUnion::class,
     ),
     15 => shape(
       'var' => 'bool_field',
@@ -2161,7 +2161,7 @@ class FieldLevelTerseStruct implements \IThriftSyncStruct, \IThriftStructMetadat
     24 => shape(
       'var' => 'enum_field',
       'type' => \TType::I32,
-      'enum' => \facebook\thrift\test\terse_write\MyEnum::class,
+      'enum' => \facebook\thrift\test\fixtures\terse_write\MyEnum::class,
     ),
     25 => shape(
       'var' => 'list_field',
@@ -2197,12 +2197,12 @@ class FieldLevelTerseStruct implements \IThriftSyncStruct, \IThriftStructMetadat
     28 => shape(
       'var' => 'struct_field',
       'type' => \TType::STRUCT,
-      'class' => \facebook\thrift\test\terse_write\MyStruct::class,
+      'class' => \facebook\thrift\test\fixtures\terse_write\MyStruct::class,
     ),
     30 => shape(
       'var' => 'union_field',
       'type' => \TType::STRUCT,
-      'class' => \facebook\thrift\test\terse_write\MyUnion::class,
+      'class' => \facebook\thrift\test\fixtures\terse_write\MyUnion::class,
     ),
   ];
   const dict<string, int> FIELDMAP = dict[
@@ -2248,12 +2248,12 @@ class FieldLevelTerseStruct implements \IThriftSyncStruct, \IThriftStructMetadat
     ?'terse_double_field' => ?float,
     ?'terse_string_field' => ?string,
     ?'terse_binary_field' => ?string,
-    ?'terse_enum_field' => ?\facebook\thrift\test\terse_write\MyEnum,
+    ?'terse_enum_field' => ?\facebook\thrift\test\fixtures\terse_write\MyEnum,
     ?'terse_list_field' => ?Vector<int>,
     ?'terse_set_field' => ?Set<int>,
     ?'terse_map_field' => ?Map<int, int>,
-    ?'terse_struct_field' => ?\facebook\thrift\test\terse_write\MyStruct,
-    ?'terse_union_field' => ?\facebook\thrift\test\terse_write\MyUnion,
+    ?'terse_struct_field' => ?\facebook\thrift\test\fixtures\terse_write\MyStruct,
+    ?'terse_union_field' => ?\facebook\thrift\test\fixtures\terse_write\MyUnion,
     ?'bool_field' => ?bool,
     ?'byte_field' => ?int,
     ?'short_field' => ?int,
@@ -2263,12 +2263,12 @@ class FieldLevelTerseStruct implements \IThriftSyncStruct, \IThriftStructMetadat
     ?'double_field' => ?float,
     ?'string_field' => ?string,
     ?'binary_field' => ?string,
-    ?'enum_field' => ?\facebook\thrift\test\terse_write\MyEnum,
+    ?'enum_field' => ?\facebook\thrift\test\fixtures\terse_write\MyEnum,
     ?'list_field' => ?Vector<int>,
     ?'set_field' => ?Set<int>,
     ?'map_field' => ?Map<int, int>,
-    ?'struct_field' => ?\facebook\thrift\test\terse_write\MyStruct,
-    ?'union_field' => ?\facebook\thrift\test\terse_write\MyUnion,
+    ?'struct_field' => ?\facebook\thrift\test\fixtures\terse_write\MyStruct,
+    ?'union_field' => ?\facebook\thrift\test\fixtures\terse_write\MyUnion,
   );
 
   const type TShape = shape(
@@ -2281,12 +2281,12 @@ class FieldLevelTerseStruct implements \IThriftSyncStruct, \IThriftStructMetadat
     'terse_double_field' => float,
     'terse_string_field' => string,
     'terse_binary_field' => string,
-    ?'terse_enum_field' => ?\facebook\thrift\test\terse_write\MyEnum,
+    ?'terse_enum_field' => ?\facebook\thrift\test\fixtures\terse_write\MyEnum,
     'terse_list_field' => vec<int>,
     'terse_set_field' => dict<int, bool>,
     'terse_map_field' => dict<int, int>,
-    ?'terse_struct_field' => ?\facebook\thrift\test\terse_write\MyStruct::TShape,
-    ?'terse_union_field' => ?\facebook\thrift\test\terse_write\MyUnion::TShape,
+    ?'terse_struct_field' => ?\facebook\thrift\test\fixtures\terse_write\MyStruct::TShape,
+    ?'terse_union_field' => ?\facebook\thrift\test\fixtures\terse_write\MyUnion::TShape,
     'bool_field' => bool,
     'byte_field' => int,
     'short_field' => int,
@@ -2296,12 +2296,12 @@ class FieldLevelTerseStruct implements \IThriftSyncStruct, \IThriftStructMetadat
     'double_field' => float,
     'string_field' => string,
     'binary_field' => string,
-    ?'enum_field' => ?\facebook\thrift\test\terse_write\MyEnum,
+    ?'enum_field' => ?\facebook\thrift\test\fixtures\terse_write\MyEnum,
     'list_field' => vec<int>,
     'set_field' => dict<int, bool>,
     'map_field' => dict<int, int>,
-    ?'struct_field' => ?\facebook\thrift\test\terse_write\MyStruct::TShape,
-    ?'union_field' => ?\facebook\thrift\test\terse_write\MyUnion::TShape,
+    ?'struct_field' => ?\facebook\thrift\test\fixtures\terse_write\MyStruct::TShape,
+    ?'union_field' => ?\facebook\thrift\test\fixtures\terse_write\MyUnion::TShape,
     ...
   );
   const int STRUCTURAL_ID = 3364463154269576460;
@@ -2354,7 +2354,7 @@ class FieldLevelTerseStruct implements \IThriftSyncStruct, \IThriftStructMetadat
    * Original thrift field:-
    * 10: terse_write.MyEnum terse_enum_field
    */
-  public ?\facebook\thrift\test\terse_write\MyEnum $terse_enum_field;
+  public ?\facebook\thrift\test\fixtures\terse_write\MyEnum $terse_enum_field;
   /**
    * Original thrift field:-
    * 11: list<i16> terse_list_field
@@ -2374,12 +2374,12 @@ class FieldLevelTerseStruct implements \IThriftSyncStruct, \IThriftStructMetadat
    * Original thrift field:-
    * 14: terse_write.MyStruct terse_struct_field
    */
-  public ?\facebook\thrift\test\terse_write\MyStruct $terse_struct_field;
+  public ?\facebook\thrift\test\fixtures\terse_write\MyStruct $terse_struct_field;
   /**
    * Original thrift field:-
    * 29: terse_write.MyUnion terse_union_field
    */
-  public ?\facebook\thrift\test\terse_write\MyUnion $terse_union_field;
+  public ?\facebook\thrift\test\fixtures\terse_write\MyUnion $terse_union_field;
   /**
    * Original thrift field:-
    * 15: bool bool_field
@@ -2429,7 +2429,7 @@ class FieldLevelTerseStruct implements \IThriftSyncStruct, \IThriftStructMetadat
    * Original thrift field:-
    * 24: terse_write.MyEnum enum_field
    */
-  public ?\facebook\thrift\test\terse_write\MyEnum $enum_field;
+  public ?\facebook\thrift\test\fixtures\terse_write\MyEnum $enum_field;
   /**
    * Original thrift field:-
    * 25: list<i16> list_field
@@ -2449,14 +2449,14 @@ class FieldLevelTerseStruct implements \IThriftSyncStruct, \IThriftStructMetadat
    * Original thrift field:-
    * 28: terse_write.MyStruct struct_field
    */
-  public ?\facebook\thrift\test\terse_write\MyStruct $struct_field;
+  public ?\facebook\thrift\test\fixtures\terse_write\MyStruct $struct_field;
   /**
    * Original thrift field:-
    * 30: terse_write.MyUnion union_field
    */
-  public ?\facebook\thrift\test\terse_write\MyUnion $union_field;
+  public ?\facebook\thrift\test\fixtures\terse_write\MyUnion $union_field;
 
-  public function __construct(?bool $terse_bool_field = null, ?int $terse_byte_field = null, ?int $terse_short_field = null, ?int $terse_int_field = null, ?int $terse_long_field = null, ?float $terse_float_field = null, ?float $terse_double_field = null, ?string $terse_string_field = null, ?string $terse_binary_field = null, ?\facebook\thrift\test\terse_write\MyEnum $terse_enum_field = null, ?Vector<int> $terse_list_field = null, ?Set<int> $terse_set_field = null, ?Map<int, int> $terse_map_field = null, ?\facebook\thrift\test\terse_write\MyStruct $terse_struct_field = null, ?\facebook\thrift\test\terse_write\MyUnion $terse_union_field = null, ?bool $bool_field = null, ?int $byte_field = null, ?int $short_field = null, ?int $int_field = null, ?int $long_field = null, ?float $float_field = null, ?float $double_field = null, ?string $string_field = null, ?string $binary_field = null, ?\facebook\thrift\test\terse_write\MyEnum $enum_field = null, ?Vector<int> $list_field = null, ?Set<int> $set_field = null, ?Map<int, int> $map_field = null, ?\facebook\thrift\test\terse_write\MyStruct $struct_field = null, ?\facebook\thrift\test\terse_write\MyUnion $union_field = null)[] {
+  public function __construct(?bool $terse_bool_field = null, ?int $terse_byte_field = null, ?int $terse_short_field = null, ?int $terse_int_field = null, ?int $terse_long_field = null, ?float $terse_float_field = null, ?float $terse_double_field = null, ?string $terse_string_field = null, ?string $terse_binary_field = null, ?\facebook\thrift\test\fixtures\terse_write\MyEnum $terse_enum_field = null, ?Vector<int> $terse_list_field = null, ?Set<int> $terse_set_field = null, ?Map<int, int> $terse_map_field = null, ?\facebook\thrift\test\fixtures\terse_write\MyStruct $terse_struct_field = null, ?\facebook\thrift\test\fixtures\terse_write\MyUnion $terse_union_field = null, ?bool $bool_field = null, ?int $byte_field = null, ?int $short_field = null, ?int $int_field = null, ?int $long_field = null, ?float $float_field = null, ?float $double_field = null, ?string $string_field = null, ?string $binary_field = null, ?\facebook\thrift\test\fixtures\terse_write\MyEnum $enum_field = null, ?Vector<int> $list_field = null, ?Set<int> $set_field = null, ?Map<int, int> $map_field = null, ?\facebook\thrift\test\fixtures\terse_write\MyStruct $struct_field = null, ?\facebook\thrift\test\fixtures\terse_write\MyUnion $union_field = null)[] {
     $this->terse_bool_field = $terse_bool_field ?? false;
     $this->terse_byte_field = $terse_byte_field ?? 0;
     $this->terse_short_field = $terse_short_field ?? 0;
@@ -3131,8 +3131,8 @@ class FieldLevelTerseStruct implements \IThriftSyncStruct, \IThriftStructMetadat
       $shape['terse_list_field'] |> new Vector($$),
       new Set(Keyset\keys($shape['terse_set_field'])),
       $shape['terse_map_field'] |> new Map($$),
-      Shapes::idx($shape, 'terse_struct_field') |> $$ === null ? null : (\facebook\thrift\test\terse_write\MyStruct::__fromShape($$)),
-      Shapes::idx($shape, 'terse_union_field') |> $$ === null ? null : (\facebook\thrift\test\terse_write\MyUnion::__fromShape($$)),
+      Shapes::idx($shape, 'terse_struct_field') |> $$ === null ? null : (\facebook\thrift\test\fixtures\terse_write\MyStruct::__fromShape($$)),
+      Shapes::idx($shape, 'terse_union_field') |> $$ === null ? null : (\facebook\thrift\test\fixtures\terse_write\MyUnion::__fromShape($$)),
       $shape['bool_field'],
       $shape['byte_field'],
       $shape['short_field'],
@@ -3146,8 +3146,8 @@ class FieldLevelTerseStruct implements \IThriftSyncStruct, \IThriftStructMetadat
       $shape['list_field'] |> new Vector($$),
       new Set(Keyset\keys($shape['set_field'])),
       $shape['map_field'] |> new Map($$),
-      Shapes::idx($shape, 'struct_field') |> $$ === null ? null : (\facebook\thrift\test\terse_write\MyStruct::__fromShape($$)),
-      Shapes::idx($shape, 'union_field') |> $$ === null ? null : (\facebook\thrift\test\terse_write\MyUnion::__fromShape($$)),
+      Shapes::idx($shape, 'struct_field') |> $$ === null ? null : (\facebook\thrift\test\fixtures\terse_write\MyStruct::__fromShape($$)),
+      Shapes::idx($shape, 'union_field') |> $$ === null ? null : (\facebook\thrift\test\fixtures\terse_write\MyUnion::__fromShape($$)),
     );
   }
 
@@ -3239,7 +3239,7 @@ class FieldLevelTerseStruct implements \IThriftSyncStruct, \IThriftStructMetadat
       $this->terse_binary_field = HH\FIXME\UNSAFE_CAST<mixed, string>($parsed['terse_binary_field']);
     }
     if (idx($parsed, 'terse_enum_field') !== null) {
-      $this->terse_enum_field = \facebook\thrift\test\terse_write\MyEnum::coerce(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\terse_write\MyEnum>($parsed['terse_enum_field']));
+      $this->terse_enum_field = \facebook\thrift\test\fixtures\terse_write\MyEnum::coerce(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\fixtures\terse_write\MyEnum>($parsed['terse_enum_field']));
     }
     if (idx($parsed, 'terse_list_field') !== null) {
       $_json6 = HH\FIXME\UNSAFE_CAST<mixed, Vector<int>>($parsed['terse_list_field']);
@@ -3287,14 +3287,14 @@ class FieldLevelTerseStruct implements \IThriftSyncStruct, \IThriftStructMetadat
       $this->terse_map_field = $_container21;
     }
     if (idx($parsed, 'terse_struct_field') !== null) {
-      $_tmp24 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\terse_write\MyStruct>($parsed['terse_struct_field']));
-      $_tmp25 = \facebook\thrift\test\terse_write\MyStruct::withDefaultValues();
+      $_tmp24 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\fixtures\terse_write\MyStruct>($parsed['terse_struct_field']));
+      $_tmp25 = \facebook\thrift\test\fixtures\terse_write\MyStruct::withDefaultValues();
       $_tmp25->readFromJson($_tmp24);
       $this->terse_struct_field = $_tmp25;
     }
     if (idx($parsed, 'terse_union_field') !== null) {
-      $_tmp26 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\terse_write\MyUnion>($parsed['terse_union_field']));
-      $_tmp27 = \facebook\thrift\test\terse_write\MyUnion::withDefaultValues();
+      $_tmp26 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\fixtures\terse_write\MyUnion>($parsed['terse_union_field']));
+      $_tmp27 = \facebook\thrift\test\fixtures\terse_write\MyUnion::withDefaultValues();
       $_tmp27->readFromJson($_tmp26);
       $this->terse_union_field = $_tmp27;
     }
@@ -3341,7 +3341,7 @@ class FieldLevelTerseStruct implements \IThriftSyncStruct, \IThriftStructMetadat
       $this->binary_field = HH\FIXME\UNSAFE_CAST<mixed, string>($parsed['binary_field']);
     }
     if (idx($parsed, 'enum_field') !== null) {
-      $this->enum_field = \facebook\thrift\test\terse_write\MyEnum::coerce(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\terse_write\MyEnum>($parsed['enum_field']));
+      $this->enum_field = \facebook\thrift\test\fixtures\terse_write\MyEnum::coerce(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\fixtures\terse_write\MyEnum>($parsed['enum_field']));
     }
     if (idx($parsed, 'list_field') !== null) {
       $_json34 = HH\FIXME\UNSAFE_CAST<mixed, Vector<int>>($parsed['list_field']);
@@ -3389,14 +3389,14 @@ class FieldLevelTerseStruct implements \IThriftSyncStruct, \IThriftStructMetadat
       $this->map_field = $_container49;
     }
     if (idx($parsed, 'struct_field') !== null) {
-      $_tmp52 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\terse_write\MyStruct>($parsed['struct_field']));
-      $_tmp53 = \facebook\thrift\test\terse_write\MyStruct::withDefaultValues();
+      $_tmp52 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\fixtures\terse_write\MyStruct>($parsed['struct_field']));
+      $_tmp53 = \facebook\thrift\test\fixtures\terse_write\MyStruct::withDefaultValues();
       $_tmp53->readFromJson($_tmp52);
       $this->struct_field = $_tmp53;
     }
     if (idx($parsed, 'union_field') !== null) {
-      $_tmp54 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\terse_write\MyUnion>($parsed['union_field']));
-      $_tmp55 = \facebook\thrift\test\terse_write\MyUnion::withDefaultValues();
+      $_tmp54 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\fixtures\terse_write\MyUnion>($parsed['union_field']));
+      $_tmp55 = \facebook\thrift\test\fixtures\terse_write\MyUnion::withDefaultValues();
       $_tmp55->readFromJson($_tmp54);
       $this->union_field = $_tmp55;
     }
@@ -3408,7 +3408,7 @@ class FieldLevelTerseStruct implements \IThriftSyncStruct, \IThriftStructMetadat
  * Original thrift struct:-
  * AdaptedFields
  */
-<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/terse_write/AdaptedFields'))>>
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/fixtures/terse_write/AdaptedFields'))>>
 class AdaptedFields implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct, \IThriftStructWithClearTerseFields {
   use \ThriftSerializationTrait;
 
@@ -3691,7 +3691,7 @@ class AdaptedFields implements \IThriftSyncStruct, \IThriftStructMetadata, \IThr
  * Original thrift exception:-
  * TerseException
  */
-<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/terse_write/TerseException'))>>
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/fixtures/terse_write/TerseException'))>>
 class TerseException extends \TException implements \IThriftSyncStruct, \IThriftExceptionMetadata, \IThriftStructWithClearTerseFields {
   use \ThriftSerializationTrait;
 

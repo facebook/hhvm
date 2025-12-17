@@ -80,7 +80,7 @@ public final class SameNamespaceStruct implements com.facebook.thrift.payload.Th
       THRIFT_NAMES_TO_IDS.put("data", 1);
       FIELD_METADATA.put(1, DATA_FIELD_DESC);
       com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
-        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/SameNamespaceStruct"),
+        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/fixtures/adapter/SameNamespaceStruct"),
         SameNamespaceStruct.class, SameNamespaceStruct::read0));
     }
     

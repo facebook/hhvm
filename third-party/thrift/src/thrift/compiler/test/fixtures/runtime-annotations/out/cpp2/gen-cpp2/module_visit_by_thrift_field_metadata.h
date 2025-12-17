@@ -14,51 +14,51 @@ namespace thrift {
 namespace detail {
 
 template <>
-struct VisitByFieldId<::facebook::thrift::test::MyAnnotation> {
+struct VisitByFieldId<::facebook::thrift::test::fixtures::runtime_annotations::MyAnnotation> {
   template <typename F, typename T>
   void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     default:
-      throwInvalidThriftId(fieldId, "::facebook::thrift::test::MyAnnotation");
+      throwInvalidThriftId(fieldId, "::facebook::thrift::test::fixtures::runtime_annotations::MyAnnotation");
     }
   }
 };
 
 template <>
-struct VisitByFieldId<::facebook::thrift::test::MyStruct> {
+struct VisitByFieldId<::facebook::thrift::test::fixtures::runtime_annotations::MyStruct> {
   template <typename F, typename T>
   void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).field_ref());
     default:
-      throwInvalidThriftId(fieldId, "::facebook::thrift::test::MyStruct");
+      throwInvalidThriftId(fieldId, "::facebook::thrift::test::fixtures::runtime_annotations::MyStruct");
     }
   }
 };
 
 template <>
-struct VisitByFieldId<::facebook::thrift::test::MyUnion> {
+struct VisitByFieldId<::facebook::thrift::test::fixtures::runtime_annotations::MyUnion> {
   template <typename F, typename T>
   void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).field_ref());
     default:
-      throwInvalidThriftId(fieldId, "::facebook::thrift::test::MyUnion");
+      throwInvalidThriftId(fieldId, "::facebook::thrift::test::fixtures::runtime_annotations::MyUnion");
     }
   }
 };
 
 template <>
-struct VisitByFieldId<::facebook::thrift::test::MyException> {
+struct VisitByFieldId<::facebook::thrift::test::fixtures::runtime_annotations::MyException> {
   template <typename F, typename T>
   void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).field_ref());
     default:
-      throwInvalidThriftId(fieldId, "::facebook::thrift::test::MyException");
+      throwInvalidThriftId(fieldId, "::facebook::thrift::test::fixtures::runtime_annotations::MyException");
     }
   }
 };

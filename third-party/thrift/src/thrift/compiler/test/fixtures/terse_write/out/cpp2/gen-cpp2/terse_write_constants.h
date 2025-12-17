@@ -10,13 +10,13 @@
 
 #include "thrift/compiler/test/fixtures/terse_write/gen-cpp2/terse_write_types.h"
 
-namespace facebook::thrift::test::terse_write {
+namespace facebook::thrift::test::fixtures::terse_write {
 /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift"} */
 namespace terse_write_constants {
 
-  FOLLY_EXPORT ::std::string_view _fbthrift_schema_1b60768cd8997ee0();
-  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_1b60768cd8997ee0_includes();
-  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_1b60768cd8997ee0_uris();
+  FOLLY_EXPORT ::std::string_view _fbthrift_schema_340b53b42d4cb6a7();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_340b53b42d4cb6a7_includes();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_340b53b42d4cb6a7_uris();
 
 } // namespace terse_write_constants
-} // namespace facebook::thrift::test::terse_write
+} // namespace facebook::thrift::test::fixtures::terse_write

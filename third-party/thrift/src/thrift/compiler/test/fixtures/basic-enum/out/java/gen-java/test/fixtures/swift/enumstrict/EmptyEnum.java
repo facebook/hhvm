@@ -33,6 +33,9 @@ public enum EmptyEnum implements com.facebook.thrift.enums.BaseEnum, com.faceboo
         }
     }
 
+    static {
+      com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/fixtures/basic_enum/EmptyEnum"), EmptyEnum.class, EmptyEnum::read0));
+    }
     public static com.facebook.thrift.payload.Reader<EmptyEnum> asReader() {
         return EmptyEnum::read0;
     }

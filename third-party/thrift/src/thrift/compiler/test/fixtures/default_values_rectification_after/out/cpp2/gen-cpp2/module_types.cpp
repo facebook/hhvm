@@ -14,7 +14,7 @@
 
 
 
-namespace facebook::thrift::compiler::test::fixtures::default_values_rectification {
+namespace facebook::thrift::compiler::test::fixtures::default_values_rectification_after {
 
 std::string_view EmptyStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -52,10 +52,10 @@ void swap([[maybe_unused]] EmptyStruct& a, [[maybe_unused]] EmptyStruct& b) {
 }
 
 
-} // namespace facebook::thrift::compiler::test::fixtures::default_values_rectification
+} // namespace facebook::thrift::compiler::test::fixtures::default_values_rectification_after
 
 
-namespace facebook::thrift::compiler::test::fixtures::default_values_rectification {
+namespace facebook::thrift::compiler::test::fixtures::default_values_rectification_after {
 
 std::string_view TestStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -103,7 +103,7 @@ TestStruct& TestStruct::operator=([[maybe_unused]] TestStruct&& other) noexcept 
 }
 
 
-TestStruct::TestStruct(apache::thrift::FragileConstructor, ::std::int32_t unqualified_int_field__arg, bool unqualified_bool_field__arg, ::std::vector<::std::int32_t> unqualified_list_field__arg, ::facebook::thrift::compiler::test::fixtures::default_values_rectification::EmptyStruct unqualified_struct_field__arg, ::std::int32_t optional_int_field__arg, bool optional_bool_field__arg, ::std::vector<::std::int32_t> optional_list_field__arg, ::facebook::thrift::compiler::test::fixtures::default_values_rectification::EmptyStruct optional_struct_field__arg) :
+TestStruct::TestStruct(apache::thrift::FragileConstructor, ::std::int32_t unqualified_int_field__arg, bool unqualified_bool_field__arg, ::std::vector<::std::int32_t> unqualified_list_field__arg, ::facebook::thrift::compiler::test::fixtures::default_values_rectification_after::EmptyStruct unqualified_struct_field__arg, ::std::int32_t optional_int_field__arg, bool optional_bool_field__arg, ::std::vector<::std::int32_t> optional_list_field__arg, ::facebook::thrift::compiler::test::fixtures::default_values_rectification_after::EmptyStruct optional_struct_field__arg) :
     __fbthrift_field_unqualified_int_field(std::move(unqualified_int_field__arg)),
     __fbthrift_field_unqualified_bool_field(std::move(unqualified_bool_field__arg)),
     __fbthrift_field_unqualified_list_field(std::move(unqualified_list_field__arg)),
@@ -175,12 +175,12 @@ const ::std::vector<::std::int32_t>& TestStruct::get_unqualified_list_field() co
   return static_cast<::std::vector<::std::int32_t>&&>(__fbthrift_field_unqualified_list_field);
 }
 
-const ::facebook::thrift::compiler::test::fixtures::default_values_rectification::EmptyStruct& TestStruct::get_unqualified_struct_field() const& {
+const ::facebook::thrift::compiler::test::fixtures::default_values_rectification_after::EmptyStruct& TestStruct::get_unqualified_struct_field() const& {
   return __fbthrift_field_unqualified_struct_field;
 }
 
-::facebook::thrift::compiler::test::fixtures::default_values_rectification::EmptyStruct TestStruct::get_unqualified_struct_field() && {
-  return static_cast<::facebook::thrift::compiler::test::fixtures::default_values_rectification::EmptyStruct&&>(__fbthrift_field_unqualified_struct_field);
+::facebook::thrift::compiler::test::fixtures::default_values_rectification_after::EmptyStruct TestStruct::get_unqualified_struct_field() && {
+  return static_cast<::facebook::thrift::compiler::test::fixtures::default_values_rectification_after::EmptyStruct&&>(__fbthrift_field_unqualified_struct_field);
 }
 
 const ::std::int32_t* TestStruct::get_optional_int_field() const& {
@@ -217,11 +217,11 @@ const ::std::vector<::std::int32_t>* TestStruct::get_optional_list_field() const
   return optional_list_field_ref().has_value() ? std::addressof(__fbthrift_field_optional_list_field) : nullptr;
 }
 
-const ::facebook::thrift::compiler::test::fixtures::default_values_rectification::EmptyStruct* TestStruct::get_optional_struct_field() const& {
+const ::facebook::thrift::compiler::test::fixtures::default_values_rectification_after::EmptyStruct* TestStruct::get_optional_struct_field() const& {
   return optional_struct_field_ref().has_value() ? std::addressof(__fbthrift_field_optional_struct_field) : nullptr;
 }
 
-::facebook::thrift::compiler::test::fixtures::default_values_rectification::EmptyStruct* TestStruct::get_optional_struct_field() & {
+::facebook::thrift::compiler::test::fixtures::default_values_rectification_after::EmptyStruct* TestStruct::get_optional_struct_field() & {
   return optional_struct_field_ref().has_value() ? std::addressof(__fbthrift_field_optional_struct_field) : nullptr;
 }
 
@@ -242,20 +242,20 @@ static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         TestStruct,
         ::apache::thrift::type_class::structure,
-        ::facebook::thrift::compiler::test::fixtures::default_values_rectification::EmptyStruct>,
+        ::facebook::thrift::compiler::test::fixtures::default_values_rectification_after::EmptyStruct>,
     "inconsistent use of json option");
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         TestStruct,
         ::apache::thrift::type_class::structure,
-        ::facebook::thrift::compiler::test::fixtures::default_values_rectification::EmptyStruct>,
+        ::facebook::thrift::compiler::test::fixtures::default_values_rectification_after::EmptyStruct>,
     "inconsistent use of json option");
 
-} // namespace facebook::thrift::compiler::test::fixtures::default_values_rectification
+} // namespace facebook::thrift::compiler::test::fixtures::default_values_rectification_after
 
-namespace facebook::thrift::compiler::test::fixtures::default_values_rectification { namespace {
+namespace facebook::thrift::compiler::test::fixtures::default_values_rectification_after { namespace {
 [[maybe_unused]] FOLLY_ERASE void validateAdapters() {
 }
-}} // namespace facebook::thrift::compiler::test::fixtures::default_values_rectification
+}} // namespace facebook::thrift::compiler::test::fixtures::default_values_rectification_after
 namespace apache::thrift::detail::annotation {
 }

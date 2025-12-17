@@ -15,23 +15,23 @@
 
 namespace apache { namespace thrift {
 
-const std::string_view TEnumTraits<::facebook::thrift::test::Result>::__fbthrift_module_name_internal_do_not_use = kModuleName;
-folly::Range<::facebook::thrift::test::Result const*> const TEnumTraits<::facebook::thrift::test::Result>::values = folly::range(TEnumDataStorage<::facebook::thrift::test::Result>::values);
-folly::Range<std::string_view const*> const TEnumTraits<::facebook::thrift::test::Result>::names = folly::range(TEnumDataStorage<::facebook::thrift::test::Result>::names);
+const std::string_view TEnumTraits<::facebook::thrift::test::fixtures::service_schema::Result>::__fbthrift_module_name_internal_do_not_use = kModuleName;
+folly::Range<::facebook::thrift::test::fixtures::service_schema::Result const*> const TEnumTraits<::facebook::thrift::test::fixtures::service_schema::Result>::values = folly::range(TEnumDataStorage<::facebook::thrift::test::fixtures::service_schema::Result>::values);
+folly::Range<std::string_view const*> const TEnumTraits<::facebook::thrift::test::fixtures::service_schema::Result>::names = folly::range(TEnumDataStorage<::facebook::thrift::test::fixtures::service_schema::Result>::names);
 
-bool TEnumTraits<::facebook::thrift::test::Result>::findName(type value, std::string_view* out) noexcept {
+bool TEnumTraits<::facebook::thrift::test::fixtures::service_schema::Result>::findName(type value, std::string_view* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_name(value, out);
 }
 
-bool TEnumTraits<::facebook::thrift::test::Result>::findValue(std::string_view name, type* out) noexcept {
+bool TEnumTraits<::facebook::thrift::test::fixtures::service_schema::Result>::findValue(std::string_view name, type* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 
-const std::vector<std::any>& TEnumTraits<::facebook::thrift::test::Result>::annotations() noexcept {
+const std::vector<std::any>& TEnumTraits<::facebook::thrift::test::fixtures::service_schema::Result>::annotations() noexcept {
   return ::apache::thrift::detail::annotation::empty_annotations();
 }
 
-const std::vector<std::any>& TEnumTraits<::facebook::thrift::test::Result>::enumValueAnnotations(::facebook::thrift::test::Result value) noexcept {
+const std::vector<std::any>& TEnumTraits<::facebook::thrift::test::fixtures::service_schema::Result>::enumValueAnnotations(::facebook::thrift::test::fixtures::service_schema::Result value) noexcept {
   switch (static_cast<std::int32_t>(value)) {
     default:
       return ::apache::thrift::detail::annotation::empty_annotations();
@@ -43,7 +43,7 @@ const std::vector<std::any>& TEnumTraits<::facebook::thrift::test::Result>::enum
 
 
 
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::service_schema {
 
 std::string_view CustomException::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -56,7 +56,7 @@ std::string_view CustomException::__fbthrift_get_class_name() {
 CustomException::CustomException(const CustomException&) = default;
 CustomException& CustomException::operator=(const CustomException&) = default;
 CustomException::CustomException() :
-    __fbthrift_field_result( ::facebook::thrift::test::Result::SO_SO) {
+    __fbthrift_field_result( ::facebook::thrift::test::fixtures::service_schema::Result::SO_SO) {
 }
 
 
@@ -76,7 +76,7 @@ CustomException& CustomException::operator=([[maybe_unused]] CustomException&& o
 }
 
 
-CustomException::CustomException(apache::thrift::FragileConstructor, ::std::string name__arg, ::facebook::thrift::test::Result result__arg) :
+CustomException::CustomException(apache::thrift::FragileConstructor, ::std::string name__arg, ::facebook::thrift::test::fixtures::service_schema::Result result__arg) :
     __fbthrift_field_name(std::move(name__arg)),
     __fbthrift_field_result(std::move(result__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
@@ -86,7 +86,7 @@ CustomException::CustomException(apache::thrift::FragileConstructor, ::std::stri
 void CustomException::__fbthrift_clear() {
   // clear all fields
   this->__fbthrift_field_name = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
-  this->__fbthrift_field_result = ::facebook::thrift::test::Result();
+  this->__fbthrift_field_result = ::facebook::thrift::test::fixtures::service_schema::Result();
   __isset = {};
 }
 
@@ -106,11 +106,11 @@ bool CustomException::operator<([[maybe_unused]] const CustomException& rhs) con
 }
 
 
-::facebook::thrift::test::Result CustomException::get_result() const {
+::facebook::thrift::test::fixtures::service_schema::Result CustomException::get_result() const {
   return __fbthrift_field_result;
 }
 
-::facebook::thrift::test::Result& CustomException::set_result(::facebook::thrift::test::Result result_) {
+::facebook::thrift::test::fixtures::service_schema::Result& CustomException::set_result(::facebook::thrift::test::fixtures::service_schema::Result result_) {
   result_ref() = result_;
   return __fbthrift_field_result;
 }
@@ -123,11 +123,11 @@ void swap([[maybe_unused]] CustomException& a, [[maybe_unused]] CustomException&
 }
 
 
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::service_schema
 
-namespace facebook::thrift::test { namespace {
+namespace facebook::thrift::test::fixtures::service_schema { namespace {
 [[maybe_unused]] FOLLY_ERASE void validateAdapters() {
 }
-}} // namespace facebook::thrift::test
+}} // namespace facebook::thrift::test::fixtures::service_schema
 namespace apache::thrift::detail::annotation {
 }

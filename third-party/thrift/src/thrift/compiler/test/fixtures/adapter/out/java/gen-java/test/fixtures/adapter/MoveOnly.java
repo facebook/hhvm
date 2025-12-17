@@ -80,7 +80,7 @@ public final class MoveOnly implements com.facebook.thrift.payload.ThriftSeriali
       THRIFT_NAMES_TO_IDS.put("ptr", 1);
       FIELD_METADATA.put(1, PTR_FIELD_DESC);
       com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
-        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/MoveOnly"),
+        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/fixtures/adapter/MoveOnly"),
         MoveOnly.class, MoveOnly::read0));
     }
     

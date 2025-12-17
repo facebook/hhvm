@@ -11,32 +11,32 @@
 #include "thrift/compiler/test/fixtures/service-schema/gen-cpp2/module_constants.h"
 #include <thrift/lib/cpp2/gen/service_cpp.h>
 
-std::unique_ptr<apache::thrift::AsyncProcessor> apache::thrift::ServiceHandler<::facebook::thrift::test::PrimitivesService>::getProcessor() {
-  return std::make_unique<::facebook::thrift::test::PrimitivesServiceAsyncProcessor>(this);
+std::unique_ptr<apache::thrift::AsyncProcessor> apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>::getProcessor() {
+  return std::make_unique<::facebook::thrift::test::fixtures::service_schema::PrimitivesServiceAsyncProcessor>(this);
 }
 
-apache::thrift::ServiceHandler<::facebook::thrift::test::PrimitivesService>::CreateMethodMetadataResult apache::thrift::ServiceHandler<::facebook::thrift::test::PrimitivesService>::createMethodMetadata() {
-  return ::apache::thrift::detail::ap::createMethodMetadataMap<::facebook::thrift::test::PrimitivesServiceAsyncProcessor>(getServiceRequestInfoMap().value().get());
+apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>::CreateMethodMetadataResult apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>::createMethodMetadata() {
+  return ::apache::thrift::detail::ap::createMethodMetadataMap<::facebook::thrift::test::fixtures::service_schema::PrimitivesServiceAsyncProcessor>(getServiceRequestInfoMap().value().get());
 }
 
 #if defined(THRIFT_SCHEMA_AVAILABLE)
-std::optional<apache::thrift::schema::DefinitionsSchema> apache::thrift::ServiceHandler<::facebook::thrift::test::PrimitivesService>::getServiceSchema() {
+std::optional<apache::thrift::schema::DefinitionsSchema> apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>::getServiceSchema() {
   std::optional<apache::thrift::schema::DefinitionsSchema> ret = schema::DefinitionsSchema{};
-  ret->schema = ::apache::thrift::schema::detail::loadBundledSchema(::facebook::thrift::test::module_constants::_fbthrift_schema_bc0984a218954d47_includes());
-  ret->definitions = { {"\x8a\x6f\xcf\x1a\xc4\x7f\xef\xe9\xfc\xd0\xb5\xce\x3b\x5e\x14\xb4", 16} };
+  ret->schema = ::apache::thrift::schema::detail::loadBundledSchema(::facebook::thrift::test::fixtures::service_schema::module_constants::_fbthrift_schema_db27c1f89cb27d2_includes());
+  ret->definitions = { {"\x07\xc4\x0a\xe6\x37\xa8\x3b\x59\x57\x38\x32\x5c\xb2\xa7\x99\xc4", 16} };
   return ret;
 }
 
-std::vector<folly::not_null<const apache::thrift::syntax_graph::ServiceNode*>> apache::thrift::ServiceHandler<::facebook::thrift::test::PrimitivesService>::getServiceSchemaNodes() {
-  return {&apache::thrift::SchemaRegistry::get().getNode<::facebook::thrift::test::PrimitivesService>()};
+std::vector<folly::not_null<const apache::thrift::syntax_graph::ServiceNode*>> apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>::getServiceSchemaNodes() {
+  return {&apache::thrift::SchemaRegistry::get().getNode<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>()};
 }
 #endif
 
-std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const>> apache::thrift::ServiceHandler<::facebook::thrift::test::PrimitivesService>::getServiceRequestInfoMap() const {
+std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const>> apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>::getServiceRequestInfoMap() const {
   return __fbthrift_serviceInfoHolder.requestInfoMap();
 }
 
-::facebook::thrift::test::PrimitivesServiceServiceInfoHolder apache::thrift::ServiceHandler<::facebook::thrift::test::PrimitivesService>::__fbthrift_serviceInfoHolder;
+::facebook::thrift::test::fixtures::service_schema::PrimitivesServiceServiceInfoHolder apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>::__fbthrift_serviceInfoHolder;
 
 //
 // Service Methods
@@ -46,16 +46,16 @@ std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const
 // Method 'init'
 //
 
-::std::int64_t apache::thrift::ServiceHandler<::facebook::thrift::test::PrimitivesService>::init(::std::int64_t /*param0*/, ::std::int64_t /*param1*/) {
+::std::int64_t apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>::init(::std::int64_t /*param0*/, ::std::int64_t /*param1*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("init");
 }
 
-::std::int64_t apache::thrift::ServiceHandler<::facebook::thrift::test::PrimitivesService>::sync_init(::std::int64_t p_param0, ::std::int64_t p_param1) {
+::std::int64_t apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>::sync_init(::std::int64_t p_param0, ::std::int64_t p_param1) {
   return init(p_param0, p_param1);
 }
 
 folly::SemiFuture<::std::int64_t>
-apache::thrift::ServiceHandler<::facebook::thrift::test::PrimitivesService>::semifuture_init(::std::int64_t p_param0, ::std::int64_t p_param1) {
+apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>::semifuture_init(::std::int64_t p_param0, ::std::int64_t p_param1) {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_init.compare_exchange_strong(
       expected,
@@ -65,7 +65,7 @@ apache::thrift::ServiceHandler<::facebook::thrift::test::PrimitivesService>::sem
 }
 
 folly::Future<::std::int64_t>
-apache::thrift::ServiceHandler<::facebook::thrift::test::PrimitivesService>::future_init(::std::int64_t p_param0, ::std::int64_t p_param1) {
+apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>::future_init(::std::int64_t p_param0, ::std::int64_t p_param1) {
   auto expected{apache::thrift::detail::si::InvocationType::Future};
   __fbthrift_invocation_init.compare_exchange_strong(
       expected,
@@ -78,7 +78,7 @@ apache::thrift::ServiceHandler<::facebook::thrift::test::PrimitivesService>::fut
 
 #if FOLLY_HAS_COROUTINES
 folly::coro::Task<::std::int64_t>
-apache::thrift::ServiceHandler<::facebook::thrift::test::PrimitivesService>::co_init(::std::int64_t p_param0, ::std::int64_t p_param1) {
+apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>::co_init(::std::int64_t p_param0, ::std::int64_t p_param1) {
   auto expected{apache::thrift::detail::si::InvocationType::Coro};
   __fbthrift_invocation_init.compare_exchange_strong(
       expected,
@@ -88,7 +88,7 @@ apache::thrift::ServiceHandler<::facebook::thrift::test::PrimitivesService>::co_
                              withCapturedArgs<::std::int64_t /*param0*/, ::std::int64_t /*param1*/>(p_param0, p_param1));
 }
 
-folly::coro::Task<::std::int64_t> apache::thrift::ServiceHandler<::facebook::thrift::test::PrimitivesService>::co_init(
+folly::coro::Task<::std::int64_t> apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>::co_init(
     apache::thrift::RequestParams /* params */, ::std::int64_t p_param0, ::std::int64_t p_param1) {
   auto expected{apache::thrift::detail::si::InvocationType::CoroParam};
   __fbthrift_invocation_init.compare_exchange_strong(
@@ -99,7 +99,7 @@ folly::coro::Task<::std::int64_t> apache::thrift::ServiceHandler<::facebook::thr
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::facebook::thrift::test::PrimitivesService>::async_tm_init(
+void apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>::async_tm_init(
     apache::thrift::HandlerCallbackPtr<::std::int64_t> callback, ::std::int64_t p_param0, ::std::int64_t p_param1) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
@@ -192,16 +192,16 @@ determineInvocationType:
 // Method 'method_that_throws'
 //
 
-::facebook::thrift::test::Result apache::thrift::ServiceHandler<::facebook::thrift::test::PrimitivesService>::method_that_throws() {
+::facebook::thrift::test::fixtures::service_schema::Result apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>::method_that_throws() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("method_that_throws");
 }
 
-::facebook::thrift::test::Result apache::thrift::ServiceHandler<::facebook::thrift::test::PrimitivesService>::sync_method_that_throws() {
+::facebook::thrift::test::fixtures::service_schema::Result apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>::sync_method_that_throws() {
   return method_that_throws();
 }
 
-folly::SemiFuture<::facebook::thrift::test::Result>
-apache::thrift::ServiceHandler<::facebook::thrift::test::PrimitivesService>::semifuture_method_that_throws() {
+folly::SemiFuture<::facebook::thrift::test::fixtures::service_schema::Result>
+apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>::semifuture_method_that_throws() {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_method_that_throws.compare_exchange_strong(
       expected,
@@ -210,8 +210,8 @@ apache::thrift::ServiceHandler<::facebook::thrift::test::PrimitivesService>::sem
   return sync_method_that_throws();
 }
 
-folly::Future<::facebook::thrift::test::Result>
-apache::thrift::ServiceHandler<::facebook::thrift::test::PrimitivesService>::future_method_that_throws() {
+folly::Future<::facebook::thrift::test::fixtures::service_schema::Result>
+apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>::future_method_that_throws() {
   auto expected{apache::thrift::detail::si::InvocationType::Future};
   __fbthrift_invocation_method_that_throws.compare_exchange_strong(
       expected,
@@ -223,8 +223,8 @@ apache::thrift::ServiceHandler<::facebook::thrift::test::PrimitivesService>::fut
 }
 
 #if FOLLY_HAS_COROUTINES
-folly::coro::Task<::facebook::thrift::test::Result>
-apache::thrift::ServiceHandler<::facebook::thrift::test::PrimitivesService>::co_method_that_throws() {
+folly::coro::Task<::facebook::thrift::test::fixtures::service_schema::Result>
+apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>::co_method_that_throws() {
   auto expected{apache::thrift::detail::si::InvocationType::Coro};
   __fbthrift_invocation_method_that_throws.compare_exchange_strong(
       expected,
@@ -234,7 +234,7 @@ apache::thrift::ServiceHandler<::facebook::thrift::test::PrimitivesService>::co_
                              withCapturedArgs<>());
 }
 
-folly::coro::Task<::facebook::thrift::test::Result> apache::thrift::ServiceHandler<::facebook::thrift::test::PrimitivesService>::co_method_that_throws(
+folly::coro::Task<::facebook::thrift::test::fixtures::service_schema::Result> apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>::co_method_that_throws(
     apache::thrift::RequestParams /* params */) {
   auto expected{apache::thrift::detail::si::InvocationType::CoroParam};
   __fbthrift_invocation_method_that_throws.compare_exchange_strong(
@@ -245,8 +245,8 @@ folly::coro::Task<::facebook::thrift::test::Result> apache::thrift::ServiceHandl
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::facebook::thrift::test::PrimitivesService>::async_tm_method_that_throws(
-    apache::thrift::HandlerCallbackPtr<::facebook::thrift::test::Result> callback) {
+void apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>::async_tm_method_that_throws(
+    apache::thrift::HandlerCallbackPtr<::facebook::thrift::test::fixtures::service_schema::Result> callback) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -338,16 +338,16 @@ determineInvocationType:
 // Method 'return_void_method'
 //
 
-void apache::thrift::ServiceHandler<::facebook::thrift::test::PrimitivesService>::return_void_method(::std::int64_t /*id*/, std::unique_ptr<::cpp2::I> /*i*/) {
+void apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>::return_void_method(::std::int64_t /*id*/, std::unique_ptr<::cpp2::I> /*i*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("return_void_method");
 }
 
-void apache::thrift::ServiceHandler<::facebook::thrift::test::PrimitivesService>::sync_return_void_method(::std::int64_t p_id, std::unique_ptr<::cpp2::I> p_i) {
+void apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>::sync_return_void_method(::std::int64_t p_id, std::unique_ptr<::cpp2::I> p_i) {
   return return_void_method(p_id, std::move(p_i));
 }
 
 folly::SemiFuture<folly::Unit>
-apache::thrift::ServiceHandler<::facebook::thrift::test::PrimitivesService>::semifuture_return_void_method(::std::int64_t p_id, std::unique_ptr<::cpp2::I> p_i) {
+apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>::semifuture_return_void_method(::std::int64_t p_id, std::unique_ptr<::cpp2::I> p_i) {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_return_void_method.compare_exchange_strong(
       expected,
@@ -358,7 +358,7 @@ apache::thrift::ServiceHandler<::facebook::thrift::test::PrimitivesService>::sem
 }
 
 folly::Future<folly::Unit>
-apache::thrift::ServiceHandler<::facebook::thrift::test::PrimitivesService>::future_return_void_method(::std::int64_t p_id, std::unique_ptr<::cpp2::I> p_i) {
+apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>::future_return_void_method(::std::int64_t p_id, std::unique_ptr<::cpp2::I> p_i) {
   auto expected{apache::thrift::detail::si::InvocationType::Future};
   __fbthrift_invocation_return_void_method.compare_exchange_strong(
       expected,
@@ -371,7 +371,7 @@ apache::thrift::ServiceHandler<::facebook::thrift::test::PrimitivesService>::fut
 
 #if FOLLY_HAS_COROUTINES
 folly::coro::Task<void>
-apache::thrift::ServiceHandler<::facebook::thrift::test::PrimitivesService>::co_return_void_method(::std::int64_t p_id, std::unique_ptr<::cpp2::I> p_i) {
+apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>::co_return_void_method(::std::int64_t p_id, std::unique_ptr<::cpp2::I> p_i) {
   auto expected{apache::thrift::detail::si::InvocationType::Coro};
   __fbthrift_invocation_return_void_method.compare_exchange_strong(
       expected,
@@ -381,7 +381,7 @@ apache::thrift::ServiceHandler<::facebook::thrift::test::PrimitivesService>::co_
                              withCapturedArgs<::std::int64_t /*id*/, std::unique_ptr<::cpp2::I> /*i*/>(p_id, std::move(p_i)));
 }
 
-folly::coro::Task<void> apache::thrift::ServiceHandler<::facebook::thrift::test::PrimitivesService>::co_return_void_method(
+folly::coro::Task<void> apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>::co_return_void_method(
     apache::thrift::RequestParams /* params */, ::std::int64_t p_id, std::unique_ptr<::cpp2::I> p_i) {
   auto expected{apache::thrift::detail::si::InvocationType::CoroParam};
   __fbthrift_invocation_return_void_method.compare_exchange_strong(
@@ -392,7 +392,7 @@ folly::coro::Task<void> apache::thrift::ServiceHandler<::facebook::thrift::test:
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::facebook::thrift::test::PrimitivesService>::async_tm_return_void_method(
+void apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>::async_tm_return_void_method(
     apache::thrift::HandlerCallbackPtr<void> callback, ::std::int64_t p_id, std::unique_ptr<::cpp2::I> p_i) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
@@ -487,14 +487,14 @@ determineInvocationType:
 //
 
 
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::service_schema {
 
 ::std::int64_t PrimitivesServiceSvNull::init(::std::int64_t /*param0*/, ::std::int64_t /*param1*/) { 
   return 0;
 }
 
-::facebook::thrift::test::Result PrimitivesServiceSvNull::method_that_throws() { 
-  return (::facebook::thrift::test::Result)0;
+::facebook::thrift::test::fixtures::service_schema::Result PrimitivesServiceSvNull::method_that_throws() { 
+  return (::facebook::thrift::test::fixtures::service_schema::Result)0;
 }
 
 void PrimitivesServiceSvNull::return_void_method(::std::int64_t /*id*/, std::unique_ptr<::cpp2::I> /*i*/) { 
@@ -506,7 +506,7 @@ std::string_view PrimitivesServiceAsyncProcessor::getServiceName() {
 }
 
 void PrimitivesServiceAsyncProcessor::getServiceMetadata(apache::thrift::metadata::ThriftServiceMetadataResponse& response) {
-  ::apache::thrift::detail::md::ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::PrimitivesService>>::gen(response);
+  ::apache::thrift::detail::md::ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>>::gen(response);
 }
 
 void PrimitivesServiceAsyncProcessor::processSerializedCompressedRequestWithMetadata(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, const apache::thrift::AsyncProcessorFactory::MethodMetadata& methodMetadata, apache::thrift::protocol::PROTOCOL_TYPES protType, apache::thrift::Cpp2RequestContext* context, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
@@ -571,4 +571,4 @@ apache::thrift::ServiceRequestInfoMap PrimitivesServiceServiceInfoHolder::static
 
   return requestInfoMap;
 }
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::service_schema

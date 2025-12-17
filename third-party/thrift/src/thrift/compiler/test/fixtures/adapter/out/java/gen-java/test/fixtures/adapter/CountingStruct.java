@@ -118,7 +118,7 @@ public final class CountingStruct implements com.facebook.thrift.payload.ThriftS
       THRIFT_NAMES_TO_IDS.put("regularString", 3);
       FIELD_METADATA.put(3, REGULAR_STRING_FIELD_DESC);
       com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
-        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/CountingStruct"),
+        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/fixtures/adapter/CountingStruct"),
         CountingStruct.class, CountingStruct::read0));
     }
     

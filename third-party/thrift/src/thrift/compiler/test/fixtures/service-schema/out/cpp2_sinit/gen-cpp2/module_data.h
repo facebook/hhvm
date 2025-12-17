@@ -12,8 +12,8 @@
 
 namespace apache { namespace thrift {
 
-template <> struct TEnumDataStorage<::facebook::thrift::test::Result> {
-  using type = ::facebook::thrift::test::Result;
+template <> struct TEnumDataStorage<::facebook::thrift::test::fixtures::service_schema::Result> {
+  using type = ::facebook::thrift::test::fixtures::service_schema::Result;
   static constexpr const std::size_t size = 3;
   static constexpr std::array<type, size> values = { {
       type::OK,
@@ -27,7 +27,7 @@ template <> struct TEnumDataStorage<::facebook::thrift::test::Result> {
   }};
 };
 
-template <> struct TStructDataStorage<::facebook::thrift::test::CustomException> {
+template <> struct TStructDataStorage<::facebook::thrift::test::fixtures::service_schema::CustomException> {
   static constexpr const std::size_t fields_size = 2;
   static const std::string_view name;
   static const std::array<std::string_view, fields_size> fields_names;

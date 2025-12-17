@@ -14,18 +14,18 @@ namespace thrift {
 namespace detail {
 
 template <>
-struct VisitByFieldId<::facebook::thrift::compiler::test::fixtures::default_values_rectification::EmptyStruct> {
+struct VisitByFieldId<::facebook::thrift::compiler::test::fixtures::default_values_rectification_before::EmptyStruct> {
   template <typename F, typename T>
   void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     default:
-      throwInvalidThriftId(fieldId, "::facebook::thrift::compiler::test::fixtures::default_values_rectification::EmptyStruct");
+      throwInvalidThriftId(fieldId, "::facebook::thrift::compiler::test::fixtures::default_values_rectification_before::EmptyStruct");
     }
   }
 };
 
 template <>
-struct VisitByFieldId<::facebook::thrift::compiler::test::fixtures::default_values_rectification::TestStruct> {
+struct VisitByFieldId<::facebook::thrift::compiler::test::fixtures::default_values_rectification_before::TestStruct> {
   template <typename F, typename T>
   void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
@@ -46,7 +46,7 @@ struct VisitByFieldId<::facebook::thrift::compiler::test::fixtures::default_valu
     case 8:
       return f(7, static_cast<T&&>(t).optional_struct_field_ref());
     default:
-      throwInvalidThriftId(fieldId, "::facebook::thrift::compiler::test::fixtures::default_values_rectification::TestStruct");
+      throwInvalidThriftId(fieldId, "::facebook::thrift::compiler::test::fixtures::default_values_rectification_before::TestStruct");
     }
   }
 };

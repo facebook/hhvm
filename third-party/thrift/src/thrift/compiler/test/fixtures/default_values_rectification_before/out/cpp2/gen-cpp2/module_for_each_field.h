@@ -14,14 +14,14 @@ namespace thrift {
 namespace detail {
 
 template <>
-struct ForEachField<::facebook::thrift::compiler::test::fixtures::default_values_rectification::EmptyStruct> {
+struct ForEachField<::facebook::thrift::compiler::test::fixtures::default_values_rectification_before::EmptyStruct> {
   template <typename F, typename... T>
   void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
   }
 };
 
 template <>
-struct ForEachField<::facebook::thrift::compiler::test::fixtures::default_values_rectification::TestStruct> {
+struct ForEachField<::facebook::thrift::compiler::test::fixtures::default_values_rectification_before::TestStruct> {
   template <typename F, typename... T>
   void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).unqualified_int_field_ref()...);

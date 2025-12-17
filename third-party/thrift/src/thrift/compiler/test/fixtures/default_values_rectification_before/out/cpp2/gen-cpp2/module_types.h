@@ -59,10 +59,10 @@ APACHE_THRIFT_DEFINE_ACCESSOR(optional_struct_field);
 // BEGIN declare_enums
 // END declare_enums
 // BEGIN forward_declare
-namespace facebook::thrift::compiler::test::fixtures::default_values_rectification {
+namespace facebook::thrift::compiler::test::fixtures::default_values_rectification_before {
 class EmptyStruct;
 class TestStruct;
-} // namespace facebook::thrift::compiler::test::fixtures::default_values_rectification
+} // namespace facebook::thrift::compiler::test::fixtures::default_values_rectification_before
 // END forward_declare
 namespace apache::thrift::detail::annotation {
 } // namespace apache::thrift::detail::annotation
@@ -72,7 +72,7 @@ namespace apache::thrift::detail::qualifier {
 
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
-namespace facebook::thrift::compiler::test::fixtures::default_values_rectification {
+namespace facebook::thrift::compiler::test::fixtures::default_values_rectification_before {
 using ::apache::thrift::detail::operator!=;
 using ::apache::thrift::detail::operator>;
 using ::apache::thrift::detail::operator<=;
@@ -88,7 +88,7 @@ class EmptyStruct final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
-  static constexpr folly::cstring_view __fbthrift_thrift_uri = "facebook.com/thrift/compiler/test/fixtures/default_values_rectification/EmptyStruct";
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = "facebook.com/thrift/compiler/test/fixtures/default_values_rectification_before/EmptyStruct";
   static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   static std::string_view __fbthrift_get_class_name();
   template <class ...>
@@ -170,7 +170,7 @@ class TestStruct final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
-  static constexpr folly::cstring_view __fbthrift_thrift_uri = "facebook.com/thrift/compiler/test/fixtures/default_values_rectification/TestStruct";
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = "facebook.com/thrift/compiler/test/fixtures/default_values_rectification_before/TestStruct";
   static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   static std::string_view __fbthrift_get_class_name();
   template <class ...>
@@ -196,11 +196,11 @@ class TestStruct final  {
     ::apache::thrift::type::i32_t,
     ::apache::thrift::type::bool_t,
     ::apache::thrift::type::list<::apache::thrift::type::i32_t>,
-    ::apache::thrift::type::struct_t<::facebook::thrift::compiler::test::fixtures::default_values_rectification::EmptyStruct>,
+    ::apache::thrift::type::struct_t<::facebook::thrift::compiler::test::fixtures::default_values_rectification_before::EmptyStruct>,
     ::apache::thrift::type::i32_t,
     ::apache::thrift::type::bool_t,
     ::apache::thrift::type::list<::apache::thrift::type::i32_t>,
-    ::apache::thrift::type::struct_t<::facebook::thrift::compiler::test::fixtures::default_values_rectification::EmptyStruct>
+    ::apache::thrift::type::struct_t<::facebook::thrift::compiler::test::fixtures::default_values_rectification_before::EmptyStruct>
   >;
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
@@ -218,7 +218,7 @@ class TestStruct final  {
 
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  TestStruct(apache::thrift::FragileConstructor, ::std::int32_t unqualified_int_field__arg, bool unqualified_bool_field__arg, ::std::vector<::std::int32_t> unqualified_list_field__arg, ::facebook::thrift::compiler::test::fixtures::default_values_rectification::EmptyStruct unqualified_struct_field__arg, ::std::int32_t optional_int_field__arg, bool optional_bool_field__arg, ::std::vector<::std::int32_t> optional_list_field__arg, ::facebook::thrift::compiler::test::fixtures::default_values_rectification::EmptyStruct optional_struct_field__arg);
+  TestStruct(apache::thrift::FragileConstructor, ::std::int32_t unqualified_int_field__arg, bool unqualified_bool_field__arg, ::std::vector<::std::int32_t> unqualified_list_field__arg, ::facebook::thrift::compiler::test::fixtures::default_values_rectification_before::EmptyStruct unqualified_struct_field__arg, ::std::int32_t optional_int_field__arg, bool optional_bool_field__arg, ::std::vector<::std::int32_t> optional_list_field__arg, ::facebook::thrift::compiler::test::fixtures::default_values_rectification_before::EmptyStruct optional_struct_field__arg);
 
   TestStruct(TestStruct&&) noexcept;
 
@@ -237,7 +237,7 @@ class TestStruct final  {
  private:
   ::std::vector<::std::int32_t> __fbthrift_field_unqualified_list_field;
  private:
-  ::facebook::thrift::compiler::test::fixtures::default_values_rectification::EmptyStruct __fbthrift_field_unqualified_struct_field;
+  ::facebook::thrift::compiler::test::fixtures::default_values_rectification_before::EmptyStruct __fbthrift_field_unqualified_struct_field;
  private:
   ::std::int32_t __fbthrift_field_optional_int_field;
  private:
@@ -245,7 +245,7 @@ class TestStruct final  {
  private:
   ::std::vector<::std::int32_t> __fbthrift_field_optional_list_field;
  private:
-  ::facebook::thrift::compiler::test::fixtures::default_values_rectification::EmptyStruct __fbthrift_field_optional_struct_field;
+  ::facebook::thrift::compiler::test::fixtures::default_values_rectification_before::EmptyStruct __fbthrift_field_optional_struct_field;
  private:
   apache::thrift::detail::isset_bitset<8, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
 
@@ -363,37 +363,37 @@ class TestStruct final  {
   }
 
   /** Glean { "field": "unqualified_struct_field" } */
-  template <typename..., typename fbthrift_T = ::facebook::thrift::compiler::test::fixtures::default_values_rectification::EmptyStruct>
+  template <typename..., typename fbthrift_T = ::facebook::thrift::compiler::test::fixtures::default_values_rectification_before::EmptyStruct>
   FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> unqualified_struct_field_ref() const& {
     return {this->__fbthrift_field_unqualified_struct_field, __isset.at(3), __isset.bit(3)};
   }
 
   /** Glean { "field": "unqualified_struct_field" } */
-  template <typename..., typename fbthrift_T = ::facebook::thrift::compiler::test::fixtures::default_values_rectification::EmptyStruct>
+  template <typename..., typename fbthrift_T = ::facebook::thrift::compiler::test::fixtures::default_values_rectification_before::EmptyStruct>
   FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> unqualified_struct_field_ref() & {
     return {this->__fbthrift_field_unqualified_struct_field, __isset.at(3), __isset.bit(3)};
   }
 
   /** Glean { "field": "unqualified_struct_field" } */
-  template <typename..., typename fbthrift_T = ::facebook::thrift::compiler::test::fixtures::default_values_rectification::EmptyStruct>
+  template <typename..., typename fbthrift_T = ::facebook::thrift::compiler::test::fixtures::default_values_rectification_before::EmptyStruct>
   FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> unqualified_struct_field_ref() && {
     return {static_cast<fbthrift_T&&>(this->__fbthrift_field_unqualified_struct_field), __isset.at(3), __isset.bit(3)};
   }
 
   /** Glean { "field": "unqualified_struct_field" } */
-  template <typename..., typename fbthrift_T = ::facebook::thrift::compiler::test::fixtures::default_values_rectification::EmptyStruct>
+  template <typename..., typename fbthrift_T = ::facebook::thrift::compiler::test::fixtures::default_values_rectification_before::EmptyStruct>
   FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> unqualified_struct_field() const& {
     return {this->__fbthrift_field_unqualified_struct_field, __isset.at(3), __isset.bit(3)};
   }
 
   /** Glean { "field": "unqualified_struct_field" } */
-  template <typename..., typename fbthrift_T = ::facebook::thrift::compiler::test::fixtures::default_values_rectification::EmptyStruct>
+  template <typename..., typename fbthrift_T = ::facebook::thrift::compiler::test::fixtures::default_values_rectification_before::EmptyStruct>
   FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> unqualified_struct_field() & {
     return {this->__fbthrift_field_unqualified_struct_field, __isset.at(3), __isset.bit(3)};
   }
 
   /** Glean { "field": "unqualified_struct_field" } */
-  template <typename..., typename fbthrift_T = ::facebook::thrift::compiler::test::fixtures::default_values_rectification::EmptyStruct>
+  template <typename..., typename fbthrift_T = ::facebook::thrift::compiler::test::fixtures::default_values_rectification_before::EmptyStruct>
   FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> unqualified_struct_field() && {
     return {static_cast<fbthrift_T&&>(this->__fbthrift_field_unqualified_struct_field), __isset.at(3), __isset.bit(3)};
   }
@@ -507,37 +507,37 @@ class TestStruct final  {
   }
 
   /** Glean { "field": "optional_struct_field" } */
-  template <typename..., typename fbthrift_T = ::facebook::thrift::compiler::test::fixtures::default_values_rectification::EmptyStruct>
+  template <typename..., typename fbthrift_T = ::facebook::thrift::compiler::test::fixtures::default_values_rectification_before::EmptyStruct>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const fbthrift_T&> optional_struct_field_ref() const& {
     return {this->__fbthrift_field_optional_struct_field, __isset.at(7), __isset.bit(7)};
   }
 
   /** Glean { "field": "optional_struct_field" } */
-  template <typename..., typename fbthrift_T = ::facebook::thrift::compiler::test::fixtures::default_values_rectification::EmptyStruct>
+  template <typename..., typename fbthrift_T = ::facebook::thrift::compiler::test::fixtures::default_values_rectification_before::EmptyStruct>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<fbthrift_T&> optional_struct_field_ref() & {
     return {this->__fbthrift_field_optional_struct_field, __isset.at(7), __isset.bit(7)};
   }
 
   /** Glean { "field": "optional_struct_field" } */
-  template <typename..., typename fbthrift_T = ::facebook::thrift::compiler::test::fixtures::default_values_rectification::EmptyStruct>
+  template <typename..., typename fbthrift_T = ::facebook::thrift::compiler::test::fixtures::default_values_rectification_before::EmptyStruct>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<fbthrift_T&&> optional_struct_field_ref() && {
     return {static_cast<fbthrift_T&&>(this->__fbthrift_field_optional_struct_field), __isset.at(7), __isset.bit(7)};
   }
 
   /** Glean { "field": "optional_struct_field" } */
-  template <typename..., typename fbthrift_T = ::facebook::thrift::compiler::test::fixtures::default_values_rectification::EmptyStruct>
+  template <typename..., typename fbthrift_T = ::facebook::thrift::compiler::test::fixtures::default_values_rectification_before::EmptyStruct>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const fbthrift_T&> optional_struct_field() const& {
     return {this->__fbthrift_field_optional_struct_field, __isset.at(7), __isset.bit(7)};
   }
 
   /** Glean { "field": "optional_struct_field" } */
-  template <typename..., typename fbthrift_T = ::facebook::thrift::compiler::test::fixtures::default_values_rectification::EmptyStruct>
+  template <typename..., typename fbthrift_T = ::facebook::thrift::compiler::test::fixtures::default_values_rectification_before::EmptyStruct>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<fbthrift_T&> optional_struct_field() & {
     return {this->__fbthrift_field_optional_struct_field, __isset.at(7), __isset.bit(7)};
   }
 
   /** Glean { "field": "optional_struct_field" } */
-  template <typename..., typename fbthrift_T = ::facebook::thrift::compiler::test::fixtures::default_values_rectification::EmptyStruct>
+  template <typename..., typename fbthrift_T = ::facebook::thrift::compiler::test::fixtures::default_values_rectification_before::EmptyStruct>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<fbthrift_T&&> optional_struct_field() && {
     return {static_cast<fbthrift_T&&>(this->__fbthrift_field_optional_struct_field), __isset.at(7), __isset.bit(7)};
   }
@@ -576,16 +576,16 @@ class TestStruct final  {
 
   /** Glean { "field": "unqualified_struct_field" } */
   [[deprecated("Use `FOO.unqualified_struct_field().value()` instead of `FOO.get_unqualified_struct_field()`")]]
-  const ::facebook::thrift::compiler::test::fixtures::default_values_rectification::EmptyStruct& get_unqualified_struct_field() const&;
+  const ::facebook::thrift::compiler::test::fixtures::default_values_rectification_before::EmptyStruct& get_unqualified_struct_field() const&;
 
   /** Glean { "field": "unqualified_struct_field" } */
   [[deprecated("Use `FOO.unqualified_struct_field().value()` instead of `FOO.get_unqualified_struct_field()`")]]
-  ::facebook::thrift::compiler::test::fixtures::default_values_rectification::EmptyStruct get_unqualified_struct_field() &&;
+  ::facebook::thrift::compiler::test::fixtures::default_values_rectification_before::EmptyStruct get_unqualified_struct_field() &&;
 
   /** Glean { "field": "unqualified_struct_field" } */
-  template <typename T_TestStruct_unqualified_struct_field_struct_setter = ::facebook::thrift::compiler::test::fixtures::default_values_rectification::EmptyStruct>
+  template <typename T_TestStruct_unqualified_struct_field_struct_setter = ::facebook::thrift::compiler::test::fixtures::default_values_rectification_before::EmptyStruct>
   [[deprecated("Use `FOO.unqualified_struct_field() = BAR` instead of `FOO.set_unqualified_struct_field(BAR)`")]]
-  ::facebook::thrift::compiler::test::fixtures::default_values_rectification::EmptyStruct& set_unqualified_struct_field(T_TestStruct_unqualified_struct_field_struct_setter&& unqualified_struct_field_) {
+  ::facebook::thrift::compiler::test::fixtures::default_values_rectification_before::EmptyStruct& set_unqualified_struct_field(T_TestStruct_unqualified_struct_field_struct_setter&& unqualified_struct_field_) {
     unqualified_struct_field_ref() = std::forward<T_TestStruct_unqualified_struct_field_struct_setter>(unqualified_struct_field_);
     return __fbthrift_field_unqualified_struct_field;
   }
@@ -638,18 +638,18 @@ class TestStruct final  {
 
   /** Glean { "field": "optional_struct_field" } */
   [[deprecated("Use `FOO.optional_struct_field().value()` instead of `FOO.get_optional_struct_field()`")]]
-  const ::facebook::thrift::compiler::test::fixtures::default_values_rectification::EmptyStruct* get_optional_struct_field() const&;
+  const ::facebook::thrift::compiler::test::fixtures::default_values_rectification_before::EmptyStruct* get_optional_struct_field() const&;
 
   /** Glean { "field": "optional_struct_field" } */
   [[deprecated("Use `FOO.optional_struct_field().value()` instead of `FOO.get_optional_struct_field()`")]]
-  ::facebook::thrift::compiler::test::fixtures::default_values_rectification::EmptyStruct* get_optional_struct_field() &;
+  ::facebook::thrift::compiler::test::fixtures::default_values_rectification_before::EmptyStruct* get_optional_struct_field() &;
 
-  ::facebook::thrift::compiler::test::fixtures::default_values_rectification::EmptyStruct* get_optional_struct_field() && = delete;
+  ::facebook::thrift::compiler::test::fixtures::default_values_rectification_before::EmptyStruct* get_optional_struct_field() && = delete;
 
   /** Glean { "field": "optional_struct_field" } */
-  template <typename T_TestStruct_optional_struct_field_struct_setter = ::facebook::thrift::compiler::test::fixtures::default_values_rectification::EmptyStruct>
+  template <typename T_TestStruct_optional_struct_field_struct_setter = ::facebook::thrift::compiler::test::fixtures::default_values_rectification_before::EmptyStruct>
   [[deprecated("Use `FOO.optional_struct_field() = BAR` instead of `FOO.set_optional_struct_field(BAR)`")]]
-  ::facebook::thrift::compiler::test::fixtures::default_values_rectification::EmptyStruct& set_optional_struct_field(T_TestStruct_optional_struct_field_struct_setter&& optional_struct_field_) {
+  ::facebook::thrift::compiler::test::fixtures::default_values_rectification_before::EmptyStruct& set_optional_struct_field(T_TestStruct_optional_struct_field_struct_setter&& optional_struct_field_) {
     optional_struct_field_ref() = std::forward<T_TestStruct_optional_struct_field_struct_setter>(optional_struct_field_);
     return __fbthrift_field_optional_struct_field;
   }
@@ -679,17 +679,17 @@ unsigned long TestStruct::read(Protocol_* iprot) {
 }
 
 
-} // namespace facebook::thrift::compiler::test::fixtures::default_values_rectification
+} // namespace facebook::thrift::compiler::test::fixtures::default_values_rectification_before
 
 namespace apache::thrift::detail {
-template <> struct TSchemaAssociation<::facebook::thrift::compiler::test::fixtures::default_values_rectification::EmptyStruct, false> {
+template <> struct TSchemaAssociation<::facebook::thrift::compiler::test::fixtures::default_values_rectification_before::EmptyStruct, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = 4952383987043382979;
-  static constexpr ::std::string_view definitionKey = {"\x05\x8c\x0f\xc5\x87\xf7\x79\xd6\x17\xf2\xf2\xde\x04\x6d\x86\x47", 16};
+  static constexpr int64_t programId = 6318900912073763317;
+  static constexpr ::std::string_view definitionKey = {"\x73\x1b\x72\xd8\x5e\xf4\x86\xab\x75\x20\xab\x7d\xa8\x9d\xb8\x3b", 16};
 };
-template <> struct TSchemaAssociation<::facebook::thrift::compiler::test::fixtures::default_values_rectification::TestStruct, false> {
+template <> struct TSchemaAssociation<::facebook::thrift::compiler::test::fixtures::default_values_rectification_before::TestStruct, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = 4952383987043382979;
-  static constexpr ::std::string_view definitionKey = {"\x36\x26\x78\x6b\x16\x20\x57\x6f\x8e\x2f\xa1\xa4\x95\x48\xb6\xe8", 16};
+  static constexpr int64_t programId = 6318900912073763317;
+  static constexpr ::std::string_view definitionKey = {"\x3c\xba\xe9\x0e\x74\x97\x54\x54\x12\xe9\xa4\x50\x18\x31\x9c\x72", 16};
 };
 } // namespace apache::thrift::detail

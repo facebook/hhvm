@@ -10,7 +10,7 @@
 
 #include <thrift/lib/cpp2/gen/service_tcc.h>
 
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::service_schema {
 typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, ::apache::thrift::type_class::integral, ::std::int64_t*>, apache::thrift::FieldData<2, ::apache::thrift::type_class::integral, ::std::int64_t*>> ExtendedService_init_pargs;
 typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::integral, ::std::int64_t*>> ExtendedService_init_presult;
 //
@@ -109,7 +109,7 @@ void ExtendedServiceAsyncProcessor::executeRequest_init(
       /* .qualifiedMethodName =*/ "ExtendedService.init"};
   apache::thrift::HandlerCallback<::std::int64_t>::DecoratorAfterCallback decoratorCallback{
     static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<::facebook::thrift::test::ExtendedService>::fbthrift_invoke_decorator_after_init};
+    apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::service_schema::ExtendedService>::fbthrift_invoke_decorator_after_init};
  auto callback =
       apache::thrift::HandlerCallbackPtr<::std::int64_t>::make(
           apache::thrift::detail::ServerRequestHelper::request(
@@ -171,7 +171,7 @@ template <class ProtocolIn_, class ProtocolOut_>
     apache::thrift::ContextStack* ctx,
     ::std::int64_t const& _return) {
   ProtocolOut_ prot;
-  ::facebook::thrift::test::ExtendedService_init_presult result;
+  ::facebook::thrift::test::fixtures::service_schema::ExtendedService_init_presult result;
   result.get<0>().value = const_cast<::std::int64_t*>(&_return);
   result.setIsSet(0, true);
   return serializeResponse("init", &prot, ctx, result);
@@ -201,4 +201,4 @@ void ExtendedServiceAsyncProcessor::throw_wrapped_init(
 // End of Service Methods
 //
 
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::service_schema

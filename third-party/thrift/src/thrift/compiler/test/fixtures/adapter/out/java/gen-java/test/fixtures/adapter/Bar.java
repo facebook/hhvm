@@ -215,7 +215,7 @@ public final class Bar implements com.facebook.thrift.payload.ThriftSerializable
       THRIFT_NAMES_TO_IDS.put("structListFieldWithTypedef", 8);
       FIELD_METADATA.put(8, STRUCT_LIST_FIELD_WITH_TYPEDEF_FIELD_DESC);
       com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
-        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/Bar"),
+        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/fixtures/adapter/Bar"),
         Bar.class, Bar::read0));
     }
     

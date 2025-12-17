@@ -14,7 +14,7 @@ namespace thrift {
 namespace detail {
 
 template <>
-struct VisitUnion<::facebook::thrift::test::terse_write::MyUnion> {
+struct VisitUnion<::facebook::thrift::test::fixtures::terse_write::MyUnion> {
 
   template <typename F, typename T>
   decltype(auto) operator()([[maybe_unused]] F&& f, T&& t) const {

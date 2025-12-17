@@ -18,7 +18,7 @@ include "thrift/annotation/cpp.thrift"
 include "thrift/annotation/thrift.thrift"
 
 @thrift.Experimental
-package "facebook.com/thrift/test/terse_write/deprecated"
+package "facebook.com/thrift/test/fixtures/terse_write/deprecated"
 
 enum MyEnum {
   ME0 = 0,

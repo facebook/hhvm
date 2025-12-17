@@ -12,8 +12,8 @@
 
 namespace apache { namespace thrift {
 
-template <> struct TEnumDataStorage<::facebook::thrift::test::terse_write::deprecated::MyEnum> {
-  using type = ::facebook::thrift::test::terse_write::deprecated::MyEnum;
+template <> struct TEnumDataStorage<::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum> {
+  using type = ::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum;
   static constexpr const std::size_t size = 2;
   static constexpr std::array<type, size> values = { {
       type::ME0,
@@ -25,8 +25,8 @@ template <> struct TEnumDataStorage<::facebook::thrift::test::terse_write::depre
   }};
 };
 
-template <> struct TEnumDataStorage<::facebook::thrift::test::terse_write::deprecated::MyUnion::Type> {
-  using type = ::facebook::thrift::test::terse_write::deprecated::MyUnion::Type;
+template <> struct TEnumDataStorage<::facebook::thrift::test::fixtures::terse_write::deprecated::MyUnion::Type> {
+  using type = ::facebook::thrift::test::fixtures::terse_write::deprecated::MyUnion::Type;
   static constexpr const std::size_t size = 0;
   static constexpr std::array<type, size> values = { {
   }};
@@ -34,7 +34,7 @@ template <> struct TEnumDataStorage<::facebook::thrift::test::terse_write::depre
   }};
 };
 
-template <> struct TStructDataStorage<::facebook::thrift::test::terse_write::deprecated::MyStruct> {
+template <> struct TStructDataStorage<::facebook::thrift::test::fixtures::terse_write::deprecated::MyStruct> {
   static constexpr const std::size_t fields_size = 0;
   static const std::string_view name;
   static const std::array<std::string_view, fields_size> fields_names;
@@ -49,7 +49,7 @@ template <> struct TStructDataStorage<::facebook::thrift::test::terse_write::dep
   static const std::array<int, fields_size> isset_indexes;
 };
 
-template <> struct TStructDataStorage<::facebook::thrift::test::terse_write::deprecated::MyUnion> {
+template <> struct TStructDataStorage<::facebook::thrift::test::fixtures::terse_write::deprecated::MyUnion> {
   static constexpr const std::size_t fields_size = 0;
   static const std::string_view name;
   static const std::array<std::string_view, fields_size> fields_names;
@@ -64,7 +64,7 @@ template <> struct TStructDataStorage<::facebook::thrift::test::terse_write::dep
   static const std::array<int, fields_size> isset_indexes;
 };
 
-template <> struct TStructDataStorage<::facebook::thrift::test::terse_write::deprecated::StructLevelTerseStruct> {
+template <> struct TStructDataStorage<::facebook::thrift::test::fixtures::terse_write::deprecated::StructLevelTerseStruct> {
   static constexpr const std::size_t fields_size = 15;
   static const std::string_view name;
   static const std::array<std::string_view, fields_size> fields_names;
@@ -79,7 +79,7 @@ template <> struct TStructDataStorage<::facebook::thrift::test::terse_write::dep
   static const std::array<int, fields_size> isset_indexes;
 };
 
-template <> struct TStructDataStorage<::facebook::thrift::test::terse_write::deprecated::FieldLevelTerseStruct> {
+template <> struct TStructDataStorage<::facebook::thrift::test::fixtures::terse_write::deprecated::FieldLevelTerseStruct> {
   static constexpr const std::size_t fields_size = 30;
   static const std::string_view name;
   static const std::array<std::string_view, fields_size> fields_names;
@@ -94,7 +94,7 @@ template <> struct TStructDataStorage<::facebook::thrift::test::terse_write::dep
   static const std::array<int, fields_size> isset_indexes;
 };
 
-template <> struct TStructDataStorage<::facebook::thrift::test::terse_write::deprecated::CppRefStructFields> {
+template <> struct TStructDataStorage<::facebook::thrift::test::fixtures::terse_write::deprecated::CppRefStructFields> {
   static constexpr const std::size_t fields_size = 2;
   static const std::string_view name;
   static const std::array<std::string_view, fields_size> fields_names;
@@ -109,7 +109,7 @@ template <> struct TStructDataStorage<::facebook::thrift::test::terse_write::dep
   static const std::array<int, fields_size> isset_indexes;
 };
 
-template <> struct TStructDataStorage<::facebook::thrift::test::terse_write::deprecated::DeprecatedTerseWriteWithCustomDefault> {
+template <> struct TStructDataStorage<::facebook::thrift::test::fixtures::terse_write::deprecated::DeprecatedTerseWriteWithCustomDefault> {
   static constexpr const std::size_t fields_size = 13;
   static const std::string_view name;
   static const std::array<std::string_view, fields_size> fields_names;
@@ -124,7 +124,7 @@ template <> struct TStructDataStorage<::facebook::thrift::test::terse_write::dep
   static const std::array<int, fields_size> isset_indexes;
 };
 
-template <> struct TStructDataStorage<::facebook::thrift::test::terse_write::deprecated::DeprecatedTerseWriteWithRedundantCustomDefault> {
+template <> struct TStructDataStorage<::facebook::thrift::test::fixtures::terse_write::deprecated::DeprecatedTerseWriteWithRedundantCustomDefault> {
   static constexpr const std::size_t fields_size = 13;
   static const std::string_view name;
   static const std::array<std::string_view, fields_size> fields_names;

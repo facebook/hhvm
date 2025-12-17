@@ -9,55 +9,55 @@
 
 #include <thrift/lib/cpp2/gen/client_cpp.h>
 
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::service_schema {
 typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, ::apache::thrift::type_class::integral, ::std::int64_t*>, apache::thrift::FieldData<2, ::apache::thrift::type_class::integral, ::std::int64_t*>> PrimitivesService_init_pargs;
 typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::integral, ::std::int64_t*>> PrimitivesService_init_presult;
 typedef apache::thrift::ThriftPresult<false> PrimitivesService_method_that_throws_pargs;
-typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::enumeration, ::facebook::thrift::test::Result*>, apache::thrift::FieldData<1, ::apache::thrift::type_class::structure, ::facebook::thrift::test::CustomException>> PrimitivesService_method_that_throws_presult;
+typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::enumeration, ::facebook::thrift::test::fixtures::service_schema::Result*>, apache::thrift::FieldData<1, ::apache::thrift::type_class::structure, ::facebook::thrift::test::fixtures::service_schema::CustomException>> PrimitivesService_method_that_throws_presult;
 typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, ::apache::thrift::type_class::integral, ::std::int64_t*>, apache::thrift::FieldData<2, ::apache::thrift::type_class::structure, ::cpp2::I*>> PrimitivesService_return_void_method_pargs;
 typedef apache::thrift::ThriftPresult<true> PrimitivesService_return_void_method_presult;
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::service_schema
 template <typename RpcOptions>
-void apache::thrift::Client<::facebook::thrift::test::PrimitivesService>::fbthrift_send_init(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback, std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata) {
+void apache::thrift::Client<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>::fbthrift_send_init(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback, std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata) {
 
   static ::apache::thrift::MethodMetadata::Data* methodMetadata =
         new ::apache::thrift::MethodMetadata::Data(
                 "init",
                 ::apache::thrift::FunctionQualifier::Unspecified,
-                "facebook.com/thrift/test/PrimitivesService");
+                "facebook.com/thrift/test/fixtures/service_schema/PrimitivesService");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), std::move(interceptorFrameworkMetadata));
 }
 
 template <typename RpcOptions>
-void apache::thrift::Client<::facebook::thrift::test::PrimitivesService>::fbthrift_send_method_that_throws(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback, std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata) {
+void apache::thrift::Client<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>::fbthrift_send_method_that_throws(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback, std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata) {
 
   static ::apache::thrift::MethodMetadata::Data* methodMetadata =
         new ::apache::thrift::MethodMetadata::Data(
                 "method_that_throws",
                 ::apache::thrift::FunctionQualifier::Unspecified,
-                "facebook.com/thrift/test/PrimitivesService");
+                "facebook.com/thrift/test/fixtures/service_schema/PrimitivesService");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), std::move(interceptorFrameworkMetadata));
 }
 
 template <typename RpcOptions>
-void apache::thrift::Client<::facebook::thrift::test::PrimitivesService>::fbthrift_send_return_void_method(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback, std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata) {
+void apache::thrift::Client<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>::fbthrift_send_return_void_method(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback, std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata) {
 
   static ::apache::thrift::MethodMetadata::Data* methodMetadata =
         new ::apache::thrift::MethodMetadata::Data(
                 "return_void_method",
                 ::apache::thrift::FunctionQualifier::Unspecified,
-                "facebook.com/thrift/test/PrimitivesService");
+                "facebook.com/thrift/test/fixtures/service_schema/PrimitivesService");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), std::move(interceptorFrameworkMetadata));
 }
 
 
 
-void apache::thrift::Client<::facebook::thrift::test::PrimitivesService>::init(std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int64_t p_param0, ::std::int64_t p_param1) {
+void apache::thrift::Client<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>::init(std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int64_t p_param0, ::std::int64_t p_param1) {
   ::apache::thrift::RpcOptions rpcOptions;
   init(rpcOptions, std::move(callback), p_param0, p_param1);
 }
 
-void apache::thrift::Client<::facebook::thrift::test::PrimitivesService>::init(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int64_t p_param0, ::std::int64_t p_param1) {
+void apache::thrift::Client<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>::init(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int64_t p_param0, ::std::int64_t p_param1) {
   auto [ctx, header] = initCtx(&rpcOptions);
   if (ctx != nullptr) {
     auto argsAsRefs = std::tie(p_param0, p_param1);
@@ -67,10 +67,10 @@ void apache::thrift::Client<::facebook::thrift::test::PrimitivesService>::init(a
   fbthrift_serialize_and_send_init(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_param0, p_param1);
 }
 
-apache::thrift::SerializedRequest apache::thrift::Client<::facebook::thrift::test::PrimitivesService>::fbthrift_serialize_init(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, ::std::int64_t p_param0, ::std::int64_t p_param1) {
+apache::thrift::SerializedRequest apache::thrift::Client<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>::fbthrift_serialize_init(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, ::std::int64_t p_param0, ::std::int64_t p_param1) {
   return apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& prot) {
     using ProtocolWriter = std::decay_t<decltype(prot)>;
-    ::facebook::thrift::test::PrimitivesService_init_pargs args;
+    ::facebook::thrift::test::fixtures::service_schema::PrimitivesService_init_pargs args;
     args.get<0>().value = &p_param0;
     args.get<1>().value = &p_param1;
     const auto sizer = [&](ProtocolWriter* p) { return args.serializedSizeZC(p); };
@@ -87,7 +87,7 @@ apache::thrift::SerializedRequest apache::thrift::Client<::facebook::thrift::tes
   });
 }
 
-void apache::thrift::Client<::facebook::thrift::test::PrimitivesService>::fbthrift_serialize_and_send_init(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int64_t p_param0, ::std::int64_t p_param1, bool stealRpcOptions) {
+void apache::thrift::Client<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>::fbthrift_serialize_and_send_init(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int64_t p_param0, ::std::int64_t p_param1, bool stealRpcOptions) {
   apache::thrift::SerializedRequest request = fbthrift_serialize_init(rpcOptions, *header, contextStack, p_param0, p_param1);
   std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
   if (contextStack != nullptr) {
@@ -100,7 +100,7 @@ void apache::thrift::Client<::facebook::thrift::test::PrimitivesService>::fbthri
   }
 }
 
-std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::facebook::thrift::test::PrimitivesService>::initCtx(apache::thrift::RpcOptions* rpcOptions) {
+std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>::initCtx(apache::thrift::RpcOptions* rpcOptions) {
   auto header = std::make_shared<apache::thrift::transport::THeader>(
       apache::thrift::transport::THeader::ALLOW_BIG_FRAMES);
   header->setProtocolId(channel_->getProtocolId());
@@ -118,12 +118,12 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
   return {std::move(ctx), std::move(header)};
 }
 
-::std::int64_t apache::thrift::Client<::facebook::thrift::test::PrimitivesService>::sync_init(::std::int64_t p_param0, ::std::int64_t p_param1) {
+::std::int64_t apache::thrift::Client<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>::sync_init(::std::int64_t p_param0, ::std::int64_t p_param1) {
   ::apache::thrift::RpcOptions rpcOptions;
   return sync_init(rpcOptions, p_param0, p_param1);
 }
 
-::std::int64_t apache::thrift::Client<::facebook::thrift::test::PrimitivesService>::sync_init(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_param0, ::std::int64_t p_param1) {
+::std::int64_t apache::thrift::Client<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>::sync_init(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_param0, ::std::int64_t p_param1) {
   apache::thrift::ClientReceiveState returnState;
   apache::thrift::ClientSyncCallback<false> callback(&returnState);
   auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
@@ -162,7 +162,7 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
 
 
 template <typename CallbackType>
-folly::SemiFuture<::std::int64_t> apache::thrift::Client<::facebook::thrift::test::PrimitivesService>::fbthrift_semifuture_init(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_param0, ::std::int64_t p_param1) {
+folly::SemiFuture<::std::int64_t> apache::thrift::Client<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>::fbthrift_semifuture_init(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_param0, ::std::int64_t p_param1) {
   using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<::std::int64_t>;
   folly::Promise<CallbackHelper::PromiseResult> promise;
   auto semifuture = promise.getSemiFuture();
@@ -187,34 +187,34 @@ folly::SemiFuture<::std::int64_t> apache::thrift::Client<::facebook::thrift::tes
   return std::move(semifuture).deferValue(CallbackHelper::processClientInterceptorsAndExtractResult);
 }
 
-folly::Future<::std::int64_t> apache::thrift::Client<::facebook::thrift::test::PrimitivesService>::future_init(::std::int64_t p_param0, ::std::int64_t p_param1) {
+folly::Future<::std::int64_t> apache::thrift::Client<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>::future_init(::std::int64_t p_param0, ::std::int64_t p_param1) {
   ::apache::thrift::RpcOptions rpcOptions;
   return future_init(rpcOptions, p_param0, p_param1);
 }
 
-folly::SemiFuture<::std::int64_t> apache::thrift::Client<::facebook::thrift::test::PrimitivesService>::semifuture_init(::std::int64_t p_param0, ::std::int64_t p_param1) {
+folly::SemiFuture<::std::int64_t> apache::thrift::Client<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>::semifuture_init(::std::int64_t p_param0, ::std::int64_t p_param1) {
   ::apache::thrift::RpcOptions rpcOptions;
   return semifuture_init(rpcOptions, p_param0, p_param1);
 }
 
-folly::Future<::std::int64_t> apache::thrift::Client<::facebook::thrift::test::PrimitivesService>::future_init(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_param0, ::std::int64_t p_param1) {
+folly::Future<::std::int64_t> apache::thrift::Client<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>::future_init(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_param0, ::std::int64_t p_param1) {
   using CallbackType = apache::thrift::FutureCallback<::std::int64_t>;
   return fbthrift_semifuture_init<CallbackType>(rpcOptions, p_param0, p_param1).toUnsafeFuture();
 }
 
-folly::SemiFuture<::std::int64_t> apache::thrift::Client<::facebook::thrift::test::PrimitivesService>::semifuture_init(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_param0, ::std::int64_t p_param1) {
+folly::SemiFuture<::std::int64_t> apache::thrift::Client<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>::semifuture_init(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_param0, ::std::int64_t p_param1) {
   using CallbackType = apache::thrift::SemiFutureCallback<::std::int64_t>;
   return fbthrift_semifuture_init<CallbackType>(rpcOptions, p_param0, p_param1);
 }
 
 
-void apache::thrift::Client<::facebook::thrift::test::PrimitivesService>::init(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, ::std::int64_t p_param0, ::std::int64_t p_param1) {
+void apache::thrift::Client<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>::init(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, ::std::int64_t p_param0, ::std::int64_t p_param1) {
   init(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)), p_param0, p_param1);
 }
 
 #if FOLLY_HAS_COROUTINES
 #endif // FOLLY_HAS_COROUTINES
-folly::exception_wrapper apache::thrift::Client<::facebook::thrift::test::PrimitivesService>::recv_wrapped_init(::std::int64_t& _return, ::apache::thrift::ClientReceiveState& state) {
+folly::exception_wrapper apache::thrift::Client<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>::recv_wrapped_init(::std::int64_t& _return, ::apache::thrift::ClientReceiveState& state) {
   if (state.isException()) {
     return std::move(state.exception());
   }
@@ -222,7 +222,7 @@ folly::exception_wrapper apache::thrift::Client<::facebook::thrift::test::Primit
     return folly::make_exception_wrapper<apache::thrift::TApplicationException>("recv_ called without result");
   }
 
-  using result = ::facebook::thrift::test::PrimitivesService_init_presult;
+  using result = ::facebook::thrift::test::fixtures::service_schema::PrimitivesService_init_presult;
   switch (state.protocolId()) {
     case apache::thrift::protocol::T_BINARY_PROTOCOL:
     {
@@ -243,7 +243,7 @@ folly::exception_wrapper apache::thrift::Client<::facebook::thrift::test::Primit
   return folly::make_exception_wrapper<apache::thrift::TApplicationException>("Could not find Protocol");
 }
 
-::std::int64_t apache::thrift::Client<::facebook::thrift::test::PrimitivesService>::recv_init(::apache::thrift::ClientReceiveState& state) {
+::std::int64_t apache::thrift::Client<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>::recv_init(::apache::thrift::ClientReceiveState& state) {
   ::std::int64_t _return;
   auto ew = recv_wrapped_init(_return, state);
   if (ew) {
@@ -252,20 +252,20 @@ folly::exception_wrapper apache::thrift::Client<::facebook::thrift::test::Primit
   return _return;
 }
 
-::std::int64_t apache::thrift::Client<::facebook::thrift::test::PrimitivesService>::recv_instance_init(::apache::thrift::ClientReceiveState& state) {
+::std::int64_t apache::thrift::Client<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>::recv_instance_init(::apache::thrift::ClientReceiveState& state) {
   return recv_init(state);
 }
 
-folly::exception_wrapper apache::thrift::Client<::facebook::thrift::test::PrimitivesService>::recv_instance_wrapped_init(::std::int64_t& _return, ::apache::thrift::ClientReceiveState& state) {
+folly::exception_wrapper apache::thrift::Client<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>::recv_instance_wrapped_init(::std::int64_t& _return, ::apache::thrift::ClientReceiveState& state) {
   return recv_wrapped_init(_return, state);
 }
 
-void apache::thrift::Client<::facebook::thrift::test::PrimitivesService>::method_that_throws(std::unique_ptr<apache::thrift::RequestCallback> callback) {
+void apache::thrift::Client<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>::method_that_throws(std::unique_ptr<apache::thrift::RequestCallback> callback) {
   ::apache::thrift::RpcOptions rpcOptions;
   method_that_throws(rpcOptions, std::move(callback));
 }
 
-void apache::thrift::Client<::facebook::thrift::test::PrimitivesService>::method_that_throws(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback) {
+void apache::thrift::Client<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>::method_that_throws(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback) {
   auto [ctx, header] = method_that_throwsCtx(&rpcOptions);
   if (ctx != nullptr) {
     auto argsAsRefs = std::tie();
@@ -275,10 +275,10 @@ void apache::thrift::Client<::facebook::thrift::test::PrimitivesService>::method
   fbthrift_serialize_and_send_method_that_throws(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback));
 }
 
-apache::thrift::SerializedRequest apache::thrift::Client<::facebook::thrift::test::PrimitivesService>::fbthrift_serialize_method_that_throws(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack) {
+apache::thrift::SerializedRequest apache::thrift::Client<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>::fbthrift_serialize_method_that_throws(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack) {
   return apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& prot) {
     using ProtocolWriter = std::decay_t<decltype(prot)>;
-    ::facebook::thrift::test::PrimitivesService_method_that_throws_pargs args;
+    ::facebook::thrift::test::fixtures::service_schema::PrimitivesService_method_that_throws_pargs args;
     const auto sizer = [&](ProtocolWriter* p) { return args.serializedSizeZC(p); };
     const auto writer = [&](ProtocolWriter* p) { args.write(p); };
     return apache::thrift::preprocessSendT<ProtocolWriter>(
@@ -293,7 +293,7 @@ apache::thrift::SerializedRequest apache::thrift::Client<::facebook::thrift::tes
   });
 }
 
-void apache::thrift::Client<::facebook::thrift::test::PrimitivesService>::fbthrift_serialize_and_send_method_that_throws(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions) {
+void apache::thrift::Client<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>::fbthrift_serialize_and_send_method_that_throws(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions) {
   apache::thrift::SerializedRequest request = fbthrift_serialize_method_that_throws(rpcOptions, *header, contextStack);
   std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
   if (contextStack != nullptr) {
@@ -306,7 +306,7 @@ void apache::thrift::Client<::facebook::thrift::test::PrimitivesService>::fbthri
   }
 }
 
-std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::facebook::thrift::test::PrimitivesService>::method_that_throwsCtx(apache::thrift::RpcOptions* rpcOptions) {
+std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>::method_that_throwsCtx(apache::thrift::RpcOptions* rpcOptions) {
   auto header = std::make_shared<apache::thrift::transport::THeader>(
       apache::thrift::transport::THeader::ALLOW_BIG_FRAMES);
   header->setProtocolId(channel_->getProtocolId());
@@ -324,12 +324,12 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
   return {std::move(ctx), std::move(header)};
 }
 
-::facebook::thrift::test::Result apache::thrift::Client<::facebook::thrift::test::PrimitivesService>::sync_method_that_throws() {
+::facebook::thrift::test::fixtures::service_schema::Result apache::thrift::Client<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>::sync_method_that_throws() {
   ::apache::thrift::RpcOptions rpcOptions;
   return sync_method_that_throws(rpcOptions);
 }
 
-::facebook::thrift::test::Result apache::thrift::Client<::facebook::thrift::test::PrimitivesService>::sync_method_that_throws(apache::thrift::RpcOptions& rpcOptions) {
+::facebook::thrift::test::fixtures::service_schema::Result apache::thrift::Client<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>::sync_method_that_throws(apache::thrift::RpcOptions& rpcOptions) {
   apache::thrift::ClientReceiveState returnState;
   apache::thrift::ClientSyncCallback<false> callback(&returnState);
   auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
@@ -354,7 +354,7 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
     }
   };
   return folly::fibers::runInMainContext([&] {
-    ::facebook::thrift::test::Result _return;
+    ::facebook::thrift::test::fixtures::service_schema::Result _return;
     folly::exception_wrapper ew = recv_wrapped_method_that_throws(_return, returnState);
     if (contextStack != nullptr) {
       contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
@@ -368,8 +368,8 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
 
 
 template <typename CallbackType>
-folly::SemiFuture<::facebook::thrift::test::Result> apache::thrift::Client<::facebook::thrift::test::PrimitivesService>::fbthrift_semifuture_method_that_throws(apache::thrift::RpcOptions& rpcOptions) {
-  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<::facebook::thrift::test::Result>;
+folly::SemiFuture<::facebook::thrift::test::fixtures::service_schema::Result> apache::thrift::Client<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>::fbthrift_semifuture_method_that_throws(apache::thrift::RpcOptions& rpcOptions) {
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<::facebook::thrift::test::fixtures::service_schema::Result>;
   folly::Promise<CallbackHelper::PromiseResult> promise;
   auto semifuture = promise.getSemiFuture();
   auto ctxAndHeader = method_that_throwsCtx(&rpcOptions);
@@ -384,7 +384,7 @@ folly::SemiFuture<::facebook::thrift::test::Result> apache::thrift::Client<::fac
     auto argsAsRefs = std::tie();
     if (auto exTry = contextStack->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions);
         exTry.hasException()) {
-      return folly::makeSemiFuture<::facebook::thrift::test::Result>(std::move(exTry).exception());
+      return folly::makeSemiFuture<::facebook::thrift::test::fixtures::service_schema::Result>(std::move(exTry).exception());
     }
     interceptorFrameworkMetadata = detail::ContextStackUnsafeAPI(*contextStack).getInterceptorFrameworkMetadata(rpcOptions);
   }
@@ -393,34 +393,34 @@ folly::SemiFuture<::facebook::thrift::test::Result> apache::thrift::Client<::fac
   return std::move(semifuture).deferValue(CallbackHelper::processClientInterceptorsAndExtractResult);
 }
 
-folly::Future<::facebook::thrift::test::Result> apache::thrift::Client<::facebook::thrift::test::PrimitivesService>::future_method_that_throws() {
+folly::Future<::facebook::thrift::test::fixtures::service_schema::Result> apache::thrift::Client<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>::future_method_that_throws() {
   ::apache::thrift::RpcOptions rpcOptions;
   return future_method_that_throws(rpcOptions);
 }
 
-folly::SemiFuture<::facebook::thrift::test::Result> apache::thrift::Client<::facebook::thrift::test::PrimitivesService>::semifuture_method_that_throws() {
+folly::SemiFuture<::facebook::thrift::test::fixtures::service_schema::Result> apache::thrift::Client<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>::semifuture_method_that_throws() {
   ::apache::thrift::RpcOptions rpcOptions;
   return semifuture_method_that_throws(rpcOptions);
 }
 
-folly::Future<::facebook::thrift::test::Result> apache::thrift::Client<::facebook::thrift::test::PrimitivesService>::future_method_that_throws(apache::thrift::RpcOptions& rpcOptions) {
-  using CallbackType = apache::thrift::FutureCallback<::facebook::thrift::test::Result>;
+folly::Future<::facebook::thrift::test::fixtures::service_schema::Result> apache::thrift::Client<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>::future_method_that_throws(apache::thrift::RpcOptions& rpcOptions) {
+  using CallbackType = apache::thrift::FutureCallback<::facebook::thrift::test::fixtures::service_schema::Result>;
   return fbthrift_semifuture_method_that_throws<CallbackType>(rpcOptions).toUnsafeFuture();
 }
 
-folly::SemiFuture<::facebook::thrift::test::Result> apache::thrift::Client<::facebook::thrift::test::PrimitivesService>::semifuture_method_that_throws(apache::thrift::RpcOptions& rpcOptions) {
-  using CallbackType = apache::thrift::SemiFutureCallback<::facebook::thrift::test::Result>;
+folly::SemiFuture<::facebook::thrift::test::fixtures::service_schema::Result> apache::thrift::Client<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>::semifuture_method_that_throws(apache::thrift::RpcOptions& rpcOptions) {
+  using CallbackType = apache::thrift::SemiFutureCallback<::facebook::thrift::test::fixtures::service_schema::Result>;
   return fbthrift_semifuture_method_that_throws<CallbackType>(rpcOptions);
 }
 
 
-void apache::thrift::Client<::facebook::thrift::test::PrimitivesService>::method_that_throws(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback) {
+void apache::thrift::Client<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>::method_that_throws(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback) {
   method_that_throws(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)));
 }
 
 #if FOLLY_HAS_COROUTINES
 #endif // FOLLY_HAS_COROUTINES
-folly::exception_wrapper apache::thrift::Client<::facebook::thrift::test::PrimitivesService>::recv_wrapped_method_that_throws(::facebook::thrift::test::Result& _return, ::apache::thrift::ClientReceiveState& state) {
+folly::exception_wrapper apache::thrift::Client<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>::recv_wrapped_method_that_throws(::facebook::thrift::test::fixtures::service_schema::Result& _return, ::apache::thrift::ClientReceiveState& state) {
   if (state.isException()) {
     return std::move(state.exception());
   }
@@ -428,7 +428,7 @@ folly::exception_wrapper apache::thrift::Client<::facebook::thrift::test::Primit
     return folly::make_exception_wrapper<apache::thrift::TApplicationException>("recv_ called without result");
   }
 
-  using result = ::facebook::thrift::test::PrimitivesService_method_that_throws_presult;
+  using result = ::facebook::thrift::test::fixtures::service_schema::PrimitivesService_method_that_throws_presult;
   switch (state.protocolId()) {
     case apache::thrift::protocol::T_BINARY_PROTOCOL:
     {
@@ -449,8 +449,8 @@ folly::exception_wrapper apache::thrift::Client<::facebook::thrift::test::Primit
   return folly::make_exception_wrapper<apache::thrift::TApplicationException>("Could not find Protocol");
 }
 
-::facebook::thrift::test::Result apache::thrift::Client<::facebook::thrift::test::PrimitivesService>::recv_method_that_throws(::apache::thrift::ClientReceiveState& state) {
-  ::facebook::thrift::test::Result _return;
+::facebook::thrift::test::fixtures::service_schema::Result apache::thrift::Client<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>::recv_method_that_throws(::apache::thrift::ClientReceiveState& state) {
+  ::facebook::thrift::test::fixtures::service_schema::Result _return;
   auto ew = recv_wrapped_method_that_throws(_return, state);
   if (ew) {
     ew.throw_exception();
@@ -458,20 +458,20 @@ folly::exception_wrapper apache::thrift::Client<::facebook::thrift::test::Primit
   return _return;
 }
 
-::facebook::thrift::test::Result apache::thrift::Client<::facebook::thrift::test::PrimitivesService>::recv_instance_method_that_throws(::apache::thrift::ClientReceiveState& state) {
+::facebook::thrift::test::fixtures::service_schema::Result apache::thrift::Client<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>::recv_instance_method_that_throws(::apache::thrift::ClientReceiveState& state) {
   return recv_method_that_throws(state);
 }
 
-folly::exception_wrapper apache::thrift::Client<::facebook::thrift::test::PrimitivesService>::recv_instance_wrapped_method_that_throws(::facebook::thrift::test::Result& _return, ::apache::thrift::ClientReceiveState& state) {
+folly::exception_wrapper apache::thrift::Client<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>::recv_instance_wrapped_method_that_throws(::facebook::thrift::test::fixtures::service_schema::Result& _return, ::apache::thrift::ClientReceiveState& state) {
   return recv_wrapped_method_that_throws(_return, state);
 }
 
-void apache::thrift::Client<::facebook::thrift::test::PrimitivesService>::return_void_method(std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int64_t p_id, const ::cpp2::I& p_i) {
+void apache::thrift::Client<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>::return_void_method(std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int64_t p_id, const ::cpp2::I& p_i) {
   ::apache::thrift::RpcOptions rpcOptions;
   return_void_method(rpcOptions, std::move(callback), p_id, p_i);
 }
 
-void apache::thrift::Client<::facebook::thrift::test::PrimitivesService>::return_void_method(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int64_t p_id, const ::cpp2::I& p_i) {
+void apache::thrift::Client<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>::return_void_method(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int64_t p_id, const ::cpp2::I& p_i) {
   auto [ctx, header] = return_void_methodCtx(&rpcOptions);
   if (ctx != nullptr) {
     auto argsAsRefs = std::tie(p_id, p_i);
@@ -481,10 +481,10 @@ void apache::thrift::Client<::facebook::thrift::test::PrimitivesService>::return
   fbthrift_serialize_and_send_return_void_method(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_id, p_i);
 }
 
-apache::thrift::SerializedRequest apache::thrift::Client<::facebook::thrift::test::PrimitivesService>::fbthrift_serialize_return_void_method(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, ::std::int64_t p_id, const ::cpp2::I& p_i) {
+apache::thrift::SerializedRequest apache::thrift::Client<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>::fbthrift_serialize_return_void_method(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, ::std::int64_t p_id, const ::cpp2::I& p_i) {
   return apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& prot) {
     using ProtocolWriter = std::decay_t<decltype(prot)>;
-    ::facebook::thrift::test::PrimitivesService_return_void_method_pargs args;
+    ::facebook::thrift::test::fixtures::service_schema::PrimitivesService_return_void_method_pargs args;
     args.get<0>().value = &p_id;
     args.get<1>().value = const_cast<::cpp2::I*>(&p_i);
     const auto sizer = [&](ProtocolWriter* p) { return args.serializedSizeZC(p); };
@@ -501,7 +501,7 @@ apache::thrift::SerializedRequest apache::thrift::Client<::facebook::thrift::tes
   });
 }
 
-void apache::thrift::Client<::facebook::thrift::test::PrimitivesService>::fbthrift_serialize_and_send_return_void_method(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int64_t p_id, const ::cpp2::I& p_i, bool stealRpcOptions) {
+void apache::thrift::Client<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>::fbthrift_serialize_and_send_return_void_method(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int64_t p_id, const ::cpp2::I& p_i, bool stealRpcOptions) {
   apache::thrift::SerializedRequest request = fbthrift_serialize_return_void_method(rpcOptions, *header, contextStack, p_id, p_i);
   std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
   if (contextStack != nullptr) {
@@ -514,7 +514,7 @@ void apache::thrift::Client<::facebook::thrift::test::PrimitivesService>::fbthri
   }
 }
 
-std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::facebook::thrift::test::PrimitivesService>::return_void_methodCtx(apache::thrift::RpcOptions* rpcOptions) {
+std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>::return_void_methodCtx(apache::thrift::RpcOptions* rpcOptions) {
   auto header = std::make_shared<apache::thrift::transport::THeader>(
       apache::thrift::transport::THeader::ALLOW_BIG_FRAMES);
   header->setProtocolId(channel_->getProtocolId());
@@ -532,12 +532,12 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
   return {std::move(ctx), std::move(header)};
 }
 
-void apache::thrift::Client<::facebook::thrift::test::PrimitivesService>::sync_return_void_method(::std::int64_t p_id, const ::cpp2::I& p_i) {
+void apache::thrift::Client<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>::sync_return_void_method(::std::int64_t p_id, const ::cpp2::I& p_i) {
   ::apache::thrift::RpcOptions rpcOptions;
   sync_return_void_method(rpcOptions, p_id, p_i);
 }
 
-void apache::thrift::Client<::facebook::thrift::test::PrimitivesService>::sync_return_void_method(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_id, const ::cpp2::I& p_i) {
+void apache::thrift::Client<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>::sync_return_void_method(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_id, const ::cpp2::I& p_i) {
   apache::thrift::ClientReceiveState returnState;
   apache::thrift::ClientSyncCallback<false> callback(&returnState);
   auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
@@ -574,7 +574,7 @@ void apache::thrift::Client<::facebook::thrift::test::PrimitivesService>::sync_r
 
 
 template <typename CallbackType>
-folly::SemiFuture<folly::Unit> apache::thrift::Client<::facebook::thrift::test::PrimitivesService>::fbthrift_semifuture_return_void_method(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_id, const ::cpp2::I& p_i) {
+folly::SemiFuture<folly::Unit> apache::thrift::Client<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>::fbthrift_semifuture_return_void_method(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_id, const ::cpp2::I& p_i) {
   using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<folly::Unit>;
   folly::Promise<CallbackHelper::PromiseResult> promise;
   auto semifuture = promise.getSemiFuture();
@@ -599,34 +599,34 @@ folly::SemiFuture<folly::Unit> apache::thrift::Client<::facebook::thrift::test::
   return std::move(semifuture).deferValue(CallbackHelper::processClientInterceptorsAndExtractResult);
 }
 
-folly::Future<folly::Unit> apache::thrift::Client<::facebook::thrift::test::PrimitivesService>::future_return_void_method(::std::int64_t p_id, const ::cpp2::I& p_i) {
+folly::Future<folly::Unit> apache::thrift::Client<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>::future_return_void_method(::std::int64_t p_id, const ::cpp2::I& p_i) {
   ::apache::thrift::RpcOptions rpcOptions;
   return future_return_void_method(rpcOptions, p_id, p_i);
 }
 
-folly::SemiFuture<folly::Unit> apache::thrift::Client<::facebook::thrift::test::PrimitivesService>::semifuture_return_void_method(::std::int64_t p_id, const ::cpp2::I& p_i) {
+folly::SemiFuture<folly::Unit> apache::thrift::Client<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>::semifuture_return_void_method(::std::int64_t p_id, const ::cpp2::I& p_i) {
   ::apache::thrift::RpcOptions rpcOptions;
   return semifuture_return_void_method(rpcOptions, p_id, p_i);
 }
 
-folly::Future<folly::Unit> apache::thrift::Client<::facebook::thrift::test::PrimitivesService>::future_return_void_method(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_id, const ::cpp2::I& p_i) {
+folly::Future<folly::Unit> apache::thrift::Client<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>::future_return_void_method(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_id, const ::cpp2::I& p_i) {
   using CallbackType = apache::thrift::FutureCallback<folly::Unit>;
   return fbthrift_semifuture_return_void_method<CallbackType>(rpcOptions, p_id, p_i).toUnsafeFuture();
 }
 
-folly::SemiFuture<folly::Unit> apache::thrift::Client<::facebook::thrift::test::PrimitivesService>::semifuture_return_void_method(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_id, const ::cpp2::I& p_i) {
+folly::SemiFuture<folly::Unit> apache::thrift::Client<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>::semifuture_return_void_method(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_id, const ::cpp2::I& p_i) {
   using CallbackType = apache::thrift::SemiFutureCallback<folly::Unit>;
   return fbthrift_semifuture_return_void_method<CallbackType>(rpcOptions, p_id, p_i);
 }
 
 
-void apache::thrift::Client<::facebook::thrift::test::PrimitivesService>::return_void_method(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, ::std::int64_t p_id, const ::cpp2::I& p_i) {
+void apache::thrift::Client<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>::return_void_method(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, ::std::int64_t p_id, const ::cpp2::I& p_i) {
   return_void_method(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)), p_id, p_i);
 }
 
 #if FOLLY_HAS_COROUTINES
 #endif // FOLLY_HAS_COROUTINES
-folly::exception_wrapper apache::thrift::Client<::facebook::thrift::test::PrimitivesService>::recv_wrapped_return_void_method(::apache::thrift::ClientReceiveState& state) {
+folly::exception_wrapper apache::thrift::Client<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>::recv_wrapped_return_void_method(::apache::thrift::ClientReceiveState& state) {
   if (state.isException()) {
     return std::move(state.exception());
   }
@@ -634,7 +634,7 @@ folly::exception_wrapper apache::thrift::Client<::facebook::thrift::test::Primit
     return folly::make_exception_wrapper<apache::thrift::TApplicationException>("recv_ called without result");
   }
 
-  using result = ::facebook::thrift::test::PrimitivesService_return_void_method_presult;
+  using result = ::facebook::thrift::test::fixtures::service_schema::PrimitivesService_return_void_method_presult;
   switch (state.protocolId()) {
     case apache::thrift::protocol::T_BINARY_PROTOCOL:
     {
@@ -655,18 +655,18 @@ folly::exception_wrapper apache::thrift::Client<::facebook::thrift::test::Primit
   return folly::make_exception_wrapper<apache::thrift::TApplicationException>("Could not find Protocol");
 }
 
-void apache::thrift::Client<::facebook::thrift::test::PrimitivesService>::recv_return_void_method(::apache::thrift::ClientReceiveState& state) {
+void apache::thrift::Client<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>::recv_return_void_method(::apache::thrift::ClientReceiveState& state) {
   auto ew = recv_wrapped_return_void_method(state);
   if (ew) {
     ew.throw_exception();
   }
 }
 
-void apache::thrift::Client<::facebook::thrift::test::PrimitivesService>::recv_instance_return_void_method(::apache::thrift::ClientReceiveState& state) {
+void apache::thrift::Client<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>::recv_instance_return_void_method(::apache::thrift::ClientReceiveState& state) {
   recv_return_void_method(state);
 }
 
-folly::exception_wrapper apache::thrift::Client<::facebook::thrift::test::PrimitivesService>::recv_instance_wrapped_return_void_method(::apache::thrift::ClientReceiveState& state) {
+folly::exception_wrapper apache::thrift::Client<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>::recv_instance_wrapped_return_void_method(::apache::thrift::ClientReceiveState& state) {
   return recv_wrapped_return_void_method(state);
 }
 

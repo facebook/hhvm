@@ -9,16 +9,16 @@
 #include <cstdint>
 
 // BEGIN forward_declare
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::encode {
 class Foo;
 class Bar;
 class Baz;
 class OpEncodeStruct;
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::encode
 // END forward_declare
 
 // BEGIN forward_declare_enums
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::encode {
 enum class Enum;
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::encode
 // END forward_declare_enums

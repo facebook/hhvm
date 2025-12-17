@@ -382,7 +382,7 @@ APACHE_THRIFT_DEFINE_ACCESSOR(map_field);
 } // namespace apache::thrift
 
 // BEGIN declare_enums
-namespace facebook::thrift::test::terse_write::deprecated {
+namespace facebook::thrift::test::fixtures::terse_write::deprecated {
 
 /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/deprecated_terse_write.thrift", "name": "MyEnum", "kind": "enum" } */
 enum class MyEnum {
@@ -390,15 +390,15 @@ enum class MyEnum {
   ME1 = 1,
 };
 
-} // namespace facebook::thrift::test::terse_write::deprecated
+} // namespace facebook::thrift::test::fixtures::terse_write::deprecated
 
-template<> struct std::hash<::facebook::thrift::test::terse_write::deprecated::MyEnum> :
-  ::apache::thrift::detail::enum_hash<::facebook::thrift::test::terse_write::deprecated::MyEnum> {};
+template<> struct std::hash<::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum> :
+  ::apache::thrift::detail::enum_hash<::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum> {};
 
 namespace apache::thrift {
 
-template <> struct TEnumTraits<::facebook::thrift::test::terse_write::deprecated::MyEnum> {
-  using type = ::facebook::thrift::test::terse_write::deprecated::MyEnum;
+template <> struct TEnumTraits<::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum> {
+  using type = ::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum;
 
   static constexpr std::size_t const size = 2;
   static folly::Range<type const*> const values;
@@ -416,7 +416,7 @@ template <> struct TEnumTraits<::facebook::thrift::test::terse_write::deprecated
     return "deprecated_terse_write";
   }
 
-  static constexpr folly::cstring_view __fbthrift_thrift_uri = "facebook.com/thrift/test/terse_write/deprecated/MyEnum";
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = "facebook.com/thrift/test/fixtures/terse_write/deprecated/MyEnum";
 
   static char const* findName(type value) noexcept {
     std::string_view ret;
@@ -427,13 +427,13 @@ template <> struct TEnumTraits<::facebook::thrift::test::terse_write::deprecated
   static constexpr type max() { return type::ME1; }
 
   static const std::vector<std::any>& annotations() noexcept;
-  static const std::vector<std::any>& enumValueAnnotations(::facebook::thrift::test::terse_write::deprecated::MyEnum) noexcept;
+  static const std::vector<std::any>& enumValueAnnotations(::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum) noexcept;
 };
 
 } // namespace apache::thrift
 // END declare_enums
 // BEGIN forward_declare
-namespace facebook::thrift::test::terse_write::deprecated {
+namespace facebook::thrift::test::fixtures::terse_write::deprecated {
 class MyStruct;
 class MyUnion;
 class StructLevelTerseStruct;
@@ -441,43 +441,43 @@ class FieldLevelTerseStruct;
 class CppRefStructFields;
 class DeprecatedTerseWriteWithCustomDefault;
 class DeprecatedTerseWriteWithRedundantCustomDefault;
-} // namespace facebook::thrift::test::terse_write::deprecated
+} // namespace facebook::thrift::test::fixtures::terse_write::deprecated
 // END forward_declare
 namespace apache::thrift::detail::annotation {
 } // namespace apache::thrift::detail::annotation
 
 namespace apache::thrift::detail::qualifier {
 template<>
-struct is_deprecated_terse_writes_with_custom_default_field<::facebook::thrift::test::terse_write::deprecated::DeprecatedTerseWriteWithCustomDefault,::apache::thrift::type::field_id<1>> : std::true_type{};
+struct is_deprecated_terse_writes_with_custom_default_field<::facebook::thrift::test::fixtures::terse_write::deprecated::DeprecatedTerseWriteWithCustomDefault,::apache::thrift::type::field_id<1>> : std::true_type{};
 template<>
-struct is_deprecated_terse_writes_with_custom_default_field<::facebook::thrift::test::terse_write::deprecated::DeprecatedTerseWriteWithCustomDefault,::apache::thrift::type::field_id<2>> : std::true_type{};
+struct is_deprecated_terse_writes_with_custom_default_field<::facebook::thrift::test::fixtures::terse_write::deprecated::DeprecatedTerseWriteWithCustomDefault,::apache::thrift::type::field_id<2>> : std::true_type{};
 template<>
-struct is_deprecated_terse_writes_with_custom_default_field<::facebook::thrift::test::terse_write::deprecated::DeprecatedTerseWriteWithCustomDefault,::apache::thrift::type::field_id<3>> : std::true_type{};
+struct is_deprecated_terse_writes_with_custom_default_field<::facebook::thrift::test::fixtures::terse_write::deprecated::DeprecatedTerseWriteWithCustomDefault,::apache::thrift::type::field_id<3>> : std::true_type{};
 template<>
-struct is_deprecated_terse_writes_with_custom_default_field<::facebook::thrift::test::terse_write::deprecated::DeprecatedTerseWriteWithCustomDefault,::apache::thrift::type::field_id<4>> : std::true_type{};
+struct is_deprecated_terse_writes_with_custom_default_field<::facebook::thrift::test::fixtures::terse_write::deprecated::DeprecatedTerseWriteWithCustomDefault,::apache::thrift::type::field_id<4>> : std::true_type{};
 template<>
-struct is_deprecated_terse_writes_with_custom_default_field<::facebook::thrift::test::terse_write::deprecated::DeprecatedTerseWriteWithCustomDefault,::apache::thrift::type::field_id<5>> : std::true_type{};
+struct is_deprecated_terse_writes_with_custom_default_field<::facebook::thrift::test::fixtures::terse_write::deprecated::DeprecatedTerseWriteWithCustomDefault,::apache::thrift::type::field_id<5>> : std::true_type{};
 template<>
-struct is_deprecated_terse_writes_with_custom_default_field<::facebook::thrift::test::terse_write::deprecated::DeprecatedTerseWriteWithCustomDefault,::apache::thrift::type::field_id<6>> : std::true_type{};
+struct is_deprecated_terse_writes_with_custom_default_field<::facebook::thrift::test::fixtures::terse_write::deprecated::DeprecatedTerseWriteWithCustomDefault,::apache::thrift::type::field_id<6>> : std::true_type{};
 template<>
-struct is_deprecated_terse_writes_with_custom_default_field<::facebook::thrift::test::terse_write::deprecated::DeprecatedTerseWriteWithCustomDefault,::apache::thrift::type::field_id<7>> : std::true_type{};
+struct is_deprecated_terse_writes_with_custom_default_field<::facebook::thrift::test::fixtures::terse_write::deprecated::DeprecatedTerseWriteWithCustomDefault,::apache::thrift::type::field_id<7>> : std::true_type{};
 template<>
-struct is_deprecated_terse_writes_with_custom_default_field<::facebook::thrift::test::terse_write::deprecated::DeprecatedTerseWriteWithCustomDefault,::apache::thrift::type::field_id<8>> : std::true_type{};
+struct is_deprecated_terse_writes_with_custom_default_field<::facebook::thrift::test::fixtures::terse_write::deprecated::DeprecatedTerseWriteWithCustomDefault,::apache::thrift::type::field_id<8>> : std::true_type{};
 template<>
-struct is_deprecated_terse_writes_with_custom_default_field<::facebook::thrift::test::terse_write::deprecated::DeprecatedTerseWriteWithCustomDefault,::apache::thrift::type::field_id<9>> : std::true_type{};
+struct is_deprecated_terse_writes_with_custom_default_field<::facebook::thrift::test::fixtures::terse_write::deprecated::DeprecatedTerseWriteWithCustomDefault,::apache::thrift::type::field_id<9>> : std::true_type{};
 template<>
-struct is_deprecated_terse_writes_with_custom_default_field<::facebook::thrift::test::terse_write::deprecated::DeprecatedTerseWriteWithCustomDefault,::apache::thrift::type::field_id<10>> : std::true_type{};
+struct is_deprecated_terse_writes_with_custom_default_field<::facebook::thrift::test::fixtures::terse_write::deprecated::DeprecatedTerseWriteWithCustomDefault,::apache::thrift::type::field_id<10>> : std::true_type{};
 template<>
-struct is_deprecated_terse_writes_with_custom_default_field<::facebook::thrift::test::terse_write::deprecated::DeprecatedTerseWriteWithCustomDefault,::apache::thrift::type::field_id<11>> : std::true_type{};
+struct is_deprecated_terse_writes_with_custom_default_field<::facebook::thrift::test::fixtures::terse_write::deprecated::DeprecatedTerseWriteWithCustomDefault,::apache::thrift::type::field_id<11>> : std::true_type{};
 template<>
-struct is_deprecated_terse_writes_with_custom_default_field<::facebook::thrift::test::terse_write::deprecated::DeprecatedTerseWriteWithCustomDefault,::apache::thrift::type::field_id<12>> : std::true_type{};
+struct is_deprecated_terse_writes_with_custom_default_field<::facebook::thrift::test::fixtures::terse_write::deprecated::DeprecatedTerseWriteWithCustomDefault,::apache::thrift::type::field_id<12>> : std::true_type{};
 template<>
-struct is_deprecated_terse_writes_with_custom_default_field<::facebook::thrift::test::terse_write::deprecated::DeprecatedTerseWriteWithCustomDefault,::apache::thrift::type::field_id<13>> : std::true_type{};
+struct is_deprecated_terse_writes_with_custom_default_field<::facebook::thrift::test::fixtures::terse_write::deprecated::DeprecatedTerseWriteWithCustomDefault,::apache::thrift::type::field_id<13>> : std::true_type{};
 } // namespace apache::thrift::detail::qualifier
 
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
-namespace facebook::thrift::test::terse_write::deprecated {
+namespace facebook::thrift::test::fixtures::terse_write::deprecated {
 using ::apache::thrift::detail::operator!=;
 using ::apache::thrift::detail::operator>;
 using ::apache::thrift::detail::operator<=;
@@ -493,7 +493,7 @@ class MyStruct final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
-  static constexpr folly::cstring_view __fbthrift_thrift_uri = "facebook.com/thrift/test/terse_write/deprecated/MyStruct";
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = "facebook.com/thrift/test/fixtures/terse_write/deprecated/MyStruct";
   static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   static std::string_view __fbthrift_get_class_name();
   template <class ...>
@@ -575,7 +575,7 @@ class MyUnion final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
-  static constexpr folly::cstring_view __fbthrift_thrift_uri = "facebook.com/thrift/test/terse_write/deprecated/MyUnion";
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = "facebook.com/thrift/test/fixtures/terse_write/deprecated/MyUnion";
   static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   static std::string_view __fbthrift_get_class_name();
   template <class ...>
@@ -695,7 +695,7 @@ class StructLevelTerseStruct final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
-  static constexpr folly::cstring_view __fbthrift_thrift_uri = "facebook.com/thrift/test/terse_write/deprecated/StructLevelTerseStruct";
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = "facebook.com/thrift/test/fixtures/terse_write/deprecated/StructLevelTerseStruct";
   static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   static std::string_view __fbthrift_get_class_name();
   template <class ...>
@@ -734,12 +734,12 @@ class StructLevelTerseStruct final  {
     ::apache::thrift::type::double_t,
     ::apache::thrift::type::string_t,
     ::apache::thrift::type::binary_t,
-    ::apache::thrift::type::enum_t<::facebook::thrift::test::terse_write::deprecated::MyEnum>,
+    ::apache::thrift::type::enum_t<::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum>,
     ::apache::thrift::type::list<::apache::thrift::type::i16_t>,
     ::apache::thrift::type::set<::apache::thrift::type::i16_t>,
     ::apache::thrift::type::map<::apache::thrift::type::i16_t, ::apache::thrift::type::i16_t>,
-    ::apache::thrift::type::struct_t<::facebook::thrift::test::terse_write::deprecated::MyStruct>,
-    ::apache::thrift::type::union_t<::facebook::thrift::test::terse_write::deprecated::MyUnion>
+    ::apache::thrift::type::struct_t<::facebook::thrift::test::fixtures::terse_write::deprecated::MyStruct>,
+    ::apache::thrift::type::union_t<::facebook::thrift::test::fixtures::terse_write::deprecated::MyUnion>
   >;
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
@@ -757,7 +757,7 @@ class StructLevelTerseStruct final  {
 
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  StructLevelTerseStruct(apache::thrift::FragileConstructor, bool bool_field__arg, ::std::int8_t byte_field__arg, ::std::int16_t short_field__arg, ::std::int32_t int_field__arg, ::std::int64_t long_field__arg, float float_field__arg, double double_field__arg, ::std::string string_field__arg, ::std::string binary_field__arg, ::facebook::thrift::test::terse_write::deprecated::MyEnum enum_field__arg, ::std::vector<::std::int16_t> list_field__arg, ::std::set<::std::int16_t> set_field__arg, ::std::map<::std::int16_t, ::std::int16_t> map_field__arg, ::facebook::thrift::test::terse_write::deprecated::MyStruct struct_field__arg, ::facebook::thrift::test::terse_write::deprecated::MyUnion union_field__arg);
+  StructLevelTerseStruct(apache::thrift::FragileConstructor, bool bool_field__arg, ::std::int8_t byte_field__arg, ::std::int16_t short_field__arg, ::std::int32_t int_field__arg, ::std::int64_t long_field__arg, float float_field__arg, double double_field__arg, ::std::string string_field__arg, ::std::string binary_field__arg, ::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum enum_field__arg, ::std::vector<::std::int16_t> list_field__arg, ::std::set<::std::int16_t> set_field__arg, ::std::map<::std::int16_t, ::std::int16_t> map_field__arg, ::facebook::thrift::test::fixtures::terse_write::deprecated::MyStruct struct_field__arg, ::facebook::thrift::test::fixtures::terse_write::deprecated::MyUnion union_field__arg);
 
   StructLevelTerseStruct(StructLevelTerseStruct&&) noexcept;
 
@@ -788,7 +788,7 @@ class StructLevelTerseStruct final  {
  private:
   ::std::string __fbthrift_field_binary_field;
  private:
-  ::facebook::thrift::test::terse_write::deprecated::MyEnum __fbthrift_field_enum_field;
+  ::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum __fbthrift_field_enum_field;
  private:
   ::std::vector<::std::int16_t> __fbthrift_field_list_field;
  private:
@@ -796,9 +796,9 @@ class StructLevelTerseStruct final  {
  private:
   ::std::map<::std::int16_t, ::std::int16_t> __fbthrift_field_map_field;
  private:
-  ::facebook::thrift::test::terse_write::deprecated::MyStruct __fbthrift_field_struct_field;
+  ::facebook::thrift::test::fixtures::terse_write::deprecated::MyStruct __fbthrift_field_struct_field;
  private:
-  ::facebook::thrift::test::terse_write::deprecated::MyUnion __fbthrift_field_union_field;
+  ::facebook::thrift::test::fixtures::terse_write::deprecated::MyUnion __fbthrift_field_union_field;
 
  public:
 
@@ -1130,37 +1130,37 @@ class StructLevelTerseStruct final  {
   }
 
   /** Glean { "field": "enum_field" } */
-  template <typename..., typename fbthrift_T = ::facebook::thrift::test::terse_write::deprecated::MyEnum>
+  template <typename..., typename fbthrift_T = ::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const fbthrift_T&> enum_field_ref() const& {
     return ::apache::thrift::terse_field_ref<const fbthrift_T&>{this->__fbthrift_field_enum_field};
   }
 
   /** Glean { "field": "enum_field" } */
-  template <typename..., typename fbthrift_T = ::facebook::thrift::test::terse_write::deprecated::MyEnum>
+  template <typename..., typename fbthrift_T = ::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<fbthrift_T&> enum_field_ref() & {
     return ::apache::thrift::terse_field_ref<fbthrift_T&>{this->__fbthrift_field_enum_field};
   }
 
   /** Glean { "field": "enum_field" } */
-  template <typename..., typename fbthrift_T = ::facebook::thrift::test::terse_write::deprecated::MyEnum>
+  template <typename..., typename fbthrift_T = ::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<fbthrift_T&&> enum_field_ref() && {
     return ::apache::thrift::terse_field_ref<fbthrift_T&&>{static_cast<fbthrift_T&&>(this->__fbthrift_field_enum_field)};
   }
 
   /** Glean { "field": "enum_field" } */
-  template <typename..., typename fbthrift_T = ::facebook::thrift::test::terse_write::deprecated::MyEnum>
+  template <typename..., typename fbthrift_T = ::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const fbthrift_T&> enum_field() const& {
     return ::apache::thrift::terse_field_ref<const fbthrift_T&>{this->__fbthrift_field_enum_field};
   }
 
   /** Glean { "field": "enum_field" } */
-  template <typename..., typename fbthrift_T = ::facebook::thrift::test::terse_write::deprecated::MyEnum>
+  template <typename..., typename fbthrift_T = ::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<fbthrift_T&> enum_field() & {
     return ::apache::thrift::terse_field_ref<fbthrift_T&>{this->__fbthrift_field_enum_field};
   }
 
   /** Glean { "field": "enum_field" } */
-  template <typename..., typename fbthrift_T = ::facebook::thrift::test::terse_write::deprecated::MyEnum>
+  template <typename..., typename fbthrift_T = ::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<fbthrift_T&&> enum_field() && {
     return ::apache::thrift::terse_field_ref<fbthrift_T&&>{static_cast<fbthrift_T&&>(this->__fbthrift_field_enum_field)};
   }
@@ -1274,73 +1274,73 @@ class StructLevelTerseStruct final  {
   }
 
   /** Glean { "field": "struct_field" } */
-  template <typename..., typename fbthrift_T = ::facebook::thrift::test::terse_write::deprecated::MyStruct>
+  template <typename..., typename fbthrift_T = ::facebook::thrift::test::fixtures::terse_write::deprecated::MyStruct>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const fbthrift_T&> struct_field_ref() const& {
     return ::apache::thrift::terse_field_ref<const fbthrift_T&>{this->__fbthrift_field_struct_field};
   }
 
   /** Glean { "field": "struct_field" } */
-  template <typename..., typename fbthrift_T = ::facebook::thrift::test::terse_write::deprecated::MyStruct>
+  template <typename..., typename fbthrift_T = ::facebook::thrift::test::fixtures::terse_write::deprecated::MyStruct>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<fbthrift_T&> struct_field_ref() & {
     return ::apache::thrift::terse_field_ref<fbthrift_T&>{this->__fbthrift_field_struct_field};
   }
 
   /** Glean { "field": "struct_field" } */
-  template <typename..., typename fbthrift_T = ::facebook::thrift::test::terse_write::deprecated::MyStruct>
+  template <typename..., typename fbthrift_T = ::facebook::thrift::test::fixtures::terse_write::deprecated::MyStruct>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<fbthrift_T&&> struct_field_ref() && {
     return ::apache::thrift::terse_field_ref<fbthrift_T&&>{static_cast<fbthrift_T&&>(this->__fbthrift_field_struct_field)};
   }
 
   /** Glean { "field": "struct_field" } */
-  template <typename..., typename fbthrift_T = ::facebook::thrift::test::terse_write::deprecated::MyStruct>
+  template <typename..., typename fbthrift_T = ::facebook::thrift::test::fixtures::terse_write::deprecated::MyStruct>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const fbthrift_T&> struct_field() const& {
     return ::apache::thrift::terse_field_ref<const fbthrift_T&>{this->__fbthrift_field_struct_field};
   }
 
   /** Glean { "field": "struct_field" } */
-  template <typename..., typename fbthrift_T = ::facebook::thrift::test::terse_write::deprecated::MyStruct>
+  template <typename..., typename fbthrift_T = ::facebook::thrift::test::fixtures::terse_write::deprecated::MyStruct>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<fbthrift_T&> struct_field() & {
     return ::apache::thrift::terse_field_ref<fbthrift_T&>{this->__fbthrift_field_struct_field};
   }
 
   /** Glean { "field": "struct_field" } */
-  template <typename..., typename fbthrift_T = ::facebook::thrift::test::terse_write::deprecated::MyStruct>
+  template <typename..., typename fbthrift_T = ::facebook::thrift::test::fixtures::terse_write::deprecated::MyStruct>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<fbthrift_T&&> struct_field() && {
     return ::apache::thrift::terse_field_ref<fbthrift_T&&>{static_cast<fbthrift_T&&>(this->__fbthrift_field_struct_field)};
   }
 
   /** Glean { "field": "union_field" } */
-  template <typename..., typename fbthrift_T = ::facebook::thrift::test::terse_write::deprecated::MyUnion>
+  template <typename..., typename fbthrift_T = ::facebook::thrift::test::fixtures::terse_write::deprecated::MyUnion>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const fbthrift_T&> union_field_ref() const& {
     return ::apache::thrift::terse_field_ref<const fbthrift_T&>{this->__fbthrift_field_union_field};
   }
 
   /** Glean { "field": "union_field" } */
-  template <typename..., typename fbthrift_T = ::facebook::thrift::test::terse_write::deprecated::MyUnion>
+  template <typename..., typename fbthrift_T = ::facebook::thrift::test::fixtures::terse_write::deprecated::MyUnion>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<fbthrift_T&> union_field_ref() & {
     return ::apache::thrift::terse_field_ref<fbthrift_T&>{this->__fbthrift_field_union_field};
   }
 
   /** Glean { "field": "union_field" } */
-  template <typename..., typename fbthrift_T = ::facebook::thrift::test::terse_write::deprecated::MyUnion>
+  template <typename..., typename fbthrift_T = ::facebook::thrift::test::fixtures::terse_write::deprecated::MyUnion>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<fbthrift_T&&> union_field_ref() && {
     return ::apache::thrift::terse_field_ref<fbthrift_T&&>{static_cast<fbthrift_T&&>(this->__fbthrift_field_union_field)};
   }
 
   /** Glean { "field": "union_field" } */
-  template <typename..., typename fbthrift_T = ::facebook::thrift::test::terse_write::deprecated::MyUnion>
+  template <typename..., typename fbthrift_T = ::facebook::thrift::test::fixtures::terse_write::deprecated::MyUnion>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const fbthrift_T&> union_field() const& {
     return ::apache::thrift::terse_field_ref<const fbthrift_T&>{this->__fbthrift_field_union_field};
   }
 
   /** Glean { "field": "union_field" } */
-  template <typename..., typename fbthrift_T = ::facebook::thrift::test::terse_write::deprecated::MyUnion>
+  template <typename..., typename fbthrift_T = ::facebook::thrift::test::fixtures::terse_write::deprecated::MyUnion>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<fbthrift_T&> union_field() & {
     return ::apache::thrift::terse_field_ref<fbthrift_T&>{this->__fbthrift_field_union_field};
   }
 
   /** Glean { "field": "union_field" } */
-  template <typename..., typename fbthrift_T = ::facebook::thrift::test::terse_write::deprecated::MyUnion>
+  template <typename..., typename fbthrift_T = ::facebook::thrift::test::fixtures::terse_write::deprecated::MyUnion>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<fbthrift_T&&> union_field() && {
     return ::apache::thrift::terse_field_ref<fbthrift_T&&>{static_cast<fbthrift_T&&>(this->__fbthrift_field_union_field)};
   }
@@ -1379,7 +1379,7 @@ class FieldLevelTerseStruct final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
-  static constexpr folly::cstring_view __fbthrift_thrift_uri = "facebook.com/thrift/test/terse_write/deprecated/FieldLevelTerseStruct";
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = "facebook.com/thrift/test/fixtures/terse_write/deprecated/FieldLevelTerseStruct";
   static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   static std::string_view __fbthrift_get_class_name();
   template <class ...>
@@ -1433,11 +1433,11 @@ class FieldLevelTerseStruct final  {
     ::apache::thrift::type::double_t,
     ::apache::thrift::type::string_t,
     ::apache::thrift::type::binary_t,
-    ::apache::thrift::type::enum_t<::facebook::thrift::test::terse_write::deprecated::MyEnum>,
+    ::apache::thrift::type::enum_t<::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum>,
     ::apache::thrift::type::list<::apache::thrift::type::i16_t>,
     ::apache::thrift::type::set<::apache::thrift::type::i16_t>,
     ::apache::thrift::type::map<::apache::thrift::type::i16_t, ::apache::thrift::type::i16_t>,
-    ::apache::thrift::type::struct_t<::facebook::thrift::test::terse_write::deprecated::MyStruct>,
+    ::apache::thrift::type::struct_t<::facebook::thrift::test::fixtures::terse_write::deprecated::MyStruct>,
     ::apache::thrift::type::bool_t,
     ::apache::thrift::type::byte_t,
     ::apache::thrift::type::i16_t,
@@ -1447,12 +1447,12 @@ class FieldLevelTerseStruct final  {
     ::apache::thrift::type::double_t,
     ::apache::thrift::type::string_t,
     ::apache::thrift::type::binary_t,
-    ::apache::thrift::type::enum_t<::facebook::thrift::test::terse_write::deprecated::MyEnum>,
+    ::apache::thrift::type::enum_t<::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum>,
     ::apache::thrift::type::list<::apache::thrift::type::i16_t>,
     ::apache::thrift::type::set<::apache::thrift::type::i16_t>,
     ::apache::thrift::type::map<::apache::thrift::type::i16_t, ::apache::thrift::type::i16_t>,
-    ::apache::thrift::type::struct_t<::facebook::thrift::test::terse_write::deprecated::MyStruct>,
-    ::apache::thrift::type::union_t<::facebook::thrift::test::terse_write::deprecated::MyUnion>,
+    ::apache::thrift::type::struct_t<::facebook::thrift::test::fixtures::terse_write::deprecated::MyStruct>,
+    ::apache::thrift::type::union_t<::facebook::thrift::test::fixtures::terse_write::deprecated::MyUnion>,
     ::apache::thrift::type::cpp_type<std::unique_ptr<folly::IOBuf>, ::apache::thrift::type::byte_t>
   >;
   void __fbthrift_clear();
@@ -1471,7 +1471,7 @@ class FieldLevelTerseStruct final  {
 
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  FieldLevelTerseStruct(apache::thrift::FragileConstructor, bool terse_bool_field__arg, ::std::int8_t terse_byte_field__arg, ::std::int16_t terse_short_field__arg, ::std::int32_t terse_int_field__arg, ::std::int64_t terse_long_field__arg, float terse_float_field__arg, double terse_double_field__arg, ::std::string terse_string_field__arg, ::std::string terse_binary_field__arg, ::facebook::thrift::test::terse_write::deprecated::MyEnum terse_enum_field__arg, ::std::vector<::std::int16_t> terse_list_field__arg, ::std::set<::std::int16_t> terse_set_field__arg, ::std::map<::std::int16_t, ::std::int16_t> terse_map_field__arg, ::facebook::thrift::test::terse_write::deprecated::MyStruct terse_struct_field__arg, bool bool_field__arg, ::std::int8_t byte_field__arg, ::std::int16_t short_field__arg, ::std::int32_t int_field__arg, ::std::int64_t long_field__arg, float float_field__arg, double double_field__arg, ::std::string string_field__arg, ::std::string binary_field__arg, ::facebook::thrift::test::terse_write::deprecated::MyEnum enum_field__arg, ::std::vector<::std::int16_t> list_field__arg, ::std::set<::std::int16_t> set_field__arg, ::std::map<::std::int16_t, ::std::int16_t> map_field__arg, ::facebook::thrift::test::terse_write::deprecated::MyStruct struct_field__arg, ::facebook::thrift::test::terse_write::deprecated::MyUnion union_field__arg, std::unique_ptr<folly::IOBuf> iobuf_ptr_field__arg);
+  FieldLevelTerseStruct(apache::thrift::FragileConstructor, bool terse_bool_field__arg, ::std::int8_t terse_byte_field__arg, ::std::int16_t terse_short_field__arg, ::std::int32_t terse_int_field__arg, ::std::int64_t terse_long_field__arg, float terse_float_field__arg, double terse_double_field__arg, ::std::string terse_string_field__arg, ::std::string terse_binary_field__arg, ::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum terse_enum_field__arg, ::std::vector<::std::int16_t> terse_list_field__arg, ::std::set<::std::int16_t> terse_set_field__arg, ::std::map<::std::int16_t, ::std::int16_t> terse_map_field__arg, ::facebook::thrift::test::fixtures::terse_write::deprecated::MyStruct terse_struct_field__arg, bool bool_field__arg, ::std::int8_t byte_field__arg, ::std::int16_t short_field__arg, ::std::int32_t int_field__arg, ::std::int64_t long_field__arg, float float_field__arg, double double_field__arg, ::std::string string_field__arg, ::std::string binary_field__arg, ::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum enum_field__arg, ::std::vector<::std::int16_t> list_field__arg, ::std::set<::std::int16_t> set_field__arg, ::std::map<::std::int16_t, ::std::int16_t> map_field__arg, ::facebook::thrift::test::fixtures::terse_write::deprecated::MyStruct struct_field__arg, ::facebook::thrift::test::fixtures::terse_write::deprecated::MyUnion union_field__arg, std::unique_ptr<folly::IOBuf> iobuf_ptr_field__arg);
 
   FieldLevelTerseStruct(FieldLevelTerseStruct&&) noexcept;
 
@@ -1502,7 +1502,7 @@ class FieldLevelTerseStruct final  {
  private:
   ::std::string __fbthrift_field_terse_binary_field;
  private:
-  ::facebook::thrift::test::terse_write::deprecated::MyEnum __fbthrift_field_terse_enum_field;
+  ::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum __fbthrift_field_terse_enum_field;
  private:
   ::std::vector<::std::int16_t> __fbthrift_field_terse_list_field;
  private:
@@ -1510,7 +1510,7 @@ class FieldLevelTerseStruct final  {
  private:
   ::std::map<::std::int16_t, ::std::int16_t> __fbthrift_field_terse_map_field;
  private:
-  ::facebook::thrift::test::terse_write::deprecated::MyStruct __fbthrift_field_terse_struct_field;
+  ::facebook::thrift::test::fixtures::terse_write::deprecated::MyStruct __fbthrift_field_terse_struct_field;
  private:
   bool __fbthrift_field_bool_field;
  private:
@@ -1530,7 +1530,7 @@ class FieldLevelTerseStruct final  {
  private:
   ::std::string __fbthrift_field_binary_field;
  private:
-  ::facebook::thrift::test::terse_write::deprecated::MyEnum __fbthrift_field_enum_field;
+  ::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum __fbthrift_field_enum_field;
  private:
   ::std::vector<::std::int16_t> __fbthrift_field_list_field;
  private:
@@ -1538,9 +1538,9 @@ class FieldLevelTerseStruct final  {
  private:
   ::std::map<::std::int16_t, ::std::int16_t> __fbthrift_field_map_field;
  private:
-  ::facebook::thrift::test::terse_write::deprecated::MyStruct __fbthrift_field_struct_field;
+  ::facebook::thrift::test::fixtures::terse_write::deprecated::MyStruct __fbthrift_field_struct_field;
  private:
-  ::facebook::thrift::test::terse_write::deprecated::MyUnion __fbthrift_field_union_field;
+  ::facebook::thrift::test::fixtures::terse_write::deprecated::MyUnion __fbthrift_field_union_field;
  private:
   std::unique_ptr<folly::IOBuf> __fbthrift_field_iobuf_ptr_field;
  private:
@@ -1876,37 +1876,37 @@ class FieldLevelTerseStruct final  {
   }
 
   /** Glean { "field": "terse_enum_field" } */
-  template <typename..., typename fbthrift_T = ::facebook::thrift::test::terse_write::deprecated::MyEnum>
+  template <typename..., typename fbthrift_T = ::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const fbthrift_T&> terse_enum_field_ref() const& {
     return ::apache::thrift::terse_field_ref<const fbthrift_T&>{this->__fbthrift_field_terse_enum_field};
   }
 
   /** Glean { "field": "terse_enum_field" } */
-  template <typename..., typename fbthrift_T = ::facebook::thrift::test::terse_write::deprecated::MyEnum>
+  template <typename..., typename fbthrift_T = ::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<fbthrift_T&> terse_enum_field_ref() & {
     return ::apache::thrift::terse_field_ref<fbthrift_T&>{this->__fbthrift_field_terse_enum_field};
   }
 
   /** Glean { "field": "terse_enum_field" } */
-  template <typename..., typename fbthrift_T = ::facebook::thrift::test::terse_write::deprecated::MyEnum>
+  template <typename..., typename fbthrift_T = ::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<fbthrift_T&&> terse_enum_field_ref() && {
     return ::apache::thrift::terse_field_ref<fbthrift_T&&>{static_cast<fbthrift_T&&>(this->__fbthrift_field_terse_enum_field)};
   }
 
   /** Glean { "field": "terse_enum_field" } */
-  template <typename..., typename fbthrift_T = ::facebook::thrift::test::terse_write::deprecated::MyEnum>
+  template <typename..., typename fbthrift_T = ::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const fbthrift_T&> terse_enum_field() const& {
     return ::apache::thrift::terse_field_ref<const fbthrift_T&>{this->__fbthrift_field_terse_enum_field};
   }
 
   /** Glean { "field": "terse_enum_field" } */
-  template <typename..., typename fbthrift_T = ::facebook::thrift::test::terse_write::deprecated::MyEnum>
+  template <typename..., typename fbthrift_T = ::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<fbthrift_T&> terse_enum_field() & {
     return ::apache::thrift::terse_field_ref<fbthrift_T&>{this->__fbthrift_field_terse_enum_field};
   }
 
   /** Glean { "field": "terse_enum_field" } */
-  template <typename..., typename fbthrift_T = ::facebook::thrift::test::terse_write::deprecated::MyEnum>
+  template <typename..., typename fbthrift_T = ::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<fbthrift_T&&> terse_enum_field() && {
     return ::apache::thrift::terse_field_ref<fbthrift_T&&>{static_cast<fbthrift_T&&>(this->__fbthrift_field_terse_enum_field)};
   }
@@ -2020,37 +2020,37 @@ class FieldLevelTerseStruct final  {
   }
 
   /** Glean { "field": "terse_struct_field" } */
-  template <typename..., typename fbthrift_T = ::facebook::thrift::test::terse_write::deprecated::MyStruct>
+  template <typename..., typename fbthrift_T = ::facebook::thrift::test::fixtures::terse_write::deprecated::MyStruct>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const fbthrift_T&> terse_struct_field_ref() const& {
     return ::apache::thrift::terse_field_ref<const fbthrift_T&>{this->__fbthrift_field_terse_struct_field};
   }
 
   /** Glean { "field": "terse_struct_field" } */
-  template <typename..., typename fbthrift_T = ::facebook::thrift::test::terse_write::deprecated::MyStruct>
+  template <typename..., typename fbthrift_T = ::facebook::thrift::test::fixtures::terse_write::deprecated::MyStruct>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<fbthrift_T&> terse_struct_field_ref() & {
     return ::apache::thrift::terse_field_ref<fbthrift_T&>{this->__fbthrift_field_terse_struct_field};
   }
 
   /** Glean { "field": "terse_struct_field" } */
-  template <typename..., typename fbthrift_T = ::facebook::thrift::test::terse_write::deprecated::MyStruct>
+  template <typename..., typename fbthrift_T = ::facebook::thrift::test::fixtures::terse_write::deprecated::MyStruct>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<fbthrift_T&&> terse_struct_field_ref() && {
     return ::apache::thrift::terse_field_ref<fbthrift_T&&>{static_cast<fbthrift_T&&>(this->__fbthrift_field_terse_struct_field)};
   }
 
   /** Glean { "field": "terse_struct_field" } */
-  template <typename..., typename fbthrift_T = ::facebook::thrift::test::terse_write::deprecated::MyStruct>
+  template <typename..., typename fbthrift_T = ::facebook::thrift::test::fixtures::terse_write::deprecated::MyStruct>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const fbthrift_T&> terse_struct_field() const& {
     return ::apache::thrift::terse_field_ref<const fbthrift_T&>{this->__fbthrift_field_terse_struct_field};
   }
 
   /** Glean { "field": "terse_struct_field" } */
-  template <typename..., typename fbthrift_T = ::facebook::thrift::test::terse_write::deprecated::MyStruct>
+  template <typename..., typename fbthrift_T = ::facebook::thrift::test::fixtures::terse_write::deprecated::MyStruct>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<fbthrift_T&> terse_struct_field() & {
     return ::apache::thrift::terse_field_ref<fbthrift_T&>{this->__fbthrift_field_terse_struct_field};
   }
 
   /** Glean { "field": "terse_struct_field" } */
-  template <typename..., typename fbthrift_T = ::facebook::thrift::test::terse_write::deprecated::MyStruct>
+  template <typename..., typename fbthrift_T = ::facebook::thrift::test::fixtures::terse_write::deprecated::MyStruct>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<fbthrift_T&&> terse_struct_field() && {
     return ::apache::thrift::terse_field_ref<fbthrift_T&&>{static_cast<fbthrift_T&&>(this->__fbthrift_field_terse_struct_field)};
   }
@@ -2380,37 +2380,37 @@ class FieldLevelTerseStruct final  {
   }
 
   /** Glean { "field": "enum_field" } */
-  template <typename..., typename fbthrift_T = ::facebook::thrift::test::terse_write::deprecated::MyEnum>
+  template <typename..., typename fbthrift_T = ::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum>
   FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> enum_field_ref() const& {
     return {this->__fbthrift_field_enum_field, __isset.at(9), __isset.bit(9)};
   }
 
   /** Glean { "field": "enum_field" } */
-  template <typename..., typename fbthrift_T = ::facebook::thrift::test::terse_write::deprecated::MyEnum>
+  template <typename..., typename fbthrift_T = ::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum>
   FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> enum_field_ref() & {
     return {this->__fbthrift_field_enum_field, __isset.at(9), __isset.bit(9)};
   }
 
   /** Glean { "field": "enum_field" } */
-  template <typename..., typename fbthrift_T = ::facebook::thrift::test::terse_write::deprecated::MyEnum>
+  template <typename..., typename fbthrift_T = ::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum>
   FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> enum_field_ref() && {
     return {static_cast<fbthrift_T&&>(this->__fbthrift_field_enum_field), __isset.at(9), __isset.bit(9)};
   }
 
   /** Glean { "field": "enum_field" } */
-  template <typename..., typename fbthrift_T = ::facebook::thrift::test::terse_write::deprecated::MyEnum>
+  template <typename..., typename fbthrift_T = ::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum>
   FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> enum_field() const& {
     return {this->__fbthrift_field_enum_field, __isset.at(9), __isset.bit(9)};
   }
 
   /** Glean { "field": "enum_field" } */
-  template <typename..., typename fbthrift_T = ::facebook::thrift::test::terse_write::deprecated::MyEnum>
+  template <typename..., typename fbthrift_T = ::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum>
   FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> enum_field() & {
     return {this->__fbthrift_field_enum_field, __isset.at(9), __isset.bit(9)};
   }
 
   /** Glean { "field": "enum_field" } */
-  template <typename..., typename fbthrift_T = ::facebook::thrift::test::terse_write::deprecated::MyEnum>
+  template <typename..., typename fbthrift_T = ::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum>
   FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> enum_field() && {
     return {static_cast<fbthrift_T&&>(this->__fbthrift_field_enum_field), __isset.at(9), __isset.bit(9)};
   }
@@ -2524,73 +2524,73 @@ class FieldLevelTerseStruct final  {
   }
 
   /** Glean { "field": "struct_field" } */
-  template <typename..., typename fbthrift_T = ::facebook::thrift::test::terse_write::deprecated::MyStruct>
+  template <typename..., typename fbthrift_T = ::facebook::thrift::test::fixtures::terse_write::deprecated::MyStruct>
   FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> struct_field_ref() const& {
     return {this->__fbthrift_field_struct_field, __isset.at(13), __isset.bit(13)};
   }
 
   /** Glean { "field": "struct_field" } */
-  template <typename..., typename fbthrift_T = ::facebook::thrift::test::terse_write::deprecated::MyStruct>
+  template <typename..., typename fbthrift_T = ::facebook::thrift::test::fixtures::terse_write::deprecated::MyStruct>
   FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> struct_field_ref() & {
     return {this->__fbthrift_field_struct_field, __isset.at(13), __isset.bit(13)};
   }
 
   /** Glean { "field": "struct_field" } */
-  template <typename..., typename fbthrift_T = ::facebook::thrift::test::terse_write::deprecated::MyStruct>
+  template <typename..., typename fbthrift_T = ::facebook::thrift::test::fixtures::terse_write::deprecated::MyStruct>
   FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> struct_field_ref() && {
     return {static_cast<fbthrift_T&&>(this->__fbthrift_field_struct_field), __isset.at(13), __isset.bit(13)};
   }
 
   /** Glean { "field": "struct_field" } */
-  template <typename..., typename fbthrift_T = ::facebook::thrift::test::terse_write::deprecated::MyStruct>
+  template <typename..., typename fbthrift_T = ::facebook::thrift::test::fixtures::terse_write::deprecated::MyStruct>
   FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> struct_field() const& {
     return {this->__fbthrift_field_struct_field, __isset.at(13), __isset.bit(13)};
   }
 
   /** Glean { "field": "struct_field" } */
-  template <typename..., typename fbthrift_T = ::facebook::thrift::test::terse_write::deprecated::MyStruct>
+  template <typename..., typename fbthrift_T = ::facebook::thrift::test::fixtures::terse_write::deprecated::MyStruct>
   FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> struct_field() & {
     return {this->__fbthrift_field_struct_field, __isset.at(13), __isset.bit(13)};
   }
 
   /** Glean { "field": "struct_field" } */
-  template <typename..., typename fbthrift_T = ::facebook::thrift::test::terse_write::deprecated::MyStruct>
+  template <typename..., typename fbthrift_T = ::facebook::thrift::test::fixtures::terse_write::deprecated::MyStruct>
   FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> struct_field() && {
     return {static_cast<fbthrift_T&&>(this->__fbthrift_field_struct_field), __isset.at(13), __isset.bit(13)};
   }
 
   /** Glean { "field": "union_field" } */
-  template <typename..., typename fbthrift_T = ::facebook::thrift::test::terse_write::deprecated::MyUnion>
+  template <typename..., typename fbthrift_T = ::facebook::thrift::test::fixtures::terse_write::deprecated::MyUnion>
   FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> union_field_ref() const& {
     return {this->__fbthrift_field_union_field, __isset.at(14), __isset.bit(14)};
   }
 
   /** Glean { "field": "union_field" } */
-  template <typename..., typename fbthrift_T = ::facebook::thrift::test::terse_write::deprecated::MyUnion>
+  template <typename..., typename fbthrift_T = ::facebook::thrift::test::fixtures::terse_write::deprecated::MyUnion>
   FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> union_field_ref() & {
     return {this->__fbthrift_field_union_field, __isset.at(14), __isset.bit(14)};
   }
 
   /** Glean { "field": "union_field" } */
-  template <typename..., typename fbthrift_T = ::facebook::thrift::test::terse_write::deprecated::MyUnion>
+  template <typename..., typename fbthrift_T = ::facebook::thrift::test::fixtures::terse_write::deprecated::MyUnion>
   FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> union_field_ref() && {
     return {static_cast<fbthrift_T&&>(this->__fbthrift_field_union_field), __isset.at(14), __isset.bit(14)};
   }
 
   /** Glean { "field": "union_field" } */
-  template <typename..., typename fbthrift_T = ::facebook::thrift::test::terse_write::deprecated::MyUnion>
+  template <typename..., typename fbthrift_T = ::facebook::thrift::test::fixtures::terse_write::deprecated::MyUnion>
   FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> union_field() const& {
     return {this->__fbthrift_field_union_field, __isset.at(14), __isset.bit(14)};
   }
 
   /** Glean { "field": "union_field" } */
-  template <typename..., typename fbthrift_T = ::facebook::thrift::test::terse_write::deprecated::MyUnion>
+  template <typename..., typename fbthrift_T = ::facebook::thrift::test::fixtures::terse_write::deprecated::MyUnion>
   FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> union_field() & {
     return {this->__fbthrift_field_union_field, __isset.at(14), __isset.bit(14)};
   }
 
   /** Glean { "field": "union_field" } */
-  template <typename..., typename fbthrift_T = ::facebook::thrift::test::terse_write::deprecated::MyUnion>
+  template <typename..., typename fbthrift_T = ::facebook::thrift::test::fixtures::terse_write::deprecated::MyUnion>
   FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> union_field() && {
     return {static_cast<fbthrift_T&&>(this->__fbthrift_field_union_field), __isset.at(14), __isset.bit(14)};
   }
@@ -2729,11 +2729,11 @@ class FieldLevelTerseStruct final  {
 
   /** Glean { "field": "enum_field" } */
   [[deprecated("Use `FOO.enum_field().value()` instead of `FOO.get_enum_field()`")]]
-  ::facebook::thrift::test::terse_write::deprecated::MyEnum get_enum_field() const;
+  ::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum get_enum_field() const;
 
   /** Glean { "field": "enum_field" } */
   [[deprecated("Use `FOO.enum_field() = BAR` instead of `FOO.set_enum_field(BAR)`")]]
-  ::facebook::thrift::test::terse_write::deprecated::MyEnum& set_enum_field(::facebook::thrift::test::terse_write::deprecated::MyEnum enum_field_);
+  ::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum& set_enum_field(::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum enum_field_);
 
   /** Glean { "field": "list_field" } */
   [[deprecated("Use `FOO.list_field().value()` instead of `FOO.get_list_field()`")]]
@@ -2785,32 +2785,32 @@ class FieldLevelTerseStruct final  {
 
   /** Glean { "field": "struct_field" } */
   [[deprecated("Use `FOO.struct_field().value()` instead of `FOO.get_struct_field()`")]]
-  const ::facebook::thrift::test::terse_write::deprecated::MyStruct& get_struct_field() const&;
+  const ::facebook::thrift::test::fixtures::terse_write::deprecated::MyStruct& get_struct_field() const&;
 
   /** Glean { "field": "struct_field" } */
   [[deprecated("Use `FOO.struct_field().value()` instead of `FOO.get_struct_field()`")]]
-  ::facebook::thrift::test::terse_write::deprecated::MyStruct get_struct_field() &&;
+  ::facebook::thrift::test::fixtures::terse_write::deprecated::MyStruct get_struct_field() &&;
 
   /** Glean { "field": "struct_field" } */
-  template <typename T_FieldLevelTerseStruct_struct_field_struct_setter = ::facebook::thrift::test::terse_write::deprecated::MyStruct>
+  template <typename T_FieldLevelTerseStruct_struct_field_struct_setter = ::facebook::thrift::test::fixtures::terse_write::deprecated::MyStruct>
   [[deprecated("Use `FOO.struct_field() = BAR` instead of `FOO.set_struct_field(BAR)`")]]
-  ::facebook::thrift::test::terse_write::deprecated::MyStruct& set_struct_field(T_FieldLevelTerseStruct_struct_field_struct_setter&& struct_field_) {
+  ::facebook::thrift::test::fixtures::terse_write::deprecated::MyStruct& set_struct_field(T_FieldLevelTerseStruct_struct_field_struct_setter&& struct_field_) {
     struct_field_ref() = std::forward<T_FieldLevelTerseStruct_struct_field_struct_setter>(struct_field_);
     return __fbthrift_field_struct_field;
   }
 
   /** Glean { "field": "union_field" } */
   [[deprecated("Use `FOO.union_field().value()` instead of `FOO.get_union_field()`")]]
-  const ::facebook::thrift::test::terse_write::deprecated::MyUnion& get_union_field() const&;
+  const ::facebook::thrift::test::fixtures::terse_write::deprecated::MyUnion& get_union_field() const&;
 
   /** Glean { "field": "union_field" } */
   [[deprecated("Use `FOO.union_field().value()` instead of `FOO.get_union_field()`")]]
-  ::facebook::thrift::test::terse_write::deprecated::MyUnion get_union_field() &&;
+  ::facebook::thrift::test::fixtures::terse_write::deprecated::MyUnion get_union_field() &&;
 
   /** Glean { "field": "union_field" } */
-  template <typename T_FieldLevelTerseStruct_union_field_struct_setter = ::facebook::thrift::test::terse_write::deprecated::MyUnion>
+  template <typename T_FieldLevelTerseStruct_union_field_struct_setter = ::facebook::thrift::test::fixtures::terse_write::deprecated::MyUnion>
   [[deprecated("Use `FOO.union_field() = BAR` instead of `FOO.set_union_field(BAR)`")]]
-  ::facebook::thrift::test::terse_write::deprecated::MyUnion& set_union_field(T_FieldLevelTerseStruct_union_field_struct_setter&& union_field_) {
+  ::facebook::thrift::test::fixtures::terse_write::deprecated::MyUnion& set_union_field(T_FieldLevelTerseStruct_union_field_struct_setter&& union_field_) {
     union_field_ref() = std::forward<T_FieldLevelTerseStruct_union_field_struct_setter>(union_field_);
     return __fbthrift_field_union_field;
   }
@@ -2873,7 +2873,7 @@ class FieldLevelTerseStruct final  {
   }
 
   bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::enum_field>) const {
-    return this->__fbthrift_field_enum_field != ::facebook::thrift::test::terse_write::deprecated::MyEnum();
+    return this->__fbthrift_field_enum_field != ::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum();
   }
 
   bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::list_field>) const {
@@ -2913,7 +2913,7 @@ class CppRefStructFields final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
-  static constexpr folly::cstring_view __fbthrift_thrift_uri = "facebook.com/thrift/test/terse_write/deprecated/CppRefStructFields";
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = "facebook.com/thrift/test/fixtures/terse_write/deprecated/CppRefStructFields";
   static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   static std::string_view __fbthrift_get_class_name();
   template <class ...>
@@ -2931,7 +2931,7 @@ class CppRefStructFields final  {
 
   using __fbthrift_reflection_type_tags = folly::tag_t<
     ::apache::thrift::type::i32_t,
-    ::apache::thrift::type::struct_t<::facebook::thrift::test::terse_write::deprecated::MyStruct>
+    ::apache::thrift::type::struct_t<::facebook::thrift::test::fixtures::terse_write::deprecated::MyStruct>
   >;
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
@@ -2949,7 +2949,7 @@ class CppRefStructFields final  {
 
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  CppRefStructFields(apache::thrift::FragileConstructor, ::std::unique_ptr<::std::int32_t> primitive_ref_field__arg, ::std::unique_ptr<::facebook::thrift::test::terse_write::deprecated::MyStruct> struct_ref_field__arg);
+  CppRefStructFields(apache::thrift::FragileConstructor, ::std::unique_ptr<::std::int32_t> primitive_ref_field__arg, ::std::unique_ptr<::facebook::thrift::test::fixtures::terse_write::deprecated::MyStruct> struct_ref_field__arg);
 
   CppRefStructFields(CppRefStructFields&&) noexcept;
   CppRefStructFields(const CppRefStructFields& src);
@@ -2963,7 +2963,7 @@ class CppRefStructFields final  {
  private:
   ::std::unique_ptr<::std::int32_t> __fbthrift_field_primitive_ref_field;
  private:
-  ::std::unique_ptr<::facebook::thrift::test::terse_write::deprecated::MyStruct> __fbthrift_field_struct_ref_field;
+  ::std::unique_ptr<::facebook::thrift::test::fixtures::terse_write::deprecated::MyStruct> __fbthrift_field_struct_ref_field;
 
  public:
 
@@ -3009,43 +3009,43 @@ class CppRefStructFields final  {
     return static_cast<const ::std::unique_ptr<::std::int32_t>&&>(__fbthrift_field_primitive_ref_field);
   }
   /** Glean { "field": "struct_ref_field" } */
-  FOLLY_ERASE ::std::unique_ptr<::facebook::thrift::test::terse_write::deprecated::MyStruct>& struct_ref_field_ref() & {
+  FOLLY_ERASE ::std::unique_ptr<::facebook::thrift::test::fixtures::terse_write::deprecated::MyStruct>& struct_ref_field_ref() & {
     return __fbthrift_field_struct_ref_field;
   }
 
   /** Glean { "field": "struct_ref_field" } */
-  FOLLY_ERASE const ::std::unique_ptr<::facebook::thrift::test::terse_write::deprecated::MyStruct>& struct_ref_field_ref() const& {
+  FOLLY_ERASE const ::std::unique_ptr<::facebook::thrift::test::fixtures::terse_write::deprecated::MyStruct>& struct_ref_field_ref() const& {
     return __fbthrift_field_struct_ref_field;
   }
 
   /** Glean { "field": "struct_ref_field" } */
-  FOLLY_ERASE ::std::unique_ptr<::facebook::thrift::test::terse_write::deprecated::MyStruct>&& struct_ref_field_ref() && {
-    return static_cast<::std::unique_ptr<::facebook::thrift::test::terse_write::deprecated::MyStruct>&&>(__fbthrift_field_struct_ref_field);
+  FOLLY_ERASE ::std::unique_ptr<::facebook::thrift::test::fixtures::terse_write::deprecated::MyStruct>&& struct_ref_field_ref() && {
+    return static_cast<::std::unique_ptr<::facebook::thrift::test::fixtures::terse_write::deprecated::MyStruct>&&>(__fbthrift_field_struct_ref_field);
   }
 
   /** Glean { "field": "struct_ref_field" } */
-  FOLLY_ERASE const ::std::unique_ptr<::facebook::thrift::test::terse_write::deprecated::MyStruct>&& struct_ref_field_ref() const&& {
-    return static_cast<const ::std::unique_ptr<::facebook::thrift::test::terse_write::deprecated::MyStruct>&&>(__fbthrift_field_struct_ref_field);
+  FOLLY_ERASE const ::std::unique_ptr<::facebook::thrift::test::fixtures::terse_write::deprecated::MyStruct>&& struct_ref_field_ref() const&& {
+    return static_cast<const ::std::unique_ptr<::facebook::thrift::test::fixtures::terse_write::deprecated::MyStruct>&&>(__fbthrift_field_struct_ref_field);
   }
 
   /** Glean { "field": "struct_ref_field" } */
-  FOLLY_ERASE ::std::unique_ptr<::facebook::thrift::test::terse_write::deprecated::MyStruct>& struct_ref_field() & {
+  FOLLY_ERASE ::std::unique_ptr<::facebook::thrift::test::fixtures::terse_write::deprecated::MyStruct>& struct_ref_field() & {
     return __fbthrift_field_struct_ref_field;
   }
 
   /** Glean { "field": "struct_ref_field" } */
-  FOLLY_ERASE const ::std::unique_ptr<::facebook::thrift::test::terse_write::deprecated::MyStruct>& struct_ref_field() const& {
+  FOLLY_ERASE const ::std::unique_ptr<::facebook::thrift::test::fixtures::terse_write::deprecated::MyStruct>& struct_ref_field() const& {
     return __fbthrift_field_struct_ref_field;
   }
 
   /** Glean { "field": "struct_ref_field" } */
-  FOLLY_ERASE ::std::unique_ptr<::facebook::thrift::test::terse_write::deprecated::MyStruct>&& struct_ref_field() && {
-    return static_cast<::std::unique_ptr<::facebook::thrift::test::terse_write::deprecated::MyStruct>&&>(__fbthrift_field_struct_ref_field);
+  FOLLY_ERASE ::std::unique_ptr<::facebook::thrift::test::fixtures::terse_write::deprecated::MyStruct>&& struct_ref_field() && {
+    return static_cast<::std::unique_ptr<::facebook::thrift::test::fixtures::terse_write::deprecated::MyStruct>&&>(__fbthrift_field_struct_ref_field);
   }
 
   /** Glean { "field": "struct_ref_field" } */
-  FOLLY_ERASE const ::std::unique_ptr<::facebook::thrift::test::terse_write::deprecated::MyStruct>&& struct_ref_field() const&& {
-    return static_cast<const ::std::unique_ptr<::facebook::thrift::test::terse_write::deprecated::MyStruct>&&>(__fbthrift_field_struct_ref_field);
+  FOLLY_ERASE const ::std::unique_ptr<::facebook::thrift::test::fixtures::terse_write::deprecated::MyStruct>&& struct_ref_field() const&& {
+    return static_cast<const ::std::unique_ptr<::facebook::thrift::test::fixtures::terse_write::deprecated::MyStruct>&&>(__fbthrift_field_struct_ref_field);
   }
 
   template <class Protocol_>
@@ -3086,7 +3086,7 @@ class DeprecatedTerseWriteWithCustomDefault final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
-  static constexpr folly::cstring_view __fbthrift_thrift_uri = "facebook.com/thrift/test/terse_write/deprecated/DeprecatedTerseWriteWithCustomDefault";
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = "facebook.com/thrift/test/fixtures/terse_write/deprecated/DeprecatedTerseWriteWithCustomDefault";
   static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   static std::string_view __fbthrift_get_class_name();
   template <class ...>
@@ -3123,7 +3123,7 @@ class DeprecatedTerseWriteWithCustomDefault final  {
     ::apache::thrift::type::double_t,
     ::apache::thrift::type::string_t,
     ::apache::thrift::type::binary_t,
-    ::apache::thrift::type::enum_t<::facebook::thrift::test::terse_write::deprecated::MyEnum>,
+    ::apache::thrift::type::enum_t<::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum>,
     ::apache::thrift::type::list<::apache::thrift::type::i16_t>,
     ::apache::thrift::type::set<::apache::thrift::type::i16_t>,
     ::apache::thrift::type::map<::apache::thrift::type::i16_t, ::apache::thrift::type::i16_t>
@@ -3144,7 +3144,7 @@ class DeprecatedTerseWriteWithCustomDefault final  {
 
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  DeprecatedTerseWriteWithCustomDefault(apache::thrift::FragileConstructor, bool bool_field__arg, ::std::int8_t byte_field__arg, ::std::int16_t short_field__arg, ::std::int32_t int_field__arg, ::std::int64_t long_field__arg, float float_field__arg, double double_field__arg, ::std::string string_field__arg, ::std::string binary_field__arg, ::facebook::thrift::test::terse_write::deprecated::MyEnum enum_field__arg, ::std::vector<::std::int16_t> list_field__arg, ::std::set<::std::int16_t> set_field__arg, ::std::map<::std::int16_t, ::std::int16_t> map_field__arg);
+  DeprecatedTerseWriteWithCustomDefault(apache::thrift::FragileConstructor, bool bool_field__arg, ::std::int8_t byte_field__arg, ::std::int16_t short_field__arg, ::std::int32_t int_field__arg, ::std::int64_t long_field__arg, float float_field__arg, double double_field__arg, ::std::string string_field__arg, ::std::string binary_field__arg, ::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum enum_field__arg, ::std::vector<::std::int16_t> list_field__arg, ::std::set<::std::int16_t> set_field__arg, ::std::map<::std::int16_t, ::std::int16_t> map_field__arg);
 
   DeprecatedTerseWriteWithCustomDefault(DeprecatedTerseWriteWithCustomDefault&&) noexcept;
 
@@ -3175,7 +3175,7 @@ class DeprecatedTerseWriteWithCustomDefault final  {
  private:
   ::std::string __fbthrift_field_binary_field;
  private:
-  ::facebook::thrift::test::terse_write::deprecated::MyEnum __fbthrift_field_enum_field;
+  ::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum __fbthrift_field_enum_field;
  private:
   ::std::vector<::std::int16_t> __fbthrift_field_list_field;
  private:
@@ -3515,37 +3515,37 @@ class DeprecatedTerseWriteWithCustomDefault final  {
   }
 
   /** Glean { "field": "enum_field" } */
-  template <typename..., typename fbthrift_T = ::facebook::thrift::test::terse_write::deprecated::MyEnum>
+  template <typename..., typename fbthrift_T = ::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum>
   FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> enum_field_ref() const& {
     return {this->__fbthrift_field_enum_field, __isset.at(9), __isset.bit(9)};
   }
 
   /** Glean { "field": "enum_field" } */
-  template <typename..., typename fbthrift_T = ::facebook::thrift::test::terse_write::deprecated::MyEnum>
+  template <typename..., typename fbthrift_T = ::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum>
   FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> enum_field_ref() & {
     return {this->__fbthrift_field_enum_field, __isset.at(9), __isset.bit(9)};
   }
 
   /** Glean { "field": "enum_field" } */
-  template <typename..., typename fbthrift_T = ::facebook::thrift::test::terse_write::deprecated::MyEnum>
+  template <typename..., typename fbthrift_T = ::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum>
   FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> enum_field_ref() && {
     return {static_cast<fbthrift_T&&>(this->__fbthrift_field_enum_field), __isset.at(9), __isset.bit(9)};
   }
 
   /** Glean { "field": "enum_field" } */
-  template <typename..., typename fbthrift_T = ::facebook::thrift::test::terse_write::deprecated::MyEnum>
+  template <typename..., typename fbthrift_T = ::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum>
   FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> enum_field() const& {
     return {this->__fbthrift_field_enum_field, __isset.at(9), __isset.bit(9)};
   }
 
   /** Glean { "field": "enum_field" } */
-  template <typename..., typename fbthrift_T = ::facebook::thrift::test::terse_write::deprecated::MyEnum>
+  template <typename..., typename fbthrift_T = ::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum>
   FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> enum_field() & {
     return {this->__fbthrift_field_enum_field, __isset.at(9), __isset.bit(9)};
   }
 
   /** Glean { "field": "enum_field" } */
-  template <typename..., typename fbthrift_T = ::facebook::thrift::test::terse_write::deprecated::MyEnum>
+  template <typename..., typename fbthrift_T = ::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum>
   FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> enum_field() && {
     return {static_cast<fbthrift_T&&>(this->__fbthrift_field_enum_field), __isset.at(9), __isset.bit(9)};
   }
@@ -3756,11 +3756,11 @@ class DeprecatedTerseWriteWithCustomDefault final  {
 
   /** Glean { "field": "enum_field" } */
   [[deprecated("Use `FOO.enum_field().value()` instead of `FOO.get_enum_field()`")]]
-  ::facebook::thrift::test::terse_write::deprecated::MyEnum get_enum_field() const;
+  ::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum get_enum_field() const;
 
   /** Glean { "field": "enum_field" } */
   [[deprecated("Use `FOO.enum_field() = BAR` instead of `FOO.set_enum_field(BAR)`")]]
-  ::facebook::thrift::test::terse_write::deprecated::MyEnum& set_enum_field(::facebook::thrift::test::terse_write::deprecated::MyEnum enum_field_);
+  ::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum& set_enum_field(::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum enum_field_);
 
   /** Glean { "field": "list_field" } */
   [[deprecated("Use `FOO.list_field().value()` instead of `FOO.get_list_field()`")]]
@@ -3860,7 +3860,7 @@ class DeprecatedTerseWriteWithCustomDefault final  {
   }
 
   bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::enum_field>) const {
-    return this->__fbthrift_field_enum_field !=  ::facebook::thrift::test::terse_write::deprecated::MyEnum::ME1;
+    return this->__fbthrift_field_enum_field !=  ::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum::ME1;
   }
 
   bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::list_field>) const {
@@ -3896,7 +3896,7 @@ class DeprecatedTerseWriteWithRedundantCustomDefault final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
-  static constexpr folly::cstring_view __fbthrift_thrift_uri = "facebook.com/thrift/test/terse_write/deprecated/DeprecatedTerseWriteWithRedundantCustomDefault";
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = "facebook.com/thrift/test/fixtures/terse_write/deprecated/DeprecatedTerseWriteWithRedundantCustomDefault";
   static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   static std::string_view __fbthrift_get_class_name();
   template <class ...>
@@ -3933,7 +3933,7 @@ class DeprecatedTerseWriteWithRedundantCustomDefault final  {
     ::apache::thrift::type::double_t,
     ::apache::thrift::type::string_t,
     ::apache::thrift::type::binary_t,
-    ::apache::thrift::type::enum_t<::facebook::thrift::test::terse_write::deprecated::MyEnum>,
+    ::apache::thrift::type::enum_t<::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum>,
     ::apache::thrift::type::list<::apache::thrift::type::i16_t>,
     ::apache::thrift::type::set<::apache::thrift::type::i16_t>,
     ::apache::thrift::type::map<::apache::thrift::type::i16_t, ::apache::thrift::type::i16_t>
@@ -3954,7 +3954,7 @@ class DeprecatedTerseWriteWithRedundantCustomDefault final  {
 
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  DeprecatedTerseWriteWithRedundantCustomDefault(apache::thrift::FragileConstructor, bool bool_field__arg, ::std::int8_t byte_field__arg, ::std::int16_t short_field__arg, ::std::int32_t int_field__arg, ::std::int64_t long_field__arg, float float_field__arg, double double_field__arg, ::std::string string_field__arg, ::std::string binary_field__arg, ::facebook::thrift::test::terse_write::deprecated::MyEnum enum_field__arg, ::std::vector<::std::int16_t> list_field__arg, ::std::set<::std::int16_t> set_field__arg, ::std::map<::std::int16_t, ::std::int16_t> map_field__arg);
+  DeprecatedTerseWriteWithRedundantCustomDefault(apache::thrift::FragileConstructor, bool bool_field__arg, ::std::int8_t byte_field__arg, ::std::int16_t short_field__arg, ::std::int32_t int_field__arg, ::std::int64_t long_field__arg, float float_field__arg, double double_field__arg, ::std::string string_field__arg, ::std::string binary_field__arg, ::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum enum_field__arg, ::std::vector<::std::int16_t> list_field__arg, ::std::set<::std::int16_t> set_field__arg, ::std::map<::std::int16_t, ::std::int16_t> map_field__arg);
 
   DeprecatedTerseWriteWithRedundantCustomDefault(DeprecatedTerseWriteWithRedundantCustomDefault&&) noexcept;
 
@@ -3985,7 +3985,7 @@ class DeprecatedTerseWriteWithRedundantCustomDefault final  {
  private:
   ::std::string __fbthrift_field_binary_field;
  private:
-  ::facebook::thrift::test::terse_write::deprecated::MyEnum __fbthrift_field_enum_field;
+  ::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum __fbthrift_field_enum_field;
  private:
   ::std::vector<::std::int16_t> __fbthrift_field_list_field;
  private:
@@ -4325,37 +4325,37 @@ class DeprecatedTerseWriteWithRedundantCustomDefault final  {
   }
 
   /** Glean { "field": "enum_field" } */
-  template <typename..., typename fbthrift_T = ::facebook::thrift::test::terse_write::deprecated::MyEnum>
+  template <typename..., typename fbthrift_T = ::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum>
   FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> enum_field_ref() const& {
     return {this->__fbthrift_field_enum_field, __isset.at(9), __isset.bit(9)};
   }
 
   /** Glean { "field": "enum_field" } */
-  template <typename..., typename fbthrift_T = ::facebook::thrift::test::terse_write::deprecated::MyEnum>
+  template <typename..., typename fbthrift_T = ::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum>
   FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> enum_field_ref() & {
     return {this->__fbthrift_field_enum_field, __isset.at(9), __isset.bit(9)};
   }
 
   /** Glean { "field": "enum_field" } */
-  template <typename..., typename fbthrift_T = ::facebook::thrift::test::terse_write::deprecated::MyEnum>
+  template <typename..., typename fbthrift_T = ::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum>
   FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> enum_field_ref() && {
     return {static_cast<fbthrift_T&&>(this->__fbthrift_field_enum_field), __isset.at(9), __isset.bit(9)};
   }
 
   /** Glean { "field": "enum_field" } */
-  template <typename..., typename fbthrift_T = ::facebook::thrift::test::terse_write::deprecated::MyEnum>
+  template <typename..., typename fbthrift_T = ::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum>
   FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> enum_field() const& {
     return {this->__fbthrift_field_enum_field, __isset.at(9), __isset.bit(9)};
   }
 
   /** Glean { "field": "enum_field" } */
-  template <typename..., typename fbthrift_T = ::facebook::thrift::test::terse_write::deprecated::MyEnum>
+  template <typename..., typename fbthrift_T = ::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum>
   FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> enum_field() & {
     return {this->__fbthrift_field_enum_field, __isset.at(9), __isset.bit(9)};
   }
 
   /** Glean { "field": "enum_field" } */
-  template <typename..., typename fbthrift_T = ::facebook::thrift::test::terse_write::deprecated::MyEnum>
+  template <typename..., typename fbthrift_T = ::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum>
   FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> enum_field() && {
     return {static_cast<fbthrift_T&&>(this->__fbthrift_field_enum_field), __isset.at(9), __isset.bit(9)};
   }
@@ -4566,11 +4566,11 @@ class DeprecatedTerseWriteWithRedundantCustomDefault final  {
 
   /** Glean { "field": "enum_field" } */
   [[deprecated("Use `FOO.enum_field().value()` instead of `FOO.get_enum_field()`")]]
-  ::facebook::thrift::test::terse_write::deprecated::MyEnum get_enum_field() const;
+  ::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum get_enum_field() const;
 
   /** Glean { "field": "enum_field" } */
   [[deprecated("Use `FOO.enum_field() = BAR` instead of `FOO.set_enum_field(BAR)`")]]
-  ::facebook::thrift::test::terse_write::deprecated::MyEnum& set_enum_field(::facebook::thrift::test::terse_write::deprecated::MyEnum enum_field_);
+  ::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum& set_enum_field(::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum enum_field_);
 
   /** Glean { "field": "list_field" } */
   [[deprecated("Use `FOO.list_field().value()` instead of `FOO.get_list_field()`")]]
@@ -4670,7 +4670,7 @@ class DeprecatedTerseWriteWithRedundantCustomDefault final  {
   }
 
   bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::enum_field>) const {
-    return this->__fbthrift_field_enum_field !=  ::facebook::thrift::test::terse_write::deprecated::MyEnum::ME0;
+    return this->__fbthrift_field_enum_field !=  ::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum::ME0;
   }
 
   bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::list_field>) const {
@@ -4697,14 +4697,14 @@ unsigned long DeprecatedTerseWriteWithRedundantCustomDefault::read(Protocol_* ip
 }
 
 
-} // namespace facebook::thrift::test::terse_write::deprecated
+} // namespace facebook::thrift::test::fixtures::terse_write::deprecated
 
 namespace apache::thrift {
 
-template <> struct TEnumDataStorage<::facebook::thrift::test::terse_write::deprecated::MyUnion::Type>;
+template <> struct TEnumDataStorage<::facebook::thrift::test::fixtures::terse_write::deprecated::MyUnion::Type>;
 
-template <> struct TEnumTraits<::facebook::thrift::test::terse_write::deprecated::MyUnion::Type> {
-  using type = ::facebook::thrift::test::terse_write::deprecated::MyUnion::Type;
+template <> struct TEnumTraits<::facebook::thrift::test::fixtures::terse_write::deprecated::MyUnion::Type> {
+  using type = ::facebook::thrift::test::fixtures::terse_write::deprecated::MyUnion::Type;
 
   static constexpr std::size_t const size = 0;
   static folly::Range<type const*> const values;
@@ -4723,44 +4723,44 @@ template <> struct TEnumTraits<::facebook::thrift::test::terse_write::deprecated
 } // namespace apache::thrift
 
 namespace apache::thrift::detail {
-template <> struct TSchemaAssociation<::facebook::thrift::test::terse_write::deprecated::MyStruct, false> {
+template <> struct TSchemaAssociation<::facebook::thrift::test::fixtures::terse_write::deprecated::MyStruct, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = 3152988158178856581;
-  static constexpr ::std::string_view definitionKey = {"\x03\x41\xbf\x6f\x63\x03\xdd\x0f\x17\x07\xa3\x92\x0a\x06\x3e\xa9", 16};
+  static constexpr int64_t programId = -746293781327670656;
+  static constexpr ::std::string_view definitionKey = {"\x02\x0f\xcd\xe0\x05\x9e\x54\x53\x72\xc3\x0b\xed\x60\xd5\x16\xa0", 16};
 };
-template <> struct TSchemaAssociation<::facebook::thrift::test::terse_write::deprecated::MyUnion, false> {
+template <> struct TSchemaAssociation<::facebook::thrift::test::fixtures::terse_write::deprecated::MyUnion, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = 3152988158178856581;
-  static constexpr ::std::string_view definitionKey = {"\xf0\x90\x29\x21\xeb\x6a\x25\xcd\x8b\xd3\xba\x71\x41\x17\xf0\x81", 16};
+  static constexpr int64_t programId = -746293781327670656;
+  static constexpr ::std::string_view definitionKey = {"\xf1\x3d\x6c\x7c\x64\x63\xbf\x73\x09\x90\x50\x89\xc5\xd8\x95\x3e", 16};
 };
-template <> struct TSchemaAssociation<::facebook::thrift::test::terse_write::deprecated::StructLevelTerseStruct, false> {
+template <> struct TSchemaAssociation<::facebook::thrift::test::fixtures::terse_write::deprecated::StructLevelTerseStruct, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = 3152988158178856581;
-  static constexpr ::std::string_view definitionKey = {"\xd1\xe0\xe5\xe5\xf4\x76\x48\xe0\x49\xa4\xaa\xce\x5b\x63\x34\xeb", 16};
+  static constexpr int64_t programId = -746293781327670656;
+  static constexpr ::std::string_view definitionKey = {"\x9b\x31\x6a\x99\xe1\x94\x1f\x0c\xe9\x0a\xe1\x1c\x15\x94\xfc\x89", 16};
 };
-template <> struct TSchemaAssociation<::facebook::thrift::test::terse_write::deprecated::FieldLevelTerseStruct, false> {
+template <> struct TSchemaAssociation<::facebook::thrift::test::fixtures::terse_write::deprecated::FieldLevelTerseStruct, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = 3152988158178856581;
-  static constexpr ::std::string_view definitionKey = {"\x05\x36\x29\xe1\x78\x69\x12\x8c\xb5\x6e\x69\xd7\x39\xfe\x54\x9e", 16};
+  static constexpr int64_t programId = -746293781327670656;
+  static constexpr ::std::string_view definitionKey = {"\x97\x87\x17\xb6\x0f\x96\xea\x51\xc6\xc4\xbd\xce\x81\xd6\x31\x37", 16};
 };
-template <> struct TSchemaAssociation<::facebook::thrift::test::terse_write::deprecated::CppRefStructFields, false> {
+template <> struct TSchemaAssociation<::facebook::thrift::test::fixtures::terse_write::deprecated::CppRefStructFields, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = 3152988158178856581;
-  static constexpr ::std::string_view definitionKey = {"\xb6\xdb\xea\x91\x12\xd6\xf1\x53\x1a\x03\xe3\x6b\x95\xa7\x17\x19", 16};
+  static constexpr int64_t programId = -746293781327670656;
+  static constexpr ::std::string_view definitionKey = {"\x61\xb3\xad\x8e\x9c\x69\x9c\x47\xe2\x82\x32\x87\xff\x6d\x05\x4e", 16};
 };
-template <> struct TSchemaAssociation<::facebook::thrift::test::terse_write::deprecated::DeprecatedTerseWriteWithCustomDefault, false> {
+template <> struct TSchemaAssociation<::facebook::thrift::test::fixtures::terse_write::deprecated::DeprecatedTerseWriteWithCustomDefault, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = 3152988158178856581;
-  static constexpr ::std::string_view definitionKey = {"\xfd\xe0\xf3\x73\x1b\x3b\x04\x7f\xab\x43\x57\xac\x06\x83\xfc\x2a", 16};
+  static constexpr int64_t programId = -746293781327670656;
+  static constexpr ::std::string_view definitionKey = {"\xce\xa0\xc7\xd0\x99\x8b\x1a\xc8\x0a\xfe\xca\xe8\xc3\x12\xbf\x2c", 16};
 };
-template <> struct TSchemaAssociation<::facebook::thrift::test::terse_write::deprecated::DeprecatedTerseWriteWithRedundantCustomDefault, false> {
+template <> struct TSchemaAssociation<::facebook::thrift::test::fixtures::terse_write::deprecated::DeprecatedTerseWriteWithRedundantCustomDefault, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = 3152988158178856581;
-  static constexpr ::std::string_view definitionKey = {"\x21\x42\x75\xc7\x42\xf1\x41\x59\xa8\x16\x20\xb8\x50\x3f\x3a\x98", 16};
+  static constexpr int64_t programId = -746293781327670656;
+  static constexpr ::std::string_view definitionKey = {"\x8d\x58\xe6\x83\xe3\x4a\x9f\xc1\xe2\x77\xbe\xfb\x5c\x01\x15\x0d", 16};
 };
-template <> struct TSchemaAssociation<::facebook::thrift::test::terse_write::deprecated::MyEnum, true> {
+template <> struct TSchemaAssociation<::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum, true> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = 3152988158178856581;
-  static constexpr ::std::string_view definitionKey = {"\xdc\x13\xbe\xb9\xf8\x02\x38\x98\x2f\x61\x34\xbf\x5f\x9e\x2f\x6c", 16};
+  static constexpr int64_t programId = -746293781327670656;
+  static constexpr ::std::string_view definitionKey = {"\xde\x46\xc0\x53\x6f\x1d\x75\x95\x50\x4a\x24\xa1\x0d\xf2\xdf\x6b", 16};
 };
 } // namespace apache::thrift::detail

@@ -6,7 +6,7 @@
  */
 #include "thrift/compiler/test/fixtures/terse_write/gen-cpp2/deprecated_terse_write_types_custom_protocol.h"
 
-namespace facebook::thrift::test::terse_write::deprecated {
+namespace facebook::thrift::test::fixtures::terse_write::deprecated {
 
 template void MyStruct::readNoXfer<>(apache::thrift::CompactProtocolReader*);
 template uint32_t MyStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
@@ -43,4 +43,4 @@ template uint32_t DeprecatedTerseWriteWithRedundantCustomDefault::write<>(apache
 template uint32_t DeprecatedTerseWriteWithRedundantCustomDefault::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t DeprecatedTerseWriteWithRedundantCustomDefault::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
-} // namespace facebook::thrift::test::terse_write::deprecated
+} // namespace facebook::thrift::test::fixtures::terse_write::deprecated

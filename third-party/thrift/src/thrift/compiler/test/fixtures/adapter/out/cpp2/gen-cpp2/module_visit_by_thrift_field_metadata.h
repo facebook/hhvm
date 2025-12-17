@@ -14,7 +14,7 @@ namespace thrift {
 namespace detail {
 
 template <>
-struct VisitByFieldId<::facebook::thrift::test::MyAnnotation> {
+struct VisitByFieldId<::facebook::thrift::test::fixtures::adapter::MyAnnotation> {
   template <typename F, typename T>
   void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
@@ -23,13 +23,13 @@ struct VisitByFieldId<::facebook::thrift::test::MyAnnotation> {
     case 2:
       return f(1, static_cast<T&&>(t).color_ref());
     default:
-      throwInvalidThriftId(fieldId, "::facebook::thrift::test::MyAnnotation");
+      throwInvalidThriftId(fieldId, "::facebook::thrift::test::fixtures::adapter::MyAnnotation");
     }
   }
 };
 
 template <>
-struct VisitByFieldId<::facebook::thrift::test::Foo> {
+struct VisitByFieldId<::facebook::thrift::test::fixtures::adapter::Foo> {
   template <typename F, typename T>
   void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
@@ -64,13 +64,13 @@ struct VisitByFieldId<::facebook::thrift::test::Foo> {
     case 15:
       return f(14, static_cast<T&&>(t).adapted_list_nested_ref());
     default:
-      throwInvalidThriftId(fieldId, "::facebook::thrift::test::Foo");
+      throwInvalidThriftId(fieldId, "::facebook::thrift::test::fixtures::adapter::Foo");
     }
   }
 };
 
 template <>
-struct VisitByFieldId<::facebook::thrift::test::Baz> {
+struct VisitByFieldId<::facebook::thrift::test::fixtures::adapter::Baz> {
   template <typename F, typename T>
   void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
@@ -85,13 +85,13 @@ struct VisitByFieldId<::facebook::thrift::test::Baz> {
     case 9:
       return f(4, static_cast<T&&>(t).longField_ref());
     default:
-      throwInvalidThriftId(fieldId, "::facebook::thrift::test::Baz");
+      throwInvalidThriftId(fieldId, "::facebook::thrift::test::fixtures::adapter::Baz");
     }
   }
 };
 
 template <>
-struct VisitByFieldId<::facebook::thrift::test::Bar> {
+struct VisitByFieldId<::facebook::thrift::test::fixtures::adapter::Bar> {
   template <typename F, typename T>
   void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
@@ -112,39 +112,39 @@ struct VisitByFieldId<::facebook::thrift::test::Bar> {
     case 8:
       return f(7, static_cast<T&&>(t).structListFieldWithTypedef_ref());
     default:
-      throwInvalidThriftId(fieldId, "::facebook::thrift::test::Bar");
+      throwInvalidThriftId(fieldId, "::facebook::thrift::test::fixtures::adapter::Bar");
     }
   }
 };
 
 template <>
-struct VisitByFieldId<::facebook::thrift::test::detail::DirectlyAdapted> {
+struct VisitByFieldId<::facebook::thrift::test::fixtures::adapter::detail::DirectlyAdapted> {
   template <typename F, typename T>
   void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).field_ref());
     default:
-      throwInvalidThriftId(fieldId, "::facebook::thrift::test::detail::DirectlyAdapted");
+      throwInvalidThriftId(fieldId, "::facebook::thrift::test::fixtures::adapter::detail::DirectlyAdapted");
     }
   }
 };
 
 template <>
-struct VisitByFieldId<::facebook::thrift::test::detail::IndependentDirectlyAdapted> {
+struct VisitByFieldId<::facebook::thrift::test::fixtures::adapter::detail::IndependentDirectlyAdapted> {
   template <typename F, typename T>
   void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).field_ref());
     default:
-      throwInvalidThriftId(fieldId, "::facebook::thrift::test::detail::IndependentDirectlyAdapted");
+      throwInvalidThriftId(fieldId, "::facebook::thrift::test::fixtures::adapter::detail::IndependentDirectlyAdapted");
     }
   }
 };
 
 template <>
-struct VisitByFieldId<::facebook::thrift::test::StructWithFieldAdapter> {
+struct VisitByFieldId<::facebook::thrift::test::fixtures::adapter::StructWithFieldAdapter> {
   template <typename F, typename T>
   void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
@@ -157,13 +157,13 @@ struct VisitByFieldId<::facebook::thrift::test::StructWithFieldAdapter> {
     case 4:
       return f(3, static_cast<T&&>(t).opt_boxed_field_ref());
     default:
-      throwInvalidThriftId(fieldId, "::facebook::thrift::test::StructWithFieldAdapter");
+      throwInvalidThriftId(fieldId, "::facebook::thrift::test::fixtures::adapter::StructWithFieldAdapter");
     }
   }
 };
 
 template <>
-struct VisitByFieldId<::facebook::thrift::test::TerseAdaptedFields> {
+struct VisitByFieldId<::facebook::thrift::test::fixtures::adapter::TerseAdaptedFields> {
   template <typename F, typename T>
   void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
@@ -174,50 +174,50 @@ struct VisitByFieldId<::facebook::thrift::test::TerseAdaptedFields> {
     case 3:
       return f(2, static_cast<T&&>(t).set_field_ref());
     default:
-      throwInvalidThriftId(fieldId, "::facebook::thrift::test::TerseAdaptedFields");
+      throwInvalidThriftId(fieldId, "::facebook::thrift::test::fixtures::adapter::TerseAdaptedFields");
     }
   }
 };
 
 template <>
-struct VisitByFieldId<::facebook::thrift::test::B> {
+struct VisitByFieldId<::facebook::thrift::test::fixtures::adapter::B> {
   template <typename F, typename T>
   void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).a_ref());
     default:
-      throwInvalidThriftId(fieldId, "::facebook::thrift::test::B");
+      throwInvalidThriftId(fieldId, "::facebook::thrift::test::fixtures::adapter::B");
     }
   }
 };
 
 template <>
-struct VisitByFieldId<::facebook::thrift::test::A> {
+struct VisitByFieldId<::facebook::thrift::test::fixtures::adapter::A> {
   template <typename F, typename T>
   void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     default:
-      throwInvalidThriftId(fieldId, "::facebook::thrift::test::A");
+      throwInvalidThriftId(fieldId, "::facebook::thrift::test::fixtures::adapter::A");
     }
   }
 };
 
 template <>
-struct VisitByFieldId<::facebook::thrift::test::Config> {
+struct VisitByFieldId<::facebook::thrift::test::fixtures::adapter::Config> {
   template <typename F, typename T>
   void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).path_ref());
     default:
-      throwInvalidThriftId(fieldId, "::facebook::thrift::test::Config");
+      throwInvalidThriftId(fieldId, "::facebook::thrift::test::fixtures::adapter::Config");
     }
   }
 };
 
 template <>
-struct VisitByFieldId<::facebook::thrift::test::MyStruct> {
+struct VisitByFieldId<::facebook::thrift::test::fixtures::adapter::MyStruct> {
   template <typename F, typename T>
   void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
@@ -226,13 +226,13 @@ struct VisitByFieldId<::facebook::thrift::test::MyStruct> {
     case 2:
       return f(1, static_cast<T&&>(t).set_string_ref());
     default:
-      throwInvalidThriftId(fieldId, "::facebook::thrift::test::MyStruct");
+      throwInvalidThriftId(fieldId, "::facebook::thrift::test::fixtures::adapter::MyStruct");
     }
   }
 };
 
 template <>
-struct VisitByFieldId<::facebook::thrift::test::AdaptTestStruct> {
+struct VisitByFieldId<::facebook::thrift::test::fixtures::adapter::AdaptTestStruct> {
   template <typename F, typename T>
   void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
@@ -257,13 +257,13 @@ struct VisitByFieldId<::facebook::thrift::test::AdaptTestStruct> {
     case 10:
       return f(9, static_cast<T&&>(t).binary_data_ref());
     default:
-      throwInvalidThriftId(fieldId, "::facebook::thrift::test::AdaptTestStruct");
+      throwInvalidThriftId(fieldId, "::facebook::thrift::test::fixtures::adapter::AdaptTestStruct");
     }
   }
 };
 
 template <>
-struct VisitByFieldId<::facebook::thrift::test::AdaptTemplatedTestStruct> {
+struct VisitByFieldId<::facebook::thrift::test::fixtures::adapter::AdaptTemplatedTestStruct> {
   template <typename F, typename T>
   void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
@@ -312,26 +312,26 @@ struct VisitByFieldId<::facebook::thrift::test::AdaptTemplatedTestStruct> {
     case 22:
       return f(21, static_cast<T&&>(t).doubleTypedefBool_ref());
     default:
-      throwInvalidThriftId(fieldId, "::facebook::thrift::test::AdaptTemplatedTestStruct");
+      throwInvalidThriftId(fieldId, "::facebook::thrift::test::fixtures::adapter::AdaptTemplatedTestStruct");
     }
   }
 };
 
 template <>
-struct VisitByFieldId<::facebook::thrift::test::AdaptTemplatedNestedTestStruct> {
+struct VisitByFieldId<::facebook::thrift::test::fixtures::adapter::AdaptTemplatedNestedTestStruct> {
   template <typename F, typename T>
   void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).adaptedStruct_ref());
     default:
-      throwInvalidThriftId(fieldId, "::facebook::thrift::test::AdaptTemplatedNestedTestStruct");
+      throwInvalidThriftId(fieldId, "::facebook::thrift::test::fixtures::adapter::AdaptTemplatedNestedTestStruct");
     }
   }
 };
 
 template <>
-struct VisitByFieldId<::facebook::thrift::test::ThriftAdaptTestUnion> {
+struct VisitByFieldId<::facebook::thrift::test::fixtures::adapter::ThriftAdaptTestUnion> {
   template <typename F, typename T>
   void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
@@ -340,39 +340,39 @@ struct VisitByFieldId<::facebook::thrift::test::ThriftAdaptTestUnion> {
     case 2:
       return f(1, static_cast<T&&>(t).custom_ref());
     default:
-      throwInvalidThriftId(fieldId, "::facebook::thrift::test::ThriftAdaptTestUnion");
+      throwInvalidThriftId(fieldId, "::facebook::thrift::test::fixtures::adapter::ThriftAdaptTestUnion");
     }
   }
 };
 
 template <>
-struct VisitByFieldId<::facebook::thrift::test::ThriftAdaptedStruct> {
+struct VisitByFieldId<::facebook::thrift::test::fixtures::adapter::ThriftAdaptedStruct> {
   template <typename F, typename T>
   void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).data_ref());
     default:
-      throwInvalidThriftId(fieldId, "::facebook::thrift::test::ThriftAdaptedStruct");
+      throwInvalidThriftId(fieldId, "::facebook::thrift::test::fixtures::adapter::ThriftAdaptedStruct");
     }
   }
 };
 
 template <>
-struct VisitByFieldId<::facebook::thrift::test::detail::DirectlyAdaptedStruct> {
+struct VisitByFieldId<::facebook::thrift::test::fixtures::adapter::detail::DirectlyAdaptedStruct> {
   template <typename F, typename T>
   void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).data_ref());
     default:
-      throwInvalidThriftId(fieldId, "::facebook::thrift::test::detail::DirectlyAdaptedStruct");
+      throwInvalidThriftId(fieldId, "::facebook::thrift::test::fixtures::adapter::detail::DirectlyAdaptedStruct");
     }
   }
 };
 
 template <>
-struct VisitByFieldId<::facebook::thrift::test::StructFieldAdaptedStruct> {
+struct VisitByFieldId<::facebook::thrift::test::fixtures::adapter::StructFieldAdaptedStruct> {
   template <typename F, typename T>
   void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
@@ -385,148 +385,148 @@ struct VisitByFieldId<::facebook::thrift::test::StructFieldAdaptedStruct> {
     case 4:
       return f(3, static_cast<T&&>(t).typedefOfAdapted_ref());
     default:
-      throwInvalidThriftId(fieldId, "::facebook::thrift::test::StructFieldAdaptedStruct");
+      throwInvalidThriftId(fieldId, "::facebook::thrift::test::fixtures::adapter::StructFieldAdaptedStruct");
     }
   }
 };
 
 template <>
-struct VisitByFieldId<::facebook::thrift::test::CircularAdaptee> {
+struct VisitByFieldId<::facebook::thrift::test::fixtures::adapter::CircularAdaptee> {
   template <typename F, typename T>
   void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).field_ref());
     default:
-      throwInvalidThriftId(fieldId, "::facebook::thrift::test::CircularAdaptee");
+      throwInvalidThriftId(fieldId, "::facebook::thrift::test::fixtures::adapter::CircularAdaptee");
     }
   }
 };
 
 template <>
-struct VisitByFieldId<::facebook::thrift::test::CircularStruct> {
+struct VisitByFieldId<::facebook::thrift::test::fixtures::adapter::CircularStruct> {
   template <typename F, typename T>
   void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).field_ref());
     default:
-      throwInvalidThriftId(fieldId, "::facebook::thrift::test::CircularStruct");
+      throwInvalidThriftId(fieldId, "::facebook::thrift::test::fixtures::adapter::CircularStruct");
     }
   }
 };
 
 template <>
-struct VisitByFieldId<::facebook::thrift::test::ReorderedStruct> {
+struct VisitByFieldId<::facebook::thrift::test::fixtures::adapter::ReorderedStruct> {
   template <typename F, typename T>
   void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).reordered_dependent_adapted_ref());
     default:
-      throwInvalidThriftId(fieldId, "::facebook::thrift::test::ReorderedStruct");
+      throwInvalidThriftId(fieldId, "::facebook::thrift::test::fixtures::adapter::ReorderedStruct");
     }
   }
 };
 
 template <>
-struct VisitByFieldId<::facebook::thrift::test::detail::DeclaredAfterStruct> {
+struct VisitByFieldId<::facebook::thrift::test::fixtures::adapter::detail::DeclaredAfterStruct> {
   template <typename F, typename T>
   void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     default:
-      throwInvalidThriftId(fieldId, "::facebook::thrift::test::detail::DeclaredAfterStruct");
+      throwInvalidThriftId(fieldId, "::facebook::thrift::test::fixtures::adapter::detail::DeclaredAfterStruct");
     }
   }
 };
 
 template <>
-struct VisitByFieldId<::facebook::thrift::test::UnderlyingRenamedStruct> {
-  template <typename F, typename T>
-  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
-    switch (fieldId) {
-    case 1:
-      return f(0, static_cast<T&&>(t).data_ref());
-    default:
-      throwInvalidThriftId(fieldId, "::facebook::thrift::test::UnderlyingRenamedStruct");
-    }
-  }
-};
-
-template <>
-struct VisitByFieldId<::facebook::thrift::test::UnderlyingSameNamespaceStruct> {
+struct VisitByFieldId<::facebook::thrift::test::fixtures::adapter::UnderlyingRenamedStruct> {
   template <typename F, typename T>
   void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).data_ref());
     default:
-      throwInvalidThriftId(fieldId, "::facebook::thrift::test::UnderlyingSameNamespaceStruct");
+      throwInvalidThriftId(fieldId, "::facebook::thrift::test::fixtures::adapter::UnderlyingRenamedStruct");
     }
   }
 };
 
 template <>
-struct VisitByFieldId<::facebook::thrift::test::detail::HeapAllocated> {
+struct VisitByFieldId<::facebook::thrift::test::fixtures::adapter::UnderlyingSameNamespaceStruct> {
+  template <typename F, typename T>
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
+    switch (fieldId) {
+    case 1:
+      return f(0, static_cast<T&&>(t).data_ref());
+    default:
+      throwInvalidThriftId(fieldId, "::facebook::thrift::test::fixtures::adapter::UnderlyingSameNamespaceStruct");
+    }
+  }
+};
+
+template <>
+struct VisitByFieldId<::facebook::thrift::test::fixtures::adapter::detail::HeapAllocated> {
   template <typename F, typename T>
   void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     default:
-      throwInvalidThriftId(fieldId, "::facebook::thrift::test::detail::HeapAllocated");
+      throwInvalidThriftId(fieldId, "::facebook::thrift::test::fixtures::adapter::detail::HeapAllocated");
     }
   }
 };
 
 template <>
-struct VisitByFieldId<::facebook::thrift::test::MoveOnly> {
+struct VisitByFieldId<::facebook::thrift::test::fixtures::adapter::MoveOnly> {
   template <typename F, typename T>
   void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).ptr_ref());
     default:
-      throwInvalidThriftId(fieldId, "::facebook::thrift::test::MoveOnly");
+      throwInvalidThriftId(fieldId, "::facebook::thrift::test::fixtures::adapter::MoveOnly");
     }
   }
 };
 
 template <>
-struct VisitByFieldId<::facebook::thrift::test::AlsoMoveOnly> {
+struct VisitByFieldId<::facebook::thrift::test::fixtures::adapter::AlsoMoveOnly> {
   template <typename F, typename T>
   void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).ptr_ref());
     default:
-      throwInvalidThriftId(fieldId, "::facebook::thrift::test::AlsoMoveOnly");
+      throwInvalidThriftId(fieldId, "::facebook::thrift::test::fixtures::adapter::AlsoMoveOnly");
     }
   }
 };
 
 template <>
-struct VisitByFieldId<::facebook::thrift::test::ApplyAdapter> {
+struct VisitByFieldId<::facebook::thrift::test::fixtures::adapter::ApplyAdapter> {
   template <typename F, typename T>
   void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     default:
-      throwInvalidThriftId(fieldId, "::facebook::thrift::test::ApplyAdapter");
+      throwInvalidThriftId(fieldId, "::facebook::thrift::test::fixtures::adapter::ApplyAdapter");
     }
   }
 };
 
 template <>
-struct VisitByFieldId<::facebook::thrift::test::detail::TransitiveAdapted> {
+struct VisitByFieldId<::facebook::thrift::test::fixtures::adapter::detail::TransitiveAdapted> {
   template <typename F, typename T>
   void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     default:
-      throwInvalidThriftId(fieldId, "::facebook::thrift::test::detail::TransitiveAdapted");
+      throwInvalidThriftId(fieldId, "::facebook::thrift::test::fixtures::adapter::detail::TransitiveAdapted");
     }
   }
 };
 
 template <>
-struct VisitByFieldId<::facebook::thrift::test::CountingStruct> {
+struct VisitByFieldId<::facebook::thrift::test::fixtures::adapter::CountingStruct> {
   template <typename F, typename T>
   void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
@@ -537,46 +537,46 @@ struct VisitByFieldId<::facebook::thrift::test::CountingStruct> {
     case 3:
       return f(2, static_cast<T&&>(t).regularString_ref());
     default:
-      throwInvalidThriftId(fieldId, "::facebook::thrift::test::CountingStruct");
+      throwInvalidThriftId(fieldId, "::facebook::thrift::test::fixtures::adapter::CountingStruct");
     }
   }
 };
 
 template <>
-struct VisitByFieldId<::facebook::thrift::test::Person> {
+struct VisitByFieldId<::facebook::thrift::test::fixtures::adapter::Person> {
   template <typename F, typename T>
   void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).name_ref());
     default:
-      throwInvalidThriftId(fieldId, "::facebook::thrift::test::Person");
+      throwInvalidThriftId(fieldId, "::facebook::thrift::test::fixtures::adapter::Person");
     }
   }
 };
 
 template <>
-struct VisitByFieldId<::facebook::thrift::test::Person2> {
+struct VisitByFieldId<::facebook::thrift::test::fixtures::adapter::Person2> {
   template <typename F, typename T>
   void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).name_ref());
     default:
-      throwInvalidThriftId(fieldId, "::facebook::thrift::test::Person2");
+      throwInvalidThriftId(fieldId, "::facebook::thrift::test::fixtures::adapter::Person2");
     }
   }
 };
 
 template <>
-struct VisitByFieldId<::facebook::thrift::test::Renamed> {
+struct VisitByFieldId<::facebook::thrift::test::fixtures::adapter::Renamed> {
   template <typename F, typename T>
   void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).field_ref());
     default:
-      throwInvalidThriftId(fieldId, "::facebook::thrift::test::Renamed");
+      throwInvalidThriftId(fieldId, "::facebook::thrift::test::fixtures::adapter::Renamed");
     }
   }
 };

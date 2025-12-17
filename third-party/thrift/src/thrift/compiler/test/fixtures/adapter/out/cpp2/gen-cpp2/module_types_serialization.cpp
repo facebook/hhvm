@@ -14,11 +14,11 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
-void TccStructTraits<::facebook::thrift::test::MyAnnotation>::translateFieldName(
+void TccStructTraits<::facebook::thrift::test::fixtures::adapter::MyAnnotation>::translateFieldName(
     std::string_view _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::MyAnnotation>;
+  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::fixtures::adapter::MyAnnotation>;
   static const st::translate_field_name_table table{
       data::fields_size,
       data::fields_names.data(),
@@ -35,11 +35,11 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
-void TccStructTraits<::facebook::thrift::test::Foo>::translateFieldName(
+void TccStructTraits<::facebook::thrift::test::fixtures::adapter::Foo>::translateFieldName(
     std::string_view _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::Foo>;
+  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::fixtures::adapter::Foo>;
   static const st::translate_field_name_table table{
       data::fields_size,
       data::fields_names.data(),
@@ -56,11 +56,11 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
-void TccStructTraits<::facebook::thrift::test::Baz>::translateFieldName(
+void TccStructTraits<::facebook::thrift::test::fixtures::adapter::Baz>::translateFieldName(
     std::string_view _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::Baz>;
+  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::fixtures::adapter::Baz>;
   static const st::translate_field_name_table table{
       data::fields_size,
       data::fields_names.data(),
@@ -77,11 +77,11 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
-void TccStructTraits<::facebook::thrift::test::Bar>::translateFieldName(
+void TccStructTraits<::facebook::thrift::test::fixtures::adapter::Bar>::translateFieldName(
     std::string_view _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::Bar>;
+  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::fixtures::adapter::Bar>;
   static const st::translate_field_name_table table{
       data::fields_size,
       data::fields_names.data(),
@@ -98,11 +98,11 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
-void TccStructTraits<::facebook::thrift::test::detail::DirectlyAdapted>::translateFieldName(
+void TccStructTraits<::facebook::thrift::test::fixtures::adapter::detail::DirectlyAdapted>::translateFieldName(
     std::string_view _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::detail::DirectlyAdapted>;
+  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::fixtures::adapter::detail::DirectlyAdapted>;
   static const st::translate_field_name_table table{
       data::fields_size,
       data::fields_names.data(),
@@ -119,11 +119,11 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
-void TccStructTraits<::facebook::thrift::test::detail::IndependentDirectlyAdapted>::translateFieldName(
+void TccStructTraits<::facebook::thrift::test::fixtures::adapter::detail::IndependentDirectlyAdapted>::translateFieldName(
     std::string_view _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::detail::IndependentDirectlyAdapted>;
+  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::fixtures::adapter::detail::IndependentDirectlyAdapted>;
   static const st::translate_field_name_table table{
       data::fields_size,
       data::fields_names.data(),
@@ -140,11 +140,11 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
-void TccStructTraits<::facebook::thrift::test::StructWithFieldAdapter>::translateFieldName(
+void TccStructTraits<::facebook::thrift::test::fixtures::adapter::StructWithFieldAdapter>::translateFieldName(
     std::string_view _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::StructWithFieldAdapter>;
+  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::fixtures::adapter::StructWithFieldAdapter>;
   static const st::translate_field_name_table table{
       data::fields_size,
       data::fields_names.data(),
@@ -161,11 +161,11 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
-void TccStructTraits<::facebook::thrift::test::TerseAdaptedFields>::translateFieldName(
+void TccStructTraits<::facebook::thrift::test::fixtures::adapter::TerseAdaptedFields>::translateFieldName(
     std::string_view _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::TerseAdaptedFields>;
+  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::fixtures::adapter::TerseAdaptedFields>;
   static const st::translate_field_name_table table{
       data::fields_size,
       data::fields_names.data(),
@@ -182,11 +182,11 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
-void TccStructTraits<::facebook::thrift::test::B>::translateFieldName(
+void TccStructTraits<::facebook::thrift::test::fixtures::adapter::B>::translateFieldName(
     std::string_view _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::B>;
+  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::fixtures::adapter::B>;
   static const st::translate_field_name_table table{
       data::fields_size,
       data::fields_names.data(),
@@ -203,11 +203,11 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
-void TccStructTraits<::facebook::thrift::test::A>::translateFieldName(
+void TccStructTraits<::facebook::thrift::test::fixtures::adapter::A>::translateFieldName(
     std::string_view _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::A>;
+  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::fixtures::adapter::A>;
   static const st::translate_field_name_table table{
       data::fields_size,
       data::fields_names.data(),
@@ -224,11 +224,11 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
-void TccStructTraits<::facebook::thrift::test::Config>::translateFieldName(
+void TccStructTraits<::facebook::thrift::test::fixtures::adapter::Config>::translateFieldName(
     std::string_view _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::Config>;
+  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::fixtures::adapter::Config>;
   static const st::translate_field_name_table table{
       data::fields_size,
       data::fields_names.data(),
@@ -245,11 +245,11 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
-void TccStructTraits<::facebook::thrift::test::MyStruct>::translateFieldName(
+void TccStructTraits<::facebook::thrift::test::fixtures::adapter::MyStruct>::translateFieldName(
     std::string_view _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::MyStruct>;
+  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::fixtures::adapter::MyStruct>;
   static const st::translate_field_name_table table{
       data::fields_size,
       data::fields_names.data(),
@@ -266,11 +266,11 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
-void TccStructTraits<::facebook::thrift::test::AdaptTestStruct>::translateFieldName(
+void TccStructTraits<::facebook::thrift::test::fixtures::adapter::AdaptTestStruct>::translateFieldName(
     std::string_view _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::AdaptTestStruct>;
+  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::fixtures::adapter::AdaptTestStruct>;
   static const st::translate_field_name_table table{
       data::fields_size,
       data::fields_names.data(),
@@ -287,11 +287,11 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
-void TccStructTraits<::facebook::thrift::test::AdaptTemplatedTestStruct>::translateFieldName(
+void TccStructTraits<::facebook::thrift::test::fixtures::adapter::AdaptTemplatedTestStruct>::translateFieldName(
     std::string_view _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::AdaptTemplatedTestStruct>;
+  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::fixtures::adapter::AdaptTemplatedTestStruct>;
   static const st::translate_field_name_table table{
       data::fields_size,
       data::fields_names.data(),
@@ -308,11 +308,11 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
-void TccStructTraits<::facebook::thrift::test::AdaptTemplatedNestedTestStruct>::translateFieldName(
+void TccStructTraits<::facebook::thrift::test::fixtures::adapter::AdaptTemplatedNestedTestStruct>::translateFieldName(
     std::string_view _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::AdaptTemplatedNestedTestStruct>;
+  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::fixtures::adapter::AdaptTemplatedNestedTestStruct>;
   static const st::translate_field_name_table table{
       data::fields_size,
       data::fields_names.data(),
@@ -329,11 +329,11 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
-void TccStructTraits<::facebook::thrift::test::ThriftAdaptTestUnion>::translateFieldName(
+void TccStructTraits<::facebook::thrift::test::fixtures::adapter::ThriftAdaptTestUnion>::translateFieldName(
     std::string_view _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::ThriftAdaptTestUnion>;
+  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::fixtures::adapter::ThriftAdaptTestUnion>;
   static const st::translate_field_name_table table{
       data::fields_size,
       data::fields_names.data(),
@@ -350,11 +350,11 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
-void TccStructTraits<::facebook::thrift::test::ThriftAdaptedStruct>::translateFieldName(
+void TccStructTraits<::facebook::thrift::test::fixtures::adapter::ThriftAdaptedStruct>::translateFieldName(
     std::string_view _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::ThriftAdaptedStruct>;
+  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::fixtures::adapter::ThriftAdaptedStruct>;
   static const st::translate_field_name_table table{
       data::fields_size,
       data::fields_names.data(),
@@ -371,11 +371,11 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
-void TccStructTraits<::facebook::thrift::test::detail::DirectlyAdaptedStruct>::translateFieldName(
+void TccStructTraits<::facebook::thrift::test::fixtures::adapter::detail::DirectlyAdaptedStruct>::translateFieldName(
     std::string_view _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::detail::DirectlyAdaptedStruct>;
+  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::fixtures::adapter::detail::DirectlyAdaptedStruct>;
   static const st::translate_field_name_table table{
       data::fields_size,
       data::fields_names.data(),
@@ -392,11 +392,11 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
-void TccStructTraits<::facebook::thrift::test::StructFieldAdaptedStruct>::translateFieldName(
+void TccStructTraits<::facebook::thrift::test::fixtures::adapter::StructFieldAdaptedStruct>::translateFieldName(
     std::string_view _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::StructFieldAdaptedStruct>;
+  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::fixtures::adapter::StructFieldAdaptedStruct>;
   static const st::translate_field_name_table table{
       data::fields_size,
       data::fields_names.data(),
@@ -413,11 +413,11 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
-void TccStructTraits<::facebook::thrift::test::CircularAdaptee>::translateFieldName(
+void TccStructTraits<::facebook::thrift::test::fixtures::adapter::CircularAdaptee>::translateFieldName(
     std::string_view _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::CircularAdaptee>;
+  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::fixtures::adapter::CircularAdaptee>;
   static const st::translate_field_name_table table{
       data::fields_size,
       data::fields_names.data(),
@@ -434,11 +434,11 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
-void TccStructTraits<::facebook::thrift::test::CircularStruct>::translateFieldName(
+void TccStructTraits<::facebook::thrift::test::fixtures::adapter::CircularStruct>::translateFieldName(
     std::string_view _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::CircularStruct>;
+  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::fixtures::adapter::CircularStruct>;
   static const st::translate_field_name_table table{
       data::fields_size,
       data::fields_names.data(),
@@ -455,11 +455,11 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
-void TccStructTraits<::facebook::thrift::test::ReorderedStruct>::translateFieldName(
+void TccStructTraits<::facebook::thrift::test::fixtures::adapter::ReorderedStruct>::translateFieldName(
     std::string_view _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::ReorderedStruct>;
+  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::fixtures::adapter::ReorderedStruct>;
   static const st::translate_field_name_table table{
       data::fields_size,
       data::fields_names.data(),
@@ -476,11 +476,11 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
-void TccStructTraits<::facebook::thrift::test::detail::DeclaredAfterStruct>::translateFieldName(
+void TccStructTraits<::facebook::thrift::test::fixtures::adapter::detail::DeclaredAfterStruct>::translateFieldName(
     std::string_view _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::detail::DeclaredAfterStruct>;
+  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::fixtures::adapter::detail::DeclaredAfterStruct>;
   static const st::translate_field_name_table table{
       data::fields_size,
       data::fields_names.data(),
@@ -497,11 +497,11 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
-void TccStructTraits<::facebook::thrift::test::UnderlyingRenamedStruct>::translateFieldName(
+void TccStructTraits<::facebook::thrift::test::fixtures::adapter::UnderlyingRenamedStruct>::translateFieldName(
     std::string_view _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::UnderlyingRenamedStruct>;
+  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::fixtures::adapter::UnderlyingRenamedStruct>;
   static const st::translate_field_name_table table{
       data::fields_size,
       data::fields_names.data(),
@@ -518,11 +518,11 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
-void TccStructTraits<::facebook::thrift::test::UnderlyingSameNamespaceStruct>::translateFieldName(
+void TccStructTraits<::facebook::thrift::test::fixtures::adapter::UnderlyingSameNamespaceStruct>::translateFieldName(
     std::string_view _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::UnderlyingSameNamespaceStruct>;
+  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::fixtures::adapter::UnderlyingSameNamespaceStruct>;
   static const st::translate_field_name_table table{
       data::fields_size,
       data::fields_names.data(),
@@ -539,11 +539,11 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
-void TccStructTraits<::facebook::thrift::test::detail::HeapAllocated>::translateFieldName(
+void TccStructTraits<::facebook::thrift::test::fixtures::adapter::detail::HeapAllocated>::translateFieldName(
     std::string_view _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::detail::HeapAllocated>;
+  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::fixtures::adapter::detail::HeapAllocated>;
   static const st::translate_field_name_table table{
       data::fields_size,
       data::fields_names.data(),
@@ -560,11 +560,11 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
-void TccStructTraits<::facebook::thrift::test::MoveOnly>::translateFieldName(
+void TccStructTraits<::facebook::thrift::test::fixtures::adapter::MoveOnly>::translateFieldName(
     std::string_view _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::MoveOnly>;
+  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::fixtures::adapter::MoveOnly>;
   static const st::translate_field_name_table table{
       data::fields_size,
       data::fields_names.data(),
@@ -581,11 +581,11 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
-void TccStructTraits<::facebook::thrift::test::AlsoMoveOnly>::translateFieldName(
+void TccStructTraits<::facebook::thrift::test::fixtures::adapter::AlsoMoveOnly>::translateFieldName(
     std::string_view _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::AlsoMoveOnly>;
+  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::fixtures::adapter::AlsoMoveOnly>;
   static const st::translate_field_name_table table{
       data::fields_size,
       data::fields_names.data(),
@@ -602,11 +602,11 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
-void TccStructTraits<::facebook::thrift::test::ApplyAdapter>::translateFieldName(
+void TccStructTraits<::facebook::thrift::test::fixtures::adapter::ApplyAdapter>::translateFieldName(
     std::string_view _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::ApplyAdapter>;
+  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::fixtures::adapter::ApplyAdapter>;
   static const st::translate_field_name_table table{
       data::fields_size,
       data::fields_names.data(),
@@ -623,11 +623,11 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
-void TccStructTraits<::facebook::thrift::test::detail::TransitiveAdapted>::translateFieldName(
+void TccStructTraits<::facebook::thrift::test::fixtures::adapter::detail::TransitiveAdapted>::translateFieldName(
     std::string_view _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::detail::TransitiveAdapted>;
+  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::fixtures::adapter::detail::TransitiveAdapted>;
   static const st::translate_field_name_table table{
       data::fields_size,
       data::fields_names.data(),
@@ -644,11 +644,11 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
-void TccStructTraits<::facebook::thrift::test::CountingStruct>::translateFieldName(
+void TccStructTraits<::facebook::thrift::test::fixtures::adapter::CountingStruct>::translateFieldName(
     std::string_view _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::CountingStruct>;
+  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::fixtures::adapter::CountingStruct>;
   static const st::translate_field_name_table table{
       data::fields_size,
       data::fields_names.data(),
@@ -665,11 +665,11 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
-void TccStructTraits<::facebook::thrift::test::Person>::translateFieldName(
+void TccStructTraits<::facebook::thrift::test::fixtures::adapter::Person>::translateFieldName(
     std::string_view _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::Person>;
+  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::fixtures::adapter::Person>;
   static const st::translate_field_name_table table{
       data::fields_size,
       data::fields_names.data(),
@@ -686,11 +686,11 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
-void TccStructTraits<::facebook::thrift::test::Person2>::translateFieldName(
+void TccStructTraits<::facebook::thrift::test::fixtures::adapter::Person2>::translateFieldName(
     std::string_view _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::Person2>;
+  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::fixtures::adapter::Person2>;
   static const st::translate_field_name_table table{
       data::fields_size,
       data::fields_names.data(),
@@ -707,11 +707,11 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
-void TccStructTraits<::facebook::thrift::test::Renamed>::translateFieldName(
+void TccStructTraits<::facebook::thrift::test::fixtures::adapter::Renamed>::translateFieldName(
     std::string_view _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::Renamed>;
+  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::fixtures::adapter::Renamed>;
   static const st::translate_field_name_table table{
       data::fields_size,
       data::fields_names.data(),
@@ -724,7 +724,7 @@ void TccStructTraits<::facebook::thrift::test::Renamed>::translateFieldName(
 } // namespace thrift
 } // namespace apache
 
-namespace facebook::thrift::test {
+namespace facebook::thrift::test::fixtures::adapter {
 
 
 
@@ -840,4 +840,4 @@ namespace detail {
 
 
 
-} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test::fixtures::adapter

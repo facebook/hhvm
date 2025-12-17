@@ -7,7 +7,7 @@
   "package": {
     "domain_prefix": "facebook",
     "domain_suffix": "com",
-    "path": "thrift/compiler/test/fixtures/default_values_rectification",
+    "path": "thrift/compiler/test/fixtures/default_values_rectification_before",
     "filename": "module"
   },
   "structs" :

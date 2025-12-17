@@ -252,7 +252,7 @@ impl ::fbthrift::GetTType for MyEnum {
 
 impl ::fbthrift::GetUri for self::MyEnum {
     fn uri() -> &'static ::std::primitive::str {
-        "facebook.com/thrift/test/terse_write/MyEnum"
+        "facebook.com/thrift/test/fixtures/terse_write/MyEnum"
     }
 }
 
@@ -305,7 +305,7 @@ impl ::fbthrift::GetTType for self::MyStruct {
 
 impl ::fbthrift::GetUri for self::MyStruct {
     fn uri() -> &'static ::std::primitive::str {
-        "facebook.com/thrift/test/terse_write/MyStruct"
+        "facebook.com/thrift/test/fixtures/terse_write/MyStruct"
     }
 }
 
@@ -398,7 +398,7 @@ impl ::fbthrift::GetTType for MyUnion {
 
 impl ::fbthrift::GetUri for self::MyUnion {
     fn uri() -> &'static ::std::primitive::str {
-        "facebook.com/thrift/test/terse_write/MyUnion"
+        "facebook.com/thrift/test/fixtures/terse_write/MyUnion"
     }
 }
 
@@ -715,7 +715,7 @@ impl ::fbthrift::GetTType for self::MyStructWithCustomDefault {
 
 impl ::fbthrift::GetUri for self::MyStructWithCustomDefault {
     fn uri() -> &'static ::std::primitive::str {
-        "facebook.com/thrift/test/terse_write/MyStructWithCustomDefault"
+        "facebook.com/thrift/test/fixtures/terse_write/MyStructWithCustomDefault"
     }
 }
 
@@ -868,7 +868,7 @@ impl ::fbthrift::GetTType for self::StructLevelTerseStruct {
 
 impl ::fbthrift::GetUri for self::StructLevelTerseStruct {
     fn uri() -> &'static ::std::primitive::str {
-        "facebook.com/thrift/test/terse_write/StructLevelTerseStruct"
+        "facebook.com/thrift/test/fixtures/terse_write/StructLevelTerseStruct"
     }
 }
 
@@ -1256,7 +1256,7 @@ impl ::fbthrift::GetTType for self::FieldLevelTerseStruct {
 
 impl ::fbthrift::GetUri for self::FieldLevelTerseStruct {
     fn uri() -> &'static ::std::primitive::str {
-        "facebook.com/thrift/test/terse_write/FieldLevelTerseStruct"
+        "facebook.com/thrift/test/fixtures/terse_write/FieldLevelTerseStruct"
     }
 }
 
@@ -1926,7 +1926,7 @@ impl ::fbthrift::GetTType for self::AdaptedFields {
 
 impl ::fbthrift::GetUri for self::AdaptedFields {
     fn uri() -> &'static ::std::primitive::str {
-        "facebook.com/thrift/test/terse_write/AdaptedFields"
+        "facebook.com/thrift/test/fixtures/terse_write/AdaptedFields"
     }
 }
 
@@ -2134,7 +2134,7 @@ impl ::fbthrift::GetTType for self::TerseException {
 
 impl ::fbthrift::GetUri for self::TerseException {
     fn uri() -> &'static ::std::primitive::str {
-        "facebook.com/thrift/test/terse_write/TerseException"
+        "facebook.com/thrift/test/fixtures/terse_write/TerseException"
     }
 }
 

@@ -2506,9 +2506,9 @@ std::string deserializeSBProfData(const std::string& root,
       !Cfg::Eval::EnableAsyncJIT) {
     return "Deser failed: options not enabled\n";
   }
-  if (s_sbDeserDone.test_and_set()) {
-    return "Deser failed: already attempted deserialization\n";
-  }
+
+  s_sbDeserDone.test_and_set();
+
   std::string errMsg;
   VMWorker([&] () {
     hphp_session_init(Treadmill::SessionKind::PreloadRepo);

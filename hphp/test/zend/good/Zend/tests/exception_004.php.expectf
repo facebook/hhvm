@@ -1,2 +1,2 @@
 
-Fatal error: Exceptions must implement the Throwable interface. in %s/exception_004.php on line 8
+Fatal error: Exceptions must implement the Throwable interface, got Foo. in %s/exception_004.php on line 8

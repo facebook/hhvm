@@ -3,4 +3,4 @@ caught[good]: InvalidOperationException
 caught[good]: Error
 caught[good]: AssertionError
 
-Fatal error: Exceptions must implement the Throwable interface. in %s on line 7
+Fatal error: Exceptions must implement the Throwable interface, got NonThrowable. in %s on line 7

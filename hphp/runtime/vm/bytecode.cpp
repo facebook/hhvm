@@ -2265,7 +2265,10 @@ OPTBLD_INLINE void iopThrow(PC&) {
   TypedValue* c1 = vmStack().topC();
   if (c1->m_type != KindOfObject ||
       !c1->m_data.pobj->instanceof(SystemLib::getThrowableClass())) {
-    raise_error("Exceptions must implement the Throwable interface.");
+    raise_error(
+      "Exceptions must implement the Throwable interface, got %s.",
+      describe_actual_type(c1).c_str()
+    );
   }
   auto obj = Object::attach(c1->m_data.pobj);
   vmStack().discard();

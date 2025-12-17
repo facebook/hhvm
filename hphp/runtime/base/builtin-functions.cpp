@@ -32,6 +32,7 @@
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/method-lookup.h"
+#include "hphp/runtime/vm/type-constraint.h"
 #include "hphp/runtime/vm/unit.h"
 
 #include "hphp/system/systemlib.h"
@@ -1353,7 +1354,11 @@ bool is_generated(const StringData* name) {
 
 void throw_exception(const Object& e) {
   if (!e.instanceof(SystemLib::getThrowableClass())) {
-    raise_error("Exceptions must implement the Throwable interface.");
+    auto const tv = make_tv<KindOfObject>(e.get());
+    raise_error(
+      "Exceptions must implement the Throwable interface, got %s.",
+      describe_actual_type(&tv).c_str()
+    );
   }
   DEBUGGER_ATTACHED_ONLY(phpDebuggerExceptionThrownHook(e.get()));
   throw req::root<Object>(e);

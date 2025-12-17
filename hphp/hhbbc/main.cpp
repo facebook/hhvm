@@ -323,6 +323,7 @@ std::pair<WholeProgramInput, Config> load_repo(TicketExecutor& executor,
   auto const load = [&] (size_t bucketIdx,
                          std::vector<const StringData*> units)
     -> coro::Task<void> {
+    assertx(!units.empty());
 
     // Load the UnitEmitters from disk (deferring this until here cuts
     // down on the number of UnitEmitters we have to keep in memory at
@@ -369,12 +370,15 @@ std::pair<WholeProgramInput, Config> load_repo(TicketExecutor& executor,
     tuplized.reserve(refs.size());
     for (auto& r : refs) tuplized.emplace_back(std::move(r));
 
+    auto metadata = make_exec_metadata("load-repo", units[0]->toCppString());
+
     // Run the job and get refs to the keys and values.
     auto [valueRefs, keyRefs] = co_await
       client.exec(
         s_loadRepoJob,
         std::move(configRef),
-        std::move(tuplized)
+        std::move(tuplized),
+        std::move(metadata)
       );
 
     // We need the keys locally, so load them. Values can stay as
@@ -408,6 +412,7 @@ std::pair<WholeProgramInput, Config> load_repo(TicketExecutor& executor,
 extern_worker::Options make_extern_worker_options() {
   extern_worker::Options opts;
   opts
+    .setApplication("hhbbc")
     .setUseCase(options.ExternWorkerUseCase)
     .setUseSubprocess(options.ExternWorkerUseCase.empty()
                       ? extern_worker::Options::UseSubprocess::Always

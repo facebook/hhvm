@@ -154,6 +154,16 @@ template <typename T> std::vector<T> singleton_vec(T t) {
 
 //////////////////////////////////////////////////////////////////////
 
+extern_worker::Client::ExecMetadata
+make_exec_metadata(const std::string& job,
+                   const std::string& key = "");
+extern_worker::Client::ExecMetadata
+make_exec_metadata(const std::string& job,
+                   int round,
+                   const std::string& key = "");
+
+//////////////////////////////////////////////////////////////////////
+
 void profile_memory(const char* what, const char* when, const std::string&);
 void summarize_memory(StructuredLogEntry*);
 

@@ -332,6 +332,14 @@ enum class OutputType { Val, Opt, Vec };
 
 // Configeration controlling the behavior of Client.
 struct Options {
+  // Specify a name for this application. This will be used for
+  // logging and for attempting to re-use workers with the same
+  // application.
+  Options& setApplication(std::string a) {
+    m_application = std::move(a);
+    return *this;
+  }
+
   // Whether to use the always available "subprocess"
   // implementation. This uses fork+exec (and stores data on disk).
   enum class UseSubprocess {
@@ -410,11 +418,7 @@ struct Options {
     return *this;
   }
 
-  Options& setFeaturesFile(std::string f) {
-    m_featuresFile = std::move(f);
-    return *this;
-  }
-
+  // Set the path used for subprocess workers.
   Options& setWorkerPath(std::string p) {
     m_workerPath = std::move(p);
     return *this;
@@ -481,9 +485,17 @@ struct Options {
     return *this;
   }
 
+  Options& setFeaturesFile(std::string f) {
+    m_featuresFile = std::move(f);
+    return *this;
+  }
+
   UseSubprocess m_useSubprocess{UseSubprocess::Always};
   std::filesystem::path m_workingDir{std::filesystem::temp_directory_path()};
-  std::chrono::seconds m_timeout{std::chrono::minutes{15}};
+  std::chrono::seconds m_timeout{
+    // Debug builds can be a lot slower
+    std::chrono::minutes{debug ? 60 : 20}
+  };
   std::chrono::seconds m_minTTL{std::chrono::hours{3}};
   std::chrono::milliseconds m_throttleBaseWait{25};
   size_t m_throttleRetries{7};
@@ -501,6 +513,7 @@ struct Options {
   int m_engineConnectionCount{6};
   int m_executionConcurrencyLimit{6000};
   int m_acConnectionCount{16};
+  std::string m_application{""};
   std::string m_useCase{""};
   std::string m_platform{"linux-remote-execution"};
   std::string m_featuresFile{""};
@@ -609,6 +622,18 @@ struct Client {
 
     // Expect the job to use this many logical cores for the duration it runs.
     int32_t cpu_units{1};
+
+    // Expect the job to use at most this much memory. This is used to
+    // determine which worker should run this job and can be omitted
+    // (by setting to 0).
+    uint64_t max_memory{0};
+
+    // Expect the job to require at most this much storage for the
+    // input. This is used to determine which worker should run this
+    // job. If not set (by keeping it set to zero), the client will
+    // try to automatically determine this from the input blobs (which
+    // is what you pretty much always want).
+    uint64_t input_storage_required{0};
 
     // A job identifier used to track the "same" job across many
     // client sessions and job executions with different inputs.

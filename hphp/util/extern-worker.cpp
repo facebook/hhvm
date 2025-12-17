@@ -1982,6 +1982,7 @@ void Client::Impl::throttleSleep(size_t retry,
     std::lock_guard<std::mutex> _{lock};
     return std::chrono::microseconds{distrib(engine)};
   }();
+  FTRACE(2, "Sleeping for {:,} milliseconds...\n", wait.count());
 
   // Use normal sleep here, not coro friendly sleep. The whole purpose
   // is to slow down execution and using a coro sleep will just allow

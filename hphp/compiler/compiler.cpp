@@ -748,6 +748,7 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
 Options makeExternWorkerOptions(const CompilerOptions& po) {
   Options options;
   options
+    .setApplication(Cfg::Eval::UseHHBBC ? "hhbbc" : "hphpc")
     .setUseCase(Option::ExternWorkerUseCase)
     .setFeaturesFile(Option::ExternWorkerFeaturesFile)
     .setWorkerPath(Option::ExternWorkerPath)

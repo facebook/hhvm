@@ -1048,8 +1048,12 @@ Client::Impl::tryWithThrottling(size_t retries,
     for (size_t i = 0; i < retries-1; ++i) {
       try {
         co_return co_await f();
-      } catch (const detail::Throttle&) {
+      } catch (const detail::Throttle& e) {
         ++throttles;
+        FTRACE(
+          2, "Received throttle: \"{}\" (Total: {})\n",
+          e.what(), throttles.load()
+        );
         throttleSleep(i, wait);
       }
     }

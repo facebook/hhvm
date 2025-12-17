@@ -906,9 +906,13 @@ coro::Task<void> Package::parseGroup(
           assertx(!metas.empty());
           Client::ExecMetadata metadata{
             .optimistic = optimistic,
-            .job_key = folly::sformat("parse-{}-{}", attempts,
-                                      metas[0].m_filename)
+            .job_key = folly::sformat(
+              "parse {} {}",
+              attempts,
+              metas[0].m_filename
+            )
           };
+
           auto parseMetas = co_await callback(
             *configRef, metasRef, fds, metadata
           );
@@ -1265,8 +1269,9 @@ coro::Task<void> Package::indexGroup(const IndexCallback& callback,
           assertx(!metas.empty());
           Client::ExecMetadata metadata{
             .optimistic = optimistic,
-            .job_key = folly::sformat("index-{}", metas[0].m_filename)
+            .job_key = folly::sformat("index {}", metas[0].m_filename)
           };
+
           auto [configRef, metasRef, fileRefs, optionRefs] =
             co_await storeInputs(
               optimistic, paths, metas, options, storedOptions, m_client,

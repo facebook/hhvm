@@ -7611,9 +7611,10 @@ void check_invariants(const IndexData& index) {
         })
       | as<std::vector>();
 
-    Client::ExecMetadata metadata{
-      .job_key = folly::sformat("check cinfo invariants {}", work[0])
-    };
+    auto metadata = make_exec_metadata(
+      "check cinfo invariants",
+      work[0]->toCppString()
+    );
     auto config = co_await index.configRef->getCopy();
     auto outputs = co_await index.client->exec(
       s_checkCInfoInvariantsJob,
@@ -7637,9 +7638,10 @@ void check_invariants(const IndexData& index) {
         })
       | as<std::vector>();
 
-    Client::ExecMetadata metadata{
-      .job_key = folly::sformat("check func-family invariants {}", work[0])
-    };
+    auto metadata = make_exec_metadata(
+      "chunk func-family invariants",
+      work[0]->toCppString()
+    );
     auto config = co_await index.configRef->getCopy();
     auto outputs = co_await index.client->exec(
       s_checkFuncFamilyInvariantsJob,
@@ -12421,16 +12423,14 @@ flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
       co_return UpdateVec{};
     }
 
-    Client::ExecMetadata metadata{
-      .job_key = folly::sformat(
-        "flatten classes {}",
-        work.classes.empty()
-          ? (work.uninstantiable.empty()
-             ? work.funcs[0]
-             : work.uninstantiable[0])
-          : work.classes[0]
-      )
-    };
+    auto metadata = make_exec_metadata(
+      "flatten classes",
+      work.classes.empty()
+        ? (work.uninstantiable.empty()
+           ? work.funcs[0]->toCppString()
+           : work.uninstantiable[0]->toCppString())
+        : work.classes[0]->toCppString()
+    );
     auto classes = from(work.classes)
       | map([&] (SString c) { return index.classRefs.at(c); })
       | as<std::vector>();
@@ -15328,17 +15328,16 @@ void build_subclass_lists(IndexData& index,
       index.configRef->getCopy()
     );
 
-    Client::ExecMetadata metadata{
-      .job_key = folly::sformat(
-        "build subclass list {}",
-        [&] {
-          if (!bucket.classes.empty()) return bucket.classes[0];
-          if (!bucket.splits.empty()) return bucket.splits[0];
-          assertx(!bucket.leafs.empty());
-          return bucket.leafs[0];
-        }()
-      )
-    };
+    auto metadata = make_exec_metadata(
+      "build subclass list",
+      round,
+      [&] {
+        if (!bucket.classes.empty()) return bucket.classes[0];
+        if (!bucket.splits.empty()) return bucket.splits[0];
+        assertx(!bucket.leafs.empty());
+        return bucket.leafs[0];
+      }()->toCppString()
+    );
 
     auto results = co_await
       index.client->exec(
@@ -16111,10 +16110,7 @@ void init_types(IndexData& index, InitTypesMetadata meta) {
     );
 
     auto config = co_await index.configRef->getCopy();
-
-    Client::ExecMetadata metadata{
-      .job_key = folly::sformat("init types {}", work[0])
-    };
+    auto metadata = make_exec_metadata("init types", work[0]->toCppString());
 
     auto results = co_await
       index.client->exec(
@@ -16187,9 +16183,7 @@ void init_types(IndexData& index, InitTypesMetadata meta) {
       );
     }
 
-    Client::ExecMetadata metadata{
-      .job_key = folly::sformat("fixup units {}", units[0])
-    };
+    auto metadata = make_exec_metadata("fixup units", units[0]->toCppString());
 
     auto config = co_await index.configRef->getCopy();
     auto outputs = co_await index.client->exec(
@@ -16260,9 +16254,10 @@ void init_types(IndexData& index, InitTypesMetadata meta) {
       index.configRef->getCopy()
     );
 
-    Client::ExecMetadata metadata{
-      .job_key = folly::sformat("aggregate name-only {}", names[0])
-    };
+    auto metadata = make_exec_metadata(
+      "aggregate name-only",
+      names[0]->toCppString()
+    );
 
     auto results = co_await
       index.client->exec(

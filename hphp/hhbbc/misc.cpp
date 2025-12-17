@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/base/string-data.h"
 
+#include "hphp/util/extern-worker.h"
 #include "hphp/util/hash.h"
 
 //////////////////////////////////////////////////////////////////////
@@ -29,8 +30,6 @@ namespace HPHP::HHBBC {
 
 std::vector<std::vector<SString>>
 consistently_bucketize(const std::vector<SString>& items, size_t bucketSize) {
-  using namespace folly::gen;
-
   // Calculate the number of buckets we need, assuming each bucket
   // will contain "bucketSize" number of elements (rounding up).
   assertx(bucketSize > 0);
@@ -39,7 +38,8 @@ consistently_bucketize(const std::vector<SString>& items, size_t bucketSize) {
 }
 
 std::vector<std::vector<SString>>
-consistently_bucketize_by_num_buckets(const std::vector<SString>& items, size_t numBuckets) {
+consistently_bucketize_by_num_buckets(const std::vector<SString>& items,
+                                      size_t numBuckets) {
   using namespace folly::gen;
   if (numBuckets == items.size()) {
     return from(items)
@@ -84,6 +84,43 @@ consistently_bucketize_by_num_buckets(const std::vector<SString>& items, size_t 
     end(buckets)
   );
   return buckets;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+namespace {
+
+// Would be nice to determine this better.
+static constexpr size_t kMaxMemory = 8UL*1024*1024*1024;
+
+}
+
+//////////////////////////////////////////////////////////////////////
+
+extern_worker::Client::ExecMetadata make_exec_metadata(const std::string& job,
+                                                       const std::string& key) {
+  extern_worker::Client::ExecMetadata meta;
+  meta.max_memory = kMaxMemory;
+
+  meta.job_key = folly::sformat("{}{}{}", job, key.empty() ? "" : " ", key);
+  meta.affinity_keys.emplace_back(meta.job_key);
+  if (!key.empty()) meta.affinity_keys.emplace_back(job);
+  return meta;
+}
+
+extern_worker::Client::ExecMetadata make_exec_metadata(const std::string& job,
+                                                       int round,
+                                                       const std::string& key) {
+  extern_worker::Client::ExecMetadata meta;
+  meta.max_memory = kMaxMemory;
+
+  auto const jobAndRound = folly::sformat("{} round {}", job, round);
+  meta.job_key =
+    folly::sformat("{}{}{}", jobAndRound, key.empty() ? "" : " ", key);
+  meta.affinity_keys.emplace_back(meta.job_key);
+  if (!key.empty()) meta.affinity_keys.emplace_back(jobAndRound);
+  meta.affinity_keys.emplace_back(job);
+  return meta;
 }
 
 //////////////////////////////////////////////////////////////////////

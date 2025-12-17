@@ -157,7 +157,7 @@ class ClientRunner
   std::normal_distribution<double> requestDistribution_;
   std::uniform_int_distribution<uint32_t> ticketDistribution_;
   std::uniform_int_distribution<uint32_t> resumeDistribution_;
-  uint32_t clientsOutstanding_;
+  uint32_t clientsOutstanding_{0};
   std::mt19937 rng_;
   std::shared_ptr<fizz::client::BasicPskCache> pskCache_;
   std::shared_ptr<quic::BasicQuicPskCache> quicPskCache_;
@@ -294,7 +294,7 @@ ClientRunner::ClientRunner(HTTPerfStats& parentStats,
       requestDistribution_(FLAGS_request_avg, 1),
       ticketDistribution_(0, 100),
       resumeDistribution_(0, 100),
-      clientsOutstanding_(0),
+
       pskCache_(std::make_shared<fizz::client::BasicPskCache>()),
       quicPskCache_(std::make_shared<quic::BasicQuicPskCache>()) {
   attachEventBase(&eventBase_);

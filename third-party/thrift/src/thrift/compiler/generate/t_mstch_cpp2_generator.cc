@@ -531,23 +531,6 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
     return globals;
   }
 
-  /**
-   * Get the type of a const value, prioritizing the inferred type from the
-   * owning const over AST t_const_value::ttype.
-   * t_whisker_generator's default t_const_value.type prioritizes AST ttype.
-   * Prioritizing the owning const inferred type here supports preserving
-   * typedefs, etc. The AST ttype is already fully resolved (i.e.
-   * typedef-erased). The inferred type from the owning const will use the
-   * relevant typedef in codegen where applicable.
-   */
-  const t_type* get_const_value_type(const t_const_value& value) const {
-    return context().get_const_value_type(value).empty()
-        // DO_BEFORE(hchok, 20251220): This is extremely temporary, to isolate
-        // AST t_const_value type changes from subsequent generator changes
-        ? value.type()->get_true_type()
-        : context().get_const_value_type(value).get_type();
-  }
-
   prototype<t_program>::ptr make_prototype_for_program(
       const prototype_database& proto) const override {
     auto base = t_whisker_generator::make_prototype_for_program(proto);
@@ -802,20 +785,12 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
     auto base = t_whisker_generator::make_prototype_for_const_value(proto);
     auto def = whisker::dsl::prototype_builder<h_const_value>::extends(base);
 
-    // Get the value type, prioritizing the inferred type here preserving
-    // typedefs, etc.
-    def.property("const_type", [this, &proto](const t_const_value& self) {
-      const t_type* type = get_const_value_type(self);
-      return type != nullptr ? resolve_derived_t_type(proto, *type)
-                             : whisker::make::null;
-    });
-
     // This is an override of referenceable_from? in the base whisker
     // generator's t_const_value prototype, with an additional condition on the
     // value type which is specific to the cpp2 generator
     def.function(
         "referenceable_from?",
-        [this](const t_const_value& self, whisker::dsl::function::context ctx) {
+        [](const t_const_value& self, whisker::dsl::function::context ctx) {
           ctx.declare_arity(1);
           ctx.declare_named_arguments({});
           const t_const* from_const =
@@ -827,7 +802,9 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
           // referenced from any const that's not the owner and the type is what
           // we expect it to be
           return owner != nullptr && owner != from_const &&
-              same_types(get_const_value_type(self), owner->type());
+              same_types(
+                     self.type().empty() ? nullptr : &self.type().deref(),
+                     owner->type());
         });
 
     return std::move(def).make();

@@ -371,16 +371,11 @@ t_whisker_generator::make_prototype_for_const_value(
     const prototype_database& proto) const {
   prototype_builder<h_const_value> def;
   using cv = t_const_value::t_const_value_kind;
-  def.property("type", [this, &proto](const t_const_value& self) {
-    // Prioritize AST populated ttype, fallback to inferred expected type in
-    // context
-    const t_type* type = self.type().empty()
-        ? context().get_const_value_type(self).get_type()
-        // DO_BEFORE(hchok, 20251220): This is extremely temporary, to isolate
-        // AST t_const_value type changes from subsequent generator changes
-        : self.type()->get_true_type();
-    return type == nullptr ? whisker::make::null
-                           : resolve_derived_t_type(proto, *type);
+  def.property("type", [&proto](const t_const_value& self) {
+    if (self.type().empty()) {
+      throw whisker::eval_error("Const value has indeterminate type");
+    }
+    return resolve_derived_t_type(proto, self.type().deref());
   });
   def.property("bool?", [](const t_const_value& self) {
     return self.kind() == cv::CV_BOOL;
@@ -1133,60 +1128,6 @@ void whisker_generator_context::register_visitors(
           field_parents_[&field] = &node;
         }
       });
-
-  visitor.add_const_visitor([this](const context&, const t_const& node) {
-    if (node.value() != nullptr) {
-      visit_const_value(node.value(), node.type_ref());
-    }
-  });
-  visitor.add_field_visitor([this](const context&, const t_field& node) {
-    if (node.default_value() != nullptr) {
-      visit_const_value(node.default_value(), node.type());
-    }
-  });
-  visitor.add_function_param_visitor(
-      [this](const context&, const t_field& node) {
-        if (node.default_value() != nullptr) {
-          visit_const_value(node.default_value(), node.type());
-        }
-      });
-}
-
-void whisker_generator_context::visit_const_value(
-    const t_const_value* value, const t_type_ref& expected_type) {
-  if (value == nullptr || expected_type.empty()) {
-    return;
-  }
-
-  const_value_types_[value] = expected_type;
-  if (const auto* map = expected_type->get_true_type()->try_as<t_map>();
-      map != nullptr && value->kind() == t_const_value::CV_MAP) {
-    for (const auto& [key, val] : value->get_map()) {
-      visit_const_value(key, map->key_type());
-      visit_const_value(val, map->val_type());
-    }
-  } else if (const auto* list =
-                 expected_type->get_true_type()->try_as<t_list>();
-             list != nullptr && value->kind() == t_const_value::CV_LIST) {
-    for (const t_const_value* val : value->get_list()) {
-      visit_const_value(val, list->elem_type());
-    }
-  } else if (const auto* set = expected_type->get_true_type()->try_as<t_set>();
-             set != nullptr && value->kind() == t_const_value::CV_LIST) {
-    for (const t_const_value* val : value->get_list()) {
-      visit_const_value(val, set->elem_type());
-    }
-  } else if (const auto* structured =
-                 expected_type->get_true_type()->try_as<t_structured>();
-             structured != nullptr && value->kind() == t_const_value::CV_MAP) {
-    for (const auto& [key, val] : value->get_map()) {
-      if (const t_field* field = key->kind() == t_const_value::CV_STRING
-              ? structured->get_field_by_name(key->get_string())
-              : nullptr) {
-        visit_const_value(val, field->type());
-      }
-    }
-  }
 }
 
 } // namespace apache::thrift::compiler

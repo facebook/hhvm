@@ -22,16 +22,16 @@
   {{#if value.bool?}}
 {{value.bool_value}}
   {{#else if value.integer?}}
-static_cast<{{value.const_type.cpp_standard_type}}>({{value.integer_value}})
+static_cast<{{value.type.cpp_standard_type}}>({{value.integer_value}})
   {{#else if value.double?}}
-static_cast<{{value.const_type.cpp_standard_type}}>({{value.double_value}})
+static_cast<{{value.type.cpp_standard_type}}>({{value.double_value}})
   {{#else if value.string?}}
 "{{value.string_value}}"
   {{#else if value.enum?}}
     {{#if value.enum_value?}}
- ::{{value.const_type.qualified_namespace}}::{{value.const_type.cpp_name}}::{{value.enum_value.cpp_name}}
+ ::{{value.type.qualified_namespace}}::{{value.type.cpp_name}}::{{value.enum_value.cpp_name}}
     {{#else}}
-static_cast< ::{{value.const_type.qualified_namespace}}::{{value.const_type.cpp_name}}>({{value.integer_value}})
+static_cast< ::{{value.type.qualified_namespace}}::{{value.type.cpp_name}}>({{value.integer_value}})
     {{/if value.enum_value?}}
   {{/if value.bool?}}
 {{/let partial}}
@@ -49,9 +49,9 @@ static_cast< ::{{value.const_type.qualified_namespace}}::{{value.const_type.cpp_
   {{! Used by list/map values }}
   {{#let partial iterate_const_values_adapted_nested |value| captures |iterate_const_values root_const|}}
 {{#pragma ignore-newlines}}
-{{#if value.const_type.cpp_adapter}}{{value.const_type.cpp_adapter}}::fromThrift({{value.const_type.cpp_standard_type}}({{/if}}
+{{#if value.type.cpp_adapter}}{{value.type.cpp_adapter}}::fromThrift({{value.type.cpp_standard_type}}({{/if}}
 {{#partial iterate_const_values value=value root_const=root_const}}
-{{#if value.const_type.cpp_adapter}})){{/if}}
+{{#if value.type.cpp_adapter}})){{/if}}
   {{/let partial}}{{! end of `iterate_const_values_adapted_nested` nested partial }}
 
   {{!
@@ -61,14 +61,14 @@ static_cast< ::{{value.const_type.qualified_namespace}}::{{value.const_type.cpp_
     commenting every line break we don't want to emit.
   }}
   {{#let partial list_value captures |iterate_const_values_adapted_nested value|}}
-std::initializer_list<{{value.const_type.true_type.elem_type.cpp_type}}>{{!
+std::initializer_list<{{value.type.true_type.elem_type.cpp_type}}>{{!
   }}{ {{#each (array.enumerate value.list_elements with_last=true) as |i elem last?|}}{{!
 }}{{#partial iterate_const_values_adapted_nested value=elem}}{{#if (not last?)}},
   {{/if (not last?)}}{{/each}} }{{!
 }}{{/let partial}}{{! end of `list_value` nested partial }}
 
   {{#let partial map_value captures |iterate_const_values_adapted_nested value|}}
-std::initializer_list<{{value.const_type.cpp_type}}::value_type>{{!
+std::initializer_list<{{value.type.cpp_type}}::value_type>{{!
   }}{ {{#each (array.enumerate value.map_elements with_last=true) as |i elem last?|}}{{!
 }}{ {{#partial iterate_const_values_adapted_nested value=elem.key}}, {{!
 }}{{#partial iterate_const_values_adapted_nested value=elem.value}} }{{#if (not last?)}},
@@ -78,7 +78,7 @@ std::initializer_list<{{value.const_type.cpp_type}}::value_type>{{!
 
 {{! End of nested partials; start of main `iterate_const_values` content }}
   {{#if value.string?}}
-apache::thrift::StringTraits<{{value.const_type.cpp_standard_type}}>::fromStringLiteral({{#partial primitive value=value}})
+apache::thrift::StringTraits<{{value.type.cpp_standard_type}}>::fromStringLiteral({{#partial primitive value=value}})
   {{#else if (not value.container?)}}
     {{! Any non-string primitive or enum type }}
 {{#partial primitive value=value}}
@@ -90,7 +90,7 @@ apache::thrift::StringTraits<{{value.const_type.cpp_standard_type}}>::fromString
 ::{{value.owner.program.qualified_namespace}}::{{value.owner.program.name}}_constants::{{value.owner.name}}()
   {{#else if value.structured?}}
     {{! Struct/union values }}
-::apache::thrift::detail::make_structured_constant<{{value.const_type.cpp_standard_type}}>(
+::apache::thrift::detail::make_structured_constant<{{value.type.cpp_standard_type}}>(
     {{#each (array.enumerate value.structured_elements with_last=true) as |i elem last?|}}
       {{#let cpp_first_adapter = elem.field.cpp_first_adapter}}
 ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::{{elem.field.cpp_name}}
@@ -99,7 +99,7 @@ apache::thrift::StringTraits<{{value.const_type.cpp_standard_type}}>::fromString
     {{/each}}
 )
 
-  {{#else if (and value.list? (or value.const_type.list? value.const_type.set?))}}
+  {{#else if (and value.list? (or value.type.list? value.type.set?))}}
 {{#partial list_value}}
   {{#else if value.map?}}
 {{#partial map_value}}
@@ -110,7 +110,7 @@ apache::thrift::StringTraits<{{value.const_type.cpp_standard_type}}>::fromString
     exported for use in `module_constants`. }}
 {{#let export partial iterate_const_values_adapted |value root_const| captures |iterate_const_values|}}
 {{#pragma ignore-newlines}}
-{{#if value.const_type.cpp_adapter}}{{value.const_type.cpp_adapter}}::fromThrift({{value.const_type.cpp_standard_type}}({{/if}}
+{{#if value.type.cpp_adapter}}{{value.type.cpp_adapter}}::fromThrift({{value.type.cpp_standard_type}}({{/if}}
 {{#partial iterate_const_values value=value root_const=root_const}}
-{{#if value.const_type.cpp_adapter}})){{/if}}
+{{#if value.type.cpp_adapter}})){{/if}}
 {{/let partial}}

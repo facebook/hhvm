@@ -37,7 +37,7 @@
 {{#let export partial const_value |value| captures |primitive_value|}}
   {{#let val_type = value.type}}
 {{#if val_type.primitive?}}{{#partial primitive_value value=value}}{{!
-}}{{#else if (and val_type.enum? value.enum_value?)}}{{val_type.name}}.{{value.enum_value.name}}{{!
+}}{{#else if (and val_type.enum? value.enum_value?)}}{{val_type.true_type.name}}.{{value.enum_value.name}}{{!
 }}{{#else if val_type.list?}}{{!
   List
 }}[

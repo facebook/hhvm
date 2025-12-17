@@ -19,7 +19,7 @@ const Var2 string = "20"
 var Var3 *MyStruct = NewMyStruct().
     SetFieldNonCompat(int32(30)).
     SetSetStringNonCompat(
-        []string{
+        SetWithAdapter{
     "10",
     "20",
 },
@@ -29,7 +29,7 @@ const Var5 string = "50"
 var Var6 *MyStruct = NewMyStruct().
     SetFieldNonCompat(int32(60)).
     SetSetStringNonCompat(
-        []string{
+        SetWithAdapter{
     "30",
     "40",
 },

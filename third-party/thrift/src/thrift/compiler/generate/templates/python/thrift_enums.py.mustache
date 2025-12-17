@@ -20,8 +20,14 @@ Generated Python enums for Thrift types
 {{#import "common/common" as m_common}}
 {{#partial m_common.auto_generated_py}}
 import builtins
+{{#if (has_compiler_option? "avoid_enum_metadata_circular_reference")}}
+import importlib
+from types import ModuleType
+
+{{#else}}
 
 import apache.thrift.metadata.thrift_types as _fbthrift_metadata
+{{/if (has_compiler_option? "avoid_enum_metadata_circular_reference")}}
 import {{program.base_library_package}}.types as _fbthrift_python_types
 {{#each program.include_namespaces as |include|}}
   {{#if include.has_types?}}
@@ -34,6 +40,11 @@ import typing as _std_python_typing
 {{!
     This is necessary because thrift_abstract_types.py imports this.
 }}
+{{#if (has_compiler_option? "avoid_enum_metadata_circular_reference")}}
+
+def _fbthrift__import_ThriftMetadata() -> ModuleType:
+    return importlib.import_module("apache.thrift.metadata.thrift_types")
+{{/if (has_compiler_option? "avoid_enum_metadata_circular_reference")}}
 
 
 class {{enum.name}}(_fbthrift_python_types.{{#if enum.flags?}}Flag{{#else}}Enum, int{{/if}}):
@@ -49,7 +60,7 @@ class {{enum.name}}(_fbthrift_python_types.{{#if enum.flags?}}Flag{{#else}}Enum,
         return {{#if (string.empty? enum.uri)}}None{{#else}}"{{enum.uri}}"{{/if}}
 
     @staticmethod
-    def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
+    def __get_metadata__() -> {{> metadata/metadata_return_type}}
         return gen_metadata_enum_{{enum.name}}()
 
     def _to_python(self) -> "{{enum.name}}":
@@ -74,7 +85,11 @@ class {{enum.name}}(_fbthrift_python_types.{{#if enum.flags?}}Flag{{#else}}Enum,
 
 {{#each program.enums as |enum|}}
 def _fbthrift_gen_metadata_enum_{{enum.name}}({{!
-}}metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:
+}}metadata_struct: {{> metadata/metadata_thrift_type}}) -> {{> metadata/metadata_return_type}}
+    {{#if (has_compiler_option? "avoid_enum_metadata_circular_reference")}}
+    _fbthrift_metadata = _fbthrift__import_ThriftMetadata()
+
+    {{/if (has_compiler_option? "avoid_enum_metadata_circular_reference")}}
     qualified_name = "{{program.name}}.{{enum.name}}"
 
     if qualified_name in metadata_struct.enums:
@@ -97,7 +112,10 @@ def _fbthrift_gen_metadata_enum_{{enum.name}}({{!
 
     return new_struct
 
-def gen_metadata_enum_{{enum.name}}() -> _fbthrift_metadata.ThriftMetadata:
+def gen_metadata_enum_{{enum.name}}() -> {{> metadata/metadata_return_type}}
+    {{#if (has_compiler_option? "avoid_enum_metadata_circular_reference")}}
+    _fbthrift_metadata = _fbthrift__import_ThriftMetadata()
+    {{/if (has_compiler_option? "avoid_enum_metadata_circular_reference")}}
     return _fbthrift_gen_metadata_enum_{{enum.name}}(
         _fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={})
     )

@@ -16,8 +16,11 @@
 
 #pragma once
 
-#include <stdint.h>
+#include <array>
 #include <cstring>
+#include <memory>
+#include <random>
+#include <stdint.h>
 #include <string_view>
 
 #include "hphp/util/portability.h"
@@ -335,6 +338,191 @@ struct StringData;
 // to the same bucket they did previously). Salt can be used to
 // calculate different mappings for the same set of keys.
 size_t consistent_hash(int64_t key, size_t buckets, int64_t salt = 0);
+
+///////////////////////////////////////////////////////////////////////////////
+
+/**
+ * Tabulation hashing implementation with optional twisted tabulation extension.
+ *
+ * Tabulation hashing is a simple and efficient hashing technique that
+ * provides strong theoretical guarantees, including k-independence
+ * for certain values of k.  It works by splitting the input into
+ * blocks, using each block as an index into a randomly-initialized
+ * lookup table, and XORing the results together.
+ *
+ * When D > 0, this implements "twisted" or "mixed" tabulation
+ * hashing, which provides even stronger guarantees by introducing
+ * additional derived blocks that are hashed through a second layer of
+ * tables.
+ *
+ * Template parameters:
+ *   I: Input type (must be unsigned integral). The value to be hashed.
+ *   O: Output type (defaults to I). Can be an integral type or std::array
+ *      of integral types for wider hash outputs.
+ *   B: Block type (defaults to uint8_t). The input is split into blocks of
+ *      this size. Smaller blocks use less memory but may be slower.
+ *   D: Number of expanded/derived blocks (defaults to 0). When D > 0, enables
+ *      twisted tabulation hashing for stronger theoretical properties.
+ *
+ * Example usage:
+ *   std::mt19937_64 rng(seed);
+ *   TabulationHash<uint64_t> hash(rng);
+ *   uint64_t result = hash(12345);
+ */
+template <typename I, typename O = I, typename B = uint8_t, size_t D = 0>
+struct TabulationHash {
+  using Input = I;
+  using Output = O;
+  using Block = B;
+
+  static_assert(std::is_integral_v<Input> && !std::is_signed_v<Input>);
+  static_assert(std::is_integral_v<Block> && !std::is_signed_v<Block>);
+  static_assert(std::numeric_limits<Input>::digits %
+                std::numeric_limits<Block>::digits == 0);
+
+  /**
+   * Construct a tabulation hash function with random tables.
+   *
+   * @param r A random number generator (e.g., std::mt19937_64) used to
+   *          initialize the lookup tables. Different generators produce
+   *          different hash functions.
+   */
+  template <typename R> explicit TabulationHash(R&&);
+
+  /**
+   * Hash an input value.
+   *
+   * This operation is thread-safe and can be called concurrently from
+   * multiple threads on the same hash instance.
+   *
+   * @param v The value to hash (must be of type Input).
+   * @return The hash value of type Output.
+   */
+  Output operator()(Input v) const noexcept;
+
+private:
+
+  // Helper to XOR two arrays element-wise (for std::array Output types).
+  template <typename T, size_t N>
+  static void exclusive_or(std::array<T, N>& a, const std::array<T, N>& b) {
+    static_assert(std::is_integral_v<T> && !std::is_signed_v<T>);
+    for (size_t i = 0; i < N; ++i) a[i] ^= b[i];
+  }
+  // Helper to XOR two scalar values (for integral Output types).
+  template <typename T> static void exclusive_or(T& a, const T& b) {
+    static_assert(std::is_integral_v<T> && !std::is_signed_v<T>);
+    a ^= b;
+  }
+
+  // Wrapper for std::uniform_int_distribution to generate random values
+  // of type T (either integral types or std::array).
+  template <typename T>
+  struct Distribution {
+    template <typename R> T operator()(R&& r) { return d(r); }
+    std::uniform_int_distribution<T> d;
+  };
+
+  // Specialization for generating random std::array values.
+  template <typename T, size_t N>
+  struct Distribution<std::array<T, N>> {
+    template <typename R>
+    std::array<T, N> operator()(R&& r) {
+      std::array<T, N> out;
+      for (size_t i = 0; i < N; ++i) out[i] = d(r);
+      return out;
+    }
+    std::uniform_int_distribution<T> d;
+  };
+
+  // Number of blocks the input is split into (e.g., 8 for uint64_t with uint8_t blocks).
+  static constexpr size_t kNumInputBlocks =
+    std::numeric_limits<Input>::digits / std::numeric_limits<Block>::digits;
+  // Number of expanded/derived blocks for twisted tabulation (0 for simple tabulation).
+  static constexpr size_t kNumExpandedBlocks = D;
+  // Size of each lookup table dimension (e.g., 256 for uint8_t blocks).
+  static constexpr size_t kBlockSize =
+    size_t{std::numeric_limits<Block>::max()} + 1;
+
+  // Type of lookup table mapping Block -> Output.
+  using ToOutput = std::array<Output, kBlockSize>;
+
+  // Type representing expanded/derived blocks for twisted tabulation.
+  using Expanded = std::array<Block, kNumExpandedBlocks>;
+  // Type of lookup table mapping Block -> Expanded.
+  using ToExpanded = std::array<Expanded, kBlockSize>;
+
+  // Internal state containing all lookup tables.
+  struct State {
+    // table1: Maps each input block directly to an Output value.
+    // One table per input block position.
+    std::array<ToOutput, kNumInputBlocks> table1{};
+    // table2: Maps each input block to derived/expanded blocks.
+    // Only used when D > 0 (twisted tabulation).
+    std::array<ToExpanded, kNumInputBlocks> table2{};
+    // table3: Maps each expanded block to an Output value.
+    // Only used when D > 0 (twisted tabulation).
+    std::array<ToOutput, kNumExpandedBlocks> table3{};
+  };
+  std::shared_ptr<State> state;
+};
+
+template <typename I, typename O, typename B, size_t D>
+template <typename R>
+TabulationHash<I, O, B, D>::TabulationHash(R&& r) {
+  Distribution<Output> distrib1;
+  std::uniform_int_distribution<Block> distrib2;
+
+  state = std::make_shared<State>();
+
+  // Initialize table1: Direct input block -> output mappings.
+  // For each position in the input, create a random lookup table.
+  for (auto& t1 : state->table1) {
+    for (auto& t2 : t1) t2 = distrib1(r);
+  }
+  // Initialize table2: Input block -> expanded block mappings.
+  // Only used for twisted tabulation (when D > 0).
+  for (auto& t1 : state->table2) {
+    for (auto& t2 : t1) {
+      for (auto& t3 : t2) t3 = distrib2(r);
+    }
+  }
+  // Initialize table3: Expanded block -> output mappings.
+  // Only used for twisted tabulation (when D > 0).
+  for (auto& t1 : state->table3) {
+    for (auto& t2 : t1) t2 = distrib1(r);
+  }
+}
+
+template <typename I, typename O, typename B, size_t D>
+TabulationHash<I, O, B, D>::Output
+TabulationHash<I, O, B, D>::operator()(Input v) const noexcept {
+  Output out{};
+  Expanded expanded{};
+
+  auto const& table1 = state->table1;
+  auto const& table2 = state->table2;
+  // Phase 1: Process each block of the input value.
+  // For each block position i, extract the i-th block from v and use it
+  // to look up values in table1[i] and table2[i], XORing the results.
+  for (size_t i = 0; i < kNumInputBlocks; ++i) {
+    // Use the current low block as an index into table1 and XOR its output.
+    exclusive_or(out, table1[i][static_cast<Block>(v)]);
+    // Use the current low block to generate expanded blocks (for twisted tabulation).
+    auto const& t = table2[i][static_cast<Block>(v)];
+    for (size_t j = 0; j < kNumExpandedBlocks; ++j) expanded[j] ^= t[j];
+    // Shift to the next block.
+    v >>= std::numeric_limits<Block>::digits;
+  }
+
+  // Phase 2: Process the expanded/derived blocks (twisted tabulation).
+  // Only executes when D > 0. Each expanded block is used as an index
+  // into table3 to produce additional output that is XORed into the result.
+  auto const& table3 = state->table3;
+  for (size_t i = 0; i < kNumExpandedBlocks; ++i) {
+    exclusive_or(out, table3[i][expanded[i]]);
+  }
+  return out;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -11,6 +11,7 @@
 #include <folly/ExceptionWrapper.h>
 #include <folly/portability/GMock.h>
 #include <proxygen/lib/http/webtransport/WebTransport.h>
+#include <quic/priority/HTTPPriorityQueue.h>
 
 namespace proxygen::test {
 
@@ -164,10 +165,10 @@ class FakeStreamHandle
     writeErr_ = err;
     return folly::unit;
   }
-  GenericApiRet setPriority(uint8_t urgency,
-                            uint32_t order,
-                            bool inc) override {
-    pri.emplace(std::forward_as_tuple(urgency, order, inc));
+  GenericApiRet setPriority(quic::PriorityQueue::Priority priority) override {
+    quic::HTTPPriorityQueue::Priority httpPri(priority);
+    pri.emplace(std::forward_as_tuple(
+        httpPri->urgency, httpPri->order, httpPri->incremental));
     return folly::unit;
   }
 
@@ -307,15 +308,12 @@ class FakeSharedWebTransport : public WebTransport {
   }
 
   folly::Expected<folly::Unit, ErrorCode> setPriority(
-      uint64_t streamId,
-      uint8_t level,
-      uint32_t order,
-      bool incremental) override {
+      uint64_t streamId, quic::PriorityQueue::Priority priority) override {
     auto h = writeHandles.find(streamId);
     if (h == writeHandles.end()) {
       return folly::makeUnexpected(WebTransport::ErrorCode::GENERIC_ERROR);
     }
-    return h->second->setPriority(level, order, incremental);
+    return h->second->setPriority(priority);
   }
 
   folly::Expected<folly::Unit, ErrorCode> stopSending(uint64_t streamId,

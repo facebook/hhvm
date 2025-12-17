@@ -183,7 +183,7 @@ TEST_F(QuicWebTransportTest, SetPriority) {
   EXPECT_TRUE(handle.hasValue());
   socketDriver_.expectSetPriority(
       handle.value()->getID(), quic::HTTPPriorityQueue::Priority(1, false, 1));
-  handle.value()->setPriority(1, 1, false);
+  handle.value()->setPriority(quic::HTTPPriorityQueue::Priority(1, false, 1));
   handle.value()->writeStreamData(nullptr, true, nullptr);
   eventBase_.loop();
 }

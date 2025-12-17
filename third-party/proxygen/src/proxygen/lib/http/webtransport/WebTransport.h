@@ -16,6 +16,7 @@
 #include <folly/io/IOBuf.h>
 #include <quic/api/QuicCallbacks.h>
 #include <quic/api/TransportInfo.h>
+#include <quic/priority/PriorityQueue.h>
 
 namespace proxygen {
 
@@ -203,7 +204,7 @@ class WebTransport {
         uint32_t error) = 0;
 
     virtual folly::Expected<folly::Unit, ErrorCode> setPriority(
-        uint8_t level, uint32_t order, bool incremental) = 0;
+        quic::PriorityQueue::Priority priority) = 0;
 
     // The returned Future will complete when the stream is available for more
     // writes.
@@ -249,7 +250,7 @@ class WebTransport {
   virtual folly::Expected<folly::Unit, ErrorCode> resetStream(
       uint64_t streamId, uint32_t error) = 0;
   virtual folly::Expected<folly::Unit, ErrorCode> setPriority(
-      uint64_t streamId, uint8_t level, uint32_t order, bool incremental) = 0;
+      uint64_t streamId, quic::PriorityQueue::Priority priority) = 0;
   virtual folly::Expected<folly::SemiFuture<uint64_t>, ErrorCode> awaitWritable(
       uint64_t streamId) = 0;
 

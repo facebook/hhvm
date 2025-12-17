@@ -68,8 +68,9 @@ class WebTransportImpl : public WebTransport {
                             uint32_t /*errorCode*/) = 0;
 
     virtual folly::Expected<folly::Unit, WebTransport::ErrorCode>
-        setWebTransportStreamPriority(HTTPCodec::StreamID /*id*/,
-                                      HTTPPriority /*pri*/) = 0;
+        setWebTransportStreamPriority(
+            HTTPCodec::StreamID /*id*/,
+            quic::PriorityQueue::Priority /*pri*/) = 0;
 
     virtual folly::Expected<std::pair<std::unique_ptr<folly::IOBuf>, bool>,
                             WebTransport::ErrorCode>
@@ -182,12 +183,12 @@ class WebTransportImpl : public WebTransport {
     return it->second.resetStream(error);
   }
   folly::Expected<folly::Unit, WebTransport::ErrorCode> setPriority(
-      uint64_t id, uint8_t level, uint32_t order, bool incremental) override {
+      uint64_t id, quic::PriorityQueue::Priority priority) override {
     auto it = wtEgressStreams_.find(id);
     if (it == wtEgressStreams_.end()) {
       return folly::makeUnexpected(WebTransport::ErrorCode::INVALID_STREAM_ID);
     }
-    return it->second.setPriority(level, order, incremental);
+    return it->second.setPriority(priority);
   }
   folly::Expected<folly::SemiFuture<uint64_t>, ErrorCode> awaitWritable(
       uint64_t streamId) override {
@@ -248,9 +249,8 @@ class WebTransportImpl : public WebTransport {
     }
 
     folly::Expected<folly::Unit, WebTransport::ErrorCode> setPriority(
-        uint8_t level, uint32_t order, bool incremental) override {
-      return impl_.tp_.setWebTransportStreamPriority(
-          getID(), {level, incremental, order});
+        quic::PriorityQueue::Priority priority) override {
+      return impl_.tp_.setWebTransportStreamPriority(getID(), priority);
     }
     folly::Expected<folly::SemiFuture<uint64_t>, ErrorCode> awaitWritable()
         override;

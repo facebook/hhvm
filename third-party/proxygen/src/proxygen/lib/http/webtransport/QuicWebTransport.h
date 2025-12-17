@@ -101,8 +101,9 @@ class QuicWebTransport
       HTTPCodec::StreamID /*id*/, uint32_t /*errorCode*/) override;
 
   folly::Expected<folly::Unit, WebTransport::ErrorCode>
-      setWebTransportStreamPriority(HTTPCodec::StreamID /*id*/,
-                                    HTTPPriority /*pri*/) override;
+      setWebTransportStreamPriority(
+          HTTPCodec::StreamID /*id*/,
+          quic::PriorityQueue::Priority /*pri*/) override;
 
   folly::Expected<std::pair<std::unique_ptr<folly::IOBuf>, bool>,
                   WebTransport::ErrorCode>

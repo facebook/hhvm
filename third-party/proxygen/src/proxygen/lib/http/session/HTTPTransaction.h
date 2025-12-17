@@ -672,8 +672,9 @@ class HTTPTransaction
     }
 
     folly::Expected<folly::Unit, WebTransport::ErrorCode>
-    setWebTransportStreamPriority(HTTPCodec::StreamID /*id*/,
-                                  HTTPPriority /*pri*/) override {
+    setWebTransportStreamPriority(
+        HTTPCodec::StreamID /*id*/,
+        quic::PriorityQueue::Priority /*pri*/) override {
       LOG(FATAL) << __func__ << " not supported";
       folly::assume_unreachable();
     }

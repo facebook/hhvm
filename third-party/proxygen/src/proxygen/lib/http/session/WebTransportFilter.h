@@ -244,7 +244,7 @@ class WebTransportFilter
 
   folly::Expected<folly::Unit, WebTransport::ErrorCode>
   setWebTransportStreamPriority(HTTPCodec::StreamID id,
-                                HTTPPriority pri) override {
+                                quic::PriorityQueue::Priority pri) override {
     return h3Tp_ ? h3Tp_->setWebTransportStreamPriority(id, pri) : folly::unit;
   }
 

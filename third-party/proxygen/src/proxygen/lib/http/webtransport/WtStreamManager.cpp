@@ -178,9 +178,8 @@ struct WriteHandle : public WebTransport::StreamWriteHandle {
       bool fin,
       WebTransport::ByteEventCallback* byteEventCallback) override;
   folly::Expected<folly::Unit, ErrCode> resetStream(uint32_t error) override;
-  folly::Expected<folly::Unit, ErrCode> setPriority(uint8_t level,
-                                                    uint32_t order,
-                                                    bool incremental) override;
+  folly::Expected<folly::Unit, ErrCode> setPriority(
+      quic::PriorityQueue::Priority priority) override;
   folly::Expected<folly::SemiFuture<uint64_t>, ErrCode> awaitWritable()
       override;
 
@@ -839,7 +838,7 @@ folly::Expected<folly::Unit, WriteHandle::ErrCode> WriteHandle::resetStream(
 }
 
 folly::Expected<folly::Unit, WriteHandle::ErrCode> WriteHandle::setPriority(
-    uint8_t level, uint32_t order, bool incremental) {
+    quic::PriorityQueue::Priority priority) {
   XLOG(FATAL) << "not implemented";
 }
 

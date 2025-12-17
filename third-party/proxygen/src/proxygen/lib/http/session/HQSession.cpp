@@ -3887,9 +3887,9 @@ HQSession::HQStreamTransport::resetWebTransportEgress(HTTPCodec::StreamID id,
 
 folly::Expected<folly::Unit, WebTransport::ErrorCode>
 HQSession::HQStreamTransport::setWebTransportStreamPriority(
-    HTTPCodec::StreamID id, HTTPPriority pri) {
+    HTTPCodec::StreamID id, quic::PriorityQueue::Priority pri) {
   if (session_.sock_) {
-    auto res = session_.sock_->setStreamPriority(id, toQuicPriority(pri));
+    auto res = session_.sock_->setStreamPriority(id, pri);
     if (res.hasError()) {
       return folly::makeUnexpected(WebTransport::ErrorCode::GENERIC_ERROR);
     }

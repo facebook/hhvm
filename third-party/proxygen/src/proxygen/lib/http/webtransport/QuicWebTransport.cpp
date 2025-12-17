@@ -150,14 +150,10 @@ QuicWebTransport::resetWebTransportEgress(HTTPCodec::StreamID id,
 }
 
 folly::Expected<folly::Unit, WebTransport::ErrorCode>
-QuicWebTransport::setWebTransportStreamPriority(HTTPCodec::StreamID id,
-                                                HTTPPriority pri) {
-
+QuicWebTransport::setWebTransportStreamPriority(
+    HTTPCodec::StreamID id, quic::PriorityQueue::Priority pri) {
   XCHECK(quicSocket_);
-  auto res = quicSocket_->setStreamPriority(
-      id,
-      quic::HTTPPriorityQueue::Priority(
-          pri.urgency, pri.incremental, pri.orderId));
+  auto res = quicSocket_->setStreamPriority(id, pri);
   if (res.hasError()) {
     return folly::makeUnexpected(WebTransport::ErrorCode::GENERIC_ERROR);
   }

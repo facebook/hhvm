@@ -372,6 +372,15 @@ struct PropagatedStates {
   // before next()).
   const Optional<Type>& lastPush() const { return m_lastPush; }
 
+  // The undoable array set performed by the current instruction (if
+  // any). Since next() will destroy information about the *pushed*
+  // array (IE, the post-set array), we can use this to recover the
+  // post-set array from the pre-set array. This juggling is done to
+  // avoid having a simultaneous reference to the pre-array and
+  // post-array to avoid triggering COW.
+  using LastSet = StateMutationUndo::UndoableArraySet;
+  const Optional<LastSet>& lastSet() const { return m_lastSet; }
+
   // Interp flags for the current instruction.
   bool wasPEI() const { return currentMark().wasPEI; }
   bool unreachable() const { return currentMark().unreachable; }
@@ -387,6 +396,7 @@ private:
   }
 
   Optional<Type> m_lastPush;
+  Optional<LastSet> m_lastSet;
   CompactVector<Type> m_stack;
   CompactVector<Type> m_locals;
   CompactVector<std::pair<LocalId, Type>> m_afterLocals;

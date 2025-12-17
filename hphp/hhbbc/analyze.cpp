@@ -1423,6 +1423,7 @@ void PropagatedStates::next() {
   assertx(std::get_if<StateMutationUndo::Mark>(&m_undos.events.back()));
 
   m_lastPush.reset();
+  m_lastSet.reset();
   m_afterLocals.clear();
   m_undos.events.pop_back();
 
@@ -1452,6 +1453,21 @@ void PropagatedStates::next() {
         auto& old = m_locals[l.id];
         m_afterLocals.emplace_back(std::make_pair(l.id, std::move(old)));
         old = std::move(l.t);
+        return false;
+      },
+      [this] (StateMutationUndo::UndoableArraySet& s) {
+        // Instead of holding onto a reference to the pre-set array
+        // (which can cause COW to trigger), store enough information
+        // to undo the set. This can only be done under certain
+        // circumstances. If not applicable, a normal stack-write undo
+        // is issued instead.
+        assertx(!m_stack.empty());
+        // Store information about the last undoable array set without
+        // referencing the array itself, to try to keep array
+        // ref-count at 1.
+        if (!m_lastSet) m_lastSet.emplace(s);
+        auto arr = std::move(m_stack.back());
+        m_stack.back() = undo_array_like_set(std::move(arr), s.key);
         return false;
       }
     );

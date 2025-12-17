@@ -620,6 +620,9 @@ private:
   friend IterTypes iter_types(const Type&);
   friend Optional<RepoAuthType> make_repo_type_arr(const Type&);
 
+  friend bool array_like_set_can_be_undone(const Type&, const Type&);
+  friend Type undo_array_like_set(Type, const Type&);
+
   friend Type vec_val(SArray);
   friend Type vec_empty();
   friend Type some_vec_empty();
@@ -1466,7 +1469,9 @@ std::pair<Type,bool> array_like_elem(const Type& arr, const Type& key);
  * the set. The returned type includes the non-TArrLike bits copied
  * into them.
  */
-std::pair<Type,bool> array_like_set(Type arr, const Type& key, const Type& val);
+std::pair<Type,bool> array_like_set(Type arr,
+                                    const Type& key,
+                                    const Type& val);
 
 /*
  * Perform a newelem operation on an array-like type.  Returns an
@@ -1485,6 +1490,26 @@ std::pair<Type,bool> array_like_set(Type arr, const Type& key, const Type& val);
  * copied into them.
  */
 std::pair<Type,bool> array_like_newelem(Type arr, const Type& val);
+
+/*
+ * Check if an array_like_set on the given array with the given key
+ * and "undo-able". That is, given just the post-set array and the
+ * key, it's possible to reconstruct the array before the
+ * mutation. True will be returned if it definitely can be, false
+ * otherwise.
+ *
+ * Right now this is used to track chains of AddElemC without keeping
+ * a copy of each intermediate state.
+ */
+bool array_like_set_can_be_undone(const Type& arr, const Type& key);
+
+/*
+ * Given an array which is the product of array_like_set with the
+ * given key, produce the array as it was *before* the
+ * array_like_set. This is only if array_like_set returned true on the
+ * pre-set version of the array (with the same key).
+ */
+Type undo_array_like_set(Type arr, const Type& key);
 
 /*
  * Return the best known information for iteration of the supplied type. This is

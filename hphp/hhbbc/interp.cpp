@@ -927,32 +927,51 @@ void in(ISS& env, const bc::AddElemC&) {
   auto const promoteMayThrow = (promotion == Promotion::YesMightThrow);
 
   auto inTy = (env.state.stack.end() - 3).unspecialize();
-  // Unspecialize modifies the stack location
-  if (env.undo) env.undo->onStackWrite(env.state.stack.size() - 3, inTy);
+  auto canUndo = false;
+  if (env.undo) {
+    // Special case: can we undo this AddElemC without explicitly
+    // storing the input array? This is desirable because we can (try
+    // to) keep the array's ref-count at 1, which will avoid O(N^2)
+    // blow-up in long AddElemC chains.
+    if (array_like_set_can_be_undone(inTy, k)) {
+      canUndo = true;
+    } else {
+      // Unspecialize modifies the stack location
+      env.undo->onStackWrite(env.state.stack.size() - 3, inTy);
+    }
+  }
 
-  auto outTy = [&] (const Type& key) -> Optional<Type> {
-    if (!key.subtypeOf(BArrKey)) return std::nullopt;
+  auto outTy = [&] () -> Optional<Type> {
+    if (!k.subtypeOf(BArrKey)) return std::nullopt;
     if (inTy.subtypeOf(BDict)) {
-      auto const r = array_like_set(std::move(inTy), key, v);
+      auto const r = array_like_set(std::move(inTy), k, v);
       if (!r.second) return r.first;
     }
     return std::nullopt;
-  }(k);
+  }();
+  // If a set is reversible, we must be able the model the set.
+  assertx(IMPLIES(canUndo, outTy.has_value()));
 
-  if (outTy && !promoteMayThrow && will_reduce(env)) {
+  if (!canUndo && outTy && !promoteMayThrow && will_reduce(env)) {
     if (!env.trackedElems.empty() &&
         env.trackedElems.back().depth + 3 == env.state.stack.size()) {
-      auto const handled = [&] (const Type& key) {
-        if (!key.subtypeOf(BArrKey)) return false;
-        auto ktv = tv(key);
+      auto const handled = [&] {
+        if (!k.subtypeOf(BArrKey)) return false;
+        auto ktv = tv(k);
         if (!ktv) return false;
         auto vtv = tv(v);
         if (!vtv) return false;
         return mutate_add_elem_array(env, [&](ArrayData** arr) {
           *arr = (*arr)->setMove(*ktv, *vtv);
         });
-      }(k);
+      }();
       if (handled) {
+        if (env.undo) {
+          env.undo->onStackWrite(
+            env.state.stack.size() - 3,
+            std::move((env.state.stack.end() - 3)->type)
+          );
+        }
         (env.state.stack.end() - 3)->type = std::move(*outTy);
         reduce(env, bc::PopC {}, bc::PopC {});
         ITRACE(2, "(addelem* -> {}\n",
@@ -965,10 +984,23 @@ void in(ISS& env, const bc::AddElemC&) {
     }
   }
 
-  discard(env, 3);
+  // Remove the key and value.
+  popC(env);
+  popC(env);
+
+  // If this AddElemC is reversible, then suppress the normal undo log
+  // recording. All subsequent stack actions will be replaced by a
+  // single undo action.
+  if (canUndo) env.undo->suppress();
+  SCOPE_EXIT { if (canUndo) env.undo->unsuppress(); };
+
+  popC(env);
   finish_tracked_elems(env, env.state.stack.size());
 
-  if (!outTy) return push(env, TInitCell);
+  if (!outTy) {
+    assertx(!canUndo);
+    return push(env, TInitCell);
+  }
 
   if (outTy->subtypeOf(BBottom)) {
     unreachable(env);
@@ -977,6 +1009,13 @@ void in(ISS& env, const bc::AddElemC&) {
     constprop(env);
   }
   push(env, std::move(*outTy));
+  if (canUndo) {
+    // Finally unsuppress the undo log and record the reversible array
+    // set. If we can't undo the set, then the above stack pushes/pops
+    // will record the set in the normal way.
+    env.undo->unsuppress();
+    env.undo->onUndoableArraySet(topC(env), k);
+  }
 }
 
 void in(ISS& env, const bc::AddNewElemC&) {

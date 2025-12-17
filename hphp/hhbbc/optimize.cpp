@@ -107,7 +107,7 @@ bool ignoresReadLocal(const Bytecode& bcode, LocalId l) {
 }
 
 template<typename TyBC, typename ArgType>
-Optional<Bytecode> makeAssert(ArgType arg, Type t) {
+Optional<Bytecode> makeAssert(ArgType arg, const Type& t) {
   if (t.subtypeOf(BBottom)) return std::nullopt;
   auto const rat = make_repo_type(t);
   using T = RepoAuthType::Tag;
@@ -122,8 +122,8 @@ template<class Gen>
 void insert_assertions_step(const php::Func& func,
                             const Bytecode& bcode,
                             const State& state,
-                            std::bitset<kMaxTrackedLocals> mayReadLocalSet,
-                            std::vector<uint8_t> obviousStackOutputs,
+                            const std::bitset<kMaxTrackedLocals>& mayReadLocalSet,
+                            const std::vector<uint8_t>& obviousStackOutputs,
                             Gen gen) {
   if (state.unreachable) return;
 
@@ -144,7 +144,7 @@ void insert_assertions_step(const php::Func& func,
     assertx(idx < state.stack.size());
     if (obviousStackOutputs[state.stack.size() - idx - 1]) return;
     if (ignoresStackInput(bcode.op)) return;
-    auto const realT = state.stack[state.stack.size() - idx - 1].type;
+    auto const& realT = state.stack[state.stack.size() - idx - 1].type;
     auto const flav  = stack_flav(realT);
 
     if (!realT.strictSubtypeOf(flav)) return;
@@ -214,6 +214,7 @@ bool hasObviousStackOutput(const Bytecode& op, const Interp& interp) {
   case Op::NewStructDict:
   case Op::NewVec:
   case Op::NewKeysetArray:
+  case Op::AddElemC:
   case Op::AddNewElemC:
   case Op::NewCol:
   case Op::NewPair:
@@ -330,17 +331,23 @@ void insert_assertions(VisitContext& visit, BlockId bid, State state) {
       break;
     }
 
-    auto const preState = state;
-    auto const flags    = step(interp, op);
-
-    insert_assertions_step(
-      *func,
-      op,
-      preState,
-      flags.mayReadLocalSet,
-      obviousStackOutputs,
-      gen
-    );
+    if (op.op == Op::AddElemC) {
+      // Don't bother with AddElemC. It's not usually useful and the
+      // type assertions can trigger O(N^2) behavior in long chains.
+      auto const flags = step(interp, op);
+      assertx(flags.mayReadLocalSet.none());
+    } else {
+      auto const preState = state;
+      auto const flags    = step(interp, op);
+      insert_assertions_step(
+        *func,
+        op,
+        preState,
+        flags.mayReadLocalSet,
+        obviousStackOutputs,
+        gen
+      );
+    }
 
     if (op.op == Op::CGetL2) {
       obviousStackOutputs.emplace(obviousStackOutputs.end() - 1,

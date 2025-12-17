@@ -4041,6 +4041,8 @@ Type::ArrayCat categorize_array(const Type& t) {
 
 CompactVector<LSString> get_string_keys(const Type& t) {
   CompactVector<LSString> strs;
+  // No keys if the array is known to be empty.
+  if (t.subtypeOf(BArrLikeE)) return strs;
 
   switch (t.m_dataTag) {
     case DataTag::ArrLikeVal:
@@ -7182,7 +7184,7 @@ std::pair<Type, bool> array_like_set(Type base,
   // Sets aren't allowed on a keyset.
   if (arr.subtypeOf(BKeyset)) return std::make_pair(std::move(rest), true);
 
-  // Otherwise split the array intoits specific array types, do the
+  // Otherwise split the array into its specific array types, do the
   // set on each one, then union the results back together.
   auto result = TBottom;
   auto mightThrow = false;
@@ -7878,6 +7880,44 @@ std::pair<Type, bool> array_like_newelem_impl(Type arr, const Type& val) {
   }
 
   not_reached();
+}
+
+//////////////////////////////////////////////////////////////////////
+
+// Right now the only array set which can undone is one with
+// ArrLikeMap specialization and where the key's constant value is
+// known. We could also do ArrLikePacked, but there isn't a need at
+// the moment. The other specializations don't preserve enough
+// information (and ArrLikeVal is dealt with specially already).
+bool array_like_set_can_be_undone(const Type& arr, const Type& k) {
+  if (!k.subtypeOf(BArrKey) || k.is(BBottom)) return false;
+  if (!arr.subtypeAmong(BDictN, BArrLike)) return false;
+  if (arr.m_dataTag != DataTag::ArrLikeMap) return false;
+  auto const& map = *arr.m_data.map;
+  if (map.hasOptElements()) return false;
+  auto const kTV = tvCounted(k);
+  if (!kTV) return false;
+  return map.map.find(*kTV) == map.map.end();
+}
+
+// Undo the last set on this array. Since the pre-set array must meet
+// array_like_set_can_be_undone requirements, we only need to delete
+// the key from the specialization.
+Type undo_array_like_set(Type arr, const Type& k) {
+  assertx(k.subtypeOf(BArrKey));
+  assertx(!k.is(BBottom));
+  assertx(arr.subtypeAmong(BDictN, BArrLike));
+  assertx(arr.m_dataTag == DataTag::ArrLikeMap);
+  auto map = arr.m_data.map.mutate();
+  assertx(!map->hasOptElements());
+  auto const kTV = tvCounted(k);
+  assertx(kTV);
+  auto const it = map->map.find(*kTV);
+  // The key is guaranteed to exist and did not exist before the set,
+  // so simply delete it.
+  assertx(it != map->map.end());
+  map->map.erase(it);
+  return arr;
 }
 
 //////////////////////////////////////////////////////////////////////

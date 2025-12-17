@@ -1304,7 +1304,8 @@ void dce(Env& env, const bc::NewDictArray&) {
 }
 
 void dce(Env& env, const bc::AddElemC& /*op*/) {
-  assertx(env.states.lastPush().has_value());
+  assertx(env.states.lastPush().has_value() ||
+          env.states.lastSet().has_value());
 
   stack_ops(env, [&] (UseInfo& ui) {
       // If the set might throw it needs to be kept.
@@ -1322,22 +1323,46 @@ void dce(Env& env, const bc::AddElemC& /*op*/) {
         // dce, since we're going to recompute the FuncAnalysis anyway.
         return PushFlags::MarkLive;
       }
-      auto const& arrPost = *env.states.lastPush();
+
+      // Get the array as it was *before* the set.
       auto const& arrPre = topC(env, 2);
-      auto const postSize = arr_size(arrPost);
-      if (!postSize || postSize == arr_size(arrPre)) {
+      // Now get information about the set itself. This is either
+      // undoable set information, or simply the post-set array
+      // (depending on whether the set was undoable).
+      auto const postInfo = [&] {
+        if (auto const& set = env.states.lastSet()) return *set;
+        auto const& arrPost = env.states.lastPush();
+        assertx(arrPost.has_value());
+        // Note: We avoid storing the actual array here to keep
+        // ref-counts at 1.
+        return PropagatedStates::LastSet{
+          topC(env, 1),
+          arr_size(*arrPost),
+          categorize_array(*arrPost),
+          arrPost->strictSubtypeOf(BDictN)
+        };
+      }();
+
+      auto const preSize = arr_size(arrPre);
+      if (!postInfo.size || !preSize || *postInfo.size == *preSize) {
         // if postSize is known, and equal to preSize, the AddElemC
         // didn't add an element (duplicate key) so we have to give up.
         // if its not known, we also have nothing to do.
         return PushFlags::MarkLive;
       }
+      // We know the set added something and we know all the sizes, so
+      // the post-array must have one more element than the pre.
+      assertx(*postInfo.size == *preSize + 1);
       if (ui.usage == Use::AddElemC) {
         return PushFlags::AddElemC;
       }
-      auto const cat = categorize_array(arrPost);
-      if (cat.hasValue) {
+      if (postInfo.cat.hasValue) {
+        assertx(!env.states.lastSet());
+        assertx(env.states.lastPush());
         if (allUnusedIfNotLastRef(ui)) return PushFlags::MarkUnused;
+        auto const& arrPost = *env.states.lastPush();
         auto v = tv(arrPost);
+        assertx(v);
         CompactVector<Bytecode> bcs;
         assertx(arrPost.subtypeOf(BDictN));
         bcs.emplace_back(bc::Dict { v->m_data.parr });
@@ -1348,11 +1373,26 @@ void dce(Env& env, const bc::AddElemC& /*op*/) {
 
       if (isLinked(ui)) return PushFlags::MarkLive;
 
-      if (arrPost.strictSubtypeOf(BDictN) &&
-          cat.cat == Type::ArrayCat::Struct &&
-          *postSize <= ArrayData::MaxElemsOnStack) {
+      if (postInfo.isStrictSubtypeOfDict &&
+          postInfo.cat.cat == Type::ArrayCat::Struct &&
+          postInfo.size <= ArrayData::MaxElemsOnStack) {
         CompactVector<Bytecode> bcs;
-        bcs.emplace_back(bc::NewStructDict { get_string_keys(arrPost) });
+        // Either get the keys directly from the post-set array, so
+        // infer it by adding the (known) key to the pre-set array
+        // (since we know the set added exactly one key, we can
+        // predict the effects exactly).
+        auto keys = [&] {
+          if (auto const& p = env.states.lastPush()) {
+            return get_string_keys(*p);
+          } else {
+            assertx(postInfo.key.strictSubtypeOf(BStr));
+            assertx(is_specialized_string(postInfo.key));
+            auto keys = get_string_keys(arrPre);
+            keys.emplace_back(sval_of(postInfo.key));
+            return keys;
+          }
+        }();
+        bcs.emplace_back(bc::NewStructDict { std::move(keys) });
         ui.actions[env.id] = DceAction(DceAction::Replace, std::move(bcs));
         return PushFlags::AddElemC;
       }

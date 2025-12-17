@@ -449,17 +449,54 @@ struct StateMutationUndo {
   // Stack modification (undone by changing the stack slot to the
   // recorded type).
   struct Stack { size_t idx; Type t; };
-  using Events = std::variant<Push, Pop, Local, Stack, Mark>;
+  // Top of stack is an array which just had the given key inserted
+  // into it, and the set is reversable. (Used to avoid COW for large
+  // specialized arrays).
+  struct UndoableArraySet {
+    Type key;
+    // Store information about *post* set array so DCE can avoid
+    // needing to materialize the post set array.
+    Optional<int64_t> size;
+    Type::ArrayCat cat;
+    bool isStrictSubtypeOfDict;
+  };
+  using Events = std::variant<Push, Pop, Local, Stack, Mark, UndoableArraySet>;
 
   std::vector<Events> events;
+  bool suppressed{false};
 
-  void onPush() { events.emplace_back(Push{}); }
-  void onPop(Type old) { events.emplace_back(Pop{ std::move(old) }); }
+  void suppress() {
+    assertx(!suppressed);
+    suppressed = true;
+  }
+  void unsuppress() { suppressed = false; }
+
+  void onPush() {
+    if (suppressed) return;
+    events.emplace_back(Push{});
+  }
+  void onPop(Type old) {
+    if (suppressed) return;
+    events.emplace_back(Pop{ std::move(old) });
+  }
   void onStackWrite(size_t idx, Type old) {
+    if (suppressed) return;
     events.emplace_back(Stack{ idx, std::move(old) });
   }
   void onLocalWrite(LocalId l, Type old) {
+    if (suppressed) return;
     events.emplace_back(Local{ l, std::move(old) });
+  }
+  void onUndoableArraySet(const Type& arr, Type key) {
+    if (suppressed) return;
+    events.emplace_back(
+      UndoableArraySet{
+        std::move(key),
+        arr_size(arr),
+        categorize_array(arr),
+        arr.strictSubtypeOf(BDictN)
+      }
+    );
   }
 };
 

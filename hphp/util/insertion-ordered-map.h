@@ -94,6 +94,8 @@ private:
     return emplace_back(k, v);
   }
 
+  void erase(iterator it) { getList().erase(it); }
+
   iterator begin() { return getList().begin(); }
   iterator end()   { return getList().end(); }
   const_iterator begin() const { return getList().begin(); }

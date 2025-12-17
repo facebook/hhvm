@@ -56,6 +56,9 @@ struct copy_ptr {
   explicit operator bool() const { return !isNull(); }
   bool isNull() const { return m_p == nullptr; }
 
+  bool unique() const { return !m_p || get_ref(m_p) == 1; }
+  bool shared() const { return !unique(); }
+
   const T& operator*() const { return *m_p; }
   const T* operator->() const { return m_p; }
   const T* get() const { return m_p; }

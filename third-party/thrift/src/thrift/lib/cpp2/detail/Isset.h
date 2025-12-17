@@ -16,6 +16,7 @@
 
 #pragma once
 #include <cassert>
+#include <type_traits>
 #include <folly/synchronization/AtomicUtil.h>
 
 namespace apache::thrift::detail {
@@ -24,6 +25,13 @@ namespace apache::thrift::detail {
 // even if integer is atomic
 template <typename T>
 struct IntWrapper {
+  static_assert(
+      !std::is_reference_v<T>,
+      "IntWrapper cannot wrap reference types. "
+      "Wrapping a reference would create a dangling reference: "
+      "`T& value{0}` creates a temporary and binds to it, which is "
+      "immediately destroyed, causing heap-use-after-free.");
+
   IntWrapper() = default;
   explicit IntWrapper(T t) : value(t) {}
 
@@ -165,8 +173,8 @@ class BitRef {
   template <bool B>
   explicit BitRef(const BitRef<B>& other)
       : value_(
-            other.is_atomic_ ? IssetBitSet(other.value_.atomic.value())
-                             : IssetBitSet(other.value_.non_atomic.value())),
+            other.is_atomic_ ? IssetBitSet(*other.value_.atomic_ptr)
+                             : IssetBitSet(*other.value_.non_atomic_ptr)),
         bit_index_(other.bit_index_),
         is_atomic_(other.is_atomic_) {}
 
@@ -177,26 +185,50 @@ class BitRef {
 #endif
   void operator=(bool flag) {
     if (is_atomic_) {
-      value_.atomic[bit_index_] = flag;
+      setBit(*value_.atomic_ptr, bit_index_, flag);
     } else {
-      value_.non_atomic[bit_index_] = flag;
+      setBit(*value_.non_atomic_ptr, bit_index_, flag);
     }
   }
 
   explicit operator bool() const {
     if (is_atomic_) {
-      return value_.atomic[bit_index_];
+      return getBit(*value_.atomic_ptr, bit_index_);
     } else {
-      return value_.non_atomic[bit_index_];
+      return getBit(*value_.non_atomic_ptr, bit_index_);
     }
   }
 
  private:
+  static bool getBit(const uint8_t& isset, uint8_t bit) {
+    return isset & (uint8_t(1) << bit);
+  }
+
+  static bool getBit(const std::atomic<uint8_t>& isset, uint8_t bit) {
+    return isset.load(std::memory_order_relaxed) & (uint8_t(1) << bit);
+  }
+
+  static void setBit(uint8_t& isset, uint8_t bit, bool flag) {
+    if (flag) {
+      isset |= (uint8_t(1) << bit);
+    } else {
+      isset &= ~(uint8_t(1) << bit);
+    }
+  }
+
+  static void setBit(std::atomic<uint8_t>& isset, uint8_t bit, bool flag) {
+    if (flag) {
+      folly::atomic_fetch_set(isset, bit, std::memory_order_relaxed);
+    } else {
+      folly::atomic_fetch_reset(isset, bit, std::memory_order_relaxed);
+    }
+  }
+
   union IssetBitSet {
-    explicit IssetBitSet(Isset& isset) : non_atomic(isset) {}
-    explicit IssetBitSet(AtomicIsset& isset) : atomic(isset) {}
-    apache::thrift::detail::BitSet<Isset&> non_atomic;
-    apache::thrift::detail::BitSet<AtomicIsset&> atomic;
+    explicit IssetBitSet(Isset& isset) : non_atomic_ptr(&isset) {}
+    explicit IssetBitSet(AtomicIsset& isset) : atomic_ptr(&isset) {}
+    Isset* non_atomic_ptr;
+    AtomicIsset* atomic_ptr;
   } value_;
 
   const uint8_t bit_index_;

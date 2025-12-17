@@ -22,38 +22,28 @@
 namespace apache::thrift::detail::test {
 
 template <class T>
-BitSet<T> makeBitSet(T& storage) {
-  if constexpr (std::is_reference_v<T>) {
-    return BitSet<T>{storage};
-  } else {
-    return {};
-  }
+BitSet<T> makeBitSet([[maybe_unused]] T& storage) {
+  return {};
 }
 
 template <class>
 struct IntTest : ::testing::Test {};
 
-using Ints = ::testing::
-    Types<uint8_t, uint8_t&, std::atomic<uint8_t>, std::atomic<uint8_t>&>;
+using Ints = ::testing::Types<uint8_t, std::atomic<uint8_t>>;
 TYPED_TEST_SUITE(IntTest, Ints);
 
 TYPED_TEST(IntTest, Traits) {
   static_assert(std::is_copy_constructible_v<BitSet<TypeParam>>);
   static_assert(std::is_nothrow_move_constructible_v<BitSet<TypeParam>>);
   static_assert(std::is_trivially_destructible_v<BitSet<TypeParam>>);
-  if constexpr (std::is_reference_v<TypeParam>) {
-    static_assert(std::is_trivially_copy_constructible_v<BitSet<TypeParam>>);
-    static_assert(std::is_trivially_move_constructible_v<BitSet<TypeParam>>);
-  } else {
-    // In this case `BitSet<TypeParam>` will be data member in thrift struct. We
-    // need to make sure thrift struct is copy/move assignable.
-    static_assert(std::is_copy_assignable_v<BitSet<TypeParam>>);
-    static_assert(std::is_move_assignable_v<BitSet<TypeParam>>);
-  }
+  // `BitSet<TypeParam>` will be data member in thrift struct. We
+  // need to make sure thrift struct is copy/move assignable.
+  static_assert(std::is_copy_assignable_v<BitSet<TypeParam>>);
+  static_assert(std::is_move_assignable_v<BitSet<TypeParam>>);
 }
 
 TYPED_TEST(IntTest, Basic) {
-  std::remove_reference_t<TypeParam> storage{0};
+  TypeParam storage{0};
   auto b = makeBitSet<TypeParam>(storage);
   for (int i = 0; i < 8; i++) {
     b[i] = i % 3;
@@ -71,12 +61,11 @@ TYPED_TEST(IntTest, Basic) {
 template <class>
 struct AtomicIntTest : ::testing::Test {};
 
-using AtomicInts =
-    ::testing::Types<std::atomic<uint8_t>, std::atomic<uint8_t>&>;
+using AtomicInts = ::testing::Types<std::atomic<uint8_t>>;
 TYPED_TEST_SUITE(AtomicIntTest, AtomicInts);
 
 TYPED_TEST(AtomicIntTest, Basic) {
-  std::remove_reference_t<TypeParam> storage{0};
+  TypeParam storage{0};
   auto b = makeBitSet<TypeParam>(storage);
   std::thread t[8];
   for (int i = 0; i < 8; i++) {

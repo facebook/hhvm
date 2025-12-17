@@ -452,9 +452,7 @@ abstract class ThriftClientBase implements IThriftClient {
     int $expectedsequenceid,
     RpcOptions $rpc_options,
     shape(?'read_options' => int) $options = shape(),
-  ): Awaitable<
-    \ResponseAndClientSink<TSinkFirstType, TSinkType, TSinkFinalType>,
-  > {
+  ): Awaitable<\ResponseAndSink<TSinkFirstType, TSinkType, TSinkFinalType>> {
 
     $channel = $this->channel_;
     $out_transport = $this->output_->getTransport();

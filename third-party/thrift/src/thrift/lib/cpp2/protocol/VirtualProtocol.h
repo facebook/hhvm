@@ -33,7 +33,11 @@ namespace apache::thrift {
 class VirtualReaderBase {
  public:
   VirtualReaderBase() {}
-  virtual ~VirtualReaderBase() {}
+  virtual ~VirtualReaderBase() = default;
+  VirtualReaderBase(const VirtualReaderBase&) = delete;
+  VirtualReaderBase& operator=(const VirtualReaderBase&) = delete;
+  VirtualReaderBase(VirtualReaderBase&&) = default;
+  VirtualReaderBase& operator=(VirtualReaderBase&&) = default;
 
   virtual ProtocolType protocolType() const = 0;
   virtual bool kUsesFieldNames() const = 0;
@@ -96,7 +100,11 @@ class VirtualReader : public VirtualReaderBase {
           false>
   explicit VirtualReader(Args&&... args)
       : protocol_(std::forward<Args>(args)...) {}
-  ~VirtualReader() override {}
+  ~VirtualReader() override = default;
+  VirtualReader(const VirtualReader&) = delete;
+  VirtualReader& operator=(const VirtualReader&) = delete;
+  VirtualReader(VirtualReader&&) = default;
+  VirtualReader& operator=(VirtualReader&&) = default;
 
   ProtocolType protocolType() const override {
     return protocol_.protocolType();

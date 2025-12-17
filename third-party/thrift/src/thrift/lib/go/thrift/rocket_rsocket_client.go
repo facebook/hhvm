@@ -195,10 +195,10 @@ func (r *rsocketClient) RequestResponse(
 	return nil, nil, err
 }
 
-func (r *rsocketClient) FireAndForget(_ context.Context, messageName string, headers map[string]string, dataBytes []byte) error {
+func (r *rsocketClient) FireAndForget(ctx context.Context, messageName string, headers map[string]string, dataBytes []byte) error {
 	r.resetDeadline()
 	request, err := rocket.EncodeRequestPayload(
-		context.Background(),
+		ctx,
 		messageName,
 		r.protoID,
 		rpcmetadata.RpcKind_SINGLE_REQUEST_NO_RESPONSE,

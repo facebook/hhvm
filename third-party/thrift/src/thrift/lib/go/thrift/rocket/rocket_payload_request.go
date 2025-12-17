@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"maps"
+	"math"
 
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 	"github.com/facebook/fbthrift/thrift/lib/thrift/rpcmetadata"
@@ -46,6 +47,12 @@ func EncodeRequestPayload(
 	frameworkMetadata := getFrameworkMetadata(ctx)
 	if frameworkMetadata != nil {
 		metadata.SetFrameworkMetadata(frameworkMetadata)
+	}
+
+	if rpcOpts := types.GetRPCOptions(ctx); rpcOpts != nil && rpcOpts.QueueTimeout > 0 {
+		//nolint:gosec // G115: guarded by max int32
+		queueTimeoutMs := int32(min(rpcOpts.QueueTimeout.Milliseconds(), math.MaxInt32))
+		metadata.SetQueueTimeoutMs(&queueTimeoutMs)
 	}
 
 	if interactionID, ok := types.GetInteractionIDFromContext(ctx); ok {

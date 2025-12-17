@@ -164,7 +164,13 @@ struct SHA1 : private boost::totally_ordered<SHA1> {
   }
 
   template <typename SerDe> void serde(SerDe& serde) {
-    for (auto& w : q) serde(w);
+    // Using ZigZag actually results in more bytes when encoding, so
+    // prefer direct encoding.
+    if constexpr (SerDe::deserializing) {
+      serde.readRaw((char*)q.data(), sizeof(q));
+    } else {
+      serde.writeRaw((const char*)q.data(), sizeof(q));
+    }
   }
 };
 

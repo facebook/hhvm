@@ -237,6 +237,20 @@ struct BlobEncoder {
     if (some) encode(*opt, extra...);
   }
 
+  template<typename T, typename D, typename... Extra>
+  void encode(const std::unique_ptr<T, D>& p, const Extra&... extra) {
+    auto const some = (bool)p;
+    encode(some);
+    if (some) encode(*p, extra...);
+  }
+
+  template<typename T, typename... Extra>
+  void encode(const copy_ptr<T>& p, const Extra&... extra) {
+    auto const some = (bool)p;
+    encode(some);
+    if (some) encode(*p, extra...);
+  }
+
   template <size_t I = 0, typename... Ts>
   typename std::enable_if<I == sizeof...(Ts), void>::type
   encode(const std::tuple<Ts...>& /*val*/) {}
@@ -393,31 +407,6 @@ struct BlobEncoder {
     for (auto it = cont.begin(); it != cont.end(); ++it) {
       encode(deltaEncode(prev, *it));
       prev = *it;
-    }
-    return *this;
-  }
-
-  // Encode a type which has a conversion to nullptr, skipping the
-  // encoding if it is nullptr. This is mainly meant for smart pointer
-  // types where the pointer may not be set.
-  template <typename T>
-  BlobEncoder& nullable(const T& t) {
-    if (t) {
-      (*this)(true);
-      (*this)(t);
-    } else {
-      (*this)(false);
-    }
-    return *this;
-  }
-
-  template <typename T>
-  BlobEncoder& sharedPtr(const std::shared_ptr<T>& p) {
-    if (p) {
-      (*this)(true);
-      (*this)(*p);
-    } else {
-      (*this)(false);
     }
     return *this;
   }
@@ -593,6 +582,12 @@ struct BlobDecoder {
 
   size_t advanced() const { return m_p - m_start; }
 
+  void readRaw(char* ptr, size_t size) {
+    assertx(remaining() >= size);
+    std::copy(data(), data() + size, ptr);
+    advance(size);
+  }
+
   // Produce a value of type T from the decoder. Uses a specialized
   // creation function if available, otherwise just default constructs
   // the value and calls the decoder on it.
@@ -712,6 +707,28 @@ struct BlobDecoder {
       opt = std::nullopt;
     } else {
       opt = make<T>(extra...);
+    }
+  }
+
+  template<typename T, typename D, typename... Extra>
+  void decode(std::unique_ptr<T, D>& p, Extra... extra) {
+    bool some;
+    decode(some);
+    if (!some) {
+      p.reset(nullptr);
+    } else {
+      p.reset(new T{make<T>(extra...)});
+    }
+  }
+
+  template<typename T, typename... Extra>
+  void decode(copy_ptr<T>& p, Extra... extra) {
+    bool some;
+    decode(some);
+    if (!some) {
+      p.reset();
+    } else {
+      p.emplace(make<T>(extra...));
     }
   }
 
@@ -877,32 +894,6 @@ struct BlobDecoder {
       vec.push_back(prev);
     }
     vec.shrink_to_fit();
-    return *this;
-  }
-
-  // Decode a type encoded by BlobEncoder::nullable. If the value was
-  // not encoded, it will be set to nullptr.
-  template <typename T>
-  BlobDecoder& nullable(T& t) {
-    bool present;
-    (*this)(present);
-    if (present) {
-      (*this)(t);
-    } else {
-      t = nullptr;
-    }
-    return *this;
-  }
-
-  template <typename T>
-  BlobDecoder& sharedPtr(std::shared_ptr<T>& p) {
-    bool present;
-    (*this)(present);
-    if (present) {
-      p = std::make_shared<T>(make<T>());
-    } else {
-      p.reset();
-    }
     return *this;
   }
 
@@ -1113,51 +1104,6 @@ struct BlobDecoder {
   } else {                                      \
     SD(X);                                      \
   }
-
-//////////////////////////////////////////////////////////////////////
-
-namespace detail {
-
-// Helpers to stamp out BlobEncoderHelpers for unique_ptr and
-// copy_ptrs wrapping the above types.
-
-template <typename T, typename D> struct UPBlobImpl {
-  template <typename SerDe, typename... Extra>
-  static void serde(SerDe& sd, std::unique_ptr<T, D>& p, Extra... extra) {
-    if constexpr (SerDe::deserializing) {
-      p = std::unique_ptr<T, D>(new T);
-    } else {
-      assertx(p);
-    }
-    sd(*p, extra...);
-  }
-};
-
-template <typename T> struct CPBlobImpl {
-  template <typename SerDe, typename... Extra>
-  static void serde(SerDe& sd, copy_ptr<T>& p, Extra... extra) {
-    if constexpr (SerDe::deserializing) {
-      sd(*p.emplace(), extra...);
-    } else {
-      assertx(p);
-      sd(*p, extra...);
-    }
-  }
-};
-
-}
-
-//////////////////////////////////////////////////////////////////////
-
-#define MAKE_UNIQUE_PTR_BLOB_SERDE_HELPER(T)                    \
-  template<typename D>                                          \
-  struct BlobEncoderHelper<std::unique_ptr<T, D>>               \
-    : public detail::UPBlobImpl<T, D> {};
-
-#define MAKE_COPY_PTR_BLOB_SERDE_HELPER(T)                      \
-  template<>                                                    \
-  struct BlobEncoderHelper<copy_ptr<T>>                         \
-    : public detail::CPBlobImpl<T> {};
 
 //////////////////////////////////////////////////////////////////////
 

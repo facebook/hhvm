@@ -1579,12 +1579,4 @@ Type unserialize_classes(const IIndex&, Type);
 
 //////////////////////////////////////////////////////////////////////
 
-MAKE_COPY_PTR_BLOB_SERDE_HELPER(HHBBC::DWaitHandle)
-MAKE_COPY_PTR_BLOB_SERDE_HELPER(HHBBC::DArrLikePacked)
-MAKE_COPY_PTR_BLOB_SERDE_HELPER(HHBBC::DArrLikePackedN)
-MAKE_COPY_PTR_BLOB_SERDE_HELPER(HHBBC::DArrLikeMap)
-MAKE_COPY_PTR_BLOB_SERDE_HELPER(HHBBC::DArrLikeMapN)
-
-//////////////////////////////////////////////////////////////////////
-
 }

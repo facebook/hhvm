@@ -865,17 +865,4 @@ std::string show(FuncClsUnit);
 
 //////////////////////////////////////////////////////////////////////
 
-MAKE_COPY_PTR_BLOB_SERDE_HELPER(HHBBC::php::Block)
-MAKE_UNIQUE_PTR_BLOB_SERDE_HELPER(HHBBC::php::Unit)
-MAKE_UNIQUE_PTR_BLOB_SERDE_HELPER(HHBBC::php::Func)
-MAKE_UNIQUE_PTR_BLOB_SERDE_HELPER(HHBBC::php::FuncBytecode)
-MAKE_UNIQUE_PTR_BLOB_SERDE_HELPER(HHBBC::php::Class)
-MAKE_UNIQUE_PTR_BLOB_SERDE_HELPER(HHBBC::php::ClassBytecode)
-MAKE_UNIQUE_PTR_BLOB_SERDE_HELPER(HHBBC::php::Constant)
-MAKE_UNIQUE_PTR_BLOB_SERDE_HELPER(HHBBC::php::TypeAlias)
-MAKE_UNIQUE_PTR_BLOB_SERDE_HELPER(HHBBC::php::Module)
-MAKE_UNIQUE_PTR_BLOB_SERDE_HELPER(HHBBC::php::FatalInfo)
-
-//////////////////////////////////////////////////////////////////////
-
 }

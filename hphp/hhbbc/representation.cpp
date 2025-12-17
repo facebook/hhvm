@@ -268,7 +268,7 @@ template <typename SerDe> void FatalInfo::serde(SerDe& sd) {
 template <typename SerDe> void Unit::serde(SerDe& sd) {
   ScopedStringDataIndexer _;
   sd(filename)
-    .nullable(fatalInfo)
+    (fatalInfo)
     (funcs)
     (classes)
     (typeAliases)

@@ -26296,12 +26296,4 @@ template struct AnalysisIndexParam<MethodsWithoutCInfo>;
 
 //////////////////////////////////////////////////////////////////////
 
-MAKE_UNIQUE_PTR_BLOB_SERDE_HELPER(HHBBC::ClassInfo2)
-MAKE_UNIQUE_PTR_BLOB_SERDE_HELPER(HHBBC::FuncInfo2)
-MAKE_UNIQUE_PTR_BLOB_SERDE_HELPER(HHBBC::FuncFamily2)
-MAKE_UNIQUE_PTR_BLOB_SERDE_HELPER(HHBBC::MethodsWithoutCInfo)
-MAKE_UNIQUE_PTR_BLOB_SERDE_HELPER(HHBBC::BuildSubclassListJob::Split)
-
-//////////////////////////////////////////////////////////////////////
-
 }

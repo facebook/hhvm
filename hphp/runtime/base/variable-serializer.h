@@ -116,6 +116,10 @@ struct VariableSerializer {
   // ignore uninitialized late init props and do not attempt to serialize them
   void setIgnoreLateInit() { m_ignoreLateInit = true; }
 
+  // Skip JsonSerializable interface handling during JSON serialization.
+  // This avoids re-entrancy concerns when serializing from Xenon code.
+  void setSkipJsonSerializable() { m_skipJsonSerializable = true; }
+
   // Serialize legacy bit and provenance tag, using same format as
   // Type::Internal serializer. This is only supported Type::Serialize.
   void setSerializeProvenanceAndLegacy() {
@@ -289,6 +293,7 @@ private:
   bool m_vdWarn{false};          // warn when attempting on vec-like darrays
   bool m_ddWarn{false};          // warn when attempting on non-vec-like darrays
   bool m_ignoreLateInit{false};  // ignore uninitalized late init props
+  bool m_skipJsonSerializable{false};  // skip JsonSerializable handling for JSON
   bool m_disallowObjects{false};  // throw if serializing non-collection object
   bool m_keepClasses{false};     // emit lazy class if serializing class or lazy class
   bool m_hasHackWarned{false};   // have we already warned on Hack arrays?
@@ -338,6 +343,19 @@ private:
 inline String internal_serialize(const Variant& v) {
   VariableSerializer vs{VariableSerializer::Type::Internal};
   return vs.serializeValue(v, false);
+}
+
+// For internal HHVM use: JSON encode without invoking JsonSerializable.
+// This is intended to allow extensions to encode as json without
+// re-entering the VM.
+inline String json_encode_skip_jsonserializable(
+    const Variant& v,
+    int64_t options = 0,
+    bool limit = true
+) {
+  VariableSerializer vs{VariableSerializer::Type::JSON, static_cast<int>(options)};
+  vs.setSkipJsonSerializable();
+  return vs.serializeValue(v, limit);
 }
 
 // TODO: Move to util/folly?

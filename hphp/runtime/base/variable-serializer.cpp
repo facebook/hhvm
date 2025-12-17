@@ -680,7 +680,7 @@ void VariableSerializer::write(const Object& v) {
     // m_disallowObjects not relevent in JSON path bc it's only
     //setable via serialize_with_options
 
-    if (v.instanceof(s_JsonSerializable)) {
+    if (!m_skipJsonSerializable && v.instanceof(s_JsonSerializable)) {
       assertx(!v->isCollection());
       auto const providedCoeffects =
         m_pure ? RuntimeCoeffects::pure() : RuntimeCoeffects::defaults();

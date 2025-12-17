@@ -23,6 +23,7 @@
 #include "hphp/runtime/vm/native-data.h"
 #include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/surprise-flags.h"
+#include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/server/http-server.h"
 #include "hphp/runtime/server/pagelet-server.h"
 #include "hphp/runtime/server/xbox-server.h"
@@ -300,7 +301,7 @@ void XenonRequestLocalData::log(Xenon::SampleType t,
     // we want to include the originating thread ID and provide locking.
     dict.set(s_tid, Process::GetThreadPid());
     auto const opts = k_JSON_FB_FORCE_HACK_ARRAYS;
-    String out = Variant::attach(HHVM_FN(json_encode)(dict, opts)).toString();
+    String out = json_encode_skip_jsonserializable(dict, opts, true /* limit */);
 
     // Synchronize file append using a static mutex
     static std::mutex xenon_file_mutex;

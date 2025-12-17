@@ -2753,6 +2753,11 @@ ReqBindJmp and CallFuncEntry.
   In debug builds, if LocalsDecRefd flag is set on S0, causes runtime failure by
   emitting a trap instruction. Otherwise, this instruction does nothing.
 
+| DbgTrap, ND, NA, NF
+
+  Causes any attached debugger to trap. The process may abort if no debugger is
+  attached.
+
 | DbgTrashStk<offset>, ND, S(StkPtr), NF
 
   For debugging purposes.  Store kTVTrashJITStk to the stack slot pointed to

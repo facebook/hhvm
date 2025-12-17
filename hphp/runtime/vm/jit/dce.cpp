@@ -675,6 +675,7 @@ bool canDCE(const IRInstruction& inst) {
   case EndCatch:
   case StUnwinderExn:
   case UnwindCheckSideExit:
+  case DbgTrap:
   case DbgTrashStk:
   case DbgTrashFrame:
   case DbgTrashMem:

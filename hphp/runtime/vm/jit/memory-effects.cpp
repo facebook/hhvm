@@ -1638,6 +1638,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdImplicitContextMemoKey:
   case LdMemoAgnosticIC:
   case RetranslateOptAsync:
+  case DbgTrap:
     return IrrelevantEffects {};
 
   case LookupClsCns:

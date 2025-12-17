@@ -27,6 +27,12 @@ import (
 
 // These are temporary aliases to the types package. They will be removed or kept, but that is to be determined in future diffs as we refactor.
 
+type RPCOptions = types.RPCOptions
+
+type Priority = types.Priority
+
+type contextHeaders = types.ContextHeaders
+
 type RequestChannel = types.RequestChannel
 
 type ProcessorFunction = types.ProcessorFunction

@@ -315,6 +315,7 @@ func (s *rocketServerSocket) requestResponse(msg payload.Payload) mono.Mono {
 
 		queueTimeout := getQueueTimeout(metadata)
 		if processDelay > queueTimeout {
+			s.observer.TaskTimeout()
 			return nil, taskExpiredError
 		}
 
@@ -438,6 +439,7 @@ func (s *rocketServerSocket) fireAndForget(msg payload.Payload) {
 
 	queueTimeout := getQueueTimeout(metadata)
 	if processDelay > queueTimeout {
+		s.observer.TaskTimeout()
 		s.log("rocketServer fireAndForget: dropping request due to queue timeout")
 		return
 	}

@@ -204,7 +204,7 @@ TEST_F(FizzBaseTest, TestReadSingle) {
   EXPECT_CALL(*TestStateMachine::instance, processSocketData(_, _, _))
       .WillOnce(InvokeWithoutArgs([]() {
         Actions actions;
-        actions.push_back(A1());
+        actions.emplace_back(A1());
         return actions;
       }));
   EXPECT_CALL(testFizz_->visitor_, a1()).WillOnce(Invoke([this]() {
@@ -218,9 +218,9 @@ TEST_F(FizzBaseTest, TestReadMulti) {
       .InSequence(s_)
       .WillOnce(InvokeWithoutArgs([]() {
         Actions actions;
-        actions.push_back(A1());
-        actions.push_back(A2());
-        actions.push_back(A1());
+        actions.emplace_back(A1());
+        actions.emplace_back(A2());
+        actions.emplace_back(A1());
         return actions;
       }));
   EXPECT_CALL(testFizz_->visitor_, a1()).InSequence(s_);
@@ -230,7 +230,7 @@ TEST_F(FizzBaseTest, TestReadMulti) {
       .InSequence(s_)
       .WillOnce(InvokeWithoutArgs([]() {
         Actions actions;
-        actions.push_back(A2());
+        actions.emplace_back(A2());
         return actions;
       }));
   EXPECT_CALL(testFizz_->visitor_, a2()).InSequence(s_);
@@ -238,7 +238,7 @@ TEST_F(FizzBaseTest, TestReadMulti) {
       .InSequence(s_)
       .WillOnce(InvokeWithoutArgs([]() {
         Actions actions;
-        actions.push_back(A1());
+        actions.emplace_back(A1());
         return actions;
       }));
   EXPECT_CALL(testFizz_->visitor_, a1())
@@ -255,7 +255,7 @@ TEST_F(FizzBaseTest, TestReadNoActions) {
       .InSequence(s_)
       .WillOnce(InvokeWithoutArgs([]() {
         Actions actions;
-        actions.push_back(A1());
+        actions.emplace_back(A1());
         return actions;
       }));
   EXPECT_CALL(testFizz_->visitor_, a1())
@@ -268,7 +268,7 @@ TEST_F(FizzBaseTest, TestWriteNewSessionTicket) {
   EXPECT_CALL(*TestStateMachine::instance, processWriteNewSessionTicket_(_, _))
       .WillOnce(InvokeWithoutArgs([]() {
         Actions actions;
-        actions.push_back(A1());
+        actions.emplace_back(A1());
         return actions;
       }));
   EXPECT_CALL(testFizz_->visitor_, a1());
@@ -279,7 +279,7 @@ TEST_F(FizzBaseTest, TestWrite) {
   EXPECT_CALL(*TestStateMachine::instance, processAppWrite_(_, _))
       .WillOnce(InvokeWithoutArgs([]() {
         Actions actions;
-        actions.push_back(A1());
+        actions.emplace_back(A1());
         return actions;
       }));
   EXPECT_CALL(testFizz_->visitor_, a1());
@@ -290,7 +290,7 @@ TEST_F(FizzBaseTest, TestEarlyWrite) {
   EXPECT_CALL(*TestStateMachine::instance, processEarlyAppWrite_(_, _))
       .WillOnce(InvokeWithoutArgs([]() {
         Actions actions;
-        actions.push_back(A1());
+        actions.emplace_back(A1());
         return actions;
       }));
   EXPECT_CALL(testFizz_->visitor_, a1());
@@ -302,7 +302,7 @@ TEST_F(FizzBaseTest, TestWriteMulti) {
       *TestStateMachine::instance, processAppWrite_(_, WriteMatches("write1")))
       .WillOnce(InvokeWithoutArgs([]() {
         Actions actions;
-        actions.push_back(A1());
+        actions.emplace_back(A1());
         return actions;
       }));
   EXPECT_CALL(testFizz_->visitor_, a1());
@@ -311,7 +311,7 @@ TEST_F(FizzBaseTest, TestWriteMulti) {
       *TestStateMachine::instance, processAppWrite_(_, WriteMatches("write2")))
       .WillOnce(InvokeWithoutArgs([]() {
         Actions actions;
-        actions.push_back(A2());
+        actions.emplace_back(A2());
         return actions;
       }));
   EXPECT_CALL(testFizz_->visitor_, a2());
@@ -322,7 +322,7 @@ TEST_F(FizzBaseTest, TestInitiateKeyUpdate) {
   EXPECT_CALL(*TestStateMachine::instance, processAppWrite_(_, _))
       .WillOnce(InvokeWithoutArgs([]() {
         Actions actions;
-        actions.push_back(A1());
+        actions.emplace_back(A1());
         return actions;
       }));
   bool inCallback = false;
@@ -346,7 +346,7 @@ TEST_F(FizzBaseTest, TestAppClose) {
   EXPECT_CALL(*TestStateMachine::instance, processAppClose(_))
       .WillOnce(InvokeWithoutArgs([]() {
         Actions actions;
-        actions.push_back(A1());
+        actions.emplace_back(A1());
         return actions;
       }));
   EXPECT_CALL(testFizz_->visitor_, a1());
@@ -358,7 +358,7 @@ TEST_F(FizzBaseTest, TestWriteNewSessionTicketInCallback) {
       .InSequence(s_)
       .WillOnce(InvokeWithoutArgs([]() {
         Actions actions;
-        actions.push_back(A1());
+        actions.emplace_back(A1());
         return actions;
       }));
   EXPECT_CALL(testFizz_->visitor_, a1())
@@ -374,7 +374,7 @@ TEST_F(FizzBaseTest, TestWriteNewSessionTicketInCallback) {
       .InSequence(s_)
       .WillOnce(InvokeWithoutArgs([]() {
         Actions actions;
-        actions.push_back(A2());
+        actions.emplace_back(A2());
         return actions;
       }));
   EXPECT_CALL(testFizz_->visitor_, a2())
@@ -393,7 +393,7 @@ TEST_F(FizzBaseTest, TestWriteInCallback) {
       .InSequence(s_)
       .WillOnce(InvokeWithoutArgs([]() {
         Actions actions;
-        actions.push_back(A1());
+        actions.emplace_back(A1());
         return actions;
       }));
   EXPECT_CALL(testFizz_->visitor_, a1())
@@ -407,7 +407,7 @@ TEST_F(FizzBaseTest, TestWriteInCallback) {
       .InSequence(s_)
       .WillOnce(InvokeWithoutArgs([]() {
         Actions actions;
-        actions.push_back(A2());
+        actions.emplace_back(A2());
         return actions;
       }));
   EXPECT_CALL(testFizz_->visitor_, a2())
@@ -429,7 +429,7 @@ TEST_F(FizzBaseTest, TestAppCloseInCallback) {
       .InSequence(s_)
       .WillOnce(InvokeWithoutArgs([]() {
         Actions actions;
-        actions.push_back(A1());
+        actions.emplace_back(A1());
         return actions;
       }));
   EXPECT_CALL(testFizz_->visitor_, a1())
@@ -439,7 +439,7 @@ TEST_F(FizzBaseTest, TestAppCloseInCallback) {
       .InSequence(s_)
       .WillOnce(InvokeWithoutArgs([]() {
         Actions actions;
-        actions.push_back(A2());
+        actions.emplace_back(A2());
         return actions;
       }));
   EXPECT_CALL(testFizz_->visitor_, a2())
@@ -457,7 +457,7 @@ TEST_F(FizzBaseTest, TestWriteThenCloseInCallback) {
       .InSequence(s_)
       .WillOnce(InvokeWithoutArgs([]() {
         Actions actions;
-        actions.push_back(A1());
+        actions.emplace_back(A1());
         return actions;
       }));
   EXPECT_CALL(testFizz_->visitor_, a1())
@@ -481,7 +481,7 @@ TEST_F(FizzBaseTest, TestDeleteInCallback) {
       .InSequence(s_)
       .WillOnce(InvokeWithoutArgs([]() {
         Actions actions;
-        actions.push_back(A1());
+        actions.emplace_back(A1());
         return actions;
       }));
   EXPECT_CALL(testFizz_->visitor_, a1())
@@ -491,7 +491,7 @@ TEST_F(FizzBaseTest, TestDeleteInCallback) {
       .InSequence(s_)
       .WillOnce(InvokeWithoutArgs([]() {
         Actions actions;
-        actions.push_back(A2());
+        actions.emplace_back(A2());
         return actions;
       }));
   EXPECT_CALL(testFizz_->visitor_, a2())
@@ -505,7 +505,7 @@ TEST_F(FizzBaseTest, TestStopOnError) {
       .InSequence(s_)
       .WillOnce(InvokeWithoutArgs([]() {
         Actions actions;
-        actions.push_back(A1());
+        actions.emplace_back(A1());
         return actions;
       }));
   EXPECT_CALL(testFizz_->visitor_, a1())
@@ -522,7 +522,7 @@ TEST_F(FizzBaseTest, TestPause) {
       .InSequence(s_)
       .WillOnce(InvokeWithoutArgs([]() {
         Actions actions;
-        actions.push_back(A1());
+        actions.emplace_back(A1());
         return actions;
       }));
   EXPECT_CALL(testFizz_->visitor_, a1())
@@ -598,7 +598,7 @@ TEST_F(FizzBaseTest, TestErrorPendingEvents) {
       *TestStateMachine::instance, processAppWrite_(_, WriteMatches("write1")))
       .WillOnce(InvokeWithoutArgs([]() {
         Actions actions;
-        actions.push_back(A1());
+        actions.emplace_back(A1());
         return actions;
       }));
   auto w2 = appWrite("write2");
@@ -637,7 +637,7 @@ TEST_F(FizzBaseTest, TestErrorWhileErroring) {
       *TestStateMachine::instance, processAppWrite_(_, WriteMatches("write1")))
       .WillOnce(InvokeWithoutArgs([]() {
         Actions actions;
-        actions.push_back(A1());
+        actions.emplace_back(A1());
         return actions;
       }));
   StrictMock<MockWriteCallback> wcb3;
@@ -655,7 +655,7 @@ TEST_F(FizzBaseTest, TestErrorWhileErroring) {
       *TestStateMachine::instance, processAppWrite_(_, WriteMatches("write2")))
       .WillOnce(InvokeWithoutArgs([]() {
         Actions actions;
-        actions.push_back(A2());
+        actions.emplace_back(A2());
         return actions;
       }));
   EXPECT_CALL(testFizz_->visitor_, a2()).WillOnce(Invoke([&]() {
@@ -714,8 +714,8 @@ TEST_F(FizzBaseTest, TestMoveToErrorStateOnVisit) {
   EXPECT_CALL(*TestStateMachine::instance, processSocketData(_, _, _))
       .WillOnce(InvokeWithoutArgs([]() {
         Actions actions;
-        actions.push_back(A1());
-        actions.push_back(A2());
+        actions.emplace_back(A1());
+        actions.emplace_back(A2());
         return actions;
       }));
 
@@ -739,8 +739,8 @@ TEST_F(FizzBaseTest, TestActionProcessedAfterError) {
       .WillOnce(InvokeWithoutArgs([&]() {
         testFizz_->state_.state_ = StateEnum::Error;
         Actions actions;
-        actions.push_back(A1());
-        actions.push_back(A2());
+        actions.emplace_back(A1());
+        actions.emplace_back(A2());
         return actions;
       }));
   EXPECT_FALSE(testFizz_->inErrorState());

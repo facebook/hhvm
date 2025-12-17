@@ -16,6 +16,8 @@
 
 #include <thrift/lib/cpp2/transport/rocket/server/RocketStreamClientCallback.h>
 
+#include <fmt/core.h>
+
 THRIFT_FLAG_DEFINE_bool(rocket_server_disable_send_callback, false);
 
 namespace apache::thrift::rocket {
@@ -109,6 +111,7 @@ bool RocketStreamClientCallback::onStreamNext(StreamPayload&& payload) {
     scheduleTimeout();
   }
 
+  ++(*chunksInMemory_);
   streamMetricCallback_.onStreamNext(rpcMethodName_);
 
   applyCompressionConfigIfNeeded(payload);
@@ -211,7 +214,8 @@ void RocketStreamClientCallback::timeoutExpired() noexcept {
   streamRpcError.name_utf8() =
       apache::thrift::TEnumTraits<StreamRpcErrorCode>::findName(
           StreamRpcErrorCode::CREDIT_TIMEOUT);
-  streamRpcError.what_utf8() = "Stream expire timeout(no credit from client)";
+  streamRpcError.what_utf8() =
+      fmt::format("Stream credit timeout: chunksInMemory={}", *chunksInMemory_);
   onStreamError(
       folly::make_exception_wrapper<rocket::RocketException>(
           rocket::ErrorCode::CANCELED,

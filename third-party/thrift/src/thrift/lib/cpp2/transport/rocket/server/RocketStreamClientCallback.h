@@ -93,14 +93,19 @@ class RocketStreamClientCallback final : public StreamClientCallback {
       : public apache::thrift::MessageChannel::SendCallback {
    public:
     explicit StreamMessageSentCallback(
-        std::shared_ptr<ContextStack> contextStack)
-        : contextStack_(std::move(contextStack)), endReason_(std::nullopt) {}
+        std::shared_ptr<ContextStack> contextStack,
+        std::shared_ptr<uint64_t> chunksInMemory)
+        : contextStack_(std::move(contextStack)),
+          endReason_(std::nullopt),
+          chunksInMemory_(std::move(chunksInMemory)) {}
 
     explicit StreamMessageSentCallback(
         std::shared_ptr<ContextStack> contextStack,
-        std::optional<apache::thrift::details::STREAM_ENDING_TYPES>&& endReason)
+        std::optional<apache::thrift::details::STREAM_ENDING_TYPES>&& endReason,
+        std::shared_ptr<uint64_t> chunksInMemory)
         : contextStack_(std::move(contextStack)),
-          endReason_(std::move(endReason)) {}
+          endReason_(std::move(endReason)),
+          chunksInMemory_(std::move(chunksInMemory)) {}
 
     void sendQueued() noexcept override {}
 
@@ -116,6 +121,9 @@ class RocketStreamClientCallback final : public StreamClientCallback {
 
    private:
     void invokeCallbacks() {
+      if (chunksInMemory_ && *chunksInMemory_ > 0) {
+        --(*chunksInMemory_);
+      }
       if (contextStack_) {
         if (endReason_) {
           contextStack_->onStreamFinally(*endReason_);
@@ -126,16 +134,22 @@ class RocketStreamClientCallback final : public StreamClientCallback {
     }
     std::shared_ptr<ContextStack> contextStack_;
     std::optional<details::STREAM_ENDING_TYPES> endReason_;
+    std::shared_ptr<uint64_t> chunksInMemory_;
   };
 
   using SendCallbackPtr = apache::thrift::MessageChannel::SendCallbackPtr;
   SendCallbackPtr makeSendCallback(
       std::optional<details::STREAM_ENDING_TYPES> endReason) {
-    if (contextStack_ && !THRIFT_FLAG(rocket_server_disable_send_callback)) {
-      return SendCallbackPtr(
-          new StreamMessageSentCallback(contextStack_, std::move(endReason)));
-    }
-    return nullptr;
+    // Always create callback to track chunksInMemory_ for debugging credit
+    // timeouts. Pass contextStack_ only if enabled.
+    auto contextStackForCallback =
+        (contextStack_ && !THRIFT_FLAG(rocket_server_disable_send_callback))
+        ? contextStack_
+        : nullptr;
+    return SendCallbackPtr(new StreamMessageSentCallback(
+        std::move(contextStackForCallback),
+        std::move(endReason),
+        chunksInMemory_));
   }
 
   template <typename Payload>
@@ -170,6 +184,10 @@ class RocketStreamClientCallback final : public StreamClientCallback {
   std::string rpcMethodName_{"<unknown_stream_method>"};
   StreamMetricCallback& streamMetricCallback_;
   std::shared_ptr<ContextStack> contextStack_{nullptr};
+
+  // Tracks chunks in memory (received but not yet sent).
+  // Uses shared_ptr so callback can safely decrement after stream destruction.
+  std::shared_ptr<uint64_t> chunksInMemory_ = std::make_shared<uint64_t>(0);
 
   void scheduleTimeout();
   void cancelTimeout();

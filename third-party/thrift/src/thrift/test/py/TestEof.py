@@ -27,13 +27,13 @@ if lib_path:
 if sys.version_info[0] >= 3:
     xrange = range
 
-from ThriftTest import ThriftTest
-from ThriftTest.ttypes import *
 import time
 import unittest
 
 from thrift.protocol import TBinaryProtocol
 from thrift.transport import TSocket, TTransport
+from ThriftTest import ThriftTest
+from ThriftTest.ttypes import Xtruct
 
 
 class TestEof(unittest.TestCase):

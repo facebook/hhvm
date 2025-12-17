@@ -251,9 +251,3 @@ struct ConstrainedFloat32 {
   ///     * REJECT: raises `TypeError`for `NaN` values.
   3: ConstraintLevel not_a_number;
 }
-
-/// This is the v0 of `ConstrainedFloat32` annotation above. It is equivalent to
-/// `ConstrainedFloat32` with the `precision_loss` field set to `ALLOW_INVALID`.
-/// DO NOT ADD NEW USES OF THIS ANNOTATION. It will soon be removed.
-@scope.Typedef
-struct EnableUnsafeUnconstrainedFloat32 {}

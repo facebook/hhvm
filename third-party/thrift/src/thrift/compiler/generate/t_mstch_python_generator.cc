@@ -1062,10 +1062,6 @@ class t_mstch_python_prototypes_generator : public t_whisker_generator {
           proto, self, find_structured_adapter_annotation(self));
     });
     def.property("deferred_float32_conversion?", [](const t_type& self) {
-      if (self.has_structured_annotation(
-              kPythonEnableUnsafeUnconstrainedFloat32)) {
-        return true;
-      }
       if (const auto* float_constraint =
               t_typedef::get_first_structured_annotation_or_null(
                   &self, kPythonConstrainedFloat32)) {

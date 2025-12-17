@@ -15,14 +15,52 @@
 */
 #include <cstdlib>
 
+#include "hphp/hhbbc/parallel.h"
+
 namespace HPHP::HHBBC {
 
 //////////////////////////////////////////////////////////////////////
 
 namespace parallel {
 
+//////////////////////////////////////////////////////////////////////
+
 size_t num_threads = 31;
 size_t final_threads = 31;
+
+//////////////////////////////////////////////////////////////////////
+
+thread_local bool tl_inParallel = false;
+
+//////////////////////////////////////////////////////////////////////
+
+thread_pool::thread_pool()
+{
+  for (size_t i = 0; i < parallel::num_threads; ++i) {
+    threads.emplace_back(&thread_pool::thread_run, this, i);
+  }
+}
+
+thread_pool::~thread_pool() {
+  active.shutdown();
+  for (auto& t : threads) t.join();
+}
+
+void thread_pool::thread_run(size_t worker) {
+  tl_inParallel = true;
+  SCOPE_EXIT { tl_inParallel = false; };
+  HphpSessionAndThread _{Treadmill::SessionKind::HHBBC};
+  try {
+    while (true) {
+      active.wait();
+      func(worker);
+      wait.post();
+    }
+  } catch (const folly::ShutdownSemError&) {
+  }
+}
+
+//////////////////////////////////////////////////////////////////////
 
 }
 

@@ -22,7 +22,6 @@
 #include <string>
 #include <vector>
 
-
 #include "hphp/util/configs/eval.h"
 #include "hphp/util/dataflow-worklist.h"
 #include "hphp/util/trace.h"
@@ -352,7 +351,11 @@ FuncAnalysis do_analyze_collect(const IIndex& index,
     }
   };
 
-  FTRACE(2, "{:-^70}\n-- {}\n", "Analyze", show(ctx));
+  FTRACE(
+    2, "{:-^70}\n-- {}\n",
+    index.frozen() ? "Analyze (frozen)" : "Analyze",
+    show(ctx)
+  );
 
   /*
    * Set of RPO ids that still need to be visited.
@@ -459,7 +462,7 @@ FuncAnalysis do_analyze_collect(const IIndex& index,
           !collect.effectFree) {
         break;
       }
-      if (flags.updateInfo.replacedBcs.size() ||
+      if (!flags.updateInfo.replacedBcs.empty() ||
           flags.updateInfo.unchangedBcs != blk->hhbcs.size() ||
           flags.updateInfo.fallthrough != blk->fallthrough) {
         blockUpdates[bid] = std::move(flags.updateInfo);
@@ -548,7 +551,19 @@ FuncAnalysis do_analyze_collect(const IIndex& index,
     ret += sep + bsep;
     folly::format(
       &ret,
-      "Inferred return type: {}{}\n",
+      "{}{}: Inferred return type: {}{}\n",
+      show(ctx),
+      [&] () -> std::string {
+        using namespace folly::gen;
+        if (!knownArgs) return "";
+        return folly::sformat(
+          " (context: {}, args: {})",
+          show(knownArgs->context),
+          from(knownArgs->args)
+            | map([] (const Type& t) { return show(t); })
+            | unsplit<std::string>(",")
+        );
+      }(),
       show(ai.inferredReturn),
       ai.effectFree ? " (effect-free)" : ""
     );
@@ -994,9 +1009,9 @@ ClassAnalysis analyze_class(const IIndex& index, const Context& ctx) {
         "hni {}::{} has impossible type. "
         "The annotation says it is type ({}) "
         "but the default value is type ({}).\n",
-          ctx.cls->name,
+        ctx.cls->name,
         prop.name,
-          show(hniTy),
+        show(hniTy),
         show(cellTy)
       );
     }

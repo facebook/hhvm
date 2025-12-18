@@ -61,8 +61,8 @@ struct CallContext {
 
 inline bool operator==(const CallContext& a, const CallContext& b) {
   return a.callee == b.callee &&
-         equivalently_refined(a.args, b.args) &&
-         equivalently_refined(a.context, b.context);
+         equal(a.args, b.args) &&
+         equal(a.context, b.context);
 }
 
 struct CallContextHasher {

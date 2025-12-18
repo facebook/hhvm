@@ -176,6 +176,7 @@ bool checkNativeFunc(const FuncEmitter* func, const UnitEmitter* unit, ErrorMode
   auto const funcname = func->name;
   auto const pc = func->pce();
   auto const clsname = pc ? pc->name() : nullptr;
+  always_assert(unit->m_extension);
   auto const& info = Native::getNativeFunction(unit->m_extension->nativeFuncs(),
                                                funcname, clsname,
                                                func->attrs & AttrStatic);

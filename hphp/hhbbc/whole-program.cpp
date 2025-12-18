@@ -605,9 +605,10 @@ void analyze_constants(Index& index) {
 
     if (input.empty()) co_return;
 
-    Client::ExecMetadata metadata{
-      .job_key = folly::sformat("analyze constants {}", input.key())
-    };
+    auto metadata = make_exec_metadata(
+      "analyze-constants",
+      input.key()->toCppString()
+    );
 
     auto [inputMeta, config] = co_await coro::collectAll(
       index.client().store(input.takeMeta()),

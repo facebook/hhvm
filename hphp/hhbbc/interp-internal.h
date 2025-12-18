@@ -427,7 +427,6 @@ bool shouldAttemptToFold(ISS& env, const php::Func* func, const FCallArgs& fca,
       fca.hasGenerics() ||
       fca.numRets() != 1 ||
       !will_reduce(env) ||
-      any(env.collect.opts & CollectionOpts::Speculating) ||
       any(env.collect.opts & CollectionOpts::Optimizing)) {
     return false;
   }
@@ -759,7 +758,7 @@ void setIterKey(ISS& env, IterId id, LocalId key) {
 Type peekLocRaw(ISS& env, LocalId l) {
   auto ret = env.state.locals[l];
   if (is_volatile_local(env.ctx.func, l)) {
-    always_assert_flog(ret == TCell, "volatile local was not TCell");
+    always_assert_flog(ret.is(BCell), "volatile local was not TCell");
   }
   return ret;
 }
@@ -777,7 +776,7 @@ void setLocRaw(ISS& env, LocalId l, Type t) {
   killThisLoc(env, l);
   if (is_volatile_local(env.ctx.func, l)) {
     auto current = env.state.locals[l];
-    always_assert_flog(current == TCell, "volatile local was not TCell");
+    always_assert_flog(current.is(BCell), "volatile local was not TCell");
     return;
   }
   if (env.undo) env.undo->onLocalWrite(l, std::move(env.state.locals[l]));

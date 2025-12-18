@@ -88,8 +88,7 @@ void remove_unreachable_blocks(const FuncAnalysis& ainfo, php::WideFunc& func) {
     auto const& state = ainfo.bdata[bid].stateIn;
     if (!state.initialized) return true;
     if (!state.unreachable) return false;
-    return blk->hhbcs.size() != 1 ||
-           blk->hhbcs.back().op != Op::StaticAnalysisError;
+    return !is_fatal_block(*blk);
   };
 
   for (auto bid : func.blockRange()) {
@@ -104,6 +103,7 @@ void remove_unreachable_blocks(const FuncAnalysis& ainfo, php::WideFunc& func) {
     blk->fallthrough = NoBlockId;
     blk->throwExit = NoBlockId;
     blk->exnNodeId = NoExnNodeId;
+    assertx(is_fatal_block(*blk));
   }
 
   remove_unnecessary_exception_handlers(ainfo, func);

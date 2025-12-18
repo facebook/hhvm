@@ -662,14 +662,14 @@ LocalId equivLocalRange(ISS& env, const LocalRange& range) {
       auto equivRange = [&] {
         // local equivalency includes differing by Uninit, so we need
         // to check the types.
-        if (peekLocRaw(env, equivFirst) != peekLocRaw(env, range.first)) {
+        if (!equal(peekLocRaw(env, equivFirst), peekLocRaw(env, range.first))) {
           return false;
         }
 
         for (uint32_t i = 1; i < range.count; ++i) {
           if (!locsAreEquiv(env, equivFirst + i, range.first + i) ||
-              peekLocRaw(env, equivFirst + i) !=
-              peekLocRaw(env, range.first + i)) {
+              !equal(peekLocRaw(env, equivFirst + i),
+                     peekLocRaw(env, range.first + i))) {
             return false;
           }
         }
@@ -1472,7 +1472,7 @@ std::pair<Type,bool> resolveSame(ISS& env) {
     return NSame ? typeNSame(t1, t2) : typeSame(t1, t2);
   }();
 
-  if (warningsEnabled && result == (NSame ? TFalse : TTrue)) {
+  if (warningsEnabled && result.is(NSame ? BFalse : BTrue)) {
     warningsEnabled = false;
   }
   return { result, warningsEnabled && compare_might_raise(t1, t2) };
@@ -1618,7 +1618,7 @@ bool sameJmpImpl(ISS& env, Op sameOp, const JmpOp& jmp) {
         }
         return t;
       } else if (ty.strictSubtypeOf(TBool) && t.subtypeOf(BBool)) {
-        return ty == TFalse ? TTrue : TFalse;
+        return ty.is(BFalse) ? TTrue : TFalse;
       }
       return t;
     });
@@ -1699,8 +1699,8 @@ bool cmpWillThrow(const Type& t1, const Type& t2) {
 }
 
 void eqImpl(ISS& env, bool eq) {
- auto rs = resolveSame<false>(env);
-  if (rs.first == TTrue) {
+  auto rs = resolveSame<false>(env);
+  if (rs.first.is(BTrue)) {
     if (!rs.second) constprop(env);
     discard(env, 2);
     return push(env, eq ? TTrue : TFalse);
@@ -1751,7 +1751,7 @@ void in(ISS& env, const bc::Cmp&) {
   auto const t2 = topC(env, 1);
   if (cmpThrowCheck(env, t1, t2)) return;
   discard(env, 2);
-  if (t1 == t2) {
+  if (equal(t1, t2)) {
     auto const v1 = tv(t1);
     auto const v2 = tv(t2);
     if (v1 && v2) {
@@ -2110,7 +2110,8 @@ void jmpImpl(ISS& env, const JmpOp& op) {
     return reduce(env, bc::PopC{});
   }
 
-  auto const fix = [&] {
+  auto const fix = [&, effectFree=effectFree] {
+    if (effectFree) effect_free(env);
     if (env.flags.jmpDest == NoBlockId || !can_rewind(env)) return;
     auto const jmpDest = env.flags.jmpDest;
     env.flags.jmpDest = NoBlockId;
@@ -2158,9 +2159,11 @@ void jmpImpl(ISS& env, const JmpOp& op) {
   }
 
   popC(env);
-  if (effectFree) effect_free(env);
 
-  if (location == NoLocalId) return env.propagate(op.target1, &env.state);
+  if (location == NoLocalId) {
+    if (effectFree) effect_free(env);
+    return env.propagate(op.target1, &env.state);
+  }
 
   refineLocation(env, location,
                  Negate ? assert_nonemptiness : assert_emptiness,
@@ -3000,7 +3003,8 @@ void in(ISS& env, const bc::InstanceOfD& op) {
   if (auto const rcls = env.index.resolve_class(op.str1)) {
     auto result = [&] (const Type& r) {
       nothrow(env);
-      if (r != TBool) constprop(env);
+
+      if (!r.is(BBool)) constprop(env);
       popC(env);
       push(env, r);
     };
@@ -3522,7 +3526,7 @@ Optional<std::pair<Type, LocalId>> moveToLocImpl(ISS& env,
           locsAreEquiv(env, equivLoc, op.loc1)) {
         // We allow equivalency to ignore Uninit, so we need to check
         // the types here.
-        if (peekLocRaw(env, op.loc1) == topC(env)) {
+        if (equal(peekLocRaw(env, op.loc1), topC(env))) {
           return std::nullopt;
         }
       }
@@ -4143,7 +4147,8 @@ void fcallKnownImpl(
     }
   }
 
-  if (fca.asyncEagerTarget() != NoBlockId && typeFromWH(returnType) == TBottom) {
+  if (fca.asyncEagerTarget() != NoBlockId &&
+      typeFromWH(returnType).is(BBottom)) {
     // Kill the async eager target if the function never returns.
     reduce(env, fcallWithFCA(std::move(fca.withoutAsyncEagerTarget())));
     return;
@@ -4159,7 +4164,7 @@ void fcallKnownImpl(
   if (fca.hasUnpack()) popC(env);
   std::vector<Type> inOuts;
   for (auto i = uint32_t{0}; i < numArgs; ++i) {
-    if (nullsafe && fca.isInOut(numArgs - i - 1)) {
+    if (nullsafe && fca.enforceInOut() && fca.isInOut(numArgs - i - 1)) {
       inOuts.emplace_back(popCV(env));
     } else {
       popCV(env);
@@ -4945,7 +4950,7 @@ void in(ISS& env, const bc::NewObjD& op)  {
     if (rcls->couldBeOverriddenByRegular()) return false;
     auto const r = env.index.resolve_class(*env.ctx.cls);
     if (!r) return false;
-    return obj == objExact(*r);
+    return equal(obj, objExact(*r));
   }();
   push(env, setctx(std::move(obj), isCtx));
 }
@@ -4961,7 +4966,7 @@ void in(ISS& env, const bc::NewObjS& op) {
   if (dcls.isExact() && !dcls.cls().couldHaveReifiedGenerics() &&
       module_check_always_passes(env, dcls) &&
       (!dcls.cls().couldBeOverridden() ||
-       equivalently_refined(cls, unctx(cls)))) {
+       equal(cls, unctx(cls)))) {
     return reduce(env, bc::NewObjD { dcls.cls().name() });
   }
 
@@ -6112,6 +6117,7 @@ void memoSetImpl(ISS& env, const Op& op, bool eager) {
     (!env.ctx.func->isAsync || eager) ? TBottom : t,
     effectFree
   );
+  if (effectFree) effect_free(env);
   push(env, std::move(t));
 }
 
@@ -6256,6 +6262,8 @@ BlockId speculate(Interp& interp) {
   auto failed = false;
   ISS env { interp, [&] (BlockId, const State*) { failed = true; } };
 
+  assertx(env.collect.mInstrState.empty());
+
   FTRACE(4, "  Speculate B{}\n", interp.bid);
   for (auto const& bc : interp.blk->hhbcs) {
     assertx(!interp.state.unreachable);
@@ -6281,10 +6289,12 @@ BlockId speculate(Interp& interp) {
     assertx(!flags.returned);
 
     if (flags.jmpDest != NoBlockId && interp.state.stack.size() == low_water) {
+      assertx(env.collect.mInstrState.empty());
       FTRACE(2, "  Speculate found target block {}\n", flags.jmpDest);
       return flags.jmpDest;
     }
   }
+  assertx(env.collect.mInstrState.empty());
 
   if (interp.state.stack.size() != low_water) {
     FTRACE(3,

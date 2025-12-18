@@ -69,6 +69,7 @@ bool is_native_unit(const php::Unit& unit) {
 std::unique_ptr<php::Unit> make_native_unit() {
   auto unit = std::make_unique<php::Unit>();
   unit->filename = s_nativeUnitName.get();
+  unit->extName = staticEmptyString();
 
   for (auto const& [name, val] : Native::getConstants()) {
     assertx(type(val) != KindOfUninit);

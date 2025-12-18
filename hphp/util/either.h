@@ -168,6 +168,21 @@ struct Either {
   }
 
   /*
+   * Similar to above, except the null pointer case calls the 3rd
+   * provided function.
+   */
+  template<typename LF, typename RF, typename NF>
+  typename std::common_type<
+    typename std::invoke_result<LF, L>::type,
+    typename std::invoke_result<RF, R>::type,
+    typename std::invoke_result<NF>::type
+  >::type match(const LF& lf, const RF& rf, const NF& nf) const {
+    if (auto const l = left()) return lf(l);
+    if (auto const r = right()) return rf(r);
+    return nf();
+  }
+
+  /*
    * Functions that simultaneously query the type tag and extract the
    * pointer of that type.  Both return nullptr if the Either does not
    * hold that type.

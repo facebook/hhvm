@@ -447,22 +447,25 @@ struct Type {
   /*
    * Exact equality or inequality of types, and hashing.
    */
-  bool operator==(const Type& o) const;
-  bool operator!=(const Type& o) const { return !(*this == o); }
+  bool equal(const Type&) const;
+  bool equalNoContext(const Type&) const;
+
+  // operator== deliberately not implemented. You must be explicit
+  // about whether you need to care about the context or not.
+
   size_t hash() const;
 
-  const Type& operator |= (const Type& other);
-  const Type& operator |= (Type&& other);
-  const Type& operator &= (const Type& other);
-  const Type& operator &= (Type&& other);
+  const Type& operator|=(const Type& other);
+  const Type& operator|=(Type&& other);
+  const Type& operator&=(const Type& other);
+  const Type& operator&=(Type&& other);
 
   /*
-   * Returns true if this type is equivalently refined, more refined or strictly
-   * more refined than `o`.  This is similar to the `==` and subtype operations
-   * defined below, except they take into account if a type is tagged as a
-   * context.
+   * Returns true if this type is more refined or strictly more
+   * refined than `o`.  This is similar to the subtype operations
+   * defined below, except they take into account if a type is tagged
+   * as a context.
    */
-  bool equivalentlyRefined(const Type& o) const;
   bool moreRefined(const Type& o) const;
   bool strictlyMoreRefined(const Type& o) const;
 
@@ -1001,8 +1004,8 @@ Type unctx(Type t);
 /*
  * Refinedness equivalence checks.
  */
-inline bool equivalently_refined(const Type& a, const Type& b) {
-  return a.equivalentlyRefined(b);
+inline bool equal(const Type& a, const Type& b) {
+  return a.equal(b);
 }
 
 template<
@@ -1011,12 +1014,16 @@ template<
     std::is_same<typename Iterable::value_type, Type>::value
   >
 >
-bool equivalently_refined(const Iterable& a, const Iterable& b) {
+bool equal(const Iterable& a, const Iterable& b) {
   if (a.size() != b.size()) return false;
   for (auto ita = a.begin(), itb = b.begin(); ita != a.end(); ++ita, ++itb) {
-    if (!equivalently_refined(*ita, *itb)) return false;
+    if (!equal(*ita, *itb)) return false;
   }
   return true;
+}
+
+inline bool equal_no_context(const Type& a, const Type& b) {
+  return a.equalNoContext(b);
 }
 
 /*

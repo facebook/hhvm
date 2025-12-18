@@ -688,6 +688,10 @@ struct CollectedInfo {
       base.loc = BaseLoc::None;
       arrayChain.clear();
     }
+
+    bool empty() const {
+      return base.loc == BaseLoc::None && arrayChain.empty();
+    }
   };
   MInstrState mInstrState;
 

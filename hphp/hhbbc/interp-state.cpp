@@ -90,8 +90,8 @@ bool merge_into(Iter& dst, const Iter& src, JoinOp join) {
             ? NoBlockId
             : diter.initBlock;
           auto const changed =
-            !equivalently_refined(key, diter.types.key) ||
-            !equivalently_refined(value, diter.types.value) ||
+            !equal(key, diter.types.key) ||
+            !equal(value, diter.types.value) ||
             count != diter.types.count ||
             throws1 != diter.types.mayThrowOnInit ||
             throws2 != diter.types.mayThrowOnGetOrNext ||
@@ -445,7 +445,7 @@ bool merge_impl(State& dst, const State& src, JoinOp join) {
   auto changed = false;
 
   auto const thisType = join(dst.thisType, src.thisType);
-  if (thisType != dst.thisType) {
+  if (!equal(thisType, dst.thisType)) {
     changed = true;
     dst.thisType = thisType;
   }
@@ -459,7 +459,7 @@ bool merge_impl(State& dst, const State& src, JoinOp join) {
 
   for (auto i = size_t{0}; i < dst.stack.size(); ++i) {
     auto newT = join(dst.stack[i].type, src.stack[i].type);
-    if (!equivalently_refined(dst.stack[i].type, newT)) {
+    if (!equal(dst.stack[i].type, newT)) {
       changed = true;
       dst.stack[i].type = std::move(newT);
     }
@@ -471,7 +471,7 @@ bool merge_impl(State& dst, const State& src, JoinOp join) {
 
   for (auto i = size_t{0}; i < dst.locals.size(); ++i) {
     auto newT = join(dst.locals[i], src.locals[i]);
-    if (!equivalently_refined(dst.locals[i], newT)) {
+    if (!equal(dst.locals[i], newT)) {
       changed = true;
       dst.locals[i] = std::move(newT);
     }
@@ -764,10 +764,6 @@ std::string state_string(const php::Func& f, const State& st,
       ret += local_string(f, j);
     }
     ret += "\n";
-  }
-
-  if (collect.mInstrState.base.loc != BaseLoc::None) {
-    folly::format(&ret, "mInstrState   :: {}\n", show(f, collect.mInstrState));
   }
 
   return ret;

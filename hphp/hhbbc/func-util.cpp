@@ -211,7 +211,8 @@ bool is_86init_func(const php::Func& f) {
     f.name == s_86cinit.get() ||
     f.name == s_86pinit.get() ||
     f.name == s_86sinit.get() ||
-    f.name == s_86linit.get();
+    f.name == s_86linit.get() ||
+    f.name == s_86reifiedinit.get();
 }
 
 //////////////////////////////////////////////////////////////////////

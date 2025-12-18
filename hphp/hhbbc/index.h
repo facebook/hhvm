@@ -157,7 +157,7 @@ struct PropStateElem {
 
   bool operator==(const PropStateElem& o) const {
     return
-      ty == o.ty &&
+      equal(ty, o.ty) &&
       tc == o.tc &&
       attrs == o.attrs &&
       everModified == o.everModified;
@@ -736,8 +736,8 @@ struct Class {
   bool isMissingDebug() const;
 #endif
 
-private:
   ClassGraph graph() const;
+private:
   ClassInfo* cinfo() const;
   ClassInfo2* cinfo2() const;
 
@@ -1341,6 +1341,9 @@ struct Index {
   struct ReturnType {
     Type t;
     bool effectFree{false};
+    template <typename SerDe> void serde(SerDe& sd) {
+      sd(t)(effectFree);
+    }
   };
 
   /*
@@ -2022,18 +2025,7 @@ struct AnalysisDeps {
   Type add(MethRef, Type);
   Type add(Func, Type);
 
-  bool empty() const {
-    return
-      funcs.empty() &&
-      methods.empty() &&
-      classes.empty() &&
-      clsConstants.empty() &&
-      constants.empty() &&
-      anyClsConstants.empty() &&
-      typeCnsClasses.empty() &&
-      typeCnsClsConstants.empty() &&
-      typeCnsAnyClsConstants.empty();
-  }
+  bool empty() const;
 
   AnalysisDeps& operator|=(const AnalysisDeps&);
 
@@ -2381,6 +2373,10 @@ struct AnalysisOutput {
 // user doesn't need to know any implementation details.
 struct AnalysisScheduler {
   explicit AnalysisScheduler(Index&);
+  AnalysisScheduler(const AnalysisScheduler&) = delete;
+  AnalysisScheduler(AnalysisScheduler&&);
+  AnalysisScheduler& operator=(const AnalysisScheduler&) = delete;
+  AnalysisScheduler& operator=(AnalysisScheduler&&) = delete;
   ~AnalysisScheduler();
 
   // Register a class or function with the given name to be
@@ -2585,8 +2581,12 @@ private:
 // whole roundtrip through the scheduler.
 struct AnalysisWorklist {
   FuncClsUnit next();
+  FuncClsUnit peek() const;
+
+  size_t size() const { return list.size(); }
 
   void schedule(FuncClsUnit);
+  void sort();
 private:
   hphp_fast_set<FuncClsUnit, FuncClsUnitHasher> in;
   std::deque<FuncClsUnit> list;

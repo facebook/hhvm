@@ -304,7 +304,6 @@ struct Func : FuncBase {
   LSString name;
   SrcInfo srcInfo;
 
-
   /*
    * If hhbbc flattens a trait, we keep the original filename of the file
    * that defined the trait in originalUnit to get to the srcLocs. This
@@ -323,7 +322,6 @@ struct Func : FuncBase {
    */
   CompactVector<Param> params;
   CompactVector<Local> locals;
-
 
   /*
    * Which unit defined this function.  If it is a method, the cls
@@ -837,6 +835,22 @@ struct FuncClsUnit {
       : nullptr;
   }
 
+  php::Func* func() {
+    return tagged.tag() == Tag::Func
+      ? (php::Func*)tagged.ptr()
+      : nullptr;
+  }
+  php::Class* cls() {
+    return tagged.tag() == Tag::Class
+      ? (php::Class*)tagged.ptr()
+      : nullptr;
+  }
+  php::Unit* unit() {
+    return tagged.tag() == Tag::Unit
+      ? (php::Unit*)tagged.ptr()
+      : nullptr;
+  }
+
   size_t hash() const { return pointer_hash<const void>{}(tagged.ptr()); }
 
   bool operator==(FuncClsUnit o) const {
@@ -845,6 +859,38 @@ struct FuncClsUnit {
     return tagged.ptr() == o.tagged.ptr();
   }
   bool operator!=(FuncClsUnit o) const { return !(*this == o); }
+
+  // Less than operator, but guaranteed to be stable across different
+  // machines.
+  bool stableLT(FuncClsUnit o) const {
+    if (*this == o) return false;
+    auto const t1 = tagged.tag();
+    auto const t2 = o.tagged.tag();
+    if (t1 != t2) return t1 < t2;
+    switch (t1) {
+      case Tag::Func: {
+        auto const f1 = (const php::Func*)tagged.ptr();
+        auto const f2 = (const php::Func*)o.tagged.ptr();
+        if (!f1) return false;
+        if (!f2) return true;
+        return string_data_lt_func{}(f1->name, f2->name);
+      }
+      case Tag::Class: {
+        auto const c1 = (const php::Class*)tagged.ptr();
+        auto const c2 = (const php::Class*)o.tagged.ptr();
+        if (!c1) return false;
+        if (!c2) return true;
+        return string_data_lt_type{}(c1->name, c2->name);
+      }
+      case Tag::Unit: {
+        auto const u1 = (const php::Unit*)tagged.ptr();
+        auto const u2 = (const php::Unit*)o.tagged.ptr();
+        if (!u1) return false;
+        if (!u2) return true;
+        return string_data_lt{}(u1->filename, u2->filename);
+      }
+    }
+  }
 
 private:
   enum class Tag : uint8_t {

@@ -70,6 +70,13 @@ inline bool is_unsetl_throw(const php::Block& b) {
   return true;
 }
 
+// Does this block end with StaticAnalysisError?
+inline bool is_fatal_block(const php::Block& b, size_t offset = 0) {
+  if (offset + 1 != b.hhbcs.size()) return false;
+  auto const& bc = b.hhbcs.back();
+  return bc.op == Op::StaticAnalysisError;
+}
+
 /*
  * Walk through single_nop blocks to the next block that actually does
  * something.

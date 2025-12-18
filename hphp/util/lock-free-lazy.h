@@ -81,7 +81,7 @@ struct LockFreeLazy {
    * if present() has already returned true and you know there's no
    * concurrent reset() calls.
    */
-  const T& rawGet();
+  const T& rawGet() const;
 
   /*
    * Check (without blocking) whether there's a contained value. This
@@ -171,9 +171,9 @@ const T& LockFreeLazy<T>::get(const F& f) {
   }
 }
 
-template<typename T> const T& LockFreeLazy<T>::rawGet() {
+template<typename T> const T& LockFreeLazy<T>::rawGet() const {
   assertx(present());
-  return *std::launder(reinterpret_cast<T*>(&m_storage));
+  return *std::launder(reinterpret_cast<const T*>(&m_storage));
 }
 
 template<typename T> bool LockFreeLazy<T>::reset() {

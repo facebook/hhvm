@@ -336,7 +336,12 @@ uint32_t numNVArgs(const php::Func& f) {
 std::string show(const ConstIndex& idx, const IIndex& index) {
   if (auto const cls = index.lookup_class(idx.cls)) {
     assertx(idx.idx < cls->constants.size());
-    return folly::sformat("{}::{}", idx.cls, cls->constants[idx.idx].name);
+    return folly::sformat(
+      "{}::{} ({})",
+      idx.cls,
+      cls->constants[idx.idx].name,
+      idx.idx
+    );
   }
   return show(idx);
 }
@@ -1606,11 +1611,11 @@ std::unique_ptr<ClassGraph::Table> ClassGraph::g_table{nullptr};
 thread_local ClassGraph::SerdeState ClassGraph::tl_serde_state{};
 
 struct ClassGraphHasher {
+  using folly_is_avalanching = std::true_type;
   size_t operator()(ClassGraph g) const {
     return pointer_hash<ClassGraph::Node>{}(g.this_);
   }
 };
-
 
 bool ClassGraph::NodeIdxSet::add(Node& n) {
   if (n.idx >= set.universe_size()) {
@@ -1684,7 +1689,6 @@ ClassGraph::NodeIdxSet::NodeIdxSet()
 {
   assertx(!table().locking);
 }
-
 
 struct ClassGraph::ScopedSerdeState {
   ScopedSerdeState() {
@@ -1879,7 +1883,7 @@ private:
     auto wrapper = foldParents(
       n,
       [&] (Node& p) {
-        if (ignore && ignore->count(&p)) {
+        if (ignore && ignore->contains(&p)) {
           Wrapper w{count};
           w.stop = true;
           return w;
@@ -2304,6 +2308,10 @@ void ClassGraph::finalizeParents() {
   assertx(!this_->isConservative());
   assertx(!this_->hasCompleteChildren());
   std::sort(begin(this_->parents), end(this_->parents), Node::Compare{});
+  this_->parents.erase(
+    std::unique(begin(this_->parents), end(this_->parents)),
+    end(this_->parents)
+  );
 }
 
 void ClassGraph::reset() {
@@ -3103,7 +3111,7 @@ ClassGraph::NodeVec ClassGraph::combine(const NodeVec& lhs,
     auto const flipNonRegR = flip ? nonRegL : nonRegR;
 
     // This logic handles the unioning of two classes. If two classes
-    // don't have a common parent, their union if Top, which is
+    // don't have a common parent, their union is Top, which is
     // dropped from the intersection list. For regular classes, we can
     // just get the parent list. For non-regular classes, we need to
     // use subclassOf.
@@ -3678,22 +3686,6 @@ ClassGraph::setCompleteImpl(const Impl& impl, Node& n) {
       f = (Flags)(f | FlagNonRegSub);
     }
     if (n.hasCompleteChildren()) {
-      // If we know all the children, the list should be in canonical
-      // order.
-      if (debug) {
-        impl.lock(
-          n,
-          [&] {
-            always_assert(
-              std::is_sorted(
-                begin(n.children),
-                end(n.children),
-                Node::Compare{}
-              )
-            );
-          }
-        );
-      }
       return std::make_pair(
         f,
         n.children.empty() ? 1 : impl.getCompleteSize(n)
@@ -3734,7 +3726,13 @@ ClassGraph::setCompleteImpl(const Impl& impl, Node& n) {
     if (!n.children.empty()) impl.setCompleteSize(n, *count);
     impl.lock(
       n,
-      [&] { std::sort(begin(n.children), end(n.children), Node::Compare{}); }
+      [&] {
+        std::sort(begin(n.children), end(n.children), Node::Compare{});
+        assertx(
+          std::adjacent_find(begin(n.children), end(n.children)) ==
+          end(n.children)
+        );
+      }
     );
     impl.updateFlags(n, (Flags)(flags | FlagChildren));
   }
@@ -3767,7 +3765,6 @@ void ClassGraph::setConservative(const Impl& impl,
   if (nonRegSub) f = (Flags)(f | FlagNonRegSub);
 
   impl.updateFlags(n, f);
-  impl.lock(n, [&] { n.children.clear(); });
 }
 
 template <typename SerDe, typename T>
@@ -3883,7 +3880,6 @@ void ClassGraph::serdeImpl(SerDe& sd,
           // Record whether this node has complete children, so we can
           // reconstruct that when deserializing.
           assertx(IMPLIES(hasCompleteChildren(), !isConservative()));
-          assertx(IMPLIES(isConservative(), this_->children.empty()));
           assertx(IMPLIES(!hasCompleteChildren() && !isConservative(),
                           !this_->hasRegularSubclass() &&
                           !this_->hasNonRegularSubclass()));
@@ -4004,7 +4000,6 @@ void ClassGraph::deserBlock(SerDe& sd, const Impl& impl) {
         // If this is a "missing" node, it shouldn't have any links
         // (because we shouldn't know anything about it).
         assertx(IMPLIES(flags & FlagMissing, parents.empty()));
-        assertx(std::is_sorted(begin(parents), end(parents), Node::Compare{}));
 
         // For each parent, register this node as a child. Lock the
         // appropriate node if we're concurrent deserializing.
@@ -4012,10 +4007,7 @@ void ClassGraph::deserBlock(SerDe& sd, const Impl& impl) {
           impl.lock(
             *parent,
             [&, node=node] {
-              if (parent->hasCompleteChildren() ||
-                  parent->isConservative()) {
-                return;
-              }
+              if (parent->hasCompleteChildren()) return;
               parent->children.emplace_back(node);
             }
           );
@@ -4051,13 +4043,13 @@ template <typename SerDe>
 size_t ClassGraph::serDownward(SerDe& sd, Node& n) {
   assertx(!table().locking);
   assertx(tl_serde_state.isActive());
+
   if (!tl_serde_state.downward->add(n)) return 0;
 
   if (n.children.empty() || !n.hasCompleteChildren()) {
     return serUpward(sd, n);
   }
   assertx(!n.isConservative());
-  assertx(std::is_sorted(begin(n.children), end(n.children), Node::Compare{}));
 
   size_t count = 0;
   for (auto const child : n.children) {
@@ -4080,12 +4072,10 @@ bool ClassGraph::serUpward(SerDe& sd, Node& n) {
   assertx(IMPLIES(n.isMissing(), n.parents.empty()));
   assertx(IMPLIES(n.isMissing(), n.children.empty()));
   assertx(IMPLIES(n.isMissing(), n.flags() == FlagMissing));
-  assertx(IMPLIES(n.isConservative(), n.children.empty()));
   assertx(IMPLIES(!n.hasCompleteChildren() && !n.isConservative(),
                   !n.hasRegularSubclass()));
   assertx(IMPLIES(!n.hasCompleteChildren() && !n.isConservative(),
                   !n.hasNonRegularSubclass()));
-  assertx(std::is_sorted(begin(n.parents), end(n.parents), Node::Compare{}));
 
   encodeName(sd, n.name);
   // Shouldn't have any FlagWait when serializing.
@@ -4136,10 +4126,11 @@ struct AuxClassGraphs {
   hphp_fast_set<ClassGraph, ClassGraphHasher> newWithChildren;
 
   template <typename SerDe> void serde(SerDe& sd) {
+    ClassGraph::ScopedSerdeState _;
     sd(noChildren, std::less<>{}, nullptr, true)
       (withChildren, std::less<>{}, nullptr, false)
       ;
-    // newNoChildren and newWithChildren deliberately not serialized.
+    // The rest deliberately not serialized.
   }
 };
 
@@ -6576,7 +6567,7 @@ private:
 
   std::string display(ConstIndex cns) const {
     if (auto const p = from(cns)) {
-      return folly::sformat("{}::{}", p->cls, p->name);
+      return folly::sformat("{}::{} ({})", p->cls, p->name, cns.idx);
     }
     return show(cns, AnalysisIndexAdaptor { index.index });
   }
@@ -7251,7 +7242,7 @@ void compute_iface_vtables(IndexData& index,
     slotUses[slot] += iface.usage;
   }
 
-  if (debug) {
+  if constexpr (debug) {
     // Make sure we have an initialized entry for each slot for the sort below.
     for (Slot slot = 0; slot < maxSlot; ++slot) {
       always_assert(slotUses.contains(slot));
@@ -8256,7 +8247,7 @@ Index::ReturnType context_sensitive_return_type(AnalysisIndex::IndexData& data,
   returnType.t = return_with_context(std::move(returnType.t), adjustedCtx);
 
   auto const checkParam = [&] (size_t i) {
-    auto check = [&](const TypeConstraint& tc) {
+    auto check = [&] (const TypeConstraint& tc) {
       if (tc.hasConstraint() && !tc.isTypeVar() && !tc.isTypeConstant()) {
         return callCtx.args[i].strictlyMoreRefined(
           lookup_constraint(
@@ -8312,7 +8303,7 @@ Index::ReturnType context_sensitive_return_type(AnalysisIndex::IndexData& data,
       "bytecode is not allowed\n",
       func_fullname(func)
     );
-    return R{ TInitCell, false };
+    return returnType;
   }
   if (!func.rawBlocks) {
     ITRACE_MOD(
@@ -8320,10 +8311,10 @@ Index::ReturnType context_sensitive_return_type(AnalysisIndex::IndexData& data,
       "Skipping inline interp of {} because bytecode not present\n",
       func_fullname(func)
     );
-    return R{ TInitCell, false };
+    return returnType;
   }
 
-  auto const contextType = [&] {
+  auto contextType = [&] {
     ++data.contextualInterpNestingLevel;
     SCOPE_EXIT { --data.contextualInterpNestingLevel; };
 
@@ -8355,7 +8346,7 @@ Index::ReturnType context_sensitive_return_type(AnalysisIndex::IndexData& data,
     using namespace folly::gen;
     return folly::sformat(
       "{} calling {} (context: {}, args: {})",
-      func_fullname(caller),
+      show(caller),
       func_fullname(func),
       show(callCtx.context),
       from(callCtx.args)
@@ -8364,25 +8355,25 @@ Index::ReturnType context_sensitive_return_type(AnalysisIndex::IndexData& data,
     );
   };
 
+  // The context sensitive type could be a subtype of the insensitive
+  // type if the analysis took advantage of the known arguments. On
+  // the other-hand, it could be a supertype of the insensitive type
+  // if we didn't have the same dependencies present as when the
+  // insensitive type was produced. So, we cannot make any assumptions
+  // about the two's relationship (except that they must have a
+  // non-empty intersection).
   always_assert_flog(
-    contextType.t.subtypeOf(returnType.t),
-    "Context sensitive return type for {} is {} ",
-    "which is not at least as refined as context insensitive "
+    contextType.t.is(BBottom) || contextType.t.couldBe(returnType.t),
+    "Context sensitive return type for {} is {} "
+    "which is not compatible with context insensitive "
     "return type {}\n",
     error_context(),
     show(contextType.t),
     show(returnType.t)
   );
-  always_assert_flog(
-    contextType.effectFree || !returnType.effectFree,
-    "Context sensitive effect-free for {} is {} ",
-    "which is not at least as refined as context insensitive "
-    "effect-free {}\n",
-    error_context(),
-    contextType.effectFree,
-    returnType.effectFree
-  );
 
+  contextType.t &= returnType.t;
+  contextType.effectFree |= returnType.effectFree;
   return contextType;
 }
 
@@ -8920,18 +8911,18 @@ PropMergeResult merge_static_type_impl(IndexData& data,
 /*
  * Split a group of buckets so that no bucket is larger (including its
  * dependencies) than the given max size. The given callable is used
- * to obtain the dependencies of bucket item.
+ * to add to the dependencies of bucket item.
  *
  * Note: if a single item has dependencies larger than maxSize, you'll
  * get a bucket with just that and its dependencies (which will be
  * larger than maxSize). This is the only situation where a returned
  * bucket will be larger than maxSize.
  */
-template <typename GetDeps>
+template <typename AddDeps>
 std::vector<std::vector<SString>>
 split_buckets(const std::vector<std::vector<SString>>& items,
               size_t maxSize,
-              const GetDeps& getDeps) {
+              const AddDeps& addDeps) {
   // Split all of the buckets in parallel
   auto rebuckets = parallel::map(
     items,
@@ -8948,17 +8939,20 @@ split_buckets(const std::vector<std::vector<SString>>& items,
       out.emplace_back();
       out.back().emplace_back(bucket[0]);
 
-      auto allDeps = getDeps(bucket[0]);
+      TSStringSet deps;
+      addDeps(bucket[0], deps);
       for (size_t i = 1, size = bucket.size(); i < size; ++i) {
-        auto const& d = getDeps(bucket[i]);
-        allDeps.insert(begin(d), end(d));
-        auto const newSize = allDeps.size() + out.back().size() + 1;
+        addDeps(bucket[i], deps);
+        auto const newSize = deps.size() + out.back().size() + 1;
+
         if (newSize > maxSize) {
-          allDeps = d;
+          deps.clear();
+          addDeps(bucket[i], deps);
           out.emplace_back();
         }
         out.back().emplace_back(bucket[i]);
       }
+
       return out;
     }
   );
@@ -9039,7 +9033,7 @@ struct HierarchicalWorkBucket {
  * where we're processing classes in a "hierarchical" manner (either
  * from parent class to children, or from leaf class to parents).
  *
- * The dependencies for each class is provided by the getDeps
+ * The dependencies for each class is provided by the addDeps
  * callable. For the purposes of promoting a class to a full output
  * (see above algorithm description), each class must be assigned an
  * index. The (optional) index for a class is provided by the getIdx
@@ -9047,11 +9041,12 @@ struct HierarchicalWorkBucket {
  * considered for promotion. The given "numClasses" parameter is an
  * upper bound on the possible returned indices.
  */
-template <typename GetDeps, typename GetIdx>
+template <typename AddDeps, typename IsInstan, typename GetIdx>
 std::vector<HierarchicalWorkBucket>
 build_hierarchical_work(std::vector<std::vector<SString>>& buckets,
                         size_t numClasses,
-                        const GetDeps& getDeps,
+                        const AddDeps& addDeps,
+                        const IsInstan& isInstan,
                         const GetIdx& getIdx) {
   struct DepHashState {
     std::mutex lock;
@@ -9077,10 +9072,7 @@ build_hierarchical_work(std::vector<std::vector<SString>>& buckets,
 
       // Gather up all dependencies for this bucket
       TSStringSet deps;
-      for (auto const cls : bucket) {
-        auto const d = getDeps(cls).first;
-        deps.insert(begin(*d), end(*d));
-      }
+      for (auto const cls : bucket) addDeps(cls, deps);
 
       // Make sure dependencies and roots are disjoint.
       for (auto const c : bucket) deps.erase(c);
@@ -9139,7 +9131,7 @@ build_hierarchical_work(std::vector<std::vector<SString>>& buckets,
         );
         if (hash == s.lowestHash && bucketIdx == s.lowestBucket) {
           bucket.emplace_back(d);
-        } else if (getDeps(d).second) {
+        } else if (isInstan(d)) {
           // Otherwise keep it as a dependency, but only if it's
           // actually instantiable.
           depOut.emplace_back(d);
@@ -9150,7 +9142,7 @@ build_hierarchical_work(std::vector<std::vector<SString>>& buckets,
       auto const bucketEnd = std::partition(
         begin(bucket),
         end(bucket),
-        [&] (SString cls) { return getDeps(cls).second; }
+        [&] (SString cls) { return isInstan(cls); }
       );
       std::vector<SString> uninstantiable{bucketEnd, end(bucket)};
       bucket.erase(bucketEnd, end(bucket));
@@ -9180,25 +9172,29 @@ build_hierarchical_work(std::vector<std::vector<SString>>& buckets,
   );
 }
 
-template <typename GetDeps, typename GetIdx>
+template <typename AddDeps, typename IsInstan, typename GetIdx>
 std::vector<HierarchicalWorkBucket>
 assign_hierarchical_work(std::vector<SString> roots,
-                        size_t numClasses,
-                        size_t bucketSize,
-                        size_t maxSize,
-                        const GetDeps& getDeps,
-                        const GetIdx& getIdx) {
+                         size_t numClasses,
+                         size_t bucketSize,
+                         size_t maxSize,
+                         const AddDeps& addDeps,
+                         const IsInstan& isInstan,
+                         const GetIdx& getIdx) {
   // First turn roots into buckets, and split if any exceed the
   // maximum size.
   auto buckets = split_buckets(
     consistently_bucketize(roots, bucketSize),
     maxSize,
-    [&] (SString cls) -> const TSStringSet& {
-      auto const [d, _] = getDeps(cls);
-      return *d;
-    }
+    addDeps
   );
-  return build_hierarchical_work(buckets, numClasses, getDeps, getIdx);
+  return build_hierarchical_work(
+    buckets,
+    numClasses,
+    addDeps,
+    isInstan,
+    getIdx
+  );
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -9549,7 +9545,7 @@ struct FlattenJob {
 
       auto const interfaces = cinfo->classGraph.interfaces();
 
-      if (debug) {
+      if constexpr (debug) {
         always_assert(IMPLIES(is_closure(*cls), interfaces.empty()));
         for (auto const& cloinfo : cinfo->closures) {
           always_assert(cloinfo->classGraph.interfaces().empty());
@@ -10041,7 +10037,7 @@ private:
     cinfo->name = cls.name;
     cinfo->hasConstProp = cls.hasConstProp;
     cinfo->hasReifiedParent = cls.hasReifiedGenerics;
-    cinfo->hasReifiedGeneric = cls.userAttributes.count(s___Reified.get());
+    cinfo->hasReifiedGeneric = cls.userAttributes.contains(s___Reified.get());
     cinfo->subHasReifiedGeneric = cinfo->hasReifiedGeneric;
     cinfo->initialNoReifiedInit = cls.attrs & AttrNoReifiedInit;
     cinfo->isMockClass = is_mock_class(&cls);
@@ -10388,7 +10384,7 @@ private:
       // public traits cannot define internal properties unless they
       // have the __ModuleLevelTrait attribute
       ((cls.attrs & AttrTrait) && (cls.attrs & AttrPublic)) &&
-        !(cls.userAttributes.count(s___ModuleLevelTrait.get()));
+        !(cls.userAttributes.contains(s___ModuleLevelTrait.get()));
 
     for (auto const& p : cls.properties) {
       if (cannotDefineInternalProperties && (p.attrs & AttrInternal)) {
@@ -10879,9 +10875,7 @@ private:
         meth.cls,
         existingMeth.name
       );
-      if (existingMeth.attrs & AttrPrivate) {
-        existing.setHasPrivateAncestor();
-      }
+      if (existingMeth.attrs & AttrPrivate) existing.setHasPrivateAncestor();
       existing.setMeth(meth);
       existing.attrs = attrs;
       existing.setTopLevel();
@@ -11213,7 +11207,7 @@ private:
         orig.originalModuleName != dstCls.moduleName;
       bool copyFromInternal =
         (orig.cls->attrs & AttrInternal)
-        && dstCls.userAttributes.count(s___ModuleLevelTrait.get());
+        && dstCls.userAttributes.contains(s___ModuleLevelTrait.get());
 
       if (Cfg::Eval::ModuleLevelTraits &&
           (copyFromModuleLevelTrait || copyFromInternal)) {
@@ -11382,7 +11376,7 @@ private:
             state.methodIdx(index.m_ctx->name, cinfo.name, b.first);
         }
       );
-    } else if (debug) {
+    } else if constexpr (debug) {
       // When building the ClassInfos, we proactively added all
       // closures from usedTraits to the extraMethods map; but now
       // we're going to start from the used methods, and deduce which
@@ -11965,7 +11959,7 @@ void flatten_type_mappings(IndexData& index,
                                       | TypeConstraintFlags::DisplayNullable
                                       | TypeConstraintFlags::UpperBound);
       auto const isUnion = typeMapping->value.isUnion();
-      FTRACE(4, "Flattening Type Mapping {} \n", typeMapping->name);
+      FTRACE(4, "Flattening type mapping {}\n", typeMapping->name);
       bool anyUnresolved = false;
 
       auto enumMeta = folly::get_ptr(meta.cls, typeMapping->name);
@@ -12003,7 +11997,7 @@ void flatten_type_mappings(IndexData& index,
         }
 
         std::queue<std::tuple<LSString, bool>> queue; // item, inEnum
-        FTRACE(4, "Pushing ({} {}) onto queue\n", name, inEnum);
+        FTRACE(5, "Pushing ({} {}) onto queue\n", name, inEnum);
         queue.push(std::make_tuple(name, inEnum));
 
         for (size_t rounds = 0;; ++rounds) {
@@ -12012,7 +12006,7 @@ void flatten_type_mappings(IndexData& index,
           name = normalizeNS(name);
           queue.pop();
 
-          FTRACE(4, "Popping ({} {})\n", name, inEnum);
+          FTRACE(5, "Popping ({} {})\n", name, inEnum);
 
           if (auto const next = folly::get_ptr(meta.typeMappings, name)) {
             flags |= next->value.flags() & (TypeConstraintFlags::Nullable
@@ -12029,7 +12023,7 @@ void flatten_type_mappings(IndexData& index,
               auto next_type = next_tc.type();
               auto next_value = next_tc.typeName();
               if (next_type == AnnotType::Unresolved) {
-                FTRACE(4, "Pushing ({} {}) onto queue\n", next_value, inEnum);
+                FTRACE(5, "Pushing ({} {}) onto queue\n", next_value, inEnum);
                 queue.push(std::make_tuple(next_value, inEnum));
                 continue;
               }
@@ -12124,7 +12118,7 @@ void flatten_type_mappings(IndexData& index,
       name,
       after.value.debugName()
     );
-    if (after.value.isUnresolved() && meta.cls.count(name)) {
+    if (after.value.isUnresolved() && meta.cls.contains(name)) {
       FTRACE(4, "  Marking enum '{}' as uninstantiable\n", name);
       meta.cls.at(name).uninstantiable = true;
     }
@@ -12217,7 +12211,7 @@ flatten_classes_assign(IndexFlattenMetadata& meta) {
 
         for (auto const d : deps) {
           auto const& lookup = self(d, visited, self);
-          if (lookup.instantiable || meta.cls.count(d)) {
+          if (lookup.instantiable || meta.cls.contains(d)) {
             out.deps.emplace(d);
           }
           out.deps.insert(begin(lookup.deps), end(lookup.deps));
@@ -12259,10 +12253,14 @@ flatten_classes_assign(IndexFlattenMetadata& meta) {
     meta.allCls.size(),
     kBucketSize,
     kMaxBucketSize,
-    [&] (SString c) {
+    [&] (SString c, TSStringSet& deps) {
       TSStringSet visited;
       auto const& lookup = findAllDeps(c, visited, findAllDeps);
-      return std::make_pair(&lookup.deps, lookup.instantiable);
+      deps.insert(begin(lookup.deps), end(lookup.deps));
+    },
+    [&] (SString c) {
+      TSStringSet visited;
+      return findAllDeps(c, visited, findAllDeps).instantiable;
     },
     [&] (const TSStringSet&, size_t, SString c) -> Optional<size_t> {
       return meta.cls.at(c).idx;
@@ -12458,7 +12456,7 @@ flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
         if (!seen.emplace(u).second) return;
         if (auto const m = folly::get_ptr(meta.typeMappings, u)) {
           typeMappings.emplace_back(*m);
-        } else if (!index.classRefs.count(u) ||
+        } else if (!index.classRefs.contains(u) ||
                    meta.cls.at(u).uninstantiable) {
           missingTypes.emplace_back(u);
         }
@@ -12475,12 +12473,7 @@ flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
       for (auto const d : work.deps)    addClass(d);
       for (auto const f : work.funcs)   addFunc(f);
 
-      std::sort(
-        begin(typeMappings), end(typeMappings),
-        [] (const TypeMapping& a, const TypeMapping& b) {
-          return string_data_lt_type{}(a.name, b.name);
-        }
-      );
+      std::sort(begin(typeMappings), end(typeMappings));
       std::sort(begin(missingTypes), end(missingTypes), string_data_lt_type{});
     }
 
@@ -13034,7 +13027,7 @@ struct BuildSubclassListJob {
     // Store mappings of names to classes and edges.
     LocalIndex index;
 
-    if (debug) {
+    if constexpr (debug) {
       for (auto const& cinfo : classes.vals) {
         always_assert(!cinfo->classGraph.isMissing());
         always_assert(!cinfo->classGraph.hasCompleteChildren());
@@ -13449,17 +13442,17 @@ protected:
         info.nonRegularMeths.erase(meth);
       }
       for (auto const& meth : entryInfo.nonRegularPrivateMeths) {
-        if (info.regularMeths.count(meth) ||
-            info.nonRegularPrivateMeths.count(meth)) {
+        if (info.regularMeths.contains(meth) ||
+            info.nonRegularPrivateMeths.contains(meth)) {
           continue;
         }
         info.nonRegularPrivateMeths.emplace(meth);
         info.nonRegularMeths.erase(meth);
       }
       for (auto const& meth : entryInfo.nonRegularMeths) {
-        if (info.regularMeths.count(meth) ||
-            info.nonRegularPrivateMeths.count(meth) ||
-            info.nonRegularMeths.count(meth)) {
+        if (info.regularMeths.contains(meth) ||
+            info.nonRegularPrivateMeths.contains(meth) ||
+            info.nonRegularMeths.contains(meth)) {
           continue;
         }
         info.nonRegularMeths.emplace(meth);
@@ -13576,8 +13569,8 @@ protected:
         // map.
         auto& c = children[name];
         for (auto const child : split->children) {
-          assertx(index.classInfos.count(child) ||
-                  index.splits.count(child));
+          assertx(index.classInfos.contains(child) ||
+                  index.splits.contains(child));
           c.emplace(child);
         }
       }
@@ -13777,7 +13770,7 @@ protected:
 
       auto const& cls = index.cls(cinfo->name);
 
-      if (debug) {
+      if constexpr (debug) {
         for (auto const& [name, mte] : cinfo->methods) {
           if (is_special_method_name(name)) continue;
 
@@ -13821,7 +13814,7 @@ protected:
       data.hasRegularClass = cinfo->isRegularClass;
       data.hasRegularClassFull =
         data.hasRegularClass || cinfo->classGraph.mightHaveRegularSubclass();
-      if (!data.hasRegularClass && index.leafs.count(clsname)) {
+      if (!data.hasRegularClass && index.leafs.contains(clsname)) {
         data.hasRegularClass = data.hasRegularClassFull;
       }
 
@@ -13868,17 +13861,17 @@ protected:
             info.nonRegularMeths.erase(meth);
           }
           for (auto const& meth : childInfo->nonRegularPrivateMeths) {
-            if (info.regularMeths.count(meth) ||
-                info.nonRegularPrivateMeths.count(meth)) {
+            if (info.regularMeths.contains(meth) ||
+                info.nonRegularPrivateMeths.contains(meth)) {
               continue;
             }
             info.nonRegularPrivateMeths.emplace(meth);
             info.nonRegularMeths.erase(meth);
           }
           for (auto const& meth : childInfo->nonRegularMeths) {
-            if (info.regularMeths.count(meth) ||
-                info.nonRegularPrivateMeths.count(meth) ||
-                info.nonRegularMeths.count(meth)) {
+            if (info.regularMeths.contains(meth) ||
+                info.nonRegularPrivateMeths.contains(meth) ||
+                info.nonRegularMeths.contains(meth)) {
               continue;
             }
             info.nonRegularMeths.emplace(meth);
@@ -13918,7 +13911,6 @@ protected:
         return
           childData.hasRegularClass ||
           !info.regularComplete ||
-          info.privateAncestor ||
           is_special_method_name(name) ||
           name == s_construct.get();
       }
@@ -13937,7 +13929,7 @@ protected:
     // methods to data.methods.
     if (!data.hasRegularClass) {
       for (auto& [name, info] : childData.methods) {
-        if (!info.regularComplete || info.privateAncestor) continue;
+        if (!info.regularComplete) continue;
         if (is_special_method_name(name)) continue;
         if (name == s_construct.get()) continue;
         if (data.methods.contains(name)) continue;
@@ -13950,7 +13942,7 @@ protected:
         newInfo.regularStatic = std::move(info.regularStatic);
         newInfo.complete = false;
         newInfo.regularComplete = true;
-        newInfo.privateAncestor = false;
+        newInfo.privateAncestor = info.privateAncestor;
       }
     }
 
@@ -14004,10 +13996,10 @@ protected:
     // with the rest.
     size_t childIdx = 0;
     while (calculatedForTop.size() < children.size()) {
-      auto child = children[childIdx++];
+      auto const child = children[childIdx++];
       if (calculatedForTop.contains(child)) continue;
       // Top Splits have no associated data yet.
-      if (index.top.count(child) && index.splits.count(child)) {
+      if (index.top.contains(child) && index.splits.contains(child)) {
         calculatedForTop.emplace(child);
         continue;
       }
@@ -14276,7 +14268,7 @@ protected:
       auto& cls = index.cls(cinfo->name);
 
       // This class is mocked if its on the mocked classes list.
-      cinfo->isMocked = (bool)data.mockedClasses.count(cinfo->name);
+      cinfo->isMocked = (bool)data.mockedClasses.contains(cinfo->name);
       cinfo->isSubMocked = data.isSubMocked || cinfo->isMocked;
       attribute_setter(cls.attrs, !cinfo->isSubMocked, AttrNoMock);
 
@@ -14409,7 +14401,7 @@ protected:
           std::get_if<FuncFamilyEntry::SingleAndNone>(&entry.m_meths)
         );
 
-        if (debug) {
+        if constexpr (debug) {
           if (mte.attrs & AttrNoOverride) {
             always_assert(info.complete);
             always_assert(info.regularComplete);
@@ -14431,9 +14423,9 @@ protected:
                 info.nonRegularMeths.size() == 1
               );
               always_assert(
-                info.regularMeths.count(meth) ||
-                info.nonRegularPrivateMeths.count(meth) ||
-                info.nonRegularMeths.count(meth)
+                info.regularMeths.contains(meth) ||
+                info.nonRegularPrivateMeths.contains(meth) ||
+                info.nonRegularMeths.contains(meth)
               );
             }
 
@@ -14691,12 +14683,13 @@ dfs_bucketize(SubclassMetadata& subclassMeta,
   // Visit immediate children. Recurse until you find a node that has small
   // enough transitive deps.
   auto const visitSubgraph = [&](SString root, auto const& self) {
-    if (processed.count(root) || visited.count(root)) return false;
+    if (processed.contains(root) || visited.contains(root)) return false;
     if (!depsSize(root)) return false;
     auto progress = false;
     visited.insert(root);
 
-    assertx(IMPLIES(splitImmDeps.count(root), depsSize(root) <= kMaxBucketSize));
+    assertx(IMPLIES(splitImmDeps.contains(root),
+                    depsSize(root) <= kMaxBucketSize));
     if (depsSize(root) <= kMaxBucketSize) {
       processSubgraph(root);
       progress = true;
@@ -14751,10 +14744,11 @@ dfs_bucketize(SubclassMetadata& subclassMeta,
   auto const work = build_hierarchical_work(
     flattened,
     maxClassIdx,
-    [&] (SString c) {
+    [&] (SString c, TSStringSet& out) {
       auto const& deps = getDeps(c, getDeps).deps;
-      return std::make_pair(&deps, true);
+      out.insert(begin(deps), end(deps));
     },
+    [] (SString) { return true; },
     [&] (const TSStringSet&, size_t, SString c) -> Optional<size_t> {
       if (!leafs.contains(c)) return std::nullopt;
       return subclassMeta.meta.at(c).idx;
@@ -14795,7 +14789,7 @@ SubclassWork build_subclass_lists_assign(SubclassMetadata subclassMeta) {
   // bucket in a round.
   auto toProcess = std::move(subclassMeta.all);
   TSStringSet tp;
-  if (debug) tp.insert(toProcess.begin(), toProcess.end());
+  if constexpr (debug) tp.insert(toProcess.begin(), toProcess.end());
 
   for (size_t round = 0; !toProcess.empty(); ++round) {
     // If we have this many rounds, something has gone wrong, because
@@ -14942,8 +14936,9 @@ SubclassWork build_subclass_lists_assign(SubclassMetadata subclassMeta) {
               return buckets;
             }(),
             kMaxBucketSize,
-            [&] (SString child) -> const TSStringSet& {
-              return findDeps(child, findDeps).deps;
+            [&] (SString child, TSStringSet& deps) {
+              auto const& d = findDeps(child, findDeps).deps;
+              deps.insert(begin(d), end(d));
             }
           );
           // Each bucket corresponds to a new split node, which will
@@ -15144,7 +15139,7 @@ SubclassWork build_subclass_lists_assign(SubclassMetadata subclassMeta) {
   for (auto& [name, p] : splitPtrs) out.allSplits.emplace(name, std::move(p));
 
   // Ensure we create an output for everything exactly once
-  if (debug) {
+  if constexpr (debug) {
     for (size_t round = 0; round < out.buckets.size(); ++round) {
       auto const& r = out.buckets[round];
       for (size_t i = 0; i < r.size(); ++i) {
@@ -15156,15 +15151,8 @@ SubclassWork build_subclass_lists_assign(SubclassMetadata subclassMeta) {
     assertx(tp.empty());
   }
 
-#ifdef HPHP_TRACE
   if (Trace::moduleEnabled(Trace::hhbbc_index, 4)) {
     for (size_t round = 0; round < out.buckets.size(); ++round) {
-      size_t nc = 0;
-      size_t ns = 0;
-      size_t nd = 0;
-      size_t nsd = 0;
-      size_t nl = 0;
-
       auto const& r = out.buckets[round];
       for (size_t i = 0; i < r.size(); ++i) {
         auto const& bucket = r[i];
@@ -15185,24 +15173,9 @@ SubclassWork build_subclass_lists_assign(SubclassMetadata subclassMeta) {
         for (DEBUG_ONLY auto const& e : bucket.edges) {
           FTRACE(6, "    {} -> {}\n", e.cls, e.split);
         }
-        nc += bucket.classes.size();
-        ns += bucket.splits.size();
-        nd += bucket.deps.size();
-        nsd += bucket.splitDeps.size();
-        nl += bucket.leafs.size();
       }
-      FTRACE(4, "BSL round #{} stats\n"
-        " {} buckets\n"
-        " {} classes\n"
-        " {} splits\n"
-        " {} deps\n"
-        " {} split deps\n"
-        " {} leafs\n",
-        round, r.size(), nc, ns, nd, nsd, nl
-      );
     }
   }
-#endif
 
   return out;
 }
@@ -15258,7 +15231,7 @@ void build_subclass_lists(IndexData& index,
     }
 
     // We shouldn't get closures or Closure in any of this.
-    if (debug) {
+    if constexpr (debug) {
       for (auto const c : bucket.classes) {
         always_assert(!c->tsame(s_Closure.get()));
         always_assert(!is_closure_name(c));
@@ -15909,17 +15882,17 @@ struct AggregateNameOnlyJob: public BuildSubclassListJob {
           info.nonRegularMeths.erase(meth);
         }
         for (auto const& meth : entryInfo.nonRegularPrivateMeths) {
-          if (info.regularMeths.count(meth) ||
-              info.nonRegularPrivateMeths.count(meth)) {
+          if (info.regularMeths.contains(meth) ||
+              info.nonRegularPrivateMeths.contains(meth)) {
             continue;
           }
           info.nonRegularPrivateMeths.emplace(meth);
           info.nonRegularMeths.erase(meth);
         }
         for (auto const& meth : entryInfo.nonRegularMeths) {
-          if (info.regularMeths.count(meth) ||
-              info.nonRegularPrivateMeths.count(meth) ||
-              info.nonRegularMeths.count(meth)) {
+          if (info.regularMeths.contains(meth) ||
+              info.nonRegularPrivateMeths.contains(meth) ||
+              info.nonRegularMeths.contains(meth)) {
             continue;
           }
           info.nonRegularMeths.emplace(meth);
@@ -16070,12 +16043,12 @@ void init_types(IndexData& index, InitTypesMetadata meta) {
     // shows up in a class' type-hints, or if it's a potential
     // reg-only equivalent.
     auto const addDep = [&] (SString dep, bool addEquiv) {
-      if (!meta.classes.count(dep) || roots.count(dep)) return;
+      if (!meta.classes.contains(dep) || roots.contains(dep)) return;
       cinfoDeps.emplace_back(index.classInfoRefs.at(dep));
       if (!addEquiv) return;
       if (auto const cls = folly::get_ptr(meta.classes, dep)) {
         for (auto const d : cls->candidateRegOnlyEquivs) {
-          if (!meta.classes.count(d) || roots.count(d)) continue;
+          if (!meta.classes.contains(d) || roots.contains(d)) continue;
           cinfoDeps.emplace_back(index.classInfoRefs.at(d));
         }
       }
@@ -16184,7 +16157,6 @@ void init_types(IndexData& index, InitTypesMetadata meta) {
     }
 
     auto metadata = make_exec_metadata("fixup units", units[0]->toCppString());
-
     auto config = co_await index.configRef->getCopy();
     auto outputs = co_await index.client->exec(
       s_unitFixupJob,
@@ -16620,7 +16592,16 @@ IndexFlattenMetadata make_remote(IndexData& index,
     );
   }
 
-  if (debug) {
+  if constexpr (debug) {
+    for (auto const f : special_builtins()) {
+      always_assert_flog(
+        index.funcRefs.contains(f) &&
+        index.funcToUnit.contains(f),
+        "{} is marked as a builtin, but does not exist",
+        f
+      );
+    }
+
     for (auto const& [cns, unitAndInit] : index.constantToUnit) {
       if (!unitAndInit.second) continue;
       if (is_native_unit(unitAndInit.first)) continue;
@@ -19206,7 +19187,7 @@ Index::lookup_foldable_return_type(Context ctx,
     acc->second = contextType;
   } else {
     // someone beat us to it
-    assertx(acc->second.t == contextType.t);
+    assertx(equal(acc->second.t, contextType.t));
   }
   return contextType;
 }
@@ -19619,8 +19600,7 @@ bool Index::lookup_class_init_might_raise(Context ctx, res::Class cls) const {
   }
 }
 
-Slot
-Index::lookup_iface_vtable_slot(const php::Class* cls) const {
+Slot Index::lookup_iface_vtable_slot(const php::Class* cls) const {
   return folly::get_default(m_data->ifaceSlotMap, cls->name, kInvalidSlot);
 }
 
@@ -19859,7 +19839,7 @@ void Index::refine_constants(const FuncAnalysisResult& fa,
 
   if (type(cns->val) != KindOfUninit) {
     always_assert_flog(
-      from_cell(cns->val) == fa.inferredReturn,
+      equal(from_cell(cns->val), fa.inferredReturn),
       "Constant value invariant violated in {}.\n"
       "    Value went from {} to {}",
       cns_name,
@@ -19984,7 +19964,7 @@ bool Index::refine_closure_use_vars(const php::Class* cls,
 
   for (auto i = uint32_t{0}; i < vars.size(); ++i) {
     always_assert_flog(
-      vars[i].equivalentlyRefined(unctx(vars[i])),
+      equal(vars[i], unctx(vars[i])),
       "Closure cannot have a used var with a context dependent type"
     );
   }
@@ -20136,7 +20116,7 @@ void Index::update_prop_initial_values(const Context& ctx,
     if (type(info.val) != KindOfUninit) {
       always_assert_flog(
         type(prop.val) == KindOfUninit ||
-        from_cell(prop.val) == from_cell(info.val),
+        equal(from_cell(prop.val), from_cell(info.val)),
         "Property initial value invariant violated for {}::{}\n"
         "  Value went from {} to {}",
         ctx.cls->name, prop.name,
@@ -20422,11 +20402,23 @@ FuncClsUnit AnalysisWorklist::next() {
   return n;
 }
 
+FuncClsUnit AnalysisWorklist::peek() const {
+  if (list.empty()) return FuncClsUnit{};
+  return list.front();
+}
+
 void AnalysisWorklist::schedule(FuncClsUnit fc) {
   assertx(IMPLIES(fc.cls(), !is_closure(*fc.cls())));
   if (!in.emplace(fc).second) return;
   ITRACE(2, "scheduling {} onto worklist\n", show(fc));
   list.emplace_back(fc);
+}
+
+void AnalysisWorklist::sort() {
+  std::sort(
+    begin(list), end(list),
+    [] (FuncClsUnit f1, FuncClsUnit f2) { return f1.stableLT(f2); }
+  );
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -20449,7 +20441,7 @@ bool AnalysisDeps::add(ConstIndex cns, bool inTypeCns) {
 bool AnalysisDeps::add(Constant cns) {
   // Dependency on top-level constant implies a dependency on the
   // 86cinit initialized as well (which may not even exist).
-  add(Func { HPHP::Constant::funcNameFromName(cns.name) }, Type::Meta);
+  add(Func { HPHP::Constant::funcNameFromName(cns.name) }, Type::RetType);
   return constants.emplace(cns.name).second;
 }
 
@@ -20481,6 +20473,19 @@ AnalysisDeps::Type AnalysisDeps::merge(Type& o, Type n) {
   auto const added = n - o;
   o |= n;
   return added;
+}
+
+bool AnalysisDeps::empty() const {
+  return
+    funcs.empty() &&
+    methods.empty() &&
+    classes.empty() &&
+    clsConstants.empty() &&
+    constants.empty() &&
+    anyClsConstants.empty() &&
+    typeCnsClasses.empty() &&
+    typeCnsClsConstants.empty() &&
+    typeCnsAnyClsConstants.empty();
 }
 
 AnalysisDeps& AnalysisDeps::operator|=(const AnalysisDeps& o) {
@@ -20546,6 +20551,12 @@ std::string show(const AnalysisDeps& d) {
             return folly::sformat("{} -> [{}]", show(p.first), show(p.second));
           })
         | unsplit<std::string>(", ")
+    );
+  }
+  if (!d.constants.empty()) {
+    folly::format(
+      &out, "  constants: {}\n",
+      from(d.constants) | map(toCpp) | unsplit<std::string>(", ")
     );
   }
   if (!d.clsConstants.empty()) {
@@ -20648,7 +20659,7 @@ void AnalysisChangeSet::filter(const TSStringSet& keepClasses,
   folly::erase_if(
     fixedClsConstants,
     [&] (ConstIndex idx) {
-      return !keepClasses.count(idx.cls) || allClsConstantsFixed.count(idx.cls);
+      return !keepClasses.contains(idx.cls) || allClsConstantsFixed.contains(idx.cls);
     }
   );
   folly::erase_if(
@@ -21088,7 +21099,7 @@ void AnalysisScheduler::recordChanges(const AnalysisOutput& output) {
   auto const valid = [&] (SString name, DepState::Kind kind) {
     switch (kind) {
       case DepState::Func:
-        return funcs.count(name) || output.meta.removedFuncs.count(name);
+        return funcs.contains(name) || output.meta.removedFuncs.contains(name);
       case DepState::Class: {
         if (!is_closure_name(name)) return (bool)classes.contains(name);
         auto const ctx = folly::get_default(index.m_data->closureToClass, name);
@@ -21352,7 +21363,7 @@ void AnalysisScheduler::updateDepState(AnalysisOutput& output) {
       assertx(bases.empty());
       continue;
     }
-    if (debug) {
+    if constexpr (debug) {
       // Class constant base classes should only shrink.
       for (auto const b : bases) always_assert(old->contains(b));
     }
@@ -22863,7 +22874,7 @@ std::vector<SString> AnalysisScheduler::tracePass4() {
     traceLeafs.emplace_back(name);
   }
 
-  if (debug) {
+  if constexpr (debug) {
     // Every TraceState at this point should be covered (or not
     // eligible).
     parallel::for_each(
@@ -22897,9 +22908,11 @@ AnalysisScheduler::tracePass5(size_t bucketSize,
     traceState.size(),
     bucketSize,
     maxBucketSize,
-    [&] (SString n) {
-      return std::make_pair(&traceState.at(n).deps, true);
+    [&] (SString n, TSStringSet& out) {
+      auto const& deps = traceState.at(n).deps;
+      out.insert(begin(deps), end(deps));
     },
+    [] (SString) { return true; },
     [&] (const TSStringSet& roots,
          size_t bucketIdx,
          SString n) -> Optional<size_t> {
@@ -22922,14 +22935,14 @@ AnalysisScheduler::tracePass5(size_t bucketSize,
       // If the TraceState is a leaf, or isn't in any of the traces
       // for this bucket, we don't want to promote it.
       auto const s = folly::get_ptr(traceState, n);
-      if (!s || !s->eligible || s->leaf.load() || !inTrace.count(n)) {
+      if (!s || !s->eligible || s->leaf.load() || !inTrace.contains(n)) {
         return std::nullopt;
       }
       return s->idx;
     }
   );
 
-  if (debug) {
+  if constexpr (debug) {
     // Sanity check that every eligible TraceState belongs to at least
     // one bucket.
     TSStringSet inputs;
@@ -23005,7 +23018,7 @@ AnalysisScheduler::tracePass6(const std::vector<Bucket>& buckets) {
 
       for (auto const item : b.deps) {
         auto const s = folly::get_ptr(traceState, item);
-        if (!s || !s->eligible || !inTrace.count(item)) continue;
+        if (!s || !s->eligible || !inTrace.contains(item)) continue;
         assertx(!s->depStates.empty());
 
         for (auto const d : s->depStates) {
@@ -23166,8 +23179,8 @@ void AnalysisScheduler::tracePass7(InputsAndUntracked& inputs) {
       }
       if (any(k & K::Dep)) {
         present.add(i);
-        if (input.meta.classDeps.count(name) ||
-            input.meta.processDepCls.count(name)) {
+        if (input.meta.classDeps.contains(name) ||
+            input.meta.processDepCls.contains(name)) {
           assertx(any(k & K::Bytecode));
           process.add(i);
         }
@@ -23191,8 +23204,8 @@ void AnalysisScheduler::tracePass7(InputsAndUntracked& inputs) {
       }
       if (any(k & K::Dep)) {
         present.add(i);
-        if (input.meta.funcDeps.count(name) ||
-            input.meta.processDepFunc.count(name)) {
+        if (input.meta.funcDeps.contains(name) ||
+            input.meta.processDepFunc.contains(name)) {
           assertx(any(k & K::Bytecode));
           process.add(i);
         }
@@ -23215,8 +23228,8 @@ void AnalysisScheduler::tracePass7(InputsAndUntracked& inputs) {
       }
       if (any(k & K::Dep)) {
         present.add(i);
-        if (input.meta.unitDeps.count(name) ||
-            input.meta.processDepUnit.count(name)) {
+        if (input.meta.unitDeps.contains(name) ||
+            input.meta.processDepUnit.contains(name)) {
           process.add(i);
         }
       }
@@ -24326,7 +24339,7 @@ Optional<res::Class> AnalysisIndex::resolve_class(SString n) const {
   // A php::Class should always be accompanied by it's ClassInfo,
   // unless if it's uninstantiable. So, if we have a php::Class here,
   // we know it's uninstantiable.
-  if (m_data->badClasses.count(n) || m_data->classes.count(n)) {
+  if (m_data->badClasses.contains(n) || m_data->classes.contains(n)) {
     return std::nullopt;
   }
   return res::Class::getOrCreate(n);
@@ -24863,7 +24876,7 @@ AnalysisIndex::lookup_foldable_return_type(const CallContext& calleeCtx) const {
     return R{ TInitCell, false };
   }
 
-  auto const contextualRet = [&] () -> Optional<Type> {
+  auto contextualRet = [&] () -> Optional<Type> {
     ++m_data->foldableInterpNestingLevel;
     SCOPE_EXIT { --m_data->foldableInterpNestingLevel; };
 
@@ -24893,17 +24906,20 @@ AnalysisIndex::lookup_foldable_return_type(const CallContext& calleeCtx) const {
     return R{ TInitCell, false };
   }
 
+  auto const insensitive = unserialize_type(finfo.returnTy);
+
   ITRACE_MOD(
     Trace::hhbbc, 4,
-    "Foldable return type: {}\n",
-    show(*contextualRet)
+    "Foldable return type: {}, context insensitive type: {}\n",
+    show(*contextualRet),
+    show(insensitive)
   );
 
   auto const error_context = [&] {
     using namespace folly::gen;
     return folly::sformat(
       "{} calling {} (context: {}, args: {})",
-      func_fullname(caller),
+      show(caller),
       func_fullname(func),
       show(calleeCtx.context),
       from(calleeCtx.args)
@@ -24912,18 +24928,24 @@ AnalysisIndex::lookup_foldable_return_type(const CallContext& calleeCtx) const {
     );
   };
 
-  auto const insensitive = unserialize_type(finfo.returnTy);
+  // The context sensitive type could be a subtype of the insensitive
+  // type if the analysis took advantage of the known arguments. On
+  // the other-hand, it could be a supertype of the insensitive type
+  // if we didn't have the same dependencies present as when the
+  // insensitive type was produced. So, we cannot make any assumptions
+  // about the two's relationship (except that they must have a
+  // non-empty intersection).
   always_assert_flog(
-    contextualRet->subtypeOf(insensitive),
+    contextualRet->is(BBottom) || contextualRet->couldBe(insensitive),
     "Context sensitive return type for {} is {} "
-    "which not at least as refined as context insensitive "
+    "which is not compatible as context insensitive "
     "return type {}\n",
     error_context(),
     show(*contextualRet),
     show(insensitive)
   );
+  *contextualRet &= insensitive;
   if (!is_scalar(*contextualRet)) return R{ TInitCell, false };
-
   return R{ *contextualRet, true };
 }
 
@@ -25064,7 +25086,7 @@ res::Func AnalysisIndex::rfunc_from_dcls(const DCls& dcls,
           hphp_fast_set<ClassGraph, ClassGraphHasher> newCommon;
           c.walkParents(
             [&] (ClassGraph p) {
-              if (first || commonParents.count(p)) {
+              if (first || commonParents.contains(p)) {
                 newCommon.emplace(p);
               }
               return true;
@@ -25485,7 +25507,7 @@ void AnalysisIndex::refine_constants(const FuncAnalysisResult& fa) {
 
   if (type(cns->val) != KindOfUninit) {
     always_assert_flog(
-      from_cell(cns->val) == fa.inferredReturn,
+      equal(from_cell(cns->val), fa.inferredReturn),
       "Constant value invariant violated in {}.\n"
       "    Value went from {} to {}",
       name,
@@ -25735,7 +25757,7 @@ void AnalysisIndex::update_prop_initial_values(const FuncAnalysisResult& fa) {
       );
       always_assert_flog(
         type(prop.val) == KindOfUninit ||
-        from_cell(prop.val) == from_cell(info.val),
+        equal(from_cell(prop.val), from_cell(info.val)),
         "Property initial value invariant violated for {}::{}\n"
         "  Value went from {} to {}",
         fa.ctx.cls->name, prop.name,
@@ -25820,7 +25842,8 @@ void AnalysisIndex::update_bytecode(FuncAnalysisResult& fa) {
     func_fullname(*fa.ctx.func)
   );
 
-  if (update == UpdateBCResult::ChangedAnalyze ||
+  if (fa.reanalyzeOnUpdate ||
+      update == UpdateBCResult::ChangedAnalyze ||
       fa.ctx.func->name == s_86cinit.get()) {
     ITRACE(2, "Updated bytecode for {} in a way that requires re-analysis\n",
            func_fullname(*fa.ctx.func));

@@ -365,8 +365,7 @@ bool shouldRefineBase(ISS& env) {
 
 void startBase(ISS& env, Base base) {
   auto& oldState = env.collect.mInstrState;
-  assertx(oldState.base.loc == BaseLoc::None);
-  assertx(oldState.arrayChain.empty());
+  assertx(oldState.empty());
   assertx(isInitialBaseLoc(base.loc));
   assertx(!base.type.subtypeOf(TBottom));
 
@@ -380,7 +379,7 @@ void startBase(ISS& env, Base base) {
 // "effect-free" (see updateBaseWithType).
 bool endBase(ISS& env, bool update = true, LocalId keyLoc = NoLocalId) {
   auto& state = env.collect.mInstrState;
-  assertx(state.base.loc != BaseLoc::None);
+  assertx(!state.empty());
 
   FTRACE(5, "    endBase: {}\n", show(*env.ctx.func, state.base));
 
@@ -405,7 +404,7 @@ bool moveBase(ISS& env,
               bool update = true,
               LocalId keyLoc = NoLocalId) {
   auto& state = env.collect.mInstrState;
-  assertx(state.base.loc != BaseLoc::None);
+  assertx(!state.empty());
   assertx(isDimBaseLoc(newBase.loc));
   assertx(!state.base.type.subtypeOf(BBottom));
 
@@ -432,7 +431,7 @@ bool moveBase(ISS& env,
 bool extendArrChain(ISS& env, Type key, Type arr,
                     Type val, LocalId keyLoc = NoLocalId) {
   auto& state = env.collect.mInstrState;
-  assertx(state.base.loc != BaseLoc::None);
+  assertx(!state.empty());
   // NB: The various array operation functions can accept arbitrary
   // types as long as they contain TArrLike.  However we still do not
   // allow putting anything but TArrLike in the chain, since (in

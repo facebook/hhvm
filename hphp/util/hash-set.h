@@ -24,8 +24,11 @@ namespace HPHP {
 
 // Similar ref/iter stability as std::unordered_set, and allocates each
 // instance of T separately, never moving.
-template <class T, class V=std::hash<T>, class W=std::equal_to<T>>
-using hphp_hash_set = folly::F14NodeSet<T,V,W>;
+template <class T,
+          class V=std::hash<T>,
+          class W=std::equal_to<T>,
+          class A=std::allocator<T>>
+using hphp_hash_set = folly::F14NodeSet<T,V,W,A>;
 
 template <class T, class V=std::hash<T>, class W=std::equal_to<T>>
 using hphp_vector_set = folly::F14VectorSet<T,V,W>;

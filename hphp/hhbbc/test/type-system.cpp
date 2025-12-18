@@ -29,6 +29,7 @@
 #include "hphp/hhbbc/context.h"
 #include "hphp/hhbbc/func-util.h"
 #include "hphp/hhbbc/hhbbc.h"
+#include "hphp/hhbbc/interp.h"
 #include "hphp/hhbbc/misc.h"
 #include "hphp/hhbbc/representation.h"
 #include "hphp/hhbbc/parallel.h"
@@ -59,6 +60,13 @@ void PrintTo(Emptiness e, ::std::ostream* os) {
     case Emptiness::Maybe:    *os << "maybe"; break;
     default: always_assert(false);
   }
+}
+
+inline bool operator==(const Type& t1, const Type& t2) {
+  return t1.equalNoContext(t2);
+}
+inline bool operator!=(const Type& t1, const Type& t2) {
+  return !t1.equalNoContext(t2);
 }
 
 Type make_obj_for_testing(trep, res::Class, bool, bool, bool);
@@ -257,7 +265,7 @@ const StaticString s_ChildClosure3("Closure$ChildClosure3");
 // A test program so we can actually test things involving object or
 // class types.
 Index make_index() {
-  std::string const hhas = R"(
+  std::string hhas = R"(
     # Technically this should be provided by systemlib, but it's the
     # only one we have to make sure the type system can see for unit
     # test purposes, so we can just define it here.  We don't need to
@@ -663,6 +671,18 @@ Index make_index() {
     }
   )";
 
+  // Add definitions for builtins to satisfy various assertions.
+  for (auto const f : special_builtins()) {
+    folly::format(
+      &hhas,
+      "    .function N {}() {{\n"
+      "      Null\n"
+      "      RetC None\n"
+      "    }}\n",
+      f
+    );
+  }
+
   Logger::LogLevel = Logger::LogNone;
 
   HHBBC::parallel::num_threads = 1;
@@ -675,6 +695,7 @@ Index make_index() {
     nullptr,
     RepoOptions::defaults().packageInfo()
   )};
+  always_assert(!ue->m_fatalUnit);
 
   auto parse = parse_unit(*ue);
 
@@ -1827,7 +1848,7 @@ namespace {
 void test_basic_operators(const std::vector<Type>& types) {
   for (auto const& t : types) {
     EXPECT_EQ(t, t);
-    EXPECT_TRUE(t.equivalentlyRefined(t));
+    EXPECT_TRUE(t.equal(t));
     EXPECT_TRUE(t.subtypeOf(t));
     EXPECT_TRUE(t.moreRefined(t));
     EXPECT_FALSE(t.strictSubtypeOf(t));
@@ -1869,7 +1890,7 @@ void test_basic_operators(const std::vector<Type>& types) {
 
       auto const ctxful = isCtxful(t1, t2);
 
-      auto const equivRefined = t1.equivalentlyRefined(t2);
+      auto const equivRefined = t1.equal(t2);
       auto const moreRefined = t1.moreRefined(t2);
       auto const couldBe = t1.couldBe(t2);
 
@@ -1908,7 +1929,7 @@ void test_basic_operators(const std::vector<Type>& types) {
       auto const isect = intersection_of(t1, t2);
 
       EXPECT_EQ(t1 == t2, t2 == t1);
-      EXPECT_EQ(equivRefined, t2.equivalentlyRefined(t1));
+      EXPECT_EQ(equivRefined, t2.equal(t1));
       EXPECT_EQ(couldBe, t2.couldBe(t1));
       EXPECT_EQ(uni, union_of(t2, t1));
       EXPECT_EQ(isect, intersection_of(t2, t1));
@@ -1917,12 +1938,12 @@ void test_basic_operators(const std::vector<Type>& types) {
       EXPECT_TRUE(t2.moreRefined(uni));
       EXPECT_TRUE(isect.moreRefined(t1));
       EXPECT_TRUE(isect.moreRefined(t2));
-      EXPECT_TRUE(intersection_of(uni, t1).equivalentlyRefined(t1));
-      EXPECT_TRUE(intersection_of(uni, t2).equivalentlyRefined(t2));
+      EXPECT_TRUE(intersection_of(uni, t1).equal(t1));
+      EXPECT_TRUE(intersection_of(uni, t2).equal(t2));
 
       if (moreRefined) {
-        EXPECT_TRUE(uni.equivalentlyRefined(t2));
-        EXPECT_TRUE(isect.equivalentlyRefined(t1));
+        EXPECT_TRUE(uni.equal(t2));
+        EXPECT_TRUE(isect.equal(t1));
       }
 
       if (couldBe) {
@@ -2343,7 +2364,7 @@ TEST(Type, Split) {
     EXPECT_TRUE(split.moreRefined(orig));
     EXPECT_TRUE(rest.moreRefined(orig));
     EXPECT_FALSE(split.couldBe(rest));
-    EXPECT_TRUE(union_of(split, rest).equivalentlyRefined(orig));
+    EXPECT_TRUE(union_of(split, rest).equal(orig));
 
     if (orig.couldBe(bits)) {
       EXPECT_TRUE(split.subtypeOf(bits));
@@ -7026,9 +7047,9 @@ TEST(Type, ContextDependent) {
   auto const thisSubObjUnTy     = setctx(subObj(*clsUn));
 
 #define REFINE_EQ(A, B) \
-  EXPECT_TRUE((A).equivalentlyRefined((B)))
+  EXPECT_TRUE((A).equal((B)))
 #define REFINE_NEQ(A, B) \
-  EXPECT_FALSE((A).equivalentlyRefined((B)))
+  EXPECT_FALSE((A).equal((B)))
 
   // check that improving any non context dependent type does not change the
   // type whether or not the context is related.

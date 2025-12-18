@@ -297,7 +297,13 @@ private:
   Resolution r;
 };
 
-using GenericsMap = hphp_fast_map<std::string, Type>;
+struct TypeWrapper {
+  /* implicit */ TypeWrapper(Type t) : type{std::move(t)} {}
+  Type type;
+  bool operator==(const TypeWrapper& o) const { return equal(type, o.type); }
+};
+
+using GenericsMap = hphp_fast_map<std::string, TypeWrapper>;
 
 struct Cache;
 
@@ -358,10 +364,10 @@ struct Cache {
   };
 
   struct GenericsHasher {
-    size_t operator()(const std::pair<std::string, Type>& p) const {
+    size_t operator()(const std::pair<std::string, TypeWrapper>& p) const {
       return folly::hash::hash_128_to_64(
         folly::hasher<std::string>{}(p.first),
-        p.second.hash()
+        p.second.type.hash()
       );
     }
   };
@@ -599,7 +605,7 @@ Resolution resolve_typevar(ResolveCtx& ctx, SArray ts) {
   if (it == ctx.generics->end()) {
     return Resolution { dict_val(ts), false };
   }
-  return Resolution { it->second, false };
+  return Resolution { it->second.type, false };
 }
 
 Resolution resolve_shape(ResolveCtx& ctx, SArray ts) {
@@ -1149,6 +1155,8 @@ Resolution resolve_type_structure(const IIndex& index,
     .set(key, make_tv<KindOfPersistentString>(typeAlias.name))
     .finishTS();
 }
+
+//////////////////////////////////////////////////////////////////////
 
 SString type_structure_name(SArray ts) {
   assertx(ts->isStatic());

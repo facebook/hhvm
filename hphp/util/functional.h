@@ -141,6 +141,8 @@ struct pairHashCompare {
 
 template<typename T>
 struct int_hash {
+  using folly_is_avalanching = std::true_type;
+
   static_assert(std::is_integral<T>::value);
   size_t operator() (T v) const {
     return hash_int64(static_cast<uint64_t>(v));
@@ -154,6 +156,8 @@ using uint32_hash = int_hash<uint32_t>;
 
 template<typename T>
 struct pointer_hash {
+  using folly_is_avalanching = std::true_type;
+
   size_t operator() (const T *const p) const {
     return hash_int64(intptr_t(p));
   }
@@ -167,7 +171,28 @@ struct pointer_hash {
 };
 
 template<typename T>
+struct pointer_pair_hash {
+  using folly_is_avalanching = std::true_type;
+
+  size_t operator() (const std::pair<const T* const, const T* const>& p) const {
+    return hash_int64_pair(
+      intptr_t(p.first),
+      intptr_t(p.second)
+    );
+  }
+  size_t hash(const std::pair<const T* const, const T* const>& p) const {
+    return operator()(p);
+  }
+  bool equal(const std::pair<const T* const, const T* const>& lhs,
+             const std::pair<const T* const, const T* const>& rhs) const {
+    return lhs == rhs;
+  }
+};
+
+template<typename T>
 struct smart_pointer_hash {
+  using folly_is_avalanching = std::true_type;
+
   size_t operator() (const T &p) const {
     return (size_t)hash_int64(intptr_t(p.get()));
   }

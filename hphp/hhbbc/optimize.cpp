@@ -377,7 +377,7 @@ void insert_assertions(VisitContext& visit, BlockId bid, State state) {
 // it is non-null - specifically, assign the new block an rpoId.
 BlockId make_fatal_block(php::WideFunc& func, const php::Block* srcBlk,
                          FuncAnalysis* ainfo) {
-  FTRACE(1, " ++ new block {}\n", func.blocks().size());
+  FTRACE(1, " ++ new fatal block {}\n", func.blocks().size());
   auto bid = make_block(func, srcBlk);
   auto const blk = func.blocks()[bid].mutate();
   auto const srcLoc = srcBlk->hhbcs.back().srcLoc;
@@ -387,6 +387,7 @@ BlockId make_fatal_block(php::WideFunc& func, const php::Block* srcBlk,
   blk->fallthrough = NoBlockId;
   blk->throwExit = NoBlockId;
   blk->exnNodeId = NoExnNodeId;
+  assertx(is_fatal_block(*blk));
 
   if (ainfo) {
     assertx(ainfo->bdata.size() == bid);
@@ -881,11 +882,7 @@ UpdateBCResult update_bytecode(php::WideFunc& func,
     auto const removing_fatal = [&] {
       auto const& u = ent.second;
       if (!u.replacedBcs.empty()) return false;
-      if (u.unchangedBcs + 1 != blk->hhbcs.size()) return false;
-      auto const& bc = blk->hhbcs[u.unchangedBcs];
-      if (bc.op != Op::StaticAnalysisError) return false;
-      assertx(instrFlags(bc.op) & TF);
-      return true;
+      return is_fatal_block(*blk, u.unchangedBcs);
     };
 
     auto const srcLoc = blk->hhbcs.front().srcLoc;
@@ -939,6 +936,7 @@ UpdateBCResult update_bytecode(php::WideFunc& func,
         blk->fallthrough = fatal();
       } else {
         blk->hhbcs.push_back(bc::StaticAnalysisError {});
+        assertx(is_fatal_block(*blk, blk->hhbcs.size() - 1));
         set_changed();
       }
     }

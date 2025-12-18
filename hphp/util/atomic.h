@@ -51,7 +51,7 @@ assert_address_is_atomically_accessible(ATTRIBUTE_UNUSED T* address) {
  * In some data structures (like Func) we need to copy objects that contain atomics.
  */
 template<typename T> class CopyableAtomic : public std::atomic<T> {
-  static_assert(std::is_integral<T>::value || std::is_pointer<T>::value);
+  static_assert(std::is_arithmetic<T>::value || std::is_pointer<T>::value);
   static_assert(sizeof(T) == 1 || sizeof(T) == 2 ||
                 sizeof(T) == 4 || sizeof(T) == 8);
  public:

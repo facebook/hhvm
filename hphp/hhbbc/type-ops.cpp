@@ -116,47 +116,32 @@ Type typeShr(Type t1, Type t2) { return shift_impl(t1, t2, tvShr); }
 //////////////////////////////////////////////////////////////////////
 
 Type typeIncDec(IncDecOp op, Type t) {
-  auto const val = tv(t);
-
-  if (!val) {
-    // Doubles always stay doubles
-    if (t.subtypeOf(BDbl)) return TDbl;
-
-    if (t.subtypeOf(BOptInt)) {
-      // Ints stay ints unless they can overflow to doubles
-      if (t.subtypeOf(BInt)) {
-        return TInt;
-      }
-      // ++ on null throws, stays null on --. Uninit is folded to init.
-      if (t.subtypeOf(BNull)) return isInc(op) ? TBottom : TInitNull;
-      // Optional integer case. The union of the above two cases.
-      if (isInc(op)) return TInt;
-      return TOptInt;
-    }
-
-    // No-op on bool, array, resource, object.
-    if (t.subtypeOf(BBool | BArrLike | BRes | BObj)) return t;
-
-    return TInitCell;
+  auto const inc = isInc(op);
+  if (auto const val = tv(t)) {
+    auto resultTy = eval_cell([inc,val] {
+      auto c = *val;
+      inc ? tvInc(&c) : tvDec(&c);
+      return c;
+    });
+    // We may have inferred a TSStr or TSArr with a value here, but at
+    // runtime it will not be static.
+    if (resultTy) return loosen_staticness(*resultTy);
   }
 
-  auto const inc = isInc(op);
+  // Doubles always stay doubles
+  if (t.subtypeOf(BDbl)) return TDbl;
+  if (t.subtypeOf(BOptInt)) {
+    if (t.subtypeOf(BInt)) return TInt;
+    // ++ on null throws, stays null on --. Uninit is folded to init.
+    if (t.subtypeOf(BNull)) return isInc(op) ? TBottom : TInitNull;
+    // Optional integer case. The union of the above two cases.
+    if (isInc(op)) return TInt;
+    return TOptInt;
+  }
 
-  // We can't constprop with this eval_cell, because of the effects
-  // on locals.
-  auto resultTy = eval_cell([inc,val] {
-    auto c = *val;
-    if (inc) {
-      tvInc(&c);
-    } else {
-      tvDec(&c);
-    }
-    return c;
-  });
-
-  // We may have inferred a TSStr or TSArr with a value here, but at
-  // runtime it will not be static.
-  return resultTy ? loosen_staticness(*resultTy) : TInitCell;
+  // No-op on bool, array, resource, object.
+  if (t.subtypeOf(BBool | BArrLike | BRes | BObj)) return t;
+  return TInitCell;
 }
 
 Type typeSetOp(SetOpOp op, Type lhs, Type rhs) {

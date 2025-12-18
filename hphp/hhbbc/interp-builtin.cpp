@@ -135,29 +135,6 @@ TypeOrReduced builtin_floor(ISS& env, const php::Func* func,
   return floatIfNumeric(env, func, fca);
 }
 
-/**
- * The compiler specializes the two-arg version of min() and max()
- * into an HNI provided helper. If both arguments are an integer
- * or both arguments are a double, we know the exact type of the
- * return value. If they're both numeric, the result is at least
- * numeric.
- */
-TypeOrReduced minmax2(ISS& env, const php::Func* func, const FCallArgs& fca) {
-  assertx(fca.numArgs() == 2);
-  auto const t0 = getArg(env, func, fca, 0);
-  auto const t1 = getArg(env, func, fca, 1);
-  if (!t0.subtypeOf(BNum) || !t1.subtypeOf(BNum)) return NoReduced{};
-  return t0 == t1 ? t0 : TNum;
-}
-TypeOrReduced builtin_max2(ISS& env, const php::Func* func,
-                           const FCallArgs& fca) {
-  return minmax2(env, func, fca);
-}
-TypeOrReduced builtin_min2(ISS& env, const php::Func* func,
-                           const FCallArgs& fca) {
-  return minmax2(env, func, fca);
-}
-
 TypeOrReduced builtin_strlen(ISS& env, const php::Func* func,
                              const FCallArgs& fca) {
   assertx(fca.numArgs() == 1);
@@ -364,7 +341,7 @@ TypeOrReduced builtin_array_key_cast(ISS& env, const php::Func* func,
     effect_free(env);
   }
 
-  if (retTy == TBottom) unreachable(env);
+  if (retTy.is(BBottom)) unreachable(env);
   return retTy;
 }
 
@@ -372,10 +349,10 @@ TypeOrReduced builtin_is_callable(ISS& env, const php::Func* func,
                                   const FCallArgs& fca) {
   assertx(fca.numArgs() >= 1 && fca.numArgs() <= 2);
   // Do not handle syntax-only checks or name output.
-  if (getArg(env, func, fca, 1) != TFalse) return NoReduced{};
+  if (!getArg(env, func, fca, 1).is(BFalse)) return NoReduced{};
 
   auto const ty = getArg(env, func, fca, 0);
-  if (ty == TInitCell) return NoReduced{};
+  if (ty.is(BInitCell)) return NoReduced{};
   auto const res = [&]() -> Optional<bool> {
     if (ty.subtypeOf(BClsMeth | BFunc)) return true;
     if (ty.subtypeOf(BArrLikeE | BKeyset) ||
@@ -655,8 +632,6 @@ TypeOrReduced builtin_type_structure_class(ISS& env, const php::Func* func,
   X(get_class, get_class)                                               \
   X(get_class_from_object, HH\\get_class_from_object)                   \
   X(class_to_classname, HH\\class_to_classname)                         \
-  X(max2, max2)                                                         \
-  X(min2, min2)                                                         \
   X(strlen, strlen)                                                     \
   X(is_numeric, is_numeric)                                             \
   X(is_scalar, is_scalar)                                               \

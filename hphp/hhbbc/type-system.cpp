@@ -641,7 +641,7 @@ struct DualDispatchCouldBeImpl {
     // Keyset specializations can only be either other if the key ==
     // val invariant holds after intersecting them.
     if (!subtypeAmong(isect, BKeysetN, BArrLikeN)) return true;
-    if (a.key == a.val && b.key == b.val) return true;
+    if (equal(a.key, a.val) && equal(b.key, b.val)) return true;
     return intersection_of(a.key, b.key).couldBe(intersection_of(a.val, b.val));
   }
 
@@ -687,7 +687,7 @@ struct DualDispatchCouldBeImpl {
   bool operator()(const DArrLikePackedN& a, const DArrLikeMapN& b) const {
     if (!b.key.couldBe(BInt) || !a.type.couldBe(b.val)) return false;
     if (!subtypeAmong(isect, BKeysetN, BArrLikeN)) return true;
-    if (a.type == TInt && b.key == b.val) return true;
+    if (a.type.is(BInt) && equal(b.key, b.val)) return true;
     return intersection_of(b.key, TInt).couldBe(intersection_of(a.type, b.val));
   }
 
@@ -714,7 +714,7 @@ struct DualDispatchCouldBeImpl {
     }
     if (!subtypeAmong(isect, BKeysetN, BArrLikeN)) return true;
     auto const vals = packed_values(a);
-    if (vals == packedKey && b.key == b.val) return true;
+    if (vals.equal(packedKey) && equal(b.key, b.val)) return true;
     return
       intersection_of(b.key, packedKey).couldBe(intersection_of(vals, b.val));
   }
@@ -977,7 +977,7 @@ struct DualDispatchIntersectionImpl {
       if (val.is(BBottom)) return TBottom;
     }
 
-    if (subtypeAmong(bits, BKeysetN, BArrLikeN) && key != val) {
+    if (subtypeAmong(bits, BKeysetN, BArrLikeN) && !equal(key, val)) {
       auto isect = intersection_of(key, val);
       if (isect.is(BBottom)) return TBottom;
       if (!key.subtypeOf(isect)) key = isect;
@@ -1062,7 +1062,7 @@ struct DualDispatchIntersectionImpl {
       }
       if (subtypeAmong(bits, BKeysetN, BArrLikeN)) {
         auto key = map_key(kv.first, kv.second);
-        if (key != kv.second.val) {
+        if (!equal(key, kv.second.val)) {
           auto val = intersection_of(std::move(key), kv.second.val);
           if (val.is(BBottom)) return TBottom;
           elems.update(it, MapElem::KeyFromType(val, val));
@@ -1116,7 +1116,7 @@ struct DualDispatchIntersectionImpl {
         optVal = TBottom;
       }
 
-      if (subtypeAmong(bits, BKeysetN, BArrLikeN) && optKey != optVal) {
+      if (subtypeAmong(bits, BKeysetN, BArrLikeN) && !equal(optKey, optVal)) {
         auto isect = intersection_of(optKey, optVal);
 
         if (is_specialized_int(isect)) {
@@ -2538,7 +2538,6 @@ bool Type::equivImpl(const Type& o) const {
   case DataTag::Obj:
     return m_data.dobj.same(o.m_data.dobj, contextSensitive);
   case DataTag::WaitHandle:
-    assertx(m_data.dwh->cls.same(o.m_data.dwh->cls));
     return m_data.dwh->inner.equivImpl<contextSensitive>(
       o.m_data.dwh->inner
     );
@@ -2582,11 +2581,11 @@ bool Type::equivImpl(const Type& o) const {
   not_reached();
 }
 
-bool Type::equivalentlyRefined(const Type& o) const {
+bool Type::equal(const Type& o) const {
   return equivImpl<true>(o);
 }
 
-bool Type::operator==(const Type& o) const {
+bool Type::equalNoContext(const Type& o) const {
   return equivImpl<false>(o);
 }
 
@@ -2814,7 +2813,7 @@ bool Type::subtypeOf(const Type& o) const {
 bool Type::strictSubtypeOf(const Type& o) const {
   assertx(checkInvariants());
   assertx(o.checkInvariants());
-  return *this != o && subtypeOf(o);
+  return !equal_no_context(*this, o) && subtypeOf(o);
 }
 
 bool Type::couldBe(const Type& o) const {
@@ -3133,7 +3132,7 @@ bool Type::checkInvariants() const {
         assertx(!v.is(BBottom));
         assertx(v.subtypeOf(vals.first));
         assertx(v.couldBe(vals.second));
-        assertx(IMPLIES(isKeyset, v == ival(idx)));
+        assertx(IMPLIES(isKeyset, v.equal(ival(idx))));
         assertx(IMPLIES(maybeKeyset, v.couldBe(ival(idx))));
         ++idx;
       }
@@ -3168,7 +3167,7 @@ bool Type::checkInvariants() const {
           ++idx;
         }
 
-        assertx(IMPLIES(isKeyset, keyType == kv.second.val));
+        assertx(IMPLIES(isKeyset, keyType.equal(kv.second.val)));
         assertx(IMPLIES(maybeKeyset, keyType.couldBe(kv.second.val)));
       }
       // Map shouldn't have packed-like keys. If it does, it should be Packed
@@ -3182,7 +3181,7 @@ bool Type::checkInvariants() const {
     if (!m_data.map->optKey.is(BBottom)) {
       assertx(m_data.map->optKey.subtypeOf(key.first));
       assertx(m_data.map->optVal.subtypeOf(val.first));
-      assertx(IMPLIES(isKeyset, m_data.map->optKey == m_data.map->optVal));
+      assertx(IMPLIES(isKeyset, m_data.map->optKey.equal(m_data.map->optVal)));
       // If the optional element has a key with specialized data, it
       // cannot be the same value as a known key.
       if (is_specialized_int(m_data.map->optKey)) {
@@ -3253,7 +3252,7 @@ bool Type::checkInvariants() const {
     // should be Map instead.
     assertx(!is_scalar_counted(m_data.mapn->key));
     assertx(IMPLIES(maybeKeyset, m_data.mapn->key.couldBe(m_data.mapn->val)));
-    assertx(IMPLIES(isKeyset, m_data.mapn->key == m_data.mapn->val));
+    assertx(IMPLIES(isKeyset, m_data.mapn->key.equal(m_data.mapn->val)));
     break;
   }
   }
@@ -7388,8 +7387,8 @@ bool arr_map_set(Type& map,
         } else {
           // For Keysets we also have to deal with possibly no longer
           // knowing the key's staticness.
-          assertx(key == val);
-          assertx(mapKey == mapVal);
+          assertx(equal(key, val));
+          assertx(equal(mapKey, mapVal));
           auto const u = union_of(std::move(mapKey), key);
           elems.emplace_back(
             *k,
@@ -7451,8 +7450,8 @@ bool arr_map_set(Type& map,
           } else {
             // For Keysets we also have to deal with possibly no
             // longer knowing the key's staticness.
-            assertx(key == val);
-            assertx(mutated->optKey == mutated->optVal);
+            assertx(equal(key, val));
+            assertx(equal(mutated->optKey, mutated->optVal));
             auto const u = union_of(key, mutated->optKey);
             mutated->map.emplace_back(
               *k,
@@ -7509,7 +7508,7 @@ std::pair<Type,bool> array_like_set_impl(Type arr,
   assertx(!arr.is(BBottom));
   assertx(!val.is(BBottom));
   assertx(!key.is(BBottom));
-  assertx(IMPLIES(arr.subtypeOf(BKeyset), key == val));
+  assertx(IMPLIES(arr.subtypeOf(BKeyset), equal(key, val)));
 
   // Remove emptiness and loosen staticness from the bits
   auto const bits = [&] {

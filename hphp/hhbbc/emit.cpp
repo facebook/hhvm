@@ -1290,9 +1290,9 @@ std::unique_ptr<UnitEmitter> emit_unit(Index& index, php::Unit& unit) {
 
   EmitUnitState state { index, &unit };
 
-  // Go thought all constants and see if they still need their
+  // Go through all constants and see if they still need their
   // matching 86cinit func. In repo mode we are able to optimize away
-  // most of them away. And if the const don't need them anymore we
+  // most of them away. If the const doesn't need them anymore we
   // should not emit them.
   hphp_fast_set<const StringData*> const_86cinit_funcs;
   for (size_t id = 0; id < unit.constants.size(); ++id) {

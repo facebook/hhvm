@@ -24,6 +24,8 @@ namespace HPHP::HHBBC {
 
 //////////////////////////////////////////////////////////////////////
 
+#ifdef HPHP_TRACE
+
 namespace {
 
 bool method_map_contains(const MethodMap& mmap,
@@ -54,16 +56,21 @@ bool method_map_contains(const MethodMap& mmap,
 
 //////////////////////////////////////////////////////////////////////
 
-bool is_trace_function(const php::Class* cls,
+bool is_trace_function(const php::Class* inCls,
                        const php::Func* func,
                        const php::Unit* inUnit) {
   auto const unit = [&] () -> SString {
     if (inUnit) return inUnit->filename;
-    if (cls) return cls->unit;
+    if (inCls) return inCls->unit;
     if (func) return func->unit;
     return nullptr;
   }();
-  return is_trace_function(cls ? cls->name : nullptr,
+  auto const cls = [&] () -> SString {
+    if (inCls) return inCls->name;
+    if (func && func->cls) return func->cls->name;
+    return nullptr;
+  }();
+  return is_trace_function(cls,
                            func ? func->name : nullptr,
                            unit);
 }
@@ -75,7 +82,12 @@ bool is_trace_function(const Context& ctx) {
     if (ctx.func) return ctx.func->unit;
     return nullptr;
   }();
-  return is_trace_function(ctx.cls ? ctx.cls->name : nullptr,
+  auto const cls = [&] () -> SString {
+    if (ctx.cls) return ctx.cls->name;
+    if (ctx.func && ctx.func->cls) return ctx.func->cls->name;
+    return nullptr;
+  }();
+  return is_trace_function(cls,
                            ctx.func ? ctx.func->name : nullptr,
                            unit);
 }
@@ -86,16 +98,21 @@ bool is_trace_function(SString cls,
   return method_map_contains(options.TraceFunctions, cls, func, unit);
 }
 
-int trace_bump_for(const php::Class* cls,
+int trace_bump_for(const php::Class* inCls,
                    const php::Func* func,
                    const php::Unit* inUnit) {
   auto const unit = [&] () -> SString {
     if (inUnit) return inUnit->filename;
-    if (cls) return cls->unit;
+    if (inCls) return inCls->unit;
     if (func) return func->unit;
     return nullptr;
   }();
-  return trace_bump_for(cls ? cls->name : nullptr,
+  auto const cls = [&] () -> SString {
+    if (inCls) return inCls->name;
+    if (func && func->cls) return func->cls->name;
+    return nullptr;
+  }();
+  return trace_bump_for(cls,
                         func ? func->name : nullptr,
                         unit);
 }
@@ -107,7 +124,12 @@ int trace_bump_for(const Context& ctx) {
     if (ctx.func) return ctx.func->unit;
     return nullptr;
   }();
-  return trace_bump_for(ctx.cls ? ctx.cls->name : nullptr,
+  auto const cls = [&] () -> SString {
+    if (ctx.cls) return ctx.cls->name;
+    if (ctx.func && ctx.func->cls) return ctx.func->cls->name;
+    return nullptr;
+  }();
+  return trace_bump_for(cls,
                         ctx.func ? ctx.func->name : nullptr,
                         unit);
 }
@@ -118,6 +140,8 @@ int trace_bump_for(SString cls,
   return is_trace_function(cls, func, unit) ? kTraceFuncBump :
     ((unit && is_systemlib_part(unit)) ? kSystemLibBump : 0);
 }
+
+#endif
 
 //////////////////////////////////////////////////////////////////////
 

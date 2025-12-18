@@ -6126,6 +6126,54 @@ FuncClsUnit fc_from_context(const Context& ctx,
 
 //////////////////////////////////////////////////////////////////////
 
+Trace::Bump bump_for_class(const Index::IndexData& index, SString c) {
+  if constexpr (Trace::enabled) {
+    return Trace::Bump{
+      Trace::hhbbc_index,
+      trace_bump_for(c, nullptr, folly::get_default(index.classToUnit, c))
+    };
+  } else {
+    return Trace::Bump{Trace::hhbbc_index, 0};
+  }
+}
+
+Trace::Bump bump_for_func(const Index::IndexData& index, SString f) {
+  if constexpr (Trace::enabled) {
+    return Trace::Bump{
+      Trace::hhbbc_index,
+      trace_bump_for(nullptr, f, folly::get_default(index.funcToUnit, f))
+    };
+  } else {
+    return Trace::Bump{Trace::hhbbc_index, 0};
+  }
+}
+
+Trace::Bump bump_for_unit(const Index::IndexData&, SString u) {
+  if constexpr (Trace::enabled) {
+    return Trace::Bump{Trace::hhbbc_index, trace_bump_for(nullptr, nullptr, u)};
+  } else {
+    return Trace::Bump{Trace::hhbbc_index, 0};
+  }
+}
+
+Trace::Bump bump_for_constant(const Index::IndexData& index, SString cns) {
+  if constexpr (Trace::enabled) {
+    return Trace::Bump{
+      Trace::hhbbc_index,
+      [&] {
+        if (auto const p = folly::get_ptr(index.constantToUnit, cns)) {
+          return trace_bump_for(nullptr, nullptr, p->first);
+        }
+        return 0;
+      }()
+    };
+  } else {
+    return Trace::Bump{Trace::hhbbc_index, 0};
+  }
+}
+
+//////////////////////////////////////////////////////////////////////
+
 // Record the dependencies of all classes and functions being
 // processed with an AnalysisIndex. These dependencies will ultimately
 // be reported back to the master AnalysisScheduler, but will also
@@ -11950,6 +11998,11 @@ void flatten_type_mappings(IndexData& index,
   auto resolved = parallel::map(
     work,
     [&] (const TypeMapping* typeMapping) {
+      Trace::Bump bump{
+        Trace::hhbbc_index,
+        trace_bump_for(typeMapping->name, nullptr, typeMapping->unit)
+      };
+
       Optional<TSStringSet> seen;
       TypeConstraintFlags flags =
         typeMapping->value.flags() & (TypeConstraintFlags::Nullable
@@ -12089,6 +12142,7 @@ void flatten_type_mappings(IndexData& index,
                 TypeConstraint{AnnotType::Unresolved, flags, name},
                 false,
                 inEnum,
+                typeMapping->unit
               };
             }
           }
@@ -12106,12 +12160,21 @@ void flatten_type_mappings(IndexData& index,
       // it will deal with some of the canonicalizations like `bool`.
       auto value = TypeConstraint::makeUnion(typeMapping->name, std::move(tvu));
       // Should no longer be a type alias.
-      return TypeMapping { typeMapping->name, value, false, typeMapping->isEnum};
+      return TypeMapping {
+        typeMapping->name,
+        value,
+        false,
+        typeMapping->isEnum,
+        typeMapping->unit
+      };
     }
   );
 
   for (auto& after : resolved) {
     auto const name = after.name;
+    Trace::Bump bump{
+      Trace::hhbbc_index, trace_bump_for(name, nullptr, after.unit)
+    };
     using namespace folly::gen;
     FTRACE(
       4, "Type-mapping '{}' flattened to {}\n",
@@ -15151,7 +15214,7 @@ SubclassWork build_subclass_lists_assign(SubclassMetadata subclassMeta) {
     assertx(tp.empty());
   }
 
-  if (Trace::moduleEnabled(Trace::hhbbc_index, 4)) {
+  if (Trace::moduleEnabled(Trace::hhbbc_index, 5)) {
     for (size_t round = 0; round < out.buckets.size(); ++round) {
       auto const& r = out.buckets[round];
       for (size_t i = 0; i < r.size(); ++i) {
@@ -15623,6 +15686,7 @@ private:
   }
 
   static void unresolve_missing(const LocalIndex& index, php::Func& func) {
+    auto const UNUSED bump = trace_bump(func, Trace::hhbbc_index);
     for (auto& p : func.params) {
       p.typeConstraints.forEachMutable([&](TypeConstraint& tc) {
         unresolve_missing(index, tc);
@@ -15635,6 +15699,7 @@ private:
   }
 
   static void unresolve_missing(const LocalIndex& index, php::Class& cls) {
+    auto const UNUSED bump = trace_bump(cls, Trace::hhbbc_index);
     if (cls.attrs & AttrEnum) unresolve_missing(index, cls.enumBaseTy);
     for (auto& meth : cls.methods) unresolve_missing(index, *meth);
     for (auto& prop : cls.properties) {
@@ -15646,9 +15711,7 @@ private:
 
   static Type initial_return_type(const LocalIndex& index,
                                   const php::Func& f) {
-    Trace::Bump _{
-      Trace::hhbbc_index, kSystemLibBump, is_systemlib_part(f.unit)
-    };
+    auto const UNUSED bump = trace_bump(f, Trace::hhbbc_index);
     auto ty = return_type_from_constraints(
         f,
         [&] (SString name) -> Optional<res::Class> {
@@ -21010,6 +21073,8 @@ void AnalysisScheduler::registerClass(SString name) {
   // Closures are only scheduled as part of the class or func they're
   // declared in.
   if (is_closure_name(name)) return;
+
+  auto const UNUSED bump = bump_for_class(*index.m_data, name);
   FTRACE(5, "AnalysisScheduler: registering class {}\n", name);
 
   auto const [cState, emplaced1] = classState.try_emplace(name, name);
@@ -21034,6 +21099,7 @@ void AnalysisScheduler::registerClass(SString name) {
 }
 
 void AnalysisScheduler::registerFunc(SString name) {
+  auto const UNUSED bump = bump_for_func(*index.m_data, name);
   FTRACE(5, "AnalysisScheduler: registering func {}\n", name);
 
   auto const [fState, emplaced1] = funcState.try_emplace(name, name);
@@ -21070,6 +21136,7 @@ void AnalysisScheduler::registerFunc(SString name) {
 }
 
 void AnalysisScheduler::registerUnit(SString name) {
+  auto const UNUSED bump = bump_for_unit(*index.m_data, name);
   FTRACE(5, "AnalysisScheduler: registering unit {}\n", name);
 
   auto const [uState, emplaced1] = unitState.try_emplace(name, name);
@@ -21114,6 +21181,7 @@ void AnalysisScheduler::recordChanges(const AnalysisOutput& output) {
   };
 
   for (auto const [name, type] : changed.funcs) {
+    auto const UNUSED bump = bump_for_func(*index.m_data, name);
     FTRACE(4, "AnalysisScheduler: func {} changed ({})\n", name, show(type));
     auto state = folly::get_ptr(funcState, name);
     always_assert_flog(
@@ -21132,6 +21200,7 @@ void AnalysisScheduler::recordChanges(const AnalysisOutput& output) {
   }
 
   for (auto const [meth, type] : changed.methods) {
+    auto const UNUSED bump = bump_for_class(*index.m_data, meth.cls);
     FTRACE(4, "AnalysisScheduler: method {} changed ({})\n",
            show(meth), show(type));
     auto state = folly::get_ptr(classState, meth.cls);
@@ -21152,6 +21221,7 @@ void AnalysisScheduler::recordChanges(const AnalysisOutput& output) {
   }
 
   for (auto const cns : changed.clsConstants) {
+    auto const UNUSED bump = bump_for_class(*index.m_data, cns.cls);
     auto state = folly::get_ptr(classState, cns.cls);
     always_assert_flog(
       state,
@@ -21175,6 +21245,7 @@ void AnalysisScheduler::recordChanges(const AnalysisOutput& output) {
   }
 
   for (auto const cns : changed.fixedClsConstants) {
+    auto const UNUSED bump = bump_for_class(*index.m_data, cns.cls);
     auto state = folly::get_ptr(classState, cns.cls);
     always_assert_flog(
       state,
@@ -21198,6 +21269,7 @@ void AnalysisScheduler::recordChanges(const AnalysisOutput& output) {
   }
 
   for (auto const cls : changed.allClsConstantsFixed) {
+    auto const UNUSED bump = bump_for_class(*index.m_data, cls);
     auto state = folly::get_ptr(classState, cls);
     always_assert_flog(
       state,
@@ -21220,6 +21292,7 @@ void AnalysisScheduler::recordChanges(const AnalysisOutput& output) {
   }
 
   for (auto const name : changed.constants) {
+    auto const UNUSED bump = bump_for_constant(*index.m_data, name);
     FTRACE(4, "AnalysisScheduler: constant {} changed\n", name);
     auto state = folly::get_ptr(cnsChanged, name);
     always_assert_flog(
@@ -21238,6 +21311,7 @@ void AnalysisScheduler::recordChanges(const AnalysisOutput& output) {
   }
 
   for (auto const unit : changed.unitsFixed) {
+    auto const UNUSED bump = bump_for_unit(*index.m_data, unit);
     auto state = folly::get_ptr(unitState, unit);
     always_assert_flog(
       state,
@@ -21445,6 +21519,7 @@ void AnalysisScheduler::removeFuncs() {
 
   TSStringSet traceNamesToRemove;
   for (auto const name : funcsToRemove) {
+    auto const UNUSED bump = bump_for_func(*index.m_data, name);
     FTRACE(4, "AnalysisScheduler: removing function {}\n", name);
 
     auto fstate = folly::get_ptr(funcState, name);
@@ -21900,6 +21975,8 @@ void AnalysisScheduler::findToSchedule() {
     [&] (SString name) {
       assertx(!is_closure_name(name));
       auto& state = classState.at(name).depState;
+      auto const UNUSED bump = bump_for_class(*index.m_data, name);
+      FTRACE(5, "Class {} dep-state:\n{}", name, show(state.deps));
       state.toSchedule = check(name, state);
       if (state.toSchedule) ++totalWorkItems;
     }
@@ -21908,6 +21985,8 @@ void AnalysisScheduler::findToSchedule() {
     funcNames,
     [&] (SString name) {
       auto& state = funcState.at(name).depState;
+      auto const UNUSED bump = bump_for_func(*index.m_data, name);
+      FTRACE(5, "Func {} dep-state:\n{}", name, show(state.deps));
       state.toSchedule = check(name, state);
       if (state.toSchedule) ++totalWorkItems;
     }
@@ -21916,6 +21995,8 @@ void AnalysisScheduler::findToSchedule() {
     unitNames,
     [&] (SString name) {
       auto& state = unitState.at(name).depState;
+      auto const UNUSED bump = bump_for_unit(*index.m_data, name);
+      FTRACE(5, "Unit {} dep-state:\n{}", name, show(state.deps));
       state.toSchedule = check(name, state);
       if (state.toSchedule) ++totalWorkItems;
     }

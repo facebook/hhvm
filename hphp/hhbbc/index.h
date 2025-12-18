@@ -954,6 +954,7 @@ struct TypeMapping {
   TypeConstraint value;
   bool isTypeAlias;
   bool isEnum;
+  LSString unit;
 
   bool operator==(const TypeMapping& o) const {
     return name->tsame(o.name);
@@ -963,7 +964,7 @@ struct TypeMapping {
   }
 
   template <typename SerDe> void serde(SerDe& sd) {
-    sd(name)(value)(isTypeAlias)(isEnum);
+    sd(name)(value)(isTypeAlias)(isEnum)(unit);
   }
 };
 

@@ -568,6 +568,8 @@ private:
     SCOPE_ASSERT_DETAIL("update unit") {
       return "Updating Unit: " + show(ua.ctx);
     };
+    auto const UNUSED bump =
+      trace_bump(ua.ctx, Trace::hhbbc, Trace::hhbbc_cfg, Trace::hhbbc_index);
     AnalysisIndexAdaptor adaptor{index};
     ContextPusher _{adaptor, ua.ctx};
     index.update_type_aliases(ua);
@@ -994,7 +996,8 @@ WholeProgramInput::make(std::unique_ptr<UnitEmitter> ue) {
           typeAlias->name,
           typeAlias->value,
           true,
-          false
+          false,
+          parsed.unit->filename
         }
       );
     }
@@ -1058,7 +1061,9 @@ WholeProgramInput::make(std::unique_ptr<UnitEmitter> ue) {
       assertx(!tc.isNullable());
       addType(types, folly::Range<const TypeConstraint*>(&tc, &tc + 1), nullptr);
       if (tc.isMixed()) tc.setType(AnnotType::ArrayKey);
-      typeMapping.emplace(TypeMapping{c->name, tc, false, true});
+      typeMapping.emplace(
+        TypeMapping{c->name, tc, false, true, unit}
+      );
     }
 
     std::sort(begin(deps), end(deps), string_data_lt_type{});

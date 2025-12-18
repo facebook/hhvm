@@ -207,6 +207,7 @@ PropertiesInfo::PropertiesInfo(const IIndex& index,
   , m_func(ctx.func)
 {
   if (m_cls == nullptr && ctx.cls != nullptr) {
+    auto const UNUSED bump = trace_bump(*ctx.cls, Trace::hhbbc_index);
     m_privateProperties = index.lookup_private_props(ctx.cls);
     m_privateStatics    = index.lookup_private_statics(ctx.cls);
   }

@@ -289,17 +289,13 @@ void state_after(const char* when,
                  const php::Unit& u,
                  const Index& index) {
   TRACE_SET_MOD(hhbbc)
-  Trace::Bump bumper{Trace::hhbbc, kSystemLibBump, is_systemlib_part(u)};
+  auto const UNUSED bump = trace_bump(u, Trace::hhbbc);
   FTRACE(4, "{:-^70}\n{}{:-^70}\n", when, show(u, index), "");
 }
 
 void state_after(const char* when, const ParsedUnit& parsed) {
   TRACE_SET_MOD(hhbbc)
-  Trace::Bump bumper{
-    Trace::hhbbc,
-    kSystemLibBump,
-    is_systemlib_part(*parsed.unit)
-  };
+  auto const UNUSED bump = trace_bump(*parsed.unit, Trace::hhbbc);
 
   std::vector<const php::Func*> funcs;
   std::vector<const php::Class*> classes;

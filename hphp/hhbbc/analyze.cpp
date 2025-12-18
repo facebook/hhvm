@@ -328,8 +328,7 @@ FuncAnalysis do_analyze_collect(const IIndex& index,
     return "Analyzing: " + show(ctx);
   };
 
-  auto const UNUSED bump =
-    trace_bump(ctx, Trace::hhbbc, Trace::hhbbc_cfg, Trace::hhbbc_index);
+  Optional<std::array<Trace::Bump, 3>> bump;
 
   if (knownArgs) {
     using namespace folly::gen;
@@ -344,7 +343,14 @@ FuncAnalysis do_analyze_collect(const IIndex& index,
           | unsplit<std::string>(",")
       )
     );
+  } else {
+    // Only bump if we're not doing inline analysis. Otherwise we want
+    // to keep the bump from the caller.
+    bump.emplace(
+      trace_bump(ctx, Trace::hhbbc, Trace::hhbbc_cfg, Trace::hhbbc_index)
+    );
   }
+
   SCOPE_EXIT {
     if (knownArgs) {
       FTRACE(2, "{:.^70}\n", "End Inline Interp");
@@ -617,6 +623,8 @@ FuncAnalysis do_analyze(const IIndex& index,
   while (auto const cns = clsCnsWork->next()) {
     clsCnsWork->setCurrent(cns);
     SCOPE_EXIT { clsCnsWork->clearCurrent(cns); };
+    auto const UNUSED bump =
+      trace_bump(ctx, Trace::hhbbc, Trace::hhbbc_cfg, Trace::hhbbc_index);
     auto fa = analyze_func_inline(
       index,
       ctx,
@@ -926,6 +934,8 @@ ClassAnalysis analyze_class_constants(const IIndex& index, const Context& ctx) {
 
   for (auto const& m : ctx.cls->methods) {
     if (!is_86init_func(*m)) continue;
+    auto const UNUSED bump =
+      trace_bump(*m, Trace::hhbbc, Trace::hhbbc_cfg, Trace::hhbbc_index);
     auto const wf = php::WideFunc::cns(m.get());
     analysis.methods.emplace_back(
       analyze_func(
@@ -988,6 +998,9 @@ ClassAnalysis analyze_class(const IIndex& index, const Context& ctx) {
 
   for (size_t propIdx = 0, size = ctx.cls->properties.size();
        propIdx < size; ++propIdx) {
+    auto const UNUSED bump =
+      trace_bump(ctx, Trace::hhbbc, Trace::hhbbc_cfg, Trace::hhbbc_index);
+
     auto const& prop = ctx.cls->properties[propIdx];
     auto const cellTy = from_cell(prop.val);
 
@@ -1147,6 +1160,8 @@ ClassAnalysis analyze_class(const IIndex& index, const Context& ctx) {
         f->name == s_86reifiedinit.get()) {
       continue;
     }
+    auto const UNUSED bump =
+      trace_bump(*f, Trace::hhbbc, Trace::hhbbc_cfg, Trace::hhbbc_index);
     auto const DEBUG_ONLY inserted = work.worklist.schedule(*f);
     assertx(inserted);
     auto [type, refinements] = index.lookup_return_type_raw(f.get());
@@ -1160,6 +1175,8 @@ ClassAnalysis analyze_class(const IIndex& index, const Context& ctx) {
   if (associatedClosures) {
     for (auto const c : *associatedClosures) {
       auto const f = c->methods[0].get();
+      auto const UNUSED bump =
+        trace_bump(*f, Trace::hhbbc, Trace::hhbbc_cfg, Trace::hhbbc_index);
       auto const DEBUG_ONLY inserted = work.worklist.schedule(*f);
       assertx(inserted);
       auto [type, refinements] = index.lookup_return_type_raw(f);
@@ -1236,6 +1253,9 @@ ClassAnalysis analyze_class(const IIndex& index, const Context& ctx) {
       assertx(meta.outputIdx >= 0);
       auto& results = (*meta.output)[meta.outputIdx];
 
+      auto const UNUSED bump =
+        trace_bump(*f, Trace::hhbbc, Trace::hhbbc_cfg, Trace::hhbbc_index);
+
       auto const oldTypeIt = work.returnTypes.find(f);
       assertx(oldTypeIt != work.returnTypes.end());
       auto& [oldType, oldEffectFree] = oldTypeIt->second;
@@ -1288,6 +1308,9 @@ ClassAnalysis analyze_class(const IIndex& index, const Context& ctx) {
       work.noPropRefine = false;
 
       if (!meta.output) continue;
+
+      auto const UNUSED bump =
+        trace_bump(context, Trace::hhbbc, Trace::hhbbc_cfg, Trace::hhbbc_index);
 
       auto returnTypeIt = work.returnTypes.find(f);
       assertx(returnTypeIt != work.returnTypes.end());

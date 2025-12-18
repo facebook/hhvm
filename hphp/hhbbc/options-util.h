@@ -32,6 +32,8 @@ struct Unit;
 
 //////////////////////////////////////////////////////////////////////
 
+#ifdef HPHP_TRACE
+
 bool is_trace_function(const php::Class*,
                        const php::Func*,
                        const php::Unit* = nullptr);
@@ -44,12 +46,51 @@ int trace_bump_for(const php::Class*,
 int trace_bump_for(SString cls, SString func, SString unit);
 int trace_bump_for(const Context&);
 
+#else
+
+inline bool is_trace_function(const php::Class*,
+                              const php::Func*,
+                              const php::Unit* = nullptr) { return false; }
+inline bool is_trace_function(SString, SString, SString) { return false; }
+inline bool is_trace_function(const Context&) { return false; }
+inline int trace_bump_for(const php::Class*,
+                          const php::Func*,
+                          const php::Unit* = nullptr) { return 0; }
+inline int trace_bump_for(SString, SString, SString) { return 0; }
+inline int trace_bump_for(const Context&) { return 0; }
+
+#endif
 //////////////////////////////////////////////////////////////////////
 
 template <typename... T>
+inline
 std::array<Trace::Bump, sizeof...(T)> trace_bump(const Context& ctx,
                                                  T... mods) {
   auto const b = trace_bump_for(ctx);
+  return { Trace::Bump{mods, b}... };
+}
+
+template <typename... T>
+inline
+std::array<Trace::Bump, sizeof...(T)> trace_bump(const php::Func& f,
+                                                 T... mods) {
+  auto const b = trace_bump_for(nullptr, &f, nullptr);
+  return { Trace::Bump{mods, b}... };
+}
+
+template <typename... T>
+inline
+std::array<Trace::Bump, sizeof...(T)> trace_bump(const php::Class& c,
+                                                 T... mods) {
+  auto const b = trace_bump_for(&c, nullptr, nullptr);
+  return { Trace::Bump{mods, b}... };
+}
+
+template <typename... T>
+inline
+std::array<Trace::Bump, sizeof...(T)> trace_bump(const php::Unit& u,
+                                                 T... mods) {
+  auto const b = trace_bump_for(nullptr, nullptr, &u);
   return { Trace::Bump{mods, b}... };
 }
 

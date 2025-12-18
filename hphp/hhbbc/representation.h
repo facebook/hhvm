@@ -40,6 +40,7 @@
 
 #include "hphp/hhbbc/bc.h"
 #include "hphp/hhbbc/misc.h"
+#include "hphp/hhbbc/options-util.h"
 #include "hphp/hhbbc/src-loc.h"
 
 namespace HPHP {
@@ -889,6 +890,19 @@ struct FuncClsUnit {
         if (!u2) return true;
         return string_data_lt{}(u1->filename, u2->filename);
       }
+    }
+  }
+
+  int traceBump() const {
+    if constexpr (!Trace::enabled) return 0;
+    if (auto const c = cls()) {
+      return trace_bump_for(c, nullptr);
+    } else if (auto const f = func()) {
+      return trace_bump_for(nullptr, f);
+    } else if (auto const u = unit()) {
+      return trace_bump_for(nullptr, nullptr, u);
+    } else {
+      return 0;
     }
   }
 

@@ -216,15 +216,6 @@ mstch::node mstch_const_value::const_struct() {
   return a;
 }
 
-mstch::node mstch_const_value::owning_const() {
-  return context_.const_factory->make_mstch_object(
-      const_value_->get_owner(),
-      context_,
-      pos_,
-      /*current_const=*/nullptr,
-      /*field=*/nullptr);
-}
-
 mstch::node mstch_field::type() {
   return context_.type_factory->make_mstch_object(
       field_->type().get_type(), context_, pos_);

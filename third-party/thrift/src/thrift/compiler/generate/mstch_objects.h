@@ -882,8 +882,6 @@ class mstch_const_value : public mstch_base {
             {"value:list_elements", &mstch_const_value::list_elems},
             {"value:map_elements", &mstch_const_value::map_elems},
             {"value:const_struct", &mstch_const_value::const_struct},
-            {"value:referenceable?", &mstch_const_value::referenceable},
-            {"value:owning_const", &mstch_const_value::owning_const},
         });
   }
 
@@ -891,11 +889,6 @@ class mstch_const_value : public mstch_base {
   mstch::node list_elems();
   mstch::node map_elems();
   mstch::node const_struct();
-  mstch::node referenceable() {
-    return const_value_->get_owner() &&
-        current_const_ != const_value_->get_owner();
-  }
-  mstch::node owning_const();
 
  protected:
   const t_const_value* const_value_;

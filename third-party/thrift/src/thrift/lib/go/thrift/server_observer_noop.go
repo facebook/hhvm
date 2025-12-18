@@ -54,6 +54,7 @@ func (*noopServerObserver) ProcessDelay(_ time.Duration) {}
 func (*noopServerObserver) ProcessTime(_ time.Duration)  {}
 
 // Function-level stats (no-op implementations)
-func (*noopServerObserver) ReceivedRequestForFunction(_ string)             {}
-func (*noopServerObserver) AnyExceptionForFunction(_ string)                {}
-func (*noopServerObserver) TimeReadUsForFunction(_ string, _ time.Duration) {}
+func (*noopServerObserver) ReceivedRequestForFunction(_ string)                {}
+func (*noopServerObserver) AnyExceptionForFunction(_ string)                   {}
+func (*noopServerObserver) TimeReadUsForFunction(_ string, _ time.Duration)    {}
+func (*noopServerObserver) TimeProcessUsForFunction(_ string, _ time.Duration) {}

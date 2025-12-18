@@ -151,6 +151,8 @@ func process(ctx context.Context, processor Processor, prot Protocol, processorS
 		if timingSeries := processorStats[name]; timingSeries != nil {
 			timingSeries.RecordWithStatus(pfuncDuration, runError == nil)
 		}
+		// Record function-level process timing for stats collection
+		observer.TimeProcessUsForFunction(name, pfuncDuration)
 		if runError != nil {
 			appException = maybeWrapApplicationException(runError)
 		}

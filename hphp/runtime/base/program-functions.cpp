@@ -2318,7 +2318,9 @@ static int execute_program_impl(int argc, char** argv) {
         Cfg::Eval::UnixServerPath.c_str(), args, po.count
       );
       if (Cfg::Eval::UseRemoteUnixServer == "only") {
-        Logger::Error("Failed to connect to unix server.");
+        Logger::Error("Failed to connect to unix server, make sure HHVM is "
+                      "running and the \"%s\" socket exists.",
+                      Cfg::Eval::UnixServerPath.c_str());
         exit(HPHP_EXIT_FAILURE);
       }
     }
@@ -2991,7 +2993,7 @@ static bool hphp_warmup(ExecutionContext *context,
 
 void hphp_session_init(Treadmill::SessionKind session_kind,
                        Transport* transport,
-                       RequestId id, 
+                       RequestId id,
                        RequestId root_req_id) {
   if (id.unallocated()) id = RequestId::allocate();
   assertx(!*s_sessionInitialized);

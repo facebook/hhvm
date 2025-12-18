@@ -16,7 +16,7 @@
 
 include "module.thrift"
 
-package "test.dev/hack/ns2"
+package "facebook.com/thrift/test/fixtures/php_hack_ns"
 
 namespace hack hack_ns2
 

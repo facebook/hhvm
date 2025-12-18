@@ -18,7 +18,7 @@ include "module.thrift"
 
 include "thrift/lib/thrift/patch.thrift"
 
-package "test.dev/hack/ns2"
+package "facebook.com/thrift/test/fixtures/hack_service"
 
 namespace hack hack_ns2
 

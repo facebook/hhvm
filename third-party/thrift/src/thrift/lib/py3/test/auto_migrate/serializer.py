@@ -25,6 +25,7 @@ from apache.thrift.test.terse_write.terse_write.types import (
     FieldLevelTerseStruct,
     MyEnum,
     MyStruct,
+    MyUnion,
 )
 from testing.thrift_types import easy as python_easy, hard as python_hard
 from testing.types import (
@@ -37,6 +38,7 @@ from testing.types import (
     StringBucket,
     StrStrMap,
 )
+from thrift.lib.py3.test.auto_migrate.auto_migrate_util import is_auto_migrated
 from thrift.py3.common import Protocol
 from thrift.py3.exceptions import Error
 from thrift.py3.serializer import (
@@ -357,6 +359,7 @@ class SerializerTests(SerializerTestBase):
             set_field={1},
             map_field={1: 1},
             struct_field=MyStruct(field1=1),
+            union_field=MyUnion(),
         )
         empty = EmptyStruct()
         for proto in Protocol:
@@ -367,6 +370,18 @@ class SerializerTests(SerializerTestBase):
             self.assertIsInstance(decoded, type(obj))
             self.assertEqual(decoded, obj)
             self.assertEqual(length, len(encoded))
+            # pyre-ignore[6]: isset typing is awful
+            isset_map: Mapping[str, bool] = Struct.isset_DEPRECATED(decoded).__dict__
+            self.assertEqual(len(isset_map), 15 if is_auto_migrated() else 0, isset_map)
+            # terse fields not included in py3 isset
+            if is_auto_migrated():
+                non_union_isset = [
+                    isset
+                    for fld_name, isset in isset_map.items()
+                    if fld_name != "union_field"
+                ]
+                self.assertTrue(all(non_union_isset), isset_map)
+                self.assertFalse(isset_map["union_field"])
 
         # Set fields to their intrinsic default.
         obj = FieldLevelTerseStruct(
@@ -384,11 +399,21 @@ class SerializerTests(SerializerTestBase):
             set_field=set(),
             map_field={},
             struct_field=MyStruct(field1=0),
+            union_field=MyUnion(),
         )
         for proto in Protocol:
             encoded = serialize(obj, protocol=proto)
             encoded_empty = serialize(empty, protocol=proto)
             self.assertEqual(encoded, encoded_empty)
+            decoded = deserialize(type(obj), encoded, protocol=proto)
+
+            # pyre-ignore[6]: isset typing is awful
+            isset_map: Mapping[str, bool] = Struct.isset_DEPRECATED(decoded).__dict__
+            # terse fields not included in py3 isset
+            self.assertEqual(len(isset_map), 15 if is_auto_migrated() else 0, isset_map)
+            self.assertFalse(any(isset_map.values()), isset_map)
+            if not is_auto_migrated():
+                self.assertNotIn("union_field", isset_map)
 
 
 class SerializerForwardCompat(SerializerTestBase):

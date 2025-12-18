@@ -345,6 +345,21 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
   /// Ensures the given field is set.
   template <typename Id>
   void ensure() {
+    if constexpr (is_thrift_union_v<T>) {
+      ensurePatchable();
+      if (data_.assign() ||
+          (!ensures<Id>() && !apache::thrift::empty(*data_.ensure()))) {
+        // If we are ensuring a different field than we previously ensured,
+        // we should assign this field.
+        constexpr bool kIsIOBufPtr =
+            std::is_same_v<FieldType<Id>, std::unique_ptr<folly::IOBuf>>;
+        if constexpr (kIsIOBufPtr) {
+          return Base::derived().template assign<Id>(folly::IOBuf{});
+        } else {
+          return Base::derived().template assign<Id>(FieldType<Id>{});
+        }
+      }
+    }
     // Ensuring non-optional field to intrinsic default is allowed since we
     // might want to ensure field in case the field doesn't exist in dynamic
     // value. (e.g., Terse field with default value. Without ensuring it first,
@@ -355,6 +370,16 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
   template <typename Id, typename U = FieldType<Id>>
   std::enable_if_t<type::is_optional_or_union_field_v<T, Id>> ensure(
       U&& defaultVal) {
+    // TODO: simplify the logic by combining with the `ensure()` method above.
+    if constexpr (is_thrift_union_v<T>) {
+      ensurePatchable();
+      if (data_.assign() ||
+          (!ensures<Id>() && !apache::thrift::empty(*data_.ensure()))) {
+        // If we are ensuring a different field than we previously ensured,
+        // we should assign this field.
+        return Base::derived().template assign<Id>(std::forward<U>(defaultVal));
+      }
+    }
     if (maybeEnsure<Id>()) {
       if (patchPrior<Id>().toThrift().clear().value() &&
           !is_thrift_union_v<T>) {
@@ -591,12 +616,31 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
   // operation so that we can have sub-patches.
   template <typename U = T>
   if_union_patch<U> ensurePatchable() {
-    if (data_.assign().has_value()) {
-      data_.clear() = true;
-      *data_.ensure() = std::move(*data_.assign());
-      // Unset assign.
-      data_.assign().reset();
+    if (!data_.assign().has_value()) {
+      return;
     }
+
+    if (data_.assign()->getType() == T::Type::__EMPTY__) {
+      // If we assigned patch to an empty union, we can't turn it into ensure +
+      // patch. In this case we can just keep it as it is since all field
+      // patches would be no-op unless we ensure them later.
+      return;
+    }
+
+    auto tmp = std::move(*data_.assign());
+    op::visit_union_with_tag(
+        tmp,
+        [&](auto tag, auto& field) {
+          using Id = folly::type_list_element_t<0, decltype(tag)>;
+          using Tag = op::get_type_tag<T, Id>;
+          Base::reset();
+          FieldPatchAssigner<Tag>{}(patch<Id>(), std::move(field));
+        },
+        [] {
+          throw std::logic_error(
+              "This should never happen. "
+              "We just handled the __EMPTY__ case.");
+        });
   }
 
   // For Thrift Struct, we always ensure the patch is patchable.

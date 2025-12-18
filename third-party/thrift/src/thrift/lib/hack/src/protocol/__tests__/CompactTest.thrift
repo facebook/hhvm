@@ -16,6 +16,7 @@
  */
 
 include "thrift/annotation/thrift.thrift"
+include "thrift/annotation/hack.thrift"
 package "meta.com/thrift/core/protocol/_tests_/compact_test"
 
 namespace hack ""
@@ -26,6 +27,7 @@ struct CompactTestStructSmall {
   3: list<float> floats;
 }
 
+@hack.MigrationBlockingAllowInheritance
 struct CompactTestStruct {
   1: i32 i1;
   2: i32 i2;

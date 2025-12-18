@@ -152,10 +152,11 @@ impl From<SettleDurationMs> for i64 {
     }
 }
 
-#[derive(Serialize, Clone, Debug)]
+#[derive(Serialize, Clone, Debug, Default)]
 #[serde(into = "i64")]
 pub enum SyncTimeout {
     /// Use the default cookie synchronization timeout
+    #[default]
     Default,
     /// Disable the use of a sync cookie.
     /// This can save ~15ms of latency, but may result in
@@ -170,12 +171,6 @@ pub enum SyncTimeout {
     /// Note that the server has millisecond level granularity
     /// for the timeout.
     Duration(std::time::Duration),
-}
-
-impl Default for SyncTimeout {
-    fn default() -> Self {
-        Self::Default
-    }
 }
 
 impl SyncTimeout {
@@ -620,17 +615,12 @@ pub struct TriggerRequest {
     pub relative_root: Option<PathBuf>,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub enum TriggerStdinConfig {
+    #[default]
     DevNull,
     FieldNames(Vec<String>),
     NamePerLine,
-}
-
-impl Default for TriggerStdinConfig {
-    fn default() -> Self {
-        Self::DevNull
-    }
 }
 
 impl TriggerStdinConfig {

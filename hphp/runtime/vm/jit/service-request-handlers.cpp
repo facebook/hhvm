@@ -151,9 +151,9 @@ TranslationResult getTranslation(SrcKey sk) {
     return TranslationResult{s};
   }
 
-  auto const ctx = getContext(args.sk, args.kind == TransKind::Profile);
   if (mcgen::isAsyncJitEnabled(args.kind)) {
     assertx(isLive(args.kind) || isProfiling(args.kind));
+    auto const ctx = getContext(args.sk, args.kind == TransKind::Profile);
     mcgen::enqueueAsyncTranslateRequest(args.kind, ctx, 0);
     return TranslationResult::failTransiently();
   }
@@ -178,6 +178,7 @@ TranslationResult getTranslation(SrcKey sk) {
     return TranslationResult{tca};
   }
 
+  auto const ctx = getContext(args.sk, args.kind == TransKind::Profile);
   return mcgen::retranslate(args, ctx);
 }
 

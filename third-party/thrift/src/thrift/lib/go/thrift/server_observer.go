@@ -46,4 +46,5 @@ type ServerObserver interface {
 	AnyExceptionForFunction(function string)                          // any exception (declared or undeclared) thrown in specific function
 	TimeReadUsForFunction(function string, duration time.Duration)    // time spent reading/demarshaling for specific function
 	TimeProcessUsForFunction(function string, duration time.Duration) // time spent processing for specific function
+	TimeWriteUsForFunction(function string, duration time.Duration)   // time spent marshaling/writing for specific function
 }

@@ -358,6 +358,9 @@ func (s *rocketServerSocket) requestResponse(msg payload.Payload) mono.Mono {
 		}
 		protocol.setRequestHeader(LoadHeaderKey, strconv.FormatUint(uint64(loadMetric), 10))
 
+		// Track time spent marshaling/writing response
+		writeStartTime := time.Now()
+
 		responseCompressionAlgo := rocket.CompressionAlgorithmFromCompressionConfig(metadata.GetCompressionConfig())
 		var payload payload.Payload
 		if appException != nil {
@@ -375,6 +378,9 @@ func (s *rocketServerSocket) requestResponse(msg payload.Payload) mono.Mono {
 				protocol.Bytes(),
 			)
 		}
+
+		// Record time spent marshaling/writing response
+		s.observer.TimeWriteUsForFunction(rpcFuncName, time.Since(writeStartTime))
 
 		// Track actual handler execution time
 		processTime := time.Since(processStartTime)

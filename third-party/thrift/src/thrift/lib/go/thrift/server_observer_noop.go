@@ -58,3 +58,4 @@ func (*noopServerObserver) ReceivedRequestForFunction(_ string)                {
 func (*noopServerObserver) AnyExceptionForFunction(_ string)                   {}
 func (*noopServerObserver) TimeReadUsForFunction(_ string, _ time.Duration)    {}
 func (*noopServerObserver) TimeProcessUsForFunction(_ string, _ time.Duration) {}
+func (*noopServerObserver) TimeWriteUsForFunction(_ string, _ time.Duration)   {}

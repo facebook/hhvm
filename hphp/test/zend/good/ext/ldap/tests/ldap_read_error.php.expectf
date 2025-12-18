@@ -1,9 +1,9 @@
 
-Warning: ldap_read() expects at least 3 parameters, 0 given in %s/ldap_read_error.php on line 7
+Warning: ldap_read() expects at least 3 positional parameters, 0 given in %s/ldap_read_error.php on line 7
 
-Warning: ldap_read() expects at least 3 parameters, 1 given in %s/ldap_read_error.php on line 8
+Warning: ldap_read() expects at least 3 positional parameters, 1 given in %s/ldap_read_error.php on line 8
 
-Warning: ldap_read() expects at least 3 parameters, 2 given in %s/ldap_read_error.php on line 9
+Warning: ldap_read() expects at least 3 positional parameters, 2 given in %s/ldap_read_error.php on line 9
 
-Warning: ldap_read() expects at most 8 parameters, 9 given in %s/ldap_read_error.php on line 12
+Warning: ldap_read() expects at most 8 positional parameters, 9 given in %s/ldap_read_error.php on line 12
 ===DONE===

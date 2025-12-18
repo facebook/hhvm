@@ -1,7 +1,7 @@
 *** Testing glob() : error conditions ***
 -- Testing glob() with unexpected no. of arguments --
 
-Warning: glob() expects at least 1 parameter, 0 given in %s/glob_error.php on line 17
+Warning: glob() expects at least 1 positional parameter, 0 given in %s/glob_error.php on line 17
 
-Warning: glob() expects at most 2 parameters, 3 given in %s/glob_error.php on line 18
+Warning: glob() expects at most 2 positional parameters, 3 given in %s/glob_error.php on line 18
 Done

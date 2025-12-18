@@ -1,5 +1,5 @@
 
-Warning: gzgets() expects at most 2 parameters, 3 given in %s/gzgets_error.php on line 7
+Warning: gzgets() expects at most 2 positional parameters, 3 given in %s/gzgets_error.php on line 7
 
-Warning: gzgets() expects at least 1 parameter, 0 given in %s/gzgets_error.php on line 9
+Warning: gzgets() expects at least 1 positional parameter, 0 given in %s/gzgets_error.php on line 9
 ===DONE===

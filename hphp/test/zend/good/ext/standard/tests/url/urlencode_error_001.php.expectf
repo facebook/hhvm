@@ -2,9 +2,9 @@
 
 -- Testing urlencode() function with Zero arguments --
 
-Warning: urlencode() expects exactly 1 parameter, 0 given in %s/urlencode_error_001.php on line 14
+Warning: urlencode() expects exactly 1 positional parameter, 0 given in %s/urlencode_error_001.php on line 14
 
 -- Testing urlencode() function with more than expected no. of arguments --
 
-Warning: urlencode() expects exactly 1 parameter, 2 given in %s/urlencode_error_001.php on line 20
+Warning: urlencode() expects exactly 1 positional parameter, 2 given in %s/urlencode_error_001.php on line 20
 Done

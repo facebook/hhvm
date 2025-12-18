@@ -7,7 +7,7 @@ dict(1) {
 }
 
 -- comparison function taking too many parameters --
-string(59) "too_many_parameters() expects exactly 3 parameters, 2 given"
+string(70) "too_many_parameters() expects exactly 3 positional parameters, 2 given"
 
 -- comparison function taking too few parameters --
 dict(0) {

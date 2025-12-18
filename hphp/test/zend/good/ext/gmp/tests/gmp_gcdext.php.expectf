@@ -35,9 +35,9 @@ bool(false)
 Warning: gmp_gcdexct(): Unable to convert variable to GMP - wrong type in %s/gmp_gcdext.php on line 27
 bool(false)
 
-Warning: gmp_gcdext() expects exactly 2 parameters, 3 given in %s/gmp_gcdext.php on line 28
+Warning: gmp_gcdext() expects exactly 2 positional parameters, 3 given in %s/gmp_gcdext.php on line 28
 
-Warning: gmp_gcdext() expects exactly 2 parameters, 1 given in %s/gmp_gcdext.php on line 29
+Warning: gmp_gcdext() expects exactly 2 positional parameters, 1 given in %s/gmp_gcdext.php on line 29
 
-Warning: gmp_gcdext() expects exactly 2 parameters, 0 given in %s/gmp_gcdext.php on line 30
+Warning: gmp_gcdext() expects exactly 2 positional parameters, 0 given in %s/gmp_gcdext.php on line 30
 Done

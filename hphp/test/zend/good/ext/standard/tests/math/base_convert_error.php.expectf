@@ -1,11 +1,11 @@
 *** Testing base_convert() : error conditions ***
 Incorrect number of arguments
 
-Warning: base_convert() expects exactly 3 parameters, 0 given in %s/base_convert_error.php on line 15
+Warning: base_convert() expects exactly 3 positional parameters, 0 given in %s/base_convert_error.php on line 15
 
-Warning: base_convert() expects exactly 3 parameters, 1 given in %s/base_convert_error.php on line 16
+Warning: base_convert() expects exactly 3 positional parameters, 1 given in %s/base_convert_error.php on line 16
 
-Warning: base_convert() expects exactly 3 parameters, 2 given in %s/base_convert_error.php on line 17
+Warning: base_convert() expects exactly 3 positional parameters, 2 given in %s/base_convert_error.php on line 17
 
 Warning: Invalid argument: Invalid frombase: 1 in %s/base_convert_error.php on line 18
 

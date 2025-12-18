@@ -1,10 +1,10 @@
 *** Testing ftell() : error conditions ***
 -- Testing ftell() with zero argument --
 
-Warning: ftell() expects exactly 1 parameter, 0 given in %s/test/zend/good/ext/standard/tests/file/fseek_ftell_rewind_error2.php on line 16
+Warning: ftell() expects exactly 1 positional parameter, 0 given in %s/test/zend/good/ext/standard/tests/file/fseek_ftell_rewind_error2.php on line 16
 -- Testing ftell() with more than expected number of arguments --
 
-Warning: ftell() expects exactly 1 parameter, 2 given in %s/test/zend/good/ext/standard/tests/file/fseek_ftell_rewind_error2.php on line 21
+Warning: ftell() expects exactly 1 positional parameter, 2 given in %s/test/zend/good/ext/standard/tests/file/fseek_ftell_rewind_error2.php on line 21
 -- Testing ftell with closed/unset file handle --
 Warning: Not a valid stream resource in %s/test/zend/good/ext/standard/tests/file/fseek_ftell_rewind_error2.php on line 26
 bool(false)

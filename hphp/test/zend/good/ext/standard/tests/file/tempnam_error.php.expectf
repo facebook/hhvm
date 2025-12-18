@@ -1,16 +1,16 @@
 *** Testing tempnam() error conditions ***
 
-Warning: tempnam() expects exactly 2 parameters, 3 given in %s/tempnam_error.php on line 10
+Warning: tempnam() expects exactly 2 positional parameters, 3 given in %s/tempnam_error.php on line 10
 
-Warning: tempnam() expects exactly 2 parameters, 3 given in %s/tempnam_error.php on line 11
+Warning: tempnam() expects exactly 2 positional parameters, 3 given in %s/tempnam_error.php on line 11
 
-Warning: tempnam() expects exactly 2 parameters, 1 given in %s/tempnam_error.php on line 14
+Warning: tempnam() expects exactly 2 positional parameters, 1 given in %s/tempnam_error.php on line 14
 
-Warning: tempnam() expects exactly 2 parameters, 1 given in %s/tempnam_error.php on line 15
+Warning: tempnam() expects exactly 2 positional parameters, 1 given in %s/tempnam_error.php on line 15
 
-Warning: tempnam() expects exactly 2 parameters, 1 given in %s/tempnam_error.php on line 16
+Warning: tempnam() expects exactly 2 positional parameters, 1 given in %s/tempnam_error.php on line 16
 
-Warning: tempnam() expects exactly 2 parameters, 1 given in %s/tempnam_error.php on line 17
+Warning: tempnam() expects exactly 2 positional parameters, 1 given in %s/tempnam_error.php on line 17
 
-Warning: tempnam() expects exactly 2 parameters, 0 given in %s/tempnam_error.php on line 18
+Warning: tempnam() expects exactly 2 positional parameters, 0 given in %s/tempnam_error.php on line 18
 *** Done ***

@@ -2,9 +2,9 @@
 
 Too many arguments
 
-Warning: ceil() expects exactly 1 parameter, 2 given in %s/ceil_error.php on line 12
+Warning: ceil() expects exactly 1 positional parameter, 2 given in %s/ceil_error.php on line 12
 
 Too few arguments
 
-Warning: ceil() expects exactly 1 parameter, 0 given in %s/ceil_error.php on line 15
+Warning: ceil() expects exactly 1 positional parameter, 0 given in %s/ceil_error.php on line 15
 ===Done===

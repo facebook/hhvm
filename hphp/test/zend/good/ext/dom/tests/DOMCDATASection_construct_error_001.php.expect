@@ -1,1 +1,1 @@
-DOMCdataSection::__construct() expects exactly 1 parameter, 0 given
+DOMCdataSection::__construct() expects exactly 1 positional parameter, 0 given

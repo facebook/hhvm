@@ -1025,7 +1025,7 @@ bool is_constructor_name(const char* fn) {
 
 void throw_missing_arguments_nr(const char *fn, int expected, int got) {
   SystemLib::throwRuntimeExceptionObject(folly::sformat(
-    "{}() expects exactly {} parameter{}, {} given",
+    "{}() expects exactly {} positional parameter{}, {} given",
     fn,
     expected,
     expected == 1 ? "" : "s",

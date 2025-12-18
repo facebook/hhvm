@@ -5,7 +5,7 @@ NULL
 Warning: Invalid operand type was used: %S expects array(s) or collection(s) in %s/array_change_key_case_errors.php on line 7
 NULL
 
-Warning: array_change_key_case() expects at least 1 parameter, 0 given in %s/array_change_key_case_errors.php on line 8
+Warning: array_change_key_case() expects at least 1 positional parameter, 0 given in %s/array_change_key_case_errors.php on line 8
 
-Warning: array_change_key_case() expects at most 2 parameters, 3 given in %s/array_change_key_case_errors.php on line 9
+Warning: array_change_key_case() expects at most 2 positional parameters, 3 given in %s/array_change_key_case_errors.php on line 9
 end

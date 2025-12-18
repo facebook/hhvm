@@ -2,5 +2,5 @@
 
 -- Testing ob_flush() function with one argument --
 
-Warning: ob_flush() expects exactly 0 parameters, 1 given in %s/ob_flush_error_001.php on line 13
+Warning: ob_flush() expects exactly 0 positional parameters, 1 given in %s/ob_flush_error_001.php on line 13
 Done

@@ -57,8 +57,8 @@ Constant: IMAGETYPE_XBM
 	Without dot: xbm
 bool(false)
 
-Warning: image_type_to_extension() expects at least 1 parameter, 0 given in %s/image_type_to_extension.php on line 28
+Warning: image_type_to_extension() expects at least 1 positional parameter, 0 given in %s/image_type_to_extension.php on line 28
 bool(false)
 
-Warning: image_type_to_extension() expects at most 2 parameters, 3 given in %s/image_type_to_extension.php on line 30
+Warning: image_type_to_extension() expects at most 2 positional parameters, 3 given in %s/image_type_to_extension.php on line 30
 Done

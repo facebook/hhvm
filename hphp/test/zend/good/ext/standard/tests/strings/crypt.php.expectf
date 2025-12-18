@@ -6,6 +6,6 @@ BLO
 Notice: crypt(): No salt parameter was specified. You must use a randomly generated salt and a strong hash function to produce a secure hash. in %s/crypt.php on line 18
 string(34) %s
 
-Warning: crypt() expects at least 1 parameter, 0 given in %s/crypt.php on line 19
+Warning: crypt() expects at least 1 positional parameter, 0 given in %s/crypt.php on line 19
 
-Warning: crypt() expects at most 2 parameters, 3 given in %s/crypt.php on line 20
+Warning: crypt() expects at most 2 positional parameters, 3 given in %s/crypt.php on line 20

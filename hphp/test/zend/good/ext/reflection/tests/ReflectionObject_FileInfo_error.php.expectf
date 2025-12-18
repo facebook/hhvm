@@ -1,15 +1,15 @@
 string(%d) "%s/ReflectionObject_FileInfo_error.php"
 
-Warning: ReflectionClass::getFileName() expects exactly 0 parameters, 1 given in %s/ReflectionObject_FileInfo_error.php on line 9
+Warning: ReflectionClass::getFileName() expects exactly 0 positional parameters, 1 given in %s/ReflectionObject_FileInfo_error.php on line 9
 
-Warning: ReflectionClass::getFileName() expects exactly 0 parameters, 2 given in %s/ReflectionObject_FileInfo_error.php on line 10
+Warning: ReflectionClass::getFileName() expects exactly 0 positional parameters, 2 given in %s/ReflectionObject_FileInfo_error.php on line 10
 int(2)
 
-Warning: ReflectionClass::getStartLine() expects exactly 0 parameters, 1 given in %s/ReflectionObject_FileInfo_error.php on line 9
+Warning: ReflectionClass::getStartLine() expects exactly 0 positional parameters, 1 given in %s/ReflectionObject_FileInfo_error.php on line 9
 
-Warning: ReflectionClass::getStartLine() expects exactly 0 parameters, 2 given in %s/ReflectionObject_FileInfo_error.php on line 10
+Warning: ReflectionClass::getStartLine() expects exactly 0 positional parameters, 2 given in %s/ReflectionObject_FileInfo_error.php on line 10
 int(2)
 
-Warning: ReflectionClass::getEndLine() expects exactly 0 parameters, 1 given in %s/ReflectionObject_FileInfo_error.php on line 9
+Warning: ReflectionClass::getEndLine() expects exactly 0 positional parameters, 1 given in %s/ReflectionObject_FileInfo_error.php on line 9
 
-Warning: ReflectionClass::getEndLine() expects exactly 0 parameters, 2 given in %s/ReflectionObject_FileInfo_error.php on line 10
+Warning: ReflectionClass::getEndLine() expects exactly 0 positional parameters, 2 given in %s/ReflectionObject_FileInfo_error.php on line 10

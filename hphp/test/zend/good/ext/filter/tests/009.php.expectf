@@ -5,5 +5,5 @@ int(257)
 bool(false)
 bool(false)
 
-Warning: filter_id() expects exactly 1 parameter, 3 given in %s/test/zend/good/ext/filter/tests/009.php on line 9
+Warning: filter_id() expects exactly 1 positional parameter, 3 given in %s/test/zend/good/ext/filter/tests/009.php on line 9
 Done

@@ -34,5 +34,5 @@ string(3) "wtf"
 
 string(70) "Invalid dict key: expected a key of type int or string, stdClass given"
 string(59) "Invalid vec key: expected a key of type int, stdClass given"
-string(47) "HH\idx() expects at least 2 parameters, 1 given"
-string(47) "HH\idx() expects at least 2 parameters, 0 given"
+string(58) "HH\idx() expects at least 2 positional parameters, 1 given"
+string(58) "HH\idx() expects at least 2 positional parameters, 0 given"

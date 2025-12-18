@@ -1,5 +1,5 @@
 
-Warning: imageline() expects exactly 6 parameters, 5 given in %s/lines.php on line 6
+Warning: imageline() expects exactly 6 positional parameters, 5 given in %s/lines.php on line 6
 Horizontal: ok
 Vertical: ok
 Diagonal: ok

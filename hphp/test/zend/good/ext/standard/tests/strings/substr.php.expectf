@@ -1,14 +1,14 @@
 *** Testing for error conditions ***
 
-Warning: substr() expects at least 2 parameters, 0 given in %s/substr.php on line 14
+Warning: substr() expects at least 2 positional parameters, 0 given in %s/substr.php on line 14
 
-Warning: substr() expects at least 2 parameters, 1 given in %s/substr.php on line 17
+Warning: substr() expects at least 2 positional parameters, 1 given in %s/substr.php on line 17
 
-Warning: substr() expects at least 2 parameters, 1 given in %s/substr.php on line 20
+Warning: substr() expects at least 2 positional parameters, 1 given in %s/substr.php on line 20
 
-Warning: substr() expects at least 2 parameters, 1 given in %s/substr.php on line 23
+Warning: substr() expects at least 2 positional parameters, 1 given in %s/substr.php on line 23
 
-Warning: substr() expects at most 3 parameters, 4 given in %s/substr.php on line 26
+Warning: substr() expects at most 3 positional parameters, 4 given in %s/substr.php on line 26
 
 --- Iteration 1 ---
 

@@ -1,8 +1,8 @@
 *** Testing readlink(): error conditions ***
 
-Warning: readlink() expects exactly 1 parameter, 0 given in %s/readlink_realpath_error.php on line 12
+Warning: readlink() expects exactly 1 positional parameter, 0 given in %s/readlink_realpath_error.php on line 12
 
-Warning: readlink() expects exactly 1 parameter, 2 given in %s/readlink_realpath_error.php on line 13
+Warning: readlink() expects exactly 1 positional parameter, 2 given in %s/readlink_realpath_error.php on line 13
 
 *** Testing readlink() on a non-existent link ***
 
@@ -20,9 +20,9 @@ Warning: readlink(): No such file or directory %s in %s/readlink_realpath_error.
 bool(false)
 *** Testing realpath(): error conditions ***
 
-Warning: realpath() expects exactly 1 parameter, 0 given in %s/readlink_realpath_error.php on line 25
+Warning: realpath() expects exactly 1 positional parameter, 0 given in %s/readlink_realpath_error.php on line 25
 
-Warning: realpath() expects exactly 1 parameter, 2 given in %s/readlink_realpath_error.php on line 26
+Warning: realpath() expects exactly 1 positional parameter, 2 given in %s/readlink_realpath_error.php on line 26
 
 *** Testing realpath() on a non-existent file ***
 bool(false)

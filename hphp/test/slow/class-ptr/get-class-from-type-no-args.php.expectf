@@ -1,1 +1,2 @@
-Fatal error: get_class_from_type() expects exactly 0 parameters, 1 given in %s/class-ptr/get-class-from-type-no-args.php on line 5
+
+Fatal error: get_class_from_type() expects exactly 0 positional parameters, 1 given in %s/class-ptr/get-class-from-type-no-args.php on line 5

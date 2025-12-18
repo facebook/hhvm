@@ -2,11 +2,11 @@
 
 -- Testing gzencode() function with Zero arguments --
 
-Warning: gzencode() expects at least 1 parameter, 0 given in %s/gzencode_error1.php on line 24
+Warning: gzencode() expects at least 1 positional parameter, 0 given in %s/gzencode_error1.php on line 24
 
 -- Testing gzencode() function with more than expected no. of arguments --
 
-Warning: gzencode() expects at most 3 parameters, 4 given in %s/gzencode_error1.php on line 32
+Warning: gzencode() expects at most 3 positional parameters, 4 given in %s/gzencode_error1.php on line 32
 
 -- Testing with incorrect compression level --
 

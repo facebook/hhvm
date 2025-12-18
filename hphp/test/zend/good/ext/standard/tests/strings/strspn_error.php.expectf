@@ -2,13 +2,13 @@
 
 -- Testing strspn() function with Zero arguments --
 
-Warning: strspn() expects at least 2 parameters, 0 given in %s/strspn_error.php on line 17
+Warning: strspn() expects at least 2 positional parameters, 0 given in %s/strspn_error.php on line 17
 
 -- Testing strspn() function with more than expected no. of arguments --
 
-Warning: strspn() expects at most 4 parameters, 5 given in %s/strspn_error.php on line 28
+Warning: strspn() expects at most 4 positional parameters, 5 given in %s/strspn_error.php on line 28
 
 -- Testing strspn() function with less than expected no. of arguments --
 
-Warning: strspn() expects at least 2 parameters, 1 given in %s/strspn_error.php on line 33
+Warning: strspn() expects at least 2 positional parameters, 1 given in %s/strspn_error.php on line 33
 Done

@@ -4,4 +4,4 @@ float(57.295779513082)
 
 Too few arguments
 
-Warning: rad2deg() expects exactly 1 parameter, 0 given in %s/rad2deg_error.php on line 20
+Warning: rad2deg() expects exactly 1 positional parameter, 0 given in %s/rad2deg_error.php on line 20

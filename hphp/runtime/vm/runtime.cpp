@@ -290,7 +290,7 @@ namespace {
 std::string formatArgumentErrMsg(const Func* func, const char* amount,
                                  uint32_t expected, uint32_t got) {
   return folly::sformat(
-    "{}() expects {} {} parameter{}, {} given",
+    "{}() expects {} {} positional parameter{}, {} given",
     func->fullNameWithClosureName(),
     amount,
     expected,

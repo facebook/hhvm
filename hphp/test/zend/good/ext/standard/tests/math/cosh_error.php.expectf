@@ -1,8 +1,8 @@
 
 Too many arguments
 
-Warning: cosh() expects exactly 1 parameter, 2 given in %s/cosh_error.php on line 11
+Warning: cosh() expects exactly 1 positional parameter, 2 given in %s/cosh_error.php on line 11
 
 Too few arguments
 
-Warning: cosh() expects exactly 1 parameter, 0 given in %s/cosh_error.php on line 14
+Warning: cosh() expects exactly 1 positional parameter, 0 given in %s/cosh_error.php on line 14

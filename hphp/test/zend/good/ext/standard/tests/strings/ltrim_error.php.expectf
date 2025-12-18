@@ -2,11 +2,11 @@
 
 -- Testing ltrim() function with no arguments --
 
-Warning: ltrim() expects at least 1 parameter, 0 given in %s/ltrim_error.php on line 12
+Warning: ltrim() expects at least 1 positional parameter, 0 given in %s/ltrim_error.php on line 12
 
 -- Testing ltrim() function with more than expected no. of arguments --
 
-Warning: ltrim() expects at most 2 parameters, 3 given in %s/ltrim_error.php on line 16
+Warning: ltrim() expects at most 2 positional parameters, 3 given in %s/ltrim_error.php on line 16
 
 -- Test ltrim function with various invalid charlists
 

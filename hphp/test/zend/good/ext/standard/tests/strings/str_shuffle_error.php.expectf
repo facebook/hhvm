@@ -2,9 +2,9 @@
 
 -- Testing str_shuffle() function with no arguments --
 
-Warning: str_shuffle() expects exactly 1 parameter, 0 given in %s/str_shuffle_error.php on line 10
+Warning: str_shuffle() expects exactly 1 positional parameter, 0 given in %s/str_shuffle_error.php on line 10
 
 -- Testing str_shuffle() function with more than expected no. of arguments --
 
-Warning: str_shuffle() expects exactly 1 parameter, 2 given in %s/str_shuffle_error.php on line 14
+Warning: str_shuffle() expects exactly 1 positional parameter, 2 given in %s/str_shuffle_error.php on line 14
 ===DONE===

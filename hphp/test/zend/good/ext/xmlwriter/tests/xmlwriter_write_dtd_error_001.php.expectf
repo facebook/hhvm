@@ -1,2 +1,2 @@
 
-Warning: xmlwriter_write_dtd() expects at least 2 parameters, 1 given in %s/xmlwriter_write_dtd_error_001.php on line 3
+Warning: xmlwriter_write_dtd() expects at least 2 positional parameters, 1 given in %s/xmlwriter_write_dtd_error_001.php on line 3

@@ -11,8 +11,8 @@ f1: # arguments passed is 3
 	arg[0] = >23.45<
 	arg[1] = ><
 	arg[2] = >Array<
-string(42) "f2() expects exactly 2 parameters, 0 given"
-string(42) "f2() expects exactly 2 parameters, 1 given"
+string(53) "f2() expects exactly 2 positional parameters, 0 given"
+string(53) "f2() expects exactly 2 positional parameters, 1 given"
 f2: $p1 = 10, $p2 = 20
 f2: $p1 = 10, $p2 = 20
 5 squared = 25

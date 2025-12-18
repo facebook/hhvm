@@ -9,7 +9,7 @@ bool(false)
 
 Warning: %s
 
-Warning: md5_file() expects at most 2 parameters, 3 given in %s/md5_file.php on line 29
+Warning: md5_file() expects at most 2 positional parameters, 3 given in %s/md5_file.php on line 29
 
 *** Hexadecimal Output for Empty file as Argument ***
 string(32) "d41d8cd98f00b204e9800998ecf8427e"

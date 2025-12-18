@@ -1,9 +1,9 @@
 *** Testing hash_hmac() : error conditions ***
 
 -- Testing hash_hmac() function with less than expected no. of arguments --
-string(50) "hash_hmac() expects at least 3 parameters, 0 given"
-string(50) "hash_hmac() expects at least 3 parameters, 1 given"
-string(50) "hash_hmac() expects at least 3 parameters, 2 given"
+string(61) "hash_hmac() expects at least 3 positional parameters, 0 given"
+string(61) "hash_hmac() expects at least 3 positional parameters, 1 given"
+string(61) "hash_hmac() expects at least 3 positional parameters, 2 given"
 
 -- Testing hash_hmac() function with more than expected no. of arguments --
 string(8) "96859101"

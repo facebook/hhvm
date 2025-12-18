@@ -1,4 +1,4 @@
-Warning: mb_encoding_aliases() expects exactly 1 parameter, 0 given in %s/test/zend/good/ext/mbstring/tests/mb_encoding_aliases.php on line 2
+Warning: mb_encoding_aliases() expects exactly 1 positional parameter, 0 given in %s/test/zend/good/ext/mbstring/tests/mb_encoding_aliases.php on line 2
 vec(11) {
   string(14) "ANSI_X3.4-1968"
   string(14) "ANSI_X3.4-1986"

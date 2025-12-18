@@ -919,7 +919,7 @@ class ReflectionProperty implements Reflector {
     } else {
       if (count($args) != 2) {
         trigger_error('ReflectionProperty::setValue() expects exactly 2'.
-                      ' parameters, ' . count($args) . ' given', E_WARNING);
+                      ' positional parameters, ' . count($args) . ' given', E_WARNING);
         return null;
       }
       if (!is_object($obj)) {

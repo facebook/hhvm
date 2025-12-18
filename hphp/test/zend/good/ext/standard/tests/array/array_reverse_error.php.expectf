@@ -2,11 +2,11 @@
 
 -- Testing array_reverse() function with Zero arguments --
 
-Warning: array_reverse() expects at least 1 parameter, 0 given in %s/array_reverse_error.php on line 11
+Warning: array_reverse() expects at least 1 positional parameter, 0 given in %s/array_reverse_error.php on line 11
 
 -- Testing array_diff() function with more than expected no. of arguments --
 
-Warning: array_reverse() expects at most 2 parameters, 3 given in %s/array_reverse_error.php on line 17
+Warning: array_reverse() expects at most 2 positional parameters, 3 given in %s/array_reverse_error.php on line 17
 
-Warning: array_reverse() expects at most 2 parameters, 3 given in %s/array_reverse_error.php on line 18
+Warning: array_reverse() expects at most 2 positional parameters, 3 given in %s/array_reverse_error.php on line 18
 Done

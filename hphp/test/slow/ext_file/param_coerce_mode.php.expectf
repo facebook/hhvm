@@ -34,7 +34,7 @@ Warning: Not a valid stream resource in %s/param_coerce_mode.php on line %d
 
 Warning: Argument 1 passed to fflush() must be an instance of resource, bool given in %s/param_coerce_mode.php on line %d
 
-Warning: ftruncate() expects exactly 2 parameters, 1 given in %s/param_coerce_mode.php on line %d
+Warning: ftruncate() expects exactly 2 positional parameters, 1 given in %s/param_coerce_mode.php on line %d
 
 Warning: Argument 1 passed to fputcsv() must be an instance of resource, bool given in %s/param_coerce_mode.php on line %d
 

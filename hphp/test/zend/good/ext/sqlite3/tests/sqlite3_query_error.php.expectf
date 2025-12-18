@@ -1,6 +1,6 @@
 Testing SQLite3 query without parameters
 
-Warning: SQLite3::query() expects exactly 1 parameter, 0 given in %s/sqlite3_query_error.php on line 5
+Warning: SQLite3::query() expects exactly 1 positional parameter, 0 given in %s/sqlite3_query_error.php on line 5
 Testing SQLite3 qeury with empty string parameter
 bool(false)
 Done

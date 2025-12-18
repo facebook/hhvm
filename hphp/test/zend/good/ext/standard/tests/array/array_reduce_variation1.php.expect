@@ -4,5 +4,5 @@
 int(2)
 
 --- Testing with a callback with too many parameters ---
-string(49) "threeArgs() expects exactly 3 parameters, 2 given"
+string(60) "threeArgs() expects exactly 3 positional parameters, 2 given"
 ===DONE===

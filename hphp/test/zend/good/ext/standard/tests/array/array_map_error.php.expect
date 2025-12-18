@@ -1,7 +1,7 @@
 *** Testing array_map() : error conditions ***
 
 -- Testing array_map() function with less no. of arrays than callback function arguments --
-string(49) "callback2() expects exactly 2 parameters, 1 given"
+string(60) "callback2() expects exactly 2 positional parameters, 1 given"
 
 -- Testing array_map() function with more no. of arrays than callback function arguments --
 vec(2) {

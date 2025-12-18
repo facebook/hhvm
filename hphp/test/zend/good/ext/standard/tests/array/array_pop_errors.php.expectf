@@ -1,7 +1,7 @@
 
 *** Testing Error Conditions ***
 
-Warning: array_pop() expects exactly 1 parameter, 0 given in %s/array_pop_errors.php on line 30
+Warning: array_pop() expects exactly 1 positional parameter, 0 given in %s/array_pop_errors.php on line 30
 
 Warning: array_pop() expects parameter 1 to be an array or mutable collection in %s/array_pop_errors.php on line 33
 NULL
@@ -9,7 +9,7 @@ NULL
 Warning: array_pop() expects parameter 1 to be an array or mutable collection in %s/array_pop_errors.php on line 36
 NULL
 
-Warning: array_pop() expects exactly 1 parameter, 2 given in %s/array_pop_errors.php on line 39
+Warning: array_pop() expects exactly 1 positional parameter, 2 given in %s/array_pop_errors.php on line 39
 NULL
 
 Done

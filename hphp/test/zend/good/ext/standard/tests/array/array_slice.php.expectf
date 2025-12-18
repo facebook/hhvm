@@ -1,14 +1,14 @@
 *** Output for Zero Argument ***
 
-Warning: array_slice() expects at least 2 parameters, 0 given in %s/test/zend/good/ext/standard/tests/array/array_slice.php on line 22
+Warning: array_slice() expects at least 2 positional parameters, 0 given in %s/test/zend/good/ext/standard/tests/array/array_slice.php on line 22
 
 *** Output for Single array Argument ***
 
-Warning: array_slice() expects at least 2 parameters, 1 given in %s/test/zend/good/ext/standard/tests/array/array_slice.php on line 26
+Warning: array_slice() expects at least 2 positional parameters, 1 given in %s/test/zend/good/ext/standard/tests/array/array_slice.php on line 26
 
 *** Output for invalid number of Arguments ***
 
-Warning: array_slice() expects at most 4 parameters, 5 given in %s/test/zend/good/ext/standard/tests/array/array_slice.php on line 30
+Warning: array_slice() expects at most 4 positional parameters, 5 given in %s/test/zend/good/ext/standard/tests/array/array_slice.php on line 30
 
 *** Output for scalar Argument ***
 

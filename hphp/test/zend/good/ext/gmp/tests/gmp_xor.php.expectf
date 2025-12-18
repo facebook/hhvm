@@ -9,9 +9,9 @@ string(1) "0"
 string(15) "987657876574716"
 string(21) "987658017016065701376"
 
-Warning: gmp_xor() expects exactly 2 parameters, 3 given in %s/gmp_xor.php on line 15
+Warning: gmp_xor() expects exactly 2 positional parameters, 3 given in %s/gmp_xor.php on line 15
 
-Warning: gmp_xor() expects exactly 2 parameters, 1 given in %s/gmp_xor.php on line 16
+Warning: gmp_xor() expects exactly 2 positional parameters, 1 given in %s/gmp_xor.php on line 16
 
 Warning: gmp_xor(): Unable to convert variable to GMP - wrong type in %s/gmp_xor.php on line 17
 bool(false)

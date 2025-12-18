@@ -1,9 +1,9 @@
 
 *** Testing error conditions ***
 
-Warning: addcslashes() expects exactly 2 parameters, 0 given in %s/addcslashes_004.php on line 5
+Warning: addcslashes() expects exactly 2 positional parameters, 0 given in %s/addcslashes_004.php on line 5
 
-Warning: addcslashes() expects exactly 2 parameters, 1 given in %s/addcslashes_004.php on line 8
+Warning: addcslashes() expects exactly 2 positional parameters, 1 given in %s/addcslashes_004.php on line 8
 
-Warning: addcslashes() expects exactly 2 parameters, 3 given in %s/addcslashes_004.php on line 9
+Warning: addcslashes() expects exactly 2 positional parameters, 3 given in %s/addcslashes_004.php on line 9
 Done

@@ -39,7 +39,7 @@ bool(true)
 bool(true)
 bool(true)
 
-Warning: mcrypt_get_block_size() expects exactly 2 parameters, 1 given in %s/test/slow/ext_mcrypt/ext_mcrypt.php on line 112
+Warning: mcrypt_get_block_size() expects exactly 2 positional parameters, 1 given in %s/test/slow/ext_mcrypt/ext_mcrypt.php on line 112
 bool(true)
 bool(true)
 bool(true)

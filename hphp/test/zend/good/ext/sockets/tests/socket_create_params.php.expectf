@@ -1,6 +1,6 @@
 
-Warning: socket_create() expects exactly 3 parameters, 0 given in %s/socket_create_params.php on line 2
+Warning: socket_create() expects exactly 3 positional parameters, 0 given in %s/socket_create_params.php on line 2
 
-Warning: socket_create() expects exactly 3 parameters, 1 given in %s/socket_create_params.php on line 3
+Warning: socket_create() expects exactly 3 positional parameters, 1 given in %s/socket_create_params.php on line 3
 
-Warning: socket_create() expects exactly 3 parameters, 2 given in %s/socket_create_params.php on line 4
+Warning: socket_create() expects exactly 3 positional parameters, 2 given in %s/socket_create_params.php on line 4

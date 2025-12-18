@@ -1,8 +1,8 @@
 *** Testing error conditions ***
 
-Warning: disk_total_space() expects exactly 1 parameter, 0 given in %s/disk_total_space_error.php on line 11
+Warning: disk_total_space() expects exactly 1 positional parameter, 0 given in %s/disk_total_space_error.php on line 11
 
-Warning: disk_total_space() expects exactly 1 parameter, 2 given in %s/disk_total_space_error.php on line 13
+Warning: disk_total_space() expects exactly 1 positional parameter, 2 given in %s/disk_total_space_error.php on line 13
 
 Warning: disk_total_space(): No such file or directory in %s/disk_total_space_error.php on line 16
 bool(false)

@@ -2746,7 +2746,10 @@ fn emit_special_function<'a>(
             if nargs != 1 {
                 return Err(Error::fatal_runtime(
                     pos,
-                    format!("fun() expects exactly 1 parameter, {} given", nargs),
+                    format!(
+                        "fun() expects exactly 1 positional parameter, {} given",
+                        nargs
+                    ),
                 ));
             }
             // `inout` is dropped here, but it should be impossible to have an expression
@@ -2778,7 +2781,7 @@ fn emit_special_function<'a>(
                 Err(Error::fatal_runtime(
                     pos,
                     format!(
-                        "__debugger_is_uninit() expects exactly 1 parameter {} given",
+                        "__debugger_is_uninit() expects exactly 1 positional parameter {} given",
                         nargs
                     ),
                 ))
@@ -2824,7 +2827,7 @@ fn emit_special_function<'a>(
             _ => Err(Error::fatal_runtime(
                 pos,
                 format!(
-                    "__SystemLib\\unwrap_enum_class_label() expects exactly 1 parameter, {} given",
+                    "__SystemLib\\unwrap_enum_class_label() expects exactly 1 positional parameter, {} given",
                     nargs
                 ),
             )),
@@ -2844,7 +2847,7 @@ fn emit_special_function<'a>(
             _ => Err(Error::fatal_runtime(
                 pos,
                 format!(
-                    "classname_to_class() expects exactly 1 parameter, {} given",
+                    "classname_to_class() expects exactly 1 positional parameter, {} given",
                     nargs
                 ),
             )),
@@ -2859,7 +2862,10 @@ fn emit_special_function<'a>(
             ]))),
             _ => Err(Error::fatal_runtime(
                 pos,
-                format!("global_set() expects exactly 2 parameters, {} given", nargs),
+                format!(
+                    "global_set() expects exactly 2 positional parameters, {} given",
+                    nargs
+                ),
             )),
         },
         ("HH\\global_unset", _) => match *args {
@@ -2872,7 +2878,7 @@ fn emit_special_function<'a>(
             _ => Err(Error::fatal_runtime(
                 pos,
                 format!(
-                    "global_unset() expects exactly 1 parameter, {} given",
+                    "global_unset() expects exactly 1 positional parameter, {} given",
                     nargs
                 ),
             )),
@@ -2961,7 +2967,7 @@ fn emit_special_function<'a>(
                 return Err(Error::fatal_runtime(
                     pos,
                     format!(
-                        "get_class_from_type() expects exactly 0 parameters, {} given",
+                        "get_class_from_type() expects exactly 0 positional parameters, {} given",
                         args.len()
                     ),
                 ));

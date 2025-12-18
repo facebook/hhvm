@@ -2,7 +2,7 @@
 
 -- Testing is_subclass_of() function with more than expected no. of arguments --
 
-Warning: is_subclass_of() expects at most 3 parameters, 4 given in %s/is_subclass_of_error_001.php on line 17
+Warning: is_subclass_of() expects at most 3 positional parameters, 4 given in %s/is_subclass_of_error_001.php on line 17
 
 -- Testing is_subclass_of() function with less than expected no. of arguments --
 

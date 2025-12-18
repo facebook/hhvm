@@ -1,2 +1,2 @@
 
-Warning: imagecopymerge() expects exactly 9 parameters, 0 given in %s/imagecopymerge_error.php on line 3
+Warning: imagecopymerge() expects exactly 9 positional parameters, 0 given in %s/imagecopymerge_error.php on line 3

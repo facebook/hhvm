@@ -165,7 +165,7 @@ vec(7) {
 
 *** Testing error conditions ***
 
-Warning: explode() expects at most 3 parameters, 4 given in %s/test/zend/good/ext/standard/tests/strings/explode1.php on line 59
+Warning: explode() expects at most 3 positional parameters, 4 given in %s/test/zend/good/ext/standard/tests/strings/explode1.php on line 59
 
-Warning: explode() expects at least 2 parameters, 1 given in %s/test/zend/good/ext/standard/tests/strings/explode1.php on line 60
+Warning: explode() expects at least 2 positional parameters, 1 given in %s/test/zend/good/ext/standard/tests/strings/explode1.php on line 60
 Done

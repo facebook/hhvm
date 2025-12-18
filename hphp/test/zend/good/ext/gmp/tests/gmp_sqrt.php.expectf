@@ -13,9 +13,9 @@ Warning: gmp_sqrt(): Number has to be greater than or equal to 0 in %s/gmp_sqrt.
 string(1) "0"
 string(2) "27"
 
-Warning: gmp_sqrt() expects exactly 1 parameter, 2 given in %s/gmp_sqrt.php on line 16
+Warning: gmp_sqrt() expects exactly 1 positional parameter, 2 given in %s/gmp_sqrt.php on line 16
 
-Warning: gmp_sqrt() expects exactly 1 parameter, 0 given in %s/gmp_sqrt.php on line 17
+Warning: gmp_sqrt() expects exactly 1 positional parameter, 0 given in %s/gmp_sqrt.php on line 17
 
 Warning: gmp_sqrt(): Unable to convert variable to GMP - wrong type in %s/gmp_sqrt.php on line 18
 bool(false)

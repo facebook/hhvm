@@ -11,10 +11,10 @@ bool(false)
 Warning: Not a valid stream resource in %s/test/zend/good/ext/standard/tests/file/flock_error.php on line 32
 bool(false)
 
-Warning: flock() expects exactly 3 parameters, 0 given in %s/test/zend/good/ext/standard/tests/file/flock_error.php on line 37
+Warning: flock() expects exactly 3 positional parameters, 0 given in %s/test/zend/good/ext/standard/tests/file/flock_error.php on line 37
 
-Warning: flock() expects exactly 3 parameters, 1 given in %s/test/zend/good/ext/standard/tests/file/flock_error.php on line 38
+Warning: flock() expects exactly 3 positional parameters, 1 given in %s/test/zend/good/ext/standard/tests/file/flock_error.php on line 38
 
-Warning: flock() expects exactly 3 parameters, 4 given in %s/test/zend/good/ext/standard/tests/file/flock_error.php on line 41
+Warning: flock() expects exactly 3 positional parameters, 4 given in %s/test/zend/good/ext/standard/tests/file/flock_error.php on line 41
 
 *** Done ***

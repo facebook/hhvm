@@ -2,11 +2,11 @@
 
 -- Testing strval() function with more than expected no. of arguments --
 
-Warning: strval() expects exactly 1 parameter, 2 given in %s/strval_error.php on line 21
+Warning: strval() expects exactly 1 positional parameter, 2 given in %s/strval_error.php on line 21
 
 -- Testing strval() function with less than expected no. of arguments --
 
-Warning: strval() expects exactly 1 parameter, 0 given in %s/strval_error.php on line 25
+Warning: strval() expects exactly 1 positional parameter, 0 given in %s/strval_error.php on line 25
 
 -- Testing strval() function with object which has not toString() method  --
 

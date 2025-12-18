@@ -1,7 +1,7 @@
 
-Warning: property_exists() expects exactly 2 parameters, 0 given in %s/011.php on line 23
+Warning: property_exists() expects exactly 2 positional parameters, 0 given in %s/011.php on line 23
 
-Warning: property_exists() expects exactly 2 parameters, 1 given in %s/011.php on line 24
+Warning: property_exists() expects exactly 2 positional parameters, 1 given in %s/011.php on line 24
 bool(true)
 bool(true)
 bool(true)

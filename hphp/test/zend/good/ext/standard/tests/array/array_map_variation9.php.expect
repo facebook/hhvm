@@ -11,5 +11,5 @@ dict(4) {
   string(5) "22.22"
 }
 -- checking binary safe array with two parameter callback function --
-string(49) "callback2() expects exactly 2 parameters, 1 given"
+string(60) "callback2() expects exactly 2 positional parameters, 1 given"
 Done

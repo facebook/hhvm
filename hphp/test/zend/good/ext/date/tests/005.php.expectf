@@ -1,7 +1,7 @@
 
-Warning: idate() expects at least 1 parameter, 0 given in %s/005.php on line 6
+Warning: idate() expects at least 1 positional parameter, 0 given in %s/005.php on line 6
 
-Warning: idate() expects at most 2 parameters, 3 given in %s/005.php on line 7
+Warning: idate() expects at most 2 positional parameters, 3 given in %s/005.php on line 7
 
 Warning: Invalid argument: unknown format char: 49 in %s/005.php on line 9
 bool(false)

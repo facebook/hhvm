@@ -1,5 +1,5 @@
 
-Warning: ldap_get_dn() expects exactly 2 parameters, 1 given in %s/ldap_get_dn_error.php on line 5
+Warning: ldap_get_dn() expects exactly 2 positional parameters, 1 given in %s/ldap_get_dn_error.php on line 5
 
 Warning: Not a valid ldap result entry resource in %s/ldap_get_dn_error.php on line 6
 bool(false)

@@ -1,4 +1,4 @@
 
-Warning: ReflectionClass::isInternal() expects exactly 0 parameters, 1 given in %s/ReflectionClass_isInternal_error.php on line 3
+Warning: ReflectionClass::isInternal() expects exactly 0 positional parameters, 1 given in %s/ReflectionClass_isInternal_error.php on line 3
 
-Warning: ReflectionClass::isInternal() expects exactly 0 parameters, 2 given in %s/ReflectionClass_isInternal_error.php on line 4
+Warning: ReflectionClass::isInternal() expects exactly 0 positional parameters, 2 given in %s/ReflectionClass_isInternal_error.php on line 4

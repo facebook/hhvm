@@ -1,11 +1,11 @@
 
-Warning: ldap_set_option() expects exactly 3 parameters, 0 given in %s/ldap_set_option_error.php on line 20
+Warning: ldap_set_option() expects exactly 3 positional parameters, 0 given in %s/ldap_set_option_error.php on line 20
 
-Warning: ldap_set_option() expects exactly 3 parameters, 1 given in %s/ldap_set_option_error.php on line 21
+Warning: ldap_set_option() expects exactly 3 positional parameters, 1 given in %s/ldap_set_option_error.php on line 21
 
-Warning: ldap_set_option() expects exactly 3 parameters, 2 given in %s/ldap_set_option_error.php on line 22
+Warning: ldap_set_option() expects exactly 3 positional parameters, 2 given in %s/ldap_set_option_error.php on line 22
 
-Warning: ldap_set_option() expects exactly 3 parameters, 4 given in %s/ldap_set_option_error.php on line 25
+Warning: ldap_set_option() expects exactly 3 positional parameters, 4 given in %s/ldap_set_option_error.php on line 25
 bool(false)
 
 Warning: Control must have an oid key in %s/ldap_set_option_error.php on line 30

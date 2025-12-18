@@ -2,5 +2,5 @@
 
 -- Testing date function with no arguments --
 
-Warning: date() expects at least 1 parameter, 0 given in %s/date_error.php on line 16
+Warning: date() expects at least 1 positional parameter, 0 given in %s/date_error.php on line 16
 ===DONE===

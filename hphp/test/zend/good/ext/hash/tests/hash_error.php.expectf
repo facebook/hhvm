@@ -2,13 +2,13 @@
 
 -- Testing hash() function with less than expected no. of arguments --
 
-Warning: hash() expects at least 2 parameters, 0 given in %s/hash_error.php on line 11
+Warning: hash() expects at least 2 positional parameters, 0 given in %s/hash_error.php on line 11
 
-Warning: hash() expects at least 2 parameters, 1 given in %s/hash_error.php on line 12
+Warning: hash() expects at least 2 positional parameters, 1 given in %s/hash_error.php on line 12
 
 -- Testing hash() function with more than expected no. of arguments --
 
-Warning: hash() expects at most 3 parameters, 4 given in %s/hash_error.php on line 16
+Warning: hash() expects at most 3 positional parameters, 4 given in %s/hash_error.php on line 16
 
 -- Testing hash() function with invalid hash algorithm --
 

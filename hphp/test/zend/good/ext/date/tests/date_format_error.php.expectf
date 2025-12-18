@@ -2,13 +2,13 @@
 
 -- Testing date_create() function with zero arguments --
 
-Warning: date_format() expects exactly 2 parameters, 0 given in %s/date_format_error.php on line 14
+Warning: date_format() expects exactly 2 positional parameters, 0 given in %s/date_format_error.php on line 14
 
 -- Testing date_create() function with less than expected no. of arguments --
 
-Warning: date_format() expects exactly 2 parameters, 1 given in %s/date_format_error.php on line 19
+Warning: date_format() expects exactly 2 positional parameters, 1 given in %s/date_format_error.php on line 19
 
 -- Testing date_create() function with more than expected no. of arguments --
 
-Warning: date_format() expects exactly 2 parameters, 3 given in %s/date_format_error.php on line 24
+Warning: date_format() expects exactly 2 positional parameters, 3 given in %s/date_format_error.php on line 24
 ===DONE===

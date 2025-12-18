@@ -1,4 +1,4 @@
 
-Warning: ReflectionClass::isInstantiable() expects exactly 0 parameters, 1 given in %s/ReflectionClass_isInstantiable_error.php on line 7
+Warning: ReflectionClass::isInstantiable() expects exactly 0 positional parameters, 1 given in %s/ReflectionClass_isInstantiable_error.php on line 7
 
-Warning: ReflectionClass::isInstantiable() expects exactly 0 parameters, 2 given in %s/ReflectionClass_isInstantiable_error.php on line 8
+Warning: ReflectionClass::isInstantiable() expects exactly 0 positional parameters, 2 given in %s/ReflectionClass_isInstantiable_error.php on line 8

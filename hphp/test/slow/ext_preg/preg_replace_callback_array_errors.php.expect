@@ -1,6 +1,6 @@
-Warning: preg_replace_callback_array() expects exactly 4 parameters, 0 given
+Warning: preg_replace_callback_array() expects exactly 4 positional parameters, 0 given
 
-Warning: preg_replace_callback_array() expects exactly 4 parameters, 1 given
+Warning: preg_replace_callback_array() expects exactly 4 positional parameters, 1 given
 
 Warning: preg_replace_callback_array() expects parameter 1 to be an array, integer given
 
@@ -11,7 +11,7 @@ Warning: preg_replace_callback_array() expects parameter 1 to be an array, integ
 
 Warning: Argument 3 passed to preg_replace_callback_array() must be an instance of int, string given
 
-Warning: preg_replace_callback_array() expects exactly 4 parameters, 5 given
+Warning: preg_replace_callback_array() expects exactly 4 positional parameters, 5 given
 string(0) ""
 
 Warning: Not a valid callback function notValid1

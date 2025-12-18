@@ -6,11 +6,11 @@ string(15) "%ttesting trim  "
 
 *** Testing error conditions ***
 
-Warning: trim() expects at least 1 parameter, 0 given in %s/trim1.php on line 21
+Warning: trim() expects at least 1 positional parameter, 0 given in %s/trim1.php on line 21
 
-Warning: trim() expects at most 2 parameters, 3 given in %s/trim1.php on line 23
+Warning: trim() expects at most 2 positional parameters, 3 given in %s/trim1.php on line 23
 
-Warning: trim() expects at most 2 parameters, 3 given in %s/trim1.php on line 24
+Warning: trim() expects at most 2 positional parameters, 3 given in %s/trim1.php on line 24
 
 *** Testing with String with embedded NULL ***
 string(22) "234%h{00}05678%h{00}00efgh\xijkl"

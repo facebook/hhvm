@@ -16,4 +16,4 @@ f In:  $p: 10
 f Out: $p: 200
 int(200)
 int(200)
-string(40) "f() expects exactly 1 parameter, 0 given"
+string(51) "f() expects exactly 1 positional parameter, 0 given"

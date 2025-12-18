@@ -4,11 +4,11 @@ object(GMP) (1) {
 }
 string(8) "98765678"
 
-Warning: gmp_init() expects at least 1 parameter, 0 given in %s/gmp_init.php on line 5
+Warning: gmp_init() expects at least 1 positional parameter, 0 given in %s/gmp_init.php on line 5
 
-Warning: gmp_init() expects at least 1 parameter, 0 given in %s/gmp_init.php on line 6
+Warning: gmp_init() expects at least 1 positional parameter, 0 given in %s/gmp_init.php on line 6
 
-Warning: gmp_init() expects at most 2 parameters, 4 given in %s/gmp_init.php on line 7
+Warning: gmp_init() expects at most 2 positional parameters, 4 given in %s/gmp_init.php on line 7
 
 Warning: gmp_init(): Bad base for conversion: -1 (should be between 2 and 62) in %s/gmp_init.php on line 8
 bool(false)

@@ -2,10 +2,10 @@ int(1)
 int(2)
 int(20)
 
-Warning: ReflectionProperty::setValue() expects exactly 2 parameters, 0 given in %s/test/slow/reflection/ReflectionProperty_setValue.php on line 21
+Warning: ReflectionProperty::setValue() expects exactly 2 positional parameters, 0 given in %s/test/slow/reflection/ReflectionProperty_setValue.php on line 21
 int(42)
 
-Warning: ReflectionProperty::setValue() expects exactly 2 parameters, 1 given in %s/test/slow/reflection/ReflectionProperty_setValue.php on line 23
+Warning: ReflectionProperty::setValue() expects exactly 2 positional parameters, 1 given in %s/test/slow/reflection/ReflectionProperty_setValue.php on line 23
 int(42)
 int(4)
 

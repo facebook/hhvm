@@ -30,10 +30,6 @@ function thrift_protocol_write_binary_struct(
   HH\FIXME\MISSING_PARAM_TYPE $request_struct,
 ): void;
 <<__PHPStdLib>>
-function thrift_protocol_write_binary_struct_to_string(
-  HH\FIXME\MISSING_PARAM_TYPE $struct,
-): string;
-<<__PHPStdLib>>
 function thrift_protocol_read_binary(
   HH\FIXME\MISSING_PARAM_TYPE $transportobj,
   string $obj_typename,
@@ -43,12 +39,6 @@ function thrift_protocol_read_binary(
 <<__PHPStdLib>>
 function thrift_protocol_read_binary_struct(
   HH\FIXME\MISSING_PARAM_TYPE $transportobj,
-  string $obj_typename,
-  int $options = 0,
-): HH\FIXME\MISSING_RETURN_TYPE;
-<<__PHPStdLib>>
-function thrift_protocol_read_binary_struct_from_string(
-  string $buffer,
   string $obj_typename,
   int $options = 0,
 ): HH\FIXME\MISSING_RETURN_TYPE;

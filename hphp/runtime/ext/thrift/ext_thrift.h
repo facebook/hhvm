@@ -56,10 +56,6 @@ void HHVM_FUNCTION(
     const Object& transportobj,
     const Object& request_struct);
 
-String HHVM_FUNCTION(
-    thrift_protocol_write_binary_struct_to_string,
-    const Object& request_struct);
-
 Object HHVM_FUNCTION(
     thrift_protocol_read_binary,
     const Object& transportobj,
@@ -70,13 +66,6 @@ Object HHVM_FUNCTION(
 Variant HHVM_FUNCTION(
     thrift_protocol_read_binary_struct,
     const Object& transportobj,
-    const String& obj_typename,
-    int64_t options);
-
-
-Object HHVM_FUNCTION(
-    thrift_protocol_read_binary_struct_from_string,
-    const String& serialized,
     const String& obj_typename,
     int64_t options);
 

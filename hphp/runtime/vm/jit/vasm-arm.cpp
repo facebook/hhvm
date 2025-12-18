@@ -1654,12 +1654,8 @@ void lowerVptr(Vptr& p, Vout& v, ImmediateStyle is = kLegacyStyle, ImmediateStyl
 #define Y(vasm_opc, m, n)                                   \
 void lower(const VLS& e, vasm_opc& i, Vlabel b, size_t z) { \
   lower_impl(e.unit, b, z, [&] (Vout& v) {                  \
-    if (i.n.isGP())                                         \
-      lowerVptr(i.m, v, kXPositiveImmediate12,              \
-          kUnscaledSignedImmediate9);                       \
-    else                                                    \
-      lowerVptr(i.m, v, kUnscaledSignedImmediate9,          \
-          kUnscaledSignedImmediate9);                       \
+    lowerVptr(i.m, v, kXPositiveImmediate12,                \
+        kUnscaledSignedImmediate9);                         \
     v << i;                                                 \
   });                                                       \
 }

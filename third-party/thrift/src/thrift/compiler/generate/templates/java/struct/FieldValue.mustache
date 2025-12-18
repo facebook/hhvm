@@ -14,7 +14,7 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}{{^field:value}}{{!
+}}{{#if (object.eq? field:default_value null)}}{{!
   }}{{#field:terse?}}{{!
     }}{{#field:hasAdapter?}}{{!
     }}{{> FromThriftStart}}{{#field:isObject?}}{{#field:type}}{{> ThriftBoxedType}}{{/field:type}}.defaultInstance(){{/field:isObject?}}{{^field:isObject?}}{{#field:type}}{{> struct/IntrinsicDefault}}{{/field:type}}{{/field:isObject?}}{{> FromThriftEnd}}{{!
@@ -37,13 +37,16 @@
       }}{{^field:hasWrapper?}}{{field:javaDefaultValue}}{{/field:hasWrapper?}}{{!
     }}{{/field:hasAdapter?}}{{!
   }}{{/field:terse?}}{{!
-}}{{/field:value}}{{!
 
-}}{{#field:value}}{{!
-}}{{#field:hasAdapter?}}{{!
-  }}{{> FromThriftStart}}{{#field:hasInitialValue?}}{{#field:type}}{{field:nestedDepth++}}{{> DefaultValue}}{{field:nestedDepth--}}{{/field:type}}{{/field:hasInitialValue?}}{{^field:hasInitialValue?}}{{field:javaDefaultValue}}{{/field:hasInitialValue?}}{{> FromThriftEnd}}{{!
-}}{{/field:hasAdapter?}}{{!
-}}{{^field:hasAdapter?}}{{!
-  }}{{#field:hasInitialValue?}}{{#field:type}}{{field:nestedDepth++}}{{> DefaultValue}}{{field:nestedDepth--}}{{/field:type}}{{/field:hasInitialValue?}}{{^field:hasInitialValue?}}{{field:javaDefaultValue}}{{/field:hasInitialValue?}}{{!
-}}{{/field:hasAdapter?}}{{!
-}}{{/field:value}}
+}}{{#else}}{{!
+
+}}{{#if field:hasAdapter?}}{{!
+  }}{{> FromThriftStart}}{{#if field:hasInitialValue?}}{{!
+    }}{{#partial const_value.const_value value=field:default_value root_const=null as_bean=struct:asBean? field_hasAdapter=field:hasAdapter? }}{{!
+  }}{{#else}}{{field:javaDefaultValue}}{{/if field:hasInitialValue?}}{{> FromThriftEnd}}{{!
+}}{{#else}}{{!
+  }}{{#if field:hasInitialValue?}}{{!
+    }}{{#partial const_value.const_value value=field:default_value root_const=null as_bean=struct:asBean? field_hasAdapter=field:hasAdapter? }}{{!
+  }}{{#else}}{{field:javaDefaultValue}}{{/if field:hasInitialValue?}}{{!
+}}{{/if field:hasAdapter?}}{{!
+}}{{/if (object.eq? field:default_value null)}}

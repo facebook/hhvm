@@ -42,6 +42,7 @@ type ServerObserver interface {
 	ProcessTime(duration time.Duration) // time spent in handler execution
 
 	// Function-level stats for tracking detailed request behavior
-	ReceivedRequestForFunction(function string) // request received for specific function
-	AnyExceptionForFunction(function string)    // any exception (declared or undeclared) thrown in specific function
+	ReceivedRequestForFunction(function string)                    // request received for specific function
+	AnyExceptionForFunction(function string)                       // any exception (declared or undeclared) thrown in specific function
+	TimeReadUsForFunction(function string, duration time.Duration) // time spent reading/demarshaling for specific function
 }

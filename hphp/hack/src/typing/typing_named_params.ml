@@ -26,8 +26,11 @@ let find_names_mismatch
   let expected_named_params = named_params_of expected_ft in
   let extra_names =
     SMap.fold
-      (fun name _actual_fp acc ->
-        if not (SMap.mem name expected_named_params) then
+      (fun name actual_fp acc ->
+        (* function(optional named bool $b): void   <:   function(): void *)
+        let is_expected = SMap.mem name expected_named_params in
+        let is_required = not (Typing_defs_core.get_fp_is_optional actual_fp) in
+        if is_required && not is_expected then
           name :: acc
         else
           acc)

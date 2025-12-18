@@ -1,18 +1,1 @@
-ERROR: File "named_params_optional_subtyping.php", line 4, characters 10-11:
-Invalid return type (Typing[4041])
-  File "named_params_optional_subtyping.php", line 3, characters 17-61:
-  Unexpected named parameter: b
-  File "named_params_optional_subtyping.php", line 3, characters 68-88:
-  Because of this definition
-ERROR: File "named_params_optional_subtyping.php", line 12, characters 19-19:
-The method `m` is not compatible with the overridden method (Typing[4341])
-  File "named_params_optional_subtyping.php", line 12, characters 19-19:
-  Method `m` has type `(function(int $_, named optional bool $b): void)` in `C2`
-  File "named_params_optional_subtyping.php", line 8, characters 19-19:
-  But it has type `(function(int $_): void)` in parent `C1`
-  File "named_params_optional_subtyping.php", line 12, characters 19-19:
-  Type `(function(int $_, named optional bool $b): void)` is not a subtype of `(function(int $_): void)`
-  File "named_params_optional_subtyping.php", line 12, characters 19-19:
-  Unexpected named parameter: b
-  File "named_params_optional_subtyping.php", line 8, characters 19-19:
-  Because of this definition
+No errors

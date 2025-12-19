@@ -30,6 +30,7 @@
 #include <boost/program_options.hpp>
 
 #include <folly/ScopeGuard.h>
+#include <folly/system/HardwareConcurrency.h>
 #include <folly/portability/Unistd.h>
 
 #include "hphp/runtime/base/configs/configs.h"
@@ -75,7 +76,7 @@ void parse_options(int argc, char** argv) {
   namespace po = boost::program_options;
 
   auto const defaultThreadCount =
-    std::max<long>(sysconf(_SC_NPROCESSORS_ONLN) - 1, 1);
+    std::max<long>(static_cast<long>(folly::available_concurrency()) - 1, 1);
   auto const defaultFinalThreadCount =
     std::max<long>(defaultThreadCount - 1, 1);
 

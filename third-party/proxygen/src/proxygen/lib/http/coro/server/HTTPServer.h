@@ -193,6 +193,8 @@ class HTTPServer : public quic::QuicHandshakeSocketHolder::Callback {
     setReusePortSocketOption_ = true;
   }
 
+  void updateTlsCredentials() noexcept;
+
   void setHostId(uint32_t hostId);
 
   /**
@@ -216,6 +218,10 @@ class HTTPServer : public quic::QuicHandshakeSocketHolder::Callback {
 
   void removeObserver(Observer* observer) {
     observers_.erase(observer);
+  }
+
+  folly::EventBase* evb() noexcept {
+    return &eventBase_;
   }
 
  private:

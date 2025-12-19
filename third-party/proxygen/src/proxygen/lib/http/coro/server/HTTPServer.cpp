@@ -8,14 +8,16 @@
 
 #include "proxygen/lib/http/coro/server/HTTPServer.h"
 #include "proxygen/lib/http/coro/HTTPFilterFactoryHandler.h"
-#include <folly/io/async/EventBaseManager.h>
-#include <folly/logging/xlog.h>
-#include <folly/system/HardwareConcurrency.h>
 #include <proxygen/lib/utils/Time.h>
 #include <quic/common/events/FollyQuicEventBase.h>
 #include <quic/congestion_control/ServerCongestionControllerFactory.h>
 #include <quic/logging/FileQLogger.h>
 #include <quic/server/QuicSharedUDPSocketFactory.h>
+
+#include <folly/fibers/BatchSemaphore.h>
+#include <folly/io/async/EventBaseManager.h>
+#include <folly/logging/xlog.h>
+#include <folly/system/HardwareConcurrency.h>
 
 namespace proxygen::coro {
 
@@ -431,6 +433,25 @@ void HTTPServer::setHostId(uint32_t hostId) {
     eventBase_.runImmediatelyOrRunInEventBaseThreadAndWait(
         [this] { quicServer_->setHostId(hostId_); });
   }
+}
+
+void HTTPServer::updateTlsCredentials() noexcept {
+  eventBase_.checkIsInEventBaseThread();
+  folly::fibers::BatchSemaphore sem{/*tokenCount=*/0};
+  const size_t numAcceptors = acceptors_.size();
+
+  // reload all ssl contexts in all acceptors
+  for (auto& [evb, acceptors] : acceptors_) {
+    evb->runInEventBaseThread([&]() {
+      for (auto& acceptor : acceptors) {
+        if (acceptor.isSSL()) {
+          acceptor.reloadSSLContextConfigs();
+        }
+      }
+      sem.signal(1);
+    });
+  }
+  sem.wait(numAcceptors); // wait until all async work is complete
 }
 
 } // namespace proxygen::coro

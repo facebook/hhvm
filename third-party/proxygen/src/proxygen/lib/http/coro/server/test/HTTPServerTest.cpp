@@ -24,6 +24,7 @@
 #include <folly/coro/GtestHelpers.h>
 #include <folly/portability/GMock.h>
 #include <folly/portability/GTest.h>
+#include <folly/testing/TestUtil.h>
 #include <proxygen/lib/http/coro/test/TestUtils.h>
 #include <quic/api/test/Mocks.h>
 #include <quic/logging/test/Mocks.h>
@@ -34,6 +35,12 @@
 using namespace proxygen::coro;
 
 namespace {
+
+std::string_view getTestDir() {
+  static const std::string kTestDir =
+      getContainingDirectory(XLOG_FILENAME).str();
+  return kTestDir;
+}
 
 struct StatsFactory : public ServerFilterFactory {
   std::pair<HTTPSourceFilter*, HTTPSourceFilter*> makeFilters() override {
@@ -180,7 +187,7 @@ class HTTPServerTests : public TestWithParam<TransportType> {
         folly::SSLContext::VerifyClientCertificate::DO_NOT_REQUEST;
     tlsConfig.setNextProtocols({"h2", "http/1.1"});
     try {
-      const std::string kTestDir = getContainingDirectory(XLOG_FILENAME).str();
+      const std::string kTestDir{getTestDir()};
       tlsConfig.setCertificate(kTestDir + "certs/test_cert1.pem",
                                kTestDir + "certs/test_key1.pem",
                                "");
@@ -387,6 +394,110 @@ TEST_P(HTTPServerTests, TestFizzLoggingCallbackInvoked) {
   EXPECT_EQ(response.headers->getStatusCode(), 200);
 
   stopServer();
+}
+
+/**
+ * Unit test extrapolated from proxygen/httpserver/tests/HTTPServerTest.cpp
+ */
+TEST_P(HTTPServerTests, TestUpdateTLSCredentials) {
+  // Set up a temporary file with credentials that we will update
+  folly::test::TemporaryFile credFile;
+  auto copyCreds = [path = credFile.path()](const std::string& certFile,
+                                            const std::string& keyFile) {
+    std::string certData, keyData;
+    folly::readFile(certFile.c_str(), certData);
+    folly::writeFile(certData, path.c_str(), O_WRONLY | O_CREAT | O_TRUNC);
+    folly::writeFile(std::string("\n"), path.c_str(), O_WRONLY | O_APPEND);
+    folly::readFile(keyFile.c_str(), keyData);
+    folly::writeFile(keyData, path.c_str(), O_WRONLY | O_APPEND);
+  };
+
+  auto getCertDigest = [&](const X509* x) -> std::string {
+    unsigned int n;
+    unsigned char md[EVP_MAX_MD_SIZE];
+    const EVP_MD* dig = EVP_sha256();
+
+    if (!X509_digest(x, dig, md, &n)) {
+      throw std::runtime_error("Cannot calculate digest");
+    }
+    return std::string((const char*)md, n);
+  };
+
+  // init tmp file w/ cert1.pem & cert1.key
+  const std::string testDir{getTestDir()};
+  const std::string credFilePath{credFile.path().string()};
+
+  copyCreds(testDir + "certs/test_cert1.pem", testDir + "certs/test_key1.pem");
+  // set tlsConfig certificate to tmp file
+  auto tlsConfig = getTLSConfig();
+  tlsConfig.setCertificate(credFilePath, credFilePath, "");
+
+  // start server with custom tlsConfig constructed above
+  serverConfig_.socketConfig.bindAddress.setFromIpPort(listenAddress_,
+                                                       listenPort_);
+  serverConfig_.socketConfig.sslContextConfigs.emplace_back(
+      std::move(tlsConfig));
+  server_ =
+      ScopedHTTPServer::start(std::move(serverConfig_), handler_, nullptr);
+
+  struct TlsConnectCb : public folly::AsyncSocket::ConnectCallback {
+    TlsConnectCb(folly::AsyncSSLSocket& sock) : sock(sock) {
+    }
+    void connectSuccess() noexcept override {
+      if (auto cert = sock.getPeerCertificate()) {
+        peerCert = folly::OpenSSLTransportCertificate::tryExtractX509(cert);
+      }
+      baton.post();
+    }
+    void connectErr(
+        const folly::AsyncSocketException& socketEx) noexcept override {
+      ex = folly::make_exception_wrapper<folly::AsyncSocketException>(socketEx);
+      baton.post();
+    }
+
+    folly::AsyncSocket& sock;
+    folly::ssl::X509UniquePtr peerCert{nullptr};
+    folly::exception_wrapper ex;
+    folly::coro::Baton baton;
+  };
+
+  folly::EventBase evb;
+
+  // Connect and store digest of server cert
+  auto doTlsConnection = [&]() -> auto {
+    return folly::coro::co_invoke([&]() -> folly::coro::Task<std::string> {
+      folly::AsyncSSLSocket::UniquePtr sock(
+          new folly::AsyncSSLSocket(std::make_shared<SSLContext>(), &evb));
+      TlsConnectCb cb{*sock};
+      sock->connect(&cb, server_->address().value(), 100);
+      co_await cb.baton;
+      CHECK(!cb.ex && cb.peerCert);
+      co_return getCertDigest(cb.peerCert.get());
+    });
+  };
+
+  /**
+   * 1. do tls connection and get first certificate
+   * 2. update temp credFile & invoke HTTPServer::updateTlsCredentials
+   * 3. do new tls connection and get second certificate
+   * 4. verify first cert != second cert
+   */
+  auto cert1 = folly::coro::blockingWait(doTlsConnection(), &evb);
+
+  // update credFile to a different cert/key
+  copyCreds(testDir + "certs/test_cert2.pem", testDir + "certs/test_key2.pem");
+  auto& httpServer = server_->getServer();
+  httpServer.evb()->runImmediatelyOrRunInEventBaseThreadAndWait(
+      [&]() { httpServer.updateTlsCredentials(); });
+
+  // second tls connection post updating server cert file
+  auto cert2 = folly::coro::blockingWait(doTlsConnection(), &evb);
+
+  // verify certificates yielded from first and second tls conn attempts are
+  // different
+  EXPECT_EQ(cert1.length(), SHA256_DIGEST_LENGTH);
+  EXPECT_EQ(cert2.length(), SHA256_DIGEST_LENGTH);
+  EXPECT_NE(cert1, cert2);
 }
 
 INSTANTIATE_TEST_SUITE_P(HTTPServerStartStop,

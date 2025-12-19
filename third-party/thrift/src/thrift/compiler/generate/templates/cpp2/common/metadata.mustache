@@ -1,0 +1,57 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}
+
+{{! Const value metadata for structured annotations }}
+{{#let partial cv_metadata |value|}}
+{{#pragma ignore-newlines}}
+
+{{#if value.bool?}}cvBool({{value.bool_value}})
+{{#else if (or value.integer? value.enum?)}}cvInteger({{value.integer_value}})
+{{#else if value.double?}}cvDouble({{value.double_value}})
+{{#else if value.string?}}cvString("{{value.string_value}}")
+
+  {{#else if value.structured?}}
+    {{#let ttype = value.type.true_type}}
+cvStruct("{{ttype.program_name}}.{{ttype.name}}", { {{!}}
+     {{#each (array.enumerate value.structured_elements with_last=true) as |i elem last?|}}
+{"{{elem.field.name}}", {{#partial cv_metadata value=elem.value}} }{{#if (not last?)}}, {{/if}}
+     {{/each}}
+ })
+
+  {{#else if value.map?}}
+cvMap({ {{!}}
+    {{#each (array.enumerate value.map_elements with_last=true) as |i elem last?|}}
+cvPair({{#partial cv_metadata value=elem.key}}, {{#partial cv_metadata value=elem.value}}){{#if (not last?)}}, {{/if}}
+    {{/each}}
+ })
+
+  {{#else if value.list?}}
+cvList({ {{!}}
+    {{#each (array.enumerate value.list_elements with_last=true) as |i elem last?|}}
+{{#partial cv_metadata value=elem}}{{#if (not last?)}}, {{/if}}
+    {{/each}}
+ })
+
+  {{/if value.bool?}}
+{{/let partial}}
+
+{{! A single structured annotation value }}
+{{#let export partial structured_annotation |value| captures |cv_metadata|}}
+{{#pragma ignore-newlines}}
+*{{#partial cv_metadata value=value}}.cv_struct()
+{{/let partial}}

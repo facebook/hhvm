@@ -15,6 +15,7 @@
   limitations under the License.
 
 }}
+{{#import "common/metadata" as metadata}}
 {{#import "types/schema_association" as schema_association}}
 {{> Autogen}}
 #include <thrift/lib/cpp2/gen/module_metadata_cpp.h>
@@ -57,11 +58,11 @@ void EnumMetadata<::{{program:qualified_namespace}}::{{enum:cpp_name}}>::gen(Thr
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-{{#enum:structured_annotations}}
-{{#constant:type.self.structured?}}
-  res.metadata.structured_annotations()->push_back({{> metadata/const_struct}});
-{{/constant:type.self.structured?}}
-{{/enum:structured_annotations}}
+{{#each enum:self.structured_annotations as |annot|}}
+  {{#if annot.type.structured?}}
+  res.metadata.structured_annotations()->push_back({{#partial metadata.structured_annotation value=annot.value}});
+  {{/if annot.type.structured?}}
+{{/each}}
 }
 {{/program:enums}}
 
@@ -98,11 +99,11 @@ StructMetadata<{{struct:cpp_fullname}}>::gen(ThriftMetadata& metadata) {
 {{/struct:fields?}}
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-{{#struct:structured_annotations}}
-{{#constant:type.self.structured?}}
-  {{struct:metadata_name}}.structured_annotations()->push_back({{> metadata/const_struct}});
-{{/constant:type.self.structured?}}
-{{/struct:structured_annotations}}
+{{#each struct:self.structured_annotations as |annot|}}
+  {{#if annot.type.structured?}}
+  {{struct:metadata_name}}.structured_annotations()->push_back({{#partial metadata.structured_annotation value=annot.value}});
+  {{/if annot.type.structured?}}
+{{/each}}
   return res.metadata;
 }
 {{/program:structs}}
@@ -143,11 +144,11 @@ void ExceptionMetadata<{{struct:cpp_fullname}}>::gen(ThriftMetadata& metadata) {
 {{/struct:fields?}}
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-{{#struct:structured_annotations}}
-{{#constant:type.self.structured?}}
-  {{struct:metadata_name}}.structured_annotations()->push_back({{> metadata/const_struct}});
-{{/constant:type.self.structured?}}
-{{/struct:structured_annotations}}
+{{#each struct:self.structured_annotations as |annot|}}
+  {{#if annot.type.structured?}}
+  {{struct:metadata_name}}.structured_annotations()->push_back({{#partial metadata.structured_annotation value=annot.value}});
+  {{/if annot.type.structured?}}
+{{/each}}
 }
 {{/struct:exception?}}
 {{/program:structs}}
@@ -182,11 +183,11 @@ void ServiceMetadata<::{{> service_common/service_class_name}}>::gen_{{function:
   DCHECK_EQ(*func.is_oneway(), {{function:oneway?}});
   [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
   func.structured_annotations()->clear();
-{{#function:structured_annotations}}
-{{#constant:type.self.structured?}}
-  func.structured_annotations()->push_back({{> metadata/const_struct}});
-{{/constant:type.self.structured?}}
-{{/function:structured_annotations}}
+{{#each function:self.structured_annotations as |annot|}}
+  {{#if annot.type.structured?}}
+  func.structured_annotations()->push_back({{#partial metadata.structured_annotation value=annot.value}});
+  {{/if annot.type.structured?}}
+{{/each}}
 }
 {{/function:starts_interaction?}}{{/service:functions}}
 
@@ -258,11 +259,11 @@ const ThriftServiceContextRef* ServiceMetadata<::{{> service_common/service_clas
 {{/service:extends?}}
   [[maybe_unused]] auto {{service:metadata_name}}Annotations = std::move(*{{service:metadata_name}}.structured_annotations());
   {{service:metadata_name}}.structured_annotations()->clear();
-{{#service:structured_annotations}}
-{{#constant:type.self.structured?}}
-  {{service:metadata_name}}.structured_annotations()->push_back({{> metadata/const_struct}});
-{{/constant:type.self.structured?}}
-{{/service:structured_annotations}}
+{{#each service:self.structured_annotations as |annot|}}
+  {{#if annot.type.structured?}}
+  {{service:metadata_name}}.structured_annotations()->push_back({{#partial metadata.structured_annotation value=annot.value}});
+  {{/if annot.type.structured?}}
+{{/each}}
   ThriftServiceContextRef& context = services[selfIndex];
   metadata.services()->emplace("{{program:name}}.{{service:name}}", std::move({{service:metadata_name}}));
   context.service_name() = "{{program:name}}.{{service:name}}";

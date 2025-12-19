@@ -14,7 +14,11 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}{ {{field:id}}, "{{field:name}}", {{field:optional?}}, {{#field:type}}{{> metadata/type_gen}}{{/field:type}}, {{!
-}}std::vector<ThriftConstStruct>{ {{#field:structured_annotations}}{{#constant:type.self.structured?}}{{!
-}}{{> metadata/const_struct}}, {{!
-}}{{/constant:type.self.structured?}}{{/field:structured_annotations}}}},
+}}
+{{#pragma ignore-newlines}}
+{ {{field:id}}, "{{field:name}}", {{field:optional?}}, {{#field:type}}{{> metadata/type_gen}}{{/field:type}}, {{!}}
+std::vector<ThriftConstStruct>{ {{!}}
+  {{#each field:self.structured_annotations as |annot|}}
+{{#if annot.type.structured?}}{{#partial metadata.structured_annotation value=annot.value}}, {{/if}}
+  {{/each}}
+}},

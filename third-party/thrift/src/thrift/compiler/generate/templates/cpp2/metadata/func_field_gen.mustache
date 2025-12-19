@@ -16,13 +16,13 @@
 
 }}DCHECK_EQ(*{{> metadata/func_field_name}}.id(), {{field:id}});
 DCHECK_EQ(*{{> metadata/func_field_name}}.name(), "{{field:name}}");
-{{#field:structured_annotations}}
+  {{#each field:self.structured_annotations as |annot|}}
 {{> metadata/func_field_name}}.structured_annotations().emplace().assign({
-{{#constant:type.self.structured?}}
-    {{> metadata/const_struct}},
-{{/constant:type.self.structured?}}
+    {{#if annot.type.structured?}}
+    {{#partial metadata.structured_annotation value=annot.value}},
+    {{/if annot.type.structured?}}
 });
-{{/field:structured_annotations}}
+  {{/each}}
 {{#field:type}}
 auto {{> metadata/func_field_name}}_type = {{> metadata/type_gen}};
 {{> metadata/func_field_name}}_type->writeAndGenType(*{{> metadata/func_field_name}}.type(), metadata);

@@ -14,10 +14,12 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}{{#type:typedef?}}{{!
-}}std::make_unique<Typedef>("{{type:program_name}}.{{type:cpp_name}}", {{#type:typedef_type}}{{> metadata/type_gen}}{{/type:typedef_type}}, std::vector<ThriftConstStruct>{ {{#type:typedef}}{{#typedef:structured_annotations}}{{#if constant:type.self.structured?}}{{> metadata/const_struct}}, {{/if}}{{/typedef:structured_annotations}}{{/type:typedef}} }){{!
-}}{{/type:typedef?}}{{!
-}}{{^type:typedef?}}{{!
+}}{{#if type:typedef?}}{{!
+}}std::make_unique<Typedef>("{{type:program_name}}.{{type:cpp_name}}", {{#type:typedef_type}}{{> metadata/type_gen}}{{/type:typedef_type}}, std::vector<ThriftConstStruct>{ {{!
+  }}{{#type:typedef}}{{#each typedef:self.structured_annotations as |annot|}}{{!
+  }}{{#if annot.type.structured?}}{{#partial metadata.structured_annotation value=annot.value}}, {{/if}}{{!
+  }}{{/each}}{{/type:typedef}} }){{!
+}}{{#else}}{{!
 }}{{#type:primitive?}}{{!
 }}std::make_unique<Primitive>({{!
 }}{{#type:bool?}}ThriftPrimitiveType::THRIFT_BOOL_TYPE{{/type:bool?}}{{!
@@ -40,4 +42,4 @@
 }}{{#type:union?}}std::make_unique<Union<{{type:cpp_standard_type}}>>("{{type:program_name}}.{{type:name}}"){{/type:union?}}{{!
 }}{{^type:union?}}std::make_unique<Struct<{{type:cpp_standard_type}}>>("{{type:program_name}}.{{type:name}}"){{/type:union?}}{{!
 }}{{/type:structured?}}{{!
-}}{{/type:primitive?}}{{/type:typedef?}}
+}}{{/type:primitive?}}{{/if type:typedef?}}

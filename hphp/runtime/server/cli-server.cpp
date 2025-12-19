@@ -174,6 +174,7 @@ way to determine how much progress the server made.
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <sys/xattr.h>
+#include <systemd/sd-daemon.h>
 
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/uuid/uuid_io.hpp>
@@ -600,8 +601,10 @@ void CLIServer::start() {
 
     m_server->attachEventBase(m_ev);
     m_server->addAcceptCallback(this, nullptr);
-
     setState(State::RUNNING);
+
+    if (Cfg::Eval::UnixServerNotifySystemd) sd_notify(0, "READY=1");
+
     m_ev->loop();
     Logger::Info("CLI server thread terminating");
   });

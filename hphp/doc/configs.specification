@@ -1312,6 +1312,11 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 
 - bool Eval.UnixServerAssumeRepoRealpath = true, UNKNOWN
 
+- bool Eval.UnixServerNotifySystemd = false, UNKNOWN
+
+  When set will notify systemd that hhvm is READY after unix server startup is
+  complete.
+
 - bool Eval.TrashFillOnRequestExit = false, UNKNOWN
 
 - bool Eval.EnableReverseDataMap = true, UNKNOWN

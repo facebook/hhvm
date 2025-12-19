@@ -13,6 +13,7 @@
 #include <folly/io/async/EventBaseManager.h>
 #include <folly/portability/GFlags.h>
 #include <folly/portability/Unistd.h>
+#include <folly/system/HardwareConcurrency.h>
 #include <proxygen/httpserver/HTTPServer.h>
 #include <proxygen/httpserver/RequestHandlerFactory.h>
 
@@ -59,7 +60,7 @@ int main(int argc, char* argv[]) {
   };
 
   if (FLAGS_threads <= 0) {
-    FLAGS_threads = sysconf(_SC_NPROCESSORS_ONLN);
+    FLAGS_threads = folly::available_concurrency();
     CHECK_GT(FLAGS_threads, 0);
   }
 

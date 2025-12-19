@@ -26,14 +26,12 @@
         {{> metadata/thrift_metadata_field}}
         {{/struct:fields_sorted}}
     },
-    {{#if (not (array.empty? struct:structured_annotations))}}
+    {{#if (not (array.empty? struct:self.structured_annotations))}}
     StructuredAnnotations: []*{{program:metadata_qualifier}}ThriftConstStruct{
-        {{#struct:structured_annotations}}
-        {{#constant:value}}
-        {{> metadata/thrift_metadata_const_struct}}
-        {{/constant:value}}
-        {{/struct:structured_annotations}}
+      {{#each struct:self.structured_annotations as |annot|}}
+        {{#partial metadata.structured_annotation value=annot.value}}
+      {{/each}}
     },
-    {{/if (not (array.empty? struct:structured_annotations))}}
+    {{/if (not (array.empty? struct:self.structured_annotations))}}
 }
 {{!newline}}

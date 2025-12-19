@@ -115,9 +115,7 @@ class t_mstch_go_generator : public t_mstch_generator {
     def.property("go_package_alias", [this](const t_program& self) {
       return data_.get_go_package_alias(&self);
     });
-    def.property("thirft_source_path", [](const t_program& self) {
-      return self.path();
-    });
+    def.property("thirft_source_path", mem_fn(&t_program::path));
     def.property("compat?", [this](const t_program&) { return data_.compat; });
     def.property("compat_setters?", [this](const t_program&) {
       return data_.compat_setters;
@@ -127,6 +125,21 @@ class t_mstch_go_generator : public t_mstch_generator {
     });
     def.property("gen_default_get?", [this](const t_program&) {
       return data_.gen_default_get;
+    });
+    def.property("go_import_path", [](const t_program& self) {
+      return go::get_go_package_dir(&self);
+    });
+    def.property("import_metadata_package?", [](const t_program& self) {
+      // We don't need to import the metadata package if we are
+      // generating metadata inside the metadata package itself. Duh.
+      return go::get_go_package_dir(&self) != go::THRIFT_METADATA_IMPORT;
+    });
+    def.property("metadata_qualifier", [](const t_program& self) {
+      // We don't need to use "metadata." qualifier when generating
+      // metadata inside the metadata package itself.
+      return go::get_go_package_dir(&self) == go::THRIFT_METADATA_IMPORT
+          ? whisker::make::string("")
+          : whisker::make::string("metadata.");
     });
 
     return std::move(def).make();
@@ -460,12 +473,7 @@ class mstch_go_program : public mstch_program {
     register_methods(
         this,
         {
-            {"program:go_import_path", &mstch_go_program::go_import_path},
             {"program:thrift_imports", &mstch_go_program::thrift_imports},
-            {"program:import_metadata_package?",
-             &mstch_go_program::should_import_metadata_package},
-            {"program:metadata_qualifier",
-             &mstch_go_program::metadata_qualifier},
             {"program:thrift_metadata_types",
              &mstch_go_program::thrift_metadata_types},
             {"program:req_resp_structs", &mstch_go_program::req_resp_structs},
@@ -479,21 +487,6 @@ class mstch_go_program : public mstch_program {
     }
     return a;
   }
-  mstch::node go_import_path() { return get_go_import_path_(); }
-  mstch::node should_import_metadata_package() {
-    // We don't need to import the metadata package if we are
-    // generating metadata inside the metadata package itself. Duh.
-    return !is_metadata_package_();
-  }
-  mstch::node metadata_qualifier() {
-    // We don't need to use "metadata." qualifier when generating
-    // metadata inside the metadata package itself.
-    if (!is_metadata_package_()) {
-      return std::string("metadata.");
-    } else {
-      return std::string("");
-    }
-  }
   mstch::node thrift_metadata_types() {
     return make_mstch_array(
         data_.thrift_metadata_types, *context_.type_factory);
@@ -504,11 +497,6 @@ class mstch_go_program : public mstch_program {
 
  private:
   go::codegen_data& data_;
-
-  std::string get_go_import_path_() { return go::get_go_package_dir(program_); }
-  bool is_metadata_package_() {
-    return get_go_import_path_() == go::THRIFT_METADATA_IMPORT;
-  }
 };
 
 class mstch_go_struct : public mstch_struct {

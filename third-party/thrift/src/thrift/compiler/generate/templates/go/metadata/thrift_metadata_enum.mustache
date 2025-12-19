@@ -26,14 +26,12 @@
         {{enum_value:value}}: "{{enum_value:name}}",
         {{/enum:values}}
     },
-    {{#if (not (array.empty? enum:structured_annotations))}}
+    {{#if (not (array.empty? enum:self.structured_annotations))}}
     StructuredAnnotations: []*{{program:metadata_qualifier}}ThriftConstStruct{
-        {{#enum:structured_annotations}}
-        {{#constant:value}}
-        {{> metadata/thrift_metadata_const_struct}}
-        {{/constant:value}}
-        {{/enum:structured_annotations}}
+      {{#each enum:self.structured_annotations as |annot|}}
+        {{#partial metadata.structured_annotation value=annot.value}}
+      {{/each}}
     },
-    {{/if (not (array.empty? enum:structured_annotations))}}
+    {{/if (not (array.empty? enum:self.structured_annotations))}}
 },
 {{!newline}}

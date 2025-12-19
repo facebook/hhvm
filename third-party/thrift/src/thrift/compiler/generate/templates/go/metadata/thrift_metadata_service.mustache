@@ -31,14 +31,12 @@
         {{/function:go_server_supported?}}
         {{/service:functions}}
     },
-    {{#if (not (array.empty? service:structured_annotations))}}
+    {{#if (not (array.empty? service:self.structured_annotations))}}
     StructuredAnnotations: []*{{program:metadata_qualifier}}ThriftConstStruct{
-        {{#service:structured_annotations}}
-        {{#constant:value}}
-        {{> metadata/thrift_metadata_const_struct}}
-        {{/constant:value}}
-        {{/service:structured_annotations}}
+      {{#each service:self.structured_annotations as |annot|}}
+        {{#partial metadata.structured_annotation value=annot.value}}
+      {{/each}}
     },
-    {{/if (not (array.empty? service:structured_annotations))}}
+    {{/if (not (array.empty? service:self.structured_annotations))}}
 },
 {{!newline}}

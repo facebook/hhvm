@@ -70,14 +70,12 @@
         {{/function:exceptions}}
     },
     {{/function:exceptions?}}
-    {{#if (not (array.empty? function:structured_annotations))}}
+    {{#if (not (array.empty? function:self.structured_annotations))}}
     StructuredAnnotations: []*{{program:metadata_qualifier}}ThriftConstStruct{
-        {{#function:structured_annotations}}
-        {{#constant:value}}
-        {{> metadata/thrift_metadata_const_struct}}
-        {{/constant:value}}
-        {{/function:structured_annotations}}
+      {{#each function:self.structured_annotations as |annot|}}
+        {{#partial metadata.structured_annotation value=annot.value}}
+      {{/each}}
     },
-    {{/if (not (array.empty? function:structured_annotations))}}
+    {{/if (not (array.empty? function:self.structured_annotations))}}
 },
 {{!newline}}

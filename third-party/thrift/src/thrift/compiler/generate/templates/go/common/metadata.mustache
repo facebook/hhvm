@@ -1,0 +1,95 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}
+
+{{!
+  Recursively renders a const value's metadata.
+}}
+{{#let partial const_value |value|}}
+{{!
+  Nested partial for const value pair and struct values, so we can leverage
+  standalone indentation.
+  They must be nested partials to support rendering circular references by
+  capturing the parent in the nested partial:
+    const_value -> const_value_pair -> const_value
+}}
+  {{#let partial const_value_pair |elem| captures |const_value|}}
+&{{root_program.metadata_qualifier}}ThriftConstValuePair{
+    Key: {{#partial const_value value=elem.key}}
+    Value: {{#partial const_value value=elem.value}}
+},
+  {{/let partial}}
+  {{#let partial const_struct captures |const_value value|}}
+&{{root_program.metadata_qualifier}}ThriftConstStruct{
+    Type: &{{root_program.metadata_qualifier}}ThriftStructType{
+        Name: "{{value.type.true_type.scoped_name}}",
+    },
+    Fields: map[string]*{{root_program.metadata_qualifier}}ThriftConstValue{
+  {{#each value.structured_elements as |elem|}}
+        "{{elem.field.name}}":
+            {{#partial const_value value=elem.value}}
+  {{/each}}
+    },
+},
+  {{/let partial}}
+{{! Main const value content }}
+&{{root_program.metadata_qualifier}}ThriftConstValue{
+  {{#if value.bool?}}
+    CvBool: thrift.Pointerize({{value.bool_value}}),
+  {{#else if value.integer?}}
+    CvInteger: thrift.Pointerize(int64({{value.integer_value}})),
+  {{#else if value.double?}}
+    CvDouble: thrift.Pointerize(float64({{value.double_value}})),
+  {{#else if value.string?}}
+    CvString: thrift.Pointerize({{value.go_quoted_value}}),
+  {{#else if value.map?}}
+    CvMap: []*{{root_program.metadata_qualifier}}ThriftConstValuePair{
+    {{#each value.map_elements as |elem|}}
+        {{#partial const_value_pair elem=elem}}
+    {{/each}}
+    },
+  {{#else if value.list?}}
+    CvList: []*{{root_program.metadata_qualifier}}ThriftConstValue{
+    {{#each value.list_elements as |elem|}}
+        {{#partial const_value value=elem}}
+    {{/each}}
+    },
+  {{#else if value.structured?}}
+    CvStruct: {{#partial const_struct}}
+  {{/if value.bool?}}
+},
+{{/let partial}}
+
+{{!
+  Structured annotation const metadata.
+  This is the same as the `const_struct` nested partial in `const_value`, but
+  emitted WITHOUT an outer `ThriftConstValue` wrapper, exported for structured
+  annotations.
+}}
+{{#let export partial structured_annotation |value| captures |const_value|}}
+&{{root_program.metadata_qualifier}}ThriftConstStruct{
+    Type: &{{root_program.metadata_qualifier}}ThriftStructType{
+        Name: "{{value.type.true_type.scoped_name}}",
+    },
+    Fields: map[string]*{{root_program.metadata_qualifier}}ThriftConstValue{
+  {{#each value.structured_elements as |elem|}}
+        "{{elem.field.name}}":
+            {{#partial const_value value=elem.value}}
+  {{/each}}
+    },
+},
+{{/let partial}}

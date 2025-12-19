@@ -11,6 +11,7 @@
 #include <condition_variable>
 #include <memory>
 #include <mutex>
+#include <optional>
 #include <string>
 #include <thread>
 #include <vector>
@@ -32,6 +33,18 @@ class AdditionalLoggerIf {
   AdditionalLoggerIf& operator=(AdditionalLoggerIf&&) = delete;
 
   virtual void log(const std::vector<stat_t>& stats) = 0;
+
+  /**
+   * Get the backup stats root path to use when the default stats_root is not
+   * available. This allows platform-specific implementations (e.g., Tupperware)
+   * to provide alternative paths.
+   *
+   * @return The backup stats root path, or nullopt if no backup is
+   *         available.
+   */
+  virtual std::optional<std::string> getBackupStatsRootPath() const {
+    return std::nullopt;
+  }
 };
 
 class McrouterLogger {
@@ -70,6 +83,11 @@ class McrouterLogger {
   bool loggedStartupOptions_{false};
   // Name of the periodic function registered with the function scheduler.
   const std::string functionHandle_;
+
+  /**
+   * The resolved stats root path (either the default or the TW backup path)
+   */
+  std::string statsRoot_;
 
   /**
    * File paths of stats we want to touch and keep their mtimes up-to-date

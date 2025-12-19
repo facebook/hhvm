@@ -36,29 +36,23 @@ const char* kStatsSfx = "stats";
 const char* kStatsStartupOptionsSfx = "startup_options";
 const char* kConfigSourcesInfoFileName = "config_sources_info";
 
-std::string stats_file_path(
-    const McrouterOptions& opts,
-    const std::string& suffix) {
-  boost::filesystem::path path(opts.stats_root);
-  path /= getStatPrefix(opts) + "." + suffix;
-  return path.string();
-}
-
 /**
  * Writes string to a file.
  */
 void write_file(
     const McrouterOptions& opts,
+    const std::string& statsRoot,
     const std::string& suffix,
     const std::string& str) {
   try {
     // In case the dir was deleted some time after mcrouter started
-    if (!ensureDirExistsAndWritable(opts.stats_root)) {
+    if (!ensureDirExistsAndWritable(statsRoot)) {
       return;
     }
 
-    std::string path = stats_file_path(opts, suffix);
-    atomicallyWriteFileToDisk(str, path);
+    boost::filesystem::path path(statsRoot);
+    path /= getStatPrefix(opts) + "." + suffix;
+    atomicallyWriteFileToDisk(str, path.string());
   } catch (const std::exception& e) {
     VLOG(1) << "Failed to write stats to disk: " << e.what();
   }
@@ -71,14 +65,16 @@ void write_file(
  */
 void write_stats_file(
     const McrouterOptions& opts,
+    const std::string& statsRoot,
     const std::string& suffix,
     const folly::dynamic& stats) {
   auto statsString = toPrettySortedJson(stats) + "\n";
-  write_file(opts, suffix, statsString);
+  write_file(opts, statsRoot, suffix, statsString);
 }
 
 void write_stats_to_disk(
     const McrouterOptions& opts,
+    const std::string& statsRoot,
     std::vector<stat_t>& stats,
     const folly::dynamic& requestStats) {
   try {
@@ -115,17 +111,19 @@ void write_stats_to_disk(
       jstats[folly::to<std::string>(prefix, kv.first.asString())] = kv.second;
     }
 
-    write_stats_file(opts, kStatsSfx, jstats);
+    write_stats_file(opts, statsRoot, kStatsSfx, jstats);
   } catch (const std::exception& e) {
     VLOG(1) << "Failed to write stats to disk: " << e.what();
   }
 }
 
-void write_config_sources_info_to_disk(CarbonRouterInstanceBase& router) {
+void write_config_sources_info_to_disk(
+    CarbonRouterInstanceBase& router,
+    const std::string& statsRoot) {
   auto config_info_json = router.configApi().getConfigSourcesInfo();
 
   try {
-    boost::filesystem::path path(router.opts().stats_root);
+    boost::filesystem::path path(statsRoot);
     path /= getStatPrefix(router.opts()) + "." + kConfigSourcesInfoFileName;
     atomicallyWriteFileToDisk(
         toPrettySortedJson(config_info_json), path.string());
@@ -158,17 +156,40 @@ bool McrouterLogger::start() {
     return false;
   }
 
-  if (!ensureDirExistsAndWritable(router_.opts().stats_root)) {
-    LOG(WARNING) << "Can't create or chmod " << router_.opts().stats_root
-                 << ", disabling stats logging";
-    return false;
+  // Try the default stats_root first
+  if (ensureDirExistsAndWritable(router_.opts().stats_root)) {
+    statsRoot_ = router_.opts().stats_root;
+  } else {
+    // If default path is not available and TW backup is enabled, try backup
+    // path
+    if (router_.opts().enable_tw_crash_config_backup_path &&
+        additionalLogger_) {
+      auto backupPath = additionalLogger_->getBackupStatsRootPath();
+      if (backupPath.has_value() &&
+          ensureDirExistsAndWritable(backupPath.value())) {
+        statsRoot_ = backupPath.value();
+        LOG(INFO) << "Using backup path for stats logging: " << statsRoot_;
+      } else {
+        const char* pathStr =
+            backupPath.has_value() ? backupPath->c_str() : "empty";
+        LOG(WARNING) << "Can't create or chmod path: " << pathStr
+                     << ", disabling stats logging";
+        return false;
+      }
+    } else {
+      LOG(WARNING) << "Can't create or chmod " << router_.opts().stats_root
+                   << ", disabling stats logging";
+      return false;
+    }
   }
 
-  auto path = stats_file_path(router_.opts(), kStatsStartupOptionsSfx);
+  boost::filesystem::path path(statsRoot_);
+  path /= getStatPrefix(router_.opts()) + "." + kStatsStartupOptionsSfx;
+  auto pathStr = path.string();
   if (std::find(
-          touchStatsFilepaths_.begin(), touchStatsFilepaths_.end(), path) ==
+          touchStatsFilepaths_.begin(), touchStatsFilepaths_.end(), pathStr) ==
       touchStatsFilepaths_.end()) {
-    touchStatsFilepaths_.push_back(std::move(path));
+    touchStatsFilepaths_.push_back(std::move(pathStr));
   }
 
   auto scheduler = router_.functionScheduler();
@@ -197,7 +218,8 @@ void McrouterLogger::logStartupOptions() {
   auto json_options = folly::toDynamic(router_.getStartupOpts());
   json_options["pid"] = folly::to<std::string>(getpid());
   insertCustomStartupOpts(json_options);
-  write_stats_file(router_.opts(), kStatsStartupOptionsSfx, json_options);
+  write_stats_file(
+      router_.opts(), statsRoot_, kStatsStartupOptionsSfx, json_options);
 }
 
 void McrouterLogger::log() {
@@ -245,8 +267,8 @@ void McrouterLogger::log() {
     }
   }
 
-  write_stats_to_disk(router_.opts(), stats, requestStats);
-  write_config_sources_info_to_disk(router_);
+  write_stats_to_disk(router_.opts(), statsRoot_, stats, requestStats);
+  write_config_sources_info_to_disk(router_, statsRoot_);
 
   for (const auto& filepath : touchStatsFilepaths_) {
     touchFile(filepath);

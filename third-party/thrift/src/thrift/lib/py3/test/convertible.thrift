@@ -17,6 +17,9 @@
 include "thrift/annotation/python.thrift"
 include "thrift/annotation/thrift.thrift"
 
+@thrift.AllowLegacyMissingUris
+package;
+
 namespace cpp2 convertible
 
 enum Empty {

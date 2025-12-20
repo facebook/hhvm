@@ -18,6 +18,10 @@ namespace py3 transitive_deps
 
 include "thrift/lib/py3/test/transitive_deps/c.thrift"
 include "thrift/lib/py3/test/transitive_deps/d.thrift"
+include "thrift/annotation/thrift.thrift"
+
+@thrift.AllowLegacyMissingUris
+package;
 
 typedef list<c.C> B
 

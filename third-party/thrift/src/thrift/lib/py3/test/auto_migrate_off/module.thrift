@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
+include "thrift/annotation/thrift.thrift"
+
+@thrift.AllowLegacyMissingUris
+package;
+
 namespace py3 thrift.py3.test.auto_migrate_off
 
 // A test module to check effect of auto-migrate build constraint on output thrift-python codegen.

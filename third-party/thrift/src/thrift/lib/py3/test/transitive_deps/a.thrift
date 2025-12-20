@@ -17,6 +17,10 @@
 namespace py3 transitive_deps
 
 include "thrift/lib/py3/test/transitive_deps/b.thrift"
+include "thrift/annotation/thrift.thrift"
+
+@thrift.AllowLegacyMissingUris
+package;
 
 struct A {
   1: list<b.B> b;

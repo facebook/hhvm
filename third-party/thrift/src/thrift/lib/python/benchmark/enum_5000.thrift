@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
+include "thrift/annotation/thrift.thrift"
+
+@thrift.AllowLegacyMissingUris
+package;
+
 namespace py3 thrift.benchmark
 namespace py thrift.benchmark.enum_5000
 namespace cpp2 thrift.benchmark.enum_5000

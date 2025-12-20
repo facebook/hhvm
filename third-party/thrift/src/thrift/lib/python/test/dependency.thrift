@@ -18,6 +18,10 @@ namespace py3 testing
 
 include "thrift/lib/python/test/sub_dependency.thrift"
 include "thrift/lib/python/test/injected_field.thrift"
+include "thrift/annotation/thrift.thrift"
+
+@thrift.AllowLegacyMissingUris
+package;
 
 enum Status {
   ACTIVE = 1,

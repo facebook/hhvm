@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
+include "thrift/annotation/thrift.thrift"
+
+@thrift.AllowLegacyMissingUris
+package;
+
 namespace py3 testing
 namespace py testing.py_deprecated_asyncio_fallback_test
 namespace py.asyncio testing.py_deprecated_asyncio_fallback_test

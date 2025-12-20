@@ -20,6 +20,9 @@ namespace py3 testing
 include "thrift/lib/py3/test/mixin/b.thrift"
 include "thrift/annotation/thrift.thrift"
 
+@thrift.AllowLegacyMissingUris
+package;
+
 struct Mixin3Base {
   1: string field3;
 }

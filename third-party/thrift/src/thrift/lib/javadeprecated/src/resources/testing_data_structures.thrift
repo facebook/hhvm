@@ -21,6 +21,9 @@ namespace android com.facebook.thrift.android.test
 include "thrift/annotation/java.thrift"
 include "thrift/annotation/thrift.thrift"
 
+@thrift.AllowLegacyMissingUris
+package;
+
 @thrift.DeprecatedUnvalidatedAnnotations{
   items = {"java.swift.type": "it.unimi.dsi.fastutil.ints.Int2LongArrayMap"},
 }

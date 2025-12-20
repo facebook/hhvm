@@ -19,6 +19,9 @@ namespace py thrift.util.test_service
 
 include "thrift/annotation/thrift.thrift"
 
+@thrift.AllowLegacyMissingUris
+package;
+
 exception UserException1 {
   1: string message;
 }

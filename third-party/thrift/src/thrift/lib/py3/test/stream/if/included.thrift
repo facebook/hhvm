@@ -18,6 +18,10 @@ namespace cpp2 thrift.py3.test.included
 namespace py3 thrift.py3.test.included
 
 include "thrift/annotation/python.thrift"
+include "thrift/annotation/thrift.thrift"
+
+@thrift.AllowLegacyMissingUris
+package;
 
 typedef i64 IncludedInt64
 

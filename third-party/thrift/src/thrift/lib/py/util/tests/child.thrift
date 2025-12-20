@@ -17,6 +17,9 @@
 include "thrift/lib/py/util/tests/parent.thrift"
 include "thrift/annotation/thrift.thrift"
 
+@thrift.AllowLegacyMissingUris
+package;
+
 namespace py3 thrift.test
 namespace py thrift.test.child
 

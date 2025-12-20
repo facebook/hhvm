@@ -15,6 +15,10 @@
  */
 
 include "thrift/lib/py3/test/stream/if/included.thrift"
+include "thrift/annotation/thrift.thrift"
+
+@thrift.AllowLegacyMissingUris
+package;
 
 namespace cpp2 thrift.py3.test
 namespace py3 thrift.py3.test

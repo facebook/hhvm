@@ -17,6 +17,9 @@
 include "thrift/annotation/cpp.thrift"
 include "thrift/annotation/thrift.thrift"
 
+@thrift.AllowLegacyMissingUris
+package;
+
 cpp_include "folly/io/IOBuf.h"
 
 @cpp.Type{name = "std::unique_ptr<folly::IOBuf>"}

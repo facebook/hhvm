@@ -17,6 +17,10 @@
 namespace java.swift com.facebook.mojo.example
 
 include "thrift/lib/java/fbthrift-maven-plugin/fbthrift-maven-plugin-example/Example2.thrift"
+include "thrift/annotation/thrift.thrift"
+
+@thrift.AllowLegacyMissingUris
+package;
 
 struct Example1 {
   1: optional i32 bar;

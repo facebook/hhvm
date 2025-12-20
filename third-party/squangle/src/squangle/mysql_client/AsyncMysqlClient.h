@@ -190,8 +190,7 @@ class AsyncMysqlClient : public MysqlClientBase {
   }
 
   virtual std::string_view getBaseClient() const noexcept override {
-    static constexpr std::string_view kSyncClient{"AsyncMysqlClient"};
-    return kSyncClient;
+    return "AsyncMysqlClient";
   }
 
  protected:

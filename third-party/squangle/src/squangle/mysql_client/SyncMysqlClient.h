@@ -56,8 +56,7 @@ class SyncMysqlClient : public MysqlClientBase {
   static std::shared_ptr<SyncMysqlClient> defaultClient();
 
   virtual std::string_view getBaseClient() const noexcept override {
-    static constexpr std::string_view kSyncClient{"SyncMysqlClient"};
-    return kSyncClient;
+    return "SyncMysqlClient";
   }
 
  protected:

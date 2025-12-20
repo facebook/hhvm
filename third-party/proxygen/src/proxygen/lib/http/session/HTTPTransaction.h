@@ -680,6 +680,13 @@ class HTTPTransaction
     }
 
     folly::Expected<folly::Unit, WebTransport::ErrorCode>
+    setWebTransportPriorityQueue(
+        std::unique_ptr<quic::PriorityQueue> /*queue*/) noexcept override {
+      LOG(FATAL) << __func__ << " not supported";
+      folly::assume_unreachable();
+    }
+
+    folly::Expected<folly::Unit, WebTransport::ErrorCode>
     pauseWebTransportIngress(HTTPCodec::StreamID /*id*/) override {
       LOG(FATAL) << __func__ << " not supported";
       folly::assume_unreachable();

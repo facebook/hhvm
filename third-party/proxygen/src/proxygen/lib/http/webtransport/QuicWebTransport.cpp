@@ -162,6 +162,17 @@ QuicWebTransport::setWebTransportStreamPriority(
 }
 
 folly::Expected<folly::Unit, WebTransport::ErrorCode>
+QuicWebTransport::setWebTransportPriorityQueue(
+    std::unique_ptr<quic::PriorityQueue> queue) noexcept {
+  XCHECK(quicSocket_);
+  auto res = quicSocket_->setPriorityQueue(std::move(queue));
+  if (res.hasError()) {
+    return folly::makeUnexpected(WebTransport::ErrorCode::GENERIC_ERROR);
+  }
+  return folly::unit;
+}
+
+folly::Expected<folly::Unit, WebTransport::ErrorCode>
 QuicWebTransport::pauseWebTransportIngress(HTTPCodec::StreamID id) {
   XCHECK(quicSocket_);
   auto res = quicSocket_->pauseRead(id);

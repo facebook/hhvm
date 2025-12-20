@@ -105,6 +105,10 @@ class QuicWebTransport
           HTTPCodec::StreamID /*id*/,
           quic::PriorityQueue::Priority /*pri*/) override;
 
+  folly::Expected<folly::Unit, WebTransport::ErrorCode>
+      setWebTransportPriorityQueue(
+          std::unique_ptr<quic::PriorityQueue> /*queue*/) noexcept override;
+
   folly::Expected<std::pair<std::unique_ptr<folly::IOBuf>, bool>,
                   WebTransport::ErrorCode>
   readWebTransportData(HTTPCodec::StreamID id, size_t max) override {

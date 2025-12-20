@@ -92,6 +92,10 @@ class MockWebTransport : public WebTransport {
   MOCK_METHOD(GenericApiRet,
               setPriority,
               (uint64_t, quic::PriorityQueue::Priority));
+  MOCK_METHOD(GenericApiRet,
+              setPriorityQueue,
+              (std::unique_ptr<quic::PriorityQueue>),
+              (noexcept));
   MOCK_METHOD(GenericApiRet, stopSending, (uint64_t, uint32_t));
   MOCK_METHOD(GenericApiRet, sendDatagram, (std::unique_ptr<folly::IOBuf>));
   MOCK_METHOD((const folly::SocketAddress&), getLocalAddress, (), (const));

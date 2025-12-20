@@ -248,6 +248,13 @@ class WebTransportFilter
     return h3Tp_ ? h3Tp_->setWebTransportStreamPriority(id, pri) : folly::unit;
   }
 
+  folly::Expected<folly::Unit, WebTransport::ErrorCode>
+  setWebTransportPriorityQueue(
+      std::unique_ptr<quic::PriorityQueue> queue) noexcept override {
+    return h3Tp_ ? h3Tp_->setWebTransportPriorityQueue(std::move(queue))
+                 : folly::unit;
+  }
+
   folly::Expected<std::pair<std::unique_ptr<folly::IOBuf>, bool>,
                   WebTransport::ErrorCode>
   readWebTransportData(HTTPCodec::StreamID id, size_t max) override {

@@ -251,6 +251,8 @@ class WebTransport {
       uint64_t streamId, uint32_t error) = 0;
   virtual folly::Expected<folly::Unit, ErrorCode> setPriority(
       uint64_t streamId, quic::PriorityQueue::Priority priority) = 0;
+  virtual folly::Expected<folly::Unit, ErrorCode> setPriorityQueue(
+      std::unique_ptr<quic::PriorityQueue> queue) noexcept = 0;
   virtual folly::Expected<folly::SemiFuture<uint64_t>, ErrorCode> awaitWritable(
       uint64_t streamId) = 0;
 

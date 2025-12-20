@@ -72,6 +72,10 @@ class WebTransportImpl : public WebTransport {
             HTTPCodec::StreamID /*id*/,
             quic::PriorityQueue::Priority /*pri*/) = 0;
 
+    virtual folly::Expected<folly::Unit, WebTransport::ErrorCode>
+        setWebTransportPriorityQueue(
+            std::unique_ptr<quic::PriorityQueue> /*queue*/) noexcept = 0;
+
     virtual folly::Expected<std::pair<std::unique_ptr<folly::IOBuf>, bool>,
                             WebTransport::ErrorCode>
     readWebTransportData(HTTPCodec::StreamID /*id*/, size_t /*max*/) = 0;
@@ -189,6 +193,10 @@ class WebTransportImpl : public WebTransport {
       return folly::makeUnexpected(WebTransport::ErrorCode::INVALID_STREAM_ID);
     }
     return it->second.setPriority(priority);
+  }
+  folly::Expected<folly::Unit, WebTransport::ErrorCode> setPriorityQueue(
+      std::unique_ptr<quic::PriorityQueue> queue) noexcept override {
+    return tp_.setWebTransportPriorityQueue(std::move(queue));
   }
   folly::Expected<folly::SemiFuture<uint64_t>, ErrorCode> awaitWritable(
       uint64_t streamId) override {

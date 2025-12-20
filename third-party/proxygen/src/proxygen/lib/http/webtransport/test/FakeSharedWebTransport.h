@@ -316,6 +316,11 @@ class FakeSharedWebTransport : public WebTransport {
     return h->second->setPriority(priority);
   }
 
+  folly::Expected<folly::Unit, ErrorCode> setPriorityQueue(
+      std::unique_ptr<quic::PriorityQueue> /*queue*/) noexcept override {
+    return folly::unit;
+  }
+
   folly::Expected<folly::Unit, ErrorCode> stopSending(uint64_t streamId,
                                                       uint32_t error) override {
     auto h = readHandles.find(streamId);

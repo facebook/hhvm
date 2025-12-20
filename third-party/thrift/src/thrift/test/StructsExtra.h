@@ -19,6 +19,8 @@
 #include <folly/small_vector.h>
 #include <folly/sorted_vector_types.h>
 
+#include <thrift/lib/cpp2/Thrift.h>
+
 namespace apache {
 namespace thrift {
 namespace test {

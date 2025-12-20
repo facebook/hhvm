@@ -18,6 +18,8 @@
 
 #include <cstdint>
 
+#include <thrift/lib/cpp2/Thrift.h>
+
 #include <boost/operators.hpp>
 
 namespace apache {

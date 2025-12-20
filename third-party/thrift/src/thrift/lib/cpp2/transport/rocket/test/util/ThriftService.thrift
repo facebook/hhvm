@@ -17,6 +17,10 @@
 namespace cpp2 testutil.testservice
 
 include "thrift/annotation/cpp.thrift"
+include "thrift/annotation/thrift.thrift"
+
+@thrift.AllowLegacyMissingUris
+package;
 
 struct Message {
   1: string message;

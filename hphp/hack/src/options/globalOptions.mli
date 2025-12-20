@@ -288,7 +288,10 @@ type t = {
   class_sub_classname: bool;  (** Whether class<T> <: classname<T> *)
   class_class_type: bool;  (** When true, C::class : class<C> *)
   needs_concrete: bool;
-      (** Enable __NeedsConcrete checking https://fburl.com/hack-needs-concrete *)
+      (** Enable __NeedsConcrete checking https://fburl.com/hack-needs-concrete.
+       * Excludes hierarchy/override check, which is covered by `needs_concrete_override_check` *)
+  needs_concrete_override_check: bool;
+      (** Enable override check for __NeedsConcrete methods https://fburl.com/hack-needs-concrete *)
   allow_class_string_cast: bool;  (** Admits (string)$c when $c: class<T>  *)
   class_pointer_ban_classname_new: int;
       (** Error on new $c() when $c: classname<T>  *)
@@ -419,6 +422,7 @@ val set :
   ?class_sub_classname:bool ->
   ?class_class_type:bool ->
   ?needs_concrete:bool ->
+  ?needs_concrete_override_check:bool ->
   ?allow_class_string_cast:bool ->
   ?class_pointer_ban_classname_new:int ->
   ?class_pointer_ban_classname_type_structure:int ->

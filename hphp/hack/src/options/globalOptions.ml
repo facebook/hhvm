@@ -195,6 +195,7 @@ type t = {
   class_sub_classname: bool;
   class_class_type: bool;
   needs_concrete: bool;
+  needs_concrete_override_check: bool;
   allow_class_string_cast: bool;
   class_pointer_ban_classname_new: int;
   class_pointer_ban_classname_type_structure: int;
@@ -319,6 +320,7 @@ let default =
     class_sub_classname = true;
     class_class_type = true;
     needs_concrete = false;
+    needs_concrete_override_check = false;
     allow_class_string_cast = true;
     class_pointer_ban_classname_new = 0;
     class_pointer_ban_classname_type_structure = 0;
@@ -440,6 +442,7 @@ let set
     ?class_sub_classname
     ?class_class_type
     ?needs_concrete
+    ?needs_concrete_override_check
     ?allow_class_string_cast
     ?class_pointer_ban_classname_new
     ?class_pointer_ban_classname_type_structure
@@ -750,6 +753,10 @@ let set
       setting class_sub_classname options.class_sub_classname;
     class_class_type = setting class_class_type options.class_class_type;
     needs_concrete = setting needs_concrete options.needs_concrete;
+    needs_concrete_override_check =
+      setting
+        needs_concrete_override_check
+        options.needs_concrete_override_check;
     allow_class_string_cast =
       setting allow_class_string_cast options.allow_class_string_cast;
     class_pointer_ban_classname_new =

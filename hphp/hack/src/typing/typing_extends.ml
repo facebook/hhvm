@@ -787,7 +787,7 @@ let check_needs_concrete_override
     ~class_pos
     ~member_name =
   if
-    TypecheckerOptions.needs_concrete env.genv.tcopt
+    TypecheckerOptions.needs_concrete_override_check env.genv.tcopt
     && (not (get_ce_readonly_prop_or_needs_concrete parent_class_elt))
     && get_ce_readonly_prop_or_needs_concrete class_elt
   then

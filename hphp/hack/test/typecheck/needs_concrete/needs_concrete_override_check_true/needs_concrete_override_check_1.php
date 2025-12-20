@@ -1,4 +1,6 @@
 <?hh
+// Test that __NeedsConcrete methods cannot override non-__NeedsConcrete methods
+// when needs_concrete_override_check is enabled
 
 class Base {
   public function foo(): void {}

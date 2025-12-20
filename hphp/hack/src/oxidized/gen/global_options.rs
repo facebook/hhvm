@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<07b42b6a9fb05aad30e5c0589478b0cf>>
+// @generated SignedSource<<8218300fdbd908f0eedad82a589d0721>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -395,8 +395,11 @@ pub struct GlobalOptions {
     pub class_sub_classname: bool,
     /// When true, C::class : class<C>
     pub class_class_type: bool,
-    /// Enable __NeedsConcrete checking https://fburl.com/hack-needs-concrete
+    /// Enable __NeedsConcrete checking https://fburl.com/hack-needs-concrete.
+    /// Excludes hierarchy/override check, which is covered by `needs_concrete_override_check`
     pub needs_concrete: bool,
+    /// Enable override check for __NeedsConcrete methods https://fburl.com/hack-needs-concrete
+    pub needs_concrete_override_check: bool,
     /// Admits (string)$c when $c: class<T>
     pub allow_class_string_cast: bool,
     /// Error on new $c() when $c: classname<T>

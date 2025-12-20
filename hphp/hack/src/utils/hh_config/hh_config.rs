@@ -572,6 +572,10 @@ impl HhConfig {
                 .get_bool_or("class_sub_classname", default.class_sub_classname)?,
             class_class_type: hhconfig.get_bool_or("class_class_type", default.class_class_type)?,
             needs_concrete: hhconfig.get_bool_or("needs_concrete", default.needs_concrete)?,
+            needs_concrete_override_check: hhconfig.get_bool_or(
+                "needs_concrete_override_check",
+                default.needs_concrete_override_check,
+            )?,
             allow_class_string_cast: hhconfig
                 .get_bool_or("allow_class_string_cast", default.allow_class_string_cast)?,
             class_pointer_ban_classname_new: hhconfig.get_int_or(

@@ -333,6 +333,9 @@ let class_class_type t = t.GlobalOptions.class_class_type
 
 let needs_concrete t = t.GlobalOptions.needs_concrete
 
+let needs_concrete_override_check t =
+  t.GlobalOptions.needs_concrete_override_check
+
 let allow_class_string_cast t = t.GlobalOptions.allow_class_string_cast
 
 let class_pointer_ban_classname_new t =

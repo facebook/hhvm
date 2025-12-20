@@ -19,6 +19,7 @@
 #include "hphp/util/alloc.h"
 #include "hphp/util/assertions.h"
 #include "hphp/util/jemalloc-util.h"
+#include "hphp/util/ptr.h"
 #include "hphp/util/roar.h"
 
 #include <cinttypes>
@@ -29,13 +30,19 @@ namespace HPHP {
 uintptr_t lowArenaMinAddr() {
   const char* str = getenv("HHVM_LOW_ARENA_START");
   if (str == nullptr) {
-    if (use_roar && use_lowptr) return 0x50000000; // 1GB + 256MB
-#if !defined(INSTRUMENTED_BUILD) && defined(USE_LOWPTR)
-    return 1u << 30;
-#else
-    return 1u << 31;
+    // 2GB if we are not low-mem constrained.
+    if (use_packedptr || !use_lowptr) return 2ull << 30;
+
+#if defined(INSTRUMENTED_BUILD)
+    // 2GB if instrumented build due to large text size.
+    return 2ull << 30;
 #endif
+
+    // 1GB for pure low-mem, steal extra 256MB for roar.
+    if (use_roar) return 0x50000000; // 1GB + 256MB
+    return 1ull << 30; // 1GB
   }
+
   uintptr_t start = 0;
   if (sscanf(str, "0x%lx", &start) == 1) return start;
   if (sscanf(str, "%lu", &start) == 1) return start;

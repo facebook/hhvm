@@ -17,6 +17,10 @@
 namespace cpp2 facebook.thrift.benchmarks
 
 include "thrift/annotation/cpp.thrift"
+include "thrift/annotation/thrift.thrift"
+
+@thrift.AllowLegacyMissingUris
+package;
 
 struct TwoInts {
   1: optional i32 x;

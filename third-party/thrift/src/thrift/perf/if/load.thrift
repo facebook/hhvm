@@ -22,6 +22,10 @@ namespace py.asyncio apache.thrift.test.asyncio.load
 namespace java.swift org.apache.swift.thrift.perf
 
 include "thrift/annotation/cpp.thrift"
+include "thrift/annotation/thrift.thrift"
+
+@thrift.AllowLegacyMissingUris
+package;
 
 exception LoadError {
   1: i32 code;

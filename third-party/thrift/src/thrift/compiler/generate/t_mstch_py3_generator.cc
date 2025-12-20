@@ -613,7 +613,7 @@ class py3_mstch_type : public mstch_type {
       mstch_context& ctx,
       mstch_element_position pos,
       context c)
-      : mstch_type(type->get_true_type(), ctx, pos),
+      : mstch_type(type, ctx, pos),
         prog_(c.program),
         file_type_(c.file_type),
         cached_props_(get_cached_props(type, c)) {
@@ -662,7 +662,8 @@ class py3_mstch_type : public mstch_type {
     // Need import if in a different declaration file, or type originated in a
     // different Thrift program
     return *file_type_ != FileType::CBindingsFile ||
-        (type_->program() != nullptr && type_->program() != prog_);
+        (resolved_type_->program() != nullptr &&
+         resolved_type_->program() != prog_);
   }
 
   mstch::node cbinding_path() {
@@ -714,7 +715,7 @@ class py3_mstch_type : public mstch_type {
   }
 
   mstch::node cythonTypeNoneable() {
-    return !(is_number() || type_->is<t_container>());
+    return !(is_number() || resolved_type_->is<t_container>());
   }
 
   mstch::node hasCythonType() { return has_cython_type(); }
@@ -730,39 +731,41 @@ class py3_mstch_type : public mstch_type {
   // types that don't have an underlying C++ type
   // i.e., structs, unions, exceptions all enclose a C++ type
   mstch::node isSimple() {
-    return (type_->is<t_primitive_type>() || type_->is<t_enum>() ||
-            type_->is<t_container>()) &&
+    return (resolved_type_->is<t_primitive_type>() ||
+            resolved_type_->is<t_enum>() ||
+            resolved_type_->is<t_container>()) &&
         !is_custom_binary_type();
   }
 
   // types that need conversion to py3 if accessed from thrift-python struct
   // fields
-  mstch::node needs_convert() { return type_needs_convert(type_); }
+  mstch::node needs_convert() { return type_needs_convert(resolved_type_); }
 
   mstch::node is_container_of_struct() {
-    return type_->is<t_container>() && container_needs_convert(type_);
+    return resolved_type_->is<t_container>() &&
+        container_needs_convert(resolved_type_);
   }
 
   // type:list_elem_type etc. is defined in mstch_objects, so the returned
   // type node doesn't define type:needs_convert
   mstch::node element_needs_convert() {
-    if (const t_list* list = type_->try_as<t_list>()) {
+    if (const t_list* list = resolved_type_->try_as<t_list>()) {
       return type_needs_convert(list->elem_type().get_type());
-    } else if (const t_set* set = type_->try_as<t_set>()) {
+    } else if (const t_set* set = resolved_type_->try_as<t_set>()) {
       return type_needs_convert(set->elem_type().get_type());
     }
     return false;
   }
 
   mstch::node map_key_needs_convert() {
-    if (const t_map* map = type_->try_as<t_map>()) {
+    if (const t_map* map = resolved_type_->try_as<t_map>()) {
       return type_needs_convert(map->key_type().get_type());
     }
     return false;
   }
 
   mstch::node map_value_needs_convert() {
-    if (const t_map* map = type_->try_as<t_map>()) {
+    if (const t_map* map = resolved_type_->try_as<t_map>()) {
       return type_needs_convert(map->val_type().get_type());
     }
     return false;
@@ -777,18 +780,18 @@ class py3_mstch_type : public mstch_type {
   const std::string& get_flat_name() const { return cached_props_.flat_name(); }
 
   void set_flat_name(const std::string& extra) {
-    cached_props_.set_flat_name(prog_, type_, extra);
+    cached_props_.set_flat_name(prog_, resolved_type_, extra);
   }
 
   bool is_default_template() const {
-    return cached_props_.is_default_template(type_);
+    return cached_props_.is_default_template(resolved_type_);
   }
 
   bool is_custom_cpp_type() const { return cached_props_.cpp_type() != ""; }
 
  protected:
   const t_program* get_type_program() const {
-    if (const t_program* p = type_->program()) {
+    if (const t_program* p = resolved_type_->program()) {
       return p;
     }
     return prog_;
@@ -804,19 +807,23 @@ class py3_mstch_type : public mstch_type {
 
   std::string to_cython_type() const { return cached_props_.to_cython_type(); }
 
-  bool is_integer() const { return type_->is_any_int() || type_->is_byte(); }
+  bool is_integer() const {
+    return resolved_type_->is_any_int() || resolved_type_->is_byte();
+  }
 
-  bool is_number() const { return is_integer() || type_->is_floating_point(); }
+  bool is_number() const {
+    return is_integer() || resolved_type_->is_floating_point();
+  }
 
   bool is_list_of_string() {
-    if (const t_list* list = type_->try_as<t_list>()) {
+    if (const t_list* list = resolved_type_->try_as<t_list>()) {
       return list->elem_type()->is_string_or_binary();
     }
     return false;
   }
 
   bool is_set_of_string() {
-    if (const t_set* set = type_->try_as<t_set>()) {
+    if (const t_set* set = resolved_type_->try_as<t_set>()) {
       return set->elem_type()->is_string_or_binary();
     }
     return false;
@@ -824,9 +831,9 @@ class py3_mstch_type : public mstch_type {
 
   bool has_cython_type() const {
     return has_option("inplace_migrate")
-        ? !(type_->is<t_container>() || type_->is<t_struct>() ||
-            type_->is<t_union>())
-        : !type_->is<t_container>();
+        ? !(resolved_type_->is<t_container>() ||
+            resolved_type_->is<t_struct>() || resolved_type_->is<t_union>())
+        : !resolved_type_->is<t_container>();
   }
 
   bool is_iobuf() const { return cached_props_.cpp_type() == "folly::IOBuf"; }
@@ -836,7 +843,7 @@ class py3_mstch_type : public mstch_type {
   }
 
   bool is_flexible_binary() const {
-    return type_->is_binary() && is_custom_cpp_type() && !is_iobuf() &&
+    return resolved_type_->is_binary() && is_custom_cpp_type() && !is_iobuf() &&
         !is_iobuf_ref() &&
         // We know that folly::fbstring is completely substitutable for
         // std::string and it's a common-enough type to special-case:
@@ -1485,16 +1492,49 @@ class t_mstch_py3_generator : public t_mstch_generator {
     auto base = t_whisker_generator::make_prototype_for_type(proto);
     auto def = whisker::dsl::prototype_builder<h_type>::extends(base);
 
+    // Overrides for `t_named` properties, resolving typedefs before computing
+    // the value. This is necessary because the py3 generator previously used to
+    // erase typedefs when initializing mstch_type, but still used the
+    // unresolved type in the constructor to resolve context properties.
+    // To resolve context properties in Whisker, we need to use the unresolved
+    // type as the key, but that requires us to resolve typedefs for all other
+    // properties to maintain compatibility.
+    def.property("py_name", [](const t_type& self) {
+      return python::get_py3_name(*self.get_true_type());
+    });
+    def.property("hasPyName?", [](const t_type& self) {
+      const t_type* true_type = self.get_true_type();
+      return python::get_py3_name(*true_type) != true_type->name();
+    });
+    def.property("cppName", [](const t_type& self) {
+      return cpp2::get_name(self.get_true_type());
+    });
+    def.property("modulePath", [this](const t_type& self) {
+      const t_type* true_type = self.get_true_type();
+      const t_program* program = true_type->program() == nullptr
+          ? get_program()
+          : true_type->program();
+      return fmt::format(
+          "_{}", fmt::join(get_type_py3_namespace(program, "types"), "_"));
+    });
+
     def.property("module_path_period_separated", [this](const t_type& self) {
-      const t_program* program =
-          self.program() == nullptr ? get_program() : self.program();
+      const t_type* true_type = self.get_true_type();
+      const t_program* program = true_type->program() == nullptr
+          ? get_program()
+          : true_type->program();
       return fmt::format(
           "{}", fmt::join(get_type_py3_namespace(program, "types"), "."));
     });
 
     def.property("need_module_path?", [this](const t_type& self) {
-      return file_type_ == FileType::NotTypesFile ||
-          (self.program() != nullptr && self.program() != get_program());
+      if (file_type_ == FileType::NotTypesFile) {
+        return true;
+      }
+      const t_type* true_type = self.get_true_type();
+      return (
+          true_type->program() != nullptr &&
+          true_type->program() != get_program());
     });
 
     def.property("iobufWrapper?", [this](const t_type& self) {

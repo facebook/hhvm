@@ -31,5 +31,8 @@ async function main() {
   );
   fb_end_user_func_async($t);
 
+  // wait for request to actually finish (requestShutdown) and release the lock
+  await HH\SimpleLock\lock('held');
+
   lock3('main');
 }

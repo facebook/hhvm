@@ -39,8 +39,7 @@ HQStreamCodec::HQStreamCodec(StreamID streamId,
           << " HQ stream codec for stream " << streamId_;
 }
 
-HQStreamCodec::~HQStreamCodec() {
-}
+HQStreamCodec::~HQStreamCodec() = default;
 
 ParseResult HQStreamCodec::checkFrameAllowed(FrameType type) {
   if (isConnect_ && type != hq::FrameType::DATA) {

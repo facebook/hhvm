@@ -41,8 +41,7 @@ class HQControlCodec
                            : kMaxClientBidiStreamId;
   }
 
-  ~HQControlCodec() override {
-  }
+  ~HQControlCodec() override = default;
 
   // HQ Unidirectional Codec API
   std::unique_ptr<folly::IOBuf> onUnidirectionalIngress(

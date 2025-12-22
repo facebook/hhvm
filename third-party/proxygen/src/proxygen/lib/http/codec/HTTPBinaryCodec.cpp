@@ -53,8 +53,7 @@ HTTPBinaryCodec::HTTPBinaryCodec(TransportDirection direction, bool knownLength)
       transportDirection_(direction) {
 }
 
-HTTPBinaryCodec::~HTTPBinaryCodec() {
-}
+HTTPBinaryCodec::~HTTPBinaryCodec() = default;
 
 ParseResult HTTPBinaryCodec::parseFramingIndicator(folly::io::Cursor& cursor,
                                                    bool& request,

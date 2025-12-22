@@ -49,8 +49,7 @@ HTTP2Codec::HTTP2Codec(TransportDirection direction)
           << " HTTP/2 codec";
 }
 
-HTTP2Codec::~HTTP2Codec() {
-}
+HTTP2Codec::~HTTP2Codec() = default;
 
 // HTTPCodec API
 

@@ -26,8 +26,7 @@ class FlowControlFilter : public PassThroughHTTPCodecFilter {
  public:
   class Callback {
    public:
-    virtual ~Callback() {
-    }
+    virtual ~Callback() = default;
     /**
      * Notification channel to alert when the send window state changes.
      */

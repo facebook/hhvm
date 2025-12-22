@@ -56,8 +56,7 @@ class HQUnidirectionalCodec {
  public:
   class Callback {
    public:
-    virtual ~Callback() {
-    }
+    virtual ~Callback() = default;
     virtual void onError(HTTPCodec::StreamID streamID,
                          const HTTPException& error,
                          bool newTxn) = 0;
@@ -81,8 +80,7 @@ class HQUnidirectionalCodec {
    */
   virtual void onUnidirectionalIngressEOF() = 0;
 
-  virtual ~HQUnidirectionalCodec() {
-  }
+  virtual ~HQUnidirectionalCodec() = default;
 
   [[nodiscard]] StreamDirection getStreamDirection() const {
     return streamDir_;

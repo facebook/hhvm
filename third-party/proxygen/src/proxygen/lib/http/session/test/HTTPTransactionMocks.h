@@ -465,8 +465,7 @@ class MockHTTPTransaction : public HTTPTransaction {
 class MockHTTPTransactionTransportCallback
     : public HTTPTransaction::TransportCallback {
  public:
-  MockHTTPTransactionTransportCallback() {
-  }
+  MockHTTPTransactionTransportCallback() = default;
   MOCK_METHOD((void), firstHeaderByteFlushed, (), (noexcept));
   MOCK_METHOD((void), firstByteFlushed, (), (noexcept));
   MOCK_METHOD((void), trackedByteFlushed, (), (noexcept));

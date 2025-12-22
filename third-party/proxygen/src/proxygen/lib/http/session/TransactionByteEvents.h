@@ -54,8 +54,7 @@ class TimestampByteEvent
    */
   class Callback {
    public:
-    virtual ~Callback() {
-    }
+    virtual ~Callback() = default;
     virtual void timeoutExpired(TimestampByteEvent* event) noexcept = 0;
   };
 

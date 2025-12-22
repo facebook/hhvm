@@ -97,8 +97,7 @@ namespace proxygen {
 /** Info about Transaction running on this session */
 class TransactionInfo {
  public:
-  TransactionInfo() {
-  }
+  TransactionInfo() = default;
 
   TransactionInfo(std::chrono::milliseconds ttfb,
                   std::chrono::milliseconds ttlb,
@@ -334,14 +333,12 @@ class HTTPTransactionHandler : public TraceEventObserver {
       folly::Optional<uint32_t> /*error*/) noexcept {
   }
 
-  ~HTTPTransactionHandler() override {
-  }
+  ~HTTPTransactionHandler() override = default;
 };
 
 class HTTPPushTransactionHandler : public HTTPTransactionHandler {
  public:
-  ~HTTPPushTransactionHandler() override {
-  }
+  ~HTTPPushTransactionHandler() override = default;
 
   void onHeadersComplete(std::unique_ptr<HTTPMessage>) noexcept final {
     LOG(FATAL) << "push txn received headers";
@@ -435,8 +432,7 @@ class HTTPTransactionTransportCallback {
   virtual void datagramBytesReceived(size_t /* size */) noexcept {
   }
 
-  virtual ~HTTPTransactionTransportCallback() {
-  }
+  virtual ~HTTPTransactionTransportCallback() = default;
 };
 
 class HTTPSessionBase;

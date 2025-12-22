@@ -12,8 +12,7 @@ namespace proxygen {
 
 class TTLBAStats {
  public:
-  virtual ~TTLBAStats() noexcept {
-  }
+  virtual ~TTLBAStats() noexcept = default;
 
   TTLBAStats() = default;
   TTLBAStats(const TTLBAStats&) = delete;

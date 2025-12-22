@@ -26,8 +26,7 @@ class HTTPTransactionHandler;
 
 class HTTPSessionController {
  public:
-  virtual ~HTTPSessionController() {
-  }
+  virtual ~HTTPSessionController() = default;
 
   /**
    * Will be invoked whenever HTTPSession successfully parses a

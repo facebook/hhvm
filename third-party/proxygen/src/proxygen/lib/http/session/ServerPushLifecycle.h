@@ -69,8 +69,7 @@ class HTTPTransaction;
 //
 class ServerPushLifecycleCallback {
  public:
-  virtual ~ServerPushLifecycleCallback() {
-  }
+  virtual ~ServerPushLifecycleCallback() = default;
 
   /**
    * A push promise has arrived, but has not been fully parsed yet

@@ -38,8 +38,7 @@ class HTTPSessionBase : public wangle::ManagedConnection {
    */
   class InfoCallback {
    public:
-    virtual ~InfoCallback() {
-    }
+    virtual ~InfoCallback() = default;
 
     // Note: you must not start any asynchronous work from onCreate()
     virtual void onCreate(const HTTPSessionBase&) {

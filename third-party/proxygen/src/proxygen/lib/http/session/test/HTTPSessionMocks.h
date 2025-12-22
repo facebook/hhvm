@@ -24,8 +24,7 @@ namespace proxygen {
 
 class HTTPHandlerBase {
  public:
-  HTTPHandlerBase() {
-  }
+  HTTPHandlerBase() = default;
   HTTPHandlerBase(HTTPTransaction* txn, HTTPMessage* msg)
       : txn_(txn), msg_(msg) {
   }
@@ -470,8 +469,7 @@ class MockHTTPPushHandler
     : public HTTPHandlerBase
     , public HTTPTransaction::PushHandler {
  public:
-  MockHTTPPushHandler() {
-  }
+  MockHTTPPushHandler() = default;
   MockHTTPPushHandler(HTTPTransaction& txn,
                       HTTPMessage* msg,
                       const folly::SocketAddress&)

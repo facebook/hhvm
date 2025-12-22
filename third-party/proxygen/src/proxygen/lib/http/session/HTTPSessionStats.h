@@ -22,8 +22,7 @@ class HTTPSessionStats : public TTLBAStats {
   HTTPSessionStats& operator=(const HTTPSessionStats&) = delete;
   HTTPSessionStats(HTTPSessionStats&&) = delete;
   HTTPSessionStats& operator=(HTTPSessionStats&&) = delete;
-  ~HTTPSessionStats() noexcept override {
-  }
+  ~HTTPSessionStats() noexcept override = default;
 
   virtual void recordTransactionOpened() noexcept = 0;
   virtual void recordTransactionClosed() noexcept = 0;

@@ -20,8 +20,7 @@ SecondaryAuthManager::SecondaryAuthManager(
   cert_ = std::move(cert);
 }
 
-SecondaryAuthManager::~SecondaryAuthManager() {
-}
+SecondaryAuthManager::~SecondaryAuthManager() = default;
 
 std::pair<uint16_t, std::unique_ptr<folly::IOBuf>>
 SecondaryAuthManager::createAuthRequest(

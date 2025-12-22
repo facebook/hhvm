@@ -60,8 +60,7 @@ HTTPUpstreamSession::HTTPUpstreamSession(
                           infoCallback) {
 }
 
-HTTPUpstreamSession::~HTTPUpstreamSession() {
-}
+HTTPUpstreamSession::~HTTPUpstreamSession() = default;
 
 bool HTTPUpstreamSession::isReplaySafe() const {
   return sock_ ? sock_->isReplaySafe() : false;

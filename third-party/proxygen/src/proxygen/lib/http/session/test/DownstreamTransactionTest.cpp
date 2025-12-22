@@ -21,8 +21,7 @@ using std::unique_ptr;
 
 class DownstreamTransactionTest : public testing::Test {
  public:
-  DownstreamTransactionTest() {
-  }
+  DownstreamTransactionTest() = default;
 
   void SetUp() override {
     EXPECT_CALL(transport_, describe(_)).WillRepeatedly(Return());

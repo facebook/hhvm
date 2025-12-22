@@ -24,8 +24,7 @@ class CoroSSLTransport : public folly::coro::TransportIf {
     // invoked to verify the peer's end-entity leaf certificate after OpenSSL's
     // chain validation and after calling the HandshakeCB's handshakeVer() and
     // only if these are successful.
-    TransportOptions() {
-    }
+    TransportOptions() = default;
     std::shared_ptr<folly::CertificateIdentityVerifier> verifier;
   };
 

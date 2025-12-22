@@ -706,8 +706,7 @@ class HTTPSession
    public:
     explicit WriteTimeout(HTTPSession* session) : session_(session) {
     }
-    ~WriteTimeout() override {
-    }
+    ~WriteTimeout() override = default;
 
     void timeoutExpired() noexcept override {
       session_->writeTimeoutExpired();
@@ -970,8 +969,7 @@ class HTTPSession
         : session_(session), dg_(std::make_unique<DestructorGuard>(session)) {
     }
 
-    ~ShutdownTransportCallback() override {
-    }
+    ~ShutdownTransportCallback() override = default;
 
     void runLoopCallback() noexcept override;
 
@@ -985,8 +983,7 @@ class HTTPSession
    public:
     explicit FlowControlTimeout(HTTPSession* session) : session_(session) {
     }
-    ~FlowControlTimeout() override {
-    }
+    ~FlowControlTimeout() override = default;
 
     void timeoutExpired() noexcept override {
       session_->flowControlTimeoutExpired();
@@ -1010,8 +1007,7 @@ class HTTPSession
    public:
     explicit DrainTimeout(HTTPSession* session) : session_(session) {
     }
-    ~DrainTimeout() override {
-    }
+    ~DrainTimeout() override = default;
 
     void timeoutExpired() noexcept override {
       session_->closeWhenIdle();

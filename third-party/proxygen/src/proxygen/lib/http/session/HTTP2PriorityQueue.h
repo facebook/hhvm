@@ -26,8 +26,7 @@ class HTTP2PriorityQueueBase : public HTTPCodec::PriorityQueue {
  public:
   class BaseNode {
    public:
-    virtual ~BaseNode() {
-    }
+    virtual ~BaseNode() = default;
     virtual bool isEnqueued() const = 0;
     [[nodiscard]] virtual uint64_t calculateDepth(
         bool includeVirtual = true) const = 0;

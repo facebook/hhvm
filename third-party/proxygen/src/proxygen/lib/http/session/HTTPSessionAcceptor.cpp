@@ -38,8 +38,7 @@ HTTPSessionAcceptor::HTTPSessionAcceptor(
   }
 }
 
-HTTPSessionAcceptor::~HTTPSessionAcceptor() {
-}
+HTTPSessionAcceptor::~HTTPSessionAcceptor() = default;
 
 const HTTPErrorPage* HTTPSessionAcceptor::getErrorPage(
     const SocketAddress& addr) const {

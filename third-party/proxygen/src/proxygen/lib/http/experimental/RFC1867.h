@@ -24,8 +24,7 @@ class RFC1867Codec : HTTPCodec::Callback {
  public:
   class Callback {
    public:
-    virtual ~Callback() {
-    }
+    virtual ~Callback() = default;
     // return < 0 to skip remainder of field callbacks?
     virtual int onFieldStart(const std::string& name,
                              folly::Optional<std::string> filename,

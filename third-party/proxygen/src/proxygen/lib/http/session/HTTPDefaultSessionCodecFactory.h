@@ -25,8 +25,7 @@ class HTTPDefaultSessionCodecFactory : public HTTPCodecFactory {
  public:
   explicit HTTPDefaultSessionCodecFactory(
       std::shared_ptr<const AcceptorConfiguration> accConfig);
-  ~HTTPDefaultSessionCodecFactory() override {
-  }
+  ~HTTPDefaultSessionCodecFactory() override = default;
 
   /**
    * Get a codec instance

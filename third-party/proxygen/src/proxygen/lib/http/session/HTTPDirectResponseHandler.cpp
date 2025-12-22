@@ -28,8 +28,7 @@ HTTPDirectResponseHandler::HTTPDirectResponseHandler(
       forceConnectionClose_(true) {
 }
 
-HTTPDirectResponseHandler::~HTTPDirectResponseHandler() {
-}
+HTTPDirectResponseHandler::~HTTPDirectResponseHandler() = default;
 
 void HTTPDirectResponseHandler::setTransaction(HTTPTransaction* txn) noexcept {
   txn_ = txn;

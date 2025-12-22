@@ -17,8 +17,7 @@ CodecErrorResponseHandler::CodecErrorResponseHandler(ErrorCode /*statusCode*/)
     : txn_(nullptr) {
 }
 
-CodecErrorResponseHandler::~CodecErrorResponseHandler() {
-}
+CodecErrorResponseHandler::~CodecErrorResponseHandler() = default;
 
 void CodecErrorResponseHandler::setTransaction(HTTPTransaction* txn) noexcept {
   txn_ = txn;

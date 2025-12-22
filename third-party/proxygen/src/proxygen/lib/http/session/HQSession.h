@@ -113,8 +113,7 @@ class HQSession
 
   class ConnectCallback {
    public:
-    virtual ~ConnectCallback() {
-    }
+    virtual ~ConnectCallback() = default;
 
     /**
      * This function is not terminal of the callback, downstream should expect

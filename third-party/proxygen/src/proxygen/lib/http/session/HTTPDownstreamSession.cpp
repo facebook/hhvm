@@ -14,8 +14,7 @@
 
 namespace proxygen {
 
-HTTPDownstreamSession::~HTTPDownstreamSession() {
-}
+HTTPDownstreamSession::~HTTPDownstreamSession() = default;
 
 void HTTPDownstreamSession::startNow() {
   HTTPSession::startNow();

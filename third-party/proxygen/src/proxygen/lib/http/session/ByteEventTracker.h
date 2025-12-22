@@ -29,8 +29,7 @@ class ByteEventTracker {
  public:
   class Callback {
    public:
-    virtual ~Callback() {
-    }
+    virtual ~Callback() = default;
     virtual void onPingReplyLatency(int64_t latency) noexcept = 0;
     virtual void onTxnByteEventWrittenToBuf(
         const ByteEvent& event) noexcept = 0;

@@ -41,8 +41,7 @@ class ByteEvent {
         callback_(callback) {
   }
   FOLLY_POP_WARNING
-  virtual ~ByteEvent() {
-  }
+  virtual ~ByteEvent() = default;
   EventType getType() const {
     return eventType_;
   }

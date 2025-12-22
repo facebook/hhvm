@@ -16,6 +16,9 @@
 
 include "thrift/annotation/thrift.thrift"
 
+@thrift.AllowLegacyMissingUris
+package;
+
 enum global_enum1 {
   field0 = 0,
   field1 = 1,

@@ -15,6 +15,11 @@
  */
 
 // A set of defintions that require special care in the code gen.
+include "thrift/annotation/thrift.thrift"
+
+@thrift.AllowLegacyMissingUris
+package;
+
 namespace cpp2 apache.thrift.test.reflection
 
 // An enum that has a value with the same name.

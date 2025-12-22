@@ -28,6 +28,9 @@ include "thrift/test/reflection/reflection_dep_B.thrift"
 include "thrift/test/reflection/reflection_dep_C.thrift"
 include "thrift/annotation/python.thrift"
 
+@thrift.AllowLegacyMissingUris
+package;
+
 cpp_include "thrift/test/AdapterTest.h"
 cpp_include "thrift/test/reflection/fatal_custom_types.h"
 cpp_include "<deque>"

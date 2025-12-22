@@ -19,6 +19,9 @@ namespace cpp2 apache.thrift.test
 include "thrift/annotation/thrift.thrift"
 include "thrift/annotation/cpp.thrift"
 
+@thrift.AllowLegacyMissingUris
+package;
+
 cpp_include "thrift/test/StructsExtra.h"
 
 struct Basic {

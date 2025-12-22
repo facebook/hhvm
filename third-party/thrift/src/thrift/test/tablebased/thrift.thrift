@@ -18,6 +18,10 @@ namespace cpp2 facebook.thrift.test
 
 include "thrift/test/tablebased/include.thrift"
 include "thrift/annotation/cpp.thrift"
+include "thrift/annotation/thrift.thrift"
+
+@thrift.AllowLegacyMissingUris
+package;
 
 @cpp.Type{name = "std::unique_ptr<folly::IOBuf>"}
 typedef binary IOBufPtr

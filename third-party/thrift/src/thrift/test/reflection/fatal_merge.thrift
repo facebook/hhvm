@@ -27,6 +27,9 @@ include "thrift/annotation/cpp.thrift"
 
 include "thrift/annotation/thrift.thrift"
 
+@thrift.AllowLegacyMissingUris
+package;
+
 struct Basic {
   1: string b;
   2: optional string b_opt;

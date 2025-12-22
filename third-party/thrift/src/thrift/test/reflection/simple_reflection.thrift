@@ -16,6 +16,10 @@
 
 include "thrift/annotation/cpp.thrift"
 include "thrift/annotation/thrift.thrift"
+
+@thrift.AllowLegacyMissingUris
+package;
+
 cpp_include "thrift/test/AdapterTest.h"
 
 namespace cpp2 test_cpp2.simple_cpp_reflection

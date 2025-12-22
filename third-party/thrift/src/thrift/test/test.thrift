@@ -20,6 +20,10 @@ namespace py3 thrift.test
 cpp_include "folly/sorted_vector_types.h"
 
 include "thrift/annotation/cpp.thrift"
+include "thrift/annotation/thrift.thrift"
+
+@thrift.AllowLegacyMissingUris
+package;
 
 enum enum1 {
   field0 = 0,

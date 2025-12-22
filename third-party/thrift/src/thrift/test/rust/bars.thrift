@@ -15,6 +15,10 @@
  */
 
 include "thrift/test/rust/foos.thrift"
+include "thrift/annotation/thrift.thrift"
+
+@thrift.AllowLegacyMissingUris
+package;
 
 namespace rust best_crate
 

@@ -19,6 +19,9 @@ include "thrift/annotation/python.thrift"
 include "thrift/test/thrift-python/included.thrift"
 include "thrift/annotation/thrift.thrift"
 
+@thrift.AllowLegacyMissingUris
+package;
+
 namespace py3 thrift.test.thrift_python
 
 const bool bool_constant = true;

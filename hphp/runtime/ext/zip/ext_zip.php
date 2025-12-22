@@ -532,15 +532,12 @@ function zip_entry_open(resource $zip,
  * Read from an open directory entry
  *
  * @param resource $zip_entry - A directory entry returned by zip_read().
- * @param int $length - The number of bytes to return.    This should be
- *   the uncompressed length you wish to read.
  *
  * @return string - Returns the data read, empty string on end of a file,
  *   or FALSE on error.
  */
 <<__Native>>
-function zip_entry_read(resource $zip_entry,
-                        int $length = 1024): mixed;
+function zip_entry_read(resource $zip_entry): mixed;
 
 /**
  * Open a ZIP file archive

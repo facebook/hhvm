@@ -1404,13 +1404,12 @@ static bool HHVM_FUNCTION(zip_entry_open, const OptResource& zip,
   return true;
 }
 
-static Variant HHVM_FUNCTION(zip_entry_read, const OptResource& zip_entry,
-                             int64_t length) {
+static Variant HHVM_FUNCTION(zip_entry_read, const OptResource& zip_entry) {
   auto zipEntry = cast<ZipEntry>(zip_entry);
 
   FAIL_IF_INVALID_ZIPENTRY(zip_entry_read, zipEntry);
 
-  return zipEntry->read(length > 0 ? length : 1024);
+  return zipEntry->read(1024);
 }
 
 static Variant HHVM_FUNCTION(zip_open, const String& filename) {

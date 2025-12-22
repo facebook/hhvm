@@ -198,7 +198,7 @@ function zip_entry_open(resource $zip, resource $zip_entry, string $mode): bool;
  * Read from an open directory entry
  */
 <<__PHPStdLib>>
-function zip_entry_read(resource $zip_entry, int $length = 1024): string;
+function zip_entry_read(resource $zip_entry): string;
 
 /**
  * Open a ZIP file archive

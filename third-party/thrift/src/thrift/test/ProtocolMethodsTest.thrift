@@ -21,6 +21,9 @@ cpp_include "thrift/test/ProtocolMethodsTestCustomTypes.h"
 include "thrift/annotation/cpp.thrift"
 include "thrift/annotation/thrift.thrift"
 
+@thrift.AllowLegacyMissingUris
+package;
+
 @thrift.DeprecatedUnvalidatedAnnotations{
   items = {"no_default_comparators": "1"},
 }

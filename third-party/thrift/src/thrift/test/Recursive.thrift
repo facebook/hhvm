@@ -18,6 +18,9 @@ include "thrift/annotation/thrift.thrift"
 include "thrift/test/Recursive2.thrift"
 include "thrift/annotation/cpp.thrift"
 
+@thrift.AllowLegacyMissingUris
+package;
+
 namespace py3 thrift.test
 namespace cpp2 apache.thrift.test
 

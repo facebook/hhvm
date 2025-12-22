@@ -19,6 +19,9 @@ namespace cpp2 apache.thrift.test
 
 include "thrift/annotation/thrift.thrift"
 
+@thrift.AllowLegacyMissingUris
+package;
+
 exception MyException {
   @thrift.ExceptionMessage
   1: string msg;

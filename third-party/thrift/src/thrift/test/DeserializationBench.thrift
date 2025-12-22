@@ -17,6 +17,10 @@
 cpp_include "folly/sorted_vector_types.h"
 
 include "thrift/annotation/cpp.thrift"
+include "thrift/annotation/thrift.thrift"
+
+@thrift.AllowLegacyMissingUris
+package;
 
 struct StructA {
   1: bool fieldA;

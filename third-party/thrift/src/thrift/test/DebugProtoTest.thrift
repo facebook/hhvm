@@ -19,6 +19,10 @@ namespace cpp2 apache.thrift.test
 namespace java thrift.test.proto
 
 include "thrift/annotation/cpp.thrift"
+include "thrift/annotation/thrift.thrift"
+
+@thrift.AllowLegacyMissingUris
+package;
 
 struct Reserved {
   1: string from;

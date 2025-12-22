@@ -15,6 +15,10 @@
  */
 
 include "thrift/annotation/thrift.thrift"
+
+@thrift.AllowLegacyMissingUris
+package;
+
 namespace py3 thrift.test
 
 struct DefaultValues {

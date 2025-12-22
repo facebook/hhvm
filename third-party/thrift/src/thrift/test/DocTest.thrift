@@ -20,6 +20,11 @@
  * Seriously, this is the documentation for this whole program.
  */
 
+include "thrift/annotation/thrift.thrift"
+
+@thrift.AllowLegacyMissingUris
+package;
+
 namespace py3 thrift.test
 namespace java thrift.test
 namespace cpp thrift.test

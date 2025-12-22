@@ -19,6 +19,10 @@ namespace cpp2 apache.thrift.test
 namespace java thrift.test
 
 include "thrift/test/JsonToThriftTest/mySimpleStruct.thrift"
+include "thrift/annotation/thrift.thrift"
+
+@thrift.AllowLegacyMissingUris
+package;
 
 typedef map<string, mySimpleStruct.mySimpleStruct> simpleMap
 

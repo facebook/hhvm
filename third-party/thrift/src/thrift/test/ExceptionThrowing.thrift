@@ -19,6 +19,9 @@ namespace cpp2 thrift.test.cpp2
 
 include "thrift/annotation/thrift.thrift"
 
+@thrift.AllowLegacyMissingUris
+package;
+
 exception SimpleException {
   @thrift.ExceptionMessage
   1: required string message;

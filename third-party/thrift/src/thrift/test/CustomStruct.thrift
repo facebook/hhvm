@@ -19,6 +19,10 @@ namespace cpp2 thrift.test
 cpp_include "thrift/test/CustomStruct.h"
 
 include "thrift/annotation/cpp.thrift"
+include "thrift/annotation/thrift.thrift"
+
+@thrift.AllowLegacyMissingUris
+package;
 
 struct MyStruct {
   1: string stringData;

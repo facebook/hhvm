@@ -19,6 +19,9 @@ cpp_include "<list>"
 include "thrift/annotation/cpp.thrift"
 include "thrift/annotation/thrift.thrift"
 
+@thrift.AllowLegacyMissingUris
+package;
+
 @cpp.Type{template = "std::list"}
 typedef list<i32> int_linked_list
 

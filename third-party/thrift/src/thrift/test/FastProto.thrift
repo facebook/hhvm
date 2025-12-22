@@ -18,6 +18,9 @@ namespace py3 thrift.test
 
 include "thrift/annotation/thrift.thrift"
 
+@thrift.AllowLegacyMissingUris
+package;
+
 struct AStruct {
   1: required string aString;
   2: i32 anInteger;

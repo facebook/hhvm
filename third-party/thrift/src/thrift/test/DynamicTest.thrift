@@ -15,6 +15,10 @@
  */
 
 include "thrift/lib/thrift/dynamic.thrift"
+include "thrift/annotation/thrift.thrift"
+
+@thrift.AllowLegacyMissingUris
+package;
 
 struct Container {
   1: dynamic.DynamicType data;

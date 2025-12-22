@@ -89,10 +89,9 @@ Config createConfigFromFlags() {
     return config;
   }
 
-  typename std::remove_reference<decltype(Config().levelPreset().value())>::type
-      levelPreset;
-  if (TEnumTraits<typename std::remove_reference<
-          decltype(Config().levelPreset().value())>::type>()
+  std::remove_reference_t<decltype(Config().levelPreset().value())> levelPreset;
+  if (TEnumTraits<
+          std::remove_reference_t<decltype(Config().levelPreset().value())>>()
           .findValue(FLAGS_compression_level, &levelPreset)) {
     config.levelPreset_ref() = levelPreset;
     return config;

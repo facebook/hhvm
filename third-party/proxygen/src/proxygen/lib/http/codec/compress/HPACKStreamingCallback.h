@@ -15,8 +15,7 @@
 namespace proxygen::HPACK {
 class StreamingCallback {
  public:
-  virtual ~StreamingCallback() {
-  }
+  virtual ~StreamingCallback() = default;
 
   virtual void onHeader(const HPACKHeaderName& name,
                         const folly::fbstring& value) = 0;

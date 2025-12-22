@@ -29,8 +29,7 @@ namespace proxygen {
  */
 class HPACKHeaderName {
  public:
-  HPACKHeaderName() {
-  }
+  HPACKHeaderName() = default;
 
   explicit HPACKHeaderName(folly::StringPiece name) {
     storeAddress(name);

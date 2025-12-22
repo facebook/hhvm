@@ -21,8 +21,7 @@ class HPACKHeader {
  public:
   static const uint32_t kMinLength = 32;
 
-  HPACKHeader() {
-  }
+  HPACKHeader() = default;
 
   HPACKHeader(const HPACKHeaderName& name_, folly::StringPiece value_)
       : name(name_), value(value_.data(), value_.size()) {
@@ -55,8 +54,7 @@ class HPACKHeader {
     return *this;
   }
 
-  ~HPACKHeader() {
-  }
+  ~HPACKHeader() = default;
 
   /**
    * size of usable bytes of the header entry, does not include overhead

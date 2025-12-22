@@ -111,8 +111,7 @@ class Reader {
  public:
   explicit Reader(const std::string& fname) : filename(fname) {
   }
-  virtual ~Reader() {
-  }
+  virtual ~Reader() = default;
 
   virtual ssize_t read() {
     ssize_t rc = -1;

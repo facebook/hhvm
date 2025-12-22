@@ -34,8 +34,7 @@ class HPACKHeader;
 class QPACKCodec : public HeaderCodec {
  public:
   QPACKCodec();
-  ~QPACKCodec() override {
-  }
+  ~QPACKCodec() override = default;
 
   // QPACK encode: id is used for internal tracking of references
   QPACKEncoder::EncodeResult encode(

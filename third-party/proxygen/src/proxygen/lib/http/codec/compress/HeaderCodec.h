@@ -38,10 +38,8 @@ class HeaderCodec {
 
   class Stats {
    public:
-    Stats() {
-    }
-    virtual ~Stats() {
-    }
+    Stats() = default;
+    virtual ~Stats() = default;
 
     virtual void recordEncode(Type type, HTTPHeaderSize& size) = 0;
     virtual void recordDecode(Type type, HTTPHeaderSize& size) = 0;
@@ -49,10 +47,8 @@ class HeaderCodec {
     virtual void recordDecodeTooLarge(Type type) = 0;
   };
 
-  HeaderCodec() {
-  }
-  virtual ~HeaderCodec() {
-  }
+  HeaderCodec() = default;
+  virtual ~HeaderCodec() = default;
 
   /**
    * compressed and uncompressed size of the last encode

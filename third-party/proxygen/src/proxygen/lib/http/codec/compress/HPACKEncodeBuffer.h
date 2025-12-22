@@ -23,8 +23,7 @@ class HPACKEncodeBuffer {
 
   explicit HPACKEncodeBuffer(uint32_t growthSize);
 
-  ~HPACKEncodeBuffer() {
-  }
+  ~HPACKEncodeBuffer() = default;
 
   void setHuffmanLimits(std::pair<uint32_t, uint32_t> limits) {
     if (huffMax_ >= huffMin_) {

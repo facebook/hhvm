@@ -89,8 +89,7 @@ class HuffTree {
    */
   explicit HuffTree(const uint32_t* codes, const uint8_t* bits);
   explicit HuffTree(HuffTree&& tree) = default;
-  ~HuffTree() {
-  }
+  ~HuffTree() = default;
 
   /**
    * decode bitstream into a string literal

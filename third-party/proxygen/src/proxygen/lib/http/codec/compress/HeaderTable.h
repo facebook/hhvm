@@ -33,8 +33,7 @@ class HeaderTable {
     init(capacityVal);
   }
 
-  virtual ~HeaderTable() {
-  }
+  virtual ~HeaderTable() = default;
   HeaderTable(const HeaderTable&) = delete;
   HeaderTable& operator=(const HeaderTable&) = delete;
 

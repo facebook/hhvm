@@ -17,8 +17,7 @@ namespace proxygen {
 class QPACKContext {
  public:
   QPACKContext(uint32_t tableSize, bool trackReferences);
-  ~QPACKContext() {
-  }
+  ~QPACKContext() = default;
 
   /**
    * @return header at the given index by composing dynamic and static tables

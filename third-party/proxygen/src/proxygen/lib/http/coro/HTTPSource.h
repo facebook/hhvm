@@ -66,8 +66,7 @@ namespace proxygen::coro {
  */
 class HTTPSource {
  public:
-  virtual ~HTTPSource() {
-  }
+  virtual ~HTTPSource() = default;
 
   virtual folly::coro::Task<HTTPHeaderEvent> readHeaderEvent() = 0;
 

@@ -35,8 +35,7 @@ void writeFrameHeaderManual(IOBufQueue& queue,
 
 class HTTP2FramerTest : public testing::Test {
  public:
-  HTTP2FramerTest() {
-  }
+  HTTP2FramerTest() = default;
 
   template <typename ParseFunc, typename... Args>
   void parse(ParseFunc&& parseFn, FrameHeader& outHeader, Args&&... outArgs) {

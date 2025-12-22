@@ -26,8 +26,7 @@ class SessionHolder : private HTTPSessionBase::InfoCallback {
  public:
   class Callback {
    public:
-    virtual ~Callback() {
-    }
+    virtual ~Callback() = default;
     virtual void detachIdle(SessionHolder*) = 0;
     virtual void detachPartiallyFilled(SessionHolder*) = 0;
     virtual void detachFilled(SessionHolder*) = 0;
@@ -39,8 +38,7 @@ class SessionHolder : private HTTPSessionBase::InfoCallback {
 
   class Stats {
    public:
-    virtual ~Stats() {
-    }
+    virtual ~Stats() = default;
     virtual void onConnectionCreated() = 0;
     virtual void onConnectionClosed() = 0;
     virtual void onConnectionActivated() = 0;

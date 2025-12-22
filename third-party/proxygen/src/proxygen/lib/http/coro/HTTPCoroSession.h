@@ -91,8 +91,7 @@ using HTTPSessionContextPtr = detail::KeepAlivePtr<HTTPSessionContext>;
  */
 class HTTPHandler {
  public:
-  virtual ~HTTPHandler() {
-  }
+  virtual ~HTTPHandler() = default;
   virtual folly::coro::Task<HTTPSourceHolder> handleRequest(
       folly::EventBase* evb,
       HTTPSessionContextPtr ctx,

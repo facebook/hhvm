@@ -23,8 +23,7 @@ using namespace testing;
 
 class HTTP1xCodecCallback : public HTTPCodec::Callback {
  public:
-  HTTP1xCodecCallback() {
-  }
+  HTTP1xCodecCallback() = default;
 
   void onMessageBegin(HTTPCodec::StreamID /*stream*/,
                       HTTPMessage* /*msg*/) override {

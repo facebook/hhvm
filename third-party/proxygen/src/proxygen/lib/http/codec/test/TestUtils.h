@@ -116,8 +116,7 @@ size_t parseUnidirectional(
 
 class FakeHTTPCodecCallback : public HTTPCodec::Callback {
  public:
-  FakeHTTPCodecCallback() {
-  }
+  FakeHTTPCodecCallback() = default;
 
   void onMessageBegin(HTTPCodec::StreamID /*stream*/, HTTPMessage*) override {
     messageBegin++;

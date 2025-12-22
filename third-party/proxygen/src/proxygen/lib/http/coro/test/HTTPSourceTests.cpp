@@ -35,8 +35,7 @@ namespace proxygen::coro::test {
 
 class MockStreamSourceCallback : public HTTPStreamSource::Callback {
  public:
-  MockStreamSourceCallback() {
-  }
+  MockStreamSourceCallback() = default;
 
   MOCK_METHOD(void, bytesProcessed, (HTTPCodec::StreamID, size_t, size_t));
   MOCK_METHOD(void, windowOpen, (HTTPCodec::StreamID));
@@ -47,8 +46,7 @@ class MockStreamSourceCallback : public HTTPStreamSource::Callback {
 
 class MockHTTPBodyEventQueueCallback : public HTTPBodyEventQueue::Callback {
  public:
-  MockHTTPBodyEventQueueCallback() {
-  }
+  MockHTTPBodyEventQueueCallback() = default;
 
   MOCK_METHOD(void, onEgressBytesBuffered, (int64_t), (noexcept));
 };

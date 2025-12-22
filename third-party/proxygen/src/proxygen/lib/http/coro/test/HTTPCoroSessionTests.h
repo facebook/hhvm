@@ -35,8 +35,7 @@ std::string paramsToTestName(const testing::TestParamInfo<TestParams> &info);
 
 class TestHTTPTransport {
  public:
-  virtual ~TestHTTPTransport() {
-  }
+  virtual ~TestHTTPTransport() = default;
 
   // Add a read event for the given stream
   virtual void addReadEvent(HTTPCodec::StreamID id,

@@ -23,8 +23,7 @@ namespace proxygen {
  */
 class ServerIdleSessionController {
  public:
-  explicit ServerIdleSessionController() {
-  }
+  explicit ServerIdleSessionController() = default;
 
   /**
    * Transfer idle session from another thread, if available.

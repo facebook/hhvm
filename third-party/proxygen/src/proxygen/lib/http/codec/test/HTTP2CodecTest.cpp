@@ -1892,10 +1892,8 @@ TEST_F(HTTP2CodecTest, BadRFC9218Priority) {
 
 class DummyQueue : public HTTPCodec::PriorityQueue {
  public:
-  DummyQueue() {
-  }
-  ~DummyQueue() override {
-  }
+  DummyQueue() = default;
+  ~DummyQueue() override = default;
   void addPriorityNode(HTTPCodec::StreamID id, HTTPCodec::StreamID) override {
     nodes_.push_back(id);
   }

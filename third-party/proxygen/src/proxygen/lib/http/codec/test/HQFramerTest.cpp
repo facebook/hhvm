@@ -46,8 +46,7 @@ bool isValidPushId(folly::Optional<PushId> maxAllowedPushId, PushId pushId) {
 template <class T>
 class HQFramerTestFixture : public T {
  public:
-  HQFramerTestFixture() {
-  }
+  HQFramerTestFixture() = default;
 
   template <typename Func, typename... Args>
   void parse(ParseResult parseError,

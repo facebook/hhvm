@@ -20,13 +20,11 @@ class CompressionScheme : public folly::EventBase::LoopCallback {
  public:
   explicit CompressionScheme(CompressionSimulator* sim) : simulator_(sim) {
   }
-  ~CompressionScheme() override {
-  }
+  ~CompressionScheme() override = default;
 
   /* Parent class for acks */
   struct Ack {
-    virtual ~Ack() {
-    }
+    virtual ~Ack() = default;
   };
 
   /* Generate an ack for the given sequence number */

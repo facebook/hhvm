@@ -25,13 +25,11 @@ file.
   }}{{^value:nonzero?}}False{{/value:nonzero?}}{{!
 }}{{/value:bool?}}{{!
 }}{{#value:integer?}}{{!
-    }}{{#value:value_for_bool?}}{{!
-        }}{{#value:nonzero?}}True{{/value:nonzero?}}{{!
-        }}{{^value:nonzero?}}False{{/value:nonzero?}}{{!
-    }}{{/value:value_for_bool?}}{{!
-    }}{{^value:value_for_bool?}}{{!
-    }}{{value:integer_value}}{{#value:value_for_floating_point?}}.0{{/value:value_for_floating_point?}}{{!
-    }}{{/value:value_for_bool?}}{{!
+    }}{{#if value:type.bool?}}{{!
+      }}{{#if value:nonzero?}}True{{#else}}False{{/if}}{{!
+    }}{{#else}}{{!
+    }}{{value:integer_value}}{{#if value:type.floating_point?}}.0{{/if}}{{!
+    }}{{/if value:type.bool?}}{{!
 }}{{/value:integer?}}{{!
 }}{{#value:double?}}{{value:double_value}}{{/value:double?}}{{!
 }}{{#value:structured?}}{{!
@@ -41,8 +39,7 @@ file.
     }}{{/value:type.true_type}}{{!
 }}{{/value:structured?}}{{!
 }}{{#value:string?}}{{!
-    }}{{#value:py3_binary?}}b"{{value:string_value}}"{{/value:py3_binary?}}{{!
-    }}{{^value:py3_binary?}}"{{value:unicode_value}}"{{/value:py3_binary?}}{{!
+    }}{{#if value:type.binary?}}b"{{value:string_value}}"{{#else}}"{{value:unicode_value}}"{{/if}}{{!
 }}{{/value:string?}}{{!
 }}{{#value:map?}}{{!
     }}{{#value:const_container_type}}{{!

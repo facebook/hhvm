@@ -22,6 +22,7 @@ Since this file will eventually be removed, do not import from here, use
 `.types` imports instead.
 
 }}
+{{#import "common/constants" as constants}}
 {{> common/auto_generated_py}}
 {{#program:hasConstants}}
 import thrift.py3.types
@@ -41,7 +42,7 @@ from {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:nam
 )
 {{/program:hasContainerTypes}}
 
-{{#program:constants}}{{#constant:value}}
-{{constant:name}} = {{> inplace/constant_value_py }}
-{{/constant:value}}{{/program:constants}}
+{{#program:constants}}
+{{constant:name}} = {{#partial constants.inplace_const_value value=constant:self.value }}
+{{/program:constants}}
 {{/program:hasConstants}}

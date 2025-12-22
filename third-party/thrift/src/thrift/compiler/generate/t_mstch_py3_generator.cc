@@ -636,7 +636,6 @@ class py3_mstch_type : public mstch_type {
              &py3_mstch_type::moduleAutoMigratePath},
             {"type:cbinding_path", &py3_mstch_type::cbinding_path},
             {"type:capi_converter_path", &py3_mstch_type::capi_converter_path},
-            {"type:flat_name", &py3_mstch_type::flatName},
             {"type:cppNamespaces", &py3_mstch_type::cppNamespaces},
             {"type:cppTemplate", &py3_mstch_type::cppTemplate},
             {"type:cythonTemplate", &py3_mstch_type::cythonTemplate},
@@ -699,8 +698,6 @@ class py3_mstch_type : public mstch_type {
         fmt::join(
             get_type_py3_namespace(get_type_program(), "thrift_types"), "_"));
   }
-
-  mstch::node flatName() { return cached_props_.flat_name(); }
 
   mstch::node cppNamespaces() {
     return create_string_array(get_type_cpp2_namespace());
@@ -1000,7 +997,6 @@ class py3_mstch_field : public mstch_field {
             {"field:hasDefaultValue?", &py3_mstch_field::hasDefaultValue},
             {"field:optional_default?",
              &py3_mstch_field::has_optional_default_value},
-            {"field:user_default_value", &py3_mstch_field::user_default_value},
             {"field:PEP484Optional?", &py3_mstch_field::isPEP484Optional},
             {"field:isset?", &py3_mstch_field::isSet},
             {"field:boxed_ref?", &py3_mstch_field::boxed_ref},
@@ -1043,13 +1039,6 @@ class py3_mstch_field : public mstch_field {
   bool has_optional_default_value() {
     return field_->qualifier() == t_field_qualifier::optional &&
         field_->default_value() != nullptr;
-  }
-
-  mstch::node user_default_value() {
-    const t_const_value* value = field_->default_value();
-    return value == nullptr ? mstch::node()
-                            : context_.const_value_factory->make_mstch_object(
-                                  value, context_, pos_, nullptr);
   }
 
   mstch::node boxed_ref() {
@@ -1126,61 +1115,10 @@ class py3_mstch_const_value : public mstch_const_value {
     register_methods(
         this,
         {
-            {"value:value_for_bool?", &py3_mstch_const_value::is_bool_value},
-            {"value:value_for_floating_point?",
-             &py3_mstch_const_value::is_float_value},
-            {"value:py3_binary?", &py3_mstch_const_value::is_binary},
-            {"value:unicode_value", &py3_mstch_const_value::unicode_value},
-            {"value:const_enum_type", &py3_mstch_const_value::const_enum_type},
-            {"value:py3_enum_value_name",
-             &py3_mstch_const_value::py3_enum_value_name},
             {"value:const_enum_type", &py3_mstch_const_value::const_enum_type},
             {"value:const_container_type",
              &py3_mstch_const_value::const_container_type},
         });
-  }
-
-  mstch::node is_bool_value() {
-    if (auto ttype = const_value_->type()) {
-      return ttype->get_true_type()->is_bool();
-    }
-    return false;
-  }
-
-  mstch::node is_float_value() {
-    if (auto ttype = const_value_->type()) {
-      return ttype->get_true_type()->is_floating_point();
-    }
-    return false;
-  }
-
-  mstch::node is_binary() {
-    auto& ttype = const_value_->type();
-    return type_ == cv::CV_STRING && ttype &&
-        ttype->get_true_type()->is_binary();
-  }
-
-  /*
-   * Use this function (instead of the version used by C++) to render unicode
-   * strings, i.e., normal python strings "".
-   * For binary bytes b"", use string_value, which has octal escapes for
-   * unicode characters.
-   */
-  mstch::node unicode_value() {
-    if (type_ != cv::CV_STRING) {
-      return {};
-    }
-    return get_escaped_string<nonascii_handling::no_escape>(
-        const_value_->get_string());
-  }
-
-  mstch::node py3_enum_value_name() {
-    if (!const_value_->is_enum() || const_value_->get_enum_value() == nullptr) {
-      return mstch::node();
-    }
-    const auto& enum_name = const_value_->get_enum()->name();
-    return python::get_py3_name_class_scope(
-        *const_value_->get_enum_value(), enum_name);
   }
 
   mstch::node const_enum_type() {
@@ -1442,6 +1380,34 @@ class t_mstch_py3_generator : public t_mstch_generator {
     return globals;
   }
 
+  prototype<t_const_value>::ptr make_prototype_for_const_value(
+      const prototype_database& proto) const override {
+    auto base = t_whisker_generator::make_prototype_for_const_value(proto);
+    auto def = whisker::dsl::prototype_builder<h_const_value>::extends(base);
+
+    def.property("py3_enum_value_name", [](const t_const_value& self) {
+      if (!self.is_enum() || self.get_enum_value() == nullptr) {
+        return whisker::make::null;
+      }
+      const auto& enum_name = self.get_enum()->name();
+      return whisker::make::string(
+          python::get_py3_name_class_scope(*self.get_enum_value(), enum_name));
+    });
+    /*
+     * Use this function (instead of the version used by C++) to render unicode
+     * strings, i.e., normal python strings "".
+     * For binary bytes b"", use string_value, which has octal escapes for
+     * unicode characters.
+     */
+    def.property("unicode_value", [](const t_const_value& self) {
+      return self.kind() == t_const_value::CV_STRING
+          ? get_escaped_string<nonascii_handling::no_escape>(self.get_string())
+          : "";
+    });
+
+    return std::move(def).make();
+  }
+
   prototype<t_field>::ptr make_prototype_for_field(
       const prototype_database& proto) const override {
     auto base = t_whisker_generator::make_prototype_for_field(proto);
@@ -1540,6 +1506,10 @@ class t_mstch_py3_generator : public t_mstch_generator {
           type_context_.get_cached_props(&self);
       return cached_props.cpp_type() == "folly::IOBuf" ||
           cached_props.cpp_type() == "std::unique_ptr<folly::IOBuf>";
+    });
+
+    def.property("flat_name", [this](const t_type& self) {
+      return type_context_.get_cached_props(&self).flat_name();
     });
 
     return std::move(def).make();

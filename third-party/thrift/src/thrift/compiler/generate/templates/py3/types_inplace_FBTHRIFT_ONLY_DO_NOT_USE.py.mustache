@@ -20,6 +20,7 @@ This file holds pure python implementations of thrift types that
 are re-exported via types.pyx
 
 }}
+{{#import "common/constants" as constants}}
 {{> common/auto_generated_py}}
 {{#program:inplace_migrate?}}
 
@@ -228,7 +229,7 @@ class {{struct:name}}({{> types/python_struct_class }}):
                 return None
             {{/field:optional_default?}}
             {{#field:optional_default?}}
-                __python_val = {{#field:user_default_value}}{{#field:type}}{{> inplace/constant_value_py }}{{/field:type}}{{/field:user_default_value}}
+                __python_val = {{#partial constants.inplace_const_value value=field:self.default_value }}
             {{/field:optional_default?}}
             {{/field:optional?}}{{^field:optional?}}{{#struct:union?}}
             if __python_val is None:
@@ -243,7 +244,7 @@ class {{struct:name}}({{> types/python_struct_class }}):
 {{/field:optional_default?}}{{#field:optional_default?}}
         __python_val = self._fbthrift__inner.{{field:py_name}}
         if __python_val is None:
-            return {{#field:user_default_value}}{{#field:type}}{{> inplace/constant_value_py }}{{/field:type}}{{/field:user_default_value}}
+            return {{#partial constants.inplace_const_value value=field:self.default_value }}
         return __python_val
 {{/field:optional_default?}}{{/type:needs_convert?}}{{/field:type}}
 
@@ -336,7 +337,7 @@ __all__.append("{{struct:name}}")
 {{/program:filtered_structs}}
 
 ### Constants
-{{#program:constants}}{{#constant:value}}
-{{constant:name}} = {{> inplace/constant_value_py }}
-{{/constant:value}}{{/program:constants}}
+{{#program:constants}}
+{{constant:name}} = {{#partial constants.inplace_const_value value=constant:self.value }}
+{{/program:constants}}
 {{/program:inplace_migrate?}}

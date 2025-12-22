@@ -305,7 +305,7 @@ TEST(StorageRowTest, RandomValues) {
       case 0: {
         // Null values
         row.appendNull();
-        values.push_back({});
+        values.emplace_back();
         break;
       }
 
@@ -313,7 +313,7 @@ TEST(StorageRowTest, RandomValues) {
         // Boolean values
         auto val = folly::Random::randBool(0.5);
         row.appendValue(val);
-        values.push_back(val);
+        values.emplace_back(val);
         break;
       }
 
@@ -322,7 +322,7 @@ TEST(StorageRowTest, RandomValues) {
         int8_t val;
         randomBytes(&val, sizeof(val));
         row.appendValue((int64_t)val);
-        values.push_back((int64_t)val);
+        values.emplace_back((int64_t)val);
         break;
       }
 
@@ -331,7 +331,7 @@ TEST(StorageRowTest, RandomValues) {
         int16_t val;
         randomBytes(&val, sizeof(val));
         row.appendValue((int64_t)val);
-        values.push_back((int64_t)val);
+        values.emplace_back((int64_t)val);
         break;
       }
 
@@ -340,7 +340,7 @@ TEST(StorageRowTest, RandomValues) {
         int32_t val;
         randomBytes(&val, sizeof(val));
         row.appendValue((int64_t)val);
-        values.push_back((int64_t)val);
+        values.emplace_back((int64_t)val);
         break;
       }
 
@@ -349,7 +349,7 @@ TEST(StorageRowTest, RandomValues) {
         int64_t val;
         randomBytes(&val, sizeof(val));
         row.appendValue(val);
-        values.push_back(val);
+        values.emplace_back(val);
         break;
       }
 
@@ -358,7 +358,7 @@ TEST(StorageRowTest, RandomValues) {
         uint8_t val;
         randomBytes(&val, sizeof(val));
         row.appendValue((uint64_t)val);
-        values.push_back((uint64_t)val);
+        values.emplace_back((uint64_t)val);
         break;
       }
 
@@ -367,7 +367,7 @@ TEST(StorageRowTest, RandomValues) {
         uint16_t val;
         randomBytes(&val, sizeof(val));
         row.appendValue((uint64_t)val);
-        values.push_back((uint64_t)val);
+        values.emplace_back((uint64_t)val);
         break;
       }
 
@@ -376,7 +376,7 @@ TEST(StorageRowTest, RandomValues) {
         uint32_t val;
         randomBytes(&val, sizeof(val));
         row.appendValue((uint64_t)val);
-        values.push_back((uint64_t)val);
+        values.emplace_back((uint64_t)val);
         break;
       }
 
@@ -385,7 +385,7 @@ TEST(StorageRowTest, RandomValues) {
         uint64_t val;
         randomBytes(&val, sizeof(val));
         row.appendValue(val);
-        values.push_back(val);
+        values.emplace_back(val);
         break;
       }
 
@@ -394,7 +394,7 @@ TEST(StorageRowTest, RandomValues) {
         double val;
         randomBytes(&val, sizeof(val));
         row.appendValue(val);
-        values.push_back(val);
+        values.emplace_back(val);
         break;
       }
 
@@ -404,7 +404,7 @@ TEST(StorageRowTest, RandomValues) {
         std::string val(size, ' ');
         randomBytes(val.data(), val.size());
         row.appendValue(val);
-        values.push_back(val);
+        values.emplace_back(val);
         break;
       }
 
@@ -414,7 +414,7 @@ TEST(StorageRowTest, RandomValues) {
         std::string val(size, ' ');
         randomBytes(val.data(), val.size());
         row.appendValue(val);
-        values.push_back(val);
+        values.emplace_back(val);
         break;
       }
     }

@@ -65,11 +65,11 @@ const std::vector<std::any>& TEnumTraits<::{{program:qualified_namespace}}::{{en
     case {{enum_value:value}}: {
       static const folly::Indestructible<std::vector<std::any>> ret = [] {
           std::vector<std::any> values;
-      {{#enum_value:structured_annotations}}
-        {{#if constant:is_runtime_annotation?}}
-          values.emplace_back({{#partial const_value.iterate_const_values value=constant:self.value root_const=constant:self}});
-        {{/if constant:is_runtime_annotation?}}
-      {{/enum_value:structured_annotations}}
+      {{#each enum_value:structured_annotations as |annot|}}
+        {{#if annot.is_runtime_annotation?}}
+          values.emplace_back({{#partial const_value.iterate_const_values value=annot.value root_const=annot}});
+        {{/if annot.is_runtime_annotation?}}
+      {{/each}}
           return values;
         }();
       return *ret;

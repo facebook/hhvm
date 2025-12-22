@@ -16,8 +16,8 @@
 #include "hphp/runtime/ext/facts/log-perf.h"
 #include <folly/logging/xlog.h>
 #include "hphp/runtime/base/autoload-map.h"
-#include "hphp/runtime/base/sandbox-events.h"
 #include "hphp/runtime/base/type-variant.h"
+#include "hphp/util/sandbox-events.h"
 
 namespace HPHP::Facts {
 

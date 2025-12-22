@@ -35,7 +35,6 @@
 #include "hphp/runtime/base/autoload-map.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/config.h"
-#include "hphp/runtime/base/sandbox-events.h"
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/type-string.h"
@@ -57,6 +56,7 @@
 #include "hphp/util/hash-map.h"
 #include "hphp/util/hash.h"
 #include "hphp/util/logger.h"
+#include "hphp/util/sandbox-events.h"
 #include "hphp/util/sqlite-wrapper.h"
 #include "hphp/util/trace.h"
 

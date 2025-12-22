@@ -33,7 +33,6 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/request-info.h"
-#include "hphp/runtime/base/sandbox-events.h"
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/type-variant.h"
@@ -53,6 +52,7 @@
 #include "hphp/util/configs/autoload.h"
 #include "hphp/util/hash-set.h"
 #include "hphp/util/optional.h"
+#include "hphp/util/sandbox-events.h"
 #include "hphp/util/sha1.h"
 
 namespace fs = std::filesystem;

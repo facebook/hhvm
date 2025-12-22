@@ -55,11 +55,6 @@ union CppRef {
   5: string shared_const;
 }
 
-@thrift.DeprecatedUnvalidatedAnnotations{
-  items = {"cpp.methods": "
-   void foo() {}
-"},
-}
 union CppMethods {
   1: i32 field;
 }

@@ -112,6 +112,17 @@ def _win32_strerror(err):
 
 
 class WatchmanError(Exception):
+    """Base exception for watchman client errors.
+
+    This exception and its subclasses are raised when errors occur during
+    watchman client operations, such as communication failures, invalid
+    responses, or command execution errors.
+
+    Attributes:
+        msg: Error message describing the problem.
+        cmd: Optional command that was being executed when the error occurred.
+    """
+
     def __init__(self, msg=None, cmd=None):
         self.msg = msg
         self.cmd = cmd

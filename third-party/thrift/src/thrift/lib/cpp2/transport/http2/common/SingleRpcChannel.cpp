@@ -428,8 +428,10 @@ void SingleRpcChannel::onThriftResponse() noexcept {
   const auto& retryAfter = headers_->getHeaders().getSingleOrEmpty(
       proxygen::HTTP_HEADER_RETRY_AFTER);
 
-  // HTTP 503 (Service Unavailable) + Retry-After
-  if (statusCode == 503 && !retryAfter.empty()) {
+  // HTTP 429 (Too Many Requests) - rate limiting/throttling
+  // HTTP 503 (Service Unavailable) + Retry-After - service overload
+  // Both indicate server-side overload and should be retried
+  if (statusCode == 429 || (statusCode == 503 && !retryAfter.empty())) {
     // A Retry-After header may contain a http-date or a number of seconds.
     // We do not currently attempt to parse either of these, and assume the
     // presence of the header implies we should try again due to overload.

@@ -217,6 +217,8 @@ void httpHandler(
   } else if (message.getURL() == "app_overloaded") {
     builder.status(503, "Service Unavailable")
         .header(proxygen::HTTP_HEADER_RETRY_AFTER, "0");
+  } else if (message.getURL() == "too_many_requests") {
+    builder.status(429, "Too Many Requests");
   } else if (message.getURL() == "eof") {
     builder.status(200, "OK");
   } else {
@@ -344,6 +346,18 @@ TEST(SingleRpcChannel, ClientExceptions) {
   ASSERT_FALSE(rstate.receiveState.isException());
   auto headers = rstate.receiveState.header()->getHeaders();
   auto iter = headers.find("ex");
+  EXPECT_TRUE(iter != headers.end());
+  EXPECT_EQ(iter->second, kAppOverloadedErrorCode);
+
+  // Ensure that HTTP 429 (Too Many Requests) is also marked as APP_OVERLOADED
+  rstate = sendRequest(evb, *channel, "too_many_requests").getVia(&evb);
+
+  EXPECT_TRUE(rstate.sent);
+  EXPECT_FALSE(rstate.error);
+  EXPECT_TRUE(rstate.reply);
+  ASSERT_FALSE(rstate.receiveState.isException());
+  headers = rstate.receiveState.header()->getHeaders();
+  iter = headers.find("ex");
   EXPECT_TRUE(iter != headers.end());
   EXPECT_EQ(iter->second, kAppOverloadedErrorCode);
 

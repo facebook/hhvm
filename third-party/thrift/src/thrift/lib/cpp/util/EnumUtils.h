@@ -24,9 +24,9 @@
 #include <string_view>
 #include <fmt/format.h>
 
-#include <folly/Conv.h>
 #include <folly/Portability.h>
 #include <folly/lang/Exception.h>
+#include <folly/lang/Pretty.h>
 
 #include <thrift/lib/cpp/Thrift.h>
 
@@ -102,7 +102,7 @@ std::string enumNameSafe(EnumType value) {
   auto under = folly::to_underlying(value);
   std::string_view name;
   bool found = TEnumTraits<EnumType>::findName(value, &name);
-  return found ? std::string(name) : folly::to<std::string>(under);
+  return found ? std::string(name) : fmt::to_string(under);
 }
 
 /*

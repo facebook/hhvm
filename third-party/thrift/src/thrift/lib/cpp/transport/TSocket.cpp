@@ -23,6 +23,8 @@
 #include <sstream>
 #include <thread>
 
+#include <glog/logging.h>
+
 #include <folly/portability/Fcntl.h>
 #include <folly/portability/Sockets.h>
 #include <folly/portability/Unistd.h>
@@ -122,8 +124,8 @@ bool TSocket::peek() {
       return false;
     }
 #endif
-    GlobalOutput.perror(
-        "TSocket::peek() recv() " + getSocketInfo(), errno_copy);
+    errno = errno_copy;
+    PLOG(ERROR) << "TSocket::peek() recv() " << getSocketInfo();
     throw TTransportException(
         TTransportException::UNKNOWN, "recv()", errno_copy);
   }
@@ -145,8 +147,8 @@ void TSocket::openConnection(struct addrinfo* res) {
   }
   if (socket_ == -1) {
     int errno_copy = errno;
-    GlobalOutput.perror(
-        "TSocket::open() socket() " + getSocketInfo(), errno_copy);
+    errno = errno_copy;
+    PLOG(ERROR) << "TSocket::open() socket() " << getSocketInfo();
     throw TTransportException(
         TTransportException::NOT_OPEN, "socket()", errno_copy);
   }
@@ -166,16 +168,16 @@ void TSocket::openConnection(struct addrinfo* res) {
   if (options_.connTimeout > 0) {
     if (-1 == fcntl(socket_, F_SETFL, flags | O_NONBLOCK)) {
       int errno_copy = errno;
-      GlobalOutput.perror(
-          "TSocket::open() fcntl() " + getSocketInfo(), errno_copy);
+      errno = errno_copy;
+      PLOG(ERROR) << "TSocket::open() fcntl() " << getSocketInfo();
       throw TTransportException(
           TTransportException::NOT_OPEN, "fcntl() failed", errno_copy);
     }
   } else {
     if (-1 == fcntl(socket_, F_SETFL, flags & ~O_NONBLOCK)) {
       int errno_copy = errno;
-      GlobalOutput.perror(
-          "TSocket::open() fcntl " + getSocketInfo(), errno_copy);
+      errno = errno_copy;
+      PLOG(ERROR) << "TSocket::open() fcntl " << getSocketInfo();
       throw TTransportException(
           TTransportException::NOT_OPEN, "fcntl() failed", errno_copy);
     }
@@ -186,9 +188,9 @@ void TSocket::openConnection(struct addrinfo* res) {
     if (-1 ==
         setsockopt(socket_, SOL_SOCKET, SO_REUSEADDR, &val, sizeof(val))) {
       int errno_copy = errno; // Copy errno because we're allocating memory.
-      GlobalOutput.perror(
-          "TSocket::open() setsockopt(SO_REUSEADDR) " + getSocketInfo(),
-          errno_copy);
+      errno = errno_copy;
+      PLOG(ERROR) << "TSocket::open() setsockopt(SO_REUSEADDR) "
+                  << getSocketInfo();
       // No need to throw.
     }
   }
@@ -198,9 +200,7 @@ void TSocket::openConnection(struct addrinfo* res) {
   if (!path_.empty()) {
     size_t len = path_.size() + 1;
     if (len > sizeof(((sockaddr_un*)nullptr)->sun_path)) {
-      int errno_copy = errno;
-      GlobalOutput.perror(
-          "TSocket::open() Unix Domain socket path too long", errno_copy);
+      LOG(ERROR) << "TSocket::open() Unix Domain socket path too long";
       throw TTransportException(
           TTransportException::NOT_OPEN, " Unix Domain socket path too long");
     }
@@ -221,8 +221,8 @@ void TSocket::openConnection(struct addrinfo* res) {
 
   if (errno != EINPROGRESS) {
     int errno_copy = errno;
-    GlobalOutput.perror(
-        "TSocket::open() connect() " + getSocketInfo(), errno_copy);
+    errno = errno_copy;
+    PLOG(ERROR) << "TSocket::open() connect() " << getSocketInfo();
     throw TTransportException(
         TTransportException::NOT_OPEN,
         "connect() failed " + getSocketInfo(),
@@ -255,8 +255,8 @@ try_again:
     lon = sizeof(int);
     int ret2 = getsockopt(socket_, SOL_SOCKET, SO_ERROR, (void*)&val, &lon);
     if (ret2 == -1) {
-      GlobalOutput.perror(
-          "TSocket::open() getsockopt() " + getSocketInfo(), errno_after_poll);
+      errno = errno_after_poll;
+      PLOG(ERROR) << "TSocket::open() getsockopt() " << getSocketInfo();
       throw TTransportException(
           TTransportException::NOT_OPEN, "getsockopt()", errno_after_poll);
     }
@@ -264,14 +264,14 @@ try_again:
     if (val == 0) {
       goto done;
     }
-    GlobalOutput.perror(
-        "TSocket::open() error on socket (after poll) " + getSocketInfo(), val);
+    errno = val;
+    PLOG(ERROR) << "TSocket::open() error on socket (after poll) "
+                << getSocketInfo();
     throw TTransportException(
         TTransportException::NOT_OPEN, "socket open() error", val);
   } else if (ret == 0) {
     // socket timed out
-    string errStr = "TSocket::open() timed out " + getSocketInfo();
-    GlobalOutput(errStr.c_str());
+    LOG(ERROR) << "TSocket::open() timed out " << getSocketInfo();
     throw TTransportException(
         TTransportException::NOT_OPEN, "open() timed out " + getSocketInfo());
   } else {
@@ -279,10 +279,9 @@ try_again:
     // timeout value yet.
     if (errno_after_poll == EINTR) {
       if (pausableTimer.hasExceededTimeLimit()) {
-        GlobalOutput.perror(
-            "TSocket::open() poll() (EINTRs, then timed out) " +
-                getSocketInfo(),
-            errno_after_poll);
+        errno = errno_after_poll;
+        PLOG(ERROR) << "TSocket::open() poll() (EINTRs, then timed out) "
+                    << getSocketInfo();
         throw TTransportException(
             TTransportException::NOT_OPEN,
             "poll() failed (EINTRs, then timed out)",
@@ -291,8 +290,8 @@ try_again:
         goto try_again;
       }
     } else { // error on poll() other than EINTR
-      GlobalOutput.perror(
-          "TSocket::open() poll() " + getSocketInfo(), errno_after_poll);
+      errno = errno_after_poll;
+      PLOG(ERROR) << "TSocket::open() poll() " << getSocketInfo();
       throw TTransportException(
           TTransportException::NOT_OPEN, "poll() failed", errno_after_poll);
     }
@@ -346,9 +345,8 @@ void TSocket::local_open() {
   error = getaddrinfo(host_.c_str(), port, &hints, &res0);
 
   if (error) {
-    string errStr = "TSocket::open() getaddrinfo() " + maybeGetSocketInfo() +
-        string(gai_strerror(error));
-    GlobalOutput(errStr.c_str());
+    LOG(ERROR) << "TSocket::open() getaddrinfo() " << maybeGetSocketInfo()
+               << " " << gai_strerror(error);
     close();
     throw TTransportException(
         TTransportException::NOT_OPEN,
@@ -488,8 +486,8 @@ try_again:
 #endif
 
     // Now it's not a try again case, but a real probblez
-    GlobalOutput.perror(
-        "TSocket::read() recv() " + getSocketInfo(), errno_after_recv);
+    errno = errno_after_recv;
+    PLOG(ERROR) << "TSocket::read() recv() " << getSocketInfo();
 
     // If we disconnect with no linger time
     if (errno_after_recv == ECONNRESET) {
@@ -572,8 +570,8 @@ uint32_t TSocket::write_partial(const uint8_t* buf, uint32_t len) {
     }
     // Fail on a send error
     int errno_copy = errno;
-    GlobalOutput.perror(
-        "TSocket::write_partial() send() " + getSocketInfo(), errno_copy);
+    errno = errno_copy;
+    PLOG(ERROR) << "TSocket::write_partial() send() " << getSocketInfo();
 
     if (errno_copy == EPIPE || errno_copy == ECONNRESET ||
         errno_copy == ENOTCONN) {
@@ -670,8 +668,8 @@ TSocket::Options TSocket::getCurrentSocketOptions() {
   ret = getsockopt(socket_, SOL_SOCKET, SO_SNDTIMEO, &s, optlen);
   if (ret == -1) {
     int errno_copy = errno; // Copy errno because we're allocating memory.
-    GlobalOutput.perror(
-        "TSocket::SendTimeout getsockopt() " + getSocketInfo(), errno_copy);
+    errno = errno_copy;
+    PLOG(ERROR) << "TSocket::SendTimeout getsockopt() " << getSocketInfo();
   } else {
     ro.sendTimeout = msTimeFromTimeval(s);
   }
@@ -683,8 +681,8 @@ TSocket::Options TSocket::getCurrentSocketOptions() {
   ret = getsockopt(socket_, SOL_SOCKET, SO_RCVTIMEO, &s, optlen);
   if (ret == -1) {
     int errno_copy = errno; // Copy errno because we're allocating memory.
-    GlobalOutput.perror(
-        "TSocket::RecvTimeout getsockopt() " + getSocketInfo(), errno_copy);
+    errno = errno_copy;
+    PLOG(ERROR) << "TSocket::RecvTimeout getsockopt() " << getSocketInfo();
   } else {
     ro.recvTimeout = msTimeFromTimeval(s);
   }
@@ -696,9 +694,8 @@ TSocket::Options TSocket::getCurrentSocketOptions() {
   ret = getsockopt(socket_, SOL_SOCKET, SO_SNDBUF, &bufSize, optlen);
   if (ret == -1) {
     int errno_copy = errno; // Copy errno because we're allocating memory.
-    GlobalOutput.perror(
-        "TSocket::getSendBufSize() setsockopt() " + getSocketInfo(),
-        errno_copy);
+    errno = errno_copy;
+    PLOG(ERROR) << "TSocket::getSendBufSize() setsockopt() " << getSocketInfo();
   } else {
     ro.sendBufSize = bufSize;
   }
@@ -710,9 +707,8 @@ TSocket::Options TSocket::getCurrentSocketOptions() {
   ret = getsockopt(socket_, SOL_SOCKET, SO_RCVBUF, &bufSize, optlen);
   if (ret == -1) {
     int errno_copy = errno; // Copy errno because we're allocating memory.
-    GlobalOutput.perror(
-        "TSocket::getRecvBufSize() setsockopt() " + getSocketInfo(),
-        errno_copy);
+    errno = errno_copy;
+    PLOG(ERROR) << "TSocket::getRecvBufSize() setsockopt() " << getSocketInfo();
   } else {
     ro.recvBufSize = bufSize;
   }
@@ -723,8 +719,8 @@ TSocket::Options TSocket::getCurrentSocketOptions() {
   ret = getsockopt(socket_, SOL_SOCKET, SO_LINGER, &l, optlen);
   if (ret == -1) {
     int errno_copy = errno; // Copy errno because we're allocating memory.
-    GlobalOutput.perror(
-        "TSocket::getLinger() setsockopt() " + getSocketInfo(), errno_copy);
+    errno = errno_copy;
+    PLOG(ERROR) << "TSocket::getLinger() setsockopt() " << getSocketInfo();
   } else {
     ro.lingerOn = l.l_onoff;
     ro.lingerVal = l.l_linger;
@@ -737,8 +733,8 @@ TSocket::Options TSocket::getCurrentSocketOptions() {
   ret = getsockopt(socket_, IPPROTO_TCP, TCP_NODELAY, &v, optlen);
   if (ret == -1) {
     int errno_copy = errno; // Copy errno because we're allocating memory.
-    GlobalOutput.perror(
-        "TSocket::getNoDelay() setsockopt() " + getSocketInfo(), errno_copy);
+    errno = errno_copy;
+    PLOG(ERROR) << "TSocket::getNoDelay() setsockopt() " << getSocketInfo();
   } else {
     ro.noDelay = v;
   }
@@ -750,9 +746,9 @@ TSocket::Options TSocket::getCurrentSocketOptions() {
   ret = getsockopt(socket_, SOL_SOCKET, SO_REUSEADDR, &v, optlen);
   if (ret == -1) {
     int errno_copy = errno; // Copy errno because we're allocating memory.
-    GlobalOutput.perror(
-        "TSocket::getCurrentSocketOptions() SO_REUSEADDR " + getSocketInfo(),
-        errno_copy);
+    errno = errno_copy;
+    PLOG(ERROR) << "TSocket::getCurrentSocketOptions() SO_REUSEADDR "
+                << getSocketInfo();
   } else {
     ro.reuseAddr = v;
   }
@@ -766,8 +762,8 @@ void TSocket::setLinger(bool on, int linger) {
     int ret = setsockopt(socket_, SOL_SOCKET, SO_LINGER, &l, sizeof(l));
     if (ret == -1) {
       int errno_copy = errno; // Copy errno because we're allocating memory.
-      GlobalOutput.perror(
-          "TSocket::setLinger() setsockopt() " + getSocketInfo(), errno_copy);
+      errno = errno_copy;
+      PLOG(ERROR) << "TSocket::setLinger() setsockopt() " << getSocketInfo();
       return;
     }
   }
@@ -783,8 +779,8 @@ void TSocket::setNoDelay(bool noDelay) {
     int ret = setsockopt(socket_, IPPROTO_TCP, TCP_NODELAY, &v, sizeof(v));
     if (ret == -1) {
       int errno_copy = errno; // Copy errno because we're allocating memory.
-      GlobalOutput.perror(
-          "TSocket::setNoDelay() setsockopt() " + getSocketInfo(), errno_copy);
+      errno = errno_copy;
+      PLOG(ERROR) << "TSocket::setNoDelay() setsockopt() " << getSocketInfo();
       return;
     }
   }
@@ -798,9 +794,7 @@ void TSocket::setConnTimeout(int ms) {
 
 void TSocket::setRecvTimeout(int ms) {
   if (ms < 0) {
-    char errBuf[512];
-    sprintf(errBuf, "TSocket::setRecvTimeout with negative input: %d\n", ms);
-    GlobalOutput(errBuf);
+    LOG(ERROR) << "TSocket::setRecvTimeout with negative input: " << ms;
     return;
   }
 
@@ -809,9 +803,9 @@ void TSocket::setRecvTimeout(int ms) {
     int ret = setsockopt(socket_, SOL_SOCKET, SO_RCVTIMEO, &r, sizeof(r));
     if (ret == -1) {
       int errno_copy = errno; // Copy errno because we're allocating memory.
-      GlobalOutput.perror(
-          "TSocket::setRecvTimeout() setsockopt() " + getSocketInfo(),
-          errno_copy);
+      errno = errno_copy;
+      PLOG(ERROR) << "TSocket::setRecvTimeout() setsockopt() "
+                  << getSocketInfo();
       return;
     }
   }
@@ -825,11 +819,8 @@ void TSocket::setSendBufSize(size_t bufsize) {
     // The kernel may prevent the applicaton from sending new data
     // as it reduces the buffer
     if (bufsize < options_.sendBufSize) {
-      GlobalOutput.printf(
-          "Error cannot reduce send buffer size of \
-          open socket old: %zu new: %zu",
-          options_.sendBufSize,
-          bufsize);
+      LOG(ERROR) << "Error cannot reduce send buffer size of open socket old: "
+                 << options_.sendBufSize << " new: " << bufsize;
       return;
     }
 
@@ -837,9 +828,9 @@ void TSocket::setSendBufSize(size_t bufsize) {
         setsockopt(socket_, SOL_SOCKET, SO_SNDBUF, &bufsize, sizeof(bufsize));
     if (ret == -1) {
       int errno_copy = errno; // Copy errno because we're allocating memory.
-      GlobalOutput.perror(
-          "TSocket::setSendBufSize() setsockopt() " + getSocketInfo(),
-          errno_copy);
+      errno = errno_copy;
+      PLOG(ERROR) << "TSocket::setSendBufSize() setsockopt() "
+                  << getSocketInfo();
       return;
     }
   }
@@ -855,11 +846,8 @@ void TSocket::setRecvBufSize(size_t bufsize) {
     // the advertised receiving window it announced to the sender.
     // This will cause heavy retransmission from the sender.
     if (bufsize < options_.recvBufSize) {
-      GlobalOutput.printf(
-          "Error cannot reduce Recv buffer size of \
-          open socket old: %zu new: %zu",
-          options_.recvBufSize,
-          bufsize);
+      LOG(ERROR) << "Error cannot reduce Recv buffer size of open socket old: "
+                 << options_.recvBufSize << " new: " << bufsize;
       return;
     }
 
@@ -867,9 +855,9 @@ void TSocket::setRecvBufSize(size_t bufsize) {
         setsockopt(socket_, SOL_SOCKET, SO_RCVBUF, &bufsize, sizeof(bufsize));
     if (ret == -1) {
       int errno_copy = errno; // Copy errno because we're allocating memory.
-      GlobalOutput.perror(
-          "TSocket::setRecvBufSize() setsockopt() " + getSocketInfo(),
-          errno_copy);
+      errno = errno_copy;
+      PLOG(ERROR) << "TSocket::setRecvBufSize() setsockopt() "
+                  << getSocketInfo();
       return;
     }
   }
@@ -879,9 +867,7 @@ void TSocket::setRecvBufSize(size_t bufsize) {
 
 void TSocket::setSendTimeout(int ms) {
   if (ms < 0) {
-    char errBuf[512];
-    sprintf(errBuf, "TSocket::setSendTimeout with negative input: %d\n", ms);
-    GlobalOutput(errBuf);
+    LOG(ERROR) << "TSocket::setSendTimeout with negative input: " << ms;
     return;
   }
 
@@ -890,9 +876,9 @@ void TSocket::setSendTimeout(int ms) {
     int ret = setsockopt(socket_, SOL_SOCKET, SO_SNDTIMEO, &s, sizeof(s));
     if (ret == -1) {
       int errno_copy = errno; // Copy errno because we're allocating memory.
-      GlobalOutput.perror(
-          "TSocket::setSendTimeout() setsockopt() " + getSocketInfo(),
-          errno_copy);
+      errno = errno_copy;
+      PLOG(ERROR) << "TSocket::setSendTimeout() setsockopt() "
+                  << getSocketInfo();
       return;
     }
   }

@@ -21,6 +21,7 @@
 #include <cstring>
 
 #include <zlib.h>
+#include <glog/logging.h>
 
 using std::string;
 
@@ -80,9 +81,8 @@ inline void TZlibTransport::checkZlibRv(int status, const char* message) {
 inline void TZlibTransport::checkZlibRvNothrow(
     int status, const char* message) {
   if (status != Z_OK) {
-    string output = "TZlibTransport: zlib failure in destructor: " +
-        TZlibTransportException::errorMessage(status, message);
-    GlobalOutput(output.c_str());
+    LOG(ERROR) << "TZlibTransport: zlib failure in destructor: "
+               << TZlibTransportException::errorMessage(status, message);
   }
 }
 

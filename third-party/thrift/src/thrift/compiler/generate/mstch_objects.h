@@ -881,14 +881,12 @@ class mstch_const_value : public mstch_base {
             {"value:self", &mstch_const_value::self},
             {"value:list_elements", &mstch_const_value::list_elems},
             {"value:map_elements", &mstch_const_value::map_elems},
-            {"value:const_struct", &mstch_const_value::const_struct},
         });
   }
 
   whisker::object self() { return make_self(*const_value_); }
   mstch::node list_elems();
   mstch::node map_elems();
-  mstch::node const_struct();
 
  protected:
   const t_const_value* const_value_;

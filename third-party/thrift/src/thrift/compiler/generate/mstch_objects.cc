@@ -186,36 +186,6 @@ mstch::node mstch_const_value::map_elems() {
                              : mstch::node();
 }
 
-mstch::node mstch_const_value::const_struct() {
-  std::vector<t_const*> constants;
-  std::vector<const t_field*> fields;
-  mstch::array a;
-
-  const auto* type = const_value_->type()->get_true_type();
-  if (const t_structured* strct = type->try_as<t_structured>()) {
-    for (auto member : const_value_->get_map()) {
-      const auto* field = strct->get_field_by_name(member.first->get_string());
-      assert(field != nullptr);
-      constants.push_back(new t_const(
-          nullptr,
-          t_type_ref::from_req_ptr(field->type().get_type()),
-          field->name(),
-          member.second->clone()));
-      fields.push_back(field);
-    }
-  }
-
-  for (size_t i = 0, size = constants.size(); i < size; ++i) {
-    a.emplace_back(context_.const_factory->make_mstch_object(
-        constants[i],
-        context_,
-        mstch_element_position(i, size),
-        current_const_,
-        fields[i]));
-  }
-  return a;
-}
-
 mstch::node mstch_field::type() {
   return context_.type_factory->make_mstch_object(
       field_->type().get_type(), context_, pos_);

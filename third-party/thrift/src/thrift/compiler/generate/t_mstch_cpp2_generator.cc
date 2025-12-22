@@ -305,6 +305,9 @@ class cpp2_generator_context {
 
   cpp2_generator_context(cpp2_generator_context&&) = default;
   cpp2_generator_context& operator=(cpp2_generator_context&&) = default;
+  ~cpp2_generator_context() = default;
+  cpp2_generator_context(const cpp2_generator_context&) = delete;
+  cpp2_generator_context& operator=(const cpp2_generator_context&) = delete;
 
   bool is_orderable(
       const t_structured& structured_type,

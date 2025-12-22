@@ -16,8 +16,7 @@ namespace proxygen {
 
 class HTTPRequestVerifier {
  public:
-  explicit HTTPRequestVerifier() {
-  }
+  explicit HTTPRequestVerifier() = default;
 
   void reset(HTTPMessage* msg) {
     msg_ = msg;

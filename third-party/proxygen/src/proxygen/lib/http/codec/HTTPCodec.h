@@ -54,8 +54,7 @@ class HTTPCodec {
   static constexpr StreamID MaxStreamID = std::numeric_limits<StreamID>::max();
 
   struct ExAttributes {
-    ExAttributes() {
-    }
+    ExAttributes() = default;
     ExAttributes(StreamID controlStreamId, bool isUnidirectional)
         : controlStream(controlStreamId), unidirectional(isUnidirectional) {
     }
@@ -68,8 +67,7 @@ class HTTPCodec {
 
   class PriorityQueue {
    public:
-    virtual ~PriorityQueue() {
-    }
+    virtual ~PriorityQueue() = default;
 
     virtual void addPriorityNode(StreamID id, StreamID parent) = 0;
   };
@@ -345,12 +343,10 @@ class HTTPCodec {
       return 0;
     }
 
-    virtual ~Callback() {
-    }
+    virtual ~Callback() = default;
   };
 
-  virtual ~HTTPCodec() {
-  }
+  virtual ~HTTPCodec() = default;
 
   /**
    * Maps a stream id to its sequence number using the underlying protocol as

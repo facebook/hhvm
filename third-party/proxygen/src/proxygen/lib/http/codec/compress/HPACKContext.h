@@ -17,8 +17,7 @@ namespace proxygen {
 class HPACKContext {
  public:
   explicit HPACKContext(uint32_t tableSize);
-  ~HPACKContext() {
-  }
+  ~HPACKContext() = default;
 
   /**
    * get the index of the given header by looking into both dynamic and static

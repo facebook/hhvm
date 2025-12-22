@@ -40,22 +40,12 @@ struct CompressionInfoPart {
         staticRefs_(staticRefs) {
   }
 
-  CompressionInfoPart() {
-  }
+  CompressionInfoPart() = default;
 
   // copy constructor
   CompressionInfoPart(const CompressionInfoPart&) = default;
   // copy assignment operator
-  CompressionInfoPart& operator=(const CompressionInfoPart& other) {
-    headerTableSize_ = other.headerTableSize_;
-    bytesStored_ = other.bytesStored_;
-    headersStored_ = other.headersStored_;
-    inserts_ = other.inserts_;
-    blockedInserts_ = other.blockedInserts_;
-    duplications_ = other.duplications_;
-    staticRefs_ = other.staticRefs_;
-    return *this;
-  }
+  CompressionInfoPart& operator=(const CompressionInfoPart& other) = default;
   // move constructor
   CompressionInfoPart(CompressionInfoPart&&) = default;
   // move assignment operator
@@ -101,8 +91,7 @@ struct CompressionInfo {
                 ingressStaticRefs) {
   }
 
-  CompressionInfo() {
-  }
+  CompressionInfo() = default;
 
   bool operator==(const CompressionInfo& tableInfo) const {
     return egress.headerTableSize_ == tableInfo.egress.headerTableSize_ &&

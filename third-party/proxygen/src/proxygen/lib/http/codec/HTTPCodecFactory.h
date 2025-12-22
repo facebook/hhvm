@@ -42,8 +42,7 @@ class HTTPCodecFactory {
   HTTPCodecFactory() = default;
   explicit HTTPCodecFactory(CodecConfig config) : defaultConfig_(config) {
   }
-  virtual ~HTTPCodecFactory() {
-  }
+  virtual ~HTTPCodecFactory() = default;
 
   /**
    * Get a codec instance

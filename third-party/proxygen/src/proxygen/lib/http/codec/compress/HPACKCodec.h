@@ -40,8 +40,7 @@ uint32_t prepareHeaders(const std::vector<Header>& headers,
 class HPACKCodec : public HeaderCodec {
  public:
   explicit HPACKCodec(TransportDirection direction);
-  ~HPACKCodec() override {
-  }
+  ~HPACKCodec() override = default;
 
   std::unique_ptr<folly::IOBuf> encode(
       std::vector<compress::Header>& headers) noexcept;

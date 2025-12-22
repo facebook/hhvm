@@ -30,8 +30,7 @@ class HPACKDecodeBuffer {
         endOfBufferIsError_(endOfBufferIsError) {
   }
 
-  ~HPACKDecodeBuffer() {
-  }
+  ~HPACKDecodeBuffer() = default;
 
   void reset(folly::io::Cursor& cursorVal) {
     reset(cursorVal, folly::to<uint32_t>(cursorVal.totalLength()));

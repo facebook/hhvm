@@ -56,8 +56,7 @@ class DummyHTTPSessionStats : public HTTPSessionStats {
 
 class MockHTTPSessionStats : public DummyHTTPSessionStats {
  public:
-  MockHTTPSessionStats() {
-  }
+  MockHTTPSessionStats() = default;
   void recordTransactionOpened() noexcept override {
     _recordTransactionOpened();
   }

@@ -53,8 +53,7 @@ class MockQuicSocketDriver : public folly::EventBase::LoopCallback {
   // incoming data to a codec
   class LocalAppCallback {
    public:
-    virtual ~LocalAppCallback() {
-    }
+    virtual ~LocalAppCallback() = default;
     virtual void unidirectionalReadCallback(
         quic::StreamId id, std::unique_ptr<folly::IOBuf> buf) = 0;
     virtual void readCallback(quic::StreamId id,

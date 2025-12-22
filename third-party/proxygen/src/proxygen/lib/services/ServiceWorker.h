@@ -44,8 +44,7 @@ class ServiceWorker {
       : service_(service), worker_(worker) {
   }
 
-  virtual ~ServiceWorker() {
-  }
+  virtual ~ServiceWorker() = default;
 
   [[nodiscard]] Service* getService() const {
     return service_;

@@ -14,8 +14,7 @@
 
 namespace proxygen {
 
-WheelTimerInstance::WheelTimerInstance() {
-}
+WheelTimerInstance::WheelTimerInstance() = default;
 
 WheelTimerInstance::WheelTimerInstance(folly::HHWheelTimer* timer)
     : wheelTimerPtr_(timer) {
@@ -36,9 +35,8 @@ WheelTimerInstance::WheelTimerInstance(
 }
 
 WheelTimerInstance::WheelTimerInstance(const WheelTimerInstance& timerInstance)
-    : wheelTimerPtr_(timerInstance.wheelTimerPtr_),
-      defaultTimeoutMS_(timerInstance.defaultTimeoutMS_) {
-}
+
+    = default;
 
 WheelTimerInstance::WheelTimerInstance(
     WheelTimerInstance&& timerInstance) noexcept
@@ -70,11 +68,8 @@ void WheelTimerInstance::scheduleTimeout(
   scheduleTimeout(callback, defaultTimeoutMS_);
 }
 
-WheelTimerInstance& WheelTimerInstance::operator=(const WheelTimerInstance& t) {
-  wheelTimerPtr_ = t.wheelTimerPtr_;
-  defaultTimeoutMS_ = t.defaultTimeoutMS_;
-  return *this;
-}
+WheelTimerInstance& WheelTimerInstance::operator=(const WheelTimerInstance& t) =
+    default;
 
 WheelTimerInstance& WheelTimerInstance::operator=(
     const WheelTimerInstance&& timer) {

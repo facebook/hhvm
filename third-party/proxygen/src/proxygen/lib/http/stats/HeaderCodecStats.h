@@ -18,8 +18,7 @@ namespace proxygen {
 class TLHeaderCodecStats : public HeaderCodec::Stats {
  public:
   explicit TLHeaderCodecStats(const std::string& prefix);
-  ~TLHeaderCodecStats() override {
-  }
+  ~TLHeaderCodecStats() override = default;
   TLHeaderCodecStats(const TLHeaderCodecStats&) = delete;
   TLHeaderCodecStats& operator=(const TLHeaderCodecStats&) = delete;
 

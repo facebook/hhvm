@@ -19,15 +19,13 @@ namespace proxygen {
 class Sampled {
 
  public:
-  Sampled() {
-  }
+  Sampled() = default;
 
   explicit Sampled(const Sampling& sampling) {
     sample(sampling);
   }
 
-  virtual ~Sampled() {
-  }
+  virtual ~Sampled() = default;
 
   void sample(const Sampling& sampling) {
     if (sampling.isLucky()) {

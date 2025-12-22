@@ -18,8 +18,7 @@ class ServiceConfiguration {
   ServiceConfiguration() : takeoverEnabled_(false) {
   }
 
-  virtual ~ServiceConfiguration() {
-  }
+  virtual ~ServiceConfiguration() = default;
 
   /**
    * Set/get whether or not we should enable socket takeover

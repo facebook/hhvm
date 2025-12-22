@@ -46,10 +46,8 @@ class IOBufPrinter {
     return printChain(buf, Format::BIN, coalesce);
   }
 
-  IOBufPrinter() {
-  }
-  virtual ~IOBufPrinter() {
-  }
+  IOBufPrinter() = default;
+  virtual ~IOBufPrinter() = default;
 
   virtual std::string print(const folly::IOBuf* buf) = 0;
 };

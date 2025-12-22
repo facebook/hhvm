@@ -14,11 +14,9 @@
 
 namespace proxygen {
 
-Service::Service() {
-}
+Service::Service() = default;
 
-Service::~Service() {
-}
+Service::~Service() = default;
 
 void Service::addServiceWorker(std::unique_ptr<ServiceWorker> worker,
                                RequestWorkerThread* reqWorker) {

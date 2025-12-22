@@ -17,11 +17,9 @@ namespace proxygen {
 
 class MultiSampled {
  public:
-  MultiSampled() {
-  }
+  MultiSampled() = default;
 
-  virtual ~MultiSampled() {
-  }
+  virtual ~MultiSampled() = default;
 
   void sample(const std::string& tag, const Sampling& sampling) {
     if (sampling.isLucky()) {

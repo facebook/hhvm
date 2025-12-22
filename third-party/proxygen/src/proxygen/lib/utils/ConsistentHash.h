@@ -16,8 +16,7 @@ namespace proxygen {
 
 class ConsistentHash {
  public:
-  virtual ~ConsistentHash() {
-  }
+  virtual ~ConsistentHash() = default;
 
   /**
    * build() builds the hashing pool based on a vector of nodes with their keys

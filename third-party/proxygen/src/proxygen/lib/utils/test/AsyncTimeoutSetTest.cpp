@@ -27,8 +27,7 @@ using StackTimeoutSet = folly::UndelayedDestruction<AsyncTimeoutSet>;
 
 class MockTimeoutClock : public AsyncTimeoutSet::TimeoutClock {
  public:
-  MockTimeoutClock() {
-  }
+  MockTimeoutClock() = default;
 
   MOCK_METHOD(std::chrono::milliseconds, millisecondsSinceEpoch, ());
 };
@@ -40,8 +39,7 @@ class TestTimeout : public AsyncTimeoutSet::Callback {
     addTimeout(std::forward<Args>(args)...);
     _scheduleNext();
   }
-  TestTimeout() {
-  }
+  TestTimeout() = default;
 
   void addTimeout(AsyncTimeoutSet* set) {
     nextSets_.push_back(set);

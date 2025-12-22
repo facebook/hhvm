@@ -38,12 +38,10 @@ class TesterInterface {
  public:
   class Callback {
    public:
-    virtual ~Callback() {
-    }
+    virtual ~Callback() = default;
     virtual void onA() = 0;
   };
-  virtual ~TesterInterface() {
-  }
+  virtual ~TesterInterface() = default;
   virtual void setCallback(Callback* cb) = 0;
   virtual void doA() = 0;
 };

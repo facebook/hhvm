@@ -167,8 +167,7 @@ inline std::string getDateTimeStr(TimePoint tp) {
 template <typename ClockType = SteadyClock>
 class TimeUtilGeneric {
  public:
-  virtual ~TimeUtilGeneric() {
-  }
+  virtual ~TimeUtilGeneric() = default;
 
   [[nodiscard]] virtual std::chrono::time_point<ClockType> now() const {
     return getCurrentTime<ClockType>();

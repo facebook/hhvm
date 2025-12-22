@@ -100,8 +100,7 @@ class TraceEvent {
         : event_(event), itr_(event.metaData_.begin()) {
     }
 
-    ~Iterator() {
-    }
+    ~Iterator() = default;
 
     void next() {
       ++itr_;

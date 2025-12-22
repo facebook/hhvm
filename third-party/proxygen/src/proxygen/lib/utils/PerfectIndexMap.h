@@ -48,8 +48,7 @@ template <typename Key,
 class PerfectIndexMap {
  public:
   static_assert(sizeof(Key) == 1, "Key must be of size 1 byte.");
-  PerfectIndexMap() {
-  }
+  PerfectIndexMap() = default;
   virtual ~PerfectIndexMap() = default;
 
   // Getters into the underlying map.

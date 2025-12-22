@@ -53,8 +53,7 @@ class AsyncTimeoutSet
    */
   class Callback {
    public:
-    Callback() {
-    }
+    Callback() = default;
 
     virtual ~Callback();
 
@@ -114,11 +113,9 @@ class AsyncTimeoutSet
    */
   class TimeoutClock {
    public:
-    TimeoutClock() {
-    }
+    TimeoutClock() = default;
 
-    virtual ~TimeoutClock() {
-    }
+    virtual ~TimeoutClock() = default;
 
     virtual std::chrono::milliseconds millisecondsSinceEpoch() = 0;
   };

@@ -26,8 +26,7 @@ class RequestWorkerThread {
  public:
   class FinishCallback {
    public:
-    virtual ~FinishCallback() noexcept {
-    }
+    virtual ~FinishCallback() noexcept = default;
     virtual void workerStarted(RequestWorkerThread*) = 0;
     virtual void workerFinished(RequestWorkerThread*) = 0;
   };

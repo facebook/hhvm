@@ -36,8 +36,7 @@ class Exception : public std::exception {
       : msg_(folly::to<std::string>(std::forward<Args>(args)...)), code_(0) {
   }
 
-  ~Exception() noexcept override {
-  }
+  ~Exception() noexcept override = default;
 
   // std::exception methods
   [[nodiscard]] const char* what() const noexcept override;

@@ -20,6 +20,9 @@ namespace py thrift.test.py.adapter
 include "thrift/test/py/adapter_bar.thrift"
 include "thrift/annotation/thrift.thrift"
 
+@thrift.AllowLegacyMissingUris
+package;
+
 struct Foo {
   1: Bar_6216 structField;
   2: Bar_6216 oStructField;

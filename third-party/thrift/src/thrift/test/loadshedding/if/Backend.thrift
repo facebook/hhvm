@@ -15,6 +15,10 @@
  */
 
 include "common/fb303/if/fb303.thrift"
+include "thrift/annotation/thrift.thrift"
+
+@thrift.AllowLegacyMissingUris
+package;
 
 namespace cpp2 facebook.thrift.test
 

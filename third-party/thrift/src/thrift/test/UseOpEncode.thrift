@@ -18,6 +18,10 @@ namespace cpp2 apache.thrift.test
 
 include "thrift/annotation/cpp.thrift"
 include "thrift/annotation/thrift.thrift"
+
+@thrift.AllowLegacyMissingUris
+package;
+
 cpp_include "thrift/test/AdapterTest.h"
 
 @thrift.Uri{value = "facebook.com/thrift/test/use_op_encode/Foo"}

@@ -21,6 +21,9 @@ include "thrift/annotation/cpp.thrift"
 
 include "thrift/annotation/thrift.thrift"
 
+@thrift.AllowLegacyMissingUris
+package;
+
 enum SampleEnum {
   kSampleEnumFoo = 0,
   kSampleEnumBar = 1,

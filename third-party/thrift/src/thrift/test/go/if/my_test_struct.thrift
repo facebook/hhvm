@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
+include "thrift/annotation/thrift.thrift"
+
+@thrift.AllowLegacyMissingUris
+package;
+
 namespace go 'github.com/facebook/fbthrift/thrift/test/go/if/my_test_struct'
 
 enum MyTestEnum {

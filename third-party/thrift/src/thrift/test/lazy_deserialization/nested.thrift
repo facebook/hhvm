@@ -20,6 +20,9 @@ include "thrift/annotation/cpp.thrift"
 
 include "thrift/annotation/thrift.thrift"
 
+@thrift.AllowLegacyMissingUris
+package;
+
 struct Inner {
   1: optional i32 field;
 }

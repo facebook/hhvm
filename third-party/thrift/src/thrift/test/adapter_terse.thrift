@@ -17,6 +17,11 @@
 namespace cpp2 apache.thrift.test.terse
 
 include "thrift/annotation/cpp.thrift"
+include "thrift/annotation/thrift.thrift"
+
+@thrift.AllowLegacyMissingUris
+package;
+
 cpp_include "thrift/test/AdapterTest.h"
 
 @cpp.Adapter{name = "::apache::thrift::test::AdaptTestMsAdapter"}

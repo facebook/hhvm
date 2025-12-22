@@ -17,6 +17,11 @@
 namespace cpp2 apache.thrift.test.no_uri
 
 include "thrift/annotation/cpp.thrift"
+include "thrift/annotation/thrift.thrift"
+
+@thrift.AllowLegacyMissingUris
+package;
+
 cpp_include "thrift/test/AdapterTest.h"
 cpp_include "thrift/lib/cpp2/Adapt.h"
 

@@ -20,6 +20,9 @@ namespace py thrift.test.UnionTest
 include "thrift/annotation/cpp.thrift"
 include "thrift/annotation/thrift.thrift"
 
+@thrift.AllowLegacyMissingUris
+package;
+
 @cpp.Type{name = "folly::IOBuf"}
 typedef binary IOBuf
 

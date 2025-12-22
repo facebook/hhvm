@@ -20,6 +20,10 @@ namespace py thrift.test.UnionTest
 namespace java thrift.test.union
 
 include "thrift/annotation/cpp.thrift"
+include "thrift/annotation/thrift.thrift"
+
+@thrift.AllowLegacyMissingUris
+package;
 
 struct OneOfEach {
   // make at least one field of a struct contained in a union required

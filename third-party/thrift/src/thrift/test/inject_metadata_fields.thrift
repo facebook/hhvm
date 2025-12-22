@@ -20,6 +20,9 @@ include "thrift/test/clear.thrift"
 include "thrift/test/inject_metadata_fields_annot.thrift"
 include "thrift/annotation/thrift.thrift"
 
+@thrift.AllowLegacyMissingUris
+package;
+
 namespace cpp2 apache.thrift.test.inject_metadata_fields
 
 enum MyEnum {

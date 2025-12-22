@@ -17,6 +17,9 @@
 include "thrift/annotation/thrift.thrift"
 include "thrift/annotation/cpp.thrift"
 
+@thrift.AllowLegacyMissingUris
+package;
+
 namespace cpp2 apache.thrift.test
 
 union Basic {

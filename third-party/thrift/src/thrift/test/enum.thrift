@@ -17,6 +17,9 @@
 include "thrift/annotation/cpp.thrift"
 include "thrift/annotation/thrift.thrift"
 
+@thrift.AllowLegacyMissingUris
+package;
+
 enum MyEnum1 {
   ME1_0 = 0,
   ME1_1 = 1,

@@ -19,6 +19,9 @@ namespace go thrift.test.go.if.thrifttest
 include "thrift/annotation/go.thrift"
 include "thrift/annotation/thrift.thrift"
 
+@thrift.AllowLegacyMissingUris
+package;
+
 enum Numberz {
   ONE = 1,
   TWO = 2,

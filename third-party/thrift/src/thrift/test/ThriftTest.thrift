@@ -25,6 +25,9 @@ namespace json thrift.test
 include "thrift/annotation/cpp.thrift"
 include "thrift/annotation/thrift.thrift"
 
+@thrift.AllowLegacyMissingUris
+package;
+
 enum Numberz {
   ONE = 1,
   TWO = 2,

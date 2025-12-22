@@ -18,6 +18,9 @@ include "thrift/annotation/thrift.thrift"
 include "thrift/annotation/cpp.thrift"
 include "thrift/test/enum.thrift"
 
+@thrift.AllowLegacyMissingUris
+package;
+
 enum MyQualifiedEnum {
   FOO = 0,
   BAR = 1,

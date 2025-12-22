@@ -20,6 +20,10 @@ cpp_include "folly/io/IOBuf.h"
 cpp_include "thrift/test/ContainerSize.h"
 
 include "thrift/annotation/cpp.thrift"
+include "thrift/annotation/thrift.thrift"
+
+@thrift.AllowLegacyMissingUris
+package;
 
 struct Struct {
   @cpp.Type{name = "TestFileBackedString"}

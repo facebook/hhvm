@@ -18,6 +18,10 @@ namespace cpp2 apache.thrift.test
 namespace py3 thrift.test
 
 include "thrift/annotation/cpp.thrift"
+include "thrift/annotation/thrift.thrift"
+
+@thrift.AllowLegacyMissingUris
+package;
 
 enum MyEnum {
   @cpp.Name{value = "REALM"}

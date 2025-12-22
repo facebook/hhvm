@@ -26,6 +26,9 @@ cpp_include "thrift/test/reflection/fatal_custom_types.h"
 include "thrift/annotation/cpp.thrift"
 include "thrift/annotation/thrift.thrift"
 
+@thrift.AllowLegacyMissingUris
+package;
+
 enum compat_enum1 {
   field0 = 0,
   field1 = 1,

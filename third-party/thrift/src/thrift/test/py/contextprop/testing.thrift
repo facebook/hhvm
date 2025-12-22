@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
+include "thrift/annotation/thrift.thrift"
+
+@thrift.AllowLegacyMissingUris
+package;
+
 namespace cpp2 thrift.test.contextprop_test
 namespace py3 thrift.test.contextprop_test
 namespace py thrift.test.contextprop_test.py.testing

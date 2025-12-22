@@ -18,6 +18,9 @@ include "thrift/annotation/internal.thrift"
 include "thrift/annotation/scope.thrift"
 include "thrift/annotation/thrift.thrift"
 
+@thrift.AllowLegacyMissingUris
+package;
+
 struct FieldsWithAnnotation {
   @thrift.Box
   1: optional i64 structured_boxed_field;

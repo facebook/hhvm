@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
+include "thrift/annotation/thrift.thrift"
+
+@thrift.AllowLegacyMissingUris
+package;
+
 namespace go 'thrift/test/go/gonamespace/thriftif'
 
 struct TestCallRequest {

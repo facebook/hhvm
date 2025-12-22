@@ -18,6 +18,9 @@ namespace py3 thrift.test.fuzzer
 
 include "thrift/annotation/thrift.thrift"
 
+@thrift.AllowLegacyMissingUris
+package;
+
 enum Color {
   RED = 0xFF0000,
   ORANGE = 0xFF6600,

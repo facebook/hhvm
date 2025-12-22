@@ -163,11 +163,6 @@ class diagnostic_results {
  public:
   explicit diagnostic_results(std::vector<diagnostic> initial_diagnostics);
   diagnostic_results() = default;
-  diagnostic_results(const diagnostic_results&) = default;
-  diagnostic_results(diagnostic_results&&) noexcept = default;
-
-  diagnostic_results& operator=(diagnostic_results&&) noexcept = default;
-  diagnostic_results& operator=(const diagnostic_results&) = default;
 
   const std::vector<diagnostic>& diagnostics() const& { return diagnostics_; }
   std::vector<diagnostic>&& diagnostics() && { return std::move(diagnostics_); }

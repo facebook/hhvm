@@ -54,7 +54,9 @@ class file {
   }
 
   file(const file&) = delete;
-  void operator=(const file&) = delete;
+  file& operator=(const file&) = delete;
+  file(file&&) = delete;
+  file& operator=(file&&) = delete;
 
   explicit operator bool() const { return file_ != nullptr; }
 

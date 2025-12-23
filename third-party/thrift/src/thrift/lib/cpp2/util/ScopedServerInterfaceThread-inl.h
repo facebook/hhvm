@@ -83,6 +83,7 @@ class StreamFaultInjectionCallback : public StreamClientCallback,
     if (serverCallback_) {
       serverCallback_->onStreamCancel();
       delete this;
+      return;
     }
     clientCallback_ = nullptr;
   }

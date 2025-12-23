@@ -110,6 +110,8 @@ public:
     return m_type;
   }
 
+  virtual std::string name() const = 0;
+
   bool send(DebuggerThriftBuffer&);
   bool recv(DebuggerThriftBuffer&);
 

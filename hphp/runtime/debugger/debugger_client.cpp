@@ -17,6 +17,7 @@
 
 #include <signal.h>
 #include <fstream>
+#include <chrono>
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
@@ -37,6 +38,7 @@
 #include "hphp/util/process.h"
 #include "hphp/util/stack-trace.h"
 #include "hphp/util/string-vsnprintf.h"
+#include "hphp/util/sandbox-events.h"
 #include "hphp/util/text-art.h"
 #include "hphp/util/text-color.h"
 

@@ -69,6 +69,8 @@ protected:
     int index
   );
 
+  std::string name() const override { return "break"; }
+
 private:
   // Either points to the breakpoint collection of a debugger client
   // or points to m_bps. In the former case the client frees the

@@ -27,6 +27,8 @@ struct CmdConfig : DebuggerCommand {
   void help(DebuggerClient&) override;
   void onClient(DebuggerClient&) override;
 
+  std::string name() const override { return "config"; }
+
 private:
   void listVars(DebuggerClient&);
 };

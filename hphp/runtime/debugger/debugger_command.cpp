@@ -19,12 +19,23 @@
 #include <folly/portability/Sockets.h>
 
 #include "hphp/runtime/debugger/debugger.h"
+#include "hphp/util/sandbox-events.h"
 #include "hphp/runtime/debugger/cmd/all.h"
 #include "hphp/util/logger.h"
 
 namespace HPHP::Eval {
 ///////////////////////////////////////////////////////////////////////////////
 TRACE_SET_MOD(debugger)
+namespace {
+
+void logEvent(std::string_view event, std::string_view key, uint64_t duration_us) {
+  rareSboxEvent("debugger", event, key, duration_us);
+  auto msg = folly::sformat("DebuggerCommand - {}::{} took {}us\n",
+                            event, key, duration_us);
+  TRACE(2, msg);
+}
+} // namespace
+
 
 // Resets the buffer, serializes this command into the buffer and then
 // flushes the buffer.
@@ -122,6 +133,7 @@ bool DebuggerCommand::Receive(DebuggerThriftBuffer& thrift,
   }
 
   TRACE(1, "DebuggerCommand::Receive: got cmd of type %d\n", type);
+  auto startTime = std::chrono::steady_clock::now();
 
   // Not all commands are here, as not all commands need to be sent over wire.
   switch (type) {
@@ -159,6 +171,11 @@ bool DebuggerCommand::Receive(DebuggerThriftBuffer& thrift,
       cmd.reset();
       return true;
   }
+  assertx(cmd);
+  auto duration = std::chrono::duration_cast<std::chrono::microseconds>(
+                          std::chrono::steady_clock::now() - startTime);
+  logEvent("debugger_command", cmd->name(), static_cast<uint64_t>(duration.count()));
+
   if (!cmd->recv(thrift)) {
     // Note: this error case is easily tested, and we have a test for it. But
     // the error case noted above is quite difficult to test. Keep these two

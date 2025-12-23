@@ -38,6 +38,8 @@ struct CmdEvalStream : DebuggerCommand {
   void handleReply(DebuggerClient&);
   StreamStatus getStreamStatus();
 
+  std::string name() const override { return "eval_stream"; }
+
 protected:
   void sendImpl(DebuggerThriftBuffer&) override;
   void recvImpl(DebuggerThriftBuffer&) override;

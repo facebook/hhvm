@@ -34,6 +34,8 @@ struct CmdEval : DebuggerCommand {
     return m_failed;
   }
 
+  std::string name() const override { return "eval"; }
+
 protected:
   void sendImpl(DebuggerThriftBuffer&) override;
   void recvImpl(DebuggerThriftBuffer&) override;

@@ -30,6 +30,8 @@ struct CmdComplete : DebuggerCommand {
   bool onServer(DebuggerProxy& proxy) override;
   void onClient(DebuggerClient& client) override;
 
+  std::string name() const override { return "complete"; }
+
  protected:
   void sendImpl(DebuggerThriftBuffer& thrift) override;
   void recvImpl(DebuggerThriftBuffer& thrift) override;

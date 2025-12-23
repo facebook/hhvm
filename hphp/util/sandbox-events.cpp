@@ -41,9 +41,9 @@ void logSboxEvent(uint32_t sample_rate, std::string_view source,
 }
 
 void rareSboxEvent(std::string_view source, std::string_view event,
-                   std::string_view key) {
+                   std::string_view key, uint64_t duration_us) {
   if (Cfg::Autoload::PerfSampleRate != 0) {
-    logSboxEvent(1, source, event, key, 0, std::nullopt);
+    logSboxEvent(1, source, event, key, duration_us, std::nullopt);
   }
 }
 

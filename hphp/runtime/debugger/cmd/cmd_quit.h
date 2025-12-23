@@ -27,6 +27,8 @@ struct CmdQuit : DebuggerCommand {
   void help(DebuggerClient&) override;
   bool onServer(DebuggerProxy&) override;
   void onClient(DebuggerClient&) override;
+
+  std::string name() const override { return "quit"; }
 };
 
 ///////////////////////////////////////////////////////////////////////////////

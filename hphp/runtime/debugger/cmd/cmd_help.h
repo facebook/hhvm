@@ -31,6 +31,8 @@ struct CmdHelp : DebuggerCommand {
   void help(DebuggerClient&) override;
   void onClient(DebuggerClient&) override;
 
+  std::string name() const override { return "help"; }
+
 private:
   bool processTutorial(DebuggerClient&);
 };

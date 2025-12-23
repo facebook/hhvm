@@ -28,7 +28,7 @@ void logSboxEvent(uint32_t sampleRate, std::string_view source,
                      HPHP::Optional<std::string_view> error_msg);
 
 void rareSboxEvent(std::string_view source, std::string_view event,
-                   std::string_view key);
+                   std::string_view key, uint64_t duration_us = 0);
 
 inline void sampleSboxEvent(uint32_t sampleRate, std::string_view source,
                             std::string_view event, std::string_view key,

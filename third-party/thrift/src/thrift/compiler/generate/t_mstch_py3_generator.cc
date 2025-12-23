@@ -1104,47 +1104,6 @@ class py3_mstch_enum : public mstch_enum {
   mstch::node cpp_name() { return cpp2::get_name(enum_); }
 };
 
-class py3_mstch_const_value : public mstch_const_value {
- public:
-  py3_mstch_const_value(
-      const t_const_value* cv,
-      mstch_context& ctx,
-      mstch_element_position pos,
-      const t_const* current_const)
-      : mstch_const_value(cv, ctx, pos, current_const) {
-    register_methods(
-        this,
-        {
-            {"value:const_enum_type", &py3_mstch_const_value::const_enum_type},
-            {"value:const_container_type",
-             &py3_mstch_const_value::const_container_type},
-        });
-  }
-
-  mstch::node const_enum_type() {
-    if (!const_value_->type() || type_ != cv::CV_INTEGER ||
-        !const_value_->is_enum()) {
-      return {};
-    }
-    const auto* type = const_value_->type()->get_true_type();
-    if (type->is<t_enum>()) {
-      return context_.type_factory->make_mstch_object(type, context_);
-    }
-    return {};
-  }
-
-  mstch::node const_container_type() {
-    if (!const_value_->type()) {
-      return {};
-    }
-    const auto* type = const_value_->type()->get_true_type();
-    if (type->is<t_container>()) {
-      return context_.type_factory->make_mstch_object(type, context_);
-    }
-    return {};
-  }
-};
-
 std::string py3_mstch_program::visit_type_impl(
     const t_type* orig_type, bool fromTypeDef) {
   bool hasPy3EnableCppAdapterAnnot =
@@ -1555,7 +1514,6 @@ void t_mstch_py3_generator::set_mstch_factories() {
   mstch_context_.add<py3_mstch_struct>();
   mstch_context_.add<py3_mstch_field>();
   mstch_context_.add<py3_mstch_enum>();
-  mstch_context_.add<py3_mstch_const_value>();
 }
 
 void t_mstch_py3_generator::generate_init_files() {

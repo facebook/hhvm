@@ -42,19 +42,19 @@ file.
     }}{{#if value:type.binary?}}b"{{value:string_value}}"{{#else}}"{{value:unicode_value}}"{{/if}}{{!
 }}{{/value:string?}}{{!
 }}{{#value:map?}}{{!
-    }}{{#value:const_container_type}}{{!
+    }}{{#value:type.true_type}}{{!
     }}{{> types/container_from_cpp }}({{> types/current_module_cbindings}}.{{> types/c_constant }}()){{!
-    }}{{/value:const_container_type}}{{!
+    }}{{/value:type.true_type}}{{!
 }}{{/value:map?}}{{!
 }}{{#value:list?}}{{!
-    }}{{#value:const_container_type}}{{!
+    }}{{#value:type.true_type}}{{!
     }}{{> types/container_from_cpp }}({{> types/current_module_cbindings}}.{{> types/c_constant }}()){{!
-    }}{{/value:const_container_type}}{{!
+    }}{{/value:type.true_type}}{{!
 }}{{/value:list?}}{{!
 }}{{#value:enum?}}{{!
     }}{{^value:enum_value?}}__BadEnum({{/value:enum_value?}}{{!
-    }}{{#value:const_enum_type}}{{#type:need_module_path?}}{{type:modulePath}}.{{!
-    }}{{/type:need_module_path?}}{{/value:const_enum_type}}{{!
+    }}{{#value:type.true_type}}{{#type:need_module_path?}}{{type:modulePath}}.{{!
+    }}{{/type:need_module_path?}}{{/value:type.true_type}}{{!
     }}{{value:enum_name}}{{#value:enum_value?}}.{{value:py3_enum_value_name}}{{/value:enum_value?}}{{!
     }}{{^value:enum_value?}}, {{value:integer_value}}){{/value:enum_value?}}{{!
 }}{{/value:enum?}}

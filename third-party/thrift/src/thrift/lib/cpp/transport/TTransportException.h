@@ -17,7 +17,6 @@
 #ifndef _THRIFT_TRANSPORT_TTRANSPORTEXCEPTION_H_
 #define _THRIFT_TRANSPORT_TTRANSPORTEXCEPTION_H_ 1
 
-#include <folly/Conv.h>
 #include <folly/io/async/AsyncSocketException.h>
 
 #include <thrift/lib/cpp/Thrift.h>
@@ -173,15 +172,7 @@ class FOLLY_EXPORT TTransportException
   static std::string getMessage(std::string&& message, int errno_copy);
 
   static std::string getDefaultMessage(
-      TTransportExceptionType type, std::string&& message) {
-    if (message.empty() &&
-        static_cast<size_t>(type) >= TTransportExceptionTypeSize::value) {
-      return "TTransportException: (Invalid exception type '" +
-          folly::to<std::string>(type) + "')";
-    } else {
-      return std::move(message);
-    }
-  }
+      TTransportExceptionType type, std::string&& message);
 
   /** Error code */
   TTransportExceptionType type_;

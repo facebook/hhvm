@@ -21,7 +21,6 @@
 #include <thrift/lib/cpp/test/loadgen/LoadConfig.h>
 
 #include <stdio.h>
-#include <string.h>
 #include <chrono>
 
 using namespace boost;
@@ -103,10 +102,8 @@ uint32_t QpsMonitor::printHeader() {
   if (printAllTime_) {
     separatorLength += 10;
   }
-  char sep[separatorLength + 1];
-  memset(sep, '-', separatorLength);
-  sep[separatorLength] = '\0';
-  printf("%s\n", sep);
+  std::string sep(separatorLength, '-');
+  printf("%s\n", sep.c_str());
 
   fflush(stdout);
 

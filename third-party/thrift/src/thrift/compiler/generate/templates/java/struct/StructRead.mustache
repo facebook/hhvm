@@ -26,14 +26,14 @@ public static {{struct:javaCapitalName}} read0(TProtocol oprot) throws TExceptio
   {{struct:javaCapitalName}}.Builder builder = new {{struct:javaCapitalName}}.Builder();
   {{#struct:fields}}
   {{#field:terse?}}
-  {{#field:value}}
+  {{#field:default_value}}
   {{#field:hasAdapter?}}
   builder.{{> SetterName}}({{> FromThriftStart}}{{#field:type}}{{> struct/IntrinsicDefault}}{{/field:type}}{{> FromThriftEnd}});
   {{/field:hasAdapter?}}
   {{^field:hasAdapter?}}
   {{^field:isObject?}}builder.{{> SetterName}}({{#field:type}}{{> struct/IntrinsicDefault}}{{/field:type}});{{/field:isObject?}}
   {{/field:hasAdapter?}}
-  {{/field:value}}
+  {{/field:default_value}}
   {{/field:terse?}}
   {{/struct:fields}}
   while (true) {

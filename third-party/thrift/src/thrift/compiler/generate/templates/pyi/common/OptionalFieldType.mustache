@@ -18,8 +18,8 @@
 
 Wraps FieldType with an optional type when there's no default value.
 
-}}{{^field:value}}{{^field:optional?}}__T.Optional[{{/field:optional?}}{{/field:value}}{{!
+}}{{^field:default_value}}{{^field:optional?}}__T.Optional[{{/field:optional?}}{{/field:default_value}}{{!
 }}{{#field:optional?}}__T.Optional[{{/field:optional?}}{{!
 }}{{> common/FieldType}}{{!
-}}{{^field:value}}{{^field:optional?}}]{{/field:optional?}}{{/field:value}}{{!
+}}{{^field:default_value}}{{^field:optional?}}]{{/field:optional?}}{{/field:default_value}}{{!
 }}{{#field:optional?}}]{{/field:optional?}}

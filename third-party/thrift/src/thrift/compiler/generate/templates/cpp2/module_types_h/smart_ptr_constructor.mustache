@@ -17,4 +17,4 @@
 }}{{!
 }}{{#field:cpp_ref_unique?}}{{#type:cpp_use_allocator?}}folly::allocate_unique{{/type:cpp_use_allocator?}}{{^type:cpp_use_allocator?}}std::make_unique{{/type:cpp_use_allocator?}}{{/field:cpp_ref_unique?}}{{!
 }}{{^field:cpp_ref_unique?}}{{#type:cpp_use_allocator?}}std::allocate_shared{{/type:cpp_use_allocator?}}{{^type:cpp_use_allocator?}}std::make_shared{{/type:cpp_use_allocator?}}{{/field:cpp_ref_unique?}}{{!
-}}<{{field:cpp_type}}>({{#type:cpp_use_allocator?}}__fbthrift_alloc{{/type:cpp_use_allocator?}}{{#field:value}}{{> field/default}}{{/field:value}})
+}}<{{field:cpp_type}}>({{#type:cpp_use_allocator?}}__fbthrift_alloc{{/type:cpp_use_allocator?}}{{#field:default_value}}{{> field/default}}{{/field:default_value}})

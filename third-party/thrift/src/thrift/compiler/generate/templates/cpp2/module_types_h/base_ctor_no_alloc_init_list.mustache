@@ -24,9 +24,9 @@
       }}{{#field:boxed_ref?}}{{> field/default}}{{/field:boxed_ref?}}{{!
         TODO(dokwon): Support custom default for intern boxed field.
       }}{{#field:intern_boxed_ref?}}{{field:cpp_storage_type}}::fromStaticConstant(&::apache::thrift::op::getDefault<{{> field/tag}}>()){{/field:intern_boxed_ref?}}{{!
-      }}{{^field:cpp_ref?}}{{#field:value}}{{!
+      }}{{^field:cpp_ref?}}{{#field:default_value}}{{!
           Use value initialization when no custom default is provided.
-        }}{{> field/default}}{{/field:value}}{{!
+        }}{{> field/default}}{{/field:default_value}}{{!
       }}{{/field:cpp_ref?}}{{!
       }}){{> common/comma_newline}}{{!
     }}{{/field:type}}{{!

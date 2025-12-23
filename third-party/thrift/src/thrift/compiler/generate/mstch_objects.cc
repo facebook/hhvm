@@ -148,14 +148,6 @@ mstch::node mstch_type::get_typedef() {
   return mstch::node();
 }
 
-mstch::node mstch_field::value() {
-  if (!field_->default_value()) {
-    return mstch::node();
-  }
-  return context_.const_value_factory->make_mstch_object(
-      field_->default_value(), context_, pos_, /*current_const=*/nullptr);
-}
-
 mstch::node mstch_field::type() {
   return context_.type_factory->make_mstch_object(
       field_->type().get_type(), context_, pos_);
@@ -270,11 +262,6 @@ mstch::node mstch_typedef::type() {
 mstch::node mstch_const::type() {
   return context_.type_factory->make_mstch_object(
       const_->type(), context_, pos_);
-}
-
-mstch::node mstch_const::value() {
-  return context_.const_value_factory->make_mstch_object(
-      const_->value(), context_, pos_, const_);
 }
 
 mstch::node mstch_const::program() {

@@ -21,12 +21,11 @@
 }}{{^field:cpp_exactly_one_adapter?}}{{> types/adapter_pre}}{{/field:cpp_exactly_one_adapter?}}{{!
 }}{{#field:cpp_exactly_one_adapter?}}{{field:cpp_standard_type}}({{/field:cpp_exactly_one_adapter?}}{{!
 }}{{/field:cpp_first_adapter}}{{!
-}}{{#field:value}}{{!
-    }}{{#partial const_value.iterate_const_values value=field:self.default_value root_const=null}}{{!
-}}{{/field:value}}{{!
-}}{{^field:value}}{{!
+}}{{#if (object.notnull? field:default_value)}}{{!
+    }}{{#partial const_value.iterate_const_values value=field:default_value root_const=null}}{{!
+}}{{#else}}{{!
   }}{{> field/intrinsic_default}}{{!
-}}{{/field:value}}{{!
+}}{{/if (object.notnull? field:default_value)}}{{!
 }}{{#field:cpp_first_adapter}}{{!
 }}{{^field:cpp_exactly_one_adapter?}}{{> types/adapter_post}}{{/field:cpp_exactly_one_adapter?}}{{!
 }}{{#field:cpp_exactly_one_adapter?}}){{/field:cpp_exactly_one_adapter?}}{{!

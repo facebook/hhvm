@@ -734,7 +734,6 @@ class mstch_field : public mstch_base {
         {
             {"self", &mstch_field::self},
             {"field:self", &mstch_field::self},
-            {"field:value", &mstch_field::value},
             {"field:type", &mstch_field::type},
             {"field:index", &mstch_field::index},
             {"field:structured_annotations",
@@ -743,7 +742,6 @@ class mstch_field : public mstch_base {
   }
 
   whisker::object self() { return make_self(*field_); }
-  mstch::node value();
   mstch::node type();
   mstch::node index() { return pos_.index; }
   mstch::node structured_annotations() {
@@ -800,7 +798,6 @@ class mstch_const : public mstch_base {
             {"constant:self", &mstch_const::self},
             {"constant:index", &mstch_const::index},
             {"constant:type", &mstch_const::type},
-            {"constant:value", &mstch_const::value},
             {"constant:program", &mstch_const::program},
             {"constant:field", &mstch_const::field},
         });
@@ -809,7 +806,6 @@ class mstch_const : public mstch_base {
   whisker::object self() { return make_self(*const_); }
   mstch::node index() { return pos_.index; }
   mstch::node type();
-  mstch::node value();
   mstch::node program();
   mstch::node field();
 

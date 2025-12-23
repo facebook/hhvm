@@ -99,8 +99,7 @@ def get_reflection__{{struct:name}}() -> __StructSpec:
                 }}{{/field:required?}},
             default={{!
             }}{{^struct:union?}}{{!
-                }}{{#field:value}}defaults.{{field:name}}{{/field:value}}{{!
-                }}{{^field:value}}None{{/field:value}}{{!
+                }}{{#if (object.notnull? field:default_value)}}defaults.{{field:name}}{{#else}}None{{/if}}{{!
             }}{{/struct:union?}}{{!
             }}{{#struct:union?}}None{{/struct:union?}},
             annotations={

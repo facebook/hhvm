@@ -25,7 +25,7 @@
     }}{{#field:cpp_ref_not_boxed?}}{{!
 }}{{#field:cpp_ref_unique?}}{{#type:cpp_use_allocator?}}folly::allocate_unique{{/type:cpp_use_allocator?}}{{^type:cpp_use_allocator?}}std::make_unique{{/type:cpp_use_allocator?}}{{/field:cpp_ref_unique?}}{{!
 }}{{#field:cpp_ref_shared?}}{{#type:cpp_use_allocator?}}std::allocate_shared{{/type:cpp_use_allocator?}}{{^type:cpp_use_allocator?}}std::make_shared{{/type:cpp_use_allocator?}}{{/field:cpp_ref_shared?}}{{!
-}}<{{field:cpp_type}}>({{#field:value}}{{> field/default}}{{/field:value}}{{#type:cpp_use_allocator?}}alloc{{/type:cpp_use_allocator?}}){{/field:cpp_ref_not_boxed?}}{{!
+}}<{{field:cpp_type}}>({{#field:default_value}}{{> field/default}}{{/field:default_value}}{{#type:cpp_use_allocator?}}alloc{{/type:cpp_use_allocator?}}){{/field:cpp_ref_not_boxed?}}{{!
 }}{{^field:cpp_ref?}}{{#type:cpp_use_allocator?}}alloc{{/type:cpp_use_allocator?}}{{/field:cpp_ref?}}{{!
     }}){{/field:type}}{{^last?}},{{/last?}}{{#last?}} {}{{/last?}}
 {{/struct:fields_in_layout_order}}

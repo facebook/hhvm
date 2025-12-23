@@ -23,10 +23,9 @@
 
 }}
 {{#field:type}}{{!
-}}{{#field:value}}{{!
-  }}{{#partial constants.const_value value=value:self root_const=null}}{{!
-}}{{/field:value}}{{!
-}}{{^field:value}}{{!
+}}{{#if (object.notnull? field:default_value)}}{{!
+  }}{{#partial constants.const_value value=field:default_value root_const=null}}{{!
+}}{{#else}}{{!
   }}{{> common/natural_default_value}}{{!
-}}{{/field:value}}{{!
+}}{{/if (object.notnull? field:default_value)}}{{!
 }}{{/field:type}}

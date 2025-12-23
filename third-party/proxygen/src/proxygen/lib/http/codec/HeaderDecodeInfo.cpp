@@ -113,6 +113,17 @@ bool HeaderDecodeInfo::onHeader(const HPACKHeaderName& name,
         contentLength_ = cl;
         break;
       }
+      case HTTP_HEADER_HOST: {
+        if (verifier.hasAuthority()) { // HTTP_HEADER_HOST already present
+          bool ok =
+              msg->getHeaders().getSingleOrEmpty(HTTP_HEADER_HOST) == valueSp;
+          if (!ok) {
+            parsingError = ":authority/Host header mismatch";
+          }
+          return ok; // skips adding if already present and equal
+        }
+        break;
+      }
       default:
         // no op
         break;
@@ -129,25 +140,17 @@ bool HeaderDecodeInfo::onHeader(const HPACKHeaderName& name,
             strictValidation_ ? CodecUtil::CtlEscapeMode::STRICT
                               : CodecUtil::CtlEscapeMode::STRICT_COMPAT);
     if (!nameOk || !valueOk) {
-      proxygenError = kErrorHeaderContentValidation;
-      if (nameSp.empty()) {
-        proxygenError = kErrorParseHeader;
-      }
+      proxygenError =
+          nameSp.empty() ? kErrorParseHeader : kErrorHeaderContentValidation;
       parsingError = folly::to<string>("Invalid header name=", nameSp);
       headerErrorValue = valueSp;
       return false;
     }
+
     // Add the (name, value) pair to headers
-    if (headerCode == HTTP_HEADER_OTHER) {
-      msg->getHeaders().add(nameSp, valueSp);
-    } else if (headerCode == HTTP_HEADER_HOST && verifier.hasAuthority()) {
-      if (msg->getHeaders().getSingleOrEmpty(HTTP_HEADER_HOST) != valueSp) {
-        parsingError = ":authority/Host header mismatch";
-        return false;
-      }
-    } else {
-      msg->getHeaders().add(headerCode, valueSp);
-    }
+    headerCode == HTTP_HEADER_OTHER
+        ? msg->getHeaders().add(nameSp, valueSp)
+        : msg->getHeaders().add(headerCode, valueSp);
   }
   return true;
 }

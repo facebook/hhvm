@@ -57,8 +57,7 @@ namespace proxygen {
 class AsyncDNSStatsCollector : public DNSResolver::StatsCollector {
  public:
   explicit AsyncDNSStatsCollector(const std::string& prefix);
-  ~AsyncDNSStatsCollector() override {
-  }
+  ~AsyncDNSStatsCollector() override = default;
 
   // DNSResolver::StatsCollector
   void recordSuccess(const std::vector<DNSResolver::Answer>& answers,

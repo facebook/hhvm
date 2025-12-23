@@ -67,8 +67,7 @@ class PoolHealthChecker {
       std::vector<folly::SocketAddress>&& addresses, TimePoint t) {
   }
 
-  virtual ~PoolHealthChecker() {
-  }
+  virtual ~PoolHealthChecker() = default;
 };
 
 } // namespace proxygen

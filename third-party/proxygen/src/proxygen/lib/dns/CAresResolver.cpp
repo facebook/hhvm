@@ -52,10 +52,8 @@ using AresDataUniquePtr = std::unique_ptr<T, AresDataDeleter<T>>;
 
 class NullStatsCollector : public DNSResolver::StatsCollector {
  public:
-  NullStatsCollector() {
-  }
-  ~NullStatsCollector() override {
-  }
+  NullStatsCollector() = default;
+  ~NullStatsCollector() override = default;
   void recordSuccess(const std::vector<DNSResolver::Answer>& /*answers*/,
                      std::chrono::milliseconds /*latency*/) noexcept override {
   }
@@ -476,8 +474,7 @@ class CAresResolver::MultiQuery
       : resolver_(resolver), name_(name) {
   }
 
-  ~MultiQuery() override {
-  }
+  ~MultiQuery() override = default;
 
   void resolve(ResolutionCallback* callback,
                const std::list<Query*>& queries,
@@ -592,8 +589,7 @@ class CAresResolver::SocketHandler : public folly::EventHandler {
         sock_(sock),
         channel_(channel) {
   }
-  ~SocketHandler() override {
-  }
+  ~SocketHandler() override = default;
 
   void handlerReady(uint16_t events) noexcept override {
     ares_socket_t rsock =

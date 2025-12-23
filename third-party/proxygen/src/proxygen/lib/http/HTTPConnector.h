@@ -37,8 +37,7 @@ class HTTPConnector : protected folly::AsyncSocket::ConnectCallback {
    */
   class Callback {
    public:
-    virtual ~Callback() {
-    }
+    virtual ~Callback() = default;
     virtual void connectSuccess(HTTPUpstreamSession* session) = 0;
     virtual void connectError(const folly::AsyncSocketException& ex) = 0;
     // Called when the transport is about to be connected - similar to

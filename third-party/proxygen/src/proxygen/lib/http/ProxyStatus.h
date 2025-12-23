@@ -29,8 +29,7 @@ class ProxyStatus {
   ProxyStatus() {
     statusType_ = StatusType::ENUM_COUNT;
   }
-  virtual ~ProxyStatus() {
-  }
+  virtual ~ProxyStatus() = default;
   explicit ProxyStatus(StatusType statusType);
 
   StatusType getStatusType() const;

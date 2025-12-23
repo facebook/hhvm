@@ -99,8 +99,7 @@ class CAresResolver : public DNSResolver {
           const TimeUtil* timeUtil = nullptr,
           TraceEventContext teContext = TraceEventContext());
 
-    ~Query() override {
-    }
+    ~Query() override = default;
 
     void resolve(ResolutionCallback* cb, std::chrono::milliseconds timeout);
     void cancelResolutionImpl() override;

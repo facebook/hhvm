@@ -10,10 +10,8 @@
 
 namespace proxygen {
 
-MockDNSModule::MockDNSModule() {
-}
+MockDNSModule::MockDNSModule() = default;
 
-MockDNSModule::~MockDNSModule() {
-}
+MockDNSModule::~MockDNSModule() = default;
 
 } // namespace proxygen

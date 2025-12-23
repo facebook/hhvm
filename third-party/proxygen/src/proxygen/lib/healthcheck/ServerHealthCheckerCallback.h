@@ -103,8 +103,7 @@ class ServerHealthCheckerCallback {
       const ServerLoadInfo* serverLoadInfo = nullptr,
       const ExtraInfo* extraInfo = nullptr) = 0;
 
-  virtual ~ServerHealthCheckerCallback() {
-  }
+  virtual ~ServerHealthCheckerCallback() = default;
 };
 
 } // namespace proxygen

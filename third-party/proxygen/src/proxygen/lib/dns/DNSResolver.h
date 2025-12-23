@@ -189,7 +189,7 @@ class DNSResolver : public folly::DelayedDestruction {
     }
 
     //default ctor
-    Answer() {}
+    Answer() = default;
 
     // for unit tests
     bool operator==(const Answer& rhs) const {
@@ -229,7 +229,7 @@ class DNSResolver : public folly::DelayedDestruction {
     std::set<QueryBase *> queries_;
 
    public:
-    ResolutionCallback() {}
+    ResolutionCallback() = default;
     virtual ~ResolutionCallback();
 
     /**
@@ -307,7 +307,7 @@ class DNSResolver : public folly::DelayedDestruction {
    */
   class StatsCollector {
     public:
-     virtual ~StatsCollector() {}
+     virtual ~StatsCollector() = default;
 
      /**
       * These callbacks pertain to the resolution request as a whole and
@@ -460,11 +460,11 @@ class DNSResolver : public folly::DelayedDestruction {
    const folly::SocketAddress& address);
 
  protected:
-  ~DNSResolver() override {}
+  ~DNSResolver() override = default;
 
   class QueryBase {
    public:
-     virtual ~QueryBase() {}
+     virtual ~QueryBase() = default;
      virtual void cancelResolutionImpl() = 0;
   };
 

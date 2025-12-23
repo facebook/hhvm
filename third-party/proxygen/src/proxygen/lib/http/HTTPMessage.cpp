@@ -87,8 +87,7 @@ HTTPMessage::HTTPMessage()
       trailersAllowed_(false) {
 }
 
-HTTPMessage::~HTTPMessage() {
-}
+HTTPMessage::~HTTPMessage() = default;
 
 HTTPMessage::HTTPMessage(const HTTPMessage& message)
     : startTime_(message.startTime_),

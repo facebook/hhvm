@@ -31,8 +31,7 @@ class HQConnector : public HQSession::ConnectCallback {
  public:
   class Callback {
    public:
-    virtual ~Callback() {
-    }
+    virtual ~Callback() = default;
     virtual void connectSuccess(HQUpstreamSession* session) = 0;
     virtual void connectError(const quic::QuicErrorCode& code) = 0;
   };

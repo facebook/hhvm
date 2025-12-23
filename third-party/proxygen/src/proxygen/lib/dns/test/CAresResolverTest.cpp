@@ -29,8 +29,7 @@ class MockCAresResolver : public CAresResolver {
       (const));
 
  private:
-  ~MockCAresResolver() override {
-  }
+  ~MockCAresResolver() override = default;
 };
 
 class MockQuery : public CAresResolver::Query {

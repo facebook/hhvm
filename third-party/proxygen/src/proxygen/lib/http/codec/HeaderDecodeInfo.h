@@ -30,7 +30,6 @@ class HeaderDecodeInfo {
     isRequestTrailers_ = isRequestTrailers;
     validate_ = validate;
     hasStatus_ = false;
-    contentLength_ = folly::none;
     regularHeaderSeen_ = false;
     pseudoHeaderSeen_ = false;
     parsingError.clear();
@@ -66,7 +65,6 @@ class HeaderDecodeInfo {
   // Default to false for now to match existing behavior
   bool strictValidation_{false};
   bool allowEmptyPath_{false};
-  folly::Optional<uint32_t> contentLength_;
 };
 
 } // namespace proxygen

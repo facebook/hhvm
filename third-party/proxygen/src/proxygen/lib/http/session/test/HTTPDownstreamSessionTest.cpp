@@ -4592,3 +4592,23 @@ TEST_F(HTTP2DownstreamSessionTest, IdleSessionDoubleGoawayReadTimeout) {
   // Run the event loop
   eventBase_.loop();
 }
+
+TEST_F(HTTP2DownstreamSessionTest, ZeroContentLengthTest) {
+  // send post req with two CLs, one invalid (i.e. "-1") & another valid (i.e.
+  // "0"); mistmatched CLs should trigger an error
+  auto req = getGetRequest("/");
+  req.setMethod(HTTPMethod::POST);
+  req.getHeaders().add(HTTP_HEADER_CONTENT_LENGTH, "-1");
+  req.getHeaders().add(HTTP_HEADER_CONTENT_LENGTH, "0");
+
+  // serialize and send
+  EXPECT_CALL(mockController_, getParseErrorHandler(_, _, _))
+      .WillOnce(Return(nullptr));
+  auto id = sendRequest(req, /*eom=*/false);
+  clientCodec_->generateBody(
+      requests_, id, makeBuf(10), HTTPCodec::NoPadding, false);
+  clientCodec_->generateEOM(requests_, id);
+  flushRequestsAndLoopN(2);
+
+  gracefulShutdown();
+}

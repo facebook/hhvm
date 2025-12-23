@@ -28,6 +28,7 @@ bool HeaderDecodeInfo::onHeader(const HPACKHeaderName& name,
   auto headerCode = name.getHeaderCode();
   folly::StringPiece nameSp(name.get());
   folly::StringPiece valueSp(value);
+  auto& headers = msg->getHeaders();
 
   if (nameSp.startsWith(':')) {
     pseudoHeaderSeen_ = true;
@@ -104,19 +105,19 @@ bool HeaderDecodeInfo::onHeader(const HPACKHeaderName& name,
         parsingError = string("HTTP/2 Message with Connection header");
         return false;
       case HTTP_HEADER_CONTENT_LENGTH: {
-        uint32_t cl = 0;
-        folly::tryTo<uint32_t>(valueSp).then([&cl](uint32_t num) { cl = num; });
-        if (contentLength_ && *contentLength_ != cl) {
-          parsingError = string("Multiple content-length headers");
-          return false;
+        const auto cl = headers.getSingleOrNullptr(HTTP_HEADER_CONTENT_LENGTH);
+        if (cl) {
+          bool ok = *cl == valueSp;
+          if (!ok) {
+            parsingError = string("Multiple content-length headers");
+          }
+          return ok; // skips adding if already present and equal
         }
-        contentLength_ = cl;
         break;
       }
       case HTTP_HEADER_HOST: {
         if (verifier.hasAuthority()) { // HTTP_HEADER_HOST already present
-          bool ok =
-              msg->getHeaders().getSingleOrEmpty(HTTP_HEADER_HOST) == valueSp;
+          bool ok = headers.getSingleOrEmpty(HTTP_HEADER_HOST) == valueSp;
           if (!ok) {
             parsingError = ":authority/Host header mismatch";
           }
@@ -148,9 +149,8 @@ bool HeaderDecodeInfo::onHeader(const HPACKHeaderName& name,
     }
 
     // Add the (name, value) pair to headers
-    headerCode == HTTP_HEADER_OTHER
-        ? msg->getHeaders().add(nameSp, valueSp)
-        : msg->getHeaders().add(headerCode, valueSp);
+    headerCode == HTTP_HEADER_OTHER ? headers.add(nameSp, valueSp)
+                                    : headers.add(headerCode, valueSp);
   }
   return true;
 }

@@ -71,7 +71,6 @@ mstch_factories::mstch_factories() {
   add<mstch_field>();
   add<mstch_enum>();
   add<mstch_const>();
-  add<mstch_const_value>();
 }
 
 mstch::node mstch_type::get_structured() {
@@ -262,15 +261,6 @@ mstch::node mstch_typedef::type() {
 mstch::node mstch_const::type() {
   return context_.type_factory->make_mstch_object(
       const_->type(), context_, pos_);
-}
-
-mstch::node mstch_const::program() {
-  return context_.program_factory->make_mstch_object(
-      const_->program(), context_, pos_);
-}
-
-mstch::node mstch_const::field() {
-  return context_.field_factory->make_mstch_object(field_, context_, pos_);
 }
 
 mstch::node mstch_program::structs() {

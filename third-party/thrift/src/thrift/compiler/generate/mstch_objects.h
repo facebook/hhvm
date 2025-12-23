@@ -86,7 +86,6 @@ using mstch_field_factory = mstch_factory<t_field>;
 using mstch_enum_factory = mstch_factory<t_enum>;
 using mstch_const_factory =
     mstch_factory<t_const, const t_const*, const t_field*>;
-using mstch_const_value_factory = mstch_factory<t_const_value, const t_const*>;
 using mstch_stream_factory = mstch_factory<t_stream>;
 
 class mstch_factories {
@@ -101,7 +100,6 @@ class mstch_factories {
   std::unique_ptr<mstch_field_factory> field_factory;
   std::unique_ptr<mstch_enum_factory> enum_factory;
   std::unique_ptr<mstch_const_factory> const_factory;
-  std::unique_ptr<mstch_const_value_factory> const_value_factory;
 
   mstch_factories();
 
@@ -168,7 +166,6 @@ class mstch_factories {
   auto& get(t_field*) { return field_factory; }
   auto& get(t_enum*) { return enum_factory; }
   auto& get(t_const*) { return const_factory; }
-  auto& get(t_const_value*) { return const_value_factory; }
 
   template <typename MstchType, typename Node, typename... Args, typename Data>
   void make(std::unique_ptr<mstch_factory<Node, Args...>>& factory, Data data) {
@@ -287,11 +284,6 @@ class mstch_base : public mstch::object {
           containing_service);
     }
     return make_mstch_array(container, *context_.service_factory);
-  }
-
-  template <typename C, typename... Args>
-  mstch::array make_mstch_consts(const C& container, const Args&... args) {
-    return make_mstch_array(container, *context_.const_value_factory, args...);
   }
 
   template <typename C, typename... Args>
@@ -796,53 +788,17 @@ class mstch_const : public mstch_base {
         {
             {"self", &mstch_const::self},
             {"constant:self", &mstch_const::self},
-            {"constant:index", &mstch_const::index},
             {"constant:type", &mstch_const::type},
-            {"constant:program", &mstch_const::program},
-            {"constant:field", &mstch_const::field},
         });
   }
 
   whisker::object self() { return make_self(*const_); }
-  mstch::node index() { return pos_.index; }
   mstch::node type();
-  mstch::node program();
-  mstch::node field();
 
  protected:
   const t_const* const_;
   const t_const* current_const_;
   const t_field* field_;
-};
-
-class mstch_const_value : public mstch_base {
- public:
-  using ast_type = t_const_value;
-  using cv = t_const_value::t_const_value_kind;
-
-  mstch_const_value(
-      const t_const_value* cv,
-      mstch_context& ctx,
-      mstch_element_position pos,
-      const t_const* current_const)
-      : mstch_base(ctx, pos),
-        const_value_(cv),
-        current_const_(current_const),
-        type_(cv->kind()) {
-    register_methods(
-        this,
-        {
-            {"self", &mstch_const_value::self},
-            {"value:self", &mstch_const_value::self},
-        });
-  }
-
-  whisker::object self() { return make_self(*const_value_); }
-
- protected:
-  const t_const_value* const_value_;
-  const t_const* current_const_;
-  const cv type_;
 };
 
 } // namespace apache::thrift::compiler

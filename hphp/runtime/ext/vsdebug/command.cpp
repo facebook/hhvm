@@ -16,9 +16,22 @@
 
 #include "hphp/runtime/ext/vsdebug/debugger.h"
 #include "hphp/runtime/ext/vsdebug/command.h"
+#include "hphp/util/sandbox-events.h"
 
 namespace HPHP {
 namespace VSDEBUG {
+
+namespace {
+
+void logEvent(std::string_view event, std::string_view key, uint64_t duration_us) {
+  rareSboxEvent("vsdebug", event, key, duration_us);
+  VSDebugLogger::Log(
+    VSDebugLogger::LogLevelInfo,
+    "VSDebug - {}::{} took {}us",
+    event, key, duration_us
+  );
+}
+} // namespace
 
 const folly::dynamic VSCommand::s_emptyArgs = folly::dynamic::object;
 
@@ -265,11 +278,17 @@ bool VSCommand::parseCommand(
 
 bool VSCommand::execute() {
   assertx(m_debugger != nullptr);
-  return m_debugger->executeClientCommand(
+  auto startTime = std::chrono::steady_clock::now();
+  auto status = m_debugger->executeClientCommand(
     this,
     [&](DebuggerSession* session, folly::dynamic& responseMsg) {
       return executeImpl(session, &responseMsg);
     });
+  auto duration = std::chrono::duration_cast<std::chrono::microseconds>(
+                          std::chrono::steady_clock::now() - startTime);
+  logEvent("VSCommand::execute", this->commandName(), 
+           static_cast<uint64_t>(duration.count()));
+  return status;
 }
 
 request_id_t VSCommand::targetThreadId(DebuggerSession* /*session*/) {

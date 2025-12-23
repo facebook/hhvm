@@ -11,13 +11,11 @@
 #include "thrift/compiler/test/fixtures/method_decorators/gen-cpp2/module_types.h"
 
 
-
-// For method decorators
-#include <thrift/lib/cpp2/gen/module_method_decorator_h.h>
-
-// for interactions
-#include <thrift/lib/cpp2/async/ServerStream.h>
 #include <thrift/lib/cpp2/async/Sink.h>
+#include <thrift/lib/cpp2/async/BiDiStream.h>
+#include <thrift/lib/cpp2/async/ServerBiDiStreamFactory.h>
+#include <thrift/lib/cpp2/async/ServerStream.h>
+#include <thrift/lib/cpp2/gen/module_method_decorator_h.h>
 
 namespace folly {
   class IOBuf;

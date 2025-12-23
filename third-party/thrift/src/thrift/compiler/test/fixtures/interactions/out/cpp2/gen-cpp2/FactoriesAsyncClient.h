@@ -11,9 +11,9 @@
 #include "thrift/compiler/test/fixtures/interactions/gen-cpp2/module_types.h"
 #include "thrift/compiler/test/fixtures/interactions/gen-cpp2/shared_types.h"
 #include <thrift/lib/cpp2/async/ClientBufferedStream.h>
-#include <thrift/lib/cpp2/async/ClientBufferedStream.h>
 #include <thrift/lib/cpp2/async/ClientSinkBridge.h>
 #include <thrift/lib/cpp2/async/Sink.h>
+#include <thrift/lib/cpp2/async/BiDiStream.h>
 
 namespace apache { namespace thrift {
   class Cpp2RequestContext;

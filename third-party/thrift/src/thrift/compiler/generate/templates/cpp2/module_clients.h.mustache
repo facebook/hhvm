@@ -32,23 +32,14 @@
 {{/each}}
 {{/program}}
 
-{{#any_sinks?}}
-// for sinks
-#include <thrift/lib/cpp2/async/ClientSinkBridge.h>
+{{#if (or any_sinks? any_interactions?)}}
 #include <thrift/lib/cpp2/async/Sink.h>
-{{/any_sinks?}}
-
-{{#any_streams?}}
-// for streams
-#include <thrift/lib/cpp2/async/ClientBufferedStream.h>
-{{/any_streams?}}
-
-{{#any_interactions?}}
-// for interactions
-#include <thrift/lib/cpp2/async/ClientBufferedStream.h>
+#include <thrift/lib/cpp2/async/BiDiStream.h>
 #include <thrift/lib/cpp2/async/ClientSinkBridge.h>
-#include <thrift/lib/cpp2/async/Sink.h>
-{{/any_interactions?}}
+{{/if (or any_sinks? any_interactions?)}}
+{{#if (or any_streams? any_interactions?)}}
+#include <thrift/lib/cpp2/async/ClientBufferedStream.h>
+{{/if (or any_streams? any_interactions?)}}
 
 namespace apache { namespace thrift {
   class Cpp2RequestContext;

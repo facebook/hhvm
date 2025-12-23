@@ -35,22 +35,17 @@
 {{#each service:cpp_includes as |cpp_include|}}
 #include {{cpp_include}}
 {{/each}}
-{{^service:interactions?}}
-{{#service:streams?}}
+{{#if (or service:streams? service:interactions?)}}
 #include <thrift/lib/cpp2/async/ServerStream.h>
-{{/service:streams?}}
-{{#service:sinks?}}
+{{/if (or service:streams? service:interactions?)}}
+{{#if (or service:sinks? service:interactions?)}}
 #include <thrift/lib/cpp2/async/Sink.h>
-{{/service:sinks?}}
-{{#if service:self.has_bidirectional_streams?}}
+{{/if (or service:sinks? service:interactions?)}}
+{{#if (or service:self.has_bidirectional_streams? service:interactions?)}}
 #include <thrift/lib/cpp2/async/BiDiStream.h>
 #include <thrift/lib/cpp2/async/ServerBiDiStreamFactory.h>
-{{/if service:self.has_bidirectional_streams?}}
-{{/service:interactions?}}
-{{#service:interactions?}}
-#include <thrift/lib/cpp2/async/ServerStream.h>
-#include <thrift/lib/cpp2/async/Sink.h>
-{{/service:interactions?}}{{#service:cpp_requires_method_decorator?}}
+{{/if (or service:self.has_bidirectional_streams? service:interactions?)}}
+{{#service:cpp_requires_method_decorator?}}
 #include <thrift/lib/cpp2/gen/module_method_decorator_h.h>
 {{/service:cpp_requires_method_decorator?}}
 

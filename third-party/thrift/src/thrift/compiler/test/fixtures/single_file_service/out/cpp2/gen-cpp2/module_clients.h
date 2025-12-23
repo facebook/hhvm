@@ -13,17 +13,10 @@
 // cpp_include's
 #include <memory>
 
-// for sinks
-#include <thrift/lib/cpp2/async/ClientSinkBridge.h>
 #include <thrift/lib/cpp2/async/Sink.h>
-
-// for streams
-#include <thrift/lib/cpp2/async/ClientBufferedStream.h>
-
-// for interactions
-#include <thrift/lib/cpp2/async/ClientBufferedStream.h>
+#include <thrift/lib/cpp2/async/BiDiStream.h>
 #include <thrift/lib/cpp2/async/ClientSinkBridge.h>
-#include <thrift/lib/cpp2/async/Sink.h>
+#include <thrift/lib/cpp2/async/ClientBufferedStream.h>
 
 namespace apache { namespace thrift {
   class Cpp2RequestContext;

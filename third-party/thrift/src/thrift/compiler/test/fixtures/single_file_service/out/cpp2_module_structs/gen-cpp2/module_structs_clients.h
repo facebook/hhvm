@@ -12,8 +12,6 @@
 
 
 
-
-
 namespace apache { namespace thrift {
   class Cpp2RequestContext;
   namespace detail { namespace ac { struct ClientRequestContext; }}

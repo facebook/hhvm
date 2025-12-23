@@ -13,6 +13,8 @@
 #include "thrift/compiler/test/fixtures/interactions/gen-cpp2/shared_types.h"
 #include <thrift/lib/cpp2/async/ServerStream.h>
 #include <thrift/lib/cpp2/async/Sink.h>
+#include <thrift/lib/cpp2/async/BiDiStream.h>
+#include <thrift/lib/cpp2/async/ServerBiDiStreamFactory.h>
 
 namespace folly {
   class IOBuf;

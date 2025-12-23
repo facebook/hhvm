@@ -9,9 +9,9 @@
 #include <thrift/lib/cpp2/gen/client_h.h>
 
 #include "thrift/compiler/test/fixtures/bidi/gen-cpp2/module_types.h"
+#include <thrift/lib/cpp2/async/ClientBufferedStream.h>
 #include <thrift/lib/cpp2/async/ClientSinkBridge.h>
 #include <thrift/lib/cpp2/async/Sink.h>
-#include <thrift/lib/cpp2/async/ClientBufferedStream.h>
 #include <thrift/lib/cpp2/async/BiDiStream.h>
 
 namespace apache { namespace thrift {

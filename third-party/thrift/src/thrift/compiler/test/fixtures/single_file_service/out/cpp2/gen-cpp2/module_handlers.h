@@ -13,15 +13,10 @@
 // cpp_include's
 #include <memory>
 
-// for sinks
 #include <thrift/lib/cpp2/async/Sink.h>
-
-// for streams
+#include <thrift/lib/cpp2/async/BiDiStream.h>
+#include <thrift/lib/cpp2/async/ServerBiDiStreamFactory.h>
 #include <thrift/lib/cpp2/async/ServerStream.h>
-
-// for interactions
-#include <thrift/lib/cpp2/async/ServerStream.h>
-#include <thrift/lib/cpp2/async/Sink.h>
 
 namespace folly {
   class IOBuf;

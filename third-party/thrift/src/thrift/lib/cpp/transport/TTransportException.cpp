@@ -36,7 +36,8 @@ std::string TTransportException::getDefaultMessage(
   if (message.empty() &&
       static_cast<size_t>(type) >= TTransportExceptionTypeSize::value) {
     return fmt::format(
-        "TTransportException: (Invalid exception type '{}')", type);
+        "TTransportException: (Invalid exception type '{}')",
+        folly::to_underlying(type));
   } else {
     return std::move(message);
   }

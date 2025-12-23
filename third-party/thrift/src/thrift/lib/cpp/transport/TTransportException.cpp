@@ -16,4 +16,17 @@
 
 #include <thrift/lib/cpp/transport/TTransportException.h>
 
-using std::string;
+#include <folly/String.h>
+
+namespace apache::thrift::transport {
+
+std::string TTransportException::getMessage(
+    std::string&& message, int errno_copy) {
+  if (errno_copy != 0) {
+    return message + ": " + folly::errnoStr(errno_copy);
+  } else {
+    return std::move(message);
+  }
+}
+
+} // namespace apache::thrift::transport

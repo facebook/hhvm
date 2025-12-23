@@ -170,13 +170,7 @@ class FOLLY_EXPORT TTransportException
   std::string strerror_s(int errno_copy);
 
   /** Return a message based on the input. */
-  static std::string getMessage(std::string&& message, int errno_copy) {
-    if (errno_copy != 0) {
-      return message + ": " + TOutput::strerror_s(errno_copy);
-    } else {
-      return std::move(message);
-    }
-  }
+  static std::string getMessage(std::string&& message, int errno_copy);
 
   static std::string getDefaultMessage(
       TTransportExceptionType type, std::string&& message) {

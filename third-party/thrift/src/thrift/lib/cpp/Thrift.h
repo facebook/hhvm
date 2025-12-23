@@ -108,45 +108,6 @@ struct TEnumTraits {
   }
 };
 
-class TOutput {
- public:
-  TOutput() : f_(&errorTimeWrapper) {}
-
-  inline void setOutputFunction(void (*function)(const char*)) {
-    f_ = function;
-  }
-
-  inline void operator()(const char* message) { f_(message); }
-
-  // It is important to have a const char* overload here instead of
-  // just the string version, otherwise errno could be corrupted
-  // if there is some problem allocating memory when constructing
-  // the string.
-  void perror(const char* message, int errno_copy);
-  inline void perror(const std::string& message, int errno_copy) {
-    perror(message.c_str(), errno_copy);
-  }
-
-  void printf(const char* message, ...);
-
-  inline static void errorTimeWrapper(const char* msg) {
-    time_t now;
-    char dbgtime[26];
-    time(&now);
-    ctime_r(&now, dbgtime);
-    dbgtime[24] = 0;
-    fprintf(stderr, "Thrift: %s %s\n", dbgtime, msg);
-  }
-
-  /** Just like strerror_r but returns a C++ string object. */
-  static std::string strerror_s(int errno_copy);
-
- private:
-  void (*f_)(const char*);
-};
-
-extern TOutput GlobalOutput;
-
 /**
  * Base class for all Thrift exceptions.
  * Should never be instantiated, only caught.

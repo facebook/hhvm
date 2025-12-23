@@ -222,10 +222,42 @@ class HTTPHeaders {
   /**
    * Returns the value of the header if it's found in the message and is the
    * only value under the given name. If either of these is violated, returns
+   * nullptr. `exists` member can help distinguish whether nullptr was returned
+   * due to multiple ocurrences or not found.
+   *
+   * For code that follows `HTTPHeaders::exists ->
+   * HTTPHeaders::getSingleOrEmpty` pattern, it can be replaced with
+   * `HTTPHeader::getSingleOrNullptr` to elide a memchr lookup in the happy path
+   */
+  struct SingleOrNullptrResult {
+    const std::string* value{nullptr};
+    bool exists{false};
+
+    // convenience functions to replace ::exists & ::getSingleOrEmpty pattern
+    operator bool() const noexcept {
+      return exists;
+    }
+    const std::string& operator*() const noexcept {
+      return value ? *value : empty_string;
+    }
+    const std::string* operator->() const noexcept {
+      return &(operator*)();
+    }
+  };
+  [[nodiscard]] SingleOrNullptrResult getSingleOrNullptr(
+      HTTPHeaderCode code) const noexcept;
+  [[nodiscard]] SingleOrNullptrResult getSingleOrNullptr(
+      folly::StringPiece name) const noexcept;
+
+  /**
+   * Returns the value of the header if it's found in the message and is the
+   * only value under the given name. If either of these is violated, returns
    * empty_string.
    */
-  template <typename T> // either uint8_t or string
-  const std::string& getSingleOrEmpty(const T& nameOrCode) const;
+  [[nodiscard]] const std::string& getSingleOrEmpty(
+      HTTPHeaderCode code) const noexcept;
+  [[nodiscard]] const std::string& getSingleOrEmpty(
+      folly::StringPiece name) const noexcept;
   [[nodiscard]] const std::string rawGet(const std::string& header) const {
     return getSingleOrEmpty(header);
   }
@@ -566,27 +598,6 @@ bool HTTPHeaders::removeByPredicate(LAMBDA func) {
   }
 
   return removed;
-}
-
-template <typename T> // either uint8_t or string
-const std::string& HTTPHeaders::getSingleOrEmpty(const T& nameOrCode) const {
-  const std::string* res = nullptr;
-  forEachValueOfHeader(nameOrCode, [&](const std::string& value) -> bool {
-    if (res != nullptr) {
-      // a second value is found
-      res = nullptr;
-      return true; // stop processing
-    } else {
-      // the first value is found
-      res = &value;
-      return false;
-    }
-  });
-  if (res == nullptr) {
-    return empty_string;
-  } else {
-    return *res;
-  }
 }
 
 #ifndef PROXYGEN_HTTPHEADERS_IMPL

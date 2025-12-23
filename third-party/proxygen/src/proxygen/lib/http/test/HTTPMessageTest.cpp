@@ -935,6 +935,40 @@ TEST(HTTPMessage, StrictMode) {
   EXPECT_TRUE(message.removeQueryParam("c"));
 }
 
+TEST(HTTPMessage, GetSingleOrNullptr) {
+  HTTPMessage msg;
+  auto& headers = msg.getHeaders();
+  headers.add(HTTP_HEADER_HOST, "facebook.com");
+  headers.add("test", "test");
+
+  // no "missing" header
+  auto missingLookup = headers.getSingleOrNullptr("missing");
+  EXPECT_FALSE(missingLookup);       // exists
+  EXPECT_FALSE(missingLookup.value); // no longer a singular header
+  EXPECT_EQ(*missingLookup, "");
+  EXPECT_TRUE(missingLookup->empty());
+
+  // single "host" header exists,
+  auto hostLookup = headers.getSingleOrNullptr(HTTP_HEADER_HOST);
+  EXPECT_TRUE(hostLookup);       // exists
+  EXPECT_TRUE(hostLookup.value); // singular header
+  EXPECT_EQ(*hostLookup, "facebook.com");
+
+  // single "test" header exists
+  auto testLookup = headers.getSingleOrNullptr("test");
+  EXPECT_TRUE(testLookup);       // exists
+  EXPECT_TRUE(testLookup.value); // singular header
+  EXPECT_EQ(*testLookup, "test");
+
+  // add another "test" header
+  headers.add("test", "test");
+  testLookup = headers.getSingleOrNullptr("test");
+  EXPECT_TRUE(testLookup);        // exists
+  EXPECT_FALSE(testLookup.value); // no longer a singular header
+  EXPECT_EQ(*testLookup, "");
+  EXPECT_TRUE(testLookup->empty());
+}
+
 #ifdef NDEBUG
 // This fails DCHECKs in debug mode, throws in opt
 TEST(HTTPMessage, BadAPIUsage) {

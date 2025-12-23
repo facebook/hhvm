@@ -342,4 +342,35 @@ void HTTPHeaders::copyTo(HTTPHeaders& hdrs) const {
   }
 }
 
+HTTPHeaders::SingleOrNullptrResult HTTPHeaders::getSingleOrNullptr(
+    HTTPHeaderCode code) const noexcept {
+  SingleOrNullptrResult res;
+  forEachValueOfHeader(code, [&](const std::string& value) -> bool {
+    res.value = (res.value == nullptr) ? &value : nullptr;
+    res.exists = true;
+    return res.value == nullptr; // stop if seen before
+  });
+  return res;
+}
+
+HTTPHeaders::SingleOrNullptrResult HTTPHeaders::getSingleOrNullptr(
+    folly::StringPiece name) const noexcept {
+  SingleOrNullptrResult res;
+  forEachValueOfHeader(name, [&](const std::string& value) -> bool {
+    res.value = (res.value == nullptr) ? &value : nullptr;
+    res.exists = true;
+    return res.value == nullptr; // stop if seen before
+  });
+  return res;
+}
+
+const std::string& HTTPHeaders::getSingleOrEmpty(
+    HTTPHeaderCode code) const noexcept {
+  return *getSingleOrNullptr(code);
+}
+const std::string& HTTPHeaders::getSingleOrEmpty(
+    folly::StringPiece name) const noexcept {
+  return *getSingleOrNullptr(name);
+}
+
 } // namespace proxygen

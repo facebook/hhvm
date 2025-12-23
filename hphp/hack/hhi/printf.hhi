@@ -7,7 +7,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  */
-
+<<file: __EnableUnstableFeatures('open_tuples', 'type_splat')>>
 namespace {
 
   /**
@@ -95,10 +95,10 @@ namespace {
    * If possible, upgrade to \HH\Lib\Str\format().
    * This uses the far stricter \HH\Lib\Str\SprintfFormat type.
    */
-  <<__PHPStdLib>>
-  function sprintf(
-    \HH\FormatString<PlainSprintf> $fmt,
-    HH\FIXME\MISSING_PARAM_TYPE ...$fmt_args
+  <<__PHPStdLib, __NoAutoLikes>>
+  function sprintf<Targs as (mixed...)>(
+    \HH\TypedFormatString<PlainSprintf,Targs> $fmt,
+    ...Targs $fmt_args
   )[]: string;
   /**
    * printf uses PlainSprintf as its format string.
@@ -106,10 +106,10 @@ namespace {
    * If possible, upgrade to \HH\Lib\Str\format().
    * This uses the far stricter \HH\Lib\Str\SprintfFormat type.
    */
-  <<__PHPStdLib>>
-  function printf(
-    \HH\FormatString<PlainSprintf> $fmt,
-    HH\FIXME\MISSING_PARAM_TYPE ...$fmt_args
+  <<__PHPStdLib, __NoAutoLikes>>
+  function printf<Targs as (mixed...)>(
+    \HH\TypedFormatString<PlainSprintf,Targs> $fmt,
+    ...Targs $fmt_args
   ): int;
 
 }
@@ -119,9 +119,10 @@ namespace HH {
   // Results in an \HH\InvariantException whose message is the result of
   // calling sprintf with the arguments given this function.
   // Equivalent to invariant(false, $fmt, ...$fmt_args).
-  function invariant_violation(
-    FormatString<\PlainSprintf> $fmt,
-    mixed ...$fmt_args
+  <<__NoAutoLikes>>
+  function invariant_violation<Targs as (mixed...)>(
+    TypedFormatString<\PlainSprintf,Targs> $fmt,
+    ...Targs $fmt_args
   )[]: noreturn;
 
 }

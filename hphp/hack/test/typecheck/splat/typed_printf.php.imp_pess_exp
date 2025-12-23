@@ -1,0 +1,52 @@
+ERROR: File "typed_printf.php", line 30, characters 31-38:
+Invalid argument (Typing[4110])
+  File "typed_printf.php", line 30, characters 12-28:
+  Expected `int` because of the `%d` format specifier
+  File "typed_printf.php", line 30, characters 34-38:
+  But got `bool`
+ERROR: File "typed_printf.php", line 30, characters 31-38:
+Invalid argument (Typing[4110])
+  File "typed_printf.php", line 30, characters 12-28:
+  Expected `string` because of the `%s` format specifier
+  File "typed_printf.php", line 30, characters 31-31:
+  But got `int`
+ERROR: File "typed_printf.php", line 31, characters 31-33:
+Invalid argument (Typing[4110])
+  File "typed_printf.php", line 31, characters 12-28:
+  Expected `(string, int)`
+  File "typed_printf.php", line 31, characters 31-33:
+  But got `(string)`
+ERROR: File "typed_printf.php", line 36, characters 15-25:
+Invalid argument (Typing[4110])
+  File "printf.hhi", line 54, characters 31-35:
+  Expected `float`
+  File "typed_printf.php", line 36, characters 24-25:
+  But got `int`
+ERROR: File "typed_printf.php", line 37, characters 15-16:
+Invalid argument (Typing[4110])
+  File "typed_printf.php", line 35, characters 27-57:
+  Expected `(?arraykey, mixed, ?float)`
+  File "typed_printf.php", line 37, characters 15-16:
+  But got `(int)`
+ERROR: File "typed_printf.php", line 43, characters 17-26:
+Invalid argument (Typing[4110])
+  File "typed_printf.php", line 41, characters 30-40:
+  Expected `string` because of the `%s` format specifier
+  File "typed_printf.php", line 43, characters 17-21:
+  But got `bool`
+ERROR: File "typed_printf.php", line 43, characters 17-26:
+Invalid argument (Typing[4110])
+  File "typed_printf.php", line 41, characters 42-54:
+  Expected `int` because of the `%d` format specifier
+  File "typed_printf.php", line 43, characters 24-26:
+  But got `float`
+ERROR: File "typed_printf.php", line 47, characters 12-19:
+Invalid format string `%` in `"Test %"` (Typing[4038])
+  File "typed_printf.php", line 10, characters 24-24:
+  You can add a new format specifier by adding `format_eof()` to `~I`
+ERROR: File "typed_printf.php", line 47, characters 26-30:
+Invalid argument (Typing[4110])
+  File "typed_printf.php", line 47, characters 12-23:
+  Expected `()` because this is the result of a concatenation
+  File "typed_printf.php", line 47, characters 26-30:
+  But got `(string)`

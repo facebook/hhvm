@@ -139,13 +139,9 @@ class {{#struct:exception?}}FOLLY_EXPORT {{/struct:exception?}}{{struct:cpp_unde
   }
 {{#struct:has_runtime_annotation?}}
   using __fbthrift_struct_annotations = folly::tag_t<
-{{#struct:structured_runtime_annotations}}
-{{#constant:type.self.structured?}}
-{{#constant:type}}
-    {{type:cpp_fullname}}{{^last?}}, {{/last?}}
-{{/constant:type}}
-{{/constant:type.self.structured?}}
-{{/struct:structured_runtime_annotations}}
+  {{#each (array.enumerate struct:structured_runtime_annotations with_last=true) as |i annot last_annot?|}}
+    {{annot.type.cpp_fullname}}{{#if (not last_annot?)}}, {{/if}}
+  {{/each}}
   >;
 {{/struct:has_runtime_annotation?}}
 {{#struct:fields_with_runtime_annotation?}}
@@ -157,9 +153,9 @@ class {{#struct:exception?}}FOLLY_EXPORT {{/struct:exception?}}{{struct:cpp_unde
   using __fbthrift_annotations_on_fields = folly::tag_t<
 {{#struct:fields_with_runtime_annotation}}
     folly::tag_t<
-{{#field:structured_runtime_annotations}}{{#constant:type}}
-      {{type:cpp_fullname}}{{^last?}},{{/last?}}
-{{/constant:type}}{{/field:structured_runtime_annotations}}
+  {{#each (array.enumerate field:structured_runtime_annotations with_last=true) as |i annot last_annot?|}}
+      {{annot.type.cpp_fullname}}{{#if (not last_annot?)}},{{/if}}
+  {{/each}}
     >{{^last?}},{{/last?}}
 {{/struct:fields_with_runtime_annotation}}
   >;

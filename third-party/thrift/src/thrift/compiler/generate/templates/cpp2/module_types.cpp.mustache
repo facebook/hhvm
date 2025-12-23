@@ -264,11 +264,11 @@ template<> const std::vector<std::any>& field_annotation_values<{{struct:cpp_ful
     case {{field:id}}: {
       static const folly::Indestructible<std::vector<std::any>> ret = [] {
         std::vector<std::any> values;
-  {{#field:structured_annotations}}
-    {{#if constant:is_runtime_annotation?}}
-        values.emplace_back({{#partial const_value.iterate_const_values value=constant:self.value root_const=constant:self}});
-    {{/if constant:is_runtime_annotation?}}
-  {{/field:structured_annotations}}
+  {{#each field:structured_annotations as |annot|}}
+    {{#if annot.is_runtime_annotation?}}
+        values.emplace_back({{#partial const_value.iterate_const_values value=annot.value root_const=annot}});
+    {{/if annot.is_runtime_annotation?}}
+  {{/each}}
         return values;
       }();
       return *ret;
@@ -284,11 +284,11 @@ template<> const std::vector<std::any>& field_annotation_values<{{struct:cpp_ful
 template<> const std::vector<std::any>& struct_annotation_values<{{struct:cpp_fullname}}>() {
   static const folly::Indestructible<std::vector<std::any>> ret = [] {
     std::vector<std::any> values;
-{{#struct:structured_annotations}}
-  {{#if constant:is_runtime_annotation?}}
-    values.emplace_back({{#partial const_value.iterate_const_values value=constant:self.value root_const=constant:self}});
-  {{/if constant:is_runtime_annotation?}}
-{{/struct:structured_annotations}}
+{{#each struct:structured_annotations as |annot|}}
+  {{#if annot.is_runtime_annotation?}}
+    values.emplace_back({{#partial const_value.iterate_const_values value=annot.value root_const=annot}});
+  {{/if annot.is_runtime_annotation?}}
+{{/each}}
     return values;
   }();
   return *ret;

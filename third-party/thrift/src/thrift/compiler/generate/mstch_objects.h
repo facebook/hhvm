@@ -221,31 +221,6 @@ class mstch_base : public mstch::object {
   mstch::node first() { return pos_.first; }
   mstch::node last() { return pos_.last; }
 
-  mstch::node structured_annotations(
-      const std::vector<const t_const*>& annotations) {
-    mstch::array a;
-    size_t i = 0;
-    for (const t_const* annotation : annotations) {
-      mstch_element_position pos(i, annotations.size());
-      a.emplace_back(context_.const_factory->make_mstch_object(
-          annotation, context_, pos, annotation, nullptr));
-      ++i;
-    }
-    return a;
-  }
-
-  mstch::node structured_annotations(const t_named* annotated) {
-    mstch::array a;
-    size_t i = 0;
-    for (const t_const& annotation : annotated->structured_annotations()) {
-      mstch_element_position pos(i, annotated->structured_annotations().size());
-      a.emplace_back(context_.const_factory->make_mstch_object(
-          &annotation, context_, pos, &annotation, nullptr));
-      ++i;
-    }
-    return a;
-  }
-
   template <typename T>
   whisker::object make_self(const T& node) {
     return whisker::object(
@@ -421,8 +396,6 @@ class mstch_service : public mstch_base {
              &mstch_service::parent_service_name},
             {"service:interactions", &mstch_service::interactions},
             {"service:interactions?", &mstch_service::has_interactions},
-            {"service:structured_annotations",
-             &mstch_service::structured_annotations},
         });
 
     // Collect performed interactions and cache them.
@@ -484,9 +457,6 @@ class mstch_service : public mstch_base {
   mstch::node interactions() {
     return make_mstch_interactions(interactions_, service_);
   }
-  mstch::node structured_annotations() {
-    return mstch_base::structured_annotations(service_);
-  }
   mstch::node is_interaction() { return service_->is<t_interaction>(); }
 
   ~mstch_service() override = default;
@@ -531,8 +501,6 @@ class mstch_function : public mstch_base {
             {"function:return_type", &mstch_function::return_type},
             {"function:exceptions", &mstch_function::exceptions},
             {"function:args", &mstch_function::arg_list},
-            {"function:structured_annotations",
-             &mstch_function::structured_annotations},
 
             // Sink methods:
             {"function:sink_first_response_type",
@@ -558,9 +526,6 @@ class mstch_function : public mstch_base {
   mstch::node exceptions();
 
   mstch::node arg_list();
-  mstch::node structured_annotations() {
-    return mstch_base::structured_annotations(function_);
-  }
 
   mstch::node sink_first_response_type();
   mstch::node sink_elem_type();
@@ -641,16 +606,11 @@ class mstch_typedef : public mstch_base {
             {"self", &mstch_typedef::self},
             {"typedef:self", &mstch_typedef::self},
             {"typedef:type", &mstch_typedef::type},
-            {"typedef:structured_annotations",
-             &mstch_typedef::structured_annotations},
         });
   }
 
   whisker::object self() { return make_self(*typedef_); }
   mstch::node type();
-  mstch::node structured_annotations() {
-    return mstch_base::structured_annotations(typedef_);
-  }
 
  protected:
   const t_typedef* typedef_;
@@ -678,8 +638,6 @@ class mstch_struct : public mstch_base {
              &mstch_struct::fields_in_serialization_order},
             {"struct:has_serialize_in_field_id_order_annotation?",
              &mstch_struct::has_serialize_in_field_id_order_annotation},
-            {"struct:structured_annotations",
-             &mstch_struct::structured_annotations},
         });
   }
 
@@ -695,9 +653,6 @@ class mstch_struct : public mstch_base {
     throw whisker::eval_error("exception:self used on non-exception node");
   }
   mstch::node fields();
-  mstch::node structured_annotations() {
-    return mstch_base::structured_annotations(struct_);
-  }
 
   mstch::node fields_in_serialization_order() {
     if (struct_->has_structured_annotation(kSerializeInFieldIdOrderUri)) {
@@ -728,17 +683,12 @@ class mstch_field : public mstch_base {
             {"field:self", &mstch_field::self},
             {"field:type", &mstch_field::type},
             {"field:index", &mstch_field::index},
-            {"field:structured_annotations",
-             &mstch_field::structured_annotations},
         });
   }
 
   whisker::object self() { return make_self(*field_); }
   mstch::node type();
   mstch::node index() { return pos_.index; }
-  mstch::node structured_annotations() {
-    return mstch_base::structured_annotations(field_);
-  }
 
  protected:
   const t_field* field_;
@@ -755,15 +705,10 @@ class mstch_enum : public mstch_base {
         {
             {"self", &mstch_enum::self},
             {"enum:self", &mstch_enum::self},
-            {"enum:structured_annotations",
-             &mstch_enum::structured_annotations},
         });
   }
 
   whisker::object self() { return make_self(*enum_); }
-  mstch::node structured_annotations() {
-    return mstch_base::structured_annotations(enum_);
-  }
 
  protected:
   const t_enum* enum_;

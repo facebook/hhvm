@@ -554,6 +554,34 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
     def.property("cpp_name", [](const t_named& named) {
       return cpp2::get_name(&named);
     });
+    // This property is necessary rather than just looping
+    // `structured_annotations` with an `is_runtime_annotation?` condition for
+    // enumerating with first/last scenarios, where the first/last *runtime*
+    // (i.e. condition passing) annotation may not be the same as the first/last
+    // annotation (i.e. loop iteration)
+    def.property(
+        "structured_runtime_annotations", [&proto](const t_named& named) {
+          std::vector<const t_const*> runtime_annotations;
+          runtime_annotations.reserve(named.structured_annotations().size());
+          for (const auto& annotation : named.structured_annotations()) {
+            if (is_runtime_annotation(*annotation.type())) {
+              runtime_annotations.push_back(&annotation);
+            }
+          }
+          return to_array(runtime_annotations, proto.of<t_const>());
+        });
+    return std::move(def).make();
+  }
+
+  prototype<t_structured>::ptr make_prototype_for_structured(
+      const prototype_database& proto) const override {
+    auto base = t_whisker_generator::make_prototype_for_structured(proto);
+    auto def = whisker::dsl::prototype_builder<h_structured>::extends(base);
+
+    def.property("cpp_fullname", [this](const t_structured& strct) {
+      return cpp_context_->resolver().get_underlying_namespaced_name(strct);
+    });
+
     return std::move(def).make();
   }
 
@@ -576,6 +604,11 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
 
     def.property("resolves_to_complex_return?", [](const t_type& type) {
       return is_complex_return(type.get_true_type());
+    });
+
+    def.property("cpp_fullname", [this](const t_type& type) {
+      return cpp_context_->resolver().get_namespaced_name(
+          *type.program(), type);
     });
 
     def.property("cpp_type", [&](const t_type& type) {
@@ -1540,7 +1573,6 @@ class cpp_mstch_type : public mstch_type {
             {"type:resolves_to_enum?", &cpp_mstch_type::resolves_to_enum},
             {"type:transitively_refers_to_struct?",
              &cpp_mstch_type::transitively_refers_to_struct},
-            {"type:cpp_fullname", &cpp_mstch_type::cpp_fullname},
             {"type:string_or_binary?", &cpp_mstch_type::is_string_or_binary},
             {"type:non_empty_struct?", &cpp_mstch_type::is_non_empty_struct},
             {"type:cpp_declare_hash", &cpp_mstch_type::cpp_declare_hash},
@@ -1614,10 +1646,6 @@ class cpp_mstch_type : public mstch_type {
     }
     return false;
   }
-  mstch::node cpp_fullname() {
-    return cpp_context_->resolver().get_namespaced_name(
-        *type_->program(), *type_);
-  }
   mstch::node is_string_or_binary() {
     return resolved_type_->is_string_or_binary();
   }
@@ -1681,7 +1709,6 @@ class cpp_mstch_struct : public mstch_struct {
              &cpp_mstch_struct::is_directly_adapted},
             {"struct:dependent_direct_adapter?",
              &cpp_mstch_struct::dependent_direct_adapter},
-            {"struct:cpp_fullname", &cpp_mstch_struct::cpp_fullname},
             {"struct:cpp_methods", &cpp_mstch_struct::cpp_methods},
             {"struct:cpp_declare_hash", &cpp_mstch_struct::cpp_declare_hash},
             {"struct:cpp_declare_equal_to",
@@ -1725,8 +1752,6 @@ class cpp_mstch_struct : public mstch_struct {
              &cpp_mstch_struct::has_fields_with_runtime_annotation},
             {"struct:fields_with_runtime_annotation",
              &cpp_mstch_struct::fields_with_runtime_annotation},
-            {"struct:structured_runtime_annotations",
-             &cpp_mstch_struct::structured_runtime_annotations},
             {"struct:any?", &cpp_mstch_struct::any},
             {"struct:extra_namespace", &cpp_mstch_struct::extra_namespace},
             {"struct:type_tag", &cpp_mstch_struct::type_tag},
@@ -1801,9 +1826,6 @@ class cpp_mstch_struct : public mstch_struct {
       }
     }
     return false;
-  }
-  mstch::node cpp_fullname() {
-    return cpp_context_->resolver().get_underlying_namespaced_name(*struct_);
   }
   mstch::node cpp_underlying_name() {
     return cpp_name_resolver::get_underlying_name(*struct_);
@@ -2079,17 +2101,6 @@ class cpp_mstch_struct : public mstch_struct {
     return cache.emplace(struct_, std::move(result)).first->second;
   }
 
-  mstch::node structured_runtime_annotations() {
-    std::vector<const t_const*> runtime_annotations;
-    for (const auto& annotation : struct_->structured_annotations()) {
-      if (is_runtime_annotation(*annotation.type())) {
-        runtime_annotations.push_back(&annotation);
-      }
-    }
-
-    return mstch_base::structured_annotations(runtime_annotations);
-  }
-
   mstch::node extra_namespace() {
     auto* extra = cpp_context_->resolver().get_extra_namespace(*struct_);
     return extra ? *extra : mstch::node{};
@@ -2337,8 +2348,6 @@ class cpp_mstch_field : public mstch_field {
              &cpp_mstch_field::raw_string_or_binary},
             {"field:use_op_encode?", &cpp_mstch_field::use_op_encode},
             {"field:fill?", &cpp_mstch_field::fill},
-            {"field:structured_runtime_annotations",
-             &cpp_mstch_field::structured_runtime_annotations},
         });
   }
   mstch::node name_hash() {
@@ -2577,17 +2586,6 @@ class cpp_mstch_field : public mstch_field {
     return (field_->qualifier() == t_field_qualifier::none ||
             field_->qualifier() == t_field_qualifier::required) &&
         !std::get<bool>(deprecated_terse_writes());
-  }
-
-  mstch::node structured_runtime_annotations() {
-    std::vector<const t_const*> runtime_annotations;
-    for (const auto& annotation : field_->structured_annotations()) {
-      if (is_runtime_annotation(*annotation.type())) {
-        runtime_annotations.push_back(&annotation);
-      }
-    }
-
-    return mstch_base::structured_annotations(runtime_annotations);
   }
 
  private:

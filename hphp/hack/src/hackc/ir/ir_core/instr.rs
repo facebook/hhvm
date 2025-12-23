@@ -45,7 +45,6 @@ use crate::TypeStructEnforceKind;
 use crate::TypeStructResolveOp;
 use crate::ValueId;
 use crate::VarId;
-use crate::VerifyKind;
 
 pub trait HasLoc {
     fn loc_id(&self) -> LocId;
@@ -180,9 +179,9 @@ pub enum Terminator {
     #[has_operands(none)]
     MemoGetEager(MemoGetEager),
     NativeImpl(LocId),
-    Ret(ValueId, VerifyKind, LocId),
+    Ret(ValueId, LocId),
     RetCSuspended(ValueId, LocId),
-    RetM(Box<[ValueId]>, VerifyKind, LocId),
+    RetM(Box<[ValueId]>, LocId),
     #[has_locals(none)]
     Switch {
         cond: ValueId,
@@ -563,6 +562,7 @@ pub enum Hhbc {
     VerifyOutType(ValueId, LocalId, LocId),
     VerifyParamType(ValueId, LocalId, LocId),
     VerifyParamTypeTS(ValueId, LocalId, LocId),
+    VerifyRetTypeC(ValueId, LocId),
     VerifyRetTypeTS([ValueId; 2], LocId),
     VerifyTypeTS([ValueId; 2], LocId),
     WHResult(ValueId, LocId),
@@ -1261,8 +1261,8 @@ impl Instr {
         Instr::Special(Special::Param)
     }
 
-    pub fn ret(vid: ValueId, kind: VerifyKind, loc: LocId) -> Instr {
-        Instr::Terminator(Terminator::Ret(vid, kind, loc))
+    pub fn ret(vid: ValueId, loc: LocId) -> Instr {
+        Instr::Terminator(Terminator::Ret(vid, loc))
     }
 
     pub fn tombstone() -> Instr {

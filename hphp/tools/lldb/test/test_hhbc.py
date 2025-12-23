@@ -86,7 +86,7 @@ class HHBCTestCase(base.TestHHVMBinary):
             "+160: IterFree 0",
             "+162: Throw",
             "+163: Int 1",
-            "+172: RetC 0",
+            "+172: RetC",
         ]
         output_lines = output.strip().split("\n")
         self.assertEqual(len(output_lines), len(expected_bcs))
@@ -192,7 +192,7 @@ class HHBCTestCase2(base.TestHHVMBinary):
             '+64: FCallFuncD <> 1 1 "" "" - "" 3',  # 3=>"var_dump"
             "+71: PopC",
             "+72: True",
-            "+73: RetC 0",
+            "+73: RetC",
         ]
 
         output_lines = output.strip().split("\n")
@@ -235,7 +235,7 @@ class HHBCTestCase3(base.TestHHVMBinary):
             "+116: IterFree 0",
             "+118: Throw",
             "+119: Int 1",
-            "+128: RetC 0",
+            "+128: RetC",
         ]
 
         output_lines = output.strip().split("\n")
@@ -265,7 +265,7 @@ class HHBCTestCase4(base.TestHHVMBinary):
             "+22: AssertRATL L:1 Obj",
             "+25: AssertRATL L:1 Obj",
             "+28: Int 1",
-            "+37: RetC 0",
+            "+37: RetC",
         ]
 
         output_lines = output.strip().split("\n")

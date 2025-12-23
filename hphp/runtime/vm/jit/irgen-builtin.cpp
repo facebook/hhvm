@@ -1735,7 +1735,7 @@ void emitNativeImpl(IRGS& env) {
   auto const ret = builtinCall(env, callee, params);
 
   push(env, ret);
-  emitRetC(env, VerifyKind::None);
+  emitRetC(env);
 }
 
 //////////////////////////////////////////////////////////////////////

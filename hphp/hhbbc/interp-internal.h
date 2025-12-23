@@ -238,11 +238,9 @@ void readAllLocals(ISS& env) {
 
 void doRet(ISS& env, Type t, bool hasEffects) {
   assertx(env.state.stack.empty());
-  assertx(!t.is(BBottom) || hasEffects);
   env.flags.mayReadLocalSet.set();
   env.flags.retParam = NoLocalId;
   env.flags.returned = t;
-  if (t.is(BBottom)) unreachable(env);
   if (!hasEffects) effect_free(env);
 }
 
@@ -319,7 +317,6 @@ void push(ISS& env, Type t, LocalId l) {
   env.state.topStkIterKeyEquiv = NoIterId;
   if (env.undo) env.undo->onPush();
 }
-
 
 //////////////////////////////////////////////////////////////////////
 // $this

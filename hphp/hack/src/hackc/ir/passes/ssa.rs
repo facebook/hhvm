@@ -451,7 +451,6 @@ mod test {
     use ir_core::FunctionName;
     use ir_core::Immediate;
     use ir_core::LocId;
-    use ir_core::VerifyKind;
     use ir_core::instr::HasOperands;
     use ir_core::instr::Predicate;
     use ir_core::instr::Terminator;
@@ -468,7 +467,7 @@ mod test {
             let null = builder.emit_imm(Immediate::Null);
             let id = FunctionName::intern("my_fn");
             builder.emit(Instr::simple_call(id, &[value], loc));
-            builder.emit(Instr::ret(null, VerifyKind::None, loc));
+            builder.emit(Instr::ret(null, loc));
         });
         verify::verify_func(&func, &Default::default());
         assert!(is_ssa(&func));
@@ -492,7 +491,7 @@ mod test {
             let value = builder.emit(Instr::get_var(var));
             let id = FunctionName::intern("my_fn");
             builder.emit(Instr::simple_call(id, &[value], loc));
-            builder.emit(Instr::ret(null, VerifyKind::None, loc));
+            builder.emit(Instr::ret(null, loc));
         });
         verify::verify_func(&func, &Default::default());
         assert!(!is_ssa(&func));
@@ -588,7 +587,7 @@ mod test {
             let value2 = builder.emit(Instr::get_var(var2));
             let id = FunctionName::intern("my_fn");
             builder.emit(Instr::simple_call(id, &[value0, value1, value2], loc));
-            builder.emit(Instr::ret(null, VerifyKind::None, loc));
+            builder.emit(Instr::ret(null, loc));
         });
         verify::verify_func(&func, &Default::default());
         assert!(!is_ssa(&func));

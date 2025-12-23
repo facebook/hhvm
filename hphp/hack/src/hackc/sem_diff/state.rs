@@ -1289,6 +1289,8 @@ fn is_checkpoint_instr(instr: &NodeInstr) -> bool {
             Opcode::VerifyOutType(..)
             | Opcode::VerifyParamType(..)
             | Opcode::VerifyParamTypeTS(..)
+            | Opcode::VerifyRetNonNullC
+            | Opcode::VerifyRetTypeC
             | Opcode::VerifyRetTypeTS
             | Opcode::VerifyTypeTS,
         ) => true,
@@ -1435,7 +1437,7 @@ fn is_checkpoint_instr(instr: &NodeInstr) -> bool {
             | Opcode::ResolveRClsMethodD(..)
             | Opcode::ResolveRClsMethodS(..)
             | Opcode::ResolveRFunc(..)
-            | Opcode::RetC(..)
+            | Opcode::RetC
             | Opcode::RetCSuspended
             | Opcode::RetM(..)
             | Opcode::SSwitch { .. }
@@ -1598,6 +1600,7 @@ fn clean_opcode(opcode: &Opcode) -> Opcode {
         | Opcode::Req
         | Opcode::ReqDoc
         | Opcode::ReqOnce
+        | Opcode::RetC
         | Opcode::RetCSuspended
         | Opcode::Same
         | Opcode::Select
@@ -1612,6 +1615,8 @@ fn clean_opcode(opcode: &Opcode) -> Opcode {
         | Opcode::ThrowNonExhaustiveSwitch
         | Opcode::True
         | Opcode::UnsetG
+        | Opcode::VerifyRetNonNullC
+        | Opcode::VerifyRetTypeC
         | Opcode::VerifyRetTypeTS
         | Opcode::VerifyTypeTS
         | Opcode::WHResult
@@ -1674,8 +1679,7 @@ fn clean_opcode(opcode: &Opcode) -> Opcode {
         | Opcode::ResolveMethCaller(_)
         | Opcode::ResolveRClsMethod(_)
         | Opcode::ResolveRFunc(_)
-        | Opcode::RetC(_)
-        | Opcode::RetM(_, _)
+        | Opcode::RetM(_)
         | Opcode::SetOpS(_)
         | Opcode::SetS(_)
         | Opcode::String(_)

@@ -125,14 +125,6 @@ pub mod ffi {
 
     #[repr(u8)]
     #[derive(Debug, Copy, Clone, Hash, Eq, PartialEq, Serialize)]
-    enum VerifyKind {
-        None,
-        All,
-        NonNull,
-    }
-
-    #[repr(u8)]
-    #[derive(Debug, Copy, Clone, Hash, Eq, PartialEq, Serialize)]
     enum TypeStructEnforceKind {
         Deep,
         Shallow,
@@ -267,7 +259,6 @@ pub mod ffi {
         type SpecialClsRef;
         type SwitchKind;
         type TypeStructResolveOp;
-        type VerifyKind;
         type TypeStructEnforceKind;
         type AsTypeStructExceptionKind;
         fn fcall_flags_to_string_ffi(flags: FCallArgsFlags) -> String;

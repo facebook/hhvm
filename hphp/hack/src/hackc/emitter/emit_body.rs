@@ -33,7 +33,6 @@ use hhbc::TParamInfo;
 use hhbc::TypeInfo;
 use hhbc::TypedValue;
 use hhbc::UpperBound;
-use hhbc::VerifyKind;
 use hhbc_string_utils as string_utils;
 use indexmap::IndexSet;
 use instruction_sequence::InstrSeq;
@@ -665,7 +664,8 @@ fn set_emit_statement_state(
     } else if flags.contains(Flags::ASYNC) && verify_return.is_some() {
         Some(InstrSeq::gather(vec![
             instr::null(),
-            instr::ret_c(VerifyKind::All),
+            instr::verify_ret_type_c(),
+            instr::ret_c(),
         ]))
     } else {
         None

@@ -341,7 +341,7 @@ where
             | Opcode::ResolveRClsMethodS(..)
             | Opcode::ResolveRFunc(..)
             | Opcode::RetCSuspended
-            | Opcode::RetC(..)
+            | Opcode::RetC
             | Opcode::RetM(..)
             | Opcode::Same
             | Opcode::Select
@@ -372,6 +372,8 @@ where
             | Opcode::VerifyOutType(..)
             | Opcode::VerifyParamType(..)
             | Opcode::VerifyParamTypeTS(..)
+            | Opcode::VerifyRetNonNullC
+            | Opcode::VerifyRetTypeC
             | Opcode::VerifyRetTypeTS
             | Opcode::VerifyTypeTS
             | Opcode::WHResult

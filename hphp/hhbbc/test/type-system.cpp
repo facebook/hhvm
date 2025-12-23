@@ -285,19 +285,19 @@ Index make_index() {
     .class Closure$ChildClosure1 extends Closure {
       .method [public static] N __invoke() isClosureBody {
         Null
-        RetC None
+        RetC
       }
     }
     .class Closure$ChildClosure2 extends Closure {
       .method [public static] N __invoke() isClosureBody {
         Null
-        RetC None
+        RetC
       }
     }
     .class Closure$ChildClosure3 extends Closure {
       .method [public static] N __invoke() isClosureBody {
         Null
-        RetC None
+        RetC
       }
     }
 
@@ -667,7 +667,7 @@ Index make_index() {
       PopC
       PopC
       Int 1
-      RetC None
+      RetC
     }
   )";
 

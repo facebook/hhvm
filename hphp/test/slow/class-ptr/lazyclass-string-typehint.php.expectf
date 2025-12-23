@@ -39,9 +39,9 @@ Notice: Implicit Class to string conversion for argument 2 passed to foo7() in %
 class(Foo)
 string(3) "Foo"
 
-Notice: Implicit Class to string conversion for argument 2 returned from foo7() as an inout parameter in %s/test/slow/class-ptr/lazyclass-string-typehint.php on line 61
-
 Notice: Implicit Class to string conversion for return of foo7() in %s/test/slow/class-ptr/lazyclass-string-typehint.php on line 61
+
+Notice: Implicit Class to string conversion for argument 2 returned from foo7() as an inout parameter in %s/test/slow/class-ptr/lazyclass-string-typehint.php on line 61
 string(3) "Foo"
 string(3) "Baz"
 

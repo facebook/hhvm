@@ -368,143 +368,6 @@ void replace_last_op(ISS& env, Bytecode&& bc) {
   last = bc_with_loc(last.srcLoc, bc);
 }
 
-template<typename TOp>
-bool reduceRet(ISS& env, const TOp& op, HPHP::VerifyKind kind) {
-  static_assert(false);
-}
-
-template<>
-bool reduceRet(ISS& env, const bc::RetC&, HPHP::VerifyKind kind) {
-  reduce(env, bc::RetC {kind});
-  return true;
-}
-
-template<>
-bool reduceRet(ISS& env, const bc::RetM& op, HPHP::VerifyKind kind) {
-  reduce(env, bc::RetM {op.arg1, kind});
-  return true;
-}
-
-template<>
-bool reduceRet(ISS& env, const bc::VerifyOutType&, HPHP::VerifyKind kind) {
-  assertx(kind == VerifyKind::None);
-  reduce(env);
-  return true;
-}
-
-struct VerifyResult {
-  Type type;
-  bool effectFree;
-  bool coerced;
-};
-
-template<typename TOp>
-Optional<VerifyResult> verifyRetNonNullImpl(ISS& env, const TOp& op, const Type& retTy) {
-  if (!retTy.couldBe(BInitNull)) {
-    reduceRet(env, op, VerifyKind::None);
-    return std::nullopt;
-  }
-  auto const& constraints = env.ctx.func->retTypeConstraints;
-  auto hasNonNullableType = std::any_of(
-    constraints.range().begin(),
-    constraints.range().end(),
-    [&](const TypeConstraint& tc) {
-      return !tc.isSoft() && !tc.isNullable();
-    }
-  );
-
-  auto refined = hasNonNullableType
-    ? (retTy.subtypeOf(BInitNull) ? TBottom : unopt(retTy))
-    : retTy;
-  return VerifyResult(std::move(refined), false, false);
-}
-
-template<typename TOp>
-Optional<VerifyResult> verifyRetAllImpl(ISS& env, const TypeIntersectionConstraint& tcs,
-                                   bool reduce_nullonly, const TOp& op, const Type& stackT) {
-  assertx(!tcs.isTop());
-
-  auto refined = TInitCell;
-  auto remove = true;
-  auto effectFree = true;
-  auto coerced = false;
-  auto nullonly = reduce_nullonly &&
-    stackT.couldBe(BInitNull) &&
-    !stackT.subtypeOf(BInitNull);
-
-  for (auto const& tc : tcs.range()) {
-    auto const type = lookup_constraint(env.index, env.ctx, tc, stackT);
-    if (stackT.moreRefined(type.lower)) {
-      refined = intersection_of(std::move(refined), stackT);
-      continue;
-    }
-
-    if (!stackT.couldBe(type.upper)) {
-      return VerifyResult(TBottom, false, false);
-    }
-
-    remove = false;
-    if (nullonly) {
-      nullonly = unopt(stackT).moreRefined(type.lower);
-    }
-
-    auto result = intersection_of(stackT, type.upper);
-    if (type.coerceClassToString == TriBool::Yes) {
-      assertx(!type.lower.couldBe(BCls | BLazyCls));
-      assertx(type.upper.couldBe(BStr | BCls | BLazyCls));
-      if (result.couldBe(BCls | BLazyCls)) {
-        result = promote_classish(std::move(result));
-        coerced = true;
-        if (effectFree && (Cfg::Eval::ClassStringHintNoticesSampleRate > 0 ||
-                           !promote_classish(stackT).moreRefined(type.lower))) {
-          effectFree = false;
-        }
-      } else {
-        effectFree = false;
-      }
-    } else if (type.coerceClassToString == TriBool::Maybe) {
-      if (result.couldBe(BCls | BLazyCls)) result |= TSStr;
-      effectFree = false;
-    } else {
-      effectFree = false;
-    }
-
-    refined = intersection_of(std::move(refined), result);
-    if (refined.is(BBottom)) {
-      return VerifyResult(TBottom, false, coerced);
-    }
-  }
-
-  if (remove) {
-    assertx(effectFree);
-    assertx(!coerced);
-    reduceRet(env, op, VerifyKind::None);
-    return std::nullopt;
-  }
-
-  // In cases where stackT includes InitNull, but would pass the
-  // type-constraint if it was not InitNull, we can lower to a
-  // non-null check.
-  if (nullonly) {
-    reduceRet(env, op, VerifyKind::NonNull);
-    return std::nullopt;
-  }
-
-  return VerifyResult(std::move(refined), effectFree, coerced);
-}
-
-template <typename Op>
-Optional<VerifyResult> verifyRetImpl(ISS& env, HPHP::VerifyKind kind, const Op& op, const Type& type) {
-  switch (kind) {
-    case HPHP::VerifyKind::All:
-      return verifyRetAllImpl(env, env.ctx.func->retTypeConstraints, true, op, type);
-    case HPHP::VerifyKind::NonNull:
-      return verifyRetNonNullImpl(env, op, type);
-    case HPHP::VerifyKind::None:
-      return VerifyResult(type, true, false);
-  }
-}
-
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -2242,39 +2105,30 @@ void in(ISS& env, const bc::SSwitch& op) {
   });
 }
 
-void in(ISS& env, const bc::RetC& op) {
+void in(ISS& env, const bc::RetC& /*op*/) {
   auto const locEquiv = topStkLocal(env);
-  auto res = verifyRetImpl(env, op.subop1, op, topC(env));
-  if (!res) return;
-  popC(env);
-  doRet(env, res->type, !res->effectFree);
-  if (!res->coerced && locEquiv != NoLocalId && locEquiv < env.ctx.func->params.size()) {
+  doRet(env, popC(env), false);
+  if (locEquiv != NoLocalId && locEquiv < env.ctx.func->params.size()) {
     env.flags.retParam = locEquiv;
   }
 }
-
 void in(ISS& env, const bc::RetM& op) {
-  auto res = verifyRetImpl(env, op.subop2, op, topC(env, op.arg1 - 1));
-  if (!res) return;
   std::vector<Type> ret(op.arg1);
-  for (int i = 0; i < op.arg1; ++i) {
+  for (int i = 0; i < op.arg1; i++) {
     ret[op.arg1 - i - 1] = popC(env);
   }
-  ret[0] = std::move(res->type);
-  bool unreachable = std::any_of(
-    ret.begin(),
-    ret.end(),
-    [&](const Type& t) { return t.is(BBottom);}
-  );
-  doRet(env, unreachable ? TBottom : vec(std::move(ret)), unreachable || !res->effectFree);
+  doRet(env, vec(std::move(ret)), false);
 }
 
 void in(ISS& env, const bc::RetCSuspended&) {
   always_assert(env.ctx.func->isAsync && !env.ctx.func->isGenerator);
 
-  auto const type = popC(env);
-  auto const retTy = is_specialized_wait_handle(type) ? wait_handle_inner(type) : TInitCell;
-  doRet(env, retTy, retTy.is(BBottom));
+  auto const t = popC(env);
+  doRet(
+    env,
+    is_specialized_wait_handle(t) ? wait_handle_inner(t) : TInitCell,
+    false
+  );
 }
 
 void in(ISS& env, const bc::Throw& /*op*/) {
@@ -5474,13 +5328,91 @@ void in(ISS& env, const bc::VerifyParamTypeTS& op) {
   popC(env);
 }
 
+void verifyRetImpl(ISS& env, const TypeIntersectionConstraint& tcs,
+                   bool reduce_nullonly) {
+  assertx(!tcs.isTop());
+  auto stackT = topC(env);
+
+  auto refined = TInitCell;
+  auto remove = true;
+  auto effectFree = true;
+  auto nullonly =
+    reduce_nullonly &&
+    stackT.couldBe(BInitNull) &&
+    !stackT.subtypeOf(BInitNull);
+  for (auto const& tc : tcs.range()) {
+    auto const type = lookup_constraint(env.index, env.ctx, tc, stackT);
+    if (stackT.moreRefined(type.lower)) {
+      refined = intersection_of(std::move(refined), stackT);
+      continue;
+    }
+
+    if (!stackT.couldBe(type.upper)) {
+      popC(env);
+      push(env, TBottom);
+      return unreachable(env);
+    }
+
+    remove = false;
+    if (nullonly) {
+      nullonly = unopt(stackT).moreRefined(type.lower);
+    }
+
+    auto result = intersection_of(stackT, type.upper);
+    if (type.coerceClassToString == TriBool::Yes) {
+      assertx(!type.lower.couldBe(BCls | BLazyCls));
+      assertx(type.upper.couldBe(BStr | BCls | BLazyCls));
+      if (result.couldBe(BCls | BLazyCls)) {
+        result = promote_classish(std::move(result));
+        if (effectFree && (Cfg::Eval::ClassStringHintNoticesSampleRate > 0 ||
+              !promote_classish(stackT).moreRefined(type.lower))) {
+          effectFree = false;
+        }
+      } else {
+        effectFree = false;
+      }
+    } else if (type.coerceClassToString == TriBool::Maybe) {
+      if (result.couldBe(BCls | BLazyCls)) result |= TSStr;
+      effectFree = false;
+    } else {
+      effectFree = false;
+    }
+
+    refined = intersection_of(std::move(refined), result);
+    if (refined.is(BBottom)) {
+      popC(env);
+      push(env, TBottom);
+      return unreachable(env);
+    }
+  }
+
+  if (remove) {
+    return reduce(env);
+  }
+
+  // In cases where stackT includes InitNull, but would pass the
+  // type-constraint if it was not InitNull, we can lower to a
+  // non-null check.
+  if (nullonly) {
+    return reduce(env, bc::VerifyRetNonNullC {});
+  }
+
+  if (effectFree) {
+    effect_free(env);
+    constprop(env);
+  }
+
+  popC(env);
+  push(env, std::move(refined));
+}
+
 void in(ISS& env, const bc::VerifyOutType& op) {
   auto const& pinfo = env.ctx.func->params[op.loc1];
-  auto res = verifyRetAllImpl(env, pinfo.typeConstraints, false, op, topC(env));
-  if (!res) return;
-  if (res->effectFree) effect_free(env);
-  popC(env);
-  push(env, std::move(res->type));
+  verifyRetImpl(env, pinfo.typeConstraints, false);
+}
+
+void in(ISS& env, const bc::VerifyRetTypeC& /*op*/) {
+  verifyRetImpl(env, env.ctx.func->retTypeConstraints, true);
 }
 
 void in(ISS& env, const bc::VerifyRetTypeTS& /*op*/) {
@@ -5563,6 +5495,36 @@ void in(ISS& env, const bc::VerifyTypeTS& /*op*/) {
   popC(env);
   popC(env);
   push(env, std::move(stackT), stackEquiv);
+}
+
+void in(ISS& env, const bc::VerifyRetNonNullC&) {
+  auto stackT = topC(env);
+  if (!stackT.couldBe(BInitNull)) return reduce(env);
+
+  auto const& constraints = env.ctx.func->retTypeConstraints;
+  if (stackT.subtypeOf(BInitNull)) {
+    if (std::any_of(
+        constraints.range().begin(),
+        constraints.range().end(),
+        [&](const TypeConstraint& tc) {
+          return !tc.isSoft() && !tc.isNullable();
+        })) {
+      popC(env);
+      push(env, TBottom);
+      return unreachable(env);
+    }
+    return;
+  }
+
+  if (std::all_of(
+      constraints.range().begin(),
+      constraints.range().end(),
+      [](auto const& tc) { return tc.isNullable() || tc.isSoft();}
+    )) {
+    return;
+  }
+  popC(env);
+  push(env, unopt(std::move(stackT)));
 }
 
 void in(ISS& env, const bc::SelfCls&) {

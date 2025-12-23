@@ -51,8 +51,6 @@ SSATmp* verifyPropType(IRGS& env,
                        SSATmp* name,
                        bool isSProp);
 
-void verifyRetType(IRGS& env, int32_t id, int32_t ind, bool onlyCheckNullability);
-
 void verifyMysteryBoxConstraint(IRGS& env, const MysteryBoxConstraint& c,
                                 SSATmp* val, Block* fail);
 

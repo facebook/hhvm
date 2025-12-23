@@ -23,7 +23,7 @@
   startOuter:
     IterGetValue <WithKeys> 0 $0
     PopL $1
-    IterGetKey <WithKeys> 0 $0
+    IterGetKey <WithKeys> 0 $0 
     PopL $2
     String "\n"
     CGetL2 $1
@@ -42,7 +42,7 @@
     startInner:
       IterGetValue <WithKeys> 1 $0
       PopL $3
-      IterGetKey <WithKeys> 1 $0
+      IterGetKey <WithKeys> 1 $0 
       PopL $4
       String "\n"
       CGetL2 $3
@@ -74,5 +74,5 @@
   }
 endOuter:
   Int 1
-  RetC None
+  RetC
 }

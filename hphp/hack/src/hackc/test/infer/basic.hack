@@ -105,6 +105,10 @@ function cmp2(int $a, int $b): void {
 // CHECK: define $root.ret_str($this: *void) : .notnull *HackString {
 // CHECK: #b0:
 // CHECK: // .column 3
+// CHECK:   n0 = $builtins.hhbc_is_type_str($builtins.hack_string("hello, world\n"))
+// CHECK: // .column 3
+// CHECK:   n1 = $builtins.hhbc_verify_type_pred($builtins.hack_string("hello, world\n"), n0)
+// CHECK: // .column 3
 // CHECK:   ret $builtins.hack_string("hello, world\n")
 // CHECK: }
 function ret_str(): string {
@@ -180,6 +184,10 @@ function check_param_types(int $a, float $b, string $c): void {
 // CHECK: // .column 10
 // CHECK:   n1 = $builtins.hack_bool(__sil_instanceof(n0, <C>, 0))
 // CHECK: // .column 3
+// CHECK:   n2 = $builtins.hhbc_is_type_bool(n1)
+// CHECK: // .column 3
+// CHECK:   n3 = $builtins.hhbc_verify_type_pred(n1, n2)
+// CHECK: // .column 3
 // CHECK:   ret n1
 // CHECK: }
 function check_is_class(mixed $a): bool {
@@ -193,6 +201,10 @@ function check_is_class(mixed $a): bool {
 // CHECK:   n0: *HackMixed = load &$a
 // CHECK: // .column 10
 // CHECK:   n1 = $builtins.hack_bool(__sil_instanceof(n0, <C>, 1))
+// CHECK: // .column 3
+// CHECK:   n2 = $builtins.hhbc_is_type_bool(n1)
+// CHECK: // .column 3
+// CHECK:   n3 = $builtins.hhbc_verify_type_pred(n1, n2)
 // CHECK: // .column 3
 // CHECK:   ret n1
 // CHECK: }

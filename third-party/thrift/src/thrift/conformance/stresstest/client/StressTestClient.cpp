@@ -145,8 +145,8 @@ folly::coro::Task<void> ThriftStressTestClient::co_sinkTm(
     const StreamRequest& req) {
   co_await timedExecute([&]() -> folly::coro::Task<void> {
     auto result = co_await client_->co_sinkTm(req);
-    std::ignore =
-        result.sink.sink([&]() -> folly::coro::AsyncGenerator<BasicResponse&&> {
+    std::ignore = co_await result.sink.sink(
+        [&]() -> folly::coro::AsyncGenerator<BasicResponse&&> {
           for (int64_t i = 0; i < req.processInfo()->numChunks(); i++) {
             co_await maybeSleep(req);
             BasicResponse chunk;

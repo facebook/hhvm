@@ -72,7 +72,6 @@ mstch_factories::mstch_factories() {
   add<mstch_enum>();
   add<mstch_const>();
   add<mstch_const_value>();
-  add<mstch_const_map_element>();
 }
 
 mstch::node mstch_type::get_structured() {
@@ -155,30 +154,6 @@ mstch::node mstch_field::value() {
   }
   return context_.const_value_factory->make_mstch_object(
       field_->default_value(), context_, pos_, /*current_const=*/nullptr);
-}
-
-mstch::node mstch_const_map_element::element_key() {
-  return context_.const_value_factory->make_mstch_object(
-      element_.first, context_, pos_, current_const_);
-}
-
-mstch::node mstch_const_map_element::element_value() {
-  return context_.const_value_factory->make_mstch_object(
-      element_.second, context_, pos_, current_const_);
-}
-
-mstch::node mstch_const_value::list_elems() {
-  return type_ == cv::CV_LIST
-      ? make_mstch_consts(const_value_->get_list(), current_const_)
-      : mstch::node();
-}
-
-mstch::node mstch_const_value::map_elems() {
-  return type_ == cv::CV_MAP ? make_mstch_array(
-                                   const_value_->get_map(),
-                                   *context_.const_map_element_factory,
-                                   current_const_)
-                             : mstch::node();
 }
 
 mstch::node mstch_field::type() {

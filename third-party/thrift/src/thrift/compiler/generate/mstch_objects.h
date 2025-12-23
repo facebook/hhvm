@@ -87,8 +87,6 @@ using mstch_enum_factory = mstch_factory<t_enum>;
 using mstch_const_factory =
     mstch_factory<t_const, const t_const*, const t_field*>;
 using mstch_const_value_factory = mstch_factory<t_const_value, const t_const*>;
-using mstch_const_map_element_factory =
-    mstch_factory<std::pair<t_const_value*, t_const_value*>, const t_const*>;
 using mstch_stream_factory = mstch_factory<t_stream>;
 
 class mstch_factories {
@@ -104,7 +102,6 @@ class mstch_factories {
   std::unique_ptr<mstch_enum_factory> enum_factory;
   std::unique_ptr<mstch_const_factory> const_factory;
   std::unique_ptr<mstch_const_value_factory> const_value_factory;
-  std::unique_ptr<mstch_const_map_element_factory> const_map_element_factory;
 
   mstch_factories();
 
@@ -172,9 +169,6 @@ class mstch_factories {
   auto& get(t_enum*) { return enum_factory; }
   auto& get(t_const*) { return const_factory; }
   auto& get(t_const_value*) { return const_value_factory; }
-  auto& get(std::pair<t_const_value*, t_const_value*>*) {
-    return const_map_element_factory;
-  }
 
   template <typename MstchType, typename Node, typename... Args, typename Data>
   void make(std::unique_ptr<mstch_factory<Node, Args...>>& factory, Data data) {
@@ -844,48 +838,15 @@ class mstch_const_value : public mstch_base {
         {
             {"self", &mstch_const_value::self},
             {"value:self", &mstch_const_value::self},
-            {"value:list_elements", &mstch_const_value::list_elems},
-            {"value:map_elements", &mstch_const_value::map_elems},
         });
   }
 
   whisker::object self() { return make_self(*const_value_); }
-  mstch::node list_elems();
-  mstch::node map_elems();
 
  protected:
   const t_const_value* const_value_;
   const t_const* current_const_;
   const cv type_;
-};
-
-class mstch_const_map_element : public mstch_base {
- public:
-  using ast_type = std::pair<t_const_value*, t_const_value*>;
-
-  mstch_const_map_element(
-      const ast_type* e,
-      mstch_context& ctx,
-      mstch_element_position pos,
-      const t_const* current_const)
-      : mstch_base(ctx, pos), element_(*e), current_const_(current_const) {
-    register_methods(
-        this,
-        {
-            {"element:key", &mstch_const_map_element::element_key},
-            {"element:value", &mstch_const_map_element::element_value},
-            // Properties to enable Whisker migration, where map elements have
-            // 'key' and 'value' properties
-            {"key", &mstch_const_map_element::element_key},
-            {"value", &mstch_const_map_element::element_value},
-        });
-  }
-  mstch::node element_key();
-  mstch::node element_value();
-
- protected:
-  const std::pair<t_const_value*, t_const_value*> element_;
-  const t_const* current_const_;
 };
 
 } // namespace apache::thrift::compiler

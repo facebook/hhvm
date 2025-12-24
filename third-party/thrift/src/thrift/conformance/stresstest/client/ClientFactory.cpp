@@ -294,11 +294,13 @@ folly::AsyncTransport::UniquePtr createIOUringTLS(
 
 folly::AsyncTransport::UniquePtr createIOUringFizz(
     folly::EventBase* evb, const ClientConnectionConfig& cfg) {
+  auto sock = new folly::AsyncIoUringSocket(evb);
   auto fizzClient = fizz::client::AsyncFizzClient::UniquePtr(
-      new fizz::client::AsyncFizzClient(evb, getFizzContext(cfg)));
-  auto ring = new folly::AsyncIoUringSocket(std::move(fizzClient));
-  ring->connect(cfg.connectCb, cfg.serverHost);
-  return folly::AsyncTransport::UniquePtr(ring);
+      new fizz::client::AsyncFizzClient(
+          folly::AsyncTransport::UniquePtr(sock), getFizzContext(cfg)));
+  fizzClient->connect(
+      cfg.serverHost, cfg.connectCb, getFizzVerifier(cfg), {}, {});
+  return fizzClient;
 }
 #endif
 } // namespace

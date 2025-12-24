@@ -244,6 +244,8 @@ class AsyncFizzBase : public folly::WriteChainAsyncTransportWrapper<
     return "Fizz";
   }
 
+  int getNapiId() const override;
+
   /**
    * EventBase operations.
    */

@@ -52,6 +52,10 @@ void AsyncFizzBase::destroy() {
   DelayedDestruction::destroy();
 }
 
+int AsyncFizzBase::getNapiId() const {
+  return transport_->getNapiId();
+}
+
 AsyncFizzBase::ReadCallback* AsyncFizzBase::getReadCallback() const {
   return readCallback_;
 }

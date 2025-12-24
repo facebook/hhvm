@@ -133,7 +133,7 @@ void AsyncFizzClientT<SM>::connect(
   }
 
   auto underlyingSocket =
-      transport_->getUnderlyingTransport<folly::AsyncSocket>();
+      transport_->getUnderlyingTransport<folly::AsyncSocketTransport>();
   if (underlyingSocket) {
     underlyingSocket->disableTransparentTls();
     underlyingSocket->connect(

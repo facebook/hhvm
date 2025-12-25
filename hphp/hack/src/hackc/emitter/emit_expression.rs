@@ -5142,92 +5142,90 @@ fn emit_as<'a>(e: &mut Emitter, env: &Env<'a>, pos: &Pos, as_: &ast::As_) -> Res
         is_nullable,
         enforce_deep,
     } = as_;
-    e.local_scope(|e| {
-        let (enforcement, exception) = if *enforce_deep {
-            (
-                hhbc::TypeStructEnforceKind::Deep,
-                AsTypeStructExceptionKind::Typehint,
-            )
-        } else {
-            (
-                hhbc::TypeStructEnforceKind::Shallow,
-                AsTypeStructExceptionKind::Error,
-            )
+
+    let (enforcement, exception) = if *enforce_deep {
+        (
+            hhbc::TypeStructEnforceKind::Deep,
+            AsTypeStructExceptionKind::Typehint,
+        )
+    } else {
+        (
+            hhbc::TypeStructEnforceKind::Shallow,
+            AsTypeStructExceptionKind::Error,
+        )
+    };
+    let done_label = e.label_gen_mut().next_regular();
+
+    if let Some(op) = hint_to_type_op(e, hint) {
+        return Ok(InstrSeq::gather(vec![
+            emit_expr(e, env, expr)?,
+            instr::dup(),
+            instr::is_type_c(op),
+            instr::jmp_nz(done_label),
+            if *is_nullable {
+                InstrSeq::gather(vec![instr::pop_c(), instr::null(), instr::jmp(done_label)])
+            } else {
+                InstrSeq::gather(vec![
+                    emit_reified_arg(e, env, pos, true, hint)?.0,
+                    instr::throw_as_type_struct_exception(exception),
+                ])
+            },
+            instr::label(done_label),
+        ]));
+    }
+
+    let (ts_instrs, is_static) = emit_reified_arg(e, env, pos, true, hint)?;
+    let main_block = |e, ts_instrs, resolve| {
+        let check_instr = match resolve {
+            TypeStructResolveOp::Resolve => {
+                instr::is_type_struct_c(hhbc::TypeStructResolveOp::Resolve, enforcement)
+            }
+            TypeStructResolveOp::DontResolve => {
+                instr::is_type_struct_c(hhbc::TypeStructResolveOp::DontResolve, enforcement)
+            }
+            _ => panic!("Enum value does not match one of listed variants"),
         };
-        let done_label = e.label_gen_mut().next_regular();
 
-        if let Some(op) = hint_to_type_op(e, hint) {
-            return Ok(InstrSeq::gather(vec![
-                emit_expr(e, env, expr)?,
-                instr::dup(),
-                instr::is_type_c(op),
-                instr::jmp_nz(done_label),
-                if *is_nullable {
-                    InstrSeq::gather(vec![instr::pop_c(), instr::null(), instr::jmp(done_label)])
-                } else {
-                    InstrSeq::gather(vec![
-                        emit_reified_arg(e, env, pos, true, hint)?.0,
-                        instr::throw_as_type_struct_exception(exception),
-                    ])
-                },
-                instr::label(done_label),
-            ]));
-        }
-
-        let arg_local = e.local_gen_mut().get_unnamed();
-        let type_struct_local = e.local_gen_mut().get_unnamed();
-        let (ts_instrs, is_static) = emit_reified_arg(e, env, pos, true, hint)?;
-        let then_label = e.label_gen_mut().next_regular();
-        let main_block = |ts_instrs, resolve| {
-            InstrSeq::gather(vec![
+        if *is_nullable {
+            Ok(InstrSeq::gather(vec![
                 ts_instrs,
-                instr::set_l(type_struct_local),
-                match resolve {
-                    TypeStructResolveOp::Resolve => {
-                        instr::is_type_struct_c(hhbc::TypeStructResolveOp::Resolve, enforcement)
-                    }
-                    TypeStructResolveOp::DontResolve => {
-                        instr::is_type_struct_c(hhbc::TypeStructResolveOp::DontResolve, enforcement)
-                    }
-                    _ => panic!("Enum value does not match one of listed variants"),
-                },
-                instr::jmp_nz(then_label),
-                if *is_nullable {
-                    InstrSeq::gather(vec![instr::null(), instr::jmp(done_label)])
-                } else {
+                check_instr,
+                instr::jmp_nz(done_label),
+                instr::pop_c(),
+                instr::null(),
+                instr::label(done_label),
+            ]))
+        } else {
+            scope::with_unnamed_local(e, |_e, type_struct_local| {
+                Ok((
+                    ts_instrs,
                     InstrSeq::gather(vec![
-                        instr::push_l(arg_local),
+                        instr::set_l(type_struct_local),
+                        check_instr,
+                        instr::jmp_nz(done_label),
                         instr::push_l(type_struct_local),
                         instr::throw_as_type_struct_exception(exception),
-                    ])
-                },
-            ])
-        };
-        let i2 = if is_static {
-            main_block(
-                get_type_structure_for_hint(
-                    e,
-                    &[],
-                    &IndexSet::new(),
-                    TypeRefinementInHint::Disallowed,
-                    hint,
-                )?,
-                TypeStructResolveOp::Resolve,
-            )
-        } else {
-            main_block(ts_instrs, TypeStructResolveOp::DontResolve)
-        };
-        let i1 = emit_expr(e, env, expr)?;
-        Ok(InstrSeq::gather(vec![
-            i1,
-            instr::set_l(arg_local),
-            i2,
-            instr::label(then_label),
-            instr::push_l(arg_local),
-            instr::unset_l(type_struct_local),
-            instr::label(done_label),
-        ]))
-    })
+                        instr::label(done_label),
+                    ]),
+                    instr::empty(),
+                ))
+            })
+        }
+    };
+    let i2 = if is_static {
+        let ts_instrs = get_type_structure_for_hint(
+            e,
+            &[],
+            &IndexSet::new(),
+            TypeRefinementInHint::Disallowed,
+            hint,
+        )?;
+        main_block(e, ts_instrs, TypeStructResolveOp::Resolve)?
+    } else {
+        main_block(e, ts_instrs, TypeStructResolveOp::DontResolve)?
+    };
+    let i1 = emit_expr(e, env, expr)?;
+    Ok(InstrSeq::gather(vec![i1, instr::dup(), i2]))
 }
 
 fn emit_cast<'a>(

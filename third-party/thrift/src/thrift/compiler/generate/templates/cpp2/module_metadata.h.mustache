@@ -22,103 +22,10 @@
 
 #include <thrift/lib/cpp2/gen/module_metadata_h.h>
 #include "{{program:include_prefix}}{{program:name}}_types.h"
-{{#program:thrift_includes}}
-#include "{{program:include_prefix}}{{program:name}}_metadata.h"
-{{/program:thrift_includes}}
 
+{{! Note: ServiceTag below is not related to metadata, however, we can't remove it from this file yet since some codebases rely on it. }}
 {{#program:services}}
 namespace {{service:qualified_namespace}} {
 class {{service:cpp_name}};
 } // namespace {{service:qualified_namespace}}
 {{/program:services}}
-
-namespace apache {
-namespace thrift {
-namespace detail {
-namespace md {
-
-{{#program:enums}}
-{{#if (not (has_compiler_option? "no_metadata"))}}
-template <>
-class EnumMetadata<::{{program:qualified_namespace}}::{{enum:cpp_name}}> {
- public:
-  static void gen(ThriftMetadata& metadata);
-};
-{{#else}}
-template <>
-class EnumMetadata<::{{program:qualified_namespace}}::{{enum:cpp_name}}>
-    : private EmptyMetadata {
- public:
-  using EmptyMetadata::gen;
-};
-{{/if (not (has_compiler_option? "no_metadata"))}}
-{{/program:enums}}
-{{#program:structs}}
-{{#if (not (has_compiler_option? "no_metadata"))}}
-template <>
-class StructMetadata<{{struct:cpp_fullname}}> {
- public:
-  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
-};
-{{#else}}
-template <>
-class StructMetadata<{{struct:cpp_fullname}}>
-    : private EmptyMetadata {
- public:
-  using EmptyMetadata::gen;
-};
-{{/if (not (has_compiler_option? "no_metadata"))}}
-{{/program:structs}}
-{{#program:structs}}
-{{#struct:exception?}}
-{{#if (not (has_compiler_option? "no_metadata"))}}
-template <>
-class ExceptionMetadata<{{struct:cpp_fullname}}> {
- public:
-  static void gen(ThriftMetadata& metadata);
-};
-{{#else}}
-template <>
-class ExceptionMetadata<{{struct:cpp_fullname}}>
-    : private EmptyMetadata {
- public:
-  using EmptyMetadata::gen;
-};
-{{/if (not (has_compiler_option? "no_metadata"))}}
-{{/struct:exception?}}
-{{/program:structs}}
-{{#program:services}}
-{{#if (not (has_compiler_option? "no_metadata"))}}
-template <>
-class ServiceMetadata<::{{> service_common/service_class_name}}> {
- public:
-  static void gen(ThriftServiceMetadataResponse& response);
- private:
-  static const ThriftServiceContextRef* genRecurse(ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services);
-
-  template <typename T>
-  friend class ServiceMetadata;
-
-{{#service:functions}}{{^function:starts_interaction?}}
-  static void gen_{{function:cpp_name}}(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
-{{/function:starts_interaction?}}{{/service:functions}}
-};
-{{#else}}
-template <>
-class ServiceMetadata<::{{> service_common/service_class_name}}>
-    : private EmptyServiceMetadata {
- public:
-  using EmptyServiceMetadata::gen;
-
- private:
-  using EmptyServiceMetadata::genRecurse;
-
-  template <typename T>
-  friend class ServiceMetadata;
-};
-{{/if (not (has_compiler_option? "no_metadata"))}}
-{{/program:services}}
-} // namespace md
-} // namespace detail
-} // namespace thrift
-} // namespace apache

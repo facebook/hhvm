@@ -11,23 +11,3 @@
 #include <thrift/lib/cpp2/gen/module_metadata_h.h>
 #include "thrift/compiler/test/fixtures/deprecated-clear/gen-cpp2/module_types.h"
 
-
-namespace apache {
-namespace thrift {
-namespace detail {
-namespace md {
-
-template <>
-class EnumMetadata<::apache::thrift::test::MyEnum> {
- public:
-  static void gen(ThriftMetadata& metadata);
-};
-template <>
-class StructMetadata<::apache::thrift::test::StructWithDefaultStruct> {
- public:
-  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
-};
-} // namespace md
-} // namespace detail
-} // namespace thrift
-} // namespace apache

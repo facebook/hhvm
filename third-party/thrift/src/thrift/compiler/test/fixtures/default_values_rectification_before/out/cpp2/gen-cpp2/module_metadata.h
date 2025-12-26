@@ -11,23 +11,3 @@
 #include <thrift/lib/cpp2/gen/module_metadata_h.h>
 #include "thrift/compiler/test/fixtures/default_values_rectification_before/gen-cpp2/module_types.h"
 
-
-namespace apache {
-namespace thrift {
-namespace detail {
-namespace md {
-
-template <>
-class StructMetadata<::facebook::thrift::compiler::test::fixtures::default_values_rectification_before::EmptyStruct> {
- public:
-  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
-};
-template <>
-class StructMetadata<::facebook::thrift::compiler::test::fixtures::default_values_rectification_before::TestStruct> {
- public:
-  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
-};
-} // namespace md
-} // namespace detail
-} // namespace thrift
-} // namespace apache

@@ -11,38 +11,3 @@
 #include <thrift/lib/cpp2/gen/module_metadata_h.h>
 #include "thrift/compiler/test/fixtures/basic-enum/gen-cpp2/module_types.h"
 
-
-namespace apache {
-namespace thrift {
-namespace detail {
-namespace md {
-
-template <>
-class EnumMetadata<::test::fixtures::enumstrict::EmptyEnum> {
- public:
-  static void gen(ThriftMetadata& metadata);
-};
-template <>
-class EnumMetadata<::test::fixtures::enumstrict::MyEnum> {
- public:
-  static void gen(ThriftMetadata& metadata);
-};
-template <>
-class EnumMetadata<::test::fixtures::enumstrict::MyUseIntrinsicDefaultEnum> {
- public:
-  static void gen(ThriftMetadata& metadata);
-};
-template <>
-class EnumMetadata<::test::fixtures::enumstrict::MyBigEnum> {
- public:
-  static void gen(ThriftMetadata& metadata);
-};
-template <>
-class StructMetadata<::test::fixtures::enumstrict::MyStruct> {
- public:
-  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
-};
-} // namespace md
-} // namespace detail
-} // namespace thrift
-} // namespace apache

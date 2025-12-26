@@ -11,33 +11,3 @@
 #include <thrift/lib/cpp2/gen/module_metadata_h.h>
 #include "thrift/compiler/test/fixtures/any/gen-cpp2/module_types.h"
 
-
-namespace apache {
-namespace thrift {
-namespace detail {
-namespace md {
-
-template <>
-class StructMetadata<::facebook::thrift::compiler::test::fixtures::any::detail::MyStruct> {
- public:
-  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
-};
-template <>
-class StructMetadata<::facebook::thrift::compiler::test::fixtures::any::MyUnion> {
- public:
-  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
-};
-template <>
-class StructMetadata<::facebook::thrift::compiler::test::fixtures::any::MyException> {
- public:
-  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
-};
-template <>
-class ExceptionMetadata<::facebook::thrift::compiler::test::fixtures::any::MyException> {
- public:
-  static void gen(ThriftMetadata& metadata);
-};
-} // namespace md
-} // namespace detail
-} // namespace thrift
-} // namespace apache

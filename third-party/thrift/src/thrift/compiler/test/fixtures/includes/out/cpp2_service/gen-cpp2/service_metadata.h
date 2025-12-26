@@ -10,32 +10,7 @@
 
 #include <thrift/lib/cpp2/gen/module_metadata_h.h>
 #include "thrift/compiler/test/fixtures/includes/gen-cpp2/service_types.h"
-#include "thrift/compiler/test/fixtures/includes/gen-cpp2/module_metadata.h"
-#include "thrift/compiler/test/fixtures/includes/gen-cpp2/includes_metadata.h"
 
 namespace cpp2 {
 class MyService;
 } // namespace cpp2
-
-namespace apache {
-namespace thrift {
-namespace detail {
-namespace md {
-
-template <>
-class ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>> {
- public:
-  static void gen(ThriftServiceMetadataResponse& response);
- private:
-  static const ThriftServiceContextRef* genRecurse(ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services);
-
-  template <typename T>
-  friend class ServiceMetadata;
-
-  static void gen_query(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
-  static void gen_has_arg_docs(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
-};
-} // namespace md
-} // namespace detail
-} // namespace thrift
-} // namespace apache

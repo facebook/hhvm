@@ -10,8 +10,6 @@
 
 #include <thrift/lib/cpp2/gen/module_metadata_h.h>
 #include "thrift/compiler/test/fixtures/service-schema/gen-cpp2/module_types.h"
-#include "thrift/compiler/test/fixtures/service-schema/gen-cpp2/extend_metadata.h"
-#include "thrift/compiler/test/fixtures/service-schema/gen-cpp2/include_metadata.h"
 
 namespace facebook::thrift::test::fixtures::service_schema {
 class PrimitivesService;
@@ -19,54 +17,3 @@ class PrimitivesService;
 namespace facebook::thrift::test::fixtures::service_schema {
 class ExtendedService;
 } // namespace facebook::thrift::test::fixtures::service_schema
-
-namespace apache {
-namespace thrift {
-namespace detail {
-namespace md {
-
-template <>
-class EnumMetadata<::facebook::thrift::test::fixtures::service_schema::Result> {
- public:
-  static void gen(ThriftMetadata& metadata);
-};
-template <>
-class StructMetadata<::facebook::thrift::test::fixtures::service_schema::CustomException> {
- public:
-  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
-};
-template <>
-class ExceptionMetadata<::facebook::thrift::test::fixtures::service_schema::CustomException> {
- public:
-  static void gen(ThriftMetadata& metadata);
-};
-template <>
-class ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::service_schema::PrimitivesService>> {
- public:
-  static void gen(ThriftServiceMetadataResponse& response);
- private:
-  static const ThriftServiceContextRef* genRecurse(ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services);
-
-  template <typename T>
-  friend class ServiceMetadata;
-
-  static void gen_init(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
-  static void gen_method_that_throws(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
-  static void gen_return_void_method(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
-};
-template <>
-class ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::service_schema::ExtendedService>> {
- public:
-  static void gen(ThriftServiceMetadataResponse& response);
- private:
-  static const ThriftServiceContextRef* genRecurse(ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services);
-
-  template <typename T>
-  friend class ServiceMetadata;
-
-  static void gen_init(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
-};
-} // namespace md
-} // namespace detail
-} // namespace thrift
-} // namespace apache

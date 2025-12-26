@@ -10,26 +10,4 @@
 
 #include <thrift/lib/cpp2/gen/module_metadata_h.h>
 #include "thrift/compiler/test/fixtures/qualified/gen-cpp2/module2_types.h"
-#include "thrift/compiler/test/fixtures/qualified/gen-cpp2/module0_metadata.h"
-#include "thrift/compiler/test/fixtures/qualified/gen-cpp2/module1_metadata.h"
 
-
-namespace apache {
-namespace thrift {
-namespace detail {
-namespace md {
-
-template <>
-class StructMetadata<::module2::Struct> {
- public:
-  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
-};
-template <>
-class StructMetadata<::module2::BigStruct> {
- public:
-  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
-};
-} // namespace md
-} // namespace detail
-} // namespace thrift
-} // namespace apache

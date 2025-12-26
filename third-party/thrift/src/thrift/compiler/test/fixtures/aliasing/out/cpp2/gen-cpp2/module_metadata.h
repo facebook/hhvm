@@ -10,21 +10,4 @@
 
 #include <thrift/lib/cpp2/gen/module_metadata_h.h>
 #include "thrift/compiler/test/fixtures/aliasing/gen-cpp2/module_types.h"
-#include "other/gen-cpp2/module_metadata.h"
-#include "thrift/compiler/test/fixtures/aliasing/gen-cpp2/not_module_metadata.h"
 
-
-namespace apache {
-namespace thrift {
-namespace detail {
-namespace md {
-
-template <>
-class StructMetadata<::facebook::thrift::compiler::test::fixtures::aliasing::Foo> {
- public:
-  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
-};
-} // namespace md
-} // namespace detail
-} // namespace thrift
-} // namespace apache

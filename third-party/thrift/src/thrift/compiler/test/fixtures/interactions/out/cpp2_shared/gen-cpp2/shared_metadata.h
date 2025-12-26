@@ -14,29 +14,3 @@
 namespace thrift::shared_interactions {
 class InteractLocally;
 } // namespace thrift::shared_interactions
-
-namespace apache {
-namespace thrift {
-namespace detail {
-namespace md {
-
-template <>
-class StructMetadata<::thrift::shared_interactions::DoSomethingResult> {
- public:
-  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
-};
-template <>
-class ServiceMetadata<::apache::thrift::ServiceHandler<::thrift::shared_interactions::InteractLocally>> {
- public:
-  static void gen(ThriftServiceMetadataResponse& response);
- private:
-  static const ThriftServiceContextRef* genRecurse(ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services);
-
-  template <typename T>
-  friend class ServiceMetadata;
-
-};
-} // namespace md
-} // namespace detail
-} // namespace thrift
-} // namespace apache

@@ -14,30 +14,3 @@
 namespace test::namespace_from_package::module {
 class TestService;
 } // namespace test::namespace_from_package::module
-
-namespace apache {
-namespace thrift {
-namespace detail {
-namespace md {
-
-template <>
-class StructMetadata<::test::namespace_from_package::module::Foo> {
- public:
-  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
-};
-template <>
-class ServiceMetadata<::apache::thrift::ServiceHandler<::test::namespace_from_package::module::TestService>> {
- public:
-  static void gen(ThriftServiceMetadataResponse& response);
- private:
-  static const ThriftServiceContextRef* genRecurse(ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services);
-
-  template <typename T>
-  friend class ServiceMetadata;
-
-  static void gen_init(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
-};
-} // namespace md
-} // namespace detail
-} // namespace thrift
-} // namespace apache

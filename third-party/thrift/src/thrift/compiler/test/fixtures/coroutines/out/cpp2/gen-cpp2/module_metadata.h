@@ -14,29 +14,3 @@
 namespace cpp2 {
 class MyService;
 } // namespace cpp2
-
-namespace apache {
-namespace thrift {
-namespace detail {
-namespace md {
-
-template <>
-class ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>> {
- public:
-  static void gen(ThriftServiceMetadataResponse& response);
- private:
-  static const ThriftServiceContextRef* genRecurse(ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services);
-
-  template <typename T>
-  friend class ServiceMetadata;
-
-  static void gen_ping(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
-  static void gen_getRandomData(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
-  static void gen_hasDataById(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
-  static void gen_getDataById(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
-  static void gen_putDataById(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
-};
-} // namespace md
-} // namespace detail
-} // namespace thrift
-} // namespace apache

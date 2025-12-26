@@ -14,24 +14,3 @@
 namespace cpp2 {
 class NullService;
 } // namespace cpp2
-
-namespace apache {
-namespace thrift {
-namespace detail {
-namespace md {
-
-template <>
-class ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::NullService>> {
- public:
-  static void gen(ThriftServiceMetadataResponse& response);
- private:
-  static const ThriftServiceContextRef* genRecurse(ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services);
-
-  template <typename T>
-  friend class ServiceMetadata;
-
-};
-} // namespace md
-} // namespace detail
-} // namespace thrift
-} // namespace apache

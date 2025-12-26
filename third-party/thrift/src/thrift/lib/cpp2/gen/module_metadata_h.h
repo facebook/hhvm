@@ -37,46 +37,44 @@ using ThriftService = ::apache::thrift::metadata::ThriftService;
 using ThriftServiceMetadataResponse =
     ::apache::thrift::metadata::ThriftServiceMetadataResponse;
 
-class EmptyMetadata {
- protected:
-  FOLLY_ERASE static void gen(ThriftMetadata&) {}
-};
+inline constexpr Options kGenerateAll = {
+    .genAnnotations = true, .genNestedTypes = true};
 
-class EmptyServiceMetadata {
- protected:
-  FOLLY_ERASE static void gen(ThriftServiceMetadataResponse&) {}
-  FOLLY_ERASE static const ThriftServiceContextRef* genRecurse(
-      ThriftMetadata&, std::vector<ThriftServiceContextRef>&) {
-    return nullptr;
+template <typename T>
+class EnumMetadata {
+ public:
+  static void gen(ThriftMetadata& metadata) {
+    genEnumMetadata<T>(metadata, kGenerateAll);
   }
 };
 
 template <typename T>
-class EnumMetadata {
-  static_assert(
-      !sizeof(T),
-      "invalid use of base template, you may need to include the <type>_metadata.h header");
-};
-
-template <typename T>
 class StructMetadata {
-  static_assert(
-      !sizeof(T),
-      "invalid use of base template, you may need to include the <type>_metadata.h header");
+ public:
+  static const metadata::ThriftStruct& gen(ThriftMetadata& metadata) {
+    return genStructMetadata<T>(metadata, kGenerateAll).metadata;
+  }
 };
 
 template <typename T>
 class ExceptionMetadata {
-  static_assert(
-      !sizeof(T),
-      "invalid use of base template, you may need to include the <type>_metadata.h header");
+ public:
+  static void gen(ThriftMetadata& metadata) {
+    genExceptionMetadata<T>(metadata, kGenerateAll);
+  }
 };
 
 template <typename T>
 class ServiceMetadata {
-  static_assert(
-      !sizeof(T),
-      "invalid use of base template, you may need to include the <type>_metadata.h header");
+  static_assert(folly::always_false<T>);
+};
+
+template <typename Tag>
+class ServiceMetadata<::apache::thrift::ServiceHandler<Tag>> {
+ public:
+  static void gen(ThriftServiceMetadataResponse& response) {
+    genServiceMetadataResponse<Tag>(response);
+  }
 };
 
 } // namespace detail::md

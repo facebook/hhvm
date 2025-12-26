@@ -293,6 +293,13 @@ class t_type_ref final {
    * errors for types not found even during deferred resolution.
    */
   t_placeholder_typedef* unresolved_type() { return unresolved_typedef_; }
+
+  /**
+   * See (non-const) `unresolved_type()`.
+   */
+  const t_placeholder_typedef* unresolved_type() const {
+    return unresolved_typedef_;
+  }
 };
 
 bool is_scalar(const t_type& type);

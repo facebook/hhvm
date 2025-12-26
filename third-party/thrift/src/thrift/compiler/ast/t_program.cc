@@ -55,16 +55,16 @@ void t_program::add_definition(std::unique_ptr<t_named> definition) {
 
   if (!is_uri_eligible(*definition)) {
     // Not eligible for URIs - ensure that the URI value is empty
-    definition->set_uri("");
+    definition->set_uri("", /*is_explicit=*/true);
   } else if (!definition->explicit_uri()) {
     // Resolve Thrift URI.
     if (auto* cnst = definition->find_structured_annotation_or_null(kUriUri)) {
       auto* val = cnst->get_value_from_structured_annotation_or_null("value");
-      definition->set_uri(val ? val->get_string() : "");
+      definition->set_uri(val ? val->get_string() : "", /*is_explicit=*/true);
     } else if (
         auto* uri =
             definition->find_unstructured_annotation_or_null("thrift.uri")) {
-      definition->set_uri(*uri); // Explicit from annotation.
+      definition->set_uri(*uri, /*is_explicit=*/true);
     } else { // Inherit from package.
       definition->set_uri(
           package_.get_uri(definition->name()), /*is_explicit=*/false);
@@ -252,6 +252,56 @@ const t_named* t_program::find_global_by_id(scope::identifier id) const {
       [&](scope::enum_id&& id) -> const t_named* {
         return global_scope_->find(id);
       });
+}
+
+std::vector<t_program*> t_program::get_included_programs() const {
+  std::vector<t_program*> included_programs;
+  included_programs.reserve(includes_.size());
+  for (const auto& include : includes_) {
+    included_programs.push_back(include->get_program());
+  }
+  return included_programs;
+}
+
+std::vector<t_program*> t_program::get_includes_for_codegen() const {
+  std::vector<t_program*> included_programs;
+  for (const auto& include : includes_) {
+    static const std::string_view prefix = "thrift/annotation/";
+    auto path = include->raw_path();
+    if (std::string_view(path.data(), std::min(path.size(), prefix.size())) ==
+        prefix) {
+      continue;
+    }
+    included_programs.push_back(include->get_program());
+  }
+  return included_programs;
+}
+
+void t_program::add_include(std::unique_ptr<t_include> include) {
+  std::string_view scope_name =
+      include->alias().value_or(include->get_program()->name());
+
+  const auto global_priority = include->alias().has_value()
+      ? scope::program_scope::ALIAS_PRIORITY
+      : global_scope_->global_priority(*include->get_program());
+  auto& defs = available_scopes_[scope_name];
+  // TODO @sadroeck - Sort on insert for performance
+  defs.push_back(
+      scope_by_priority{
+          &include->get_program()->program_scope(), global_priority});
+  std::sort(defs.begin(), defs.end());
+  includes_.push_back(include.get());
+  nodes_.push_back(std::move(include));
+}
+
+const t_const* t_program::inherit_annotation_or_null(
+    const t_named& node, const char* uri) const {
+  if (const t_const* annot = node.find_structured_annotation_or_null(uri)) {
+    return annot;
+  } else if (node.generated()) { // Generated nodes do not inherit.
+    return nullptr;
+  }
+  return find_structured_annotation_or_null(uri);
 }
 
 } // namespace apache::thrift::compiler

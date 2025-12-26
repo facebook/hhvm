@@ -107,7 +107,29 @@ class t_program : public t_named {
   // Defintions, in the order they were added.
   node_list_view<t_named> definitions() { return definitions_; }
   node_list_view<const t_named> definitions() const { return definitions_; }
+
+  /**
+   * Adds the given (named) definition to this program.
+   *
+   * The URI of the given definition is set as follows:
+   * 1. if `definition` is not eligible for Thrift URIs: set to empty ("").
+   * 2. else, if it does not already have an explicit URI, attempts to determine
+   *    the URI using the first of the following:
+   *    a. `@thrift.Uri` (structured annotation)
+   *    b. `thrift.uri` (deprecated, unstructured annotation)
+   *    c. Implicitly, using the `package` name (if any).
+   *
+   * Finally, the given definition is indexed in the appropriate collection
+   * depending on its actual type:
+   * - all structured types (struct, union and exception) are indexed in
+   *   `structured_definitions()`
+   * - structs and unions are also indexed in `struct_and_unions()`
+   * - exceptions are also indexed in `exceptions()`
+   * - interactions, services, enums, typedefs and consts are indexed in the
+   *   eponymous `interactions()`, `services()`, etc.
+   */
   void add_definition(std::unique_ptr<t_named> definition);
+
   void add_enum_definition(scope::enum_id id, const t_const& constant);
 
   // A convience function that:
@@ -208,35 +230,16 @@ class t_program : public t_named {
   /**
    * Returns a list of programs that are included by this program.
    */
-  std::vector<t_program*> get_included_programs() const {
-    std::vector<t_program*> included_programs;
-    included_programs.reserve(includes_.size());
-    for (const auto& include : includes_) {
-      included_programs.push_back(include->get_program());
-    }
-    return included_programs;
-  }
+  std::vector<t_program*> get_included_programs() const;
+
   /**
-   * As above, but excludes annotation files which shouldn't normally be
-   * included.
+   * As `get_included_programs()`, but excludes annotation files which shouldn't
+   * normally be included.
    */
-  std::vector<t_program*> get_includes_for_codegen() const {
-    std::vector<t_program*> included_programs;
-    for (const auto& include : includes_) {
-      static const std::string_view prefix = "thrift/annotation/";
-      auto path = include->raw_path();
-      if (std::string_view(path.data(), std::min(path.size(), prefix.size())) ==
-          prefix) {
-        continue;
-      }
-      included_programs.push_back(include->get_program());
-    }
-    return included_programs;
-  }
+  std::vector<t_program*> get_includes_for_codegen() const;
 
   t_global_scope* global_scope() const { return global_scope_.get(); }
 
-  // Only used in py_frontend.tcc
   const std::map<std::string, std::string>& namespaces() const {
     return namespaces_;
   }
@@ -263,22 +266,7 @@ class t_program : public t_named {
   std::vector<std::string> gen_namespace_or_default(
       const std::string& language, namespace_config config) const;
 
-  void add_include(std::unique_ptr<t_include> include) {
-    std::string_view scope_name =
-        include->alias().value_or(include->get_program()->name());
-
-    const auto global_priority = include->alias().has_value()
-        ? scope::program_scope::ALIAS_PRIORITY
-        : global_scope_->global_priority(*include->get_program());
-    auto& defs = available_scopes_[scope_name];
-    // TODO @sadroeck - Sort on insert for performance
-    defs.push_back(
-        scope_by_priority{
-            &include->get_program()->program_scope(), global_priority});
-    std::sort(defs.begin(), defs.end());
-    includes_.push_back(include.get());
-    nodes_.push_back(std::move(include));
-  }
+  void add_include(std::unique_ptr<t_include> include);
 
   /**
    * This sets the directory path of the current thrift program,
@@ -330,17 +318,12 @@ class t_program : public t_named {
     return dynamic_cast<const Node*>(local_node);
   }
 
-  // Looks for an annotation on the given node, then if not found, and the node
-  // is not generated, looks for the same annotation on the program.
+  /**
+   * Looks for an annotation on the given node, then if not found, and the node
+   * is not generated, looks for the same annotation on the program.
+   */
   const t_const* inherit_annotation_or_null(
-      const t_named& node, const char* uri) const {
-    if (const t_const* annot = node.find_structured_annotation_or_null(uri)) {
-      return annot;
-    } else if (node.generated()) { // Generated nodes do not inherit.
-      return nullptr;
-    }
-    return find_structured_annotation_or_null(uri);
-  }
+      const t_named& node, const char* uri) const;
 
  private:
   t_package package_;

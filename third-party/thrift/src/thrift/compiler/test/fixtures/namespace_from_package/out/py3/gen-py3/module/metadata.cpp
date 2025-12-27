@@ -7,6 +7,8 @@
 
 #include "thrift/compiler/test/fixtures/namespace_from_package/gen-py3/module/metadata.h"
 
+#include "thrift/compiler/test/fixtures/namespace_from_package/gen-cpp2/module_handlers.h"
+
 namespace test {
 namespace namespace_from_package {
 namespace module {

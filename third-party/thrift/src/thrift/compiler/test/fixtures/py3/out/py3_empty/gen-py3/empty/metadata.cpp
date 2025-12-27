@@ -7,6 +7,8 @@
 
 #include "thrift/compiler/test/fixtures/py3/gen-py3/empty/metadata.h"
 
+#include "thrift/compiler/test/fixtures/py3/gen-py3cpp/empty_handlers.h"
+
 namespace cpp2 {
 ::apache::thrift::metadata::ThriftMetadata empty_getThriftModuleMetadata() {
   ::apache::thrift::metadata::ThriftServiceMetadataResponse response;

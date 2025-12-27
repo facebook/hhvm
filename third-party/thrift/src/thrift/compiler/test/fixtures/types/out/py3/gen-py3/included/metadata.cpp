@@ -7,6 +7,8 @@
 
 #include "thrift/compiler/test/fixtures/types/gen-py3/included/metadata.h"
 
+#include "thrift/compiler/test/fixtures/types/gen-cpp2/included_handlers.h"
+
 namespace apache {
 namespace thrift {
 namespace fixtures {

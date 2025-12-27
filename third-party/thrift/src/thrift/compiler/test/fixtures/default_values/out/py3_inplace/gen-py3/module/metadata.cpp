@@ -7,6 +7,8 @@
 
 #include "thrift/compiler/test/fixtures/default_values/gen-py3/module/metadata.h"
 
+#include "thrift/compiler/test/fixtures/default_values/gen-cpp2/module_handlers.h"
+
 namespace facebook {
 namespace thrift {
 namespace compiler {

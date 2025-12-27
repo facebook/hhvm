@@ -7,6 +7,8 @@
 
 #include "thrift/compiler/test/fixtures/basic-annotations/gen-py3/scope/metadata.h"
 
+#include "thrift/compiler/test/fixtures/basic-annotations/gen-cpp2/scope_handlers.h"
+
 namespace facebook {
 namespace thrift {
 namespace annotation {

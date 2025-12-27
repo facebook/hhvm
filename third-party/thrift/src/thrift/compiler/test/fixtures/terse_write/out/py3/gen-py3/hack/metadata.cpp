@@ -7,6 +7,8 @@
 
 #include "thrift/compiler/test/fixtures/terse_write/gen-py3/hack/metadata.h"
 
+#include "thrift/compiler/test/fixtures/terse_write/gen-cpp2/hack_handlers.h"
+
 namespace facebook {
 namespace thrift {
 namespace annotation {

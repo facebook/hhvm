@@ -7,6 +7,8 @@
 
 #include "thrift/compiler/test/fixtures/mcpp2-compare/gen-py3/module/metadata.h"
 
+#include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/module_handlers.h"
+
 namespace some {
 namespace valid {
 namespace ns {

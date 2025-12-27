@@ -7,6 +7,8 @@
 
 #include "thrift/compiler/test/fixtures/basic-annotations/gen-py3/go/metadata.h"
 
+#include "thrift/compiler/test/fixtures/basic-annotations/gen-cpp2/go_handlers.h"
+
 namespace facebook {
 namespace thrift {
 namespace annotation {

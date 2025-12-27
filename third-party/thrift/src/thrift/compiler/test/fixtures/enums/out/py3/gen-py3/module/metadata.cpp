@@ -7,6 +7,8 @@
 
 #include "thrift/compiler/test/fixtures/enums/gen-py3/module/metadata.h"
 
+#include "thrift/compiler/test/fixtures/enums/gen-cpp2/module_handlers.h"
+
 namespace test {
 namespace fixtures {
 namespace enums {

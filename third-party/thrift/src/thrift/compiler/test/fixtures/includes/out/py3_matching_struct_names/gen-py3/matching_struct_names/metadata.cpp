@@ -7,6 +7,8 @@
 
 #include "thrift/compiler/test/fixtures/includes/gen-py3/matching_struct_names/metadata.h"
 
+#include "thrift/compiler/test/fixtures/includes/gen-cpp2/matching_struct_names_handlers.h"
+
 namespace cpp2 {
 ::apache::thrift::metadata::ThriftMetadata matching_struct_names_getThriftModuleMetadata() {
   ::apache::thrift::metadata::ThriftServiceMetadataResponse response;

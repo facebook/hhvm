@@ -7,6 +7,8 @@
 
 #include "thrift/compiler/test/fixtures/namespace/gen-py3/emptyns/metadata.h"
 
+#include "thrift/compiler/test/fixtures/namespace/gen-cpp2/emptyns_handlers.h"
+
 namespace cpp2 {
 ::apache::thrift::metadata::ThriftMetadata emptyns_getThriftModuleMetadata() {
   ::apache::thrift::metadata::ThriftServiceMetadataResponse response;

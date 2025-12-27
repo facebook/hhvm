@@ -7,6 +7,8 @@
 
 #include "thrift/compiler/test/fixtures/refs/gen-py3/java/metadata.h"
 
+#include "thrift/compiler/test/fixtures/refs/gen-cpp2/java_handlers.h"
+
 namespace facebook {
 namespace thrift {
 namespace annotation {

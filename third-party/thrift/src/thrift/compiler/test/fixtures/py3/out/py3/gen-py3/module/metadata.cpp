@@ -7,6 +7,8 @@
 
 #include "thrift/compiler/test/fixtures/py3/gen-py3/module/metadata.h"
 
+#include "thrift/compiler/test/fixtures/py3/gen-py3cpp/module_handlers.h"
+
 namespace py3 {
 namespace simple {
 ::apache::thrift::metadata::ThriftMetadata module_getThriftModuleMetadata() {

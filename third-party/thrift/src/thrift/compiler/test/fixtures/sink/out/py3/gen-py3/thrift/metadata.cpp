@@ -7,6 +7,8 @@
 
 #include "thrift/compiler/test/fixtures/sink/gen-py3/thrift/metadata.h"
 
+#include "thrift/compiler/test/fixtures/sink/gen-cpp2/thrift_handlers.h"
+
 namespace facebook {
 namespace thrift {
 namespace annotation {

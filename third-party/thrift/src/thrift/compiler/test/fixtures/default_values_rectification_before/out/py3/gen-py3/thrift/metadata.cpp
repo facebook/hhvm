@@ -7,6 +7,8 @@
 
 #include "thrift/compiler/test/fixtures/default_values_rectification_before/gen-py3/thrift/metadata.h"
 
+#include "thrift/compiler/test/fixtures/default_values_rectification_before/gen-cpp2/thrift_handlers.h"
+
 namespace facebook {
 namespace thrift {
 namespace annotation {

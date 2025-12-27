@@ -7,6 +7,8 @@
 
 #include "thrift/compiler/test/fixtures/inject_metadata_fields/gen-py3/foo/metadata.h"
 
+#include "thrift/compiler/test/fixtures/inject_metadata_fields/gen-cpp2/foo_handlers.h"
+
 namespace cpp2 {
 ::apache::thrift::metadata::ThriftMetadata foo_getThriftModuleMetadata() {
   ::apache::thrift::metadata::ThriftServiceMetadataResponse response;

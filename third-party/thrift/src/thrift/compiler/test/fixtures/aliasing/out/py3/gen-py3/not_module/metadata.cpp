@@ -7,6 +7,8 @@
 
 #include "thrift/compiler/test/fixtures/aliasing/gen-py3/not_module/metadata.h"
 
+#include "thrift/compiler/test/fixtures/aliasing/gen-cpp2/not_module_handlers.h"
+
 namespace cpp2 {
 ::apache::thrift::metadata::ThriftMetadata not_module_getThriftModuleMetadata() {
   ::apache::thrift::metadata::ThriftServiceMetadataResponse response;

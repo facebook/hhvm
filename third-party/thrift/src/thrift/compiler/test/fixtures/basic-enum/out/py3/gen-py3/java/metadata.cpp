@@ -7,6 +7,8 @@
 
 #include "thrift/compiler/test/fixtures/basic-enum/gen-py3/java/metadata.h"
 
+#include "thrift/compiler/test/fixtures/basic-enum/gen-cpp2/java_handlers.h"
+
 namespace facebook {
 namespace thrift {
 namespace annotation {

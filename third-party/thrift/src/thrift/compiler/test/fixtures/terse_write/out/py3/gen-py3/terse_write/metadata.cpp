@@ -7,6 +7,8 @@
 
 #include "thrift/compiler/test/fixtures/terse_write/gen-py3/terse_write/metadata.h"
 
+#include "thrift/compiler/test/fixtures/terse_write/gen-cpp2/terse_write_handlers.h"
+
 namespace facebook {
 namespace thrift {
 namespace test {

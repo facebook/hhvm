@@ -7,6 +7,8 @@
 
 #include "thrift/compiler/test/fixtures/int_limits/gen-py3/module/metadata.h"
 
+#include "thrift/compiler/test/fixtures/int_limits/gen-cpp2/module_handlers.h"
+
 namespace cpp2 {
 ::apache::thrift::metadata::ThriftMetadata module_getThriftModuleMetadata() {
   ::apache::thrift::metadata::ThriftServiceMetadataResponse response;

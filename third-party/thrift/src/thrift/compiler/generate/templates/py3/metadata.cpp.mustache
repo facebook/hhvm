@@ -20,6 +20,8 @@
 
 #include "{{program:include_prefix}}gen-py3/{{program:name}}/metadata.h"
 
+#include "{{program:include_prefix}}{{program:cpp_gen_path}}/{{program:name}}_handlers.h"
+
 {{#program:cppNamespaces}}namespace {{value}} {
 {{/program:cppNamespaces}}
 ::apache::thrift::metadata::ThriftMetadata {{program:name}}_getThriftModuleMetadata() {

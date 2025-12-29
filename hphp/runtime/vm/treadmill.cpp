@@ -153,13 +153,13 @@ const TreadmillRequestInfo* getRequestToAbort() {
       Cfg::Server::MaxRequestAgeFactor * timeout
     ));
     if (!limit.count()) continue;
-    auto const age = Clock::now() - req.startTime;
-    if (age <= limit) continue;
-    oldest = &req;
     if (req.sessionKind == SessionKind::TranslateWorker &&
         (oldestWorker == nullptr || req.startTime < oldestWorker->startTime)) {
       oldestWorker = &req;
     }
+    auto const age = Clock::now() - req.startTime;
+    if (age <= limit) continue;
+    oldest = &req;
   }
 
   if (!oldest) return nullptr;

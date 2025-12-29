@@ -16,7 +16,6 @@
 
 #include <gtest/gtest.h>
 
-#include <thrift/lib/cpp2/gen/module_metadata_cpp.h>
 #include <thrift/lib/cpp2/test/metadata/gen-cpp2/AnotherTestService.h>
 #include <thrift/lib/cpp2/test/metadata/gen-cpp2/EnumTestService.h>
 #include <thrift/lib/cpp2/test/metadata/gen-cpp2/ExceptionTestService.h>

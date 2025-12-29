@@ -123,15 +123,6 @@ typedef ExternId ValueId
 }
 typedef ExternId ProtocolId
 
-// The id of an externally stored type.
-//
-// See 'type.thrift'.
-@thrift.AllowLegacyTypedefUri
-@cpp.Adapter{
-  name = "::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::TypeId>",
-}
-typedef ExternId TypeId
-
 // The id of an externally stored definition.
 //
 // See 'schema.thrift'.

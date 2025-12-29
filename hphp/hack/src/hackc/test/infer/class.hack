@@ -567,7 +567,7 @@ function cgets(): void {
 
 // TEST-CHECK-BAL: define $root.sets
 // CHECK: define $root.sets($this: *void) : *void {
-// CHECK: local $0: *void, $1: *void
+// CHECK: local $0: *void
 // CHECK: #b0:
 // CHECK:   n0 = $builtins.hack_new_dict($builtins.hack_string("kind"), $builtins.hack_int(3))
 // CHECK: // .column 6
@@ -575,34 +575,42 @@ function cgets(): void {
 // CHECK: // .column 15
 // CHECK:   n2 = $root.source(null)
 // CHECK: // .column 15
-// CHECK:   store &$0 <- n2: *HackMixed
+// CHECK:   jmp b1
+// CHECK: #b1:
 // CHECK: // .column 15
-// CHECK:   store &$1 <- n0: *HackMixed
+// CHECK:   store &$0 <- n0: *HackMixed
 // CHECK: // .column 15
 // CHECK:   n3 = $builtins.hhbc_is_type_struct_c(n2, n0, $builtins.hack_int(1), $builtins.hack_int(0))
 // CHECK: // .column 15
-// CHECK:   jmp b1, b2
-// CHECK: #b1:
+// CHECK:   jmp b2, b4
+// CHECK:   .handlers b5
+// CHECK: #b2:
 // CHECK: // .column 15
 // CHECK:   prune $builtins.hack_is_true(n3)
 // CHECK: // .column 15
-// CHECK:   n4: *HackMixed = load &$0
+// CHECK:   jmp b3
+// CHECK:   .handlers b5
+// CHECK: #b3:
 // CHECK: // .column 15
-// CHECK:   store &$1 <- null: *HackMixed
+// CHECK:   store &$0 <- null: *HackMixed
 // CHECK: // .column 3
-// CHECK:   store n1.?.prop3 <- n4: *HackMixed
+// CHECK:   store n1.?.prop3 <- n2: *HackMixed
 // CHECK: // .column 2
 // CHECK:   ret null
-// CHECK: #b2:
+// CHECK: #b4:
 // CHECK: // .column 15
 // CHECK:   prune ! $builtins.hack_is_true(n3)
 // CHECK: // .column 15
-// CHECK:   n5: *HackMixed = load &$0
+// CHECK:   n4: *HackMixed = load &$0
 // CHECK: // .column 15
-// CHECK:   n6: *HackMixed = load &$1
-// CHECK: // .column 15
-// CHECK:   n7 = $builtins.hhbc_throw_as_type_struct_exception(n5, n6)
+// CHECK:   n5 = $builtins.hhbc_throw_as_type_struct_exception(n2, n4)
 // CHECK:   unreachable
+// CHECK:   .handlers b5
+// CHECK: #b5(n6: *HackMixed):
+// CHECK: // .column 15
+// CHECK:   store &$0 <- null: *HackMixed
+// CHECK: // .column 15
+// CHECK:   throw n6
 // CHECK: }
 function sets(): void {
   C::$prop3 = source() as float;

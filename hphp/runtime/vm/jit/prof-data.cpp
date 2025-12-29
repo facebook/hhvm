@@ -81,7 +81,7 @@ ProfData::ProfData()
                      makeAHMConfig<decltype(m_profilingFuncs)>())
   , m_optimizedSKs(Cfg::Eval::PGOFuncCountHint,
                    makeAHMConfig<decltype(m_optimizedSKs)>())
-  , m_proflogueDB(Cfg::Eval::PGOFuncCountHint * 2,
+  , m_proflogueDB(Cfg::Eval::PGOFuncCountHint * 10,
                   makeAHMConfig<decltype(m_proflogueDB)>())
   , m_dvFuncletDB(Cfg::Eval::PGOFuncCountHint * 2,
                   makeAHMConfig<decltype(m_dvFuncletDB)>())

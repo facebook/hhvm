@@ -2907,6 +2907,8 @@ void t_mstch_cpp2_generator::generate_inline_services(
   };
   const auto& module_name = get_program()->name();
   render_to_file(context, "module_clients.h", module_name + "_clients.h");
+  render_to_file(
+      context, "module_clients_fwd.h", module_name + "_clients_fwd.h");
   render_to_file(context, "module_clients.cpp", module_name + "_clients.cpp");
   render_to_file(
       context, "module_handlers-inl.h", module_name + "_handlers-inl.h");

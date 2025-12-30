@@ -75,7 +75,10 @@ bool t_placeholder_typedef::resolve() {
   // type_ref instead.
   set_name(aliased_type_ref_->name());
   set_program(aliased_type_ref_->program());
-  // Successfully resolved, and updated name, program.
+  // Copy the URI from the resolved type so that URI-based lookups work
+  // correctly (e.g., find_structured_annotation_or_null).
+  set_uri(aliased_type_ref_->uri(), aliased_type_ref_->explicit_uri());
+  // Successfully resolved, and updated name, program, uri.
   return true;
 }
 

@@ -286,3 +286,51 @@ TEST(ParserTest, unresolved_include_circular_references) {
   EXPECT_TRUE(diag.has_value());
   EXPECT_EQ("Circular typedef: Foo --> Foo", diag->message());
 }
+
+// Test that when a structured annotation is used BEFORE its include
+// (on the program itself), the URI lookup still works correctly.
+// This is the key bug case where a placeholder typedef is created.
+TEST(ParserTest, structured_annotation_before_include_uri) {
+  auto source_mgr = source_manager();
+  source_mgr.add_virtual_file("annotation.thrift", R"(
+    package "facebook.com/thrift/test/annotation"
+    struct MyAnnotation {
+      1: string value;
+    }
+  )");
+
+  // The program annotation @annotation.MyAnnotation appears BEFORE the include.
+  // This creates a placeholder typedef that must be resolved correctly.
+  source_mgr.add_virtual_file("test.thrift", R"(
+    @annotation.MyAnnotation{value="test"}
+    package "facebook.com/thrift/test"
+
+    include "annotation.thrift"
+
+    struct S {
+      1: i32 field;
+    }
+  )");
+
+  auto diag = std::optional<diagnostic>();
+  auto diags = diagnostics_engine(
+      source_mgr, [&diag](const diagnostic& d) { diag = d; });
+
+  auto programs = parse_ast(source_mgr, diags, "test.thrift", {});
+  EXPECT_FALSE(diags.has_errors()) << (diag ? diag->message() : "no diag");
+  ASSERT_NE(programs, nullptr);
+
+  // The program itself should have the structured annotation
+  auto& root = *programs->root_program();
+  ASSERT_EQ(root.structured_annotations().size(), 1);
+
+  // The annotation type should have the correct URI from the resolved type
+  const auto& annotation = root.structured_annotations()[0];
+  EXPECT_EQ(
+      annotation.type()->uri(),
+      "facebook.com/thrift/test/annotation/MyAnnotation");
+
+  // has_structured_annotation should also work with URI lookup
+  EXPECT_TRUE(root.has_structured_annotation(
+      "facebook.com/thrift/test/annotation/MyAnnotation"));
+}

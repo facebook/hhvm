@@ -319,7 +319,6 @@ add_library(
   async/processor/ServerRequestTask.cpp
   async/processor/ServiceHandlerBase.cpp
   gen/module_constants_cpp.cpp
-  gen/module_metadata_cpp.cpp
   gen/module_types_cpp.cpp
   security/AsyncStopTLS.cpp
   security/FizzPeeker.cpp

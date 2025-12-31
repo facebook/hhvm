@@ -278,14 +278,8 @@ class StructuredCursorReader : detail::BaseCursorReader<ProtocolReader> {
   template <typename Ident>
   using view_type = detail::lift_view_t<native_type<Ident>, Contiguous>;
 
-  template <typename TypeClass, typename Ident>
-  using enable_for =
-      typename std::enable_if_t<type::is_a_v<type_tag<Ident>, TypeClass>, int>;
-
-  template <typename Ident>
-  using enable_string_view = typename std::enable_if_t<
-      type::is_a_v<type_tag<Ident>, type::string_c> && Contiguous,
-      int>;
+  template <typename Ident, typename TypeClass>
+  static constexpr bool field_is = type::is_a_v<type_tag<Ident>, TypeClass>;
 
   template <typename U, typename Ident>
   using maybe_optional = std::conditional_t<
@@ -339,7 +333,8 @@ class StructuredCursorReader : detail::BaseCursorReader<ProtocolReader> {
 
   /** numeric types */
 
-  template <typename Ident, enable_for<type::number_c, Ident> = 0>
+  template <typename Ident>
+    requires field_is<Ident, type::number_c>
   [[nodiscard]] bool_if_optional<Ident> read(native_type<Ident>& value) {
     return readField<Ident>(
         [&] { op::decode<type_tag<Ident>>(*protocol_, value); }, value);
@@ -347,19 +342,22 @@ class StructuredCursorReader : detail::BaseCursorReader<ProtocolReader> {
 
   /** string/binary */
 
-  template <typename Ident, enable_string_view<Ident> = 0>
+  template <typename Ident>
+    requires(field_is<Ident, type::string_c> && Contiguous)
   [[nodiscard]] bool_if_optional<Ident> read(std::string_view& value) {
     return readField<Ident>(
         [&] { value = detail::readStringView<ProtocolReader>(*protocol_); },
         value);
   }
 
-  template <typename Ident, enable_for<type::string_c, Ident> = 0>
+  template <typename Ident>
+    requires field_is<Ident, type::string_c>
   [[nodiscard]] bool_if_optional<Ident> read(std::string& value) {
     return readField<Ident>([&] { protocol_->readString(value); }, value);
   }
 
-  template <typename Ident, enable_for<type::string_c, Ident> = 0>
+  template <typename Ident>
+    requires field_is<Ident, type::string_c>
   [[nodiscard]] bool_if_optional<Ident> read(folly::IOBuf& value) {
     return readField<Ident>([&] { protocol_->readBinary(value); }, value);
   }
@@ -372,7 +370,8 @@ class StructuredCursorReader : detail::BaseCursorReader<ProtocolReader> {
    * endRead before any other methods on this object can be called.
    */
 
-  template <typename Ident, enable_for<type::container_c, Ident> = 0>
+  template <typename Ident>
+    requires field_is<Ident, type::container_c>
   maybe_optional<
       ContainerCursorReader<type_tag<Ident>, ProtocolReader, Contiguous>,
       Ident>
@@ -416,7 +415,8 @@ class StructuredCursorReader : detail::BaseCursorReader<ProtocolReader> {
    * endRead before any other methods on this object can be called.
    */
 
-  template <typename Ident, enable_for<type::structured_c, Ident> = 0>
+  template <typename Ident>
+    requires field_is<Ident, type::structured_c>
   maybe_optional<
       StructuredCursorReader<type_tag<Ident>, ProtocolReader, Contiguous>,
       Ident>
@@ -452,12 +452,9 @@ class StructuredCursorReader : detail::BaseCursorReader<ProtocolReader> {
   }
 
   /** union type accessor */
-
-  template <
-      typename...,
-      typename U = T,
-      typename = std::enable_if_t<is_thrift_union_v<U>>>
-  auto readType() -> typename U::Type {
+  auto /* T::Type */ readType()
+    requires is_thrift_union_v<T>
+  {
     return static_cast<typename T::Type>(readState_.fieldId);
   }
 
@@ -585,12 +582,10 @@ class ContainerCursorReader : detail::BaseCursorReader<ProtocolReader> {
       typename detail::ContainerTraits<Tag>::ElementType,
       Contiguous>;
   using ElementTag = typename detail::ContainerTraits<Tag>::ElementTag;
-  template <typename CTag, typename OwnTag>
-  using enable_cursor_for = std::enable_if_t<
-      (type::is_a_v<OwnTag, type::list_c> ||
-       type::is_a_v<OwnTag, type::set_c>) &&
-          type::is_a_v<ElementTag, CTag>,
-      int>;
+  template <typename CTag>
+  static constexpr bool is_supported_element_of_type =
+      (type::is_a_v<Tag, type::list_c> || type::is_a_v<Tag, type::set_c>) &&
+      type::is_a_v<ElementTag, CTag>;
 
  public:
   /**
@@ -649,11 +644,9 @@ class ContainerCursorReader : detail::BaseCursorReader<ProtocolReader> {
    *  reader.endRead(std::move(outerReader));
    */
 
-  template <
-      typename...,
-      typename U = Tag,
-      enable_cursor_for<type::container_c, U> = 0>
-  ContainerCursorReader<ElementTag, ProtocolReader, Contiguous> beginRead() {
+  ContainerCursorReader<ElementTag, ProtocolReader, Contiguous> beginRead()
+    requires is_supported_element_of_type<type::container_c>
+  {
     checkState(State::Active);
     if (!remaining_) {
       folly::throw_exception<std::out_of_range>("No elements remaining");
@@ -709,11 +702,9 @@ class ContainerCursorReader : detail::BaseCursorReader<ProtocolReader> {
    *  reader.endRead(std::move(outerReader));
    */
 
-  template <
-      typename...,
-      typename U = Tag,
-      enable_cursor_for<type::structured_c, U> = 0>
-  StructuredCursorReader<ElementTag, ProtocolReader, Contiguous> beginRead() {
+  StructuredCursorReader<ElementTag, ProtocolReader, Contiguous> beginRead()
+    requires is_supported_element_of_type<type::structured_c>
+  {
     checkState(State::Active);
     if (!remaining_) {
       folly::throw_exception<std::out_of_range>("No elements remaining");
@@ -908,14 +899,14 @@ class StructuredCursorWriter : detail::BaseCursorWriter<ProtocolWriter> {
   template <typename Ident>
   using native_type = op::get_native_type<T, Ident>;
 
-  template <typename TypeClass, typename Ident>
-  using enable_for =
-      typename std::enable_if_t<type::is_a_v<type_tag<Ident>, TypeClass>, int>;
+  template <typename Ident, typename TypeClass>
+  static constexpr bool field_is = type::is_a_v<type_tag<Ident>, TypeClass>;
 
  public:
   /** numeric types */
 
-  template <typename Ident, enable_for<type::number_c, Ident> = 0>
+  template <typename Ident>
+    requires field_is<Ident, type::number_c>
   void write(native_type<Ident> value) {
     writeField<Ident>(
         [&] { op::encode<type_tag<Ident>>(*protocol_, value); }, value);
@@ -923,12 +914,14 @@ class StructuredCursorWriter : detail::BaseCursorWriter<ProtocolWriter> {
 
   /** string/binary */
 
-  template <typename Ident, enable_for<type::string_c, Ident> = 0>
+  template <typename Ident>
+    requires field_is<Ident, type::string_c>
   void write(const folly::IOBuf& value) {
     writeField<Ident>([&] { protocol_->writeBinary(value); }, value);
   }
 
-  template <typename Ident, enable_for<type::string_c, Ident> = 0>
+  template <typename Ident>
+    requires field_is<Ident, type::string_c>
   void write(std::string_view value) {
     writeField<Ident>([&] { protocol_->writeBinary(value); }, value);
   }
@@ -940,7 +933,8 @@ class StructuredCursorWriter : detail::BaseCursorWriter<ProtocolWriter> {
    * beginWrite() and the corresponding endWrite().
    */
 
-  template <typename Ident, enable_for<type::string_c, Ident> = 0>
+  template <typename Ident>
+    requires field_is<Ident, type::string_c>
   StringCursorWriter<ProtocolWriter> beginWrite(int32_t maxSize) {
     beforeWriteField<Ident>();
     state_ = State::Child;
@@ -958,10 +952,8 @@ class StructuredCursorWriter : detail::BaseCursorWriter<ProtocolWriter> {
 
   /** containers */
 
-  template <
-      typename Ident,
-      typename Container,
-      enable_for<type::container_c, Ident> = 0>
+  template <typename Ident, typename Container>
+    requires field_is<Ident, type::container_c>
   void write(const Container& value) {
     writeField<Ident>(
         [&] { op::encode<type_tag<Ident>>(*protocol_, value); }, value);
@@ -976,7 +968,8 @@ class StructuredCursorWriter : detail::BaseCursorWriter<ProtocolWriter> {
    * beginWrite() and the corresponding endWrite().
    */
 
-  template <typename Ident, enable_for<type::container_c, Ident> = 0>
+  template <typename Ident>
+    requires field_is<Ident, type::container_c>
   ContainerCursorWriter<type_tag<Ident>, ProtocolWriter> beginWrite() {
     beforeWriteField<Ident>();
     state_ = State::Child;
@@ -1004,7 +997,8 @@ class StructuredCursorWriter : detail::BaseCursorWriter<ProtocolWriter> {
    * beginWrite() and the corresponding endWrite().
    */
 
-  template <typename Ident, enable_for<type::structured_c, Ident> = 0>
+  template <typename Ident>
+    requires field_is<Ident, type::structured_c>
   StructuredCursorWriter<type_tag<Ident>, ProtocolWriter> beginWrite() {
     beforeWriteField<Ident>();
     state_ = State::Child;
@@ -1026,7 +1020,8 @@ class StructuredCursorWriter : detail::BaseCursorWriter<ProtocolWriter> {
     state_ = State::Abandoned;
   }
 
-  template <typename Ident, enable_for<type::structured_c, Ident> = 0>
+  template <typename Ident>
+    requires field_is<Ident, type::structured_c>
   void write(const native_type<Ident>& value) {
     writeField<Ident>(
         [&] { op::encode<type_tag<Ident>>(*protocol_, value); }, value);
@@ -1040,7 +1035,8 @@ class StructuredCursorWriter : detail::BaseCursorWriter<ProtocolWriter> {
    * migrating one of the fields to change the order in the struct or performing
    * the computation in field order is preferable due to the added cost and
    * complexity of using this API. */
-  template <typename Ident, enable_for<type::structured_c, Ident> = 0>
+  template <typename Ident>
+    requires field_is<Ident, type::structured_c>
   void writeSerialized(
       CursorSerializationWrapper<native_type<Ident>>&& cursorValue) {
     beforeWriteField<Ident>();
@@ -1169,12 +1165,10 @@ class ContainerCursorWriter : detail::DelayedSizeCursorWriter<ProtocolWriter> {
 
   using ElementType = typename detail::ContainerTraits<Tag>::ElementType;
   using ElementTag = typename detail::ContainerTraits<Tag>::ElementTag;
-  template <typename CTag, typename OwnTag>
-  using enable_cursor_for = std::enable_if_t<
-      (type::is_a_v<OwnTag, type::list_c> ||
-       type::is_a_v<OwnTag, type::set_c>) &&
-          type::is_a_v<ElementTag, CTag>,
-      int>;
+  template <typename CTag>
+  static constexpr bool is_supported_element_of_type =
+      (type::is_a_v<Tag, type::list_c> || type::is_a_v<Tag, type::set_c>) &&
+      type::is_a_v<ElementTag, CTag>;
 
  public:
   void write(const ElementType& val) {
@@ -1191,11 +1185,9 @@ class ContainerCursorWriter : detail::DelayedSizeCursorWriter<ProtocolWriter> {
    * Note: none of this writer's other methods may be called between
    * beginWrite() and the corresponding endWrite().
    */
-  template <
-      typename...,
-      typename U = Tag,
-      enable_cursor_for<type::container_c, U> = 0>
-  ContainerCursorWriter<ElementTag, ProtocolWriter> beginWrite() {
+  ContainerCursorWriter<ElementTag, ProtocolWriter> beginWrite()
+    requires is_supported_element_of_type<type::container_c>
+  {
     checkState(State::Active);
     state_ = State::Child;
     return ContainerCursorWriter<ElementTag, ProtocolWriter>{protocol_};
@@ -1215,11 +1207,9 @@ class ContainerCursorWriter : detail::DelayedSizeCursorWriter<ProtocolWriter> {
    * Note: none of this writer's other methods may be called between
    * beginWrite() and the corresponding endWrite().
    */
-  template <
-      typename...,
-      typename U = Tag,
-      enable_cursor_for<type::structured_c, U> = 0>
-  StructuredCursorWriter<ElementTag, ProtocolWriter> beginWrite() {
+  StructuredCursorWriter<ElementTag, ProtocolWriter> beginWrite()
+    requires is_supported_element_of_type<type::structured_c>
+  {
     checkState(State::Active);
     state_ = State::Child;
     return StructuredCursorWriter<ElementTag, ProtocolWriter>{protocol_};

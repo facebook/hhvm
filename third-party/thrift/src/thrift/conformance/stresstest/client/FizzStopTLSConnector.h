@@ -28,7 +28,7 @@ class FizzStopTLSConnector
     : public fizz::client::AsyncFizzClient::HandshakeCallback,
       public fizz::AsyncFizzBase::EndOfTLSCallback {
  public:
-  ~FizzStopTLSConnector() {
+  ~FizzStopTLSConnector() override {
     // Ensure client is destroyed on the correct thread if it still exists
     if (client_ && connectEvb_) {
       auto clientToDestroy = std::move(client_);

@@ -84,7 +84,7 @@ class ClientThread : public folly::HHWheelTimer::Callback {
     });
   }
 
-  ~ClientThread() {
+  ~ClientThread() override {
     // destroy clients in event base thread
     thread_->getEventBase()->runInEventBaseThreadAndWait(
         [clients = std::move(clients_),

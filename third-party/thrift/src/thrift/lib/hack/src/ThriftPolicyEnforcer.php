@@ -91,6 +91,16 @@ final class ThriftPolicyEnforcer extends PolicyEnforcer {
       0;
   }
 
+  <<__Override>>
+  protected static function getAssetClassForServiceGraphLogging(
+    string $asset_type,
+  )[leak_safe]: PolicyEnforcerAssetClass {
+    if ($asset_type == 'CachiusService') {
+      return PolicyEnforcerAssetClass::CACHIUS;
+    }
+    return static::ASSET_CLASS;
+  }
+
   public static function getCallerName(
     string $asset_type, // This is actually the service name in this context
     ?int $caller,

@@ -1246,8 +1246,7 @@ class rust_mstch_service : public mstch_service {
          {"service:snake", &rust_mstch_service::rust_snake},
          {"service:requestContext?", &rust_mstch_service::rust_request_context},
          {"service:extendedClients",
-          &rust_mstch_service::rust_extended_clients},
-         {"service:program_name", &rust_mstch_service::program_name}});
+          &rust_mstch_service::rust_extended_clients}});
   }
   mstch::node rust_functions();
   mstch::node rust_client_package() {
@@ -1294,7 +1293,6 @@ class rust_mstch_service : public mstch_service {
     }
     return extended_services;
   }
-  mstch::node program_name() { return service_->program()->name(); }
 
   mstch::node rust_all_exceptions();
 

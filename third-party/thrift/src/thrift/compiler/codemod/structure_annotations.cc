@@ -232,37 +232,6 @@ class structure_annotations {
         to_add.insert("@cpp.MinimizePadding");
         fm_.add_include("thrift/annotation/cpp.thrift");
       }
-    } else if (name == "cpp.enum_type") {
-      to_remove.emplace_back(name, data);
-      if (!node.has_structured_annotation(kCppEnumTypeUri)) {
-        std::string_view value = data.value;
-        if (value.substr(0, 2) == "::") {
-          value = value.substr(2);
-        }
-        if (value.substr(0, 5) == "std::") {
-          value = value.substr(5);
-        }
-        std::string type;
-        if (value == "int8_t" || value == "char") {
-          type = "I8";
-        } else if (value == "uint8_t" || value == "unsigned char") {
-          type = "U8";
-        } else if (value == "int16_t" || value == "short") {
-          type = "I16";
-        } else if (value == "uint16_t" || value == "unsigned short") {
-          type = "U16";
-        } else if (
-            value == "uint32_t" || value == "unsigned long" ||
-            value == "unsigned" || value == "uint") {
-          type = "U32";
-        } else {
-          return;
-        }
-        to_add.insert(
-            fmt::format(
-                "@cpp.EnumType{{type = cpp.EnumUnderlyingType.{}}}", type));
-        fm_.add_include("thrift/annotation/cpp.thrift");
-      }
     } else if (
         name == "cpp.declare_bitwise_ops" &&
         (node.has_structured_annotation(kBitmaskEnumUri) ||

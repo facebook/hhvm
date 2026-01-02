@@ -692,10 +692,6 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
             throw std::runtime_error("unknown enum underlying type");
         }
       }
-      if (const std::string* type =
-              e.find_unstructured_annotation_or_null("cpp.enum_type")) {
-        return *type;
-      }
       return e.has_unstructured_annotation("cpp.deprecated_enum_unscoped")
           ? "int"
           : "";

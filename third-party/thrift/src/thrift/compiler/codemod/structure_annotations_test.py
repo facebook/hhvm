@@ -154,13 +154,6 @@ class StructureAnnotationsTest(unittest.TestCase):
                 } (message="m", cpp.minimize_padding)
                 exception EE {}
 
-                enum E8 {} (cpp.enum_type="char")
-                enum E16 {} (cpp.enum_type="int16_t")
-                enum E32 {} (cpp.enum_type="int")
-                enum U8 {} (cpp.enum_type="std::uint8_t")
-                enum U16 {} (cpp.enum_type="unsigned short")
-                enum U32 {} (cpp.enum_type="::std::uint32_t", cpp.declare_bitwise_ops)
-
                 interaction J {} (serial)
                 service S {
                     void f() (thread = "eb", priority = "HIGH")
@@ -214,19 +207,6 @@ class StructureAnnotationsTest(unittest.TestCase):
                     2: i32 c;
                 }
                 exception EE {}
-
-                @cpp.EnumType{type = cpp.EnumUnderlyingType.I8}
-                enum E8 {}
-                @cpp.EnumType{type = cpp.EnumUnderlyingType.I16}
-                enum E16 {}
-                enum E32 {}
-                @cpp.EnumType{type = cpp.EnumUnderlyingType.U8}
-                enum U8 {}
-                @cpp.EnumType{type = cpp.EnumUnderlyingType.U16}
-                enum U16 {}
-                @cpp.EnumType{type = cpp.EnumUnderlyingType.U32}
-                @thrift.DeprecatedUnvalidatedAnnotations{items = {"cpp.declare_bitwise_ops": "1"}}
-                enum U32 {}
 
                 @thrift.Serial
                 interaction J {}

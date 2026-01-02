@@ -1753,6 +1753,7 @@ void deprecate_annotations(sema_context& ctx, const t_named& node) {
       "code",
       "cpp.indirection",
       "cpp2.declare_bitwise_ops",
+      "cpp.enum_type",
       "cpp2.enum_type",
       "cpp2.deprecated_enum_unscoped",
       "process_in_event_base",

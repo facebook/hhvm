@@ -446,7 +446,12 @@ reflected_struct {
    *
    * @author: Marcelo Juchem <marcelo@fb.com>
    */
-  using name = typename Traits::name;
+  using name [[deprecated("Use name_v instead")]] = typename Traits::name;
+
+  /**
+   * A run-time string representing the struct name.
+   */
+  static inline const auto name_v = op::get_class_name_v<type>;
 
   /**
    * An implementation defined type template that provides the appropriate
@@ -559,7 +564,13 @@ struct reflected_struct_data_member {
    *
    * @author: Marcelo Juchem <marcelo@fb.com>
    */
-  using name = typename Traits::name;
+  using name [[deprecated("Use name_v instead")]] = typename Traits::name;
+
+  /**
+   * A run-time string representing the struct field name.
+   */
+  static inline const auto name_v =
+      op::get_name_v<typename Traits::owner, typename Traits::tag>;
 
   /**
    * The type of the data member.

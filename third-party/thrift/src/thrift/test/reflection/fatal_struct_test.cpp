@@ -74,6 +74,7 @@ TEST(FatalStruct, Struct1SanityCheck) {
 
   EXPECT_SAME<struct1, traits::type>();
   EXPECT_SAME<struct1s, traits::name>();
+  EXPECT_EQ("struct1", traits::name_v);
 
   EXPECT_SAME<traits, apache::thrift::try_reflect_struct<struct1, void>>();
   EXPECT_SAME<void, apache::thrift::try_reflect_struct<int, void>>();
@@ -84,6 +85,12 @@ TEST(FatalStruct, Struct1SanityCheck) {
   EXPECT_SAME<field3s, traits::member::field3::name>();
   EXPECT_SAME<field4s, traits::member::field4::name>();
   EXPECT_SAME<field5s, traits::member::field5::name>();
+  EXPECT_EQ("field0", traits::member::field0::name_v);
+  EXPECT_EQ("field1", traits::member::field1::name_v);
+  EXPECT_EQ("field2", traits::member::field2::name_v);
+  EXPECT_EQ("field3", traits::member::field3::name_v);
+  EXPECT_EQ("field4", traits::member::field4::name_v);
+  EXPECT_EQ("field5", traits::member::field5::name_v);
 
   struct1 pod;
   *pod.field0() = 19;

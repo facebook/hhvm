@@ -268,6 +268,9 @@ namespace {
     public function recvGtid(): string {}
     public function responseAttributes(): Map<string, string> {}
     public function resultSizeBytes(): int {}
+    public function mysqlInfo(): ?string {}
+    public function rowsMatched(): ?int {}
+    public function warningsCount(): int {}
   }
   class AsyncMysqlRowBlock
     implements Countable, KeyedTraversable<int, AsyncMysqlRow> {

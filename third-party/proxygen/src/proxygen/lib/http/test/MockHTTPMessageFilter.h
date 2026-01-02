@@ -61,7 +61,7 @@ class MockHTTPMessageFilter : public HTTPMessageFilter {
     nextOnHeadersComplete(std::move(msgU));
   }
 
-  const std::string& getFilterName() const noexcept override {
+  std::string_view getFilterName() const noexcept override {
     return kMockFilterName;
   }
 

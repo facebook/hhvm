@@ -14,6 +14,8 @@
 
 #include <proxygen/lib/http/sink/HTTPSink.h>
 
+#include <string_view>
+
 namespace proxygen {
 
 static const std::string kMessageFilterDefaultName_ = "Unknown";
@@ -103,7 +105,7 @@ class HTTPMessageFilter
     nextTransactionHandler_->onExTransaction(txn);
   }
 
-  [[nodiscard]] virtual const std::string& getFilterName() const noexcept {
+  [[nodiscard]] virtual std::string_view getFilterName() const noexcept {
     return kMessageFilterDefaultName_;
   }
 

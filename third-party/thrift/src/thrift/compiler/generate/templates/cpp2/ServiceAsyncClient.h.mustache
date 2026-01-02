@@ -20,12 +20,12 @@
 
 #include <thrift/lib/cpp2/gen/client_h.h>
 
-#include "{{service:include_prefix}}{{service:program_name}}_types.h"
+#include "{{service:include_prefix}}{{service:program.name}}_types.h"
 {{#service:extends}}
 #if __has_include("{{service:include_prefix}}{{service:name}}AsyncClient.h")
 #include "{{service:include_prefix}}{{service:name}}AsyncClient.h"
 #else
-#include "{{service:include_prefix}}{{service:program_name}}_clients.h"
+#include "{{service:include_prefix}}{{service:program.name}}_clients.h"
 #endif
 {{/service:extends}}
 {{#service:thrift_includes}}

@@ -20,9 +20,9 @@
 
 #include "{{service:include_prefix}}{{service:name}}.h"
 #include "{{service:include_prefix}}{{service:name}}.tcc"
-#include "{{service:include_prefix}}{{service:program_name}}_metadata.h"
+#include "{{service:include_prefix}}{{service:program.name}}_metadata.h"
 {{#service:has_service_schema}}
-#include "{{service:include_prefix}}{{service:program_name}}_constants.h"
+#include "{{service:include_prefix}}{{service:program.name}}_constants.h"
 {{/service:has_service_schema}}
 #include <thrift/lib/cpp2/gen/service_cpp.h>
 

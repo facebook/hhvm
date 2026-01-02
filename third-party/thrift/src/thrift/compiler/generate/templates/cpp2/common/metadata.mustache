@@ -27,7 +27,7 @@
 
   {{#else if value.structured?}}
     {{#let ttype = value.type.true_type}}
-cvStruct("{{ttype.program_name}}.{{ttype.name}}", { {{!}}
+cvStruct("{{ttype.program.name}}.{{ttype.name}}", { {{!}}
      {{#each (array.enumerate value.structured_elements with_last=true) as |i elem last?|}}
 {"{{elem.field.name}}", {{#partial cv_metadata value=elem.value}} }{{#if (not last?)}}, {{/if}}
      {{/each}}

@@ -590,10 +590,6 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
     auto base = t_whisker_generator::make_prototype_for_type(proto);
     auto def = whisker::dsl::prototype_builder<h_type>::extends(base);
 
-    def.property("program_name", [](const t_type& type) {
-      return type.program() ? type.program()->name() : "";
-    });
-
     def.property("qualified_namespace", [](const t_type& type) {
       return cpp2::get_gen_unprefixed_namespace(*type.program());
     });

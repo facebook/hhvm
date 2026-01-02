@@ -10,6 +10,7 @@
 
 #include <gmock/gmock.h>
 
+#include "proxygen/facebook/revproxy/caching/filter/FilterNames.h"
 #include <proxygen/lib/http/HTTPMessageFilters.h>
 
 namespace proxygen {
@@ -109,6 +110,19 @@ class MockHTTPMessageFilter : public HTTPMessageFilter {
   bool trackTrailersPassedThrough_{false};
   std::shared_ptr<const HTTPHeaders> requestHeadersCopy_;
   std::shared_ptr<const HTTPHeaders> requestTrailersCopy_;
+};
+
+// A mock filter that returns kWritebackFilterName for testing
+// the consecutive WritebackFilter check.
+class MockWritebackFilter : public HTTPMessageFilter {
+ public:
+  [[nodiscard]] std::string_view getFilterName() const noexcept override {
+    return filter::kWritebackFilterName;
+  }
+
+  [[noreturn]] std::unique_ptr<HTTPMessageFilter> clone() noexcept override {
+    LOG(FATAL) << "clone() not implemented for MockWritebackFilter";
+  }
 };
 
 } // namespace proxygen

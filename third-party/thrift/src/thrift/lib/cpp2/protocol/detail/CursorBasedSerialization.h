@@ -452,5 +452,19 @@ constexpr bool validateCppTypes() {
   return true;
 }
 
+template <typename T>
+concept CursorReader = requires(T t) {
+  t.finalize();
+  t.abandon();
+  typename T::State;
+};
+
+template <typename T>
+concept CursorWriter = requires(T t) {
+  t.finalize();
+  t.abandon();
+  typename T::State;
+};
+
 } // namespace detail
 } // namespace apache::thrift

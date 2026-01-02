@@ -538,7 +538,6 @@ class StructuredCursorReader : detail::BaseCursorReader<ProtocolReader> {
     }
   }
 
- private:
   // Last field id the caller tried to read.
   FieldId fieldId_{0};
   // Contains last field id read from the buffer.
@@ -658,28 +657,6 @@ class ContainerCursorReader : detail::BaseCursorReader<ProtocolReader> {
         protocol_};
   }
 
-  template <typename CTag>
-  void endRead(
-      ContainerCursorReader<CTag, ProtocolReader, Contiguous>&& child) {
-    checkState(State::Child);
-    child.finalize();
-    state_ = State::Active;
-    --remaining_;
-  }
-
-  /**
-   * A faster version of endRead for when the caller doesn't intend to read any
-   * more. Once a child reader has been abandoned, abandonRead is the only
-   * method that can be called on any of its parents.
-   */
-  template <typename CTag>
-  void abandonRead(
-      ContainerCursorReader<CTag, ProtocolReader, Contiguous>&& child) {
-    checkState(State::Child);
-    child.abandon();
-    state_ = State::Abandoned;
-  }
-
   /**
    * Manual read path for containers of structured types.
    *
@@ -716,9 +693,8 @@ class ContainerCursorReader : detail::BaseCursorReader<ProtocolReader> {
         protocol_};
   }
 
-  template <typename CTag>
-  void endRead(
-      StructuredCursorReader<CTag, ProtocolReader, Contiguous>&& child) {
+  template <detail::CursorReader ChildReader>
+  void endRead(ChildReader&& child) {
     checkState(State::Child);
     child.finalize();
     state_ = State::Active;
@@ -730,9 +706,8 @@ class ContainerCursorReader : detail::BaseCursorReader<ProtocolReader> {
    * more. Once a child reader has been abandoned, abandonRead is the only
    * method that can be called on any of its parents.
    */
-  template <typename CTag>
-  void abandonRead(
-      StructuredCursorReader<CTag, ProtocolReader, Contiguous>&& child) {
+  template <detail::CursorReader ChildReader>
+  void abandonRead(ChildReader&& child) {
     checkState(State::Child);
     child.abandon();
     state_ = State::Abandoned;
@@ -1193,14 +1168,6 @@ class ContainerCursorWriter : detail::DelayedSizeCursorWriter<ProtocolWriter> {
     return ContainerCursorWriter<ElementTag, ProtocolWriter>{protocol_};
   }
 
-  template <typename CTag, typename PW>
-  void endWrite(ContainerCursorWriter<CTag, PW>&& child) {
-    checkState(State::Child);
-    child.finalize();
-    ++n;
-    state_ = State::Active;
-  }
-
   /**
    * structured types
    *
@@ -1215,8 +1182,8 @@ class ContainerCursorWriter : detail::DelayedSizeCursorWriter<ProtocolWriter> {
     return StructuredCursorWriter<ElementTag, ProtocolWriter>{protocol_};
   }
 
-  template <typename CTag, typename PW>
-  void endWrite(StructuredCursorWriter<CTag, PW>&& child) {
+  template <detail::CursorWriter ChildWriter>
+  void endWrite(ChildWriter&& child) {
     checkState(State::Child);
     child.finalize();
     ++n;

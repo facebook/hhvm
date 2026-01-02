@@ -17,7 +17,7 @@
 }}
 // BEGIN forward_declare
 {{#program:structs?}}
-namespace {{program:qualified_namespace}} {
+namespace {{program:cpp_qualified_namespace}} {
 {{#program:structs}}
 {{#struct:extra_namespace}}
 namespace {{struct:extra_namespace}} {
@@ -27,6 +27,6 @@ class {{struct:cpp_underlying_name}};
 } // namespace {{struct:extra_namespace}}
 {{/struct:extra_namespace}}
 {{/program:structs}}
-} // namespace {{program:qualified_namespace}}
+} // namespace {{program:cpp_qualified_namespace}}
 {{/program:structs?}}
 // END forward_declare

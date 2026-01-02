@@ -29,7 +29,7 @@
 #include <fatal/type/traits.h>
 #include <fatal/type/list.h>
 
-namespace {{program:qualified_namespace}} {
+namespace {{program:cpp_qualified_namespace}} {
 
 namespace __fbthrift_refl {
 namespace __fbthrift_refl_impl = ::apache::thrift::detail::reflection_impl;
@@ -141,4 +141,4 @@ class {{struct:cpp_name}}_struct_traits {
 {{#program:structs}}{{^struct:union?}}
 THRIFT_REGISTER_STRUCT_TRAITS({{#struct:extra_namespace}}{{struct:extra_namespace}}::{{/struct:extra_namespace}}{{struct:cpp_name}}, __fbthrift_refl::{{struct:cpp_name}}_struct_traits);
 {{/struct:union?}}{{/program:structs}}
-} // namespace {{program:qualified_namespace}}
+} // namespace {{program:cpp_qualified_namespace}}

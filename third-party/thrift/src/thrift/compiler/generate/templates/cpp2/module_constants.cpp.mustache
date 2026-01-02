@@ -26,7 +26,7 @@
 #include "{{program:include_prefix}}{{program:name}}_constants.h"
 {{/program:thrift_includes}}
 
-namespace {{program:qualified_namespace}} {
+namespace {{program:cpp_qualified_namespace}} {
 namespace {{program:name}}_constants {
 
 {{#program:constants}}
@@ -87,4 +87,4 @@ namespace {{program:name}}_constants {
 }
 
 } // namespace {{program:name}}_constants
-} // namespace {{program:qualified_namespace}}
+} // namespace {{program:cpp_qualified_namespace}}

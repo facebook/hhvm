@@ -27,7 +27,7 @@ folly::exception_wrapper {{> service_common/client_class_name}}::recv_wrapped_{{
     return folly::make_exception_wrapper<apache::thrift::TApplicationException>("recv_ called without result");
   }
 
-  using result = ::{{service:qualified_namespace}}::{{service:parent_service_cpp_name}}_{{function:prefixed_name}}_presult;
+  using result = ::{{service:cpp_qualified_namespace}}::{{service:parent_service_cpp_name}}_{{function:prefixed_name}}_presult;
   switch (state.protocolId()) {
     case apache::thrift::protocol::T_BINARY_PROTOCOL:
     {

@@ -25,8 +25,8 @@
 namespace apache { namespace thrift {
 {{#program:enums}}
 
-template <> struct TEnumDataStorage<::{{program:qualified_namespace}}::{{enum:cpp_name}}> {
-  using type = ::{{program:qualified_namespace}}::{{enum:cpp_name}};
+template <> struct TEnumDataStorage<::{{program:cpp_qualified_namespace}}::{{enum:cpp_name}}> {
+  using type = ::{{program:cpp_qualified_namespace}}::{{enum:cpp_name}};
   static constexpr const std::size_t size = {{(array.len enum:values)}};
   static constexpr std::array<type, size> values = { {
 {{#enum:values}}{{!

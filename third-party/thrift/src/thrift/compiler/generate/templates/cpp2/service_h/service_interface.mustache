@@ -17,17 +17,17 @@
 }}
 {{#import "types/schema_association" as schema_association}}
 {{#import "method_decorators/decorator_h" as method_decorator_h}}
-namespace {{service:qualified_namespace}} {
+namespace {{service:cpp_qualified_namespace}} {
 class {{service:cpp_name}};
 class {{service:cpp_name}}AsyncProcessor;
 
 {{> service_h/service_info_holder}}
 
-} // namespace {{service:qualified_namespace}}
+} // namespace {{service:cpp_qualified_namespace}}
 
 namespace apache::thrift {
 template <>
-class ServiceHandler<{{service:qualified_name}}> : {{#service:extends}}virtual public ::{{service:qualified_namespace}}::{{service:cpp_name}}SvIf{{/service:extends}}{{^service:extends}}public apache::thrift::ServerInterface{{/service:extends}} {
+class ServiceHandler<{{service:qualified_name}}> : {{#service:extends}}virtual public ::{{service:cpp_qualified_namespace}}::{{service:cpp_name}}SvIf{{/service:extends}}{{^service:extends}}public apache::thrift::ServerInterface{{/service:extends}} {
   static_assert(!folly::is_detected_v<::apache::thrift::detail::st::detect_complete, {{service:qualified_name}}>, "Definition collision with service tag. Either rename the Thrift service using @cpp.Name annotation or rename the conflicting C++ type.");
 
  public:
@@ -66,6 +66,6 @@ namespace detail {
 }
 } // namespace apache::thrift
 
-namespace {{service:qualified_namespace}} {
+namespace {{service:cpp_qualified_namespace}} {
 using {{service:cpp_name}}SvIf [[deprecated("Use apache::thrift::ServiceHandler<{{service:cpp_name}}> instead")]] = ::apache::thrift::ServiceHandler<{{service:cpp_name}}>;
-} // namespace {{service:qualified_namespace}}
+} // namespace {{service:cpp_qualified_namespace}}

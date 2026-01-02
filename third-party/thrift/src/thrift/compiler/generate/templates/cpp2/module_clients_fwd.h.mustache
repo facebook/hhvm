@@ -23,14 +23,14 @@ namespace apache::thrift {
 } // namespace apache::thrift
 
 {{#services}}
-namespace {{service:qualified_namespace}} {
+namespace {{service:cpp_qualified_namespace}} {
 class {{service:cpp_name}};
-} // namespace {{service:qualified_namespace}}
+} // namespace {{service:cpp_qualified_namespace}}
 {{/services}}
 
 
 namespace apache::thrift {
 {{#services}}
-template<> class Client<::{{service:qualified_namespace}}::{{service:cpp_name}}>;
+template<> class Client<::{{service:cpp_qualified_namespace}}::{{service:cpp_name}}>;
 {{/services}}
 } // namespace apache::thrift

@@ -25,7 +25,7 @@
 #include <fatal/type/sequence.h>
 
 #include "{{program:include_prefix}}{{program:name}}_types.h"
-namespace {{program:qualified_namespace}} {
+namespace {{program:cpp_qualified_namespace}} {
 
 namespace __fbthrift_refl {
 
@@ -45,17 +45,17 @@ struct {{program:name}}_module_traits {
   >;
   using enums = ::fatal::list<
       {{#program:fatal_enums}}{{#fatal_strings:items}}
-      ::fatal::pair<::{{program:qualified_namespace}}::{{fatal_string:name}}, strings::{{fatal_string:name}}>{{^last?}},{{/last?}}
+      ::fatal::pair<::{{program:cpp_qualified_namespace}}::{{fatal_string:name}}, strings::{{fatal_string:name}}>{{^last?}},{{/last?}}
       {{/fatal_strings:items}}{{/program:fatal_enums}}
   >;
   using unions = ::fatal::list<
       {{#program:fatal_unions}}{{#fatal_strings:items}}
-      ::fatal::pair<::{{program:qualified_namespace}}::{{fatal_string:name}}, strings::{{fatal_string:name}}>{{^last?}},{{/last?}}
+      ::fatal::pair<::{{program:cpp_qualified_namespace}}::{{fatal_string:name}}, strings::{{fatal_string:name}}>{{^last?}},{{/last?}}
       {{/fatal_strings:items}}{{/program:fatal_unions}}
   >;
   using structs = ::fatal::list<
       {{#program:fatal_structs}}{{#fatal_strings:items}}
-      ::fatal::pair<::{{program:qualified_namespace}}::{{fatal_string:name}}, strings::{{fatal_string:name}}>{{^last?}},{{/last?}}
+      ::fatal::pair<::{{program:cpp_qualified_namespace}}::{{fatal_string:name}}, strings::{{fatal_string:name}}>{{^last?}},{{/last?}}
       {{/fatal_strings:items}}{{/program:fatal_structs}}
   >;
   using constants = ::fatal::list<
@@ -116,4 +116,4 @@ class {{program:name}}_tags {
   using services = __fbthrift_services;
 };
 
-} // namespace {{program:qualified_namespace}}
+} // namespace {{program:cpp_qualified_namespace}}

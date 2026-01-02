@@ -33,7 +33,7 @@ template <> struct TSchemaAssociation<{{node.cpp_qualified_underlying_name}}, {{
 {{#let export partial definition |node|}}
 {{#if node.program.schema_name}}
 ::folly::Range<const ::std::string_view*> TSchemaAssociation<{{node.cpp_qualified_underlying_name}}, {{node.enum?}}>::bundle() {
-    return ::{{node.program.qualified_namespace}}::{{node.program.name}}_constants::{{node.program.schema_name}}_includes();
+    return ::{{node.program.cpp_qualified_namespace}}::{{node.program.name}}_constants::{{node.program.schema_name}}_includes();
 }
 {{/if node.program.schema_name}}
 {{/let partial}}

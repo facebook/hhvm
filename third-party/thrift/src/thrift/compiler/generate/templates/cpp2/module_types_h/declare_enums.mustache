@@ -16,7 +16,7 @@
 
 }}// BEGIN declare_enums
 {{#program:enums?}}
-namespace {{program:qualified_namespace}} {
+namespace {{program:cpp_qualified_namespace}} {
 {{#program:enums}}
 
 {{> common/enum_docblock }}
@@ -30,18 +30,18 @@ enum {{^enum:cpp_is_unscoped}}class {{/enum:cpp_is_unscoped}}{{enum:cpp_name}}{{
 {{/enum:cpp_declare_bitwise_ops}}
 {{/program:enums}}
 
-} // namespace {{program:qualified_namespace}}
+} // namespace {{program:cpp_qualified_namespace}}
 
 {{#program:enums}}
-template<> struct std::hash<::{{program:qualified_namespace}}::{{enum:cpp_name}}> :
-  ::apache::thrift::detail::enum_hash<::{{program:qualified_namespace}}::{{enum:cpp_name}}> {};
+template<> struct std::hash<::{{program:cpp_qualified_namespace}}::{{enum:cpp_name}}> :
+  ::apache::thrift::detail::enum_hash<::{{program:cpp_qualified_namespace}}::{{enum:cpp_name}}> {};
 {{/program:enums}}
 
 namespace apache::thrift {
 {{#program:enums}}
 
-template <> struct TEnumTraits<::{{program:qualified_namespace}}::{{enum:cpp_name}}> {
-  using type = ::{{program:qualified_namespace}}::{{enum:cpp_name}};
+template <> struct TEnumTraits<::{{program:cpp_qualified_namespace}}::{{enum:cpp_name}}> {
+  using type = ::{{program:cpp_qualified_namespace}}::{{enum:cpp_name}};
 
   static constexpr std::size_t const size = {{(array.len enum:values)}};
   static folly::Range<type const*> const values;
@@ -74,7 +74,7 @@ template <> struct TEnumTraits<::{{program:qualified_namespace}}::{{enum:cpp_nam
   {{/if (not (array.empty? enum:values))}}
 
   static const std::vector<std::any>& annotations() noexcept;
-  static const std::vector<std::any>& enumValueAnnotations(::{{program:qualified_namespace}}::{{enum:cpp_name}}) noexcept;
+  static const std::vector<std::any>& enumValueAnnotations(::{{program:cpp_qualified_namespace}}::{{enum:cpp_name}}) noexcept;
 };
 {{/program:enums}}
 

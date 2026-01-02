@@ -74,7 +74,7 @@ FOLLY_POP_WARNING
 {{> module_types_cpp/declare_union_types}}
 {{/struct:union?}}
 
-namespace {{program:qualified_namespace}} {
+namespace {{program:cpp_qualified_namespace}} {
 {{#struct:extra_namespace}}
 namespace {{struct:extra_namespace}} {
 {{/struct:extra_namespace}}
@@ -209,12 +209,12 @@ static_assert(
 {{#struct:extra_namespace}}
 } // namespace {{struct:extra_namespace}}
 {{/struct:extra_namespace}}
-} // namespace {{program:qualified_namespace}}
+} // namespace {{program:cpp_qualified_namespace}}
 {{/program:split_structs}}{{!
 
 }}{{! Validate adapters in typedefs and fields. }}
 
-namespace {{program:qualified_namespace}} { namespace {
+namespace {{program:cpp_qualified_namespace}} { namespace {
 [[maybe_unused]] FOLLY_ERASE void validateAdapters() {
 {{#program:split_structs}}{{#struct:fields}}
 {{#field:cpp_first_adapter}}{{#field:type}}
@@ -228,17 +228,17 @@ namespace {{program:qualified_namespace}} { namespace {
 {{/type:cpp_adapter}}
 {{/typedef:type}}{{/program:typedefs}}
 }
-}} // namespace {{program:qualified_namespace}}
+}} // namespace {{program:cpp_qualified_namespace}}
 {{#if (has_compiler_option? "tablebased")}}
 
 namespace apache::thrift::detail {
 {{#program:split_enums}}
 const TypeInfo TypeToInfo<
     type_class::enumeration,
-    ::{{program:qualified_namespace}}::{{enum:cpp_name}}>::typeInfo = {
+    ::{{program:cpp_qualified_namespace}}::{{enum:cpp_name}}>::typeInfo = {
     /* .type */ protocol::TType::T_I32,
-    /* .get */ get<int32_t, ::{{program:qualified_namespace}}::{{enum:cpp_name}}>,
-    /* .set */ eraseFuncPtr(set<::{{program:qualified_namespace}}::{{enum:cpp_name}}, int32_t>),
+    /* .get */ get<int32_t, ::{{program:cpp_qualified_namespace}}::{{enum:cpp_name}}>,
+    /* .set */ eraseFuncPtr(set<::{{program:cpp_qualified_namespace}}::{{enum:cpp_name}}, int32_t>),
     /* .typeExt */ nullptr,
 };
 {{/program:split_enums}}
@@ -249,7 +249,7 @@ const TypeInfo TypeToInfo<
     /* .type */ protocol::TType::T_STRUCT,
     /* .get */ nullptr,
     /* .set */ nullptr,
-    /* .typeExt */ &::{{program:qualified_namespace}}::__fbthrift_struct_info_{{struct:cpp_underlying_name}},
+    /* .typeExt */ &::{{program:cpp_qualified_namespace}}::__fbthrift_struct_info_{{struct:cpp_underlying_name}},
 };
 {{/program:split_structs}}
 } // namespace apache::thrift::detail

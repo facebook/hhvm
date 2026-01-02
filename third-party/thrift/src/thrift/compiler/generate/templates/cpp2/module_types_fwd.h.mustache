@@ -27,10 +27,10 @@
 {{#program:enums?}}
 
 // BEGIN forward_declare_enums
-namespace {{program:qualified_namespace}} {
+namespace {{program:cpp_qualified_namespace}} {
 {{#program:enums}}
 enum {{^enum:cpp_is_unscoped}}class {{/enum:cpp_is_unscoped}}{{enum:cpp_name}}{{#enum:cpp_enum_type}} : {{enum:cpp_enum_type}}{{/enum:cpp_enum_type}};
 {{/program:enums}}
-} // namespace {{program:qualified_namespace}}
+} // namespace {{program:cpp_qualified_namespace}}
 // END forward_declare_enums
 {{/program:enums?}}

@@ -538,7 +538,8 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
       const prototype_database& proto) const override {
     auto base = t_whisker_generator::make_prototype_for_program(proto);
     auto def = whisker::dsl::prototype_builder<h_program>::extends(base);
-    def.property("qualified_namespace", &cpp2::get_gen_unprefixed_namespace);
+    def.property(
+        "cpp_qualified_namespace", &cpp2::get_gen_unprefixed_namespace);
     def.property(
         "const_referenced_in_field_default?", [this](const t_program& program) {
           return cpp_context_->field_default_const_ref_programs().contains(
@@ -590,7 +591,7 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
     auto base = t_whisker_generator::make_prototype_for_type(proto);
     auto def = whisker::dsl::prototype_builder<h_type>::extends(base);
 
-    def.property("qualified_namespace", [](const t_type& type) {
+    def.property("cpp_qualified_namespace", [](const t_type& type) {
       return cpp2::get_gen_unprefixed_namespace(*type.program());
     });
 

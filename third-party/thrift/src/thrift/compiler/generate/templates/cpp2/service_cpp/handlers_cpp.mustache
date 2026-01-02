@@ -30,7 +30,7 @@ std::optional<apache::thrift::schema::DefinitionsSchema> {{> service_common/serv
 {{#program}}
 {{#program:has_schema?}}
   std::optional<apache::thrift::schema::DefinitionsSchema> ret = schema::DefinitionsSchema{};
-  ret->schema = ::apache::thrift::schema::detail::loadBundledSchema(::{{service:qualified_namespace}}::{{program:name}}_constants::{{program:schema_name}}_includes());
+  ret->schema = ::apache::thrift::schema::detail::loadBundledSchema(::{{service:cpp_qualified_namespace}}::{{program:name}}_constants::{{program:schema_name}}_includes());
   ret->definitions = { {"{{service:definition_key.buffer}}", {{service:definition_key.length}}} };
   return ret;
 {{/program:has_schema?}}
@@ -61,7 +61,7 @@ std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const
 {{> service_cpp/service_interface_impl}}
 {{/service:interactions}}
 
-namespace {{service:qualified_namespace}} {
+namespace {{service:cpp_qualified_namespace}} {
 
 {{> service_cpp/service_null_impl}}
 
@@ -86,4 +86,4 @@ void {{service:cpp_name}}AsyncProcessor::executeRequest(apache::thrift::ServerRe
 {{#service:interactions?}}
 {{> service_cpp/interaction_constructor_map}}
 {{/service:interactions?}}
-} // namespace {{service:qualified_namespace}}
+} // namespace {{service:cpp_qualified_namespace}}

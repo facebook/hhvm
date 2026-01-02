@@ -390,7 +390,7 @@ template <class ProtocolIn_, class ProtocolOut_>
 
   return {serializeResponse("{{> common/function_name}}", &prot, ctx, result), std::move(sinkConsumerImpl)};
 {{#else}}
-  ::{{service:qualified_namespace}}::{{service:parent_service_cpp_name}}_{{function:prefixed_name}}_presult result;
+  ::{{service:cpp_qualified_namespace}}::{{service:parent_service_cpp_name}}_{{function:prefixed_name}}_presult result;
 {{^type:void?}}
   result.get<0>().value = const_cast<{{function:cpp_return_type}}*>(&_return);
   result.setIsSet(0, true);
@@ -410,7 +410,7 @@ void {{service:parent_service_cpp_name}}AsyncProcessor::throw_wrapped_{{function
     return;
   }
 {{#if function:exceptions?}}
-  ::{{service:qualified_namespace}}::{{service:parent_service_cpp_name}}_{{function:prefixed_name}}_presult{{#if (or function:sink? function:stream?)}}::InitialResponsePResultType{{/if}} result;
+  ::{{service:cpp_qualified_namespace}}::{{service:parent_service_cpp_name}}_{{function:prefixed_name}}_presult{{#if (or function:sink? function:stream?)}}::InitialResponsePResultType{{/if}} result;
   constexpr bool kHasReturnType = {{#if function:initial_response?}}true{{#else}}false{{/if}};
   if (!::apache::thrift::detail::ap::insert_exn<kHasReturnType>(result, ew, [&]<typename Ex>(Ex&){
     if (ctx) {

@@ -19,29 +19,29 @@
 
 namespace apache { namespace thrift {
 
-const std::string_view TEnumTraits<::{{program:qualified_namespace}}::{{enum:cpp_name}}>::__fbthrift_module_name_internal_do_not_use = kModuleName;
-folly::Range<::{{program:qualified_namespace}}::{{enum:cpp_name}} const*> const TEnumTraits<::{{program:qualified_namespace}}::{{enum:cpp_name}}>::values = {{!
+const std::string_view TEnumTraits<::{{program:cpp_qualified_namespace}}::{{enum:cpp_name}}>::__fbthrift_module_name_internal_do_not_use = kModuleName;
+folly::Range<::{{program:cpp_qualified_namespace}}::{{enum:cpp_name}} const*> const TEnumTraits<::{{program:cpp_qualified_namespace}}::{{enum:cpp_name}}>::values = {{!
   }}{{#if empty_enum?}}{{!
     }}{};{{!
   }}{{#else}}{{!
-    }}folly::range(TEnumDataStorage<::{{program:qualified_namespace}}::{{enum:cpp_name}}>::values);{{!
+    }}folly::range(TEnumDataStorage<::{{program:cpp_qualified_namespace}}::{{enum:cpp_name}}>::values);{{!
   }}{{/if empty_enum?}}
-folly::Range<std::string_view const*> const TEnumTraits<::{{program:qualified_namespace}}::{{enum:cpp_name}}>::names = {{!
+folly::Range<std::string_view const*> const TEnumTraits<::{{program:cpp_qualified_namespace}}::{{enum:cpp_name}}>::names = {{!
   }}{{#if empty_enum?}}{{!
     }}{};{{!
   }}{{#else}}{{!
-    }}folly::range(TEnumDataStorage<::{{program:qualified_namespace}}::{{enum:cpp_name}}>::names);{{!
+    }}folly::range(TEnumDataStorage<::{{program:cpp_qualified_namespace}}::{{enum:cpp_name}}>::names);{{!
   }}{{/if empty_enum?}}
 
-bool TEnumTraits<::{{program:qualified_namespace}}::{{enum:cpp_name}}>::findName(type value, std::string_view* out) noexcept {
+bool TEnumTraits<::{{program:cpp_qualified_namespace}}::{{enum:cpp_name}}>::findName(type value, std::string_view* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_name(value, out);
 }
 
-bool TEnumTraits<::{{program:qualified_namespace}}::{{enum:cpp_name}}>::findValue(std::string_view name, type* out) noexcept {
+bool TEnumTraits<::{{program:cpp_qualified_namespace}}::{{enum:cpp_name}}>::findValue(std::string_view name, type* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 
-const std::vector<std::any>& TEnumTraits<::{{program:qualified_namespace}}::{{enum:cpp_name}}>::annotations() noexcept {
+const std::vector<std::any>& TEnumTraits<::{{program:cpp_qualified_namespace}}::{{enum:cpp_name}}>::annotations() noexcept {
   {{#if enum:has_runtime_annotation?}}
   static const folly::Indestructible<std::vector<std::any>> ret = [] {
       std::vector<std::any> values;
@@ -58,7 +58,7 @@ const std::vector<std::any>& TEnumTraits<::{{program:qualified_namespace}}::{{en
   {{/if enum:has_runtime_annotation?}}
 }
 
-const std::vector<std::any>& TEnumTraits<::{{program:qualified_namespace}}::{{enum:cpp_name}}>::enumValueAnnotations(::{{program:qualified_namespace}}::{{enum:cpp_name}} value) noexcept {
+const std::vector<std::any>& TEnumTraits<::{{program:cpp_qualified_namespace}}::{{enum:cpp_name}}>::enumValueAnnotations(::{{program:cpp_qualified_namespace}}::{{enum:cpp_name}} value) noexcept {
   switch (static_cast<std::int32_t>(value)) {
     {{#enum:values}}
     {{#if enum_value:has_runtime_annotation?}}

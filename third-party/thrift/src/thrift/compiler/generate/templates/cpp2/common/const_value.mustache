@@ -29,9 +29,9 @@ static_cast<{{value.type.cpp_standard_type}}>({{value.double_value}})
 "{{value.string_value}}"
   {{#else if value.enum?}}
     {{#if value.enum_value?}}
- ::{{value.type.qualified_namespace}}::{{value.type.cpp_name}}::{{value.enum_value.cpp_name}}
+ ::{{value.type.cpp_qualified_namespace}}::{{value.type.cpp_name}}::{{value.enum_value.cpp_name}}
     {{#else}}
-static_cast< ::{{value.type.qualified_namespace}}::{{value.type.cpp_name}}>({{value.integer_value}})
+static_cast< ::{{value.type.cpp_qualified_namespace}}::{{value.type.cpp_name}}>({{value.integer_value}})
     {{/if value.enum_value?}}
   {{/if value.bool?}}
 {{/let partial}}
@@ -87,7 +87,7 @@ apache::thrift::StringTraits<{{value.type.cpp_standard_type}}>::fromStringLitera
         This is allowed when a value is considered referenceable AND the const to be
         referenced is defined in an external program (i.e. external? is true), or same
         program const referencing is enabled in the current context. }}
-::{{value.owner.program.qualified_namespace}}::{{value.owner.program.name}}_constants::{{value.owner.name}}()
+::{{value.owner.program.cpp_qualified_namespace}}::{{value.owner.program.name}}_constants::{{value.owner.name}}()
   {{#else if value.structured?}}
     {{! Struct/union values }}
 ::apache::thrift::detail::make_structured_constant<{{value.type.cpp_standard_type}}>(

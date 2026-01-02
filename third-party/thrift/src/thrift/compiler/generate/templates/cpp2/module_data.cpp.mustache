@@ -24,9 +24,9 @@
 #include <thrift/lib/cpp2/gen/module_data_cpp.h>
 
 {{#program:services}}
-namespace {{service:qualified_namespace}} {
+namespace {{service:cpp_qualified_namespace}} {
 class {{service:cpp_name}};
-} // namespace {{service:qualified_namespace}}
+} // namespace {{service:cpp_qualified_namespace}}
 {{/program:services}}
 namespace apache::thrift {
 {{#program:structs}}

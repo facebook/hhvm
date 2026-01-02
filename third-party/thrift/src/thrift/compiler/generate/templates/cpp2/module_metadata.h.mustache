@@ -25,7 +25,7 @@
 
 {{! Note: ServiceTag below is not related to metadata, however, we can't remove it from this file yet since some codebases rely on it. }}
 {{#program:services}}
-namespace {{service:qualified_namespace}} {
+namespace {{service:cpp_qualified_namespace}} {
 class {{service:cpp_name}};
-} // namespace {{service:qualified_namespace}}
+} // namespace {{service:cpp_qualified_namespace}}
 {{/program:services}}

@@ -18,7 +18,7 @@
 {{> Autogen}}
 #include "{{program:include_prefix}}{{program:name}}_types_custom_protocol.h"
 
-namespace {{program:qualified_namespace}} {
+namespace {{program:cpp_qualified_namespace}} {
 {{#program:split_structs}}
 
 {{#struct:extra_namespace}}
@@ -33,4 +33,4 @@ template uint32_t {{struct:cpp_underlying_name}}::serializedSizeZC<>(apache::thr
 {{/struct:extra_namespace}}
 {{/program:split_structs}}
 
-} // namespace {{program:qualified_namespace}}
+} // namespace {{program:cpp_qualified_namespace}}

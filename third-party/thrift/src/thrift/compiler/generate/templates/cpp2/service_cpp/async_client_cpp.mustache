@@ -15,9 +15,9 @@
   limitations under the License.
 
 }}
-namespace {{service:qualified_namespace}} {
+namespace {{service:cpp_qualified_namespace}} {
 {{> service_common/typedefs}}
-} // namespace {{service:qualified_namespace}}
+} // namespace {{service:cpp_qualified_namespace}}
 {{> service_async_client_cpp/templated_received}}
 
 
@@ -64,9 +64,9 @@ apache::thrift::Client<{{service:parent_service_qualified_name}}>::{{function:cr
 
 {{#service:interactions}}
 
-namespace {{service:qualified_namespace}} {
+namespace {{service:cpp_qualified_namespace}} {
 {{> service_common/typedefs}}
-} // namespace {{service:qualified_namespace}}
+} // namespace {{service:cpp_qualified_namespace}}
 {{> service_async_client_cpp/templated_received}}
 
 {{#service:functions}}{{#function:return_type}}

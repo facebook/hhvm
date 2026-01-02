@@ -40,7 +40,7 @@ void {{> service_common/client_class_name}}::{{function:cpp_name}}(apache::thrif
 apache::thrift::SerializedRequest {{> service_common/client_class_name}}::fbthrift_serialize_{{function:cpp_name}}(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack{{function_comma}}{{> service_common/function_param_list_client}}) {
   return apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& prot) {
     using ProtocolWriter = std::decay_t<decltype(prot)>;
-    ::{{service:qualified_namespace}}::{{service:parent_service_cpp_name}}_{{function:prefixed_name}}_pargs args;
+    ::{{service:cpp_qualified_namespace}}::{{service:parent_service_cpp_name}}_{{function:prefixed_name}}_pargs args;
 {{#function:args}}{{#field:type}}
 {{^type:resolves_to_complex_return?}}
     args.get<{{field:index}}>().value = &p_{{field:cpp_name}};

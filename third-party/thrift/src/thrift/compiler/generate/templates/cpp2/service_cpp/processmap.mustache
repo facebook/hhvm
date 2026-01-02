@@ -67,7 +67,7 @@ apache::thrift::ServiceRequestInfoMap {{service:cpp_name}}ServiceInfoHolder::sta
 {{/function:return_type}}{{/service:functions}}{{/service:interactions}}
   };
 {{#service:extends}}
-  apache::thrift::ServiceRequestInfoMap parentMap = ::{{service:qualified_namespace}}::{{service:cpp_name}}ServiceInfoHolder::staticRequestInfoMap();
+  apache::thrift::ServiceRequestInfoMap parentMap = ::{{service:cpp_qualified_namespace}}::{{service:cpp_name}}ServiceInfoHolder::staticRequestInfoMap();
   requestInfoMap.insert(std::begin(parentMap), std::end(parentMap));
 {{/service:extends}}
 

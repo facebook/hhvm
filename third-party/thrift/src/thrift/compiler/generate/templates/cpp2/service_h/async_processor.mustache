@@ -14,12 +14,12 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}class {{service:cpp_name}}AsyncProcessor : public {{#service:extends}}::{{service:qualified_namespace}}::{{service:cpp_name}}AsyncProcessor{{/service:extends}}{{^service:extends}}::apache::thrift::GeneratedAsyncProcessorBase{{/service:extends}} {
+}}class {{service:cpp_name}}AsyncProcessor : public {{#service:extends}}::{{service:cpp_qualified_namespace}}::{{service:cpp_name}}AsyncProcessor{{/service:extends}}{{^service:extends}}::apache::thrift::GeneratedAsyncProcessorBase{{/service:extends}} {
  public:
   std::string_view getServiceName() override;
   void getServiceMetadata(apache::thrift::metadata::ThriftServiceMetadataResponse& response) override;
 {{#service:extends}}
-  using BaseAsyncProcessor = ::{{service:qualified_namespace}}::{{service:cpp_name}}AsyncProcessor;
+  using BaseAsyncProcessor = ::{{service:cpp_qualified_namespace}}::{{service:cpp_name}}AsyncProcessor;
 {{/service:extends}}
 {{^service:extends}}
   using BaseAsyncProcessor = void;
@@ -56,7 +56,7 @@
  public:
   {{service:cpp_name}}AsyncProcessor(::apache::thrift::ServiceHandler<{{service:qualified_name}}>* iface) :
 {{#service:extends}}
-      ::{{service:qualified_namespace}}::{{service:cpp_name}}AsyncProcessor(iface),
+      ::{{service:cpp_qualified_namespace}}::{{service:cpp_name}}AsyncProcessor(iface),
 {{/service:extends}}
       iface_(iface) {}
   ~{{service:cpp_name}}AsyncProcessor() override {}

@@ -254,10 +254,9 @@ class HTTPHeaders {
    * only value under the given name. If either of these is violated, returns
    * empty_string.
    */
+  [[nodiscard]] const std::string& getSingleOrEmpty(HTTPHeaderCode code) const;
   [[nodiscard]] const std::string& getSingleOrEmpty(
-      HTTPHeaderCode code) const noexcept;
-  [[nodiscard]] const std::string& getSingleOrEmpty(
-      folly::StringPiece name) const noexcept;
+      folly::StringPiece name) const;
   [[nodiscard]] const std::string rawGet(const std::string& header) const {
     return getSingleOrEmpty(header);
   }

@@ -364,12 +364,11 @@ HTTPHeaders::SingleOrNullptrResult HTTPHeaders::getSingleOrNullptr(
   return res;
 }
 
-const std::string& HTTPHeaders::getSingleOrEmpty(
-    HTTPHeaderCode code) const noexcept {
+const std::string& HTTPHeaders::getSingleOrEmpty(HTTPHeaderCode code) const {
   return *getSingleOrNullptr(code);
 }
 const std::string& HTTPHeaders::getSingleOrEmpty(
-    folly::StringPiece name) const noexcept {
+    folly::StringPiece name) const {
   return *getSingleOrNullptr(name);
 }
 

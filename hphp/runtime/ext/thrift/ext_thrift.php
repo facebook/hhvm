@@ -15,6 +15,11 @@ function thrift_protocol_write_binary_struct(\HH\object $transportobj,
                                       \HH\object $request_struct): void;
 
 <<__Native>>
+function thrift_protocol_write_binary_struct_to_string(
+  \HH\object $request_struct,
+): string;
+
+<<__Native>>
 function thrift_protocol_read_binary(\HH\object $transportobj,
                                      string $obj_typename,
                                      bool $strict_read,
@@ -24,6 +29,12 @@ function thrift_protocol_read_binary(\HH\object $transportobj,
 function thrift_protocol_read_binary_struct(\HH\object $transportobj,
                                             string $obj_typename,
                                             int $options = 0): mixed;
+
+
+<<__Native>>
+function thrift_protocol_read_binary_struct_from_string(string $serialized,
+                                                         string $obj_typename,
+                                                         int $options = 0): \HH\object;
 
 <<__Native>>
 function thrift_protocol_set_compact_version(int $version)[leak_safe]: int;

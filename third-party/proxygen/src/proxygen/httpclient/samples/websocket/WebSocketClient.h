@@ -20,7 +20,7 @@ class WebSocketClient
     , public proxygen::HTTPTransactionHandler {
 
  public:
-  WebSocketClient(folly::EventBase* evb, const proxygen::URL& url);
+  WebSocketClient(folly::EventBase* evb, proxygen::URL url);
 
   ~WebSocketClient() override = default;
 

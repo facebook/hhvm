@@ -18,8 +18,8 @@ using namespace std;
 
 namespace websocketclient {
 
-WebSocketClient::WebSocketClient(EventBase* evb, const proxygen::URL& url)
-    : evb_(evb), url_(url) {
+WebSocketClient::WebSocketClient(EventBase* evb, proxygen::URL url)
+    : evb_(evb), url_(std::move(url)) {
 }
 
 void WebSocketClient::connectSuccess(HTTPUpstreamSession* session) {

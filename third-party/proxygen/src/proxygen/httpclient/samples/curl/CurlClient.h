@@ -68,10 +68,10 @@ class CurlClient
  public:
   CurlClient(folly::EventBase* evb,
              proxygen::HTTPMethod httpMethod,
-             const proxygen::URL& url,
+             proxygen::URL url,
              const proxygen::URL* proxy,
              const proxygen::HTTPHeaders& headers,
-             const std::string& inputFilename,
+             std::string inputFilename,
              bool h2c = false,
              unsigned short httpMajor = 1,
              unsigned short httpMinor = 1);

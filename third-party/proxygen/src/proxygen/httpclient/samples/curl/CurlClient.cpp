@@ -10,6 +10,7 @@
 
 #include <iostream>
 #include <sys/stat.h>
+#include <utility>
 
 #include <folly/FileUtil.h>
 #include <folly/String.h>
@@ -30,17 +31,17 @@ namespace CurlService {
 
 CurlClient::CurlClient(EventBase* evb,
                        HTTPMethod httpMethod,
-                       const URL& url,
+                       URL url,
                        const proxygen::URL* proxy,
                        const HTTPHeaders& headers,
-                       const string& inputFilename,
+                       string inputFilename,
                        bool h2c,
                        unsigned short httpMajor,
                        unsigned short httpMinor)
     : evb_(evb),
       httpMethod_(httpMethod),
-      url_(url),
-      inputFilename_(inputFilename),
+      url_(std::move(url)),
+      inputFilename_(std::move(inputFilename)),
       h2c_(h2c),
       httpMajor_(httpMajor),
       httpMinor_(httpMinor) {

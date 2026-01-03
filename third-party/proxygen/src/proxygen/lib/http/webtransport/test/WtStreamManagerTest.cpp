@@ -10,12 +10,21 @@
 #include <proxygen/lib/http/webtransport/WtStreamManager.h>
 
 #include <folly/portability/GTest.h>
+#include <quic/priority/HTTPPriorityQueue.h>
 
 using namespace proxygen::coro::detail;
 
 namespace proxygen::coro::test {
 
 using WtStreamManager = detail::WtStreamManager;
+
+// Helper to check which stream is next in the priority queue
+void expectNextWritable(quic::PriorityQueue* pq, uint64_t expectedStreamId) {
+  EXPECT_FALSE(pq->empty());
+  auto nextId = pq->peekNextScheduledID();
+  EXPECT_TRUE(nextId.isStreamID());
+  EXPECT_EQ(nextId.asStreamID(), expectedStreamId);
+}
 
 struct WtSmEgressCb : WtStreamManager::EgressCallback {
   WtSmEgressCb() = default;
@@ -50,8 +59,9 @@ TEST(WtStreamManager, BasicSelfBidi) {
   WtConfig config{.peerMaxStreamsBidi = 2};
   WtSmEgressCb egressCb;
   WtSmIngressCb ingressCb;
+  auto priorityQueue = std::make_unique<quic::HTTPPriorityQueue>();
   WtStreamManager streamManager{
-      detail::WtDir::Client, config, egressCb, ingressCb};
+      detail::WtDir::Client, config, egressCb, ingressCb, *priorityQueue};
 
   // 0x00 is the next expected bidi stream id for client
   EXPECT_TRUE(streamManager.canCreateBidi());
@@ -77,8 +87,9 @@ TEST(WtStreamManager, BasicSelfUni) {
   WtConfig config{.peerMaxStreamsUni = 2};
   WtSmEgressCb egressCb;
   WtSmIngressCb ingressCb;
+  auto priorityQueue = std::make_unique<quic::HTTPPriorityQueue>();
   WtStreamManager streamManager{
-      detail::WtDir::Client, config, egressCb, ingressCb};
+      detail::WtDir::Client, config, egressCb, ingressCb, *priorityQueue};
 
   // 0x02 is the next expected uni stream id for client
   EXPECT_TRUE(streamManager.canCreateUni());
@@ -104,8 +115,9 @@ TEST(WtStreamManager, BasicPeerBidi) {
   WtConfig config{.selfMaxStreamsBidi = 2};
   WtSmEgressCb egressCb;
   WtSmIngressCb ingressCb;
+  auto priorityQueue = std::make_unique<quic::HTTPPriorityQueue>();
   WtStreamManager streamManager{
-      detail::WtDir::Client, config, egressCb, ingressCb};
+      detail::WtDir::Client, config, egressCb, ingressCb, *priorityQueue};
 
   // 0x01 is the next expected bidi stream for server
   auto bidiRes = streamManager.getOrCreateBidiHandle(0x01);
@@ -132,8 +144,9 @@ TEST(WtStreamManager, BasicPeerUni) {
   WtConfig config{.selfMaxStreamsUni = 2};
   WtSmEgressCb egressCb;
   WtSmIngressCb ingressCb;
+  auto priorityQueue = std::make_unique<quic::HTTPPriorityQueue>();
   WtStreamManager streamManager{
-      detail::WtDir::Client, config, egressCb, ingressCb};
+      detail::WtDir::Client, config, egressCb, ingressCb, *priorityQueue};
 
   // 0x03 is the next expected uni stream for server
   auto bidiRes = streamManager.getOrCreateBidiHandle(0x03);
@@ -161,8 +174,9 @@ TEST(WtStreamManager, NextBidiUniHandle) {
   WtConfig config{.peerMaxStreamsBidi = 2, .peerMaxStreamsUni = 2};
   WtSmEgressCb egressCb;
   WtSmIngressCb ingressCb;
+  auto priorityQueue = std::make_unique<quic::HTTPPriorityQueue>();
   WtStreamManager streamManager{
-      detail::WtDir::Client, config, egressCb, ingressCb};
+      detail::WtDir::Client, config, egressCb, ingressCb, *priorityQueue};
 
   // next egress handle tests
   auto uni = CHECK_NOTNULL(streamManager.createEgressHandle());
@@ -188,8 +202,9 @@ TEST(WtStreamManager, StreamLimits) {
   WtConfig config{};
   WtSmEgressCb egressCb;
   WtSmIngressCb ingressCb;
+  auto priorityQueue = std::make_unique<quic::HTTPPriorityQueue>();
   WtStreamManager streamManager{
-      detail::WtDir::Client, config, egressCb, ingressCb};
+      detail::WtDir::Client, config, egressCb, ingressCb, *priorityQueue};
 
   // a single egress handle should succeed
   auto uni = streamManager.createEgressHandle();
@@ -227,8 +242,9 @@ TEST(WtStreamManager, EnqueueIngressData) {
   WtConfig config{.peerMaxStreamsBidi = 2};
   WtSmEgressCb egressCb;
   WtSmIngressCb ingressCb;
+  auto priorityQueue = std::make_unique<quic::HTTPPriorityQueue>();
   WtStreamManager streamManager{
-      detail::WtDir::Client, config, egressCb, ingressCb};
+      detail::WtDir::Client, config, egressCb, ingressCb, *priorityQueue};
 
   // next createBidiHandle should succeed
   auto one = streamManager.createBidiHandle();
@@ -260,13 +276,20 @@ TEST(WtStreamManager, WriteEgressHandle) {
   WtConfig config{.peerMaxStreamsBidi = 2};
   WtSmEgressCb egressCb;
   WtSmIngressCb ingressCb;
+  auto priorityQueue = std::make_unique<quic::HTTPPriorityQueue>();
   WtStreamManager streamManager{
-      detail::WtDir::Client, config, egressCb, ingressCb};
+      detail::WtDir::Client, config, egressCb, ingressCb, *priorityQueue};
 
   // next two ::createBidiHandle should succeed
   auto one = streamManager.createBidiHandle();
   auto two = streamManager.createBidiHandle();
   CHECK(one.readHandle && one.writeHandle && two.readHandle && two.writeHandle);
+
+  // Set priorities to make ordering predictable (urgency, incremental)
+  one.writeHandle->setPriority(quic::HTTPPriorityQueue::Priority(
+      0, false)); // Higher priority (urgency 0)
+  two.writeHandle->setPriority(quic::HTTPPriorityQueue::Priority(
+      1, false)); // Lower priority (urgency 1)
 
   constexpr auto kBufLen = 65'535;
   // kBufLen will fill up both conn & stream egress windows
@@ -287,33 +310,42 @@ TEST(WtStreamManager, WriteEgressHandle) {
               res.value() == WebTransport::FCState::UNBLOCKED);
 
   // we should be able to dequeue kBufLen data from one.writeHandle
-  EXPECT_EQ(streamManager.nextWritable(), one.writeHandle);
+  expectNextWritable(priorityQueue.get(), one.writeHandle->getID());
   auto dequeue = streamManager.dequeue(*one.writeHandle, /*atMost=*/kBufLen);
   EXPECT_EQ(dequeue.data->computeChainDataLength(), kBufLen);
   EXPECT_FALSE(dequeue.fin);
-  // no connection flow control, nextWritable == nullptr
-  EXPECT_EQ(streamManager.nextWritable(), nullptr);
+  // one still in queue but blocked on conn FC - dequeue again to move to
+  // connFcBlockedStreams_
+  dequeue = streamManager.dequeue(*one.writeHandle, /*atMost=*/kBufLen);
+  EXPECT_EQ(dequeue.data, nullptr);
+  EXPECT_FALSE(dequeue.fin);
+  // two is now next writable - dequeue would move to connFcBlockedStreams_
+  expectNextWritable(priorityQueue.get(), two.writeHandle->getID());
 
   // grant one a single byte of stream credit; dequeuing from one should yield
   // nothing since we're still blocked on conn flow control
   EXPECT_TRUE(streamManager.onMaxData(
       MaxStreamData{{kBufLen + 1}, one.writeHandle->getID()}));
-  EXPECT_EQ(streamManager.nextWritable(), nullptr);
+  // two is still next writable (one is blocked on conn FC)
+  expectNextWritable(priorityQueue.get(), two.writeHandle->getID());
 
   // grant one additional byte of conn credit; dequeue from one should yield
   // byte + eof
   EXPECT_TRUE(streamManager.onMaxData(MaxConnData{kBufLen + 1}));
-  EXPECT_EQ(streamManager.nextWritable(), one.writeHandle);
+  // one is re-inserted from connFcBlockedStreams_ and should be next (higher
+  // priority)
+  expectNextWritable(priorityQueue.get(), one.writeHandle->getID());
   dequeue = streamManager.dequeue(*one.writeHandle, /*atMost=*/kBufLen);
   EXPECT_EQ(dequeue.data->computeChainDataLength(), 1);
   EXPECT_TRUE(dequeue.fin);
 
-  // no next writable stream since blocked on conn egress flow control
-  EXPECT_EQ(streamManager.nextWritable(), nullptr);
+  // stream two is next writable, but blocked on conn egress flow control
+  expectNextWritable(priorityQueue.get(), two.writeHandle->getID());
 
   // grant enough conn fc credit to unblock two completely
   EXPECT_TRUE(streamManager.onMaxData(MaxConnData{kBufLen * 2}));
-  EXPECT_EQ(streamManager.nextWritable(), two.writeHandle);
+  // two still next
+  expectNextWritable(priorityQueue.get(), two.writeHandle->getID());
   dequeue = streamManager.dequeue(*two.writeHandle, /*atMost=*/kBufLen);
   EXPECT_EQ(dequeue.data->computeChainDataLength(), kBufLen - 1);
   EXPECT_TRUE(dequeue.fin);
@@ -323,8 +355,9 @@ TEST(WtStreamManager, BidiHandleCancellation) {
   WtConfig config{};
   WtSmEgressCb egressCb;
   WtSmIngressCb ingressCb;
+  auto priorityQueue = std::make_unique<quic::HTTPPriorityQueue>();
   WtStreamManager streamManager{
-      detail::WtDir::Client, config, egressCb, ingressCb};
+      detail::WtDir::Client, config, egressCb, ingressCb, *priorityQueue};
 
   // next ::createBidiHandle should succeed
   auto one = streamManager.createBidiHandle();
@@ -339,7 +372,8 @@ TEST(WtStreamManager, BidiHandleCancellation) {
   auto ct = one.writeHandle->getCancelToken();
   streamManager.onStopSending({one.writeHandle->getID(), 0x00});
   EXPECT_TRUE(ct.isCancellationRequested());
-  EXPECT_EQ(streamManager.nextWritable(), nullptr);
+  // stream should be removed from queue after cancellation
+  EXPECT_TRUE(priorityQueue->empty());
 
   // StreamManager::onResetStream should request cancellation of ingress handle
   auto fut = one.readHandle->readStreamData();
@@ -353,8 +387,9 @@ TEST(WtStreamManager, GrantFlowControlCredit) {
   WtConfig config{.peerMaxStreamsBidi = 2};
   WtSmEgressCb egressCb;
   WtSmIngressCb ingressCb;
+  auto priorityQueue = std::make_unique<quic::HTTPPriorityQueue>();
   WtStreamManager streamManager{
-      detail::WtDir::Client, config, egressCb, ingressCb};
+      detail::WtDir::Client, config, egressCb, ingressCb, *priorityQueue};
 
   constexpr auto kBufLen = 65'535;
 
@@ -407,8 +442,9 @@ TEST(WtStreamManager, GrantConnFlowControlCreditAfterRead) {
   WtConfig config{.peerMaxStreamsBidi = 2};
   WtSmEgressCb egressCb;
   WtSmIngressCb ingressCb;
+  auto priorityQueue = std::make_unique<quic::HTTPPriorityQueue>();
   WtStreamManager streamManager{
-      detail::WtDir::Client, config, egressCb, ingressCb};
+      detail::WtDir::Client, config, egressCb, ingressCb, *priorityQueue};
 
   constexpr auto kBufLen = 65'535;
 
@@ -447,8 +483,9 @@ TEST(WtStreamManager, NonDefaultFlowControlValues) {
       config.selfMaxStreamDataUni = 100;
   WtSmEgressCb egressCb;
   WtSmIngressCb ingressCb;
+  auto priorityQueue = std::make_unique<quic::HTTPPriorityQueue>();
   WtStreamManager streamManager{
-      detail::WtDir::Client, config, egressCb, ingressCb};
+      detail::WtDir::Client, config, egressCb, ingressCb, *priorityQueue};
   constexpr auto kBufLen = 100;
 
   // enqueue 100 bytes of data
@@ -475,7 +512,8 @@ TEST(WtStreamManager, NonDefaultFlowControlValues) {
   // is 60
   one.writeHandle->writeStreamData(
       makeBuf(kBufLen), /*fin=*/true, /*byteEventCallback=*/nullptr);
-  EXPECT_EQ(streamManager.nextWritable(), one.writeHandle);
+  // one is next writable
+  expectNextWritable(priorityQueue.get(), one.writeHandle->getID());
   auto dequeue = streamManager.dequeue(*one.writeHandle,
                                        std::numeric_limits<uint64_t>::max());
   EXPECT_EQ(dequeue.data->computeChainDataLength(), 60);
@@ -486,7 +524,7 @@ TEST(WtStreamManager, NonDefaultFlowControlValues) {
   auto* two = CHECK_NOTNULL(streamManager.createEgressHandle());
   two->writeStreamData(
       makeBuf(kBufLen), /*fin=*/true, /*byteEventCallback=*/nullptr);
-  EXPECT_EQ(streamManager.nextWritable(), two);
+  expectNextWritable(priorityQueue.get(), two->getID());
   dequeue = streamManager.dequeue(*two, std::numeric_limits<uint64_t>::max());
   EXPECT_EQ(dequeue.data->computeChainDataLength(), 40);
   EXPECT_FALSE(dequeue.fin);
@@ -496,8 +534,9 @@ TEST(WtStreamManager, ResetStreamReleasesConnFlowControl) {
   WtConfig config{.selfMaxStreamsUni = 10};
   WtSmEgressCb egressCb;
   WtSmIngressCb ingressCb;
+  auto priorityQueue = std::make_unique<quic::HTTPPriorityQueue>();
   WtStreamManager streamManager{
-      detail::WtDir::Client, config, egressCb, ingressCb};
+      detail::WtDir::Client, config, egressCb, ingressCb, *priorityQueue};
   constexpr auto kBufLen = 65'535;
   constexpr auto kHalfBufLen = (kBufLen / 2) + 1;
 
@@ -530,8 +569,9 @@ TEST(WtStreamManager, StopSendingResetStreamTest) {
   WtConfig config{};
   WtSmEgressCb egressCb;
   WtSmIngressCb ingressCb;
+  auto priorityQueue = std::make_unique<quic::HTTPPriorityQueue>();
   WtStreamManager streamManager{
-      detail::WtDir::Client, config, egressCb, ingressCb};
+      detail::WtDir::Client, config, egressCb, ingressCb, *priorityQueue};
   constexpr auto kBufLen = 65'535;
 
   // next ::createBidiHandle should succeed
@@ -581,8 +621,9 @@ TEST(WtStreamManager, AwaitWritableTest) {
   WtConfig config{};
   WtSmEgressCb egressCb;
   WtSmIngressCb ingressCb;
+  auto priorityQueue = std::make_unique<quic::HTTPPriorityQueue>();
   WtStreamManager streamManager{
-      detail::WtDir::Client, config, egressCb, ingressCb};
+      detail::WtDir::Client, config, egressCb, ingressCb, *priorityQueue};
 
   constexpr auto kBufLen = 65'535;
   // next ::createBidiHandle should succeed
@@ -619,8 +660,9 @@ TEST(WtStreamManager, WritableStreams) {
   WtConfig config{.peerMaxStreamsUni = 3};
   WtSmEgressCb egressCb;
   WtSmIngressCb ingressCb;
+  auto priorityQueue = std::make_unique<quic::HTTPPriorityQueue>();
   WtStreamManager streamManager{
-      detail::WtDir::Client, config, egressCb, ingressCb};
+      detail::WtDir::Client, config, egressCb, ingressCb, *priorityQueue};
   constexpr auto kBufLen = 65'535;
   constexpr auto kAtMost = std::numeric_limits<uint64_t>::max();
 
@@ -633,55 +675,60 @@ TEST(WtStreamManager, WritableStreams) {
       makeBuf(1), /*fin=*/true, /*byteEventCallback=*/nullptr);
   EXPECT_TRUE(writeRes.hasValue() &&
               writeRes.value() == WebTransport::FCState::UNBLOCKED);
-  EXPECT_TRUE(std::exchange(egressCb.evAvail_, false)); // nextWritable now
-                                                        // not-nullptr
-  EXPECT_EQ(streamManager.nextWritable(), one);
+  EXPECT_TRUE(std::exchange(egressCb.evAvail_, false));
+  // next writable stream is one
+  expectNextWritable(priorityQueue.get(), one->getID());
 
   // dequeue should yield the expected results
   auto dequeue = streamManager.dequeue(*one, kAtMost);
   EXPECT_TRUE(dequeue.data->length() == 1 && dequeue.fin);
 
   // no more writableStreams
-  EXPECT_EQ(streamManager.nextWritable(), nullptr);
+  EXPECT_TRUE(priorityQueue->empty());
 
   // write kBufLen data; which will exceed conn flow control by one byte)
   writeRes = two->writeStreamData(
       makeBuf(kBufLen), /*fin=*/false, /*byteEventCallback=*/nullptr);
   EXPECT_TRUE(writeRes.hasValue() &&
               writeRes.value() == WebTransport::FCState::BLOCKED);
-  EXPECT_TRUE(std::exchange(egressCb.evAvail_, false)); // nextWritable now
-                                                        // not-nullptr
-  EXPECT_EQ(streamManager.nextWritable(), two);
+  EXPECT_TRUE(std::exchange(egressCb.evAvail_, false));
+  // next writable stream is two
+  expectNextWritable(priorityQueue.get(), two->getID());
 
   // dequeue will yield kBufLen - 1 (limited by conn flow control)
   dequeue = streamManager.dequeue(*two, kAtMost);
   EXPECT_EQ(dequeue.data->length(), kBufLen - 1);
   EXPECT_FALSE(dequeue.fin);
-  // will return nullptr as no conn flow control available
-  EXPECT_EQ(streamManager.nextWritable(), nullptr);
+  // two still in queue but blocked on conn FC - dequeue again to move to
+  // connFcBlockedStreams_
+  dequeue = streamManager.dequeue(*two, kAtMost);
+  EXPECT_EQ(dequeue.data, nullptr);
+  EXPECT_FALSE(dequeue.fin);
+  // no writable streams, blocked on conn flow control
+  EXPECT_TRUE(priorityQueue->empty());
 
   // issue one additional byte of conn fc
   EXPECT_TRUE(streamManager.onMaxData(MaxConnData{kBufLen + 1}));
 
-  // will return two as conn flow control is now available
-  EXPECT_EQ(streamManager.nextWritable(), two);
+  // two is now writable after conn flow control granted
+  expectNextWritable(priorityQueue.get(), two->getID());
   dequeue = streamManager.dequeue(*two, kAtMost);
   EXPECT_EQ(dequeue.data->length(), 1);
   EXPECT_FALSE(dequeue.fin);
 
-  // ::nextWritable should return stream with only a pending fin even if
-  // connection-level fc is blocked
+  // FIN-only stream should still be writable even when connection FC is blocked
   auto three = CHECK_NOTNULL(streamManager.createEgressHandle());
   three->writeStreamData(nullptr, /*fin=*/true, /*byteEventCallback=*/nullptr);
-  EXPECT_EQ(streamManager.nextWritable(), three);
+  expectNextWritable(priorityQueue.get(), three->getID());
 }
 
 TEST(WtStreamManager, DrainWtSession) {
   WtConfig config{.peerMaxStreamsBidi = 2, .peerMaxStreamsUni = 2};
   WtSmEgressCb egressCb;
   WtSmIngressCb ingressCb;
+  auto priorityQueue = std::make_unique<quic::HTTPPriorityQueue>();
   WtStreamManager streamManager{
-      detail::WtDir::Client, config, egressCb, ingressCb};
+      detail::WtDir::Client, config, egressCb, ingressCb, *priorityQueue};
 
   // drain session, expect enqueued event
   streamManager.onDrainSession({});
@@ -708,8 +755,9 @@ TEST(WtStreamManager, CloseWtSession) {
   WtConfig config{};
   WtSmEgressCb egressCb;
   WtSmIngressCb ingressCb;
+  auto priorityQueue = std::make_unique<quic::HTTPPriorityQueue>();
   WtStreamManager streamManager{
-      detail::WtDir::Client, config, egressCb, ingressCb};
+      detail::WtDir::Client, config, egressCb, ingressCb, *priorityQueue};
 
   // ensure cancellation source is cancelled when invoked ::onCloseSession
   auto one = streamManager.createBidiHandle();
@@ -741,8 +789,9 @@ TEST(WtStreamManager, ResetStreamReliableSize) {
   WtConfig config{};
   WtSmEgressCb egressCb;
   WtSmIngressCb ingressCb;
+  auto priorityQueue = std::make_unique<quic::HTTPPriorityQueue>();
   WtStreamManager streamManager{
-      detail::WtDir::Client, config, egressCb, ingressCb};
+      detail::WtDir::Client, config, egressCb, ingressCb, *priorityQueue};
 
   // enqueue 100 bytes, ensure ::onResetStream does not deallocate stream until
   // after 100 bytes are read
@@ -772,8 +821,9 @@ TEST(WtStreamManager, InvalidCtrlFrames) {
   WtConfig config{};
   WtSmEgressCb egressCb;
   WtSmIngressCb ingressCb;
+  auto priorityQueue = std::make_unique<quic::HTTPPriorityQueue>();
   WtStreamManager streamManager{
-      detail::WtDir::Client, config, egressCb, ingressCb};
+      detail::WtDir::Client, config, egressCb, ingressCb, *priorityQueue};
 
   auto bidi = streamManager.createBidiHandle();
   // stream grant offset (i.e. 0) < stream current offset (i.e. 64KiB)
@@ -795,8 +845,9 @@ TEST(WtStreamManager, IssueMaxStreamsBidiUni) {
   WtConfig config{.selfMaxStreamsBidi = 2, .selfMaxStreamsUni = 2};
   WtSmEgressCb egressCb;
   WtSmIngressCb ingressCb;
+  auto priorityQueue = std::make_unique<quic::HTTPPriorityQueue>();
   WtStreamManager streamManager{
-      detail::WtDir::Client, config, egressCb, ingressCb};
+      detail::WtDir::Client, config, egressCb, ingressCb, *priorityQueue};
 
   auto peerBidi = streamManager.getOrCreateBidiHandle(0x01);
   CHECK(peerBidi.readHandle && peerBidi.writeHandle);
@@ -827,8 +878,9 @@ TEST(WtStreamManager, ShutdownOpenStreams) {
   WtConfig config;
   WtSmEgressCb egressCb;
   WtSmIngressCb ingressCb;
+  auto priorityQueue = std::make_unique<quic::HTTPPriorityQueue>();
   WtStreamManager streamManager{
-      detail::WtDir::Client, config, egressCb, ingressCb};
+      detail::WtDir::Client, config, egressCb, ingressCb, *priorityQueue};
 
   // create bidi stream
   auto bidi = streamManager.createBidiHandle();
@@ -845,8 +897,9 @@ TEST(WtStreamManager, NoopNonExistentStreams) {
   WtConfig config{.peerMaxStreamsBidi = 2, .peerMaxStreamsUni = 2};
   WtSmEgressCb egressCb;
   WtSmIngressCb ingressCb;
+  auto priorityQueue = std::make_unique<quic::HTTPPriorityQueue>();
   WtStreamManager streamManager{
-      detail::WtDir::Client, config, egressCb, ingressCb};
+      detail::WtDir::Client, config, egressCb, ingressCb, *priorityQueue};
 
   streamManager.onStopSending({.streamId = 0});
   streamManager.onResetStream({.streamId = 1});
@@ -875,21 +928,84 @@ TEST(WtStreamManager, OnlyFinPending) {
   WtConfig config{.peerMaxStreamsUni = 2};
   WtSmEgressCb egressCb;
   WtSmIngressCb ingressCb;
+  auto priorityQueue = std::make_unique<quic::HTTPPriorityQueue>();
   WtStreamManager streamManager{
-      detail::WtDir::Client, config, egressCb, ingressCb};
+      detail::WtDir::Client, config, egressCb, ingressCb, *priorityQueue};
 
   auto one = CHECK_NOTNULL(streamManager.createEgressHandle());
   auto two = CHECK_NOTNULL(streamManager.createEgressHandle());
 
+  // Set priorities to make ordering predictable (urgency, incremental)
+  one->setPriority(quic::HTTPPriorityQueue::Priority(
+      0, false)); // Higher priority (urgency 0)
+  two->setPriority(quic::HTTPPriorityQueue::Priority(
+      1, false)); // Lower priority (urgency 1)
+
   one->writeStreamData(
       /*data*/ makeBuf(1), /*fin=*/true, /*byteEventCallback=*/nullptr);
   // next expected writable stream is one
-  EXPECT_EQ(streamManager.nextWritable(), one);
+  expectNextWritable(priorityQueue.get(), one->getID());
 
   two->writeStreamData(
       /*data*/ nullptr, /*fin=*/true, /*byteEventCallback=*/nullptr);
-  // next expected writable stream is now two
-  EXPECT_EQ(streamManager.nextWritable(), two);
+  // one still has higher priority, so it should still be next
+  expectNextWritable(priorityQueue.get(), one->getID());
+}
+
+TEST(WtStreamManager, NextWritableReturnsNullptrWhenQueueEmpty) {
+  WtConfig config{.peerMaxStreamsUni = 2};
+  WtSmEgressCb egressCb;
+  WtSmIngressCb ingressCb;
+  auto priorityQueue = std::make_unique<quic::HTTPPriorityQueue>();
+  WtStreamManager streamManager{
+      detail::WtDir::Client, config, egressCb, ingressCb, *priorityQueue};
+
+  // Queue is empty, nextWritable should return nullptr
+  EXPECT_EQ(streamManager.nextWritable(), nullptr);
+
+  // Create a stream but don't write data - queue should still be empty
+  auto one = CHECK_NOTNULL(streamManager.createEgressHandle());
+  EXPECT_EQ(streamManager.nextWritable(), nullptr);
+
+  // Write data to make stream writable
+  one->writeStreamData(
+      makeBuf(10), /*fin=*/false, /*byteEventCallback=*/nullptr);
+  EXPECT_NE(streamManager.nextWritable(), nullptr);
+  EXPECT_EQ(streamManager.nextWritable(), one);
+}
+
+TEST(WtStreamManager, NextWritableReturnsNullptrWhenHeadIsDatagram) {
+  WtConfig config{.peerMaxStreamsUni = 2};
+  WtSmEgressCb egressCb;
+  WtSmIngressCb ingressCb;
+  auto priorityQueue = std::make_unique<quic::HTTPPriorityQueue>();
+  WtStreamManager streamManager{
+      detail::WtDir::Client, config, egressCb, ingressCb, *priorityQueue};
+
+  // Insert a datagram directly into the priority queue (bypassing
+  // StreamPriorityQueue)
+  auto datagramId = quic::PriorityQueue::Identifier::fromDatagramFlowID(42);
+  priorityQueue->insertOrUpdate(datagramId,
+                                quic::HTTPPriorityQueue::Priority(0, false));
+
+  // Even though there's something in the queue, nextWritable should return
+  // nullptr because the head is a datagram, not a stream
+  EXPECT_FALSE(priorityQueue->empty());
+  EXPECT_EQ(streamManager.nextWritable(), nullptr);
+
+  // Now add a stream with lower priority
+  auto one = CHECK_NOTNULL(streamManager.createEgressHandle());
+  one->setPriority(quic::HTTPPriorityQueue::Priority(1, false));
+  one->writeStreamData(
+      makeBuf(10), /*fin=*/false, /*byteEventCallback=*/nullptr);
+
+  // Datagram is still at head (higher priority), so nextWritable still returns
+  // nullptr
+  EXPECT_EQ(streamManager.nextWritable(), nullptr);
+
+  // Remove the datagram, now the stream should be at the head
+  priorityQueue->erase(datagramId);
+  EXPECT_EQ(streamManager.nextWritable(), one);
 }
 
 } // namespace proxygen::coro::test

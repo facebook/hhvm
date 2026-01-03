@@ -14,6 +14,9 @@
 #include <set>
 #include <variant>
 
+#include <folly/container/F14Set.h>
+#include <proxygen/lib/http/webtransport/StreamPriorityQueue.h>
+
 /**
  * get rid of WebTransport.h dependency, extract StreamReadHandle &
  * StreamWriteHandle into a different TU?
@@ -57,9 +60,8 @@
  *      ::moveEvents and install a visitor to ensure all control-frames are
  *      handled appropriately.
  *
- *    – A stream that is now writable (e.g. ::nextWritable will return
- *      non-nullptr). The transport should query the nextWritable stream and
- *      dequeue data from the handle.
+ *    – A stream that is now writable. The transport should peek the priority
+ *      queue and dequeue data from streams by ID.
  *
  * A note about stream handles – everything is dervied from WtDir (the role of
  * the endpoint, e.g. client or server) and stream id. Any attempt to
@@ -84,8 +86,8 @@ struct WtStreamManager {
    * connection- and stream-level flow control, reset_stream, stop_sending,
    * etc.)
    *
-   * It is also invoked once there is a writable stream (i.e. nextWritable()
-   * transitions from returning nullptr to returning a valid egress handle)
+   * It is also invoked once there is a writable stream (i.e. the priority
+   * queue becomes non-empty)
    */
   struct EgressCallback {
     virtual ~EgressCallback() = default;
@@ -122,7 +124,8 @@ struct WtStreamManager {
   WtStreamManager(WtDir dir,
                   const WtConfig& config,
                   EgressCallback& egressCb,
-                  IngressCallback& ingressCb) noexcept;
+                  IngressCallback& ingressCb,
+                  quic::PriorityQueue& priorityQueue) noexcept;
   ~WtStreamManager() noexcept;
 
   using WtException = WebTransport::Exception;
@@ -144,6 +147,10 @@ struct WtStreamManager {
 
   // Gets a stream if it already exists, otherwise nullptr
   [[nodiscard]] WebTransport::BidiStreamHandle getBidiHandle(
+      uint64_t streamId) const noexcept;
+  [[nodiscard]] WtWriteHandle* getEgressHandle(
+      uint64_t streamId) const noexcept;
+  [[nodiscard]] WtReadHandle* getIngressHandle(
       uint64_t streamId) const noexcept;
 
   /**
@@ -261,8 +268,12 @@ struct WtStreamManager {
   friend struct Accessor;
 
   /**
-   * nextWritable() returns the next writable stream **if exists and there is
-   * available connection flow control**. Otherwise, returns nullptr
+   * DEPRECATED: Use the priority queue directly instead.
+   *
+   * Returns the next writable stream if the head of the priority queue is a
+   * stream. Returns nullptr if:
+   * - The queue is empty
+   * - The head of the queue is not a stream (e.g., a datagram)
    */
   [[nodiscard]] WtWriteHandle* nextWritable() const noexcept;
 
@@ -301,10 +312,6 @@ struct WtStreamManager {
   [[nodiscard]] bool isIngress(uint64_t streamId) const;
   [[nodiscard]] bool isUni(uint64_t streamId) const;
   [[nodiscard]] bool isBidi(uint64_t streamId) const;
-  [[nodiscard]] WtWriteHandle* getEgressHandle(
-      uint64_t streamId) const noexcept;
-  [[nodiscard]] WtReadHandle* getIngressHandle(
-      uint64_t streamId) const noexcept;
 
   void enqueueEvent(Event&& ev) noexcept;
   void onStreamWritable(WtWriteHandle& wh) noexcept;
@@ -365,20 +372,20 @@ struct WtStreamManager {
     Type maxStreams_;
   } maxStreams_;
 
-  // writable streams ordered by stream id
-  // TODO(@damlaj): support priorities
-  struct Compare {
-    bool operator()(const WtWriteHandle* l, const WtWriteHandle* r) const;
-  };
   /**
-   * Any stream with buffered data & available stream-level flow control is in
-   * this map, regardless of available connection-level flow control. This is so
-   * an ::onMaxData does not have to iterate over all streams to determine which
-   * streams are writable.
-   *
-   * ::nextWritable, however, will account for the connection-level flow control
+   * Priority queue wrapper for scheduling stream egress.
+   * Streams are inserted when they have buffered data & stream-level FC.
+   * Removed when out of data or stream FC.
+   * Connection-FC-blocked streams are tracked separately and re-inserted on
+   * onMaxData.
    */
-  std::set<WtWriteHandle*, Compare> writableStreams_;
+  StreamPriorityQueue writableStreams_;
+
+  /**
+   * Streams that have data + stream FC but are blocked by connection FC.
+   * These are re-inserted into writableStreams_ when connection FC is granted.
+   */
+  folly::F14FastSet<WtWriteHandle*> connFcBlockedStreams_;
 
   WtConfig wtConfig_;
   uint64_t connBytesRead_{0};

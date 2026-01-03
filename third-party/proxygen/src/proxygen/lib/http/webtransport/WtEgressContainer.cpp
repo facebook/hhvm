@@ -27,7 +27,7 @@ WtBufferedStreamData::DequeueResult WtBufferedStreamData::dequeue(
                      window_.getAvailable(),
                      static_cast<uint64_t>(data_.chainLength())});
   DequeueResult res;
-  res.data = data_.splitAtMost(atMost);
+  res.data = atMost == 0 ? nullptr : data_.splitAtMost(atMost);
   res.fin = data_.empty() && std::exchange(fin_, false);
   window_.commit(atMost);
   return res;

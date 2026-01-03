@@ -110,6 +110,9 @@ struct WtStreamManager::Accessor {
   auto& writableStreams() {
     return sm_.writableStreams_;
   }
+  auto& connFcBlockedStreams() {
+    return sm_.connFcBlockedStreams_;
+  }
   WtStreamManager& sm_;
 };
 
@@ -191,6 +194,7 @@ struct WriteHandle : public WebTransport::StreamWriteHandle {
 
   Accessor smAccessor_;
   WtBufferedStreamData bufferedSendData_;
+  quic::PriorityQueue::Priority priority_; // Stream priority
   uint64_t err{kInvalidVarint};
   WritePromise promise_{emptyWritePromise()};
   HandleState state_;
@@ -329,10 +333,12 @@ uint64_t& WtStreamManager::MaxStreamsContainer::getMaxStreams(
 WtStreamManager::WtStreamManager(WtDir dir,
                                  const WtConfig& config,
                                  EgressCallback& egressCb,
-                                 IngressCallback& ingressCb) noexcept
+                                 IngressCallback& ingressCb,
+                                 quic::PriorityQueue& priorityQueue) noexcept
     : dir_(dir),
       nextStreamIds_(nextStreamIds(dir)),
       maxStreams_(maxStreams(dir, config)),
+      writableStreams_(priorityQueue),
       wtConfig_(config),
       connRecvFc_(config.selfMaxConnData),
       connSendFc_(config.peerMaxConnData),
@@ -507,8 +513,21 @@ WtStreamManager::Result WtStreamManager::onMaxData(MaxConnData data) noexcept {
   if (!connSendFc_.grant(data.maxData)) {
     return Fail;
   }
+
   bool wasEmpty = !hasEvent();
-  if (!wasEmpty && hasEvent()) {
+  // Re-add all connection-FC-blocked streams to the priority queue
+  auto blockedStreams = std::move(connFcBlockedStreams_);
+  for (auto* wh : blockedStreams) {
+    auto& writeHandle = writehandle_ref_cast(*wh);
+    if (writeHandle.bufferedSendData_.canSendData()) {
+      writableStreams_.insert(writeHandle.getID(), writeHandle.priority_);
+    } else {
+      XLOG(ERR) << "Stream " << writeHandle.getID()
+                << " in connFcBlockedStreams_ but !canSendData";
+    }
+  }
+
+  if (wasEmpty && hasEvent()) {
     egressCb_.eventsAvailable();
   }
   return Ok;
@@ -566,31 +585,35 @@ StreamData WtStreamManager::dequeue(WtWriteHandle& wh,
                                     uint64_t atMost) noexcept {
   // we're limited by conn egress fc
   atMost = std::min(atMost, connSendFc_.getAvailable());
-  auto res = writehandle_ref_cast(wh).dequeue(atMost);
+  auto& writeHandle = writehandle_ref_cast(wh);
+  auto res = writeHandle.dequeue(atMost);
   // TODO(@damlaj): return len to elide unnecessarily computing chain len
   auto len = computeChainLength(res.data);
   // commit len bytes to conn window
   connSendFc_.commit(len);
+
+  // Connection FC blocked if we have data but conn window is exhausted
+  if (connSendFc_.getAvailable() == 0 &&
+      writeHandle.bufferedSendData_.hasData()) {
+    connFcBlockedStreams_.insert(&wh);
+  }
+
   XLOG(DBG8) << __func__ << "; atMost=" << atMost << "; len=" << len
              << "; fin=" << res.fin;
   return res;
 }
 
-WtStreamManager::WtWriteHandle* WtStreamManager::nextWritable() const noexcept {
-  WriteHandle* wh = !writableStreams_.empty()
-                        ? writehandle_ptr_cast(*writableStreams_.begin())
-                        : nullptr;
-  // streams with only a pending fin should be yielded even if connection-level
-  // flow control window is blocked
-  return (wh && (connSendFc_.getAvailable() > 0 ||
-                 wh->bufferedSendData_.onlyFinPending()))
-             ? wh
-             : nullptr;
-}
-
 void WtStreamManager::onStreamWritable(WtWriteHandle& wh) noexcept {
+  // Don't re-insert if already tracked as conn FC blocked
+  if (connFcBlockedStreams_.count(&wh) > 0) {
+    return;
+  }
+
   bool wasEmpty = !hasEvent();
-  writableStreams_.insert(&wh);
+
+  auto& writeHandle = writehandle_ref_cast(wh);
+  writableStreams_.insert(writeHandle.getID(), writeHandle.priority_);
+
   if (wasEmpty && hasEvent()) {
     egressCb_.eventsAvailable();
   }
@@ -623,29 +646,8 @@ bool WtStreamManager::canCreateBidi() const noexcept {
   return !streamLimitExceeded(nextStreamIds_.bidi);
 }
 
-/**
- * Even if wt connection is flow-control blocked, a stream with only a fin
- * pending should be yielded from ::nextWritable. We insert streams with only a
- * pending fin first in the set for ::nextWritable to check such cases in O(1)
- * time.
- */
-bool WtStreamManager::Compare::operator()(const WtWriteHandle* l,
-                                          const WtWriteHandle* r) const {
-  const auto* lWh = static_cast<const WriteHandle*>(l);
-  const auto* rWh = static_cast<const WriteHandle*>(r);
-  // safe to cast to int64_t as getID() is limited by kMaxVarint
-  int64_t lId = lWh->getID();
-  int64_t rId = rWh->getID();
-  // set highest order bit to ensure id is negative for onlyFinPending streams
-  // (i.e. always less than non-onlyFinPending streams) while maintaining stream
-  // id priority
-  lId |= int64_t(lWh->bufferedSendData_.onlyFinPending()) << 63;
-  rId |= int64_t(rWh->bufferedSendData_.onlyFinPending()) << 63;
-  return lId < rId;
-}
-
 bool WtStreamManager::hasEvent() const noexcept {
-  return nextWritable() != nullptr || !ctrlEvents_.empty();
+  return writableStreams_.hasStreams() || !ctrlEvents_.empty();
 }
 
 uint64_t WtStreamManager::initStreamRecvFc(uint64_t streamId) const noexcept {
@@ -695,6 +697,11 @@ WtStreamManager::WtWriteHandle* WtStreamManager::getEgressHandle(
 WtStreamManager::WtReadHandle* WtStreamManager::getIngressHandle(
     uint64_t streamId) const noexcept {
   return getBidiHandle(streamId).readHandle;
+}
+
+WtStreamManager::WtWriteHandle* WtStreamManager::nextWritable() const noexcept {
+  auto streamId = writableStreams_.peek();
+  return streamId ? getEgressHandle(*streamId) : nullptr;
 }
 
 } // namespace proxygen::coro::detail
@@ -839,7 +846,12 @@ folly::Expected<folly::Unit, WriteHandle::ErrCode> WriteHandle::resetStream(
 
 folly::Expected<folly::Unit, WriteHandle::ErrCode> WriteHandle::setPriority(
     quic::PriorityQueue::Priority priority) {
-  XLOG(FATAL) << "not implemented";
+  XCHECK_NE(state_, Closed) << "setPriority after close";
+
+  priority_ = priority;
+  smAccessor_.writableStreams().update(getID(), priority_);
+
+  return folly::unit;
 }
 
 Result WriteHandle::onMaxData(uint64_t offset) {
@@ -871,16 +883,26 @@ WritePromise WriteHandle::resetPromise() noexcept {
 // TODO(@damlaj): StreamData and DequeueResult should be the same struct
 StreamData WriteHandle::dequeue(uint64_t atMost) noexcept {
   XCHECK_NE(state_, Closed) << "dequeue after close";
+
   auto res = bufferedSendData_.dequeue(atMost);
   const auto bufferAvailable = bufferedSendData_.window().getBufferAvailable();
+
   if (bufferAvailable > 0) {
     if (auto p = resetPromise(); p.valid()) {
       p.setValue(bufferAvailable);
     }
   }
-  if (!bufferedSendData_.canSendData()) {
-    smAccessor_.writableStreams().erase(this);
+
+  auto bytesDequeued = computeChainLength(res.data);
+
+  // Erase if blocked (wrote nothing) or done (!canSendData)
+  // Consume if wrote data and still have more
+  if (bytesDequeued > 0 && bufferedSendData_.canSendData()) {
+    smAccessor_.writableStreams().consume(bytesDequeued);
+  } else {
+    smAccessor_.writableStreams().erase(getID());
   }
+
   finish(res.fin);
   return StreamData{std::move(res.data), res.fin};
 }
@@ -892,7 +914,9 @@ void WriteHandle::cancel(folly::exception_wrapper ex) noexcept {
   if (auto p = resetPromise(); p.valid()) {
     p.setException(ex_);
   }
-  smAccessor_.writableStreams().erase(this);
+  smAccessor_.writableStreams().erase(getID());
+  // Also remove from conn FC blocked set if present
+  smAccessor_.connFcBlockedStreams().erase(this);
   cs_.requestCancellation();
   // **beware finish must be last** (`this` can be deleted immediately after)
   finish(/*done=*/true);

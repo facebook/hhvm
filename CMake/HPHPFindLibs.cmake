@@ -271,6 +271,10 @@ if (APPLE)
   find_library(KERBEROS_LIB NAMES gssapi_krb5)
 endif()
 
+if (LINUX)
+  find_package(Bpf REQUIRED)
+endif()
+
 # This is required by Homebrew's libc. See
 # https://github.com/facebook/hhvm/pull/5728#issuecomment-124290712
 # for more info.
@@ -331,6 +335,10 @@ macro(hphp_link target)
   target_link_libraries(${target} ${VISIBILITY} ${LIBEVENT_LIB})
   target_link_libraries(${target} ${VISIBILITY} ${CURL_LIBRARIES})
   target_link_libraries(${target} ${VISIBILITY} glog)
+
+  if (LINUX)
+    target_link_libraries(${target} ${VISIBILITY} ${BPF_LIBRARIES})
+  endif()
 
   if (LIBINOTIFY_LIBRARY)
     target_link_libraries(${target} ${VISIBILITY} ${LIBINOTIFY_LIBRARY})

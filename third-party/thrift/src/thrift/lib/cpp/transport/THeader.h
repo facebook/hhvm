@@ -365,7 +365,7 @@ class THeader final {
       StringToStringMap& persistentReadHeaders);
 
   void setDesiredCompressionConfig(CompressionConfig compressionConfig) {
-    c_.compressionConfig_ = compressionConfig;
+    c_.compressionConfig_ = std::move(compressionConfig);
   }
 
   folly::Optional<CompressionConfig> getDesiredCompressionConfig() const {

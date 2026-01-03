@@ -27,8 +27,6 @@ namespace apache::thrift {
  */
 class HeaderChannel {
  public:
-  HeaderChannel() {}
-
   void addRpcOptionHeaders(
       apache::thrift::transport::THeader* header, const RpcOptions& rpcOptions);
 
@@ -44,14 +42,15 @@ class HeaderChannel {
     loggingContext_ = std::move(loggingContext);
   }
 
-  const transport::THeader::StringToStringMap& getPersistentWriteHeaders() {
+  const transport::THeader::StringToStringMap& getPersistentWriteHeaders()
+      const {
     return persistentWriteHeaders_;
   }
 
-  void preprocessHeader(apache::thrift::transport::THeader* header);
+  void preprocessHeader(apache::thrift::transport::THeader* header) const;
 
  protected:
-  virtual ~HeaderChannel() {}
+  virtual ~HeaderChannel() = default;
 
   virtual bool clientSupportHeader() { return true; }
 

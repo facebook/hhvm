@@ -61,7 +61,7 @@ void HeaderChannel::addRpcOptionHeaders(
 }
 
 void HeaderChannel::preprocessHeader(
-    apache::thrift::transport::THeader* header) {
+    apache::thrift::transport::THeader* header) const {
   header->mutableWriteHeaders().insert(
       persistentWriteHeaders_.begin(), persistentWriteHeaders_.end());
 
@@ -77,23 +77,18 @@ void HeaderChannel::preprocessHeader(
 
     if (!header->getDesiredCompressionConfig()) {
       apache::thrift::CompressionConfig compressionConfig;
-      switch (transform) {
-        case transport::THeader::ZLIB_TRANSFORM: {
-          apache::thrift::CodecConfig codec;
-          codec.zlibConfig() = apache::thrift::ZlibCompressionCodecConfig();
-          compressionConfig.codecConfig() = codec;
+      switch (auto&& codec = compressionConfig.codecConfig().emplace();
+              transform) {
+        case transport::THeader::ZLIB_TRANSFORM:
+          codec.zlibConfig().emplace();
           break;
-        }
-        case transport::THeader::ZSTD_TRANSFORM: {
-          apache::thrift::CodecConfig codec;
-          codec.zstdConfig() = apache::thrift::ZstdCompressionCodecConfig();
-          compressionConfig.codecConfig() = codec;
+        case transport::THeader::ZSTD_TRANSFORM:
+          codec.zstdConfig().emplace();
           break;
-        }
         default:
           LOG(DFATAL) << "Unsupported transform: " << transform;
       }
-      header->setDesiredCompressionConfig(compressionConfig);
+      header->setDesiredCompressionConfig(std::move(compressionConfig));
     }
   }
   if (loggingContext_) {

@@ -4827,6 +4827,14 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                     default(self);
                 }
             }
+            PrefixedStringExpression(x) => {
+                // Allow prefixed strings (e.g., re'/foo/') in constant expressions for runtime only
+                if self.env.is_typechecker() {
+                    default(self)
+                } else {
+                    self.check_constant_expression(&x.str, static_allowed)
+                }
+            }
             _ => default(self),
         }
     }

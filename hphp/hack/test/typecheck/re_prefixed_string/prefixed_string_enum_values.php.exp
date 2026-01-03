@@ -1,0 +1,4 @@
+ERROR: File "prefixed_string_enum_values.php", line 4, characters 12-23:
+Expected constant expression for initializer (Parsing[1002])
+ERROR: File "prefixed_string_enum_values.php", line 4, characters 12-23:
+Illegal constant value (Naming[2023])

@@ -271,6 +271,10 @@ if (APPLE)
   find_library(KERBEROS_LIB NAMES gssapi_krb5)
 endif()
 
+if (LINUX)
+  find_package(LibUnwind REQUIRED)
+endif()
+
 # This is required by Homebrew's libc. See
 # https://github.com/facebook/hhvm/pull/5728#issuecomment-124290712
 # for more info.
@@ -418,6 +422,10 @@ macro(hphp_link target)
 
   target_link_libraries(${target} ${VISIBILITY} afdt)
   target_link_libraries(${target} ${VISIBILITY} mbfl)
+
+  if (LINUX)
+    target_link_libraries(${target} ${VISIBILITY} ${LIBUNWIND_LIBRARIES})
+  endif()
 
   if (EDITLINE_LIBRARIES)
     target_link_libraries(${target} ${VISIBILITY} ${EDITLINE_LIBRARIES})

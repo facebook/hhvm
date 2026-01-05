@@ -593,8 +593,8 @@ StreamData WtStreamManager::dequeue(WtWriteHandle& wh,
   connSendFc_.commit(len);
 
   // Connection FC blocked if we have data but conn window is exhausted
-  if (connSendFc_.getAvailable() == 0 &&
-      writeHandle.bufferedSendData_.hasData()) {
+  const bool hasData = !res.fin && writeHandle.bufferedSendData_.hasData();
+  if (connSendFc_.getAvailable() == 0 && hasData) {
     connFcBlockedStreams_.insert(&wh);
   }
 

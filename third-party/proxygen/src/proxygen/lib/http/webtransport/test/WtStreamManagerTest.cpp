@@ -351,6 +351,27 @@ TEST(WtStreamManager, WriteEgressHandle) {
   EXPECT_TRUE(dequeue.fin);
 }
 
+TEST(WtStreamManager, DequeueWriteConnFcBlocked) {
+  WtConfig config{.peerMaxStreamsUni = 1};
+  WtSmEgressCb egressCb;
+  WtSmIngressCb ingressCb;
+  auto priorityQueue = std::make_unique<quic::HTTPPriorityQueue>();
+  WtStreamManager streamManager{
+      detail::WtDir::Client, config, egressCb, ingressCb, *priorityQueue};
+
+  auto uni = CHECK_NOTNULL(streamManager.createEgressHandle());
+  // write kBufLen & fin into stream (fills egress buffer)
+  constexpr auto kBufLen = 65'535;
+  auto res = uni->writeStreamData(
+      makeBuf(kBufLen), /*fin=*/true, /*byteEventCallback=*/nullptr);
+  EXPECT_TRUE(res.hasValue() && *res == WebTransport::FCState::BLOCKED);
+
+  // we should be able to dequeue kBufLen data from one.writeHandle
+  expectNextWritable(priorityQueue.get(), uni->getID());
+  auto dequeue = streamManager.dequeue(*uni, /*atMost=*/kBufLen);
+  EXPECT_TRUE(dequeue.data && dequeue.fin);
+}
+
 TEST(WtStreamManager, BidiHandleCancellation) {
   WtConfig config{};
   WtSmEgressCb egressCb;

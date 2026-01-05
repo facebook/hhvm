@@ -198,7 +198,7 @@ inline AsyncMcServer::Options createAsyncMcServerOptions(
       opts.setMaxConnections(standaloneOpts.max_conns, opts.numThreads);
   if (maxConns > 0) {
     VLOG(1) << "The system will allow " << maxConns
-            << " simultaneos connections before start closing connections"
+            << " simultaneous connections before start closing connections"
             << " using an LRU algorithm";
   }
 

@@ -11050,8 +11050,9 @@ size_t color_block_initialize(
     }
   }
 
-  if (arch() == Arch::ARM)
+  if (arch() == Arch::ARM) {
     align_group_assignments(state, free, b, assignments, processed);
+  }
 
   // Now that we've selected registers for all the Vregs, we need to
   // bias any unprocessed predecessors. That is, we want to make it

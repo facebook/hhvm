@@ -9,6 +9,11 @@
 open Hh_prelude
 open ServerEnv
 
+[@@@alert "-dependencies"]
+(* TODO: either use fanout-aware functions from typing env
+ * or update this comment to say why we don't need them
+ *)
+
 type member = Method of string
 
 let findrefs_member_of_member = function

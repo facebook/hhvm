@@ -108,14 +108,14 @@ bool QueryArgument::isAliasedAggregateColumn() const {
 QueryArgument&& QueryArgument::operator()(
     folly::StringPiece q1,
     const QueryArgument& q2) {
-  getPairs().emplace_back(ArgPair(q1.str(), q2));
+  getPairs().emplace_back(q1.str(), q2);
   return std::move(*this);
 }
 
 QueryArgument&& QueryArgument::operator()(
     folly::fbstring&& q1,
     QueryArgument&& q2) {
-  getPairs().emplace_back(ArgPair(std::move(q1), std::move(q2)));
+  getPairs().emplace_back(std::move(q1), std::move(q2));
   return std::move(*this);
 }
 
@@ -237,7 +237,7 @@ void QueryArgument::initFromDynamic(const folly::dynamic& param) {
     for (const auto& key : keys) {
       QueryArgument q2(fromDynamic(param[key]));
 
-      vec.emplace_back(ArgPair(key.asString(), q2));
+      vec.emplace_back(key.asString(), q2);
     }
   } else if (param.isNull()) {
     value_ = {};

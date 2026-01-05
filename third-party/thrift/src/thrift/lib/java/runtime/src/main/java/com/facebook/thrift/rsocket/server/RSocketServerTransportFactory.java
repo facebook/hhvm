@@ -20,6 +20,7 @@ import com.facebook.swift.service.ThriftServerConfig;
 import com.facebook.thrift.server.RpcServerHandler;
 import com.facebook.thrift.server.ServerTransportFactory;
 import com.facebook.thrift.util.RpcServerUtils;
+import com.facebook.thrift.util.SPINiftyMetrics;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import reactor.core.publisher.Mono;
@@ -34,14 +35,17 @@ public class RSocketServerTransportFactory
 
   @Override
   public Mono<? extends RSocketServerTransport> createServerTransport(
-      SocketAddress bindAddress, RpcServerHandler rpcServerHandler) {
-    return RSocketServerTransport.createInstance(parsePort(bindAddress), rpcServerHandler, config);
+      SocketAddress bindAddress, RpcServerHandler rpcServerHandler, SPINiftyMetrics serverMetrics) {
+    return RSocketServerTransport.createInstance(
+        parsePort(bindAddress), rpcServerHandler, config, serverMetrics);
   }
 
   public Mono<? extends RSocketServerTransport> createServerTransport(
       RpcServerHandler rpcServerHandler) {
     return createServerTransport(
-        new InetSocketAddress("localhost", parsePort(config.getPort())), rpcServerHandler);
+        new InetSocketAddress("localhost", parsePort(config.getPort())),
+        rpcServerHandler,
+        new SPINiftyMetrics());
   }
 
   private int parsePort(int port) {

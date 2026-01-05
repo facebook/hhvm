@@ -57,7 +57,10 @@ public class LegacyServerTransport implements ServerTransport {
   }
 
   static Mono<LegacyServerTransport> createNewInstance(
-      SocketAddress bindAddress, RpcServerHandler rpcServerHandler, ThriftServerConfig config) {
+      SocketAddress bindAddress,
+      RpcServerHandler rpcServerHandler,
+      ThriftServerConfig config,
+      SPINiftyMetrics serverMetrics) {
 
     return Mono.defer(
         () -> {
@@ -65,7 +68,6 @@ public class LegacyServerTransport implements ServerTransport {
           requireNonNull(config, "config is null");
 
           MonoProcessor<Void> onClose = MonoProcessor.create();
-          SPINiftyMetrics metrics = new SPINiftyMetrics();
 
           Optional<Supplier<SslContext>> sslContext = Optional.empty();
           if (config.isSslEnabled() && bindAddress instanceof InetSocketAddress) {
@@ -80,7 +82,7 @@ public class LegacyServerTransport implements ServerTransport {
                   sslContext,
                   config.isAllowPlaintext(),
                   config.isAssumeClientsSupportOutOfOrderResponses(),
-                  metrics,
+                  serverMetrics,
                   config.getConnectionLimit());
 
           EventLoopGroup group = RpcResources.getEventLoopGroup();
@@ -116,7 +118,7 @@ public class LegacyServerTransport implements ServerTransport {
           NettyUtil.toMono(channel.closeFuture()).subscribe(onClose);
 
           return NettyUtil.toMono(bind)
-              .thenReturn(new LegacyServerTransport(channel, metrics, onClose));
+              .thenReturn(new LegacyServerTransport(channel, serverMetrics, onClose));
         });
   }
 

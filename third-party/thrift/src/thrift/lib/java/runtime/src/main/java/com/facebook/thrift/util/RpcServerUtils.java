@@ -216,15 +216,16 @@ public final class RpcServerUtils {
 
     final int port = config.getPort() == 0 ? RpcServerUtils.findFreePort() : config.getPort();
 
+    SPINiftyMetrics serverMetrics = new SPINiftyMetrics();
     if (config.isEnableUDS()) {
       return transportFactory.createServerTransport(
-          new DomainSocketAddress(config.getUdsPath()), rpcServerHandler);
+          new DomainSocketAddress(config.getUdsPath()), rpcServerHandler, serverMetrics);
     } else if (config.isBindAddressEnabled()) {
       return transportFactory.createServerTransport(
-          new InetSocketAddress(config.getBindAddress(), port), rpcServerHandler);
+          new InetSocketAddress(config.getBindAddress(), port), rpcServerHandler, serverMetrics);
     } else {
       return transportFactory.createServerTransport(
-          new InetSocketAddress("localhost", port), rpcServerHandler);
+          new InetSocketAddress("localhost", port), rpcServerHandler, serverMetrics);
     }
   }
 

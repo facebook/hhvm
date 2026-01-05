@@ -19,6 +19,7 @@ package com.facebook.thrift.legacy.server;
 import com.facebook.swift.service.ThriftServerConfig;
 import com.facebook.thrift.server.RpcServerHandler;
 import com.facebook.thrift.server.ServerTransportFactory;
+import com.facebook.thrift.util.SPINiftyMetrics;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import reactor.core.publisher.Mono;
@@ -32,13 +33,16 @@ public class LegacyServerTransportFactory implements ServerTransportFactory<Lega
 
   @Override
   public Mono<? extends LegacyServerTransport> createServerTransport(
-      SocketAddress bindAddress, RpcServerHandler rpcServerHandler) {
-    return LegacyServerTransport.createNewInstance(bindAddress, rpcServerHandler, config);
+      SocketAddress bindAddress, RpcServerHandler rpcServerHandler, SPINiftyMetrics serverMetrics) {
+    return LegacyServerTransport.createNewInstance(
+        bindAddress, rpcServerHandler, config, serverMetrics);
   }
 
   public Mono<? extends LegacyServerTransport> createServerTransport(
       RpcServerHandler rpcServerHandler) {
     return createServerTransport(
-        new InetSocketAddress("localhost", config.getPort()), rpcServerHandler);
+        new InetSocketAddress("localhost", config.getPort()),
+        rpcServerHandler,
+        new SPINiftyMetrics());
   }
 }

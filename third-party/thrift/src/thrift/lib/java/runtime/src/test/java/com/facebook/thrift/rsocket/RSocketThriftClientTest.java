@@ -32,6 +32,7 @@ import com.facebook.thrift.rsocket.server.RSocketServerTransport;
 import com.facebook.thrift.rsocket.server.RSocketServerTransportFactory;
 import com.facebook.thrift.server.RpcServerHandler;
 import com.facebook.thrift.util.FutureUtil;
+import com.facebook.thrift.util.SPINiftyMetrics;
 import com.google.common.util.concurrent.ListenableFuture;
 import io.airlift.units.Duration;
 import java.net.InetSocketAddress;
@@ -119,7 +120,9 @@ public class RSocketThriftClientTest {
     RSocketServerTransportFactory transportFactory =
         new RSocketServerTransportFactory(new ThriftServerConfig().setEnableJdkSsl(false));
     RSocketServerTransport transport =
-        transportFactory.createServerTransport(new InetSocketAddress(0), serverHandler).block();
+        transportFactory
+            .createServerTransport(new InetSocketAddress(0), serverHandler, new SPINiftyMetrics())
+            .block();
     InetSocketAddress address = (InetSocketAddress) transport.getAddress();
 
     RpcClientFactory factory =

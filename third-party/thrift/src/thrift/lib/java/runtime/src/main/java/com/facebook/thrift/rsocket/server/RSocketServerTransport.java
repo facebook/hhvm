@@ -44,17 +44,18 @@ public class RSocketServerTransport implements ServerTransport {
   }
 
   static Mono<RSocketServerTransport> createInstance(
-      SocketAddress socketAddress, RpcServerHandler rpcServerHandler, ThriftServerConfig config) {
+      SocketAddress socketAddress,
+      RpcServerHandler rpcServerHandler,
+      ThriftServerConfig config,
+      SPINiftyMetrics serverMetrics) {
     try {
       requireNonNull(rpcServerHandler, "methodInvoker is null");
       requireNonNull(config, "config is null");
 
-      SPINiftyMetrics metrics = new SPINiftyMetrics();
-
       return RSocketServer.create(new ThriftSocketAcceptor(rpcServerHandler))
           .fragment(MAX_FRAME_SIZE)
           .payloadDecoder(PayloadDecoder.ZERO_COPY)
-          .bind(new ReactorServerTransport(socketAddress, config, metrics))
+          .bind(new ReactorServerTransport(socketAddress, config, serverMetrics))
           .map(RSocketServerTransport::new);
     } catch (Exception e) {
       return Mono.error(e);

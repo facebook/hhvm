@@ -56,6 +56,9 @@ public class ServerStats {
   private static final String ACTIVE_REQUESTS_KEY = "thrift.active_requests.avg";
   private static final String QUEUED_REQUESTS_KEY = "thrift.queued_requests.avg.60";
   // Connection related Counter Keys
+  private static final String CHANNEL_COUNT_KEY = "thrift.channel.count";
+  private static final String BYTES_READ_KEY = "thrift.bytes_read.count";
+  private static final String BYTES_WRITTEN_KEY = "thrift.bytes_written.count";
   private static final String ACCEPTED_CONNS_KEY = "thrift.accepted_connections.count";
   private static final String DROPPED_CONNS_KEY = "thrift.dropped_conns.count";
   private static final String REJECTED_CONNS_KEY = "thrift.rejected_conns.count";
@@ -146,6 +149,11 @@ public class ServerStats {
       resultCounters.put(QUEUED_REQUESTS_KEY, (long) threadPoolExecutor.getQueue().size());
     }
     if (niftyMetrics != null) {
+      resultCounters.put(CHANNEL_COUNT_KEY, (long) niftyMetrics.getChannelCount());
+
+      resultCounters.put(BYTES_READ_KEY, niftyMetrics.getBytesRead());
+      resultCounters.put(BYTES_WRITTEN_KEY, niftyMetrics.getBytesWritten());
+
       resultCounters.put(ACCEPTED_CONNS_KEY, niftyMetrics.getAcceptedConnections());
       resultCounters.put(
           ACCEPTED_CONNS_KEY + ONE_MINUTE, niftyMetrics.getAcceptedConnectionsOneMin());

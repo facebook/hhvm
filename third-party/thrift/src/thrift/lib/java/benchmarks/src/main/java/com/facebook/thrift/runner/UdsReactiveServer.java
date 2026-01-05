@@ -23,6 +23,7 @@ import com.facebook.thrift.example.ping.PingService;
 import com.facebook.thrift.example.ping.PingServiceRpcServerHandler;
 import com.facebook.thrift.legacy.server.LegacyServerTransport;
 import com.facebook.thrift.legacy.server.LegacyServerTransportFactory;
+import com.facebook.thrift.util.SPINiftyMetrics;
 import io.netty.channel.unix.DomainSocketAddress;
 import io.netty.util.ResourceLeakDetector;
 import java.util.Collections;
@@ -48,7 +49,9 @@ public class UdsReactiveServer {
             new ThriftServerConfig().setSslEnabled(false).setUdsPath("/tmp/uds_benchmark.socket"));
     DomainSocketAddress socketAddress = new DomainSocketAddress("/tmp/uds_benchmark.socket");
     LegacyServerTransport transport =
-        transportFactory.createServerTransport(socketAddress, serverHandler).block();
+        transportFactory
+            .createServerTransport(socketAddress, serverHandler, new SPINiftyMetrics())
+            .block();
 
     LockSupport.park();
   }

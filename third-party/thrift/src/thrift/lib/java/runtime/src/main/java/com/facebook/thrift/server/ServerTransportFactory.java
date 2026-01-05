@@ -16,10 +16,11 @@
 
 package com.facebook.thrift.server;
 
+import com.facebook.thrift.util.SPINiftyMetrics;
 import java.net.SocketAddress;
 import reactor.core.publisher.Mono;
 
 public interface ServerTransportFactory<T extends ServerTransport> {
   Mono<? extends T> createServerTransport(
-      SocketAddress bindAddress, RpcServerHandler rpcServerHandler);
+      SocketAddress bindAddress, RpcServerHandler rpcServerHandler, SPINiftyMetrics niftyMetrics);
 }

@@ -25,6 +25,7 @@ import com.facebook.thrift.example.ping.PingService;
 import com.facebook.thrift.example.ping.PingServiceReactiveClient;
 import com.facebook.thrift.example.ping.PingServiceRpcServerHandler;
 import com.facebook.thrift.legacy.server.LegacyServerTransportFactory;
+import com.facebook.thrift.util.SPINiftyMetrics;
 import com.facebook.thrift.util.resources.RpcResources;
 import io.netty.channel.unix.DomainSocketAddress;
 import java.net.InetSocketAddress;
@@ -84,7 +85,7 @@ public class ReactiveRpcBenchmarks {
       LegacyServerTransportFactory factory =
           new LegacyServerTransportFactory(
               new ThriftServerConfig().setSslEnabled(false).setUdsPath("/tmp/jmh.socket"));
-      factory.createServerTransport(socketAddress, serverHandler).block();
+      factory.createServerTransport(socketAddress, serverHandler, new SPINiftyMetrics()).block();
       System.out.println("Ping Service started...");
 
       System.out.println("Connecting Ping Service Client...");

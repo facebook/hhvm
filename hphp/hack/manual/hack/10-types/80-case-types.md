@@ -4,7 +4,7 @@ Case types are a special kind of type alias that enable declaration of runtime-d
 
 ## Basic Syntax
 
-```hack
+```
 case type Name = Variant1 | Variant2 | ... ;
 case type Name<T1, T2> as UpperBound = Variant1 | Variant2 | ... ;
 ```
@@ -18,6 +18,8 @@ case type Name<T1, T2> as UpperBound = Variant1 | Variant2 | ... ;
 ### Examples
 
 ```hack
+class MyClass {}
+
 case type SimpleCaseType = int | MyClass;
 
 case type BoundedAndGenericCaseType<+Tk as arraykey> as nonnull =
@@ -102,8 +104,10 @@ case type CT = int | string;
 // When CT is expected (super side), we can pass int or string
 function accept_ct(CT $x): void {}
 
-accept_ct(42);        // OK: int <: (int | string)
-accept_ct("hello");   // OK: string <: (int | string)
+function f(): void {
+  accept_ct(42);      // OK: int <: (int | string)
+  accept_ct("hello"); // OK: string <: (int | string)
+}
 ```
 
 ### When Case Type is on the Sub Side (Left Side)
@@ -134,6 +138,8 @@ function test(CT_Bounded $bounded, CT_No_Bounds $unbounded): void {
 Case types can be decomposed using `is` runtime type checks:
 
 ```hack
+final class MyClass {}
+
 case type MyCaseType = int | string | MyClass;
 
 function takes_case_type(MyCaseType $x): void {

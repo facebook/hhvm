@@ -1,0 +1,24 @@
+ERROR: File "80-case-types-05.hack", line 11, characters 14-21:
+Invalid argument (Typing[4110])
+  File "80-case-types-05.hack", line 6, characters 21-23:
+  Expected `int`
+  File "80-case-types-05.hack", line 10, characters 15-24:
+  But got `arraykey`
+  File "80-case-types-05.hack", line 3, characters 25-32:
+    by the definition of `CT_Bounded`
+ERROR: File "80-case-types-05.hack", line 15, characters 14-23:
+Invalid argument (Typing[4110])
+  File "80-case-types-05.hack", line 6, characters 21-23:
+  Expected `int`
+  File "80-case-types-05.hack", line 10, characters 36-47:
+  But got `mixed`
+  File "80-case-types-05.hack", line 4, characters 11-22:
+    by the definition of `CT_No_Bounds`
+ERROR: File "80-case-types-05.hack", line 16, characters 19-28:
+Invalid argument (Typing[4110])
+  File "80-case-types-05.hack", line 7, characters 26-33:
+  Expected `arraykey`
+  File "80-case-types-05.hack", line 10, characters 36-47:
+  But got `mixed`
+  File "80-case-types-05.hack", line 4, characters 11-22:
+    by the definition of `CT_No_Bounds`

@@ -100,6 +100,7 @@ fn looks_like_toplevel_code(src: &str) -> bool {
         // Type aliases
         "type",
         "newtype",
+        "case",
         // Constants
         "const",
         // Modules

@@ -62,16 +62,12 @@ enum ThrowWhere {
 }
 
 service TestBidiService {
-  // @lint-ignore THRIFTCHECKS new unreleased feature
   sink<string>, stream<string> echo(1: double serverDelay);
 
-  // @lint-ignore THRIFTCHECKS new unreleased feature
   string, sink<string>, stream<string> echoWithResponse(1: string initial);
 
-  // @lint-ignore THRIFTCHECKS new unreleased feature
-  sink<string>, stream<i32> intStream(double serverDelay);
+  sink<string>, stream<i32> intStream(1: double serverDelay);
 
-  // @lint-ignore THRIFTCHECKS new unreleased feature
   FirstResponse, sink<SinkChunk>, stream<StreamChunk> structBidi(
     1: FirstRequest request,
   );
@@ -81,7 +77,6 @@ service TestBidiService {
   // if where is 1, throws on the stream before first chunk
   // if where is 2, throws on the stream after first chunk
   // otherwise, doesn't throw
-  // @lint-ignore THRIFTCHECKS new unreleased feature
   sink<i64 throws (1: SinkException sinkEx)>, stream<
     i64 throws (1: StreamException streamEx)
   > canThrow(1: ThrowWhere where, 2: bool expected_throw) throws (

@@ -17,6 +17,8 @@ let on_hint on_error hint ~ctx =
           ~init:(false, false)
           ~f:(fun (seen_optional, optional_precedes_non_optional) pi ->
             match pi with
+            | Some { Aast.hfparam_splat = Some Ast_defs.Splat; _ } ->
+              (seen_optional, optional_precedes_non_optional)
             | Some { Aast.hfparam_optional = Some Ast_defs.Optional; _ } ->
               (true, optional_precedes_non_optional)
             | _ ->

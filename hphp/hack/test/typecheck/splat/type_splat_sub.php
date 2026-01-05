@@ -14,7 +14,7 @@ function expectSplatFun<T as (mixed...)>(
   // Just test passing a function with a splat parameter to
   // another function that expects the same
   expectSplatFunAux($f, $tup);
-  //($f)(2, ...$tup);
+  ($f)(2, ...$tup);
 }
 
 function none(int $i): void {
@@ -57,4 +57,21 @@ function test2(
   expectSplatFun($atleast_one, tuple(45));
   expectSplatFun($atleast_one, tuple(45, 2.0));
   expectSplatFun($atleast_one, tuple(45, 3.0, 54));
+}
+
+function expectFunWithSplat<T as (mixed...)>(
+  (function(int, optional bool, ...T): void) $f,
+  ... T $args,
+): void {
+  ($f)(1, true, ...$args);
+}
+function expectFunControl((function(int, optional bool): void) $f): void {}
+
+function test3(
+  (function(int, bool): void) $g1,
+  (function(int): void) $g2,
+  (function(int, bool, string): void) $g3,
+): void {
+  expectFunWithSplat($g2, 23);
+  expectFunWithSplat($g3);
 }

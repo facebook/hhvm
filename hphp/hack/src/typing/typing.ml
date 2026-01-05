@@ -7342,8 +7342,10 @@ end = struct
                   Supposing that $yi have types yi, we just need to assert
                     (u1, ..., un) <: (t1, ..., tm, `...`t)
               *)
-              let consumed =
-                List.length plain_params - List.length plain_params_remaining
+              let (consumed, required_params, optional_params) =
+                split_remaining_params_required_optional
+                  non_variadic_or_splat_params
+                  plain_params_remaining
               in
               let remaining_actual_tys =
                 List.drop (List.map argtys ~f:snd) consumed
@@ -7389,13 +7391,15 @@ end = struct
               in
               let expected_ty =
                 mk
-                  ( Reason.unpack_param (Pos.none, pos_def, consumed),
+                  ( Reason.witness_from_decl splat_param.fp_pos,
                     Ttuple
                       {
                         t_required =
-                          List.map plain_params_remaining ~f:(fun (_, fp) ->
+                          List.map required_params ~f:(fun (_, fp) ->
                               fp.fp_type);
-                        t_optional = [];
+                        t_optional =
+                          List.map optional_params ~f:(fun (_, fp) ->
+                              fp.fp_type);
                         t_extra = Tsplat splat_param.fp_type;
                       } )
               in

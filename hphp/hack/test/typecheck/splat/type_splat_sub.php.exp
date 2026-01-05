@@ -1,1 +1,12 @@
-No errors
+ERROR: File "type_splat_sub.php", line 75, characters 22-24:
+Invalid argument (Typing[4040])
+  File "type_splat_sub.php", line 72, characters 3-23:
+  Too few positional arguments (required 2 but got 1)
+  File "type_splat_sub.php", line 63, characters 3-44:
+  Because of this definition
+ERROR: File "type_splat_sub.php", line 76, characters 22-24:
+Invalid argument (Typing[4341])
+  File "type_splat_sub.php", line 73, characters 18-21:
+  Parameter required but expected to be optional
+  File "type_splat_sub.php", line 63, characters 27-30:
+  Because of this definition

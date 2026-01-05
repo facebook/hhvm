@@ -1639,13 +1639,15 @@ end = struct
             (r_super, idx_super, ty_super)
 
   and simplify_param_modes ~subtype_env ~fn_param_sub ~fn_param_super env =
-    let { fp_pos = pos1; _ } = fn_param_super in
-    let { fp_pos = pos2; _ } = fn_param_sub in
-    match (get_fp_mode fn_param_super, get_fp_mode fn_param_sub) with
-    | (FPnormal, FPnormal)
-    | (FPinout, FPinout) ->
-      valid env
-    | (FPnormal, FPinout) ->
+    let { fp_pos = pos1; fp_name = name1; _ } = fn_param_super in
+    let { fp_pos = pos2; fp_name = name2; _ } = fn_param_sub in
+    (* Usually an arity check covers this case, except in the case that a splat parameter is preceded by an optional parameter *)
+    if
+      get_fp_is_optional fn_param_super
+      && (not (get_fp_is_optional fn_param_sub))
+      && Option.is_none name1
+      && Option.is_none name2
+    then
       invalid
         ~fail:
           (Option.map
@@ -1654,21 +1656,38 @@ end = struct
                Typing_error.(
                  fun on_error ->
                    apply_reasons ~on_error
-                   @@ Secondary.Inoutness_mismatch
-                        { pos = pos2; decl_pos = pos1 }))
+                   @@ Secondary.Fun_param_required_but_expected_optional
+                        { pos = pos2; decl_pos = pos1; param_names = [] }))
         env
-    | (FPinout, FPnormal) ->
-      invalid
-        ~fail:
-          (Option.map
-             subtype_env.Subtype_env.on_error
-             ~f:
-               Typing_error.(
-                 fun on_error ->
-                   apply_reasons ~on_error
-                   @@ Secondary.Inoutness_mismatch
-                        { pos = pos1; decl_pos = pos2 }))
-        env
+    else
+      match (get_fp_mode fn_param_super, get_fp_mode fn_param_sub) with
+      | (FPnormal, FPnormal)
+      | (FPinout, FPinout) ->
+        valid env
+      | (FPnormal, FPinout) ->
+        invalid
+          ~fail:
+            (Option.map
+               subtype_env.Subtype_env.on_error
+               ~f:
+                 Typing_error.(
+                   fun on_error ->
+                     apply_reasons ~on_error
+                     @@ Secondary.Inoutness_mismatch
+                          { pos = pos2; decl_pos = pos1 }))
+          env
+      | (FPinout, FPnormal) ->
+        invalid
+          ~fail:
+            (Option.map
+               subtype_env.Subtype_env.on_error
+               ~f:
+                 Typing_error.(
+                   fun on_error ->
+                     apply_reasons ~on_error
+                     @@ Secondary.Inoutness_mismatch
+                          { pos = pos1; decl_pos = pos2 }))
+          env
 
   and simplify_param_accept_disposable
       ~subtype_env ~fn_param_sub ~fn_param_super env =
@@ -2137,7 +2156,6 @@ end = struct
         ~arg_pos subtype_env fn_param_sub fn_param_super env =
       let { fp_type = ty_sub; _ } = fn_param_sub
       and { fp_type = ty_super; _ } = fn_param_super in
-
       (* Construct the subtype proposition for the two parameters; function
          paramaters are contravariant unless they are marked with `inout`
          in which case they are typed as invariant *)
@@ -2351,7 +2369,32 @@ end = struct
         ~this_ty:None
         ~lhs:{ sub_supportdyn = None; ty_sub = tuple_ty }
         ~rhs:{ super_like = false; super_supportdyn = false; ty_super = ty_sub }
-    | ([], _) -> valid
+      (* We've run out of parameters *)
+    | ([], _ :: _) ->
+      let splat_super =
+        match List.last positional_params_super with
+        | Some fp -> get_fp_splat fp
+        | None -> false
+      in
+      if splat_super then
+        let fail =
+          Option.map
+            subtype_env.Subtype_env.on_error
+            ~f:
+              Typing_error.(
+                fun on_error ->
+                  apply_reasons ~on_error
+                  @@ Secondary.Fun_too_few_args
+                       {
+                         pos = Reason.to_pos r_sub;
+                         decl_pos = Reason.to_pos r_super;
+                         actual = idx_sub;
+                         expected = List.length fn_params_super;
+                       })
+        in
+        invalid ~fail
+      else
+        valid
     | (_, []) -> valid
     | (fn_param_sub :: fn_params_sub, fn_param_super :: fn_params_super) ->
       let (arg_pos, arg_posl) =

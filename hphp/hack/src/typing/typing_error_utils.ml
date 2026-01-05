@@ -5510,17 +5510,20 @@ end = struct
       lazy
         [
           ( pos,
-            Printf.sprintf
-              "Named parameter%s %s %s required but expected to be optional"
-              (if List.length param_names > 1 then
-                "s"
-              else
-                "")
-              names_str
-              (if List.length param_names > 1 then
-                "are"
-              else
-                "is") );
+            if List.is_empty param_names then
+              "Parameter required but expected to be optional"
+            else
+              Printf.sprintf
+                "Named parameter%s %s %s required but expected to be optional"
+                (if List.length param_names > 1 then
+                  "s"
+                else
+                  "")
+                names_str
+                (if List.length param_names > 1 then
+                  "are"
+                else
+                  "is") );
           (decl_pos, "Because of this definition");
         ]
     in

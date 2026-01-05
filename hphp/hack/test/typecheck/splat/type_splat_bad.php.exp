@@ -1,54 +1,48 @@
-ERROR: File "type_splat_bad.php", line 6, characters 46-53:
+ERROR: File "type_splat_bad.php", line 7, characters 13-20:
 A splat parameter `...` may only appear at the end of a parameter list. (Parsing[1002])
-ERROR: File "type_splat_bad.php", line 6, characters 71-86:
+ERROR: File "type_splat_bad.php", line 8, characters 3-19:
 A splat parameter `...` may only appear at the end of a parameter list. (Parsing[1002])
-ERROR: File "type_splat_bad.php", line 10, characters 46-53:
+ERROR: File "type_splat_bad.php", line 15, characters 13-20:
 A splat parameter `...` may only appear at the end of a parameter list. (Parsing[1002])
-ERROR: File "type_splat_bad.php", line 10, characters 74-90:
+ERROR: File "type_splat_bad.php", line 16, characters 3-19:
 A splat parameter `...` may only appear at the end of a parameter list. (Parsing[1002])
-ERROR: File "type_splat_bad.php", line 14, characters 46-53:
+ERROR: File "type_splat_bad.php", line 23, characters 13-20:
 A splat parameter `...` may only appear at the end of a parameter list. (Parsing[1002])
-ERROR: File "type_splat_bad.php", line 14, characters 80-96:
+ERROR: File "type_splat_bad.php", line 24, characters 3-19:
 A splat parameter `...` may only appear at the end of a parameter list. (Parsing[1002])
-ERROR: File "type_splat_bad.php", line 18, characters 36-74:
-Optional parameter cannot precede non-optional parameter (Parsing[1002])
-ERROR: File "type_splat_bad.php", line 22, characters 46-51:
+ERROR: File "type_splat_bad.php", line 31, characters 13-18:
 A variadic parameter `...` may only appear at the end of a parameter list. (Parsing[1002])
-ERROR: File "type_splat_bad.php", line 22, characters 74-85:
+ERROR: File "type_splat_bad.php", line 32, characters 3-14:
 A variadic parameter `...` may only appear at the end of a parameter list. (Parsing[1002])
-ERROR: File "type_splat_bad.php", line 26, characters 47-76:
+ERROR: File "type_splat_bad.php", line 39, characters 3-33:
 A splat parameter `...` must not have a default value. (Parsing[1002])
-ERROR: File "type_splat_bad.php", line 31, characters 60-76:
+ERROR: File "type_splat_bad.php", line 46, characters 20-36:
 A splat parameter cannot also be optional. (Parsing[1002])
-ERROR: File "type_splat_bad.php", line 31, characters 89-113:
+ERROR: File "type_splat_bad.php", line 47, characters 5-30:
 A splat parameter cannot also be optional. (Parsing[1002])
-ERROR: File "type_splat_bad.php", line 33, characters 60-70:
+ERROR: File "type_splat_bad.php", line 51, characters 20-30:
 A splat parameter cannot also be variadic. (Parsing[1002])
-ERROR: File "type_splat_bad.php", line 33, characters 83-101:
+ERROR: File "type_splat_bad.php", line 52, characters 5-24:
 A splat parameter cannot also be variadic. (Parsing[1002])
-ERROR: File "type_splat_bad.php", line 37, characters 51-64:
+ERROR: File "type_splat_bad.php", line 58, characters 18-31:
 A splat parameter `...` cannot have a modifier that changes the calling convention, like `inout`. (Parsing[1002])
-ERROR: File "type_splat_bad.php", line 37, characters 77-96:
+ERROR: File "type_splat_bad.php", line 59, characters 3-23:
 A splat parameter `...` cannot have a modifier that changes the calling convention, like `inout`. (Parsing[1002])
-ERROR: File "type_splat_bad.php", line 40, characters 52-68:
+ERROR: File "type_splat_bad.php", line 64, characters 18-34:
 Splat parameters cannot be marked readonly (Parsing[1002])
-ERROR: File "type_splat_bad.php", line 40, characters 81-103:
+ERROR: File "type_splat_bad.php", line 65, characters 3-26:
 Splat parameters cannot be marked readonly (Parsing[1002])
-ERROR: File "type_splat_bad.php", line 18, characters 104-110:
-A previous parameter has a default value.
-Remove all the default values for the preceding parameters,
-or add a default value to this one. (Typing[4077])
-ERROR: File "type_splat_bad.php", line 26, characters 51-55:
+ERROR: File "type_splat_bad.php", line 39, characters 7-11:
 Some type arguments violate their constraints (Typing[4323])
-  File "type_splat_bad.php", line 26, characters 57-63:
+  File "type_splat_bad.php", line 39, characters 13-19:
   Expected `(mixed...)`
-  File "type_splat_bad.php", line 26, characters 51-55:
+  File "type_splat_bad.php", line 39, characters 7-11:
   But got `Targs super (int, int, mixed...)`
-ERROR: File "type_splat_bad.php", line 26, characters 51-55:
+ERROR: File "type_splat_bad.php", line 39, characters 7-11:
 Some type arguments violate their constraints (Typing[4323])
-  File "type_splat_bad.php", line 26, characters 57-63:
+  File "type_splat_bad.php", line 39, characters 13-19:
   Expected `(mixed...)`
-  File "type_splat_bad.php", line 26, characters 51-55:
+  File "type_splat_bad.php", line 39, characters 7-11:
   But got `mixed`
-  File "type_splat_bad.php", line 26, characters 51-55:
+  File "type_splat_bad.php", line 39, characters 7-11:
     by the definition of `Targs` arising from an implicit `as mixed` constraint on this type

@@ -60,6 +60,7 @@ impl Pass for ValidateFunctionHintOptionalParametersPass {
                     } else {
                         match previous_optional_param {
                             None => (),
+                            Some(_) if p.pre_ellipsis.is_ellipsis() => (),
                             Some(_) => {
                                 env.emit_error(NamingPhaseError::Parsing(ParsingError::ParsingError {
                                 pos: pos.clone(),

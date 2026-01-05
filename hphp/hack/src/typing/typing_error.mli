@@ -1550,6 +1550,7 @@ and Secondary : sig
     | Fun_param_required_but_expected_optional of {
         pos: Pos_or_decl.t;
         decl_pos: Pos_or_decl.t;
+        (* If empty, this is a positional parameter *)
         param_names: string list;
       }
     | Required_field_is_optional of {

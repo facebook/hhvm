@@ -164,7 +164,9 @@ let check_params_for_required_after_optional ~from_abstract_method paraml :
         | Init when is_optional_or_default -> Seen_optional_or_default
         | Init -> Init
         | Seen_optional_or_default
-          when is_optional_or_default || Aast_utils.is_param_variadic param ->
+          when is_optional_or_default
+               || Aast_utils.is_param_variadic param
+               || Aast_utils.is_param_splat param ->
           Seen_optional_or_default
         | Seen_optional_or_default ->
           Found_required_after_optional_or_default param

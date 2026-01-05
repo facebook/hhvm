@@ -515,7 +515,7 @@ struct Options {
   int m_acConnectionCount{16};
   std::string m_application{""};
   std::string m_useCase{""};
-  std::string m_platform{"linux-remote-execution"};
+  std::string m_platform{"releng_www_hhbbc"};
   std::string m_featuresFile{""};
   std::string m_workerPath{""};
   std::string m_zstdDictionaryPath{""};

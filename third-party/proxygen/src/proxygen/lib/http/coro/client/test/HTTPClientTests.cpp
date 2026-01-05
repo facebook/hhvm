@@ -7,6 +7,7 @@
  */
 
 #include "proxygen/lib/http/coro/HTTPError.h"
+#include "proxygen/lib/http/coro/client/CertReloadSessionPool.h"
 #include "proxygen/lib/http/coro/client/HTTPClientConnectionCache.h"
 #include "proxygen/lib/http/coro/client/HTTPCoroConnector.h"
 #include "proxygen/lib/http/coro/client/HTTPCoroSessionPool.h"
@@ -1652,6 +1653,113 @@ CO_TEST_P_X(HTTPCoroSessionPoolTests, FlushPool) {
   EXPECT_TRUE(res3.hasException() && res4.hasException());
 }
 
+class CertReloadSessionPoolTests : public HTTPClientTests {
+ protected:
+  std::unique_ptr<CertReloadSessionPool> pool_;
+
+ public:
+  void SetUp() override {
+    HTTPClientTests::SetUp();
+    pool_ = makePool();
+  }
+
+  using PoolParams = HTTPCoroSessionPool::PoolParams;
+  using SessParams = HTTPCoroConnector::SessionParams;
+
+  std::unique_ptr<CertReloadSessionPool> makePool(
+      PoolParams poolParams = PoolParams{},
+      SessParams sessParams = SessParams{}) {
+    std::unique_ptr<CertReloadSessionPool> pool;
+    if (GetParam() == TransportType::QUIC) {
+      auto qconnParams = boost::get<HTTPCoroConnector::QuicConnectionParams>(
+          getConnParams(GetParam()));
+      auto qconnParamsPtr = getQuicConnParams(qconnParams);
+      pool = std::make_unique<CertReloadSessionPool>(
+          &evb_,
+          serverAddress_.getAddressStr(),
+          serverAddress_.getPort(),
+          poolParams,
+          std::move(qconnParamsPtr),
+          sessParams);
+    } else {
+      auto connParams = boost::get<HTTPCoroConnector::ConnectionParams>(
+          getConnParams(GetParam()));
+      pool = std::make_unique<CertReloadSessionPool>(
+          &evb_,
+          serverAddress_.getAddressStr(),
+          serverAddress_.getPort(),
+          poolParams,
+          std::move(connParams),
+          sessParams);
+    }
+    return pool;
+  }
+};
+
+// Verifies that CertReloadSessionPool correctly invokes the user-provided
+// timer callback periodically, and that the pool continues to function
+// after the callback updates connection params. This simulates the real-world
+// scenario where long-running services need to refresh expiring certs.
+CO_TEST_P_X(CertReloadSessionPoolTests, TimerCallback) {
+  auto certPath =
+      getContainingDirectory(__FILE__).str() + "/certs/test_cert1.pem";
+  auto keyPath =
+      getContainingDirectory(__FILE__).str() + "/certs/test_key1.pem";
+  auto transportType = GetParam();
+
+  // Capture base connection params so we can preserve settings like the
+  // certificate verifier while updating the fizz context
+  auto baseConnParams = boost::get<HTTPCoroConnector::ConnectionParams>(
+      getConnParams(TransportType::TLS_FIZZ));
+  auto baseQuicConnParams =
+      (transportType == TransportType::QUIC)
+          ? std::make_optional(
+                boost::get<HTTPCoroConnector::QuicConnectionParams>(
+                    getConnParams(TransportType::QUIC)))
+          : std::nullopt;
+
+  pool_->setTimerCallback(
+      [certPath, keyPath, transportType, baseConnParams, baseQuicConnParams](
+          HTTPCoroSessionPool& p) {
+        // Build TLS context from cert paths
+        HTTPCoroConnector::TLSParams tlsParams;
+        tlsParams.clientCertPath = certPath;
+        tlsParams.clientKeyPath = keyPath;
+
+        if (transportType == TransportType::QUIC) {
+          tlsParams.nextProtocols = {"h3"};
+          auto quicParams =
+              std::make_shared<HTTPCoroConnector::QuicConnectionParams>(
+                  *baseQuicConnParams);
+          quicParams->fizzContextAndVerifier.fizzContext =
+              HTTPCoroConnector::makeFizzClientContext(tlsParams);
+          p.setQuicConnectionParams(std::move(quicParams));
+        } else {
+          auto connParams = baseConnParams;
+          connParams.fizzContextAndVerifier.fizzContext =
+              HTTPCoroConnector::makeFizzClientContext(tlsParams);
+          p.setConnParams(connParams);
+        }
+      },
+      std::chrono::milliseconds(50));
+
+  // Establish initial connection
+  auto res1 = co_await co_awaitTry(pool_->getSessionWithReservation());
+  EXPECT_FALSE(res1.hasException());
+
+  // Wait for timer callback to fire at least once
+  co_await folly::coro::sleep(std::chrono::milliseconds(100));
+
+  // Verify pool still works after callback updated connection params.
+  // Flush existing sessions and establish a new connection with the
+  // reloaded certs.
+  pool_->flush();
+  auto res2 = co_await co_awaitTry(pool_->getSessionWithReservation());
+  EXPECT_FALSE(res2.hasException());
+
+  pool_->drain();
+}
+
 class HTTPClientConnectionCacheTests : public HTTPClientTests {
  public:
   void SetUp() override {
@@ -2048,6 +2156,13 @@ INSTANTIATE_TEST_SUITE_P(HTTPCoroSessionPoolTLSTests,
 INSTANTIATE_TEST_SUITE_P(HTTPCoroSessionPoolSSLTests,
                          HTTPCoroSessionPoolSSLTests,
                          Values(TransportType::TLS),
+                         transportTypeToTestName);
+
+INSTANTIATE_TEST_SUITE_P(CertReloadSessionPoolTests,
+                         CertReloadSessionPoolTests,
+                         Values(TransportType::TLS,
+                                TransportType::TLS_FIZZ,
+                                TransportType::QUIC),
                          transportTypeToTestName);
 
 // No QUIC, for now

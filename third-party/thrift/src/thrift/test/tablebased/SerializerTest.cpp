@@ -137,7 +137,7 @@ Type makeStructWithRefLike() {
   using Struct =
       std::remove_reference_t<decltype(*obj.shared_struct_field_ref())>;
   obj.shared_struct_field_ref() = std::make_shared<std::add_const_t<Struct>>(
-      makeStructBLike<typename std::remove_const<Struct>::type>());
+      makeStructBLike<std::remove_const_t<Struct>>());
   std::vector<std::string> tmp = {"test1", "test2"};
   obj.shared_list_field_ref() =
       std::make_shared<const std::vector<std::string>>(std::move(tmp));

@@ -6254,6 +6254,58 @@ end = struct
       | _ -> ((env, expr, ty), s))
     (* Call instance method *)
     | Obj_get (e1, (_, pos_id, Id m), nullflavor, Is_method) ->
+      (* We should use the constraint only if we're sure that immediately doing
+         obj_get will fail to get to concrete types. *)
+      let rec should_use_constraint seen env ty =
+        let (env, ty) = Env.expand_type env ty in
+        match get_node ty with
+        | Tdynamic
+        | Tprim _
+        | Ttuple _
+        | Tfun _
+        | Tshape _
+        | Toption _
+        | Tclass _
+        | Tvec_or_dict _
+        | Tclass_ptr _
+        | Tlabel _
+        | Tany _
+        | Tnonnull
+        | Tneg _
+        | Taccess _ ->
+          (* All of these can be handled by obj_get *)
+          (env, false)
+        | Tvar var ->
+          let bounds = Env.get_tyvar_lower_bounds env var in
+          should_use_constraint_for_inter
+            seen
+            env
+            (List.filter_map (Internal_type_set.to_list bounds) ~f:(fun ity ->
+                 match ity with
+                 | LoclType ty -> Some ty
+                 | _ -> None))
+        | Tunion ts ->
+          (* If one of the branches of the union won't resolve,
+             then obj_get will end up with a 4297 from trying to force solve *)
+          List.exists_env env ~f:(should_use_constraint seen) ts
+        | Tintersection ts -> should_use_constraint_for_inter seen env ts
+        | Tdependent (_, ty) -> should_use_constraint seen env ty
+        | Tgeneric name
+        | Tnewtype (name, _, _) ->
+          if not (SSet.mem name seen) then
+            let (env, ts) =
+              TUtils.get_concrete_supertypes ~abstract_enum:true env ty
+            in
+            should_use_constraint_for_inter (SSet.add name seen) env ts
+          else
+            (env, false)
+      and should_use_constraint_for_inter seen env ts =
+        match ts with
+        | [] -> (env, true)
+        | [ty] -> should_use_constraint seen env ty
+        | _ -> (env, false)
+        (* The constraint doesn't work well with intersections, so don't bother *)
+      in
       let (env, te1, ty1) =
         expr
           ~expected:None
@@ -6266,11 +6318,31 @@ end = struct
         | Regular -> None
         | Nullsafe -> Some p
       in
-      let use_constraint_inference =
+      (* These are the only kinds of calls that we support with constraint inference *)
+      let maybe_use_constraint_inference =
         List.is_empty explicit_targs
         && Option.is_none unpacked_element
         && Option.is_none nullsafe
-        && TCO.constraint_method_call env.genv.tcopt
+      in
+      let (env, use_constraint_inference) =
+        if
+          maybe_use_constraint_inference
+          && TCO.constraint_method_call env.genv.tcopt
+        then
+          (* Config tells us to use it for all supported functions *)
+          (env, true)
+        else if
+          maybe_use_constraint_inference
+          && Option.is_some env.in_expr_tree
+          && TypecheckerOptions.experimental_feature_enabled
+               (Env.get_tcopt env)
+               TypecheckerOptions.experimental_try_constraint_method_inference
+        then
+          (* Inside of an expression tree, we can use constraint inference if the appropriate experimental_tc_feature is enabled.
+             Many of the features that constraint inference doesn't support are not allowed in expression trees: inout, disposable, etc. *)
+          should_use_constraint SSet.empty env ty1
+        else
+          (env, false)
       in
       if use_constraint_inference then (
         (* Construct a function type from the types of the arguments, and check
@@ -6289,21 +6361,26 @@ end = struct
         in
         let arg_posl =
           List.map el ~f:(fun arg ->
-              match arg with
-              | Aast_defs.Ainout (_, (_, pos, e))
-              | Aast_defs.Anamed (_, (_, pos, e))
-              | Aast_defs.Anormal (_, pos, e) ->
-                (match e with
-                | ReadonlyExpr _ -> (pos, true)
-                | _ -> (pos, false)))
+              let (e, pos, name, is_inout) =
+                match arg with
+                | Aast_defs.Ainout (_, (_, pos, e)) -> (e, pos, None, true)
+                | Aast_defs.Anamed (n, (_, pos, e)) -> (e, pos, Some n, false)
+                | Aast_defs.Anormal (_, pos, e) -> (e, pos, None, false)
+              in
+              match e with
+              | ReadonlyExpr _ -> (pos, name, true, is_inout)
+              | _ -> (pos, name, false, is_inout))
         in
-        let make_param (pos, is_readonly) ty =
+        let make_param (pos, name, is_readonly, is_inout) ty =
           {
             fp_pos = Pos_or_decl.of_raw_pos pos;
-            fp_name = None;
+            fp_name = Option.map ~f:snd name;
             fp_type = ty;
             fp_flags =
-              Typing_defs_flags.FunParam.(set_readonly is_readonly default);
+              Typing_defs_flags.FunParam.(
+                set_named
+                  (Option.is_some name)
+                  (set_inout is_inout (set_readonly is_readonly default)));
             fp_def_value = None;
           }
         in
@@ -6346,7 +6423,8 @@ end = struct
               (Some
                  {
                    hmm_explicit_targs = [];
-                   hmm_args_pos = List.map ~f:fst arg_posl;
+                   hmm_args_pos =
+                     List.map ~f:(fun (pos, _, _, _) -> pos) arg_posl;
                  })
         in
         let (env, ty_err_opt) =

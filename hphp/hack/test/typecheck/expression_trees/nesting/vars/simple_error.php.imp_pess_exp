@@ -4,9 +4,3 @@ Typing error (Typing[4110])
   Expected `int`
   File "expr_tree.php", line 153, characters 40-45:
   But got `string`
-ERROR: File "simple_error.php", line 7, characters 30-50:
-Typing error (Typing[4110])
-  File "expr_tree.php", line 175, characters 5-21:
-  Expected `ExprTreeOpType<nothing>`
-  File "expr_tree.php", line 144, characters 39-41:
-  But got `int`

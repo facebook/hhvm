@@ -1,0 +1,8 @@
+ERROR: File "construct_default_values.php", line 12, characters 22-36:
+Typing error (Typing[4403])
+  File "construct_default_values.php", line 12, characters 17-18:
+  Expected a function that requires the capability AccessGlobals
+  File "construct_default_values.php", line 5, characters 19-21:
+  But got a function that requires the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, SystemLocal, WriteProperty}
+ERROR: File "construct_default_values.php", line 12, characters 29-29:
+Read access to `$this->b` before initialization (Typing[4083])

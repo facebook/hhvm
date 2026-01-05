@@ -1,0 +1,4 @@
+ERROR: File "lambda_with_invoke.php", line 21, characters 40-46:
+You are trying to access the method `rubbish` but this is an int (Typing[4062])
+  File "lambda_with_invoke.php", line 21, characters 53-53:
+  Definition is here

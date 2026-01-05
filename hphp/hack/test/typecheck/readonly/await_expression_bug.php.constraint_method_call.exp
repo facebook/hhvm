@@ -1,0 +1,8 @@
+ERROR: File "await_expression_bug.php", line 16, characters 15-23:
+Typing error (Typing[4411])
+  File "await_expression_bug.php", line 5, characters 25-27:
+  Function readonly mismatch
+  File "await_expression_bug.php", line 5, characters 25-27:
+  This function is not marked readonly
+  File "await_expression_bug.php", line 16, characters 15-23:
+  This function is marked readonly

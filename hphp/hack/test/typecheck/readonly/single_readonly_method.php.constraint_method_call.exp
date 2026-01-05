@@ -1,0 +1,8 @@
+ERROR: File "single_readonly_method.php", line 8, characters 10-21:
+Typing error (Typing[4411])
+  File "single_readonly_method.php", line 4, characters 19-21:
+  Function readonly mismatch
+  File "single_readonly_method.php", line 4, characters 19-21:
+  This function is not marked readonly
+  File "single_readonly_method.php", line 8, characters 10-21:
+  This function is marked readonly

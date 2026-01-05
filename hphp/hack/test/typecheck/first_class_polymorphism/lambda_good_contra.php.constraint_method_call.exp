@@ -1,0 +1,8 @@
+ERROR: File "lambda_good_contra.php", line 25, characters 29-46:
+Invalid argument (Typing[4411])
+  File "lambda_good_contra.php", line 25, characters 29-46:
+  Function readonly mismatch
+  File "lambda_good_contra.php", line 25, characters 29-46:
+  This function is not marked readonly
+  File "lambda_good_contra.php", line 16, characters 10-13:
+  This function is marked readonly

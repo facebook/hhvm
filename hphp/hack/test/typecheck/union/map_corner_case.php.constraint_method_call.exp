@@ -1,0 +1,16 @@
+ERROR: File "map_corner_case.php", line 23, characters 5-16:
+This is not an object of type `KeyedContainer`, this is a nonnull value (Typing[4370])
+ERROR: File "map_corner_case.php", line 23, characters 5-16:
+This is not an object of type `KeyedContainer`, this is some value (Typing[4370])
+  File "map_corner_case.php", line 13, characters 27-32:
+  Definition is here
+ERROR: File "map_corner_case.php", line 24, characters 5-17:
+This is not an object of type `KeyedContainer`, this is a nonnull value (Typing[4370])
+ERROR: File "map_corner_case.php", line 24, characters 5-17:
+This is not an object of type `KeyedContainer`, this is some value (Typing[4370])
+  File "map_corner_case.php", line 5, characters 14-19:
+  Definition is here
+ERROR: File "map_corner_case.php", line 24, characters 5-17:
+This is not an object of type `KeyedContainer`, this is some value (Typing[4370])
+  File "map_corner_case.php", line 12, characters 27-32:
+  Definition is here

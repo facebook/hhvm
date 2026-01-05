@@ -1,0 +1,16 @@
+ERROR: File "lambda_good_co.php", line 26, characters 29-30:
+Invalid argument (Typing[4411])
+  File "lambda_good_co.php", line 25, characters 8-25:
+  Function readonly mismatch
+  File "lambda_good_co.php", line 25, characters 8-25:
+  This function is not marked readonly
+  File "lambda_good_co.php", line 16, characters 10-13:
+  This function is marked readonly
+ERROR: File "lambda_good_co.php", line 28, characters 29-46:
+Invalid argument (Typing[4411])
+  File "lambda_good_co.php", line 28, characters 29-46:
+  Function readonly mismatch
+  File "lambda_good_co.php", line 28, characters 29-46:
+  This function is not marked readonly
+  File "lambda_good_co.php", line 16, characters 10-13:
+  This function is marked readonly

@@ -1,0 +1,6 @@
+ERROR: File "ctx-const-bounds_implicit-lower-defaults.php", line 9, characters 3-9:
+Typing error (Typing[4403])
+  File "ctx-const-bounds_implicit-lower-defaults.php", line 8, characters 10-33:
+  Expected a function that requires the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, SystemLocal, WriteProperty}
+  File "ctx-const-bounds_implicit-lower-defaults.php", line 5, characters 38-38:
+  But got a function that requires the capability <expr#2>::C

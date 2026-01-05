@@ -1,0 +1,16 @@
+ERROR: File "mock_return.php", line 20, characters 38-67:
+Invalid argument (Typing[4110])
+  File "mock_return.php", line 5, characters 25-28:
+  Expected `Tfun`
+  File "mock_return.php", line 12, characters 31-34:
+    via this generic `Tfun`
+  File "mock_return.php", line 20, characters 38-67:
+  But got `(function(mixed $_args...)[]: Tr)`
+ERROR: File "mock_return.php", line 20, characters 38-67:
+Invalid argument (Typing[4411])
+  File "mock_return.php", line 20, characters 38-67:
+  Function readonly mismatch
+  File "mock_return.php", line 20, characters 38-67:
+  This function is not marked readonly
+  File "mock_return.php", line 19, characters 16-50:
+  This function is marked readonly

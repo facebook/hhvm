@@ -1,0 +1,26 @@
+ERROR: File "generator.php", line 6, characters 23-29:
+Internal error: Return type is not a generator (Other[0000])
+ERROR: File "generator.php", line 6, characters 23-29:
+`yield` is not supported in expression trees. (Parsing[1002])
+ERROR: File "generator.php", line 5, characters 18-21:
+Invalid return type (Typing[4110])
+  File "generator.php", line 5, characters 18-21:
+  Expected `void`
+  File "generator.php", line 5, characters 18-21:
+  But got `Generator<_, _, _>` (result of function containing a `yield`)
+ERROR: File "generator.php", line 6, characters 14-32:
+Invalid argument (Typing[4110])
+  File "expr_tree.php", line 90, characters 21-26:
+  Expected `string`
+  File "expr_tree.php", line 104, characters 29-44:
+    resulting from expanding the type constant `ExampleDsl::TAst`
+  File "generator.php", line 6, characters 23-29:
+  But got `AsyncGenerator<?nothing, int, nothing>` (result of `async function` with `yield` in the body)
+ERROR: File "generator.php", line 6, characters 23-29:
+Invalid argument (Typing[4110])
+  File "expr_tree.php", line 90, characters 21-26:
+  Expected `string`
+  File "expr_tree.php", line 247, characters 9-24:
+    resulting from expanding the type constant `ExampleDsl::TAst`
+  File "generator.php", line 6, characters 23-29:
+  But got `null` (`$generator->send()` can always send a `null` back to a `yield`)

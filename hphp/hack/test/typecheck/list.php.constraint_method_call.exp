@@ -1,0 +1,16 @@
+ERROR: File "list.php", line 16, characters 5-23:
+You cannot use this syntax on the left-hand side of an assignment. (Parsing[1002])
+ERROR: File "list.php", line 16, characters 5-28:
+Invalid assignment (Typing[4110])
+  File "list.php", line 16, characters 5-23:
+  Expected `nothing`
+  File "list.php", line 16, characters 27-28:
+  But got `int`
+ERROR: File "list.php", line 16, characters 12-15:
+No instance method `list` in `A` (Typing[4053])
+  File "list.php", line 13, characters 19-21:
+  Did you mean `foo` instead?
+  File "list.php", line 12, characters 7-7:
+  This is why I think it is an object of type A
+  File "list.php", line 12, characters 7-7:
+  Declaration of `A` is here

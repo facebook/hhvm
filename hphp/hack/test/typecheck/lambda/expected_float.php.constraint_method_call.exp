@@ -1,0 +1,8 @@
+ERROR: File "expected_float.php", line 6, characters 10-31:
+Invalid return type (Typing[4110])
+  File "expected_float.php", line 4, characters 42-46:
+  Expected `float`
+  File "expected_float.php", line 6, characters 25-30:
+  But got `num` because it is the result of a division `/`
+  File "expected_float.php", line 6, characters 25-30:
+  This type argument to `Vector` must match exactly (it is invariant)

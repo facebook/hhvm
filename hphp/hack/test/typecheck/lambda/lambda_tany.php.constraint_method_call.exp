@@ -1,0 +1,2 @@
+ERROR: File "lambda_tany.php", line 11, characters 31-32:
+Was expecting a type hint (Typing[4032])

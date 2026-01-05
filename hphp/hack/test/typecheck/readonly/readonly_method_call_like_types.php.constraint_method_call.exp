@@ -1,0 +1,32 @@
+ERROR: File "readonly_method_call_like_types.php", line 11, characters 3-22:
+Typing error (Typing[4411])
+  File "readonly_method_call_like_types.php", line 3, characters 19-23:
+  Function readonly mismatch
+  File "readonly_method_call_like_types.php", line 3, characters 19-23:
+  This function is not marked readonly
+  File "readonly_method_call_like_types.php", line 11, characters 3-22:
+  This function is marked readonly
+ERROR: File "readonly_method_call_like_types.php", line 14, characters 5-24:
+Typing error (Typing[4411])
+  File "readonly_method_call_like_types.php", line 3, characters 19-23:
+  Function readonly mismatch
+  File "readonly_method_call_like_types.php", line 3, characters 19-23:
+  This function is not marked readonly
+  File "readonly_method_call_like_types.php", line 14, characters 5-24:
+  This function is marked readonly
+ERROR: File "readonly_method_call_like_types.php", line 18, characters 5-15:
+Typing error (Typing[4411])
+  File "readonly_method_call_like_types.php", line 3, characters 19-23:
+  Function readonly mismatch
+  File "readonly_method_call_like_types.php", line 3, characters 19-23:
+  This function is not marked readonly
+  File "readonly_method_call_like_types.php", line 18, characters 5-15:
+  This function is marked readonly
+ERROR: File "readonly_method_call_like_types.php", line 19, characters 5-24:
+Typing error (Typing[4411])
+  File "readonly_method_call_like_types.php", line 3, characters 19-23:
+  Function readonly mismatch
+  File "readonly_method_call_like_types.php", line 3, characters 19-23:
+  This function is not marked readonly
+  File "readonly_method_call_like_types.php", line 19, characters 5-24:
+  This function is marked readonly

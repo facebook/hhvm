@@ -92,6 +92,38 @@ void ServerSinkFactory::setContextStack(ContextStack::UniquePtr contextStack) {
   contextStack_ = std::move(contextStack);
 }
 
+ServerSinkFactory::ServerSinkFactory(
+    ConsumerCallback* consumerCallback,
+    uint64_t bufferSize,
+    std::chrono::milliseconds chunkTimeout)
+    : bufferSize_{bufferSize}, chunkTimeout_{chunkTimeout} {
+  startFunction_ = [consumerCallback](
+                       uint64_t bufferSize,
+                       std::chrono::milliseconds chunkTimeout,
+                       folly::EventBase* evb,
+                       TilePtr&& interaction,
+                       ContextStack::UniquePtr contextStack,
+                       FirstResponsePayload&& firstResponsePayload,
+                       SinkClientCallback* clientCallback) {
+    DCHECK(evb->isInEventBaseThread());
+    SinkConsumerImpl sinkConsumer;
+    sinkConsumer.bufferSize = bufferSize;
+    sinkConsumer.chunkTimeout = chunkTimeout;
+    sinkConsumer.interaction = std::move(interaction);
+    sinkConsumer.contextStack = std::move(contextStack);
+
+    auto sink =
+        new ServerSinkBridge(std::move(sinkConsumer), *evb, clientCallback);
+    auto sinkPtr = sink->copy();
+
+    std::ignore = clientCallback->onFirstResponse(
+        std::move(firstResponsePayload), evb, sink);
+
+    sink->serverPush(bufferSize);
+    consumerCallback->provideSink(std::move(sinkPtr));
+  };
+}
+
 } // namespace apache::thrift::detail
 
 #endif

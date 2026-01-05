@@ -36,6 +36,13 @@ class ServerSinkFactory {
       FirstResponsePayload&&,
       SinkClientCallback*)>;
 
+  class ConsumerCallback {
+   public:
+    virtual void provideSink(ServerSinkBridge::Ptr sink) = 0;
+    ConsumerCallback() = default;
+    virtual ~ConsumerCallback() = default;
+  };
+
   explicit ServerSinkFactory();
 
   explicit ServerSinkFactory(StartFunction&& fn);
@@ -43,6 +50,11 @@ class ServerSinkFactory {
   explicit ServerSinkFactory(
       SinkConsumerImpl::Consumer&& consumer,
       folly::Executor::KeepAlive<> serverExecutor,
+      uint64_t bufferSize,
+      std::chrono::milliseconds timeout);
+
+  explicit ServerSinkFactory(
+      ConsumerCallback* consumerCallback,
       uint64_t bufferSize,
       std::chrono::milliseconds timeout);
 

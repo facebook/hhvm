@@ -79,6 +79,8 @@ class ServerSinkBridge : public TwoWayBridge<
   // start() should be called on the CPU thread
   folly::coro::Task<void> start();
 
+  uint64_t getBufferSize() const { return consumer_.bufferSize; }
+
   //
   // SinkServerCallback method
   //
@@ -102,6 +104,11 @@ class ServerSinkBridge : public TwoWayBridge<
   //
   // end of TwoWayBridge methods
   //
+
+  using TwoWayBridge::serverClose;
+  using TwoWayBridge::serverGetMessages;
+  using TwoWayBridge::serverPush;
+  using TwoWayBridge::serverWait;
 
  private:
   ServerSinkBridge(

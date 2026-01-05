@@ -810,8 +810,8 @@ void ThriftServerRequestSink::sendSerializedError(
 void ThriftServerRequestSink::sendSinkThriftResponse(
     ResponseRpcMetadata&& metadata,
     std::unique_ptr<folly::IOBuf> data,
-    apache::thrift::detail::SinkConsumerImpl&& sinkConsumer) noexcept {
-  if (!sinkConsumer) {
+    apache::thrift::detail::ServerSinkFactory&& sinkFactory) noexcept {
+  if (!sinkFactory.valid()) {
     sendSerializedError(std::move(metadata), std::move(data));
     return;
   }
@@ -823,23 +823,13 @@ void ThriftServerRequestSink::sendSinkThriftResponse(
     return;
   }
   context_.unsetMarkRequestComplete();
-  auto* executor = sinkConsumer.executor.get();
   clientCallback_->setProtoId(getProtoId());
-  clientCallback_->setChunkTimeout(sinkConsumer.chunkTimeout);
-  auto serverCallback = apache::thrift::detail::ServerSinkBridge::create(
-      std::move(sinkConsumer), *getEventBase(), clientCallback_);
-  DCHECK(getRequestContext()->getHeader()->fds.empty()); // No FDs for sinks
-  clientCallback_->onFirstResponse(
-      FirstResponsePayload{std::move(data), std::move(metadata)},
-      nullptr /* evb */,
-      serverCallback.get());
+  clientCallback_->setChunkTimeout(sinkFactory.getChunkTimeout());
 
-  co_withExecutor(
-      executor,
-      folly::coro::co_invoke(
-          &apache::thrift::detail::ServerSinkBridge::start,
-          std::move(serverCallback)))
-      .start();
+  auto payload = apache::thrift::FirstResponsePayload{
+      std::move(data), std::move(metadata)};
+  DCHECK(getRequestContext()->getHeader()->fds.empty()); // No FDs for sinks
+  sinkFactory.start(std::move(payload), clientCallback_, &evb_);
 }
 
 bool ThriftServerRequestSink::sendSinkThriftResponse(

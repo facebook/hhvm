@@ -671,9 +671,9 @@ struct HandlerCallbackHelperSink {
   using InnerType = SinkInputType&&;
   using InputType = SinkInputType&&;
   using CobPtr =
-      std::pair<apache::thrift::SerializedResponse, SinkConsumerImpl> (*)(
+      std::pair<apache::thrift::SerializedResponse, ServerSinkFactory> (*)(
           ContextStack*, InputType, folly::Executor::KeepAlive<>);
-  static std::pair<apache::thrift::SerializedResponse, SinkConsumerImpl> call(
+  static std::pair<apache::thrift::SerializedResponse, ServerSinkFactory> call(
       CobPtr cob, ContextStack* ctx, folly::Executor* ex, InputType input) {
     return cob(ctx, std::move(input), ex);
   }

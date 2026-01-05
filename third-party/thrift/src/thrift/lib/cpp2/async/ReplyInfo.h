@@ -19,6 +19,7 @@
 #include <thrift/lib/cpp2/async/Interaction.h>
 #include <thrift/lib/cpp2/async/ResponseChannel.h>
 #include <thrift/lib/cpp2/async/ServerBiDiStreamFactory.h>
+#include <thrift/lib/cpp2/async/ServerSinkFactory.h>
 #include <thrift/lib/cpp2/async/Sink.h>
 #include <thrift/lib/cpp2/server/Cpp2ConnContext.h>
 
@@ -67,23 +68,22 @@ class SinkConsumerReplyInfo {
  public:
   SinkConsumerReplyInfo(
       ResponseChannelRequest::UniquePtr req,
-      apache::thrift::detail::SinkConsumerImpl sinkConsumer,
+      apache::thrift::detail::ServerSinkFactory sinkFactory,
       ResponsePayload&& response,
       folly::Optional<uint32_t> crc32c)
       : req_(std::move(req)),
-        sinkConsumer_(std::move(sinkConsumer)),
+        sinkFactory_(std::move(sinkFactory)),
         response_(std::move(response)),
         crc32c_(crc32c) {}
 
   void operator()() noexcept {
 #if FOLLY_HAS_COROUTINES
-    req_->sendSinkReply(
-        std::move(response_), std::move(sinkConsumer_), crc32c_);
+    req_->sendSinkReply(std::move(response_), std::move(sinkFactory_), crc32c_);
 #endif
   }
 
   ResponseChannelRequest::UniquePtr req_;
-  apache::thrift::detail::SinkConsumerImpl sinkConsumer_;
+  apache::thrift::detail::ServerSinkFactory sinkFactory_;
   ResponsePayload response_;
   folly::Optional<uint32_t> crc32c_;
 };

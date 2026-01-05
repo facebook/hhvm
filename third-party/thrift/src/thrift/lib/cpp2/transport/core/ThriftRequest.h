@@ -36,6 +36,7 @@
 #include <thrift/lib/cpp2/Flags.h>
 #include <thrift/lib/cpp2/PluggableFunction.h>
 #include <thrift/lib/cpp2/async/ResponseChannel.h>
+#include <thrift/lib/cpp2/async/ServerSinkFactory.h>
 #include <thrift/lib/cpp2/async/Sink.h>
 #include <thrift/lib/cpp2/protocol/Serializer.h>
 #include <thrift/lib/cpp2/server/Cpp2ConnContext.h>
@@ -201,7 +202,7 @@ class ThriftRequestCore : public ResponseChannelRequest {
 #if FOLLY_HAS_COROUTINES
   void sendSinkReply(
       ResponsePayload&& response,
-      apache::thrift::detail::SinkConsumerImpl&& consumerImpl,
+      apache::thrift::detail::ServerSinkFactory&& consumerImpl,
       folly::Optional<uint32_t> crc32c) final {
     if (tryCancel()) {
       cancelTimeout();
@@ -405,7 +406,7 @@ class ThriftRequestCore : public ResponseChannelRequest {
   virtual void sendSinkThriftResponse(
       ResponseRpcMetadata&&,
       std::unique_ptr<folly::IOBuf>,
-      apache::thrift::detail::SinkConsumerImpl&&) noexcept {
+      apache::thrift::detail::ServerSinkFactory&&) noexcept {
     LOG(FATAL) << "sendSinkThriftResponse not implemented";
   }
 
@@ -516,10 +517,10 @@ class ThriftRequestCore : public ResponseChannelRequest {
   void sendReplyInternal(
       ResponseRpcMetadata&& metadata,
       std::unique_ptr<folly::IOBuf> buf,
-      apache::thrift::detail::SinkConsumerImpl sink) {
+      apache::thrift::detail::ServerSinkFactory sinkFactory) {
     if (checkResponseSize(*buf)) {
       sendSinkThriftResponse(
-          std::move(metadata), std::move(buf), std::move(sink));
+          std::move(metadata), std::move(buf), std::move(sinkFactory));
     } else {
       sendResponseTooBigEx();
     }

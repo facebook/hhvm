@@ -203,7 +203,7 @@ void SinkServiceAsyncProcessor::executeRequest_method(
 template <class ProtocolIn_, class ProtocolOut_>
 /* static */ std::pair<
     apache::thrift::SerializedResponse,
-    apache::thrift::detail::SinkConsumerImpl>
+    apache::thrift::detail::ServerSinkFactory>
 SinkServiceAsyncProcessor::return_method(
     apache::thrift::ContextStack* ctx,
     ::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse>&& _return,
@@ -213,7 +213,7 @@ SinkServiceAsyncProcessor::return_method(
   using SinkPResultType = SinkService_method_presult::SinkPResultType;
   using FinalResponsePResultType =
       SinkService_method_presult::FinalResponsePResultType;
-  auto sinkConsumerImpl = apache::thrift::detail::ap::toSinkConsumerImpl<
+  auto sinkConsumerImpl = apache::thrift::detail::ap::toServerSinkFactory<
       ProtocolIn_,
       ProtocolOut_,
       SinkPResultType,
@@ -388,7 +388,7 @@ void SinkServiceAsyncProcessor::executeRequest_methodAndReponse(
 template <class ProtocolIn_, class ProtocolOut_>
 /* static */ std::pair<
     apache::thrift::SerializedResponse,
-    apache::thrift::detail::SinkConsumerImpl>
+    apache::thrift::detail::ServerSinkFactory>
 SinkServiceAsyncProcessor::return_methodAndReponse(
     apache::thrift::ContextStack* ctx,
     ::apache::thrift::ResponseAndSinkConsumer<::cpp2::InitialResponse, ::cpp2::SinkPayload, ::cpp2::FinalResponse>&& _return,
@@ -400,7 +400,7 @@ SinkServiceAsyncProcessor::return_methodAndReponse(
       SinkService_methodAndReponse_presult::FinalResponsePResultType;
   result.get<0>().value = &_return.response;
   result.setIsSet(0, true);
-  auto sinkConsumerImpl = apache::thrift::detail::ap::toSinkConsumerImpl<
+  auto sinkConsumerImpl = apache::thrift::detail::ap::toServerSinkFactory<
       ProtocolIn_,
       ProtocolOut_,
       SinkPResultType,
@@ -575,7 +575,7 @@ void SinkServiceAsyncProcessor::executeRequest_methodThrow(
 template <class ProtocolIn_, class ProtocolOut_>
 /* static */ std::pair<
     apache::thrift::SerializedResponse,
-    apache::thrift::detail::SinkConsumerImpl>
+    apache::thrift::detail::ServerSinkFactory>
 SinkServiceAsyncProcessor::return_methodThrow(
     apache::thrift::ContextStack* ctx,
     ::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse>&& _return,
@@ -585,7 +585,7 @@ SinkServiceAsyncProcessor::return_methodThrow(
   using SinkPResultType = SinkService_methodThrow_presult::SinkPResultType;
   using FinalResponsePResultType =
       SinkService_methodThrow_presult::FinalResponsePResultType;
-  auto sinkConsumerImpl = apache::thrift::detail::ap::toSinkConsumerImpl<
+  auto sinkConsumerImpl = apache::thrift::detail::ap::toServerSinkFactory<
       ProtocolIn_,
       ProtocolOut_,
       SinkPResultType,
@@ -626,7 +626,7 @@ void SinkServiceAsyncProcessor::throw_wrapped_methodThrow(
       apache::thrift::MessageType::T_REPLY,
       "methodThrow");
   payload.transform(reqCtx->getHeader()->getWriteTransforms());
-  req->sendSinkReply(std::move(payload), apache::thrift::detail::SinkConsumerImpl{});
+  req->sendSinkReply(std::move(payload), apache::thrift::detail::ServerSinkFactory{});
 }
 //
 // End of Method 'methodThrow'
@@ -778,7 +778,7 @@ void SinkServiceAsyncProcessor::executeRequest_methodSinkThrow(
 template <class ProtocolIn_, class ProtocolOut_>
 /* static */ std::pair<
     apache::thrift::SerializedResponse,
-    apache::thrift::detail::SinkConsumerImpl>
+    apache::thrift::detail::ServerSinkFactory>
 SinkServiceAsyncProcessor::return_methodSinkThrow(
     apache::thrift::ContextStack* ctx,
     ::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse>&& _return,
@@ -788,7 +788,7 @@ SinkServiceAsyncProcessor::return_methodSinkThrow(
   using SinkPResultType = SinkService_methodSinkThrow_presult::SinkPResultType;
   using FinalResponsePResultType =
       SinkService_methodSinkThrow_presult::FinalResponsePResultType;
-  auto sinkConsumerImpl = apache::thrift::detail::ap::toSinkConsumerImpl<
+  auto sinkConsumerImpl = apache::thrift::detail::ap::toServerSinkFactory<
       ProtocolIn_,
       ProtocolOut_,
       SinkPResultType,
@@ -963,7 +963,7 @@ void SinkServiceAsyncProcessor::executeRequest_methodFinalThrow(
 template <class ProtocolIn_, class ProtocolOut_>
 /* static */ std::pair<
     apache::thrift::SerializedResponse,
-    apache::thrift::detail::SinkConsumerImpl>
+    apache::thrift::detail::ServerSinkFactory>
 SinkServiceAsyncProcessor::return_methodFinalThrow(
     apache::thrift::ContextStack* ctx,
     ::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse>&& _return,
@@ -973,7 +973,7 @@ SinkServiceAsyncProcessor::return_methodFinalThrow(
   using SinkPResultType = SinkService_methodFinalThrow_presult::SinkPResultType;
   using FinalResponsePResultType =
       SinkService_methodFinalThrow_presult::FinalResponsePResultType;
-  auto sinkConsumerImpl = apache::thrift::detail::ap::toSinkConsumerImpl<
+  auto sinkConsumerImpl = apache::thrift::detail::ap::toServerSinkFactory<
       ProtocolIn_,
       ProtocolOut_,
       SinkPResultType,
@@ -1148,7 +1148,7 @@ void SinkServiceAsyncProcessor::executeRequest_methodBothThrow(
 template <class ProtocolIn_, class ProtocolOut_>
 /* static */ std::pair<
     apache::thrift::SerializedResponse,
-    apache::thrift::detail::SinkConsumerImpl>
+    apache::thrift::detail::ServerSinkFactory>
 SinkServiceAsyncProcessor::return_methodBothThrow(
     apache::thrift::ContextStack* ctx,
     ::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse>&& _return,
@@ -1158,7 +1158,7 @@ SinkServiceAsyncProcessor::return_methodBothThrow(
   using SinkPResultType = SinkService_methodBothThrow_presult::SinkPResultType;
   using FinalResponsePResultType =
       SinkService_methodBothThrow_presult::FinalResponsePResultType;
-  auto sinkConsumerImpl = apache::thrift::detail::ap::toSinkConsumerImpl<
+  auto sinkConsumerImpl = apache::thrift::detail::ap::toServerSinkFactory<
       ProtocolIn_,
       ProtocolOut_,
       SinkPResultType,
@@ -1335,7 +1335,7 @@ void SinkServiceAsyncProcessor::executeRequest_methodFast(
 template <class ProtocolIn_, class ProtocolOut_>
 /* static */ std::pair<
     apache::thrift::SerializedResponse,
-    apache::thrift::detail::SinkConsumerImpl>
+    apache::thrift::detail::ServerSinkFactory>
 SinkServiceAsyncProcessor::return_methodFast(
     apache::thrift::ContextStack* ctx,
     ::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse>&& _return,
@@ -1345,7 +1345,7 @@ SinkServiceAsyncProcessor::return_methodFast(
   using SinkPResultType = SinkService_methodFast_presult::SinkPResultType;
   using FinalResponsePResultType =
       SinkService_methodFast_presult::FinalResponsePResultType;
-  auto sinkConsumerImpl = apache::thrift::detail::ap::toSinkConsumerImpl<
+  auto sinkConsumerImpl = apache::thrift::detail::ap::toServerSinkFactory<
       ProtocolIn_,
       ProtocolOut_,
       SinkPResultType,

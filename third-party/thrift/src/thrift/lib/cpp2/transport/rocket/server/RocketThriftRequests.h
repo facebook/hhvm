@@ -275,7 +275,7 @@ class ThriftServerRequestSink final : public RocketThriftRequest {
   void sendSinkThriftResponse(
       ResponseRpcMetadata&&,
       std::unique_ptr<folly::IOBuf>,
-      apache::thrift::detail::SinkConsumerImpl&&) noexcept override;
+      apache::thrift::detail::ServerSinkFactory&&) noexcept override;
 
   bool sendSinkThriftResponse(
       ResponseRpcMetadata&&,

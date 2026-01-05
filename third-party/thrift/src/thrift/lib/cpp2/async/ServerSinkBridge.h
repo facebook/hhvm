@@ -39,14 +39,16 @@ struct SinkConsumerImpl {
   using Consumer = folly::Function<folly::coro::Task<folly::Try<StreamPayload>>(
       folly::coro::AsyncGenerator<folly::Try<StreamPayload>&&>)>;
   Consumer consumer;
-  uint64_t bufferSize;
-  std::chrono::milliseconds chunkTimeout;
+  uint64_t bufferSize{};
+  std::chrono::milliseconds chunkTimeout{};
   folly::Executor::KeepAlive<> executor;
   TilePtr interaction{};
   ContextStack::UniquePtr contextStack = nullptr;
   explicit operator bool() const { return (bool)consumer; }
 #endif
 };
+
+class ServerSinkFactory;
 
 #if FOLLY_HAS_COROUTINES
 class ServerSinkBridge;
@@ -134,7 +136,10 @@ class ServerSinkBridge : public TwoWayBridge<
   bool sinkComplete_{false};
 
   TileStreamGuard interaction_;
+
+  friend ServerSinkFactory;
 };
+
 #endif
 
 } // namespace apache::thrift::detail

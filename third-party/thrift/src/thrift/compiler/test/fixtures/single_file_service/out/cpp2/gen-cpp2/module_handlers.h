@@ -464,7 +464,7 @@ class BAsyncProcessor : public ::cpp2::AAsyncProcessor {
   template <class ProtocolIn_, class ProtocolOut_>
   static std::pair<
       apache::thrift::SerializedResponse,
-      apache::thrift::detail::SinkConsumerImpl>
+      apache::thrift::detail::ServerSinkFactory>
   return_sink_stuff(
       apache::thrift::ContextStack* ctx,
       ::apache::thrift::SinkConsumer<::std::int32_t, ::std::int32_t>&& _return,

@@ -336,7 +336,7 @@ template <class ProtocolIn_, class ProtocolOut_>
 {{#else if function:self.sink?}}
 /* static */ std::pair<
     apache::thrift::SerializedResponse,
-    apache::thrift::detail::SinkConsumerImpl>
+    apache::thrift::detail::ServerSinkFactory>
 {{service:parent_service_cpp_name}}AsyncProcessor::return_{{function:prefixed_name}}(
     apache::thrift::ContextStack* ctx,
     {{function:cpp_return_type}}&& _return,
@@ -382,7 +382,7 @@ template <class ProtocolIn_, class ProtocolOut_>
   result.get<0>().value = &_return.response;
   result.setIsSet(0, true);
 {{/if function:sink_has_first_response?}}
-  auto sinkConsumerImpl = apache::thrift::detail::ap::toSinkConsumerImpl<
+  auto sinkConsumerImpl = apache::thrift::detail::ap::toServerSinkFactory<
       ProtocolIn_,
       ProtocolOut_,
       SinkPResultType,
@@ -441,7 +441,7 @@ void {{service:parent_service_cpp_name}}AsyncProcessor::throw_wrapped_{{function
 {{#else if function:stream?}}
   req->sendStreamReply(std::move(payload), apache::thrift::detail::ServerStreamFactory{nullptr});
 {{#else if function:sink?}}
-  req->sendSinkReply(std::move(payload), apache::thrift::detail::SinkConsumerImpl{});
+  req->sendSinkReply(std::move(payload), apache::thrift::detail::ServerSinkFactory{});
 {{#else}}
   return req->sendReply(std::move(payload));
 {{/if function:bidirectional_stream?}}

@@ -1557,7 +1557,7 @@ template <
     typename FinalResponsePResult,
     typename SinkType,
     typename FinalResponseType>
-apache::thrift::detail::SinkConsumerImpl toSinkConsumerImpl(
+apache::thrift::detail::ServerSinkFactory toServerSinkFactory(
     [[maybe_unused]] SinkConsumer<SinkType, FinalResponseType>&& sinkConsumer,
     [[maybe_unused]] folly::Executor::KeepAlive<> executor) {
 #if FOLLY_HAS_COROUTINES
@@ -1591,11 +1591,12 @@ apache::thrift::detail::SinkConsumerImpl toSinkConsumerImpl(
                                         ProtocolWriter,
                                         FinalResponsePResult>(std::move(ew)));
   };
-  return apache::thrift::detail::SinkConsumerImpl{
+  apache::thrift::detail::ServerSinkFactory sinkFactory{
       std::move(consumer),
+      std::move(executor),
       sinkConsumer.bufferSize,
-      sinkConsumer.sinkOptions.chunkTimeout,
-      std::move(executor)};
+      sinkConsumer.sinkOptions.chunkTimeout};
+  return sinkFactory;
 #else
   std::terminate();
 #endif

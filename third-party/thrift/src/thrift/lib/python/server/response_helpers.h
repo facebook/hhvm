@@ -22,6 +22,7 @@
 #include <glog/logging.h>
 #include <thrift/lib/cpp/protocol/TProtocolTypes.h>
 #include <thrift/lib/cpp2/async/AsyncProcessor.h>
+#include <thrift/lib/cpp2/async/ServerSinkBridge.h>
 #include <thrift/lib/cpp2/async/StreamCallbacks.h>
 #include <thrift/lib/cpp2/gen/service_tcc.h>
 #include <thrift/lib/cpp2/protocol/Serializer.h>
@@ -132,7 +133,7 @@ static void throw_wrapped(
 }
 
 template <typename ProtocolWriter>
-apache::thrift::detail::SinkConsumerImpl toSinkConsumerImpl(
+apache::thrift::detail::ServerSinkFactory toServerSinkFactory(
     SinkConsumer<std::unique_ptr<folly::IOBuf>, std::unique_ptr<folly::IOBuf>>&&
         sinkConsumer,
     folly::Executor::KeepAlive<> executor) {
@@ -158,11 +159,12 @@ apache::thrift::detail::SinkConsumerImpl toSinkConsumerImpl(
     }
     co_return encoder(std::move(ew));
   };
-  return apache::thrift::detail::SinkConsumerImpl{
+  apache::thrift::detail::ServerSinkFactory sinkFactory{
       std::move(consumer),
+      std::move(executor),
       sinkConsumer.bufferSize,
-      sinkConsumer.sinkOptions.chunkTimeout,
-      std::move(executor)};
+      sinkConsumer.sinkOptions.chunkTimeout};
+  return sinkFactory;
 #else
   std::terminate();
 #endif
@@ -171,7 +173,7 @@ apache::thrift::detail::SinkConsumerImpl toSinkConsumerImpl(
 template <class ProtocolIn_, class ProtocolOut_>
 static std::pair<
     apache::thrift::SerializedResponse,
-    apache::thrift::detail::SinkConsumerImpl>
+    apache::thrift::detail::ServerSinkFactory>
 return_sink(
     apache::thrift::ContextStack* ctx,
     ::apache::thrift::ResponseAndSinkConsumer<
@@ -181,7 +183,7 @@ return_sink(
     folly::Executor::KeepAlive<> executor) {
   return {
       return_serialized<ProtocolIn_, ProtocolOut_>(ctx, *(response.response)),
-      toSinkConsumerImpl<ProtocolOut_>(
+      toServerSinkFactory<ProtocolOut_>(
           std::move(response.sinkConsumer), std::move(executor))};
 }
 

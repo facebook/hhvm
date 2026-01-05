@@ -214,7 +214,7 @@ class SinkServiceAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcess
   template <class ProtocolIn_, class ProtocolOut_>
   static std::pair<
       apache::thrift::SerializedResponse,
-      apache::thrift::detail::SinkConsumerImpl>
+      apache::thrift::detail::ServerSinkFactory>
   return_method(
       apache::thrift::ContextStack* ctx,
       ::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse>&& _return,
@@ -255,7 +255,7 @@ class SinkServiceAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcess
   template <class ProtocolIn_, class ProtocolOut_>
   static std::pair<
       apache::thrift::SerializedResponse,
-      apache::thrift::detail::SinkConsumerImpl>
+      apache::thrift::detail::ServerSinkFactory>
   return_methodAndReponse(
       apache::thrift::ContextStack* ctx,
       ::apache::thrift::ResponseAndSinkConsumer<::cpp2::InitialResponse, ::cpp2::SinkPayload, ::cpp2::FinalResponse>&& _return,
@@ -296,7 +296,7 @@ class SinkServiceAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcess
   template <class ProtocolIn_, class ProtocolOut_>
   static std::pair<
       apache::thrift::SerializedResponse,
-      apache::thrift::detail::SinkConsumerImpl>
+      apache::thrift::detail::ServerSinkFactory>
   return_methodThrow(
       apache::thrift::ContextStack* ctx,
       ::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse>&& _return,
@@ -337,7 +337,7 @@ class SinkServiceAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcess
   template <class ProtocolIn_, class ProtocolOut_>
   static std::pair<
       apache::thrift::SerializedResponse,
-      apache::thrift::detail::SinkConsumerImpl>
+      apache::thrift::detail::ServerSinkFactory>
   return_methodSinkThrow(
       apache::thrift::ContextStack* ctx,
       ::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse>&& _return,
@@ -378,7 +378,7 @@ class SinkServiceAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcess
   template <class ProtocolIn_, class ProtocolOut_>
   static std::pair<
       apache::thrift::SerializedResponse,
-      apache::thrift::detail::SinkConsumerImpl>
+      apache::thrift::detail::ServerSinkFactory>
   return_methodFinalThrow(
       apache::thrift::ContextStack* ctx,
       ::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse>&& _return,
@@ -419,7 +419,7 @@ class SinkServiceAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcess
   template <class ProtocolIn_, class ProtocolOut_>
   static std::pair<
       apache::thrift::SerializedResponse,
-      apache::thrift::detail::SinkConsumerImpl>
+      apache::thrift::detail::ServerSinkFactory>
   return_methodBothThrow(
       apache::thrift::ContextStack* ctx,
       ::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse>&& _return,
@@ -460,7 +460,7 @@ class SinkServiceAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcess
   template <class ProtocolIn_, class ProtocolOut_>
   static std::pair<
       apache::thrift::SerializedResponse,
-      apache::thrift::detail::SinkConsumerImpl>
+      apache::thrift::detail::ServerSinkFactory>
   return_methodFast(
       apache::thrift::ContextStack* ctx,
       ::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse>&& _return,

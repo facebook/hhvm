@@ -59,7 +59,7 @@
 {{#else if function:self.sink?}}
   static std::pair<
       apache::thrift::SerializedResponse,
-      apache::thrift::detail::SinkConsumerImpl>
+      apache::thrift::detail::ServerSinkFactory>
   return_{{function:prefixed_name}}(
       apache::thrift::ContextStack* ctx,
       {{function:cpp_return_type}}&& _return,

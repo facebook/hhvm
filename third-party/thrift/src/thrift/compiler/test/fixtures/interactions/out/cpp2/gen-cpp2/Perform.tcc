@@ -881,7 +881,7 @@ void PerformAsyncProcessor::executeRequest_MyInteraction_encode(
 template <class ProtocolIn_, class ProtocolOut_>
 /* static */ std::pair<
     apache::thrift::SerializedResponse,
-    apache::thrift::detail::SinkConsumerImpl>
+    apache::thrift::detail::ServerSinkFactory>
 PerformAsyncProcessor::return_MyInteraction_encode(
     apache::thrift::ContextStack* ctx,
     ::apache::thrift::ResponseAndSinkConsumer<::std::set<::std::int32_t>, ::std::string, ::std::string>&& _return,
@@ -893,7 +893,7 @@ PerformAsyncProcessor::return_MyInteraction_encode(
       Perform_MyInteraction_encode_presult::FinalResponsePResultType;
   result.get<0>().value = &_return.response;
   result.setIsSet(0, true);
-  auto sinkConsumerImpl = apache::thrift::detail::ap::toSinkConsumerImpl<
+  auto sinkConsumerImpl = apache::thrift::detail::ap::toServerSinkFactory<
       ProtocolIn_,
       ProtocolOut_,
       SinkPResultType,
@@ -1584,7 +1584,7 @@ void PerformAsyncProcessor::executeRequest_MyInteractionFast_encode(
 template <class ProtocolIn_, class ProtocolOut_>
 /* static */ std::pair<
     apache::thrift::SerializedResponse,
-    apache::thrift::detail::SinkConsumerImpl>
+    apache::thrift::detail::ServerSinkFactory>
 PerformAsyncProcessor::return_MyInteractionFast_encode(
     apache::thrift::ContextStack* ctx,
     ::apache::thrift::ResponseAndSinkConsumer<::std::set<::std::int32_t>, ::std::string, ::std::string>&& _return,
@@ -1596,7 +1596,7 @@ PerformAsyncProcessor::return_MyInteractionFast_encode(
       Perform_MyInteractionFast_encode_presult::FinalResponsePResultType;
   result.get<0>().value = &_return.response;
   result.setIsSet(0, true);
-  auto sinkConsumerImpl = apache::thrift::detail::ap::toSinkConsumerImpl<
+  auto sinkConsumerImpl = apache::thrift::detail::ap::toServerSinkFactory<
       ProtocolIn_,
       ProtocolOut_,
       SinkPResultType,

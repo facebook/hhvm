@@ -381,9 +381,9 @@ class HandlerCallbackBase {
 #if !FOLLY_HAS_COROUTINES
   [[noreturn]]
 #endif
-  void sendReply(
-      [[maybe_unused]] std::pair<SerializedResponse, detail::SinkConsumerImpl>&&
-          responseAndSinkConsumer);
+  void sendReply([[maybe_unused]] std::pair<
+                 SerializedResponse,
+                 detail::ServerSinkFactory>&& responseAndSinkConsumer);
   void sendReply(ResponseAndServerBiDiStreamFactory&& responseAndStream);
 
   bool fulfillTilePromise(std::unique_ptr<Tile> ptr);

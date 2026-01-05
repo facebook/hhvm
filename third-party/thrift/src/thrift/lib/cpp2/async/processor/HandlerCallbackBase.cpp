@@ -222,7 +222,7 @@ void HandlerCallbackBase::sendReply(
 void HandlerCallbackBase::sendReply(
     [[maybe_unused]] std::pair<
         SerializedResponse,
-        apache::thrift::detail::SinkConsumerImpl>&& responseAndSinkConsumer) {
+        apache::thrift::detail::ServerSinkFactory>&& responseAndSinkConsumer) {
   if (!isStreamTrackingEnabled()) {
     this->ctx_.reset();
   }
@@ -237,18 +237,18 @@ void HandlerCallbackBase::sendReply(
                          MessageType::T_REPLY,
                          reqCtx_->getMethodName());
   payload = transform(std::move(payload));
-  auto& sinkConsumer = responseAndSinkConsumer.second;
-  sinkConsumer.interaction = std::move(interaction_);
-  sinkConsumer.contextStack = std::move(this->ctx_);
+  auto& sinkFactory = responseAndSinkConsumer.second;
+  sinkFactory.setInteraction(std::move(interaction_));
+  sinkFactory.setContextStack(std::move(this->ctx_));
 
   if (getEventBase()->isInEventBaseThread()) {
     SinkConsumerReplyInfo(
-        std::move(req_), std::move(sinkConsumer), std::move(payload), crc32c)();
+        std::move(req_), std::move(sinkFactory), std::move(payload), crc32c)();
   } else {
     putMessageInReplyQueue(
         std::in_place_type_t<SinkConsumerReplyInfo>(),
         std::move(req_),
-        std::move(sinkConsumer),
+        std::move(sinkFactory),
         std::move(payload),
         crc32c);
   }

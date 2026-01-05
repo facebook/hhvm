@@ -896,7 +896,7 @@ void BAsyncProcessor::executeRequest_sink_stuff(
 template <class ProtocolIn_, class ProtocolOut_>
 /* static */ std::pair<
     apache::thrift::SerializedResponse,
-    apache::thrift::detail::SinkConsumerImpl>
+    apache::thrift::detail::ServerSinkFactory>
 BAsyncProcessor::return_sink_stuff(
     apache::thrift::ContextStack* ctx,
     ::apache::thrift::SinkConsumer<::std::int32_t, ::std::int32_t>&& _return,
@@ -906,7 +906,7 @@ BAsyncProcessor::return_sink_stuff(
   using SinkPResultType = B_sink_stuff_presult::SinkPResultType;
   using FinalResponsePResultType =
       B_sink_stuff_presult::FinalResponsePResultType;
-  auto sinkConsumerImpl = apache::thrift::detail::ap::toSinkConsumerImpl<
+  auto sinkConsumerImpl = apache::thrift::detail::ap::toServerSinkFactory<
       ProtocolIn_,
       ProtocolOut_,
       SinkPResultType,

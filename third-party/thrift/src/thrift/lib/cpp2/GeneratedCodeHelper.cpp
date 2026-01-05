@@ -141,7 +141,7 @@ void helper<ProtocolReader, ProtocolWriter>::process_exn(
 #if FOLLY_HAS_COROUTINES
             request->sendSinkReply(
                 ResponsePayload::create(std::move(payload)),
-                detail::SinkConsumerImpl{});
+                detail::ServerSinkFactory{});
 #else
             DCHECK(false);
 #endif

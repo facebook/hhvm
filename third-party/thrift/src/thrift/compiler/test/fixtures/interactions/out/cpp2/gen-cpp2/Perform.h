@@ -475,7 +475,7 @@ class PerformAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcessorBa
   template <class ProtocolIn_, class ProtocolOut_>
   static std::pair<
       apache::thrift::SerializedResponse,
-      apache::thrift::detail::SinkConsumerImpl>
+      apache::thrift::detail::ServerSinkFactory>
   return_MyInteraction_encode(
       apache::thrift::ContextStack* ctx,
       ::apache::thrift::ResponseAndSinkConsumer<::std::set<::std::int32_t>, ::std::string, ::std::string>&& _return,
@@ -616,7 +616,7 @@ class PerformAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcessorBa
   template <class ProtocolIn_, class ProtocolOut_>
   static std::pair<
       apache::thrift::SerializedResponse,
-      apache::thrift::detail::SinkConsumerImpl>
+      apache::thrift::detail::ServerSinkFactory>
   return_MyInteractionFast_encode(
       apache::thrift::ContextStack* ctx,
       ::apache::thrift::ResponseAndSinkConsumer<::std::set<::std::int32_t>, ::std::string, ::std::string>&& _return,

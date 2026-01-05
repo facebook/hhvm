@@ -129,7 +129,7 @@ class ResponseChannelRequest {
 #if FOLLY_HAS_COROUTINES
   virtual void sendSinkReply(
       ResponsePayload&&,
-      apache::thrift::detail::SinkConsumerImpl&&,
+      apache::thrift::detail::ServerSinkFactory&&,
       folly::Optional<uint32_t> = folly::none) {
     throw std::logic_error("unimplemented");
   }

@@ -7993,6 +7993,13 @@ end = struct
         in
         refine_local ty env
       in
+      let rec is_class_or_tuple_of_class predicate =
+        match snd predicate with
+        | IsTag (ClassTag _) -> true
+        | IsTupleOf { tp_required } ->
+          List.exists ~f:is_class_or_tuple_of_class tp_required
+        | _ -> false
+      in
       ( env,
         refine_local
           ty_true
@@ -8002,10 +8009,7 @@ end = struct
                   Typing_logic.valid)
             in
             (env, predicate_ty))
-          ~ty_refine_is_class:
-            (match predicate with
-            | (_, IsTag (ClassTag _)) -> true
-            | _ -> false),
+          ~ty_refine_is_class:(is_class_or_tuple_of_class predicate),
         refine_local
           ty_false
           (fun env -> (env, MakeType.neg reason predicate))
@@ -8059,10 +8063,16 @@ end = struct
                  (T223013561)
               *)
               let (env, inter) = Inter.intersect_list env reason tyl in
+              let rec is_class_or_tuple_of_class ty =
+                match get_node ty with
+                | Ttuple { t_required; _ } ->
+                  List.exists t_required ~f:is_class_or_tuple_of_class
+                | _ -> Typing_utils.is_class ty
+              in
               Typing_helpers.refine_and_simplify_intersection
                 ~hint_first:false
                 env
-                ~is_class:(Typing_utils.is_class refine)
+                ~is_class:(is_class_or_tuple_of_class refine)
                 reason
                 inter
                 refine)

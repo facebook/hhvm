@@ -11,26 +11,20 @@ Errors:
           "File \"refinement_test1.php\", line 25, characters 20-20:"
         ]
       },
-      "option": {
-        "count": 1,
-        "positions": [
-          "File \"refinement_test1.php\", line 23, characters 20-23:"
-        ]
-      },
       "shape": {
         "count": 1,
         "positions": [
           "File \"refinement_test1.php\", line 18, characters 16-44:"
         ]
       },
-      "union": {
+      "union-dynamic": {
         "count": 1,
         "positions": [
           "File \"refinement_test1.php\", line 5, characters 18-21:"
         ]
       }
     },
-    "new_refinements": 4,
+    "new_refinements": 5,
     "total_refinements": 8
   }
 }

@@ -235,6 +235,27 @@ end) : S with type atom := Atom.t = struct
           right1 &&& right2 ||| (right1 &&& span2) ||| (right2 &&& span1));
     }
 
+  (*
+    Combines two partitions using the algebra for union predicates.
+
+    When combining partitions P1 and P2 for union predicates (P1 | P2):
+    - left: passes at least one predicate = L1 | L2
+    - right: fails both predicates = R1 & R2
+    - span: uncertain (not definitely left or right) = (S1 & S2) | (S1 & R2) | (R1 & S2)
+
+    This is different from regular join which does component-wise union.
+  *)
+  let union_combine
+      { left = left1; span = span1; right = right1 }
+      { left = left2; span = span2; right = right2 } =
+    {
+      left = Lattice.Infix_ops.(left1 ||| left2);
+      span =
+        Lattice.Infix_ops.(
+          span1 &&& span2 ||| (span1 &&& right2) ||| (right1 &&& span2));
+      right = Lattice.Infix_ops.(right1 &&& right2);
+    }
+
   (* If the partition is fully within the left, span or right we can
      simplify the DNF to be [set], otherwise return [t] unchanged *)
   let simplify t atom =

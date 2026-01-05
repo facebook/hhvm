@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<2c3f5c94b0ef6f31c3ed188a23f5f994>>
+// @generated SignedSource<<f2cf7bdffd426d5ab4b758ae2a8c1210>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -662,6 +662,7 @@ pub enum TypePredicate_ {
     IsTag(TypeTag),
     IsTupleOf(TuplePredicate),
     IsShapeOf(ShapePredicate),
+    IsUnionOf(Vec<TypePredicate>),
 }
 
 #[derive(

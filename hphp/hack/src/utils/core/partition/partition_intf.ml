@@ -46,6 +46,13 @@ module type S = sig
   (** Intersects two partitions together producing another partition *)
   val meet : t -> t -> t
 
+  (** Combines two partitions using the algebra for union predicates.
+      For union predicates (P1 | P2):
+      - left: passes at least one predicate
+      - right: fails both predicates
+      - span: uncertain (may pass either) *)
+  val union_combine : t -> t -> t
+
   (** If the partition is fully within the left, span or right we can
      simplify the DNF to be just the given atom, otherwise return [t] unchanged
   *)

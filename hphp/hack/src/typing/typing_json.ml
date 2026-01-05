@@ -232,6 +232,11 @@ let rec from_type : env -> show_like_ty:bool -> locl_ty -> json =
                         ])
                    (TShapeMap.bindings sp_fields)) );
           ]
+      | IsUnionOf predicates ->
+        let predicates_json =
+          List.map predicates ~f:(fun p -> obj @@ predicate_json p)
+        in
+        name "isunion" @ [("args", JSON_Array predicates_json)]
       (* TODO: T196048813 optional, open, fuel? *)
     in
     obj @@ kind p "negation" @ predicate_json predicate

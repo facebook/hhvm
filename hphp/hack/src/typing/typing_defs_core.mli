@@ -255,6 +255,7 @@ and type_predicate_ =
   | IsTag of type_tag
   | IsTupleOf of tuple_predicate
   | IsShapeOf of shape_predicate
+  | IsUnionOf of type_predicate list
 
 and type_predicate = (Reason.t[@transform.opaque]) * type_predicate_
 

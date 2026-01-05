@@ -132,10 +132,29 @@ module TyPredicate = struct
     | Tnonnull -> Result.Error "nonnull"
     | Tdynamic -> Result.Error "dynamic"
     | Tany _ -> Result.Error "any"
-    | Toption _ -> Result.Error "option"
+    | Toption ty_opt -> begin
+      let open Hh_prelude.Result.Let_syntax in
+      let* (next_wildcard_id, pred_opt) = of_ty env next_wildcard_id ty_opt in
+      let pred_null = (get_reason ty, IsTag NullTag) in
+      return (next_wildcard_id, IsUnionOf [pred_opt; pred_null])
+      |> Result.map_error ~f:(fun err -> "option-" ^ err)
+    end
     | Tfun _ -> Result.Error "fun"
     | Tgeneric _ -> Result.Error "generic"
-    | Tunion _ -> Result.Error "union"
+    | Tunion tys -> begin
+      match
+        List.fold_result tys ~init:(next_wildcard_id, []) ~f:(fun acc ty ->
+            let (next_wildcard_id, predicates) = acc in
+            let open Hh_prelude.Result.Let_syntax in
+            let* (next_wildcard_id, predicate) =
+              of_ty env next_wildcard_id ty
+            in
+            return (next_wildcard_id, predicate :: predicates))
+      with
+      | Result.Error err -> Result.Error ("union-" ^ err)
+      | Result.Ok (next_wildcard_id, predicates) ->
+        Result.Ok (next_wildcard_id, IsUnionOf (List.rev predicates))
+    end
     | Tintersection _ -> Result.Error "intersection"
     | Tvec_or_dict _ -> Result.Error "vec_or_dict"
     | Taccess _ -> Result.Error "access"
@@ -270,6 +289,15 @@ module TyPredicate = struct
           IMap.empty
       in
       (env, new_tparams)
+    | (_reason, IsUnionOf predicates) ->
+      let (env, new_tparams) =
+        List.map_env env predicates ~f:(fun env predicate ->
+            let (env, new_tparams) =
+              instantiate_wildcards_for_predicate env predicate p
+            in
+            (env, new_tparams))
+      in
+      (env, List.fold new_tparams ~init:IMap.empty ~f:IMap.union)
 
   let rec to_ty lookup_wildcard predicate =
     let tag_to_ty reason tag =
@@ -312,6 +340,23 @@ module TyPredicate = struct
           sp_fields
       in
       Typing_make_type.shape reason (Typing_make_type.nothing reason) map
+    | (reason, IsUnionOf predicates) -> begin
+      match
+        List.partition_tf predicates ~f:(fun p ->
+            match p with
+            | (_, IsTag NullTag) -> true
+            | _ -> false)
+      with
+      | (_ :: _, [other]) ->
+        Typing_make_type.nullable reason (to_ty lookup_wildcard other)
+      | (_ :: _, others) ->
+        Typing_make_type.nullable reason
+        @@ Typing_make_type.union reason
+        @@ List.map others ~f:(to_ty lookup_wildcard)
+      | ([], _) ->
+        Typing_make_type.union reason
+        @@ List.map predicates ~f:(to_ty lookup_wildcard)
+    end
 
   exception FoundWildcard
 
@@ -564,6 +609,11 @@ module TyPartition = struct
   let meet (partition1, t1, f1) (partition2, t2, f2) =
     (Partition.meet partition1 partition2, UTL.conj t1 t2, UTL.conj f1 f2)
 
+  let union_combine (partition1, t1, f1) (partition2, t2, f2) =
+    ( Partition.union_combine partition1 partition2,
+      UTL.disj t1 t2,
+      UTL.conj f1 f2 )
+
   let product ~f sub_splits_and_assumptions =
     let sub_splits = List.map sub_splits_and_assumptions ~f:fst3 in
     let assumption_pairs =
@@ -770,6 +820,36 @@ and split_ty_by_tag
   else
     (env, TyPartition.mk_span ~env ~predicate ty)
 
+and split_ty_by_union
+    ~(other_intersected_tys : locl_ty list)
+    ~(expansions : SSet.t)
+    (env : env)
+    (ty : locl_ty)
+    (predicates : type_predicate list) : env * TyPartition.t =
+  (* Split the type by each predicate in the union.
+
+     When splitting T by union predicate (P1 | P2 | ... | Pn):
+     - Left: parts that pass at least one predicate = L1 ∪ L2 ∪ ... ∪ Ln
+     - Right: parts that fail all predicates = R1 ∩ R2 ∩ ... ∩ Rn
+     - Span: parts that may or may not pass = everything else
+
+     This is NOT the same as joining the partitions (which would give L1∪L2, S1∪S2, R1∪R2).
+  *)
+  let (env, partitions) =
+    List.fold_map
+      ~init:env
+      ~f:(fun env pred ->
+        split_ty ~other_intersected_tys ~expansions env ty ~predicate:pred)
+      predicates
+  in
+  (* Combine partitions using the correct algebra for union predicates *)
+  let partition =
+    match partitions with
+    | [] -> TyPartition.mk_bottom
+    | first :: rest -> List.fold rest ~init:first ~f:TyPartition.union_combine
+  in
+  (env, partition)
+
 and split_ty
     ~(other_intersected_tys : locl_ty list)
     ~(expansions : SSet.t)
@@ -797,6 +877,8 @@ and split_ty
         shape_predicate
         predicate
     | IsTag tag -> split_ty_by_tag ~ty_datatype env ety tag predicate
+    | IsUnionOf predicates ->
+      split_ty_by_union ~other_intersected_tys ~expansions env ety predicates
   in
   let split_union ~other_intersected_tys ~expansions env (tys : locl_ty list) =
     let (env, partitions) =
@@ -855,12 +937,21 @@ and split_ty
       partition_f
         DataType.(of_ty ~safe_for_are_disjoint:true env @@ Class (name, args))
     | Tneg (_, predicate) ->
-      let (env, dty) =
+      let rec to_dty env predicate =
         match predicate with
         | IsTag tag -> DataType.of_tag ~safe_for_are_disjoint:false env tag
         | IsTupleOf _ -> DataType.(of_ty ~safe_for_are_disjoint:false env Tuple)
         | IsShapeOf _ -> DataType.(of_ty ~safe_for_are_disjoint:false env Shape)
+        | IsUnionOf preds ->
+          List.fold_left_env
+            env
+            preds
+            ~init:DataType.empty
+            ~f:(fun env dt_acc pred ->
+              let (env, dt) = to_dty env (snd pred) in
+              (env, DataType.union dt_acc dt))
       in
+      let (env, dty) = to_dty env predicate in
       let dty = DataType.complement dty in
       partition_f (env, dty)
     | Tprim Aast.Tnoreturn -> (env, TyPartition.mk_bottom)

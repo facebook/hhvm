@@ -265,6 +265,7 @@ and type_predicate_ =
   | IsTag of type_tag
   | IsTupleOf of tuple_predicate
   | IsShapeOf of shape_predicate
+  | IsUnionOf of type_predicate list
 
 and type_predicate =
   (Reason.t[@hash.ignore] [@transform.opaque]) * type_predicate_
@@ -702,6 +703,10 @@ module Pp = struct
       Format.fprintf fmt "(@[<2>IsShapeOf@ ";
       pp_shape_predicate fmt shape_predicate;
       Format.fprintf fmt "@])"
+    | IsUnionOf predicates ->
+      Format.fprintf fmt "(@[<2>IsUnionOf@ ";
+      pp_list pp_type_predicate fmt predicates;
+      Format.fprintf fmt "@])"
 
   and pp_tuple_predicate fmt { tp_required } =
     Format.fprintf fmt "@[<2>{ ";
@@ -827,6 +832,7 @@ let type_predicate__con_ordinal type_predicate_ =
   | IsTag _ -> 0
   | IsTupleOf _ -> 1
   | IsShapeOf _ -> 2
+  | IsUnionOf _ -> 3
 
 let type_tag_con_ordinal type_tag =
   match type_tag with

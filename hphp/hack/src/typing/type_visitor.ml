@@ -364,7 +364,8 @@ class virtual ['a] locl_type_visitor : ['a] locl_type_visitor_type =
       match snd neg_ty with
       | IsTag tag -> on_tag acc tag
       | IsTupleOf _
-      | IsShapeOf _ ->
+      | IsShapeOf _
+      | IsUnionOf _ ->
         acc
 
     method on_tunapplied_alias acc _ _ = acc

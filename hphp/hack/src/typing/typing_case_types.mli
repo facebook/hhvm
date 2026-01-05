@@ -118,8 +118,14 @@ module AtomicDataTypes : sig
   val of_tag :
     safe_for_are_disjoint:bool -> env -> Typing_defs_core.type_tag -> env * t
 
+  (** The empty set of data types *)
+  val empty : t
+
   (** Computes the complement for the set of values contained in [t] *)
   val complement : t -> t
+
+  (** Computes the union of the two given sets **)
+  val union : t -> t -> t
 
   (** Returns true if the given data types are known to have no values in
       common, otherwise returns false *)

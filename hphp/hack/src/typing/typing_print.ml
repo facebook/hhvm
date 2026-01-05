@@ -1321,6 +1321,13 @@ module Full = struct
             ([text "shape("]
             @ List.intersperse texts ~sep:(text ", ")
             @ [text ")"]) )
+      | IsUnionOf predicates ->
+        let (fuel, texts) =
+          List.fold_map ~init:fuel predicates ~f:predicate_doc
+        in
+        ( fuel,
+          Concat (List.intersperse texts ~sep:(Concat [Space; text "|"; Space]))
+        )
       (* TODO: T196048813 optional, open, fuel? *)
     in
     let (fuel, pdoc) = predicate_doc fuel predicate in
@@ -1786,6 +1793,9 @@ module ErrorString = struct
                   ])
           in
           "shape(" ^ String.concat texts ~sep:", " ^ ")"
+        | IsUnionOf predicates ->
+          let strings = List.map predicates ~f:(fun (_, pred) -> str pred) in
+          String.concat ~sep:" | " strings
         (* TODO: T196048813, dedupe?, optional, open, fuel? *)
       in
       (fuel, "anything but " ^ str @@ snd predicate)

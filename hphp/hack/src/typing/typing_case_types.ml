@@ -458,6 +458,10 @@ module DataType : sig
           right: TagWithReason.t;
         }
 
+    val empty : t
+
+    val union : t -> t -> t
+
     val disjoint : TagWithReason.ctx -> t -> t -> disjoint
 
     val are_disjoint : TagWithReason.ctx -> t -> t -> bool
@@ -817,7 +821,7 @@ end = struct
         (env, to_datatypes ~safe_for_are_disjoint ~trail env cls args)
   end
 
-  let fromPredicate
+  let rec fromPredicate
       ~safe_for_are_disjoint ~trail (env : env) (predicate : type_predicate) :
       env * t =
     let open Tag in
@@ -842,6 +846,12 @@ end = struct
     | IsTag tag -> from_tag tag
     | IsTupleOf _ -> (env, Set.singleton ~reason VecData)
     | IsShapeOf _ -> (env, Set.singleton ~reason DictData)
+    | IsUnionOf predicates ->
+      let (env, sets) =
+        List.fold_map predicates ~init:env ~f:(fun env pred ->
+            fromPredicate ~safe_for_are_disjoint ~trail env pred)
+      in
+      (env, List.fold sets ~init:Set.empty ~f:Set.union)
 
   type context = {
     safe_for_are_disjoint: bool;
@@ -1240,7 +1250,11 @@ module AtomicDataTypes = struct
       DataType.Class.to_datatypes ~safe_for_are_disjoint ~trail env name
       @@ Tag.generics_for_class_and_tag_generic_l env name args
 
+  let empty = DataType.Set.empty
+
   let complement dt = DataType.Set.diff mixed dt
+
+  let union dt1 dt2 = DataType.Set.union dt1 dt2
 
   let are_disjoint env dt1 dt2 = DataType.Set.are_disjoint env dt1 dt2
 end

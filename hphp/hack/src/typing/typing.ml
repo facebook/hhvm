@@ -1125,31 +1125,7 @@ let is_hack_collection env ty =
 
 let check_class_get
     env p def_pos cid mid ce (_, _cid_pos, e) function_pointer is_method =
-  let needs_concrete_is_enabled =
-    TypecheckerOptions.needs_concrete env.genv.tcopt
-  in
-  let callee_is_needs_concrete_method =
-    is_method && get_ce_readonly_prop_or_needs_concrete ce
-  in
-  let check_needs_concrete_call (via : [ `Static | `Self | `Parent ]) : unit =
-    (* `self` and `parent` forward the referent of `static` so are just as dangerous *)
-    if
-      needs_concrete_is_enabled
-      && callee_is_needs_concrete_method
-      && not (Env.static_points_to_concrete_class env)
-    then
-      Typing_warning_utils.add
-        env
-        ( p,
-          Typing_warning.Call_needs_concrete,
-          {
-            Typing_warning.Call_needs_concrete.call_pos = p;
-            class_name = cid;
-            meth_name = mid;
-            decl_pos = def_pos;
-            via = (via :> [ `Id | `Static | `Self | `Parent ]);
-          } )
-  in
+  Typing_needs_concrete.check_class_get env p def_pos cid mid ce e is_method;
   match e with
   | CIself when get_ce_abstract ce -> begin
     match Env.get_self_id env with
@@ -1235,33 +1211,6 @@ let check_class_get
         primary
         @@ Primary.Static_synthetic_method
              { class_name; meth_name = mid; pos = p; decl_pos = def_pos })
-  | CI _ when needs_concrete_is_enabled && callee_is_needs_concrete_method ->
-    Env.get_class env cid
-    |> Decl_entry.to_option
-    |> Option.iter ~f:(fun class_ ->
-           let is_concrete =
-             let is_non_abstract = not (Cls.abstract class_) in
-             let is_final_non_consistent_construct =
-               match snd @@ Typing_env.get_construct env class_ with
-               | FinalClass -> true
-               | Inconsistent
-               | ConsistentConstruct ->
-                 false
-             in
-             is_non_abstract || is_final_non_consistent_construct
-           in
-           if not is_concrete then
-             Typing_warning_utils.add
-               env
-               ( p,
-                 Typing_warning.Call_needs_concrete,
-                 {
-                   Typing_warning.Call_needs_concrete.call_pos = p;
-                   class_name = cid;
-                   meth_name = mid;
-                   decl_pos = def_pos;
-                   via = `Id;
-                 } ))
   | CI (_, class_name) ->
     (match Env.get_class env class_name with
     | Decl_entry.NotYetAvailable
@@ -1330,32 +1279,11 @@ let check_class_get
                    })
         end
       end)
-  | CIself -> check_needs_concrete_call `Self
-  | CIparent -> check_needs_concrete_call `Parent
-  | CIstatic ->
-    let () = check_needs_concrete_call `Static in
-    if
-      needs_concrete_is_enabled
-      && get_ce_abstract ce
-      && not (Env.static_points_to_concrete_class env)
-    then
-      (* We check for abstract access via `static`
-       * as part of the "needs concrete" feature, because
-       * checking for calls to `abstract` functions for
-       * `self`/`parent`/classname, etc. is already covered by other type
-       * errors such as Primary.Self_abstract_call, Primary.Parent_abstract_call, etc.
-       *)
-      Typing_warning_utils.add
-        env
-        ( p,
-          Typing_warning.Abstract_access_via_static,
-          {
-            Typing_warning.Abstract_access_via_static.access_pos = p;
-            class_name = cid;
-            member_name = mid;
-            decl_pos = def_pos;
-          } )
-  | CIexpr _ -> ()
+  | CIself
+  | CIparent
+  | CIstatic
+  | CIexpr _ ->
+    ()
 
 module Fun_id : sig
   (** Synthesize the type of a function identifier. If no type arguments are
@@ -11933,24 +11861,13 @@ end = struct
     let (env, tal, te, classes) =
       class_id_for_new ~exact ~is_attribute ~is_catch p env cid explicit_targs
     in
+    Typing_needs_concrete.check_instantiation env p cid;
     begin
       match cid with
       | CIstatic
         when TypecheckerOptions.needs_concrete env.genv.tcopt
              && not (Env.static_points_to_concrete_class env) ->
-        Env.get_self_class env
-        |> Decl_entry.to_option
-        |> Option.iter ~f:(fun class_ ->
-               Typing_warning_utils.add
-                 env
-                 ( p,
-                   Typing_warning.Uninstantiable_class_via_static,
-                   {
-                     Typing_warning.Uninstantiable_class_via_static.usage_pos =
-                       p;
-                     class_name = Cls.name class_;
-                     decl_pos = Cls.pos class_;
-                   } ))
+        ()
       | _ ->
         List.iter classes ~f:(function
             | `Dynamic -> ()

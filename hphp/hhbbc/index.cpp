@@ -349,6 +349,229 @@ std::string show(const ConstIndex& idx, const IIndex& index) {
 //////////////////////////////////////////////////////////////////////
 
 /*
+ * Inferred information about a function, computed by whole-program analysis.
+ *
+ * This structure contains the results of analysis passes that refine our
+ * knowledge about a function's behavior. These values are computed iteratively
+ * and can only become more specific (never less specific) across analysis
+ * rounds until reaching a fixed point.
+ */
+struct InferredFuncInfo {
+  /*
+   * The best-known return type of the function, if we have any
+   * information.  May be TBottom if the function is known to never
+   * return (e.g. always throws).
+   */
+  Type returnTy = TInitCell;
+
+  /*
+   * If the function always returns the same parameter, this will be
+   * set to its id; otherwise it will be NoLocalId.
+   */
+  LocalId retParam{NoLocalId};
+
+  /*
+   * The number of times we've refined returnTy.
+   */
+  uint32_t returnRefinements{0};
+
+  /*
+   * Whether the function is free of side-effects.
+   */
+  bool effectFree{false};
+
+  /*
+   * Bitset representing which parameters definitely don't affect the
+   * result of the function, assuming it produces one. Note that the
+   * parameter type verification does not count as a use in this
+   * context.
+   */
+  std::bitset<64> unusedParams;
+
+  template <typename SerDe> void serde(SerDe&);
+};
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * Inferred information about a class, computed by whole-program analysis.
+ *
+ * This structure contains the results of analysis passes that refine our
+ * knowledge about a class's properties and constants. Like InferredFuncInfo,
+ * these values are computed iteratively and can only become more specific
+ * (never less specific) across analysis rounds.
+ */
+struct InferredClassInfo {
+  /*
+   * Inferred information about a class constant declared on this
+   * class (not flattened).
+   */
+  SStringToOneT<ClsConstInfo> clsConstantInfo;
+
+  template <typename SerDe> void serde(SerDe&);
+};
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * Monotonicity requires that when you use some analysis results from
+ * a func or class, that information must never become more general
+ * (i.e., it can only shrink). Violating monotonicity can cause
+ * analysis to oscillate indefinitely or produce incorrect
+ * optimization decisions. Distributed analysis, however, can break
+ * monotonicity. A given class or function might be analyzed on
+ * multiple jobs simultaneously (i.e., if it's part of another class
+ * or func's dependency trace). Since each job will generally have a
+ * different set of available entities, it's quite possible for the
+ * analysis of the same entity to produce different results in
+ * different jobs.  This isn't a problem by itself, since the only
+ * analysis that truly "counts" is the one which is authoritative
+ * (i.e., the one job which actually reports the analysis results back
+ * to the main process).
+ *
+ * Suppose we have entities A, B, and C. Entity A is analyzed and
+ * reported on job #1, and entity B is analyzed and reported on job
+ * #2. Because B depends on A, entity A is also present on job #2 (but
+ * not reported from there). Entity C is actually a dep of entity A,
+ * but this isn't known yet, so it's not present on job #1 (but it
+ * happens to be on job #2 by chance).
+ *
+ * Round 1: In one round, we analyze everything. Entity A is analyzed
+ * in job #1 and reports its results. We did not know that entity C is
+ * a dep, so it is not present and the analysis cannot make use of
+ * it. However, after analysis, we now know entity C is a dep for next
+ * round. Likewise, entity B is processed and reported from job
+ * #2. Since A is a known dep of B, A is also present on job #2 and
+ * will be analyzed (but not reported). In the process of analyzing A,
+ * we learn the dependency on C and since C happens to be present on
+ * the job, we take it into account while analyzing A. This means the
+ * analysis of A on job #2 might actually infer better types than on
+ * job #1. This better analysis is ephemeral because it is not
+ * reported back (that is job #1's job). When B is analyzed on job #2,
+ * it uses the analysis of A. The analysis of B is reported back to
+ * the main process.
+ *
+ * Round 2: So far nothing is amiss. When we perform the next round,
+ * we know that C is a dependency of A, so job #1 includes both A and
+ * C. We analyze A, which now has C's information. This analysis
+ * should come to the same result as previously calculated in job #2
+ * (or perhaps better), so it (eventually) will produce the most
+ * specific types. B is analyzed on job #2 again, and A is present
+ * there as well. A has the results from the first round analysis in
+ * job #1. This analysis is less specific than we had computed in
+ * round 1 job #2 (which then fed into B's analysis). We analyze B
+ * again, using the less specific A information, and boom, we get a
+ * monotonicity violation.
+ *
+ * There are a variety of ways to solve this. At first I attempted to
+ * solve this by enforcing that jobs don't take advantage of
+ * information that isn't present on all other connected jobs. However
+ * this is clumsy, causes more rounds unnecessarily, and doesn't
+ * always work with long chains of dependencies.
+ *
+ * Instead solve it with the notion of retained info. Whenever an
+ * entity uses some information from another entity, it "retains" that
+ * info inside itself. On subsequent rounds, if the information
+ * obtained from another entity is less specific than in the retained
+ * info, the retained info is used instead. This ensures a "ratchet"
+ * where information doesn't ever get less specific. RetainedInfo is
+ * double buffered. It contains the retained info from the last round,
+ * while also recording the retained info for next round. These are
+ * separate because the two can be very different (if we optimize away
+ * a dependency we don't need its retained info anymore). Also we
+ * avoid recording retained info for cases where it's unnecessary
+ * (i.e., we know we have the authoritative information for an
+ * entity).
+ */
+struct RetainedInfo {
+  // Obtain the information about a given func or class, returning
+  // nullptr if there is none.
+  const InferredFuncInfo* get(const FuncInfo2&) const;
+  const InferredClassInfo* get(const ClassInfo2&) const;
+
+  // Record information about the given func or class.
+  InferredFuncInfo& retain(const FuncInfo2&);
+  InferredClassInfo& retain(const ClassInfo2&);
+
+  // Drop the old retained info, and make the info from retain() calls
+  // be the current state. This must be called before the information
+  // is serialized.
+  void flip();
+
+  bool empty() const { return !state; }
+
+  template <typename SerDe> void serde(SerDe&);
+private:
+  struct FKey {
+    SString cls;
+    SString func;
+
+    bool operator<(const FKey& o) const {
+      assertx(func);
+      assertx(o.func);
+      if (!cls) {
+        return o.cls || string_data_lt_func{}(func, o.func);
+      } else if (!o.cls) {
+        return false;
+      } else if (string_data_lt_type{}(cls, o.cls)) {
+        return true;
+      } else if (string_data_lt_type{}(o.cls, cls)) {
+        return false;
+      } else {
+        return string_data_lt_func{}(func, o.func);
+      }
+    }
+
+    template <typename SerDe> void serde(SerDe& sd) { sd(cls)(func); }
+  };
+
+  struct Hasher {
+    size_t operator()(const FKey& k) const {
+      return folly::hash::hash_combine(
+        k.cls ? k.cls->hash() : 0,
+        pointer_hash<StringData>{}(k.func)
+      );
+    }
+  };
+
+  struct Equals {
+    bool operator()(const FKey& k1, const FKey& k2) const {
+      assertx(k1.func);
+      assertx(k2.func);
+      if (!k1.cls) {
+        return !k2.cls && (k1.func == k2.func);
+      } else if (!k2.cls) {
+        return false;
+      } else if (!k1.cls->tsame(k2.cls)) {
+        return false;
+      } else {
+        return k1.func == k2.func;
+      }
+    }
+  };
+
+  using FMap = hphp_fast_map<FKey, InferredFuncInfo, Hasher, Equals>;
+  using CMap = TSStringToOneT<InferredClassInfo>;
+
+  static FKey makeKey(const FuncInfo2&);
+
+  struct State {
+    FMap funcCurrent;
+    FMap funcNext;
+    CMap clsCurrent;
+    CMap clsNext;
+    template <typename SerDe> void serde(SerDe& sd) {
+      sd(funcCurrent, std::less<>{})
+        (clsCurrent, std::less<>{})
+        ; // Next intentionally not serialized
+    }
+  };
+  std::unique_ptr<State> state;
+};
+
+//////////////////////////////////////////////////////////////////////
+
+/*
  * Currently inferred information about a PHP function.
  *
  * Nothing in this structure can ever be untrue.  The way the
@@ -425,34 +648,15 @@ struct FuncInfo2 {
   const php::Func* func = nullptr;
 
   /*
-   * The best-known return type of the function, if we have any
-   * information. May be TBottom if the function is known to never
-   * return (e.g. always throws).
+   * Inferred information about this func
    */
-  Type returnTy = TInitCell;
+  InferredFuncInfo inferred;
 
   /*
-   * If the function always returns the same parameter, this will be
-   * set to its id; otherwise it will be NoLocalId.
-  */
-  LocalId retParam{NoLocalId};
-
-  /*
-   * The number of times we've refined returnTy.
+   * Retained information about other entities which have contributed
+   * to this func's inferred information.
    */
-  uint32_t returnRefinements{0};
-
-  /*
-   * Whether this function is effect-free.
-   */
-  bool effectFree{false};
-
-  /*
-   * Bitset representing which parameters definitely don't affect the
-   * result of the function, assuming it produces one. Note that
-   * the parameter type verification does not count as a use in this context.
-   */
-  std::bitset<64> unusedParams;
+  RetainedInfo retained;
 
   /*
    * If we utilize a ClassGraph while resolving types, we store it
@@ -494,6 +698,25 @@ struct MethodsWithoutCInfo {
       ;
   }
 };
+
+//////////////////////////////////////////////////////////////////////
+
+template <typename SerDe> void InferredFuncInfo::serde(SerDe& sd) {
+  ScopedStringDataIndexer _;
+  sd(returnTy)
+    (retParam)
+    (returnRefinements)
+    (effectFree)
+    (unusedParams)
+    ;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+template <typename SerDe> void InferredClassInfo::serde(SerDe& sd) {
+  ScopedStringDataIndexer _;
+  sd(clsConstantInfo, string_data_lt{});
+}
 
 //////////////////////////////////////////////////////////////////////
 
@@ -4134,25 +4357,10 @@ template <typename SerDe> void FuncInfo2::serde(SerDe& sd) {
   ScopedStringDataIndexer _;
   ClassGraph::ScopedSerdeState _2;
   sd(name)
-    (returnTy)
-    (retParam)
-    (returnRefinements)
-    (effectFree)
-    (unusedParams)
+    (inferred)
+    (retained)
+    (auxClassGraphs)
     ;
-
-  if constexpr (SerDe::deserializing) {
-    bool present;
-    sd(present);
-    if (present) {
-      auxClassGraphs = std::make_unique<AuxClassGraphs>(
-        sd.template make<AuxClassGraphs>()
-      );
-    }
-  } else {
-    sd((bool)auxClassGraphs);
-    if (auxClassGraphs) sd(*auxClassGraphs);
-  }
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -4351,10 +4559,9 @@ struct ClassInfo2 {
   SStringToOneT<ConstIndexAndKind> clsConstants;
 
   /*
-   * Inferred information about a class constant declared on this
-   * class (not flattened).
+   * Inferred information about this class
    */
-  SStringToOneT<ClsConstInfo> clsConstantInfo;
+  InferredClassInfo inferred;
 
   /*
    * A list of extra properties supplied by this class's used traits.
@@ -4454,6 +4661,12 @@ struct ClassInfo2 {
   AuxClassGraphs auxClassGraphs;
 
   /*
+   * Retained information about other entities which have contributed
+   * to this class's inferred information.
+   */
+  RetainedInfo retained;
+
+  /*
    * Track if this class has a property which might redeclare a property in a
    * parent class with an inequivalent type-hint.
    */
@@ -4521,7 +4734,7 @@ struct ClassInfo2 {
     sd(name)
       (parent)
       (clsConstants, string_data_lt{})
-      (clsConstantInfo, string_data_lt{})
+      (inferred)
       (traitProps)
       (methods, string_data_lt{})
       (missingMethods, string_data_lt{})
@@ -4531,6 +4744,7 @@ struct ClassInfo2 {
       (methodFamilies, string_data_lt{})
       (funcInfos)
       (auxClassGraphs)
+      (retained)
       (hasBadRedeclareProp)
       (hasBadInitialPropValues)
       (hasConstProp)
@@ -4549,7 +4763,52 @@ struct ClassInfo2 {
 
 //////////////////////////////////////////////////////////////////////
 
+const InferredFuncInfo* RetainedInfo::get(const FuncInfo2& finfo) const {
+  if (!state) return nullptr;
+  return folly::get_ptr(state->funcCurrent, makeKey(finfo));
+}
+
+const InferredClassInfo* RetainedInfo::get(const ClassInfo2& cinfo) const {
+  if (!state) return nullptr;
+  return folly::get_ptr(state->clsCurrent, cinfo.name);
+}
+
+InferredFuncInfo& RetainedInfo::retain(const FuncInfo2& finfo) {
+  if (!state) state = std::make_unique<State>();
+  return state->funcNext.try_emplace(makeKey(finfo)).first->second;
+}
+
+InferredClassInfo& RetainedInfo::retain(const ClassInfo2& cinfo) {
+  if (!state) state = std::make_unique<State>();
+  return state->clsNext.try_emplace(cinfo.name).first->second;
+}
+
+void RetainedInfo::flip() {
+  if (!state) return;
+  state->funcCurrent = std::move(state->funcNext);
+  state->clsCurrent = std::move(state->clsNext);
+  state->funcNext.clear();
+  state->clsNext.clear();
+}
+
+RetainedInfo::FKey RetainedInfo::makeKey(const FuncInfo2& finfo) {
+  assertx(finfo.func);
+  return FKey{
+    finfo.func->cls ? finfo.func->cls->name : nullptr,
+    finfo.func->name
+  };
+}
+
+template <typename SerDe> void RetainedInfo::serde(SerDe& sd) {
+  ScopedStringDataIndexer _;
+  sd(state);
+}
+
+//////////////////////////////////////////////////////////////////////
+
 namespace res {
+
+//////////////////////////////////////////////////////////////////////
 
 Class::Class(ClassGraph g): opaque{g.this_} {
   assertx(g.this_);
@@ -8343,9 +8602,9 @@ Index::ReturnType context_sensitive_return_type(AnalysisIndex::IndexData& data,
     }
 
     if (data.deps->add(func, AnalysisDeps::RetParam)) {
-      if (finfo.retParam != NoLocalId &&
-          callCtx.args.size() > finfo.retParam &&
-          checkParam(finfo.retParam)) {
+      if (finfo.inferred.retParam != NoLocalId &&
+          callCtx.args.size() > finfo.inferred.retParam &&
+          checkParam(finfo.inferred.retParam)) {
         return true;
       }
     }
@@ -15859,8 +16118,8 @@ struct InitTypesJob {
         auto const& func = cls.methods[i];
         auto& finfo = cinfo.funcInfos[i];
         assertx(func->name == finfo->name);
-        assertx(finfo->returnTy.is(BInitCell));
-        finfo->returnTy = initial_return_type(index, *func);
+        assertx(finfo->inferred.returnTy.is(BInitCell));
+        finfo->inferred.returnTy = initial_return_type(index, *func);
       }
     };
 
@@ -15883,9 +16142,9 @@ struct InitTypesJob {
       auto const& func = funcs.vals[i];
       auto& finfo = finfos.vals[i];
       assertx(func->name == finfo->name);
-      assertx(finfo->returnTy.is(BInitCell));
+      assertx(finfo->inferred.returnTy.is(BInitCell));
       unresolve_missing(index, *func);
-      finfo->returnTy = initial_return_type(index, *func);
+      finfo->inferred.returnTy = initial_return_type(index, *func);
     }
 
     return std::make_tuple(
@@ -17068,11 +17327,11 @@ void remote_func_info_to_local(IndexData& index,
   assertx(func.name == rfinfo.name);
   auto finfo = func_info(index, &func);
   assertx(finfo->returnTy.is(BInitCell));
-  finfo->returnTy = std::move(rfinfo.returnTy);
-  finfo->returnRefinements = rfinfo.returnRefinements;
-  finfo->retParam = rfinfo.retParam;
-  finfo->effectFree = rfinfo.effectFree;
-  finfo->unusedParams = rfinfo.unusedParams;
+  finfo->returnTy = std::move(rfinfo.inferred.returnTy);
+  finfo->returnRefinements = rfinfo.inferred.returnRefinements;
+  finfo->retParam = rfinfo.inferred.retParam;
+  finfo->effectFree = rfinfo.inferred.effectFree;
+  finfo->unusedParams = rfinfo.inferred.unusedParams;
 }
 
 // Convert the FuncInfo2s we loaded from extern-worker into their
@@ -17335,7 +17594,7 @@ void make_class_infos_local(
             cinfo->clsConstTypes.resize(i+1, ClsConstInfo { TInitCell, 0 });
           }
           cinfo->clsConstTypes[i] = folly::get_default(
-            rcinfo->clsConstantInfo,
+            rcinfo->inferred.clsConstantInfo,
             cns.name,
             ClsConstInfo { TInitCell, 0 }
           );
@@ -24947,7 +25206,7 @@ Type AnalysisIndex::lookup_constant(SString name) const {
     // explicit dependence on the constant, we might not have the init
     // func present.
     if (fit == end(m_data->finfos)) return TInitCell;
-    return unctx(unserialize_type(fit->second->returnTy));
+    return unctx(unserialize_type(fit->second->inferred.returnTy));
   }
   return m_data->badConstants.contains(name) ? TBottom : TInitCell;
 }
@@ -24988,7 +25247,7 @@ AnalysisIndex::lookup_class_constants(const php::Class& cls) const {
       out.emplace_back(cns.name, ClsConstInfo{ TInitCell, 0 });
     } else {
       auto info = folly::get_default(
-        cls.cinfo->clsConstantInfo,
+        cls.cinfo->inferred.clsConstantInfo,
         cns.name,
         ClsConstInfo{ TInitCell, 0 }
       );
@@ -25074,7 +25333,7 @@ AnalysisIndex::lookup_class_constant(const Type& cls,
       ITRACE(4, "(dynamic)\n");
       if (!cnsCls->cinfo) return conservative();
       auto const info =
-        folly::get_ptr(cnsCls->cinfo->clsConstantInfo, cns.name);
+        folly::get_ptr(cnsCls->cinfo->inferred.clsConstantInfo, cns.name);
       return R{
         info ? unserialize_type(info->type) : TInitCell,
         TriBool::Yes,
@@ -25327,8 +25586,8 @@ Index::ReturnType AnalysisIndex::lookup_return_type(MethodsInfo* methods,
       return R{ TInitCell, false };
     }
     return R{
-      unctx(unserialize_type(finfo.returnTy)),
-      finfo.effectFree
+      unctx(unserialize_type(finfo.inferred.returnTy)),
+      finfo.inferred.effectFree
     };
   };
 
@@ -25359,8 +25618,8 @@ Index::ReturnType AnalysisIndex::lookup_return_type(MethodsInfo* methods,
         return R{ TInitCell, false };
       }
       return R{
-        unctx(unserialize_type(f.finfo->returnTy)),
-        f.finfo->effectFree
+        unctx(unserialize_type(f.finfo->inferred.returnTy)),
+        f.finfo->inferred.effectFree
       };
     },
     [&] (res::Func::Method2 m)          { return meth(*m.finfo); },
@@ -25439,8 +25698,8 @@ AnalysisIndex::lookup_foldable_return_type(const CallContext& calleeCtx) const {
   auto const& finfo = func_info(*m_data, func);
   // No need to call unserialize_type here. If it's a scalar, there's
   // nothing to unserialize anyways.
-  if (finfo.effectFree && is_scalar(finfo.returnTy)) {
-    return R{ finfo.returnTy, finfo.effectFree };
+  if (finfo.inferred.effectFree && is_scalar(finfo.inferred.returnTy)) {
+    return R{ finfo.inferred.returnTy, finfo.inferred.effectFree };
   }
 
   auto const& caller = *context_for_deps(*m_data).func;
@@ -25495,7 +25754,7 @@ AnalysisIndex::lookup_foldable_return_type(const CallContext& calleeCtx) const {
     return R{ TInitCell, false };
   }
 
-  auto const insensitive = unserialize_type(finfo.returnTy);
+  auto const insensitive = unserialize_type(finfo.inferred.returnTy);
 
   ITRACE_MOD(
     Trace::hhbbc, 4,
@@ -25543,10 +25802,10 @@ AnalysisIndex::lookup_return_type_raw(const php::Func& f) const {
   auto const& finfo = func_info(*m_data, f);
   return std::make_pair(
     Index::ReturnType{
-      unserialize_type(finfo.returnTy),
-      finfo.effectFree
+      unserialize_type(finfo.inferred.returnTy),
+      finfo.inferred.effectFree
     },
-    finfo.returnRefinements
+    finfo.inferred.returnRefinements
   );
 }
 
@@ -25564,7 +25823,7 @@ bool AnalysisIndex::func_depends_on_arg(const php::Func& func,
                                         size_t arg) const {
   if (!m_data->deps->add(func, AnalysisDeps::Type::UnusedParams)) return true;
   auto const& finfo = func_info(*m_data, func);
-  return arg >= finfo.unusedParams.size() || !finfo.unusedParams.test(arg);
+  return arg >= finfo.inferred.unusedParams.size() || !finfo.inferred.unusedParams.test(arg);
 }
 
 /*
@@ -26151,14 +26410,14 @@ void AnalysisIndex::refine_class_constants(const FuncAnalysisResult& fa) {
         show(c.second.type)
       );
       cns.val = *val;
-      if (cinfo) cinfo->clsConstantInfo.erase(cns.name);
+      if (cinfo) cinfo->inferred.clsConstantInfo.erase(cns.name);
       m_data->deps->update(
         cns,
         ConstIndex { fa.ctx.func->cls->name, c.first }
       );
     } else if (cinfo) {
       auto old = folly::get_default(
-        cinfo->clsConstantInfo,
+        cinfo->inferred.clsConstantInfo,
         cns.name,
         ClsConstInfo{ TInitCell, 0 }
       );
@@ -26174,7 +26433,7 @@ void AnalysisIndex::refine_class_constants(const FuncAnalysisResult& fa) {
           cns.name,
           show(c.second.type)
         );
-        cinfo->clsConstantInfo.insert_or_assign(
+        cinfo->inferred.clsConstantInfo.insert_or_assign(
           cns.name,
           ClsConstInfo {
             serialize_type(c.second.type),
@@ -26207,7 +26466,7 @@ void AnalysisIndex::refine_return_info(const FuncAnalysisResult& fa) {
 
   auto changes = AnalysisDeps::Type::None;
 
-  if (finfo.retParam == NoLocalId) {
+  if (finfo.inferred.retParam == NoLocalId) {
     // This is just a heuristic; it doesn't mean that the value passed
     // in was returned, but that the value of the parameter at the
     // point of the RetC was returned. We use it to make (heuristic)
@@ -26216,41 +26475,41 @@ void AnalysisIndex::refine_return_info(const FuncAnalysisResult& fa) {
     // inline interp, and get worse results, which breaks
     // monotonicity).
     if (fa.retParam != NoLocalId) {
-      finfo.retParam = fa.retParam;
+      finfo.inferred.retParam = fa.retParam;
       changes |= AnalysisDeps::Type::RetParam;
     }
   } else {
     always_assert_flog(
-      finfo.retParam == fa.retParam,
+      finfo.inferred.retParam == fa.retParam,
       "Index return param invariant violated in {}.\n"
       "    Went from {} to {}\n",
-      finfo.retParam,
+      finfo.inferred.retParam,
       fa.retParam,
       error_loc()
     );
   }
 
   auto const unusedParams = ~fa.usedParams;
-  if (finfo.unusedParams != unusedParams) {
+  if (finfo.inferred.unusedParams != unusedParams) {
     always_assert_flog(
-      (finfo.unusedParams | unusedParams) == unusedParams,
+      (finfo.inferred.unusedParams | unusedParams) == unusedParams,
       "Index unused params decreased in {}.\n",
       error_loc()
     );
-    finfo.unusedParams = unusedParams;
+    finfo.inferred.unusedParams = unusedParams;
     changes |= AnalysisDeps::Type::UnusedParams;
   }
 
-  auto const oldReturnTy = unserialize_type(finfo.returnTy);
+  auto const oldReturnTy = unserialize_type(finfo.inferred.returnTy);
   if (fa.inferredReturn.strictlyMoreRefined(oldReturnTy)) {
-    if (finfo.returnRefinements < options.returnTypeRefineLimit) {
-      finfo.returnTy = serialize_type(fa.inferredReturn);
-      finfo.returnRefinements += fa.localReturnRefinements + 1;
-      if (finfo.returnRefinements > options.returnTypeRefineLimit) {
+    if (finfo.inferred.returnRefinements < options.returnTypeRefineLimit) {
+      finfo.inferred.returnTy = serialize_type(fa.inferredReturn);
+      finfo.inferred.returnRefinements += fa.localReturnRefinements + 1;
+      if (finfo.inferred.returnRefinements > options.returnTypeRefineLimit) {
         FTRACE(1, "maxed out return type refinements at {}\n", error_loc());
       }
       changes |= AnalysisDeps::Type::RetType;
-      if (is_scalar(finfo.returnTy)) {
+      if (is_scalar(finfo.inferred.returnTy)) {
         changes |= AnalysisDeps::Type::ScalarRetType;
       }
     } else {
@@ -26268,14 +26527,14 @@ void AnalysisIndex::refine_return_info(const FuncAnalysisResult& fa) {
   }
 
   always_assert_flog(
-    !finfo.effectFree || fa.effectFree,
+    !finfo.inferred.effectFree || fa.effectFree,
     "Index effect-free invariant violated in {}.\n"
     "    Went from true to false\n",
     error_loc()
   );
 
-  if (finfo.effectFree != fa.effectFree) {
-    finfo.effectFree = fa.effectFree;
+  if (finfo.inferred.effectFree != fa.effectFree) {
+    finfo.inferred.effectFree = fa.effectFree;
     changes |= AnalysisDeps::Type::RetType;
   }
 

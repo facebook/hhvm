@@ -1395,25 +1395,21 @@ struct ClassGraph {
   // A "missing" ClassGraph is a special variant which represents a
   // class about which nothing is known. The class might not even
   // exist. The only valid thing to do with such a class is query its
-  // name. The "raw" variant ignores any permission checks.
+  // name.
   bool isMissing() const;
-  bool isMissingRaw() const;
 
   // A class might or might not have complete knowledge about its
   // children. If this returns true, you can perform any of the below
   // queries on it. If not, you can only perform queries related to
   // the parents (non-missing classes always have complete parent
-  // information). The "raw" variant ignores any permission checks.
+  // information).
   bool hasCompleteChildren() const;
-  bool hasCompleteChildrenRaw() const;
 
   // A conservative class is one which will never have complete
   // children. This generally means that the class has too many
   // subclasses to efficiently represent. We treat such classes
-  // conservatively, except in a few cases. The "raw" variant ignores
-  // any permission checks.
+  // conservatively, except in a few cases.
   bool isConservative() const;
-  bool isConservativeRaw() const;
 
   // Whether this class is an interface, a trait, an enum, or an
   // abstract class. It is invalid to check these if isMissing() is
@@ -1456,7 +1452,7 @@ struct ClassGraph {
   // true. NB: Being on a class' children list does not necessarily
   // mean that it has a "is-a" relationship. Namely, classes on a
   // trait's children list are not instances of the trait itself.
-  std::vector<ClassGraph> children() const;
+  std::vector<ClassGraph> children(bool regOnly = false) const;
 
   // Retrieve the interfaces implemented by this class directly.
   std::vector<ClassGraph> declInterfaces() const {
@@ -1475,6 +1471,10 @@ struct ClassGraph {
   // Returns true if this class is a child of the other class.
   bool isChildOf(ClassGraph) const;
 
+  // Returns a list of the parents that *all* regular subclasses of
+  // this class have in common.
+  std::vector<ClassGraph> commonParentsOfRegSubs() const;
+
   // Retrieve the set of classes which *might* be equivalent to this
   // class when ignoring non-regular classes. This does not include
   // subclasses of this class.
@@ -1491,17 +1491,10 @@ struct ClassGraph {
   bool subCouldBe(ClassGraph, bool nonRegL, bool nonRegR) const;
 
   // "Ensures" that this ClassGraph will be present (with the
-  // requested information) for subsequent analysis rounds. If these
-  // functions return false, you must treat this ClassGraph as if it's
-  // missing!
-  [[nodiscard]] bool ensure() const;
-  [[nodiscard]] bool ensureWithChildren() const;
-  [[nodiscard]] bool ensureCInfo() const;
-
-  // Check if you're allowed to use this ClassGraph's knowledge (and
-  // child info if specified). If this returns false, you must treat
-  // the ClassGraph as if it was missing.
-  bool allowed(bool children) const;
+  // requested information) for subsequent analysis rounds.
+  void ensure() const;
+  void ensureWithChildren(bool regOnly = false) const;
+  void ensureCInfo() const;
 
   // Used when building ClassGraphs initially.
   void setClosureBase();
@@ -1563,11 +1556,12 @@ private:
   struct Node;
   struct Table;
 
-  using NodeSet = hphp_fast_set<Node*>;
-  template <typename T> using NodeMap = hphp_fast_map<Node*, T>;
-  using NodeVec = TinyVector<Node*, 4>;
-
   struct TLNodeIdxSet;
+
+  using NodeSet = hphp_fast_set<Node*, pointer_hash<Node>>;
+  template <typename T>
+  using NodeMap = hphp_fast_map<Node*, T, pointer_hash<Node>>;
+  using NodeVec = TinyVector<Node*, 4>;
 
   struct SmallBitset;
   struct LargeBitset;
@@ -1614,6 +1608,8 @@ private:
     };
     LockFreeLazyPtr<NonRegularInfo> nonRegInfo;
     LockFreeLazyPtr<NonRegularInfo> nonRegInfoDisallow;
+
+    LockFreeLazy<NodeSet> commonParentsOfRegSubs;
 
     // Unique sequential id assigned to every node. Used for NodeIdxSet.
     using Idx = uint32_t;
@@ -1745,7 +1741,7 @@ private:
   std::vector<ClassGraph> directParents(Flags) const;
 
   bool storeAuxs(AnalysisIndex::IndexData&, bool) const;
-  bool onAuxs(AnalysisIndex::IndexData&, bool) const;
+  bool onAuxs(AnalysisIndex::IndexData&, bool, bool) const;
 
   static Table& table();
 
@@ -1761,13 +1757,11 @@ private:
   static void enumerateIsectMembers(const NodeVec&, bool,
                                     const F&, bool = false);
 
-  static std::pair<NodeSet, NodeSet> calcSubclassOfSplit(Node&);
-  static NodeSet calcSubclassOf(Node&);
+  static std::pair<NodeSet, NodeSet> calcSubclassOfSplit(Node&, bool);
+  static NodeSet calcSubclassOf(Node&, bool);
   static Node* calcRegOnlyEquiv(Node&, const NodeSet&);
 
-  // Rank nodes, optionally taking into account permission
-  // information.
-  template <bool> static bool betterNode(Node*, Node*);
+  static bool betterNode(Node*, Node*);
 
   template <typename F>
   static Action forEachParent(Node&, const F&, NodeIdxSet&);
@@ -1777,9 +1771,9 @@ private:
   static Action forEachParentImpl(Node&, const F&, NodeIdxSet*, bool);
 
   template <typename F>
-  static Action forEachChild(Node&, const F&, NodeIdxSet&);
+  static Action forEachChild(Node&, const F&, NodeIdxSet&, bool = true);
   template <typename F>
-  static Action forEachChild(Node&, const F&);
+  static Action forEachChild(Node&, const F&, bool = true);
   template <typename F>
   static Action forEachChildImpl(Node&, const F&, NodeIdxSet*, bool);
 
@@ -2374,18 +2368,18 @@ ClassInfo2* ClassGraph::cinfo2() const {
 
 bool ClassGraph::mightBeRegular() const {
   assertx(this_);
-  return isMissing() || this_->isRegular();
+  return this_->isRegular() || isMissing();
 }
 
 bool ClassGraph::mightBeNonRegular() const {
   assertx(this_);
-  return isMissing() || !this_->isRegular();
+  return !this_->isRegular() || isMissing();
 }
 
 bool ClassGraph::mightHaveRegularSubclass() const {
   assertx(this_);
   if (this_->hasCompleteChildren() || this_->isConservative()) {
-    return this_->hasRegularSubclass() || !allowed(true);
+    return this_->hasRegularSubclass();
   }
   return true;
 }
@@ -2393,37 +2387,22 @@ bool ClassGraph::mightHaveRegularSubclass() const {
 bool ClassGraph::mightHaveNonRegularSubclass() const {
   assertx(this_);
   if (this_->hasCompleteChildren() || this_->isConservative()) {
-    return this_->hasNonRegularSubclass() || !allowed(true);
+    return this_->hasNonRegularSubclass();
   }
   return true;
 }
 
 bool ClassGraph::isMissing() const {
   assertx(this_);
-  return this_->isMissing() || !allowed(false);
-}
-
-bool ClassGraph::isMissingRaw() const {
-  assertx(this_);
   return this_->isMissing();
 }
 
 bool ClassGraph::hasCompleteChildren() const {
   assertx(this_);
-  return !this_->isMissing() && this_->hasCompleteChildren() && allowed(true);
-}
-
-bool ClassGraph::hasCompleteChildrenRaw() const {
-  assertx(this_);
   return !this_->isMissing() && this_->hasCompleteChildren();
 }
 
 bool ClassGraph::isConservative() const {
-  assertx(this_);
-  return !this_->isMissing() && this_->isConservative() && allowed(true);
-}
-
-bool ClassGraph::isConservativeRaw() const {
   assertx(this_);
   return !this_->isMissing() && this_->isConservative();
 }
@@ -2564,16 +2543,16 @@ bool ClassGraph::operator<(ClassGraph h) const {
 ClassGraph ClassGraph::withoutNonRegular() const {
   assertx(!table().locking);
   assertx(this_);
-  if (!ensure() || this_->isMissing() || this_->isRegular()) {
-    return *this;
-  }
+  ensure();
+  if (this_->isMissing() || this_->isRegular()) return *this;
   return ClassGraph { this_->nonRegularInfo().regOnlyEquiv };
 }
 
 ClassGraph ClassGraph::base() const {
   assertx(!table().locking);
   assertx(this_);
-  if (ensure() && !this_->isMissing()) {
+  ensure();
+  if (!this_->isMissing()) {
     for (auto const p : this_->parents) {
       if (p->isBase()) return ClassGraph { p };
     }
@@ -2586,7 +2565,7 @@ ClassGraph ClassGraph::topBase() const {
   assertx(this_);
   assertx(!isMissing());
 
-  always_assert(ensure());
+  ensure();
 
   auto current = this_;
   auto last = this_;
@@ -2613,7 +2592,7 @@ std::vector<ClassGraph> ClassGraph::bases() const {
   assertx(this_);
   assertx(!isMissing());
 
-  always_assert(ensure());
+  ensure();
 
   std::vector<ClassGraph> out;
   auto current = this_;
@@ -2641,8 +2620,7 @@ std::vector<ClassGraph> ClassGraph::interfaces() const {
   assertx(this_);
   assertx(!isMissing());
 
-  always_assert(ensure());
-
+  ensure();
   std::vector<ClassGraph> out;
   forEachParent(
     *this_,
@@ -2661,8 +2639,7 @@ void ClassGraph::walkParents(const F& f) const {
   assertx(this_);
   assertx(!isMissing());
 
-  always_assert(ensure());
-
+  ensure();
   forEachParent(
     *this_,
     [&] (Node& p) {
@@ -2673,13 +2650,13 @@ void ClassGraph::walkParents(const F& f) const {
   );
 }
 
-std::vector<ClassGraph> ClassGraph::children() const {
+std::vector<ClassGraph> ClassGraph::children(bool regOnly) const {
   assertx(!table().locking);
   assertx(this_);
   assertx(!isMissing());
   assertx(hasCompleteChildren());
 
-  always_assert(ensureWithChildren());
+  ensureWithChildren(regOnly);
 
   std::vector<ClassGraph> out;
   // If this_ is a trait, then forEachChild won't walk the list. Use
@@ -2688,7 +2665,9 @@ std::vector<ClassGraph> ClassGraph::children() const {
   forEachChildImpl(
     *this_,
     [&] (Node& c) {
-      out.emplace_back(ClassGraph{ &c });
+      if (!regOnly || c.isRegular()) {
+        out.emplace_back(ClassGraph{ &c });
+      }
       return Action::Continue;
     },
     &*visited,
@@ -2703,8 +2682,7 @@ std::vector<ClassGraph> ClassGraph::directParents(Flags flags) const {
   assertx(this_);
   assertx(!isMissing());
 
-  always_assert(ensure());
-
+  ensure();
   std::vector<ClassGraph> out;
   out.reserve(this_->parents.size());
   for (auto const p : this_->parents) {
@@ -2719,8 +2697,7 @@ std::vector<ClassGraph> ClassGraph::directParents() const {
   assertx(this_);
   assertx(!isMissing());
 
-  always_assert(ensure());
-
+  ensure();
   std::vector<ClassGraph> out;
   out.reserve(this_->parents.size());
   for (auto const p : this_->parents) out.emplace_back(ClassGraph { p });
@@ -2733,12 +2710,30 @@ bool ClassGraph::isChildOf(ClassGraph o) const {
   assertx(o.this_);
   assertx(!isMissing());
   assertx(!o.isMissing());
-  always_assert(ensure());
+
+  ensure();
   if (this_ == o.this_) return true;
   // Nothing is a child of a trait except itself and we know they're
   // not equal.
   if (o.this_->isTrait()) return false;
   return findParent(*this_, *o.this_);
+}
+
+std::vector<ClassGraph> ClassGraph::commonParentsOfRegSubs() const {
+  assertx(!table().locking);
+  assertx(this_);
+  assertx(!this_->isMissing());
+  assertx(!this_->isRegular());
+  assertx(hasCompleteChildren());
+
+  auto const& nodes = this_->commonParentsOfRegSubs.get(
+    [&] { return calcSubclassOf(*this_, true); }
+  );
+
+  using namespace folly::gen;
+  return from(nodes)
+    | map([] (Node* n) { return ClassGraph{ n }; })
+    | as<std::vector>();
 }
 
 std::vector<ClassGraph> ClassGraph::candidateRegOnlyEquivs() const {
@@ -2748,7 +2743,7 @@ std::vector<ClassGraph> ClassGraph::candidateRegOnlyEquivs() const {
 
   if (this_->isRegular() || this_->isConservative()) return {};
   assertx(this_->hasCompleteChildren());
-  auto const nonParents = calcSubclassOfSplit(*this_).first;
+  auto const nonParents = calcSubclassOfSplit(*this_, false).first;
   if (nonParents.empty()) return {};
   if (nonParents.size() == 1) return { ClassGraph { *nonParents.begin() } };
 
@@ -2809,7 +2804,7 @@ void ClassGraph::setRegOnlyEquivs() const {
   assertx(!this_->isMissing());
   if (this_->isRegular() || this_->isConservative()) return;
   assertx(this_->hasCompleteChildren());
-  auto const equiv = calcRegOnlyEquiv(*this_, calcSubclassOf(*this_));
+  auto const equiv = calcRegOnlyEquiv(*this_, calcSubclassOf(*this_, false));
   if (!equiv || equiv == this_ || findParent(*equiv, *this_)) return;
   auto const [it, s] = table().regOnlyEquivs.emplace(this_, equiv);
   always_assert(s || it->second == equiv);
@@ -2820,22 +2815,11 @@ ClassGraph::Node::nonRegularInfo() {
   assertx(!table().locking);
   assertx(!isMissing());
   assertx(!isRegular());
-  auto const allowed = ClassGraph{this}.ensureWithChildren();
-  auto const& i = nonRegInfo.get(
+  ClassGraph{this}.ensureWithChildren(true);
+  return nonRegInfo.get(
     [this] {
       auto info = std::make_unique<NonRegularInfo>();
-      info->subclassOf = calcSubclassOf(*this);
-      info->regOnlyEquiv = calcRegOnlyEquiv(*this, info->subclassOf);
-      return info.release();
-    }
-  );
-  if (allowed || !hasCompleteChildren() || isTrait()) return i;
-  // We're not allowed to use this Node's information, so instead use
-  // more pessimistic info.
-  return nonRegInfoDisallow.get(
-    [this] {
-      auto info = std::make_unique<NonRegularInfo>();
-      info->subclassOf = allParents(*this);
+      info->subclassOf = calcSubclassOf(*this, false);
       info->regOnlyEquiv = calcRegOnlyEquiv(*this, info->subclassOf);
       return info.release();
     }
@@ -2849,8 +2833,10 @@ bool ClassGraph::exactSubtypeOfExact(ClassGraph o,
   assertx(this_);
   assertx(o.this_);
 
-  auto const missing1 = !ensure() || this_->isMissing();
-  auto const missing2 = !o.ensure() || o.this_->isMissing();
+  ensure();
+  o.ensure();
+  auto const missing1 = this_->isMissing();
+  auto const missing2 = o.this_->isMissing();
 
   // Two exact classes are only subtypes of another if they're the
   // same. One additional complication is if the class isn't regular
@@ -2881,8 +2867,10 @@ bool ClassGraph::exactSubtypeOf(ClassGraph o,
   assertx(this_);
   assertx(o.this_);
 
-  auto const missing1 = !ensure() || this_->isMissing();
-  auto const missing2 = !o.ensure() || o.this_->isMissing();
+  ensure();
+  o.ensure();
+  auto const missing1 = this_->isMissing();
+  auto const missing2 = o.this_->isMissing();
 
   // If we want to exclude non-regular classes on either side, and the
   // lhs is not regular, there's no subtype relation. If nonRegL is
@@ -2914,12 +2902,16 @@ bool ClassGraph::subSubtypeOf(ClassGraph o, bool nonRegL, bool nonRegR) const {
   assertx(this_);
   assertx(o.this_);
 
-  auto const missing1 = !ensure() || this_->isMissing();
-  auto const missing2 = !o.ensure() || o.this_->isMissing();
+  ensure();
+  o.ensure();
+  auto const missing1 = this_->isMissing();
+  auto const missing2 = o.this_->isMissing();
 
   if (nonRegL && !nonRegR) {
     if (missing1 || !this_->isRegular()) return false;
-    if (this_->hasNonRegularSubclass()) return false;
+    if (this_->hasCompleteChildren() && this_->hasNonRegularSubclass()) {
+      return false;
+    }
   }
 
   // If this_ must be part of the lhs, it's equivalent to
@@ -2949,7 +2941,7 @@ bool ClassGraph::exactCouldBeExact(ClassGraph o,
   assertx(this_);
   assertx(o.this_);
 
-  auto const missing = !ensure() || this_->isMissing();
+  ensure();
 
   // Two exact classes can only be each other if they're the same
   // class. The only complication is if the class isn't regular and
@@ -2957,7 +2949,7 @@ bool ClassGraph::exactCouldBeExact(ClassGraph o,
   // class is actually Bottom, a Bottom can never could-be anything
   // (not even itself).
   if (this_ != o.this_) return false;
-  if (missing || this_->isRegular()) return true;
+  if (this_->isMissing() || this_->isRegular()) return true;
   return nonRegL && nonRegR;
 }
 
@@ -2966,8 +2958,10 @@ bool ClassGraph::exactCouldBe(ClassGraph o, bool nonRegL, bool nonRegR) const {
   assertx(this_);
   assertx(o.this_);
 
-  auto const missing1 = !ensure() || this_->isMissing();
-  auto const missing2 = !o.ensure() || o.this_->isMissing();
+  ensure();
+  o.ensure();
+  auto const missing1 = this_->isMissing();
+  auto const missing2 = o.this_->isMissing();
 
   // exactCouldBe is almost identical to exactSubtypeOf, except the
   // case of the lhs being bottom is treated differently (bottom in
@@ -2996,8 +2990,10 @@ bool ClassGraph::subCouldBe(ClassGraph o, bool nonRegL, bool nonRegR) const {
   assertx(this_);
   assertx(o.this_);
 
-  auto const missing1 = !ensure() || this_->isMissing();
-  auto const missing2 = !o.ensure() || o.this_->isMissing();
+  ensure();
+  o.ensure();
+  auto const missing1 = this_->isMissing();
+  auto const missing2 = o.this_->isMissing();
 
   auto const regOnly = !nonRegL || !nonRegR;
 
@@ -3010,23 +3006,22 @@ bool ClassGraph::subCouldBe(ClassGraph o, bool nonRegL, bool nonRegR) const {
              (!missing2 && o.this_->isTrait())) {
     return false;
   } else if (regOnly) {
-    if (!missing1 && !this_->isRegular() && !this_->hasRegularSubclass()) {
+    if (!missing1 && !this_->isRegular() && !mightHaveRegularSubclass()) {
       return false;
     }
-    if (!missing2 && !o.this_->isRegular() && !o.this_->hasRegularSubclass()) {
+    if (!missing2 && !o.this_->isRegular() && !o.mightHaveRegularSubclass()) {
       return false;
     }
   }
 
   auto left = this_;
   auto right = o.this_;
-  if (betterNode<true>(right, left)) std::swap(left, right);
+  if (betterNode(right, left)) std::swap(left, right);
+  ClassGraph lg{left};
+  ClassGraph rg{right};
 
-  if (!ClassGraph{left}.ensureWithChildren() ||
-      !left->hasCompleteChildren()) {
-    return true;
-  }
-  if (right->isMissing()) return false;
+  lg.ensureWithChildren(regOnly);
+  if (!lg.hasCompleteChildren()) return true;
 
   TLNodeIdxSet visited;
   auto const action = forEachChild(
@@ -3047,7 +3042,7 @@ bool ClassGraph::subCouldBe(ClassGraph o, bool nonRegL, bool nonRegR) const {
 // equivalent classes. The results are split into the nodes which
 // aren't parents of this class, and the ones which are not.
 std::pair<ClassGraph::NodeSet, ClassGraph::NodeSet>
-ClassGraph::calcSubclassOfSplit(Node& n) {
+ClassGraph::calcSubclassOfSplit(Node& n, bool ignoreTrait) {
   assertx(!table().locking);
   assertx(!n.isMissing());
   assertx(!n.isRegular());
@@ -3055,7 +3050,7 @@ ClassGraph::calcSubclassOfSplit(Node& n) {
   // Traits cannot be a subclass of anything but itself, and if we
   // don't know all of the children, we have to be pessimistic and
   // report only the parents.
-  if (n.isTrait()) return std::make_pair(NodeSet{}, NodeSet{});
+  if (!ignoreTrait && n.isTrait()) return std::make_pair(NodeSet{}, NodeSet{});
   if (!n.hasCompleteChildren()) {
     return std::make_pair(NodeSet{}, allParents(n));
   }
@@ -3071,7 +3066,8 @@ ClassGraph::calcSubclassOfSplit(Node& n) {
       assertx(c.hasCompleteChildren());
       first = &c;
       return Action::Stop;
-    }
+    },
+    !ignoreTrait
   );
   // No regular child
   if (!first) return std::make_pair(NodeSet{}, NodeSet{});
@@ -3100,7 +3096,8 @@ ClassGraph::calcSubclassOfSplit(Node& n) {
       [&] (Node& c) {
         if (!c.isRegular()) return Action::Continue;
         return tracker(c) ? Action::Skip : Action::Stop;
-      }
+      },
+      !ignoreTrait
     );
     auto nodes = tracker.nodes();
     return std::make_pair(std::move(nodes), std::move(parents));
@@ -3113,11 +3110,11 @@ ClassGraph::calcSubclassOfSplit(Node& n) {
   }
 }
 
-ClassGraph::NodeSet ClassGraph::calcSubclassOf(Node& n) {
+ClassGraph::NodeSet ClassGraph::calcSubclassOf(Node& n, bool ignoreTrait) {
   assertx(!table().locking);
   assertx(!n.isMissing());
   assertx(!n.isRegular());
-  auto [nonParents, parents] = calcSubclassOfSplit(n);
+  auto [nonParents, parents] = calcSubclassOfSplit(n, ignoreTrait);
   nonParents.insert(begin(parents), end(parents));
   return nonParents;
 }
@@ -3197,7 +3194,7 @@ ClassGraph::Node* ClassGraph::calcRegOnlyEquiv(Node& base,
     Node* best = nullptr;
     for (auto const n : heads) {
       if (!isSufficient(n)) continue;
-      if (!best || betterNode<false>(n, best)) best = n;
+      if (!best || betterNode(n, best)) best = n;
     }
     assertx(best);
     return best;
@@ -3211,17 +3208,13 @@ ClassGraph::Node* ClassGraph::calcRegOnlyEquiv(Node& base,
 }
 
 // Somewhat arbitrarily ranks two Nodes in a consistent manner.
-template <bool Allow>
 bool ClassGraph::betterNode(Node* n1, Node* n2) {
   if (n1 == n2) return false;
 
   // Non-missing nodes are always better. Two missing nodes are ranked
-  // according to name. If Allow is true and we're not allowed to use
-  // the Node, treat it as equivalent to isMissing() being true.
-  auto const missing1 =
-    n1->isMissing() || (Allow && !ClassGraph{n1}.allowed(false));
-  auto const missing2 =
-    n2->isMissing() || (Allow && !ClassGraph{n2}.allowed(false));
+  // according to name.
+  auto const missing1 = n1->isMissing();
+  auto const missing2 = n2->isMissing();
   if (missing1) {
     if (!missing2) return false;
     return string_data_lt_type{}(n1->name, n2->name);
@@ -3229,10 +3222,8 @@ bool ClassGraph::betterNode(Node* n1, Node* n2) {
     return true;
   }
 
-  auto const complete1 =
-    n1->hasCompleteChildren() && (!Allow || ClassGraph{n1}.allowed(true));
-  auto const complete2 =
-    n2->hasCompleteChildren() && (!Allow || ClassGraph{n2}.allowed(true));
+  auto const complete1 = n1->hasCompleteChildren();
+  auto const complete2 = n2->hasCompleteChildren();
 
   // Nodes with complete children are better than those that don't.
   if (!complete1) {
@@ -3242,15 +3233,7 @@ bool ClassGraph::betterNode(Node* n1, Node* n2) {
     return true;
   }
 
-  // Choose the one with the least (immediate) children. Calculating
-  // the full subclass list would be better, but more
-  // expensive. Traits are always considered to have no children.
-  auto const s1 = n1->isTrait() ? 0 : n1->children.size();
-  auto const s2 = n2->isTrait() ? 0 : n2->children.size();
-  if (s1 != s2) return s1 < s2;
-
-  // Otherwise rank them acccording to what flags they have and then
-  // finally by name.
+  // Rank them acccording to what kind of class it is.
   auto const weight = [] (const Node* n) {
     auto const f = n->flags();
     if (f & FlagAbstract)  return 1;
@@ -3262,6 +3245,15 @@ bool ClassGraph::betterNode(Node* n1, Node* n2) {
   auto const w1 = weight(n1);
   auto const w2 = weight(n2);
   if (w1 != w2) return w1 < w2;
+
+  // Finally, choose the one with the least (immediate)
+  // children. Calculating the full subclass list would be better, but
+  // more expensive. Traits are always considered to have no children.
+  auto const s1 = n1->isTrait() ? 0 : n1->children.size();
+  auto const s2 = n2->isTrait() ? 0 : n2->children.size();
+  if (s1 != s2) return s1 < s2;
+
+  // At last resort, order by name.
   return string_data_lt_type{}(n1->name, n2->name);
 }
 
@@ -3307,23 +3299,21 @@ ClassGraph::NodeVec ClassGraph::combine(const NodeVec& lhs,
    * individual classes pair-wise, then intersect them together.
    */
   auto const process = [&] (Node* l, Node* r) {
-    auto allowedL = ClassGraph{l}.ensure();
-    auto allowedR = ClassGraph{r}.ensure();
+    ClassGraph{l}.ensure();
+    ClassGraph{r}.ensure();
 
     // Order the l and r to cut down on the number of cases to deal
     // with below.
     auto const flip = [&] {
-      if (!allowedL || l->isMissing()) return false;
-      if (!allowedR || r->isMissing()) return true;
+      if (l->isMissing()) return false;
+      if (r->isMissing()) return true;
       if (nonRegL || l->isRegular()) return false;
       if (nonRegR || r->isRegular()) return true;
       if (isSubL) return false;
       return isSubR;
     }();
-    if (flip) {
-      std::swap(l, r);
-      std::swap(allowedL, allowedR);
-    }
+    if (flip) std::swap(l, r);
+
     auto const flipSubL = flip ? isSubR : isSubL;
     auto const flipSubR = flip ? isSubL : isSubR;
     auto const flipNonRegL = flip ? nonRegR : nonRegL;
@@ -3334,7 +3324,7 @@ ClassGraph::NodeVec ClassGraph::combine(const NodeVec& lhs,
     // dropped from the intersection list. For regular classes, we can
     // just get the parent list. For non-regular classes, we need to
     // use subclassOf.
-    if (!allowedL || l->isMissing()) {
+    if (l->isMissing()) {
       if (l == r) combined.emplace(l);
     } else if (flipNonRegL || l->isRegular()) {
       if (flipNonRegR || r->isRegular()) {
@@ -3383,7 +3373,7 @@ ClassGraph::NodeVec ClassGraph::intersect(const NodeVec& lhs,
     lhs.begin(), lhs.end(),
     rhs.begin(), rhs.end(),
     std::back_inserter(combined),
-    betterNode<false>
+    betterNode
   );
 
   // Build the "heads". These are the nodes which could potentially be
@@ -3391,13 +3381,14 @@ ClassGraph::NodeVec ClassGraph::intersect(const NodeVec& lhs,
   // calculated below. We leave them out to reduce the amount of work.
   NodeSet heads;
   for (auto const n : combined) {
-    auto const allowed = ClassGraph{n}.ensure();
-    if (!allowed || n->isMissing()) {
+    ClassGraph g{ n };
+    g.ensure();
+    if (n->isMissing()) {
       heads.emplace(n);
     } else if ((nonRegL && nonRegR) || n->isRegular()) {
       auto const p = allParents(*n);
       heads.insert(p.begin(), p.end());
-    } else if (!n->hasRegularSubclass()) {
+    } else if (!g.mightHaveRegularSubclass()) {
       nonRegOut = false;
       return {};
     } else {
@@ -3417,14 +3408,10 @@ ClassGraph::NodeVec ClassGraph::intersect(const NodeVec& lhs,
     combined,
     nonRegL && nonRegR,
     [&] (Node& n) {
-      if (n.isMissing() || !n.hasCompleteChildren()) {
+      ClassGraph g{ &n };
+      if (n.isMissing() || !n.isRegular() ||
+          !(n.hasCompleteChildren() || n.isConservative())) {
         if (nonRegL && nonRegR) nonRegOut = true;
-      } else if (!n.isRegular()) {
-        if (!nonRegL || !nonRegR) {
-          assertx(!ClassGraph{&n}.allowed(true));
-        } else {
-          nonRegOut = true;
-        }
       } else if (!nonRegOut && nonRegL && nonRegR) {
         if (n.hasNonRegularSubclass()) nonRegOut = true;
       }
@@ -3438,7 +3425,9 @@ ClassGraph::NodeVec ClassGraph::intersect(const NodeVec& lhs,
         // Otherwise this is the first time. Find the initial set of
         // candidates (all of the parents of this node minus the
         // heads) and set up the tracker.
-        auto common = n.isMissing() ? NodeSet{&n} : allParents(n);
+        auto common = n.isMissing()
+          ? NodeSet{&n}
+          : allParents(n);
         folly::erase_if(common, [&] (Node* c) { return heads.contains(c); });
         if (common.size() <= SmallBitset::kMaxSize) {
           small.emplace(common, &heads);
@@ -3477,8 +3466,8 @@ ClassGraph::NodeVec ClassGraph::removeNonReg(const NodeVec& v) {
   NodeVec lhs;
   NodeVec rhs;
   for (auto const n : v) {
-    auto const allowed = ClassGraph{n}.ensure();
-    if (!allowed || n->isMissing() || n->isRegular()) {
+    ClassGraph{n}.ensure();
+    if (n->isMissing() || n->isRegular()) {
       lhs.emplace_back(n);
     } else if (auto const e = n->nonRegularInfo().regOnlyEquiv) {
       lhs.emplace_back(e);
@@ -3488,7 +3477,7 @@ ClassGraph::NodeVec ClassGraph::removeNonReg(const NodeVec& v) {
   }
   if (lhs.size() <= 1) return lhs;
 
-  std::sort(lhs.begin(), lhs.end(), betterNode<false>);
+  std::sort(lhs.begin(), lhs.end(), betterNode);
   rhs.emplace_back(lhs.back());
   lhs.pop_back();
 
@@ -3513,7 +3502,7 @@ bool ClassGraph::couldBeIsect(const NodeVec& lhs,
     lhs.begin(), lhs.end(),
     rhs.begin(), rhs.end(),
     std::back_inserter(combined),
-    betterNode<false>
+    betterNode
   );
 
   auto couldBe = false;
@@ -3542,22 +3531,17 @@ void ClassGraph::enumerateIsectMembers(const NodeVec& nodes,
   if (nodes.empty()) return;
 
   if (table().index) {
-    for (auto const n : nodes) (void)ClassGraph{n}.ensure();
+    for (auto const n : nodes) ClassGraph{n}.ensure();
   }
 
   // Find the "best" node to start with.
-  auto head = *std::min_element(nodes.begin(), nodes.end(), betterNode<true>);
-  if (!ClassGraph{head}.ensureWithChildren() ||
-      head->isMissing() ||
-      !head->hasCompleteChildren()) {
+  auto head = *std::min_element(nodes.begin(), nodes.end(), betterNode);
+  ClassGraph{head}.ensureWithChildren(!nonReg);
+  if (head->isMissing() || !head->hasCompleteChildren()) {
     // If the best node is missing or doesn't have complete children,
     // they all don't, so just supply the input list.
     for (auto const n : nodes) {
-      assertx(
-        n->isMissing() ||
-        !n->hasCompleteChildren() ||
-        !ClassGraph{n}.allowed(true)
-      );
+      assertx(n->isMissing() || !n->hasCompleteChildren());
       if (!f(*n)) break;
     }
     return;
@@ -3605,8 +3589,8 @@ ClassGraph::NodeVec ClassGraph::canonicalize(const NodeSet& nodes,
     TLNodeIdxSet visited;
     for (auto const n : nodes) {
       if (!heads.contains(n)) continue;
-      auto const allowed = ClassGraph{n}.ensure();
-      if (!allowed || n->isMissing()) continue;
+      ClassGraph{n}.ensure();
+      if (n->isMissing()) continue;
       forEachParent(
         *n,
         [&] (Node& p) {
@@ -3639,7 +3623,7 @@ ClassGraph::NodeVec ClassGraph::canonicalize(const NodeSet& nodes,
           if (!ClassGraph{n1}.subSubtypeOf(ClassGraph{n2}, false, false)) {
             return true;
           }
-          if (betterNode<true>(n2, n1)) return true;
+          if (betterNode(n2, n1)) return true;
         }
         return false;
       }();
@@ -3650,7 +3634,7 @@ ClassGraph::NodeVec ClassGraph::canonicalize(const NodeSet& nodes,
   }
 
   // Finally sort them according to how good they are.
-  std::sort(out.begin(), out.end(), betterNode<false>);
+  std::sort(out.begin(), out.end(), betterNode);
   return out;
 }
 
@@ -3709,7 +3693,11 @@ bool ClassGraph::findParent(Node& n1, Node& n2) {
 bool ClassGraph::findParent(Node& start, Node& target, NodeIdxSet& visited) {
   assertx(!start.isMissing());
 
-  static thread_local hphp_fast_map<std::pair<Node*, Node*>, bool> cache;
+  static thread_local hphp_fast_map<
+    std::pair<Node*, Node*>,
+    bool,
+    pointer_pair_hash<Node>
+  > cache;
   if (auto const r = folly::get_ptr(cache, std::make_pair(&start, &target))) {
     return *r;
   }
@@ -3741,14 +3729,15 @@ ClassGraph::NodeSet ClassGraph::allParents(Node& n) {
 }
 
 template <typename F>
-ClassGraph::Action ClassGraph::forEachChild(Node& n, const F& f, NodeIdxSet& v) {
-  return forEachChildImpl(n, f, &v, true);
+ClassGraph::Action ClassGraph::forEachChild(Node& n, const F& f,
+                                            NodeIdxSet& v, bool start) {
+  return forEachChildImpl(n, f, &v, start);
 }
 
 template <typename F>
-ClassGraph::Action ClassGraph::forEachChild(Node& n, const F& f) {
+ClassGraph::Action ClassGraph::forEachChild(Node& n, const F& f, bool start) {
   TLNodeIdxSet v;
-  return forEachChildImpl(n, f, &*v, true);
+  return forEachChildImpl(n, f, &*v, start);
 }
 
 template <typename F>
@@ -4910,21 +4899,21 @@ bool Class::mightContainNonRegular() const {
 
 bool Class::couldHaveMagicBool() const {
   auto const g = graph();
-  if (!g.ensure()) return true;
+  g.ensure();
   if (g.isMissing()) return true;
   if (!g.isInterface()) return has_magic_bool_conversion(g.topBase().name());
-  if (!g.ensureWithChildren()) return true;
+  g.ensureWithChildren();
   if (!g.hasCompleteChildren()) return true;
   for (auto const c : g.children()) {
+    if (c.isMissing()) return true;
     if (has_magic_bool_conversion(c.topBase().name())) return true;
   }
   return false;
 }
 
 bool Class::couldHaveMockedSubClass() const {
-  if (!graph().ensureCInfo()) {
-    return true;
-  } else if (auto const ci = cinfo()) {
+  graph().ensureCInfo();
+  if (auto const ci = cinfo()) {
     return ci->isSubMocked;
   } else if (auto const ci = cinfo2()) {
     return ci->isSubMocked;
@@ -4934,9 +4923,8 @@ bool Class::couldHaveMockedSubClass() const {
 }
 
 bool Class::couldBeMocked() const {
-  if (!graph().ensureCInfo()) {
-    return true;
-  } else if (auto const ci = cinfo()) {
+  graph().ensureCInfo();
+  if (auto const ci = cinfo()) {
     return ci->isMocked;
   } else if (auto const ci = cinfo2()) {
     return ci->isMocked;
@@ -4946,9 +4934,8 @@ bool Class::couldBeMocked() const {
 }
 
 bool Class::couldHaveReifiedGenerics() const {
-  if (!graph().ensureCInfo()) {
-    return true;
-  } else if (auto const ci = cinfo()) {
+  graph().ensureCInfo();
+  if (auto const ci = cinfo()) {
     return ci->cls->hasReifiedGenerics;
   } else if (auto const ci = cinfo2()) {
     return ci->hasReifiedGeneric;
@@ -4958,9 +4945,8 @@ bool Class::couldHaveReifiedGenerics() const {
 }
 
 bool Class::mustHaveReifiedGenerics() const {
-  if (!graph().ensureCInfo()) {
-    return false;
-  } else if (auto const ci = cinfo()) {
+  graph().ensureCInfo();
+  if (auto const ci = cinfo()) {
     return ci->cls->hasReifiedGenerics;
   } else if (auto const ci = cinfo2()) {
     return ci->hasReifiedGeneric;
@@ -4970,9 +4956,8 @@ bool Class::mustHaveReifiedGenerics() const {
 }
 
 bool Class::couldHaveReifiedParent() const {
-  if (!graph().ensureCInfo()) {
-    return true;
-  } else if (auto const ci = cinfo()) {
+  graph().ensureCInfo();
+  if (auto const ci = cinfo()) {
     return ci->hasReifiedParent;
   } else if (auto const ci = cinfo2()) {
     return ci->hasReifiedParent;
@@ -4982,9 +4967,8 @@ bool Class::couldHaveReifiedParent() const {
 }
 
 bool Class::mustHaveReifiedParent() const {
-  if (!graph().ensureCInfo()) {
-    return false;
-  } else if (auto const ci = cinfo()) {
+  graph().ensureCInfo();
+  if (auto const ci = cinfo()) {
     return ci->hasReifiedParent;
   } else if (auto const ci = cinfo2()) {
     return ci->hasReifiedParent;
@@ -4995,9 +4979,8 @@ bool Class::mustHaveReifiedParent() const {
 
 bool Class::mightCareAboutDynConstructs() const {
   if (!Cfg::Eval::ForbidDynamicConstructs) return false;
-  if (!graph().ensureCInfo()) {
-    return true;
-  } else if (auto const ci = cinfo()) {
+  graph().ensureCInfo();
+  if (auto const ci = cinfo()) {
     return !(ci->cls->attrs & AttrDynamicallyConstructible);
   } else if (auto const ci = cinfo2()) {
     return !ci->cls || !(ci->cls->attrs & AttrDynamicallyConstructible);
@@ -5008,9 +4991,8 @@ bool Class::mightCareAboutDynConstructs() const {
 
 bool Class::mightCareAboutDynamicallyReferenced() const {
   if (Cfg::Eval::DynamicallyReferencedNoticeSampleRate == 0) return false;
-  if (!graph().ensureCInfo()) {
-    return true;
-  } else if (auto const ci = cinfo()) {
+  graph().ensureCInfo();
+  if (auto const ci = cinfo()) {
     return !(ci->cls->attrs & AttrDynamicallyReferenced);
   } else if (auto const ci = cinfo2()) {
     return !ci->cls || !(ci->cls->attrs & AttrDynamicallyReferenced);
@@ -5020,9 +5002,8 @@ bool Class::mightCareAboutDynamicallyReferenced() const {
 }
 
 bool Class::couldHaveConstProp() const {
-  if (!graph().ensureCInfo()) {
-    return true;
-  } else if (auto const ci = cinfo()) {
+  graph().ensureCInfo();
+  if (auto const ci = cinfo()) {
     return ci->hasConstProp;
   } else if (auto const ci = cinfo2()) {
     return ci->hasConstProp;
@@ -5032,9 +5013,8 @@ bool Class::couldHaveConstProp() const {
 }
 
 bool Class::subCouldHaveConstProp() const {
-  if (!graph().ensureCInfo()) {
-    return true;
-  } else if (auto const ci = cinfo()) {
+  graph().ensureCInfo();
+  if (auto const ci = cinfo()) {
     return ci->subHasConstProp;
   } else if (auto const ci = cinfo2()) {
     return ci->subHasConstProp;
@@ -5052,9 +5032,8 @@ Optional<res::Class> Class::parent() const {
 }
 
 const php::Class* Class::cls() const {
-  if (!graph().ensureCInfo()) {
-    return nullptr;
-  } else if (auto const ci = cinfo()) {
+  graph().ensureCInfo();
+  if (auto const ci = cinfo()) {
     return ci->cls;
   } else if (auto const ci = cinfo2()) {
     return ci->cls;
@@ -5076,7 +5055,7 @@ bool Class::isComplete() const {
 bool
 Class::forEachSubclass(const std::function<void(SString, Attr)>& f) const {
   auto const g = graph();
-  if (!g.ensureWithChildren()) return false;
+  g.ensureWithChildren();
   if (g.isMissing() || !g.hasCompleteChildren()) return false;
   for (auto const c : g.children()) {
     auto const attrs = [&] {
@@ -5097,9 +5076,9 @@ std::string show(const Class& c) {
   }
 
   auto const g = c.graph();
-  if (g.isMissingRaw()) return folly::sformat("\"{}\"", g.name());
-  if (!g.hasCompleteChildrenRaw()) {
-    if (g.isConservativeRaw()) {
+  if (g.isMissing()) return folly::sformat("\"{}\"", g.name());
+  if (!g.hasCompleteChildren()) {
+    if (g.isConservative()) {
       return folly::sformat(
         "{}*{}",
         (c.cinfo() || c.cinfo2()) ? "" : "-",
@@ -5127,9 +5106,8 @@ void Class::visitEverySub(folly::Range<const Class*> classes,
                           const F& f) {
   if (classes.size() == 1) {
     auto const n = classes[0].graph().this_;
-    if (!ClassGraph{n}.ensureWithChildren() ||
-        n->isMissing() ||
-        !n->hasCompleteChildren()) {
+    ClassGraph{n}.ensureWithChildren(!includeNonRegular);
+    if (n->isMissing() || !n->hasCompleteChildren()) {
       f(Class{ClassGraph{ n }});
       return;
     }
@@ -5260,7 +5238,7 @@ void Class::makeConservativeForTest() {
 
 #ifndef NDEBUG
 bool Class::isMissingDebug() const {
-  return graph().isMissingRaw();
+  return graph().isMissing();
 }
 #endif
 
@@ -6019,6 +5997,8 @@ std::string show(const Func& f) {
   return ret;
 }
 
+//////////////////////////////////////////////////////////////////////
+
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -6085,21 +6065,17 @@ struct Index::IndexData {
   TSStringToOneT<TSStringSet> classToClosures;
   FSStringToOneT<TSStringSet> funcToClosures;
 
+  // Maps a closure to it's declaring class or function.
+  TSStringToOneT<SString> closureToClass;
+  TSStringToOneT<SString> closureToFunc;
+
   // Maps entities to the unit they were declared in.
   TSStringToOneT<SString> classToUnit;
   FSStringToOneT<SString> funcToUnit;
   TSStringToOneT<SString> typeAliasToUnit;
-  // Maps entities to the bundle they belong to (for class bundling).
-  TSStringToOneT<SString> classToBundle;
-  FSStringToOneT<SString> funcToBundle;
-  SStringToOneT<SString> unitToBundle;
   // If bool is true, then the constant is "dynamic" and has an
   // associated 86cinit function.
   SStringToOneT<std::pair<SString, bool>> constantToUnit;
-
-  // Maps a closure to it's declaring class or function.
-  TSStringToOneT<SString> closureToClass;
-  TSStringToOneT<SString> closureToFunc;
 
   // Maps a class to the classes which it has inherited class
   // constants from.
@@ -6109,6 +6085,11 @@ struct Index::IndexData {
   // everywhere.
   SStringToOneT<SStringSet> unitCInitPredeps;
   SStringToOneT<SStringSet> unitPredeps;
+
+  // Maps entities to the bundle they belong to.
+  TSStringToOneT<SString> classToBundle;
+  FSStringToOneT<SString> funcToBundle;
+  SStringToOneT<SString> unitToBundle;
 
   // All the classes that have a 86*init function.
   TSStringSet classesWith86Inits;
@@ -6486,12 +6467,11 @@ struct DepTracker {
   // Register dependencies on various entities to the current
   // dependency context.
 
-  [[nodiscard]] bool add(Class c) {
+  void add(Class c) {
+    if (!index.frozen) return;
     auto const fc = context();
-    auto const a = allowed(fc, c, false);
-    if (!index.frozen) return a;
     if (auto const c2 = fc.cls()) {
-      if (c2->name->tsame(c.name)) return a;
+      if (c2->name->tsame(c.name)) return;
     }
     auto& d = deps[fc];
     if (d.add(c, index.inTypeCns)) {
@@ -6501,20 +6481,16 @@ struct DepTracker {
     }
     // Class either exists or not and won't change within the job, so
     // nothing to record for worklist.
-    return a;
   }
 
-  [[nodiscard]] bool add(const php::Func& f, Type t = Type::None) {
+  void add(const php::Func& f, Type t = Type::None) {
     auto const fc = context();
     assertx(!fc.unit());
-    auto const a = f.cls
-      ? allowed(fc, Class { f.cls->name }, t & Type::Bytecode)
-      : allowed(fc, Func { f.name }, t & Type::Bytecode);
     if (index.frozen) {
       if (auto const c = fc.cls()) {
-        if (f.cls && c->name->tsame(f.cls->name)) return a;
+        if (f.cls && c->name->tsame(f.cls->name)) return;
       } else if (auto const f2 = fc.func()) {
-        if (!f.cls && f2->name->fsame(f.name)) return a;
+        if (!f.cls && f2->name->fsame(f.name)) return;
       }
 
       if (auto const DEBUG_ONLY added = deps[fc].add(f, t)) {
@@ -6525,125 +6501,103 @@ struct DepTracker {
           func_fullname(f)
         );
       }
-    } else if (!a) {
-      return false;
     } else {
       // Record dependency for worklist if anything can change within
       // the job.
       t &= AnalysisDeps::kValidForChanges;
-      if (t == Type::None) return true;
-      funcs[&f][fc] |= t;
+      if (t != Type::None) funcs[&f][fc] |= t;
     }
-    return a;
   }
 
-  [[nodiscard]] bool add(MethRef m, Type t = Type::None) {
+  void add(MethRef m, Type t = Type::None) {
     auto const fc = context();
     assertx(!fc.unit());
-    auto const a = allowed(fc, Class { m.cls }, t & Type::Bytecode);
     if (index.frozen) {
       if (auto const c = fc.cls()) {
-        if (c->name->tsame(m.cls)) return a;
+        if (c->name->tsame(m.cls)) return;
       }
       if (auto const DEBUG_ONLY added = deps[fc].add(m, t)) {
         FTRACE(2, "{} now depends on {}method {}\n",
                HHBBC::show(fc), displayAdded(added), display(m));
       }
-    } else if (!a) {
-      return false;
     } else {
       // Record dependency for worklist if anything can change within
       // the job.
       t &= AnalysisDeps::kValidForChanges;
-      if (t == Type::None) return true;
-      if (auto const p = from(m)) funcs[p][fc] |= t;
+      if (t == Type::None) return;
+      if (auto const p = from(m)) {
+        FTRACE(2, "{} now depends on {} ({})\n",
+               HHBBC::show(fc), func_fullname(*p), show(t));
+        funcs[p][fc] |= t;
+      }
     }
-    return a;
   }
 
-  [[nodiscard]] bool add(Func f, Type t = Type::None) {
+  void add(Func f, Type t = Type::None) {
     auto const fc = context();
     assertx(!fc.unit());
-    auto const a = allowed(fc, f, t & Type::Bytecode);
     if (index.frozen) {
       if (auto const f2 = fc.func()) {
-        if (f2->name->fsame(f.name)) return a;
+        if (f2->name->fsame(f.name)) return;
       }
       if (auto const DEBUG_ONLY added = deps[fc].add(f, t)) {
         FTRACE(2, "{} now depends on {}func {}\n",
                HHBBC::show(fc), displayAdded(added), f.name);
       }
-    } else if (!a) {
-      return false;
     } else {
       // Record dependency for worklist if anything can change within
       // the job.
       t &= AnalysisDeps::kValidForChanges;
-      if (t == Type::None) return true;
+      if (t == Type::None) return;
       if (auto const p = folly::get_default(index.funcs, f.name)) {
         funcs[p][fc] |= t;
       }
     }
-    return a;
   }
 
-  [[nodiscard]] bool add(ConstIndex cns) {
+  void add(ConstIndex cns) {
     auto const fc = context();
-    auto const a = allowed(fc, Class { cns.cls }, false);
     if (index.frozen) {
       if (auto const c = fc.cls()) {
-        if (c->name->tsame(cns.cls)) return a;
+        if (c->name->tsame(cns.cls)) return;
       }
       if (deps[fc].add(cns, index.inTypeCns)) {
         FTRACE(2, "{} now depends on class constant {}{}\n",
                HHBBC::show(fc), display(cns),
                index.inTypeCns ? " (in type-cns)" : "");
       }
-    } else if (!a) {
-      return false;
     } else if (auto const p = from(cns)) {
       clsConstants[p].emplace(fc);
     }
-    return a;
   }
 
-  [[nodiscard]] bool add(AnyClassConstant cns) {
+  void add(AnyClassConstant cns) {
     auto const fc = context();
-    auto const a = allowed(fc, Class { cns.name }, false);
     if (index.frozen) {
       if (auto const c = fc.cls()) {
-        if (c->name->tsame(cns.name)) return a;
+        if (c->name->tsame(cns.name)) return;
       }
       if (deps[fc].add(cns, index.inTypeCns)) {
         FTRACE(2, "{} now depends on any class constant from {}{}\n",
                HHBBC::show(fc), cns.name,
                index.inTypeCns ? " (in type-cns)" : "");
       }
-    } else if (!a) {
-      return false;
     } else if (auto const cls = folly::get_default(index.classes, cns.name)) {
       anyClsConstants[cls].emplace(fc);
     }
-    return a;
   }
 
-  [[nodiscard]] bool add(Constant cns) {
+  void add(Constant cns) {
     auto const fc = context();
     assertx(!fc.unit());
-    auto const a = allowed(fc, cns);
     if (index.frozen) {
       if (deps[fc].add(cns)) {
         FTRACE(2, "{} now depends on constant {}\n", HHBBC::show(fc), cns.name);
       }
-    } else if (!a) {
-      return false;
     } else if (auto const p = folly::get_ptr(index.constants, cns.name)) {
       constants[p->first].emplace(fc);
     }
-    return a;
   }
-
-  bool allowed(Class c) const { return allowed(context(), c, false); }
 
   // Mark that the given entity has changed in some way. This not only
   // results in the change being reported back to the
@@ -6688,6 +6642,8 @@ struct DepTracker {
     if (t == Type::None) return;
     auto const p = folly::get_default(index.funcs, f.name);
     if (!p) return;
+    FTRACE(2, "{} pre-depends on {}func {}\n",
+           HHBBC::show(fc), displayAdded(t), f.name);
     funcs[p][fc] |= t;
   }
 
@@ -6695,18 +6651,29 @@ struct DepTracker {
     assertx(!index.frozen);
     assertx(!fc.unit());
     if (t == Type::None) return;
-    if (auto const p = from(m)) funcs[p][fc] |= t;
+    auto const p = from(m);
+    if (!p) return;
+    FTRACE(2, "{} pre-depends on {}method {}\n",
+           HHBBC::show(fc), displayAdded(t), display(m));
+    funcs[p][fc] |= t;
   }
 
   void preadd(FuncClsUnit fc, ConstIndex cns) {
     assertx(!index.frozen);
-    if (auto const p = from(cns)) clsConstants[p].emplace(fc);
+    auto const p = from(cns);
+    if (!p) return;
+    FTRACE(2, "{} pre-depends on class constant from {}\n",
+           HHBBC::show(fc), display(cns));
+    clsConstants[p].emplace(fc);
   }
 
   void preadd(FuncClsUnit fc, AnyClassConstant cns) {
     assertx(!index.frozen);
     auto const p = folly::get_default(index.classes, cns.name);
-    if (p) anyClsConstants[p].emplace(fc);
+    if (!p) return;
+    FTRACE(2, "{} pre-depends on any class constant from {}\n",
+           HHBBC::show(fc), cns.name);
+    anyClsConstants[p].emplace(fc);
   }
 
   void preadd(FuncClsUnit fc, Constant cns) {
@@ -6714,40 +6681,8 @@ struct DepTracker {
     assertx(!fc.unit());
     auto const p = folly::get_ptr(index.constants, cns.name);
     if (!p) return;
+    FTRACE(2, "{} pre-depends on constant {}\n", HHBBC::show(fc), cns.name);
     constants[p->first].emplace(fc);
-  }
-
-  // Add bucket presence information for the given entities, which
-  // will be used to perform permission checks.
-  using BucketPresence = AnalysisInput::BucketPresence;
-
-  void restrict(FuncClsUnit fc, BucketPresence b) {
-    assertx(b.present->contains(index.bucketIdx));
-    always_assert(allows.emplace(fc, std::move(b)).second);
-  }
-
-  void restrict(Class c, BucketPresence b) {
-    assertx(b.present->contains(index.bucketIdx));
-    assertx(index.badClasses.contains(c.name));
-    always_assert(badClassAllows.emplace(c.name, std::move(b)).second);
-  }
-
-  void restrict(Func f, BucketPresence b) {
-    assertx(b.present->contains(index.bucketIdx));
-    assertx(index.badFuncs.contains(f.name));
-    always_assert(badFuncAllows.emplace(f.name, std::move(b)).second);
-  }
-
-  void restrict(Constant cns, BucketPresence b) {
-    assertx(b.present->contains(index.bucketIdx));
-    assertx(index.badConstants.contains(cns.name));
-    always_assert(badConstantAllows.emplace(cns.name, std::move(b)).second);
-  }
-
-  const BucketPresence& bucketFor(FuncClsUnit fc) const {
-    auto const b = folly::get_ptr(allows, fc);
-    always_assert_flog(b, "Unable to get bucket for {}", show(fc));
-    return *b;
   }
 
   void reset(FuncClsUnit fc) { deps.erase(fc); }
@@ -6758,106 +6693,15 @@ struct DepTracker {
     return std::move(it->second);
   }
 
+  const AnalysisDeps* get(FuncClsUnit fc) const {
+    return folly::get_ptr(deps, fc);
+  }
+
   AnalysisChangeSet& getChanges() { return changes; }
   const AnalysisChangeSet& getChanges() const { return changes; }
 
 private:
-  // NB: One entity is allowed to use another entity's information if
-  // the user's bucket presence is a subset of the usee's bucket
-  // presence. This means the the usee is present in *all* the buckets
-  // that the user is in, and therefore all workers will come to the
-  // same analysis.
-
-  bool allowed(FuncClsUnit fc, Class c, bool bytecode) const {
-    auto& cache = bytecode ? allowCacheBC : allowCache;
-    if (auto const b = folly::get_ptr(cache, fc, c.name)) return *b;
-
-    auto const a = folly::get_ptr(allows, fc);
-    assertx(a);
-    assertx(a->process->contains(index.bucketIdx));
-
-    auto const b = [&] {
-      if (auto const cls = folly::get_default(index.classes, c.name)) {
-        auto const canon = canonicalize(*cls);
-        if (auto const c2 = canon.cls()) {
-          auto const ca = folly::get_ptr(allows, c2);
-          assertx(ca);
-          assertx(ca->present->contains(index.bucketIdx));
-          return a->process->isSubset(
-            bytecode ? *ca->withBC : *ca->present
-          );
-        }
-        if (auto const f = canon.func()) {
-          auto const fa = folly::get_ptr(allows, f);
-          assertx(fa);
-          assertx(fa->present->contains(index.bucketIdx));
-          return a->process->isSubset(
-            bytecode ? *fa->withBC : *fa->present
-          );
-        }
-        always_assert(false);
-      }
-      if (auto const ta = folly::get_ptr(index.typeAliases, c.name)) {
-        auto const ua = folly::get_ptr(allows, ta->second);
-        assertx(ua);
-        assertx(ua->present->contains(index.bucketIdx));
-        return a->process->isSubset(*ua->present);
-      }
-      if (index.badClasses.contains(c.name)) {
-        auto const ca = folly::get_ptr(badClassAllows, c.name);
-        assertx(ca);
-        assertx(ca->present->contains(index.bucketIdx));
-        return a->process->isSubset(*ca->present);
-      }
-      return false;
-    }();
-    cache[fc][c.name] = b;
-    return b;
-  }
-
-  bool allowed(FuncClsUnit fc, Func f, bool bytecode) const {
-    assertx(!fc.unit());
-    auto const a = folly::get_ptr(allows, fc);
-    assertx(a);
-    assertx(a->process->contains(index.bucketIdx));
-    if (auto const func = folly::get_default(index.funcs, f.name)) {
-      auto const fa = folly::get_ptr(allows, func);
-      assertx(fa);
-      assertx(fa->present->contains(index.bucketIdx));
-      return a->process->isSubset(
-        bytecode ? *fa->withBC : *fa->present
-      );
-    }
-    if (index.badFuncs.contains(f.name)) {
-      auto const fa = folly::get_ptr(badFuncAllows, f.name);
-      assertx(fa);
-      assertx(fa->present->contains(index.bucketIdx));
-      return a->process->isSubset(*fa->present);
-    }
-    return false;
-  }
-
-  bool allowed(FuncClsUnit fc, Constant cns) const {
-    assertx(!fc.unit());
-    auto const a = folly::get_ptr(allows, fc);
-    assertx(a);
-    assertx(a->process->contains(index.bucketIdx));
-    if (auto const c = folly::get_ptr(index.constants, cns.name)) {
-      auto const unit = folly::get_default(index.units, c->second->filename);
-      assertx(unit);
-      auto const ua = folly::get_ptr(allows, unit);
-      assertx(ua);
-      assertx(ua->present->contains(index.bucketIdx));
-      return a->process->isSubset(*ua->present);
-    }
-    if (index.badConstants.contains(cns.name)) {
-      auto const ca = folly::get_ptr(badConstantAllows, cns.name);
-      assertx(ca);
-      assertx(ca->present->contains(index.bucketIdx));
-      return a->process->isSubset(*ca->present);
-    }
-    return false;
-  }
+  using Mode = AnalysisMode;
 
   // Return appropriate entity to attribute the dependency to. If
   // we're analyzing a function within a class, use the class. If it's
@@ -6927,7 +6771,7 @@ private:
     hphp_fast_map<FuncClsUnit, Type, FuncClsUnitHasher>;
 
   void schedule(const FuncClsUnitSet* fcs) {
-   if (!fcs || fcs->empty()) return;
+    if (!fcs || fcs->empty()) return;
     TinyVector<FuncClsUnit, 4> v;
     v.insert(begin(*fcs), end(*fcs));
     addToWorklist(v);
@@ -6977,22 +6821,10 @@ private:
   AnalysisChangeSet changes;
   hphp_fast_map<FuncClsUnit, AnalysisDeps, FuncClsUnitHasher> deps;
 
-  hphp_fast_map<FuncClsUnit, BucketPresence, FuncClsUnitHasher> allows;
-  TSStringToOneT<BucketPresence> badClassAllows;
-  FSStringToOneT<BucketPresence> badFuncAllows;
-  SStringToOneT<BucketPresence> badConstantAllows;
-
   hphp_fast_map<const php::Func*, FuncClsUnitToType> funcs;
   hphp_fast_map<const php::Const*, FuncClsUnitSet> clsConstants;
   hphp_fast_map<const php::Constant*, FuncClsUnitSet> constants;
   hphp_fast_map<const php::Class*, FuncClsUnitSet> anyClsConstants;
-
-  // We do a lot of permission checks on the same items, so cache the
-  // results.
-  mutable hphp_fast_map<FuncClsUnit, TSStringToOneT<bool>,
-                        FuncClsUnitHasher> allowCache;
-  mutable hphp_fast_map<FuncClsUnit, TSStringToOneT<bool>,
-                        FuncClsUnitHasher> allowCacheBC;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -7098,7 +6930,7 @@ const php::Func* func_from_meth_ref(const IndexData& index,
 
 const php::Func* func_from_meth_ref(const AnalysisIndex::IndexData& index,
                                     const MethRef& meth) {
-  if (!index.deps->add(AnalysisDeps::Class { meth.cls })) return nullptr;
+  index.deps->add(AnalysisDeps::Class { meth.cls });
   auto const cls = folly::get_default(index.classes, meth.cls);
   if (!cls) {
     always_assert_flog(
@@ -7166,7 +6998,11 @@ bool ClassGraph::storeAuxs(AnalysisIndex::IndexData& i, bool children) const {
   return false;
 }
 
-bool ClassGraph::onAuxs(AnalysisIndex::IndexData& i, bool children) const {
+bool ClassGraph::onAuxs(AnalysisIndex::IndexData& i,
+                        bool children,
+                        bool regOnly) const {
+  assertx(IMPLIES(!children, !regOnly));
+
   // Check if this ClassGraph is on the current context's aux set *or*
   // if it is implied by another ClassGraph on the aux set (for
   // example, if this ClassGraph is a parent of a ClassGraph already
@@ -7177,114 +7013,166 @@ bool ClassGraph::onAuxs(AnalysisIndex::IndexData& i, bool children) const {
     if (target == this_) return true;
     // Check for direct membership first
     if (auxs.withChildren.contains(*this)) return true;
-    if (auxs.noChildren.contains(*this)) return !children;
+    if (!children && auxs.noChildren.contains(*this)) return true;
     if (this_->isMissing()) return false;
 
     // Check if any parents of this Node are on the set.
-    if (!auxs.withChildren.empty()) {
-      auto const a = forEachParent(
+    auto const a = forEachParent(
+      *this_,
+      [&] (Node& p) {
+        if (target != &p && !auxs.withChildren.contains(ClassGraph { &p })) {
+          return Action::Continue;
+        }
+        return p.hasCompleteChildren()
+          ? Action::Stop
+          : Action::Skip;
+      }
+    );
+    if (a == Action::Stop) return true;
+
+    if (children) {
+      if (!this_->hasCompleteChildren()) return false;
+
+      NodeMap<bool> parents;
+      parents[this_] = false;
+
+      Optional<bool> all;
+      Optional<bool> allReg;
+      forEachChild(
         *this_,
-        [&] (Node& p) {
-          if (target == &p) return Action::Stop;
-          return auxs.withChildren.contains(ClassGraph { &p })
-            ? Action::Stop
+        [&] (Node& c) {
+          if (&c == this_) return Action::Continue;
+          auto const any = foldParentsImpl(
+            c,
+            [&] (Node& p) {
+              if (target == &p) return true;
+              if (!auxs.withChildren.contains(ClassGraph{ &p })) return false;
+              assertx(p.hasCompleteChildren() || p.isConservative());
+              return p.hasCompleteChildren();
+            },
+            [&] { return false; },
+            parents,
+            true
+          );
+          all = all.value_or(true) && any;
+          if (c.isRegular()) allReg = allReg.value_or(true) && any;
+          if (allReg && !*allReg) return Action::Stop;
+          if (!regOnly && !*all) return Action::Stop;
+          return (!regOnly || c.isRegular())
+            ? Action::Skip
             : Action::Continue;
         }
       );
-      if (a == Action::Stop) return true;
+      if (all.value_or(false)) return true;
+      return regOnly && allReg.value_or(false);
     }
 
-    if (children) return false;
-
-    TLNodeIdxSet visited;
-    for (auto const n : auxs.noChildren) {
-      if (n.this_->isMissing()) continue;
-      if (findParent(*n.this_, *this_, *visited)) return true;
+    {
+      TLNodeIdxSet visited;
+      for (auto const n : auxs.noChildren) {
+        if (n.this_->isMissing()) continue;
+        if (findParent(*n.this_, *this_, *visited)) return true;
+      }
+      for (auto const n : auxs.withChildren) {
+        if (n.this_->isMissing()) continue;
+        if (findParent(*n.this_, *this_, *visited)) return true;
+      }
+      if (target && findParent(*target, *this_, *visited)) return true;
     }
+
+    static thread_local NodeMap<NodeSet> cousinCache;
+    auto const cache = [&] {
+      if (auto const c = folly::get_ptr(cousinCache, this_)) return c;
+
+      TLNodeIdxSet parents;
+      NodeSet cousins;
+      forEachChild(
+        *this_,
+        [&] (Node& c) {
+          forEachParentImpl(
+            c,
+            [&] (Node& p) {
+              cousins.emplace(&p);
+              return Action::Continue;
+            },
+            &*parents,
+            true
+          );
+          return Action::Continue;
+        }
+      );
+
+      auto const [it, emplaced] =
+        cousinCache.try_emplace(this_, std::move(cousins));
+      always_assert(emplaced);
+      return &it->second;
+    }();
+
+    if (cache->contains(target)) return true;
     for (auto const n : auxs.withChildren) {
-      if (n.this_->isMissing()) continue;
-      if (findParent(*n.this_, *this_, *visited)) return true;
+      if (!cache->contains(n.this_)) continue;
+      assertx(n.this_->hasCompleteChildren() || n.this_->isConservative());
+      return n.this_->hasCompleteChildren();
     }
-    if (target && findParent(*target, *this_, *visited)) return true;
 
     return false;
   };
 
   auto const fc = fc_from_context(context_for_deps(i), i);
+
   if (auto const c = fc.cls()) {
     if (!c->cinfo) return false;
     if (c->cinfo == cinfo2()) return true;
     return check(c->cinfo->auxClassGraphs, c->cinfo->classGraph.this_);
   }
-
   if (auto const f = fc.func()) {
     auto const& fi = func_info(i, *f);
     if (!fi.auxClassGraphs) return false;
     return check(*fi.auxClassGraphs, nullptr);
   }
-
   return false;
 }
 
 // Ensure ClassGraph is not missing
-bool ClassGraph::ensure() const {
+void ClassGraph::ensure() const {
   assertx(this_);
   auto const i = table().index;
-  if (!i) return true;
-  if (onAuxs(*i, false)) {
+  if (!i) return;
+
+  if (onAuxs(*i, false, false)) {
     if (i->frozen) always_assert(storeAuxs(*i, false));
-    return true;
-  } else if (i->deps->allowed(AnalysisDeps::Class { name() })) {
-    if (this_->isMissing()) {
-      always_assert(i->deps->add(AnalysisDeps::Class { name() }));
-    }
-    if (!i->frozen) return true;
-    if (!storeAuxs(*i, false)) {
-      (void)i->deps->add(AnalysisDeps::Class { name() });
-    }
-    return true;
-  } else {
-    (void)i->deps->add(AnalysisDeps::Class { name() });
-    return false;
+    return;
   }
+  if (this_->isMissing()) i->deps->add(AnalysisDeps::Class { name() });
+  if (!i->frozen) return;
+  if (!storeAuxs(*i, false)) i->deps->add(AnalysisDeps::Class { name() });
 }
 
 // Ensure ClassGraph is not missing and has complete child
 // information.
-bool ClassGraph::ensureWithChildren() const {
+void ClassGraph::ensureWithChildren(bool regOnly) const {
   assertx(this_);
   auto const i = table().index;
-  if (!i) return true;
-  if (onAuxs(*i, true)) {
+  if (!i) return;
+
+  if (onAuxs(*i, true, regOnly)) {
     if (i->frozen) always_assert(storeAuxs(*i, true));
-    return true;
-  } else if (i->deps->allowed(AnalysisDeps::Class { name() })) {
-    if (this_->isMissing() ||
-        (!this_->hasCompleteChildren() && !this_->isConservative())) {
-      always_assert(i->deps->add(AnalysisDeps::Class { name() }));
-    }
-    if (!i->frozen) return true;
-    if (!storeAuxs(*i, true)) {
-      (void)i->deps->add(AnalysisDeps::Class { name() });
-    }
-    return true;
-  } else {
-    (void)i->deps->add(AnalysisDeps::Class { name() });
-    return false;
+    return;
   }
+  if (this_->isMissing() ||
+      (!this_->hasCompleteChildren() && !this_->isConservative())) {
+    i->deps->add(AnalysisDeps::Class { name() });
+  }
+  if (!i->frozen) return;
+  if (!storeAuxs(*i, true)) i->deps->add(AnalysisDeps::Class { name() });
 }
 
 // Ensure ClassGraph is not missing and has an associated ClassInfo2
 // (strongest condition).
-bool ClassGraph::ensureCInfo() const {
+void ClassGraph::ensureCInfo() const {
   auto const i = table().index;
-  return !i || i->deps->add(AnalysisDeps::Class { name() });
-}
-
-bool ClassGraph::allowed(bool children) const {
-  auto const i = table().index;
-  return !i || onAuxs(*i, children) ||
-    i->deps->allowed(AnalysisDeps::Class { name() });
+  if (!i) return;
+  i->deps->add(AnalysisDeps::Class { name() });
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -8607,12 +8495,11 @@ Index::ReturnType context_sensitive_return_type(AnalysisIndex::IndexData& data,
       return false;
     }
 
-    if (data.deps->add(func, AnalysisDeps::RetParam)) {
-      if (finfo.inferred.retParam != NoLocalId &&
-          callCtx.args.size() > finfo.inferred.retParam &&
-          checkParam(finfo.inferred.retParam)) {
-        return true;
-      }
+    data.deps->add(func, AnalysisDeps::RetParam);
+    if (finfo.inferred.retParam != NoLocalId &&
+        callCtx.args.size() > finfo.inferred.retParam &&
+        checkParam(finfo.inferred.retParam)) {
+      return true;
     }
 
     if (!options.ContextSensitiveInterp) return false;
@@ -8630,15 +8517,7 @@ Index::ReturnType context_sensitive_return_type(AnalysisIndex::IndexData& data,
     return returnType;
   }
 
-  if (!data.deps->add(func, AnalysisDeps::Bytecode)) {
-    ITRACE_MOD(
-      Trace::hhbbc, 4,
-      "Skipping inline interp of {} because inspecting "
-      "bytecode is not allowed\n",
-      func_fullname(func)
-    );
-    return returnType;
-  }
+  data.deps->add(func, AnalysisDeps::Bytecode);
   if (!func.rawBlocks) {
     ITRACE_MOD(
       Trace::hhbbc, 4,
@@ -25328,9 +25207,6 @@ FSStringSet strip_unneeded_constant_inits(AnalysisIndex::IndexData& index) {
         begin(unit->funcs), end(unit->funcs),
         [&, unit=unit] (SString f) {
           if (!stripped.contains(f)) return false;
-          assertx(
-            index.deps->bucketFor(unit).process->contains(index.bucketIdx)
-          );
           return true;
         }
       ),
@@ -25671,32 +25547,6 @@ AnalysisIndex::AnalysisIndex(
 
   ClassGraph::setAnalysisIndex(*m_data);
 
-  // Use the BucketSet information in the input metadata to set up the
-  // permissions.
-  for (auto& [n, b] : meta.classBuckets) {
-    if (auto const c = folly::get_default(m_data->classes, n)) {
-      m_data->deps->restrict(c, std::move(b));
-    } else if (m_data->badClasses.contains(n)) {
-      m_data->deps->restrict(DepTracker::Class { n }, std::move(b));
-    }
-  }
-  for (auto& [n, b] : meta.funcBuckets) {
-    if (auto const f = folly::get_default(m_data->funcs, n)) {
-      m_data->deps->restrict(f, std::move(b));
-    } else if (m_data->badFuncs.contains(n)) {
-      m_data->deps->restrict(DepTracker::Func { n }, std::move(b));
-    }
-  }
-  for (auto& [n, b] : meta.unitBuckets) {
-    if (auto const u = folly::get_default(m_data->units, n)) {
-      m_data->deps->restrict(u, std::move(b));
-    }
-  }
-  for (auto& [n, b] : meta.badConstantBuckets) {
-    assertx(m_data->badConstants.contains(n));
-    m_data->deps->restrict(DepTracker::Constant { n }, std::move(b));
-  }
-
   initialize_worklist(
     meta,
     std::move(depClassNames),
@@ -25742,7 +25592,6 @@ void AnalysisIndex::initialize_worklist(const AnalysisInput::Meta& meta,
       assertx(!meta.classDeps.contains(name));
       continue;
     }
-    assertx(m_data->deps->bucketFor(cls).process->contains(m_data->bucketIdx));
     if (auto const deps = folly::get_ptr(meta.classDeps, name)) {
       add(cls, *deps);
     } else {
@@ -25752,23 +25601,14 @@ void AnalysisIndex::initialize_worklist(const AnalysisInput::Meta& meta,
 
   for (auto const name : depClasses) {
     if (auto const deps = folly::get_ptr(meta.classDeps, name)) {
-      assertx(
-        m_data->deps->bucketFor(m_data->classes.at(name))
-          .process->contains(m_data->bucketIdx)
-      );
       add(m_data->classes.at(name), *deps);
     } else if (meta.processDepCls.contains(name)) {
-      assertx(
-        m_data->deps->bucketFor(m_data->classes.at(name))
-          .process->contains(m_data->bucketIdx)
-      );
       m_data->worklist.schedule(m_data->classes.at(name));
     }
   }
 
   for (auto const name : m_data->outFuncNames) {
     auto const func = m_data->funcs.at(name);
-    assertx(m_data->deps->bucketFor(func).process->contains(m_data->bucketIdx));
     if (auto const deps = folly::get_ptr(meta.funcDeps, name)) {
       add(func, *deps);
     } else {
@@ -25778,25 +25618,14 @@ void AnalysisIndex::initialize_worklist(const AnalysisInput::Meta& meta,
 
   for (auto const name : depFuncs) {
     if (auto const deps = folly::get_ptr(meta.funcDeps, name)) {
-      assertx(
-        m_data->deps->bucketFor(m_data->funcs.at(name))
-          .process->contains(m_data->bucketIdx)
-      );
       add(m_data->funcs.at(name), *deps);
     } else if (meta.processDepFunc.contains(name)) {
-      assertx(
-        m_data->deps->bucketFor(m_data->funcs.at(name))
-          .process->contains(m_data->bucketIdx)
-      );
       m_data->worklist.schedule(m_data->funcs.at(name));
     }
   }
 
   for (auto const name : m_data->outUnitNames) {
     auto const unit = m_data->units.at(name);
-    assertx(
-      m_data->deps->bucketFor(unit).process->contains(m_data->bucketIdx)
-    );
     if (auto const deps = folly::get_ptr(meta.unitDeps, name)) {
       add(unit, *deps);
     } else {
@@ -25806,16 +25635,8 @@ void AnalysisIndex::initialize_worklist(const AnalysisInput::Meta& meta,
 
   for (auto const name : depUnits) {
     if (auto const deps = folly::get_ptr(meta.unitDeps, name)) {
-      assertx(
-        m_data->deps->bucketFor(m_data->units.at(name))
-          .process->contains(m_data->bucketIdx)
-      );
       add(m_data->units.at(name), *deps);
     } else if (meta.processDepUnit.contains(name)) {
-      assertx(
-        m_data->deps->bucketFor(m_data->units.at(name))
-          .process->contains(m_data->bucketIdx)
-      );
       m_data->worklist.schedule(m_data->units.at(name));
     }
   }
@@ -25916,7 +25737,7 @@ const php::Unit& AnalysisIndex::lookup_unit(SString n) const {
 
 const php::Class*
 AnalysisIndex::lookup_const_class(const php::Const& cns) const {
-  if (!m_data->deps->add(AnalysisDeps::Class { cns.cls })) return nullptr;
+  m_data->deps->add(AnalysisDeps::Class { cns.cls });
   return folly::get_default(m_data->classes, cns.cls);
 }
 
@@ -26028,24 +25849,19 @@ res::Func AnalysisIndex::resolve_func(SString n) const {
     return res::Func { res::Func::FuncName { n } };
   }
 
-  if (m_data->deps->add(AnalysisDeps::Func { n })) {
-    if (auto const finfo = folly::get_default(m_data->finfos, n)) {
-      return res::Func { res::Func::Fun2 { finfo } };
-    }
-    if (m_data->badFuncs.contains(n)) {
-      return res::Func { res::Func::MissingFunc { n } };
-    }
+  m_data->deps->add(AnalysisDeps::Func { n });
+  if (auto const finfo = folly::get_default(m_data->finfos, n)) {
+    return res::Func { res::Func::Fun2 { finfo } };
+  }
+  if (m_data->badFuncs.contains(n)) {
+    return res::Func { res::Func::MissingFunc { n } };
   }
   return res::Func { res::Func::FuncName { n } };
 }
 
 Optional<res::Class> AnalysisIndex::resolve_class(SString n) const {
   n = normalizeNS(n);
-  if (!m_data->deps->add(AnalysisDeps::Class { n })) {
-    // If we can't use information about the class, there's no point
-    // in checking, and just use the unknown case.
-    return res::Class::getOrCreate(n);
-  }
+  m_data->deps->add(AnalysisDeps::Class { n });
   if (auto const cinfo = folly::get_default(m_data->cinfos, n)) {
     return res::Class::get(*cinfo);
   }
@@ -26060,26 +25876,19 @@ Optional<res::Class> AnalysisIndex::resolve_class(SString n) const {
 }
 
 Optional<res::Class> AnalysisIndex::resolve_class(const php::Class& cls) const {
-  if (!m_data->deps->add(AnalysisDeps::Class { cls.name })) {
-    return res::Class::getOrCreate(cls.name);
-  }
+  m_data->deps->add(AnalysisDeps::Class { cls.name });
   if (cls.cinfo) return res::Class::get(*cls.cinfo);
   return std::nullopt;
 }
 
 res::Func AnalysisIndex::resolve_func_or_method(const php::Func& f) const {
-  if (!m_data->deps->add(f)) {
-    if (!f.cls) {
-      return res::Func { res::Func::FuncName { f.name } };
-    }
-    return res::Func { res::Func::MethodName { f.cls->name, f.name } };
-  }
+  m_data->deps->add(f);
   if (!f.cls) return res::Func { res::Func::Fun2 { &func_info(*m_data, f) } };
   return res::Func { res::Func::Method2 { &func_info(*m_data, f) } };
 }
 
 Type AnalysisIndex::lookup_constant(SString name) const {
-  if (!m_data->deps->add(AnalysisDeps::Constant { name })) return TInitCell;
+  m_data->deps->add(AnalysisDeps::Constant { name });
 
   if (auto const p = folly::get_ptr(m_data->constants, name)) {
     auto const cns = p->first;
@@ -26179,10 +25988,12 @@ AnalysisIndex::lookup_class_constant(const Type& cls,
   if (dcls.isExact()) {
     auto const rcls = dcls.cls();
     auto const cinfo = rcls.cinfo2();
-    if (!cinfo || !m_data->deps->add(AnalysisDeps::Class { rcls.name() })) {
-      (void)m_data->deps->add(AnalysisDeps::AnyClassConstant { rcls.name() });
+
+    if (!cinfo) {
+      m_data->deps->add(AnalysisDeps::AnyClassConstant { rcls.name() });
       return conservative();
     }
+    m_data->deps->add(AnalysisDeps::Class { rcls.name() });
 
     ITRACE(4, "{}:\n", cinfo->name);
     Trace::Indent _;
@@ -26194,8 +26005,7 @@ AnalysisIndex::lookup_class_constant(const Type& cls,
     assertx(!m_data->badClasses.contains(idx.idx.cls));
     if (idx.kind != ConstModifierFlags::Kind::Value) return notFound();
 
-    if (!m_data->deps->add(idx.idx)) return conservative();
-
+    m_data->deps->add(idx.idx);
     auto const cnsClsIt = m_data->classes.find(idx.idx.cls);
     if (cnsClsIt == end(m_data->classes)) return conservative();
     auto const& cnsCls = cnsClsIt->second;
@@ -26285,10 +26095,11 @@ AnalysisIndex::lookup_class_type_constant(
   if (dcls.isExact()) {
     auto const rcls = dcls.cls();
     auto const cinfo = rcls.cinfo2();
-    if (!cinfo || !m_data->deps->add(AnalysisDeps::Class { rcls.name() })) {
-      (void)m_data->deps->add(AnalysisDeps::AnyClassConstant { rcls.name() });
+    if (!cinfo) {
+      m_data->deps->add(AnalysisDeps::AnyClassConstant { rcls.name() });
       return conservative(rcls.name());
     }
+    m_data->deps->add(AnalysisDeps::Class { rcls.name() });
 
     ITRACE(4, "{}:\n", cinfo->name);
     Trace::Indent _;
@@ -26300,7 +26111,7 @@ AnalysisIndex::lookup_class_type_constant(
     assertx(!m_data->badClasses.contains(idx.idx.cls));
     if (idx.kind != ConstModifierFlags::Kind::Type) return notFound();
 
-    if (!m_data->deps->add(idx.idx)) return conservative(rcls.name());
+    m_data->deps->add(idx.idx);
 
     auto const cnsClsIt = m_data->classes.find(idx.idx.cls);
     if (cnsClsIt == end(m_data->classes)) return conservative(rcls.name());
@@ -26383,7 +26194,7 @@ AnalysisIndex::lookup_class_type_constant(const php::Class& ctx,
     };
   };
 
-  if (!m_data->deps->add(idx)) return conservative();
+  m_data->deps->add(idx);
   auto const cinfo = folly::get_default(m_data->cinfos, idx.cls);
   if (!cinfo) return conservative();
 
@@ -26467,9 +26278,7 @@ Index::ReturnType AnalysisIndex::lookup_return_type(MethodsInfo* methods,
         return R{ unctx(std::move(ret->t)), ret->effectFree };
       }
     }
-    if (!m_data->deps->add(*finfo.func, AnalysisDeps::Type::RetType)) {
-      return R{ TInitCell, false };
-    }
+    m_data->deps->add(*finfo.func, AnalysisDeps::Type::RetType);
     return R{
       unctx(unserialize_type(finfo.inferred.returnTy)),
       finfo.inferred.effectFree
@@ -26479,7 +26288,7 @@ Index::ReturnType AnalysisIndex::lookup_return_type(MethodsInfo* methods,
   return match<R>(
     rfunc.val,
     [&] (res::Func::FuncName f) {
-      (void)m_data->deps->add(
+      m_data->deps->add(
         AnalysisDeps::Func { f.name },
         AnalysisDeps::Type::RetType
       );
@@ -26488,7 +26297,7 @@ Index::ReturnType AnalysisIndex::lookup_return_type(MethodsInfo* methods,
     [&] (res::Func::MethodName m) {
       // If we know the name of the class, we can register a
       // dependency on it. If not, nothing we can do.
-      if (m.cls) (void)m_data->deps->add(AnalysisDeps::Class { m.cls });
+      if (m.cls) m_data->deps->add(AnalysisDeps::Class { m.cls });
       return R{ TInitCell, false };
     },
     [&] (res::Func::Fun)                -> R { always_assert(false); },
@@ -26499,9 +26308,7 @@ Index::ReturnType AnalysisIndex::lookup_return_type(MethodsInfo* methods,
     [&] (res::Func::MissingMethod)      { return R{ TBottom, false }; },
     [&] (const res::Func::Isect&)       -> R { always_assert(false); },
     [&] (res::Func::Fun2 f) {
-      if (!m_data->deps->add(*f.finfo->func, AnalysisDeps::Type::RetType)) {
-        return R{ TInitCell, false };
-      }
+      m_data->deps->add(*f.finfo->func, AnalysisDeps::Type::RetType);
       return R{
         unctx(unserialize_type(f.finfo->inferred.returnTy)),
         f.finfo->inferred.effectFree
@@ -26589,13 +26396,10 @@ AnalysisIndex::lookup_foldable_return_type(const CallContext& calleeCtx) const {
 
   auto const& caller = *context_for_deps(*m_data).func;
 
-  if (!m_data->deps->add(
-        func,
-        AnalysisDeps::Type::ScalarRetType |
-        AnalysisDeps::Type::Bytecode
-      )) {
-    return R{ TInitCell, false };
-  }
+  m_data->deps->add(
+    func,
+    AnalysisDeps::Type::ScalarRetType | AnalysisDeps::Type::Bytecode
+  );
   if (m_data->foldableInterpNestingLevel > maxNestingLevel) {
     return R{ TInitCell, false };
   }
@@ -26706,9 +26510,11 @@ AnalysisIndex::lookup_closure_use_vars(const php::Func& func,
 
 bool AnalysisIndex::func_depends_on_arg(const php::Func& func,
                                         size_t arg) const {
-  if (!m_data->deps->add(func, AnalysisDeps::Type::UnusedParams)) return true;
+  m_data->deps->add(func, AnalysisDeps::Type::UnusedParams);
   auto const& finfo = func_info(*m_data, func);
-  return arg >= finfo.inferred.unusedParams.size() || !finfo.inferred.unusedParams.test(arg);
+  return
+    arg >= finfo.inferred.unusedParams.size()
+    || !finfo.inferred.unusedParams.test(arg);
 }
 
 /*
@@ -26795,10 +26601,7 @@ res::Func AnalysisIndex::rfunc_from_dcls(const DCls& dcls,
 
   auto const onClass = [&] (Class cls, bool isExact) {
     auto const g = cls.graph();
-    if (!g.ensureCInfo()) {
-      onFunc(general(dcls.containsNonRegular()));
-      return;
-    }
+    g.ensureCInfo();
 
     if (auto const cinfo = g.cinfo2()) {
       onFunc(process(cinfo, isExact, dcls.containsNonRegular()));
@@ -26848,7 +26651,7 @@ res::Func AnalysisIndex::rfunc_from_dcls(const DCls& dcls,
 
         assertx(!commonParents.empty());
         for (auto const p : commonParents) {
-          if (!p.ensureCInfo()) continue;
+          p.ensureCInfo();
           if (auto const cinfo = p.cinfo2()) {
             onFunc(process(cinfo, false, false));
           }
@@ -26858,7 +26661,7 @@ res::Func AnalysisIndex::rfunc_from_dcls(const DCls& dcls,
 
       g.walkParents(
         [&] (ClassGraph p) {
-          if (!p.ensureCInfo()) return true;
+          p.ensureCInfo();
           if (auto const cinfo = p.cinfo2()) {
             onFunc(process(cinfo, false, dcls.containsNonRegular()));
             return false;
@@ -26962,9 +26765,7 @@ res::Func AnalysisIndex::resolve_method(const Type& thisType,
       return general(cinfo->name, includeNonRegular);
     }
 
-    if (!m_data->deps->add(meth->meth())) {
-      return general(cinfo->name, includeNonRegular);
-    }
+    m_data->deps->add(meth->meth());
     auto const func = func_from_meth_ref(*m_data, meth->meth());
     if (!func) return general(cinfo->name, includeNonRegular);
 
@@ -27007,10 +26808,8 @@ res::Func AnalysisIndex::resolve_method(const Type& thisType,
       auto conservative = false;
       auto const ancestor = [&] () -> const php::Func* {
         if (!ctx.cls) return nullptr;
-        if (!m_data->deps->add(AnalysisDeps::Class { ctx.cls->name })) {
-          conservative = true;
-          return nullptr;
-        }
+        m_data->deps->add(AnalysisDeps::Class { ctx.cls->name });
+
         // Look up the ClassInfo corresponding to the context.
         auto const ctxCInfo = ctx.cls->cinfo;
         if (!ctxCInfo) return nullptr;
@@ -27023,10 +26822,7 @@ res::Func AnalysisIndex::resolve_method(const Type& thisType,
         if (!ctxMeth) return nullptr;
         // If it defines a private method, use it.
         if ((ctxMeth->attrs & AttrPrivate) && ctxMeth->topLevel()) {
-          if (!m_data->deps->add(ctxMeth->meth())) {
-            conservative = true;
-            return nullptr;
-          }
+          m_data->deps->add(ctxMeth->meth());
           auto const ctxFunc = func_from_meth_ref(*m_data, ctxMeth->meth());
           if (!ctxFunc) conservative = true;
           return ctxFunc;
@@ -27131,11 +26927,7 @@ res::Func AnalysisIndex::resolve_ctor(const Type& obj) const {
         return Func { Func::MethodName { cinfo->name, s_construct.get() } };
       }
 
-      if (!m_data->deps->add(meth->meth())) {
-        return Func {
-          Func::MethodName { dcls.smallestCls().name(), s_construct.get() }
-        };
-      }
+      m_data->deps->add(meth->meth());
 
       // We have a ctor, but it might be overridden in a subclass.
       assertx(!(meth->attrs & AttrStatic));
@@ -27178,9 +26970,7 @@ res::Func AnalysisIndex::resolve_ctor(const Type& obj) const {
 
 std::pair<const php::TypeAlias*, bool>
 AnalysisIndex::lookup_type_alias(SString name) const {
-  if (!m_data->deps->add(AnalysisDeps::Class { name })) {
-    return std::make_pair(nullptr, true);
-  }
+  m_data->deps->add(AnalysisDeps::Class { name });
   if (m_data->classes.contains(name)) return std::make_pair(nullptr, false);
   if (auto const ta = folly::get_ptr(m_data->typeAliases, name)) {
     return std::make_pair(ta->first, true);
@@ -27191,9 +26981,7 @@ AnalysisIndex::lookup_type_alias(SString name) const {
 Index::ClassOrTypeAlias
 AnalysisIndex::lookup_class_or_type_alias(SString n) const {
   n = normalizeNS(n);
-  if (!m_data->deps->add(AnalysisDeps::Class { n })) {
-    return Index::ClassOrTypeAlias{nullptr, nullptr, true};
-  }
+  m_data->deps->add(AnalysisDeps::Class { n });
   if (auto const cls = folly::get_default(m_data->classes, n)) {
     return Index::ClassOrTypeAlias{cls, nullptr, true};
   }

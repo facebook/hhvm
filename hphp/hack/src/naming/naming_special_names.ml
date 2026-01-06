@@ -30,11 +30,7 @@ module Classes = struct
 
   let cHHFormatString = "\\HH\\FormatString"
 
-  let cHHTypedFormatString = "\\HH\\TypedFormatString"
-
   let is_format_string x = String.equal x cHHFormatString
-
-  let is_typed_format_string x = String.equal x cHHTypedFormatString
 
   let cHH_BuiltinEnum = "\\HH\\BuiltinEnum"
 

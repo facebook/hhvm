@@ -575,32 +575,7 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
     in
     let (env, err_opt1) = sub_arraykey env p1 ty1 in
     let (env, err_opt2) = sub_arraykey env p2 ty2 in
-    let r = Reason.concat_ret p in
-    let ty =
-      begin
-        (* Special case for TypedFormatString operands.
-         * If  e1 has type TypedFormatString<I,(t1,...,tn)>
-         * and e2 has type TypedFormatString<I,(u1,...,um)>
-         * then e1 . e2 has type TypedFormatString<I,(t1,...,tn,u1,...,um)>
-         *)
-        match (get_node ty1, get_node ty2) with
-        | ( Tnewtype (fs1, [ty1; tuple1], _),
-            Tnewtype (fs2, [ty2; tuple2], bound) )
-          when SN.Classes.is_typed_format_string fs1
-               && SN.Classes.is_typed_format_string fs2
-               && Typing_defs.equal_locl_ty ty1 ty2 -> begin
-          match (get_node tuple1, get_node tuple2) with
-          | ( Ttuple { t_required = req1; t_optional = []; t_extra = _ },
-              Ttuple { t_required = req2; t_optional = []; t_extra = _ } ) ->
-            mk
-              ( r,
-                Tnewtype
-                  (fs1, [ty1; Typing_make_type.tuple r (req1 @ req2)], bound) )
-          | _ -> MakeType.string r
-        end
-        | _ -> MakeType.string r
-      end
-    in
+    let ty = MakeType.string (Reason.concat_ret p) in
     make_result env te1 err_opt1 te2 err_opt2 ty
   | Ast_defs.Barbar
   | Ast_defs.Ampamp ->

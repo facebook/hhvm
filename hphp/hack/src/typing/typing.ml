@@ -3529,33 +3529,7 @@ end = struct
      *)
     | Null -> make_result env p Aast.Null (MakeType.null (Reason.witness p))
     | String s ->
-      let (env, expected) =
-        Env_help.expand_expected_opt
-          ~strip_supportdyn:false
-          ~pessimisable_builtin:false
-          env
-          expected
-      in
-      begin
-        match expected with
-        | Some (_pos, _ur, _, _, Tnewtype (fs, [ty; _], _))
-          when SN.Classes.is_typed_format_string fs ->
-          let (env, fpl) = Typing_exts.parse_printf_string env s p ty in
-          let tuple_ty =
-            Typing_make_type.tuple
-              (Reason.witness p)
-              (List.map fpl ~f:(fun fp -> fp.fp_type))
-          in
-          let string_ty =
-            mk
-              ( Reason.witness p,
-                Tnewtype (fs, [ty; tuple_ty], MakeType.string (Reason.witness p))
-              )
-          in
-          make_result env p (Aast.String s) string_ty
-        | _ ->
-          make_result env p (Aast.String s) (MakeType.string (Reason.witness p))
-      end
+      make_result env p (Aast.String s) (MakeType.string (Reason.witness p))
     | String2 idl ->
       let (env, tel) = string2 env idl in
       make_result env p (Aast.String2 tel) (MakeType.string (Reason.witness p))
@@ -12206,34 +12180,9 @@ end = struct
         (Aast.Binop { bop; lhs = te1; rhs = te2 })
         (MakeType.bool (Reason.logic_ret p))
     | _ ->
-      let (env, expected) =
-        match bop with
-        | Ast_defs.Dot ->
-          Env_help.expand_expected_opt
-            ~strip_supportdyn:false
-            ~pessimisable_builtin:false
-            env
-            expected
-        | _ -> (env, None)
-      in
-      let (env, expected) =
-        match expected with
-        | Some (pos, ur, _, _, Tnewtype (fs, [ty; _], bound))
-          when SN.Classes.is_typed_format_string fs ->
-          let (env, fresh_ty) = Env.fresh_type env p in
-          let expected =
-            ExpectedTy.make
-              pos
-              ur
-              (mk
-                 (Reason.concat_operand p, Tnewtype (fs, [ty; fresh_ty], bound)))
-          in
-          (env, Some expected)
-        | _ -> (env, None)
-      in
       let (env, te1, ty1) =
         Expr.expr
-          ~expected
+          ~expected:None
           ~ctxt:Expr.Context.{ default with check_defined }
           env
           e1
@@ -12241,7 +12190,7 @@ end = struct
       let (env, te2, ty2) =
         check_e2
           (Expr.expr
-             ~expected
+             ~expected:None
              ~ctxt:Expr.Context.{ default with check_defined })
           env
           e2

@@ -7,7 +7,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  */
-<<file:__EnableUnstableFeatures('class_type','open_tuples', 'type_splat')>>
+<<file:__EnableUnstableFeatures('class_type')>>
 namespace HH {
 
   // The functions in this file are defined in HHVM and known to the
@@ -65,11 +65,10 @@ namespace HH {
    *
    * See http://docs.hhvm.com/hack/reference/function/HH.invariant/
    */
-  <<__NoAutoLikes>>
-  function invariant<Targs as (mixed...)>(
+  function invariant(
     \HH\FIXME\MISSING_PARAM_TYPE $condition,
-    \HH\TypedFormatString<\PlainSprintf, Targs> $f,
-    ...Targs $f_args
+    FormatString<\PlainSprintf> $f,
+    mixed ...$f_args
   )[]: void; // becomes:
   // if (!(<condition>)) { // an Exception is thrown
   //   invariant_violation('sprintf format: %s', 'string', ...);

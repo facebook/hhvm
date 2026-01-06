@@ -729,10 +729,10 @@ bool optimize_builtin(ISS& env, const php::Func* func, const FCallArgs& fca) {
 }
 
 Optional<Type> const_fold(ISS& env,
-                                 uint32_t nArgs,
-                                 uint32_t numExtraInputs,
-                                 const php::Func& phpFunc,
-                                 bool variadicsPacked) {
+                          uint32_t nArgs,
+                          uint32_t numExtraInputs,
+                          const php::Func& phpFunc,
+                          bool variadicsPacked) {
   assertx(phpFunc.attrs & AttrIsFoldable);
 
   std::vector<TypedValue> args(nArgs);
@@ -771,7 +771,7 @@ Optional<Type> const_fold(ISS& env,
     );
   }
 
-  FTRACE(1, "invoking: {}\n", func->fullName()->data());
+  ITRACE(2, "invoking: {}\n", func->fullName());
 
   assertx(!Cfg::Jit::Enabled);
   // NB: Coeffects are already checked prior to here by `shouldAttemptToFold`

@@ -87,7 +87,8 @@ struct ExecutionContext;
  * If `initAsWorker` is set, JIT data structure and extensions will not be
  * initialized as they're expensive to set up and unused by workers.
  */
-void hphp_process_init(bool initForWorkerProcess = false);
+void hphp_process_init(bool initForWorkerProcess = false,
+                       bool skipRDSInit = false);
 void cli_client_init();
 void cli_client_thread_init();
 void cli_client_thread_exit();
@@ -117,7 +118,8 @@ bool hphp_invoke(ExecutionContext *context,
                  bool allowDynCallNoPointer = false);
 void hphp_context_exit();
 
-void hphp_thread_init(bool skipExtensions = false);
+void hphp_thread_init(bool skipExtensions = false,
+                      bool skipRDSInit = false);
 void hphp_thread_exit(bool skipExtensions = false);
 
 void init_current_pthread_stack_limits();

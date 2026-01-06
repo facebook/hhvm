@@ -249,7 +249,7 @@ struct LoadRepoJob {
     process_init(config.o, config.gd, false);
   }
   static std::vector<W::Key> fini() {
-    process_exit();
+    process_exit(false);
     return std::move(s_keys);
   }
   static Variadic<W::Value> run(UnitEmitterSerdeWrapper wrapper) {
@@ -537,7 +537,6 @@ void compile_repo() {
     };
   };
 
-  HphpSession session{Treadmill::SessionKind::HHBBC};
   whole_program(
     std::move(inputs),
     std::move(config),
@@ -572,6 +571,7 @@ void process_init(const Options& o,
     setrlimit(RLIMIT_CORE, &rl);
   }
 
+  rds::threadInit();
   rds::local::init();
   SCOPE_FAIL { rds::local::fini(); };
 
@@ -608,7 +608,7 @@ void process_init(const Options& o,
   gd.load(false);
 
   register_process_init();
-  hphp_process_init(!fullInit);
+  hphp_process_init(!fullInit, true);
   SCOPE_FAIL { hphp_process_exit(); };
 
   options = o;
@@ -624,9 +624,15 @@ void process_init(const Options& o,
   Cfg::LoadFromGlobalDataOnlyHHBBC(gd);
 
   options.SourceRootForFileBC = gd.SourceRootForFileBC;
+
+  if (fullInit) hphp_session_init(Treadmill::SessionKind::HHBBC);
 }
 
-void process_exit() {
+void process_exit(bool full) {
+  if (full) {
+    hphp_context_exit();
+    hphp_session_exit();
+  }
   hphp_process_exit();
   rds::local::fini();
 }
@@ -653,7 +659,7 @@ int main(int argc, char** argv) try {
   gd.load(false);
 
   process_init(options, gd, true);
-  SCOPE_EXIT { process_exit(); };
+  SCOPE_EXIT { process_exit(true); };
 
   Logger::LogLevel = logging ? Logger::LogInfo : Logger::LogError;
   Logger::Escape = false;

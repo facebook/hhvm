@@ -2547,12 +2547,13 @@ static void update_constants_and_options() {
   }
 }
 
-void hphp_thread_init(bool skipExtensions /* = false */) {
+void hphp_thread_init(bool skipExtensions /* = false */,
+                      bool skipRDSInit /* = false */) {
   init_current_pthread_stack_limits();
 #if USE_JEMALLOC
   arenas_thread_init();
 #endif
-  rds::threadInit();
+  if (!skipRDSInit) rds::threadInit();
   ServerStats::GetLogger();
   zend_get_bigint_data();
   zend_rand_init();
@@ -2646,7 +2647,8 @@ void init_current_pthread_stack_limits() {
   }
 }
 
-void hphp_process_init(bool initForWorkerProcess /* = false */) {
+void hphp_process_init(bool initForWorkerProcess /* = false */,
+                       bool skipRDSInit /* = false */) {
   init_current_pthread_stack_limits();
   BootStats::mark("pthread_init");
 
@@ -2659,9 +2661,9 @@ void hphp_process_init(bool initForWorkerProcess /* = false */) {
   timezone_init();
   BootStats::mark("timezone_init");
 
-  rds::processInit();
+  if (!skipRDSInit) rds::processInit();
 
-  hphp_thread_init(/* skipExtensions= */ initForWorkerProcess);
+  hphp_thread_init(/* skipExtensions= */ initForWorkerProcess, skipRDSInit);
 
   struct sigaction action = {};
   action.sa_sigaction = on_timeout;

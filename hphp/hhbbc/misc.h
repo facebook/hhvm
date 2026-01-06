@@ -325,7 +325,7 @@ using UniquePtrRefVec = std::vector<UniquePtrRef<T>>;
 // structures will be parsed and initialized.
 void process_init(const Options&, const RepoGlobalData&, bool full);
 // Undo process_init().
-void process_exit();
+void process_exit(bool full);
 
 }}
 

@@ -39,8 +39,8 @@ namespace HPHP::HHBBC {
  * will return non-static objects, or throw exceptions (e.g. tvAdd()
  * with an array and an int).
  *
- * This routine converts these things back to types.  In the case of
- * an exception it returns TInitCell.
+ * This routine converts these things back to types. In the case of
+ * an exception it returns std::nullopt.
  */
 template<class Pred>
 Optional<Type> eval_cell(Pred p) {

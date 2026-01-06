@@ -32,6 +32,7 @@
 #include <tbb/concurrent_hash_map.h>
 
 #include <folly/Format.h>
+#include <folly/AtomicLinkedList.h>
 #include <folly/Lazy.h>
 #include <folly/MapUtil.h>
 #include <folly/Memory.h>
@@ -65,6 +66,7 @@
 #include "hphp/hhbbc/wide-func.h"
 
 #include "hphp/util/assertions.h"
+#include "hphp/util/approximate-nearest-neighbor.h"
 #include "hphp/util/bitset-utils.h"
 #include "hphp/util/check-size.h"
 #include "hphp/util/configs/eval.h"
@@ -6087,6 +6089,10 @@ struct Index::IndexData {
   TSStringToOneT<SString> classToUnit;
   FSStringToOneT<SString> funcToUnit;
   TSStringToOneT<SString> typeAliasToUnit;
+  // Maps entities to the bundle they belong to (for class bundling).
+  TSStringToOneT<SString> classToBundle;
+  FSStringToOneT<SString> funcToBundle;
+  SStringToOneT<SString> unitToBundle;
   // If bool is true, then the constant is "dynamic" and has an
   // associated 86cinit function.
   SStringToOneT<std::pair<SString, bool>> constantToUnit;
@@ -17320,6 +17326,885 @@ struct AggregateJob {
 };
 
 Job<AggregateJob> s_aggregateJob;
+
+struct ClassBundleAssignments {
+  struct Assignments {
+    std::vector<SString> classes;
+    std::vector<SString> funcs;
+    std::vector<SString> units;
+  };
+  SStringToOneT<Assignments> assignments;
+  std::vector<std::vector<SString>> buckets;
+};
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * ClassBundler - Groups classes, functions, and units into bundles for
+ * distributed whole-program analysis.
+ *
+ * PROBLEM:
+ * Distributed analysis processes classes in parallel across multiple workers.
+ * Classes with dependencies should ideally be analyzed together to minimize
+ * remote data fetching and maximize cache locality. However, naively grouping
+ * all interdependent classes can create bundles that are too large to
+ * efficiently process.
+ *
+ * APPROACH:
+ * ClassBundler uses a multi-phase algorithm to create balanced bundles:
+ *
+ * 1. Initial Setup (build_bundles):
+ *    - Start with one bundle per unit (compilation unit)
+ *    - Track dependencies between bundles based on unit predeps
+ *    - Calculate bundle weights (sum of serialized sizes of classes/funcs)
+ *
+ * 2. Merge Single Predecessors:
+ *    - Eagerly merge bundles that have exactly one predecessor
+ *    - This handles simple linear dependency chains efficiently
+ *
+ * 3. Similarity-Based Merging (merge_nearest):
+ *    - Use Approximate Nearest Neighbor (ANN) to find similar bundles
+ *    - Similarity measured by Jaccard index of dependency sets
+ *    - Multiple rounds with progressively relaxed similarity thresholds
+ *    - Only merge if combined weight stays under kMaxBundleWeight
+ *
+ * 4. Directory-Based Grouping (merge_by_directory):
+ *    - As a final pass, merge bundles from the same directory structure
+ *    - Respects smaller limits (kMaxPathBundleWeight, kMaxPathBundleSize)
+ *    - Helps group related code even when dependency analysis misses connections
+ *
+ * CONSTRAINTS:
+ * - Maximum bundle weight: ~5MB (kMaxBundleWeight)
+ * - Path-based merging limited to ~256KB and 1000 units
+ * - Bundles merged only if they can fit within weight limits
+ * - Algorithm continues until work reduction drops below 20% per round
+ *
+ * OUTPUT:
+ * A mapping from bundle names to the classes, functions, and units they contain.
+ * These assignments are used to partition work across distributed analysis workers.
+ */
+struct ClassBundler {
+  explicit ClassBundler(const IndexData& i)
+    : index{i}
+  { build_bundles(); }
+
+  SStringToOneT<ClassBundleAssignments::Assignments> operator()();
+private:
+  // Represents a bundle during the merging process
+  struct Bundle {
+    SString name;                     // Unit name (bundle identifier)
+    size_t bundleIdx{std::numeric_limits<size_t>::max()};  // Stable index in bundles array
+    size_t workIdx{std::numeric_limits<size_t>::max()};    // Index in current worklist
+    size_t weight{0};                 // Sum of serialized sizes (bytes)
+    size_t size{0};                   // Number of units in bundle
+    Bundle* canonical{nullptr};       // For union-find of merged bundles
+    std::vector<Bundle*> preds;       // Dependencies (units this depends on)
+    std::vector<Bundle*> succs;       // Dependents (units that depend on this)
+    std::vector<size_t> set;          // workIdx of neighbors (for ANN similarity)
+
+    folly::AtomicIntrusiveLinkedListHook<Bundle> hook;
+    folly::AtomicIntrusiveLinkedList<Bundle, &Bundle::hook> toMerge;
+  };
+
+  static constexpr size_t kMaxBundleWeight = 5*1024*1024;
+  static constexpr size_t kBundleWeightSlack = 32*1024;
+
+  static constexpr size_t kMaxPathBundleWeight = 256*1024;
+  static constexpr size_t kMaxPathBundleSize = 1000;
+
+  static constexpr double kMinBundleWorkReduction = 0.2;
+
+  std::vector<std::unique_ptr<Bundle>> bundles;
+  SStringToOneT<Bundle*> nameToBundle;
+
+  std::vector<Bundle*> worklist;
+
+  const IndexData& index;
+
+  using ANN = ApproximateNearestNeighbor<uint32_t, uint32_t>;
+
+  void build_bundles();
+  void prepare_worklist();
+  void merge_bundles(double);
+  void merge_single_preds();
+  void add_all(ANN&);
+  void merge_nearest(ANN&, double);
+  bool merge_by_directory(size_t);
+
+  static bool can_fit(const Bundle& b1, const Bundle& b2) {
+    return
+      b1.weight <= kMaxBundleWeight &&
+      b2.weight <= kMaxBundleWeight &&
+      (b1.weight + b2.weight) <= (kMaxBundleWeight + kBundleWeightSlack);
+  }
+
+  static Bundle* canonicalize(Bundle* b) {
+    if (!b) return nullptr;
+    while (b->canonical != b) b = b->canonical;
+    return b;
+  }
+
+  static void union_bundles(Bundle* b1, Bundle* b2) {
+    auto const c1 = canonicalize(b1);
+    if (!c1) return;
+    auto const c2 = canonicalize(b2);
+    if (!c2 || c1 == c2) return;
+    if (c1->workIdx < c2->workIdx) {
+      c2->canonical = c1;
+    } else {
+      c1->canonical = c2;
+    }
+  }
+
+  static double jaccard(const Bundle&, const Bundle&);
+};
+
+/*
+ * Main entry point: Runs the multi-phase bundling algorithm.
+ *
+ * Algorithm flow:
+ * 1. Initialize worklist with all bundles
+ * 2. Run multiple rounds of similarity-based merging with progressively
+ *    relaxed thresholds (params array controls similarity bounds)
+ * 3. Each round:
+ *    - Merge bundles with single predecessors (easy wins)
+ *    - Build ANN structure for similarity search
+ *    - Find and merge similar bundles
+ *    - Stop if work reduction drops below 20%
+ * 4. Final cleanup: merge single preds and group by directory
+ * 5. Collect results into final bundle assignments
+ *
+ * Returns: Map from bundle name -> {classes, funcs, units} in that bundle
+ */
+SStringToOneT<ClassBundleAssignments::Assignments> ClassBundler::operator()() {
+  // Fixed seed for reproducibility across builds
+  std::seed_seq seed{
+    0x08063e940685c5c0, 0x300a9ddf20bef7e6,
+    0x2dc449bd348bc372, 0x0639cfcb12ee5bf3,
+    0x3b17aad01d3f4333, 0x02d0668f2608fedb,
+    0x1eb61a4615f13e61, 0x0b63193e0a474be5,
+    0x254665be1a8dc9d7, 0x2555912023d35fca,
+    0x0760f9a005c66bf7, 0x308ebd302742054c,
+    0x113336a30c1f717a, 0x01e4ee8833c98079,
+    0x292a0eb90b952d49, 0x232362b63903bfcc,
+    0x11111111faceb00c, 0x7777faceb00c7777
+  };
+  std::mt19937_64 prng{seed};
+
+  worklist.clear();
+  for (auto const& b : bundles) {
+    assertx(b->canonical == b.get());
+    b->workIdx = worklist.size();
+    worklist.emplace_back(b.get());
+  }
+
+  struct Params {
+    ANN::Bound lower;
+    ANN::Bound higher;
+  };
+  const std::array params{
+    Params{ ANN::Bound{0.25, 0.01}, ANN::Bound{0.75, 0.90} },
+    Params{ ANN::Bound{0.25, 0.05}, ANN::Bound{0.50, 0.90} },
+    Params{ ANN::Bound{0.25, 0.25}, ANN::Bound{0.40, 0.90} },
+    Params{ ANN::Bound{0.25, 0.50}, ANN::Bound{0.35, 0.90} }
+  };
+  static_assert(std::tuple_size<decltype(params)>() > 0);
+
+  for (size_t round = 0;; ++round) {
+    if (worklist.empty()) break;
+    auto const beforeWork = worklist.size();
+    merge_single_preds();
+    if (worklist.empty()) break;
+
+    auto const& param = round < params.size()
+      ? params[round]
+      : params.back();
+    ANN ann{prng, param.lower, param.higher, worklist.size(), worklist.size()};
+
+    add_all(ann);
+    merge_nearest(ann, param.lower.similarity);
+
+    if (round+1 >= params.size()) {
+      auto const reduction =
+        double(beforeWork - worklist.size()) / beforeWork;
+      if (reduction < kMinBundleWorkReduction) break;
+    }
+  }
+
+  merge_single_preds();
+  for (size_t d = 1; merge_by_directory(d); ++d) {}
+
+  worklist.clear();
+
+  SStringToOneT<ClassBundleAssignments::Assignments> out;
+  out.reserve(bundles.size());
+
+  for (auto const& [c, _] : index.classRefs) {
+    auto const b = canonicalize(nameToBundle.at(index.classToUnit.at(c)));
+    out[b->name].classes.emplace_back(c);
+  }
+  for (auto const& [f, _] : index.funcRefs) {
+    auto const b = canonicalize(nameToBundle.at(index.funcToUnit.at(f)));
+    out[b->name].funcs.emplace_back(f);
+  }
+  for (auto const& [u, _] : index.unitRefs) {
+    auto const b = canonicalize(nameToBundle.at(u));
+    out[b->name].units.emplace_back(u);
+  }
+
+  nameToBundle.clear();
+  bundles.clear();
+
+  for (auto& [_, a] : out) {
+    std::sort(begin(a.classes), end(a.classes), string_data_lt_type{});
+    std::sort(begin(a.funcs), end(a.funcs), string_data_lt_func{});
+    std::sort(begin(a.units), end(a.units), string_data_lt{});
+  }
+  return out;
+}
+
+/*
+ * Initialize bundles: one bundle per unit with dependency graph.
+ *
+ * Creates initial bundle state:
+ * 1. Create one bundle per compilation unit
+ * 2. Calculate bundle weights by summing serialized sizes of all
+ *    classes, funcs, and units in each bundle
+ * 3. Build predecessor/successor dependency graph based on unit predeps
+ *    (units this bundle depends on / units that depend on this bundle)
+ * 4. Sort bundles by name for stable ordering
+ *
+ * The dependency graph is crucial for similarity-based merging: bundles
+ * with similar dependencies are more likely to benefit from being merged.
+ */
+void ClassBundler::build_bundles() {
+  nameToBundle.reserve(index.unitRefs.size());
+  bundles.reserve(index.unitRefs.size());
+
+  for (auto const& [n, r] : index.unitRefs) {
+    auto b = std::make_unique<Bundle>(n);
+    b->weight += r.id().m_size;
+    b->size = 1;
+    b->canonical = b.get();
+    nameToBundle.emplace(n, b.get());
+    bundles.emplace_back(std::move(b));
+  }
+  always_assert(bundles.size() < std::numeric_limits<uint32_t>::max());
+
+  std::sort(
+    begin(bundles), end(bundles),
+    [] (const std::unique_ptr<Bundle>& a,
+        const std::unique_ptr<Bundle>& b) {
+      return string_data_lt{}(a->name, b->name);
+    }
+  );
+  for (size_t i = 0, size = bundles.size(); i < size; ++i) {
+    bundles[i]->bundleIdx = i;
+  }
+
+  for (auto const& [c, r] : index.classRefs) {
+    auto& b = nameToBundle.at(index.classToUnit.at(c));
+    b->weight += r.id().m_size;
+  }
+  for (auto const& [c, r] : index.classInfoRefs) {
+    auto& b = nameToBundle.at(index.classToUnit.at(c));
+    b->weight += r.id().m_size;
+  }
+  for (auto const& [c, r] : index.classBytecodeRefs) {
+    auto& b = nameToBundle.at(index.classToUnit.at(c));
+    b->weight += r.id().m_size;
+  }
+  for (auto const& [c, r] : index.uninstantiableClsMethRefs) {
+    auto& b = nameToBundle.at(index.classToUnit.at(c));
+    b->weight += r.id().m_size;
+  }
+
+  for (auto const& [f, r] : index.funcRefs) {
+    auto& b = nameToBundle.at(index.funcToUnit.at(f));
+    b->weight += r.id().m_size;
+  }
+  for (auto const& [f, r] : index.funcInfoRefs) {
+    auto& b = nameToBundle.at(index.funcToUnit.at(f));
+    b->weight += r.id().m_size;
+  }
+  for (auto const& [f, r] : index.funcBytecodeRefs) {
+    auto& b = nameToBundle.at(index.funcToUnit.at(f));
+    b->weight += r.id().m_size;
+  }
+
+  struct PredList {
+    folly::AtomicLinkedList<Bundle*> preds;
+  };
+  std::vector<PredList> predLists;
+  predLists.resize(bundles.size());
+
+  parallel::for_each(
+    bundles,
+    [&] (std::unique_ptr<Bundle>& bundle) {
+      auto const add = [&] (SString n) {
+        if (n == bundle->name) return;
+        auto& b = nameToBundle.at(n);
+        bundle->succs.emplace_back(b);
+        assertx(b->bundleIdx < predLists.size());
+        predLists[b->bundleIdx].preds.insertHead(bundle.get());
+      };
+
+      auto const onPredep = [&] (const SStringSet* predeps) {
+        if (!predeps) return;
+        for (auto const d : *predeps) {
+          if (auto const u = folly::get_default(index.classToUnit, d))     add(u);
+          if (auto const u = folly::get_default(index.funcToUnit, d))      add(u);
+          if (auto const u = folly::get_default(index.typeAliasToUnit, d)) add(u);
+          if (auto const u = folly::get_ptr(index.constantToUnit, d))      add(u->first);
+        }
+      };
+      onPredep(folly::get_ptr(index.unitCInitPredeps, bundle->name));
+      onPredep(folly::get_ptr(index.unitPredeps, bundle->name));
+    }
+  );
+
+  parallel::for_each(
+    bundles,
+    [&] (std::unique_ptr<Bundle>& bundle) {
+      std::sort(
+        begin(bundle->succs), end(bundle->succs),
+        [] (const Bundle* a, const Bundle* b) {
+          return string_data_lt{}(a->name, b->name);
+        }
+      );
+      bundle->succs.erase(
+        std::unique(begin(bundle->succs), end(bundle->succs)),
+        end(bundle->succs)
+      );
+
+      assertx(bundle->bundleIdx < predLists.size());
+      predLists[bundle->bundleIdx].preds.sweepOnce(
+        [&] (Bundle* b) { bundle->preds.emplace_back(b); }
+      );
+      std::sort(
+        begin(bundle->preds), end(bundle->preds),
+        [] (const Bundle* a, const Bundle* b) {
+          return string_data_lt{}(a->name, b->name);
+        }
+      );
+
+      bundle->succs.shrink_to_fit();
+      bundle->preds.shrink_to_fit();
+    }
+  );
+}
+
+/*
+ * Calculate Jaccard similarity between two bundles.
+ *
+ * Jaccard index = |intersection| / |union|
+ *              = |A ∩ B| / |A ∪ B|
+ *              = matches / (size(A) + size(B) - matches)
+ *
+ * The similarity is measured on the bundles' dependency sets (stored in
+ * bundle.set), which contain the workIdx of neighboring bundles (both
+ * predecessors and successors). High similarity (close to 1.0) means the
+ * bundles have very similar dependencies and would likely benefit from
+ * being merged to improve cache locality.
+ *
+ * This function assumes bundle.set is sorted, which is ensured by
+ * prepare_worklist(). The implementation uses a two-pointer merge
+ * technique for O(n+m) complexity.
+ */
+double ClassBundler::jaccard(const Bundle& a, const Bundle& b) {
+  size_t matches = 0;
+  auto it1 = begin(a.set);
+  auto it2 = begin(b.set);
+  auto const end1 = end(a.set);
+  auto const end2 = end(b.set);
+  while (it1 != end1 && it2 != end2) {
+    if (*it1 < *it2) {
+      ++it1;
+    } else {
+      if (!(*it2 < *it1)) {
+        ++it1;
+        ++matches;
+      }
+      ++it2;
+    }
+  }
+  return matches/double(a.set.size()+b.set.size()-matches);
+}
+
+/*
+ * Prepare worklist for the next merging phase.
+ *
+ * Filters and rebuilds the worklist to exclude:
+ * - Bundles that have been merged (canonical != self)
+ * - Bundles already at or over max weight limit
+ *
+ * For remaining bundles:
+ * - Assigns new workIdx (position in current worklist)
+ * - Builds the "neighbor set" (bundle.set) containing workIdx of all
+ *   bundles this bundle depends on or is depended upon by
+ * - Sorts and deduplicates the neighbor set
+ *
+ * The neighbor set is critical for ANN similarity search: it's the feature
+ * vector used to find similar bundles. Bundles with overlapping neighbor
+ * sets are considered similar and are candidates for merging.
+ *
+ * Called after each merge phase to compact the worklist and update indices.
+ */
+void ClassBundler::prepare_worklist() {
+  worklist.erase(
+    std::remove_if(
+      begin(worklist), end(worklist),
+      [&] (Bundle* b) {
+        b->workIdx = std::numeric_limits<size_t>::max();
+        if (b->canonical != b) return true;
+        if (b->weight >= kMaxBundleWeight) return true;
+        return false;
+      }
+    ),
+    end(worklist)
+  );
+
+  parallel::gen(
+    worklist.size(),
+    [&] (size_t workIdx) {
+      auto b = worklist[workIdx];
+      b->workIdx = workIdx;
+      b->set.clear();
+      b->set.reserve(b->preds.size() + b->succs.size() + 1);
+      b->set.emplace_back(b->workIdx);
+      return nullptr;
+    }
+  );
+
+  parallel::for_each(
+    worklist,
+    [&] (Bundle* b) {
+      for (auto const p : b->preds) {
+        auto const idx = canonicalize(p)->workIdx;
+        if (idx >= worklist.size()) continue;
+        b->set.emplace_back(idx);
+      }
+      for (auto const s : b->succs) {
+        auto const idx = canonicalize(s)->workIdx;
+        if (idx >= worklist.size()) continue;
+        b->set.emplace_back(idx);
+      }
+      std::sort(begin(b->set), end(b->set));
+      b->set.erase(
+        std::unique(begin(b->set), end(b->set)),
+        end(b->set)
+      );
+      b->set.shrink_to_fit();
+    }
+  );
+}
+
+/*
+ * Execute bundle merges using union-find and update dependency graph.
+ *
+ * This is the core merging function that implements the union-find
+ * structure via the canonical pointer. The process is parallelized:
+ *
+ * Phase 1 (parallel): Collect merge decisions
+ * - For each bundle, if it's been marked to merge (canonical != self),
+ *   add it to its canonical bundle's toMerge list
+ *
+ * Phase 2 (parallel): Perform merges
+ * - For each canonical bundle:
+ *   - If all merged bundles fit within kMaxBundleWeight, merge them all
+ *   - Otherwise, greedily merge bundles by Jaccard similarity until
+ *     weight limit is reached
+ *   - Merged bundles get their preds/succs moved to the canonical bundle
+ * - The tricky part: If the combined weight exceeds the limit, we sort
+ *   the candidates by similarity and greedily pack as many as fit,
+ *   rejecting those that would exceed the limit (they become canonical
+ *   again via w->canonical = w)
+ *
+ * Phase 3 (parallel): Clean up dependency graph
+ * - Canonicalize all predecessor/successor pointers (follow canonical chain)
+ * - Remove self-edges (bundle depending on itself)
+ * - Sort and deduplicate preds/succs lists
+ * - Clear temporary data structures
+ *
+ * Finally, calls prepare_worklist() to rebuild the worklist for the next round.
+ *
+ * The lower_bound parameter enforces minimum similarity for greedy merging
+ * when weight limits are exceeded.
+ */
+void ClassBundler::merge_bundles(double lower_bound) {
+  parallel::for_each(
+    worklist,
+    [&] (Bundle* b) {
+      assertx(b->workIdx < worklist.size());
+      auto c = canonicalize(b);
+      if (b != c) c->toMerge.insertHead(b);
+    }
+  );
+
+  parallel::for_each(
+    worklist,
+    [&] (Bundle* b) {
+      if (b->canonical != b) return;
+
+      auto totalWeight = b->weight;
+      TinyVector<Bundle*, 4> toMerge;
+      b->toMerge.sweepOnce(
+        [&] (Bundle* m) {
+          assertx(canonicalize(m) == b);
+          toMerge.emplace_back(m);
+          totalWeight += m->weight;
+        }
+      );
+
+      auto const merge = [&] (Bundle* m) {
+        assertx(can_fit(*b, *m));
+
+        b->preds.insert(
+          end(b->preds),
+          begin(m->preds),
+          end(m->preds)
+        );
+        b->succs.insert(
+          end(b->succs),
+          begin(m->succs),
+          end(m->succs)
+        );
+        assertx(b->size > 0);
+        assertx(m->size > 0);
+        b->size += m->size;
+        assertx(b->weight > 0);
+        assertx(m->weight > 0);
+        b->weight += m->weight;
+
+        m->size = 0;
+        m->weight = 0;
+        decltype(m->preds){}.swap(m->preds);
+        decltype(m->succs){}.swap(m->succs);
+        decltype(m->set){}.swap(m->set);
+      };
+
+      if (totalWeight <= kMaxBundleWeight) {
+        for (auto const m : toMerge) merge(m);
+        return;
+      }
+
+      std::sort(
+        toMerge.begin(),
+        toMerge.end(),
+        [&] (const Bundle* m1, const Bundle* m2) {
+          auto const j1 = jaccard(*b, *m1);
+          auto const j2 = jaccard(*b, *m2);
+          if (j1 != j2) return j1 > j2;
+          if (m1->weight != m2->weight) return m1->weight < m2->weight;
+          return m1->workIdx < m2->workIdx;
+        }
+      );
+
+      for (auto const w : toMerge) {
+        if (can_fit(*b, *w) && jaccard(*b, *w) >= lower_bound) {
+          merge(w);
+        } else {
+          w->canonical = w;
+        }
+      }
+    }
+  );
+
+  parallel::for_each(
+    worklist,
+    [&] (Bundle* b) {
+      if (b->canonical != b) return;
+
+      for (auto& s : b->succs) s = canonicalize(s);
+      for (auto& p : b->preds) p = canonicalize(p);
+
+      b->succs.erase(
+        std::remove_if(
+          begin(b->succs),
+          end(b->succs),
+          [&] (Bundle* s) { return s == b; }
+        ),
+        end(b->succs)
+      );
+      b->preds.erase(
+        std::remove_if(
+          begin(b->preds),
+          end(b->preds),
+          [&] (Bundle* p) { return p == b; }
+        ),
+        end(b->preds)
+      );
+
+      auto const compare = [] (const Bundle* a, const Bundle* b) {
+        return a->bundleIdx < b->bundleIdx;
+      };
+      std::sort(begin(b->succs), end(b->succs), compare);
+      std::sort(begin(b->preds), end(b->preds), compare);
+
+      b->succs.erase(
+        std::unique(begin(b->succs), end(b->succs)),
+        end(b->succs)
+      );
+      b->preds.erase(
+        std::unique(begin(b->preds), end(b->preds)),
+        end(b->preds)
+      );
+
+      b->succs.shrink_to_fit();
+      b->preds.shrink_to_fit();
+      decltype(b->set){}.swap(b->set);
+    }
+  );
+
+  prepare_worklist();
+}
+
+/*
+ * Eagerly merge bundles that have exactly one predecessor.
+ *
+ * This is an optimization for the common case of linear dependency chains:
+ * if bundle A is the only thing that depends on bundle B, we can safely
+ * merge them without needing similarity analysis.
+ *
+ * Only merges if the combined weight stays under kMaxBundleWeight.
+ *
+ * This is called at the beginning of each round (before ANN search) to
+ * quickly reduce the worklist size by handling the easy cases. It's also
+ * called at the very end to merge any remaining single-predecessor bundles
+ * after similarity-based merging is done.
+ */
+void ClassBundler::merge_single_preds() {
+  for (auto const w : worklist) {
+    if (w->preds.size() != 1) continue;
+    if (!can_fit(*w, *w->preds[0])) continue;
+    union_bundles(w, w->preds[0]);
+  }
+  merge_bundles(0.0);
+}
+
+/*
+ * Add all canonical bundles to the ANN (Approximate Nearest Neighbor) index.
+ *
+ * The ANN structure is used for efficiently finding similar bundles based
+ * on their dependency sets (bundle.set). This is a two-phase process:
+ *
+ * Phase 1 (parallel): preadd() - Reserves space in the ANN structure
+ * for each bundle's workIdx
+ *
+ * Phase 2 (parallel by experiment): addByExperiment() - Adds each bundle's
+ * feature vector (the sorted neighbor set) to the ANN structure
+ *
+ * The ANN maintains multiple "experiments" (hash tables with different random
+ * seeds) to improve the probability of finding nearest neighbors. Adding
+ * bundles separately by experiment allows parallelization while avoiding
+ * race conditions within each experiment's data structure.
+ *
+ * Only canonical bundles are added (skips merged bundles where canonical != self).
+ */
+void ClassBundler::add_all(ANN& ann) {
+  parallel::for_each(
+    worklist,
+    [&] (Bundle* bundle) {
+      if (bundle->canonical != bundle) return;
+      ann.preadd(bundle->workIdx);
+    }
+  );
+
+  parallel::gen(
+    ann.numExperiments(),
+    [&] (size_t experiment) {
+      for (auto const bundle : worklist) {
+        if (bundle->canonical != bundle) continue;
+        ann.addByExperiment(
+          bundle->workIdx,
+          experiment,
+          begin(bundle->set),
+          end(bundle->set)
+        );
+      }
+      return nullptr;
+    }
+  );
+}
+
+/*
+ * Find and merge nearest neighbors using ANN similarity search.
+ *
+ * For each canonical bundle:
+ * 1. Query ANN for its nearest neighbor (bundle with most similar dependency set)
+ * 2. Filter: only consider neighbors that fit within weight limit (can_fit check)
+ * 3. Verify similarity: calculate exact Jaccard similarity and reject if below
+ *    lower_similarity threshold
+ * 4. Mark the bundle for merging with its nearest neighbor (via union_bundles)
+ *
+ * This is the core similarity-based merging step. The ANN structure makes
+ * finding similar bundles efficient (approximate O(log n) rather than O(n^2)),
+ * which is crucial at scale.
+ *
+ * Key insight: The ANN gives us *candidates* for similar bundles, but we verify
+ * with exact Jaccard similarity before committing to the merge. This balances
+ * performance (fast approximate search) with correctness (exact similarity check).
+ *
+ * After collecting all merge decisions, calls merge_bundles() to execute them
+ * with the given lower_similarity as the minimum threshold.
+ */
+void ClassBundler::merge_nearest(ANN& ann, double lower_similarity) {
+  std::vector<ANN::Counter> counters{parallel::num_threads};
+  auto const mergeInto = parallel::gen(
+    worklist.size(),
+    [&] (size_t idx, size_t worker) -> Bundle* {
+      auto const bundle = worklist[idx];
+      if (bundle->canonical != bundle) return nullptr;
+
+      auto const n = ann.nearest(
+        bundle->workIdx,
+        counters[worker],
+        [&] (size_t id) {
+          assertx(id < worklist.size());
+          return can_fit(*bundle, *worklist[id]);
+        }
+      );
+      if (!n) return nullptr;
+      assertx(*n != bundle->workIdx);
+      assertx(*n < worklist.size());
+      auto const best = worklist[*n];
+
+      assertx(best->workIdx == *n);
+      auto const j = jaccard(*bundle, *best);
+      return (j < lower_similarity) ? nullptr : best;
+    }
+  );
+
+  assertx(mergeInto.size() == worklist.size());
+  for (size_t i = 0, size = worklist.size(); i < size; ++i) {
+    union_bundles(worklist[i], mergeInto[i]);
+  }
+
+  merge_bundles(lower_similarity);
+}
+
+/*
+ * Merge bundles by directory structure as a final cleanup pass.
+ *
+ * After similarity-based merging is complete, this groups bundles that come
+ * from the same directory path, even if they don't share dependencies. This
+ * helps merge related code that the dependency analysis might have missed.
+ *
+ * Algorithm:
+ * 1. Group bundles by directory prefix (strip 'depth' levels from the path)
+ * 2. For each directory group:
+ *    - Sort bundles by weight (smallest first) for better packing
+ *    - Greedily merge bundles into groups that fit within stricter limits:
+ *      * kMaxPathBundleWeight (~256KB) - much smaller than normal limit
+ *      * kMaxPathBundleSize (1000 units) - prevents huge directory bundles
+ * 3. When a bundle doesn't fit, start a new group within that directory
+ *
+ * The depth parameter controls how many directory levels to strip. Called
+ * iteratively with increasing depth (1, 2, 3, ...) until maxDepth is reached
+ * or no more bundles can be grouped.
+ *
+ * Returns true if this depth level found bundles to group (indicating we
+ * should try a deeper level), false otherwise.
+ *
+ * Path-based merging uses conservative limits because directory proximity is
+ * a weaker signal than dependency similarity.
+ */
+bool ClassBundler::merge_by_directory(size_t depth) {
+  assertx(depth > 0);
+
+  hphp_fast_map<std::string, std::vector<Bundle*>> dirs;
+  size_t maxDepth = 0;
+  for (auto const w : worklist) {
+    if (w->weight >= kMaxPathBundleWeight) continue;
+    if (w->size >= kMaxPathBundleSize) continue;
+    auto n = w->name->toCppString();
+    for (size_t i = 0; i < depth; ++i) {
+      auto pos = n.find_last_of("/");
+      if (pos == std::string::npos) pos = 0;
+      n.erase(pos);
+      if (n.empty()) break;
+      maxDepth = std::max(maxDepth, i+1);
+    }
+    dirs[n].emplace_back(w);
+  }
+
+  std::vector<std::string> allDirs;
+  allDirs.reserve(dirs.size());
+  for (auto const& [dir, _] : dirs) allDirs.emplace_back(dir);
+
+  parallel::for_each(
+    allDirs,
+    [&] (const std::string& dir) {
+      auto& units = dirs.at(dir);
+
+      std::sort(
+        begin(units), end(units),
+        [&] (const Bundle* a, const Bundle* b) {
+          return
+            std::tie(a->weight, a->workIdx) <
+            std::tie(b->weight, b->workIdx);
+        }
+      );
+
+      Bundle* first = nullptr;
+      size_t totalWeight = 0;
+      size_t totalCount = 0;
+      for (auto const b : units) {
+        if (totalWeight + b->weight > kMaxPathBundleWeight ||
+            totalCount + b->size > kMaxPathBundleSize) {
+          first = nullptr;
+          totalWeight = 0;
+          totalCount = 0;
+        }
+        totalWeight += b->weight;
+        totalCount += b->size;
+        if (!first) {
+          first = b;
+        } else {
+          union_bundles(first, b);
+        }
+      }
+    }
+  );
+
+  merge_bundles(0.0);
+  return maxDepth == depth;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+ClassBundleAssignments find_class_bundles(IndexData& i) {
+  trace_time tracer{"find class bundles"};
+  tracer.ignore_client_stats();
+
+  ClassBundler bundler{i};
+  auto assignments = bundler();
+
+  std::vector<SString> bundles;
+  bundles.reserve(assignments.size());
+
+  for (auto const& [n, m] : assignments) {
+    bundles.emplace_back(n);
+    for (auto const c : m.classes) {
+      always_assert(i.classToBundle.emplace(c, n).second);
+    }
+    for (auto const f : m.funcs) {
+      always_assert(i.funcToBundle.emplace(f, n).second);
+    }
+    for (auto const u : m.units) {
+      always_assert(i.unitToBundle.emplace(u, n).second);
+    }
+  }
+
+  constexpr size_t kBundleBucketSize = 500;
+
+  return ClassBundleAssignments{
+    std::move(assignments),
+    consistently_bucketize(bundles, kBundleBucketSize)
+  };
+}
+
+//////////////////////////////////////////////////////////////////////
 
 void remote_func_info_to_local(IndexData& index,
                                const php::Func& func,

@@ -15,6 +15,7 @@
  */
 
 #include <string>
+#include <glog/logging.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <thrift/compiler/ast/t_program_bundle.h>
@@ -56,9 +57,10 @@ Fixture prepare_fixture(std::string_view contents) {
   diagnostics_engine diags = make_diagnostics_printer(*sourceManager);
   std::unique_ptr<t_program_bundle> programBundle =
       parse_ast(*sourceManager, diags, kTestFileName, {});
+  CHECK_NOTNULL(programBundle.get());
 
   auto fileManager = std::make_unique<file_manager>(
-      *sourceManager, *programBundle->root_program());
+      *sourceManager, *CHECK_NOTNULL(programBundle->root_program()));
 
   return Fixture{
       .source_manager_ = std::move(sourceManager),
@@ -184,6 +186,19 @@ include "some/other/file.thrift"
 
 /// This comment describes the struct
 struct S {}
+)");
+}
+
+TEST_F(FileManagerTest, add_include_trailing_comment) {
+  Fixture fixture = prepare_fixture(R"(
+include "thrift/annotation/thrift.thrift" // foo
+)");
+
+  fixture.file_manager_->add_include("some/other/file.thrift");
+
+  EXPECT_EQ(fixture.file_manager_->get_new_content(), R"(
+include "thrift/annotation/thrift.thrift" // foo
+include "some/other/file.thrift"
 )");
 }
 

@@ -101,6 +101,26 @@ class AnnotateAllowLegacyMissingUrisTest(unittest.TestCase):
                 """,
         )
 
+    def test_adds_annotation_existing_package_and_other_includes_with_commend(self):
+        self._check(
+            before="""\
+                include "thrift/annotation/cpp.thrift" // foo
+
+                package;
+
+                struct S { }
+                """,
+            after="""\
+                include "thrift/annotation/cpp.thrift" // foo
+                include "thrift/annotation/thrift.thrift"
+
+                @thrift.AllowLegacyMissingUris
+                package;
+
+                struct S { }
+                """,
+        )
+
     def test_adds_annotation_existing_package_before_include(self):
         self._check(
             before="""\
@@ -154,6 +174,29 @@ class AnnotateAllowLegacyMissingUrisTest(unittest.TestCase):
                 namespace cpp2 foo
 
                 include "thrift/annotation/cpp.thrift"
+                include "thrift/annotation/thrift.thrift"
+
+                @thrift.AllowLegacyMissingUris
+                package;
+
+
+                struct S { }
+                """,
+        )
+
+    def test_adds_annotation_with_namespaces_and_other_include_with_comment(self):
+        self._check(
+            before="""\
+                namespace cpp2 foo
+
+                include "thrift/annotation/cpp.thrift" // foo
+
+                struct S { }
+                """,
+            after="""\
+                namespace cpp2 foo
+
+                include "thrift/annotation/cpp.thrift" // foo
                 include "thrift/annotation/thrift.thrift"
 
                 @thrift.AllowLegacyMissingUris

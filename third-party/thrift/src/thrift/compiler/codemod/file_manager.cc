@@ -157,7 +157,15 @@ std::optional<size_t> file_manager::add_include(std::string thrift_include) {
   const size_t new_include_offset = [&]() -> size_t {
     // If there are includes, add new include after the last one.
     if (!program_->includes().empty()) {
-      return to_offset(program_->includes().back()->src_range().end) + 1;
+      size_t offset = to_offset(program_->includes().back()->src_range().end);
+      // Move to the beginning of the next line to handle any trailing comments
+      // on the include line (e.g., include "foo.thrift" // comment)
+      size_t newline_pos = old_content_.find('\n', offset);
+      if (newline_pos != std::string::npos) {
+        return newline_pos + 1;
+      }
+      // If no newline found, place at end of content
+      return old_content_.length();
     }
 
     // Otherwise, add the include before the first of: package, namespace or

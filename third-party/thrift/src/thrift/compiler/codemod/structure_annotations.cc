@@ -259,6 +259,19 @@ class structure_annotations {
         to_add.insert("@cpp.ProcessInEbThreadUnsafe");
         fm_.add_include("thrift/annotation/cpp.thrift");
       }
+    } else if (name == "cpp.declare_hash" || name == "cpp2.declare_hash") {
+      to_remove.emplace_back(name, data);
+      if (!node.has_structured_annotation(kCppDeclareHashSpecialization)) {
+        to_add.insert("@cpp.DeclareHashSpecialization");
+        fm_.add_include("thrift/annotation/cpp.thrift");
+      }
+    } else if (
+        name == "cpp.declare_equal_to" || name == "cpp2.declare_equal_to") {
+      to_remove.emplace_back(name, data);
+      if (!node.has_structured_annotation(kCppDeclareEqualToSpecialization)) {
+        to_add.insert("@cpp.DeclareEqualToSpecialization");
+        fm_.add_include("thrift/annotation/cpp.thrift");
+      }
     }
 
     // hack

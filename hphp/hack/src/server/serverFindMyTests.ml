@@ -170,6 +170,107 @@ let search_type ctx type_name genv =
 let is_enumish_kind classish_kind =
   Ast_defs.is_c_enum classish_kind || Ast_defs.is_c_enum_class classish_kind
 
+(** Reasons tell us why we are considering a particular symbol.
+    They effectively act as labels on the edges in our graph, used for provenance tracking. *)
+module Reason = struct
+  (** We are adding the method in question to our graph because ... *)
+  type method_ =
+    | MRoot  (** ... it's a root *)
+    | MRefMethod
+        (** ... it references (e.g., calls) another method in our graph *)
+    | MTypedefClassPtr
+        (** ... it does Ty::class, where Ty is a typedef in our graph. *)
+    | MTypedefNameof
+        (** ... it does nameof Ty, where Ty is a typedef in our graph. *)
+    | MClassClassPtr
+        (** ... it does C::class, where C is a class in our graph. *)
+    | MTypeconstClassPtr
+        (** ... it does Ty::TBar::class, where Ty::TBar is a type constant in our graph. *)
+    | MTypeconstStructure
+        (** ... it does type_structure(Ty::class, 'TBar'), where Ty::TBar is a type constant in our graph. *)
+    | MRefEnumType  (** ... it references some enum type in our graph *)
+    | MNewExpr  (** It does new T(...), where T is a type in our graph *)
+  [@@deriving show, ord, sexp, hash]
+
+  (** We are adding the typedef in question to our graph because ... *)
+  type typedef =
+    | TdRoot  (** ... it's a root *)
+    | TdRefTypedef
+        (** ... its definition references another typedef in our graph *)
+  [@@deriving show, ord, sexp, hash]
+
+  (** We are adding the type constant in question to our graph because ... *)
+  type typeconst =
+    | TcRoot  (** ... it's a root *)
+    | TcRefTypeconst
+        (** ... its definition references another typeconst in our graph *)
+    | TcRefTypedef  (** ... its definition references a typedef in our graph *)
+  [@@deriving show, ord, sexp, hash]
+
+  (** We are adding the class-ish definition to our graph because ... *)
+  type classish =
+    | CRoot  (** it's a root *)
+    | CEnclosingRootMethod
+      (* it's the class containing a method given as a root *)
+  [@@deriving show, ord, sexp, hash]
+
+  type t =
+    | Method of method_
+    | Typeconst of typeconst
+    | Typedef of typedef
+    | Classish of classish
+  [@@deriving show, ord, sexp, hash]
+end
+
+(** We associate an "expansion strategy" with each symbol in our graph.
+    It determines how to construct the successors for a node with that symbol in the graph.
+
+    We can view `Expansion_strategy.t` as a coarser version of `Reason.t`:
+    - There's a surjective function from the latter to the former
+    - In our graph, a node for a symbol with a given expansion strategy `st` can have
+      incoming edges annotated with different reasons `r`, as long as they all map to the
+      same `st`.
+
+  An alternative view is that `Expansion_strategy` defines an equivalence relation on `Reason.t`:
+  If we encounter the same symbol `s` for two different reasons `r1` and `r2` such that
+  `of_reason r1 == of_reason r2`, then they can share a node in our graph because they will have
+  the same successor nodes.
+*)
+module Expansion_strategy = struct
+  type method_ = MDefault [@@deriving show, ord, sexp, hash]
+
+  type typedef = TdDefault [@@deriving show, ord, sexp, hash]
+
+  type typeconst = TcDefault [@@deriving show, ord, sexp, hash]
+
+  type classish = CDefault [@@deriving show, ord, sexp, hash]
+
+  type t =
+    | Method of method_
+    | Typeconst of typeconst
+    | Typedef of typedef
+    | Classish of classish
+  [@@deriving show, ord, sexp, hash]
+
+  let of_reason = function
+    | Reason.Method MRoot -> Method MDefault
+    | Reason.Method MRefMethod -> Method MDefault
+    | Reason.Method MTypedefClassPtr -> Method MDefault
+    | Reason.Method MClassClassPtr -> Method MDefault
+    | Reason.Method MTypeconstClassPtr -> Method MDefault
+    | Reason.Method MTypedefNameof -> Method MDefault
+    | Reason.Method MRefEnumType -> Method MDefault
+    | Reason.Method MTypeconstStructure -> Method MDefault
+    | Reason.Method MNewExpr -> Method MDefault
+    | Reason.Typeconst TcRoot -> Typeconst TcDefault
+    | Reason.Typeconst TcRefTypeconst -> Typeconst TcDefault
+    | Reason.Typeconst TcRefTypedef -> Typeconst TcDefault
+    | Reason.Typedef TdRoot -> Typedef TdDefault
+    | Reason.Typedef TdRefTypedef -> Typedef TdDefault
+    | Reason.Classish CRoot -> Classish CDefault
+    | Reason.Classish CEnclosingRootMethod -> Classish CDefault
+end
+
 (* Standalone module so we can pass it to Hash_set *)
 module Symbol_def = struct
   type member = {
@@ -178,6 +279,8 @@ module Symbol_def = struct
   }
   [@@deriving show, ord, sexp, hash]
 
+  (** We do not categorize typedefs as classish because there is no corresponding Ast_defs.classish_kind for typedefs.
+      This is different from ServerFindRefs, which uses the "Class" action for typedefs. *)
   type t =
     | Method of member
     | Typeconst of member
@@ -186,24 +289,32 @@ module Symbol_def = struct
         kind: Ast_defs.classish_kind;
       }
     | Typedef of { name: string  (** Does not have leading \ *) }
-        (** We do not categorize typedefs as classish because there is no corresponding Ast_defs.classish_kind for typedefs.
-          This is different from ServerFindRefs, which uses the "Class" action for typedefs. *)
   [@@deriving show, ord, sexp, hash]
 
-  let class_from_name ctx class_name =
+  type with_strategy = {
+    symbol_def: t;
+    strategy: Expansion_strategy.t;
+        (** Invariant: The symbol's  constructor name matches that of the strategy:
+            (e.g., a Symbol_def.Method is matched with a Expansion_strategy.Method) *)
+  }
+  [@@deriving show, ord, sexp, hash]
+
+  type with_reason = {
+    symbol_def: t;
+    reason: Reason.t;
+        (** Invariant: The symbol's  constructor name matches that of the reason:
+            (e.g., a Symbol_def.Method is matched with a Reason.Method) *)
+  }
+  [@@deriving show, sexp, hash]
+
+  let class_from_name ctx class_name reason : with_strategy =
     let decl = get_class_decl_entry ctx class_name in
     let kind = Folded_class.kind decl in
-    Classish { name = class_name; kind }
+    let strategy = Expansion_strategy.of_reason reason in
+    { symbol_def = Classish { name = class_name; kind }; strategy }
 end
 
 open Symbol_def
-
-(** A symbol we encounter during our BFS traversal *)
-type symbol_node = {
-  symbol_def: Symbol_def.t;
-  distance: int;
-}
-[@@deriving show]
 
 type error_msg = string
 
@@ -217,8 +328,8 @@ type result_entry = ServerCommandTypes.Find_my_tests.result_entry
   If so, return the latter. Otherwise, return None.
 *)
 let process_method_occurrence
-    ~referenced_name:_ ~referencing_pos ~referencing_nast : Symbol_def.t option
-    =
+    ~referenced_name:_ ~referencing_pos ~referencing_nast :
+    Symbol_def.with_reason option =
   let visitor =
     object
       inherit [_] Aast.reduce as super
@@ -237,7 +348,9 @@ let process_method_occurrence
           (* We are seeing a method, so on_class_ must have set the class_name *)
           let class_name = snd (Option.value_exn ctx) in
           let method_name = snd m.Aast.m_name in
-          Some (Method { class_name; member_name = method_name })
+          let member = { class_name; member_name = method_name } in
+          let reason = Reason.Method Reason.MRefMethod in
+          Some { symbol_def = Method member; reason }
         else
           None
 
@@ -260,8 +373,8 @@ let process_method_occurrence
 *)
 let process_class_occurrence
     ~kind ~referenced_name:class_name ~referencing_pos ~referencing_nast :
-    Symbol_def.t option =
-  let is_in_class_or_new_expr block =
+    Symbol_def.with_reason option =
+  let reason_if_class_or_new_expr block =
     let is_our_class ci =
       match ci with
       | Aast.CI class_id
@@ -277,20 +390,33 @@ let process_class_occurrence
        inherit [_] Aast.reduce as super
 
        method! on_stmt ctx (stmt_span, stmt_) =
-         Pos.contains stmt_span referencing_pos && self#on_stmt_ ctx stmt_
+         if Pos.contains stmt_span referencing_pos then
+           self#on_stmt_ ctx stmt_
+         else
+           None
 
        method! on_expr_ ctx expr_ =
          (* TODO(frankemrich) This is pretty brittle and just handles the common cases.
              If we do this using TASTs instead of NASTs we can just inspect the types *)
          match expr_ with
-         | New ((_, _, ci), _, _, _, _) -> is_our_class ci
+         | New ((_, _, ci), _, _, _, _) ->
+           if is_our_class ci then
+             Some Reason.MNewExpr
+           else
+             None
          | Class_const ((_, _, ci), const_name) ->
-           is_our_class ci && String.equal (snd const_name) "class"
+           if is_our_class ci && String.equal (snd const_name) "class" then
+             Some Reason.MClassClassPtr
+           else
+             None
          | _ -> super#on_expr_ ctx expr_
 
-       method zero = false
+       method zero = None
 
-       method plus = ( || )
+       method plus r1 r2 =
+         match (r1, r2) with
+         | (None, _) -> r2
+         | (Some _, _) -> r1
     end)
       #on_block
       ()
@@ -312,21 +438,25 @@ let process_class_occurrence
       method! on_method_ ctx m =
         let span = m.m_span in
 
-        let should_include_method method_body_block =
+        let reason_for method_body_block =
           if is_enumish_kind kind then
             (* If we are looking at an enum, we are very permissive:
                Any method that mentions the enum type will be included *)
-            true
+            Some Reason.MRefEnumType
           else
-            is_in_class_or_new_expr method_body_block
+            reason_if_class_or_new_expr method_body_block
         in
         let body_block = m.m_body.fb_ast in
-        if Pos.contains span referencing_pos && should_include_method body_block
-        then
-          (* We are seeing a method, so on_class_ must have set the class_name *)
-          let class_name = snd (Option.value_exn ctx) in
-          let method_name = snd m.Aast.m_name in
-          Some (Method { class_name; member_name = method_name })
+        if Pos.contains span referencing_pos then
+          match reason_for body_block with
+          | Some reason ->
+            (* We are seeing a method, so on_class_ must have set the class_name *)
+            let class_name = snd (Option.value_exn ctx) in
+            let method_name = snd m.Aast.m_name in
+            let member = { class_name; member_name = method_name } in
+            let reason = Reason.Method reason in
+            Some { symbol_def = Method member; reason }
+          | None -> None
         else
           None
 
@@ -391,28 +521,38 @@ let is_type_structure_for expr_ type_name typeconst_name =
     + nameof Ty
    *)
 let process_typedef_occurrence
-    ~referenced_name ~referencing_pos ~referencing_nast : Symbol_def.t option =
-  let block_has_relevant_reference block =
+    ~referenced_name ~referencing_pos ~referencing_nast :
+    Symbol_def.with_reason option =
+  let reason_if_block_has_relevant_reference block =
     (object (self)
        inherit [_] Aast.reduce as super
 
        method! on_stmt ctx (stmt_span, stmt_) =
-         Pos.contains stmt_span referencing_pos && self#on_stmt_ ctx stmt_
+         if Pos.contains stmt_span referencing_pos then
+           self#on_stmt_ ctx stmt_
+         else
+           None
 
        method! on_expr ctx expr =
          let (_, expr_span, expr_) = expr in
          if Pos.contains expr_span referencing_pos then
            (* Ty::class *)
-           is_class_const_for expr_ referenced_name
-           (* nameof Ty *)
-           || is_nameof_for expr_ referenced_name
-           || super#on_expr ctx expr
+           if is_class_const_for expr_ referenced_name then
+             Some Reason.MTypedefClassPtr
+           else if (* nameof Ty *)
+                   is_nameof_for expr_ referenced_name then
+             Some Reason.MTypedefNameof
+           else
+             super#on_expr ctx expr
          else
-           false
+           None
 
-       method zero = false
+       method zero = None
 
-       method plus = ( || )
+       method plus r1 r2 =
+         match (r1, r2) with
+         | (None, _) -> r2
+         | (Some _, _) -> r1
     end)
       #on_block
       ()
@@ -434,7 +574,13 @@ let process_typedef_occurrence
       method! on_typedef _ctx td =
         let span = td.t_span in
         if Pos.contains span referencing_pos then
-          Some (Symbol_def.Typedef { name = Utils.strip_ns (snd td.t_name) })
+          let reason = Reason.Typedef Reason.TdRefTypedef in
+          Some
+            {
+              symbol_def =
+                Symbol_def.Typedef { name = Utils.strip_ns (snd td.t_name) };
+              reason;
+            }
         else
           None
 
@@ -443,13 +589,15 @@ let process_typedef_occurrence
         if Pos.contains span referencing_pos then
           (* Check if the reference is in a form we care about *)
           let body_block = m.m_body.fb_ast in
-          if block_has_relevant_reference body_block then
-            (* We are seeing a method, so on_class_ must have set the class_name *)
-            let class_name = snd (Option.value_exn ctx) in
-            let method_name = snd m.m_name in
-            Some (Symbol_def.Method { class_name; member_name = method_name })
-          else
-            None
+          Option.map
+            (reason_if_block_has_relevant_reference body_block)
+            ~f:(fun reason ->
+              (* We are seeing a method, so on_class_ must have set the class_name *)
+              let class_name = snd (Option.value_exn ctx) in
+              let method_name = snd m.m_name in
+              let member = { class_name; member_name = method_name } in
+              let reason = Reason.Method reason in
+              { symbol_def = Symbol_def.Method member; reason })
         else
           None
 
@@ -459,8 +607,9 @@ let process_typedef_occurrence
           (* We are seeing a typeconst, so on_class_ must have set the class_name *)
           let class_name = Utils.strip_ns (snd (Option.value_exn ctx)) in
           let typeconst_name = snd tc.c_tconst_name in
-          Some
-            (Symbol_def.Typeconst { class_name; member_name = typeconst_name })
+          let member = { class_name; member_name = typeconst_name } in
+          let reason = Reason.Typeconst Reason.TcRefTypedef in
+          Some { symbol_def = Symbol_def.Typeconst member; reason }
         else
           None
 
@@ -486,8 +635,8 @@ let process_typedef_occurrence
 
    *)
 let process_typeconst_occurrence
-    ~referenced_name:_ ~referencing_pos ~referencing_nast : Symbol_def.t option
-    =
+    ~referenced_name:_ ~referencing_pos ~referencing_nast :
+    Symbol_def.with_reason option =
   let visitor =
     let open Aast in
     object
@@ -511,8 +660,9 @@ let process_typeconst_occurrence
           (* We are seeing a typeconst, so on_class_ must have set the class_name *)
           let class_name = Utils.strip_ns (snd (Option.value_exn ctx)) in
           let typeconst_name = snd tc.c_tconst_name in
-          Some
-            (Symbol_def.Typeconst { class_name; member_name = typeconst_name })
+          let member = { class_name; member_name = typeconst_name } in
+          let reason = Reason.Typeconst Reason.TcRefTypeconst in
+          Some { symbol_def = Symbol_def.Typeconst member; reason }
         else
           None
 
@@ -534,7 +684,7 @@ let process_typeconst_occurrence
 
   Otherwise, we apply `on_non_test_file_reference` to check if the reference is from a symbol where
   we should continue searching. *)
-let get_references_standard
+let get_successors_standard
     ctx target_symbol search_results on_non_test_file_reference =
   let resolve_found_position
       (acc_symbol_defs, acc_files)
@@ -564,11 +714,11 @@ let get_references_standard
           ~referencing_pos
           ~referencing_nast
       with
-      | Some referencing_def ->
+      | Some referencing_def_r ->
         log_debug
           "get_references_standard: found referencing def %s"
-          (Symbol_def.show referencing_def);
-        Result.Ok (referencing_def :: acc_symbol_defs, acc_files)
+          (Symbol_def.show_with_reason referencing_def_r);
+        Result.Ok (referencing_def_r :: acc_symbol_defs, acc_files)
       | None ->
         log_info
           "get_references_standard: Could not find surrounding definition for use site %s of symbol %s, or it's not suitable"
@@ -592,19 +742,21 @@ let get_references_standard
     + Is it referenced from another typedef or typeconst?
     + Is it referenced from a test file?
    *)
-let get_typeconst_references
+let get_typeconst_successors
     ~(ctx : Provider_context.t)
     ~(genv : ServerEnv.genv)
     ~(env : ServerEnv.env)
     class_name
-    member_name =
+    member_name
+    _strategy =
   let open Result.Let_syntax in
   let typeconst_search_result =
     search_member ctx class_name (Typeconst member_name) genv env
   in
   let typeconst_symbol = Typeconst { class_name; member_name } in
+
   let* (typeconst_using_symbols, typeconst_using_test_files) =
-    get_references_standard
+    get_successors_standard
       ctx
       typeconst_symbol
       typeconst_search_result
@@ -662,7 +814,9 @@ let get_typeconst_references
               (* We are seeing a method, so on_class_ must have set the class_name *)
               let class_name = snd (Option.value_exn ctx) in
               let method_name = snd m.m_name in
-              Some (Symbol_def.Method { class_name; member_name = method_name })
+              let member = { class_name; member_name = method_name } in
+              let reason = Reason.Method MTypeconstStructure in
+              Some { symbol_def = Symbol_def.Method member; reason }
             else
               None
           else
@@ -721,29 +875,47 @@ let get_typeconst_references
 
   Result.Ok (symbols, test_files)
 
-let get_references
+let get_successors
     ~(ctx : Provider_context.t)
     ~(genv : ServerEnv.genv)
     ~(env : ServerEnv.env)
-    symbol : (Symbol_def.t list * string list, error_msg) Result.t =
-  match symbol with
-  | Method { class_name; member_name } ->
+    (symbol : Symbol_def.with_strategy) :
+    (Symbol_def.with_reason list * string list, error_msg) Result.t =
+  match (symbol.symbol_def, symbol.strategy) with
+  | (Method { class_name; member_name }, Expansion_strategy.Method MDefault) ->
     let search_results =
       search_member ctx class_name (Method member_name) genv env
     in
-    get_references_standard ctx symbol search_results process_method_occurrence
-  | Classish { name; kind } ->
-    let search_results = search_type ctx name genv in
-    get_references_standard
+    get_successors_standard
       ctx
-      symbol
+      symbol.symbol_def
+      search_results
+      process_method_occurrence
+  | (Classish { name; kind }, Expansion_strategy.Classish _) ->
+    let search_results = search_type ctx name genv in
+    get_successors_standard
+      ctx
+      symbol.symbol_def
       search_results
       (process_class_occurrence ~kind)
-  | Typedef { name } ->
+  | (Typedef { name }, Expansion_strategy.Typedef TdDefault) ->
     let search_results = search_type ctx name genv in
-    get_references_standard ctx symbol search_results process_typedef_occurrence
-  | Typeconst { class_name; member_name } ->
-    get_typeconst_references ~ctx ~genv ~env class_name member_name
+    get_successors_standard
+      ctx
+      symbol.symbol_def
+      search_results
+      process_typedef_occurrence
+  | (Typeconst { class_name; member_name }, Expansion_strategy.Typeconst _) ->
+    get_typeconst_successors
+      ~ctx
+      ~genv
+      ~env
+      class_name
+      member_name
+      symbol.strategy
+  | _ ->
+    failwith
+      "Internal error: mismatched symbol_def and strategy in get_successors"
 
 let is_root_symbol_in_test_file ctx symbol_def =
   let type_name =
@@ -770,88 +942,211 @@ let is_root_symbol_in_test_file ctx symbol_def =
     else
       None
 
-let search
-    ~(ctx : Provider_context.t)
-    ~(genv : ServerEnv.genv)
-    ~(env : ServerEnv.env)
-    max_distance
-    (roots : Symbol_def.t list) : result_entry list =
-  let queue = Queue.create () in
-  let seen_symbols = Hash_set.create (module Symbol_def) in
-  (* Maps test file paths to the minimum distance at which we have discovered them *)
-  let test_files = Hashtbl.create (module String) in
+module Selection_graph = struct
+  module Symbol_node = struct
+    type t = {
+      symbol_s: Symbol_def.with_strategy;
+          (** The Symbol_def.with_strategy uniquely identifies each node in the graph. *)
+      distance: int;
+      incoming: (Reason.t, Symbol_def.with_strategy list) Hashtbl.t; [@opaque]
+          (** Invariant: no duplicates *)
+    }
+    [@@deriving show]
 
-  List.iter roots ~f:(fun root_symbol ->
-      let seen =
-        Result.is_error (Hash_set.strict_add seen_symbols root_symbol)
-      in
-      match is_root_symbol_in_test_file ctx root_symbol with
-      | Some test_file -> ignore (Hashtbl.add test_files ~key:test_file ~data:0)
-      | None ->
-        if not seen then (
-          log_debug "Adding root %s to queue" (Symbol_def.show root_symbol);
-          Queue.enqueue queue { distance = 0; symbol_def = root_symbol }
-        ));
+    let make symbol_s distance =
+      { symbol_s; distance; incoming = Hashtbl.create (module Reason) }
 
-  (* For each root, we add a node for the enclosing class.
-     TODO(frankemrich): In the future we may want to consider doing this for any method we
-     encounter, not just root methods *)
-  List.iter roots ~f:(fun root_symbol ->
-      match root_symbol with
-      | Method { class_name; _ } ->
-        let class_symbol = Symbol_def.class_from_name ctx class_name in
-        let seen =
-          Result.is_error (Hash_set.strict_add seen_symbols class_symbol)
+    let add_incoming ~predecessor ~target ~reason =
+      Hashtbl.update target.incoming reason ~f:(fun existing ->
+          let predecessor_symbol = predecessor.symbol_s in
+          predecessor_symbol :: Option.value existing ~default:[])
+  end
+
+  (** Just here so we can create a Hashtbl with Symbol_def.with_strategy keys *)
+  module With_strategy = struct
+    type t = Symbol_def.with_strategy [@@deriving ord, sexp, hash]
+  end
+
+  let check_invariants
+      (nodes : (Symbol_def.with_strategy, Symbol_node.t) Hashtbl.t) :
+      (unit, error_msg) result =
+    let open Result.Let_syntax in
+    let check_symbol_strategy_match (ws : Symbol_def.with_strategy) :
+        (unit, error_msg) result =
+      let open Symbol_def in
+      match (ws.symbol_def, ws.strategy) with
+      | (Method _, Expansion_strategy.Method _)
+      | (Typeconst _, Expansion_strategy.Typeconst _)
+      | (Typedef _, Expansion_strategy.Typedef _)
+      | (Classish _, Expansion_strategy.Classish _) ->
+        Result.Ok ()
+      | _ ->
+        let msg =
+          Printf.sprintf
+            "Symbol/strategy mismatch: %s"
+            (Symbol_def.show_with_strategy ws)
         in
-        (* We consider going from root (distance 0) to the enclosing class as a step *)
-        let distance = 1 in
-        if not seen then (
-          log_debug
-            "Adding enclosing class to queue for root %s"
-            (Symbol_def.show root_symbol);
-          Queue.enqueue queue { distance; symbol_def = class_symbol }
-        )
-      | _ -> ());
+        HackEventLogger.invariant_violation_bug msg;
+        Result.Error msg
+    in
 
-  let rec bfs () =
-    match Queue.dequeue queue with
-    | Some ({ distance; symbol_def } as node) when distance < max_distance ->
-      log_info "processing node %s" (show_symbol_node node);
-      let new_distance = distance + 1 in
-      (match get_references ~ctx ~genv ~env symbol_def with
-      | Result.Ok (referencing_defs, referencing_test_files) ->
-        List.iter referencing_defs ~f:(fun referencing_def ->
-            match Hash_set.strict_add seen_symbols referencing_def with
-            | Result.Ok () ->
-              let new_node =
-                { distance = new_distance; symbol_def = referencing_def }
+    let check_no_duplicate_incoming
+        (node : Symbol_node.t)
+        ((reason, incoming) : Reason.t * Symbol_def.with_strategy list) :
+        (unit, error_msg) result =
+      let seen = Hash_set.create (module With_strategy) in
+      List.fold_result incoming ~init:() ~f:(fun () incoming_symbol ->
+          Result.map_error
+            (Hash_set.strict_add seen incoming_symbol)
+            ~f:(fun _ ->
+              let msg =
+                Printf.sprintf
+                  "duplicate edge from %s to %s for reason %s"
+                  (Symbol_def.show_with_strategy incoming_symbol)
+                  (Symbol_def.show_with_strategy node.symbol_s)
+                  (Reason.show reason)
               in
-              log_info "adding node %s to queue" (show_symbol_node new_node);
-              Queue.enqueue queue new_node
-            | Result.Error _ -> (* Already seen, nothing to do *) ());
-        List.iter referencing_test_files ~f:(fun referencing_test_file ->
-            match
-              Hashtbl.add
-                test_files
-                ~key:referencing_test_file
-                ~data:new_distance
-            with
-            | `Duplicate -> (* Already seen, nothing to do *) ()
-            | `Ok -> log_info "adding new test %s" referencing_test_file);
-        bfs ()
-      | Result.Error msg ->
-        log_info
-          "Getting references for symbol %s failed: %s"
-          (Symbol_def.show symbol_def)
-          msg)
-    | _ -> ()
-  in
+              HackEventLogger.invariant_violation_bug msg;
+              msg))
+    in
 
-  bfs ();
+    Hashtbl.fold
+      nodes
+      ~init:(Result.Ok ())
+      ~f:(fun ~key:symbol_s ~data:node acc ->
+        let* () = acc in
 
-  Hashtbl.fold test_files ~init:[] ~f:(fun ~key ~data acc ->
-      let open ServerCommandTypes.Find_my_tests in
-      { file_path = key; distance = data } :: acc)
+        let* () = check_symbol_strategy_match symbol_s in
+
+        let per_reason = Hashtbl.to_alist node.incoming in
+        let checked =
+          List.map per_reason ~f:(check_no_duplicate_incoming node)
+        in
+        let* () = Result.all_unit checked in
+        Result.Ok ())
+
+  let build
+      ~(ctx : Provider_context.t)
+      ~(genv : ServerEnv.genv)
+      ~(env : ServerEnv.env)
+      max_distance
+      (roots : Symbol_def.with_strategy list) :
+      (result_entry list, error_msg) Result.t =
+    let open Result.Let_syntax in
+    (* Invariant: Deduplicated; does not contain the same Symbol_def.with_strategy twice *)
+    let queue : Symbol_node.t Queue.t = Queue.create () in
+
+    (* Invariant: Superset of nodes in `queue` *)
+    let nodes : (Symbol_def.with_strategy, Symbol_node.t) Hashtbl.t =
+      Hashtbl.create (module With_strategy)
+    in
+    (* Maps test file paths to the minimum distance at which we have discovered them *)
+    let test_files = Hashtbl.create (module String) in
+
+    let maybe_add_node
+        (symbol : Symbol_def.with_strategy) distance predecessor_opt =
+      let (seen, node) =
+        match Hashtbl.find nodes symbol with
+        | None ->
+          let node = Symbol_node.make symbol distance in
+          Hashtbl.add_exn nodes ~key:symbol ~data:node;
+          Queue.enqueue queue node;
+          (false, node)
+        | Some node ->
+          log_debug "Saw symbol %s again" (Symbol_def.show_with_strategy symbol);
+          (true, node)
+      in
+
+      assert (node.distance <= distance);
+      Option.iter predecessor_opt ~f:(fun (predecessor, reason) ->
+          Symbol_node.add_incoming ~predecessor ~target:node ~reason);
+      seen
+    in
+
+    List.iter roots ~f:(fun root_symbol ->
+        match is_root_symbol_in_test_file ctx root_symbol.symbol_def with
+        | Some test_file ->
+          ignore (Hashtbl.add test_files ~key:test_file ~data:0)
+        | None -> ignore (maybe_add_node root_symbol 0 None));
+
+    (* For each root method, we add a node for the enclosing class.
+       TODO(frankemrich): In the future we may want to consider doing this for any method we
+       encounter, not just root methods *)
+    let added_root_symbols =
+      Hashtbl.fold nodes ~init:[] ~f:(fun ~key:_ ~data acc ->
+          data.symbol_s :: acc)
+    in
+    List.iter added_root_symbols ~f:(fun root_symbol ->
+        match root_symbol.symbol_def with
+        | Method { class_name; _ } ->
+          let reason = Reason.Classish CEnclosingRootMethod in
+
+          let class_symbol = Symbol_def.class_from_name ctx class_name reason in
+
+          (* We consider going from root (distance 0) to the enclosing class as a step *)
+          let distance = 1 in
+
+          (* Must exist, we added it during init above *)
+          let root_node = Hashtbl.find_exn nodes root_symbol in
+          let seen =
+            maybe_add_node class_symbol distance (Some (root_node, reason))
+          in
+
+          if not seen then
+            log_debug
+              "Added enclosing class to queue for root %s"
+              (Symbol_def.show_with_strategy root_symbol)
+        | _ -> ());
+
+    let rec bfs () =
+      match Queue.dequeue queue with
+      | Some ({ distance; symbol_s; incoming = _ } as node)
+        when distance < max_distance ->
+        log_info "processing node %s" (Symbol_node.show node);
+        let new_distance = distance + 1 in
+        (match get_successors ~ctx ~genv ~env symbol_s with
+        | Result.Ok (referencing_defs, referencing_test_files) ->
+          List.iter
+            referencing_defs
+            ~f:(fun { symbol_def = referencing_def; reason } ->
+              let referencing_symbol_s : Symbol_def.with_strategy =
+                {
+                  symbol_def = referencing_def;
+                  strategy = Expansion_strategy.of_reason reason;
+                }
+              in
+              ignore
+                (maybe_add_node
+                   referencing_symbol_s
+                   new_distance
+                   (Some (node, reason))));
+          List.iter referencing_test_files ~f:(fun referencing_test_file ->
+              match
+                Hashtbl.add
+                  test_files
+                  ~key:referencing_test_file
+                  ~data:new_distance
+              with
+              | `Duplicate -> (* Already seen, nothing to do *) ()
+              | `Ok -> log_info "adding new test %s" referencing_test_file);
+          bfs ()
+        | Result.Error msg ->
+          log_info
+            "Getting references for symbol %s failed: %s"
+            (Symbol_def.show_with_strategy symbol_s)
+            msg)
+      | _ -> ()
+    in
+
+    bfs ();
+
+    let* () = check_invariants nodes in
+
+    Result.Ok
+      (Hashtbl.fold test_files ~init:[] ~f:(fun ~key ~data acc ->
+           let open ServerCommandTypes.Find_my_tests in
+           { file_path = key; distance = data } :: acc))
+end
 
 let go
     ~(ctx : Provider_context.t)
@@ -871,17 +1166,31 @@ let go
 
   let* roots =
     List.fold_result actions ~init:[] ~f:(fun acc action ->
-        let root =
+        let root : Symbol_def.with_strategy =
           match action with
           | Class { class_name } ->
-            Symbol_def.class_from_name ctx (Utils.strip_ns class_name)
+            let reason = Reason.Classish CRoot in
+            Symbol_def.class_from_name ctx (Utils.strip_ns class_name) reason
           | Method { class_name; member_name } ->
-            Method { class_name = Utils.strip_ns class_name; member_name }
-          | Typedef { name } -> Typedef { name = Utils.strip_ns name }
+            let reason = Reason.Method MRoot in
+            let strategy = Expansion_strategy.of_reason reason in
+            let symbol_def =
+              Method { class_name = Utils.strip_ns class_name; member_name }
+            in
+            { symbol_def; strategy }
+          | Typedef { name } ->
+            let reason = Reason.Typedef TdRoot in
+            let strategy = Expansion_strategy.of_reason reason in
+            { symbol_def = Typedef { name = Utils.strip_ns name }; strategy }
           | Typeconst { class_name; member_name } ->
-            Typeconst { class_name = Utils.strip_ns class_name; member_name }
+            let reason = Reason.Typeconst TcRoot in
+            let strategy = Expansion_strategy.of_reason reason in
+            let symbol_def =
+              Typeconst { class_name = Utils.strip_ns class_name; member_name }
+            in
+            { symbol_def; strategy }
         in
 
         Result.Ok (root :: acc))
   in
-  Result.Ok (search ~ctx ~genv ~env max_distance roots)
+  Selection_graph.build ~ctx ~genv ~env max_distance roots

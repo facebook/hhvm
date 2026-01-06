@@ -246,9 +246,7 @@ metadata::detail::LimitedVector<ThriftConstStruct> genStructuredAnnotations(
 } // namespace
 
 GenMetadataResult<metadata::ThriftEnum> genEnumMetadata(
-    metadata::ThriftMetadata& md,
-    const syntax_graph::EnumNode& node,
-    Options options) {
+    metadata::ThriftMetadata& md, const syntax_graph::EnumNode& node) {
   auto name = getName(node);
   auto res = md.enums()->try_emplace(name);
   GenMetadataResult<metadata::ThriftEnum> ret{!res.second, res.first->second};
@@ -259,10 +257,8 @@ GenMetadataResult<metadata::ThriftEnum> genEnumMetadata(
   for (const auto& value : node.values()) {
     ret.metadata.elements()[value.i32()] = value.name();
   }
-  if (options.genAnnotations) {
-    ret.metadata.structured_annotations() =
-        genStructuredAnnotations(node.definition().annotations());
-  }
+  ret.metadata.structured_annotations() =
+      genStructuredAnnotations(node.definition().annotations());
   return ret;
 }
 
@@ -298,31 +294,30 @@ metadata::ThriftPrimitiveType toThriftPrimitiveType(
 ThriftType genType(
     metadata::ThriftMetadata& md, const syntax_graph::TypeRef& type) {
   ThriftType ret;
-  Options options = {.genAnnotations = true, .genNestedTypes = true};
   switch (type.kind()) {
     case syntax_graph::TypeRef::Kind::PRIMITIVE: {
       ret.t_primitive() = toThriftPrimitiveType(type.asPrimitive());
       return ret;
     }
     case syntax_graph::TypeRef::Kind::STRUCT: {
-      auto res = genStructMetadata(md, type.asStructured(), options);
+      auto res = genStructMetadata(md, type.asStructured());
       ret.t_struct().emplace().name() = *res.metadata.name();
       return ret;
     }
     case syntax_graph::TypeRef::Kind::UNION: {
-      auto res = genStructMetadata(md, type.asStructured(), options);
+      auto res = genStructMetadata(md, type.asStructured());
       ret.t_union().emplace().name() = *res.metadata.name();
       return ret;
     }
     case syntax_graph::TypeRef::Kind::EXCEPTION: {
       // Note: exception is considered t_struct in metadata's Type system.
       // There is no t_exception in metadata::ThriftType.
-      auto res = genStructMetadata(md, type.asStructured(), options);
+      auto res = genStructMetadata(md, type.asStructured());
       ret.t_struct().emplace().name() = *res.metadata.name();
       return ret;
     }
     case syntax_graph::TypeRef::Kind::ENUM: {
-      auto res = genEnumMetadata(md, type.asEnum(), options);
+      auto res = genEnumMetadata(md, type.asEnum());
       ret.t_enum().emplace().name() = *res.metadata.name();
       return ret;
     }
@@ -365,8 +360,7 @@ template <class Metadata>
 static auto genStructuredInMetadataMap(
     metadata::ThriftMetadata& md,
     std::map<std::string, Metadata>& metadataMap,
-    const syntax_graph::StructuredNode& node,
-    Options options) {
+    const syntax_graph::StructuredNode& node) {
   auto name = getName(node);
   auto res = metadataMap.try_emplace(name);
   GenMetadataResult<Metadata> ret{!res.second, res.first->second};
@@ -384,39 +378,26 @@ static auto genStructuredInMetadataMap(
     f.name() = field.name();
     f.is_optional() =
         (field.presence() == syntax_graph::FieldPresenceQualifier::OPTIONAL_);
-    if (options.genAnnotations) {
-      f.structured_annotations() =
-          genStructuredAnnotations(field.annotations());
-    }
-    if (options.genNestedTypes) {
-      f.type() = genType(md, field.type());
-    }
+    f.structured_annotations() = genStructuredAnnotations(field.annotations());
+    f.type() = genType(md, field.type());
   }
-  if (options.genAnnotations) {
-    ret.metadata.structured_annotations() =
-        genStructuredAnnotations(node.definition().annotations());
-  }
+  ret.metadata.structured_annotations() =
+      genStructuredAnnotations(node.definition().annotations());
   return ret;
 }
 
 GenMetadataResult<metadata::ThriftStruct> genStructMetadata(
-    metadata::ThriftMetadata& md,
-    const syntax_graph::StructuredNode& node,
-    Options options) {
-  return genStructuredInMetadataMap(md, *md.structs(), node, options);
+    metadata::ThriftMetadata& md, const syntax_graph::StructuredNode& node) {
+  return genStructuredInMetadataMap(md, *md.structs(), node);
 }
 
 GenMetadataResult<metadata::ThriftException> genExceptionMetadata(
-    metadata::ThriftMetadata& md,
-    const syntax_graph::ExceptionNode& node,
-    Options options) {
-  return genStructuredInMetadataMap(md, *md.exceptions(), node, options);
+    metadata::ThriftMetadata& md, const syntax_graph::ExceptionNode& node) {
+  return genStructuredInMetadataMap(md, *md.exceptions(), node);
 }
 
 metadata::ThriftService genServiceMetadata(
-    const syntax_graph::ServiceNode& node,
-    metadata::ThriftMetadata& md,
-    Options options) {
+    const syntax_graph::ServiceNode& node, metadata::ThriftMetadata& md) {
   metadata::ThriftService ret;
   ret.name() = getName(node);
   ret.uri() = node.uri();
@@ -428,40 +409,33 @@ metadata::ThriftService genServiceMetadata(
       continue;
     }
     ret.functions()->emplace_back().name() = func.name();
-    if (options.genNestedTypes) {
-      if (auto stream = func.response().stream()) {
-        ret.functions()->back().return_type()->t_stream().emplace();
-        ret.functions()->back().return_type()->t_stream()->elemType() =
-            std::make_unique<ThriftType>(genType(md, stream->payloadType()));
-        if (auto retType = func.response().type()) {
-          ret.functions()
-              ->back()
-              .return_type()
-              ->t_stream()
-              ->initialResponseType() =
-              std::make_unique<ThriftType>(genType(md, *retType));
-        }
-      } else if (auto sink = func.response().sink()) {
-        ret.functions()->back().return_type()->t_sink().emplace();
-        ret.functions()->back().return_type()->t_sink()->elemType() =
-            std::make_unique<ThriftType>(genType(md, sink->payloadType()));
-        ret.functions()->back().return_type()->t_sink()->finalResponseType() =
-            std::make_unique<ThriftType>(
-                genType(md, sink->finalResponseType()));
-        if (auto retType = func.response().type()) {
-          ret.functions()
-              ->back()
-              .return_type()
-              ->t_sink()
-              ->initialResponseType() =
-              std::make_unique<ThriftType>(genType(md, *retType));
-        }
-      } else if (auto retType = func.response().type()) {
-        ret.functions()->back().return_type() = genType(md, *retType);
-      } else {
-        ret.functions()->back().return_type()->t_primitive() =
-            metadata::ThriftPrimitiveType::THRIFT_VOID_TYPE;
+    if (auto stream = func.response().stream()) {
+      ret.functions()->back().return_type()->t_stream().emplace();
+      ret.functions()->back().return_type()->t_stream()->elemType() =
+          std::make_unique<ThriftType>(genType(md, stream->payloadType()));
+      if (auto retType = func.response().type()) {
+        ret.functions()
+            ->back()
+            .return_type()
+            ->t_stream()
+            ->initialResponseType() =
+            std::make_unique<ThriftType>(genType(md, *retType));
       }
+    } else if (auto sink = func.response().sink()) {
+      ret.functions()->back().return_type()->t_sink().emplace();
+      ret.functions()->back().return_type()->t_sink()->elemType() =
+          std::make_unique<ThriftType>(genType(md, sink->payloadType()));
+      ret.functions()->back().return_type()->t_sink()->finalResponseType() =
+          std::make_unique<ThriftType>(genType(md, sink->finalResponseType()));
+      if (auto retType = func.response().type()) {
+        ret.functions()->back().return_type()->t_sink()->initialResponseType() =
+            std::make_unique<ThriftType>(genType(md, *retType));
+      }
+    } else if (auto retType = func.response().type()) {
+      ret.functions()->back().return_type() = genType(md, *retType);
+    } else {
+      ret.functions()->back().return_type()->t_primitive() =
+          metadata::ThriftPrimitiveType::THRIFT_VOID_TYPE;
     }
     ret.functions()->back().is_oneway() =
         func.qualifier() == type::FunctionQualifier::OneWay;
@@ -470,43 +444,31 @@ metadata::ThriftService genServiceMetadata(
       i.id() = static_cast<std::int16_t>(param.id());
       i.name() = param.name();
       i.is_optional() = false;
-      if (options.genAnnotations) {
-        i.structured_annotations() =
-            genStructuredAnnotations(param.annotations());
-      }
-      if (options.genNestedTypes) {
-        i.type() = genType(md, param.type());
-      }
+      i.structured_annotations() =
+          genStructuredAnnotations(param.annotations());
+      i.type() = genType(md, param.type());
     }
     for (const auto& exception : func.exceptions()) {
       auto& i = ret.functions()->back().exceptions()->emplace_back();
       i.id() = static_cast<std::int16_t>(exception.id());
       i.name() = exception.name();
       i.is_optional() = false;
-      if (options.genAnnotations) {
-        i.structured_annotations() =
-            genStructuredAnnotations(exception.annotations());
-      }
-      if (options.genNestedTypes) {
-        i.type() = genType(md, exception.type());
-        if (exception.type().isStructured()) {
-          // Mimicking the existing logic: we add all types in throw clause
-          // into `exceptions` field as long as it's structured.
-          // https://github.com/facebook/fbthrift/blob/v2025.11.03.00/thrift/compiler/generate/templates/cpp2/module_metadata.cpp.mustache#L153-L157
-          genStructuredInMetadataMap(
-              md, *md.exceptions(), exception.type().asStructured(), options);
-        }
+      i.structured_annotations() =
+          genStructuredAnnotations(exception.annotations());
+      i.type() = genType(md, exception.type());
+      if (exception.type().isStructured()) {
+        // Mimicking the existing logic: we add all types in throw clause
+        // into `exceptions` field as long as it's structured.
+        // https://github.com/facebook/fbthrift/blob/v2025.11.03.00/thrift/compiler/generate/templates/cpp2/module_metadata.cpp.mustache#L153-L157
+        genStructuredInMetadataMap(
+            md, *md.exceptions(), exception.type().asStructured());
       }
     }
-    if (options.genAnnotations) {
-      ret.functions()->back().structured_annotations() =
-          genStructuredAnnotations(func.annotations());
-    }
+    ret.functions()->back().structured_annotations() =
+        genStructuredAnnotations(func.annotations());
   }
-  if (options.genAnnotations) {
-    ret.structured_annotations() =
-        genStructuredAnnotations(node.definition().annotations());
-  }
+  ret.structured_annotations() =
+      genStructuredAnnotations(node.definition().annotations());
   return ret;
 }
 
@@ -514,8 +476,7 @@ const ThriftServiceContextRef* genServiceMetadataRecurse(
     const syntax_graph::ServiceNode& node,
     ThriftMetadata& metadata,
     std::vector<ThriftServiceContextRef>& services) {
-  Options options = {.genAnnotations = true, .genNestedTypes = true};
-  auto serviceMetadata = genServiceMetadata(node, metadata, options);
+  auto serviceMetadata = genServiceMetadata(node, metadata);
   // We need to keep the index around because a reference or iterator could be
   // invalidated.
   auto selfIndex = services.size();

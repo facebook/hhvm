@@ -64,8 +64,7 @@ TYPED_TEST_SUITE(StructComparisonTest, Structureds);
 TYPED_TEST(StructComparisonTest, StructComparisonTest) {
   metadata::ThriftMetadata lhs, rhs;
   StructMetadata<TypeParam>::gen(lhs);
-  genStructMetadata<TypeParam>(
-      rhs, {.genAnnotations = true, .genNestedTypes = true});
+  genStructMetadata<TypeParam>(rhs);
   EXPECT_EQ(lhs, rhs);
   EXPECT_GE(lhs.structs()->size(), 1); // sanity check
 }

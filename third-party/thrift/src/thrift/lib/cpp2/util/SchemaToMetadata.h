@@ -47,52 +47,37 @@ const auto& getDefinitionNodeWithLock() {
   return SchemaRegistry::get().getDefinitionNode<T>();
 }
 
-struct Options {
-  bool genAnnotations = false;
-  bool genNestedTypes = false;
-};
-
 // Generate metadata of `node` inside `md`, return the generated metadata.
 GenMetadataResult<metadata::ThriftEnum> genEnumMetadata(
-    metadata::ThriftMetadata& md,
-    const syntax_graph::EnumNode& node,
-    Options options);
+    metadata::ThriftMetadata& md, const syntax_graph::EnumNode& node);
 
 template <class E>
-auto genEnumMetadata(metadata::ThriftMetadata& md, Options options) {
-  return genEnumMetadata(md, getNodeWithLock<E>(), options);
+auto genEnumMetadata(metadata::ThriftMetadata& md) {
+  return genEnumMetadata(md, getNodeWithLock<E>());
 }
 
 GenMetadataResult<metadata::ThriftStruct> genStructMetadata(
-    metadata::ThriftMetadata& md,
-    const syntax_graph::StructuredNode& node,
-    Options options);
+    metadata::ThriftMetadata& md, const syntax_graph::StructuredNode& node);
 
 template <class T>
-auto genStructMetadata(metadata::ThriftMetadata& md, Options options) {
-  return genStructMetadata(md, getNodeWithLock<T>(), options);
+auto genStructMetadata(metadata::ThriftMetadata& md) {
+  return genStructMetadata(md, getNodeWithLock<T>());
 }
 
 GenMetadataResult<metadata::ThriftException> genExceptionMetadata(
-    metadata::ThriftMetadata& md,
-    const syntax_graph::ExceptionNode& node,
-    Options options);
+    metadata::ThriftMetadata& md, const syntax_graph::ExceptionNode& node);
 
 template <class T>
-auto genExceptionMetadata(metadata::ThriftMetadata& md, Options options) {
-  return genExceptionMetadata(md, getNodeWithLock<T>(), options);
+auto genExceptionMetadata(metadata::ThriftMetadata& md) {
+  return genExceptionMetadata(md, getNodeWithLock<T>());
 }
 
 metadata::ThriftService genServiceMetadata(
-    const syntax_graph::ServiceNode& node,
-    metadata::ThriftMetadata& md,
-    Options options);
+    const syntax_graph::ServiceNode& node, metadata::ThriftMetadata& md);
 
 template <class Tag>
-metadata::ThriftService genServiceMetadata(
-    metadata::ThriftMetadata& md, Options options) {
-  return genServiceMetadata(
-      getDefinitionNodeWithLock<Tag>().asService(), md, options);
+metadata::ThriftService genServiceMetadata(metadata::ThriftMetadata& md) {
+  return genServiceMetadata(getDefinitionNodeWithLock<Tag>().asService(), md);
 }
 
 const metadata::ThriftServiceContextRef* genServiceMetadataRecurse(

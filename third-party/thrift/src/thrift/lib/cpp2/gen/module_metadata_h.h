@@ -37,22 +37,17 @@ using ThriftService = ::apache::thrift::metadata::ThriftService;
 using ThriftServiceMetadataResponse =
     ::apache::thrift::metadata::ThriftServiceMetadataResponse;
 
-inline constexpr Options kGenerateAll = {
-    .genAnnotations = true, .genNestedTypes = true};
-
 template <typename T>
 class EnumMetadata {
  public:
-  static void gen(ThriftMetadata& metadata) {
-    genEnumMetadata<T>(metadata, kGenerateAll);
-  }
+  static void gen(ThriftMetadata& metadata) { genEnumMetadata<T>(metadata); }
 };
 
 template <typename T>
 class StructMetadata {
  public:
   static const metadata::ThriftStruct& gen(ThriftMetadata& metadata) {
-    return genStructMetadata<T>(metadata, kGenerateAll).metadata;
+    return genStructMetadata<T>(metadata).metadata;
   }
 };
 
@@ -60,7 +55,7 @@ template <typename T>
 class ExceptionMetadata {
  public:
   static void gen(ThriftMetadata& metadata) {
-    genExceptionMetadata<T>(metadata, kGenerateAll);
+    genExceptionMetadata<T>(metadata);
   }
 };
 

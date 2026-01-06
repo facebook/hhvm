@@ -1043,10 +1043,12 @@ let main_internal
             | Some "Method"
             | None ->
               Method { class_name; member_name }
+            | Some "Typeconst" -> Typeconst { class_name; member_name }
             | Some _ -> raise Exit_status.(Exit_with Input_error))
           ~name_only_action:(fun name ->
             match kind with
             | Some "Class" -> Class { class_name = name }
+            | Some "Typedef" -> Typedef { name }
             | Some _
             | None ->
               raise Exit_status.(Exit_with Input_error))

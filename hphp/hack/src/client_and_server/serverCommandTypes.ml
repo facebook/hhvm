@@ -159,7 +159,9 @@ module Find_my_tests = struct
 
   type action =
     | Class of { class_name: string }
+    | Typedef of { name: string }
     | Method of member
+    | Typeconst of member
   [@@deriving show]
 
   type result_entry = {

@@ -268,3 +268,50 @@ class TestFindMyTests(test_case.TestCase[common_tests.CommonTestDriver]):
             expected_test_files=[],
             max_distance=10,
         )
+
+    def test_typedefs_and_typeconsts1(self) -> None:
+        """Tests that we detect references between typedefs, typeconsts, and usages of them.
+
+        Uses files from f/ subdirectory
+        """
+
+        prefix = os.path.join(self.test_driver.repo_dir, "f", "__tests__")
+
+        self.check_has_tests_with_distances(
+            prefix=prefix,
+            symbols=["Typedef|F1_TypeAlias1"],
+            expected_test_files=[
+                # F1_Test2, F1_Test6, F1_Test8 should not be selected.
+                ("F1_Test1.php", 3),
+                ("F1_Test3.php", 1),
+                ("F1_Test4.php", 2),
+                ("F1_Test5.php", 2),
+                ("F1_Test7.php", 4),
+                # ("F1_Test9.php", 3), should be selected once T247845469 is fixed
+            ],
+            max_distance=10,
+        )
+
+    def test_typedefs_and_typeconsts2(self) -> None:
+        """Tests that we detect references between typedefs, typeconsts, and usages of them.
+
+        Uses files from f/ subdirectory
+        """
+
+        prefix = os.path.join(self.test_driver.repo_dir, "f", "__tests__")
+
+        # Similar to previous test, but now starting at the second hop (F1_ClassWithTypeConst1::TBar)
+        # Everything should still be selected (with decremented distance), except F1_Test3 and F1_Test9 which are only selected if F1_TypeAlias1 is traversed.
+
+        self.check_has_tests_with_distances(
+            prefix=prefix,
+            symbols=["Typeconst|F1_ClassWithTypeConst1::TBar"],
+            expected_test_files=[
+                # F1_Test2, F1_Test3, F1_Test6, F1_Test8 should not be selected.
+                ("F1_Test1.php", 2),
+                ("F1_Test4.php", 1),
+                ("F1_Test5.php", 1),
+                ("F1_Test7.php", 3),
+            ],
+            max_distance=10,
+        )

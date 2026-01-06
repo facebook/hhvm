@@ -14,10 +14,13 @@ open ServerEnv
  * or update this comment to say why we don't need them
  *)
 
-type member = Method of string
+type member =
+  | Method of string
+  | Typeconst of string
 
 let findrefs_member_of_member = function
   | Method m -> SearchTypes.Find_refs.Method m
+  | Typeconst t -> SearchTypes.Find_refs.Typeconst t
 
 let supported_test_framework_classes = SSet.of_list ["WWWTest"]
 
@@ -111,6 +114,7 @@ let search_member
     let open Typing_deps.Dep.Member in
     match member with
     | Method n -> [method_ n; smethod n]
+    | Typeconst t -> [const t]
   in
   let fr_member = findrefs_member_of_member member in
 
@@ -145,18 +149,19 @@ let search_member
   let include_defs = false in
   search ctx target include_defs ~files genv
 
-let search_class ctx class_name genv =
-  let class_name = add_ns class_name in
+let search_type ctx type_name genv =
+  let type_name = add_ns type_name in
   let target =
     (* We use IExplicitClass here instead of IClass.
-       The difference is that this excludes references to our target using static::, self:: and parent::, which we don't care about *)
-    FindRefsService.IExplicitClass class_name
+       The difference is that this excludes references to our target using static::, self:: and parent::, which we don't care about.
+       Despite being named "class", this also works for typedefs *)
+    FindRefsService.IExplicitClass type_name
   in
   let files =
     FindRefsService.get_dependent_files
       ctx
       genv.ServerEnv.workers
-      (SSet.singleton class_name)
+      (SSet.singleton type_name)
     |> Relative_path.Set.elements
   in
   let include_defs = false in
@@ -167,15 +172,22 @@ let is_enumish_kind classish_kind =
 
 (* Standalone module so we can pass it to Hash_set *)
 module Symbol_def = struct
+  type member = {
+    class_name: string;  (** Does not have leading \*)
+    member_name: string;
+  }
+  [@@deriving show, ord, sexp, hash]
+
   type t =
-    | Method of {
-        class_name: string;  (** Does not have leading \*)
-        method_name: string;
-      }
+    | Method of member
+    | Typeconst of member
     | Classish of {
         name: string;  (** Does not have leading \*)
         kind: Ast_defs.classish_kind;
       }
+    | Typedef of { name: string  (** Does not have leading \ *) }
+        (** We do not categorize typedefs as classish because there is no corresponding Ast_defs.classish_kind for typedefs.
+          This is different from ServerFindRefs, which uses the "Class" action for typedefs. *)
   [@@deriving show, ord, sexp, hash]
 
   let class_from_name ctx class_name =
@@ -205,7 +217,7 @@ type result_entry = ServerCommandTypes.Find_my_tests.result_entry
   If so, return the latter. Otherwise, return None.
 *)
 let process_method_occurrence
-    (method_occurrence_pos : Pos.t) method_occurrence_nast : Symbol_def.t option
+    ~referenced_name:_ ~referencing_pos ~referencing_nast : Symbol_def.t option
     =
   let visitor =
     object
@@ -213,7 +225,7 @@ let process_method_occurrence
 
       method! on_class_ _ctx class_ =
         let class_span = class_.Aast.c_span in
-        if Pos.contains class_span method_occurrence_pos then
+        if Pos.contains class_span referencing_pos then
           let ctx = Some class_.Aast.c_name in
           super#on_class_ ctx class_
         else
@@ -221,11 +233,11 @@ let process_method_occurrence
 
       method! on_method_ ctx m =
         let span = m.Aast.m_span in
-        if Pos.contains span method_occurrence_pos then
+        if Pos.contains span referencing_pos then
           (* We are seeing a method, so on_class_ must have set the class_name *)
           let class_name = snd (Option.value_exn ctx) in
           let method_name = snd m.Aast.m_name in
-          Some (Method { class_name; method_name })
+          Some (Method { class_name; member_name = method_name })
         else
           None
 
@@ -237,7 +249,7 @@ let process_method_occurrence
         | (Some _, _) -> r1
     end
   in
-  visitor#on_program None method_occurrence_nast
+  visitor#on_program None referencing_nast
 
 (**
   Turns a class symbol occurrence (i.e., class name use site) into the surrounding definition,
@@ -247,7 +259,7 @@ let process_method_occurrence
   or `new C1(...)`.
 *)
 let process_class_occurrence
-    class_name kind (class_occurrence_pos : Pos.t) class_occurrence_nast :
+    ~kind ~referenced_name:class_name ~referencing_pos ~referencing_nast :
     Symbol_def.t option =
   let is_in_class_or_new_expr block =
     let is_our_class ci =
@@ -265,7 +277,7 @@ let process_class_occurrence
        inherit [_] Aast.reduce as super
 
        method! on_stmt ctx (stmt_span, stmt_) =
-         Pos.contains stmt_span class_occurrence_pos && self#on_stmt_ ctx stmt_
+         Pos.contains stmt_span referencing_pos && self#on_stmt_ ctx stmt_
 
        method! on_expr_ ctx expr_ =
          (* TODO(frankemrich) This is pretty brittle and just handles the common cases.
@@ -291,7 +303,7 @@ let process_class_occurrence
 
       method! on_class_ _ctx class_ =
         let class_span = class_.Aast.c_span in
-        if Pos.contains class_span class_occurrence_pos then
+        if Pos.contains class_span referencing_pos then
           let ctx = Some class_.Aast.c_name in
           super#on_class_ ctx class_
         else
@@ -309,14 +321,12 @@ let process_class_occurrence
             is_in_class_or_new_expr method_body_block
         in
         let body_block = m.m_body.fb_ast in
-        if
-          Pos.contains span class_occurrence_pos
-          && should_include_method body_block
+        if Pos.contains span referencing_pos && should_include_method body_block
         then
           (* We are seeing a method, so on_class_ must have set the class_name *)
           let class_name = snd (Option.value_exn ctx) in
           let method_name = snd m.Aast.m_name in
-          Some (Method { class_name; method_name })
+          Some (Method { class_name; member_name = method_name })
         else
           None
 
@@ -328,97 +338,388 @@ let process_class_occurrence
         | (Some _, _) -> r1
     end
   in
-  method_visitor#on_program None class_occurrence_nast
+  method_visitor#on_program None referencing_nast
+
+let is_class_id_for class_id_ type_name =
+  match class_id_ with
+  | Aast.CI class_id
+  | CIexpr (_, _, Id class_id) ->
+    String.equal (snd class_id) type_name
+  | _ -> false
+
+let is_call_of_function expr_ function_name =
+  match expr_ with
+  | Aast.Call { func = (_, _, Aast.Id (_, name)); _ } ->
+    String.equal name function_name
+  | _ -> false
+
+let is_nameof_for expr_ type_name =
+  match expr_ with
+  | Aast.Nameof (_, _, class_id_) -> is_class_id_for class_id_ type_name
+  | _ -> false
+
+(* Checks if this is TypeName::class *)
+let is_class_const_for expr_ type_name =
+  match expr_ with
+  | Aast.Class_const ((_, _, ci), const_name) ->
+    (match ci with
+    | Aast.CI class_id
+    | CIexpr (_, _, Id class_id) ->
+      String.equal (snd class_id) type_name
+      && String.equal (snd const_name) "class"
+    | _ -> false)
+  | _ -> false
+
+(* Checks if this is type_structure(TypeName::class, 'typeconst_name') *)
+let is_type_structure_for expr_ type_name typeconst_name =
+  match expr_ with
+  | Aast.Call { func = _; args = [Aast.Anormal arg1; Aast.Anormal arg2]; _ }
+    when is_call_of_function expr_ "type_structure" ->
+    let ((), _, arg1_) = arg1 in
+    let ((), arg2_pos, _) = arg2 in
+    is_class_const_for arg1_ type_name
+    && Nast.equal_expr arg2 ((), arg2_pos, Aast.String typeconst_name)
+  | _ -> false
+
+(** Turns an occurrence of a typedef Ty into the surrounding definition,
+  if we are interested in it.
+
+  Concretely, if Ty is used at some position p, check if
+  - if p is inside some other typedef or typeconst definition.
+  - if p is inside a method we look for
+    + Ty::class
+    + nameof Ty
+   *)
+let process_typedef_occurrence
+    ~referenced_name ~referencing_pos ~referencing_nast : Symbol_def.t option =
+  let block_has_relevant_reference block =
+    (object (self)
+       inherit [_] Aast.reduce as super
+
+       method! on_stmt ctx (stmt_span, stmt_) =
+         Pos.contains stmt_span referencing_pos && self#on_stmt_ ctx stmt_
+
+       method! on_expr ctx expr =
+         let (_, expr_span, expr_) = expr in
+         if Pos.contains expr_span referencing_pos then
+           (* Ty::class *)
+           is_class_const_for expr_ referenced_name
+           (* nameof Ty *)
+           || is_nameof_for expr_ referenced_name
+           || super#on_expr ctx expr
+         else
+           false
+
+       method zero = false
+
+       method plus = ( || )
+    end)
+      #on_block
+      ()
+      block
+  in
+  let visitor =
+    let open Aast in
+    object
+      inherit [_] Aast.reduce as super
+
+      method! on_class_ _ctx class_ =
+        let class_span = class_.c_span in
+        if Pos.contains class_span referencing_pos then
+          let ctx = Some class_.c_name in
+          super#on_class_ ctx class_
+        else
+          None
+
+      method! on_typedef _ctx td =
+        let span = td.t_span in
+        if Pos.contains span referencing_pos then
+          Some (Symbol_def.Typedef { name = Utils.strip_ns (snd td.t_name) })
+        else
+          None
+
+      method! on_method_ ctx m =
+        let span = m.m_span in
+        if Pos.contains span referencing_pos then
+          (* Check if the reference is in a form we care about *)
+          let body_block = m.m_body.fb_ast in
+          if block_has_relevant_reference body_block then
+            (* We are seeing a method, so on_class_ must have set the class_name *)
+            let class_name = snd (Option.value_exn ctx) in
+            let method_name = snd m.m_name in
+            Some (Symbol_def.Method { class_name; member_name = method_name })
+          else
+            None
+        else
+          None
+
+      method! on_class_typeconst_def ctx tc =
+        let span = tc.c_tconst_span in
+        if Pos.contains span referencing_pos then
+          (* We are seeing a typeconst, so on_class_ must have set the class_name *)
+          let class_name = Utils.strip_ns (snd (Option.value_exn ctx)) in
+          let typeconst_name = snd tc.c_tconst_name in
+          Some
+            (Symbol_def.Typeconst { class_name; member_name = typeconst_name })
+        else
+          None
+
+      method zero = None
+
+      method plus r1 r2 =
+        match (r1, r2) with
+        | (None, _) -> r2
+        | (Some _, _) -> r1
+    end
+  in
+  visitor#on_program None referencing_nast
+
+(** Turns an occurrence of a typeconst Foo::TBar into the surrounding definition,
+  if we are interested in it.
+
+  Concretely, if Foo::Bar is used at some position p, check if
+  - if p is inside some other typedef or typeconst definition.
+
+
+  Note that we have special logic elsewhere that looks for
+  type_structure(Foo::class, 'TBar')
+
+   *)
+let process_typeconst_occurrence
+    ~referenced_name:_ ~referencing_pos ~referencing_nast : Symbol_def.t option
+    =
+  let visitor =
+    let open Aast in
+    object
+      inherit [_] Aast.reduce as super
+
+      method! on_class_ _ctx class_ =
+        let class_span = class_.c_span in
+        if Pos.contains class_span referencing_pos then
+          let ctx = Some class_.c_name in
+          super#on_class_ ctx class_
+        else
+          None
+
+      method! on_typedef _ctx _td =
+        (* Hack does not allow aliasing a typeconst! *)
+        None
+
+      method! on_class_typeconst_def ctx tc =
+        let span = tc.c_tconst_span in
+        if Pos.contains span referencing_pos then
+          (* We are seeing a typeconst, so on_class_ must have set the class_name *)
+          let class_name = Utils.strip_ns (snd (Option.value_exn ctx)) in
+          let typeconst_name = snd tc.c_tconst_name in
+          Some
+            (Symbol_def.Typeconst { class_name; member_name = typeconst_name })
+        else
+          None
+
+      method zero = None
+
+      method plus r1 r2 =
+        match (r1, r2) with
+        | (None, _) -> r2
+        | (Some _, _) -> r1
+    end
+  in
+  visitor#on_program None referencing_nast
 
 (**
-  Find references to the given symbol.
-  If the reference is from a test file, it's returned as part of the second list.
-  Otherwise, the definition from where the reference happens is returned as part of the first list. *)
-let get_method_references
-    ~(ctx : Provider_context.t)
-    ~(genv : ServerEnv.genv)
-    ~(env : ServerEnv.env)
-    ~class_name
-    ~method_name : (Symbol_def.t list * string list, error_msg) Result.t =
-  let search_results =
-    search_member ctx class_name (Method method_name) genv env
-  in
+  Handles the most common case:
+  Our `target_symbol` is referenced by a bunch of `search_results`.
+  For each of these referencing positions, we check if they are from a test file.
+  If so, we select the file immediately.
+
+  Otherwise, we apply `on_non_test_file_reference` to check if the reference is from a symbol where
+  we should continue searching. *)
+let get_references_standard
+    ctx target_symbol search_results on_non_test_file_reference =
   let resolve_found_position
       (acc_symbol_defs, acc_files)
-      SearchTypes.Find_refs.{ name = _; pos = referencing_pos } =
+      SearchTypes.Find_refs.{ name = referenced_name; pos = referencing_pos } =
     let relative_path = Pos.filename referencing_pos in
     let path = Relative_path.suffix relative_path in
 
     log_debug
-      "get_method_references: Resolving symbol occurence %s of method %s::%s"
-      (show_pos_strip_newline referencing_pos)
-      class_name
-      method_name;
-
-    (* We could implement all of our traversals without NASTs, but just CSTs and their
-       Full_fidelity_positioned_syntax.parentage function.
-
-       But those never seem to be cached, whereas the NAST may still be in cache after we just
-       constructed the TAST in FindRefsService. *)
-    let nast = Ast_provider.get_ast ~full:true ctx relative_path in
-
-    if is_test_file ctx path nast then (
-      log_debug "get_method_references: Reference is from a test file: %s" path;
-      Result.Ok
-        ( acc_symbol_defs,
-          (Pos.to_absolute referencing_pos |> Pos.filename) :: acc_files )
-    ) else
-      match process_method_occurrence referencing_pos nast with
-      | Some referencing_def ->
-        log_debug
-          "get_method_references: found referencing def %s"
-          (Symbol_def.show referencing_def);
-        Result.Ok (referencing_def :: acc_symbol_defs, acc_files)
-      | None ->
-        Result.Error
-          (Printf.sprintf
-             "Could not find definition enclosing %s"
-             (show_pos_strip_newline referencing_pos))
-  in
-  List.fold_result search_results ~init:([], []) ~f:resolve_found_position
-
-let get_class_references
-    ~(ctx : Provider_context.t) ~(genv : ServerEnv.genv) ~name ~kind :
-    (Symbol_def.t list * string list, error_msg) Result.t =
-  let search_results = search_class ctx name genv in
-  let resolve_found_position
-      (acc_symbol_defs, acc_files)
-      SearchTypes.Find_refs.{ name = _; pos = referencing_pos } =
-    let relative_path = Pos.filename referencing_pos in
-    let path = Relative_path.suffix relative_path in
-
-    log_debug
-      "get_class_references: Resolving symbol occurence %s"
+      "get_references_standard: Resolving symbol occurence %s"
       (show_pos_strip_newline referencing_pos);
 
-    (* Same comment here regarding using NASTs to benefit from caching *)
-    let nast = Ast_provider.get_ast ~full:true ctx relative_path in
+    (* We could implement all of our traversals without NASTs, but just CSTs and their
+       Full_fidelity_positioned_syntax.parentage function. *)
+    let referencing_nast = Ast_provider.get_ast ~full:true ctx relative_path in
 
-    if is_test_file ctx path nast then (
-      log_debug "get_class_references: Reference is from a test file: %s" path;
+    if is_test_file ctx path referencing_nast then (
+      log_debug
+        "get_references_standard: Reference is from a test file: %s"
+        path;
       Result.Ok
         ( acc_symbol_defs,
           (Pos.to_absolute referencing_pos |> Pos.filename) :: acc_files )
     ) else
-      match process_class_occurrence name kind referencing_pos nast with
+      match
+        on_non_test_file_reference
+          ~referenced_name
+          ~referencing_pos
+          ~referencing_nast
+      with
       | Some referencing_def ->
         log_debug
-          "get_class_references: found referencing def %s"
+          "get_references_standard: found referencing def %s"
           (Symbol_def.show referencing_def);
         Result.Ok (referencing_def :: acc_symbol_defs, acc_files)
       | None ->
         log_info
-          "get_class_references: Could not find surrounding definition for use site %s of class %s, or it's not suitable"
+          "get_references_standard: Could not find surrounding definition for use site %s of symbol %s, or it's not suitable"
           (show_pos_strip_newline referencing_pos)
-          name;
+          (Symbol_def.show target_symbol);
         Result.Ok (acc_symbol_defs, acc_files)
   in
   List.fold_result search_results ~init:([], []) ~f:resolve_found_position
+
+(** For type constants `Foo::TBar`, we need to do something slightly special:
+  - We are particularly interested in `type_structure(Foo::class, 'TBar')`
+    + In order to find these, we need to find all references to Foo,
+      not just those to Foo::TBar.
+  - We don't want to use the logic in `get_references_standard` that would blindly accept any
+    reference from a test file to `Foo`.
+
+  Therefore, we
+  - Look search all references to `Foo` and check if they are actually a `type_structure` call for
+    `Foo::TBar`
+  - We search all references to `Foo::TBar` to do similar checks as process_typedef_occurrence:
+    + Is it referenced from another typedef or typeconst?
+    + Is it referenced from a test file?
+   *)
+let get_typeconst_references
+    ~(ctx : Provider_context.t)
+    ~(genv : ServerEnv.genv)
+    ~(env : ServerEnv.env)
+    class_name
+    member_name =
+  let open Result.Let_syntax in
+  let typeconst_search_result =
+    search_member ctx class_name (Typeconst member_name) genv env
+  in
+  let typeconst_symbol = Typeconst { class_name; member_name } in
+  let* (typeconst_using_symbols, typeconst_using_test_files) =
+    get_references_standard
+      ctx
+      typeconst_symbol
+      typeconst_search_result
+      process_typeconst_occurrence
+  in
+
+  let block_has_type_structure_for_typeconst referencing_pos block =
+    (object (self)
+       inherit [_] Aast.reduce as super
+
+       method! on_stmt ctx (stmt_span, stmt_) =
+         Pos.contains stmt_span referencing_pos && self#on_stmt_ ctx stmt_
+
+       method! on_expr ctx expr =
+         let (_, expr_span, expr_) = expr in
+         if Pos.contains expr_span referencing_pos then
+           is_type_structure_for expr_ class_name member_name
+           || super#on_expr ctx expr
+         else
+           false
+
+       method zero = false
+
+       method plus = ( || )
+    end)
+      #on_block
+      ()
+      block
+  in
+
+  (* Helper to check if a reference to `class_name` is actually a type_structure call for our
+     typeconst *)
+  let get_symbols_with_type_structure_for_typeconst
+      ~referencing_pos ~referencing_nast =
+    let visitor =
+      let open Aast in
+      object
+        inherit [_] Aast.reduce as super
+
+        method! on_class_ _ctx class_ =
+          let class_span = class_.c_span in
+          if Pos.contains class_span referencing_pos then
+            let ctx = Some class_.c_name in
+            super#on_class_ ctx class_
+          else
+            None
+
+        method! on_method_ ctx m =
+          let span = m.m_span in
+          if Pos.contains span referencing_pos then
+            (* Check if the reference is in a form we care about *)
+            let body_block = m.m_body.fb_ast in
+            if block_has_type_structure_for_typeconst referencing_pos body_block
+            then
+              (* We are seeing a method, so on_class_ must have set the class_name *)
+              let class_name = snd (Option.value_exn ctx) in
+              let method_name = snd m.m_name in
+              Some (Symbol_def.Method { class_name; member_name = method_name })
+            else
+              None
+          else
+            None
+
+        method zero = None
+
+        method plus r1 r2 =
+          match (r1, r2) with
+          | (None, _) -> r2
+          | (Some _, _) -> r1
+      end
+    in
+    visitor#on_program None referencing_nast
+  in
+
+  (* References to the class itself, used to find type_structure calls *)
+  let class_search_results = search_type ctx class_name genv in
+
+  (* We add the type structure usages to our previous results *)
+  let (symbols, test_files) =
+    List.fold_left
+      class_search_results
+      ~init:(typeconst_using_symbols, typeconst_using_test_files)
+      ~f:(fun (acc_symbol_defs, acc_files) { name = _; pos = referencing_pos }
+         ->
+        let relative_path = Pos.filename referencing_pos in
+        let path = Relative_path.suffix relative_path in
+
+        log_debug
+          "get_typeconst_references: Resolving symbol occurence %s"
+          (show_pos_strip_newline referencing_pos);
+
+        (* We could implement all of our traversals without NASTs, but just CSTs and their
+           Full_fidelity_positioned_syntax.parentage function. *)
+        let referencing_nast =
+          Ast_provider.get_ast ~full:true ctx relative_path
+        in
+
+        match
+          get_symbols_with_type_structure_for_typeconst
+            ~referencing_pos
+            ~referencing_nast
+        with
+        | Some type_structure_referencing_symbol ->
+          if is_test_file ctx path referencing_nast then (
+            log_debug
+              "get_typeconst_references: Reference is from a test file: %s"
+              path;
+            ( acc_symbol_defs,
+              (Pos.to_absolute referencing_pos |> Pos.filename) :: acc_files )
+          ) else
+            (type_structure_referencing_symbol :: acc_symbol_defs, acc_files)
+        | None -> (acc_symbol_defs, acc_files))
+  in
+
+  Result.Ok (symbols, test_files)
 
 let get_references
     ~(ctx : Provider_context.t)
@@ -426,30 +727,48 @@ let get_references
     ~(env : ServerEnv.env)
     symbol : (Symbol_def.t list * string list, error_msg) Result.t =
   match symbol with
-  | Method { class_name; method_name } ->
-    get_method_references ~ctx ~genv ~env ~class_name ~method_name
-  | Classish { name; kind } -> get_class_references ~ctx ~genv ~name ~kind
+  | Method { class_name; member_name } ->
+    let search_results =
+      search_member ctx class_name (Method member_name) genv env
+    in
+    get_references_standard ctx symbol search_results process_method_occurrence
+  | Classish { name; kind } ->
+    let search_results = search_type ctx name genv in
+    get_references_standard
+      ctx
+      symbol
+      search_results
+      (process_class_occurrence ~kind)
+  | Typedef { name } ->
+    let search_results = search_type ctx name genv in
+    get_references_standard ctx symbol search_results process_typedef_occurrence
+  | Typeconst { class_name; member_name } ->
+    get_typeconst_references ~ctx ~genv ~env class_name member_name
 
 let is_root_symbol_in_test_file ctx symbol_def =
-  let check_class class_name =
-    match Naming_provider.get_class_path ctx (Utils.add_ns class_name) with
-    | None ->
-      failwith
-        (Printf.sprintf
-           "Could not resolve class %s, even though it was given as part of a root"
-           class_name)
-    | Some path ->
-      let nast = Ast_provider.get_ast ~full:true ctx path in
-      let relative_path = Relative_path.suffix path in
-      if is_test_file ctx relative_path nast then
-        let absolute_path = Relative_path.to_absolute path in
-        Some absolute_path
-      else
-        None
+  let type_name =
+    match symbol_def with
+    | Method { class_name; member_name = _ }
+    | Typeconst { class_name; member_name = _ } ->
+      class_name
+    | Classish { name; kind = _ }
+    | Typedef { name } ->
+      name
   in
-  match symbol_def with
-  | Method { class_name; method_name = _ } -> check_class class_name
-  | Classish { name; kind = _ } -> check_class name
+  match Naming_provider.get_type_path ctx (Utils.add_ns type_name) with
+  | None ->
+    failwith
+      (Printf.sprintf
+         "Could not resolve type %s, even though it was given as part of a root"
+         type_name)
+  | Some path ->
+    let nast = Ast_provider.get_ast ~full:true ctx path in
+    let relative_path = Relative_path.suffix path in
+    if is_test_file ctx relative_path nast then
+      let absolute_path = Relative_path.to_absolute path in
+      Some absolute_path
+    else
+      None
 
 let search
     ~(ctx : Provider_context.t)
@@ -557,11 +876,10 @@ let go
           | Class { class_name } ->
             Symbol_def.class_from_name ctx (Utils.strip_ns class_name)
           | Method { class_name; member_name } ->
-            Method
-              {
-                class_name = Utils.strip_ns class_name;
-                method_name = member_name;
-              }
+            Method { class_name = Utils.strip_ns class_name; member_name }
+          | Typedef { name } -> Typedef { name = Utils.strip_ns name }
+          | Typeconst { class_name; member_name } ->
+            Typeconst { class_name = Utils.strip_ns class_name; member_name }
         in
 
         Result.Ok (root :: acc))

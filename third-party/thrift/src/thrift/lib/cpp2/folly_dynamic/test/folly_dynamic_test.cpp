@@ -27,7 +27,6 @@
 #include <thrift/lib/cpp2/debug_thrift_data_difference/pretty_print.h>
 #include <thrift/lib/cpp2/folly_dynamic/folly_dynamic.h>
 
-#include <thrift/lib/cpp2/reflection/helpers.h>
 #include <thrift/lib/cpp2/reflection/internal/test_helpers.h>
 #include <thrift/test/gen-cpp2/adapter_types.h>
 #include <thrift/test/reflection/gen-cpp2/compat_fatal_types.h>
@@ -37,6 +36,8 @@
 using namespace cpp2;
 using facebook::thrift::dynamic_format;
 using facebook::thrift::format_adherence;
+namespace ident = apache::thrift::ident;
+namespace type = apache::thrift::type;
 
 namespace facebook::thrift {
 
@@ -641,58 +642,43 @@ TEST(FollyDynamic, OptionalString) {
 TEST(FollyDynamic, ListFromEmptyObject) {
   // some dynamic languages (lua, php) conflate empty array and empty object;
   // check that we do not throw in such cases
-  using type = global_structC;
-  using member_name = fatal::sequence<char, 'j', '3'>;
-  using member_meta =
-      apache::thrift::get_struct_member_by_name<type, member_name>;
-  EXPECT_SAME< // sanity check
-      member_meta::type_class,
-      apache::thrift::type_class::list<
-          apache::thrift::type_class::structure>>();
-  auto obj = from_dynamic<type>(
-      folly::dynamic::object(
-          fatal::z_data<member_name>(), folly::dynamic::object),
+  static_assert(std::is_base_of_v<
+                type::list_c,
+                apache::thrift::op::get_type_tag<global_structC, ident::j3>>);
+  auto obj = from_dynamic<global_structC>(
+      folly::dynamic::object("j3", folly::dynamic::object),
       dynamic_format::PORTABLE);
-  EXPECT_TRUE(member_meta::is_set(obj));
-  EXPECT_EQ(0, member_meta::getter{}(obj).size());
+  // @lint-ignore CLANGTIDY clang-diagnostic-deprecated-declarations
+  EXPECT_TRUE(obj.j3().is_set());
+  EXPECT_EQ(0, obj.j3()->size());
 }
 
 TEST(FollyDynamic, SetFromEmptyObject) {
   // some dynamic languages (lua, php) conflate empty array and empty object;
   // check that we do not throw in such cases
-  using type = global_structC;
-  using member_name = fatal::sequence<char, 'k', '3'>;
-  using member_meta =
-      apache::thrift::get_struct_member_by_name<type, member_name>;
-  EXPECT_SAME< // sanity check
-      member_meta::type_class,
-      apache::thrift::type_class::set<apache::thrift::type_class::structure>>();
-  auto obj = from_dynamic<type>(
-      folly::dynamic::object(
-          fatal::z_data<member_name>(), folly::dynamic::object),
+  static_assert(std::is_base_of_v<
+                type::set_c,
+                apache::thrift::op::get_type_tag<global_structC, ident::k3>>);
+  auto obj = from_dynamic<global_structC>(
+      folly::dynamic::object("k3", folly::dynamic::object),
       dynamic_format::PORTABLE);
-  EXPECT_TRUE(member_meta::is_set(obj));
-  EXPECT_EQ(0, member_meta::getter{}(obj).size());
+  // @lint-ignore CLANGTIDY clang-diagnostic-deprecated-declarations
+  EXPECT_TRUE(obj.k3().is_set());
+  EXPECT_EQ(0, obj.k3()->size());
 }
 
 TEST(FollyDynamic, MapFromEmptyArray) {
   // some dynamic languages (lua, php) conflate empty array and empty object;
   // check that we do not throw in such cases
-  using type = global_structC;
-  using member_name = fatal::sequence<char, 'l', '3'>;
-  using member_meta =
-      apache::thrift::get_struct_member_by_name<type, member_name>;
-  EXPECT_SAME< // sanity check
-      member_meta::type_class,
-      apache::thrift::type_class::map<
-          apache::thrift::type_class::integral,
-          apache::thrift::type_class::structure>>();
-  auto obj = from_dynamic<type>(
-      folly::dynamic::object(
-          fatal::z_data<member_name>(), folly::dynamic::array),
+  static_assert(std::is_base_of_v<
+                type::map_c,
+                apache::thrift::op::get_type_tag<global_structC, ident::l3>>);
+  auto obj = from_dynamic<global_structC>(
+      folly::dynamic::object("l3", folly::dynamic::array),
       dynamic_format::PORTABLE);
-  EXPECT_TRUE(member_meta::is_set(obj));
-  EXPECT_EQ(0, member_meta::getter{}(obj).size());
+  // @lint-ignore CLANGTIDY clang-diagnostic-deprecated-declarations
+  EXPECT_TRUE(obj.l3().is_set());
+  EXPECT_EQ(0, obj.l3()->size());
 }
 
 TEST(FollyDynamic, FromIobuf) {
@@ -729,26 +715,21 @@ namespace {
 
 class FollyDynamicEnum : public ::testing::Test {
  protected:
-  void SetUp() override {
-    EXPECT_SAME< // sanity check
-        member_meta::type_class,
-        apache::thrift::type_class::enumeration>();
-  }
+  static_assert(std::is_base_of_v< // sanity check
+                apache::thrift::type::enum_c,
+                apache::thrift::op::get_type_tag<global_structC, ident::e>>);
 
   using type = global_structC;
-  using member_name = fatal::sequence<char, 'e'>;
-  using member_meta =
-      apache::thrift::get_struct_member_by_name<type, member_name>;
-
-  std::string member_name_s{fatal::to_instance<std::string, member_name>()};
+  std::string member_name_s = "e";
 };
 } // namespace
 
 TEST_F(FollyDynamicEnum, FromStringStrict) {
   folly::dynamic dyn = folly::dynamic::object(member_name_s, "field0");
   auto obj = from_dynamic<type>(dyn, dynamic_format::PORTABLE);
-  EXPECT_TRUE(member_meta::is_set(obj));
-  EXPECT_EQ(global_enum1::field0, member_meta::getter{}(obj));
+  // @lint-ignore CLANGTIDY clang-diagnostic-deprecated-declarations
+  EXPECT_TRUE(obj.e().is_set());
+  EXPECT_EQ(global_enum1::field0, obj.e());
   EXPECT_THROW(
       from_dynamic<type>(dyn, dynamic_format::JSON_1), folly::ConversionError);
 }
@@ -756,8 +737,9 @@ TEST_F(FollyDynamicEnum, FromStringStrict) {
 TEST_F(FollyDynamicEnum, FromIntegerStrict) {
   folly::dynamic dyn = folly::dynamic::object(member_name_s, 0);
   auto obj = from_dynamic<type>(dyn, dynamic_format::JSON_1);
-  EXPECT_TRUE(member_meta::is_set(obj));
-  EXPECT_EQ(global_enum1::field0, member_meta::getter{}(obj));
+  // @lint-ignore CLANGTIDY clang-diagnostic-deprecated-declarations
+  EXPECT_TRUE(obj.e().is_set());
+  EXPECT_EQ(global_enum1::field0, obj.e());
   EXPECT_THROW(
       from_dynamic<type>(dyn, dynamic_format::PORTABLE), std::invalid_argument);
 }
@@ -766,24 +748,28 @@ TEST_F(FollyDynamicEnum, FromStringLenient) {
   folly::dynamic dyn = folly::dynamic::object(member_name_s, "field0");
   auto obj1 = from_dynamic<type>(
       dyn, dynamic_format::PORTABLE, format_adherence::LENIENT);
-  EXPECT_TRUE(member_meta::is_set(obj1));
-  EXPECT_EQ(global_enum1::field0, member_meta::getter{}(obj1));
+  // @lint-ignore CLANGTIDY clang-diagnostic-deprecated-declarations
+  EXPECT_TRUE(obj1.e().is_set());
+  EXPECT_EQ(global_enum1::field0, obj1.e());
   auto obj2 = from_dynamic<type>(
       dyn, dynamic_format::JSON_1, format_adherence::LENIENT);
-  EXPECT_TRUE(member_meta::is_set(obj2));
-  EXPECT_EQ(global_enum1::field0, member_meta::getter{}(obj2));
+  // @lint-ignore CLANGTIDY clang-diagnostic-deprecated-declarations
+  EXPECT_TRUE(obj2.e().is_set());
+  EXPECT_EQ(global_enum1::field0, obj2.e());
 }
 
 TEST_F(FollyDynamicEnum, FromIntegerLenient) {
   folly::dynamic dyn = folly::dynamic::object(member_name_s, 0);
   auto obj1 = from_dynamic<type>(
       dyn, dynamic_format::PORTABLE, format_adherence::LENIENT);
-  EXPECT_TRUE(member_meta::is_set(obj1));
-  EXPECT_EQ(global_enum1::field0, member_meta::getter{}(obj1));
+  // @lint-ignore CLANGTIDY clang-diagnostic-deprecated-declarations
+  EXPECT_TRUE(obj1.e().is_set());
+  EXPECT_EQ(global_enum1::field0, obj1.e());
   auto obj2 = from_dynamic<type>(
       dyn, dynamic_format::JSON_1, format_adherence::LENIENT);
-  EXPECT_TRUE(member_meta::is_set(obj2));
-  EXPECT_EQ(global_enum1::field0, member_meta::getter{}(obj2));
+  // @lint-ignore CLANGTIDY clang-diagnostic-deprecated-declarations
+  EXPECT_TRUE(obj2.e().is_set());
+  EXPECT_EQ(global_enum1::field0, obj2.e());
 }
 
 TEST(FromDynamic, StructWithVectorBool) {

@@ -18,6 +18,7 @@
 
 #include <thrift/compiler/generate/json.h>
 #include <thrift/compiler/generate/t_whisker_generator.h>
+#include <thrift/compiler/generate/templates.h>
 
 namespace apache::thrift::compiler {
 namespace {
@@ -39,6 +40,12 @@ class t_json_experimental_generator : public t_whisker_generator {
   using t_whisker_generator::t_whisker_generator;
 
   std::string template_prefix() const override { return "json"; }
+
+  whisker::source_manager template_source_manager() const final {
+    return whisker::source_manager{
+        std::make_unique<in_memory_source_manager_backend>(
+            create_templates_by_path())};
+  }
 
   void generate_program() override;
 

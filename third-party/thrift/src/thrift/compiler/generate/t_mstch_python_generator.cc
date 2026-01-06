@@ -32,6 +32,7 @@
 #include <thrift/compiler/generate/common.h>
 #include <thrift/compiler/generate/python/util.h>
 #include <thrift/compiler/generate/t_whisker_generator.h>
+#include <thrift/compiler/generate/templates.h>
 #include <thrift/compiler/sema/ast_validator.h>
 
 using ::apache::thrift::type::BaseType;
@@ -639,6 +640,12 @@ class t_mstch_python_prototypes_generator : public t_whisker_generator {
   std::shared_ptr<python_generator_context> python_context_;
   /** The `root_module_prefix` compiler option, or "" if unset */
   std::string root_module_prefix_;
+
+  whisker::source_manager template_source_manager() const final {
+    return whisker::source_manager{
+        std::make_unique<in_memory_source_manager_backend>(
+            create_templates_by_path())};
+  }
 
   void process_options(
       const std::map<std::string, std::string>& options) override {

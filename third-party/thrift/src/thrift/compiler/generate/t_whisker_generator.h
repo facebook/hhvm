@@ -122,6 +122,9 @@ class t_whisker_generator : public t_generator {
    */
   virtual std::string template_prefix() const = 0;
 
+  /** The source manager used to resolve the source code for template files. */
+  virtual whisker::source_manager template_source_manager() const = 0;
+
   /**
    * The global context used for whisker rendering. This function can be used,
    * for example, to add globally available helper functions.

@@ -20,8 +20,6 @@
 #include <thrift/compiler/ast/type_visitor.h>
 #include <thrift/compiler/detail/system.h>
 #include <thrift/compiler/generate/common.h>
-#include <thrift/compiler/generate/cpp/util.h>
-#include <thrift/compiler/generate/templates.h>
 #include <thrift/compiler/sema/schematizer.h>
 #include <thrift/compiler/whisker/ast.h>
 #include <thrift/compiler/whisker/parser.h>
@@ -906,11 +904,9 @@ class t_whisker_generator::whisker_source_parser
     : public whisker::source_resolver {
  public:
   explicit whisker_source_parser(
-      templates_map templates_by_path, std::string template_prefix)
+      whisker::source_manager src_manager, std::string template_prefix)
       : template_prefix_(std::move(template_prefix)),
-        src_manager_(
-            std::make_unique<in_memory_source_manager_backend>(
-                std::move(templates_by_path))) {}
+        src_manager_(std::move(src_manager)) {}
 
   resolve_import_result resolve_import(
       std::string_view combined_path,
@@ -1000,7 +996,7 @@ t_whisker_generator::cached_render_state& t_whisker_generator::render_state() {
     whisker::render_options options;
 
     auto source_resolver = std::make_shared<whisker_source_parser>(
-        create_templates_by_path(), template_prefix());
+        template_source_manager(), template_prefix());
     options.src_resolver = source_resolver;
 
     strictness_options strict = strictness();

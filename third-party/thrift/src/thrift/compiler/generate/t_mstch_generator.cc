@@ -15,6 +15,7 @@
  */
 
 #include <thrift/compiler/generate/t_mstch_generator.h>
+#include <thrift/compiler/generate/templates.h>
 
 #include <memory>
 #include <optional>
@@ -34,6 +35,12 @@ using namespace std;
 namespace fs = std::filesystem;
 
 namespace apache::thrift::compiler {
+
+whisker::source_manager t_mstch_generator::template_source_manager() const {
+  return whisker::source_manager{
+      std::make_unique<in_memory_source_manager_backend>(
+          create_templates_by_path())};
+}
 
 bool t_mstch_generator::has_option(const std::string& option) const {
   return has_compiler_option(option);

@@ -62,6 +62,8 @@ class t_mstch_generator : public t_whisker_generator {
    */
   virtual whisker_options render_options() const { return {}; }
 
+  whisker::source_manager template_source_manager() const final;
+
   whisker::map::raw globals(prototype_database&) const override;
 
   using t_whisker_generator::render;

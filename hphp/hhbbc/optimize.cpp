@@ -697,6 +697,8 @@ void do_optimize(const IIndex& index, FuncAnalysis&& ainfo,
                  php::WideFunc& func) {
   FTRACE(2, "{:-^70} {}\n", "Optimize Func", func->name);
 
+  ContextPusher _{index, ainfo.ctx};
+
   bool again;
   Optional<CollectedInfo> collect;
   Optional<VisitContext> visit;
@@ -875,6 +877,7 @@ UpdateBCResult update_bytecode(php::WideFunc& func,
     compressed.second.expand(ent.second);
 
     auto blk = func.blocks()[ent.first].mutate();
+    assertx(!blk->hhbcs.empty());
 
     auto const removing_fatal = [&] {
       auto const& u = ent.second;
@@ -892,7 +895,11 @@ UpdateBCResult update_bytecode(php::WideFunc& func,
         blk->hhbcs = { bc_with_loc(blk->hhbcs.front().srcLoc, bc::Nop {}) };
         set_changed_analyze();
       }
-    } else if (!removing_fatal()) {
+    } else if (!removing_fatal() &&
+               (ent.second.unchangedBcs != blk->hhbcs.size() ||
+                !ent.second.replacedBcs.empty())) {
+      // Don't mark the bytecode as changed if we're not actually
+      // changing anything.
       blk->hhbcs.erase(blk->hhbcs.begin() + ent.second.unchangedBcs,
                        blk->hhbcs.end());
       blk->hhbcs.reserve(blk->hhbcs.size() + ent.second.replacedBcs.size());
@@ -912,8 +919,16 @@ UpdateBCResult update_bytecode(php::WideFunc& func,
       return fatal_block;
     };
     if (blk->fallthrough != ent.second.fallthrough) {
+      // Changing a successor can affect the fixed-point result (for
+      // instance, if we delete an in-edge to a diamond), so we must
+      // re-analyze.
+      if (ent.second.fallthrough == NoBlockId &&
+          !is_fatal_block(*func.blocks()[blk->fallthrough])) {
+        // Changing a fallthrough from a fatal block to another
+        // doesn't count as a change.
+        set_changed_analyze();
+      }
       blk->fallthrough = ent.second.fallthrough;
-      set_changed();
     }
 
     auto hasCf = false;

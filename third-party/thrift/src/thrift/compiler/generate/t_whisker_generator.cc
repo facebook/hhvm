@@ -900,12 +900,6 @@ bool is_last_char(std::string_view data, char c) {
   return !data.empty() && data.back() == c;
 }
 
-void chomp_last_char(std::string* data, char c) {
-  if (is_last_char(*data, c)) {
-    data->pop_back();
-  }
-}
-
 } // namespace
 
 class t_whisker_generator::whisker_source_parser
@@ -985,26 +979,6 @@ class t_whisker_generator::whisker_source_parser
   std::unordered_map<std::string, std::optional<whisker::ast::root>>
       cached_asts_;
 };
-
-/* static */ t_whisker_generator::templates_map
-t_whisker_generator::create_templates_by_path() {
-  templates_map result;
-  for (std::size_t i = 0; i < templates_size; ++i) {
-    auto name = fs_path(
-        templates_name_datas[i],
-        templates_name_datas[i] + templates_name_sizes[i]);
-    name = name.parent_path() / name.stem();
-
-    auto tpl = std::string(
-        templates_content_datas[i],
-        templates_content_datas[i] + templates_content_sizes[i]);
-    // Remove a single '\n' or '\r\n' or '\r' at end, if present.
-    chomp_last_char(&tpl, '\n');
-    chomp_last_char(&tpl, '\r');
-    result.emplace(name.generic_string(), std::move(tpl));
-  }
-  return result;
-}
 
 void t_whisker_generator::initialize_context() {
   context_visitor visitor;

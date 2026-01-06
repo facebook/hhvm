@@ -17,7 +17,6 @@
 #include <thrift/compiler/generate/templates.h>
 #include <thrift/compiler/whisker/parser.h>
 
-#include <unordered_map>
 #include <fmt/std.h>
 #include <gtest/gtest.h>
 
@@ -27,27 +26,9 @@ namespace {
 
 namespace compiler = apache::thrift::compiler;
 
-// Map from template names to template content
-const std::unordered_map<std::string_view, std::string_view>&
-template_content_by_name() {
-  static std::unordered_map<std::string_view, std::string_view> templates;
-  if (templates.empty()) {
-    for (size_t i = 0; i < compiler::templates_size; i++) {
-      std::string_view name{
-          compiler::templates_name_datas[i], compiler::templates_name_sizes[i]};
-      std::string_view content{
-          compiler::templates_content_datas[i],
-          compiler::templates_content_sizes[i]};
-      templates[name] = content;
-    }
-  }
-  return templates;
-}
-
-std::vector<std::string_view> all_template_names() {
-  std::vector<std::string_view> names;
-  names.reserve(template_content_by_name().size());
-  for (const auto& [name, _] : template_content_by_name()) {
+std::vector<std::string> all_template_names() {
+  std::vector<std::string> names;
+  for (const auto& [name, _] : compiler::create_templates_by_path()) {
     names.push_back(name);
   }
   return names;
@@ -55,13 +36,13 @@ std::vector<std::string_view> all_template_names() {
 
 } // namespace
 
-class WhiskerTemplateTest : public testing::TestWithParam<std::string_view> {};
+class WhiskerTemplateTest : public testing::TestWithParam<std::string> {};
 
 TEST_P(WhiskerTemplateTest, WhiskerTemplateIsValid) {
-  std::string_view template_name = GetParam();
-  whisker::source_manager source_manager;
-  source_manager.add_virtual_file(
-      template_name, template_content_by_name().at(template_name));
+  std::string template_name = GetParam();
+  whisker::source_manager source_manager{
+      std::make_unique<compiler::in_memory_source_manager_backend>(
+          compiler::create_templates_by_path())};
   std::optional<whisker::source> source_view =
       source_manager.get_file(template_name);
   ASSERT_TRUE(source_view.has_value());

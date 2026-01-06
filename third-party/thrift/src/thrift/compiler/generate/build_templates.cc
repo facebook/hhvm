@@ -91,6 +91,7 @@ int main(int argc, char** argv) {
   std::cout << "namespace apache {" << endl;
   std::cout << "namespace thrift {" << endl;
   std::cout << "namespace compiler {" << endl;
+  std::cout << "namespace detail {" << endl;
 
   std::cout << endl;
 
@@ -145,6 +146,7 @@ int main(int argc, char** argv) {
 
   std::cout << endl;
 
+  std::cout << "} // namespace detail" << endl;
   std::cout << "} // namespace compiler" << endl;
   std::cout << "} // namespace thrift" << endl;
   std::cout << "} // namespace apache" << endl;

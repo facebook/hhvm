@@ -154,17 +154,6 @@ class t_whisker_generator : public t_generator {
    */
   virtual strictness_options strictness() const { return strictness_options(); }
 
-  using templates_map = std::map<std::string, std::string, std::less<>>;
-  /**
-   * Creates a mapping from Whisker source file paths within templates/ to
-   * their text (source) content.
-   *
-   * This mapping is used to resolve the source code for the root Whisker
-   * source file used by this renderer, as well as any partial applications
-   * seen during rendering.
-   */
-  static templates_map create_templates_by_path();
-
   /**
    * Returns the rendered output of a Whisker template source file evaluated
    * with the provided context object.

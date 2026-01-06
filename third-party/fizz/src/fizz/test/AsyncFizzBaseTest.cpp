@@ -157,7 +157,6 @@ class AsyncFizzBaseTest : public testing::Test, public AsyncFizzBase {
   MockAsyncTransport* socket_;
   StrictMock<folly::test::MockReadCallback> readCallback_;
   ReadCallback* transportReadCallback_{nullptr};
-  EventRecvmsgCallback* transportRecvCallback_{nullptr};
   AsyncSocketException ase_{AsyncSocketException::UNKNOWN, "unit test"};
   AsyncSocketException eof_{AsyncSocketException::END_OF_FILE, "unit test eof"};
   Sequence readBufSeq_;

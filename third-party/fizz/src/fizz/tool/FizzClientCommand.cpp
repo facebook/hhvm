@@ -88,14 +88,6 @@ void printUsage() {
     << "                          (Note: Setting ech configs implicitly enables ECH.)\n"
     << " -echbase64 echConfigList (base64 encoded string of echconfigs.)"
     << "                          (The echconfigs file argument must match the ECH Config List format specified in the ECH RFC.)\n"
-#ifdef FIZZ_TOOL_ENABLE_IO_URING
-    << " -io_uring                (use io_uring for I/O. Default: false)\n"
-    << " -io_uring_capacity N     (backend capacity for io_uring. Default: 128)\n"
-    << " -io_uring_max_submit N   (maximum submit size for io_uring. Default: 64)\n"
-    << " -io_uring_max_get N      (maximum get size for io_uring. Default: no limit)\n"
-    << " -io_uring_register_fds   (use registered fds with io_uring. Default: false)\n"
-    << " -io_uring_async_recv     (use async recv for io_uring. Default: false)\n"
-#endif
   ;
   // clang-format on
 }
@@ -115,8 +107,7 @@ class Connection : public AsyncSocket::ConnectCallback,
       bool willResume,
       std::string proxyTarget,
       std::shared_ptr<ClientExtensions> extensions,
-      folly::Optional<std::vector<ech::ParsedECHConfig>> echConfigs,
-      bool registerEventCallback)
+      folly::Optional<std::vector<ech::ParsedECHConfig>> echConfigs)
       : evb_(evb),
         clientContext_(clientContext),
         sni_(sni),
@@ -124,8 +115,7 @@ class Connection : public AsyncSocket::ConnectCallback,
         willResume_(willResume),
         proxyTarget_(proxyTarget),
         extensions_(extensions),
-        echConfigs_(std::move(echConfigs)),
-        registerEventCallback_(registerEventCallback) {}
+        echConfigs_(std::move(echConfigs)) {}
 
   void connect(const SocketAddress& addr) {
     sock_ = AsyncSocket::UniquePtr(new AsyncSocket(evb_));
@@ -165,7 +155,6 @@ class Connection : public AsyncSocket::ConnectCallback,
 
   void doHandshake() {
     AsyncFizzBase::TransportOptions transportOpts;
-    transportOpts.registerEventCallback = registerEventCallback_;
     transport_ = AsyncFizzClient::UniquePtr(new AsyncFizzClient(
         std::move(sock_),
         clientContext_,
@@ -440,7 +429,6 @@ class Connection : public AsyncSocket::ConnectCallback,
   std::shared_ptr<ClientExtensions> extensions_;
   std::unique_ptr<KeyLogWriter> keyLogger_;
   folly::Optional<std::vector<ech::ParsedECHConfig>> echConfigs_;
-  bool registerEventCallback_{false};
 };
 
 class ResumptionPskCache : public BasicPskCache {
@@ -542,12 +530,6 @@ int fizzClientCommand(const std::vector<std::string>& args) {
   bool ech = false;
   std::string echConfigsFile;
   std::string echConfigsBase64;
-  bool uring = false;
-  bool uringAsync = false;
-  bool uringRegisterFds = false;
-  int32_t uringCapacity = 128;
-  int32_t uringMaxSubmit = 64;
-  int32_t uringMaxGet = -1;
   uint16_t padding = 0;
 
   // clang-format off
@@ -621,24 +603,6 @@ int fizzClientCommand(const std::vector<std::string>& args) {
     {"-echbase64", {true, [&echConfigsBase64](const std::string& arg) {
         echConfigsBase64 = arg;
     }}}
-#ifdef FIZZ_TOOL_ENABLE_IO_URING
-    ,{"-io_uring", {false, [&uring](const std::string&) { uring = true; }}},
-    {"-io_uring_async_recv", {false, [&uringAsync](const std::string&) {
-        uringAsync = true;
-    }}},
-    {"-io_uring_register_fds", {false, [&uringRegisterFds](const std::string&) {
-        uringRegisterFds = true;
-    }}},
-    {"-io_uring_capacity", {true, [&uringCapacity](const std::string& arg) {
-        uringCapacity = folly::to<int32_t>(arg);
-    }}},
-    {"-io_uring_max_get", {true, [&uringMaxGet](const std::string& arg) {
-        uringMaxGet = folly::to<int32_t>(arg);
-    }}},
-    {"-io_uring_max_submit", {true, [&uringMaxSubmit](const std::string& arg) {
-        uringMaxSubmit = folly::to<int32_t>(arg);
-    }}}
-#endif
   };
   // clang-format on
 
@@ -658,21 +622,7 @@ int fizzClientCommand(const std::vector<std::string>& args) {
     return 1;
   }
 
-  EventBase evb(
-      folly::EventBase::Options().setBackendFactory([uring,
-                                                     uringAsync,
-                                                     uringRegisterFds,
-                                                     uringCapacity,
-                                                     uringMaxSubmit,
-                                                     uringMaxGet] {
-        return setupBackend(
-            uring,
-            uringAsync,
-            uringRegisterFds,
-            uringCapacity,
-            uringMaxSubmit,
-            uringMaxGet);
-      }));
+  EventBase evb{};
 
   auto clientContext = std::make_shared<FizzClientContext>();
 
@@ -841,8 +791,7 @@ int fizzClientCommand(const std::vector<std::string>& args) {
         reconnect,
         proxiedHost,
         extensions,
-        std::move(echConfigs),
-        uringAsync);
+        std::move(echConfigs));
     Connection resumptionConn(
         &evb,
         clientContext,
@@ -851,8 +800,7 @@ int fizzClientCommand(const std::vector<std::string>& args) {
         false,
         proxiedHost,
         extensions,
-        folly::none,
-        uringAsync);
+        folly::none);
 
     Connection* inputTarget = &conn;
     if (reconnect) {

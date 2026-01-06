@@ -28,10 +28,6 @@
 #include <string>
 #include <vector>
 
-#ifdef FIZZ_TOOL_ENABLE_IO_URING
-#include <folly/experimental/io/IoUringBackend.h>
-#endif
-
 namespace fizz {
 namespace tool {
 

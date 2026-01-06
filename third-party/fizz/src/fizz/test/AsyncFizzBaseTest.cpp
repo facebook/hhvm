@@ -27,14 +27,13 @@ static const uint32_t kPartialWriteThreshold = 128 * 1024;
  * The test class itself implements AsyncFizzBase so that it has access to the
  * app data interfaces.
  */
-template <typename T>
 class AsyncFizzBaseTest : public testing::Test, public AsyncFizzBase {
  public:
   AsyncFizzBaseTest()
       : testing::Test(),
         AsyncFizzBase(
             AsyncTransportWrapper::UniquePtr(new MockAsyncTransport()),
-            T::Options) {
+            TransportOptions{}) {
     socket_ = getUnderlyingTransport<MockAsyncTransport>();
     ON_CALL(*this, good()).WillByDefault(Return(true));
     ON_CALL(*this, isReplaySafe()).WillByDefault(Return(true));
@@ -46,7 +45,6 @@ class AsyncFizzBaseTest : public testing::Test, public AsyncFizzBase {
   }
 
   void TearDown() override {
-    EXPECT_CALL(*socket_, setEventCallback(nullptr));
     EXPECT_CALL(*socket_, setReadCB(nullptr));
   }
 
@@ -127,21 +125,8 @@ class AsyncFizzBaseTest : public testing::Test, public AsyncFizzBase {
   }
 
   void expectTransportReadCallback() {
-    if (T::Options.registerEventCallback) {
-      EXPECT_CALL(*socket_, setEventCallback(_))
-          .WillOnce(SaveArg<0>(&transportRecvCallback_));
-    }
     EXPECT_CALL(*socket_, setReadCB(_))
         .WillOnce(SaveArg<0>(&transportReadCallback_));
-  }
-
-  void checkCallbackConsistency() {
-    if (T::Options.registerEventCallback &&
-        (transportReadCallback_ || transportRecvCallback_)) {
-      EXPECT_EQ(
-          dynamic_cast<AsyncFizzBaseTest<T>*>(transportReadCallback_),
-          dynamic_cast<AsyncFizzBaseTest<T>*>(transportRecvCallback_));
-    }
   }
 
   void expectWrite(
@@ -276,30 +261,11 @@ MATCHER_P(BufMatches, expected, "") {
   return eq(*arg, *expected);
 }
 
-struct ReadCB {
-  static const AsyncFizzBase::TransportOptions Options;
-};
-
-const AsyncFizzBase::TransportOptions ReadCB::Options = {
-    false, // registerEventCallback
-};
-
-struct RecvCB {
-  static const AsyncFizzBase::TransportOptions Options;
-};
-
-const AsyncFizzBase::TransportOptions RecvCB::Options = {
-    true, // registerEventCallback
-};
-
-using TestTypes = ::testing::Types<ReadCB, RecvCB>;
-TYPED_TEST_SUITE(AsyncFizzBaseTest, TestTypes);
-
-TYPED_TEST(AsyncFizzBaseTest, TestIsFizz) {
+TEST_F(AsyncFizzBaseTest, TestIsFizz) {
   EXPECT_EQ(this->getSecurityProtocol(), "Fizz");
 }
 
-TYPED_TEST(AsyncFizzBaseTest, TestAppBytesWritten) {
+TEST_F(AsyncFizzBaseTest, TestAppBytesWritten) {
   EXPECT_EQ(this->getAppBytesWritten(), 0);
 
   auto four = IOBuf::copyBuffer("4444");
@@ -313,7 +279,7 @@ TYPED_TEST(AsyncFizzBaseTest, TestAppBytesWritten) {
   EXPECT_EQ(this->getAppBytesWritten(), 14);
 }
 
-TYPED_TEST(AsyncFizzBaseTest, TestAppBytesReceived) {
+TEST_F(AsyncFizzBaseTest, TestAppBytesReceived) {
   EXPECT_EQ(this->getAppBytesReceived(), 0);
 
   auto four = IOBuf::copyBuffer("4444");
@@ -327,7 +293,7 @@ TYPED_TEST(AsyncFizzBaseTest, TestAppBytesReceived) {
   EXPECT_EQ(this->getAppBytesReceived(), 14);
 }
 
-TYPED_TEST(AsyncFizzBaseTest, TestAppBytesBuffered) {
+TEST_F(AsyncFizzBaseTest, TestAppBytesBuffered) {
   AsyncTransportWrapper::WriteCallback* wcb;
   this->expectWrite('a', kPartialWriteThreshold, &wcb);
   this->expectWrite('a', 25);
@@ -362,14 +328,14 @@ TYPED_TEST(AsyncFizzBaseTest, TestAppBytesBuffered) {
   EXPECT_EQ(this->getAppBytesWritten(), 2 * kPartialWriteThreshold + 50);
 }
 
-TYPED_TEST(AsyncFizzBaseTest, TestWrite) {
+TEST_F(AsyncFizzBaseTest, TestWrite) {
   auto buf = IOBuf::copyBuffer("buf");
 
   EXPECT_CALL(*this, writeAppDataInternal(_, _, _));
   this->writeChain(nullptr, std::move(buf));
 }
 
-TYPED_TEST(AsyncFizzBaseTest, TestReadErr) {
+TEST_F(AsyncFizzBaseTest, TestReadErr) {
   this->setReadCB(&this->readCallback_);
 
   EXPECT_CALL(this->readCallback_, readErr_(_));
@@ -378,12 +344,12 @@ TYPED_TEST(AsyncFizzBaseTest, TestReadErr) {
   EXPECT_EQ(this->getReadCallback(), nullptr);
 }
 
-TYPED_TEST(AsyncFizzBaseTest, TestReadErrNoCallback) {
+TEST_F(AsyncFizzBaseTest, TestReadErrNoCallback) {
   EXPECT_CALL(*this->socket_, close());
   this->deliverError(this->ase_);
 }
 
-TYPED_TEST(AsyncFizzBaseTest, TestReadErrAsync) {
+TEST_F(AsyncFizzBaseTest, TestReadErrAsync) {
   ON_CALL(*this, good()).WillByDefault(Return(false));
   this->deliverError(this->ase_);
 
@@ -392,7 +358,7 @@ TYPED_TEST(AsyncFizzBaseTest, TestReadErrAsync) {
   EXPECT_EQ(this->getReadCallback(), nullptr);
 }
 
-TYPED_TEST(AsyncFizzBaseTest, TestReadEOF) {
+TEST_F(AsyncFizzBaseTest, TestReadEOF) {
   this->setReadCB(&this->readCallback_);
 
   EXPECT_CALL(this->readCallback_, readEOF_());
@@ -400,11 +366,11 @@ TYPED_TEST(AsyncFizzBaseTest, TestReadEOF) {
   EXPECT_EQ(this->getReadCallback(), nullptr);
 }
 
-TYPED_TEST(AsyncFizzBaseTest, TestReadEOFNoCallback) {
+TEST_F(AsyncFizzBaseTest, TestReadEOFNoCallback) {
   this->deliverError(this->eof_);
 }
 
-TYPED_TEST(AsyncFizzBaseTest, TestReadEOFDelayedCallback) {
+TEST_F(AsyncFizzBaseTest, TestReadEOFDelayedCallback) {
   this->deliverError(this->eof_);
 
   EXPECT_CALL(this->readCallback_, readEOF_());
@@ -412,7 +378,7 @@ TYPED_TEST(AsyncFizzBaseTest, TestReadEOFDelayedCallback) {
   EXPECT_EQ(this->getReadCallback(), nullptr);
 }
 
-TYPED_TEST(AsyncFizzBaseTest, TestReadEOFSetCallbackAgain) {
+TEST_F(AsyncFizzBaseTest, TestReadEOFSetCallbackAgain) {
   this->expectTransportReadCallback();
   this->setReadCB(&this->readCallback_);
 
@@ -429,7 +395,7 @@ TYPED_TEST(AsyncFizzBaseTest, TestReadEOFSetCallbackAgain) {
   this->setReadCB(&this->readCallback_);
 }
 
-TYPED_TEST(AsyncFizzBaseTest, TestMovableBuffer) {
+TEST_F(AsyncFizzBaseTest, TestMovableBuffer) {
   EXPECT_CALL(this->readCallback_, isBufferMovable_())
       .WillRepeatedly(Return(true));
 
@@ -445,7 +411,7 @@ TYPED_TEST(AsyncFizzBaseTest, TestMovableBuffer) {
   this->deliverAppData(buf2->clone());
 }
 
-TYPED_TEST(AsyncFizzBaseTest, TestMovableBufferAsyncCallback) {
+TEST_F(AsyncFizzBaseTest, TestMovableBufferAsyncCallback) {
   EXPECT_CALL(this->readCallback_, isBufferMovable_())
       .WillRepeatedly(Return(true));
 
@@ -466,7 +432,7 @@ TYPED_TEST(AsyncFizzBaseTest, TestMovableBufferAsyncCallback) {
   this->deliverAppData(buf3->clone());
 }
 
-TYPED_TEST(AsyncFizzBaseTest, TestReadBufferLarger) {
+TEST_F(AsyncFizzBaseTest, TestReadBufferLarger) {
   EXPECT_CALL(this->readCallback_, isBufferMovable_())
       .WillRepeatedly(Return(false));
 
@@ -478,7 +444,7 @@ TYPED_TEST(AsyncFizzBaseTest, TestReadBufferLarger) {
   this->deliverAppData(std::move(buf));
 }
 
-TYPED_TEST(AsyncFizzBaseTest, TestReadBufferExact) {
+TEST_F(AsyncFizzBaseTest, TestReadBufferExact) {
   EXPECT_CALL(this->readCallback_, isBufferMovable_())
       .WillRepeatedly(Return(false));
 
@@ -490,7 +456,7 @@ TYPED_TEST(AsyncFizzBaseTest, TestReadBufferExact) {
   this->deliverAppData(std::move(buf));
 }
 
-TYPED_TEST(AsyncFizzBaseTest, TestReadBufferSmaller) {
+TEST_F(AsyncFizzBaseTest, TestReadBufferSmaller) {
   EXPECT_CALL(this->readCallback_, isBufferMovable_())
       .WillRepeatedly(Return(false));
 
@@ -504,7 +470,7 @@ TYPED_TEST(AsyncFizzBaseTest, TestReadBufferSmaller) {
   this->deliverAppData(std::move(buf));
 }
 
-TYPED_TEST(AsyncFizzBaseTest, TestReadBufferAsync) {
+TEST_F(AsyncFizzBaseTest, TestReadBufferAsync) {
   EXPECT_CALL(this->readCallback_, isBufferMovable_())
       .WillRepeatedly(Return(false));
 
@@ -523,7 +489,7 @@ TYPED_TEST(AsyncFizzBaseTest, TestReadBufferAsync) {
   this->deliverAppData(std::move(buf3));
 }
 
-TYPED_TEST(AsyncFizzBaseTest, TestReadBufferZero) {
+TEST_F(AsyncFizzBaseTest, TestReadBufferZero) {
   EXPECT_CALL(this->readCallback_, isBufferMovable_())
       .WillRepeatedly(Return(false));
 
@@ -536,7 +502,7 @@ TYPED_TEST(AsyncFizzBaseTest, TestReadBufferZero) {
   this->deliverAppData(std::move(buf));
 }
 
-TYPED_TEST(AsyncFizzBaseTest, TestReadBufferPause) {
+TEST_F(AsyncFizzBaseTest, TestReadBufferPause) {
   EXPECT_CALL(this->readCallback_, isBufferMovable_())
       .WillRepeatedly(Return(false));
 
@@ -557,7 +523,7 @@ TYPED_TEST(AsyncFizzBaseTest, TestReadBufferPause) {
   this->setReadCB(&this->readCallback_);
 }
 
-TYPED_TEST(AsyncFizzBaseTest, TestReadBufferSwitchToNewMovable) {
+TEST_F(AsyncFizzBaseTest, TestReadBufferSwitchToNewMovable) {
   StrictMock<folly::test::MockReadCallback> movableCallback;
   EXPECT_CALL(this->readCallback_, isBufferMovable_())
       .WillRepeatedly(Return(false));
@@ -580,7 +546,7 @@ TYPED_TEST(AsyncFizzBaseTest, TestReadBufferSwitchToNewMovable) {
   this->deliverAppData(std::move(buf));
 }
 
-TYPED_TEST(AsyncFizzBaseTest, TestReadBufferSwitchToMovableBehavior) {
+TEST_F(AsyncFizzBaseTest, TestReadBufferSwitchToMovableBehavior) {
   this->setReadCB(&this->readCallback_);
 
   auto buf = IOBuf::copyBuffer("hello, world!");
@@ -602,18 +568,16 @@ TYPED_TEST(AsyncFizzBaseTest, TestReadBufferSwitchToMovableBehavior) {
   this->deliverAppData(std::move(buf));
 }
 
-TYPED_TEST(AsyncFizzBaseTest, TestTransportReadBufMovable) {
+TEST_F(AsyncFizzBaseTest, TestTransportReadBufMovable) {
   this->expectTransportReadCallback();
   this->startTransportReads();
-  this->checkCallbackConsistency();
   EXPECT_TRUE(this->transportReadCallback_->isBufferMovable());
 }
 
-TYPED_TEST(AsyncFizzBaseTest, TestTransportReadBufMove) {
+TEST_F(AsyncFizzBaseTest, TestTransportReadBufMove) {
   IOBufEqualTo eq;
   this->expectTransportReadCallback();
   this->startTransportReads();
-  this->checkCallbackConsistency();
 
   auto buf = IOBuf::copyBuffer("hello");
   EXPECT_CALL(*this, transportDataAvailable());
@@ -626,13 +590,12 @@ TYPED_TEST(AsyncFizzBaseTest, TestTransportReadBufMove) {
       eq(*IOBuf::copyBuffer("helloworld"), *this->transportReadBuf_.front()));
 }
 
-TYPED_TEST(AsyncFizzBaseTest, TestTransportReadBufAvail) {
+TEST_F(AsyncFizzBaseTest, TestTransportReadBufAvail) {
   void* buf;
   size_t len;
   IOBufEqualTo eq;
   this->expectTransportReadCallback();
   this->startTransportReads();
-  this->checkCallbackConsistency();
 
   EXPECT_CALL(*this, transportDataAvailable());
   this->transportReadCallback_->getReadBuffer(&buf, &len);
@@ -652,19 +615,17 @@ TYPED_TEST(AsyncFizzBaseTest, TestTransportReadBufAvail) {
       eq(*IOBuf::copyBuffer("hellogoodbye"), *this->transportReadBuf_.front()));
 }
 
-TYPED_TEST(AsyncFizzBaseTest, TestTransportReadError) {
+TEST_F(AsyncFizzBaseTest, TestTransportReadError) {
   this->expectTransportReadCallback();
   this->startTransportReads();
-  this->checkCallbackConsistency();
 
   EXPECT_CALL(*this, transportError(_));
   this->transportReadCallback_->readErr(this->ase_);
 }
 
-TYPED_TEST(AsyncFizzBaseTest, TestTransportReadEOF) {
+TEST_F(AsyncFizzBaseTest, TestTransportReadEOF) {
   this->expectTransportReadCallback();
   this->startTransportReads();
-  this->checkCallbackConsistency();
 
   EXPECT_CALL(*this, transportError(_))
       .WillOnce(Invoke([](const AsyncSocketException& ex) {
@@ -673,10 +634,9 @@ TYPED_TEST(AsyncFizzBaseTest, TestTransportReadEOF) {
   this->transportReadCallback_->readEOF();
 }
 
-TYPED_TEST(AsyncFizzBaseTest, TestTransportReadBufPause) {
+TEST_F(AsyncFizzBaseTest, TestTransportReadBufPause) {
   this->expectTransportReadCallback();
   this->startTransportReads();
-  this->checkCallbackConsistency();
 
   auto bigBuf = IOBuf::create(1024 * 1024);
   bigBuf->append(1024 * 1024);
@@ -684,19 +644,17 @@ TYPED_TEST(AsyncFizzBaseTest, TestTransportReadBufPause) {
   EXPECT_CALL(*this, transportDataAvailable());
   this->transportReadCallback_->readBufferAvailable(std::move(bigBuf));
   EXPECT_EQ(this->transportReadCallback_, nullptr);
-  this->checkCallbackConsistency();
 
   this->expectTransportReadCallback();
   this->setReadCB(&this->readCallback_);
   EXPECT_NE(this->transportReadCallback_, nullptr);
 }
 
-TYPED_TEST(AsyncFizzBaseTest, TestAppReadBufPause) {
+TEST_F(AsyncFizzBaseTest, TestAppReadBufPause) {
   EXPECT_CALL(this->readCallback_, isBufferMovable_())
       .WillRepeatedly(Return(true));
   this->expectTransportReadCallback();
   this->startTransportReads();
-  this->checkCallbackConsistency();
 
   auto bigBuf = IOBuf::create(1024 * 1024);
   bigBuf->append(1024 * 1024);
@@ -710,18 +668,18 @@ TYPED_TEST(AsyncFizzBaseTest, TestAppReadBufPause) {
   EXPECT_NE(this->transportReadCallback_, nullptr);
 }
 
-TYPED_TEST(AsyncFizzBaseTest, TestWriteSuccess) {
+TEST_F(AsyncFizzBaseTest, TestWriteSuccess) {
   AsyncTransportWrapper::WriteCallback* writeCallback = this;
   writeCallback->writeSuccess();
 }
 
-TYPED_TEST(AsyncFizzBaseTest, TestWriteError) {
+TEST_F(AsyncFizzBaseTest, TestWriteError) {
   AsyncTransportWrapper::WriteCallback* writeCallback = this;
   EXPECT_CALL(*this, transportError(_));
   writeCallback->writeErr(0, this->ase_);
 }
 
-TYPED_TEST(AsyncFizzBaseTest, TestHandshakeTimeout) {
+TEST_F(AsyncFizzBaseTest, TestHandshakeTimeout) {
   MockTimeoutManager manager;
   ON_CALL(manager, isInTimeoutManagerThread()).WillByDefault(Return(true));
   this->attachTimeoutManager(&manager);
@@ -738,15 +696,13 @@ TYPED_TEST(AsyncFizzBaseTest, TestHandshakeTimeout) {
   timeout->timeoutExpired();
 }
 
-TYPED_TEST(AsyncFizzBaseTest, TestAttachEventBase) {
+TEST_F(AsyncFizzBaseTest, TestAttachEventBase) {
   EventBase evb;
   this->expectTransportReadCallback();
   this->startTransportReads();
-  this->checkCallbackConsistency();
   ON_CALL(*this->socket_, good()).WillByDefault(Return(true));
   Sequence s;
 
-  EXPECT_CALL(*this->socket_, setEventCallback(nullptr)).InSequence(s);
   EXPECT_CALL(*this->socket_, setReadCB(nullptr)).InSequence(s);
   EXPECT_CALL(*this->socket_, detachEventBase()).InSequence(s);
   EXPECT_CALL(*this, pauseEvents()).InSequence(s);
@@ -754,24 +710,18 @@ TYPED_TEST(AsyncFizzBaseTest, TestAttachEventBase) {
 
   EXPECT_CALL(*this->socket_, attachEventBase(&evb)).InSequence(s);
   EXPECT_CALL(*this, resumeEvents()).InSequence(s);
-  if (TypeParam::Options.registerEventCallback) {
-    EXPECT_CALL(*this->socket_, setEventCallback(this->transportRecvCallback_))
-        .InSequence(s);
-  }
   EXPECT_CALL(*this->socket_, setReadCB(this->transportReadCallback_))
       .InSequence(s);
   this->attachEventBase(&evb);
 }
 
-TYPED_TEST(AsyncFizzBaseTest, TestAttachEventBaseWithReadCb) {
+TEST_F(AsyncFizzBaseTest, TestAttachEventBaseWithReadCb) {
   EventBase evb;
   this->expectTransportReadCallback();
   this->startTransportReads();
-  this->checkCallbackConsistency();
   ON_CALL(*this->socket_, good()).WillByDefault(Return(false));
   Sequence s;
 
-  EXPECT_CALL(*this->socket_, setEventCallback(nullptr)).InSequence(s);
   EXPECT_CALL(*this->socket_, setReadCB(nullptr)).InSequence(s);
   EXPECT_CALL(*this->socket_, detachEventBase()).InSequence(s);
   EXPECT_CALL(*this, pauseEvents()).InSequence(s);
@@ -781,16 +731,12 @@ TYPED_TEST(AsyncFizzBaseTest, TestAttachEventBaseWithReadCb) {
   this->setReadCB(&this->readCallback_);
   EXPECT_CALL(*this->socket_, attachEventBase(&evb)).InSequence(s);
   EXPECT_CALL(*this, resumeEvents()).InSequence(s);
-  if (TypeParam::Options.registerEventCallback) {
-    EXPECT_CALL(*this->socket_, setEventCallback(this->transportRecvCallback_))
-        .InSequence(s);
-  }
   EXPECT_CALL(*this->socket_, setReadCB(this->transportReadCallback_))
       .InSequence(s);
   this->attachEventBase(&evb);
 }
 
-TYPED_TEST(AsyncFizzBaseTest, TestSecretAvailable) {
+TEST_F(AsyncFizzBaseTest, TestSecretAvailable) {
   MockSecretCallback cb;
   this->setSecretCallback(&cb);
   auto makeSecret = [](std::string secret, SecretType type) {
@@ -865,7 +811,7 @@ TYPED_TEST(AsyncFizzBaseTest, TestSecretAvailable) {
   this->secretAvailable(serverAppSecret);
 }
 
-TYPED_TEST(AsyncFizzBaseTest, TestWriteBuffering) {
+TEST_F(AsyncFizzBaseTest, TestWriteBuffering) {
   AsyncTransportWrapper::WriteCallback* wcb;
 
   this->expectWrite('a', kPartialWriteThreshold, &wcb);
@@ -876,7 +822,7 @@ TYPED_TEST(AsyncFizzBaseTest, TestWriteBuffering) {
   wcb->writeSuccess();
 }
 
-TYPED_TEST(AsyncFizzBaseTest, TestWriteBufferingTransportBuffer) {
+TEST_F(AsyncFizzBaseTest, TestWriteBufferingTransportBuffer) {
   AsyncTransportWrapper::WriteCallback* wcb;
 
   ON_CALL(*this->socket_, getRawBytesBuffered()).WillByDefault(Return(25));
@@ -890,13 +836,13 @@ TYPED_TEST(AsyncFizzBaseTest, TestWriteBufferingTransportBuffer) {
   wcb->writeSuccess();
 }
 
-TYPED_TEST(AsyncFizzBaseTest, TestNoWriteBufferingUnshared) {
+TEST_F(AsyncFizzBaseTest, TestNoWriteBufferingUnshared) {
   this->expectWrite('a', kPartialWriteThreshold * 10);
   auto buf = getBuf('a', kPartialWriteThreshold * 10);
   this->writeChain(nullptr, std::move(buf));
 }
 
-TYPED_TEST(AsyncFizzBaseTest, TestNoWriteBufferingConnecting) {
+TEST_F(AsyncFizzBaseTest, TestNoWriteBufferingConnecting) {
   EXPECT_CALL(*this, connecting()).WillRepeatedly(Return(true));
 
   this->expectWrite('a', kPartialWriteThreshold * 10);
@@ -904,7 +850,7 @@ TYPED_TEST(AsyncFizzBaseTest, TestNoWriteBufferingConnecting) {
   this->writeChain(nullptr, buf->clone());
 }
 
-TYPED_TEST(AsyncFizzBaseTest, TestNoWriteBufferingReplayUnsafe) {
+TEST_F(AsyncFizzBaseTest, TestNoWriteBufferingReplayUnsafe) {
   EXPECT_CALL(*this, isReplaySafe()).WillRepeatedly(Return(false));
 
   this->expectWrite('a', kPartialWriteThreshold * 10);
@@ -912,7 +858,7 @@ TYPED_TEST(AsyncFizzBaseTest, TestNoWriteBufferingReplayUnsafe) {
   this->writeChain(nullptr, buf->clone());
 }
 
-TYPED_TEST(AsyncFizzBaseTest, TestWriteBufferingUnbufferedAfter) {
+TEST_F(AsyncFizzBaseTest, TestWriteBufferingUnbufferedAfter) {
   AsyncTransportWrapper::WriteCallback* wcb;
 
   this->expectWrite('a', kPartialWriteThreshold, &wcb);
@@ -926,7 +872,7 @@ TYPED_TEST(AsyncFizzBaseTest, TestWriteBufferingUnbufferedAfter) {
   this->writeChain(nullptr, getBuf('b', 100));
 }
 
-TYPED_TEST(AsyncFizzBaseTest, TestWriteBufferingSmallWritesFollowing) {
+TEST_F(AsyncFizzBaseTest, TestWriteBufferingSmallWritesFollowing) {
   AsyncTransportWrapper::WriteCallback* wcb;
 
   this->expectWrite('a', kPartialWriteThreshold, &wcb);
@@ -944,7 +890,7 @@ TYPED_TEST(AsyncFizzBaseTest, TestWriteBufferingSmallWritesFollowing) {
   wcb->writeSuccess();
 }
 
-TYPED_TEST(AsyncFizzBaseTest, TestWriteBufferingSuccessCallbacks) {
+TEST_F(AsyncFizzBaseTest, TestWriteBufferingSuccessCallbacks) {
   AsyncTransportWrapper::WriteCallback* wcb;
   StrictMock<folly::test::MockWriteCallback> cb1;
   StrictMock<folly::test::MockWriteCallback> cb2;
@@ -964,7 +910,7 @@ TYPED_TEST(AsyncFizzBaseTest, TestWriteBufferingSuccessCallbacks) {
   wcb->writeSuccess();
 }
 
-TYPED_TEST(AsyncFizzBaseTest, TestWriteBufferingError) {
+TEST_F(AsyncFizzBaseTest, TestWriteBufferingError) {
   AsyncTransportWrapper::WriteCallback* wcb;
   StrictMock<folly::test::MockWriteCallback> cb1;
   StrictMock<folly::test::MockWriteCallback> cb2;
@@ -982,7 +928,7 @@ TYPED_TEST(AsyncFizzBaseTest, TestWriteBufferingError) {
   wcb->writeErr(kPartialWriteThreshold, this->ase_);
 }
 
-TYPED_TEST(AsyncFizzBaseTest, TestWriteBufferingMixedSuccessError) {
+TEST_F(AsyncFizzBaseTest, TestWriteBufferingMixedSuccessError) {
   AsyncTransportWrapper::WriteCallback* wcb;
   AsyncTransportWrapper::WriteCallback* wcb2;
   StrictMock<folly::test::MockWriteCallback> cb1;
@@ -1009,7 +955,7 @@ TYPED_TEST(AsyncFizzBaseTest, TestWriteBufferingMixedSuccessError) {
   wcb2->writeErr(kPartialWriteThreshold, this->ase_);
 }
 
-TYPED_TEST(AsyncFizzBaseTest, TestWriteBufferingCork) {
+TEST_F(AsyncFizzBaseTest, TestWriteBufferingCork) {
   EXPECT_CALL(*this, writeAppDataInternal(_, _, _))
       .InSequence(this->writeSeq_)
       .WillOnce(Invoke([](folly::AsyncTransportWrapper::WriteCallback* callback,
@@ -1034,7 +980,7 @@ TYPED_TEST(AsyncFizzBaseTest, TestWriteBufferingCork) {
   this->writeChain(nullptr, buf->clone());
 }
 
-TYPED_TEST(AsyncFizzBaseTest, TestWriteBufferingWriteInCallback) {
+TEST_F(AsyncFizzBaseTest, TestWriteBufferingWriteInCallback) {
   AsyncTransportWrapper::WriteCallback* wcb;
   StrictMock<folly::test::MockWriteCallback> cb;
 
@@ -1053,7 +999,7 @@ TYPED_TEST(AsyncFizzBaseTest, TestWriteBufferingWriteInCallback) {
   wcb->writeSuccess();
 }
 
-TYPED_TEST(AsyncFizzBaseTest, TestWriteBufferingCloseInCallback) {
+TEST_F(AsyncFizzBaseTest, TestWriteBufferingCloseInCallback) {
   AsyncTransportWrapper::WriteCallback* wcb;
   StrictMock<folly::test::MockWriteCallback> cb1, cb2;
 
@@ -1079,7 +1025,7 @@ TYPED_TEST(AsyncFizzBaseTest, TestWriteBufferingCloseInCallback) {
   wcb->writeSuccess();
 }
 
-TYPED_TEST(AsyncFizzBaseTest, TestAlignedRecordReads) {
+TEST_F(AsyncFizzBaseTest, TestAlignedRecordReads) {
   this->setHandshakeRecordAlignedReads(true);
 
   this->expectTransportReadCallback();
@@ -1131,7 +1077,7 @@ TYPED_TEST(AsyncFizzBaseTest, TestAlignedRecordReads) {
   EXPECT_GE(len, 1460);
 }
 
-TYPED_TEST(AsyncFizzBaseTest, TestKeyUpdate) {
+TEST_F(AsyncFizzBaseTest, TestKeyUpdate) {
   size_t threshold = 20;
   size_t small_write = 15;
   size_t big_write = threshold;

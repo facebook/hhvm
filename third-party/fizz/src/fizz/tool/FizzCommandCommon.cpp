@@ -58,30 +58,6 @@ int parseArguments(
   }
   return 0;
 }
-std::unique_ptr<folly::EventBaseBackendBase> setupBackend(
-    [[maybe_unused]] bool uring,
-    [[maybe_unused]] bool uringAsync,
-    [[maybe_unused]] bool uringRegisterFds,
-    [[maybe_unused]] int32_t uringCapacity,
-    [[maybe_unused]] int32_t uringMaxSubmit,
-    [[maybe_unused]] int32_t uringMaxGet) {
-#ifdef FIZZ_TOOL_ENABLE_IO_URING
-  if (uring) {
-    try {
-      folly::PollIoBackend::Options options;
-      options.setCapacity(static_cast<size_t>(uringCapacity))
-          .setMaxSubmit(static_cast<size_t>(uringMaxSubmit))
-          .setMaxGet(static_cast<size_t>(uringMaxGet))
-          .setUseRegisteredFds(uringRegisterFds);
-      return std::make_unique<folly::IoUringBackend>(options);
-    } catch (const std::exception& e) {
-      LOG(ERROR) << "Failed to create io_uring backend: " << e.what();
-      std::exit(1);
-    }
-  }
-#endif
-  return folly::EventBase::getDefaultBackend();
-}
 
 TerminalInputHandler::TerminalInputHandler(
     EventBase* evb,

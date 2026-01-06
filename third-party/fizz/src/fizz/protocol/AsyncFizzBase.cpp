@@ -38,7 +38,6 @@ AsyncFizzBase::AsyncFizzBase(
 }
 
 AsyncFizzBase::~AsyncFizzBase() {
-  transport_->setEventCallback(nullptr);
   transport_->setReadCB(nullptr);
   if (tailWriteRequest_) {
     tailWriteRequest_->unlinkFromBase();
@@ -47,7 +46,6 @@ AsyncFizzBase::~AsyncFizzBase() {
 
 void AsyncFizzBase::destroy() {
   transport_->closeNow();
-  transport_->setEventCallback(nullptr);
   transport_->setReadCB(nullptr);
   DelayedDestruction::destroy();
 }
@@ -232,9 +230,6 @@ size_t AsyncFizzBase::getAppBytesBuffered() const {
 }
 
 void AsyncFizzBase::startTransportReads() {
-  if (transportOptions_.registerEventCallback) {
-    transport_->setEventCallback(this);
-  }
   transport_->setReadCB(this);
 }
 
@@ -359,63 +354,6 @@ void AsyncFizzBase::deliverError(
   }
 }
 
-class AsyncFizzBase::FizzMsgHdr : public folly::EventRecvmsgCallback::MsgHdr {
-  FizzMsgHdr() = delete;
-
- public:
-  ~FizzMsgHdr() override = default;
-  explicit FizzMsgHdr(AsyncFizzBase* fizzBase) {
-    arg_ = fizzBase;
-    freeFunc_ = FizzMsgHdr::free;
-    cbFunc_ = FizzMsgHdr::cb;
-  }
-
-  void reset() {
-    data_ = msghdr{};
-    auto base = static_cast<AsyncFizzBase*>(arg_);
-    base->getReadBuffer(&iov_.iov_base, &iov_.iov_len);
-    data_.msg_iov = &iov_;
-    data_.msg_iovlen = 1;
-  }
-
-  static void free(folly::EventRecvmsgCallback::MsgHdr* msgHdr) {
-    delete msgHdr;
-  }
-
-  static void cb(folly::EventRecvmsgCallback::MsgHdr* msgHdr, int res) {
-    static_cast<AsyncFizzBase*>(msgHdr->arg_)
-        ->eventRecvmsgCallback(static_cast<FizzMsgHdr*>(msgHdr), res);
-  }
-
- private:
-  iovec iov_;
-};
-
-folly::EventRecvmsgCallback::MsgHdr* AsyncFizzBase::allocateData() noexcept {
-  auto* ret = msgHdr_.release();
-  if (!ret) {
-    ret = new FizzMsgHdr(this);
-  }
-  ret->reset();
-  return ret;
-}
-
-void AsyncFizzBase::eventRecvmsgCallback(FizzMsgHdr* msgHdr, int res) {
-  DelayedDestruction::DestructorGuard dg(this);
-  if (res > 0) {
-    transportReadBuf_.postallocate(res);
-    transportDataAvailable();
-    checkBufLen();
-  } else if (res == 0) {
-    readEOF();
-  } else {
-    AsyncSocketException ex(
-        AsyncSocketException::INTERNAL_ERROR, "event recv failed", (0 - res));
-    deliverError(ex);
-  }
-  msgHdr_.reset(msgHdr);
-}
-
 void AsyncFizzBase::getReadBuffer(
     folly::IOBufQueue& buf,
     void** bufReturn,
@@ -533,7 +471,6 @@ void AsyncFizzBase::checkBufLen() {
   if (!readCallback_ &&
       (transportReadBuf_.chainLength() >= kMaxBufSize ||
        (appDataBuf_ && appDataBuf_->computeChainDataLength() >= kMaxBufSize))) {
-    transport_->setEventCallback(nullptr);
     transport_->setReadCB(nullptr);
   }
 }

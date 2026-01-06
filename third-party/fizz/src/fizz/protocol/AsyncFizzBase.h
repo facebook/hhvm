@@ -26,8 +26,7 @@ namespace fizz {
 class AsyncFizzBase : public folly::WriteChainAsyncTransportWrapper<
                           folly::AsyncTransportWrapper>,
                       protected folly::AsyncTransportWrapper::WriteCallback,
-                      protected folly::AsyncTransportWrapper::ReadCallback,
-                      protected folly::EventRecvmsgCallback {
+                      protected folly::AsyncTransportWrapper::ReadCallback {
  public:
   using UniquePtr =
       std::unique_ptr<AsyncFizzBase, folly::DelayedDestruction::Destructor>;
@@ -93,12 +92,6 @@ class AsyncFizzBase : public folly::WriteChainAsyncTransportWrapper<
   };
 
   struct TransportOptions {
-    /**
-     * Controls whether or not the async recv callback should be registered
-     * (for io_uring)
-     */
-    bool registerEventCallback{false};
-
     /*
      * AsyncTransport read mode.
      *
@@ -268,7 +261,6 @@ class AsyncFizzBase : public folly::WriteChainAsyncTransportWrapper<
   }
   void detachEventBase() override {
     handshakeTimeout_.detachEventBase();
-    transport_->setEventCallback(nullptr);
     transport_->setReadCB(nullptr);
     transport_->detachEventBase();
     pauseEvents();
@@ -552,14 +544,6 @@ class AsyncFizzBase : public folly::WriteChainAsyncTransportWrapper<
     QueuedWriteRequest* next_{nullptr};
   };
 
-  class FizzMsgHdr;
-
-  /**
-   * EventRecvmsgCallback implementation
-   */
-  folly::EventRecvmsgCallback::MsgHdr* allocateData() noexcept override;
-  void eventRecvmsgCallback(FizzMsgHdr* msgHdr, int res);
-
   /**
    * ReadCallback implementation.
    */
@@ -613,7 +597,6 @@ class AsyncFizzBase : public folly::WriteChainAsyncTransportWrapper<
   EndOfTLSCallback* endOfTLSCallback_{nullptr};
 
   TransportOptions transportOptions_;
-  std::unique_ptr<FizzMsgHdr> msgHdr_;
 
   folly::IOBufQueue zeroCopyFallbackReadBuf_{
       folly::IOBufQueue::cacheChainLength()};

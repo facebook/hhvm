@@ -92,14 +92,6 @@ void printUsage() {
     << "                          (For OpenSSL key exchanges, please use the PEM format for the private key.)\n"
     << "                          (For the X25519 key exchange, please specify the private key in hex on the first line,\n"
     << "                          (and the public key in hex on the second line.)\n"
-#ifdef FIZZ_TOOL_ENABLE_IO_URING
-    << " -io_uring                (use io_uring for I/O. Default: false)\n"
-    << " -io_uring_capacity N     (backend capacity for io_uring. Default: 128)\n"
-    << " -io_uring_max_submit N   (maximum submit size for io_uring. Default: 64)\n"
-    << " -io_uring_max_get N      (maximum get size for io_uring. Default: no limit)\n"
-    << " -io_uring_register_fds   (use registered fds with io_uring. Default: false)\n"
-    << " -io_uring_async_recv     (use async recv for io_uring. Default: false)\n"
-#endif
   ;
   // clang-format on
 }
@@ -111,8 +103,7 @@ class FizzServerAcceptor : AsyncServerSocket::AcceptCallback {
       std::shared_ptr<FizzServerContext> serverCtx,
       bool loop,
       EventBase* evb,
-      std::shared_ptr<SSLContext> sslCtx,
-      bool registerEventCallback);
+      std::shared_ptr<SSLContext> sslCtx);
 
   void connectionAccepted(
       folly::NetworkSocket fdNetworkSocket,
@@ -146,7 +137,6 @@ class FizzServerAcceptor : AsyncServerSocket::AcceptCallback {
   std::unique_ptr<TerminalInputHandler> inputHandler_;
   bool http_{false};
   std::unique_ptr<KeyLogWriter> keyLogger_;
-  bool registerEventCallback_{false};
 };
 
 class FizzExampleServer : public AsyncFizzServer::HandshakeCallback,
@@ -465,13 +455,8 @@ FizzServerAcceptor::FizzServerAcceptor(
     std::shared_ptr<FizzServerContext> serverCtx,
     bool loop,
     EventBase* evb,
-    std::shared_ptr<SSLContext> sslCtx,
-    bool registerEventCallback)
-    : loop_(loop),
-      evb_(evb),
-      ctx_(serverCtx),
-      sslCtx_(sslCtx),
-      registerEventCallback_(registerEventCallback) {
+    std::shared_ptr<SSLContext> sslCtx)
+    : loop_(loop), evb_(evb), ctx_(serverCtx), sslCtx_(sslCtx) {
   socket_ = AsyncServerSocket::UniquePtr(new AsyncServerSocket(evb_));
   socket_->bind(port);
   socket_->listen(100);
@@ -489,7 +474,6 @@ void FizzServerAcceptor::connectionAccepted(
   LOG(INFO) << "Connection accepted from " << clientAddr;
   auto sock = new AsyncSocket(evb_, folly::NetworkSocket::fromFd(fd));
   AsyncFizzBase::TransportOptions transportOpts;
-  transportOpts.registerEventCallback = registerEventCallback_;
   std::shared_ptr<AsyncFizzServer> transport =
       AsyncFizzServer::UniquePtr(new AsyncFizzServer(
           AsyncSocket::UniquePtr(sock),
@@ -676,12 +660,6 @@ int fizzServerCommand(const std::vector<std::string>& args) {
   std::string echConfigsFile;
   std::string echPrivateKeyFile;
   bool noSessionTickets = false;
-  bool uring = false;
-  bool uringAsync = false;
-  bool uringRegisterFds = false;
-  int32_t uringCapacity = 128;
-  int32_t uringMaxSubmit = 64;
-  int32_t uringMaxGet = -1;
 
   // clang-format off
   FizzArgHandlerMap handlers = {
@@ -761,24 +739,6 @@ int fizzServerCommand(const std::vector<std::string>& args) {
     {"-echprivatekey", {true, [&echPrivateKeyFile](const std::string& arg) {
         echPrivateKeyFile = arg;
     }}}
-#ifdef FIZZ_TOOL_ENABLE_IO_URING
-    ,{"-io_uring", {false, [&uring](const std::string&) { uring = true; }}},
-    {"-io_uring_async_recv", {false, [&uringAsync](const std::string&) {
-        uringAsync = true;
-    }}},
-    {"-io_uring_register_fds", {false, [&uringRegisterFds](const std::string&) {
-        uringRegisterFds = true;
-    }}},
-    {"-io_uring_capacity", {true, [&uringCapacity](const std::string& arg) {
-        uringCapacity = folly::to<int32_t>(arg);
-    }}},
-    {"-io_uring_max_get", {true, [&uringMaxGet](const std::string& arg) {
-        uringMaxGet = folly::to<int32_t>(arg);
-    }}},
-    {"-io_uring_max_submit", {true, [&uringMaxSubmit](const std::string& arg) {
-        uringMaxSubmit = folly::to<int32_t>(arg);
-    }}}
-#endif
   };
   // clang-format on
 
@@ -804,21 +764,7 @@ int fizzServerCommand(const std::vector<std::string>& args) {
     return 1;
   }
 
-  EventBase evb(
-      folly::EventBase::Options().setBackendFactory([uring,
-                                                     uringAsync,
-                                                     uringRegisterFds,
-                                                     uringCapacity,
-                                                     uringMaxSubmit,
-                                                     uringMaxGet] {
-        return setupBackend(
-            uring,
-            uringAsync,
-            uringRegisterFds,
-            uringCapacity,
-            uringMaxSubmit,
-            uringMaxGet);
-      }));
+  EventBase evb{};
   std::shared_ptr<const CertificateVerifier> verifier;
 
   if (clientAuthMode != ClientAuthMode::None) {
@@ -1175,8 +1121,7 @@ int fizzServerCommand(const std::vector<std::string>& args) {
     serverContext->setSendNewSessionTicket(false);
   }
 
-  FizzServerAcceptor acceptor(
-      port, serverContext, loop, &evb, sslContext, uringAsync);
+  FizzServerAcceptor acceptor(port, serverContext, loop, &evb, sslContext);
   if (!keyLogFile.empty()) {
     acceptor.setKeyLogWriter(std::make_unique<KeyLogWriter>(keyLogFile));
   }

@@ -37,6 +37,7 @@ struct ForEachField {
  *
  * ThriftField schema is defined here: https://git.io/JJQpY
  * If there are mixin fields, inner fields won't be iterated.
+ * If `no_metadata` thrift option is enabled, ThriftField will be empty.
  *
  * @param t thrift object
  * @param f a callable that will be called for each thrift field

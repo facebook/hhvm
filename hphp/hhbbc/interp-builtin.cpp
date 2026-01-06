@@ -183,7 +183,7 @@ TypeOrReduced builtin_function_exists(ISS& env, const php::Func* func,
   auto const name = getArg(env, func, fca, 0);
   if (!name.strictSubtypeOf(BStr)) return NoReduced{};
   auto const v = tv(name);
-  if (!v) return NoReduced{};
+  if (!can_constprop(env) || !v) return NoReduced{};
   auto const rfunc = env.index.resolve_func(v->m_data.pstr);
   switch (rfunc.exists()) {
     case TriBool::Yes:
@@ -206,14 +206,16 @@ TypeOrReduced handle_oodecl_exists(ISS& env,
   auto const autoload = getArg(env, func, fca, 1);
   if (name.subtypeOf(BStr)) {
     if (fca.numArgs() == 1) {
-        reduce(env, bc::True {});
+      reduce(env, bc::True {});
     } else if (!autoload.subtypeOf(BBool)) {
-        reduce(env, bc::CastBool {});
+      reduce(env, bc::CastBool {});
     }
     reduce(env, bc::OODeclExists { subop });
     return Reduced{};
   }
-  if (!autoload.strictSubtypeOf(TBool)) return NoReduced{};
+  if (!can_constprop(env) || !autoload.strictSubtypeOf(TBool)) {
+    return NoReduced{};
+  }
   auto const v = tv(autoload);
   assertx(v);
   if (fca.numArgs() == 2) reduce(env, bc::PopC {});

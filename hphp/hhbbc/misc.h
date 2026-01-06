@@ -201,6 +201,11 @@ private:
 
 //////////////////////////////////////////////////////////////////////
 
+std::string format_bytes(size_t);
+std::string format_duration(std::chrono::microseconds);
+
+//////////////////////////////////////////////////////////////////////
+
 /*
  * One-to-one case insensitive maps for types, where the keys
  * are static strings and the values are some T.

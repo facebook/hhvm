@@ -185,6 +185,17 @@ bool can_rewind(ISS& env) {
   return !any(env.collect.opts & CollectionOpts::Speculating);
 }
 
+// If we're in a context where constant propagation is allowed. For
+// the most part, the infra takes care of this automatically. However,
+// if you wish to do constprop manually (via reduce), you must check
+// this first.
+bool can_constprop(ISS& env) {
+  return !any(
+    env.collect.opts &
+    (CollectionOpts::Inlining | CollectionOpts::Speculating)
+  );
+}
+
 void nothrow(ISS& env) {
   ITRACE(2, "    nothrow\n");
   env.flags.wasPEI = false;
@@ -544,7 +555,9 @@ void mayReadLocal(ISS& env, uint32_t id, bool isUse = true) {
   if (id < env.flags.mayReadLocalSet.size()) {
     env.flags.mayReadLocalSet.set(id);
   }
-  if (isUse && id < env.flags.usedParams.size()) {
+  if (isUse &&
+      id < env.flags.usedParams.size() &&
+      id < env.ctx.func->params.size()) {
     env.flags.usedParams.set(id);
   }
 }

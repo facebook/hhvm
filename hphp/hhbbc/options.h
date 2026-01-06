@@ -141,6 +141,12 @@ struct Options {
   std::string profileMemory;
 
   /*
+   * Whether we should be doing all analysis distributed, or just
+   * analyze constants. This will be extremely shortlived.
+   */
+  bool useExternWorkerForFullAnalysis = false;
+
+  /*
    * Extern-worker config
    */
   std::string ExternWorkerUseCase;

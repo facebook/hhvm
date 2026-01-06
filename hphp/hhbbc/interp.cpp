@@ -470,10 +470,10 @@ void impl_vec(ISS& env, bool reduce, BytecodeVec&& bcs) {
   SCOPE_EXIT { env.analyzeDepth--; };
 
   // We should be at the start of a bytecode.
-  assertx(env.flags.wasPEI &&
-          !env.flags.canConstProp &&
-          !env.flags.effectFree &&
-          env.flags.usedParams.none());
+  assertx(env.flags.wasPEI);
+  assertx(!env.flags.canConstProp);
+  assertx(!env.flags.effectFree);
+  assertx(env.flags.usedParams.none());
 
   env.flags.wasPEI          = false;
   env.flags.canConstProp    = true;
@@ -487,11 +487,13 @@ void impl_vec(ISS& env, bool reduce, BytecodeVec&& bcs) {
     auto const wasPEI = env.flags.wasPEI;
     auto const canConstProp = env.flags.canConstProp;
     auto const effectFree = env.flags.effectFree;
+    auto const usedParams = env.flags.usedParams;
 
     ITRACE(3, "    (impl {}\n", show(*env.ctx.func, bc));
     env.flags.wasPEI          = true;
     env.flags.canConstProp    = false;
     env.flags.effectFree      = false;
+    env.flags.usedParams.reset();
     default_dispatch(env, bc);
 
     if (env.flags.canConstProp) {
@@ -509,9 +511,10 @@ void impl_vec(ISS& env, bool reduce, BytecodeVec&& bcs) {
 
     // If any of the opcodes in the impl list said they could throw,
     // then the whole thing could throw.
-    env.flags.wasPEI = env.flags.wasPEI || wasPEI;
-    env.flags.canConstProp = env.flags.canConstProp && canConstProp;
-    env.flags.effectFree = env.flags.effectFree && effectFree;
+    env.flags.wasPEI |= wasPEI;
+    env.flags.canConstProp &= canConstProp;
+    env.flags.effectFree &= effectFree;
+    env.flags.usedParams |= usedParams;
     if (env.state.unreachable || env.flags.jmpDest != NoBlockId) break;
   }
 }
@@ -2253,7 +2256,7 @@ void in(ISS& env, const bc::PushL& op) {
     // local must be initialized afterwards (or it would have thrown) but make
     // no attempt to detect cases where we would unconditionally throw.
     unreachable(env);
-  } else {
+  } else if (can_constprop(env)) {
     if (auto val = tv(peekLocRaw(env, op.loc1))) {
       return reduce(env, bc::UnsetL { op.loc1 }, gen_constant(*val));
     }
@@ -3813,7 +3816,23 @@ bool fcallOptimizeChecks(
   return false;
 }
 
-bool fcallTryFold(
+//////////////////////////////////////////////////////////////////////
+
+namespace {
+
+//////////////////////////////////////////////////////////////////////
+
+struct Folded {};
+struct NotFolded {};
+using FoldResult = std::variant<TypedValue, Folded, NotFolded>;
+
+//////////////////////////////////////////////////////////////////////
+
+}
+
+//////////////////////////////////////////////////////////////////////
+
+FoldResult fcallTryFold(
   ISS& env,
   const FCallArgs& fca,
   const res::Func& func,
@@ -3822,16 +3841,23 @@ bool fcallTryFold(
   uint32_t numExtraInputs
 ) {
   auto const foldableFunc = func.exactFunc();
-  if (!foldableFunc) return false;
+  if (!foldableFunc) return NotFolded{};
   if (!shouldAttemptToFold(env, foldableFunc, fca, context, maybeDynamic)) {
-    return false;
+    return NotFolded{};
   }
 
   assertx(!fca.hasUnpack() && !fca.hasGenerics() && fca.numRets() == 1);
 
-  auto const finish = [&] (Type ty) {
+  auto const finish = [&] (Type ty, bool effectFree) -> FoldResult {
     auto const v = tv(ty);
-    if (!v) return false;
+    if (!effectFree || !v) return NotFolded{};
+    // We have an effect-free call which results in a
+    // constant. However if we can't actually const prop in this
+    // context (for example, if we're speculating), we won't fold, but
+    // will report the constant. We can push the return type that the
+    // folding would have resulted in, maintaining consistency between
+    // speculation and non-speculation.
+    if (!can_constprop(env)) return *v;
     BytecodeVec repl;
     for (uint32_t i = 0; i < numExtraInputs; ++i) repl.push_back(bc::PopC {});
     for (uint32_t i = 0; i < fca.numArgs(); ++i) repl.push_back(bc::PopC {});
@@ -3844,15 +3870,15 @@ bool fcallTryFold(
     }
     repl.push_back(gen_constant(*v));
     reduce(env, std::move(repl));
-    return true;
+    return Folded{};
   };
 
   if (foldableFunc->attrs & AttrBuiltin &&
       foldableFunc->attrs & AttrIsFoldable) {
     auto ret = const_fold(env, fca.numArgs(), numExtraInputs, *foldableFunc,
                           false);
-    if (!ret) return false;
-    return finish(std::move(*ret));
+    if (!ret) return NotFolded{};
+    return finish(std::move(*ret), true);
   }
 
   CompactVector<Type> args(fca.numArgs());
@@ -3863,7 +3889,7 @@ bool fcallTryFold(
     if (!isScalar &&
         (env.index.func_depends_on_arg(foldableFunc, i) ||
          !arg.subtypeOf(BInitCell))) {
-      return false;
+      return NotFolded{};
     }
     args[i] = isScalar ? scalarize(arg) : arg;
   }
@@ -3873,16 +3899,17 @@ bool fcallTryFold(
     std::move(args),
     std::move(context)
   };
-  if (env.collect.unfoldableFuncs.contains(calleeCtx)) return false;
+  if (env.collect.unfoldableFuncs.contains(calleeCtx)) return NotFolded{};
 
-  auto [foldableReturnType, _] = env.index.lookup_foldable_return_type(
+  auto [foldableReturnType, effectFree] = env.index.lookup_foldable_return_type(
     env.ctx,
     calleeCtx
   );
-  if (finish(std::move(foldableReturnType))) return true;
-
-  env.collect.unfoldableFuncs.emplace(std::move(calleeCtx));
-  return false;
+  auto folded = finish(std::move(foldableReturnType), effectFree);
+  if (std::holds_alternative<NotFolded>(folded)) {
+    env.collect.unfoldableFuncs.emplace(std::move(calleeCtx));
+  }
+  return folded;
 }
 
 Type typeFromWH(Type t) {
@@ -3907,7 +3934,8 @@ void pushCallReturnType(ISS& env,
                         Type ty,
                         const FCallArgs& fca,
                         bool nullsafe,
-                        std::vector<Type> inOuts) {
+                        const std::vector<Type>& inOuts,
+                        FoldResult folded) {
   auto const numRets = fca.numRets();
   if (numRets != 1) {
     assertx(fca.asyncEagerTarget() == NoBlockId);
@@ -3954,6 +3982,7 @@ void pushCallReturnType(ISS& env,
     env.propagate(fca.asyncEagerTarget(), &env.state);
     popC(env);
   }
+
   if (nullsafe) ty = opt(std::move(ty));
   if (ty.is(BBottom)) {
     // The callee function never returns.  It might throw, or loop
@@ -3961,7 +3990,17 @@ void pushCallReturnType(ISS& env,
     push(env, TBottom);
     return unreachable(env);
   }
-  return push(env, std::move(ty));
+
+  // We would have folded this call, but we're in some context where
+  // we can't const-prop. To maintain monotonicity, push the constant
+  // that would have resulted from the folding. This ensures
+  // consistency between speculating and non-speculating.
+  if (auto const v = std::get_if<TypedValue>(&folded)) {
+    effect_free(env);
+    push(env, from_cell(*v));
+  } else {
+    push(env, std::move(ty));
+  }
 }
 
 const StaticString s_defined { "defined" };
@@ -3976,8 +4015,11 @@ void fcallKnownImpl(
   bool nullsafe,
   uint32_t numExtraInputs,
   FCallWithFCA fcallWithFCA,
-  Optional<uint32_t> inOutNum
+  Optional<uint32_t> inOutNum,
+  FoldResult folded
 ) {
+  assertx(!std::holds_alternative<Folded>(folded));
+
   auto const numArgs = fca.numArgs();
   auto [returnType, _] = [&] {
     CompactVector<Type> args(numArgs);
@@ -4026,8 +4068,14 @@ void fcallKnownImpl(
   }
   popU(env);
   popCU(env);
-  pushCallReturnType(env, std::move(returnType),
-                     fca, nullsafe, std::move(inOuts));
+  pushCallReturnType(
+    env,
+    std::move(returnType),
+    fca,
+    nullsafe,
+    inOuts,
+    std::move(folded)
+  );
 }
 
 void fcallUnknownImpl(ISS& env,
@@ -4081,16 +4129,27 @@ void in(ISS& env, const bc::FCallFuncD& op) {
     ? rfunc.lookupNumInoutParams()
     : std::nullopt;
 
-  if (fcallOptimizeChecks(env, op.fca, rfunc, updateBC, numInOut, false, 0) ||
-      fcallTryFold(env, op.fca, rfunc, TBottom, false, 0)) {
+  if (fcallOptimizeChecks(env, op.fca, rfunc, updateBC, numInOut, false, 0)) {
     return;
   }
+  auto folded = fcallTryFold(env, op.fca, rfunc, TBottom, false, 0);
+  if (std::holds_alternative<Folded>(folded)) return;
 
   if (auto const func = rfunc.exactFunc()) {
     if (optimize_builtin(env, func, op.fca)) return;
   }
 
-  fcallKnownImpl(env, op.fca, rfunc, TBottom, false, 0, updateBC, numInOut);
+  fcallKnownImpl(
+    env,
+    op.fca,
+    rfunc,
+    TBottom,
+    false,
+    0,
+    updateBC,
+    numInOut,
+    std::move(folded)
+  );
 }
 
 namespace {
@@ -4237,10 +4296,14 @@ void fcallObjMethodImpl(ISS& env, const FCallArgs& fca, SString methName,
   auto const canFold = !mayUseNullsafe && !mayThrowNonObj;
   auto const numExtraInputs = extraInput ? 1 : 0;
   if (fcallOptimizeChecks(env, fca, rfunc, updateBC,
-                          numInOut, mayUseNullsafe, numExtraInputs) ||
-      (canFold && fcallTryFold(env, fca, rfunc, ctxTy, dynamic,
-                               numExtraInputs))) {
+                          numInOut, mayUseNullsafe, numExtraInputs)) {
     return;
+  }
+
+  FoldResult folded = NotFolded{};
+  if (canFold) {
+    folded = fcallTryFold(env, fca, rfunc, ctxTy, dynamic, numExtraInputs);
+    if (std::holds_alternative<Folded>(folded)) return;
   }
 
   if (clsHint && clsHint->empty() && rfunc.exactFunc()) {
@@ -4248,7 +4311,7 @@ void fcallObjMethodImpl(ISS& env, const FCallArgs& fca, SString methName,
   }
 
   fcallKnownImpl(env, fca, rfunc, ctxTy, mayUseNullsafe, extraInput ? 1 : 0,
-                 updateBC, numInOut);
+                 updateBC, numInOut, std::move(folded));
   refineLoc();
 }
 
@@ -4311,7 +4374,17 @@ void fcallFuncStr(ISS& env, const bc::FCallFunc& op) {
   if (fcallOptimizeChecks(env, op.fca, rfunc, updateBC, numInOut, false, 1)) {
     return;
   }
-  fcallKnownImpl(env, op.fca, rfunc, TBottom, false, 1, updateBC, numInOut);
+  fcallKnownImpl(
+    env,
+    op.fca,
+    rfunc,
+    TBottom,
+    false,
+    1,
+    updateBC,
+    numInOut,
+    NotFolded{}
+  );
 }
 
 } // namespace
@@ -4537,17 +4610,18 @@ void fcallClsMethodImpl(ISS& env, const Op& op, Type clsTy, SString methName,
     : std::nullopt;
 
   if (fcallOptimizeChecks(env, op.fca, rfunc, updateBC, numInOut, false,
-                          numExtraInputs) ||
-      fcallTryFold(env, op.fca, rfunc, clsTy, dynamic, numExtraInputs)) {
+                          numExtraInputs)) {
     return;
   }
+  auto folded = fcallTryFold(env, op.fca, rfunc, clsTy, dynamic, numExtraInputs);
+  if (std::holds_alternative<Folded>(folded)) return;
 
   if (clsHint && rfunc.exactFunc() && clsHint->empty()) {
     return reduce(env, updateBC(op.fca, rfunc.exactFunc()->cls->name));
   }
 
   fcallKnownImpl(env, op.fca, rfunc, clsTy, false /* nullsafe */,
-                 numExtraInputs, updateBC, numInOut);
+                 numExtraInputs, updateBC, numInOut, std::move(folded));
 }
 
 } // namespace
@@ -4717,11 +4791,13 @@ void fcallClsMethodSImpl(ISS& env, const Op& op, SString methName, bool dynamic,
 
   auto const numExtraInputs = extraInput ? 1 : 0;
   if (fcallOptimizeChecks(env, op.fca, rfunc, updateBC, numInOut, false,
-                          numExtraInputs) ||
-      fcallTryFold(env, op.fca, rfunc, ctxCls(env), dynamic,
-                   numExtraInputs)) {
+                          numExtraInputs)) {
     return;
   }
+
+  auto folded = fcallTryFold(env, op.fca, rfunc, ctxCls(env), dynamic,
+                             numExtraInputs);
+  if (std::holds_alternative<Folded>(folded)) return;
 
   auto moduleCheck = [&] {
     auto const func = rfunc.exactFunc();
@@ -4734,7 +4810,7 @@ void fcallClsMethodSImpl(ISS& env, const Op& op, SString methName, bool dynamic,
   }
 
   fcallKnownImpl(env, op.fca, rfunc, ctxCls(env), false /* nullsafe */,
-                 extraInput ? 1 : 0, updateBC, numInOut);
+                 extraInput ? 1 : 0, updateBC, numInOut, std::move(folded));
 }
 
 } // namespace
@@ -4900,11 +4976,15 @@ void in(ISS& env, const bc::FCallCtor& op) {
     ? rfunc.lookupNumInoutParams()
     : std::nullopt;
 
-  auto const canFold = obj.subtypeOf(BObj);
-  if (fcallOptimizeChecks(env, op.fca, rfunc, updateFCA, numInOut, false, 0) ||
-      (canFold && fcallTryFold(env, op.fca, rfunc,
-                               obj, false /* dynamic */, 0))) {
+  if (fcallOptimizeChecks(env, op.fca, rfunc, updateFCA, numInOut, false, 0)) {
     return;
+  }
+
+  auto const canFold = obj.subtypeOf(BObj);
+  FoldResult folded = NotFolded{};
+  if (canFold) {
+    folded = fcallTryFold(env, op.fca, rfunc, obj, false /* dynamic */, 0);
+    if (std::holds_alternative<Folded>(folded)) return;
   }
 
   if (rfunc.exactFunc() && op.str2->empty()) {
@@ -4913,7 +4993,7 @@ void in(ISS& env, const bc::FCallCtor& op) {
   }
 
   fcallKnownImpl(env, op.fca, rfunc, obj, false /* nullsafe */, 0,
-                 updateFCA, numInOut);
+                 updateFCA, numInOut, std::move(folded));
 }
 
 void in(ISS& env, const bc::LockObj& op) {
@@ -5956,6 +6036,7 @@ void memoGetImpl(ISS& env,
       // taken edge and *then* replace the MemoGet with a constant.
       if (memoSets.effectFree) {
         auto const v = [&] () -> Optional<TypedValue> {
+          if (!can_constprop(env)) return std::nullopt;
           if (auto const v = tv(memoSets.retTy)) return v;
           if (!whBlk) return std::nullopt;
           if (auto const v = tv(memoSets.waitHandleRetTy)) return v;
@@ -6165,6 +6246,8 @@ void interpStep(ISS& env, const Bytecode& bc) {
       ITRACE(2, "   speculating, skipping actual constprop\n");
       return false;
     }
+
+    assertx(can_constprop(env));
 
     rewind(env, bc);
 

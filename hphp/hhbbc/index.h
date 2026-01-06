@@ -395,12 +395,15 @@ using ResolvedPropInits = CompactVector<std::pair<size_t, PropInitInfo>>;
 //////////////////////////////////////////////////////////////////////
 
 // private types
+struct ClassBundle;
 struct ClassGraph;
 struct ClassInfo;
 struct ClassInfo2;
 struct FuncInfo2;
 struct FuncFamily2;
 struct MethodsWithoutCInfo;
+
+struct ClassBundle;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -419,9 +422,7 @@ private:
   friend struct ::HPHP::HHBBC::AnalysisIndex;
 };
 
-using AnalysisIndexCInfo = AnalysisIndexParam<ClassInfo2>;
-using AnalysisIndexFInfo = AnalysisIndexParam<FuncInfo2>;
-using AnalysisIndexMInfo = AnalysisIndexParam<MethodsWithoutCInfo>;
+using AnalysisIndexBundle = AnalysisIndexParam<ClassBundle>;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -641,6 +642,8 @@ struct Class {
   Optional<Class> unserialize(const IIndex&) const;
   Class serialize() const;
 
+  using ClassVec = TinyVector<Class, 4>;
+
   /*
    * Invoke the given function on every possible subclass of this
    * class (including itself), providing the name and the Attr bits of
@@ -650,8 +653,6 @@ struct Class {
    * it's complete children, true otherwise.
    */
   bool forEachSubclass(const std::function<void(SString, Attr)>&) const;
-
-  using ClassVec = TinyVector<Class, 4>;
 
   /*
    * Given two lists of classes, calculate the union between them (in
@@ -1142,6 +1143,22 @@ struct Index {
    * them.
    */
   const SStringSet& units_with_type_aliases() const;
+
+  /*
+   * The names of all classes which should be analyzed (all classes
+   * except closures declared within another class).
+   */
+  const TSStringSet& all_classes_to_analyze() const;
+
+  /*
+   * The names of all top-level functions.
+   */
+  const FSStringSet& all_funcs() const;
+
+  /*
+   * The names of all units.
+   */
+  const SStringSet& all_units() const;
 
   /*
    * Access the php::Program this Index is analyzing.
@@ -1754,6 +1771,7 @@ struct IIndex {
   virtual PropState lookup_private_statics(const php::Class*,
                                            bool move = false) const = 0;
   virtual PropState lookup_public_statics(const php::Class*) const = 0;
+
   virtual PropLookupResult lookup_static(Context,
                                          const PropertiesInfo& privateProps,
                                          const Type& cls,
@@ -1858,12 +1876,6 @@ struct IndexAdaptor : public IIndex {
     }
     return {};
   }
-  Optional<res::Class> resolve_class(SString c) const override {
-    return index.resolve_class(c);
-  }
-  Optional<res::Class> resolve_class(const php::Class& c) const override {
-    return index.resolve_class(c);
-  }
   void for_each_unit_func(const php::Unit& u,
                           std::function<void(const php::Func&)> f) const override {
     index.for_each_unit_func(u, std::move(f));
@@ -1879,6 +1891,13 @@ struct IndexAdaptor : public IIndex {
   void for_each_unit_class_mutable(php::Unit& u,
                                    std::function<void(php::Class&)> f) override {
     index.for_each_unit_class_mutable(u, std::move(f));
+  }
+
+  Optional<res::Class> resolve_class(SString c) const override {
+    return index.resolve_class(c);
+  }
+  Optional<res::Class> resolve_class(const php::Class& c) const override {
+    return index.resolve_class(c);
   }
   std::pair<const php::TypeAlias*, bool>
   lookup_type_alias(SString a) const override {
@@ -2214,9 +2233,19 @@ private:
 
 //////////////////////////////////////////////////////////////////////
 
-// Wraps up all of the inputs to a particular analysis job without
-// exposing implementation details. These are produced from
-// AnalysisScheduler::schedule().
+/*
+ * Input to a single analysis job, produced by AnalysisScheduler::schedule().
+ *
+ * Each AnalysisInput represents one bucket of work to be processed in parallel.
+ * It contains:
+ * - reportBundles: Bundles whose analysis results should be reported back
+ * - noReportBundles: Bundles to analyze speculatively (on someone's trace)
+ * - Meta: Additional information needed to perform the analysis
+ *
+ * The bundles are categorized as described in AnalysisScheduler's documentation.
+ * Pure dependency bundles are fetched on-demand by the analysis job based on
+ * the dependency information in Meta.
+ */
 struct AnalysisInput {
   AnalysisInput() = default;
   AnalysisInput(const AnalysisInput&) = delete;
@@ -2224,57 +2253,15 @@ struct AnalysisInput {
   AnalysisInput& operator=(const AnalysisInput&) = delete;
   AnalysisInput& operator=(AnalysisInput&&) = default;
 
-  std::vector<SString> classNames() const;
-  std::vector<SString> funcNames() const;
-  std::vector<SString> unitNames() const;
-
-  std::vector<SString> cinfoNames() const;
-  std::vector<SString> minfoNames() const;
-
   bool empty() const {
-    return classes.empty() && funcs.empty() && units.empty();
+    return reportBundles.empty() && noReportBundles.empty();
   }
   SString key() const { return m_key; }
 
-  // Efficient set of buckets.
-  struct BucketSet {
-    BucketSet() = default;
-
-    bool isSubset(const BucketSet&) const;
-    bool contains(size_t) const;
-    bool empty() const;
-    size_t hash() const;
-    bool operator==(const BucketSet& o) const { return buckets == o.buckets; }
-
-    void add(size_t);
-    void clear();
-
-    static const BucketSet* intern(BucketSet);
-    static void clearIntern();
-
-    BucketSet& operator|=(const BucketSet&);
-
-    std::string toString() const;
-
-    template <typename SerDe> void serde(SerDe& sd) { sd(buckets); }
-  private:
-    folly::sorted_vector_set<uint32_t> buckets;
-  };
-
-  // The "presence" of an item in buckets. This is used for permission
-  // checks on the worker. An item can only use information about
-  // another item if the second item is present in every bucket the
-  // first item is in. This can be done cheaply using a subset check.
-  struct BucketPresence {
-    const BucketSet* present;
-    const BucketSet* withBC;
-    const BucketSet* process;
-    void serde(BlobEncoder&);
-    void serde(BlobDecoder&);
-    static void serdeStart();
-    static void serdeEnd();
-  };
-
+  /*
+   * Metadata needed by the analysis job to perform analysis and manage
+   * dependencies.
+   */
   struct Meta {
     Meta() = default;
     Meta(const Meta&) = delete;
@@ -2282,120 +2269,108 @@ struct AnalysisInput {
     Meta& operator=(const Meta&) = delete;
     Meta& operator=(Meta&&) = default;
 
+    // Names of all bundles included in this job (report + noReport + pureDep)
+    std::vector<SString> bundleNames;
+
+    // Missing/undefined entities that are referenced as dependencies
     TSStringSet badClasses;
     FSStringSet badFuncs;
     SStringSet badConstants;
+
+    // Dependency information for each entity being processed.
+    // Used to fetch additional bundles on-demand and track changes.
     TSStringToOneT<AnalysisDeps> classDeps;
     FSStringToOneT<AnalysisDeps> funcDeps;
     SStringToOneT<AnalysisDeps> unitDeps;
 
-    using BucketVec = std::vector<std::pair<SString, BucketPresence>>;
-    BucketVec classBuckets;
-    BucketVec funcBuckets;
-    BucketVec unitBuckets;
-    BucketVec badConstantBuckets;
+    // Entities that are starting points for this analysis (have toSchedule=true).
+    // These are the entities with changed information that triggered scheduling.
+    TSStringSet startCls;
+    FSStringSet startFunc;
+    SStringSet startUnit;
 
-    TSStringSet processDepCls;
-    FSStringSet processDepFunc;
-    SStringSet processDepUnit;
+    // Interface slot mapping (only populated in final pass)
+    TSStringToOneT<Slot> ifaceSlotMap;
 
+    // Index of this bucket in the overall scheduling round
     uint32_t bucketIdx;
 
     template <typename SerDe> void serde(SerDe& sd) {
       ScopedStringDataIndexer _;
-      BucketPresence::serdeStart();
-      SCOPE_EXIT { BucketPresence::serdeEnd(); };
-      sd(badClasses, string_data_lt_type{})
+      sd(bundleNames)
+        (badClasses, string_data_lt_type{})
         (badFuncs, string_data_lt_func{})
         (badConstants, string_data_lt{})
         (classDeps, string_data_lt_type{})
         (funcDeps, string_data_lt_func{})
         (unitDeps, string_data_lt{})
-        (classBuckets)
-        (funcBuckets)
-        (unitBuckets)
-        (badConstantBuckets)
-        (processDepCls, string_data_lt_type{})
-        (processDepFunc, string_data_lt_func{})
-        (processDepUnit, string_data_lt{})
+        (startCls, string_data_lt_type{})
+        (startFunc, string_data_lt_func{})
+        (startUnit, string_data_lt{})
+        (ifaceSlotMap, string_data_lt_type{})
         (bucketIdx)
         ;
     }
   };
+
+  std::vector<SString> reportBundleNames() const;
+
   Meta takeMeta() { return std::move(meta); }
 
   // Produces input for the analysis job.
   using Tuple = std::tuple<
-    UniquePtrRefVec<php::Class>,
-    UniquePtrRefVec<php::Func>,
-    UniquePtrRefVec<php::Unit>,
-    UniquePtrRefVec<php::ClassBytecode>,
-    UniquePtrRefVec<php::FuncBytecode>,
-    RefVec<AnalysisIndexCInfo>,
-    RefVec<AnalysisIndexFInfo>,
-    RefVec<AnalysisIndexMInfo>,
-    UniquePtrRefVec<php::Class>,
-    UniquePtrRefVec<php::Func>,
-    UniquePtrRefVec<php::Unit>,
+    RefVec<AnalysisIndexBundle>,
+    RefVec<AnalysisIndexBundle>,
     extern_worker::Ref<Meta>
   >;
-  Tuple toTuple(extern_worker::Ref<Meta>);
+  Tuple toInput(extern_worker::Ref<Meta>) const;
 private:
+  // Key for identifying this input (typically the first bundle name)
   SString m_key{nullptr};
-  const Index::IndexData* index{nullptr};
 
-  enum class Kind : uint8_t {
-    None     = 0,
-    Rep      = (1 << 0),
-    Bytecode = (1 << 1),
-    Info     = (1 << 2),
-    Dep      = (1 << 3),
-    MInfo    = (1 << 4)
-  };
-  TSStringToOneT<Kind> classes;
-  FSStringToOneT<Kind> funcs;
-  SStringToOneT<Kind> units;
-
-  friend Kind operator|(Kind k1, Kind k2) {
-    return Kind((uint8_t)k1 | (uint8_t)k2);
-  }
-  friend Kind& operator|=(Kind& k1, Kind k2) {
-    return (k1 = Kind((uint8_t)k1 | (uint8_t)k2));
-  }
-  friend Kind operator&(Kind k1, Kind k2) {
-    return Kind((uint8_t)k1 & (uint8_t)k2);
-  }
-  friend bool any(Kind);
+  // Bundles whose results should be reported back
+  RefVec<AnalysisIndexBundle> reportBundles;
+  // Bundles to analyze but not report (on someone's trace)
+  RefVec<AnalysisIndexBundle> noReportBundles;
 
   Meta meta;
 
   friend struct AnalysisScheduler;
 };
 
-inline bool any(AnalysisInput::Kind k) {
-  return k != AnalysisInput::Kind::None;
-}
-
-std::string show(const AnalysisInput::BucketPresence&);
-
 //////////////////////////////////////////////////////////////////////
 
-// These represent the output of an analysis job without exposing
-// implementation details. This is consumed by
-// AnalysisScheduler::record().
+/*
+ * Output from a single analysis job, consumed by AnalysisScheduler::record().
+ *
+ * Contains the results of analyzing the entities in an AnalysisInput, including:
+ * - Updated dependency information discovered during analysis
+ * - What changed (so the scheduler can determine what needs re-analysis)
+ * - Updated bundles with refined analysis results
+ */
 struct AnalysisOutput {
+  /*
+   * Metadata about changes and dependencies discovered during analysis.
+   */
   struct Meta {
-    std::vector<AnalysisDeps> funcDeps;
-    std::vector<AnalysisDeps> classDeps;
-    std::vector<AnalysisDeps> unitDeps;
+    // Updated dependency information for analyzed entities
+    FSStringToOneT<AnalysisDeps> funcDeps;
+    TSStringToOneT<AnalysisDeps> classDeps;
+    SStringToOneT<AnalysisDeps> unitDeps;
+
+    // What changed during analysis (used to determine eligibility for next round)
     AnalysisChangeSet changed;
+
+    // Functions that were removed (e.g., optimized-away constant initializers)
     FSStringSet removedFuncs;
+
+    // Classes from which each class inherited constants (for tracking dependencies)
     TSStringToOneT<TSStringSet> cnsBases;
     template <typename SerDe> void serde(SerDe& sd) {
       ScopedStringDataIndexer _;
-      sd(funcDeps)
-        (classDeps)
-        (unitDeps)
+      sd(funcDeps, string_data_lt_func{})
+        (classDeps, string_data_lt_type{})
+        (unitDeps, string_data_lt{})
         (changed)
         (removedFuncs, string_data_lt_func{})
         (cnsBases, string_data_lt_type{}, string_data_lt_type{})
@@ -2403,32 +2378,89 @@ struct AnalysisOutput {
     }
   };
 
-  std::vector<SString> classNames;
-  std::vector<SString> cinfoNames;
-  std::vector<SString> minfoNames;
-
-  UniquePtrRefVec<php::Class> classes;
-  UniquePtrRefVec<php::ClassBytecode> clsBC;
-  RefVec<AnalysisIndexCInfo> cinfos;
-
-  std::vector<SString> funcNames;
-  UniquePtrRefVec<php::Func> funcs;
-  UniquePtrRefVec<php::FuncBytecode> funcBC;
-  RefVec<AnalysisIndexFInfo> finfos;
-
-  RefVec<AnalysisIndexMInfo> minfos;
-
-  std::vector<SString> unitNames;
-  UniquePtrRefVec<php::Unit> units;
+  // Names of bundles that were analyzed
+  std::vector<SString> bundleNames;
+  // Updated bundles with refined analysis results (for reportBundles only)
+  RefVec<AnalysisIndexBundle> bundles;
 
   Meta meta;
 };
 
 //////////////////////////////////////////////////////////////////////
 
-// Scheduler to coordinate analysis rounds. This encapsulates all of
-// the logic to track dependencies and changes in a way so that the
-// user doesn't need to know any implementation details.
+/*
+ * Scheduler to coordinate incremental whole-program analysis rounds.
+ *
+ * OVERVIEW:
+ * =========
+ * The scheduler's primary goal is to minimize the total number of analysis
+ * rounds required to reach a fixed point by intelligently grouping work and
+ * processing dependency chains together.
+ *
+ * KEY CONCEPTS:
+ * =============
+ *
+ * Eligibility:
+ * -----------
+ * An entity (func/class/unit) is "eligible" if it might produce different
+ * analysis results this round. This happens when:
+ * - The entity's dependencies changed in the previous round, OR
+ * - One of its (transitive) dependencies is eligible
+ *
+ * Eligibility typically decreases over rounds as the program reaches a fixed
+ * point. When no entities are eligible, analysis is complete.
+ *
+ * Traces:
+ * -------
+ * A "trace" is the set of transitive dependencies that should be analyzed
+ * together to short-circuit dependency chains. If A depends on B depends on C
+ * depends on D, and all are eligible, then A's trace includes [A,B,C,D].
+ *
+ * By processing the entire trace in one job, information propagates through
+ * the whole chain in a single round instead of requiring N rounds for a
+ * chain of length N.
+ *
+ * Traces are limited by maxTraceWeight (total bytes) and maxTraceDepth
+ * (number of hops) to prevent them from spanning the entire codebase.
+ *
+ * TraceState vs DepState:
+ * -----------------------
+ * - DepState: Tracks dependencies for a single entity (func/class/unit)
+ * - TraceState: Aggregates multiple DepStates that must be scheduled together
+ *               (typically represents a bundle of entities)
+ *
+ * Since entities are bundled together for storage/distribution, all entities
+ * in a bundle must be scheduled to the same work bucket.
+ *
+ * Bundle Types:
+ * -------------
+ * Each bucket contains three mutually exclusive types of bundles:
+ *
+ * 1. reportBundles: Entities to analyze and report results for (the "primary"
+ *    work). These are entities that changed or whose dependencies changed.
+ *
+ * 2. noReportBundles: Entities to analyze but NOT report. These are on some
+ *    other entity's trace - we analyze them speculatively to shorten dependency
+ *    chains, but we don't return their results (they'll be properly analyzed
+ *    and reported when scheduled as reportBundles in a future round).
+ *
+ * 3. pureDepBundles: Entities to NOT analyze. These provide information only.
+ *    They're dependencies of other entities but are ineligible (won't change
+ *    this round), so we skip analysis and just use their existing info.
+ *
+ * ALGORITHM PHASES:
+ * =================
+ * The schedule() method executes these phases:
+ *
+ * 1. initTraceStates()  - Reset state for this round
+ * 2. findSuccs()        - Build successor graph, mark eligible entities
+ * 3. findAllDeps()      - Compute full dependency sets (trace + stable deps)
+ * 4. makeTraces()       - Build traces by following eligible dependency chains
+ * 5. makeBuckets()      - Pack traces into size-bounded buckets
+ * 6. makeInputs()       - Transform buckets into AnalysisInput jobs
+ *
+ * See individual method comments for details on each phase.
+ */
 struct AnalysisScheduler {
   explicit AnalysisScheduler(Index&);
   AnalysisScheduler(const AnalysisScheduler&) = delete;
@@ -2437,13 +2469,17 @@ struct AnalysisScheduler {
   AnalysisScheduler& operator=(AnalysisScheduler&&) = delete;
   ~AnalysisScheduler();
 
+  using Mode = AnalysisMode;
+
   // Register a class or function with the given name to be
   // tracked. If a class or function isn't tracked, it won't be
   // eligible for scheduling (though it still might be pulled in as a
   // dependency).
-  void registerClass(SString);
-  void registerFunc(SString);
-  void registerUnit(SString);
+  void registerClass(SString, AnalysisMode);
+  void registerFunc(SString, AnalysisMode);
+  void registerUnit(SString, AnalysisMode);
+
+  void enableAll();
 
   // Record the output of an analysis job. This can be called in a
   // multi-threaded context.
@@ -2453,18 +2489,30 @@ struct AnalysisScheduler {
   // calculates what has changed and what needs to be re-analyzed.
   void recordingDone();
 
-  // Schedule the work that needs to run into buckets of (roughly) the
-  // given size.
-  std::vector<AnalysisInput> schedule(size_t bucketSize,
-                                      size_t maxBucketSize);
+  // Schedule the work that needs to run into buckets. Each bucket
+  // won't exceed the specified maximum weight (by very much). The
+  // maximum trace weight determines how much (potentially redundant)
+  // extra work to put into each bucket in the hopes of minimizing
+  // total rounds.
+  std::vector<AnalysisInput> schedule(Mode,
+                                      size_t maxTraceWeight,
+                                      size_t maxTraceLength,
+                                      size_t maxBucketWeight);
 
   size_t workItems() const { return totalWorkItems; }
 
 private:
   using Type = AnalysisDeps::Type;
 
-  // Represents a func, class, or unit. The most basic unit of
-  // scheduling.
+  using BucketSet = hphp_fast_set<uint32_t>;
+
+  /*
+   * Represents a single func, class, or unit - the finest granularity
+   * of dependency tracking.
+   *
+   * Each entity tracks its own dependencies and whether it needs to be
+   * scheduled for analysis this round.
+   */
   struct DepState {
     enum Kind {
       Func,
@@ -2472,13 +2520,20 @@ private:
       Unit
     };
 
+    using Set = hphp_fast_set<DepState*, pointer_hash<DepState>>;
+    using CSet = hphp_fast_set<const DepState*, pointer_hash<DepState>>;
+
     DepState(SString name, Kind kind) : name{name}, kind{kind} {}
     SString name;
     Kind kind;
-    AnalysisDeps deps;
-    // If toSchedule is true, then the func/class/unit has changed
-    // information.
+    AnalysisDeps deps;  // Dependencies recorded from previous analysis
+    Optional<uint32_t> authBucket;  // Authoritative bucket if already scheduled
+    // toSchedule indicates this entity has changed information and needs
+    // to be re-analyzed (vs being pulled in only as a dependency)
     bool toSchedule{true};
+    // eligible indicates this entity might produce different results this
+    // round (either it or its dependencies changed last round)
+    bool eligible{true};
   };
 
   // These wrap a DepState, but also include information about what
@@ -2504,21 +2559,67 @@ private:
     bool fixed{false};
   };
 
-  // TraceState contains all the state necessary for the scheduling
-  // algorithm. A TraceState can represent multiple DepStates. For
-  // scheduling purposes we might want certain items always be
-  // processed together. This can be accomplished by giving them all
-  // the same TraceState.
+  /*
+   * TraceState aggregates multiple DepStates that must be scheduled together.
+   *
+   * Typically represents a bundle of entities. Since entities are grouped into
+   * bundles for storage and distribution, all entities in a bundle must be
+   * assigned to the same work bucket.
+   *
+   * The TraceState builds up the "trace" - the set of transitive dependencies
+   * that should be processed together to short-circuit dependency chains and
+   * minimize total analysis rounds.
+   */
   struct TraceState {
-    TSStringSet trace;
-    TSStringSet deps;
-    TinyVector<const DepState*> depStates;
+    explicit TraceState(SString n) : name{n} {}
+
+    using Set = hphp_fast_set<TraceState*, pointer_hash<TraceState>>;
+    using CSet = hphp_fast_set<const TraceState*, pointer_hash<TraceState>>;
+
+    SString name;  // Usually the bundle name
+    size_t idx{0};  // Index for deterministic ordering
+
+    // True if any DepState in this TraceState is eligible
     bool eligible{false};
-    CopyableAtomic<bool> leaf{true};
-    CopyableAtomic<bool> covered{false};
-    AnalysisInput::BucketPresence buckets;
-    size_t idx{0};
+
+    // Successor TraceStates (other bundles this one depends on).
+    // Built in findSuccs(), used to construct traces in makeTraces().
+    std::vector<TraceState*> succs;
+
+    // Full dependency set: all bundles this TraceState depends on (both
+    // eligible and ineligible). Built in findAllDeps().
+    std::vector<SString> deps;
+
+    // Subset of deps: bundles to include in trace (up to size/depth limits).
+    // These are the bundles that will be provided to the analysis job.
+    // Built in makeTraces().
+    std::vector<SString> trace;
+
+    // TraceStates that should be actively processed (have eligible work).
+    // Built in makeTraces().
+    std::vector<const TraceState*> toProcess;
+
+    // "Bad" entities (missing/undefined) that this TraceState depends on.
+    // These need to be passed to the analysis job even though they don't exist.
+    std::vector<SString> badClasses;
+    std::vector<SString> badFuncs;
+    std::vector<SString> badConstants;
+
+    // The individual DepStates that make up this TraceState
+    std::vector<DepState*> depStates;
+
+    // Set of bucket indices where this TraceState is present
+    BucketSet present;
   };
+
+  struct Bucket;
+
+  Trace::Bump bumpFor(const DepState&) const;
+  Trace::Bump bumpFor(const TraceState&) const;
+
+  void sortNames();
+
+  void addPredeps(SString, const SStringSet&, AnalysisDeps&) const;
 
   void removeFuncs();
   void findToSchedule();
@@ -2527,33 +2628,22 @@ private:
   void recordChanges(const AnalysisOutput&);
   void updateDepState(AnalysisOutput&);
 
-  void addClassToInput(SString, AnalysisInput&) const;
-  void addFuncToInput(SString, AnalysisInput&) const;
-  void addUnitToInput(SString, AnalysisInput&) const;
-  void addDepConstantToInput(SString, SString, AnalysisInput&) const;
-  void addDepUnitToInput(SString, SString, AnalysisInput&) const;
-  void addDepClassToInput(SString, SString, bool, AnalysisInput&,
-                          bool = false) const;
-  void addDepFuncToInput(SString, SString, Type, AnalysisInput&) const;
-  void addTraceDepToInput(const DepState&, AnalysisInput&) const;
-  void addDepsToInput(const DepState&, AnalysisInput&) const;
-  void addAllDepsToInput(AnalysisInput&) const;
-  void addDepsMeta(const DepState&, AnalysisInput&) const;
+  template <typename V> void visitClassAsDep(SString, bool, bool,
+                                             const V&) const;
+  template <typename V> void visitFuncAsDep(SString, bool, const V&) const;
+  template <typename V> void visitUnitAsDep(SString, const V&) const;
+  template <typename V> void visitDeps(const DepState&, bool, const V&) const;
 
-  template <typename F>
-  void onTransitiveDep(SString, const DepState&, const F&) const;
-  void addAllDeps(TSStringSet&, const DepState&) const;
-  void addDepsForTypeCns(TraceState&);
-
-  const TraceState* lookupTrace(DepState::Kind, SString) const;
-
-  const TraceState* traceForClass(SString) const;
-  const TraceState* traceForFunc(SString) const;
-  const TraceState* traceForUnit(SString) const;
-  const TraceState* traceForConstant(SString) const;
-  const TraceState* traceForTypeAlias(SString) const;
-  const TraceState* traceForClassOrTypeAlias(SString) const;
-  const TraceState* traceForDepState(const DepState&) const;
+  struct BucketPresence {
+    const BucketSet* present{nullptr};
+    Optional<uint32_t> auth;
+  };
+  BucketPresence bucketsForClass(SString) const;
+  BucketPresence bucketsForFunc(SString) const;
+  BucketPresence bucketsForUnit(SString) const;
+  BucketPresence bucketsForConstant(SString) const;
+  BucketPresence bucketsForTypeAlias(SString) const;
+  BucketPresence bucketsForClassOrTypeAlias(SString) const;
 
   Either<const ClassState*, const UnitState*>
   stateForClassOrTypeAlias(SString) const;
@@ -2561,39 +2651,25 @@ private:
   enum class Presence {
     None,
     Dep,
-    DepWithBytecode,
     Full
   };
-  Presence presenceOf(const AnalysisInput::BucketPresence&,
-                      const AnalysisInput::BucketPresence&) const;
-  Presence presenceOfClass(const TraceState&, SString) const;
-  Presence presenceOfClassOrTypeAlias(const TraceState&, SString) const;
-  Presence presenceOfFunc(const TraceState&, SString) const;
-  Presence presenceOfConstant(const TraceState&, SString) const;
+  Presence presenceOf(const DepState&, const BucketPresence&) const;
+  Presence presenceOfClass(const DepState&, SString) const;
+  Presence presenceOfClassOrTypeAlias(const DepState&, SString) const;
+  Presence presenceOfFunc(const DepState&, SString) const;
+  Presence presenceOfConstant(const DepState&, SString) const;
 
-  struct Bucket;
+  DepState::CSet findToProcess(const Bucket&) const;
+  SStringSet findRelevantBundles(const DepState::CSet&, const Bucket&) const;
 
-  void tracePass1();
-  void tracePass2();
-  void tracePass3();
-  std::vector<SString> tracePass4();
-  std::vector<Bucket> tracePass5(size_t, size_t, std::vector<SString>);
-
-  struct InputsAndUntracked {
-    std::vector<AnalysisInput> inputs;
-    std::vector<SString> untrackedFuncs;
-    std::vector<SString> untrackedClasses;
-    std::vector<SString> untrackedUnits;
-    std::vector<SString> badConstants;
-  };
-  InputsAndUntracked tracePass6(const std::vector<Bucket>&);
-  void tracePass7(InputsAndUntracked&);
-  void tracePass8(std::vector<Bucket>, std::vector<AnalysisInput>&);
-  void tracePass9(const std::vector<AnalysisInput>&);
-
-  void scheduleTraces(size_t);
-
-  void maybeDumpTraces() const;
+  void initTraceStates();
+  void findSuccs(size_t);
+  void findAllDeps();
+  void makeTraces(size_t, size_t);
+  std::vector<Bucket> makeBuckets(size_t);
+  std::vector<AnalysisInput> makeInputs(const std::vector<Bucket>&, Mode);
+  void calcBucketSets(std::vector<AnalysisInput>&);
+  void checkInputInvariants(const std::vector<AnalysisInput>&);
 
   Index& index;
 
@@ -2604,6 +2680,8 @@ private:
   std::vector<SString> unitNames;
   std::vector<SString> traceNames;
 
+  bool namesSorted{true};
+
   // Keep the address of the states (and therefore their contained
   // DepStates) the same, so we can keep pointers to them.
   FSStringToOneNodeT<FuncState> funcState;
@@ -2611,14 +2689,13 @@ private:
   SStringToOneNodeT<UnitState> unitState;
   SStringToOneNodeT<std::atomic<bool>> cnsChanged;
 
-  TSStringToOneT<TraceState> traceState;
+  SStringToOneNodeT<TraceState> traceState;
 
   struct Untracked {
-    using B = AnalysisInput::BucketPresence;
-    FSStringToOneT<B> funcs;
-    TSStringToOneT<B> classes;
-    SStringToOneT<B> units;
-    SStringToOneT<B> badConstants;
+    SStringToOneT<BucketSet> untrackedBundles;
+    FSStringToOneT<BucketSet> badFuncs;
+    TSStringToOneT<BucketSet> badClasses;
+    SStringToOneT<BucketSet> badConstants;
   };
   Untracked untracked;
 
@@ -2660,17 +2737,8 @@ struct AnalysisIndex {
   using Mode = AnalysisMode;
 
   AnalysisIndex(AnalysisWorklist&,
-                VU<php::Class>,
-                VU<php::Func>,
-                VU<php::Unit>,
-                VU<php::ClassBytecode>,
-                VU<php::FuncBytecode>,
-                V<AnalysisIndexCInfo>,
-                V<AnalysisIndexFInfo>,
-                V<AnalysisIndexMInfo>,
-                VU<php::Class>,
-                VU<php::Func>,
-                VU<php::Unit>,
+                V<AnalysisIndexBundle>,
+                V<AnalysisIndexBundle>,
                 AnalysisInput::Meta,
                 Mode);
   ~AnalysisIndex();
@@ -2685,6 +2753,8 @@ struct AnalysisIndex {
   Mode mode() const;
 
   bool tracking_public_sprops() const;
+
+  std::vector<php::Unit*> units_to_emit() const;
 
   const php::Unit& lookup_func_unit(const php::Func&) const;
   const php::Unit& lookup_func_original_unit(const php::Func&) const;
@@ -2786,14 +2856,7 @@ struct AnalysisIndex {
   void update_type_aliases(const UnitAnalysis&);
 
   using Output = extern_worker::Multi<
-    extern_worker::Variadic<std::unique_ptr<php::Class>>,
-    extern_worker::Variadic<std::unique_ptr<php::Func>>,
-    extern_worker::Variadic<std::unique_ptr<php::Unit>>,
-    extern_worker::Variadic<std::unique_ptr<php::ClassBytecode>>,
-    extern_worker::Variadic<std::unique_ptr<php::FuncBytecode>>,
-    extern_worker::Variadic<AnalysisIndexCInfo>,
-    extern_worker::Variadic<AnalysisIndexFInfo>,
-    extern_worker::Variadic<AnalysisIndexMInfo>,
+    extern_worker::Variadic<AnalysisIndexBundle>,
     AnalysisOutput::Meta
   >;
   Output finish();
@@ -2802,10 +2865,8 @@ struct AnalysisIndex {
 private:
   std::unique_ptr<IndexData> const m_data;
 
-  void initialize_worklist(const AnalysisInput::Meta&,
-                           std::vector<SString>,
-                           std::vector<SString>,
-                           std::vector<SString>);
+  void initialize_worklist(const AnalysisInput::Meta&);
+  void remember_to_report(const AnalysisInput::Meta&);
 
   void push_context(const Context&);
   void pop_context();
@@ -2817,6 +2878,10 @@ private:
 
   Type unserialize_type(Type) const;
   Type serialize_type(Type) const;
+
+  Index::ReturnType return_type_for_func(const php::Func&) const;
+  ClsConstInfo info_for_class_constant(const php::Class&,
+                                       const php::Const&) const;
 
   friend struct AnalysisIndexAdaptor;
 };

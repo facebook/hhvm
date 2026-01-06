@@ -2035,7 +2035,7 @@ void in(ISS& env, const bc::BaseSC& op) {
     // stack.
     if (op.subop3 == MOpMode::Warn || op.subop3 == MOpMode::None) {
       if (auto const v = tv(lookup.ty)) {
-        if (can_rewind(env)) {
+        if (can_rewind(env) && can_constprop(env)) {
           reduce(env, gen_constant(*v), bc::BaseC { 0, op.subop3 });
           env.collect.mInstrState.extraPop = true;
           return;
@@ -2070,7 +2070,7 @@ void in(ISS& env, const bc::BaseL& op) {
     // stack.
     if (op.subop2 == MOpMode::Warn || op.subop2 == MOpMode::None) {
       if (auto const v = tv(ty)) {
-        if (can_rewind(env)) {
+        if (can_rewind(env) && can_constprop(env)) {
           reduce(env, gen_constant(*v), bc::BaseC { 0, op.subop2 });
           env.collect.mInstrState.extraPop = true;
           return;
@@ -2173,6 +2173,7 @@ void in(ISS& env, const bc::Dim& op) {
       env.collect.mInstrState.effectFree &&
       will_reduce(env) &&
       can_rewind(env) &&
+      can_constprop(env) &&
       is_scalar(env.collect.mInstrState.base.type)) {
     // Find the base instruction which started the sequence.
     for (int i = 0; ; i++) {
@@ -2305,6 +2306,7 @@ void in(ISS& env, const bc::QueryM& op) {
   // side-ffects, we can replace the entire thing with the constant.
   if (env.collect.mInstrState.effectFree &&
       can_rewind(env) &&
+      can_constprop(env) &&
       is_scalar(topC(env))) {
     for (int i = 0; ; i++) {
       auto const last = last_op(env, i);

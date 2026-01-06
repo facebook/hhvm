@@ -432,50 +432,36 @@ void final_pass(Index& index,
 
 //////////////////////////////////////////////////////////////////////
 
-// Extern-worker job to analyze constants
+// Extern-worker job to run analysis
 
-struct AnalyzeConstantsJob {
-  static std::string name() { return "hhbbc-analyze-constants"; }
+template <AnalysisMode Mode>
+struct AnalyzeJob {
+  static std::string name() {
+    return (Mode == AnalysisMode::Constants)
+      ? "hhbbc-analyze-constants"
+      : "hhbbc-analyze";
+  }
   static void init(const Config& config) {
-    process_init(config.o, config.gd, false);
+    process_init(config.o, config.gd, true);
     AnalysisIndex::start();
   }
   static void fini() { AnalysisIndex::stop(); }
 
   template<typename T> using V = Variadic<T>;
-  template<typename T> using VU = V<std::unique_ptr<T>>;
 
   using Output = AnalysisIndex::Output;
 
-  static Output run(VU<php::Class> classes,
-                    VU<php::Func> funcs,
-                    VU<php::Unit> units,
-                    VU<php::ClassBytecode> clsBC,
-                    VU<php::FuncBytecode> funcBC,
-                    V<AnalysisIndexCInfo> cinfos,
-                    V<AnalysisIndexFInfo> finfos,
-                    V<AnalysisIndexMInfo> minfos,
-                    VU<php::Class> depClasses,
-                    VU<php::Func> depFuncs,
-                    VU<php::Unit> depUnits,
+  static Output run(V<AnalysisIndexBundle> reportBundles,
+                    V<AnalysisIndexBundle> noReportBundles,
                     AnalysisInput::Meta meta) {
     // AnalysisIndex ctor will initialize the worklist appropriately.
     AnalysisWorklist worklist;
     AnalysisIndex index{
       worklist,
-      std::move(classes.vals),
-      std::move(funcs.vals),
-      std::move(units.vals),
-      std::move(clsBC.vals),
-      std::move(funcBC.vals),
-      std::move(cinfos.vals),
-      std::move(finfos.vals),
-      std::move(minfos.vals),
-      std::move(depClasses.vals),
-      std::move(depFuncs.vals),
-      std::move(depUnits.vals),
+      std::move(reportBundles.vals),
+      std::move(noReportBundles.vals),
       std::move(meta),
-      AnalysisIndex::Mode::Constants
+      Mode
     };
 
     // Keep processing work until we reach a fixed-point (nothing new
@@ -527,7 +513,10 @@ private:
   static ClassAnalysis analyze(const php::Class& c,
                                const AnalysisIndex& index) {
     assertx(!is_closure(c));
-    return analyze_class_separate(index, Context { c.unit, nullptr, &c });
+    return (Mode == AnalysisMode::Constants || is_used_trait(c))
+      ? analyze_class_separate(index, Context { c.unit, nullptr, &c })
+      : analyze_class(AnalysisIndexAdaptor { index },
+                      Context { c.unit, nullptr, &c });
   }
 
   static UnitAnalysis analyze(const php::Unit& u, const AnalysisIndex& index) {
@@ -578,137 +567,135 @@ private:
   }
 };
 
-Job<AnalyzeConstantsJob> s_analyzeConstantsJob;
+Job<AnalyzeJob<AnalysisMode::Constants>> s_analyzeConstantsJob;
+Job<AnalyzeJob<AnalysisMode::Full>> s_analyzeJob;
 
-void analyze_constants(Index& index) {
-  trace_time tracer{"analyze constants", index.sample()};
+constexpr size_t kMaxBucketWeight =
+  1UL*1024UL*1024UL*1024UL + 512UL*1024UL*1024UL;
 
-  constexpr size_t kBucketSize = 2000;
-  constexpr size_t kMaxBucketSize = 30000;
+template <AnalysisMode Mode>
+AnalysisScheduler analyze_impl(Index& index) {
+  static_assert(Mode != AnalysisMode::Final);
+
+  trace_time tracer{
+    (Mode == AnalysisMode::Constants) ? "analyze constants" : "analyze",
+    index.sample()
+  };
 
   using namespace folly::gen;
 
   // We'll only process classes with 86*init functions or top-level
   // 86cinits.
   AnalysisScheduler scheduler{index};
-  for (auto const cls : index.classes_with_86inits()) {
-    scheduler.registerClass(cls);
-  }
-  for (auto const func : index.constant_init_funcs()) {
-    scheduler.registerFunc(func);
-  }
-  for (auto const unit : index.units_with_type_aliases()) {
-    scheduler.registerUnit(unit);
+  {
+    trace_time trace2{
+      (Mode == AnalysisMode::Constants)
+        ? "analyze constants init"
+        : "analyze init"
+    };
+    trace2.ignore_client_stats();
+
+    if constexpr (Mode == AnalysisMode::Constants) {
+      for (auto const cls : index.classes_with_86inits()) {
+        scheduler.registerClass(cls, Mode);
+      }
+      for (auto const func : index.constant_init_funcs()) {
+        scheduler.registerFunc(func, Mode);
+      }
+      for (auto const unit : index.units_with_type_aliases()) {
+        scheduler.registerUnit(unit, Mode);
+      }
+    } else {
+      for (auto const cls : index.all_classes_to_analyze()) {
+        scheduler.registerClass(cls, Mode);
+      }
+      for (auto const func : index.all_funcs()) {
+        scheduler.registerFunc(func, Mode);
+      }
+      for (auto const unit : index.all_units()) {
+        scheduler.registerUnit(unit, Mode);
+      }
+    }
   }
 
-  auto const run = [&] (AnalysisInput input,
-                        CoroLatch& latch) -> coro::Task<void> {
-    auto guard = folly::makeGuard([&] { latch.count_down(); });
-
+  auto const run = [&] (AnalysisInput input, size_t round) -> coro::Task<void> {
     co_await coro::co_reschedule_on_current_executor;
 
     if (input.empty()) co_return;
 
     auto metadata = make_exec_metadata(
-      "analyze-constants",
+      (Mode == AnalysisMode::Constants)
+        ? "analyze-constants"
+        : "analyze",
+      round,
       input.key()->toCppString()
     );
+
+    auto bundleNames = input.reportBundleNames();
 
     auto [inputMeta, config] = co_await coro::collectAll(
       index.client().store(input.takeMeta()),
       index.configRef().getCopy()
     );
 
-    auto classNames = input.classNames();
-    auto cinfoNames = input.cinfoNames();
-    auto minfoNames = input.minfoNames();
-    auto funcNames = input.funcNames();
-    auto unitNames = input.unitNames();
-    auto tuple = input.toTuple(std::move(inputMeta));
-
-    // Signal we're done touching the Index.
-    guard.dismiss();
-    latch.count_down();
-
-    auto outputs = co_await index.client().exec(
-      s_analyzeConstantsJob,
-      std::move(config),
-      singleton_vec(std::move(tuple)),
-      std::move(metadata)
-    );
+    auto inputRefs = input.toInput(std::move(inputMeta));
 
     // Run the job
-    always_assert(outputs.size() == 1);
-    auto& [clsRefs, funcRefs, unitRefs,
-           clsBCRefs, funcBCRefs,
-           cinfoRefs, finfoRefs,
-           minfoRefs, metaRef] = outputs[0];
+    auto outputs = co_await [&, config = &config] {
+      if constexpr (Mode == AnalysisMode::Constants) {
+        return index.client().exec(
+          s_analyzeConstantsJob,
+          std::move(*config),
+          singleton_vec(std::move(inputRefs)),
+          std::move(metadata)
+        );
+      } else {
+        return index.client().exec(
+          s_analyzeJob,
+          std::move(*config),
+          singleton_vec(std::move(inputRefs)),
+          std::move(metadata)
+        );
+      }
+    }();
 
-    // We cannot call scheduler.record below until all co-routines have called
-    // input.toTuple (record modifies the Index and toTuple reads from it), so
-    // block here until the latch is cleared. Technically we only need to wait
-    // on this before scheduler.record, but by doing this before the load, we
-    // avoid blocking while holding onto a lot of memory.
-    co_await latch.wait();
+    always_assert(outputs.size() == 1);
+    auto& [bundleRefs, metaRef] = outputs[0];
 
     auto meta = co_await index.client().load(std::move(metaRef));
-
-    funcNames.erase(
-      std::remove_if(
-        begin(funcNames),
-        end(funcNames),
-        [&] (SString n) { return meta.removedFuncs.contains(n); }
-      ),
-      end(funcNames)
-    );
-
-    always_assert(clsRefs.size() == classNames.size());
-    always_assert(clsBCRefs.size() == classNames.size());
-    always_assert(cinfoRefs.size() == cinfoNames.size());
-    always_assert(minfoRefs.size() == minfoNames.size());
-    always_assert(meta.classDeps.size() == classNames.size());
-    always_assert(funcRefs.size() == funcNames.size());
-    always_assert(funcBCRefs.size() == funcNames.size());
-    always_assert(finfoRefs.size() == funcNames.size());
-    always_assert(meta.funcDeps.size() == funcNames.size());
-    always_assert(unitRefs.size() == unitNames.size());
+    always_assert(bundleRefs.size() == bundleNames.size());
 
     // Inform the scheduler
     scheduler.record(
       AnalysisOutput{
-        std::move(classNames),
-        std::move(cinfoNames),
-        std::move(minfoNames),
-        std::move(clsRefs),
-        std::move(clsBCRefs),
-        std::move(cinfoRefs),
-        std::move(funcNames),
-        std::move(funcRefs),
-        std::move(funcBCRefs),
-        std::move(finfoRefs),
-        std::move(minfoRefs),
-        std::move(unitNames),
-        std::move(unitRefs),
+        std::move(bundleNames),
+        std::move(bundleRefs),
         std::move(meta)
       }
     );
+
     co_return;
   };
 
   size_t round{0};
   while (auto const workItems = scheduler.workItems()) {
     trace_time trace{
-      "analyze constants round",
-      folly::sformat("round {} -- {} work items", round, workItems)
+      (Mode == AnalysisMode::Constants)
+        ? "analyze constants round"
+        : "analyze round",
+      folly::sformat("round {} -- {:,} work items", round, workItems)
     };
     // Get the work buckets from the scheduler.
     auto work = [&] {
       trace_time trace2{
-        "analyze constants schedule",
+        (Mode == AnalysisMode::Constants)
+          ? "analyze constants schedule"
+          : "analyze schedule",
         folly::sformat("round {}", round)
       };
       trace2.ignore_client_stats();
-      return scheduler.schedule(kBucketSize, kMaxBucketSize);
+      // TODO: Investigate making more aggressive traces
+      return scheduler.schedule(Mode, 0, 0, kMaxBucketWeight);
     }();
     // Work shouldn't be empty because we add non-zero work items this
     // round.
@@ -718,18 +705,21 @@ void analyze_constants(Index& index) {
       // Process the work buckets in individual analyze constants
       // jobs. These will record their results as each one finishes.
       trace_time trace2{
-        "analyze constants run",
-        folly::sformat("round {}", round)
+        (Mode == AnalysisMode::Constants)
+          ? "analyze constants run"
+          : "analyze run",
+        folly::sformat("round {} -- {:,} jobs", round, work.size())
       };
       trace2.ignore_client_stats();
 
-      CoroLatch latch{work.size()};
       coro::blockingWait(coro::collectAllRange(
         from(work)
           | move
           | map([&] (AnalysisInput&& input) {
-              return co_withExecutor(index.executor().sticky(), run(std::move(input), latch)
-                );
+              return co_withExecutor(
+                index.executor().sticky(),
+                run(std::move(input), round)
+              );
             })
           | as<std::vector>()
       ));
@@ -740,7 +730,9 @@ void analyze_constants(Index& index) {
       // the scheduler know that all jobs are done, so it can
       // determine what needs to be run in the next round.
       trace_time trace2{
-        "analyze constants deps",
+        (Mode == AnalysisMode::Constants)
+          ? "analyze constants deps"
+          : "analyze deps",
         folly::sformat("round {}", round)
       };
       trace2.ignore_client_stats();
@@ -748,6 +740,206 @@ void analyze_constants(Index& index) {
       ++round;
     }
   }
+
+  return scheduler;
+}
+
+void analyze_constants(Index& index) {
+  analyze_impl<AnalysisMode::Constants>(index);
+}
+AnalysisScheduler analyze_full(Index& index) {
+  return analyze_impl<AnalysisMode::Full>(index);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+// Extern-worker job to run final pass optimizations and UnitEmitter
+// emission.
+
+struct FinalPassJob {
+  static std::string name() { return "hhbbc-final-pass"; }
+  static void init(const Config& config) {
+    process_init(config.o, config.gd, true);
+    AnalysisIndex::start();
+  }
+  static void fini() { AnalysisIndex::stop(); }
+
+  template<typename T> using V = Variadic<T>;
+
+  struct Output {
+    std::vector<UnitEmitterSerdeWrapper> units;
+    template <typename SerDe> void serde(SerDe& sd) {
+      ScopedStringDataIndexer _;
+      sd(units);
+    }
+  };
+
+  static Output run(V<AnalysisIndexBundle> bundles,
+                    V<AnalysisIndexBundle> depBundles,
+                    AnalysisInput::Meta meta) {
+    // AnalysisIndex ctor will initialize the worklist appropriately.
+    AnalysisWorklist worklist;
+    AnalysisIndex index{
+      worklist,
+      std::move(bundles.vals),
+      std::move(depBundles.vals),
+      std::move(meta),
+      AnalysisMode::Final
+    };
+    while (process(index, worklist)) {}
+
+    Output out;
+    AnalysisIndexAdaptor adaptor{ index };
+    for (auto u : index.units_to_emit()) {
+      out.units.emplace_back(emit_unit(adaptor, *u));
+    }
+    return out;
+  }
+private:
+  // Analyze the work item at the front of the worklist (returning
+  // false if the list is empty).
+  static bool process(AnalysisIndex& index,
+                      AnalysisWorklist& worklist) {
+    auto w = worklist.next();
+    if (auto c = w.cls()) {
+      optimize(*c, index);
+    } else if (auto f = w.func()) {
+      optimize(*f, index);
+      for (auto i : index.lookup_func_closure_invokes(*f)) {
+        optimize(*i, index);
+      }
+    } else if (w.unit()) {
+      // Nothing to do
+    } else {
+      return false;
+    }
+    return true;
+  }
+
+  static void optimize(php::Func& f, const AnalysisIndex& index) {
+    auto wf = php::WideFunc::mut(&f);
+    AnalysisContext ctx{ f.unit, wf, f.cls };
+    AnalysisIndexAdaptor adaptor{ index };
+    optimize_func(adaptor, analyze_func(adaptor, ctx, CollectionOpts{}), wf);
+  }
+
+  static void optimize(php::Class& c, const AnalysisIndex& index) {
+    assertx(!is_closure(c));
+    for (auto& m : c.methods) optimize(*m, index);
+  }
+};
+
+Job<FinalPassJob> s_finalPassJob;
+
+using UnitEmitterRef = Ref<FinalPassJob::Output>;
+using UnitEmitterRefs = RefVec<FinalPassJob::Output>;
+
+UnitEmitterRefs final_pass(Index& index, AnalysisScheduler scheduler) {
+  trace_time tracer{"final-pass"};
+  tracer.ignore_client_stats();
+
+  auto const run = [&] (AnalysisInput input) -> coro::Task<UnitEmitterRef> {
+    co_await coro::co_reschedule_on_current_executor;
+
+    always_assert(!input.empty());
+
+    auto metadata =
+      make_exec_metadata("final-pass", input.key()->toCppString());
+
+    auto [inputMeta, config] = co_await coro::collectAll(
+      index.client().store(input.takeMeta()),
+      index.configRef().getCopy()
+    );
+    auto inputRefs = input.toInput(std::move(inputMeta));
+
+    auto outputs = co_await index.client().exec(
+      s_finalPassJob,
+      std::move(config),
+      singleton_vec(std::move(inputRefs)),
+      std::move(metadata)
+    );
+    always_assert(outputs.size() == 1);
+    co_return outputs[0];
+  };
+
+  scheduler.enableAll();
+  auto const workItems = scheduler.workItems();
+  always_assert(workItems > 0);
+
+  auto work = [&] {
+    trace_time trace2{
+      "final-pass schedule",
+      folly::sformat("{:,} work items", workItems)
+    };
+    trace2.ignore_client_stats();
+    // No traces here, we only need the immediate deps
+    return scheduler.schedule(AnalysisMode::Final, 0, 0, kMaxBucketWeight);
+  }();
+  assertx(!work.empty());
+
+  trace_time trace2{
+    "final-pass run",
+    folly::sformat("{:,} jobs", work.size())
+  };
+  using namespace folly::gen;
+  return coro::blockingWait(coro::collectAllRange(
+    from(work)
+      | move
+      | map([&] (AnalysisInput&& input) {
+          return co_withExecutor(
+            index.executor().sticky(),
+            run(std::move(input))
+          );
+        })
+      | as<std::vector>()
+  ));
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void emit_units(Index& index,
+                UnitEmitterRefs refs,
+                const EmitCallback& callback) {
+  trace_time _{"emit-units", folly::sformat("{:,} units", refs.size())};
+
+  std::atomic<uint64_t> next{0};
+  auto const run = [&] (UnitEmitterRef r) -> coro::Task<void> {
+    co_await coro::co_reschedule_on_current_executor;
+
+    auto output = co_await index.client().load(std::move(r));
+    for (auto& ue : output.units) {
+      auto const idx = next++;
+      ue.m_ue->m_sn = idx;
+      ue.m_ue->setSha1(SHA1 { idx });
+      if (Cfg::Eval::AbortBuildOnVerifyError && !ue.m_ue->check(false)) {
+        fprintf(
+          stderr,
+          "The optimized unit for %s did not pass verification, "
+          "bailing because Eval.AbortBuildOnVerifyError is set\n",
+          ue.m_ue->m_filepath->data()
+        );
+        _Exit(HPHP_EXIT_FAILURE);
+      }
+      callback(std::move(ue.m_ue));
+    }
+
+    co_return;
+  };
+
+  using namespace folly::gen;
+  coro::blockingWait(
+    coro::collectAllRange(
+      from(refs)
+        | move
+        | map([&] (UnitEmitterRef&& r) {
+            return co_withExecutor(
+              index.executor().sticky(),
+              run(std::move(r))
+            );
+          })
+        | as<std::vector>()
+    )
+  );
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1286,53 +1478,63 @@ void whole_program(WholeProgramInput inputs,
     sample
   };
 
-  analyze_constants(index);
-  index.make_local();
+  if (options.useExternWorkerForFullAnalysis) {
+    auto scheduler = analyze_full(index);
+    auto emitters = final_pass(index, std::move(scheduler));
+    emit_units(index, std::move(emitters), callback);
 
-  IndexAdaptor adaptor{ index };
-  auto stats = allocate_stats();
-
-  std::atomic<uint64_t> next{0};
-  auto const emitUnit = [&] (php::Unit& unit) {
-    auto ue = emit_unit(adaptor, unit);
-    auto const idx = next++;
-    ue->m_sn = idx;
-    ue->setSha1(SHA1 { idx });
-    if (Cfg::Eval::AbortBuildOnVerifyError && !ue->check(false)) {
-      fprintf(
-        stderr,
-        "The optimized unit for %s did not pass verification, "
-        "bailing because Eval.AbortBuildOnVerifyError is set\n",
-        ue->m_filepath->data()
-      );
-      _Exit(HPHP_EXIT_FAILURE);
+    if (sample) {
+      sample->setInt("hhbbc_num_units", index.all_units().size());
+      sample->setInt("hhbbc_num_classes", index.all_classes_to_analyze().size());
+      sample->setInt("hhbbc_num_funcs", index.all_funcs().size());
     }
-    callback(std::move(ue));
-  };
+  } else {
+    analyze_constants(index);
+    index.make_local();
 
-  assertx(check(index.program()));
+    assertx(check(index.program()));
 
-  // Defer preresolve type-structures and initializing public static
-  // property types until after the constant pass, to try to get
-  // better initial values.
-  index.use_class_dependencies(false);
-  index.preresolve_type_structures();
-  index.use_class_dependencies(true);
-  analyze_iteratively(index);
-  auto cleanup_for_final = std::thread([&] { index.cleanup_for_final(); });
-  parallel::num_threads = parallel::final_threads;
-  final_pass(index, stats, emitUnit);
-  cleanup_for_final.join();
+    IndexAdaptor adaptor{ index };
+    auto stats = allocate_stats();
 
-  print_stats(stats);
+    std::atomic<uint64_t> next{0};
+    auto const emitUnit = [&] (php::Unit& unit) {
+      auto ue = emit_unit(adaptor, unit);
+      auto const idx = next++;
+      ue->m_sn = idx;
+      ue->setSha1(SHA1 { idx });
+      if (Cfg::Eval::AbortBuildOnVerifyError && !ue->check(false)) {
+        fprintf(
+          stderr,
+          "The optimized unit for %s did not pass verification, "
+          "bailing because Eval.AbortBuildOnVerifyError is set\n",
+          ue->m_filepath->data()
+        );
+        _Exit(HPHP_EXIT_FAILURE);
+      }
+      callback(std::move(ue));
+    };
 
-  if (sample) {
-    sample->setInt("hhbbc_num_units", index.program().units.size());
-    sample->setInt("hhbbc_num_classes", index.program().classes.size());
-    sample->setInt("hhbbc_num_funcs", index.program().funcs.size());
+    index.use_class_dependencies(false);
+    index.preresolve_type_structures();
+    index.use_class_dependencies(true);
+    analyze_iteratively(index);
+    auto cleanup_for_final = std::thread([&] { index.cleanup_for_final(); });
+    parallel::num_threads = parallel::final_threads;
+    final_pass(index, stats, emitUnit);
+    cleanup_for_final.join();
+
+    print_stats(stats);
+
+    if (sample) {
+      sample->setInt("hhbbc_num_units", index.program().units.size());
+      sample->setInt("hhbbc_num_classes", index.program().classes.size());
+      sample->setInt("hhbbc_num_funcs", index.program().funcs.size());
+    }
+
+    index.cleanup_post_emit();
   }
 
-  index.cleanup_post_emit();
   summarize_memory(sample);
 }
 

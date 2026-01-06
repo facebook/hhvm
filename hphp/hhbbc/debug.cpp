@@ -317,18 +317,6 @@ void state_after(const char* when, const ParsedUnit& parsed) {
 
 //////////////////////////////////////////////////////////////////////
 
-namespace {
-
-template <typename Clock>
-std::string ts(typename Clock::time_point t) {
-  char snow[64];
-  auto tm = Clock::to_time_t(t);
-  ctime_r(&tm, snow);
-  // Eliminate trailing newline from ctime_r.
-  snow[24] = '\0';
-  return snow;
-}
-
 std::string format_bytes(size_t bytes) {
   auto s = folly::prettyPrint(
     bytes,
@@ -347,6 +335,20 @@ std::string format_duration(std::chrono::microseconds usecs) {
   );
   if (!s.empty() && s[s.size()-1] == ' ') s.resize(s.size()-1);
   return s;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+namespace {
+
+template <typename Clock>
+std::string ts(typename Clock::time_point t) {
+  char snow[64];
+  auto tm = Clock::to_time_t(t);
+  ctime_r(&tm, snow);
+  // Eliminate trailing newline from ctime_r.
+  snow[24] = '\0';
+  return snow;
 }
 
 std::string client_stats(const extern_worker::Client::Stats& stats) {

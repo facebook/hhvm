@@ -600,6 +600,7 @@ void process_init(const Options& o,
   Cfg::Jit::Enabled                         = false;
   Cfg::Eval::LowStaticArrays                = false;
   Cfg::Repo::DebugInfo                      = false;
+  Cfg::Eval::PerfPidMap                     = false;
   Logger::LogLevel                          = Logger::LogError;
 
   // Load RepoGlobalData first because hphp_process_init can read

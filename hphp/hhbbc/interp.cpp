@@ -1968,7 +1968,7 @@ void jmpImpl(ISS& env, const JmpOp& op) {
   }
 
   if (e == (Negate ? Emptiness::Empty : Emptiness::NonEmpty) ||
-      (next_real_block(env.ctx.func, env.blk.fallthrough) ==
+      (next_real_block(env.ctx.func, env.fallthrough) ==
        next_real_block(env.ctx.func, op.target1))) {
     return reduce(env, bc::PopC{});
   }
@@ -6287,9 +6287,10 @@ BlockId speculateHelper(ISS& env, BlockId orig, bool updateTaken) {
   auto target = orig;
   auto pops = 0;
 
+  auto const& func = env.ctx.func;
+
   State temp{env.state, State::Compact{}};
   while (true) {
-    auto const& func = env.ctx.func;
     auto const targetBlk = func.blocks()[target].get();
     if (!targetBlk->multiPred) break;
     auto const ok = [&] {
@@ -6330,7 +6331,12 @@ BlockId speculateHelper(ISS& env, BlockId orig, bool updateTaken) {
       forEachTakenEdge(
         *last,
         [&] (BlockId bid) {
-          if (bid != orig) needsUpdate = true;
+          if (bid == orig) return;
+          if (bid == NoBlockId || !is_fatal_block(*func.blocks()[bid])) {
+            // Don't set the edge to NoBlockId if it's already pointing
+            // to a fatal block.
+            needsUpdate = true;
+          }
         }
       );
     }
@@ -6340,7 +6346,14 @@ BlockId speculateHelper(ISS& env, BlockId orig, bool updateTaken) {
       forEachTakenEdge(
         bc,
         [&] (BlockId& bid) {
-          bid = bid == orig ? target : NoBlockId;
+          if (bid == orig) {
+            bid = target;
+            return;
+          }
+          if (bid == NoBlockId) return;
+          // Don't set the edge to NoBlockId if it's already pointing
+          // to a fatal block.
+          if (!is_fatal_block(*func.blocks()[bid])) bid = NoBlockId;
         }
       );
     }
@@ -6375,6 +6388,15 @@ RunFlags run(Interp& interp, const State& in,
   auto env = ISS { interp, propagate };
   auto ret = RunFlags {};
   auto finish = [&] (BlockId fallthrough) {
+    // Don't change the fallthrough to NoBlockId if the fallthrough is
+    // already to a fatal block.
+    if (fallthrough != NoBlockId ||
+        interp.blk->fallthrough == NoBlockId ||
+        !is_fatal_block(*interp.ctx.func.blocks()[interp.blk->fallthrough])) {
+      ret.updateInfo.fallthrough = fallthrough;
+    } else {
+      ret.updateInfo.fallthrough = interp.blk->fallthrough;
+    }
     ret.updateInfo.fallthrough = fallthrough;
     ret.updateInfo.unchangedBcs = env.unchangedBcs;
     ret.updateInfo.replacedBcs = std::move(env.replacedBcs);
@@ -6384,15 +6406,27 @@ RunFlags run(Interp& interp, const State& in,
   BytecodeVec retryBcs;
   auto retryOffset = interp.blk->hhbcs.size();
   auto size = retryOffset;
-  BlockId retryFallthrough = interp.blk->fallthrough;
   size_t idx = 0;
 
+  assertx(env.collect.mInstrState.empty());
   while (true) {
     if (idx == size) {
+      assertx(env.collect.mInstrState.empty());
       finish_tracked_elems(env, 0);
-      if (!env.reprocess) break;
+      if (!env.reprocess) {
+        FTRACE(2, "  <end block>\n");
+        if (env.fallthrough == NoBlockId) return finish(NoBlockId);
+        auto const old = env.fallthrough;
+        env.fallthrough = speculateHelper(env, env.fallthrough, false);
+        if (old == env.fallthrough) {
+          propagate(env.fallthrough, &interp.state);
+          return finish(env.fallthrough);
+        }
+        FTRACE(2, "  reprocessing due to successful speculation\n");
+      } else {
+        assertx(env.unchangedBcs < retryOffset || env.replacedBcs.size());
+      }
       FTRACE(2, "  Reprocess mutated block {}\n", interp.bid);
-      assertx(env.unchangedBcs < retryOffset || env.replacedBcs.size());
       assertx(!env.undo);
       retryOffset = env.unchangedBcs;
       retryBcs = std::move(env.replacedBcs);
@@ -6430,6 +6464,7 @@ RunFlags run(Interp& interp, const State& in,
 
     if (flags.returned) {
       always_assert(idx == size);
+      assertx(env.collect.mInstrState.empty());
       if (env.reprocess) continue;
 
       always_assert(interp.blk->fallthrough == NoBlockId);
@@ -6442,6 +6477,7 @@ RunFlags run(Interp& interp, const State& in,
 
     if (flags.jmpDest != NoBlockId) {
       always_assert(idx == size);
+      assertx(env.collect.mInstrState.empty());
       auto const hasFallthrough = [&] {
         if (flags.jmpDest != interp.blk->fallthrough) {
           FTRACE(2, "  <took branch; no fallthrough>\n");
@@ -6452,15 +6488,22 @@ RunFlags run(Interp& interp, const State& in,
           return true;
         }
       }();
-      if (hasFallthrough) retryFallthrough = flags.jmpDest;
+      if (hasFallthrough) env.fallthrough = flags.jmpDest;
       if (env.reprocess) continue;
       finish_tracked_elems(env, 0);
       auto const newDest = speculateHelper(env, flags.jmpDest, true);
+      if (newDest != flags.jmpDest) {
+        FTRACE(2, "  reprocessing due to successful speculation\n");
+        if (hasFallthrough) env.fallthrough = newDest;
+        env.reprocess = true;
+        continue;
+      }
       propagate(newDest, &interp.state);
       return finish(hasFallthrough ? newDest : NoBlockId);
     }
 
     if (interp.state.unreachable) {
+      env.collect.mInstrState.clear();
       if (env.reprocess) {
         idx = size;
         continue;
@@ -6470,13 +6513,6 @@ RunFlags run(Interp& interp, const State& in,
       return finish(NoBlockId);
     }
   }
-
-  FTRACE(2, "  <end block>\n");
-  if (retryFallthrough != NoBlockId) {
-    retryFallthrough = speculateHelper(env, retryFallthrough, false);
-    propagate(retryFallthrough, &interp.state);
-  }
-  return finish(retryFallthrough);
 }
 
 StepFlags step(Interp& interp, const Bytecode& op) {
@@ -6510,8 +6546,6 @@ void default_dispatch(ISS& env, const Bytecode& op) {
   dispatch(env, op);
   if (instrFlags(op.op) & TF && env.flags.jmpDest == NoBlockId) {
     unreachable(env);
-  } else if (env.state.unreachable) {
-    env.collect.mInstrState.clear();
   }
 }
 

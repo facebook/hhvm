@@ -69,6 +69,7 @@ struct ISS {
     , state(bag.state)
     , undo(bag.undo)
     , propagate(std::move(propagate))
+    , fallthrough(bag.blk->fallthrough)
     , analyzeDepth(0)
   {}
 
@@ -83,6 +84,11 @@ struct ISS {
   PropagateFn propagate;
 
   Optional<State> stateBefore;
+
+  // Current fallthrough of the block being analyzed. This can be
+  // changed multiple times during analysis, so use this instead of
+  // blk.fallthrough (which is only changed during index update).
+  BlockId fallthrough;
 
   // If we're inside an impl (as opposed to reduce) this will be > 0
   uint32_t analyzeDepth{0};
@@ -215,7 +221,7 @@ void jmp_setdest(ISS& env, BlockId target) {
   env.flags.jmpDest = target;
 }
 void jmp_nevertaken(ISS& env) {
-  jmp_setdest(env, env.blk.fallthrough);
+  jmp_setdest(env, env.fallthrough);
 }
 
 void readUnknownParams(ISS& env) {

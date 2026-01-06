@@ -4579,7 +4579,14 @@ ClassInfo2* Class::cinfo2() const {
 }
 
 bool Class::same(const Class& o) const {
-  return graph() == o.graph();
+  if (opaque.left()) {
+    if (!o.opaque.left()) return false;
+    return graph() == o.graph();
+  } else if (o.opaque.right()) {
+    return opaque.right()->tsame(o.opaque.right());
+  } else {
+    return false;
+  }
 }
 
 bool Class::exactSubtypeOfExact(const Class& o,
@@ -4964,6 +4971,10 @@ Optional<Class> Class::unserialize(const IIndex& index) const {
   return index.resolve_class(opaque.right());
 }
 
+Class Class::serialize() const {
+  return Class{ name() };
+}
+
 Class Class::get(SString name) {
   return Class{ ClassGraph::get(name) };
 }
@@ -4999,12 +5010,8 @@ bool Class::isMissingDebug() const {
 #endif
 
 void Class::serde(BlobEncoder& sd) const {
-  sd(
-    opaque.left()
-      ? graph()
-      : ClassGraph::get(opaque.right()),
-    nullptr
-  );
+  assertx(isSerialized());
+  sd(ClassGraph::get(opaque.right()), nullptr);
 }
 
 Class Class::makeForSerde(BlobDecoder& sd) {
@@ -6093,6 +6100,25 @@ struct AnalysisIndex::IndexData {
 
   // The type of analysis that we're doing.
   Mode mode;
+
+  // We'll unserialize the same things over and over, so cache the
+  // results.
+  struct UnserializeKey {
+    FuncClsUnit context;
+    Type type;
+    bool operator==(const UnserializeKey& o) const {
+      return context == o.context && equal(type, o.type);
+    }
+    struct Hasher {
+      size_t operator()(const UnserializeKey& k) const {
+        return folly::hash::hash_combine(
+          k.context.hash(),
+          k.type.hash()
+        );
+      }
+    };
+  };
+  hphp_fast_map<UnserializeKey, Type, UnserializeKey::Hasher> unserializeCache;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -15953,7 +15979,7 @@ private:
       }
     );
     FTRACE(3, "Initial return type for {}: {}\n", func_fullname(f), show(ty));
-    return ty;
+    return serialize_classes(std::move(ty));
   }
 
   static void set_bad_initial_prop_values(const LocalIndex& index,
@@ -20704,7 +20730,23 @@ bool AnalysisIndex::tracking_public_sprops() const {
 }
 
 Type AnalysisIndex::unserialize_type(Type t) const {
-  return unserialize_classes(AnalysisIndexAdaptor { *this }, std::move(t));
+  if (!might_have_dcls(t)) {
+    return unserialize_classes(AnalysisIndexAdaptor { *this }, std::move(t));
+  }
+
+  IndexData::UnserializeKey key{
+    fc_from_context(context_for_deps(*m_data), *m_data), t
+  };
+  if (auto const c = folly::get_ptr(m_data->unserializeCache, key)) {
+    return *c;
+  }
+  t = unserialize_classes(AnalysisIndexAdaptor { *this }, std::move(t));
+  m_data->unserializeCache.emplace(key, t);
+  return t;
+}
+
+Type AnalysisIndex::serialize_type(Type t) const {
+  return serialize_classes(std::move(t));
 }
 
 /*
@@ -24664,6 +24706,10 @@ void AnalysisIndex::freeze() {
   assertx(!m_data->frozen);
   m_data->frozen = true;
 
+  // We're going to be recording dependencies, so we must force actual
+  // unserialization again.
+  m_data->unserializeCache.clear();
+
   // We're going to do a final set of analysis to record dependencies,
   // so we must re-add the original set of items to the worklist.
   assertx(!m_data->worklist.next());
@@ -26134,7 +26180,13 @@ void AnalysisIndex::refine_class_constants(const FuncAnalysisResult& fa) {
           cns.name,
           show(c.second.type)
         );
-        cinfo->clsConstantInfo.insert_or_assign(cns.name, c.second);
+        cinfo->clsConstantInfo.insert_or_assign(
+          cns.name,
+          ClsConstInfo {
+            serialize_type(c.second.type),
+            c.second.refinements
+          }
+        );
         m_data->deps->update(cns, ConstIndex { cinfo->name, c.first });
       } else {
         always_assert_flog(
@@ -26198,7 +26250,7 @@ void AnalysisIndex::refine_return_info(const FuncAnalysisResult& fa) {
   auto const oldReturnTy = unserialize_type(finfo.returnTy);
   if (fa.inferredReturn.strictlyMoreRefined(oldReturnTy)) {
     if (finfo.returnRefinements < options.returnTypeRefineLimit) {
-      finfo.returnTy = fa.inferredReturn;
+      finfo.returnTy = serialize_type(fa.inferredReturn);
       finfo.returnRefinements += fa.localReturnRefinements + 1;
       if (finfo.returnRefinements > options.returnTypeRefineLimit) {
         FTRACE(1, "maxed out return type refinements at {}\n", error_loc());

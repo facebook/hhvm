@@ -627,15 +627,19 @@ struct Class {
   bool isComplete() const;
 
   /*
-   * Classes that come out of the BlobEncoder start out as
+   * Classes that come out of the BlobDecoder start out as
    * "serialized". This means it just wraps a string. Almost nothing
    * can be done on a serialized class, except call unserialize on
    * it. Unserialize will produce the "real" class, recording
    * dependencies as necessary. If unserialize returns std::nullopt
    * then the class definitely doesn't exist.
+   *
+   * Likewise, when using BlobEncoder, you must manually serialize the
+   * class beforehand.
    */
   bool isSerialized() const;
   Optional<Class> unserialize(const IIndex&) const;
+  Class serialize() const;
 
   /*
    * Invoke the given function on every possible subclass of this
@@ -2812,6 +2816,7 @@ private:
   res::Func rfunc_from_dcls(const DCls&, SString, const P&, const G&) const;
 
   Type unserialize_type(Type) const;
+  Type serialize_type(Type) const;
 
   friend struct AnalysisIndexAdaptor;
 };

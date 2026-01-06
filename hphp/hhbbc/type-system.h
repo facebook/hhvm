@@ -337,6 +337,8 @@ private:
   IsectAndExactWrapper* rawIsectAndExact() const;
 };
 
+std::string show(const DCls&, bool isObj = false);
+
 //////////////////////////////////////////////////////////////////////
 
 struct DWaitHandle;
@@ -654,6 +656,8 @@ private:
   friend Type toobj(const Type&);
   friend Type objcls(const Type&);
 
+  friend bool might_have_dcls(const Type&);
+
   friend struct WaitHandleCOWer;
   friend struct ArrLikePackedNCOWer;
   friend struct ArrLikePackedCOWer;
@@ -662,6 +666,9 @@ private:
 
   friend Type unserialize_classes(const IIndex&, Type);
   friend void unserialize_classes_impl(const IIndex&, const Type&, COWer&);
+
+  friend Type serialize_classes(Type);
+  friend void serialize_classes_impl(const Type&, COWer&);
 
   // These have to be defined here but are not meant to be used
   // outside of type-system.cpp
@@ -1567,10 +1574,17 @@ bool compare_might_raise(const Type& t1, const Type& t2);
  */
 std::pair<Type, Promotion> promote_classlike_to_key(Type);
 
+/*
+ * Returns true if the Type *might* contain a DCls within it. This is
+ * conservative. If it returns false, the Type definitely does not. If
+ * it returnes true, the Type still might not contain one.
+ */
+bool might_have_dcls(const Type&);
+
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Calls res::Class::unserialize on any res::Class' contained within
+ * Calls res::Class::unserialize on any res::Class contained within
  * the given Type. It also puts the Type into a "canonical" form. A
  * Type that comes from BlobDecoder may not be in a canonical form
  * (since the extern-worker job which produced it didn't have complete
@@ -1579,6 +1593,13 @@ std::pair<Type, Promotion> promote_classlike_to_key(Type);
  * complete).
  */
 Type unserialize_classes(const IIndex&, Type);
+
+/*
+ * Calls res::Class::serialize on any res::Class contains within the
+ * given type. This is necessary for any Type which will be sent to
+ * BlobEncoder, as only serialized classes can be encoded.
+ */
+Type serialize_classes(Type);
 
 //////////////////////////////////////////////////////////////////////
 

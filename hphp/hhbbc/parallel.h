@@ -329,7 +329,7 @@ void populateThreads(std::array<std::thread, Total>& threads,
                      size_t idx,
                      Func&& func,
                      Funcs&&... funcs) {
-  auto const work = [&] {
+  if (tl_inParallel) {
     try {
       func();
     } catch (const std::runtime_error& e) {
@@ -338,17 +338,20 @@ void populateThreads(std::array<std::thread, Total>& threads,
       );
       failed = true;
     }
-  };
-
-  if (tl_inParallel) {
-    work();
   } else {
     threads[idx] = std::thread(
-      [&] {
+      [func = std::forward<Func>(func), &failed]() mutable {
         tl_inParallel = true;
         SCOPE_EXIT { tl_inParallel = false; };
         HphpSessionAndThread _{Treadmill::SessionKind::HHBBC};
-        work();
+        try {
+          func();
+        } catch (const std::runtime_error& e) {
+          std::fprintf(
+            stderr, "worker thread exited with exception: %s\n", e.what()
+          );
+          failed = true;
+        }
       }
     );
   }

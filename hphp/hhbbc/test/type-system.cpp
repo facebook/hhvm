@@ -7666,6 +7666,153 @@ TEST(Type, IterTypes) {
   }
 }
 
+TEST(Type, MightHaveDCls) {
+  auto index = make_index();
+
+  // Types that never contain DCls
+  EXPECT_FALSE(might_have_dcls(TInt));
+  EXPECT_FALSE(might_have_dcls(TDbl));
+  EXPECT_FALSE(might_have_dcls(TStr));
+  EXPECT_FALSE(might_have_dcls(TBool));
+  EXPECT_FALSE(might_have_dcls(TNull));
+  EXPECT_FALSE(might_have_dcls(TBottom));
+  EXPECT_FALSE(might_have_dcls(TTop));
+  EXPECT_FALSE(might_have_dcls(TUninit));
+  EXPECT_FALSE(might_have_dcls(TInitNull));
+  EXPECT_FALSE(might_have_dcls(TFalse));
+  EXPECT_FALSE(might_have_dcls(TTrue));
+  EXPECT_FALSE(might_have_dcls(ival(42)));
+  EXPECT_FALSE(might_have_dcls(dval(3.14)));
+  EXPECT_FALSE(might_have_dcls(sval(s_A.get())));
+
+  // LazyClass and EnumClassLabel should not contain DCls
+  EXPECT_FALSE(might_have_dcls(TLazyCls));
+  EXPECT_FALSE(might_have_dcls(TEnumClassLabel));
+
+  // Array values without objects should not contain DCls
+  EXPECT_FALSE(might_have_dcls(vec_val(static_vec(1, 2, 3))));
+  EXPECT_FALSE(might_have_dcls(dict_val(static_dict(s_A, 100, s_B, 200))));
+
+  // Types that might contain DCls - Object types
+  auto const cls = index.resolve_class(s_Base.get());
+  if (!cls) ADD_FAILURE();
+  EXPECT_TRUE(might_have_dcls(objExact(*cls)));
+  EXPECT_TRUE(might_have_dcls(subObj(*cls)));
+  // Note: TObj and TOptObj have DataTag::None (no specialization), so might_have_dcls returns false
+  // because there's no actual DCls stored in the type - only bits.
+  EXPECT_FALSE(might_have_dcls(TObj));
+  EXPECT_FALSE(might_have_dcls(TOptObj));
+
+  // Types that might contain DCls - Class types
+  EXPECT_TRUE(might_have_dcls(clsExact(*cls, false)));
+  EXPECT_TRUE(might_have_dcls(subCls(*cls, false)));
+  EXPECT_TRUE(might_have_dcls(clsExact(*cls, true)));
+  EXPECT_TRUE(might_have_dcls(subCls(*cls, true)));
+  // TCls and TOptCls also have DataTag::None
+  EXPECT_FALSE(might_have_dcls(TCls));
+  EXPECT_FALSE(might_have_dcls(TOptCls));
+
+  // Arrays that contain objects/classes should return true
+  EXPECT_TRUE(might_have_dcls(make_specialized_arrpacked(BVec, {objExact(*cls)})));
+  EXPECT_TRUE(might_have_dcls(make_specialized_arrpacked(BVec, {TObj})));
+  EXPECT_TRUE(might_have_dcls(make_specialized_arrpackedn(BVec, TObj)));
+  EXPECT_TRUE(might_have_dcls(make_specialized_arrpackedn(BVec, clsExact(*cls, false))));
+
+  auto const map = MapElems{map_elem(s_A, objExact(*cls))};
+  EXPECT_TRUE(might_have_dcls(make_specialized_arrmap(BDict, map)));
+  EXPECT_TRUE(might_have_dcls(make_specialized_arrmapn(BDict, TStr, TObj)));
+  EXPECT_TRUE(might_have_dcls(make_specialized_arrmapn(BDict, TStr, TCls)));
+
+  // WaitHandles containing objects should return true
+  EXPECT_TRUE(might_have_dcls(make_specialized_wait_handle(BObj, objExact(*cls))));
+  EXPECT_TRUE(might_have_dcls(make_specialized_wait_handle(BObj, TObj)));
+
+  // Note: might_have_dcls is conservative for array specializations - it returns true
+  // for any specialized array type without checking the element types deeply.
+  // Arrays with non-object elements still return true if they have specializations.
+  EXPECT_TRUE(might_have_dcls(make_specialized_arrpacked(BVec, {TInt, TStr})));
+  EXPECT_TRUE(might_have_dcls(make_specialized_arrpackedn(BVec, TInt)));
+  EXPECT_TRUE(might_have_dcls(make_specialized_arrmapn(BDict, TStr, TInt)));
+
+  // Union types - TObj and TCls are just bits, so unions with them don't have DCls
+  EXPECT_FALSE(might_have_dcls(union_of(TInt, TStr)));
+  EXPECT_FALSE(might_have_dcls(union_of(TInt, TObj)));
+  EXPECT_FALSE(might_have_dcls(union_of(TStr, TCls)));
+  // Note: Unions involving specialized types may lose specialization and revert to just bits
+}
+
+TEST(Type, SerializeClasses) {
+  auto index = make_index();
+
+  auto const baseCls = index.resolve_class(s_Base.get());
+  auto const aCls = index.resolve_class(s_A.get());
+  auto const aaCls = index.resolve_class(s_AA.get());
+  if (!baseCls || !aCls || !aaCls) ADD_FAILURE();
+
+  // Test exact object serialization
+  auto obj1 = objExact(*baseCls);
+  auto obj1Serialized = serialize_classes(obj1);
+  EXPECT_TRUE(might_have_dcls(obj1Serialized));
+
+  // Test sub-object serialization
+  auto obj2 = subObj(*baseCls);
+  auto obj2Serialized = serialize_classes(obj2);
+  EXPECT_TRUE(might_have_dcls(obj2Serialized));
+
+  // Test exact class serialization
+  auto cls1 = clsExact(*baseCls, false);
+  auto cls1Serialized = serialize_classes(cls1);
+  EXPECT_TRUE(might_have_dcls(cls1Serialized));
+
+  // Test sub-class serialization
+  auto cls2 = subCls(*baseCls, false);
+  auto cls2Serialized = serialize_classes(cls2);
+  EXPECT_TRUE(might_have_dcls(cls2Serialized));
+
+  // Test serialization in arrays - packed arrays
+  auto arrWithObj = make_specialized_arrpacked(BVec, {objExact(*baseCls), TInt});
+  auto arrWithObjSerialized = serialize_classes(arrWithObj);
+  EXPECT_TRUE(might_have_dcls(arrWithObjSerialized));
+
+  // Test serialization in arrays - packedN arrays
+  auto arrPackedN = make_specialized_arrpackedn(BVec, subObj(*baseCls));
+  auto arrPackedNSerialized = serialize_classes(arrPackedN);
+  EXPECT_TRUE(might_have_dcls(arrPackedNSerialized));
+
+  // Test serialization in arrays - map arrays
+  auto const map = MapElems{map_elem(s_A, objExact(*aCls))};
+  auto arrMap = make_specialized_arrmap(BDict, map);
+  auto arrMapSerialized = serialize_classes(arrMap);
+  EXPECT_TRUE(might_have_dcls(arrMapSerialized));
+
+  // Test serialization in arrays - mapN arrays
+  auto arrMapN = make_specialized_arrmapn(BDict, TStr, clsExact(*baseCls, false));
+  auto arrMapNSerialized = serialize_classes(arrMapN);
+  EXPECT_TRUE(might_have_dcls(arrMapNSerialized));
+
+  // Test serialization in WaitHandles
+  auto wh = make_specialized_wait_handle(BObj, objExact(*aaCls));
+  auto whSerialized = serialize_classes(wh);
+  EXPECT_TRUE(might_have_dcls(whSerialized));
+
+  // Test that serialization is idempotent for types without DCls
+  auto intType = TInt;
+  auto intTypeSerialized = serialize_classes(intType);
+  EXPECT_EQ(intType, intTypeSerialized);
+
+  auto strType = TStr;
+  auto strTypeSerialized = serialize_classes(strType);
+  EXPECT_EQ(strType, strTypeSerialized);
+
+  // Test serialization doesn't change types without objects/classes
+  // Note: Arrays with specializations still report might_have_dcls=true even without objects
+  auto arrNoObj = make_specialized_arrpacked(BVec, {TInt, TStr});
+  auto arrNoObjSerialized = serialize_classes(arrNoObj);
+  // Both should report true because they have array specializations
+  EXPECT_TRUE(might_have_dcls(arrNoObj));
+  EXPECT_TRUE(might_have_dcls(arrNoObjSerialized));
+}
+
 //////////////////////////////////////////////////////////////////////
 
 }

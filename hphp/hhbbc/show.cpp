@@ -456,6 +456,60 @@ std::string show(SrcLoc loc) {
 
 //////////////////////////////////////////////////////////////////////
 
+std::string show(const DCls& dcls, bool isObj) {
+  auto const lt = [&] {
+    assertx(!dcls.isExact());
+    return !isObj && !dcls.containsNonRegular() ? "<-" : "<=";
+  };
+
+  auto const eq = [&] (res::Class cls) {
+    return isObj || dcls.containsNonRegular() || cls.hasCompleteChildren()
+      ? "=" : "=-";
+  };
+
+  std::string ret;
+  if (dcls.isExact()) {
+    folly::toAppend(eq(dcls.cls()), show(dcls.cls()), &ret);
+  } else if (dcls.isSub()) {
+    folly::toAppend(lt(), show(dcls.cls()), &ret);
+  } else if (dcls.isIsect()) {
+    folly::toAppend(
+      lt(),
+      "{",
+      [&] {
+        using namespace folly::gen;
+        return from(dcls.isect())
+          | map([] (res::Class c) { return show(c); })
+          | unsplit<std::string>("&");
+      }(),
+      "}",
+      &ret
+    );
+  } else {
+    auto const [e, i] = dcls.isectAndExact();
+    folly::toAppend(
+      eq(e),
+      "{",
+      show(e),
+      "}&",
+      lt(),
+      "{",
+      [&, i=i] {
+        using namespace folly::gen;
+        return from(*i)
+          | map([] (res::Class c) { return show(c); })
+          | unsplit<std::string>("&");
+      }(),
+          "}",
+      &ret
+    );
+  }
+  if (dcls.isCtx()) folly::toAppend(" this", &ret);
+  return ret;
+}
+
+//////////////////////////////////////////////////////////////////////
+
 std::string show(const Type& t) {
   /*
    * Type pretty printing
@@ -621,68 +675,16 @@ std::string show(const Type& t) {
       return std::make_pair(ret, specMatches + restMatches);
     };
 
-    auto const showDCls = [&] (const DCls& dcls, bool isObj) {
-      auto const lt = [&] {
-        assertx(!dcls.isExact());
-        return !isObj && !dcls.containsNonRegular() ? "<-" : "<=";
-      };
-
-      auto const eq = [&] (res::Class cls) {
-        return isObj || dcls.containsNonRegular() || cls.hasCompleteChildren()
-          ? "=" : "=-";
-      };
-
-      std::string ret;
-      if (dcls.isExact()) {
-        folly::toAppend(eq(dcls.cls()), show(dcls.cls()), &ret);
-      } else if (dcls.isSub()) {
-        folly::toAppend(lt(), show(dcls.cls()), &ret);
-      } else if (dcls.isIsect()) {
-        folly::toAppend(
-          lt(),
-          "{",
-          [&] {
-            using namespace folly::gen;
-            return from(dcls.isect())
-              | map([] (res::Class c) { return show(c); })
-              | unsplit<std::string>("&");
-          }(),
-          "}",
-          &ret
-        );
-      } else {
-        auto const [e, i] = dcls.isectAndExact();
-        folly::toAppend(
-          eq(e),
-          "{",
-          show(e),
-          "}&",
-          lt(),
-          "{",
-          [&, i=i] {
-            using namespace folly::gen;
-            return from(*i)
-              | map([] (res::Class c) { return show(c); })
-              | unsplit<std::string>("&");
-          }(),
-          "}",
-          &ret
-        );
-      }
-      if (dcls.isCtx()) folly::toAppend(" this", &ret);
-      return ret;
-    };
-
     switch (t.m_dataTag) {
     case DataTag::Obj:
-      return impl(BObj, showDCls(t.m_data.dobj, true));
+      return impl(BObj, show(t.m_data.dobj, true));
     case DataTag::WaitHandle:
       return impl(
         BObj,
         folly::sformat("=WaitH<{}>", show(t.m_data.dwh->inner))
       );
     case DataTag::Cls:
-      return impl(BCls, showDCls(t.m_data.dcls, false));
+      return impl(BCls, show(t.m_data.dcls, false));
     case DataTag::ArrLikePacked:
       return impl(
         BArrLike,

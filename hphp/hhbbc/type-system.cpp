@@ -2102,7 +2102,7 @@ DCls DCls::MakeIsect(IsectSet isect, bool nonReg) {
 
 DCls DCls::MakeIsectAndExact(res::Class exact, IsectSet isect, bool nonReg) {
   assertx(!isect.empty());
-  assertx(exact.isMissingDebug());
+  assertx(exact.isSerialized() || exact.isMissingDebug());
   auto w = new IsectAndExactWrapper{exact, std::move(isect)};
   return DCls{
     nonReg ? Tag(TagIsect | TagExact) : Tag(TagIsect | TagExact | TagReg),
@@ -6293,6 +6293,31 @@ Type promote_classish(Type t) {
 
 //////////////////////////////////////////////////////////////////////
 
+bool might_have_dcls(const Type& t) {
+  // Only these types could contain a DCls.
+  if (!t.couldBe(BCArrLikeN | BObj | BCls)) return false;
+  switch (t.m_dataTag) {
+    case DataTag::None:
+    case DataTag::Int:
+    case DataTag::Dbl:
+    case DataTag::Str:
+    case DataTag::LazyCls:
+    case DataTag::EnumClassLabel:
+    case DataTag::ArrLikeVal:
+      return false;
+    case DataTag::WaitHandle:
+    case DataTag::ArrLikePacked:
+    case DataTag::ArrLikePackedN:
+    case DataTag::ArrLikeMap:
+    case DataTag::ArrLikeMapN:
+    case DataTag::Obj:
+    case DataTag::Cls:
+      return true;
+  }
+}
+
+//////////////////////////////////////////////////////////////////////
+
 // The COWer subclasses allow for traversing specializations while
 // potentially COWing the types. We can avoid COWing the type (and all
 // of it's parent types) until we know we're going to make a change.
@@ -6463,20 +6488,11 @@ void unserialize_classes_impl(const IIndex& index,
   SCOPE_EXIT { parent.noCOW().checkInvariants(); };
 
   auto const onDCls = [&] (const DCls& dcls, bool isObj) {
-    auto newT = [&] () -> Optional<Type> {
+    auto newT = [&] {
       if (dcls.isIsect()) {
-        auto const& isect = dcls.isect();
-        if (!std::any_of(
-              isect.begin(),
-              isect.end(),
-              [] (res::Class i) { return i.isSerialized(); }
-            )) {
-          return std::nullopt;
-        }
         auto const nonReg = dcls.containsNonRegular();
-
         auto out = TInitCell;
-        for (auto const i : isect) {
+        for (auto const i : dcls.isect()) {
           auto const u = i.unserialize(index);
           if (!u) return TBottom;
           out &= isObj ? subObj(*u) : subCls(*u, nonReg);
@@ -6484,16 +6500,7 @@ void unserialize_classes_impl(const IIndex& index,
         return out;
       } else if (dcls.isIsectAndExact()) {
         auto const [e, isect] = dcls.isectAndExact();
-        if (!e.isSerialized() &&
-            !std::any_of(
-              isect->begin(),
-              isect->end(),
-              [] (res::Class i) { return i.isSerialized(); }
-            )) {
-          return std::nullopt;
-        }
         auto const nonReg = dcls.containsNonRegular();
-
         auto const eu = e.unserialize(index);
         if (!eu) return TBottom;
         auto out = isObj ? objExact(*eu) : clsExact(*eu, nonReg);
@@ -6504,11 +6511,8 @@ void unserialize_classes_impl(const IIndex& index,
         }
         return out;
       } else {
-        auto const& cls = dcls.cls();
-        if (!cls.isSerialized()) return std::nullopt;
-        auto const u = cls.unserialize(index);
+        auto const u = dcls.cls().unserialize(index);
         if (!u) return TBottom;
-
         if (dcls.isExact()) {
           return isObj
             ? objExact(*u)
@@ -6519,18 +6523,16 @@ void unserialize_classes_impl(const IIndex& index,
             ? subObj(*u)
             : subCls(*u, dcls.containsNonRegular());
         }
-        return std::nullopt;
       }
     }();
 
-    if (!newT) return;
     auto& p = parent();
-    if (newT->is(BBottom)) {
+    if (newT.is(BBottom)) {
       p = isObj ? remove_obj(std::move(p)) : remove_cls(std::move(p));
     } else {
       auto const bits = p.m_bits;
       auto const mark = p.m_legacyMark;
-      p = setctx(std::move(*newT), dcls.isCtx());
+      p = setctx(std::move(newT), dcls.isCtx());
       p.m_bits = bits;
       p.m_legacyMark = mark;
     }
@@ -6624,6 +6626,124 @@ void unserialize_classes_impl(const IIndex& index,
 Type unserialize_classes(const IIndex& index, Type t) {
   TypeCOWer cower{t};
   unserialize_classes_impl(index, t, cower);
+  return t;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void serialize_classes_impl(const Type& t, COWer& parent) {
+  SCOPE_EXIT { parent.noCOW().checkInvariants(); };
+
+  auto const onDCls = [&] (const DCls& dcls, bool isObj) {
+    auto newDCls = [&] {
+      if (dcls.isIsect()) {
+        auto const& isect = dcls.isect();
+
+        DCls::IsectSet out;
+        out.reserve(isect.size());
+        for (auto i : isect) out.emplace_back(i.serialize());
+
+        return DCls::MakeIsect(std::move(out), dcls.containsNonRegular());
+      } else if (dcls.isIsectAndExact()) {
+        auto const [e, isect] = dcls.isectAndExact();
+
+        DCls::IsectSet out;
+        out.reserve(isect->size());
+        for (auto i : *isect) out.emplace_back(i.serialize());
+
+        return DCls::MakeIsectAndExact(
+          e.serialize(),
+          std::move(out),
+          dcls.containsNonRegular()
+        );
+      } else if (dcls.isExact()) {
+        return DCls::MakeExact(
+          dcls.cls().serialize(),
+          dcls.containsNonRegular()
+        );
+      } else {
+        assertx(dcls.isSub());
+        return DCls::MakeSub(
+          dcls.cls().serialize(),
+          dcls.containsNonRegular()
+        );
+      }
+    }();
+    newDCls.setCtx(dcls.isCtx());
+
+    auto& p = parent();
+    if (isObj) {
+      assertx(p.m_dataTag == DataTag::Obj);
+      p.m_data.dobj = std::move(newDCls);
+    } else {
+      assertx(p.m_dataTag == DataTag::Cls);
+      p.m_data.dcls = std::move(newDCls);
+    }
+  };
+
+  switch (t.m_dataTag) {
+    case DataTag::None:
+    case DataTag::Int:
+    case DataTag::Dbl:
+    case DataTag::Str:
+    case DataTag::LazyCls:
+    case DataTag::EnumClassLabel:
+    case DataTag::ArrLikeVal:
+      // These can never contain objects or classes.
+      break;
+    case DataTag::WaitHandle: {
+      WaitHandleCOWer next{parent, *t.m_data.dwh};
+      serialize_classes_impl(next.get().inner, next);
+      auto const& dcls = next.get().cls;
+      assertx(dcls.isExact() || dcls.isSub());
+      auto const u = dcls.cls().serialize();
+      next.getAndCOW().cls.setCls(u);
+      break;
+    }
+    case DataTag::ArrLikePacked: {
+      ArrLikePackedCOWer next{parent, *t.m_data.packed};
+      do {
+        serialize_classes_impl(next.currentElem(), next);
+      } while (next.nextElem());
+      break;
+    }
+    case DataTag::ArrLikePackedN: {
+      ArrLikePackedNCOWer next{parent, *t.m_data.packedn};
+      serialize_classes_impl(next.get().type, next);
+      break;
+    }
+    case DataTag::ArrLikeMap: {
+      ArrLikeMapCOWer next{parent, *t.m_data.map};
+      do {
+        serialize_classes_impl(next.currentElem(), next);
+      } while (next.nextElem());
+      assertx(next.optKeyOrValue().is(BBottom) ||
+              next.optKeyOrValue().subtypeOf(BArrKey));
+      assertx(!next.optKeyOrValue().couldBe(BCls | BObj));
+      next.toOptVal();
+      serialize_classes_impl(next.optKeyOrValue(), next);
+      break;
+    }
+    case DataTag::ArrLikeMapN: {
+      ArrLikeMapNCOWer next{parent, *t.m_data.mapn};
+      assertx(next.keyOrValue().subtypeOf(BArrKey));
+      assertx(!next.keyOrValue().couldBe(BCls | BObj));
+      next.toValue();
+      serialize_classes_impl(next.keyOrValue(), next);
+      break;
+    }
+    case DataTag::Obj:
+      onDCls(t.m_data.dobj, true);
+      break;
+    case DataTag::Cls:
+      onDCls(t.m_data.dcls, false);
+      break;
+  }
+}
+
+Type serialize_classes(Type t) {
+  TypeCOWer cower{t};
+  serialize_classes_impl(t, cower);
   return t;
 }
 

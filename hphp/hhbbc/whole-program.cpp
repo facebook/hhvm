@@ -767,8 +767,7 @@ struct WholeProgramInput::Key::Impl {
     ClassBytecode
   };
 
-  using UnresolvedTypes =
-    hphp_fast_set<SString, string_data_hash, string_data_tsame>;
+  using UnresolvedTypes = TSStringSet;
 
   struct FailInfo {
     LSString message;
@@ -778,10 +777,14 @@ struct WholeProgramInput::Key::Impl {
     LSString name;
     std::vector<TypeMapping> typeMappings;
     std::vector<std::pair<SString, bool>> constants;
+    SStringSet cinitPredeps;
+    SStringSet predeps;
     template <typename SerDe> void serde(SerDe& sd) {
       sd(name)
         (typeMappings)
         (constants)
+        (cinitPredeps, string_data_lt{})
+        (predeps, string_data_lt{})
         ;
     }
   };
@@ -992,6 +995,9 @@ WholeProgramInput::make(std::unique_ptr<UnitEmitter> ue) {
     }
 
     KeyI::UnitInfo info{parsed.unit->filename};
+    info.cinitPredeps = std::move(parsed.cinitPredeps);
+    info.predeps = std::move(parsed.predeps);
+
     for (auto const& typeAlias : parsed.unit->typeAliases) {
       info.typeMappings.emplace_back(
         TypeMapping{
@@ -999,7 +1005,8 @@ WholeProgramInput::make(std::unique_ptr<UnitEmitter> ue) {
           typeAlias->value,
           true,
           false,
-          parsed.unit->filename
+          parsed.unit->filename,
+          typeAlias->typeStructure
         }
       );
     }
@@ -1064,7 +1071,7 @@ WholeProgramInput::make(std::unique_ptr<UnitEmitter> ue) {
       addType(types, folly::Range<const TypeConstraint*>(&tc, &tc + 1), nullptr);
       if (tc.isMixed()) tc.setType(AnnotType::ArrayKey);
       typeMapping.emplace(
-        TypeMapping{c->name, tc, false, true, unit}
+        TypeMapping{c->name, tc, false, true, unit, nullptr}
       );
     }
 
@@ -1213,7 +1220,9 @@ Index::Input make_index_input(WholeProgramInput input) {
               p.second.cast<std::unique_ptr<php::Unit>>(),
               p.first.m_impl->unit.name,
               std::move(p.first.m_impl->unit.typeMappings),
-              std::move(p.first.m_impl->unit.constants)
+              std::move(p.first.m_impl->unit.constants),
+              std::move(p.first.m_impl->unit.cinitPredeps),
+              std::move(p.first.m_impl->unit.predeps)
             }
           );
           break;

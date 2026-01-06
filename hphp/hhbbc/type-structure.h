@@ -89,4 +89,14 @@ SString type_structure_name(SArray);
 
 //////////////////////////////////////////////////////////////////////
 
+/*
+ * Fill the given set with any identifiers that this type-structure
+ * might reference. This is best effort and might not include all
+ * actual identifiers. This is fine as this is only used to "prime"
+ * the scheduler.
+ */
+void type_structure_references(SArray, SStringSet&);
+
+//////////////////////////////////////////////////////////////////////
+
 }

@@ -76,20 +76,22 @@ struct ParseUnitState {
    * have the full SourceLocTable information in it, so we're limited
    * to line numbers.
    */
-  std::variant< SourceLocTable
-                , LineTable
-                > srcLocInfo;
+  std::variant<SourceLocTable, LineTable> srcLocInfo;
 
   /*
    * Map from Closure name to the function containing the Closure's
    * associated CreateCl opcode.
    */
-  hphp_fast_map<
-    SString,
-    php::Func*,
-    string_data_hash,
-    string_data_tsame
-  > createClMap;
+  TSStringToOneT<php::Func*> createClMap;
+
+  /*
+   * Possible identifiers that this unit references (either just in
+   * cinit or elsewhere). This isn't exhaustive as it might miss some
+   * references. This is fine, as it's only used to "prime" to
+   * scheduler with possible dependencies.
+   */
+  SStringSet cinitPredeps;
+  SStringSet predeps;
 
   struct SrcLocHash {
     size_t operator()(const php::SrcLoc& sl) const {
@@ -245,6 +247,21 @@ MKey make_mkey(const php::Func& /*func*/, MemberKey mk) {
   not_reached();
 }
 
+// Whether some string might be a valid class or func name. This
+// doesn't have to be perfect as it's just an optimization.
+bool is_possible_identifier(SString s) {
+  return
+    !s->empty() &&
+    s->size() <= 96 &&
+    std::isalpha(*s->data()) &&
+    std::strspn(
+      s->data(),
+      "0123456789_\\"
+      "abcdefghijklmnopqrstuvwxyz"
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    ) == s->size();
+}
+
 template<class FindBlock>
 void populate_block(ParseUnitState& puState,
                     const FuncEmitter& fe,
@@ -308,6 +325,12 @@ void populate_block(ParseUnitState& puState,
     );
   };
 
+  auto const add_predep = [&] (SString n) {
+    is_86init_func(func)
+      ? puState.cinitPredeps.emplace(n)
+      : puState.predeps.emplace(n);
+  };
+
 #define IMM_BLA(n)     auto targets = decode_switch(opPC);
 #define IMM_SLA(n)     auto targets = decode_sswitch(opPC);
 #define IMM_IVA(n)     auto arg##n = decode_iva(pc);
@@ -333,7 +356,8 @@ void populate_block(ParseUnitState& puState,
                          return id;                              \
                        }();
 #define IMM_DA(n)      auto dbl##n = decode<double>(pc);
-#define IMM_SA(n)      auto str##n = ue.lookupLitstrId(decode<Id>(pc));
+#define IMM_SA(n)      auto str##n = ue.lookupLitstrId(decode<Id>(pc)); \
+                       add_predep(str##n);
 #define IMM_RATA(n)    auto rat = decodeRAT(ue, pc);
 #define IMM_AA(n)      auto arr##n = ue.lookupArrayId(decode<Id>(pc));
 #define IMM_BA(n)      assertx(next == past);     \
@@ -370,6 +394,7 @@ void populate_block(ParseUnitState& puState,
                            ? findBlock(opPC + aeOffset - fe.bc())            \
                            : NoBlockId;                                      \
                          assertx(aeTarget == NoBlockId || next == past);     \
+                         if (fca.context) add_predep(fca.context);           \
                          return FCallArgs(fca.flags, fca.numArgs,            \
                                           fca.numRets, std::move(inoutArgs), \
                                           std::move(readonlyArgs),           \
@@ -908,12 +933,15 @@ std::unique_ptr<php::Class> parse_class(ParseUnitState& puState,
     return true;
   }();
 
+  if (ret->parentName) puState.predeps.emplace(ret->parentName);
 
   for (auto& iface : pce.interfaces()) {
     ret->interfaceNames.push_back(iface);
+    puState.predeps.emplace(iface);
   }
   for (auto& enumInclude : pce.enumIncludes()) {
     ret->includedEnumNames.push_back(enumInclude);
+    puState.predeps.emplace(enumInclude);
   }
 
   copy(ret->usedTraitNames,  pce.usedTraits());
@@ -948,12 +976,10 @@ std::unique_ptr<php::Class> parse_class(ParseUnitState& puState,
 
   auto const getTypeStructureConst = [&] (const PreClassEmitter::Const& cconst) {
     auto const val = cconst.valOption();
-    if (!Cfg::Eval::EmitBespokeTypeStructures ||
-        !val.has_value() ||
-        !isArrayLikeType(val->type())) {
-      return val;
-    }
+    if (!val.has_value() || !isArrayLikeType(val->type())) return val;
     auto const ad = val->val().parr;
+    type_structure_references(ad, puState.cinitPredeps);
+    if (!Cfg::Eval::EmitBespokeTypeStructures) return val;
     if (!bespoke::TypeStructure::isValidTypeStructure(ad)) return val;
     auto const ts = bespoke::TypeStructure::MakeFromVanillaStatic(ad, true);
     return make_optional(make_tv<KindOfPersistentDict>(ts));
@@ -1090,7 +1116,8 @@ std::unique_ptr<php::Module> parse_module(const Module& m) {
   });
 }
 
-std::unique_ptr<php::TypeAlias> parse_type_alias(const TypeAliasEmitter& te) {
+std::unique_ptr<php::TypeAlias> parse_type_alias(ParseUnitState& pu,
+                                                 const TypeAliasEmitter& te) {
   FTRACE(2, "  type alias: {}\n", te.name()->data());
 
   auto const ts = [&] () -> SArray {
@@ -1101,6 +1128,7 @@ std::unique_ptr<php::TypeAlias> parse_type_alias(const TypeAliasEmitter& te) {
     if (!bespoke::TypeStructure::isValidTypeStructure(a.get())) return a.get();
     return bespoke::TypeStructure::MakeFromVanillaStatic(a.get(), true);
   }();
+  if (ts) type_structure_references(ts, pu.cinitPredeps);
 
   return std::unique_ptr<php::TypeAlias>(new php::TypeAlias {
     php::SrcInfo { te.getLocation() },
@@ -1177,7 +1205,7 @@ ParsedUnit parse_unit(const UnitEmitter& ue) {
   }
 
   for (auto const& te : ue.typeAliases()) {
-    ret.unit->typeAliases.emplace_back(parse_type_alias(*te));
+    ret.unit->typeAliases.emplace_back(parse_type_alias(puState, *te));
   }
 
   for (auto const& c : ue.constants()) {
@@ -1229,6 +1257,17 @@ ParsedUnit parse_unit(const UnitEmitter& ue) {
     for (auto const& c : ret.classes) always_assert(check(*c));
   }
   state_after("parse", ret);
+
+  folly::erase_if(
+    puState.cinitPredeps,
+    [] (SString s) { return !is_possible_identifier(s); }
+  );
+  folly::erase_if(
+    puState.predeps,
+    [] (SString s) { return !is_possible_identifier(s); }
+  );
+  ret.cinitPredeps = std::move(puState.cinitPredeps);
+  ret.predeps = std::move(puState.predeps);
 
   return ret;
 }

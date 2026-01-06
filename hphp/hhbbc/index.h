@@ -955,6 +955,7 @@ struct TypeMapping {
   bool isTypeAlias;
   bool isEnum;
   LSString unit;
+  SArray typeStructure;
 
   bool operator==(const TypeMapping& o) const {
     return name->tsame(o.name);
@@ -964,7 +965,7 @@ struct TypeMapping {
   }
 
   template <typename SerDe> void serde(SerDe& sd) {
-    sd(name)(value)(isTypeAlias)(isEnum)(unit);
+    sd(name)(value)(isTypeAlias)(isEnum)(unit)(typeStructure);
   }
 };
 
@@ -1019,6 +1020,8 @@ struct Index {
       LSString name;
       std::vector<TypeMapping> typeMappings;
       std::vector<std::pair<SString, bool>> constants;
+      SStringSet cinitPredeps;
+      SStringSet predeps;
     };
 
     struct FuncBytecodeMeta {

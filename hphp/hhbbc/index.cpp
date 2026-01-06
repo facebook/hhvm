@@ -5839,12 +5839,25 @@ struct Index::IndexData {
   // constants from.
   TSStringToOneT<TSStringSet> classToCnsBases;
 
+  // Maps an unit to it's predeps, whether just in cinits or
+  // everywhere.
+  SStringToOneT<SStringSet> unitCInitPredeps;
+  SStringToOneT<SStringSet> unitPredeps;
+
   // All the classes that have a 86*init function.
   TSStringSet classesWith86Inits;
   // All the 86cinit functions for "dynamic" top-level constants.
   FSStringSet constantInitFuncs;
   // All the units that have type-aliases within them.
   SStringSet unitsWithTypeAliases;
+
+  // Maps a class to any methods which must be analyzed as part of
+  // that class.
+  TSStringToOneT<MethRefSet> extraMethods;
+
+  // Maps an unit to all the originalUnit fields of funcs in that
+  // unit.
+  SStringToOneT<SStringSet> unitToOriginalUnits;
 
   std::unique_ptr<php::Program> program;
 
@@ -5865,13 +5878,6 @@ struct Index::IndexData {
     FuncFamilyOrSingle m_regular;
   };
   SStringToOneT<MethodFamilyEntry> methodFamilies;
-
-  // Map from each class to all the closures that are allocated in
-  // functions of that class.
-  hphp_fast_map<
-    const php::Class*,
-    CompactVector<const php::Class*>
-  > classClosureMap;
 
   hphp_fast_map<
     const php::Class*,
@@ -7177,15 +7183,6 @@ void add_program_to_index(IndexData& index) {
   }
   for (auto const& f : program.funcs) {
     add_func_to_index(index, *f);
-  }
-
-  for (auto const& c : program.classes) {
-    assertx(!c->closureContextCls);
-    for (auto const& clo : c->closures) {
-      assertx(clo->closureContextCls);
-      auto& s = index.classClosureMap[index.classes.at(clo->closureContextCls)];
-      s.emplace_back(clo.get());
-    }
   }
 
   // All funcs have been assigned indices above. Now for each func we
@@ -9307,6 +9304,28 @@ struct FlattenJob {
     std::vector<TSStringSet> classTypeUses;
     std::vector<TSStringSet> funcTypeUses;
     std::vector<InterfaceConflicts> interfaceConflicts;
+    std::vector<MethRefSet> extraMethods;
+    std::vector<TSStringSet> flattenedInto;
+
+    // Flattening can cause a class or func to inherit more pre-deps.
+    struct NewPredeps {
+      SStringSet predeps;
+      SStringSet cinitPredeps;
+      template <typename SerDe> void serde(SerDe& sd) {
+        sd(predeps, string_data_lt{})
+          (cinitPredeps, string_data_lt{})
+          ;
+      }
+    };
+    std::vector<NewPredeps> newClassPredeps;
+    std::vector<NewPredeps> newFuncPredeps;
+
+    // If an unit contains a function or method with an originalUnit
+    // field different than unit, it is recorded here. This is used
+    // for the final pass, where we have to ensure that both a
+    // function's unit and it's original unit is present.
+    SStringToOneT<SStringSet> originalUnits;
+
     template <typename SerDe> void serde(SerDe& sd) {
       ScopedStringDataIndexer _;
       sd(uninstantiable, string_data_lt_type{})
@@ -9317,6 +9336,11 @@ struct FlattenJob {
         (classTypeUses, string_data_lt_type{})
         (funcTypeUses, string_data_lt_type{})
         (interfaceConflicts)
+        (extraMethods, std::less<>{})
+        (flattenedInto, string_data_lt_type{})
+        (newClassPredeps)
+        (newFuncPredeps)
+        (originalUnits, string_data_lt{}, string_data_lt{})
         ;
     }
   };
@@ -9443,9 +9467,7 @@ struct FlattenJob {
     std::vector<const php::Class*> newClosures;
 
     for (auto const cls : worklist) {
-      Trace::Bump bumper{
-        Trace::hhbbc_index, kSystemLibBump, is_systemlib_part(cls->unit)
-      };
+      auto const UNUSED bump = trace_bump(*cls, Trace::hhbbc_index);
 
       ITRACE(2, "flatten class: {}\n", cls->name);
       Trace::Indent indent;
@@ -9523,6 +9545,9 @@ struct FlattenJob {
     outNames.reserve(classes.vals.size());
     outMeta.parents.reserve(classes.vals.size());
     outMeta.newClosures.reserve(newClosures.size());
+    outMeta.classTypeUses.reserve(classes.vals.size());
+    outMeta.extraMethods.reserve(classes.vals.size());
+    outMeta.flattenedInto.reserve(classes.vals.size());
 
     auto const makeMethodsWithoutCInfo = [&] (const php::Class& cls) {
       always_assert(outMeta.uninstantiable.emplace(cls.name).second);
@@ -9566,7 +9591,13 @@ struct FlattenJob {
       SCOPE_EXIT { index.m_ctx = nullptr; };
 
       outMeta.classTypeUses.emplace_back();
-      update_type_constraints(index, *cls, &outMeta.classTypeUses.back());
+      outMeta.newClassPredeps.emplace_back();
+      update_type_constraints(
+        index,
+        *cls,
+        outMeta.classTypeUses.back(),
+        outMeta.newClassPredeps.back()
+      );
       optimize_properties(index, *cls, *cinfo);
       for (auto const& func : cls->methods) {
         cinfo->funcInfos.emplace_back(make_func_info(index, *func));
@@ -9577,7 +9608,12 @@ struct FlattenJob {
         auto const it = index.m_classInfos.find(clo->name);
         always_assert(it != end(index.m_classInfos));
         auto& cloinfo = it->second;
-        update_type_constraints(index, *clo, &outMeta.classTypeUses.back());
+        update_type_constraints(
+          index,
+          *clo,
+          outMeta.classTypeUses.back(),
+          outMeta.newClassPredeps.back()
+        );
         optimize_properties(index, *clo, *cloinfo);
         assertx(clo->methods.size() == 1);
         cloinfo->funcInfos.emplace_back(
@@ -9585,6 +9621,7 @@ struct FlattenJob {
         );
       }
 
+      outMeta.extraMethods.emplace_back(cinfo->extraMethods);
       outNames.emplace(cls->name);
 
       // Record interface conflicts
@@ -9684,8 +9721,11 @@ struct FlattenJob {
         );
       }
 
+      auto const& state = index.m_states.at(name);
+      outMeta.flattenedInto.emplace_back();
+      outMeta.flattenedInto.back() = std::move(state->m_flattenedInto);
+
       if (!is_closure(*cls)) {
-        auto const& state = index.m_states.at(name);
         outMeta.parents.emplace_back();
         auto& parents = outMeta.parents.back().names;
         parents.reserve(state->m_parents.size());
@@ -9711,6 +9751,7 @@ struct FlattenJob {
         auto const it = index.m_classInfos.find(clo->name);
         always_assert(it != end(index.m_classInfos));
         auto& cloinfo = it->second;
+        assertx(cloinfo->extraMethods.empty());
 
         // Closures are always leafs.
         cloinfo->classGraph.setComplete();
@@ -9726,7 +9767,17 @@ struct FlattenJob {
           );
         }
 
+        for (auto const& m : clo->methods) {
+          if (!m->originalUnit || m->originalUnit == m->unit) continue;
+          outMeta.originalUnits[m->unit].emplace(m->originalUnit);
+        }
+
         cinfo->closures.emplace_back(std::move(cloinfo));
+      }
+
+      for (auto const& m : cls->methods) {
+        if (!m->originalUnit || m->originalUnit == m->unit) continue;
+        outMeta.originalUnits[m->unit].emplace(m->originalUnit);
       }
 
       outClasses.vals.emplace_back(std::move(cls));
@@ -9745,13 +9796,23 @@ struct FlattenJob {
       outMeta.newClosures.emplace_back(
         OutputMeta::NewClosure{clo->unit, clo->name, clo->closureContextCls}
       );
+      for (auto const& m : clo->methods) {
+        if (!m->originalUnit || m->originalUnit == m->unit) continue;
+        outMeta.originalUnits[m->unit].emplace(m->originalUnit);
+      }
     }
 
     Variadic<std::unique_ptr<FuncInfo2>> funcInfos;
     funcInfos.vals.reserve(funcs.vals.size());
     for (auto& func : funcs.vals) {
       outMeta.funcTypeUses.emplace_back();
-      update_type_constraints(index, *func, &outMeta.funcTypeUses.back());
+      outMeta.newFuncPredeps.emplace_back();
+      update_type_constraints(
+        index,
+        *func,
+        outMeta.funcTypeUses.back(),
+        outMeta.newFuncPredeps.back()
+      );
       funcInfos.vals.emplace_back(make_func_info(index, *func));
     }
 
@@ -9809,6 +9870,7 @@ private:
     SStringSet m_cnsFromTrait;
     SStringToOneT<size_t> m_methodIndices;
     CompactVector<const php::Class*> m_parents;
+    TSStringSet m_flattenedInto;
 
     size_t& methodIdx(SString context, SString cls, SString name) {
       auto const it = m_methodIndices.find(name);
@@ -11538,6 +11600,7 @@ private:
     for (auto const tname : cls.usedTraitNames) {
       auto const& tinfo = index.classInfo(tname);
       cinfo.classGraph.flattenTraitInto(tinfo.classGraph);
+      state.m_flattenedInto.emplace(tname);
     }
 
     // If we flatten the traits into us, they're no longer actual
@@ -11694,7 +11757,7 @@ private:
 
   static bool resolve_one(TypeConstraint& tc,
                           const TypeConstraint& tv,
-                          TSStringSet* uses,
+                          TSStringSet& uses,
                           bool isProp,
                           bool isUnion) {
     assertx(!tv.isUnion());
@@ -11712,7 +11775,7 @@ private:
     if (isUnion) tc.unresolve();
     tc.resolveType(tv.type(), tv.isNullable(), value);
     assertx(IMPLIES(isProp, tc.validForProp()));
-    if (uses && value) uses->emplace(value);
+    if (value) uses.emplace(value);
     return true;
   }
 
@@ -11722,21 +11785,19 @@ private:
   static void update_type_constraint(const LocalIndex& index,
                                      TypeConstraint& tc,
                                      bool isProp,
-                                     TSStringSet* uses) {
+                                     TSStringSet& uses,
+                                     SStringSet& predeps) {
     always_assert(IMPLIES(isProp, tc.validForProp()));
 
     if (!tc.isUnresolved()) {
       // Any TC already resolved is assumed to be correct.
-      if (uses) {
-        for (auto& part : eachTypeConstraintInUnion(tc)) {
-          if (auto clsName = part.clsName()) {
-            uses->emplace(clsName);
-          }
-        }
+      for (auto& part : eachTypeConstraintInUnion(tc)) {
+        if (auto clsName = part.clsName()) uses.emplace(clsName);
       }
       return;
     }
     auto const name = tc.typeName();
+    predeps.emplace(name);
 
     if (tc.isUnion()) {
       // This is a union that contains unresolved names.
@@ -11748,6 +11809,8 @@ private:
 
     // Is this name a type-alias or enum?
     if (auto const tm = index.typeMapping(name)) {
+      predeps.emplace(tm->name);
+
       if (tm->value.isUnion()) {
         auto flags =
           tc.flags() & (TypeConstraintFlags::Nullable
@@ -11766,12 +11829,17 @@ private:
           members.emplace_back(std::move(copy));
         }
         tc = TypeConstraint::makeUnion(name, members);
+        if (tm->typeStructure) {
+          type_structure_references(tm->typeStructure, predeps);
+        }
         return;
       }
 
       // This unresolved name resolves to a single type.
-      assertx(!tm->value.isUnion());
       resolve_one(tc, tm->value, uses, isProp, false);
+      if (tm->typeStructure) {
+        type_structure_references(tm->typeStructure, predeps);
+      }
       return;
     }
 
@@ -11780,35 +11848,47 @@ private:
     // name.
     if (index.missingType(name)) return;
     tc.resolveType(AnnotType::SubObject, tc.isNullable(), name);
-    if (uses) uses->emplace(name);
+    uses.emplace(name);
   }
 
   static void update_type_constraints(const LocalIndex& index,
                                       php::Func& func,
-                                      TSStringSet* uses) {
+                                      TSStringSet& uses,
+                                      OutputMeta::NewPredeps& predeps) {
+    auto& pre = is_86init_func(func) ? predeps.cinitPredeps : predeps.predeps;
+
     for (auto& p : func.params) {
       p.typeConstraints.forEachMutable([&](TypeConstraint& tc) {
-        update_type_constraint(index, tc, false, uses);
+          update_type_constraint(index, tc, false, uses, pre);
       });
     }
 
     func.retTypeConstraints.forEachMutable(
       [&](TypeConstraint& tc) {
-        update_type_constraint(index, tc, false, uses);
+        update_type_constraint(index, tc, false, uses, pre);
       }
     );
   }
 
   static void update_type_constraints(const LocalIndex& index,
                                       php::Class& cls,
-                                      TSStringSet* uses) {
+                                      TSStringSet& uses,
+                                      OutputMeta::NewPredeps& predeps) {
     if (cls.attrs & AttrEnum) {
-      update_type_constraint(index, cls.enumBaseTy, false, uses);
+      update_type_constraint(
+        index,
+        cls.enumBaseTy,
+        false,
+        uses,
+        predeps.predeps
+      );
     }
-    for (auto& meth : cls.methods) update_type_constraints(index, *meth, uses);
+    for (auto& meth : cls.methods) {
+      update_type_constraints(index, *meth, uses, predeps);
+    }
     for (auto& prop : cls.properties) {
       prop.typeConstraints.forEachMutable([&](TypeConstraint& tc) {
-        update_type_constraint(index, tc, true, uses);
+        update_type_constraint(index, tc, true, uses, predeps.predeps);
       });
     }
   }
@@ -11872,8 +11952,10 @@ private:
           // This property's type-constraint might not have been
           // resolved (if the parent is not on the output list for
           // this job), so do so here.
+          TSStringSet uses;
+          SStringSet predeps;
           parentProp->typeConstraints.forEachMutable([&](TypeConstraint& tc) {
-            update_type_constraint(index, tc, true, nullptr);
+            update_type_constraint(index, tc, true, uses, predeps);
           });
 
           // This check is safe, but conservative. It might miss a few
@@ -11924,7 +12006,6 @@ private:
     }
   }
 };
-
 
 Job<FlattenJob> s_flattenJob;
 
@@ -12022,34 +12103,42 @@ void flatten_type_mappings(IndexData& index,
       auto enumMeta = folly::get_ptr(meta.cls, typeMapping->name);
 
       std::vector<TypeConstraint> tvu;
+      Optional<SArray> lastTS;
 
       for (auto const& tc : eachTypeConstraintInUnion(typeMapping->value)) {
         const auto type = tc.type();
         const auto value = tc.typeName();
         auto name = value;
-        bool inEnum = typeMapping->isEnum; // Are we inside an enum
+        auto const inEnum = typeMapping->isEnum;
 
         if (type != AnnotType::Unresolved) {
           // If the type-mapping is already resolved, we mainly take it
           // as is. The exception is if it's an enum, in which case we
           // validate the underlying base type.
           assertx(type != AnnotType::SubObject);
-          if (!enumMeta) {
+          if (enumMeta) {
+            if (!enumSupportsAnnot(type)) {
+              FTRACE(
+                2, "Type-mapping '{}' is invalid because it resolves to "
+                "invalid enum type {}\n",
+                typeMapping->name,
+                annotName(type)
+              );
+              tvu.emplace_back(AnnotType::Unresolved, tc.flags(), value);
+              lastTS = nullptr;
+              continue;
+            }
+            tvu.emplace_back(type, tc.flags() | flags, value);
+            anyUnresolved = true;
+          } else {
             tvu.emplace_back(tc);
-            continue;
           }
-          if (!enumSupportsAnnot(type)) {
-            FTRACE(
-              2, "Type-mapping '{}' is invalid because it resolves to "
-              "invalid enum type {}\n",
-              typeMapping->name,
-              annotName(type)
-            );
-            tvu.emplace_back(AnnotType::Unresolved, tc.flags(), value);
-            continue;
+
+          if (!lastTS) {
+            lastTS = typeMapping->typeStructure;
+          } else if (*lastTS != typeMapping->typeStructure) {
+            lastTS = nullptr;
           }
-          tvu.emplace_back(type, tc.flags() | flags, value);
-          anyUnresolved = true;
           continue;
         }
 
@@ -12094,9 +12183,16 @@ void flatten_type_mappings(IndexData& index,
                 );
                 tvu.emplace_back(AnnotType::Unresolved, tc.flags() | flags, name);
                 anyUnresolved = true;
+                lastTS = nullptr;
                 continue;
               }
               tvu.emplace_back(next_type, tc.flags() | flags, next_value);
+            }
+
+            if (!lastTS) {
+              lastTS = next->typeStructure;
+            } else if (*lastTS != next->typeStructure) {
+              lastTS = nullptr;
             }
           } else if (index.classRefs.contains(name)) {
             if (inEnum) {
@@ -12114,6 +12210,7 @@ void flatten_type_mappings(IndexData& index,
               name
             );
             if (inEnum) anyUnresolved = true;
+            lastTS = nullptr;
             continue;
           } else {
             FTRACE(
@@ -12124,6 +12221,7 @@ void flatten_type_mappings(IndexData& index,
             );
             tvu.emplace_back(AnnotType::Unresolved, tc.flags() | flags, name);
             anyUnresolved = true;
+            lastTS = nullptr;
             continue;
           }
 
@@ -12146,7 +12244,8 @@ void flatten_type_mappings(IndexData& index,
                 TypeConstraint{AnnotType::Unresolved, flags, name},
                 false,
                 inEnum,
-                typeMapping->unit
+                typeMapping->unit,
+                typeMapping->typeStructure
               };
             }
           }
@@ -12169,7 +12268,8 @@ void flatten_type_mappings(IndexData& index,
         value,
         false,
         typeMapping->isEnum,
-        typeMapping->unit
+        typeMapping->unit,
+        lastTS.value_or(nullptr)
       };
     }
   );
@@ -12447,8 +12547,10 @@ flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
     UniquePtrRef<php::Class> cls;
     UniquePtrRef<php::ClassBytecode> bytecode;
     UniquePtrRef<ClassInfo2> cinfo;
-    SString unitToAddTo;
     TSStringSet typeUses;
+    MethRefSet extraMethods;
+    TSStringSet flattenedInto;
+    FlattenJob::OutputMeta::NewPredeps newPredeps;
     bool isInterface{false};
     bool has86init{false};
     CompactVector<SString> parents;
@@ -12458,6 +12560,7 @@ flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
     UniquePtrRef<php::Func> func;
     UniquePtrRef<FuncInfo2> finfo;
     TSStringSet typeUses;
+    FlattenJob::OutputMeta::NewPredeps newPredeps;
   };
   struct ClosureUpdate {
     SString name;
@@ -12468,8 +12571,16 @@ flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
     SString name;
     UniquePtrRef<MethodsWithoutCInfo> methods;
   };
-  using Update =
-    std::variant<ClassUpdate, FuncUpdate, ClosureUpdate, MethodUpdate>;
+  struct UnitUpdate {
+    SStringToOneT<SStringSet> originalUnits;
+  };
+  using Update = std::variant<
+    ClassUpdate,
+    FuncUpdate,
+    ClosureUpdate,
+    MethodUpdate,
+    UnitUpdate
+  >;
   using UpdateVec = std::vector<Update>;
 
   tbb::concurrent_hash_map<
@@ -12602,6 +12713,9 @@ flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
       }
       assertx(outputIdx < clsRefs.size());
       assertx(outputIdx < clsMeta.classTypeUses.size());
+      assertx(outputIdx < clsMeta.extraMethods.size());
+      assertx(outputIdx < clsMeta.flattenedInto.size());
+      assertx(outputIdx < clsMeta.newClassPredeps.size());
 
       auto const& flattenMeta = meta.cls.at(name);
       updates.emplace_back(
@@ -12610,8 +12724,10 @@ flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
           std::move(clsRefs[outputIdx]),
           std::move(bytecodeRefs[outputIdx]),
           std::move(cinfoRefs[outputIdx]),
-          nullptr,
           std::move(clsMeta.classTypeUses[outputIdx]),
+          std::move(clsMeta.extraMethods[outputIdx]),
+          std::move(clsMeta.flattenedInto[outputIdx]),
+          std::move(clsMeta.newClassPredeps[outputIdx]),
           (bool)clsMeta.interfaces.contains(name),
           (bool)clsMeta.with86init.contains(name)
         }
@@ -12649,15 +12765,21 @@ flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
     assertx(methodIdx == methodRefs.size());
 
     assertx(work.funcs.size() == clsMeta.funcTypeUses.size());
+    assertx(work.funcs.size() == clsMeta.newFuncPredeps.size());
     for (size_t i = 0, size = work.funcs.size(); i < size; ++i) {
       updates.emplace_back(
         FuncUpdate{
           work.funcs[i],
           std::move(funcRefs[i]),
           std::move(finfoRefs[i]),
-          std::move(clsMeta.funcTypeUses[i])
+          std::move(clsMeta.funcTypeUses[i]),
+          std::move(clsMeta.newFuncPredeps[i])
         }
       );
+    }
+
+    if (!clsMeta.originalUnits.empty()) {
+      updates.emplace_back(UnitUpdate{ std::move(clsMeta.originalUnits) });
     }
 
     for (auto const& c : clsMeta.interfaceConflicts) {
@@ -12849,6 +12971,85 @@ flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
               auto& meta = initTypesMeta.funcs[u->name];
               assertx(meta.deps.empty());
               meta.deps.insert(begin(u->typeUses), end(u->typeUses));
+            }
+          }
+        }
+      },
+      [&] {
+        for (auto& updates : allUpdates) {
+          for (auto& update : updates) {
+            auto const u = std::get_if<ClassUpdate>(&update);
+            if (!u || u->extraMethods.empty()) continue;
+            always_assert(
+              index.extraMethods.emplace(
+                u->name,
+                std::move(u->extraMethods)
+              ).second
+            );
+          }
+        }
+      },
+      [&] {
+        for (auto& updates : allUpdates) {
+          for (auto& update : updates) {
+            if (auto const u = std::get_if<ClassUpdate>(&update)) {
+              auto const unit = index.classToUnit.at(u->name);
+              auto& toPredeps = index.unitPredeps.at(unit);
+              auto& toCInitPredeps = index.unitCInitPredeps.at(unit);
+              toPredeps.insert(begin(u->typeUses), end(u->typeUses));
+              toPredeps.insert(
+                begin(u->newPredeps.predeps),
+                end(u->newPredeps.predeps)
+              );
+              toCInitPredeps.insert(
+                begin(u->newPredeps.cinitPredeps),
+                end(u->newPredeps.cinitPredeps)
+              );
+            } else if (auto const u = std::get_if<FuncUpdate>(&update)) {
+              auto const unit = index.funcToUnit.at(u->name);
+              auto& toPredeps = index.unitPredeps.at(unit);
+              auto& toCInitPredeps = index.unitCInitPredeps.at(unit);
+              toPredeps.insert(begin(u->typeUses), end(u->typeUses));
+              toPredeps.insert(
+                begin(u->newPredeps.predeps),
+                end(u->newPredeps.predeps)
+              );
+              toCInitPredeps.insert(
+                begin(u->newPredeps.cinitPredeps),
+                end(u->newPredeps.cinitPredeps)
+              );
+            }
+          }
+        }
+
+        for (auto& updates : allUpdates) {
+          for (auto& update : updates) {
+            auto const u = std::get_if<ClassUpdate>(&update);
+            if (!u) continue;
+            auto const unit = index.classToUnit.at(u->name);
+            auto& toPredeps = index.unitPredeps.at(unit);
+            auto& toCInitPredeps = index.unitCInitPredeps.at(unit);
+            for (auto const t : u->flattenedInto) {
+              auto const fromUnit = index.classToUnit.at(t);
+              auto const& fromPredeps = index.unitPredeps.at(fromUnit);
+              auto const& fromCInitPredeps =
+                index.unitCInitPredeps.at(fromUnit);
+              toPredeps.insert(begin(fromPredeps), end(fromPredeps));
+              toCInitPredeps.insert(
+                begin(fromCInitPredeps),
+                end(fromCInitPredeps)
+              );
+            }
+          }
+        }
+      },
+      [&] {
+        for (auto& updates : allUpdates) {
+          for (auto& update : updates) {
+            auto const u = std::get_if<UnitUpdate>(&update);
+            if (!u) continue;
+            for (auto const& [n, orig] : u->originalUnits) {
+              index.unitToOriginalUnits[n].insert(begin(orig), end(orig));
             }
           }
         }
@@ -15624,6 +15825,10 @@ struct InitTypesJob {
       }
     }
 
+    for (auto const& finfo : finfos.vals) {
+      always_assert(index.funcInfos.emplace(finfo->name, finfo.get()).second);
+    }
+
     auto const onCls = [&] (php::Class& cls, ClassInfo2& cinfo) {
       assertx(cls.name->tsame(cinfo.name));
       assertx(cinfo.funcInfos.size() == cls.methods.size());
@@ -15674,8 +15879,9 @@ struct InitTypesJob {
 private:
 
   struct LocalIndex {
-    TSStringToOneT<const ClassInfo2*> classInfos;
-    TSStringToOneT<const php::Class*> classes;
+    TSStringToOneT<ClassInfo2*> classInfos;
+    TSStringToOneT<php::Class*> classes;
+    FSStringToOneT<FuncInfo2*> funcInfos;
   };
 
   static void unresolve_missing(const LocalIndex& index, TypeConstraint& tc) {
@@ -16009,6 +16215,8 @@ void init_types(IndexData& index, InitTypesMetadata meta) {
   constexpr size_t kFixupsBucketSize = 3000;
   constexpr size_t kAggregateBucketSize = 3000;
 
+  TSStringToOneT<std::vector<SString>> classAliases;
+
   auto typeBuckets = consistently_bucketize(
     [&] {
       // Temporarily suppress case collision logging
@@ -16019,13 +16227,21 @@ void init_types(IndexData& index, InitTypesMetadata meta) {
       std::vector<SString> roots;
       roots.reserve(meta.classes.size() + meta.funcs.size());
       for (auto const& [name, _] : meta.classes) {
+        // Ignore closures, they'll be processed alongside their
+        // owning class/func.
+        if (is_closure_name(name)) continue;
         roots.emplace_back(name);
       }
       for (auto const& [name, _] : meta.funcs) {
         // A class and a func could have the same name. Avoid
         // duplicates. If we do have a name collision it just means
-        // the func and class will be assigned to the same bucket.
-        if (meta.classes.contains(name)) continue;
+        // the func and class will be assigned to the same bucket. We
+        // do, however, need to record the alias to disambiguate in a
+        // few cases.
+        if (meta.classes.contains(name)) {
+          classAliases[name].emplace_back(name);
+          continue;
+        }
         roots.emplace_back(name);
       }
       return roots;
@@ -16095,6 +16311,33 @@ void init_types(IndexData& index, InitTypesMetadata meta) {
     std::vector<SString> classNames;
     std::vector<SString> funcNames;
 
+    // Closures are not part of the worklist. For classes this is fine
+    // since they belong to the owning class and will be processed as
+    // part of them. For funcs, however, they are stored
+    // separately. So add any func closures to the worklist now (we do
+    // this after bucketizing to ensure a func and it's closures
+    // always end up on the same worker).
+    auto const addClosures = [&] (SString f) {
+      auto const clos = folly::get_ptr(index.funcToClosures, f);
+      if (!clos) return;
+      for (auto const n : *clos) work.emplace_back(n);
+    };
+
+    auto const beforeWorkSize = work.size();
+    for (size_t i = 0, size = beforeWorkSize; i < size; ++i) {
+      auto const w = work[i];
+      if (meta.funcs.contains(w)) {
+        addClosures(w);
+      } else if (auto const aliases = folly::get_ptr(classAliases, w)) {
+        for (auto const a : *aliases) addClosures(a);
+      }
+    }
+    std::sort(
+      begin(work) + beforeWorkSize,
+      end(work),
+      string_data_lt_type{}
+    );
+
     roots.reserve(work.size());
     classNames.reserve(work.size());
 
@@ -16102,8 +16345,12 @@ void init_types(IndexData& index, InitTypesMetadata meta) {
       if (meta.classes.contains(w)) {
         always_assert(roots.emplace(w).second);
         classNames.emplace_back(w);
+        if (auto const aliases = folly::get_ptr(classAliases, w)) {
+          for (auto const a : *aliases) funcNames.emplace_back(a);
+        }
+      } else if (meta.funcs.contains(w)) {
+        funcNames.emplace_back(w);
       }
-      if (meta.funcs.contains(w)) funcNames.emplace_back(w);
     }
 
     // Add a dependency to the job. A class is a dependency if it
@@ -16121,19 +16368,25 @@ void init_types(IndexData& index, InitTypesMetadata meta) {
       }
     };
 
+    auto const addFuncDeps = [&] (SString f) {
+      auto const func = folly::get_ptr(meta.funcs, f);
+      always_assert(func);
+      funcs.emplace_back(index.funcRefs.at(f));
+      finfos.emplace_back(index.funcInfoRefs.at(f));
+      for (auto const d : func->deps) addDep(d, true);
+    };
+
     for (auto const w : work) {
       if (auto const cls = folly::get_ptr(meta.classes, w)) {
         classes.emplace_back(index.classRefs.at(w));
         cinfos.emplace_back(index.classInfoRefs.at(w));
         for (auto const d : cls->deps) addDep(d, true);
         for (auto const d : cls->candidateRegOnlyEquivs) addDep(d, false);
-      }
-      // Not else if. A name can correspond to both a class and a
-      // func.
-      if (auto const func = folly::get_ptr(meta.funcs, w)) {
-        funcs.emplace_back(index.funcRefs.at(w));
-        finfos.emplace_back(index.funcInfoRefs.at(w));
-        for (auto const d : func->deps) addDep(d, true);
+        if (auto const aliases = folly::get_ptr(classAliases, w)) {
+          for (auto const a : *aliases) addFuncDeps(a);
+        }
+      } else if (meta.funcs.contains(w)) {
+        addFuncDeps(w);
       }
     }
     addDep(s_Awaitable.get(), true);
@@ -16480,6 +16733,16 @@ IndexFlattenMetadata make_remote(IndexData& index,
       index.unitRefs.emplace(unit.name, std::move(unit.unit)).second,
       "Duplicate unit: {}",
       unit.name
+    );
+
+    always_assert(
+      index.unitPredeps.emplace(unit.name, std::move(unit.predeps)).second
+    );
+    always_assert(
+      index.unitCInitPredeps.emplace(
+        unit.name,
+        std::move(unit.cinitPredeps)
+      ).second
     );
 
     for (auto const& [cnsName, hasInit] : unit.constants) {
@@ -17432,6 +17695,10 @@ void make_local(IndexData& index) {
   decltype(index.closureToFunc){}.swap(index.closureToFunc);
   decltype(index.closureToClass){}.swap(index.closureToClass);
   decltype(index.classToCnsBases){}.swap(index.classToCnsBases);
+  decltype(index.extraMethods){}.swap(index.extraMethods);
+  decltype(index.unitToOriginalUnits){}.swap(index.unitToOriginalUnits);
+  decltype(index.unitCInitPredeps){}.swap(index.unitCInitPredeps);
+  decltype(index.unitPredeps){}.swap(index.unitPredeps);
 
   // Unlike other cases, we want to bound each bucket to roughly the
   // same total byte size (since ultimately we're going to download
@@ -20470,7 +20737,6 @@ void Index::cleanup_post_emit() {
   CLEAR_PARALLEL(m_data->modules);
   CLEAR_PARALLEL(m_data->units);
 
-  CLEAR_PARALLEL(m_data->classClosureMap);
   CLEAR_PARALLEL(m_data->classExtraMethodMap);
 
   CLEAR_PARALLEL(m_data->classInfo);

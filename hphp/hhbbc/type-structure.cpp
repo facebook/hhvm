@@ -1208,4 +1208,107 @@ SString type_structure_name(SArray ts) {
 
 //////////////////////////////////////////////////////////////////////
 
+void type_structure_references(SArray ts, SStringSet& names) {
+  if (!ts) return;
+
+  assertx(ts->isStatic());
+  assertx(ts->isDictType());
+
+  auto const onList = [&names] (SArray list) {
+    if (!list) return;
+    auto const size = list->size();
+    for (size_t i = 0; i < size; ++i) {
+      auto const tv = list->get(i);
+      assertx(tvIsDict(tv));
+      type_structure_references(val(tv).parr, names);
+    }
+  };
+
+  auto const onShape = [&names] (SArray shape) {
+    if (!shape) return;
+    auto const fields = get_ts_fields(shape);
+    auto const size = fields->size();
+    for (size_t i = 0; i < size; ++i) {
+      assertx(tvIsArrayLike(fields->nvGetVal(i)));
+      auto const key = fields->nvGetKey(i);
+      auto const value = val(fields->nvGetVal(i)).parr;
+
+      auto const v = value->get(s_value);
+      if (v.is_init() && tvIsDict(v)) {
+        type_structure_references(val(v).parr, names);
+      }
+
+      if (!value->exists(s_is_cls_cns)) continue;
+      assertx(tvIsString(key));
+      auto const clsCns = val(key).pstr->toCppString();
+      std::string clsNameStr, cnsNameStr;
+      folly::split("::", clsCns, clsNameStr, cnsNameStr);
+      names.emplace(makeStaticString(clsNameStr));
+    }
+  };
+
+  switch (get_ts_kind(ts)) {
+    case TS::Kind::T_enum:
+    case TS::Kind::T_trait:
+    case TS::Kind::T_class:
+    case TS::Kind::T_interface:
+    case TS::Kind::T_unresolved:
+    case TS::Kind::T_xhp:
+      names.emplace(get_ts_classname(ts));
+      onList(get_ts_generic_types_opt(ts));
+      break;
+    case TS::Kind::T_fun:
+      type_structure_references(get_ts_return_type(ts), names);
+      onList(get_ts_param_types(ts));
+      type_structure_references(get_ts_variadic_type_opt(ts), names);
+      break;
+    case TS::Kind::T_tuple:
+      onList(get_ts_elem_types(ts));
+      onList(get_ts_optional_elem_types_opt(ts));
+      type_structure_references(get_ts_variadic_type_opt(ts), names);
+      break;
+    case TS::Kind::T_darray:
+    case TS::Kind::T_varray:
+    case TS::Kind::T_varray_or_darray:
+    case TS::Kind::T_dict:
+    case TS::Kind::T_vec:
+    case TS::Kind::T_keyset:
+    case TS::Kind::T_vec_or_dict:
+    case TS::Kind::T_any_array:
+      onList(get_ts_generic_types_opt(ts));
+      break;
+    case TS::Kind::T_shape:
+      onShape(ts);
+      break;
+    case TS::Kind::T_typeaccess:
+      names.emplace(get_ts_root_name(ts));
+      break;
+    case TS::Kind::T_union:
+      onList(get_ts_union_types(ts));
+      break;
+    case TS::Kind::T_resource:
+    case TS::Kind::T_recursiveUnion:
+    case TS::Kind::T_class_ptr:
+    case TS::Kind::T_class_or_classname:
+    case TS::Kind::T_typevar:
+    case TS::Kind::T_reifiedtype:
+    case TS::Kind::T_int:
+    case TS::Kind::T_bool:
+    case TS::Kind::T_float:
+    case TS::Kind::T_string:
+    case TS::Kind::T_num:
+    case TS::Kind::T_arraykey:
+    case TS::Kind::T_void:
+    case TS::Kind::T_null:
+    case TS::Kind::T_nothing:
+    case TS::Kind::T_noreturn:
+    case TS::Kind::T_mixed:
+    case TS::Kind::T_dynamic:
+    case TS::Kind::T_nonnull:
+      break;
+  }
+}
+
+//////////////////////////////////////////////////////////////////////
+
 }

@@ -1457,17 +1457,15 @@ private:
   struct NodeIdxSet {
     NodeIdxSet();
 
+    bool operator[](const Node& n) const {
+      return n.idx < versions.size() && versions[n.idx] == version;
+    }
     bool add(Node& n);
     void erase(Node& n);
-    void clear() { set.clear(); }
-    bool empty() { return set.empty(); }
-    size_t size() { return set.size(); }
+    void clear() { ++version; }
   private:
-    struct Extract {
-      Node::Idx operator()(const Node* n) const;
-    };
-
-    sparse_id_set<Node::Idx, const Node*, Extract> set;
+    std::vector<uint64_t> versions;
+    uint64_t version;
   };
 
   // Iterating through parents or children can result in one of three
@@ -1618,27 +1616,22 @@ struct ClassGraphHasher {
 };
 
 bool ClassGraph::NodeIdxSet::add(Node& n) {
-  if (n.idx >= set.universe_size()) {
-    set.resize(folly::nextPowTwo(n.idx+1));
+  if (n.idx >= versions.size()) {
+    versions.resize(folly::nextPowTwo(n.idx+1), 0);
   }
-  return set.insert(&n);
+  if (versions[n.idx] == version) return false;
+  versions[n.idx] = version;
+  return true;
 }
 
 void ClassGraph::NodeIdxSet::erase(Node& n) {
-  if (n.idx < set.universe_size()) {
-    set.erase(&n);
-  }
-}
-
-ClassGraph::Node::Idx ClassGraph::NodeIdxSet::Extract::operator()(const Node* n) const {
-  assertx(n->idx > 0);
-  return n->idx;
+  if (n.idx < versions.size()) versions[n.idx] = 0;
 }
 
 // Thread-local NodeIdxSet which automatically clears itself
 // afterwards (thus avoids memory allocation).
 struct ClassGraph::TLNodeIdxSet {
-  TLNodeIdxSet() : set{get()} { assertx(set.empty()); }
+  TLNodeIdxSet() : set{get()} {}
 
   ~TLNodeIdxSet() {
     set.clear();
@@ -1685,7 +1678,8 @@ struct ClassGraph::Table {
 };
 
 ClassGraph::NodeIdxSet::NodeIdxSet()
-  : set{folly::nextPowTwo((Node::Idx)(table().nodes.size() + 1))}
+  : versions{folly::nextPowTwo((Node::Idx)(table().nodes.size() + 1)), 0}
+  , version{1}
 {
   assertx(!table().locking);
 }

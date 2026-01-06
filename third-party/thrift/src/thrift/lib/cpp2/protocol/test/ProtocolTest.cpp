@@ -36,6 +36,11 @@ static constexpr size_t kTestingProtocolMaxDepth = 4;
 TEST(TTypeTest, Format) {
   EXPECT_EQ(fmt::format("{}", T_BOOL), "BOOL");
   EXPECT_EQ(fmt::format("{}", T_I64), "I64");
+
+  auto uint8Max = std::numeric_limits<uint8_t>::max();
+  EXPECT_EQ(
+      fmt::format("{}", static_cast<TType>(uint8Max)),
+      fmt::format("UNKNOWN({})", uint8Max));
 }
 
 template <typename ProtocolWriter>

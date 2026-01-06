@@ -59,7 +59,7 @@ std::string debugStringForTType(TType type) {
     case T_FLOAT:
       return "FLOAT";
     default:
-      return fmt::format("UNKNOWN({})", type);
+      return fmt::format("UNKNOWN({})", static_cast<uint8_t>(type));
   }
 }
 

@@ -2672,9 +2672,7 @@ void t_mstch_cpp2_generator::generate_metadata(const t_program* program) {
   const auto& prog = cached_program(program);
 
   render_to_file(prog, "module_metadata.h", name + "_metadata.h");
-  if (!has_option("no_metadata")) {
-    render_to_file(prog, "module_metadata.cpp", name + "_metadata.cpp");
-  }
+  render_to_file(prog, "module_metadata.cpp", name + "_metadata.cpp");
 }
 
 void t_mstch_cpp2_generator::generate_sinit(const t_program* program) {

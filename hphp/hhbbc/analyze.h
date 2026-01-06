@@ -170,6 +170,7 @@ struct ClassAnalysisWorklist {
   void scheduleForProp(SString name);
   void scheduleForPropMutate(SString name);
   void scheduleForReturnType(const php::Func& callee);
+  void scheduleForUseVars(const php::Func& invoke);
 
   void addPropDep(SString name, const php::Func& f) {
     propDeps[name].emplace(&f);
@@ -179,6 +180,9 @@ struct ClassAnalysisWorklist {
   }
   void addReturnTypeDep(const php::Func& callee, const php::Func& f) {
     returnTypeDeps[&callee].emplace(&f);
+  }
+  void addUseVarsDep(const php::Func& invoke, const php::Func& caller) {
+    useVarDeps[&invoke].emplace(&caller);
   }
 
   bool empty() const { return worklist.empty(); }
@@ -194,6 +198,13 @@ struct ClassAnalysisWorklist {
     return &it->second;
   }
 
+  const hphp_fast_set<const php::Func*>*
+  depsForUseVars(const php::Func& f) const {
+    auto const it = useVarDeps.find(&f);
+    if (it == useVarDeps.end()) return nullptr;
+    return &it->second;
+  }
+
 private:
   hphp_fast_set<const php::Func*> inWorklist;
   std::deque<const php::Func*> worklist;
@@ -203,12 +214,14 @@ private:
   Deps<SString> propDeps;
   Deps<SString> propMutateDeps;
   Deps<const php::Func*> returnTypeDeps;
+  Deps<const php::Func*> useVarDeps;
 };
 
 struct ClassAnalysisWork {
   ClassAnalysisWorklist worklist;
   hphp_fast_map<const php::Func*, Index::ReturnType> returnTypes;
   hphp_fast_map<const php::Func*, hphp_fast_set<SString>> propMutators;
+  hphp_fast_map<const php::Func*, CompactVector<Type>> useVars;
   // List of properties whose initial values have been determined to
   // satisfy their type-constraint and which haven't been reflected in
   // the index yet.

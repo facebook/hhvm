@@ -543,6 +543,7 @@ private:
     AnalysisIndexAdaptor adaptor{index};
     ContextPusher _{adaptor, fa.ctx};
     index.refine_return_info(fa);
+    index.refine_closure_use_vars(fa);
     index.refine_constants(fa);
     index.refine_class_constants(fa);
     index.update_prop_initial_values(fa);
@@ -853,6 +854,9 @@ private:
   static void optimize(php::Class& c, const AnalysisIndex& index) {
     assertx(!is_closure(c));
     for (auto& m : c.methods) optimize(*m, index);
+    for (auto& clo : c.closures) {
+      for (auto& m : clo->methods) optimize(*m, index);
+    }
   }
 };
 

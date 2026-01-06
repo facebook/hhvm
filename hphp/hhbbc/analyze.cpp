@@ -53,6 +53,8 @@ const StaticString s_Closure("Closure");
 const StaticString s_AsyncGenerator("HH\\AsyncGenerator");
 const StaticString s_Generator("Generator");
 
+const StaticString s_invoke("__invoke");
+
 //////////////////////////////////////////////////////////////////////
 
 /*
@@ -143,9 +145,10 @@ Optional<State> entry_state(const IIndex& index, CollectedInfo& collect,
   }
 
   // Closures have use vars, we need to look up their types from the index.
-  auto const useVars = ctx.func->isClosureBody
-    ? index.lookup_closure_use_vars(*ctx.func)
-    : CompactVector<Type>{};
+  auto const useVars = [&] {
+    if (!ctx.func->isClosureBody) return CompactVector<Type>{};
+    return collect.closureUseVars.initial(*ctx.func);
+  }();
 
   /*
    * Reified functions have a hidden local that's always the first
@@ -499,7 +502,7 @@ FuncAnalysis do_analyze_collect(const IIndex& index,
     }
   } while (!incompleteQ.empty());
 
-  ai.closureUseTypes = std::move(collect.closureUseTypes);
+  ai.closureUseTypes = collect.closureUseVars.merged();
   ai.effectFree = collect.effectFree;
   ai.reanalyzeOnUpdate = collect.reanalyzeOnUpdate;
   ai.hasInvariantIterBase = collect.hasInvariantIterBase;
@@ -798,6 +801,12 @@ void ClassAnalysisWorklist::scheduleForPropMutate(SString name) {
 void ClassAnalysisWorklist::scheduleForReturnType(const php::Func& callee) {
   auto const it = returnTypeDeps.find(&callee);
   if (it == returnTypeDeps.end()) return;
+  for (auto const f : it->second) schedule(*f);
+}
+
+void ClassAnalysisWorklist::scheduleForUseVars(const php::Func& invoke) {
+  auto const it = useVarDeps.find(&invoke);
+  if (it == useVarDeps.end()) return;
   for (auto const f : it->second) schedule(*f);
 }
 
@@ -1214,6 +1223,7 @@ ClassAnalysis analyze_class(const IIndex& index, const Context& ctx) {
     assertx(inserted);
     auto [type, refinements] = index.lookup_return_type_raw(f);
     work.returnTypes.emplace(f, std::move(type));
+    work.useVars.emplace(f, index.lookup_closure_use_vars_raw(*f));
     funcMeta.emplace(
       f, FuncMeta{ctx.unit, c, &clsAnalysis.closures, refinements}
     );
@@ -1227,8 +1237,29 @@ ClassAnalysis analyze_class(const IIndex& index, const Context& ctx) {
     );
   }
 
-  // Keep analyzing until we have more functions scheduled (the fixed
-  // point).
+  // Suppose we first analyze a function which has a CreateCl and
+  // record use-var types, then later analysis (within analyze_class)
+  // determines the CreateCl was dead. In that case, we'll overwrite
+  // the original FuncAnalysisResult (containing the use-var types)
+  // with the new one (containing no use-var types because we didn't
+  // see a CreateCl). The lack of info in the FuncAnalysisResult will
+  // prevent the index from being updated, even though our analysis
+  // might depend on some of those initial use-var types. This can
+  // cause monotonicity violations. To prevent this, when overwriting
+  // a FuncAnalysisResult entry, always make sure to copy over any
+  // use-var type into the new one. This ensures that if ever see a
+  // CreateCl, the FuncAnalysisResult will always have a record of
+  // that.
+  auto const persistUseTypes = [&] (const FuncAnalysisResult& from,
+                                    FuncAnalysisResult& to) {
+    for (auto const& [clo, types] : from.closureUseTypes) {
+      // Will only add closure entries which don't already exist.
+      to.closureUseTypes.emplace(clo, types);
+    }
+  };
+
+  // Keep analyzing until we have more no functions scheduled (the
+  // fixed point).
   while (!work.worklist.empty()) {
     hphp_fast_set<const php::Func*> changed;
 
@@ -1247,7 +1278,9 @@ ClassAnalysis analyze_class(const IIndex& index, const Context& ctx) {
           meta.outputIdx = meta.output->size();
           meta.output->emplace_back(std::move(results));
         } else {
-          (*meta.output)[meta.outputIdx] = std::move(results);
+          auto& output = (*meta.output)[meta.outputIdx];
+          persistUseTypes(output, results);
+          output = std::move(results);
         }
       }
 
@@ -1330,6 +1363,40 @@ ClassAnalysis analyze_class(const IIndex& index, const Context& ctx) {
         );
       }
 
+      for (auto const& [clo, useVars] : results.closureUseTypes) {
+        assertx(is_closure(*clo));
+        auto invoke = find_method(clo, s_invoke.get());
+        always_assert(invoke);
+
+        auto const old = folly::get_ptr(work.useVars, invoke);
+        if (!old) continue;
+
+        auto anyChanged = false;
+        for (size_t i = 0, size = useVars.size(); i < size; ++i) {
+          auto u = useVars.get_default(i, TCell);
+          auto const o = old->get_default(i, TCell);
+
+          if (u.strictlyMoreRefined(o)) {
+            old->ensure(i, TCell) = std::move(u);
+            anyChanged = true;
+          } else {
+            always_assert_flog(
+              u.moreRefined(o),
+              "Index closure use-var invariant violated for {}.\n"
+              "   {} is not at least as refined as {}\n",
+              clo->name,
+              show(u),
+              show(o)
+            );
+          }
+        }
+
+        if (anyChanged) {
+          work.worklist.scheduleForUseVars(*invoke);
+          changed.emplace(invoke);
+        }
+      }
+
       results.localReturnRefinements = meta.localReturnRefinements;
       if (results.localReturnRefinements > 0) --results.localReturnRefinements;
     }
@@ -1396,11 +1463,47 @@ ClassAnalysis analyze_class(const IIndex& index, const Context& ctx) {
         );
       }
 
+      for (auto const& [clo, useVars] : results.closureUseTypes) {
+        assertx(is_closure(*clo));
+        auto invoke = find_method(clo, s_invoke.get());
+        always_assert(invoke);
+
+        auto const old = folly::get_ptr(work.useVars, invoke);
+        if (!old) continue;
+
+        auto anyChanged = false;
+        for (size_t i = 0, size = useVars.size(); i < size; ++i) {
+          auto u = useVars.get_default(i, TCell);
+          auto const o = old->get_default(i, TCell);
+
+          if (u.strictlyMoreRefined(o)) {
+            old->ensure(i, TCell) = std::move(u);
+            anyChanged = true;
+          } else {
+            always_assert_flog(
+              u.moreRefined(o),
+              "Index closure use-var invariant violated for {}.\n"
+              "   {} is not at least as refined as {}\n",
+              clo->name,
+              show(u),
+              show(o)
+            );
+          }
+        }
+
+        if (anyChanged) {
+          work.worklist.scheduleForUseVars(*invoke);
+          changed.emplace(invoke);
+        }
+      }
+
       results.localReturnRefinements = meta.localReturnRefinements;
       if (results.localReturnRefinements > 0) --results.localReturnRefinements;
 
       assertx(meta.outputIdx >= 0);
-      (*meta.output)[meta.outputIdx] = std::move(results);
+      auto& output = (*meta.output)[meta.outputIdx];
+      persistUseTypes(output, results);
+      output = std::move(results);
     }
 
     // Return types have reached a fixed point. However, this means
@@ -1430,13 +1533,20 @@ ClassAnalysis analyze_class(const IIndex& index, const Context& ctx) {
       };
 
       hphp_fast_set<SString> retryProps;
-      for (auto const f : changed) {
-        auto const deps = work.worklist.depsForReturnType(*f);
-        if (!deps) continue;
-        for (auto const dep : *deps) {
+      auto const addProps = [&] (const hphp_fast_set<const php::Func*>& deps) {
+        for (auto const dep : deps) {
           auto const propsIt = work.propMutators.find(dep);
           if (propsIt == work.propMutators.end()) continue;
           for (auto const prop : propsIt->second) retryProps.emplace(prop);
+        }
+      };
+
+      for (auto const f : changed) {
+        if (auto const deps = work.worklist.depsForReturnType(*f)) {
+          addProps(*deps);
+        }
+        if (auto const deps = work.worklist.depsForUseVars(*f)) {
+          addProps(*deps);
         }
       }
 

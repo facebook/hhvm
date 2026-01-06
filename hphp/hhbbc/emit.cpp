@@ -1137,7 +1137,7 @@ void emit_class(EmitUnitState& state, UnitEmitter& ue, PreClassEmitter* pce,
   if (is_closure(cls)) {
     auto f = find_method(&cls, s_invoke.get());
     always_assert(f);
-    useVars = state.index.lookup_closure_use_vars(*f, true);
+    useVars = state.index.lookup_closure_use_vars_raw(*f);
   }
   auto uvIt = useVars.begin();
 

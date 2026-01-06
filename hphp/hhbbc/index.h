@@ -1409,16 +1409,9 @@ struct Index {
   /*
    * Return the best known types of a closure's used variables (on
    * entry to the closure).  The function is the closure body.
-   *
-   * If move is true, the value will be moved out of the index. This
-   * should only be done at emit time. (note that the only other user
-   * of this info is analysis, which only uses it when processing the
-   * owning class, so its safe to kill after emitting the owning
-   * unit).
    */
   CompactVector<Type>
-    lookup_closure_use_vars(const php::Func*,
-                            bool move = false) const;
+  lookup_closure_use_vars(const php::Func*) const;
 
   /*
    * Returns the control-flow insensitive inferred private instance
@@ -1470,12 +1463,6 @@ struct Index {
                                  const PropertiesInfo& privateProps,
                                  const Type& cls,
                                  const Type& name) const;
-
-  /*
-   * Lookup if initializing (which is a side-effect of several bytecodes) the
-   * given class might raise.
-   */
-  bool lookup_class_init_might_raise(Context, res::Class) const;
 
   /*
    * Lookup the best known type for a public (non-static) property. Since we
@@ -1762,8 +1749,9 @@ struct IIndex {
   lookup_return_type_raw(const php::Func*) const = 0;
 
   virtual CompactVector<Type>
-  lookup_closure_use_vars(const php::Func&,
-                          bool move = false) const = 0;
+  lookup_closure_use_vars(const php::Func&) const = 0;
+  virtual CompactVector<Type>
+  lookup_closure_use_vars_raw(const php::Func&) const = 0;
 
   virtual PropState lookup_private_props(const php::Class*,
                                          bool move = false) const = 0;
@@ -1975,8 +1963,12 @@ struct IndexAdaptor : public IIndex {
     return index.lookup_return_type_raw(f);
   }
   CompactVector<Type>
-  lookup_closure_use_vars(const php::Func& f, bool m = false) const override {
-    return index.lookup_closure_use_vars(&f, m);
+  lookup_closure_use_vars(const php::Func& f) const override {
+    return index.lookup_closure_use_vars(&f);
+  }
+  CompactVector<Type>
+  lookup_closure_use_vars_raw(const php::Func& f) const override {
+    return index.lookup_closure_use_vars(&f);
   }
   PropState lookup_private_props(const php::Class* c,
                                  bool m = false) const override {
@@ -2064,6 +2056,8 @@ struct AnalysisDeps {
     UnusedParams  = (1 << 4),
     // Bytecode of class or function
     Bytecode      = (1 << 5),
+    // Use vars of a closure
+    UseVars       = (1 << 6)
   };
 
   // Some types can change as a result of analysis and hence can
@@ -2075,7 +2069,8 @@ struct AnalysisDeps {
     Type::ScalarRetType |
     Type::RetParam |
     Type::UnusedParams |
-    Type::Bytecode
+    Type::Bytecode |
+    Type::UseVars
   );
 
   static constexpr bool isValidForChanges(Type t) {
@@ -2092,11 +2087,11 @@ struct AnalysisDeps {
   // Dependency on an unspecified class constant (name is the class).
   struct AnyClassConstant { SString name; };
 
-  bool add(Class, bool inTypeCns = false);
+  Type add(Class, Type);
 
-  bool add(ConstIndex, bool inTypeCns = false);
+  bool add(ConstIndex, bool inTypeCns);
   bool add(Constant);
-  bool add(AnyClassConstant, bool inTypeCns = false);
+  bool add(AnyClassConstant, bool inTypeCns);
 
   Type add(const php::Func&, Type);
   Type add(MethRef, Type);
@@ -2113,7 +2108,6 @@ struct AnalysisDeps {
       (clsConstants, std::less<>{})
       (anyClsConstants, string_data_lt_type{})
       (constants, string_data_lt{})
-      (typeCnsClasses, string_data_lt_type{})
       (typeCnsClsConstants, std::less<>{})
       (typeCnsAnyClsConstants, string_data_lt_type{})
       ;
@@ -2123,12 +2117,11 @@ private:
   FSStringToOneT<Type> funcs;
   hphp_fast_map<MethRef, Type, MethRef::Hash> methods;
 
-  TSStringSet classes;
+  TSStringToOneT<Type> classes;
   hphp_fast_set<ConstIndex, ConstIndex::Hasher> clsConstants;
   TSStringSet anyClsConstants;
   SStringSet constants;
 
-  TSStringSet typeCnsClasses;
   hphp_fast_set<ConstIndex, ConstIndex::Hasher> typeCnsClsConstants;
   TSStringSet typeCnsAnyClsConstants;
 
@@ -2188,6 +2181,7 @@ struct AnalysisChangeSet {
 
   void changed(ConstIndex);
   void changed(const php::Constant&);
+  void changed(const php::Class&, Type);
   void changed(const php::Func&, Type);
 
   void fixed(ConstIndex);
@@ -2206,6 +2200,7 @@ struct AnalysisChangeSet {
 
   template <typename SerDe> void serde(SerDe& sd) {
     sd(funcs, string_data_lt_func{})
+      (classes, string_data_lt_type{})
       (methods, std::less<>{})
       (constants, string_data_lt{})
       (clsConstants, std::less<>{})
@@ -2218,6 +2213,7 @@ struct AnalysisChangeSet {
   }
 private:
   FSStringToOneT<Type> funcs;
+  TSStringToOneT<Type> classes;
   hphp_fast_map<MethRef, Type, MethRef::Hash> methods;
   SStringSet constants;
   hphp_fast_set<ConstIndex, ConstIndex::Hasher> clsConstants;
@@ -2554,6 +2550,7 @@ private:
   struct ClassState {
     explicit ClassState(SString name) : depState{name, DepState::Class} {}
     DepState depState;
+    Type changed{};
     CompactVector<Type> methodChanges;
     boost::dynamic_bitset<> cnsChanges;
     boost::dynamic_bitset<> cnsFixed;
@@ -2827,9 +2824,8 @@ struct AnalysisIndex {
   std::pair<Index::ReturnType, size_t>
   lookup_return_type_raw(const php::Func& f) const;
 
-  CompactVector<Type>
-  lookup_closure_use_vars(const php::Func&,
-                          bool move = false) const;
+  CompactVector<Type> lookup_closure_use_vars(const php::Func&) const;
+  CompactVector<Type> lookup_closure_use_vars_raw(const php::Func&) const;
 
   bool func_depends_on_arg(const php::Func&, size_t) const;
 
@@ -2858,6 +2854,7 @@ struct AnalysisIndex {
   void refine_constants(const FuncAnalysisResult&);
   void refine_class_constants(const FuncAnalysisResult&);
   void refine_return_info(const FuncAnalysisResult&);
+  void refine_closure_use_vars(const FuncAnalysisResult&);
   void update_prop_initial_values(const FuncAnalysisResult&);
   void update_type_consts(const ClassAnalysis&);
   void update_bytecode(FuncAnalysisResult&);
@@ -2972,7 +2969,9 @@ struct AnalysisIndexAdaptor : public IIndex {
   lookup_return_type_raw(const php::Func*) const override;
 
   CompactVector<Type>
-  lookup_closure_use_vars(const php::Func&, bool m = false) const override;
+  lookup_closure_use_vars(const php::Func&) const override;
+  CompactVector<Type>
+  lookup_closure_use_vars_raw(const php::Func&) const override;
 
   PropState lookup_private_props(const php::Class*, bool m = false) const override;
   PropState lookup_private_statics(const php::Class*, bool m = false) const override;

@@ -584,13 +584,20 @@ using ClosureUseVarMap = hphp_fast_map<
   CompactVector<Type>
 >;
 
-/*
- * Merge the types in the vector as possible use vars for the closure
- * `clo' into the destination map.
- */
-void merge_closure_use_vars_into(ClosureUseVarMap& dst,
-                                 const php::Class& clo,
-                                 CompactVector<Type>);
+struct ClosureUseVarInfo {
+  ClosureUseVarInfo(const IIndex*, Context, ClassAnalysis*);
+
+  CompactVector<Type> initial(const php::Func&);
+  void merge(const php::Class&, CompactVector<Type>);
+
+  ClosureUseVarMap merged() { return std::move(m_merged); }
+
+private:
+  const IIndex* m_index;
+  ClassAnalysis* m_cls;
+  const php::Func* m_func;
+  ClosureUseVarMap m_merged;
+};
 
 //////////////////////////////////////////////////////////////////////
 
@@ -646,7 +653,7 @@ struct CollectedInfo {
                 ClsConstantWork* clsCns = nullptr,
                 const FuncAnalysis* fa = nullptr);
 
-  ClosureUseVarMap closureUseTypes;
+  ClosureUseVarInfo closureUseVars;
   PropertiesInfo props;
   MethodsInfo methods;
   ClsConstantWork* clsCns;

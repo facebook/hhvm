@@ -5658,11 +5658,7 @@ void in(ISS& env, const bc::CreateCl& op) {
     for (auto i = uint32_t{0}; i < nargs; ++i) {
       usedVars[nargs - i - 1] = unctx(popCU(env));
     }
-    merge_closure_use_vars_into(
-      env.collect.closureUseTypes,
-      *cls,
-      std::move(usedVars)
-    );
+    env.collect.closureUseVars.merge(*cls, std::move(usedVars));
   }
 
   effect_free(env);

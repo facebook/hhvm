@@ -155,7 +155,8 @@ CollectedInfo::CollectedInfo(const IIndex& index,
                              CollectionOpts opts,
                              ClsConstantWork* clsCns,
                              const FuncAnalysis* fa)
-    : props{index, ctx, cls}
+    : closureUseVars{&index, ctx, cls}
+    , props{index, ctx, cls}
     , methods{ctx, cls}
     , clsCns{clsCns}
     , opts{fa ? opts | CollectionOpts::Optimizing : opts}
@@ -412,20 +413,36 @@ Optional<Index::ReturnType> MethodsInfo::lookupReturnType(const php::Func& f) {
 
 //////////////////////////////////////////////////////////////////////
 
-void merge_closure_use_vars_into(ClosureUseVarMap& dst,
-                                 const php::Class& clo,
-                                 CompactVector<Type> types) {
-  auto& current = dst[&clo];
+ClosureUseVarInfo::ClosureUseVarInfo(const IIndex* i,
+                                     Context ctx,
+                                     ClassAnalysis* cls)
+  : m_index{i}
+  , m_cls{cls}
+  , m_func{ctx.func}
+{}
+
+CompactVector<Type> ClosureUseVarInfo::initial(const php::Func& f) {
+  if (!m_cls || !m_cls->work) return m_index->lookup_closure_use_vars(f);
+  auto vars = folly::get_ptr(m_cls->work->useVars, &f);
+  m_cls->work->worklist.addUseVarsDep(f, *m_func);
+  if (!vars) return m_index->lookup_closure_use_vars(f);
+  return *vars;
+}
+
+void ClosureUseVarInfo::merge(const php::Class& clo,
+                              CompactVector<Type> useVars) {
+  auto& current = m_merged[&clo];
   if (current.empty()) {
-    current = std::move(types);
+    current = std::move(useVars);
     return;
   }
-
-  assertx(types.size() == current.size());
+  assertx(useVars.size() == current.size());
   for (auto i = uint32_t{0}; i < current.size(); ++i) {
-    current[i] |= std::move(types[i]);
+    current[i] |= std::move(useVars[i]);
   }
 }
+
+//////////////////////////////////////////////////////////////////////
 
 template<class JoinOp>
 bool merge_impl(State& dst, const State& src, JoinOp join) {

@@ -415,6 +415,9 @@ struct InferredClassInfo {
    */
   SStringToOneT<ClsConstInfo> clsConstantInfo;
 
+  // If this is a closure, the best known types of its use-vars.
+  CompactVector<Type> useVars;
+
   template <typename SerDe> void serde(SerDe&);
 };
 
@@ -722,7 +725,9 @@ template <typename SerDe> void InferredFuncInfo::serde(SerDe& sd) {
 
 template <typename SerDe> void InferredClassInfo::serde(SerDe& sd) {
   ScopedStringDataIndexer _;
-  sd(clsConstantInfo, string_data_lt{});
+  sd(clsConstantInfo, string_data_lt{})
+    (useVars)
+    ;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -6531,20 +6536,27 @@ struct DepTracker {
   // Register dependencies on various entities to the current
   // dependency context.
 
-  void add(Class c) {
-    if (!index.frozen) return;
+  void add(Class c, Type t = Type::None) {
     auto const fc = context();
-    if (auto const c2 = fc.cls()) {
-      if (c2->name->tsame(c.name)) return;
+    if (index.frozen) {
+      if (auto const c2 = fc.cls()) {
+        if (c2->name->tsame(c.name)) return;
+      }
+
+      if (auto const DEBUG_ONLY added = deps[fc].add(c, t)) {
+        FTRACE(
+          2, "{} now depends on class {}{}\n",
+          HHBBC::show(fc),
+          displayAdded(added),
+          c.name
+        );
+      }
+    } else if (auto const cls = folly::get_default(index.classes, c.name)) {
+      // Record dependency for worklist if anything can change within
+      // the job.
+      t &= AnalysisDeps::kValidForChanges;
+      if (t != Type::None) classes[cls][fc] |= t;
     }
-    auto& d = deps[fc];
-    if (d.add(c, index.inTypeCns)) {
-      FTRACE(2, "{} now depends on class {}{}\n",
-             HHBBC::show(fc), c.name,
-             index.inTypeCns ? " (in type-cns)" : "");
-    }
-    // Class either exists or not and won't change within the job, so
-    // nothing to record for worklist.
   }
 
   void add(const php::Func& f, Type t = Type::None) {
@@ -6667,6 +6679,18 @@ struct DepTracker {
   // results in the change being reported back to the
   // AnalysisScheduler, but will reschedule any work locally which has
   // a dependency.
+
+  void update(const php::Class& c, Type t) {
+    if (t == Type::None) return;
+    assertx(AnalysisDeps::isValidForChanges(t));
+    assertx(!index.frozen);
+    FTRACE(
+      2, "class {} {} changed, scheduling\n",
+      c.name, show(t)
+    );
+    changes.changed(c, t);
+    schedule(folly::get_ptr(classes, &c), t);
+  }
 
   void update(const php::Func& f, Type t) {
     if (t == Type::None) return;
@@ -6835,27 +6859,7 @@ private:
     if (fcs.empty()) return;
     std::sort(
       fcs.begin(), fcs.end(),
-      [] (FuncClsUnit fc1, FuncClsUnit fc2) {
-        if (auto const c1 = fc1.cls()) {
-          if (auto const c2 = fc2.cls()) {
-            return string_data_lt_type{}(c1->name, c2->name);
-          }
-          return true;
-        }
-        if (auto const f1 = fc1.func()) {
-          if (auto const f2 = fc2.func()) {
-            return string_data_lt_func{}(f1->name, f2->name);
-          }
-          return !fc2.cls();
-        }
-        if (auto const u1 = fc1.unit()) {
-          if (auto const u2 = fc2.unit()) {
-            return string_data_lt{}(u1->filename, u2->filename);
-          }
-          return !fc2.cls() && !fc2.func();
-        }
-        return false;
-      }
+      [] (FuncClsUnit fc1, FuncClsUnit fc2) { return fc1.stableLT(fc2); }
     );
     Trace::Indent _;
     for (auto const fc : fcs) index.worklist.schedule(fc);
@@ -6865,6 +6869,7 @@ private:
   AnalysisChangeSet changes;
   hphp_fast_map<FuncClsUnit, AnalysisDeps, FuncClsUnitHasher> deps;
 
+  hphp_fast_map<const php::Class*, FuncClsUnitToType> classes;
   hphp_fast_map<const php::Func*, FuncClsUnitToType> funcs;
   hphp_fast_map<const php::Const*, FuncClsUnitSet> clsConstants;
   hphp_fast_map<const php::Constant*, FuncClsUnitSet> constants;
@@ -20913,8 +20918,7 @@ Index::lookup_return_type_raw(const php::Func* f) const {
 }
 
 CompactVector<Type>
-Index::lookup_closure_use_vars(const php::Func* func,
-                               bool move) const {
+Index::lookup_closure_use_vars(const php::Func* func) const {
   assertx(func->isClosureBody);
 
   auto const numUseVars = closure_num_use_vars(func);
@@ -20923,7 +20927,6 @@ Index::lookup_closure_use_vars(const php::Func* func,
   if (it == end(m_data->closureUseVars)) {
     return CompactVector<Type>(numUseVars, TCell);
   }
-  if (move) return std::move(it->second);
   return it->second;
 }
 
@@ -21131,17 +21134,6 @@ Type Index::lookup_public_prop(const php::Class* cls, SString name) const {
     return TCell;
   }
   return lookup_public_prop_impl(*m_data, it->second, name);
-}
-
-bool Index::lookup_class_init_might_raise(Context ctx, res::Class cls) const {
-  if (auto const ci = cls.cinfo()) {
-    return class_init_might_raise(*m_data, ctx, ci);
-  } else if (cls.cinfo2()) {
-    // Not implemented yet
-    always_assert(false);
-  } else {
-    return true;
-  }
 }
 
 Slot Index::lookup_iface_vtable_slot(const php::Class* cls) const {
@@ -22066,16 +22058,14 @@ void AnalysisWorklist::sort() {
 
 //////////////////////////////////////////////////////////////////////
 
-bool AnalysisDeps::add(Class c, bool inTypeCns) {
-  return inTypeCns
-    ? typeCnsClasses.emplace(c.name).second
-    : classes.emplace(c.name).second;
+AnalysisDeps::Type AnalysisDeps::add(Class c, Type t) {
+  return merge(classes[c.name], t | Type::Meta);
 }
 
 bool AnalysisDeps::add(ConstIndex cns, bool inTypeCns) {
   // Dependency on class constant implies a dependency on the class as
   // well.
-  add(Class { cns.cls }, inTypeCns);
+  add(Class { cns.cls }, Type::Meta);
   return inTypeCns
     ? typeCnsClsConstants.emplace(cns).second
     : clsConstants.emplace(cns).second;
@@ -22091,7 +22081,7 @@ bool AnalysisDeps::add(Constant cns) {
 bool AnalysisDeps::add(AnyClassConstant any, bool inTypeCns) {
   // Dependency on class constant implies a dependency on the class as
   // well.
-  add(Class { any.name }, inTypeCns);
+  add(Class { any.name }, Type::Meta);
   return inTypeCns
     ? typeCnsAnyClsConstants.emplace(any.name).second
     : anyClsConstants.emplace(any.name).second;
@@ -22104,7 +22094,7 @@ AnalysisDeps::Type AnalysisDeps::add(const php::Func& f, Type t) {
 }
 
 AnalysisDeps::Type AnalysisDeps::add(MethRef m, Type t) {
-  add(Class { m.cls });
+  add(Class { m.cls }, Type::Meta);
   return merge(methods[m], t | Type::Meta);
 }
 
@@ -22126,17 +22116,14 @@ bool AnalysisDeps::empty() const {
     clsConstants.empty() &&
     constants.empty() &&
     anyClsConstants.empty() &&
-    typeCnsClasses.empty() &&
     typeCnsClsConstants.empty() &&
     typeCnsAnyClsConstants.empty();
 }
 
 AnalysisDeps& AnalysisDeps::operator|=(const AnalysisDeps& o) {
   clsConstants.insert(begin(o.clsConstants), end(o.clsConstants));
-  classes.insert(begin(o.classes), end(o.classes));
   constants.insert(begin(o.constants), end(o.constants));
   anyClsConstants.insert(begin(o.anyClsConstants), end(o.anyClsConstants));
-  typeCnsClasses.insert(begin(o.typeCnsClasses), end(o.typeCnsClasses));
   typeCnsClsConstants.insert(
     begin(o.typeCnsClsConstants),
     end(o.typeCnsClsConstants)
@@ -22146,6 +22133,7 @@ AnalysisDeps& AnalysisDeps::operator|=(const AnalysisDeps& o) {
     end(o.typeCnsAnyClsConstants)
   );
   for (auto const [name, t] : o.funcs) funcs[name] |= t;
+  for (auto const [name, t] : o.classes) classes[name] |= t;
   for (auto const [meth, t] : o.methods) methods[meth] |= t;
   return *this;
 }
@@ -22162,6 +22150,7 @@ std::string show(AnalysisDeps::Type t) {
   if (t & T::RetParam)      add("returned param");
   if (t & T::UnusedParams)  add("unused params");
   if (t & T::Bytecode)      add("bytecode");
+  if (t & T::UseVars)       add("use-vars");
   return out;
 }
 
@@ -22173,7 +22162,11 @@ std::string show(const AnalysisDeps& d) {
   if (!d.classes.empty()) {
     folly::format(
       &out, "  classes: {}\n",
-      from(d.classes) | map(toCpp) | unsplit<std::string>(", ")
+      from(d.classes)
+        | map([&] (auto const& p) {
+            return folly::sformat("{} -> [{}]", toCpp(p.first), show(p.second));
+          })
+        | unsplit<std::string>(", ")
     );
   }
   if (!d.funcs.empty()) {
@@ -22216,12 +22209,6 @@ std::string show(const AnalysisDeps& d) {
       from(d.anyClsConstants) | map(toCpp) | unsplit<std::string>(", ")
     );
   }
-  if (!d.typeCnsClasses.empty()) {
-    folly::format(
-      &out, "  type-cns classes: {}\n",
-      from(d.typeCnsClasses) | map(toCpp) | unsplit<std::string>(", ")
-    );
-  }
   if (!d.typeCnsClsConstants.empty()) {
     folly::format(
       &out, "  type-cns class-constants: {}\n",
@@ -22249,6 +22236,11 @@ void AnalysisChangeSet::changed(ConstIndex idx) {
 
 void AnalysisChangeSet::changed(const php::Constant& c) {
   constants.emplace(c.name);
+}
+
+void AnalysisChangeSet::changed(const php::Class& c, Type t) {
+  assertx(AnalysisDeps::isValidForChanges(t));
+  classes[c.name] |= t;
 }
 
 void AnalysisChangeSet::changed(const php::Func& f, Type t) {
@@ -22289,6 +22281,9 @@ void AnalysisChangeSet::filter(const TSStringSet& keepClasses,
                                const SStringSet& keepConstants) {
   folly::erase_if(
     funcs, [&] (auto const& p) { return !keepFuncs.contains(p.first); }
+  );
+  folly::erase_if(
+    classes, [&] (auto const& p) { return !keepClasses.contains(p.first); }
   );
   folly::erase_if(
     methods, [&] (auto const& p) { return !keepClasses.contains(p.first.cls); }
@@ -22453,8 +22448,8 @@ void AnalysisScheduler::addPredeps(SString name,
   for (auto const d : predeps) {
     if (i.classToUnit.contains(d)) {
       FTRACE(5, "AnalysisScheduler: adding class pre-dep {} for {}\n", d, name);
-      deps.add(A::Class{ d });
-      deps.add(A::AnyClassConstant{ d });
+      deps.add(A::Class{ d }, A::Type::Meta);
+      deps.add(A::AnyClassConstant{ d }, false);
     }
     if (i.funcToUnit.contains(d)) {
       FTRACE(5, "AnalysisScheduler: adding func pre-dep {} for {}\n", d, name);
@@ -22462,7 +22457,7 @@ void AnalysisScheduler::addPredeps(SString name,
     }
     if (i.typeAliasToUnit.contains(d)) {
       FTRACE(5, "AnalysisScheduler: adding type-alias pre-dep {} for {}\n", d, name);
-      deps.add(A::Class{ d });
+      deps.add(A::Class{ d }, A::Type::Meta);
     }
     if (i.constantToUnit.contains(d)) {
       FTRACE(5, "AnalysisScheduler: adding unit pre-dep {} for {}\n", d, name);
@@ -22652,6 +22647,26 @@ void AnalysisScheduler::recordChanges(const AnalysisOutput& output) {
       }
     }
   };
+
+  for (auto const [name, type] : changed.classes) {
+    auto const UNUSED bump = bump_for_class(*index.m_data, name);
+    FTRACE(4, "AnalysisScheduler: class {} changed ({})\n",
+           name, show(type));
+    auto state = folly::get_ptr(classState, name);
+    always_assert_flog(
+      state,
+      "Trying to mark un-tracked func {} changed",
+      name
+    );
+    always_assert_flog(
+      valid(name, DepState::Class),
+      "Trying to mark class {} as changed from wrong shard",
+      name
+    );
+    assertx(AnalysisDeps::isValidForChanges(type));
+    assertx(state->changed == Type::None);
+    state->changed = type;
+  }
 
   for (auto const [name, type] : changed.funcs) {
     auto const UNUSED bump = bump_for_func(*index.m_data, name);
@@ -23194,22 +23209,27 @@ void AnalysisScheduler::findToSchedule() {
     // already incorporated the change inside the analysis
     // job). Otherwise schedule this class or func to run.
 
-    for (auto const cls : d.deps.classes) {
-      if (presenceOfClassOrTypeAlias(d, cls) == Presence::None) {
-        FTRACE(
-          4, "AnalysisScheduler: {} new class/type-alias dependency on {},"
-          " scheduling\n",
-          name, cls
-        );
-        return true;
-      }
-    }
+    for (auto const [cls, newT] : d.deps.classes) {
+      if (newT == Type::None) continue;
 
-    for (auto const cls : d.deps.typeCnsClasses) {
-      if (presenceOfClassOrTypeAlias(d, cls) == Presence::None) {
+      auto const schedule = [&, cls=cls, newT=newT] {
+        switch (presenceOfClassOrTypeAlias(d, cls)) {
+          case Presence::None:
+            return true;
+          case Presence::Dep: {
+            auto const state = folly::get_ptr(classState, cls);
+            if (!state) return false;
+            return (bool)(state->changed & newT);
+          }
+          case Presence::Full:
+            return false;
+        }
+      }();
+
+      if (schedule) {
         FTRACE(
-          4, "AnalysisScheduler: {} new class/type-alias dependency "
-          "(in type-cns) on {}, scheduling\n",
+          4, "AnalysisScheduler: {} new/changed dependency on class {},"
+          " scheduling\n",
           name, cls
         );
         return true;
@@ -23419,6 +23439,7 @@ void AnalysisScheduler::resetChanges() {
       Type::None
     );
     state.cnsChanges.reset();
+    state.changed = Type::None;
   };
 
   parallel::for_each(
@@ -23592,19 +23613,19 @@ void AnalysisScheduler::visitDeps(const DepState& state,
   if (d.empty()) return;
   assertx(IMPLIES(state.kind == DepState::Class, !is_closure_name(state.name)));
 
-  for (auto const c : d.classes) {
+  for (auto const [c, type] : d.classes) {
+    if (type == Type::None) continue;
+    if (!full && !(type & AnalysisDeps::kValidForChanges)) continue;
+
     stateForClassOrTypeAlias(c).match(
-      [&] (const ClassState*) {
-        if (full) visitClassAsDep(c, false, true, visit);
-      },
+      [&] (const ClassState*) { visitClassAsDep(c, false, full, visit); },
       [&] (const UnitState* s) {
         assertx(s);
         if (full || !s->fixed) visitUnitAsDep(s->depState.name, visit);
       },
-      [&] () { if (full) visitClassAsDep(c, false, true, visit); }
+      [&] { visitClassAsDep(c, false, full, visit); }
     );
   }
-  for (auto const c : d.typeCnsClasses) visitClassAsDep(c, false, full, visit);
 
   for (auto const [meth, type] : d.methods) {
     if (type == Type::None) continue;
@@ -26910,13 +26931,72 @@ AnalysisIndex::lookup_return_type_raw(const php::Func& f) const {
 }
 
 CompactVector<Type>
-AnalysisIndex::lookup_closure_use_vars(const php::Func& func,
-                                       bool) const {
-  // Not implemented yet, be conservative
+AnalysisIndex::lookup_closure_use_vars(const php::Func& func) const {
   assertx(func.isClosureBody);
+  assertx(func.cls);
+  assertx(is_closure(*func.cls));
+
   auto const numUseVars = closure_num_use_vars(&func);
   if (!numUseVars) return {};
-  return CompactVector<Type>(numUseVars, TCell);
+  m_data->deps->add(
+    AnalysisDeps::Class{ func.cls->name },
+    AnalysisDeps::Type::UseVars
+  );
+  auto const cinfo = func.cls->cinfo;
+  if (!cinfo) return CompactVector<Type>{numUseVars, TCell};
+  auto const& inferred = cinfo->inferred.useVars;
+
+  CompactVector<Type> out;
+  out.reserve(numUseVars);
+  for (size_t i = 0; i < numUseVars; ++i) {
+    out.emplace_back(unserialize_type(inferred.get_default(i, TCell)));
+  }
+
+  if (auto const rinfo = retained_for_context(*m_data)) {
+    auto better = false;
+    if (auto const info = rinfo->get(*cinfo)) {
+      auto const& retained = info->useVars;
+      for (size_t i = 0; i < numUseVars; ++i) {
+        out[i] &= unserialize_type(retained.get_default(i, TCell));
+        auto const old = unserialize_type(inferred.get_default(i, TCell));
+        if (out[i].strictSubtypeOf(old)) better = true;
+      }
+    }
+
+    if (should_retain(*cinfo, better, *m_data)) {
+      ITRACE_MOD(
+        Trace::hhbbc, 4,
+        "Retaining inferred closure use-vars type information about {}\n",
+        func.cls
+      );
+      auto& info = rinfo->retain(*cinfo);
+      info.useVars.clear();
+      info.useVars.reserve(numUseVars);
+      for (auto const& t : out) info.useVars.emplace_back(serialize_type(t));
+    }
+  }
+
+  return out;
+}
+
+CompactVector<Type>
+AnalysisIndex::lookup_closure_use_vars_raw(const php::Func& func) const {
+  assertx(func.isClosureBody);
+  assertx(func.cls);
+  assertx(is_closure(*func.cls));
+
+  auto const numUseVars = closure_num_use_vars(&func);
+  if (!numUseVars) return {};
+  auto const cinfo = func.cls->cinfo;
+  if (!cinfo) return CompactVector<Type>{numUseVars, TCell};
+  auto const& inferred = cinfo->inferred.useVars;
+
+  CompactVector<Type> out;
+  out.reserve(numUseVars);
+  for (size_t i = 0; i < numUseVars; ++i) {
+    out.emplace_back(unserialize_type(inferred.get_default(i, TCell)));
+  }
+  return out;
 }
 
 bool AnalysisIndex::func_depends_on_arg(const php::Func& func,
@@ -27868,6 +27948,58 @@ void AnalysisIndex::refine_return_info(const FuncAnalysisResult& fa) {
   m_data->deps->update(func, changes);
 }
 
+void AnalysisIndex::refine_closure_use_vars(const FuncAnalysisResult& fa) {
+  assertx(m_data->mode != Mode::Final);
+
+  for (auto const& [cls, vars] : fa.closureUseTypes) {
+    assertx(is_closure(*cls));
+
+    if constexpr (debug) {
+      for (size_t i = 0; i < vars.size(); ++i) {
+        always_assert_flog(
+          equal(vars[i], unctx(vars[i])),
+          "Closure {} cannot have a used var with a context dependent type",
+          cls->name
+        );
+      }
+    }
+
+    if (!cls->cinfo) continue;
+
+    auto& current = cls->cinfo->inferred.useVars;
+    current.reserve(vars.size());
+
+    auto changed = false;
+    for (size_t i = 0, size = vars.size(); i < size; ++i) {
+      auto const old = unserialize_type(current.get_default(i, TCell));
+      if (vars[i].strictSubtypeOf(old)) {
+        current.ensure(i, TCell) = serialize_type(vars[i]);
+        changed = true;
+      } else {
+        always_assert_flog(
+          vars[i].moreRefined(old),
+          "Index closure use-var invariant violated for {}.\n"
+          "   {} is not at least as refined as {}\n",
+          cls->name,
+          show(vars[i]),
+          show(old)
+        );
+      }
+    }
+
+    always_assert_flog(
+      !m_data->frozen || !changed,
+      "Attempting to refine closure use-var info for {} "
+      "when index is frozen",
+      cls->name
+    );
+
+    if (changed) {
+      m_data->deps->update(*cls, AnalysisDeps::Type::UseVars);
+    }
+  }
+}
+
 void AnalysisIndex::update_prop_initial_values(const FuncAnalysisResult& fa) {
   assertx(m_data->mode != Mode::Final);
 
@@ -28413,8 +28545,12 @@ AnalysisIndexAdaptor::lookup_return_type_raw(const php::Func* f) const {
   return index.lookup_return_type_raw(*f);
 }
 CompactVector<Type>
-AnalysisIndexAdaptor::lookup_closure_use_vars(const php::Func& f, bool m) const {
-  return index.lookup_closure_use_vars(f, m);
+AnalysisIndexAdaptor::lookup_closure_use_vars(const php::Func& f) const {
+  return index.lookup_closure_use_vars(f);
+}
+CompactVector<Type>
+AnalysisIndexAdaptor::lookup_closure_use_vars_raw(const php::Func& f) const {
+  return index.lookup_closure_use_vars_raw(f);
 }
 
 PropState AnalysisIndexAdaptor::lookup_private_props(const php::Class* cls,

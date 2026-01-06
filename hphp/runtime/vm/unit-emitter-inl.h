@@ -94,8 +94,7 @@ inline bool UnitEmitter::isSystemLib() const {
 ///////////////////////////////////////////////////////////////////////////////
 
 template <typename SerDe>
-void UnitEmitterSerdeWrapper::serde(SerDe& sd,
-                                    const Extension* extension) {
+void UnitEmitterSerdeWrapper::serde(SerDe& sd) {
   if constexpr (SerDe::deserializing) {
     assertx(!m_ue);
 
@@ -109,12 +108,9 @@ void UnitEmitterSerdeWrapper::serde(SerDe& sd,
       auto ue = std::make_unique<UnitEmitter>(
         sha1, SHA1{}, RepoOptions::defaults().packageInfo()
       );
-      ue->m_extension = extension;
+      ue->m_extension = nullptr;
       ue->m_filepath = makeStaticString(filepath);
       ue->serde(sd, false);
-
-      // Make sure that for systemlib units people pass down extension.
-      assertx(ue->isSystemLib() == (extension != nullptr));
 
       m_ue = std::move(ue);
     }

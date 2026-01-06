@@ -22,7 +22,7 @@ inline bool isLoaded(const String& name) {
   return isLoaded(name.data());
 }
 
-Extension* get(const char* name);
+Extension* get(const char* name, bool ignoreDisabled = true);
 inline Extension* get(const String& name) {
   return get(name.data());
 }

@@ -1280,10 +1280,15 @@ void whole_program(WholeProgramInput inputs,
   analyze_constants(index);
   index.make_local();
 
+  IndexAdaptor adaptor{ index };
   auto stats = allocate_stats();
+
+  std::atomic<uint64_t> next{0};
   auto const emitUnit = [&] (php::Unit& unit) {
-    IndexAdaptor adaptor{ index };
     auto ue = emit_unit(adaptor, unit);
+    auto const idx = next++;
+    ue->m_sn = idx;
+    ue->setSha1(SHA1 { idx });
     if (Cfg::Eval::AbortBuildOnVerifyError && !ue->check(false)) {
       fprintf(
         stderr,

@@ -378,8 +378,7 @@ struct UnitEmitterSerdeWrapper {
   /* implicit */ UnitEmitterSerdeWrapper(std::unique_ptr<UnitEmitter> ue)
       : m_ue{std::move(ue)} {}
   std::unique_ptr<UnitEmitter> m_ue;
-  template <typename SerDe> void serde(
-    SerDe& sd, const Extension* extension = nullptr);
+  template <typename SerDe> void serde(SerDe& sd);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

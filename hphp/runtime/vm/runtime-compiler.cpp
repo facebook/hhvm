@@ -232,7 +232,7 @@ Unit* compile_string(folly::StringPiece s,
 Unit* get_systemlib(const std::string& path, const Extension* extension) {
   assertx(path[0] == '/' && path[1] == ':');
 
-  if (Cfg::Repo::Authoritative) { 
+  if (Cfg::Repo::Authoritative) {
     if (auto u = lookupSyslibUnit(makeStaticString(path))) {
       return u;
     }
@@ -246,9 +246,12 @@ Unit* get_systemlib(const std::string& path, const Extension* extension) {
 
   UnitEmitterSerdeWrapper uew;
   BlobDecoder decoder(buffer.data(), buffer.size());
-  uew.serde(decoder, extension);
+  uew.serde(decoder);
 
   auto ue = std::move(uew.m_ue);
+  ue->m_extension = extension;
+  assertx(IMPLIES(ue->isSystemLib(), extension));
+
   onLoadUE(ue);
 
   auto u = ue->create();

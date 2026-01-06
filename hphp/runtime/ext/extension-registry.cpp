@@ -100,10 +100,11 @@ bool isLoaded(const char* name) {
   return (it != s_exts->end()) && it->second->moduleEnabled();
 }
 
-Extension* get(const char* name) {
+Extension* get(const char* name, bool onlyEnabled) {
   assertx(s_exts);
   auto it = s_exts->find(name);
-  if ((it != s_exts->end()) && it->second->moduleEnabled()) {
+  if ((it != s_exts->end()) &&
+      (!onlyEnabled || it->second->moduleEnabled())) {
     return it->second;
   }
   return nullptr;

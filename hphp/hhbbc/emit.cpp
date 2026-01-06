@@ -1252,27 +1252,29 @@ void emit_module(UnitEmitter& ue, const php::Module& module) {
 }
 
 std::unique_ptr<UnitEmitter> emit_unit(IIndex& index, php::Unit& unit) {
+  SCOPE_ASSERT_DETAIL("emit_unit") { return unit.filename->toCppString(); };
+
   Trace::Bump bumper{
     Trace::hhbbc_emit, kSystemLibBump, is_systemlib_part(unit)
   };
 
+  ContextPusher _{index, Context{ unit.filename, nullptr, nullptr }};
+
+  assertx(!is_native_unit(unit));
   assertx(check(unit, index));
 
-  static std::atomic<uint64_t> nextUnitId{0};
-  auto unitSn = nextUnitId++;
-
   auto extension = [&]() -> Extension* {
-    if (!unit.extName->empty()) {
-      return ExtensionRegistry::get(unit.extName->data());
-    }
-    return nullptr;
+    if (unit.extName->empty()) return nullptr;
+    auto const ext = ExtensionRegistry::get(unit.extName->data(), false);
+    always_assert(ext);
+    return ext;
   }();
 
-  auto ue = std::make_unique<UnitEmitter>(SHA1 { unitSn },
+  auto ue = std::make_unique<UnitEmitter>(SHA1{},
                                           SHA1{},
                                           unit.packageInfo);
   FTRACE(1, "  unit {}\n", unit.filename->data());
-  ue->m_sn = unitSn;
+  ue->m_sn = 0; // Will be set before writing to repo
   ue->m_filepath = unit.filename;
   ue->m_extension = extension;
   ue->m_metaData = unit.metaData;

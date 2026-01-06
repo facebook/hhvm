@@ -871,18 +871,15 @@ void UnitEmitter::serde(SerDe& sd, bool lazy) {
         std::string ext_name;
         sd(ext_name);
         m_extension = [&]() -> Extension* {
-          if (!ext_name.empty()) {
-            return ExtensionRegistry::get(ext_name);
-          }
-          return nullptr;
+          if (ext_name.empty()) return nullptr;
+          auto const ext = ExtensionRegistry::get(ext_name.c_str(), false);
+          always_assert(ext);
+          return ext;
         }();
       } else {
-        const std::string ext_name = [&]{
-          if (m_extension) {
-            return std::string(m_extension->getName());
-          }
-          return std::string("");
-        }();
+        auto const ext_name = m_extension
+          ? std::string{m_extension->getName()}
+          : std::string{};
         sd(ext_name);
       }
 

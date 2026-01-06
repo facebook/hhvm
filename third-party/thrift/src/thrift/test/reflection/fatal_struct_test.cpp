@@ -23,6 +23,8 @@
 
 #include <gtest/gtest.h>
 
+namespace ident = apache::thrift::ident;
+
 FATAL_S(struct1s, "struct1");
 FATAL_S(field0s, "field0");
 FATAL_S(field1s, "field1");
@@ -73,18 +75,11 @@ TEST(FatalStruct, Struct1SanityCheck) {
   using traits = apache::thrift::reflect_struct<struct1>;
 
   EXPECT_SAME<struct1, traits::type>();
-  EXPECT_SAME<struct1s, traits::name>();
   EXPECT_EQ("struct1", traits::name_v);
 
   EXPECT_SAME<traits, apache::thrift::try_reflect_struct<struct1, void>>();
   EXPECT_SAME<void, apache::thrift::try_reflect_struct<int, void>>();
 
-  EXPECT_SAME<field0s, traits::member::field0::name>();
-  EXPECT_SAME<field1s, traits::member::field1::name>();
-  EXPECT_SAME<field2s, traits::member::field2::name>();
-  EXPECT_SAME<field3s, traits::member::field3::name>();
-  EXPECT_SAME<field4s, traits::member::field4::name>();
-  EXPECT_SAME<field5s, traits::member::field5::name>();
   EXPECT_EQ("field0", traits::member::field0::name_v);
   EXPECT_EQ("field1", traits::member::field1::name_v);
   EXPECT_EQ("field2", traits::member::field2::name_v);
@@ -129,195 +124,148 @@ TEST(FatalStruct, Struct1SanityCheck) {
   EXPECT_EQ(enum1::field1, pod.field5()->get_ue_2());
 
   EXPECT_SAME<
-      field0s,
-      fatal::get<traits::members, field0s, fatal::get_type::name>::name>();
-  EXPECT_SAME<
-      field1s,
-      fatal::get<traits::members, field1s, fatal::get_type::name>::name>();
-  EXPECT_SAME<
-      field2s,
-      fatal::get<traits::members, field2s, fatal::get_type::name>::name>();
-  EXPECT_SAME<
-      field3s,
-      fatal::get<traits::members, field3s, fatal::get_type::name>::name>();
-  EXPECT_SAME<
-      field4s,
-      fatal::get<traits::members, field4s, fatal::get_type::name>::name>();
-  EXPECT_SAME<
-      field5s,
-      fatal::get<traits::members, field5s, fatal::get_type::name>::name>();
-
-  EXPECT_SAME<
       std::int32_t,
-      fatal::get<traits::members, field0s, fatal::get_type::name>::type>();
+      fatal::get<traits::members, ident::field0, fatal::get_type::tag>::type>();
   EXPECT_SAME<
       std::string,
-      fatal::get<traits::members, field1s, fatal::get_type::name>::type>();
+      fatal::get<traits::members, ident::field1, fatal::get_type::tag>::type>();
   EXPECT_SAME<
       enum1,
-      fatal::get<traits::members, field2s, fatal::get_type::name>::type>();
+      fatal::get<traits::members, ident::field2, fatal::get_type::tag>::type>();
   EXPECT_SAME<
       enum2,
-      fatal::get<traits::members, field3s, fatal::get_type::name>::type>();
+      fatal::get<traits::members, ident::field3, fatal::get_type::tag>::type>();
   EXPECT_SAME<
       union1,
-      fatal::get<traits::members, field4s, fatal::get_type::name>::type>();
+      fatal::get<traits::members, ident::field4, fatal::get_type::tag>::type>();
   EXPECT_SAME<
       union2,
-      fatal::get<traits::members, field5s, fatal::get_type::name>::type>();
+      fatal::get<traits::members, ident::field5, fatal::get_type::tag>::type>();
 
   EXPECT_SAME<
       field_id<1>,
-      fatal::get<traits::members, field0s, fatal::get_type::name>::id>();
+      fatal::get<traits::members, ident::field0, fatal::get_type::tag>::id>();
   EXPECT_SAME<
       field_id<2>,
-      fatal::get<traits::members, field1s, fatal::get_type::name>::id>();
+      fatal::get<traits::members, ident::field1, fatal::get_type::tag>::id>();
   EXPECT_SAME<
       field_id<4>,
-      fatal::get<traits::members, field2s, fatal::get_type::name>::id>();
+      fatal::get<traits::members, ident::field2, fatal::get_type::tag>::id>();
   EXPECT_SAME<
       field_id<8>,
-      fatal::get<traits::members, field3s, fatal::get_type::name>::id>();
+      fatal::get<traits::members, ident::field3, fatal::get_type::tag>::id>();
   EXPECT_SAME<
       field_id<16>,
-      fatal::get<traits::members, field4s, fatal::get_type::name>::id>();
+      fatal::get<traits::members, ident::field4, fatal::get_type::tag>::id>();
   EXPECT_SAME<
       field_id<32>,
-      fatal::get<traits::members, field5s, fatal::get_type::name>::id>();
+      fatal::get<traits::members, ident::field5, fatal::get_type::tag>::id>();
 
   EXPECT_SAME<
       required<apache::thrift::optionality::required>,
-      fatal::get<traits::members, field0s, fatal::get_type::name>::optional>();
+      fatal::get<traits::members, ident::field0, fatal::get_type::tag>::
+          optional>();
   EXPECT_SAME<
       required<apache::thrift::optionality::optional>,
-      fatal::get<traits::members, field1s, fatal::get_type::name>::optional>();
+      fatal::get<traits::members, ident::field1, fatal::get_type::tag>::
+          optional>();
   EXPECT_SAME<
       required<apache::thrift::optionality::required_of_writer>,
-      fatal::get<traits::members, field2s, fatal::get_type::name>::optional>();
+      fatal::get<traits::members, ident::field2, fatal::get_type::tag>::
+          optional>();
   EXPECT_SAME<
       required<apache::thrift::optionality::required>,
-      fatal::get<traits::members, field3s, fatal::get_type::name>::optional>();
+      fatal::get<traits::members, ident::field3, fatal::get_type::tag>::
+          optional>();
   EXPECT_SAME<
       required<apache::thrift::optionality::optional>,
-      fatal::get<traits::members, field4s, fatal::get_type::name>::optional>();
+      fatal::get<traits::members, ident::field4, fatal::get_type::tag>::
+          optional>();
   EXPECT_SAME<
       required<apache::thrift::optionality::required_of_writer>,
-      fatal::get<traits::members, field5s, fatal::get_type::name>::optional>();
+      fatal::get<traits::members, ident::field5, fatal::get_type::tag>::
+          optional>();
 
   EXPECT_EQ(
       98,
-      (fatal::get<
-          traits::members,
-          traits::member::field0::name,
-          fatal::get_type::name>::getter{}(pod)));
+      (fatal::get<traits::members, ident::field0, fatal::get_type::tag>::
+           getter{}(pod)));
   EXPECT_EQ(
       "test",
-      (fatal::get<
-          traits::members,
-          traits::member::field1::name,
-          fatal::get_type::name>::getter{}(pod)));
+      (fatal::get<traits::members, ident::field1, fatal::get_type::tag>::
+           getter{}(pod)));
   EXPECT_EQ(
       enum1::field0,
-      (fatal::get<
-          traits::members,
-          traits::member::field2::name,
-          fatal::get_type::name>::getter{}(pod)));
+      (fatal::get<traits::members, ident::field2, fatal::get_type::tag>::
+           getter{}(pod)));
   EXPECT_EQ(
       enum2::field2_2,
-      (fatal::get<
-          traits::members,
-          traits::member::field3::name,
-          fatal::get_type::name>::getter{}(pod)));
+      (fatal::get<traits::members, ident::field3, fatal::get_type::tag>::
+           getter{}(pod)));
   EXPECT_EQ(
       union1::Type::ui,
-      (fatal::get<
-           traits::members,
-           traits::member::field4::name,
-           fatal::get_type::name>::getter{}(pod)
-           .getType()));
+      (fatal::get<traits::members, ident::field4, fatal::get_type::tag>::
+           getter{}(pod)
+               .getType()));
   EXPECT_EQ(
       56,
-      (fatal::get<
-           traits::members,
-           traits::member::field4::name,
-           fatal::get_type::name>::getter{}(pod)
-           .get_ui()));
+      (fatal::get<traits::members, ident::field4, fatal::get_type::tag>::
+           getter{}(pod)
+               .get_ui()));
   EXPECT_EQ(
       union2::Type::ue_2,
-      (fatal::get<
-           traits::members,
-           traits::member::field5::name,
-           fatal::get_type::name>::getter{}(pod)
-           .getType()));
+      (fatal::get<traits::members, ident::field5, fatal::get_type::tag>::
+           getter{}(pod)
+               .getType()));
   EXPECT_EQ(
       enum1::field1,
-      (fatal::get<
-           traits::members,
-           traits::member::field5::name,
-           fatal::get_type::name>::getter{}(pod)
-           .get_ue_2()));
+      (fatal::get<traits::members, ident::field5, fatal::get_type::tag>::
+           getter{}(pod)
+               .get_ue_2()));
 
   EXPECT_SAME<
       apache::thrift::type_class::integral,
-      fatal::get<traits::members, field0s, fatal::get_type::name>::
+      fatal::get<traits::members, ident::field0, fatal::get_type::tag>::
           type_class>();
   EXPECT_SAME<
       apache::thrift::type_class::string,
-      fatal::get<traits::members, field1s, fatal::get_type::name>::
+      fatal::get<traits::members, ident::field1, fatal::get_type::tag>::
           type_class>();
   EXPECT_SAME<
       apache::thrift::type_class::enumeration,
-      fatal::get<traits::members, field2s, fatal::get_type::name>::
+      fatal::get<traits::members, ident::field2, fatal::get_type::tag>::
           type_class>();
   EXPECT_SAME<
       apache::thrift::type_class::enumeration,
-      fatal::get<traits::members, field3s, fatal::get_type::name>::
+      fatal::get<traits::members, ident::field3, fatal::get_type::tag>::
           type_class>();
   EXPECT_SAME<
       apache::thrift::type_class::variant,
-      fatal::get<traits::members, field4s, fatal::get_type::name>::
+      fatal::get<traits::members, ident::field4, fatal::get_type::tag>::
           type_class>();
   EXPECT_SAME<
       apache::thrift::type_class::variant,
-      fatal::get<traits::members, field5s, fatal::get_type::name>::
+      fatal::get<traits::members, ident::field5, fatal::get_type::tag>::
           type_class>();
 
   EXPECT_SAME<
       traits::member::field0,
-      fatal::get<
-          traits::members,
-          traits::member::field0::name,
-          fatal::get_type::name>>();
+      fatal::get<traits::members, ident::field0, fatal::get_type::tag>>();
   EXPECT_SAME<
       traits::member::field1,
-      fatal::get<
-          traits::members,
-          traits::member::field1::name,
-          fatal::get_type::name>>();
+      fatal::get<traits::members, ident::field1, fatal::get_type::tag>>();
   EXPECT_SAME<
       traits::member::field2,
-      fatal::get<
-          traits::members,
-          traits::member::field2::name,
-          fatal::get_type::name>>();
+      fatal::get<traits::members, ident::field2, fatal::get_type::tag>>();
   EXPECT_SAME<
       traits::member::field3,
-      fatal::get<
-          traits::members,
-          traits::member::field3::name,
-          fatal::get_type::name>>();
+      fatal::get<traits::members, ident::field3, fatal::get_type::tag>>();
   EXPECT_SAME<
       traits::member::field4,
-      fatal::get<
-          traits::members,
-          traits::member::field4::name,
-          fatal::get_type::name>>();
+      fatal::get<traits::members, ident::field4, fatal::get_type::tag>>();
   EXPECT_SAME<
       traits::member::field5,
-      fatal::get<
-          traits::members,
-          traits::member::field5::name,
-          fatal::get_type::name>>();
+      fatal::get<traits::members, ident::field5, fatal::get_type::tag>>();
 }
 
 FATAL_S(structB_annotation1k, "multi_line_annotation");
@@ -386,12 +334,11 @@ TEST(FatalStruct, MemberAnnotations) {
 
   EXPECT_SAME<
       fatal::list<>,
-      fatal::get<info::members, info::member::c::name, fatal::get_type::name>::
-          annotations::map>();
+      fatal::get<info::members, ident::c, fatal::get_type::tag>::annotations::
+          map>();
 
   using annotations_d =
-      fatal::get<info::members, info::member::d::name, fatal::get_type::name>::
-          annotations;
+      fatal::get<info::members, ident::d, fatal::get_type::tag>::annotations;
   using expected_d_map = fatal::list<
       apache::thrift::annotation<structBd_annotation1k, structBd_annotation1v>,
       apache::thrift::annotation<structBd_annotation2k, structBd_annotation2v>>;
@@ -489,15 +436,15 @@ FATAL_S(annotated_v_m_mixed_map, "{\"a\": -2, \"b\": \"B\", \"c\": 3}");
 
 TEST(FatalStruct, SetMethods) {
   using info = apache::thrift::reflect_struct<struct4>;
-  using req_field = fatal::
-      get<info::members, info::member::field0::name, fatal::get_type::name>;
-  using opt_field = fatal::
-      get<info::members, info::member::field1::name, fatal::get_type::name>;
-  using def_field = fatal::
-      get<info::members, info::member::field2::name, fatal::get_type::name>;
+  using req_field =
+      fatal::get<info::members, ident::field0, fatal::get_type::tag>;
+  using opt_field =
+      fatal::get<info::members, ident::field1, fatal::get_type::tag>;
+  using def_field =
+      fatal::get<info::members, ident::field2, fatal::get_type::tag>;
 
-  using ref_field = fatal::
-      get<info::members, info::member::field3::name, fatal::get_type::name>;
+  using ref_field =
+      fatal::get<info::members, ident::field3, fatal::get_type::tag>;
 
   struct4 a;
   EXPECT_TRUE(req_field::is_set(a));
@@ -524,15 +471,15 @@ TEST(FatalStruct, SetMethods) {
 
 TEST(FatalStruct, FieldRefGetter) {
   using info = apache::thrift::reflect_struct<struct4>;
-  using req_field = fatal::
-      get<info::members, info::member::field0::name, fatal::get_type::name>;
-  using opt_field = fatal::
-      get<info::members, info::member::field1::name, fatal::get_type::name>;
-  using def_field = fatal::
-      get<info::members, info::member::field2::name, fatal::get_type::name>;
+  using req_field =
+      fatal::get<info::members, ident::field0, fatal::get_type::tag>;
+  using opt_field =
+      fatal::get<info::members, ident::field1, fatal::get_type::tag>;
+  using def_field =
+      fatal::get<info::members, ident::field2, fatal::get_type::tag>;
 
-  using ref_field = fatal::
-      get<info::members, info::member::field3::name, fatal::get_type::name>;
+  using ref_field =
+      fatal::get<info::members, ident::field3, fatal::get_type::tag>;
 
   struct4 a;
 
@@ -580,20 +527,16 @@ TEST(FatalStruct, FieldRefGetter) {
 TEST(FatalStruct, RenamedField) {
   using meta = apache::thrift::reflect_struct<struct_with_renamed_field>;
   using fmeta = meta::member::boring_cxx_name;
-  auto fname = fatal::to_instance<std::string, fmeta::name>();
+  auto fname = fmeta::name_v.str();
   EXPECT_EQ("fancy.idl.name", fname);
 }
 
 TEST(FatalStruct, StructWithAdaptedField) {
   using info = apache::thrift::reflect_struct<StructWithAdaptedField>;
-  using type_adapted_field = fatal::get<
-      info::members,
-      info::member::typeAdapted::name,
-      fatal::get_type::name>;
-  using field_adapted_field = fatal::get<
-      info::members,
-      info::member::fieldAdapted::name,
-      fatal::get_type::name>;
+  using type_adapted_field =
+      fatal::get<info::members, ident::typeAdapted, fatal::get_type::tag>;
+  using field_adapted_field =
+      fatal::get<info::members, ident::fieldAdapted, fatal::get_type::tag>;
   StructWithAdaptedField a;
 
   using type_adapted_type = apache::thrift::test::Wrapper<IntStruct>;
@@ -634,7 +577,8 @@ TEST(FatalStruct, Terse) {
   using traits = apache::thrift::reflect_struct<struct2>;
   EXPECT_SAME<
       required<apache::thrift::optionality::terse>,
-      fatal::get<traits::members, fieldAs, fatal::get_type::name>::optional>();
+      fatal::get<traits::members, ident::fieldA, fatal::get_type::tag>::
+          optional>();
 }
 
 TEST(FatalStruct, InvokeByFieldName) {
@@ -643,14 +587,14 @@ TEST(FatalStruct, InvokeByFieldName) {
 
   for (auto name : {"field0", "field1", "field2", "field3", "field4"}) {
     invokeByFieldName<traits::members>(name, [name]<class Member>(Member) {
-      EXPECT_STREQ(fatal::z_data<typename Member::type::name>(), name);
+      EXPECT_STREQ(Member::type::name_v.data(), name);
     });
   }
 
   bool found = invokeByFieldName<traits::members>(
       "field0",
       []<class Member>(Member, int input) {
-        EXPECT_STREQ(fatal::z_data<typename Member::type::name>(), "field0");
+        EXPECT_STREQ(Member::type::name_v.data(), "field0");
         EXPECT_EQ(input, 10);
       },
       10);

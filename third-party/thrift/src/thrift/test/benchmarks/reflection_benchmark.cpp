@@ -77,7 +77,7 @@ void add_benchmark() {
       int k = 0;
       fatal::foreach<typename reflect_struct<Struct>::members>([&k](auto tag) {
         using Member = decltype(fatal::tag_type(tag));
-        const char* name = fatal::z_data<typename Member::name>();
+        const char* name = Member::name_v.data();
         for (char c : std::string_view(name)) {
           k += c;
         }

@@ -238,11 +238,10 @@ struct impl<T, type_class::structure> {
       using type = deref_inner_t<decltype(getter{}(std::declval<T&>()))>;
       using type_class = typename MemberInfo::type_class;
       using type_helper = get_helper<type, type_class>;
-      using member_name = typename MemberInfo::name;
       using member_annotations = typename MemberInfo::annotations::map;
       type_helper::register_into(schema);
       auto& f = (*dt.fields())[MemberInfo::id::value];
-      std::string name = fatal::to_instance<std::string, member_name>();
+      std::string name = MemberInfo::name_v.str();
       impl_structure_util::init(
           f,
           type_helper::id(),

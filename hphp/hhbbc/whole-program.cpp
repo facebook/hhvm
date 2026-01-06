@@ -46,7 +46,6 @@
 #include "hphp/hhbbc/parallel.h"
 #include "hphp/hhbbc/parse.h"
 #include "hphp/hhbbc/representation.h"
-#include "hphp/hhbbc/stats.h"
 #include "hphp/hhbbc/type-system.h"
 #include "hphp/hhbbc/wide-func.h"
 
@@ -397,9 +396,7 @@ void analyze_iteratively(Index& index) {
  * queries to php::Func and php::Class structures.
  */
 template<typename F>
-void final_pass(Index& index,
-                const StatsHolder& stats,
-                F emitUnit) {
+void final_pass(Index& index, F emitUnit) {
   trace_time _{"final pass"};
   _.ignore_client_stats();
   index.freeze();
@@ -420,11 +417,24 @@ void final_pass(Index& index,
       state_after("optimize", *unit, adaptor);
       if (!dump_dir.empty()) {
         if (Trace::moduleEnabledRelease(Trace::hhbbc_dump, 2)) {
-          dump_representation(dump_dir, adaptor, *unit);
+          auto const d = dump_representation(adaptor, *unit);
+          if (!d.empty()) {
+            write_representation_dump(
+              dump_dir,
+              unit->filename->toCppString(),
+              d
+            );
+          }
         }
-        dump_index(dump_dir, adaptor, *unit);
+        auto const d = dump_index(adaptor, *unit);
+        if (!d.empty()) {
+          write_index_dump(
+            dump_dir,
+            unit->filename->toCppString(),
+            d
+          );
+        }
       }
-      collect_stats(stats, index, *unit);
       emitUnit(*unit);
     }
   );
@@ -768,9 +778,14 @@ struct FinalPassJob {
 
   struct Output {
     std::vector<UnitEmitterSerdeWrapper> units;
+    hphp_fast_map<std::string, std::string> indexDump;
+    hphp_fast_map<std::string, std::string> repDump;
     template <typename SerDe> void serde(SerDe& sd) {
       ScopedStringDataIndexer _;
-      sd(units);
+      sd(units)
+        (indexDump, std::less<>{})
+        (repDump, std::less<>{})
+        ;
     }
   };
 
@@ -788,9 +803,21 @@ struct FinalPassJob {
     };
     while (process(index, worklist)) {}
 
-    Output out;
     AnalysisIndexAdaptor adaptor{ index };
+    Output out;
     for (auto u : index.units_to_emit()) {
+      if (meta.dumpRep) {
+        auto d = dump_representation(adaptor, *u);
+        if (!d.empty()) {
+          out.repDump.emplace(u->filename->toCppString(), std::move(d));
+        }
+      }
+      if (meta.dumpIndex) {
+        auto d = dump_index(adaptor, *u);
+        if (!d.empty()) {
+          out.indexDump.emplace(u->filename->toCppString(), std::move(d));
+        }
+      }
       out.units.emplace_back(emit_unit(adaptor, *u));
     }
     return out;
@@ -834,7 +861,9 @@ Job<FinalPassJob> s_finalPassJob;
 using UnitEmitterRef = Ref<FinalPassJob::Output>;
 using UnitEmitterRefs = RefVec<FinalPassJob::Output>;
 
-UnitEmitterRefs final_pass(Index& index, AnalysisScheduler scheduler) {
+UnitEmitterRefs final_pass(Index& index,
+                           AnalysisScheduler scheduler,
+                           bool debugDump) {
   trace_time tracer{"final-pass"};
   tracer.ignore_client_stats();
 
@@ -846,11 +875,19 @@ UnitEmitterRefs final_pass(Index& index, AnalysisScheduler scheduler) {
     auto metadata =
       make_exec_metadata("final-pass", input.key()->toCppString());
 
-    auto [inputMeta, config] = co_await coro::collectAll(
-      index.client().store(input.takeMeta()),
+    auto inputMeta = input.takeMeta();
+    if (debugDump) {
+      if (Trace::moduleEnabledRelease(Trace::hhbbc_dump, 2)) {
+        inputMeta.dumpRep = true;
+      }
+      inputMeta.dumpIndex = true;
+    }
+
+    auto [inputMetaRef, config] = co_await coro::collectAll(
+      index.client().store(std::move(inputMeta)),
       index.configRef().getCopy()
     );
-    auto inputRefs = input.toInput(std::move(inputMeta));
+    auto inputRefs = input.toInput(std::move(inputMetaRef));
 
     auto outputs = co_await index.client().exec(
       s_finalPassJob,
@@ -899,7 +936,8 @@ UnitEmitterRefs final_pass(Index& index, AnalysisScheduler scheduler) {
 
 void emit_units(Index& index,
                 UnitEmitterRefs refs,
-                const EmitCallback& callback) {
+                const EmitCallback& callback,
+                const std::string& debugDump) {
   trace_time _{"emit-units", folly::sformat("{:,} units", refs.size())};
 
   std::atomic<uint64_t> next{0};
@@ -907,6 +945,16 @@ void emit_units(Index& index,
     co_await coro::co_reschedule_on_current_executor;
 
     auto output = co_await index.client().load(std::move(r));
+
+    if (!debugDump.empty()) {
+      for (auto const& [p, d] : output.repDump) {
+        write_representation_dump(debugDump, p, d);
+      }
+      for (auto const& [p, d] : output.indexDump) {
+        write_index_dump(debugDump, p, d);
+      }
+    }
+
     for (auto& ue : output.units) {
       auto const idx = next++;
       ue.m_ue->m_sn = idx;
@@ -1480,8 +1528,10 @@ void whole_program(WholeProgramInput inputs,
 
   if (options.useExternWorkerForFullAnalysis) {
     auto scheduler = analyze_full(index);
-    auto emitters = final_pass(index, std::move(scheduler));
-    emit_units(index, std::move(emitters), callback);
+
+    auto const debugDump = debug_dump_to();
+    auto emitters = final_pass(index, std::move(scheduler), !debugDump.empty());
+    emit_units(index, std::move(emitters), callback, debugDump);
 
     if (sample) {
       sample->setInt("hhbbc_num_units", index.all_units().size());
@@ -1495,7 +1545,6 @@ void whole_program(WholeProgramInput inputs,
     assertx(check(index.program()));
 
     IndexAdaptor adaptor{ index };
-    auto stats = allocate_stats();
 
     std::atomic<uint64_t> next{0};
     auto const emitUnit = [&] (php::Unit& unit) {
@@ -1521,10 +1570,8 @@ void whole_program(WholeProgramInput inputs,
     analyze_iteratively(index);
     auto cleanup_for_final = std::thread([&] { index.cleanup_for_final(); });
     parallel::num_threads = parallel::final_threads;
-    final_pass(index, stats, emitUnit);
+    final_pass(index, emitUnit);
     cleanup_for_final.join();
-
-    print_stats(stats);
 
     if (sample) {
       sample->setInt("hhbbc_num_units", index.program().units.size());

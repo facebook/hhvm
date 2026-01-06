@@ -2283,8 +2283,9 @@ struct AnalysisInput {
     FSStringToOneT<AnalysisDeps> funcDeps;
     SStringToOneT<AnalysisDeps> unitDeps;
 
-    // Entities that are starting points for this analysis (have toSchedule=true).
-    // These are the entities with changed information that triggered scheduling.
+    // Entities that are starting points for this analysis (have
+    // toSchedule=true).  These are the entities with changed
+    // information that triggered scheduling.
     TSStringSet startCls;
     FSStringSet startFunc;
     SStringSet startUnit;
@@ -2294,6 +2295,11 @@ struct AnalysisInput {
 
     // Index of this bucket in the overall scheduling round
     uint32_t bucketIdx;
+
+    // Whether to dump the index and/or representation for units
+    // during final-pass.
+    bool dumpIndex{false};
+    bool dumpRep{false};
 
     template <typename SerDe> void serde(SerDe& sd) {
       ScopedStringDataIndexer _;
@@ -2309,6 +2315,8 @@ struct AnalysisInput {
         (startUnit, string_data_lt{})
         (ifaceSlotMap, string_data_lt_type{})
         (bucketIdx)
+        (dumpIndex)
+        (dumpRep)
         ;
     }
   };

@@ -26,6 +26,7 @@ namespace HPHP::HHBBC {
 
 //////////////////////////////////////////////////////////////////////
 
+struct IIndex;
 struct ParsedUnit;
 
 //////////////////////////////////////////////////////////////////////
@@ -35,10 +36,16 @@ struct ParsedUnit;
  * temporary directory as readable text.
  */
 std::string debug_dump_to();
-void dump_representation(const std::string& dir,
-                         const IIndex&,
-                         const php::Unit&);
-void dump_index(const std::string&, const IIndex&, const php::Unit&);
+
+std::string dump_representation(const IIndex&, const php::Unit&);
+std::string dump_index(const IIndex&, const php::Unit&);
+
+void write_representation_dump(const std::string& dir,
+                               const std::string& unitPath,
+                               const std::string& dump);
+void write_index_dump(const std::string& dir,
+                      const std::string& unitPath,
+                      const std::string& dump);
 
 /*
  * Utilities for printing the state of the program after various

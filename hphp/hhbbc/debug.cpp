@@ -44,10 +44,10 @@ namespace {
 const StaticString s_invoke("__invoke");
 
 template<class Operation>
-void with_file(fs::path dir, const php::Unit& u, Operation op) {
+void with_file(fs::path dir, const std::string& unitPath, Operation op) {
   // Paths for systemlib units start with /, which gets interpreted as
   // an absolute path, so strip it.
-  auto filename = u.filename->data();
+  auto filename = unitPath.data();
   if (filename[0] == '/') ++filename;
 
   auto const file = dir / fs::path(filename);
@@ -196,8 +196,6 @@ void dump_func_state(std::ostream& out,
 std::string debug_dump_to() {
   if (!Trace::moduleEnabledRelease(Trace::hhbbc_dump, 1)) return "";
 
-  trace_time tracer("debug dump");
-
   auto dir = [&]{
     if (auto const dumpDir = getenv("HHBBC_DUMP_DIR")) {
       return fs::path(dumpDir);
@@ -218,61 +216,56 @@ std::string debug_dump_to() {
   return dir.string();
 }
 
-void dump_representation(const std::string& dir,
-                         const IIndex& index,
-                         const php::Unit& unit) {
+void write_representation_dump(const std::string& dir,
+                               const std::string& unitPath,
+                               const std::string& dump) {
   auto const rep_dir = fs::path{dir} / "representation";
-  with_file(rep_dir, unit, [&] (std::ostream& out) {
-    out << show(unit, index);
-  });
+  with_file(rep_dir, unitPath, [&] (std::ostream& out) { out << dump; });
 }
 
-void dump_index(const std::string& dir,
-                const IIndex& index,
-                const php::Unit& unit) {
+void write_index_dump(const std::string& dir,
+                      const std::string& unitPath,
+                      const std::string& dump) {
+  auto const rep_dir = fs::path{dir} / "index";
+  with_file(rep_dir, unitPath, [&] (std::ostream& out) { out << dump; });
+}
+
+std::string dump_representation(const IIndex& index,
+                                const php::Unit& unit) {
+  ContextPusher _{index, Context{ unit.filename, nullptr, nullptr }};
+  return show(unit, index);
+}
+
+std::string dump_index(const IIndex& index, const php::Unit& unit) {
   if (!*unit.filename->data()) {
     // The native systemlibs: for now just skip.
-    return;
+    return "";
   }
 
-  auto ind_dir = fs::path{dir} / "index";
+  ContextPusher _{index, Context{ unit.filename, nullptr, nullptr }};
 
-  with_file(ind_dir, unit, [&] (std::ostream& out) {
-    std::vector<const php::Class*> classes;
-    index.for_each_unit_class(
-      unit,
-      [&] (const php::Class& c) { classes.emplace_back(&c); }
-    );
-    std::sort(
-      begin(classes), end(classes),
-      [] (const php::Class* a, const php::Class* b) {
-        return string_data_lt_type{}(a->name, b->name);
-      }
-    );
-
-    for (auto const c : classes) {
-      dump_class_state(out, index, c);
-
-      std::vector<const php::Func*> funcs;
-      funcs.reserve(c->methods.size());
-      for (auto const& m : c->methods) {
-        if (!m) continue;
-        funcs.emplace_back(m.get());
-      }
-      std::sort(
-        begin(funcs), end(funcs),
-        [] (const php::Func* a, const php::Func* b) {
-          return string_data_lt{}(a->name, b->name);
-        }
-      );
-      for (auto const f : funcs) dump_func_state(out, index, *f);
+  std::vector<const php::Class*> classes;
+  index.for_each_unit_class(
+    unit,
+    [&] (const php::Class& c) { classes.emplace_back(&c); }
+  );
+  std::sort(
+    begin(classes), end(classes),
+    [] (const php::Class* a, const php::Class* b) {
+      return string_data_lt_type{}(a->name, b->name);
     }
+  );
+
+  std::ostringstream out;
+  for (auto const c : classes) {
+    dump_class_state(out, index, c);
 
     std::vector<const php::Func*> funcs;
-    index.for_each_unit_func(
-      unit,
-      [&] (const php::Func& f) { funcs.emplace_back(&f); }
-    );
+    funcs.reserve(c->methods.size());
+    for (auto const& m : c->methods) {
+      if (!m) continue;
+      funcs.emplace_back(m.get());
+    }
     std::sort(
       begin(funcs), end(funcs),
       [] (const php::Func* a, const php::Func* b) {
@@ -280,7 +273,22 @@ void dump_index(const std::string& dir,
       }
     );
     for (auto const f : funcs) dump_func_state(out, index, *f);
-  });
+  }
+
+  std::vector<const php::Func*> funcs;
+  index.for_each_unit_func(
+    unit,
+    [&] (const php::Func& f) { funcs.emplace_back(&f); }
+  );
+  std::sort(
+    begin(funcs), end(funcs),
+    [] (const php::Func* a, const php::Func* b) {
+      return string_data_lt{}(a->name, b->name);
+    }
+  );
+  for (auto const f : funcs) dump_func_state(out, index, *f);
+
+  return out.str();
 }
 
 //////////////////////////////////////////////////////////////////////

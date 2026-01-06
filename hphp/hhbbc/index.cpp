@@ -6056,6 +6056,9 @@ struct AnalysisIndex::IndexData {
   FSStringToOneT<std::unique_ptr<FuncInfo2>> allFInfos;
   SStringToOneT<std::unique_ptr<php::Unit>> allUnits;
 
+  hphp_fast_map<const php::Func*,
+                hphp_fast_set<const php::Class*>> funcToClosures;
+
   // Anything on these lists is known to definitely not exist.
   TSStringSet badClasses;
   FSStringSet badFuncs;
@@ -6082,6 +6085,7 @@ struct AnalysisIndex::IndexData {
   // frozen.
   bool frozen{false};
 
+  // The type of analysis that we're doing.
   Mode mode;
 };
 
@@ -18185,15 +18189,6 @@ void Index::preresolve_type_structures() {
 
 //////////////////////////////////////////////////////////////////////
 
-const CompactVector<const php::Class*>*
-Index::lookup_closures(const php::Class* cls) const {
-  auto const it = m_data->classClosureMap.find(cls);
-  if (it != end(m_data->classClosureMap)) {
-    return &it->second;
-  }
-  return nullptr;
-}
-
 const hphp_fast_set<const php::Func*>*
 Index::lookup_extra_methods(const php::Class* cls) const {
   if (cls->attrs & AttrNoExpandTrait) return nullptr;
@@ -18989,9 +18984,26 @@ ClsConstLookupResult Index::lookup_class_constant(Context ctx,
 }
 
 std::vector<std::pair<SString, ConstIndex>>
-Index::lookup_flattened_class_type_constants(const php::Class&) const {
-  // Should never be used with an Index.
-  always_assert(false);
+Index::lookup_flattened_class_type_constants(const php::Class& cls) const {
+  std::vector<std::pair<SString, ConstIndex>> out;
+
+  auto const rcls = resolve_class(cls);
+  if (!rcls) return out;
+  auto const cinfo = rcls->cinfo();
+  if (!cinfo) return out;
+
+  out.reserve(cinfo->clsConstants.size());
+  for (auto const& [name, idx] : cinfo->clsConstants) {
+    if (idx->kind != ConstModifierFlags::Kind::Type) continue;
+    out.emplace_back(name, ConstIndex{ idx.cls->name, idx.idx });
+  }
+  std::sort(
+    begin(out), end(out),
+    [] (auto const& p1, auto const& p2) {
+      return string_data_lt{}(p1.first, p2.first);
+    }
+  );
+  return out;
 }
 
 std::vector<std::pair<SString, ClsConstInfo>>
@@ -19123,11 +19135,70 @@ Index::lookup_class_type_constant(
 }
 
 ClsTypeConstLookupResult
-Index::lookup_class_type_constant(const php::Class&,
-                                  SString,
-                                  HHBBC::ConstIndex) const {
-  // Should never be called with an Index.
-  always_assert(false);
+Index::lookup_class_type_constant(const php::Class& ctx,
+                                  SString name,
+                                  HHBBC::ConstIndex idx) const {
+  ITRACE(4, "lookup_class_type_constant: {}::{}\n",
+         ctx.name, show(idx, IndexAdaptor{ *this }));
+  Trace::Indent _;
+
+  using R = ClsTypeConstLookupResult;
+
+  auto const conservative = [] {
+    ITRACE(4, "conservative\n");
+    return R {
+      TypeStructureResolution { TSDictN, true },
+      TriBool::Maybe,
+      TriBool::Maybe
+    };
+  };
+
+  auto const notFound = [] {
+    ITRACE(4, "not found\n");
+    return R {
+      TypeStructureResolution { TBottom, false },
+      TriBool::No,
+      TriBool::No
+    };
+  };
+
+  // Unlike lookup_class_constant, we distinguish abstract from
+  // not-found, as the runtime sometimes treats them differently.
+  auto const abstract = [] {
+    ITRACE(4, "abstract\n");
+    return R {
+      TypeStructureResolution { TBottom, false },
+      TriBool::No,
+      TriBool::Yes
+    };
+  };
+
+  auto const cinfo = folly::get_default(m_data->classInfo, idx.cls);
+  if (!cinfo) return conservative();
+
+  assertx(idx.idx < cinfo->cls->constants.size());
+  auto const& cns = cinfo->cls->constants[idx.idx];
+  if (cns.kind != ConstModifierFlags::Kind::Type) return notFound();
+  if (!cns.val.has_value()) return abstract();
+
+  assertx(tvIsDict(*cns.val));
+
+  ITRACE(4, "({}) {}\n", cns.cls, show(dict_val(val(*cns.val).parr)));
+
+  auto resolved = resolve_type_structure(IndexAdaptor { *this }, cns, ctx);
+
+  // The result of resolve_type_structure isn't, in general,
+  // static. However a type-constant will always be, so force that
+  // here.
+  assertx(resolved.type.is(BBottom) || resolved.type.couldBe(BUnc));
+  resolved.type &= TUnc;
+  auto const r = R{
+    std::move(resolved),
+    TriBool::Yes,
+    TriBool::No
+  };
+  ITRACE(4, "-> {}\n", show(r));
+  return r;
 }
 
 Type Index::lookup_constant(Context ctx, SString cnsName) const {
@@ -20362,7 +20433,7 @@ void Index::freeze() {
 }
 
 bool AnalysisIndex::tracking_public_sprops() const {
-  return false;
+  return m_data->mode == Mode::Full;
 }
 
 Type AnalysisIndex::unserialize_type(Type t) const {
@@ -24132,6 +24203,13 @@ AnalysisIndex::AnalysisIndex(
   }
 
   for (auto const& [_, cls] : m_data->allClasses) {
+    if (is_closure(*cls)) {
+      assertx(!cls->closureContextCls);
+      assertx(cls->closureDeclFunc);
+      auto const f = folly::get_default(m_data->funcs, cls->closureDeclFunc);
+      always_assert(f);
+      m_data->funcToClosures[f].emplace(cls.get());
+    }
     if (!cls->cinfo) continue;
     always_assert(cls.get() == cls->cinfo->cls);
   }
@@ -24343,6 +24421,8 @@ void AnalysisIndex::freeze() {
 
 bool AnalysisIndex::frozen() const { return m_data->frozen; }
 
+AnalysisMode AnalysisIndex::mode() const { return m_data->mode; }
+
 const php::Unit& AnalysisIndex::lookup_func_unit(const php::Func& f) const {
   auto const it = m_data->units.find(f.unit);
   always_assert_flog(
@@ -24432,13 +24512,65 @@ void AnalysisIndex::for_each_unit_class_mutable(
 
 const php::Class&
 AnalysisIndex::lookup_closure_context(const php::Class& cls) const {
+  if (!cls.closureContextCls) return cls;
+  auto const p = folly::get_default(m_data->classes, cls.closureContextCls);
   always_assert_flog(
-    !cls.closureContextCls,
-    "AnalysisIndex does not yet support closure contexts (for {})",
-    cls.name
+    p,
+    "Closure {} is missing its context class {}",
+    cls.name, cls.closureContextCls
   );
-  return cls;
+  return *p;
 }
+
+CompactVector<const php::Func*>
+AnalysisIndex::lookup_extra_methods(const php::Class& cls) const {
+  CompactVector<const php::Func*> out;
+  if (cls.attrs & AttrNoExpandTrait) return out;
+  if (!cls.cinfo) return out;
+
+  out.reserve(cls.cinfo->extraMethods.size());
+  for (auto const meth : cls.cinfo->extraMethods) {
+    auto const f = func_from_meth_ref(*m_data, meth);
+    always_assert_flog(
+      f,
+      "Class {} is missing one of its extra methods {}",
+      cls.name,
+      show(meth)
+    );
+    out.emplace_back(f);
+  }
+
+  std::sort(
+    begin(out), end(out),
+    [] (const php::Func* f1, const php::Func* f2) {
+      assertx(f1->cls);
+      assertx(f2->cls);
+      if (f1->cls != f2->cls) {
+        return string_data_lt_type{}(f1->cls->name, f2->cls->name);
+      }
+      return string_data_lt_func{}(f1->name, f2->name);
+    }
+  );
+  return out;
+}
+
+CompactVector<php::Func*>
+AnalysisIndex::lookup_func_closure_invokes(const php::Func& f) const {
+  CompactVector<php::Func*> out;
+  auto const& closures = folly::get_default(m_data->funcToClosures, &f);
+  out.reserve(closures.size());
+  for (auto const c : closures) {
+    assertx(c->methods.size() == 1);
+    out.emplace_back(c->methods[0].get());
+  }
+  std::sort(
+    begin(out), end(out),
+    [] (const php::Func* f1, const php::Func* f2) {
+      return string_data_lt{}(f1->cls->name, f2->cls->name);
+    }
+  );
+  return out;
+ }
 
 res::Func AnalysisIndex::resolve_func(SString n) const {
   n = normalizeNS(n);
@@ -26241,8 +26373,6 @@ void PublicSPropMutations::mergeUnknown(Context ctx) {
 
 //////////////////////////////////////////////////////////////////////
 
-#define UNIMPLEMENTED always_assert_flog(false, "{} not implemented for AnalysisIndex", __func__)
-
 bool AnalysisIndexAdaptor::frozen() const {
   return index.frozen();
 }
@@ -26279,14 +26409,9 @@ const php::Class* AnalysisIndexAdaptor::lookup_class(SString c) const {
   return index.lookup_class(c);
 }
 
-const CompactVector<const php::Class*>*
-AnalysisIndexAdaptor::lookup_closures(const php::Class*) const {
-  UNIMPLEMENTED;
-}
-
-const hphp_fast_set<const php::Func*>*
-AnalysisIndexAdaptor::lookup_extra_methods(const php::Class*) const {
-  UNIMPLEMENTED;
+CompactVector<const php::Func*>
+AnalysisIndexAdaptor::lookup_extra_methods(const php::Class& c) const {
+  return index.lookup_extra_methods(c);
 }
 
 void AnalysisIndexAdaptor::for_each_unit_func(
@@ -26486,8 +26611,6 @@ Slot AnalysisIndexAdaptor::lookup_iface_vtable_slot(const php::Class* c) const {
 bool AnalysisIndexAdaptor::tracking_public_sprops() const {
   return index.tracking_public_sprops();
 }
-
-#undef UNIMPLEMENTED
 
 //////////////////////////////////////////////////////////////////////
 

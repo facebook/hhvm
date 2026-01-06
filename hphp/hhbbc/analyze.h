@@ -209,6 +209,10 @@ struct ClassAnalysisWork {
   ClassAnalysisWorklist worklist;
   hphp_fast_map<const php::Func*, Index::ReturnType> returnTypes;
   hphp_fast_map<const php::Func*, hphp_fast_set<SString>> propMutators;
+  // List of properties whose initial values have been determined to
+  // satisfy their type-constraint and which haven't been reflected in
+  // the index yet.
+  SStringSet privatePropsSatisfiesTC;
   bool noPropRefine = false;
 };
 
@@ -324,10 +328,10 @@ FuncAnalysis analyze_func_inline(const IIndex&,
 ClassAnalysis analyze_class(const IIndex&, const Context&);
 
 /*
- * Perform an analysis of all the class constants for a php::Class
- * (both declared and inherited).
+ * Perform an analysis of all the methods for a php::Class separately
+ * (without doing whole-class analysis).
  */
-ClassAnalysis analyze_class_constants(const IIndex&, const Context&);
+ClassAnalysis analyze_class_separate(const AnalysisIndex&, const Context&);
 
 //////////////////////////////////////////////////////////////////////
 

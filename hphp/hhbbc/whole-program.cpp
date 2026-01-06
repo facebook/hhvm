@@ -506,6 +506,9 @@ private:
       update(analyze(*c, index), index);
     } else if (auto const f = w.func()) {
       update(analyze(*f, index), index);
+      for (auto const i : index.lookup_func_closure_invokes(*f)) {
+        update(analyze(*i, index), index);
+      }
     } else if (auto const u = w.unit()) {
       update(analyze(*u, index), index);
     } else {
@@ -523,10 +526,8 @@ private:
 
   static ClassAnalysis analyze(const php::Class& c,
                                const AnalysisIndex& index) {
-    return analyze_class_constants(
-      AnalysisIndexAdaptor { index },
-      Context { c.unit, nullptr, &c }
-    );
+    assertx(!is_closure(c));
+    return analyze_class_separate(index, Context { c.unit, nullptr, &c });
   }
 
   static UnitAnalysis analyze(const php::Unit& u, const AnalysisIndex& index) {

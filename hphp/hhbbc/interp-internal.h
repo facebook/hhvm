@@ -951,6 +951,11 @@ Optional<Type> thisPropType(ISS& env, SString name) {
 }
 
 bool isMaybeThisPropAttr(ISS& env, SString name, Attr attr) {
+  if (attr & AttrInitialSatisfiesTC) {
+    if (env.collect.props.privatePropertySatisfiesTC(name)) return true;
+    attr = (Attr)(attr & ~AttrInitialSatisfiesTC);
+  }
+  if (!attr) return false;
   auto const& raw = env.collect.props.privatePropertiesRaw();
   auto const it = raw.find(name);
   // Prop either doesn't exist, or is on an unflattened trait. Be
@@ -960,6 +965,11 @@ bool isMaybeThisPropAttr(ISS& env, SString name, Attr attr) {
 }
 
 bool isDefinitelyThisPropAttr(ISS& env, SString name, Attr attr) {
+  if (attr & AttrInitialSatisfiesTC) {
+    if (env.collect.props.privatePropertySatisfiesTC(name)) return true;
+    attr = (Attr)(attr & ~AttrInitialSatisfiesTC);
+  }
+  if (!attr) return false;
   auto const& raw = env.collect.props.privatePropertiesRaw();
   auto const it = raw.find(name);
   // Prop either doesn't exist, or is on an unflattened trait. Be

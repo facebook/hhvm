@@ -910,7 +910,8 @@ FuncAnalysis analyze_func_inline(const IIndex& index,
                     opts | CollectionOpts::Inlining);
 }
 
-ClassAnalysis analyze_class_constants(const IIndex& index, const Context& ctx) {
+ClassAnalysis analyze_class_separate(const AnalysisIndex& index,
+                                     const Context& ctx) {
   assertx(ctx.cls);
   assertx(!ctx.func);
   assertx(!is_closure(*ctx.cls));
@@ -925,21 +926,48 @@ ClassAnalysis analyze_class_constants(const IIndex& index, const Context& ctx) {
     );
   }
 
-  ContextPusher _{index, ctx};
+  AnalysisIndexAdaptor adaptor{index};
+  ContextPusher _{adaptor, ctx};
   ClassAnalysis analysis{ctx};
 
   if (!is_used_trait(*ctx.cls)) {
-    resolve_type_constants(index, ctx, analysis);
+    resolve_type_constants(adaptor, ctx, analysis);
+  }
+
+  if (index.mode() != AnalysisMode::Constants) {
+    auto const associatedClosures = [&] {
+      CompactVector<const php::Class*> out;
+      out.reserve(ctx.cls->closures.size());
+      for (auto& clo : ctx.cls->closures) out.emplace_back(clo.get());
+      return out;
+    }();
+
+    for (auto const c : associatedClosures) {
+      auto const f = c->methods[0].get();
+      auto const UNUSED bump =
+        trace_bump(*f, Trace::hhbbc, Trace::hhbbc_cfg, Trace::hhbbc_index);
+      auto const wf = php::WideFunc::cns(f);
+      analysis.closures.emplace_back(
+        analyze_func(
+          adaptor,
+          AnalysisContext { ctx.unit, wf, ctx.cls },
+          CollectionOpts{}
+        )
+      );
+    }
   }
 
   for (auto const& m : ctx.cls->methods) {
-    if (!is_86init_func(*m)) continue;
+    if (index.mode() == AnalysisMode::Constants &&
+        !is_86init_func(*m)) {
+      continue;
+    }
     auto const UNUSED bump =
       trace_bump(*m, Trace::hhbbc, Trace::hhbbc_cfg, Trace::hhbbc_index);
     auto const wf = php::WideFunc::cns(m.get());
     analysis.methods.emplace_back(
       analyze_func(
-        index,
+        adaptor,
         AnalysisContext { ctx.unit, wf, ctx.cls },
         CollectionOpts{}
       )
@@ -950,8 +978,11 @@ ClassAnalysis analyze_class_constants(const IIndex& index, const Context& ctx) {
 }
 
 ClassAnalysis analyze_class(const IIndex& index, const Context& ctx) {
-
-  assertx(ctx.cls && !ctx.func && !is_used_trait(*ctx.cls));
+  assertx(ctx.cls);
+  assertx(!ctx.func);
+  assertx(!is_used_trait(*ctx.cls));
+  // Uncomment when local execution is gone
+  //assertx(!is_closure(*ctx.cls));
 
   {
     auto const UNUSED bump =
@@ -964,10 +995,17 @@ ClassAnalysis analyze_class(const IIndex& index, const Context& ctx) {
   }
 
   ContextPusher _{index, ctx};
-
   ClassAnalysis clsAnalysis(ctx);
-  auto const associatedClosures = index.lookup_closures(ctx.cls);
-  auto const associatedMethods  = index.lookup_extra_methods(ctx.cls);
+
+  resolve_type_constants(index, ctx, clsAnalysis);
+
+  auto const associatedClosures = [&] {
+    CompactVector<const php::Class*> out;
+    out.reserve(ctx.cls->closures.size());
+    for (auto& clo : ctx.cls->closures) out.emplace_back(clo.get());
+    return out;
+  }();
+  auto const associatedMethods  = index.lookup_extra_methods(*ctx.cls);
   auto const isHNIBuiltin       = ctx.cls->attrs & AttrBuiltin;
 
   /*
@@ -1090,20 +1128,27 @@ ClassAnalysis analyze_class(const IIndex& index, const Context& ctx) {
    * be run again as part of the fixedpoint computation.
    */
   CompactVector<FuncAnalysis> initResults;
-  auto const analyze_86init = [&] (const StaticString& name) {
-    if (auto func = find_method(ctx.cls, name.get())) {
-      auto const wf = php::WideFunc::cns(func);
-      auto const context = AnalysisContext { ctx.unit, wf, ctx.cls };
-      initResults.emplace_back(
-        do_analyze(index, context, &clsAnalysis, &clsCnsWork)
-      );
+  for (auto const& f : ctx.cls->methods) {
+    if (!is_86init_func(*f)) continue;
+    auto const wf = php::WideFunc::cns(f.get());
+    auto const context = AnalysisContext { ctx.unit, wf, ctx.cls };
+    initResults.emplace_back(
+      do_analyze(index, context, &clsAnalysis, &clsCnsWork)
+    );
+  }
+
+  ClassAnalysisWork work;
+  clsAnalysis.work = &work;
+
+  for (auto const& fa : initResults) {
+    auto const resolved = fa.resolvedInitializers.right();
+    if (!resolved) continue;
+    for (auto const& [idx, init] : *resolved) {
+      if (!init.satisfies) continue;
+      assertx(idx < ctx.cls->properties.size());
+      work.privatePropsSatisfiesTC.emplace(ctx.cls->properties[idx].name);
     }
-  };
-  analyze_86init(s_86pinit);
-  analyze_86init(s_86sinit);
-  analyze_86init(s_86linit);
-  analyze_86init(s_86cinit);
-  analyze_86init(s_86reifiedinit);
+  }
 
   // NB: Properties can still be TBottom at this point if their initial values
   // cannot possibly satisfy their type-constraints. The classes of such
@@ -1120,16 +1165,11 @@ ClassAnalysis analyze_class(const IIndex& index, const Context& ctx) {
    * counter.  This guarantees eventual termination.
    */
 
-  ClassAnalysisWork work;
-  clsAnalysis.work = &work;
-
   clsAnalysis.methods.reserve(initResults.size() + ctx.cls->methods.size());
   for (auto& m : initResults) {
     clsAnalysis.methods.emplace_back(std::move(m));
   }
-  if (associatedClosures) {
-    clsAnalysis.closures.reserve(associatedClosures->size());
-  }
+  clsAnalysis.closures.reserve(associatedClosures.size());
 
   auto const startPrivateProperties = clsAnalysis.privateProperties;
   auto const startPrivateStatics = clsAnalysis.privateStatics;
@@ -1147,19 +1187,13 @@ ClassAnalysis analyze_class(const IIndex& index, const Context& ctx) {
 
   auto const getMeta = [&] (const php::Func& f) -> FuncMeta& {
     auto metaIt = funcMeta.find(&f);
-    assertx(metaIt != funcMeta.end());
+    always_assert(metaIt != funcMeta.end());
     return metaIt->second;
   };
 
   // Build up the initial worklist:
   for (auto const& f : ctx.cls->methods) {
-    if (f->name == s_86pinit.get() ||
-        f->name == s_86sinit.get() ||
-        f->name == s_86linit.get() ||
-        f->name == s_86cinit.get() ||
-        f->name == s_86reifiedinit.get()) {
-      continue;
-    }
+    if (is_86init_func(*f)) continue;
     auto const UNUSED bump =
       trace_bump(*f, Trace::hhbbc, Trace::hhbbc_cfg, Trace::hhbbc_index);
     auto const DEBUG_ONLY inserted = work.worklist.schedule(*f);
@@ -1172,34 +1206,32 @@ ClassAnalysis analyze_class(const IIndex& index, const Context& ctx) {
     );
   }
 
-  if (associatedClosures) {
-    for (auto const c : *associatedClosures) {
-      auto const f = c->methods[0].get();
-      auto const UNUSED bump =
-        trace_bump(*f, Trace::hhbbc, Trace::hhbbc_cfg, Trace::hhbbc_index);
-      auto const DEBUG_ONLY inserted = work.worklist.schedule(*f);
-      assertx(inserted);
-      auto [type, refinements] = index.lookup_return_type_raw(f);
-      work.returnTypes.emplace(f, std::move(type));
-      funcMeta.emplace(
-        f, FuncMeta{ctx.unit, c, &clsAnalysis.closures, refinements}
-      );
-    }
+  for (auto const c : associatedClosures) {
+    auto const f = c->methods[0].get();
+    auto const UNUSED bump =
+      trace_bump(*f, Trace::hhbbc, Trace::hhbbc_cfg, Trace::hhbbc_index);
+    auto const DEBUG_ONLY inserted = work.worklist.schedule(*f);
+    assertx(inserted);
+    auto [type, refinements] = index.lookup_return_type_raw(f);
+    work.returnTypes.emplace(f, std::move(type));
+    funcMeta.emplace(
+      f, FuncMeta{ctx.unit, c, &clsAnalysis.closures, refinements}
+    );
   }
-  if (associatedMethods) {
-    for (auto const m : *associatedMethods) {
-      auto const DEBUG_ONLY inserted = work.worklist.schedule(*m);
-      assertx(inserted);
-      funcMeta.emplace(
-        m,
-        FuncMeta{m->unit, ctx.cls, nullptr, 0, 0}
-      );
-    }
+  for (auto const m : associatedMethods) {
+    auto const DEBUG_ONLY inserted = work.worklist.schedule(*m);
+    assertx(inserted);
+    funcMeta.emplace(
+      m,
+      FuncMeta{m->unit, ctx.cls, nullptr, 0, 0}
+    );
   }
 
   // Keep analyzing until we have more functions scheduled (the fixed
   // point).
   while (!work.worklist.empty()) {
+    hphp_fast_set<const php::Func*> changed;
+
     // First analyze funcs until we hit a fixed point for the
     // properties. Until we reach that, the return types are *not*
     // guaranteed to be correct.
@@ -1241,8 +1273,6 @@ ClassAnalysis analyze_class(const IIndex& index, const Context& ctx) {
     // information (such as return type information) is now correct
     // (but might not be optimal).
 
-    auto bail = false;
-
     // Reflect any improved return types into the results. This will
     // make them available for local analysis and they'll eventually
     // be written back into the Index.
@@ -1266,34 +1296,43 @@ ClassAnalysis analyze_class(const IIndex& index, const Context& ctx) {
             < options.returnTypeRefineLimit) {
           oldType = results.inferredReturn;
           work.worklist.scheduleForReturnType(*f);
+          changed.emplace(f);
         } else if (meta.localReturnRefinements > 0) {
           results.inferredReturn = oldType;
           results.effectFree = oldEffectFree;
         }
         ++meta.localReturnRefinements;
-      } else if (!results.inferredReturn.moreRefined(oldType)) {
-        // If we have a monotonicity violation, bail out immediately
-        // and let the Index complain.
-        bail = true;
-        break;
+      } else {
+        always_assert_flog(
+          results.inferredReturn.moreRefined(oldType),
+          "Index return type invariant violated in {} {}.\n"
+          "   {} is not at least as refined as {}\n",
+          f->unit,
+          func_fullname(*f),
+          show(results.inferredReturn),
+          show(oldType)
+        );
       }
 
       if (results.effectFree) {
         if (!oldEffectFree) {
           oldEffectFree = true;
           work.worklist.scheduleForReturnType(*f);
+          changed.emplace(f);
         }
-      } else if (oldEffectFree) {
-        bail = true;
-        break;
+      } else {
+        always_assert_flog(
+          !oldEffectFree,
+          "Index effect-free invariant violated in {} {}.\n"
+          "    Went from true to false\n",
+          f->unit,
+          func_fullname(*f)
+        );
       }
 
       results.localReturnRefinements = meta.localReturnRefinements;
       if (results.localReturnRefinements > 0) --results.localReturnRefinements;
     }
-    if (bail) break;
-
-    hphp_fast_set<const php::Func*> changed;
 
     // We've made the return types available for local analysis. Now
     // iterate again and see if we can improve them.
@@ -1329,21 +1368,32 @@ ClassAnalysis analyze_class(const IIndex& index, const Context& ctx) {
           results.effectFree = oldEffectFree;
         }
         ++meta.localReturnRefinements;
-      } else if (!results.inferredReturn.moreRefined(oldReturn)) {
-        // If we have a monotonicity violation, bail out immediately
-        // and let the Index complain.
-        bail = true;
-        break;
+      } else {
+        always_assert_flog(
+          results.inferredReturn.moreRefined(oldReturn),
+          "Index return type invariant violated in {} {}.\n"
+          "   {} is not at least as refined as {}\n",
+          f->unit,
+          func_fullname(*f),
+          show(results.inferredReturn),
+          show(oldReturn)
+        );
       }
 
       if (results.effectFree) {
         if (!oldEffectFree) {
           oldEffectFree = true;
           work.worklist.scheduleForReturnType(*f);
+          changed.emplace(f);
         }
-      } else if (oldEffectFree) {
-        bail = true;
-        break;
+      } else {
+        always_assert_flog(
+          !oldEffectFree,
+          "Index effect-free invariant violated in {} {}.\n"
+          "    Went from true to false\n",
+          f->unit,
+          func_fullname(*f)
+        );
       }
 
       results.localReturnRefinements = meta.localReturnRefinements;
@@ -1352,7 +1402,6 @@ ClassAnalysis analyze_class(const IIndex& index, const Context& ctx) {
       assertx(meta.outputIdx >= 0);
       (*meta.output)[meta.outputIdx] = std::move(results);
     }
-    if (bail) break;
 
     // Return types have reached a fixed point. However, this means
     // that we might be able to further improve property types. So, if
@@ -1994,8 +2043,6 @@ Type return_type_from_constraints(
   const std::function<Optional<res::Class>(SString)>& resolve,
   const std::function<Optional<Type>()>& self
 ) {
-  if (f.isMemoizeWrapper) return TInitCell;
-
   if (f.isGenerator) {
     if (f.isAsync) {
       // Async generators always return AsyncGenerator object.

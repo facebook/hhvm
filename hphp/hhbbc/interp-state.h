@@ -540,6 +540,8 @@ struct PropertiesInfo {
   bool hasInitialValues() const { return !m_inits.empty(); }
   const PropInitInfo* getInitialValue(const php::Prop&) const;
 
+  bool privatePropertySatisfiesTC(SString name) const;
+
   const PropState& privatePropertiesRaw() const;
   const PropState& privateStaticsRaw() const;
 

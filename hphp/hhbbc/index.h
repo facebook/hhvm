@@ -1191,13 +1191,6 @@ struct Index {
                                    std::function<void(php::Class&)>);
 
   /*
-   * Find all the closures created inside the context of a given
-   * php::Class.
-   */
-  const CompactVector<const php::Class*>*
-    lookup_closures(const php::Class*) const;
-
-  /*
    * Find all the extra methods associated with a class from its
    * traits.
    */
@@ -1680,11 +1673,8 @@ struct IIndex {
   virtual void for_each_unit_class_mutable(php::Unit&,
                                            std::function<void(php::Class&)>) = 0;
 
-  virtual const CompactVector<const php::Class*>*
-  lookup_closures(const php::Class*) const = 0;
-
-  virtual const hphp_fast_set<const php::Func*>*
-  lookup_extra_methods(const php::Class*) const = 0;
+  virtual CompactVector<const php::Func*>
+  lookup_extra_methods(const php::Class&) const = 0;
 
   virtual Optional<res::Class> resolve_class(SString) const = 0;
   virtual Optional<res::Class> resolve_class(const php::Class&) const = 0;
@@ -1840,13 +1830,26 @@ struct IndexAdaptor : public IIndex {
   const php::Class* lookup_class(SString c) const override {
     return index.lookup_class(c);
   }
-  const CompactVector<const php::Class*>*
-  lookup_closures(const php::Class* c) const override {
-    return index.lookup_closures(c);
-  }
-  const hphp_fast_set<const php::Func*>*
-  lookup_extra_methods(const php::Class* c) const override {
-    return index.lookup_extra_methods(c);
+  CompactVector<const php::Func*>
+  lookup_extra_methods(const php::Class& c) const override {
+    if (auto const extra = index.lookup_extra_methods(&c)) {
+      CompactVector<const php::Func*> out;
+      out.reserve(extra->size());
+      for (auto const e : *extra) out.emplace_back(e);
+      std::sort(
+        begin(out), end(out),
+        [] (const php::Func* f1, const php::Func* f2) {
+          assertx(f1->cls);
+          assertx(f2->cls);
+          if (f1->cls != f2->cls) {
+            return string_data_lt_type{}(f1->cls->name, f2->cls->name);
+          }
+          return string_data_lt_func{}(f1->name, f2->name);
+        }
+      );
+      return out;
+    }
+    return {};
   }
   Optional<res::Class> resolve_class(SString c) const override {
     return index.resolve_class(c);
@@ -2000,6 +2003,15 @@ private:
   bool set_in_type_cns(bool) const override { return false; }
 
   Index& index;
+};
+
+//////////////////////////////////////////////////////////////////////
+
+// What kind of analysis is being done?
+enum class AnalysisMode {
+  Constants,
+  Full,
+  Final
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -2638,11 +2650,7 @@ struct AnalysisIndex {
   template<typename T> using V = std::vector<T>;
   template<typename T> using VU = V<std::unique_ptr<T>>;
 
-  enum class Mode {
-    Constants,
-    Full,
-    Final
-  };
+  using Mode = AnalysisMode;
 
   AnalysisIndex(AnalysisWorklist&,
                 VU<php::Class>,
@@ -2666,6 +2674,8 @@ struct AnalysisIndex {
 
   void freeze();
   bool frozen() const;
+
+  Mode mode() const;
 
   bool tracking_public_sprops() const;
 
@@ -2691,6 +2701,9 @@ struct AnalysisIndex {
                            std::function<void(const php::Class&)>) const;
   void for_each_unit_class_mutable(php::Unit&,
                                    std::function<void(php::Class&)>);
+
+  CompactVector<const php::Func*> lookup_extra_methods(const php::Class&) const;
+  CompactVector<php::Func*> lookup_func_closure_invokes(const php::Func&) const;
 
   Optional<res::Class> resolve_class(SString) const;
   Optional<res::Class> resolve_class(const php::Class&) const;
@@ -2824,11 +2837,8 @@ struct AnalysisIndexAdaptor : public IIndex {
   void for_each_unit_class_mutable(php::Unit&,
                                    std::function<void(php::Class&)>) override;
 
-  const CompactVector<const php::Class*>*
-  lookup_closures(const php::Class*) const override;
-
-  const hphp_fast_set<const php::Func*>*
-  lookup_extra_methods(const php::Class*) const override;
+  CompactVector<const php::Func*>
+  lookup_extra_methods(const php::Class&) const override;
 
   Optional<res::Class> resolve_class(SString) const override;
   Optional<res::Class> resolve_class(const php::Class&) const override;

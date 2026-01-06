@@ -385,6 +385,15 @@ PropertiesInfo::getInitialValue(const php::Prop& prop) const {
   return folly::get_ptr(m_inits, &prop);
 }
 
+bool PropertiesInfo::privatePropertySatisfiesTC(SString name) const {
+  if (m_cls && m_cls->work &&
+      m_cls->work->privatePropsSatisfiesTC.contains(name)) {
+    return true;
+  }
+  auto const p = folly::get_ptr(privatePropertiesRaw(), name);
+  return p && (p->attrs & AttrInitialSatisfiesTC);
+}
+
 //////////////////////////////////////////////////////////////////////
 
 MethodsInfo::MethodsInfo(Context ctx, ClassAnalysis* cls)

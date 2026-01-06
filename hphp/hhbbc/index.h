@@ -1661,6 +1661,7 @@ struct IIndex {
   virtual bool frozen() const = 0;
 
   virtual const php::Unit* lookup_func_unit(const php::Func&) const = 0;
+  virtual const php::Unit* lookup_func_original_unit(const php::Func&) const = 0;
 
   virtual const php::Unit* lookup_class_unit(const php::Class&) const = 0;
 
@@ -1669,6 +1670,15 @@ struct IIndex {
   virtual const php::Class* lookup_closure_context(const php::Class&) const = 0;
 
   virtual const php::Class* lookup_class(SString) const = 0;
+
+  virtual void for_each_unit_func(const php::Unit&,
+                                  std::function<void(const php::Func&)>) const = 0;
+  virtual void for_each_unit_func_mutable(php::Unit&,
+                                          std::function<void(php::Func&)>) = 0;
+  virtual void for_each_unit_class(const php::Unit&,
+                                   std::function<void(const php::Class&)>) const = 0;
+  virtual void for_each_unit_class_mutable(php::Unit&,
+                                           std::function<void(php::Class&)>) = 0;
 
   virtual const CompactVector<const php::Class*>*
   lookup_closures(const php::Class*) const = 0;
@@ -1738,7 +1748,7 @@ struct IIndex {
   lookup_return_type_raw(const php::Func*) const = 0;
 
   virtual CompactVector<Type>
-  lookup_closure_use_vars(const php::Func*,
+  lookup_closure_use_vars(const php::Func&,
                           bool move = false) const = 0;
 
   virtual PropState lookup_private_props(const php::Class*,
@@ -1746,13 +1756,15 @@ struct IIndex {
 
   virtual PropState lookup_private_statics(const php::Class*,
                                            bool move = false) const = 0;
-
+  virtual PropState lookup_public_statics(const php::Class*) const = 0;
   virtual PropLookupResult lookup_static(Context,
                                          const PropertiesInfo& privateProps,
                                          const Type& cls,
                                          const Type& name) const = 0;
 
   virtual Type lookup_public_prop(const Type& obj, const Type& name) const = 0;
+
+  virtual Slot lookup_iface_vtable_slot(const php::Class*) const = 0;
 
   virtual PropMergeResult
   merge_static_type(Context ctx,
@@ -1765,7 +1777,7 @@ struct IIndex {
                     bool ignoreConst = false,
                     bool mustBeReadOnly = false) const = 0;
 
-  virtual bool using_class_dependencies() const = 0;
+  virtual bool tracking_public_sprops() const = 0;
 private:
   virtual void push_context(const Context&) const = 0;
   virtual void pop_context() const = 0;
@@ -1813,6 +1825,9 @@ struct IndexAdaptor : public IIndex {
   const php::Unit* lookup_func_unit(const php::Func& f) const override {
     return index.lookup_func_unit(f);
   }
+  const php::Unit* lookup_func_original_unit(const php::Func& f) const override {
+    return index.lookup_func_original_unit(f);
+  }
   const php::Unit* lookup_class_unit(const php::Class& c) const override {
     return index.lookup_class_unit(c);
   }
@@ -1838,6 +1853,22 @@ struct IndexAdaptor : public IIndex {
   }
   Optional<res::Class> resolve_class(const php::Class& c) const override {
     return index.resolve_class(c);
+  }
+  void for_each_unit_func(const php::Unit& u,
+                          std::function<void(const php::Func&)> f) const override {
+    index.for_each_unit_func(u, std::move(f));
+  }
+  void for_each_unit_func_mutable(php::Unit& u,
+                                  std::function<void(php::Func&)> f) override {
+    index.for_each_unit_func_mutable(u, std::move(f));
+  }
+  void for_each_unit_class(const php::Unit& u,
+                           std::function<void(const php::Class&)> f) const override {
+    index.for_each_unit_class(u, std::move(f));
+  }
+  void for_each_unit_class_mutable(php::Unit& u,
+                                   std::function<void(php::Class&)> f) override {
+    index.for_each_unit_class_mutable(u, std::move(f));
   }
   std::pair<const php::TypeAlias*, bool>
   lookup_type_alias(SString a) const override {
@@ -1915,8 +1946,8 @@ struct IndexAdaptor : public IIndex {
     return index.lookup_return_type_raw(f);
   }
   CompactVector<Type>
-  lookup_closure_use_vars(const php::Func* f, bool m = false) const override {
-    return index.lookup_closure_use_vars(f, m);
+  lookup_closure_use_vars(const php::Func& f, bool m = false) const override {
+    return index.lookup_closure_use_vars(&f, m);
   }
   PropState lookup_private_props(const php::Class* c,
                                  bool m = false) const override {
@@ -1925,6 +1956,9 @@ struct IndexAdaptor : public IIndex {
   PropState lookup_private_statics(const php::Class* c,
                                    bool m = false) const override {
     return index.lookup_private_statics(c, m);
+  }
+  PropState lookup_public_statics(const php::Class* c) const override {
+    return index.lookup_public_statics(c);
   }
   PropLookupResult lookup_static(Context c1,
                                  const PropertiesInfo& p,
@@ -1935,6 +1969,10 @@ struct IndexAdaptor : public IIndex {
   Type lookup_public_prop(const Type& o, const Type& n) const override {
     return index.lookup_public_prop(o, n);
   }
+  Slot lookup_iface_vtable_slot(const php::Class* c) const override {
+    return index.lookup_iface_vtable_slot(c);
+  }
+
   PropMergeResult
   merge_static_type(Context ctx,
                     PublicSPropMutations& publicMutations,
@@ -1951,7 +1989,7 @@ struct IndexAdaptor : public IIndex {
       mustBeReadOnly
     );
   }
-  bool using_class_dependencies() const override {
+  bool tracking_public_sprops() const override {
     return index.using_class_dependencies();
   }
 
@@ -2629,7 +2667,10 @@ struct AnalysisIndex {
   void freeze();
   bool frozen() const;
 
+  bool tracking_public_sprops() const;
+
   const php::Unit& lookup_func_unit(const php::Func&) const;
+  const php::Unit& lookup_func_original_unit(const php::Func&) const;
 
   const php::Unit& lookup_class_unit(const php::Class&) const;
 
@@ -2640,6 +2681,16 @@ struct AnalysisIndex {
   const php::Class& lookup_closure_context(const php::Class&) const;
 
   const php::Class* lookup_class(SString) const;
+
+  void for_each_unit_func(const php::Unit&,
+                          std::function<void(const php::Func&)>) const;
+  void for_each_unit_func_mutable(php::Unit&,
+                                  std::function<void(php::Func&)>);
+
+  void for_each_unit_class(const php::Unit&,
+                           std::function<void(const php::Class&)>) const;
+  void for_each_unit_class_mutable(php::Unit&,
+                                   std::function<void(php::Class&)>);
 
   Optional<res::Class> resolve_class(SString) const;
   Optional<res::Class> resolve_class(const php::Class&) const;
@@ -2666,6 +2717,7 @@ struct AnalysisIndex {
 
   PropState lookup_private_props(const php::Class&) const;
   PropState lookup_private_statics(const php::Class&) const;
+  PropState lookup_public_statics(const php::Class&) const;
 
   Index::ReturnType lookup_return_type(MethodsInfo*, res::Func) const;
   Index::ReturnType lookup_return_type(MethodsInfo*,
@@ -2676,6 +2728,10 @@ struct AnalysisIndex {
 
   std::pair<Index::ReturnType, size_t>
   lookup_return_type_raw(const php::Func& f) const;
+
+  CompactVector<Type>
+  lookup_closure_use_vars(const php::Func&,
+                          bool move = false) const;
 
   bool func_depends_on_arg(const php::Func&, size_t) const;
 
@@ -2688,6 +2744,8 @@ struct AnalysisIndex {
   std::pair<const php::TypeAlias*, bool> lookup_type_alias(SString) const;
 
   Index::ClassOrTypeAlias lookup_class_or_type_alias(SString) const;
+
+  Slot lookup_iface_vtable_slot(const php::Class&) const;
 
   PropMergeResult
   merge_static_type(PublicSPropMutations&,
@@ -2751,10 +2809,20 @@ struct AnalysisIndexAdaptor : public IIndex {
   bool frozen() const override;
 
   const php::Unit* lookup_func_unit(const php::Func&) const override;
+  const php::Unit* lookup_func_original_unit(const php::Func&) const override;
   const php::Unit* lookup_class_unit(const php::Class&) const override;
   const php::Class* lookup_const_class(const php::Const&) const override;
   const php::Class* lookup_closure_context(const php::Class&) const override;
   const php::Class* lookup_class(SString) const override;
+
+  void for_each_unit_func(const php::Unit&,
+                          std::function<void(const php::Func&)>) const override;
+  void for_each_unit_func_mutable(php::Unit&,
+                                  std::function<void(php::Func&)>) override;
+  void for_each_unit_class(const php::Unit&,
+                           std::function<void(const php::Class&)>) const override;
+  void for_each_unit_class_mutable(php::Unit&,
+                                   std::function<void(php::Class&)>) override;
 
   const CompactVector<const php::Class*>*
   lookup_closures(const php::Class*) const override;
@@ -2813,10 +2881,11 @@ struct AnalysisIndexAdaptor : public IIndex {
   lookup_return_type_raw(const php::Func*) const override;
 
   CompactVector<Type>
-  lookup_closure_use_vars(const php::Func*, bool m = false) const override;
+  lookup_closure_use_vars(const php::Func&, bool m = false) const override;
 
   PropState lookup_private_props(const php::Class*, bool m = false) const override;
   PropState lookup_private_statics(const php::Class*, bool m = false) const override;
+  PropState lookup_public_statics(const php::Class*) const override;
 
   PropLookupResult lookup_static(Context,
                                  const PropertiesInfo&,
@@ -2824,6 +2893,8 @@ struct AnalysisIndexAdaptor : public IIndex {
                                  const Type&) const override;
 
   Type lookup_public_prop(const Type&, const Type&) const override;
+
+  Slot lookup_iface_vtable_slot(const php::Class*) const override;
 
   PropMergeResult
   merge_static_type(Context,
@@ -2836,7 +2907,7 @@ struct AnalysisIndexAdaptor : public IIndex {
                     bool ignoreConst = false,
                     bool mustBeReadOnly = false) const override;
 
-  bool using_class_dependencies() const override;
+  bool tracking_public_sprops() const override;
 
 private:
   void push_context(const Context&) const override;

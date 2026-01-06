@@ -36,16 +36,16 @@ struct ParsedUnit;
  */
 std::string debug_dump_to();
 void dump_representation(const std::string& dir,
-                         const Index&,
+                         const IIndex&,
                          const php::Unit&);
-void dump_index(const std::string&, const Index&, const php::Unit&);
+void dump_index(const std::string&, const IIndex&, const php::Unit&);
 
 /*
  * Utilities for printing the state of the program after various
  * transformations.
  */
 
-void state_after(const char* when, const php::Unit&, const Index&);
+void state_after(const char* when, const php::Unit&, const IIndex&);
 void state_after(const char* when, const ParsedUnit&);
 
 //////////////////////////////////////////////////////////////////////

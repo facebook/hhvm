@@ -410,7 +410,7 @@ private:
  * Pre: stateIn.initialized == true
  */
 PropagatedStates
-locally_propagated_states(const Index&,
+locally_propagated_states(const IIndex&,
                           const AnalysisContext&,
                           CollectedInfo& collect,
                           BlockId bid,
@@ -421,7 +421,7 @@ locally_propagated_states(const Index&,
  * target of the block.  This is used to update the in state for a block added
  * to the CFG in between analysis rounds.
  */
-State locally_propagated_bid_state(const Index& index,
+State locally_propagated_bid_state(const IIndex& index,
                                    const AnalysisContext& ctx,
                                    CollectedInfo& collect,
                                    BlockId bid,

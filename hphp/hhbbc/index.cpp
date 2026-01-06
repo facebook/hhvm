@@ -20361,6 +20361,10 @@ void Index::freeze() {
   m_data->ever_frozen = true;
 }
 
+bool AnalysisIndex::tracking_public_sprops() const {
+  return false;
+}
+
 Type AnalysisIndex::unserialize_type(Type t) const {
   return unserialize_classes(AnalysisIndexAdaptor { *this }, std::move(t));
 }
@@ -24349,6 +24353,17 @@ const php::Unit& AnalysisIndex::lookup_func_unit(const php::Func& f) const {
   return *it->second;
 }
 
+const php::Unit& AnalysisIndex::lookup_func_original_unit(const php::Func& f) const {
+  auto const unit = f.originalUnit ? f.originalUnit : f.unit;
+  auto const it = m_data->units.find(unit);
+  always_assert_flog(
+    it != end(m_data->units),
+    "Attempting to access missing original unit {} for func {}",
+    unit, func_fullname(f)
+  );
+  return *it->second;
+}
+
 const php::Unit& AnalysisIndex::lookup_class_unit(const php::Class& c) const {
   auto const it = m_data->units.find(c.unit);
   always_assert_flog(
@@ -24377,6 +24392,42 @@ AnalysisIndex::lookup_const_class(const php::Const& cns) const {
 
 const php::Class* AnalysisIndex::lookup_class(SString name) const {
   return folly::get_default(m_data->classes, name);
+}
+
+void AnalysisIndex::for_each_unit_func(
+  const php::Unit& unit,
+  std::function<void(const php::Func&)> f
+) const {
+  for (auto const func : unit.funcs) {
+    f(*m_data->funcs.at(func));
+  }
+}
+
+void AnalysisIndex::for_each_unit_func_mutable(
+  php::Unit& unit,
+  std::function<void(php::Func&)> f
+) {
+  for (auto const func : unit.funcs) {
+    f(*m_data->funcs.at(func));
+  }
+}
+
+void AnalysisIndex::for_each_unit_class(
+  const php::Unit& unit,
+  std::function<void(const php::Class&)> f
+) const {
+  for (auto const cls : unit.classes) {
+    f(*m_data->classes.at(cls));
+  }
+}
+
+void AnalysisIndex::for_each_unit_class_mutable(
+  php::Unit& unit,
+  std::function<void(php::Class&)> f
+) {
+  for (auto const cls : unit.classes) {
+    f(*m_data->classes.at(cls));
+  }
 }
 
 const php::Class&
@@ -24805,6 +24856,25 @@ PropState AnalysisIndex::lookup_private_statics(const php::Class& cls) const {
   );
 }
 
+PropState AnalysisIndex::lookup_public_statics(const php::Class& cls) const {
+  // Public static property tracking not yet implemented, so be
+  // conservative.
+  return make_unknown_propstate(
+    AnalysisIndexAdaptor { *this },
+    cls,
+    [&] (const php::Prop& prop) {
+      return
+        (prop.attrs & (AttrPublic|AttrProtected)) &&
+        (prop.attrs & AttrStatic);
+    }
+  );
+}
+
+Slot AnalysisIndex::lookup_iface_vtable_slot(const php::Class&) const {
+  // Not implemented yet
+  always_assert(false);
+}
+
 Index::ReturnType AnalysisIndex::lookup_return_type(MethodsInfo* methods,
                                                     res::Func rfunc) const {
   using R = Index::ReturnType;
@@ -25040,6 +25110,16 @@ AnalysisIndex::lookup_return_type_raw(const php::Func& f) const {
     },
     finfo.returnRefinements
   );
+}
+
+CompactVector<Type>
+AnalysisIndex::lookup_closure_use_vars(const php::Func& func,
+                                       bool) const {
+  // Not implemented yet, be conservative
+  assertx(func.isClosureBody);
+  auto const numUseVars = closure_num_use_vars(&func);
+  if (!numUseVars) return {};
+  return CompactVector<Type>(numUseVars, TCell);
 }
 
 bool AnalysisIndex::func_depends_on_arg(const php::Func& func,
@@ -26182,6 +26262,10 @@ bool AnalysisIndexAdaptor::set_in_type_cns(bool b) const {
 const php::Unit* AnalysisIndexAdaptor::lookup_func_unit(const php::Func& func) const {
   return &index.lookup_func_unit(func);
 }
+const php::Unit*
+AnalysisIndexAdaptor::lookup_func_original_unit(const php::Func& func) const {
+  return &index.lookup_func_original_unit(func);
+}
 const php::Unit* AnalysisIndexAdaptor::lookup_class_unit(const php::Class& cls) const {
   return &index.lookup_class_unit(cls);
 }
@@ -26203,6 +26287,31 @@ AnalysisIndexAdaptor::lookup_closures(const php::Class*) const {
 const hphp_fast_set<const php::Func*>*
 AnalysisIndexAdaptor::lookup_extra_methods(const php::Class*) const {
   UNIMPLEMENTED;
+}
+
+void AnalysisIndexAdaptor::for_each_unit_func(
+  const php::Unit& u,
+  std::function<void(const php::Func&)> f
+) const {
+  index.for_each_unit_func(u, std::move(f));
+}
+void AnalysisIndexAdaptor::for_each_unit_func_mutable(
+  php::Unit& u,
+  std::function<void(php::Func&)> f
+) {
+  index.for_each_unit_func_mutable(u, std::move(f));
+}
+void AnalysisIndexAdaptor::for_each_unit_class(
+  const php::Unit& u,
+  std::function<void(const php::Class&)> f
+) const {
+  index.for_each_unit_class(u, std::move(f));
+}
+void AnalysisIndexAdaptor::for_each_unit_class_mutable(
+  php::Unit& u,
+  std::function<void(php::Class&)> f
+) {
+  index.for_each_unit_class_mutable(u, std::move(f));
 }
 
 Optional<res::Class> AnalysisIndexAdaptor::resolve_class(SString n) const {
@@ -26303,8 +26412,8 @@ AnalysisIndexAdaptor::lookup_return_type_raw(const php::Func* f) const {
   return index.lookup_return_type_raw(*f);
 }
 CompactVector<Type>
-AnalysisIndexAdaptor::lookup_closure_use_vars(const php::Func*, bool) const {
-  UNIMPLEMENTED;
+AnalysisIndexAdaptor::lookup_closure_use_vars(const php::Func& f, bool m) const {
+  return index.lookup_closure_use_vars(f, m);
 }
 
 PropState AnalysisIndexAdaptor::lookup_private_props(const php::Class* cls,
@@ -26314,6 +26423,9 @@ PropState AnalysisIndexAdaptor::lookup_private_props(const php::Class* cls,
 PropState AnalysisIndexAdaptor::lookup_private_statics(const php::Class* cls,
                                                        bool) const {
   return index.lookup_private_statics(*cls);
+}
+PropState AnalysisIndexAdaptor::lookup_public_statics(const php::Class* cls) const {
+  return index.lookup_public_statics(*cls);
 }
 
 PropLookupResult AnalysisIndexAdaptor::lookup_static(Context,
@@ -26367,8 +26479,12 @@ AnalysisIndexAdaptor::merge_static_type(Context,
   );
 }
 
-bool AnalysisIndexAdaptor::using_class_dependencies() const {
-  return false;
+Slot AnalysisIndexAdaptor::lookup_iface_vtable_slot(const php::Class* c) const {
+  return index.lookup_iface_vtable_slot(*c);
+}
+
+bool AnalysisIndexAdaptor::tracking_public_sprops() const {
+  return index.tracking_public_sprops();
 }
 
 #undef UNIMPLEMENTED

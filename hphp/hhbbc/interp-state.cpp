@@ -159,7 +159,7 @@ CollectedInfo::CollectedInfo(const IIndex& index,
     , methods{ctx, cls}
     , clsCns{clsCns}
     , opts{fa ? opts | CollectionOpts::Optimizing : opts}
-    , publicSPropMutations{index.using_class_dependencies() && !fa}
+    , publicSPropMutations{index.tracking_public_sprops() && !fa}
 {
   if (fa) {
     unfoldableFuncs = fa->unfoldableFuncs;

@@ -78,7 +78,7 @@ std::vector<NameTy> sorted_prop_state(const PropState& ps) {
 }
 
 void dump_class_state(std::ostream& out,
-                      const Index& index,
+                      const IIndex& index,
                       const php::Class* c) {
   auto const clsName = c->name->toCppString();
 
@@ -93,7 +93,7 @@ void dump_class_state(std::ostream& out,
 
   if (is_closure(*c)) {
     auto const invoke = find_method(c, s_invoke.get());
-    auto const useVars = index.lookup_closure_use_vars(invoke);
+    auto const useVars = index.lookup_closure_use_vars(*invoke);
     for (auto i = size_t{0}; i < useVars.size(); ++i) {
       out << clsName << "->" << c->properties[i].name->data() << " :: "
           << show(useVars[i]) << '\n';
@@ -175,7 +175,7 @@ void dump_class_state(std::ostream& out,
 }
 
 void dump_func_state(std::ostream& out,
-                     const Index& index,
+                     const IIndex& index,
                      const php::Func& f) {
   auto const name = f.cls
     ? folly::sformat(
@@ -219,7 +219,7 @@ std::string debug_dump_to() {
 }
 
 void dump_representation(const std::string& dir,
-                         const Index& index,
+                         const IIndex& index,
                          const php::Unit& unit) {
   auto const rep_dir = fs::path{dir} / "representation";
   with_file(rep_dir, unit, [&] (std::ostream& out) {
@@ -228,7 +228,7 @@ void dump_representation(const std::string& dir,
 }
 
 void dump_index(const std::string& dir,
-                const Index& index,
+                const IIndex& index,
                 const php::Unit& unit) {
   if (!*unit.filename->data()) {
     // The native systemlibs: for now just skip.
@@ -287,7 +287,7 @@ void dump_index(const std::string& dir,
 
 void state_after(const char* when,
                  const php::Unit& u,
-                 const Index& index) {
+                 const IIndex& index) {
   TRACE_SET_MOD(hhbbc)
   auto const UNUSED bump = trace_bump(u, Trace::hhbbc);
   FTRACE(4, "{:-^70}\n{}{:-^70}\n", when, show(u, index), "");

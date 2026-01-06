@@ -61,13 +61,13 @@ const StaticString s_invoke("__invoke");
 //////////////////////////////////////////////////////////////////////
 
 struct EmitUnitState {
-  explicit EmitUnitState(const Index& index, const php::Unit* unit) :
+  explicit EmitUnitState(const IIndex& index, const php::Unit* unit) :
       index(index), unit(unit) {}
 
   /*
    * Access to the Index for this program.
    */
-  const Index& index;
+  const IIndex& index;
 
   /*
    * Access to the unit we're emitting
@@ -1136,7 +1136,8 @@ void emit_class(EmitUnitState& state, UnitEmitter& ue, PreClassEmitter* pce,
   CompactVector<Type> useVars;
   if (is_closure(cls)) {
     auto f = find_method(&cls, s_invoke.get());
-    useVars = state.index.lookup_closure_use_vars(f, true);
+    always_assert(f);
+    useVars = state.index.lookup_closure_use_vars(*f, true);
   }
   auto uvIt = useVars.begin();
 
@@ -1250,7 +1251,7 @@ void emit_module(UnitEmitter& ue, const php::Module& module) {
 
 }
 
-std::unique_ptr<UnitEmitter> emit_unit(Index& index, php::Unit& unit) {
+std::unique_ptr<UnitEmitter> emit_unit(IIndex& index, php::Unit& unit) {
   Trace::Bump bumper{
     Trace::hhbbc_emit, kSystemLibBump, is_systemlib_part(unit)
   };

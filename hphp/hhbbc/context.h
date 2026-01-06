@@ -30,7 +30,7 @@ namespace HPHP::HHBBC {
 struct CollectedInfo;
 struct ContextHash;
 struct FuncAnalysis;
-struct Index;
+struct IIndex;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -109,12 +109,12 @@ struct AnalysisContext {
  * The WideFunc in this struct will always match the func in ainfo.ctx.
  */
 struct VisitContext {
-  const Index& index;
+  const IIndex& index;
   const FuncAnalysis& ainfo;
   CollectedInfo& collect;
   php::WideFunc& func;
 
-  VisitContext(const Index& index, const FuncAnalysis& ainfo,
+  VisitContext(const IIndex& index, const FuncAnalysis& ainfo,
                CollectedInfo& collect, php::WideFunc& func);
 };
 

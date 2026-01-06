@@ -400,8 +400,10 @@ template<typename F>
 void final_pass(Index& index,
                 const StatsHolder& stats,
                 F emitUnit) {
-  trace_time final_pass("final pass", index.sample());
+  trace_time _{"final pass"};
+  _.ignore_client_stats();
   index.freeze();
+  IndexAdaptor adaptor{ index };
   auto const dump_dir = debug_dump_to();
   parallel::for_each(
     index.program().units,
@@ -413,15 +415,14 @@ void final_pass(Index& index,
         // This const_cast is safe since no two threads update the same Func.
         auto func = php::WideFunc::mut(const_cast<php::Func*>(context.func));
         auto const ctx = AnalysisContext { context.unit, func, context.cls };
-        IndexAdaptor adaptor{ index };
-        optimize_func(index, analyze_func(adaptor, ctx, CollectionOpts{}), func);
+        optimize_func(adaptor, analyze_func(adaptor, ctx, CollectionOpts{}), func);
       }
-      state_after("optimize", *unit, index);
+      state_after("optimize", *unit, adaptor);
       if (!dump_dir.empty()) {
         if (Trace::moduleEnabledRelease(Trace::hhbbc_dump, 2)) {
-          dump_representation(dump_dir, index, *unit);
+          dump_representation(dump_dir, adaptor, *unit);
         }
-        dump_index(dump_dir, index, *unit);
+        dump_index(dump_dir, adaptor, *unit);
       }
       collect_stats(stats, index, *unit);
       emitUnit(*unit);
@@ -1280,7 +1281,8 @@ void whole_program(WholeProgramInput inputs,
 
   auto stats = allocate_stats();
   auto const emitUnit = [&] (php::Unit& unit) {
-    auto ue = emit_unit(index, unit);
+    IndexAdaptor adaptor{ index };
+    auto ue = emit_unit(adaptor, unit);
     if (Cfg::Eval::AbortBuildOnVerifyError && !ue->check(false)) {
       fprintf(
         stderr,

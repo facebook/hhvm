@@ -339,9 +339,9 @@ struct LocalRemappingIndex {
 //////////////////////////////////////////////////////////////////////
 
 struct DceState {
-  explicit DceState(const Index& index, const FuncAnalysis& ainfo) :
+  explicit DceState(const IIndex& index, const FuncAnalysis& ainfo) :
       index(index), ainfo(ainfo) {}
-  const Index& index;
+  const IIndex& index;
   const FuncAnalysis& ainfo;
   /*
    * Used to accumulate a set of blk/stack-slot pairs that
@@ -2713,15 +2713,14 @@ void local_dce(VisitContext& visit, BlockId bid, const State& stateIn) {
 
 //////////////////////////////////////////////////////////////////////
 
-bool global_dce(const Index& index, const FuncAnalysis& ai,
+bool global_dce(const IIndex& index, const FuncAnalysis& ai,
                 php::WideFunc& func) {
   auto rpoId = [&] (BlockId blk) {
     return ai.bdata[blk].rpoId;
   };
 
-  IndexAdaptor adaptor{index};
   auto collect = CollectedInfo{
-    adaptor,
+    index,
     ai.ctx,
     nullptr,
     CollectionOpts{},

@@ -48,7 +48,7 @@ namespace HHBBC {
 
 //////////////////////////////////////////////////////////////////////
 
-struct Index;
+struct IIndex;
 struct ClassInfo2;
 
 namespace php {
@@ -793,16 +793,16 @@ std::string show(const Class&);
 std::string show(const Unit&,
                  const std::vector<const Class*>&,
                  const std::vector<const Func*>&);
-std::string show(const Unit&, const Index&);
+std::string show(const Unit&, const IIndex&);
 std::string show(const Unit&, const Program&);
-std::string show(const Program&, const Index&);
+std::string show(const Program&, const IIndex&);
 std::string local_string(const Func&, LocalId);
 
 //////////////////////////////////////////////////////////////////////
 
 bool check(const Func&);
 bool check(const Class&, bool checkMeths = true);
-bool check(const Unit&, const Index&);
+bool check(const Unit&, const IIndex&);
 bool check(const Program&);
 
 //////////////////////////////////////////////////////////////////////

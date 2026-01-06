@@ -396,7 +396,7 @@ std::string show(const Unit& unit,
   return ret;
 }
 
-std::string show(const Unit& unit, const Index& index) {
+std::string show(const Unit& unit, const IIndex& index) {
   std::vector<const php::Class*> classes;
   std::vector<const php::Func*> funcs;
   index.for_each_unit_class(
@@ -438,7 +438,7 @@ std::string show(const Unit& unit, const Program& p) {
   return show(unit, classes, funcs);
 }
 
-std::string show(const Program& p, const Index& index) {
+std::string show(const Program& p, const IIndex& index) {
   using namespace folly::gen;
   return from(p.units)
     | map([&] (const std::unique_ptr<php::Unit>& u) { return show(*u, index); })

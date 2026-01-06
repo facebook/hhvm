@@ -206,7 +206,7 @@ bool check(const php::Class& c, bool checkMeths) {
   return true;
 }
 
-bool check(const php::Unit& u, const Index& index) {
+bool check(const php::Unit& u, const IIndex& index) {
   index.for_each_unit_class(
     u, [&] (const php::Class& c) { assertx(check(c)); }
   );

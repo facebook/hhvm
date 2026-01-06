@@ -588,7 +588,7 @@ bool control_flow_opts(const FuncAnalysis& ainfo, php::WideFunc& func) {
   return anyChanges;
 }
 
-void split_critical_edges(const Index& index, FuncAnalysis& ainfo,
+void split_critical_edges(const IIndex& index, FuncAnalysis& ainfo,
                           php::WideFunc& func) {
   // Changed tracks if we need to recompute RPO.
   auto changed = false;
@@ -619,9 +619,8 @@ void split_critical_edges(const Index& index, FuncAnalysis& ainfo,
     });
     assertx(replacedDstTarget);
 
-    IndexAdaptor adaptor{index};
     auto collect = CollectedInfo {
-      adaptor, ainfo.ctx, nullptr,
+      index, ainfo.ctx, nullptr,
       CollectionOpts{}, nullptr, &ainfo
     };
     auto const ctx = AnalysisContext { ainfo.ctx.unit, func, ainfo.ctx.cls };

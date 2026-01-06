@@ -49,7 +49,7 @@ namespace HPHP::HHBBC {
 
 //////////////////////////////////////////////////////////////////////
 
-VisitContext::VisitContext(const Index& index, const FuncAnalysis& ainfo,
+VisitContext::VisitContext(const IIndex& index, const FuncAnalysis& ainfo,
                            CollectedInfo& collect, php::WideFunc& func)
     : index(index), ainfo(ainfo), collect(collect), func(func) {
   assertx(ainfo.ctx.func == func);
@@ -311,8 +311,7 @@ void insert_assertions(VisitContext& visit, BlockId bid, State state) {
   std::vector<uint8_t> obviousStackOutputs(state.stack.size(), false);
 
   auto fallthrough = cblk->fallthrough;
-  IndexAdaptor adaptor{ index };
-  auto interp = Interp { adaptor, ctx, visit.collect, bid, cblk.get(), state };
+  auto interp = Interp { index, ctx, visit.collect, bid, cblk.get(), state };
 
   for (auto& op : cblk->hhbcs) {
     FTRACE(2, "  == {}\n", show(*func, op));
@@ -457,8 +456,7 @@ struct OptimizeIterState {
     auto const& ainfo = visit.ainfo;
     auto const blk = func.blocks()[bid].get();
     auto const ctx = AnalysisContext { ainfo.ctx.unit, func, ainfo.ctx.cls };
-    IndexAdaptor adaptor{ visit.index };
-    auto interp = Interp { adaptor, ctx, visit.collect, bid, blk, state };
+    auto interp = Interp { visit.index, ctx, visit.collect, bid, blk, state };
     for (uint32_t opIdx = 0; opIdx < blk->hhbcs.size(); ++opIdx) {
       // If we've already determined that nothing is eligible, we can just stop.
       if (!eligible.any()) break;
@@ -695,15 +693,14 @@ void optimize_iterators(VisitContext& visit) {
 
 //////////////////////////////////////////////////////////////////////
 
-void do_optimize(const Index& index, FuncAnalysis&& ainfo,
+void do_optimize(const IIndex& index, FuncAnalysis&& ainfo,
                  php::WideFunc& func) {
   FTRACE(2, "{:-^70} {}\n", "Optimize Func", func->name);
 
   bool again;
   Optional<CollectedInfo> collect;
   Optional<VisitContext> visit;
-  IndexAdaptor adaptor{ index };
-  collect.emplace(adaptor, ainfo.ctx, nullptr, CollectionOpts{}, nullptr, &ainfo);
+  collect.emplace(index, ainfo.ctx, nullptr, CollectionOpts{}, nullptr, &ainfo);
   visit.emplace(index, ainfo, *collect, func);
 
   update_bytecode(func, std::move(ainfo.blockUpdates), &ainfo);
@@ -731,10 +728,10 @@ void do_optimize(const Index& index, FuncAnalysis&& ainfo,
      * anything else.
      */
     auto const ctx = AnalysisContext { ainfo.ctx.unit, func, ainfo.ctx.cls };
-    ainfo = analyze_func(adaptor, ctx, CollectionOpts{});
+    ainfo = analyze_func(index, ctx, CollectionOpts{});
     update_bytecode(func, std::move(ainfo.blockUpdates), &ainfo);
     collect.emplace(
-      adaptor, ainfo.ctx, nullptr, CollectionOpts{}, nullptr, &ainfo
+      index, ainfo.ctx, nullptr, CollectionOpts{}, nullptr, &ainfo
     );
     visit.emplace(index, ainfo, *collect, func);
 
@@ -841,7 +838,7 @@ Bytecode gen_constant(const TypedValue& cell) {
   not_reached();
 }
 
-void optimize_func(const Index& index, FuncAnalysis&& ainfo,
+void optimize_func(const IIndex& index, FuncAnalysis&& ainfo,
                    php::WideFunc& func) {
   SCOPE_ASSERT_DETAIL("optimize_func") {
     return "Optimizing:" + show(ainfo.ctx);

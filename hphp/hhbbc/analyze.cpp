@@ -144,7 +144,7 @@ Optional<State> entry_state(const IIndex& index, CollectedInfo& collect,
 
   // Closures have use vars, we need to look up their types from the index.
   auto const useVars = ctx.func->isClosureBody
-    ? index.lookup_closure_use_vars(ctx.func)
+    ? index.lookup_closure_use_vars(*ctx.func)
     : CompactVector<Type>{};
 
   /*
@@ -1515,7 +1515,7 @@ void PropagatedStates::next() {
 }
 
 PropagatedStates
-locally_propagated_states(const Index& index,
+locally_propagated_states(const IIndex& index,
                           const AnalysisContext& ctx,
                           CollectedInfo& collect,
                           BlockId bid,
@@ -1529,8 +1529,7 @@ locally_propagated_states(const Index& index,
   StateMutationUndo undos;
   undos.events.reserve((blk->hhbcs.size() + 1) * 4);
 
-  IndexAdaptor adaptor{index};
-  auto interp = Interp { adaptor, ctx, collect, bid, blk, state, &undos };
+  auto interp = Interp { index, ctx, collect, bid, blk, state, &undos };
 
   for (auto const& op : blk->hhbcs) {
     auto const markIdx = undos.events.size();
@@ -1552,7 +1551,7 @@ locally_propagated_states(const Index& index,
   return PropagatedStates{std::move(state), std::move(undos)};
 }
 
-State locally_propagated_bid_state(const Index& index,
+State locally_propagated_bid_state(const IIndex& index,
                                    const AnalysisContext& ctx,
                                    CollectedInfo& collect,
                                    BlockId bid,
@@ -1563,8 +1562,7 @@ State locally_propagated_bid_state(const Index& index,
 
   auto const originalState = state;
   auto const blk = ctx.func.blocks()[bid].get();
-  IndexAdaptor adaptor{index};
-  auto interp = Interp { adaptor, ctx, collect, bid, blk, state };
+  auto interp = Interp { index, ctx, collect, bid, blk, state };
 
   State ret{};
   auto const propagate = [&] (BlockId target, const State* st) {

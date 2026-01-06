@@ -21,7 +21,7 @@ namespace HPHP::HHBBC {
 
 //////////////////////////////////////////////////////////////////////
 
-struct Index;
+struct IIndex;
 struct FuncAnalysis;
 struct Bytecode;
 struct BlockUpdateInfo;
@@ -39,7 +39,7 @@ using BlockUpdates = CompactVector<std::pair<BlockId, CompressedBlockUpdate>>;
  * php::Func, and may renumber the php::Func's locals, but won't update
  * any of the func's other metadata.
  */
-void optimize_func(const Index&, FuncAnalysis&&, php::WideFunc&);
+void optimize_func(const IIndex&, FuncAnalysis&&, php::WideFunc&);
 
 enum class UpdateBCResult {
   None, // No changes

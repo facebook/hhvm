@@ -19,7 +19,7 @@
 
 namespace HPHP::HHBBC {
 
-struct Index;
+struct IIndex;
 struct FuncAnalysis;
 
 //////////////////////////////////////////////////////////////////////
@@ -61,9 +61,8 @@ bool control_flow_opts(const FuncAnalysis&, php::WideFunc& func);
  * Critical edge blocks that remain a single nop will get folded away by
  * control_flow_opts.
  */
-void split_critical_edges(const Index&, FuncAnalysis&, php::WideFunc& func);
+void split_critical_edges(const IIndex&, FuncAnalysis&, php::WideFunc& func);
 
 //////////////////////////////////////////////////////////////////////
 
 }
-

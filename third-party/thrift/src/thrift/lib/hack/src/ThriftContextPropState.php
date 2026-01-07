@@ -614,17 +614,15 @@ final class ThriftContextPropState {
     return null;
   }
 
-  public function getBreadthDepthProduct()[]: ?int {
+  public function getBreadth()[]: ?int {
     $estimate = $this->getTraceContext()?->tracing_context?->estimate;
     if ($estimate is nonnull) {
-      return $estimate->breadthDepthProduct;
+      return $estimate->breadth;
     }
     return null;
   }
 
-  public function setBreadthDepthProduct(
-    int $breadth_depth_product,
-  )[write_props]: void {
+  public function setBreadth(int $breadth)[write_props]: void {
     $this->storage->baggage =
       $this->storage->baggage ?? ContextProp\Baggage::withDefaultValues();
     $baggage = $this->storage->baggage as nonnull;
@@ -636,7 +634,7 @@ final class ThriftContextPropState {
     $tracing_context = $trace_context->tracing_context;
     $tracing_context->estimate = $tracing_context->estimate ??
       ContextProp\TraceSizeEstimation::withDefaultValues();
-    $tracing_context->estimate->breadthDepthProduct = $breadth_depth_product;
+    $tracing_context->estimate->breadth = $breadth;
     $this->dirty();
   }
 

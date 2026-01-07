@@ -746,18 +746,18 @@ final class ThriftContextPropStateTest extends WWWTest {
     expect($tcps->getRequestIdEncoded())->toEqual("0");
   }
 
-  public function testTraceSizeEstimationBreadthDepthProduct(): void {
+  public function testTraceSizeEstimationBreadth(): void {
     $tcps = ThriftContextPropState::get();
     $tcps->clear();
-    expect($tcps->getBreadthDepthProduct())->toBeNull();
+    expect($tcps->getBreadth())->toBeNull();
 
     // Set breadth depth product
-    $tcps->setBreadthDepthProduct(100);
-    expect($tcps->getBreadthDepthProduct())->toEqual(100);
+    $tcps->setBreadth(100);
+    expect($tcps->getBreadth())->toEqual(100);
 
     // Override existing value
-    $tcps->setBreadthDepthProduct(200);
-    expect($tcps->getBreadthDepthProduct())->toEqual(200);
+    $tcps->setBreadth(200);
+    expect($tcps->getBreadth())->toEqual(200);
 
     // Verify it's properly nested in the baggage structure
     expect($tcps->getBaggage())->toNotBeNull();
@@ -793,17 +793,17 @@ final class ThriftContextPropStateTest extends WWWTest {
     $tcps->clear();
 
     // Set both fields
-    $tcps->setBreadthDepthProduct(500);
+    $tcps->setBreadth(500);
     $tcps->setDepth(25);
 
     // Verify both fields are set correctly
-    expect($tcps->getBreadthDepthProduct())->toEqual(500);
+    expect($tcps->getBreadth())->toEqual(500);
     expect($tcps->getDepth())->toEqual(25);
 
     // Verify the estimate struct exists
     $estimate = $tcps->getTraceContext()?->tracing_context?->estimate;
     expect($estimate)->toNotBeNull();
-    expect($estimate?->breadthDepthProduct)->toEqual(500);
+    expect($estimate?->breadth)->toEqual(500);
     expect($estimate?->depth)->toEqual(25);
   }
 
@@ -815,7 +815,7 @@ final class ThriftContextPropStateTest extends WWWTest {
     $serialized_before = $tcps->getSerialized();
 
     // Set breadth depth product, which should dirty the cache
-    $tcps->setBreadthDepthProduct(300);
+    $tcps->setBreadth(300);
 
     // Serialize the state again
     $serialized_after = $tcps->getSerialized();

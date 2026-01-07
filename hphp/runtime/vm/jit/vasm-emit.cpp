@@ -20,7 +20,6 @@
 #include "hphp/runtime/vm/jit/asm-info.h"
 #include "hphp/runtime/vm/jit/cg-meta.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
-#include "hphp/runtime/vm/jit/outlined-sequence-selector.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/relocation.h"
 #include "hphp/runtime/vm/jit/tc.h"
@@ -196,7 +195,7 @@ void emitVunit(Vunit& vunit, const IRUnit* unit,
     Cfg::Jit::TraceUploadFunctions.count(func->fullName()->toCppString());
 
   Optional<AsmInfo> optAI;
-  if (unit && (Cfg::Jit::BuildOutliningHashes || uploadUnit ||
+  if (unit && (uploadUnit ||
                dumpIREnabled(unit->context().kind))) {
     optAI.emplace(*unit);
   }
@@ -236,9 +235,6 @@ void emitVunit(Vunit& vunit, const IRUnit* unit,
     }
     printUnit(kCodeGenLevel, *unit, " after code gen ",
              ai, nullptr, annotations);
-    if (Cfg::Jit::BuildOutliningHashes) {
-      recordIR(*unit, ai);
-    }
     if (uploadUnit) {
       BlobStore::Key k;
       std::ostringstream str;

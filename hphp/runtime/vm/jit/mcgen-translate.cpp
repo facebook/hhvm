@@ -21,7 +21,6 @@
 
 #include "hphp/runtime/vm/jit/func-order.h"
 #include "hphp/runtime/vm/jit/inlining-decider.h"
-#include "hphp/runtime/vm/jit/outlined-sequence-selector.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/prof-data-serialize.h"
 #include "hphp/runtime/vm/jit/stack-offsets.h"
@@ -482,13 +481,6 @@ void retranslateAll(bool skipSerialize) {
           createSrcRecs(func);
           enqueueRetranslateOptRequest(&jobs.back());
         }
-      }
-      if (Cfg::Jit::BuildOutliningHashes) {
-        auto const dispatcher = s_dispatcher.load(std::memory_order_acquire);
-        if (dispatcher) {
-          dispatcher->waitEmpty(false);
-        }
-        buildOptimizedHashes();
       }
     };
     runParallelRetranslate();

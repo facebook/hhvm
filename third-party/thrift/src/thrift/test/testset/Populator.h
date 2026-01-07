@@ -16,9 +16,7 @@
 
 #pragma once
 #include <thrift/lib/cpp2/reflection/populator.h>
-#include <thrift/lib/cpp2/reflection/reflection.h>
 #include <thrift/test/testset/Testing.h>
-#include <thrift/test/testset/gen-cpp2/testset_fatal_types.h>
 
 namespace apache::thrift::test {
 namespace detail {

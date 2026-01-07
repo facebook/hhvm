@@ -16,6 +16,10 @@
 
 include "thrift/annotation/python.thrift"
 include "thrift/annotation/scope.thrift"
+include "thrift/annotation/thrift.thrift"
+
+@thrift.AllowLegacyMissingUris
+package;
 
 @python.Adapter{name = "my.Adapter", typeHint = "my.AdaptedType[]"}
 @scope.Transitive

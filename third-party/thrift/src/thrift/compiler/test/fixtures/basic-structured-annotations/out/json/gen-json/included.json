@@ -1,9 +1,14 @@
 {
   "__fbthrift": {"@generated": 0},
   "thrift_module" : "included",
+  "includes": {
+    "thrift" : {
+      "path" : "thrift/annotation/thrift.thrift"
+    }
+  },
   "structs" : {
     "structured_annotation_included" : {
-      "lineno" : 17,
+      "lineno" : 22,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -14,11 +19,11 @@
           "default_value" : "cacbcac",
           "source_range" : {
             "begin" : {
-              "line" : 18,
+              "line" : 23,
               "column" : 3
             },
             "end" : {
-              "line" : 18,
+              "line" : 23,
               "column" : 30
             }
           }
@@ -26,11 +31,11 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 17,
+          "line" : 22,
           "column" : 1
         },
         "end" : {
-          "line" : 19,
+          "line" : 24,
           "column" : 2
         }
       }

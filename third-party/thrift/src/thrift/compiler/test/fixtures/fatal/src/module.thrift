@@ -27,6 +27,9 @@ include "reflection_dep_C.thrift"
 include "thrift/annotation/cpp.thrift"
 include "thrift/annotation/thrift.thrift"
 
+@thrift.AllowLegacyMissingUris
+package;
+
 cpp_include "thrift/test/fatal_custom_types.h"
 
 enum enum1 {

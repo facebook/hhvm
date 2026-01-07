@@ -1109,22 +1109,22 @@ template <> struct TEnumTraits<::cpp2::OrderableUnion::Type> {
 namespace apache::thrift::detail {
 template <> struct TSchemaAssociation<::cpp2::NonOrderableStruct, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = -5881391171047860882;
-  static constexpr ::std::string_view definitionKey = {"\x4b\x5f\xa5\x14\xc3\x4a\x6c\xee\x10\x93\xc3\x6e\x3e\x65\xcc\xe8", 16};
+  static constexpr int64_t programId = -2903219379507000797;
+  static constexpr ::std::string_view definitionKey = {"\xcb\xc6\x12\xc8\x61\x29\xa7\xbb\xd1\x51\x93\xa4\x62\x77\x9c\xfc", 16};
 };
 template <> struct TSchemaAssociation<::cpp2::NonOrderableUnion, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = -5881391171047860882;
-  static constexpr ::std::string_view definitionKey = {"\x81\x30\x1f\xd1\x03\xcb\xd4\xe6\x0b\x73\x51\x80\x39\xf0\xdb\xdf", 16};
+  static constexpr int64_t programId = -2903219379507000797;
+  static constexpr ::std::string_view definitionKey = {"\x3d\xad\x11\x25\x27\x38\xba\x17\x10\xcb\x6f\x70\xc2\xf4\xc0\x2d", 16};
 };
 template <> struct TSchemaAssociation<::cpp2::OrderableStruct, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = -5881391171047860882;
-  static constexpr ::std::string_view definitionKey = {"\xea\x26\xa3\xd5\xd7\xee\xac\xb9\x61\xe2\x09\x90\x7d\x66\x11\x0a", 16};
+  static constexpr int64_t programId = -2903219379507000797;
+  static constexpr ::std::string_view definitionKey = {"\xa0\xc7\x8a\x53\x51\xbe\x88\x48\xdd\xde\x40\xf9\x47\x1d\x9b\xa6", 16};
 };
 template <> struct TSchemaAssociation<::cpp2::OrderableUnion, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = -5881391171047860882;
-  static constexpr ::std::string_view definitionKey = {"\xbb\x74\xb1\x57\x7e\xd5\x5f\xb8\xbd\x52\x5c\x3b\x16\xf3\x14\x71", 16};
+  static constexpr int64_t programId = -2903219379507000797;
+  static constexpr ::std::string_view definitionKey = {"\xd4\xfc\x78\x42\x71\x7a\xc2\x41\x05\x2e\xd8\x5d\xb7\x42\x92\xcf", 16};
 };
 } // namespace apache::thrift::detail

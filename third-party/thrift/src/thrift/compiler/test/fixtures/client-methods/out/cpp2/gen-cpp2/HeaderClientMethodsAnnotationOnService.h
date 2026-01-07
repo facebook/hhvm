@@ -88,8 +88,8 @@ class ServiceHandler<::cpp2::HeaderClientMethodsAnnotationOnService> : public ap
 namespace detail {
 template <> struct TSchemaAssociation<::cpp2::HeaderClientMethodsAnnotationOnService, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = 8289997534464861998;
-  static constexpr ::std::string_view definitionKey = {"\xd3\x04\x79\x51\xe1\x0e\xe4\x64\x58\xde\xf0\x95\x04\x48\xb9\xb4", 16};
+  static constexpr int64_t programId = -2343470203340770696;
+  static constexpr ::std::string_view definitionKey = {"\xe9\x8f\xa7\x97\xb7\x9c\x2b\xfb\x8b\x8d\x8b\xfd\xd1\x95\x38\xe3", 16};
 };
 }
 } // namespace apache::thrift

@@ -2751,27 +2751,27 @@ unsigned long NotEmptiableStruct::read(Protocol_* iprot) {
 namespace apache::thrift::detail {
 template <> struct TSchemaAssociation<::apache::thrift::test::MyStruct, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = 6049169901077872319;
-  static constexpr ::std::string_view definitionKey = {"\x0c\x81\xfa\x29\x42\xfe\xed\x75\xcd\x9d\xbf\x5a\x19\xb3\x1f\x20", 16};
+  static constexpr int64_t programId = 5950249399056504002;
+  static constexpr ::std::string_view definitionKey = {"\xd6\x92\x6b\x1a\x4c\x93\xec\x6e\x57\xcf\xb1\x39\x84\x76\x98\x2f", 16};
 };
 template <> struct TSchemaAssociation<::apache::thrift::test::EmptiableStruct, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = 6049169901077872319;
-  static constexpr ::std::string_view definitionKey = {"\xf8\xf2\x93\xab\x7f\x76\x63\xd3\xf4\x2c\x0d\x3a\x81\xc2\x03\x6d", 16};
+  static constexpr int64_t programId = 5950249399056504002;
+  static constexpr ::std::string_view definitionKey = {"\x3f\xf8\xca\x9c\x42\x2f\xa4\xd0\xff\x3f\x08\xd8\x68\x48\x0d\x70", 16};
 };
 template <> struct TSchemaAssociation<::apache::thrift::test::EmptiableTerseStruct, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = 6049169901077872319;
-  static constexpr ::std::string_view definitionKey = {"\x7e\xe5\xa5\xfb\xf3\x4a\x18\x2e\x08\xd9\x1f\xbf\x17\x65\xf5\xe2", 16};
+  static constexpr int64_t programId = 5950249399056504002;
+  static constexpr ::std::string_view definitionKey = {"\xb6\x32\x71\x49\x7b\x6b\x1c\x02\x04\xff\x1e\xcc\xd9\xb6\xa4\x99", 16};
 };
 template <> struct TSchemaAssociation<::apache::thrift::test::NotEmptiableStruct, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = 6049169901077872319;
-  static constexpr ::std::string_view definitionKey = {"\x0e\xa2\xd4\xbb\x49\x7d\xe0\xd0\xa0\x75\xb7\x81\xe6\x59\x63\x85", 16};
+  static constexpr int64_t programId = 5950249399056504002;
+  static constexpr ::std::string_view definitionKey = {"\xb9\xb5\x6a\xfd\x05\x99\xa3\x94\xb4\xfa\x74\x39\x58\x72\xe8\x23", 16};
 };
 template <> struct TSchemaAssociation<::apache::thrift::test::MyEnum, true> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = 6049169901077872319;
-  static constexpr ::std::string_view definitionKey = {"\xc2\xad\xcb\xb8\xa7\x6d\x80\xe3\x1d\x95\xaa\xb0\xd3\x48\x81\x53", 16};
+  static constexpr int64_t programId = 5950249399056504002;
+  static constexpr ::std::string_view definitionKey = {"\xa8\xda\xfc\xb5\xf8\x7b\xf4\xd0\x13\x0d\xe7\x21\x82\x3b\x38\xcc", 16};
 };
 } // namespace apache::thrift::detail

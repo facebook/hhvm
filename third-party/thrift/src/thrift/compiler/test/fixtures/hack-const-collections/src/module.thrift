@@ -16,6 +16,9 @@
 
 include "thrift/annotation/thrift.thrift"
 
+@thrift.AllowLegacyMissingUris
+package;
+
 struct Foo {
   1: list<string> a;
   2: optional map<string, list<set<i32>>> b;

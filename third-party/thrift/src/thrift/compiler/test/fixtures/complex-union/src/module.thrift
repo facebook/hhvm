@@ -17,6 +17,10 @@
 namespace java.swift test.fixtures.complex_union
 
 include "thrift/annotation/cpp.thrift"
+include "thrift/annotation/thrift.thrift"
+
+@thrift.AllowLegacyMissingUris
+package;
 
 typedef map<i16, string> containerTypedef
 

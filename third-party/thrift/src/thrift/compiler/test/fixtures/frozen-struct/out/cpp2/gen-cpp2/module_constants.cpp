@@ -16,13 +16,13 @@ namespace some::ns {
 namespace module_constants {
 
 
-::std::string_view _fbthrift_schema_4dd995b4249eaff4() {
+::std::string_view _fbthrift_schema_12d7a2f34d05ca7() {
   return "";
 }
-::folly::Range<const ::std::string_view*> _fbthrift_schema_4dd995b4249eaff4_includes() {
+::folly::Range<const ::std::string_view*> _fbthrift_schema_12d7a2f34d05ca7_includes() {
   return {};
 }
-::folly::Range<const ::std::string_view*> _fbthrift_schema_4dd995b4249eaff4_uris() {
+::folly::Range<const ::std::string_view*> _fbthrift_schema_12d7a2f34d05ca7_uris() {
   return {};
 }
 

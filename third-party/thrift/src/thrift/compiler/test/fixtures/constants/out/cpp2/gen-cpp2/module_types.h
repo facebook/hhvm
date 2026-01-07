@@ -2623,57 +2623,57 @@ template <> struct TEnumTraits<::cpp2::union2::Type> {
 namespace apache::thrift::detail {
 template <> struct TSchemaAssociation<::cpp2::Internship, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = -1124688000350795336;
-  static constexpr ::std::string_view definitionKey = {"\x21\x2c\xd1\x37\x31\x46\x76\x00\xe0\x83\x03\x3b\x02\x43\xfe\x65", 16};
+  static constexpr int64_t programId = -7371383660911263142;
+  static constexpr ::std::string_view definitionKey = {"\xe1\xdc\x8f\xd0\x31\x8d\x17\xf7\x87\xcf\xc8\x6f\x14\xdc\x21\xd6", 16};
 };
 template <> struct TSchemaAssociation<::cpp2::Range, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = -1124688000350795336;
-  static constexpr ::std::string_view definitionKey = {"\x73\x04\xe7\x3e\x97\x54\x27\x10\x24\xba\xa8\x0a\xaa\xe7\x61\x2c", 16};
+  static constexpr int64_t programId = -7371383660911263142;
+  static constexpr ::std::string_view definitionKey = {"\xd1\x34\x17\x0c\x57\x4a\x07\xb5\x50\xbd\x8e\xd8\x36\xb4\xe4\xe9", 16};
 };
 template <> struct TSchemaAssociation<::cpp2::struct1, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = -1124688000350795336;
-  static constexpr ::std::string_view definitionKey = {"\xdc\x1a\xf9\x3b\x48\x8a\xfe\x43\xbb\x74\x48\x32\x1b\x56\xe9\x7b", 16};
+  static constexpr int64_t programId = -7371383660911263142;
+  static constexpr ::std::string_view definitionKey = {"\x36\xfc\xb7\xf0\x65\x36\x91\x8f\x63\xde\xdd\x9b\xb7\x0e\x15\x66", 16};
 };
 template <> struct TSchemaAssociation<::cpp2::struct2, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = -1124688000350795336;
-  static constexpr ::std::string_view definitionKey = {"\xa1\x59\x73\x54\xd4\xde\x12\xe6\xb5\x52\x18\x9c\xf7\xe4\x6c\x65", 16};
+  static constexpr int64_t programId = -7371383660911263142;
+  static constexpr ::std::string_view definitionKey = {"\x59\xcf\x42\xfa\xfb\xaf\x1d\x72\x48\x77\x0e\x51\x42\xb4\xc2\xc6", 16};
 };
 template <> struct TSchemaAssociation<::cpp2::struct3, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = -1124688000350795336;
-  static constexpr ::std::string_view definitionKey = {"\x55\x54\x91\x23\xe3\xdf\x7c\x5d\x0d\xf3\x0d\x20\x60\xfd\xa3\x4f", 16};
+  static constexpr int64_t programId = -7371383660911263142;
+  static constexpr ::std::string_view definitionKey = {"\xbb\xad\x11\xaf\xcc\x3a\x7e\x6a\x9a\x64\x97\xe2\xb1\xc8\x61\x7e", 16};
 };
 template <> struct TSchemaAssociation<::cpp2::struct4, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = -1124688000350795336;
-  static constexpr ::std::string_view definitionKey = {"\x3d\xfe\xb4\xb8\x96\x5f\x55\x6e\xe9\xa8\xc3\x9d\x12\x7e\xcf\xd5", 16};
+  static constexpr int64_t programId = -7371383660911263142;
+  static constexpr ::std::string_view definitionKey = {"\x65\x0b\x57\x11\x55\xe2\xb2\x3f\x20\xdb\x37\x8f\xaf\xf6\xf0\x4f", 16};
 };
 template <> struct TSchemaAssociation<::cpp2::union1, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = -1124688000350795336;
-  static constexpr ::std::string_view definitionKey = {"\xff\x81\x79\x95\x31\x7b\xea\x8e\x03\x15\x8c\xc6\x59\x96\x47\x1f", 16};
+  static constexpr int64_t programId = -7371383660911263142;
+  static constexpr ::std::string_view definitionKey = {"\xe7\x31\x5c\x02\x00\x79\x32\x67\x32\x87\xf2\xe9\xe4\x58\x38\x72", 16};
 };
 template <> struct TSchemaAssociation<::cpp2::union2, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = -1124688000350795336;
-  static constexpr ::std::string_view definitionKey = {"\x6b\xbd\xa8\x17\x39\x02\x81\x43\x65\xc1\x27\x14\x84\x36\x0d\x9b", 16};
+  static constexpr int64_t programId = -7371383660911263142;
+  static constexpr ::std::string_view definitionKey = {"\xbb\xfe\xe9\xfe\x96\x59\x89\x6b\x12\xe1\xef\x5d\xf5\x8a\xdc\xd8", 16};
 };
 template <> struct TSchemaAssociation<::cpp2::EmptyEnum, true> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = -1124688000350795336;
-  static constexpr ::std::string_view definitionKey = {"\x8b\x44\x17\x2a\x2a\x7e\xfe\x12\x83\x76\x59\xdb\x6a\xfe\xa4\xcd", 16};
+  static constexpr int64_t programId = -7371383660911263142;
+  static constexpr ::std::string_view definitionKey = {"\x1f\xb5\x68\x4f\x72\x47\xd3\x46\xe9\xef\xd1\xd3\x18\x77\x92\x45", 16};
 };
 template <> struct TSchemaAssociation<::cpp2::City, true> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = -1124688000350795336;
-  static constexpr ::std::string_view definitionKey = {"\x93\xbb\x67\xb3\x26\x3c\x93\xa7\xbf\x41\x68\x28\x3f\x91\x36\xc4", 16};
+  static constexpr int64_t programId = -7371383660911263142;
+  static constexpr ::std::string_view definitionKey = {"\xc9\xd1\xbf\x1b\x81\x46\xc0\x9c\x2b\x82\xaa\xd8\x5f\xe6\x4e\x04", 16};
 };
 template <> struct TSchemaAssociation<::cpp2::Company, true> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = -1124688000350795336;
-  static constexpr ::std::string_view definitionKey = {"\x7c\xae\xcb\x68\x90\x6c\x39\x07\xad\xcd\x3c\x55\x34\x4d\x96\x00", 16};
+  static constexpr int64_t programId = -7371383660911263142;
+  static constexpr ::std::string_view definitionKey = {"\x1b\x3e\x78\x5b\x4f\x6b\xcb\x9e\x4f\x43\x64\x63\x51\x18\x15\xf7", 16};
 };
 } // namespace apache::thrift::detail

@@ -17,6 +17,10 @@
 namespace cpp2 cpp2
 
 include "thrift/annotation/cpp.thrift"
+include "thrift/annotation/thrift.thrift"
+
+@thrift.AllowLegacyMissingUris
+package;
 
 // Test struct and union with @cpp.NonOrderable annotation
 @cpp.NonOrderable

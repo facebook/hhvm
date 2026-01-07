@@ -52,13 +52,13 @@ namespace detail {
 
 template <> struct TSchemaAssociation<::cpp2::HeaderClientMethodsAnnotationOnService, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = 8289997534464861998;
-  static constexpr ::std::string_view definitionKey = {"\xd3\x04\x79\x51\xe1\x0e\xe4\x64\x58\xde\xf0\x95\x04\x48\xb9\xb4", 16};
+  static constexpr int64_t programId = -2343470203340770696;
+  static constexpr ::std::string_view definitionKey = {"\xe9\x8f\xa7\x97\xb7\x9c\x2b\xfb\x8b\x8d\x8b\xfd\xd1\x95\x38\xe3", 16};
 };
 template <> struct TSchemaAssociation<::cpp2::HeaderClientMethodsAnnotationOnFunction, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = 8289997534464861998;
-  static constexpr ::std::string_view definitionKey = {"\x9c\xdd\xc7\xa5\x1c\x0f\xae\x50\xa3\x27\xa7\xe4\xe1\x56\xea\x62", 16};
+  static constexpr int64_t programId = -2343470203340770696;
+  static constexpr ::std::string_view definitionKey = {"\x17\x37\xce\x25\xe5\x1e\x08\x5e\x92\xcf\x7d\x8a\x14\xae\xe4\x62", 16};
 };
 } // namespace detail
 } // namespace apache::thrift

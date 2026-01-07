@@ -14,9 +14,9 @@ namespace apache::thrift::test {
 /** Glean {"file": "thrift/compiler/test/fixtures/emptiable/src/simple_deprecated_terse_writes.thrift"} */
 namespace simple_deprecated_terse_writes_constants {
 
-  FOLLY_EXPORT ::std::string_view _fbthrift_schema_fdc43d6ffb377768();
-  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_fdc43d6ffb377768_includes();
-  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_fdc43d6ffb377768_uris();
+  FOLLY_EXPORT ::std::string_view _fbthrift_schema_974321ce74c90d75();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_974321ce74c90d75_includes();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_974321ce74c90d75_uris();
 
 } // namespace simple_deprecated_terse_writes_constants
 } // namespace apache::thrift::test

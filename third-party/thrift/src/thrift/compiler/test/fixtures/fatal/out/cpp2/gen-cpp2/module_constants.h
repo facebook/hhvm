@@ -42,9 +42,9 @@ namespace module_constants {
     return constant_with_special_name_;
   }
 
-  FOLLY_EXPORT ::std::string_view _fbthrift_schema_7a4a502fee7f90ef();
-  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_7a4a502fee7f90ef_includes();
-  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_7a4a502fee7f90ef_uris();
+  FOLLY_EXPORT ::std::string_view _fbthrift_schema_a6d2aee851a15bca();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_a6d2aee851a15bca_includes();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_a6d2aee851a15bca_uris();
 
 } // namespace module_constants
 } // namespace test_cpp2::cpp_reflection

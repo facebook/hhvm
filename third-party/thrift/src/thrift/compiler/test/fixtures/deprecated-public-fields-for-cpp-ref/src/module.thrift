@@ -15,6 +15,10 @@
  */
 
 include "thrift/annotation/cpp.thrift"
+include "thrift/annotation/thrift.thrift"
+
+@thrift.AllowLegacyMissingUris
+package;
 
 struct Foo {
   @cpp.Ref{type = cpp.RefType.Unique}

@@ -19,6 +19,9 @@ namespace java.swift test.fixtures.exceptions
 include "thrift/annotation/thrift.thrift"
 include "thrift/annotation/python.thrift"
 
+@thrift.AllowLegacyMissingUris
+package;
+
 transient server exception Fiery {
   @thrift.ExceptionMessage
   1: required string message;

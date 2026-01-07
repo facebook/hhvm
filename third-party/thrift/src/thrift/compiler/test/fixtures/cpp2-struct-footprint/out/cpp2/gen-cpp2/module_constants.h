@@ -14,9 +14,9 @@ namespace cpp2_struct_footprint {
 /** Glean {"file": "thrift/compiler/test/fixtures/cpp2-struct-footprint/src/module.thrift"} */
 namespace module_constants {
 
-  FOLLY_EXPORT ::std::string_view _fbthrift_schema_e403d3dce351f983();
-  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_e403d3dce351f983_includes();
-  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_e403d3dce351f983_uris();
+  FOLLY_EXPORT ::std::string_view _fbthrift_schema_3208579ee75995d7();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_3208579ee75995d7_includes();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_3208579ee75995d7_uris();
 
 } // namespace module_constants
 } // namespace cpp2_struct_footprint

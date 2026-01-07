@@ -17,6 +17,10 @@
 include "thrift/annotation/python.thrift"
 
 include "c.thrift"
+include "thrift/annotation/thrift.thrift"
+
+@thrift.AllowLegacyMissingUris
+package;
 
 typedef c.C1 C1
 

@@ -117,8 +117,8 @@ class BadInteractionIf : public apache::thrift::Tile, public apache::thrift::Ser
 namespace detail {
 template <> struct TSchemaAssociation<::cpp2::GoodService, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = 5752107916518885951;
-  static constexpr ::std::string_view definitionKey = {"\x9f\x37\xc4\xd4\xa4\x30\xdc\x92\x05\xda\xf0\xef\xd9\xe9\xea\x12", 16};
+  static constexpr int64_t programId = -1132704805568646402;
+  static constexpr ::std::string_view definitionKey = {"\x51\x9b\x52\xe2\xbf\x81\x50\x1b\x96\x75\x24\x01\x97\x2d\x41\xd2", 16};
 };
 }
 } // namespace apache::thrift

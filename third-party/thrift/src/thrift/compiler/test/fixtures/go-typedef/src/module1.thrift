@@ -19,6 +19,9 @@ include "module2.thrift"
 include "thrift/annotation/go.thrift"
 include "thrift/annotation/thrift.thrift"
 
+@thrift.AllowLegacyMissingUris
+package;
+
 typedef string Plate
 typedef string State
 typedef i32 Year

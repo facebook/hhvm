@@ -14,9 +14,9 @@ namespace apache::thrift::test {
 /** Glean {"file": "thrift/compiler/test/fixtures/emptiable/src/simple.thrift"} */
 namespace simple_constants {
 
-  FOLLY_EXPORT ::std::string_view _fbthrift_schema_53f2f7f9a3bb3ebf();
-  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_53f2f7f9a3bb3ebf_includes();
-  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_53f2f7f9a3bb3ebf_uris();
+  FOLLY_EXPORT ::std::string_view _fbthrift_schema_5293884d7bbe94c2();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_5293884d7bbe94c2_includes();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_5293884d7bbe94c2_uris();
 
 } // namespace simple_constants
 } // namespace apache::thrift::test

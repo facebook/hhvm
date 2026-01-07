@@ -14,6 +14,12 @@
  * limitations under the License.
  */
 
+include "thrift/annotation/thrift.thrift"
+
+
+@thrift.AllowLegacyMissingUris
+package;
+
 namespace java.swift test.fixtures.constants
 namespace java.swift.constants test.fixtures.constants.ModuleConstants
 

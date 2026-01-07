@@ -42,9 +42,9 @@ namespace module_constants {
     return SHOUTY_;
   }
 
-  FOLLY_EXPORT ::std::string_view _fbthrift_schema_89c6f3548a1a8acd();
-  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_89c6f3548a1a8acd_includes();
-  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_89c6f3548a1a8acd_uris();
+  FOLLY_EXPORT ::std::string_view _fbthrift_schema_d8c7c01b749d12cc();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_d8c7c01b749d12cc_includes();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_d8c7c01b749d12cc_uris();
 
 } // namespace module_constants
 } // namespace cpp2

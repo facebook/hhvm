@@ -14,13 +14,13 @@ namespace apache::thrift::test {
 namespace simple_constants {
 
 
-::std::string_view _fbthrift_schema_53f2f7f9a3bb3ebf() {
+::std::string_view _fbthrift_schema_5293884d7bbe94c2() {
   return "";
 }
-::folly::Range<const ::std::string_view*> _fbthrift_schema_53f2f7f9a3bb3ebf_includes() {
+::folly::Range<const ::std::string_view*> _fbthrift_schema_5293884d7bbe94c2_includes() {
   return {};
 }
-::folly::Range<const ::std::string_view*> _fbthrift_schema_53f2f7f9a3bb3ebf_uris() {
+::folly::Range<const ::std::string_view*> _fbthrift_schema_5293884d7bbe94c2_uris() {
   return {};
 }
 

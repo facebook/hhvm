@@ -14,13 +14,13 @@ namespace some::ns {
 namespace include1_constants {
 
 
-::std::string_view _fbthrift_schema_933b10759aaa870() {
+::std::string_view _fbthrift_schema_f715f908572e777b() {
   return "";
 }
-::folly::Range<const ::std::string_view*> _fbthrift_schema_933b10759aaa870_includes() {
+::folly::Range<const ::std::string_view*> _fbthrift_schema_f715f908572e777b_includes() {
   return {};
 }
-::folly::Range<const ::std::string_view*> _fbthrift_schema_933b10759aaa870_uris() {
+::folly::Range<const ::std::string_view*> _fbthrift_schema_f715f908572e777b_uris() {
   return {};
 }
 

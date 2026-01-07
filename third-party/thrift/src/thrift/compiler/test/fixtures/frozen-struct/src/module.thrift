@@ -20,6 +20,9 @@ include "thrift/annotation/thrift.thrift"
 include "include1.thrift"
 include "include2.thrift"
 
+@thrift.AllowLegacyMissingUris
+package;
+
 namespace cpp2 some.ns
 
 struct ModuleA {

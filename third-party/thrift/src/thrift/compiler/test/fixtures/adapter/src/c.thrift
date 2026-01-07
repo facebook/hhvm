@@ -15,6 +15,10 @@
  */
 
 include "thrift/annotation/python.thrift"
+include "thrift/annotation/thrift.thrift"
+
+@thrift.AllowLegacyMissingUris
+package;
 
 @python.Adapter{
   name = "three.AdapterThree",

@@ -88,8 +88,8 @@ class ServiceHandler<::cpp2::MyServicePrioParent> : public apache::thrift::Serve
 namespace detail {
 template <> struct TSchemaAssociation<::cpp2::MyServicePrioParent, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = 5752107916518885951;
-  static constexpr ::std::string_view definitionKey = {"\x0c\xa0\x3c\xda\x6a\x09\xbe\xfb\x37\xc2\x73\x0a\x4f\xd7\x63\xa1", 16};
+  static constexpr int64_t programId = -1132704805568646402;
+  static constexpr ::std::string_view definitionKey = {"\x12\xcd\x64\x05\x52\xd2\xb0\x3b\xe0\xf3\x75\x2c\x98\x3a\x82\xb7", 16};
 };
 }
 } // namespace apache::thrift

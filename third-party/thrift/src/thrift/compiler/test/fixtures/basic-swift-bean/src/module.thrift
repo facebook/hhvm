@@ -18,6 +18,10 @@ namespace java.swift test.fixtures.basic_swift_bean
 
 include "thrift/annotation/java.thrift"
 include "thrift/annotation/cpp.thrift"
+include "thrift/annotation/thrift.thrift"
+
+@thrift.AllowLegacyMissingUris
+package;
 
 enum MyEnum {
   MyValue1 = 0,

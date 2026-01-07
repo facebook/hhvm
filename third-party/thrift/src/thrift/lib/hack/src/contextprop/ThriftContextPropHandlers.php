@@ -40,7 +40,7 @@ final class ThriftContextPropHandlers {
             MCPProductID::L4_ADS_MANAGER
         ) &&
         (
-          Environment::getServiceId() == 'web_ads_manager/hhvm' ||
+          RuntimeTenant::isAdsManagerTenant() ||
           Environment::isAsyncEnvironment()
         ) &&
         JustKnobs::evalString(

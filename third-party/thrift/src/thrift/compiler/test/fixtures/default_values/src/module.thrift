@@ -22,6 +22,11 @@ struct TrivialStruct {
   1: i32 int_value;
 }
 
+struct TrivialStructWithDefault {
+  1: i32 int_value_1;
+  2: i32 int_value_2 = 42;
+}
+
 struct StructWithNoCustomDefaultValues {
   1: i32 unqualified_integer;
   2: optional i32 optional_integer;
@@ -42,6 +47,8 @@ struct StructWithCustomDefaultValues {
   @thrift.AllowUnsafeOptionalCustomDefaultValue
   5: optional TrivialStruct optional_struct = TrivialStruct{int_value = 456};
   6: required TrivialStruct required_struct = TrivialStruct{int_value = 789};
+  7: TrivialStructWithDefault struct_with_default_unspecified = TrivialStructWithDefault{};
+  8: TrivialStructWithDefault struct_with_default_specified = TrivialStructWithDefault{int_value_1 = 123};
 }
 
 struct StructWithCollectionDefaultValues {

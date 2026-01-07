@@ -237,10 +237,7 @@ class module_CONSTANTS implements \IThriftConstants {
    */
   <<__Memoize>>
   public static function pod_0()[write_props]: struct1{
-    return struct1::fromShape(
-      shape(
-      )
-    );
+    return struct1::withDefaultValues();
   }
 
   /**
@@ -249,10 +246,7 @@ class module_CONSTANTS implements \IThriftConstants {
    */
   <<__Memoize>>
   public static function pod_s_0()[write_props]: struct1{
-    return struct1::fromShape(
-      shape(
-      )
-    );
+    return struct1::withDefaultValues();
   }
 
   /**
@@ -463,10 +457,7 @@ class module_CONSTANTS implements \IThriftConstants {
    */
   <<__Memoize>>
   public static function u_1_3()[write_props]: union1{
-    return union1::fromShape(
-      shape(
-      )
-    );
+    return union1::withDefaultValues();
   }
 
   /**
@@ -555,10 +546,7 @@ class module_CONSTANTS implements \IThriftConstants {
   public static function u_2_6()[write_props]: union2{
     return union2::fromShape(
       shape(
-        "u" => union1::fromShape(
-          shape(
-          )
-        ),
+        "u" => union1::withDefaultValues(),
       )
     );
   }

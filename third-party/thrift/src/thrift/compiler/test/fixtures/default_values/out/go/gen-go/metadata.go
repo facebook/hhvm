@@ -31,6 +31,13 @@ var (
                     Name: "module.TrivialStruct",
                 },
         }
+    premadeThriftType_module_TrivialStructWithDefault =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "module.TrivialStructWithDefault",
+                },
+        }
     premadeThriftType_module_StructWithNoCustomDefaultValues =
         &metadata.ThriftType{
             TStruct:
@@ -86,6 +93,25 @@ var (
                 &metadata.ThriftField{
                     Id:         1,
                     Name:       "int_value",
+                    IsOptional: false,
+                    Type:       premadeThriftType_i32,
+                },
+            },
+        }
+    premadeStructMetadata_TrivialStructWithDefault =
+        &metadata.ThriftStruct{
+            Name:    "module.TrivialStructWithDefault",
+            IsUnion: false,
+            Fields:  []*metadata.ThriftField{
+                &metadata.ThriftField{
+                    Id:         1,
+                    Name:       "int_value_1",
+                    IsOptional: false,
+                    Type:       premadeThriftType_i32,
+                },
+                &metadata.ThriftField{
+                    Id:         2,
+                    Name:       "int_value_2",
                     IsOptional: false,
                     Type:       premadeThriftType_i32,
                 },
@@ -175,6 +201,18 @@ var (
                     IsOptional: false,
                     Type:       premadeThriftType_module_TrivialStruct,
                 },
+                &metadata.ThriftField{
+                    Id:         7,
+                    Name:       "struct_with_default_unspecified",
+                    IsOptional: false,
+                    Type:       premadeThriftType_module_TrivialStructWithDefault,
+                },
+                &metadata.ThriftField{
+                    Id:         8,
+                    Name:       "struct_with_default_specified",
+                    IsOptional: false,
+                    Type:       premadeThriftType_module_TrivialStructWithDefault,
+                },
             },
         }
     premadeStructMetadata_StructWithCollectionDefaultValues =
@@ -226,6 +264,7 @@ var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
     fbthriftThriftTypesMap := make(map[string]*metadata.ThriftType)
     fbthriftThriftTypesMap["i32"] = premadeThriftType_i32
     fbthriftThriftTypesMap["module.TrivialStruct"] = premadeThriftType_module_TrivialStruct
+    fbthriftThriftTypesMap["module.TrivialStructWithDefault"] = premadeThriftType_module_TrivialStructWithDefault
     fbthriftThriftTypesMap["module.StructWithNoCustomDefaultValues"] = premadeThriftType_module_StructWithNoCustomDefaultValues
     fbthriftThriftTypesMap["module.StructWithCustomDefaultValues"] = premadeThriftType_module_StructWithCustomDefaultValues
     fbthriftThriftTypesMap["module.StructWithCollectionDefaultValues"] = premadeThriftType_module_StructWithCollectionDefaultValues
@@ -235,6 +274,7 @@ var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
 var structMetadatas = func() []*metadata.ThriftStruct {
     fbthriftResults := make([]*metadata.ThriftStruct, 0)
     fbthriftResults = append(fbthriftResults, premadeStructMetadata_TrivialStruct)
+    fbthriftResults = append(fbthriftResults, premadeStructMetadata_TrivialStructWithDefault)
     fbthriftResults = append(fbthriftResults, premadeStructMetadata_StructWithNoCustomDefaultValues)
     fbthriftResults = append(fbthriftResults, premadeStructMetadata_StructWithCustomDefaultValues)
     fbthriftResults = append(fbthriftResults, premadeStructMetadata_StructWithCollectionDefaultValues)

@@ -442,19 +442,13 @@ class FieldsInjectedWithIncludedStruct implements \IThriftSyncStruct, \IThriftSt
       'fields' => dict[
         'injected_structured_annotation_field' => shape(
           'field' => dict[
-            '\facebook\thrift\annotation\Box' => \facebook\thrift\annotation\Box::fromShape(
-              shape(
-              )
-            ),
+            '\facebook\thrift\annotation\Box' => \facebook\thrift\annotation\Box::withDefaultValues(),
           ],
           'type' => dict[],
         ),
         'injected_unstructured_annotation_field' => shape(
           'field' => dict[
-            '\facebook\thrift\annotation\Box' => \facebook\thrift\annotation\Box::fromShape(
-              shape(
-              )
-            ),
+            '\facebook\thrift\annotation\Box' => \facebook\thrift\annotation\Box::withDefaultValues(),
           ],
           'type' => dict[],
         ),

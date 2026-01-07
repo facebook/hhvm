@@ -13,6 +13,11 @@ template uint32_t TrivialStruct::write<>(apache::thrift::BinaryProtocolWriter*) 
 template uint32_t TrivialStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
 template uint32_t TrivialStruct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
 
+template void TrivialStructWithDefault::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t TrivialStructWithDefault::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t TrivialStructWithDefault::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t TrivialStructWithDefault::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+
 template void StructWithNoCustomDefaultValues::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
 template uint32_t StructWithNoCustomDefaultValues::write<>(apache::thrift::BinaryProtocolWriter*) const;
 template uint32_t StructWithNoCustomDefaultValues::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;

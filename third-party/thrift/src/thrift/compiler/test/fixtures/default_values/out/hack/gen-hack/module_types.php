@@ -93,6 +93,113 @@ class TrivialStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
 
 /**
  * Original thrift struct:-
+ * TrivialStructWithDefault
+ */
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/compiler/test/fixtures/default_values/TrivialStructWithDefault'))>>
+class TrivialStructWithDefault implements \IThriftSyncStruct, \IThriftStructMetadata {
+  use \ThriftSerializationTrait;
+
+  const \ThriftStructTypes::TSpec SPEC = dict[
+    1 => shape(
+      'var' => 'int_value_1',
+      'type' => \TType::I32,
+    ),
+    2 => shape(
+      'var' => 'int_value_2',
+      'type' => \TType::I32,
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'int_value_1' => 1,
+    'int_value_2' => 2,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'int_value_1' => ?int,
+    ?'int_value_2' => ?int,
+  );
+
+  const int STRUCTURAL_ID = 6601976999284451632;
+  /**
+   * Original thrift field:-
+   * 1: i32 int_value_1
+   */
+  public int $int_value_1;
+  /**
+   * Original thrift field:-
+   * 2: i32 int_value_2
+   */
+  public int $int_value_2;
+
+  public function __construct(?int $int_value_1 = null, ?int $int_value_2 = null)[] {
+    $this->int_value_1 = $int_value_1 ?? 0;
+    $this->int_value_2 = $int_value_2 ?? 42;
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'int_value_1'),
+      Shapes::idx($shape, 'int_value_2'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'TrivialStructWithDefault';
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "module.TrivialStructWithDefault",
+        "fields" => vec[
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 1,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                )
+              ),
+              "name" => "int_value_1",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 2,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                )
+              ),
+              "name" => "int_value_2",
+            )
+          ),
+        ],
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+}
+
+/**
+ * Original thrift struct:-
  * StructWithNoCustomDefaultValues
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/compiler/test/fixtures/default_values/StructWithNoCustomDefaultValues'))>>
@@ -347,6 +454,16 @@ class StructWithCustomDefaultValues implements \IThriftSyncStruct, \IThriftStruc
       'type' => \TType::STRUCT,
       'class' => \facebook\thrift\compiler\test\fixtures\default_values\TrivialStruct::class,
     ),
+    7 => shape(
+      'var' => 'struct_with_default_unspecified',
+      'type' => \TType::STRUCT,
+      'class' => \facebook\thrift\compiler\test\fixtures\default_values\TrivialStructWithDefault::class,
+    ),
+    8 => shape(
+      'var' => 'struct_with_default_specified',
+      'type' => \TType::STRUCT,
+      'class' => \facebook\thrift\compiler\test\fixtures\default_values\TrivialStructWithDefault::class,
+    ),
   ];
   const dict<string, int> FIELDMAP = dict[
     'unqualified_integer' => 1,
@@ -355,6 +472,8 @@ class StructWithCustomDefaultValues implements \IThriftSyncStruct, \IThriftStruc
     'unqualified_struct' => 4,
     'optional_struct' => 5,
     'required_struct' => 6,
+    'struct_with_default_unspecified' => 7,
+    'struct_with_default_specified' => 8,
   ];
 
   const type TConstructorShape = shape(
@@ -364,9 +483,11 @@ class StructWithCustomDefaultValues implements \IThriftSyncStruct, \IThriftStruc
     ?'unqualified_struct' => ?\facebook\thrift\compiler\test\fixtures\default_values\TrivialStruct,
     ?'optional_struct' => ?\facebook\thrift\compiler\test\fixtures\default_values\TrivialStruct,
     ?'required_struct' => ?\facebook\thrift\compiler\test\fixtures\default_values\TrivialStruct,
+    ?'struct_with_default_unspecified' => ?\facebook\thrift\compiler\test\fixtures\default_values\TrivialStructWithDefault,
+    ?'struct_with_default_specified' => ?\facebook\thrift\compiler\test\fixtures\default_values\TrivialStructWithDefault,
   );
 
-  const int STRUCTURAL_ID = 8772051469260393608;
+  const int STRUCTURAL_ID = 5336628158379793886;
   /**
    * Original thrift field:-
    * 1: i32 unqualified_integer
@@ -397,14 +518,42 @@ class StructWithCustomDefaultValues implements \IThriftSyncStruct, \IThriftStruc
    * 6: module.TrivialStruct required_struct
    */
   public ?\facebook\thrift\compiler\test\fixtures\default_values\TrivialStruct $required_struct;
+  /**
+   * Original thrift field:-
+   * 7: module.TrivialStructWithDefault struct_with_default_unspecified
+   */
+  public ?\facebook\thrift\compiler\test\fixtures\default_values\TrivialStructWithDefault $struct_with_default_unspecified;
+  /**
+   * Original thrift field:-
+   * 8: module.TrivialStructWithDefault struct_with_default_specified
+   */
+  public ?\facebook\thrift\compiler\test\fixtures\default_values\TrivialStructWithDefault $struct_with_default_specified;
 
-  public function __construct(?int $unqualified_integer = null, ?int $optional_integer = null, ?int $required_integer = null, ?\facebook\thrift\compiler\test\fixtures\default_values\TrivialStruct $unqualified_struct = null, ?\facebook\thrift\compiler\test\fixtures\default_values\TrivialStruct $optional_struct = null, ?\facebook\thrift\compiler\test\fixtures\default_values\TrivialStruct $required_struct = null)[] {
+  public function __construct(?int $unqualified_integer = null, ?int $optional_integer = null, ?int $required_integer = null, ?\facebook\thrift\compiler\test\fixtures\default_values\TrivialStruct $unqualified_struct = null, ?\facebook\thrift\compiler\test\fixtures\default_values\TrivialStruct $optional_struct = null, ?\facebook\thrift\compiler\test\fixtures\default_values\TrivialStruct $required_struct = null, ?\facebook\thrift\compiler\test\fixtures\default_values\TrivialStructWithDefault $struct_with_default_unspecified = null, ?\facebook\thrift\compiler\test\fixtures\default_values\TrivialStructWithDefault $struct_with_default_specified = null)[] {
     $this->unqualified_integer = $unqualified_integer ?? 42;
     $this->optional_integer = $optional_integer ?? 43;
     $this->required_integer = $required_integer ?? 44;
-    $this->unqualified_struct = $unqualified_struct;
-    $this->optional_struct = $optional_struct;
-    $this->required_struct = $required_struct;
+    $this->unqualified_struct = $unqualified_struct ?? \facebook\thrift\compiler\test\fixtures\default_values\TrivialStruct::fromShape(
+      shape(
+        "int_value" => 123,
+      )
+    );
+    $this->optional_struct = $optional_struct ?? \facebook\thrift\compiler\test\fixtures\default_values\TrivialStruct::fromShape(
+      shape(
+        "int_value" => 456,
+      )
+    );
+    $this->required_struct = $required_struct ?? \facebook\thrift\compiler\test\fixtures\default_values\TrivialStruct::fromShape(
+      shape(
+        "int_value" => 789,
+      )
+    );
+    $this->struct_with_default_unspecified = $struct_with_default_unspecified ?? \facebook\thrift\compiler\test\fixtures\default_values\TrivialStructWithDefault::withDefaultValues();
+    $this->struct_with_default_specified = $struct_with_default_specified ?? \facebook\thrift\compiler\test\fixtures\default_values\TrivialStructWithDefault::fromShape(
+      shape(
+        "int_value_1" => 123,
+      )
+    );
   }
 
   public static function withDefaultValues()[]: this {
@@ -419,6 +568,8 @@ class StructWithCustomDefaultValues implements \IThriftSyncStruct, \IThriftStruc
       Shapes::idx($shape, 'unqualified_struct'),
       Shapes::idx($shape, 'optional_struct'),
       Shapes::idx($shape, 'required_struct'),
+      Shapes::idx($shape, 'struct_with_default_unspecified'),
+      Shapes::idx($shape, 'struct_with_default_specified'),
     );
   }
 
@@ -511,6 +662,36 @@ class StructWithCustomDefaultValues implements \IThriftSyncStruct, \IThriftStruc
               "name" => "required_struct",
             )
           ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 7,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_struct" => \tmeta_ThriftStructType::fromShape(
+                    shape(
+                      "name" => "module.TrivialStructWithDefault",
+                    )
+                  ),
+                )
+              ),
+              "name" => "struct_with_default_unspecified",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 8,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_struct" => \tmeta_ThriftStructType::fromShape(
+                    shape(
+                      "name" => "module.TrivialStructWithDefault",
+                    )
+                  ),
+                )
+              ),
+              "name" => "struct_with_default_specified",
+            )
+          ),
         ],
         "is_union" => false,
       )
@@ -523,19 +704,13 @@ class StructWithCustomDefaultValues implements \IThriftSyncStruct, \IThriftStruc
       'fields' => dict[
         'optional_integer' => shape(
           'field' => dict[
-            '\facebook\thrift\annotation\AllowUnsafeOptionalCustomDefaultValue' => \facebook\thrift\annotation\AllowUnsafeOptionalCustomDefaultValue::fromShape(
-              shape(
-              )
-            ),
+            '\facebook\thrift\annotation\AllowUnsafeOptionalCustomDefaultValue' => \facebook\thrift\annotation\AllowUnsafeOptionalCustomDefaultValue::withDefaultValues(),
           ],
           'type' => dict[],
         ),
         'optional_struct' => shape(
           'field' => dict[
-            '\facebook\thrift\annotation\AllowUnsafeOptionalCustomDefaultValue' => \facebook\thrift\annotation\AllowUnsafeOptionalCustomDefaultValue::fromShape(
-              shape(
-              )
-            ),
+            '\facebook\thrift\annotation\AllowUnsafeOptionalCustomDefaultValue' => \facebook\thrift\annotation\AllowUnsafeOptionalCustomDefaultValue::withDefaultValues(),
           ],
           'type' => dict[],
         ),

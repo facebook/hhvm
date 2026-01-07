@@ -241,10 +241,7 @@ class MyService_first_result extends \ThriftSyncStructWithResult implements \ITh
         'success' => shape(
           'field' => dict[],
           'type' => dict[
-            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
-              shape(
-              )
-            ),
+            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::withDefaultValues(),
             '\test\fixtures\basic_structured_annotations\structured_annotation_inline' => \test\fixtures\basic_structured_annotations\structured_annotation_inline::fromShape(
               shape(
                 "count" => 1,
@@ -522,10 +519,7 @@ class MyServiceStaticMetadata implements \IThriftServiceStaticMetadata {
       ],
       'functions' => dict[
         'first' => dict[
-          '\test\fixtures\basic_structured_annotations\structured_annotation_with_default' => \test\fixtures\basic_structured_annotations\structured_annotation_with_default::fromShape(
-            shape(
-            )
-          ),
+          '\test\fixtures\basic_structured_annotations\structured_annotation_with_default' => \test\fixtures\basic_structured_annotations\structured_annotation_with_default::withDefaultValues(),
         ],
         'second' => dict[
           '\test\fixtures\basic_structured_annotations\structured_annotation_inline' => \test\fixtures\basic_structured_annotations\structured_annotation_inline::fromShape(

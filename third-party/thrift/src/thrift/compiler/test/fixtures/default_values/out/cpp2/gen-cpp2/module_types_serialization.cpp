@@ -35,6 +35,27 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
+void TccStructTraits<::facebook::thrift::compiler::test::fixtures::default_values::TrivialStructWithDefault>::translateFieldName(
+    std::string_view _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::facebook::thrift::compiler::test::fixtures::default_values::TrivialStructWithDefault>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace apache {
+namespace thrift {
+namespace detail {
+
 void TccStructTraits<::facebook::thrift::compiler::test::fixtures::default_values::StructWithNoCustomDefaultValues>::translateFieldName(
     std::string_view _fname,
     int16_t& fid,
@@ -95,6 +116,9 @@ void TccStructTraits<::facebook::thrift::compiler::test::fixtures::default_value
 } // namespace apache
 
 namespace facebook::thrift::compiler::test::fixtures::default_values {
+
+
+
 
 
 

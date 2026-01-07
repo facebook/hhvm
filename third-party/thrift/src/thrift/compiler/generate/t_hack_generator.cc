@@ -120,6 +120,8 @@ class t_hack_generator : public t_concat_generator {
         option_is_specified(options, "enum_transparenttype");
     soft_attribute_ = option_is_specified(options, "soft_attribute");
     strict_unions_ = option_is_specified(options, "strict_unions");
+    legacy_default_values_ =
+        option_is_specified(options, "legacy_default_values");
     protected_unions_ =
         option_is_specified(options, "protected_unions") || strict_unions_;
     legacy_union_json_serialization_ =
@@ -1141,6 +1143,11 @@ class t_hack_generator : public t_concat_generator {
   bool strict_unions_;
 
   /**
+   * Use legacy behavior for default values in nested thrift structs
+   */
+  bool legacy_default_values_;
+
+  /**
    * Control rollout of incorrect field access in union logging
    */
   bool union_logger_rollout_;
@@ -2090,6 +2097,8 @@ std::string t_hack_generator::render_const_value_helper(
       out << temp_val;
 
       set_indent(preserved_indent_size);
+    } else if (value->get_map().empty()) {
+      out << struct_name << "::withDefaultValues()";
     } else {
       out << struct_name << "::fromShape(\n";
       indent_up();
@@ -4549,8 +4558,8 @@ void t_hack_generator::generate_php_struct_constructor_field_assignment(
   }
   std::string dval;
   bool is_exception = tstruct->is<t_exception>();
-  if (field.default_value() != nullptr &&
-      !(t->is<t_structured>() || skip_custom_default)) {
+  if (field.default_value() != nullptr && !skip_custom_default &&
+      !(t->is<t_structured>() && legacy_default_values_)) {
     dval = render_const_value(
         t,
         field.default_value(),
@@ -7647,6 +7656,7 @@ THRIFT_REGISTER_GENERATOR(
     "    shapes           Generate Shape definitions for structs\n"
     "    protected_unions Generate protected members for thrift unions\n"
     "    strict_unions    Only allow single set field for thrift unions\n"
+    "    legacy_default_values use legacy behavior for default values in nested structs\n"
     "    legacy_union_json_serialization Preserve existing json serialization \n"
     "                                       for thrift unions\n"
     "    shape_arraykeys  When generating Shape definition for structs:\n"

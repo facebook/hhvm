@@ -1,4 +1,5 @@
 hack: hack:json,hack_collections=1 src/module.thrift
+hack_legacy_default_values: hack:json,hack_collections=1,legacy_default_values=1 src/module.thrift
 cpp2: mstch_cpp2:reflection src/module.thrift
 go: mstch_go src/module.thrift
 py3: mstch_py3 src/module.thrift

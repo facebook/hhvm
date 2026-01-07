@@ -1098,7 +1098,11 @@ class B implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
     $this->i32_with_default_value = $i32_with_default_value ?? 1729;
     $this->double_with_default_value = $double_with_default_value ?? 3.14159;
     $this->enum_with_default_value = $enum_with_default_value ?? \test\fixtures\Enum::ENUM;
-    $this->A_with_default_value = $A_with_default_value;
+    $this->A_with_default_value = $A_with_default_value ?? \test\fixtures\A::fromShape(
+      shape(
+        "a" => "bc",
+      )
+    );
     $this->set_of_i32_with_default_value = $set_of_i32_with_default_value ?? Set {
       3,
       7,

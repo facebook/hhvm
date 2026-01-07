@@ -27,6 +27,21 @@ struct VisitByFieldId<::facebook::thrift::compiler::test::fixtures::default_valu
 };
 
 template <>
+struct VisitByFieldId<::facebook::thrift::compiler::test::fixtures::default_values::TrivialStructWithDefault> {
+  template <typename F, typename T>
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
+    switch (fieldId) {
+    case 1:
+      return f(0, static_cast<T&&>(t).int_value_1_ref());
+    case 2:
+      return f(1, static_cast<T&&>(t).int_value_2_ref());
+    default:
+      throwInvalidThriftId(fieldId, "::facebook::thrift::compiler::test::fixtures::default_values::TrivialStructWithDefault");
+    }
+  }
+};
+
+template <>
 struct VisitByFieldId<::facebook::thrift::compiler::test::fixtures::default_values::StructWithNoCustomDefaultValues> {
   template <typename F, typename T>
   void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
@@ -66,6 +81,10 @@ struct VisitByFieldId<::facebook::thrift::compiler::test::fixtures::default_valu
       return f(4, static_cast<T&&>(t).optional_struct_ref());
     case 6:
       return f(5, static_cast<T&&>(t).required_struct_ref());
+    case 7:
+      return f(6, static_cast<T&&>(t).struct_with_default_unspecified_ref());
+    case 8:
+      return f(7, static_cast<T&&>(t).struct_with_default_specified_ref());
     default:
       throwInvalidThriftId(fieldId, "::facebook::thrift::compiler::test::fixtures::default_values::StructWithCustomDefaultValues");
     }

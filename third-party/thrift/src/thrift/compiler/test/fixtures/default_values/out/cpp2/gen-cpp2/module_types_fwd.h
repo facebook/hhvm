@@ -9,6 +9,7 @@
 // BEGIN forward_declare
 namespace facebook::thrift::compiler::test::fixtures::default_values {
 class TrivialStruct;
+class TrivialStructWithDefault;
 class StructWithNoCustomDefaultValues;
 class StructWithCustomDefaultValues;
 class StructWithCollectionDefaultValues;

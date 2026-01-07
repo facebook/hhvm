@@ -404,10 +404,7 @@ class C_numbers_StreamResponse extends \ThriftSyncStructWithResult implements \I
         'success' => shape(
           'field' => dict[],
           'type' => dict[
-            '\facebook\thrift\annotation\rust\NewType' => \facebook\thrift\annotation\rust\NewType::fromShape(
-              shape(
-              )
-            ),
+            '\facebook\thrift\annotation\rust\NewType' => \facebook\thrift\annotation\rust\NewType::withDefaultValues(),
           ],
         ),
       ],

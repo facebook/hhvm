@@ -1,2 +1,3 @@
 hack: hack:shapes=1,shapes_allow_unknown_fields=1,hack_collections=1 src/module.thrift
+hack_legacy_default_values: hack:shapes=1,shapes_allow_unknown_fields=1,hack_collections=1,legacy_default_values=1 src/module.thrift
 java: mstch_java src/module.thrift

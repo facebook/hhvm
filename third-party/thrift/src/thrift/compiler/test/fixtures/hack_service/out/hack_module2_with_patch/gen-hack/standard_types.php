@@ -413,10 +413,7 @@ class apache_thrift_type_standard_TypeUri implements \IThriftSyncStruct, \IThrif
         'typeHashPrefixSha2_256' => shape(
           'field' => dict[],
           'type' => dict[
-            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
-              shape(
-              )
-            ),
+            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::withDefaultValues(),
             '\facebook\thrift\annotation\cpp\Type' => \facebook\thrift\annotation\cpp\Type::fromShape(
               shape(
                 "name" => "folly::fbstring",
@@ -433,10 +430,7 @@ class apache_thrift_type_standard_TypeUri implements \IThriftSyncStruct, \IThrif
         'definitionKey' => shape(
           'field' => dict[],
           'type' => dict[
-            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
-              shape(
-              )
-            ),
+            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::withDefaultValues(),
             '\facebook\thrift\annotation\cpp\Type' => \facebook\thrift\annotation\cpp\Type::fromShape(
               shape(
                 "name" => "folly::fbstring",
@@ -1599,10 +1593,7 @@ class apache_thrift_type_standard_TypeName implements \IThriftSyncStruct, \IThri
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\facebook\thrift\annotation\rust\Ord' => \facebook\thrift\annotation\rust\Ord::fromShape(
-          shape(
-          )
-        ),
+        '\facebook\thrift\annotation\rust\Ord' => \facebook\thrift\annotation\rust\Ord::withDefaultValues(),
       ],
       'fields' => dict[
       ],

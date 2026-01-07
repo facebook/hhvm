@@ -19,6 +19,7 @@ namespace default_values {
   ::apache::thrift::metadata::ThriftServiceMetadataResponse response;
   ::apache::thrift::metadata::ThriftMetadata& metadata = *response.metadata();
   ::apache::thrift::detail::md::StructMetadata<TrivialStruct>::gen(metadata);
+  ::apache::thrift::detail::md::StructMetadata<TrivialStructWithDefault>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<StructWithNoCustomDefaultValues>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<StructWithCustomDefaultValues>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<StructWithCollectionDefaultValues>::gen(metadata);

@@ -26,6 +26,24 @@ THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 1> TStructDataStorage<:
   0,
 }};
 
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::facebook::thrift::compiler::test::fixtures::default_values::TrivialStructWithDefault>::name = "TrivialStructWithDefault";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 2> TStructDataStorage<::facebook::thrift::compiler::test::fixtures::default_values::TrivialStructWithDefault>::fields_names = { {
+  "int_value_1"sv,
+  "int_value_2"sv,
+}};
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 2> TStructDataStorage<::facebook::thrift::compiler::test::fixtures::default_values::TrivialStructWithDefault>::fields_ids = { {
+  1,
+  2,
+}};
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 2> TStructDataStorage<::facebook::thrift::compiler::test::fixtures::default_values::TrivialStructWithDefault>::fields_types = { {
+  TType::T_I32,
+  TType::T_I32,
+}};
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 2> TStructDataStorage<::facebook::thrift::compiler::test::fixtures::default_values::TrivialStructWithDefault>::isset_indexes = { {
+  0,
+  1,
+}};
+
 THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::facebook::thrift::compiler::test::fixtures::default_values::StructWithNoCustomDefaultValues>::name = "StructWithNoCustomDefaultValues";
 THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 6> TStructDataStorage<::facebook::thrift::compiler::test::fixtures::default_values::StructWithNoCustomDefaultValues>::fields_names = { {
   "unqualified_integer"sv,
@@ -61,37 +79,45 @@ THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 6> TStructDataStorage<:
 }};
 
 THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::facebook::thrift::compiler::test::fixtures::default_values::StructWithCustomDefaultValues>::name = "StructWithCustomDefaultValues";
-THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 6> TStructDataStorage<::facebook::thrift::compiler::test::fixtures::default_values::StructWithCustomDefaultValues>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 8> TStructDataStorage<::facebook::thrift::compiler::test::fixtures::default_values::StructWithCustomDefaultValues>::fields_names = { {
   "unqualified_integer"sv,
   "optional_integer"sv,
   "required_integer"sv,
   "unqualified_struct"sv,
   "optional_struct"sv,
   "required_struct"sv,
+  "struct_with_default_unspecified"sv,
+  "struct_with_default_specified"sv,
 }};
-THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 6> TStructDataStorage<::facebook::thrift::compiler::test::fixtures::default_values::StructWithCustomDefaultValues>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 8> TStructDataStorage<::facebook::thrift::compiler::test::fixtures::default_values::StructWithCustomDefaultValues>::fields_ids = { {
   1,
   2,
   3,
   4,
   5,
   6,
+  7,
+  8,
 }};
-THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 6> TStructDataStorage<::facebook::thrift::compiler::test::fixtures::default_values::StructWithCustomDefaultValues>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 8> TStructDataStorage<::facebook::thrift::compiler::test::fixtures::default_values::StructWithCustomDefaultValues>::fields_types = { {
   TType::T_I32,
   TType::T_I32,
   TType::T_I32,
+  TType::T_STRUCT,
+  TType::T_STRUCT,
   TType::T_STRUCT,
   TType::T_STRUCT,
   TType::T_STRUCT,
 }};
-THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 6> TStructDataStorage<::facebook::thrift::compiler::test::fixtures::default_values::StructWithCustomDefaultValues>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 8> TStructDataStorage<::facebook::thrift::compiler::test::fixtures::default_values::StructWithCustomDefaultValues>::isset_indexes = { {
   0,
   1,
   -1,
   2,
   3,
   -1,
+  4,
+  5,
 }};
 
 THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::facebook::thrift::compiler::test::fixtures::default_values::StructWithCollectionDefaultValues>::name = "StructWithCollectionDefaultValues";
@@ -129,6 +155,7 @@ THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 6> TStructDataStorage<:
 }};
 
 namespace detail {
+
 
 
 

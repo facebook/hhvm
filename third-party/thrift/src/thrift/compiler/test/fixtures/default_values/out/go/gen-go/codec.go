@@ -30,6 +30,15 @@ var (
                 NewFunc:    func() thrift.Struct { return NewTrivialStruct() },
             },
     }
+    premadeCodecTypeSpec_module_TrivialStructWithDefault = &thrift.TypeSpec{
+        FullName: "module.TrivialStructWithDefault",
+        CodecStructSpec:
+            &thrift.CodecStructSpec{
+                ScopedName: "module.TrivialStructWithDefault",
+                IsUnion:    false,
+                NewFunc:    func() thrift.Struct { return NewTrivialStructWithDefault() },
+            },
+    }
     premadeCodecTypeSpec_module_StructWithNoCustomDefaultValues = &thrift.TypeSpec{
         FullName: "module.StructWithNoCustomDefaultValues",
         CodecStructSpec:
@@ -109,6 +118,41 @@ var (
             },
             FieldSpecNameToIndex: map[string]int{
                 "int_value": 0,
+            },
+        }
+    premadeStructSpec_TrivialStructWithDefault =
+        &thrift.StructSpec{
+            Name:                 "TrivialStructWithDefault",
+            ScopedName:           "module.TrivialStructWithDefault",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   1,
+                    WireType:             thrift.I32,
+                    Name:                 "int_value_1",
+                    ReflectIndex:         0,
+                    IsOptional:           false,
+                    ValueTypeSpec:        premadeCodecTypeSpec_i32,
+                    MustBeSetToSerialize: false,
+                },
+                {
+                    ID:                   2,
+                    WireType:             thrift.I32,
+                    Name:                 "int_value_2",
+                    ReflectIndex:         1,
+                    IsOptional:           false,
+                    ValueTypeSpec:        premadeCodecTypeSpec_i32,
+                    MustBeSetToSerialize: false,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                1: 0,
+                2: 1,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "int_value_1": 0,
+                "int_value_2": 1,
             },
         }
     premadeStructSpec_StructWithNoCustomDefaultValues =
@@ -251,6 +295,24 @@ var (
                     ValueTypeSpec:        premadeCodecTypeSpec_module_TrivialStruct,
                     MustBeSetToSerialize: true,
                 },
+                {
+                    ID:                   7,
+                    WireType:             thrift.STRUCT,
+                    Name:                 "struct_with_default_unspecified",
+                    ReflectIndex:         6,
+                    IsOptional:           false,
+                    ValueTypeSpec:        premadeCodecTypeSpec_module_TrivialStructWithDefault,
+                    MustBeSetToSerialize: true,
+                },
+                {
+                    ID:                   8,
+                    WireType:             thrift.STRUCT,
+                    Name:                 "struct_with_default_specified",
+                    ReflectIndex:         7,
+                    IsOptional:           false,
+                    ValueTypeSpec:        premadeCodecTypeSpec_module_TrivialStructWithDefault,
+                    MustBeSetToSerialize: true,
+                },
             },
             FieldSpecIDToIndex:   map[int16]int{
                 1: 0,
@@ -259,6 +321,8 @@ var (
                 4: 3,
                 5: 4,
                 6: 5,
+                7: 6,
+                8: 7,
             },
             FieldSpecNameToIndex: map[string]int{
                 "unqualified_integer": 0,
@@ -267,6 +331,8 @@ var (
                 "unqualified_struct": 3,
                 "optional_struct": 4,
                 "required_struct": 5,
+                "struct_with_default_unspecified": 6,
+                "struct_with_default_specified": 7,
             },
         }
     premadeStructSpec_StructWithCollectionDefaultValues =
@@ -354,6 +420,7 @@ var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {
     fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec)
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_i32.FullName] = premadeCodecTypeSpec_i32
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_TrivialStruct.FullName] = premadeCodecTypeSpec_module_TrivialStruct
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_TrivialStructWithDefault.FullName] = premadeCodecTypeSpec_module_TrivialStructWithDefault
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_StructWithNoCustomDefaultValues.FullName] = premadeCodecTypeSpec_module_StructWithNoCustomDefaultValues
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_StructWithCustomDefaultValues.FullName] = premadeCodecTypeSpec_module_StructWithCustomDefaultValues
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_StructWithCollectionDefaultValues.FullName] = premadeCodecTypeSpec_module_StructWithCollectionDefaultValues

@@ -1,1 +1,2 @@
 hack: hack:shape_construct=1,shapes=1,legacy_arrays=1 src/module.thrift
+hack_legacy_default_values: hack:shape_construct=1,shapes=1,legacy_arrays=1,legacy_default_values=1 src/module.thrift

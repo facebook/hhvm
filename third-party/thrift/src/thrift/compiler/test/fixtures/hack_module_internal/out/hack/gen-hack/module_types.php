@@ -28,10 +28,7 @@ class FooEnum_TEnumStaticMetadata implements \IThriftEnumStaticMetadata {
   public static function getAllStructuredAnnotations()[write_props]: \TEnumAnnotations {
     return shape(
       'enum' => dict[
-        '\facebook\thrift\annotation\hack\ModuleInternal' => \facebook\thrift\annotation\hack\ModuleInternal::fromShape(
-          shape(
-          )
-        ),
+        '\facebook\thrift\annotation\hack\ModuleInternal' => \facebook\thrift\annotation\hack\ModuleInternal::withDefaultValues(),
       ],
       'constants' => dict[
       ],
@@ -134,18 +131,12 @@ class Foo implements \IThriftSyncStruct, \IThriftStructMetadata {
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\facebook\thrift\annotation\hack\ModuleInternal' => \facebook\thrift\annotation\hack\ModuleInternal::fromShape(
-          shape(
-          )
-        ),
+        '\facebook\thrift\annotation\hack\ModuleInternal' => \facebook\thrift\annotation\hack\ModuleInternal::withDefaultValues(),
       ],
       'fields' => dict[
         'str_field' => shape(
           'field' => dict[
-            '\facebook\thrift\annotation\hack\ModuleInternal' => \facebook\thrift\annotation\hack\ModuleInternal::fromShape(
-              shape(
-              )
-            ),
+            '\facebook\thrift\annotation\hack\ModuleInternal' => \facebook\thrift\annotation\hack\ModuleInternal::withDefaultValues(),
           ],
           'type' => dict[],
         ),
@@ -336,10 +327,7 @@ class FooUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUn
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\facebook\thrift\annotation\hack\ModuleInternal' => \facebook\thrift\annotation\hack\ModuleInternal::fromShape(
-          shape(
-          )
-        ),
+        '\facebook\thrift\annotation\hack\ModuleInternal' => \facebook\thrift\annotation\hack\ModuleInternal::withDefaultValues(),
       ],
       'fields' => dict[
       ],

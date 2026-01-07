@@ -22,6 +22,15 @@ struct ForEachField<::facebook::thrift::compiler::test::fixtures::default_values
 };
 
 template <>
+struct ForEachField<::facebook::thrift::compiler::test::fixtures::default_values::TrivialStructWithDefault> {
+  template <typename F, typename... T>
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
+    f(0, static_cast<T&&>(t).int_value_1_ref()...);
+    f(1, static_cast<T&&>(t).int_value_2_ref()...);
+  }
+};
+
+template <>
 struct ForEachField<::facebook::thrift::compiler::test::fixtures::default_values::StructWithNoCustomDefaultValues> {
   template <typename F, typename... T>
   void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
@@ -44,6 +53,8 @@ struct ForEachField<::facebook::thrift::compiler::test::fixtures::default_values
     f(3, static_cast<T&&>(t).unqualified_struct_ref()...);
     f(4, static_cast<T&&>(t).optional_struct_ref()...);
     f(5, static_cast<T&&>(t).required_struct_ref()...);
+    f(6, static_cast<T&&>(t).struct_with_default_unspecified_ref()...);
+    f(7, static_cast<T&&>(t).struct_with_default_specified_ref()...);
   }
 };
 

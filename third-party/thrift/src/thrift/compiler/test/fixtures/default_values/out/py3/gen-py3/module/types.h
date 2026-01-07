@@ -29,6 +29,19 @@ inline void reset_field<::facebook::thrift::compiler::test::fixtures::default_va
 }
 
 template<>
+inline void reset_field<::facebook::thrift::compiler::test::fixtures::default_values::TrivialStructWithDefault>(
+    ::facebook::thrift::compiler::test::fixtures::default_values::TrivialStructWithDefault& obj, uint16_t index) {
+  switch (index) {
+    case 0:
+      obj.int_value_1_ref().copy_from(default_inst<::facebook::thrift::compiler::test::fixtures::default_values::TrivialStructWithDefault>().int_value_1_ref());
+      return;
+    case 1:
+      obj.int_value_2_ref().copy_from(default_inst<::facebook::thrift::compiler::test::fixtures::default_values::TrivialStructWithDefault>().int_value_2_ref());
+      return;
+  }
+}
+
+template<>
 inline void reset_field<::facebook::thrift::compiler::test::fixtures::default_values::StructWithNoCustomDefaultValues>(
     ::facebook::thrift::compiler::test::fixtures::default_values::StructWithNoCustomDefaultValues& obj, uint16_t index) {
   switch (index) {
@@ -75,6 +88,12 @@ inline void reset_field<::facebook::thrift::compiler::test::fixtures::default_va
     case 5:
       obj.required_struct_ref().copy_from(default_inst<::facebook::thrift::compiler::test::fixtures::default_values::StructWithCustomDefaultValues>().required_struct_ref());
       return;
+    case 6:
+      obj.struct_with_default_unspecified_ref().copy_from(default_inst<::facebook::thrift::compiler::test::fixtures::default_values::StructWithCustomDefaultValues>().struct_with_default_unspecified_ref());
+      return;
+    case 7:
+      obj.struct_with_default_specified_ref().copy_from(default_inst<::facebook::thrift::compiler::test::fixtures::default_values::StructWithCustomDefaultValues>().struct_with_default_specified_ref());
+      return;
   }
 }
 
@@ -106,6 +125,16 @@ inline void reset_field<::facebook::thrift::compiler::test::fixtures::default_va
 template<>
 inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct>::namesmap() {
+  static const folly::Indestructible<NamesMap> map {
+    {
+    }
+  };
+  return *map;
+}
+
+template<>
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+    ::facebook::thrift::compiler::test::fixtures::default_values::TrivialStructWithDefault>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
     }

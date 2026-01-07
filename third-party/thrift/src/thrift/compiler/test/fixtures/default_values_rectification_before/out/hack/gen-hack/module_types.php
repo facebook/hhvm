@@ -188,14 +188,14 @@ class TestStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
     $this->unqualified_bool_field = $unqualified_bool_field ?? false;
     $this->unqualified_list_field = $unqualified_list_field ?? Vector {
     };
-    $this->unqualified_struct_field = $unqualified_struct_field;
+    $this->unqualified_struct_field = $unqualified_struct_field ?? \facebook\thrift\compiler\test\fixtures\default_values_rectification_before\EmptyStruct::withDefaultValues();
     $this->optional_int_field = $optional_int_field ?? 42;
     $this->optional_bool_field = $optional_bool_field ?? true;
     $this->optional_list_field = $optional_list_field ?? Vector {
       1,
       2,
     };
-    $this->optional_struct_field = $optional_struct_field;
+    $this->optional_struct_field = $optional_struct_field ?? \facebook\thrift\compiler\test\fixtures\default_values_rectification_before\EmptyStruct::withDefaultValues();
   }
 
   public static function withDefaultValues()[]: this {
@@ -352,37 +352,25 @@ class TestStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
       'fields' => dict[
         'optional_int_field' => shape(
           'field' => dict[
-            '\facebook\thrift\annotation\AllowUnsafeOptionalCustomDefaultValue' => \facebook\thrift\annotation\AllowUnsafeOptionalCustomDefaultValue::fromShape(
-              shape(
-              )
-            ),
+            '\facebook\thrift\annotation\AllowUnsafeOptionalCustomDefaultValue' => \facebook\thrift\annotation\AllowUnsafeOptionalCustomDefaultValue::withDefaultValues(),
           ],
           'type' => dict[],
         ),
         'optional_bool_field' => shape(
           'field' => dict[
-            '\facebook\thrift\annotation\AllowUnsafeOptionalCustomDefaultValue' => \facebook\thrift\annotation\AllowUnsafeOptionalCustomDefaultValue::fromShape(
-              shape(
-              )
-            ),
+            '\facebook\thrift\annotation\AllowUnsafeOptionalCustomDefaultValue' => \facebook\thrift\annotation\AllowUnsafeOptionalCustomDefaultValue::withDefaultValues(),
           ],
           'type' => dict[],
         ),
         'optional_list_field' => shape(
           'field' => dict[
-            '\facebook\thrift\annotation\AllowUnsafeOptionalCustomDefaultValue' => \facebook\thrift\annotation\AllowUnsafeOptionalCustomDefaultValue::fromShape(
-              shape(
-              )
-            ),
+            '\facebook\thrift\annotation\AllowUnsafeOptionalCustomDefaultValue' => \facebook\thrift\annotation\AllowUnsafeOptionalCustomDefaultValue::withDefaultValues(),
           ],
           'type' => dict[],
         ),
         'optional_struct_field' => shape(
           'field' => dict[
-            '\facebook\thrift\annotation\AllowUnsafeOptionalCustomDefaultValue' => \facebook\thrift\annotation\AllowUnsafeOptionalCustomDefaultValue::fromShape(
-              shape(
-              )
-            ),
+            '\facebook\thrift\annotation\AllowUnsafeOptionalCustomDefaultValue' => \facebook\thrift\annotation\AllowUnsafeOptionalCustomDefaultValue::withDefaultValues(),
           ],
           'type' => dict[],
         ),

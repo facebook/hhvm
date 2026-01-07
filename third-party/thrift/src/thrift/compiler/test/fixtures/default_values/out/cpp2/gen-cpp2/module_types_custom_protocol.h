@@ -30,6 +30,13 @@ struct TccStructTraits<::facebook::thrift::compiler::test::fixtures::default_val
       apache::thrift::protocol::TType& _ftype) noexcept;
 };
 template <>
+struct TccStructTraits<::facebook::thrift::compiler::test::fixtures::default_values::TrivialStructWithDefault> {
+  static void translateFieldName(
+      std::string_view _fname,
+      int16_t& fid,
+      apache::thrift::protocol::TType& _ftype) noexcept;
+};
+template <>
 struct TccStructTraits<::facebook::thrift::compiler::test::fixtures::default_values::StructWithNoCustomDefaultValues> {
   static void translateFieldName(
       std::string_view _fname,
@@ -174,6 +181,161 @@ extern template void TrivialStruct::readNoXfer<>(apache::thrift::CompactProtocol
 extern template uint32_t TrivialStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
 extern template uint32_t TrivialStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 extern template uint32_t TrivialStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+
+template <class Protocol_>
+void TrivialStructWithDefault::readNoXfer(Protocol_* iprot) {
+  __fbthrift_clear_terse_fields();
+
+  apache::thrift::detail::ProtocolReaderStructReadState<Protocol_> _readState;
+
+  _readState.readStructBegin(iprot);
+
+  using apache::thrift::TProtocolException;
+
+
+  if (UNLIKELY(!_readState.advanceToNextField(
+          iprot,
+          0,
+          1,
+          apache::thrift::protocol::T_I32))) {
+    goto _advance_failure;
+  }
+_readField_int_value_1:
+  {
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t>::readWithContext(*iprot, this->__fbthrift_field_int_value_1, _readState);
+  }
+ this->__isset.set(0, true);
+
+  if (UNLIKELY(!_readState.advanceToNextField(
+          iprot,
+          1,
+          2,
+          apache::thrift::protocol::T_I32))) {
+    goto _advance_failure;
+  }
+_readField_int_value_2:
+  {
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t>::readWithContext(*iprot, this->__fbthrift_field_int_value_2, _readState);
+  }
+ this->__isset.set(1, true);
+
+  if (UNLIKELY(!_readState.advanceToNextField(
+          iprot,
+          2,
+          0,
+          apache::thrift::protocol::T_STOP))) {
+    goto _advance_failure;
+  }
+
+_end:
+  _readState.readStructEnd(iprot);
+
+  return;
+
+  goto _advance_failure; // Avoid compiler warnings about unused labels.
+  _advance_failure:
+  _readState.afterAdvanceFailure(iprot);
+_loop:
+  if (_readState.atStop()) {
+    goto _end;
+  }
+  if (iprot->kUsesFieldNames()) {
+    _readState.template fillFieldTraitsFromName<apache::thrift::detail::TccStructTraits<TrivialStructWithDefault>>();
+  }
+
+  switch (_readState.fieldId) {
+    case 1:
+    {
+      if (LIKELY(_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_I32))) {
+        goto _readField_int_value_1;
+      } else {
+        goto _skip;
+      }
+    }
+    case 2:
+    {
+      if (LIKELY(_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_I32))) {
+        goto _readField_int_value_2;
+      } else {
+        goto _skip;
+      }
+    }
+    default:
+    {
+_skip:
+      _readState.skip(iprot);
+      _readState.readFieldEnd(iprot);
+      _readState.readFieldBeginNoInline(iprot);
+      goto _loop;
+    }
+  }
+}
+
+template <class Protocol_>
+uint32_t TrivialStructWithDefault::serializedSize(Protocol_ const* prot_) const {
+  uint32_t xfer = 0;
+  xfer += prot_->serializedStructSize("TrivialStructWithDefault");
+  {
+    xfer += prot_->serializedFieldSize("int_value_1", apache::thrift::protocol::T_I32, 1);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t>::serializedSize<false>(*prot_, this->__fbthrift_field_int_value_1);
+  }
+  {
+    xfer += prot_->serializedFieldSize("int_value_2", apache::thrift::protocol::T_I32, 2);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t>::serializedSize<false>(*prot_, this->__fbthrift_field_int_value_2);
+  }
+  xfer += prot_->serializedSizeStop();
+  return xfer;
+}
+
+template <class Protocol_>
+uint32_t TrivialStructWithDefault::serializedSizeZC(Protocol_ const* prot_) const {
+  uint32_t xfer = 0;
+  xfer += prot_->serializedStructSize("TrivialStructWithDefault");
+  {
+    xfer += prot_->serializedFieldSize("int_value_1", apache::thrift::protocol::T_I32, 1);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t>::serializedSize<false>(*prot_, this->__fbthrift_field_int_value_1);
+  }
+  {
+    xfer += prot_->serializedFieldSize("int_value_2", apache::thrift::protocol::T_I32, 2);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t>::serializedSize<false>(*prot_, this->__fbthrift_field_int_value_2);
+  }
+  xfer += prot_->serializedSizeStop();
+  return xfer;
+}
+
+template <class Protocol_>
+uint32_t TrivialStructWithDefault::write(Protocol_* prot_) const {
+  uint32_t xfer = 0;
+  xfer += prot_->writeStructBegin("TrivialStructWithDefault");
+  bool previousFieldHasValue = true;
+  {
+    constexpr int16_t kPrevFieldId = 0;
+    xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_I32, 1, kPrevFieldId>(*prot_, "int_value_1", previousFieldHasValue);
+    previousFieldHasValue = true;
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t>::write(*prot_, this->__fbthrift_field_int_value_1);
+    xfer += prot_->writeFieldEnd();
+  }
+  {
+    constexpr int16_t kPrevFieldId = 1;
+    xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_I32, 2, kPrevFieldId>(*prot_, "int_value_2", previousFieldHasValue);
+    previousFieldHasValue = true;
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t>::write(*prot_, this->__fbthrift_field_int_value_2);
+    xfer += prot_->writeFieldEnd();
+  }
+  xfer += prot_->writeFieldStop();
+  xfer += prot_->writeStructEnd();
+  return xfer;
+}
+
+extern template void TrivialStructWithDefault::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+extern template uint32_t TrivialStructWithDefault::write<>(apache::thrift::BinaryProtocolWriter*) const;
+extern template uint32_t TrivialStructWithDefault::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+extern template uint32_t TrivialStructWithDefault::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+extern template void TrivialStructWithDefault::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+extern template uint32_t TrivialStructWithDefault::write<>(apache::thrift::CompactProtocolWriter*) const;
+extern template uint32_t TrivialStructWithDefault::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+extern template uint32_t TrivialStructWithDefault::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
 template <class Protocol_>
@@ -579,6 +741,36 @@ _readField_required_struct:
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
           6,
+          7,
+          apache::thrift::protocol::T_STRUCT))) {
+    goto _advance_failure;
+  }
+_readField_struct_with_default_unspecified:
+  {
+    _readState.beforeSubobject(iprot);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::compiler::test::fixtures::default_values::TrivialStructWithDefault>::readWithContext(*iprot, this->__fbthrift_field_struct_with_default_unspecified, _readState);
+    _readState.afterSubobject(iprot);
+  }
+ this->__isset.set(4, true);
+
+  if (UNLIKELY(!_readState.advanceToNextField(
+          iprot,
+          7,
+          8,
+          apache::thrift::protocol::T_STRUCT))) {
+    goto _advance_failure;
+  }
+_readField_struct_with_default_specified:
+  {
+    _readState.beforeSubobject(iprot);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::compiler::test::fixtures::default_values::TrivialStructWithDefault>::readWithContext(*iprot, this->__fbthrift_field_struct_with_default_specified, _readState);
+    _readState.afterSubobject(iprot);
+  }
+ this->__isset.set(5, true);
+
+  if (UNLIKELY(!_readState.advanceToNextField(
+          iprot,
+          8,
           0,
           apache::thrift::protocol::T_STOP))) {
     goto _advance_failure;
@@ -649,6 +841,22 @@ _loop:
         goto _skip;
       }
     }
+    case 7:
+    {
+      if (LIKELY(_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_STRUCT))) {
+        goto _readField_struct_with_default_unspecified;
+      } else {
+        goto _skip;
+      }
+    }
+    case 8:
+    {
+      if (LIKELY(_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_STRUCT))) {
+        goto _readField_struct_with_default_specified;
+      } else {
+        goto _skip;
+      }
+    }
     default:
     {
 _skip:
@@ -688,6 +896,14 @@ uint32_t StructWithCustomDefaultValues::serializedSize(Protocol_ const* prot_) c
     xfer += prot_->serializedFieldSize("required_struct", apache::thrift::protocol::T_STRUCT, 6);
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct>::serializedSize<false>(*prot_, this->__fbthrift_field_required_struct);
   }
+  {
+    xfer += prot_->serializedFieldSize("struct_with_default_unspecified", apache::thrift::protocol::T_STRUCT, 7);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::compiler::test::fixtures::default_values::TrivialStructWithDefault>::serializedSize<false>(*prot_, this->__fbthrift_field_struct_with_default_unspecified);
+  }
+  {
+    xfer += prot_->serializedFieldSize("struct_with_default_specified", apache::thrift::protocol::T_STRUCT, 8);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::compiler::test::fixtures::default_values::TrivialStructWithDefault>::serializedSize<false>(*prot_, this->__fbthrift_field_struct_with_default_specified);
+  }
   xfer += prot_->serializedSizeStop();
   return xfer;
 }
@@ -719,6 +935,14 @@ uint32_t StructWithCustomDefaultValues::serializedSizeZC(Protocol_ const* prot_)
   {
     xfer += prot_->serializedFieldSize("required_struct", apache::thrift::protocol::T_STRUCT, 6);
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct>::serializedSize<true>(*prot_, this->__fbthrift_field_required_struct);
+  }
+  {
+    xfer += prot_->serializedFieldSize("struct_with_default_unspecified", apache::thrift::protocol::T_STRUCT, 7);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::compiler::test::fixtures::default_values::TrivialStructWithDefault>::serializedSize<true>(*prot_, this->__fbthrift_field_struct_with_default_unspecified);
+  }
+  {
+    xfer += prot_->serializedFieldSize("struct_with_default_specified", apache::thrift::protocol::T_STRUCT, 8);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::compiler::test::fixtures::default_values::TrivialStructWithDefault>::serializedSize<true>(*prot_, this->__fbthrift_field_struct_with_default_specified);
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -773,6 +997,20 @@ uint32_t StructWithCustomDefaultValues::write(Protocol_* prot_) const {
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 6, kPrevFieldId>(*prot_, "required_struct", previousFieldHasValue);
     previousFieldHasValue = true;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct>::write(*prot_, this->__fbthrift_field_required_struct);
+    xfer += prot_->writeFieldEnd();
+  }
+  {
+    constexpr int16_t kPrevFieldId = 6;
+    xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 7, kPrevFieldId>(*prot_, "struct_with_default_unspecified", previousFieldHasValue);
+    previousFieldHasValue = true;
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::compiler::test::fixtures::default_values::TrivialStructWithDefault>::write(*prot_, this->__fbthrift_field_struct_with_default_unspecified);
+    xfer += prot_->writeFieldEnd();
+  }
+  {
+    constexpr int16_t kPrevFieldId = 7;
+    xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 8, kPrevFieldId>(*prot_, "struct_with_default_specified", previousFieldHasValue);
+    previousFieldHasValue = true;
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::compiler::test::fixtures::default_values::TrivialStructWithDefault>::write(*prot_, this->__fbthrift_field_struct_with_default_specified);
     xfer += prot_->writeFieldEnd();
   }
   xfer += prot_->writeFieldStop();

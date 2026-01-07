@@ -315,3 +315,48 @@ class TestFindMyTests(test_case.TestCase[common_tests.CommonTestDriver]):
             ],
             max_distance=10,
         )
+
+    def test_duplicates(self) -> None:
+        """Tests two kinds of duplication:
+        - Passing the same root twice
+        - Having a method call an existing method in the graph twice
+
+        Uses files from g/ subdirectory
+        """
+        prefix = os.path.join(self.test_driver.repo_dir, "g", "__tests__")
+
+        self.check_has_tests_with_distances(
+            prefix=prefix,
+            symbols=["G_Root::duplicateRoot", "G_Root::duplicateRoot"],
+            expected_test_files=[("G_DuplicateTest.php", 3)],
+            max_distance=10,
+        )
+
+    def test_cycle(self) -> None:
+        """Tests that cycles in the call graph do not cause issues.
+
+        Uses files from g/ subdirectory
+        """
+        prefix = os.path.join(self.test_driver.repo_dir, "g", "__tests__")
+
+        self.check_has_tests_with_distances(
+            prefix=prefix,
+            symbols=["G_Root::cycleRoot"],
+            expected_test_files=[("G_CycleTest.php", 3)],
+            max_distance=10,
+        )
+
+    def test_multi_path(self) -> None:
+        """Tests that when there are multiple paths to the same method,
+        we use the shortest distance.
+
+        Uses files from g/ subdirectory.
+        """
+        prefix = os.path.join(self.test_driver.repo_dir, "g", "__tests__")
+
+        self.check_has_tests_with_distances(
+            prefix=prefix,
+            symbols=["G_Root::multiPathRoot"],
+            expected_test_files=[("G_MultiPathTest.php", 3)],
+            max_distance=10,
+        )

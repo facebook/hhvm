@@ -305,13 +305,18 @@ module Symbol_def = struct
         (** Invariant: The symbol's  constructor name matches that of the reason:
             (e.g., a Symbol_def.Method is matched with a Reason.Method) *)
   }
-  [@@deriving show, sexp, hash]
+  [@@deriving show, sexp, hash, ord]
 
   let class_from_name ctx class_name reason : with_strategy =
     let decl = get_class_decl_entry ctx class_name in
     let kind = Folded_class.kind decl in
     let strategy = Expansion_strategy.of_reason reason in
     { symbol_def = Classish { name = class_name; kind }; strategy }
+
+  (* Just here for Hash_set *)
+  module With_reason = struct
+    type t = with_reason [@@deriving sexp, hash, ord]
+  end
 end
 
 open Symbol_def
@@ -1106,8 +1111,13 @@ module Selection_graph = struct
         let new_distance = distance + 1 in
         (match get_successors ~ctx ~genv ~env symbol_s with
         | Result.Ok (referencing_defs, referencing_test_files) ->
-          List.iter
-            referencing_defs
+          (* referencing_defs may include duplicates.
+             We need to skip them to avoid creating duplicate edges between nodes *)
+          let referencing_defs_dedup =
+            Hash_set.of_list (module Symbol_def.With_reason) referencing_defs
+          in
+          Hash_set.iter
+            referencing_defs_dedup
             ~f:(fun { symbol_def = referencing_def; reason } ->
               let referencing_symbol_s : Symbol_def.with_strategy =
                 {

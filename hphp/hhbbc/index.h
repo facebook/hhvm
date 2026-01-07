@@ -162,8 +162,14 @@ struct PropStateElem {
       attrs == o.attrs &&
       everModified == o.everModified;
   }
+  template <typename SerDe> void serde(SerDe& sd) {
+    sd(ty)
+      (attrs)
+      (everModified)
+      ;
+  }
 };
-using PropState = std::map<LSString,PropStateElem>;
+using PropState = std::map<LSString, PropStateElem, string_data_lt>;
 
 /*
  * The result of Index::lookup_static
@@ -194,6 +200,19 @@ inline PropLookupResult& operator|=(PropLookupResult& a,
   return a;
 }
 
+inline PropLookupResult& operator&=(PropLookupResult& a,
+                                    const PropLookupResult& b) {
+  assertx(a.name == b.name);
+  a.ty &= b.ty;
+  a.found &= b.found;
+  a.isConst &= b.isConst;
+  a.readOnly &= b.readOnly;
+  a.lateInit &= b.lateInit;
+  a.internal &= b.internal;
+  a.classInitMightRaise &= b.classInitMightRaise;
+  return a;
+}
+
 std::string show(const PropLookupResult&);
 
 /*
@@ -211,6 +230,13 @@ inline PropMergeResult& operator|=(PropMergeResult& a,
                                    const PropMergeResult& b) {
   a.adjusted |= b.adjusted;
   a.throws |= b.throws;
+  return a;
+}
+
+inline PropMergeResult& operator&=(PropMergeResult& a,
+                                   const PropMergeResult& b) {
+  a.adjusted &= b.adjusted;
+  a.throws &= b.throws;
   return a;
 }
 
@@ -2041,7 +2067,7 @@ struct AnalysisDeps {
   // Some dependencies (for example, functions) can have multiple
   // "types" (IE, return-type, bytecode, etc). A class or func's
   // dependency on a function will be some union of these types.
-  enum Type : uint8_t {
+  enum Type : uint16_t {
     None          = 0,
     // The existence of this thing and basic metadata and nothing
     // more.
@@ -2057,7 +2083,12 @@ struct AnalysisDeps {
     // Bytecode of class or function
     Bytecode      = (1 << 5),
     // Use vars of a closure
-    UseVars       = (1 << 6)
+    UseVars       = (1 << 6),
+    // Whether a class might raise when being initialized
+    ClassInitMightRaise = (1 << 7),
+    // The initial (non-scalar) value of any property on the class
+    // (per-property granularity not necessary).
+    PropInitVals = (1 << 8)
   };
 
   // Some types can change as a result of analysis and hence can
@@ -2070,7 +2101,9 @@ struct AnalysisDeps {
     Type::RetParam |
     Type::UnusedParams |
     Type::Bytecode |
-    Type::UseVars
+    Type::UseVars |
+    Type::ClassInitMightRaise |
+    Type::PropInitVals
   );
 
   static constexpr bool isValidForChanges(Type t) {
@@ -2087,11 +2120,42 @@ struct AnalysisDeps {
   // Dependency on an unspecified class constant (name is the class).
   struct AnyClassConstant { SString name; };
 
+  // Dependency on a specific property of a class (whether static or instance).
+  struct Property {
+    SString cls;   // Class name
+    SString prop;  // Property name
+    bool operator==(const Property& o) const {
+      return cls->tsame(o.cls) && prop == o.prop;
+    }
+    bool operator<(const Property& o) const {
+      if (string_data_lt_type{}(cls, o.cls)) return true;
+      if (string_data_lt_type{}(o.cls, cls)) return false;
+      return string_data_lt{}(prop, o.prop);
+    }
+    struct Hasher {
+      size_t operator()(const Property& p) const {
+        return folly::hash::hash_combine(
+          p.cls->hash(),
+          p.prop->hash()
+        );
+      }
+    };
+    template <typename SerDe> void serde(SerDe& sd) {
+      sd(cls)(prop);
+    }
+  };
+  // Dependency on any property changes from a class. Used when property name
+  // is unknown or for bulk operations.
+  struct AnyProperty { SString cls; };
+
   Type add(Class, Type);
 
   bool add(ConstIndex, bool inTypeCns);
   bool add(Constant);
   bool add(AnyClassConstant, bool inTypeCns);
+
+  bool add(Property);
+  bool add(AnyProperty);
 
   Type add(const php::Func&, Type);
   Type add(MethRef, Type);
@@ -2110,6 +2174,8 @@ struct AnalysisDeps {
       (constants, string_data_lt{})
       (typeCnsClsConstants, std::less<>{})
       (typeCnsAnyClsConstants, string_data_lt_type{})
+      (properties, std::less<>{})
+      (anyProperties, string_data_lt_type{})
       ;
   }
 
@@ -2124,6 +2190,9 @@ private:
 
   hphp_fast_set<ConstIndex, ConstIndex::Hasher> typeCnsClsConstants;
   TSStringSet typeCnsAnyClsConstants;
+
+  hphp_fast_set<Property, Property::Hasher> properties;
+  TSStringSet anyProperties;
 
   static Type merge(Type&, Type);
 
@@ -2178,11 +2247,13 @@ std::string show(AnalysisDeps::Type);
 struct AnalysisChangeSet {
   using Type = AnalysisDeps::Type;
   using Class = AnalysisDeps::Class;
+  using Property = AnalysisDeps::Property;
 
   void changed(ConstIndex);
   void changed(const php::Constant&);
   void changed(const php::Class&, Type);
   void changed(const php::Func&, Type);
+  void changed(const php::Class&, const php::Prop&);
 
   void fixed(ConstIndex);
   void fixed(const php::Class&);
@@ -2207,6 +2278,7 @@ struct AnalysisChangeSet {
       (fixedClsConstants, std::less<>{})
       (allClsConstantsFixed, string_data_lt_type{})
       (unitsFixed, string_data_lt{})
+      (properties, std::less<>{})
       (clsTypeCnsNames, string_data_lt_type{}, string_data_lt_type{})
       (unitTypeCnsNames, string_data_lt{}, string_data_lt_type{})
       ;
@@ -2220,6 +2292,7 @@ private:
   hphp_fast_set<ConstIndex, ConstIndex::Hasher> fixedClsConstants;
   TSStringSet allClsConstantsFixed;
   SStringSet unitsFixed;
+  hphp_fast_set<Property, Property::Hasher> properties;
 
   TSStringToOneT<TSStringSet> clsTypeCnsNames;
   TSStringToOneT<TSStringSet> unitTypeCnsNames;
@@ -2555,6 +2628,7 @@ private:
     boost::dynamic_bitset<> cnsChanges;
     boost::dynamic_bitset<> cnsFixed;
     TSStringSet typeCnsNames;
+    SStringSet propertyChanges;
     bool allCnsFixed{false};
   };
   struct UnitState {
@@ -2814,6 +2888,13 @@ struct AnalysisIndex {
   PropState lookup_private_statics(const php::Class&) const;
   PropState lookup_public_statics(const php::Class&) const;
 
+  PropLookupResult lookup_static(Context,
+                                 const PropertiesInfo&,
+                                 const Type&,
+                                 const Type&) const;
+
+  Type lookup_public_prop(const Type&, const Type&) const;
+
   Index::ReturnType lookup_return_type(MethodsInfo*, res::Func) const;
   Index::ReturnType lookup_return_type(MethodsInfo*,
                                        const CompactVector<Type>&,
@@ -2842,7 +2923,8 @@ struct AnalysisIndex {
   Slot lookup_iface_vtable_slot(const php::Class&) const;
 
   PropMergeResult
-  merge_static_type(PublicSPropMutations&,
+  merge_static_type(Context,
+                    PublicSPropMutations&,
                     PropertiesInfo&,
                     const Type&,
                     const Type&,
@@ -2855,6 +2937,8 @@ struct AnalysisIndex {
   void refine_class_constants(const FuncAnalysisResult&);
   void refine_return_info(const FuncAnalysisResult&);
   void refine_closure_use_vars(const FuncAnalysisResult&);
+  void refine_private_props(const ClassAnalysis&);
+  void refine_private_statics(const ClassAnalysis&);
   void update_prop_initial_values(const FuncAnalysisResult&);
   void update_type_consts(const ClassAnalysis&);
   void update_bytecode(FuncAnalysisResult&);
@@ -2881,12 +2965,23 @@ private:
   template <typename P, typename G>
   res::Func rfunc_from_dcls(const DCls&, SString, const P&, const G&) const;
 
+  template <typename F, typename I, typename M>
+  bool visit_prop_decls(const DCls&,
+                        SString,
+                        const F&,
+                        const I&,
+                        const M&) const;
+
   Type unserialize_type(Type) const;
   Type serialize_type(Type) const;
 
   Index::ReturnType return_type_for_func(const php::Func&) const;
   ClsConstInfo info_for_class_constant(const php::Class&,
                                        const php::Const&) const;
+
+  void refine_private_propstate(const php::Class&,
+                                const PropState&,
+                                PropState&) const;
 
   friend struct AnalysisIndexAdaptor;
 };

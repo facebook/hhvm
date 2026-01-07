@@ -279,7 +279,7 @@ using ContextRetTyMap = tbb::concurrent_hash_map<
 //////////////////////////////////////////////////////////////////////
 
 template<typename Filter>
-PropState make_unknown_propstate(const IIndex& index,
+PropState make_unknown_propstate(const Index& index,
                                  const php::Class& cls,
                                  Filter filter) {
   auto ret = PropState{};
@@ -287,7 +287,7 @@ PropState make_unknown_propstate(const IIndex& index,
     if (filter(prop)) {
       auto& elem = ret[prop.name];
       elem.ty = adjust_type_for_prop(
-        index,
+        IndexAdaptor { index },
         cls,
         &prop.typeConstraints,
         TCell
@@ -417,6 +417,11 @@ struct InferredClassInfo {
 
   // If this is a closure, the best known types of its use-vars.
   CompactVector<Type> useVars;
+
+  // Inferred information about this class' private properties and
+  // statics.
+  PropState privateProps;
+  PropState privateStatics;
 
   template <typename SerDe> void serde(SerDe&);
 };
@@ -727,6 +732,8 @@ template <typename SerDe> void InferredClassInfo::serde(SerDe& sd) {
   ScopedStringDataIndexer _;
   sd(clsConstantInfo, string_data_lt{})
     (useVars)
+    (privateProps)
+    (privateStatics)
     ;
 }
 
@@ -4582,6 +4589,31 @@ struct ClassInfo2 {
   };
   SStringToOneT<ConstIndexAndKind> clsConstants;
 
+  // Metadata tracking where a property is declared across the class
+  // hierarchy. For a given property name, this allows one to
+  // identify all relevant declaring classes without walking entire
+  // hierarchies, which is expensive.
+  //
+  // If there's no entry for a property in the map, the property
+  // cannot be present. If there's an entry, but decl and subDecls are
+  // empty, it means the property isn't declared on this class (or
+  // parents), but at least one subclass does. We are pessimistic in
+  // that case. This saves space in the table and such accesses
+  // shouldn't type-check anyways.
+  struct PropDeclInfo {
+    // The class that declares this property (if any)
+    SString decl{nullptr};
+    // Subclasses that also declare/override this property
+    TSStringSet subDecls;
+
+    template <typename SerDe> void serde(SerDe& sd) {
+      sd(decl)
+        (subDecls, string_data_lt_type{})
+        ;
+    }
+  };
+  SStringToOneT<PropDeclInfo> propDeclInfo;
+
   /*
    * Inferred information about this class
    */
@@ -4758,6 +4790,7 @@ struct ClassInfo2 {
     sd(name)
       (parent)
       (clsConstants, string_data_lt{})
+      (propDeclInfo, string_data_lt{})
       (inferred)
       (traitProps)
       (methods, string_data_lt{})
@@ -6532,6 +6565,8 @@ struct DepTracker {
   using Class = AnalysisDeps::Class;
   using Constant = AnalysisDeps::Constant;
   using AnyClassConstant = AnalysisDeps::AnyClassConstant;
+  using Property = AnalysisDeps::Property;
+  using AnyProperty = AnalysisDeps::AnyProperty;
 
   // Register dependencies on various entities to the current
   // dependency context.
@@ -6631,6 +6666,41 @@ struct DepTracker {
     }
   }
 
+  void add(Property prop) {
+    auto const fc = context();
+    if (index.frozen) {
+      if (auto const c = fc.cls()) {
+        if (c->name->tsame(prop.cls)) return;
+      }
+      if (deps[fc].add(prop)) {
+        FTRACE(2, "{} now depends on property {}::{}\n",
+               HHBBC::show(fc), prop.cls, prop.prop);
+      }
+    } else if (auto const cls = folly::get_default(index.classes, prop.cls)) {
+      for (auto const& p : cls->properties) {
+        if (p.name == prop.prop) {
+          properties[&p].emplace(fc);
+          break;
+        }
+      }
+    }
+  }
+
+  void add(AnyProperty prop) {
+    auto const fc = context();
+    if (index.frozen) {
+      if (auto const c = fc.cls()) {
+        if (c->name->tsame(prop.cls)) return;
+      }
+      if (deps[fc].add(prop)) {
+        FTRACE(2, "{} now depends on any property from {}\n",
+               HHBBC::show(fc), prop.cls);
+      }
+    } else if (auto const cls = folly::get_default(index.classes, prop.cls)) {
+      anyProperties[cls].emplace(fc);
+    }
+  }
+
   void add(ConstIndex cns) {
     auto const fc = context();
     if (index.frozen) {
@@ -6714,6 +6784,14 @@ struct DepTracker {
     if (auto const p = folly::get_default(index.classes, idx.cls)) {
       schedule(folly::get_ptr(anyClsConstants, p));
     }
+  }
+
+  void update(const php::Class& cls, const php::Prop& prop) {
+    assertx(!index.frozen);
+    FTRACE(2, "property {}::{} changed, scheduling\n", cls.name, prop.name);
+    changes.changed(cls, prop);
+    schedule(folly::get_ptr(properties, &prop));
+    schedule(folly::get_ptr(anyProperties, &cls));
   }
 
   void update(const php::Constant& cns) {
@@ -6874,6 +6952,8 @@ private:
   hphp_fast_map<const php::Const*, FuncClsUnitSet> clsConstants;
   hphp_fast_map<const php::Constant*, FuncClsUnitSet> constants;
   hphp_fast_map<const php::Class*, FuncClsUnitSet> anyClsConstants;
+  hphp_fast_map<const php::Prop*, FuncClsUnitSet> properties;
+  hphp_fast_map<const php::Class*, FuncClsUnitSet> anyProperties;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -7034,6 +7114,41 @@ RetainedInfo* retained_for_context(AnalysisIndex::IndexData& index) {
   } else {
     return nullptr;
   }
+}
+
+//////////////////////////////////////////////////////////////////////
+
+template<typename Filter>
+PropState make_unknown_propstate(const AnalysisIndex::IndexData& index,
+                                 const php::Class& cls,
+                                 Filter filter) {
+  auto ret = PropState{};
+  for (auto& prop : cls.properties) {
+    if (filter(prop)) {
+      auto& elem = ret[prop.name];
+      elem.ty = adjust_type_for_prop(
+        AnalysisIndexAdaptor { index.index },
+        cls,
+        &prop.typeConstraints,
+        TCell
+      );
+      if (prop.attrs & AttrSystemInitialValue) {
+        if (type(prop.val) == KindOfUninit) {
+          index.deps->add(
+            AnalysisDeps::Class { cls.name },
+            AnalysisDeps::Type::PropInitVals
+          );
+        }
+        auto initial = loosen_all(from_cell(prop.val));
+        if (!initial.subtypeOf(BUninit)) elem.ty |= initial;
+      }
+      elem.tc = &prop.typeConstraints;
+      elem.attrs = prop.attrs;
+      elem.everModified = true;
+    }
+  }
+
+  return ret;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -8792,6 +8907,33 @@ Type initial_type_for_public_sprop(const Index& index,
   );
 }
 
+Type initial_type_for_public_sprop(const AnalysisIndex::IndexData& index,
+                                   const php::Class& cls,
+                                   const php::Prop& prop) {
+  /*
+   * If the initializer type is TUninit, it means an 86sinit provides
+   * the actual initialization type or it is AttrLateInit. So we don't
+   * want to include the Uninit (which isn't really a user-visible
+   * type for the property) or by the time we union things in we'll
+   * have inferred nothing much.
+   */
+  auto const ty = from_cell(prop.val);
+  if (ty.subtypeOf(BUninit)) {
+    index.deps->add(
+      AnalysisDeps::Class { cls.name },
+      AnalysisDeps::Type::PropInitVals
+    );
+    return TBottom;
+  }
+  if (prop.attrs & AttrSystemInitialValue) return ty;
+  return adjust_type_for_prop(
+    AnalysisIndexAdaptor { index.index },
+    cls,
+    &prop.typeConstraints,
+    ty
+  );
+}
+
 Type lookup_public_prop_impl(
   const IndexData& data,
   const ClassInfo* cinfo,
@@ -8835,8 +8977,9 @@ Type lookup_public_prop_impl(
 
 // Test if the given property (declared in `cls') is accessible in the
 // given context (null if we're not in a class).
-bool static_is_accessible(const ClassInfo* clsCtx,
-                          const ClassInfo* cls,
+template <typename C>
+bool static_is_accessible(const C* clsCtx,
+                          const C* cls,
                           const php::Prop& prop) {
   assertx(prop.attrs & AttrStatic);
   switch (prop.attrs & (AttrPublic|AttrProtected|AttrPrivate)) {
@@ -8878,14 +9021,88 @@ bool class_init_might_raise(IndexData& data,
   return false;
 }
 
+// Return true if the given class can possibly throw when its
+// initialized. Initialization can happen when an object of that class
+// is instantiated, or when static properties are accessed. Registers
+// dependencies on parent classes to ensure they're re-analyzed if
+// initialization behavior changes.
+bool class_init_might_raise(AnalysisIndex::IndexData& index,
+                            const DCls& dcls) {
+  // Check this class and all of its parents for possible inequivalent
+  // redeclarations or bad initial values.
+  auto const walk = [&] (const ClassInfo2& cinfo) {
+    auto might = false;
+
+    cinfo.classGraph.walkParents(
+      [&] (ClassGraph parent) {
+        parent.ensureCInfo();
+        auto const pinfo = parent.cinfo2();
+        if (!pinfo) {
+          might = true;
+          // Keep going so we can record as many dependencies as we
+          // can.
+          return true;
+        }
+        // Be conservative for now if we have unflattened traits.
+        if (!pinfo->traitProps.empty()) {
+          might = true;
+          return false;
+        }
+        if (pinfo->hasBadRedeclareProp) {
+          might = true;
+          return false;
+        }
+        // This is the only thing which can actually change from
+        // analysis
+        if (pinfo->hasBadInitialPropValues) {
+          // Only register the dependency if it is true. If it is
+          // false, then it must stay false, so there's no need for a
+          // specific dependency on it.
+          index.deps->add(
+            AnalysisDeps::Class { pinfo->name },
+            AnalysisDeps::Type::ClassInitMightRaise
+          );
+          might = true;
+          return false;
+        }
+        return true;
+      }
+    );
+
+    return might;
+  };
+
+  auto const onRCls = [&] (res::Class rcls) {
+    rcls.graph().ensureCInfo();
+    auto const cinfo = rcls.graph().cinfo2();
+    if (!cinfo) return true;
+    return walk(*cinfo);
+  };
+
+  if (dcls.isExact() || dcls.isSub()) {
+    return onRCls(dcls.cls());
+  } else if (dcls.isIsect()) {
+    auto const& isect = dcls.isect();
+    assertx(isect.size() > 1);
+    auto might = true;
+    for (auto const r : isect) might &= onRCls(r);
+    return might;
+  } else {
+    // Even though this has an intersection list, it must be the exact
+    // class, so it's sufficient to process that.
+    assertx(dcls.isIsectAndExact());
+    return onRCls(dcls.isectAndExact().first);
+  }
+}
+
 /*
  * Calculate the effects of applying the given type against the
  * type-constraints for the given prop. This includes the subtype
  * which will succeed (if any), and if the type-constraint check might
  * throw.
  */
-PropMergeResult prop_tc_effects(const Index& index,
-                                const ClassInfo* ci,
+PropMergeResult prop_tc_effects(const IIndex& index,
+                                const php::Class& cls,
                                 const php::Prop& prop,
                                 const Type& val,
                                 bool checkUB) {
@@ -8897,26 +9114,23 @@ PropMergeResult prop_tc_effects(const Index& index,
   // goes
   if (Cfg::Eval::CheckPropTypeHints <= 0) return R{ val, TriBool::No };
 
-  auto const ctx = Context { nullptr, nullptr, ci->cls };
+  auto const ctx = Context { nullptr, nullptr, &cls };
 
   auto const check = [&] (const TypeConstraint& tc, const Type& t) {
     // If the type as is satisfies the constraint, we won't throw and
     // the type is unchanged.
-    if (t.moreRefined(
-          lookup_constraint(IndexAdaptor { index }, ctx, tc, t).lower)
-       ) {
-    return R{ t, TriBool:: No };
+    if (t.moreRefined(lookup_constraint(index, ctx, tc, t).lower)) {
+      return R{ t, TriBool:: No };
     }
     // Otherwise adjust the type. If we get a Bottom we'll definitely
     // throw. We already know the type doesn't completely satisfy the
     // constraint, so we'll at least maybe throw.
-    auto adjusted =
-      adjust_type_for_prop(IndexAdaptor { index }, *ctx.cls, tc, t);
+    auto adjusted = adjust_type_for_prop(index, *ctx.cls, tc, t);
     auto const throws = yesOrMaybe(adjusted.subtypeOf(BBottom));
     return R{ std::move(adjusted), throws };
   };
 
-  R result(val, TriBool::No);
+  R result{val, TriBool::No};
   for (auto const& tc : prop.typeConstraints.range()) {
     if (checkUB || !tc.isUpperBound()) {
       // Otherwise check every eligible type constraint. We'll feed the
@@ -8925,7 +9139,7 @@ PropMergeResult prop_tc_effects(const Index& index,
       auto r = check(tc, result.adjusted);
       result.throws &= r.throws;
       result.adjusted = std::move(r.adjusted);
-		  if (result.throws == TriBool::Yes) break;
+      if (result.throws == TriBool::Yes) break;
     }
   }
   return result;
@@ -8974,15 +9188,22 @@ PropLookupResult lookup_static_impl(IndexData& data,
               &prop.typeConstraints,
               TInitCell
             ),
-            initial_type_for_public_sprop(*data.m_index, *ci->cls, prop)
+            initial_type_for_public_sprop(
+              *data.m_index,
+              *ci->cls, prop
+            )
           );
         }
         auto const it = ci->publicStaticProps.find(propName);
         if (it == end(ci->publicStaticProps)) {
-          // We've recorded mutations, but have information for this
-          // property. That means there's no mutations so only
+          // We've recorded mutations, but have no information for
+          // this property. That means there's no mutations so only
           // consider the initial value.
-          return initial_type_for_public_sprop(*data.m_index, *ci->cls, prop);
+          return initial_type_for_public_sprop(
+            *data.m_index,
+            *ci->cls,
+            prop
+          );
         }
         return it->second.inferredType;
       }
@@ -9137,7 +9358,13 @@ PropMergeResult merge_static_type_impl(IndexData& data,
   // effects of that merge.
   auto const merge = [&] (const php::Prop& prop, const ClassInfo* ci) {
     // First calculate the effects of the type-constraint.
-    auto const effects = prop_tc_effects(*data.m_index, ci, prop, val, checkUB);
+    auto const effects = prop_tc_effects(
+      IndexAdaptor { *data.m_index },
+      *ci->cls,
+      prop,
+      val,
+      checkUB
+    );
     // No point in merging if the type-constraint will always fail.
     if (effects.throws == TriBool::Yes) {
       ITRACE(
@@ -10800,6 +11027,9 @@ private:
       auto const& parentState = index.state(cls.parentName);
       state.m_props = parentState.m_props;
       state.m_propIndices = parentState.m_propIndices;
+
+      assertx(cinfo.propDeclInfo.empty());
+      cinfo.propDeclInfo = index.classInfo(cls.parentName).propDeclInfo;
     }
 
     for (auto const iface : cls.interfaceNames) {
@@ -10869,11 +11099,17 @@ private:
                            const php::Prop& prop,
                            SString src,
                            bool trait) {
+    auto& dinfo = cinfo.propDeclInfo[name];
+
     auto const [it, emplaced] =
       state.m_propIndices.emplace(name, state.m_props.size());
     if (emplaced) {
       state.m_props.emplace_back(State::PropTuple{name, src, prop});
       if (trait) cinfo.traitProps.emplace_back(prop);
+
+      assertx(!dinfo.decl);
+      assertx(dinfo.subDecls.empty());
+      dinfo.decl = src;
       return true;
     }
     assertx(it->second < state.m_props.size());
@@ -10921,7 +11157,11 @@ private:
       }
     }
 
-    if (trait) cinfo.traitProps.emplace_back(prop);
+    if (trait) {
+      cinfo.traitProps.emplace_back(prop);
+    } else {
+      dinfo.decl = src;
+    }
     prevTuple = State::PropTuple{name, src, prop};
     return true;
   }
@@ -11871,6 +12111,8 @@ private:
 
     for (auto& p : cinfo.traitProps) {
       ITRACE(4, "- prop {}\n", p.name);
+      auto& info = cinfo.propDeclInfo.at(p.name);
+      info.decl = cinfo.name;
       cls.properties.emplace_back(std::move(p));
       cls.properties.back().attrs |= AttrTrait;
     }
@@ -11886,7 +12128,8 @@ private:
         auto const& cns = cls.constants[i];
         if (!cns.val) {
           // Only add non-value constants.
-          auto DEBUG_ONLY succeeded = existingCnsIndexes.emplace(cns.name, i).second;
+          auto DEBUG_ONLY succeeded =
+            existingCnsIndexes.emplace(cns.name, i).second;
           assertx(succeeded);
         }
       }
@@ -13495,6 +13738,14 @@ struct BuildSubclassListJob {
     // initial values).
     SStringSet propsWithImplicitNullable;
 
+    // For a given prop name, all subclasses which have a declaration
+    // for the property. If an entry is present, but the set is empty,
+    // it means the property is declared in a subclass, but there's no
+    // declaration in this class or parents. We don't track the
+    // subclasses precisely in that case because the amount of
+    // properties can be huge.
+    SStringToOneT<TSStringSet> propDeclInfo;
+
     // The classes for whom isMocked would be true due to one of the
     // classes making up this Data. The classes in this set may not
     // necessarily be also part of this Data.
@@ -13513,6 +13764,7 @@ struct BuildSubclassListJob {
     template <typename SerDe> void serde(SerDe& sd) {
       sd(methods, string_data_lt{})
         (propsWithImplicitNullable, string_data_lt{})
+        (propDeclInfo, string_data_lt{}, string_data_lt_type{})
         (mockedClasses, string_data_lt_type{})
         (hasConstProp)
         (hasReifiedGeneric)
@@ -14418,6 +14670,11 @@ protected:
         }
       }
 
+      for (auto const& [n, info] : cinfo->propDeclInfo) {
+        auto& decls = data.propDeclInfo[n];
+        decls = info.subDecls;
+        if (info.decl) decls.emplace(info.decl);
+      }
       return data;
     }
 
@@ -14544,6 +14801,10 @@ protected:
       begin(childData.propsWithImplicitNullable),
       end(childData.propsWithImplicitNullable)
     );
+
+    for (auto const& [n, d] : childData.propDeclInfo) {
+      data.propDeclInfo[n].insert(begin(d), end(d));
+    }
 
     data.mockedClasses.insert(
       begin(childData.mockedClasses),
@@ -14896,6 +15157,17 @@ protected:
         }(),
         AttrNoReifiedInit
       );
+
+      for (auto const& [n, decls] : data.propDeclInfo) {
+        auto& info = cinfo->propDeclInfo[n];
+        assertx(info.subDecls.empty());
+        // If there's no higher declaration, keep the entry (which we
+        // might have just created), but don't track subclasses any
+        // longer.
+        if (!info.decl) continue;
+        info.subDecls = decls;
+        info.subDecls.erase(info.decl);
+      }
 
       for (auto& [name, mte] : cinfo->methods) {
         if (is_special_method_name(name)) continue;
@@ -20939,7 +21211,7 @@ Index::lookup_private_props(const php::Class* cls,
     return it->second;
   }
   return make_unknown_propstate(
-    IndexAdaptor { *this },
+    *this,
     *cls,
     [&] (const php::Prop& prop) {
       return (prop.attrs & AttrPrivate) && !(prop.attrs & AttrStatic);
@@ -20956,7 +21228,7 @@ Index::lookup_private_statics(const php::Class* cls,
     return it->second;
   }
   return make_unknown_propstate(
-    IndexAdaptor { *this },
+    *this,
     *cls,
     [&] (const php::Prop& prop) {
       return (prop.attrs & AttrPrivate) && (prop.attrs & AttrStatic);
@@ -21835,7 +22107,8 @@ void Index::freeze() {
 }
 
 bool AnalysisIndex::tracking_public_sprops() const {
-  return m_data->mode == Mode::Full;
+  // Not implemented yet
+  return false;
 }
 
 Type AnalysisIndex::unserialize_type(Type t) const {
@@ -22087,6 +22360,20 @@ bool AnalysisDeps::add(AnyClassConstant any, bool inTypeCns) {
     : anyClsConstants.emplace(any.name).second;
 }
 
+bool AnalysisDeps::add(Property p) {
+  // Dependency on a property implies a dependency on the class as
+  // well.
+  add(Class { p.cls }, Type::Meta);
+  return properties.emplace(std::move(p)).second;
+}
+
+bool AnalysisDeps::add(AnyProperty p) {
+  // Dependency on a class' properties implies a dependency on the
+  // class as well.
+  add(Class { p.cls }, Type::Meta);
+  return anyProperties.emplace(p.cls).second;
+}
+
 AnalysisDeps::Type AnalysisDeps::add(const php::Func& f, Type t) {
   return f.cls
     ? add(MethRef { f }, t)
@@ -22117,7 +22404,9 @@ bool AnalysisDeps::empty() const {
     constants.empty() &&
     anyClsConstants.empty() &&
     typeCnsClsConstants.empty() &&
-    typeCnsAnyClsConstants.empty();
+    typeCnsAnyClsConstants.empty() &&
+    properties.empty() &&
+    anyProperties.empty();
 }
 
 AnalysisDeps& AnalysisDeps::operator|=(const AnalysisDeps& o) {
@@ -22131,6 +22420,14 @@ AnalysisDeps& AnalysisDeps::operator|=(const AnalysisDeps& o) {
   typeCnsAnyClsConstants.insert(
     begin(o.typeCnsAnyClsConstants),
     end(o.typeCnsAnyClsConstants)
+  );
+  properties.insert(
+    begin(o.properties),
+    end(o.properties)
+  );
+  anyProperties.insert(
+    begin(o.anyProperties),
+    end(o.anyProperties)
   );
   for (auto const [name, t] : o.funcs) funcs[name] |= t;
   for (auto const [name, t] : o.classes) classes[name] |= t;
@@ -22151,6 +22448,8 @@ std::string show(AnalysisDeps::Type t) {
   if (t & T::UnusedParams)  add("unused params");
   if (t & T::Bytecode)      add("bytecode");
   if (t & T::UseVars)       add("use-vars");
+  if (t & T::ClassInitMightRaise) add("class-init-might-raise");
+  if (t & T::PropInitVals)  add("prop-init-vals");
   return out;
 }
 
@@ -22223,7 +22522,22 @@ std::string show(const AnalysisDeps& d) {
       from(d.typeCnsAnyClsConstants) | map(toCpp) | unsplit<std::string>(", ")
     );
   }
-
+  if (!d.properties.empty()) {
+    folly::format(
+      &out, "  properties: {}\n",
+      from(d.properties)
+        | map([] (auto const& p) {
+            return folly::sformat("{}::{}", p.cls, p.prop);
+          })
+        | unsplit<std::string>(", ")
+    );
+  }
+  if (!d.anyProperties.empty()) {
+    folly::format(
+      &out, "  any properties: {}\n",
+      from(d.anyProperties) | map(toCpp) | unsplit<std::string>(", ")
+    );
+  }
   if (out.empty()) out = "  (none)\n";
   return out;
 }
@@ -22250,6 +22564,10 @@ void AnalysisChangeSet::changed(const php::Func& f, Type t) {
   } else {
     funcs[f.name] |= t;
   }
+}
+
+void AnalysisChangeSet::changed(const php::Class& c, const php::Prop& p) {
+  properties.emplace(c.name, p.name);
 }
 
 void AnalysisChangeSet::fixed(ConstIndex idx) {
@@ -22305,6 +22623,9 @@ void AnalysisChangeSet::filter(const TSStringSet& keepClasses,
   );
   folly::erase_if(
     unitsFixed, [&] (SString s) { return !keepUnits.contains(s); }
+  );
+  folly::erase_if(
+    properties, [&] (const Property& p) { return !keepClasses.contains(p.cls); }
   );
   folly::erase_if(
     clsTypeCnsNames, [&] (auto const& p) { return !keepClasses.contains(p.first); }
@@ -22796,6 +23117,23 @@ void AnalysisScheduler::recordChanges(const AnalysisOutput& output) {
     );
     assertx(!state->load(std::memory_order_acquire));
     state->store(true, std::memory_order_release);
+  }
+
+  for (auto const& p : changed.properties) {
+    auto const UNUSED bump = bump_for_class(*index.m_data, p.cls);
+    FTRACE(4, "AnalysisScheduler: property {}::{} changed\n", p.cls, p.prop);
+    auto state = folly::get_ptr(classState, p.cls);
+    always_assert_flog(
+      state,
+      "Trying to mark property {} for un-tracked class {} changed",
+      p.prop, p.cls
+    );
+    always_assert_flog(
+      valid(p.cls, DepState::Class),
+      "Trying to mark property {} for class {} as changed from wrong shard",
+      p.prop, p.cls
+    );
+    state->propertyChanges.emplace(p.prop);
   }
 
   for (auto const unit : changed.unitsFixed) {
@@ -23388,6 +23726,56 @@ void AnalysisScheduler::findToSchedule() {
       }
     }
 
+    for (auto const& prop : d.deps.properties) {
+      auto const schedule = [&] {
+        switch (presenceOfClass(d, prop.cls)) {
+          case Presence::None:
+            return true;
+          case Presence::Dep: {
+            auto const state = folly::get_ptr(classState, prop.cls);
+            if (!state) return false;
+            return state->propertyChanges.contains(prop.prop);
+          }
+          case Presence::Full:
+            return false;
+        }
+      }();
+
+      if (schedule) {
+        FTRACE(
+          4, "AnalysisScheduler: {} new/changed dependency on "
+          "property {}::{}, scheduling\n",
+          name, prop.cls, prop.prop
+        );
+        return true;
+      }
+    }
+
+    for (auto const cls: d.deps.anyProperties) {
+      auto const schedule = [&] {
+        switch (presenceOfClass(d, cls)) {
+          case Presence::None:
+            return true;
+          case Presence::Dep: {
+            auto const state = folly::get_ptr(classState, cls);
+            if (!state) return false;
+            return !state->propertyChanges.empty();
+          }
+          case Presence::Full:
+            return false;
+        }
+      }();
+
+      if (schedule) {
+        FTRACE(
+          4, "AnalysisScheduler: {} new/changed dependency on "
+          "any property from {}, scheduling\n",
+          name, cls
+        );
+        return true;
+      }
+    }
+
     return false;
   };
 
@@ -23439,6 +23827,7 @@ void AnalysisScheduler::resetChanges() {
       Type::None
     );
     state.cnsChanges.reset();
+    state.propertyChanges.clear();
     state.changed = Type::None;
   };
 
@@ -23720,6 +24109,13 @@ void AnalysisScheduler::visitDeps(const DepState& state,
     } else if (full) {
       visit.onBadConstant(cns);
     }
+  }
+
+  for (auto const& prop : d.properties) {
+    visitClassAsDep(prop.cls, false, full, visit);
+  }
+  for (auto const cls : d.anyProperties) {
+    visitClassAsDep(cls, false, full, visit);
   }
 }
 
@@ -25738,6 +26134,19 @@ AnalysisIndex::AnalysisIndex(
     cls->cinfo = cinfo;
     cinfo->cls = cls;
 
+    // Serialized property info won't have the TC pointer set, so do
+    // it here.
+    for (auto const& prop : cls->properties) {
+      if (!(prop.attrs & AttrPrivate)) continue;
+      auto& map = (prop.attrs & AttrStatic)
+        ? cinfo->inferred.privateStatics
+        : cinfo->inferred.privateProps;
+      auto elem = folly::get_ptr(map, prop.name);
+      if (!elem) continue;
+      assertx(!elem->tc);
+      elem->tc = &prop.typeConstraints;
+    }
+
     auto const numMethods = cls->methods.size();
     always_assert(cinfo->funcInfos.size() == numMethods);
     for (size_t i = 0; i < numMethods; ++i) {
@@ -26665,10 +27074,17 @@ AnalysisIndex::lookup_class_type_constant(const php::Class& ctx,
 }
 
 PropState AnalysisIndex::lookup_private_props(const php::Class& cls) const {
-  // Private property tracking not yet implemented, so be
-  // conservative.
+  if (cls.cinfo && !cls.cinfo->inferred.privateProps.empty()) {
+    auto cleaned = cls.cinfo->inferred.privateProps;
+    for (auto& [n, e] : cleaned) {
+      m_data->deps->add(AnalysisDeps::Property{ cls.name, n });
+      e.ty = unserialize_type(std::move(e.ty));
+    }
+    return cleaned;
+  }
+  m_data->deps->add(AnalysisDeps::AnyProperty { cls.name });
   return make_unknown_propstate(
-    AnalysisIndexAdaptor { *this },
+    *m_data,
     cls,
     [&] (const php::Prop& prop) {
       return (prop.attrs & AttrPrivate) && !(prop.attrs & AttrStatic);
@@ -26677,10 +27093,17 @@ PropState AnalysisIndex::lookup_private_props(const php::Class& cls) const {
 }
 
 PropState AnalysisIndex::lookup_private_statics(const php::Class& cls) const {
-  // Private static property tracking not yet implemented, so be
-  // conservative.
+  if (cls.cinfo && !cls.cinfo->inferred.privateStatics.empty()) {
+    auto cleaned = cls.cinfo->inferred.privateStatics;
+    for (auto& [n, e] : cleaned) {
+      m_data->deps->add(AnalysisDeps::Property{ cls.name, n });
+      e.ty = unserialize_type(std::move(e.ty));
+    }
+    return cleaned;
+  }
+  m_data->deps->add(AnalysisDeps::AnyProperty { cls.name });
   return make_unknown_propstate(
-    AnalysisIndexAdaptor { *this },
+    *m_data,
     cls,
     [&] (const php::Prop& prop) {
       return (prop.attrs & AttrPrivate) && (prop.attrs & AttrStatic);
@@ -26692,7 +27115,7 @@ PropState AnalysisIndex::lookup_public_statics(const php::Class& cls) const {
   // Public static property tracking not yet implemented, so be
   // conservative.
   return make_unknown_propstate(
-    AnalysisIndexAdaptor { *this },
+    *m_data,
     cls,
     [&] (const php::Prop& prop) {
       return
@@ -26700,6 +27123,396 @@ PropState AnalysisIndex::lookup_public_statics(const php::Class& cls) const {
         (prop.attrs & AttrStatic);
     }
   );
+}
+
+// Visit all classes that declare a given property without traversing
+// the full class hierarchy.
+//
+// Parameters:
+//   dcls - The class representing where the property is accessed
+//        - from (which might not be the class which declares it).
+//   prop - Property name to search for (nullptr to visit all properties)
+//   f    - Invoked for each class that declares the property
+//   i    - Invoked when merging results from intersection types
+//   m    - Invoked when property has no declaring class
+//
+// Returns true if all relevant information was available, false if
+// any were missing (indicating incomplete information requiring
+// conservative fallback). Automatically registers dependencies on
+// all declaring classes.
+template <typename F, typename I, typename M>
+bool AnalysisIndex::visit_prop_decls(const DCls& dcls,
+                                     SString prop,
+                                     const F& f,
+                                     const I& i,
+                                     const M& m) const {
+  auto const addDep = [&] (SString cls) {
+    if (prop) {
+      m_data->deps->add(AnalysisDeps::Property { cls, prop });
+    } else {
+      m_data->deps->add(AnalysisDeps::AnyProperty { cls });
+    }
+  };
+
+  auto const onDInfo = [&] (const ClassInfo2::PropDeclInfo& dinfo, bool sub) {
+    auto success = true;
+
+    if (dinfo.decl) {
+      addDep(dinfo.decl);
+      if (auto const cinfo = folly::get_default(m_data->cinfos, dinfo.decl)) {
+        f(*cinfo);
+      } else {
+        success = false;
+      }
+    } else {
+      m();
+    }
+
+    if (!sub) return success;
+    // If the dinfo is empty, it means the property might exist in a
+    // subclass, but isn't present in this class. Be pessimistic in
+    // those cases. This is distinguished from having no dinfo at all,
+    // which means it doesn't exist here or in any subclasses.
+    if (!dinfo.decl && dinfo.subDecls.empty()) return false;
+
+    for (auto const c : dinfo.subDecls) {
+      addDep(c);
+      if (auto const cinfo = folly::get_default(m_data->cinfos, c)) {
+        f(*cinfo);
+      } else {
+        success = false;
+      }
+    }
+
+    return success;
+  };
+
+  auto const onRCls = [&] (res::Class rcls, bool sub) {
+    rcls.graph().ensureCInfo();
+    auto const cinfo = rcls.cinfo2();
+    if (!cinfo) return false;
+    if (prop) {
+      if (auto const dinfo = folly::get_ptr(cinfo->propDeclInfo, prop)) {
+        return onDInfo(*dinfo, sub);
+      }
+      // No entry means it definitely doesn't exist.
+      m();
+      return true;
+    } else {
+      auto success = true;
+      for (auto const& [n, dinfo] : cinfo->propDeclInfo) {
+        success &= onDInfo(dinfo, sub);
+      }
+      return success;
+    }
+  };
+
+  if (dcls.isExact()) {
+    return onRCls(dcls.cls(), false);
+  } else if (dcls.isSub()) {
+    return onRCls(dcls.cls(), true);
+  } else if (dcls.isIsect()) {
+    auto const& isect = dcls.isect();
+    assertx(isect.size() > 1);
+    auto success = true;
+    for (auto const r : isect) {
+      success &= onRCls(r, true);
+      i();
+    }
+    return success;
+  } else {
+    // Even though this has an intersection list, it must be the exact
+    // class, so it's sufficient to process that.
+    assertx(dcls.isIsectAndExact());
+    return onRCls(dcls.isectAndExact().first, false);
+  }
+}
+
+PropLookupResult
+AnalysisIndex::lookup_static(Context ctx,
+                             const PropertiesInfo& privateProps,
+                             const Type& cls,
+                             const Type& name) const {
+  ITRACE(4, "lookup_static: {} {}::${}\n", show(ctx), show(cls), show(name));
+  Trace::Indent _;
+
+  using R = PropLookupResult;
+
+  // First try to obtain the property name as a static string
+  auto const sname = [&] () -> SString {
+    // Treat non-string names conservatively, but the caller should be
+    // checking this.
+    if (!is_specialized_string(name)) return nullptr;
+    return sval_of(name);
+  }();
+
+  // Conservative result when we can't do any better. The type can be
+  // anything, and anything might throw.
+  auto const conservative = [&] {
+    ITRACE(4, "conservative\n");
+    return R{
+      TInitCell,
+      sname,
+      TriBool::Maybe,
+      TriBool::Maybe,
+      TriBool::Maybe,
+      TriBool::Maybe,
+      TriBool::Maybe,
+      true
+    };
+  };
+
+  // The property definitely wasn't found.
+  auto const notFound = [&] {
+    ITRACE(4, "nothing found\n");
+    return PropLookupResult{
+      TBottom,
+      sname,
+      TriBool::No,
+      TriBool::No,
+      TriBool::No,
+      TriBool::No,
+      TriBool::No,
+      false
+    };
+  };
+
+  // If we don't know what `cls' is, there's not much we can do.
+  if (!is_specialized_cls(cls)) return conservative();
+
+  // Turn the context class into a ClassInfo2* for convenience.
+  if (ctx.cls && !ctx.cls->cinfo) return conservative();
+  auto const ctxCls = ctx.cls ? ctx.cls->cinfo : nullptr;
+
+  auto const initMightRaise =
+    class_init_might_raise(*m_data, dcls_of(cls));
+
+  auto const type = [&] (const php::Prop& prop,
+                         const ClassInfo2& cinfo) {
+    switch (prop.attrs & (AttrPublic|AttrProtected|AttrPrivate)) {
+      case AttrPublic:
+      case AttrProtected: {
+        // Tracking of public statics not yet implemented. Use what we
+        // can infer from the type-constraint.
+        return union_of(
+          adjust_type_for_prop(
+            AnalysisIndexAdaptor { *this },
+            *cinfo.cls,
+            &prop.typeConstraints,
+            TInitCell
+          ),
+          initial_type_for_public_sprop(
+            *m_data,
+            *cinfo.cls,
+            prop
+          )
+        );
+      }
+      case AttrPrivate: {
+        assertx(ctxCls == &cinfo);
+        auto const elem = privateProps.readPrivateStatic(prop.name);
+        if (!elem) return TInitCell;
+        return remove_uninit(elem->ty);
+      }
+    }
+    always_assert(false);
+  };
+
+  auto const fromProp = [&] (const php::Prop& prop,
+                             const ClassInfo2& cinfo) {
+    // The property was definitely found. Compute its attributes
+    // from the prop metadata.
+    return PropLookupResult{
+      type(prop, cinfo),
+      sname,
+      TriBool::Yes,
+      yesOrNo(prop.attrs & AttrIsConst),
+      yesOrNo(prop.attrs & AttrIsReadonly),
+      yesOrNo(prop.attrs & AttrLateInit),
+      yesOrNo(prop.attrs & AttrInternal),
+      initMightRaise
+    };
+  };
+
+  Optional<R> result;
+  auto const addResult = [&] (R r) {
+    if (!result.has_value()) {
+      result.emplace(std::move(r));
+    } else {
+      *result |= r;
+      ITRACE(4, "  -> {}\n", show(*result));
+    }
+  };
+  Optional<R> iresult;
+
+  auto const full = visit_prop_decls(
+    dcls_of(cls),
+    sname,
+    [&] (const ClassInfo2& cinfo) {
+      if (sname) {
+        for (auto const& prop : cinfo.cls->properties) {
+          if (prop.name != sname) continue;
+          // We have a matching prop. If its not static or not
+          // accessible, the access will not succeed.
+          if (!(prop.attrs & AttrStatic) ||
+              !static_is_accessible(ctxCls, &cinfo, prop)) {
+            ITRACE(
+              6, "{}::${} found but inaccessible\n",
+              cinfo.cls->name, sname
+            );
+            addResult(notFound());
+            return;
+          }
+
+          // Otherwise its a match
+          auto r = fromProp(prop, cinfo);
+          ITRACE(6, "found {}:${} {}\n", cinfo.cls->name, prop.name, show(r));
+          addResult(std::move(r));
+          return;
+        }
+
+        addResult(notFound());
+        return;
+      }
+
+      addResult(notFound());
+      for (auto const& prop : cinfo.cls->properties) {
+        if (!(prop.attrs & AttrStatic) ||
+            !static_is_accessible(ctxCls, &cinfo, prop)) {
+          ITRACE(
+            6, "skipping inaccessible {}::${}\n",
+            cinfo.cls->name, prop.name
+          );
+          continue;
+        }
+
+        auto r = fromProp(prop, cinfo);
+        ITRACE(6, "including {}:${} {}\n", cinfo.cls->name, prop.name, show(r));
+        addResult(std::move(r));
+      }
+    },
+    [&] {
+      if (!result.has_value()) {
+        if (!iresult.has_value()) {
+          iresult.emplace(notFound());
+        } else {
+          *iresult &= notFound();
+        }
+      } else if (!iresult.has_value()) {
+        iresult = std::move(result);
+      } else {
+        *iresult &= *result;
+      }
+      result.reset();
+    },
+    [&] { addResult(notFound()); }
+  );
+  if (!full) return conservative();
+
+  if (iresult.has_value()) {
+    assertx(!result.has_value());
+    ITRACE(4, "union -> {}\n", show(*iresult));
+    return *iresult;
+  }
+  if (result.has_value()) {
+    ITRACE(4, "union -> {}\n", show(*result));
+    return *result;
+  }
+  return notFound();
+}
+
+Type AnalysisIndex::lookup_public_prop(const Type& obj,
+                                       const Type& name) const {
+  ITRACE(4, "lookup_public_prop: {}::${}\n", show(obj), show(name));
+  Trace::Indent _;
+
+  if (!is_specialized_obj(obj)) return TCell;
+
+  if (!is_specialized_string(name)) return TCell;
+  auto const sname = sval_of(name);
+
+  Optional<Type> type;
+  auto const addType = [&] (Type t) {
+    if (!type.has_value()) {
+      type.emplace(std::move(t));
+    } else {
+      *type |= t;
+      ITRACE(4, "  -> {}\n", show(*type));
+    }
+  };
+  Optional<Type> itype;
+
+  auto const full = visit_prop_decls(
+    dobj_of(obj),
+    sname,
+    [&] (const ClassInfo2& cinfo) {
+      for (auto const& prop : cinfo.cls->properties) {
+        if (prop.name != sname) continue;
+        // Make sure its non-static and public. Otherwise its another
+        // function's problem.
+        if (prop.attrs & (AttrStatic | AttrPrivate)) {
+          ITRACE(
+            6, "{}::${} found but ineligible\n",
+            cinfo.cls->name, sname
+          );
+          break;
+        }
+
+        // Otherwise its a match
+
+        // Get a type corresponding to its declared type-hint (if any).
+        auto ty = adjust_type_for_prop(
+          AnalysisIndexAdaptor { *this },
+          *cinfo.cls,
+          &prop.typeConstraints,
+          TCell
+        );
+        // We might have to include the initial value which might be
+        // outside of the type-hint.
+        auto initialTy = loosen_all(from_cell(prop.val));
+        if (initialTy.subtypeOf(TUninit)) {
+          m_data->deps->add(
+            AnalysisDeps::Class { cinfo.name },
+            AnalysisDeps::Type::PropInitVals
+          );
+        } else if (prop.attrs & AttrSystemInitialValue) {
+          ty |= initialTy;
+        }
+
+        ITRACE(6, "found {}:${} {}\n", cinfo.cls->name, prop.name, show(ty));
+        addType(std::move(ty));
+        break;
+      }
+      return;
+    },
+    [&] {
+      if (!type.has_value()) {
+        if (!itype.has_value()) itype.emplace(TCell);
+      } else if (!itype.has_value()) {
+        itype = std::move(type);
+      } else {
+        *itype &= *type;
+      }
+      type.reset();
+    },
+    [&] { addType(TCell); }
+  );
+  if (!full) return TCell;
+
+  if (itype.has_value()) {
+    assertx(!type.has_value());
+    ITRACE(4, "union -> {}\n", show(*itype));
+    return *itype;
+  }
+  if (type.has_value()) {
+    ITRACE(4, "union -> {}\n", show(*type));
+    return *type;
+  }
+
+  // Unlike in the static case, we cannot assert TBottom if we don't
+  // find anything. Properties can be set dynamically, so even if we
+  // don't find a declaration, it could still exist.
+  return TCell;
 }
 
 Slot AnalysisIndex::lookup_iface_vtable_slot(const php::Class& c) const {
@@ -27704,6 +28517,7 @@ AnalysisIndex::lookup_class_or_type_alias(SString n) const {
 }
 
 PropMergeResult AnalysisIndex::merge_static_type(
+    Context ctx,
     PublicSPropMutations& publicMutations,
     PropertiesInfo& privateProps,
     const Type& cls,
@@ -27712,8 +28526,248 @@ PropMergeResult AnalysisIndex::merge_static_type(
     bool checkUB,
     bool ignoreConst,
     bool mustBeReadOnly) const {
-  // Not yet implemented
-  return PropMergeResult{ TInitCell, TriBool::Maybe };
+  ITRACE(
+    4, "merge_static_type: {} {}::${} {}\n",
+    show(ctx), show(cls), show(name), show(val)
+  );
+  Trace::Indent _;
+
+  assertx(val.subtypeOf(BInitCell));
+
+  using R = PropMergeResult;
+
+  // In some cases we might try to merge Bottom if we're in
+  // unreachable code. This won't affect anything, so just skip out
+  // early.
+  if (val.subtypeOf(BBottom)) return R{ TBottom, TriBool::No };
+
+  // Try to turn the given property name into a static string
+  auto const sname = [&] () -> SString {
+    // Non-string names are treated conservatively here. The caller
+    // should be checking for these and doing the right thing.
+    if (!is_specialized_string(name)) return nullptr;
+    return sval_of(name);
+  }();
+
+  // The case where we don't know `cls':
+  auto const unknownCls = [&] {
+    if (!sname) {
+      // Very bad case. We don't know `cls' or the property name. This
+      // mutation can be affecting anything, so merge it into all
+      // properties (this drops type information for public
+      // properties).
+      ITRACE(4, "unknown class and prop. merging everything\n");
+      privateProps.mergeInAllPrivateStatics(
+        AnalysisIndexAdaptor { *this },
+        unctx(val),
+        ignoreConst,
+        mustBeReadOnly
+      );
+    } else {
+      // Otherwise we don't know `cls', but do know the property
+      // name. We'll store this mutation separately and union it in to
+      // any lookup with the same name.
+      ITRACE(4, "unknown class. merging all props with name {}\n", sname);
+
+      // Assume that it could possibly affect any private property
+      // with the same name.
+      privateProps.mergeInPrivateStatic(
+        AnalysisIndexAdaptor { *this },
+        sname,
+        unctx(val),
+        ignoreConst,
+        mustBeReadOnly
+      );
+    }
+
+    // To be conservative, say we might throw and be conservative
+    // about conversions.
+    return PropMergeResult{
+      loosen_likeness(val),
+      TriBool::Maybe
+    };
+  };
+
+  // If we don't find a property, then the mutation will definitely
+  // fail.
+  auto const notFound = [&] {
+    return PropMergeResult{
+      TBottom,
+      TriBool::Yes
+    };
+  };
+
+  // check if we can determine the class.
+  if (!is_specialized_cls(cls)) return unknownCls();
+
+  if (ctx.cls && !ctx.cls->cinfo) return unknownCls();
+  auto const ctxCls = ctx.cls ? ctx.cls->cinfo : nullptr;
+
+  auto const initMightRaise =
+    class_init_might_raise(*m_data, dcls_of(cls));
+
+  // Perform the actual merge for a given property, returning the
+  // effects of that merge.
+  auto const merge = [&] (const php::Prop& prop, const ClassInfo2& cinfo) {
+    // First calculate the effects of the type-constraint.
+    auto effects = prop_tc_effects(
+      AnalysisIndexAdaptor { *this },
+      *cinfo.cls,
+      prop,
+      val,
+      checkUB
+    );
+    // No point in merging if the type-constraint will always fail.
+    if (effects.throws == TriBool::Yes) {
+      ITRACE(
+        6, "tc would throw on {}::${} with {}, skipping\n",
+        cinfo.cls->name, prop.name, show(val)
+      );
+      return effects;
+    } else if (effects.throws == TriBool::No) {
+      if (initMightRaise) effects.throws = TriBool::Maybe;
+    }
+
+    assertx(!effects.adjusted.subtypeOf(BBottom));
+
+    ITRACE(
+      6, "merging {} into {}::${}\n",
+      show(effects), cinfo.cls->name, prop.name
+    );
+
+    switch (prop.attrs & (AttrPublic|AttrProtected|AttrPrivate)) {
+      case AttrPublic:
+      case AttrProtected:
+        // If the property is internal, accessing it may throw
+        // TODO(T131951529): we can do better by checking modules here
+        if ((prop.attrs & AttrInternal) && effects.throws == TriBool::No) {
+          ITRACE(6, "{}::${} is internal, "
+                 "being pessimistic with regards to throwing\n",
+                 cinfo.cls->name, prop.name);
+          return PropMergeResult{
+            effects.adjusted,
+            TriBool::Maybe
+          };
+        }
+        return effects;
+      case AttrPrivate: {
+        assertx(ctxCls == &cinfo);
+        privateProps.mergeInPrivateStaticPreAdjusted(
+          prop.name,
+          unctx(effects.adjusted)
+        );
+        return effects;
+      }
+    }
+    always_assert(false);
+  };
+
+  Optional<R> result;
+  auto const addResult = [&] (R r) {
+    if (!result.has_value()) {
+      result.emplace(std::move(r));
+    } else {
+      *result |= r;
+      ITRACE(4, "  -> {}\n", show(*result));
+    }
+  };
+  Optional<R> iresult;
+
+  auto const full = visit_prop_decls(
+    dcls_of(cls),
+    sname,
+    [&] (const ClassInfo2& cinfo) {
+      if (sname) {
+        for (auto const& prop : cinfo.cls->properties) {
+          if (prop.name != sname) continue;
+          // We found a property with the right name, but its
+          // inaccessible from this context (or not even static). This
+          // mutation will fail, so we don't need to modify the type.
+          if (!(prop.attrs & AttrStatic) ||
+              !static_is_accessible(ctxCls, &cinfo, prop)) {
+            ITRACE(
+              6, "{}::${} found but inaccessible\n",
+              cinfo.cls->name, sname
+            );
+            addResult(notFound());
+            return;
+          }
+          // Mutations to AttrConst properties will fail as well, unless
+          // it we want to override that behavior.
+          if (!ignoreConst && (prop.attrs & AttrIsConst)) {
+            ITRACE(
+              6, "{}:${} found but const\n",
+              cinfo.cls->name, sname
+            );
+            addResult(notFound());
+            return;
+          }
+          if (mustBeReadOnly && !(prop.attrs & AttrIsReadonly)) {
+            ITRACE(
+              6, "{}:${} found but is mutable and must be readonly\n",
+              cinfo.cls->name, sname
+            );
+            addResult(notFound());
+            return;
+          }
+
+          auto r = merge(prop, cinfo);
+          ITRACE(6, "including {}:${} {}\n", cinfo.cls->name, prop.name, show(r));
+          addResult(std::move(r));
+          return;
+        }
+
+        addResult(notFound());
+        return;
+      }
+
+      addResult(notFound());
+      for (auto const& prop : cinfo.cls->properties) {
+        if (!(prop.attrs & AttrStatic) ||
+            !static_is_accessible(ctxCls, &cinfo, prop)) {
+          ITRACE(
+            6, "skipping inaccessible {}::${}\n",
+            cinfo.cls->name, prop.name
+          );
+          continue;
+        }
+
+        auto r = merge(prop, cinfo);
+        ITRACE(6, "including {}:${} {}\n", cinfo.cls->name, prop.name, show(r));
+        addResult(std::move(r));
+      }
+    },
+    [&] {
+      if (!result.has_value()) {
+        if (!iresult.has_value()) {
+          iresult.emplace(notFound());
+        } else {
+          *iresult &= notFound();
+        }
+      } else if (!iresult.has_value()) {
+        iresult = std::move(result);
+      } else {
+        *iresult &= *result;
+      }
+      result.reset();
+    },
+    [&] { addResult(notFound()); }
+  );
+
+  if (!full) return unknownCls();
+
+  if (iresult.has_value()) {
+    assertx(!result.has_value());
+    ITRACE(4, "union -> {}\n", show(*iresult));
+    return *iresult;
+  }
+  if (result.has_value()) {
+    ITRACE(4, "union -> {}\n", show(*result));
+    return *result;
+  }
+
+  ITRACE(6, "nothing found\n");
+  return notFound();
 }
 
 void AnalysisIndex::refine_constants(const FuncAnalysisResult& fa) {
@@ -28000,6 +29054,114 @@ void AnalysisIndex::refine_closure_use_vars(const FuncAnalysisResult& fa) {
   }
 }
 
+void AnalysisIndex::refine_private_propstate(const php::Class& cls,
+                                             const PropState& from,
+                                             PropState& to) const {
+  assertx(!from.empty());
+  auto const DEBUG_ONLY wasEmpty = to.empty();
+
+  for (auto const& prop : cls.properties) {
+    auto const newElem = folly::get_ptr(from, prop.name);
+    if (!newElem) continue;
+
+    if (!to.contains(prop.name)) {
+      assertx(wasEmpty);
+      to.emplace(
+        prop.name,
+        PropStateElem{
+          TCell,
+          newElem->tc,
+          newElem->attrs,
+          true
+        }
+      );
+    }
+
+    assertx(to.contains(prop.name));
+    auto& oldElem = to[prop.name];
+    assertx(oldElem.tc == newElem->tc);
+
+    auto const oldT = unserialize_type(oldElem.ty);
+    auto newT = unserialize_type(newElem->ty);
+
+    auto changed = false;
+
+    if (newT.strictlyMoreRefined(oldT)) {
+      oldElem.ty = serialize_type(std::move(newT));
+      changed = true;
+    } else {
+      always_assert_flog(
+        newT.moreRefined(oldT),
+        "Property refinement failed on {}::${} -- {} was not a subtype of {}\n",
+        cls.name,
+        prop.name,
+        show(newT),
+        show(oldT)
+      );
+    }
+
+    if (newElem->everModified) {
+      always_assert_flog(
+        oldElem.everModified,
+        "Property refinement failed on {}::${} -- "
+        "ever-modified flag went from false to true\n",
+        cls.name, prop.name
+      );
+    } else if (oldElem.everModified) {
+      oldElem.everModified = false;
+      changed = true;
+    }
+
+    if (changed) {
+      always_assert_flog(
+        !m_data->frozen,
+        "Attempting to update property {}::${} when index is frozen",
+        cls.name, prop.name
+      );
+      m_data->deps->update(cls, prop);
+    }
+  }
+}
+
+void AnalysisIndex::refine_private_props(const ClassAnalysis& ca) {
+  assertx(m_data->mode != Mode::Final);
+  assertx(ca.ctx.cls);
+
+  if (!ca.ctx.cls->cinfo) return;
+  if (ca.privateProperties.empty()) return;
+  assertx(!is_used_trait(*ca.ctx.cls));
+
+  refine_private_propstate(
+    *ca.ctx.cls,
+    ca.privateProperties,
+    ca.ctx.cls->cinfo->inferred.privateProps
+  );
+}
+
+void AnalysisIndex::refine_private_statics(const ClassAnalysis& ca) {
+  assertx(m_data->mode != Mode::Final);
+  assertx(ca.ctx.cls);
+
+  if (!ca.ctx.cls->cinfo) return;
+  if (ca.privateStatics.empty()) return;
+  assertx(!is_used_trait(*ca.ctx.cls));
+
+  // We can't store context dependent types in private statics since
+  // they could be accessed using different contexts.
+  //
+  // I don't think this is needed anymore.
+  auto cleaned = ca.privateStatics;
+  for (auto& [name, elem] : cleaned) {
+    elem.ty = unctx(unserialize_type(std::move(elem.ty)));
+  }
+
+  refine_private_propstate(
+    *ca.ctx.cls,
+    cleaned,
+    ca.ctx.cls->cinfo->inferred.privateStatics
+  );
+}
+
 void AnalysisIndex::update_prop_initial_values(const FuncAnalysisResult& fa) {
   assertx(m_data->mode != Mode::Final);
 
@@ -28010,6 +29172,7 @@ void AnalysisIndex::update_prop_initial_values(const FuncAnalysisResult& fa) {
   auto& props = const_cast<php::Class*>(fa.ctx.func->cls)->properties;
 
   auto changed = false;
+  auto changedInitialVal = false;
   for (auto const& [idx, info] : *resolved) {
     assertx(idx < props.size());
     auto& prop = props[idx];
@@ -28061,15 +29224,18 @@ void AnalysisIndex::update_prop_initial_values(const FuncAnalysisResult& fa) {
         prop.name,
         show(from_cell(info.val))
       );
-      always_assert_flog(
-        type(prop.val) == KindOfUninit ||
-        equal(from_cell(prop.val), from_cell(info.val)),
-        "Property initial value invariant violated for {}::{}\n"
-        "  Value went from {} to {}",
-        fa.ctx.func->cls->name, prop.name,
-        show(from_cell(prop.val)), show(from_cell(info.val))
-      );
-      prop.val = info.val;
+      if (type(prop.val) == KindOfUninit) {
+        prop.val = info.val;
+        changedInitialVal = true;
+      } else {
+        always_assert_flog(
+          equal(from_cell(prop.val), from_cell(info.val)),
+          "Property initial value invariant violated for {}::{}\n"
+          "  Value went from {} to {}",
+          fa.ctx.func->cls->name, prop.name,
+          show(from_cell(prop.val)), show(from_cell(info.val))
+        );
+      }
     } else {
       always_assert_flog(
         type(prop.val) == KindOfUninit,
@@ -28080,6 +29246,19 @@ void AnalysisIndex::update_prop_initial_values(const FuncAnalysisResult& fa) {
       );
     }
   }
+
+  if (changedInitialVal) {
+    ITRACE(
+      2, "Updated property init info for {} in a way that requires re-analysis\n",
+      fa.ctx.func->cls->name
+    );
+    m_data->worklist.schedule(fc_from_context(fa.ctx, *m_data));
+    m_data->deps->update(
+      *fa.ctx.func->cls,
+      AnalysisDeps::Type::PropInitVals
+    );
+  }
+
   if (!changed) return;
 
   auto const cinfo = fa.ctx.func->cls->cinfo;
@@ -28093,7 +29272,13 @@ void AnalysisIndex::update_prop_initial_values(const FuncAnalysisResult& fa) {
     }
   );
 
-  if (noBad) cinfo->hasBadInitialPropValues = false;
+  if (noBad) {
+    cinfo->hasBadInitialPropValues = false;
+    m_data->deps->update(
+      *cinfo->cls,
+      AnalysisDeps::Type::ClassInitMightRaise
+    );
+  }
 }
 
 void AnalysisIndex::update_type_consts(const ClassAnalysis& analysis) {
@@ -28565,37 +29750,20 @@ PropState AnalysisIndexAdaptor::lookup_public_statics(const php::Class* cls) con
   return index.lookup_public_statics(*cls);
 }
 
-PropLookupResult AnalysisIndexAdaptor::lookup_static(Context,
-                                                     const PropertiesInfo&,
-                                                     const Type&,
-                                                     const Type& name) const {
-  // Not implemented yet, be conservative.
-
-  auto const sname = [&] () -> SString {
-    // Treat non-string names conservatively, but the caller should be
-    // checking this.
-    if (!is_specialized_string(name)) return nullptr;
-    return sval_of(name);
-  }();
-
-  return PropLookupResult{
-    TInitCell,
-    sname,
-    TriBool::Maybe,
-    TriBool::Maybe,
-    TriBool::Maybe,
-    TriBool::Maybe,
-    TriBool::Maybe,
-    true
-  };
+PropLookupResult AnalysisIndexAdaptor::lookup_static(Context ctx,
+                                                     const PropertiesInfo& p,
+                                                     const Type& c,
+                                                     const Type& n) const {
+  return index.lookup_static(ctx, p, c, n);
 }
 
-Type AnalysisIndexAdaptor::lookup_public_prop(const Type&, const Type&) const {
-  return TInitCell;
+Type AnalysisIndexAdaptor::lookup_public_prop(const Type& obj,
+                                              const Type& name) const {
+  return index.lookup_public_prop(obj, name);
 }
 
 PropMergeResult
-AnalysisIndexAdaptor::merge_static_type(Context,
+AnalysisIndexAdaptor::merge_static_type(Context ctx,
                                         PublicSPropMutations& publicMutations,
                                         PropertiesInfo& privateProps,
                                         const Type& cls,
@@ -28605,6 +29773,7 @@ AnalysisIndexAdaptor::merge_static_type(Context,
                                         bool ignoreConst,
                                         bool mustBeReadOnly) const {
   return index.merge_static_type(
+    ctx,
     publicMutations,
     privateProps,
     cls,

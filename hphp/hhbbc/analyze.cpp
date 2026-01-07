@@ -1094,7 +1094,8 @@ ClassAnalysis analyze_class(const IIndex& index, const Context& ctx) {
         t = TBottom;
       } else if (!(prop.attrs & AttrSystemInitialValue)) {
         t = adjust_type_for_prop(
-            index, *ctx.cls, &prop.typeConstraints, t);
+          index, *ctx.cls, &prop.typeConstraints, t
+        );
       }
       auto& elem = clsAnalysis.privateProperties[prop.name];
       elem.ty = std::move(t);
@@ -1110,7 +1111,8 @@ ClassAnalysis analyze_class(const IIndex& index, const Context& ctx) {
         : (prop.attrs & AttrSystemInitialValue)
           ? cellTy
           : adjust_type_for_prop(
-              index, *ctx.cls, &prop.typeConstraints, cellTy);
+            index, *ctx.cls, &prop.typeConstraints, cellTy
+          );
       auto& elem = clsAnalysis.privateStatics[prop.name];
       elem.ty = std::move(t);
       elem.tc = &prop.typeConstraints;

@@ -561,6 +561,8 @@ private:
       AnalysisIndexAdaptor adaptor{index};
       ContextPusher _{adaptor, ca.ctx};
       index.update_type_consts(ca);
+      index.refine_private_props(ca);
+      index.refine_private_statics(ca);
     }
     for (auto& fa : ca.methods)  update(std::move(fa), index);
     for (auto& fa : ca.closures) update(std::move(fa), index);

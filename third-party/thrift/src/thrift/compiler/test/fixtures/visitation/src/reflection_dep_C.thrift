@@ -17,6 +17,10 @@
 namespace cpp2 test_cpp2.cpp_reflection
 
 include "reflection_dep_D.thrift"
+include "thrift/annotation/thrift.thrift"
+
+@thrift.AllowLegacyMissingUris
+package;
 
 struct dep_C_struct {
   1: reflection_dep_D.dep_D_struct d;

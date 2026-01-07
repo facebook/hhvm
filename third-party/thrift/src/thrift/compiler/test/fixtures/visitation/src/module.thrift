@@ -25,6 +25,10 @@ namespace py3 test_py.cpp_reflection
 include "reflection_dep_B.thrift"
 include "reflection_dep_C.thrift"
 include "thrift/annotation/cpp.thrift"
+include "thrift/annotation/thrift.thrift"
+
+@thrift.AllowLegacyMissingUris
+package;
 
 cpp_include "thrift/test/fatal_custom_types.h"
 

@@ -103,12 +103,20 @@ val format_summary :
   max_errors:int option ->
   string option
 
+(** Run a computation; if it produces an error, call the error handler instead of
+    adding the error to the error map. Warnings are added to the error map and
+    don't trigger the error handler. *)
 val try_ : (unit -> 'a) -> (error -> 'a) -> 'a
 
+(** Like {!try_} but also treats results satisfying the [fail] predicate as failures. *)
 val try_pred : fail:('a -> bool) -> (unit -> 'a) -> (unit -> 'a) -> 'a
 
+(** Like {!try_} but adds the error to the error map before calling the error handler. *)
 val try_with_error : (unit -> 'a) -> (unit -> 'a) -> 'a
 
+(** Run a computation; if it produces an error, call the continuation with both the
+    result and the error. The continuation can inspect or transform the result.
+    See {!try_} for warning behavior. *)
 val try_with_result : (unit -> 'a) -> ('a -> error -> 'a) -> 'a
 
 val run_and_check_for_errors : (unit -> 'a) -> 'a * bool
@@ -138,6 +146,8 @@ val run_with_span : Pos.t -> (unit -> 'a) -> 'a
 (** ignore errors produced by function passed in argument. *)
 val ignore_ : (unit -> 'res) -> 'res
 
+(** Like {!try_} but only calls the error handler if both an error occurs and
+    the condition holds. Otherwise adds the error to the error map. *)
 val try_when :
   (unit -> 'res) -> if_error_and:(unit -> bool) -> then_:(error -> unit) -> 'res
 
@@ -145,6 +155,9 @@ val has_no_errors : (unit -> 'res) -> bool
 
 val currently_has_errors : unit -> bool
 
+(** Apply the continuation to the result only if no errors occurred. On error,
+    add it to the error map and return the original result. See {!try_} for
+    warning behavior. *)
 val try_if_no_errors : (unit -> 'res) -> ('res -> 'res) -> 'res
 
 val merge : t -> t -> t

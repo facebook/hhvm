@@ -7,6 +7,12 @@
  *
  *)
 
+(** Watch out!
+  * - Errors consist of both the things we call errors (severity = Err) and the things we call warnings (errors with severity = Warning)
+  * - We never do 'try' logic with warnings (if we do, it's a bug). See `try_with_result` logic
+  * - For fixmes/ignore: The things we call warnings (errors with severity = Warning) can sometimes have error (non-warning) codes: see `try_apply_fixme `
+*)
+
 open Hh_prelude
 
 type error_code = int
@@ -212,16 +218,33 @@ let try_with_result (f1 : unit -> 'res) (f2 : 'res -> error -> 'res) : 'res =
       else
         (claim, reasons)
     in
-    f2 result
-    @@ User_error.make
-         severity
-         code
-         claim
-         reasons
-         explanation
-         ~quickfixes
-         ~custom_msgs
-         ?function_pos
+    let error =
+      User_error.make
+        severity
+        code
+        claim
+        reasons
+        explanation
+        ~quickfixes
+        ~custom_msgs
+        ?function_pos
+    in
+    (* We ensure warnings do not affect typechecker behavior and are not lost *)
+    (match severity with
+    | User_error.Err -> f2 result error
+    | User_error.Warning ->
+      if !accumulate_errors then begin
+        let current_list =
+          Relative_path.Map.find_opt !error_map !current_file
+          |> Option.value ~default:[]
+        in
+        error_map :=
+          Relative_path.Map.add
+            !error_map
+            ~key:!current_file
+            ~data:(error :: current_list)
+      end;
+      result)
 
 let try_with_result_pure ~fail f g =
   let error_map_copy = !error_map in
@@ -248,7 +271,27 @@ let try_with_result_pure ~fail f g =
   in
   match get_last errors with
   | None when not @@ fail result -> result
-  | _ -> g result
+  | None -> g result
+  | Some error ->
+    (* We ensure warnings do not affect typechecker behavior and are not lost *)
+    (match User_error.(error.severity) with
+    | User_error.Err -> g result
+    | User_error.Warning ->
+      if !accumulate_errors then begin
+        let current_list =
+          Relative_path.Map.find_opt !error_map !current_file
+          |> Option.value ~default:[]
+        in
+        error_map :=
+          Relative_path.Map.add
+            !error_map
+            ~key:!current_file
+            ~data:(error :: current_list)
+      end;
+      if fail result then
+        g result
+      else
+        result)
 
 (* Reset errors before running [f] so that we can return the errors
  * caused by f. These errors are not added in the global list of errors. *)
@@ -1420,6 +1463,7 @@ let ignore_ f =
 
 let try_when f ~if_error_and:condition ~then_:do_ =
   try_with_result f (fun result error ->
+      (* Note: we only reach here for errors proper (severity = Err) *)
       if condition () then
         do_ error
       else

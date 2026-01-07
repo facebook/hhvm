@@ -29,9 +29,9 @@
 
 #include <thrift/lib/cpp2/reflection/internal/test_helpers.h>
 #include <thrift/test/gen-cpp2/adapter_types.h>
-#include <thrift/test/reflection/gen-cpp2/compat_fatal_types.h>
-#include <thrift/test/reflection/gen-cpp2/global_fatal_types.h>
-#include <thrift/test/reflection/gen-cpp2/reflection_fatal_types.h>
+#include <thrift/test/reflection/gen-cpp2/compat_types.h>
+#include <thrift/test/reflection/gen-cpp2/global_types.h>
+#include <thrift/test/reflection/gen-cpp2/reflection_types.h>
 
 using namespace cpp2;
 using facebook::thrift::dynamic_format;

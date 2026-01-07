@@ -55,7 +55,6 @@
 (65,8)-(65,8) An expression is expected here.
 (66,6)-(66,6) A semicolon `;` is expected here.
 (66,8)-(66,8) An expression is expected here.
-(67,1)-(67,8) Cannot use unstable feature: `case_types`
 (67,5)-(67,5) The `type` keyword is expected here.
 (68,6)-(68,6) An expression is expected here.
 (70,8)-(70,8) An expression is expected here.

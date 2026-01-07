@@ -36,13 +36,13 @@ namespace enums_constants {
 }
 
 
-::std::string_view _fbthrift_schema_13f072109540bb8d() {
+::std::string_view _fbthrift_schema_3fa65e569f525ab5() {
   return "";
 }
-::folly::Range<const ::std::string_view*> _fbthrift_schema_13f072109540bb8d_includes() {
+::folly::Range<const ::std::string_view*> _fbthrift_schema_3fa65e569f525ab5_includes() {
   return {};
 }
-::folly::Range<const ::std::string_view*> _fbthrift_schema_13f072109540bb8d_uris() {
+::folly::Range<const ::std::string_view*> _fbthrift_schema_3fa65e569f525ab5_uris() {
   return {};
 }
 

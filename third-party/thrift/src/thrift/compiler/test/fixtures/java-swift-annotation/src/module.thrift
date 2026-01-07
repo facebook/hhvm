@@ -20,6 +20,9 @@ include "thrift/annotation/compat.thrift"
 include "thrift/annotation/java.thrift"
 include "thrift/annotation/thrift.thrift"
 
+@thrift.AllowLegacyMissingUris
+package;
+
 @thrift.DeprecatedUnvalidatedAnnotations{
   items = {"java.swift.type": "com.foo.FastIntLongMap"},
 }

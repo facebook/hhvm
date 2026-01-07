@@ -15,6 +15,10 @@
  */
 
 include "transitive.thrift"
+include "thrift/annotation/thrift.thrift"
+
+@thrift.AllowLegacyMissingUris
+package;
 
 namespace android one.two.three
 namespace java.swift test.fixtures.includes.includes

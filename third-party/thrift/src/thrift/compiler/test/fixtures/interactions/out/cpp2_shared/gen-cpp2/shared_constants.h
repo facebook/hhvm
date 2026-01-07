@@ -14,9 +14,9 @@ namespace thrift::shared_interactions {
 /** Glean {"file": "thrift/compiler/test/fixtures/interactions/src/shared.thrift"} */
 namespace shared_constants {
 
-  FOLLY_EXPORT ::std::string_view _fbthrift_schema_c56c72d4e711dd06();
-  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_c56c72d4e711dd06_includes();
-  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_c56c72d4e711dd06_uris();
+  FOLLY_EXPORT ::std::string_view _fbthrift_schema_7c84d31b4cbc05a6();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_7c84d31b4cbc05a6_includes();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_7c84d31b4cbc05a6_uris();
 
 } // namespace shared_constants
 } // namespace thrift::shared_interactions

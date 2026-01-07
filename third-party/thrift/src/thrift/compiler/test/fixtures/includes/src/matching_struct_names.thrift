@@ -15,6 +15,10 @@
  */
 
 include "module.thrift"
+include "thrift/annotation/thrift.thrift"
+
+@thrift.AllowLegacyMissingUris
+package;
 
 struct MyStruct {
   1: string field;

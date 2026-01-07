@@ -18,6 +18,9 @@ include "thrift/annotation/internal.thrift"
 include "thrift/annotation/thrift.thrift"
 include "foo.thrift"
 
+@thrift.AllowLegacyMissingUris
+package;
+
 namespace java.swift test.fixtures.injectMetadataFields
 namespace go test.fixtures.inject_metadata_fields
 

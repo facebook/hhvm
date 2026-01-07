@@ -21,9 +21,9 @@ namespace includes_constants {
     return IncludedConstant_;
   }
 
-  FOLLY_EXPORT ::std::string_view _fbthrift_schema_75bef702b0f2c20f();
-  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_75bef702b0f2c20f_includes();
-  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_75bef702b0f2c20f_uris();
+  FOLLY_EXPORT ::std::string_view _fbthrift_schema_39c6bf53c0e3258e();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_39c6bf53c0e3258e_includes();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_39c6bf53c0e3258e_uris();
 
 } // namespace includes_constants
 } // namespace a::different::ns

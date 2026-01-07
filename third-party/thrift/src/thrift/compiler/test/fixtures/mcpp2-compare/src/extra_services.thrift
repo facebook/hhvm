@@ -18,6 +18,9 @@ include "module.thrift"
 include "thrift/annotation/cpp.thrift"
 include "thrift/annotation/thrift.thrift"
 
+@thrift.AllowLegacyMissingUris
+package;
+
 namespace cpp2 extra.svc
 
 struct containerStruct2 {

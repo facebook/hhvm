@@ -17,6 +17,10 @@
 include "includes.thrift"
 include "thrift/annotation/cpp.thrift"
 include "thrift/annotation/thrift.thrift"
+
+@thrift.AllowLegacyMissingUris
+package;
+
 cpp_include "<folly/small_vector.h>"
 
 namespace cpp2 some.valid.ns

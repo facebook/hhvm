@@ -889,22 +889,22 @@ unsigned long Foo::read(Protocol_* iprot) {
 namespace apache::thrift::detail {
 template <> struct TSchemaAssociation<::cpp2::Mixin1, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = -8710065736483237863;
-  static constexpr ::std::string_view definitionKey = {"\x82\x05\xde\x74\xee\x11\x21\x1b\xb8\x22\x8c\x04\x66\xed\x94\xe6", 16};
+  static constexpr int64_t programId = 3798933143090054968;
+  static constexpr ::std::string_view definitionKey = {"\xde\x15\x66\x90\xe8\xf0\x41\x9a\x9b\xbc\xe8\x95\xc0\x5a\x8d\x00", 16};
 };
 template <> struct TSchemaAssociation<::cpp2::Mixin2, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = -8710065736483237863;
-  static constexpr ::std::string_view definitionKey = {"\xf9\xce\xc1\xbe\x1f\x6a\xde\x5f\x0d\xfb\xcc\xb8\xa5\x02\xf0\xe9", 16};
+  static constexpr int64_t programId = 3798933143090054968;
+  static constexpr ::std::string_view definitionKey = {"\x2e\x85\x75\x29\x0f\x6d\x30\x04\xb1\xc7\x20\x67\xdd\x15\x49\x6a", 16};
 };
 template <> struct TSchemaAssociation<::cpp2::Mixin3Base, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = -8710065736483237863;
-  static constexpr ::std::string_view definitionKey = {"\x00\x8e\x33\x1a\x77\x9f\x7c\x55\x38\xe2\x08\x9e\x78\xc8\x4a\xbc", 16};
+  static constexpr int64_t programId = 3798933143090054968;
+  static constexpr ::std::string_view definitionKey = {"\x3c\x3a\xba\x14\xa2\x55\x01\x6a\xe2\xdf\x8d\x18\x29\x87\xc5\x13", 16};
 };
 template <> struct TSchemaAssociation<::cpp2::Foo, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = -8710065736483237863;
-  static constexpr ::std::string_view definitionKey = {"\xf4\xd2\xe5\x53\x5b\x1b\x97\xd8\x1b\xd1\x39\x24\x2c\x4f\x17\xba", 16};
+  static constexpr int64_t programId = 3798933143090054968;
+  static constexpr ::std::string_view definitionKey = {"\x17\x9f\x85\x03\x41\x4d\x5a\x69\x57\xb1\x20\x3d\x1f\x9a\xbb\x48", 16};
 };
 } // namespace apache::thrift::detail

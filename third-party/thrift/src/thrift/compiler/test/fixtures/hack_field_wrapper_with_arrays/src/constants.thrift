@@ -15,6 +15,10 @@
  */
 
 include "include.thrift"
+include "thrift/annotation/thrift.thrift"
+
+@thrift.AllowLegacyMissingUris
+package;
 
 enum Company {
   // Should not have any impact

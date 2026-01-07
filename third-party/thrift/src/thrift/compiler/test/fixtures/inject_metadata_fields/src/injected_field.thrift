@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
+include "thrift/annotation/thrift.thrift"
+
+@thrift.AllowLegacyMissingUris
+package;
+
 namespace java.swift test.fixtures.injectMetadataFields
 namespace go test.fixtures.inject_metadata_fields
 

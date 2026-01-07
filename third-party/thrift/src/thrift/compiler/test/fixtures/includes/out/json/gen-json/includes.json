@@ -3,33 +3,33 @@
   "thrift_module" : "includes",
   "constants" : {
     "ExampleIncluded" : {
-      "lineno" : 27,
+      "lineno" : 31,
       "value" : { "MyIntField" : 2, "MyTransitiveField" : { "a" : 2 } },
       "type_enum" : "STRUCT",
       "spec_args" : "Included",
       "source_range" : {
         "begin" : {
-          "line" : 27,
+          "line" : 31,
           "column" : 1
         },
         "end" : {
-          "line" : 30,
+          "line" : 34,
           "column" : 3
         }
       }
     },
     "IncludedConstant" : {
-      "lineno" : 34,
+      "lineno" : 38,
       "value" : 42,
       "type_enum" : "I64",
       "spec_args" : null,
       "source_range" : {
         "begin" : {
-          "line" : 34,
+          "line" : 38,
           "column" : 1
         },
         "end" : {
-          "line" : 34,
+          "line" : 38,
           "column" : 33
         }
       }
@@ -38,35 +38,38 @@
   "includes": {
     "transitive" : {
       "path" : "transitive.thrift"
+    },
+    "thrift" : {
+      "path" : "thrift/annotation/thrift.thrift"
     }
   },
   "typedefs" : {
     "IncludedInt64" : {
-      "lineno" : 32,
+      "lineno" : 36,
       "type_enum" : "I64",
       "spec_args" : null,
       "source_range" : {
         "begin" : {
-          "line" : 32,
+          "line" : 36,
           "column" : 1
         },
         "end" : {
-          "line" : 32,
+          "line" : 36,
           "column" : 26
         }
       }
     },
     "TransitiveFoo" : {
-      "lineno" : 37,
+      "lineno" : 41,
       "type_enum" : "STRUCT",
       "spec_args" : "transitive.Foo",
       "source_range" : {
         "begin" : {
-          "line" : 37,
+          "line" : 41,
           "column" : 1
         },
         "end" : {
-          "line" : 37,
+          "line" : 41,
           "column" : 37
         }
       }
@@ -74,7 +77,7 @@
   },
   "structs" : {
     "Included" : {
-      "lineno" : 22,
+      "lineno" : 26,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -85,11 +88,11 @@
           "default_value" : 0,
           "source_range" : {
             "begin" : {
-              "line" : 23,
+              "line" : 27,
               "column" : 3
             },
             "end" : {
-              "line" : 23,
+              "line" : 27,
               "column" : 25
             }
           }
@@ -101,11 +104,11 @@
           "default_value" : { "a" : 2 },
           "source_range" : {
             "begin" : {
-              "line" : 24,
+              "line" : 28,
               "column" : 3
             },
             "end" : {
-              "line" : 24,
+              "line" : 28,
               "column" : 63
             }
           }
@@ -113,11 +116,11 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 22,
+          "line" : 26,
           "column" : 1
         },
         "end" : {
-          "line" : 25,
+          "line" : 29,
           "column" : 2
         }
       }

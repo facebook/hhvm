@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
+include "thrift/annotation/thrift.thrift"
+
+@thrift.AllowLegacyMissingUris
+package;
+
 namespace java.swift test.fixtures.swift.toobigenum
 namespace java test.fixtures.toobigenum
 namespace cpp2 test.fixtures.toobigenum

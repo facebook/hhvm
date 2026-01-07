@@ -922,7 +922,7 @@ unsigned long containerStruct2::read(Protocol_* iprot) {
 namespace apache::thrift::detail {
 template <> struct TSchemaAssociation<::extra::svc::containerStruct2, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = -1731276921098640572;
-  static constexpr ::std::string_view definitionKey = {"\x7d\xab\x3d\x1e\x50\xbe\xba\x92\xdc\xf6\xc3\x0e\xf3\xf3\x9e\xfb", 16};
+  static constexpr int64_t programId = 7008180839786116618;
+  static constexpr ::std::string_view definitionKey = {"\x21\xba\x67\x0c\x29\x40\x2b\xa0\x42\x44\x72\xde\x0f\x86\x79\x47", 16};
 };
 } // namespace apache::thrift::detail

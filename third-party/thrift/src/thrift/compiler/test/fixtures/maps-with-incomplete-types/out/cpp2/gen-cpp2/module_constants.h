@@ -14,9 +14,9 @@ namespace apache::thrift::test {
 /** Glean {"file": "thrift/compiler/test/fixtures/maps-with-incomplete-types/src/module.thrift"} */
 namespace module_constants {
 
-  FOLLY_EXPORT ::std::string_view _fbthrift_schema_da2dbb89aa91c52();
-  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_da2dbb89aa91c52_includes();
-  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_da2dbb89aa91c52_uris();
+  FOLLY_EXPORT ::std::string_view _fbthrift_schema_669ff7815599c1be();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_669ff7815599c1be_includes();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_669ff7815599c1be_uris();
 
 } // namespace module_constants
 } // namespace apache::thrift::test

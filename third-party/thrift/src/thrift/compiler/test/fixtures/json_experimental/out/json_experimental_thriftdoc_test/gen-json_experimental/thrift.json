@@ -1,0 +1,597 @@
+{
+  "__fbthrift": "@generated",
+  "thrift_module" : "thrift",
+  "includes": {
+    "scope": "thrift/annotation/scope.thrift"
+  },
+  "namespaces": {
+    "android": "com.facebook.thrift.annotation_deprecated",
+    "go": "thrift.annotation.thrift",
+    "hs": "Facebook.Thrift.Annotation.Thrift",
+    "java": "com.facebook.thrift.annotation_deprecated",
+    "js": "thrift.annotation.thrift",
+    "py": "thrift.annotation.thrift",
+    "py.asyncio": "facebook_thrift_asyncio.annotation.thrift"
+  },
+  "package": {
+    "domain_prefix": "facebook",
+    "domain_suffix": "com",
+    "path": "thrift/annotation",
+    "filename": "thrift"
+  },
+
+  "enumerations" :
+  {
+      "RpcPriority" : {
+        "name" : "RpcPriority",
+        "constants" : {
+          "HIGH_IMPORTANT" : {
+            "name" : "HIGH_IMPORTANT",
+            "lineno" : 225,
+            "value" : 0
+          },
+          "HIGH" : {
+            "name" : "HIGH",
+            "lineno" : 226,
+            "value" : 1
+          },
+          "IMPORTANT" : {
+            "name" : "IMPORTANT",
+            "lineno" : 227,
+            "value" : 2
+          },
+          "NORMAL" : {
+            "name" : "NORMAL",
+            "lineno" : 228,
+            "value" : 3
+          },
+          "BEST_EFFORT" : {
+            "name" : "BEST_EFFORT",
+            "lineno" : 229,
+            "value" : 4
+          }
+        },
+        "lineno" : 224
+      }
+  },
+  "structs" :
+  {
+      "Experimental" : {
+        "name" : "Experimental",
+        "structured_annotations": {
+          "scope.Program" : {
+            "type" : {
+            "type" : "struct",
+            "name" : "Program",
+            "path" : "thrift/annotation/scope.thrift"
+          },
+            "value" : {}
+          },
+          "scope.Definition" : {
+            "type" : {
+            "type" : "struct",
+            "name" : "Definition",
+            "path" : "thrift/annotation/scope.thrift"
+          },
+            "value" : {}
+          }
+        },
+        "docstring" : "Indicates a definition/feature should only be used with permission, may\nonly work in specific contexts, and may change in incompatible ways without\nnotice. Note that this is primarily intended to annotate features by the Thrift Team\nand isn't recommended for general use.\n",
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 37
+      },
+      "ReserveIds" : {
+        "name" : "ReserveIds",
+        "structured_annotations": {
+          "scope.Structured" : {
+            "type" : {
+            "type" : "struct",
+            "name" : "Structured",
+            "path" : "thrift/annotation/scope.thrift"
+          },
+            "value" : {}
+          },
+          "scope.Enum" : {
+            "type" : {
+            "type" : "struct",
+            "name" : "Enum",
+            "path" : "thrift/annotation/scope.thrift"
+          },
+            "value" : {}
+          }
+        },
+        "docstring" : "Annotate a thrift structured or enum to indicate if ids or values should not\nbe used.\n\nFor example, you may want to mark ids as deprecated, or these ids\nmight be reserved for other use cases or annotations.\n\nThe resolved set of disallowed ids is the union of the values in `ids` and\nthe range of values represented in `id_ranges`. Example:\n\n // These ids are not allowed: 3, 8, half-open ranges [10, 15), [20, 30)\n @thrift.ReserveIds{ids = [3, 8], id_ranges = {10: 15, 20: 30}}\n struct Foo {\n   ...\n   3: i64 f; // Build failure: 3 cannot be used\n }\n",
+        "fields" : {
+          "ids" : {
+            "name" : "ids",
+            "docstring" : "Individual ids that cannot be used.\n",
+            "key" : 1,
+            "lineno" : 62,
+            "required" : "opt-in-req-out",
+            "type" : {
+      "type" : "list",
+      "inner_type" : "i32"
+    }
+                  },
+          "id_ranges" : {
+            "name" : "id_ranges",
+            "docstring" : "Represents ranges of ids that cannot be used.\n\nEach (key: value) pair represents the half-open range `[key, value)`,\nwhere `key` is included and `value` is not. For example, the map\n`{10: 15, 20: 30}` represents the union of id/value ranges `[10, 15)` and\n`[20, 30)`.\n",
+            "key" : 2,
+            "lineno" : 72,
+            "required" : "opt-in-req-out",
+            "type" : {
+      "type" : "map",
+      "key_type" : "i32",
+      "value_type" : "i32"
+    }
+                  }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 58
+      },
+      "RequiresBackwardCompatibility" : {
+        "name" : "RequiresBackwardCompatibility",
+        "structured_annotations": {
+          "scope.Structured" : {
+            "type" : {
+            "type" : "struct",
+            "name" : "Structured",
+            "path" : "thrift/annotation/scope.thrift"
+          },
+            "value" : {}
+          },
+          "thrift.Experimental" : {
+            "type" : {
+            "type" : "struct",
+            "name" : "Experimental"
+          },
+            "value" : {}
+          }
+        },
+        "docstring" : "Indicates additional backward compatibility restrictions, beyond the\nstandard Thrift required 'wire' compatibility.\n",
+        "fields" : {
+          "field_name" : {
+            "name" : "field_name",
+            "default_value" : 0,
+            "key" : 1,
+            "lineno" : 83,
+            "required" : "opt-in-req-out",
+            "type" : "bool"
+                  }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 80
+      },
+      "TerseWrite" : {
+        "name" : "TerseWrite",
+        "structured_annotations": {
+          "scope.Program" : {
+            "type" : {
+            "type" : "struct",
+            "name" : "Program",
+            "path" : "thrift/annotation/scope.thrift"
+          },
+            "value" : {}
+          },
+          "scope.Struct" : {
+            "type" : {
+            "type" : "struct",
+            "name" : "Struct",
+            "path" : "thrift/annotation/scope.thrift"
+          },
+            "value" : {}
+          },
+          "scope.Exception" : {
+            "type" : {
+            "type" : "struct",
+            "name" : "Exception",
+            "path" : "thrift/annotation/scope.thrift"
+          },
+            "value" : {}
+          },
+          "scope.Field" : {
+            "type" : {
+            "type" : "struct",
+            "name" : "Field",
+            "path" : "thrift/annotation/scope.thrift"
+          },
+            "value" : {}
+          }
+        },
+        "docstring" : "An annotation that changes the field qualifier from 'none' to 'terse'.\nA terse field is eligible to skip serialization, when it equals to the\nintrinsic default value. It also clears to the intrinsic default value\nbefore deserialization to distinguish between if a terse field was skipped\nor missing during serialization. This is different from an unqualified\nfield, as an unqualified field is always serialized regardless of its value,\nand it is not cleared before deserialization.\n\nThe annotation can be only used to annotate an unqualified field, and when\nit is annotating a struct or exception, it changes all unqualified fields to\nterse fields. Note, the annotation can not be used for union.\n",
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 103
+      },
+      "Box" : {
+        "name" : "Box",
+        "structured_annotations": {
+          "scope.Field" : {
+            "type" : {
+            "type" : "struct",
+            "name" : "Field",
+            "path" : "thrift/annotation/scope.thrift"
+          },
+            "value" : {}
+          }
+        },
+        "docstring" : "Indicates that an optional field's value should never be stored on the stack,\ni.e. the subobject should be allocated separately (e.g. because it is large and infrequently set).\n\nNOTE: The APIs and initialization behavior are same as normal field, but different from `@cpp.Ref`. e.g.\n\n```\nstruct Foo {\n  1: optional i32 normal;\n  @thrift.Box\n  2: optional i32 boxed;\n  @cpp.Ref\n  3: optional i32 referred;\n}\n```\nin C++\n\n```\nFoo foo;\nEXPECT_FALSE(foo.normal().has_value()); // okay\nEXPECT_FALSE(foo.boxed().has_value()); // okay\nEXPECT_FALSE(foo.referred().has_value()); // build failure: std::unique_ptr doesn't have has_value method\n\nEXPECT_EQ(*foo.normal(), 0); // throw bad_field_access exception\nEXPECT_EQ(*foo.boxed(), 0); // throw bad_field_access exception\nEXPECT_EQ(*foo.referred(), 0); // okay, field has value by default\n```\n\nAffects C++ and Rust.\nTODO: replace with @cpp.Box + @rust.Box\n",
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 139
+      },
+      "Mixin" : {
+        "name" : "Mixin",
+        "structured_annotations": {
+          "scope.Field" : {
+            "type" : {
+            "type" : "struct",
+            "name" : "Field",
+            "path" : "thrift/annotation/scope.thrift"
+          },
+            "value" : {}
+          }
+        },
+        "docstring" : "Indicates whether the nested fields are accessible directly.\nhttps://github.com/facebook/fbthrift/blob/v2023.11.20.00/thrift/doc/idl/mixins.md\n",
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 146
+      },
+      "SerializeInFieldIdOrder" : {
+        "name" : "SerializeInFieldIdOrder",
+        "structured_annotations": {
+          "scope.Struct" : {
+            "type" : {
+            "type" : "struct",
+            "name" : "Struct",
+            "path" : "thrift/annotation/scope.thrift"
+          },
+            "value" : {}
+          },
+          "thrift.Experimental" : {
+            "type" : {
+            "type" : "struct",
+            "name" : "Experimental"
+          },
+            "value" : {}
+          }
+        },
+        "docstring" : "Option to serialize thrift struct in ascending field id order instead of field declaration order.\n\nThis can potentially make serialized data size smaller in compact protocol,\nsince compact protocol can write deltas between subsequent field ids instead of full ids.\n\nNOTE: This annotation won't reduce payload size for other protocols.\n",
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 157
+      },
+      "BitmaskEnum" : {
+        "name" : "BitmaskEnum",
+        "structured_annotations": {
+          "scope.Enum" : {
+            "type" : {
+            "type" : "struct",
+            "name" : "Enum",
+            "path" : "thrift/annotation/scope.thrift"
+          },
+            "value" : {}
+          }
+        },
+        "docstring" : "Indicates an enum is a bitmask and should support bit-wise operators.\nCurrently generates additional code in C++ and Hack.\n",
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 165
+      },
+      "ExceptionMessage" : {
+        "name" : "ExceptionMessage",
+        "structured_annotations": {
+          "scope.Field" : {
+            "type" : {
+            "type" : "struct",
+            "name" : "Field",
+            "path" : "thrift/annotation/scope.thrift"
+          },
+            "value" : {}
+          }
+        },
+        "docstring" : "Specifies the field where the exception message is stored.\n\nThe \"exception message\" is typically a human-readable description of the\nexception. It is made available to the exception-handling code via standard,\nlanguage-dependent APIs of the generated code, such as:\n  - [`std::exception::what()`](https://en.cppreference.com/w/cpp/error/exception/what)\n     in C++.\n  - [`Throwable.getMessage()`](https://docs.oracle.com/javase/8/docs/api/java/lang/Throwable.html#getMessage--)\n    in Java.\n  - etc.\n\nThis annotation can be specified on at most one field of an\n[exception definition](https://github.com/facebook/fbthrift/blob/main/thrift/doc/idl/index.md#exceptions),\nwhose type must be `string`. The thrift compiler will generate an error\nif this annotation is specified on a field in any other structured definition,\nlike a [struct definition](https://github.com/facebook/fbthrift/blob/main/thrift/doc/idl/index.md#structs)\nor an [union definition](https://github.com/facebook/fbthrift/blob/main/thrift/doc/idl/index.md#unions)\n\nIf an exception definition does not specify this annotation for any field, the\nexception message returned by the aforementioned APIs is unspecified.\n",
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 190
+      },
+      "InternBox" : {
+        "name" : "InternBox",
+        "structured_annotations": {
+          "scope.Field" : {
+            "type" : {
+            "type" : "struct",
+            "name" : "Field",
+            "path" : "thrift/annotation/scope.thrift"
+          },
+            "value" : {}
+          },
+          "thrift.Experimental" : {
+            "type" : {
+            "type" : "struct",
+            "name" : "Experimental"
+          },
+            "value" : {}
+          }
+        },
+        "docstring" : "Indicates that a field's value should never be stored on the stack, and that\nidentical values can be shared in immutable contexts.\n",
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 197
+      },
+      "Serial" : {
+        "name" : "Serial",
+        "structured_annotations": {
+          "scope.Interaction" : {
+            "type" : {
+            "type" : "struct",
+            "name" : "Interaction",
+            "path" : "thrift/annotation/scope.thrift"
+          },
+            "value" : {}
+          }
+        },
+        "docstring" : "Indicates that an interaction's methods should be processed sequentially.\n",
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 204
+      },
+      "Uri" : {
+        "name" : "Uri",
+        "structured_annotations": {
+          "scope.Enum" : {
+            "type" : {
+            "type" : "struct",
+            "name" : "Enum",
+            "path" : "thrift/annotation/scope.thrift"
+          },
+            "value" : {}
+          },
+          "scope.Service" : {
+            "type" : {
+            "type" : "struct",
+            "name" : "Service",
+            "path" : "thrift/annotation/scope.thrift"
+          },
+            "value" : {}
+          },
+          "scope.Structured" : {
+            "type" : {
+            "type" : "struct",
+            "name" : "Structured",
+            "path" : "thrift/annotation/scope.thrift"
+          },
+            "value" : {}
+          }
+        },
+        "docstring" : "Changes the URI of this definition away from the default-generated one.\n",
+        "fields" : {
+          "value" : {
+            "name" : "value",
+            "key" : 1,
+            "lineno" : 214,
+            "required" : "opt-in-req-out",
+            "type" : "string"
+                  }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 210
+      },
+      "Priority" : {
+        "name" : "Priority",
+        "structured_annotations": {
+          "scope.Function" : {
+            "type" : {
+            "type" : "struct",
+            "name" : "Function",
+            "path" : "thrift/annotation/scope.thrift"
+          },
+            "value" : {}
+          }
+        },
+        "docstring" : "Changes the priority of this function (default NORMAL).\n",
+        "fields" : {
+          "level" : {
+            "name" : "level",
+            "key" : 1,
+            "lineno" : 222,
+            "required" : "opt-in-req-out",
+            "type" : {
+      "type" : "enum",
+      "name" : "RpcPriority"
+    }
+                  }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 220
+      },
+      "DeprecatedUnvalidatedAnnotations" : {
+        "name" : "DeprecatedUnvalidatedAnnotations",
+        "structured_annotations": {
+          "scope.Definition" : {
+            "type" : {
+            "type" : "struct",
+            "name" : "Definition",
+            "path" : "thrift/annotation/scope.thrift"
+          },
+            "value" : {}
+          }
+        },
+        "docstring" : "Applies unstructured annotations to a definition.\n",
+        "fields" : {
+          "items" : {
+            "name" : "items",
+            "key" : 1,
+            "lineno" : 237,
+            "required" : "opt-in-req-out",
+            "type" : {
+      "type" : "map",
+      "key_type" : "string",
+      "value_type" : "string"
+    }
+                  }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 235
+      },
+      "AllowReservedIdentifier" : {
+        "name" : "AllowReservedIdentifier",
+        "structured_annotations": {
+          "scope.Definition" : {
+            "type" : {
+            "type" : "struct",
+            "name" : "Definition",
+            "path" : "thrift/annotation/scope.thrift"
+          },
+            "value" : {}
+          }
+        },
+        "docstring" : "In addition to reserved words, Thrift reserves all identifiers\nthat contain the case-insensitive substring fbthrift preceded\nby one or more underscores.\nThe use of such identifiers requires users to explicitly annotate\nthe usage with\n  `@thrift.AllowReservedFilename` for filenames\n  `@thrift.AllowReservedIdentifier` for all other identifiers\nand may result in undefined behavior.\n",
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 250
+      },
+      "AllowReservedFilename" : {
+        "name" : "AllowReservedFilename",
+        "structured_annotations": {
+          "scope.Program" : {
+            "type" : {
+            "type" : "struct",
+            "name" : "Program",
+            "path" : "thrift/annotation/scope.thrift"
+          },
+            "value" : {}
+          }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 253
+      },
+      "RuntimeAnnotation" : {
+        "name" : "RuntimeAnnotation",
+        "structured_annotations": {
+          "scope.Struct" : {
+            "type" : {
+            "type" : "struct",
+            "name" : "Struct",
+            "path" : "thrift/annotation/scope.thrift"
+          },
+            "value" : {}
+          }
+        },
+        "docstring" : "Applies to structured annotation that need to be accessed runtime in TypeSystem\nand C++ always-on reflection.\n",
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 260
+      },
+      "AllowLegacyTypedefUri" : {
+        "name" : "AllowLegacyTypedefUri",
+        "structured_annotations": {
+          "scope.Typedef" : {
+            "type" : {
+            "type" : "struct",
+            "name" : "Typedef",
+            "path" : "thrift/annotation/scope.thrift"
+          },
+            "value" : {}
+          }
+        },
+        "docstring" : "Allows the Thrift compiler to add a URI to the target typedef.\n\nUse of this annotation is strongly DISCOURAGED, and is provided for\nbackwards-compatibility purposes only.\n\nIndeed, Thrift IDL [typedefs](https://github.com/facebook/fbthrift/blob/main/thrift/doc/idl/index.md#typedefs)\ndo not correspond to the set of user-defined types that can have unique URIs\nper the [Thrift Object Model](https://github.com/facebook/fbthrift/blob/main/thrift/doc/object-model/index.md#thrift-uri)\nWhile it may seem like typedefs correspond to\n[Opaque Alias Types](https://github.com/facebook/fbthrift/blob/main/thrift/doc/object-model/index.md#opaque-alias-types),\nthat is actually incorrect, as the \"aliased\" type that a typedef introduces\nis considered identical - at the Object Model level - to the original type.\n\nThis annotation is introduced to allow \"grandfathering in\" existing typedef\nURIs in preparation for the thrift compiler to reject such cases in the\nfuture (unless this annotation is specified).\n\nThis annoation MUST NOT be applied to a typedef for which no URI is\nspecified (either explicitly via @thrift.Uri, or implicitly through a\nnon-empty\n[package declaration](https://github.com/facebook/fbthrift/blob/main/thrift/doc/idl/index.md#package-declaration)).\n",
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 286
+      },
+      "AllowUnsafeOptionalCustomDefaultValue" : {
+        "name" : "AllowUnsafeOptionalCustomDefaultValue",
+        "structured_annotations": {
+          "scope.Field" : {
+            "type" : {
+            "type" : "struct",
+            "name" : "Field",
+            "path" : "thrift/annotation/scope.thrift"
+          },
+            "value" : {}
+          }
+        },
+        "docstring" : "Allows the target field of a struct or exception, whose qualifier is\n`optional`, to have a custom default value specified in IDL.\n\nUse of this annotation is strongly DISCOURAGED, as custom default values for\noptional fields are both non-sensical and dangerous:\n  - non-sensical because, by definition, the \"default\" state of an optional\n    field is to have no value (i.e., be \"absent\") - as explicitly specified\n    in the [Thrift Object Model](https://github.com/facebook/fbthrift/blob/main/thrift/doc/object-model/index.md#structured-types).\n  - dangerous because in practice, the runtime behavior of the generated code\n    for optional fields with custom default values is inconsistent (sometimes\n    even for the same programming language!).\n\nThis annotation is merely introduced to allow existing use cases to be\ngrandfathered into the new compiler validation logic, which will reject\noptional fields with custom default values unless this annotation is\nspecified.\n\nThis annotation MUST NOT be applied to a field whose qualifier is not\noptional, or that doesn't have a custom default value. If applied, the target\nfield MUST be in a struct or exception (but NOT a union).\n",
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 311
+      },
+      "AllowUnsafeUnionFieldCustomDefaultValue" : {
+        "name" : "AllowUnsafeUnionFieldCustomDefaultValue",
+        "structured_annotations": {
+          "scope.Field" : {
+            "type" : {
+            "type" : "struct",
+            "name" : "Field",
+            "path" : "thrift/annotation/scope.thrift"
+          },
+            "value" : {}
+          }
+        },
+        "docstring" : "Allows the target field of a union to have a custom default value specified\nin IDL.\n\nUse of this annotation is strongly DISCOURAGED, for reasons similar to\n`AllowUnsafeOptionalCustomDefaultValue` above, except that default values\nfor union fields make even less sense (imagine having multiple union fields\nwith custom default values!).\n\nThis annotation is merely introduced to allow existing use cases to be\ngrandfathered into the new compiler validation logic, which will reject\nunion fields with custom default values unless this annotation is\nspecified.\n\nThis annotation MUST NOT be applied to a field that doesn't have a custom\ndefault value, or that is not in a union.\n",
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 331
+      },
+      "AllowUnsafeRequiredFieldQualifier" : {
+        "name" : "AllowUnsafeRequiredFieldQualifier",
+        "structured_annotations": {
+          "scope.Field" : {
+            "type" : {
+            "type" : "struct",
+            "name" : "Field",
+            "path" : "thrift/annotation/scope.thrift"
+          },
+            "value" : {}
+          }
+        },
+        "docstring" : "Allows the target field of a struct or exception to be marked \"required\".\n\nUse of this annotation is strongly DISCOURAGED and almost certainly in\nunexpected behavior. Indeed, the \"required\" field qualifier has been\ndeprecated since 2018, and the behavior in generated code is inconsistent\n(most notably, it does NOT enforce any expectation on user code in C++ since\n2021).\n\nThis annotation is merely introduced to allow existing use cases to be\ngrandfathered into the new compiler validation logic, which will otherwise\nreject any \"required\" field.\n",
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 347
+      },
+      "AllowLegacyMissingUris" : {
+        "name" : "AllowLegacyMissingUris",
+        "structured_annotations": {
+          "scope.Program" : {
+            "type" : {
+            "type" : "struct",
+            "name" : "Program",
+            "path" : "thrift/annotation/scope.thrift"
+          },
+            "value" : {}
+          },
+          "scope.Structured" : {
+            "type" : {
+            "type" : "struct",
+            "name" : "Structured",
+            "path" : "thrift/annotation/scope.thrift"
+          },
+            "value" : {}
+          },
+          "scope.Enum" : {
+            "type" : {
+            "type" : "struct",
+            "name" : "Enum",
+            "path" : "thrift/annotation/scope.thrift"
+          },
+            "value" : {}
+          }
+        },
+        "docstring" : "Allows Thrift IDL to build despite missing otherwise required Thrift URIs.\n\nAccording to the [Thrift Object Model](https://github.com/facebook/fbthrift/blob/main/thrift/doc/object-model/index.md#thrift-uri),\nall user-defined types MUST have a unique, non-empty URI. In Thrift IDL, this\nis accomplished by either:\n1. Specifying a non-empty [`package`](https://github.com/facebook/fbthrift/blob/main/thrift/doc/idl/index.md#package-declaration), or\n2. Explicitly adding the `@thrift.Uri` annotation with a non-empty `value`\n   (see `struct Uri` above).\n\nFailure to do so results in an invalid Thrift schema, but this has\nhistorically not been enforced - until H2'2026.\n\nUse of this annotation is strongly DISCOURAGED, but is provided to allow\nexisting schemas to be grandfathered in and continue building successfully\nuntil the required URIs are specified.\n\nThis annotation can be specified either on the declaration of types that are\nrequired to have URIs (i.e., struct, union, exception and enum), or on the\nfile-level `package`.\n\nAdding this annotation on the `package` is equivalent to annotating every\ntype definiting in that file that is:\n1. required to have a URI (i.e., struct, union, exception or enum), and\n2. does not have a non-empty URI.\n\nA Thrift IDL schema is ill-formed if either of the following is true:\n1. It defines a type that:\n    a. is required to have a URI, but the provided (or inferred) URI is empty, and\n    b. is not annotated - directly or through its `package` - with this\n       annotation (i.e., `@thrift.AllowLegacyMissingUris`)\n2. It uses this annotation unnecessarily, i.e. if:\n   a. it specifies this annotation on a type definition that doesn't need it\n      it (either because it has a non-empty URI, or is not required to have\n      one), or\n   b. it specifies this annotation on the `package` but does not have any\n      type definition that needs it.\n",
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 388
+      }
+  },
+  "source_path" : "thrift/annotation/thrift",
+  "py_namespace" : "thrift.annotation.thrift"
+}

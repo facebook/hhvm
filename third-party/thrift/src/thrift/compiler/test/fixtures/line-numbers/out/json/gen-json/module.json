@@ -3,36 +3,41 @@
   "thrift_module" : "module",
   "constants" : {
     "fortyTwo" : {
-      "lineno" : 19,
+      "lineno" : 24,
       "value" : 42,
       "type_enum" : "I64",
       "spec_args" : null,
       "source_range" : {
         "begin" : {
-          "line" : 19,
+          "line" : 24,
           "column" : 1
         },
         "end" : {
-          "line" : 19,
+          "line" : 24,
           "column" : 25
         }
       }
     }
   },
+  "includes": {
+    "thrift" : {
+      "path" : "thrift/annotation/thrift.thrift"
+    }
+  },
   "enumerations" : {
     "MyEnum" : {
-      "lineno" : 29,
+      "lineno" : 34,
       "constants" : {
         "VALUE1" : 1,
         "VALUE2" : 2
       },
       "source_range" : {
         "begin" : {
-          "line" : 29,
+          "line" : 34,
           "column" : 1
         },
         "end" : {
-          "line" : 33,
+          "line" : 38,
           "column" : 2
         }
       }
@@ -40,16 +45,16 @@
   },
   "typedefs" : {
     "MyMapTypedef" : {
-      "lineno" : 21,
+      "lineno" : 26,
       "type_enum" : "MAP",
       "spec_args" : { "key_type" : { "type_enum" : "I64", "spec_args" : null }, "val_type" : { "type_enum" : "STRING", "spec_args" : null} } ,
       "source_range" : {
         "begin" : {
-          "line" : 21,
+          "line" : 26,
           "column" : 1
         },
         "end" : {
-          "line" : 21,
+          "line" : 26,
           "column" : 38
         }
       }
@@ -57,7 +62,7 @@
   },
   "structs" : {
     "MyAnnot" : {
-      "lineno" : 17,
+      "lineno" : 22,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -65,17 +70,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 17,
+          "line" : 22,
           "column" : 1
         },
         "end" : {
-          "line" : 17,
+          "line" : 22,
           "column" : 18
         }
       }
     },
     "MyStruct" : {
-      "lineno" : 23,
+      "lineno" : 28,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -85,11 +90,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 24,
+              "line" : 29,
               "column" : 3
             },
             "end" : {
-              "line" : 24,
+              "line" : 29,
               "column" : 21
             }
           }
@@ -100,11 +105,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 25,
+              "line" : 30,
               "column" : 3
             },
             "end" : {
-              "line" : 26,
+              "line" : 31,
               "column" : 40
             }
           }
@@ -112,11 +117,11 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 23,
+          "line" : 28,
           "column" : 1
         },
         "end" : {
-          "line" : 27,
+          "line" : 32,
           "column" : 2
         }
       }
@@ -124,7 +129,7 @@
   },
   "services" : {
     "MyService" : {
-      "lineno" : 35,
+      "lineno" : 40,
       "functions" : {
         "MyService.ping" : {
           "return_type" : {
@@ -135,11 +140,11 @@
           "throws" : [],
           "source_range" : {
             "begin" : {
-              "line" : 36,
+              "line" : 41,
               "column" : 3
             },
             "end" : {
-              "line" : 36,
+              "line" : 41,
               "column" : 15
             }
           }
@@ -153,11 +158,11 @@
           "throws" : [],
           "source_range" : {
             "begin" : {
-              "line" : 38,
+              "line" : 43,
               "column" : 3
             },
             "end" : {
-              "line" : 39,
+              "line" : 44,
               "column" : 28
             }
           }
@@ -165,11 +170,11 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 35,
+          "line" : 40,
           "column" : 1
         },
         "end" : {
-          "line" : 40,
+          "line" : 45,
           "column" : 2
         }
       }

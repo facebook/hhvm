@@ -4,11 +4,14 @@
   "includes": {
     "includes" : {
       "path" : "includes.thrift"
+    },
+    "thrift" : {
+      "path" : "thrift/annotation/thrift.thrift"
     }
   },
   "structs" : {
     "MyStruct" : {
-      "lineno" : 20,
+      "lineno" : 25,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -19,11 +22,11 @@
           "default_value" : { "MyIntField" : 2, "MyTransitiveField" : { "a" : 2 } },
           "source_range" : {
             "begin" : {
-              "line" : 21,
+              "line" : 26,
               "column" : 3
             },
             "end" : {
-              "line" : 21,
+              "line" : 26,
               "column" : 67
             }
           }
@@ -34,11 +37,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 22,
+              "line" : 27,
               "column" : 3
             },
             "end" : {
-              "line" : 22,
+              "line" : 27,
               "column" : 45
             }
           }
@@ -50,11 +53,11 @@
           "default_value" : 42,
           "source_range" : {
             "begin" : {
-              "line" : 23,
+              "line" : 28,
               "column" : 3
             },
             "end" : {
-              "line" : 23,
+              "line" : 28,
               "column" : 71
             }
           }
@@ -62,11 +65,11 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 20,
+          "line" : 25,
           "column" : 1
         },
         "end" : {
-          "line" : 24,
+          "line" : 29,
           "column" : 2
         }
       }

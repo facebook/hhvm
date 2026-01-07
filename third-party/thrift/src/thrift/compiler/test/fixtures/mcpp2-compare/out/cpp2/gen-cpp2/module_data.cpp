@@ -814,18 +814,18 @@ namespace detail {
 
 template <> struct TSchemaAssociation<::some::valid::ns::EmptyService, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = 7310692166277539174;
-  static constexpr ::std::string_view definitionKey = {"\xf0\x86\x30\xf7\xab\x0b\xe7\x2b\xaa\xf5\x14\x74\x1e\xd7\xb2\x00", 16};
+  static constexpr int64_t programId = 690951889242425239;
+  static constexpr ::std::string_view definitionKey = {"\x90\xa0\x50\xfa\xa4\xab\xa1\xfc\x4e\x17\x26\x19\xef\x8d\x4f\x69", 16};
 };
 template <> struct TSchemaAssociation<::some::valid::ns::ReturnService, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = 7310692166277539174;
-  static constexpr ::std::string_view definitionKey = {"\xf8\x47\xee\x58\x80\xaf\x95\xc6\xb2\x68\x9e\x73\x3f\xf5\x07\xec", 16};
+  static constexpr int64_t programId = 690951889242425239;
+  static constexpr ::std::string_view definitionKey = {"\xac\x5a\xab\x10\x5f\x7f\x59\x54\x15\x36\x37\x83\xdb\x0d\xf8\x71", 16};
 };
 template <> struct TSchemaAssociation<::some::valid::ns::ParamService, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = 7310692166277539174;
-  static constexpr ::std::string_view definitionKey = {"\x8b\xd3\x86\xa6\xb7\xe2\xdf\xa5\xad\x73\xc9\x7d\xa3\xad\xb8\xf5", 16};
+  static constexpr int64_t programId = 690951889242425239;
+  static constexpr ::std::string_view definitionKey = {"\xf2\xf4\x56\x72\xaf\x9e\x84\x04\x56\xdb\xa5\xef\x38\x31\x6d\x3d", 16};
 };
 } // namespace detail
 } // namespace apache::thrift

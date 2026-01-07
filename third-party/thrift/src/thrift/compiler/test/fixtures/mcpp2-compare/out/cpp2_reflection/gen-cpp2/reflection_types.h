@@ -180,7 +180,7 @@ unsigned long ReflectionStruct::read(Protocol_* iprot) {
 namespace apache::thrift::detail {
 template <> struct TSchemaAssociation<::cpp2::ReflectionStruct, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = 1901735943368972403;
-  static constexpr ::std::string_view definitionKey = {"\xc5\xa2\x1a\xc0\x9a\x8e\x1c\x2c\xee\x11\x57\xb1\xe8\x91\x3e\xf1", 16};
+  static constexpr int64_t programId = 4655757543903679549;
+  static constexpr ::std::string_view definitionKey = {"\x1c\xe1\xf1\x76\x3b\x91\x41\x3c\x81\x78\xdb\x42\x6e\xce\xad\x79", 16};
 };
 } // namespace apache::thrift::detail

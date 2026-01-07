@@ -70,9 +70,9 @@ namespace module_constants {
     return min_byte_const_;
   }
 
-  FOLLY_EXPORT ::std::string_view _fbthrift_schema_6a92e1732fe1f98d();
-  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_6a92e1732fe1f98d_includes();
-  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_6a92e1732fe1f98d_uris();
+  FOLLY_EXPORT ::std::string_view _fbthrift_schema_247ba51f312c94b4();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_247ba51f312c94b4_includes();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_247ba51f312c94b4_uris();
 
 } // namespace module_constants
 } // namespace cpp2

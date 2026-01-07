@@ -15,6 +15,10 @@
  */
 
 include "thrift/annotation/hack.thrift"
+include "thrift/annotation/thrift.thrift"
+
+@thrift.AllowLegacyMissingUris
+package;
 
 namespace hack hack.fixtures
 namespace hack.module hack.module.internal

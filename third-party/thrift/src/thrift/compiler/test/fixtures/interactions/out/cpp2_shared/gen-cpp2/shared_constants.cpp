@@ -14,13 +14,13 @@ namespace thrift::shared_interactions {
 namespace shared_constants {
 
 
-::std::string_view _fbthrift_schema_c56c72d4e711dd06() {
+::std::string_view _fbthrift_schema_7c84d31b4cbc05a6() {
   return "";
 }
-::folly::Range<const ::std::string_view*> _fbthrift_schema_c56c72d4e711dd06_includes() {
+::folly::Range<const ::std::string_view*> _fbthrift_schema_7c84d31b4cbc05a6_includes() {
   return {};
 }
-::folly::Range<const ::std::string_view*> _fbthrift_schema_c56c72d4e711dd06_uris() {
+::folly::Range<const ::std::string_view*> _fbthrift_schema_7c84d31b4cbc05a6_uris() {
   return {};
 }
 

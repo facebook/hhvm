@@ -16,6 +16,11 @@
 
 // @lint-ignore-every THRIFTFORMAT
 
+include "thrift/annotation/thrift.thrift"
+
+@thrift.AllowLegacyMissingUris
+package;
+
 namespace py thrift.compiler.test.fixtures.json_experimental.src.DemoWidgetDocs
 namespace php thrift_php_demo
 

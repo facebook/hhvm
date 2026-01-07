@@ -15,13 +15,13 @@ namespace matching_module_name {
 namespace matching_module_name_constants {
 
 
-::std::string_view _fbthrift_schema_1cd40e8dd523bf67() {
+::std::string_view _fbthrift_schema_6c416ba7ec822e7e() {
   return "";
 }
-::folly::Range<const ::std::string_view*> _fbthrift_schema_1cd40e8dd523bf67_includes() {
+::folly::Range<const ::std::string_view*> _fbthrift_schema_6c416ba7ec822e7e_includes() {
   return {};
 }
-::folly::Range<const ::std::string_view*> _fbthrift_schema_1cd40e8dd523bf67_uris() {
+::folly::Range<const ::std::string_view*> _fbthrift_schema_6c416ba7ec822e7e_uris() {
   return {};
 }
 

@@ -17,6 +17,10 @@
 namespace cpp2 matching_module_name
 
 include "other/matching_module_name.thrift"
+include "thrift/annotation/thrift.thrift"
+
+@thrift.AllowLegacyMissingUris
+package;
 
 struct MyStruct {
   1: matching_module_name.OtherStruct OtherStructField;

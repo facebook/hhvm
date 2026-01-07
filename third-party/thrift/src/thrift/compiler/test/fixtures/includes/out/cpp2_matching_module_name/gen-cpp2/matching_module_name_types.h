@@ -188,7 +188,7 @@ unsigned long MyStruct::read(Protocol_* iprot) {
 namespace apache::thrift::detail {
 template <> struct TSchemaAssociation<::matching_module_name::MyStruct, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = 2077301330453708647;
-  static constexpr ::std::string_view definitionKey = {"\x6b\x35\xa5\xfe\x90\x2b\xb3\xa9\x34\xfa\x84\x86\x67\x48\x33\x7e", 16};
+  static constexpr int64_t programId = 7800634398554074750;
+  static constexpr ::std::string_view definitionKey = {"\x7c\x81\xf4\x98\xec\x3f\xd6\x1d\xb9\x8c\x4e\x7d\x7c\x38\xea\xe0", 16};
 };
 } // namespace apache::thrift::detail

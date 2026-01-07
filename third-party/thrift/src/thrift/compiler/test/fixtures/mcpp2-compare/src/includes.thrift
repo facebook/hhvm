@@ -19,6 +19,10 @@ cpp_include "folly/sorted_vector_types.h"
 namespace cpp2 a.different.ns
 
 include "thrift/annotation/cpp.thrift"
+include "thrift/annotation/thrift.thrift"
+
+@thrift.AllowLegacyMissingUris
+package;
 
 typedef i64 IncludedInt64
 

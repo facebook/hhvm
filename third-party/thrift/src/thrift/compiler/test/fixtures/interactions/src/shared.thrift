@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
+include "thrift/annotation/thrift.thrift"
+
+@thrift.AllowLegacyMissingUris
+package;
+
 namespace cpp2 thrift.shared_interactions
 namespace java.swift test.fixtures.another_interactions
 namespace py test.fixtures.another_interactions

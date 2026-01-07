@@ -26,9 +26,9 @@ namespace enums_constants {
   /** Glean {"constant": "ConstantMap2"} */
   ::std::map<::facebook::ns::qwerty::AnEnumC, ::std::map<::std::int16_t, ::std::set<::std::int16_t>>> const& ConstantMap2();
 
-  FOLLY_EXPORT ::std::string_view _fbthrift_schema_13f072109540bb8d();
-  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_13f072109540bb8d_includes();
-  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_13f072109540bb8d_uris();
+  FOLLY_EXPORT ::std::string_view _fbthrift_schema_3fa65e569f525ab5();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_3fa65e569f525ab5_includes();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_3fa65e569f525ab5_uris();
 
 } // namespace enums_constants
 } // namespace facebook::ns::qwerty

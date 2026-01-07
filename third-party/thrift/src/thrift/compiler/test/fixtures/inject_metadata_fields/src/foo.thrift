@@ -17,6 +17,9 @@
 include "thrift/annotation/thrift.thrift"
 include "injected_field.thrift"
 
+@thrift.AllowLegacyMissingUris
+package;
+
 namespace go test.fixtures.inject_metadata_fields
 
 struct Fields {

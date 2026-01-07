@@ -28,9 +28,9 @@ namespace simple_constants {
     return kIndexId_;
   }
 
-  FOLLY_EXPORT ::std::string_view _fbthrift_schema_fd38c81e7958ce95();
-  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_fd38c81e7958ce95_includes();
-  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_fd38c81e7958ce95_uris();
+  FOLLY_EXPORT ::std::string_view _fbthrift_schema_98203f6e4f0a59d2();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_98203f6e4f0a59d2_includes();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_98203f6e4f0a59d2_uris();
 
 } // namespace simple_constants
 } // namespace apache::thrift::test

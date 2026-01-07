@@ -23,9 +23,9 @@ namespace module2_constants {
   /** Glean {"constant": "c4"} */
   ::module2::Struct const& c4();
 
-  FOLLY_EXPORT ::std::string_view _fbthrift_schema_9188ad030fa5981a();
-  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_9188ad030fa5981a_includes();
-  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_9188ad030fa5981a_uris();
+  FOLLY_EXPORT ::std::string_view _fbthrift_schema_15288af608750d52();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_15288af608750d52_includes();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_15288af608750d52_uris();
 
 } // namespace module2_constants
 } // namespace module2

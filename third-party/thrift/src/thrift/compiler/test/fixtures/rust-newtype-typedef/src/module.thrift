@@ -15,6 +15,10 @@
  */
 
 include "thrift/annotation/rust.thrift"
+include "thrift/annotation/thrift.thrift"
+
+@thrift.AllowLegacyMissingUris
+package;
 
 @rust.NewType
 @rust.Type{name = "sorted_vector_map::SortedVectorMap"}

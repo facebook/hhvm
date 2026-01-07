@@ -14,13 +14,13 @@ namespace cpp2 {
 namespace module_constants {
 
 
-::std::string_view _fbthrift_schema_a93688dbffe3956b() {
+::std::string_view _fbthrift_schema_87ff82dc7e3b4b7d() {
   return "";
 }
-::folly::Range<const ::std::string_view*> _fbthrift_schema_a93688dbffe3956b_includes() {
+::folly::Range<const ::std::string_view*> _fbthrift_schema_87ff82dc7e3b4b7d_includes() {
   return {};
 }
-::folly::Range<const ::std::string_view*> _fbthrift_schema_a93688dbffe3956b_uris() {
+::folly::Range<const ::std::string_view*> _fbthrift_schema_87ff82dc7e3b4b7d_uris() {
   return {};
 }
 

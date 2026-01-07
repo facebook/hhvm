@@ -27,6 +27,9 @@ namespace py3 simple.example
 include 'dependent.thrift'
 include "thrift/annotation/thrift.thrift"
 
+@thrift.AllowLegacyMissingUris
+package;
+
 enum AnEnum {
   ONE = 1,
   TWO = 2,

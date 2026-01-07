@@ -1,5 +1,5 @@
 Schema {
-  1: programs (list) = list<struct>[3] {
+  1: programs (list) = list<struct>[5] {
     [0] = Program {
       1: attrs (struct) = DefinitionAttrs {
         1: name (string) = "module",
@@ -8,7 +8,7 @@ Schema {
       2: id (i64) = 986987743245182930,
       3: includes (list) = list<i64>[2] {
         [0] = 3647982146561211874,
-        [1] = -5500541977004985971,
+        [1] = -6912007785227909936,
       },
       8: definitionKeys (list) = list<string>[4] {
         [0] = "\257\242\363\312(\261x~\016\336{\272v<ul",
@@ -35,14 +35,118 @@ Schema {
     [2] = Program {
       1: attrs (struct) = DefinitionAttrs {
         1: name (string) = "include",
+        8: annotations (map) = map<string,struct>[1] {
+          "facebook.com/thrift/annotation/AllowLegacyMissingUris" -> Annotation {
+          },
+        },
+        9: annotationsByKey (map) = map<string,struct>[1] {
+          "\241\256\037\227\214=[\353D\003\222\0268\036=s" -> Annotation {
+          },
+        },
       },
-      2: id (i64) = -5500541977004985971,
+      2: id (i64) = -6912007785227909936,
+      3: includes (list) = list<i64>[1] {
+        [0] = 9183676402141577639,
+      },
       8: definitionKeys (list) = list<string>[1] {
-        [0] = "&Z;^k\371\222\325\341\315\"\2569\3258\353",
+        [0] = "\377o\213{\246z\033\206\017\232\006\317\366\026\322J",
       },
       5: path (string) = "include.thrift",
       7: namespaces (map) = map<string,string>[1] {
         "java.swift" -> "test.fixtures.service_schema",
+      },
+    },
+    [3] = Program {
+      1: attrs (struct) = DefinitionAttrs {
+        1: name (string) = "thrift",
+        2: uri (string) = "facebook.com/thrift/annotation",
+      },
+      2: id (i64) = 9183676402141577639,
+      3: includes (list) = list<i64>[1] {
+        [0] = -3050215275751179326,
+      },
+      8: definitionKeys (list) = list<string>[23] {
+        [0] = "x\217\365\217\031\224\220{L\361\2175\324\006\006\275",
+        [1] = "\001[\252'\232\0316\034\344\004\232\344\220\307*\247",
+        [2] = "\352d\214\253\213\217k7L\346\200\315+K\273\332",
+        [3] = "\3737\221\360)X1F\032z\307\362\324\360jk",
+        [4] = "\327=\355\006n\362\224LO(y\315\017\000\2424",
+        [5] = "\350Ma\327\237\312\2069\034tx\203p.\206K",
+        [6] = "\?JgR\016\210\300\360[\212\363\302\342V\315\035",
+        [7] = " 8b\202\374\205\000j\210Q\232\277\\|\264\177",
+        [8] = "R\310X\005\357\205\2029\010\370T\225\231\310\n\276",
+        [9] = "\302\000\217\033\210\004\263\034\017e\270\247\202\026\211\341",
+        [10] = "5\304n\356R\216\325q1F_\2519\255\330M",
+        [11] = "\022\346E\350\366\361\336Gk\007\343'tz\364\n",
+        [12] = "3\231N\247\234/T'H\255l\005\371%\330\352",
+        [13] = "'\310bY\216\254M*\356\353L\"\037\350\325~",
+        [14] = "EGL2\022\262\\r#fp\233.\365\230 ",
+        [15] = "\360\220\346n\202\341\3576\032\000\330\200\360S\314\355",
+        [16] = "\024K\254\363\251\307@6\243\031BIlt\247\265",
+        [17] = "}\340\216xz\354\312\300\352&\032\265\n\305\243p",
+        [18] = "tc\004\324\236e\250\315L\030\241}\274\310H\"",
+        [19] = "\360\262\177 |\t\n\272\251\305\300\033\341K\024\325",
+        [20] = "\376^\264=Nb>\275\017\?p\250\237\227\?m",
+        [21] = "D-\211\251\035\304\241\013\232\0056F\317aE~",
+        [22] = "\241\256\037\227\214=[\353D\003\222\0268\036=s",
+      },
+      5: path (string) = "thrift/annotation/thrift.thrift",
+      7: namespaces (map) = map<string,string>[7] {
+        "android" -> "com.facebook.thrift.annotation_deprecated",
+        "go" -> "thrift.annotation.thrift",
+        "hs" -> "Facebook.Thrift.Annotation.Thrift",
+        "java" -> "com.facebook.thrift.annotation_deprecated",
+        "js" -> "thrift.annotation.thrift",
+        "py" -> "thrift.annotation.thrift",
+        "py.asyncio" -> "facebook_thrift_asyncio.annotation.thrift",
+      },
+    },
+    [4] = Program {
+      1: attrs (struct) = DefinitionAttrs {
+        1: name (string) = "scope",
+        2: uri (string) = "facebook.com/thrift/annotation",
+        6: docs (struct) = DocBlock {
+          1: contents (string) = "Annotations that indicate which IDL definition a structured annotation can\nbe placed on.\n\nFor example:\n  include \"thrift/annotat[...](389)",
+          2: sourceRange (struct) = SourceRange {
+            1: programId (i64) = -3050215275751179326,
+            2: beginLine (i32) = 19,
+            3: beginColumn (i32) = 1,
+            4: endLine (i32) = 35,
+            5: endColumn (i32) = 4,
+          },
+        },
+      },
+      2: id (i64) = -3050215275751179326,
+      8: definitionKeys (list) = list<string>[20] {
+        [0] = "8\222\345M\250\372\307|,#\014\375\017\247\205\354",
+        [1] = "{Z\177\217(\2164vx\317O\313\n7\010j",
+        [2] = "@C\263\304\025\311\274\302j\271\276\250'\265H\205",
+        [3] = "\235L\"\303\260H\245\253\376\236p\314`oa,",
+        [4] = "\022Ye\?;\353+S\307\031@\271\256\305\307\241",
+        [5] = ":\301\203\021\215\215Y\032 \030%S\246w\240A",
+        [6] = "\341\240\331\255'O\376\343o\304g\207\261\241;\036",
+        [7] = "\013A\226\243\366\336\370%G_\326v_\006xi",
+        [8] = "/H\223\017&\000\270\250\016pa\275\271,\010\366",
+        [9] = "\327\2163G\025i\021 \020 \020\026\245)\337\341",
+        [10] = "\t\234\326q\357\330#\033\314\274D\244z\224\222M",
+        [11] = "}\371\002\020\372\327\347\250\034\307\353M\240&\210G",
+        [12] = "\211\220DX\177M\376\341T2\021I\"d\241i",
+        [13] = "\271yQG\256\355\263)\260>\251)Z\240y\371",
+        [14] = "#\237\\\241\216p\234_\272`.\310k\234\264\221",
+        [15] = "\275\344\333\321/\n\341~\263\304\336xT,N\025",
+        [16] = "ft\346m\276\355\244{\371\016,O]\035OR",
+        [17] = "\360\245\311\226\207\354e\263\267\343\264\344/\211\375+",
+        [18] = "\214\360f\2515N\037\220\234\307\274@k\305\250{",
+        [19] = "\204\365\0070\365#\323\323\020\273\004\212\246\243g}",
+      },
+      5: path (string) = "thrift/annotation/scope.thrift",
+      7: namespaces (map) = map<string,string>[6] {
+        "android" -> "com.facebook.thrift.annotation_deprecated",
+        "go" -> "thrift.annotation.scope",
+        "java" -> "com.facebook.thrift.annotation_deprecated",
+        "js" -> "thrift.annotation.scope",
+        "py" -> "thrift.annotation.scope",
+        "py.asyncio" -> "facebook_thrift_asyncio.annotation.scope",
       },
     },
   },
@@ -184,7 +288,7 @@ Schema {
                   3: type (struct) = TypeStruct {
                     1: name (struct) = TypeName {
                       11: structType (struct) = TypeUri {
-                        4: definitionKey (string) = "&Z;^k\371\222\325\341\315\"\2569\3258\353",
+                        4: definitionKey (string) = "\377o\213{\246z\033\206\017\232\006\317\366\026\322J",
                       },
                     },
                     2: params (list) = list<struct>[0] {

@@ -26,7 +26,7 @@ namespace module_constants {
   static const ::std::array<::std::string_view, 3> includes = {
     _fbthrift_schema_db27c1f89cb27d2(),
     ::apache::thrift::detail::mc::readSchema(::facebook::thrift::test::fixtures::service_schema::extend_constants::_fbthrift_schema_32a03c6f38bf7de2),
-    ::apache::thrift::detail::mc::readSchema(::cpp2::include_constants::_fbthrift_schema_b3aa26370c7e318d),
+    ::apache::thrift::detail::mc::readSchema(::cpp2::include_constants::_fbthrift_schema_a0139d8a6cc184d0),
   };
   return ::folly::range(includes);
 }

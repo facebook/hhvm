@@ -17,6 +17,10 @@
 namespace java.swift test.fixtures.sink
 
 include "thrift/annotation/cpp.thrift"
+include "thrift/annotation/thrift.thrift"
+
+@thrift.AllowLegacyMissingUris
+package;
 
 struct InitialResponse {
   1: string content;

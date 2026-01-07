@@ -120,8 +120,8 @@ class IIf : public apache::thrift::Tile, public apache::thrift::ServerInterface 
 namespace detail {
 template <> struct TSchemaAssociation<::cpp2::A, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = -7283581240934668548;
-  static constexpr ::std::string_view definitionKey = {"\x17\xa8\x53\xd5\x98\xc7\x14\x67\xf7\x7b\x70\xbf\xfd\x06\xcf\xce", 16};
+  static constexpr int64_t programId = 7180559895022194586;
+  static constexpr ::std::string_view definitionKey = {"\x8a\xb6\x51\x75\x83\x55\xf1\x07\x7b\x3a\x35\x97\x79\xfa\x59\xa0", 16};
 };
 }
 } // namespace apache::thrift
@@ -335,8 +335,8 @@ class ServiceHandler<::cpp2::B> : virtual public ::cpp2::ASvIf {
 namespace detail {
 template <> struct TSchemaAssociation<::cpp2::B, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = -7283581240934668548;
-  static constexpr ::std::string_view definitionKey = {"\x46\x40\x1e\x86\xac\xfc\xa8\x93\xd7\xb5\xb9\xbe\x1e\x1b\x5d\x4d", 16};
+  static constexpr int64_t programId = 7180559895022194586;
+  static constexpr ::std::string_view definitionKey = {"\x46\xb6\x8e\x26\x3d\xaa\x59\xa4\xba\x44\x94\x55\x57\xe3\xcd\x43", 16};
 };
 }
 } // namespace apache::thrift
@@ -569,8 +569,8 @@ class IIf : public apache::thrift::Tile, public apache::thrift::ServerInterface 
 namespace detail {
 template <> struct TSchemaAssociation<::cpp2::C, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = -7283581240934668548;
-  static constexpr ::std::string_view definitionKey = {"\x33\xd4\xc1\x6b\x55\x68\xb4\x68\x3d\x36\x71\xe1\x99\x01\xf4\x09", 16};
+  static constexpr int64_t programId = 7180559895022194586;
+  static constexpr ::std::string_view definitionKey = {"\x9e\xba\x69\x3d\xe9\xd5\x5b\x1c\x54\x08\x10\x78\x89\xb1\x1c\x55", 16};
 };
 }
 } // namespace apache::thrift

@@ -15,6 +15,10 @@
  */
 
 include "thrift/annotation/rust.thrift"
+include "thrift/annotation/thrift.thrift"
+
+@thrift.AllowLegacyMissingUris
+package;
 
 struct ThereAreNoPascalCaseKeywords {
   1: bool return;

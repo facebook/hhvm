@@ -18,6 +18,9 @@ include "thrift/annotation/cpp.thrift"
 include "thrift/annotation/python.thrift"
 include "thrift/annotation/thrift.thrift"
 
+@thrift.AllowLegacyMissingUris
+package;
+
 namespace cpp2 py3.simple
 
 @cpp.Type{name = "std::unique_ptr<folly::IOBuf>"}

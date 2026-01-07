@@ -17,6 +17,10 @@
 namespace java.swift test.fixtures.stream
 
 include "thrift/annotation/cpp.thrift"
+include "thrift/annotation/thrift.thrift"
+
+@thrift.AllowLegacyMissingUris
+package;
 
 safe server exception FooStreamEx {}
 safe server exception FooEx {}

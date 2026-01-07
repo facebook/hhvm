@@ -535,12 +535,12 @@ unsigned long Foo2::read(Protocol_* iprot) {
 namespace apache::thrift::detail {
 template <> struct TSchemaAssociation<::cpp2::Foo, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = -6253660554085034645;
-  static constexpr ::std::string_view definitionKey = {"\x18\x27\x47\x34\x3a\x53\x02\x32\x7f\x34\x27\xa3\xcb\x39\xc0\xe2", 16};
+  static constexpr int64_t programId = -8647048876005831811;
+  static constexpr ::std::string_view definitionKey = {"\x4e\x80\xd7\x8c\x06\xa2\xb7\x39\x99\xad\x2e\x81\x45\x45\x93\xa2", 16};
 };
 template <> struct TSchemaAssociation<::cpp2::Foo2, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = -6253660554085034645;
-  static constexpr ::std::string_view definitionKey = {"\xb5\x98\x87\xd0\xea\xb5\xb4\xdb\xcd\xe0\x09\x1a\xb8\xff\x3c\x19", 16};
+  static constexpr int64_t programId = -8647048876005831811;
+  static constexpr ::std::string_view definitionKey = {"\x67\x52\x0b\x19\x5a\x54\xae\x80\x07\x76\x6c\x26\x7c\xb4\x18\x40", 16};
 };
 } // namespace apache::thrift::detail

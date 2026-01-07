@@ -354,7 +354,7 @@ unsigned long BasicTypes::read(Protocol_* iprot) {
 namespace apache::thrift::detail {
 template <> struct TSchemaAssociation<::cpp2::BasicTypes, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = -2085189577537265531;
-  static constexpr ::std::string_view definitionKey = {"\x15\xaa\xb3\x9b\x40\xf8\xf9\x2e\xc0\xea\x9a\x58\x08\x64\x5e\x7d", 16};
+  static constexpr int64_t programId = 940534236796795597;
+  static constexpr ::std::string_view definitionKey = {"\x7e\xbe\x0a\x5a\xde\xec\x4f\xf1\x86\x4b\x45\x52\x48\x5d\xc9\x9f", 16};
 };
 } // namespace apache::thrift::detail

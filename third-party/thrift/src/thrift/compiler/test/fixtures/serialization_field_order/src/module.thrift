@@ -19,6 +19,9 @@ namespace java.swift test.fixtures.adapter
 
 include "thrift/annotation/thrift.thrift"
 
+@thrift.AllowLegacyMissingUris
+package;
+
 @thrift.SerializeInFieldIdOrder
 struct Foo {
   3: i32 field1;

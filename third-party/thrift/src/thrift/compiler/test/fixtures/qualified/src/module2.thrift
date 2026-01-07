@@ -22,6 +22,10 @@ namespace java.swift test.fixtures.module2
 
 include "module0.thrift"
 include "module1.thrift"
+include "thrift/annotation/thrift.thrift"
+
+@thrift.AllowLegacyMissingUris
+package;
 
 struct Struct {
   1: module0.Struct first;

@@ -16,6 +16,9 @@
 
 include "thrift/annotation/thrift.thrift"
 
+@thrift.AllowLegacyMissingUris
+package;
+
 enum TestEnum {
   UNKNOWN = 0,
   NEW_VALUE = 1,

@@ -415,18 +415,18 @@ namespace detail {
 
 template <> struct TSchemaAssociation<::py3::simple::SimpleService, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = 6345946797339430963;
-  static constexpr ::std::string_view definitionKey = {"\xc4\x02\x1a\x14\x36\x2e\x5c\x3c\x0f\x59\xf5\x20\x45\xa9\xd2\x14", 16};
+  static constexpr int64_t programId = -4259380151706122153;
+  static constexpr ::std::string_view definitionKey = {"\xf8\x0f\x3b\x71\x9e\xe7\x66\x02\x7f\x82\xad\x37\xa4\x72\xd8\x05", 16};
 };
 template <> struct TSchemaAssociation<::py3::simple::DerivedService, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = 6345946797339430963;
-  static constexpr ::std::string_view definitionKey = {"\x37\x0e\xa7\x95\xe5\x86\xec\x6d\xc6\x79\x33\xcd\x63\x4f\x1c\xf7", 16};
+  static constexpr int64_t programId = -4259380151706122153;
+  static constexpr ::std::string_view definitionKey = {"\xb0\xf5\x5f\x9b\x1d\xeb\x64\xc0\xac\x8f\x0b\x7f\xd2\x78\xe7\x8a", 16};
 };
 template <> struct TSchemaAssociation<::py3::simple::RederivedService, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = 6345946797339430963;
-  static constexpr ::std::string_view definitionKey = {"\x7c\x11\x07\x26\x6c\xbd\x5b\x25\x25\xbe\xfa\x9f\x63\x01\xd2\x9a", 16};
+  static constexpr int64_t programId = -4259380151706122153;
+  static constexpr ::std::string_view definitionKey = {"\xbb\xe8\x01\xe1\x89\x47\xca\xcf\x82\x1d\xa9\x14\x9b\xe9\xcf\x9b", 16};
 };
 } // namespace detail
 } // namespace apache::thrift

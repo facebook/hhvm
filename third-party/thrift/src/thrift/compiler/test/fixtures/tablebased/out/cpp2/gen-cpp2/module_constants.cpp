@@ -14,13 +14,13 @@ namespace test::fixtures::tablebased {
 namespace module_constants {
 
 
-::std::string_view _fbthrift_schema_8dac88a2d2ebc650() {
+::std::string_view _fbthrift_schema_ef6860959277f327() {
   return "";
 }
-::folly::Range<const ::std::string_view*> _fbthrift_schema_8dac88a2d2ebc650_includes() {
+::folly::Range<const ::std::string_view*> _fbthrift_schema_ef6860959277f327_includes() {
   return {};
 }
-::folly::Range<const ::std::string_view*> _fbthrift_schema_8dac88a2d2ebc650_uris() {
+::folly::Range<const ::std::string_view*> _fbthrift_schema_ef6860959277f327_uris() {
   return {};
 }
 

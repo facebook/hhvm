@@ -18,6 +18,9 @@ include "thrift/annotation/cpp.thrift"
 include "thrift/annotation/java.thrift"
 include "thrift/annotation/thrift.thrift"
 
+@thrift.AllowLegacyMissingUris
+package;
+
 namespace java.swift test.fixtures.refs
 
 enum MyEnum {

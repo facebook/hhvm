@@ -14,6 +14,12 @@
  * limitations under the License.
  */
 
+include "thrift/annotation/thrift.thrift"
+
+
+@thrift.AllowLegacyMissingUris
+package;
+
 struct def {
   1: i64 from;
   2: string in;

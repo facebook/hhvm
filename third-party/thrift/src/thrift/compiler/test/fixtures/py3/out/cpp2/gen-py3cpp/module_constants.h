@@ -98,9 +98,9 @@ namespace module_constants {
   /** Glean {"constant": "ANOTHER_CONST_MAP"} */
   ::std::map<::py3::simple::AnEnumRenamed, ::std::int32_t> const& ANOTHER_CONST_MAP();
 
-  FOLLY_EXPORT ::std::string_view _fbthrift_schema_581154fd6af1d033();
-  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_581154fd6af1d033_includes();
-  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_581154fd6af1d033_uris();
+  FOLLY_EXPORT ::std::string_view _fbthrift_schema_c4e3a451b6350857();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_c4e3a451b6350857_includes();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_c4e3a451b6350857_uris();
 
 } // namespace module_constants
 } // namespace py3::simple

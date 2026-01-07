@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
+include "thrift/annotation/thrift.thrift"
+
+@thrift.AllowLegacyMissingUris
+package;
+
 namespace android test.fixtures.basic
 namespace java test.fixtures.basic
 namespace java.swift test.fixtures.basic

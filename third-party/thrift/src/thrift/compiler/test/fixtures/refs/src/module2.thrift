@@ -16,6 +16,10 @@
 
 include "includes.thrift"
 include "thrift/annotation/cpp.thrift"
+include "thrift/annotation/thrift.thrift"
+
+@thrift.AllowLegacyMissingUris
+package;
 
 struct StructUsingOtherNamespace {
   @cpp.Ref{type = cpp.RefType.Unique}

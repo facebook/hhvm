@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
+include "thrift/annotation/thrift.thrift"
+
+@thrift.AllowLegacyMissingUris
+package;
+
 namespace cpp2 simple.dependent
 namespace py simple.dependent
 namespace py.asyncio simple.dependent_asyncio

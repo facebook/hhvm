@@ -1895,7 +1895,7 @@ struct PrologueID {
 
   struct Hasher {
     size_t operator()(PrologueID pid) const {
-      return folly::hash::hash_combine(pid.funcId().toInt(), pid.nargs());
+      return pid.funcId().toInt() + pid.nargs();
     }
   };
 

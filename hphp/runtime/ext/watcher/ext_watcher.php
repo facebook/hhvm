@@ -1,8 +1,10 @@
 <?hh
 
+// If you update this, make sure to update the corresponding `ext_watcher.hhi` file.
+
 namespace HH {
 
-type WatcherOptions = shape (
+type WatcherOptions = shape(
   ?'repo_root' => string,
   ?'include_paths' => vec<string>,
   ?'include_extensions' => vec<string>,

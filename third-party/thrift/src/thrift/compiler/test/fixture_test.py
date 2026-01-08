@@ -18,7 +18,6 @@
 import difflib
 import os
 import re
-import shutil
 import subprocess
 import sys
 import tempfile
@@ -104,8 +103,7 @@ class FixtureTest(unittest.TestCase):
             raise
 
     def setUp(self) -> None:
-        tmp = tempfile.mkdtemp()
-        self.addCleanup(shutil.rmtree, tmp, True)
+        tmp: str = self.enterContext(tempfile.TemporaryDirectory())
         self.tmp_dir_abspath = Path(tmp).resolve(strict=True)
         self.maxDiff = None
 

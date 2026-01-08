@@ -1,0 +1,6 @@
+ERROR: File "class_abstract_final_11_bad_position.php", line 4, characters 3-67:
+Incomplete position information! We couldn't find the exact line of your type error in this definition. Please run `hh rage` and post in https://fb.workplace.com/groups/hackforhiphop/. (Typing[4002])
+  File "class_abstract_final_11_bad_position.php", line 3, characters 22-23:
+  `C2` is uninstantiable
+  File "class_abstract_final_11_bad_position.php", line 3, characters 22-23:
+  Declaration is here

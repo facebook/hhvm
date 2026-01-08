@@ -18,6 +18,10 @@ namespace cpp2 metadata.test.services
 
 include "thrift/lib/cpp2/test/metadata/typedef_test.thrift"
 include "thrift/lib/cpp2/test/metadata/simple_structs_test.thrift"
+include "thrift/annotation/thrift.thrift"
+
+@thrift.AllowLegacyMissingUris
+package;
 
 exception CutoffException {
   1: string reason;

@@ -18,6 +18,10 @@ namespace cpp2 apache.thrift.test
 
 cpp_include "thrift/lib/cpp2/server/test/ServiceMethodDecoratorTestLib.h"
 include "thrift/annotation/cpp.thrift"
+include "thrift/annotation/thrift.thrift"
+
+@thrift.AllowLegacyMissingUris
+package;
 
 struct EchoRequest {
   1: string text;

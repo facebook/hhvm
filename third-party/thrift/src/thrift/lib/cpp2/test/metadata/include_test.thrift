@@ -20,6 +20,10 @@ include "thrift/lib/cpp2/test/metadata/enum_test.thrift"
 include "thrift/lib/cpp2/test/metadata/exception_test.thrift"
 include "thrift/lib/cpp2/test/metadata/simple_structs_test.thrift"
 include "thrift/lib/cpp2/test/metadata/typedef_test.thrift"
+include "thrift/annotation/thrift.thrift"
+
+@thrift.AllowLegacyMissingUris
+package;
 
 typedef string CoolString
 

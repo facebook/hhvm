@@ -22,6 +22,9 @@ namespace cpp apache.thrift.test
 
 include "thrift/annotation/thrift.thrift"
 
+@thrift.AllowLegacyMissingUris
+package;
+
 @thrift.DeprecatedUnvalidatedAnnotations{
   items = {"no_default_comparators": "true"},
 }

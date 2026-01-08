@@ -17,6 +17,9 @@
 include "thrift/annotation/scope.thrift"
 include "thrift/annotation/thrift.thrift"
 
+@thrift.AllowLegacyMissingUris
+package;
+
 namespace cpp2 apache.thrift.syntax_graph.test
 
 @thrift.Uri{value = "meta.com/thrift_test/TestRecursiveStruct"}

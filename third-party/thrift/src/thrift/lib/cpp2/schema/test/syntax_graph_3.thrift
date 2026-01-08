@@ -17,6 +17,10 @@
 namespace cpp2 apache.thrift.syntax_graph.test
 
 include "thrift/lib/thrift/any.thrift"
+include "thrift/annotation/thrift.thrift"
+
+@thrift.AllowLegacyMissingUris
+package;
 
 struct OtherTestStruct {}
 

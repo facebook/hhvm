@@ -17,6 +17,10 @@
 namespace cpp2 apache.thrift.test
 
 include "thrift/annotation/cpp.thrift"
+include "thrift/annotation/thrift.thrift"
+
+@thrift.AllowLegacyMissingUris
+package;
 
 interaction SampleInteraction {
   string echo(1: string str);

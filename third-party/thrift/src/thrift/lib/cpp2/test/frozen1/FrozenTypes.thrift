@@ -17,6 +17,10 @@
 namespace cpp2 "FrozenTypes"
 
 include "thrift/annotation/cpp.thrift"
+include "thrift/annotation/thrift.thrift"
+
+@thrift.AllowLegacyMissingUris
+package;
 
 struct Pod {
   3: i32 a;

@@ -15,6 +15,10 @@
  */
 
 include "thrift/lib/cpp2/schema/test/syntax_graph.thrift"
+include "thrift/annotation/thrift.thrift"
+
+@thrift.AllowLegacyMissingUris
+package;
 
 namespace cpp2 apache.thrift.syntax_graph.test
 

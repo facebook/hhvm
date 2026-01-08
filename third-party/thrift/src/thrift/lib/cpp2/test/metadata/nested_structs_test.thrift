@@ -18,6 +18,9 @@ namespace cpp2 metadata.test.nested_structs
 
 include "thrift/annotation/thrift.thrift"
 
+@thrift.AllowLegacyMissingUris
+package;
+
 enum Continent {
   NorthAmerica = 1,
   SouthAmerica = 2,

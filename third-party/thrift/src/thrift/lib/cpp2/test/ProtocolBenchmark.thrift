@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
+include "thrift/annotation/thrift.thrift"
+
+@thrift.AllowLegacyMissingUris
+package;
+
 namespace cpp apache.thrift.test
 namespace cpp2 apache.thrift.test
 

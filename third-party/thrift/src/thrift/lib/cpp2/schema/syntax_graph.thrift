@@ -19,6 +19,10 @@ namespace rust syntax_graph
 namespace py3 apache.thrift.syntax_graph
 
 include "thrift/annotation/cpp.thrift"
+include "thrift/annotation/thrift.thrift"
+
+@thrift.AllowLegacyMissingUris
+package;
 
 enum Primitive {
   BOOL = 1,

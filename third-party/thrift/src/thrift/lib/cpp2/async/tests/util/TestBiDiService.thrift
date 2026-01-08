@@ -19,6 +19,9 @@ namespace cpp2 apache.thrift.detail.test
 include "thrift/annotation/cpp.thrift"
 include "thrift/annotation/thrift.thrift"
 
+@thrift.AllowLegacyMissingUris
+package;
+
 exception BiDiSinkException {
   @thrift.ExceptionMessage
   1: string message;

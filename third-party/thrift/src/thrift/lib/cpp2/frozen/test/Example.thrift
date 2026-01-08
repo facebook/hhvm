@@ -18,6 +18,9 @@ include "thrift/lib/cpp2/frozen/test/Helper.thrift"
 include "thrift/annotation/cpp.thrift"
 include "thrift/annotation/thrift.thrift"
 
+@thrift.AllowLegacyMissingUris
+package;
+
 namespace cpp2 apache.thrift.test
 
 cpp_include "<unordered_set>"

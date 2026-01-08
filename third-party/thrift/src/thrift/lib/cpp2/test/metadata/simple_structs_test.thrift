@@ -17,6 +17,10 @@
 namespace cpp2 metadata.test.simple_structs
 
 include "thrift/annotation/cpp.thrift"
+include "thrift/annotation/thrift.thrift"
+
+@thrift.AllowLegacyMissingUris
+package;
 
 struct Nat {
   1: string data = "";

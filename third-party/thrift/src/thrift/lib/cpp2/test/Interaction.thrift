@@ -20,6 +20,9 @@ include "thrift/annotation/cpp.thrift"
 
 include "thrift/annotation/thrift.thrift"
 
+@thrift.AllowLegacyMissingUris
+package;
+
 struct Point {
   1: i32 x;
   2: i32 y;

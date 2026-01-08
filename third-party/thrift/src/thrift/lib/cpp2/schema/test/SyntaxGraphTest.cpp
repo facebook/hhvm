@@ -119,7 +119,7 @@ TEST_F(ServiceSchemaTest, TransitivePrograms) {
   EXPECT_EQ(secondProgram.definitionsByName().size(), 2);
   {
     ProgramNode::IncludesList includes = secondProgram.includes();
-    EXPECT_EQ(includes.size(), 1);
+    EXPECT_EQ(includes.size(), 2);
 
     EXPECT_EQ(includes[0]->name(), "syntax_graph");
     EXPECT_EQ(includes[0], &mainProgram);
@@ -1173,7 +1173,7 @@ TEST(SyntaxGraphTest, getSchemaMerge) {
   const auto& other = registry.getNode<test::OtherTestStruct>();
   const auto& test = registry.getNode<test::TestStruct>();
   const auto& prog = registry.getDefinitionNode<test::TestStruct2>().program();
-  ASSERT_EQ(prog.includes().size(), 1);
+  ASSERT_EQ(prog.includes().size(), 2);
   EXPECT_EQ(prog.includes()[0]->name(), "syntax_graph");
   EXPECT_EQ(test.definition().name(), "TestStruct");
   EXPECT_EQ(other.definition().name(), "OtherTestStruct");

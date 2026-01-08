@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
+include "thrift/annotation/thrift.thrift"
+
+@thrift.AllowLegacyMissingUris
+package;
+
 namespace cpp2 metadata.test.struct_union
 
 typedef list<string> StringList

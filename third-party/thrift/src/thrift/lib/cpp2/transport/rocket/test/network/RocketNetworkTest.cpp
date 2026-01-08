@@ -1029,11 +1029,6 @@ class TestClientCallback : public StreamClientCallback {
     subscription_ = &serverCallback;
   }
 
-  void cancel() {
-    if (auto* subscription = std::exchange(subscription_, nullptr)) {
-      subscription->onStreamCancel();
-    }
-  }
   void request(uint64_t tokens) {
     if (subscription_) {
       std::ignore = subscription_->onStreamRequestN(tokens);

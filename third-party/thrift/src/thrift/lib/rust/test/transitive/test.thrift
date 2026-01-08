@@ -15,6 +15,10 @@
  */
 
 include "thrift/lib/rust/test/transitive/get_struct_name.thrift"
+include "thrift/annotation/thrift.thrift"
+
+@thrift.AllowLegacyMissingUris
+package;
 
 @get_struct_name.GetStructName
 struct Foo {

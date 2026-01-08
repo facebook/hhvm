@@ -16,6 +16,10 @@
 
 include "thrift/annotation/rust.thrift"
 include "thrift/annotation/scope.thrift"
+include "thrift/annotation/thrift.thrift"
+
+@thrift.AllowLegacyMissingUris
+package;
 
 @rust.Adapter{name = "::adapters::StringAdapter"}
 typedef string AdaptedString

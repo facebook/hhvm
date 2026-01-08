@@ -22,6 +22,8 @@ codegen_includer_proc_macro = { version = "0.1.0", git = "https://github.com/fac
 fbthrift = { version = "0.0.1+unstable", path = "../../../.." }
 futures = { version = "0.3.31", features = ["async-await", "compat"] }
 teststructs__types = { package = "teststructs", version = "0.0.1+unstable", path = ".." }
+thrift = { version = "0.0.1+unstable", path = "../../../../annotation/thrift" }
+thrift_clients = { version = "0.0.1+unstable", path = "../../../../annotation/thrift/clients" }
 tracing = { version = "0.1.41", features = ["attributes", "valuable"] }
 
 [build-dependencies]

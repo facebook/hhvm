@@ -31,6 +31,9 @@ namespace go 'github.com/facebook/fbthrift/thrift/lib/thrift/rpcmetadata'
 include "thrift/annotation/thrift.thrift"
 include "thrift/annotation/cpp.thrift"
 
+@thrift.AllowLegacyMissingUris
+package;
+
 cpp_include "thrift/lib/cpp2/util/ManagedStringView.h"
 cpp_include "thrift/lib/thrift/RpcMetadata_extra.h"
 cpp_include "folly/container/F14Map.h"

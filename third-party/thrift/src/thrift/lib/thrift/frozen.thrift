@@ -19,6 +19,10 @@ cpp_include "folly/sorted_vector_types.h"
 namespace cpp2 apache.thrift.frozen.schema
 
 include "thrift/annotation/cpp.thrift"
+include "thrift/annotation/thrift.thrift"
+
+@thrift.AllowLegacyMissingUris
+package;
 
 struct Field {
   // layout id, indexes into layouts

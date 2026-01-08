@@ -28,6 +28,10 @@ namespace cpp2 apache.thrift.reflection
 // These values must be exactly the same as those defined in
 // thrift/compiler/parse/t_type.h
 include "thrift/annotation/cpp.thrift"
+include "thrift/annotation/thrift.thrift"
+
+@thrift.AllowLegacyMissingUris
+package;
 
 enum Type {
   TYPE_VOID = 0,

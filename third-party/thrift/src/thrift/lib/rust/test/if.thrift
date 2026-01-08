@@ -17,6 +17,10 @@
 namespace rust interface
 
 include "thrift/annotation/rust.thrift"
+include "thrift/annotation/thrift.thrift"
+
+@thrift.AllowLegacyMissingUris
+package;
 
 @rust.Exhaustive
 struct WrapBinary {

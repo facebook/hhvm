@@ -20,6 +20,9 @@ namespace rust fbthrift_test_if
 include "thrift/annotation/rust.thrift"
 include "thrift/annotation/thrift.thrift"
 
+@thrift.AllowLegacyMissingUris
+package;
+
 struct Small {
   1: i32 num;
   2: i64 two;

@@ -18,6 +18,9 @@ namespace cpp2 facebook
 
 include "thrift/annotation/thrift.thrift"
 
+@thrift.AllowLegacyMissingUris
+package;
+
 struct Struct {
   // @lint-ignore THRIFTCHECKS
   @thrift.AllowUnsafeOptionalCustomDefaultValue

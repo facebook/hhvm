@@ -16,6 +16,9 @@
 
 include "thrift/annotation/thrift.thrift"
 
+@thrift.AllowLegacyMissingUris
+package;
+
 enum ErrorCode {
   UNKNOWN = 0,
   INVALID_VALUE = 1,

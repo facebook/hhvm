@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
+include "thrift/annotation/thrift.thrift"
+
+@thrift.AllowLegacyMissingUris
+package;
+
 namespace cpp2 apache.thrift.serverdbginfo
 namespace php ThriftServerDbgInfo
 namespace py3 apache.thrift.serverdbginfo

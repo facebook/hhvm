@@ -29,6 +29,9 @@ include "thrift/annotation/cpp.thrift"
 include "thrift/annotation/thrift.thrift"
 include "thrift/annotation/hack.thrift"
 
+@thrift.AllowLegacyMissingUris
+package;
+
 @hack.MigrationBlockingLegacyJSONSerialization
 union Dynamic {
   @thrift.DeprecatedUnvalidatedAnnotations{

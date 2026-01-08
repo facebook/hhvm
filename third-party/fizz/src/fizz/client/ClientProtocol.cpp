@@ -1717,6 +1717,8 @@ Status EventHandler<
   // Now, in the ECH case, the context above is the outer context. We have to
   // construct the inner context using the inner client hello we sent before.
   std::unique_ptr<HandshakeContext> echHandshakeContext;
+  folly::Optional<ECHStatus> echStatus;
+  folly::Optional<ClientPresharedKey> greasePsk;
   if (state.echState().has_value()) {
     auto firstEchHandshakeContext =
         state.context()->getFactory()->makeHandshakeContext(cipher);
@@ -1729,6 +1731,28 @@ Status EventHandler<
         state.context()->getFactory()->makeHandshakeContext(cipher);
     echHandshakeContext->appendToTranscript(
         encodeHandshake(std::move(echChloHash)));
+
+    // Check for acceptance. We'll still generate another ECH per the RFC, but
+    // the server will already let us know here.
+    auto echScheduler = state.context()->getFactory()->makeKeyScheduler(cipher);
+    echScheduler->deriveEarlySecret(folly::range(state.echState()->random));
+    if (ech::checkECHAccepted(
+            hrr, echHandshakeContext->clone(), std::move(echScheduler))) {
+      echStatus = ECHStatus::Accepted;
+    } else {
+      echStatus = ECHStatus::Rejected;
+    }
+    VLOG(8) << "ECH was " << toString(*echStatus);
+
+    // Generate GREASE PSK if needed
+    if (state.echState()->greasePsk.has_value()) {
+      greasePsk = ech::generateGreasePSKForHRR(
+          state.echState()->greasePsk.value(), state.context()->getFactory());
+    }
+
+    // Now that ECH acceptance check is done, we can append the real HRR to the
+    // transcript
+    echHandshakeContext->appendToTranscript(*hrr.originalEncoding);
   }
 
   Buf encodedClientHello;
@@ -1751,31 +1775,7 @@ Status EventHandler<
   }
 
   Buf encodedECH;
-  folly::Optional<ECHStatus> echStatus;
-  folly::Optional<ClientPresharedKey> greasePsk;
-
-  // In the HRR case, we reuse the previous HPKE context to bind this to the
-  // previous ECH we sent. We reuse the fake SNI and dummy random we sent
-  // earlier (as expected for an HRR client hello).
   if (state.echState().has_value()) {
-    // Check for acceptance. We'll still generate another ECH per the RFC, but
-    // the server will already let us know here.
-    auto echScheduler = state.context()->getFactory()->makeKeyScheduler(cipher);
-    echScheduler->deriveEarlySecret(folly::range(state.echState()->random));
-    if (ech::checkECHAccepted(
-            hrr, echHandshakeContext->clone(), std::move(echScheduler))) {
-      echStatus = ECHStatus::Accepted;
-    } else {
-      echStatus = ECHStatus::Rejected;
-    }
-    VLOG(8) << "ECH was " << toString(*echStatus);
-
-    // Generate GREASE PSK if needed
-    if (state.echState()->greasePsk.has_value()) {
-      greasePsk = ech::generateGreasePSKForHRR(
-          state.echState()->greasePsk.value(), state.context()->getFactory());
-    }
-
     // Construct HRR ECH
     chlo = constructEncryptedClientHello(
         Event::HelloRetryRequest,
@@ -1794,7 +1794,6 @@ Status EventHandler<
     encodedClientHello = encodeHandshake(chlo);
 
     // Write to ECH transcript
-    echHandshakeContext->appendToTranscript(*hrr.originalEncoding);
     echHandshakeContext->appendToTranscript(encodedECH);
   }
 

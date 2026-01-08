@@ -3177,6 +3177,9 @@ TEST_F(ClientProtocolTest, TestHelloRetryRequestECHFlow) {
                 {0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA}),
             EarlySecrets::HRRECHAcceptConfirmation);
       }));
+  EXPECT_CALL(
+      *mockEchHandshakeContext2, appendToTranscript(BufMatches("hrrencoding")))
+      .InSequence(contextSeq);
   // Construct expected hellos for hpke sealing setup.
   auto chlo = getDefaultClientHello();
   chlo.random.fill(0x66);
@@ -3255,9 +3258,6 @@ TEST_F(ClientProtocolTest, TestHelloRetryRequestECHFlow) {
             sealed->append(payloadSize);
             return sealed;
           }));
-  EXPECT_CALL(
-      *mockEchHandshakeContext2, appendToTranscript(BufMatches("hrrencoding")))
-      .InSequence(contextSeq);
   EXPECT_CALL(*mockEchHandshakeContext2, appendToTranscript(_))
       .InSequence(contextSeq);
   EXPECT_CALL(*mockHandshakeContext2, appendToTranscript(_))
@@ -3451,6 +3451,9 @@ TEST_F(ClientProtocolTest, TestHelloRetryRequestECHRejectedFlow) {
                 {0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA}),
             EarlySecrets::HRRECHAcceptConfirmation);
       }));
+  EXPECT_CALL(
+      *mockEchHandshakeContext2, appendToTranscript(BufMatches("hrrencoding")))
+      .InSequence(contextSeq);
   // Construct expected hellos for hpke sealing setup.
   auto chlo = getDefaultClientHello();
   chlo.random.fill(0x66);
@@ -3529,9 +3532,6 @@ TEST_F(ClientProtocolTest, TestHelloRetryRequestECHRejectedFlow) {
             sealed->append(payloadSize);
             return sealed;
           }));
-  EXPECT_CALL(
-      *mockEchHandshakeContext2, appendToTranscript(BufMatches("hrrencoding")))
-      .InSequence(contextSeq);
   EXPECT_CALL(*mockEchHandshakeContext2, appendToTranscript(_))
       .InSequence(contextSeq);
   EXPECT_CALL(*mockHandshakeContext2, appendToTranscript(_))
@@ -3696,36 +3696,6 @@ TEST_F(ClientProtocolTest, TestHelloRetryRequestECHPSKFlow) {
       }));
   EXPECT_CALL(*mockEchHandshakeContext2, appendToTranscript(_))
       .InSequence(contextSeq);
-  mockKeyScheduler_ = new MockKeyScheduler();
-  EXPECT_CALL(*factory_, makeKeyScheduler(CipherSuite::TLS_AES_128_GCM_SHA256))
-      .InSequence(contextSeq)
-      .WillOnce(InvokeWithoutArgs([=, this]() {
-        return std::unique_ptr<KeyScheduler>(mockKeyScheduler_);
-      }));
-  EXPECT_CALL(*mockEchHandshakeContext2, clone())
-      .InSequence(contextSeq)
-      .WillOnce(InvokeWithoutArgs([=]() {
-        return std::unique_ptr<HandshakeContext>(mockResumptionContext);
-      }));
-  EXPECT_CALL(
-      *mockKeyScheduler_, deriveEarlySecret(RangeMatches("resumptionsecret")))
-      .InSequence(contextSeq);
-  EXPECT_CALL(
-      *mockKeyScheduler_, getSecret(EarlySecrets::ResumptionPskBinder, _))
-      .InSequence(contextSeq)
-      .WillOnce(InvokeWithoutArgs([]() {
-        return DerivedSecret(
-            std::vector<uint8_t>({'b', 'k'}),
-            EarlySecrets::ResumptionPskBinder);
-      }));
-  EXPECT_CALL(*mockResumptionContext, appendToTranscript(_))
-      .InSequence(contextSeq);
-  EXPECT_CALL(*mockResumptionContext, getFinishedData(RangeMatches("bk")))
-      .InSequence(contextSeq)
-      .WillOnce(InvokeWithoutArgs(
-          []() { return folly::IOBuf::copyBuffer("binder"); }));
-  EXPECT_CALL(*mockResumptionContext, appendToTranscript(_))
-      .InSequence(contextSeq);
   auto mockAcceptKeyScheduler = new MockKeyScheduler();
   EXPECT_CALL(*factory_, makeKeyScheduler(CipherSuite::TLS_AES_128_GCM_SHA256))
       .InSequence(contextSeq)
@@ -3769,13 +3739,43 @@ TEST_F(ClientProtocolTest, TestHelloRetryRequestECHPSKFlow) {
                 {0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA}),
             EarlySecrets::HRRECHAcceptConfirmation);
       }));
+  EXPECT_CALL(
+      *mockEchHandshakeContext2, appendToTranscript(BufMatches("hrrencoding")))
+      .InSequence(contextSeq);
+  mockKeyScheduler_ = new MockKeyScheduler();
+  EXPECT_CALL(*factory_, makeKeyScheduler(CipherSuite::TLS_AES_128_GCM_SHA256))
+      .InSequence(contextSeq)
+      .WillOnce(InvokeWithoutArgs([=, this]() {
+        return std::unique_ptr<KeyScheduler>(mockKeyScheduler_);
+      }));
+  EXPECT_CALL(*mockEchHandshakeContext2, clone())
+      .InSequence(contextSeq)
+      .WillOnce(InvokeWithoutArgs([=]() {
+        return std::unique_ptr<HandshakeContext>(mockResumptionContext);
+      }));
+  EXPECT_CALL(
+      *mockKeyScheduler_, deriveEarlySecret(RangeMatches("resumptionsecret")))
+      .InSequence(contextSeq);
+  EXPECT_CALL(
+      *mockKeyScheduler_, getSecret(EarlySecrets::ResumptionPskBinder, _))
+      .InSequence(contextSeq)
+      .WillOnce(InvokeWithoutArgs([]() {
+        return DerivedSecret(
+            std::vector<uint8_t>({'b', 'k'}),
+            EarlySecrets::ResumptionPskBinder);
+      }));
+  EXPECT_CALL(*mockResumptionContext, appendToTranscript(_))
+      .InSequence(contextSeq);
+  EXPECT_CALL(*mockResumptionContext, getFinishedData(RangeMatches("bk")))
+      .InSequence(contextSeq)
+      .WillOnce(InvokeWithoutArgs(
+          []() { return folly::IOBuf::copyBuffer("binder"); }));
+  EXPECT_CALL(*mockResumptionContext, appendToTranscript(_))
+      .InSequence(contextSeq);
   EXPECT_CALL(*mockHpkeContext, _seal(_, _))
       .InSequence(contextSeq)
       .WillOnce(InvokeWithoutArgs(
           []() { return folly::IOBuf::copyBuffer("echsealed"); }));
-  EXPECT_CALL(
-      *mockEchHandshakeContext2, appendToTranscript(BufMatches("hrrencoding")))
-      .InSequence(contextSeq);
   EXPECT_CALL(*mockEchHandshakeContext2, appendToTranscript(_))
       .InSequence(contextSeq);
   EXPECT_CALL(*mockHandshakeContext2, appendToTranscript(_))

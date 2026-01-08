@@ -67,6 +67,7 @@ class DefinitionKeyEqual : public std::equal_to<type::DefinitionKey> {
       const type::DefinitionKey& lhs, const DefinitionKeyRef& rhs) const {
     return Delegate::operator()(lhs, rhs.get());
   }
+  // NOLINTNEXTLINE(clang-diagnostic-unused-member-function)
   bool operator()(
       const DefinitionKeyRef& lhs, const type::DefinitionKey& rhs) const {
     return Delegate::operator()(lhs.get(), rhs);

@@ -23,6 +23,10 @@ namespace py3 thrift.conformance
 namespace java.swift org.apache.thrift.conformance
 
 include "thrift/conformance/if/any.thrift"
+include "thrift/annotation/thrift.thrift"
+
+@thrift.AllowLegacyMissingUris
+package;
 
 struct PatchOpResponse {
   1: any.Any result;

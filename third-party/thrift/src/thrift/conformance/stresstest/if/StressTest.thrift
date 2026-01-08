@@ -18,6 +18,10 @@ namespace cpp2 apache.thrift.stress
 namespace hack thrift_stress
 
 include "thrift/annotation/cpp.thrift"
+include "thrift/annotation/thrift.thrift"
+
+@thrift.AllowLegacyMissingUris
+package;
 
 cpp_include "thrift/lib/cpp2/protocol/detail/PaddedBinaryAdapter.h"
 

@@ -27,6 +27,9 @@ include "thrift/conformance/if/rpc.thrift"
 include "thrift/conformance/if/patch_data.thrift"
 include "thrift/annotation/thrift.thrift"
 
+@thrift.AllowLegacyMissingUris
+package;
+
 // A Collection of tests.
 struct TestSuite {
   // The name of the suite.

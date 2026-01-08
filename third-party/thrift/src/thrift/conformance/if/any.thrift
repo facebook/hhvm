@@ -30,6 +30,10 @@ include "thrift/annotation/java.thrift"
 include "thrift/annotation/rust.thrift"
 include "thrift/conformance/if/protocol.thrift"
 include "thrift/lib/thrift/standard.thrift"
+include "thrift/annotation/thrift.thrift"
+
+@thrift.AllowLegacyMissingUris
+package;
 
 // Any encoded thrift value.
 @rust.Ord

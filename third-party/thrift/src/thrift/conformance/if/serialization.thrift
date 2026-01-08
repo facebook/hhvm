@@ -24,6 +24,10 @@ namespace java.swift org.apache.thrift.conformance
 
 include "thrift/conformance/if/any.thrift"
 include "thrift/conformance/if/protocol.thrift"
+include "thrift/annotation/thrift.thrift"
+
+@thrift.AllowLegacyMissingUris
+package;
 
 struct RoundTripRequest {
   // The value to decode and renecode.

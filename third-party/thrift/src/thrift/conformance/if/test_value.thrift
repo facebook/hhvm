@@ -26,6 +26,10 @@ namespace go thrift.conformance.test_value
 
 include "thrift/lib/thrift/type.thrift"
 include "thrift/annotation/cpp.thrift"
+include "thrift/annotation/thrift.thrift"
+
+@thrift.AllowLegacyMissingUris
+package;
 
 // A value defined via calls to a protocol implementation.
 struct EncodeValue {

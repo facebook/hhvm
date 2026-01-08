@@ -18,7 +18,7 @@
 
 #include <thrift/lib/cpp2/reflection/internal/test_helpers.h>
 
-#include <thrift/test/reflection/gen-cpp2/reflection_fatal_types.h>
+#include <thrift/test/reflection/gen-cpp2/reflection_types.h>
 
 #include <gtest/gtest.h>
 

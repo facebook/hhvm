@@ -48,7 +48,9 @@ struct StructWithCustomDefaultValues {
   5: optional TrivialStruct optional_struct = TrivialStruct{int_value = 456};
   6: required TrivialStruct required_struct = TrivialStruct{int_value = 789};
   7: TrivialStructWithDefault struct_with_default_unspecified = TrivialStructWithDefault{};
-  8: TrivialStructWithDefault struct_with_default_specified = TrivialStructWithDefault{int_value_1 = 123};
+  8: TrivialStructWithDefault struct_with_default_specified = TrivialStructWithDefault{
+    int_value_1 = 123,
+  };
 }
 
 struct StructWithCollectionDefaultValues {

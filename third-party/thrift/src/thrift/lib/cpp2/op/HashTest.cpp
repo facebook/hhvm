@@ -44,7 +44,6 @@ class DebugHasher {
     result_ = {reinterpret_cast<const char*>(buf.data()), buf.size()};
   }
 
-  const std::string& getResult() const& { return result_; }
   std::string&& getResult() && { return std::move(result_); }
 
   template <typename Value>
@@ -52,13 +51,6 @@ class DebugHasher {
       const Value& value) {
     handlePrefix();
     combine(folly::to<std::string>(value));
-  }
-
-  void combine(const folly::IOBuf& value) {
-    handlePrefix();
-    for (const auto buf : value) {
-      combine(buf);
-    }
   }
 
   void combine(folly::StringPiece value) { combine(folly::ByteRange{value}); }

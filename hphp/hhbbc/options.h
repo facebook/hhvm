@@ -123,18 +123,6 @@ struct Options {
   //////////////////////////////////////////////////////////////////////////////
 
   /*
-   * Whether to produce extended stats information.  (Takes extra
-   * time.)
-   */
-  bool extendedStats = false;
-
-  /*
-   * The filepath where to save the stats file.  If the path is empty, then we
-   * save the stats file to a temporary file.
-   */
-  std::string stats_file;
-
-  /*
    * If non-empty, dump jemalloc memory profiles at key points during
    * the build, using this as a prefix.
    */

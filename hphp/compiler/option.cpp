@@ -63,6 +63,7 @@ bool Option::ParserAsyncCleanup = true;
 bool Option::ParserOptimisticStore = true;
 
 bool Option::ForceEnableSymbolRefs = false;
+bool Option::UseExternWorkerForFullAnalysis = false;
 
 std::string Option::ExternWorkerUseCase;
 std::string Option::ExternWorkerPlatform;
@@ -149,6 +150,9 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
 
   Config::Bind(ForceEnableSymbolRefs, ini, config,
                "ForceEnableSymbolRefs", false);
+
+  Config::Bind(UseExternWorkerForFullAnalysis, ini, config,
+               "UseExternWorkerForFullAnalysis", false);
 
   Config::Bind(ParserGroupSize, ini, config,
                "ParserGroupSize", kDefaultParserGroupSize);

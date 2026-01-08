@@ -108,6 +108,8 @@ struct Option {
    */
   static bool ForceEnableSymbolRefs;
 
+  static bool UseExternWorkerForFullAnalysis;
+
   /* Config passed to extern_worker::Client */
   static std::string ExternWorkerUseCase;
   static std::string ExternWorkerPlatform;

@@ -94,18 +94,12 @@ void parse_options(int argc, char** argv) {
     ("input",
       po::value(&input_repo)->default_value("hhvm.hhbc"),
       "input hhbc repo path")
-    ("stats-file",
-      po::value(&options.stats_file)->default_value(""),
-      "stats file path")
     ("no-logging",
       po::bool_switch(&no_logging),
       "turn off logging")
     ("no-cores",
       po::bool_switch(&no_cores),
       "turn off core dumps (useful when running lots of tests in parallel)")
-    ("extended-stats",
-      po::bool_switch(&options.extendedStats),
-      "Spend time to produce extra stats")
     ("profile-memory",
      po::value(&options.profileMemory)->default_value(""),
       "If non-empty, dump jemalloc memory profiles at key points")

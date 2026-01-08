@@ -1651,6 +1651,8 @@ bool process(CompilerOptions &po) {
   if (Option::ConstFoldFileBC) {
     HHBBC::options.SourceRootForFileBC = Cfg::Server::SourceRoot;
   }
+  HHBBC::options.useExternWorkerForFullAnalysis =
+    Option::UseExternWorkerForFullAnalysis;
   HHBBC::options.CoreDump = po.coredump;
 
   Timer timer{Timer::WallTime, "running HHBBC"};

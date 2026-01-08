@@ -109,16 +109,24 @@ let check_instantiation
       Typing_env.get_self_class env
       |> Decl_entry.to_option
       |> Option.iter ~f:(fun (class_ : Decl_provider.class_decl) ->
-             Typing_warning_utils.add
-               env
-               ( instantiation_pos,
-                 Typing_warning.Uninstantiable_class_via_static,
-                 {
-                   Typing_warning.Uninstantiable_class_via_static.usage_pos =
-                     instantiation_pos;
-                   class_name = Folded_class.name class_;
-                   decl_pos = Folded_class.pos class_;
-                 } ))
+             let would_be_redundant =
+               (* Elsewhere we already generate a 4002 (uninstantiable class)
+                * error for `new static(....)` in `abstract final` classes
+                * https://www.internalfb.com/code/fbsource/[0032e6cacac2bab09425384b967f12d8d4743daf]/fbcode/hphp/hack/src/typing/typing.ml?lines=4226%2C11972
+                *)
+               Folded_class.abstract class_ && Folded_class.final class_
+             in
+             if not would_be_redundant then
+               Typing_warning_utils.add
+                 env
+                 ( instantiation_pos,
+                   Typing_warning.Uninstantiable_class_via_static,
+                   {
+                     Typing_warning.Uninstantiable_class_via_static.usage_pos =
+                       instantiation_pos;
+                     class_name = Folded_class.name class_;
+                     decl_pos = Folded_class.pos class_;
+                   } ))
     | CIstatic
     | CIself
     | CIparent

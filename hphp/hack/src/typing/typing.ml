@@ -11928,59 +11928,30 @@ end = struct
       class_id_for_new ~exact ~is_attribute ~is_catch p env cid explicit_targs
     in
     Typing_needs_concrete.check_instantiation env p cid;
-    begin
-      match cid with
-      | CIstatic
-        when TypecheckerOptions.needs_concrete env.genv.tcopt
-             && not (Env.static_points_to_concrete_class env) ->
-        ()
-      | _ ->
-        List.iter classes ~f:(function
-            | `Dynamic -> ()
-            | `Class ((pos, name), class_info, c_ty) ->
-              let pos = Pos_or_decl.unsafe_to_raw_pos pos in
-              let kind = Cls.kind class_info in
-              if String.equal SN.Classes.cString (Cls.name class_info) then
-                uninstantiable_error
-                  env
-                  p
-                  cid
-                  (Cls.pos class_info)
-                  name
-                  pos
-                  c_ty
-              else if
-                Ast_defs.is_c_trait kind
-                || Ast_defs.is_c_enum kind
-                || Ast_defs.is_c_enum_class kind
-              then
-                match cid with
-                | CIexpr _
-                | CI _ ->
-                  uninstantiable_error
-                    env
-                    p
-                    cid
-                    (Cls.pos class_info)
-                    name
-                    pos
-                    c_ty
-                | CIstatic
-                | CIparent
-                | CIself ->
-                  ()
-              else if Ast_defs.is_c_abstract kind && Cls.final class_info then
-                uninstantiable_error
-                  env
-                  p
-                  cid
-                  (Cls.pos class_info)
-                  name
-                  pos
-                  c_ty
-              else
-                ())
-    end;
+    List.iter classes ~f:(function
+        | `Dynamic -> ()
+        | `Class ((pos, name), class_info, c_ty) ->
+          let pos = Pos_or_decl.unsafe_to_raw_pos pos in
+          let kind = Cls.kind class_info in
+          if String.equal SN.Classes.cString (Cls.name class_info) then
+            uninstantiable_error env p cid (Cls.pos class_info) name pos c_ty
+          else if
+            Ast_defs.is_c_trait kind
+            || Ast_defs.is_c_enum kind
+            || Ast_defs.is_c_enum_class kind
+          then
+            match cid with
+            | CIexpr _
+            | CI _ ->
+              uninstantiable_error env p cid (Cls.pos class_info) name pos c_ty
+            | CIstatic
+            | CIparent
+            | CIself ->
+              ()
+          else if Ast_defs.is_c_abstract kind && Cls.final class_info then
+            uninstantiable_error env p cid (Cls.pos class_info) name pos c_ty
+          else
+            ());
     (env, tal, te, classes)
 end
 

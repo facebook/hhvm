@@ -12,13 +12,13 @@ abstract class C1 {
 
 }
 
-// C2 is *not* concrete even though it is `abstract final`.
-// C2 has an unimplemented member (the constructor)
+
+
 abstract final class C2 extends C1 {
   const int X = 3;
   public static function m(): void {
-    new static(); // error
-    static::nc(); // error
+    new static(); // pre-existing 4002 error and no redundant warning
+    static::nc(); // we generate a warning
   }
 
   public static function abs(): void {}

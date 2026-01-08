@@ -15,14 +15,11 @@
 
 # pyre-unsafe
 
-import difflib
-import os
 import re
 import subprocess
 import sys
 import tempfile
 import traceback
-import typing
 import unittest
 from pathlib import Path
 
@@ -36,71 +33,14 @@ assert _THRIFT_BIN_PATH
 _FIXTURES_ROOT_DIR_RELPATH = Path("thrift/compiler/test/fixtures")
 
 
-def _gen_find_recursive_files(top: Path) -> typing.Generator[Path, None, None]:
-    """Yields a Path for every file under `top`, relative to it."""
-
-    for root, _, filenames in os.walk(top):
-        root_path = Path(root)
-        for filename in filenames:
-            yield (root_path / filename).relative_to(top)
-
-
 class FixtureTest(unittest.TestCase):
-    MSG = " ".join(
-        [
-            "One or more fixtures are out of sync with the thrift compiler.",
-            "To sync them, build thrift and then run:",
-            "`thrift/compiler/test/build_fixtures <build-dir>`, where",
-            "<build-dir> is a path where the program `thrift/compiler/thrift`",
-            "may be found.",
-        ]
+    MSG = (
+        "One or more fixtures are out of sync with the thrift compiler. "
+        "To sync them, build thrift and then run: "
+        "`thrift/compiler/test/build_fixtures <build-dir>`, where "
+        "<build-dir> is a path where the program `thrift/compiler/thrift` "
+        "may be found."
     )
-
-    def _compare_code(
-        self,
-        gen_code_path: Path,
-        fixture_code_path: Path,
-        cmd: typing.List[str],
-        cmd_working_dir: str,
-    ) -> None:
-        """
-        Checks that the contents of the files under the two given paths are
-        identical, and fails this test if that is not the case.
-        """
-        gen_file_relpaths: list[Path] = sorted(_gen_find_recursive_files(gen_code_path))
-
-        fixture_file_relpaths: list[Path] = sorted(
-            _gen_find_recursive_files(fixture_code_path)
-        )
-
-        try:
-            # Compare that the generated files are the same
-            self.assertEqual(gen_file_relpaths, fixture_file_relpaths)
-
-            for gen_file_relpath in gen_file_relpaths:
-                gen_file_path = gen_code_path / gen_file_relpath
-                fixture_file_path = fixture_code_path / gen_file_relpath
-                gen_file_contents = gen_file_path.read_text()
-                fixture_file_contents = fixture_file_path.read_text()
-                if gen_file_contents == fixture_file_contents:
-                    continue
-
-                msg = [f"Difference found in {gen_file_relpath}:"]
-                for line in difflib.unified_diff(
-                    fixture_file_contents.splitlines(),
-                    gen_file_contents.splitlines(),
-                    str(fixture_file_path),
-                    str(gen_file_path),
-                    lineterm="",
-                ):
-                    msg.append(line)
-                msg.append("WORKDIR: {}".format(cmd_working_dir))
-                msg.append("COMMAND: {}".format(" ".join(cmd)))
-                self.fail("\n".join(msg))
-        except Exception:
-            print(self.MSG, file=sys.stderr)
-            traceback.print_exc(file=sys.stderr)
-            raise
 
     def setUp(self) -> None:
         tmp: str = self.enterContext(tempfile.TemporaryDirectory())
@@ -109,15 +49,12 @@ class FixtureTest(unittest.TestCase):
 
     def runTest(
         self,
-        working_directory: Path,
+        working_dir: Path,
         fixture_dir_abspath: Path,
         fixture_cmd: fixture_utils.FixtureCmd,
     ) -> None:
-        fixture_output_root_dir_abspath = self.tmp_dir_abspath / "out"
-        fixture_output_root_dir_abspath.mkdir()
-
-        outdir = fixture_output_root_dir_abspath / fixture_cmd.unique_name
-        os.mkdir(outdir)
+        outdir = self.tmp_dir_abspath / "out" / fixture_cmd.unique_name
+        outdir.mkdir(parents=True, exist_ok=False)
 
         if fixture_cmd.output_directory_arg_pos is not None:
             fixture_cmd.build_command_args[fixture_cmd.output_directory_arg_pos] = str(
@@ -127,18 +64,24 @@ class FixtureTest(unittest.TestCase):
         subprocess.check_call(
             fixture_cmd.build_command_args,
             close_fds=True,
-            cwd=working_directory,
+            cwd=working_dir,
         )
 
         fixture_utils.apply_postprocessing(outdir)
 
         # Compare generated code to fixture code
-        self._compare_code(
-            fixture_output_root_dir_abspath / fixture_cmd.unique_name,
-            fixture_dir_abspath / "out" / fixture_cmd.unique_name,
-            fixture_cmd.build_command_args,
-            str(working_directory),
-        )
+        try:
+            fixture_utils.assert_identical_output(
+                test=self,
+                expected_dir=fixture_dir_abspath / "out" / fixture_cmd.unique_name,
+                actual_dir=outdir,
+                working_dir=str(working_dir),
+                command=" ".join(fixture_cmd.build_command_args),
+            )
+        except Exception:
+            print(self.MSG, file=sys.stderr)
+            traceback.print_exc(file=sys.stderr)
+            raise
 
 
 def _add_fixture(klazz, fixture_name: str) -> None:
@@ -161,7 +104,7 @@ def _add_fixture(klazz, fixture_name: str) -> None:
 
         def test_method(self: FixtureTest, cmd=fixture_cmd):
             self.runTest(
-                working_directory=repo_root_dir_abspath,
+                working_dir=repo_root_dir_abspath,
                 fixture_dir_abspath=fixture_dir_abspath,
                 fixture_cmd=cmd,
             )

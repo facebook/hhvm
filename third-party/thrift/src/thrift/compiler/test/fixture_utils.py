@@ -13,9 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# pyre-unsafe
+# pyre-strict
 
 import atexit
+import difflib
 import os
 import re
 import shlex
@@ -25,6 +26,7 @@ from contextlib import ExitStack
 from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
 from typing import Optional
+from unittest import TestCase
 
 import importlib_resources
 
@@ -147,7 +149,7 @@ def parse_fixture_cmds(
 # A letter followed by 0 or more letters, digits or underscores, ending with
 # a colon. All lowercase. The part preceding the colon is meant to be the
 # unique (within a fixture) name for this cmd line. It is captured in group 1.
-_FIXTURE_CMD_NAME_PREFIX_PATTERN = re.compile(r"^([a-z][a-z0-9_]*):$")
+_FIXTURE_CMD_NAME_PREFIX_PATTERN: re.Pattern[str] = re.compile(r"^([a-z][a-z0-9_]*):$")
 
 
 def _parse_fixture_cmd(
@@ -258,13 +260,26 @@ def _parse_fixture_cmd(
         ) from err
 
 
-def _get_binary(filename: str) -> Optional[Path]:
+def _gen_find_recursive_files(top: Path) -> typing.Generator[Path, None, None]:
+    """Yields a Path for every file under `top`, relative to it."""
+
+    for root, _, filenames in top.walk():
+        root_path = Path(root)
+        for filename in filenames:
+            yield (root_path / filename).relative_to(top)
+
+
+def get_resource_as_file(filename: str, module: Optional[str] = None) -> Optional[Path]:
     """
     Returns path to the binary, or None if not be found.
+
+    Args:
+        filename: The resource file name.
+        module:   The module whose target owns the resource. Defaults to the module for `fixture_utils`.
     """
     file_manager = ExitStack()
     atexit.register(file_manager.close)
-    resource = importlib_resources.files(__name__) / filename
+    resource = importlib_resources.files(module or __name__) / filename
     path = file_manager.enter_context(importlib_resources.as_file(resource))
     return path if path.is_file() else None
 
@@ -282,7 +297,7 @@ def get_thrift_binary_path(
           its parents.
     """
     if thrift_bin_arg is None:
-        return _get_binary("thrift")
+        return get_resource_as_file("thrift")
 
     return _ascend_find_exe(Path.cwd(), thrift_bin_arg)
 
@@ -297,7 +312,7 @@ def get_thrift2ast_binary_path() -> typing.Optional[Path]:
           executable with this name in the current working directory or any of
           its parents.
     """
-    return _get_binary("thrift2ast")
+    return get_resource_as_file("thrift2ast")
 
 
 def get_all_fixture_names(fixtures_root_dir_path: Path) -> list[str]:
@@ -341,6 +356,60 @@ def validate_that_root_path_is_a_dir(root_path: Path) -> None:
         )
 
 
+def assert_identical_output(
+    test: TestCase,
+    expected_dir: Path,
+    actual_dir: Path,
+    working_dir: str,
+    command: str,
+) -> None:
+    """
+    Checks that the contents of the files under the two given paths are
+    identical, and fails this test if that is not the case.
+
+    Args:
+        test:         The test case context that the comparison is being run under.
+        expected_dir: The directory containing the expected (ground truth) output.
+        actual_dir:   The directory containing the actual output to be checked.
+        working_dir:  The working directory in which the generation command was run.
+        command:      The generation command that was run to produce the actual output.
+    """
+    gen_file_relpaths: list[Path] = sorted(_gen_find_recursive_files(actual_dir))
+
+    fixture_file_relpaths: list[Path] = sorted(_gen_find_recursive_files(expected_dir))
+
+    # Compare that the generated files are the same
+    test.assertEqual(gen_file_relpaths, fixture_file_relpaths)
+
+    for gen_file_relpath in gen_file_relpaths:
+        gen_file_path = actual_dir / gen_file_relpath
+        fixture_file_path = expected_dir / gen_file_relpath
+        gen_file_contents = gen_file_path.read_text()
+        fixture_file_contents = fixture_file_path.read_text()
+        if gen_file_contents == fixture_file_contents:
+            continue
+
+        message = textwrap.dedent("""\
+        Differences found in '{relpath}':
+        {diff}
+        WORKDIR: {workdir}
+        COMMAND: {command}""").format(
+            relpath=gen_file_relpath,
+            diff="\n".join(
+                difflib.unified_diff(
+                    fixture_file_contents.splitlines(),
+                    gen_file_contents.splitlines(),
+                    fromfile=str(fixture_file_path),
+                    tofile=str(gen_file_path),
+                    lineterm="",
+                )
+            ),
+            workdir=working_dir,
+            command=command,
+        )
+        test.fail(message)
+
+
 def apply_postprocessing(
     fixture_output_root_dir_abspath: Path,
 ) -> None:
@@ -355,7 +424,7 @@ def apply_postprocessing(
     """
     DELIMITER = "@fbthrift_strip_from_fixtures"
 
-    for root, _, files in os.walk(fixture_output_root_dir_abspath):
+    for root, _, files in fixture_output_root_dir_abspath.walk():
         for file in files:
             file_path = Path(root) / file
             with open(file_path, "r+", encoding="utf-8") as f:

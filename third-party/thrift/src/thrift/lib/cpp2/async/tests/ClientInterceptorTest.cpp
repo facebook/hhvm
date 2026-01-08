@@ -732,20 +732,6 @@ class ClientInterceptorWithResponseValue
     }
   }
 
-  // Get the result value as a string (for compatibility with existing tests)
-  std::string getResultValueAsString() const {
-    if (std::holds_alternative<std::monostate>(resultValue)) {
-      return "";
-    } else if (std::holds_alternative<std::string>(resultValue)) {
-      return std::get<std::string>(resultValue);
-    } else if (std::holds_alternative<int32_t>(resultValue)) {
-      return std::to_string(std::get<int32_t>(resultValue));
-    } else if (std::holds_alternative<int64_t>(resultValue)) {
-      return std::to_string(std::get<int64_t>(resultValue));
-    }
-    return "";
-  }
-
   // Stored information about the response
   std::string methodName;
   bool hadException = false;

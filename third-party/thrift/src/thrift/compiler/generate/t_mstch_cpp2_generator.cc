@@ -68,7 +68,6 @@ bool is_annotation_blacklisted_in_fatal(const std::string& key) {
       "cpp.ref_type",
       "cpp.template",
       "cpp.type",
-      "cpp2.methods",
       "cpp2.ref",
       "cpp2.ref_type",
       "cpp2.template",
@@ -200,7 +199,7 @@ std::string mangle_field_name(const std::string& name) {
 
 bool should_mangle_field_storage_name_in_struct(const t_structured& s) {
   // We don't mangle field name if cpp.methods exist
-  return !s.has_unstructured_annotation({"cpp.methods", "cpp2.methods"});
+  return !s.has_unstructured_annotation("cpp.methods");
 }
 
 bool resolves_to_container_or_struct(const t_type* type) {
@@ -1837,8 +1836,7 @@ class cpp_mstch_struct : public mstch_struct {
   }
 
   mstch::node cpp_methods() {
-    return struct_->get_unstructured_annotation(
-        {"cpp.methods", "cpp2.methods"});
+    return struct_->get_unstructured_annotation({"cpp.methods"});
   }
   mstch::node cpp_declare_hash() {
     return struct_->has_unstructured_annotation(
@@ -1889,7 +1887,7 @@ class cpp_mstch_struct : public mstch_struct {
 
   mstch::node is_eligible_for_constexpr() {
     return is_eligible_for_constexpr_(struct_) ||
-        struct_->has_unstructured_annotation({"cpp.methods", "cpp2.methods"});
+        struct_->has_unstructured_annotation("cpp.methods");
   }
   mstch::node cpp_virtual() {
     return struct_->has_unstructured_annotation(

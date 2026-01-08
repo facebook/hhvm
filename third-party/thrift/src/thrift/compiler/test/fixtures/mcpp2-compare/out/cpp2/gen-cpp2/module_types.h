@@ -6169,7 +6169,7 @@ class ComplexUnion final  {
  protected:
   storage_type value_;
   std::underlying_type_t<Type> fbthrift_type_;
-  // user defined code (cpp2.methods = ...)
+  // user defined code (cpp.methods = ...)
   void foo(const std::string& bar) {}
 
  private:
@@ -8210,7 +8210,7 @@ class containerStruct final  {
   uint32_t serializedSizeZC(Protocol_ const* prot_) const;
   template <class Protocol_>
   uint32_t write(Protocol_* prot_) const;
-  // user defined code (cpp2.methods = ...)
+  // user defined code (cpp.methods = ...)
   void foo(const std::string& bar) {}
 
  private:
@@ -9841,7 +9841,7 @@ class AnnotatedStruct  {
   uint32_t serializedSizeZC(Protocol_ const* prot_) const;
   template <class Protocol_>
   uint32_t write(Protocol_* prot_) const;
-  // user defined code (cpp2.methods = ...)
+  // user defined code (cpp.methods = ...)
   void foo(const std::string& bar) {}
 
  private:

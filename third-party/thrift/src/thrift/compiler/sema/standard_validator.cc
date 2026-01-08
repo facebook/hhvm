@@ -1767,6 +1767,7 @@ void deprecate_annotations(sema_context& ctx, const t_named& node) {
       "cpp.enum_type",
       "cpp2.enum_type",
       "cpp2.deprecated_enum_unscoped",
+      "cpp2.methods",
       "process_in_event_base",
   };
   std::map<std::string, std::string> removed_prefixes = {{"rust.", "rust"}};

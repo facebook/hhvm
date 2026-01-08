@@ -66,7 +66,7 @@ Hack type checker to tell them when they have done something wrong.
 ## Links
 
 Internal links should be **absolute paths** without a domain,
-e.g. `/hack/contributing/introduction`.
+e.g. `/docs/hack/contributing/introduction`.
 
 Image paths should be relative to `static`,
 e.g. `/img/imagename.png`.

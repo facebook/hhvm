@@ -79,7 +79,7 @@ void simplifyInPlace(IRUnit&, IRInstruction*);
 /*
  * Perform a simplification pass in the entire unit.
  *
- * After running this pass, the caller must run a manditoryDCE to restore IR
+ * After running this pass, the caller must run a mandatoryDCE to restore IR
  * invariants.
  */
 void simplifyPass(IRUnit&);

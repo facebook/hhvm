@@ -1061,12 +1061,19 @@ void validate_field_id(sema_context& ctx, const t_field& node) {
       node.name());
 }
 
-void validate_compatibility_with_lazy_field(
-    sema_context& ctx, const t_structured& node) {
-  if (has_lazy_field(node) && node.has_unstructured_annotation("cpp.methods")) {
-    ctx.error(
-        "cpp.methods is incompatible with lazy deserialization in struct `{}`",
-        node.name());
+void validate_cpp_methods(sema_context& ctx, const t_structured& node) {
+  if (node.has_unstructured_annotation("cpp.methods")) {
+    if (has_lazy_field(node)) {
+      ctx.error(
+          "cpp.methods is incompatible with lazy deserialization in struct `{}`",
+          node.name());
+      return;
+    }
+    ctx.report(
+        node,
+        validation_to_diagnostic_level(
+            ctx.sema_parameters().deprecated_cpp_methods),
+        "cpp.methods is not supported");
   }
 }
 
@@ -1968,8 +1975,7 @@ ast_validator standard_validator() {
       &validate_function_exception_field_name_uniqueness);
 
   validator.add_structured_definition_visitor(&validate_field_names_uniqueness);
-  validator.add_structured_definition_visitor(
-      &validate_compatibility_with_lazy_field);
+  validator.add_structured_definition_visitor(&validate_cpp_methods);
   validator.add_structured_definition_visitor(
       &validate_reserved_ids_structured);
   validator.add_structured_definition_visitor(

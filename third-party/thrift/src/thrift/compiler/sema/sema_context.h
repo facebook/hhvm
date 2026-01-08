@@ -168,6 +168,9 @@ struct sema_params {
   // Action to take on unnecessary uses of the @thrift.AllowLegacyMissingUris
   // annotation.
   validation_level unnecessary_allow_missing_uris = validation_level::error;
+
+  // Action to take on deprecated cpp.methods annotations.
+  validation_level deprecated_cpp_methods = validation_level::none;
 };
 
 // An AST visitor context for semantic analysis. It combines diagnostics

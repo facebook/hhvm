@@ -1569,6 +1569,17 @@ TEST(CompilerTest, annotation_scopes) {
       {"--legacy-strict"});
 }
 
+TEST(CompilerTest, cpp_methods_validation) {
+  check_compile(
+      R"(
+    package "facebook.com/thrift/test"
+
+    struct Foo { # expected-error: cpp.methods is not supported
+    } (cpp.methods = "")
+  )",
+      {"--extra-validation", "deprecated_cpp_methods=error"});
+}
+
 TEST(CompilerTest, lazy_struct_compatibility) {
   check_compile(R"(
     package "facebook.com/thrift/test"

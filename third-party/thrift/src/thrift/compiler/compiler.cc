@@ -186,6 +186,10 @@ Options:
                 implicit_field_ids (IGNORED: always present, i.e. implicit field
                   IDs are always forbidden).
 
+                deprecated_cpp_methods=none|error
+                  Action to take on deprecated cpp.methods annotations.
+                  Default: none
+
 Available generators (and options):
 )");
   for (const auto& gen : generator_registry::get_generators()) {
@@ -973,6 +977,13 @@ std::string parse_args(
                   /*flag=*/validator,
                   /*prefix=*/"unnecessary_allow_missing_uris",
                   &sparams.unnecessary_allow_missing_uris)) {
+            continue;
+          }
+
+          if (maybe_parse_validation_level_flag(
+                  /*flag=*/validator,
+                  /*prefix=*/"deprecated_cpp_methods",
+                  &sparams.deprecated_cpp_methods)) {
             continue;
           }
         } catch (const std::exception& e) {

@@ -178,14 +178,6 @@ Options:
                 warn_on_redundant_custom_default_values
                   DEPRECATED, prefer: redundant_custom_default_values=warn
 
-                forbid_non_optional_cpp_ref_fields (IGNORED: set by default).
-                  Struct (and exception) fields with a @cpp.Ref (or
-                  cpp[2].ref[_type]) annotation must be optional, unless
-                  annotated with @cpp.AllowLegacyNonOptionalRef.
-
-                implicit_field_ids (IGNORED: always present, i.e. implicit field
-                  IDs are always forbidden).
-
                 deprecated_cpp_methods=none|error
                   Action to take on deprecated cpp.methods annotations.
                   Default: none
@@ -904,15 +896,6 @@ std::string parse_args(
         if (validator == "warn_on_redundant_custom_default_values") {
           sparams.redundant_custom_default_values =
               sema_params::validation_level::warn;
-          continue;
-        }
-        if (validator == "forbid_non_optional_cpp_ref_fields") {
-          // no-op
-          continue;
-        }
-
-        if (validator == "implicit_field_ids") {
-          // no-op
           continue;
         }
 

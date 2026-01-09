@@ -108,9 +108,6 @@ val format_summary :
     don't trigger the error handler. *)
 val try_ : (unit -> 'a) -> (error -> 'a) -> 'a
 
-(** Like {!try_} but also treats results satisfying the [fail] predicate as failures. *)
-val try_pred : fail:('a -> bool) -> (unit -> 'a) -> (unit -> 'a) -> 'a
-
 (** Like {!try_} but adds the error to the error map before calling the error handler. *)
 val try_with_error : (unit -> 'a) -> (unit -> 'a) -> 'a
 
@@ -123,7 +120,7 @@ val run_and_check_for_errors : (unit -> 'a) -> 'a * bool
 
 (** Return the list of errors caused by the function passed as parameter
     along with its result. *)
-val do_ : ?apply_fixmes:bool -> ?drop_fixmed:bool -> (unit -> 'a) -> t * 'a
+val do_ : ?drop_fixmed:bool -> (unit -> 'a) -> t * 'a
 
 (** Return the list of errors caused by the function passed as parameter
     along with its result. *)

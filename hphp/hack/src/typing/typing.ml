@@ -13447,22 +13447,6 @@ end = struct
               inter_ty
               (p, mid)
         in
-        let try_get_smember_from_constraints env class_info =
-          Errors.try_with_error
-            (fun () -> get_smember_from_constraints env class_info)
-            (fun () ->
-              Typing_error_utils.add_typing_error ~env
-              @@ TOG.smember_not_found
-                   p
-                   ~is_const
-                   ~is_method
-                   ~is_function_pointer
-                   class_info
-                   mid
-                   Typing_error.Callback.unify_error;
-              let (env, ty) = Env.fresh_type_error env p in
-              (env, (ty, []), dflt_rval_err))
-        in
         if is_const then (
           let const =
             if incl_tc then
@@ -13478,7 +13462,7 @@ end = struct
               | None -> Env.get_const env class_ mid
           in
           match const with
-          | None -> try_get_smember_from_constraints env class_
+          | None -> get_smember_from_constraints env class_
           | Some { cc_type; cc_abstract; cc_pos; _ } ->
             let ((env, ty_err_opt), cc_locl_type) =
               Phase.localize ~ety_env env cc_type
@@ -13511,7 +13495,7 @@ end = struct
              * (via class-level where clauses or require class constraints); if yes, repeat
              * the search on all the upper bounds, if not raise an error.
              *)
-            try_get_smember_from_constraints env class_
+            get_smember_from_constraints env class_
           | Some
               ({
                  ce_visibility = vis;

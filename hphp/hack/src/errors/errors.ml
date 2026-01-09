@@ -1370,11 +1370,6 @@ let convert_errors_to_string ?(include_filename = false) (errors : error list) :
 
 let try_ f1 f2 = try_with_result f1 (fun _ err -> f2 err)
 
-let try_with_error f1 f2 =
-  try_ f1 (fun error ->
-      add_error error;
-      f2 ())
-
 let has_no_errors (f : unit -> 'a) : bool =
   try_
     (fun () ->

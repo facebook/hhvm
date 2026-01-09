@@ -108,9 +108,6 @@ val format_summary :
     don't trigger the error handler. *)
 val try_ : (unit -> 'a) -> (error -> 'a) -> 'a
 
-(** Like {!try_} but adds the error to the error map before calling the error handler. *)
-val try_with_error : (unit -> 'a) -> (unit -> 'a) -> 'a
-
 (** Run a computation; if it produces an error, call the continuation with both the
     result and the error. The continuation can inspect or transform the result.
     See {!try_} for warning behavior. *)

@@ -29,6 +29,7 @@ let list_to_list_of_e_and_others xs =
 module TyPredicate = struct
   let rec of_ty env next_wildcard_id (ty : locl_ty) :
       (int * type_predicate, string) Result.t =
+    let (_is_supportdyn, env, ty) = Typing_utils.strip_supportdyn env ty in
     Result.map ~f:(fun (next_wildcard_id, pred_) ->
         (next_wildcard_id, (get_reason ty, pred_)))
     @@
@@ -66,34 +67,50 @@ module TyPredicate = struct
         @@ TypecheckerOptions.type_refinement_partition_shapes env.genv.tcopt
       then
         Result.Error "shape"
-      else if
-        (* this type comes from localizing a hint so a closed shape should have
-           the canonical form of the nothing type *)
-        Typing_defs.is_nothing s_unknown_value
-      then begin
+      else begin
         match
           TShapeMap.fold
             (fun key s_field acc ->
-              if s_field.sft_optional then
-                (* Skip shapes with optional fields for now T196048813 *)
-                Result.Error "optional_field"
-              else
-                let open Hh_prelude.Result.Let_syntax in
-                let* (next_wildcard_id, sf_predicates) = acc in
-                let* (next_wildcard_id, sfp_predicate) =
-                  of_ty env next_wildcard_id s_field.sft_ty
-                in
-                return
-                  (next_wildcard_id, (key, { sfp_predicate }) :: sf_predicates))
+              let sfp_optional = s_field.sft_optional in
+              let open Hh_prelude.Result.Let_syntax in
+              let* (next_wildcard_id, sf_predicates) = acc in
+              let* (next_wildcard_id, sfp_predicate) =
+                of_ty env next_wildcard_id s_field.sft_ty
+              in
+              return
+                ( next_wildcard_id,
+                  (key, { sfp_optional; sfp_predicate }) :: sf_predicates ))
             s_fields
             (Result.Ok (next_wildcard_id, []))
         with
         | Result.Error err -> Result.Error ("shape-" ^ err)
         | Result.Ok (next_wildcard_id, elts) ->
-          Result.Ok
-            (next_wildcard_id, IsShapeOf { sp_fields = TShapeMap.of_list elts })
-      end else
-        Result.Error "open_shape"
+          let result_is_open =
+            if
+              (* this type comes from localizing a hint so a closed shape should have
+                 the canonical form of the nothing type *)
+              Typing_defs.is_nothing s_unknown_value
+            then
+              Result.Ok false
+            else if
+              ty_equal s_unknown_value (Typing_make_type.mixed Reason.none)
+              || ty_equal
+                   s_unknown_value
+                   (Typing_make_type.supportdyn Reason.none
+                   @@ Typing_make_type.mixed Reason.none)
+            then
+              Result.Ok true
+            else
+              Result.Error "unexpected s_unknown_value"
+          in
+          Result.map result_is_open ~f:(fun sp_allows_unknown_fields ->
+              ( next_wildcard_id,
+                IsShapeOf
+                  {
+                    sp_allows_unknown_fields;
+                    sp_fields = TShapeMap.of_list elts;
+                  } ))
+      end
     | Tclass (_, Exact, _) -> Result.Error "exact class"
     | Tclass ((_, name), Nonexact _, args) ->
       let (next_wildcard_id, generics) =
@@ -276,11 +293,11 @@ module TyPredicate = struct
             (env, new_tparams))
       in
       (env, List.fold new_tparams ~init:IMap.empty ~f:IMap.union)
-    | (_reason, IsShapeOf { sp_fields }) ->
+    | (_reason, IsShapeOf { sp_fields; sp_allows_unknown_fields = _ }) ->
       let (env, new_tparams) =
         TShapeMap.fold_env
           env
-          (fun env _key { sfp_predicate } new_tparams_acc ->
+          (fun env _key { sfp_predicate; sfp_optional = _ } new_tparams_acc ->
             let (env, new_tparams) =
               instantiate_wildcards_for_predicate env sfp_predicate p
             in
@@ -329,17 +346,25 @@ module TyPredicate = struct
               t_optional = [];
               t_extra = Tvariadic (Typing_make_type.nothing reason);
             } )
-    | (reason, IsShapeOf { sp_fields }) ->
+    | (reason, IsShapeOf { sp_fields; sp_allows_unknown_fields }) ->
       let map =
         TShapeMap.map
-          (fun { sfp_predicate } ->
+          (fun { sfp_predicate; sfp_optional } ->
             {
-              sft_optional = false;
+              sft_optional = sfp_optional;
               sft_ty = to_ty lookup_wildcard sfp_predicate;
             })
           sp_fields
       in
-      Typing_make_type.shape reason (Typing_make_type.nothing reason) map
+      let kind =
+        if sp_allows_unknown_fields then
+          (* open shape predicates from hints always have supportdyn kinds
+             https://fburl.com/code/aguo2c7i *)
+          Typing_make_type.supportdyn_mixed reason
+        else
+          Typing_make_type.nothing reason
+      in
+      Typing_make_type.shape reason kind map
     | (reason, IsUnionOf predicates) -> begin
       match
         List.partition_tf predicates ~f:(fun p ->
@@ -703,15 +728,14 @@ let rec split_ty_by_tuple
       (env, TyPartition.mk_span ~env ~predicate ty)
 
 and split_ty_by_shape
-    ~(expansions : SSet.t)
     ~(ty_datatype : DataType.t)
     (env : env)
     (ty : locl_ty)
-    { sp_fields = field_predicate_map }
+    (sp_allows_unknown_fields : bool)
+    (sp_fields : shape_field_predicate TShapeMap.t)
     (predicate : type_predicate) : env * TyPartition.t =
   match deref ty with
-  | ( ty_reason,
-      Tshape { s_origin = _; s_unknown_value; s_fields = field_ty_map } ) ->
+  | (_, Tshape { s_origin = _; s_unknown_value; s_fields }) ->
     let has_class_const_field map =
       TShapeMap.exists
         (fun field _val ->
@@ -722,72 +746,93 @@ and split_ty_by_shape
             false)
         map
     in
-    if
-      has_class_const_field field_ty_map
-      || has_class_const_field field_predicate_map
-    then
-      (* class const field names are unsound, so fall back to span *)
-      (env, TyPartition.mk_span ~env ~predicate ty)
-    else if
-      (* Ignore (span) open shape, optional fields for now (T196048813) *)
-
-      (* We're going to remove this test later (T196048813) so don't worry so
-         much about this being too specific of a check *)
-      (not (Typing_defs.is_nothing s_unknown_value))
-      || TShapeMap.exists
-           (fun _field { sft_optional; sft_ty = _ } -> sft_optional)
-           field_ty_map
-    then
+    if has_class_const_field s_fields || has_class_const_field sp_fields then
+      (* class const field names are unsound, so fall back to SPAN *)
       (env, TyPartition.mk_span ~env ~predicate ty)
     else
-      let field_ty_pairs =
-        List.sort
-          (TShapeMap.elements field_ty_map)
-          ~compare:(fun (f1, _) (f2, _) -> TShapeField.compare f1 f2)
+      (* RIGHT if: ty has a required field that is not in the predicate and predicate is closed *)
+      let has_extra_required_field =
+        (not sp_allows_unknown_fields)
+        && TShapeMap.exists
+             (fun key { sft_optional; _ } ->
+               (not sft_optional) && not (TShapeMap.mem key sp_fields))
+             s_fields
       in
-      let field_predicate_pairs =
-        List.sort
-          (TShapeMap.elements field_predicate_map)
-          ~compare:(fun (f1, _) (f2, _) -> TShapeField.compare f1 f2)
-      in
-      if
-        not
-        @@ List.equal
-             TShapeField.equal
-             (List.map field_ty_pairs ~f:fst)
-             (List.map field_predicate_pairs ~f:fst)
-      then
-        (* mismatched fields *)
+      if has_extra_required_field then
         (env, TyPartition.mk_right ~env ~predicate ty)
       else
-        (* Calculate the splits for each field *)
-        let (env, field_split_pairs) =
-          List.fold_map
-            (List.zip_exn field_ty_pairs field_predicate_pairs)
-            ~init:env
-            ~f:(fun
-                 env
-                 ( (field, { sft_optional = _; sft_ty }),
-                   (_field, { sfp_predicate }) )
-               ->
-              let (env, splits) =
-                split_ty
-                  ~other_intersected_tys:[]
-                  ~expansions
-                  env
-                  sft_ty
-                  ~predicate:sfp_predicate
-              in
-              (env, (field, splits)))
+        (* For fields in predicate but not in ty: must be optional else RIGHT *)
+        let missing_required_field =
+          TShapeMap.exists
+            (fun key { sfp_optional; _ } ->
+              (not sfp_optional) && not (TShapeMap.mem key s_fields))
+            sp_fields
         in
-        let (fields, splits) = List.unzip field_split_pairs in
-        let mk_shape tys =
-          Typing_make_type.shape ty_reason (Typing_make_type.nothing ty_reason)
-          @@ TShapeMap.of_list
-          @@ List.zip_exn fields
-          @@ List.map tys ~f:(fun ty -> { sft_optional = false; sft_ty = ty })
-        in
-        (env, TyPartition.product ~f:mk_shape splits)
+
+        if missing_required_field then
+          (env, TyPartition.mk_right ~env ~predicate ty)
+        else
+          (* Split each field that exists in both ty and predicate *)
+          let (env, field_splits) =
+            TShapeMap.fold_env
+              env
+              (fun env key ty_field splits_acc ->
+                match TShapeMap.find_opt key sp_fields with
+                | Some pred_field ->
+                  (* Split this field's type by the predicate field's predicate *)
+                  let (env, field_split) =
+                    split_ty
+                      ~other_intersected_tys:[]
+                      ~expansions:SSet.empty
+                      env
+                      ty_field.sft_ty
+                      ~predicate:pred_field.sfp_predicate
+                  in
+                  (env, (key, ty_field, pred_field, field_split) :: splits_acc)
+                | None ->
+                  (* Field only in ty, not in predicate. Checked above *)
+                  (env, splits_acc))
+              s_fields
+              []
+          in
+
+          (* Check if any field is fully incompatible (fully right) *)
+          let has_incompatible_field =
+            List.exists
+              field_splits
+              ~f:(fun (_, ty_field, _, (field_partition, _, _)) ->
+                let field_left = TyPartition.left field_partition in
+                let field_span = TyPartition.span field_partition in
+                let is_fully_right =
+                  List.is_empty field_left && List.is_empty field_span
+                in
+                (* Required field in ty that's fully incompatible *)
+                (not ty_field.sft_optional) && is_fully_right)
+          in
+
+          if has_incompatible_field then
+            (env, TyPartition.mk_right ~env ~predicate ty)
+          else
+            (* Check if all fields are fully left *)
+            let all_fields_fully_left =
+              List.for_all
+                field_splits
+                ~f:(fun (_, _, _, (field_partition, _, _)) ->
+                  let field_span = TyPartition.span field_partition in
+                  let field_right = TyPartition.right field_partition in
+                  List.is_empty field_span && List.is_empty field_right)
+            in
+
+            (* For left, we also need to check openness constraints *)
+            let openness_satisfies_left =
+              sp_allows_unknown_fields || Typing_defs.is_nothing s_unknown_value
+            in
+
+            if all_fields_fully_left && openness_satisfies_left then
+              (env, TyPartition.mk_left ~env ~predicate ty)
+            else
+              (* Cannot conclude fully left or fully right, fall back to span *)
+              (env, TyPartition.mk_span ~env ~predicate ty)
   | _ ->
     (* Shapes are dicts at runtime, thus if the type's data type is disjoint from a dict
        we can conclude the type must be in the right partition. Otherwise we do not
@@ -868,13 +913,13 @@ and split_ty
         ety
         sub_predicates
         predicate
-    | IsShapeOf shape_predicate ->
+    | IsShapeOf { sp_allows_unknown_fields; sp_fields } ->
       split_ty_by_shape
-        ~expansions
         ~ty_datatype
         env
         ety
-        shape_predicate
+        sp_allows_unknown_fields
+        sp_fields
         predicate
     | IsTag tag -> split_ty_by_tag ~ty_datatype env ety tag predicate
     | IsUnionOf predicates ->

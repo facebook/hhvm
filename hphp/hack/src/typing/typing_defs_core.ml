@@ -247,14 +247,12 @@ and type_tag =
   | ClassTag of Ast_defs.id_ * type_tag_generic list
 
 and shape_field_predicate = {
-  (* T196048813 *)
-  (* sfp_optional: bool; *)
+  sfp_optional: bool;
   sfp_predicate: type_predicate;
 }
 
 and shape_predicate = {
-  (* T196048813 *)
-  (* sp_allows_unknown_fields: bool; *)
+  sp_allows_unknown_fields: bool;
   sp_fields: shape_field_predicate TShapeMap.t;
 }
 
@@ -715,18 +713,32 @@ module Pp = struct
     Format.fprintf fmt "@]";
     Format.fprintf fmt "@ }@]"
 
-  and pp_shape_predicate fmt { sp_fields } =
+  and pp_shape_predicate fmt { sp_fields; sp_allows_unknown_fields } =
     Format.fprintf fmt "@[<2>{ ";
+
     Format.fprintf fmt "@[%s =@ " "sp_fields";
     TShapeMap.pp pp_shape_field_predicate fmt sp_fields;
     Format.fprintf fmt "@]";
+    Format.fprintf fmt ";@ ";
+
+    Format.fprintf fmt "@[%s =@ " "sp_allows_unknown_fields";
+    Format.fprintf fmt "%B" sp_allows_unknown_fields;
+    Format.fprintf fmt "@]";
+
     Format.fprintf fmt "@ }@]"
 
-  and pp_shape_field_predicate fmt { sfp_predicate } =
+  and pp_shape_field_predicate fmt { sfp_optional; sfp_predicate } =
     Format.fprintf fmt "@[<2>{ ";
+
     Format.fprintf fmt "@[%s =@ " "sfp_predicate";
     pp_type_predicate fmt sfp_predicate;
     Format.fprintf fmt "@]";
+    Format.fprintf fmt ";@ ";
+
+    Format.fprintf fmt "@[%s =@ " "sfp_optional";
+    Format.fprintf fmt "%B" sfp_optional;
+    Format.fprintf fmt "@]";
+
     Format.fprintf fmt "@ }@]"
 
   and pp_type_tag_generic fmt generic =
@@ -1159,12 +1171,17 @@ and compare_type_tag tag1 tag2 =
 and compare_tuple_predicate tp1 tp2 =
   List.compare compare_type_predicate tp1.tp_required tp2.tp_required
 
-and compare_shape_predicate sp1 sp2 =
-  TShapeMap.compare compare_shape_field_predicate sp1.sp_fields sp2.sp_fields
+and compare_shape_predicate
+    { sp_allows_unknown_fields = u1; sp_fields = f1 }
+    { sp_allows_unknown_fields = u2; sp_fields = f2 } =
+  chain_compare
+    (TShapeMap.compare compare_shape_field_predicate f1 f2)
+    (fun _ -> Bool.compare u1 u2)
 
-and compare_shape_field_predicate { sfp_predicate = p1 } { sfp_predicate = p2 }
-    =
-  compare_type_predicate p1 p2
+and compare_shape_field_predicate
+    { sfp_optional = o1; sfp_predicate = p1 }
+    { sfp_optional = o2; sfp_predicate = p2 } =
+  chain_compare (compare_type_predicate p1 p2) (fun _ -> Bool.compare o1 o2)
 
 and ty_compare : type a. ?normalize_lists:bool -> a ty -> a ty -> int =
  fun ?(normalize_lists = false) ty1 ty2 ->

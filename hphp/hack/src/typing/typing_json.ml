@@ -218,19 +218,21 @@ let rec from_type : env -> show_like_ty:bool -> locl_ty -> json =
           List.map tp_required ~f:(fun p -> obj @@ predicate_json p)
         in
         name "istuple" @ [("args", JSON_Array predicates_json)]
-      | IsShapeOf { sp_fields } ->
+      | IsShapeOf { sp_fields; sp_allows_unknown_fields } ->
         name "isshape"
         @ [
             ( "fields",
               JSON_Array
                 (List.map
-                   ~f:(fun (field, { sfp_predicate }) ->
+                   ~f:(fun (field, { sfp_predicate; sfp_optional }) ->
                      obj
                      @@ [
                           ("name", shape_field_name_to_json field);
                           ("predicate", obj @@ predicate_json sfp_predicate);
+                          ("optional", JSON_Bool sfp_optional);
                         ])
                    (TShapeMap.bindings sp_fields)) );
+            ("allows_unknown_fields", JSON_Bool sp_allows_unknown_fields);
           ]
       | IsUnionOf predicates ->
         let predicates_json =

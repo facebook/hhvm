@@ -607,7 +607,31 @@ module Subtype_negation = struct
         when not (String.equal SN.Classes.cString id) ->
         None
       | Tneg predicate ->
-        Typing_refinement.TyPredicate.to_ty_without_instantiation_opt predicate
+        (* negate_ak_null_type is ultimately used in simplifcations of the form
+           A & !B <: C iff A <: C | B
+           However, if we overapproximate (C | B) which we do for shape unions,
+           this transform is unsound.
+           For this reason, we exclude predicates containing IsShapeOf from this
+           calculus.
+           Another (better) solution would be to add a flag to Typing_union
+           functions forbidding overapproximation.
+           We also overapproximate unions of tuples, but I don't think we can
+           contrive/observe the same unsoundness since we atomicize tuples
+           during type splitting
+        *)
+        let rec has_isshape predicate =
+          match snd predicate with
+          | IsTag _ -> false
+          | IsUnionOf preds
+          | IsTupleOf { tp_required = preds } ->
+            List.exists preds ~f:has_isshape
+          | IsShapeOf _ -> true
+        in
+        if has_isshape predicate then
+          None
+        else
+          Typing_refinement.TyPredicate.to_ty_without_instantiation_opt
+            predicate
       | _ -> None
     in
     (env, neg_ty)

@@ -230,14 +230,12 @@ and type_tag =
   | ClassTag of Ast_defs.id_ * type_tag_generic list
 
 and shape_field_predicate = {
-  (* T196048813 *)
-  (* sfp_optional: bool; *)
+  sfp_optional: bool;
   sfp_predicate: type_predicate;
 }
 
 and shape_predicate = {
-  (* T196048813 *)
-  (* sp_allows_unknown_fields: bool; *)
+  sp_allows_unknown_fields: bool;
   sp_fields: shape_field_predicate TShapeMap.t;
 }
 

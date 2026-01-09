@@ -1292,12 +1292,12 @@ module Full = struct
           Concat
             ([text "("] @ List.intersperse texts ~sep:(text ", ") @ [text ")"])
         )
-      | IsShapeOf { sp_fields } ->
+      | IsShapeOf { sp_fields; sp_allows_unknown_fields } ->
         let (fuel, texts) =
           List.fold_map
             ~init:fuel
             (TShapeMap.elements sp_fields)
-            ~f:(fun fuel (key, { sfp_predicate }) ->
+            ~f:(fun fuel (key, { sfp_predicate; sfp_optional }) ->
               let key_delim =
                 match key with
                 | Typing_defs.TSFlit_str _ -> text "'"
@@ -1307,6 +1307,10 @@ module Full = struct
               ( fuel,
                 Concat
                   [
+                    (if sfp_optional then
+                      text "?"
+                    else
+                      Nothing);
                     key_delim;
                     text_strip_ns @@ Typing_defs.TShapeField.name key;
                     key_delim;
@@ -1315,6 +1319,12 @@ module Full = struct
                     Space;
                     pdoc;
                   ] ))
+        in
+        let texts =
+          if sp_allows_unknown_fields then
+            texts @ [text "..."]
+          else
+            texts
         in
         ( fuel,
           Concat
@@ -1328,7 +1338,7 @@ module Full = struct
         ( fuel,
           Concat (List.intersperse texts ~sep:(Concat [Space; text "|"; Space]))
         )
-      (* TODO: T196048813 optional, open, fuel? *)
+      (* TODO: T196048813 fuel? *)
     in
     let (fuel, pdoc) = predicate_doc fuel predicate in
     let doc =
@@ -1772,11 +1782,11 @@ module ErrorString = struct
         | IsTupleOf { tp_required } ->
           let strings = List.map tp_required ~f:(fun (_, pred) -> str pred) in
           "(" ^ String.concat ~sep:", " strings ^ ")"
-        | IsShapeOf { sp_fields } ->
+        | IsShapeOf { sp_fields; sp_allows_unknown_fields } ->
           let texts =
             List.map
               (TShapeMap.elements sp_fields)
-              ~f:(fun (key, { sfp_predicate }) ->
+              ~f:(fun (key, { sfp_predicate; sfp_optional }) ->
                 let key_delim =
                   match key with
                   | Typing_defs.TSFlit_str _ -> "'"
@@ -1785,6 +1795,10 @@ module ErrorString = struct
                 String.concat
                   ~sep:""
                   [
+                    (if sfp_optional then
+                      "?"
+                    else
+                      "");
                     key_delim;
                     Typing_defs.TShapeField.name key;
                     key_delim;
@@ -1792,11 +1806,17 @@ module ErrorString = struct
                     str (snd sfp_predicate);
                   ])
           in
+          let texts =
+            if sp_allows_unknown_fields then
+              texts @ ["..."]
+            else
+              texts
+          in
           "shape(" ^ String.concat texts ~sep:", " ^ ")"
         | IsUnionOf predicates ->
           let strings = List.map predicates ~f:(fun (_, pred) -> str pred) in
           String.concat ~sep:" | " strings
-        (* TODO: T196048813, dedupe?, optional, open, fuel? *)
+        (* TODO: T196048813, dedupe?, fuel? *)
       in
       (fuel, "anything but " ^ str @@ snd predicate)
 

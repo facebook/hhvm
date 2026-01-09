@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<f2cf7bdffd426d5ab4b758ae2a8c1210>>
+// @generated SignedSource<<5a41496373bce6d383520405e06ddc8f>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -588,9 +588,11 @@ pub enum TypeTag {
     ToOcamlRep
 )]
 #[rust_to_ocaml(and)]
+#[rust_to_ocaml(prefix = "sfp_")]
 #[repr(C)]
 pub struct ShapeFieldPredicate {
-    pub sfp_predicate: TypePredicate,
+    pub optional: bool,
+    pub predicate: TypePredicate,
 }
 
 #[derive(
@@ -609,9 +611,11 @@ pub struct ShapeFieldPredicate {
     ToOcamlRep
 )]
 #[rust_to_ocaml(and)]
+#[rust_to_ocaml(prefix = "sp_")]
 #[repr(C)]
 pub struct ShapePredicate {
-    pub sp_fields: t_shape_map::TShapeMap<ShapeFieldPredicate>,
+    pub allows_unknown_fields: bool,
+    pub fields: t_shape_map::TShapeMap<ShapeFieldPredicate>,
 }
 
 #[derive(

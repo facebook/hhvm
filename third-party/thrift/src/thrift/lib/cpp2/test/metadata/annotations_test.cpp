@@ -15,9 +15,10 @@
  */
 
 #include <gtest/gtest.h>
+#include <thrift/lib/cpp2/gen/module_metadata_h.h>
 #include <thrift/lib/cpp2/runtime/SchemaRegistry.h>
 #include <thrift/lib/cpp2/test/metadata/gen-cpp2/TestService.h>
-#include <thrift/lib/cpp2/test/metadata/gen-cpp2/annotations_metadata.h>
+#include <thrift/lib/cpp2/test/metadata/gen-cpp2/annotations_types.h>
 #include <thrift/lib/cpp2/util/DebugTree.h>
 
 namespace apache::thrift::test {

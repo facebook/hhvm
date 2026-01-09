@@ -23,12 +23,12 @@ final class ProductIdContextHandlerTest extends WWWTest {
   public async function testProductIdDifferentFromTFM(): Awaitable<void> {
     $params = shape();
     $mutable_tfm = ThriftFrameworkMetadata::withDefaultValues();
-    $mutable_tfm->origin_id = 123;
+    $mutable_tfm->origin_id = MCPOriginIDs::XI_INTEL;
 
     // TagManager::getLatestOriginID() returns a different value than what is in TFM already
     $mock =
       self::mockClassStaticMethodUNSAFE(TagManager::class, 'getLatestOriginID')
-        ->mockReturn(456);
+        ->mockReturn(MCPOriginIDs::CROSSMETA_INTEGRITY_XI);
 
     // call handler
     $handler = new ProductIdContextHandler();
@@ -43,18 +43,20 @@ final class ProductIdContextHandlerTest extends WWWTest {
     expect($mock)->wasCalledOnce();
 
     // verify that TFM was updated
-    expect($mutable_tfm->origin_id)->toEqual(456);
+    expect($mutable_tfm->origin_id)->toEqual(
+      MCPOriginIDs::CROSSMETA_INTEGRITY_XI,
+    );
   }
 
   public async function testProductIdSameAsTFM(): Awaitable<void> {
     $params = shape();
     $mutable_tfm = ThriftFrameworkMetadata::withDefaultValues();
-    $mutable_tfm->origin_id = 123;
+    $mutable_tfm->origin_id = MCPOriginIDs::XI_INTEL;
 
     // TagManager::getLatestOriginID() returns a different value than what is in TFM already
     $mock =
       self::mockClassStaticMethodUNSAFE(TagManager::class, 'getLatestOriginID')
-        ->mockReturn(123);
+        ->mockReturn(MCPOriginIDs::XI_INTEL);
 
     // call handler
     $handler = new ProductIdContextHandler();
@@ -69,7 +71,7 @@ final class ProductIdContextHandlerTest extends WWWTest {
     expect($mock)->wasCalledOnce();
 
     // verify that TFM was NOT updated
-    expect($mutable_tfm->origin_id)->toEqual(123);
+    expect($mutable_tfm->origin_id)->toEqual(MCPOriginIDs::XI_INTEL);
   }
 
   public async function testRegisteredHandlerOverridesProductIdWhenProductIdChanges(
@@ -80,8 +82,8 @@ final class ProductIdContextHandlerTest extends WWWTest {
         new ThriftShimClient(new TBinaryProtocol(new TNullTransport())),
     );
 
-    // product id in ThriftContextPropState is 123
-    MCPContext::setGlobal__UNSAFE(123);
+    // product id in ThriftContextPropState is set
+    MCPContext::setGlobal__UNSAFE(MCPOriginIDs::XI_INTEL);
 
     $transport =
       TServiceRouterTransport::create('sample_service_name', dict[], dict[]);
@@ -90,7 +92,7 @@ final class ProductIdContextHandlerTest extends WWWTest {
     // TagManager::getLatestOriginID() returns a different value than what is in ThriftContextPropState already
     $mock =
       self::mockClassStaticMethodUNSAFE(TagManager::class, 'getLatestOriginID')
-        ->mockReturn(456);
+        ->mockReturn(MCPOriginIDs::CROSSMETA_INTEGRITY_XI);
 
     $handler = new ProductIdContextHandler();
     $client_handler->addHandler($handler);
@@ -119,7 +121,7 @@ final class ProductIdContextHandlerTest extends WWWTest {
         new TMemoryBuffer(Base64::decode($encoded_request_tfm)),
       ),
     );
-    expect($tfm->origin_id)->toEqual(456);
+    expect($tfm->origin_id)->toEqual(MCPOriginIDs::CROSSMETA_INTEGRITY_XI);
   }
 
   public async function testRegisteredHandlerDoesNotOverrideProductIdWhenProductIdDoesNotChange(
@@ -130,8 +132,8 @@ final class ProductIdContextHandlerTest extends WWWTest {
         new ThriftShimClient(new TBinaryProtocol(new TNullTransport())),
     );
 
-    // product id in ThriftContextPropState is 123
-    MCPContext::setGlobal__UNSAFE(123);
+    // product id in ThriftContextPropState is set
+    MCPContext::setGlobal__UNSAFE(MCPOriginIDs::XI_INTEL);
 
     $transport =
       TServiceRouterTransport::create('sample_service_name', dict[], dict[]);
@@ -140,7 +142,7 @@ final class ProductIdContextHandlerTest extends WWWTest {
     // TagManager::getLatestOriginID() returns the same value as what is in ThriftContextPropState already
     $mock =
       self::mockClassStaticMethodUNSAFE(TagManager::class, 'getLatestOriginID')
-        ->mockReturn(123);
+        ->mockReturn(MCPOriginIDs::XI_INTEL);
 
     $handler = new ProductIdContextHandler();
     $client_handler->addHandler($handler);
@@ -169,7 +171,7 @@ final class ProductIdContextHandlerTest extends WWWTest {
         new TMemoryBuffer(Base64::decode($encoded_request_tfm)),
       ),
     );
-    expect($tfm->origin_id)->toEqual(123);
+    expect($tfm->origin_id)->toEqual(MCPOriginIDs::XI_INTEL);
   }
 
   public async function testRegisteredHandlerDoesOverrideProductIDWhenProductIdIsNull(
@@ -190,7 +192,7 @@ final class ProductIdContextHandlerTest extends WWWTest {
     // TagManager::getLatestOriginID() returns the same value as what is in ThriftContextPropState already
     $mock =
       self::mockClassStaticMethodUNSAFE(TagManager::class, 'getLatestOriginID')
-        ->mockReturn(123);
+        ->mockReturn(MCPOriginIDs::XI_INTEL);
 
     $handler = new ProductIdContextHandler();
     $client_handler->addHandler($handler);
@@ -219,6 +221,6 @@ final class ProductIdContextHandlerTest extends WWWTest {
         new TMemoryBuffer(Base64::decode($encoded_request_tfm)),
       ),
     );
-    expect($tfm->origin_id)->toEqual(123);
+    expect($tfm->origin_id)->toEqual(MCPOriginIDs::XI_INTEL);
   }
 }

@@ -135,7 +135,7 @@ final class ThriftContextPropStateTest extends WWWTest {
   public function testOriginIdNullable(): void {
     expect(MCPContext::getOriginId())->toBeNull();
     // 0 is different from null
-    MCPContext::setGlobal__UNSAFE(0);
+    MCPContext::setGlobal__UNSAFE(MCPOriginIDs::UNKNOWN);
     expect(MCPContext::getOriginId())->toEqual(0);
     MCPContext::setGlobal__UNSAFE(null);
     expect(MCPContext::getOriginId())->toBeNull();
@@ -581,7 +581,7 @@ final class ThriftContextPropStateTest extends WWWTest {
     ThriftContextPropState::initFromString($e);
     $tcps = ThriftContextPropState::get();
     $serialized_before = $tcps->getSerialized();
-    MCPContext::setGlobal__UNSAFE(12345);
+    MCPContext::setGlobal__UNSAFE(MCPOriginIDs::INTEGRITY);
     $serialized_after = $tcps->getSerialized();
     expect($serialized_before)->toNotEqual($serialized_after);
   }

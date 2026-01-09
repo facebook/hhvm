@@ -30,7 +30,7 @@ final class ThriftContextPropHandlerTest extends WWWTest {
 
   public function testValue(): void {
     ThriftContextPropState::get()->setRequestId("abcba");
-    MCPContext::setGlobal__UNSAFE(777);
+    MCPContext::setGlobal__UNSAFE(MCPOriginIDs::INTEGRITY);
     $v = ThriftContextPropHandler::makeV();
     if ($v !== null) {
       $transport = Base64::decode($v);
@@ -40,7 +40,7 @@ final class ThriftContextPropHandlerTest extends WWWTest {
       expect($tfm->request_id)->toBeNull();
       $tfm->read($prot);
       expect($tfm->request_id)->toEqual("abcba");
-      expect($tfm->origin_id)->toEqual(777);
+      expect($tfm->origin_id)->toEqual(MCPOriginIDs::INTEGRITY);
     } else {
       expect(true)->toBeFalse();
     }
@@ -77,7 +77,7 @@ final class ThriftContextPropHandlerTest extends WWWTest {
     $v = ThriftContextPropHandler::makeV();
     expect($v)->toBeNull();
 
-    MCPContext::setGlobal__UNSAFE(0);
+    MCPContext::setGlobal__UNSAFE(MCPOriginIDs::UNKNOWN);
     $v = ThriftContextPropHandler::makeV();
     expect($v)->toNotBeNull();
 

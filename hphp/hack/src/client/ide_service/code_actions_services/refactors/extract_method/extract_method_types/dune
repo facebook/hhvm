@@ -1,3 +1,5 @@
+(include_subdirs no)
+
 (library
  (name extract_method_types)
  (libraries

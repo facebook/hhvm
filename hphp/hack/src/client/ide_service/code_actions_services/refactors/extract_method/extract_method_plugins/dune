@@ -2,7 +2,9 @@
 
 let library_entry name suffix =
   Printf.sprintf
-"(library
+"(include_subdirs no)
+
+(library
   (name %s)
   (wrapped false)
   (modules)

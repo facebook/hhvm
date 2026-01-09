@@ -1,3 +1,5 @@
+(include_subdirs no)
+
 (library
  (name code_action_types)
  (libraries

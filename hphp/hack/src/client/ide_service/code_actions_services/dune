@@ -1,3 +1,5 @@
+(include_subdirs unqualified)
+
 (library
  (name code_actions_services)
  (wrapped true)
@@ -5,18 +7,17 @@
   annotated_ast
   ast
   code_action_types
-  code_actions_services_refactors
   collections
   decl_provider
   errors
-  extract_classish
-  extract_method
-  inline_method
+  extract_method_plugins
+  extract_method_types
   full_fidelity
   logging
   lsp
   pos
   provider_context
+  server_command_types
   simplihack
   tast_env
   tast_provider

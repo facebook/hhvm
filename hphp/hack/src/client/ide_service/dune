@@ -119,14 +119,10 @@
   annotated_ast
   ast
   client_ide_message
-  code_action_types
-  code_actions_services_refactors
+  code_actions_services
   collections
   decl_provider
   errors
-  extract_classish
-  extract_method
-  inline_method
   full_fidelity
   logging
   lsp

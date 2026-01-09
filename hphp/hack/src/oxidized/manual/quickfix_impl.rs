@@ -18,6 +18,13 @@ impl<P: WithErasedLines> WithErasedLines for Edits<P> {
                     .map(|(s, p)| (s, p.with_erased_lines()))
                     .collect(),
             ),
+            Self::AddFunctionAttribute {
+                function_pos,
+                attribute_name,
+            } => Self::AddFunctionAttribute {
+                function_pos: function_pos.with_erased_lines(),
+                attribute_name,
+            },
         }
     }
 }

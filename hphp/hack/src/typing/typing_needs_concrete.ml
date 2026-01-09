@@ -94,6 +94,7 @@ let check_class_get
                 class_name = cid;
                 member_name = mid;
                 decl_pos = def_pos;
+                containing_method_pos = Some env.genv.function_pos;
               } )
       | CI _ -> ()
       | CIexpr _ -> ()

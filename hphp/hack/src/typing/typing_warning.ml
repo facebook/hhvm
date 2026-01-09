@@ -189,6 +189,7 @@ module Abstract_access_via_static = struct
     class_name: string;
     member_name: string;
     decl_pos: Pos_or_decl.t;
+    containing_method_pos: Pos.t option;
   }
 end
 

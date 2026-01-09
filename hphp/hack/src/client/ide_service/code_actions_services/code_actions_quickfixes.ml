@@ -8,6 +8,8 @@
 open Hh_prelude
 
 let text_edits
+    (ctx : Provider_context.t)
+    (entry : Provider_context.entry)
     (classish_positions : Pos.t Classish_positions.t)
     (quickfix : Pos.t Quickfix.t) : Code_action_types.edit list =
   match Quickfix.get_edits quickfix with
@@ -28,8 +30,16 @@ let text_edits
           "Could not find class position for quickfix"
       in
       [])
+  | Quickfix.Add_function_attribute { function_pos; attribute_name } ->
+    Code_actions_edits_add_attribute.create
+      ctx
+      entry
+      ~function_pos
+      ~attribute_name
 
 let convert_quickfix
+    (ctx : Provider_context.t)
+    (entry : Provider_context.entry)
     path
     (classish_positions : Pos.t Classish_positions.t)
     (quickfix : Pos.t Quickfix.t) : Code_action_types.quickfix =
@@ -37,7 +47,7 @@ let convert_quickfix
     lazy
       (Relative_path.Map.singleton
          path
-         (text_edits classish_positions quickfix))
+         (text_edits ctx entry classish_positions quickfix))
   in
 
   Code_action_types.(
@@ -83,7 +93,7 @@ let errors_to_quickfixes
   in
   let quickfixes = List.bind ~f:User_error.quickfixes errors_here in
   let standard_quickfixes =
-    List.map quickfixes ~f:(convert_quickfix path classish_positions)
+    List.map quickfixes ~f:(convert_quickfix ctx entry path classish_positions)
   in
   let quickfixes_from_refactors =
     errors_here |> List.bind ~f:(Quickfixes_from_refactors.find ctx entry)

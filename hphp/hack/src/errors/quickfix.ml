@@ -21,6 +21,13 @@ type 'pos edits =
     }
       (** A quickfix might want to add things to an empty class declaration,
       which requires FFP to compute the { position. *)
+  | Add_function_attribute of {
+      function_pos: 'pos;
+      attribute_name: string;
+          (** Ideally should be a string from naming_special_names.ml .
+          * Restriction: only resolves to a quickfix when the function_pos is in the same file as the error
+          *)
+    }
 [@@deriving eq, ord, show]
 
 type 'pos t = {
@@ -45,6 +52,8 @@ let map_positions : 'a t -> f:('a -> 'b) -> 'b t =
       let edits = List.map edits ~f:(fun (s, p) -> (s, f p)) in
       Eager edits
     | Classish_end fields -> Classish_end fields
+    | Add_function_attribute { function_pos; attribute_name } ->
+      Add_function_attribute { function_pos = f function_pos; attribute_name }
   in
   let edits = transform_edits edits in
 

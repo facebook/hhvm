@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<a5263da8f7e23e12afed29a12239e8f3>>
+// @generated SignedSource<<4123247f6b3415f1f540966abf4955d9>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -72,6 +72,14 @@ pub enum Edits<Pos> {
     #[rust_to_ocaml(prefix = "classish_end_")]
     #[rust_to_ocaml(name = "Classish_end")]
     ClassishEnd { new_text: String, name: String },
+    /// Add an attribute to the end of the attribute list for the current function.
+    #[rust_to_ocaml(name = "Add_function_attribute")]
+    AddFunctionAttribute {
+        function_pos: Pos,
+        /// Ideally should be a string from naming_special_names.ml .
+        /// Restriction: only resolves to a quickfix when the function_pos is in the same file as the error
+        attribute_name: String,
+    },
 }
 
 #[derive(

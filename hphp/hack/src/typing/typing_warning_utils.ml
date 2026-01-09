@@ -685,7 +685,24 @@ module Abstract_access_via_static = struct
 
   let reasons { decl_pos; _ } = [(decl_pos, "Declaration is here")]
 
-  let quickfixes _ = []
+  let quickfixes { containing_method_pos; decl_pos = _; _ } =
+    match containing_method_pos with
+    | Some function_pos ->
+      let title =
+        Printf.sprintf "Add %s attribute" SN.UserAttributes.uaNeedsConcrete
+      in
+      [
+        Quickfix.make
+          ~title
+          ~edits:
+            (Quickfix.Add_function_attribute
+               {
+                 function_pos;
+                 attribute_name = SN.UserAttributes.uaNeedsConcrete;
+               })
+          ~hint_styles:[];
+      ]
+    | None -> []
 end
 
 module Uninstantiable_class_via_static = struct

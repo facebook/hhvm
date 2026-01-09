@@ -18,6 +18,12 @@ type 'pos edits =
     }
       (** A quickfix might want to add things to an empty class declaration,
       which requires FFP to compute the { position. *)
+  | Add_function_attribute of {
+      function_pos: 'pos;
+      attribute_name: string;
+          (** Ideally should be a string from naming_special_names.ml *)
+    }
+      (** Add an attribute to the end of the attribute list for the current function. *)
 [@@deriving eq, ord, show]
 
 (** How should we indicate to the user that a quickfix is available,

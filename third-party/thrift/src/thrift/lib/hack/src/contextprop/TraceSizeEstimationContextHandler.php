@@ -3,13 +3,17 @@
 
 final class TraceSizeEstimationContextHandler implements IContextHandler {
 
-  private readonly int $upstreamDepth;
+  private readonly int $depth;
+  private int $breadth;
 
   private static ?TraceSizeEstimationContextHandler $instance = null;
 
   private function __construct()[defaults] {
     $upstream_depth = ThriftContextPropState::get()->getDepth() ?? 0;
-    $this->upstreamDepth = $upstream_depth;
+    $upstream_breadth = ThriftContextPropState::get()->getBreadth() ?? 0;
+
+    $this->depth = $upstream_depth;
+    $this->breadth = $upstream_breadth;
   }
 
   public static function getInstance(
@@ -18,6 +22,13 @@ final class TraceSizeEstimationContextHandler implements IContextHandler {
       self::$instance = new self();
     }
     return self::$instance;
+  }
+
+  /**
+   * Reset the singleton instance.
+   */
+  public static function resetInstance()[globals]: void {
+    self::$instance = null;
   }
 
   public function onIncomingDownstream(
@@ -49,9 +60,12 @@ final class TraceSizeEstimationContextHandler implements IContextHandler {
     $tracing_context->estimate = $tracing_context->estimate ??
       ContextProp\TraceSizeEstimation::withDefaultValues();
 
-    // modify context values to send outbound
-    $outgoing_depth = readonly $this->upstreamDepth + 1;
-    $tracing_context->estimate->depth = $outgoing_depth;
+    // write values
+    $tracing_context->estimate->depth = readonly $this->depth + 1;
+    $tracing_context->estimate->breadth = $this->breadth;
+
+    // bump breadth for next service call
+    $this->breadth++;
   }
 
   public function onIncomingUpstream(

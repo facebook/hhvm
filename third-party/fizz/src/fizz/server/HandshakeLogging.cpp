@@ -24,6 +24,7 @@ void HandshakeLogging::populateFromClientHello(const ClientHello& chlo) {
   }
   clientCiphers = chlo.cipher_suites;
   clientExtensions.clear();
+  clientExtensions.reserve(chlo.extensions.size());
   for (const auto& extension : chlo.extensions) {
     clientExtensions.push_back(extension.extension_type);
     if (extension.extension_type == ExtensionType::test_extension &&
@@ -35,6 +36,7 @@ void HandshakeLogging::populateFromClientHello(const ClientHello& chlo) {
   clientAlpns.clear();
   auto alpn = getExtension<ProtocolNameList>(chlo.extensions);
   if (alpn) {
+    clientAlpns.reserve(alpn->protocol_name_list.size());
     for (auto& protocol : alpn->protocol_name_list) {
       clientAlpns.push_back(protocol.name->to<std::string>());
     }
@@ -51,6 +53,7 @@ void HandshakeLogging::populateFromClientHello(const ClientHello& chlo) {
   auto keyShare = getExtension<ClientKeyShare>(chlo.extensions);
   if (keyShare && !clientKeyShares) {
     std::vector<NamedGroup> shares;
+    shares.reserve(keyShare->client_shares.size());
     for (const auto& entry : keyShare->client_shares) {
       shares.push_back(entry.group);
     }

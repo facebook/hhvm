@@ -1,0 +1,49 @@
+
+:::info[Note]
+This is a point-in-time snapshot of the API documentation from January 2026.
+Going forward, we will not be maintaining a public copy of these references,
+and recommend users to refer to the built-in signature helpers available in
+the Hack LSP instead for complete and up-to-date information.
+:::
+
+Returns the first key in the current [` Vector `](/docs/apis/Classes/HH/Vector/)
+
+
+
+
+``` Hack
+public function firstKey(): ?int;
+```
+
+
+
+
+## Returns
+
+
+
+
++ ` ?int ` - The first key (an integer) in the current [` Vector `](/docs/apis/Classes/HH/Vector/), or `` null `` if
+  the [` Vector `](/docs/apis/Classes/HH/Vector/) is empty.
+
+
+
+
+## Examples
+
+
+
+
+The following example gets the first key from [` Vector `](/docs/apis/Classes/HH/Vector/). An empty [` Vector `](/docs/apis/Classes/HH/Vector/) will return `` null `` as its first key.
+
+
+
+
+``` basic-usage.hack
+$v = Vector {'red', 'green', 'blue', 'yellow'};
+\var_dump($v->firstKey());
+
+$v = Vector {};
+\var_dump($v->firstKey());
+```
+<!-- HHAPIDOC -->

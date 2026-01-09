@@ -1,3 +1,23 @@
+---
+title: Overview
+---
+
 # Hack APIs
 
-...
+:::info[Note]
+This is a point-in-time snapshot of the API documentation from January 2026.
+Going forward, we will not be maintaining a public copy of these references,
+and recommend users to refer to the built-in signature helpers available in
+the Hack LSP instead for complete and up-to-date information.
+:::
+
+## Sections
+
+ * [Classes](/docs/apis/Classes)
+ * [Functions](/docs/apis/Functions)
+ * [Interfaces](/docs/apis/Interfaces)
+ * [Traits](/docs/apis/Traits)
+
+:::tip
+See also the [Hack Standard Library](/docs/hsl/overview).
+:::

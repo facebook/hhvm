@@ -1,0 +1,39 @@
+
+:::info[Note]
+This is a point-in-time snapshot of the API documentation from January 2026.
+Going forward, we will not be maintaining a public copy of these references,
+and recommend users to refer to the built-in signature helpers available in
+the Hack LSP instead for complete and up-to-date information.
+:::
+
+Move the async iterator to the next [` Awaitable `](/docs/apis/Classes/HH/Awaitable/) position
+
+
+
+
+``` Hack
+public function next(): Awaitable<?(Tk, Tv)>;
+```
+
+
+
+
+```
+foreach ($async_iter await $async_iter->next() $key=>$value)
+```
+
+
+
+
+The above is the longhand syntax for ` await as $key=>$value `.
+
+
+
+
+## Returns
+
+
+
+
++ [` Awaitable<?(Tk, `](/docs/apis/Classes/HH/Awaitable/)`` Tv)> `` - The next [` Awaitable `](/docs/apis/Classes/HH/Awaitable/) in the iterator sequence.
+<!-- HHAPIDOC -->

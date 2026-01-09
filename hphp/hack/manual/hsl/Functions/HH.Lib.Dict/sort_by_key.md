@@ -1,0 +1,63 @@
+
+:::info[Note]
+This is a point-in-time snapshot of the API documentation from January 2026.
+Going forward, we will not be maintaining a public copy of these references,
+and recommend users to refer to the built-in signature helpers available in
+the Hack LSP instead for complete and up-to-date information.
+:::
+
+Returns a new dict sorted by the keys of the given KeyedTraversable
+
+
+
+
+``` Hack
+namespace HH\Lib\Dict;
+
+function sort_by_key<Tk as arraykey, Tv>(
+  KeyedTraversable<Tk, Tv> $traversable,
+  ?(function(Tk, Tk): num) $key_comparator = NULL,
+): dict<Tk, Tv>;
+```
+
+
+
+
+If the
+optional comparator function isn't provided, the keys will be sorted in
+ascending order.
+
+
+
+
++ To sort by the values of the KeyedTraversable, see ` Dict\sort() `.
++ To sort by some computable property of each value, see ` Dict\sort_by() `.
+
+
+
+
+Time complexity: O((n log n) * c), where c is the complexity of the
+comparator function (which is O(1) if not provided explicitly)
+Space complexity: O(n)
+
+
+
+
+## Parameters
+
+
+
+
+* [` KeyedTraversable<Tk, `](/docs/apis/Interfaces/HH/KeyedTraversable/)`` Tv> $traversable ``
+* ` ?(function(Tk, Tk): num) $key_comparator = NULL `
+
+
+
+
+## Returns
+
+
+
+
+- ` dict<Tk, Tv> `
+<!-- HHAPIDOC -->

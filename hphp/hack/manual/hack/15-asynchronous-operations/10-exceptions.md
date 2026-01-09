@@ -57,8 +57,8 @@ function main(): void {
 ```
 
 To get around this, and get the successful results as well, we can use the [utility function](/docs/hack/asynchronous-operations/utility-functions)
-[`HH\Asio\wrap`](/docs/apis/function/HH.Asio.wrap/). It takes an awaitable and returns the expected result or the exception
-if one was thrown. The exception it gives back is of the type [`ResultOrExceptionWrapper`](/docs/apis/interface/HH.Asio.ResultOrExceptionWrapper/).
+[`HH\Asio\wrap`](/docs/apis/Functions/HH.Asio/wrap/). It takes an awaitable and returns the expected result or the exception
+if one was thrown. The exception it gives back is of the type [`ResultOrExceptionWrapper`](/docs/apis/Interfaces/HH.Asio/ResultOrExceptionWrapper/).
 
 ```hack no-extract
 namespace HH\Asio {

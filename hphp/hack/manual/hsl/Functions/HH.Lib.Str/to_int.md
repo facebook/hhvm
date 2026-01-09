@@ -1,0 +1,54 @@
+
+:::info[Note]
+This is a point-in-time snapshot of the API documentation from January 2026.
+Going forward, we will not be maintaining a public copy of these references,
+and recommend users to refer to the built-in signature helpers available in
+the Hack LSP instead for complete and up-to-date information.
+:::
+
+Returns the given string as an integer, or null if the string isn't numeric
+
+
+
+
+``` Hack
+namespace HH\Lib\Str;
+
+function to_int(
+  string $string,
+): ?int;
+```
+
+
+
+
+## Guide
+
+
+
+
++ [String](</docs/hack/built-in-types/string>)
+
+
+
+
+
+
+
+## Parameters
+
+
+
+
+* ` string $string `
+
+
+
+
+## Returns
+
+
+
+
+- ` ?int `
+<!-- HHAPIDOC -->

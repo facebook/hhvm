@@ -120,6 +120,7 @@ type client_check_env = {
   warning_switches: Filter_errors.switch list;
   dump_config: bool;
   find_my_tests_max_distance: int;
+  find_my_tests_max_test_files: int option;
 }
 
 let string_to_rename_mode = function

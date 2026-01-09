@@ -11,5 +11,6 @@ val go :
   genv:ServerEnv.genv ->
   env:ServerEnv.env ->
   max_distance:int ->
+  max_test_files:int option ->
   ServerCommandTypes.Find_my_tests.action list ->
   ServerCommandTypes.Find_my_tests.result

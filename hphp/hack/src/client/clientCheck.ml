@@ -150,6 +150,7 @@ let connect
     warning_switches = _;
     dump_config = _;
     find_my_tests_max_distance = _;
+    find_my_tests_max_test_files = _;
   } =
     args
   in
@@ -1061,7 +1062,9 @@ let main_internal
     let%lwt (result, telemtry) =
       rpc args
       @@ ServerCommandTypes.FIND_MY_TESTS
-           (args.find_my_tests_max_distance, actions)
+           ( args.find_my_tests_max_distance,
+             args.find_my_tests_max_test_files,
+             actions )
     in
     (match result with
     | Ok fmt_result ->

@@ -53,6 +53,7 @@ let main (env : ClientEnv.client_check_env) (config : ServerLocalConfig.t) :
     warning_switches = _;
     dump_config = _;
     find_my_tests_max_distance = _;
+    find_my_tests_max_test_files = _;
   } =
     env
   in

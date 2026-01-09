@@ -1035,6 +1035,7 @@ module Selection_graph = struct
       ~(genv : ServerEnv.genv)
       ~(env : ServerEnv.env)
       max_distance
+      max_test_files
       (roots : Symbol_def.with_strategy list) :
       (result_entry list, error_msg) Result.t =
     let open Result.Let_syntax in
@@ -1103,10 +1104,16 @@ module Selection_graph = struct
               (Symbol_def.show_with_strategy root_symbol)
         | _ -> ());
 
+    let at_test_file_limit () =
+      match max_test_files with
+      | None -> false
+      | Some limit -> Hashtbl.length test_files >= limit
+    in
+
     let rec bfs () =
       match Queue.dequeue queue with
       | Some ({ distance; symbol_s; incoming = _ } as node)
-        when distance < max_distance ->
+        when distance < max_distance && not (at_test_file_limit ()) ->
         log_info "processing node %s" (Symbol_node.show node);
         let new_distance = distance + 1 in
         (match get_successors ~ctx ~genv ~env symbol_s with
@@ -1131,14 +1138,15 @@ module Selection_graph = struct
                    new_distance
                    (Some (node, reason))));
           List.iter referencing_test_files ~f:(fun referencing_test_file ->
-              match
-                Hashtbl.add
-                  test_files
-                  ~key:referencing_test_file
-                  ~data:new_distance
-              with
-              | `Duplicate -> (* Already seen, nothing to do *) ()
-              | `Ok -> log_info "adding new test %s" referencing_test_file);
+              if not (at_test_file_limit ()) then
+                match
+                  Hashtbl.add
+                    test_files
+                    ~key:referencing_test_file
+                    ~data:new_distance
+                with
+                | `Duplicate -> (* Already seen, nothing to do *) ()
+                | `Ok -> log_info "adding new test %s" referencing_test_file);
           bfs ()
         | Result.Error msg ->
           log_info
@@ -1163,6 +1171,7 @@ let go
     ~(genv : ServerEnv.genv)
     ~(env : ServerEnv.env)
     ~(max_distance : int)
+    ~(max_test_files : int option)
     (actions : ServerCommandTypes.Find_my_tests.action list) :
     ServerCommandTypes.Find_my_tests.result =
   let open Result.Let_syntax in
@@ -1203,4 +1212,4 @@ let go
 
         Result.Ok (root :: acc))
   in
-  Selection_graph.build ~ctx ~genv ~env max_distance roots
+  Selection_graph.build ~ctx ~genv ~env max_distance max_test_files roots

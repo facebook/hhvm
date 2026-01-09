@@ -220,6 +220,7 @@ let parse_check_args cmd ~from_default : ClientEnv.client_check_env =
     if !only_log_errors then set_mode (MODE_LOG_ERRORS config)
   in
   let find_my_tests_max_distance = ref 1 in
+  let find_my_tests_max_test_files = ref None in
   (* parse args *)
   let usage =
     match cmd with
@@ -372,6 +373,12 @@ let parse_check_args cmd ~from_default : ClientEnv.client_check_env =
       ( "--find-my-tests-max-distance",
         Arg.Int (fun max_distance -> find_my_tests_max_distance := max_distance),
         "maximum distance between given symbol(s) and any test that --find-my-tests will return (default: 1)"
+      );
+      ( "--find-my-tests-max-test-files",
+        Arg.Int
+          (fun max_test_files ->
+            find_my_tests_max_test_files := Some max_test_files),
+        "maximum number of test files to return from --find-my-tests (default: unlimited)"
       );
       Common_argspecs.force_dormant_start force_dormant_start;
       Common_argspecs.from from;
@@ -921,6 +928,7 @@ rewrite to the function names to something like `foo_1` and `foo_2`.
     warning_switches = List.rev !warning_switches;
     dump_config = !dump_config;
     find_my_tests_max_distance = !find_my_tests_max_distance;
+    find_my_tests_max_test_files = !find_my_tests_max_test_files;
   }
 
 let parse_start_env command ~from_default =

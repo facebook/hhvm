@@ -25,6 +25,7 @@ class TestFindMyTests(test_case.TestCase[common_tests.CommonTestDriver]):
         expected_test_files: List[Tuple[str, Optional[int]]],
         symbols: List[str],
         max_distance: int = 1,
+        max_test_files: Optional[int] = None,
     ) -> None:
         self.test_driver.start_hh_server()
 
@@ -34,16 +35,17 @@ class TestFindMyTests(test_case.TestCase[common_tests.CommonTestDriver]):
             print("stderr: " + err)
             self.fail("hh check failed")
 
-        (output, err, retcode) = self.test_driver.run_check(
-            options=[
-                "--autostart-server=false",
-                "--json",
-                "--find-my-tests-max-distance",
-                str(max_distance),
-                "--find-my-tests",
-            ]
-            + symbols
-        )
+        options = [
+            "--autostart-server=false",
+            "--json",
+            "--find-my-tests-max-distance",
+            str(max_distance),
+        ]
+        if max_test_files is not None:
+            options.extend(["--find-my-tests-max-test-files", str(max_test_files)])
+        options.append("--find-my-tests")
+
+        (output, err, retcode) = self.test_driver.run_check(options=options + symbols)
 
         print(
             self.test_driver.get_all_logs(self.test_driver.repo_dir).current_server_log
@@ -174,6 +176,27 @@ class TestFindMyTests(test_case.TestCase[common_tests.CommonTestDriver]):
                 expected_test_files=expected_tests,
                 max_distance=max_distance,
             )
+
+    def test_max_test_files(self) -> None:
+        """Tests that --find-my-tests-max-test-files limits the number of test files returned.
+
+        This is just reusing the definitions for test_indrection, but running with a limit.
+        """
+
+        prefix = os.path.join(self.test_driver.repo_dir, "b", "__tests__")
+
+        expected_tests: List[Tuple[str, Optional[int]]] = [
+            ("B_UsesDist1Test.php", 1),
+            ("B_UsesDist2Test.php", 2),
+        ]
+
+        self.check_has_tests_with_distances(
+            prefix=prefix,
+            symbols=["B_Def::foo"],
+            expected_test_files=expected_tests,
+            max_distance=4,
+            max_test_files=2,
+        )
 
     def test_construction1(self) -> None:
         """Tests that we detect object creation (without explicit constructors)

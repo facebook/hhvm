@@ -442,7 +442,9 @@ type _ t =
   | DEPS_IN_BATCH :
       (string * int * int) list
       -> Find_refs.result_or_retry list t
-  | FIND_MY_TESTS : (int * Find_my_tests.action list) -> Find_my_tests.result t
+  | FIND_MY_TESTS :
+      (int * int option * Find_my_tests.action list)
+      -> Find_my_tests.result t
   | PACKAGE_LINT : string -> Package_lint.fast_result t
 
 type cmd_metadata = {

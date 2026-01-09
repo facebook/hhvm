@@ -81,8 +81,10 @@ Errors:
                    (Expr
                       ((noreturn), [19:3-25],
                        (Call
-                          { func = (((function(HH\FormatString<PlainSprintf> $fmt, mixed $fmt_args...)[]: noreturn)), [19:3-12], (Id ([19:3-12], "\\HH\\invariant_violation"))); 
-                            targs = []; args = [(Anormal ((string), [19:19-24], (String "foo")))]; 
+                          { func =
+                            (((function<Targs as (mixed...)>(HH\TypedFormatString<PlainSprintf, ()> $fmt, ...() $fmt_args)[]: noreturn)), [19:3-12], (Id ([19:3-12], "\\HH\\invariant_violation")));
+                            targs = [((()), ([19:3-12], Hwildcard))]; 
+                            args = [(Anormal ((HH\TypedFormatString<~PlainSprintf, ()>), [19:19-24], (String "foo")))]; 
                             unpacked_arg = None }))))
                    ],
                  [([Pos.none], Noop)])));
@@ -90,8 +92,8 @@ Errors:
               (Expr
                  ((noreturn), [20:3-29],
                   (Call
-                     { func = (((function(HH\FormatString<PlainSprintf> $fmt, mixed $fmt_args...)[]: noreturn)), [20:3-22], (Id ([20:3-22], "\\HH\\invariant_violation"))); 
-                       targs = []; args = [(Anormal ((string), [20:23-28], (String "foo")))]; 
+                     { func = (((function<Targs as (mixed...)>(HH\TypedFormatString<PlainSprintf, ()> $fmt, ...() $fmt_args)[]: noreturn)), [20:3-22], (Id ([20:3-22], "\\HH\\invariant_violation")));
+                       targs = [((()), ([20:3-22], Hwildcard))]; args = [(Anormal ((HH\TypedFormatString<~PlainSprintf, ()>), [20:23-28], (String "foo")))]; 
                        unpacked_arg = None }))))
              ]
            };

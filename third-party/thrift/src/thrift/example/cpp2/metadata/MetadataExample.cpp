@@ -17,8 +17,9 @@
 #include <glog/logging.h>
 #include <range/v3/algorithm/find_if.hpp>
 #include <folly/init/Init.h>
-#include <thrift/example/if/gen-cpp2/MetadataExample_metadata.h>
+#include <thrift/example/if/gen-cpp2/MetadataExample_types.h>
 #include <thrift/example/if/gen-cpp2/MyService.h>
+#include <thrift/lib/cpp2/gen/module_metadata_h.h>
 
 namespace apache::thrift::metadata {
 

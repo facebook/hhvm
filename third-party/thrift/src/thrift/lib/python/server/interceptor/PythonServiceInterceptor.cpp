@@ -82,7 +82,7 @@ std::string ObservableServiceInterceptor::getName() const {
   return name_;
 }
 
-std::optional<PyObject*> ObservableServiceInterceptor::onConnection(
+std::optional<PyObject*> ObservableServiceInterceptor::onConnectionEstablished(
     ServiceInterceptorBase::ConnectionInfo connectionInfo) {
   GILGuard gil;
   ensure_module_imported();

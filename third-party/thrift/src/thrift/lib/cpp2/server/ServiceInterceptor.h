@@ -46,9 +46,13 @@ class ServiceInterceptor : public ServiceInterceptorBase {
     co_return;
   }
 
-  virtual std::optional<ConnectionState> onConnection(ConnectionInfo) {
+  virtual void onConnectionAttempted(ConnectionInfo) {}
+
+  virtual std::optional<ConnectionState> onConnectionEstablished(
+      ConnectionInfo) {
     return std::nullopt;
   }
+
   virtual void onConnectionClosed(ConnectionState*, ConnectionInfo) noexcept {}
 
   const ServiceInterceptorQualifiedName& getQualifiedName() const final {
@@ -56,7 +60,19 @@ class ServiceInterceptor : public ServiceInterceptorBase {
   }
 
  private:
-  void internal_onConnection(
+  void internal_onConnectionAttempted(
+      ConnectionInfo connectionInfo,
+      InterceptorMetricCallback& interceptorMetricCallback) final {
+    if (isDisabled()) {
+      return;
+    }
+    folly::stop_watch<std::chrono::microseconds> onConnectionAttemptTimer;
+    onConnectionAttempted(std::move(connectionInfo));
+    interceptorMetricCallback.onConnectionAttemptedComplete(
+        getQualifiedName(), onConnectionAttemptTimer.elapsed());
+  }
+
+  void internal_onConnectionEstablished(
       ConnectionInfo connectionInfo,
       InterceptorMetricCallback& interceptorMetricCallback) final {
     if (isDisabled()) {
@@ -64,12 +80,13 @@ class ServiceInterceptor : public ServiceInterceptorBase {
     }
     folly::stop_watch<std::chrono::microseconds> onConnectionTimer;
     auto* storage = connectionInfo.storage;
-    if (auto value = onConnection(std::move(connectionInfo))) {
+    if (auto value = onConnectionEstablished(std::move(connectionInfo))) {
       storage->emplace<ConnectionState>(std::move(*value));
     }
     interceptorMetricCallback.onConnectionComplete(
         getQualifiedName(), onConnectionTimer.elapsed());
   }
+
   void internal_onConnectionClosed(
       ConnectionInfo connectionInfo,
       InterceptorMetricCallback& interceptorMetricCallback) noexcept final {

@@ -34,7 +34,7 @@ class StressTestServiceInterceptor final
   folly::coro::Task<void> onResponse(
       RequestState*, ConnectionState*, ResponseInfo) final;
 
-  std::optional<ConnectionState> onConnection(ConnectionInfo) final;
+  std::optional<ConnectionState> onConnectionEstablished(ConnectionInfo) final;
 
   void onConnectionClosed(ConnectionState*, ConnectionInfo) noexcept final;
 };

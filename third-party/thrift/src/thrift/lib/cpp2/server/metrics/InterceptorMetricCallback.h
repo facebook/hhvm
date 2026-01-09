@@ -46,11 +46,24 @@ class InterceptorMetricCallback {
       std::chrono::microseconds onResponseDuration) = 0;
 
   /**
-   * Records the completion of a single interceptor's onConnection call.
+   * Records the completion of a single interceptor's onConnectionAttempted
+   * call.
    *
    * @param qualifiedName The fully qualified name of the interceptor.
-   * @param onConnectionDuration The time it took to complete the onResponse
+   * @param onConnectionAttemptDuration The time it took to complete the
+   * onConnectionAttempted call.
+   */
+  virtual void onConnectionAttemptedComplete(
+      const ServiceInterceptorQualifiedName& qualifiedName,
+      std::chrono::microseconds onConnectionAttemptDuration) = 0;
+
+  /**
+   * Records the completion of a single interceptor's onConnectionEstablished
    * call.
+   *
+   * @param qualifiedName The fully qualified name of the interceptor.
+   * @param onConnectionDuration The time it took to complete the
+   * onConnectionEstablished call.
    */
   virtual void onConnectionComplete(
       const ServiceInterceptorQualifiedName& qualifiedName,
@@ -75,6 +88,10 @@ class NoopInterceptorMetricCallback : public InterceptorMetricCallback {
   }
 
   void onResponseComplete(
+      const ServiceInterceptorQualifiedName&, std::chrono::microseconds) final {
+  }
+
+  void onConnectionAttemptedComplete(
       const ServiceInterceptorQualifiedName&, std::chrono::microseconds) final {
   }
 

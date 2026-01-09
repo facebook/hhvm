@@ -51,7 +51,7 @@ class ObservableServiceInterceptor : public PythonServiceInterceptor {
 
   std::string getName() const override;
 
-  std::optional<PyObject*> onConnection(ConnectionInfo) override;
+  std::optional<PyObject*> onConnectionEstablished(ConnectionInfo) override;
   void onConnectionClosed(
       PyObject** /* ConnectionState */, ConnectionInfo) noexcept override;
 

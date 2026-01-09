@@ -228,7 +228,8 @@ struct ServiceInterceptorCountWithRequestState
 
   using NamedServiceInterceptor::NamedServiceInterceptor;
 
-  std::optional<ConnectionState> onConnection(ConnectionInfo) override {
+  std::optional<ConnectionState> onConnectionEstablished(
+      ConnectionInfo) override {
     onConnectionCount++;
     return 1;
   }
@@ -384,11 +385,11 @@ struct ServiceInterceptorThrowOnConnection
  public:
   using NamedServiceInterceptor::NamedServiceInterceptor;
 
-  [[noreturn]] std::optional<folly::Unit> onConnection(
+  [[noreturn]] std::optional<folly::Unit> onConnectionEstablished(
       ConnectionInfo) override {
     onConnectionCount++;
     throw std::runtime_error(
-        "Exception from ServiceInterceptorThrowOnConnection::onConnection");
+        "Exception from ServiceInterceptorThrowOnConnection::onConnectionEstablished");
   }
 
   void onConnectionClosed(folly::Unit*, ConnectionInfo) noexcept override {
@@ -454,6 +455,12 @@ class MockInterceptorMetricCallback : public InterceptorMetricCallback {
  public:
   MOCK_METHOD(
       void,
+      onConnectionAttemptedComplete,
+      (const ServiceInterceptorQualifiedName& qualifiedName,
+       std::chrono::microseconds onResponseTime),
+      (override));
+  MOCK_METHOD(
+      void,
       onConnectionComplete,
       (const ServiceInterceptorQualifiedName& qualifiedName,
        std::chrono::microseconds onResponseTime),
@@ -494,6 +501,9 @@ CO_TEST_P(ServiceInterceptorTestP, BasicTM) {
   const auto callsIfNotHttp2 = [&](int value) -> int {
     return transportType() == TransportType::HTTP2 ? 0 : value;
   };
+  EXPECT_CALL(*interceptorMetricCallback, onConnectionAttemptedComplete(_, _))
+      .Times(callsIfNotHttp2(2))
+      .WillRepeatedly(Return());
   EXPECT_CALL(*interceptorMetricCallback, onConnectionComplete(_, _))
       .Times(callsIfNotHttp2(2))
       .WillRepeatedly(Return());
@@ -541,7 +551,7 @@ CO_TEST_P(ServiceInterceptorTestP, InterceptorControl) {
   struct BrokenInterceptor : public NamedServiceInterceptor<folly::Unit> {
     using NamedServiceInterceptor::NamedServiceInterceptor;
 
-    [[noreturn]] std::optional<folly::Unit> onConnection(
+    [[noreturn]] std::optional<folly::Unit> onConnectionEstablished(
         ConnectionInfo) override {
       throw std::runtime_error("Broken");
     }
@@ -1230,11 +1240,12 @@ CO_TEST_P(ServiceInterceptorTestP, OnConnectionException) {
           }
           EXPECT_THAT(
               std::string(ex.what()),
-              HasSubstr("ServiceInterceptor::onConnection threw exceptions"));
+              HasSubstr(
+                  "ServiceInterceptor::onConnectionEstablished threw exceptions"));
           EXPECT_THAT(
               std::string(ex.what()),
               HasSubstr(
-                  "Exception from ServiceInterceptorThrowOnConnection::onConnection"));
+                  "Exception from ServiceInterceptorThrowOnConnection::onConnectionEstablished"));
           EXPECT_THAT(
               std::string(ex.what()), HasSubstr("[TestModule.Interceptor1]"));
           EXPECT_THAT(
@@ -1702,6 +1713,96 @@ CO_TEST_P(
       };
 
   EXPECT_THAT(interceptor->results, ElementsAreArray(expectedResults));
+}
+
+CO_TEST_P(ServiceInterceptorTestP, OnConnectionAttempt) {
+  struct ServiceInterceptorTrackingConnectionAttempt
+      : public NamedServiceInterceptor<folly::Unit> {
+   public:
+    using ConnectionState = folly::Unit;
+    using RequestState = folly::Unit;
+
+    using NamedServiceInterceptor::NamedServiceInterceptor;
+
+    void onConnectionAttempted(ConnectionInfo) override {
+      onConnectionAttemptedCount++;
+    }
+
+    std::optional<ConnectionState> onConnectionEstablished(
+        ConnectionInfo) override {
+      onConnectionEstablishedCount++;
+      return std::nullopt;
+    }
+
+    void onConnectionClosed(
+        ConnectionState*, ConnectionInfo) noexcept override {
+      onConnectionClosedCount++;
+    }
+
+    folly::coro::Task<std::optional<RequestState>> onRequest(
+        ConnectionState*, RequestInfo) override {
+      onRequestCount++;
+      co_return std::nullopt;
+    }
+
+    folly::coro::Task<void> onResponse(
+        RequestState*, ConnectionState*, ResponseInfo) override {
+      onResponseCount++;
+      co_return;
+    }
+
+    int onConnectionAttemptedCount = 0;
+    int onConnectionEstablishedCount = 0;
+    int onConnectionClosedCount = 0;
+    int onRequestCount = 0;
+    int onResponseCount = 0;
+  };
+
+  auto interceptor =
+      std::make_shared<ServiceInterceptorTrackingConnectionAttempt>(
+          "ConnectionAttemptInterceptor");
+  auto runner =
+      makeServer(std::make_shared<TestHandler>(), [&](ThriftServer& server) {
+        server.addModule(std::make_unique<TestModule>(interceptor));
+      });
+
+  // HTTP2 does not support onConnection and onConnectionClosed because
+  // ThriftProcessor creates & disposes the Cpp2ConnContext every request, not
+  // connection.
+  const auto valueIfNotHttp2 = [&](int value) -> int {
+    return transportType() == TransportType::HTTP2 ? 0 : value;
+  };
+
+  {
+    auto client = runner->newStickyClient<
+        apache::thrift::Client<test::ServiceInterceptorTest>>(
+        nullptr /* callbackExecutor */, channelFor(transportType()));
+
+    co_await client->co_echo("");
+
+    // Both onConnectionAttempted and onConnectionEstablished should be called
+    // after the first request (which establishes the connection)
+    EXPECT_EQ(interceptor->onConnectionAttemptedCount, valueIfNotHttp2(1));
+    EXPECT_EQ(interceptor->onConnectionEstablishedCount, valueIfNotHttp2(1));
+    EXPECT_EQ(interceptor->onConnectionClosedCount, valueIfNotHttp2(0));
+    EXPECT_EQ(interceptor->onRequestCount, 1);
+    EXPECT_EQ(interceptor->onResponseCount, 1);
+
+    co_await client->co_echo("");
+    EXPECT_EQ(interceptor->onRequestCount, 2);
+    EXPECT_EQ(interceptor->onResponseCount, 2);
+
+    // Connection counts should remain the same after additional requests
+    EXPECT_EQ(interceptor->onConnectionAttemptedCount, valueIfNotHttp2(1));
+    EXPECT_EQ(interceptor->onConnectionEstablishedCount, valueIfNotHttp2(1));
+    EXPECT_EQ(interceptor->onConnectionClosedCount, valueIfNotHttp2(0));
+  }
+
+  // After client is destroyed, onConnectionClosed should be called
+  runner.reset();
+  EXPECT_EQ(interceptor->onConnectionAttemptedCount, valueIfNotHttp2(1));
+  EXPECT_EQ(interceptor->onConnectionEstablishedCount, valueIfNotHttp2(1));
+  EXPECT_EQ(interceptor->onConnectionClosedCount, valueIfNotHttp2(1));
 }
 
 INSTANTIATE_TEST_SUITE_P(

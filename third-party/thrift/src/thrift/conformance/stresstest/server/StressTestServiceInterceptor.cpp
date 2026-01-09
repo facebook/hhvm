@@ -33,7 +33,7 @@ folly::coro::Task<void> StressTestServiceInterceptor::onResponse(
 }
 
 std::optional<StressTestServiceInterceptor::ConnectionState>
-StressTestServiceInterceptor::onConnection(ConnectionInfo) {
+StressTestServiceInterceptor::onConnectionEstablished(ConnectionInfo) {
   return std::nullopt;
 }
 

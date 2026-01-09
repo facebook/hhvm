@@ -204,12 +204,26 @@ void Cpp2Worker::invokeServiceInterceptorsOnConnectionForHeader(
   const auto& serviceInterceptors = server_->getServiceInterceptors();
   bool didServiceInterceptorOnConnectionThrow = false;
 
+  // First, invoke onConnectionAttempted for all interceptors
   for (std::size_t i = 0; i < serviceInterceptors.size(); ++i) {
     ServiceInterceptorBase::ConnectionInfo connectionInfo{
         &context,
         context.getStorageForServiceInterceptorOnConnectionByIndex(i)};
     try {
-      serviceInterceptors[i]->internal_onConnection(
+      serviceInterceptors[i]->internal_onConnectionAttempted(
+          std::move(connectionInfo), server_->getInterceptorMetricCallback());
+    } catch (...) {
+      didServiceInterceptorOnConnectionThrow = true;
+    }
+  }
+
+  // Then, invoke onConnectionEstablished for all interceptors
+  for (std::size_t i = 0; i < serviceInterceptors.size(); ++i) {
+    ServiceInterceptorBase::ConnectionInfo connectionInfo{
+        &context,
+        context.getStorageForServiceInterceptorOnConnectionByIndex(i)};
+    try {
+      serviceInterceptors[i]->internal_onConnectionEstablished(
           std::move(connectionInfo), server_->getInterceptorMetricCallback());
     } catch (...) {
       didServiceInterceptorOnConnectionThrow = true;
@@ -219,7 +233,8 @@ void Cpp2Worker::invokeServiceInterceptorsOnConnectionForHeader(
   // Unfortunately, header transport does not have a way to provide an error
   // message on connection creation failure back to the user.
   if (didServiceInterceptorOnConnectionThrow) {
-    VLOG(4) << "ServiceInterceptor::onConnection() threw exception(s)";
+    VLOG(4)
+        << "ServiceInterceptor::onConnectionEstablished() threw exception(s)";
     connection.stop();
   }
 #endif // FOLLY_HAS_COROUTINES

@@ -76,7 +76,9 @@ class ServiceInterceptorBase {
     Cpp2ConnContext* context = nullptr;
     detail::ServiceInterceptorOnConnectionStorage* storage = nullptr;
   };
-  virtual void internal_onConnection(
+  virtual void internal_onConnectionAttempted(
+      ConnectionInfo, InterceptorMetricCallback&) = 0;
+  virtual void internal_onConnectionEstablished(
       ConnectionInfo, InterceptorMetricCallback&) = 0;
   virtual void internal_onConnectionClosed(
       ConnectionInfo, InterceptorMetricCallback&) noexcept = 0;

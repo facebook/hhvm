@@ -264,7 +264,8 @@ void ThriftRocketServerHandler::handleSetupFrame(
                   ErrorCode::INVALID_SETUP,
                   "Error in implementation of custom connection handler."));
         }
-        invokeServiceInterceptorsOnConnection(connection);
+        invokeServiceInterceptorsOnConnectionAttempted(connection);
+        invokeServiceInterceptorsOnConnectionEstablished(connection);
         return;
       }
     }
@@ -289,6 +290,8 @@ void ThriftRocketServerHandler::handleSetupFrame(
     }
 
     connection.applyQosMarking(meta);
+
+    invokeServiceInterceptorsOnConnectionAttempted(connection);
 
     ServerPushMetadata serverMeta;
     serverMeta.set_setupResponse();
@@ -325,7 +328,7 @@ void ThriftRocketServerHandler::handleSetupFrame(
                 folly::exceptionStr(e).toStdString())));
   }
 
-  invokeServiceInterceptorsOnConnection(connection);
+  invokeServiceInterceptorsOnConnectionEstablished(connection);
 }
 
 folly::Expected<std::optional<CustomCompressionSetupResponse>, std::string>
@@ -1058,8 +1061,45 @@ void ThriftRocketServerHandler::onBeforeHandleFrame() {
   worker_->getServer()->touchRequestTimestamp();
 }
 
-void ThriftRocketServerHandler::invokeServiceInterceptorsOnConnection(
+void ThriftRocketServerHandler::invokeServiceInterceptorsOnConnectionAttempted(
     IRocketServerConnection& connection) noexcept {
+#if FOLLY_HAS_COROUTINES
+  auto* server = worker_->getServer();
+  const auto& serviceInterceptors = server->getServiceInterceptors();
+  std::vector<std::pair<std::size_t, std::exception_ptr>> exceptions;
+
+  for (std::size_t i = 0; i < serviceInterceptors.size(); ++i) {
+    ServiceInterceptorBase::ConnectionInfo connectionInfo{
+        &connContext_,
+        connContext_.getStorageForServiceInterceptorOnConnectionByIndex(i)};
+    try {
+      serviceInterceptors[i]->internal_onConnectionAttempted(
+          std::move(connectionInfo), server->getInterceptorMetricCallback());
+    } catch (...) {
+      exceptions.emplace_back(i, folly::current_exception());
+    }
+  }
+  if (!exceptions.empty()) {
+    std::string message = fmt::format(
+        "ServiceInterceptor::onConnectionAttempted threw exceptions:\n[{}] {}\n",
+        serviceInterceptors[exceptions[0].first]->getQualifiedName().get(),
+        folly::exceptionStr(exceptions[0].second));
+    for (std::size_t i = 1; i < exceptions.size(); ++i) {
+      message += fmt::format(
+          "[{}] {}\n",
+          serviceInterceptors[exceptions[i].first]->getQualifiedName().get(),
+          folly::exceptionStr(exceptions[i].second));
+    }
+    return connection.close(
+        folly::make_exception_wrapper<RocketException>(
+            ErrorCode::REJECTED_SETUP, std::move(message)));
+  }
+#endif // FOLLY_HAS_COROUTINES
+}
+
+void ThriftRocketServerHandler::
+    invokeServiceInterceptorsOnConnectionEstablished(
+        IRocketServerConnection& connection) noexcept {
 #if FOLLY_HAS_COROUTINES
   auto* server = worker_->getServer();
   const auto& serviceInterceptors = server->getServiceInterceptors();
@@ -1071,7 +1111,7 @@ void ThriftRocketServerHandler::invokeServiceInterceptorsOnConnection(
         &connContext_,
         connContext_.getStorageForServiceInterceptorOnConnectionByIndex(i)};
     try {
-      serviceInterceptors[i]->internal_onConnection(
+      serviceInterceptors[i]->internal_onConnectionEstablished(
           std::move(connectionInfo), server->getInterceptorMetricCallback());
     } catch (...) {
       exceptions.emplace_back(i, folly::current_exception());
@@ -1079,7 +1119,7 @@ void ThriftRocketServerHandler::invokeServiceInterceptorsOnConnection(
   }
   if (!exceptions.empty()) {
     std::string message = fmt::format(
-        "ServiceInterceptor::onConnection threw exceptions:\n[{}] {}\n",
+        "ServiceInterceptor::onConnectionEstablished threw exceptions:\n[{}] {}\n",
         serviceInterceptors[exceptions[0].first]->getQualifiedName().get(),
         folly::exceptionStr(exceptions[0].second));
     for (std::size_t i = 1; i < exceptions.size(); ++i) {

@@ -152,11 +152,6 @@ val has_no_errors : (unit -> 'res) -> bool
 
 val currently_has_errors : unit -> bool
 
-(** Apply the continuation to the result only if no errors occurred. On error,
-    add it to the error map and return the original result. See {!try_} for
-    warning behavior. *)
-val try_if_no_errors : (unit -> 'res) -> ('res -> 'res) -> 'res
-
 val merge : t -> t -> t
 
 val merge_into_current : t -> unit

@@ -1382,21 +1382,6 @@ let has_no_errors (f : unit -> 'a) : bool =
       true)
     (fun _ -> false)
 
-(* Runs f2 on the result only if f1 returns has no errors. *)
-let try_if_no_errors f1 f2 =
-  let (result, error_opt) =
-    try_with_result
-      (fun () ->
-        let result = f1 () in
-        (result, None))
-      (fun (result, _none) error -> (result, Some error))
-  in
-  match error_opt with
-  | Some err ->
-    add_error err;
-    result
-  | None -> f2 result
-
 (*****************************************************************************)
 (* Do. *)
 (*****************************************************************************)

@@ -235,7 +235,7 @@ class Cpp2Connection : public HeaderServerChannel::Callback,
     ~Cpp2Request() override;
 
     // Cancel request is ususally called from a different thread than sendReply.
-    virtual void cancelRequest();
+    void cancelRequest();
 
     Cpp2RequestContext* getContext() { return &reqContext_; }
 

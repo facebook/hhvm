@@ -1,0 +1,2 @@
+class static properties can be accessed from a type alias to that class
+class static methods can be accessed from a type alias to that class

@@ -694,6 +694,7 @@ void Class::releaseSProps() {
 
 Class::Avail Class::avail(Class*& parent,
                           bool tryAutoload /* = false */) const {
+  FTRACE(3, "Class::avail class name {} autoload {}", name()->data(), tryAutoload);
   if (Class *ourParent = m_parent.get()) {
     if (!parent) {
       PreClass *ppcls = ourParent->m_preClass.get();
@@ -735,7 +736,13 @@ Class::Avail Class::avail(Class*& parent,
   for (size_t i = 0; i < m_declInterfaces.size(); i++) {
     auto di = m_declInterfaces[i].get();
     const StringData* pdi = m_preClass.get()->interfaces()[i];
-    assertx(pdi->tsame(di->name()));
+    if (!pdi->tsame(di->name())) {
+      // PreClass stores the exact string name that a class implements from
+      // That string must be either an interface or a type alias to one
+      assertx(Cfg::Eval::AllowClassTypeAliases);
+      assertx(TypeAlias::load(pdi));
+      assertx(NamedType::getNoCreate(pdi)->getCachedClass()->name()->tsame(di->name()));
+    }
 
     PreClass *pint = di->m_preClass.get();
     Class* interface = Class::get(pint->namedType(), pdi,
@@ -5124,6 +5131,8 @@ Class* Class::def(const PreClass* preClass, bool failIsFatal /* = true */) {
       top = nameList->clsList();
       continue;
     }
+
+    FTRACE(3, "Created class {}\n", newClass->name()->data());
 
     DEBUGGER_ATTACHED_ONLY(phpDebuggerDefClassHook(newClass));
     assertx(!Cfg::Repo::Authoritative ||

@@ -271,6 +271,7 @@ enum mc_msg_flags_t {
   MC_MSG_FLAG_REQUEST_EXPTIME = 0x80,
   MC_MSG_FLAG_THRIFT_BINARY_SERIALIZED = 0x100,
   MC_MSG_FLAG_REQUEST_MISROUTED_OR_STALE = 0x200,
+  MC_MSG_FLAG_KCB_MISS = 0x400,
   MC_MSG_FLAG_NZLIB_COMPRESSED = 0x800,
   MC_MSG_FLAG_QUICKLZ_COMPRESSED = 0x2000,
   MC_MSG_FLAG_SNAPPY_COMPRESSED = 0x4000,
@@ -279,6 +280,7 @@ enum mc_msg_flags_t {
   MC_MSG_FLAG_HOT_KEY = 0x20000,
   MC_MSG_FLAG_ZSTD_COMPRESSED = 0x40000,
   MC_MSG_FLAG_MANAGED_COMPRESSION_COMPRESSED = 0x80000,
+
   /* Bits reserved for application-specific extension flags: */
   MC_MSG_FLAG_USER_1 = 0x100000000LL,
   MC_MSG_FLAG_USER_2 = 0x200000000LL,
@@ -336,6 +338,8 @@ static inline const char* mc_flag_to_string(const enum mc_msg_flags_t flag) {
       return "MANAGED_COMPRESSION_COMPRESSED";
     case MC_MSG_FLAG_HOT_KEY:
       return "HOT_KEY";
+    case MC_MSG_FLAG_KCB_MISS:
+      return "KCB_MISS";
     case MC_MSG_FLAG_USER_1:
       return "USER_1";
     case MC_MSG_FLAG_USER_2:

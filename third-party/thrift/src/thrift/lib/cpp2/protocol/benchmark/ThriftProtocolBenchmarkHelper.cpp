@@ -478,8 +478,7 @@ TestData deserializeProtobufArray(std::unique_ptr<folly::IOBuf> serialized) {
 template <typename TestData>
 TestData deserializeProtobufString(std::unique_ptr<folly::IOBuf> serialized) {
   TestData testData;
-  std::string str(
-      reinterpret_cast<const char*>(serialized->data()), serialized->length());
+  std::string str = serialized->to<std::string>();
   testData.ParseFromString(str);
   return testData;
 }

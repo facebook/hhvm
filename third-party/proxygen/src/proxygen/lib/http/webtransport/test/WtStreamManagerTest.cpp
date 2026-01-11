@@ -19,9 +19,10 @@ namespace proxygen::coro::test {
 using WtStreamManager = detail::WtStreamManager;
 
 // Helper to check which stream is next in the priority queue
-void expectNextWritable(quic::PriorityQueue* pq, uint64_t expectedStreamId) {
-  EXPECT_FALSE(pq->empty());
-  auto nextId = pq->peekNextScheduledID();
+void expectNextWritable(const quic::PriorityQueue& pq,
+                        uint64_t expectedStreamId) {
+  EXPECT_FALSE(pq.empty());
+  auto nextId = pq.peekNextScheduledID();
   EXPECT_TRUE(nextId.isStreamID());
   EXPECT_EQ(nextId.asStreamID(), expectedStreamId);
 }
@@ -310,42 +311,47 @@ TEST(WtStreamManager, WriteEgressHandle) {
               res.value() == WebTransport::FCState::UNBLOCKED);
 
   // we should be able to dequeue kBufLen data from one.writeHandle
-  expectNextWritable(priorityQueue.get(), one.writeHandle->getID());
+  expectNextWritable(*priorityQueue, one.writeHandle->getID());
+  EXPECT_EQ(streamManager.nextWritable(), one.writeHandle);
   auto dequeue = streamManager.dequeue(*one.writeHandle, /*atMost=*/kBufLen);
   EXPECT_EQ(dequeue.data->computeChainDataLength(), kBufLen);
   EXPECT_FALSE(dequeue.fin);
   // one still in queue but blocked on conn FC - dequeue again to move to
   // connFcBlockedStreams_
+  EXPECT_EQ(streamManager.nextWritable(), nullptr);
   dequeue = streamManager.dequeue(*one.writeHandle, /*atMost=*/kBufLen);
   EXPECT_EQ(dequeue.data, nullptr);
   EXPECT_FALSE(dequeue.fin);
+
   // two is now next writable - dequeue would move to connFcBlockedStreams_
-  expectNextWritable(priorityQueue.get(), two.writeHandle->getID());
+  expectNextWritable(*priorityQueue, two.writeHandle->getID());
 
   // grant one a single byte of stream credit; dequeuing from one should yield
   // nothing since we're still blocked on conn flow control
   EXPECT_TRUE(streamManager.onMaxData(
       MaxStreamData{{kBufLen + 1}, one.writeHandle->getID()}));
   // two is still next writable (one is blocked on conn FC)
-  expectNextWritable(priorityQueue.get(), two.writeHandle->getID());
+  expectNextWritable(*priorityQueue, two.writeHandle->getID());
 
   // grant one additional byte of conn credit; dequeue from one should yield
   // byte + eof
   EXPECT_TRUE(streamManager.onMaxData(MaxConnData{kBufLen + 1}));
   // one is re-inserted from connFcBlockedStreams_ and should be next (higher
   // priority)
-  expectNextWritable(priorityQueue.get(), one.writeHandle->getID());
+  expectNextWritable(*priorityQueue, one.writeHandle->getID());
+  EXPECT_EQ(streamManager.nextWritable(), one.writeHandle);
   dequeue = streamManager.dequeue(*one.writeHandle, /*atMost=*/kBufLen);
   EXPECT_EQ(dequeue.data->computeChainDataLength(), 1);
   EXPECT_TRUE(dequeue.fin);
 
   // stream two is next writable, but blocked on conn egress flow control
-  expectNextWritable(priorityQueue.get(), two.writeHandle->getID());
+  expectNextWritable(*priorityQueue, two.writeHandle->getID());
 
   // grant enough conn fc credit to unblock two completely
   EXPECT_TRUE(streamManager.onMaxData(MaxConnData{kBufLen * 2}));
   // two still next
-  expectNextWritable(priorityQueue.get(), two.writeHandle->getID());
+  expectNextWritable(*priorityQueue, two.writeHandle->getID());
+  EXPECT_EQ(streamManager.nextWritable(), two.writeHandle);
   dequeue = streamManager.dequeue(*two.writeHandle, /*atMost=*/kBufLen);
   EXPECT_EQ(dequeue.data->computeChainDataLength(), kBufLen - 1);
   EXPECT_TRUE(dequeue.fin);
@@ -367,7 +373,7 @@ TEST(WtStreamManager, DequeueWriteConnFcBlocked) {
   EXPECT_TRUE(res.hasValue() && *res == WebTransport::FCState::BLOCKED);
 
   // we should be able to dequeue kBufLen data from one.writeHandle
-  expectNextWritable(priorityQueue.get(), uni->getID());
+  expectNextWritable(*priorityQueue, uni->getID());
   auto dequeue = streamManager.dequeue(*uni, /*atMost=*/kBufLen);
   EXPECT_TRUE(dequeue.data && dequeue.fin);
 }
@@ -394,6 +400,7 @@ TEST(WtStreamManager, BidiHandleCancellation) {
   streamManager.onStopSending({one.writeHandle->getID(), 0x00});
   EXPECT_TRUE(ct.isCancellationRequested());
   // stream should be removed from queue after cancellation
+  EXPECT_EQ(streamManager.nextWritable(), nullptr);
   EXPECT_TRUE(priorityQueue->empty());
 
   // StreamManager::onResetStream should request cancellation of ingress handle
@@ -534,7 +541,8 @@ TEST(WtStreamManager, NonDefaultFlowControlValues) {
   one.writeHandle->writeStreamData(
       makeBuf(kBufLen), /*fin=*/true, /*byteEventCallback=*/nullptr);
   // one is next writable
-  expectNextWritable(priorityQueue.get(), one.writeHandle->getID());
+  EXPECT_EQ(streamManager.nextWritable(), one.writeHandle);
+  expectNextWritable(*priorityQueue, one.writeHandle->getID());
   auto dequeue = streamManager.dequeue(*one.writeHandle,
                                        std::numeric_limits<uint64_t>::max());
   EXPECT_EQ(dequeue.data->computeChainDataLength(), 60);
@@ -545,7 +553,8 @@ TEST(WtStreamManager, NonDefaultFlowControlValues) {
   auto* two = CHECK_NOTNULL(streamManager.createEgressHandle());
   two->writeStreamData(
       makeBuf(kBufLen), /*fin=*/true, /*byteEventCallback=*/nullptr);
-  expectNextWritable(priorityQueue.get(), two->getID());
+  EXPECT_EQ(streamManager.nextWritable(), two);
+  expectNextWritable(*priorityQueue, two->getID());
   dequeue = streamManager.dequeue(*two, std::numeric_limits<uint64_t>::max());
   EXPECT_EQ(dequeue.data->computeChainDataLength(), 40);
   EXPECT_FALSE(dequeue.fin);
@@ -698,13 +707,15 @@ TEST(WtStreamManager, WritableStreams) {
               writeRes.value() == WebTransport::FCState::UNBLOCKED);
   EXPECT_TRUE(std::exchange(egressCb.evAvail_, false));
   // next writable stream is one
-  expectNextWritable(priorityQueue.get(), one->getID());
+  EXPECT_EQ(streamManager.nextWritable(), one);
+  expectNextWritable(*priorityQueue, one->getID());
 
   // dequeue should yield the expected results
   auto dequeue = streamManager.dequeue(*one, kAtMost);
   EXPECT_TRUE(dequeue.data->length() == 1 && dequeue.fin);
 
   // no more writableStreams
+  EXPECT_EQ(streamManager.nextWritable(), nullptr);
   EXPECT_TRUE(priorityQueue->empty());
 
   // write kBufLen data; which will exceed conn flow control by one byte)
@@ -714,7 +725,8 @@ TEST(WtStreamManager, WritableStreams) {
               writeRes.value() == WebTransport::FCState::BLOCKED);
   EXPECT_TRUE(std::exchange(egressCb.evAvail_, false));
   // next writable stream is two
-  expectNextWritable(priorityQueue.get(), two->getID());
+  EXPECT_EQ(streamManager.nextWritable(), two);
+  expectNextWritable(*priorityQueue, two->getID());
 
   // dequeue will yield kBufLen - 1 (limited by conn flow control)
   dequeue = streamManager.dequeue(*two, kAtMost);
@@ -722,6 +734,7 @@ TEST(WtStreamManager, WritableStreams) {
   EXPECT_FALSE(dequeue.fin);
   // two still in queue but blocked on conn FC - dequeue again to move to
   // connFcBlockedStreams_
+  EXPECT_EQ(streamManager.nextWritable(), nullptr);
   dequeue = streamManager.dequeue(*two, kAtMost);
   EXPECT_EQ(dequeue.data, nullptr);
   EXPECT_FALSE(dequeue.fin);
@@ -732,7 +745,8 @@ TEST(WtStreamManager, WritableStreams) {
   EXPECT_TRUE(streamManager.onMaxData(MaxConnData{kBufLen + 1}));
 
   // two is now writable after conn flow control granted
-  expectNextWritable(priorityQueue.get(), two->getID());
+  EXPECT_EQ(streamManager.nextWritable(), two);
+  expectNextWritable(*priorityQueue, two->getID());
   dequeue = streamManager.dequeue(*two, kAtMost);
   EXPECT_EQ(dequeue.data->length(), 1);
   EXPECT_FALSE(dequeue.fin);
@@ -740,7 +754,8 @@ TEST(WtStreamManager, WritableStreams) {
   // FIN-only stream should still be writable even when connection FC is blocked
   auto three = CHECK_NOTNULL(streamManager.createEgressHandle());
   three->writeStreamData(nullptr, /*fin=*/true, /*byteEventCallback=*/nullptr);
-  expectNextWritable(priorityQueue.get(), three->getID());
+  EXPECT_EQ(streamManager.nextWritable(), three);
+  expectNextWritable(*priorityQueue, three->getID());
 }
 
 TEST(WtStreamManager, DrainWtSession) {
@@ -965,12 +980,14 @@ TEST(WtStreamManager, OnlyFinPending) {
   one->writeStreamData(
       /*data*/ makeBuf(1), /*fin=*/true, /*byteEventCallback=*/nullptr);
   // next expected writable stream is one
-  expectNextWritable(priorityQueue.get(), one->getID());
+  EXPECT_EQ(streamManager.nextWritable(), one);
+  expectNextWritable(*priorityQueue, one->getID());
 
   two->writeStreamData(
       /*data*/ nullptr, /*fin=*/true, /*byteEventCallback=*/nullptr);
   // one still has higher priority, so it should still be next
-  expectNextWritable(priorityQueue.get(), one->getID());
+  EXPECT_EQ(streamManager.nextWritable(), one);
+  expectNextWritable(*priorityQueue, one->getID());
 }
 
 TEST(WtStreamManager, NextWritableReturnsNullptrWhenQueueEmpty) {

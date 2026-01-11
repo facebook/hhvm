@@ -605,13 +605,15 @@ StreamData WtStreamManager::dequeue(WtWriteHandle& wh,
 
 void WtStreamManager::onStreamWritable(WtWriteHandle& wh) noexcept {
   // Don't re-insert if already tracked as conn FC blocked
-  if (connFcBlockedStreams_.count(&wh) > 0) {
+  auto& writeHandle = writehandle_ref_cast(wh);
+
+  if (connSendFc_.getAvailable() == 0 &&
+      !writeHandle.bufferedSendData_.onlyFinPending()) {
+    connFcBlockedStreams_.insert(&wh);
     return;
   }
 
   bool wasEmpty = !hasEvent();
-
-  auto& writeHandle = writehandle_ref_cast(wh);
   writableStreams_.insert(writeHandle.getID(), writeHandle.priority_);
 
   if (wasEmpty && hasEvent()) {
@@ -701,7 +703,14 @@ WtStreamManager::WtReadHandle* WtStreamManager::getIngressHandle(
 
 WtStreamManager::WtWriteHandle* WtStreamManager::nextWritable() const noexcept {
   auto streamId = writableStreams_.peek();
-  return streamId ? getEgressHandle(*streamId) : nullptr;
+  auto* wh =
+      writehandle_ptr_cast(streamId ? getEgressHandle(*streamId) : nullptr);
+  XLOG(DBG6) << __func__ << "; wh=" << wh
+             << "; connSendFc.avail=" << connSendFc_.getAvailable();
+  return (wh && (connSendFc_.getAvailable() > 0 ||
+                 wh->bufferedSendData_.onlyFinPending()))
+             ? wh
+             : nullptr;
 }
 
 } // namespace proxygen::coro::detail
@@ -827,7 +836,7 @@ WriteHandle::writeStreamData(std::unique_ptr<folly::IOBuf> data,
   XLOG_IF(ERR, !(len || fin)) << "no-op writeStreamData";
   bool connBlocked = smAccessor_.connSend().buffer(len);
   bool streamBlocked = bufferedSendData_.enqueue(std::move(data), fin);
-  XLOG(DBG6) << __func__ << "; len=" << len << "; fin=" << fin
+  XLOG(DBG6) << __func__ << "; id=" << id_ << "; len=" << len << "; fin=" << fin
              << "; connBlocked=" << connBlocked
              << "; streamBlocked=" << streamBlocked;
   if (bufferedSendData_.canSendData()) {
@@ -886,7 +895,6 @@ StreamData WriteHandle::dequeue(uint64_t atMost) noexcept {
 
   auto res = bufferedSendData_.dequeue(atMost);
   const auto bufferAvailable = bufferedSendData_.window().getBufferAvailable();
-
   if (bufferAvailable > 0) {
     if (auto p = resetPromise(); p.valid()) {
       p.setValue(bufferAvailable);
@@ -894,6 +902,8 @@ StreamData WriteHandle::dequeue(uint64_t atMost) noexcept {
   }
 
   auto bytesDequeued = computeChainLength(res.data);
+  XLOG(DBG6) << __func__ << "; id=" << id_ << "; len=" << bytesDequeued
+             << "; fin=" << res.fin;
 
   // Erase if blocked (wrote nothing) or done (!canSendData)
   // Consume if wrote data and still have more

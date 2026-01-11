@@ -43,6 +43,7 @@
 namespace proxygen {
 class HTTPSessionStats;
 class WebTransport;
+class WebTransportHandler;
 } // namespace proxygen
 
 namespace proxygen::coro {
@@ -337,7 +338,9 @@ class HTTPCoroSession
     std::shared_ptr<WebTransport> wt;
   };
   virtual folly::coro::Task<WtReqResult> sendWtReq(
-      RequestReservation reservation, const HTTPMessage& msg) noexcept;
+      RequestReservation reservation,
+      const HTTPMessage& msg,
+      std::unique_ptr<WebTransportHandler>) noexcept;
 
   void describe(std::ostream& os) const override;
 
@@ -825,7 +828,9 @@ class HTTPUniplexTransportSession final : public HTTPCoroSession {
   void setConnectionFlowControl(uint32_t connFlowControl) override;
 
   folly::coro::Task<WtReqResult> sendWtReq(
-      RequestReservation reservation, const HTTPMessage& msg) noexcept final;
+      RequestReservation reservation,
+      const HTTPMessage& msg,
+      std::unique_ptr<WebTransportHandler>) noexcept final;
 
  private:
   folly::coro::Task<void> runImpl();

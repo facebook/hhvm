@@ -20,6 +20,8 @@
 #include <quic/state/QuicStreamUtilities.h>
 #include <wangle/acceptor/ConnectionManager.h>
 
+#include <proxygen/lib/http/coro/util/CoroWtSession.h>
+
 namespace {
 
 using namespace proxygen;
@@ -499,6 +501,7 @@ void HTTPUniplexTransportSession::start() {
     codec_.addFilters(std::move(rateLimitFilter));
   }
   codec_.setCallback(this);
+  detail::setEgressWtHttpSettings(codec_->getEgressSettings());
   sendPreface();
 }
 
@@ -3705,32 +3708,24 @@ namespace {
 
 constexpr std::string_view kWtNotSupported = "WebTransport not supported";
 constexpr std::string_view kInvalidWtReq = "Invalid WebTransport request";
-
 using WtReqResult = HTTPCoroSession::WtReqResult;
-
-/**
- * http/2 wt draft:
- * > In order to indicate support for WebTransport, both the client and the
- * > server MUST send a SETTINGS_WEBTRANSPORT_MAX_SESSIONS value greater than
- * > "0" in their SETTINGS frame
- *
- * > An endpoint needs to send both SETTINGS_ENABLE_CONNECT_PROTOCOL and
- * > SETTINGS_WEBTRANSPORT_MAX_SESSIONS for WebTransport to be enabled.
- */
-bool supportsWt(std::initializer_list<const HTTPSettings*> settings) {
-  constexpr auto kEnableConnectProto = SettingsId::ENABLE_CONNECT_PROTOCOL;
-  constexpr auto kEnableWtMaxSess = SettingsId::WT_MAX_SESSIONS;
-  return std::all_of(settings.begin(), settings.end(), [](auto* settings) {
-    return settings &&
-           settings->getSetting(kEnableConnectProto, /*defaultVal=*/0) &&
-           settings->getSetting(kEnableWtMaxSess, /*defaultVal=*/0);
-  });
-}
 
 folly::coro::Task<WtReqResult> makeInternalEx(std::string_view err) {
   return folly::coro::makeErrorTask<WtReqResult>(
       HTTPError{HTTPErrorCode::INTERNAL_ERROR, std::string(err)});
 }
+
+struct CoroWtSessionImpl : public detail::CoroWtSession {
+  using CoroWtSession::CoroWtSession;
+  HTTPSessionContextPtr ka_{}; // ensures session isn't destructed prior to
+                               // WtHandle
+  const folly::SocketAddress& getLocalAddress() const noexcept override {
+    return ka_->getLocalAddress();
+  }
+  const folly::SocketAddress& getPeerAddress() const noexcept override {
+    return ka_->getPeerAddress();
+  }
+};
 
 }; // namespace
 
@@ -3741,14 +3736,16 @@ folly::coro::Task<WtReqResult> makeInternalEx(std::string_view err) {
  * sychronously resolved and should only be checked for errors via co_awaitTry()
  */
 folly::coro::Task<WtReqResult> HTTPCoroSession::sendWtReq(
-    RequestReservation reservation, const HTTPMessage& msg) noexcept {
+    RequestReservation reservation,
+    const HTTPMessage& msg,
+    std::unique_ptr<WebTransportHandler>) noexcept {
   // XLOG_IF(FATAL, !folly::kIsDebug) << "wt wip"; // crash in non-debug modes
   if (!reservation.fromSession(this)) {
     return makeInternalEx("Invalid reservation");
   }
 
-  const bool wtEnabled =
-      supportsWt({codec_->getIngressSettings(), codec_->getEgressSettings()});
+  const bool wtEnabled = detail::supportsWt(
+      {codec_->getIngressSettings(), codec_->getEgressSettings()});
   const bool validWtReq = HTTPWebTransport::isConnectMessage(msg);
   if (!(wtEnabled && validWtReq)) {
     auto err = !validWtReq ? kInvalidWtReq : kWtNotSupported;
@@ -3761,26 +3758,51 @@ folly::coro::Task<WtReqResult> HTTPCoroSession::sendWtReq(
 }
 
 folly::coro::Task<WtReqResult> HTTPUniplexTransportSession::sendWtReq(
-    RequestReservation reservation, const HTTPMessage& msg) noexcept {
+    RequestReservation reservation,
+    const HTTPMessage& msg,
+    std::unique_ptr<WebTransportHandler> wtHandler) noexcept {
   auto valid = co_await co_awaitTry(
-      HTTPCoroSession::sendWtReq(std::move(reservation), msg));
+      HTTPCoroSession::sendWtReq(std::move(reservation), msg, nullptr));
   if (valid.hasException()) {
     co_return valid;
   }
+
   // valid wt req
+  auto egressSource = detail::EgressSourcePtr(new detail::EgressSource(
+      eventBase_.get(),
+      /*id=*/folly::none,
+      /*callback=*/nullptr,
+      /*egressBufferSize=*/getStreamSendFlowControlWindow()));
+  egressSource->validateHeadersAndSkip(msg);
+
   auto res = sendRequestImpl(/*headers=*/msg,
                              /*egressHeadersFn=*/nullptr,
                              /*byteEventRegistrations=*/{},
-                             /*bodySource=*/nullptr);
-
+                             /*bodySource=*/egressSource.get());
   XCHECK(res.hasValue()); // http/2 should always succeed here
-  while (res->readable()) {
+
+  WtReqResult ret;
+  do {
     auto ev = co_await co_nothrow(res->readHeaderEvent());
-    if (ev.isFinal()) {
-      co_return {std::move(ev.headers), nullptr};
-    }
+    ret.resp = std::move(ev.headers);
+  } while (!ret.resp->isFinal());
+
+  if (!ret.resp->is2xxResponse()) {
+    co_return ret; // failed upgrade => ret.wt == nullptr
   }
-  folly::assume_unreachable();
+
+  // wt upgrade successful
+  auto wt = std::make_shared<CoroWtSessionImpl>(
+      eventBase_.get(),
+      detail::WtDir::Client,
+      detail::getWtConfig(codec_->getIngressSettings(),
+                          codec_->getEgressSettings()),
+      std::move(wtHandler));
+  wt->ka_ = acquireKeepAlive();
+  wt->start(wt, std::move(*res), std::move(egressSource));
+
+  ret.wt = std::move(wt);
+  co_return ret;
 }
 
 } // namespace proxygen::coro

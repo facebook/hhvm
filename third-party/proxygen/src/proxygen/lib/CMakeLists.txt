@@ -123,6 +123,7 @@ set(
     http/coro/HTTPStreamSource.cpp
     http/coro/HTTPTransactionAdaptorSource.cpp
     http/coro/util/Transport.cpp
+    http/coro/util/CoroWtSession.cpp
     http/coro/util/ExecutorSourceFilter.cpp
     http/coro/util/DetachableExecutor.cpp
     http/coro/util/CancellableBaton.cpp
@@ -248,6 +249,8 @@ add_library(
     http/webtransport/HTTPWebTransport.cpp
     http/webtransport/WebTransport.cpp
     http/webtransport/WebTransportImpl.cpp
+    http/webtransport/WtEgressContainer.cpp
+    http/webtransport/WtStreamManager.cpp
     pools/generators/FileServerListGenerator.cpp
     pools/generators/ServerListGenerator.cpp
     sampling/Sampling.cpp

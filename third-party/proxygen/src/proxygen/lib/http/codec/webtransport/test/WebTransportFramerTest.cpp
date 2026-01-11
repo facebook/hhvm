@@ -198,24 +198,45 @@ TEST(WebTransportFramerTest, WTStopSendingCapsuleSizeError) {
 }
 
 TEST(WebTransportFramerTest, WTStream) {
-  folly::IOBufQueue queue{folly::IOBufQueue::cacheChainLength()};
-  WTStreamCapsule capsule{.streamId = 0x01,
-                          .streamData =
-                              folly::IOBuf::copyBuffer("Hello, World!"),
-                          .fin = true};
-  auto writeRes = writeWTStream(queue, capsule);
-  ASSERT_TRUE(writeRes.has_value());
-  auto buf = queue.move();
-  auto cursor = folly::io::Cursor(buf.get());
-  auto payloadLen = parseCapsuleHeader(
-      cursor, static_cast<uint64_t>(CapsuleType::WT_STREAM_WITH_FIN));
+  {
+    folly::IOBufQueue queue{folly::IOBufQueue::cacheChainLength()};
+    WTStreamCapsule capsule{.streamId = 0x01,
+                            .streamData =
+                                folly::IOBuf::copyBuffer("Hello, World!"),
+                            .fin = true};
+    auto writeRes = writeWTStream(queue, capsule);
+    ASSERT_TRUE(writeRes.has_value());
+    auto buf = queue.move();
+    auto cursor = folly::io::Cursor(buf.get());
+    auto payloadLen = parseCapsuleHeader(
+        cursor, static_cast<uint64_t>(CapsuleType::WT_STREAM_WITH_FIN));
 
-  auto parsedCapsule = parseWTStream(cursor, payloadLen, capsule.fin);
-  ASSERT_TRUE(parsedCapsule.hasValue());
-  ASSERT_EQ(parsedCapsule->streamId, capsule.streamId);
-  ASSERT_TRUE(
-      folly::IOBufEqualTo()(parsedCapsule->streamData, capsule.streamData));
-  ASSERT_EQ(parsedCapsule->fin, capsule.fin);
+    auto parsedCapsule = parseWTStream(cursor, payloadLen, capsule.fin);
+    ASSERT_TRUE(parsedCapsule.hasValue());
+    ASSERT_EQ(parsedCapsule->streamId, capsule.streamId);
+    ASSERT_TRUE(
+        folly::IOBufEqualTo()(parsedCapsule->streamData, capsule.streamData));
+    ASSERT_EQ(parsedCapsule->fin, capsule.fin);
+  }
+
+  {
+    // test nullptr streamData
+    folly::IOBufQueue queue{folly::IOBufQueue::cacheChainLength()};
+    WTStreamCapsule capsule{
+        .streamId = 0x01, .streamData = nullptr, .fin = true};
+    auto writeRes = writeWTStream(queue, capsule);
+    ASSERT_TRUE(writeRes.has_value());
+    auto buf = queue.move();
+    auto cursor = folly::io::Cursor(buf.get());
+    auto payloadLen = parseCapsuleHeader(
+        cursor, static_cast<uint64_t>(CapsuleType::WT_STREAM_WITH_FIN));
+
+    auto parsedCapsule = parseWTStream(cursor, payloadLen, capsule.fin);
+    ASSERT_TRUE(parsedCapsule.hasValue());
+    ASSERT_EQ(parsedCapsule->streamId, capsule.streamId);
+    ASSERT_EQ(parsedCapsule->streamData->computeChainDataLength(), 0);
+    ASSERT_EQ(parsedCapsule->fin, capsule.fin);
+  }
 }
 
 TEST(WebTransportFramerTest, WTStreamStreamIdError) {

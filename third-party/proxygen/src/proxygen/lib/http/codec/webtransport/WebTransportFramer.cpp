@@ -341,15 +341,19 @@ WriteResult writeWTStream(folly::IOBufQueue& queue,
   bool error = false;
   auto capsuleType =
       capsule.fin ? CapsuleType::WT_STREAM_WITH_FIN : CapsuleType::WT_STREAM;
-  auto capsuleLen = getCapsuleSize<1, 1>(
-      {capsule.streamId}, {capsule.streamData->computeChainDataLength()});
+  const auto dataLen =
+      capsule.streamData ? capsule.streamData->computeChainDataLength() : 0;
+  auto capsuleLen = getCapsuleSize<1, 1>({capsule.streamId}, {dataLen});
   if (capsuleLen.hasError()) {
     return std::nullopt;
   }
   writeCapsuleHeader(queue, capsuleType, size, error, capsuleLen.value());
   writeVarint(queue, capsule.streamId, size, error);
-  queue.append(capsule.streamData->clone());
-  size += capsule.streamData->computeChainDataLength();
+  if (dataLen) {
+    // TODO(@damlaj): replace const WtStreamCapsule& w/ WtStreamCapsule&&
+    queue.append(capsule.streamData->clone());
+  }
+  size += dataLen;
   return error ? std::nullopt : std::make_optional(size);
 }
 

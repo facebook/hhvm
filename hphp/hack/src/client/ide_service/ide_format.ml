@@ -179,7 +179,7 @@ let minimal_edit (old_src : string) (new_src : string) :
         (List.length old_src_lines - range_end_line)
     in
     let (new_text, start_line_adjustment) =
-      if List.is_empty new_src_novel_lines then
+      if List.is_empty new_src_novel_lines && range_end_line < List.length new_src_lines then
         (*
           Empty `new_src_novel_lines` does not mean that there was no change
           (otherwise we wouldn't have reached here),

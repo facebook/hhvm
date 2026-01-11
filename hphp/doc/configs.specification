@@ -1514,11 +1514,6 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 
   Use a topological sort of dependencies when loading units
 
-- bool Eval.AllowClassTypeAliases = false, vivek7
-
-  Allow classes to extend from, implement, or use class/interface/trait type aliases.
-  Allow instantiating class type aliases and accessing their static properties.
-
 # Hack.Lang
 
 - bool Hack.Lang.DisableLvalAsAnExpression = false, UNKNOWN, repooptionsflag(Parser)|hackc(parser)

@@ -569,7 +569,7 @@ std::string resolveContextMsg(const TSCtx& ctx) {
 std::pair<Array, bool> getAlias(TSEnv& env, const String& aliasName,
                                 bool usePreResolved) {
 
-  if (aliasName.same(s_this) || !TypeAlias::lookup(aliasName.get())) {
+  if (aliasName.same(s_this) || Class::lookup(aliasName.get())) {
     return std::make_pair(Array::CreateDict(), false);
   }
 

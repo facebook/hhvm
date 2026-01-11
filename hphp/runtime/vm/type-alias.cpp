@@ -23,17 +23,12 @@
 #include "hphp/runtime/vm/named-entity-defs.h"
 #include "hphp/runtime/vm/unit.h"
 
-
-TRACE_SET_MOD(class_load)
-
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 namespace {
 
-std::pair<TypeAlias, Class*> resolveTypeAlias(const PreTypeAlias* thisType, bool failIsFatal) {
-
-  FTRACE(3, "  Resolving type alias {}\n", thisType->name->data());
+TypeAlias resolveTypeAlias(const PreTypeAlias* thisType, bool failIsFatal) {
   /*
    * If this type alias is a KindOfObject and the name on the right
    * hand side was another type alias, we will bind the name to the
@@ -56,7 +51,7 @@ std::pair<TypeAlias, Class*> resolveTypeAlias(const PreTypeAlias* thisType, bool
 
   if (!thisType->value.isUnresolved()) {
     req.value = thisType->value;
-    return std::make_pair(req, nullptr);
+    return req;
   }
 
   TypeConstraintFlags flags =
@@ -90,20 +85,16 @@ std::pair<TypeAlias, Class*> resolveTypeAlias(const PreTypeAlias* thisType, bool
     parts.emplace_back(value);
   };
 
-  Class* klass = nullptr;
-
   for (auto const& tc : eachTypeConstraintInUnion(thisType->value)) {
     auto type = tc.type();
     auto typeName = tc.typeName();
-    FTRACE(4, "  Processing type constraint {}\n", typeName->data());
-    
     if (type != AnnotType::SubObject && type != AnnotType::Unresolved) {
       parts.emplace_back(type, flags);
       continue;
     }
     auto targetNE = NamedType::getOrCreate(typeName);
-    if ((klass = targetNE->getCachedClass())) {
-      FTRACE(4, " Type constraint is class {}\n", klass->name()->data());
+
+    if (auto klass = targetNE->getCachedClass()) {
       typeAliasFromClass(klass);
       continue;
     }
@@ -111,7 +102,7 @@ std::pair<TypeAlias, Class*> resolveTypeAlias(const PreTypeAlias* thisType, bool
     if (auto targetTd = targetNE->getCachedTypeAlias()) {
       assertx(type != AnnotType::SubObject);
       from(*targetTd);
-      if (req.invalid) return std::make_pair(req, nullptr);
+      if (req.invalid) return req;
       continue;
     }
 
@@ -119,21 +110,20 @@ std::pair<TypeAlias, Class*> resolveTypeAlias(const PreTypeAlias* thisType, bool
         AutoloadHandler::s_instance->autoloadTypeOrTypeAlias(
           StrNR(const_cast<StringData*>(typeName))
         )) {
-      if ((klass = targetNE->getCachedClass())) {
-        FTRACE(4, " Type constraint is class {}\n", klass->name()->data());
+      if (auto klass = targetNE->getCachedClass()) {
         typeAliasFromClass(klass);
         continue;
       }
       if (auto targetTd = targetNE->getCachedTypeAlias()) {
         assertx(type != AnnotType::SubObject);
         from(*targetTd);
-        if (req.invalid) return std::make_pair(req, nullptr);
+        if (req.invalid) return req;
         continue;
       }
     }
     // could not resolve, it is invalid
     req.invalid = true;
-    return std::make_pair(req, nullptr);
+    return req;
   }
 
   req.value = [&] {
@@ -143,17 +133,7 @@ std::pair<TypeAlias, Class*> resolveTypeAlias(const PreTypeAlias* thisType, bool
       raise_error("%s in %s on line %d\n", ex.what(), thisType->unit->origFilepath()->data(), thisType->line0);
     }
   }();
-
-  if (parts.size() == 1 
-      && klass != nullptr 
-      && req.value.isSubObject() 
-      && !req.value.isNullable()) {
-    FTRACE(3, "  Single-constraint type alias {} points to non-nullable class {}\n",
-        thisType->name->data(), klass->name()->data());
-    return std::make_pair(req, klass);
-  }
-
-  return std::make_pair(req, nullptr);
+  return req;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -240,8 +220,6 @@ const TypeAlias* TypeAlias::load(const StringData* name,
 }
 
 const TypeAlias* TypeAlias::def(const PreTypeAlias* thisType, bool failIsFatal) {
-  FTRACE(2, "  Defining type alias {} failIsFatal {}\n", thisType->name->data(), failIsFatal);
-
   auto nameList = NamedType::getOrCreate(thisType->name);
 
   /*
@@ -256,7 +234,7 @@ const TypeAlias* TypeAlias::def(const PreTypeAlias* thisType, bool failIsFatal) 
     };
     if (nameList->isPersistentTypeAlias()) {
       // We may have cached the fully resolved type in a previous request.
-      if (resolveTypeAlias(thisType, failIsFatal).first != *current) {
+      if (resolveTypeAlias(thisType, failIsFatal) != *current) {
         if (!failIsFatal) return nullptr;
         raiseIncompatible();
       }
@@ -280,7 +258,7 @@ const TypeAlias* TypeAlias::def(const PreTypeAlias* thisType, bool failIsFatal) 
     not_reached();
   }
 
-  auto [resolved, klass] = resolveTypeAlias(thisType, failIsFatal);
+  auto resolved = resolveTypeAlias(thisType, failIsFatal);
   if (resolved.invalid) {
     if (!failIsFatal) return nullptr;
     FrameRestore _(thisType);
@@ -309,16 +287,6 @@ const TypeAlias* TypeAlias::def(const PreTypeAlias* thisType, bool failIsFatal) 
   if (!nameList->m_cachedTypeAlias.isPersistent()) {
     nameList->setCachedTypeAlias(resolved);
   }
-  if (Cfg::Eval::AllowClassTypeAliases && klass) {
-    FTRACE(3, 
-      "  Binding the NE for single-constraint type alias {} to non-nullable class {} \n", 
-      thisType->name->data(), 
-      klass->name()->data()
-    );
-    nameList->getClassHandle(thisType->name);
-    nameList->setCachedClass(klass);
-  }
-
   return nameList->getCachedTypeAlias();
 }
 

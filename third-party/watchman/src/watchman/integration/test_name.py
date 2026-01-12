@@ -130,7 +130,7 @@ class TestNameExpr(WatchmanTestCase.WatchmanTestCase):
 
         self.assertRegex(
             str(ctx.exception),
-            ("Argument 2 to 'i?name' must be either a string " "or an array of string"),
+            ("Argument 2 to 'i?name' must be either a string or an array of string"),
         )
 
         with self.assertRaises(pywatchman.WatchmanError) as ctx:

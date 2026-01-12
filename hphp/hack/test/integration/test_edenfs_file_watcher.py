@@ -1366,6 +1366,34 @@ function test_deprecated() : void {
         # the state is deasserted.
         self.assertFalse(is_asserted())
 
+    def test_deferral9(self) -> None:
+        config = self.test_driver.getConfig()
+        config.state_tracking = True
+        config.write_hhconf(
+            self.test_driver.watchman_instance.getUnixSockPath(),
+            self.test_driver.repo_dir,
+        )
+
+        self.test_driver.start_hh_server()
+
+        # Assert a state that is NOT in the tracked_states list
+        _, is_still_asserted = self.test_driver.assertStateForSeconds(
+            "untracked-state", 30
+        )
+
+        # Create a file while the untracked state is asserted
+        self.test_driver.createNonHackFile("untracked_test.php")
+
+        # We should see the change ...
+        self.test_driver.check_cmd(
+            [
+                "ERROR: {root}untracked_test.php:1:1,1: A .php file must begin with `<?hh`. (Parsing[1002])",
+            ]
+        )
+
+        # ... and we should also not have waited until deferral.
+        self.assertTrue(is_still_asserted())
+
 
 class EdenfsWatcherNonMountPointRepoTests(EdenfsWatcherTests):
     """Runs the same tests as EdenfsWatcherTests, but with a testing repo that's not the mount point of the Eden mount.

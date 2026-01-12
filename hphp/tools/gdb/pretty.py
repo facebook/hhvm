@@ -10,7 +10,6 @@ import re
 
 import gdb
 import gdb.types
-
 import gdbutils
 from gdbutils import *
 import idx
@@ -128,7 +127,7 @@ class SetTVBriefCommand(gdb.Command):
                 gdbutils.tv_brief = False
                 return
 
-        print("tv-brief <arg>\n" "  Valid values for <arg> are true and false.\n")
+        print("tv-brief <arg>\n  Valid values for <arg> are true and false.\n")
 
 
 SetTVBriefCommand()

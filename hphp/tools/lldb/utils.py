@@ -401,9 +401,9 @@ def Enum(
     members = enum.GetEnumMembers()
     assert members.IsValid(), f"'{enum_name} is not an enumeration"
     val = members[elem]
-    assert (
-        val is not None and val.IsValid()
-    ), f"couldn't find enumerator '{elem}' in '{enum_name}'"
+    assert val is not None and val.IsValid(), (
+        f"couldn't find enumerator '{elem}' in '{enum_name}'"
+    )
     return val
 
 
@@ -462,7 +462,9 @@ def get(struct: lldb.SBValue, *field_names: str) -> lldb.SBValue:
     assert struct.GetError().Success(), f"invalid struct '{struct.name}'"
     # Note: You can also do lldb.value(val).<name>
     v = struct.GetChildMemberWithName(field_names[0])
-    assert v.GetError().Success(), f"couldn't find field '{field_names[0]}' in struct '{struct.name}' with type '{struct.type.name}'"
+    assert v.GetError().Success(), (
+        f"couldn't find field '{field_names[0]}' in struct '{struct.name}' with type '{struct.type.name}'"
+    )
 
     if len(field_names) == 1:
         return v
@@ -542,9 +544,9 @@ def unsigned_cast(v: lldb.SBValue, t: lldb.SBType) -> lldb.SBValue:
     ret = v.target.EvaluateExpression(f"({t.name}){v.unsigned}")
     debug_print(f"unsigned_cast(v=0x{v.unsigned:x}) {t.name} res {ret.unsigned:x}")
 
-    assert (
-        ret is not None and ret.GetError().Success()
-    ), f"Failed to cast {v} ({v.unsigned}) to {t.name}"
+    assert ret is not None and ret.GetError().Success(), (
+        f"Failed to cast {v} ({v.unsigned}) to {t.name}"
+    )
     return ret
 
 
@@ -992,9 +994,9 @@ def string_data_val(val: lldb.SBValue, keep_case: bool = True) -> str:
     assert val.type.name == "HPHP::StringData", f"invalid type {val.type.name}"
 
     addr = val.load_addr
-    assert (
-        addr != lldb.LLDB_INVALID_ADDRESS
-    ), f"invalid string address 0x{val.load_addr:x}"
+    assert addr != lldb.LLDB_INVALID_ADDRESS, (
+        f"invalid string address 0x{val.load_addr:x}"
+    )
     addr += val.size
     m_len = val.children[1].GetChildMemberWithName("m_len").unsigned
     # pyre-fixme[6]: For 2nd argument expected `str` but got `int`.
@@ -1037,9 +1039,9 @@ def pretty_resource_header(header: lldb.SBValue, print_data: bool = True) -> str
     if header.type.IsPointerType():
         header = deref(header)
 
-    assert (
-        header.type.name == "HPHP::ResourceHdr"
-    ), f"Expected HPHP::ResourceHdr, got {header.type.name}"
+    assert header.type.name == "HPHP::ResourceHdr", (
+        f"Expected HPHP::ResourceHdr, got {header.type.name}"
+    )
     data = None
     if print_data:
         addr = header.load_addr

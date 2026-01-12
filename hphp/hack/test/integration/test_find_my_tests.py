@@ -3,7 +3,6 @@
 import json
 import os
 import sys
-
 from typing import List, Optional, Tuple
 
 import hphp.hack.test.integration.common_tests as common_tests

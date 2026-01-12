@@ -1062,7 +1062,7 @@ def main() -> None:
     parser.add_argument(
         "--diff",
         action="store_true",
-        help="On test failure, show the content of " "the files and a diff",
+        help="On test failure, show the content of the files and a diff",
     )
     parser.add_argument("--mode-flag", type=str)
     parser.add_argument("--flags", nargs=argparse.REMAINDER)

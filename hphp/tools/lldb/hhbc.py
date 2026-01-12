@@ -754,7 +754,7 @@ class HHBC:
         )
 
         for i in range(0, num_imms):
-            utils.debug_print(f"instr_info(): iteration {i+1}/{num_imms}")
+            utils.debug_print(f"instr_info(): iteration {i + 1}/{num_imms}")
             immoff = utils.ptr_add(bc, instrlen)
             immtype = HHBC.imm_type(op, i, bc.target)
             imminfo = HHBC.imm_info(immoff, immtype)
@@ -763,7 +763,7 @@ class HHBC:
             imm = imminfo["value"]
             imms.append(imm)
 
-            utils.debug_print(f"instr_info(): immediate #{i+1} = {imm} ({immtype})")
+            utils.debug_print(f"instr_info(): immediate #{i + 1} = {imm} ({immtype})")
 
         utils.debug_print(f"instr_info(): instrlen={instrlen}")
 
@@ -852,16 +852,16 @@ the previous call left off.
         assert self.bcpos is not None
         self.bcpos = self.bcpos.Cast(bctype)
 
-        assert (
-            self.bcpos.GetError().Success()
-        ), f"Unable to cast bcpos: {self.bcpos.GetError()}"
+        assert self.bcpos.GetError().Success(), (
+            f"Unable to cast bcpos: {self.bcpos.GetError()}"
+        )
 
         # pyre-fixme[6]: For 1st argument expected `SBValue` but got `Optional[SBValue]`.
         bcstart = utils.ptr_add(self.bcpos, -self.bcoff)
 
         for _i in range(0, self.count):
             utils.debug_print(
-                f"\nHhxCommand::__init__(): iteration {_i+1} of a maximum of {self.count}; bcpos=0x{self.bcpos.unsigned:x}"
+                f"\nHhxCommand::__init__(): iteration {_i + 1} of a maximum of {self.count}; bcpos=0x{self.bcpos.unsigned:x}"
             )
             if self.end is not None and self.bcpos.unsigned >= self.end.unsigned:
                 self.bcpos = None

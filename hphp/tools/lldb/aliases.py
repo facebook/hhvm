@@ -31,7 +31,7 @@ class RegexAlias(abc.ABC):
         cls,
         debugger: lldb.SBDebugger,
     ) -> None:
-        command = f"command regex -h '{cls.help}' -s '{cls.syntax_help}' {cls.alias} {" ".join("'" + s + "'" for s in cls.substitutions)}"
+        command = f"command regex -h '{cls.help}' -s '{cls.syntax_help}' {cls.alias} {' '.join("'" + s + "'" for s in cls.substitutions)}"
         debugger.HandleCommand(command)
 
 

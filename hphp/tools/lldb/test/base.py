@@ -33,7 +33,6 @@ assert lldb_path, "Couldn't find lldb on host"
 
 sys.path.append(lldb_path)
 import hphp.tools.lldb.utils as utils
-
 import lldb
 
 # pyre-fixme[21]: Could not find module `fblldb.utils`.
@@ -75,12 +74,12 @@ class LLDBTestBase(BaseFacebookTestCase, abc.ABC):
                 True,
                 error,
             )
-            assert (
-                process.IsValid() and error.Success()
-            ), f"Unable to launch process ({get_lldb_object_description(error)})"
-            assert (
-                process.GetState() == lldb.eStateStopped
-            ), "Process is not in Stopped state"
+            assert process.IsValid() and error.Success(), (
+                f"Unable to launch process ({get_lldb_object_description(error)})"
+            )
+            assert process.GetState() == lldb.eStateStopped, (
+                "Process is not in Stopped state"
+            )
 
         (status, output) = run_lldb_command(
             debugger, f"command script import {scripts_path}/hhvm.py"
@@ -112,9 +111,9 @@ class LLDBTestBase(BaseFacebookTestCase, abc.ABC):
     def process(self) -> lldb.SBProcess:
         """Get the process associated wih the debugger's target"""
         process = self.target.GetProcess()
-        assert (
-            process.IsValid()
-        ), f"Invalid process; self.launchProcess() returns '{self.launchProcess()}'"
+        assert process.IsValid(), (
+            f"Invalid process; self.launchProcess() returns '{self.launchProcess()}'"
+        )
         return process
 
     @property

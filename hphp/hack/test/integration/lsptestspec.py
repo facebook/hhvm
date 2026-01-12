@@ -77,9 +77,9 @@ def line() -> int:
     accurately.
     """
     cf = inspect.currentframe()
-    assert (
-        cf is not None
-    ), "Must be able to get current call frame to produce error messages for test"
+    assert cf is not None, (
+        "Must be able to get current call frame to produce error messages for test"
+    )
     # pyre-fixme[16]: `Optional` has no attribute `f_lineno`.
     return cf.f_back.f_lineno
 
@@ -819,9 +819,9 @@ received the notification:
             for request, lsp_id in lsp_id_map.items()
             if lsp_id == previous_request_lsp_id
         ]
-        assert isinstance(
-            corresponding_request, _RequestSpec
-        ), "We should have identified a client-to-server request at this point"
+        assert isinstance(corresponding_request, _RequestSpec), (
+            "We should have identified a client-to-server request at this point"
+        )
         return corresponding_request
 
     def _render_telemetry_rage(

@@ -64,9 +64,9 @@ def format(
         extra_options = " ".join(extra_options)
 
         if synthetic_children:
-            assert isinstance(
-                func_or_class, type
-            ), "Can only use synthetic_children=True in @format decorator on classes"
+            assert isinstance(func_or_class, type), (
+                "Can only use synthetic_children=True in @format decorator on classes"
+            )
             Formatters.append(
                 lambda top_module: f"type synthetic add {extra_options} "
                 f'--python-class {top_module + "." if top_module else ""}pretty.{func_or_class.__name__} "{datatype}"'

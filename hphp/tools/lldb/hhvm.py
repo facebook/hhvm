@@ -17,7 +17,6 @@ import hhbc
 
 # pyre-fixme[21]: Could not find module `idx`.
 import idx
-
 import lldb
 
 # pyre-fixme[21]: Could not find module `lookup`.

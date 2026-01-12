@@ -36,9 +36,9 @@ def lookup_func(func_id: lldb.SBValue) -> typing.Optional[lldb.SBValue]:
     """
 
     target = func_id.target
-    assert (
-        func_id.type.name == "HPHP::FuncId"
-    ), f"invalid func_id, type given is {func_id.type.name} but expected HPHP::FuncId"
+    assert func_id.type.name == "HPHP::FuncId", (
+        f"invalid func_id, type given is {func_id.type.name} but expected HPHP::FuncId"
+    )
 
     # If we fail to find this symbol, we're going to assume
     # failure is because it actually can't be found (which is the

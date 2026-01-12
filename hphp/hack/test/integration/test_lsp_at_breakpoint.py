@@ -5,7 +5,6 @@ import os
 from pathlib import Path
 
 from hphp.hack.test.integration.lsp_test_base import LspTestBase
-
 from hphp.hack.test.integration.lsptestspec import line, LspTestSpec
 
 """

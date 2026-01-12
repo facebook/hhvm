@@ -13,7 +13,6 @@ decide what setup and teardown code goes where.
 
 import os
 import re
-
 import shutil
 import subprocess
 import sys
@@ -26,7 +25,6 @@ import hphp.hack.test.integration.common_tests as common_tests
 from eden.integration.lib.edenclient import EdenFS
 from hphp.hack.test.integration.common_tests import CommonTestDriver
 from hphp.hack.test.integration.hh_paths import hh_server
-
 from watchman.integration.lib import WatchmanInstance
 
 

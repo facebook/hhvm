@@ -167,9 +167,9 @@ def create_php(
     )  # lldb.SBValue[HPHP::Func::SharedData::Flags]
 
     shared_type = utils.rawtype(shared.type).GetPointeeType()
-    assert (
-        shared_type.name == "HPHP::Func::SharedData"
-    ), f"create_php: Expected m_shared to point to HPHP::Func::SharedData, it points to {shared_type.name}"
+    assert shared_type.name == "HPHP::Func::SharedData", (
+        f"create_php: Expected m_shared to point to HPHP::Func::SharedData, it points to {shared_type.name}"
+    )
 
     # Pull the function name.
     if utils.get(flags, "m_isClosureBody").unsigned == 0:
@@ -324,9 +324,9 @@ def php_line_number_from_repo(func: lldb.SBValue, pc: int) -> typing.Optional[in
         line_table = utils.TokenOrPtr.get_ptr(line_table).Cast(line_table_type)
     else:
         rauth = utils.Global("HPHP::Cfg::Repo::Authoritative", func.target)
-        assert (
-            rauth.unsigned != 0
-        ), "php_line_number_from_repo: expected to be in repo authoritative mode"
+        assert rauth.unsigned != 0, (
+            "php_line_number_from_repo: expected to be in repo authoritative mode"
+        )
         # TODO emulate FuncEmitter::loadLineTableFromRepo(m_unit->sn(), table.token())
         return None
 

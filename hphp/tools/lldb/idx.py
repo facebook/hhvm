@@ -147,9 +147,9 @@ def compact_vector_at(
 
 
 @utils.memoized
-def idx_accessors() -> (
-    dict[str, typing.Callable[[lldb.SBValue, int, None], lldb.SBValue | None]]
-):
+def idx_accessors() -> dict[
+    str, typing.Callable[[lldb.SBValue, int, None], lldb.SBValue | None]
+]:
     return {
         "HPHP::AtomicLowPtrVector": atomic_low_ptr_vector_at,
         "HPHP::CompactVector": compact_vector_at,

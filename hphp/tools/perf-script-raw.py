@@ -12,7 +12,8 @@
 # The perf data may be recorded with -g or not.
 #
 
-import string, sys
+import string
+import sys
 
 #
 # Positions of various fields within a line.  Assumes lines look like this:

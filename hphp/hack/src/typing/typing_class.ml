@@ -637,6 +637,17 @@ let check_consistent_enum_inclusion
     included_cls ((dest_cls_pos, dest_cls) : Pos.t * Cls.t) ~env =
   let included_kind = Cls.kind included_cls in
   let dest_kind = Cls.kind dest_cls in
+  (* Check package visibility *)
+  if Typing_env.check_packages env then
+    Option.iter
+      ~f:(Typing_error_utils.add_typing_error ~env)
+      (Typing_visibility.check_package_access
+         ~should_check_package_boundary:(`Yes "enum")
+         ~use_pos:dest_cls_pos
+         ~def_pos:(Cls.pos included_cls)
+         env
+         (Cls.get_package included_cls)
+         (Cls.name included_cls));
   match (Cls.enum_type included_cls, Cls.enum_type dest_cls) with
   | (Some included_e, Some dest_e) ->
     (* ensure that the base types are identical *)

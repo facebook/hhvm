@@ -892,14 +892,6 @@ void t_whisker_generator::define_prototypes(prototype_database& db) const {
 
 using fs_path = std::filesystem::path;
 
-namespace {
-
-bool is_last_char(std::string_view data, char c) {
-  return !data.empty() && data.back() == c;
-}
-
-} // namespace
-
 class t_whisker_generator::whisker_source_parser
     : public whisker::source_resolver {
  public:
@@ -1068,7 +1060,7 @@ void t_whisker_generator::write_to_file(
           fmt::format("Could not open '{}' for writing.", abs_path.string()));
     }
     output << data;
-    if (!is_last_char(data, '\n')) {
+    if (!data.ends_with('\n')) {
       // Terminate with newline.
       output << '\n';
     }

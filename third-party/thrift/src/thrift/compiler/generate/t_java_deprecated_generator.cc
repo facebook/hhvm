@@ -86,7 +86,6 @@ std::optional<string> t_java_deprecated_generator::java_struct_parent_class(
     const t_structured* /* unused */, StructGenParams params) {
   return params.is_exception ? std::optional{std::string{"Exception"}}
                              : std::nullopt;
-  // return boost::make_optional(params.is_exception, std::string("Exception"));
 }
 
 /**

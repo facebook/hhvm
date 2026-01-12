@@ -22,7 +22,6 @@
 #include <unordered_set>
 
 #include <boost/algorithm/string/classification.hpp>
-#include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/algorithm/string/split.hpp>
 
@@ -502,23 +501,19 @@ mstch::node adapter_node(
     auto adapter_name =
         get_annotation_property_string(adapter_annotation, "name");
 
-    is_generic = boost::algorithm::ends_with(adapter_name, "<>");
+    is_generic = adapter_name.ends_with("<>");
     if (is_generic) {
       adapter_name = adapter_name.substr(0, adapter_name.length() - 2);
     }
 
-    if (!package.empty() &&
-        boost::algorithm::starts_with(adapter_name, kRustCrateTypesPrefix)) {
+    if (!package.empty() && adapter_name.starts_with(kRustCrateTypesPrefix)) {
       adapter_name =
           package + "::" + adapter_name.substr(kRustCrateTypesPrefix.length());
-    } else if (
-        !package.empty() &&
-        boost::algorithm::starts_with(adapter_name, kRustCratePrefix)) {
+    } else if (!package.empty() && adapter_name.starts_with(kRustCratePrefix)) {
       adapter_name =
           package + "::" + adapter_name.substr(kRustCratePrefix.length());
-    } else if (!(boost::algorithm::starts_with(adapter_name, "::") ||
-                 boost::algorithm::starts_with(
-                     adapter_name, kRustCratePrefix))) {
+    } else if (!(adapter_name.starts_with("::") ||
+                 adapter_name.starts_with(kRustCratePrefix))) {
       adapter_name = "::" + adapter_name;
     }
 
@@ -1615,8 +1610,7 @@ class rust_mstch_struct : public mstch_struct {
           for (const t_const_value* val : item.second->get_list()) {
             auto str_val = val->get_string();
 
-            if (!package.empty() &&
-                boost::algorithm::starts_with(str_val, kRustCratePrefix)) {
+            if (!package.empty() && str_val.starts_with(kRustCratePrefix)) {
               str_val =
                   package + "::" + str_val.substr(kRustCratePrefix.length());
             }
@@ -1705,8 +1699,7 @@ class rust_mstch_enum : public mstch_enum {
           for (const t_const_value* val : item.second->get_list()) {
             auto str_val = val->get_string();
 
-            if (!package.empty() &&
-                boost::algorithm::starts_with(str_val, kRustCratePrefix)) {
+            if (!package.empty() && str_val.starts_with(kRustCratePrefix)) {
               str_val =
                   package + "::" + str_val.substr(kRustCratePrefix.length());
             }

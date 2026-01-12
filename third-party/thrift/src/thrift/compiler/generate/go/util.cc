@@ -462,8 +462,7 @@ std::string munge_ident(const std::string& ident, bool exported, bool compat) {
   // constructors. For example, if we are given a NewFoo message and a Foo
   // message, the Foo message will generate a NewFoo constructor function, which
   // will conflict with the NewFoo struct.
-  bool starts_with_new = boost::algorithm::starts_with(result, "New");
-  if (starts_with_new) {
+  if (result.starts_with("New")) {
     result += '_';
   }
 

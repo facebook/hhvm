@@ -15,39 +15,29 @@
  */
 
 #include <filesystem>
-#include <string_view>
 #include <thrift/compiler/generate/templates.h>
 
 namespace apache::thrift::compiler {
 
-namespace {
-
-bool is_last_char(std::string_view data, char c) {
-  return !data.empty() && data.back() == c;
-}
-void chomp_last_char(std::string* data, char c) {
-  if (is_last_char(*data, c)) {
-    data->pop_back();
-  }
-}
-
-} // namespace
-
 templates_map create_templates_by_path() {
   templates_map result;
   for (std::size_t i = 0; i < detail::templates_size; ++i) {
-    auto name = std::filesystem::path(
+    std::filesystem::path name(
         detail::templates_name_datas[i],
         detail::templates_name_datas[i] + detail::templates_name_sizes[i]);
     name = name.parent_path() / name.stem();
 
-    auto tpl = std::string(
+    std::string tpl(
         detail::templates_content_datas[i],
         detail::templates_content_datas[i] +
             detail::templates_content_sizes[i]);
     // Remove a single '\n' or '\r\n' or '\r' at end, if present.
-    chomp_last_char(&tpl, '\n');
-    chomp_last_char(&tpl, '\r');
+    if (tpl.ends_with('\n')) {
+      tpl.pop_back();
+    }
+    if (tpl.ends_with('\r')) {
+      tpl.pop_back();
+    }
     result.emplace(name.generic_string(), std::move(tpl));
   }
   return result;

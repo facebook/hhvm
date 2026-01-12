@@ -16,7 +16,6 @@
 
 #include <thrift/compiler/generate/python/util.h>
 
-#include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/replace.hpp>
 #include <thrift/compiler/ast/ast_visitor.h>
 #include <thrift/compiler/ast/uri.h>
@@ -33,8 +32,8 @@ bool is_type_iobuf(const t_type* type) {
 }
 
 bool is_patch_program(const t_program* prog) {
-  return prog ? (boost::algorithm::starts_with(prog->name(), "gen_patch_") ||
-                 boost::algorithm::starts_with(prog->name(), "gen_safe_patch_"))
+  return prog ? (prog->name().starts_with("gen_patch_") ||
+                 prog->name().starts_with("gen_safe_patch_"))
               : false;
 }
 

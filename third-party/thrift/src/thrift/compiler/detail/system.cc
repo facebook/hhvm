@@ -18,7 +18,6 @@
 
 #include <functional>
 
-#include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/replace.hpp>
 
 namespace apache::thrift::compiler::detail {
@@ -49,8 +48,7 @@ std::filesystem::path format_abs_path(std::string_view path) {
     // Handles long paths on windows.
     // https://www.boost.org/doc/libs/1_69_0/libs/filesystem/doc/reference.html#long-path-warning
     static constexpr auto kExtendedLengthPathPrefix = L"\\\\?\\";
-    if (!boost::algorithm::starts_with(
-            abs_path.wstring(), kExtendedLengthPathPrefix)) {
+    if (!abs_path.wstring().starts_with(kExtendedLengthPathPrefix)) {
       auto native_path = abs_path.make_preferred().wstring();
       // At this point the path may have a mix of '\\' and '\' separators.
       boost::algorithm::replace_all(native_path, L"\\\\", L"\\");

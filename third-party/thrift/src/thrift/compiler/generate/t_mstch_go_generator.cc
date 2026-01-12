@@ -18,8 +18,7 @@
 #include <memory>
 #include <set>
 #include <string>
-#include <boost/algorithm/string.hpp>
-#include <boost/algorithm/string/predicate.hpp>
+#include <boost/algorithm/string/erase.hpp>
 #include <boost/algorithm/string/replace.hpp>
 #include <fmt/format.h>
 #include <thrift/compiler/ast/t_struct.h>
@@ -532,17 +531,17 @@ class mstch_go_struct : public mstch_struct {
   mstch::node is_resp_struct() {
     // Whether this is a helper response struct.
     return data_.is_req_resp_struct(*struct_) &&
-        boost::algorithm::starts_with(struct_->name(), "resp");
+        struct_->name().starts_with("resp");
   }
   mstch::node is_req_struct() {
     // Whether this is a helper request struct.
     return data_.is_req_resp_struct(*struct_) &&
-        boost::algorithm::starts_with(struct_->name(), "req");
+        struct_->name().starts_with("req");
   }
   mstch::node is_stream_struct() {
     // Whether this is a helper stream struct.
     return data_.is_req_resp_struct(*struct_) &&
-        boost::algorithm::starts_with(struct_->name(), "stream");
+        struct_->name().starts_with("stream");
   }
   mstch::node fields_sorted() {
     // Fields (optionally) in the most optimal (memory-saving) layout order.

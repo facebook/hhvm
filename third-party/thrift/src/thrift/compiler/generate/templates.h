@@ -55,6 +55,6 @@ using templates_map = std::map<std::string, std::string, std::less<>>;
  * This mapping is used to resolve the source code for template paths during
  * rendering.
  */
-std::map<std::string, std::string, std::less<>> create_templates_by_path();
+templates_map create_templates_by_path();
 
 } // namespace apache::thrift::compiler

@@ -77,6 +77,6 @@ def get_client(
 def install_proxy_factory(
     factory: Optional[Callable[[Type[TClient]], Callable[[TClient], Any]]],
 ) -> None: ...
-def get_proxy_factory() -> (
-    Optional[Callable[[Type[Client]], Callable[[Client], Any]]]
-): ...
+def get_proxy_factory() -> Optional[
+    Callable[[Type[Client]], Callable[[Client], Any]]
+]: ...

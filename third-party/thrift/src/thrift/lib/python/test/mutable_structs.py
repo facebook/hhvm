@@ -22,9 +22,7 @@ import unittest
 from datetime import datetime
 
 import thrift.python.mutable_serializer as mutable_serializer
-
 from parameterized import parameterized
-
 from thrift.python.mutable_exceptions import MutableGeneratedError
 from thrift.python.mutable_types import (
     _isset as mutable_isset,
@@ -35,7 +33,6 @@ from thrift.python.mutable_types import (
     to_thrift_set,
 )
 from thrift.python.test_helpers import round_thrift_to_float32
-
 from thrift.test.thrift_python.struct_test.thrift_mutable_types import (
     TestComplexContainersStruct,
     TestContainersWithStructElements as TestContainersWithStructElementsMutable,
@@ -54,7 +51,6 @@ from thrift.test.thrift_python.struct_test.thrift_mutable_types import (
     TestStructWithFloatingPoint as TestStructWithFloatingPointMutable,
     TestStructWithUnionField as TestStructWithUnionFieldMutable,
 )
-
 from thrift.test.thrift_python.struct_test.thrift_types import (
     TestStructAllThriftContainerTypes as TestStructAllThriftContainerTypesImmutable,
     TestStructAllThriftPrimitiveTypes as TestStructAllThriftPrimitiveTypesImmutable,

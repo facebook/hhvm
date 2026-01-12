@@ -22,7 +22,6 @@ import convertible.thrift_mutable_types as python_mutable_types
 import convertible.thrift_types as python_types
 import convertible.ttypes as py_deprecated_types
 import convertible.types as py3_types
-
 from parameterized import parameterized
 from thrift.python.mutable_types import to_thrift_list, to_thrift_map, to_thrift_set
 from thrift.python.types import BadEnum

@@ -20,7 +20,6 @@ import unittest
 
 from testing.types import Color, HardError, SimpleError, UnfriendlyError, UnusedError
 from thrift.lib.py3.test.auto_migrate.auto_migrate_util import is_auto_migrated
-
 from thrift.lib.py3.test.exception_helper import (
     simulate_HardError,
     simulate_UnusedError,

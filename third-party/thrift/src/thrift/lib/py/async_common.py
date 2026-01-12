@@ -25,7 +25,6 @@ Look for them in TAsyncioServer and TTrolliusServer respectively.
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import asyncio
-
 import logging
 import struct
 import warnings

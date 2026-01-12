@@ -20,7 +20,6 @@ import unittest
 from typing import cast, Type, TypeVar
 
 from testing.thrift_types import Color as python_Color, Kind as python_Kind
-
 from testing.types import BadMembers, Color, ColorGroups, File, Kind, Perm
 from thrift.py3.common import Protocol
 from thrift.py3.serializer import deserialize, serialize

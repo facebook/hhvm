@@ -18,7 +18,6 @@
 from __future__ import annotations
 
 import pickle
-
 import sys
 import types
 import unittest
@@ -31,10 +30,8 @@ import python_test.enums.thrift_mutable_types as mutable_types
 import python_test.enums.thrift_types as immutable_types
 import testing.dependency.thrift_enums as dependency_enums
 import testing.dependency.thrift_types as dependency_types
-
 import thrift.python.mutable_serializer as mutable_serializer
 import thrift.python.serializer as immutable_serializer
-
 from parameterized import parameterized_class
 from python_test.enums.thrift_abstract_types import Color as AbstractColor
 from python_test.enums.thrift_types import (
@@ -48,7 +45,6 @@ from python_test.enums.thrift_types import (
     OptionalFile,
     Perm,
 )
-
 from python_test.enums_typedef_only.thrift_abstract_types import ColorTypedef
 from thrift.python.mutable_types import (
     _ThriftListWrapper,
@@ -56,7 +52,6 @@ from thrift.python.mutable_types import (
     to_thrift_list,
     to_thrift_map,
 )
-
 from thrift.python.types import BadEnum, Enum, Flag
 
 

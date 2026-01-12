@@ -16,7 +16,9 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-import base64, json, sys
+import base64
+import json
+import sys
 
 from thrift.protocol.TProtocol import TProtocolBase, TProtocolException
 from thrift.Thrift import TType

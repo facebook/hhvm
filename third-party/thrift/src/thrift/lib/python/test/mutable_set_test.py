@@ -17,14 +17,11 @@
 import collections.abc
 import pickle
 import unittest
-
 from typing import Iterable
 
 from python_test.sets.thrift_mutable_types import SetI32
-
 from thrift.python.mutable_containers import MutableSet
 from thrift.python.mutable_types import to_thrift_set
-
 from thrift.python.types import typeinfo_i32
 
 

@@ -19,18 +19,15 @@ from __future__ import annotations
 
 import asyncio
 import typing
-
 from unittest import IsolatedAsyncioTestCase
 
 from thrift.lib.python.client.test.client_event_handler.helper import (
     TestHelper as ClientEventHandlerTestHelper,
 )
-
 from thrift.lib.python.client.test.event_handler_helper import (
     client_handler_that_throws,
 )
 from thrift.lib.python.client.test.test_server import server_in_event_loop
-
 from thrift.python.client import (
     ClientType,
     get_client,

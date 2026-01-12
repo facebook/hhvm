@@ -19,12 +19,9 @@ import unittest
 from typing import Type, Union
 
 import thrift.python.test.annotations.thrift_mutable_types as mutable_test_types
-
 import thrift.python.test.annotations.thrift_types as immutable_test_types
-
 from parameterized import parameterized
 from thrift.python.mutable_types import MutableStructOrUnion
-
 from thrift.python.types import StructOrUnion
 
 

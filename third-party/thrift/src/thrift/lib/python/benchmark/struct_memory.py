@@ -18,25 +18,20 @@
 from __future__ import annotations
 
 import gc
-
 import os
 import time
 from typing import Generator
 
 import click
 import memray
-
 import thrift.python.mutable_serializer as mutable_serializer
 import thrift.python.serializer as immutable_serializer
-
 from thrift.benchmark.struct.thrift_enums import MyEnum
-
 from thrift.benchmark.struct.thrift_mutable_types import (
     Included as IncludedMutable,
     MyStruct as MyStructMutable,
     StringBucket as StringBucketMutable,
 )
-
 from thrift.benchmark.struct.thrift_types import (
     Included as IncludedImmutable,
     MyStruct as MyStructImmutable,
@@ -77,9 +72,9 @@ Please see https://bloomberg.github.io/memray/
 """
 
 
-def _create_immutable() -> (
-    tuple[IncludedImmutable, StringBucketImmutable, MyStructImmutable]
-):
+def _create_immutable() -> tuple[
+    IncludedImmutable, StringBucketImmutable, MyStructImmutable
+]:
     included = IncludedImmutable(vals=["1", "2", "3", "4", "5"])
     string_bucket = StringBucketImmutable(
         one="1",

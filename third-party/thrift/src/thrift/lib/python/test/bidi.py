@@ -19,12 +19,10 @@ from __future__ import annotations
 
 import asyncio
 import sys
-
 from typing import AsyncGenerator, Callable, Generator, Tuple, TypeVar
 from unittest import IsolatedAsyncioTestCase
 
 from parameterized import parameterized
-
 from thrift.lib.python.test.test_server import TestServer
 from thrift.python.bidi_service.thrift_clients import TestBidiService
 from thrift.python.bidi_service.thrift_services import TestBidiServiceInterface
@@ -38,10 +36,8 @@ from thrift.python.bidi_service.thrift_types import (
     StreamException,
     ThrowWhere,
 )
-
 from thrift.python.client import ClientType, get_client
 from thrift.python.exceptions import ApplicationError, ApplicationErrorType
-
 from thrift.python.streaming.bidistream import BidirectionalStream
 from thrift.python.streaming.stream import ClientBufferedStream
 

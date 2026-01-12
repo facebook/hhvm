@@ -17,12 +17,10 @@
 import copy
 import pickle
 import unittest
-
 from typing import TypeVar
 
 from testing.thrift_types import ComplexUnion, Digits, Integers
 from thrift.lib.python.test.testing_utils import run_concurrently
-
 from thrift.python.serializer import deserialize, serialize
 from thrift.python.types import StructOrUnion
 

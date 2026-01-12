@@ -19,13 +19,11 @@ import unittest
 from typing import AsyncIterator, Tuple
 
 from thrift.lib.python.test.test_server import TestServer
-
 from thrift.py3.server import get_context
 from thrift.py3.test.included.included.thrift_types import Included
 from thrift.py3.test.stream.thrift_clients import StreamTestService
 from thrift.py3.test.stream.thrift_services import StreamTestServiceInterface
 from thrift.py3.test.stream.thrift_types import FuncEx, StreamEx
-
 from thrift.python.client import ClientType, get_client
 from thrift.python.common import RpcOptions
 

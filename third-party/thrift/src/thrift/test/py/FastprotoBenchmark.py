@@ -22,7 +22,6 @@ import timeit
 from multiprocessing import Process, Queue
 
 import psutil
-
 from thrift.protocol import fastproto, TBinaryProtocol, TCompactProtocol
 from thrift.transport import TTransport
 

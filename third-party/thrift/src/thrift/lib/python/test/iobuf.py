@@ -19,16 +19,12 @@
 from __future__ import annotations
 
 import unittest
-
 from typing import Type
 
 import iobuf.thrift_mutable_types as mutable_types
 import iobuf.thrift_types as immutable_ypes
-
 from folly.iobuf import IOBuf
-
 from iobuf.thrift_types import Moo as MooType
-
 from parameterized import parameterized_class
 
 

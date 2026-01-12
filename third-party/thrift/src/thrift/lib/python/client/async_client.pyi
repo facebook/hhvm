@@ -22,7 +22,6 @@ from thrift.python.client.omni_client import (
     InteractionMethodPosition,
     RpcKind,
 )
-
 from thrift.python.common import RpcOptions
 from thrift.python.mutable_types import (
     _fbthrift_MutableResponseStreamResult,

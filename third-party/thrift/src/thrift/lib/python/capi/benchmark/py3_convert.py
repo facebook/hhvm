@@ -19,7 +19,6 @@ import timeit
 from collections import defaultdict
 
 import click
-
 import convertible.thrift_types as python_types  # noqa: F401
 import convertible.types as py3_types  # noqa: F401
 from tabulate import tabulate

@@ -17,7 +17,6 @@
 import unittest
 
 from thrift.python.mutable_types import to_thrift_list
-
 from thrift.test.thrift_python.struct_test.thrift_mutable_types import (
     TestExceptionAsListElement,
     TestExceptionWithContainer,

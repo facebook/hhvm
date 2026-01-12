@@ -20,7 +20,6 @@ import typing
 from enum import Enum
 
 import click
-
 from tabulate import tabulate
 
 
@@ -226,43 +225,43 @@ def deserialze_statement(flavor: Flavor) -> str:
 @click.pass_context
 def int_list_random_access_statement(ctx, flavor: Flavor) -> str:
     size = ctx.params["size"]
-    return f"_ = inst.val_list[{size//2}]"
+    return f"_ = inst.val_list[{size // 2}]"
 
 
 @click.pass_context
 def str_list_random_access_statement(ctx, flavor: Flavor) -> str:
     size = ctx.params["size"]
-    return f"_ = inst.str_list[{size//2}]"
+    return f"_ = inst.str_list[{size // 2}]"
 
 
 @click.pass_context
 def int_set_random_access_statement(ctx, flavor: Flavor) -> str:
     size = ctx.params["size"]
-    return f"{size//2} in inst.val_set"
+    return f"{size // 2} in inst.val_set"
 
 
 @click.pass_context
 def str_set_random_access_statement(ctx, flavor: Flavor) -> str:
     size = ctx.params["size"]
-    return f"{size//2} in inst.str_set"
+    return f"{size // 2} in inst.str_set"
 
 
 @click.pass_context
 def int_str_map_random_access_statement(ctx, flavor: Flavor) -> str:
     size = ctx.params["size"]
-    return f"_ = inst.val_map[{size//2}]"
+    return f"_ = inst.val_map[{size // 2}]"
 
 
 @click.pass_context
 def int_int_map_random_access_statement(ctx, flavor: Flavor) -> str:
     size = ctx.params["size"]
-    return f"_ = inst.int_map[{size//2}]"
+    return f"_ = inst.int_map[{size // 2}]"
 
 
 @click.pass_context
 def str_str_map_random_access_statement(ctx, flavor: Flavor) -> str:
     size = ctx.params["size"]
-    key = f"key_{size//2}"
+    key = f"key_{size // 2}"
     return f"_ = inst.str_map['{key}']"
 
 
@@ -270,7 +269,7 @@ def str_str_map_random_access_statement(ctx, flavor: Flavor) -> str:
 def nested_map_random_access_statement(ctx, flavor: Flavor) -> str:
     size = ctx.params["size"]
     inner_size = ctx.params["inner_size"]
-    return f"_ = inst.val_map_structs[{size//2}].vals[{inner_size//2}]"
+    return f"_ = inst.val_map_structs[{size // 2}].vals[{inner_size // 2}]"
 
 
 def int_list_iterate_statement(flavor: Flavor) -> str:

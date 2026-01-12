@@ -15,12 +15,10 @@
 # pyre-strict
 import pickle
 import unittest
-
 from collections.abc import MutableSequence
 from typing import cast
 
 from python_test.containers.thrift_mutable_types import Foo, Lists
-
 from python_test.lists.thrift_mutable_types import (
     easy,
     EasyList,
@@ -28,12 +26,9 @@ from python_test.lists.thrift_mutable_types import (
     ListOfStrToI32Map,
     StrList2D,
 )
-
 from thrift.python.mutable_containers import MutableList, MutableMap
-
 from thrift.python.mutable_typeinfos import MutableListTypeInfo
 from thrift.python.mutable_types import to_thrift_list
-
 from thrift.python.types import typeinfo_i32
 
 

@@ -22,15 +22,11 @@ import unittest
 from datetime import datetime
 
 import thrift.python.mutable_serializer as mutable_serializer
-
 import thrift.python.serializer as immutable_serializer
-
 from folly.iobuf import IOBuf
-
 from parameterized import parameterized
 from thrift.python.exceptions import Error
 from thrift.python.mutable_containers import MutableList, MutableMap, MutableSet
-
 from thrift.python.mutable_exceptions import MutableGeneratedError
 from thrift.python.mutable_types import (
     MutableStruct,
@@ -46,7 +42,6 @@ from thrift.python.types import (
     StructMeta as ImmutableStructMeta,
     StructOrUnion as ImmutableStructOrUnion,
 )
-
 from thrift.test.thrift_python.struct_test.thrift_abstract_types import TestEnum
 from thrift.test.thrift_python.struct_test.thrift_mutable_types import (
     bool_constant,
@@ -79,7 +74,6 @@ from thrift.test.thrift_python.struct_test.thrift_mutable_types import (
     TestStructWithDefaultValues as TestStructWithDefaultValuesMutable,
     TestStructWithTypedefField as TestStructWithTypedefFieldMutable,
 )
-
 from thrift.test.thrift_python.struct_test.thrift_types import (
     TestStruct as TestStructImmutable,
     TestStructAdaptedTypes as TestStructAdaptedTypesImmutable,

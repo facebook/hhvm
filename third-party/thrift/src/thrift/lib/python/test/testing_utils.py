@@ -15,7 +15,6 @@
 # pyre-strict
 
 import threading
-
 from collections.abc import Sequence, Set
 from contextlib import contextmanager
 from typing import Callable

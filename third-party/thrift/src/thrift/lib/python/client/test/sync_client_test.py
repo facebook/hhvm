@@ -23,13 +23,11 @@ import unittest
 from thrift.lib.python.client.test.client_event_handler.helper import (
     TestHelper as ClientEventHandlerTestHelper,
 )
-
 from thrift.lib.python.client.test.event_handler_helper import (
     addEventHandler,
     client_handler_that_throws,
 )
 from thrift.lib.python.client.test.test_server import server_in_another_process
-
 from thrift.python.client import ClientType, get_sync_client
 from thrift.python.common import RpcOptions
 from thrift.python.exceptions import (

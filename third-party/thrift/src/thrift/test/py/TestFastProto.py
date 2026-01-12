@@ -27,7 +27,6 @@ from FastProto.ttypes import (
     StructWithUnion,
     TestUnion,
 )
-
 from thrift.protocol import fastproto, TBinaryProtocol, TCompactProtocol
 from thrift.protocol.exceptions import ThriftUnicodeDecodeError
 from thrift.transport.TTransport import TMemoryBuffer

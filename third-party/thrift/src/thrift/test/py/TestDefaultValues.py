@@ -19,7 +19,6 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import unittest
 
 from DefaultValuesTest.ttypes import DefaultValues
-
 from thrift.protocol.TBinaryProtocol import TBinaryProtocol
 from thrift.transport.TTransport import TMemoryBuffer
 

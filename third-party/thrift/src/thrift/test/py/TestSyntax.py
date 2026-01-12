@@ -15,7 +15,8 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-import glob, sys
+import glob
+import sys
 
 sys.path.insert(0, "./gen-py")
 sys.path.insert(0, glob.glob("../../lib/py/build/lib.*")[0])

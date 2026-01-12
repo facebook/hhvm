@@ -407,7 +407,7 @@ class RemoteClient:
 
     def _get_client(self, options):
         """Get the thrift client that will be used to make method calls"""
-        raise TypeError("_get_client should be called on " "a subclass of RemoteClient")
+        raise TypeError("_get_client should be called on a subclass of RemoteClient")
 
     def _close_client(self):
         """After making the method call, do any cleanup work"""
@@ -536,8 +536,7 @@ class RemoteTransportClient(RemoteClient):
                     parsed_headers = eval(options.headers)
                 except Exception:
                     self._exit(
-                        error_message="Request headers (--headers) argument"
-                        " failed eval"
+                        error_message="Request headers (--headers) argument failed eval"
                     )
                 if not isinstance(parsed_headers, dict):
                     self._exit(
@@ -549,7 +548,7 @@ class RemoteTransportClient(RemoteClient):
             protocol = THeaderProtocol.THeaderProtocol(transport)
         else:
             self._exit(
-                error_message=("No valid protocol " "specified for %s" % (type(self))),
+                error_message=("No valid protocol specified for %s" % (type(self))),
                 status=os.EX_USAGE,
             )
 
@@ -566,7 +565,7 @@ class RemoteTransportClient(RemoteClient):
     def _validate_options(self, options):
         super(RemoteTransportClient, self)._validate_options(options)
         if options.framed and options.unframed:
-            self._exit(error_message="cannot specify both " "--framed and --unframed")
+            self._exit(error_message="cannot specify both --framed and --unframed")
 
     def _parse_host_port(self, value, default_port):
         parts = value.rsplit(":", 1)
@@ -625,9 +624,7 @@ class RemoteHttpClient(RemoteTransportClient):
         """Check if there are any option inconsistencies, and exit if so"""
         super(RemoteHttpClient, self)._validate_options(options)
         if not any([options.unframed, options.json]):
-            self._exit(
-                error_message="can only specify --url with " "--unframed or --json"
-            )
+            self._exit(error_message="can only specify --url with --unframed or --json")
 
 
 class RemoteUNIXDomainClient(RemoteTransportClient):
@@ -687,12 +684,10 @@ class Remote:
             )
         if client_type is RemoteClient:
             raise TypeError(
-                ("Remote client must be a strict subclass " "of RemoteClient.")
+                ("Remote client must be a strict subclass of RemoteClient.")
             )
         if not hasattr(client_type, "SELECTOR_OPTIONS"):
-            raise AttributeError(
-                ("Remote client must have a " "SELECTOR_OPTIONS field.")
-            )
+            raise AttributeError(("Remote client must have a SELECTOR_OPTIONS field."))
 
         cls.__client_types.add(client_type)
         cls.register_cmdline_options(client_type.CMDLINE_OPTIONS)

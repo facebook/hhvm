@@ -19,17 +19,12 @@ import typing
 import unittest
 
 import thrift.test.thrift_python.enum_test.thrift_abstract_types as enum_test_abstract_types
-
 import thrift.test.thrift_python.enum_test.thrift_enums as enum_test_enums
-
 import thrift.test.thrift_python.included.thrift_abstract_types
-
 from parameterized import parameterized
 from thrift.python.abstract_types import AbstractGeneratedError
-
 from thrift.python.exceptions import Error, GeneratedError
 from thrift.python.mutable_exceptions import MutableGeneratedError
-
 from thrift.test.thrift_python.struct_test.thrift_abstract_types import (  # @manual=//thrift/test/thrift-python:struct_test_thrift-python-types
     TestExceptionAllThriftPrimitiveTypes as TestExceptionAllThriftPrimitiveTypesAbstract,
     TestExceptionCopy as TestExceptionCopyAbstract,
@@ -49,7 +44,6 @@ from thrift.test.thrift_python.struct_test.thrift_abstract_types import (  # @ma
     TestStructWithTypedefField as TestStructWithTypedefFieldAbstract,
     TestStructWithUnionField as TestStructWithUnionFieldAbstract,
 )
-
 from thrift.test.thrift_python.struct_test.thrift_mutable_types import (
     TestExceptionAllThriftPrimitiveTypes as TestExceptionAllThriftPrimitiveTypesMutable,
     TestExceptionCopy as TestExceptionCopyMutable,
@@ -66,7 +60,6 @@ from thrift.test.thrift_python.struct_test.thrift_mutable_types import (
     TestStructWithTypedefField as TestStructWithTypedefFieldMutable,
     TestStructWithUnionField as TestStructWithUnionFieldMutable,
 )
-
 from thrift.test.thrift_python.struct_test.thrift_types import (
     TestExceptionAllThriftPrimitiveTypes as TestExceptionAllThriftPrimitiveTypesImmutable,
     TestExceptionCopy as TestExceptionCopyImmutable,
@@ -83,17 +76,14 @@ from thrift.test.thrift_python.struct_test.thrift_types import (
     TestStructWithTypedefField as TestStructWithTypedefFieldImmutable,
     TestStructWithUnionField as TestStructWithUnionFieldImmutable,
 )
-
 from thrift.test.thrift_python.union_test.thrift_abstract_types import (  # @manual=//thrift/test/thrift-python:union_test_thrift-python-types
     TestUnion as TestUnionAbstract,
     # TODO: Uncomment when adapted types work correctly.
     # TestUnionAdaptedTypes as TestUnionAdaptedTypesAbstract,
 )
-
 from thrift.test.thrift_python.union_test.thrift_mutable_types import (
     TestUnion as TestUnionMutable,
 )
-
 from thrift.test.thrift_python.union_test.thrift_types import (
     TestUnion as TestUnionImmutable,
 )

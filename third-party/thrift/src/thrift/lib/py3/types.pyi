@@ -28,7 +28,6 @@ from typing import (
 )
 
 import thrift.python.types
-
 from thrift.py3.exceptions import GeneratedError
 
 Enum = thrift.python.types.Enum

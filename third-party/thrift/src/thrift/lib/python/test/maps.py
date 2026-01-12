@@ -19,22 +19,16 @@
 from __future__ import annotations
 
 import unittest
-
 from collections.abc import ItemsView, KeysView, ValuesView
-
 from enum import Enum, IntEnum
 from typing import Dict, Type, TypeVar
 
 import python_test.containers.thrift_mutable_types as mutable_containers_types
 import python_test.containers.thrift_types as immutable_containers_types
-
 import python_test.maps.thrift_mutable_types as mutable_maps_types
 import python_test.maps.thrift_types as immutable_maps_types
-
 from folly.iobuf import IOBuf
-
 from parameterized import parameterized_class
-
 from python_test.containers.thrift_types import (
     Color as ColorType,
     Foo as FooType,

@@ -17,13 +17,11 @@
 import copy
 import pickle
 import unittest
-
 from typing import TypeVar
 
 from testing.thrift_types import HardError
 from thrift.lib.python.test.testing_utils import run_concurrently
 from thrift.python.exceptions import GeneratedError
-
 from thrift.python.serializer import deserialize, serialize
 
 

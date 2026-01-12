@@ -18,7 +18,6 @@
 import unittest
 
 import thrift.python.test.cpp_converter_helper as converter
-
 from convertible.thrift_types import Color, Nested, Simple, Union
 from thrift.python.test.annotations.thrift_types import RenamedEmpty
 

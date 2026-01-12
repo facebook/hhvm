@@ -35,7 +35,6 @@ from testing.services import (
     TestingServiceInterface,
 )
 from testing.types import Color, easy, HardError
-
 from thrift.py3.client import ClientType, get_client
 from thrift.py3.common import Priority, Protocol, RpcOptions
 from thrift.py3.exceptions import ApplicationError

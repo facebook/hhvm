@@ -18,10 +18,8 @@ import unittest
 
 import test.fixtures.hidden_test.thrift_types as python_types
 import test.fixtures.hidden_test.ttypes as py_types
-
 import thrift.python.serializer as python_serializer
 from thrift.protocol import TCompactProtocol
-
 from thrift.util import Serializer
 
 

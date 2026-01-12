@@ -18,9 +18,7 @@
 import unittest
 
 import testing.thrift_types
-
 import testing.types
-
 from thrift.lib.py3.test.auto_migrate.auto_migrate_util import is_auto_migrated
 from thrift.py3.test.auto_migrate_on.module.thrift_types import TestStruct
 

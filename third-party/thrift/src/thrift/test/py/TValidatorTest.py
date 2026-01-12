@@ -31,7 +31,6 @@ from myMixedStruct.ttypes import myMixedStruct, mySuperSimpleStruct
 from myNestedMapStruct.ttypes import myNestedMapStruct
 from mySetStruct.ttypes import mySetStruct
 from mySimpleStruct.ttypes import mySimpleStruct
-
 # import logging
 # log = logging.getLogger()
 # log.setLevel(logging.DEBUG)

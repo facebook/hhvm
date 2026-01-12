@@ -19,7 +19,6 @@ import testing.types as testing_types
 import transitive_deps.a.constants_FBTHRIFT_ONLY_DO_NOT_USE as transitive_deps_constants
 import transitive_deps.a.types as transitive_deps_types
 from later.unittest import TestCase
-
 from parameterized import parameterized_class
 
 """

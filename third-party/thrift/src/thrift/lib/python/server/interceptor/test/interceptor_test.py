@@ -32,7 +32,6 @@ from thrift.python.client.client_wrapper import TAsyncClient
 from thrift.python.exceptions import ApplicationError, TransportError
 from thrift.python.server import ServiceInterface, ThriftServer
 from thrift.python.server_impl.interceptor.server_module import PythonServerModule
-
 from thrift.python.server_impl.interceptor.service_interceptor import (
     AbstractServiceInterceptor,
     PyObservableServiceInterceptor,

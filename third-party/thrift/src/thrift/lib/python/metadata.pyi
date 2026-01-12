@@ -52,7 +52,6 @@ from apache.thrift.metadata.thrift_types import (
 )
 from thrift.python.client import Client
 from thrift.python.exceptions import GeneratedError
-
 from thrift.python.types import Enum as ThriftEnumClass, ServiceInterface, StructOrUnion
 
 class ThriftKind(Enum):

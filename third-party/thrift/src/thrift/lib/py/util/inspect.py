@@ -206,9 +206,9 @@ def _get_function_arg_specs(
         arg_spec = arg_specs.pop(param)
         ordered_arg_specs.append(arg_spec)
 
-    assert (
-        not arg_specs
-    ), f"did not consume all thrift arguments for {fn_name}: {arg_specs}"
+    assert not arg_specs, (
+        f"did not consume all thrift arguments for {fn_name}: {arg_specs}"
+    )
 
     return ordered_arg_specs
 

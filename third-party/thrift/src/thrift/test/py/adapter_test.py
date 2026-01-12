@@ -90,9 +90,12 @@ class AdapterTest(unittest.TestCase):
         for protocol in PROTOCOLS:
             with self.subTest(protocol=type(protocol).__name__):
                 foo = Foo(structField={})
-                with patch(
-                    "thrift.test.py.adapter_for_tests.AdapterTestStructToDict.to_thrift"
-                ) as mock_to_thrift, self.assertRaises(RuntimeError):
+                with (
+                    patch(
+                        "thrift.test.py.adapter_for_tests.AdapterTestStructToDict.to_thrift"
+                    ) as mock_to_thrift,
+                    self.assertRaises(RuntimeError),
+                ):
                     mock_to_thrift.side_effect = RuntimeError()
                     Serializer.serialize(protocol, foo)
 
@@ -100,8 +103,11 @@ class AdapterTest(unittest.TestCase):
                     protocol,
                     FooWithoutAdapters(structField=Bar()),
                 )
-                with patch(
-                    "thrift.test.py.adapter_for_tests.AdapterTestStructToDict.from_thrift"
-                ) as mock_from_thrift, self.assertRaises(RuntimeError):
+                with (
+                    patch(
+                        "thrift.test.py.adapter_for_tests.AdapterTestStructToDict.from_thrift"
+                    ) as mock_from_thrift,
+                    self.assertRaises(RuntimeError),
+                ):
                     mock_from_thrift.side_effect = RuntimeError()
                     Serializer.deserialize(protocol, serialized, Foo())

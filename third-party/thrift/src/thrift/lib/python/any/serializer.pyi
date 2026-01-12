@@ -17,9 +17,7 @@
 import typing
 
 from apache.thrift.type.type.thrift_types import Type
-
 from folly.iobuf import IOBuf
-
 from thrift.lib.python.any.typestub import (
     PrimitiveType,
     SerializableType,

@@ -19,7 +19,6 @@ import typing
 import unittest
 
 import thrift.test.python_capi.parity as parity
-
 from thrift.python.exceptions import GeneratedError
 from thrift.python.serializer import deserialize, Protocol, serialize
 from thrift.python.types import StructOrUnion

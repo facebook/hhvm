@@ -18,14 +18,12 @@ import typing
 import unittest
 
 from parameterized import parameterized
-
 from thrift.python.mutable_typeinfos import (
     MutableListTypeInfo,
     MutableMapTypeInfo,
     MutableSetTypeInfo,
     MutableStructTypeInfo,
 )
-
 from thrift.python.test.typeinfo_test import TypeInfoTests as CTests
 from thrift.python.types import (
     AdaptedTypeInfo,

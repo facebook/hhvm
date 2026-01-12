@@ -19,11 +19,9 @@
 from __future__ import annotations
 
 import typing
-
 import unittest
 
 import testing.thrift_metadata
-
 from apache.thrift.metadata.thrift_types import ThriftMetadata, ThriftPrimitiveType
 from testing.thrift_clients import (
     ExtendServiceWithNoTypes,

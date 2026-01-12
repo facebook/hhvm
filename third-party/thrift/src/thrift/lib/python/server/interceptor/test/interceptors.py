@@ -63,9 +63,9 @@ class CountingInterceptor(AbstractServiceInterceptor[ConnectionState, RequestSta
     ) -> None:
         self._counts.onConnectClosed += 1
         assert connection_state in self.connection_states, "connection_state unknown"
-        assert (
-            connection_state.info != connection_info
-        ), "connection_state unexpected match"
+        assert connection_state.info != connection_info, (
+            "connection_state unexpected match"
+        )
 
     def onRequest(
         self, connection_state: ConnectionState, request_info: RequestInfo
@@ -93,16 +93,16 @@ class CountingInterceptor(AbstractServiceInterceptor[ConnectionState, RequestSta
         assert request_state in self.request_states, "request_state unknown"
         assert response_info is not None, "response_info is not None"
         assert response_info.exception is None, "exception should be None"
-        assert (
-            response_info.service_name == request_state.info.service_name
-        ), "service name mismatch"
+        assert response_info.service_name == request_state.info.service_name, (
+            "service name mismatch"
+        )
         assert (
             response_info.defining_service_name
             == request_state.info.defining_service_name
         ), "service name mismatch"
-        assert (
-            response_info.method_name == request_state.info.method_name
-        ), "method name mismatch"
+        assert response_info.method_name == request_state.info.method_name, (
+            "method name mismatch"
+        )
 
 
 class OnConnectThrowsInterceptor(

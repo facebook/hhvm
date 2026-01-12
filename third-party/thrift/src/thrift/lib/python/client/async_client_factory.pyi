@@ -43,6 +43,6 @@ def get_client(
 def install_proxy_factory(
     factory: typing.Optional[typing.Callable[[typing.Type[AsyncClient]], ...]],
 ) -> None: ...
-def get_proxy_factory() -> (
-    typing.Optional[typing.Callable[[typing.Type[AsyncClient]], ...]]
-): ...
+def get_proxy_factory() -> typing.Optional[
+    typing.Callable[[typing.Type[AsyncClient]], ...]
+]: ...

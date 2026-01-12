@@ -18,11 +18,9 @@ import collections.abc
 import pickle
 import string
 import unittest
-
 from typing import cast, ItemsView, Iterator, KeysView, Optional, ValuesView
 
 from python_test.maps.thrift_mutable_types import StrIntMap
-
 from thrift.python.mutable_containers import (
     MapItemsView,
     MapKeysView,
@@ -30,10 +28,8 @@ from thrift.python.mutable_containers import (
     MutableList,
     MutableMap,
 )
-
 from thrift.python.mutable_typeinfos import MutableListTypeInfo
 from thrift.python.mutable_types import to_thrift_list, to_thrift_map, to_thrift_set
-
 from thrift.python.types import typeinfo_i32, typeinfo_string
 
 

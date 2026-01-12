@@ -19,7 +19,6 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import unittest
 
 from Recursive.ttypes import CoRec, CoRec2, RecList, RecTree
-
 from thrift.protocol.TBinaryProtocol import (
     TBinaryProtocolAcceleratedFactory,
     TBinaryProtocolFactory,

@@ -16,7 +16,6 @@
 
 
 import asyncio
-
 from pathlib import Path
 
 from thrift.py3.server import SocketAddress

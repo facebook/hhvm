@@ -24,7 +24,6 @@ from typing import Type
 from unittest.mock import call, MagicMock
 
 from parameterized import parameterized_class
-
 from thrift.python.mutable_types import to_thrift_list, to_thrift_map, to_thrift_set
 from thrift.python.test.adapters.datetime import DatetimeAdapter
 
@@ -39,7 +38,6 @@ DatetimeAdapter.to_thrift_field = DatetimeAdapter_to_thrift_field
 
 import python_test.adapter.thrift_mutable_types as mutable_types
 import python_test.adapter.thrift_types as immutable_types
-
 from python_test.adapter.thrift_mutable_types import (
     AdaptedInt as AdaptedIntMutable,
     Bar as BarMutable,

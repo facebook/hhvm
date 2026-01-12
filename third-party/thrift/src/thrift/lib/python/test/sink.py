@@ -23,7 +23,6 @@ from typing import AsyncGenerator, Awaitable, Callable, Tuple
 from unittest import IsolatedAsyncioTestCase
 
 from thrift.lib.python.test.test_server import TestServer
-
 from thrift.python.client import ClientType, get_client
 from thrift.python.exceptions import ApplicationError, ApplicationErrorType
 from thrift.python.sink_service.thrift_clients import TestSinkService
@@ -33,7 +32,6 @@ from thrift.python.sink_service.thrift_types import (
     MyException,
     SinkException,
 )
-
 from thrift.python.streaming.sink import ClientSink
 
 AsyncIntGenerator = AsyncGenerator[int, None]

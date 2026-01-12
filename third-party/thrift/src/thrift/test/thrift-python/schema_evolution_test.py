@@ -17,7 +17,6 @@
 import unittest
 
 from parameterized import parameterized_class
-
 from schema_evolution_test.thrift_types import (
     MyStruct_V1,
     MyStruct_V2,
@@ -27,7 +26,6 @@ from schema_evolution_test.thrift_types import (
     Old,
 )
 from thrift.python.protocol import Protocol
-
 from thrift.python.serializer import deserialize, serialize
 from thrift.python.types import isset_DEPRECATED, StructOrUnion
 

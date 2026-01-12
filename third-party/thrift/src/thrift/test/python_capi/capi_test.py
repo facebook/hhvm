@@ -20,7 +20,6 @@ import unittest
 from sys import getrefcount
 
 import thrift.python_capi.fixture as fixture
-
 from folly.iobuf import IOBuf
 from thrift.python.exceptions import GeneratedError
 from thrift.python.serializer import deserialize, Protocol, serialize, serialize_iobuf
@@ -53,7 +52,6 @@ from thrift.test.python_capi.serialized_dep.thrift_types import (
     SerializedStruct,
     SerializedUnion,
 )
-
 from thrift.test.python_capi.thrift_dep.thrift_types import (
     DepEnum,
     DepStruct,

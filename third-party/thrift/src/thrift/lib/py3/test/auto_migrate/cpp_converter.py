@@ -19,9 +19,7 @@ import unittest
 
 import convertible.thrift_types as python_convertible
 import testing.thrift_types as python_testing
-
 import thrift.py3.test.cpp_converter_helper as converter
-
 from convertible.types import Color, Nested, Simple, Union
 from testing.types import NonCopyable
 from thrift.lib.py3.test.auto_migrate.auto_migrate_util import is_auto_migrated

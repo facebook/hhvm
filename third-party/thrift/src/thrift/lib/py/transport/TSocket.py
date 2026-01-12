@@ -406,8 +406,7 @@ class TServerSocket(TSocketBase, TServerTransportBase):
 
     def fileno(self):
         warnings.warn(
-            "fileno() is deprecated for TServerSocket.  "
-            "Please use filenos() instead."
+            "fileno() is deprecated for TServerSocket.  Please use filenos() instead."
         )
         return TSocketBase.fileno(self)
 

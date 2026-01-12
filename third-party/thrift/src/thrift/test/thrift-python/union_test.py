@@ -22,18 +22,14 @@ from datetime import datetime
 
 import thrift.python.mutable_serializer as mutable_serializer
 import thrift.python.serializer as immutable_serializer
-
 from thrift.python.mutable_types import MutableStructOrUnion, to_thrift_list
-
 from thrift.python.types import StructOrUnion as ImmutableStructOrUnion
-
 from thrift.test.thrift_python.union_test.thrift_mutable_types import (
     DefaultFieldUnion as DefaultFieldUnionMutable,
     TestStruct as TestStructMutable,
     TestUnion as TestUnionMutable,
     TestUnionAdaptedTypes as TestUnionAdaptedTypesMutable,
 )
-
 from thrift.test.thrift_python.union_test.thrift_types import (
     DefaultFieldUnion as DefaultFieldUnionImmutable,
     TestStruct as TestStructImmutable,

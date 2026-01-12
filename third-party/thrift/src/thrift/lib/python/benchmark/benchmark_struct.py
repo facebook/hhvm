@@ -18,11 +18,9 @@
 from __future__ import annotations
 
 import timeit
-
 from typing import Callable
 
 import click
-
 from tabulate import tabulate
 
 

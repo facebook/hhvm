@@ -19,7 +19,6 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 # workaround for a python bug.  see http://bugs.python.org/issue8484
 import hashlib
 import logging
-
 import os
 import socket
 import ssl

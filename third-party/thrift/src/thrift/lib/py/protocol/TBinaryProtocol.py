@@ -17,7 +17,6 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import sys
-
 from struct import pack, unpack
 
 from thrift.protocol.TProtocol import TProtocolBase, TProtocolException

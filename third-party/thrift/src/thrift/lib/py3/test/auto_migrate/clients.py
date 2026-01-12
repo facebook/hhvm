@@ -31,7 +31,6 @@ from thrift.lib.py3.test.auto_migrate.auto_migrate_util import is_auto_migrated
 from thrift.lib.python.client.test.client_event_handler.helper import (
     TestHelper as ClientEventHandlerTestHelper,
 )
-
 from thrift.lib.python.client.test.event_handler_helper import (
     client_handler_that_throws,
 )
@@ -116,9 +115,10 @@ class ClientTests(unittest.IsolatedAsyncioTestCase):
                 )
 
     def test_bad_unix_domain_socket_raises_TransportError_on_connection(self) -> None:
-        with tempfile.TemporaryDirectory() as tempdir, socket.socket(
-            socket.AF_UNIX, socket.SOCK_STREAM
-        ) as s:
+        with (
+            tempfile.TemporaryDirectory() as tempdir,
+            socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as s,
+        ):
             socket_path: str = os.path.join(tempdir, "socket")
             s.bind(socket_path)
 

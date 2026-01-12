@@ -18,10 +18,8 @@ import types
 import unittest
 
 import thrift.test.thrift_python.enum_test.thrift_enums as enums
-
 import thrift.test.thrift_python.enum_test.thrift_mutable_types as mutable_types
 import thrift.test.thrift_python.enum_test.thrift_types as immutable_types
-
 from parameterized import parameterized
 from thrift.python.mutable_types import to_thrift_list
 

@@ -18,7 +18,6 @@ from collections.abc import Iterable, Mapping, Sequence, Set as abcSet
 from dataclasses import asdict as dataclass_asdict, is_dataclass
 from enum import IntEnum
 from math import isclose
-
 from typing import cast as typing_cast, Protocol, TypeVar
 
 from thrift.py3.exceptions import GeneratedError as py3_GeneratedError

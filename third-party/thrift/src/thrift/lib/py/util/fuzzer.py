@@ -29,7 +29,6 @@ import os
 import pprint
 import sys
 import time
-
 from urllib.parse import urlparse
 
 try:
@@ -263,7 +262,7 @@ class FuzzerConfiguration(object):
             val = type_(val)
         except ValueError:
             raise TypeError(
-                ("Expected type %s for setting %s, " "but got type %s (%s)")
+                ("Expected type %s for setting %s, but got type %s (%s)")
                 % (type_, name, type(val), val)
             )
         return val
@@ -282,10 +281,7 @@ class FuzzerConfiguration(object):
         else:
             if not isinstance(val, list):
                 raise TypeError(
-                    (
-                        "Expected list of length %s "
-                        "for setting %s, but got type %s (%s)"
-                    )
+                    ("Expected list of length %s for setting %s, but got type %s (%s)")
                     % (nargs, name, type(val), val)
                 )
             ret = []
@@ -314,7 +310,7 @@ class FuzzerConfiguration(object):
             raise TypeError("Invalid config file. Top-level must be Object.")
         for name, val in settings.items():
             if name not in cls.argspec:
-                raise ValueError(("Unrecognized configuration " "option: %s") % name)
+                raise ValueError(("Unrecognized configuration option: %s") % name)
             arg = cls.argspec[name]
             val = cls._try_parse(name, arg, val)
             attr_name = arg.get("attr_name", name)
@@ -500,7 +496,7 @@ class Service(object):
 
         if self.methods is None:
             raise ValueError(
-                "Service.load_methods must be " "called before Service.get_methods"
+                "Service.load_methods must be called before Service.get_methods"
             )
 
         if include is None:
@@ -1006,12 +1002,12 @@ class FuzzTester(object):
 
                 if did_crash:
                     logging.error(
-                        ("Method %s caused the " "server to crash.") % (method_name)
+                        ("Method %s caused the server to crash.") % (method_name)
                     )
                     break
                 else:
                     logging.info(
-                        ("Method %s raised unexpected " "exceptions in %d/%d tests.")
+                        ("Method %s raised unexpected exceptions in %d/%d tests.")
                         % (method_name, self.n_exceptions, self.n_tests)
                     )
 

@@ -24,7 +24,6 @@ import typing
 from multiprocessing import Event, Process, synchronize
 
 from thrift.lib.python.client.test.http2_helper import install_http2_routing_handler
-
 from thrift.py3.server import get_context, SocketAddress
 from thrift.python.leaf.thrift_services import LeafServiceInterface
 from thrift.python.server import ThriftServer

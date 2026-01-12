@@ -26,7 +26,6 @@ from typing import Sequence
 from derived.thrift_clients import DerivedTestingService
 from derived.thrift_services import DerivedTestingServiceInterface
 from folly.iobuf import IOBuf
-
 from stack_args.thrift_clients import StackService
 from stack_args.thrift_services import StackServiceInterface
 from stack_args.thrift_types import simple

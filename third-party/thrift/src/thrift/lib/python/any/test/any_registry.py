@@ -21,7 +21,6 @@ import typing
 import unittest
 
 import testing.thrift_types
-
 from apache.thrift.type.standard.thrift_types import StandardProtocol, TypeName
 from apache.thrift.type.type.thrift_types import Protocol
 from folly.iobuf import IOBuf

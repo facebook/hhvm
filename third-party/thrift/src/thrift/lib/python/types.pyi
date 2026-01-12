@@ -19,7 +19,6 @@ import typing
 from typing import Never
 
 from folly.iobuf import IOBuf
-
 from thrift.python.adapter import Adapter
 from thrift.python.exceptions import GeneratedError
 from thrift.python.serializer import Protocol

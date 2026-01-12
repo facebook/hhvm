@@ -38,7 +38,6 @@ from binary.thrift_types import (
     BinaryUnion as BinaryUnionImmutable,
 )
 from folly.iobuf import IOBuf
-
 from parameterized import parameterized
 from thrift.lib.python.test.test_server import TestServer
 from thrift.python.client import get_client

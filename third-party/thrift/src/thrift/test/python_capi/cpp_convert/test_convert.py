@@ -18,7 +18,6 @@
 import unittest
 
 import thrift.test.python_capi.cpp_convert.lib as lib
-
 from thrift.test.python_capi.thrift_dep.thrift_types import DepEnum, DepStruct, DepUnion
 
 

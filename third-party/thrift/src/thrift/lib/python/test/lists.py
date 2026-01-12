@@ -19,19 +19,14 @@ from __future__ import annotations
 
 import itertools
 import unittest
-
 from typing import List, Type, TypeVar
 
 import python_test.containers.thrift_mutable_types as mutable_containers_types
 import python_test.containers.thrift_types as immutable_containers_types
-
 import python_test.lists.thrift_mutable_types as mutable_lists_types
 import python_test.lists.thrift_types as immutable_lists_types
-
 from folly.iobuf import IOBuf
-
 from parameterized import parameterized_class
-
 from python_test.containers.thrift_types import Color, Foo, Lists
 from python_test.lists.thrift_types import (
     AtoIValueList,

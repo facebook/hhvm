@@ -21,7 +21,6 @@ from sys import float_info
 from typing import Callable
 
 import thrift.python.types  # noqa: F401
-
 from folly.iobuf import IOBuf
 from thrift.python.marshal import marshal_fixture as fixture
 from thrift.python.marshal.marshal_fixture import (

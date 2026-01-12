@@ -24,12 +24,9 @@ from typing import AbstractSet, Sequence, Tuple, Type, TypeVar
 
 import python_test.containers.thrift_mutable_types as mutable_containers_types
 import python_test.containers.thrift_types as immutable_containers_types
-
 import python_test.sets.thrift_mutable_types as mutable_sets_types
 import python_test.sets.thrift_types as immutable_sets_types
-
 from folly.iobuf import IOBuf
-
 from parameterized import parameterized_class
 from python_test.containers.thrift_types import Color, Foo, Sets
 from python_test.sets.thrift_types import (

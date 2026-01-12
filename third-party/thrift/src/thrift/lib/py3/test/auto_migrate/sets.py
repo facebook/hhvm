@@ -20,7 +20,6 @@ import unittest
 from typing import AbstractSet, Sequence, Tuple
 
 import thrift.python.types as python_types
-
 from testing.types import (
     Color,
     ColorGroups,
@@ -36,7 +35,6 @@ from thrift.lib.py3.test.auto_migrate.auto_migrate_util import (
     brokenInAutoMigrate,
     is_auto_migrated,
 )
-
 from thrift.lib.python.test.testing_utils import Untruthy
 from thrift.py3.types import Container, Set as Py3Set
 from thrift.python.types import Set as PythonSet

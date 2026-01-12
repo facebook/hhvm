@@ -20,7 +20,6 @@ import unittest
 # this validates we can handle some unfortunate pickling behavior
 # please always import containers from .types
 from testing.containers_FBTHRIFT_ONLY_DO_NOT_USE import List__i32
-
 from testing.types import I32List
 
 

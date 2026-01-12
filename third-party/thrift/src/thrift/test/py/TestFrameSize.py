@@ -22,7 +22,6 @@ import unittest
 from thrift.protocol import TBinaryProtocol
 from thrift.transport import TTransport
 from thrift.transport.THeaderTransport import THeaderTransport
-
 from ThriftTest.ttypes import Xtruct
 
 

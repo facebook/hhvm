@@ -19,18 +19,14 @@
 from __future__ import annotations
 
 import types
-
 import unittest
-
 from typing import Type, TypeVar
 
 import python_test.refs.thrift_mutable_types as mutable_types
 import python_test.refs.thrift_types as immutable_types
 import thrift.python.mutable_serializer as mutable_serializer
 import thrift.python.serializer as immutable_serializer
-
 from parameterized import parameterized_class
-
 from python_test.refs.thrift_types import Circular, ComplexRef as ComplexRefType
 from thrift.python.mutable_types import (
     _ThriftListWrapper,

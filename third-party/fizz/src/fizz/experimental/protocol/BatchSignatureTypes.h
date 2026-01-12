@@ -27,10 +27,10 @@ struct BatchSignatureSchemes;
  */
 template <>
 struct BatchSignatureSchemes<Sha256> {
-  constexpr static std::array<SignatureScheme, 2> schemes = {
+  constexpr static std::array<SignatureScheme, 2> schemes = {{
       SignatureScheme::ecdsa_secp256r1_sha256_batch,
       SignatureScheme::rsa_pss_sha256_batch,
-  };
+  }};
 
   static folly::Optional<SignatureScheme> getFromBaseScheme(
       SignatureScheme baseScheme) {

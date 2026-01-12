@@ -17,7 +17,6 @@
 import asyncio
 
 import click
-
 from thrift.conformance.rpc.thrift_clients import RPCConformanceService
 from thrift.conformance.rpc.thrift_types import (
     ClientInstruction,

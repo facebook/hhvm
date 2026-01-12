@@ -17,7 +17,6 @@ import io
 import os
 import os.path
 import tempfile
-
 import unittest
 from unittest import mock
 

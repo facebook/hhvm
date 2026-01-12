@@ -21,7 +21,6 @@ import tempfile
 import unittest
 
 import pkg_resources
-
 from xplat.thrift.compiler.codemod.test_utils import read_file, run_binary, write_file
 
 HEADER_NO_URI = """

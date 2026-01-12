@@ -27,7 +27,6 @@ from importlib import resources
 from apache.thrift.ast.thrift_types import Ast
 from apache.thrift.type.schema.thrift_types import ReturnType
 from apache.thrift.type.standard.thrift_types import TypeName, TypeUri
-
 from thrift.python.serializer import deserialize
 
 file_manager = ExitStack()

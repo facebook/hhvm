@@ -89,6 +89,24 @@ abstract class FB303ServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
   const class<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = FB303ServiceStaticMetadata::class;
   const string THRIFT_SVC_NAME = FB303ServiceStaticMetadata::THRIFT_SVC_NAME;
 
+  public function getMethodMetadata_renamed_rpc(
+  ): \ThriftServiceRequestResponseMethod<
+    FB303ServiceAsyncIf,
+    \test\fixtures\basic\FB303Service_renamed_rpc_args,
+    \test\fixtures\basic\FB303Service_renamed_rpc_result,
+    \test\fixtures\basic\MyRenamedStruct,
+  > {
+    return new \ThriftServiceRequestResponseMethod(
+      \test\fixtures\basic\FB303Service_renamed_rpc_args::class,
+      \test\fixtures\basic\FB303Service_renamed_rpc_result::class,
+      async (
+        FB303ServiceAsyncIf $handler,
+        \test\fixtures\basic\FB303Service_renamed_rpc_args $args,
+      )[defaults] ==> {
+        return await $handler->renamed_rpc($args->int_parameter);
+      },
+    );
+  }
   protected async function process_renamed_rpc(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('renamed_rpc');
     $reply_type = \TMessageType::REPLY;

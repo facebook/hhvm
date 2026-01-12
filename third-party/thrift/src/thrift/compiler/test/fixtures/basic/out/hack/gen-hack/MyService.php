@@ -296,6 +296,25 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
   const class<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = MyServiceStaticMetadata::class;
   const string THRIFT_SVC_NAME = MyServiceStaticMetadata::THRIFT_SVC_NAME;
 
+  public function getMethodMetadata_ping(
+  ): \ThriftServiceRequestResponseMethod<
+    MyServiceAsyncIf,
+    \test\fixtures\basic\MyService_ping_args,
+    \test\fixtures\basic\MyService_ping_result,
+    null,
+  > {
+    return new \ThriftServiceRequestResponseMethod(
+      \test\fixtures\basic\MyService_ping_args::class,
+      \test\fixtures\basic\MyService_ping_result::class,
+      async (
+        MyServiceAsyncIf $handler,
+        \test\fixtures\basic\MyService_ping_args $args,
+      )[defaults] ==> {
+        await $handler->ping();
+        return null;
+      },
+    );
+  }
   protected async function process_ping(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('ping');
     $reply_type = \TMessageType::REPLY;
@@ -311,6 +330,24 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
       $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
     }
     $this->writeHelper($result, 'ping', $seqid, $handler_ctx, $output, $reply_type);
+  }
+  public function getMethodMetadata_getRandomData(
+  ): \ThriftServiceRequestResponseMethod<
+    MyServiceAsyncIf,
+    \test\fixtures\basic\MyService_getRandomData_args,
+    \test\fixtures\basic\MyService_getRandomData_result,
+    string,
+  > {
+    return new \ThriftServiceRequestResponseMethod(
+      \test\fixtures\basic\MyService_getRandomData_args::class,
+      \test\fixtures\basic\MyService_getRandomData_result::class,
+      async (
+        MyServiceAsyncIf $handler,
+        \test\fixtures\basic\MyService_getRandomData_args $args,
+      )[defaults] ==> {
+        return await $handler->getRandomData();
+      },
+    );
   }
   protected async function process_getRandomData(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('getRandomData');
@@ -328,6 +365,25 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
     }
     $this->writeHelper($result, 'getRandomData', $seqid, $handler_ctx, $output, $reply_type);
   }
+  public function getMethodMetadata_sink(
+  ): \ThriftServiceRequestResponseMethod<
+    MyServiceAsyncIf,
+    \test\fixtures\basic\MyService_sink_args,
+    \test\fixtures\basic\MyService_sink_result,
+    null,
+  > {
+    return new \ThriftServiceRequestResponseMethod(
+      \test\fixtures\basic\MyService_sink_args::class,
+      \test\fixtures\basic\MyService_sink_result::class,
+      async (
+        MyServiceAsyncIf $handler,
+        \test\fixtures\basic\MyService_sink_args $args,
+      )[defaults] ==> {
+        await $handler->sink($args->sink);
+        return null;
+      },
+    );
+  }
   protected async function process_sink(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('sink');
     $reply_type = \TMessageType::REPLY;
@@ -343,6 +399,25 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
       $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
     }
     $this->writeHelper($result, 'sink', $seqid, $handler_ctx, $output, $reply_type);
+  }
+  public function getMethodMetadata_putDataById(
+  ): \ThriftServiceRequestResponseMethod<
+    MyServiceAsyncIf,
+    \test\fixtures\basic\MyService_putDataById_args,
+    \test\fixtures\basic\MyService_putDataById_result,
+    null,
+  > {
+    return new \ThriftServiceRequestResponseMethod(
+      \test\fixtures\basic\MyService_putDataById_args::class,
+      \test\fixtures\basic\MyService_putDataById_result::class,
+      async (
+        MyServiceAsyncIf $handler,
+        \test\fixtures\basic\MyService_putDataById_args $args,
+      )[defaults] ==> {
+        await $handler->putDataById($args->id, $args->data);
+        return null;
+      },
+    );
   }
   protected async function process_putDataById(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('putDataById');
@@ -360,6 +435,24 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
     }
     $this->writeHelper($result, 'putDataById', $seqid, $handler_ctx, $output, $reply_type);
   }
+  public function getMethodMetadata_hasDataById(
+  ): \ThriftServiceRequestResponseMethod<
+    MyServiceAsyncIf,
+    \test\fixtures\basic\MyService_hasDataById_args,
+    \test\fixtures\basic\MyService_hasDataById_result,
+    bool,
+  > {
+    return new \ThriftServiceRequestResponseMethod(
+      \test\fixtures\basic\MyService_hasDataById_args::class,
+      \test\fixtures\basic\MyService_hasDataById_result::class,
+      async (
+        MyServiceAsyncIf $handler,
+        \test\fixtures\basic\MyService_hasDataById_args $args,
+      )[defaults] ==> {
+        return await $handler->hasDataById($args->id);
+      },
+    );
+  }
   protected async function process_hasDataById(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('hasDataById');
     $reply_type = \TMessageType::REPLY;
@@ -375,6 +468,24 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
       $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
     }
     $this->writeHelper($result, 'hasDataById', $seqid, $handler_ctx, $output, $reply_type);
+  }
+  public function getMethodMetadata_getDataById(
+  ): \ThriftServiceRequestResponseMethod<
+    MyServiceAsyncIf,
+    \test\fixtures\basic\MyService_getDataById_args,
+    \test\fixtures\basic\MyService_getDataById_result,
+    string,
+  > {
+    return new \ThriftServiceRequestResponseMethod(
+      \test\fixtures\basic\MyService_getDataById_args::class,
+      \test\fixtures\basic\MyService_getDataById_result::class,
+      async (
+        MyServiceAsyncIf $handler,
+        \test\fixtures\basic\MyService_getDataById_args $args,
+      )[defaults] ==> {
+        return await $handler->getDataById($args->id);
+      },
+    );
   }
   protected async function process_getDataById(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('getDataById');
@@ -392,6 +503,25 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
     }
     $this->writeHelper($result, 'getDataById', $seqid, $handler_ctx, $output, $reply_type);
   }
+  public function getMethodMetadata_deleteDataById(
+  ): \ThriftServiceRequestResponseMethod<
+    MyServiceAsyncIf,
+    \test\fixtures\basic\MyService_deleteDataById_args,
+    \test\fixtures\basic\MyService_deleteDataById_result,
+    null,
+  > {
+    return new \ThriftServiceRequestResponseMethod(
+      \test\fixtures\basic\MyService_deleteDataById_args::class,
+      \test\fixtures\basic\MyService_deleteDataById_result::class,
+      async (
+        MyServiceAsyncIf $handler,
+        \test\fixtures\basic\MyService_deleteDataById_args $args,
+      )[defaults] ==> {
+        await $handler->deleteDataById($args->id);
+        return null;
+      },
+    );
+  }
   protected async function process_deleteDataById(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('deleteDataById');
     $reply_type = \TMessageType::REPLY;
@@ -407,6 +537,21 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
       $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
     }
     $this->writeHelper($result, 'deleteDataById', $seqid, $handler_ctx, $output, $reply_type);
+  }
+  public function getMethodMetadata_lobDataById(
+  ): \ThriftServiceOnewayMethod<
+    MyServiceAsyncIf,
+    \test\fixtures\basic\MyService_lobDataById_args,
+  > {
+    return new \ThriftServiceOnewayMethod(
+      \test\fixtures\basic\MyService_lobDataById_args::class,
+      async (
+        MyServiceAsyncIf $handler,
+        \test\fixtures\basic\MyService_lobDataById_args $args,
+      )[defaults] ==> {
+        await $handler->lobDataById($args->id, $args->data);
+      },
+    );
   }
   protected async function process_lobDataById(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('lobDataById');

@@ -101,6 +101,24 @@ abstract class BarAsyncProcessorBase extends \ThriftAsyncProcessor {
   const class<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = BarStaticMetadata::class;
   const string THRIFT_SVC_NAME = BarStaticMetadata::THRIFT_SVC_NAME;
 
+  public function getMethodMetadata_baz(
+  ): \ThriftServiceRequestResponseMethod<
+    BarAsyncIf,
+    Bar_baz_args,
+    Bar_baz_result,
+    string,
+  > {
+    return new \ThriftServiceRequestResponseMethod(
+      Bar_baz_args::class,
+      Bar_baz_result::class,
+      async (
+        BarAsyncIf $handler,
+        Bar_baz_args $args,
+      )[defaults] ==> {
+        return await $handler->baz($args->a, $args->b, $args->c, $args->d, $args->e);
+      },
+    );
+  }
   protected async function process_baz(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('baz');
     $reply_type = \TMessageType::REPLY;

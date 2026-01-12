@@ -81,6 +81,25 @@ abstract class MyServicePrioChildAsyncProcessorBase extends MyServicePrioParentA
   const class<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = MyServicePrioChildStaticMetadata::class;
   const string THRIFT_SVC_NAME = MyServicePrioChildStaticMetadata::THRIFT_SVC_NAME;
 
+  public function getMethodMetadata_pang(
+  ): \ThriftServiceRequestResponseMethod<
+    MyServicePrioChildAsyncIf,
+    MyServicePrioChild_pang_args,
+    MyServicePrioChild_pang_result,
+    null,
+  > {
+    return new \ThriftServiceRequestResponseMethod(
+      MyServicePrioChild_pang_args::class,
+      MyServicePrioChild_pang_result::class,
+      async (
+        MyServicePrioChildAsyncIf $handler,
+        MyServicePrioChild_pang_args $args,
+      )[defaults] ==> {
+        await $handler->pang();
+        return null;
+      },
+    );
+  }
   protected async function process_pang(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('pang');
     $reply_type = \TMessageType::REPLY;

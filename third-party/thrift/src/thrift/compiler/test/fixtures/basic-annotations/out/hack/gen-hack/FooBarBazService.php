@@ -135,6 +135,25 @@ abstract class FooBarBazServiceAsyncProcessorBase extends \ThriftAsyncProcessor 
   const class<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = FooBarBazServiceStaticMetadata::class;
   const string THRIFT_SVC_NAME = FooBarBazServiceStaticMetadata::THRIFT_SVC_NAME;
 
+  public function getMethodMetadata_foo(
+  ): \ThriftServiceRequestResponseMethod<
+    FooBarBazServiceAsyncIf,
+    FooBarBazService_foo_args,
+    FooBarBazService_foo_result,
+    null,
+  > {
+    return new \ThriftServiceRequestResponseMethod(
+      FooBarBazService_foo_args::class,
+      FooBarBazService_foo_result::class,
+      async (
+        FooBarBazServiceAsyncIf $handler,
+        FooBarBazService_foo_args $args,
+      )[defaults] ==> {
+        await $handler->foo();
+        return null;
+      },
+    );
+  }
   protected async function process_foo(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('foo');
     $reply_type = \TMessageType::REPLY;
@@ -151,6 +170,25 @@ abstract class FooBarBazServiceAsyncProcessorBase extends \ThriftAsyncProcessor 
     }
     $this->writeHelper($result, 'foo', $seqid, $handler_ctx, $output, $reply_type);
   }
+  public function getMethodMetadata_bar(
+  ): \ThriftServiceRequestResponseMethod<
+    FooBarBazServiceAsyncIf,
+    FooBarBazService_bar_args,
+    FooBarBazService_bar_result,
+    null,
+  > {
+    return new \ThriftServiceRequestResponseMethod(
+      FooBarBazService_bar_args::class,
+      FooBarBazService_bar_result::class,
+      async (
+        FooBarBazServiceAsyncIf $handler,
+        FooBarBazService_bar_args $args,
+      )[defaults] ==> {
+        await $handler->bar();
+        return null;
+      },
+    );
+  }
   protected async function process_bar(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('bar');
     $reply_type = \TMessageType::REPLY;
@@ -166,6 +204,25 @@ abstract class FooBarBazServiceAsyncProcessorBase extends \ThriftAsyncProcessor 
       $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
     }
     $this->writeHelper($result, 'bar', $seqid, $handler_ctx, $output, $reply_type);
+  }
+  public function getMethodMetadata_baz(
+  ): \ThriftServiceRequestResponseMethod<
+    FooBarBazServiceAsyncIf,
+    FooBarBazService_baz_args,
+    FooBarBazService_baz_result,
+    null,
+  > {
+    return new \ThriftServiceRequestResponseMethod(
+      FooBarBazService_baz_args::class,
+      FooBarBazService_baz_result::class,
+      async (
+        FooBarBazServiceAsyncIf $handler,
+        FooBarBazService_baz_args $args,
+      )[defaults] ==> {
+        await $handler->baz();
+        return null;
+      },
+    );
   }
   protected async function process_baz(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('baz');

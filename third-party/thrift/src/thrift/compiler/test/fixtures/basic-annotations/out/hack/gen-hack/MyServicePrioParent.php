@@ -108,6 +108,25 @@ abstract class MyServicePrioParentAsyncProcessorBase extends \ThriftAsyncProcess
   const class<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = MyServicePrioParentStaticMetadata::class;
   const string THRIFT_SVC_NAME = MyServicePrioParentStaticMetadata::THRIFT_SVC_NAME;
 
+  public function getMethodMetadata_ping(
+  ): \ThriftServiceRequestResponseMethod<
+    MyServicePrioParentAsyncIf,
+    MyServicePrioParent_ping_args,
+    MyServicePrioParent_ping_result,
+    null,
+  > {
+    return new \ThriftServiceRequestResponseMethod(
+      MyServicePrioParent_ping_args::class,
+      MyServicePrioParent_ping_result::class,
+      async (
+        MyServicePrioParentAsyncIf $handler,
+        MyServicePrioParent_ping_args $args,
+      )[defaults] ==> {
+        await $handler->ping();
+        return null;
+      },
+    );
+  }
   protected async function process_ping(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('ping');
     $reply_type = \TMessageType::REPLY;
@@ -123,6 +142,25 @@ abstract class MyServicePrioParentAsyncProcessorBase extends \ThriftAsyncProcess
       $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
     }
     $this->writeHelper($result, 'ping', $seqid, $handler_ctx, $output, $reply_type);
+  }
+  public function getMethodMetadata_pong(
+  ): \ThriftServiceRequestResponseMethod<
+    MyServicePrioParentAsyncIf,
+    MyServicePrioParent_pong_args,
+    MyServicePrioParent_pong_result,
+    null,
+  > {
+    return new \ThriftServiceRequestResponseMethod(
+      MyServicePrioParent_pong_args::class,
+      MyServicePrioParent_pong_result::class,
+      async (
+        MyServicePrioParentAsyncIf $handler,
+        MyServicePrioParent_pong_args $args,
+      )[defaults] ==> {
+        await $handler->pong();
+        return null;
+      },
+    );
   }
   protected async function process_pong(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('pong');

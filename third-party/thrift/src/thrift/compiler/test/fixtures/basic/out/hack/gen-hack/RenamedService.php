@@ -87,6 +87,25 @@ abstract class RenamedServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
   const class<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = RenamedServiceStaticMetadata::class;
   const string THRIFT_SVC_NAME = RenamedServiceStaticMetadata::THRIFT_SVC_NAME;
 
+  public function getMethodMetadata_simple_rpc(
+  ): \ThriftServiceRequestResponseMethod<
+    RenamedServiceAsyncIf,
+    \test\fixtures\basic\RenamedService_simple_rpc_args,
+    \test\fixtures\basic\RenamedService_simple_rpc_result,
+    null,
+  > {
+    return new \ThriftServiceRequestResponseMethod(
+      \test\fixtures\basic\RenamedService_simple_rpc_args::class,
+      \test\fixtures\basic\RenamedService_simple_rpc_result::class,
+      async (
+        RenamedServiceAsyncIf $handler,
+        \test\fixtures\basic\RenamedService_simple_rpc_args $args,
+      )[defaults] ==> {
+        await $handler->simple_rpc();
+        return null;
+      },
+    );
+  }
   protected async function process_simple_rpc(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('simple_rpc');
     $reply_type = \TMessageType::REPLY;

@@ -88,6 +88,24 @@ abstract class TestServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
   const class<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = TestServiceStaticMetadata::class;
   const string THRIFT_SVC_NAME = TestServiceStaticMetadata::THRIFT_SVC_NAME;
 
+  public function getMethodMetadata_init(
+  ): \ThriftServiceRequestResponseMethod<
+    TestServiceAsyncIf,
+    \test\namespace_from_package_without_module_name\TestService_init_args,
+    \test\namespace_from_package_without_module_name\TestService_init_result,
+    int,
+  > {
+    return new \ThriftServiceRequestResponseMethod(
+      \test\namespace_from_package_without_module_name\TestService_init_args::class,
+      \test\namespace_from_package_without_module_name\TestService_init_result::class,
+      async (
+        TestServiceAsyncIf $handler,
+        \test\namespace_from_package_without_module_name\TestService_init_args $args,
+      )[defaults] ==> {
+        return await $handler->init($args->int1);
+      },
+    );
+  }
   protected async function process_init(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('init');
     $reply_type = \TMessageType::REPLY;

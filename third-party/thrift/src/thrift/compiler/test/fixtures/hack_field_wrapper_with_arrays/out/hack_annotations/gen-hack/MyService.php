@@ -83,6 +83,24 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
   const class<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = MyServiceStaticMetadata::class;
   const string THRIFT_SVC_NAME = MyServiceStaticMetadata::THRIFT_SVC_NAME;
 
+  public function getMethodMetadata_second(
+  ): \ThriftServiceRequestResponseMethod<
+    MyServiceAsyncIf,
+    MyService_second_args,
+    MyService_second_result,
+    bool,
+  > {
+    return new \ThriftServiceRequestResponseMethod(
+      MyService_second_args::class,
+      MyService_second_result::class,
+      async (
+        MyServiceAsyncIf $handler,
+        MyService_second_args $args,
+      )[defaults] ==> {
+        return await $handler->second($args->count);
+      },
+    );
+  }
   protected async function process_second(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('second');
     $reply_type = \TMessageType::REPLY;

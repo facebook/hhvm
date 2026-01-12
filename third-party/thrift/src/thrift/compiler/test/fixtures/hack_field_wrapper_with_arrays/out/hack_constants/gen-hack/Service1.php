@@ -156,6 +156,24 @@ abstract class Service1AsyncProcessorBase extends \ThriftAsyncProcessor {
   const class<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = Service1StaticMetadata::class;
   const string THRIFT_SVC_NAME = Service1StaticMetadata::THRIFT_SVC_NAME;
 
+  public function getMethodMetadata_func(
+  ): \ThriftServiceRequestResponseMethod<
+    Service1AsyncIf,
+    Service1_func_args,
+    Service1_func_result,
+    MyStruct,
+  > {
+    return new \ThriftServiceRequestResponseMethod(
+      Service1_func_args::class,
+      Service1_func_result::class,
+      async (
+        Service1AsyncIf $handler,
+        Service1_func_args $args,
+      )[defaults] ==> {
+        return await $handler->func($args->arg1, $args->arg2);
+      },
+    );
+  }
   protected async function process_func(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('func');
     $reply_type = \TMessageType::REPLY;
@@ -172,6 +190,24 @@ abstract class Service1AsyncProcessorBase extends \ThriftAsyncProcessor {
     }
     $this->writeHelper($result, 'func', $seqid, $handler_ctx, $output, $reply_type);
   }
+  public function getMethodMetadata_func1(
+  ): \ThriftServiceRequestResponseMethod<
+    Service1AsyncIf,
+    Service1_func1_args,
+    Service1_func1_result,
+    MyStruct,
+  > {
+    return new \ThriftServiceRequestResponseMethod(
+      Service1_func1_args::class,
+      Service1_func1_result::class,
+      async (
+        Service1AsyncIf $handler,
+        Service1_func1_args $args,
+      )[defaults] ==> {
+        return await $handler->func1($args->arg1, $args->arg2);
+      },
+    );
+  }
   protected async function process_func1(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('func1');
     $reply_type = \TMessageType::REPLY;
@@ -187,6 +223,24 @@ abstract class Service1AsyncProcessorBase extends \ThriftAsyncProcessor {
       $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
     }
     $this->writeHelper($result, 'func1', $seqid, $handler_ctx, $output, $reply_type);
+  }
+  public function getMethodMetadata_func2(
+  ): \ThriftServiceRequestResponseMethod<
+    Service1AsyncIf,
+    Service1_func2_args,
+    Service1_func2_result,
+    i64WithWrapper,
+  > {
+    return new \ThriftServiceRequestResponseMethod(
+      Service1_func2_args::class,
+      Service1_func2_result::class,
+      async (
+        Service1AsyncIf $handler,
+        Service1_func2_args $args,
+      )[defaults] ==> {
+        return await $handler->func2($args->arg1, $args->arg2);
+      },
+    );
   }
   protected async function process_func2(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('func2');

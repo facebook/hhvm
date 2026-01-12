@@ -6,4 +6,4 @@
 # LICENSE file in the root directory of this source tree.
 
 set -x
-python3 "$(dirname "$0")/build/fbcode_builder/getdeps.py" install-system-deps --recursive watchman
+python3 "$(dirname "$0")/build/fbcode_builder/getdeps.py" --allow-system-packages install-system-deps --recursive watchman

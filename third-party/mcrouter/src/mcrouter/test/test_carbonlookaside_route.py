@@ -14,7 +14,6 @@ import time
 from string import Template
 
 from mcrouter.test.MCProcess import MockMemcached
-
 from mcrouter.test.McrouterTestCase import McrouterTestCase
 
 

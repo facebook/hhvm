@@ -9,7 +9,6 @@
 import time
 
 from mcrouter.test.MCProcess import MockMemcached
-
 from mcrouter.test.McrouterTestCase import McrouterTestCase
 
 

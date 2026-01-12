@@ -9,7 +9,6 @@
 import time
 
 from mcrouter.test.McrouterTestCase import McrouterTestCase
-
 from mcrouter.test.mock_servers import SleepServer
 
 

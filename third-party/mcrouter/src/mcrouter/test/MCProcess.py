@@ -331,7 +331,7 @@ class MCProcess(ProcessBase):
             elif line.startswith("SERVER_ERROR"):
                 if hadValue:
                     raise Exception(
-                        "Received hit reply + SERVER_ERROR for " "multiget request"
+                        "Received hit reply + SERVER_ERROR for multiget request"
                     )
                 return line
             else:

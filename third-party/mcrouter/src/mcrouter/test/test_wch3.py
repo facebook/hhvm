@@ -10,7 +10,6 @@
 from collections import defaultdict
 
 from mcrouter.test.McrouterTestCase import McrouterTestCase
-
 from mcrouter.test.mock_servers import MockServer
 
 

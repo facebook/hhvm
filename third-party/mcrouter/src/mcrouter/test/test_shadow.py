@@ -164,7 +164,7 @@ class TestShadow(McrouterTestCase):
 
     def test_runtime_variables_override_key_fraction(self):
         mcrouter = self.get_mcrouter(
-            ["--runtime-vars-file=mcrouter/" "test/runtime_vars_file.json"]
+            ["--runtime-vars-file=mcrouter/test/runtime_vars_file.json"]
         )
         # SpookyHashV2 will choose these values for 0.4 .. 0.5:
         shadow_list = [9, 10, 20, 26, 32, 34, 42, 47, 54, 63, 64, 98]
@@ -190,7 +190,7 @@ class TestShadow(McrouterTestCase):
 
     def test_runtime_variables_override_range(self):
         mcrouter = self.get_mcrouter(
-            ["--runtime-vars-file=mcrouter/" "test/runtime_vars_file.json"]
+            ["--runtime-vars-file=mcrouter/test/runtime_vars_file.json"]
         )
         # SpookyHashV2 will choose these values for 0.0 .. 0.1:
         shadow_list = [10, 11, 15, 34, 40, 43, 47, 71, 93]

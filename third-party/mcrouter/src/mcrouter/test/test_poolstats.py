@@ -7,7 +7,6 @@
 # pyre-unsafe
 
 import os
-
 import time
 
 from mcrouter.test.MCProcess import Mcrouter

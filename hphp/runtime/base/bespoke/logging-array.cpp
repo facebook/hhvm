@@ -157,8 +157,8 @@ ArrayData* maybeMakeLoggingArray(ArrayData* ad, LoggingProfile* profile) {
 
   if (ad->isSampledArray() || !ad->isVanilla()) {
     assertx(!profile->key.isRuntimeLocation());
-    DEBUG_ONLY auto const op = *profile->key.op();
-    assertx(isArrLikeCastOp(op) || op == Op::NewObjD);
+    DEBUG_ONLY auto const op = profile->key.op();
+    assertx(!op || isArrLikeCastOp(*op) || *op == Op::NewObjD);
     FTRACE(5, "Skipping logging for {} array.\n",
            ad->isSampledArray() ? "sampled" : "bespoke");
     return ad;

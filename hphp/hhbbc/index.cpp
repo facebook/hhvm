@@ -10924,12 +10924,21 @@ private:
     // considered to be overridden.
     for (auto& [name, mte] : cinfo->methods) {
       assertx(!cinfo->missingMethods.contains(name));
-      if (is_special_method_name(name)) {
-        attribute_setter(mte.attrs, false, AttrNoOverride);
-        mte.clearNoOverrideRegular();
-      } else {
-        attribute_setter(mte.attrs, true, AttrNoOverride);
+
+      auto const noOverride = !is_special_method_name(name);
+      attribute_setter(mte.attrs, noOverride, AttrNoOverride);
+      if (noOverride) {
         mte.setNoOverrideRegular();
+      } else {
+        mte.clearNoOverrideRegular();
+      }
+
+      // Keep func attrs in sync
+      auto const meth = mte.meth();
+      if (meth.cls->tsame(cinfo->name)) {
+        assertx(meth.idx < cls.methods.size());
+        auto& m = cls.methods[meth.idx];
+        attribute_setter(m->attrs, noOverride, AttrNoOverride);
       }
     }
 
@@ -15259,6 +15268,17 @@ protected:
           attribute_setter(mte.attrs, false, AttrNoOverride);
         } else if (!noOverride()) {
           attribute_setter(mte.attrs, false, AttrNoOverride);
+        }
+
+        // Keep func attrs in sync
+        if (meth.cls->tsame(cinfo->name)) {
+          assertx(meth.idx < cls.methods.size());
+          auto& m = cls.methods[meth.idx];
+          attribute_setter(
+            m->attrs,
+            (bool)(mte.attrs & AttrNoOverride),
+            AttrNoOverride
+          );
         }
 
         auto& entry = cinfo->methodFamilies.at(name);

@@ -111,9 +111,6 @@ class EventBaseBackend : public folly::EventBaseBackendBase {
   EventBaseBackend() {
     evb_ = event_base_new();
   }
-  explicit EventBaseBackend(event_base* evb) : evb_(evb) {
-    CHECK(evb);
-  }
   ~EventBaseBackend() override {
     event_base_free(evb_);
   }

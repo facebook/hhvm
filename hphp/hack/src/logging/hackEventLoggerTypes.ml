@@ -132,6 +132,8 @@ type rollout_flags = {
   edenfs_file_watcher_sync_queries_obey_deferral: bool;
       (** POC: @frankemrich -  If false, ServerNotifier.get_changes_sync backed by Edenfs_watcher will return
           file changes even when we are currently deferring changes (e.g. because meerkat is running). *)
+  edenfs_file_watcher_state_tracking: bool;
+      (** POC: @frankemrich - Whether to use Eden's state tracking API *)
   fanout_strip_class_location: bool;
       (* POC: @fzn, if true fanout strips class location when comparing shallow classes for minor changes *)
 }

@@ -173,6 +173,8 @@ let init
       timeout_secs;
       throttle_time_ms;
       report_telemetry;
+      state_tracking;
+      sync_queries_obey_deferral;
       _;
     } =
       local_config.edenfs_file_watcher
@@ -185,6 +187,8 @@ let init
         timeout_secs;
         throttle_time_ms;
         report_telemetry;
+        state_tracking;
+        sync_queries_obey_deferral;
       }
     in
     match Edenfs_watcher.init init_settings with
@@ -357,6 +361,9 @@ let convert_edenfs_watcher_changes
       (* TODO(T215219438) Need to inform ServerRevisionTracker about changed files,
          similarly to what convert_watchman_changes does *)
       SSet.of_list file_changes
+    | Edenfs_watcher_types.StateEnter _
+    | Edenfs_watcher_types.StateLeave _ ->
+      SSet.empty
   in
   ServerRevisionTracker.files_changed local_config (SSet.cardinal changed_files);
   changed_files

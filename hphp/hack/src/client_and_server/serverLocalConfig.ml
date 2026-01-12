@@ -96,6 +96,7 @@ module EdenfsFileWatcher = struct
             Eden will send us a change notification. *)
     report_telemetry: bool;
         (** If true, will log additional telemetry collected from within Edenfs_watcher *)
+    state_tracking: bool;
   }
 
   let default =
@@ -106,6 +107,7 @@ module EdenfsFileWatcher = struct
       throttle_time_ms = 50;
       sync_queries_obey_deferral = true;
       report_telemetry = false;
+      state_tracking = false;
     }
 
   let load ~current_version ~default config =
@@ -148,6 +150,12 @@ module EdenfsFileWatcher = struct
         ~default:default.report_telemetry
         config
     in
+    let state_tracking =
+      bool_
+        "edenfs_file_watcher_state_tracking"
+        ~default:default.state_tracking
+        config
+    in
     {
       debug_logging;
       enabled;
@@ -155,6 +163,7 @@ module EdenfsFileWatcher = struct
       sync_queries_obey_deferral;
       throttle_time_ms;
       report_telemetry;
+      state_tracking;
     }
 end
 

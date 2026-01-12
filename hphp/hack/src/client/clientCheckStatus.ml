@@ -498,6 +498,8 @@ let edenfs_watcher_get_raw_updates_since ~root ~clock ~local_config =
     timeout_secs;
     throttle_time_ms;
     report_telemetry;
+    state_tracking;
+    sync_queries_obey_deferral;
     _;
   } =
     local_config.ServerLocalConfig.edenfs_file_watcher
@@ -510,12 +512,17 @@ let edenfs_watcher_get_raw_updates_since ~root ~clock ~local_config =
       timeout_secs;
       throttle_time_ms;
       report_telemetry;
+      state_tracking;
+      sync_queries_obey_deferral;
     }
   in
   let translate_changes list = function
     | Edenfs_watcher_types.FileChanges file_changes
     | CommitTransition { file_changes; _ } ->
       List.append list file_changes
+    | StateEnter _
+    | StateLeave _ ->
+      []
   in
 
   match Edenfs_watcher.Standalone.get_changes_since settings clock with

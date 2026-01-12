@@ -1031,5 +1031,7 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
       edenfs_file_watcher_enabled = options.edenfs_file_watcher.enabled;
       edenfs_file_watcher_sync_queries_obey_deferral =
         options.edenfs_file_watcher.sync_queries_obey_deferral;
+      edenfs_file_watcher_state_tracking =
+        options.edenfs_file_watcher.state_tracking;
       fanout_strip_class_location = options.fanout_strip_class_location;
     }

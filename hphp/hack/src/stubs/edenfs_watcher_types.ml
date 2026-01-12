@@ -16,6 +16,8 @@ type settings = {
           This means that this is the minimum period (in milliseconds) between each time
           Eden will send us a change notification. *)
   report_telemetry: bool;
+  state_tracking: bool;
+  sync_queries_obey_deferral: bool;
 }
 
 type changes =
@@ -26,6 +28,8 @@ type changes =
       file_changes: string list;
           (** List is not guaranteed to be deduplicated *)
     }
+  | StateEnter of string
+  | StateLeave of string
 [@@deriving show]
 
 type edenfs_watcher_error =

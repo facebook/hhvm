@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<74b91cd2aac977e2478c98164283d609>>
+// @generated SignedSource<<0548444f57bf19fe18b5e399e268d541>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -189,6 +189,9 @@ pub struct Settings {
     /// Eden will send us a change notification.
     pub throttle_time_ms: isize,
     pub report_telemetry: bool,
+    /// Whether to use Eden's state tracking feature
+    pub state_tracking: bool,
+    pub sync_queries_obey_deferral: bool,
 }
 
 #[derive(
@@ -217,6 +220,8 @@ pub enum Changes {
         /// List is not guaranteed to be deduplicated
         file_changes: Vec<String>,
     },
+    StateEnter(String),
+    StateLeave(String),
 }
 
 #[derive(

@@ -11,6 +11,8 @@
 #include <folly/ScopeGuard.h>
 #include <proxygen/httpserver/ResponseHandler.h>
 
+#include <memory>
+
 namespace proxygen {
 
 /**
@@ -126,7 +128,7 @@ class ResponseBuilder {
   }
 
   ResponseBuilder& trailers(const HTTPHeaders& trailers) {
-    trailers_.reset(new HTTPHeaders(trailers));
+    trailers_ = std::make_unique<HTTPHeaders>(trailers);
     return *this;
   }
 

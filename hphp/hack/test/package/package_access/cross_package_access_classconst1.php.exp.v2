@@ -7,7 +7,7 @@ error: Typing[4472] Cannot access a class defined in package pkg2 from package p
 cross_package_access_classconst1.php--a.php:4:9
     2 | // package pkg1
     3 | function test(): void {
-[1] 4 |    $b = B1::class; // error when package_allow_class_const_violations is off
+[1] 4 |    $b = B1::class; // error when package_allow_classconst_violations is off
     5 | }
 
 cross_package_access_classconst1.php--b.php:4:7
@@ -18,9 +18,9 @@ cross_package_access_classconst1.php--b.php:4:7
 
 PACKAGES.toml:3:11
     1 | [packages]
-    2 |
+    2 | 
 [4] 3 | [packages.pkg1]
     4 | include_paths=["//"]
-    5 |
+    5 | 
 
 1 error found

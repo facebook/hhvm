@@ -4276,6 +4276,7 @@ end = struct
       class_const
         env
         p
+        ~under_type_structure:false
         ~require_class_ptr:
           (Class_id.classname_error
              env
@@ -5081,6 +5082,7 @@ end = struct
         (MakeType.classname (Reason.witness p) [cty])
 
   and class_const
+      ~under_type_structure
       ?(is_attribute_param = false)
       ?(incl_tc = false)
       ?(require_class_ptr = Class_id.Pass)
@@ -5096,11 +5098,41 @@ end = struct
         []
         cid
     in
+    let should_check_packages =
+      let (_, _, cid_) = cid in
+      match cid_ with
+      | Aast.CI _ when not under_type_structure -> Env.check_packages env
+      | _ -> false
+    in
     let env =
       match get_node cty with
-      | Tclass ((_, n), _, _)
-        when Env.is_enum_class env n && String.(SN.Members.mClass <> snd mid) ->
-        Typing_local_ops.enforce_enum_class_variant p env
+      | Tclass ((_, class_name), _, _) ->
+        (* Check package constraints on constants.
+         * NB: this code will be superseded by the package check on CI once
+         * the allow_classconst_violation carveout is removed *)
+        if (not (String.equal (snd mid) "class")) && should_check_packages then begin
+          match Env.get_class env class_name with
+          | Decl_entry.Found class_ ->
+            Option.iter
+              ~f:(Typing_error_utils.add_typing_error ~env)
+              (TVis.check_package_access
+                 ~should_check_package_boundary:(`Yes "class constant")
+                 ~use_pos:p
+                 ~def_pos:(Cls.pos class_)
+                 env
+                 (Cls.get_package class_)
+                 class_name)
+          | Decl_entry.DoesNotExist
+          | Decl_entry.NotYetAvailable ->
+            ()
+        end;
+        if
+          Env.is_enum_class env class_name
+          && String.(SN.Members.mClass <> snd mid)
+        then
+          Typing_local_ops.enforce_enum_class_variant p env
+        else
+          env
       | _ -> env
     in
     let (env, (const_ty, _tal)) =
@@ -5842,6 +5874,7 @@ end = struct
         in
         let result =
           class_const
+            ~under_type_structure:true
             ~incl_tc:true
             ~require_class_ptr:
               (Class_id.classname_error

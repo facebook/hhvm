@@ -1,12 +1,17 @@
 //// a.php
 <?hh
-// package pkg1
+// package pkg
+
 function test(): void {
-   $b = B1::class; // error when package_allow_classconst_violations is off
+  $x = B1::class;
+  $x::FOO;
 }
 
 //// b.php
 <?hh
 // package pkg2
 <<file: __PackageOverride('pkg2')>>
-class B1 {}
+
+class B1 {
+  const string FOO = 'foo';
+}

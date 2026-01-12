@@ -39,6 +39,19 @@ namespace whisker {
 namespace {
 
 /**
+ * Maximum allowed depth for template render stack, before rendering is aborted
+ * with a fatal template stack overflow error.
+ */
+constexpr size_t kRenderStackMaxDepth = 10'000;
+
+/**
+ * Number of the deepest frames to display in the backtrace for a template stack
+ * overflow error. Limiting the backtrace depth in a scenario where it's already
+ * known there's a lot of frames prevents a deluge of noisy output.
+ */
+constexpr size_t kStackOverflowBacktraceFrames = 100;
+
+/**
  * An abstraction around std::ostream& that buffers lines of output and
  * abstracts away indentation from the main renderer implementation.
  *
@@ -274,41 +287,7 @@ class source_stack {
   auto make_frame_guard(
       const eval_context& eval_ctx,
       frame::reason reason,
-      source_location jumped_from) {
-    class frame_guard {
-     public:
-      explicit frame_guard(
-          source_stack& stack,
-          const eval_context& eval_ctx,
-          frame::reason&& reason,
-          source_location jumped_from)
-          : stack_(stack) {
-        if (auto* frame = stack_.top()) {
-          // Save the jump location since we're jumping to a new frame. This
-          // allows collecting a backtrace.
-          frame->jumped_from = jumped_from;
-        }
-        stack.frames_.emplace_back(
-            stack_.top(), std::move(eval_ctx), std::move(reason));
-      }
-      ~frame_guard() noexcept {
-        assert(!stack_.frames_.empty());
-        stack_.frames_.pop_back();
-        if (auto* source = stack_.top()) {
-          // Reset the jump location since we've return to its origin.
-          source->jumped_from = source_location();
-        }
-      }
-      frame_guard(frame_guard&& other) = delete;
-      frame_guard& operator=(frame_guard&& other) = delete;
-      frame_guard(const frame_guard& other) = delete;
-      frame_guard& operator=(const frame_guard& other) = delete;
-
-     private:
-      source_stack& stack_;
-    };
-    return frame_guard{*this, eval_ctx, std::move(reason), jumped_from};
-  }
+      source_location jumped_from);
 
   struct backtrace_frame {
     /**
@@ -329,7 +308,9 @@ class source_stack {
    * The source_location from the current stack frame must be provided by the
    * caller.
    */
-  backtrace make_backtrace_at(const source_location& current) const {
+  backtrace make_backtrace_at(
+      const source_location& current,
+      std::optional<size_t> max_frames = std::nullopt) const {
     assert(current != source_location());
     const frame* frame = top();
     assert(frame != nullptr);
@@ -341,7 +322,9 @@ class source_stack {
             frame->cause,
         });
     frame = frame->prev;
-    for (; frame != nullptr; frame = frame->prev) {
+    for (; frame != nullptr &&
+         result.size() < max_frames.value_or(kRenderStackMaxDepth);
+         frame = frame->prev) {
       assert(frame->jumped_from != source_location());
       result.emplace_back(
           backtrace_frame{
@@ -377,6 +360,57 @@ struct render_error : std::exception {
  private:
   source_stack::backtrace backtrace_;
 };
+
+auto source_stack::make_frame_guard(
+    const eval_context& eval_ctx,
+    frame::reason reason,
+    source_location jumped_from) {
+  class frame_guard {
+   public:
+    explicit frame_guard(
+        source_stack& stack,
+        const eval_context& eval_ctx,
+        frame::reason&& reason,
+        source_location jumped_from)
+        : stack_(stack) {
+      if (auto* frame = stack_.top()) {
+        // Save the jump location since we're jumping to a new frame. This
+        // allows collecting a backtrace.
+        frame->jumped_from = jumped_from;
+      }
+
+      // Guard against stack overflow
+      if (stack.frames_.size() >= kRenderStackMaxDepth) {
+        stack.diags_.error(
+            jumped_from,
+            "Maximum recursion depth of {} exceeded. Backtrace of deepest {} frames:",
+            kRenderStackMaxDepth,
+            kStackOverflowBacktraceFrames);
+        throw render_error(stack.make_backtrace_at(
+            jumped_from, /*max_frames=*/kStackOverflowBacktraceFrames));
+      }
+
+      stack.frames_.emplace_back(
+          stack_.top(), std::move(eval_ctx), std::move(reason));
+    }
+    ~frame_guard() noexcept {
+      assert(!stack_.frames_.empty());
+      stack_.frames_.pop_back();
+      if (auto* source = stack_.top()) {
+        // Reset the jump location since we've return to its origin.
+        source->jumped_from = source_location();
+      }
+    }
+    frame_guard(frame_guard&& other) = delete;
+    frame_guard& operator=(frame_guard&& other) = delete;
+    frame_guard(const frame_guard& other) = delete;
+    frame_guard& operator=(const frame_guard& other) = delete;
+
+   private:
+    source_stack& stack_;
+  };
+  return frame_guard{*this, eval_ctx, std::move(reason), jumped_from};
+}
 
 /**
  * A class that provides common diagnostic helpers around source_stack that is

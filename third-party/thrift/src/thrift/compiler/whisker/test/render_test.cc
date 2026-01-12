@@ -2956,4 +2956,53 @@ TEST_F(RenderTest, pragma_ignore_newlines) {
   EXPECT_EQ(*result, "This is\nnot\n!\n all one line");
 }
 
+// Explicitly triggering a potential stack overflow, and checking the Whisker VM
+// will handle it and emit a useful error. Disable this test in ASAN builds, as
+// ASAN is not a fan of stack overflows.
+#if (                                                \
+    !defined(__SANITIZE_ADDRESS__) /* gcc asan */ && \
+    !__has_feature(address_sanitizer) /* clang asan */)
+
+TEST_F(RenderTest, infinite_recursion) {
+  show_source_backtrace_on_failure(true);
+  auto result = render(
+      R"(
+{{#let partial recursive}}
+  {{#let partial inner captures |recursive|}}
+Inner {{#partial recursive}}
+  {{/let partial}}
+
+Recursive {{#partial inner}}
+{{/let partial}}
+
+{{#partial recursive}}
+)",
+      w::map());
+
+  // Our two partials render each other recursively, so we expect the backtrace
+  // to alternate between the two
+  std::string expected_backtrace = "";
+  for (int i = 0; i < 100; i++) {
+    if (i % 2 == 0) {
+      expected_backtrace += fmt::format(
+          "#{} recursive @ path/to/test.whisker <line:7, col:11>\n", i);
+    } else {
+      expected_backtrace +=
+          fmt::format("#{} inner @ path/to/test.whisker <line:4, col:7>\n", i);
+    }
+  }
+
+  EXPECT_THAT(
+      diagnostics(),
+      testing::ElementsAre(
+          diagnostic(
+              diagnostic_level::error,
+              "Maximum recursion depth of 10000 exceeded. Backtrace of deepest 100 frames:",
+              path_to_file,
+              7),
+          error_backtrace(std::move(expected_backtrace))));
+}
+
+#endif
+
 } // namespace whisker

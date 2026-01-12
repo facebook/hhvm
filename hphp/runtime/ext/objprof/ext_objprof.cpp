@@ -755,6 +755,10 @@ Array HHVM_FUNCTION(objprof_get_data,
 ) {
   int64_t visit_count = 0;
   int64_t max_depth_seen = 0;
+  if (Cfg::Eval::ObjProfMaxNesting > 0 &&
+    (max_depth > Cfg::Eval::ObjProfMaxNesting || max_depth <= 0)) {
+    max_depth = Cfg::Eval::ObjProfMaxNesting;
+  }
   return objprof_get_data_impl(
     flags,
     exclude_list,
@@ -773,6 +777,10 @@ Array HHVM_FUNCTION(objprof_get_data_with_graph_stats,
 ) {
   int64_t visit_count = 0;
   int64_t max_depth_seen = 0;
+  if (Cfg::Eval::ObjProfMaxNesting > 0 &&
+    (max_depth > Cfg::Eval::ObjProfMaxNesting || max_depth <= 0)) {
+    max_depth = Cfg::Eval::ObjProfMaxNesting;
+  }
   auto profs = objprof_get_data_impl(
     flags,
     exclude_list,
@@ -1129,6 +1137,10 @@ Array HHVM_FUNCTION(objprof_get_data_extended,
 ) {
   int64_t visit_count = 0;
   int64_t max_depth_seen = 0;
+  if (Cfg::Eval::ObjProfMaxNesting > 0 &&
+    (max_depth > Cfg::Eval::ObjProfMaxNesting || max_depth <= 0)) {
+    max_depth = Cfg::Eval::ObjProfMaxNesting;
+  }
   return objprof_get_data_extended_impl(
     flags,
     exclude_list,
@@ -1147,6 +1159,10 @@ Array HHVM_FUNCTION(objprof_get_data_extended_with_graph_stats,
 ) {
   int64_t visit_count = 0;
   int64_t max_depth_seen = 0;
+  if (Cfg::Eval::ObjProfMaxNesting > 0 &&
+    (max_depth > Cfg::Eval::ObjProfMaxNesting || max_depth <= 0)) {
+    max_depth = Cfg::Eval::ObjProfMaxNesting;
+  }
   auto profs = objprof_get_data_extended_impl(
     flags,
     exclude_list,
@@ -1343,6 +1359,10 @@ Array HHVM_FUNCTION(objprof_get_paths,
 ) {
   int64_t visit_count = 0;
   int64_t max_depth_seen = 0;
+  if (Cfg::Eval::ObjProfMaxNesting > 0 &&
+    (max_depth > Cfg::Eval::ObjProfMaxNesting || max_depth <= 0)) {
+    max_depth = Cfg::Eval::ObjProfMaxNesting;
+  }
   return objprof_get_paths_impl(
     flags,
     exclude_list,
@@ -1361,6 +1381,10 @@ Array HHVM_FUNCTION(objprof_get_paths_with_graph_stats,
 ) {
   int64_t visit_count = 0;
   int64_t max_depth_seen = 0;
+  if (Cfg::Eval::ObjProfMaxNesting > 0 &&
+    (max_depth > Cfg::Eval::ObjProfMaxNesting || max_depth <= 0)) {
+    max_depth = Cfg::Eval::ObjProfMaxNesting;
+  }
   auto profs = objprof_get_paths_impl(
     flags,
     exclude_list,

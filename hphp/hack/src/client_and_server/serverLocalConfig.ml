@@ -97,6 +97,10 @@ module EdenfsFileWatcher = struct
     report_telemetry: bool;
         (** If true, will log additional telemetry collected from within Edenfs_watcher *)
     state_tracking: bool;
+        (** Whether to use Eden's state tracking feature for deferring file changes *)
+    tracked_states: string list;
+        (** List of state names to track for deferring file changes.
+            Only used when state_tracking is enabled. *)
   }
 
   let default =
@@ -108,6 +112,7 @@ module EdenfsFileWatcher = struct
       sync_queries_obey_deferral = true;
       report_telemetry = false;
       state_tracking = false;
+      tracked_states = ["hg.transaction"; "hg.update"; "meerkat-build"];
     }
 
   let load ~current_version ~default config =
@@ -156,6 +161,12 @@ module EdenfsFileWatcher = struct
         ~default:default.state_tracking
         config
     in
+    let tracked_states =
+      string_list
+        "edenfs_file_watcher_tracked_states"
+        ~default:default.tracked_states
+        config
+    in
     {
       debug_logging;
       enabled;
@@ -164,6 +175,7 @@ module EdenfsFileWatcher = struct
       throttle_time_ms;
       report_telemetry;
       state_tracking;
+      tracked_states;
     }
 end
 

@@ -19,7 +19,7 @@ import sys
 import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import ClassVar, List, Optional
+from typing import Callable, ClassVar, List, Optional, Tuple
 
 import hphp.hack.test.integration.common_tests as common_tests
 from eden.integration.lib.edenclient import EdenFS
@@ -28,16 +28,25 @@ from hphp.hack.test.integration.hh_paths import hh_server
 from watchman.integration.lib import WatchmanInstance
 
 
+# Test states used in deferral tests.
+TEST_STATE_0 = "hh-state-tracking-test-state0"
+TEST_STATE_1 = "hh-state-tracking-test-state1"
+
+
 @dataclass
 class Config:
     streaming_errors: bool
+    state_tracking: bool
     interruptions: bool = True
     throttle_time_ms: int = 50
+    obey_deferral: bool = True
 
     def write_hhconf(self, watchman_socket_path: str, output_folder: str) -> None:
         streaming_errors = str(self.streaming_errors).lower()
         throttle_time_ms = str(self.throttle_time_ms)
         interruptions = str(self.interruptions).lower()
+        state_tracking = str(self.state_tracking).lower()
+        obey_deferral = str(self.obey_deferral).lower()
 
         config = f"""
 min_log_level = Debug
@@ -49,6 +58,9 @@ interrupt_on_file_changes = {interruptions}
 interrupt_on_client = {interruptions}
 edenfs_file_watcher_enabled = true
 edenfs_file_watcher_throttle_time_ms = {throttle_time_ms}
+edenfs_file_watcher_sync_queries_obey_deferral = {obey_deferral}
+edenfs_file_watcher_state_tracking = {state_tracking}
+edenfs_file_watcher_tracked_states = {TEST_STATE_0}, {TEST_STATE_1}
 watchman_sockname = {watchman_socket_path}
 produce_streaming_errors = {streaming_errors}
 consume_streaming_errors = {streaming_errors}
@@ -213,7 +225,7 @@ class EdenfsWatcherTestDriver(common_tests.CommonTestDriver):
 
     @classmethod
     def getConfig(cls) -> Config:
-        return Config(streaming_errors=False)
+        return Config(streaming_errors=False, state_tracking=False)
 
     @classmethod
     def setUpClassImpl(
@@ -334,6 +346,8 @@ class EdenfsWatcherTestDriver(common_tests.CommonTestDriver):
     def tearDown(self) -> None:
         print("running EdenfsWatcherDriver.tearDown")
 
+        print(self.get_all_logs(self.repo_dir).all_server_logs)
+
         # It's ugly to do this here, since this isn't really tear-down code,
         # but core testing logic, but we need to get this into every test
         assertEdenFsWatcherInitialized(self)
@@ -437,6 +451,52 @@ class EdenfsWatcherTestDriver(common_tests.CommonTestDriver):
         cls.createNonHackFile(".hg/ignored.php", base=cls.eden_mount_point)
         if cls.isMountPointIgnored():
             cls.createNonHackFile("ignored.php", base=cls.eden_mount_point)
+
+    def assertStateForSeconds(
+        self, state_name: str, duration_secs: int
+    ) -> Tuple[Callable[[], None], Callable[[], bool]]:
+        """Asserts the given state for the given number of seconds with Eden.
+
+        This function returns as soon as the state is asserted.
+        The state then remains asserted in the background.
+
+        Returns to thunks:
+        - Calling the first one waits until the state is de-asserted
+        - Calling the second returns a boolean indicating whether the state is
+           still asserted.
+        """
+
+        eden_state_asserter_path = os.getenv("HH_EDEN_TEST_STATE_ASSERTER", None)
+        if eden_state_asserter_path is None:
+            raise Exception("HH_EDEN_TEST_STATE_ASSERTER not set")
+
+        proc: subprocess.Popen[str] = subprocess.Popen(
+            [
+                eden_state_asserter_path,
+                self.eden_mount_point,
+                state_name,
+                str(duration_secs),
+            ],
+            universal_newlines=True,
+            stdout=subprocess.PIPE,
+        )
+
+        # We want to wait until the process is running and has actually asserted the state
+        stdout = proc.stdout
+        if stdout is None:
+            raise Exception("Could not access stdout of state asserter executable")
+        line = stdout.readline().strip()
+        self.assertEqual(line, "state asserted")
+
+        # ... but we won't wait until actual deassertion. That's what this thunk can be used for.
+        def wait_and_check() -> None:
+            retcode = proc.wait()
+            self.assertEqual(retcode, 0)
+
+        def is_still_asserted() -> bool:
+            return proc.poll() is None
+
+        return (wait_and_check, is_still_asserted)
 
 
 class EdenfsWatcherTests(common_tests.CommonTests):
@@ -1078,22 +1138,249 @@ function test_deprecated() : void {
             f"Edenfs_watcher.get_all_files returned {exected_file_count} files",
         )
 
-    # Note that we inherit all tests from CommonTests and run them,
-    # but using EdenfsWatcherTestDriver
+    def test_deferral1(self) -> None:
+        config = self.test_driver.getConfig()
+        config.state_tracking = True
+        config.streaming_errors = True
+        config.write_hhconf(
+            self.test_driver.watchman_instance.getUnixSockPath(),
+            self.test_driver.repo_dir,
+        )
+
+        # These are two states that the server listens for
+        state0 = TEST_STATE_0
+        state1 = TEST_STATE_1
+
+        self.test_driver.start_hh_server()
+
+        self.test_driver.createNonHackFile("file1.php")
+
+        wait_for0, is_asserted0 = self.test_driver.assertStateForSeconds(state0, 10)
+
+        self.test_driver.createNonHackFile("file2.php")
+
+        # We want this to be de-asserted *after* state0
+        self.test_driver.assertStateForSeconds(state1, 20)
+
+        self.test_driver.createNonHackFile("file3.php")
+
+        wait_for0()
+
+        self.test_driver.createNonHackFile("file4.php")
+
+        self.test_driver.check_cmd(
+            [
+                "ERROR: {root}"
+                + f"file{i}.php:1:1,1: A .php file must begin with `<?hh`. (Parsing[1002])"
+                for i in range(1, 5)
+            ]
+        )
+        # We are running with streaming errors enabled, so the hh invocation should block until
+        # the state is deasserted.
+        self.assertFalse(is_asserted0())
+
+    def run_instant_deassertion_test(
+        self, throttle_time_ms: int, wait_for_deassert: bool
+    ) -> None:
+        """Asserts and immediately deasserts states many times in quick succession.
+
+        Checks that this does not incorrectly leave us stuck in a deferred state.
+        """
+        config = self.test_driver.getConfig()
+        config.state_tracking = True
+        config.throttle_time_ms = throttle_time_ms
+        config.write_hhconf(
+            self.test_driver.watchman_instance.getUnixSockPath(),
+            self.test_driver.repo_dir,
+        )
+        state = TEST_STATE_0
+
+        self.test_driver.start_hh_server()
+
+        # 30 iterations keeps this test at around 1.5 minutes
+        for iterations in range(1, 30):
+            for _ in range(iterations):
+                wait_thunk, _ = self.test_driver.assertStateForSeconds(state, 0)
+                if wait_for_deassert:
+                    wait_thunk()
+
+            self.test_driver.createNonHackFile("file.php")
+
+            self.test_driver.check_cmd(
+                [
+                    "ERROR: {root}file.php:1:1,1: A .php file must begin with `<?hh`. (Parsing[1002])",
+                ]
+            )
+
+            path = os.path.join(self.test_driver.repo_dir, "file.php")
+            os.remove(path)
+
+            self.test_driver.check_cmd(["No errors!"])
+
+    def test_deferral2(self) -> None:
+        self.run_instant_deassertion_test(throttle_time_ms=0, wait_for_deassert=True)
+
+    def test_deferral3(self) -> None:
+        self.run_instant_deassertion_test(throttle_time_ms=500, wait_for_deassert=True)
+
+    def test_deferral6(self) -> None:
+        config = self.test_driver.getConfig()
+        config.state_tracking = True
+        config.streaming_errors = False
+        config.write_hhconf(
+            self.test_driver.watchman_instance.getUnixSockPath(),
+            self.test_driver.repo_dir,
+        )
+
+        state0 = TEST_STATE_0
+        state1 = TEST_STATE_1
+
+        self.test_driver.start_hh_server()
+
+        self.test_driver.createNonHackFile("file0.php")
+
+        wait_for0, _ = self.test_driver.assertStateForSeconds(state0, 20)
+
+        self.test_driver.createNonHackFile("file1.php")
+
+        self.test_driver.check_cmd(
+            [
+                "ERROR: {root}file0.php:1:1,1: A .php file must begin with `<?hh`. (Parsing[1002])",
+            ]
+        )
+
+        # will be deasserted while state0 is still asserted
+        wait_for1, _ = self.test_driver.assertStateForSeconds(state1, 10)
+
+        self.test_driver.createNonHackFile("file2.php")
+
+        self.test_driver.check_cmd(
+            [
+                "ERROR: {root}file0.php:1:1,1: A .php file must begin with `<?hh`. (Parsing[1002])",
+            ]
+        )
+
+        wait_for1()
+        self.test_driver.check_cmd(
+            [
+                "ERROR: {root}file0.php:1:1,1: A .php file must begin with `<?hh`. (Parsing[1002])",
+            ]
+        )
+
+        wait_for0()
+        self.test_driver.check_cmd(
+            [
+                "ERROR: {root}file0.php:1:1,1: A .php file must begin with `<?hh`. (Parsing[1002])",
+                "ERROR: {root}file1.php:1:1,1: A .php file must begin with `<?hh`. (Parsing[1002])",
+                "ERROR: {root}file2.php:1:1,1: A .php file must begin with `<?hh`. (Parsing[1002])",
+            ]
+        )
+
+        self.test_driver.createNonHackFile("file3.php")
+        wait_for0()
+        self.test_driver.check_cmd(
+            [
+                "ERROR: {root}file0.php:1:1,1: A .php file must begin with `<?hh`. (Parsing[1002])",
+                "ERROR: {root}file1.php:1:1,1: A .php file must begin with `<?hh`. (Parsing[1002])",
+                "ERROR: {root}file2.php:1:1,1: A .php file must begin with `<?hh`. (Parsing[1002])",
+                "ERROR: {root}file3.php:1:1,1: A .php file must begin with `<?hh`. (Parsing[1002])",
+            ]
+        )
+
+    def test_deferral7(self) -> None:
+        config = self.test_driver.getConfig()
+        config.state_tracking = True
+        config.streaming_errors = False
+        config.obey_deferral = False
+        config.write_hhconf(
+            self.test_driver.watchman_instance.getUnixSockPath(),
+            self.test_driver.repo_dir,
+        )
+
+        state0 = TEST_STATE_0
+        state1 = TEST_STATE_1
+
+        self.test_driver.start_hh_server()
+
+        self.test_driver.createNonHackFile("file0.php")
+
+        wait_for0, _ = self.test_driver.assertStateForSeconds(state0, 20)
+
+        self.test_driver.createNonHackFile("file1.php")
+
+        self.test_driver.check_cmd(
+            [
+                "ERROR: {root}file0.php:1:1,1: A .php file must begin with `<?hh`. (Parsing[1002])",
+                "ERROR: {root}file1.php:1:1,1: A .php file must begin with `<?hh`. (Parsing[1002])",
+            ]
+        )
+
+        # will be deasserted while state0 is still asserted
+        wait_for1, _ = self.test_driver.assertStateForSeconds(state1, 10)
+
+        self.test_driver.createNonHackFile("file2.php")
+
+        wait_for1()
+        self.test_driver.check_cmd(
+            [
+                "ERROR: {root}file0.php:1:1,1: A .php file must begin with `<?hh`. (Parsing[1002])",
+                "ERROR: {root}file1.php:1:1,1: A .php file must begin with `<?hh`. (Parsing[1002])",
+                "ERROR: {root}file2.php:1:1,1: A .php file must begin with `<?hh`. (Parsing[1002])",
+            ]
+        )
+
+        wait_for0()
+        self.test_driver.createNonHackFile("file3.php")
+        self.test_driver.check_cmd(
+            [
+                "ERROR: {root}file0.php:1:1,1: A .php file must begin with `<?hh`. (Parsing[1002])",
+                "ERROR: {root}file1.php:1:1,1: A .php file must begin with `<?hh`. (Parsing[1002])",
+                "ERROR: {root}file2.php:1:1,1: A .php file must begin with `<?hh`. (Parsing[1002])",
+                "ERROR: {root}file3.php:1:1,1: A .php file must begin with `<?hh`. (Parsing[1002])",
+            ]
+        )
+
+    def test_deferral8(self) -> None:
+        config = self.test_driver.getConfig()
+        config.state_tracking = True
+        config.streaming_errors = True
+        config.write_hhconf(
+            self.test_driver.watchman_instance.getUnixSockPath(),
+            self.test_driver.repo_dir,
+        )
+
+        state = TEST_STATE_0
+        _, is_asserted = self.test_driver.assertStateForSeconds(state, 20)
+
+        # Note that we asserted before server startup
+        self.test_driver.start_hh_server()
+
+        self.test_driver.createNonHackFile("file.php")
+
+        self.test_driver.check_cmd(
+            [
+                "ERROR: {root}file.php:1:1,1: A .php file must begin with `<?hh`. (Parsing[1002])",
+            ]
+        )
+        # We are running with streaming errors enabled, so the hh invocation should block until
+        # the state is deasserted.
+        self.assertFalse(is_asserted())
 
 
 class EdenfsWatcherNonMountPointRepoTests(EdenfsWatcherTests):
     """Runs the same tests as EdenfsWatcherTests, but with a testing repo that's not the mount point of the Eden mount.
 
-    We also make another, orthogonal change compared to EdenfsWatcherTestDriver:
-    We run with streaming errors enabled. This way, we run all tests with and without streaming
-    errors enabled.
+    We also make two orthogonal changes compared to EdenfsWatcherTestDriver:
+    - We run with streaming errors enabled. This way, we run all tests with and without streaming
+      errors enabled.
+    - We run with state tracking enabled. This way, we run all tests with and without state
+      tracking enabled.
     """
 
     class _Driver(EdenfsWatcherTestDriver):
         @classmethod
         def getConfig(cls) -> Config:
-            return Config(streaming_errors=True)
+            return Config(streaming_errors=True, state_tracking=True)
 
         @classmethod
         def setUpClass(cls, template_repo: str) -> None:

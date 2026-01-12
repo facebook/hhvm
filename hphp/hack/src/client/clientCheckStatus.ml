@@ -500,6 +500,7 @@ let edenfs_watcher_get_raw_updates_since ~root ~clock ~local_config =
     report_telemetry;
     state_tracking;
     sync_queries_obey_deferral;
+    tracked_states;
     _;
   } =
     local_config.ServerLocalConfig.edenfs_file_watcher
@@ -514,6 +515,7 @@ let edenfs_watcher_get_raw_updates_since ~root ~clock ~local_config =
       report_telemetry;
       state_tracking;
       sync_queries_obey_deferral;
+      tracked_states;
     }
   in
   let translate_changes list = function

@@ -18,6 +18,9 @@ type settings = {
   report_telemetry: bool;
   state_tracking: bool;
   sync_queries_obey_deferral: bool;
+  tracked_states: string list;
+      (** List of state names to track for deferring file changes.
+          Only used when state_tracking is enabled. *)
 }
 
 type changes =

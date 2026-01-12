@@ -17,7 +17,7 @@
  **)
 open Hh_prelude
 
-type watchman_event = {
+type state_change_event = {
   timestamp: float;
   source: string;
   is_enter: bool;
@@ -34,7 +34,7 @@ or amending the list because we just received a state-transition event, is the s
 4. Observe the consequence, that existence of "enter" events can only be discharged either by
 a subsequent leave, or an outstanding one from the recent past.
 *)
-type event_list = watchman_event list
+type event_list = state_change_event list
 
 type tracker_state = {
   mutable is_enabled: bool;
@@ -70,6 +70,7 @@ type state_handler = {
     Hh_json.json option ->
     (* state metadata *)
     unit;
+  on_commit_transition: Path.t (* project root *) -> Hg.Rev.t -> unit;
 }
 
 type tracker_event_state = { mutable outstanding_events: event_list }
@@ -112,7 +113,8 @@ let handler_fn () =
     List.exists outstanding ~f:(fun e -> e.is_enter)
   in
 
-  let transition (outstanding : event_list) (e : watchman_event) : event_list =
+  let transition (outstanding : event_list) (e : state_change_event) :
+      event_list =
     (* Note: we blindly trusting that e.timestamp is newer than anything in the list.
        The consequence if not is mild; it just means the 10s criterion will be slightly off. *)
 
@@ -169,6 +171,7 @@ let handler_fn () =
     else
       e :: outstanding
   in
+  let on_commit_transition root to_commit = add_query ~hg_rev:to_commit root in
   let on_state_enter state_name =
     let event =
       { source = state_name; timestamp = Unix.gettimeofday (); is_enter = true }
@@ -208,14 +211,26 @@ let handler_fn () =
     | _ -> ()
   in
   let is_hg_updating () = is_in_state state.outstanding_events in
-  { on_state_enter; on_state_leave; is_hg_updating }
+  { on_state_enter; on_state_leave; is_hg_updating; on_commit_transition }
 
 let handler = handler_fn ()
 
-let on_state_enter state_name = handler.on_state_enter state_name
+module Watchman = struct
+  let on_state_enter state_name = handler.on_state_enter state_name
 
-let on_state_leave root state_name state_metadata =
-  handler.on_state_leave root state_name state_metadata
+  let on_state_leave root state_name state_metadata =
+    handler.on_state_leave root state_name state_metadata
+end
+
+module Edenfs_watcher = struct
+  let on_state_enter state_name = handler.on_state_enter state_name
+
+  let on_state_leave root state_name =
+    handler.on_state_leave root state_name None
+
+  let on_commit_transition root to_commit =
+    handler.on_commit_transition root (Hg.Rev.of_string to_commit)
+end
 
 let is_hg_updating = handler.is_hg_updating
 

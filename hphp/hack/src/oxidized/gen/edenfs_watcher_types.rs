@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<0548444f57bf19fe18b5e399e268d541>>
+// @generated SignedSource<<3b25173958fe094aa1360a573369f7a0>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -192,6 +192,9 @@ pub struct Settings {
     /// Whether to use Eden's state tracking feature
     pub state_tracking: bool,
     pub sync_queries_obey_deferral: bool,
+    /// List of state names to track for deferring file changes.
+    /// Only used when state_tracking is enabled.
+    pub tracked_states: Vec<String>,
 }
 
 #[derive(

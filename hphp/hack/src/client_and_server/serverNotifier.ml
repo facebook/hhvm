@@ -59,10 +59,9 @@ type t =
   | EdenfsFileWatcher of {
       instance: Edenfs_watcher.instance;
       num_workers: int;
-      tmp_watchman_instance: Watchman.watchman_instance ref;
-          (** Currently, the Eden notification API does not support reporting state transitions (e.g.,
-          hg.update, meerkat-build enter/leave events). In the meantime, we use a Watchman instance
-          that just listens to these events. *)
+      tmp_watchman_instance: Watchman.watchman_instance ref option;
+          (** None iff state_tracking config option is true.
+              Otherwise, contains Watchman instance used only for state tracking  *)
       root: Path.t;
       local_config: ServerLocalConfig.t;
       last_clock: Edenfs_watcher.clock ref;
@@ -175,10 +174,22 @@ let init
       report_telemetry;
       state_tracking;
       sync_queries_obey_deferral;
+      tracked_states;
       _;
     } =
       local_config.edenfs_file_watcher
     in
+    (* If state tracking and hg_aware are both enabled, verify that tracked_states
+       includes the hg states. *)
+    if state_tracking && local_config.hg_aware then begin
+      if
+        not
+          (List.mem tracked_states "hg.transaction" ~equal:String.equal
+          && List.mem tracked_states "hg.update" ~equal:String.equal)
+      then
+        failwith
+          "state_tracking and hg_aware are enabled, but not tracking hg.update and hg.transaction"
+    end;
     let init_settings =
       {
         Edenfs_watcher_types.root;
@@ -189,6 +200,7 @@ let init
         report_telemetry;
         state_tracking;
         sync_queries_obey_deferral;
+        tracked_states;
       }
     in
     match Edenfs_watcher.init init_settings with
@@ -219,38 +231,9 @@ let init
     | Result.Ok (instance, initial_clock) ->
       let last_clock = ref initial_clock in
 
-      (* This is just temporary:
-         For now, we also carry around a Watchman instance.
-         This is just used to get hg and meerkat state change updates. *)
-      let ServerLocalConfig.Watchman.
-            { sockname; init_timeout; debug_logging; _ } =
-        watchman_config
-      in
-      (* This Watchman instance doesn't care about file changes at all. *)
-      let expression_terms =
-        [Hh_json_helpers.AdhocJsonHelpers.strlist ["false"]]
-      in
-      let watchman_env =
-        Watchman.init
-          {
-            Watchman.init_timeout =
-              Watchman.Explicit_timeout (float init_timeout);
-            subscribe_mode = Some Watchman.Defer_changes;
-            expression_terms;
-            debug_logging =
-              ServerArgs.watchman_debug_logging options || debug_logging;
-            sockname;
-            subscription_prefix = "hh_type_check_state_transition_watcher";
-            roots = [root];
-          }
-          ()
-      in
-      (match watchman_env with
-      | Some watchman_env ->
-        let tmp_watchman_instance =
-          ref (Watchman.Watchman_alive watchman_env)
-        in
+      if state_tracking then (
         HackEventLogger.set_file_watcher_edenfs ();
+        let tmp_watchman_instance = None in
         Some
           (EdenfsFileWatcher
              {
@@ -261,10 +244,53 @@ let init
                local_config;
                last_clock;
              })
-      | None ->
-        let msg = "Failed to initialize Watchman event watching instance" in
-        HackEventLogger.edenfs_watcher_fallback ~msg;
-        None)
+      ) else
+        (* This is just temporary:
+           For now, we also carry around a Watchman instance.
+           This is just used to get hg and meerkat state change updates. *)
+        let ServerLocalConfig.Watchman.
+              { sockname; init_timeout; debug_logging; _ } =
+          watchman_config
+        in
+        (* This Watchman instance doesn't care about file changes at all. *)
+        let expression_terms =
+          [Hh_json_helpers.AdhocJsonHelpers.strlist ["false"]]
+        in
+        let watchman_env =
+          Watchman.init
+            {
+              Watchman.init_timeout =
+                Watchman.Explicit_timeout (float init_timeout);
+              subscribe_mode = Some Watchman.Defer_changes;
+              expression_terms;
+              debug_logging =
+                ServerArgs.watchman_debug_logging options || debug_logging;
+              sockname;
+              subscription_prefix = "hh_type_check_state_transition_watcher";
+              roots = [root];
+            }
+            ()
+        in
+        (match watchman_env with
+        | Some watchman_env ->
+          let tmp_watchman_instance =
+            Some (ref (Watchman.Watchman_alive watchman_env))
+          in
+          HackEventLogger.set_file_watcher_edenfs ();
+          Some
+            (EdenfsFileWatcher
+               {
+                 instance;
+                 tmp_watchman_instance;
+                 num_workers;
+                 root;
+                 local_config;
+                 last_clock;
+               })
+        | None ->
+          let msg = "Failed to initialize Watchman event watching instance" in
+          HackEventLogger.edenfs_watcher_fallback ~msg;
+          None)
   in
 
   if edenfs_watcher_enabled && watchman_enabled then
@@ -339,30 +365,42 @@ let convert_watchman_changes
     raise Exit_status.(Exit_with Watchman_invalid_result)
   | Watchman.State_enter (name, _metadata) ->
     if local_config.ServerLocalConfig.hg_aware then
-      ServerRevisionTracker.on_state_enter name;
+      ServerRevisionTracker.Watchman.on_state_enter name;
     SSet.empty
   | Watchman.State_leave (name, metadata) ->
     if local_config.ServerLocalConfig.hg_aware then
-      ServerRevisionTracker.on_state_leave root name metadata;
+      ServerRevisionTracker.Watchman.on_state_leave root name metadata;
     SSet.empty
   | Watchman.Files_changed changes ->
     ServerRevisionTracker.files_changed local_config (SSet.cardinal changes);
     changes
 
 let convert_edenfs_watcher_changes
-    local_config (eden_changes : Edenfs_watcher_types.changes) : SSet.t =
+    local_config root (eden_changes : Edenfs_watcher_types.changes) : SSet.t =
+  let state_tracking =
+    local_config.ServerLocalConfig.edenfs_file_watcher.state_tracking
+  in
   let changed_files =
     match eden_changes with
-    | Edenfs_watcher_types.CommitTransition { file_changes; _ } ->
+    | Edenfs_watcher_types.CommitTransition { file_changes; to_commit; _ } ->
       (* TODO(T224461521) Need to inform ServerRevisionTracker about commit
          transition, similarly to what convert_watchman_changes does *)
+      if state_tracking && local_config.ServerLocalConfig.hg_aware then
+        ServerRevisionTracker.Edenfs_watcher.on_commit_transition root to_commit;
       SSet.of_list file_changes
     | Edenfs_watcher_types.FileChanges file_changes ->
       (* TODO(T215219438) Need to inform ServerRevisionTracker about changed files,
          similarly to what convert_watchman_changes does *)
       SSet.of_list file_changes
-    | Edenfs_watcher_types.StateEnter _
-    | Edenfs_watcher_types.StateLeave _ ->
+    | Edenfs_watcher_types.StateEnter name ->
+      Hh_logger.debug "ServerNotifier: StateEnter(%s)" name;
+      if state_tracking && local_config.ServerLocalConfig.hg_aware then
+        ServerRevisionTracker.Edenfs_watcher.on_state_enter name;
+      SSet.empty
+    | Edenfs_watcher_types.StateLeave name ->
+      Hh_logger.debug "ServerNotifier: StateLeave(%s)" name;
+      if state_tracking && local_config.ServerLocalConfig.hg_aware then
+        ServerRevisionTracker.Edenfs_watcher.on_state_leave root name;
       SSet.empty
   in
   ServerRevisionTracker.files_changed local_config (SSet.cardinal changed_files);
@@ -395,11 +433,11 @@ let process_watchman_state_changes ~sync instance_ref root local_config : unit =
   let process_changes = function
     | Watchman.State_enter (name, _metadata) ->
       if local_config.ServerLocalConfig.hg_aware then
-        ServerRevisionTracker.on_state_enter name;
+        ServerRevisionTracker.Watchman.on_state_enter name;
       MeerkatTracker.on_state_enter name
     | Watchman.State_leave (name, metadata) ->
       if local_config.ServerLocalConfig.hg_aware then
-        ServerRevisionTracker.on_state_leave root name metadata;
+        ServerRevisionTracker.Watchman.on_state_leave root name metadata;
       MeerkatTracker.on_state_leave name
     | Watchman.Files_changed files when SSet.is_empty files -> ()
     | _ ->
@@ -449,11 +487,17 @@ let get_changes_sync (t : t) telemetry : SSet.t * clock option * Telemetry.t =
     | EdenfsFileWatcher
         { instance; root; local_config; tmp_watchman_instance; last_clock; _ }
       ->
-      process_watchman_state_changes
-        ~sync:true
-        tmp_watchman_instance
-        root
-        local_config;
+      Option.iter tmp_watchman_instance ~f:(fun tmp_watchman_instance ->
+          (* We get here only if native state tracking is disabled *)
+          process_watchman_state_changes
+            ~sync:true
+            tmp_watchman_instance
+            root
+            local_config);
+
+      let state_tracking =
+        local_config.ServerLocalConfig.edenfs_file_watcher.state_tracking
+      in
 
       let sync_queries_obey_deferral =
         local_config.ServerLocalConfig.edenfs_file_watcher
@@ -461,7 +505,11 @@ let get_changes_sync (t : t) telemetry : SSet.t * clock option * Telemetry.t =
       in
 
       (* TODO(T226505256) Workaround for deferring changes while Meerkat is running *)
-      if sync_queries_obey_deferral && MeerkatTracker.is_meerkat_running () then (
+      if
+        (not state_tracking)
+        && sync_queries_obey_deferral
+        && MeerkatTracker.is_meerkat_running ()
+      then (
         (* This is here to slow down the interrupt mechanism while we are deferring changes:
            Edenfs_watcher itself is unaware of the deferral and will write to the notification
            file descriptor if it sees changes.
@@ -492,7 +540,9 @@ let get_changes_sync (t : t) telemetry : SSet.t * clock option * Telemetry.t =
         in
         let changes_set =
           List.fold_left changes ~init:SSet.empty ~f:(fun acc c ->
-              SSet.union acc (convert_edenfs_watcher_changes local_config c))
+              SSet.union
+                acc
+                (convert_edenfs_watcher_changes local_config root c))
         in
         if not (SSet.is_empty changes_set) then last_clock := new_clock;
         (changes_set, Some (ServerNotifierTypes.Eden !last_clock), telemetry)
@@ -550,14 +600,20 @@ let get_changes_async (t : t) telemetry : changes * clock option * Telemetry.t =
     | EdenfsFileWatcher
         { instance; tmp_watchman_instance; root; local_config; last_clock; _ }
       ->
-      process_watchman_state_changes
-        ~sync:false
-        tmp_watchman_instance
-        root
-        local_config;
+      let state_tracking =
+        local_config.ServerLocalConfig.edenfs_file_watcher.state_tracking
+      in
+
+      Option.iter tmp_watchman_instance ~f:(fun tmp_watchman_instance ->
+          (* We get here only if native state tracking is disabled *)
+          process_watchman_state_changes
+            ~sync:false
+            tmp_watchman_instance
+            root
+            local_config);
 
       (* TODO(T226505256) Workaround for deferring changes while Meerkat is running *)
-      if MeerkatTracker.is_meerkat_running () then (
+      if (not state_tracking) && MeerkatTracker.is_meerkat_running () then (
         (* This is here to slow down the interrupt mechanism while we are deferring changes:
            Edenfs_watcher itself is unaware of the deferral and will write to the notification
            file descriptor if it sees changes.
@@ -589,7 +645,9 @@ let get_changes_async (t : t) telemetry : changes * clock option * Telemetry.t =
 
         let changes_set =
           List.fold_left changes ~init:SSet.empty ~f:(fun acc c ->
-              SSet.union acc (convert_edenfs_watcher_changes local_config c))
+              SSet.union
+                acc
+                (convert_edenfs_watcher_changes local_config root c))
         in
         if not (SSet.is_empty changes_set) then last_clock := new_clock;
         (AsyncChanges changes_set, Some (Eden !last_clock), telemetry)

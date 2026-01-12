@@ -8,17 +8,31 @@
 
 val initialize : Hg.global_rev -> unit
 
-(* state_name *)
-val on_state_enter : string -> unit
+(** Used by Watchman-backed ServerNotifier to inform ServerRevisionTracker about changes *)
+module Watchman : sig
+  (* state_name *)
+  val on_state_enter : string (* state_name *) -> unit
 
-val on_state_leave :
-  Path.t ->
-  (* project root *)
-  string ->
-  (* state name *)
-  Hh_json.json option ->
-  (* state metadata *)
-  unit
+  val on_state_leave :
+    Path.t ->
+    (* project root *)
+    string ->
+    (* state name *)
+    Hh_json.json option ->
+    (* state metadata *)
+    unit
+end
+
+(** Used by Edenfs_watcher-backed ServerNotifier to inform ServerRevisionTracker about changes *)
+module Edenfs_watcher : sig
+  val on_state_enter : string (* state_name *) -> unit
+
+  val on_state_leave :
+    Path.t -> (* project root *) string (* state_name *) -> unit
+
+  val on_commit_transition :
+    Path.t (* project root *) -> string (* to_commit *) -> unit
+end
 
 val is_hg_updating : unit -> bool
 

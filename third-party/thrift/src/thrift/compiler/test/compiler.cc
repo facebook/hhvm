@@ -130,39 +130,39 @@ std::vector<diagnostic> extract_expected_diagnostics(
             &column_match,
             &message_match,
             &name_match)) {
-      diagnostic_level level = type_match.as_string() == "error"
+      diagnostic_level level = std::string(type_match) == "error"
           ? diagnostic_level::error
           : diagnostic_level::warning;
-      auto ln_no_str = line_num_match.as_string();
+      auto ln_no_str = std::string(line_num_match);
       int line_num = line_number;
       if (!ln_no_str.empty()) {
         line_num = (ln_no_str.at(0) == '+' || ln_no_str.at(0) == '-')
             ? line_num + std::stoi(ln_no_str)
             : std::stoi(ln_no_str);
       }
-      auto name = name_match.as_string();
+      auto name = std::string(name_match);
       if ((!original_match.empty() || !replacement_match.empty()) &&
           !column_match.empty()) {
-        auto col_str = column_match.as_string();
+        auto col_str = std::string(column_match);
         int col_num = std::stoi(col_str);
 
         // Both the original string or the replacement could have newlines,
         // which need to be unescaped in order for the equality match to work
-        auto replacement = replacement_match.as_string();
+        auto replacement = std::string(replacement_match);
         re2::RE2::GlobalReplace(&replacement, "\\\\n", "\n");
-        auto original = original_match.as_string();
+        auto original = std::string(original_match);
         re2::RE2::GlobalReplace(&original, "\\\\n", "\n");
 
         result.emplace_back(
             level,
-            message_match.as_string(),
+            std::string(message_match),
             file_name,
             line_num,
             name,
             fixit(original, replacement, line_num, col_num));
       } else {
         result.emplace_back(
-            level, message_match.as_string(), file_name, line_num, name);
+            level, std::string(message_match), file_name, line_num, name);
       }
     }
 

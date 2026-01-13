@@ -28,7 +28,7 @@ class InsecureVerifierDangerousDoNotUseInProduction
 
   [[nodiscard]] std::vector<fizz::Extension> getCertificateRequestExtensions()
       const override {
-    return std::vector<fizz::Extension>();
+    return {};
   }
 };
 } // namespace proxygen

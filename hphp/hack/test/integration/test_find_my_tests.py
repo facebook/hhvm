@@ -382,3 +382,70 @@ class TestFindMyTests(test_case.TestCase[common_tests.CommonTestDriver]):
             expected_test_files=[("G_MultiPathTest.php", 3)],
             max_distance=10,
         )
+
+
+class TestFindMyTestsIllformed(test_case.TestCase[common_tests.CommonTestDriver]):
+    """Tests that hh --find-my-tests handles ill-formed files gracefully.
+
+    Uses a separate repo that contains files with syntax errors.
+    """
+
+    @classmethod
+    def get_template_repo(cls) -> str:
+        return "hphp/hack/test/integration/data/find_my_tests_illformed_repo/"
+
+    @classmethod
+    def get_test_driver(cls) -> common_tests.CommonTestDriver:
+        return common_tests.CommonTestDriver()
+
+    def test_illformed_files(self) -> None:
+        """Tests that --find-my-tests succeeds even when the repo contains ill-formed files."""
+        self.test_driver.start_hh_server()
+
+        (output, err, retcode) = self.test_driver.run_check()
+        print("hh check output: " + output)
+        print("hh check stderr: " + err)
+        self.assertEqual(
+            retcode,
+            2,
+            "Expected hh check to return exit code 2 (type error) due to ill-formed file",
+        )
+
+        (output, err, retcode) = self.test_driver.run_check(
+            options=[
+                "--autostart-server=false",
+                "--json",
+                "--find-my-tests-max-distance",
+                "2",
+                "--find-my-tests",
+            ]
+            + ["Root::root"]
+        )
+
+        print(
+            self.test_driver.get_all_logs(self.test_driver.repo_dir).current_server_log
+        )
+
+        if retcode != 0:
+            print("stdout: " + output)
+            print("stderr: " + err)
+            self.fail("hh --find-my-tests failed when it should have succeeded")
+
+        print(f"hh response: {output}")
+
+        # Verify the response is valid JSON (even if empty)
+        result = json.loads(output)
+        self.assertIsInstance(result, list)
+
+        self.assertEqual(len(result), 2, "Expected 2 test file to be returned")
+
+        expected_test_files = {
+            os.path.join(self.test_driver.repo_dir, "src", "__tests__", file)
+            for file in ["MyTest1.php", "MyTest3.php"]
+        }
+        actual_files = {file_result["file_path"] for file_result in result}
+
+        self.assertSetEqual(expected_test_files, actual_files)
+
+        for r in result:
+            self.assertEqual(r["distance"], 2)

@@ -239,6 +239,18 @@ def round_float32(val: float | int) -> float: ...
 class _fbthrift_ResponseStreamResult(Struct, typing.Generic[TChunk]):
     success: typing.Final[TChunk]
 
+# Generic base classes for sink response types.
+# These allow the overload in async_client.pyi to extract the user-facing type
+# from generated wrapper classes (e.g., _fbthrift_Service_method_result_sink_elem).
+TSinkElem = typing.TypeVar("TSinkElem")
+TSinkFinal = typing.TypeVar("TSinkFinal")
+
+class _fbthrift_SinkResult(Struct, typing.Generic[TSinkElem]):
+    success: typing.Final[TSinkElem]
+
+class _fbthrift_SinkFinalResult(Struct, typing.Generic[TSinkFinal]):
+    success: typing.Final[TSinkFinal]
+
 class ServiceInterface:
     @staticmethod
     def service_name() -> bytes: ...

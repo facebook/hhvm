@@ -23,11 +23,11 @@ The internal return type of a service handler
         }}_typing.AsyncIterator[_fbthrift_iobuf.IOBuf]]{{!
     }}{{/function.stream?}}{{!
     }}{{#function.sink?}}_typing.Tuple[_fbthrift_iobuf.IOBuf, {{!
-        }}_typing.Callable[[_typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None]], _typing.Awaitable[_fbthrift_iobuf.IOBuf]]]{{!
+        }}_typing.Callable[[_typing.Callable[[], _typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None]]], _typing.Awaitable[_fbthrift_iobuf.IOBuf]]]{{!
     }}{{/function.sink?}}{{!
     }}{{^function.sink_or_stream?}}_fbthrift_iobuf.IOBuf{{/function.sink_or_stream?}}{{!
   }}{{/function.bidirectional_stream?}}{{#function.bidirectional_stream?}}{{!
     }}_typing.Tuple[_fbthrift_iobuf.IOBuf, {{!
-      }}_typing.Callable[[_typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None]], _typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None]]]{{!
+      }}_typing.Callable[[_typing.Callable[[], _typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None]]], _typing.Awaitable[_typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None]]]]{{!
   }}{{/function.bidirectional_stream?}}{{!
 }}{{/function.oneway?}}

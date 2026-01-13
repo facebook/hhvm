@@ -39,6 +39,18 @@ Whisker partial equivalent to the macro `structs/unadapted_name`.
 {{#if python.generate_immutable_types?}}_fbthrift_python_types.Struct{{/if}}
 {{/let partial}}
 
+{{#let export partial sink_result_base}}
+{{#pragma ignore-newlines}}
+{{#if python.generate_mutable_types?}}_fbthrift_python_mutable_types._fbthrift_MutableSinkResult{{/if}}
+{{#if python.generate_immutable_types?}}_fbthrift_python_types._fbthrift_SinkResult{{/if}}
+{{/let partial}}
+
+{{#let export partial sink_final_result_base}}
+{{#pragma ignore-newlines}}
+{{#if python.generate_mutable_types?}}_fbthrift_python_mutable_types._fbthrift_MutableSinkFinalResult{{/if}}
+{{#if python.generate_immutable_types?}}_fbthrift_python_types._fbthrift_SinkFinalResult{{/if}}
+{{/let partial}}
+
 {{! Metaclass for Thrift struct }}
 {{#let export partial struct_metaclass}}
 {{#pragma ignore-newlines}}

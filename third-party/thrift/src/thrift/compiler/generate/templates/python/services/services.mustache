@@ -127,9 +127,9 @@ class {{service.name}}Interface(
         self,
         handler_sink_callback: {{> services/sink_callback }},
         protocol: Protocol
-    ) -> _typing.Callable[[_typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None]], _typing.Awaitable[_fbthrift_iobuf.IOBuf]]:
+    ) -> _typing.Callable[[_typing.Callable[[], _typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None]]], _typing.Awaitable[_fbthrift_iobuf.IOBuf]]:
         async def _fbthrift_iobuf_sink_callback(
-            _iobuf_agen: _typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None],
+            _iobuf_agen: _typing.Callable[[], _typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None]],
         ) -> _fbthrift_iobuf.IOBuf:
             async def _handler_agen() -> _typing.AsyncGenerator[{{#partial typehints.pep484_type type=function.sink.elem_type}}, None]:
                 async for iobuf_item in _iobuf_agen():
@@ -147,6 +147,7 @@ class {{service.name}}Interface(
                         continue
                     for _ex_fld_name, ex in sink_elem:
                         if ex is not None:
+                            # pyre-ignore[48]: Invalid Exception
                             raise ex
                     assert sink_elem.success is not None, "unexpected empty sink element"
                     {{/if (array.empty? function.sink.exceptions)}}
@@ -181,9 +182,9 @@ class {{service.name}}Interface(
         self,
         handler_bidi_callback: {{> services/bidi_callback }},
         protocol: Protocol
-    ) -> _typing.Callable[[_typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None]], _typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None]]:
+    ) -> _typing.Callable[[_typing.Callable[[], _typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None]]], _typing.Awaitable[_typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None]]]:
         async def _fbthrift_iobuf_bidi_callback(
-            _iobuf_agen: _typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None],
+            _iobuf_agen: _typing.Callable[[], _typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None]],
         ) -> _typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None]:
             async def _handle_sink() -> _typing.AsyncGenerator[{{#partial typehints.pep484_type type=function.sink.elem_type}}, None]:
                 async for iobuf_item in _iobuf_agen():
@@ -201,6 +202,7 @@ class {{service.name}}Interface(
                         continue
                     for _ex_fld_name, ex in sink_elem:
                         if ex is not None:
+                            # pyre-ignore[48]: Invalid Exception
                             raise ex
                     assert sink_elem.success is not None, "unexpected empty sink element"
                     {{/if (array.empty? function.sink.exceptions)}}

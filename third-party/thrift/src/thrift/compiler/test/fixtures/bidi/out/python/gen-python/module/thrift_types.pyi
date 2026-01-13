@@ -101,14 +101,19 @@ class _fbthrift_BiDiService_simple_result_stream_elem(_fbthrift_python_types._fb
         ]]]: ...
 
 
-class _fbthrift_BiDiService_simple_result_sink_elem(_fbthrift_python_types.Struct):
-    success: _typing.Final[builtins.int]
+class _fbthrift_BiDiService_simple_result_sink_elem(_fbthrift_python_types._fbthrift_SinkResult[builtins.int]):
 
     def __init__(
         self,
         *,
         success: _typing.Optional[builtins.int] = ...
     ) -> None: ...
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[
+        str,
+        _typing.Union[
+            builtins.int,
+        ]]]: ...
 
 
 
@@ -151,14 +156,19 @@ class _fbthrift_BiDiService_response_result_stream_elem(_fbthrift_python_types._
         ]]]: ...
 
 
-class _fbthrift_BiDiService_response_result_sink_elem(_fbthrift_python_types.Struct):
-    success: _typing.Final[builtins.int]
+class _fbthrift_BiDiService_response_result_sink_elem(_fbthrift_python_types._fbthrift_SinkResult[builtins.int]):
 
     def __init__(
         self,
         *,
         success: _typing.Optional[builtins.int] = ...
     ) -> None: ...
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[
+        str,
+        _typing.Union[
+            builtins.int,
+        ]]]: ...
 
 
 
@@ -194,7 +204,7 @@ class _fbthrift_BiDiService_canThrow_result_stream_elem(_fbthrift_python_types._
     ex: _typing.Final[_fbthrift_BiDiStreamException]
 
     def __init__(
-        self, *, success: _typing.Optional[builtins.int] = ..., ex: _typing.Optional[_fbthrift_BiDiStreamException]=...
+        self, *, success: _typing.Optional[builtins.int] = ..., _ex0__ex: _typing.Optional[_fbthrift_BiDiStreamException]=...
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
@@ -205,14 +215,20 @@ class _fbthrift_BiDiService_canThrow_result_stream_elem(_fbthrift_python_types._
         ]]]: ...
 
 
-class _fbthrift_BiDiService_canThrow_result_sink_elem(_fbthrift_python_types.Struct):
-    success: _typing.Final[builtins.int]
+class _fbthrift_BiDiService_canThrow_result_sink_elem(_fbthrift_python_types._fbthrift_SinkResult[builtins.int]):
     ex: _typing.Final[_fbthrift_BiDiSinkException]
 
     def __init__(
         self,
         *,
-        success: _typing.Optional[builtins.int] = ..., ex: _typing.Optional[_fbthrift_BiDiSinkException]=...
+        success: _typing.Optional[builtins.int] = ..., _ex0__ex: _typing.Optional[_fbthrift_BiDiSinkException]=...
     ) -> None: ...
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[
+        str,
+        _typing.Union[
+            builtins.int,
+            _fbthrift_BiDiSinkException,
+        ]]]: ...
 
 

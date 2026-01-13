@@ -25,14 +25,27 @@ from thrift.python.client.omni_client import (
 from thrift.python.common import RpcOptions
 from thrift.python.mutable_types import (
     _fbthrift_MutableResponseStreamResult,
+    _fbthrift_MutableSinkFinalResult,
+    _fbthrift_MutableSinkResult,
     MutableStructOrUnion,
 )
-from thrift.python.types import _fbthrift_ResponseStreamResult, StructOrUnion, TChunk
+from thrift.python.streaming.bidistream import BidirectionalStream
+from thrift.python.streaming.sink import ClientSink
+from thrift.python.types import (
+    _fbthrift_ResponseStreamResult,
+    _fbthrift_SinkFinalResult,
+    _fbthrift_SinkResult,
+    StructOrUnion,
+    TChunk,
+)
 
 TAsyncClient = typing.TypeVar("TAsyncClient", bound="AsyncClient")
 TResponse = typing.TypeVar(
     "TResponse", bound=typing.Union[StructOrUnion, MutableStructOrUnion]
 )
+TSinkChunk = typing.TypeVar("TSinkChunk")
+TFinalResponse = typing.TypeVar("TFinalResponse")
+TStreamChunk = typing.TypeVar("TStreamChunk")
 
 class AsyncClient:
     def __init__(self) -> None: ...
@@ -101,5 +114,53 @@ class AsyncClient:
         rpc_options: typing.Optional[RpcOptions] = ...,
         is_mutable_types: typing.Optional[bool] = False,
     ) -> typing.Tuple[TResponse, typing.AsyncGenerator[TChunk, None]]: ...
+    @typing.overload
+    async def _send_request(
+        self,
+        service_name: str,
+        function_name: str,
+        args: StructOrUnion | MutableStructOrUnion,
+        response_cls: typing.Tuple[
+            typing.Type[TResponse],
+            typing.Type[_fbthrift_SinkResult[TSinkChunk]]
+            | typing.Type[_fbthrift_MutableSinkResult[TSinkChunk]],
+            typing.Type[_fbthrift_ResponseStreamResult[TStreamChunk]]
+            | typing.Type[_fbthrift_MutableResponseStreamResult[TStreamChunk]],
+        ],
+        rpc_kind: RpcKind = ...,
+        qualifier: FunctionQualifier = ...,
+        interaction_position: InteractionMethodPosition = ...,
+        interaction_name: str = ...,
+        created_interaction: AsyncClient = ...,
+        uri_or_name: str = ...,
+        rpc_options: typing.Optional[RpcOptions] = ...,
+        is_mutable_types: typing.Optional[bool] = False,
+    ) -> typing.Tuple[TResponse, BidirectionalStream[TSinkChunk, TStreamChunk]]: ...
+    @typing.overload
+    async def _send_request(
+        self,
+        service_name: str,
+        function_name: str,
+        args: StructOrUnion | MutableStructOrUnion,
+        response_cls: typing.Tuple[
+            typing.Type[TResponse],
+            typing.Type[_fbthrift_SinkResult[TSinkChunk]]
+            | typing.Type[_fbthrift_MutableSinkResult[TSinkChunk]],
+            typing.Type[_fbthrift_SinkFinalResult[TFinalResponse]]
+            | typing.Type[_fbthrift_MutableSinkFinalResult[TFinalResponse]],
+        ],
+        rpc_kind: RpcKind = ...,
+        qualifier: FunctionQualifier = ...,
+        interaction_position: InteractionMethodPosition = ...,
+        interaction_name: str = ...,
+        created_interaction: AsyncClient = ...,
+        uri_or_name: str = ...,
+        rpc_options: typing.Optional[RpcOptions] = ...,
+        is_mutable_types: typing.Optional[bool] = False,
+    ) -> typing.Tuple[
+        TResponse,
+        ClientSink[TSinkChunk, TFinalResponse]
+        | BidirectionalStream[TSinkChunk, TFinalResponse],
+    ]: ...
     def set_persistent_header(self, key: str, value: str) -> None: ...
     def _at_aexit(self, callback: typing.Callable[[], typing.Any]) -> None: ...

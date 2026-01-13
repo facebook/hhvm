@@ -112,6 +112,14 @@ class Async({{#if extends_service?}}{{#service.extends}}{{!
         )
         {{#function.sink_or_stream?}}
         _fbthrift_resp, _fbthrift_sink_or_stream = _fbthrift_resp
+        {{! isinstance check narrows union type (ClientSink | BidirectionalStream) for Pyre.
+            Order matters: bidirectional_stream? must be checked FIRST because sink? returns
+            true for regular sinks as well as bidi streams (bidi is a sink with stream response). }}
+        {{#if function.bidirectional_stream?}}
+        assert isinstance(_fbthrift_sink_or_stream, _fbthrift_BidirectionalStream)
+        {{#else if function.sink?}}
+        assert isinstance(_fbthrift_sink_or_stream, _fbthrift_ClientSink)
+        {{/if function.bidirectional_stream?}}
         {{/function.sink_or_stream?}}
         {{#function.early_client_return?}}
         # shortcut to success path for non-void returns

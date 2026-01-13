@@ -324,6 +324,7 @@ class MyService_MyInteraction(_fbthrift_python_Client["MyService_MyInteraction.A
                 rpc_options=rpc_options,
             )
             _fbthrift_resp, _fbthrift_sink_or_stream = _fbthrift_resp
+            assert isinstance(_fbthrift_sink_or_stream, _fbthrift_ClientSink)
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
                 return _fbthrift_resp.success, _fbthrift_sink_or_stream
@@ -463,6 +464,7 @@ class MyService_MyInteractionFast(_fbthrift_python_Client["MyService_MyInteracti
                 rpc_options=rpc_options,
             )
             _fbthrift_resp, _fbthrift_sink_or_stream = _fbthrift_resp
+            assert isinstance(_fbthrift_sink_or_stream, _fbthrift_ClientSink)
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
                 return _fbthrift_resp.success, _fbthrift_sink_or_stream
@@ -855,6 +857,7 @@ class Factories_MyInteraction(_fbthrift_python_Client["Factories_MyInteraction.A
                 rpc_options=rpc_options,
             )
             _fbthrift_resp, _fbthrift_sink_or_stream = _fbthrift_resp
+            assert isinstance(_fbthrift_sink_or_stream, _fbthrift_ClientSink)
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
                 return _fbthrift_resp.success, _fbthrift_sink_or_stream
@@ -994,6 +997,7 @@ class Factories_MyInteractionFast(_fbthrift_python_Client["Factories_MyInteracti
                 rpc_options=rpc_options,
             )
             _fbthrift_resp, _fbthrift_sink_or_stream = _fbthrift_resp
+            assert isinstance(_fbthrift_sink_or_stream, _fbthrift_ClientSink)
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
                 return _fbthrift_resp.success, _fbthrift_sink_or_stream
@@ -1305,6 +1309,7 @@ class Perform_MyInteraction(_fbthrift_python_Client["Perform_MyInteraction.Async
                 rpc_options=rpc_options,
             )
             _fbthrift_resp, _fbthrift_sink_or_stream = _fbthrift_resp
+            assert isinstance(_fbthrift_sink_or_stream, _fbthrift_ClientSink)
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
                 return _fbthrift_resp.success, _fbthrift_sink_or_stream
@@ -1444,6 +1449,7 @@ class Perform_MyInteractionFast(_fbthrift_python_Client["Perform_MyInteractionFa
                 rpc_options=rpc_options,
             )
             _fbthrift_resp, _fbthrift_sink_or_stream = _fbthrift_resp
+            assert isinstance(_fbthrift_sink_or_stream, _fbthrift_ClientSink)
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
                 return _fbthrift_resp.success, _fbthrift_sink_or_stream
@@ -1761,6 +1767,7 @@ class InteractWithShared_MyInteraction(_fbthrift_python_Client["InteractWithShar
                 rpc_options=rpc_options,
             )
             _fbthrift_resp, _fbthrift_sink_or_stream = _fbthrift_resp
+            assert isinstance(_fbthrift_sink_or_stream, _fbthrift_ClientSink)
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
                 return _fbthrift_resp.success, _fbthrift_sink_or_stream

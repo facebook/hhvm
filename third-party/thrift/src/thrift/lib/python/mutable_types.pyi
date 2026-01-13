@@ -65,3 +65,15 @@ TChunk = typing.TypeVar("TChunk")
 
 class _fbthrift_MutableResponseStreamResult(MutableStruct, typing.Generic[TChunk]):
     success: typing.Final[TChunk]
+
+# Generic base classes for mutable sink response types.
+# These allow the overload in async_client.pyi to extract the user-facing type
+# from generated wrapper classes (e.g., _fbthrift_Service_method_result_sink_elem).
+TSinkElem = typing.TypeVar("TSinkElem")
+TSinkFinal = typing.TypeVar("TSinkFinal")
+
+class _fbthrift_MutableSinkResult(MutableStruct, typing.Generic[TSinkElem]):
+    success: typing.Final[TSinkElem]
+
+class _fbthrift_MutableSinkFinalResult(MutableStruct, typing.Generic[TSinkFinal]):
+    success: typing.Final[TSinkFinal]

@@ -80,8 +80,8 @@ class _fbthrift_{{service.name}}_{{function.name}}_result_stream_elem({{!
 
     def __init__(
         self, *, success: _typing.Optional[{{#partial typehints.pep484_type type=function.stream.elem_type}}] = ...{{!
-        }}{{#each function.stream.exceptions as |field|}}{{!
-        }}, {{field.py_name}}: _typing.Optional[{{#partial typehints.pep484_type type=field.type}}]=...{{!
+        }}{{#each (array.enumerate function.stream.exceptions) as |index field|}}{{!
+        }}, {{#partial m_fields.exception_field_name field=field index=index}}: _typing.Optional[{{#partial typehints.pep484_type type=field.type}}]=...{{!
         }}{{/each}}
     ) -> None: ...
 
@@ -98,8 +98,9 @@ class _fbthrift_{{service.name}}_{{function.name}}_result_stream_elem({{!
   {{#if function.sink?}}
 
 
-class _fbthrift_{{service.name}}_{{function.name}}_result_sink_elem({{#partial m_types.struct_base}}):
-    success: _typing.Final[{{#partial typehints.pep484_type type=function.sink.elem_type}}]
+class _fbthrift_{{service.name}}_{{function.name}}_result_sink_elem({{!
+}}{{#partial m_types.sink_result_base}}{{!
+}}[{{#partial typehints.pep484_type type=function.sink.elem_type}}]):
     {{#each function.sink.exceptions as |field|}}
     {{field.py_name}}: _typing.Final[{{#partial typehints.pep484_type type=field.type}}]
     {{/each}}
@@ -108,15 +109,25 @@ class _fbthrift_{{service.name}}_{{function.name}}_result_sink_elem({{#partial m
         self,
         *,
         success: _typing.Optional[{{#partial typehints.pep484_type type=function.sink.elem_type}}] = ...{{!
-        }}{{#each function.sink.exceptions as |field|}}{{!
-        }}, {{field.py_name}}: _typing.Optional[{{#partial typehints.pep484_type type=field.type}}]=...{{!
+        }}{{#each (array.enumerate function.sink.exceptions) as |index field|}}{{!
+        }}, {{#partial m_fields.exception_field_name field=field index=index}}: _typing.Optional[{{#partial typehints.pep484_type type=field.type}}]=...{{!
         }}{{/each}}
     ) -> None: ...
 
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[
+        str,
+        _typing.Union[
+            {{#partial typehints.pep484_type type=function.sink.elem_type}},
+            {{#each function.sink.exceptions as |field|}}
+            {{#partial typehints.pep484_type type=field.type}},
+            {{/each}}
+        ]]]: ...
+
 
     {{#if (not function.bidirectional_stream?)}}
-class _fbthrift_{{service.name}}_{{function.name}}_result_sink_final({{#partial m_types.struct_base}}):
-    success: _typing.Final[{{#partial typehints.pep484_type type=function.sink.final_response_type}}]
+class _fbthrift_{{service.name}}_{{function.name}}_result_sink_final({{!
+}}{{#partial m_types.sink_final_result_base}}{{!
+}}[{{#partial typehints.pep484_type type=function.sink.final_response_type}}]):
     {{#each function.sink.final_response_exceptions as |field|}}
     {{field.py_name}}: _typing.Final[{{#partial typehints.pep484_type type=field.type}}]
     {{/each}}
@@ -125,10 +136,19 @@ class _fbthrift_{{service.name}}_{{function.name}}_result_sink_final({{#partial 
         self,
         *,
         success: _typing.Optional[{{#partial typehints.pep484_type type=function.sink.final_response_type}}] = ...{{!
-        }}{{#each function.sink.final_response_exceptions as |field|}}{{!
-        }}, {{field.py_name}}: _typing.Optional[{{#partial typehints.pep484_type type=field.type}}]=...{{!
+        }}{{#each (array.enumerate function.sink.final_response_exceptions) as |index field|}}{{!
+        }}, {{#partial m_fields.exception_field_name field=field index=index}}: _typing.Optional[{{#partial typehints.pep484_type type=field.type}}]=...{{!
         }}{{/each}}
     ) -> None: ...
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[
+        str,
+        _typing.Union[
+            {{#partial typehints.pep484_type type=function.sink.final_response_type}},
+            {{#each function.sink.final_response_exceptions as |field|}}
+            {{#partial typehints.pep484_type type=field.type}},
+            {{/each}}
+        ]]]: ...
     {{/if (not function.bidirectional_stream?)}}
   {{/if function.sink?}}
 {{/each}}

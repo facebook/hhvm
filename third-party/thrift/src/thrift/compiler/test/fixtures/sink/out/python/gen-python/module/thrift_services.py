@@ -65,9 +65,9 @@ class SinkServiceInterface(
         self,
         handler_sink_callback: _typing.Callable[[_typing.AsyncGenerator[_fbthrift__module__thrift_types.SinkPayload, None]], _typing.Awaitable[_fbthrift__module__thrift_types.FinalResponse]],
         protocol: Protocol
-    ) -> _typing.Callable[[_typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None]], _typing.Awaitable[_fbthrift_iobuf.IOBuf]]:
+    ) -> _typing.Callable[[_typing.Callable[[], _typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None]]], _typing.Awaitable[_fbthrift_iobuf.IOBuf]]:
         async def _fbthrift_iobuf_sink_callback(
-            _iobuf_agen: _typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None],
+            _iobuf_agen: _typing.Callable[[], _typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None]],
         ) -> _fbthrift_iobuf.IOBuf:
             async def _handler_agen() -> _typing.AsyncGenerator[_fbthrift__module__thrift_types.SinkPayload, None]:
                 async for iobuf_item in _iobuf_agen():
@@ -86,7 +86,7 @@ class SinkServiceInterface(
         return _fbthrift_iobuf_sink_callback
 
 
-    async def _fbthrift__handler_method(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _typing.Tuple[_fbthrift_iobuf.IOBuf, _typing.Callable[[_typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None]], _typing.Awaitable[_fbthrift_iobuf.IOBuf]]]:
+    async def _fbthrift__handler_method(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _typing.Tuple[_fbthrift_iobuf.IOBuf, _typing.Callable[[_typing.Callable[[], _typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None]]], _typing.Awaitable[_fbthrift_iobuf.IOBuf]]]:
         args_struct = deserialize(_fbthrift__module__thrift_types._fbthrift_SinkService_method_args, args, protocol)
         value = await self.method()
         sink_callback = value
@@ -104,9 +104,9 @@ class SinkServiceInterface(
         self,
         handler_sink_callback: _typing.Callable[[_typing.AsyncGenerator[_fbthrift__module__thrift_types.SinkPayload, None]], _typing.Awaitable[_fbthrift__module__thrift_types.FinalResponse]],
         protocol: Protocol
-    ) -> _typing.Callable[[_typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None]], _typing.Awaitable[_fbthrift_iobuf.IOBuf]]:
+    ) -> _typing.Callable[[_typing.Callable[[], _typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None]]], _typing.Awaitable[_fbthrift_iobuf.IOBuf]]:
         async def _fbthrift_iobuf_sink_callback(
-            _iobuf_agen: _typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None],
+            _iobuf_agen: _typing.Callable[[], _typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None]],
         ) -> _fbthrift_iobuf.IOBuf:
             async def _handler_agen() -> _typing.AsyncGenerator[_fbthrift__module__thrift_types.SinkPayload, None]:
                 async for iobuf_item in _iobuf_agen():
@@ -125,7 +125,7 @@ class SinkServiceInterface(
         return _fbthrift_iobuf_sink_callback
 
 
-    async def _fbthrift__handler_methodAndReponse(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _typing.Tuple[_fbthrift_iobuf.IOBuf, _typing.Callable[[_typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None]], _typing.Awaitable[_fbthrift_iobuf.IOBuf]]]:
+    async def _fbthrift__handler_methodAndReponse(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _typing.Tuple[_fbthrift_iobuf.IOBuf, _typing.Callable[[_typing.Callable[[], _typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None]]], _typing.Awaitable[_fbthrift_iobuf.IOBuf]]]:
         args_struct = deserialize(_fbthrift__module__thrift_types._fbthrift_SinkService_methodAndReponse_args, args, protocol)
         value = await self.methodAndReponse()
         value, sink_callback = value
@@ -143,9 +143,9 @@ class SinkServiceInterface(
         self,
         handler_sink_callback: _typing.Callable[[_typing.AsyncGenerator[_fbthrift__module__thrift_types.SinkPayload, None]], _typing.Awaitable[_fbthrift__module__thrift_types.FinalResponse]],
         protocol: Protocol
-    ) -> _typing.Callable[[_typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None]], _typing.Awaitable[_fbthrift_iobuf.IOBuf]]:
+    ) -> _typing.Callable[[_typing.Callable[[], _typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None]]], _typing.Awaitable[_fbthrift_iobuf.IOBuf]]:
         async def _fbthrift_iobuf_sink_callback(
-            _iobuf_agen: _typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None],
+            _iobuf_agen: _typing.Callable[[], _typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None]],
         ) -> _fbthrift_iobuf.IOBuf:
             async def _handler_agen() -> _typing.AsyncGenerator[_fbthrift__module__thrift_types.SinkPayload, None]:
                 async for iobuf_item in _iobuf_agen():
@@ -164,7 +164,7 @@ class SinkServiceInterface(
         return _fbthrift_iobuf_sink_callback
 
 
-    async def _fbthrift__handler_methodThrow(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _typing.Tuple[_fbthrift_iobuf.IOBuf, _typing.Callable[[_typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None]], _typing.Awaitable[_fbthrift_iobuf.IOBuf]]]:
+    async def _fbthrift__handler_methodThrow(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _typing.Tuple[_fbthrift_iobuf.IOBuf, _typing.Callable[[_typing.Callable[[], _typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None]]], _typing.Awaitable[_fbthrift_iobuf.IOBuf]]]:
         args_struct = deserialize(_fbthrift__module__thrift_types._fbthrift_SinkService_methodThrow_args, args, protocol)
         try:
             value = await self.methodThrow()
@@ -188,9 +188,9 @@ class SinkServiceInterface(
         self,
         handler_sink_callback: _typing.Callable[[_typing.AsyncGenerator[_fbthrift__module__thrift_types.SinkPayload, None]], _typing.Awaitable[_fbthrift__module__thrift_types.FinalResponse]],
         protocol: Protocol
-    ) -> _typing.Callable[[_typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None]], _typing.Awaitable[_fbthrift_iobuf.IOBuf]]:
+    ) -> _typing.Callable[[_typing.Callable[[], _typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None]]], _typing.Awaitable[_fbthrift_iobuf.IOBuf]]:
         async def _fbthrift_iobuf_sink_callback(
-            _iobuf_agen: _typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None],
+            _iobuf_agen: _typing.Callable[[], _typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None]],
         ) -> _fbthrift_iobuf.IOBuf:
             async def _handler_agen() -> _typing.AsyncGenerator[_fbthrift__module__thrift_types.SinkPayload, None]:
                 async for iobuf_item in _iobuf_agen():
@@ -204,6 +204,7 @@ class SinkServiceInterface(
                         continue
                     for _ex_fld_name, ex in sink_elem:
                         if ex is not None:
+                            # pyre-ignore[48]: Invalid Exception
                             raise ex
                     assert sink_elem.success is not None, "unexpected empty sink element"
 
@@ -214,7 +215,7 @@ class SinkServiceInterface(
         return _fbthrift_iobuf_sink_callback
 
 
-    async def _fbthrift__handler_methodSinkThrow(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _typing.Tuple[_fbthrift_iobuf.IOBuf, _typing.Callable[[_typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None]], _typing.Awaitable[_fbthrift_iobuf.IOBuf]]]:
+    async def _fbthrift__handler_methodSinkThrow(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _typing.Tuple[_fbthrift_iobuf.IOBuf, _typing.Callable[[_typing.Callable[[], _typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None]]], _typing.Awaitable[_fbthrift_iobuf.IOBuf]]]:
         args_struct = deserialize(_fbthrift__module__thrift_types._fbthrift_SinkService_methodSinkThrow_args, args, protocol)
         value = await self.methodSinkThrow()
         sink_callback = value
@@ -232,9 +233,9 @@ class SinkServiceInterface(
         self,
         handler_sink_callback: _typing.Callable[[_typing.AsyncGenerator[_fbthrift__module__thrift_types.SinkPayload, None]], _typing.Awaitable[_fbthrift__module__thrift_types.FinalResponse]],
         protocol: Protocol
-    ) -> _typing.Callable[[_typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None]], _typing.Awaitable[_fbthrift_iobuf.IOBuf]]:
+    ) -> _typing.Callable[[_typing.Callable[[], _typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None]]], _typing.Awaitable[_fbthrift_iobuf.IOBuf]]:
         async def _fbthrift_iobuf_sink_callback(
-            _iobuf_agen: _typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None],
+            _iobuf_agen: _typing.Callable[[], _typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None]],
         ) -> _fbthrift_iobuf.IOBuf:
             async def _handler_agen() -> _typing.AsyncGenerator[_fbthrift__module__thrift_types.SinkPayload, None]:
                 async for iobuf_item in _iobuf_agen():
@@ -256,7 +257,7 @@ class SinkServiceInterface(
         return _fbthrift_iobuf_sink_callback
 
 
-    async def _fbthrift__handler_methodFinalThrow(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _typing.Tuple[_fbthrift_iobuf.IOBuf, _typing.Callable[[_typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None]], _typing.Awaitable[_fbthrift_iobuf.IOBuf]]]:
+    async def _fbthrift__handler_methodFinalThrow(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _typing.Tuple[_fbthrift_iobuf.IOBuf, _typing.Callable[[_typing.Callable[[], _typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None]]], _typing.Awaitable[_fbthrift_iobuf.IOBuf]]]:
         args_struct = deserialize(_fbthrift__module__thrift_types._fbthrift_SinkService_methodFinalThrow_args, args, protocol)
         value = await self.methodFinalThrow()
         sink_callback = value
@@ -274,9 +275,9 @@ class SinkServiceInterface(
         self,
         handler_sink_callback: _typing.Callable[[_typing.AsyncGenerator[_fbthrift__module__thrift_types.SinkPayload, None]], _typing.Awaitable[_fbthrift__module__thrift_types.FinalResponse]],
         protocol: Protocol
-    ) -> _typing.Callable[[_typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None]], _typing.Awaitable[_fbthrift_iobuf.IOBuf]]:
+    ) -> _typing.Callable[[_typing.Callable[[], _typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None]]], _typing.Awaitable[_fbthrift_iobuf.IOBuf]]:
         async def _fbthrift_iobuf_sink_callback(
-            _iobuf_agen: _typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None],
+            _iobuf_agen: _typing.Callable[[], _typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None]],
         ) -> _fbthrift_iobuf.IOBuf:
             async def _handler_agen() -> _typing.AsyncGenerator[_fbthrift__module__thrift_types.SinkPayload, None]:
                 async for iobuf_item in _iobuf_agen():
@@ -290,6 +291,7 @@ class SinkServiceInterface(
                         continue
                     for _ex_fld_name, ex in sink_elem:
                         if ex is not None:
+                            # pyre-ignore[48]: Invalid Exception
                             raise ex
                     assert sink_elem.success is not None, "unexpected empty sink element"
 
@@ -303,7 +305,7 @@ class SinkServiceInterface(
         return _fbthrift_iobuf_sink_callback
 
 
-    async def _fbthrift__handler_methodBothThrow(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _typing.Tuple[_fbthrift_iobuf.IOBuf, _typing.Callable[[_typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None]], _typing.Awaitable[_fbthrift_iobuf.IOBuf]]]:
+    async def _fbthrift__handler_methodBothThrow(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _typing.Tuple[_fbthrift_iobuf.IOBuf, _typing.Callable[[_typing.Callable[[], _typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None]]], _typing.Awaitable[_fbthrift_iobuf.IOBuf]]]:
         args_struct = deserialize(_fbthrift__module__thrift_types._fbthrift_SinkService_methodBothThrow_args, args, protocol)
         value = await self.methodBothThrow()
         sink_callback = value
@@ -321,9 +323,9 @@ class SinkServiceInterface(
         self,
         handler_sink_callback: _typing.Callable[[_typing.AsyncGenerator[_fbthrift__module__thrift_types.SinkPayload, None]], _typing.Awaitable[_fbthrift__module__thrift_types.FinalResponse]],
         protocol: Protocol
-    ) -> _typing.Callable[[_typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None]], _typing.Awaitable[_fbthrift_iobuf.IOBuf]]:
+    ) -> _typing.Callable[[_typing.Callable[[], _typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None]]], _typing.Awaitable[_fbthrift_iobuf.IOBuf]]:
         async def _fbthrift_iobuf_sink_callback(
-            _iobuf_agen: _typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None],
+            _iobuf_agen: _typing.Callable[[], _typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None]],
         ) -> _fbthrift_iobuf.IOBuf:
             async def _handler_agen() -> _typing.AsyncGenerator[_fbthrift__module__thrift_types.SinkPayload, None]:
                 async for iobuf_item in _iobuf_agen():
@@ -342,7 +344,7 @@ class SinkServiceInterface(
         return _fbthrift_iobuf_sink_callback
 
 
-    async def _fbthrift__handler_methodFast(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _typing.Tuple[_fbthrift_iobuf.IOBuf, _typing.Callable[[_typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None]], _typing.Awaitable[_fbthrift_iobuf.IOBuf]]]:
+    async def _fbthrift__handler_methodFast(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _typing.Tuple[_fbthrift_iobuf.IOBuf, _typing.Callable[[_typing.Callable[[], _typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None]]], _typing.Awaitable[_fbthrift_iobuf.IOBuf]]]:
         args_struct = deserialize(_fbthrift__module__thrift_types._fbthrift_SinkService_methodFast_args, args, protocol)
         value = await self.methodFast()
         sink_callback = value

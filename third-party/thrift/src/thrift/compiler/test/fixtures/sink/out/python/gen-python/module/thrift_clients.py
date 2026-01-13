@@ -75,6 +75,7 @@ class SinkService(_fbthrift_python_Client["SinkService.Async", "SinkService.Sync
                 rpc_options=rpc_options,
             )
             _fbthrift_resp, _fbthrift_sink_or_stream = _fbthrift_resp
+            assert isinstance(_fbthrift_sink_or_stream, _fbthrift_ClientSink)
             return _fbthrift_sink_or_stream
     
         async def methodAndReponse(
@@ -92,6 +93,7 @@ class SinkService(_fbthrift_python_Client["SinkService.Async", "SinkService.Sync
                 rpc_options=rpc_options,
             )
             _fbthrift_resp, _fbthrift_sink_or_stream = _fbthrift_resp
+            assert isinstance(_fbthrift_sink_or_stream, _fbthrift_ClientSink)
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
                 return _fbthrift_resp.success, _fbthrift_sink_or_stream
@@ -115,6 +117,7 @@ class SinkService(_fbthrift_python_Client["SinkService.Async", "SinkService.Sync
                 rpc_options=rpc_options,
             )
             _fbthrift_resp, _fbthrift_sink_or_stream = _fbthrift_resp
+            assert isinstance(_fbthrift_sink_or_stream, _fbthrift_ClientSink)
             # pyre-ignore[16]: `type(_fbthrift_resp)` has no attribute `_ex0__ex`
             if (_fbthrift_ex := _fbthrift_resp._ex0__ex) is not None:
                 raise _fbthrift_ex
@@ -135,6 +138,7 @@ class SinkService(_fbthrift_python_Client["SinkService.Async", "SinkService.Sync
                 rpc_options=rpc_options,
             )
             _fbthrift_resp, _fbthrift_sink_or_stream = _fbthrift_resp
+            assert isinstance(_fbthrift_sink_or_stream, _fbthrift_ClientSink)
             return _fbthrift_sink_or_stream
     
         async def methodFinalThrow(
@@ -152,6 +156,7 @@ class SinkService(_fbthrift_python_Client["SinkService.Async", "SinkService.Sync
                 rpc_options=rpc_options,
             )
             _fbthrift_resp, _fbthrift_sink_or_stream = _fbthrift_resp
+            assert isinstance(_fbthrift_sink_or_stream, _fbthrift_ClientSink)
             return _fbthrift_sink_or_stream
     
         async def methodBothThrow(
@@ -169,6 +174,7 @@ class SinkService(_fbthrift_python_Client["SinkService.Async", "SinkService.Sync
                 rpc_options=rpc_options,
             )
             _fbthrift_resp, _fbthrift_sink_or_stream = _fbthrift_resp
+            assert isinstance(_fbthrift_sink_or_stream, _fbthrift_ClientSink)
             return _fbthrift_sink_or_stream
     
         async def methodFast(
@@ -186,6 +192,7 @@ class SinkService(_fbthrift_python_Client["SinkService.Async", "SinkService.Sync
                 rpc_options=rpc_options,
             )
             _fbthrift_resp, _fbthrift_sink_or_stream = _fbthrift_resp
+            assert isinstance(_fbthrift_sink_or_stream, _fbthrift_ClientSink)
             return _fbthrift_sink_or_stream
     
     

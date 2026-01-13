@@ -80,6 +80,7 @@ class BiDiService(_fbthrift_python_Client["BiDiService.Async", "BiDiService.Sync
                 is_mutable_types=True,
             )
             _fbthrift_resp, _fbthrift_sink_or_stream = _fbthrift_resp
+            assert isinstance(_fbthrift_sink_or_stream, _fbthrift_BidirectionalStream)
             return _fbthrift_sink_or_stream
     
         async def response(
@@ -98,6 +99,7 @@ class BiDiService(_fbthrift_python_Client["BiDiService.Async", "BiDiService.Sync
                 is_mutable_types=True,
             )
             _fbthrift_resp, _fbthrift_sink_or_stream = _fbthrift_resp
+            assert isinstance(_fbthrift_sink_or_stream, _fbthrift_BidirectionalStream)
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
                 return _fbthrift_resp.success, _fbthrift_sink_or_stream
@@ -122,6 +124,7 @@ class BiDiService(_fbthrift_python_Client["BiDiService.Async", "BiDiService.Sync
                 is_mutable_types=True,
             )
             _fbthrift_resp, _fbthrift_sink_or_stream = _fbthrift_resp
+            assert isinstance(_fbthrift_sink_or_stream, _fbthrift_BidirectionalStream)
             # pyre-ignore[16]: `type(_fbthrift_resp)` has no attribute `_ex0__ex`
             if (_fbthrift_ex := _fbthrift_resp._ex0__ex) is not None:
                 raise _fbthrift_ex

@@ -868,8 +868,6 @@ class module_importer {
   }
 
  private:
-  eval_context& eval_ctx() { return vm_.stack().top()->context; }
-
   void do_export(
       map::raw& exports, std::string name, object value, source_location loc) {
     auto [_, inserted] = exports.emplace(name, std::move(value));

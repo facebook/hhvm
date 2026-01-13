@@ -15,7 +15,7 @@ path = "../src/rust_to_ocaml.rs"
 anyhow = "1.0.98"
 attr_parser = { version = "0.0.0", path = "../attr_parser" }
 clap = { version = "3.2.25", features = ["derive", "env", "regex", "unicode", "wrap_help"] }
-convert_case = "0.6"
+convert_case = "0.10.0"
 derive_more = { version = "1.0.0", features = ["full"] }
 indexmap = { version = "2.9.0", features = ["arbitrary", "rayon", "serde"] }
 serde = { version = "1.0.219", features = ["derive", "rc"] }

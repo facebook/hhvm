@@ -8,12 +8,12 @@
 
 #pragma once
 
+#include <csignal>
 #include <folly/Function.h>
 #include <folly/SocketAddress.h>
 #include <folly/io/async/AsyncServerSocket.h>
 #include <proxygen/httpserver/Filters.h>
 #include <proxygen/httpserver/RequestHandlerFactory.h>
-#include <signal.h>
 
 namespace proxygen {
 

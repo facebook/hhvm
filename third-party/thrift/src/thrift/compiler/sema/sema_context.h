@@ -170,7 +170,7 @@ struct sema_params {
   validation_level unnecessary_allow_missing_uris = validation_level::error;
 
   // Action to take on deprecated cpp.methods annotations.
-  validation_level deprecated_cpp_methods = validation_level::none;
+  validation_level deprecated_cpp_methods = validation_level::error;
 };
 
 // An AST visitor context for semantic analysis. It combines diagnostics

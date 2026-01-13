@@ -48,10 +48,10 @@ template uint32_t AnotherException::write<>(apache::thrift::BinaryProtocolWriter
 template uint32_t AnotherException::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
 template uint32_t AnotherException::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
 
-template void containerStruct::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
-template uint32_t containerStruct::write<>(apache::thrift::BinaryProtocolWriter*) const;
-template uint32_t containerStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
-template uint32_t containerStruct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void ContainerStruct::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t ContainerStruct::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t ContainerStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t ContainerStruct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
 
 template void MyIncludedStruct::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
 template uint32_t MyIncludedStruct::write<>(apache::thrift::BinaryProtocolWriter*) const;

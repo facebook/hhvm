@@ -34,8 +34,8 @@ cdef object AnException_from_cpp(const shared_ptr[_fbthrift_cbindings.cAnExcepti
 cdef shared_ptr[_fbthrift_cbindings.cAnotherException] AnotherException_convert_to_cpp(object inst) except*
 cdef object AnotherException_from_cpp(const shared_ptr[_fbthrift_cbindings.cAnotherException]& c_struct)
 
-cdef shared_ptr[_fbthrift_cbindings.ccontainerStruct] containerStruct_convert_to_cpp(object inst) except*
-cdef object containerStruct_from_cpp(const shared_ptr[_fbthrift_cbindings.ccontainerStruct]& c_struct)
+cdef shared_ptr[_fbthrift_cbindings.cContainerStruct] ContainerStruct_convert_to_cpp(object inst) except*
+cdef object ContainerStruct_from_cpp(const shared_ptr[_fbthrift_cbindings.cContainerStruct]& c_struct)
 
 cdef shared_ptr[_fbthrift_cbindings.cMyIncludedStruct] MyIncludedStruct_convert_to_cpp(object inst) except*
 cdef object MyIncludedStruct_from_cpp(const shared_ptr[_fbthrift_cbindings.cMyIncludedStruct]& c_struct)

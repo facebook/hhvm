@@ -1188,13 +1188,13 @@ void ParamServiceWrapper::async_tm_listunion_string_param(
 }
 void ParamServiceWrapper::async_tm_annotatedParams(
   apache::thrift::HandlerCallbackPtr<void> callback
-    , std::unique_ptr<::some::valid::ns::containerStruct> no_annotation
+    , std::unique_ptr<::some::valid::ns::ContainerStruct> no_annotation
     , std::unique_ptr<std::set<int32_t>> opt_ref_type_shared
     , CppFakeI32 base_type
     , std::unique_ptr<folly::small_vector<int64_t, 8 >> list_type
     , std::unique_ptr<folly::sorted_vector_set<std::string>> set_type
     , std::unique_ptr<FakeMap> map_type
-    , std::unique_ptr<std::unordered_map<std::string, containerStruct>> map_struct_type
+    , std::unique_ptr<std::unordered_map<std::string, ContainerStruct>> map_struct_type
     , std::unique_ptr<folly::IOBuf> iobuf_type
     , std::unique_ptr<std::unique_ptr<folly::IOBuf>> iobuf_ptr
     , std::unique_ptr<std::vector<int32_t>> list_i32_template
@@ -1207,7 +1207,7 @@ void ParamServiceWrapper::async_tm_annotatedParams(
     , std::unique_ptr<folly::sorted_vector_map<int64_t,std::string>> typedef_map_template
     , std::unique_ptr<folly::IOBuf> iobuf_type_val
     , std::unique_ptr<std::unique_ptr<folly::IOBuf>> iobuf_ptr_val
-    , std::unique_ptr<::some::valid::ns::containerStruct> struct_struct
+    , std::unique_ptr<::some::valid::ns::ContainerStruct> struct_struct
 ) {
   auto ctx = callback->getRequestContext();
   folly::via(

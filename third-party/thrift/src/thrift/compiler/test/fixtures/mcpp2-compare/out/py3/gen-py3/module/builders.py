@@ -206,9 +206,9 @@ class AnotherException_Builder(thrift.py3.builder.StructBuilder):
         yield "req_code", self.req_code
         yield "message", self.message
 
-_fbthrift_struct_type__containerStruct = _module_types.containerStruct
-class containerStruct_Builder(thrift.py3.builder.StructBuilder):
-    _struct_type = _fbthrift_struct_type__containerStruct
+_fbthrift_struct_type__ContainerStruct = _module_types.ContainerStruct
+class ContainerStruct_Builder(thrift.py3.builder.StructBuilder):
+    _struct_type = _fbthrift_struct_type__ContainerStruct
 
     def __init__(self):
         self.fieldA: _typing.Optional[bool] = None

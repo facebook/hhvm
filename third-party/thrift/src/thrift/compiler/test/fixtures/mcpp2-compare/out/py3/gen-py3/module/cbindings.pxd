@@ -305,18 +305,18 @@ cdef extern from * nogil:
         bint empty()
 
 cdef extern from * nogil:
-    cdef cppclass std_unordered_map_std_string_containerStruct "std::unordered_map<std::string, containerStruct>":
+    cdef cppclass std_unordered_map_std_string_ContainerStruct "std::unordered_map<std::string, ContainerStruct>":
         ctypedef string key_type
-        ctypedef ccontainerStruct mapped_type
+        ctypedef cContainerStruct mapped_type
         ctypedef size_t size_type
 
         cppclass iterator:
-            cpair[string, ccontainerStruct]& operator*()
+            cpair[string, cContainerStruct]& operator*()
             iterator operator++()
             bint operator==(iterator)
             bint operator!=(iterator)
         cppclass reverse_iterator:
-            cpair[string, ccontainerStruct]& operator*()
+            cpair[string, cContainerStruct]& operator*()
             iterator operator++()
             bint operator==(reverse_iterator)
             bint operator!=(reverse_iterator)
@@ -325,10 +325,10 @@ cdef extern from * nogil:
         cppclass const_reverse_iterator(reverse_iterator):
             pass
 
-        std_unordered_map_std_string_containerStruct() except +
-        std_unordered_map_std_string_containerStruct(std_unordered_map_std_string_containerStruct&) except +
+        std_unordered_map_std_string_ContainerStruct() except +
+        std_unordered_map_std_string_ContainerStruct(std_unordered_map_std_string_ContainerStruct&) except +
 
-        ccontainerStruct& operator[](string&)
+        cContainerStruct& operator[](string&)
         iterator find(const string&)
         const_iterator const_find "find"(const string&)
         size_type count(const string&)
@@ -594,14 +594,14 @@ cdef extern from "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/module_me
         void gen(__fbthrift_cThriftMetadata &metadata)
 cdef extern from "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/module_types_custom_protocol.h" namespace "::some::valid::ns":
 
-    cdef cppclass ccontainerStruct "::some::valid::ns::containerStruct":
-        ccontainerStruct() except +
-        bint operator==(ccontainerStruct&)
-        bint operator!=(ccontainerStruct&)
-        bint operator<(ccontainerStruct&)
-        bint operator>(ccontainerStruct&)
-        bint operator<=(ccontainerStruct&)
-        bint operator>=(ccontainerStruct&)
+    cdef cppclass cContainerStruct "::some::valid::ns::ContainerStruct":
+        cContainerStruct() except +
+        bint operator==(cContainerStruct&)
+        bint operator!=(cContainerStruct&)
+        bint operator<(cContainerStruct&)
+        bint operator>(cContainerStruct&)
+        bint operator<=(cContainerStruct&)
+        bint operator>=(cContainerStruct&)
         __field_ref[cbool] fieldA_ref "fieldA_ref" ()
         __required_field_ref[cbool] req_fieldA_ref "req_fieldA_ref" ()
         __optional_field_ref[cbool] opt_fieldA_ref "opt_fieldA_ref" ()
@@ -667,30 +667,30 @@ cdef extern from "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/module_ty
         cAnnotatedStruct() except +
         bint operator==(cAnnotatedStruct&)
         bint operator!=(cAnnotatedStruct&)
-        __field_ref[ccontainerStruct] no_annotation_ref "no_annotation_ref" ()
-        unique_ptr[ccontainerStruct] cpp_unique_ref_ref "cpp_unique_ref_ref" ()
-        unique_ptr[ccontainerStruct] cpp2_unique_ref_ref "cpp2_unique_ref_ref" ()
+        __field_ref[cContainerStruct] no_annotation_ref "no_annotation_ref" ()
+        unique_ptr[cContainerStruct] cpp_unique_ref_ref "cpp_unique_ref_ref" ()
+        unique_ptr[cContainerStruct] cpp2_unique_ref_ref "cpp2_unique_ref_ref" ()
         unique_ptr[cmap[cint32_t,vector[string]]] container_with_ref_ref "container_with_ref_ref" ()
-        unique_ptr[ccontainerStruct] req_cpp_unique_ref_ref "req_cpp_unique_ref_ref" ()
-        unique_ptr[ccontainerStruct] req_cpp2_unique_ref_ref "req_cpp2_unique_ref_ref" ()
+        unique_ptr[cContainerStruct] req_cpp_unique_ref_ref "req_cpp_unique_ref_ref" ()
+        unique_ptr[cContainerStruct] req_cpp2_unique_ref_ref "req_cpp2_unique_ref_ref" ()
         unique_ptr[vector[string]] req_container_with_ref_ref "req_container_with_ref_ref" ()
-        unique_ptr[ccontainerStruct] opt_cpp_unique_ref_ref "opt_cpp_unique_ref_ref" ()
-        unique_ptr[ccontainerStruct] opt_cpp2_unique_ref_ref "opt_cpp2_unique_ref_ref" ()
+        unique_ptr[cContainerStruct] opt_cpp_unique_ref_ref "opt_cpp_unique_ref_ref" ()
+        unique_ptr[cContainerStruct] opt_cpp2_unique_ref_ref "opt_cpp2_unique_ref_ref" ()
         unique_ptr[cset[cint32_t]] opt_container_with_ref_ref "opt_container_with_ref_ref" ()
-        unique_ptr[ccontainerStruct] ref_type_unique_ref "ref_type_unique_ref" ()
-        shared_ptr[ccontainerStruct] ref_type_shared_ref "ref_type_shared_ref" ()
+        unique_ptr[cContainerStruct] ref_type_unique_ref "ref_type_unique_ref" ()
+        shared_ptr[cContainerStruct] ref_type_shared_ref "ref_type_shared_ref" ()
         shared_ptr[const cmap[cint32_t,vector[string]]] ref_type_const_ref "ref_type_const_ref" ()
-        shared_ptr[ccontainerStruct] req_ref_type_shared_ref "req_ref_type_shared_ref" ()
-        shared_ptr[const ccontainerStruct] req_ref_type_const_ref "req_ref_type_const_ref" ()
+        shared_ptr[cContainerStruct] req_ref_type_shared_ref "req_ref_type_shared_ref" ()
+        shared_ptr[const cContainerStruct] req_ref_type_const_ref "req_ref_type_const_ref" ()
         unique_ptr[vector[string]] req_ref_type_unique_ref "req_ref_type_unique_ref" ()
-        shared_ptr[const ccontainerStruct] opt_ref_type_const_ref "opt_ref_type_const_ref" ()
-        unique_ptr[ccontainerStruct] opt_ref_type_unique_ref "opt_ref_type_unique_ref" ()
+        shared_ptr[const cContainerStruct] opt_ref_type_const_ref "opt_ref_type_const_ref" ()
+        unique_ptr[cContainerStruct] opt_ref_type_unique_ref "opt_ref_type_unique_ref" ()
         shared_ptr[cset[cint32_t]] opt_ref_type_shared_ref "opt_ref_type_shared_ref" ()
         __field_ref[CppFakeI32] base_type_ref "base_type_ref" ()
         __field_ref[folly_small_vector_int64_t_8] list_type_ref "list_type_ref" ()
         __field_ref[folly_sorted_vector_set_std_string] set_type_ref "set_type_ref" ()
         __field_ref[FakeMap] map_type_ref "map_type_ref" ()
-        __field_ref[std_unordered_map_std_string_containerStruct] map_struct_type_ref "map_struct_type_ref" ()
+        __field_ref[std_unordered_map_std_string_ContainerStruct] map_struct_type_ref "map_struct_type_ref" ()
         __field_ref[_fbthrift_iobuf.cIOBuf] iobuf_type_ref "iobuf_type_ref" ()
         __field_ref[unique_ptr[_fbthrift_iobuf.cIOBuf]] iobuf_ptr_ref "iobuf_ptr_ref" ()
         __field_ref[std_list[cint32_t]] list_i32_template_ref "list_i32_template_ref" ()
@@ -703,7 +703,7 @@ cdef extern from "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/module_ty
         __field_ref[folly_sorted_vector_map[cint64_t,string]] typedef_map_template_ref "typedef_map_template_ref" ()
         __field_ref[_fbthrift_iobuf.cIOBuf] iobuf_type_val_ref "iobuf_type_val_ref" ()
         __field_ref[unique_ptr[_fbthrift_iobuf.cIOBuf]] iobuf_ptr_val_ref "iobuf_ptr_val_ref" ()
-        __field_ref[ccontainerStruct] struct_struct_ref "struct_struct_ref" ()
+        __field_ref[cContainerStruct] struct_struct_ref "struct_struct_ref" ()
 
 
     cdef cppclass cComplexContainerStruct "::some::valid::ns::ComplexContainerStruct":

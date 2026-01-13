@@ -2282,13 +2282,13 @@ cdef class ParamService(thrift.py3.client.Client):
 
     _fbthrift_annotations_DO_NOT_USE_annotatedParams = {
         'return': 'None',
-        'no_annotation': 'module.types.containerStruct', 'opt_ref_type_shared': '_typing.AbstractSet[int]', 'base_type': 'int', 'list_type': '_typing.Sequence[int]', 'set_type': '_typing.AbstractSet[str]', 'map_type': '_typing.Mapping[int, float]', 'map_struct_type': '_typing.Mapping[str, module.types.containerStruct]', 'iobuf_type': '_fbthrift_iobuf.IOBuf', 'iobuf_ptr': '_fbthrift_iobuf.IOBuf', 'list_i32_template': '_typing.Sequence[int]', 'list_string_template': '_typing.Sequence[str]', 'set_template': '_typing.AbstractSet[str]', 'map_template': '_typing.Mapping[int, str]', 'typedef_list_template': '_typing.Sequence[int]', 'typedef_deque_template': '_typing.Sequence[str]', 'typedef_set_template': '_typing.AbstractSet[str]', 'typedef_map_template': '_typing.Mapping[int, str]', 'iobuf_type_val': '_fbthrift_iobuf.IOBuf', 'iobuf_ptr_val': '_fbthrift_iobuf.IOBuf', 'struct_struct': 'module.types.containerStruct', 
+        'no_annotation': 'module.types.ContainerStruct', 'opt_ref_type_shared': '_typing.AbstractSet[int]', 'base_type': 'int', 'list_type': '_typing.Sequence[int]', 'set_type': '_typing.AbstractSet[str]', 'map_type': '_typing.Mapping[int, float]', 'map_struct_type': '_typing.Mapping[str, module.types.ContainerStruct]', 'iobuf_type': '_fbthrift_iobuf.IOBuf', 'iobuf_ptr': '_fbthrift_iobuf.IOBuf', 'list_i32_template': '_typing.Sequence[int]', 'list_string_template': '_typing.Sequence[str]', 'set_template': '_typing.AbstractSet[str]', 'map_template': '_typing.Mapping[int, str]', 'typedef_list_template': '_typing.Sequence[int]', 'typedef_deque_template': '_typing.Sequence[str]', 'typedef_set_template': '_typing.AbstractSet[str]', 'typedef_map_template': '_typing.Mapping[int, str]', 'iobuf_type_val': '_fbthrift_iobuf.IOBuf', 'iobuf_ptr_val': '_fbthrift_iobuf.IOBuf', 'struct_struct': 'module.types.ContainerStruct', 
     }
 
     @cython.always_allow_keywords(True)
     def annotatedParams(
             ParamService self,
-            _module_types.containerStruct no_annotation not None,
+            _module_types.ContainerStruct no_annotation not None,
             opt_ref_type_shared not None,
             base_type not None,
             list_type not None,
@@ -2307,7 +2307,7 @@ cdef class ParamService(thrift.py3.client.Client):
             typedef_map_template not None,
             _fbthrift_iobuf.IOBuf iobuf_type_val not None,
             _fbthrift_iobuf.IOBuf iobuf_ptr_val not None,
-            _module_types.containerStruct struct_struct not None,
+            _module_types.ContainerStruct struct_struct not None,
             *,
             __RpcOptions rpc_options=None
     ):
@@ -2325,8 +2325,8 @@ cdef class ParamService(thrift.py3.client.Client):
             set_type = _module_types.folly_sorted_vector_set_std_string__Set__string(set_type)
         if not isinstance(map_type, _module_types.FakeMap__Map__i64_double):
             map_type = _module_types.FakeMap__Map__i64_double(map_type)
-        if not isinstance(map_struct_type, _module_types.std_unordered_map_std_string_containerStruct__Map__string_containerStruct):
-            map_struct_type = _module_types.std_unordered_map_std_string_containerStruct__Map__string_containerStruct(map_struct_type)
+        if not isinstance(map_struct_type, _module_types.std_unordered_map_std_string_ContainerStruct__Map__string_ContainerStruct):
+            map_struct_type = _module_types.std_unordered_map_std_string_ContainerStruct__Map__string_ContainerStruct(map_struct_type)
         if not isinstance(list_i32_template, _module_types.List__i32):
             list_i32_template = _module_types.List__i32(list_i32_template)
         if not isinstance(list_string_template, _module_types.List__string):
@@ -2350,13 +2350,13 @@ cdef class ParamService(thrift.py3.client.Client):
         bridgeFutureWith[cFollyUnit](
             self._executor,
             down_cast_ptr[cParamServiceClientWrapper, cClientWrapper](self._client.get()).annotatedParams(rpc_options._cpp_obj, 
-                deref((<_module_types.containerStruct>no_annotation)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE),
+                deref((<_module_types.ContainerStruct>no_annotation)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE),
                 _module_types.Set__i32__make_instance(opt_ref_type_shared),
                 base_type,
                 _module_types.folly_small_vector_int64_t_8__List__i64__make_instance(list_type),
                 _module_types.folly_sorted_vector_set_std_string__Set__string__make_instance(set_type),
                 _module_types.FakeMap__Map__i64_double__make_instance(map_type),
-                _module_types.std_unordered_map_std_string_containerStruct__Map__string_containerStruct__make_instance(map_struct_type),
+                _module_types.std_unordered_map_std_string_ContainerStruct__Map__string_ContainerStruct__make_instance(map_struct_type),
                 deref((<_fbthrift_iobuf.IOBuf>iobuf_type).c_clone()),
                 ((<_fbthrift_iobuf.IOBuf>iobuf_ptr).c_clone()),
                 _module_types.List__i32__make_instance(list_i32_template),
@@ -2369,7 +2369,7 @@ cdef class ParamService(thrift.py3.client.Client):
                 _module_types.folly_sorted_vector_map__Map__i64_string__make_instance(typedef_map_template),
                 deref((<_fbthrift_iobuf.IOBuf>iobuf_type_val).c_clone()),
                 ((<_fbthrift_iobuf.IOBuf>iobuf_ptr_val).c_clone()),
-                deref((<_module_types.containerStruct>struct_struct)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE),
+                deref((<_module_types.ContainerStruct>struct_struct)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE),
             ),
             ParamService_annotatedParams_callback,
             <PyObject *> __userdata

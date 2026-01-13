@@ -160,140 +160,140 @@ inline void reset_field<::some::valid::ns::AnotherException>(
 }
 
 template<>
-inline void reset_field<::some::valid::ns::containerStruct>(
-    ::some::valid::ns::containerStruct& obj, uint16_t index) {
+inline void reset_field<::some::valid::ns::ContainerStruct>(
+    ::some::valid::ns::ContainerStruct& obj, uint16_t index) {
   switch (index) {
     case 0:
-      obj.fieldA_ref().copy_from(default_inst<::some::valid::ns::containerStruct>().fieldA_ref());
+      obj.fieldA_ref().copy_from(default_inst<::some::valid::ns::ContainerStruct>().fieldA_ref());
       return;
     case 1:
-      obj.req_fieldA_ref().copy_from(default_inst<::some::valid::ns::containerStruct>().req_fieldA_ref());
+      obj.req_fieldA_ref().copy_from(default_inst<::some::valid::ns::ContainerStruct>().req_fieldA_ref());
       return;
     case 2:
-      obj.opt_fieldA_ref().copy_from(default_inst<::some::valid::ns::containerStruct>().opt_fieldA_ref());
+      obj.opt_fieldA_ref().copy_from(default_inst<::some::valid::ns::ContainerStruct>().opt_fieldA_ref());
       return;
     case 3:
-      obj.fieldB_ref().copy_from(default_inst<::some::valid::ns::containerStruct>().fieldB_ref());
+      obj.fieldB_ref().copy_from(default_inst<::some::valid::ns::ContainerStruct>().fieldB_ref());
       return;
     case 4:
-      obj.req_fieldB_ref().copy_from(default_inst<::some::valid::ns::containerStruct>().req_fieldB_ref());
+      obj.req_fieldB_ref().copy_from(default_inst<::some::valid::ns::ContainerStruct>().req_fieldB_ref());
       return;
     case 5:
-      obj.opt_fieldB_ref().copy_from(default_inst<::some::valid::ns::containerStruct>().opt_fieldB_ref());
+      obj.opt_fieldB_ref().copy_from(default_inst<::some::valid::ns::ContainerStruct>().opt_fieldB_ref());
       return;
     case 6:
-      obj.fieldC_ref().copy_from(default_inst<::some::valid::ns::containerStruct>().fieldC_ref());
+      obj.fieldC_ref().copy_from(default_inst<::some::valid::ns::ContainerStruct>().fieldC_ref());
       return;
     case 7:
-      obj.req_fieldC_ref().copy_from(default_inst<::some::valid::ns::containerStruct>().req_fieldC_ref());
+      obj.req_fieldC_ref().copy_from(default_inst<::some::valid::ns::ContainerStruct>().req_fieldC_ref());
       return;
     case 8:
-      obj.opt_fieldC_ref().copy_from(default_inst<::some::valid::ns::containerStruct>().opt_fieldC_ref());
+      obj.opt_fieldC_ref().copy_from(default_inst<::some::valid::ns::ContainerStruct>().opt_fieldC_ref());
       return;
     case 9:
-      obj.fieldD_ref().copy_from(default_inst<::some::valid::ns::containerStruct>().fieldD_ref());
+      obj.fieldD_ref().copy_from(default_inst<::some::valid::ns::ContainerStruct>().fieldD_ref());
       return;
     case 10:
-      obj.fieldE_ref().copy_from(default_inst<::some::valid::ns::containerStruct>().fieldE_ref());
+      obj.fieldE_ref().copy_from(default_inst<::some::valid::ns::ContainerStruct>().fieldE_ref());
       return;
     case 11:
-      obj.req_fieldE_ref().copy_from(default_inst<::some::valid::ns::containerStruct>().req_fieldE_ref());
+      obj.req_fieldE_ref().copy_from(default_inst<::some::valid::ns::ContainerStruct>().req_fieldE_ref());
       return;
     case 12:
-      obj.opt_fieldE_ref().copy_from(default_inst<::some::valid::ns::containerStruct>().opt_fieldE_ref());
+      obj.opt_fieldE_ref().copy_from(default_inst<::some::valid::ns::ContainerStruct>().opt_fieldE_ref());
       return;
     case 13:
-      obj.fieldF_ref().copy_from(default_inst<::some::valid::ns::containerStruct>().fieldF_ref());
+      obj.fieldF_ref().copy_from(default_inst<::some::valid::ns::ContainerStruct>().fieldF_ref());
       return;
     case 14:
-      obj.fieldG_ref().copy_from(default_inst<::some::valid::ns::containerStruct>().fieldG_ref());
+      obj.fieldG_ref().copy_from(default_inst<::some::valid::ns::ContainerStruct>().fieldG_ref());
       return;
     case 15:
-      obj.fieldH_ref().copy_from(default_inst<::some::valid::ns::containerStruct>().fieldH_ref());
+      obj.fieldH_ref().copy_from(default_inst<::some::valid::ns::ContainerStruct>().fieldH_ref());
       return;
     case 16:
-      obj.fieldI_ref().copy_from(default_inst<::some::valid::ns::containerStruct>().fieldI_ref());
+      obj.fieldI_ref().copy_from(default_inst<::some::valid::ns::ContainerStruct>().fieldI_ref());
       return;
     case 17:
-      obj.fieldJ_ref().copy_from(default_inst<::some::valid::ns::containerStruct>().fieldJ_ref());
+      obj.fieldJ_ref().copy_from(default_inst<::some::valid::ns::ContainerStruct>().fieldJ_ref());
       return;
     case 18:
-      obj.fieldK_ref().copy_from(default_inst<::some::valid::ns::containerStruct>().fieldK_ref());
+      obj.fieldK_ref().copy_from(default_inst<::some::valid::ns::ContainerStruct>().fieldK_ref());
       return;
     case 19:
-      obj.fieldL_ref().copy_from(default_inst<::some::valid::ns::containerStruct>().fieldL_ref());
+      obj.fieldL_ref().copy_from(default_inst<::some::valid::ns::ContainerStruct>().fieldL_ref());
       return;
     case 20:
-      obj.fieldM_ref().copy_from(default_inst<::some::valid::ns::containerStruct>().fieldM_ref());
+      obj.fieldM_ref().copy_from(default_inst<::some::valid::ns::ContainerStruct>().fieldM_ref());
       return;
     case 21:
-      obj.fieldN_ref().copy_from(default_inst<::some::valid::ns::containerStruct>().fieldN_ref());
+      obj.fieldN_ref().copy_from(default_inst<::some::valid::ns::ContainerStruct>().fieldN_ref());
       return;
     case 22:
-      obj.fieldO_ref().copy_from(default_inst<::some::valid::ns::containerStruct>().fieldO_ref());
+      obj.fieldO_ref().copy_from(default_inst<::some::valid::ns::ContainerStruct>().fieldO_ref());
       return;
     case 23:
-      obj.fieldP_ref().copy_from(default_inst<::some::valid::ns::containerStruct>().fieldP_ref());
+      obj.fieldP_ref().copy_from(default_inst<::some::valid::ns::ContainerStruct>().fieldP_ref());
       return;
     case 24:
-      obj.fieldQ_ref().copy_from(default_inst<::some::valid::ns::containerStruct>().fieldQ_ref());
+      obj.fieldQ_ref().copy_from(default_inst<::some::valid::ns::ContainerStruct>().fieldQ_ref());
       return;
     case 25:
-      obj.fieldR_ref().copy_from(default_inst<::some::valid::ns::containerStruct>().fieldR_ref());
+      obj.fieldR_ref().copy_from(default_inst<::some::valid::ns::ContainerStruct>().fieldR_ref());
       return;
     case 26:
-      obj.req_fieldR_ref().copy_from(default_inst<::some::valid::ns::containerStruct>().req_fieldR_ref());
+      obj.req_fieldR_ref().copy_from(default_inst<::some::valid::ns::ContainerStruct>().req_fieldR_ref());
       return;
     case 27:
-      obj.opt_fieldR_ref().copy_from(default_inst<::some::valid::ns::containerStruct>().opt_fieldR_ref());
+      obj.opt_fieldR_ref().copy_from(default_inst<::some::valid::ns::ContainerStruct>().opt_fieldR_ref());
       return;
     case 28:
-      obj.fieldS_ref().copy_from(default_inst<::some::valid::ns::containerStruct>().fieldS_ref());
+      obj.fieldS_ref().copy_from(default_inst<::some::valid::ns::ContainerStruct>().fieldS_ref());
       return;
     case 29:
-      obj.fieldT_ref().copy_from(default_inst<::some::valid::ns::containerStruct>().fieldT_ref());
+      obj.fieldT_ref().copy_from(default_inst<::some::valid::ns::ContainerStruct>().fieldT_ref());
       return;
     case 30:
-      obj.fieldU_ref().copy_from(default_inst<::some::valid::ns::containerStruct>().fieldU_ref());
+      obj.fieldU_ref().copy_from(default_inst<::some::valid::ns::ContainerStruct>().fieldU_ref());
       return;
     case 31:
-      obj.fieldV_ref().copy_from(default_inst<::some::valid::ns::containerStruct>().fieldV_ref());
+      obj.fieldV_ref().copy_from(default_inst<::some::valid::ns::ContainerStruct>().fieldV_ref());
       return;
     case 32:
-      obj.req_fieldV_ref().copy_from(default_inst<::some::valid::ns::containerStruct>().req_fieldV_ref());
+      obj.req_fieldV_ref().copy_from(default_inst<::some::valid::ns::ContainerStruct>().req_fieldV_ref());
       return;
     case 33:
-      obj.opt_fieldV_ref().copy_from(default_inst<::some::valid::ns::containerStruct>().opt_fieldV_ref());
+      obj.opt_fieldV_ref().copy_from(default_inst<::some::valid::ns::ContainerStruct>().opt_fieldV_ref());
       return;
     case 34:
-      obj.fieldW_ref().copy_from(default_inst<::some::valid::ns::containerStruct>().fieldW_ref());
+      obj.fieldW_ref().copy_from(default_inst<::some::valid::ns::ContainerStruct>().fieldW_ref());
       return;
     case 35:
-      obj.fieldX_ref().copy_from(default_inst<::some::valid::ns::containerStruct>().fieldX_ref());
+      obj.fieldX_ref().copy_from(default_inst<::some::valid::ns::ContainerStruct>().fieldX_ref());
       return;
     case 36:
-      obj.req_fieldX_ref().copy_from(default_inst<::some::valid::ns::containerStruct>().req_fieldX_ref());
+      obj.req_fieldX_ref().copy_from(default_inst<::some::valid::ns::ContainerStruct>().req_fieldX_ref());
       return;
     case 37:
-      obj.opt_fieldX_ref().copy_from(default_inst<::some::valid::ns::containerStruct>().opt_fieldX_ref());
+      obj.opt_fieldX_ref().copy_from(default_inst<::some::valid::ns::ContainerStruct>().opt_fieldX_ref());
       return;
     case 38:
-      obj.fieldY_ref().copy_from(default_inst<::some::valid::ns::containerStruct>().fieldY_ref());
+      obj.fieldY_ref().copy_from(default_inst<::some::valid::ns::ContainerStruct>().fieldY_ref());
       return;
     case 39:
-      obj.fieldZ_ref().copy_from(default_inst<::some::valid::ns::containerStruct>().fieldZ_ref());
+      obj.fieldZ_ref().copy_from(default_inst<::some::valid::ns::ContainerStruct>().fieldZ_ref());
       return;
     case 40:
-      obj.fieldAA_ref().copy_from(default_inst<::some::valid::ns::containerStruct>().fieldAA_ref());
+      obj.fieldAA_ref().copy_from(default_inst<::some::valid::ns::ContainerStruct>().fieldAA_ref());
       return;
     case 41:
-      obj.fieldAC_ref().copy_from(default_inst<::some::valid::ns::containerStruct>().fieldAC_ref());
+      obj.fieldAC_ref().copy_from(default_inst<::some::valid::ns::ContainerStruct>().fieldAC_ref());
       return;
     case 42:
-      obj.fieldAD_ref().copy_from(default_inst<::some::valid::ns::containerStruct>().fieldAD_ref());
+      obj.fieldAD_ref().copy_from(default_inst<::some::valid::ns::ContainerStruct>().fieldAD_ref());
       return;
     case 43:
-      obj.fieldAE_ref().copy_from(default_inst<::some::valid::ns::containerStruct>().fieldAE_ref());
+      obj.fieldAE_ref().copy_from(default_inst<::some::valid::ns::ContainerStruct>().fieldAE_ref());
       return;
   }
 }
@@ -553,7 +553,7 @@ inline const std::unordered_map<std::string_view, std::string_view>& PyStructTra
 
 template<>
 inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
-    ::some::valid::ns::containerStruct>::namesmap() {
+    ::some::valid::ns::ContainerStruct>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
     }

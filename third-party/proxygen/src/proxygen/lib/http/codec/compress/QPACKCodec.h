@@ -116,20 +116,20 @@ class QPACKCodec : public HeaderCodec {
   }
 
   CompressionInfo getCompressionInfo() const {
-    return CompressionInfo(encoder_.getTableSize(),
-                           encoder_.getBytesStored(),
-                           encoder_.getHeadersStored(),
-                           encoder_.getInsertCount(),
-                           encoder_.getBlockedInserts(),
-                           encoder_.getDuplications(),
-                           encoder_.getStaticRefs(),
-                           decoder_.getTableSize(),
-                           decoder_.getBytesStored(),
-                           decoder_.getHeadersStored(),
-                           decoder_.getInsertCount(),
-                           0, // decoder can't track blocked inserts
-                           decoder_.getDuplications(),
-                           decoder_.getStaticRefs());
+    return {encoder_.getTableSize(),
+            encoder_.getBytesStored(),
+            encoder_.getHeadersStored(),
+            encoder_.getInsertCount(),
+            encoder_.getBlockedInserts(),
+            encoder_.getDuplications(),
+            encoder_.getStaticRefs(),
+            decoder_.getTableSize(),
+            decoder_.getBytesStored(),
+            decoder_.getHeadersStored(),
+            decoder_.getInsertCount(),
+            0, // decoder can't track blocked inserts
+            decoder_.getDuplications(),
+            decoder_.getStaticRefs()};
   }
 
   void setHeaderIndexingStrategy(const HeaderIndexingStrategy* indexingStrat) {

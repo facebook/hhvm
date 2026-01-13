@@ -15,7 +15,7 @@ using std::string;
 namespace proxygen::test {
 
 folly::ByteRange input(const char *str) {
-  return folly::ByteRange(reinterpret_cast<const uint8_t *>(str), strlen(str));
+  return {reinterpret_cast<const uint8_t *>(str), strlen(str)};
 }
 
 TEST(CodecUtil, validateURL) {

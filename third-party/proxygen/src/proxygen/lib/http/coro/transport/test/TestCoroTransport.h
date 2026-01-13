@@ -46,11 +46,11 @@ class TestCoroTransport : public folly::coro::TransportIf {
   }
 
   folly::SocketAddress getLocalAddress() const noexcept override {
-    return folly::SocketAddress("::1", localPort_);
+    return {"::1", localPort_};
   }
 
   folly::SocketAddress getPeerAddress() const noexcept override {
-    return folly::SocketAddress("::1", peerPort_);
+    return {"::1", peerPort_};
   }
 
   folly::coro::Task<size_t> read(

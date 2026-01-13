@@ -12,11 +12,11 @@
 
 namespace {
 folly::SocketAddress getV6TestAddress() {
-  return folly::SocketAddress("::1", 0);
+  return {"::1", 0};
 }
 
 folly::SocketAddress getV4TestAddress() {
-  return folly::SocketAddress("127.0.0.1", 0);
+  return {"127.0.0.1", 0};
 }
 } // namespace
 

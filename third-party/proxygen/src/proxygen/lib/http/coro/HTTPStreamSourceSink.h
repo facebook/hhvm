@@ -78,7 +78,7 @@ class HTTPStreamSourceUpstreamSink
   void getCurrentFlowControlInfo(FlowControlInfo*) const override {
   }
   [[nodiscard]] CompressionInfo getHeaderCompressionInfo() const override {
-    return CompressionInfo();
+    return {};
   }
   void detachAndAbortIfIncomplete(std::unique_ptr<HTTPSink> self) override;
 

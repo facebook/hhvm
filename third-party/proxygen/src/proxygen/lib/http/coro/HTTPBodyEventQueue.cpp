@@ -111,7 +111,7 @@ HTTPBodyEvent HTTPBodyEventQueue::dequeueBodyEvent(uint32_t max) {
       // only return part of it, split the buffer and re-push it to the front
       auto resultBuf = bodyEvent.event.body.splitAtMost(toReturn);
       bodyQueue_.emplace_front(std::move(bodyEvent));
-      return HTTPBodyEvent(std::move(resultBuf), false);
+      return {std::move(resultBuf), false};
     }
   }
   return bodyEvent;

@@ -170,7 +170,7 @@ class H3DatagramAsyncSocket
   folly::NetworkSocket getNetworkSocket() const override {
     // Not great but better than crashing.
     VLOG(4) << "getNetworkSocket returning fake socket";
-    return folly::NetworkSocket();
+    return {};
   }
 
   void setReusePort(bool /*reusePort*/) override {

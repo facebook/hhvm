@@ -74,20 +74,20 @@ class HPACKCodec : public HeaderCodec {
   }
 
   CompressionInfo getCompressionInfo() const {
-    return CompressionInfo(encoder_.getTableSize(),
-                           encoder_.getBytesStored(),
-                           encoder_.getHeadersStored(),
-                           encoder_.getInsertCount(),
-                           0,
-                           0,
-                           encoder_.getStaticRefs(),
-                           decoder_.getTableSize(),
-                           decoder_.getBytesStored(),
-                           decoder_.getHeadersStored(),
-                           decoder_.getInsertCount(),
-                           0,
-                           0,
-                           decoder_.getStaticRefs());
+    return {encoder_.getTableSize(),
+            encoder_.getBytesStored(),
+            encoder_.getHeadersStored(),
+            encoder_.getInsertCount(),
+            0,
+            0,
+            encoder_.getStaticRefs(),
+            decoder_.getTableSize(),
+            decoder_.getBytesStored(),
+            decoder_.getHeadersStored(),
+            decoder_.getInsertCount(),
+            0,
+            0,
+            decoder_.getStaticRefs()};
   }
 
   void setHeaderIndexingStrategy(const HeaderIndexingStrategy* indexingStrat) {

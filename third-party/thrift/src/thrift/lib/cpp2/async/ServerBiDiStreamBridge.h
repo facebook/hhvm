@@ -76,10 +76,10 @@ class ServerBiDiStreamBridge
   // end of TwoWayBridge methods
   //
 
-  template <typename In, typename Out>
+  template <typename Out>
   static folly::coro::Task<> getTask(
       ServerBiDiStreamBridge::Ptr bridge,
-      folly::coro::AsyncGenerator<In> input,
+      folly::coro::AsyncGenerator<Out&&> input,
       StreamElementEncoder<Out>* encode) {
     SCOPE_EXIT {
       bridge->serverClose();

@@ -93,7 +93,7 @@ from module.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
     folly_small_vector_int64_t_8__List__i64,
     folly_sorted_vector_set_std_string__Set__string,
     FakeMap__Map__i64_double,
-    std_unordered_map_std_string_containerStruct__Map__string_containerStruct,
+    std_unordered_map_std_string_ContainerStruct__Map__string_ContainerStruct,
     Map__i64_string,
     std_list__List__i32,
     std_deque__List__string,
@@ -1929,19 +1929,19 @@ cdef class AnotherException(thrift.py3.exceptions.GeneratedError):
 
 @__cython.auto_pickle(False)
 @__cython.final
-cdef class containerStruct(thrift.py3.types.Struct):
+cdef class ContainerStruct(thrift.py3.types.Struct):
     __module__ = _fbthrift__module_name__
 
-    def __init__(containerStruct self, **kwargs):
-        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.ccontainerStruct]()
-        self._fields_setter = _fbthrift_types_fields.__containerStruct_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
+    def __init__(ContainerStruct self, **kwargs):
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cContainerStruct]()
+        self._fields_setter = _fbthrift_types_fields.__ContainerStruct_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         super().__init__(**kwargs)
 
     cdef void _fbthrift_set_field(self, str name, object value) except *:
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return _fbthrift_IsSet("containerStruct", {
+        return _fbthrift_IsSet("ContainerStruct", {
           "fieldA": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).fieldA_ref().has_value(),
           "req_fieldA": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).req_fieldA_ref().has_value(),
           "opt_fieldA": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).opt_fieldA_ref().has_value(),
@@ -1989,8 +1989,8 @@ cdef class containerStruct(thrift.py3.types.Struct):
         })
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.ccontainerStruct] cpp_obj):
-        __fbthrift_inst = <containerStruct>containerStruct.__new__(containerStruct)
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cContainerStruct] cpp_obj):
+        __fbthrift_inst = <ContainerStruct>ContainerStruct.__new__(ContainerStruct)
         __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(cpp_obj)
         return __fbthrift_inst
 
@@ -2381,66 +2381,66 @@ cdef class containerStruct(thrift.py3.types.Struct):
         return self.fieldAE_impl()
 
 
-    def __hash__(containerStruct self):
+    def __hash__(ContainerStruct self):
         return super().__hash__()
 
-    def __repr__(containerStruct self):
+    def __repr__(ContainerStruct self):
         return super().__repr__()
 
-    def __str__(containerStruct self):
+    def __str__(ContainerStruct self):
         return super().__str__()
 
 
-    def __copy__(containerStruct self):
+    def __copy__(ContainerStruct self):
         return self
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
-        return __richcmp[_module_cbindings.ccontainerStruct](
+        return __richcmp[_module_cbindings.cContainerStruct](
             self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
-            (<containerStruct>other)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
+            (<ContainerStruct>other)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
             op,
         ) if r is None else r
 
     @staticmethod
     def __get_reflection__():
-        return get_types_reflection().get_reflection__containerStruct()
+        return get_types_reflection().get_reflection__ContainerStruct()
 
     @staticmethod
     def __get_metadata__():
         cdef __fbthrift_cThriftMetadata meta
-        _module_cbindings.StructMetadata[_module_cbindings.ccontainerStruct].gen(meta)
+        _module_cbindings.StructMetadata[_module_cbindings.cContainerStruct].gen(meta)
         return __MetadataBox.box(cmove(meta))
 
     @staticmethod
     def __get_thrift_name__():
-        return "module.containerStruct"
+        return "module.ContainerStruct"
 
     @classmethod
     def _fbthrift_get_field_name_by_index(cls, idx):
-        return __sv_to_str(__get_field_name_by_index[_module_cbindings.ccontainerStruct](idx))
+        return __sv_to_str(__get_field_name_by_index[_module_cbindings.cContainerStruct](idx))
 
     @classmethod
     def _fbthrift_get_struct_size(cls):
         return 44
 
-    cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(containerStruct self, __Protocol proto):
+    cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(ContainerStruct self, __Protocol proto):
         cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
         with nogil:
-            data = cmove(serializer.cserialize[_module_cbindings.ccontainerStruct](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto))
+            data = cmove(serializer.cserialize[_module_cbindings.cContainerStruct](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto))
         return _fbthrift_iobuf.from_unique_ptr(cmove(data))
 
-    cdef cuint32_t _fbthrift_deserialize(containerStruct self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
+    cdef cuint32_t _fbthrift_deserialize(ContainerStruct self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
         cdef cuint32_t needed
-        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.ccontainerStruct]()
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cContainerStruct]()
         with nogil:
-            needed = serializer.cdeserialize[_module_cbindings.ccontainerStruct](buf, self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto)
+            needed = serializer.cdeserialize[_module_cbindings.cContainerStruct](buf, self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto)
         return needed
 
 
     def _to_python(self):
         return thrift.python.converter.to_python_struct(
-            _fbthrift_python_types.containerStruct,
+            _fbthrift_python_types.ContainerStruct,
             self,
         )
 
@@ -2450,7 +2450,7 @@ cdef class containerStruct(thrift.py3.types.Struct):
     def _to_py_deprecated(self):
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module.ttypes")
-        return thrift.util.converter.to_py_struct(py_deprecated_types.containerStruct, self)
+        return thrift.util.converter.to_py_struct(py_deprecated_types.ContainerStruct, self)
 
 @__cython.auto_pickle(False)
 @__cython.final
@@ -2640,7 +2640,7 @@ cdef class AnnotatedStruct(thrift.py3.types.Struct):
 
     cdef inline no_annotation_impl(self):
         if self.__fbthrift_cached_no_annotation is None:
-            self.__fbthrift_cached_no_annotation = containerStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).no_annotation_ref().ref(), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+            self.__fbthrift_cached_no_annotation = ContainerStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).no_annotation_ref().ref(), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         return self.__fbthrift_cached_no_annotation
 
     @property
@@ -2651,7 +2651,7 @@ cdef class AnnotatedStruct(thrift.py3.types.Struct):
         if self.__fbthrift_cached_cpp_unique_ref is None:
             if not deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).cpp_unique_ref_ref():
                 return None
-            self.__fbthrift_cached_cpp_unique_ref = containerStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).cpp_unique_ref_ref()), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+            self.__fbthrift_cached_cpp_unique_ref = ContainerStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).cpp_unique_ref_ref()), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         return self.__fbthrift_cached_cpp_unique_ref
 
     @property
@@ -2662,7 +2662,7 @@ cdef class AnnotatedStruct(thrift.py3.types.Struct):
         if self.__fbthrift_cached_cpp2_unique_ref is None:
             if not deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).cpp2_unique_ref_ref():
                 return None
-            self.__fbthrift_cached_cpp2_unique_ref = containerStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).cpp2_unique_ref_ref()), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+            self.__fbthrift_cached_cpp2_unique_ref = ContainerStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).cpp2_unique_ref_ref()), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         return self.__fbthrift_cached_cpp2_unique_ref
 
     @property
@@ -2684,7 +2684,7 @@ cdef class AnnotatedStruct(thrift.py3.types.Struct):
         if self.__fbthrift_cached_req_cpp_unique_ref is None:
             if not deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).req_cpp_unique_ref_ref():
                 return None
-            self.__fbthrift_cached_req_cpp_unique_ref = containerStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).req_cpp_unique_ref_ref()), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+            self.__fbthrift_cached_req_cpp_unique_ref = ContainerStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).req_cpp_unique_ref_ref()), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         return self.__fbthrift_cached_req_cpp_unique_ref
 
     @property
@@ -2695,7 +2695,7 @@ cdef class AnnotatedStruct(thrift.py3.types.Struct):
         if self.__fbthrift_cached_req_cpp2_unique_ref is None:
             if not deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).req_cpp2_unique_ref_ref():
                 return None
-            self.__fbthrift_cached_req_cpp2_unique_ref = containerStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).req_cpp2_unique_ref_ref()), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+            self.__fbthrift_cached_req_cpp2_unique_ref = ContainerStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).req_cpp2_unique_ref_ref()), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         return self.__fbthrift_cached_req_cpp2_unique_ref
 
     @property
@@ -2717,7 +2717,7 @@ cdef class AnnotatedStruct(thrift.py3.types.Struct):
         if self.__fbthrift_cached_opt_cpp_unique_ref is None:
             if not deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).opt_cpp_unique_ref_ref():
                 return None
-            self.__fbthrift_cached_opt_cpp_unique_ref = containerStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).opt_cpp_unique_ref_ref()), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+            self.__fbthrift_cached_opt_cpp_unique_ref = ContainerStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).opt_cpp_unique_ref_ref()), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         return self.__fbthrift_cached_opt_cpp_unique_ref
 
     @property
@@ -2728,7 +2728,7 @@ cdef class AnnotatedStruct(thrift.py3.types.Struct):
         if self.__fbthrift_cached_opt_cpp2_unique_ref is None:
             if not deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).opt_cpp2_unique_ref_ref():
                 return None
-            self.__fbthrift_cached_opt_cpp2_unique_ref = containerStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).opt_cpp2_unique_ref_ref()), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+            self.__fbthrift_cached_opt_cpp2_unique_ref = ContainerStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).opt_cpp2_unique_ref_ref()), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         return self.__fbthrift_cached_opt_cpp2_unique_ref
 
     @property
@@ -2750,7 +2750,7 @@ cdef class AnnotatedStruct(thrift.py3.types.Struct):
         if self.__fbthrift_cached_ref_type_unique is None:
             if not deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).ref_type_unique_ref():
                 return None
-            self.__fbthrift_cached_ref_type_unique = containerStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).ref_type_unique_ref()), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+            self.__fbthrift_cached_ref_type_unique = ContainerStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).ref_type_unique_ref()), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         return self.__fbthrift_cached_ref_type_unique
 
     @property
@@ -2761,7 +2761,7 @@ cdef class AnnotatedStruct(thrift.py3.types.Struct):
         if self.__fbthrift_cached_ref_type_shared is None:
             if not deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).ref_type_shared_ref():
                 return None
-            self.__fbthrift_cached_ref_type_shared = containerStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).ref_type_shared_ref()), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+            self.__fbthrift_cached_ref_type_shared = ContainerStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).ref_type_shared_ref()), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         return self.__fbthrift_cached_ref_type_shared
 
     @property
@@ -2783,7 +2783,7 @@ cdef class AnnotatedStruct(thrift.py3.types.Struct):
         if self.__fbthrift_cached_req_ref_type_shared is None:
             if not deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).req_ref_type_shared_ref():
                 return None
-            self.__fbthrift_cached_req_ref_type_shared = containerStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).req_ref_type_shared_ref()), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+            self.__fbthrift_cached_req_ref_type_shared = ContainerStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).req_ref_type_shared_ref()), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         return self.__fbthrift_cached_req_ref_type_shared
 
     @property
@@ -2794,7 +2794,7 @@ cdef class AnnotatedStruct(thrift.py3.types.Struct):
         if self.__fbthrift_cached_req_ref_type_const is None:
             if not deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).req_ref_type_const_ref():
                 return None
-            self.__fbthrift_cached_req_ref_type_const = containerStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).req_ref_type_const_ref()), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+            self.__fbthrift_cached_req_ref_type_const = ContainerStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).req_ref_type_const_ref()), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         return self.__fbthrift_cached_req_ref_type_const
 
     @property
@@ -2816,7 +2816,7 @@ cdef class AnnotatedStruct(thrift.py3.types.Struct):
         if self.__fbthrift_cached_opt_ref_type_const is None:
             if not deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).opt_ref_type_const_ref():
                 return None
-            self.__fbthrift_cached_opt_ref_type_const = containerStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).opt_ref_type_const_ref()), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+            self.__fbthrift_cached_opt_ref_type_const = ContainerStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).opt_ref_type_const_ref()), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         return self.__fbthrift_cached_opt_ref_type_const
 
     @property
@@ -2827,7 +2827,7 @@ cdef class AnnotatedStruct(thrift.py3.types.Struct):
         if self.__fbthrift_cached_opt_ref_type_unique is None:
             if not deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).opt_ref_type_unique_ref():
                 return None
-            self.__fbthrift_cached_opt_ref_type_unique = containerStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).opt_ref_type_unique_ref()), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+            self.__fbthrift_cached_opt_ref_type_unique = ContainerStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).opt_ref_type_unique_ref()), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         return self.__fbthrift_cached_opt_ref_type_unique
 
     @property
@@ -2881,7 +2881,7 @@ cdef class AnnotatedStruct(thrift.py3.types.Struct):
 
     cdef inline map_struct_type_impl(self):
         if self.__fbthrift_cached_map_struct_type is None:
-            self.__fbthrift_cached_map_struct_type = std_unordered_map_std_string_containerStruct__Map__string_containerStruct__from_cpp(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).map_struct_type_ref().ref())
+            self.__fbthrift_cached_map_struct_type = std_unordered_map_std_string_ContainerStruct__Map__string_ContainerStruct__from_cpp(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).map_struct_type_ref().ref())
         return self.__fbthrift_cached_map_struct_type
 
     @property
@@ -3002,7 +3002,7 @@ cdef class AnnotatedStruct(thrift.py3.types.Struct):
 
     cdef inline struct_struct_impl(self):
         if self.__fbthrift_cached_struct_struct is None:
-            self.__fbthrift_cached_struct_struct = containerStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).struct_struct_ref().ref(), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+            self.__fbthrift_cached_struct_struct = ContainerStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).struct_struct_ref().ref(), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         return self.__fbthrift_cached_struct_struct
 
     @property
@@ -4186,8 +4186,8 @@ cdef object FakeMap__Map__i64_double__from_cpp(const _module_cbindings.FakeMap& 
         py_items[ckey] = cval
     return FakeMap__Map__i64_double(py_items, private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor)
 
-cdef _module_cbindings.std_unordered_map_std_string_containerStruct std_unordered_map_std_string_containerStruct__Map__string_containerStruct__make_instance(object items) except *:
-    cdef _module_cbindings.std_unordered_map_std_string_containerStruct c_inst
+cdef _module_cbindings.std_unordered_map_std_string_ContainerStruct std_unordered_map_std_string_ContainerStruct__Map__string_ContainerStruct__make_instance(object items) except *:
+    cdef _module_cbindings.std_unordered_map_std_string_ContainerStruct c_inst
     cdef string c_key
     if items is None:
         return cmove(c_inst)
@@ -4195,21 +4195,21 @@ cdef _module_cbindings.std_unordered_map_std_string_containerStruct std_unordere
         if not isinstance(key, str):
             raise TypeError(f"{key!r} is not of type str")
         c_key = key.encode('UTF-8')
-        if not isinstance(item, containerStruct):
-            raise TypeError(f"{item!r} is not of type containerStruct")
+        if not isinstance(item, ContainerStruct):
+            raise TypeError(f"{item!r} is not of type ContainerStruct")
 
-        c_inst[c_key] = deref((<containerStruct>item)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
+        c_inst[c_key] = deref((<ContainerStruct>item)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
     return cmove(c_inst)
 
-cdef object std_unordered_map_std_string_containerStruct__Map__string_containerStruct__from_cpp(const _module_cbindings.std_unordered_map_std_string_containerStruct& c_map) except *:
+cdef object std_unordered_map_std_string_ContainerStruct__Map__string_ContainerStruct__from_cpp(const _module_cbindings.std_unordered_map_std_string_ContainerStruct& c_map) except *:
     cdef dict py_items = {}
-    cdef __map_iter[_module_cbindings.std_unordered_map_std_string_containerStruct] iter = __map_iter[_module_cbindings.std_unordered_map_std_string_containerStruct](c_map)
+    cdef __map_iter[_module_cbindings.std_unordered_map_std_string_ContainerStruct] iter = __map_iter[_module_cbindings.std_unordered_map_std_string_ContainerStruct](c_map)
     cdef string ckey
-    cdef shared_ptr[_module_cbindings.ccontainerStruct] cval
+    cdef shared_ptr[_module_cbindings.cContainerStruct] cval
     for i in range(c_map.size()):
         iter.genNextKeyVal(ckey, cval)
-        py_items[__init_unicode_from_cpp(ckey)] = containerStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cval))
-    return std_unordered_map_std_string_containerStruct__Map__string_containerStruct(py_items, private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor)
+        py_items[__init_unicode_from_cpp(ckey)] = ContainerStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cval))
+    return std_unordered_map_std_string_ContainerStruct__Map__string_ContainerStruct(py_items, private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor)
 
 cdef cmap[cint64_t,string] Map__i64_string__make_instance(object items) except *:
     cdef cmap[cint64_t,string] c_inst
@@ -4849,7 +4849,7 @@ CppFakeI32 = int
 FollySmallVectorI64 = folly_small_vector_int64_t_8__List__i64
 SortedVectorSetString = folly_sorted_vector_set_std_string__Set__string
 FakeMap = FakeMap__Map__i64_double
-UnorderedMapStruct = std_unordered_map_std_string_containerStruct__Map__string_containerStruct
+UnorderedMapStruct = std_unordered_map_std_string_ContainerStruct__Map__string_ContainerStruct
 std_list = std_list__List__i32
 std_deque = std_deque__List__string
 folly_set = folly_sorted_vector_set__Set__string

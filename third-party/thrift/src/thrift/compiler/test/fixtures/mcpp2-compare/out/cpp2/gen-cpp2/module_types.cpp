@@ -1442,36 +1442,36 @@ void swap([[maybe_unused]] AnotherException& a, [[maybe_unused]] AnotherExceptio
 
 namespace some::valid::ns {
 
-std::string_view containerStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+std::string_view ContainerStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
-  return apache::thrift::TStructDataStorage<containerStruct>::fields_names[folly::to_underlying(ord) - 1];
+  return apache::thrift::TStructDataStorage<ContainerStruct>::fields_names[folly::to_underlying(ord) - 1];
 }
-std::string_view containerStruct::__fbthrift_get_class_name() {
-  return apache::thrift::TStructDataStorage<containerStruct>::name;
+std::string_view ContainerStruct::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<ContainerStruct>::name;
 }
 
-containerStruct::containerStruct() :
-    fieldA(),
-    req_fieldA(),
-    opt_fieldA(),
-    fieldC(std::initializer_list<::std::int32_t>{ static_cast<::std::int32_t>(1),
+ContainerStruct::ContainerStruct() :
+    __fbthrift_field_fieldA(),
+    __fbthrift_field_req_fieldA(),
+    __fbthrift_field_opt_fieldA(),
+    __fbthrift_field_fieldC(std::initializer_list<::std::int32_t>{ static_cast<::std::int32_t>(1),
   static_cast<::std::int32_t>(2),
   static_cast<::std::int32_t>(3),
   static_cast<::std::int32_t>(4) }),
-    req_fieldC(std::initializer_list<::std::int32_t>{ static_cast<::std::int32_t>(1),
+    __fbthrift_field_req_fieldC(std::initializer_list<::std::int32_t>{ static_cast<::std::int32_t>(1),
   static_cast<::std::int32_t>(2),
   static_cast<::std::int32_t>(3),
   static_cast<::std::int32_t>(4) }),
-    opt_fieldC(std::initializer_list<::std::int32_t>{ static_cast<::std::int32_t>(1),
+    __fbthrift_field_opt_fieldC(std::initializer_list<::std::int32_t>{ static_cast<::std::int32_t>(1),
   static_cast<::std::int32_t>(2),
   static_cast<::std::int32_t>(3),
   static_cast<::std::int32_t>(4) }),
-    fieldE(apache::thrift::StringTraits<::std::string>::fromStringLiteral("somestring")),
-    req_fieldE(apache::thrift::StringTraits<::std::string>::fromStringLiteral("somestring")),
-    opt_fieldE(apache::thrift::StringTraits<::std::string>::fromStringLiteral("somestring")),
-    fieldF(::some::valid::ns::module_constants::aListOfLists()),
-    fieldI(true),
-    fieldJ(std::initializer_list<::std::map<::std::string, ::std::vector<::std::int32_t>>::value_type>{ { apache::thrift::StringTraits<::std::string>::fromStringLiteral("subfieldA"), std::initializer_list<::std::int32_t>{ static_cast<::std::int32_t>(1),
+    __fbthrift_field_fieldE(apache::thrift::StringTraits<::std::string>::fromStringLiteral("somestring")),
+    __fbthrift_field_req_fieldE(apache::thrift::StringTraits<::std::string>::fromStringLiteral("somestring")),
+    __fbthrift_field_opt_fieldE(apache::thrift::StringTraits<::std::string>::fromStringLiteral("somestring")),
+    __fbthrift_field_fieldF(::some::valid::ns::module_constants::aListOfLists()),
+    __fbthrift_field_fieldI(true),
+    __fbthrift_field_fieldJ(std::initializer_list<::std::map<::std::string, ::std::vector<::std::int32_t>>::value_type>{ { apache::thrift::StringTraits<::std::string>::fromStringLiteral("subfieldA"), std::initializer_list<::std::int32_t>{ static_cast<::std::int32_t>(1),
   static_cast<::std::int32_t>(4),
   static_cast<::std::int32_t>(8),
   static_cast<::std::int32_t>(12) } },
@@ -1479,68 +1479,165 @@ containerStruct::containerStruct() :
   static_cast<::std::int32_t>(5),
   static_cast<::std::int32_t>(9),
   static_cast<::std::int32_t>(13) } } }),
-    fieldN(),
-    fieldQ(),
-    fieldR( ::some::valid::ns::MyEnumA::fieldB),
-    req_fieldR( ::some::valid::ns::MyEnumA::fieldB),
-    opt_fieldR( ::some::valid::ns::MyEnumA::fieldB),
-    fieldS( ::some::valid::ns::MyEnumA::fieldB),
-    fieldU(std::initializer_list<::some::valid::ns::MyEnumA>{  ::some::valid::ns::MyEnumA::fieldC,
+    __fbthrift_field_fieldN(),
+    __fbthrift_field_fieldQ(),
+    __fbthrift_field_fieldR( ::some::valid::ns::MyEnumA::fieldB),
+    __fbthrift_field_req_fieldR( ::some::valid::ns::MyEnumA::fieldB),
+    __fbthrift_field_opt_fieldR( ::some::valid::ns::MyEnumA::fieldB),
+    __fbthrift_field_fieldS( ::some::valid::ns::MyEnumA::fieldB),
+    __fbthrift_field_fieldU(std::initializer_list<::some::valid::ns::MyEnumA>{  ::some::valid::ns::MyEnumA::fieldC,
    ::some::valid::ns::MyEnumA::fieldB,
    ::some::valid::ns::MyEnumA::fieldA }),
-    fieldAC(),
-    fieldAD() {
+    __fbthrift_field_fieldAC(),
+    __fbthrift_field_fieldAD() {
 }
 
 
-containerStruct::~containerStruct() {}
+ContainerStruct::~ContainerStruct() {}
+
+ContainerStruct::ContainerStruct([[maybe_unused]] ContainerStruct&& other) noexcept :
+    __fbthrift_field_fieldA(std::move(other.__fbthrift_field_fieldA)),
+    __fbthrift_field_req_fieldA(std::move(other.__fbthrift_field_req_fieldA)),
+    __fbthrift_field_opt_fieldA(std::move(other.__fbthrift_field_opt_fieldA)),
+    __fbthrift_field_fieldB(std::move(other.__fbthrift_field_fieldB)),
+    __fbthrift_field_req_fieldB(std::move(other.__fbthrift_field_req_fieldB)),
+    __fbthrift_field_opt_fieldB(std::move(other.__fbthrift_field_opt_fieldB)),
+    __fbthrift_field_fieldC(std::move(other.__fbthrift_field_fieldC)),
+    __fbthrift_field_req_fieldC(std::move(other.__fbthrift_field_req_fieldC)),
+    __fbthrift_field_opt_fieldC(std::move(other.__fbthrift_field_opt_fieldC)),
+    __fbthrift_field_fieldD(std::move(other.__fbthrift_field_fieldD)),
+    __fbthrift_field_fieldE(std::move(other.__fbthrift_field_fieldE)),
+    __fbthrift_field_req_fieldE(std::move(other.__fbthrift_field_req_fieldE)),
+    __fbthrift_field_opt_fieldE(std::move(other.__fbthrift_field_opt_fieldE)),
+    __fbthrift_field_fieldF(std::move(other.__fbthrift_field_fieldF)),
+    __fbthrift_field_fieldG(std::move(other.__fbthrift_field_fieldG)),
+    __fbthrift_field_fieldH(std::move(other.__fbthrift_field_fieldH)),
+    __fbthrift_field_fieldI(std::move(other.__fbthrift_field_fieldI)),
+    __fbthrift_field_fieldJ(std::move(other.__fbthrift_field_fieldJ)),
+    __fbthrift_field_fieldK(std::move(other.__fbthrift_field_fieldK)),
+    __fbthrift_field_fieldL(std::move(other.__fbthrift_field_fieldL)),
+    __fbthrift_field_fieldM(std::move(other.__fbthrift_field_fieldM)),
+    __fbthrift_field_fieldN(std::move(other.__fbthrift_field_fieldN)),
+    __fbthrift_field_fieldO(std::move(other.__fbthrift_field_fieldO)),
+    __fbthrift_field_fieldP(std::move(other.__fbthrift_field_fieldP)),
+    __fbthrift_field_fieldQ(std::move(other.__fbthrift_field_fieldQ)),
+    __fbthrift_field_fieldR(std::move(other.__fbthrift_field_fieldR)),
+    __fbthrift_field_req_fieldR(std::move(other.__fbthrift_field_req_fieldR)),
+    __fbthrift_field_opt_fieldR(std::move(other.__fbthrift_field_opt_fieldR)),
+    __fbthrift_field_fieldS(std::move(other.__fbthrift_field_fieldS)),
+    __fbthrift_field_fieldT(std::move(other.__fbthrift_field_fieldT)),
+    __fbthrift_field_fieldU(std::move(other.__fbthrift_field_fieldU)),
+    __fbthrift_field_fieldV(std::move(other.__fbthrift_field_fieldV)),
+    __fbthrift_field_req_fieldV(std::move(other.__fbthrift_field_req_fieldV)),
+    __fbthrift_field_opt_fieldV(std::move(other.__fbthrift_field_opt_fieldV)),
+    __fbthrift_field_fieldW(std::move(other.__fbthrift_field_fieldW)),
+    __fbthrift_field_fieldX(std::move(other.__fbthrift_field_fieldX)),
+    __fbthrift_field_req_fieldX(std::move(other.__fbthrift_field_req_fieldX)),
+    __fbthrift_field_opt_fieldX(std::move(other.__fbthrift_field_opt_fieldX)),
+    __fbthrift_field_fieldY(std::move(other.__fbthrift_field_fieldY)),
+    __fbthrift_field_fieldZ(std::move(other.__fbthrift_field_fieldZ)),
+    __fbthrift_field_fieldAA(std::move(other.__fbthrift_field_fieldAA)),
+    __fbthrift_field_fieldAC(std::move(other.__fbthrift_field_fieldAC)),
+    __fbthrift_field_fieldAD(std::move(other.__fbthrift_field_fieldAD)),
+    __fbthrift_field_fieldAE(std::move(other.__fbthrift_field_fieldAE)),
+    __isset(other.__isset) {
+}
+
+ContainerStruct& ContainerStruct::operator=([[maybe_unused]] ContainerStruct&& other) noexcept {
+    this->__fbthrift_field_fieldA = std::move(other.__fbthrift_field_fieldA);
+    this->__fbthrift_field_req_fieldA = std::move(other.__fbthrift_field_req_fieldA);
+    this->__fbthrift_field_opt_fieldA = std::move(other.__fbthrift_field_opt_fieldA);
+    this->__fbthrift_field_fieldB = std::move(other.__fbthrift_field_fieldB);
+    this->__fbthrift_field_req_fieldB = std::move(other.__fbthrift_field_req_fieldB);
+    this->__fbthrift_field_opt_fieldB = std::move(other.__fbthrift_field_opt_fieldB);
+    this->__fbthrift_field_fieldC = std::move(other.__fbthrift_field_fieldC);
+    this->__fbthrift_field_req_fieldC = std::move(other.__fbthrift_field_req_fieldC);
+    this->__fbthrift_field_opt_fieldC = std::move(other.__fbthrift_field_opt_fieldC);
+    this->__fbthrift_field_fieldD = std::move(other.__fbthrift_field_fieldD);
+    this->__fbthrift_field_fieldE = std::move(other.__fbthrift_field_fieldE);
+    this->__fbthrift_field_req_fieldE = std::move(other.__fbthrift_field_req_fieldE);
+    this->__fbthrift_field_opt_fieldE = std::move(other.__fbthrift_field_opt_fieldE);
+    this->__fbthrift_field_fieldF = std::move(other.__fbthrift_field_fieldF);
+    this->__fbthrift_field_fieldG = std::move(other.__fbthrift_field_fieldG);
+    this->__fbthrift_field_fieldH = std::move(other.__fbthrift_field_fieldH);
+    this->__fbthrift_field_fieldI = std::move(other.__fbthrift_field_fieldI);
+    this->__fbthrift_field_fieldJ = std::move(other.__fbthrift_field_fieldJ);
+    this->__fbthrift_field_fieldK = std::move(other.__fbthrift_field_fieldK);
+    this->__fbthrift_field_fieldL = std::move(other.__fbthrift_field_fieldL);
+    this->__fbthrift_field_fieldM = std::move(other.__fbthrift_field_fieldM);
+    this->__fbthrift_field_fieldN = std::move(other.__fbthrift_field_fieldN);
+    this->__fbthrift_field_fieldO = std::move(other.__fbthrift_field_fieldO);
+    this->__fbthrift_field_fieldP = std::move(other.__fbthrift_field_fieldP);
+    this->__fbthrift_field_fieldQ = std::move(other.__fbthrift_field_fieldQ);
+    this->__fbthrift_field_fieldR = std::move(other.__fbthrift_field_fieldR);
+    this->__fbthrift_field_req_fieldR = std::move(other.__fbthrift_field_req_fieldR);
+    this->__fbthrift_field_opt_fieldR = std::move(other.__fbthrift_field_opt_fieldR);
+    this->__fbthrift_field_fieldS = std::move(other.__fbthrift_field_fieldS);
+    this->__fbthrift_field_fieldT = std::move(other.__fbthrift_field_fieldT);
+    this->__fbthrift_field_fieldU = std::move(other.__fbthrift_field_fieldU);
+    this->__fbthrift_field_fieldV = std::move(other.__fbthrift_field_fieldV);
+    this->__fbthrift_field_req_fieldV = std::move(other.__fbthrift_field_req_fieldV);
+    this->__fbthrift_field_opt_fieldV = std::move(other.__fbthrift_field_opt_fieldV);
+    this->__fbthrift_field_fieldW = std::move(other.__fbthrift_field_fieldW);
+    this->__fbthrift_field_fieldX = std::move(other.__fbthrift_field_fieldX);
+    this->__fbthrift_field_req_fieldX = std::move(other.__fbthrift_field_req_fieldX);
+    this->__fbthrift_field_opt_fieldX = std::move(other.__fbthrift_field_opt_fieldX);
+    this->__fbthrift_field_fieldY = std::move(other.__fbthrift_field_fieldY);
+    this->__fbthrift_field_fieldZ = std::move(other.__fbthrift_field_fieldZ);
+    this->__fbthrift_field_fieldAA = std::move(other.__fbthrift_field_fieldAA);
+    this->__fbthrift_field_fieldAC = std::move(other.__fbthrift_field_fieldAC);
+    this->__fbthrift_field_fieldAD = std::move(other.__fbthrift_field_fieldAD);
+    this->__fbthrift_field_fieldAE = std::move(other.__fbthrift_field_fieldAE);
+    __isset = other.__isset;
+    return *this;
+}
 
 
-containerStruct::containerStruct(apache::thrift::FragileConstructor, bool fieldA__arg, bool req_fieldA__arg, bool opt_fieldA__arg, ::std::map<::std::string, bool> fieldB__arg, ::std::map<::std::string, bool> req_fieldB__arg, ::std::map<::std::string, bool> opt_fieldB__arg, ::std::set<::std::int32_t> fieldC__arg, ::std::set<::std::int32_t> req_fieldC__arg, ::std::set<::std::int32_t> opt_fieldC__arg, ::std::string fieldD__arg, ::std::string fieldE__arg, ::std::string req_fieldE__arg, ::std::string opt_fieldE__arg, ::std::vector<::std::vector<::std::int32_t>> fieldF__arg, ::std::map<::std::string, ::std::map<::std::string, ::std::map<::std::string, ::std::int32_t>>> fieldG__arg, ::std::vector<::std::set<::std::int32_t>> fieldH__arg, bool fieldI__arg, ::std::map<::std::string, ::std::vector<::std::int32_t>> fieldJ__arg, ::std::vector<::std::vector<::std::vector<::std::vector<::std::int32_t>>>> fieldK__arg, ::std::set<::std::set<::std::set<bool>>> fieldL__arg, ::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>> fieldM__arg, ::some::valid::ns::simpleTypeDef fieldN__arg, ::some::valid::ns::complexStructTypeDef fieldO__arg, ::std::vector<::some::valid::ns::mostComplexTypeDef> fieldP__arg, ::some::valid::ns::MyEnumA fieldQ__arg, ::some::valid::ns::MyEnumA fieldR__arg, ::some::valid::ns::MyEnumA req_fieldR__arg, ::some::valid::ns::MyEnumA opt_fieldR__arg, ::some::valid::ns::MyEnumA fieldS__arg, ::std::vector<::some::valid::ns::MyEnumA> fieldT__arg, ::std::vector<::some::valid::ns::MyEnumA> fieldU__arg, ::some::valid::ns::MyStruct fieldV__arg, ::some::valid::ns::MyStruct req_fieldV__arg, ::some::valid::ns::MyStruct opt_fieldV__arg, ::std::set<::some::valid::ns::MyStruct> fieldW__arg, ::some::valid::ns::ComplexUnion fieldX__arg, ::some::valid::ns::ComplexUnion req_fieldX__arg, ::some::valid::ns::ComplexUnion opt_fieldX__arg, ::std::vector<::some::valid::ns::ComplexUnion> fieldY__arg, ::some::valid::ns::unionTypeDef fieldZ__arg, ::std::vector<::some::valid::ns::unionTypeDef> fieldAA__arg, ::some::valid::ns::MyEnumB fieldAC__arg, ::a::different::ns::AnEnum fieldAD__arg, ::std::map<::std::string, ::std::int32_t> fieldAE__arg) :
-    fieldA(std::move(fieldA__arg)),
-    req_fieldA(std::move(req_fieldA__arg)),
-    opt_fieldA(std::move(opt_fieldA__arg)),
-    fieldB(std::move(fieldB__arg)),
-    req_fieldB(std::move(req_fieldB__arg)),
-    opt_fieldB(std::move(opt_fieldB__arg)),
-    fieldC(std::move(fieldC__arg)),
-    req_fieldC(std::move(req_fieldC__arg)),
-    opt_fieldC(std::move(opt_fieldC__arg)),
-    fieldD(std::move(fieldD__arg)),
-    fieldE(std::move(fieldE__arg)),
-    req_fieldE(std::move(req_fieldE__arg)),
-    opt_fieldE(std::move(opt_fieldE__arg)),
-    fieldF(std::move(fieldF__arg)),
-    fieldG(std::move(fieldG__arg)),
-    fieldH(std::move(fieldH__arg)),
-    fieldI(std::move(fieldI__arg)),
-    fieldJ(std::move(fieldJ__arg)),
-    fieldK(std::move(fieldK__arg)),
-    fieldL(std::move(fieldL__arg)),
-    fieldM(std::move(fieldM__arg)),
-    fieldN(std::move(fieldN__arg)),
-    fieldO(std::move(fieldO__arg)),
-    fieldP(std::move(fieldP__arg)),
-    fieldQ(std::move(fieldQ__arg)),
-    fieldR(std::move(fieldR__arg)),
-    req_fieldR(std::move(req_fieldR__arg)),
-    opt_fieldR(std::move(opt_fieldR__arg)),
-    fieldS(std::move(fieldS__arg)),
-    fieldT(std::move(fieldT__arg)),
-    fieldU(std::move(fieldU__arg)),
-    fieldV(std::move(fieldV__arg)),
-    req_fieldV(std::move(req_fieldV__arg)),
-    opt_fieldV(std::move(opt_fieldV__arg)),
-    fieldW(std::move(fieldW__arg)),
-    fieldX(std::move(fieldX__arg)),
-    req_fieldX(std::move(req_fieldX__arg)),
-    opt_fieldX(std::move(opt_fieldX__arg)),
-    fieldY(std::move(fieldY__arg)),
-    fieldZ(std::move(fieldZ__arg)),
-    fieldAA(std::move(fieldAA__arg)),
-    fieldAC(std::move(fieldAC__arg)),
-    fieldAD(std::move(fieldAD__arg)),
-    fieldAE(std::move(fieldAE__arg)) { 
+ContainerStruct::ContainerStruct(apache::thrift::FragileConstructor, bool fieldA__arg, bool req_fieldA__arg, bool opt_fieldA__arg, ::std::map<::std::string, bool> fieldB__arg, ::std::map<::std::string, bool> req_fieldB__arg, ::std::map<::std::string, bool> opt_fieldB__arg, ::std::set<::std::int32_t> fieldC__arg, ::std::set<::std::int32_t> req_fieldC__arg, ::std::set<::std::int32_t> opt_fieldC__arg, ::std::string fieldD__arg, ::std::string fieldE__arg, ::std::string req_fieldE__arg, ::std::string opt_fieldE__arg, ::std::vector<::std::vector<::std::int32_t>> fieldF__arg, ::std::map<::std::string, ::std::map<::std::string, ::std::map<::std::string, ::std::int32_t>>> fieldG__arg, ::std::vector<::std::set<::std::int32_t>> fieldH__arg, bool fieldI__arg, ::std::map<::std::string, ::std::vector<::std::int32_t>> fieldJ__arg, ::std::vector<::std::vector<::std::vector<::std::vector<::std::int32_t>>>> fieldK__arg, ::std::set<::std::set<::std::set<bool>>> fieldL__arg, ::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>> fieldM__arg, ::some::valid::ns::simpleTypeDef fieldN__arg, ::some::valid::ns::complexStructTypeDef fieldO__arg, ::std::vector<::some::valid::ns::mostComplexTypeDef> fieldP__arg, ::some::valid::ns::MyEnumA fieldQ__arg, ::some::valid::ns::MyEnumA fieldR__arg, ::some::valid::ns::MyEnumA req_fieldR__arg, ::some::valid::ns::MyEnumA opt_fieldR__arg, ::some::valid::ns::MyEnumA fieldS__arg, ::std::vector<::some::valid::ns::MyEnumA> fieldT__arg, ::std::vector<::some::valid::ns::MyEnumA> fieldU__arg, ::some::valid::ns::MyStruct fieldV__arg, ::some::valid::ns::MyStruct req_fieldV__arg, ::some::valid::ns::MyStruct opt_fieldV__arg, ::std::set<::some::valid::ns::MyStruct> fieldW__arg, ::some::valid::ns::ComplexUnion fieldX__arg, ::some::valid::ns::ComplexUnion req_fieldX__arg, ::some::valid::ns::ComplexUnion opt_fieldX__arg, ::std::vector<::some::valid::ns::ComplexUnion> fieldY__arg, ::some::valid::ns::unionTypeDef fieldZ__arg, ::std::vector<::some::valid::ns::unionTypeDef> fieldAA__arg, ::some::valid::ns::MyEnumB fieldAC__arg, ::a::different::ns::AnEnum fieldAD__arg, ::std::map<::std::string, ::std::int32_t> fieldAE__arg) :
+    __fbthrift_field_fieldA(std::move(fieldA__arg)),
+    __fbthrift_field_req_fieldA(std::move(req_fieldA__arg)),
+    __fbthrift_field_opt_fieldA(std::move(opt_fieldA__arg)),
+    __fbthrift_field_fieldB(std::move(fieldB__arg)),
+    __fbthrift_field_req_fieldB(std::move(req_fieldB__arg)),
+    __fbthrift_field_opt_fieldB(std::move(opt_fieldB__arg)),
+    __fbthrift_field_fieldC(std::move(fieldC__arg)),
+    __fbthrift_field_req_fieldC(std::move(req_fieldC__arg)),
+    __fbthrift_field_opt_fieldC(std::move(opt_fieldC__arg)),
+    __fbthrift_field_fieldD(std::move(fieldD__arg)),
+    __fbthrift_field_fieldE(std::move(fieldE__arg)),
+    __fbthrift_field_req_fieldE(std::move(req_fieldE__arg)),
+    __fbthrift_field_opt_fieldE(std::move(opt_fieldE__arg)),
+    __fbthrift_field_fieldF(std::move(fieldF__arg)),
+    __fbthrift_field_fieldG(std::move(fieldG__arg)),
+    __fbthrift_field_fieldH(std::move(fieldH__arg)),
+    __fbthrift_field_fieldI(std::move(fieldI__arg)),
+    __fbthrift_field_fieldJ(std::move(fieldJ__arg)),
+    __fbthrift_field_fieldK(std::move(fieldK__arg)),
+    __fbthrift_field_fieldL(std::move(fieldL__arg)),
+    __fbthrift_field_fieldM(std::move(fieldM__arg)),
+    __fbthrift_field_fieldN(std::move(fieldN__arg)),
+    __fbthrift_field_fieldO(std::move(fieldO__arg)),
+    __fbthrift_field_fieldP(std::move(fieldP__arg)),
+    __fbthrift_field_fieldQ(std::move(fieldQ__arg)),
+    __fbthrift_field_fieldR(std::move(fieldR__arg)),
+    __fbthrift_field_req_fieldR(std::move(req_fieldR__arg)),
+    __fbthrift_field_opt_fieldR(std::move(opt_fieldR__arg)),
+    __fbthrift_field_fieldS(std::move(fieldS__arg)),
+    __fbthrift_field_fieldT(std::move(fieldT__arg)),
+    __fbthrift_field_fieldU(std::move(fieldU__arg)),
+    __fbthrift_field_fieldV(std::move(fieldV__arg)),
+    __fbthrift_field_req_fieldV(std::move(req_fieldV__arg)),
+    __fbthrift_field_opt_fieldV(std::move(opt_fieldV__arg)),
+    __fbthrift_field_fieldW(std::move(fieldW__arg)),
+    __fbthrift_field_fieldX(std::move(fieldX__arg)),
+    __fbthrift_field_req_fieldX(std::move(req_fieldX__arg)),
+    __fbthrift_field_opt_fieldX(std::move(opt_fieldX__arg)),
+    __fbthrift_field_fieldY(std::move(fieldY__arg)),
+    __fbthrift_field_fieldZ(std::move(fieldZ__arg)),
+    __fbthrift_field_fieldAA(std::move(fieldAA__arg)),
+    __fbthrift_field_fieldAC(std::move(fieldAC__arg)),
+    __fbthrift_field_fieldAD(std::move(fieldAD__arg)),
+    __fbthrift_field_fieldAE(std::move(fieldAE__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
   __isset.set(folly::index_constant<2>(), true);
@@ -1580,525 +1677,525 @@ containerStruct::containerStruct(apache::thrift::FragileConstructor, bool fieldA
   __isset.set(folly::index_constant<36>(), true);
 }
 
-void containerStruct::__fbthrift_clear() {
+void ContainerStruct::__fbthrift_clear() {
   // clear all fields
-  this->fieldA = bool();
-  this->req_fieldA = bool();
-  this->opt_fieldA = bool();
-  this->fieldB.clear();
-  this->req_fieldB.clear();
-  this->opt_fieldB.clear();
-  this->fieldC.clear();
-  this->req_fieldC.clear();
-  this->opt_fieldC.clear();
-  this->fieldD = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
-  this->fieldE = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
-  this->req_fieldE = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
-  this->opt_fieldE = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
-  this->fieldF.clear();
-  this->fieldG.clear();
-  this->fieldH.clear();
-  this->fieldI = bool();
-  this->fieldJ.clear();
-  this->fieldK.clear();
-  this->fieldL.clear();
-  this->fieldM.clear();
-  this->fieldN = ::some::valid::ns::simpleTypeDef();
-  this->fieldO.clear();
-  this->fieldP.clear();
-  this->fieldQ = ::some::valid::ns::MyEnumA();
-  this->fieldR = ::some::valid::ns::MyEnumA();
-  this->req_fieldR = ::some::valid::ns::MyEnumA();
-  this->opt_fieldR = ::some::valid::ns::MyEnumA();
-  this->fieldS = ::some::valid::ns::MyEnumA();
-  this->fieldT.clear();
-  this->fieldU.clear();
-  ::apache::thrift::clear(this->fieldV);
-  ::apache::thrift::clear(this->req_fieldV);
-  ::apache::thrift::clear(this->opt_fieldV);
-  this->fieldW.clear();
-  ::apache::thrift::clear(this->fieldX);
-  ::apache::thrift::clear(this->req_fieldX);
-  ::apache::thrift::clear(this->opt_fieldX);
-  this->fieldY.clear();
-  this->fieldZ.clear();
-  this->fieldAA.clear();
-  this->fieldAC = ::some::valid::ns::MyEnumB();
-  this->fieldAD = ::a::different::ns::AnEnum();
-  this->fieldAE.clear();
+  this->__fbthrift_field_fieldA = bool();
+  this->__fbthrift_field_req_fieldA = bool();
+  this->__fbthrift_field_opt_fieldA = bool();
+  this->__fbthrift_field_fieldB.clear();
+  this->__fbthrift_field_req_fieldB.clear();
+  this->__fbthrift_field_opt_fieldB.clear();
+  this->__fbthrift_field_fieldC.clear();
+  this->__fbthrift_field_req_fieldC.clear();
+  this->__fbthrift_field_opt_fieldC.clear();
+  this->__fbthrift_field_fieldD = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
+  this->__fbthrift_field_fieldE = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
+  this->__fbthrift_field_req_fieldE = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
+  this->__fbthrift_field_opt_fieldE = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
+  this->__fbthrift_field_fieldF.clear();
+  this->__fbthrift_field_fieldG.clear();
+  this->__fbthrift_field_fieldH.clear();
+  this->__fbthrift_field_fieldI = bool();
+  this->__fbthrift_field_fieldJ.clear();
+  this->__fbthrift_field_fieldK.clear();
+  this->__fbthrift_field_fieldL.clear();
+  this->__fbthrift_field_fieldM.clear();
+  this->__fbthrift_field_fieldN = ::some::valid::ns::simpleTypeDef();
+  this->__fbthrift_field_fieldO.clear();
+  this->__fbthrift_field_fieldP.clear();
+  this->__fbthrift_field_fieldQ = ::some::valid::ns::MyEnumA();
+  this->__fbthrift_field_fieldR = ::some::valid::ns::MyEnumA();
+  this->__fbthrift_field_req_fieldR = ::some::valid::ns::MyEnumA();
+  this->__fbthrift_field_opt_fieldR = ::some::valid::ns::MyEnumA();
+  this->__fbthrift_field_fieldS = ::some::valid::ns::MyEnumA();
+  this->__fbthrift_field_fieldT.clear();
+  this->__fbthrift_field_fieldU.clear();
+  ::apache::thrift::clear(this->__fbthrift_field_fieldV);
+  ::apache::thrift::clear(this->__fbthrift_field_req_fieldV);
+  ::apache::thrift::clear(this->__fbthrift_field_opt_fieldV);
+  this->__fbthrift_field_fieldW.clear();
+  ::apache::thrift::clear(this->__fbthrift_field_fieldX);
+  ::apache::thrift::clear(this->__fbthrift_field_req_fieldX);
+  ::apache::thrift::clear(this->__fbthrift_field_opt_fieldX);
+  this->__fbthrift_field_fieldY.clear();
+  this->__fbthrift_field_fieldZ.clear();
+  this->__fbthrift_field_fieldAA.clear();
+  this->__fbthrift_field_fieldAC = ::some::valid::ns::MyEnumB();
+  this->__fbthrift_field_fieldAD = ::a::different::ns::AnEnum();
+  this->__fbthrift_field_fieldAE.clear();
   __isset = {};
 }
 
-void containerStruct::__fbthrift_clear_terse_fields() {
+void ContainerStruct::__fbthrift_clear_terse_fields() {
 }
 
-bool containerStruct::__fbthrift_is_empty() const {
+bool ContainerStruct::__fbthrift_is_empty() const {
   return false;
 }
 
-bool containerStruct::operator==([[maybe_unused]] const containerStruct& rhs) const {
+bool ContainerStruct::operator==([[maybe_unused]] const ContainerStruct& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool containerStruct::operator<([[maybe_unused]] const containerStruct& rhs) const {
+bool ContainerStruct::operator<([[maybe_unused]] const ContainerStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-bool containerStruct::get_fieldA() const {
-  return fieldA;
+bool ContainerStruct::get_fieldA() const {
+  return __fbthrift_field_fieldA;
 }
 
-bool& containerStruct::set_fieldA(bool fieldA_) {
+bool& ContainerStruct::set_fieldA(bool fieldA_) {
   fieldA_ref() = fieldA_;
-  return fieldA;
+  return __fbthrift_field_fieldA;
 }
 
-bool containerStruct::get_req_fieldA() const {
-  return req_fieldA;
+bool ContainerStruct::get_req_fieldA() const {
+  return __fbthrift_field_req_fieldA;
 }
 
-bool& containerStruct::set_req_fieldA(bool req_fieldA_) {
+bool& ContainerStruct::set_req_fieldA(bool req_fieldA_) {
   req_fieldA_ref() = req_fieldA_;
-  return req_fieldA;
+  return __fbthrift_field_req_fieldA;
 }
 
-const bool* containerStruct::get_opt_fieldA() const& {
-  return opt_fieldA_ref().has_value() ? std::addressof(opt_fieldA) : nullptr;
+const bool* ContainerStruct::get_opt_fieldA() const& {
+  return opt_fieldA_ref().has_value() ? std::addressof(__fbthrift_field_opt_fieldA) : nullptr;
 }
 
-bool* containerStruct::get_opt_fieldA() & {
-  return opt_fieldA_ref().has_value() ? std::addressof(opt_fieldA) : nullptr;
+bool* ContainerStruct::get_opt_fieldA() & {
+  return opt_fieldA_ref().has_value() ? std::addressof(__fbthrift_field_opt_fieldA) : nullptr;
 }
 
-bool& containerStruct::set_opt_fieldA(bool opt_fieldA_) {
+bool& ContainerStruct::set_opt_fieldA(bool opt_fieldA_) {
   opt_fieldA_ref() = opt_fieldA_;
-  return opt_fieldA;
+  return __fbthrift_field_opt_fieldA;
 }
 
-const ::std::map<::std::string, bool>& containerStruct::get_fieldB() const& {
-  return fieldB;
+const ::std::map<::std::string, bool>& ContainerStruct::get_fieldB() const& {
+  return __fbthrift_field_fieldB;
 }
 
-::std::map<::std::string, bool> containerStruct::get_fieldB() && {
-  return static_cast<::std::map<::std::string, bool>&&>(fieldB);
+::std::map<::std::string, bool> ContainerStruct::get_fieldB() && {
+  return static_cast<::std::map<::std::string, bool>&&>(__fbthrift_field_fieldB);
 }
 
-const ::std::map<::std::string, bool>& containerStruct::get_req_fieldB() const& {
-  return req_fieldB;
+const ::std::map<::std::string, bool>& ContainerStruct::get_req_fieldB() const& {
+  return __fbthrift_field_req_fieldB;
 }
 
-::std::map<::std::string, bool> containerStruct::get_req_fieldB() && {
-  return static_cast<::std::map<::std::string, bool>&&>(req_fieldB);
+::std::map<::std::string, bool> ContainerStruct::get_req_fieldB() && {
+  return static_cast<::std::map<::std::string, bool>&&>(__fbthrift_field_req_fieldB);
 }
 
-const ::std::map<::std::string, bool>* containerStruct::get_opt_fieldB() const& {
-  return opt_fieldB_ref().has_value() ? std::addressof(opt_fieldB) : nullptr;
+const ::std::map<::std::string, bool>* ContainerStruct::get_opt_fieldB() const& {
+  return opt_fieldB_ref().has_value() ? std::addressof(__fbthrift_field_opt_fieldB) : nullptr;
 }
 
-::std::map<::std::string, bool>* containerStruct::get_opt_fieldB() & {
-  return opt_fieldB_ref().has_value() ? std::addressof(opt_fieldB) : nullptr;
+::std::map<::std::string, bool>* ContainerStruct::get_opt_fieldB() & {
+  return opt_fieldB_ref().has_value() ? std::addressof(__fbthrift_field_opt_fieldB) : nullptr;
 }
 
-const ::std::set<::std::int32_t>& containerStruct::get_fieldC() const& {
-  return fieldC;
+const ::std::set<::std::int32_t>& ContainerStruct::get_fieldC() const& {
+  return __fbthrift_field_fieldC;
 }
 
-::std::set<::std::int32_t> containerStruct::get_fieldC() && {
-  return static_cast<::std::set<::std::int32_t>&&>(fieldC);
+::std::set<::std::int32_t> ContainerStruct::get_fieldC() && {
+  return static_cast<::std::set<::std::int32_t>&&>(__fbthrift_field_fieldC);
 }
 
-const ::std::set<::std::int32_t>& containerStruct::get_req_fieldC() const& {
-  return req_fieldC;
+const ::std::set<::std::int32_t>& ContainerStruct::get_req_fieldC() const& {
+  return __fbthrift_field_req_fieldC;
 }
 
-::std::set<::std::int32_t> containerStruct::get_req_fieldC() && {
-  return static_cast<::std::set<::std::int32_t>&&>(req_fieldC);
+::std::set<::std::int32_t> ContainerStruct::get_req_fieldC() && {
+  return static_cast<::std::set<::std::int32_t>&&>(__fbthrift_field_req_fieldC);
 }
 
-const ::std::set<::std::int32_t>* containerStruct::get_opt_fieldC() const& {
-  return opt_fieldC_ref().has_value() ? std::addressof(opt_fieldC) : nullptr;
+const ::std::set<::std::int32_t>* ContainerStruct::get_opt_fieldC() const& {
+  return opt_fieldC_ref().has_value() ? std::addressof(__fbthrift_field_opt_fieldC) : nullptr;
 }
 
-::std::set<::std::int32_t>* containerStruct::get_opt_fieldC() & {
-  return opt_fieldC_ref().has_value() ? std::addressof(opt_fieldC) : nullptr;
+::std::set<::std::int32_t>* ContainerStruct::get_opt_fieldC() & {
+  return opt_fieldC_ref().has_value() ? std::addressof(__fbthrift_field_opt_fieldC) : nullptr;
 }
 
-const ::std::string* containerStruct::get_opt_fieldE() const& {
-  return opt_fieldE_ref().has_value() ? std::addressof(opt_fieldE) : nullptr;
+const ::std::string* ContainerStruct::get_opt_fieldE() const& {
+  return opt_fieldE_ref().has_value() ? std::addressof(__fbthrift_field_opt_fieldE) : nullptr;
 }
 
-::std::string* containerStruct::get_opt_fieldE() & {
-  return opt_fieldE_ref().has_value() ? std::addressof(opt_fieldE) : nullptr;
+::std::string* ContainerStruct::get_opt_fieldE() & {
+  return opt_fieldE_ref().has_value() ? std::addressof(__fbthrift_field_opt_fieldE) : nullptr;
 }
 
-const ::std::vector<::std::vector<::std::int32_t>>& containerStruct::get_fieldF() const& {
-  return fieldF;
+const ::std::vector<::std::vector<::std::int32_t>>& ContainerStruct::get_fieldF() const& {
+  return __fbthrift_field_fieldF;
 }
 
-::std::vector<::std::vector<::std::int32_t>> containerStruct::get_fieldF() && {
-  return static_cast<::std::vector<::std::vector<::std::int32_t>>&&>(fieldF);
+::std::vector<::std::vector<::std::int32_t>> ContainerStruct::get_fieldF() && {
+  return static_cast<::std::vector<::std::vector<::std::int32_t>>&&>(__fbthrift_field_fieldF);
 }
 
-const ::std::map<::std::string, ::std::map<::std::string, ::std::map<::std::string, ::std::int32_t>>>& containerStruct::get_fieldG() const& {
-  return fieldG;
+const ::std::map<::std::string, ::std::map<::std::string, ::std::map<::std::string, ::std::int32_t>>>& ContainerStruct::get_fieldG() const& {
+  return __fbthrift_field_fieldG;
 }
 
-::std::map<::std::string, ::std::map<::std::string, ::std::map<::std::string, ::std::int32_t>>> containerStruct::get_fieldG() && {
-  return static_cast<::std::map<::std::string, ::std::map<::std::string, ::std::map<::std::string, ::std::int32_t>>>&&>(fieldG);
+::std::map<::std::string, ::std::map<::std::string, ::std::map<::std::string, ::std::int32_t>>> ContainerStruct::get_fieldG() && {
+  return static_cast<::std::map<::std::string, ::std::map<::std::string, ::std::map<::std::string, ::std::int32_t>>>&&>(__fbthrift_field_fieldG);
 }
 
-const ::std::vector<::std::set<::std::int32_t>>& containerStruct::get_fieldH() const& {
-  return fieldH;
+const ::std::vector<::std::set<::std::int32_t>>& ContainerStruct::get_fieldH() const& {
+  return __fbthrift_field_fieldH;
 }
 
-::std::vector<::std::set<::std::int32_t>> containerStruct::get_fieldH() && {
-  return static_cast<::std::vector<::std::set<::std::int32_t>>&&>(fieldH);
+::std::vector<::std::set<::std::int32_t>> ContainerStruct::get_fieldH() && {
+  return static_cast<::std::vector<::std::set<::std::int32_t>>&&>(__fbthrift_field_fieldH);
 }
 
-bool containerStruct::get_fieldI() const {
-  return fieldI;
+bool ContainerStruct::get_fieldI() const {
+  return __fbthrift_field_fieldI;
 }
 
-bool& containerStruct::set_fieldI(bool fieldI_) {
+bool& ContainerStruct::set_fieldI(bool fieldI_) {
   fieldI_ref() = fieldI_;
-  return fieldI;
+  return __fbthrift_field_fieldI;
 }
 
-const ::std::map<::std::string, ::std::vector<::std::int32_t>>& containerStruct::get_fieldJ() const& {
-  return fieldJ;
+const ::std::map<::std::string, ::std::vector<::std::int32_t>>& ContainerStruct::get_fieldJ() const& {
+  return __fbthrift_field_fieldJ;
 }
 
-::std::map<::std::string, ::std::vector<::std::int32_t>> containerStruct::get_fieldJ() && {
-  return static_cast<::std::map<::std::string, ::std::vector<::std::int32_t>>&&>(fieldJ);
+::std::map<::std::string, ::std::vector<::std::int32_t>> ContainerStruct::get_fieldJ() && {
+  return static_cast<::std::map<::std::string, ::std::vector<::std::int32_t>>&&>(__fbthrift_field_fieldJ);
 }
 
-const ::std::vector<::std::vector<::std::vector<::std::vector<::std::int32_t>>>>& containerStruct::get_fieldK() const& {
-  return fieldK;
+const ::std::vector<::std::vector<::std::vector<::std::vector<::std::int32_t>>>>& ContainerStruct::get_fieldK() const& {
+  return __fbthrift_field_fieldK;
 }
 
-::std::vector<::std::vector<::std::vector<::std::vector<::std::int32_t>>>> containerStruct::get_fieldK() && {
-  return static_cast<::std::vector<::std::vector<::std::vector<::std::vector<::std::int32_t>>>>&&>(fieldK);
+::std::vector<::std::vector<::std::vector<::std::vector<::std::int32_t>>>> ContainerStruct::get_fieldK() && {
+  return static_cast<::std::vector<::std::vector<::std::vector<::std::vector<::std::int32_t>>>>&&>(__fbthrift_field_fieldK);
 }
 
-const ::std::set<::std::set<::std::set<bool>>>& containerStruct::get_fieldL() const& {
-  return fieldL;
+const ::std::set<::std::set<::std::set<bool>>>& ContainerStruct::get_fieldL() const& {
+  return __fbthrift_field_fieldL;
 }
 
-::std::set<::std::set<::std::set<bool>>> containerStruct::get_fieldL() && {
-  return static_cast<::std::set<::std::set<::std::set<bool>>>&&>(fieldL);
+::std::set<::std::set<::std::set<bool>>> ContainerStruct::get_fieldL() && {
+  return static_cast<::std::set<::std::set<::std::set<bool>>>&&>(__fbthrift_field_fieldL);
 }
 
-const ::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>>& containerStruct::get_fieldM() const& {
-  return fieldM;
+const ::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>>& ContainerStruct::get_fieldM() const& {
+  return __fbthrift_field_fieldM;
 }
 
-::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>> containerStruct::get_fieldM() && {
-  return static_cast<::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>>&&>(fieldM);
+::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>> ContainerStruct::get_fieldM() && {
+  return static_cast<::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>>&&>(__fbthrift_field_fieldM);
 }
 
-::some::valid::ns::simpleTypeDef containerStruct::get_fieldN() const {
-  return fieldN;
+::some::valid::ns::simpleTypeDef ContainerStruct::get_fieldN() const {
+  return __fbthrift_field_fieldN;
 }
 
-::some::valid::ns::simpleTypeDef& containerStruct::set_fieldN(::some::valid::ns::simpleTypeDef fieldN_) {
+::some::valid::ns::simpleTypeDef& ContainerStruct::set_fieldN(::some::valid::ns::simpleTypeDef fieldN_) {
   fieldN_ref() = fieldN_;
-  return fieldN;
+  return __fbthrift_field_fieldN;
 }
 
-const ::some::valid::ns::complexStructTypeDef& containerStruct::get_fieldO() const& {
-  return fieldO;
+const ::some::valid::ns::complexStructTypeDef& ContainerStruct::get_fieldO() const& {
+  return __fbthrift_field_fieldO;
 }
 
-::some::valid::ns::complexStructTypeDef containerStruct::get_fieldO() && {
-  return static_cast<::some::valid::ns::complexStructTypeDef&&>(fieldO);
+::some::valid::ns::complexStructTypeDef ContainerStruct::get_fieldO() && {
+  return static_cast<::some::valid::ns::complexStructTypeDef&&>(__fbthrift_field_fieldO);
 }
 
-const ::std::vector<::some::valid::ns::mostComplexTypeDef>& containerStruct::get_fieldP() const& {
-  return fieldP;
+const ::std::vector<::some::valid::ns::mostComplexTypeDef>& ContainerStruct::get_fieldP() const& {
+  return __fbthrift_field_fieldP;
 }
 
-::std::vector<::some::valid::ns::mostComplexTypeDef> containerStruct::get_fieldP() && {
-  return static_cast<::std::vector<::some::valid::ns::mostComplexTypeDef>&&>(fieldP);
+::std::vector<::some::valid::ns::mostComplexTypeDef> ContainerStruct::get_fieldP() && {
+  return static_cast<::std::vector<::some::valid::ns::mostComplexTypeDef>&&>(__fbthrift_field_fieldP);
 }
 
-::some::valid::ns::MyEnumA containerStruct::get_fieldQ() const {
-  return fieldQ;
+::some::valid::ns::MyEnumA ContainerStruct::get_fieldQ() const {
+  return __fbthrift_field_fieldQ;
 }
 
-::some::valid::ns::MyEnumA& containerStruct::set_fieldQ(::some::valid::ns::MyEnumA fieldQ_) {
+::some::valid::ns::MyEnumA& ContainerStruct::set_fieldQ(::some::valid::ns::MyEnumA fieldQ_) {
   fieldQ_ref() = fieldQ_;
-  return fieldQ;
+  return __fbthrift_field_fieldQ;
 }
 
-::some::valid::ns::MyEnumA containerStruct::get_fieldR() const {
-  return fieldR;
+::some::valid::ns::MyEnumA ContainerStruct::get_fieldR() const {
+  return __fbthrift_field_fieldR;
 }
 
-::some::valid::ns::MyEnumA& containerStruct::set_fieldR(::some::valid::ns::MyEnumA fieldR_) {
+::some::valid::ns::MyEnumA& ContainerStruct::set_fieldR(::some::valid::ns::MyEnumA fieldR_) {
   fieldR_ref() = fieldR_;
-  return fieldR;
+  return __fbthrift_field_fieldR;
 }
 
-::some::valid::ns::MyEnumA containerStruct::get_req_fieldR() const {
-  return req_fieldR;
+::some::valid::ns::MyEnumA ContainerStruct::get_req_fieldR() const {
+  return __fbthrift_field_req_fieldR;
 }
 
-::some::valid::ns::MyEnumA& containerStruct::set_req_fieldR(::some::valid::ns::MyEnumA req_fieldR_) {
+::some::valid::ns::MyEnumA& ContainerStruct::set_req_fieldR(::some::valid::ns::MyEnumA req_fieldR_) {
   req_fieldR_ref() = req_fieldR_;
-  return req_fieldR;
+  return __fbthrift_field_req_fieldR;
 }
 
-const ::some::valid::ns::MyEnumA* containerStruct::get_opt_fieldR() const& {
-  return opt_fieldR_ref().has_value() ? std::addressof(opt_fieldR) : nullptr;
+const ::some::valid::ns::MyEnumA* ContainerStruct::get_opt_fieldR() const& {
+  return opt_fieldR_ref().has_value() ? std::addressof(__fbthrift_field_opt_fieldR) : nullptr;
 }
 
-::some::valid::ns::MyEnumA* containerStruct::get_opt_fieldR() & {
-  return opt_fieldR_ref().has_value() ? std::addressof(opt_fieldR) : nullptr;
+::some::valid::ns::MyEnumA* ContainerStruct::get_opt_fieldR() & {
+  return opt_fieldR_ref().has_value() ? std::addressof(__fbthrift_field_opt_fieldR) : nullptr;
 }
 
-::some::valid::ns::MyEnumA& containerStruct::set_opt_fieldR(::some::valid::ns::MyEnumA opt_fieldR_) {
+::some::valid::ns::MyEnumA& ContainerStruct::set_opt_fieldR(::some::valid::ns::MyEnumA opt_fieldR_) {
   opt_fieldR_ref() = opt_fieldR_;
-  return opt_fieldR;
+  return __fbthrift_field_opt_fieldR;
 }
 
-::some::valid::ns::MyEnumA containerStruct::get_fieldS() const {
-  return fieldS;
+::some::valid::ns::MyEnumA ContainerStruct::get_fieldS() const {
+  return __fbthrift_field_fieldS;
 }
 
-::some::valid::ns::MyEnumA& containerStruct::set_fieldS(::some::valid::ns::MyEnumA fieldS_) {
+::some::valid::ns::MyEnumA& ContainerStruct::set_fieldS(::some::valid::ns::MyEnumA fieldS_) {
   fieldS_ref() = fieldS_;
-  return fieldS;
+  return __fbthrift_field_fieldS;
 }
 
-const ::std::vector<::some::valid::ns::MyEnumA>& containerStruct::get_fieldT() const& {
-  return fieldT;
+const ::std::vector<::some::valid::ns::MyEnumA>& ContainerStruct::get_fieldT() const& {
+  return __fbthrift_field_fieldT;
 }
 
-::std::vector<::some::valid::ns::MyEnumA> containerStruct::get_fieldT() && {
-  return static_cast<::std::vector<::some::valid::ns::MyEnumA>&&>(fieldT);
+::std::vector<::some::valid::ns::MyEnumA> ContainerStruct::get_fieldT() && {
+  return static_cast<::std::vector<::some::valid::ns::MyEnumA>&&>(__fbthrift_field_fieldT);
 }
 
-const ::std::vector<::some::valid::ns::MyEnumA>& containerStruct::get_fieldU() const& {
-  return fieldU;
+const ::std::vector<::some::valid::ns::MyEnumA>& ContainerStruct::get_fieldU() const& {
+  return __fbthrift_field_fieldU;
 }
 
-::std::vector<::some::valid::ns::MyEnumA> containerStruct::get_fieldU() && {
-  return static_cast<::std::vector<::some::valid::ns::MyEnumA>&&>(fieldU);
+::std::vector<::some::valid::ns::MyEnumA> ContainerStruct::get_fieldU() && {
+  return static_cast<::std::vector<::some::valid::ns::MyEnumA>&&>(__fbthrift_field_fieldU);
 }
 
-const ::some::valid::ns::MyStruct& containerStruct::get_fieldV() const& {
-  return fieldV;
+const ::some::valid::ns::MyStruct& ContainerStruct::get_fieldV() const& {
+  return __fbthrift_field_fieldV;
 }
 
-::some::valid::ns::MyStruct containerStruct::get_fieldV() && {
-  return static_cast<::some::valid::ns::MyStruct&&>(fieldV);
+::some::valid::ns::MyStruct ContainerStruct::get_fieldV() && {
+  return static_cast<::some::valid::ns::MyStruct&&>(__fbthrift_field_fieldV);
 }
 
-const ::some::valid::ns::MyStruct& containerStruct::get_req_fieldV() const& {
-  return req_fieldV;
+const ::some::valid::ns::MyStruct& ContainerStruct::get_req_fieldV() const& {
+  return __fbthrift_field_req_fieldV;
 }
 
-::some::valid::ns::MyStruct containerStruct::get_req_fieldV() && {
-  return static_cast<::some::valid::ns::MyStruct&&>(req_fieldV);
+::some::valid::ns::MyStruct ContainerStruct::get_req_fieldV() && {
+  return static_cast<::some::valid::ns::MyStruct&&>(__fbthrift_field_req_fieldV);
 }
 
-const ::some::valid::ns::MyStruct* containerStruct::get_opt_fieldV() const& {
-  return opt_fieldV_ref().has_value() ? std::addressof(opt_fieldV) : nullptr;
+const ::some::valid::ns::MyStruct* ContainerStruct::get_opt_fieldV() const& {
+  return opt_fieldV_ref().has_value() ? std::addressof(__fbthrift_field_opt_fieldV) : nullptr;
 }
 
-::some::valid::ns::MyStruct* containerStruct::get_opt_fieldV() & {
-  return opt_fieldV_ref().has_value() ? std::addressof(opt_fieldV) : nullptr;
+::some::valid::ns::MyStruct* ContainerStruct::get_opt_fieldV() & {
+  return opt_fieldV_ref().has_value() ? std::addressof(__fbthrift_field_opt_fieldV) : nullptr;
 }
 
-const ::std::set<::some::valid::ns::MyStruct>& containerStruct::get_fieldW() const& {
-  return fieldW;
+const ::std::set<::some::valid::ns::MyStruct>& ContainerStruct::get_fieldW() const& {
+  return __fbthrift_field_fieldW;
 }
 
-::std::set<::some::valid::ns::MyStruct> containerStruct::get_fieldW() && {
-  return static_cast<::std::set<::some::valid::ns::MyStruct>&&>(fieldW);
+::std::set<::some::valid::ns::MyStruct> ContainerStruct::get_fieldW() && {
+  return static_cast<::std::set<::some::valid::ns::MyStruct>&&>(__fbthrift_field_fieldW);
 }
 
-const ::some::valid::ns::ComplexUnion& containerStruct::get_fieldX() const& {
-  return fieldX;
+const ::some::valid::ns::ComplexUnion& ContainerStruct::get_fieldX() const& {
+  return __fbthrift_field_fieldX;
 }
 
-::some::valid::ns::ComplexUnion containerStruct::get_fieldX() && {
-  return static_cast<::some::valid::ns::ComplexUnion&&>(fieldX);
+::some::valid::ns::ComplexUnion ContainerStruct::get_fieldX() && {
+  return static_cast<::some::valid::ns::ComplexUnion&&>(__fbthrift_field_fieldX);
 }
 
-const ::some::valid::ns::ComplexUnion& containerStruct::get_req_fieldX() const& {
-  return req_fieldX;
+const ::some::valid::ns::ComplexUnion& ContainerStruct::get_req_fieldX() const& {
+  return __fbthrift_field_req_fieldX;
 }
 
-::some::valid::ns::ComplexUnion containerStruct::get_req_fieldX() && {
-  return static_cast<::some::valid::ns::ComplexUnion&&>(req_fieldX);
+::some::valid::ns::ComplexUnion ContainerStruct::get_req_fieldX() && {
+  return static_cast<::some::valid::ns::ComplexUnion&&>(__fbthrift_field_req_fieldX);
 }
 
-const ::some::valid::ns::ComplexUnion* containerStruct::get_opt_fieldX() const& {
-  return opt_fieldX_ref().has_value() ? std::addressof(opt_fieldX) : nullptr;
+const ::some::valid::ns::ComplexUnion* ContainerStruct::get_opt_fieldX() const& {
+  return opt_fieldX_ref().has_value() ? std::addressof(__fbthrift_field_opt_fieldX) : nullptr;
 }
 
-::some::valid::ns::ComplexUnion* containerStruct::get_opt_fieldX() & {
-  return opt_fieldX_ref().has_value() ? std::addressof(opt_fieldX) : nullptr;
+::some::valid::ns::ComplexUnion* ContainerStruct::get_opt_fieldX() & {
+  return opt_fieldX_ref().has_value() ? std::addressof(__fbthrift_field_opt_fieldX) : nullptr;
 }
 
-const ::std::vector<::some::valid::ns::ComplexUnion>& containerStruct::get_fieldY() const& {
-  return fieldY;
+const ::std::vector<::some::valid::ns::ComplexUnion>& ContainerStruct::get_fieldY() const& {
+  return __fbthrift_field_fieldY;
 }
 
-::std::vector<::some::valid::ns::ComplexUnion> containerStruct::get_fieldY() && {
-  return static_cast<::std::vector<::some::valid::ns::ComplexUnion>&&>(fieldY);
+::std::vector<::some::valid::ns::ComplexUnion> ContainerStruct::get_fieldY() && {
+  return static_cast<::std::vector<::some::valid::ns::ComplexUnion>&&>(__fbthrift_field_fieldY);
 }
 
-const ::some::valid::ns::unionTypeDef& containerStruct::get_fieldZ() const& {
-  return fieldZ;
+const ::some::valid::ns::unionTypeDef& ContainerStruct::get_fieldZ() const& {
+  return __fbthrift_field_fieldZ;
 }
 
-::some::valid::ns::unionTypeDef containerStruct::get_fieldZ() && {
-  return static_cast<::some::valid::ns::unionTypeDef&&>(fieldZ);
+::some::valid::ns::unionTypeDef ContainerStruct::get_fieldZ() && {
+  return static_cast<::some::valid::ns::unionTypeDef&&>(__fbthrift_field_fieldZ);
 }
 
-const ::std::vector<::some::valid::ns::unionTypeDef>& containerStruct::get_fieldAA() const& {
-  return fieldAA;
+const ::std::vector<::some::valid::ns::unionTypeDef>& ContainerStruct::get_fieldAA() const& {
+  return __fbthrift_field_fieldAA;
 }
 
-::std::vector<::some::valid::ns::unionTypeDef> containerStruct::get_fieldAA() && {
-  return static_cast<::std::vector<::some::valid::ns::unionTypeDef>&&>(fieldAA);
+::std::vector<::some::valid::ns::unionTypeDef> ContainerStruct::get_fieldAA() && {
+  return static_cast<::std::vector<::some::valid::ns::unionTypeDef>&&>(__fbthrift_field_fieldAA);
 }
 
-::some::valid::ns::MyEnumB containerStruct::get_fieldAC() const {
-  return fieldAC;
+::some::valid::ns::MyEnumB ContainerStruct::get_fieldAC() const {
+  return __fbthrift_field_fieldAC;
 }
 
-::some::valid::ns::MyEnumB& containerStruct::set_fieldAC(::some::valid::ns::MyEnumB fieldAC_) {
+::some::valid::ns::MyEnumB& ContainerStruct::set_fieldAC(::some::valid::ns::MyEnumB fieldAC_) {
   fieldAC_ref() = fieldAC_;
-  return fieldAC;
+  return __fbthrift_field_fieldAC;
 }
 
-::a::different::ns::AnEnum containerStruct::get_fieldAD() const {
-  return fieldAD;
+::a::different::ns::AnEnum ContainerStruct::get_fieldAD() const {
+  return __fbthrift_field_fieldAD;
 }
 
-::a::different::ns::AnEnum& containerStruct::set_fieldAD(::a::different::ns::AnEnum fieldAD_) {
+::a::different::ns::AnEnum& ContainerStruct::set_fieldAD(::a::different::ns::AnEnum fieldAD_) {
   fieldAD_ref() = fieldAD_;
-  return fieldAD;
+  return __fbthrift_field_fieldAD;
 }
 
-const ::std::map<::std::string, ::std::int32_t>& containerStruct::get_fieldAE() const& {
-  return fieldAE;
+const ::std::map<::std::string, ::std::int32_t>& ContainerStruct::get_fieldAE() const& {
+  return __fbthrift_field_fieldAE;
 }
 
-::std::map<::std::string, ::std::int32_t> containerStruct::get_fieldAE() && {
-  return static_cast<::std::map<::std::string, ::std::int32_t>&&>(fieldAE);
+::std::map<::std::string, ::std::int32_t> ContainerStruct::get_fieldAE() && {
+  return static_cast<::std::map<::std::string, ::std::int32_t>&&>(__fbthrift_field_fieldAE);
 }
 
-void swap([[maybe_unused]] containerStruct& a, [[maybe_unused]] containerStruct& b) {
+void swap([[maybe_unused]] ContainerStruct& a, [[maybe_unused]] ContainerStruct& b) {
   using ::std::swap;
-  swap(a.fieldA, b.fieldA);
-  swap(a.req_fieldA, b.req_fieldA);
-  swap(a.opt_fieldA, b.opt_fieldA);
-  swap(a.fieldB, b.fieldB);
-  swap(a.req_fieldB, b.req_fieldB);
-  swap(a.opt_fieldB, b.opt_fieldB);
-  swap(a.fieldC, b.fieldC);
-  swap(a.req_fieldC, b.req_fieldC);
-  swap(a.opt_fieldC, b.opt_fieldC);
-  swap(a.fieldD, b.fieldD);
-  swap(a.fieldE, b.fieldE);
-  swap(a.req_fieldE, b.req_fieldE);
-  swap(a.opt_fieldE, b.opt_fieldE);
-  swap(a.fieldF, b.fieldF);
-  swap(a.fieldG, b.fieldG);
-  swap(a.fieldH, b.fieldH);
-  swap(a.fieldI, b.fieldI);
-  swap(a.fieldJ, b.fieldJ);
-  swap(a.fieldK, b.fieldK);
-  swap(a.fieldL, b.fieldL);
-  swap(a.fieldM, b.fieldM);
-  swap(a.fieldN, b.fieldN);
-  swap(a.fieldO, b.fieldO);
-  swap(a.fieldP, b.fieldP);
-  swap(a.fieldQ, b.fieldQ);
-  swap(a.fieldR, b.fieldR);
-  swap(a.req_fieldR, b.req_fieldR);
-  swap(a.opt_fieldR, b.opt_fieldR);
-  swap(a.fieldS, b.fieldS);
-  swap(a.fieldT, b.fieldT);
-  swap(a.fieldU, b.fieldU);
-  swap(a.fieldV, b.fieldV);
-  swap(a.req_fieldV, b.req_fieldV);
-  swap(a.opt_fieldV, b.opt_fieldV);
-  swap(a.fieldW, b.fieldW);
-  swap(a.fieldX, b.fieldX);
-  swap(a.req_fieldX, b.req_fieldX);
-  swap(a.opt_fieldX, b.opt_fieldX);
-  swap(a.fieldY, b.fieldY);
-  swap(a.fieldZ, b.fieldZ);
-  swap(a.fieldAA, b.fieldAA);
-  swap(a.fieldAC, b.fieldAC);
-  swap(a.fieldAD, b.fieldAD);
-  swap(a.fieldAE, b.fieldAE);
+  swap(a.__fbthrift_field_fieldA, b.__fbthrift_field_fieldA);
+  swap(a.__fbthrift_field_req_fieldA, b.__fbthrift_field_req_fieldA);
+  swap(a.__fbthrift_field_opt_fieldA, b.__fbthrift_field_opt_fieldA);
+  swap(a.__fbthrift_field_fieldB, b.__fbthrift_field_fieldB);
+  swap(a.__fbthrift_field_req_fieldB, b.__fbthrift_field_req_fieldB);
+  swap(a.__fbthrift_field_opt_fieldB, b.__fbthrift_field_opt_fieldB);
+  swap(a.__fbthrift_field_fieldC, b.__fbthrift_field_fieldC);
+  swap(a.__fbthrift_field_req_fieldC, b.__fbthrift_field_req_fieldC);
+  swap(a.__fbthrift_field_opt_fieldC, b.__fbthrift_field_opt_fieldC);
+  swap(a.__fbthrift_field_fieldD, b.__fbthrift_field_fieldD);
+  swap(a.__fbthrift_field_fieldE, b.__fbthrift_field_fieldE);
+  swap(a.__fbthrift_field_req_fieldE, b.__fbthrift_field_req_fieldE);
+  swap(a.__fbthrift_field_opt_fieldE, b.__fbthrift_field_opt_fieldE);
+  swap(a.__fbthrift_field_fieldF, b.__fbthrift_field_fieldF);
+  swap(a.__fbthrift_field_fieldG, b.__fbthrift_field_fieldG);
+  swap(a.__fbthrift_field_fieldH, b.__fbthrift_field_fieldH);
+  swap(a.__fbthrift_field_fieldI, b.__fbthrift_field_fieldI);
+  swap(a.__fbthrift_field_fieldJ, b.__fbthrift_field_fieldJ);
+  swap(a.__fbthrift_field_fieldK, b.__fbthrift_field_fieldK);
+  swap(a.__fbthrift_field_fieldL, b.__fbthrift_field_fieldL);
+  swap(a.__fbthrift_field_fieldM, b.__fbthrift_field_fieldM);
+  swap(a.__fbthrift_field_fieldN, b.__fbthrift_field_fieldN);
+  swap(a.__fbthrift_field_fieldO, b.__fbthrift_field_fieldO);
+  swap(a.__fbthrift_field_fieldP, b.__fbthrift_field_fieldP);
+  swap(a.__fbthrift_field_fieldQ, b.__fbthrift_field_fieldQ);
+  swap(a.__fbthrift_field_fieldR, b.__fbthrift_field_fieldR);
+  swap(a.__fbthrift_field_req_fieldR, b.__fbthrift_field_req_fieldR);
+  swap(a.__fbthrift_field_opt_fieldR, b.__fbthrift_field_opt_fieldR);
+  swap(a.__fbthrift_field_fieldS, b.__fbthrift_field_fieldS);
+  swap(a.__fbthrift_field_fieldT, b.__fbthrift_field_fieldT);
+  swap(a.__fbthrift_field_fieldU, b.__fbthrift_field_fieldU);
+  swap(a.__fbthrift_field_fieldV, b.__fbthrift_field_fieldV);
+  swap(a.__fbthrift_field_req_fieldV, b.__fbthrift_field_req_fieldV);
+  swap(a.__fbthrift_field_opt_fieldV, b.__fbthrift_field_opt_fieldV);
+  swap(a.__fbthrift_field_fieldW, b.__fbthrift_field_fieldW);
+  swap(a.__fbthrift_field_fieldX, b.__fbthrift_field_fieldX);
+  swap(a.__fbthrift_field_req_fieldX, b.__fbthrift_field_req_fieldX);
+  swap(a.__fbthrift_field_opt_fieldX, b.__fbthrift_field_opt_fieldX);
+  swap(a.__fbthrift_field_fieldY, b.__fbthrift_field_fieldY);
+  swap(a.__fbthrift_field_fieldZ, b.__fbthrift_field_fieldZ);
+  swap(a.__fbthrift_field_fieldAA, b.__fbthrift_field_fieldAA);
+  swap(a.__fbthrift_field_fieldAC, b.__fbthrift_field_fieldAC);
+  swap(a.__fbthrift_field_fieldAD, b.__fbthrift_field_fieldAD);
+  swap(a.__fbthrift_field_fieldAE, b.__fbthrift_field_fieldAE);
   swap(a.__isset, b.__isset);
 }
 
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
-        containerStruct,
+        ContainerStruct,
         ::apache::thrift::type_class::list<::apache::thrift::type_class::map<::apache::thrift::type_class::structure, ::apache::thrift::type_class::structure>>,
         ::some::valid::ns::complexStructTypeDef>,
     "inconsistent use of json option");
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
-        containerStruct,
+        ContainerStruct,
         ::apache::thrift::type_class::structure,
         ::some::valid::ns::MyStruct>,
     "inconsistent use of json option");
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
-        containerStruct,
+        ContainerStruct,
         ::apache::thrift::type_class::structure,
         ::some::valid::ns::MyStruct>,
     "inconsistent use of json option");
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
-        containerStruct,
+        ContainerStruct,
         ::apache::thrift::type_class::structure,
         ::some::valid::ns::MyStruct>,
     "inconsistent use of json option");
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
-        containerStruct,
+        ContainerStruct,
         ::apache::thrift::type_class::set<::apache::thrift::type_class::structure>,
         ::std::set<::some::valid::ns::MyStruct>>,
     "inconsistent use of json option");
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
-        containerStruct,
+        ContainerStruct,
         ::apache::thrift::type_class::variant,
         ::some::valid::ns::ComplexUnion>,
     "inconsistent use of json option");
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
-        containerStruct,
+        ContainerStruct,
         ::apache::thrift::type_class::variant,
         ::some::valid::ns::ComplexUnion>,
     "inconsistent use of json option");
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
-        containerStruct,
+        ContainerStruct,
         ::apache::thrift::type_class::variant,
         ::some::valid::ns::ComplexUnion>,
     "inconsistent use of json option");
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
-        containerStruct,
+        ContainerStruct,
         ::apache::thrift::type_class::list<::apache::thrift::type_class::variant>,
         ::std::vector<::some::valid::ns::ComplexUnion>>,
     "inconsistent use of json option");
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
-        containerStruct,
+        ContainerStruct,
         ::apache::thrift::type_class::set<::apache::thrift::type_class::variant>,
         ::some::valid::ns::unionTypeDef>,
     "inconsistent use of json option");
@@ -2259,66 +2356,149 @@ std::string_view AnnotatedStruct::__fbthrift_get_class_name() {
 }
 
 AnnotatedStruct::AnnotatedStruct() :
-    cpp_unique_ref(std::make_unique<::some::valid::ns::containerStruct>()),
-    cpp2_unique_ref(std::make_unique<::some::valid::ns::containerStruct>()),
-    container_with_ref(std::make_unique<::std::map<::std::int32_t, ::std::vector<::std::string>>>()),
-    req_cpp_unique_ref(std::make_unique<::some::valid::ns::containerStruct>()),
-    req_cpp2_unique_ref(std::make_unique<::some::valid::ns::containerStruct>()),
-    req_container_with_ref(std::make_unique<::std::vector<::std::string>>()),
-    ref_type_unique(std::make_unique<::some::valid::ns::containerStruct>()),
-    ref_type_shared(std::make_shared<::some::valid::ns::containerStruct>()),
-    ref_type_const(std::make_shared<::std::map<::std::int32_t, ::std::vector<::std::string>>>()),
-    req_ref_type_shared(std::make_shared<::some::valid::ns::containerStruct>()),
-    req_ref_type_const(std::make_shared<::some::valid::ns::containerStruct>()),
-    req_ref_type_unique(std::make_unique<::std::vector<::std::string>>()),
-    base_type(),
-    iobuf_type_val(apache::thrift::StringTraits<::some::valid::ns::IOBuf>::fromStringLiteral("value")),
-    iobuf_ptr_val(apache::thrift::StringTraits<::some::valid::ns::IOBufPtr>::fromStringLiteral("value2")),
-    struct_struct(::apache::thrift::detail::make_structured_constant<::some::valid::ns::containerStruct>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::fieldD>(apache::thrift::StringTraits<::std::string>::fromStringLiteral("some string")), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::fieldI>(false))) {
+    __fbthrift_field_cpp_unique_ref(std::make_unique<::some::valid::ns::ContainerStruct>()),
+    __fbthrift_field_cpp2_unique_ref(std::make_unique<::some::valid::ns::ContainerStruct>()),
+    __fbthrift_field_container_with_ref(std::make_unique<::std::map<::std::int32_t, ::std::vector<::std::string>>>()),
+    __fbthrift_field_req_cpp_unique_ref(std::make_unique<::some::valid::ns::ContainerStruct>()),
+    __fbthrift_field_req_cpp2_unique_ref(std::make_unique<::some::valid::ns::ContainerStruct>()),
+    __fbthrift_field_req_container_with_ref(std::make_unique<::std::vector<::std::string>>()),
+    __fbthrift_field_ref_type_unique(std::make_unique<::some::valid::ns::ContainerStruct>()),
+    __fbthrift_field_ref_type_shared(std::make_shared<::some::valid::ns::ContainerStruct>()),
+    __fbthrift_field_ref_type_const(std::make_shared<::std::map<::std::int32_t, ::std::vector<::std::string>>>()),
+    __fbthrift_field_req_ref_type_shared(std::make_shared<::some::valid::ns::ContainerStruct>()),
+    __fbthrift_field_req_ref_type_const(std::make_shared<::some::valid::ns::ContainerStruct>()),
+    __fbthrift_field_req_ref_type_unique(std::make_unique<::std::vector<::std::string>>()),
+    __fbthrift_field_base_type(),
+    __fbthrift_field_iobuf_type_val(apache::thrift::StringTraits<::some::valid::ns::IOBuf>::fromStringLiteral("value")),
+    __fbthrift_field_iobuf_ptr_val(apache::thrift::StringTraits<::some::valid::ns::IOBufPtr>::fromStringLiteral("value2")),
+    __fbthrift_field_struct_struct(::apache::thrift::detail::make_structured_constant<::some::valid::ns::ContainerStruct>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::fieldD>(apache::thrift::StringTraits<::std::string>::fromStringLiteral("some string")), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::fieldI>(false))) {
 }
 
 
 AnnotatedStruct::~AnnotatedStruct() {}
 
+AnnotatedStruct::AnnotatedStruct([[maybe_unused]] AnnotatedStruct&& other) noexcept :
+    __fbthrift_field_no_annotation(std::move(other.__fbthrift_field_no_annotation)),
+    __fbthrift_field_cpp_unique_ref(std::move(other.__fbthrift_field_cpp_unique_ref)),
+    __fbthrift_field_cpp2_unique_ref(std::move(other.__fbthrift_field_cpp2_unique_ref)),
+    __fbthrift_field_container_with_ref(std::move(other.__fbthrift_field_container_with_ref)),
+    __fbthrift_field_req_cpp_unique_ref(std::move(other.__fbthrift_field_req_cpp_unique_ref)),
+    __fbthrift_field_req_cpp2_unique_ref(std::move(other.__fbthrift_field_req_cpp2_unique_ref)),
+    __fbthrift_field_req_container_with_ref(std::move(other.__fbthrift_field_req_container_with_ref)),
+    __fbthrift_field_opt_cpp_unique_ref(std::move(other.__fbthrift_field_opt_cpp_unique_ref)),
+    __fbthrift_field_opt_cpp2_unique_ref(std::move(other.__fbthrift_field_opt_cpp2_unique_ref)),
+    __fbthrift_field_opt_container_with_ref(std::move(other.__fbthrift_field_opt_container_with_ref)),
+    __fbthrift_field_ref_type_unique(std::move(other.__fbthrift_field_ref_type_unique)),
+    __fbthrift_field_ref_type_shared(std::move(other.__fbthrift_field_ref_type_shared)),
+    __fbthrift_field_ref_type_const(std::move(other.__fbthrift_field_ref_type_const)),
+    __fbthrift_field_req_ref_type_shared(std::move(other.__fbthrift_field_req_ref_type_shared)),
+    __fbthrift_field_req_ref_type_const(std::move(other.__fbthrift_field_req_ref_type_const)),
+    __fbthrift_field_req_ref_type_unique(std::move(other.__fbthrift_field_req_ref_type_unique)),
+    __fbthrift_field_opt_ref_type_const(std::move(other.__fbthrift_field_opt_ref_type_const)),
+    __fbthrift_field_opt_ref_type_unique(std::move(other.__fbthrift_field_opt_ref_type_unique)),
+    __fbthrift_field_opt_ref_type_shared(std::move(other.__fbthrift_field_opt_ref_type_shared)),
+    __fbthrift_field_base_type(std::move(other.__fbthrift_field_base_type)),
+    __fbthrift_field_list_type(std::move(other.__fbthrift_field_list_type)),
+    __fbthrift_field_set_type(std::move(other.__fbthrift_field_set_type)),
+    __fbthrift_field_map_type(std::move(other.__fbthrift_field_map_type)),
+    __fbthrift_field_map_struct_type(std::move(other.__fbthrift_field_map_struct_type)),
+    __fbthrift_field_iobuf_type(std::move(other.__fbthrift_field_iobuf_type)),
+    __fbthrift_field_iobuf_ptr(std::move(other.__fbthrift_field_iobuf_ptr)),
+    __fbthrift_field_list_i32_template(std::move(other.__fbthrift_field_list_i32_template)),
+    __fbthrift_field_list_string_template(std::move(other.__fbthrift_field_list_string_template)),
+    __fbthrift_field_set_template(std::move(other.__fbthrift_field_set_template)),
+    __fbthrift_field_map_template(std::move(other.__fbthrift_field_map_template)),
+    __fbthrift_field_typedef_list_template(std::move(other.__fbthrift_field_typedef_list_template)),
+    __fbthrift_field_typedef_deque_template(std::move(other.__fbthrift_field_typedef_deque_template)),
+    __fbthrift_field_typedef_set_template(std::move(other.__fbthrift_field_typedef_set_template)),
+    __fbthrift_field_typedef_map_template(std::move(other.__fbthrift_field_typedef_map_template)),
+    __fbthrift_field_iobuf_type_val(std::move(other.__fbthrift_field_iobuf_type_val)),
+    __fbthrift_field_iobuf_ptr_val(std::move(other.__fbthrift_field_iobuf_ptr_val)),
+    __fbthrift_field_struct_struct(std::move(other.__fbthrift_field_struct_struct)),
+    __isset(other.__isset) {
+}
 
-AnnotatedStruct::AnnotatedStruct(apache::thrift::FragileConstructor, ::some::valid::ns::containerStruct no_annotation__arg, ::std::unique_ptr<::some::valid::ns::containerStruct> cpp_unique_ref__arg, ::std::unique_ptr<::some::valid::ns::containerStruct> cpp2_unique_ref__arg, ::std::unique_ptr<::std::map<::std::int32_t, ::std::vector<::std::string>>> container_with_ref__arg, ::std::unique_ptr<::some::valid::ns::containerStruct> req_cpp_unique_ref__arg, ::std::unique_ptr<::some::valid::ns::containerStruct> req_cpp2_unique_ref__arg, ::std::unique_ptr<::std::vector<::std::string>> req_container_with_ref__arg, ::std::unique_ptr<::some::valid::ns::containerStruct> opt_cpp_unique_ref__arg, ::std::unique_ptr<::some::valid::ns::containerStruct> opt_cpp2_unique_ref__arg, ::std::unique_ptr<::std::set<::std::int32_t>> opt_container_with_ref__arg, ::std::unique_ptr<::some::valid::ns::containerStruct> ref_type_unique__arg, ::std::shared_ptr<::some::valid::ns::containerStruct> ref_type_shared__arg, ::std::shared_ptr<const ::std::map<::std::int32_t, ::std::vector<::std::string>>> ref_type_const__arg, ::std::shared_ptr<::some::valid::ns::containerStruct> req_ref_type_shared__arg, ::std::shared_ptr<const ::some::valid::ns::containerStruct> req_ref_type_const__arg, ::std::unique_ptr<::std::vector<::std::string>> req_ref_type_unique__arg, ::std::shared_ptr<const ::some::valid::ns::containerStruct> opt_ref_type_const__arg, ::std::unique_ptr<::some::valid::ns::containerStruct> opt_ref_type_unique__arg, ::std::shared_ptr<::std::set<::std::int32_t>> opt_ref_type_shared__arg, ::some::valid::ns::CppFakeI32 base_type__arg, ::some::valid::ns::FollySmallVectorI64 list_type__arg, ::some::valid::ns::SortedVectorSetString set_type__arg, ::some::valid::ns::FakeMap map_type__arg, ::some::valid::ns::UnorderedMapStruct map_struct_type__arg, ::some::valid::ns::IOBuf iobuf_type__arg, ::some::valid::ns::IOBufPtr iobuf_ptr__arg, std::list<::std::int32_t> list_i32_template__arg, std::deque<::std::string> list_string_template__arg, folly::sorted_vector_set<::std::string> set_template__arg, folly::sorted_vector_map<::std::int64_t, ::std::string> map_template__arg, ::some::valid::ns::std_list typedef_list_template__arg, ::some::valid::ns::std_deque typedef_deque_template__arg, ::some::valid::ns::folly_set typedef_set_template__arg, ::some::valid::ns::folly_map typedef_map_template__arg, ::some::valid::ns::IOBuf iobuf_type_val__arg, ::some::valid::ns::IOBufPtr iobuf_ptr_val__arg, ::some::valid::ns::containerStruct struct_struct__arg) :
-    no_annotation(std::move(no_annotation__arg)),
-    cpp_unique_ref(std::move(cpp_unique_ref__arg)),
-    cpp2_unique_ref(std::move(cpp2_unique_ref__arg)),
-    container_with_ref(std::move(container_with_ref__arg)),
-    req_cpp_unique_ref(std::move(req_cpp_unique_ref__arg)),
-    req_cpp2_unique_ref(std::move(req_cpp2_unique_ref__arg)),
-    req_container_with_ref(std::move(req_container_with_ref__arg)),
-    opt_cpp_unique_ref(std::move(opt_cpp_unique_ref__arg)),
-    opt_cpp2_unique_ref(std::move(opt_cpp2_unique_ref__arg)),
-    opt_container_with_ref(std::move(opt_container_with_ref__arg)),
-    ref_type_unique(std::move(ref_type_unique__arg)),
-    ref_type_shared(std::move(ref_type_shared__arg)),
-    ref_type_const(std::move(ref_type_const__arg)),
-    req_ref_type_shared(std::move(req_ref_type_shared__arg)),
-    req_ref_type_const(std::move(req_ref_type_const__arg)),
-    req_ref_type_unique(std::move(req_ref_type_unique__arg)),
-    opt_ref_type_const(std::move(opt_ref_type_const__arg)),
-    opt_ref_type_unique(std::move(opt_ref_type_unique__arg)),
-    opt_ref_type_shared(std::move(opt_ref_type_shared__arg)),
-    base_type(std::move(base_type__arg)),
-    list_type(std::move(list_type__arg)),
-    set_type(std::move(set_type__arg)),
-    map_type(std::move(map_type__arg)),
-    map_struct_type(std::move(map_struct_type__arg)),
-    iobuf_type(std::move(iobuf_type__arg)),
-    iobuf_ptr(std::move(iobuf_ptr__arg)),
-    list_i32_template(std::move(list_i32_template__arg)),
-    list_string_template(std::move(list_string_template__arg)),
-    set_template(std::move(set_template__arg)),
-    map_template(std::move(map_template__arg)),
-    typedef_list_template(std::move(typedef_list_template__arg)),
-    typedef_deque_template(std::move(typedef_deque_template__arg)),
-    typedef_set_template(std::move(typedef_set_template__arg)),
-    typedef_map_template(std::move(typedef_map_template__arg)),
-    iobuf_type_val(std::move(iobuf_type_val__arg)),
-    iobuf_ptr_val(std::move(iobuf_ptr_val__arg)),
-    struct_struct(std::move(struct_struct__arg)) { 
+AnnotatedStruct& AnnotatedStruct::operator=([[maybe_unused]] AnnotatedStruct&& other) noexcept {
+    this->__fbthrift_field_no_annotation = std::move(other.__fbthrift_field_no_annotation);
+    this->__fbthrift_field_cpp_unique_ref = std::move(other.__fbthrift_field_cpp_unique_ref);
+    this->__fbthrift_field_cpp2_unique_ref = std::move(other.__fbthrift_field_cpp2_unique_ref);
+    this->__fbthrift_field_container_with_ref = std::move(other.__fbthrift_field_container_with_ref);
+    this->__fbthrift_field_req_cpp_unique_ref = std::move(other.__fbthrift_field_req_cpp_unique_ref);
+    this->__fbthrift_field_req_cpp2_unique_ref = std::move(other.__fbthrift_field_req_cpp2_unique_ref);
+    this->__fbthrift_field_req_container_with_ref = std::move(other.__fbthrift_field_req_container_with_ref);
+    this->__fbthrift_field_opt_cpp_unique_ref = std::move(other.__fbthrift_field_opt_cpp_unique_ref);
+    this->__fbthrift_field_opt_cpp2_unique_ref = std::move(other.__fbthrift_field_opt_cpp2_unique_ref);
+    this->__fbthrift_field_opt_container_with_ref = std::move(other.__fbthrift_field_opt_container_with_ref);
+    this->__fbthrift_field_ref_type_unique = std::move(other.__fbthrift_field_ref_type_unique);
+    this->__fbthrift_field_ref_type_shared = std::move(other.__fbthrift_field_ref_type_shared);
+    this->__fbthrift_field_ref_type_const = std::move(other.__fbthrift_field_ref_type_const);
+    this->__fbthrift_field_req_ref_type_shared = std::move(other.__fbthrift_field_req_ref_type_shared);
+    this->__fbthrift_field_req_ref_type_const = std::move(other.__fbthrift_field_req_ref_type_const);
+    this->__fbthrift_field_req_ref_type_unique = std::move(other.__fbthrift_field_req_ref_type_unique);
+    this->__fbthrift_field_opt_ref_type_const = std::move(other.__fbthrift_field_opt_ref_type_const);
+    this->__fbthrift_field_opt_ref_type_unique = std::move(other.__fbthrift_field_opt_ref_type_unique);
+    this->__fbthrift_field_opt_ref_type_shared = std::move(other.__fbthrift_field_opt_ref_type_shared);
+    this->__fbthrift_field_base_type = std::move(other.__fbthrift_field_base_type);
+    this->__fbthrift_field_list_type = std::move(other.__fbthrift_field_list_type);
+    this->__fbthrift_field_set_type = std::move(other.__fbthrift_field_set_type);
+    this->__fbthrift_field_map_type = std::move(other.__fbthrift_field_map_type);
+    this->__fbthrift_field_map_struct_type = std::move(other.__fbthrift_field_map_struct_type);
+    this->__fbthrift_field_iobuf_type = std::move(other.__fbthrift_field_iobuf_type);
+    this->__fbthrift_field_iobuf_ptr = std::move(other.__fbthrift_field_iobuf_ptr);
+    this->__fbthrift_field_list_i32_template = std::move(other.__fbthrift_field_list_i32_template);
+    this->__fbthrift_field_list_string_template = std::move(other.__fbthrift_field_list_string_template);
+    this->__fbthrift_field_set_template = std::move(other.__fbthrift_field_set_template);
+    this->__fbthrift_field_map_template = std::move(other.__fbthrift_field_map_template);
+    this->__fbthrift_field_typedef_list_template = std::move(other.__fbthrift_field_typedef_list_template);
+    this->__fbthrift_field_typedef_deque_template = std::move(other.__fbthrift_field_typedef_deque_template);
+    this->__fbthrift_field_typedef_set_template = std::move(other.__fbthrift_field_typedef_set_template);
+    this->__fbthrift_field_typedef_map_template = std::move(other.__fbthrift_field_typedef_map_template);
+    this->__fbthrift_field_iobuf_type_val = std::move(other.__fbthrift_field_iobuf_type_val);
+    this->__fbthrift_field_iobuf_ptr_val = std::move(other.__fbthrift_field_iobuf_ptr_val);
+    this->__fbthrift_field_struct_struct = std::move(other.__fbthrift_field_struct_struct);
+    __isset = other.__isset;
+    return *this;
+}
+
+
+AnnotatedStruct::AnnotatedStruct(apache::thrift::FragileConstructor, ::some::valid::ns::ContainerStruct no_annotation__arg, ::std::unique_ptr<::some::valid::ns::ContainerStruct> cpp_unique_ref__arg, ::std::unique_ptr<::some::valid::ns::ContainerStruct> cpp2_unique_ref__arg, ::std::unique_ptr<::std::map<::std::int32_t, ::std::vector<::std::string>>> container_with_ref__arg, ::std::unique_ptr<::some::valid::ns::ContainerStruct> req_cpp_unique_ref__arg, ::std::unique_ptr<::some::valid::ns::ContainerStruct> req_cpp2_unique_ref__arg, ::std::unique_ptr<::std::vector<::std::string>> req_container_with_ref__arg, ::std::unique_ptr<::some::valid::ns::ContainerStruct> opt_cpp_unique_ref__arg, ::std::unique_ptr<::some::valid::ns::ContainerStruct> opt_cpp2_unique_ref__arg, ::std::unique_ptr<::std::set<::std::int32_t>> opt_container_with_ref__arg, ::std::unique_ptr<::some::valid::ns::ContainerStruct> ref_type_unique__arg, ::std::shared_ptr<::some::valid::ns::ContainerStruct> ref_type_shared__arg, ::std::shared_ptr<const ::std::map<::std::int32_t, ::std::vector<::std::string>>> ref_type_const__arg, ::std::shared_ptr<::some::valid::ns::ContainerStruct> req_ref_type_shared__arg, ::std::shared_ptr<const ::some::valid::ns::ContainerStruct> req_ref_type_const__arg, ::std::unique_ptr<::std::vector<::std::string>> req_ref_type_unique__arg, ::std::shared_ptr<const ::some::valid::ns::ContainerStruct> opt_ref_type_const__arg, ::std::unique_ptr<::some::valid::ns::ContainerStruct> opt_ref_type_unique__arg, ::std::shared_ptr<::std::set<::std::int32_t>> opt_ref_type_shared__arg, ::some::valid::ns::CppFakeI32 base_type__arg, ::some::valid::ns::FollySmallVectorI64 list_type__arg, ::some::valid::ns::SortedVectorSetString set_type__arg, ::some::valid::ns::FakeMap map_type__arg, ::some::valid::ns::UnorderedMapStruct map_struct_type__arg, ::some::valid::ns::IOBuf iobuf_type__arg, ::some::valid::ns::IOBufPtr iobuf_ptr__arg, std::list<::std::int32_t> list_i32_template__arg, std::deque<::std::string> list_string_template__arg, folly::sorted_vector_set<::std::string> set_template__arg, folly::sorted_vector_map<::std::int64_t, ::std::string> map_template__arg, ::some::valid::ns::std_list typedef_list_template__arg, ::some::valid::ns::std_deque typedef_deque_template__arg, ::some::valid::ns::folly_set typedef_set_template__arg, ::some::valid::ns::folly_map typedef_map_template__arg, ::some::valid::ns::IOBuf iobuf_type_val__arg, ::some::valid::ns::IOBufPtr iobuf_ptr_val__arg, ::some::valid::ns::ContainerStruct struct_struct__arg) :
+    __fbthrift_field_no_annotation(std::move(no_annotation__arg)),
+    __fbthrift_field_cpp_unique_ref(std::move(cpp_unique_ref__arg)),
+    __fbthrift_field_cpp2_unique_ref(std::move(cpp2_unique_ref__arg)),
+    __fbthrift_field_container_with_ref(std::move(container_with_ref__arg)),
+    __fbthrift_field_req_cpp_unique_ref(std::move(req_cpp_unique_ref__arg)),
+    __fbthrift_field_req_cpp2_unique_ref(std::move(req_cpp2_unique_ref__arg)),
+    __fbthrift_field_req_container_with_ref(std::move(req_container_with_ref__arg)),
+    __fbthrift_field_opt_cpp_unique_ref(std::move(opt_cpp_unique_ref__arg)),
+    __fbthrift_field_opt_cpp2_unique_ref(std::move(opt_cpp2_unique_ref__arg)),
+    __fbthrift_field_opt_container_with_ref(std::move(opt_container_with_ref__arg)),
+    __fbthrift_field_ref_type_unique(std::move(ref_type_unique__arg)),
+    __fbthrift_field_ref_type_shared(std::move(ref_type_shared__arg)),
+    __fbthrift_field_ref_type_const(std::move(ref_type_const__arg)),
+    __fbthrift_field_req_ref_type_shared(std::move(req_ref_type_shared__arg)),
+    __fbthrift_field_req_ref_type_const(std::move(req_ref_type_const__arg)),
+    __fbthrift_field_req_ref_type_unique(std::move(req_ref_type_unique__arg)),
+    __fbthrift_field_opt_ref_type_const(std::move(opt_ref_type_const__arg)),
+    __fbthrift_field_opt_ref_type_unique(std::move(opt_ref_type_unique__arg)),
+    __fbthrift_field_opt_ref_type_shared(std::move(opt_ref_type_shared__arg)),
+    __fbthrift_field_base_type(std::move(base_type__arg)),
+    __fbthrift_field_list_type(std::move(list_type__arg)),
+    __fbthrift_field_set_type(std::move(set_type__arg)),
+    __fbthrift_field_map_type(std::move(map_type__arg)),
+    __fbthrift_field_map_struct_type(std::move(map_struct_type__arg)),
+    __fbthrift_field_iobuf_type(std::move(iobuf_type__arg)),
+    __fbthrift_field_iobuf_ptr(std::move(iobuf_ptr__arg)),
+    __fbthrift_field_list_i32_template(std::move(list_i32_template__arg)),
+    __fbthrift_field_list_string_template(std::move(list_string_template__arg)),
+    __fbthrift_field_set_template(std::move(set_template__arg)),
+    __fbthrift_field_map_template(std::move(map_template__arg)),
+    __fbthrift_field_typedef_list_template(std::move(typedef_list_template__arg)),
+    __fbthrift_field_typedef_deque_template(std::move(typedef_deque_template__arg)),
+    __fbthrift_field_typedef_set_template(std::move(typedef_set_template__arg)),
+    __fbthrift_field_typedef_map_template(std::move(typedef_map_template__arg)),
+    __fbthrift_field_iobuf_type_val(std::move(iobuf_type_val__arg)),
+    __fbthrift_field_iobuf_ptr_val(std::move(iobuf_ptr_val__arg)),
+    __fbthrift_field_struct_struct(std::move(struct_struct__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
   __isset.set(folly::index_constant<2>(), true);
@@ -2342,43 +2522,43 @@ AnnotatedStruct::AnnotatedStruct(apache::thrift::FragileConstructor, ::some::val
 
 void AnnotatedStruct::__fbthrift_clear() {
   // clear all fields
-  ::apache::thrift::clear(this->no_annotation);
-  if (this->cpp_unique_ref) ::apache::thrift::clear(*this->cpp_unique_ref);
-  if (this->cpp2_unique_ref) ::apache::thrift::clear(*this->cpp2_unique_ref);
-  this->container_with_ref = ::apache::thrift::detail::make_mutable_smart_ptr<::std::unique_ptr<::std::map<::std::int32_t, ::std::vector<::std::string>>>>();
-  if (this->req_cpp_unique_ref) ::apache::thrift::clear(*this->req_cpp_unique_ref);
-  if (this->req_cpp2_unique_ref) ::apache::thrift::clear(*this->req_cpp2_unique_ref);
-  this->req_container_with_ref = ::apache::thrift::detail::make_mutable_smart_ptr<::std::unique_ptr<::std::vector<::std::string>>>();
-  this->opt_cpp_unique_ref.reset();
-  this->opt_cpp2_unique_ref.reset();
-  this->opt_container_with_ref.reset();
-  if (this->ref_type_unique) ::apache::thrift::clear(*this->ref_type_unique);
-  if (this->ref_type_shared) this->ref_type_shared = ::apache::thrift::detail::make_mutable_smart_ptr<::std::shared_ptr<::some::valid::ns::containerStruct>>();
-  this->ref_type_const = ::apache::thrift::detail::make_mutable_smart_ptr<::std::shared_ptr<const ::std::map<::std::int32_t, ::std::vector<::std::string>>>>();
-  if (this->req_ref_type_shared) this->req_ref_type_shared = ::apache::thrift::detail::make_mutable_smart_ptr<::std::shared_ptr<::some::valid::ns::containerStruct>>();
-  if (this->req_ref_type_const) this->req_ref_type_const = ::apache::thrift::detail::make_mutable_smart_ptr<::std::shared_ptr<const ::some::valid::ns::containerStruct>>();
-  this->req_ref_type_unique = ::apache::thrift::detail::make_mutable_smart_ptr<::std::unique_ptr<::std::vector<::std::string>>>();
-  this->opt_ref_type_const.reset();
-  this->opt_ref_type_unique.reset();
-  this->opt_ref_type_shared.reset();
-  this->base_type = ::some::valid::ns::CppFakeI32();
-  this->list_type.clear();
-  this->set_type.clear();
-  this->map_type.clear();
-  this->map_struct_type.clear();
-  this->iobuf_type = apache::thrift::StringTraits<::some::valid::ns::IOBuf>::fromStringLiteral("");
-  this->iobuf_ptr = apache::thrift::StringTraits<::some::valid::ns::IOBufPtr>::fromStringLiteral("");
-  this->list_i32_template.clear();
-  this->list_string_template.clear();
-  this->set_template.clear();
-  this->map_template.clear();
-  this->typedef_list_template.clear();
-  this->typedef_deque_template.clear();
-  this->typedef_set_template.clear();
-  this->typedef_map_template.clear();
-  this->iobuf_type_val = apache::thrift::StringTraits<::some::valid::ns::IOBuf>::fromStringLiteral("");
-  this->iobuf_ptr_val = apache::thrift::StringTraits<::some::valid::ns::IOBufPtr>::fromStringLiteral("");
-  ::apache::thrift::clear(this->struct_struct);
+  ::apache::thrift::clear(this->__fbthrift_field_no_annotation);
+  if (this->__fbthrift_field_cpp_unique_ref) ::apache::thrift::clear(*this->__fbthrift_field_cpp_unique_ref);
+  if (this->__fbthrift_field_cpp2_unique_ref) ::apache::thrift::clear(*this->__fbthrift_field_cpp2_unique_ref);
+  this->__fbthrift_field_container_with_ref = ::apache::thrift::detail::make_mutable_smart_ptr<::std::unique_ptr<::std::map<::std::int32_t, ::std::vector<::std::string>>>>();
+  if (this->__fbthrift_field_req_cpp_unique_ref) ::apache::thrift::clear(*this->__fbthrift_field_req_cpp_unique_ref);
+  if (this->__fbthrift_field_req_cpp2_unique_ref) ::apache::thrift::clear(*this->__fbthrift_field_req_cpp2_unique_ref);
+  this->__fbthrift_field_req_container_with_ref = ::apache::thrift::detail::make_mutable_smart_ptr<::std::unique_ptr<::std::vector<::std::string>>>();
+  this->__fbthrift_field_opt_cpp_unique_ref.reset();
+  this->__fbthrift_field_opt_cpp2_unique_ref.reset();
+  this->__fbthrift_field_opt_container_with_ref.reset();
+  if (this->__fbthrift_field_ref_type_unique) ::apache::thrift::clear(*this->__fbthrift_field_ref_type_unique);
+  if (this->__fbthrift_field_ref_type_shared) this->__fbthrift_field_ref_type_shared = ::apache::thrift::detail::make_mutable_smart_ptr<::std::shared_ptr<::some::valid::ns::ContainerStruct>>();
+  this->__fbthrift_field_ref_type_const = ::apache::thrift::detail::make_mutable_smart_ptr<::std::shared_ptr<const ::std::map<::std::int32_t, ::std::vector<::std::string>>>>();
+  if (this->__fbthrift_field_req_ref_type_shared) this->__fbthrift_field_req_ref_type_shared = ::apache::thrift::detail::make_mutable_smart_ptr<::std::shared_ptr<::some::valid::ns::ContainerStruct>>();
+  if (this->__fbthrift_field_req_ref_type_const) this->__fbthrift_field_req_ref_type_const = ::apache::thrift::detail::make_mutable_smart_ptr<::std::shared_ptr<const ::some::valid::ns::ContainerStruct>>();
+  this->__fbthrift_field_req_ref_type_unique = ::apache::thrift::detail::make_mutable_smart_ptr<::std::unique_ptr<::std::vector<::std::string>>>();
+  this->__fbthrift_field_opt_ref_type_const.reset();
+  this->__fbthrift_field_opt_ref_type_unique.reset();
+  this->__fbthrift_field_opt_ref_type_shared.reset();
+  this->__fbthrift_field_base_type = ::some::valid::ns::CppFakeI32();
+  this->__fbthrift_field_list_type.clear();
+  this->__fbthrift_field_set_type.clear();
+  this->__fbthrift_field_map_type.clear();
+  this->__fbthrift_field_map_struct_type.clear();
+  this->__fbthrift_field_iobuf_type = apache::thrift::StringTraits<::some::valid::ns::IOBuf>::fromStringLiteral("");
+  this->__fbthrift_field_iobuf_ptr = apache::thrift::StringTraits<::some::valid::ns::IOBufPtr>::fromStringLiteral("");
+  this->__fbthrift_field_list_i32_template.clear();
+  this->__fbthrift_field_list_string_template.clear();
+  this->__fbthrift_field_set_template.clear();
+  this->__fbthrift_field_map_template.clear();
+  this->__fbthrift_field_typedef_list_template.clear();
+  this->__fbthrift_field_typedef_deque_template.clear();
+  this->__fbthrift_field_typedef_set_template.clear();
+  this->__fbthrift_field_typedef_map_template.clear();
+  this->__fbthrift_field_iobuf_type_val = apache::thrift::StringTraits<::some::valid::ns::IOBuf>::fromStringLiteral("");
+  this->__fbthrift_field_iobuf_ptr_val = apache::thrift::StringTraits<::some::valid::ns::IOBufPtr>::fromStringLiteral("");
+  ::apache::thrift::clear(this->__fbthrift_field_struct_struct);
   __isset = {};
 }
 
@@ -2394,166 +2574,166 @@ bool AnnotatedStruct::operator==([[maybe_unused]] const AnnotatedStruct& rhs) co
 }
 
 
-const ::some::valid::ns::containerStruct& AnnotatedStruct::get_no_annotation() const& {
-  return no_annotation;
+const ::some::valid::ns::ContainerStruct& AnnotatedStruct::get_no_annotation() const& {
+  return __fbthrift_field_no_annotation;
 }
 
-::some::valid::ns::containerStruct AnnotatedStruct::get_no_annotation() && {
-  return static_cast<::some::valid::ns::containerStruct&&>(no_annotation);
+::some::valid::ns::ContainerStruct AnnotatedStruct::get_no_annotation() && {
+  return static_cast<::some::valid::ns::ContainerStruct&&>(__fbthrift_field_no_annotation);
 }
 
 ::some::valid::ns::CppFakeI32 AnnotatedStruct::get_base_type() const {
-  return base_type;
+  return __fbthrift_field_base_type;
 }
 
 ::some::valid::ns::CppFakeI32& AnnotatedStruct::set_base_type(::some::valid::ns::CppFakeI32 base_type_) {
   base_type_ref() = base_type_;
-  return base_type;
+  return __fbthrift_field_base_type;
 }
 
 const ::some::valid::ns::FollySmallVectorI64& AnnotatedStruct::get_list_type() const& {
-  return list_type;
+  return __fbthrift_field_list_type;
 }
 
 ::some::valid::ns::FollySmallVectorI64 AnnotatedStruct::get_list_type() && {
-  return static_cast<::some::valid::ns::FollySmallVectorI64&&>(list_type);
+  return static_cast<::some::valid::ns::FollySmallVectorI64&&>(__fbthrift_field_list_type);
 }
 
 const ::some::valid::ns::SortedVectorSetString& AnnotatedStruct::get_set_type() const& {
-  return set_type;
+  return __fbthrift_field_set_type;
 }
 
 ::some::valid::ns::SortedVectorSetString AnnotatedStruct::get_set_type() && {
-  return static_cast<::some::valid::ns::SortedVectorSetString&&>(set_type);
+  return static_cast<::some::valid::ns::SortedVectorSetString&&>(__fbthrift_field_set_type);
 }
 
 const ::some::valid::ns::FakeMap& AnnotatedStruct::get_map_type() const& {
-  return map_type;
+  return __fbthrift_field_map_type;
 }
 
 ::some::valid::ns::FakeMap AnnotatedStruct::get_map_type() && {
-  return static_cast<::some::valid::ns::FakeMap&&>(map_type);
+  return static_cast<::some::valid::ns::FakeMap&&>(__fbthrift_field_map_type);
 }
 
 const ::some::valid::ns::UnorderedMapStruct& AnnotatedStruct::get_map_struct_type() const& {
-  return map_struct_type;
+  return __fbthrift_field_map_struct_type;
 }
 
 ::some::valid::ns::UnorderedMapStruct AnnotatedStruct::get_map_struct_type() && {
-  return static_cast<::some::valid::ns::UnorderedMapStruct&&>(map_struct_type);
+  return static_cast<::some::valid::ns::UnorderedMapStruct&&>(__fbthrift_field_map_struct_type);
 }
 
 const std::list<::std::int32_t>& AnnotatedStruct::get_list_i32_template() const& {
-  return list_i32_template;
+  return __fbthrift_field_list_i32_template;
 }
 
 std::list<::std::int32_t> AnnotatedStruct::get_list_i32_template() && {
-  return static_cast<std::list<::std::int32_t>&&>(list_i32_template);
+  return static_cast<std::list<::std::int32_t>&&>(__fbthrift_field_list_i32_template);
 }
 
 const std::deque<::std::string>& AnnotatedStruct::get_list_string_template() const& {
-  return list_string_template;
+  return __fbthrift_field_list_string_template;
 }
 
 std::deque<::std::string> AnnotatedStruct::get_list_string_template() && {
-  return static_cast<std::deque<::std::string>&&>(list_string_template);
+  return static_cast<std::deque<::std::string>&&>(__fbthrift_field_list_string_template);
 }
 
 const folly::sorted_vector_set<::std::string>& AnnotatedStruct::get_set_template() const& {
-  return set_template;
+  return __fbthrift_field_set_template;
 }
 
 folly::sorted_vector_set<::std::string> AnnotatedStruct::get_set_template() && {
-  return static_cast<folly::sorted_vector_set<::std::string>&&>(set_template);
+  return static_cast<folly::sorted_vector_set<::std::string>&&>(__fbthrift_field_set_template);
 }
 
 const folly::sorted_vector_map<::std::int64_t, ::std::string>& AnnotatedStruct::get_map_template() const& {
-  return map_template;
+  return __fbthrift_field_map_template;
 }
 
 folly::sorted_vector_map<::std::int64_t, ::std::string> AnnotatedStruct::get_map_template() && {
-  return static_cast<folly::sorted_vector_map<::std::int64_t, ::std::string>&&>(map_template);
+  return static_cast<folly::sorted_vector_map<::std::int64_t, ::std::string>&&>(__fbthrift_field_map_template);
 }
 
 const ::some::valid::ns::std_list& AnnotatedStruct::get_typedef_list_template() const& {
-  return typedef_list_template;
+  return __fbthrift_field_typedef_list_template;
 }
 
 ::some::valid::ns::std_list AnnotatedStruct::get_typedef_list_template() && {
-  return static_cast<::some::valid::ns::std_list&&>(typedef_list_template);
+  return static_cast<::some::valid::ns::std_list&&>(__fbthrift_field_typedef_list_template);
 }
 
 const ::some::valid::ns::std_deque& AnnotatedStruct::get_typedef_deque_template() const& {
-  return typedef_deque_template;
+  return __fbthrift_field_typedef_deque_template;
 }
 
 ::some::valid::ns::std_deque AnnotatedStruct::get_typedef_deque_template() && {
-  return static_cast<::some::valid::ns::std_deque&&>(typedef_deque_template);
+  return static_cast<::some::valid::ns::std_deque&&>(__fbthrift_field_typedef_deque_template);
 }
 
 const ::some::valid::ns::folly_set& AnnotatedStruct::get_typedef_set_template() const& {
-  return typedef_set_template;
+  return __fbthrift_field_typedef_set_template;
 }
 
 ::some::valid::ns::folly_set AnnotatedStruct::get_typedef_set_template() && {
-  return static_cast<::some::valid::ns::folly_set&&>(typedef_set_template);
+  return static_cast<::some::valid::ns::folly_set&&>(__fbthrift_field_typedef_set_template);
 }
 
 const ::some::valid::ns::folly_map& AnnotatedStruct::get_typedef_map_template() const& {
-  return typedef_map_template;
+  return __fbthrift_field_typedef_map_template;
 }
 
 ::some::valid::ns::folly_map AnnotatedStruct::get_typedef_map_template() && {
-  return static_cast<::some::valid::ns::folly_map&&>(typedef_map_template);
+  return static_cast<::some::valid::ns::folly_map&&>(__fbthrift_field_typedef_map_template);
 }
 
-const ::some::valid::ns::containerStruct& AnnotatedStruct::get_struct_struct() const& {
-  return struct_struct;
+const ::some::valid::ns::ContainerStruct& AnnotatedStruct::get_struct_struct() const& {
+  return __fbthrift_field_struct_struct;
 }
 
-::some::valid::ns::containerStruct AnnotatedStruct::get_struct_struct() && {
-  return static_cast<::some::valid::ns::containerStruct&&>(struct_struct);
+::some::valid::ns::ContainerStruct AnnotatedStruct::get_struct_struct() && {
+  return static_cast<::some::valid::ns::ContainerStruct&&>(__fbthrift_field_struct_struct);
 }
 
 void swap([[maybe_unused]] AnnotatedStruct& a, [[maybe_unused]] AnnotatedStruct& b) {
   using ::std::swap;
-  swap(a.no_annotation, b.no_annotation);
-  swap(a.cpp_unique_ref, b.cpp_unique_ref);
-  swap(a.cpp2_unique_ref, b.cpp2_unique_ref);
-  swap(a.container_with_ref, b.container_with_ref);
-  swap(a.req_cpp_unique_ref, b.req_cpp_unique_ref);
-  swap(a.req_cpp2_unique_ref, b.req_cpp2_unique_ref);
-  swap(a.req_container_with_ref, b.req_container_with_ref);
-  swap(a.opt_cpp_unique_ref, b.opt_cpp_unique_ref);
-  swap(a.opt_cpp2_unique_ref, b.opt_cpp2_unique_ref);
-  swap(a.opt_container_with_ref, b.opt_container_with_ref);
-  swap(a.ref_type_unique, b.ref_type_unique);
-  swap(a.ref_type_shared, b.ref_type_shared);
-  swap(a.ref_type_const, b.ref_type_const);
-  swap(a.req_ref_type_shared, b.req_ref_type_shared);
-  swap(a.req_ref_type_const, b.req_ref_type_const);
-  swap(a.req_ref_type_unique, b.req_ref_type_unique);
-  swap(a.opt_ref_type_const, b.opt_ref_type_const);
-  swap(a.opt_ref_type_unique, b.opt_ref_type_unique);
-  swap(a.opt_ref_type_shared, b.opt_ref_type_shared);
-  swap(a.base_type, b.base_type);
-  swap(a.list_type, b.list_type);
-  swap(a.set_type, b.set_type);
-  swap(a.map_type, b.map_type);
-  swap(a.map_struct_type, b.map_struct_type);
-  swap(a.iobuf_type, b.iobuf_type);
-  swap(a.iobuf_ptr, b.iobuf_ptr);
-  swap(a.list_i32_template, b.list_i32_template);
-  swap(a.list_string_template, b.list_string_template);
-  swap(a.set_template, b.set_template);
-  swap(a.map_template, b.map_template);
-  swap(a.typedef_list_template, b.typedef_list_template);
-  swap(a.typedef_deque_template, b.typedef_deque_template);
-  swap(a.typedef_set_template, b.typedef_set_template);
-  swap(a.typedef_map_template, b.typedef_map_template);
-  swap(a.iobuf_type_val, b.iobuf_type_val);
-  swap(a.iobuf_ptr_val, b.iobuf_ptr_val);
-  swap(a.struct_struct, b.struct_struct);
+  swap(a.__fbthrift_field_no_annotation, b.__fbthrift_field_no_annotation);
+  swap(a.__fbthrift_field_cpp_unique_ref, b.__fbthrift_field_cpp_unique_ref);
+  swap(a.__fbthrift_field_cpp2_unique_ref, b.__fbthrift_field_cpp2_unique_ref);
+  swap(a.__fbthrift_field_container_with_ref, b.__fbthrift_field_container_with_ref);
+  swap(a.__fbthrift_field_req_cpp_unique_ref, b.__fbthrift_field_req_cpp_unique_ref);
+  swap(a.__fbthrift_field_req_cpp2_unique_ref, b.__fbthrift_field_req_cpp2_unique_ref);
+  swap(a.__fbthrift_field_req_container_with_ref, b.__fbthrift_field_req_container_with_ref);
+  swap(a.__fbthrift_field_opt_cpp_unique_ref, b.__fbthrift_field_opt_cpp_unique_ref);
+  swap(a.__fbthrift_field_opt_cpp2_unique_ref, b.__fbthrift_field_opt_cpp2_unique_ref);
+  swap(a.__fbthrift_field_opt_container_with_ref, b.__fbthrift_field_opt_container_with_ref);
+  swap(a.__fbthrift_field_ref_type_unique, b.__fbthrift_field_ref_type_unique);
+  swap(a.__fbthrift_field_ref_type_shared, b.__fbthrift_field_ref_type_shared);
+  swap(a.__fbthrift_field_ref_type_const, b.__fbthrift_field_ref_type_const);
+  swap(a.__fbthrift_field_req_ref_type_shared, b.__fbthrift_field_req_ref_type_shared);
+  swap(a.__fbthrift_field_req_ref_type_const, b.__fbthrift_field_req_ref_type_const);
+  swap(a.__fbthrift_field_req_ref_type_unique, b.__fbthrift_field_req_ref_type_unique);
+  swap(a.__fbthrift_field_opt_ref_type_const, b.__fbthrift_field_opt_ref_type_const);
+  swap(a.__fbthrift_field_opt_ref_type_unique, b.__fbthrift_field_opt_ref_type_unique);
+  swap(a.__fbthrift_field_opt_ref_type_shared, b.__fbthrift_field_opt_ref_type_shared);
+  swap(a.__fbthrift_field_base_type, b.__fbthrift_field_base_type);
+  swap(a.__fbthrift_field_list_type, b.__fbthrift_field_list_type);
+  swap(a.__fbthrift_field_set_type, b.__fbthrift_field_set_type);
+  swap(a.__fbthrift_field_map_type, b.__fbthrift_field_map_type);
+  swap(a.__fbthrift_field_map_struct_type, b.__fbthrift_field_map_struct_type);
+  swap(a.__fbthrift_field_iobuf_type, b.__fbthrift_field_iobuf_type);
+  swap(a.__fbthrift_field_iobuf_ptr, b.__fbthrift_field_iobuf_ptr);
+  swap(a.__fbthrift_field_list_i32_template, b.__fbthrift_field_list_i32_template);
+  swap(a.__fbthrift_field_list_string_template, b.__fbthrift_field_list_string_template);
+  swap(a.__fbthrift_field_set_template, b.__fbthrift_field_set_template);
+  swap(a.__fbthrift_field_map_template, b.__fbthrift_field_map_template);
+  swap(a.__fbthrift_field_typedef_list_template, b.__fbthrift_field_typedef_list_template);
+  swap(a.__fbthrift_field_typedef_deque_template, b.__fbthrift_field_typedef_deque_template);
+  swap(a.__fbthrift_field_typedef_set_template, b.__fbthrift_field_typedef_set_template);
+  swap(a.__fbthrift_field_typedef_map_template, b.__fbthrift_field_typedef_map_template);
+  swap(a.__fbthrift_field_iobuf_type_val, b.__fbthrift_field_iobuf_type_val);
+  swap(a.__fbthrift_field_iobuf_ptr_val, b.__fbthrift_field_iobuf_ptr_val);
+  swap(a.__fbthrift_field_struct_struct, b.__fbthrift_field_struct_struct);
   swap(a.__isset, b.__isset);
 }
 
@@ -2561,79 +2741,79 @@ static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         AnnotatedStruct,
         ::apache::thrift::type_class::structure,
-        ::some::valid::ns::containerStruct>,
+        ::some::valid::ns::ContainerStruct>,
     "inconsistent use of json option");
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         AnnotatedStruct,
         ::apache::thrift::type_class::structure,
-        ::some::valid::ns::containerStruct>,
+        ::some::valid::ns::ContainerStruct>,
     "inconsistent use of json option");
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         AnnotatedStruct,
         ::apache::thrift::type_class::structure,
-        ::some::valid::ns::containerStruct>,
+        ::some::valid::ns::ContainerStruct>,
     "inconsistent use of json option");
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         AnnotatedStruct,
         ::apache::thrift::type_class::structure,
-        ::some::valid::ns::containerStruct>,
+        ::some::valid::ns::ContainerStruct>,
     "inconsistent use of json option");
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         AnnotatedStruct,
         ::apache::thrift::type_class::structure,
-        ::some::valid::ns::containerStruct>,
+        ::some::valid::ns::ContainerStruct>,
     "inconsistent use of json option");
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         AnnotatedStruct,
         ::apache::thrift::type_class::structure,
-        ::some::valid::ns::containerStruct>,
+        ::some::valid::ns::ContainerStruct>,
     "inconsistent use of json option");
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         AnnotatedStruct,
         ::apache::thrift::type_class::structure,
-        ::some::valid::ns::containerStruct>,
+        ::some::valid::ns::ContainerStruct>,
     "inconsistent use of json option");
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         AnnotatedStruct,
         ::apache::thrift::type_class::structure,
-        ::some::valid::ns::containerStruct>,
+        ::some::valid::ns::ContainerStruct>,
     "inconsistent use of json option");
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         AnnotatedStruct,
         ::apache::thrift::type_class::structure,
-        ::some::valid::ns::containerStruct>,
+        ::some::valid::ns::ContainerStruct>,
     "inconsistent use of json option");
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         AnnotatedStruct,
         ::apache::thrift::type_class::structure,
-        ::some::valid::ns::containerStruct>,
+        ::some::valid::ns::ContainerStruct>,
     "inconsistent use of json option");
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         AnnotatedStruct,
         ::apache::thrift::type_class::structure,
-        ::some::valid::ns::containerStruct>,
+        ::some::valid::ns::ContainerStruct>,
     "inconsistent use of json option");
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         AnnotatedStruct,
         ::apache::thrift::type_class::structure,
-        ::some::valid::ns::containerStruct>,
+        ::some::valid::ns::ContainerStruct>,
     "inconsistent use of json option");
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         AnnotatedStruct,
         ::apache::thrift::type_class::structure,
-        ::some::valid::ns::containerStruct>,
+        ::some::valid::ns::ContainerStruct>,
     "inconsistent use of json option");
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
@@ -2645,7 +2825,7 @@ static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         AnnotatedStruct,
         ::apache::thrift::type_class::structure,
-        ::some::valid::ns::containerStruct>,
+        ::some::valid::ns::ContainerStruct>,
     "inconsistent use of json option");
 
 } // namespace some::valid::ns

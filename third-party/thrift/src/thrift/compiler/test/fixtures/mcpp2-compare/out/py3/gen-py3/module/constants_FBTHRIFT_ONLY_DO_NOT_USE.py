@@ -36,7 +36,7 @@ from module.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
     folly_small_vector_int64_t_8__List__i64,
     folly_sorted_vector_set_std_string__Set__string,
     FakeMap__Map__i64_double,
-    std_unordered_map_std_string_containerStruct__Map__string_containerStruct,
+    std_unordered_map_std_string_ContainerStruct__Map__string_ContainerStruct,
     Map__i64_string,
     std_list__List__i32,
     std_deque__List__string,

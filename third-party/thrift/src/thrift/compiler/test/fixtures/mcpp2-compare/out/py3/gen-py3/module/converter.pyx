@@ -82,19 +82,19 @@ cdef shared_ptr[_fbthrift_cbindings.cAnotherException] AnotherException_convert_
 cdef object AnotherException_from_cpp(const shared_ptr[_fbthrift_cbindings.cAnotherException]& c_struct):
     return _fbthrift_ctypes.AnotherException._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
 
-cdef shared_ptr[_fbthrift_cbindings.ccontainerStruct] containerStruct_convert_to_cpp(object inst) except*:
+cdef shared_ptr[_fbthrift_cbindings.cContainerStruct] ContainerStruct_convert_to_cpp(object inst) except*:
     cdef unique_ptr[_folly__iobuf.cIOBuf] _fbthrift__iobuf = cmove(
         __cserialize(
-            (<_fbthrift_ctypes.containerStruct?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(),
+            (<_fbthrift_ctypes.ContainerStruct?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(),
             Protocol.BINARY,
         )
     )
-    cdef shared_ptr[_fbthrift_cbindings.ccontainerStruct] _fbthrift__out = make_shared[_fbthrift_cbindings.ccontainerStruct]()
+    cdef shared_ptr[_fbthrift_cbindings.cContainerStruct] _fbthrift__out = make_shared[_fbthrift_cbindings.cContainerStruct]()
     __cdeserialize(_fbthrift__iobuf.get(), _fbthrift__out.get(), Protocol.BINARY)
     return cmove(_fbthrift__out)
 
-cdef object containerStruct_from_cpp(const shared_ptr[_fbthrift_cbindings.ccontainerStruct]& c_struct):
-    return _fbthrift_ctypes.containerStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
+cdef object ContainerStruct_from_cpp(const shared_ptr[_fbthrift_cbindings.cContainerStruct]& c_struct):
+    return _fbthrift_ctypes.ContainerStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
 
 cdef shared_ptr[_fbthrift_cbindings.cMyIncludedStruct] MyIncludedStruct_convert_to_cpp(object inst) except*:
     return make_shared[_fbthrift_cbindings.cMyIncludedStruct](deref(

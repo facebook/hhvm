@@ -48,10 +48,10 @@ template uint32_t AnotherException::write<>(apache::thrift::CompactProtocolWrite
 template uint32_t AnotherException::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t AnotherException::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
-template void containerStruct::readNoXfer<>(apache::thrift::CompactProtocolReader*);
-template uint32_t containerStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t containerStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t containerStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+template void ContainerStruct::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t ContainerStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t ContainerStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t ContainerStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 template void MyIncludedStruct::readNoXfer<>(apache::thrift::CompactProtocolReader*);
 template uint32_t MyIncludedStruct::write<>(apache::thrift::CompactProtocolWriter*) const;

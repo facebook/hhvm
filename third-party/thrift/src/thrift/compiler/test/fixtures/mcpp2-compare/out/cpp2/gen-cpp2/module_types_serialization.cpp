@@ -182,11 +182,11 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
-void TccStructTraits<::some::valid::ns::containerStruct>::translateFieldName(
+void TccStructTraits<::some::valid::ns::ContainerStruct>::translateFieldName(
     std::string_view _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::some::valid::ns::containerStruct>;
+  using data = apache::thrift::TStructDataStorage<::some::valid::ns::ContainerStruct>;
   static const st::translate_field_name_table table{
       data::fields_size,
       data::fields_names.data(),
@@ -384,10 +384,10 @@ template uint32_t AnotherException::serializedSizeZC<>(apache::thrift::SimpleJSO
 
 
 
-template void containerStruct::readNoXfer<>(apache::thrift::SimpleJSONProtocolReader*);
-template uint32_t containerStruct::write<>(apache::thrift::SimpleJSONProtocolWriter*) const;
-template uint32_t containerStruct::serializedSize<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
-template uint32_t containerStruct::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
+template void ContainerStruct::readNoXfer<>(apache::thrift::SimpleJSONProtocolReader*);
+template uint32_t ContainerStruct::write<>(apache::thrift::SimpleJSONProtocolWriter*) const;
+template uint32_t ContainerStruct::serializedSize<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
+template uint32_t ContainerStruct::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
 
 
 

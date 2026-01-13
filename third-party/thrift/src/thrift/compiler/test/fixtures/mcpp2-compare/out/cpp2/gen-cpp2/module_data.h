@@ -279,7 +279,7 @@ template <> struct TStructDataStorage<::some::valid::ns::AnotherException> {
   static const std::array<int, fields_size> isset_indexes;
 };
 
-template <> struct TStructDataStorage<::some::valid::ns::containerStruct> {
+template <> struct TStructDataStorage<::some::valid::ns::ContainerStruct> {
   static constexpr const std::size_t fields_size = 44;
   static const std::string_view name;
   static const std::array<std::string_view, fields_size> fields_names;

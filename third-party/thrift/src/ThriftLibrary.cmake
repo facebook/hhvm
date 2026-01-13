@@ -70,7 +70,7 @@ macro(thrift_object
     "${file_path}"
     "${output_path}"
     "${include_prefix}"
-    "${ARGN}"
+    ${ARGN}
   )
   bypass_source_check(${${file_name}-${language}-SOURCES})
   add_library(
@@ -137,7 +137,7 @@ macro(thrift_library
     "${file_path}"
     "${output_path}"
     "${include_prefix}"
-    "${ARGN}"
+    ${ARGN}
   )
   add_library(
     "${file_name}-${language}"

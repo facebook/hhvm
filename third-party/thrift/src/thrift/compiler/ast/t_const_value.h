@@ -62,6 +62,8 @@ class t_const_value {
 
   t_const_value(const t_const_value&) = default;
   t_const_value(t_const_value&&) = default;
+  ~t_const_value() = default;
+  t_const_value& operator=(const t_const_value&) = delete;
   t_const_value& operator=(t_const_value&&) = default;
 
   std::unique_ptr<t_const_value> clone() const {
@@ -271,12 +273,14 @@ class t_const_value {
 
     map_value() = default;
     map_value(map_value&&) = default;
+    ~map_value() = default;
     map_value(const map_value& other) {
       for (auto& elem : other.elements) {
         add(elem.first->clone(), elem.second->clone());
       }
     }
     map_value& operator=(map_value&&) = default;
+    map_value& operator=(const map_value&) = delete;
   };
 
   struct list_value {
@@ -290,12 +294,14 @@ class t_const_value {
 
     list_value() = default;
     list_value(list_value&&) = default;
+    ~list_value() = default;
     list_value(const list_value& other) {
       for (auto& elem : other.elements) {
         add(elem->clone());
       }
     }
     list_value& operator=(list_value&&) = default;
+    list_value& operator=(const list_value&) = delete;
   };
 
   std::variant<

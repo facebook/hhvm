@@ -101,6 +101,9 @@ class t_named : public t_node {
  protected:
   explicit t_named(const t_program* program = nullptr, std::string name = "");
   t_named(const t_named& named);
+  t_named& operator=(const t_named&) = delete;
+  t_named(t_named&&) = delete;
+  t_named& operator=(t_named&&) = delete;
 
   /**
    * Set the program for this node. This is primarily exposed for the purpose of

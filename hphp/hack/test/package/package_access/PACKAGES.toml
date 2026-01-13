@@ -9,9 +9,13 @@ include_paths=[
     "//cross_package_basic_foo.php",
 ]
 includes = ["pkg1"]
+soft_includes=["pkg2_soft"]
+
+[packages.pkg2_soft]
+includes=["pkg2", "pkg1"]
 
 [packages.pkg3]
-includes = ["pkg2", "pkg1"]
+includes = ["pkg2", "pkg2_soft", "pkg1"]
 
 [packages.pkg4]
 

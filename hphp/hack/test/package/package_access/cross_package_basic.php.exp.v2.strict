@@ -6,7 +6,7 @@ error: Typing[4472] Cannot access a transparent type alias defined in package pk
 
 cross_package_basic.php--bar.php:5:13
     3 | module bar;
-    4 |
+    4 | 
 [1] 5 | type TBar = TFoo; // error when `package_allow_typedef_violations` is turned off
     6 | newtype NBar1 = TFoo; // ok
     7 | newtype NBar2 as TFoo = int; // ok
@@ -15,15 +15,15 @@ cross_package_basic.php--cross_package_basic_foo.php:3:6
     1 | <?hh
     2 | // package pkg2
 [2] 3 | type TFoo = int;
-    4 |
+    4 | 
     5 | const int FOO = 3;
 
 PACKAGES.toml:6:11
     1 | [packages]
-    2 |
+    2 | 
 [4] 3 | [packages.pkg1]
     4 | include_paths=["//"]
-    5 |
+    5 | 
 [3] 6 | [packages.pkg2]
     7 | include_paths=[
     8 |     "//cross_package_access_internal1_foo.php",
@@ -36,20 +36,20 @@ error: Typing[4472] Cannot access a global constant defined in package pkg2 from
 
 cross_package_basic.php--bar.php:11:17
      9 | module newtype NBar4 as TFoo = int; // ok
-    10 |
+    10 | 
 [1] 11 | const int BAR = FOO; // error
 
 cross_package_basic.php--cross_package_basic_foo.php:5:1
      3 | type TFoo = int;
-     4 |
+     4 | 
 [2]  5 | const int FOO = 3;
 
 PACKAGES.toml:6:11
      1 | [packages]
-     2 |
+     2 | 
 [4]  3 | [packages.pkg1]
      4 | include_paths=["//"]
-     5 |
+     5 | 
 [3]  6 | [packages.pkg2]
      7 | include_paths=[
      8 |     "//cross_package_access_internal1_foo.php",

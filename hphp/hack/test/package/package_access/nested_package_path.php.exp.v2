@@ -17,17 +17,17 @@ nested_package_path.php--pkg6/bar.php:3:10
      4 | 
      5 | function zot(): void {
 
-PACKAGES.toml:21:11
+PACKAGES.toml:25:11
      1 | [packages]
      2 | 
 [4]  3 | [packages.pkg1]
      4 | include_paths=["//"]
      5 | 
        :
-    19 | include_paths=["//pkg5/"]
-    20 | 
-[3] 21 | [packages.pkg6]
-    22 | include_paths=["//pkg6/"]
-    23 | includes = ["pkg1"]
+    23 | include_paths=["//pkg5/"]
+    24 | 
+[3] 25 | [packages.pkg6]
+    26 | include_paths=["//pkg6/"]
+    27 | includes = ["pkg1"]
 
 1 error found

@@ -461,6 +461,26 @@ class WithAnnotations {
   std::vector<Annotation> annotations_;
 };
 
+/**
+ * Base class for all graph nodes that could have documentation (i.e. docblocks)
+ * attached to them.
+ */
+class WithDocBlock {
+ protected:
+  std::optional<std::string_view> docBlock() const noexcept {
+    return docBlock_;
+  }
+
+  explicit WithDocBlock(std::optional<std::string_view> docBlock);
+  ~WithDocBlock() noexcept = default;
+
+  WithDocBlock(WithDocBlock&&) noexcept;
+  WithDocBlock& operator=(WithDocBlock&&) noexcept;
+
+ private:
+  std::optional<std::string_view> docBlock_;
+};
+
 // Helper to get the index of a type in a variant at compile-time
 template <typename Variant, typename T>
 struct IndexOfImpl;
@@ -567,6 +587,7 @@ class FieldNode final : folly::MoveOnly,
                         detail::WithResolver,
                         detail::WithName,
                         detail::WithAnnotations,
+                        detail::WithDocBlock,
                         public detail::WithDebugPrinting<FieldNode> {
  public:
   /**
@@ -581,6 +602,7 @@ class FieldNode final : folly::MoveOnly,
   using PresenceQualifier = syntax_graph::FieldPresenceQualifier;
 
   using detail::WithAnnotations::annotations;
+  using detail::WithDocBlock::docBlock;
   using detail::WithName::name;
   FieldId id() const { return id_; }
   TypeRef type() const;
@@ -598,11 +620,13 @@ class FieldNode final : folly::MoveOnly,
       FieldId id,
       PresenceQualifier presence,
       std::string_view name,
+      std::optional<std::string_view> docBlock,
       folly::not_null_unique_ptr<TypeRef> type,
       std::optional<apache::thrift::type::ValueId> customDefaultId)
       : detail::WithResolver(resolver),
         detail::WithName(name),
         detail::WithAnnotations(std::move(annotations)),
+        detail::WithDocBlock(docBlock),
         parent_(parent),
         id_(id),
         presence_(presence),
@@ -1426,6 +1450,7 @@ class DefinitionNode final : folly::MoveOnly,
                              detail::WithResolver,
                              detail::WithName,
                              detail::WithAnnotations,
+                             detail::WithDocBlock,
                              public detail::WithDebugPrinting<DefinitionNode> {
  public:
   using Alternative = std::variant<
@@ -1441,6 +1466,7 @@ class DefinitionNode final : folly::MoveOnly,
 
   const ProgramNode& program() const;
   using detail::WithAnnotations::annotations;
+  using detail::WithDocBlock::docBlock;
   using detail::WithName::name;
 
   enum class Kind {
@@ -1587,6 +1613,7 @@ class DefinitionNode final : folly::MoveOnly,
       apache::thrift::type::ProgramId programId,
       std::vector<Annotation>&& annotations,
       std::string_view name,
+      std::optional<std::string_view> docBlock,
       Alternative&& definition);
 
   void printTo(

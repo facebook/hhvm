@@ -691,6 +691,10 @@ DefinitionNode SchemaIndex::createDefinition(
     const type::DefinitionAttrs& attrs,
     DefinitionNode::Alternative&& alternative,
     const type::Schema& schema) {
+  std::optional<std::string_view> docBlock;
+  if (!op::isEmpty<>(*attrs.docs())) {
+    docBlock = *attrs.docs()->contents();
+  }
   return DefinitionNode(
       resolver_,
       folly::get_or_throw<InvalidSyntaxGraphError>(
@@ -699,6 +703,7 @@ DefinitionNode SchemaIndex::createDefinition(
           "Unknown ProgramId for DefinitionKey: "),
       createAnnotations(*attrs.annotationsByKey(), schema),
       *attrs.name(),
+      docBlock,
       std::move(alternative));
 }
 
@@ -742,6 +747,10 @@ FieldNode SchemaIndex::createField(
     const type::DefinitionKey& parentDefinitionKey,
     const type::Field& field,
     const type::Schema& schema) {
+  std::optional<std::string_view> docBlock;
+  if (!op::isEmpty<>(*field.attrs()->docs())) {
+    docBlock = *field.attrs()->docs()->contents();
+  }
   return FieldNode(
       resolver_,
       parentDefinitionKey,
@@ -749,6 +758,7 @@ FieldNode SchemaIndex::createField(
       *field.id(),
       presenceOf(*field.qualifier()),
       *field.name(),
+      docBlock,
       folly::copy_to_unique_ptr(typeOf(*field.type())),
       valueIdOf(*field.customDefault()));
 }

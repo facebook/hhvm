@@ -339,10 +339,12 @@ DefinitionNode::DefinitionNode(
     apache::thrift::type::ProgramId programId,
     std::vector<Annotation>&& annotations,
     std::string_view name,
+    std::optional<std::string_view> docBlock,
     Alternative&& definition)
     : detail::WithResolver(resolver),
       detail::WithName(name),
       detail::WithAnnotations(std::move(annotations)),
+      detail::WithDocBlock(docBlock),
       programId_(programId),
       definition_(std::move(definition)) {}
 
@@ -499,6 +501,11 @@ WithAnnotations::WithAnnotations(std::vector<Annotation>&& annotations)
 folly::span<const Annotation> WithAnnotations::annotations() const {
   return annotations_;
 }
+
+WithDocBlock::WithDocBlock(std::optional<std::string_view> docBlock)
+    : docBlock_(docBlock) {}
+WithDocBlock::WithDocBlock(WithDocBlock&&) noexcept = default;
+WithDocBlock& WithDocBlock::operator=(WithDocBlock&&) noexcept = default;
 
 const DefinitionNode& lazyResolve(
     const Resolver& resolver, const type::DefinitionKey& definitionKey) {

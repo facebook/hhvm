@@ -83,7 +83,7 @@ TEST_F(ServiceSchemaTest, Programs) {
       &mainProgram,
       &syntaxGraph.findProgramByPath(
           "thrift/lib/cpp2/schema/test/syntax_graph.thrift"));
-  EXPECT_EQ(mainProgram.definitionsByName().size(), 17);
+  EXPECT_EQ(mainProgram.definitionsByName().size(), 18);
   EXPECT_EQ(mainProgram.namespaces().size(), 1);
   EXPECT_EQ(
       mainProgram.namespaces().at("cpp2"), "apache.thrift.syntax_graph.test");

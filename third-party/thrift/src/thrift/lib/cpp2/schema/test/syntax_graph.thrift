@@ -137,3 +137,12 @@ struct StructWithCustomDefault {
   7: map<i32, TestUnion> field7 = {1: TestUnion{e = VALUE_1}};
   8: TestUnion field8 = TestUnion{e = VALUE_1};
 }
+
+/**
+ * This is a docblock for testing purposes.
+ * It spans multiple lines.
+ */
+struct StructWithDocBlock {
+  /** Field documentation */
+  1: i32 field1;
+}

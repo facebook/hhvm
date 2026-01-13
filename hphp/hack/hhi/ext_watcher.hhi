@@ -15,8 +15,32 @@ namespace HH {
     ?'socket_path' => string,
   );
 
+  // More detailed description of the fields are here: https://www.internalfb.com/intern/staticdocs/watchman/docs/cmd/query#available-fields.
   type WatcherFileResult = shape(
-    ?'sha1hex' => string,
+    ?'content.sha1hex' => string,
+    ?'exists' => bool,
+    ?'cclock' => string,
+    ?'oclock' => string,
+    ?'ctime' => int,
+    ?'ctime_ms' => int,
+    ?'ctime_us' => int,
+    ?'ctime_ns' => int,
+    ?'ctime_f' => float,
+    ?'mtime' => int,
+    ?'mtime_ms' => int,
+    ?'mtime_us' => int,
+    ?'mtime_ns' => int,
+    ?'mtime_f' => float,
+    ?'size' => int,
+    ?'mode' => int,
+    ?'uid' => int,
+    ?'gid' => int,
+    ?'ino' => int,
+    ?'dev' => int,
+    ?'nlink' => int,
+    ?'new' => bool,
+    ?'type' => string,
+    ?'symlink_target' => string,
   );
 
   type WatcherResult = shape(
@@ -28,7 +52,7 @@ namespace HH {
   function watcher_query(
     WatcherOptions $options,
     ?string $clock = null
-  ): Awaitable<WatcherResult>;
+  ): Awaitable<string>;
 
   function watcher_get_clock(
     ?WatcherOptions $options = null,

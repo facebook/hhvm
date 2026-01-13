@@ -20,8 +20,32 @@ type WatcherOptions = shape(
   ?'socket_path' => string,
 );
 
+// More detailed description of the fields are here: https://www.internalfb.com/intern/staticdocs/watchman/docs/cmd/query#available-fields.
 type WatcherFileResult = shape(
-  ?'sha1hex' => string,
+  ?'content.sha1hex' => string,
+  ?'exists' => bool,
+  ?'cclock' => string,
+  ?'oclock' => string,
+  ?'ctime' => int,
+  ?'ctime_ms' => int,
+  ?'ctime_us' => int,
+  ?'ctime_ns' => int,
+  ?'ctime_f' => float,
+  ?'mtime' => int,
+  ?'mtime_ms' => int,
+  ?'mtime_us' => int,
+  ?'mtime_ns' => int,
+  ?'mtime_f' => float,
+  ?'size' => int,
+  ?'mode' => int,
+  ?'uid' => int,
+  ?'gid' => int,
+  ?'ino' => int,
+  ?'dev' => int,
+  ?'nlink' => int,
+  ?'new' => bool,
+  ?'type' => string,
+  ?'symlink_target' => string,
 );
 
 type WatcherResult = shape(
@@ -30,11 +54,12 @@ type WatcherResult = shape(
   'is_fresh_instance' => bool
 );
 
+// This will return a JSON-encoded string of the result.
 <<__Native>>
 function watcher_query(
   /* WatcherOptions */ mixed $options,
   /* ?string */ mixed $clock = null
-): Awaitable<WatcherResult>; /* WatcherResult */
+): Awaitable<string>;
 
 <<__Native>>
 function watcher_get_clock(

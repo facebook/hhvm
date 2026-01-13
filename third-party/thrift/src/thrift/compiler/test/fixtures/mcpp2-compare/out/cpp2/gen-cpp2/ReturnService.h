@@ -321,8 +321,8 @@ class ServiceHandler<::some::valid::ns::ReturnService> : public apache::thrift::
 namespace detail {
 template <> struct TSchemaAssociation<::some::valid::ns::ReturnService, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = -4568015910949463992;
-  static constexpr ::std::string_view definitionKey = {"\x41\xc1\x00\x26\x0b\x7a\x9f\x9c\xfc\x91\x90\x89\x83\x90\x53\x02", 16};
+  static constexpr int64_t programId = 690951889242425239;
+  static constexpr ::std::string_view definitionKey = {"\xac\x5a\xab\x10\x5f\x7f\x59\x54\x15\x36\x37\x83\xdb\x0d\xf8\x71", 16};
 };
 }
 } // namespace apache::thrift

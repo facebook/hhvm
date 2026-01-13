@@ -27,7 +27,7 @@ namespace ns {
   ::apache::thrift::detail::md::StructMetadata<ComplexUnion>::gen(metadata);
   ::apache::thrift::detail::md::ExceptionMetadata<AnException>::gen(metadata);
   ::apache::thrift::detail::md::ExceptionMetadata<AnotherException>::gen(metadata);
-  ::apache::thrift::detail::md::StructMetadata<ContainerStruct>::gen(metadata);
+  ::apache::thrift::detail::md::StructMetadata<containerStruct>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<MyIncludedStruct>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<AnnotatedStruct>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<ComplexContainerStruct>::gen(metadata);

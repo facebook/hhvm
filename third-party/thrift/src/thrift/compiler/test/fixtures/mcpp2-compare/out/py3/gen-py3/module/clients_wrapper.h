@@ -202,13 +202,13 @@ class ParamServiceClientWrapper : public ::thrift::py3::ClientWrapper {
       std::string arg_param1);
     folly::Future<folly::Unit> annotatedParams(
       apache::thrift::RpcOptions& rpcOptions,
-      ::some::valid::ns::ContainerStruct arg_no_annotation,
+      ::some::valid::ns::containerStruct arg_no_annotation,
       std::set<int32_t> arg_opt_ref_type_shared,
       CppFakeI32 arg_base_type,
       folly::small_vector<int64_t, 8 > arg_list_type,
       folly::sorted_vector_set<std::string> arg_set_type,
       FakeMap arg_map_type,
-      std::unordered_map<std::string, ContainerStruct> arg_map_struct_type,
+      std::unordered_map<std::string, containerStruct> arg_map_struct_type,
       folly::IOBuf arg_iobuf_type,
       std::unique_ptr<folly::IOBuf> arg_iobuf_ptr,
       std::vector<int32_t> arg_list_i32_template,
@@ -221,7 +221,7 @@ class ParamServiceClientWrapper : public ::thrift::py3::ClientWrapper {
       folly::sorted_vector_map<int64_t,std::string> arg_typedef_map_template,
       folly::IOBuf arg_iobuf_type_val,
       std::unique_ptr<folly::IOBuf> arg_iobuf_ptr_val,
-      ::some::valid::ns::ContainerStruct arg_struct_struct);
+      ::some::valid::ns::containerStruct arg_struct_struct);
 };
 
 

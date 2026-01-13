@@ -228,7 +228,7 @@ struct VisitByFieldId<::some::valid::ns::AnotherException> {
 };
 
 template <>
-struct VisitByFieldId<::some::valid::ns::ContainerStruct> {
+struct VisitByFieldId<::some::valid::ns::containerStruct> {
   template <typename F, typename T>
   void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
@@ -321,7 +321,7 @@ struct VisitByFieldId<::some::valid::ns::ContainerStruct> {
     case 32:
       return f(43, static_cast<T&&>(t).fieldAE_ref());
     default:
-      throwInvalidThriftId(fieldId, "::some::valid::ns::ContainerStruct");
+      throwInvalidThriftId(fieldId, "::some::valid::ns::containerStruct");
     }
   }
 };

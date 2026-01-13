@@ -133,7 +133,7 @@ struct ForEachField<::some::valid::ns::AnotherException> {
 };
 
 template <>
-struct ForEachField<::some::valid::ns::ContainerStruct> {
+struct ForEachField<::some::valid::ns::containerStruct> {
   template <typename F, typename... T>
   void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).fieldA_ref()...);

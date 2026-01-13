@@ -18,7 +18,7 @@ class SimpleUnion;
 class ComplexUnion;
 class AnException;
 class AnotherException;
-class ContainerStruct;
+class containerStruct;
 class MyIncludedStruct;
 class AnnotatedStruct;
 class ComplexContainerStruct;

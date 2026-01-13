@@ -130,6 +130,9 @@ typedef list<MyStruct> structTypeDef
 typedef list<map<Empty, MyStruct>> complexStructTypeDef
 typedef list<complexStructTypeDef> mostComplexTypeDef
 
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {"cpp.methods": "void foo(const std::string& bar) {}"},
+}
 union ComplexUnion {
   1: i64 intValue;
   201: i64 opt_intValue;
@@ -193,8 +196,13 @@ exception AnotherException {
   2: string message;
 }
 
-@thrift.DeprecatedUnvalidatedAnnotations{items = {"cpp.noncopyable": "1"}}
-struct ContainerStruct {
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "void foo(const std::string& bar) {}",
+    "cpp.noncopyable": "1",
+  },
+}
+struct containerStruct {
   1: bool fieldA;
   101: required bool req_fieldA;
   201: optional bool opt_fieldA;
@@ -272,8 +280,8 @@ typedef list<i64> FollySmallVectorI64
 typedef set<string> SortedVectorSetString
 @cpp.Type{name = "FakeMap"}
 typedef map<i64, double> FakeMap
-@cpp.Type{name = "std::unordered_map<std::string, ContainerStruct>"}
-typedef map<string, ContainerStruct> UnorderedMapStruct
+@cpp.Type{name = "std::unordered_map<std::string, containerStruct>"}
+typedef map<string, containerStruct> UnorderedMapStruct
 @cpp.Type{template = "std::list"}
 typedef list<i32> std_list
 @cpp.Type{template = "std::deque"}
@@ -287,62 +295,63 @@ typedef map<i64, string> folly_map
   items = {
     "cpp.declare_equal_to": "1",
     "cpp.declare_hash": "1",
+    "cpp.methods": "void foo(const std::string& bar) {}",
     "cpp.noncopyable": "1",
     "cpp.virtual": "1",
   },
 }
 struct AnnotatedStruct {
-  1: ContainerStruct no_annotation;
+  1: containerStruct no_annotation;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @cpp.AllowLegacyDeprecatedTerseWritesRef
-  2: ContainerStruct cpp_unique_ref;
+  2: containerStruct cpp_unique_ref;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @cpp.AllowLegacyDeprecatedTerseWritesRef
-  3: ContainerStruct cpp2_unique_ref;
+  3: containerStruct cpp2_unique_ref;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @cpp.AllowLegacyDeprecatedTerseWritesRef
   4: map<i32, list<string>> container_with_ref;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
-  5: required ContainerStruct req_cpp_unique_ref;
+  5: required containerStruct req_cpp_unique_ref;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
-  6: required ContainerStruct req_cpp2_unique_ref;
+  6: required containerStruct req_cpp2_unique_ref;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   7: required list<string> req_container_with_ref;
   @cpp.Ref{type = cpp.RefType.Unique}
-  8: optional ContainerStruct opt_cpp_unique_ref;
+  8: optional containerStruct opt_cpp_unique_ref;
   @cpp.Ref{type = cpp.RefType.Unique}
-  9: optional ContainerStruct opt_cpp2_unique_ref;
+  9: optional containerStruct opt_cpp2_unique_ref;
   @cpp.Ref{type = cpp.RefType.Unique}
   10: optional set<i32> opt_container_with_ref;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyDeprecatedTerseWritesRef
   @cpp.AllowLegacyNonOptionalRef
-  11: ContainerStruct ref_type_unique;
+  11: containerStruct ref_type_unique;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
-  12: ContainerStruct ref_type_shared;
+  12: containerStruct ref_type_shared;
   @cpp.Ref{type = cpp.RefType.Shared}
   @cpp.AllowLegacyNonOptionalRef
   13: map<i32, list<string>> ref_type_const;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
-  14: required ContainerStruct req_ref_type_shared;
+  14: required containerStruct req_ref_type_shared;
   @cpp.Ref{type = cpp.RefType.Shared}
   @cpp.AllowLegacyNonOptionalRef
-  15: required ContainerStruct req_ref_type_const;
+  15: required containerStruct req_ref_type_const;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   16: required list<string> req_ref_type_unique;
   @cpp.Ref{type = cpp.RefType.Shared}
-  17: optional ContainerStruct opt_ref_type_const;
+  17: optional containerStruct opt_ref_type_const;
   @cpp.Ref{type = cpp.RefType.Unique}
-  18: optional ContainerStruct opt_ref_type_unique;
+  18: optional containerStruct opt_ref_type_unique;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   19: optional set<i32> opt_ref_type_shared;
   20: CppFakeI32 base_type;
@@ -366,7 +375,7 @@ struct AnnotatedStruct {
   34: folly_map typedef_map_template;
   38: IOBuf iobuf_type_val = "value";
   39: IOBufPtr iobuf_ptr_val = "value2";
-  40: ContainerStruct struct_struct = {
+  40: containerStruct struct_struct = {
     "fieldD": "some string",
     "fieldI": false,
   };
@@ -468,7 +477,7 @@ service ParamService {
   list<ComplexUnion> listunion_string_param(1: string param1);
 
   void annotatedParams(
-    1: ContainerStruct no_annotation,
+    1: containerStruct no_annotation,
     2: set<i32> opt_ref_type_shared,
     3: CppFakeI32 base_type,
     4: FollySmallVectorI64 list_type,
@@ -491,7 +500,7 @@ service ParamService {
     17: folly_map typedef_map_template,
     18: IOBuf iobuf_type_val = "value",
     19: IOBufPtr iobuf_ptr_val = "value2",
-    20: ContainerStruct struct_struct = {
+    20: containerStruct struct_struct = {
       "fieldD": "some string",
       "fieldI": false,
     },

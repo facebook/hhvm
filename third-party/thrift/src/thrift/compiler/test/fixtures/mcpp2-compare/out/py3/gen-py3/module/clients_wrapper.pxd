@@ -166,13 +166,13 @@ cdef extern from "thrift/compiler/test/fixtures/mcpp2-compare/gen-py3/module/cli
     cFollyFuture[vector[_module_cbindings.cComplexUnion]] listunion_string_param(cRpcOptions, 
       string arg_param1,)
     cFollyFuture[cFollyUnit] annotatedParams(cRpcOptions, 
-      _module_cbindings.cContainerStruct arg_no_annotation,
+      _module_cbindings.ccontainerStruct arg_no_annotation,
       cset[cint32_t] arg_opt_ref_type_shared,
       _module_cbindings.CppFakeI32 arg_base_type,
       _module_cbindings.folly_small_vector_int64_t_8 arg_list_type,
       _module_cbindings.folly_sorted_vector_set_std_string arg_set_type,
       _module_cbindings.FakeMap arg_map_type,
-      _module_cbindings.std_unordered_map_std_string_ContainerStruct arg_map_struct_type,
+      _module_cbindings.std_unordered_map_std_string_containerStruct arg_map_struct_type,
       _fbthrift_iobuf.cIOBuf arg_iobuf_type,
       unique_ptr[_fbthrift_iobuf.cIOBuf] arg_iobuf_ptr,
       vector[cint32_t] arg_list_i32_template,
@@ -185,5 +185,5 @@ cdef extern from "thrift/compiler/test/fixtures/mcpp2-compare/gen-py3/module/cli
       _module_cbindings.folly_sorted_vector_map[cint64_t,string] arg_typedef_map_template,
       _fbthrift_iobuf.cIOBuf arg_iobuf_type_val,
       unique_ptr[_fbthrift_iobuf.cIOBuf] arg_iobuf_ptr_val,
-      _module_cbindings.cContainerStruct arg_struct_struct,)
+      _module_cbindings.ccontainerStruct arg_struct_struct,)
 

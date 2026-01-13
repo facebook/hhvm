@@ -381,13 +381,13 @@ class ParamService(thrift.py3.client.Client):
 
     async def annotatedParams(
         self,
-        no_annotation: _module_types.ContainerStruct,
+        no_annotation: _module_types.containerStruct,
         opt_ref_type_shared: _typing.AbstractSet[int],
         base_type: int,
         list_type: _typing.Sequence[int],
         set_type: _typing.AbstractSet[str],
         map_type: _typing.Mapping[int, float],
-        map_struct_type: _typing.Mapping[str, _module_types.ContainerStruct],
+        map_struct_type: _typing.Mapping[str, _module_types.containerStruct],
         iobuf_type: _fbthrift_iobuf.IOBuf,
         iobuf_ptr: _fbthrift_iobuf.IOBuf,
         list_i32_template: _typing.Sequence[int],
@@ -400,7 +400,7 @@ class ParamService(thrift.py3.client.Client):
         typedef_map_template: _typing.Mapping[int, str],
         iobuf_type_val: _fbthrift_iobuf.IOBuf,
         iobuf_ptr_val: _fbthrift_iobuf.IOBuf,
-        struct_struct: _module_types.ContainerStruct,
+        struct_struct: _module_types.containerStruct,
         *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> None: ...

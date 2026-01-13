@@ -1310,7 +1310,7 @@ Mapping.register(FakeMap__Map__i64_double)
 __all__.append('FakeMap__Map__i64_double')
 
 
-class std_unordered_map_std_string_ContainerStruct__Map__string_ContainerStruct(thrift.py3.types.Map):
+class std_unordered_map_std_string_containerStruct__Map__string_containerStruct(thrift.py3.types.Map):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 
@@ -1319,16 +1319,16 @@ class std_unordered_map_std_string_ContainerStruct__Map__string_ContainerStruct(
     def __init__(self, items=None, private_ctor_token=None) -> None:
         if private_ctor_token is thrift.py3.types._fbthrift_map_private_ctor:
             _py_obj = items
-        elif isinstance(items, std_unordered_map_std_string_ContainerStruct__Map__string_ContainerStruct):
+        elif isinstance(items, std_unordered_map_std_string_containerStruct__Map__string_containerStruct):
             _py_obj = dict(items)
         elif items is None:
             _py_obj = dict()
         else:
-            check_key = std_unordered_map_std_string_ContainerStruct__Map__string_ContainerStruct._check_key_type_or_raise
-            check_val = std_unordered_map_std_string_ContainerStruct__Map__string_ContainerStruct._check_val_type_or_raise
+            check_key = std_unordered_map_std_string_containerStruct__Map__string_containerStruct._check_key_type_or_raise
+            check_val = std_unordered_map_std_string_containerStruct__Map__string_containerStruct._check_val_type_or_raise
             _py_obj = {check_key(k) : check_val(v) for k, v in items.items()}
 
-        super().__init__(_py_obj, std_unordered_map_std_string_ContainerStruct__Map__string_ContainerStruct)
+        super().__init__(_py_obj, std_unordered_map_std_string_containerStruct__Map__string_containerStruct)
 
     @staticmethod
     def _check_key_type_or_raise(key):
@@ -1348,29 +1348,29 @@ class std_unordered_map_std_string_ContainerStruct__Map__string_ContainerStruct(
     @staticmethod
     def _check_val_type_or_raise(item):
         if not (
-            isinstance(item, _module_types.ContainerStruct)
+            isinstance(item, _module_types.containerStruct)
         ):
-            raise TypeError(f"{item!r} is not of type _module_types.ContainerStruct")
+            raise TypeError(f"{item!r} is not of type _module_types.containerStruct")
         return item
 
     @staticmethod
     def __get_reflection__():
-        return get_types_reflection().get_reflection__std_unordered_map_std_string_ContainerStruct__Map__string_ContainerStruct()
+        return get_types_reflection().get_reflection__std_unordered_map_std_string_containerStruct__Map__string_containerStruct()
 
     @staticmethod
-    def from_python(python_map: thrift.python.types.Map) -> "std_unordered_map_std_string_ContainerStruct__Map__string_ContainerStruct":
+    def from_python(python_map: thrift.python.types.Map) -> "std_unordered_map_std_string_containerStruct__Map__string_containerStruct":
         _keys = python_map.keys()
         _values = (
-            _ensure_py3_or_raise(value, "value", _module_types.ContainerStruct)
+            _ensure_py3_or_raise(value, "value", _module_types.containerStruct)
             for value in python_map.values()
         )
-        return std_unordered_map_std_string_ContainerStruct__Map__string_ContainerStruct(
+        return std_unordered_map_std_string_containerStruct__Map__string_containerStruct(
             items=dict(zip(_keys, _values)),
             private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor,
         )
 
-Mapping.register(std_unordered_map_std_string_ContainerStruct__Map__string_ContainerStruct)
-__all__.append('std_unordered_map_std_string_ContainerStruct__Map__string_ContainerStruct')
+Mapping.register(std_unordered_map_std_string_containerStruct__Map__string_containerStruct)
+__all__.append('std_unordered_map_std_string_containerStruct__Map__string_containerStruct')
 
 
 class Map__i64_string(thrift.py3.types.Map):

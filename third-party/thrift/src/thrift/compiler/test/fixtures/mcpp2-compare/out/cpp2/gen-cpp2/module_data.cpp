@@ -353,8 +353,8 @@ THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 3> TStructDataStorage<:
   1,
 }};
 
-THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::some::valid::ns::ContainerStruct>::name = "ContainerStruct";
-THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 44> TStructDataStorage<::some::valid::ns::ContainerStruct>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::some::valid::ns::containerStruct>::name = "containerStruct";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 44> TStructDataStorage<::some::valid::ns::containerStruct>::fields_names = { {
   "fieldA"sv,
   "req_fieldA"sv,
   "opt_fieldA"sv,
@@ -400,7 +400,7 @@ THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 44> TStruc
   "fieldAD"sv,
   "fieldAE"sv,
 }};
-THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 44> TStructDataStorage<::some::valid::ns::ContainerStruct>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 44> TStructDataStorage<::some::valid::ns::containerStruct>::fields_ids = { {
   1,
   101,
   201,
@@ -446,7 +446,7 @@ THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 44> TStructDataStor
   31,
   32,
 }};
-THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 44> TStructDataStorage<::some::valid::ns::ContainerStruct>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 44> TStructDataStorage<::some::valid::ns::containerStruct>::fields_types = { {
   TType::T_BOOL,
   TType::T_BOOL,
   TType::T_BOOL,
@@ -492,7 +492,7 @@ THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 44> TStruct
   TType::T_I32,
   TType::T_MAP,
 }};
-THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 44> TStructDataStorage<::some::valid::ns::ContainerStruct>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 44> TStructDataStorage<::some::valid::ns::containerStruct>::isset_indexes = { {
   0,
   -1,
   1,
@@ -814,18 +814,18 @@ namespace detail {
 
 template <> struct TSchemaAssociation<::some::valid::ns::EmptyService, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = -4568015910949463992;
-  static constexpr ::std::string_view definitionKey = {"\x04\xb9\x95\xde\x16\x9e\x8e\xc2\xbe\x50\x05\x48\x5d\x1e\xf0\x9b", 16};
+  static constexpr int64_t programId = 690951889242425239;
+  static constexpr ::std::string_view definitionKey = {"\x90\xa0\x50\xfa\xa4\xab\xa1\xfc\x4e\x17\x26\x19\xef\x8d\x4f\x69", 16};
 };
 template <> struct TSchemaAssociation<::some::valid::ns::ReturnService, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = -4568015910949463992;
-  static constexpr ::std::string_view definitionKey = {"\x41\xc1\x00\x26\x0b\x7a\x9f\x9c\xfc\x91\x90\x89\x83\x90\x53\x02", 16};
+  static constexpr int64_t programId = 690951889242425239;
+  static constexpr ::std::string_view definitionKey = {"\xac\x5a\xab\x10\x5f\x7f\x59\x54\x15\x36\x37\x83\xdb\x0d\xf8\x71", 16};
 };
 template <> struct TSchemaAssociation<::some::valid::ns::ParamService, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = -4568015910949463992;
-  static constexpr ::std::string_view definitionKey = {"\x48\x3c\x0f\x5b\x3b\xa9\xe4\xd3\xc4\x5c\x6e\xc9\x34\x17\xaf\x67", 16};
+  static constexpr int64_t programId = 690951889242425239;
+  static constexpr ::std::string_view definitionKey = {"\xf2\xf4\x56\x72\xaf\x9e\x84\x04\x56\xdb\xa5\xef\x38\x31\x6d\x3d", 16};
 };
 } // namespace detail
 } // namespace apache::thrift

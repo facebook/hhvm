@@ -274,6 +274,7 @@ def get_reflection__ComplexUnion() -> __StructSpec:
         name="ComplexUnion",
         kind=__StructType.UNION,
         annotations={
+            """cpp.methods""": """void foo(const std::string& bar) {}""",
         },
     )
     spec.add_field(
@@ -919,15 +920,16 @@ def get_reflection__AnotherException() -> __StructSpec:
         ),
     )
     return spec
-def get_reflection__ContainerStruct() -> __StructSpec:
+def get_reflection__containerStruct() -> __StructSpec:
     spec: __StructSpec = __StructSpec._fbthrift_create(
-        name="ContainerStruct",
+        name="containerStruct",
         kind=__StructType.STRUCT,
         annotations={
+            """cpp.methods""": """void foo(const std::string& bar) {}""",
             """cpp.noncopyable""": """1""",
         },
     )
-    defaults = _module_types.ContainerStruct()
+    defaults = _module_types.containerStruct()
     spec.add_field(
         __FieldSpec._fbthrift_create(
             id=1,
@@ -1571,6 +1573,7 @@ def get_reflection__AnnotatedStruct() -> __StructSpec:
         annotations={
             """cpp.declare_equal_to""": """1""",
             """cpp.declare_hash""": """1""",
+            """cpp.methods""": """void foo(const std::string& bar) {}""",
             """cpp.noncopyable""": """1""",
             """cpp.virtual""": """1""",
         },
@@ -1581,7 +1584,7 @@ def get_reflection__AnnotatedStruct() -> __StructSpec:
             id=1,
             name="no_annotation",
             py_name="no_annotation",
-            type=_module_types.ContainerStruct,
+            type=_module_types.containerStruct,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
             default=None,
@@ -1594,7 +1597,7 @@ def get_reflection__AnnotatedStruct() -> __StructSpec:
             id=2,
             name="cpp_unique_ref",
             py_name="cpp_unique_ref",
-            type=_module_types.ContainerStruct,
+            type=_module_types.containerStruct,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
             default=None,
@@ -1607,7 +1610,7 @@ def get_reflection__AnnotatedStruct() -> __StructSpec:
             id=3,
             name="cpp2_unique_ref",
             py_name="cpp2_unique_ref",
-            type=_module_types.ContainerStruct,
+            type=_module_types.containerStruct,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
             default=None,
@@ -1633,7 +1636,7 @@ def get_reflection__AnnotatedStruct() -> __StructSpec:
             id=5,
             name="req_cpp_unique_ref",
             py_name="req_cpp_unique_ref",
-            type=_module_types.ContainerStruct,
+            type=_module_types.containerStruct,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.REQUIRED,
             default=None,
@@ -1646,7 +1649,7 @@ def get_reflection__AnnotatedStruct() -> __StructSpec:
             id=6,
             name="req_cpp2_unique_ref",
             py_name="req_cpp2_unique_ref",
-            type=_module_types.ContainerStruct,
+            type=_module_types.containerStruct,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.REQUIRED,
             default=None,
@@ -1672,7 +1675,7 @@ def get_reflection__AnnotatedStruct() -> __StructSpec:
             id=8,
             name="opt_cpp_unique_ref",
             py_name="opt_cpp_unique_ref",
-            type=_module_types.ContainerStruct,
+            type=_module_types.containerStruct,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.OPTIONAL,
             default=None,
@@ -1685,7 +1688,7 @@ def get_reflection__AnnotatedStruct() -> __StructSpec:
             id=9,
             name="opt_cpp2_unique_ref",
             py_name="opt_cpp2_unique_ref",
-            type=_module_types.ContainerStruct,
+            type=_module_types.containerStruct,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.OPTIONAL,
             default=None,
@@ -1711,7 +1714,7 @@ def get_reflection__AnnotatedStruct() -> __StructSpec:
             id=11,
             name="ref_type_unique",
             py_name="ref_type_unique",
-            type=_module_types.ContainerStruct,
+            type=_module_types.containerStruct,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
             default=None,
@@ -1724,7 +1727,7 @@ def get_reflection__AnnotatedStruct() -> __StructSpec:
             id=12,
             name="ref_type_shared",
             py_name="ref_type_shared",
-            type=_module_types.ContainerStruct,
+            type=_module_types.containerStruct,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
             default=None,
@@ -1750,7 +1753,7 @@ def get_reflection__AnnotatedStruct() -> __StructSpec:
             id=14,
             name="req_ref_type_shared",
             py_name="req_ref_type_shared",
-            type=_module_types.ContainerStruct,
+            type=_module_types.containerStruct,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.REQUIRED,
             default=None,
@@ -1763,7 +1766,7 @@ def get_reflection__AnnotatedStruct() -> __StructSpec:
             id=15,
             name="req_ref_type_const",
             py_name="req_ref_type_const",
-            type=_module_types.ContainerStruct,
+            type=_module_types.containerStruct,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.REQUIRED,
             default=None,
@@ -1789,7 +1792,7 @@ def get_reflection__AnnotatedStruct() -> __StructSpec:
             id=17,
             name="opt_ref_type_const",
             py_name="opt_ref_type_const",
-            type=_module_types.ContainerStruct,
+            type=_module_types.containerStruct,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.OPTIONAL,
             default=None,
@@ -1802,7 +1805,7 @@ def get_reflection__AnnotatedStruct() -> __StructSpec:
             id=18,
             name="opt_ref_type_unique",
             py_name="opt_ref_type_unique",
-            type=_module_types.ContainerStruct,
+            type=_module_types.containerStruct,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.OPTIONAL,
             default=None,
@@ -1880,7 +1883,7 @@ def get_reflection__AnnotatedStruct() -> __StructSpec:
             id=24,
             name="map_struct_type",
             py_name="map_struct_type",
-            type=_module_types.std_unordered_map_std_string_ContainerStruct__Map__string_ContainerStruct,
+            type=_module_types.std_unordered_map_std_string_containerStruct__Map__string_containerStruct,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
             default=None,
@@ -2049,7 +2052,7 @@ def get_reflection__AnnotatedStruct() -> __StructSpec:
             id=40,
             name="struct_struct",
             py_name="struct_struct",
-            type=_module_types.ContainerStruct,
+            type=_module_types.containerStruct,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
             default=defaults.struct_struct,
@@ -2349,11 +2352,11 @@ def get_reflection__FakeMap__Map__i64_double() -> __MapSpec:
         value_kind=__NumberType.DOUBLE,
     )
 
-def get_reflection__std_unordered_map_std_string_ContainerStruct__Map__string_ContainerStruct() -> __MapSpec:
+def get_reflection__std_unordered_map_std_string_containerStruct__Map__string_containerStruct() -> __MapSpec:
     return __MapSpec._fbthrift_create(
         key=str,
         key_kind=__NumberType.NOT_A_NUMBER,
-        value=_module_types.ContainerStruct,
+        value=_module_types.containerStruct,
         value_kind=__NumberType.NOT_A_NUMBER,
     )
 

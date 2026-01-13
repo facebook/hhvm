@@ -222,9 +222,9 @@ cdef class AnotherException(thrift.py3.exceptions.GeneratedError):
 
 
 
-cdef class ContainerStruct(thrift.py3.types.Struct):
-    cdef shared_ptr[_module_cbindings.cContainerStruct] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-    cdef _fbthrift_types_fields.__ContainerStruct_FieldsSetter _fields_setter
+cdef class containerStruct(thrift.py3.types.Struct):
+    cdef shared_ptr[_module_cbindings.ccontainerStruct] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef _fbthrift_types_fields.__containerStruct_FieldsSetter _fields_setter
     cdef inline object fieldA_impl(self)
     cdef inline object req_fieldA_impl(self)
     cdef inline object opt_fieldA_impl(self)
@@ -306,7 +306,7 @@ cdef class ContainerStruct(thrift.py3.types.Struct):
     cdef object __fbthrift_cached_fieldAE
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cContainerStruct])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.ccontainerStruct])
 
 
 
@@ -366,24 +366,24 @@ cdef class AnnotatedStruct(thrift.py3.types.Struct):
     cdef inline object iobuf_type_val_impl(self)
     cdef inline object iobuf_ptr_val_impl(self)
     cdef inline object struct_struct_impl(self)
-    cdef ContainerStruct __fbthrift_cached_no_annotation
-    cdef ContainerStruct __fbthrift_cached_cpp_unique_ref
-    cdef ContainerStruct __fbthrift_cached_cpp2_unique_ref
+    cdef containerStruct __fbthrift_cached_no_annotation
+    cdef containerStruct __fbthrift_cached_cpp_unique_ref
+    cdef containerStruct __fbthrift_cached_cpp2_unique_ref
     cdef object __fbthrift_cached_container_with_ref
-    cdef ContainerStruct __fbthrift_cached_req_cpp_unique_ref
-    cdef ContainerStruct __fbthrift_cached_req_cpp2_unique_ref
+    cdef containerStruct __fbthrift_cached_req_cpp_unique_ref
+    cdef containerStruct __fbthrift_cached_req_cpp2_unique_ref
     cdef object __fbthrift_cached_req_container_with_ref
-    cdef ContainerStruct __fbthrift_cached_opt_cpp_unique_ref
-    cdef ContainerStruct __fbthrift_cached_opt_cpp2_unique_ref
+    cdef containerStruct __fbthrift_cached_opt_cpp_unique_ref
+    cdef containerStruct __fbthrift_cached_opt_cpp2_unique_ref
     cdef object __fbthrift_cached_opt_container_with_ref
-    cdef ContainerStruct __fbthrift_cached_ref_type_unique
-    cdef ContainerStruct __fbthrift_cached_ref_type_shared
+    cdef containerStruct __fbthrift_cached_ref_type_unique
+    cdef containerStruct __fbthrift_cached_ref_type_shared
     cdef object __fbthrift_cached_ref_type_const
-    cdef ContainerStruct __fbthrift_cached_req_ref_type_shared
-    cdef ContainerStruct __fbthrift_cached_req_ref_type_const
+    cdef containerStruct __fbthrift_cached_req_ref_type_shared
+    cdef containerStruct __fbthrift_cached_req_ref_type_const
     cdef object __fbthrift_cached_req_ref_type_unique
-    cdef ContainerStruct __fbthrift_cached_opt_ref_type_const
-    cdef ContainerStruct __fbthrift_cached_opt_ref_type_unique
+    cdef containerStruct __fbthrift_cached_opt_ref_type_const
+    cdef containerStruct __fbthrift_cached_opt_ref_type_unique
     cdef object __fbthrift_cached_opt_ref_type_shared
     cdef object __fbthrift_cached_list_type
     cdef object __fbthrift_cached_set_type
@@ -401,7 +401,7 @@ cdef class AnnotatedStruct(thrift.py3.types.Struct):
     cdef object __fbthrift_cached_typedef_map_template
     cdef _fbthrift_iobuf.IOBuf __fbthrift_cached_iobuf_type_val
     cdef _fbthrift_iobuf.IOBuf __fbthrift_cached_iobuf_ptr_val
-    cdef ContainerStruct __fbthrift_cached_struct_struct
+    cdef containerStruct __fbthrift_cached_struct_struct
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cAnnotatedStruct])
@@ -538,8 +538,8 @@ cdef object folly_sorted_vector_set_std_string__Set__string__from_cpp(const _mod
 cdef _module_cbindings.FakeMap FakeMap__Map__i64_double__make_instance(object items) except *
 cdef object FakeMap__Map__i64_double__from_cpp(const _module_cbindings.FakeMap&) except *
 
-cdef _module_cbindings.std_unordered_map_std_string_ContainerStruct std_unordered_map_std_string_ContainerStruct__Map__string_ContainerStruct__make_instance(object items) except *
-cdef object std_unordered_map_std_string_ContainerStruct__Map__string_ContainerStruct__from_cpp(const _module_cbindings.std_unordered_map_std_string_ContainerStruct&) except *
+cdef _module_cbindings.std_unordered_map_std_string_containerStruct std_unordered_map_std_string_containerStruct__Map__string_containerStruct__make_instance(object items) except *
+cdef object std_unordered_map_std_string_containerStruct__Map__string_containerStruct__from_cpp(const _module_cbindings.std_unordered_map_std_string_containerStruct&) except *
 
 cdef cmap[cint64_t,string] Map__i64_string__make_instance(object items) except *
 cdef object Map__i64_string__from_cpp(const cmap[cint64_t,string]&) except *

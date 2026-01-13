@@ -182,3 +182,7 @@ val force_lazy_values : t -> t
 val is_error : t -> Tvid.t -> bool
 
 val get_rank : t -> Tvid.t -> int
+
+val get_pos : t -> Pos.t option
+
+val set_pos : t -> Pos.t option -> t

@@ -104,7 +104,7 @@ let trivial_check
         Typing_solver.expand_type_and_solve
           env
           ~description_of_expected:"a value"
-          Pos.none
+          pos
           lhs_ty
       in
       let env = Typing_env.open_tyvars env pos in

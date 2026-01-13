@@ -57,6 +57,7 @@ type t = {
   tyvars_stack: (Pos.t * Tvid.t list) list;
   subtype_prop: TL.subtype_prop;
   tyvar_occurrences: Typing_tyvar_occurrences.t;
+  pos: Pos.t option;
 }
 
 module Log = struct
@@ -115,7 +116,9 @@ module Log = struct
            List (List.map l ~f:(fun i -> Atom (var_as_string i)))))
 
   let inference_env_as_value env =
-    let { tvenv; tyvars_stack; subtype_prop; tyvar_occurrences } = env in
+    let { tvenv; tyvars_stack; subtype_prop; tyvar_occurrences; pos = _ } =
+      env
+    in
     make_map
       [
         ("tvenv", tvenv_as_value tvenv);
@@ -183,6 +186,7 @@ let empty_inference_env =
     tyvars_stack = [];
     subtype_prop = TL.valid;
     tyvar_occurrences = Occ.init;
+    pos = None;
   }
 
 let empty_tyvar_constraints =
@@ -431,19 +435,26 @@ let get_tyvar_constraints_opt env var =
     None
 
 let get_tyvar_constraints_exn env var =
+  let error msg =
+    match env.pos with
+    | None ->
+      InconsistentTypeVarState
+        (Format.sprintf
+           "Attempting to get constraints for %s type variable %s."
+           msg
+           (Typing_log_value.var_as_string var))
+    | Some pos ->
+      InconsistentTypeVarState
+        (Format.asprintf
+           "Attempting to get constraints for %s type variable %s at %a."
+           msg
+           (Typing_log_value.var_as_string var)
+           Pos.pp
+           pos)
+  in
   match get_solving_info_opt env var with
-  | None ->
-    raise
-    @@ InconsistentTypeVarState
-         (Printf.sprintf
-            "Attempting to get constraints for non-existing type variable %s."
-            (Typing_log_value.var_as_string var))
-  | Some (TVIType _) ->
-    raise
-    @@ InconsistentTypeVarState
-         (Printf.sprintf
-            "Attempting to get constraints for already solved type variable %s."
-            (Typing_log_value.var_as_string var))
+  | None -> raise (error "non-existing")
+  | Some (TVIType _) -> raise (error "already solved")
   | Some (TVIConstraints constraints) -> constraints
 
 let set_tyvar_constraints env v tyvar_constraints =
@@ -768,7 +779,13 @@ module Size = struct
     solving_info_size env solving_info
 
   let inference_env_size env =
-    let { tvenv; subtype_prop = _; tyvars_stack = _; tyvar_occurrences = _ } =
+    let {
+      tvenv;
+      subtype_prop = _;
+      tyvars_stack = _;
+      tyvar_occurrences = _;
+      pos = _;
+    } =
       env
     in
     Tvid.Map.map (tyvar_info_size env) tvenv |> fun m ->
@@ -884,6 +901,7 @@ let simple_merge env1 env2 =
     subtype_prop = subtype_prop1;
     tyvars_stack = tyvars_stack1;
     tyvar_occurrences = tyvar_occurrences1;
+    pos;
   } =
     env1
   in
@@ -892,6 +910,7 @@ let simple_merge env1 env2 =
     subtype_prop = _;
     tyvars_stack = _;
     tyvar_occurrences = _;
+    pos = _;
   } =
     env2
   in
@@ -951,6 +970,7 @@ let simple_merge env1 env2 =
     subtype_prop = subtype_prop1;
     tyvars_stack = tyvars_stack1;
     tyvar_occurrences = tyvar_occurrences1;
+    pos;
   }
 
 let get_nongraph_subtype_prop env = env.subtype_prop
@@ -1001,11 +1021,11 @@ let tyvar_info_carries_information tvinfo =
   solving_info_carries_information solving_info || rank > 0
 
 let compress env =
-  let { tvenv; subtype_prop; tyvars_stack; tyvar_occurrences } = env in
+  let { tvenv; subtype_prop; tyvars_stack; tyvar_occurrences; pos } = env in
   let tvenv =
     Tvid.Map.filter (fun _k -> tyvar_info_carries_information) tvenv
   in
-  { tvenv; subtype_prop; tyvars_stack; tyvar_occurrences }
+  { tvenv; subtype_prop; tyvars_stack; tyvar_occurrences; pos }
 
 let remove_var_from_bounds
     env v ~search_in_upper_bounds_of ~search_in_lower_bounds_of =
@@ -1074,12 +1094,12 @@ let remove_var env var ~search_in_upper_bounds_of ~search_in_lower_bounds_of =
       ~search_in_lower_bounds_of
   in
   let (env, ty) = expand_var env Reason.none var in
-  let { tvenv; tyvars_stack; tyvar_occurrences; subtype_prop } = env in
+  let { tvenv; tyvars_stack; tyvar_occurrences; subtype_prop; pos } = env in
   let tyvar_occurrences = Occ.remove_var tyvar_occurrences var in
   let tvenv = Tvid.Map.remove var tvenv in
   let tyvars_stack = remove_var_from_tyvars_stack tyvars_stack var in
   let subtype_prop = replace_var_by_ty_in_prop subtype_prop var ty in
-  { tvenv; tyvars_stack; tyvar_occurrences; subtype_prop }
+  { tvenv; tyvars_stack; tyvar_occurrences; subtype_prop; pos }
 
 let force_lazy_values_tyvar_constraints (cstrs : tyvar_constraints) =
   let {
@@ -1118,12 +1138,13 @@ let force_lazy_values_tvenv (tvenv : tvenv) =
   Tvid.Map.map force_lazy_values_tyvar_info tvenv
 
 let force_lazy_values (env : t) =
-  let { tvenv; tyvars_stack; subtype_prop; tyvar_occurrences } = env in
+  let { tvenv; tyvars_stack; subtype_prop; tyvar_occurrences; pos } = env in
   {
     tvenv = force_lazy_values_tvenv tvenv;
     tyvars_stack;
     subtype_prop = TL.force_lazy_values subtype_prop;
     tyvar_occurrences;
+    pos;
   }
 
 let is_error { tvenv; _ } tvid =
@@ -1133,3 +1154,7 @@ let is_error { tvenv; _ } tvid =
 let get_rank { tvenv; _ } tvid =
   Option.value_map ~default:0 ~f:(fun { rank; _ } -> rank)
   @@ Tvid.Map.find_opt tvid tvenv
+
+let get_pos env = env.pos
+
+let set_pos env pos = { env with pos }

@@ -15,6 +15,7 @@
 #include <folly/Random.h>
 #include <folly/io/Cursor.h>
 #include <folly/tracing/ScopedTraceSection.h>
+#include <memory>
 #include <proxygen/lib/http/HTTPHeaderSize.h>
 #include <proxygen/lib/http/codec/HTTP2Codec.h>
 #include <proxygen/lib/http/codec/HTTPChecks.h>
@@ -1673,7 +1674,8 @@ void HTTPSession::onEgressMessageFinished(HTTPTransaction* txn, bool withRST) {
       if (!shutdownTransportCb_) {
         // Just for safety, the following bumps the refcount on this session
         // to keep it live until the loopCb runs
-        shutdownTransportCb_.reset(new ShutdownTransportCallback(this));
+        shutdownTransportCb_ =
+            std::make_unique<ShutdownTransportCallback>(this);
         sock_->getEventBase()->runInLoop(shutdownTransportCb_.get());
       }
     } else {

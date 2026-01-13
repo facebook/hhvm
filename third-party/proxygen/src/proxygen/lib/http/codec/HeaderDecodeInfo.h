@@ -13,6 +13,8 @@
 #include <proxygen/lib/http/codec/compress/HPACKConstants.h>
 #include <proxygen/lib/http/codec/compress/HPACKHeaderName.h>
 
+#include <memory>
+
 namespace proxygen {
 
 class HTTPMessage;
@@ -25,7 +27,7 @@ class HeaderDecodeInfo {
             bool strictValidation,
             bool allowEmptyPath) {
     CHECK(!msg);
-    msg.reset(new HTTPMessage());
+    msg = std::make_unique<HTTPMessage>();
     isRequest_ = isRequestIn;
     isRequestTrailers_ = isRequestTrailers;
     validate_ = validate;

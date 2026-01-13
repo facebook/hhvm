@@ -10,6 +10,8 @@
 
 #include <folly/Conv.h>
 
+#include <memory>
+
 using facebook::fb303::AVG;
 using facebook::fb303::COUNT;
 using facebook::fb303::PERCENT;
@@ -52,18 +54,18 @@ AsyncDNSStatsCollector::AsyncDNSStatsCollector(const std::string& prefix)
   for (uint8_t i = 0; i <= static_cast<size_t>(DNSResolver::UNKNOWN); ++i) {
     DNSResolver::ResolutionStatus status =
         static_cast<DNSResolver::ResolutionStatus>(i);
-    status_[i].reset(new BaseStats::TLTimeseries(
+    status_[i] = std::make_unique<BaseStats::TLTimeseries>(
         folly::to<std::string>(prefix, "status.", describe(status, false)),
         RATE,
-        SUM));
+        SUM);
   }
   for (uint8_t i = 0; i < 16; ++i) {
     if (i < rcodeNames.size()) {
-      rcodes_[i].reset(new BaseStats::TLTimeseries(
-          folly::to<std::string>(prefix, "rcode.", rcodeNames[i]), RATE, SUM));
+      rcodes_[i] = std::make_unique<BaseStats::TLTimeseries>(
+          folly::to<std::string>(prefix, "rcode.", rcodeNames[i]), RATE, SUM);
     } else {
-      rcodes_[i].reset(new BaseStats::TLTimeseries(
-          folly::to<std::string>(prefix, "rcode.", i), RATE, SUM));
+      rcodes_[i] = std::make_unique<BaseStats::TLTimeseries>(
+          folly::to<std::string>(prefix, "rcode.", i), RATE, SUM);
     }
   }
 }

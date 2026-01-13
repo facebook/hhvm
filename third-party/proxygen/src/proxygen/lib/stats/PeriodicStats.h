@@ -14,6 +14,7 @@
 #include <folly/ThreadLocal.h>
 #include <folly/executors/FunctionScheduler.h>
 #include <folly/synchronization/Rcu.h>
+#include <memory>
 
 namespace proxygen {
 
@@ -88,7 +89,7 @@ class PeriodicStats {
     std::lock_guard<std::mutex> guard(schedulerMutex_);
     refreshPeriodMs_ = periodMs;
     if (!scheduler_) {
-      scheduler_.reset(new folly::FunctionScheduler());
+      scheduler_ = std::make_unique<folly::FunctionScheduler>();
       scheduler_->setThreadName("periodic_stats");
       // Steady here implies that scheduling will be fixed as opposed to
       // offsetting from the current time which is desired to ensure minimal

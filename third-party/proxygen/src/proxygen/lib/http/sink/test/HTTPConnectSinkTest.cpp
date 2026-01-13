@@ -12,6 +12,8 @@
 #include <folly/portability/GTest.h>
 #include <proxygen/lib/http/sink/HTTPConnectSink.h>
 
+#include <memory>
+
 #include "proxygen/facebook/revproxy/test/MockHTTPTransactionHandler.h"
 
 namespace proxygen {
@@ -36,8 +38,8 @@ class HTTPConnectSinkTest : public Test {
     evb_ = folly::EventBaseManager::get()->getEventBase();
     mockSocket_ = new MockAsyncTransport();
     mockHandler_ = new MockHTTPTransactionHandler();
-    sink_ = std::unique_ptr<TestHTTPConnectSink>(new TestHTTPConnectSink(
-        folly::AsyncTransport::UniquePtr(mockSocket_), mockHandler_));
+    sink_ = std::make_unique<TestHTTPConnectSink>(
+        folly::AsyncTransport::UniquePtr(mockSocket_), mockHandler_);
     sinkDeleted_ = std::make_shared<bool>(false);
     sink_->isDeleted = sinkDeleted_;
   }

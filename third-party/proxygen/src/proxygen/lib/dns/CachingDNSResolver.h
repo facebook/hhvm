@@ -9,6 +9,7 @@
 #pragma once
 
 #include <chrono>
+#include <memory>
 #include <vector>
 
 #include <folly/container/EvictingCacheMap.h>
@@ -28,14 +29,14 @@ class CachingDNSResolver : public DNSResolver {
     return UniquePtr(new CachingDNSResolver(std::forward<Args>(args)...));
   }
 
-  explicit CachingDNSResolver(DNSResolver::UniquePtr resolver,
-                              size_t cacheMaxSize = 4096,
-                              size_t cacheClearSize = 256,
-                              size_t staleCacheSizeMultiplier = 4,
-                              size_t staleCacheTTLMin = 24 * 60 * 60,
-                              size_t staleCacheTTLScale = 3,
-                              std::unique_ptr<TimeUtil> timeUtil =
-                                  std::unique_ptr<TimeUtil>(new TimeUtil()))
+  explicit CachingDNSResolver(
+      DNSResolver::UniquePtr resolver,
+      size_t cacheMaxSize = 4096,
+      size_t cacheClearSize = 256,
+      size_t staleCacheSizeMultiplier = 4,
+      size_t staleCacheTTLMin = 24 * 60 * 60,
+      size_t staleCacheTTLScale = 3,
+      std::unique_ptr<TimeUtil> timeUtil = std::make_unique<TimeUtil>())
       : resolver_(std::move(resolver)),
         cache_(cacheMaxSize, cacheClearSize),
         staleCache_(cacheMaxSize * staleCacheSizeMultiplier, cacheClearSize),

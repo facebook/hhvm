@@ -15,6 +15,7 @@
 #include <folly/io/async/HHWheelTimer.h>
 #include <folly/lang/Assume.h>
 #include <iosfwd>
+#include <memory>
 #include <proxygen/lib/http/HTTPConstants.h>
 #include <proxygen/lib/http/HTTPHeaderSize.h>
 #include <proxygen/lib/http/HTTPMessage.h>
@@ -1258,7 +1259,7 @@ class HTTPTransaction
             HTTPTransactionEgressSM::Event::sendTrailers)) {
       return;
     }
-    trailers_.reset(new HTTPHeaders(trailers));
+    trailers_ = std::make_unique<HTTPHeaders>(trailers);
   }
 
   /**

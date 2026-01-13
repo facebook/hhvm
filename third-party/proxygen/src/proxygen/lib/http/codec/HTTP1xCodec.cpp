@@ -17,6 +17,8 @@
 #include <proxygen/lib/http/codec/CodecProtocol.h>
 #include <proxygen/lib/http/codec/CodecUtil.h>
 
+#include <memory>
+
 using folly::IOBuf;
 using folly::IOBufQueue;
 using folly::StringPiece;
@@ -853,7 +855,7 @@ int HTTP1xCodec::onMessageBegin() {
   headerSize_.uncompressed = 0;
   headerSize_.compressed = 0;
   headerParseState_ = HeaderParseState::kParsingHeaderStart;
-  msg_.reset(new HTTPMessage());
+  msg_ = std::make_unique<HTTPMessage>();
   trailers_.reset();
   if (transportDirection_ == TransportDirection::DOWNSTREAM) {
     requestPending_ = true;
@@ -921,7 +923,7 @@ int HTTP1xCodec::onHeaderField(const char* buf, size_t len) {
     valid = pushHeaderNameAndValue(msg_->getHeaders());
   } else if (headerParseState_ == HeaderParseState::kParsingTrailerValue) {
     if (!trailers_) {
-      trailers_.reset(new HTTPHeaders());
+      trailers_ = std::make_unique<HTTPHeaders>();
     }
     valid = pushHeaderNameAndValue(*trailers_);
   }
@@ -1215,7 +1217,7 @@ int HTTP1xCodec::onMessageComplete() {
   DCHECK(!inRecvLastChunk_);
   if (headerParseState_ == HeaderParseState::kParsingTrailerValue) {
     if (!trailers_) {
-      trailers_.reset(new HTTPHeaders());
+      trailers_ = std::make_unique<HTTPHeaders>();
     }
     if (!pushHeaderNameAndValue(*trailers_)) {
       return -1;

@@ -26,6 +26,7 @@ from collections.abc import (
 )
 from typing import (
     Any,
+    Callable,
     Generic,
     Iterable,
     List,
@@ -146,6 +147,9 @@ class MutableList(MutableSequence[T]):
     ) -> None: ...
     def pop(self, index: int = -1) -> T: ...
     def clear(self) -> None: ...
+    def sort(
+        self, *, key: Optional[Callable[[T], Any]] = None, reverse: bool = False
+    ) -> None: ...
     @overload
     def __add__(self, other: Iterable[T]) -> MutableList[T]: ...
     @overload

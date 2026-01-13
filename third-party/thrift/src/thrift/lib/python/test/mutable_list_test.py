@@ -279,6 +279,31 @@ class MutableListTest(unittest.TestCase):
         mutable_list.clear()
         self.assertEqual(0, len(mutable_list))
 
+    def test_sort_ints(self) -> None:
+        mutable_list = _create_MutableList_i32([1, 4, 2])
+        mutable_list.sort()
+        self.assertEqual(mutable_list, [1, 2, 4])
+
+    def test_sort_ints_key(self) -> None:
+        mutable_list = _create_MutableList_i32([2, 1, 3, 6, 5, 0])
+        mutable_list.sort(key=lambda x: x % 3)
+        self.assertEqual(mutable_list, [3, 6, 0, 1, 2, 5])
+
+    def test_sort_ints_reverse(self) -> None:
+        mutable_list = _create_MutableList_i32([1, 4, 2])
+        mutable_list.sort(reverse=True)
+        self.assertEqual(mutable_list, [4, 2, 1])
+
+    def test_sort_empty_ints(self) -> None:
+        mutable_list = _create_MutableList_i32([])
+        mutable_list.sort()
+        self.assertEqual(mutable_list, [])
+
+    def test_sort_struct(self) -> None:
+        lists = Lists(structList=to_thrift_list([Foo(value=1), Foo(value=0)]))
+        lists.structList.sort()
+        self.assertEqual(lists.structList, [Foo(value=0), Foo(value=1)])
+
     def test_contains(self) -> None:
         mutable_list = _create_MutableList_i32([])
         mutable_list.extend(range(10))

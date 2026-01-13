@@ -64,16 +64,22 @@ cdef class MutableList:
     """
     A mutable container used to represent a Thrift mutable list.
     It implements the [`MutableSequence` abstract base class](https://docs.python.org/3.10/library/collections.abc.html#collections-abstract-base-classes).
-    Additionally, it supports other methods from the built-in `list` data type,
-    including `append()`, `extend()`, `pop()` `clear()`, and `remove()`.
 
-    The `_list_data` member of `MutableList` is a reference to the `list` in
-    the mutable struct tuple (`struct._fbthrift_data`). Any change to
-    `_list_data` results in an actual update to the connected Thrift struct.
-    Additionally, any update operation on the `list` elements follows the type
-    checking rules. For instance, if it is `list<i32>`, assigning a `string`
-    will raise a `TypeError`. Another consequence of the type checking is that
-    `MutableList` cannot contain `None` elements.
+    Additionally, it supports other methods from the built-in `list` data type,
+    including `append()`, `extend()`, `pop()` `clear()`, `remove()` and `sort()`.
+
+    Attributes:
+        _list_data (Python list): reference to the the `list` in the mutable struct
+            tuple (`struct._fbthrift_data`). Any change to `_list_data` results in an
+            actual update to the connected Thrift struct.
+
+            Additionally, any update operation on the `list` elements follows the type
+            checking rules. For instance, if it is `list<i32>`, assigning a `string`
+            will raise a `TypeError`. Another consequence of the type checking is that
+            `MutableList` cannot contain `None` elements.
+        _val_typeinfo (TypeInfoBase): The type of the values in this list.
+        _value_type_is_container (bool): Whether the values of this list are (nested)
+            containers.
     """
     def __cinit__(self, TypeInfoBase value_typeinfo, list list_data):
         self._val_typeinfo = value_typeinfo
@@ -121,6 +127,9 @@ cdef class MutableList:
 
     def clear(self):
         self._list_data.clear()
+
+    def sort(self, *, object key=None, object reverse=False):
+        self._list_data.sort(key=key, reverse=reverse)
 
     def __eq__(self, other):
         return list_eq(self, other)

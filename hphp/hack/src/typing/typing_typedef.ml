@@ -277,6 +277,10 @@ let typedef_def ctx typedef =
   } =
     typedef
   in
+  let env = Env.set_current_module env t_module in
+  let env = Env.set_internal env t_internal in
+  let env = Env.set_current_package_membership env t_package in
+  let (env, file_attributes) = Typing.file_attributes env t_file_attributes in
   let (do_report_cycles, hint_constraints_pairs) =
     match t_assignment with
     | SimpleTypeDef { tvh_vis = _; tvh_hint } ->
@@ -290,9 +294,6 @@ let typedef_def ctx typedef =
         List.map (variant :: variants) ~f:(fun v ->
             (v.tctv_hint, Some v.tctv_where_constraints)) )
   in
-  let env = Env.set_current_module env t_module in
-  let env = Env.set_internal env t_internal in
-  let env = Env.set_current_package_membership env t_package in
   let (env, ty_err_opt1) =
     Phase.localize_and_add_ast_generic_parameters_and_where_constraints
       env
@@ -366,7 +367,6 @@ let typedef_def ctx typedef =
       t_user_attributes
   in
   let (env, tparams) = List.map_env env t_tparams ~f:Typing.type_param in
-  let (env, file_attributes) = Typing.file_attributes env t_file_attributes in
   {
     Aast.t_annotation = Env.save (Env.get_tpenv env) env;
     t_name;

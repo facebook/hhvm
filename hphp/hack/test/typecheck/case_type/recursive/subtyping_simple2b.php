@@ -1,5 +1,5 @@
 <?hh
-<<file: __EnableUnstableFeatures('case_types')>>
+<<file: __EnableUnstableFeatures('case_types', 'recursive_case_types')>>
 
 case type A as int = A
   | int; // A | int <: int -> A <: int && int <: int -> A <: int -> recursing -> ?

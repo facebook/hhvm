@@ -33,6 +33,7 @@ impl FeatureName {
             Package => OngoingRelease,
             CaseTypes => OngoingRelease,
             CaseTypeWhereClauses => Preview,
+            RecursiveCaseTypes => Preview,
             ModuleLevelTraits => OngoingRelease,
             ModuleLevelTraitsExtensions => OngoingRelease,
             TypedLocalVariables => Preview,

@@ -494,6 +494,8 @@ let set_tcopt_unstable_features env { fa_user_attributes; _ } =
           Env.map_tcopt
             ~f:(fun t -> TCO.set_tco_enable_expression_trees t true)
             env
+        | Aast.String s when s = SN.UnstableFeatures.recursive_case_types ->
+          Env.map_tcopt ~f:TCO.enable_recursive_case_types env
         | _ -> env)
 
 let check_expected_ty_res

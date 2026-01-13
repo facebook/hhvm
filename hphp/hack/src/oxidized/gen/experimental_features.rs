@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<740162ade9a7c9f0eacb2b63285157b5>>
+// @generated SignedSource<<8ce69737a12d0e4412da0fe26d1c0299>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -103,6 +103,7 @@ pub enum FeatureName {
     Package,
     CaseTypes,
     CaseTypeWhereClauses,
+    RecursiveCaseTypes,
     ModuleLevelTraits,
     ModuleLevelTraitsExtensions,
     TypedLocalVariables,

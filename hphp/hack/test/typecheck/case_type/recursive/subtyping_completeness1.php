@@ -1,4 +1,4 @@
-<?hh
+<?hh <<file: __EnableUnstableFeatures('recursive_case_types')>>
 
 case type A = vec<A>;
 case type B = vec<B>;

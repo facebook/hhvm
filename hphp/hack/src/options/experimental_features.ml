@@ -48,6 +48,7 @@ type feature_name =
   | Package
   | CaseTypes
   | CaseTypeWhereClauses
+  | RecursiveCaseTypes
   | ModuleLevelTraits
   | ModuleLevelTraitsExtensions
   | TypedLocalVariables
@@ -98,6 +99,7 @@ let feature_name_map =
       ("package", Package);
       ("case_types", CaseTypes);
       ("case_type_where_clauses", CaseTypeWhereClauses);
+      ("recursive_case_types", RecursiveCaseTypes);
       ("module_level_traits", ModuleLevelTraits);
       ("module_level_traits_extensions", ModuleLevelTraitsExtensions);
       ("typed_local_variables", TypedLocalVariables);

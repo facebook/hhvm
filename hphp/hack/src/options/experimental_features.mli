@@ -42,6 +42,7 @@ type feature_name =
   | Package
   | CaseTypes
   | CaseTypeWhereClauses
+  | RecursiveCaseTypes
   | ModuleLevelTraits
   | ModuleLevelTraitsExtensions
   | TypedLocalVariables

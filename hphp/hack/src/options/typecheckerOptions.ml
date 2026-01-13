@@ -358,3 +358,6 @@ let class_pointer_ban_class_array_key t =
   t.GlobalOptions.class_pointer_ban_class_array_key
 
 let tco_poly_function_pointers t = t.GlobalOptions.tco_poly_function_pointers
+
+let enable_recursive_case_types t =
+  { t with GlobalOptions.recursive_case_types = true }

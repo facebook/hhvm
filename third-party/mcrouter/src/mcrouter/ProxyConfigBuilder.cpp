@@ -86,7 +86,9 @@ ProxyConfigBuilder::buildGlobalParams(
       {"router-name", opts.router_name},
       {"service-name", opts.service_name},
       {"service-router-capable", sr_linked},
-      {"router-info-name", routerInfoName}};
+      {"router-info-name", routerInfoName},
+      {"num-proxies", opts.num_proxies},
+  };
 
   auto additionalParams = additionalConfigParams();
   for (auto& it : additionalParams) {

@@ -167,6 +167,27 @@ bool simplify(Env& env, const movzbl& inst, Vlabel b, size_t i) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+bool simplify(Env& env, const movsbq& inst, Vlabel b, size_t i) {
+  // movsbq{s, tmp}; shlqi{imm, tmp, d} -> sbfizq{imm, 8, s, d}
+  return if_inst<Vinstr::shlqi>(env, b, i + 1, [&] (const shlqi& sh) {
+    if (inst.d != sh.s1) return false;
+    if (env.use_counts[inst.d] != 1) return false;
+    if (sh.fl) return false;
+    if (sh.sf.isValid() && env.use_counts[sh.sf]) return false;
+
+    auto const shift = sh.s0.l();
+    if (shift < 0 || shift > 56) return false;
+
+    return simplify_impl(env, b, i, [&] (Vout& v) {
+      auto const src = Vreg64(Vreg(inst.s));
+      v << sbfizq{sh.s0, Immed{8}, src, sh.d};
+      return 2;
+    });
+  });
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 int is_adjacent_vptr64(const Vptr64& a, const Vptr64& b, int32_t step, int32_t min_disp, int32_t max_disp) {
   const int32_t min_disp_val = a.disp < b.disp ? a.disp : b.disp;
   if (a.base.isValid() && b.base.isValid() &&

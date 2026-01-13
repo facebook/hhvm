@@ -11,6 +11,8 @@
 #include <folly/portability/GMock.h>
 #include <proxygen/lib/http/codec/HTTPCodec.h>
 
+#include <memory>
+
 namespace proxygen {
 
 #if defined(__clang__) && __clang_major__ >= 3 && __clang_minor__ >= 6
@@ -189,9 +191,7 @@ class MockHTTPCodecCallback : public HTTPCodec::Callback {
   void onError(HTTPCodec::StreamID stream,
                const HTTPException& exc,
                bool newStream) override {
-    onError(stream,
-            std::shared_ptr<HTTPException>(new HTTPException(exc)),
-            newStream);
+    onError(stream, std::make_shared<HTTPException>(exc), newStream);
   }
   MOCK_METHOD(void,
               onFrameHeader,

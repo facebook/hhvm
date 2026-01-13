@@ -17,4 +17,4 @@ python_patch: python_patch src/module.thrift
 python_does_not_have_py_deprecated: mstch_python:does_not_have_py_deprecated src/module.thrift
 python_does_not_have_py_deprecated_asyncio: mstch_python:does_not_have_py_deprecated_asyncio src/module.thrift
 python_has_neither_py_deprecated_nor_py_deprecated_asyncio: mstch_python:does_not_have_py_deprecated,does_not_have_py_deprecated_asyncio src/module.thrift
-python_no_metadata: mstch_python src/module.thrift
+python_no_metadata: mstch_python:no_metadata src/module.thrift

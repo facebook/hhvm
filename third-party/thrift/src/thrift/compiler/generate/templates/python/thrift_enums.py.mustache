@@ -20,6 +20,7 @@ Generated Python enums for Thrift types
 {{#import "common/common" as m_common}}
 {{#partial m_common.auto_generated_py}}
 import builtins
+{{#if (not (has_compiler_option? "no_metadata"))}}
 {{#if (has_compiler_option? "avoid_enum_metadata_circular_reference")}}
 import importlib
 from types import ModuleType
@@ -28,6 +29,7 @@ from types import ModuleType
 
 import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 {{/if (has_compiler_option? "avoid_enum_metadata_circular_reference")}}
+{{/if (not (has_compiler_option? "no_metadata"))}}
 import {{program.base_library_package}}.types as _fbthrift_python_types
 {{#each program.include_namespaces as |include|}}
   {{#if include.has_types?}}
@@ -40,11 +42,13 @@ import typing as _std_python_typing
 {{!
     This is necessary because thrift_abstract_types.py imports this.
 }}
+{{#if (not (has_compiler_option? "no_metadata"))}}
 {{#if (has_compiler_option? "avoid_enum_metadata_circular_reference")}}
 
 def _fbthrift__import_ThriftMetadata() -> ModuleType:
     return importlib.import_module("apache.thrift.metadata.thrift_types")
 {{/if (has_compiler_option? "avoid_enum_metadata_circular_reference")}}
+{{/if (not (has_compiler_option? "no_metadata"))}}
 
 
 class {{enum.name}}(_fbthrift_python_types.{{#if enum.flags?}}Flag{{#else}}Enum, int{{/if}}):
@@ -59,10 +63,12 @@ class {{enum.name}}(_fbthrift_python_types.{{#if enum.flags?}}Flag{{#else}}Enum,
     def __get_thrift_uri__() -> _std_python_typing.Optional[builtins.str]:
         return {{#if (string.empty? enum.uri)}}None{{#else}}"{{enum.uri}}"{{/if}}
 
+{{#if (not (has_compiler_option? "no_metadata"))}}
     @staticmethod
     def __get_metadata__() -> {{> metadata/metadata_return_type}}
         return gen_metadata_enum_{{enum.name}}()
 
+{{/if (not (has_compiler_option? "no_metadata"))}}
     def _to_python(self) -> "{{enum.name}}":
         return self
 
@@ -83,6 +89,7 @@ class {{enum.name}}(_fbthrift_python_types.{{#if enum.flags?}}Flag{{#else}}Enum,
         return self.value
 {{/each}}
 
+{{#if (not (has_compiler_option? "no_metadata"))}}
 {{#each program.enums as |enum|}}
 def _fbthrift_gen_metadata_enum_{{enum.name}}({{!
 }}metadata_struct: {{> metadata/metadata_thrift_type}}) -> {{> metadata/metadata_return_type}}
@@ -121,6 +128,7 @@ def gen_metadata_enum_{{enum.name}}() -> {{> metadata/metadata_return_type}}
     )
 
 {{/each}}
+{{/if (not (has_compiler_option? "no_metadata"))}}
 {{#each (array.enumerate program.typedefs with_first=true) as |i typedef first?|}}
   {{#if first?}}
 {{! Enum typedefs }}

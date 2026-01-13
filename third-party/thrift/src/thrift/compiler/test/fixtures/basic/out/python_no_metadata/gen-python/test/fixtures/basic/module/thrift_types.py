@@ -140,9 +140,6 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
     def _fbthrift_auto_migrate_enabled(cls):
         return False
 
-    @staticmethod
-    def __get_metadata__():
-        return _fbthrift_metadata__struct_MyStruct()
 
     def _to_python(self):
         return self
@@ -221,9 +218,6 @@ class Containers(metaclass=_fbthrift_python_types.StructMeta):
     def _fbthrift_auto_migrate_enabled(cls):
         return False
 
-    @staticmethod
-    def __get_metadata__():
-        return _fbthrift_metadata__struct_Containers()
 
     def _to_python(self):
         return self
@@ -269,9 +263,6 @@ class MyDataItem(metaclass=_fbthrift_python_types.StructMeta):
     def _fbthrift_auto_migrate_enabled(cls):
         return False
 
-    @staticmethod
-    def __get_metadata__():
-        return _fbthrift_metadata__struct_MyDataItem()
 
     def _to_python(self):
         return self
@@ -364,9 +355,6 @@ class MyUnion(metaclass=_fbthrift_python_types.UnionMeta):
     def _fbthrift_auto_migrate_enabled(cls):
         return False
 
-    @staticmethod
-    def __get_metadata__():
-        return _fbthrift_metadata__struct_MyUnion()
 
     def _to_python(self):
         return self
@@ -459,9 +447,6 @@ class MyException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
     def _fbthrift_auto_migrate_enabled(cls):
         return False
 
-    @staticmethod
-    def __get_metadata__():
-        return _fbthrift_metadata__exception_MyException()
 
     def _to_python(self):
         return self
@@ -552,9 +537,6 @@ class MyExceptionWithMessage(metaclass=_fbthrift_python_exceptions.GeneratedErro
     def _fbthrift_auto_migrate_enabled(cls):
         return False
 
-    @staticmethod
-    def __get_metadata__():
-        return _fbthrift_metadata__exception_MyExceptionWithMessage()
 
 
     def __str__(self):
@@ -616,9 +598,6 @@ class ReservedKeyword(metaclass=_fbthrift_python_types.StructMeta):
     def _fbthrift_auto_migrate_enabled(cls):
         return False
 
-    @staticmethod
-    def __get_metadata__():
-        return _fbthrift_metadata__struct_ReservedKeyword()
 
     def _to_python(self):
         return self
@@ -678,9 +657,6 @@ class UnionToBeRenamed(metaclass=_fbthrift_python_types.UnionMeta):
     def _fbthrift_auto_migrate_enabled(cls):
         return False
 
-    @staticmethod
-    def __get_metadata__():
-        return _fbthrift_metadata__struct_UnionToBeRenamed()
 
     def _to_python(self):
         return self
@@ -710,45 +686,11 @@ class UnionToBeRenamed(metaclass=_fbthrift_python_types.UnionMeta):
 _fbthrift_ABCMeta.register(_fbthrift_abstract_types.UnionToBeRenamed, UnionToBeRenamed)
 _fbthrift_UnionToBeRenamed = UnionToBeRenamed
 
-# This unfortunately has to be down here to prevent circular imports
-import test.fixtures.basic.module.thrift_metadata as _fbthrift__test__fixtures__basic__module__thrift_metadata
 
 _fbthrift_all_enums = [
     MyEnum,
     HackEnum,
 ]
-
-
-def _fbthrift_metadata__struct_MyStruct():
-    return _fbthrift__test__fixtures__basic__module__thrift_metadata.gen_metadata_struct_MyStruct()
-
-
-def _fbthrift_metadata__struct_Containers():
-    return _fbthrift__test__fixtures__basic__module__thrift_metadata.gen_metadata_struct_Containers()
-
-
-def _fbthrift_metadata__struct_MyDataItem():
-    return _fbthrift__test__fixtures__basic__module__thrift_metadata.gen_metadata_struct_MyDataItem()
-
-
-def _fbthrift_metadata__struct_MyUnion():
-    return _fbthrift__test__fixtures__basic__module__thrift_metadata.gen_metadata_struct_MyUnion()
-
-
-def _fbthrift_metadata__exception_MyException():
-    return _fbthrift__test__fixtures__basic__module__thrift_metadata.gen_metadata_exception_MyException()
-
-
-def _fbthrift_metadata__exception_MyExceptionWithMessage():
-    return _fbthrift__test__fixtures__basic__module__thrift_metadata.gen_metadata_exception_MyExceptionWithMessage()
-
-
-def _fbthrift_metadata__struct_ReservedKeyword():
-    return _fbthrift__test__fixtures__basic__module__thrift_metadata.gen_metadata_struct_ReservedKeyword()
-
-
-def _fbthrift_metadata__struct_UnionToBeRenamed():
-    return _fbthrift__test__fixtures__basic__module__thrift_metadata.gen_metadata_struct_UnionToBeRenamed()
 
 
 _fbthrift_all_structs = [

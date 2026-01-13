@@ -139,9 +139,6 @@ class MyStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     def __get_thrift_uri__():
         return "test.dev/fixtures/basic/MyStruct"
 
-    @staticmethod
-    def __get_metadata__():
-        raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
 
     def _to_python(self):
@@ -217,9 +214,6 @@ class Containers(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     def __get_thrift_uri__():
         return "test.dev/fixtures/basic/Containers"
 
-    @staticmethod
-    def __get_metadata__():
-        raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
 
     def _to_python(self):
@@ -262,9 +256,6 @@ class MyDataItem(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     def __get_thrift_uri__():
         return "test.dev/fixtures/basic/MyDataItem"
 
-    @staticmethod
-    def __get_metadata__():
-        raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
 
     def _to_python(self):
@@ -354,9 +345,6 @@ class MyUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
     def __get_thrift_uri__():
         return "test.dev/fixtures/basic/MyUnion"
 
-    @staticmethod
-    def __get_metadata__():
-        raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
 
     def _to_python(self):
@@ -446,9 +434,6 @@ class MyException(metaclass=_fbthrift_python_mutable_exceptions.MutableGenerated
     def __get_thrift_uri__():
         return "test.dev/fixtures/basic/MyException"
 
-    @staticmethod
-    def __get_metadata__():
-        raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
 
     def _to_python(self):
@@ -536,9 +521,6 @@ class MyExceptionWithMessage(metaclass=_fbthrift_python_mutable_exceptions.Mutab
     def __get_thrift_uri__():
         return "test.dev/fixtures/basic/MyExceptionWithMessage"
 
-    @staticmethod
-    def __get_metadata__():
-        raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
 
     def __str__(self):
@@ -597,9 +579,6 @@ class ReservedKeyword(metaclass=_fbthrift_python_mutable_types.MutableStructMeta
     def __get_thrift_uri__():
         return "test.dev/fixtures/basic/ReservedKeyword"
 
-    @staticmethod
-    def __get_metadata__():
-        raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
 
     def _to_python(self):
@@ -656,9 +635,6 @@ class UnionToBeRenamed(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta
     def __get_thrift_uri__():
         return "test.dev/fixtures/basic/UnionToBeRenamed"
 
-    @staticmethod
-    def __get_metadata__():
-        raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
 
     def _to_python(self):

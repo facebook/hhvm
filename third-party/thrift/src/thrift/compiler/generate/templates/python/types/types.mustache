@@ -118,9 +118,11 @@ class {{#partial m_types.unadapted_name type=struct}}{{!
     def _fbthrift_auto_migrate_enabled(cls):
         return {{(py_bool (has_compiler_option? "auto_migrate"))}}
 
+{{#if (not (has_compiler_option? "no_metadata"))}}
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__{{#if struct.exception?}}exception{{#else}}struct{{/if}}_{{#partial m_types.unadapted_name type=struct}}()
+{{/if (not (has_compiler_option? "no_metadata"))}}
     {{!
       makes reflection work in auto-migrated thrift-py3
     }}{{#if (has_compiler_option? "auto_migrate")}}
@@ -133,9 +135,11 @@ class {{#partial m_types.unadapted_name type=struct}}{{!
     {{/if (has_compiler_option? "auto_migrate")}}
 {{/if python.generate_immutable_types?}}
 {{#if python.generate_mutable_types?}}
+{{#if (not (has_compiler_option? "no_metadata"))}}
     @staticmethod
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
+{{/if (not (has_compiler_option? "no_metadata"))}}
 {{/if python.generate_mutable_types?}}
 
     {{#if (and struct.exception? (object.notnull? struct.message_field))}}
@@ -232,8 +236,10 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.{{#partial m_types.unadapted
 }}{{/each}}
 
   {{#if python.generate_immutable_types?}}
+{{#if (not (has_compiler_option? "no_metadata"))}}
 # This unfortunately has to be down here to prevent circular imports
 import {{program.module_path}}.thrift_metadata as {{program.module_mangle}}__thrift_metadata
+{{/if (not (has_compiler_option? "no_metadata"))}}
   {{/if python.generate_immutable_types?}}
 
 {{!
@@ -249,6 +255,7 @@ _fbthrift_all_enums = [
     {{/each}}
 ]
 {{#if python.generate_immutable_types?}}
+{{#if (not (has_compiler_option? "no_metadata"))}}
   {{#each program.structured_definitions as |struct|}}
     {{#let structured_kind = (if struct.exception? "exception" "struct")}}
 
@@ -256,6 +263,7 @@ _fbthrift_all_enums = [
 def _fbthrift_metadata__{{structured_kind}}_{{#partial m_types.unadapted_name type=struct}}():
     return {{program.module_mangle}}__thrift_metadata.gen_metadata_{{structured_kind}}_{{#partial m_types.unadapted_name type=struct}}()
   {{/each}}
+{{/if (not (has_compiler_option? "no_metadata"))}}
 {{/if python.generate_immutable_types?}}
 
 

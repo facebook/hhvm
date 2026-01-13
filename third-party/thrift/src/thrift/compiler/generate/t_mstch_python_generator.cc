@@ -1176,7 +1176,9 @@ class t_mstch_python_generator : public t_mstch_python_prototypes_generator {
       program_->set_include_prefix(std::string(include_prefix));
     }
     generate_types();
-    generate_metadata();
+    if (!has_compiler_option("no_metadata")) {
+      generate_metadata();
+    }
     generate_clients();
     generate_services();
   }

@@ -7,7 +7,6 @@
 
 #include "watchman/fs/FileDescriptor.h"
 #include <folly/String.h>
-#include <folly/system/Pid.h>
 #include <system_error>
 #include "watchman/fs/FSDetect.h"
 #include "watchman/fs/FileInformation.h"
@@ -228,19 +227,9 @@ w_string FileDescriptor::getOpenedPath() const {
 #elif defined(__linux__) || defined(__sun)
   char procpath[1024];
 #if defined(__linux__)
-  snprintf(
-      procpath,
-      sizeof(procpath),
-      "/proc/%d/fd/%d",
-      folly::get_cached_pid(),
-      fd_);
+  snprintf(procpath, sizeof(procpath), "/proc/self/fd/%d", fd_);
 #elif defined(__sun)
-  snprintf(
-      procpath,
-      sizeof(procpath),
-      "/proc/%d/path/%d",
-      folly::get_cached_pid(),
-      fd_);
+  snprintf(procpath, sizeof(procpath), "/proc/self/path/%d", fd_);
 #endif
 
   // Avoid an extra stat by speculatively attempting to read into

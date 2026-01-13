@@ -16,6 +16,8 @@
 
 #include <thrift/conformance/stresstest/util/IoUringUtil.h>
 
+#include <folly/IPAddress.h>
+
 DEFINE_bool(use_iouring_event_eventfd, true, "");
 DEFINE_int32(io_capacity, 0, "");
 DEFINE_int32(io_submit_sqe, 0, "");
@@ -39,8 +41,20 @@ namespace apache::thrift::stress {
 #if FOLLY_HAVE_WEAK_SYMBOLS
 FOLLY_ATTR_WEAK int resolve_napi_callback(
     int /*ifindex*/, uint32_t /*queueId*/);
+FOLLY_ATTR_WEAK int src_port_callback(
+    const folly::IPAddress& /*destAddr*/,
+    uint16_t /*destPort*/,
+    int /*targetNapiId*/,
+    const char* /*ifname*/);
 #else
 static int resolve_napi_callback(int /*ifindex*/, uint32_t /*queueId*/) {
+  return -1;
+}
+static int src_port_callback(
+    const folly::IPAddress& /*destAddr*/,
+    uint16_t /*destPort*/,
+    int /*targetNapiId*/,
+    const char* /*ifname*/) {
   return -1;
 }
 #endif
@@ -101,7 +115,8 @@ folly::IoUringBackend::Options getIoUringOptions() {
         .setZeroCopyRxQueue(currQueueId.fetch_add(1))
         .setZeroCopyRxNumPages(FLAGS_io_zcrx_num_pages)
         .setZeroCopyRxRefillEntries(FLAGS_io_zcrx_refill_entries)
-        .setResolveNapiCallback(resolve_napi_callback);
+        .setResolveNapiCallback(resolve_napi_callback)
+        .setZcrxSrcPortCallback(src_port_callback);
   }
 
   return options;

@@ -465,10 +465,10 @@ void logResume(SrcKey sk, ResumeFlags flags) {
   }
   ent.setStr("inst", sk.showInst());
 
-  ent.setInt("main_used_bytes", tc::code().main().used());
-  ent.setInt("cold_used_bytes", tc::code().cold().used());
-  ent.setInt("frozen_used_bytes", tc::code().frozen().used());
-  ent.setInt("data_used_bytes", tc::code().data().used());
+  ent.setInt("main_used_bytes", tc::code().mainUsed());
+  ent.setInt("cold_used_bytes", tc::code().coldUsed());
+  ent.setInt("frozen_used_bytes", tc::code().frozenUsed());
+  ent.setInt("data_used_bytes", tc::code().dataUsed());
 
   if (auto const sr = tc::findSrcRec(sk)) {
     auto const lock = sr->readlock();

@@ -50,6 +50,14 @@ static size_t fileSize(FILE* f) {
 void OfflineCode::openFiles(TCA tcRegionBases[TCRCount]) {
 
   for (size_t i = 0; i < TCRCount; i++) {
+    if (i && tcRegionBases[i] == tcRegionBases[0]) {
+      // We're looking at a dump from a VM running with dynamically sized
+      // sections so all of the code will be in the A file.
+      tcRegions[i].file = tcRegions[0].file;
+      tcRegions[i].baseAddr = tcRegions[0].baseAddr;
+      tcRegions[i].len = tcRegions[0].len;
+      continue;
+    }
     string fileName = dumpDir + tcRegionFileNames[i];
     tcRegions[i].file = fopen(fileName.c_str(), "rb");
     if (!tcRegions[i].file) {
@@ -65,6 +73,7 @@ void OfflineCode::openFiles(TCA tcRegionBases[TCRCount]) {
 
 void OfflineCode::closeFiles() {
   for (size_t i = 0; i < TCRCount; i++) {
+    if (i && tcRegions[i].baseAddr == tcRegions[0].baseAddr) continue;
     fclose(tcRegions[i].file);
   }
 }
@@ -77,6 +86,18 @@ bool OfflineCode::tcRegionContains(TCRegion tcr, TCA addr) const {
 
 // Returns TCRegion containing addr if any, TCRCount otherwise.
 TCRegion OfflineCode::findTCRegionContaining(TCA addr) const {
+  if (tcRegionContains(TCRMain, addr) &&
+      tcRegionContains(TCRCold, addr) &&
+      tcRegionContains(TCRFrozen, addr)) {
+    auto idx = (addr - tcRegions[TCRMain].baseAddr) >> 21;
+    always_assert(idx < blockMap.size());
+    switch (blockMap[idx]) {
+    case 'm': return TCRMain;
+    case 'c': return TCRCold;
+    case 'f': return TCRFrozen;
+    default: break;
+    }
+  }
   for (int tcr = 0; tcr < TCRCount; tcr++) {
     if (tcRegionContains((TCRegion)tcr, addr)) return (TCRegion)tcr;
   }

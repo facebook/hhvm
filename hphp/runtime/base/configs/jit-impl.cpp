@@ -86,6 +86,10 @@ bool JitLoader::LayoutProfileSplitHotColdDefault() {
   return arch() != Arch::ARM;
 }
 
+bool JitLoader::DynamicTCSectionsDefault() {
+  return arch() != Arch::ARM;
+}
+
 bool JitLoader::PGODefault() {
 #ifdef HHVM_NO_DEFAULT_PGO
   return false;

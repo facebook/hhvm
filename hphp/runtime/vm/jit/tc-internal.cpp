@@ -254,14 +254,14 @@ TranslationResult::Scope shouldTranslate(SrcKey sk, TransKind kind,
     return shouldTranslateNoSizeLimit(sk, kind, noThreshold);
   }
 
-  auto const main_under = code().main().used() < Cfg::CodeCache::AMaxUsage;
-  auto const cold_under = code().cold().used() < Cfg::CodeCache::AColdMaxUsage;
-  auto const froz_under = code().frozen().used() < Cfg::CodeCache::AFrozenMaxUsage;
+  auto const main_under = code().mainUsed() < Cfg::CodeCache::AMaxUsage;
+  auto const cold_under = code().coldUsed() < Cfg::CodeCache::AColdMaxUsage;
+  auto const froz_under = code().frozenUsed() < Cfg::CodeCache::AFrozenMaxUsage;
   // Set a flag so we quickly bail from trying to generate new
   // translations next time.
   s_TCisFull.store(true, std::memory_order_release);
 
-  if (main_under && !s_did_log.test_and_set() &&
+  if (!Cfg::Jit::DynamicTCSections && main_under && !s_did_log.test_and_set() &&
       Cfg::Eval::ProfBranchSampleFreq == 0) {
     // If we ran out of TC space in cold or frozen but not in main,
     // something unexpected is happening and we should take note of
@@ -690,7 +690,7 @@ Optional<TranslationResult> Translator::relocate(bool alignMain) {
   {
     auto codeLock = lockCode();
     while (true) {
-      auto finalView = code().view(kind);
+      auto finalView = code().view(kind, &range);
       CodeReuseBlock crb;
       auto dstView = crb.getMaybeReusedView(finalView, range);
       auto& srcView = transMeta->view;

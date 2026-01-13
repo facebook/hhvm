@@ -190,8 +190,10 @@ struct OfflineCode {
   OfflineCode(std::string _dumpDir,
                  TCA _aBase,
                  TCA _coldBase,
-                 TCA _frozenBase)
-      : dumpDir(_dumpDir) {
+                 TCA _frozenBase,
+                 const std::string& _blockMap)
+      : dumpDir(_dumpDir)
+      , blockMap(_blockMap) {
     TCA tcRegionBases[TCRCount] = {
       _aBase, _coldBase, _frozenBase
     };
@@ -242,11 +244,12 @@ private:
     {}
   };
 
-  std::string       dumpDir;
-  TCRegionRec       tcRegions[TCRCount];
+  std::string        dumpDir;
+  const std::string& blockMap;
+  TCRegionRec        tcRegions[TCRCount];
 #if defined(__x86_64__)
-  xed_state_t       xed_state;
-  xed_syntax_enum_t xed_syntax;
+  xed_state_t        xed_state;
+  xed_syntax_enum_t  xed_syntax;
 #endif
 
   std::unordered_map<TCA, std::string> addr2SymMap;

@@ -354,10 +354,10 @@ InitFiniNode s_logJitStats([]{
   ent.setInt("rejected_prologue", s_rejectPrologue.load(MO));
   ent.setInt("active_prologue", s_activePrologue.load(MO));
 
-  ent.setInt("main_used_bytes", tc::code().main().used());
-  ent.setInt("cold_used_bytes", tc::code().cold().used());
-  ent.setInt("frozen_used_bytes", tc::code().frozen().used());
-  ent.setInt("data_used_bytes", tc::code().data().used());
+  ent.setInt("main_used_bytes", tc::code().mainUsed());
+  ent.setInt("cold_used_bytes", tc::code().coldUsed());
+  ent.setInt("frozen_used_bytes", tc::code().frozenUsed());
+  ent.setInt("data_used_bytes", tc::code().dataUsed());
 
   ent.setInt("main_max_bytes", Cfg::CodeCache::AMaxUsage);
   ent.setInt("cold_max_bytes", Cfg::CodeCache::AColdMaxUsage);

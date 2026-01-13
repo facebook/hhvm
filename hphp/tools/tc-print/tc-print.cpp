@@ -1166,7 +1166,8 @@ int main(int argc, char *argv[]) {
   transCode = new OfflineCode(dumpDir,
                               g_transData->getMainBase(),
                               g_transData->getColdBase(),
-                              g_transData->getFrozenBase());
+                              g_transData->getFrozenBase(),
+                              g_transData->getBlockMap());
   Hdf config = !configFile.empty()
     ? Hdf{configFile}
     : Hdf{};

@@ -134,6 +134,10 @@ struct OfflineTransData {
     return frozenFrontier;
   }
 
+  const std::string& getBlockMap() const {
+    return blockMap;
+  }
+
   // Find translations that belong to the selectedFuncId
   void findFuncTrans(uint32_t selectedFuncId, std::vector<TransID> *inodes);
 
@@ -180,6 +184,8 @@ private:
   std::string                 dumpDir;
 
   uint32_t                    annotationsVerbosity;
+
+  std::string                 blockMap;
 
   void loadTCHeader();
 };

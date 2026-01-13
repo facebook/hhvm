@@ -1950,6 +1950,10 @@ The format can be found in hphp/tools/configs/generate_configs.rs
   On average, log every 1 / Jit.TranslationStatsSampleRate counters. Has
   no effect unless Jit.CollectTranslationStats is set.
 
+- bool Jit.DynamicTCSections, paulbiss
+
+  Dynamically allocate TC blocks
+
 # Mail
 
 - std::string Mail.SendmailPath = "/usr/lib/sendmail -t -i", UNKNOWN

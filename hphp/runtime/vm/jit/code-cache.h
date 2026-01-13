@@ -23,6 +23,12 @@
 
 namespace HPHP::jit {
 
+namespace tc {
+
+struct TransRange;
+
+}
+
 /*
  * CodeCache contains our Translation Cache, which is partitioned into 3
  * sections:
@@ -46,14 +52,15 @@ struct CodeCache {
   static constexpr uint32_t kNullptrOffset =
     std::numeric_limits<uint32_t>::max();
 
+  static constexpr size_t MinUnassigned = 4 * (2u << 20);
+
   CodeCache();
 
   template<typename L>
-  void forEachBlock(L body) const {
+  void forEachSection(L body) const {
     body("main", m_main);
     body("cold", m_cold);
     body("frozen", m_frozen);
-    body("bytecode", m_bytecode);
   }
 
   /*
@@ -76,6 +83,13 @@ struct CodeCache {
   size_t tcSize() const { return m_tcSize; }
   size_t codeSize() const { return m_codeSize; }
 
+  size_t mainUsed() const { return m_main.used(); }
+  size_t coldUsed() const { return m_cold.used(); }
+  size_t frozenUsed() const { return m_frozen.used(); }
+  size_t dataUsed() const { return m_data.used(); }
+
+  size_t totalUnassigned() const { return m_all.available(); }
+
   /*
    * Returns the total amount of code emitted to all blocks. Not synchronized,
    * so the value may be stale by the time this function returns.
@@ -83,6 +97,7 @@ struct CodeCache {
   size_t totalUsed() const;
 
   CodeAddress base() const { return m_base; }
+  CodeAddress frontier() const { return m_all.frontier(); }
   CodeAddress toAddr(uint32_t offset) const {
     if (offset == kNullptrOffset) return nullptr;
 
@@ -101,12 +116,11 @@ struct CodeCache {
   bool isValidCodeAddress(ConstCodeAddress addr) const;
 
   bool inMain(ConstCodeAddress addr) const {
-    return m_main.contains(addr);
+    return m_all.contains(addr) && blockFor(addr).name() == "main";
   }
 
   bool inMainOrColdOrFrozen(ConstCodeAddress addr) const {
-    return m_main.contains(addr) || m_cold.contains(addr) ||
-           m_frozen.contains(addr);
+    return m_all.contains(addr) && blockFor(addr).name() != "gdata";
   }
 
   /*
@@ -115,45 +129,104 @@ struct CodeCache {
   void protect();
   void unprotect();
 
-  const CodeBlock& main()   const { return m_main; }
-  const CodeBlock& cold()   const { return m_cold; }
-  const CodeBlock& frozen() const { return m_frozen; }
+  const CodeBlock& all()    const { return m_all; }
+  const CodeBlock& main()   const { return m_main.block(); }
+  const CodeBlock& cold()   const { return m_cold.block(); }
+  const CodeBlock& frozen() const { return m_frozen.block(); }
   const bool isAnySectionFull() const;
 
   const CodeBlock& bytecode() const { return m_bytecode; }
         CodeBlock& bytecode()       { return m_bytecode; }
 
-  const DataBlock& data() const { return m_data; }
+  const DataBlock& data() const { return m_data.block(); }
 
   /*
    * Return a View of this CodeCache, selecting blocks approriately depending
    * on the kind of translation to be emitted.
    */
-  View view(TransKind kind = TransKind::Invalid);
+  View view(TransKind kind = TransKind::Invalid,
+            const tc::TransRange* sizes = nullptr);
 
   /*
    * Return the block containing addr.
    */
-  const CodeBlock& blockFor(CodeAddress addr) const;
-        CodeBlock& blockFor(CodeAddress addr);
+  const CodeBlock& blockFor(ConstCodeAddress addr) const;
+        CodeBlock& blockFor(ConstCodeAddress addr);
 
   Address threadLocalStart() { return m_threadLocalStart; }
 
+  struct Section {
+    CodeBlock& block() const {
+      auto const block = m_state.load(std::memory_order_relaxed).m_last;
+      assertx(block);
+      return *block;
+    }
+
+    size_t used() const {
+      auto state = m_state.load(std::memory_order_relaxed);
+      return state.m_used + (state.m_last ? state.m_last->used() : 0);
+    }
+
+    size_t capacity() const;
+    size_t numFrees() const;
+    size_t numAllocs() const;
+    size_t bytesFree() const;
+    size_t blocksFree() const;
+
+    void setHugePageBudget(size_t budget) {
+      assertx(!m_hugePageBudget);
+      m_hugePageBudget = budget;
+    }
+
+  protected:
+    struct State { size_t m_used{0}; CodeBlock* m_last{nullptr}; };
+    std::atomic<State> m_state;
+    size_t m_hugePageBudget{0};
+  };
+
+  const Section& mainSection() const { return m_main; }
+  const Section& coldSection() const { return m_cold; }
+  const Section& frozenSection() const { return m_frozen; }
+  const Section& dataSection() const { return m_data; }
+
+  std::string blockMap() const;
+
 private:
   void cutTCSizeTo(size_t targetSize);
+
+  static constexpr const char kMain[] = "main";
+  static constexpr const char kCold[] = "cold";
+  static constexpr const char kFrozen[] = "afrozen";
+  static constexpr const char kData[] = "gdata";
+
+  template<const char* name, bool code>
+  struct SectionImpl : Section {
+    void ensure(CodeCache& cc, size_t size);
+  };
+
+  template<const char* name>
+  using CodeSection = SectionImpl<name, true>;
+  using DataSection = SectionImpl<kData, false>;
 
   Address m_threadLocalStart{nullptr};
   CodeAddress m_base;
   size_t m_tcSize; // jit output
   size_t m_codeSize; // all code (jit+bytecode)
-  size_t m_totalSize;
   size_t m_threadLocalSize;
 
-  CodeBlock m_main;
-  CodeBlock m_cold;
-  CodeBlock m_frozen;
-  CodeBlock m_bytecode;
-  DataBlock m_data;
+  CodeSection<kMain> m_main;
+  CodeSection<kCold> m_cold;
+  CodeSection<kFrozen> m_frozen;
+  DataSection m_data;
+
+  DataBlock m_bytecode;
+  DataBlock m_all;
+
+  // Each block must be at least DataBlock::kPageSize (the size of a huge page)
+  std::array<std::atomic<DataBlock*>, 1024> m_blocks;
+
+  template<const char* name, bool code>
+  friend struct SectionImpl;
 };
 
 struct CodeCache::View {

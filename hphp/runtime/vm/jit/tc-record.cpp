@@ -215,17 +215,17 @@ void updateCodeSizeCounters() {
     F(bytes_free, bytesFree,  __VA_ARGS__) \
     F(free_blocks, blocksFree, __VA_ARGS__)
 
-  code().forEachBlock([&] (const char* name, const CodeBlock& a) {
+  code().forEachSection([&] (const char* name, auto const& s) {
     auto codeUsed = s_used_counters.at(name);
     // Add delta
-    codeUsed->addValue(a.used() - codeUsed->getSum());
-    UPDATE_ALLOC_FREE_COUNTERS(name, a);
+    codeUsed->addValue(s.used() - codeUsed->getSum());
+    UPDATE_ALLOC_FREE_COUNTERS(name, s);
   });
 
   // Manually add code.data.
   auto codeUsed = s_used_counters.at("data");
-  codeUsed->addValue(code().data().used() - codeUsed->getSum());
-  UPDATE_ALLOC_FREE_COUNTERS("data", code().data());
+  codeUsed->addValue(code().dataSection().used() - codeUsed->getSum());
+  UPDATE_ALLOC_FREE_COUNTERS("data", code().dataSection());
 }
 
 size_t getLiveMainUsage() {

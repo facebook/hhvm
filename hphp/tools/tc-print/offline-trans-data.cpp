@@ -24,12 +24,12 @@
 
 using std::string;
 
-#define BUFLEN 1000
+#define BUFLEN 4096
 
 #define READ(FMT, ELEM)                                                 \
   do {                                                                  \
     if (!gzgets(file, buf, BUFLEN) || (sscanf(buf, FMT, ELEM) != 1)) {  \
-      error("Error reading " + string(FMT));                            \
+      error("Error reading {}", string(FMT));                           \
     }                                                                   \
   } while(0)
 
@@ -45,8 +45,10 @@ void OfflineTransData::loadTCHeader() {
 
   gzFile file = gzopen(fileName.c_str(), "r");
   if (!file) {
-    error("Error opening file " + fileName);
+    error("Error opening file {}", fileName);
   }
+
+  blockMap.resize(1025);
 
   // read header info
   READ("repo_schema = %40s", repoSchema);
@@ -58,6 +60,8 @@ void OfflineTransData::loadTCHeader() {
   READ("afrozen.frontier = %p", &frozenFrontier);
   READ_EMPTY();
   READ("total_translations = %u", &nTranslations);
+  READ_EMPTY();
+  READ("block_map = %1024s", blockMap.data());
   READ_EMPTY();
 
   headerSize = gztell(file);
@@ -71,7 +75,7 @@ void OfflineTransData::loadTCData(RepoWrapper* repoWrapper) {
 
   gzFile file = gzopen(fileName.c_str(), "r");
   if (!file) {
-    error("Error opening file " + fileName);
+    error("Error opening file {}", fileName);
   }
 
   gzseek(file, headerSize, SEEK_SET);
@@ -117,7 +121,7 @@ void OfflineTransData::loadTCData(RepoWrapper* repoWrapper) {
         snprintf(buf, BUFLEN,
                  "Error reading bytecode block #%lu at translation %u\n",
                  i, tRec.id);
-        error(buf);
+        error("{}", buf);
       }
 
       auto const sha1 = SHA1(sha1Tmp);
@@ -136,7 +140,7 @@ void OfflineTransData::loadTCData(RepoWrapper* repoWrapper) {
         snprintf(buf, BUFLEN,
                  "Error reading guard #%lu at translation %u\n",
                  i, tRec.id);
-        error(buf);
+        error("{}", buf);
       }
 
       tRec.guards.emplace_back(folly::to<std::string>(
@@ -159,7 +163,7 @@ void OfflineTransData::loadTCData(RepoWrapper* repoWrapper) {
         snprintf(buf, BUFLEN,
                  "Error reading annotation #%lu at translation %u\n",
                  i, tRec.id);
-        error(buf);
+        error("{}", buf);
       }
       char* title = strstr(buf, "[\"");
       char* annotation = nullptr;
@@ -202,7 +206,7 @@ void OfflineTransData::loadTCData(RepoWrapper* repoWrapper) {
                  "Error reading bytecode mapping #%lu at translation %u\n",
                  i, tRec.id);
 
-        error(buf);
+        error("{}", buf);
       }
 
       bcMap.sha1 = SHA1(sha1Tmp);

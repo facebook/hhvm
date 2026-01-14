@@ -243,7 +243,7 @@ void HTTPMessage::setMethod(folly::StringPiece method) {
     req.method_ = *result;
   } else {
     req.method_ = std::make_unique<std::string>(method.str());
-    auto& storedMethod = *boost::get<std::unique_ptr<std::string>>(req.method_);
+    auto& storedMethod = *std::get<std::unique_ptr<std::string>>(req.method_);
     std::transform(storedMethod.begin(),
                    storedMethod.end(),
                    storedMethod.begin(),
@@ -253,8 +253,8 @@ void HTTPMessage::setMethod(folly::StringPiece method) {
 
 folly::Optional<HTTPMethod> HTTPMessage::getMethod() const {
   const auto& req = request();
-  if (req.method_.which() == 2) {
-    return boost::get<HTTPMethod>(req.method_);
+  if (req.method_.index() == 2) {
+    return std::get<HTTPMethod>(req.method_);
   }
   return folly::none;
 }
@@ -264,10 +264,10 @@ folly::Optional<HTTPMethod> HTTPMessage::getMethod() const {
  */
 const std::string& HTTPMessage::getMethodString() const {
   const auto& req = request();
-  if (req.method_.which() == 1) {
-    return *boost::get<std::unique_ptr<std::string>>(req.method_);
-  } else if (req.method_.which() == 2) {
-    return methodToString(boost::get<HTTPMethod>(req.method_));
+  if (req.method_.index() == 1) {
+    return *std::get<std::unique_ptr<std::string>>(req.method_);
+  } else if (req.method_.index() == 2) {
+    return methodToString(std::get<HTTPMethod>(req.method_));
   }
   return empty_string;
 }

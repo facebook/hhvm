@@ -8,7 +8,6 @@
 
 #pragma once
 
-#include <boost/variant.hpp>
 #include <folly/Conv.h>
 #include <folly/Optional.h>
 #include <folly/SocketAddress.h>
@@ -24,6 +23,7 @@
 #include <proxygen/lib/utils/ParseURL.h>
 #include <proxygen/lib/utils/Time.h>
 #include <string>
+#include <variant>
 
 namespace proxygen {
 
@@ -951,8 +951,8 @@ class HTTPMessage {
   struct Request {
     folly::SocketAddress clientAddress_;
     mutable folly::Optional<IPPort> clientIPPort_;
-    mutable boost::
-        variant<boost::blank, std::unique_ptr<std::string>, HTTPMethod>
+    mutable std::
+        variant<std::monostate, std::unique_ptr<std::string>, HTTPMethod>
             method_;
     folly::StringPiece path_;
     folly::StringPiece query_;
@@ -972,11 +972,11 @@ class HTTPMessage {
           queryStr_(nullptr),
           url_(req.url_),
           pushStatus_(req.pushStatus_) {
-      if (req.method_.which() == 1) {
+      if (req.method_.index() == 1) {
         method_ = std::make_unique<std::string>(
-            *boost::get<std::unique_ptr<std::string>>(req.method_));
-      } else if (req.method_.which() == 2) {
-        method_ = boost::get<HTTPMethod>(req.method_);
+            *std::get<std::unique_ptr<std::string>>(req.method_));
+      } else if (req.method_.index() == 2) {
+        method_ = std::get<HTTPMethod>(req.method_);
       }
     }
   };

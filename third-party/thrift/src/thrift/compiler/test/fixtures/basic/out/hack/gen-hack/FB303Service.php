@@ -89,7 +89,7 @@ abstract class FB303ServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
   const class<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = FB303ServiceStaticMetadata::class;
   const string THRIFT_SVC_NAME = FB303ServiceStaticMetadata::THRIFT_SVC_NAME;
 
-  public function getMethodMetadata_renamed_rpc(
+  protected function getMethodMetadata_renamed_rpc(
   ): \ThriftServiceRequestResponseMethod<
     FB303ServiceAsyncIf,
     \test\fixtures\basic\FB303Service_renamed_rpc_args,

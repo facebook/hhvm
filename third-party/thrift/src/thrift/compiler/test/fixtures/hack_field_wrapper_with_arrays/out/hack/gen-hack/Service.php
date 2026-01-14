@@ -87,7 +87,7 @@ abstract class ServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
   const class<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = ServiceStaticMetadata::class;
   const string THRIFT_SVC_NAME = ServiceStaticMetadata::THRIFT_SVC_NAME;
 
-  public function getMethodMetadata_func(
+  protected function getMethodMetadata_func(
   ): \ThriftServiceRequestResponseMethod<
     ServiceAsyncIf,
     Service_func_args,

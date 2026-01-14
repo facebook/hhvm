@@ -81,7 +81,7 @@ abstract class MyServicePrioChildAsyncProcessorBase extends MyServicePrioParentA
   const class<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = MyServicePrioChildStaticMetadata::class;
   const string THRIFT_SVC_NAME = MyServicePrioChildStaticMetadata::THRIFT_SVC_NAME;
 
-  public function getMethodMetadata_pang(
+  protected function getMethodMetadata_pang(
   ): \ThriftServiceRequestResponseMethod<
     MyServicePrioChildAsyncIf,
     MyServicePrioChild_pang_args,

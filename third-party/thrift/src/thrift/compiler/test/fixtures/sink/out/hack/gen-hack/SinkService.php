@@ -274,7 +274,7 @@ abstract class SinkServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
   const class<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = SinkServiceStaticMetadata::class;
   const string THRIFT_SVC_NAME = SinkServiceStaticMetadata::THRIFT_SVC_NAME;
 
-  public function getMethodMetadata_method(
+  protected function getMethodMetadata_method(
   ): \ThriftServiceSinkMethod<
     SinkServiceAsyncIf,
     SinkService_method_args,
@@ -317,7 +317,7 @@ abstract class SinkServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
     }
     $this->writeHelper($result, 'method', $seqid, $handler_ctx, $output, $reply_type);
   }
-  public function getMethodMetadata_methodAndReponse(
+  protected function getMethodMetadata_methodAndReponse(
   ): \ThriftServiceSinkMethod<
     SinkServiceAsyncIf,
     SinkService_methodAndReponse_args,
@@ -361,7 +361,7 @@ abstract class SinkServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
     }
     $this->writeHelper($result, 'methodAndReponse', $seqid, $handler_ctx, $output, $reply_type);
   }
-  public function getMethodMetadata_methodThrow(
+  protected function getMethodMetadata_methodThrow(
   ): \ThriftServiceSinkMethod<
     SinkServiceAsyncIf,
     SinkService_methodThrow_args,
@@ -408,7 +408,7 @@ abstract class SinkServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
     }
     $this->writeHelper($result, 'methodThrow', $seqid, $handler_ctx, $output, $reply_type);
   }
-  public function getMethodMetadata_methodSinkThrow(
+  protected function getMethodMetadata_methodSinkThrow(
   ): \ThriftServiceSinkMethod<
     SinkServiceAsyncIf,
     SinkService_methodSinkThrow_args,
@@ -451,7 +451,7 @@ abstract class SinkServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
     }
     $this->writeHelper($result, 'methodSinkThrow', $seqid, $handler_ctx, $output, $reply_type);
   }
-  public function getMethodMetadata_methodFinalThrow(
+  protected function getMethodMetadata_methodFinalThrow(
   ): \ThriftServiceSinkMethod<
     SinkServiceAsyncIf,
     SinkService_methodFinalThrow_args,
@@ -494,7 +494,7 @@ abstract class SinkServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
     }
     $this->writeHelper($result, 'methodFinalThrow', $seqid, $handler_ctx, $output, $reply_type);
   }
-  public function getMethodMetadata_methodBothThrow(
+  protected function getMethodMetadata_methodBothThrow(
   ): \ThriftServiceSinkMethod<
     SinkServiceAsyncIf,
     SinkService_methodBothThrow_args,
@@ -537,7 +537,7 @@ abstract class SinkServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
     }
     $this->writeHelper($result, 'methodBothThrow', $seqid, $handler_ctx, $output, $reply_type);
   }
-  public function getMethodMetadata_methodFast(
+  protected function getMethodMetadata_methodFast(
   ): \ThriftServiceSinkMethod<
     SinkServiceAsyncIf,
     SinkService_methodFast_args,

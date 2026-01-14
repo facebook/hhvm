@@ -209,7 +209,7 @@ abstract class NestedContainersAsyncProcessorBase extends \ThriftAsyncProcessor 
   const class<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = NestedContainersStaticMetadata::class;
   const string THRIFT_SVC_NAME = NestedContainersStaticMetadata::THRIFT_SVC_NAME;
 
-  public function getMethodMetadata_mapList(
+  protected function getMethodMetadata_mapList(
   ): \ThriftServiceRequestResponseMethod<
     NestedContainersAsyncIf,
     NestedContainers_mapList_args,
@@ -244,7 +244,7 @@ abstract class NestedContainersAsyncProcessorBase extends \ThriftAsyncProcessor 
     }
     $this->writeHelper($result, 'mapList', $seqid, $handler_ctx, $output, $reply_type);
   }
-  public function getMethodMetadata_mapSet(
+  protected function getMethodMetadata_mapSet(
   ): \ThriftServiceRequestResponseMethod<
     NestedContainersAsyncIf,
     NestedContainers_mapSet_args,
@@ -279,7 +279,7 @@ abstract class NestedContainersAsyncProcessorBase extends \ThriftAsyncProcessor 
     }
     $this->writeHelper($result, 'mapSet', $seqid, $handler_ctx, $output, $reply_type);
   }
-  public function getMethodMetadata_listMap(
+  protected function getMethodMetadata_listMap(
   ): \ThriftServiceRequestResponseMethod<
     NestedContainersAsyncIf,
     NestedContainers_listMap_args,
@@ -314,7 +314,7 @@ abstract class NestedContainersAsyncProcessorBase extends \ThriftAsyncProcessor 
     }
     $this->writeHelper($result, 'listMap', $seqid, $handler_ctx, $output, $reply_type);
   }
-  public function getMethodMetadata_listSet(
+  protected function getMethodMetadata_listSet(
   ): \ThriftServiceRequestResponseMethod<
     NestedContainersAsyncIf,
     NestedContainers_listSet_args,
@@ -349,7 +349,7 @@ abstract class NestedContainersAsyncProcessorBase extends \ThriftAsyncProcessor 
     }
     $this->writeHelper($result, 'listSet', $seqid, $handler_ctx, $output, $reply_type);
   }
-  public function getMethodMetadata_turtles(
+  protected function getMethodMetadata_turtles(
   ): \ThriftServiceRequestResponseMethod<
     NestedContainersAsyncIf,
     NestedContainers_turtles_args,

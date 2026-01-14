@@ -108,7 +108,7 @@ abstract class MyServicePrioParentAsyncProcessorBase extends \ThriftAsyncProcess
   const class<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = MyServicePrioParentStaticMetadata::class;
   const string THRIFT_SVC_NAME = MyServicePrioParentStaticMetadata::THRIFT_SVC_NAME;
 
-  public function getMethodMetadata_ping(
+  protected function getMethodMetadata_ping(
   ): \ThriftServiceRequestResponseMethod<
     MyServicePrioParentAsyncIf,
     MyServicePrioParent_ping_args,
@@ -143,7 +143,7 @@ abstract class MyServicePrioParentAsyncProcessorBase extends \ThriftAsyncProcess
     }
     $this->writeHelper($result, 'ping', $seqid, $handler_ctx, $output, $reply_type);
   }
-  public function getMethodMetadata_pong(
+  protected function getMethodMetadata_pong(
   ): \ThriftServiceRequestResponseMethod<
     MyServicePrioParentAsyncIf,
     MyServicePrioParent_pong_args,

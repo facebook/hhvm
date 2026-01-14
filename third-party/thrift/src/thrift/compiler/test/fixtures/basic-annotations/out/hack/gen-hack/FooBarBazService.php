@@ -135,7 +135,7 @@ abstract class FooBarBazServiceAsyncProcessorBase extends \ThriftAsyncProcessor 
   const class<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = FooBarBazServiceStaticMetadata::class;
   const string THRIFT_SVC_NAME = FooBarBazServiceStaticMetadata::THRIFT_SVC_NAME;
 
-  public function getMethodMetadata_foo(
+  protected function getMethodMetadata_foo(
   ): \ThriftServiceRequestResponseMethod<
     FooBarBazServiceAsyncIf,
     FooBarBazService_foo_args,
@@ -170,7 +170,7 @@ abstract class FooBarBazServiceAsyncProcessorBase extends \ThriftAsyncProcessor 
     }
     $this->writeHelper($result, 'foo', $seqid, $handler_ctx, $output, $reply_type);
   }
-  public function getMethodMetadata_bar(
+  protected function getMethodMetadata_bar(
   ): \ThriftServiceRequestResponseMethod<
     FooBarBazServiceAsyncIf,
     FooBarBazService_bar_args,
@@ -205,7 +205,7 @@ abstract class FooBarBazServiceAsyncProcessorBase extends \ThriftAsyncProcessor 
     }
     $this->writeHelper($result, 'bar', $seqid, $handler_ctx, $output, $reply_type);
   }
-  public function getMethodMetadata_baz(
+  protected function getMethodMetadata_baz(
   ): \ThriftServiceRequestResponseMethod<
     FooBarBazServiceAsyncIf,
     FooBarBazService_baz_args,

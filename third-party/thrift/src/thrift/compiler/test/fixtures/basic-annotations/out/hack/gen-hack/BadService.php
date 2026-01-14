@@ -158,7 +158,7 @@ abstract class BadServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
   const class<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = BadServiceStaticMetadata::class;
   const string THRIFT_SVC_NAME = BadServiceStaticMetadata::THRIFT_SVC_NAME;
 
-  public function getMethodMetadata_bar(
+  protected function getMethodMetadata_bar(
   ): \ThriftServiceRequestResponseMethod<
     BadServiceAsyncIf,
     BadService_bar_args,

@@ -156,7 +156,7 @@ abstract class Service1AsyncProcessorBase extends \ThriftAsyncProcessor {
   const class<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = Service1StaticMetadata::class;
   const string THRIFT_SVC_NAME = Service1StaticMetadata::THRIFT_SVC_NAME;
 
-  public function getMethodMetadata_func(
+  protected function getMethodMetadata_func(
   ): \ThriftServiceRequestResponseMethod<
     Service1AsyncIf,
     Service1_func_args,
@@ -190,7 +190,7 @@ abstract class Service1AsyncProcessorBase extends \ThriftAsyncProcessor {
     }
     $this->writeHelper($result, 'func', $seqid, $handler_ctx, $output, $reply_type);
   }
-  public function getMethodMetadata_func1(
+  protected function getMethodMetadata_func1(
   ): \ThriftServiceRequestResponseMethod<
     Service1AsyncIf,
     Service1_func1_args,
@@ -224,7 +224,7 @@ abstract class Service1AsyncProcessorBase extends \ThriftAsyncProcessor {
     }
     $this->writeHelper($result, 'func1', $seqid, $handler_ctx, $output, $reply_type);
   }
-  public function getMethodMetadata_func2(
+  protected function getMethodMetadata_func2(
   ): \ThriftServiceRequestResponseMethod<
     Service1AsyncIf,
     Service1_func2_args,

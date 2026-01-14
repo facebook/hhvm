@@ -87,7 +87,7 @@ abstract class RenamedServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
   const class<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = RenamedServiceStaticMetadata::class;
   const string THRIFT_SVC_NAME = RenamedServiceStaticMetadata::THRIFT_SVC_NAME;
 
-  public function getMethodMetadata_simple_rpc(
+  protected function getMethodMetadata_simple_rpc(
   ): \ThriftServiceRequestResponseMethod<
     RenamedServiceAsyncIf,
     \test\fixtures\basic\RenamedService_simple_rpc_args,

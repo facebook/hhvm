@@ -118,7 +118,7 @@ abstract class DbMixedStackArgumentsAsyncProcessorBase extends \ThriftAsyncProce
   const class<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = DbMixedStackArgumentsStaticMetadata::class;
   const string THRIFT_SVC_NAME = DbMixedStackArgumentsStaticMetadata::THRIFT_SVC_NAME;
 
-  public function getMethodMetadata_getDataByKey0(
+  protected function getMethodMetadata_getDataByKey0(
   ): \ThriftServiceRequestResponseMethod<
     DbMixedStackArgumentsAsyncIf,
     \test\fixtures\basic\DbMixedStackArguments_getDataByKey0_args,
@@ -152,7 +152,7 @@ abstract class DbMixedStackArgumentsAsyncProcessorBase extends \ThriftAsyncProce
     }
     $this->writeHelper($result, 'getDataByKey0', $seqid, $handler_ctx, $output, $reply_type);
   }
-  public function getMethodMetadata_getDataByKey1(
+  protected function getMethodMetadata_getDataByKey1(
   ): \ThriftServiceRequestResponseMethod<
     DbMixedStackArgumentsAsyncIf,
     \test\fixtures\basic\DbMixedStackArguments_getDataByKey1_args,

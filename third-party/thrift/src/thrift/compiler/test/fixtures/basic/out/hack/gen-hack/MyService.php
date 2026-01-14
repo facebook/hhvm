@@ -296,7 +296,7 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
   const class<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = MyServiceStaticMetadata::class;
   const string THRIFT_SVC_NAME = MyServiceStaticMetadata::THRIFT_SVC_NAME;
 
-  public function getMethodMetadata_ping(
+  protected function getMethodMetadata_ping(
   ): \ThriftServiceRequestResponseMethod<
     MyServiceAsyncIf,
     \test\fixtures\basic\MyService_ping_args,
@@ -331,7 +331,7 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
     }
     $this->writeHelper($result, 'ping', $seqid, $handler_ctx, $output, $reply_type);
   }
-  public function getMethodMetadata_getRandomData(
+  protected function getMethodMetadata_getRandomData(
   ): \ThriftServiceRequestResponseMethod<
     MyServiceAsyncIf,
     \test\fixtures\basic\MyService_getRandomData_args,
@@ -365,7 +365,7 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
     }
     $this->writeHelper($result, 'getRandomData', $seqid, $handler_ctx, $output, $reply_type);
   }
-  public function getMethodMetadata_sink(
+  protected function getMethodMetadata_sink(
   ): \ThriftServiceRequestResponseMethod<
     MyServiceAsyncIf,
     \test\fixtures\basic\MyService_sink_args,
@@ -400,7 +400,7 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
     }
     $this->writeHelper($result, 'sink', $seqid, $handler_ctx, $output, $reply_type);
   }
-  public function getMethodMetadata_putDataById(
+  protected function getMethodMetadata_putDataById(
   ): \ThriftServiceRequestResponseMethod<
     MyServiceAsyncIf,
     \test\fixtures\basic\MyService_putDataById_args,
@@ -435,7 +435,7 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
     }
     $this->writeHelper($result, 'putDataById', $seqid, $handler_ctx, $output, $reply_type);
   }
-  public function getMethodMetadata_hasDataById(
+  protected function getMethodMetadata_hasDataById(
   ): \ThriftServiceRequestResponseMethod<
     MyServiceAsyncIf,
     \test\fixtures\basic\MyService_hasDataById_args,
@@ -469,7 +469,7 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
     }
     $this->writeHelper($result, 'hasDataById', $seqid, $handler_ctx, $output, $reply_type);
   }
-  public function getMethodMetadata_getDataById(
+  protected function getMethodMetadata_getDataById(
   ): \ThriftServiceRequestResponseMethod<
     MyServiceAsyncIf,
     \test\fixtures\basic\MyService_getDataById_args,
@@ -503,7 +503,7 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
     }
     $this->writeHelper($result, 'getDataById', $seqid, $handler_ctx, $output, $reply_type);
   }
-  public function getMethodMetadata_deleteDataById(
+  protected function getMethodMetadata_deleteDataById(
   ): \ThriftServiceRequestResponseMethod<
     MyServiceAsyncIf,
     \test\fixtures\basic\MyService_deleteDataById_args,
@@ -538,7 +538,7 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
     }
     $this->writeHelper($result, 'deleteDataById', $seqid, $handler_ctx, $output, $reply_type);
   }
-  public function getMethodMetadata_lobDataById(
+  protected function getMethodMetadata_lobDataById(
   ): \ThriftServiceOnewayMethod<
     MyServiceAsyncIf,
     \test\fixtures\basic\MyService_lobDataById_args,

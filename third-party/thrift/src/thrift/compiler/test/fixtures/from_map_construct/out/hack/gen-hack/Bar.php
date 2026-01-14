@@ -101,7 +101,7 @@ abstract class BarAsyncProcessorBase extends \ThriftAsyncProcessor {
   const class<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = BarStaticMetadata::class;
   const string THRIFT_SVC_NAME = BarStaticMetadata::THRIFT_SVC_NAME;
 
-  public function getMethodMetadata_baz(
+  protected function getMethodMetadata_baz(
   ): \ThriftServiceRequestResponseMethod<
     BarAsyncIf,
     Bar_baz_args,

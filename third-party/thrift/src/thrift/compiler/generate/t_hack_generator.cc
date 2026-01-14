@@ -5822,7 +5822,7 @@ void t_hack_generator::generate_method_metadata_function(
           type_to_typehint(tfunction->return_type().get_type());
     }
 
-    f_service_ << indent() << "public function getMethodMetadata_" << fn_name
+    f_service_ << indent() << "protected function getMethodMetadata_" << fn_name
                << "(\n"
                << indent() << "): \\ThriftServiceStreamingResponseMethod<\n"
                << indent() << "  " << long_name << "AsyncIf,\n"
@@ -5876,7 +5876,7 @@ void t_hack_generator::generate_method_metadata_function(
           type_to_typehint(tfunction->return_type().get_type());
     }
 
-    f_service_ << indent() << "public function getMethodMetadata_" << fn_name
+    f_service_ << indent() << "protected function getMethodMetadata_" << fn_name
                << "(\n"
                << indent() << "): \\ThriftServiceSinkMethod<\n"
                << indent() << "  " << long_name << "AsyncIf,\n"
@@ -5919,8 +5919,8 @@ void t_hack_generator::generate_method_metadata_function(
       // Oneway methods use ThriftServiceOnewayMethod (no response)
       // Unlike request-response methods, oneway methods don't need a result
       // type since they never send responses back to the client
-      f_service_ << indent() << "public function getMethodMetadata_" << fn_name
-                 << "(\n"
+      f_service_ << indent() << "protected function getMethodMetadata_"
+                 << fn_name << "(\n"
                  << indent() << "): \\ThriftServiceOnewayMethod<\n"
                  << indent() << "  " << long_name << "AsyncIf,\n"
                  << indent() << "  " << argsname << ",\n"
@@ -5949,8 +5949,8 @@ void t_hack_generator::generate_method_metadata_function(
         return_type = type_to_typehint(tfunction->return_type().get_type());
       }
 
-      f_service_ << indent() << "public function getMethodMetadata_" << fn_name
-                 << "(\n"
+      f_service_ << indent() << "protected function getMethodMetadata_"
+                 << fn_name << "(\n"
                  << indent() << "): \\ThriftServiceRequestResponseMethod<\n"
                  << indent() << "  " << long_name << "AsyncIf,\n"
                  << indent() << "  " << argsname << ",\n"

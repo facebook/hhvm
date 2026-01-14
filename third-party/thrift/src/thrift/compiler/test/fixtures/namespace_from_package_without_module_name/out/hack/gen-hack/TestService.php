@@ -88,7 +88,7 @@ abstract class TestServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
   const class<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = TestServiceStaticMetadata::class;
   const string THRIFT_SVC_NAME = TestServiceStaticMetadata::THRIFT_SVC_NAME;
 
-  public function getMethodMetadata_init(
+  protected function getMethodMetadata_init(
   ): \ThriftServiceRequestResponseMethod<
     TestServiceAsyncIf,
     \test\namespace_from_package_without_module_name\TestService_init_args,

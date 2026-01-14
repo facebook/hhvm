@@ -377,7 +377,7 @@ abstract class PubSubStreamingServiceAsyncProcessorBase extends \ThriftAsyncProc
   const class<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = PubSubStreamingServiceStaticMetadata::class;
   const string THRIFT_SVC_NAME = PubSubStreamingServiceStaticMetadata::THRIFT_SVC_NAME;
 
-  public function getMethodMetadata_returnstream(
+  protected function getMethodMetadata_returnstream(
   ): \ThriftServiceStreamingResponseMethod<
     PubSubStreamingServiceAsyncIf,
     PubSubStreamingService_returnstream_args,
@@ -417,7 +417,7 @@ abstract class PubSubStreamingServiceAsyncProcessorBase extends \ThriftAsyncProc
     }
     $this->writeHelper($result, 'returnstream', $seqid, $handler_ctx, $output, $reply_type);
   }
-  public function getMethodMetadata_streamthrows(
+  protected function getMethodMetadata_streamthrows(
   ): \ThriftServiceStreamingResponseMethod<
     PubSubStreamingServiceAsyncIf,
     PubSubStreamingService_streamthrows_args,
@@ -457,7 +457,7 @@ abstract class PubSubStreamingServiceAsyncProcessorBase extends \ThriftAsyncProc
     }
     $this->writeHelper($result, 'streamthrows', $seqid, $handler_ctx, $output, $reply_type);
   }
-  public function getMethodMetadata_servicethrows(
+  protected function getMethodMetadata_servicethrows(
   ): \ThriftServiceStreamingResponseMethod<
     PubSubStreamingServiceAsyncIf,
     PubSubStreamingService_servicethrows_args,
@@ -501,7 +501,7 @@ abstract class PubSubStreamingServiceAsyncProcessorBase extends \ThriftAsyncProc
     }
     $this->writeHelper($result, 'servicethrows', $seqid, $handler_ctx, $output, $reply_type);
   }
-  public function getMethodMetadata_servicethrows2(
+  protected function getMethodMetadata_servicethrows2(
   ): \ThriftServiceStreamingResponseMethod<
     PubSubStreamingServiceAsyncIf,
     PubSubStreamingService_servicethrows2_args,
@@ -545,7 +545,7 @@ abstract class PubSubStreamingServiceAsyncProcessorBase extends \ThriftAsyncProc
     }
     $this->writeHelper($result, 'servicethrows2', $seqid, $handler_ctx, $output, $reply_type);
   }
-  public function getMethodMetadata_boththrows(
+  protected function getMethodMetadata_boththrows(
   ): \ThriftServiceStreamingResponseMethod<
     PubSubStreamingServiceAsyncIf,
     PubSubStreamingService_boththrows_args,
@@ -589,7 +589,7 @@ abstract class PubSubStreamingServiceAsyncProcessorBase extends \ThriftAsyncProc
     }
     $this->writeHelper($result, 'boththrows', $seqid, $handler_ctx, $output, $reply_type);
   }
-  public function getMethodMetadata_responseandstreamstreamthrows(
+  protected function getMethodMetadata_responseandstreamstreamthrows(
   ): \ThriftServiceStreamingResponseMethod<
     PubSubStreamingServiceAsyncIf,
     PubSubStreamingService_responseandstreamstreamthrows_args,
@@ -630,7 +630,7 @@ abstract class PubSubStreamingServiceAsyncProcessorBase extends \ThriftAsyncProc
     }
     $this->writeHelper($result, 'responseandstreamstreamthrows', $seqid, $handler_ctx, $output, $reply_type);
   }
-  public function getMethodMetadata_responseandstreamservicethrows(
+  protected function getMethodMetadata_responseandstreamservicethrows(
   ): \ThriftServiceStreamingResponseMethod<
     PubSubStreamingServiceAsyncIf,
     PubSubStreamingService_responseandstreamservicethrows_args,
@@ -675,7 +675,7 @@ abstract class PubSubStreamingServiceAsyncProcessorBase extends \ThriftAsyncProc
     }
     $this->writeHelper($result, 'responseandstreamservicethrows', $seqid, $handler_ctx, $output, $reply_type);
   }
-  public function getMethodMetadata_responseandstreamboththrows(
+  protected function getMethodMetadata_responseandstreamboththrows(
   ): \ThriftServiceStreamingResponseMethod<
     PubSubStreamingServiceAsyncIf,
     PubSubStreamingService_responseandstreamboththrows_args,
@@ -720,7 +720,7 @@ abstract class PubSubStreamingServiceAsyncProcessorBase extends \ThriftAsyncProc
     }
     $this->writeHelper($result, 'responseandstreamboththrows', $seqid, $handler_ctx, $output, $reply_type);
   }
-  public function getMethodMetadata_returnstreamFast(
+  protected function getMethodMetadata_returnstreamFast(
   ): \ThriftServiceStreamingResponseMethod<
     PubSubStreamingServiceAsyncIf,
     PubSubStreamingService_returnstreamFast_args,

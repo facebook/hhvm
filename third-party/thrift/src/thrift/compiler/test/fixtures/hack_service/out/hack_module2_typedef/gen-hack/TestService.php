@@ -123,7 +123,7 @@ abstract class TestServiceAsyncProcessorBase extends \foo\hack_ns\FooHackService
   const class<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = TestServiceStaticMetadata::class;
   const string THRIFT_SVC_NAME = TestServiceStaticMetadata::THRIFT_SVC_NAME;
 
-  public function getMethodMetadata_ping(
+  protected function getMethodMetadata_ping(
   ): \ThriftServiceRequestResponseMethod<
     TestServiceAsyncIf,
     \hack_ns2\TestService_ping_args,
@@ -161,7 +161,7 @@ abstract class TestServiceAsyncProcessorBase extends \foo\hack_ns\FooHackService
     }
     $this->writeHelper($result, 'ping', $seqid, $handler_ctx, $output, $reply_type);
   }
-  public function getMethodMetadata_voidMethod(
+  protected function getMethodMetadata_voidMethod(
   ): \ThriftServiceRequestResponseMethod<
     TestServiceAsyncIf,
     \hack_ns2\TestService_voidMethod_args,

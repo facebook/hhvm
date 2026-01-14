@@ -291,9 +291,8 @@ void HQSession::onKnob(uint64_t knobSpace,
                        quic::BufPtr knobBlob) {
   VLOG(3) << __func__ << " sess=" << *this
           << " knob frame received: " << " KnobSpace: " << std::hex << knobSpace
-          << " KnobId: " << knobId << " KnobBlob: "
-          << std::string(reinterpret_cast<const char*>(knobBlob->data()),
-                         knobBlob->length());
+          << " KnobId: " << knobId
+          << " KnobBlob: " << knobBlob->to<std::string>();
 }
 
 bool HQSession::maybeRejectRequestAfterGoaway(quic::StreamId id) {

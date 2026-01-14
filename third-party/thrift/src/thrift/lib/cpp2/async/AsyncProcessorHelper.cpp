@@ -30,6 +30,18 @@ namespace apache::thrift {
       kMethodUnknownErrorCode);
 }
 
+/* static */ void AsyncProcessorHelper::sendInvalidInteractionIdError(
+    ResponseChannelRequest::UniquePtr request,
+    std::string_view methodName,
+    int64_t interactionId) {
+  request->sendErrorWrapped(
+      folly::make_exception_wrapper<TApplicationException>(fmt::format(
+          "Invalid interaction id for method {}: {}",
+          std::string(methodName),
+          std::to_string(interactionId))),
+      kInteractionIdUnknownErrorCode);
+}
+
 /* static */ void AsyncProcessorHelper::executeRequest(
     ServerRequest&& serverRequest) {
   // Since this request was queued, reset the processBegin

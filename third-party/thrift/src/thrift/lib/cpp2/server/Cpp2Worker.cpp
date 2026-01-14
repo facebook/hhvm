@@ -539,6 +539,19 @@ void Cpp2Worker::dispatchRequest(
           return;
         }
 
+        // if the request is for interaction's method interaction
+        if (found->metadata.createsInteraction ||
+            found->metadata.interactionName.has_value()) {
+          // but interaction id is not specified
+          if (!cpp2ReqCtx->getInteractionId()) {
+            AsyncProcessorHelper::sendInvalidInteractionIdError(
+                std::move(request),
+                cpp2ReqCtx->getMethodName(),
+                cpp2ReqCtx->getInteractionId());
+            return;
+          }
+        }
+
         auto priority = cpp2ReqCtx->getCallPriority();
         if (priority == concurrency::N_PRIORITIES) {
           priority = found->metadata.priority.value_or(concurrency::NORMAL);

@@ -36,6 +36,10 @@ class AsyncProcessorHelper {
  public:
   static void sendUnknownMethodError(
       ResponseChannelRequest::UniquePtr req, std::string_view methodName);
+  static void sendInvalidInteractionIdError(
+      ResponseChannelRequest::UniquePtr request,
+      std::string_view methodName,
+      int64_t interactionId);
 
   template <
       typename Metadata,

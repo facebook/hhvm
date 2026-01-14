@@ -323,11 +323,16 @@ Object HHVM_FUNCTION(HH_watcher_get_clock,
   std::lock_guard<std::mutex> g(s_sharedDataMutex);
 
   auto options = WatcherOptions{watcher_options, Variant{Variant::NullInit{}}};
-  auto const* repo_options = g_context->getRepoOptionsForRequest();
 
-  auto dynamic_query = (repo_options != nullptr) 
-    ? folly::dynamic::array("clock", repo_options->dir().native())
-    : folly::dynamic::array("clock", ".");
+  std::string root;
+  auto const* repo_options = g_context->getRepoOptionsForRequest();
+  if (options.root.has_value()) {
+    root = options.root.value();
+  } else {
+    root = repo_options != nullptr ? repo_options->dir().native() : ".";
+  }
+
+  auto dynamic_query = folly::dynamic::array("clock", root);
 
   auto res_future = getWatchmanClientForSocket(options.socket_path)
     .thenValue([dynamic_query] (std::shared_ptr<watchman::WatchmanClient> client) {

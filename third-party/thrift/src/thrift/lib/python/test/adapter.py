@@ -263,7 +263,7 @@ class AdapterTest(unittest.TestCase):
         self.assertIsInstance(foo.baz.value, self._fbthrift_unadapted_Baz)
 
     def test_adapted_variable(self) -> None:
-        self.assertEqual(self.NINETEEN_EIGHTY_FOUR, datetime(1984, 1, 1))
+        self.assertEqual(self.NINETEEN_EIGHTY_FOUR, datetime.fromtimestamp(441792000))
         self.assertEqual(self._fbthrift_unadapted_NINETEEN_EIGHTY_FOUR, 441792000)
 
     def test_adapted_field_with_default_value(self) -> None:

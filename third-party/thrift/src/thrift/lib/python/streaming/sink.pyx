@@ -134,7 +134,7 @@ cdef raise_first_exception_field(response_struct):
 cdef void sink_final_resp_callback(
     cFollyTry[unique_ptr[cIOBuf]]&& res,
     PyObject* user_data,
-):
+) noexcept:
     future, final_resp_cls, sink_elem_cls, protocol = <object> user_data
     
     try:

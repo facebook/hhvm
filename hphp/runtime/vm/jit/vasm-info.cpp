@@ -163,6 +163,8 @@ bool effectsImpl(const Vinstr& inst, bool pure) {
     case Vinstr::addli:
     case Vinstr::addq:
     case Vinstr::addqi:
+    case Vinstr::addshiftl:
+    case Vinstr::addshiftq:
     case Vinstr::addsd:
     case Vinstr::andb:
     case Vinstr::andbi:
@@ -173,6 +175,8 @@ bool effectsImpl(const Vinstr& inst, bool pure) {
     case Vinstr::andq:
     case Vinstr::andqi64:
     case Vinstr::andqi:
+    case Vinstr::andshiftl:
+    case Vinstr::andshiftq:
     case Vinstr::btrq:
     case Vinstr::cmovb:
     case Vinstr::cmovl:
@@ -184,6 +188,8 @@ bool effectsImpl(const Vinstr& inst, bool pure) {
     case Vinstr::cmpli:
     case Vinstr::cmpq:
     case Vinstr::cmpqi:
+    case Vinstr::cmpshiftl:
+    case Vinstr::cmpshiftq:
     case Vinstr::cmpsd:
     case Vinstr::cmpw:
     case Vinstr::cmpwi:
@@ -242,6 +248,8 @@ bool effectsImpl(const Vinstr& inst, bool pure) {
     case Vinstr::orli:
     case Vinstr::orq:
     case Vinstr::orqi:
+    case Vinstr::orshiftl:
+    case Vinstr::orshiftq:
     case Vinstr::reload:
     case Vinstr::roundsd:
     case Vinstr::sar:
@@ -269,6 +277,8 @@ bool effectsImpl(const Vinstr& inst, bool pure) {
     case Vinstr::subli:
     case Vinstr::subq:
     case Vinstr::subqi:
+    case Vinstr::subshiftl:
+    case Vinstr::subshiftq:
     case Vinstr::subsd:
     case Vinstr::testb:
     case Vinstr::testbi:
@@ -278,6 +288,8 @@ bool effectsImpl(const Vinstr& inst, bool pure) {
     case Vinstr::testqi:
     case Vinstr::testw:
     case Vinstr::testwi:
+    case Vinstr::testshiftl:
+    case Vinstr::testshiftq:
     case Vinstr::ubfmli:
     case Vinstr::ucomisd:
     case Vinstr::unpcklpd:
@@ -288,6 +300,8 @@ bool effectsImpl(const Vinstr& inst, bool pure) {
     case Vinstr::xorl:
     case Vinstr::xorq:
     case Vinstr::xorqi:
+    case Vinstr::xorshiftl:
+    case Vinstr::xorshiftq:
       assertx(!touchesMemory(inst));
       return pure;
 

@@ -291,8 +291,10 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::addli:
     case Vinstr::addlm:
     case Vinstr::addlim:
+    case Vinstr::addshiftl:
     case Vinstr::andl:
     case Vinstr::andli:
+    case Vinstr::andshiftl:
     case Vinstr::decl:
     case Vinstr::declm:
     case Vinstr::incl:
@@ -301,18 +303,23 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::shrli:
     case Vinstr::subl:
     case Vinstr::subli:
+    case Vinstr::subshiftl:
     case Vinstr::xorl:
+    case Vinstr::xorshiftl:
     case Vinstr::orlim:
+    case Vinstr::orshiftl:
     case Vinstr::cmovl:
     case Vinstr::csincl:
     case Vinstr::cmpl:
     case Vinstr::cmpli:
     case Vinstr::cmplm:
     case Vinstr::cmplim:
+    case Vinstr::cmpshiftl:
     case Vinstr::testl:
     case Vinstr::testli:
     case Vinstr::testlim:
     case Vinstr::testlm:
+    case Vinstr::testshiftl:
     case Vinstr::movl:
     case Vinstr::loadl:
     case Vinstr::loadpairl:
@@ -330,9 +337,11 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::addqmr:
     case Vinstr::addqrm:
     case Vinstr::addqim:
+    case Vinstr::addshiftq:
     case Vinstr::andq:
     case Vinstr::andqi:
     case Vinstr::andqi64:
+    case Vinstr::andshiftq:
     case Vinstr::btrq:
     case Vinstr::decq:
     case Vinstr::decqm:
@@ -350,6 +359,7 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::orq:
     case Vinstr::orqi:
     case Vinstr::orqim:
+    case Vinstr::orshiftq:
     case Vinstr::sar:
     case Vinstr::shl:
     case Vinstr::shr:
@@ -359,17 +369,21 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::sbfizq:
     case Vinstr::subq:
     case Vinstr::subqi:
+    case Vinstr::subshiftq:
     case Vinstr::subqim:
     case Vinstr::xorq:
     case Vinstr::xorqi:
+    case Vinstr::xorshiftq:
     case Vinstr::cmpq:
     case Vinstr::cmpqi:
     case Vinstr::cmpqm:
     case Vinstr::cmpqim:
+    case Vinstr::cmpshiftq:
     case Vinstr::testq:
     case Vinstr::testqi:
     case Vinstr::testqm:
     case Vinstr::testqim:
+    case Vinstr::testshiftq:
     case Vinstr::cloadq:
     case Vinstr::cmovq:
     case Vinstr::csincq:

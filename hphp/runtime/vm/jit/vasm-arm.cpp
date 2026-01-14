@@ -163,6 +163,47 @@ vixl::MemOperand M(Vptr p) {
   return MemOperand(X(p.base), p.disp);
 }
 
+vixl::Operand toOperand(const VregShiftExtend& se, Width w) {
+  always_assert_flog(w == Width::Long || w == Width::Quad,
+                     "unsupported width {} for shift/extend operand {}",
+                     show(w), show(se));
+
+  auto const baseReg = (w == Width::Long
+                        ? vixl::Register{W(Vreg32{se.reg})}
+                        : vixl::Register{X(Vreg64{se.reg})});
+
+  if (se.isShift()) {
+    auto const amount = se.amount;
+    always_assert_flog(amount <= (w == Width::Long ? 31 : 63),
+                       "shift amount {} out of range for {} with width {}",
+                       amount, show(se), show(w));
+    auto kind = se.shiftKind();
+    if ((kind == vixl::LSL || kind == vixl::NO_SHIFT) && amount == 0) {
+      return vixl::Operand(baseReg);
+    }
+    if (kind == vixl::NO_SHIFT) kind = vixl::LSL;
+    return vixl::Operand(baseReg, kind, amount);
+  }
+
+  auto const extend = se.extendKind();
+  auto const amount = se.amount;
+  switch (extend) {
+    case vixl::UXTB:
+    case vixl::SXTB:
+    case vixl::UXTH:
+    case vixl::SXTH:
+    case vixl::UXTW:
+    case vixl::SXTW:
+      return vixl::Operand(W(Vreg32{se.reg}), extend, amount);
+    case vixl::UXTX:
+    case vixl::SXTX:
+      return vixl::Operand(X(Vreg64{se.reg}), extend, amount);
+    case vixl::NO_EXTEND:
+      return vixl::Operand(baseReg, extend, amount);
+  }
+  not_reached();
+}
+
 vixl::Condition C(ConditionCode cc) {
   return arm::convertCC(cc);
 }
@@ -302,6 +343,12 @@ struct Vgen {
   void emit(const addli& i) { a->Add(W(i.d), W(i.s1), i.s0.l(), UF(i.fl)); }
   void emit(const addq& i) { a->Add(X(i.d), X(i.s1), X(i.s0), UF(i.fl));}
   void emit(const addqi& i) { a->Add(X(i.d), X(i.s1), i.s0.q(), UF(i.fl)); }
+  void emit(const addshiftl& i) {
+    a->Add(W(i.d), W(i.s1), toOperand(i.s0, Width::Long), UF(i.fl));
+  }
+  void emit(const addshiftq& i) {
+    a->Add(X(i.d), X(i.s1), toOperand(i.s0, Width::Quad), UF(i.fl));
+  }
   void emit(const addsd& i) { a->Fadd(D(i.d), D(i.s1), D(i.s0)); }
   void emit(const andb& i) { a->And(W(i.d), W(i.s1), W(i.s0), UF(i.fl)); }
   void emit(const andbi& i) { a->And(W(i.d), W(i.s1), i.s0.ub(), UF(i.fl)); }
@@ -312,6 +359,12 @@ struct Vgen {
   void emit(const andq& i) { a->And(X(i.d), X(i.s1), X(i.s0), UF(i.fl)); }
   void emit(const andqi& i) { a->And(X(i.d), X(i.s1), i.s0.q(), UF(i.fl)); }
   void emit(const andqi64& i) { a->And(X(i.d), X(i.s1), i.s0.q(), UF(i.fl)); }
+  void emit(const andshiftl& i) {
+    a->And(W(i.d), W(i.s1), toOperand(i.s0, Width::Long), UF(i.fl));
+  }
+  void emit(const andshiftq& i) {
+    a->And(X(i.d), X(i.s1), toOperand(i.s0, Width::Quad), UF(i.fl));
+  }
   void emit(const btrq& i) {
     // NB: We can't directly store the result to i.d because, in case i.s1 is
     // dead after the btrq, the register allocator may allocated both i.d and
@@ -339,6 +392,12 @@ struct Vgen {
   void emit(const cmpli& i) { a->Cmp(W(i.s1), i.s0.l()); }
   void emit(const cmpq& i) { a->Cmp(X(i.s1), X(i.s0)); }
   void emit(const cmpqi& i) { a->Cmp(X(i.s1), i.s0.q()); }
+  void emit(const cmpshiftl& i) {
+    a->Cmp(W(i.s1), toOperand(i.s0, Width::Long));
+  }
+  void emit(const cmpshiftq& i) {
+    a->Cmp(X(i.s1), toOperand(i.s0, Width::Quad));
+  }
   void emit(const cmpsd& i);
   // TODO(CDE): csinc[bw]{} Should a) sign extend and b) set SF for overflow
   void emit(const csincb& i) { a->Csinc(W(i.d), W(i.t), W(i.f), C(i.cc)); }
@@ -399,6 +458,18 @@ struct Vgen {
   void emit(const orwi& i);
   void emit(const orli& i);
   void emit(const orqi& i);
+  void emit(const orshiftl& i) {
+    a->Orr(W(i.d), W(i.s1), toOperand(i.s0, Width::Long));
+    if (i.fl) {
+      a->Bic(vixl::wzr, W(i.d), vixl::wzr, SetFlags);
+    }
+  }
+  void emit(const orshiftq& i) {
+    a->Orr(X(i.d), X(i.s1), toOperand(i.s0, Width::Quad));
+    if (i.fl) {
+      a->Bic(vixl::xzr, X(i.d), vixl::xzr, SetFlags);
+    }
+  }
   void emit(const pop& i);
   void emit(const popp& i);
   void emit(const push& i);
@@ -423,6 +494,12 @@ struct Vgen {
   void emit(const subli& i) { a->Sub(W(i.d), W(i.s1), i.s0.l(), UF(i.fl)); }
   void emit(const subq& i) { a->Sub(X(i.d), X(i.s1), X(i.s0), UF(i.fl)); }
   void emit(const subqi& i) { a->Sub(X(i.d), X(i.s1), i.s0.q(), UF(i.fl)); }
+  void emit(const subshiftl& i) {
+    a->Sub(W(i.d), W(i.s1), toOperand(i.s0, Width::Long), UF(i.fl));
+  }
+  void emit(const subshiftq& i) {
+    a->Sub(X(i.d), X(i.s1), toOperand(i.s0, Width::Quad), UF(i.fl));
+  }
   void emit(const subsd& i) { a->Fsub(D(i.d), D(i.s1), D(i.s0)); }
   void emit(const testb& i){ a->Tst(W(i.s1), W(i.s0)); }
   void emit(const testbi& i){ a->Tst(W(i.s1), i.s0.ub()); }
@@ -432,6 +509,24 @@ struct Vgen {
   void emit(const testli& i) { a->Tst(W(i.s1), i.s0.l()); }
   void emit(const testq& i) { a->Tst(X(i.s1), X(i.s0)); }
   void emit(const testqi& i) { a->Tst(X(i.s1), i.s0.q()); }
+  void emit(const testshiftl& i) {
+    a->Tst(W(i.s1), toOperand(i.s0, Width::Long));
+  }
+  void emit(const testshiftq& i) {
+    a->Tst(X(i.s1), toOperand(i.s0, Width::Quad));
+  }
+  void emit(const xorshiftl& i) {
+    a->Eor(W(i.d), W(i.s1), toOperand(i.s0, Width::Long));
+    if (i.fl) {
+      a->Bic(vixl::wzr, W(i.d), vixl::wzr, SetFlags);
+    }
+  }
+  void emit(const xorshiftq& i) {
+    a->Eor(X(i.d), X(i.s1), toOperand(i.s0, Width::Quad));
+    if (i.fl) {
+      a->Bic(vixl::xzr, X(i.d), vixl::xzr, SetFlags);
+    }
+  }
   void emit(const trap& /*i*/);
   void emit(const ucomisd& i) { a->Fcmp(D(i.s0), D(i.s1)); }
   void emit(const unpcklpd&);
@@ -1550,35 +1645,99 @@ void lowerVptr(Vptr& p, Vout& v, ImmediateStyle is = kLegacyStyle, ImmediateStyl
     DISP = 4
   };
 
+  auto const legalScale = [] (uint8_t scale) {
+    return scale == 1 || scale == 2 || scale == 4 || scale == 8;
+  };
+
+  auto const scaleIndexValue = [&] (uint8_t scale, Vreg64 index) -> Vreg64 {
+    always_assert(scale != 0);
+    assertx(index.isValid());
+
+    switch (scale) {
+      case 1:
+        return index;
+      case 2:
+      case 4:
+      case 8: {
+        auto const amount = Log2(scale);
+        auto tmp = Vreg64{v.makeReg()};
+        v << shlqi{amount, index, tmp, v.makeReg()};
+        return tmp;
+      }
+      default: {
+        Vreg64 result = index;
+        bool haveResult = false;
+        auto bits = scale;
+        uint8_t shift = 0;
+
+        while (bits != 0) {
+          if (bits & 1) {
+            auto term = [&] () -> Vreg64 {
+              if (shift == 0) return index;
+              auto tmp = Vreg64{v.makeReg()};
+              v << shlqi{shift, index, tmp, v.makeReg()};
+              return tmp;
+            }();
+
+            if (!haveResult) {
+              result = term;
+              haveResult = true;
+            } else {
+              auto tmp = Vreg64{v.makeReg()};
+              v << addq{term, result, tmp, v.makeReg()};
+              result = tmp;
+            }
+          }
+          bits >>= 1;
+          ++shift;
+        }
+
+        assertx(haveResult);
+        return result;
+      }
+    }
+  };
+
+  auto const noteIllegalScale = [&] (uint8_t scale) {
+    if (legalScale(scale)) return;
+    if (Trace::moduleEnabled(Trace::vasm, 2)) {
+      FTRACE(2, "lowerVptr: expand non-power-of-two scale {} in {}\n",
+             static_cast<int>(scale), show(p));
+    }
+  };
+
   uint8_t mode = (((p.base.isValid()  & 0x1) << 0) |
                   ((p.index.isValid() & 0x1) << 1) |
                   (((p.disp != 0)     & 0x1) << 2));
+
   switch (mode) {
     case BASE:
       // ldr/str allow [base], nothing to lower.
       break;
 
-    case BASE | INDEX:
-      if (p.scale != 1 && p.scale != uint8_t(p.width)) {
-        auto t = v.makeReg();
-        v << shlqi{Log2(p.scale), p.index, t, v.makeReg()};
-        p.index = t;
-        p.scale = 1;
+    case BASE | INDEX: {
+      if (p.index.isValid() && p.scale != 1) {
+        auto const widthScale = static_cast<uint8_t>(p.width);
+        auto const keepEncoded =
+          legalScale(widthScale) && p.scale == widthScale;
+        if (!keepEncoded) {
+          noteIllegalScale(p.scale);
+          p.index = scaleIndexValue(p.scale, p.index);
+          p.scale = 1;
+        }
       }
       break;
+    }
 
-    case INDEX:
-      // Not supported, convert to [base].
-      if (p.scale > 1) {
-        auto t = v.makeReg();
-        v << shlqi{Log2(p.scale), p.index, t, v.makeReg()};
-        p.base = t;
-      } else {
-        p.base = p.index;
+    case INDEX: {
+      if (p.index.isValid()) {
+        noteIllegalScale(p.scale);
+        p.base = scaleIndexValue(p.scale, p.index);
       }
       p.index = Vreg{};
       p.scale = 1;
       break;
+    }
 
     case BASE | DISP: {
       // if the immediate value can be directly encoded we have nothing to do
@@ -1615,14 +1774,10 @@ void lowerVptr(Vptr& p, Vout& v, ImmediateStyle is = kLegacyStyle, ImmediateStyl
       break;
     }
 
-    case INDEX | DISP:
-      // Not supported, convert to [base, #imm] or [base, index].
-      if (p.scale > 1) {
-        auto t = v.makeReg();
-        v << shlqi{Log2(p.scale), p.index, t, v.makeReg()};
-        p.base = t;
-      } else {
-        p.base = p.index;
+    case INDEX | DISP: {
+      if (p.index.isValid()) {
+        noteIllegalScale(p.scale);
+        p.base = scaleIndexValue(p.scale, p.index);
       }
       if (p.disp >= -256 && p.disp <= 255) {
         p.index = Vreg{};
@@ -1635,17 +1790,14 @@ void lowerVptr(Vptr& p, Vout& v, ImmediateStyle is = kLegacyStyle, ImmediateStyl
         p.disp = 0;
       }
       break;
+    }
 
     case BASE | INDEX | DISP: {
-      // Not supported, convert to [base, index].
-      auto index = v.makeReg();
-      if (p.scale > 1) {
-        auto t = v.makeReg();
-        v << shlqi{Log2(p.scale), p.index, t, v.makeReg()};
-        v << addqi{p.disp, t, index, v.makeReg()};
-      } else {
-        v << addqi{p.disp, p.index, index, v.makeReg()};
-      }
+      assertx(p.index.isValid());
+      noteIllegalScale(p.scale);
+      auto const scaled = scaleIndexValue(p.scale, p.index);
+      auto index = Vreg64{v.makeReg()};
+      v << addqi{p.disp, scaled, index, v.makeReg()};
       p.index = index;
       p.scale = 1;
       p.disp = 0;

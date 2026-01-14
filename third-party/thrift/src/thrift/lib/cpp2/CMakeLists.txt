@@ -359,6 +359,7 @@ add_library(
   server/ServerInstrumentation.cpp
   server/ServiceHealthPoller.cpp
   server/ServiceInterceptorBase.cpp
+  server/ServiceInterceptorControl.cpp
   server/ServiceInterceptorQualifiedName.cpp
   server/ThriftProcessor.cpp
   server/ThriftServer.cpp

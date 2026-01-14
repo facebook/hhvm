@@ -139,6 +139,7 @@ target_link_libraries(
   compiler_lib
   compiler_base
   compiler_ast
+  Boost::regex
   fmt::fmt
   Folly::folly
 )

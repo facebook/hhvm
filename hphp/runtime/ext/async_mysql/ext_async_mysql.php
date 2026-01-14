@@ -773,6 +773,32 @@ class AsyncMysqlConnectionOptions {
   <<__Native>>
   public function setServerCertValidation(string $extensions = "",
                                           string $values = ""): void;
+
+  // Gets the Connect Timeout for each connection attempt
+  <<__Native>>
+  public function getConnectTimeout(): int;
+
+  // Gets the Connect Tcp Timeout for each connection attempt
+  // Returns -1 if not set
+  <<__Native>>
+  public function getConnectTcpTimeout(): int;
+
+  // Gets the number of attempts this operation will retry connecting
+  <<__Native>>
+  public function getConnectAttempts(): int;
+
+  // Gets the total timeout that the connect will use
+  <<__Native>>
+  public function getTotalTimeout(): int;
+
+  // Gets the maximum time for a running query
+  <<__Native>>
+  public function getQueryTimeout(): int;
+
+  // Gets the map of connection attributes that will be sent to Mysql in the
+  // Connection Attributes Handshake field
+  <<__Native>>
+  public function getConnectionAttributes(): darray<string, string>;
 }
 /**
  * Provides timing statistics about the MySQL client.

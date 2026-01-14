@@ -164,6 +164,12 @@ namespace {
       string $extensions = "",
       string $values = "",
     ): void {}
+    public function getConnectTimeout(): int {}
+    public function getConnectTcpTimeout(): int {}
+    public function getConnectAttempts(): int {}
+    public function getTotalTimeout(): int {}
+    public function getQueryTimeout(): int {}
+    public function getConnectionAttributes(): darray<string, string> {}
   }
 
   class AsyncMysqlClientStats {

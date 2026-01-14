@@ -495,6 +495,48 @@ HHVM_METHOD(AsyncMysqlConnectionOptions,
   #endif
 }
 
+static int64_t
+HHVM_METHOD(AsyncMysqlConnectionOptions, getConnectTimeout) {
+  auto* data = Native::data<AsyncMysqlConnectionOptions>(this_);
+  return data->m_conn_opts.getTimeout().count();
+}
+
+static int64_t
+HHVM_METHOD(AsyncMysqlConnectionOptions, getConnectTcpTimeout) {
+  auto* data = Native::data<AsyncMysqlConnectionOptions>(this_);
+  auto timeout = data->m_conn_opts.getConnectTcpTimeout();
+  return timeout.has_value() ? timeout.value().count() : -1;
+}
+
+static int64_t
+HHVM_METHOD(AsyncMysqlConnectionOptions, getConnectAttempts) {
+  auto* data = Native::data<AsyncMysqlConnectionOptions>(this_);
+  return data->m_conn_opts.getConnectAttempts();
+}
+
+static int64_t
+HHVM_METHOD(AsyncMysqlConnectionOptions, getTotalTimeout) {
+  auto* data = Native::data<AsyncMysqlConnectionOptions>(this_);
+  return data->m_conn_opts.getTotalTimeout().count();
+}
+
+static int64_t
+HHVM_METHOD(AsyncMysqlConnectionOptions, getQueryTimeout) {
+  auto* data = Native::data<AsyncMysqlConnectionOptions>(this_);
+  return data->m_conn_opts.getQueryTimeout().count();
+}
+
+static Array
+HHVM_METHOD(AsyncMysqlConnectionOptions, getConnectionAttributes) {
+  auto* data = Native::data<AsyncMysqlConnectionOptions>(this_);
+  const auto& attrs = data->m_conn_opts.getAttributes();
+  DictInit result(attrs.size());
+  for (const auto& [key, value] : attrs) {
+    result.set(String(key), String(value));
+  }
+  return result.toArray();
+}
+
 static int64_t getQueryTimeout(int64_t timeout_micros) {
   if (timeout_micros < 0) {
     return mysqlExtension::ReadTimeout * 1000;
@@ -2140,7 +2182,7 @@ static struct AsyncMysqlExtension final : Extension {
   // bump the version number and use a version guard in www:
   //   $ext = new ReflectionExtension("async_mysql");
   //   $version = (float) $ext->getVersion();
-  AsyncMysqlExtension() : Extension("async_mysql", "8.0", "mysql_gateway") {}
+  AsyncMysqlExtension() : Extension("async_mysql", "8.1", "mysql_gateway") {}
   void moduleRegisterNative() override {
     // expose the mysql flags
     HHVM_RC_INT_SAME(NOT_NULL_FLAG);
@@ -2338,6 +2380,12 @@ static struct AsyncMysqlExtension final : Extension {
     HHVM_ME(AsyncMysqlConnectionOptions, enableDelayedResetConn);
     HHVM_ME(AsyncMysqlConnectionOptions, enableChangeUser);
     HHVM_ME(AsyncMysqlConnectionOptions, setServerCertValidation);
+    HHVM_ME(AsyncMysqlConnectionOptions, getConnectTimeout);
+    HHVM_ME(AsyncMysqlConnectionOptions, getConnectTcpTimeout);
+    HHVM_ME(AsyncMysqlConnectionOptions, getConnectAttempts);
+    HHVM_ME(AsyncMysqlConnectionOptions, getTotalTimeout);
+    HHVM_ME(AsyncMysqlConnectionOptions, getQueryTimeout);
+    HHVM_ME(AsyncMysqlConnectionOptions, getConnectionAttributes);
 
     Native::registerNativeDataInfo<AsyncMysqlConnectionOptions>();
 

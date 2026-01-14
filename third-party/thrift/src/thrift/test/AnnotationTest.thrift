@@ -26,11 +26,7 @@ package;
 typedef list<i32> int_linked_list
 
 @thrift.DeprecatedUnvalidatedAnnotations{
-  items = {
-    "cpp.methods": "public: void manuallyDefinedDummyMethod() {}",
-    "java.final": "",
-    "python.type": "DenseFoo",
-  },
+  items = {"java.final": "", "python.type": "DenseFoo"},
 }
 struct foo {
   1: i32 bar;

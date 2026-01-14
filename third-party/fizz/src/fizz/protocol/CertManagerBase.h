@@ -23,7 +23,6 @@ class CertManagerBase {
   };
   using CertMatch = folly::Optional<CertMatchStruct>;
 
- protected:
   using SigSchemeMap = std::map<SignatureScheme, std::shared_ptr<SelfCert>>;
 };
 } // namespace fizz

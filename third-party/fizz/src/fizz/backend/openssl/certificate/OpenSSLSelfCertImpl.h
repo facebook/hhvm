@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include <fizz/backend/openssl/certificate/OpenSSLSelfCertBase.h>
 #include <fizz/backend/openssl/crypto/signature/Signature.h>
 #include <fizz/compression/CertificateCompressor.h>
 #include <fizz/protocol/Certificate.h>
@@ -21,7 +22,7 @@ enum class CertificateVerifyContext;
 namespace openssl {
 
 template <KeyType T>
-class OpenSSLSelfCertImpl : public SelfCert {
+class OpenSSLSelfCertImpl : public OpenSSLSelfCertBase {
  public:
   /**
    * Private key is the private key associated with the leaf cert.
@@ -53,6 +54,11 @@ class OpenSSLSelfCertImpl : public SelfCert {
       folly::ByteRange toBeSigned) const override;
 
   [[nodiscard]] folly::ssl::X509UniquePtr getX509() const override;
+
+  [[nodiscard]] std::vector<folly::ssl::X509UniquePtr> getX509Chain()
+      const override;
+
+  [[nodiscard]] folly::ssl::EvpPkeyUniquePtr getEVPPkey() const override;
 
  protected:
   // Allows derived classes to handle init

@@ -18,6 +18,19 @@
 using namespace folly;
 using namespace testing;
 
+namespace {
+
+std::vector<folly::ssl::X509UniquePtr> cloneCerts(
+    const std::vector<folly::ssl::X509UniquePtr>& certs) {
+  std::vector<folly::ssl::X509UniquePtr> ret;
+  for (const auto& cert : certs) {
+    X509_up_ref(cert.get());
+    ret.push_back(folly::ssl::X509UniquePtr(cert.get()));
+  }
+  return ret;
+}
+} // namespace
+
 namespace fizz {
 namespace test {
 
@@ -173,6 +186,19 @@ TYPED_TEST(CertTestTyped, TestVerifyDecodedCert) {
       CertificateVerifyContext::Server,
       tbs,
       sig->coalesce());
+}
+
+TYPED_TEST(CertTestTyped, TestGetX509Chain) {
+  std::vector<folly::ssl::X509UniquePtr> certs;
+  certs.push_back(getCert<TypeParam>());
+  auto cloned = cloneCerts(certs);
+  openssl::OpenSSLSelfCertImpl<TypeParam::Type> certificate(
+      getKey<TypeParam>(), std::move(certs));
+  auto chain = certificate.getX509Chain();
+  EXPECT_EQ(chain.size(), cloned.size());
+  for (size_t i = 0; i < chain.size(); i++) {
+    EXPECT_EQ(X509_cmp(cloned[i].get(), chain[i].get()), 0);
+  }
 }
 } // namespace test
 } // namespace fizz

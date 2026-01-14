@@ -149,5 +149,22 @@ folly::ssl::X509UniquePtr OpenSSLSelfCertImpl<T>::getX509() const {
   return folly::ssl::X509UniquePtr(certs_.front().get());
 }
 
+template <KeyType T>
+std::vector<folly::ssl::X509UniquePtr> OpenSSLSelfCertImpl<T>::getX509Chain()
+    const {
+  std::vector<folly::ssl::X509UniquePtr> ret;
+  ret.reserve(certs_.size());
+  for (const auto& cert : certs_) {
+    X509_up_ref(cert.get());
+    ret.emplace_back(folly::ssl::X509UniquePtr(cert.get()));
+  }
+  return ret;
+}
+
+template <KeyType T>
+folly::ssl::EvpPkeyUniquePtr OpenSSLSelfCertImpl<T>::getEVPPkey() const {
+  return signature_.getKey();
+}
+
 } // namespace openssl
 } // namespace fizz

@@ -346,7 +346,7 @@ class MyService_MyInteraction(_fbthrift_python_Client["MyService_MyInteraction.A
     truthify = Async.truthify
     # pyre-ignore[4]: Missing annotation.
     encode = Async.encode
-    async def __aenter__(self) -> "MyInteraction.Async":
+    async def __aenter__(self) -> "MyService_MyInteraction.Async":
         raise RuntimeError("Do not use __aenter__ directly on client, use get_client instead.")
     async def __aexit__(self) -> None:
         raise RuntimeError("Do not use __aexit__ directly on client, use get_client instead.")
@@ -490,7 +490,7 @@ class MyService_MyInteractionFast(_fbthrift_python_Client["MyService_MyInteracti
     truthify = Async.truthify
     # pyre-ignore[4]: Missing annotation.
     encode = Async.encode
-    async def __aenter__(self) -> "MyInteractionFast.Async":
+    async def __aenter__(self) -> "MyService_MyInteractionFast.Async":
         raise RuntimeError("Do not use __aenter__ directly on client, use get_client instead.")
     async def __aexit__(self) -> None:
         raise RuntimeError("Do not use __aexit__ directly on client, use get_client instead.")
@@ -559,7 +559,7 @@ class MyService_SerialInteraction(_fbthrift_python_Client["MyService_SerialInter
     
     # pyre-ignore[4]: Missing annotation.
     frobnicate = Async.frobnicate
-    async def __aenter__(self) -> "SerialInteraction.Async":
+    async def __aenter__(self) -> "MyService_SerialInteraction.Async":
         raise RuntimeError("Do not use __aenter__ directly on client, use get_client instead.")
     async def __aexit__(self) -> None:
         raise RuntimeError("Do not use __aexit__ directly on client, use get_client instead.")
@@ -895,7 +895,7 @@ class Factories_MyInteraction(_fbthrift_python_Client["Factories_MyInteraction.A
     truthify = Async.truthify
     # pyre-ignore[4]: Missing annotation.
     encode = Async.encode
-    async def __aenter__(self) -> "MyInteraction.Async":
+    async def __aenter__(self) -> "Factories_MyInteraction.Async":
         raise RuntimeError("Do not use __aenter__ directly on client, use get_client instead.")
     async def __aexit__(self) -> None:
         raise RuntimeError("Do not use __aexit__ directly on client, use get_client instead.")
@@ -1039,7 +1039,7 @@ class Factories_MyInteractionFast(_fbthrift_python_Client["Factories_MyInteracti
     truthify = Async.truthify
     # pyre-ignore[4]: Missing annotation.
     encode = Async.encode
-    async def __aenter__(self) -> "MyInteractionFast.Async":
+    async def __aenter__(self) -> "Factories_MyInteractionFast.Async":
         raise RuntimeError("Do not use __aenter__ directly on client, use get_client instead.")
     async def __aexit__(self) -> None:
         raise RuntimeError("Do not use __aexit__ directly on client, use get_client instead.")
@@ -1108,7 +1108,7 @@ class Factories_SerialInteraction(_fbthrift_python_Client["Factories_SerialInter
     
     # pyre-ignore[4]: Missing annotation.
     frobnicate = Async.frobnicate
-    async def __aenter__(self) -> "SerialInteraction.Async":
+    async def __aenter__(self) -> "Factories_SerialInteraction.Async":
         raise RuntimeError("Do not use __aenter__ directly on client, use get_client instead.")
     async def __aexit__(self) -> None:
         raise RuntimeError("Do not use __aexit__ directly on client, use get_client instead.")
@@ -1363,7 +1363,7 @@ class Perform_MyInteraction(_fbthrift_python_Client["Perform_MyInteraction.Async
     truthify = Async.truthify
     # pyre-ignore[4]: Missing annotation.
     encode = Async.encode
-    async def __aenter__(self) -> "MyInteraction.Async":
+    async def __aenter__(self) -> "Perform_MyInteraction.Async":
         raise RuntimeError("Do not use __aenter__ directly on client, use get_client instead.")
     async def __aexit__(self) -> None:
         raise RuntimeError("Do not use __aexit__ directly on client, use get_client instead.")
@@ -1507,7 +1507,7 @@ class Perform_MyInteractionFast(_fbthrift_python_Client["Perform_MyInteractionFa
     truthify = Async.truthify
     # pyre-ignore[4]: Missing annotation.
     encode = Async.encode
-    async def __aenter__(self) -> "MyInteractionFast.Async":
+    async def __aenter__(self) -> "Perform_MyInteractionFast.Async":
         raise RuntimeError("Do not use __aenter__ directly on client, use get_client instead.")
     async def __aexit__(self) -> None:
         raise RuntimeError("Do not use __aexit__ directly on client, use get_client instead.")
@@ -1576,7 +1576,7 @@ class Perform_SerialInteraction(_fbthrift_python_Client["Perform_SerialInteracti
     
     # pyre-ignore[4]: Missing annotation.
     frobnicate = Async.frobnicate
-    async def __aenter__(self) -> "SerialInteraction.Async":
+    async def __aenter__(self) -> "Perform_SerialInteraction.Async":
         raise RuntimeError("Do not use __aenter__ directly on client, use get_client instead.")
     async def __aexit__(self) -> None:
         raise RuntimeError("Do not use __aexit__ directly on client, use get_client instead.")
@@ -1837,7 +1837,7 @@ class InteractWithShared_MyInteraction(_fbthrift_python_Client["InteractWithShar
     truthify = Async.truthify
     # pyre-ignore[4]: Missing annotation.
     encode = Async.encode
-    async def __aenter__(self) -> "MyInteraction.Async":
+    async def __aenter__(self) -> "InteractWithShared_MyInteraction.Async":
         raise RuntimeError("Do not use __aenter__ directly on client, use get_client instead.")
     async def __aexit__(self) -> None:
         raise RuntimeError("Do not use __aexit__ directly on client, use get_client instead.")
@@ -1958,7 +1958,7 @@ class InteractWithShared_SharedInteraction(_fbthrift_python_Client["InteractWith
     do_something = Async.do_something
     # pyre-ignore[4]: Missing annotation.
     tear_down = Async.tear_down
-    async def __aenter__(self) -> "SharedInteraction.Async":
+    async def __aenter__(self) -> "InteractWithShared_SharedInteraction.Async":
         raise RuntimeError("Do not use __aenter__ directly on client, use get_client instead.")
     async def __aexit__(self) -> None:
         raise RuntimeError("Do not use __aexit__ directly on client, use get_client instead.")
@@ -2125,7 +2125,7 @@ class BoxService_BoxedInteraction(_fbthrift_python_Client["BoxService_BoxedInter
     
     # pyre-ignore[4]: Missing annotation.
     getABox = Async.getABox
-    async def __aenter__(self) -> "BoxedInteraction.Async":
+    async def __aenter__(self) -> "BoxService_BoxedInteraction.Async":
         raise RuntimeError("Do not use __aenter__ directly on client, use get_client instead.")
     async def __aexit__(self) -> None:
         raise RuntimeError("Do not use __aexit__ directly on client, use get_client instead.")

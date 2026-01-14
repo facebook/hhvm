@@ -165,7 +165,11 @@ class Async({{#if extends_service?}}{{#service.extends}}{{!
 {{function.name}} = Async.{{function.name}}
 {{/each}}
 {{#if (has_compiler_option? "auto_migrate")}}
+{{#if service.interaction?}}
+async def __aenter__(self) -> "{{parent_service_name}}_{{service.name}}.Async":
+{{#else}}
 async def __aenter__(self) -> "{{service.name}}.Async":
+{{/if service.interaction?}}
     raise RuntimeError("Do not use __aenter__ directly on client, use get_client instead.")
 async def __aexit__(self) -> None:
     raise RuntimeError("Do not use __aexit__ directly on client, use get_client instead.")

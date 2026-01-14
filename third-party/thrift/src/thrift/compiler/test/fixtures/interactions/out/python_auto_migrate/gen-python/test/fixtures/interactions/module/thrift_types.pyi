@@ -61,7 +61,7 @@ class _fbthrift_MyService_foo_args(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None]]]: ...
 
 
@@ -73,7 +73,7 @@ class _fbthrift_MyService_foo_result(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             None,
         ]]]: ...
@@ -88,7 +88,7 @@ class _fbthrift_MyService_interact_args(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None, builtins.int]]]: ...
 
 
@@ -100,7 +100,7 @@ class _fbthrift_MyService_interact_result(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             None,
         ]]]: ...
@@ -113,7 +113,7 @@ class _fbthrift_MyService_interactFast_args(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None]]]: ...
 
 
@@ -125,7 +125,7 @@ class _fbthrift_MyService_interactFast_result(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             builtins.int,
         ]]]: ...
@@ -138,7 +138,7 @@ class _fbthrift_MyService_serialize_args(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None]]]: ...
 
 
@@ -150,7 +150,7 @@ class _fbthrift_MyService_serialize_result(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             builtins.int,
         ]]]: ...
@@ -163,7 +163,7 @@ class _fbthrift_MyService_serialize_result_stream_elem(_fbthrift_python_types._f
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             builtins.int,
         ]]]: ...
@@ -176,7 +176,7 @@ class _fbthrift_MyInteraction_frobnicate_args(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None]]]: ...
 
 
@@ -189,7 +189,7 @@ class _fbthrift_MyInteraction_frobnicate_result(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             builtins.int,
             _fbthrift_CustomException,
@@ -203,7 +203,7 @@ class _fbthrift_MyInteraction_ping_args(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None]]]: ...
 
 
@@ -214,7 +214,7 @@ class _fbthrift_MyInteraction_truthify_args(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None]]]: ...
 
 
@@ -226,7 +226,7 @@ class _fbthrift_MyInteraction_truthify_result(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             None,
         ]]]: ...
@@ -239,7 +239,7 @@ class _fbthrift_MyInteraction_truthify_result_stream_elem(_fbthrift_python_types
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             builtins.bool,
         ]]]: ...
@@ -252,7 +252,7 @@ class _fbthrift_MyInteraction_encode_args(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None]]]: ...
 
 
@@ -264,7 +264,7 @@ class _fbthrift_MyInteraction_encode_result(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             _typing.AbstractSet[builtins.int],
         ]]]: ...
@@ -279,7 +279,7 @@ class _fbthrift_MyInteraction_encode_result_sink_elem(_fbthrift_python_types._fb
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             builtins.str,
         ]]]: ...
@@ -294,7 +294,7 @@ class _fbthrift_MyInteraction_encode_result_sink_final(_fbthrift_python_types._f
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             builtins.bytes,
         ]]]: ...
@@ -307,7 +307,7 @@ class _fbthrift_MyInteractionFast_frobnicate_args(_fbthrift_python_types.Struct)
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None]]]: ...
 
 
@@ -319,7 +319,7 @@ class _fbthrift_MyInteractionFast_frobnicate_result(_fbthrift_python_types.Struc
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             builtins.int,
         ]]]: ...
@@ -332,7 +332,7 @@ class _fbthrift_MyInteractionFast_ping_args(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None]]]: ...
 
 
@@ -343,7 +343,7 @@ class _fbthrift_MyInteractionFast_truthify_args(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None]]]: ...
 
 
@@ -355,7 +355,7 @@ class _fbthrift_MyInteractionFast_truthify_result(_fbthrift_python_types.Struct)
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             None,
         ]]]: ...
@@ -368,7 +368,7 @@ class _fbthrift_MyInteractionFast_truthify_result_stream_elem(_fbthrift_python_t
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             builtins.bool,
         ]]]: ...
@@ -381,7 +381,7 @@ class _fbthrift_MyInteractionFast_encode_args(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None]]]: ...
 
 
@@ -393,7 +393,7 @@ class _fbthrift_MyInteractionFast_encode_result(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             _typing.AbstractSet[builtins.int],
         ]]]: ...
@@ -408,7 +408,7 @@ class _fbthrift_MyInteractionFast_encode_result_sink_elem(_fbthrift_python_types
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             builtins.str,
         ]]]: ...
@@ -423,7 +423,7 @@ class _fbthrift_MyInteractionFast_encode_result_sink_final(_fbthrift_python_type
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             builtins.bytes,
         ]]]: ...
@@ -436,7 +436,7 @@ class _fbthrift_SerialInteraction_frobnicate_args(_fbthrift_python_types.Struct)
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None]]]: ...
 
 
@@ -448,7 +448,7 @@ class _fbthrift_SerialInteraction_frobnicate_result(_fbthrift_python_types.Struc
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             None,
         ]]]: ...
@@ -461,7 +461,7 @@ class _fbthrift_Factories_foo_args(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None]]]: ...
 
 
@@ -473,7 +473,7 @@ class _fbthrift_Factories_foo_result(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             None,
         ]]]: ...
@@ -488,7 +488,7 @@ class _fbthrift_Factories_interact_args(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None, builtins.int]]]: ...
 
 
@@ -500,7 +500,7 @@ class _fbthrift_Factories_interact_result(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             None,
         ]]]: ...
@@ -513,7 +513,7 @@ class _fbthrift_Factories_interactFast_args(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None]]]: ...
 
 
@@ -525,7 +525,7 @@ class _fbthrift_Factories_interactFast_result(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             builtins.int,
         ]]]: ...
@@ -538,7 +538,7 @@ class _fbthrift_Factories_serialize_args(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None]]]: ...
 
 
@@ -550,7 +550,7 @@ class _fbthrift_Factories_serialize_result(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             builtins.int,
         ]]]: ...
@@ -563,7 +563,7 @@ class _fbthrift_Factories_serialize_result_stream_elem(_fbthrift_python_types._f
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             builtins.int,
         ]]]: ...
@@ -576,7 +576,7 @@ class _fbthrift_MyInteraction_frobnicate_args(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None]]]: ...
 
 
@@ -589,7 +589,7 @@ class _fbthrift_MyInteraction_frobnicate_result(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             builtins.int,
             _fbthrift_CustomException,
@@ -603,7 +603,7 @@ class _fbthrift_MyInteraction_ping_args(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None]]]: ...
 
 
@@ -614,7 +614,7 @@ class _fbthrift_MyInteraction_truthify_args(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None]]]: ...
 
 
@@ -626,7 +626,7 @@ class _fbthrift_MyInteraction_truthify_result(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             None,
         ]]]: ...
@@ -639,7 +639,7 @@ class _fbthrift_MyInteraction_truthify_result_stream_elem(_fbthrift_python_types
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             builtins.bool,
         ]]]: ...
@@ -652,7 +652,7 @@ class _fbthrift_MyInteraction_encode_args(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None]]]: ...
 
 
@@ -664,7 +664,7 @@ class _fbthrift_MyInteraction_encode_result(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             _typing.AbstractSet[builtins.int],
         ]]]: ...
@@ -679,7 +679,7 @@ class _fbthrift_MyInteraction_encode_result_sink_elem(_fbthrift_python_types._fb
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             builtins.str,
         ]]]: ...
@@ -694,7 +694,7 @@ class _fbthrift_MyInteraction_encode_result_sink_final(_fbthrift_python_types._f
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             builtins.bytes,
         ]]]: ...
@@ -707,7 +707,7 @@ class _fbthrift_MyInteractionFast_frobnicate_args(_fbthrift_python_types.Struct)
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None]]]: ...
 
 
@@ -719,7 +719,7 @@ class _fbthrift_MyInteractionFast_frobnicate_result(_fbthrift_python_types.Struc
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             builtins.int,
         ]]]: ...
@@ -732,7 +732,7 @@ class _fbthrift_MyInteractionFast_ping_args(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None]]]: ...
 
 
@@ -743,7 +743,7 @@ class _fbthrift_MyInteractionFast_truthify_args(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None]]]: ...
 
 
@@ -755,7 +755,7 @@ class _fbthrift_MyInteractionFast_truthify_result(_fbthrift_python_types.Struct)
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             None,
         ]]]: ...
@@ -768,7 +768,7 @@ class _fbthrift_MyInteractionFast_truthify_result_stream_elem(_fbthrift_python_t
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             builtins.bool,
         ]]]: ...
@@ -781,7 +781,7 @@ class _fbthrift_MyInteractionFast_encode_args(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None]]]: ...
 
 
@@ -793,7 +793,7 @@ class _fbthrift_MyInteractionFast_encode_result(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             _typing.AbstractSet[builtins.int],
         ]]]: ...
@@ -808,7 +808,7 @@ class _fbthrift_MyInteractionFast_encode_result_sink_elem(_fbthrift_python_types
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             builtins.str,
         ]]]: ...
@@ -823,7 +823,7 @@ class _fbthrift_MyInteractionFast_encode_result_sink_final(_fbthrift_python_type
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             builtins.bytes,
         ]]]: ...
@@ -836,7 +836,7 @@ class _fbthrift_SerialInteraction_frobnicate_args(_fbthrift_python_types.Struct)
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None]]]: ...
 
 
@@ -848,7 +848,7 @@ class _fbthrift_SerialInteraction_frobnicate_result(_fbthrift_python_types.Struc
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             None,
         ]]]: ...
@@ -861,7 +861,7 @@ class _fbthrift_Perform_foo_args(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None]]]: ...
 
 
@@ -873,7 +873,7 @@ class _fbthrift_Perform_foo_result(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             None,
         ]]]: ...
@@ -886,7 +886,7 @@ class _fbthrift_MyInteraction_frobnicate_args(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None]]]: ...
 
 
@@ -899,7 +899,7 @@ class _fbthrift_MyInteraction_frobnicate_result(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             builtins.int,
             _fbthrift_CustomException,
@@ -913,7 +913,7 @@ class _fbthrift_MyInteraction_ping_args(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None]]]: ...
 
 
@@ -924,7 +924,7 @@ class _fbthrift_MyInteraction_truthify_args(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None]]]: ...
 
 
@@ -936,7 +936,7 @@ class _fbthrift_MyInteraction_truthify_result(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             None,
         ]]]: ...
@@ -949,7 +949,7 @@ class _fbthrift_MyInteraction_truthify_result_stream_elem(_fbthrift_python_types
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             builtins.bool,
         ]]]: ...
@@ -962,7 +962,7 @@ class _fbthrift_MyInteraction_encode_args(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None]]]: ...
 
 
@@ -974,7 +974,7 @@ class _fbthrift_MyInteraction_encode_result(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             _typing.AbstractSet[builtins.int],
         ]]]: ...
@@ -989,7 +989,7 @@ class _fbthrift_MyInteraction_encode_result_sink_elem(_fbthrift_python_types._fb
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             builtins.str,
         ]]]: ...
@@ -1004,7 +1004,7 @@ class _fbthrift_MyInteraction_encode_result_sink_final(_fbthrift_python_types._f
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             builtins.bytes,
         ]]]: ...
@@ -1017,7 +1017,7 @@ class _fbthrift_MyInteractionFast_frobnicate_args(_fbthrift_python_types.Struct)
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None]]]: ...
 
 
@@ -1029,7 +1029,7 @@ class _fbthrift_MyInteractionFast_frobnicate_result(_fbthrift_python_types.Struc
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             builtins.int,
         ]]]: ...
@@ -1042,7 +1042,7 @@ class _fbthrift_MyInteractionFast_ping_args(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None]]]: ...
 
 
@@ -1053,7 +1053,7 @@ class _fbthrift_MyInteractionFast_truthify_args(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None]]]: ...
 
 
@@ -1065,7 +1065,7 @@ class _fbthrift_MyInteractionFast_truthify_result(_fbthrift_python_types.Struct)
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             None,
         ]]]: ...
@@ -1078,7 +1078,7 @@ class _fbthrift_MyInteractionFast_truthify_result_stream_elem(_fbthrift_python_t
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             builtins.bool,
         ]]]: ...
@@ -1091,7 +1091,7 @@ class _fbthrift_MyInteractionFast_encode_args(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None]]]: ...
 
 
@@ -1103,7 +1103,7 @@ class _fbthrift_MyInteractionFast_encode_result(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             _typing.AbstractSet[builtins.int],
         ]]]: ...
@@ -1118,7 +1118,7 @@ class _fbthrift_MyInteractionFast_encode_result_sink_elem(_fbthrift_python_types
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             builtins.str,
         ]]]: ...
@@ -1133,7 +1133,7 @@ class _fbthrift_MyInteractionFast_encode_result_sink_final(_fbthrift_python_type
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             builtins.bytes,
         ]]]: ...
@@ -1146,7 +1146,7 @@ class _fbthrift_SerialInteraction_frobnicate_args(_fbthrift_python_types.Struct)
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None]]]: ...
 
 
@@ -1158,7 +1158,7 @@ class _fbthrift_SerialInteraction_frobnicate_result(_fbthrift_python_types.Struc
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             None,
         ]]]: ...
@@ -1171,7 +1171,7 @@ class _fbthrift_InteractWithShared_do_some_similar_things_args(_fbthrift_python_
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None]]]: ...
 
 
@@ -1183,7 +1183,7 @@ class _fbthrift_InteractWithShared_do_some_similar_things_result(_fbthrift_pytho
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             _fbthrift__test__fixtures__another_interactions__shared__thrift_types.DoSomethingResult,
         ]]]: ...
@@ -1196,7 +1196,7 @@ class _fbthrift_MyInteraction_frobnicate_args(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None]]]: ...
 
 
@@ -1209,7 +1209,7 @@ class _fbthrift_MyInteraction_frobnicate_result(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             builtins.int,
             _fbthrift_CustomException,
@@ -1223,7 +1223,7 @@ class _fbthrift_MyInteraction_ping_args(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None]]]: ...
 
 
@@ -1234,7 +1234,7 @@ class _fbthrift_MyInteraction_truthify_args(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None]]]: ...
 
 
@@ -1246,7 +1246,7 @@ class _fbthrift_MyInteraction_truthify_result(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             None,
         ]]]: ...
@@ -1259,7 +1259,7 @@ class _fbthrift_MyInteraction_truthify_result_stream_elem(_fbthrift_python_types
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             builtins.bool,
         ]]]: ...
@@ -1272,7 +1272,7 @@ class _fbthrift_MyInteraction_encode_args(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None]]]: ...
 
 
@@ -1284,7 +1284,7 @@ class _fbthrift_MyInteraction_encode_result(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             _typing.AbstractSet[builtins.int],
         ]]]: ...
@@ -1299,7 +1299,7 @@ class _fbthrift_MyInteraction_encode_result_sink_elem(_fbthrift_python_types._fb
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             builtins.str,
         ]]]: ...
@@ -1314,7 +1314,7 @@ class _fbthrift_MyInteraction_encode_result_sink_final(_fbthrift_python_types._f
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             builtins.bytes,
         ]]]: ...
@@ -1327,7 +1327,7 @@ class _fbthrift_SharedInteraction_init_args(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None]]]: ...
 
 
@@ -1339,7 +1339,7 @@ class _fbthrift_SharedInteraction_init_result(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             builtins.int,
         ]]]: ...
@@ -1352,7 +1352,7 @@ class _fbthrift_SharedInteraction_do_something_args(_fbthrift_python_types.Struc
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None]]]: ...
 
 
@@ -1364,7 +1364,7 @@ class _fbthrift_SharedInteraction_do_something_result(_fbthrift_python_types.Str
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             _fbthrift__test__fixtures__another_interactions__shared__thrift_types.DoSomethingResult,
         ]]]: ...
@@ -1377,7 +1377,7 @@ class _fbthrift_SharedInteraction_tear_down_args(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None]]]: ...
 
 
@@ -1389,7 +1389,7 @@ class _fbthrift_SharedInteraction_tear_down_result(_fbthrift_python_types.Struct
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             None,
         ]]]: ...
@@ -1404,7 +1404,7 @@ class _fbthrift_BoxService_getABoxSession_args(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None, _fbthrift_ShouldBeBoxed]]]: ...
 
 
@@ -1416,7 +1416,7 @@ class _fbthrift_BoxService_getABoxSession_result(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             _fbthrift_ShouldBeBoxed,
         ]]]: ...
@@ -1429,7 +1429,7 @@ class _fbthrift_BoxedInteraction_getABox_args(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None]]]: ...
 
 
@@ -1441,7 +1441,7 @@ class _fbthrift_BoxedInteraction_getABox_result(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             _fbthrift_ShouldBeBoxed,
         ]]]: ...

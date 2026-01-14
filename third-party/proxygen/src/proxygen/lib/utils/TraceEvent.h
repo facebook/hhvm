@@ -14,7 +14,6 @@
 #include <proxygen/lib/utils/TraceEventType.h>
 #include <proxygen/lib/utils/TraceFieldType.h>
 
-#include <boost/variant.hpp>
 #include <glog/logging.h>
 
 #include <folly/Conv.h>
@@ -22,6 +21,7 @@
 
 #include <map>
 #include <string>
+#include <variant>
 #include <vector>
 
 namespace proxygen {
@@ -38,7 +38,7 @@ class TraceEvent {
   struct MetaData {
    public:
     using MetaDataType =
-        boost::variant<int64_t, std::string, std::vector<std::string>>;
+        std::variant<int64_t, std::string, std::vector<std::string>>;
 
     template <typename T,
               typename = typename std::enable_if<std::is_integral<T>::value,
@@ -70,15 +70,17 @@ class TraceEvent {
     template <typename T>
     T getValueAs() const {
       ConvVisitor<T> visitor;
-      return boost::apply_visitor(visitor, value_);
+      return std::visit(visitor, value_);
     }
 
     [[nodiscard]] const std::type_info& type() const {
-      return value_.type();
+      return std::visit(
+          [](const auto& v) -> const std::type_info& { return typeid(v); },
+          value_);
     }
 
     template <typename T>
-    struct ConvVisitor : boost::static_visitor<T> {
+    struct ConvVisitor {
       T operator()(const std::vector<std::string>& /* Unused */) const {
         folly::throw_exception<Exception>("Not supported for type");
       }
@@ -269,8 +271,7 @@ class TraceEvent {
 };
 
 template <>
-struct TraceEvent::MetaData::ConvVisitor<std::vector<std::string>>
-    : boost::static_visitor<std::vector<std::string>> {
+struct TraceEvent::MetaData::ConvVisitor<std::vector<std::string>> {
   std::vector<std::string> operator()(
       const std::vector<std::string>& operand) const {
     return operand;
@@ -283,8 +284,7 @@ struct TraceEvent::MetaData::ConvVisitor<std::vector<std::string>>
 };
 
 template <>
-struct TraceEvent::MetaData::ConvVisitor<std::string>
-    : boost::static_visitor<std::string> {
+struct TraceEvent::MetaData::ConvVisitor<std::string> {
   std::string operator()(const std::vector<std::string>& operand) const;
 
   template <typename U>

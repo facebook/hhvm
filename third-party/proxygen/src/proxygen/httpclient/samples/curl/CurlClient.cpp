@@ -124,8 +124,7 @@ void CurlClient::initializeSsl(const string& caPath,
 }
 
 void CurlClient::sslHandshakeFollowup(HTTPUpstreamSession* session) noexcept {
-  AsyncSSLSocket* sslSocket =
-      dynamic_cast<AsyncSSLSocket*>(session->getTransport());
+  auto* sslSocket = dynamic_cast<AsyncSSLSocket*>(session->getTransport());
 
   const unsigned char* nextProto = nullptr;
   unsigned nextProtoLength = 0;

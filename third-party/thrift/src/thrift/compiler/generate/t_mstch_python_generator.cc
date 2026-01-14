@@ -110,9 +110,7 @@ whisker::object adapter_node(
   }
   auto type_hint = get_annotation_property(adapter_annotation, "typeHint");
   bool is_generic = type_hint.ends_with("[]");
-  // For consts, we need to retain the `[]` suffix to indicate that the const is
-  // a container type
-  if (is_generic && dynamic_cast<const t_const*>(&self) == nullptr) {
+  if (is_generic) {
     type_hint = type_hint.substr(0, type_hint.size() - 2);
   }
   whisker::map::raw node;

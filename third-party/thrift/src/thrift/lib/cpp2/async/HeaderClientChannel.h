@@ -387,7 +387,8 @@ class HeaderClientChannel : public ClientChannel,
     // transport upgrade.
     std::unique_ptr<RequestSetupMetadata> rocketUpgradeSetupMetadata_;
 
-    const protocol::PROTOCOL_TYPES protocolId_{headerChannel_->getProtocolId()};
+    const protocol::PROTOCOL_TYPES protocolId_{
+        static_cast<protocol::PROTOCOL_TYPES>(headerChannel_->getProtocolId())};
     folly::EventBase* evb_{headerChannel_->getEventBase()};
 
     enum class State { INIT = 0, UPGRADE_IN_PROGRESS = 1, DONE = 2 };

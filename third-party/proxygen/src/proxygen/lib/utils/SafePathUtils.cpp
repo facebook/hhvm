@@ -19,8 +19,6 @@
 #include <folly/container/Foreach.h>
 #include <folly/portability/Stdlib.h>
 
-#include <boost/filesystem/path.hpp>
-
 #ifndef PATH_MAX
 #define PATH_MAX 4096
 #endif
@@ -150,15 +148,15 @@ std::string SafePath::getPath(const std::string& filePath,
 }
 
 string SafePath::cleanPath(const string& path) {
-  boost::filesystem::path output;
-  boost::filesystem::path inPath(path);
+  std::filesystem::path output;
+  std::filesystem::path inPath(path);
   FOR_EACH_RANGE(it, inPath.begin(), inPath.end()) {
     if (*it == ".") {
       continue;
     }
     if (*it == "..") {
       if (output.filename().string() != "/") {
-        output.remove_filename();
+        output = output.parent_path();
       }
       continue;
     }

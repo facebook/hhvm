@@ -12,7 +12,7 @@
 #include "proxygen/lib/dns/NaiveResolutionCallback.h"
 #include "proxygen/lib/dns/Rfc6724.h"
 
-#include <boost/thread/barrier.hpp>
+#include <barrier>
 
 namespace proxygen {
 
@@ -22,10 +22,10 @@ SyncDNSResolver::SyncDNSResolver()
 }
 SyncDNSResolver::SyncDNSResolver(DNSResolver::UniquePtr resolver) {
   // Start a thread running event loop
-  auto barrier = std::make_shared<boost::barrier>(2);
+  auto barrier = std::make_shared<std::barrier<>>(2);
   thread_ = std::thread([this, barrier]() mutable {
     evb_.runInLoop([=]() mutable {
-      barrier->wait();
+      barrier->arrive_and_wait();
       barrier.reset();
     });
 
@@ -34,7 +34,7 @@ SyncDNSResolver::SyncDNSResolver(DNSResolver::UniquePtr resolver) {
   });
 
   // Wait for event loop to start
-  barrier->wait();
+  barrier->arrive_and_wait();
 
   // Create the underlying DNS resolver we are doing to use
   resolver_ = std::move(resolver);
@@ -60,7 +60,7 @@ std::vector<folly::SocketAddress> SyncDNSResolver::resolveHostname(
   std::vector<folly::SocketAddress> addrs;
   folly::exception_wrapper ew;
 
-  auto barrier = std::make_shared<boost::barrier>(2);
+  auto barrier = std::make_shared<std::barrier<>>(2);
   evb_.runInEventBaseThread([&, barrier]() mutable {
     auto cb = new NaiveResolutionCallback(
         [&, barrier](std::vector<DNSResolver::Answer>&& answers,
@@ -77,13 +77,13 @@ std::vector<folly::SocketAddress> SyncDNSResolver::resolveHostname(
               ew = DNSResolver::makeNoNameException();
             }
           }
-          barrier->wait();
+          barrier->arrive_and_wait();
         });
 
     resolver_->resolveHostname(cb, hostname, timeout, family);
   });
 
-  barrier->wait();
+  barrier->arrive_and_wait();
   if (ew) {
     ew.throw_exception();
   }

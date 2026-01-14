@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include <boost/thread.hpp>
+#include <barrier>
 #include <chrono>
 #include <folly/io/async/SSLContext.h>
 #include <folly/system/ThreadName.h>
@@ -199,22 +199,22 @@ inline std::unique_ptr<ScopedHTTPServer> ScopedHTTPServer::start(
 
   // Start the server
   std::exception_ptr eptr;
-  auto barrier = std::make_shared<boost::barrier>(2);
+  auto barrier = std::make_shared<std::barrier<>>(2);
 
   std::thread t = std::thread([&, barrier]() {
     server->start(
         [&, barrier]() {
           folly::setThreadName("http-acceptor");
-          barrier->wait();
+          barrier->arrive_and_wait();
         },
         [&, barrier](std::exception_ptr ex) {
           eptr = ex;
-          barrier->wait();
+          barrier->arrive_and_wait();
         });
   });
 
   // Wait for server to start
-  barrier->wait();
+  barrier->arrive_and_wait();
   if (eptr) {
     t.join();
 

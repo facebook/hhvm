@@ -28,6 +28,7 @@
 #include <folly/portability/Stdlib.h>
 
 #include "hphp/hhbbc/class-util.h"
+#include "hphp/hhbbc/func-util.h"
 #include "hphp/hhbbc/index.h"
 #include "hphp/hhbbc/misc.h"
 #include "hphp/hhbbc/parallel.h"
@@ -89,6 +90,12 @@ void dump_class_state(std::ostream& out,
 
   if (auto const s = index.lookup_iface_vtable_slot(c); s != kInvalidSlot) {
     out << clsName << " vtable slot #" << s << '\n';
+  }
+
+  if (c->attrs & AttrNoOverride) {
+    out << "AttrNoOverride\n";
+  } else if (c->attrs & AttrNoOverrideRegular) {
+    out << "AttrNoOverrideRegular\n";
   }
 
   if (is_closure(*c)) {
@@ -177,16 +184,11 @@ void dump_class_state(std::ostream& out,
 void dump_func_state(std::ostream& out,
                      const IIndex& index,
                      const php::Func& f) {
-  auto const name = f.cls
-    ? folly::sformat(
-        "{}::{}()",
-        f.cls->name, f.name
-      )
-    : folly::sformat("{}()", f.name);
-
   auto const [retTy, effectFree] = index.lookup_return_type_raw(&f).first;
-  out << name << " :: " << show(retTy) <<
-    (effectFree ? " (effect-free)\n" : "\n");
+  out << func_fullname(f) << "() :: " << show(retTy);
+  if (effectFree) out << " (effect-free)";
+  if (f.attrs & AttrNoOverride) out << " (no-override)";
+  out << '\n';
 }
 
 }

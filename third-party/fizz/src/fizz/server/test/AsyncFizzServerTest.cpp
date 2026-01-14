@@ -12,6 +12,7 @@
 #include <fizz/server/AsyncFizzServer.h>
 
 #include <fizz/extensions/tokenbinding/Types.h>
+#include <fizz/protocol/test/TestUtil.h>
 #include <fizz/server/test/Mocks.h>
 #include <folly/io/async/test/MockAsyncTransport.h>
 
@@ -300,7 +301,8 @@ TEST_F(AsyncFizzServerTest, TestAttemptVersionFallback) {
             AttemptVersionFallback{
                 IOBuf::copyBuffer("ClientHello"),
                 folly::Optional<std::string>("www.hostname.com"),
-                std::make_unique<HandshakeLogging>()});
+                std::make_unique<HandshakeLogging>(),
+                TestMessages::clientHello()});
       }));
   EXPECT_CALL(handshakeCallback_, _fizzHandshakeAttemptFallback(_))
       .WillOnce(Invoke([&](AttemptVersionFallback& fallback) {
@@ -311,6 +313,13 @@ TEST_F(AsyncFizzServerTest, TestAttemptVersionFallback) {
                 fallback.clientHello,
                 IOBuf::copyBuffer("ClientHelloClientHello")));
         EXPECT_EQ(fallback.sni, "www.hostname.com");
+        auto serverNameList = getExtension<ServerNameList>(
+            fallback.preParsedClientHello.extensions);
+        EXPECT_EQ(serverNameList->server_name_list.size(), 1);
+        EXPECT_EQ(
+            serverNameList->server_name_list.front()
+                .hostname->to<std::string>(),
+            "www.hostname.com");
         server_.reset();
       }));
   socketReadCallback_->readBufferAvailable(IOBuf::copyBuffer("ClientHello"));

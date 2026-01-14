@@ -388,7 +388,8 @@ void AsyncFizzServerT<SM>::ActionMoveVisitor::operator()(
       AttemptVersionFallback{
           std::move(fallback.clientHello),
           std::move(fallback.sni),
-          std::move(fallback.handshakeLogging)});
+          std::move(fallback.handshakeLogging),
+          std::move(fallback.preParsedClientHello)});
 }
 
 template <typename SM>

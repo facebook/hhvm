@@ -1323,6 +1323,8 @@ EventHandler<ServerTypes, StateEnum::ExpectingClientHello, Event::ClientHello>::
             std::make_unique<HandshakeLogging>(*logging);
       }
 
+      fallback.preParsedClientHello = std::move(chlo);
+
       ret = actions(
           MutateState(&Transition<StateEnum::Error>), std::move(fallback));
       return Status::Success;

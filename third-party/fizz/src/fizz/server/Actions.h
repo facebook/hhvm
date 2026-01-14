@@ -43,6 +43,11 @@ struct AttemptVersionFallback {
    * Parsed fields from the ClientHello for logging purposes.
    */
   std::unique_ptr<HandshakeLogging> handshakeLogging;
+
+  /**
+   * A pre-parsed Fizz ClientHello.
+   */
+  ClientHello preParsedClientHello;
 };
 
 /**

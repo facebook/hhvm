@@ -91,26 +91,32 @@ bool simplify(Env& env, const cmovq& inst, Vlabel b, size_t i) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+template <Vinstr::Opcode ExtOp, typename ExtMov, typename ExtLoad, typename Load>
+bool simplify_load_ext(Env& env, const Load& inst, Vlabel b, size_t i) {
+  return if_inst<ExtOp>(env, b, i + 1, [&] (const ExtMov& mov) {
+      if (env.use_counts[inst.d] != 1 || inst.d != mov.s) return false;
+
+      return simplify_impl(env, b, i, [&] (Vout& v) {
+        v << ExtLoad{inst.s, mov.d};
+        return 2;
+      });
+  });
+}
+
 bool simplify(Env& env, const loadb& inst, Vlabel b, size_t i) {
-  if (if_inst<Vinstr::movzbl>(env, b, i + 1, [&] (const movzbl& mov) {
-      // loadb{s, tmp}; movzbl{tmp, d}; -> loadzbl{s, d};
-      if (!(env.use_counts[inst.d] == 1 && inst.d == mov.s)) return false;
-
-      return simplify_impl(env, b, i, [&] (Vout& v) {
-        v << loadzbl{inst.s, mov.d};
-        return 2;
-      }); })) {
-      return true;
-    }
-
-  return if_inst<Vinstr::movsbl>(env, b, i + 1, [&] (const movsbl& mov) {
-      // loadb{s, tmp}; movsbl{tmp, d}; -> loadsbl{s, d};
-      if (!(env.use_counts[inst.d] == 1 && inst.d == mov.s)) return false;
-
-      return simplify_impl(env, b, i, [&] (Vout& v) {
-        v << loadsbl{inst.s, mov.d};
-        return 2;
-      }); });
+  if (simplify_load_ext<Vinstr::movzbl, movzbl, loadzbl>(env, inst, b, i)) {
+    return true;
+  }
+  if (simplify_load_ext<Vinstr::movzbq, movzbq, loadzbq>(env, inst, b, i)) {
+    return true;
+  }
+  if (simplify_load_ext<Vinstr::movsbl, movsbl, loadsbl>(env, inst, b, i)) {
+    return true;
+  }
+  if (simplify_load_ext<Vinstr::movsbq, movsbq, loadsbq>(env, inst, b, i)) {
+    return true;
+  }
+  return false;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

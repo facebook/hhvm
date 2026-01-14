@@ -3,6 +3,7 @@ cpp2_shared: mstch_cpp2 src/shared.thrift
 py3: mstch_py3 src/module.thrift
 py3_inplace: mstch_py3:inplace_migrate src/module.thrift
 python: mstch_python src/module.thrift
+python_auto_migrate: mstch_python:auto_migrate src/module.thrift
 python_capi: mstch_python_capi src/module.thrift
 hack: hack:hack_collections=1 src/module.thrift
 java: mstch_java src/module.thrift

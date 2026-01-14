@@ -38,7 +38,6 @@ struct VisitUnion {
  *   })
  *
  * ThriftField schema is defined here: https://git.io/JJQpY
- * If `no_metadata` thrift option is enabled, ThriftField will be empty.
  * If union is empty, callable won't be called.
  *
  * A lighter-weight version not using metadata is available as

@@ -75,8 +75,7 @@ class ServiceMetadata<::apache::thrift::ServiceHandler<Tag>> {
 } // namespace detail::md
 
 /**
- * Get ThriftMetadata of given thrift structure. If no_metadata option is
- * enabled, return empty data.
+ * Get ThriftMetadata of given thrift structure.
  *
  * @tparam T thrift structure
  *

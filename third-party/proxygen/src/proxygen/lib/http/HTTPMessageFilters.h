@@ -15,6 +15,7 @@
 #include <proxygen/lib/http/sink/HTTPSink.h>
 
 #include <string_view>
+#include <variant>
 
 namespace proxygen {
 
@@ -28,14 +29,14 @@ class HTTPMessageFilter
     nextTransactionHandler_ = CHECK_NOTNULL(next);
   }
   virtual void setPrevFilter(HTTPMessageFilter* prev) noexcept {
-    if (prev_.which() == 0 && boost::get<HTTPMessageFilter*>(prev_) != prev &&
+    if (prev_.index() == 0 && std::get<HTTPMessageFilter*>(prev_) != prev &&
         prev && nextElementIsPaused_) {
       prev->pause();
     }
     prev_ = CHECK_NOTNULL(prev);
   }
   virtual void setPrevSink(HTTPSink* prev) noexcept {
-    if (prev_.which() == 1 && boost::get<HTTPSink*>(prev_) != prev && prev &&
+    if (prev_.index() == 1 && std::get<HTTPSink*>(prev_) != prev && prev &&
         nextElementIsPaused_) {
       prev->pauseIngress();
     }
@@ -83,7 +84,7 @@ class HTTPMessageFilter
     nextTransactionHandler_->setTransaction(txn);
   }
   void detachTransaction() noexcept final {
-    if (prev_.which() == 1) {
+    if (prev_.index() == 1) {
       // After detachTransaction(), the HTTPTransaction will destruct itself.
       // Set it to nullptr to avoid holding a stale pointer.
       prev_ = static_cast<HTTPSink*>(nullptr);
@@ -115,8 +116,8 @@ class HTTPMessageFilter
 
   // Doesn't need to propagate down a chain, call on head filter
   void detachHandlerFromSink(std::unique_ptr<HTTPSink> sink) noexcept {
-    CHECK_EQ(prev_.which(), 1);
-    auto prev = boost::get<HTTPSink*>(prev_);
+    CHECK_EQ(prev_.index(), 1);
+    auto prev = std::get<HTTPSink*>(prev_);
     if (prev) {
       // prev points to the transaction, detach the handler from the
       // transaction.
@@ -153,7 +154,7 @@ class HTTPMessageFilter
   }
   HTTPTransaction::Handler* nextTransactionHandler_{nullptr};
 
-  boost::variant<HTTPMessageFilter*, HTTPSink*> prev_ =
+  std::variant<HTTPMessageFilter*, HTTPSink*> prev_ =
       static_cast<HTTPSink*>(nullptr);
 
   bool nextElementIsPaused_{false};

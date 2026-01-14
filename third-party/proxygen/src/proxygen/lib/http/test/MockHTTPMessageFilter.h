@@ -66,7 +66,7 @@ class MockHTTPMessageFilter : public HTTPMessageFilter {
     return kMockFilterName;
   }
 
-  boost::variant<HTTPMessageFilter*, HTTPSink*> getPrevElement() {
+  std::variant<HTTPMessageFilter*, HTTPSink*> getPrevElement() {
     return prev_;
   }
 

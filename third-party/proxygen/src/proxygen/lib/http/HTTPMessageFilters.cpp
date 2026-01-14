@@ -17,13 +17,13 @@ void HTTPMessageFilter::pause() noexcept {
 
   nextElementIsPaused_ = true;
 
-  if (prev_.which() == 0) {
-    auto prev = boost::get<HTTPMessageFilter*>(prev_);
+  if (prev_.index() == 0) {
+    auto prev = std::get<HTTPMessageFilter*>(prev_);
     if (prev) {
       prev->pause();
     }
   } else {
-    auto prev = boost::get<HTTPSink*>(prev_);
+    auto prev = std::get<HTTPSink*>(prev_);
     if (prev) {
       prev->pauseIngress();
     }
@@ -32,13 +32,13 @@ void HTTPMessageFilter::pause() noexcept {
 
 void HTTPMessageFilter::resume(uint64_t offset) noexcept {
   nextElementIsPaused_ = false;
-  if (prev_.which() == 0) {
-    auto prev = boost::get<HTTPMessageFilter*>(prev_);
+  if (prev_.index() == 0) {
+    auto prev = std::get<HTTPMessageFilter*>(prev_);
     if (prev) {
       prev->resume(offset);
     }
   } else {
-    auto prev = boost::get<HTTPSink*>(prev_);
+    auto prev = std::get<HTTPSink*>(prev_);
     if (prev) {
       prev->resumeIngress();
     }

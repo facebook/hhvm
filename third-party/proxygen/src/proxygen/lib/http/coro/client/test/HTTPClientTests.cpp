@@ -24,6 +24,7 @@
 #include <folly/coro/ViaIfAsync.h>
 #include <quic/api/test/Mocks.h>
 #include <quic/state/test/Mocks.h>
+#include <variant>
 #include <wangle/ssl/test/MockSSLStats.h>
 
 using namespace testing;
@@ -48,8 +49,8 @@ HTTPClient::SecureTransportImpl transportImpl(TransportType transportType) {
   }
 }
 
-using ConnParams = boost::variant<HTTPCoroConnector::ConnectionParams,
-                                  HTTPCoroConnector::QuicConnectionParams>;
+using ConnParams = std::variant<HTTPCoroConnector::ConnectionParams,
+                                HTTPCoroConnector::QuicConnectionParams>;
 
 ConnParams getConnParams(TransportType transportType) {
   if (transportType == TransportType::QUIC) {
@@ -62,7 +63,7 @@ ConnParams getConnParams(TransportType transportType) {
 std::shared_ptr<const HTTPCoroConnector::QuicConnectionParams>
 getQuicConnParams(const ConnParams& connParams) {
   return std::make_shared<const HTTPCoroConnector::QuicConnectionParams>(
-      boost::get<HTTPCoroConnector::QuicConnectionParams>(connParams));
+      std::get<HTTPCoroConnector::QuicConnectionParams>(connParams));
 }
 
 folly::coro::Task<HTTPCoroSession*> HTTPCoroConnector_connect(
@@ -72,19 +73,19 @@ folly::coro::Task<HTTPCoroSession*> HTTPCoroConnector_connect(
     ConnParams connParams,
     HTTPCoroConnector::SessionParams sessParams =
         HTTPClient::getSessionParams()) {
-  if (connParams.which() == 1) {
+  if (connParams.index() == 1) {
     return HTTPCoroConnector::connect(
         evb,
         addr,
         timeout,
-        boost::get<HTTPCoroConnector::QuicConnectionParams>(connParams),
+        std::get<HTTPCoroConnector::QuicConnectionParams>(connParams),
         sessParams);
   } else {
     return HTTPCoroConnector::connect(
         evb,
         addr,
         timeout,
-        boost::get<HTTPCoroConnector::ConnectionParams>(connParams),
+        std::get<HTTPCoroConnector::ConnectionParams>(connParams),
         sessParams);
   }
 }
@@ -424,8 +425,8 @@ CO_TEST_P_X(HTTPClientTests, ConnectorConnectHappyEyeballs) {
     // Not supported yet
     co_return;
   }
-  auto connParams = boost::get<HTTPCoroConnector::ConnectionParams>(
-      getConnParams(GetParam()));
+  auto connParams =
+      std::get<HTTPCoroConnector::ConnectionParams>(getConnParams(GetParam()));
   // This addr will timeout
   folly::SocketAddress badAddr("169.254.0.1", serverAddress_.getPort());
   auto sess = co_await co_awaitTry(HTTPCoroConnector::happyEyeballsConnect(
@@ -439,8 +440,8 @@ CO_TEST_P_X(HTTPClientTests, ConnectorConnectHappyEyeballsDoubleSuccess) {
     // Not supported yet
     co_return;
   }
-  auto connParams = boost::get<HTTPCoroConnector::ConnectionParams>(
-      getConnParams(GetParam()));
+  auto connParams =
+      std::get<HTTPCoroConnector::ConnectionParams>(getConnParams(GetParam()));
   auto sessParams = HTTPCoroConnector::defaultSessionParams();
   // Set primary and secondary to the same address and a very short delay
   auto sess = co_await co_awaitTry(
@@ -460,8 +461,8 @@ CO_TEST_P_X(HTTPClientTests, ConnectorConnectHappyEyeballsFail) {
     // Not supported yet
     co_return;
   }
-  auto connParams = boost::get<HTTPCoroConnector::ConnectionParams>(
-      getConnParams(GetParam()));
+  auto connParams =
+      std::get<HTTPCoroConnector::ConnectionParams>(getConnParams(GetParam()));
   folly::SocketAddress timeoutAddr("169.254.0.1", serverAddress_.getPort());
   folly::SocketAddress failAddr("127.0.0.1", 0);
   auto sess = co_await co_awaitTry(HTTPCoroConnector::happyEyeballsConnect(
@@ -481,8 +482,8 @@ CO_TEST_P_X(HTTPClientTests, ConnectorConnectHappyEyeballsCancelFallback) {
     // Not supported yet
     co_return;
   }
-  auto connParams = boost::get<HTTPCoroConnector::ConnectionParams>(
-      getConnParams(GetParam()));
+  auto connParams =
+      std::get<HTTPCoroConnector::ConnectionParams>(getConnParams(GetParam()));
   class SslSessionManager : public HTTPCoroConnector::SslSessionManagerIf {
    public:
     void onNewSslSession(SslSessionPtr) noexcept override {
@@ -508,8 +509,8 @@ CO_TEST_P_X(HTTPClientTests, ConnectorConnectHappyEyeballsFastFail) {
     // Not supported yet
     co_return;
   }
-  auto connParams = boost::get<HTTPCoroConnector::ConnectionParams>(
-      getConnParams(GetParam()));
+  auto connParams =
+      std::get<HTTPCoroConnector::ConnectionParams>(getConnParams(GetParam()));
   folly::SocketAddress badAddr("127.0.0.1", 0);
   auto sess = co_await co_awaitTry(folly::coro::timeout(
       HTTPCoroConnector::happyEyeballsConnect(
@@ -553,7 +554,7 @@ CO_TEST_P_X(HTTPClientTests, GetWithSessionAndReservation) {
                                               HTTPCoroSessionPool::PoolParams(),
                                               std::move(qconnParams));
   } else {
-    auto connParams = boost::get<HTTPCoroConnector::ConnectionParams>(
+    auto connParams = std::get<HTTPCoroConnector::ConnectionParams>(
         getConnParams(GetParam()));
     pool =
         std::make_unique<HTTPCoroSessionPool>(&evb_,
@@ -588,7 +589,7 @@ CO_TEST_P_X(HTTPClientTests, SessionPoolCancellationTest) {
                                               HTTPCoroSessionPool::PoolParams(),
                                               std::move(qconnParams));
   } else {
-    auto connParams = boost::get<HTTPCoroConnector::ConnectionParams>(
+    auto connParams = std::get<HTTPCoroConnector::ConnectionParams>(
         getConnParams(GetParam()));
     pool =
         std::make_unique<HTTPCoroSessionPool>(&evb_,
@@ -1003,7 +1004,7 @@ class HTTPCoroSessionPoolTests : public HTTPClientTests {
       PoolParams poolParams = PoolParams{},
       SessParams sessParams = SessParams{}) {
     if (GetParam() == TransportType::QUIC) {
-      auto qconnParams = boost::get<HTTPCoroConnector::QuicConnectionParams>(
+      auto qconnParams = std::get<HTTPCoroConnector::QuicConnectionParams>(
           getConnParams(GetParam()));
       qconnParams.tlsStats = &tlsStats_;
       auto qconnParamsPtr = getQuicConnParams(qconnParams);
@@ -1014,7 +1015,7 @@ class HTTPCoroSessionPoolTests : public HTTPClientTests {
                                                std::move(qconnParamsPtr),
                                                sessParams);
     } else {
-      auto connParams = boost::get<HTTPCoroConnector::ConnectionParams>(
+      auto connParams = std::get<HTTPCoroConnector::ConnectionParams>(
           getConnParams(GetParam()));
       connParams.tlsStats = &tlsStats_;
       return std::make_unique<CoroSessionPool>(&evb_,
@@ -1069,8 +1070,8 @@ CO_TEST_P_X(HTTPCoroSessionPoolTLSTests, PoolSessionReuse) {
 
 using HTTPCoroSessionPoolSSLTests = HTTPCoroSessionPoolTests;
 CO_TEST_P_X(HTTPCoroSessionPoolSSLTests, PoolSessionReuseCustomStore) {
-  auto connParams = boost::get<HTTPCoroConnector::ConnectionParams>(
-      getConnParams(GetParam()));
+  auto connParams =
+      std::get<HTTPCoroConnector::ConnectionParams>(getConnParams(GetParam()));
   connParams.tlsStats = &tlsStats_;
   class SslSessionManager : public HTTPCoroConnector::SslSessionManagerIf {
    public:
@@ -1457,8 +1458,8 @@ TEST_P(HTTPCoroSessionPoolTests, LastOutstandingConnectFailed) {
   };
 
   // configure pool
-  auto connParams = boost::get<HTTPCoroConnector::ConnectionParams>(
-      getConnParams(GetParam()));
+  auto connParams =
+      std::get<HTTPCoroConnector::ConnectionParams>(getConnParams(GetParam()));
   auto pool = std::make_unique<CoroSessionPool>(
       &evb,
       serverAddress_.getAddressStr(),
@@ -1668,7 +1669,7 @@ class CertReloadSessionPoolTests : public HTTPClientTests {
       SessParams sessParams = SessParams{}) {
     std::unique_ptr<CertReloadSessionPool> pool;
     if (GetParam() == TransportType::QUIC) {
-      auto qconnParams = boost::get<HTTPCoroConnector::QuicConnectionParams>(
+      auto qconnParams = std::get<HTTPCoroConnector::QuicConnectionParams>(
           getConnParams(GetParam()));
       auto qconnParamsPtr = getQuicConnParams(qconnParams);
       pool = std::make_unique<CertReloadSessionPool>(
@@ -1679,7 +1680,7 @@ class CertReloadSessionPoolTests : public HTTPClientTests {
           std::move(qconnParamsPtr),
           sessParams);
     } else {
-      auto connParams = boost::get<HTTPCoroConnector::ConnectionParams>(
+      auto connParams = std::get<HTTPCoroConnector::ConnectionParams>(
           getConnParams(GetParam()));
       pool = std::make_unique<CertReloadSessionPool>(
           &evb_,
@@ -1706,12 +1707,12 @@ CO_TEST_P_X(CertReloadSessionPoolTests, TimerCallback) {
 
   // Capture base connection params so we can preserve settings like the
   // certificate verifier while updating the fizz context
-  auto baseConnParams = boost::get<HTTPCoroConnector::ConnectionParams>(
+  auto baseConnParams = std::get<HTTPCoroConnector::ConnectionParams>(
       getConnParams(TransportType::TLS_FIZZ));
   auto baseQuicConnParams =
       (transportType == TransportType::QUIC)
           ? std::make_optional(
-                boost::get<HTTPCoroConnector::QuicConnectionParams>(
+                std::get<HTTPCoroConnector::QuicConnectionParams>(
                     getConnParams(TransportType::QUIC)))
           : std::nullopt;
 
@@ -2055,8 +2056,8 @@ using HTTPClientConnectionCacheTLSTests = HTTPClientConnectionCacheTests;
 CO_TEST_P_X(HTTPClientConnectionCacheTLSTests, NonDefaultParams) {
   HTTPCoroSessionPool::PoolParams poolParams;
   poolParams.maxConnections = 1;
-  auto connParams(boost::get<HTTPCoroConnector::ConnectionParams>(
-      getConnParams(GetParam())));
+  auto connParams(
+      std::get<HTTPCoroConnector::ConnectionParams>(getConnParams(GetParam())));
   NiceMock<wangle::MockSSLStats> tlsStats_;
   connParams.tlsStats = &tlsStats_;
   HTTPCoroConnector::SessionParams sessParams;
@@ -2086,10 +2087,10 @@ CO_TEST_P_X(HTTPClientConnectionCacheTests, ProxyConnect) {
   proxyParams.server = serverAddress_.getAddressStr();
   proxyParams.port = serverAddress_.getPort();
   proxyParams.useConnect = true;
-  proxyParams.connParams = boost::get<HTTPCoroConnector::ConnectionParams>(
-      getConnParams(GetParam()));
+  proxyParams.connParams =
+      std::get<HTTPCoroConnector::ConnectionParams>(getConnParams(GetParam()));
   HTTPClientConnectionCache connCache{evb_, std::move(proxyParams)};
-  auto endpointConnParams = boost::get<HTTPCoroConnector::ConnectionParams>(
+  auto endpointConnParams = std::get<HTTPCoroConnector::ConnectionParams>(
       getConnParams(TransportType::TLS));
   // ConnCache conn params are a template, so need to include TLS context even
   // when used for plaintext connections
@@ -2107,8 +2108,8 @@ CO_TEST_P_X(HTTPClientConnectionCacheTests, ProxyGet) {
   proxyParams.server = serverAddress_.getAddressStr();
   proxyParams.port = serverAddress_.getPort();
   proxyParams.useConnect = false;
-  proxyParams.connParams = boost::get<HTTPCoroConnector::ConnectionParams>(
-      getConnParams(GetParam()));
+  proxyParams.connParams =
+      std::get<HTTPCoroConnector::ConnectionParams>(getConnParams(GetParam()));
   HTTPClientConnectionCache connCache{evb_, std::move(proxyParams)};
   auto res = co_await connCache.getSessionWithReservation(
       "foo", 12345, false, std::chrono::seconds(1));

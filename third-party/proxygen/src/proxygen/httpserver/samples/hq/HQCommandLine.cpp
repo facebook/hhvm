@@ -195,12 +195,12 @@ void initializeCommonSettings(HQToolParams& hqParams) {
         << "local_address only allowed in client mode";
     hqParams.setMode(HQMode::SERVER);
     hqParams.logprefix = "server";
-    auto& serverParams = boost::get<HQToolServerParams>(hqParams.params);
+    auto& serverParams = std::get<HQToolServerParams>(hqParams.params);
     serverParams.serverThreads = FLAGS_threads;
   } else if (FLAGS_mode == "client") {
     hqParams.setMode(HQMode::CLIENT);
     hqParams.logprefix = "client";
-    auto& clientParams = boost::get<HQToolClientParams>(hqParams.params);
+    auto& clientParams = std::get<HQToolClientParams>(hqParams.params);
     clientParams.host = FLAGS_host;
     if (FLAGS_connect_to_address.empty()) {
       clientParams.remoteAddress =
@@ -232,10 +232,10 @@ void initializeTransportSettings(HQToolParams& hqUberParams) {
   if (!FLAGS_protocol.empty()) {
     hqParams.protocol = FLAGS_protocol;
     if (hqUberParams.mode == HQMode::CLIENT) {
-      boost::get<HQToolClientParams>(hqUberParams.params).supportedAlpns = {
+      std::get<HQToolClientParams>(hqUberParams.params).supportedAlpns = {
           hqParams.protocol};
     } else if (hqUberParams.mode == HQMode::SERVER) {
-      boost::get<HQToolServerParams>(hqUberParams.params).supportedAlpns = {
+      std::get<HQToolServerParams>(hqUberParams.params).supportedAlpns = {
           hqParams.protocol};
     }
   }
@@ -282,7 +282,7 @@ void initializeTransportSettings(HQToolParams& hqUberParams) {
   }
   if (FLAGS_rate_limit >= 0) {
     CHECK(hqUberParams.mode == HQMode::SERVER);
-    boost::get<HQToolServerParams>(hqUberParams.params).rateLimitPerThread =
+    std::get<HQToolServerParams>(hqUberParams.params).rateLimitPerThread =
         FLAGS_rate_limit;
 
     std::array<uint8_t, kRetryTokenSecretLength> secret;
@@ -290,7 +290,7 @@ void initializeTransportSettings(HQToolParams& hqUberParams) {
     hqParams.transportSettings.retryTokenSecret = secret;
   }
   if (hqUberParams.mode == HQMode::CLIENT) {
-    boost::get<HQToolClientParams>(hqUberParams.params).connectTimeout =
+    std::get<HQToolClientParams>(hqUberParams.params).connectTimeout =
         std::chrono::milliseconds(FLAGS_connect_timeout);
   }
   hqParams.sendKnobFrame = FLAGS_send_knob_frame;
@@ -329,7 +329,7 @@ void initializeTransportSettings(HQToolParams& hqUberParams) {
   hqParams.transportSettings.dscpValue = FLAGS_dscp;
   hqParams.transportSettings.disableMigration = false;
   if (hqUberParams.mode == HQMode::CLIENT) {
-    boost::get<HQToolClientParams>(hqUberParams.params).clientCidLength =
+    std::get<HQToolClientParams>(hqUberParams.params).clientCidLength =
         FLAGS_client_cid_length;
   }
 
@@ -404,7 +404,7 @@ void initializeQLogSettings(HQBaseParams& hqParams) {
 
 void initializeFizzSettings(HQToolParams& toolParams) {
   if (toolParams.mode == HQMode::CLIENT) {
-    auto& clientParams = boost::get<HQToolClientParams>(toolParams.params);
+    auto& clientParams = std::get<HQToolClientParams>(toolParams.params);
     clientParams.pskFilePath = FLAGS_psk_file;
     if (!FLAGS_psk_file.empty()) {
       clientParams.pskCache =
@@ -441,7 +441,7 @@ HQInvalidParams validate(const HQToolParams& params) {
 
   // In the client mode, host/port are required
   if (params.mode == HQMode::CLIENT) {
-    auto& clientParams = boost::get<HQToolClientParams>(params.params);
+    auto& clientParams = std::get<HQToolClientParams>(params.params);
     if (clientParams.host.empty()) {
       INVALID_PARAM(host, "HQClient expected --host");
     }
@@ -497,16 +497,16 @@ HQToolParamsBuilderFromCmdline::HQToolParamsBuilderFromCmdline(
 
   if (hqParams_.mode == HQMode::CLIENT) {
     initializeHttpClientSettings(
-        boost::get<HQToolClientParams>(hqParams_.params));
+        std::get<HQToolClientParams>(hqParams_.params));
     // Populate client TLS file paths from flags
-    auto& clientParams = boost::get<HQToolClientParams>(hqParams_.params);
+    auto& clientParams = std::get<HQToolClientParams>(hqParams_.params);
     clientParams.certificateFilePath = FLAGS_cert;
     clientParams.keyFilePath = FLAGS_key;
   } else {
     initializeHttpServerSettings(
-        boost::get<HQToolServerParams>(hqParams_.params));
+        std::get<HQToolServerParams>(hqParams_.params));
     // Populate server TLS file paths from flags
-    auto& serverParams = boost::get<HQToolServerParams>(hqParams_.params);
+    auto& serverParams = std::get<HQToolServerParams>(hqParams_.params);
     serverParams.certificateFilePath = FLAGS_cert;
     serverParams.keyFilePath = FLAGS_key;
     serverParams.useInsecureDefaultCertificate =

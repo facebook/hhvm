@@ -44,10 +44,10 @@ int main(int argc, char* argv[]) {
 
     switch (params.mode) {
       case HQMode::SERVER:
-        startServer(boost::get<HQToolServerParams>(params.params));
+        startServer(std::get<HQToolServerParams>(params.params));
         break;
       case HQMode::CLIENT:
-        err = startClient(boost::get<HQToolClientParams>(params.params));
+        err = startClient(std::get<HQToolClientParams>(params.params));
         break;
       default:
         LOG(ERROR) << "Unknown mode specified: ";

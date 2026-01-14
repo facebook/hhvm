@@ -1080,8 +1080,6 @@ class HTTPMessage {
     } data_;
   } fields_;
 
-  // mutable boost::variant<boost::blank, Request, Response> fields_;
-
   Request& request() {
     DCHECK(fields_.which_ == MessageType::NONE ||
            fields_.which_ == MessageType::REQUEST)

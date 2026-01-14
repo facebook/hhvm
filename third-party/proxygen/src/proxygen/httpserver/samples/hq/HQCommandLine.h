@@ -8,9 +8,9 @@
 
 #pragma once
 
-#include <boost/variant.hpp>
 #include <proxygen/httpserver/HTTPServerOptions.h>
 #include <proxygen/httpserver/samples/hq/HQParams.h>
+#include <variant>
 
 namespace quic::samples {
 
@@ -71,18 +71,18 @@ struct HQToolParams {
 
   [[nodiscard]] const HQBaseParams& baseParams() const {
     if (mode == HQMode::CLIENT) {
-      return (HQBaseParams&)boost::get<HQToolClientParams>(params);
+      return (HQBaseParams&)std::get<HQToolClientParams>(params);
     } else if (mode == HQMode::SERVER) {
-      return (HQBaseParams&)boost::get<HQToolServerParams>(params);
+      return (HQBaseParams&)std::get<HQToolServerParams>(params);
     }
     LOG(FATAL) << "Uninit";
   }
 
   HQBaseParams& baseParams() {
     if (mode == HQMode::CLIENT) {
-      return (HQBaseParams&)boost::get<HQToolClientParams>(params);
+      return (HQBaseParams&)std::get<HQToolClientParams>(params);
     } else if (mode == HQMode::SERVER) {
-      return (HQBaseParams&)boost::get<HQToolServerParams>(params);
+      return (HQBaseParams&)std::get<HQToolServerParams>(params);
     }
     LOG(FATAL) << "Uninit";
   }
@@ -91,7 +91,7 @@ struct HQToolParams {
   std::string logprefix;
   std::string logdir;
   bool logRuntime;
-  boost::variant<HQToolClientParams, HQToolServerParams> params;
+  std::variant<HQToolClientParams, HQToolServerParams> params;
 };
 
 /**

@@ -311,8 +311,6 @@ target_link_libraries(
     fizz::fizz
     wangle::wangle
     zstd
-    Boost::boost
-    Boost::iostreams
     ZLIB::ZLIB
     ${HTTP3_DEPEND_LIBS}
     c-ares::cares

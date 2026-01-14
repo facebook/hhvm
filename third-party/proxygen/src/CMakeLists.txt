@@ -80,16 +80,6 @@ find_package(ZLIB REQUIRED)
 find_package(OpenSSL REQUIRED)
 find_package(Threads)
 find_package(c-ares REQUIRED)
-find_package(Boost 1.69 REQUIRED
-  COMPONENTS
-    iostreams
-    context
-    filesystem
-    program_options
-    regex
-    thread
-    chrono
-)
 
 list(APPEND
     _PROXYGEN_COMMON_COMPILE_OPTIONS

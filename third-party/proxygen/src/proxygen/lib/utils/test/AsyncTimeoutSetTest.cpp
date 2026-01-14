@@ -8,13 +8,13 @@
 
 #include <proxygen/lib/utils/AsyncTimeoutSet.h>
 
-#include <boost/container/flat_map.hpp>
 #include <folly/io/async/EventBase.h>
 #include <folly/io/async/EventUtil.h>
 #include <folly/io/async/test/MockTimeoutManager.h>
 #include <folly/io/async/test/UndelayedDestruction.h>
 #include <folly/io/async/test/Util.h>
 #include <folly/portability/GTest.h>
+#include <map>
 #include <vector>
 
 using namespace proxygen;
@@ -135,7 +135,7 @@ class TimeoutTest : public testing::Test {
  protected:
   MockTimeoutManager timeoutManager_;
   MockTimeoutClock timeoutClock_;
-  boost::container::flat_multimap<milliseconds, AsyncTimeout*> timeouts_;
+  std::multimap<milliseconds, AsyncTimeout*> timeouts_;
 };
 
 /*

@@ -6,9 +6,9 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+#include <latch>
 #include <memory>
 
-#include <boost/thread.hpp>
 #include <folly/FileUtil.h>
 #include <folly/executors/IOThreadPoolExecutor.h>
 #include <folly/io/async/AsyncSSLSocket.h>
@@ -44,7 +44,7 @@ const std::string kTestDir = getContainingDirectory(XLOG_FILENAME).str();
 
 class ServerThread {
  private:
-  boost::barrier barrier_{2};
+  std::latch barrier_{2};
   std::thread t_;
   HTTPServer* server_{nullptr};
 
@@ -61,14 +61,14 @@ class ServerThread {
   bool start() {
     bool throws = false;
     t_ = std::thread([&]() {
-      server_->start([&]() { barrier_.wait(); },
+      server_->start([&]() { barrier_.count_down(); },
                      [&](std::exception_ptr /*ex*/) {
                        throws = true;
                        server_ = nullptr;
-                       barrier_.wait();
+                       barrier_.count_down();
                      });
     });
-    barrier_.wait();
+    barrier_.arrive_and_wait();
     return !throws;
   }
 };
@@ -88,7 +88,7 @@ class ServerThread {
  */
 class WaitableServerThread {
  private:
-  boost::barrier barrier_{2};
+  std::latch barrier_{2};
   std::thread t_;
   HTTPServer* server_{nullptr};
   folly::Baton<true, std::atomic> baton_;
@@ -110,17 +110,17 @@ class WaitableServerThread {
       std::shared_ptr<folly::IOThreadPoolExecutor> ioExecutor = nullptr) {
     bool throws = false;
     t_ = std::thread([&]() {
-      server_->start([&]() { barrier_.wait(); },
+      server_->start([&]() { barrier_.count_down(); },
                      [&](std::exception_ptr /*ex*/) {
                        throws = true;
                        server_ = nullptr;
-                       barrier_.wait();
+                       barrier_.count_down();
                      },
                      getAcceptorFactory,
                      ioExecutor);
       baton_.wait();
     });
-    barrier_.wait();
+    barrier_.arrive_and_wait();
     return !throws;
   }
 

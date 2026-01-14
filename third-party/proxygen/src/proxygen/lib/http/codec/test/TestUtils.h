@@ -8,7 +8,6 @@
 
 #pragma once
 
-#include <boost/optional/optional_io.hpp>
 #include <folly/portability/GTest.h>
 #include <proxygen/lib/http/codec/test/MockHTTPCodec.h>
 #include <proxygen/lib/utils/TestUtils.h>

@@ -6,7 +6,6 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#include <boost/optional/optional_io.hpp>
 #include <fizz/record/Extensions.h>
 #include <fizz/record/Types.h>
 #include <folly/io/async/EventBase.h>

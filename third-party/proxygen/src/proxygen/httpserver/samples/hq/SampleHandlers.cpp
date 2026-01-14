@@ -9,8 +9,7 @@
 #include <proxygen/httpserver/samples/hq/SampleHandlers.h>
 #include <proxygen/lib/http/webtransport/HTTPWebTransport.h>
 
-#include <boost/algorithm/string.hpp>
-#include <boost/algorithm/string/split.hpp>
+#include <folly/String.h>
 #include <proxygen/lib/utils/Logging.h>
 #include <string>
 
@@ -58,15 +57,15 @@ HTTPTransactionHandler* Dispatcher::getRequestHandler(HTTPMessage* msg) {
     return new SimplePostHandler(params_);
   }
 
-  if (boost::algorithm::starts_with(path, "/chunked")) {
+  if (path.startsWith("/chunked")) {
     return new ChunkedHandler(params_,
                               folly::EventBaseManager::get()->getEventBase());
   }
-  if (boost::algorithm::starts_with(path, "/push")) {
+  if (path.startsWith("/push")) {
     return new ServerPushHandler(params_);
   }
 
-  if (boost::algorithm::starts_with(path, "/webtransport/devious-baton")) {
+  if (path.startsWith("/webtransport/devious-baton")) {
     return new DeviousBatonHandler(
         params_, folly::EventBaseManager::get()->getEventBase());
   }
@@ -76,7 +75,7 @@ HTTPTransactionHandler* Dispatcher::getRequestHandler(HTTPMessage* msg) {
         StaticFileHandler::make(params_, FLAGS_static_root);
     return staticFileHandler.get();
   }
-  if (boost::algorithm::starts_with(path, "/delay")) {
+  if (path.startsWith("/delay")) {
     return new DelayHandler(params_,
                             folly::EventBaseManager::get()->getEventBase());
   }
@@ -175,8 +174,7 @@ void ServerPushHandler::onHeadersComplete(
 
   std::string gPushResponseBody;
   std::vector<std::string> pathPieces;
-  std::string path = path_;
-  boost::split(pathPieces, path, boost::is_any_of("/"));
+  folly::split("/", path_, pathPieces);
   int responseSize = 0;
   int numResponses = 1;
 

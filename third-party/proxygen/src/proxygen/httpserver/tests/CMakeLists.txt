@@ -14,6 +14,4 @@ proxygen_add_test(TARGET HTTPServerTests
     proxygenhttpserver
     proxygencurl
     testmain
-    Boost::filesystem
-    Boost::regex
 )

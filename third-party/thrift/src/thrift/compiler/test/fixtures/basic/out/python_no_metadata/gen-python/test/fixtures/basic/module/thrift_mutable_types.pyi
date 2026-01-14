@@ -365,7 +365,7 @@ class _fbthrift_FooService_simple_rpc_args(_fbthrift_python_mutable_types.Mutabl
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        builtins.str,
+        str,
         _typing.Union[None]]]: ...
 
 
@@ -377,7 +377,7 @@ class _fbthrift_FooService_simple_rpc_result(_fbthrift_python_mutable_types.Muta
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        builtins.str,
+        str,
         _typing.Union[
             None,
         ]]]: ...
@@ -392,7 +392,7 @@ class _fbthrift_FB303Service_simple_rpc_args(_fbthrift_python_mutable_types.Muta
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        builtins.str,
+        str,
         _typing.Union[None, builtins.int]]]: ...
 
 
@@ -404,7 +404,7 @@ class _fbthrift_FB303Service_simple_rpc_result(_fbthrift_python_mutable_types.Mu
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        builtins.str,
+        str,
         _typing.Union[
             _fbthrift_ReservedKeyword,
         ]]]: ...
@@ -417,7 +417,7 @@ class _fbthrift_MyService_ping_args(_fbthrift_python_mutable_types.MutableStruct
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        builtins.str,
+        str,
         _typing.Union[None]]]: ...
 
 
@@ -429,7 +429,7 @@ class _fbthrift_MyService_ping_result(_fbthrift_python_mutable_types.MutableStru
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        builtins.str,
+        str,
         _typing.Union[
             None,
         ]]]: ...
@@ -442,7 +442,7 @@ class _fbthrift_MyService_getRandomData_args(_fbthrift_python_mutable_types.Muta
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        builtins.str,
+        str,
         _typing.Union[None]]]: ...
 
 
@@ -454,7 +454,7 @@ class _fbthrift_MyService_getRandomData_result(_fbthrift_python_mutable_types.Mu
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        builtins.str,
+        str,
         _typing.Union[
             builtins.str,
         ]]]: ...
@@ -469,7 +469,7 @@ class _fbthrift_MyService_sink_args(_fbthrift_python_mutable_types.MutableStruct
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        builtins.str,
+        str,
         _typing.Union[None, builtins.int]]]: ...
 
 
@@ -481,7 +481,7 @@ class _fbthrift_MyService_sink_result(_fbthrift_python_mutable_types.MutableStru
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        builtins.str,
+        str,
         _typing.Union[
             None,
         ]]]: ...
@@ -498,7 +498,7 @@ class _fbthrift_MyService_putDataById_args(_fbthrift_python_mutable_types.Mutabl
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        builtins.str,
+        str,
         _typing.Union[None, builtins.int, builtins.str]]]: ...
 
 
@@ -510,7 +510,7 @@ class _fbthrift_MyService_putDataById_result(_fbthrift_python_mutable_types.Muta
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        builtins.str,
+        str,
         _typing.Union[
             None,
         ]]]: ...
@@ -525,7 +525,7 @@ class _fbthrift_MyService_hasDataById_args(_fbthrift_python_mutable_types.Mutabl
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        builtins.str,
+        str,
         _typing.Union[None, builtins.int]]]: ...
 
 
@@ -537,7 +537,7 @@ class _fbthrift_MyService_hasDataById_result(_fbthrift_python_mutable_types.Muta
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        builtins.str,
+        str,
         _typing.Union[
             builtins.bool,
         ]]]: ...
@@ -552,7 +552,7 @@ class _fbthrift_MyService_getDataById_args(_fbthrift_python_mutable_types.Mutabl
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        builtins.str,
+        str,
         _typing.Union[None, builtins.int]]]: ...
 
 
@@ -564,7 +564,7 @@ class _fbthrift_MyService_getDataById_result(_fbthrift_python_mutable_types.Muta
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        builtins.str,
+        str,
         _typing.Union[
             builtins.str,
         ]]]: ...
@@ -579,7 +579,7 @@ class _fbthrift_MyService_deleteDataById_args(_fbthrift_python_mutable_types.Mut
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        builtins.str,
+        str,
         _typing.Union[None, builtins.int]]]: ...
 
 
@@ -591,7 +591,7 @@ class _fbthrift_MyService_deleteDataById_result(_fbthrift_python_mutable_types.M
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        builtins.str,
+        str,
         _typing.Union[
             None,
         ]]]: ...
@@ -608,7 +608,7 @@ class _fbthrift_MyService_lobDataById_args(_fbthrift_python_mutable_types.Mutabl
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        builtins.str,
+        str,
         _typing.Union[None, builtins.int, builtins.str]]]: ...
 
 
@@ -619,7 +619,7 @@ class _fbthrift_MyService_invalid_return_for_hack_args(_fbthrift_python_mutable_
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        builtins.str,
+        str,
         _typing.Union[None]]]: ...
 
 
@@ -631,7 +631,7 @@ class _fbthrift_MyService_invalid_return_for_hack_result(_fbthrift_python_mutabl
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        builtins.str,
+        str,
         _typing.Union[
             _fbthrift_python_mutable_containers.MutableSet[builtins.float],
         ]]]: ...
@@ -644,7 +644,7 @@ class _fbthrift_MyService_rpc_skipped_codegen_args(_fbthrift_python_mutable_type
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        builtins.str,
+        str,
         _typing.Union[None]]]: ...
 
 
@@ -656,7 +656,7 @@ class _fbthrift_MyService_rpc_skipped_codegen_result(_fbthrift_python_mutable_ty
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        builtins.str,
+        str,
         _typing.Union[
             None,
         ]]]: ...
@@ -671,7 +671,7 @@ class _fbthrift_DbMixedStackArguments_getDataByKey0_args(_fbthrift_python_mutabl
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        builtins.str,
+        str,
         _typing.Union[None, builtins.str]]]: ...
 
 
@@ -683,7 +683,7 @@ class _fbthrift_DbMixedStackArguments_getDataByKey0_result(_fbthrift_python_muta
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        builtins.str,
+        str,
         _typing.Union[
             builtins.bytes,
         ]]]: ...
@@ -698,7 +698,7 @@ class _fbthrift_DbMixedStackArguments_getDataByKey1_args(_fbthrift_python_mutabl
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        builtins.str,
+        str,
         _typing.Union[None, builtins.str]]]: ...
 
 
@@ -710,7 +710,7 @@ class _fbthrift_DbMixedStackArguments_getDataByKey1_result(_fbthrift_python_muta
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        builtins.str,
+        str,
         _typing.Union[
             builtins.bytes,
         ]]]: ...

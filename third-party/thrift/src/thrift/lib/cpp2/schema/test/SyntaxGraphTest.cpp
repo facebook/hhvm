@@ -326,7 +326,7 @@ TEST_F(ServiceSchemaTest, Typedefs) {
       typedefToListOfTestStructTypedef->name(), "TypedefToListOfTestStruct");
   const TypedefNode& t2 = typedefToListOfTestStructTypedef->asTypedef();
   EXPECT_EQ(t2.targetType().kind(), TypeRef::Kind::TYPEDEF);
-  TypeRef t2TypeRef = TypeRef::of(t2);
+  TypeRef t2TypeRef = t2.asRef();
   EXPECT_EQ(t2TypeRef.kind(), TypeRef::Kind::TYPEDEF);
   EXPECT_EQ(*typedefToListOfTestStructTypedef, t2TypeRef);
 
@@ -639,8 +639,7 @@ TEST_F(ServiceSchemaTest, Interaction) {
   EXPECT_EQ(i.functions()[0].params().size(), 1);
   EXPECT_EQ(i.functions()[0].params()[0].id(), FieldId{1});
   EXPECT_EQ(i.functions()[0].params()[0].name(), "input");
-  EXPECT_EQ(
-      i.functions()[0].params()[0].type(), TypeRef::of(testRecursiveStruct));
+  EXPECT_EQ(i.functions()[0].params()[0].type(), testRecursiveStruct.asRef());
 
   EXPECT_EQ(
       i.toDebugString(),
@@ -770,7 +769,7 @@ TEST_F(ServiceSchemaTest, RecursiveStruct) {
   const StructNode& s = testRecursiveStruct->asStruct();
 
   EXPECT_EQ(s.fields().size(), 1);
-  EXPECT_EQ(s.fields()[0].type(), TypeRef::of(s));
+  EXPECT_EQ(s.fields()[0].type(), s.asRef());
 
   EXPECT_EQ(
       s.toDebugString(),
@@ -1063,7 +1062,7 @@ TEST_F(ServiceSchemaTest, asTypeSystemTypeRef) {
   auto& mainProgram = syntaxGraph.findProgramByName("syntax_graph");
   {
     auto def = mainProgram.definitionsByName().at("TestRecursiveStruct");
-    auto ref = TypeRef::of(def->asStruct());
+    auto ref = def->asStruct().asRef();
     auto tsRef = syntaxGraph.asTypeSystemTypeRef(ref);
     EXPECT_EQ(
         tsRef.asStruct().uri(), "meta.com/thrift_test/TestRecursiveStruct");
@@ -1071,7 +1070,7 @@ TEST_F(ServiceSchemaTest, asTypeSystemTypeRef) {
   {
     auto def =
         mainProgram.definitionsByName().at("TypedefToTestStructuredAnnotation");
-    auto ref = TypeRef::of(def->asTypedef());
+    auto ref = def->asTypedef().asRef();
     auto tsRef = syntaxGraph.asTypeSystemTypeRef(ref);
     EXPECT_EQ(
         tsRef.asStruct().uri(),
@@ -1079,7 +1078,7 @@ TEST_F(ServiceSchemaTest, asTypeSystemTypeRef) {
   }
   {
     auto def = mainProgram.definitionsByName().at("TestException");
-    auto ref = TypeRef::of(def->asException());
+    auto ref = def->asException().asRef();
     EXPECT_THROW(syntaxGraph.asTypeSystemTypeRef(ref), std::runtime_error);
   }
 }

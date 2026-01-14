@@ -1398,25 +1398,25 @@ TypeRef SyntaxGraph::asSyntaxGraphTypeRef(
             "Any type is not supported by SyntaxGraph");
       },
       [&](const type_system::TypeRef::List& l) {
-        return TypeRef::of(List::of(asSyntaxGraphTypeRef(l.elementType())));
+        return List::of(asSyntaxGraphTypeRef(l.elementType())).asRef();
       },
       [&](const type_system::TypeRef::Set& s) {
-        return TypeRef::of(Set::of(asSyntaxGraphTypeRef(s.elementType())));
+        return Set::of(asSyntaxGraphTypeRef(s.elementType())).asRef();
       },
       [&](const type_system::TypeRef::Map& m) {
-        return TypeRef::of(
-            Map::of(
-                asSyntaxGraphTypeRef(m.keyType()),
-                asSyntaxGraphTypeRef(m.valueType())));
+        return Map::of(
+                   asSyntaxGraphTypeRef(m.keyType()),
+                   asSyntaxGraphTypeRef(m.valueType()))
+            .asRef();
       },
       [&](const type_system::StructNode& s) {
-        return TypeRef::of(asSyntaxGraphStructNode(s));
+        return asSyntaxGraphStructNode(s).asRef();
       },
       [&](const type_system::UnionNode& u) {
-        return TypeRef::of(asSyntaxGraphUnionNode(u));
+        return asSyntaxGraphUnionNode(u).asRef();
       },
       [&](const type_system::EnumNode& e) {
-        return TypeRef::of(asSyntaxGraphEnumNode(e));
+        return asSyntaxGraphEnumNode(e).asRef();
       },
       [&](const type_system::OpaqueAliasNode&) -> TypeRef {
         folly::throw_exception<std::runtime_error>(

@@ -751,6 +751,8 @@ class StructNode final : folly::MoveOnly,
       std::vector<FieldNode> fields)
       : StructuredNode(resolver, definitionKey, uri, std::move(fields)) {}
 
+  TypeRef asRef() const;
+
   void printTo(
       tree_printer::scope& scope, detail::VisitationTracker& visited) const;
 };
@@ -766,6 +768,8 @@ class UnionNode final : folly::MoveOnly,
       std::vector<FieldNode> fields)
       : StructuredNode(resolver, definitionKey, uri, std::move(fields)) {}
 
+  TypeRef asRef() const;
+
   void printTo(
       tree_printer::scope& scope, detail::VisitationTracker& visited) const;
 };
@@ -780,6 +784,8 @@ class ExceptionNode final : folly::MoveOnly,
       std::string_view uri,
       std::vector<FieldNode> fields)
       : StructuredNode(resolver, definitionKey, uri, std::move(fields)) {}
+
+  TypeRef asRef() const;
 
   void printTo(
       tree_printer::scope& scope, detail::VisitationTracker& visited) const;
@@ -832,6 +838,8 @@ class EnumNode final : folly::MoveOnly,
         detail::WithUri(uri),
         values_(std::move(values)) {}
 
+  TypeRef asRef() const;
+
   void printTo(
       tree_printer::scope& scope, detail::VisitationTracker& visited) const;
 
@@ -848,6 +856,8 @@ class TypedefNode final : folly::MoveOnly,
    * A reference to the underlying type, which itself could be another typedef.
    */
   const TypeRef& targetType() const { return *targetType_; }
+
+  TypeRef asRef() const;
 
   TypedefNode(
       const detail::Resolver& resolver,
@@ -889,6 +899,8 @@ class List final : public detail::WithDebugPrinting<List> {
  public:
   const TypeRef& elementType() const { return *elementType_; }
 
+  TypeRef asRef() const;
+
   ~List() noexcept = default;
   List(const List&);
   List& operator=(const List&);
@@ -912,6 +924,8 @@ class List final : public detail::WithDebugPrinting<List> {
 class Set final : public detail::WithDebugPrinting<Set> {
  public:
   const TypeRef& elementType() const { return *elementType_; }
+
+  TypeRef asRef() const;
 
   ~Set() noexcept = default;
   Set(const Set&);
@@ -937,6 +951,8 @@ class Map final : public detail::WithDebugPrinting<Map> {
  public:
   const TypeRef& keyType() const { return *keyType_; }
   const TypeRef& valueType() const { return *valueType_; }
+
+  TypeRef asRef() const;
 
   ~Map() noexcept = default;
   Map(const Map&);
@@ -1202,6 +1218,31 @@ static_assert(std::is_copy_constructible_v<TypeRef>);
 static_assert(std::is_move_constructible_v<TypeRef>);
 static_assert(std::is_copy_assignable_v<TypeRef>);
 static_assert(std::is_move_assignable_v<TypeRef>);
+
+inline TypeRef StructNode::asRef() const {
+  return TypeRef::of(*this);
+}
+inline TypeRef UnionNode::asRef() const {
+  return TypeRef::of(*this);
+}
+inline TypeRef ExceptionNode::asRef() const {
+  return TypeRef::of(*this);
+}
+inline TypeRef EnumNode::asRef() const {
+  return TypeRef::of(*this);
+}
+inline TypeRef TypedefNode::asRef() const {
+  return TypeRef::of(*this);
+}
+inline TypeRef List::asRef() const {
+  return TypeRef::of(*this);
+}
+inline TypeRef Set::asRef() const {
+  return TypeRef::of(*this);
+}
+inline TypeRef Map::asRef() const {
+  return TypeRef::of(*this);
+}
 
 class FunctionSink final : folly::MoveOnly,
                            detail::WithDebugPrinting<FunctionSink> {
@@ -1556,6 +1597,31 @@ class DefinitionNode final : folly::MoveOnly,
         return false;
     }
   }
+
+  bool isType() const {
+    switch (kind()) {
+      case Kind::STRUCT:
+      case Kind::UNION:
+      case Kind::EXCEPTION:
+      case Kind::ENUM:
+      case Kind::TYPEDEF:
+        return true;
+      case Kind::CONSTANT:
+      case Kind::SERVICE:
+      case Kind::INTERACTION:
+      default:
+        return false;
+    }
+  }
+  /**
+   * Returns a `TypeRef` to the underlying type definition, assuming the active
+   * variant alternative is a type definition.
+   *
+   * Pre-conditions:
+   *   - kind() is one of {STRUCT, UNION, EXCEPTION, ENUM, TYPEDEF}, else throws
+   *     `std::bad_variant_access`.
+   */
+  TypeRef asTypeRef() const;
   /**
    * Returns the `RpcInterfaceNode` object reference, assuming the active
    * variant alternative is an interface type.
@@ -1871,6 +1937,27 @@ type_system::SerializableRecord toSerializableRecord(
     const TypeRef& type, const protocol::Value& value);
 
 } // namespace detail
+
+inline TypeRef DefinitionNode::asTypeRef() const {
+  switch (kind()) {
+    case Kind::STRUCT:
+      return asStruct().asRef();
+    case Kind::UNION:
+      return asUnion().asRef();
+    case Kind::EXCEPTION:
+      return asException().asRef();
+    case Kind::ENUM:
+      return asEnum().asRef();
+    case Kind::TYPEDEF:
+      return asTypedef().asRef();
+    case Kind::CONSTANT:
+    case Kind::SERVICE:
+    case Kind::INTERACTION:
+    default:
+      break;
+  }
+  folly::throw_exception<std::bad_variant_access>();
+}
 
 } // namespace apache::thrift::syntax_graph
 

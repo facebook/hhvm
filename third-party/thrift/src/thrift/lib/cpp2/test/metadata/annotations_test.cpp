@@ -224,10 +224,8 @@ TEST(Annotations, Enum) {
 }
 
 TEST(Annotations, Normalization) {
-  auto annotationType =
-      syntax_graph::TypeRef::of(SchemaRegistry::get().getNode<Annotation>());
-  auto fooType =
-      syntax_graph::TypeRef::of(SchemaRegistry::get().getNode<Foo>());
+  auto annotationType = SchemaRegistry::get().getNode<Annotation>().asRef();
+  auto fooType = SchemaRegistry::get().getNode<Foo>().asRef();
   {
     std::vector<metadata::ThriftConstStruct> lhs;
     lhs.emplace_back().type()->name() = "annotations.Annotation";

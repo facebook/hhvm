@@ -65,6 +65,13 @@ TEST_F(RSAPSSTest, TestVerifyFailure) {
       rsa.verify<SignatureScheme::rsa_pss_sha256>(msg, sig->coalesce()),
       std::runtime_error);
 }
+
+TEST_F(RSAPSSTest, TestGetKey) {
+  OpenSSLSignature<KeyType::RSA> rsa;
+  rsa.setKey(generateKey());
+  auto key = rsa.getKey();
+  EXPECT_EQ(EVP_PKEY_id(key.get()), EVP_PKEY_RSA);
+}
 } // namespace test
 } // namespace openssl
 } // namespace fizz

@@ -25,6 +25,10 @@ template <KeyType T>
 class OpenSSLSignature {
  public:
   void setKey(folly::ssl::EvpPkeyUniquePtr pkey);
+  /**
+   * Returns the EVP_PKEY private key as a unique pointer.
+   */
+  folly::ssl::EvpPkeyUniquePtr getKey() const;
 
   /**
    * Returns a signature of data.

@@ -170,5 +170,11 @@ inline void OpenSSLSignature<KeyType::RSA>::setKey(
   }
   pkey_ = std::move(pkey);
 }
+
+template <KeyType T>
+inline folly::ssl::EvpPkeyUniquePtr OpenSSLSignature<T>::getKey() const {
+  EVP_PKEY_up_ref(pkey_.get());
+  return folly::ssl::EvpPkeyUniquePtr(pkey_.get());
+}
 } // namespace openssl
 } // namespace fizz

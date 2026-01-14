@@ -8,7 +8,6 @@
 
 #pragma once
 
-#include <boost/variant.hpp>
 #include <deque>
 #include <folly/Optional.h>
 #include <folly/Range.h>

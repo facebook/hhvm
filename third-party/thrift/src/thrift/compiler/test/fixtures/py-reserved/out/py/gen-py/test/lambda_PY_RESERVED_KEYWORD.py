@@ -16,7 +16,7 @@ import sys
 if sys.version_info[0] >= 3:
   long = int
 
-from .ttypes import UTF8STRINGS, def_PY_RESERVED_KEYWORD
+from .ttypes import UTF8STRINGS, from_PY_RESERVED_KEYWORD, def_PY_RESERVED_KEYWORD
 from thrift.Thrift import TProcessor
 import pprint
 import warnings

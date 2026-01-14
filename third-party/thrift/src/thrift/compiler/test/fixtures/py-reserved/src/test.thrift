@@ -38,3 +38,7 @@ service lambda {
   bool global(1: i64 raise);
   def import();
 }
+
+enum from {
+  VALUE = 1,
+}

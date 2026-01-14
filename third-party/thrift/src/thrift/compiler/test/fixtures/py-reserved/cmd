@@ -1,1 +1,2 @@
 py: py:json src/test.thrift
+python: mstch_python src/test.thrift

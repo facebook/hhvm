@@ -387,6 +387,7 @@ bool GeneratedAsyncProcessorBase::setUpRequestProcessing(ServerRequest& req) {
   auto isEbMethod =
       req.methodMetadata()->executorType == MethodMetadata::ExecutorType::EVB;
   auto& interactionName = req.methodMetadata()->interactionName;
+  bool isFactoryFunction = req.methodMetadata()->createsInteraction;
   bool interactionMetadataValid;
   if (auto interactionId = ctx->getInteractionId()) {
     if (auto interactionCreate = ctx->getInteractionCreate()) {
@@ -408,7 +409,8 @@ bool GeneratedAsyncProcessorBase::setUpRequestProcessing(ServerRequest& req) {
         interactionMetadataValid = true;
       }
     } else {
-      interactionMetadataValid = interactionName.has_value();
+      interactionMetadataValid =
+          interactionName.has_value() && !isFactoryFunction;
     }
 
     if (interactionMetadataValid && isEbMethod) {
@@ -479,7 +481,8 @@ bool GeneratedAsyncProcessorBase::setUpRequestProcessing(
         interactionMetadataValid = true;
       }
     } else {
-      interactionMetadataValid = !interaction.empty();
+      interactionMetadataValid =
+          !interaction.empty() && !isInteractionFactoryFunction;
     }
 
     if (interactionMetadataValid && !tm) {

@@ -87,7 +87,7 @@ def _standard_protocol_to_serializer_protocol(
 def _get_type_hash_prefix(obj: ObjWithUri) -> bytes:
     uri = obj.__get_thrift_uri__()
     if uri is None:
-        raise ValueError("Thrift struct doesn't have URI")
+        raise ValueError(f"Thrift struct doesn't have URI. {obj}")
     return get_universal_hash_prefix(
         get_universal_hash(UniversalHashAlgorithm.Sha2_256, uri),
         16,

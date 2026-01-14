@@ -68,7 +68,7 @@ class _fbthrift_PubSubStreamingService_returnstream_args(_fbthrift_python_types.
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None, builtins.int, builtins.int]]]: ...
 
 
@@ -80,7 +80,7 @@ class _fbthrift_PubSubStreamingService_returnstream_result(_fbthrift_python_type
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             None,
         ]]]: ...
@@ -93,7 +93,7 @@ class _fbthrift_PubSubStreamingService_returnstream_result_stream_elem(_fbthrift
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             builtins.int,
         ]]]: ...
@@ -108,7 +108,7 @@ class _fbthrift_PubSubStreamingService_streamthrows_args(_fbthrift_python_types.
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None, builtins.int]]]: ...
 
 
@@ -120,7 +120,7 @@ class _fbthrift_PubSubStreamingService_streamthrows_result(_fbthrift_python_type
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             None,
         ]]]: ...
@@ -134,7 +134,7 @@ class _fbthrift_PubSubStreamingService_streamthrows_result_stream_elem(_fbthrift
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             builtins.int,
             _fbthrift_FooStreamEx,
@@ -150,7 +150,7 @@ class _fbthrift_PubSubStreamingService_servicethrows_args(_fbthrift_python_types
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None, builtins.int]]]: ...
 
 
@@ -163,7 +163,7 @@ class _fbthrift_PubSubStreamingService_servicethrows_result(_fbthrift_python_typ
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             None,
             _fbthrift_FooEx,
@@ -177,7 +177,7 @@ class _fbthrift_PubSubStreamingService_servicethrows_result_stream_elem(_fbthrif
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             builtins.int,
         ]]]: ...
@@ -192,7 +192,7 @@ class _fbthrift_PubSubStreamingService_servicethrows2_args(_fbthrift_python_type
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None, builtins.int]]]: ...
 
 
@@ -206,7 +206,7 @@ class _fbthrift_PubSubStreamingService_servicethrows2_result(_fbthrift_python_ty
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             None,
             _fbthrift_FooEx,
@@ -221,7 +221,7 @@ class _fbthrift_PubSubStreamingService_servicethrows2_result_stream_elem(_fbthri
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             builtins.int,
         ]]]: ...
@@ -236,7 +236,7 @@ class _fbthrift_PubSubStreamingService_boththrows_args(_fbthrift_python_types.St
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None, builtins.int]]]: ...
 
 
@@ -249,7 +249,7 @@ class _fbthrift_PubSubStreamingService_boththrows_result(_fbthrift_python_types.
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             None,
             _fbthrift_FooEx,
@@ -264,7 +264,7 @@ class _fbthrift_PubSubStreamingService_boththrows_result_stream_elem(_fbthrift_p
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             builtins.int,
             _fbthrift_FooStreamEx,
@@ -280,7 +280,7 @@ class _fbthrift_PubSubStreamingService_responseandstreamstreamthrows_args(_fbthr
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None, builtins.int]]]: ...
 
 
@@ -292,7 +292,7 @@ class _fbthrift_PubSubStreamingService_responseandstreamstreamthrows_result(_fbt
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             builtins.int,
         ]]]: ...
@@ -306,7 +306,7 @@ class _fbthrift_PubSubStreamingService_responseandstreamstreamthrows_result_stre
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             builtins.int,
             _fbthrift_FooStreamEx,
@@ -322,7 +322,7 @@ class _fbthrift_PubSubStreamingService_responseandstreamservicethrows_args(_fbth
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None, builtins.int]]]: ...
 
 
@@ -335,7 +335,7 @@ class _fbthrift_PubSubStreamingService_responseandstreamservicethrows_result(_fb
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             builtins.int,
             _fbthrift_FooEx,
@@ -349,7 +349,7 @@ class _fbthrift_PubSubStreamingService_responseandstreamservicethrows_result_str
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             builtins.int,
         ]]]: ...
@@ -364,7 +364,7 @@ class _fbthrift_PubSubStreamingService_responseandstreamboththrows_args(_fbthrif
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None, builtins.int]]]: ...
 
 
@@ -377,7 +377,7 @@ class _fbthrift_PubSubStreamingService_responseandstreamboththrows_result(_fbthr
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             builtins.int,
             _fbthrift_FooEx,
@@ -392,7 +392,7 @@ class _fbthrift_PubSubStreamingService_responseandstreamboththrows_result_stream
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             builtins.int,
             _fbthrift_FooStreamEx,
@@ -410,7 +410,7 @@ class _fbthrift_PubSubStreamingService_returnstreamFast_args(_fbthrift_python_ty
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None, builtins.int, builtins.int]]]: ...
 
 
@@ -422,7 +422,7 @@ class _fbthrift_PubSubStreamingService_returnstreamFast_result(_fbthrift_python_
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             None,
         ]]]: ...
@@ -435,7 +435,7 @@ class _fbthrift_PubSubStreamingService_returnstreamFast_result_stream_elem(_fbth
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             builtins.int,
         ]]]: ...

@@ -70,7 +70,7 @@ class _fbthrift_BiDiService_simple_args(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None]]]: ...
 
 
@@ -82,7 +82,7 @@ class _fbthrift_BiDiService_simple_result(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             None,
         ]]]: ...
@@ -95,7 +95,7 @@ class _fbthrift_BiDiService_simple_result_stream_elem(_fbthrift_python_types._fb
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             builtins.int,
         ]]]: ...
@@ -110,7 +110,7 @@ class _fbthrift_BiDiService_simple_result_sink_elem(_fbthrift_python_types._fbth
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             builtins.int,
         ]]]: ...
@@ -125,7 +125,7 @@ class _fbthrift_BiDiService_response_args(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None]]]: ...
 
 
@@ -137,7 +137,7 @@ class _fbthrift_BiDiService_response_result(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             builtins.str,
         ]]]: ...
@@ -150,7 +150,7 @@ class _fbthrift_BiDiService_response_result_stream_elem(_fbthrift_python_types._
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             builtins.int,
         ]]]: ...
@@ -165,7 +165,7 @@ class _fbthrift_BiDiService_response_result_sink_elem(_fbthrift_python_types._fb
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             builtins.int,
         ]]]: ...
@@ -180,7 +180,7 @@ class _fbthrift_BiDiService_canThrow_args(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None]]]: ...
 
 
@@ -193,7 +193,7 @@ class _fbthrift_BiDiService_canThrow_result(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             None,
             _fbthrift_BiDiMethodException,
@@ -208,7 +208,7 @@ class _fbthrift_BiDiService_canThrow_result_stream_elem(_fbthrift_python_types._
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             builtins.int,
             _fbthrift_BiDiStreamException,
@@ -225,7 +225,7 @@ class _fbthrift_BiDiService_canThrow_result_sink_elem(_fbthrift_python_types._fb
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             builtins.int,
             _fbthrift_BiDiSinkException,

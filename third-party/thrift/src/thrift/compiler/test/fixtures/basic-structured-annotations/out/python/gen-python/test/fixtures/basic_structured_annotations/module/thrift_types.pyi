@@ -243,7 +243,7 @@ class _fbthrift_MyService_first_args(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None]]]: ...
 
 
@@ -255,7 +255,7 @@ class _fbthrift_MyService_first_result(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             builtins.str,
         ]]]: ...
@@ -270,7 +270,7 @@ class _fbthrift_MyService_second_args(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None, builtins.int]]]: ...
 
 
@@ -282,7 +282,7 @@ class _fbthrift_MyService_second_result(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             builtins.bool,
         ]]]: ...

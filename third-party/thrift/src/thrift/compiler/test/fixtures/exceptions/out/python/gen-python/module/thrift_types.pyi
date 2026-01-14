@@ -136,7 +136,7 @@ class _fbthrift_Raiser_doBland_args(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None]]]: ...
 
 
@@ -148,7 +148,7 @@ class _fbthrift_Raiser_doBland_result(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             None,
         ]]]: ...
@@ -161,7 +161,7 @@ class _fbthrift_Raiser_doRaise_args(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None]]]: ...
 
 
@@ -176,7 +176,7 @@ class _fbthrift_Raiser_doRaise_result(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             None,
             _fbthrift_Banal,
@@ -192,7 +192,7 @@ class _fbthrift_Raiser_get200_args(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None]]]: ...
 
 
@@ -204,7 +204,7 @@ class _fbthrift_Raiser_get200_result(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             builtins.str,
         ]]]: ...
@@ -217,7 +217,7 @@ class _fbthrift_Raiser_get500_args(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None]]]: ...
 
 
@@ -232,7 +232,7 @@ class _fbthrift_Raiser_get500_result(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             builtins.str,
             _fbthrift_Fiery,

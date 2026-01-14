@@ -502,7 +502,7 @@ class _fbthrift_SimpleService_get_five_args(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None]]]: ...
 
 
@@ -514,7 +514,7 @@ class _fbthrift_SimpleService_get_five_result(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             builtins.int,
         ]]]: ...
@@ -529,7 +529,7 @@ class _fbthrift_SimpleService_add_five_args(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None, builtins.int]]]: ...
 
 
@@ -541,7 +541,7 @@ class _fbthrift_SimpleService_add_five_result(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             builtins.int,
         ]]]: ...
@@ -554,7 +554,7 @@ class _fbthrift_SimpleService_do_nothing_args(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None]]]: ...
 
 
@@ -566,7 +566,7 @@ class _fbthrift_SimpleService_do_nothing_result(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             None,
         ]]]: ...
@@ -583,7 +583,7 @@ class _fbthrift_SimpleService_concat_args(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None, builtins.str, builtins.str]]]: ...
 
 
@@ -595,7 +595,7 @@ class _fbthrift_SimpleService_concat_result(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             builtins.str,
         ]]]: ...
@@ -610,7 +610,7 @@ class _fbthrift_SimpleService_get_value_args(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None, _fbthrift_SimpleStruct]]]: ...
 
 
@@ -622,7 +622,7 @@ class _fbthrift_SimpleService_get_value_result(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             builtins.int,
         ]]]: ...
@@ -637,7 +637,7 @@ class _fbthrift_SimpleService_negate_args(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None, builtins.bool]]]: ...
 
 
@@ -649,7 +649,7 @@ class _fbthrift_SimpleService_negate_result(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             builtins.bool,
         ]]]: ...
@@ -664,7 +664,7 @@ class _fbthrift_SimpleService_tiny_args(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None, builtins.int]]]: ...
 
 
@@ -676,7 +676,7 @@ class _fbthrift_SimpleService_tiny_result(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             builtins.int,
         ]]]: ...
@@ -691,7 +691,7 @@ class _fbthrift_SimpleService_small_args(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None, builtins.int]]]: ...
 
 
@@ -703,7 +703,7 @@ class _fbthrift_SimpleService_small_result(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             builtins.int,
         ]]]: ...
@@ -718,7 +718,7 @@ class _fbthrift_SimpleService_big_args(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None, builtins.int]]]: ...
 
 
@@ -730,7 +730,7 @@ class _fbthrift_SimpleService_big_result(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             builtins.int,
         ]]]: ...
@@ -745,7 +745,7 @@ class _fbthrift_SimpleService_two_args(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None, builtins.float]]]: ...
 
 
@@ -757,7 +757,7 @@ class _fbthrift_SimpleService_two_result(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             builtins.float,
         ]]]: ...
@@ -770,7 +770,7 @@ class _fbthrift_SimpleService_expected_exception_args(_fbthrift_python_types.Str
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None]]]: ...
 
 
@@ -783,7 +783,7 @@ class _fbthrift_SimpleService_expected_exception_result(_fbthrift_python_types.S
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             None,
             _fbthrift_SimpleException,
@@ -797,7 +797,7 @@ class _fbthrift_SimpleService_unexpected_exception_args(_fbthrift_python_types.S
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None]]]: ...
 
 
@@ -809,7 +809,7 @@ class _fbthrift_SimpleService_unexpected_exception_result(_fbthrift_python_types
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             builtins.int,
         ]]]: ...
@@ -824,7 +824,7 @@ class _fbthrift_SimpleService_sum_i16_list_args(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None, _typing.Sequence[builtins.int]]]]: ...
 
 
@@ -836,7 +836,7 @@ class _fbthrift_SimpleService_sum_i16_list_result(_fbthrift_python_types.Struct)
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             builtins.int,
         ]]]: ...
@@ -851,7 +851,7 @@ class _fbthrift_SimpleService_sum_i32_list_args(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None, _typing.Sequence[builtins.int]]]]: ...
 
 
@@ -863,7 +863,7 @@ class _fbthrift_SimpleService_sum_i32_list_result(_fbthrift_python_types.Struct)
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             builtins.int,
         ]]]: ...
@@ -878,7 +878,7 @@ class _fbthrift_SimpleService_sum_i64_list_args(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None, _typing.Sequence[builtins.int]]]]: ...
 
 
@@ -890,7 +890,7 @@ class _fbthrift_SimpleService_sum_i64_list_result(_fbthrift_python_types.Struct)
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             builtins.int,
         ]]]: ...
@@ -905,7 +905,7 @@ class _fbthrift_SimpleService_concat_many_args(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None, _typing.Sequence[builtins.str]]]]: ...
 
 
@@ -917,7 +917,7 @@ class _fbthrift_SimpleService_concat_many_result(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             builtins.str,
         ]]]: ...
@@ -932,7 +932,7 @@ class _fbthrift_SimpleService_count_structs_args(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None, _typing.Sequence[_fbthrift_SimpleStruct]]]]: ...
 
 
@@ -944,7 +944,7 @@ class _fbthrift_SimpleService_count_structs_result(_fbthrift_python_types.Struct
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             builtins.int,
         ]]]: ...
@@ -959,7 +959,7 @@ class _fbthrift_SimpleService_sum_set_args(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None, _typing.AbstractSet[builtins.int]]]]: ...
 
 
@@ -971,7 +971,7 @@ class _fbthrift_SimpleService_sum_set_result(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             builtins.int,
         ]]]: ...
@@ -988,7 +988,7 @@ class _fbthrift_SimpleService_contains_word_args(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None, _typing.AbstractSet[builtins.str], builtins.str]]]: ...
 
 
@@ -1000,7 +1000,7 @@ class _fbthrift_SimpleService_contains_word_result(_fbthrift_python_types.Struct
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             builtins.bool,
         ]]]: ...
@@ -1017,7 +1017,7 @@ class _fbthrift_SimpleService_get_map_value_args(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None, _typing.Mapping[builtins.str, builtins.str], builtins.str]]]: ...
 
 
@@ -1029,7 +1029,7 @@ class _fbthrift_SimpleService_get_map_value_result(_fbthrift_python_types.Struct
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             builtins.str,
         ]]]: ...
@@ -1044,7 +1044,7 @@ class _fbthrift_SimpleService_map_length_args(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None, _typing.Mapping[builtins.str, _fbthrift_SimpleStruct]]]]: ...
 
 
@@ -1056,7 +1056,7 @@ class _fbthrift_SimpleService_map_length_result(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             builtins.int,
         ]]]: ...
@@ -1071,7 +1071,7 @@ class _fbthrift_SimpleService_sum_map_values_args(_fbthrift_python_types.Struct)
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None, _typing.Mapping[builtins.str, builtins.int]]]]: ...
 
 
@@ -1083,7 +1083,7 @@ class _fbthrift_SimpleService_sum_map_values_result(_fbthrift_python_types.Struc
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             builtins.int,
         ]]]: ...
@@ -1098,7 +1098,7 @@ class _fbthrift_SimpleService_complex_sum_i32_args(_fbthrift_python_types.Struct
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None, _fbthrift_ComplexStruct]]]: ...
 
 
@@ -1110,7 +1110,7 @@ class _fbthrift_SimpleService_complex_sum_i32_result(_fbthrift_python_types.Stru
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             builtins.int,
         ]]]: ...
@@ -1125,7 +1125,7 @@ class _fbthrift_SimpleService_repeat_name_args(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None, _fbthrift_ComplexStruct]]]: ...
 
 
@@ -1137,7 +1137,7 @@ class _fbthrift_SimpleService_repeat_name_result(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             builtins.str,
         ]]]: ...
@@ -1150,7 +1150,7 @@ class _fbthrift_SimpleService_get_struct_args(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None]]]: ...
 
 
@@ -1162,7 +1162,7 @@ class _fbthrift_SimpleService_get_struct_result(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             _fbthrift_SimpleStruct,
         ]]]: ...
@@ -1177,7 +1177,7 @@ class _fbthrift_SimpleService_fib_args(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None, builtins.int]]]: ...
 
 
@@ -1189,7 +1189,7 @@ class _fbthrift_SimpleService_fib_result(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             _typing.Sequence[builtins.int],
         ]]]: ...
@@ -1204,7 +1204,7 @@ class _fbthrift_SimpleService_unique_words_args(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None, _typing.Sequence[builtins.str]]]]: ...
 
 
@@ -1216,7 +1216,7 @@ class _fbthrift_SimpleService_unique_words_result(_fbthrift_python_types.Struct)
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             _typing.AbstractSet[builtins.str],
         ]]]: ...
@@ -1231,7 +1231,7 @@ class _fbthrift_SimpleService_words_count_args(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None, _typing.Sequence[builtins.str]]]]: ...
 
 
@@ -1243,7 +1243,7 @@ class _fbthrift_SimpleService_words_count_result(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             _typing.Mapping[builtins.str, builtins.int],
         ]]]: ...
@@ -1258,7 +1258,7 @@ class _fbthrift_SimpleService_set_enum_args(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None, _fbthrift_AnEnum]]]: ...
 
 
@@ -1270,7 +1270,7 @@ class _fbthrift_SimpleService_set_enum_result(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             _fbthrift_AnEnum,
         ]]]: ...
@@ -1287,7 +1287,7 @@ class _fbthrift_SimpleService_list_of_lists_args(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None, builtins.int, builtins.int]]]: ...
 
 
@@ -1299,7 +1299,7 @@ class _fbthrift_SimpleService_list_of_lists_result(_fbthrift_python_types.Struct
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             _typing.Sequence[_typing.Sequence[builtins.int]],
         ]]]: ...
@@ -1314,7 +1314,7 @@ class _fbthrift_SimpleService_word_character_frequency_args(_fbthrift_python_typ
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None, builtins.str]]]: ...
 
 
@@ -1326,7 +1326,7 @@ class _fbthrift_SimpleService_word_character_frequency_result(_fbthrift_python_t
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             _typing.Mapping[builtins.str, _typing.Mapping[builtins.str, builtins.int]],
         ]]]: ...
@@ -1341,7 +1341,7 @@ class _fbthrift_SimpleService_list_of_sets_args(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None, builtins.str]]]: ...
 
 
@@ -1353,7 +1353,7 @@ class _fbthrift_SimpleService_list_of_sets_result(_fbthrift_python_types.Struct)
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             _typing.Sequence[_typing.AbstractSet[builtins.str]],
         ]]]: ...
@@ -1368,7 +1368,7 @@ class _fbthrift_SimpleService_nested_map_argument_args(_fbthrift_python_types.St
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None, _typing.Mapping[builtins.str, _typing.Sequence[_fbthrift_SimpleStruct]]]]]: ...
 
 
@@ -1380,7 +1380,7 @@ class _fbthrift_SimpleService_nested_map_argument_result(_fbthrift_python_types.
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             builtins.int,
         ]]]: ...
@@ -1395,7 +1395,7 @@ class _fbthrift_SimpleService_make_sentence_args(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None, _typing.Sequence[_typing.Sequence[builtins.str]]]]]: ...
 
 
@@ -1407,7 +1407,7 @@ class _fbthrift_SimpleService_make_sentence_result(_fbthrift_python_types.Struct
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             builtins.str,
         ]]]: ...
@@ -1422,7 +1422,7 @@ class _fbthrift_SimpleService_get_union_args(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None, _typing.Sequence[_typing.AbstractSet[builtins.int]]]]]: ...
 
 
@@ -1434,7 +1434,7 @@ class _fbthrift_SimpleService_get_union_result(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             _typing.AbstractSet[builtins.int],
         ]]]: ...
@@ -1449,7 +1449,7 @@ class _fbthrift_SimpleService_get_keys_args(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None, _typing.Sequence[_typing.Mapping[builtins.str, builtins.str]]]]]: ...
 
 
@@ -1461,7 +1461,7 @@ class _fbthrift_SimpleService_get_keys_result(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             _typing.AbstractSet[builtins.str],
         ]]]: ...
@@ -1476,7 +1476,7 @@ class _fbthrift_SimpleService_lookup_double_args(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None, builtins.int]]]: ...
 
 
@@ -1488,7 +1488,7 @@ class _fbthrift_SimpleService_lookup_double_result(_fbthrift_python_types.Struct
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             builtins.float,
         ]]]: ...
@@ -1503,7 +1503,7 @@ class _fbthrift_SimpleService_retrieve_binary_args(_fbthrift_python_types.Struct
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None, builtins.bytes]]]: ...
 
 
@@ -1515,7 +1515,7 @@ class _fbthrift_SimpleService_retrieve_binary_result(_fbthrift_python_types.Stru
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             builtins.bytes,
         ]]]: ...
@@ -1530,7 +1530,7 @@ class _fbthrift_SimpleService_contain_binary_args(_fbthrift_python_types.Struct)
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None, _typing.Sequence[builtins.bytes]]]]: ...
 
 
@@ -1542,7 +1542,7 @@ class _fbthrift_SimpleService_contain_binary_result(_fbthrift_python_types.Struc
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             _typing.AbstractSet[builtins.bytes],
         ]]]: ...
@@ -1557,7 +1557,7 @@ class _fbthrift_SimpleService_contain_enum_args(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None, _typing.Sequence[_fbthrift_AnEnum]]]]: ...
 
 
@@ -1569,7 +1569,7 @@ class _fbthrift_SimpleService_contain_enum_result(_fbthrift_python_types.Struct)
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             _typing.Sequence[_fbthrift_AnEnum],
         ]]]: ...
@@ -1584,7 +1584,7 @@ class _fbthrift_SimpleService_get_binary_union_struct_args(_fbthrift_python_type
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None, _fbthrift_BinaryUnion]]]: ...
 
 
@@ -1596,7 +1596,7 @@ class _fbthrift_SimpleService_get_binary_union_struct_result(_fbthrift_python_ty
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             _fbthrift_BinaryUnionStruct,
         ]]]: ...
@@ -1609,7 +1609,7 @@ class _fbthrift_SimpleService_get_struct_hidden_args(_fbthrift_python_types.Stru
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None]]]: ...
 
 
@@ -1621,7 +1621,7 @@ class _fbthrift_SimpleService_get_struct_hidden_result(_fbthrift_python_types.St
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             _fbthrift_SimpleStruct,
         ]]]: ...
@@ -1634,7 +1634,7 @@ class _fbthrift_DerivedService_get_six_args(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None]]]: ...
 
 
@@ -1646,7 +1646,7 @@ class _fbthrift_DerivedService_get_six_result(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             builtins.int,
         ]]]: ...
@@ -1659,7 +1659,7 @@ class _fbthrift_RederivedService_get_seven_args(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None]]]: ...
 
 
@@ -1671,7 +1671,7 @@ class _fbthrift_RederivedService_get_seven_result(_fbthrift_python_types.Struct)
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             builtins.int,
         ]]]: ...

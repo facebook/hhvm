@@ -38,7 +38,7 @@ class _fbthrift_MyService_query_args(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None, _fbthrift__module__thrift_types.MyStruct, _fbthrift__includes__thrift_types.Included]]]: ...
 
 
@@ -50,7 +50,7 @@ class _fbthrift_MyService_query_result(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             None,
         ]]]: ...
@@ -67,7 +67,7 @@ class _fbthrift_MyService_has_arg_docs_args(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None, _fbthrift__module__thrift_types.MyStruct, _fbthrift__includes__thrift_types.Included]]]: ...
 
 
@@ -79,7 +79,7 @@ class _fbthrift_MyService_has_arg_docs_result(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             None,
         ]]]: ...

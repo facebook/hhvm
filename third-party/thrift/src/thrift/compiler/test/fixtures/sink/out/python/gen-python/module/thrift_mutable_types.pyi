@@ -176,7 +176,7 @@ class _fbthrift_SinkService_method_args(_fbthrift_python_mutable_types.MutableSt
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None]]]: ...
 
 
@@ -188,7 +188,7 @@ class _fbthrift_SinkService_method_result(_fbthrift_python_mutable_types.Mutable
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             None,
         ]]]: ...
@@ -203,7 +203,7 @@ class _fbthrift_SinkService_method_result_sink_elem(_fbthrift_python_mutable_typ
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             _fbthrift_SinkPayload,
         ]]]: ...
@@ -218,7 +218,7 @@ class _fbthrift_SinkService_method_result_sink_final(_fbthrift_python_mutable_ty
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             _fbthrift_FinalResponse,
         ]]]: ...
@@ -231,7 +231,7 @@ class _fbthrift_SinkService_methodAndReponse_args(_fbthrift_python_mutable_types
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None]]]: ...
 
 
@@ -243,7 +243,7 @@ class _fbthrift_SinkService_methodAndReponse_result(_fbthrift_python_mutable_typ
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             _fbthrift_InitialResponse,
         ]]]: ...
@@ -258,7 +258,7 @@ class _fbthrift_SinkService_methodAndReponse_result_sink_elem(_fbthrift_python_m
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             _fbthrift_SinkPayload,
         ]]]: ...
@@ -273,7 +273,7 @@ class _fbthrift_SinkService_methodAndReponse_result_sink_final(_fbthrift_python_
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             _fbthrift_FinalResponse,
         ]]]: ...
@@ -286,7 +286,7 @@ class _fbthrift_SinkService_methodThrow_args(_fbthrift_python_mutable_types.Muta
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None]]]: ...
 
 
@@ -299,7 +299,7 @@ class _fbthrift_SinkService_methodThrow_result(_fbthrift_python_mutable_types.Mu
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             None,
             _fbthrift_InitialException,
@@ -315,7 +315,7 @@ class _fbthrift_SinkService_methodThrow_result_sink_elem(_fbthrift_python_mutabl
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             _fbthrift_SinkPayload,
         ]]]: ...
@@ -330,7 +330,7 @@ class _fbthrift_SinkService_methodThrow_result_sink_final(_fbthrift_python_mutab
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             _fbthrift_FinalResponse,
         ]]]: ...
@@ -343,7 +343,7 @@ class _fbthrift_SinkService_methodSinkThrow_args(_fbthrift_python_mutable_types.
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None]]]: ...
 
 
@@ -355,7 +355,7 @@ class _fbthrift_SinkService_methodSinkThrow_result(_fbthrift_python_mutable_type
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             None,
         ]]]: ...
@@ -371,7 +371,7 @@ class _fbthrift_SinkService_methodSinkThrow_result_sink_elem(_fbthrift_python_mu
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             _fbthrift_SinkPayload,
             _fbthrift_SinkException1,
@@ -387,7 +387,7 @@ class _fbthrift_SinkService_methodSinkThrow_result_sink_final(_fbthrift_python_m
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             _fbthrift_FinalResponse,
         ]]]: ...
@@ -400,7 +400,7 @@ class _fbthrift_SinkService_methodFinalThrow_args(_fbthrift_python_mutable_types
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None]]]: ...
 
 
@@ -412,7 +412,7 @@ class _fbthrift_SinkService_methodFinalThrow_result(_fbthrift_python_mutable_typ
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             None,
         ]]]: ...
@@ -427,7 +427,7 @@ class _fbthrift_SinkService_methodFinalThrow_result_sink_elem(_fbthrift_python_m
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             _fbthrift_SinkPayload,
         ]]]: ...
@@ -443,7 +443,7 @@ class _fbthrift_SinkService_methodFinalThrow_result_sink_final(_fbthrift_python_
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             _fbthrift_FinalResponse,
             _fbthrift_SinkException2,
@@ -457,7 +457,7 @@ class _fbthrift_SinkService_methodBothThrow_args(_fbthrift_python_mutable_types.
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None]]]: ...
 
 
@@ -469,7 +469,7 @@ class _fbthrift_SinkService_methodBothThrow_result(_fbthrift_python_mutable_type
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             None,
         ]]]: ...
@@ -485,7 +485,7 @@ class _fbthrift_SinkService_methodBothThrow_result_sink_elem(_fbthrift_python_mu
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             _fbthrift_SinkPayload,
             _fbthrift_SinkException1,
@@ -502,7 +502,7 @@ class _fbthrift_SinkService_methodBothThrow_result_sink_final(_fbthrift_python_m
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             _fbthrift_FinalResponse,
             _fbthrift_SinkException2,
@@ -516,7 +516,7 @@ class _fbthrift_SinkService_methodFast_args(_fbthrift_python_mutable_types.Mutab
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None]]]: ...
 
 
@@ -528,7 +528,7 @@ class _fbthrift_SinkService_methodFast_result(_fbthrift_python_mutable_types.Mut
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             None,
         ]]]: ...
@@ -543,7 +543,7 @@ class _fbthrift_SinkService_methodFast_result_sink_elem(_fbthrift_python_mutable
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             _fbthrift_SinkPayload,
         ]]]: ...
@@ -558,7 +558,7 @@ class _fbthrift_SinkService_methodFast_result_sink_final(_fbthrift_python_mutabl
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             _fbthrift_FinalResponse,
         ]]]: ...

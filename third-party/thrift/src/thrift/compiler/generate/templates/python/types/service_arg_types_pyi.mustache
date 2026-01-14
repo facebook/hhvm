@@ -37,7 +37,7 @@ class {{#partial m_functions.args_type service=service function=function}}({{#pa
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None{{#each function.params.fields as |field|}}, {{!
             }}{{#partial typehints.pep484_type type=field.type}}{{!
         }}{{/each}}]]]: ...
@@ -59,7 +59,7 @@ class _fbthrift_{{service.name}}_{{function.name}}_result({{#partial m_types.str
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             {{#partial typehints.pep484_type type=regular_response_type}},
             {{#each function.exceptions as |field|}}
@@ -87,7 +87,7 @@ class _fbthrift_{{service.name}}_{{function.name}}_result_stream_elem({{!
 
     {{! TODO: is this actually needed to enable typing? Delete if not. }}
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             {{#partial typehints.pep484_type type=function.stream.elem_type}},
             {{#each function.stream.exceptions as |field|}}
@@ -115,7 +115,7 @@ class _fbthrift_{{service.name}}_{{function.name}}_result_sink_elem({{!
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             {{#partial typehints.pep484_type type=function.sink.elem_type}},
             {{#each function.sink.exceptions as |field|}}
@@ -142,7 +142,7 @@ class _fbthrift_{{service.name}}_{{function.name}}_result_sink_final({{!
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             {{#partial typehints.pep484_type type=function.sink.final_response_type}},
             {{#each function.sink.final_response_exceptions as |field|}}

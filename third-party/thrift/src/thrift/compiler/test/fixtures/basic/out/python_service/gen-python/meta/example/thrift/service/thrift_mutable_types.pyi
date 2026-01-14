@@ -96,7 +96,7 @@ class _fbthrift_EchoService_echo_args(_fbthrift_python_mutable_types.MutableStru
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None, _fbthrift_EchoRequest]]]: ...
 
 
@@ -109,7 +109,7 @@ class _fbthrift_EchoService_echo_result(_fbthrift_python_mutable_types.MutableSt
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             _fbthrift_EchoResponse,
             _fbthrift_WhisperException,
@@ -125,7 +125,7 @@ class _fbthrift_ExtendedEchoService_echo_2_args(_fbthrift_python_mutable_types.M
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None, _fbthrift_EchoRequest]]]: ...
 
 
@@ -138,7 +138,7 @@ class _fbthrift_ExtendedEchoService_echo_2_result(_fbthrift_python_mutable_types
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             _fbthrift_EchoResponse,
             _fbthrift_WhisperException,
@@ -156,7 +156,7 @@ class _fbthrift_ExtendedMyService_putDataById_2_args(_fbthrift_python_mutable_ty
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None, builtins.int, builtins.str]]]: ...
 
 
@@ -168,7 +168,7 @@ class _fbthrift_ExtendedMyService_putDataById_2_result(_fbthrift_python_mutable_
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             None,
         ]]]: ...

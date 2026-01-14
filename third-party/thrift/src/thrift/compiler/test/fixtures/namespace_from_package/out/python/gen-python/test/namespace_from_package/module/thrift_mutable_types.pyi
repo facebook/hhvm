@@ -52,7 +52,7 @@ class _fbthrift_TestService_init_args(_fbthrift_python_mutable_types.MutableStru
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None, builtins.int]]]: ...
 
 
@@ -64,7 +64,7 @@ class _fbthrift_TestService_init_result(_fbthrift_python_mutable_types.MutableSt
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             builtins.int,
         ]]]: ...

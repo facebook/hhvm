@@ -71,7 +71,7 @@ class _fbthrift_MyService_adapted_return_args(_fbthrift_python_mutable_types.Mut
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None]]]: ...
 
 
@@ -83,7 +83,7 @@ class _fbthrift_MyService_adapted_return_result(_fbthrift_python_mutable_types.M
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             typeshed_one.AdapterOneType[_fbthrift__b__thrift_mutable_types._fbthrift_unadapted_B],
         ]]]: ...
@@ -98,7 +98,7 @@ class _fbthrift_MyService_adapted_param_args(_fbthrift_python_mutable_types.Muta
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None, typeshed_two.AdapterTwoType[_fbthrift__c__thrift_mutable_types.C2]]]]: ...
 
 
@@ -110,7 +110,7 @@ class _fbthrift_MyService_adapted_param_result(_fbthrift_python_mutable_types.Mu
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             None,
         ]]]: ...

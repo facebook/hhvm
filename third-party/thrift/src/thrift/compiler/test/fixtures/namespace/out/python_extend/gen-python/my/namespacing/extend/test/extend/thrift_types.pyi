@@ -29,7 +29,7 @@ class _fbthrift_ExtendTestService_check_args(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None, python_module_root__my__namespacing__test__hsmodule__thrift_types.HsFoo]]]: ...
 
 
@@ -41,7 +41,7 @@ class _fbthrift_ExtendTestService_check_result(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             builtins.bool,
         ]]]: ...

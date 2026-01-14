@@ -31,7 +31,7 @@ class _fbthrift_ExtendTestService_check_args(_fbthrift_python_mutable_types.Muta
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None, python_module_root__my__namespacing__test__hsmodule__thrift_mutable_types.HsFoo]]]: ...
 
 
@@ -43,7 +43,7 @@ class _fbthrift_ExtendTestService_check_result(_fbthrift_python_mutable_types.Mu
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             builtins.bool,
         ]]]: ...

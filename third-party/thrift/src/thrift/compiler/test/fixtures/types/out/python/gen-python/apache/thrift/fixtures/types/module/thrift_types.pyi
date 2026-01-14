@@ -800,7 +800,7 @@ class _fbthrift_SomeService_bounce_map_args(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None, _typing.Mapping[builtins.int, builtins.str]]]]: ...
 
 
@@ -812,7 +812,7 @@ class _fbthrift_SomeService_bounce_map_result(_fbthrift_python_types.Struct):
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             _typing.Mapping[builtins.int, builtins.str],
         ]]]: ...
@@ -827,7 +827,7 @@ class _fbthrift_SomeService_binary_keyed_map_args(_fbthrift_python_types.Struct)
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None, _typing.Sequence[builtins.int]]]]: ...
 
 
@@ -839,7 +839,7 @@ class _fbthrift_SomeService_binary_keyed_map_result(_fbthrift_python_types.Struc
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             _typing.Mapping[builtins.bytes, builtins.int],
         ]]]: ...

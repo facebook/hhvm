@@ -1054,7 +1054,7 @@ class _fbthrift_SomeService_bounce_map_args(_fbthrift_python_mutable_types.Mutab
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None, _fbthrift_python_mutable_containers.MutableMap[builtins.int, builtins.str]]]]: ...
 
 
@@ -1066,7 +1066,7 @@ class _fbthrift_SomeService_bounce_map_result(_fbthrift_python_mutable_types.Mut
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             _fbthrift_python_mutable_containers.MutableMap[builtins.int, builtins.str],
         ]]]: ...
@@ -1081,7 +1081,7 @@ class _fbthrift_SomeService_binary_keyed_map_args(_fbthrift_python_mutable_types
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[None, _fbthrift_python_mutable_containers.MutableList[builtins.int]]]]: ...
 
 
@@ -1093,7 +1093,7 @@ class _fbthrift_SomeService_binary_keyed_map_result(_fbthrift_python_mutable_typ
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
-        str,
+        builtins.str,
         _typing.Union[
             _fbthrift_python_mutable_containers.MutableMap[builtins.bytes, builtins.int],
         ]]]: ...

@@ -83,7 +83,7 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> MyService_MyInteraction.Async:
-            _fbthrift_interaction = self.createMyInteraction()
+            _fbthrift_interaction = self.__fbthrift_createMyInteraction()
             _fbthrift_resp = await self._send_request(
                 "MyService",
                 "interact",
@@ -104,7 +104,7 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> _typing.Tuple[MyService_MyInteractionFast.Async, builtins.int]:
-            _fbthrift_interaction = self.createMyInteractionFast()
+            _fbthrift_interaction = self.__fbthrift_createMyInteractionFast()
             _fbthrift_resp = await self._send_request(
                 "MyService",
                 "interactFast",
@@ -130,7 +130,7 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> _typing.Tuple[MyService_SerialInteraction.Async, builtins.int, _typing.AsyncGenerator[builtins.int, None]]:
-            _fbthrift_interaction = self.createSerialInteraction()
+            _fbthrift_interaction = self.__fbthrift_createSerialInteraction()
             _fbthrift_resp = await self._send_request(
                 "MyService",
                 "serialize",
@@ -152,30 +152,42 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
                 "Empty Response",
             )
     
-        def createMyInteraction(
+        def __fbthrift_createMyInteraction(
             self #MyService
         ) -> MyService_MyInteraction.Async:
             return self._create_interaction("MyInteraction", MyService_MyInteraction.Async)
         async def async_createMyInteraction(
             self #MyService
         ) -> MyService_MyInteraction.Async:
-            return self.createMyInteraction()
-        def createMyInteractionFast(
+            return self.__fbthrift_createMyInteraction()
+        def createMyInteraction(
+            self #MyService
+        ) -> MyService_MyInteraction.Async:
+            return self.__fbthrift_createMyInteraction()
+        def __fbthrift_createMyInteractionFast(
             self #MyService
         ) -> MyService_MyInteractionFast.Async:
             return self._create_interaction("MyInteractionFast", MyService_MyInteractionFast.Async)
         async def async_createMyInteractionFast(
             self #MyService
         ) -> MyService_MyInteractionFast.Async:
-            return self.createMyInteractionFast()
-        def createSerialInteraction(
+            return self.__fbthrift_createMyInteractionFast()
+        def createMyInteractionFast(
+            self #MyService
+        ) -> MyService_MyInteractionFast.Async:
+            return self.__fbthrift_createMyInteractionFast()
+        def __fbthrift_createSerialInteraction(
             self #MyService
         ) -> MyService_SerialInteraction.Async:
             return self._create_interaction("SerialInteraction", MyService_SerialInteraction.Async)
         async def async_createSerialInteraction(
             self #MyService
         ) -> MyService_SerialInteraction.Async:
-            return self.createSerialInteraction()
+            return self.__fbthrift_createSerialInteraction()
+        def createSerialInteraction(
+            self #MyService
+        ) -> MyService_SerialInteraction.Async:
+            return self.__fbthrift_createSerialInteraction()
     
     # pyre-ignore[4]: Missing annotation.
     foo = Async.foo
@@ -616,7 +628,7 @@ class Factories(_fbthrift_python_Client["Factories.Async", "Factories.Sync"]):
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> Factories_MyInteraction.Async:
-            _fbthrift_interaction = self.createMyInteraction()
+            _fbthrift_interaction = self.__fbthrift_createMyInteraction()
             _fbthrift_resp = await self._send_request(
                 "Factories",
                 "interact",
@@ -637,7 +649,7 @@ class Factories(_fbthrift_python_Client["Factories.Async", "Factories.Sync"]):
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> _typing.Tuple[Factories_MyInteractionFast.Async, builtins.int]:
-            _fbthrift_interaction = self.createMyInteractionFast()
+            _fbthrift_interaction = self.__fbthrift_createMyInteractionFast()
             _fbthrift_resp = await self._send_request(
                 "Factories",
                 "interactFast",
@@ -663,7 +675,7 @@ class Factories(_fbthrift_python_Client["Factories.Async", "Factories.Sync"]):
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> _typing.Tuple[Factories_SerialInteraction.Async, builtins.int, _typing.AsyncGenerator[builtins.int, None]]:
-            _fbthrift_interaction = self.createSerialInteraction()
+            _fbthrift_interaction = self.__fbthrift_createSerialInteraction()
             _fbthrift_resp = await self._send_request(
                 "Factories",
                 "serialize",
@@ -685,30 +697,42 @@ class Factories(_fbthrift_python_Client["Factories.Async", "Factories.Sync"]):
                 "Empty Response",
             )
     
-        def createMyInteraction(
+        def __fbthrift_createMyInteraction(
             self #Factories
         ) -> Factories_MyInteraction.Async:
             return self._create_interaction("MyInteraction", Factories_MyInteraction.Async)
         async def async_createMyInteraction(
             self #Factories
         ) -> Factories_MyInteraction.Async:
-            return self.createMyInteraction()
-        def createMyInteractionFast(
+            return self.__fbthrift_createMyInteraction()
+        def createMyInteraction(
+            self #Factories
+        ) -> Factories_MyInteraction.Async:
+            return self.__fbthrift_createMyInteraction()
+        def __fbthrift_createMyInteractionFast(
             self #Factories
         ) -> Factories_MyInteractionFast.Async:
             return self._create_interaction("MyInteractionFast", Factories_MyInteractionFast.Async)
         async def async_createMyInteractionFast(
             self #Factories
         ) -> Factories_MyInteractionFast.Async:
-            return self.createMyInteractionFast()
-        def createSerialInteraction(
+            return self.__fbthrift_createMyInteractionFast()
+        def createMyInteractionFast(
+            self #Factories
+        ) -> Factories_MyInteractionFast.Async:
+            return self.__fbthrift_createMyInteractionFast()
+        def __fbthrift_createSerialInteraction(
             self #Factories
         ) -> Factories_SerialInteraction.Async:
             return self._create_interaction("SerialInteraction", Factories_SerialInteraction.Async)
         async def async_createSerialInteraction(
             self #Factories
         ) -> Factories_SerialInteraction.Async:
-            return self.createSerialInteraction()
+            return self.__fbthrift_createSerialInteraction()
+        def createSerialInteraction(
+            self #Factories
+        ) -> Factories_SerialInteraction.Async:
+            return self.__fbthrift_createSerialInteraction()
     
     # pyre-ignore[4]: Missing annotation.
     foo = Async.foo
@@ -1143,30 +1167,42 @@ class Perform(_fbthrift_python_Client["Perform.Async", "Perform.Sync"]):
                 rpc_options=rpc_options,
             )
     
-        def createMyInteraction(
+        def __fbthrift_createMyInteraction(
             self #Perform
         ) -> Perform_MyInteraction.Async:
             return self._create_interaction("MyInteraction", Perform_MyInteraction.Async)
         async def async_createMyInteraction(
             self #Perform
         ) -> Perform_MyInteraction.Async:
-            return self.createMyInteraction()
-        def createMyInteractionFast(
+            return self.__fbthrift_createMyInteraction()
+        def createMyInteraction(
+            self #Perform
+        ) -> Perform_MyInteraction.Async:
+            return self.__fbthrift_createMyInteraction()
+        def __fbthrift_createMyInteractionFast(
             self #Perform
         ) -> Perform_MyInteractionFast.Async:
             return self._create_interaction("MyInteractionFast", Perform_MyInteractionFast.Async)
         async def async_createMyInteractionFast(
             self #Perform
         ) -> Perform_MyInteractionFast.Async:
-            return self.createMyInteractionFast()
-        def createSerialInteraction(
+            return self.__fbthrift_createMyInteractionFast()
+        def createMyInteractionFast(
+            self #Perform
+        ) -> Perform_MyInteractionFast.Async:
+            return self.__fbthrift_createMyInteractionFast()
+        def __fbthrift_createSerialInteraction(
             self #Perform
         ) -> Perform_SerialInteraction.Async:
             return self._create_interaction("SerialInteraction", Perform_SerialInteraction.Async)
         async def async_createSerialInteraction(
             self #Perform
         ) -> Perform_SerialInteraction.Async:
-            return self.createSerialInteraction()
+            return self.__fbthrift_createSerialInteraction()
+        def createSerialInteraction(
+            self #Perform
+        ) -> Perform_SerialInteraction.Async:
+            return self.__fbthrift_createSerialInteraction()
     
     # pyre-ignore[4]: Missing annotation.
     foo = Async.foo
@@ -1602,22 +1638,30 @@ class InteractWithShared(_fbthrift_python_Client["InteractWithShared.Async", "In
                 "Empty Response",
             )
     
-        def createMyInteraction(
+        def __fbthrift_createMyInteraction(
             self #InteractWithShared
         ) -> InteractWithShared_MyInteraction.Async:
             return self._create_interaction("MyInteraction", InteractWithShared_MyInteraction.Async)
         async def async_createMyInteraction(
             self #InteractWithShared
         ) -> InteractWithShared_MyInteraction.Async:
-            return self.createMyInteraction()
-        def createSharedInteraction(
+            return self.__fbthrift_createMyInteraction()
+        def createMyInteraction(
+            self #InteractWithShared
+        ) -> InteractWithShared_MyInteraction.Async:
+            return self.__fbthrift_createMyInteraction()
+        def __fbthrift_createSharedInteraction(
             self #InteractWithShared
         ) -> InteractWithShared_SharedInteraction.Async:
             return self._create_interaction("SharedInteraction", InteractWithShared_SharedInteraction.Async)
         async def async_createSharedInteraction(
             self #InteractWithShared
         ) -> InteractWithShared_SharedInteraction.Async:
-            return self.createSharedInteraction()
+            return self.__fbthrift_createSharedInteraction()
+        def createSharedInteraction(
+            self #InteractWithShared
+        ) -> InteractWithShared_SharedInteraction.Async:
+            return self.__fbthrift_createSharedInteraction()
     
     # pyre-ignore[4]: Missing annotation.
     do_some_similar_things = Async.do_some_similar_things
@@ -1956,7 +2000,7 @@ class BoxService(_fbthrift_python_Client["BoxService.Async", "BoxService.Sync"])
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> _typing.Tuple[BoxService_BoxedInteraction.Async, _fbthrift__test__fixtures__interactions__module__thrift_types.ShouldBeBoxed]:
-            _fbthrift_interaction = self.createBoxedInteraction()
+            _fbthrift_interaction = self.__fbthrift_createBoxedInteraction()
             _fbthrift_resp = await self._send_request(
                 "BoxService",
                 "getABoxSession",
@@ -1978,14 +2022,18 @@ class BoxService(_fbthrift_python_Client["BoxService.Async", "BoxService.Sync"])
                 "Empty Response",
             )
     
-        def createBoxedInteraction(
+        def __fbthrift_createBoxedInteraction(
             self #BoxService
         ) -> BoxService_BoxedInteraction.Async:
             return self._create_interaction("BoxedInteraction", BoxService_BoxedInteraction.Async)
         async def async_createBoxedInteraction(
             self #BoxService
         ) -> BoxService_BoxedInteraction.Async:
-            return self.createBoxedInteraction()
+            return self.__fbthrift_createBoxedInteraction()
+        def createBoxedInteraction(
+            self #BoxService
+        ) -> BoxService_BoxedInteraction.Async:
+            return self.__fbthrift_createBoxedInteraction()
     
     # pyre-ignore[4]: Missing annotation.
     getABoxSession = Async.getABoxSession

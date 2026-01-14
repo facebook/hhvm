@@ -86,7 +86,7 @@ class Async({{#if extends_service?}}{{#service.extends}}{{!
         }}{{#if function.returns_tuple?}}]{{/if}}{{!
     }}{{/function.return_type}}:
         {{#if function.creates_interaction?}}
-        _fbthrift_interaction = self.create{{function.created_interaction.name}}()
+        _fbthrift_interaction = self.__fbthrift_create{{function.created_interaction.name}}()
         {{/if function.creates_interaction?}}
         _fbthrift_resp = await self._send_request(
             {{#if service.interaction?}}"{{parent_service_name}}"{{#else}}"{{service.name}}"{{/if}},
@@ -149,14 +149,19 @@ class Async({{#if extends_service?}}{{#service.extends}}{{!
       {{#each service.interactions as |interaction|}}
         {{#let parent_service_name = service.name}}
         {{#let interaction_name = interaction.name}}
-    def create{{interaction_name}}(
+    def __fbthrift_create{{interaction_name}}(
         self #{{parent_service_name}}
     ) -> {{parent_service_name}}_{{interaction_name}}.Async:
         return self._create_interaction("{{interaction_name}}", {{parent_service_name}}_{{interaction_name}}.Async)
     async def async_create{{interaction_name}}(
         self #{{parent_service_name}}
     ) -> {{parent_service_name}}_{{interaction_name}}.Async:
-        return self.create{{interaction_name}}()
+        return self.__fbthrift_create{{interaction_name}}()
+    {{! Left for backward compatibility }}
+    def create{{interaction_name}}(
+        self #{{parent_service_name}}
+    ) -> {{parent_service_name}}_{{interaction_name}}.Async:
+        return self.__fbthrift_create{{interaction_name}}()
       {{/each}}
     {{/if (not service.interaction?)}}
 

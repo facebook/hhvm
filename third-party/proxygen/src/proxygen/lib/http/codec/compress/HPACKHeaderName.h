@@ -9,7 +9,6 @@
 #pragma once
 
 #include <algorithm>
-#include <boost/variant.hpp>
 #include <cstdint>
 #include <folly/Range.h>
 #include <folly/String.h>

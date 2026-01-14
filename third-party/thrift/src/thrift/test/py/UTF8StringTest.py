@@ -14,16 +14,16 @@
 
 # pyre-unsafe
 
-from ThriftTest.ttypes import *
 import sys
 import unittest
 
 from thrift.protocol import TBinaryProtocol, TCompactProtocol
 from thrift.transport import TSocket, TTransport
 from thrift.util import Serializer
+from ThriftTest.ttypes import ListTypeVersioningV2
 
 if sys.version_info[0] < 3:
-    chr = unichr
+    chr = unichr  # noqa: F821 - Python 2 built-in, dead code in Python 3
 
 
 class AbstractTest:

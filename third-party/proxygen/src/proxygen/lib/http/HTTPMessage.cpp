@@ -8,26 +8,16 @@
 
 #include <proxygen/lib/http/HTTPMessage.h>
 
-#include <boost/algorithm/string.hpp>
 #include <folly/Format.h>
 #include <folly/Range.h>
 #include <folly/SingletonThreadLocal.h>
+#include <folly/String.h>
 #include <string>
 #include <vector>
 
 using folly::StringPiece;
 using std::pair;
 using std::string;
-
-namespace {
-/**
- * Create a C locale once and pass it to all the boost string methods
- * that would otherwise create and destruct a temporary locale object
- * per call.  (Performance profiling showed that we were spending
- * approximately 1% of our total CPU time on temporary locale objects.)
- */
-std::locale defaultLocale;
-} // namespace
 
 namespace proxygen {
 
@@ -742,17 +732,16 @@ void HTTPMessage::splitNameValue(
     size_t valueDelimPos = keyValue.find(valueDelim);
     if (valueDelimPos == string::npos) {
       // Key only query param
-      string name = keyValue.str();
+      string name = folly::trimWhitespace(keyValue).str();
       string value;
 
-      boost::trim(name, defaultLocale);
       callback(std::move(name), std::move(value));
     } else {
-      string name = keyValue.subpiece(0, valueDelimPos).str();
-      string value = keyValue.subpiece(valueDelimPos + 1).str();
+      string name =
+          folly::trimWhitespace(keyValue.subpiece(0, valueDelimPos)).str();
+      string value =
+          folly::trimWhitespace(keyValue.subpiece(valueDelimPos + 1)).str();
 
-      boost::trim(name, defaultLocale);
-      boost::trim(value, defaultLocale);
       callback(std::move(name), std::move(value));
     }
   }

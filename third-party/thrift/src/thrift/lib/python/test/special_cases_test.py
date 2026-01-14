@@ -69,3 +69,12 @@ class SpecialCasesTest(unittest.TestCase):
             # defined in a manner to cause the error above.
             TestKeywordAsField,  # noqa: F401
         )
+
+    def test_enum_named_as_python_keyword(self) -> None:
+        # Test that enums named after Python keywords are properly escaped.
+        # "from" is a Python reserved keyword; the generated code must use "from_"
+        # as the class name to avoid syntax errors.
+        from thrift.python.test.special_cases.thrift_enums import from_
+
+        # Verify the enum works correctly
+        self.assertEqual(from_.VALUE.value, 1)

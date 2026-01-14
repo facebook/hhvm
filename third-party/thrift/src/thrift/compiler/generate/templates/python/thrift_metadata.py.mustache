@@ -114,7 +114,7 @@ def _fbthrift_metadata_service_response_{{service.name}}() -> _fbthrift_metadata
 def getThriftModuleMetadata() -> _fbthrift_metadata.ThriftMetadata:
     meta = _fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={})
     {{#each program.enums as |enum|}}
-    meta = _fbthrift_current_module_enums._fbthrift_gen_metadata_enum_{{enum.name}}(meta)
+    meta = _fbthrift_current_module_enums._fbthrift_gen_metadata_enum_{{enum.py_name}}(meta)
     {{/each}}
     {{#each program.structured_definitions as |struct|}}
     meta = _fbthrift_gen_metadata_{{#if struct.exception?}}exception{{#else}}struct{{/if}}_{{#partial m_types.unadapted_name type=struct}}(meta)

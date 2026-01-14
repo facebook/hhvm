@@ -43,7 +43,7 @@
 ({{#partial m_types.typeinfo type=map.key_type}}, {{#partial m_types.typeinfo type=map.val_type}})
   {{#else if type.enum?}}
     {{#let enum = type.true_type}}
-{{#if enum.need_module_path?}}{{enum.module_mangle}}.{{#else}}{{#partial m_common.private_alias_prefix}}{{/if}}{{enum.name}}
+{{#if enum.need_module_path?}}{{enum.module_mangle}}.{{#else}}{{#partial m_common.private_alias_prefix}}{{/if}}{{enum.py_name}}
   {{/if type.void?}}
 {{/let partial}}
 {{#if program.typedefs?}}

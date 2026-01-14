@@ -17,9 +17,9 @@ import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 
 from test.thrift_enums import (
-    from as _fbthrift_from,
+    from_ as _fbthrift_from_,
 )
-from = _fbthrift_from
+from_ = _fbthrift_from_
 
 
 @_typing.final

@@ -19,9 +19,9 @@ import thrift.python.mutable_exceptions as _fbthrift_python_mutable_exceptions
 import thrift.python.mutable_containers as _fbthrift_python_mutable_containers
 
 from test.thrift_enums import (
-    from as _fbthrift_from,
+    from_ as _fbthrift_from_,
 )
-from = _fbthrift_from
+from_ = _fbthrift_from_
 
 
 @_typing.final

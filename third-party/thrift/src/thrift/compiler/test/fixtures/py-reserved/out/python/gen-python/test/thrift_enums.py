@@ -14,7 +14,7 @@ import typing as _std_python_typing
 
 
 
-class from(_fbthrift_python_types.Enum, int):
+class from_(_fbthrift_python_types.Enum, int):
     VALUE = 1
     @staticmethod
     def __get_thrift_name__() -> builtins.str:
@@ -26,19 +26,19 @@ class from(_fbthrift_python_types.Enum, int):
 
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-        return gen_metadata_enum_from()
+        return gen_metadata_enum_from_()
 
-    def _to_python(self) -> "from":
+    def _to_python(self) -> "from_":
         return self
 
-    def _to_py3(self) -> "from":
+    def _to_py3(self) -> "from_":
         return self
 
     # pyre-ignore[11]: Annotation `test.ttypes.from` is not defined as a type.
     def _to_py_deprecated(self) -> "test.ttypes.from":
         return self.value
 
-def _fbthrift_gen_metadata_enum_from(metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:
+def _fbthrift_gen_metadata_enum_from_(metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:
     qualified_name = "test.from"
 
     if qualified_name in metadata_struct.enums:
@@ -54,8 +54,8 @@ def _fbthrift_gen_metadata_enum_from(metadata_struct: _fbthrift_metadata.ThriftM
 
     return new_struct
 
-def gen_metadata_enum_from() -> _fbthrift_metadata.ThriftMetadata:
-    return _fbthrift_gen_metadata_enum_from(
+def gen_metadata_enum_from_() -> _fbthrift_metadata.ThriftMetadata:
+    return _fbthrift_gen_metadata_enum_from_(
         _fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={})
     )
 

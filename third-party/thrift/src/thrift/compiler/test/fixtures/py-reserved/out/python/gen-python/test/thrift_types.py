@@ -16,8 +16,8 @@ import thrift.python.exceptions as _fbthrift_python_exceptions
 
 
 from test.thrift_enums import (
-    from,
-    from as _fbthrift_from,
+    from_,
+    from_ as _fbthrift_from_,
 )
 
 
@@ -194,7 +194,7 @@ _fbthrift_def_ = def_
 import test.thrift_metadata as _fbthrift__test__thrift_metadata
 
 _fbthrift_all_enums = [
-    from,
+    from_,
 ]
 
 

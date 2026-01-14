@@ -118,7 +118,7 @@ def _fbthrift_metadata_service_response_lambda() -> _fbthrift_metadata.ThriftSer
 
 def getThriftModuleMetadata() -> _fbthrift_metadata.ThriftMetadata:
     meta = _fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={})
-    meta = _fbthrift_current_module_enums._fbthrift_gen_metadata_enum_from(meta)
+    meta = _fbthrift_current_module_enums._fbthrift_gen_metadata_enum_from_(meta)
     meta = _fbthrift_gen_metadata_struct_def_(meta)
     meta = _fbthrift_gen_metadata_service_lambda(meta)
     return meta

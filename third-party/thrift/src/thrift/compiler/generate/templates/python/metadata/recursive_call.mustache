@@ -31,6 +31,6 @@ Used to turn a thrift type into a gen_metadata call
   }}{{#partial m_types.unadapted_name type=structured}}(new_struct){{!
 }}{{/type:structured?}}{{!
 }}{{#type:enum?}}{{#let enum = type:true_type}}{{!
-}}new_struct = {{enum.metadata_path}}._fbthrift_gen_metadata_enum_{{enum.name}}(new_struct){{!
+}}new_struct = {{enum.metadata_path}}._fbthrift_gen_metadata_enum_{{enum.py_name}}(new_struct){{!
 }}{{/type:enum?}}{{!
 }}

@@ -21,8 +21,8 @@ import folly.iobuf as _fbthrift_iobuf
 import thrift.python.abstract_types as _fbthrift_python_abstract_types
 
 from test.thrift_enums import (
-    from,
-    from as _fbthrift_from,
+    from_,
+    from_ as _fbthrift_from_,
 )
 
 class def_(_abc.ABC):

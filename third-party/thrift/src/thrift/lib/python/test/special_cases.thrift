@@ -46,6 +46,13 @@ struct TestStruct {
   1: bool placeholder;
 }
 
+// Test that Python reserved keywords are escaped in enum class names.
+// "from" is a Python reserved keyword; using it directly as a class name
+// would cause a syntax error.
+enum from {
+  VALUE = 1,
+}
+
 // Reproduces the use-cases where field names in structured types are the same
 // as the typenames that appear in the failures. Once the type-checker
 // encounters the field, it sees that name as the name of the field and not a

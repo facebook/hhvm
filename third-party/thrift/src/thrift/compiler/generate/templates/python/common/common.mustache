@@ -142,9 +142,9 @@ _fbthrift_
 from {{program.module_path}}.thrift_enums import (
   {{#each program.enums as |enum|}}
     {{#if python.is_source_file?}}
-    {{enum.name}},
+    {{enum.py_name}},
     {{/if python.is_source_file?}}
-    {{enum.name}} as {{#partial private_alias_prefix}}{{enum.name}},
+    {{enum.py_name}} as {{#partial private_alias_prefix}}{{enum.py_name}},
   {{/each}}
 {{! Import enum typedefs from thrift_enums }}
   {{#each program.typedefs as |typedef|}}
@@ -169,7 +169,7 @@ from {{program.module_path}}.thrift_enums import (
 }}
 {{#if python.is_type_stub?}}
   {{#each program.enums as |enum|}}
-{{enum.name}} = {{#partial private_alias_prefix}}{{enum.name}}
+{{enum.py_name}} = {{#partial private_alias_prefix}}{{enum.py_name}}
   {{/each}}
 {{! Type stub assignments for enum typedefs }}
   {{#each program.typedefs as |typedef|}}

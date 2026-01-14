@@ -19,8 +19,8 @@ import thrift.python.mutable_typeinfos as _fbthrift_python_mutable_typeinfos
 
 
 from test.thrift_enums import (
-    from,
-    from as _fbthrift_from,
+    from_,
+    from_ as _fbthrift_from_,
 )
 
 
@@ -192,7 +192,7 @@ _fbthrift_def_ = def_
 
 
 _fbthrift_all_enums = [
-    from,
+    from_,
 ]
 
 

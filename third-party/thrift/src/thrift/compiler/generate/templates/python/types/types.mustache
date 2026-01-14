@@ -251,7 +251,7 @@ import {{program.module_path}}.thrift_metadata as {{program.module_mangle}}__thr
 }}
 _fbthrift_all_enums = [
     {{#each program.enums as |enum|}}
-    {{enum.name}},
+    {{enum.py_name}},
     {{/each}}
 ]
 {{#if python.generate_immutable_types?}}

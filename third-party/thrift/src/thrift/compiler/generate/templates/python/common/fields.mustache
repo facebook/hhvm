@@ -49,7 +49,7 @@ _ex{{index}}__{{field.py_name}}
 None
   {{#else if type.enum?}}
     {{#let enum = type.true_type}}
-{{#if enum.need_module_path?}}{{enum.module_mangle}}.{{/if}}{{#partial m_common.private_alias_prefix}}{{enum.name}}
+{{#if enum.need_module_path?}}{{enum.module_mangle}}.{{/if}}{{#partial m_common.private_alias_prefix}}{{enum.py_name}}
   {{#else}}
 {{#partial typehints.unadapted_builtin type=type}}
   {{/if type.has_adapter?}}

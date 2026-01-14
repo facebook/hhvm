@@ -237,8 +237,8 @@ class FizzServerContext {
     return certManager_->getCert(identity);
   }
 
-  const CertManager* getCertManager() const {
-    return certManager_.get();
+  std::shared_ptr<const CertManager> getCertManager() const {
+    return certManager_;
   }
 
   /**

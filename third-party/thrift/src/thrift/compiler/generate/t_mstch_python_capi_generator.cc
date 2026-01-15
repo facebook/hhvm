@@ -339,7 +339,7 @@ class python_capi_mstch_program : public mstch_program {
     mstch::array a;
     a.reserve(capi_includes_.size());
     for (const auto& it : capi_includes_) {
-      a.push_back(it.second.include_prefix);
+      a.emplace_back(it.second.include_prefix);
     }
     std::sort(
         a.begin(), a.end(), [](const mstch::node& m, const mstch::node& n) {

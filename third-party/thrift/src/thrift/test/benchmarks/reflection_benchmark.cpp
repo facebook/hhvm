@@ -20,8 +20,9 @@
 #include <folly/Benchmark.h>
 #include <folly/init/Init.h>
 #include <folly/lang/Pretty.h>
-#include <thrift/test/testset/gen-cpp2/testset_fatal_all.h>
+#include <thrift/lib/cpp2/op/Get.h>
 #include <thrift/test/testset/gen-cpp2/testset_for_each_field.h>
+#include <thrift/test/testset/gen-cpp2/testset_types.h>
 
 namespace apache::thrift::test {
 namespace {
@@ -29,12 +30,9 @@ namespace {
 template <class Struct>
 void add_benchmark() {
   if constexpr (!is_thrift_union_v<Struct>) {
-    static_assert(
-        fatal::size<typename reflect_struct<Struct>::members>::value == 1);
+    static_assert(apache::thrift::op::num_fields<Struct> == 1);
   } else {
-    static_assert(
-        fatal::size<
-            typename reflect_variant<Struct>::traits::descriptors>::value == 2);
+    static_assert(apache::thrift::op::num_fields<Struct> == 2);
   }
 
   std::string name = folly::pretty_name<Struct>();
@@ -43,9 +41,8 @@ void add_benchmark() {
   if constexpr (!is_thrift_union_v<Struct>) {
     static Struct s;
     folly::addBenchmark(__FILE__, name + "_value_reflection", [] {
-      fatal::foreach<typename reflect_struct<Struct>::members>([](auto tag) {
-        using Member = decltype(fatal::tag_type(tag));
-        typename Member::field_ref_getter()(s) = "a";
+      apache::thrift::op::for_each_field_id<Struct>([](auto id) {
+        apache::thrift::op::get<decltype(id)>(s) = "a";
         folly::doNotOptimizeAway(s);
       });
       return 1;
@@ -75,9 +72,8 @@ void add_benchmark() {
   if constexpr (!is_thrift_union_v<Struct>) {
     folly::addBenchmark(__FILE__, name + "_name_reflection", [] {
       int k = 0;
-      fatal::foreach<typename reflect_struct<Struct>::members>([&k](auto tag) {
-        using Member = decltype(fatal::tag_type(tag));
-        const char* name = Member::name_v.data();
+      apache::thrift::op::for_each_field_id<Struct>([&k](auto id) {
+        auto name = apache::thrift::op::get_name_v<Struct, decltype(id)>;
         for (char c : std::string_view(name)) {
           k += c;
         }

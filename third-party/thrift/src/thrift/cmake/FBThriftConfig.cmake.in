@@ -49,8 +49,10 @@ set(FBThrift_cpp2_FOUND True)
 
 # Set FBThrift_py_FOUND if we built the thrift/lib/py library that supports
 # the output from the thrift compiler's "py" generator.
-# (Note that this generator is deprecated in favor of the "py3" generator,)
+# (Note that this generator is deprecated in favor of the "python" generator.)
 set(FBThrift_py_FOUND @thriftpy@)
+
+set(FBThrift_python_FOUND @thrift_python@)
 
 set(FBThrift_FOUND True)
 check_required_components(FBThrift)

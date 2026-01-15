@@ -13,8 +13,12 @@ use nast::Block;
 use nast::ClassId_;
 use nast::Expr;
 use nast::Expr_;
+use nast::Fun_;
+use nast::FuncBody;
 use nast::Lid;
 use nast::LocalId;
+use nast::LoopCond;
+use nast::LoopIter;
 use nast::Pos;
 use nast::Stmt;
 use nast::Stmt_;
@@ -22,6 +26,9 @@ use nast::XhpAttribute;
 use oxidized::aast_visitor::AstParams;
 use oxidized::aast_visitor::NodeMut;
 use oxidized::aast_visitor::VisitorMut;
+use oxidized::ast_defs::Bop;
+use oxidized::ast_defs::FunKind;
+use oxidized::ast_defs::OperatorNullFlavor;
 use oxidized::experimental_features::FeatureName;
 use oxidized::naming_phase_error::NamingPhaseError;
 use oxidized::nast;
@@ -65,6 +72,7 @@ impl<'a> VisitorMut<'a> for ContainsAwait {
 }
 
 /// How an expression uses await in its sub-expressions
+#[derive(PartialEq, Debug)]
 enum AwaitUsage {
     /// The expression does not await
     NoAwait,
@@ -244,15 +252,28 @@ fn check_await_usage(expr: &Expr) -> AwaitUsage {
                 NoAwait => check_await_usage(expr1),
             }
         }
-        // Can't have await in the branches (parse error)
-        Expr_::Eif(box (cond, _, _)) => check_await_usage(cond),
+        Expr_::Eif(box (cond, t, f)) => {
+            let branches = match t {
+                Some(expr) => combine_con(check_await_usage(expr), check_await_usage(f)),
+                None => check_await_usage(f),
+            };
+            match (check_await_usage(cond), branches) {
+                (x, NoAwait) => x,
+                (_, ContainsAwait) | (_, Sequential) | (_, ConcurrentAwait) | (_, Error(None)) => {
+                    Error(None)
+                }
+                (_, Error(Some(pos))) => Error(Some(pos)),
+            }
+        }
         Expr_::ExpressionTree(box nast::ExpressionTree {
             class: _,
             runtime_expr,
             free_vars: _,
         }) => check_await_usage(runtime_expr),
-        // lvalues: shouldn't contain await or $$
-        Expr_::List(_) => NoAwait,
+        Expr_::List(exprs) => exprs
+            .iter()
+            .map(check_await_usage)
+            .fold(NoAwait, combine_con),
     };
     match await_usage {
         Error(None) => Error(Some(pos.clone())),
@@ -314,6 +335,122 @@ fn sequentialise_stmt(
     }
 }
 
+fn extract_subexprs(expr: &mut nast::Expr) -> Vec<&mut nast::Expr> {
+    match expr.2 {
+        Expr_::Dollardollar(_)
+        | Expr_::Lvar(_)
+        | Expr_::Efun(_)
+        | Expr_::Lfun(_)
+        | Expr_::Invalid(box Some(_))
+        | Expr_::Clone(_)
+        | Expr_::PrefixedString(_)
+        | Expr_::ReadonlyExpr(_)
+        | Expr_::Cast(_)
+        | Expr_::Is(_)
+        | Expr_::As(_)
+        | Expr_::Upcast(_)
+        | Expr_::Import(_)
+        | Expr_::Hole(_)
+        | Expr_::Yield(_)
+        | Expr_::ETSplice(_)
+        | Expr_::Binop(_)
+        | Expr_::Assign(_)
+        | Expr_::KeyValCollection(_)
+        | Expr_::ValCollection(_)
+        | Expr_::String2(_)
+        | Expr_::Call(_)
+        | Expr_::New(_)
+        | Expr_::Xml(_)
+        | Expr_::Collection(_)
+        | Expr_::Await(_)
+        | Expr_::Pipe(_)
+        | Expr_::Eif(_)
+        | Expr_::ExpressionTree(_)
+        | Expr_::ClassConst(_)
+        | Expr_::ClassGet(_)
+        | Expr_::Pair(_) => {
+            return vec![expr];
+        }
+
+        Expr_::Null
+        | Expr_::This
+        | Expr_::True
+        | Expr_::False
+        | Expr_::Omitted
+        | Expr_::Id(_)
+        | Expr_::Int(_)
+        | Expr_::Float(_)
+        | Expr_::String(_)
+        | Expr_::Lplaceholder(_)
+        | Expr_::MethodCaller(_)
+        | Expr_::Invalid(box None)
+        | Expr_::EnumClassLabel(_)
+        | Expr_::Nameof(_)
+        | Expr_::FunctionPointer(_)
+        | Expr_::Package(_) => {
+            return vec![];
+        }
+
+        Expr_::ArrayGet(_)
+        | Expr_::Unop(_)
+        | Expr_::ObjGet(_)
+        | Expr_::List(_)
+        | Expr_::Tuple(_)
+        | Expr_::Shape(_) => {}
+    };
+
+    match &mut expr.2 {
+        Expr_::ArrayGet(box (expr1, None)) | Expr_::Unop(box (_, expr1)) => extract_subexprs(expr1),
+
+        Expr_::ArrayGet(box (expr1, Some(expr2))) | Expr_::ObjGet(box (expr1, expr2, _, _)) => {
+            let mut subexp = extract_subexprs(expr1);
+            subexp.push(expr2);
+            subexp
+        }
+
+        Expr_::List(args) | Expr_::Tuple(args) => {
+            let mut subexp = vec![];
+            for expr in args {
+                subexp.append(&mut extract_subexprs(expr));
+            }
+            subexp
+        }
+
+        Expr_::Shape(fields) => {
+            let mut subexp = vec![];
+            for (_, expr) in fields.iter_mut() {
+                subexp.append(&mut extract_subexprs(expr));
+            }
+            subexp
+        }
+
+        _ => unreachable!("handled above"),
+    }
+}
+
+fn create_lifted_block(
+    pos: &Pos,
+    con: Vec<(Lid, nast::Expr)>,
+    seq: Vec<nast::Stmt>,
+    mut tmps: Vec<Lid>,
+) -> (Option<Vec<Lid>>, Option<Block>) {
+    let block = match (con.is_empty(), seq.is_empty(), tmps.is_empty()) {
+        (true, false, _) | (true, _, false) => Some(Block(seq)),
+        (false, _, _) => {
+            tmps.extend(con.iter().map(|(lid, _)| lid.clone()));
+            let awaitall = Stmt_::Awaitall(Box::new((con, Block(seq))));
+            Some(Block(vec![Stmt(pos.clone(), awaitall)]))
+        }
+        (true, true, true) => None,
+    };
+
+    if !tmps.is_empty() {
+        (Some(tmps), block)
+    } else {
+        (None, block)
+    }
+}
+
 fn check_can_use_feature(env: &Env, pos: &Pos, feature: &FeatureName) {
     if !env.active_experimental_features.contains(feature) {
         env.emit_error(NamingPhaseError::Parsing(ParsingError::ParsingError {
@@ -335,6 +472,91 @@ impl LiftAwait {
         (0, name)
     }
 
+    fn extract_lval_keys(
+        &mut self,
+        expr: &mut nast::Expr,
+        seq: &mut Vec<nast::Stmt>,
+        tmps: &mut Vec<Lid>,
+    ) {
+        match &mut expr.2 {
+            Expr_::ArrayGet(box (_, Some(key))) | Expr_::ObjGet(box (_, key, _, _)) => {
+                match key.2 {
+                    // These member keys have no side-effects and can be left
+                    // as is.
+                    Expr_::Null
+                    | Expr_::This
+                    | Expr_::True
+                    | Expr_::False
+                    | Expr_::Omitted
+                    | Expr_::Id(_)
+                    | Expr_::Lvar(_)
+                    | Expr_::Int(_)
+                    | Expr_::Float(_)
+                    | Expr_::String(_)
+                    | Expr_::Invalid(box None)
+                    | Expr_::EnumClassLabel(_)
+                    | Expr_::Nameof(_) => {}
+
+                    // Computing any other member key may have side-effects so
+                    // as a precaution we lift it into a temporary.
+                    _ => {
+                        let tmp = self.gen_tmp_local();
+                        let pos = key.1.clone();
+                        let mut k_val = Expr((), Pos::NONE, Expr_::Null);
+                        std::mem::swap(&mut k_val, key);
+                        let lifted = hack_stmt!(pos = pos.clone(), "#{lvar(clone(tmp))} = #k_val;");
+                        *key = hack_expr!(pos = pos.clone(), "#{lvar(clone(tmp))}");
+                        seq.push(lifted);
+                        tmps.push(Lid(pos.clone(), tmp))
+                    }
+                }
+            }
+
+            Expr_::List(args) | Expr_::Tuple(args) => {
+                for expr in args {
+                    self.extract_lval_keys(expr, seq, tmps);
+                }
+            }
+
+            Expr_::Shape(fields) => {
+                for (_, expr) in fields.iter_mut() {
+                    self.extract_lval_keys(expr, seq, tmps);
+                }
+            }
+
+            _ => {}
+        }
+    }
+
+    fn extract_cond(&mut self, env: &mut Env, pos: &Pos, cond: &mut LoopCond) {
+        let mut con = vec![];
+        let mut seq = vec![];
+        let mut tmps = vec![];
+        let LoopCond(cond_tmps, cond_block, expr) = cond;
+
+        self.leave_await = true;
+        self.check_and_extract_await(env, expr, &mut con, &mut seq, &mut tmps);
+        self.leave_await = false;
+
+        (*cond_tmps, *cond_block) = create_lifted_block(pos, con, seq, tmps);
+    }
+
+    fn extract_iter(&mut self, env: &mut Env, pos: &Pos, iter: &mut LoopIter) {
+        let mut con = vec![];
+        let mut seq = vec![];
+        let mut tmps = vec![];
+
+        let LoopIter(iter_tmps, iter_block, exprs) = iter;
+
+        for expr in exprs {
+            self.leave_await = true;
+            self.check_and_extract_await(env, expr, &mut con, &mut seq, &mut tmps);
+            self.leave_await = false;
+        }
+
+        (*iter_tmps, *iter_block) = create_lifted_block(pos, con, seq, tmps);
+    }
+
     fn concurrentise(
         &mut self,
         pos: &Pos,
@@ -343,10 +565,6 @@ impl LiftAwait {
         seq: &mut Vec<nast::Stmt>,
         tmps: &mut Vec<Lid>,
     ) {
-        use nast::Fun_;
-        use nast::FuncBody;
-        use oxidized::ast_defs::FunKind;
-
         let mut non_con = vec![];
         for (i, expr) in exprs.iter_mut().enumerate() {
             let mut con1 = vec![];
@@ -452,6 +670,23 @@ impl LiftAwait {
         }
     }
 
+    fn do_sequential(&mut self, pos: &Pos, e: &mut nast::Expr, tmp: LocalId) -> Vec<nast::Stmt> {
+        let mut con = vec![];
+        let mut seq = vec![];
+        let mut tmps = vec![];
+
+        self.extract_await(e, &mut con, &mut seq, &mut tmps);
+
+        let mut e_val = Expr((), Pos::NONE, Expr_::Null);
+        std::mem::swap(&mut e_val, e);
+        seq.push(hack_stmt!(
+            pos = pos.clone(),
+            "#{lvar(clone(tmp))} = #e_val;"
+        ));
+
+        sequentialise(pos.clone(), con, seq, tmps)
+    }
+
     fn do_pipe(
         &mut self,
         e: &mut nast::Expr_,
@@ -461,6 +696,28 @@ impl LiftAwait {
         tmps: &mut Vec<Lid>,
     ) {
         match e {
+            Expr_::Pipe(box (_, expr1, expr2, OperatorNullFlavor::Nullsafe))
+                if check_await_usage(expr2) != AwaitUsage::NoAwait =>
+            {
+                let tmp = self.gen_tmp_local();
+
+                let mut stmts = self.do_sequential(pos, expr1, tmp.clone());
+                let mut replace = Some(Expr_::Lvar(Box::new(Lid(pos.clone(), tmp.clone()))));
+                std::mem::swap(&mut replace, &mut self.replace_dd);
+                let rhs_stmts = self.do_sequential(pos, expr2, tmp.clone());
+                std::mem::swap(&mut replace, &mut self.replace_dd);
+                let check_expr =
+                    hack_expr!(pos = pos.clone(), "!(#{lvar(clone(tmp))} is HH\\null)");
+                let if_stmt = Stmt(
+                    pos.clone(),
+                    Stmt_::If(Box::new((check_expr, Block(rhs_stmts), Block(vec![])))),
+                );
+                stmts.push(if_stmt);
+                seq.append(&mut stmts);
+
+                tmps.push(Lid(pos.clone(), tmp.clone()));
+                *e = Expr_::Lvar(Box::new(Lid(pos.clone(), tmp)));
+            }
             Expr_::Pipe(box (_, expr1, expr2, _)) => {
                 let mut con1 = vec![];
                 let mut seq1 = vec![];
@@ -581,8 +838,9 @@ impl LiftAwait {
     }
 
     // extract_await(e, &mut con, &mut seq) transforms e by pulling awaits out into con' and
-    // turning |> (with await on the rhs) into seq', such that it should be run as Awaitall (con') {seq'; e}.
-    // It then appends con' and seq' to con and seq. It also appends any escaping temporaries to tmps.
+    // turning |> (with await on the rhs) into seq', such that it should be run as Awaitall (con')
+    // {seq'; e}.  It then appends con' and seq' to con and seq. It also appends any escaping
+    // temporaries to tmps.
     fn extract_await(
         &mut self,
         expr: &mut nast::Expr,
@@ -593,6 +851,7 @@ impl LiftAwait {
         let leave_await = self.leave_await;
         self.leave_await = false;
         let Expr((), pos, e) = expr;
+
         match e {
             Expr_::Lvar(box Lid(_, id)) if id.1 == special_idents::DOLLAR_DOLLAR => {
                 if let Some(replace_expr) = &self.replace_dd {
@@ -664,21 +923,132 @@ impl LiftAwait {
             | Expr_::Yield(box Afield::AFkvalue(expr1, expr2)) => {
                 self.concurrentise(pos, vec![expr1, expr2], con, seq, tmps)
             }
-            Expr_::Binop(box nast::Binop { bop: _, lhs, rhs }) => {
-                // If the operator is || or &&, there are syntactic restrictions that
-                // there is no await on the rhs, and so it is safe to traverse it here
-                // just to replace $$
-                self.concurrentise(pos, vec![lhs, rhs], con, seq, tmps)
-            }
-            Expr_::Assign(box (lhs, bop, rhs)) => {
-                // If the operator is || or &&, there are syntactic restrictions that
-                // there is no await on the rhs, and so it is safe to traverse it here
-                // just to replace $$
-                self.extract_await(lhs, con, seq, tmps);
-                if bop.is_none() {
-                    self.leave_await = leave_await;
+            Expr_::Binop(box nast::Binop { bop, lhs, rhs }) => match bop {
+                Bop::Ampamp | Bop::Barbar | Bop::QuestionQuestion
+                    if check_await_usage(rhs) != AwaitUsage::NoAwait =>
+                {
+                    let tmp = self.gen_tmp_local();
+                    let (mut lhs_stmts, check_expr) = match bop {
+                        Bop::Ampamp => (
+                            self.do_sequential(pos, lhs, tmp.clone()),
+                            hack_expr!(pos = pos.clone(), "#{lvar(clone(tmp))}"),
+                        ),
+                        Bop::Barbar => (
+                            self.do_sequential(pos, lhs, tmp.clone()),
+                            hack_expr!(pos = pos.clone(), "!#{lvar(clone(tmp))}"),
+                        ),
+                        Bop::QuestionQuestion => {
+                            let mut lhs_val = Expr((), Pos::NONE, Expr_::Null);
+                            std::mem::swap(&mut lhs_val, lhs);
+                            let mut e = hack_expr!(pos = pos.clone(), "#lhs_val ?? null");
+                            (
+                                self.do_sequential(pos, &mut e, tmp.clone()),
+                                hack_expr!(pos = pos.clone(), "#{lvar(clone(tmp))} is HH\\null"),
+                            )
+                        }
+                        _ => unreachable!("checked"),
+                    };
+
+                    let rhs_stmts = self.do_sequential(pos, rhs, tmp.clone());
+                    let tmp_lid = Lid(pos.clone(), tmp);
+
+                    let if_stmt = Stmt(
+                        pos.clone(),
+                        Stmt_::If(Box::new((check_expr, Block(rhs_stmts), Block(vec![])))),
+                    );
+                    lhs_stmts.push(if_stmt);
+
+                    seq.append(&mut lhs_stmts);
+                    tmps.push(tmp_lid.clone());
+                    *e = Expr_::Lvar(Box::new(tmp_lid));
                 }
-                self.extract_await(rhs, con, seq, tmps)
+                _ => self.concurrentise(pos, vec![lhs, rhs], con, seq, tmps),
+            },
+            Expr_::Assign(box (lhs, bop, rhs)) => {
+                match (bop, check_await_usage(lhs), check_await_usage(rhs)) {
+                    // Unlike other await expressions handled here, there is no
+                    // simple syntactic transform to handle all possible forms
+                    // of (where <expr2> can contain awaits):
+                    //
+                    //   <expr1> ??= <expr2>
+                    //
+                    // While desugaring to a check and assign is tempting:
+                    //
+                    //   if ((<expr1> ?? null) is null) {
+                    //     <expr1> = <expr2>;
+                    //   }
+                    //
+                    // This will unfortunately fall apart if <expr1> has side
+                    // effects:
+                    //
+                    //   $foo[bar()] = f(await g() + await h());
+                    //
+                    // A simple transform here would unfortunately break and
+                    // execute `bar()` multiple times. Likewise our trick of
+                    // encoding using temporaries will not work as we need an
+                    // lval we can assign into.
+                    //
+                    // Instead we lift any keys from the LHS that may have side
+                    // effects into temporaries. The entire expression can then
+                    // be handled via the desugaring above, coupled with a
+                    // lifting of any await expressions in <expr1> without
+                    // lifting the lval itself so that assignment can be
+                    // preserved in the transformation.
+                    (Some(Bop::QuestionQuestion), lhs_usage, rhs_usage)
+                        if rhs_usage != AwaitUsage::NoAwait =>
+                    {
+                        if lhs_usage != AwaitUsage::NoAwait {
+                            let exprs = extract_subexprs(lhs);
+                            self.concurrentise(pos, exprs, con, seq, tmps);
+                        }
+                        self.extract_lval_keys(lhs, seq, tmps);
+
+                        let mut con1 = vec![];
+                        let mut seq1 = vec![];
+                        let mut tmps1 = vec![];
+
+                        self.extract_await(rhs, &mut con1, &mut seq1, &mut tmps1);
+
+                        let mut rhs_val = Expr((), Pos::NONE, Expr_::Null);
+                        std::mem::swap(&mut rhs_val, rhs);
+                        seq1.push(hack_stmt!(pos = pos.clone(), "#{clone(lhs)} = #rhs_val;"));
+                        let rhs_stmts = sequentialise(pos.clone(), con1, seq1, tmps1);
+
+                        let mut lhs_val = Expr((), Pos::NONE, Expr_::Null);
+                        std::mem::swap(&mut lhs_val, lhs);
+
+                        let check_expr =
+                            hack_expr!(pos = pos.clone(), "(#lhs_val ?? null) is HH\\null");
+                        let if_stmt = Stmt(
+                            pos.clone(),
+                            Stmt_::If(Box::new((check_expr, Block(rhs_stmts), Block(vec![])))),
+                        );
+                        seq.push(if_stmt);
+                        *e = Expr_::Null;
+                    }
+
+                    // If only one side has an await we can just extract it,
+                    // we still need to visit both LHS and RHS to update any
+                    // pipe variable references.
+                    (op, AwaitUsage::NoAwait, _) | (op, _, AwaitUsage::NoAwait) => {
+                        self.extract_await(lhs, con, seq, tmps);
+                        if op.is_none() {
+                            self.leave_await = leave_await;
+                        }
+                        self.extract_await(rhs, con, seq, tmps)
+                    }
+
+                    // If both sides contain an await we cannot simply naively
+                    // lift them via concurrentise as the LHS must remain an
+                    // lval. We can, however, concurrentise the RHS along with
+                    // inner expressions from the LHS so long as the outer LHS
+                    // expression remains an lval.
+                    (_, _, _) => {
+                        let mut exprs = extract_subexprs(lhs);
+                        exprs.push(rhs);
+                        self.concurrentise(pos, exprs, con, seq, tmps)
+                    }
+                }
             }
             // Expressions with lists of sub-expressions that we can lift an await out of
             // and run concurrently
@@ -706,7 +1076,16 @@ impl LiftAwait {
                 args,
                 unpacked_arg,
             }) => {
-                let mut exprs = vec![func];
+                let mut exprs = vec![];
+                if matches!(func, Expr((), _, Expr_::ObjGet(_))) {
+                    let Expr_::ObjGet(box (expr1, expr2, _, _)) = &mut func.2 else {
+                        unreachable!("checked")
+                    };
+                    exprs.push(expr1);
+                    exprs.push(expr2);
+                } else {
+                    exprs.push(func);
+                }
                 for arg in args.iter_mut() {
                     exprs.push(arg.to_expr_mut());
                 }
@@ -767,14 +1146,50 @@ impl LiftAwait {
             // Seq
             Expr_::Pipe(_) => self.do_pipe(e, pos, con, seq, tmps),
             Expr_::Eif(box (cond, t, f)) => {
-                self.extract_await(cond, con, seq, tmps);
-                if self.replace_dd.is_some() {
-                    // Relying on syntactic checks that there are no await in t or f,
-                    // but still need to traverse in case there is $$
-                    if let Some(expr) = t {
-                        self.extract_await(expr, con, seq, tmps)
+                let branch_awaits = match t {
+                    Some(expr) => combine_con(check_await_usage(expr), check_await_usage(f)),
+                    None => check_await_usage(f),
+                };
+                match branch_awaits {
+                    AwaitUsage::NoAwait => {
+                        self.extract_await(cond, con, seq, tmps);
+                        if self.replace_dd.is_some() {
+                            // Relying on syntactic checks that there are no await in t or f,
+                            // but still need to traverse in case there is $$
+                            if let Some(expr) = t {
+                                self.extract_await(expr, con, seq, tmps)
+                            }
+                            self.extract_await(f, con, seq, tmps)
+                        }
                     }
-                    self.extract_await(f, con, seq, tmps)
+                    _ => {
+                        let cond_var = self.gen_tmp_local();
+                        let res_var = self.gen_tmp_local();
+                        let mut cond_stmts = self.do_sequential(pos, cond, cond_var.clone());
+                        let t_stmts = if let Some(texpr) = t.as_mut() {
+                            self.do_sequential(pos, texpr, res_var.clone())
+                        } else {
+                            vec![hack_stmt!(
+                                pos = pos.clone(),
+                                "#{lvar(clone(res_var))} = #{lvar(clone(cond_var))};"
+                            )]
+                        };
+
+                        let f_stmts = self.do_sequential(pos, f, res_var.clone());
+                        let cond_var_lid = Lid(pos.clone(), cond_var.clone());
+                        let check =
+                            Expr((), pos.clone(), Expr_::Lvar(Box::new(cond_var_lid.clone())));
+                        let if_stmt = Stmt(
+                            pos.clone(),
+                            Stmt_::If(Box::new((check, Block(t_stmts), Block(f_stmts)))),
+                        );
+                        let res_var_lid = Lid(pos.clone(), res_var);
+                        tmps.push(cond_var_lid);
+                        tmps.push(res_var_lid.clone());
+                        seq.append(&mut cond_stmts);
+                        seq.push(if_stmt);
+                        *e = Expr_::Lvar(Box::new(res_var_lid));
+                    }
                 }
             }
 
@@ -784,8 +1199,10 @@ impl LiftAwait {
                 free_vars: _,
             }) => self.extract_await(runtime_expr, con, seq, tmps),
 
-            // lvalues: shouldn't contain await or $$
-            Expr_::List(_) => {}
+            Expr_::List(exprs) => {
+                let subexp = exprs.iter_mut().flat_map(extract_subexprs).collect();
+                self.concurrentise(pos, subexp, con, seq, tmps)
+            }
         }
     }
 
@@ -878,9 +1295,15 @@ impl<'a> VisitorMut<'a> for LiftAwait {
                     expr.accept(env, self.object())?;
                     self.check_and_extract_await(env, expr, &mut con, &mut seq, &mut tmps);
                 }
-                // No await in the test or update positions (parse error)
+
                 test.accept(env, self.object())?;
                 update.accept(env, self.object())?;
+
+                if let Some(cond) = test {
+                    self.extract_cond(env, &pos, cond);
+                }
+                self.extract_iter(env, &pos, update);
+
                 block.accept(env, self.object())?;
                 sequentialise_stmt(&pos, elem, stmt_, con, seq, tmps);
                 Ok(())
@@ -910,13 +1333,15 @@ impl<'a> VisitorMut<'a> for LiftAwait {
                 sequentialise_stmt(&pos, elem, stmt_, con, seq, tmps);
                 Ok(())
             }
-            // await cannot appear in expression in do or while (parse error)
-            Stmt_::Do(_)
-            | Stmt_::While(_)
-            | Stmt_::Block(_)
-            | Stmt_::Try(_)
-            | Stmt_::Match(_)
-            | Stmt_::Awaitall(_) => {
+            Stmt_::Do(box (body, cond)) | Stmt_::While(box (cond, body)) => {
+                cond.accept(env, self.object())?;
+                self.extract_cond(env, &pos, cond);
+
+                body.recurse(env, self.object())?;
+                *elem = Stmt(pos, stmt_);
+                Ok(())
+            }
+            Stmt_::Block(_) | Stmt_::Try(_) | Stmt_::Match(_) | Stmt_::Awaitall(_) => {
                 *elem = Stmt(pos, stmt_);
                 elem.recurse(env, self.object())
             }

@@ -77,6 +77,7 @@ type feature_name =
   | XhpTypeConstants
   | CapturePipeVariables
   | AllowExtendedAwaitSyntax
+  | AllowConditionalAwaitSyntax
 [@@deriving eq, ord, show]
 
 let feature_name_map =
@@ -130,6 +131,7 @@ let feature_name_map =
       ("xhp_type_constants", XhpTypeConstants);
       ("capture_pipe_variables", CapturePipeVariables);
       ("allow_extended_await_syntax", AllowExtendedAwaitSyntax);
+      ("allow_conditional_await_syntax", AllowConditionalAwaitSyntax);
     ]
 
 let feature_name_from_string s = SMap.find_opt s feature_name_map

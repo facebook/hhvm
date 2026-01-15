@@ -1,1 +1,0 @@
-Fatal error: `await` cannot be used as an expression in this location because it's conditionally executed. in %s/await_in_splice_conditional.php on line 11

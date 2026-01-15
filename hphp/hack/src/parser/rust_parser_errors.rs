@@ -3066,6 +3066,14 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                     continue;
                 }
 
+                ParameterDeclaration(_) => {
+                    self.errors.push(make_error_from_node(
+                            await_node,
+                            errors::invalid_await_param_default,
+                    ));
+                    break;
+                }
+
                 // These are nodes where any position is valid
                 CastExpression(_)
                 | MemberSelectionExpression(_)
@@ -3092,6 +3100,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 | SimpleInitializer(_)
                 | SubscriptExpression(_)
                 | EmbeddedSubscriptExpression(_)
+                | EmbeddedMemberSelectionExpression(_)
                 | YieldExpression(_)
                 | XHPExpression(_)
                 | XHPOpen(_)
@@ -3099,11 +3108,57 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 | XHPSpreadAttribute(_)
                 | SyntaxList(_)
                 | ListItem(_) => continue,
+
+                // Unconditional await locations that were erroneously banned
+                // as conditional
+                PrefixUnaryExpression(_) // inc, dec
+                | PostfixUnaryExpression(_) // inc, dec
+                | DecoratedExpression(_) // ... and inout
+                | LiteralExpression(_) // "{$foo(await bar())}"
+                | PrefixedStringExpression(_) // r"{$foo(await bar())}"
+                | MatchStatement(_) // match (await $x)
+                | EvalExpression(_) // eval(await $x)
+                | ListExpression(_) // list($a[await $b], ...) = ...
+                | InclusionExpression(_) => { // include await $x
+                    if !FeatureName::AllowConditionalAwaitSyntax.can_use(
+                        &self.env.parser_options,
+                        &self.env.context.active_experimental_features,
+                    ) {
+                        self.check_can_use_feature(node, &FeatureName::AllowConditionalAwaitSyntax);
+                        break;
+                    }
+                    continue;
+                }
+
+                // Statements with conditional subexpressions that permit
+                // awaits
+                WhileStatement(_) // while (await $x)
+                | DoStatement(_) // do { ... } while (await $x)
+                | ForStatement(_) => { // for (; await x(); $y += await z())
+                    self.check_can_use_feature(node, &FeatureName::AllowConditionalAwaitSyntax);
+                    break;
+                }
+
+                // Conditional expressions that can contain awaits
+                BinaryExpression(_) // ||, &&, and ??
+                | ConditionalExpression(_) // a ? b : c, a ?: b
+                | FunctionCallExpression(_) // a?->b()
+                | SafeMemberSelectionExpression(_) => { // a?->b
+                    if !FeatureName::AllowConditionalAwaitSyntax.can_use(
+                        &self.env.parser_options,
+                        &self.env.context.active_experimental_features,
+                    ) {
+                        self.check_can_use_feature(node, &FeatureName::AllowConditionalAwaitSyntax);
+                        break;
+                    }
+                    continue;
+                }
+
                 // otherwise report error and bail out
                 _ => {
                     self.errors.push(make_error_from_node(
-                        await_node,
-                        errors::invalid_await_position,
+                            await_node,
+                            errors::invalid_await_position,
                     ));
                     break;
                 }

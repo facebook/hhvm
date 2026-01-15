@@ -62,6 +62,7 @@ impl FeatureName {
             XhpTypeConstants => OngoingRelease,
             CapturePipeVariables => Unstable,
             AllowExtendedAwaitSyntax => Unstable,
+            AllowConditionalAwaitSyntax => Unstable,
         }
     }
 

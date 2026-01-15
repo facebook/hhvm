@@ -1,5 +1,11 @@
 <?hh
-<<file: __EnableUnstableFeatures('expression_trees')>>
+
+<<file:__EnableUnstableFeatures(
+  'expression_trees',
+  'capture_pipe_variables',
+  'allow_extended_await_syntax',
+  'allow_conditional_await_syntax',
+)>>
 
 class C<T> {
   public function __construct(public T $x) {}

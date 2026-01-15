@@ -99,6 +99,7 @@ using folly::test::find_resource;
 
 THRIFT_FLAG_DECLARE_string(rocket_frame_parser);
 THRIFT_FLAG_DECLARE_bool(default_sync_max_requests_to_concurrency_limit);
+THRIFT_FLAG_DECLARE_bool(rocket_set_idle_connection_timeout);
 DECLARE_int32(thrift_cpp2_protocol_reader_string_limit);
 
 static folly::AsyncSocket* shrinkSocketSendBuffer(Cpp2RequestContext* ctx) {
@@ -1802,6 +1803,7 @@ TEST_P(HeaderOrRocket, QueueTimeoutOnServerShutdown) {
 TEST_P(HeaderOrRocket, ConnectionIdleTimeoutTestSSL) {
   using namespace std::chrono_literals;
   folly::ScopedEventBaseThread clientEvbThread;
+  THRIFT_FLAG_SET_MOCK(rocket_set_idle_connection_timeout, true);
   ScopedServerInterfaceThread runner(
       std::make_shared<TestHandler>(), "::1", 0, [](auto& server) {
         server.setIdleTimeout(std::chrono::milliseconds(20));
@@ -2273,6 +2275,7 @@ TEST(ThriftServer, DISABLED_ClientTimeoutTest) {
 }
 
 TEST(ThriftServer, ConnectionIdleTimeoutTest) {
+  THRIFT_FLAG_SET_MOCK(rocket_set_idle_connection_timeout, true);
   TestThriftServerFactory<TestHandler> factory;
   auto server = factory.create();
   server->setIdleTimeout(std::chrono::milliseconds(20));
@@ -2460,6 +2463,7 @@ TEST(ThriftServer, useExistingSocketAndExit) {
 
 TEST(ThriftServer, useExistingSocketAndConnectionIdleTimeout) {
   // This is ConnectionIdleTimeoutTest, but with an existing socket
+  THRIFT_FLAG_SET_MOCK(rocket_set_idle_connection_timeout, true);
   TestThriftServerFactory<TestHandler> factory;
   auto server = factory.create();
   folly::AsyncServerSocket::UniquePtr serverSocket(
@@ -4266,7 +4270,7 @@ folly::observer::SimpleObservable<AdaptiveConcurrencyController::Config>
 
 namespace apache::thrift::detail {
 
-THRIFT_PLUGGABLE_FUNC_SET(
+THRIFT_PLUGGABLE_FUNC_SET_TEST(
     folly::observer::Observer<
         apache::thrift::AdaptiveConcurrencyController::Config>,
     makeAdaptiveConcurrencyConfig) {
@@ -4614,7 +4618,10 @@ TEST(ThriftServerTest, getResourcePoolServerDbgInfo) {
 
   // Assert
   auto resourcePools = result.resourcePools().value();
-  EXPECT_EQ(4, resourcePools.size());
+  // Exact size varies by build options due to configs being imported by
+  // dependencies. All we care about here is that it's at least 4, to check for
+  // the significant values
+  EXPECT_GE(resourcePools.size(), 4);
   EXPECT_EQ("DefaultSync", resourcePools[0].name());
   EXPECT_EQ("DefaultAsync", resourcePools[1].name());
   EXPECT_EQ("Custom1", resourcePools[2].name());

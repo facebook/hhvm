@@ -139,43 +139,60 @@ size_t readVarintMediumSlowUnrolledX86(T& value, const uint8_t* p) {
 template <class T>
 size_t readVarintMediumSlowUnrolledAarch64(T& result, const uint8_t* p) {
   // clang-format off
-  T byte;
-  byte = *p++; result = (byte & 0x7f);       
-  if (UNLIKELY(!(byte & 0x80))) 
+  uint64_t byte;
+  uint64_t acc;
+  byte = *p++; acc = (byte & 0x7f);
+  if (UNLIKELY(!(byte & 0x80))) {
+    result = static_cast<T>(acc);
     return 1;
-  byte = *p++; result |= (byte & 0x7f) <<  7; 
+  }
+  byte = *p++; acc |= (byte & 0x7f) << 7;
   if constexpr (sizeof(T) == 1) {
-    if (UNLIKELY((byte & 0x80))) 
+    if (UNLIKELY((byte & 0x80)))
       throwInvalidVarint();
+    if (UNLIKELY((byte & 0x7f) > 0x01))
+      throwInvalidVarint();
+    result = static_cast<T>(acc);
     return 2;
   } else {
-    if (UNLIKELY(!(byte & 0x80))) 
+    if (UNLIKELY(!(byte & 0x80))) {
+      result = static_cast<T>(acc);
       return 2;
-    byte = *p++; result |= (byte & 0x7f) << 14;
+    }
+    byte = *p++; acc |= (byte & 0x7f) << 14;
     if constexpr (sizeof(T) == 2) {
-      if (UNLIKELY((byte & 0x80))) 
+      if (UNLIKELY((byte & 0x80)))
         throwInvalidVarint();
+      if (UNLIKELY((byte & 0x7f) > 0x03))
+        throwInvalidVarint();
+      result = static_cast<T>(acc);
       return 3;
     } else {
-      if (UNLIKELY(!(byte & 0x80))) 
+      if (UNLIKELY(!(byte & 0x80))) {
+        result = static_cast<T>(acc);
         return 3;
-      byte = *p++; result |= (byte & 0x7f) << 21; 
-      if (UNLIKELY(!(byte & 0x80))) 
+      }
+      byte = *p++; acc |= (byte & 0x7f) << 21;
+      if (UNLIKELY(!(byte & 0x80))) {
+        result = static_cast<T>(acc);
         return 4;
-      byte = *p++; result |= (byte & 0x7f) << 28;
+      }
+      byte = *p++; acc |= (byte & 0x7f) << 28;
       if constexpr (sizeof(T) == 4) {
-        if (UNLIKELY((byte & 0x80))) 
+        if (UNLIKELY((byte & 0x80)))
           throwInvalidVarint();
+        result = static_cast<T>(acc);
         return 5;
       } else {
-        if (UNLIKELY(!(byte & 0x80))) return 5;
-        byte = *p++; result |= (byte & 0x7f) << 35; if (UNLIKELY(!(byte & 0x80))) return 6;
-        byte = *p++; result |= (byte & 0x7f) << 42; if (UNLIKELY(!(byte & 0x80))) return 7;
-        byte = *p++; result |= (byte & 0x7f) << 49; if (UNLIKELY(!(byte & 0x80))) return 8;
-        byte = *p++; result |= (byte & 0x7f) << 56; if (UNLIKELY(!(byte & 0x80))) return 9;
-        byte = *p; result |= (byte & 0x7f) << 63; 
-        if (UNLIKELY((byte & 0x80))) 
+        if (UNLIKELY(!(byte & 0x80))) { result = static_cast<T>(acc); return 5; }
+        byte = *p++; acc |= (byte & 0x7f) << 35; if (UNLIKELY(!(byte & 0x80))) { result = static_cast<T>(acc); return 6; }
+        byte = *p++; acc |= (byte & 0x7f) << 42; if (UNLIKELY(!(byte & 0x80))) { result = static_cast<T>(acc); return 7; }
+        byte = *p++; acc |= (byte & 0x7f) << 49; if (UNLIKELY(!(byte & 0x80))) { result = static_cast<T>(acc); return 8; }
+        byte = *p++; acc |= (byte & 0x7f) << 56; if (UNLIKELY(!(byte & 0x80))) { result = static_cast<T>(acc); return 9; }
+        byte = *p; acc |= (byte & 0x01) << 63;
+        if (UNLIKELY((byte & 0x80)))
           throwInvalidVarint();
+        result = static_cast<T>(acc);
         return 10;
       }
     }

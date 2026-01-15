@@ -29,11 +29,11 @@ static std::atomic<int64_t> s_maxConcurrentFanoutCount = 0;
 
 bool RequestFanoutLimit::RequestFanoutData::increment() {
   /**
-  * This operation is safe from operating on abandoned 
+  * This operation is safe from operating on abandoned
   * counter erased by other racing xbox threads, because:
   * - The counter is always initialized to 2 during insertion to account for root-req, AND
-  * - All increment for children request will happen before enqueue() 
-  *   and inside the parent request's lifetime, ensures the count will always > 0 
+  * - All increment for children request will happen before enqueue()
+  *   and inside the parent request's lifetime, ensures the count will always > 0
   *   as long as any offspring xbox request is running
   */
   auto countBeforeIncrement = currentCount.fetch_add(1, std::memory_order_acq_rel);
@@ -54,11 +54,11 @@ bool RequestFanoutLimit::RequestFanoutData::increment() {
    * Update the max concurrent count for the given root req
    */
   auto prevMax = maxCount.load(std::memory_order_acquire);
-  while (newCount > prevMax 
+  while (newCount > prevMax
     && !maxCount.compare_exchange_weak(
-      prevMax, 
-      newCount, 
-      std::memory_order_acq_rel, 
+      prevMax,
+      newCount,
+      std::memory_order_acq_rel,
       std::memory_order_acquire)
     ) {
       // prevMax updated by compare_exchange_weak
@@ -72,7 +72,7 @@ int64_t RequestFanoutLimit::RequestFanoutData::decrement() {
 }
 
 RequestFanoutLimit::RequestFanoutLimit(int limit, int size)
-  : m_limit(limit), m_map(size) {  
+  : m_limit(limit), m_map(size) {
   assertx(limit > 0);
   assertx(size > 0);
   if (Cfg::Server::EnableRequestFanoutLogging) {
@@ -87,23 +87,23 @@ void RequestFanoutLimit::increment(const RequestId& id) {
 
   auto it = m_map.find(id.id());
   if (it == m_map.end()) {
-    // Inserting 2 here (instead of 1) to include parent request as part of tracking. 
-    // This, and together with all increment for children request will happen before 
-    // enqueue() and inside the parent request's lifetime, ensures the count will 
-    // always > 0 as long as any offspring children (i.e. xbox) request is running, 
-    // which avoids operating on abandoned counter erased by other racing children 
-    // (i.e. xbox) threads. 
+    // Inserting 2 here (instead of 1) to include parent request as part of tracking.
+    // This, and together with all increment for children request will happen before
+    // enqueue() and inside the parent request's lifetime, ensures the count will
+    // always > 0 as long as any offspring children (i.e. xbox) request is running,
+    // which avoids operating on abandoned counter erased by other racing children
+    // (i.e. xbox) threads.
     auto insertResult = m_map.insert(
-      id.id(), 
+      id.id(),
       std::make_shared<RequestFanoutLimit::RequestFanoutData>(2, 2)
     );
   } else {
     auto counter = it->second.get();
     assertx(counter);
     if (!counter->increment()) {
-      if (Cfg::Server::EnableRequestFanoutLogging 
+      if (Cfg::Server::EnableRequestFanoutLogging
           && StructuredLog::enabled()
-          && Cfg::Server::RequestFanoutEnforcementLoggingSampleRate != 0 
+          && Cfg::Server::RequestFanoutEnforcementLoggingSampleRate != 0
           && id.id() % Cfg::Server::RequestFanoutEnforcementLoggingSampleRate == 0 ) {
         StructuredLogEntry entry;
         entry.setStr("event", "FANOUT_LIMIT_EXCEEDED");
@@ -127,7 +127,7 @@ void RequestFanoutLimit::decrement(const RequestId& id) {
   auto it = m_map.find(id.id());
   if (it == m_map.end()) {
     // This check is safe and necessary to handle the cases of cli-server also
-    // calling RI.onSessionExit() during SCOPE_EXIT. 
+    // calling RI.onSessionExit() during SCOPE_EXIT.
     return;
   }
 
@@ -135,25 +135,25 @@ void RequestFanoutLimit::decrement(const RequestId& id) {
   assertx(counter);
 
   auto countBeforeDecrement = counter->decrement();
-  
+
   if (countBeforeDecrement == 1) {
-    // Update the global server max counter if current root-req has spawn 
+    // Update the global server max counter if current root-req has spawn
     // more children req than any other previous root-req
     auto prevGlobalMax = s_maxConcurrentFanoutCount.load(std::memory_order_acquire);
     auto currReqMax = counter->maxCount.load(std::memory_order_acquire);
     while (
-      currReqMax > prevGlobalMax 
+      currReqMax > prevGlobalMax
       && !s_maxConcurrentFanoutCount.compare_exchange_weak(
-        prevGlobalMax, 
-        currReqMax, 
-        std::memory_order_acq_rel, 
+        prevGlobalMax,
+        currReqMax,
+        std::memory_order_acq_rel,
         std::memory_order_acquire
       )
     ) {
       // global server max updated by compare_exchange_weak
     }
 
-    if (Cfg::Server::RequestFanoutLoggingSampleRate != 0 
+    if (Cfg::Server::RequestFanoutLoggingSampleRate != 0
       && id.id() % Cfg::Server::RequestFanoutLoggingSampleRate == 0) {
       // Log the up-to-date server maxConcurrentFanoutCount to ODS
       if (m_fanoutLogger) {
@@ -179,13 +179,13 @@ void RequestFanoutLimit::decrement(const RequestId& id) {
 
 void RequestFanoutLimit::setScriptFilename(const RequestId id, std::string scriptFilename) {
   if (id.unallocated()) {
-    return; 
+    return;
   }
 
   auto it = m_map.find(id.id());
   if (it == m_map.end()) {
     // This check is safe and necessary to handle the cases of cli-server also
-    // calling RI.onSessionExit() during SCOPE_EXIT. 
+    // calling RI.onSessionExit() during SCOPE_EXIT.
     return;
   }
 

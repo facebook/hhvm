@@ -5,6 +5,7 @@
 #include "hphp/runtime/base/request-fanout-limit.h"
 #include "hphp/runtime/base/request-id.h"
 #include "hphp/system/systemlib.h"
+#include "hphp/util/configs/server.h"
 
 using namespace testing;
 
@@ -88,6 +89,10 @@ TEST_F(RequestFanoutLimitTest, HighConcurrency) {
 }
 
 TEST_F(RequestFanoutLimitTest, IncrementWithExceededLimit) {
+  // Enable enforcement and set limit for this test
+  Cfg::Server::EnforceRequestFanout = true;
+  Cfg::Server::RequestFanoutLimit = 3;
+  
   auto id = RequestId::allocate();
   EXPECT_GT(id.id(), 0);
   
@@ -101,6 +106,10 @@ TEST_F(RequestFanoutLimitTest, IncrementWithExceededLimit) {
 
   // Increment should fail when limit is exceeded
   EXPECT_ANY_THROW(limit_->increment(id));
+  
+  // Reset to defaults
+  Cfg::Server::EnforceRequestFanout = false;
+  Cfg::Server::RequestFanoutLimit = 0;
 }
 
 } // namespace HPHP

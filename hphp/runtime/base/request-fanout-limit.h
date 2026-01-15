@@ -28,10 +28,10 @@ namespace HPHP {
 /**
  * RequestFanoutLimit manages per-request thread fanout limits to prevent
  * excessive thread spawning from individual requests.
- * 
+ *
  * This class is thread-safe and uses atomic operations to track the number
  * of threads spawned for each root request ID.
- * 
+ *
  * Typical usage:
  * - Call increment() when spawning a new thread for a request
  * - Call decrement() when a thread completes
@@ -49,7 +49,7 @@ public:
     /**
     * @return True if increment succeeded, false if limit is reached
     * and increment was not performed
-    */    
+    */
     bool increment();
     /**
      * @return Decrement the currentCount and return the number before decrement
@@ -89,7 +89,7 @@ public:
 
   /**
    * Get the current thread count for a given request ID
-   * DO NOT USE outside of testing and logging as the value 
+   * DO NOT USE outside of testing and logging as the value
    * can be stale by the time it is read
    * @param id The root request ID to check
    * @return Current count, or -1 if entry not found

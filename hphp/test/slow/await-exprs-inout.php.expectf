@@ -1,0 +1,1 @@
+Fatal error: Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. in %s/await-exprs-inout.php on line 7

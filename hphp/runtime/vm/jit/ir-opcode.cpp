@@ -827,6 +827,7 @@ bool opcodeMayRaise(Opcode opc) {
   case LdPropAddr:
   case LdPtrIterKey:
   case LdPtrIterVal:
+  case LdPublicFunc:
   case LdRDSAddr:
   case LdResolvedTypeCns:
   case LdResolvedTypeCnsClsName:

@@ -34,6 +34,8 @@ use std::sync::Arc;
 
 use env::Env;
 use env::ProgramSpecificOptions;
+use hash::HashSet;
+use oxidized::experimental_features::FeatureName;
 use oxidized::namespace_env;
 use oxidized::namespace_env::Mode;
 use oxidized::naming_phase_error::NamingPhaseError;
@@ -59,6 +61,7 @@ pub fn elaborate_program_for_codegen(
     path: &RelativePath,
     program: &mut nast::Program,
     opts: &CodegenOpts,
+    active_experimental_features: HashSet<FeatureName>,
 ) -> Result<(), Vec1<NamingPhaseError>> {
     assert!(matches!(ns_env.mode, Mode::ForCodegen));
     let po = oxidized::parser_options::ParserOptions {
@@ -73,7 +76,7 @@ pub fn elaborate_program_for_codegen(
         ..Default::default()
     };
     elaborate_namespaces_visitor::elaborate_program(ns_env, program);
-    let mut env = make_env(&tco, path);
+    let mut env = make_env(&tco, path, active_experimental_features);
     elaborate_common(&env, program);
     elaborate_package_expr(&env, program);
     elaborate_for_codegen(&env, program, opts);
@@ -91,9 +94,10 @@ pub fn elaborate_program(
     tco: &TypecheckerOptions,
     path: &RelativePath,
     program: &mut nast::Program,
+    active_experimental_features: HashSet<FeatureName>,
 ) -> Vec<NamingPhaseError> {
     elaborate_namespaces_visitor::elaborate_program(ns_env(tco), program);
-    let mut env = make_env(tco, path);
+    let mut env = make_env(tco, path, active_experimental_features);
     elaborate_common(&env, program);
     if !tco.po.codegen {
         lambda_captures::elaborate_program(&mut env, program);
@@ -107,9 +111,10 @@ pub fn elaborate_fun_def(
     tco: &TypecheckerOptions,
     path: &RelativePath,
     f: &mut nast::FunDef,
+    active_experimental_features: HashSet<FeatureName>,
 ) -> Vec<NamingPhaseError> {
     elaborate_namespaces_visitor::elaborate_fun_def(ns_env(tco), f);
-    let mut env = make_env(tco, path);
+    let mut env = make_env(tco, path, active_experimental_features);
     elaborate_common(&env, f);
     if !tco.po.codegen {
         lambda_captures::elaborate_fun_def(&mut env, f);
@@ -123,9 +128,10 @@ pub fn elaborate_class_(
     tco: &TypecheckerOptions,
     path: &RelativePath,
     c: &mut nast::Class_,
+    active_experimental_features: HashSet<FeatureName>,
 ) -> Vec<NamingPhaseError> {
     elaborate_namespaces_visitor::elaborate_class_(ns_env(tco), c);
-    let mut env = make_env(tco, path);
+    let mut env = make_env(tco, path, active_experimental_features);
     elaborate_common(&env, c);
     if !tco.po.codegen {
         lambda_captures::elaborate_class_(&mut env, c);
@@ -139,9 +145,10 @@ pub fn elaborate_module_def(
     tco: &TypecheckerOptions,
     path: &RelativePath,
     m: &mut nast::ModuleDef,
+    active_experimental_features: HashSet<FeatureName>,
 ) -> Vec<NamingPhaseError> {
     elaborate_namespaces_visitor::elaborate_module_def(ns_env(tco), m);
-    let mut env = make_env(tco, path);
+    let mut env = make_env(tco, path, active_experimental_features);
     elaborate_common(&env, m);
     if !tco.po.codegen {
         lambda_captures::elaborate_module_def(&mut env, m);
@@ -153,9 +160,10 @@ pub fn elaborate_gconst(
     tco: &TypecheckerOptions,
     path: &RelativePath,
     c: &mut nast::Gconst,
+    active_experimental_features: HashSet<FeatureName>,
 ) -> Vec<NamingPhaseError> {
     elaborate_namespaces_visitor::elaborate_gconst(ns_env(tco), c);
-    let mut env = make_env(tco, path);
+    let mut env = make_env(tco, path, active_experimental_features);
     elaborate_common(&env, c);
     if !tco.po.codegen {
         lambda_captures::elaborate_gconst(&mut env, c);
@@ -167,9 +175,10 @@ pub fn elaborate_typedef(
     tco: &TypecheckerOptions,
     path: &RelativePath,
     t: &mut nast::Typedef,
+    active_experimental_features: HashSet<FeatureName>,
 ) -> Vec<NamingPhaseError> {
     elaborate_namespaces_visitor::elaborate_typedef(ns_env(tco), t);
-    let mut env = make_env(tco, path);
+    let mut env = make_env(tco, path, active_experimental_features);
     elaborate_common(&env, t);
     if !tco.po.codegen {
         lambda_captures::elaborate_typedef(&mut env, t);
@@ -181,9 +190,10 @@ pub fn elaborate_stmt(
     tco: &TypecheckerOptions,
     path: &RelativePath,
     t: &mut nast::Stmt,
+    active_experimental_features: HashSet<FeatureName>,
 ) -> Vec<NamingPhaseError> {
     elaborate_namespaces_visitor::elaborate_stmt(ns_env(tco), t);
-    let mut env = make_env(tco, path);
+    let mut env = make_env(tco, path, active_experimental_features);
     elaborate_common(&env, t);
     if !tco.po.codegen {
         lambda_captures::elaborate_stmt(&mut env, t);
@@ -213,7 +223,11 @@ fn filename_in_allowed(allowed_files: &[String], path: &Path) -> bool {
     })
 }
 
-fn make_env(tco: &TypecheckerOptions, rel_path: &RelativePath) -> Env {
+fn make_env(
+    tco: &TypecheckerOptions,
+    rel_path: &RelativePath,
+    active_experimental_features: HashSet<FeatureName>,
+) -> Env {
     let is_hhi = rel_path.is_hhi();
     let path = rel_path.path();
 
@@ -230,6 +244,7 @@ fn make_env(tco: &TypecheckerOptions, rel_path: &RelativePath) -> Env {
             allow_module_declarations,
             allow_ignore_readonly,
         },
+        active_experimental_features,
     )
 }
 

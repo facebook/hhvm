@@ -982,6 +982,12 @@ To string conversions:
 
   Loads into D the value of m_cls from S0.
 
+| LdPublicFunc, D(Func), S(FramePtr), NF
+
+  Load the first function in the stack (beginning with S(0)) that is not marked
+  as AttrNoInjection. If no such function is available then the function from
+  S(0) is returned instead.
+
 | LdClsCtor, D(Func), S(Cls) S(Func), NF
 
   Loads into D the constructor of class S0. If the constructor cannot be called

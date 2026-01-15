@@ -16,6 +16,7 @@ bitflags = { version = "2.9", features = ["serde", "std"], default-features = fa
 bstr = { version = "1.10.0", features = ["serde", "std", "unicode"] }
 elaborate_namespaces_visitor = { version = "0.0.0", path = "../naming/cargo/elaborate_namespaces" }
 hack_macros = { version = "0.0.0", path = "../utils/hack_macros/cargo/hack_macros" }
+hash = { version = "0.0.0", path = "../utils/hash" }
 hhbc_string_utils = { version = "0.0.0", path = "../hackc/utils/cargo/hhbc_string_utils" }
 intern = { version = "0.1.0", path = "../utils/intern" }
 itertools = "0.14.0"

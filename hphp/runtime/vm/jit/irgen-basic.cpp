@@ -555,7 +555,7 @@ void emitMethod(IRGS& env) { push(env, cns(env, curFunc(env)->fullName())); }
 void emitDup(IRGS& env)    { pushIncRef(env, topC(env)); }
 
 void emitFuncCred(IRGS& env) {
-  push(env, gen(env, FuncCred, cns(env, curFunc(env))));
+  push(env, gen(env, FuncCred, gen(env, LdPublicFunc, fp(env))));
 }
 //////////////////////////////////////////////////////////////////////
 

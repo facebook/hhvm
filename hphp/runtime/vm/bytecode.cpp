@@ -1102,6 +1102,19 @@ OPTBLD_INLINE void iopMethod() {
 }
 
 OPTBLD_INLINE void iopFuncCred() {
+  if (UNLIKELY(vmfp()->func()->isNoInjection())) {
+    const Func* func = nullptr;
+    walkStack([&] (const BTFrame& f) {
+      if (f.func()->isNoInjection()) return false;
+      func = f.func();
+      return true;
+    });
+    if (func) {
+      vmStack().pushObjectNoRc(
+        FunctionCredential::newInstance(func));
+      return;
+    }
+  }
   vmStack().pushObjectNoRc(
     FunctionCredential::newInstance(vmfp()->func()));
 }

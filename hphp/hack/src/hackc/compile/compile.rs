@@ -7,7 +7,6 @@
 
 pub mod dump_expr_tree;
 
-use std::collections::HashSet;
 use std::fmt;
 use std::sync::Arc;
 use std::time::Duration;
@@ -26,6 +25,7 @@ use decl_provider::DeclProvider;
 use env::emitter::Emitter;
 use error::Error;
 use error::ErrorKind;
+use hash::HashSet;
 use hhbc::FatalOp;
 use hhbc::Unit;
 use options::HhbcFlags;
@@ -34,6 +34,7 @@ use options::Options;
 use options::ParserOptions;
 use oxidized::ast;
 use oxidized::decl_parser_options::DeclParserOptions;
+use oxidized::experimental_features::FeatureName;
 use oxidized::namespace_env::Env as NamespaceEnv;
 use oxidized::namespace_env::Mode;
 use oxidized::naming_error::NamingError;
@@ -341,12 +342,13 @@ fn emit_unit_from_text(
     );
 
     let ((unit, profile), codegen_t) = match parse_result {
-        Ok(mut ast) => {
+        Ok((mut ast, active_experimental_features)) => {
             match elab::elaborate_program_for_codegen(
                 Arc::clone(&namespace_env),
                 &path,
                 &mut ast,
                 opts,
+                active_experimental_features,
             ) {
                 Ok(()) => profile_rust::time(move || {
                     (
@@ -630,7 +632,7 @@ fn parse_file(
     for_debugger_eval: bool,
     type_directed: bool,
     profile: &mut Profile,
-) -> Result<ast::Program, ParseError> {
+) -> Result<(ast::Program, HashSet<FeatureName>), ParseError> {
     let aast_env = AastEnv {
         mode: namespace_env.mode,
         php5_compat_mode: !opts.hhbc.uvs,
@@ -688,6 +690,7 @@ fn parse_file(
                 errors,
                 aast,
                 profile: parser_profile,
+                active_experimental_features,
                 ..
             } => {
                 profile.parser_profile = parser_profile;
@@ -704,7 +707,7 @@ fn parse_file(
                         e.msg().to_str_lossy().into_owned(),
                         FatalOp::Parse,
                     )),
-                    None => Ok(aast),
+                    None => Ok((aast, active_experimental_features)),
                 }
             }
         },

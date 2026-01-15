@@ -869,6 +869,7 @@ bool IRInstruction::maySyncVMRegsWithSources() const {
 
     // Intended Access
     case InitThrowableFileAndLine:
+    case LdPublicFunc:
       return true;
 
     // Likely fixable

@@ -156,6 +156,7 @@ impl<'src> AastParser {
             errors: Default::default(),
             lint_errors: Default::default(),
             profile: Default::default(),
+            active_experimental_features: Default::default(),
         })
     }
 
@@ -232,7 +233,7 @@ impl<'src> AastParser {
             env.quick_mode,
             env.show_all_errors,
             mode,
-            active_experimental_features,
+            active_experimental_features.clone(),
             indexed_source_text,
             &env.parser_options,
             Arc::clone(&ns),
@@ -284,6 +285,7 @@ impl<'src> AastParser {
                 arena_bytes: arena.allocated_bytes() as u64,
                 ..Default::default()
             },
+            active_experimental_features,
         })
     }
 

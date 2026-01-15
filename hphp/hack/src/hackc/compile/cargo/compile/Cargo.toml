@@ -22,6 +22,7 @@ elab = { version = "0.0.0", path = "../../../../elab" }
 emit_unit = { version = "0.0.0", path = "../../../emitter/cargo/emit_unit" }
 env = { version = "0.0.0", path = "../../../emitter/cargo/env" }
 error = { version = "0.0.0", path = "../../../error/cargo/error" }
+hash = { version = "0.0.0", path = "../../../../utils/hash" }
 hhbc = { version = "0.0.0", path = "../../../hhbc/cargo/hhbc" }
 ir = { version = "0.0.0", path = "../../../ir" }
 ir_to_bc = { version = "0.0.0", path = "../../../ir/conversions/ir_to_bc" }

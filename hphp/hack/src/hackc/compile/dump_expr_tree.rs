@@ -118,7 +118,7 @@ pub fn desugar_and_print(filepath: RelativePath, flags: &EnvFlags) {
         &mut Profile::default(),
     ) {
         Err(ParseError(_, msg, _)) => panic!("Parsing failed: {}", msg),
-        Ok(ast) => {
+        Ok((ast, _active_experimental_features)) => {
             let old_src = String::from_utf8_lossy(&content);
             let new_src = desugar_and_replace_et_literals(flags, ast, &old_src);
             print!("{}", new_src);

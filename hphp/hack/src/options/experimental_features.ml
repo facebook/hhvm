@@ -76,6 +76,7 @@ type feature_name =
   | NamedParametersUse
   | XhpTypeConstants
   | CapturePipeVariables
+  | AllowExtendedAwaitSyntax
 [@@deriving eq, ord, show]
 
 let feature_name_map =
@@ -106,6 +107,7 @@ let feature_name_map =
       ("typed_local_variables", TypedLocalVariables);
       ("pipe_await", PipeAwait);
       ("match_statements", MatchStatements);
+      ("strict_switch", StrictSwitch);
       ("class_type", ClassType);
       ("function_references", FunctionReferences);
       ("function_type_optional_params", FunctionTypeOptionalParams);
@@ -127,6 +129,7 @@ let feature_name_map =
       ("named_parameters_use", NamedParametersUse);
       ("xhp_type_constants", XhpTypeConstants);
       ("capture_pipe_variables", CapturePipeVariables);
+      ("allow_extended_await_syntax", AllowExtendedAwaitSyntax);
     ]
 
 let feature_name_from_string s = SMap.find_opt s feature_name_map

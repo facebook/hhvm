@@ -6,6 +6,8 @@
 use std::cell::RefCell;
 
 use bitflags::bitflags;
+use hash::HashSet;
+use oxidized::experimental_features::FeatureName;
 use oxidized::naming_phase_error::NamingPhaseError;
 use oxidized::typechecker_options::TypecheckerOptions;
 
@@ -81,6 +83,7 @@ pub struct Env {
     flags: Flags,
     errors: RefCell<Vec<NamingPhaseError>>,
     pub consistent_ctor_level: isize,
+    pub active_experimental_features: HashSet<FeatureName>,
 }
 
 impl Default for Env {
@@ -88,16 +91,22 @@ impl Default for Env {
         Self::new(
             &TypecheckerOptions::default(),
             &ProgramSpecificOptions::default(),
+            HashSet::<FeatureName>::default(),
         )
     }
 }
 
 impl Env {
-    pub fn new(tco: &TypecheckerOptions, pso: &ProgramSpecificOptions) -> Self {
+    pub fn new(
+        tco: &TypecheckerOptions,
+        pso: &ProgramSpecificOptions,
+        active_experimental_features: HashSet<FeatureName>,
+    ) -> Self {
         Self {
             flags: Flags::new(tco, pso),
             errors: RefCell::new(vec![]),
             consistent_ctor_level: tco.tco_explicit_consistent_constructors,
+            active_experimental_features,
         }
     }
 

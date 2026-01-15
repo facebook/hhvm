@@ -491,6 +491,19 @@ void checkFrame(ActRec* fp, TypedValue* sp, bool fullCheck) {
   );
 }
 
+const Func* loadPublicFunction() {
+  const Func* func = nullptr;
+  walkStack([&] (const BTFrame& f) {
+    if (!func) func = f.func();
+    if (f.func()->isNoInjection()) return false;
+    func = f.func();
+    return true;
+  });
+
+  assertx(func);
+  return func;
+}
+
 const Func* loadClassCtor(Class* cls, Func* ctxFunc) {
   const Func* f = cls->getCtor();
   if (UNLIKELY(!(f->attrs() & AttrPublic))) {

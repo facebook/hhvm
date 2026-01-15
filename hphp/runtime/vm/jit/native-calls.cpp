@@ -193,6 +193,7 @@ static CallMap s_callMap {
     {InitSProps,         &Class::initSProps, DNone, SSync,
                            {{extra(&ClassData::cls)}}},
     {DebugBacktrace,     debug_backtrace_jit, DSSA, SSync, {{SSA, 0}}},
+    {LdPublicFunc,       loadPublicFunction, DSSA, SSync, {}},
     {InitThrowableFileAndLine,
                          throwable_init_file_and_line_from_builtin,
                            DNone, debug ? SSync : SNone, {{SSA, 0}}},

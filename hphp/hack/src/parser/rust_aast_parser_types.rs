@@ -6,11 +6,13 @@
 use std::time::Duration;
 
 use file_info::Mode;
+use hash::HashSet;
 use lint_rust::LintError;
 use ocamlrep::FromOcamlRep;
 use ocamlrep::ToOcamlRep;
 use oxidized::aast::Program;
 use oxidized::errors::Error;
+use oxidized::experimental_features::FeatureName;
 use oxidized::file_info;
 use oxidized::namespace_env::Mode as NamespaceMode;
 use oxidized::parser_options::ParserOptions;
@@ -60,6 +62,8 @@ pub struct ParserResult {
     pub lint_errors: Vec<LintError>,
     #[ocamlrep(skip)]
     pub profile: ParserProfile,
+    #[ocamlrep(skip)]
+    pub active_experimental_features: HashSet<FeatureName>,
 }
 
 #[derive(Debug, Default)]

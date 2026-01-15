@@ -820,6 +820,7 @@ dependencies = [
  "emit_unit",
  "env",
  "error",
+ "hash",
  "hhbc",
  "ir",
  "ir_to_bc",
@@ -1457,6 +1458,7 @@ dependencies = [
  "bstr",
  "elaborate_namespaces_visitor",
  "hack_macros",
+ "hash",
  "hhbc_string_utils",
  "intern",
  "itertools",
@@ -4300,6 +4302,7 @@ dependencies = [
 name = "rust_aast_parser_types"
 version = "0.0.0"
 dependencies = [
+ "hash",
  "lint_rust",
  "ocamlrep",
  "oxidized",

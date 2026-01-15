@@ -4183,6 +4183,17 @@ SSATmp* simplifyStructDictTypeBoundCheck(State& env,
   return nullptr;
 }
 
+SSATmp* simplifyLdPublicFunc(State& env, const IRInstruction* inst) {
+  auto fp = inst->src(0);
+  while (fp->inst()->is(DefCalleeFP) && funcFromFP(fp)->isNoInjection()) {
+    fp = fp->inst()->marker().fp();
+  }
+
+  if (!funcFromFP(fp)->isNoInjection()) return cns(env, funcFromFP(fp));
+  if (inst->src(0) != fp) return gen(env, LdPublicFunc, fp);
+  return nullptr;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
@@ -4441,6 +4452,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
       X(LdResolvedTypeCnsClsName)
       X(CGetPropQ)
       X(StructDictTypeBoundCheck)
+      X(LdPublicFunc)
 #undef X
       default: break;
     }

@@ -1700,6 +1700,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   // can't even inspect Countable reference count fields, and several of these
   // can.  All GeneralEffects instructions are assumed to possibly do so.
 
+  case LdPublicFunc:
   case DecRefNZ:
   case ProfileDecRef:
   case AFWHBlockOn:

@@ -22,6 +22,7 @@ use nast::XhpAttribute;
 use oxidized::aast_visitor::AstParams;
 use oxidized::aast_visitor::NodeMut;
 use oxidized::aast_visitor::VisitorMut;
+use oxidized::experimental_features::FeatureName;
 use oxidized::naming_phase_error::NamingPhaseError;
 use oxidized::nast;
 use oxidized::parsing_error::ParsingError;
@@ -313,6 +314,16 @@ fn sequentialise_stmt(
     }
 }
 
+fn check_can_use_feature(env: &Env, pos: &Pos, feature: &FeatureName) {
+    if !env.active_experimental_features.contains(feature) {
+        env.emit_error(NamingPhaseError::Parsing(ParsingError::ParsingError {
+            pos: pos.clone(),
+            msg: format!("Cannot use unstable feature: `{}`", <&str>::from(feature)).into(),
+            quickfixes: vec![],
+        }));
+    }
+}
+
 impl LiftAwait {
     fn gen_tmp_local(&mut self) -> LocalId {
         let name = format!(
@@ -322,6 +333,123 @@ impl LiftAwait {
         );
         self.tmp_var_counter += 1;
         (0, name)
+    }
+
+    fn concurrentise(
+        &mut self,
+        pos: &Pos,
+        mut exprs: Vec<&mut nast::Expr>,
+        con: &mut Vec<(Lid, nast::Expr)>,
+        seq: &mut Vec<nast::Stmt>,
+        tmps: &mut Vec<Lid>,
+    ) {
+        use nast::Fun_;
+        use nast::FuncBody;
+        use oxidized::ast_defs::FunKind;
+
+        let mut non_con = vec![];
+        for (i, expr) in exprs.iter_mut().enumerate() {
+            let mut con1 = vec![];
+            let mut seq1 = vec![];
+            let mut tmps1 = vec![];
+            self.extract_await(*expr, &mut con1, &mut seq1, &mut tmps1);
+            if seq1.is_empty() {
+                con.append(&mut con1);
+                tmps.append(&mut tmps1);
+            } else {
+                non_con.push((con1, seq1, tmps1, i));
+            }
+        }
+
+        if non_con.len() == 1 && con.is_empty() {
+            let (mut con1, mut seq1, mut tmps1, _) = non_con.pop().unwrap();
+            con.append(&mut con1);
+            seq.append(&mut seq1);
+            tmps.append(&mut tmps1);
+        } else {
+            // Multiple expressions with sequential awaits need to be wrapped in async lambdas
+            for (con1, mut seq1, tmps1, i) in non_con {
+                let taken_expr = std::mem::replace(exprs[i], Expr((), Pos::NONE, Expr_::Null));
+                seq1.push(Stmt(pos.clone(), Stmt_::Return(Box::new(Some(taken_expr)))));
+
+                let stmts = if let Some(replace_expr) = &self.replace_dd {
+                    let Expr_::Lvar(lid) = replace_expr else {
+                        panic!("Expected Lvar");
+                    };
+                    let mut stmts = vec![Stmt(
+                        pos.clone(),
+                        Stmt_::Expr(Box::new(Expr(
+                            (),
+                            pos.clone(),
+                            Expr_::Assign(Box::new((
+                                Expr((), pos.clone(), replace_expr.clone()),
+                                None,
+                                Expr(
+                                    (),
+                                    pos.clone(),
+                                    Expr_::Lvar(Box::new(Lid(
+                                        pos.clone(),
+                                        (0isize, special_idents::DOLLAR_DOLLAR.to_owned()),
+                                    ))),
+                                ),
+                            ))),
+                        ))),
+                    )];
+                    stmts.append(&mut sequentialise(pos.clone(), con1, seq1, tmps1));
+                    vec![Stmt(
+                        pos.clone(),
+                        Stmt_::Block(Box::new((Some(vec![(**lid).clone()]), Block(stmts)))),
+                    )]
+                } else {
+                    sequentialise(pos.clone(), con1, seq1, tmps1)
+                };
+
+                // Create async () ==> { stmts }
+                let async_lambda = Expr_::Lfun(Box::new((
+                    Fun_ {
+                        span: pos.clone(),
+                        readonly_this: None,
+                        annotation: (),
+                        readonly_ret: None,
+                        tparams: vec![],
+                        ret: nast::TypeHint((), None),
+                        params: vec![],
+                        ctxs: None,
+                        unsafe_ctxs: None,
+                        body: FuncBody {
+                            fb_ast: Block(stmts),
+                        },
+                        fun_kind: FunKind::FAsync,
+                        user_attributes: nast::UserAttributes(vec![]),
+                        external: false,
+                        hidden: true,
+                        doc_comment: None,
+                    },
+                    vec![], // no captures
+                )));
+
+                // Create () call on the lambda
+                let lambda_expr = Expr((), pos.clone(), async_lambda);
+                let mut call_expr = Expr_::Call(Box::new(nast::CallExpr {
+                    func: lambda_expr,
+                    targs: vec![],
+                    args: vec![],
+                    unpacked_arg: None,
+                }));
+
+                if let Some(replace_expr) = &self.replace_dd {
+                    let replace_expr_wrapped = Expr((), pos.clone(), replace_expr.clone());
+                    let call_as_expr = Expr((), pos.clone(), call_expr);
+                    call_expr = hack_expr!("#replace_expr_wrapped |> #call_as_expr").2;
+                }
+
+                // Assign to temporary
+                let tmp = Lid(pos.clone(), self.gen_tmp_local());
+                let lvar = Expr_::Lvar(Box::new(tmp.clone()));
+                *exprs[i] = Expr((), pos.clone(), lvar);
+                con.push((tmp, Expr((), pos.clone(), call_expr)));
+            }
+        }
     }
 
     fn do_pipe(
@@ -534,15 +662,13 @@ impl LiftAwait {
             | Expr_::Pair(box (_, expr1, expr2))
             | Expr_::ObjGet(box (expr1, expr2, _, _))
             | Expr_::Yield(box Afield::AFkvalue(expr1, expr2)) => {
-                self.extract_await(expr1, con, seq, tmps);
-                self.extract_await(expr2, con, seq, tmps)
+                self.concurrentise(pos, vec![expr1, expr2], con, seq, tmps)
             }
             Expr_::Binop(box nast::Binop { bop: _, lhs, rhs }) => {
                 // If the operator is || or &&, there are syntactic restrictions that
                 // there is no await on the rhs, and so it is safe to traverse it here
                 // just to replace $$
-                self.extract_await(lhs, con, seq, tmps);
-                self.extract_await(rhs, con, seq, tmps)
+                self.concurrentise(pos, vec![lhs, rhs], con, seq, tmps)
             }
             Expr_::Assign(box (lhs, bop, rhs)) => {
                 // If the operator is || or &&, there are syntactic restrictions that
@@ -557,20 +683,22 @@ impl LiftAwait {
             // Expressions with lists of sub-expressions that we can lift an await out of
             // and run concurrently
             Expr_::KeyValCollection(box (_, _, args)) => {
-                for nast::Field(arg_k, arg_v) in args {
-                    self.extract_await(arg_k, con, seq, tmps);
-                    self.extract_await(arg_v, con, seq, tmps)
+                let mut exprs = vec![];
+                for nast::Field(arg_k, arg_v) in args.iter_mut() {
+                    exprs.push(arg_k);
+                    exprs.push(arg_v)
                 }
+                self.concurrentise(pos, exprs, con, seq, tmps)
             }
             Expr_::Tuple(args) | Expr_::String2(args) | Expr_::ValCollection(box (_, _, args)) => {
-                for arg in args {
-                    self.extract_await(arg, con, seq, tmps)
-                }
+                self.concurrentise(pos, args.iter_mut().collect(), con, seq, tmps)
             }
             Expr_::Shape(fields) => {
-                for (_, expr) in fields {
-                    self.extract_await(expr, con, seq, tmps)
+                let mut exprs = vec![];
+                for (_, expr) in fields.iter_mut() {
+                    exprs.push(expr)
                 }
+                self.concurrentise(pos, exprs, con, seq, tmps)
             }
             Expr_::Call(box nast::CallExpr {
                 func,
@@ -578,13 +706,14 @@ impl LiftAwait {
                 args,
                 unpacked_arg,
             }) => {
-                self.extract_await(func, con, seq, tmps);
-                for arg in args {
-                    self.extract_await(arg.to_expr_mut(), con, seq, tmps)
+                let mut exprs = vec![func];
+                for arg in args.iter_mut() {
+                    exprs.push(arg.to_expr_mut());
                 }
                 if let Some(unpack) = unpacked_arg {
-                    self.extract_await(unpack, con, seq, tmps)
+                    exprs.push(unpack)
                 }
+                self.concurrentise(pos, exprs, con, seq, tmps)
             }
             Expr_::New(box (nast::ClassId(_, _, cid), _, args, unpacked_arg, _)) => {
                 match cid {
@@ -594,38 +723,44 @@ impl LiftAwait {
                     | ClassId_::CIstatic
                     | ClassId_::CI(_) => {}
                 }
-                for arg in args {
-                    self.extract_await(arg.to_expr_mut(), con, seq, tmps)
+                let mut exprs = vec![];
+                for arg in args.iter_mut() {
+                    exprs.push(arg.to_expr_mut())
                 }
                 if let Some(unpack) = unpacked_arg {
-                    self.extract_await(unpack, con, seq, tmps)
+                    exprs.push(unpack)
                 }
+                self.concurrentise(pos, exprs, con, seq, tmps)
             }
             Expr_::Xml(box (_, attrs, exprs)) => {
-                for attr in attrs {
+                let mut exprs1 = vec![];
+                for attr in attrs.iter_mut() {
                     match attr {
                         XhpAttribute::XhpSpread(expr)
                         | XhpAttribute::XhpSimple(nast::XhpSimple { expr, .. }) => {
-                            self.extract_await(expr, con, seq, tmps)
+                            exprs1.push(expr)
                         }
                     }
                 }
-                for expr in exprs {
-                    self.extract_await(expr, con, seq, tmps);
+                for expr in exprs.iter_mut() {
+                    exprs1.push(expr)
                 }
+                self.concurrentise(pos, exprs1, con, seq, tmps)
             }
             Expr_::Collection(box (_, _, afields)) => {
-                for afield in afields {
+                let mut exprs = vec![];
+                for afield in afields.iter_mut() {
                     match afield {
                         Afield::AFvalue(expr) => {
-                            self.extract_await(expr, con, seq, tmps);
+                            exprs.push(expr);
                         }
                         Afield::AFkvalue(expr1, expr2) => {
-                            self.extract_await(expr1, con, seq, tmps);
-                            self.extract_await(expr2, con, seq, tmps)
+                            exprs.push(expr1);
+                            exprs.push(expr2)
                         }
                     }
                 }
+                self.concurrentise(pos, exprs, con, seq, tmps)
             }
             // Await
             Expr_::Await(_) => self.do_await(leave_await, pos, e, con, seq, tmps),
@@ -664,14 +799,17 @@ impl LiftAwait {
     ) {
         use AwaitUsage::*;
         match check_await_usage(expr) {
-            Error(p) if !self.allow_con_of_seq => {
-                env.emit_error(NamingPhaseError::Parsing(ParsingError::ParsingError {
-                    pos: p.unwrap_or(expr.1.clone()),
-                    msg: "Nested or piped `await` expressions cannot be used alongside other concurrent awaits".to_string(),
-                    quickfixes: vec![],
-                }));
+            Error(p) => {
+                if !self.allow_con_of_seq {
+                    if let Some(pos) = p.as_ref() {
+                        check_can_use_feature(env, pos, &FeatureName::AllowExtendedAwaitSyntax);
+                    }
+                }
+                if self.for_codegen {
+                    self.extract_await(expr, con, seq, tmps)
+                }
             }
-            ContainsAwait | ConcurrentAwait | Sequential | Error(_) => {
+            ContainsAwait | ConcurrentAwait | Sequential => {
                 if self.for_codegen {
                     self.extract_await(expr, con, seq, tmps)
                 }
@@ -1275,6 +1413,10 @@ mod tests {
 
     #[test]
     fn test_con_of_seq() {
+        use nast::Fun_;
+        use nast::FuncBody;
+        use oxidized::ast_defs::FunKind;
+
         let mut env = Env::default();
         let mut orig = build_program(hack_stmt!("await $x + (await $y |> await $$);"));
         let tmp0 = mk_lid("__tmp$lift_await0");
@@ -1287,6 +1429,11 @@ mod tests {
         let tmp3_lvar = mk_lvar(tmp3.clone());
         let tmp4 = mk_lid("__tmp$lift_await4");
         let tmp4_lvar = mk_lvar(tmp4.clone());
+        let tmp5 = mk_lid("__tmp$lift_await5");
+        let tmp5_lvar = mk_lvar(tmp5.clone());
+
+        // Build the nested sequential awaits that will go inside the async lambda
+        // mk_awaitall already creates a block with the tmp variable scope, so we don't need mk_block
         let awaitall1 = mk_awaitall(
             vec![(tmp1, hack_expr!("$y"))],
             Block(hack_stmts!("#{clone(tmp2_lvar)} = #{clone(tmp1_lvar)};")),
@@ -1295,14 +1442,57 @@ mod tests {
             vec![(tmp3, tmp2_lvar)],
             Block(hack_stmts!("#{clone(tmp4_lvar)} = #{clone(tmp3_lvar)};")),
         );
-        let _stmt = Stmt(Pos::NONE, Stmt_::Expr(Box::new(tmp4_lvar.clone())));
-        let b1 = mk_block(vec![tmp2], hack_stmts!("#awaitall1; #awaitall2;"));
-        let awaitall3 = mk_awaitall2(
-            vec![tmp4, tmp0.clone()],
-            vec![(tmp0, hack_expr!("$x"))],
-            Block(hack_stmts!("#b1; #tmp0_lvar + #tmp4_lvar;")),
+        // Build the nested block structure for the lambda body
+        let b1 = mk_block(vec![tmp2], vec![awaitall1, awaitall2]);
+        let return_stmt = Stmt(Pos::NONE, Stmt_::Return(Box::new(Some(tmp4_lvar.clone()))));
+        let b2 = mk_block(vec![tmp4], vec![b1, return_stmt]);
+
+        // Create the async lambda
+        let async_lambda = Expr(
+            (),
+            Pos::NONE,
+            Expr_::Lfun(Box::new((
+                Fun_ {
+                    span: Pos::NONE,
+                    readonly_this: None,
+                    annotation: (),
+                    readonly_ret: None,
+                    tparams: vec![],
+                    ret: nast::TypeHint((), None),
+                    params: vec![],
+                    ctxs: None,
+                    unsafe_ctxs: None,
+                    body: FuncBody {
+                        fb_ast: Block(vec![b2]),
+                    },
+                    fun_kind: FunKind::FAsync,
+                    user_attributes: nast::UserAttributes(vec![]),
+                    external: false,
+                    hidden: true,
+                    doc_comment: None,
+                },
+                vec![], // no captures
+            ))),
         );
-        let res = build_program(hack_stmt!("#awaitall3;"));
+
+        // Create the call to the lambda
+        let lambda_call = Expr(
+            (),
+            Pos::NONE,
+            Expr_::Call(Box::new(nast::CallExpr {
+                func: async_lambda,
+                targs: vec![],
+                args: vec![],
+                unpacked_arg: None,
+            })),
+        );
+
+        // Create the outer awaitall with both concurrent awaits
+        let awaitall3 = mk_awaitall(
+            vec![(tmp0, hack_expr!("$x")), (tmp5, lambda_call)],
+            Block(hack_stmts!("#tmp0_lvar + #tmp5_lvar;")),
+        );
+        let res = build_program(awaitall3);
         self::elaborate_program_test(&mut env, &mut orig, true);
         assert_eq!(orig, res);
     }

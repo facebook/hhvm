@@ -279,6 +279,7 @@ bool supportsGVN(const IRInstruction* inst) {
   case LdClsMethod:
   case LdIfaceMethod:
   case LdPropAddr:
+  case LdPublicFunc:
   case LdObjClass:
   case LdClsName:
   case LdLazyClsName:

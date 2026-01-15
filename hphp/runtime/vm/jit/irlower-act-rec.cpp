@@ -207,6 +207,8 @@ void cgLdARFunc(IRLS& env, const IRInstruction* inst) {
   cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::None, args);
 }
 
+IMPL_OPCODE_CALL(LdPublicFunc)
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }

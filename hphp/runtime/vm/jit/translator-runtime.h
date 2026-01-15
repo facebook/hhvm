@@ -162,6 +162,7 @@ void checkFrame(ActRec* fp, TypedValue* sp, bool fullCheck);
 
 void loadArrayFunctionContext(ArrayData*, ActRec* preLiveAR, ActRec* fp);
 
+const Func* loadPublicFunction();
 const Func* loadClassCtor(Class* cls, Func* ctxFunc);
 const Func* lookupClsMethodHelper(const Class* cls, const StringData* methName,
                                   ObjectData* obj, const Func* ctxFunc);

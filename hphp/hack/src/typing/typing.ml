@@ -10931,12 +10931,6 @@ end = struct
         (Typing_return.make_info hint_pos f.f_fun_kind [] env hret)
     in
     let local_tpenv = Env.get_tpenv env in
-    (* Outer pipe variables aren't available in closures. Note that
-     * locals are restored by Env.closure after processing the closure
-     *)
-    let env =
-      Env.unset_local env (Local_id.make_unscoped SN.SpecialIdents.dollardollar)
-    in
     let sound_dynamic_check_saved_env = env in
     let (env, tb) = Stmt.block env f.f_body.fb_ast in
     let has_implicit_return = LEnv.has_next env in

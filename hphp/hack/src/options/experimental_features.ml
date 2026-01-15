@@ -75,6 +75,7 @@ type feature_name =
   | NamedParameters
   | NamedParametersUse
   | XhpTypeConstants
+  | CapturePipeVariables
 [@@deriving eq, ord, show]
 
 let feature_name_map =
@@ -125,6 +126,7 @@ let feature_name_map =
       ("named_parameters", NamedParameters);
       ("named_parameters_use", NamedParametersUse);
       ("xhp_type_constants", XhpTypeConstants);
+      ("capture_pipe_variables", CapturePipeVariables);
     ]
 
 let feature_name_from_string s = SMap.find_opt s feature_name_map

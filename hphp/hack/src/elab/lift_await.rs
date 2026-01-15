@@ -487,8 +487,6 @@ impl LiftAwait {
             | Expr_::Int(_)
             | Expr_::Float(_)
             | Expr_::String(_)
-            | Expr_::Efun(_)
-            | Expr_::Lfun(_)
             | Expr_::Lplaceholder(_)
             | Expr_::MethodCaller(_)
             | Expr_::Invalid(box None)
@@ -503,6 +501,14 @@ impl LiftAwait {
                 self.extract_await(expr, con, seq, tmps)
             }
             Expr_::ClassConst(_) | Expr_::ClassGet(_) => {}
+            Expr_::Efun(_) | Expr_::Lfun(_) => {
+                // We may need to capture $$ in our lambdas
+                if let Some(replace_expr) = &self.replace_dd {
+                    let lhs = Expr((), pos.clone(), replace_expr.clone());
+                    let rhs = Expr((), pos.clone(), e.clone());
+                    *e = hack_expr!("#lhs |> #rhs").2;
+                }
+            }
 
             // Expressions with exactly one sub-expression that we can lift an await out of
             Expr_::Invalid(box Some(expr))

@@ -1,5 +1,9 @@
 ERROR: File "pipe_assign.php", line 5, characters 3-4:
+Pipe variables must occur only in the RHS of pipe expressions (Parsing[1002])
+ERROR: File "pipe_assign.php", line 5, characters 3-4:
 You cannot use this syntax on the left-hand side of an assignment. (Parsing[1002])
+ERROR: File "pipe_assign.php", line 6, characters 3-4:
+Pipe variables must occur only in the RHS of pipe expressions (Parsing[1002])
 ERROR: File "pipe_assign.php", line 6, characters 3-4:
 You cannot use this syntax on the left-hand side of an assignment. (Parsing[1002])
 ERROR: File "pipe_assign.php", line 5, characters 3-4:

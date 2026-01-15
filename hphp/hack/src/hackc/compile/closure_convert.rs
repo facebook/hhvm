@@ -153,6 +153,8 @@ struct Scope<'b> {
     summary: ScopeSummary<'b>,
     /// What variables are defined in this scope?
     variables: Variables,
+    /// Is this scope currently within a pipe-expression RHS
+    has_pipe: bool,
 }
 
 impl<'b> Scope<'b> {
@@ -168,6 +170,7 @@ impl<'b> Scope<'b> {
                 all_vars,
                 ..Variables::default()
             },
+            has_pipe: false,
         })
     }
 
@@ -330,6 +333,7 @@ impl<'b> Scope<'b> {
             parent: Some(self),
             summary,
             variables,
+            has_pipe: self.has_pipe,
         })
     }
 
@@ -358,6 +362,10 @@ impl<'b> Scope<'b> {
                 || vars.parameter_names.contains(var)
                 || vars.explicit_capture.contains(var)
             {
+                return true;
+            }
+
+            if var == special_idents::DOLLAR_DOLLAR && scope.has_pipe {
                 return true;
             }
 
@@ -403,6 +411,17 @@ impl<'b> Scope<'b> {
         self.in_using = in_using;
         let r = f(self);
         self.in_using = old_in_using;
+        r
+    }
+
+    fn with_in_pipe<F, R>(&mut self, mut f: F) -> R
+    where
+        F: FnMut(&mut Self) -> R,
+    {
+        let old = self.has_pipe;
+        self.has_pipe = true;
+        let r = f(self);
+        self.has_pipe = old;
         r
     }
 }
@@ -490,7 +509,7 @@ impl State {
         // Don't bother if it's $this, as this is captured implicitly
         if var == special_idents::THIS {
             self.capture_state.this_ = true;
-        } else if scope.should_capture_var(&var) && (var != special_idents::DOLLAR_DOLLAR) {
+        } else if scope.should_capture_var(&var) {
             // If it's bound as a parameter or definite assignment, don't add it
             // Also don't add the pipe variable
             self.capture_state.vars.insert(var.into_owned());
@@ -1078,6 +1097,11 @@ impl<'ast, 'a: 'b, 'b> VisitorMut<'ast> for ClosureVisitor<'a, 'b> {
                 Expr_::ExpressionTree(mut x) => {
                     x.runtime_expr.recurse(scope, self)?;
                     Expr_::ExpressionTree(x)
+                }
+                Expr_::Pipe(mut x) => {
+                    self.visit_expr(scope, &mut x.1)?;
+                    scope.with_in_pipe(|scope| self.visit_expr(scope, &mut x.2))?;
+                    Expr_::Pipe(x)
                 }
                 mut x => {
                     x.recurse(scope, self)?;

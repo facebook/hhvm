@@ -193,6 +193,10 @@ impl<'a> Token<'a> {
         matches!(self, Token::Number(..))
     }
 
+    pub(crate) fn is_variable(&self) -> bool {
+        matches!(self, Token::Variable(..))
+    }
+
     pub(crate) fn is_identifier(&self) -> bool {
         matches!(self, Token::Identifier(..))
     }

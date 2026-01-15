@@ -86,6 +86,7 @@ type feature_name =
       (** "xhp_type_constants": allows type constants in XHP attribute declarations
    * `attribute MyClass::TMyType attr;`
    *)
+  | CapturePipeVariables
 [@@deriving eq, ord, show]
 
 val feature_status_from_string : string -> feature_status option

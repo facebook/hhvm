@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<8ce69737a12d0e4412da0fe26d1c0299>>
+// @generated SignedSource<<d127a3842ebe7b4fb07e7c8e62ae4f9f>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -144,6 +144,7 @@ pub enum FeatureName {
     /// "xhp_type_constants": allows type constants in XHP attribute declarations
     /// `attribute MyClass::TMyType attr;`
     XhpTypeConstants,
+    CapturePipeVariables,
 }
 impl TrivialDrop for FeatureName {}
 arena_deserializer::impl_deserialize_in_arena!(FeatureName);

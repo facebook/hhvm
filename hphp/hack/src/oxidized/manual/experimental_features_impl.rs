@@ -60,6 +60,7 @@ impl FeatureName {
             NamedParameters => Unstable,
             NamedParametersUse => Unstable,
             XhpTypeConstants => OngoingRelease,
+            CapturePipeVariables => Unstable,
         }
     }
 

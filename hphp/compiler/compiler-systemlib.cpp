@@ -168,8 +168,8 @@ bool compile_systemlib(const std::filesystem::path& path, std::string output_dir
   }
 
   if (ue->m_fatalUnit) {
-    Logger::Error("Something went wrong when compiling %s because a fatal unit was created",
-                  fname.c_str());
+    Logger::Error("Something went wrong when compiling %s because a fatal unit was created: %s",
+                  fname.c_str(), ue->m_fatalMsg.data());
     return false;
   }
 

@@ -1,4 +1,2 @@
 ERROR: File "nullsafe_pipe_lambda.php", line 8, characters 33-34:
-Variable `$$` is undefined, or not always defined. (Naming[2050])
-  File "nullsafe_pipe_lambda.php", line 8, characters 21-22:
-  Did you mean `$z` instead?
+Cannot use unstable feature: `capture_pipe_variables` (Parsing[1002])

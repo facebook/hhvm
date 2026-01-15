@@ -590,6 +590,8 @@ pub const invalid_optional_keyword_on_initializer: Error =
     Cow::Borrowed("Optional keyword not required for initializer");
 pub const parent_static_prop_decl: Error =
     Cow::Borrowed("Cannot use `static` or `parent::class` in property declaration");
+pub const invalid_pipe_variable: Error =
+    Cow::Borrowed("Pipe variables must occur only in the RHS of pipe expressions");
 pub fn error2070(open_tag: &str, close_tag: &str) -> Error {
     Cow::Owned(format!(
         "XHP: mismatched tag: `{}` not the same as `{}`",

@@ -643,6 +643,9 @@ fn assemble_prop_name(token_iter: &mut Lexer<'_>) -> Result<hhbc::PropName> {
         let mut num_prefix = num_prefix.to_vec();
         num_prefix.extend_from_slice(name);
         hhbc::intern(std::str::from_utf8(&num_prefix)?)
+    } else if token_iter.peek_is(Token::is_variable) {
+        let var_nm = token_iter.expect_var()?;
+        hhbc::intern(std::str::from_utf8(&var_nm)?)
     } else {
         hhbc::intern(token_iter.expect(Token::is_identifier)?.as_str()?)
     };

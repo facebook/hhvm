@@ -83,6 +83,13 @@ enum NamespaceType {
     Unbracketed(Location),
 }
 
+#[derive(Clone, Debug)]
+enum PipeVariableState {
+    Unavailable,
+    Captured,
+    Available,
+}
+
 use NamespaceType::*;
 
 // TODO: is there a more Rust idiomatic way to write this?
@@ -173,6 +180,7 @@ struct Context<'a> {
     pub active_callable_attr_spec: Option<S<'a>>,
     pub active_const: Option<S<'a>>,
     pub active_enum_class: Option<S<'a>>,
+    pub pipe_variable_state: PipeVariableState,
     active_experimental_features: HashSet<FeatureName>,
 }
 
@@ -2754,6 +2762,15 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                         .push(make_error_from_node(node, errors::invalid_this))
                 }
             }
+            PipeVariableExpression(_) => match self.env.context.pipe_variable_state {
+                PipeVariableState::Unavailable => self
+                    .errors
+                    .push(make_error_from_node(node, errors::invalid_pipe_variable)),
+                PipeVariableState::Captured => {
+                    self.check_can_use_feature(node, &FeatureName::CapturePipeVariables)
+                }
+                PipeVariableState::Available => {}
+            },
             _ => {}
         }
     }
@@ -5506,6 +5523,20 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         let mut prev_context = None;
         let mut pushed_nested_namespace = false;
 
+        match self.parents.last() {
+            Some(Syntax {
+                children: BinaryExpression(x),
+                ..
+            }) if std::ptr::eq(node, &x.right_operand)
+                && (token_kind(&x.operator) == Some(TokenKind::BarGreaterThan)
+                    || token_kind(&x.operator) == Some(TokenKind::BarQuestionGreaterThan)) =>
+            {
+                prev_context = Some(self.env.context.clone());
+                self.env.context.pipe_variable_state = PipeVariableState::Available;
+            }
+            _ => {}
+        };
+
         match &node.children {
             ConstDeclaration(_) => {
                 prev_context = Some(self.env.context.clone());
@@ -5811,6 +5842,18 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         // preserve context when entering lambdas (and anonymous functions)
         self.env.context.active_callable = Some(node);
         self.env.context.active_callable_attr_spec = Some(s);
+
+        // ExpressionTrees don't support pipe expressions but if a pipe-variable
+        // is captured by an expression tree it can always be used in any lambdas
+        // therein regardless of whether pipe variable capture is enabled.
+        if !self.context.active_expression_tree {
+            self.env.context.pipe_variable_state = match self.env.context.pipe_variable_state {
+                PipeVariableState::Available | PipeVariableState::Captured => {
+                    PipeVariableState::Captured
+                }
+                PipeVariableState::Unavailable => PipeVariableState::Unavailable,
+            };
+        };
     }
 
     fn reset_parser_error_context_for_lambda(&mut self) -> ParserErrorsContext {
@@ -5988,6 +6031,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 active_callable_attr_spec: None,
                 active_const: None,
                 active_enum_class: None,
+                pipe_variable_state: PipeVariableState::Unavailable,
                 active_experimental_features: default_experimental_features,
             },
             hhvm_compat_mode,

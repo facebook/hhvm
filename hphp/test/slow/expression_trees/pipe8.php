@@ -1,6 +1,6 @@
 <?hh
 
-<<file:__EnableUnstableFeatures('expression_trees')>>
+<<file:__EnableUnstableFeatures('expression_trees', 'capture_pipe_variables')>>
 
 // Testing to make sure lambdas bodies don't capture $$ and we throw appropriate errors
 function test(ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleInt> $x): void {

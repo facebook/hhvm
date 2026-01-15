@@ -37,6 +37,7 @@ use hhbc_string_utils as string_utils;
 use indexmap::IndexSet;
 use instruction_sequence::InstrSeq;
 use instruction_sequence::instr;
+use naming_special_names_rust::special_idents;
 use naming_special_names_rust::std_lib_functions;
 use oxidized::aast;
 use oxidized::aast_defs::DocComment;
@@ -110,6 +111,11 @@ pub fn emit_body<'b>(
         &tp_names,
     )?;
 
+    let has_pipe = args.flags.contains(Flags::CLOSURE_BODY)
+        && scope
+            .get_captured_vars()
+            .contains(&special_idents::DOLLAR_DOLLAR.to_owned());
+
     let params = make_params(emitter, &mut tp_names, args.ast_params, &scope, args.flags)?;
 
     let upper_bounds = emit_generics_upper_bounds(
@@ -158,6 +164,10 @@ pub fn emit_body<'b>(
         None
     };
     let is_asio_low_pri = hhbc::has_asio_low_pri(&attributes);
+
+    if has_pipe {
+        env.pipe_var = Some(emitter.named_local(special_idents::DOLLAR_DOLLAR));
+    }
 
     let instrs = make_body_instrs(
         emitter,

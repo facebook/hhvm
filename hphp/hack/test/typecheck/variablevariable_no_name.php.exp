@@ -1,2 +1,4 @@
 ERROR: File "variablevariable_no_name.php", line 4, characters 10-10:
 A valid variable name starts with a letter or underscore, followed by any number of letters, numbers, or underscores (Parsing[1002])
+ERROR: File "variablevariable_no_name.php", line 4, characters 11-12:
+Pipe variables must occur only in the RHS of pipe expressions (Parsing[1002])

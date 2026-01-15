@@ -269,7 +269,7 @@ def _gen_find_recursive_files(top: Path) -> typing.Generator[Path, None, None]:
             yield (root_path / filename).relative_to(top)
 
 
-def get_resource_as_file(filename: str, module: Optional[str] = None) -> Optional[Path]:
+def get_resource_as_path(filename: str, module: Optional[str] = None) -> Optional[Path]:
     """
     Returns path to the binary, or None if not be found.
 
@@ -280,8 +280,8 @@ def get_resource_as_file(filename: str, module: Optional[str] = None) -> Optiona
     file_manager = ExitStack()
     atexit.register(file_manager.close)
     resource = importlib_resources.files(module or __name__) / filename
-    path = file_manager.enter_context(importlib_resources.as_file(resource))
-    return path if path.is_file() else None
+    path: Path = file_manager.enter_context(importlib_resources.as_file(resource))
+    return path if path.exists() else None
 
 
 def get_thrift_binary_path(
@@ -297,7 +297,7 @@ def get_thrift_binary_path(
           its parents.
     """
     if thrift_bin_arg is None:
-        return get_resource_as_file("thrift")
+        return get_resource_as_path("thrift")
 
     return _ascend_find_exe(Path.cwd(), thrift_bin_arg)
 
@@ -312,7 +312,7 @@ def get_thrift2ast_binary_path() -> typing.Optional[Path]:
           executable with this name in the current working directory or any of
           its parents.
     """
-    return get_resource_as_file("thrift2ast")
+    return get_resource_as_path("thrift2ast")
 
 
 def get_all_fixture_names(fixtures_root_dir_path: Path) -> list[str]:

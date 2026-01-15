@@ -3,9 +3,11 @@
 class RootClass {
   public darray<string, mixed> $children = dict[];
   public SomeChildOfMemoize $childWithMemoize;
+  public SomeChildOfMemoize $childWithMemoize2;
 
   public function __construct() {
     $this->childWithMemoize = new SomeChildOfMemoize();
+    $this->childWithMemoize2 = new SomeChildOfMemoize();
   }
 
   <<__Memoize>>
@@ -14,6 +16,8 @@ class RootClass {
   }
 }
 
+class InstanceCachedNode1 {}
+class InstanceCachedNode2 {}
 class ParentWithMemoizeAndMemoizeLSB {
   <<__MemoizeLSB>>
   public static function doMemoizedLSBWork(): mixed {
@@ -28,8 +32,34 @@ class ParentWithMemoizeAndMemoizeLSB {
     return json_encode(vec[$a,2,3]);
   }
   <<__Memoize>>
-  public function doInstanceMemoizedWorkWithParam(int $a): mixed {
+  public function doInstanceMemoizedWorkWithParam(int $a): InstanceCachedNode1 {
+    return new InstanceCachedNode1();
+  }
+    <<__Memoize>>
+  public function doInstanceMemoizedWorkWithParam2(int $a): InstanceCachedNode2 {
+    return new InstanceCachedNode2();
+  }
+
+  // ===== Never called section =====
+  <<__Memoize>>
+  public function neverCalledInstanceMemoWithParam(int $a): InstanceCachedNode1 {
+    return new InstanceCachedNode1();
+  }
+  <<__Memoize>>
+  public function neverCalledInstanceMemo(): InstanceCachedNode1 {
+    return new InstanceCachedNode1();
+  }
+   <<__MemoizeLSB>>
+  public static function neverCalledMemoizedLSB(): mixed {
     return json_encode(vec[1,2,3]);
+  }
+  <<__MemoizeLSB>>
+  public static function neverCalledMemoizedLSBWorkWithParam(int $a): mixed {
+    return json_encode(vec[$a,2,3]);
+  }
+  <<__Memoize>>
+  public static function neverCalledStaticMemoizedWorkWithParam(int $a): mixed {
+    return json_encode(vec[$a,2,3]);
   }
 }
 
@@ -147,18 +177,27 @@ function showTestEdge($edge) :mixed{
   }
 }
 
-function showMemoizations($node) :mixed{
-  if (idx($node, 'kind') != "Root") {
+function showInstanceMemoizations($edge, $hg) :mixed{
+  $class = idx($edge, 'class');
+  $func = idx($edge, 'func');
+  if ($class === null || $edge === null) {
     return;
   }
+  echo_buffer("Instance: $class::$func\n");
+}
 
+
+function showStaticMemoizations($node, $hg) :mixed{
+  if (idx($node, 'kind') != "Root" && idx($node, 'kind') != "Cpp") {
+    return;
+  }
   $classname = idx($node, 'class');
   $func = idx($node, 'func');
   if ($classname === null || $func === null) {
     return;
   }
-
-  echo_buffer("$classname::$func\n");
+  $kind = $node['kind'] === "Root" ? "Static: " : "Instance: ";
+  echo_buffer("$kind $classname::$func\n");
 }
 
 function showAllEdges($hg, $edges) :mixed{
@@ -181,7 +220,8 @@ function showClass($node) :mixed{
   }
 }
 
-function printNode($node) :mixed{
+function printNode($node, $indent = 0) :mixed{
+  for ($i = 0; $i < $indent; $i++) echo "  ";
   echo "node ".$node['index']." ".$node['kind']." ";
   if (isset($node['class'])) echo $node['class']." ";
   if (isset($node['func'])) echo $node['func']." ";
@@ -191,9 +231,15 @@ function printNode($node) :mixed{
   echo "\n";
 }
 
-function printEdge($edge) :mixed{
-  echo 'edge '.$edge['name'].' ';
+function printEdge($edge, $indent = 0) :mixed{
+  for ($i = 0; $i < $indent; $i++) echo "  ";
+  echo 'edge '.idx($edge, 'name', '(no name)').' ';
   echo $edge['kind'].' '.$edge['from']."->".$edge['to'];
+  if (isset($node['prop'])) echo ' prop='.$node['prop'];
+  if (isset($node['offset'])) echo ' offset='.$node['offset'];
+  if (isset($node['value'])) echo ' value='.$node['value'];
+  if (isset($node['key'])) echo ' key='.$node['key'];
+  if (isset($node['class']) && isset($node['func'])) echo ' func='.($node['class'].'::'.$node['func']);
   echo "\n";
 }
 function dfsPrintNode($hg, $node) :mixed{
@@ -228,6 +274,9 @@ function entrypoint_heapgraph(): void {
   // Memoize related tests
   $r->childWithMemoize->doInstanceMemoizedWork();
   $r->childWithMemoize->doInstanceMemoizedWorkWithParam(42);
+  $r->childWithMemoize->doInstanceMemoizedWorkWithParam(99);
+  $r->childWithMemoize->doInstanceMemoizedWorkWithParam2(123);
+  $r->childWithMemoize2->doInstanceMemoizedWork();
   SomeChildOfMemoize::doMemoizedLSBWork();
   SomeChildOfMemoize::doMemoizedLSBWorkWithParam(42);
   SomeChildOfMemoize::doStaticMemoizedWorkWithParam(42);
@@ -278,8 +327,12 @@ function entrypoint_heapgraph(): void {
   heapgraph_foreach_node($hg, showTestClasses<>);
   echo_flush();
 
-  echo "\nTraversing nodes for memoizations:\n";
-  heapgraph_foreach_node($hg, showMemoizations<>);
+  echo "\nTraversing nodes for static memoizations:\n";
+  heapgraph_foreach_node($hg, ($n) ==> showStaticMemoizations($n, $hg));
+  echo_flush();
+
+  echo "\nTraversing nodes for instance memoizations:\n";
+  heapgraph_foreach_edge($hg, ($n) ==> showInstanceMemoizations($n, $hg));
   echo_flush();
 
   echo "\nTraversing edges for first capture:\n";

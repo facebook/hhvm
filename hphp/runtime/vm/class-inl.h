@@ -720,6 +720,24 @@ inline std::pair<Slot, bool> Class::memoSlotForFunc(FuncId func) const {
   always_assert(false);
 }
 
+inline FuncId Class::funcForMemoSlot(Slot slot) const {
+  if (!hasMemoSlots()) return FuncId::Invalid;
+  if (slot >= numMemoSlots()) return FuncId::Invalid;
+  Slot parentNextSlot = (m_parent && m_parent->hasMemoSlots())
+                        ? m_parent->numMemoSlots()
+                        : 0;
+  if (slot < parentNextSlot) {
+    return m_parent->funcForMemoSlot(slot);
+  }
+  for (const auto& mapping : m_extra->m_memoMappings) {
+    if (mapping.second.first == slot) {
+      return mapping.first;
+    }
+  }
+
+  return FuncId::Invalid;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Other methods.
 

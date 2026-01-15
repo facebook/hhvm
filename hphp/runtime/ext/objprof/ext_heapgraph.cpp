@@ -43,10 +43,7 @@
 #include "hphp/runtime/vm/func-id.h"
 #include "hphp/runtime/base/heap-graph.h"
 #include "hphp/runtime/base/heap-algorithms.h"
-#include "hphp/runtime/base/rds.h"
-#include "hphp/runtime/base/rds-symbol.h"
 #include "hphp/runtime/vm/vm-regs.h"
-#include "hphp/util/match.h"
 
 namespace HPHP {
 
@@ -106,8 +103,23 @@ union CapturedNode {
 
 // Extra information about a HeapGraph::Ptr
 struct CapturedPtr {
-  enum { Key, Value, Property, Offset } index_kind;
-  uint32_t index; // location of ptr within it's from node
+  enum Kind { Key, Value, Property, Offset, Memo } index_kind;
+  union {
+    uint32_t index; // location of ptr within it's from node (for Key, Value, Property, Offset)
+    FuncId funcId;  // memoized function ID (for Memo)
+  };
+
+  // Constructors needed because FuncId has a non-trivial default constructor
+  CapturedPtr(Kind kind, uint32_t idx) : index_kind(kind), index(idx) {}
+  CapturedPtr(FuncId fid) : index_kind(Memo), funcId(fid) {}
+
+  static CapturedPtr makeIndex(Kind kind, uint32_t idx) {
+    return CapturedPtr(kind, idx);
+  }
+
+  static CapturedPtr makeMemo(FuncId fid) {
+    return CapturedPtr(fid);
+  }
 };
 
 struct HeapGraphContext : SweepableResourceData {
@@ -213,10 +225,10 @@ CapturedPtr getEdgeInfo(const HeapGraph& g, int ptr) {
           if (index < static_cast<const VanillaDict*>(from_hdr)->iterLimit()) {
             auto field = elm_offset - index * sizeof(Elm);
             if (field == Elm::keyOff()) {
-              return {CapturedPtr::Key, index};
+              return CapturedPtr::makeIndex(CapturedPtr::Key, index);
             }
             if (field == Elm::dataOff() + offsetof(TypedValue, m_data)) {
-              return {CapturedPtr::Value, index};
+              return CapturedPtr::makeIndex(CapturedPtr::Value, index);
             }
           }
         }
@@ -228,7 +240,7 @@ CapturedPtr getEdgeInfo(const HeapGraph& g, int ptr) {
           auto elm_offset = edge.offset - sizeof(ArrayData);
           uint32_t index = elm_offset / sizeof(TypedValue);
           if (index < static_cast<const ArrayData*>(from_hdr)->size()) {
-            return {CapturedPtr::Value, index};
+            return CapturedPtr::makeIndex(CapturedPtr::Value, index);
           }
         }
         break;
@@ -245,7 +257,7 @@ CapturedPtr getEdgeInfo(const HeapGraph& g, int ptr) {
           auto elm_offset = edge.offset - c_Pair::dataOffset();
           uint32_t index = elm_offset / sizeof(TypedValue);
           if (index < 2) {
-            return {CapturedPtr::Value, index};
+            return CapturedPtr::makeIndex(CapturedPtr::Value, index);
           }
         }
         break;
@@ -264,7 +276,6 @@ CapturedPtr getEdgeInfo(const HeapGraph& g, int ptr) {
       case HeaderKind::Closure:
         // the class of a c_Closure describes the captured variables
       case HeaderKind::NativeData:
-      case HeaderKind::MemoData:
       case HeaderKind::Object: {
         auto cls = from_obj->getVMClass();
         FTRACE(5, "HG: Getting connection name for class {} at {}\n",
@@ -274,10 +285,32 @@ CapturedPtr getEdgeInfo(const HeapGraph& g, int ptr) {
             prop_offset - sizeof(ObjectData)
           );
           if (index < cls->numDeclProperties()) {
-            return {CapturedPtr::Property, index};
+            return CapturedPtr::makeIndex(CapturedPtr::Property, index);
           }
         } else {
           // edge_offset > 0 && prop_offset < 0 means nativedata fields
+        }
+
+        break;
+      }
+
+      case HeaderKind::MemoData: {
+        auto cls = from_obj->getVMClass();
+        if (prop_offset < 0 && cls->hasMemoSlots()) {
+          // Edge points to memo slots area (before ObjectData)
+          // prop_offset is relative to ObjectData, so negative means before it
+          // Layout: [MemoNode][MemoSlot N-1][MemoSlot N-2]...[MemoSlot 0][ObjectData]
+          // The offset from ObjectData to MemoSlot i is -(i+1) * sizeof(MemoSlot)
+          // So: slotIdx = (-prop_offset / sizeof(MemoSlot)) - 1
+          auto negOffset = static_cast<size_t>(-prop_offset);
+          if (negOffset % sizeof(MemoSlot) == 0) {
+            auto numSlots = cls->numMemoSlots();
+            auto slotIdx = (negOffset / sizeof(MemoSlot)) - 1;
+            if (slotIdx < numSlots) {
+              auto funcId = cls->funcForMemoSlot(slotIdx);
+              return CapturedPtr::makeMemo(funcId);
+            }
+          }
         }
         break;
       }
@@ -304,7 +337,7 @@ CapturedPtr getEdgeInfo(const HeapGraph& g, int ptr) {
     }
   }
 
-  return {CapturedPtr::Offset, uint32_t(prop_offset)};
+  return CapturedPtr::makeIndex(CapturedPtr::Offset, uint32_t(prop_offset));
 }
 
 void heapgraphCallback(Array fields, const Variant& callback) {
@@ -391,6 +424,16 @@ Array createPhpEdge(HeapGraphContextPtr hgptr, int index) {
       auto slot = cls->propIndexToSlot(cptr.index);
       auto& prop = cls->declProperties()[slot];
       ptr_arr.set(s_prop, make_tv<KindOfPersistentString>(prop.name));
+      break;
+    }
+    case CapturedPtr::Memo: {
+      if (cptr.funcId != FuncId::Invalid) {
+        auto func = Func::fromFuncId(cptr.funcId);
+        ptr_arr.set(s_func, make_tv<KindOfPersistentString>(func->name()));
+        if (func->cls()) {
+          ptr_arr.set(s_class, make_tv<KindOfPersistentString>(func->cls()->name()));
+        }
+      }
       break;
     }
     case CapturedPtr::Offset:

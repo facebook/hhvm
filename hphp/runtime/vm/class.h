@@ -1345,6 +1345,13 @@ public:
   std::pair<Slot, bool> memoSlotForFunc(FuncId func) const;
 
   /*
+   * Given a memo slot index, return the FuncId that uses this slot.
+   * Returns FuncId::Invalid if no function is found for this slot.
+   * This is the reverse lookup of memoSlotForFunc().
+   */
+  FuncId funcForMemoSlot(Slot slot) const;
+
+  /*
    * Returns an offset from the object base pointer to be used for memory
    * free routines
    */

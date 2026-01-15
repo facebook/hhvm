@@ -35,7 +35,7 @@ std::unique_ptr<folly::EventBaseBackendBase> getEventBaseBackend() {
           .setMaxGet(static_cast<size_t>(FLAGS_pwt_io_uring_max_get))
           .setUseRegisteredFds(FLAGS_pwt_io_uring_use_registered_fds);
 
-      auto ret = std::make_unique<folly::IoUringBackend>(options);
+      auto ret = std::make_unique<folly::IoUringBackend>(std::move(options));
       LOG(INFO) << "Allocating io_uring backend(" << FLAGS_pwt_io_uring_capacity
                 << "," << FLAGS_pwt_io_uring_max_submit << ","
                 << FLAGS_pwt_io_uring_max_get << ","

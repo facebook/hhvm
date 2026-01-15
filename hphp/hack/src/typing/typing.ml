@@ -11000,6 +11000,7 @@ end = struct
         Aast.f_unsafe_ctxs = f.f_unsafe_ctxs;
         Aast.f_params = t_params @ t_variadic_params;
         Aast.f_external = f.f_external;
+        Aast.f_hidden = false;
         Aast.f_doc_comment = f.f_doc_comment;
       }
     in

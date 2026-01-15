@@ -9,7 +9,7 @@
         f_readonly_ret = None; f_tparams = []; f_ret = ((~mixed), (Some ([3:15-20], (Happly (([3:15-20], "\\HH\\supportdyn"), [([3:15-20], Hmixed)]))))); 
         f_params = []; f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([4:3-17], (Return (Some ((Set<nothing>), [4:10-16], (ValCollection (([4:10-13], Set), None, []))))))] };
         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([3:10-11], "__SupportDynamicType"); ua_params = [] }]; 
-        f_external = false; f_doc_comment = None };
+        f_external = false; f_hidden = false; f_doc_comment = None };
       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
       fd_package = None });
   (Fun
@@ -23,7 +23,7 @@
          f_readonly_ret = None; f_tparams = []; f_ret = ((~mixed), (Some ([7:15-20], (Happly (([7:15-20], "\\HH\\supportdyn"), [([7:15-20], Hmixed)]))))); 
          f_params = []; f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([8:3-19], (Return (Some ((keyset<nothing>), [8:10-18], (ValCollection (([8:10-16], Keyset), None, []))))))] };
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([7:10-11], "__SupportDynamicType"); ua_params = [] }]; 
-         f_external = false; f_doc_comment = None };
+         f_external = false; f_hidden = false; f_doc_comment = None };
        fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
        fd_package = None });
   (Fun
@@ -37,7 +37,7 @@
          f_readonly_ret = None; f_tparams = []; f_ret = ((~mixed), (Some ([11:16-21], (Happly (([11:16-21], "\\HH\\supportdyn"), [([11:16-21], Hmixed)]))))); 
          f_params = []; f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([12:3-20], (Return (Some ((ImmSet<nothing>), [12:10-19], (ValCollection (([12:10-16], ImmSet), None, []))))))] };
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([11:10-12], "__SupportDynamicType"); ua_params = [] }]; 
-         f_external = false; f_doc_comment = None };
+         f_external = false; f_hidden = false; f_doc_comment = None };
        fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
        fd_package = None });
   (Fun
@@ -51,7 +51,7 @@
          f_readonly_ret = None; f_tparams = []; f_ret = ((~mixed), (Some ([15:15-20], (Happly (([15:15-20], "\\HH\\supportdyn"), [([15:15-20], Hmixed)]))))); 
          f_params = []; f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([16:3-16], (Return (Some ((vec<nothing>), [16:10-15], (ValCollection (([16:10-13], Vec), None, []))))))] };
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([15:10-11], "__SupportDynamicType"); ua_params = [] }]; 
-         f_external = false; f_doc_comment = None };
+         f_external = false; f_hidden = false; f_doc_comment = None };
        fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
        fd_package = None });
   (Fun
@@ -66,7 +66,7 @@
          f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
          f_body = { fb_ast = [([20:3-17], (Return (Some ((dict<nothing, nothing>), [20:10-16], (KeyValCollection (([20:10-14], Dict), None, []))))))] }; 
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([19:10-11], "__SupportDynamicType"); ua_params = [] }]; 
-         f_external = false; f_doc_comment = None };
+         f_external = false; f_hidden = false; f_doc_comment = None };
        fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
        fd_package = None });
   (Fun
@@ -80,6 +80,6 @@
          f_readonly_ret = None; f_tparams = []; f_ret = ((~mixed), (Some ([23:16-21], (Happly (([23:16-21], "\\HH\\supportdyn"), [([23:16-21], Hmixed)]))))); 
          f_params = []; f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([24:3-20], (Return (Some ((Vector<nothing>), [24:10-19], (ValCollection (([24:10-16], Vector), None, []))))))] };
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([23:10-12], "__SupportDynamicType"); ua_params = [] }]; 
-         f_external = false; f_doc_comment = None };
+         f_external = false; f_hidden = false; f_doc_comment = None };
        fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
        fd_package = None })

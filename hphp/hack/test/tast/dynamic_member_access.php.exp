@@ -9,7 +9,7 @@
         f_readonly_ret = None; f_tparams = []; f_ret = ((~string), (Some ([3:33-39], (Happly (([3:33-39], "\\HH\\string"), []))))); 
         f_params = []; f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([3:42-55], (Return (Some ((string), [3:49-54], (String "foo")))))] }; 
         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([3:10-29], "__SupportDynamicType"); ua_params = [] }]; 
-        f_external = false; f_doc_comment = None };
+        f_external = false; f_hidden = false; f_doc_comment = None };
       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
       fd_package = None });
   (Fun
@@ -42,6 +42,6 @@
              ]
            };
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([5:10-14], "__SupportDynamicType"); ua_params = [] }]; 
-         f_external = false; f_doc_comment = None };
+         f_external = false; f_hidden = false; f_doc_comment = None };
        fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
        fd_package = None })

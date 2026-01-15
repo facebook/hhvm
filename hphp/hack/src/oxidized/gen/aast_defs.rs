@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d14270b685b436789bf18c909ec7cfbc>>
+// @generated SignedSource<<d50da7fb750ca6e1c296739fc64aaf1a>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -1474,6 +1474,7 @@ pub struct Fun_<Ex, En> {
     /// true if this declaration has no body because it is an
     /// external function declaration (e.g. from an HHI file)
     pub external: bool,
+    pub hidden: bool,
     pub doc_comment: Option<DocComment>,
 }
 
@@ -2199,6 +2200,7 @@ pub struct Method_<Ex, En> {
     /// true if this declaration has no body because it is an external method
     /// declaration (e.g. from an HHI file)
     pub external: bool,
+    pub hidden: bool,
     pub doc_comment: Option<DocComment>,
 }
 

@@ -32,7 +32,7 @@ Errors:
          f_readonly_ret = None; f_tparams = []; f_ret = ((), (Some ([9:17-21], (Hprim Tvoid)))); 
          f_params = []; f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([9:10-13], "__SupportDynamicType"); ua_params = [] }]; 
-         f_external = false; f_doc_comment = None };
+         f_external = false; f_hidden = false; f_doc_comment = None };
        fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
        fd_package = None })
   ]

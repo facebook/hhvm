@@ -871,6 +871,7 @@ and ('ex, 'en) fun_ = {
   f_external: bool;
       (** true if this declaration has no body because it is an
        * external function declaration (e.g. from an HHI file) *)
+  f_hidden: bool;
   f_doc_comment: doc_comment option;
 }
 
@@ -1120,6 +1121,7 @@ and ('ex, 'en) method_ = {
   m_external: bool;
       (** true if this declaration has no body because it is an external method
        * declaration (e.g. from an HHI file) *)
+  m_hidden: bool;
   m_doc_comment: doc_comment option;
 }
 

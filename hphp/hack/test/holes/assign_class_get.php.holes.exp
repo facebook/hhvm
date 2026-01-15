@@ -53,7 +53,7 @@
            };
          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
          m_ret = ((void), (Some ([9:40-44], (Hprim Tvoid)))); m_external = false; 
-         m_doc_comment = None };
+         m_hidden = false; m_doc_comment = None };
         { m_span = [14:3-17:4]; m_annotation = (); m_final = false; m_abstract = false; 
           m_static = false; m_readonly_this = false; m_visibility = Public; 
           m_name = ([14:19-37], "set_prop_intersect"); m_tparams = []; 
@@ -76,7 +76,7 @@
             };
           m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
           m_ret = ((void), (Some ([14:59-63], (Hprim Tvoid)))); m_external = false; 
-          m_doc_comment = None };
+          m_hidden = false; m_doc_comment = None };
         { m_span = [19:3-22:4]; m_annotation = (); m_final = false; m_abstract = false; 
           m_static = false; m_readonly_this = false; m_visibility = Public; 
           m_name = ([19:19-33], "set_prop_union"); m_tparams = []; m_where_constraints = [];
@@ -99,7 +99,7 @@
             };
           m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
           m_ret = ((void), (Some ([19:54-58], (Hprim Tvoid)))); m_external = false; 
-          m_doc_comment = None };
+          m_hidden = false; m_doc_comment = None };
         { m_span = [23:3-26:4]; m_annotation = (); m_final = false; m_abstract = false; 
           m_static = false; m_readonly_this = false; m_visibility = Public; 
           m_name = ([23:19-32], "set_pair_prop"); m_tparams = []; m_where_constraints = [];
@@ -124,7 +124,7 @@
             };
           m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
           m_ret = ((void), (Some ([23:50-54], (Hprim Tvoid)))); m_external = false; 
-          m_doc_comment = None };
+          m_hidden = false; m_doc_comment = None };
         { m_span = [28:3-31:4]; m_annotation = (); m_final = false; m_abstract = false; 
           m_static = false; m_readonly_this = false; m_visibility = Public; 
           m_name = ([28:19-34], "append_vec_prop"); m_tparams = []; m_where_constraints = [];
@@ -146,7 +146,7 @@
             };
           m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
           m_ret = ((void), (Some ([28:45-49], (Hprim Tvoid)))); m_external = false; 
-          m_doc_comment = None };
+          m_hidden = false; m_doc_comment = None };
         { m_span = [33:3-36:4]; m_annotation = (); m_final = false; m_abstract = false; 
           m_static = false; m_readonly_this = false; m_visibility = Public; 
           m_name = ([33:19-36], "set_pair_prop_fst"); m_tparams = []; 
@@ -170,7 +170,7 @@
             };
           m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
           m_ret = ((void), (Some ([33:47-51], (Hprim Tvoid)))); m_external = false; 
-          m_doc_comment = None };
+          m_hidden = false; m_doc_comment = None };
         { m_span = [38:3-41:4]; m_annotation = (); m_final = false; m_abstract = false; 
           m_static = false; m_readonly_this = false; m_visibility = Public; 
           m_name = ([38:19-36], "set_pair_prop_snd"); m_tparams = []; 
@@ -194,7 +194,7 @@
             };
           m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
           m_ret = ((void), (Some ([38:47-51], (Hprim Tvoid)))); m_external = false; 
-          m_doc_comment = None }
+          m_hidden = false; m_doc_comment = None }
         ];
       c_xhp_children = []; c_xhp_attrs = [];
       c_namespace =
@@ -260,7 +260,7 @@
             };
           m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
           m_ret = ((dynamic), (Some ([14:59-63], (Hprim Tvoid)))); m_external = false; 
-          m_doc_comment = None }
+          m_hidden = false; m_doc_comment = None }
          ];
        c_xhp_children = []; c_xhp_attrs = [];
        c_namespace =

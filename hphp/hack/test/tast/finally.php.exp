@@ -13,7 +13,7 @@ Errors:
         f_ret = ((Awaitable<~shape()>), (Some ([4:35-53], (Happly (([4:35-44], "\\HH\\Awaitable"), [([4:45-52], (Hshape { nsi_allows_unknown_fields = false; nsi_field_map = [] }))])))));
         f_params = []; f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([5:3-18], (Return (Some ((shape()), [5:10-17], (Shape [])))))] }; 
         f_fun_kind = FAsync; f_user_attributes = [{ ua_name = ([4:16-31], "__SupportDynamicType"); ua_params = [] }]; 
-        f_external = false; f_doc_comment = None };
+        f_external = false; f_hidden = false; f_doc_comment = None };
       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
       fd_package = None });
   (Fun
@@ -61,6 +61,6 @@ Errors:
              ]
            };
          f_fun_kind = FAsync; f_user_attributes = [{ ua_name = ([8:16-20], "__SupportDynamicType"); ua_params = [] }]; 
-         f_external = false; f_doc_comment = None };
+         f_external = false; f_hidden = false; f_doc_comment = None };
        fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
        fd_package = None })

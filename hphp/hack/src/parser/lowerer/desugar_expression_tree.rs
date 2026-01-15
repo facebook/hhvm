@@ -330,6 +330,7 @@ fn wrap_fun_(
         unsafe_ctxs: None, // TODO(T70095684)
         user_attributes: Default::default(),
         external: false,
+        hidden: false,
         doc_comment: None,
     }
 }
@@ -1367,6 +1368,7 @@ impl RewriteState {
                         annotation: (),
                         params: _,
                         user_attributes: _,
+                        hidden: _,
                         // The function should not use any of these newer features.
                         readonly_this: None,
                         readonly_ret: None,

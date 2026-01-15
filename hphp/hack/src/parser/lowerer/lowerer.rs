@@ -1954,6 +1954,7 @@ fn p_lambda_expression<'a>(
         unsafe_ctxs,
         user_attributes: p_user_attributes(&c.attribute_spec, env),
         external,
+        hidden: false,
         doc_comment: None,
     };
     Ok(Expr_::mk_lfun(fun, vec![]))
@@ -2416,6 +2417,7 @@ fn p_prefixed_code_expr<'a>(
             unsafe_ctxs: None,
             user_attributes: ast::UserAttributes(vec![]),
             external,
+            hidden: false,
             doc_comment: None,
         };
         let recv = ast::Expr::new((), pos.clone(), Expr_::mk_lfun(fun, vec![]));
@@ -2672,6 +2674,7 @@ fn p_anonymous_function<'a>(
         unsafe_ctxs,
         user_attributes,
         external,
+        hidden: false,
         doc_comment,
     };
     let use_ = p_use(&c.use_, env).unwrap_or_else(|_| vec![]);
@@ -2714,6 +2717,7 @@ fn p_awaitable_creation_expr<'a>(
         unsafe_ctxs: None, // TODO(T70095684)
         user_attributes,
         external,
+        hidden: false,
         doc_comment: None,
     };
     Ok(Expr_::mk_call(ast::CallExpr {
@@ -5535,6 +5539,7 @@ fn p_class_elt<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) {
                 readonly_ret: hdr.readonly_return,
                 ret: ast::TypeHint((), hdr.return_type),
                 external: is_external,
+                hidden: false,
                 doc_comment: doc_comment_opt,
             };
             class.vars.append(&mut member_def);
@@ -5986,6 +5991,7 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 fun_kind,
                 user_attributes,
                 external: is_external,
+                hidden: false,
                 doc_comment: doc_comment_opt,
             };
 

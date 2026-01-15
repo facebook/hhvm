@@ -9,7 +9,7 @@
         f_readonly_ret = None; f_tparams = []; f_ret = ((~Traversable<num>), (Some ([3:25-41], (Happly (([3:25-36], "\\HH\\Traversable"), [([3:37-40], (Hprim Tnum))]))))); 
         f_params = []; f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([4:3-19], (Return (Some ((keyset<int>), [4:10-18], (ValCollection (([4:10-16], Keyset), None, []))))))] };
         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([3:10-21], "__SupportDynamicType"); ua_params = [] }]; 
-        f_external = false; f_doc_comment = None };
+        f_external = false; f_hidden = false; f_doc_comment = None };
       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
       fd_package = None });
   (Class
@@ -42,6 +42,6 @@
          f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
          f_body = { fb_ast = [([10:3-17], (Return (Some ((dict<nothing, nothing>), [10:10-16], (KeyValCollection (([10:10-14], Dict), None, []))))))] }; 
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([9:10-27], "__SupportDynamicType"); ua_params = [] }]; 
-         f_external = false; f_doc_comment = None };
+         f_external = false; f_hidden = false; f_doc_comment = None };
        fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
        fd_package = None })

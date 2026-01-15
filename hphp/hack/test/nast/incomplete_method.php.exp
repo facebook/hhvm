@@ -10,7 +10,7 @@
          m_name = ([4:19-27], "vAUTO332"); m_tparams = []; m_where_constraints = []; 
          m_params = []; m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([6:1-2], (Return (Some ((), [6:1-2], Null))))] }; 
          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
-         m_ret = ((), None); m_external = false; m_doc_comment = None }
+         m_ret = ((), None); m_external = false; m_hidden = false; m_doc_comment = None }
         ];
       c_xhp_children = []; c_xhp_attrs = [];
       c_namespace =

@@ -937,6 +937,7 @@ let class_method : Env.t -> Nast.class_ -> Nast.method_ -> unit =
     m_user_attributes = _;
     m_readonly_ret = _;
     m_external = _;
+    m_hidden = _;
     m_doc_comment = _;
   } =
     method_

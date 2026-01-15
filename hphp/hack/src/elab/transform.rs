@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<023d69295896281ecf04262a091592d7>>
+// @generated SignedSource<<115e6d264045a707f3c535685c673896>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -1044,7 +1044,8 @@ impl Transform for Fun_ {
                 body: ref mut __binding_9,
                 user_attributes: ref mut __binding_11,
                 external: ref mut __binding_12,
-                doc_comment: ref mut __binding_13,
+                hidden: ref mut __binding_13,
+                doc_comment: ref mut __binding_14,
                 ..
             } => {
                 {
@@ -1082,7 +1083,10 @@ impl Transform for Fun_ {
                 {
                     __binding_12.transform(env, &mut pass.clone())
                 }
-                { __binding_13.transform(env, &mut pass.clone()) }
+                {
+                    __binding_13.transform(env, &mut pass.clone())
+                }
+                { __binding_14.transform(env, &mut pass.clone()) }
             }
         }
     }
@@ -1870,7 +1874,8 @@ impl Transform for Method_ {
                 user_attributes: ref mut __binding_15,
                 ret: ref mut __binding_17,
                 external: ref mut __binding_18,
-                doc_comment: ref mut __binding_19,
+                hidden: ref mut __binding_19,
+                doc_comment: ref mut __binding_20,
                 ..
             } => {
                 {
@@ -1926,7 +1931,10 @@ impl Transform for Method_ {
                 {
                     __binding_18.transform(env, &mut pass.clone())
                 }
-                { __binding_19.transform(env, &mut pass.clone()) }
+                {
+                    __binding_19.transform(env, &mut pass.clone())
+                }
+                { __binding_20.transform(env, &mut pass.clone()) }
             }
         }
     }

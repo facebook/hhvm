@@ -31,7 +31,7 @@ If you only meant to test for `null`, use `$x is nonnull` instead
            };
          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
          m_ret = ((~int), (Some ([15:33-36], (Hprim Tint)))); m_external = false; 
-         m_doc_comment = None }
+         m_hidden = false; m_doc_comment = None }
         ];
       c_xhp_children = []; c_xhp_attrs = [];
       c_namespace =

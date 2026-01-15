@@ -23,7 +23,7 @@
           ];
         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([5:3-13], (Return (Some ((), [5:10-12], (Lvar ([5:10-12], $x))))))] }; 
         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([4:10-12], "__SupportDynamicType"); ua_params = [] }]; 
-        f_external = false; f_doc_comment = None };
+        f_external = false; f_hidden = false; f_doc_comment = None };
       fd_internal = false; fd_module = None;
       fd_tparams =
       [{ tp_variance = Invariant; tp_name = ([4:13-14], "T"); tp_constraints = [(Constraint_as, ([4:13-14], (Happly (([4:13-14], "\\HH\\supportdyn"), [([4:13-14], Hmixed)]))))]; 
@@ -67,12 +67,12 @@
                      f_params = []; f_ctxs = None; f_unsafe_ctxs = None; 
                      f_body = { fb_ast = [([9:3-16], (Return (Some ((), [9:10-15], (String "foo")))))] }; 
                      f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-                     f_doc_comment = None },
+                     f_hidden = false; f_doc_comment = None },
                    [])))
                ]
              }
            ];
-         f_external = false; f_doc_comment = None };
+         f_external = false; f_hidden = false; f_doc_comment = None };
        fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
        fd_package = None })
   ]

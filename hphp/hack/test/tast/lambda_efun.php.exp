@@ -37,7 +37,7 @@ Errors:
                               (Return (Some ((~int), [15:15-22], (Binop { bop = Plus; lhs = ((~int), [15:15-17], (Lvar ([15:15-17], $y))); rhs = ((int), [15:20-22], (Lvar ([15:20-22], $z))) })))))]
                             };
                           f_fun_kind = FSync; f_user_attributes = []; 
-                          f_external = false; f_doc_comment = None },
+                          f_external = false; f_hidden = false; f_doc_comment = None },
                         [((int), ([15:15-17], $y))])))
                     )))));
             ([16:3-14],
@@ -72,7 +72,7 @@ Errors:
                                 (Return (Some ((~int), [19:12-19], (Binop { bop = Plus; lhs = ((~int), [19:12-14], (Lvar ([19:12-14], $y))); rhs = ((int), [19:17-19], (Lvar ([19:17-19], $z))) })))))]
                               };
                             f_fun_kind = FSync; f_user_attributes = []; 
-                            f_external = false; f_doc_comment = None };
+                            f_external = false; f_hidden = false; f_doc_comment = None };
                           ef_use = [((int), ([18:26-28], $y))]; ef_closure_class_name = None; 
                           ef_is_expr_tree_virtual_expr = false }))
                     )))));
@@ -113,7 +113,7 @@ Errors:
                               (Return (Some ((int), [23:21-28], (Binop { bop = Plus; lhs = ((int), [23:21-23], (Lvar ([23:21-23], $a))); rhs = ((int), [23:26-28], (Lvar ([23:26-28], $b))) })))))]
                             };
                           f_fun_kind = FSync; f_user_attributes = []; 
-                          f_external = false; f_doc_comment = None },
+                          f_external = false; f_hidden = false; f_doc_comment = None },
                         [])))
                     )))));
             ([24:3-17],
@@ -129,7 +129,7 @@ Errors:
             ]
           };
         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([12:10-13], "__SupportDynamicType"); ua_params = [] }]; 
-        f_external = false;
+        f_external = false; f_hidden = false;
         f_doc_comment =
         (Some ([2:1-10:4],
                "/**\n * Copyright (c) 2014, Facebook, Inc.\n * All rights reserved.\n *\n * This source code is licensed under the MIT license found in the\n * LICENSE file in the \"hack\" directory of this source tree.\n *\n *\n */"))

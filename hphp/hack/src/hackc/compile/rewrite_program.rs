@@ -281,6 +281,7 @@ fn extract_debugger_main(
             params: vec![],
         }]),
         external: false,
+        hidden: false,
         doc_comment: None,
     };
     let fd = FunDef {

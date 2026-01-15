@@ -21,6 +21,6 @@
             ([6:3-13], (Expr ((nothing), [6:3-12], (Array_get (((keyset<nothing>), [6:3-6], (Lvar ([6:3-6], $xs))), (Some ((mixed), [6:7-11], (Lvar ([6:7-11], $idx)))))))))]
           };
         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([3:10-32], "__SupportDynamicType"); ua_params = [] }]; 
-        f_external = false; f_doc_comment = None };
+        f_external = false; f_hidden = false; f_doc_comment = None };
       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
       fd_package = None })

@@ -18,7 +18,7 @@
           ];
         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([5:3-15], (Return (Some ((null), [5:10-14], Null))))] }; 
         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([4:10-16], "__SupportDynamicType"); ua_params = [] }]; 
-        f_external = false; f_doc_comment = None };
+        f_external = false; f_hidden = false; f_doc_comment = None };
       fd_internal = false; fd_module = None;
       fd_tparams =
       [{ tp_variance = Invariant; tp_name = ([4:17-19], "Tv"); tp_constraints = [(Constraint_as, ([4:17-19], (Happly (([4:17-19], "\\HH\\supportdyn"), [([4:17-19], Hmixed)]))))]; 
@@ -63,7 +63,7 @@
              ]
            };
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([8:10-16], "__SupportDynamicType"); ua_params = [] }]; 
-         f_external = false; f_doc_comment = None };
+         f_external = false; f_hidden = false; f_doc_comment = None };
        fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
        fd_package = None });
   (Fun
@@ -87,7 +87,7 @@
            ];
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([5:3-15], (Return (Some ((null), [5:10-14], Null))))] }; 
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([4:10-16], "__SupportDynamicType"); ua_params = [] }]; 
-         f_external = false; f_doc_comment = None };
+         f_external = false; f_hidden = false; f_doc_comment = None };
        fd_internal = false; fd_module = None;
        fd_tparams =
        [{ tp_variance = Invariant; tp_name = ([4:17-19], "Tv"); tp_constraints = [(Constraint_as, ([4:17-19], (Happly (([4:17-19], "\\HH\\supportdyn"), [([4:17-19], Hmixed)]))))];
@@ -132,6 +132,6 @@
              ]
            };
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([8:10-16], "__SupportDynamicType"); ua_params = [] }]; 
-         f_external = false; f_doc_comment = None };
+         f_external = false; f_hidden = false; f_doc_comment = None };
        fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
        fd_package = None })

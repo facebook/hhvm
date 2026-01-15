@@ -350,6 +350,7 @@ let method_def ~is_disposable env cls m =
       Aast.m_ret = (ret_locl_ty, return_hint);
       Aast.m_body = { Aast.fb_ast = tb };
       Aast.m_external = m.m_external;
+      Aast.m_hidden = m.m_hidden;
       Aast.m_doc_comment = m.m_doc_comment;
     }
   in

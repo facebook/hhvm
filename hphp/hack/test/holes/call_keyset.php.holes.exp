@@ -17,7 +17,7 @@
          m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([Pos.none], Noop)] }; 
          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
          m_ret = ((void), (Some ([4:38-42], (Hprim Tvoid)))); m_external = false; 
-         m_doc_comment = None }
+         m_hidden = false; m_doc_comment = None }
         ];
       c_xhp_children = []; c_xhp_attrs = [];
       c_namespace =
@@ -44,7 +44,7 @@
            ];
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([7:10-11], "__SupportDynamicType"); ua_params = [] }]; 
-         f_external = false; f_doc_comment = None };
+         f_external = false; f_hidden = false; f_doc_comment = None };
        fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
        fd_package = None });
   (Fun
@@ -90,7 +90,7 @@
              ]
            };
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([9:10-21], "__SupportDynamicType"); ua_params = [] }]; 
-         f_external = false; f_doc_comment = None };
+         f_external = false; f_hidden = false; f_doc_comment = None };
        fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
        fd_package = None });
   (Fun
@@ -154,7 +154,7 @@
              ]
            };
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([21:10-26], "__SupportDynamicType"); ua_params = [] }]; 
-         f_external = false; f_doc_comment = None };
+         f_external = false; f_hidden = false; f_doc_comment = None };
        fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
        fd_package = None });
   (Class
@@ -176,7 +176,7 @@
           m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([Pos.none], Noop)] }; 
           m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
           m_ret = ((dynamic), (Some ([4:38-42], (Hprim Tvoid)))); m_external = false; 
-          m_doc_comment = None }
+          m_hidden = false; m_doc_comment = None }
          ];
        c_xhp_children = []; c_xhp_attrs = [];
        c_namespace =
@@ -203,7 +203,7 @@
            ];
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([7:10-11], "__SupportDynamicType"); ua_params = [] }]; 
-         f_external = false; f_doc_comment = None };
+         f_external = false; f_hidden = false; f_doc_comment = None };
        fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
        fd_package = None });
   (Fun
@@ -266,6 +266,6 @@
              ]
            };
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([21:10-26], "__SupportDynamicType"); ua_params = [] }]; 
-         f_external = false; f_doc_comment = None };
+         f_external = false; f_hidden = false; f_doc_comment = None };
        fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
        fd_package = None })

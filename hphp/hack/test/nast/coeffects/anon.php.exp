@@ -24,7 +24,7 @@
                            f_unsafe_ctxs = (Some ([3:28-36], [([3:29-35], (Happly (([3:29-35], "\\HH\\Contexts\\Unsafe\\output"), [])))]));
                            f_body = { fb_ast = [([3:51-60], (Return (Some ((), [3:58-59], (Int "0")))))] }; 
                            f_fun_kind = FSync; f_user_attributes = []; 
-                           f_external = false; f_doc_comment = None };
+                           f_external = false; f_hidden = false; f_doc_comment = None };
                          ef_use = []; ef_closure_class_name = None; ef_is_expr_tree_virtual_expr = false }))
                    )))));
             ([5:3-10], (Expr ((), [5:3-9], (Assign (((), [5:3-5], (Lvar ([5:3-5], $x))), None, ((), [5:8-9], (Int "1")))))));
@@ -42,7 +42,7 @@
                             f_unsafe_ctxs = (Some ([6:28-37], [([6:29-36], (Happly (([6:29-36], "\\HH\\Contexts\\Unsafe\\non_det"), [])))]));
                             f_body = { fb_ast = [([6:51-61], (Return (Some ((), [6:58-60], (Lvar ([6:58-60], $x))))))] }; 
                             f_fun_kind = FSync; f_user_attributes = []; 
-                            f_external = false; f_doc_comment = None };
+                            f_external = false; f_hidden = false; f_doc_comment = None };
                           ef_use = [((), ([6:43-47], $ret))]; ef_closure_class_name = None; 
                           ef_is_expr_tree_virtual_expr = false }))
                     )))));
@@ -60,14 +60,14 @@
                             f_unsafe_ctxs = (Some ([7:21-25], [([7:22-24], (Happly (([7:22-24], "\\HH\\Contexts\\Unsafe\\rx"), [])))]));
                             f_body = { fb_ast = [([7:44-54], (Return (Some ((), [7:51-53], (Lvar ([7:51-53], $x))))))] }; 
                             f_fun_kind = FSync; f_user_attributes = []; 
-                            f_external = false; f_doc_comment = None };
+                            f_external = false; f_hidden = false; f_doc_comment = None };
                           ef_use = [((), ([7:36-40], $ret))]; ef_closure_class_name = None; 
                           ef_is_expr_tree_virtual_expr = false }))
                     )))))
             ]
           };
         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([2:10-29], "__SupportDynamicType"); ua_params = [] }]; 
-        f_external = false; f_doc_comment = None };
+        f_external = false; f_hidden = false; f_doc_comment = None };
       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
       fd_package = None })
   ]

@@ -49,7 +49,7 @@ Errors:
                               ([11:5-18], (Return (Some ((~int), [11:12-17], (Lvar ([11:12-17], $item))))))]
                             };
                           f_fun_kind = FSync; f_user_attributes = []; 
-                          f_external = false; f_doc_comment = None },
+                          f_external = false; f_hidden = false; f_doc_comment = None },
                         [((Vector<int>), ([10:13-19], $items))])))
                     )))));
             ([13:3-17],
@@ -60,6 +60,6 @@ Errors:
             ([14:3-15], (Return (Some ((~int), [14:10-14], (Call { func = (((function(): ~int)), [14:10-12], (Lvar ([14:10-12], $f))); targs = []; args = []; unpacked_arg = None })))))]
           };
         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([3:10-14], "__SupportDynamicType"); ua_params = [] }]; 
-        f_external = false; f_doc_comment = None };
+        f_external = false; f_hidden = false; f_doc_comment = None };
       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
       fd_package = None })

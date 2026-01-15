@@ -18,6 +18,6 @@
             ([6:3-13], (Return (Some ((Pair<int, string>), [6:10-12], (Hole (((Pair<int, string>), [6:10-12], (Lvar ([6:10-12], $x))), (Pair<int, string>), (~Pair<int, bool>), Typing))))))]
           };
         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([3:10-21], "__SupportDynamicType"); ua_params = [] }]; 
-        f_external = false; f_doc_comment = None };
+        f_external = false; f_hidden = false; f_doc_comment = None };
       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
       fd_package = None })

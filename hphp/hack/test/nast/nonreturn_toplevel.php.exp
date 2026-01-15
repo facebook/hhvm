@@ -18,7 +18,7 @@ Errors:
           ];
         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([4:3-12], (Return (Some ((), [4:10-11], (Int "1")))))] }; 
         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([3:10-33], "__SupportDynamicType"); ua_params = [] }]; 
-        f_external = false; f_doc_comment = None };
+        f_external = false; f_hidden = false; f_doc_comment = None };
       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
       fd_package = None });
   (Fun
@@ -38,7 +38,7 @@ Errors:
            ];
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([8:3-12], (Return (Some ((), [8:10-11], (Int "1")))))] }; 
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([7:10-37], "__SupportDynamicType"); ua_params = [] }]; 
-         f_external = false; f_doc_comment = None };
+         f_external = false; f_hidden = false; f_doc_comment = None };
        fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
        fd_package = None })
   ]

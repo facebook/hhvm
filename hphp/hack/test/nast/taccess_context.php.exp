@@ -18,7 +18,7 @@
          m_unsafe_ctxs = (Some ([5:32-41], [([5:33-40], (Haccess (([5:33-37], (Happly (([3:7-19], "\\WithConstant"), []))), [([5:39-40], "C")])))])); 
          m_body = { fb_ast = [([Pos.none], Noop)] }; m_fun_kind = FSync; 
          m_user_attributes = []; m_readonly_ret = None; m_ret = ((), (Some ([5:43-47], (Hprim Tvoid)))); 
-         m_external = false; m_doc_comment = None }
+         m_external = false; m_hidden = false; m_doc_comment = None }
         ];
       c_xhp_children = []; c_xhp_attrs = [];
       c_namespace =
@@ -48,7 +48,7 @@
           m_unsafe_ctxs = (Some ([11:41-50], [([11:42-49], (Haccess (([11:42-46], Hthis), [([11:48-49], "C")])))])); 
           m_body = { fb_ast = [] }; m_fun_kind = FSync; m_user_attributes = []; 
           m_readonly_ret = None; m_ret = ((), (Some ([11:52-56], (Hprim Tvoid)))); 
-          m_external = false; m_doc_comment = None };
+          m_external = false; m_hidden = false; m_doc_comment = None };
          { m_span = [13:3-68]; m_annotation = (); m_final = false; m_abstract = true; 
            m_static = false; m_readonly_this = false; m_visibility = Public; 
            m_name = ([13:28-42], "uses_another_C"); m_tparams = []; m_where_constraints = []; 
@@ -56,7 +56,7 @@
            m_unsafe_ctxs = (Some ([13:44-61], [([13:45-60], (Haccess (([13:45-57], (Happly (([13:45-57], "\\WithConstant"), []))), [([13:59-60], "C")])))])); 
            m_body = { fb_ast = [] }; m_fun_kind = FSync; m_user_attributes = []; 
            m_readonly_ret = None; m_ret = ((), (Some ([13:63-67], (Hprim Tvoid)))); 
-           m_external = false; m_doc_comment = None }
+           m_external = false; m_hidden = false; m_doc_comment = None }
          ];
        c_xhp_children = []; c_xhp_attrs = [];
        c_namespace =

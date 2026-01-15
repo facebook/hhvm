@@ -38,7 +38,7 @@ Errors:
            };
          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
          m_ret = ((void), (Some ([4:57-61], (Hprim Tvoid)))); m_external = false; 
-         m_doc_comment = None }
+         m_hidden = false; m_doc_comment = None }
         ];
       c_xhp_children = []; c_xhp_attrs = [];
       c_namespace =

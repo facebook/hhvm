@@ -58,7 +58,7 @@ pub fn get_attrs_for_method(
     let is_systemlib = emitter.systemlib();
     let is_dyn_callable =
         is_systemlib || (hhbc::has_dynamically_callable(user_attrs) && !is_memoize_impl);
-    let is_no_injection = hhbc::is_no_injection(user_attrs);
+    let is_no_injection = hhbc::is_no_injection(user_attrs) || method.hidden;
     let is_prov_skip_frame = hhbc::has_provenance_skip_frame(user_attrs);
     let is_readonly_return = method.readonly_ret.is_some();
 

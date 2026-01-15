@@ -248,6 +248,7 @@ let fun_def ctx fd : Tast.fun_def Tast_with_dynamic.t option =
         Aast.f_user_attributes = user_attributes;
         Aast.f_body = { Aast.fb_ast = tb };
         Aast.f_external = f.f_external;
+        Aast.f_hidden = false;
         Aast.f_doc_comment = f.f_doc_comment;
       }
     in

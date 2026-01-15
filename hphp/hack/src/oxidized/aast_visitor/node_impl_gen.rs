@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<9058946b7019801a1e392fbf880341cf>>
+// @generated SignedSource<<b459e301cbcf4b7f5dbf63ff219d283b>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -1310,6 +1310,7 @@ impl<P: Params> Node<P> for Fun_<P::Ex, P::En> {
         self.fun_kind.accept(c, v)?;
         self.user_attributes.accept(c, v)?;
         self.external.accept(c, v)?;
+        self.hidden.accept(c, v)?;
         self.doc_comment.accept(c, v)
     }
 }
@@ -1656,6 +1657,7 @@ impl<P: Params> Node<P> for Method_<P::Ex, P::En> {
         self.readonly_ret.accept(c, v)?;
         self.ret.accept(c, v)?;
         self.external.accept(c, v)?;
+        self.hidden.accept(c, v)?;
         self.doc_comment.accept(c, v)
     }
 }

@@ -15,7 +15,7 @@
          m_where_constraints = []; m_params = []; m_ctxs = None; m_unsafe_ctxs = None; 
          m_body = { fb_ast = [] }; m_fun_kind = FSync; m_user_attributes = []; 
          m_readonly_ret = None; m_ret = ((void), (Some ([6:29-33], (Hprim Tvoid)))); 
-         m_external = true; m_doc_comment = None }
+         m_external = true; m_hidden = false; m_doc_comment = None }
         ];
       c_xhp_children = []; c_xhp_attrs = [];
       c_namespace =
@@ -101,7 +101,7 @@
              ]
            };
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([9:10-18], "__SupportDynamicType"); ua_params = [] }]; 
-         f_external = false; f_doc_comment = None };
+         f_external = false; f_hidden = false; f_doc_comment = None };
        fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
        fd_package = None });
   (Fun
@@ -167,6 +167,6 @@
              ]
            };
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([9:10-18], "__SupportDynamicType"); ua_params = [] }]; 
-         f_external = false; f_doc_comment = None };
+         f_external = false; f_hidden = false; f_doc_comment = None };
        fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
        fd_package = None })

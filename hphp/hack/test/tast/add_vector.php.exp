@@ -30,7 +30,7 @@
            };
          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
          m_ret = ((void), (Some ([15:19-30], (Hprim Tvoid)))); m_external = false; 
-         m_doc_comment = None };
+         m_hidden = false; m_doc_comment = None };
         { m_span = [19:3-21:4]; m_annotation = (); m_final = false; m_abstract = false; 
           m_static = false; m_readonly_this = false; m_visibility = Public; 
           m_name = ([19:19-22], "add"); m_tparams = []; m_where_constraints = [];
@@ -53,7 +53,7 @@
             };
           m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
           m_ret = ((void), (Some ([19:30-34], (Hprim Tvoid)))); m_external = false; 
-          m_doc_comment = None };
+          m_hidden = false; m_doc_comment = None };
         { m_span = [23:3-25:4]; m_annotation = (); m_final = false; m_abstract = false; 
           m_static = false; m_readonly_this = false; m_visibility = Public; 
           m_name = ([23:19-22], "get"); m_tparams = []; m_where_constraints = [];
@@ -75,7 +75,7 @@
             };
           m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
           m_ret = ((~T), (Some ([23:32-33], (Habstr "T")))); m_external = false; 
-          m_doc_comment = None }
+          m_hidden = false; m_doc_comment = None }
         ];
       c_xhp_children = []; c_xhp_attrs = [];
       c_namespace =
@@ -184,7 +184,7 @@
              ]
            };
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([32:10-14], "__SupportDynamicType"); ua_params = [] }]; 
-         f_external = false; f_doc_comment = None };
+         f_external = false; f_hidden = false; f_doc_comment = None };
        fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
        fd_package = None });
   (Class
@@ -227,7 +227,7 @@
             };
           m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
           m_ret = ((dynamic), (Some ([19:30-34], (Hprim Tvoid)))); m_external = false; 
-          m_doc_comment = None }
+          m_hidden = false; m_doc_comment = None }
          ];
        c_xhp_children = []; c_xhp_attrs = [];
        c_namespace =
@@ -293,6 +293,6 @@
              ]
            };
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([32:10-14], "__SupportDynamicType"); ua_params = [] }]; 
-         f_external = false; f_doc_comment = None };
+         f_external = false; f_hidden = false; f_doc_comment = None };
        fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
        fd_package = None })

@@ -151,12 +151,14 @@
                                                                     f_fun_kind = FSync; 
                                                                     f_user_attributes = []; 
                                                                     f_external = false; 
+                                                                    f_hidden = false; 
                                                                     f_doc_comment = None }, 
                                                                     [((), ([4:37-40], $0fp0))]))))]; 
                                                                     unpacked_arg = None })))))] }; 
                                                                     f_fun_kind = FSync; 
                                                                     f_user_attributes = []; 
                                                                     f_external = false; 
+                                                                    f_hidden = false; 
                                                                     f_doc_comment = None }; 
                                                                     ef_use = [((), ([4:3-13], $0fp0))]; 
                                                                     ef_closure_class_name = None; 
@@ -291,6 +293,7 @@
                                                                 f_fun_kind = FSync; 
                                                                 f_user_attributes = []; 
                                                                 f_external = false; 
+                                                                f_hidden = false; 
                                                                 f_doc_comment = None },
                                                               [((), ([4:37-40], $0fp0))]))))
                                                        ];
@@ -298,14 +301,15 @@
                                      ]
                                    };
                                  f_fun_kind = FSync; f_user_attributes = []; 
-                                 f_external = false; f_doc_comment = None },
+                                 f_external = false; f_hidden = false; 
+                                 f_doc_comment = None },
                                [((), ([4:37-40], $0fp0))])));
                            targs = []; args = []; unpacked_arg = None }));
                      et_free_vars = None }))))
             ]
           };
         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([3:10-14], "__SupportDynamicType"); ua_params = [] }]; 
-        f_external = false; f_doc_comment = None };
+        f_external = false; f_hidden = false; f_doc_comment = None };
       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
       fd_package = None })
   ]

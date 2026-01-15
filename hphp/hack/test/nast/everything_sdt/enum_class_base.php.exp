@@ -84,7 +84,7 @@
           m_params = []; m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [] }; 
           m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
           m_ret = ((), (Some ([14:27-33], (Happly (([14:27-33], "\\HH\\string"), []))))); 
-          m_external = true; m_doc_comment = None }
+          m_external = true; m_hidden = false; m_doc_comment = None }
          ];
        c_xhp_children = []; c_xhp_attrs = [];
        c_namespace =

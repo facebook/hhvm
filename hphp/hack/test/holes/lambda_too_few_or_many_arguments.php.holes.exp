@@ -29,7 +29,7 @@ Errors:
           ];
         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([4:3-14], (Return (Some ((string), [4:10-13], (String "A")))))] }; 
         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([3:10-13], "__SupportDynamicType"); ua_params = [] }]; 
-        f_external = false; f_doc_comment = None };
+        f_external = false; f_hidden = false; f_doc_comment = None };
       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
       fd_package = None });
   (Fun
@@ -63,7 +63,7 @@ Errors:
            ];
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([7:10-19], "__SupportDynamicType"); ua_params = [] }]; 
-         f_external = false; f_doc_comment = None };
+         f_external = false; f_hidden = false; f_doc_comment = None };
        fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
        fd_package = None });
   (Fun
@@ -83,7 +83,7 @@ Errors:
            ];
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([8:10-19], "__SupportDynamicType"); ua_params = [] }]; 
-         f_external = false; f_doc_comment = None };
+         f_external = false; f_hidden = false; f_doc_comment = None };
        fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
        fd_package = None });
   (Fun
@@ -178,7 +178,8 @@ Errors:
                                      f_params = []; f_ctxs = None; f_unsafe_ctxs = None; 
                                      f_body = { fb_ast = [([12:20-23], (Return (Some ((string), [12:20-23], (String "A")))))] }; 
                                      f_fun_kind = FSync; f_user_attributes = []; 
-                                     f_external = false; f_doc_comment = None },
+                                     f_external = false; f_hidden = false; 
+                                     f_doc_comment = None },
                                    []))),
                                ((function(): nothing)), ((function(int): ~string)), Typing))))
                          ];
@@ -231,7 +232,8 @@ Errors:
                                              ([15:5-16], (Return (Some ((string), [15:12-15], (String "B")))))]
                                            };
                                          f_fun_kind = FSync; f_user_attributes = []; 
-                                         f_external = false; f_doc_comment = None },
+                                         f_external = false; f_hidden = false; 
+                                         f_doc_comment = None },
                                        []))),
                                    ((function(nothing $x, bool $b): nothing)), ((function(int): ~string)), Typing))),
                                ((function(int $x, bool $b): ~string)), ((function(int): ~string)), Typing))))
@@ -240,7 +242,7 @@ Errors:
              ]
            };
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([9:10-16], "__SupportDynamicType"); ua_params = [] }]; 
-         f_external = false; f_doc_comment = None };
+         f_external = false; f_hidden = false; f_doc_comment = None };
        fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
        fd_package = None });
   (Fun
@@ -274,6 +276,6 @@ Errors:
            ];
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([7:10-19], "__SupportDynamicType"); ua_params = [] }]; 
-         f_external = false; f_doc_comment = None };
+         f_external = false; f_hidden = false; f_doc_comment = None };
        fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
        fd_package = None })

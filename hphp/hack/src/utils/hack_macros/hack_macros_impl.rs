@@ -1616,6 +1616,7 @@ mod tests {
                                     fun_kind: FunKind::FSync,
                                     user_attributes: UserAttributes(vec![]),
                                     external: false,
+                                    hidden: false,
                                     doc_comment: None,
                                 },
                                 vec![],

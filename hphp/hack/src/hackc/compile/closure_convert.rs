@@ -100,6 +100,7 @@ struct FunctionSummary<'b> {
     name: &'b Sid,
     span: &'b Pos,
     tparams: &'b [Tparam],
+    hidden: bool,
 }
 
 struct LambdaSummary<'b> {
@@ -108,6 +109,7 @@ struct LambdaSummary<'b> {
     explicit_capture: Option<&'b [CaptureLid]>,
     fun_kind: FunKind,
     span: &'b Pos,
+    hidden: bool,
 }
 
 struct MethodSummary<'b> {
@@ -118,6 +120,7 @@ struct MethodSummary<'b> {
     span: &'b Pos,
     static_: bool,
     tparams: &'b [Tparam],
+    hidden: bool,
 }
 
 enum ScopeSummary<'b> {
@@ -136,6 +139,16 @@ impl<'b> ScopeSummary<'b> {
             ScopeSummary::Function(fd) => Some(fd.span),
             ScopeSummary::Method(md) => Some(md.span),
             ScopeSummary::Lambda(ld) => Some(ld.span),
+        }
+    }
+
+    fn hidden(&self) -> bool {
+        match self {
+            ScopeSummary::TopLevel => false,
+            ScopeSummary::Class(_) => false,
+            ScopeSummary::Function(fd) => fd.hidden,
+            ScopeSummary::Method(md) => md.hidden,
+            ScopeSummary::Lambda(ld) => ld.hidden,
         }
     }
 }
@@ -594,6 +607,7 @@ fn make_closure(
         readonly_ret: fd.readonly_ret,
         ret: fd.ret.clone(),
         external: false,
+        hidden: fd.hidden,
         doc_comment: fd.doc_comment.clone(),
     };
 
@@ -659,11 +673,19 @@ fn make_closure(
 /// Translate special identifiers `__CLASS__`, `__METHOD__` and `__FUNCTION__`
 /// into literal strings. It's necessary to do this before closure conversion
 /// because the enclosing class will be changed.
-fn convert_id(scope: &Scope<'_>, Id(p, s): Id) -> Expr_ {
+fn convert_id(outer_scope: &Scope<'_>, Id(p, s): Id) -> Expr_ {
     let ret = Expr_::mk_string;
     let name = |c: &ClassName| {
         Expr_::mk_string(string_utils::mangle_xhp_id(strip_id(c).to_string()).into())
     };
+
+    let mut scope = outer_scope;
+    while scope.summary.hidden() {
+        match scope.parent {
+            Some(p) => scope = p,
+            None => break,
+        }
+    }
 
     match s {
         _ if s.eq_ignore_ascii_case(pseudo_consts::G__TRAIT__) => match scope.as_class_summary() {
@@ -809,6 +831,7 @@ fn make_dyn_meth_caller_lambda(pos: &Pos, cexpr: &Expr, fexpr: &Expr, force: boo
         fun_kind: FunKind::FSync,
         user_attributes: attrs,
         external: false,
+        hidden: false,
         doc_comment: None,
     };
     let force_val = if force { Expr_::True } else { Expr_::False };
@@ -893,6 +916,7 @@ impl<'ast, 'a: 'b, 'b> VisitorMut<'ast> for ClosureVisitor<'a, 'b> {
             span: &md.span,
             static_: md.static_,
             tparams: &md.tparams,
+            hidden: md.hidden,
         });
         self.with_subscope(scope, si, variables, |self_, scope| {
             md.body.recurse(scope, self_)?;
@@ -944,6 +968,7 @@ impl<'ast, 'a: 'b, 'b> VisitorMut<'ast> for ClosureVisitor<'a, 'b> {
                     name: &fd.name,
                     span: &fd.fun.span,
                     tparams: &fd.tparams,
+                    hidden: fd.fun.hidden,
                 });
                 self.with_subscope(scope, si, variables, |self_, scope| {
                     fd.fun.body.recurse(scope, self_)?;
@@ -1245,6 +1270,7 @@ impl<'a: 'b, 'b> ClosureVisitor<'a, 'b> {
             explicit_capture: use_vars_opt.as_deref(),
             fun_kind: fd.fun_kind,
             span: &fd.span,
+            hidden: fd.hidden,
         });
         let (_, closure_cnt_per_fun) =
             self.with_subscope(scope, si, variables, |self_, scope| {

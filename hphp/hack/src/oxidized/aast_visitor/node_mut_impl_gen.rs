@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<e417734a0f5f14255dcfcb62119632a4>>
+// @generated SignedSource<<653161734484108aa8cfee3ff65c70f0>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -1310,6 +1310,7 @@ impl<P: Params> NodeMut<P> for Fun_<P::Ex, P::En> {
         self.fun_kind.accept(c, v)?;
         self.user_attributes.accept(c, v)?;
         self.external.accept(c, v)?;
+        self.hidden.accept(c, v)?;
         self.doc_comment.accept(c, v)
     }
 }
@@ -1656,6 +1657,7 @@ impl<P: Params> NodeMut<P> for Method_<P::Ex, P::En> {
         self.readonly_ret.accept(c, v)?;
         self.ret.accept(c, v)?;
         self.external.accept(c, v)?;
+        self.hidden.accept(c, v)?;
         self.doc_comment.accept(c, v)
     }
 }

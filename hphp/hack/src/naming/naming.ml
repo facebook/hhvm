@@ -371,6 +371,7 @@ let fun_def_of_stmts ctx stmts : Nast.fun_def option =
               f_fun_kind = Ast_defs.FAsync (* enable top-level await *);
               f_user_attributes = [];
               f_external = false;
+              f_hidden = false;
               f_doc_comment = None;
             };
           fd_internal = false;

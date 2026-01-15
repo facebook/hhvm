@@ -396,6 +396,7 @@ fn from_xhp_attribute_declaration_method<'a>(
         readonly_ret: None, // TODO readonly emitter
         ret: TypeHint((), None),
         external: false,
+        hidden: false,
         doc_comment: None,
     };
     emit_method::from_ast(emitter, class, meth)

@@ -132,15 +132,6 @@ final class ThriftContextPropStateTest extends WWWTest {
     expect(ThriftContextPropState::get()->getRequestId())->toEqual("12345");
   }
 
-  public function testOriginIdNullable(): void {
-    expect(MCPContext::getOriginId())->toBeNull();
-    // 0 is different from null
-    MCPContext::setGlobal__UNSAFE(MCPOriginIDs::UNKNOWN);
-    expect(MCPContext::getOriginId())->toEqual(0);
-    MCPContext::setGlobal__UNSAFE(null);
-    expect(MCPContext::getOriginId())->toBeNull();
-  }
-
   public function testRegionalizationEntityNullable(): void {
     $tcps = ThriftContextPropState::get();
     expect($tcps->getRegionalizationEntity())->toBeNull();

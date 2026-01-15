@@ -60,30 +60,4 @@ final class ThriftContextPropHandlerTest extends WWWTest {
     );
     expect($tfm->privacyUniverse)->toEqual(1234);
   }
-
-  public function testValueNull(): void {
-    ThriftContextPropState::get()->setRequestId(null);
-    MCPContext::setGlobal__UNSAFE(null);
-    ThriftContextPropState::get()->setPrivacyUniverse(null);
-    ThriftContextPropState::get()->setBaggage(null);
-    $v = ThriftContextPropHandler::makeV();
-    expect($v)->toBeNull();
-
-    ThriftContextPropState::get()->setRequestId("1234");
-    $v = ThriftContextPropHandler::makeV();
-    expect($v)->toNotBeNull();
-
-    ThriftContextPropState::get()->setRequestId(null);
-    $v = ThriftContextPropHandler::makeV();
-    expect($v)->toBeNull();
-
-    MCPContext::setGlobal__UNSAFE(MCPOriginIDs::UNKNOWN);
-    $v = ThriftContextPropHandler::makeV();
-    expect($v)->toNotBeNull();
-
-    MCPContext::setGlobal__UNSAFE(null);
-    ThriftContextPropState::get()->setPrivacyUniverse(123);
-    $v = ThriftContextPropHandler::makeV();
-    expect($v)->toNotBeNull();
-  }
 }

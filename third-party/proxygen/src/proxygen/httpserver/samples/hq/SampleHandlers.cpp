@@ -174,7 +174,7 @@ void ServerPushHandler::onHeadersComplete(
 
   std::string gPushResponseBody;
   std::vector<std::string> pathPieces;
-  folly::split("/", path_, pathPieces);
+  folly::split('/', path_, pathPieces);
   int responseSize = 0;
   int numResponses = 1;
 

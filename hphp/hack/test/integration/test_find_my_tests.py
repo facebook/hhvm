@@ -2,7 +2,6 @@
 
 import json
 import os
-import sys
 from typing import List, Optional, Tuple
 
 import hphp.hack.test.integration.common_tests as common_tests
@@ -25,8 +24,13 @@ class TestFindMyTests(test_case.TestCase[common_tests.CommonTestDriver]):
         symbols: List[str],
         max_distance: int = 1,
         max_test_files: Optional[int] = None,
+        workers: Optional[int] = None,
     ) -> None:
-        self.test_driver.start_hh_server()
+        args = []
+        if workers is not None:
+            args = ["--max-procs", str(workers)]
+
+        self.test_driver.start_hh_server(args=args)
 
         (output, err, retcode) = self.test_driver.run_check()
         if retcode != 0:
@@ -58,6 +62,13 @@ class TestFindMyTests(test_case.TestCase[common_tests.CommonTestDriver]):
         print(f"hh response: {output}")
 
         result = json.loads(output)
+
+        result_sorted = sorted(
+            result, key=lambda entry: (entry["distance"], entry["file_path"])
+        )
+        self.assertListEqual(
+            result, result_sorted, "hh --find-my-tests result not sorted as expected"
+        )
 
         actual_tests_dict = {test["file_path"]: test["distance"] for test in result}
 
@@ -372,7 +383,7 @@ class TestFindMyTests(test_case.TestCase[common_tests.CommonTestDriver]):
         """Tests that when there are multiple paths to the same method,
         we use the shortest distance.
 
-        Uses files from g/ subdirectory.
+        Uses files from g/ subdirectory
         """
         prefix = os.path.join(self.test_driver.repo_dir, "g", "__tests__")
 
@@ -381,6 +392,56 @@ class TestFindMyTests(test_case.TestCase[common_tests.CommonTestDriver]):
             symbols=["G_Root::multiPathRoot"],
             expected_test_files=[("G_MultiPathTest.php", 3)],
             max_distance=10,
+        )
+
+    def test_determinism(self) -> None:
+        """Tests that graph is built in deterministic fashion
+
+        Uses files from h/ subdirectory
+        """
+
+        prefix = os.path.join(self.test_driver.repo_dir, "h", "__tests__")
+
+        os.makedirs(prefix, exist_ok=True)
+        for i in range(0, 100):
+            file_path = os.path.join(prefix, f"H_Test{i:02d}.php")
+            with open(file_path, "w") as f:
+                f.write(
+                    f"""<?hh
+
+class H_Test{i:02d} extends WWWTest {{
+
+    public static function test(): void {{
+        H_Root::root();
+    }}
+
+}}
+"""
+                )
+
+        # We run with more workers than just the default of 2, since MultiWorker is a main
+        # source of nondeterminism in hh.
+        workers = 10
+
+        # We cap the number returned files at half of what we would be seeing otherwise.
+        # The whole point of this test is that the cut-off should be deterministic
+        max_test_files = 50
+
+        # Various folds on lists cause us to reverse lists during graph construction.
+        # That means that in the current implementation, we end up returning
+        # Test50.php to Test99.php, not Test00.php to Test49.php.
+        # Nothing wrong with that, we don't care as long it's deterministic.
+        expected_test_files: List[Tuple[str, Optional[int]]] = [
+            (f"H_Test{i:02d}.php", 1) for i in range(50, 100)
+        ]
+
+        self.check_has_tests_with_distances(
+            prefix=prefix,
+            symbols=["H_Root::root"],
+            expected_test_files=expected_test_files,
+            max_distance=10,
+            max_test_files=max_test_files,
+            workers=workers,
         )
 
 

@@ -105,6 +105,20 @@ let search ctx target include_defs ~files genv =
       files
       ~stream_file:None
   in
+  let open SearchTypes.Find_refs in
+  let compare { pos = pos1; name = name1 } { pos = pos2; name = name2 } =
+    (* We want to compare by pos (most notably: by file),
+       and then by the referenced symbol name. *)
+    let pos_compare = Pos.compare pos1 pos2 in
+    if pos_compare = 0 then
+      String.compare name1 name2
+    else
+      pos_compare
+  in
+
+  (* FindRefsService.find_references uses MultiWorker, which causes the ordering of elements in res
+     to be non-deterministic *)
+  let res = List.dedup_and_sort res ~compare in
   strip_ns res
 
 let search_member
@@ -277,7 +291,7 @@ module Symbol_def = struct
     class_name: string;  (** Does not have leading \*)
     member_name: string;
   }
-  [@@deriving show, ord, sexp, hash]
+  [@@deriving show, sexp, hash]
 
   (** We do not categorize typedefs as classish because there is no corresponding Ast_defs.classish_kind for typedefs.
       This is different from ServerFindRefs, which uses the "Class" action for typedefs. *)
@@ -289,7 +303,51 @@ module Symbol_def = struct
         kind: Ast_defs.classish_kind;
       }
     | Typedef of { name: string  (** Does not have leading \ *) }
-  [@@deriving show, ord, sexp, hash]
+  [@@deriving show, sexp, hash]
+
+  type kind =
+    | KMethod
+    | KTypeconst
+    | KClassish
+    | KTypedef
+  [@@deriving ord, sexp, hash]
+
+  let to_kind = function
+    | Method _ -> KMethod
+    | Typeconst _ -> KTypeconst
+    | Classish _ -> KClassish
+    | Typedef _ -> KTypedef
+
+  let to_type_name = function
+    | Method { class_name; member_name = _ } -> class_name
+    | Typeconst { class_name; member_name = _ } -> class_name
+    | Classish { name; kind = _ } -> name
+    | Typedef { name } -> name
+
+  let to_member_name = function
+    | Method { class_name = _; member_name } -> Some member_name
+    | Typeconst { class_name = _; member_name } -> Some member_name
+    | Classish { name = _; kind = _ } -> None
+    | Typedef { name = _ } -> None
+
+  let compare symbol_def1 symbol_def2 =
+    (* Compare by type name, then member name (if exists), then symbol kind *)
+    let class_cmp =
+      String.compare (to_type_name symbol_def1) (to_type_name symbol_def2)
+    in
+    if class_cmp <> 0 then
+      class_cmp
+    else
+      let member_cmp =
+        Option.compare
+          String.compare
+          (to_member_name symbol_def1)
+          (to_member_name symbol_def2)
+      in
+      if member_cmp <> 0 then
+        member_cmp
+      else
+        compare_kind (to_kind symbol_def1) (to_kind symbol_def2)
 
   type with_strategy = {
     symbol_def: t;
@@ -313,9 +371,14 @@ module Symbol_def = struct
     let strategy = Expansion_strategy.of_reason reason in
     { symbol_def = Classish { name = class_name; kind }; strategy }
 
-  (* Just here for Hash_set *)
+  (* Just here for Set *)
   module With_reason = struct
-    type t = with_reason [@@deriving sexp, hash, ord]
+    module T = struct
+      type t = with_reason [@@deriving sexp, hash, ord]
+    end
+
+    include T
+    include Comparator.Make (T)
   end
 end
 
@@ -1081,6 +1144,8 @@ module Selection_graph = struct
     let added_root_symbols =
       Hashtbl.fold nodes ~init:[] ~f:(fun ~key:_ ~data acc ->
           data.symbol_s :: acc)
+      (* need to sort to make graph construction deterministic! *)
+      |> List.sort ~compare:Symbol_def.compare_with_strategy
     in
     List.iter added_root_symbols ~f:(fun root_symbol ->
         match root_symbol.symbol_def with
@@ -1121,9 +1186,9 @@ module Selection_graph = struct
           (* referencing_defs may include duplicates.
              We need to skip them to avoid creating duplicate edges between nodes *)
           let referencing_defs_dedup =
-            Hash_set.of_list (module Symbol_def.With_reason) referencing_defs
+            Set.of_list (module Symbol_def.With_reason) referencing_defs
           in
-          Hash_set.iter
+          Set.iter
             referencing_defs_dedup
             ~f:(fun { symbol_def = referencing_def; reason } ->
               let referencing_symbol_s : Symbol_def.with_strategy =
@@ -1160,10 +1225,23 @@ module Selection_graph = struct
 
     let* () = check_invariants nodes in
 
-    Result.Ok
-      (Hashtbl.fold test_files ~init:[] ~f:(fun ~key ~data acc ->
-           let open ServerCommandTypes.Find_my_tests in
-           { file_path = key; distance = data } :: acc))
+    let compare entry1 entry2 =
+      let open ServerCommandTypes.Find_my_tests in
+      let dist_compare = Int.compare entry1.distance entry2.distance in
+      if dist_compare = 0 then
+        String.compare entry1.file_path entry2.file_path
+      else
+        dist_compare
+    in
+
+    let result =
+      Hashtbl.fold test_files ~init:[] ~f:(fun ~key ~data acc ->
+          let open ServerCommandTypes.Find_my_tests in
+          { file_path = key; distance = data } :: acc)
+    in
+    let result = List.sort result ~compare in
+
+    Result.Ok result
 end
 
 let go

@@ -54,6 +54,7 @@
 
 THRIFT_FLAG_DEFINE_bool(enable_rocket_connection_observers, false);
 THRIFT_FLAG_DEFINE_bool(thrift_enable_stream_counters, true);
+THRIFT_FLAG_DEFINE_bool(thrift_check_free_stream_thread, true);
 
 namespace apache::thrift::rocket {
 
@@ -1328,6 +1329,14 @@ void RocketServerConnection::sendMetadataPush(
 
 void RocketServerConnection::freeStream(
     StreamId streamId, bool markRequestComplete) {
+  // If we crash here, there is a possible data race on accessing `streams_`.
+  // The IOThread could be adding streams to the map concurrently, or erase
+  // here could invalidate any iterator being held by the IOThread (F14FastMap
+  // does not guarantee iterator stability on erase()).
+  if (THRIFT_FLAG(thrift_check_free_stream_thread)) {
+    getEventBase().checkIsInEventBaseThread();
+  }
+
   DestructorGuard dg(this);
 
   bufferedFragments_.erase(streamId);

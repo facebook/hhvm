@@ -2440,10 +2440,6 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 self.check_type_hint(&p.type_);
                 self.check_parameter_readonly(node);
 
-                if !p.pre_ellipsis.is_missing() {
-                    self.check_can_use_feature(node, &FeatureName::TypeSplat);
-                }
-
                 if let Some(inout_modifier) = parameter_callconv(node) {
                     if self.is_inside_async_method() {
                         self.errors.push(make_error_from_node_with_type(
@@ -5713,21 +5709,6 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             }
             ClassPtrTypeSpecifier(_) => {
                 self.check_can_use_feature(node, &FeatureName::ClassType);
-            }
-            TupleOrUnionOrIntersectionElementTypeSpecifier(c) => {
-                let has_optional = !c.optional.is_missing();
-                let has_ellipsis = !c.ellipsis.is_missing();
-                if has_optional || has_ellipsis {
-                    self.check_can_use_feature(node, &FeatureName::OpenTuples);
-                }
-                if !c.pre_ellipsis.is_missing() {
-                    self.check_can_use_feature(node, &FeatureName::TypeSplat);
-                }
-            }
-            ClosureParameterTypeSpecifier(x) => {
-                if !x.pre_ellipsis.is_missing() {
-                    self.check_can_use_feature(node, &FeatureName::TypeSplat);
-                }
             }
             _ => {}
         }

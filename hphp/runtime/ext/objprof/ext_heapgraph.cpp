@@ -39,9 +39,14 @@
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/memory-manager-defs.h"
 #include "hphp/runtime/vm/class.h"
+#include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/func-id.h"
 #include "hphp/runtime/base/heap-graph.h"
 #include "hphp/runtime/base/heap-algorithms.h"
+#include "hphp/runtime/base/rds.h"
+#include "hphp/runtime/base/rds-symbol.h"
 #include "hphp/runtime/vm/vm-regs.h"
+#include "hphp/util/match.h"
 
 namespace HPHP {
 
@@ -349,7 +354,17 @@ Array createPhpNode(HeapGraphContextPtr hgptr, int index) {
     if (auto cls = cnode.heap_object.cls) {
       node_arr.set(s_class, make_tv<KindOfPersistentString>(cls->name()));
     }
+  } else {
+    // Add memo function info if this is a memo cache node
+    if (node.funcId != FuncId::Invalid) {
+      auto func = Func::fromFuncId(node.funcId);
+      node_arr.set(s_func, make_tv<KindOfPersistentString>(func->name()));
+      if (func->cls()) {
+        node_arr.set(s_class, make_tv<KindOfPersistentString>(func->cls()->name()));
+      }
+    }
   }
+
   return node_arr;
 }
 
@@ -422,6 +437,7 @@ OptResource HHVM_FUNCTION(heapgraph_create, void) {
     auto& node = hg.nodes[i];
     auto& cnode = cnodes[i];
     if (!node.is_root) {
+      // For non-root nodes, only touch heap_object union member
       auto obj = innerObj(node.h);
       cnode.heap_object.kind = node.h->kind();
       cnode.heap_object.cls = obj ? obj->getVMClass() : nullptr;

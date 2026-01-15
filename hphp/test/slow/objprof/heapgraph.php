@@ -2,9 +2,41 @@
 
 class RootClass {
   public darray<string, mixed> $children = dict[];
+  public SomeChildOfMemoize $childWithMemoize;
+
+  public function __construct() {
+    $this->childWithMemoize = new SomeChildOfMemoize();
+  }
+
   <<__Memoize>>
   public static function getInstance() :mixed{
     return new RootClass();
+  }
+}
+
+class ParentWithMemoizeAndMemoizeLSB {
+  <<__MemoizeLSB>>
+  public static function doMemoizedLSBWork(): mixed {
+    return json_encode(vec[1,2,3]);
+  }
+  <<__MemoizeLSB>>
+  public static function doMemoizedLSBWorkWithParam(int $a): mixed {
+    return json_encode(vec[$a,2,3]);
+  }
+  <<__Memoize>>
+  public static function doStaticMemoizedWorkWithParam(int $a): mixed {
+    return json_encode(vec[$a,2,3]);
+  }
+  <<__Memoize>>
+  public function doInstanceMemoizedWorkWithParam(int $a): mixed {
+    return json_encode(vec[1,2,3]);
+  }
+}
+
+class SomeChildOfMemoize extends ParentWithMemoizeAndMemoizeLSB {
+  <<__Memoize>>
+  public function doInstanceMemoizedWork(): mixed {
+    return json_encode(vec[1,2,3]);
   }
 }
 
@@ -52,12 +84,11 @@ function echo_flush() :mixed{
   ObjprofHeapgraphPhp::$echobuf = vec[];
 }
 function showTestClasses($node) :mixed{
-
-
-
   $classname = idx($node, 'class', 'no class...');
   $kind = $node['kind'];
   $testclasses = dict[
+    SomeChildOfMemoize::class => 1,
+    ParentWithMemoizeAndMemoizeLSB::class => 1,
     ChildWithClosureMember::class => 1,
     ParentWithClosureTarget::class => 1,
     RootClass::class => 1,
@@ -116,6 +147,20 @@ function showTestEdge($edge) :mixed{
   }
 }
 
+function showMemoizations($node) :mixed{
+  if (idx($node, 'kind') != "Root") {
+    return;
+  }
+
+  $classname = idx($node, 'class');
+  $func = idx($node, 'func');
+  if ($classname === null || $func === null) {
+    return;
+  }
+
+  echo_buffer("$classname::$func\n");
+}
+
 function showAllEdges($hg, $edges) :mixed{
   foreach ($edges as $edge) {
     echo_buffer(edgeName($hg, $edge)."\n");
@@ -142,6 +187,7 @@ function printNode($node) :mixed{
   if (isset($node['func'])) echo $node['func']." ";
   if (isset($node['local'])) echo $node['local']." ";
   if (isset($node['prop'])) echo $node['prop']." ";
+  if (isset($node['type'])) echo $node['type']." ";
   echo "\n";
 }
 
@@ -178,6 +224,13 @@ function entrypoint_heapgraph(): void {
   $r = RootClass::getInstance();
   $r->children['MemoizedSingleton'] = new ParentWithClosureTarget();
   $r->children['MemoizedSingleton']->child->doWork();
+
+  // Memoize related tests
+  $r->childWithMemoize->doInstanceMemoizedWork();
+  $r->childWithMemoize->doInstanceMemoizedWorkWithParam(42);
+  SomeChildOfMemoize::doMemoizedLSBWork();
+  SomeChildOfMemoize::doMemoizedLSBWorkWithParam(42);
+  SomeChildOfMemoize::doStaticMemoizedWorkWithParam(42);
 
   // We do some consolidation here because the behavior when testing
   // is really non-deterministic. Both on order of scans and also
@@ -223,6 +276,10 @@ function entrypoint_heapgraph(): void {
   echo "\nTraversing first capture:\n";
   ObjprofHeapgraphPhp::$hg_for_closure = $hg;
   heapgraph_foreach_node($hg, showTestClasses<>);
+  echo_flush();
+
+  echo "\nTraversing nodes for memoizations:\n";
+  heapgraph_foreach_node($hg, showMemoizations<>);
   echo_flush();
 
   echo "\nTraversing edges for first capture:\n";

@@ -18,7 +18,10 @@
 #include "hphp/runtime/base/heap-algorithms.h"
 #include "hphp/runtime/base/heap-scan.h"
 #include "hphp/runtime/base/request-info.h"
+#include "hphp/runtime/base/rds.h"
+#include "hphp/runtime/base/rds-symbol.h"
 #include "hphp/util/ptr-map.h"
+#include "hphp/util/match.h"
 
 #include <vector>
 
@@ -55,9 +58,10 @@ size_t addPtr(HeapGraph& g, int from, int to, HeapGraph::PtrKind kind,
  */
 void addRootNode(HeapGraph& g, const PtrMap<const HeapObject*>& blocks,
                  type_scan::Scanner& scanner,
-                 const void* h, size_t size, type_scan::Index ty) {
+                 const void* h, size_t size, type_scan::Index ty,
+                 FuncId funcId = FuncId::Invalid) {
   auto from = g.nodes.size();
-  g.nodes.push_back(HeapGraph::Node{nullptr, size, true, ty, -1, -1});
+  g.nodes.push_back(HeapGraph::Node{funcId, size, ty});
   g.root_nodes.push_back(from);
   scanner.scanByIndex(ty, h, size);
   scanner.finish(
@@ -143,7 +147,7 @@ HeapGraph makeHeapGraph(bool include_free) {
         ty = type_scan::kIndexUnknown;
         break;
     }
-    g.nodes.push_back(HeapGraph::Node{h, size, false, ty, -1, -1});
+    g.nodes.push_back(HeapGraph::Node{h, size, ty});
   });
 
   // find root nodes
@@ -153,7 +157,40 @@ HeapGraph makeHeapGraph(bool include_free) {
     // returning, since at least one will be the C++ stack, and some
     // nodes will only exist for the duration of the call to this lambda,
     // for example EphemeralPtrWrapper<T>.
-    addRootNode(g, blocks, scanner, h, size, tyindex);
+    
+    // Try to extract FuncId if this is a memo cache root in RDS
+    FuncId funcId = FuncId::Invalid;
+    auto ptr = reinterpret_cast<uintptr_t>(h);
+    auto base = reinterpret_cast<uintptr_t>(rds::tl_base);
+    if (rds::tl_base && ptr >= base) {
+      auto handle = static_cast<rds::Handle>(ptr - base);
+      if (rds::isValidHandle(handle) &&
+          (rds::isNormalHandle(handle) || rds::isLocalHandle(handle))) {
+        auto sym = rds::reverseLinkExact(handle);
+        if (sym.has_value()) {
+          match(
+            sym.value(),
+            [&](const rds::StaticMemoCache& memo_cache) {
+              funcId = memo_cache.funcId;
+            },
+            [&](const rds::LSBMemoCache& lsb_cache) {
+              funcId = lsb_cache.funcId;
+            },
+            [&](const rds::StaticMemoValue& memo_value) {
+              funcId = memo_value.funcId;
+            },
+            [&](const rds::LSBMemoValue& lsb_value) {
+              funcId = lsb_value.funcId;
+            },
+            [&](auto const&) {
+              // ignore other RDS symbol types
+            }
+          );
+        }
+      }
+    }
+    
+    addRootNode(g, blocks, scanner, h, size, tyindex, funcId);
   });
 
   // find heap->heap pointers

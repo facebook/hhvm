@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "hphp/runtime/vm/func-id.h"
 #include "hphp/util/type-scan.h"
 #include <vector>
 #include <cstdint>
@@ -50,12 +51,25 @@ struct HeapGraph {
   };
   static constexpr auto NumPtrKinds = 3;
   struct Node {
-    const HeapObject* h; // nullptr for roots
+    union {
+      const HeapObject* h; // non-null for non-roots
+      FuncId funcId;       // for memo cache roots
+    };
     size_t size;
     bool is_root;
     type_scan::Index tyindex;
     int first_out;
     int first_in; // first out-ptr and in-ptr, respectively
+
+    // Constructor for heap object nodes (non-roots)
+    Node(const HeapObject* heap_obj, size_t sz, type_scan::Index ty)
+        : h(heap_obj), size(sz), is_root(false), tyindex(ty),
+          first_out(-1), first_in(-1) {}
+
+    // Constructor for root nodes
+    Node(FuncId func_id, size_t sz, type_scan::Index ty)
+        : funcId(func_id), size(sz), is_root(true), tyindex(ty),
+          first_out(-1), first_in(-1) {}
   };
   struct Ptr {
     int from, to; // node ids. if root, from == -1
@@ -122,4 +136,3 @@ std::vector<int> makeParentTree(const HeapGraph&);
 bool checkPointers(const HeapGraph& g, const char* phase);
 
 }
-

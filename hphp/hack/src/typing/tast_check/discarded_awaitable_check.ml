@@ -190,15 +190,16 @@ let visitor =
         this#on_expr (env, disallow_due_to_cast ctx env) e;
         this#on_block (env, ctx) b1;
         this#on_block (env, ctx) b2
-      | Do (b, e) ->
+      | Do (b, (_, _, e)) ->
         this#on_block (env, ctx) b;
         this#on_expr (env, disallow_due_to_cast ctx env) e
-      | While (e, b) ->
+      | While ((_, _, e), b) ->
         this#on_expr (env, disallow_due_to_cast ctx env) e;
         this#on_block (env, ctx) b
-      | For (e1, e2, e3, b) ->
+      | For (e1, e2, (_, _, e3), b) ->
         List.iter e1 ~f:(this#on_expr (env, ctx));
-        Option.iter e2 ~f:(this#on_expr (env, disallow_due_to_cast ctx env));
+        Option.iter e2 ~f:(fun (_, _, e) ->
+            this#on_expr (env, disallow_due_to_cast ctx env) e);
         List.iter e3 ~f:(this#on_expr (env, ctx));
         this#on_block (env, ctx) b
       | Switch (e, casel, dfl) ->

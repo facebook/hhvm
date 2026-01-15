@@ -15,6 +15,7 @@ use nast::Expr_;
 use nast::Hint;
 use nast::Hint_;
 use nast::Lid;
+use nast::LoopIter;
 use nast::Pos;
 use nast::ReifyKind;
 use nast::Stmt;
@@ -543,7 +544,7 @@ impl<'a> VisitorMut<'a> for TypedLocal {
                 self.join(&mut vec![then_env, else_env], env);
                 Ok(())
             }
-            Stmt_::For(box (init_exprs, cond, update_exprs, body)) => {
+            Stmt_::For(box (init_exprs, cond, LoopIter(_, _, update_exprs), body)) => {
                 let mut used_tmps = vec![];
                 let mut new_init_exprs =
                     self.add_enforcement_exprs_in_list(env, init_exprs, &mut used_tmps)?;

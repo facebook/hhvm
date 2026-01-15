@@ -923,11 +923,11 @@ impl<'ast> VisitorMut<'ast> for Checker {
                 let new_lenv = self.handle_single_block(context, context.locals.clone(), b);
                 let block_lenv = self.handle_loop(context, new_lenv, b, None);
                 context.locals = block_lenv;
-                self.visit_expr(context, cond)
+                self.visit_expr(context, &mut cond.2)
             }
             aast::Stmt_::While(w) => {
                 let (cond, b) = &mut **w;
-                self.visit_expr(context, cond)?;
+                self.visit_expr(context, &mut cond.2)?;
                 let old_lenv = context.locals.clone();
                 let new_lenv = self.handle_loop(context, old_lenv, b, None);
                 context.locals = new_lenv;
@@ -940,11 +940,11 @@ impl<'ast> VisitorMut<'ast> for Checker {
                 }
                 match term {
                     Some(t) => {
-                        self.visit_expr(context, t)?;
+                        self.visit_expr(context, &mut t.2)?;
                     }
                     None => {}
                 }
-                for inc in increment {
+                for inc in &mut increment.2 {
                     self.visit_expr(context, inc)?;
                 }
                 let old_lenv = context.locals.clone();

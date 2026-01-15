@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d50da7fb750ca6e1c296739fc64aaf1a>>
+// @generated SignedSource<<1c57c4553e5e6cfaedc126e89808c964>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -55,6 +55,50 @@ pub type Sid = ast_defs::Id;
 #[rust_to_ocaml(and)]
 #[rust_to_ocaml(attr = "transform.opaque")]
 pub type ClassName = Sid;
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(and)]
+#[repr(C)]
+pub struct LoopCond<Ex, En>(
+    pub Option<Vec<Lid>>,
+    pub Option<Block<Ex, En>>,
+    pub Expr<Ex, En>,
+);
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(and)]
+#[repr(C)]
+pub struct LoopIter<Ex, En>(
+    pub Option<Vec<Lid>>,
+    pub Option<Block<Ex, En>>,
+    pub Vec<Expr<Ex, En>>,
+);
 
 /// Aast.program represents the top-level definitions in a Hack program.
 /// ex: Expression annotation type (when typechecking, the inferred type)
@@ -185,14 +229,14 @@ pub enum Stmt_<Ex, En> {
     ///       bar();
     ///     } while($foo)
     #[rust_to_ocaml(inline_tuple)]
-    Do(Box<(Block<Ex, En>, Expr<Ex, En>)>),
+    Do(Box<(Block<Ex, En>, LoopCond<Ex, En>)>),
     /// While loop.
     ///
     ///     while ($foo) {
     ///       bar();
     ///     }
     #[rust_to_ocaml(inline_tuple)]
-    While(Box<(Expr<Ex, En>, Block<Ex, En>)>),
+    While(Box<(LoopCond<Ex, En>, Block<Ex, En>)>),
     /// Initialize a value that is automatically disposed of.
     ///
     ///     using $foo = bar(); // disposed at the end of the function
@@ -208,8 +252,8 @@ pub enum Stmt_<Ex, En> {
     For(
         Box<(
             Vec<Expr<Ex, En>>,
-            Option<Expr<Ex, En>>,
-            Vec<Expr<Ex, En>>,
+            Option<LoopCond<Ex, En>>,
+            LoopIter<Ex, En>,
             Block<Ex, En>,
         )>,
     ),

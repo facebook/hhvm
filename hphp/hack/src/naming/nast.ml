@@ -110,6 +110,10 @@ type type_hint = unit Aast.type_hint
 
 type module_def = (unit, unit) Aast.module_def
 
+type loop_cond = (unit, unit) Aast.loop_cond
+
+type loop_iter = (unit, unit) Aast.loop_iter
+
 module ShapeMap = Ast_defs.ShapeMap
 
 let class_id_to_str = function
@@ -431,13 +435,14 @@ module Visitor_DEPRECATED = struct
 
       method on_continue : 'a -> 'a
 
-      method on_do : 'a -> block -> expr -> 'a
+      method on_do : 'a -> block -> loop_cond -> 'a
 
       method on_expr : 'a -> expr -> 'a
 
       method on_expr_ : 'a -> expr_ -> 'a
 
-      method on_for : 'a -> expr list -> expr option -> expr list -> block -> 'a
+      method on_for :
+        'a -> expr list -> loop_cond option -> loop_iter -> block -> 'a
 
       method on_foreach : 'a -> expr -> (unit, unit) as_expr -> block -> 'a
 
@@ -473,7 +478,7 @@ module Visitor_DEPRECATED = struct
 
       method on_try : 'a -> block -> catch list -> block -> 'a
 
-      method on_while : 'a -> expr -> block -> 'a
+      method on_while : 'a -> loop_cond -> block -> 'a
 
       method on_using : 'a -> (unit, unit) using_stmt -> 'a
 
@@ -675,12 +680,12 @@ module Visitor_DEPRECATED = struct
         let acc = this#on_block acc b2 in
         acc
 
-      method on_do acc b e =
+      method on_do acc b (_, _, e) =
         let acc = this#on_block acc b in
         let acc = this#on_expr acc e in
         acc
 
-      method on_while acc e b =
+      method on_while acc (_, _, e) b =
         let acc = this#on_expr acc e in
         let acc = this#on_block acc b in
         acc
@@ -690,7 +695,7 @@ module Visitor_DEPRECATED = struct
         let acc = this#on_block acc us.us_block in
         acc
 
-      method on_for acc e1 e2 e3 b =
+      method on_for acc e1 e2 (_, _, e3) b =
         let on_expr_list acc es = List.fold_left es ~f:this#on_expr ~init:acc in
 
         let acc = on_expr_list acc e1 in
@@ -698,7 +703,7 @@ module Visitor_DEPRECATED = struct
         let acc =
           match e2 with
           | None -> acc
-          | Some e -> this#on_expr acc e
+          | Some (_, _, e) -> this#on_expr acc e
         in
         let acc = this#on_block acc b in
         acc

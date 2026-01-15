@@ -122,6 +122,10 @@ type type_hint = unit Aast.type_hint
 
 type module_def = (unit, unit) Aast.module_def
 
+type loop_cond = (unit, unit) Aast.loop_cond
+
+type loop_iter = (unit, unit) Aast.loop_iter
+
 module ShapeMap = Ast_defs.ShapeMap
 
 val class_id_to_str : ('a, 'b) Aast.class_id_ -> Ast_defs.id_
@@ -245,7 +249,7 @@ module Visitor_DEPRECATED : sig
 
       method on_default_case : 'a -> default_case -> 'a
 
-      method on_do : 'a -> block -> expr -> 'a
+      method on_do : 'a -> block -> loop_cond -> 'a
 
       method on_dollardollar : 'a -> id -> 'a
 
@@ -271,7 +275,8 @@ module Visitor_DEPRECATED : sig
 
       method on_float : 'a -> string -> 'a
 
-      method on_for : 'a -> expr list -> expr option -> expr list -> block -> 'a
+      method on_for :
+        'a -> expr list -> loop_cond option -> loop_iter -> block -> 'a
 
       method on_foreach : 'a -> expr -> (unit, unit) Aast.as_expr -> block -> 'a
 
@@ -387,7 +392,7 @@ module Visitor_DEPRECATED : sig
       method on_valCollection :
         'a -> Aast.pos * Aast.vc_kind -> targ option -> expr list -> 'a
 
-      method on_while : 'a -> expr -> block -> 'a
+      method on_while : 'a -> loop_cond -> block -> 'a
 
       method on_xml : 'a -> sid -> xhp_attribute list -> expr list -> 'a
 

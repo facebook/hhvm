@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<653161734484108aa8cfee3ff65c70f0>>
+// @generated SignedSource<<25e9caf3764fc939ac2f1162f37ff865>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -1625,6 +1625,42 @@ impl<P: Params> NodeMut<P> for Lid {
         self.1.accept(c, v)
     }
 }
+impl<P: Params> NodeMut<P> for LoopCond<P::Ex, P::En> {
+    fn accept<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_loop_cond(c, self)
+    }
+    fn recurse<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        self.0.accept(c, v)?;
+        self.1.accept(c, v)?;
+        self.2.accept(c, v)
+    }
+}
+impl<P: Params> NodeMut<P> for LoopIter<P::Ex, P::En> {
+    fn accept<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_loop_iter(c, self)
+    }
+    fn recurse<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        self.0.accept(c, v)?;
+        self.1.accept(c, v)?;
+        self.2.accept(c, v)
+    }
+}
 impl<P: Params> NodeMut<P> for Method_<P::Ex, P::En> {
     fn accept<'node>(
         &'node mut self,
@@ -2135,7 +2171,7 @@ impl<P: Params> NodeMut<P> for Stmt_<P::Ex, P::En> {
         }
         #[inline]
         fn helper2<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
-            a: &'node mut Box<(Block<Ex, En>, Expr<Ex, En>)>,
+            a: &'node mut Box<(Block<Ex, En>, LoopCond<Ex, En>)>,
             c: &mut P::Context,
             v: &mut dyn VisitorMut<'node, Params = P>,
         ) -> Result<(), P::Error> {
@@ -2144,7 +2180,7 @@ impl<P: Params> NodeMut<P> for Stmt_<P::Ex, P::En> {
         }
         #[inline]
         fn helper3<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
-            a: &'node mut Box<(Expr<Ex, En>, Block<Ex, En>)>,
+            a: &'node mut Box<(LoopCond<Ex, En>, Block<Ex, En>)>,
             c: &mut P::Context,
             v: &mut dyn VisitorMut<'node, Params = P>,
         ) -> Result<(), P::Error> {
@@ -2155,8 +2191,8 @@ impl<P: Params> NodeMut<P> for Stmt_<P::Ex, P::En> {
         fn helper4<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
             a: &'node mut Box<(
                 Vec<Expr<Ex, En>>,
-                Option<Expr<Ex, En>>,
-                Vec<Expr<Ex, En>>,
+                Option<LoopCond<Ex, En>>,
+                LoopIter<Ex, En>,
                 Block<Ex, En>,
             )>,
             c: &mut P::Context,

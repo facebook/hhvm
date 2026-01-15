@@ -90,9 +90,9 @@ let handler ~as_lint =
     method! at_stmt env x =
       match snd x with
       | If (e, _, _)
-      | Do (_, e)
-      | While (e, _)
-      | For (_, Some e, _, _) ->
+      | Do (_, (_, _, e))
+      | While ((_, _, e), _)
+      | For (_, Some (_, _, e), _, _) ->
         sketchy_null_check env ~as_lint e Typing_warning.Sketchy_null_check.Neq
       | _ -> ()
   end

@@ -161,11 +161,11 @@ let rec check_stmt on_expr env (id_pos, stmt_) custom_err_config =
     let then_env = check_block new_env then_block custom_err_config in
     let else_env = check_block new_env else_block custom_err_config in
     join [then_env; else_env] env custom_err_config
-  | For (init_exprs, cond, update_exprs, body) ->
+  | For (init_exprs, cond, (_, _, update_exprs), body) ->
     let env =
       List.fold_left init_exprs ~init:env ~f:(check_assign_expr on_expr)
     in
-    Option.iter ~f:(on_expr env) cond;
+    Option.iter ~f:(fun (_, _, e) -> on_expr env e) cond;
     let env = check_block env body custom_err_config in
     List.fold_left update_exprs ~init:env ~f:(fun x ->
         check_assign_expr on_expr x)
@@ -192,11 +192,11 @@ let rec check_stmt on_expr env (id_pos, stmt_) custom_err_config =
         sm_arms
     in
     join envs env custom_err_config
-  | Do (block, cond) ->
+  | Do (block, (_, _, cond)) ->
     let env = check_block env block custom_err_config in
     on_expr env cond;
     env
-  | While (cond, block) ->
+  | While ((_, _, cond), block) ->
     on_expr env cond;
     check_block env block custom_err_config
   | Awaitall (inits, block) ->

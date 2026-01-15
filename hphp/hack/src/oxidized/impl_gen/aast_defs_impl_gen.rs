@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<cef86f4f883eb29d2a329e65f11bbc40>>
+// @generated SignedSource<<d02991a88bad87eae666c4a92fb1b9b7>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -45,10 +45,10 @@ impl<Ex, En> Stmt_<Ex, En> {
     pub fn mk_if(p0: Expr<Ex, En>, p1: Block<Ex, En>, p2: Block<Ex, En>) -> Self {
         Stmt_::If(Box::new((p0, p1, p2)))
     }
-    pub fn mk_do(p0: Block<Ex, En>, p1: Expr<Ex, En>) -> Self {
+    pub fn mk_do(p0: Block<Ex, En>, p1: LoopCond<Ex, En>) -> Self {
         Stmt_::Do(Box::new((p0, p1)))
     }
-    pub fn mk_while(p0: Expr<Ex, En>, p1: Block<Ex, En>) -> Self {
+    pub fn mk_while(p0: LoopCond<Ex, En>, p1: Block<Ex, En>) -> Self {
         Stmt_::While(Box::new((p0, p1)))
     }
     pub fn mk_using(p0: UsingStmt<Ex, En>) -> Self {
@@ -56,8 +56,8 @@ impl<Ex, En> Stmt_<Ex, En> {
     }
     pub fn mk_for(
         p0: Vec<Expr<Ex, En>>,
-        p1: Option<Expr<Ex, En>>,
-        p2: Vec<Expr<Ex, En>>,
+        p1: Option<LoopCond<Ex, En>>,
+        p2: LoopIter<Ex, En>,
         p3: Block<Ex, En>,
     ) -> Self {
         Stmt_::For(Box::new((p0, p1, p2, p3)))
@@ -255,13 +255,13 @@ impl<Ex, En> Stmt_<Ex, En> {
             _ => None,
         }
     }
-    pub fn as_do(&self) -> Option<(&Block<Ex, En>, &Expr<Ex, En>)> {
+    pub fn as_do(&self) -> Option<(&Block<Ex, En>, &LoopCond<Ex, En>)> {
         match self {
             Stmt_::Do(p0) => Some((&p0.0, &p0.1)),
             _ => None,
         }
     }
-    pub fn as_while(&self) -> Option<(&Expr<Ex, En>, &Block<Ex, En>)> {
+    pub fn as_while(&self) -> Option<(&LoopCond<Ex, En>, &Block<Ex, En>)> {
         match self {
             Stmt_::While(p0) => Some((&p0.0, &p0.1)),
             _ => None,
@@ -277,8 +277,8 @@ impl<Ex, En> Stmt_<Ex, En> {
         &self,
     ) -> Option<(
         &Vec<Expr<Ex, En>>,
-        &Option<Expr<Ex, En>>,
-        &Vec<Expr<Ex, En>>,
+        &Option<LoopCond<Ex, En>>,
+        &LoopIter<Ex, En>,
         &Block<Ex, En>,
     )> {
         match self {
@@ -374,13 +374,13 @@ impl<Ex, En> Stmt_<Ex, En> {
             _ => None,
         }
     }
-    pub fn as_do_mut(&mut self) -> Option<(&mut Block<Ex, En>, &mut Expr<Ex, En>)> {
+    pub fn as_do_mut(&mut self) -> Option<(&mut Block<Ex, En>, &mut LoopCond<Ex, En>)> {
         match self {
             Stmt_::Do(p0) => Some((&mut p0.0, &mut p0.1)),
             _ => None,
         }
     }
-    pub fn as_while_mut(&mut self) -> Option<(&mut Expr<Ex, En>, &mut Block<Ex, En>)> {
+    pub fn as_while_mut(&mut self) -> Option<(&mut LoopCond<Ex, En>, &mut Block<Ex, En>)> {
         match self {
             Stmt_::While(p0) => Some((&mut p0.0, &mut p0.1)),
             _ => None,
@@ -396,8 +396,8 @@ impl<Ex, En> Stmt_<Ex, En> {
         &mut self,
     ) -> Option<(
         &mut Vec<Expr<Ex, En>>,
-        &mut Option<Expr<Ex, En>>,
-        &mut Vec<Expr<Ex, En>>,
+        &mut Option<LoopCond<Ex, En>>,
+        &mut LoopIter<Ex, En>,
         &mut Block<Ex, En>,
     )> {
         match self {
@@ -499,13 +499,13 @@ impl<Ex, En> Stmt_<Ex, En> {
             _ => None,
         }
     }
-    pub fn as_do_into(self) -> Option<(Block<Ex, En>, Expr<Ex, En>)> {
+    pub fn as_do_into(self) -> Option<(Block<Ex, En>, LoopCond<Ex, En>)> {
         match self {
             Stmt_::Do(p0) => Some(((*p0).0, (*p0).1)),
             _ => None,
         }
     }
-    pub fn as_while_into(self) -> Option<(Expr<Ex, En>, Block<Ex, En>)> {
+    pub fn as_while_into(self) -> Option<(LoopCond<Ex, En>, Block<Ex, En>)> {
         match self {
             Stmt_::While(p0) => Some(((*p0).0, (*p0).1)),
             _ => None,
@@ -521,8 +521,8 @@ impl<Ex, En> Stmt_<Ex, En> {
         self,
     ) -> Option<(
         Vec<Expr<Ex, En>>,
-        Option<Expr<Ex, En>>,
-        Vec<Expr<Ex, En>>,
+        Option<LoopCond<Ex, En>>,
+        LoopIter<Ex, En>,
         Block<Ex, En>,
     )> {
         match self {

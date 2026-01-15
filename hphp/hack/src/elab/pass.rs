@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<3debdf63cef5c3d52166a1c0946d95f4>>
+// @generated SignedSource<<80aa049dd4a66b44616e6c9d9df84171>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -19,6 +19,38 @@ use crate::env::Env;
 type Ex = ();
 type En = ();
 pub trait Pass: PassClone {
+    #[inline(always)]
+    fn on_ty_loop_cond_top_down(
+        &mut self,
+        env: &Env,
+        elem: &mut LoopCond<Ex, En>,
+    ) -> ControlFlow<()> {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_loop_cond_bottom_up(
+        &mut self,
+        env: &Env,
+        elem: &mut LoopCond<Ex, En>,
+    ) -> ControlFlow<()> {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_loop_iter_top_down(
+        &mut self,
+        env: &Env,
+        elem: &mut LoopIter<Ex, En>,
+    ) -> ControlFlow<()> {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_loop_iter_bottom_up(
+        &mut self,
+        env: &Env,
+        elem: &mut LoopIter<Ex, En>,
+    ) -> ControlFlow<()> {
+        Continue(())
+    }
     #[inline(always)]
     fn on_ty_program_top_down(&mut self, env: &Env, elem: &mut Program<Ex, En>) -> ControlFlow<()> {
         Continue(())
@@ -1379,6 +1411,50 @@ impl Clone for Passes {
     }
 }
 impl Pass for Passes {
+    #[inline(always)]
+    fn on_ty_loop_cond_top_down(
+        &mut self,
+        env: &Env,
+        elem: &mut LoopCond<Ex, En>,
+    ) -> ControlFlow<()> {
+        for pass in &mut self.passes {
+            pass.on_ty_loop_cond_top_down(env, elem)?;
+        }
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_loop_cond_bottom_up(
+        &mut self,
+        env: &Env,
+        elem: &mut LoopCond<Ex, En>,
+    ) -> ControlFlow<()> {
+        for pass in &mut self.passes {
+            pass.on_ty_loop_cond_bottom_up(env, elem)?;
+        }
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_loop_iter_top_down(
+        &mut self,
+        env: &Env,
+        elem: &mut LoopIter<Ex, En>,
+    ) -> ControlFlow<()> {
+        for pass in &mut self.passes {
+            pass.on_ty_loop_iter_top_down(env, elem)?;
+        }
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_loop_iter_bottom_up(
+        &mut self,
+        env: &Env,
+        elem: &mut LoopIter<Ex, En>,
+    ) -> ControlFlow<()> {
+        for pass in &mut self.passes {
+            pass.on_ty_loop_iter_bottom_up(env, elem)?;
+        }
+        Continue(())
+    }
     #[inline(always)]
     fn on_ty_program_top_down(&mut self, env: &Env, elem: &mut Program<Ex, En>) -> ControlFlow<()> {
         for pass in &mut self.passes {

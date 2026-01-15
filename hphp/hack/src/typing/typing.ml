@@ -9535,7 +9535,7 @@ end = struct
           LEnv.drop_cont env C.Next
       in
       (env, Aast.Return (Some (hole_on_ty_mismatch ~ty_mismatch_opt te)))
-    | Do (b, e) ->
+    | Do (b, (_, _, e)) ->
       (* NOTE: leaks scope as currently implemented; this matches
          the behavior in naming (cf. `do_stmt` in naming/naming.ml).
       *)
@@ -9584,8 +9584,8 @@ end = struct
             in
             (env, (tb, te)))
       in
-      (env, Aast.Do (tb, te))
-    | While (e, b) ->
+      (env, Aast.Do (tb, (None, None, te)))
+    | While ((_, _, e), b) ->
       let (env, (te, tb)) =
         LEnv.stash_and_do env [C.Continue; C.Break] (fun env ->
             let env =
@@ -9623,7 +9623,7 @@ end = struct
             in
             (env, (te, tb)))
       in
-      (env, Aast.While (te, tb))
+      (env, Aast.While ((None, None, te), tb))
     | Using
         {
           us_has_await = has_await;
@@ -9647,10 +9647,10 @@ end = struct
               us_block = typed_using_block;
               us_is_block_scoped;
             } )
-    | For (e1, e2, e3, b) ->
+    | For (e1, e2, (_, _, e3), b) ->
       let e2 =
         match e2 with
-        | Some e2 -> e2
+        | Some (_, _, e2) -> e2
         | None -> ((), Pos.none, True)
       in
       let (env, (te1, te2, te3, tb)) =
@@ -9700,7 +9700,7 @@ end = struct
             in
             (env, (te1, te2, te3, tb)))
       in
-      (env, Aast.For (te1, Some te2, te3, tb))
+      (env, Aast.For (te1, Some (None, None, te2), (None, None, te3), tb))
     | Switch (((_, pos, _) as e), cl, dfl) ->
       let (env, te, ty) =
         Expr.expr ~expected:None ~ctxt:Expr.Context.default env e

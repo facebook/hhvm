@@ -93,6 +93,7 @@
                                                                     { fb_ast =
                                                                     [([4:23-45],
                                                                     (While (
+                                                                    (None, None,
                                                                     ((), [4:29-33],
                                                                     (Call
                                                                     { func =
@@ -114,7 +115,7 @@
                                                                     (), [4:29-33], (Id ([4:29-33], "__bool"))), Regular, Is_method))); 
                                                                     targs = []; 
                                                                     args = []; 
-                                                                    unpacked_arg = None })),
+                                                                    unpacked_arg = None }))),
                                                                     [([4:37-43],
                                                                     (Expr
                                                                     ((), [4:37-42],

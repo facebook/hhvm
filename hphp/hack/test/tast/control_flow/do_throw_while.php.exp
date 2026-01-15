@@ -24,7 +24,7 @@
                      (New (((exact Exception), [5:15-24], (CI ([5:15-24], "\\Exception"))), 
                         [], [(Anormal ((string), [5:25-38], (String "DoWhileBody")))], None, ((function(optional string $message, optional int $code, optional ?Exception $previous)[]: void)))))))
                  ],
-               ((nothing), [6:12-17], (Lvar ([6:12-17], $cond))))))
+               (None, None, ((nothing), [6:12-17], (Lvar ([6:12-17], $cond)))))))
             ]
           };
         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([3:10-30], "__SupportDynamicType"); ua_params = [] }]; 

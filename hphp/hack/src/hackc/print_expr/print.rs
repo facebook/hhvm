@@ -875,7 +875,7 @@ fn print_statement(
         S_::Continue => w.write_all(b"continue;\n"),
         S_::While(x) => {
             let (cond, block) = &**x;
-            write::wrap_by_(w, "while (", ") ", |w| print_expr(ctx, w, env, cond))?;
+            write::wrap_by_(w, "while (", ") ", |w| print_expr(ctx, w, env, &cond.2))?;
             print_block(ctx, w, env, block.as_ref())
         }
         S_::If(x) => {

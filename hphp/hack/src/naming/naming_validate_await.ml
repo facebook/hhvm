@@ -248,12 +248,12 @@ let visitor =
         check_expr on_error expr;
         super#on_block on_error b1;
         super#on_block on_error b2
-      | For (init_exprs, test, update, block) ->
+      | For (init_exprs, test, (_, _, update), block) ->
         List.iter init_exprs ~f:(fun expr ->
             super#on_expr on_error expr;
             check_expr on_error expr);
         (* No await in the test or update positions (parse error) *)
-        Option.iter ~f:(super#on_expr on_error) test;
+        Option.iter ~f:(fun (_, _, e) -> super#on_expr on_error e) test;
         List.iter update ~f:(super#on_expr on_error);
         super#on_block on_error block
       | Switch (case, block, default) ->

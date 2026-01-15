@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<8aaed5811ff1e2a2936dceac229d0eac>>
+// @generated SignedSource<<ece9ee3db15cd9dc6f09d9b3869995ae>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -17,6 +17,8 @@ use crate::ast_defs;
 type Ex = ();
 #[doc = r#" Toplevel definitions and methods have no "environment" annotation."#]
 type En = ();
+pub type LoopCond = aast_defs::LoopCond<Ex, En>;
+pub type LoopIter = aast_defs::LoopIter<Ex, En>;
 pub type Program = aast_defs::Program<Ex, En>;
 pub type Stmt = aast_defs::Stmt<Ex, En>;
 pub type Stmt_ = aast_defs::Stmt_<Ex, En>;

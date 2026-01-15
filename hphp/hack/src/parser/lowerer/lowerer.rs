@@ -3166,6 +3166,14 @@ fn p_stmt_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt> {
     }
 }
 
+fn p_loop_cond<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::LoopCond> {
+    Ok(ast::LoopCond(None, None, p_expr(node, env)?))
+}
+
+fn p_loop_iter<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::LoopIter> {
+    Ok(ast::LoopIter(None, None, could_map(node, env, p_expr)?))
+}
+
 fn p_while_stmt<'a>(
     env: &mut Env<'a>,
     pos: Pos,
@@ -3176,7 +3184,10 @@ fn p_while_stmt<'a>(
     let new = Stmt::new;
     Ok(new(
         pos,
-        S_::mk_while(p_expr(&c.condition, env)?, p_block(true, &c.body, env)?),
+        S_::mk_while(
+            p_loop_cond(&c.condition, env)?,
+            p_block(true, &c.body, env)?,
+        ),
     ))
 }
 
@@ -3380,8 +3391,8 @@ fn p_for_stmt<'a>(
     use ast::Stmt_ as S_;
 
     let ini = could_map(&c.initializer, env, p_expr)?;
-    let ctr = map_optional(&c.control, env, p_expr)?;
-    let eol = could_map(&c.end_of_loop, env, p_expr)?;
+    let ctr = map_optional(&c.control, env, p_loop_cond)?;
+    let eol = p_loop_iter(&c.end_of_loop, env)?;
     let blk = p_block(true, &c.body, env)?;
     Ok(Stmt::new(pos, S_::mk_for(ini, ctr, eol, blk)))
 }
@@ -3441,7 +3452,7 @@ fn p_do_stmt<'a>(
         pos,
         S_::mk_do(
             p_block(false /* remove noop */, &c.body, env)?,
-            p_expr(&c.condition, env)?,
+            p_loop_cond(&c.condition, env)?,
         ),
     ))
 }

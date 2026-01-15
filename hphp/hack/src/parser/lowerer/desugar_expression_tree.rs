@@ -2028,7 +2028,7 @@ impl RewriteState {
             // Virtualized: while (MyDsl::opertationType(...)->__bool()) {...}
             // Desugared: $0v->visitWhile(new ExprPos(...), $0v->..., vec[...])
             While(w) => {
-                let (cond, body) = *w;
+                let (ast::LoopCond(_, _, cond), body) = *w;
 
                 let rewritten_cond = self.rewrite_expr(cond, visitor_name);
                 let (virtual_body_stmts, desugar_body) = self.rewrite_stmts(body.0, visitor_name);
@@ -2045,7 +2045,11 @@ impl RewriteState {
                 let virtual_stmt = Stmt(
                     pos,
                     Stmt_::mk_while(
-                        boolify(rewritten_cond.virtual_expr, visitor_name),
+                        ast::LoopCond(
+                            None,
+                            None,
+                            boolify(rewritten_cond.virtual_expr, visitor_name),
+                        ),
                         ast::Block(virtual_body_stmts),
                     ),
                 );
@@ -2055,16 +2059,20 @@ impl RewriteState {
             // Virtualized: for (...; MyDsl::operationType(...)->__bool(); ...) {...}
             // Desugared: $0v->visitFor(new ExprPos(...), vec[...], ..., vec[...], vec[...])
             For(w) => {
-                let (init, cond, incr, body) = *w;
+                let (init, cond, ast::LoopIter(_, _, incr), body) = *w;
 
                 let (virtual_init_exprs, desugar_init_exprs) =
                     self.rewrite_exprs(init, visitor_name);
 
                 let (virtual_cond_option, desugar_cond_expr) = match cond {
-                    Some(cond) => {
+                    Some(ast::LoopCond(_, _, cond)) => {
                         let rewritten_cond = self.rewrite_expr(cond, visitor_name);
                         (
-                            Some(boolify(rewritten_cond.virtual_expr, visitor_name)),
+                            Some(ast::LoopCond(
+                                None,
+                                None,
+                                boolify(rewritten_cond.virtual_expr, visitor_name),
+                            )),
                             rewritten_cond.desugar_expr,
                         )
                     }
@@ -2092,7 +2100,7 @@ impl RewriteState {
                     Stmt_::mk_for(
                         virtual_init_exprs,
                         virtual_cond_option,
-                        virtual_incr_exprs,
+                        ast::LoopIter(None, None, virtual_incr_exprs),
                         ast::Block(virtual_body_stmts),
                     ),
                 );
@@ -2386,7 +2394,7 @@ impl LiveVars {
                     self.update_for_more_live_vars(combined_lvs);
                     self.visit_expr(&mut (), cond).unwrap();
                 }
-                Stmt_::While(box (test, body)) => {
+                Stmt_::While(box (ast::LoopCond(_, _, test), body)) => {
                     // We don't need to iterate to a fixed point, because we are
                     // only looking at the used variables on entry to the loop,
                     // rather than trying to use them at program points inside
@@ -2407,13 +2415,13 @@ impl LiveVars {
                         used: BTreeMap::default(),
                         assigned: BTreeMap::default(),
                     };
-                    for e in inc.iter().rev() {
+                    for e in inc.2.iter().rev() {
                         body_lvs.visit_expr(&mut (), e).unwrap();
                     }
                     body_lvs.update_for_stmts(body);
                     body_lvs.assigned = BTreeMap::default();
                     self.update_for_more_live_vars(body_lvs);
-                    for e in test.iter().rev() {
+                    if let Some(ast::LoopCond(_, _, e)) = test {
                         self.visit_expr(&mut (), e).unwrap();
                     }
                     for e in init.iter().rev() {

@@ -402,10 +402,10 @@ and stmt env acc st =
     let b1 = block acc b1 in
     let b2 = block acc b2 in
     S.union acc (S.inter b1 b2)
-  | Do (b, e) ->
+  | Do (b, (_, _, e)) ->
     let acc = block acc b in
     expr acc e
-  | While (e, b) ->
+  | While ((_, _, e), b) ->
     (* Run on the body for $this initialisation checks but ignore the
        accumulated initialisations because while body can run zero times. *)
     let _ = block acc b in
@@ -413,11 +413,11 @@ and stmt env acc st =
   | Using us ->
     let acc = List.fold_left (snd us.us_exprs) ~f:expr ~init:acc in
     block acc us.us_block
-  | For (el1, e_opt, el2, b) ->
+  | For (el1, e_opt, (_, _, el2), b) ->
     (* Run on the body, condition, increment, for $this initialisation checks
        but ignore the accumulated initialisations because while body can run zero
        times. *)
-    Option.iter e_opt ~f:(fun e ->
+    Option.iter e_opt ~f:(fun (_, _, e) ->
         let _ = expr acc e in
         ());
     let _ = exprl env acc el2 in

@@ -103,6 +103,8 @@
                                                                     args = []; 
                                                                     unpacked_arg = None })))))],
                                                                     (Some (
+                                                                    None, None,
+                                                                    (
                                                                     (), [5:18-22],
                                                                     (
                                                                     Call
@@ -125,7 +127,8 @@
                                                                     (), [5:18-22], (Id ([5:18-22], "__bool"))), Regular, Is_method))); 
                                                                     targs = []; 
                                                                     args = []; 
-                                                                    unpacked_arg = None }))),
+                                                                    unpacked_arg = None })))),
+                                                                    (None, None,
                                                                     [((), [5:24-35],
                                                                     (Assign ((
                                                                     (), [5:24-26], (Lvar ([5:24-26], $i))), None,
@@ -150,7 +153,7 @@
                                                                     targs = []; 
                                                                     args = []; 
                                                                     unpacked_arg = None })))]; 
-                                                                    unpacked_arg = None })))))],
+                                                                    unpacked_arg = None })))))]),
                                                                     [([6:7-13],
                                                                     (Expr
                                                                     ((), [6:7-12],

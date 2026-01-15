@@ -265,22 +265,22 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
         let ae = self#on_as_expr env ae in
         let b = self#on_block env b in
         Foreach (e, ae, b)
-      | For (e1, e2, e3, b) ->
+      | For (e1, e2, (_, _, e3), b) ->
         let on_expr_list env exprs = List.map exprs ~f:(self#on_expr env) in
 
         let e1 = on_expr_list env e1 in
         let e2 =
           match e2 with
-          | Some e2 -> Some (self#on_expr env e2)
+          | Some (_, _, e2) -> Some (None, None, self#on_expr env e2)
           | None -> None
         in
         let (env, b) = self#on_block_helper env b in
         let e3 = on_expr_list env e3 in
-        For (e1, e2, e3, b)
-      | Do (b, e) ->
+        For (e1, e2, (None, None, e3), b)
+      | Do (b, (_, _, e)) ->
         let (env, b) = self#on_block_helper env b in
         let e = self#on_expr env e in
-        Do (b, e)
+        Do (b, (None, None, e))
       | _ -> super#on_stmt_ env stmt
 
     (* The function that actually rewrites names *)

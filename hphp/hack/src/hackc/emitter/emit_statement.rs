@@ -1686,6 +1686,65 @@ fn emit_block_with_temps<'a>(
     }
 }
 
+fn emit_maybe_block<'a>(
+    env: &mut Env<'a>,
+    emitter: &mut Emitter,
+    block: &Option<ast::Block>,
+) -> Result<InstrSeq> {
+    if let Some(block) = block {
+        emit_block(env, emitter, block)
+    } else {
+        Ok(instr::empty())
+    }
+}
+
+fn emit_maybe_with_tmps<'a, F>(
+    emitter: &mut Emitter,
+    lids: &Option<Vec<ast::Lid>>,
+    emit: F,
+) -> Result<InstrSeq>
+where
+    F: FnOnce(&mut Emitter) -> Result<InstrSeq>,
+{
+    if let Some(lids) = lids {
+        scope::with_unnamed_temps(emitter, lids, emit)
+    } else {
+        emit(emitter)
+    }
+}
+
+fn emit_loop_cond<'a>(
+    env: &mut Env<'a>,
+    emitter: &mut Emitter,
+    cond: &ast::LoopCond,
+    target: Label,
+    jmpnz: bool,
+) -> Result<InstrSeq> {
+    emit_maybe_with_tmps(emitter, &cond.0, |e| {
+        Ok(InstrSeq::gather(vec![
+            emit_maybe_block(env, e, &cond.1)?,
+            if jmpnz {
+                emit_expr::emit_jmpnz(e, env, &cond.2, target)?.instrs
+            } else {
+                emit_expr::emit_jmpz(e, env, &cond.2, target)?.instrs
+            },
+        ]))
+    })
+}
+
+fn emit_loop_iter<'a>(
+    env: &mut Env<'a>,
+    emitter: &mut Emitter,
+    iter: &ast::LoopIter,
+) -> Result<InstrSeq> {
+    emit_maybe_with_tmps(emitter, &iter.0, |e| {
+        Ok(InstrSeq::gather(vec![
+            emit_maybe_block(env, e, &iter.1)?,
+            emit_expr::emit_ignored_exprs(e, env, &Pos::NONE, &iter.2)?,
+        ]))
+    })
+}
+
 fn emit_block<'a>(
     env: &mut Env<'a>,
     emitter: &mut Emitter,
@@ -1698,12 +1757,12 @@ fn emit_do<'a>(
     e: &mut Emitter,
     env: &mut Env<'a>,
     body: &[ast::Stmt],
-    cond: &ast::Expr,
+    cond: &ast::LoopCond,
 ) -> Result<InstrSeq> {
     let break_label = e.label_gen_mut().next_regular();
     let cont_label = e.label_gen_mut().next_regular();
     let start_label = e.label_gen_mut().next_regular();
-    let jmpnz_instr = emit_expr::emit_jmpnz(e, env, cond, start_label)?.instrs;
+    let jmpnz_instr = emit_loop_cond(env, e, cond, start_label, true)?;
     Ok(InstrSeq::gather(vec![
         instr::label(start_label),
         env.do_in_loop_body(e, break_label, cont_label, None, body, emit_block)?,
@@ -1716,7 +1775,7 @@ fn emit_do<'a>(
 fn emit_while<'a>(
     e: &mut Emitter,
     env: &mut Env<'a>,
-    cond: &ast::Expr,
+    cond: &ast::LoopCond,
     body: &[ast::Stmt],
 ) -> Result<InstrSeq> {
     let break_label = e.label_gen_mut().next_regular();
@@ -1731,9 +1790,9 @@ fn emit_while<'a>(
              instr_jmp continue_label;
              instr_label break_label;
     */
-    let i3 = emit_expr::emit_jmpnz(e, env, cond, start_label)?.instrs;
+    let i3 = emit_loop_cond(env, e, cond, start_label, true)?;
     let i2 = env.do_in_loop_body(e, break_label, cont_label, None, body, emit_block)?;
-    let i1 = emit_expr::emit_jmpz(e, env, cond, break_label)?.instrs;
+    let i1 = emit_loop_cond(env, e, cond, break_label, false)?;
     Ok(InstrSeq::gather(vec![
         i1,
         instr::label(start_label),
@@ -1748,8 +1807,8 @@ fn emit_for<'a>(
     e: &mut Emitter,
     env: &mut Env<'a>,
     e1: &[ast::Expr],
-    e2: Option<&ast::Expr>,
-    e3: &[ast::Expr],
+    e2: Option<&ast::LoopCond>,
+    e3: &ast::LoopIter,
     body: &[ast::Stmt],
 ) -> Result<InstrSeq> {
     let break_label = e.label_gen_mut().next_regular();
@@ -1760,7 +1819,7 @@ fn emit_for<'a>(
         env: &mut Env<'a>,
         jmpz: bool,
         label: Label,
-        cond: Option<&ast::Expr>,
+        cond: Option<&ast::LoopCond>,
     ) -> Result<InstrSeq> {
         Ok(match cond {
             None => {
@@ -1770,14 +1829,7 @@ fn emit_for<'a>(
                     instr::jmp(label)
                 }
             }
-            Some(cond) => {
-                if jmpz {
-                    emit_expr::emit_jmpz(emitter, env, cond, label)
-                } else {
-                    emit_expr::emit_jmpnz(emitter, env, cond, label)
-                }?
-                .instrs
-            }
+            Some(cond) => emit_loop_cond(env, emitter, cond, label, !jmpz)?,
         })
     }
     // TODO: this is bizarre codegen for a "for" loop.
@@ -1792,7 +1844,7 @@ fn emit_for<'a>(
     //  instr_jmp start_label;
     //  instr_label break_label;
     let i5 = emit_cond(e, env, false, start_label, e2)?;
-    let i4 = emit_expr::emit_ignored_exprs(e, env, &Pos::NONE, e3)?;
+    let i4 = emit_loop_iter(env, e, e3)?;
     let i3 = env.do_in_loop_body(e, break_label, cont_label, None, body, emit_block)?;
     let i2 = emit_cond(e, env, true, break_label, e2)?;
     let i1 = emit_expr::emit_ignored_exprs(e, env, &Pos::NONE, e1)?;

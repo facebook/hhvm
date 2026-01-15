@@ -68,15 +68,15 @@ let get_types
       method! on_If env cond then_block else_block =
         for_cond env cond "If" @ super#on_If env cond then_block else_block
 
-      method! on_While env cond block =
-        for_cond env cond "While" @ super#on_While env cond block
+      method! on_While env (_, _, cond) block =
+        for_cond env cond "While" @ super#on_While env (None, None, cond) block
 
-      method! on_Do env block cond =
-        for_cond env cond "Do" @ super#on_Do env block cond
+      method! on_Do env block (_, _, cond) =
+        for_cond env cond "Do" @ super#on_Do env block (None, None, cond)
 
       method! on_For env init cond incrs block =
         (match cond with
-        | Some cond -> for_cond env cond "For"
+        | Some (_, _, cond) -> for_cond env cond "For"
         | None -> [])
         @ super#on_For env init cond incrs block
 

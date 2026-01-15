@@ -316,7 +316,7 @@ and stmt (upcasted_info : element_info) (env : env) ((pos, stmt) : T.stmt) : env
   | A.Fallthrough -> Env.move_and_merge_next_in_cont env Cont.Fallthrough
   | A.Continue -> Env.move_and_merge_next_in_cont env Cont.Continue
   | A.Break -> Env.move_and_merge_next_in_cont env Cont.Break
-  | A.While (cond, bl) ->
+  | A.While ((_, _, cond), bl) ->
     Env.stash_and_do env [Cont.Continue; Cont.Break] @@ fun env ->
     let env = Env.save_and_merge_next_in_cont env Cont.Continue in
     let env_before_iteration = env in

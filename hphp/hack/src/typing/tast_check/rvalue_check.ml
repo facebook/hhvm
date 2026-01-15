@@ -115,10 +115,10 @@ let visitor =
       | Return (Some (_, _, Hole (e, _, _, _)))
       | Return (Some e) ->
         this#allow_non_returning (fun () -> this#on_expr env e)
-      | For (e1, e2, e3, b) ->
+      | For (e1, e2, (_, _, e3), b) ->
         this#allow_non_returning (fun () -> List.iter ~f:(this#on_expr env) e1);
         this#disallow_non_returning (fun () ->
-            Option.iter ~f:(this#on_expr env) e2);
+            Option.iter ~f:(fun (_, _, e) -> this#on_expr env e) e2);
         this#allow_non_returning (fun () -> List.iter ~f:(this#on_expr env) e3);
         this#on_block env b
       | Foreach (e1, e2, b) ->

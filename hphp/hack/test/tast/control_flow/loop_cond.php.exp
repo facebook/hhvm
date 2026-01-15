@@ -44,7 +44,7 @@
                 ((exact A), [10:3-15],
                  (Assign (((exact A), [10:3-5], (Lvar ([10:3-5], $x))), None, ((exact A), [10:8-15], (New (((exact A), [10:12-13], (CI ([10:12-13], "\\A"))), [], [], None, ((function(): void))))))))));
              ([11:3-13:4],
-              (While (((?A), [11:10-12], (Lvar ([11:10-12], $x))),
+              (While ((None, None, ((?A), [11:10-12], (Lvar ([11:10-12], $x)))),
                  [([12:5-22],
                    (Expr
                       ((?A), [12:5-21],
@@ -76,11 +76,12 @@
                   (Assign (((exact A), [17:8-10], (Lvar ([17:8-10], $x))), None, (
                      (exact A), [17:13-20], (New (((exact A), [17:17-18], (CI ([17:17-18], "\\A"))), [], [], None, ((function(): void))))))))
                   ],
-                (Some ((?A), [17:22-24], (Lvar ([17:22-24], $x)))),
-                [((?A), [17:26-42],
-                  (Assign (((?A), [17:26-28], (Lvar ([17:26-28], $x))), None,
-                     ((?A), [17:31-42], (Call { func = (((function(): ?A)), [17:31-40], (Id ([17:31-40], "\\get_A_opt"))); targs = []; args = []; unpacked_arg = None })))))
-                  ],
+                (Some (None, None, ((?A), [17:22-24], (Lvar ([17:22-24], $x))))),
+                (None, None,
+                 [((?A), [17:26-42],
+                   (Assign (((?A), [17:26-28], (Lvar ([17:26-28], $x))), None,
+                      ((?A), [17:31-42], (Call { func = (((function(): ?A)), [17:31-40], (Id ([17:31-40], "\\get_A_opt"))); targs = []; args = []; unpacked_arg = None })))))
+                   ]),
                 [])))
              ]
            };

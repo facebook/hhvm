@@ -78,6 +78,12 @@ and sid = Ast_defs.id [@@transform.opaque]
 
 and class_name = sid [@@transform.opaque]
 
+and ('ex, 'en) loop_cond =
+  lid list option * ('ex, 'en) block option * ('ex, 'en) expr
+
+and ('ex, 'en) loop_iter =
+  lid list option * ('ex, 'en) block option * ('ex, 'en) expr list
+
 (** Aast.program represents the top-level definitions in a Hack program.
  * ex: Expression annotation type (when typechecking, the inferred type)
  * en: Environment (tracking state inside functions and classes)
@@ -155,13 +161,13 @@ and ('ex, 'en) stmt_ =
       (** If statement.
        *
        *     if ($foo) { ... } else { ... } *)
-  | Do of ('ex, 'en) block * ('ex, 'en) expr
+  | Do of ('ex, 'en) block * ('ex, 'en) loop_cond
       (** Do-while loop.
        *
        *     do {
        *       bar();
        *     } while($foo) *)
-  | While of ('ex, 'en) expr * ('ex, 'en) block
+  | While of ('ex, 'en) loop_cond * ('ex, 'en) block
       (** While loop.
        *
        *     while ($foo) {
@@ -174,8 +180,8 @@ and ('ex, 'en) stmt_ =
        *     using ($foo = bar(), $baz = quux()) {} // disposed after the block *)
   | For of
       ('ex, 'en) expr list
-      * ('ex, 'en) expr option
-      * ('ex, 'en) expr list
+      * ('ex, 'en) loop_cond option
+      * ('ex, 'en) loop_iter
       * ('ex, 'en) block
       (** For loop. The initializer and increment parts can include
        * multiple comma-separated statements. The termination condition is

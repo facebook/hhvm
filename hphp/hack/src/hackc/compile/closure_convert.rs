@@ -51,6 +51,8 @@ use oxidized::ast::Hint_;
 use oxidized::ast::Id;
 use oxidized::ast::Lid;
 use oxidized::ast::LocalId;
+use oxidized::ast::LoopCond;
+use oxidized::ast::LoopIter;
 use oxidized::ast::Method_;
 use oxidized::ast::Pos;
 use oxidized::ast::ReifyKind;
@@ -1000,14 +1002,16 @@ impl<'ast, 'a: 'b, 'b> VisitorMut<'ast> for ClosureVisitor<'a, 'b> {
                 x.recurse(scope, self)
             }
             Stmt_::Do(x) => {
-                let (b, e) = &mut **x;
-                scope.with_in_using(false, |scope| visit_mut(self, scope, b))?;
+                let (b1, LoopCond(_, b2, e)) = &mut **x;
+                scope.with_in_using(false, |scope| visit_mut(self, scope, b1))?;
+                scope.with_in_using(false, |scope| visit_mut(self, scope, b2))?;
                 self.visit_expr(scope, e)
             }
             Stmt_::While(x) => {
-                let (e, b) = &mut **x;
+                let (LoopCond(_, b1, e), b2) = &mut **x;
                 self.visit_expr(scope, e)?;
-                scope.with_in_using(false, |scope| visit_mut(self, scope, b))
+                scope.with_in_using(false, |scope| visit_mut(self, scope, b1))?;
+                scope.with_in_using(false, |scope| visit_mut(self, scope, b2))
             }
             Stmt_::Foreach(x) => {
                 if x.1.is_await_as_v() || x.1.is_await_as_kv() {
@@ -1016,19 +1020,20 @@ impl<'ast, 'a: 'b, 'b> VisitorMut<'ast> for ClosureVisitor<'a, 'b> {
                 x.recurse(scope, self)
             }
             Stmt_::For(x) => {
-                let (e1, e2, e3, b) = &mut **x;
+                let (e1, e2, LoopIter(_, b3, e3), b) = &mut **x;
 
                 for e in e1 {
                     self.visit_expr(scope, e)?;
                 }
-                if let Some(e) = e2 {
+                if let Some(LoopCond(_, b2, e)) = e2 {
                     self.visit_expr(scope, e)?;
+                    scope.with_in_using(false, |scope| visit_mut(self, scope, b2))?;
                 }
                 scope.with_in_using(false, |scope| visit_mut(self, scope, b))?;
                 for e in e3 {
                     self.visit_expr(scope, e)?;
                 }
-                Ok(())
+                scope.with_in_using(false, |scope| visit_mut(self, scope, b3))
             }
             Stmt_::Switch(x) => {
                 let (e, cl, dfl) = &mut **x;

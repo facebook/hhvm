@@ -17,7 +17,7 @@
         f_body =
         { fb_ast =
           [([4:3-6:4],
-            (While (((bool), [4:10-15], (Lvar ([4:10-15], $cond))),
+            (While ((None, None, ((bool), [4:10-15], (Lvar ([4:10-15], $cond)))),
                [([5:5-40],
                  (Throw
                     ((exact Exception), [5:11-39],

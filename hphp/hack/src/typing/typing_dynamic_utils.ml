@@ -24,18 +24,22 @@ let rec partition_union ~f env tyl =
       partition_union ~f env (tyl' @ tyl)
     | _ ->
       let (dyns, nondyns) = partition_union ~f env tyl in
-      if f t then
-        (t :: dyns, nondyns)
-      else (
-        match get_node t with
-        | Tunion tyl ->
-          (match strip_union ~f env tyl with
-          | Some (sub_dyns, sub_nondyns) ->
-            ( sub_dyns @ dyns,
-              MakeType.union (get_reason t) sub_nondyns :: nondyns )
-          | None -> (dyns, t :: nondyns))
-        | _ -> (dyns, t :: nondyns)
-      ))
+      (match get_node t with
+      | Tnewtype (n, [ty1], _) when String.equal n SN.Classes.cSupportDyn ->
+        (match strip_union ~f env [ty1] with
+        | None -> (dyns, t :: nondyns)
+        | Some (sub_dyns, sub_non_dyns) ->
+          let sd tyl =
+            MakeType.supportdyn
+              (get_reason ty1)
+              (MakeType.union (get_reason ty1) tyl)
+          in
+          (sd sub_dyns :: dyns, sd sub_non_dyns :: nondyns))
+      | _ ->
+        if f t then
+          (t :: dyns, nondyns)
+        else
+          (dyns, t :: nondyns)))
 
 and strip_union ~f env tyl =
   let (dyns, nondyns) = partition_union ~f env tyl in

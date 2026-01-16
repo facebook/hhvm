@@ -141,8 +141,10 @@ let locl_like r ty =
 let supportdyn r ty =
   match get_node ty with
   | Tnewtype (c, _, _) when String.equal c SN.Classes.cSupportDyn -> ty
-  | Tunion [] -> ty
-  | Tprim _ -> ty
+  | Tunion []
+  | Tdynamic
+  | Tprim _ ->
+    ty
   | _ -> mk (r, Tnewtype (SN.Classes.cSupportDyn, [ty], ty))
 
 let supportdyn_nonnull r = supportdyn r (nonnull r)

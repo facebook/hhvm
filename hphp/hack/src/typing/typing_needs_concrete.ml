@@ -48,14 +48,17 @@ let check_class_get
                  let is_non_abstract : bool =
                    not (Folded_class.abstract class_)
                  in
-                 let is_final_non_consistent_construct : bool =
-                   match snd @@ Typing_env.get_construct env class_ with
-                   | Typing_defs.FinalClass -> true
-                   | Typing_defs.Inconsistent
-                   | Typing_defs.ConsistentConstruct ->
-                     false
+                 let is_final_non_consistent_construct =
+                   lazy
+                     (match snd @@ Typing_env.get_construct env class_ with
+                     | Typing_defs.FinalClass -> true
+                     | Typing_defs.Inconsistent
+                     | Typing_defs.ConsistentConstruct ->
+                       false)
                  in
-                 is_non_abstract || is_final_non_consistent_construct
+                 is_non_abstract
+                 || Folded_class.final class_
+                    && Lazy.force is_final_non_consistent_construct
                in
                if not is_concrete then
                  Typing_warning_utils.add

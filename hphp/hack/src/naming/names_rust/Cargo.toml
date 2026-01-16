@@ -15,7 +15,7 @@ anyhow = "1.0.98"
 crossbeam = "0.8"
 hh24_types = { version = "0.0.0", path = "../../utils/hh24_types" }
 oxidized = { version = "0.0.0", path = "../../oxidized" }
-rand = { version = "0.8", features = ["small_rng"] }
+rand = { version = "0.9", features = ["small_rng"] }
 relative_path = { version = "0.0.0", path = "../../utils/rust/relative_path" }
 rusqlite = { version = "0.37.0", features = ["backup", "blob", "bundled", "column_decltype", "functions", "limits", "modern_sqlite", "serde_json"] }
 serde = { version = "1.0.219", features = ["derive", "rc"] }

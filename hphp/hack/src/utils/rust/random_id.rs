@@ -5,13 +5,13 @@
 
 /// Generates a 10-digit random alphanumeric string using rand::thread_rng
 pub fn short_string() -> String {
-    generate_alphanumeric(10, rand::thread_rng())
+    generate_alphanumeric(10, rand::rng())
 }
 
 fn generate_alphanumeric(len: usize, mut rng: rand::rngs::ThreadRng) -> String {
     use rand::Rng;
     const ALPHANUMERIC: &[u8] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     (0..len)
-        .map(|_| ALPHANUMERIC[rng.gen_range(0..ALPHANUMERIC.len())] as char)
+        .map(|_| ALPHANUMERIC[rng.random_range(0..ALPHANUMERIC.len())] as char)
         .collect()
 }

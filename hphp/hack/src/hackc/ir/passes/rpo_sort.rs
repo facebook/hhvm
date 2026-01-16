@@ -139,8 +139,8 @@ mod tests {
     use ir_core::Block;
     use ir_core::BlockId;
     use rand::Rng;
+    use rand::rng;
     use rand::seq::SliceRandom;
-    use rand::thread_rng;
 
     use super::*;
 
@@ -203,7 +203,7 @@ mod tests {
     fn permute_random() {
         let names = ["a", "b", "c", "d", "e", "f"];
         let blocks = make_dummy_blocks(&names);
-        let mut rng = thread_rng();
+        let mut rng = rng();
 
         for _ in 0..100 {
             // Create a random selection, including usually dropping entries.
@@ -211,7 +211,7 @@ mod tests {
                 .map(|n| BlockId(n as u32))
                 .collect::<Vec<_>>();
             order.shuffle(&mut rng);
-            order.truncate(rng.gen_range(0..order.len()));
+            order.truncate(rng.random_range(0..order.len()));
 
             let mut b1 = blocks.clone();
             permute_and_truncate(&mut b1, order_to_remap(&order, blocks.len()));
@@ -279,7 +279,7 @@ mod tests {
             testutils::Block::jmp("dead2", "dead"),
         ];
 
-        let mut rng = thread_rng();
+        let mut rng = rng();
 
         for _ in 0..50 {
             // Shuffle block order, but leave the entry block first. We should always
@@ -305,19 +305,19 @@ mod tests {
     #[test]
     fn random_rpo() {
         let names = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"];
-        let mut rng = thread_rng();
+        let mut rng = rng();
 
         for _ in 0..500 {
             // Build up a random function.
-            let num_blocks = rng.gen_range(2..names.len());
+            let num_blocks = rng.random_range(2..names.len());
             let mut blocks = Vec::new();
             let mut rblocks = Vec::new();
             for i in 0..num_blocks {
                 // Choose 0, 1 or 2 successor, with only a small chance of 0.
-                let num_successors = (rng.gen_range(0..7) + 2) / 3;
+                let num_successors = (rng.random_range(0..7) + 2) / 3;
                 let mut succ = || {
                     // NOTE: You can't branch to the entry block.
-                    names[rng.gen_range(1..num_blocks)]
+                    names[rng.random_range(1..num_blocks)]
                 };
                 let (term, rterm) = match num_successors {
                     0 => (testutils::Terminator::Ret, testutils::Terminator::Ret),

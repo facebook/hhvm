@@ -460,7 +460,7 @@ mod integration_tests {
 
                     let mut num_incrs = 0;
                     while num_incrs < NUM_INCRS_PER_PROC {
-                        if rng.gen_bool(0.5) {
+                        if rng.random_bool(0.5) {
                             let mut guard = lock.write(None).unwrap();
                             *guard += 1;
                             std::thread::sleep(OP_SLEEP);

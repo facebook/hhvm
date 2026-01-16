@@ -166,8 +166,8 @@ impl Names {
                     .expect("SystemTime::now() before UNIX_EPOCH")
                     .as_secs(),
                 {
-                    use rand::distributions::DistString;
-                    rand::distributions::Alphanumeric.sample_string(&mut rand::thread_rng(), 10)
+                    use rand::distr::SampleString;
+                    rand::distr::Alphanumeric.sample_string(&mut rand::rng(), 10)
                 },
             )],
         )?;

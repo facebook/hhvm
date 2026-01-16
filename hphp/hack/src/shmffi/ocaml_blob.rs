@@ -344,14 +344,14 @@ mod tests {
         let mut rng = StdRng::from_seed([0; 32]);
 
         for _ in 0..NUM_TESTS {
-            let buffer_size = (rng.r#gen::<u32>() & ((1 << 31) - 1)) as usize;
-            let uncompressed_size = if rng.gen_bool(0.5) {
+            let buffer_size = (rng.random::<u32>() & ((1 << 31) - 1)) as usize;
+            let uncompressed_size = if rng.random_bool(0.5) {
                 buffer_size
             } else {
-                (rng.r#gen::<u32>() & ((1 << 31) - 1)) as usize
+                (rng.random::<u32>() & ((1 << 31) - 1)) as usize
             };
-            let is_serialized = rng.gen_bool(0.5);
-            let is_evictable = rng.gen_bool(0.5);
+            let is_serialized = rng.random_bool(0.5);
+            let is_evictable = rng.random_bool(0.5);
 
             let header = HeapValueHeaderFields {
                 buffer_size,

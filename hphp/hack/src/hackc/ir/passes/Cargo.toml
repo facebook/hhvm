@@ -20,6 +20,6 @@ print = { version = "0.0.0", path = "../print" }
 
 [dev-dependencies]
 hash = { version = "0.0.0", path = "../../../utils/hash" }
-rand = { version = "0.8", features = ["small_rng"] }
+rand = { version = "0.9", features = ["small_rng"] }
 testutils = { version = "0.0.0", path = "../testutils" }
 verify = { version = "0.0.0", path = "../verify" }

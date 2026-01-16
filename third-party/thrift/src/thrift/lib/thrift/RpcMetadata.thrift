@@ -324,6 +324,8 @@ struct RequestRpcMetadata {
   28: optional QuotaReportConfig quotaReportConfig;
   // FB303 metric name to allow SR to restrict convergence
   29: optional string stopperMetric;
+  // FB303 metric name to allow SR to fetch global routing load counter.
+  30: optional string grLoadMetric;
 }
 
 struct ErrorClassification {
@@ -426,6 +428,8 @@ struct ResponseRpcMetadata {
   15: optional i64 secondaryLoad;
   // stopper Metric value returned by server in response
   16: optional i64 stopperMetric;
+  // Global routing load counter value returned by server in response
+  17: optional i64 grLoad;
 }
 
 enum ResponseRpcErrorCategory {

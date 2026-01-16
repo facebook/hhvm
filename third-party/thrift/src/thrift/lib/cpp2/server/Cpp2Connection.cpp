@@ -277,6 +277,15 @@ void Cpp2Connection::setServerHeaders(
     writeHeaders[THeader::QUERY_STOPPER_METRIC] =
         folly::to<std::string>(metricValue);
   }
+
+  // set global routing load header
+  auto ptGr =
+      folly::get_ptr(readHeaders, THeader::QUERY_GLOBAL_ROUTING_LOAD_HEADER);
+  if (ptGr) {
+    auto load = getWorker()->getServer()->getLoad(*ptGr);
+    writeHeaders[THeader::QUERY_GLOBAL_ROUTING_LOAD_HEADER] =
+        folly::to<std::string>(load);
+  }
 }
 
 void Cpp2Connection::requestTimeoutExpired() {

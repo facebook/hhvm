@@ -411,6 +411,10 @@ class THeader final {
     return c_.stopperMetric_;
   }
 
+  void setGrLoadValue(std::optional<int64_t> value) { c_.grLoad_ = value; }
+
+  std::optional<int64_t> getGrLoadValue() const { return c_.grLoad_; }
+
   apache::thrift::concurrency::PRIORITY getCallPriority() const;
 
   std::chrono::milliseconds getTimeoutFromHeader(std::string_view header) const;
@@ -486,6 +490,8 @@ class THeader final {
   static constexpr std::string_view QUERY_SECONDARY_LOAD_HEADER =
       "secondary_load";
   static constexpr std::string_view QUERY_STOPPER_METRIC = "stopper_metric";
+  static constexpr std::string_view QUERY_GLOBAL_ROUTING_LOAD_HEADER =
+      "gr_load";
   static constexpr std::string_view kClientId = "client_id";
   static constexpr std::string_view kServiceTraceMeta = "service_trace_meta";
   static constexpr std::string_view kTenantId = "tenant_id";
@@ -584,6 +590,7 @@ class THeader final {
     folly::Optional<int64_t> serverLoad_;
     folly::Optional<int64_t> serverSecondaryLoad_;
     folly::Optional<int64_t> stopperMetric_;
+    std::optional<int64_t> grLoad_;
 
     std::optional<ProxiedPayloadMetadata> proxiedPayloadMetadata_;
 

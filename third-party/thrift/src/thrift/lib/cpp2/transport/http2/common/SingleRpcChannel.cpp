@@ -171,6 +171,12 @@ void SingleRpcChannel::sendThriftResponse(
           folly::to<std::string>(*load));
     }
 
+    if (auto grLoad = metadata.grLoad()) {
+      metadata.otherMetadata().ensure().emplace(
+          transport::THeader::QUERY_GLOBAL_ROUTING_LOAD_HEADER,
+          folly::to<std::string>(*grLoad));
+    }
+
     if (auto otherMetadata = metadata.otherMetadata()) {
       encodeHeaders(std::move(*otherMetadata), msg);
     }
@@ -511,6 +517,12 @@ void SingleRpcChannel::extractHeaderInfo(
           headers.find(transport::THeader::QUERY_SECONDARY_LOAD_HEADER);
       secLoadIt != headers.end()) {
     metadata->secondaryLoadMetric() = secLoadIt->second;
+  }
+
+  if (const auto& grLoadIt =
+          headers.find(transport::THeader::QUERY_GLOBAL_ROUTING_LOAD_HEADER);
+      grLoadIt != headers.end()) {
+    metadata->grLoadMetric() = grLoadIt->second;
   }
 
   if (!headers.empty()) {

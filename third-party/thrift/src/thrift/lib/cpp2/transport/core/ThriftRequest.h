@@ -702,6 +702,7 @@ class ThriftRequestCore : public ResponseChannelRequest {
   folly::Optional<std::string> loadMetric_;
   folly::Optional<std::string> secondaryLoadMetric_;
   folly::Optional<std::string> stopperMetric_;
+  std::optional<std::string> grLoadMetric_;
   Cpp2RequestContext reqContext_;
   folly::Optional<CompressionConfig> compressionConfig_;
 

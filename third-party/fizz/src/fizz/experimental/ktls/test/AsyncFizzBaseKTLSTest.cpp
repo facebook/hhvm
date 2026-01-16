@@ -22,7 +22,7 @@
 #include <fizz/protocol/test/Mocks.h>
 #include <fizz/server/AeadTicketCipher.h>
 #include <fizz/server/AsyncFizzServer.h>
-#include <fizz/server/CertManager.h>
+#include <fizz/server/DefaultCertManager.h>
 #include <fizz/server/FizzServerContext.h>
 #include <fizz/server/TicketCodec.h>
 
@@ -224,13 +224,13 @@ class OneshotRead : public folly::AsyncTransport::ReadCallback {
 
 static std::shared_ptr<fizz::server::FizzServerContext>
 makeTestServerContext() {
-  auto certmanager = std::make_shared<fizz::server::CertManager>();
+  auto certmanager = std::make_shared<fizz::server::DefaultCertManager>();
   certmanager->addCertAndSetDefault(
       openssl::CertUtils::makeSelfCert(
           fizz::test::kP256Certificate.str(), fizz::test::kP256Key.str()));
 
   auto factory = std::make_shared<fizz::test::MockFactory>();
-  auto certManager = std::make_shared<server::CertManager>();
+  auto certManager = std::make_shared<server::DefaultCertManager>();
   auto ticketCipher = std::make_shared<
       Aead128GCMTicketCipher<TicketCodec<CertificateStorage::X509>>>(
       std::move(factory), std::move(certManager));

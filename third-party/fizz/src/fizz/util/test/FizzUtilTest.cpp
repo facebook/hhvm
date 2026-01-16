@@ -11,6 +11,7 @@
 #include <fizz/crypto/test/TestUtil.h>
 #include <fizz/protocol/clock/test/Mocks.h>
 #include <fizz/protocol/test/Mocks.h>
+#include <fizz/server/DefaultCertManager.h>
 #include <fizz/server/TicketTypes.h>
 #include <fizz/util/FizzUtil.h>
 #include <folly/FileUtil.h>
@@ -47,7 +48,7 @@ TEST(UtilTest, CreateTicketCipher) {
       std::chrono::seconds(100),
       std::chrono::minutes(100),
       std::make_shared<MockFactory>(),
-      std::make_shared<server::CertManager>(),
+      std::make_shared<server::DefaultCertManager>(),
       folly::Optional<std::string>("fakeContext"));
   auto clock = std::make_shared<MockClock>();
   server::TicketPolicy policy;
@@ -68,7 +69,7 @@ TEST(UtilTest, CreateTicketCipher) {
         std::chrono::seconds(100),
         std::chrono::minutes(100),
         std::make_shared<MockFactory>(),
-        std::make_shared<server::CertManager>(),
+        std::make_shared<server::DefaultCertManager>(),
         folly::Optional<std::string>("fakeContext"));
     newCipher->setPolicy(std::move(policy));
     server::ResumptionState state;

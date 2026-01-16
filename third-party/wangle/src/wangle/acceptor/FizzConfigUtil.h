@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <fizz/server/DefaultCertManager.h>
 #include <fizz/server/FizzServerContext.h>
 #include <fizz/server/TicketTypes.h>
 #include <fizz/util/FizzUtil.h>
@@ -34,7 +35,7 @@ class FizzConfigUtil {
    */
   static bool addCertsToManager(
       const std::vector<SSLContextConfig>& configs,
-      fizz::server::CertManager& manager,
+      fizz::server::DefaultCertManager& manager,
       const std::shared_ptr<PasswordInFileFactory>& pwFactory,
       bool strictSSL);
 

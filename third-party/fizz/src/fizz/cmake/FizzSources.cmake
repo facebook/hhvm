@@ -85,8 +85,8 @@ set(
         record/Types.cpp
         server/AeadCookieCipher.cpp
         server/AeadTokenCipher.cpp
-        server/CertManager.cpp
         server/CookieCipher.cpp
+        server/DefaultCertManager.cpp
         server/FizzServer.cpp
         server/FizzServerContext.cpp
         server/HandshakeLogging.cpp
@@ -247,6 +247,7 @@ set(
         server/CertManager.h
         server/CookieCipher.h
         server/CookieTypes.h
+        server/DefaultCertManager.h
         server/DualTicketCipher.h
         server/FizzServer-inl.h
         server/FizzServer.h

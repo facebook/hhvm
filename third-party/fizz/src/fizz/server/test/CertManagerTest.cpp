@@ -9,7 +9,7 @@
 #include <folly/portability/GMock.h>
 #include <folly/portability/GTest.h>
 
-#include <fizz/server/CertManager.h>
+#include <fizz/server/DefaultCertManager.h>
 
 #include <fizz/protocol/test/Mocks.h>
 
@@ -43,7 +43,7 @@ class CertManagerTest : public Test {
     return chlo;
   }
 
-  CertManager manager_;
+  DefaultCertManager manager_;
 };
 
 TEST_F(CertManagerTest, TestNoMatchDefault) {

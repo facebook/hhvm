@@ -11,6 +11,7 @@
 #include <fizz/client/FizzClientContext.h>
 #include <fizz/client/SynchronizedLruPskCache.h>
 #include <fizz/protocol/DefaultCertificateVerifier.h>
+#include <fizz/server/DefaultCertManager.h>
 #include <fizz/server/FizzServerContext.h>
 #include <fizz/server/TicketCodec.h>
 #include <fizz/server/TicketTypes.h>
@@ -77,7 +78,7 @@ std::shared_ptr<fizz::server::FizzServerContext> createFizzServerContext(
     bool requireClientVerification,
     bool preferOcbCipher,
     wangle::TLSTicketKeySeeds* ticketKeySeeds) {
-  auto certMgr = std::make_shared<fizz::server::CertManager>();
+  auto certMgr = std::make_shared<fizz::server::DefaultCertManager>();
   try {
     auto selfCert =
         fizz::openssl::CertUtils::makeSelfCert(certData.str(), keyData.str());

@@ -15,6 +15,7 @@
 #include <fizz/crypto/test/TestUtil.h>
 #include <fizz/protocol/DefaultFactory.h>
 #include <fizz/protocol/test/Mocks.h>
+#include <fizz/server/DefaultCertManager.h>
 #include <fizz/server/test/Mocks.h>
 
 static constexpr folly::StringPiece ticket{
@@ -56,7 +57,7 @@ static ResumptionState getTestResumptionState(
 
 static ResumptionState x509Decode(Buf encoded) {
   fizz::DefaultFactory factory;
-  CertManager certManager;
+  DefaultCertManager certManager;
   return TicketCodec<CertificateStorage::X509>::decode(
       std::move(encoded), factory, certManager);
 }

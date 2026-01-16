@@ -6,7 +6,7 @@
  *  LICENSE file in the root directory of this source tree.
  */
 
-#include <fizz/server/CertManager.h>
+#include <fizz/server/DefaultCertManager.h>
 
 #include <folly/String.h>
 
@@ -16,7 +16,7 @@ namespace fizz {
 namespace server {
 
 // Find a matching cert given a key.
-CertMatch CertManager::findCert(
+CertMatch DefaultCertManager::findCert(
     const std::string& key,
     const std::vector<SignatureScheme>& supportedSigSchemes,
     const std::vector<SignatureScheme>& peerSigSchemes) const {
@@ -37,7 +37,7 @@ CertMatch CertManager::findCert(
   return none;
 }
 
-CertMatch CertManager::getCert(
+CertMatch DefaultCertManager::getCert(
     const Optional<std::string>& sni,
     const std::vector<SignatureScheme>& supportedSigSchemes,
     const std::vector<SignatureScheme>& peerSigSchemes,
@@ -75,7 +75,7 @@ CertMatch CertManager::getCert(
   return folly::none;
 }
 
-std::shared_ptr<SelfCert> CertManager::getCert(
+std::shared_ptr<SelfCert> DefaultCertManager::getCert(
     const std::string& identity) const {
   auto it = identMap_.find(identity);
   if (it == identMap_.end()) {
@@ -84,7 +84,7 @@ std::shared_ptr<SelfCert> CertManager::getCert(
   return it->second;
 }
 
-std::string CertManager::getKeyFromIdent(const std::string& ident) {
+std::string DefaultCertManager::getKeyFromIdent(const std::string& ident) {
   if (ident.empty()) {
     throw std::runtime_error("empty identity");
   }
@@ -100,7 +100,7 @@ std::string CertManager::getKeyFromIdent(const std::string& ident) {
   return key;
 }
 
-void CertManager::addCertIdentity(
+void DefaultCertManager::addCertIdentity(
     std::shared_ptr<SelfCert> cert,
     const std::string& ident) {
   auto key = getKeyFromIdent(ident);
@@ -120,15 +120,17 @@ void CertManager::addCertIdentity(
   }
 }
 
-void CertManager::addCert(std::shared_ptr<SelfCert> cert) {
+void DefaultCertManager::addCert(std::shared_ptr<SelfCert> cert) {
   addCert(std::move(cert), false);
 }
 
-void CertManager::addCertAndSetDefault(std::shared_ptr<SelfCert> cert) {
+void DefaultCertManager::addCertAndSetDefault(std::shared_ptr<SelfCert> cert) {
   addCert(std::move(cert), true);
 }
 
-void CertManager::addCert(std::shared_ptr<SelfCert> cert, bool defaultCert) {
+void DefaultCertManager::addCert(
+    std::shared_ptr<SelfCert> cert,
+    bool defaultCert) {
   auto primaryIdent = cert->getIdentity();
   addCertIdentity(cert, primaryIdent);
 
@@ -148,12 +150,12 @@ void CertManager::addCert(std::shared_ptr<SelfCert> cert, bool defaultCert) {
   }
 }
 
-bool CertManager::hasCerts() const {
+bool DefaultCertManager::hasCerts() const {
   return !certs_.empty();
 }
 
-const std::unordered_map<std::string, CertManager::SigSchemeMap>&
-CertManager::getCertificatesByIdentity() const {
+const std::unordered_map<std::string, DefaultCertManager::SigSchemeMap>&
+DefaultCertManager::getCertificatesByIdentity() const {
   return certs_;
 }
 } // namespace server

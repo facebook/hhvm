@@ -33,7 +33,7 @@ namespace wangle {
 
 bool FizzConfigUtil::addCertsToManager(
     const std::vector<SSLContextConfig>& configs,
-    fizz::server::CertManager& manager,
+    fizz::server::DefaultCertManager& manager,
     const std::shared_ptr<PasswordInFileFactory>& pwFactory,
     bool strictSSL) {
   bool loadedCert = false;
@@ -82,7 +82,7 @@ std::unique_ptr<fizz::server::CertManager> FizzConfigUtil::createCertManager(
     const std::vector<SSLContextConfig>& sslContextConfigs,
     const std::shared_ptr<PasswordInFileFactory>& pwFactory,
     bool strictSSL) {
-  auto certMgr = std::make_unique<fizz::server::CertManager>();
+  auto certMgr = std::make_unique<fizz::server::DefaultCertManager>();
   if (!addCertsToManager(sslContextConfigs, *certMgr, pwFactory, strictSSL)) {
     return nullptr;
   }

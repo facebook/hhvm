@@ -8,7 +8,7 @@
 #pragma once
 #include <fizz/extensions/delegatedcred/SelfDelegatedCredential.h>
 #include <fizz/extensions/delegatedcred/Types.h>
-#include <fizz/server/CertManager.h>
+#include <fizz/server/DefaultCertManager.h>
 
 namespace fizz {
 namespace extensions {
@@ -17,7 +17,7 @@ namespace extensions {
 // delegated credential extensions and one without. Certs are selected based
 // on the usual rules with the addition of the split between delegated and
 // non-delegated certs.
-class DelegatedCredentialCertManager : public server::CertManager {
+class DelegatedCredentialCertManager : public server::DefaultCertManager {
  public:
   CertMatch getCert(
       const folly::Optional<std::string>& sni,
@@ -35,7 +35,7 @@ class DelegatedCredentialCertManager : public server::CertManager {
   bool hasDelegatedCredential() const;
 
  protected:
-  server::CertManager dcMgr_;
+  server::DefaultCertManager dcMgr_;
 };
 } // namespace extensions
 } // namespace fizz

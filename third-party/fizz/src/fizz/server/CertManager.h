@@ -8,9 +8,6 @@
 
 #pragma once
 
-#include <map>
-#include <unordered_map>
-
 #include <fizz/protocol/CertMatch.h>
 
 namespace fizz {
@@ -29,41 +26,14 @@ class CertManager {
       const folly::Optional<std::string>& sni,
       const std::vector<SignatureScheme>& supportedSigSchemes,
       const std::vector<SignatureScheme>& peerSigSchemes,
-      const ClientHello& chlo) const;
+      const ClientHello& chlo) const = 0;
 
   /**
    * Return a certificate with the a primary identity exactly matching identity.
    * Will return nullptr if no matching cert is found.
    */
-  virtual std::shared_ptr<SelfCert> getCert(const std::string& identity) const;
-
-  void addCertAndSetDefault(std::shared_ptr<SelfCert> cert);
-
-  void addCert(std::shared_ptr<SelfCert> cert);
-
-  bool hasCerts() const;
-
-  using SigSchemeMap = std::map<SignatureScheme, std::shared_ptr<SelfCert>>;
-  const std::unordered_map<std::string, SigSchemeMap>&
-  getCertificatesByIdentity() const;
-
- protected:
-  CertMatch findCert(
-      const std::string& key,
-      const std::vector<SignatureScheme>& supportedSigSchemes,
-      const std::vector<SignatureScheme>& peerSigSchemes) const;
-
-  void addCertIdentity(
-      std::shared_ptr<SelfCert> cert,
-      const std::string& ident);
-
-  void addCert(std::shared_ptr<SelfCert> cert, bool defaultCert);
-
-  static std::string getKeyFromIdent(const std::string& ident);
-
-  std::unordered_map<std::string, SigSchemeMap> certs_;
-  std::unordered_map<std::string, std::shared_ptr<SelfCert>> identMap_;
-  std::string default_;
+  virtual std::shared_ptr<SelfCert> getCert(
+      const std::string& identity) const = 0;
 };
 } // namespace server
 } // namespace fizz

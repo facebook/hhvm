@@ -12,7 +12,7 @@
 #include <fizz/compression/ZlibCertificateDecompressor.h>
 #include <fizz/compression/ZstdCertificateDecompressor.h>
 #include <fizz/server/AeadTicketCipher.h>
-#include <fizz/server/CertManager.h>
+#include <fizz/server/DefaultCertManager.h>
 #include <fizz/server/TicketCodec.h>
 #include <folly/FileUtil.h>
 #include <folly/Random.h>
@@ -160,7 +160,7 @@ quic::samples::FizzServerContextPtr createFizzServerContextImpl(
     keyData = kDefaultKeyData;
   }
   auto cert = fizz::openssl::CertUtils::makeSelfCert(certData, keyData);
-  auto certManager = std::make_shared<fizz::server::CertManager>();
+  auto certManager = std::make_shared<fizz::server::DefaultCertManager>();
   certManager->addCertAndSetDefault(std::move(cert));
 
   if (insecureDefaultCert) {

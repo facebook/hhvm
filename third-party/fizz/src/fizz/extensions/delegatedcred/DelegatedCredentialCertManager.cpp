@@ -29,14 +29,15 @@ CertMatch DelegatedCredentialCertManager::getCert(
       return dcRes;
     }
   }
-  return CertManager::getCert(sni, supportedSigSchemes, peerSigSchemes, chlo);
+  return DefaultCertManager::getCert(
+      sni, supportedSigSchemes, peerSigSchemes, chlo);
 }
 
 // Falls back to non-delegated if no match.
 std::shared_ptr<SelfCert> DelegatedCredentialCertManager::getCert(
     const std::string& identity) const {
   auto dcRes = dcMgr_.getCert(identity);
-  return dcRes ? dcRes : CertManager::getCert(identity);
+  return dcRes ? dcRes : DefaultCertManager::getCert(identity);
 }
 
 void DelegatedCredentialCertManager::addDelegatedCredentialAndSetDefault(

@@ -12,6 +12,7 @@
 #include <fizz/crypto/RandomGenerator.h>
 #include <fizz/crypto/Utils.h>
 #include <fizz/server/AsyncFizzServer.h>
+#include <fizz/server/DefaultCertManager.h>
 #include <fizz/server/TicketTypes.h>
 #include <folly/io/async/AsyncSSLSocket.h>
 #include <folly/io/async/SSLContext.h>
@@ -304,7 +305,7 @@ std::unique_ptr<SelfCert> readSelfCert() {
 }
 
 int serverTest() {
-  auto certManager = std::make_shared<server::CertManager>();
+  auto certManager = std::make_shared<server::DefaultCertManager>();
   certManager->addCertAndSetDefault(readSelfCert());
 
   auto serverContext = std::make_shared<FizzServerContext>();

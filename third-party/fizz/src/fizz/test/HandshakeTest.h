@@ -26,6 +26,7 @@
 #include <fizz/protocol/test/Matchers.h>
 #include <fizz/server/AsyncFizzServer.h>
 #include <fizz/server/CookieTypes.h>
+#include <fizz/server/DefaultCertManager.h>
 #include <fizz/server/TicketTypes.h>
 #include <fizz/server/test/Mocks.h>
 #include <fizz/test/LocalTransport.h>
@@ -66,7 +67,7 @@ class HandshakeTest : public Test {
     auto pskCache = std::make_shared<BasicPskCache>();
     clientContext_->setPskCache(std::move(pskCache));
 
-    auto certManager = std::make_shared<server::CertManager>();
+    auto certManager = std::make_shared<server::DefaultCertManager>();
     std::vector<std::shared_ptr<CertificateCompressor>> compressors = {
         std::make_shared<ZlibCertificateCompressor>(9)};
     std::vector<ssl::X509UniquePtr> rsaCerts;

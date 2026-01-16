@@ -823,7 +823,8 @@ int fizzServerCommand(const std::vector<std::string>& args) {
 
   auto ticketCipher = std::make_shared<
       Aead128GCMTicketCipher<TicketCodec<CertificateStorage::X509>>>(
-      std::make_shared<DefaultFactory>(), std::make_shared<CertManager>());
+      std::make_shared<DefaultFactory>(),
+      std::make_shared<DefaultCertManager>());
   auto ticketSeed = RandomGenerator<32>().generateRandom();
   ticketCipher->setTicketSecrets({{range(ticketSeed)}});
   serverContext->setTicketCipher(ticketCipher);

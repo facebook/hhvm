@@ -16,6 +16,7 @@
 #include <fizz/crypto/test/TestUtil.h>
 #include <fizz/protocol/clock/test/Mocks.h>
 #include <fizz/protocol/test/Mocks.h>
+#include <fizz/server/DefaultCertManager.h>
 
 using namespace fizz::test;
 using namespace testing;
@@ -80,7 +81,7 @@ class AeadTicketCipherTest : public Test {
   AeadTicketCipherTest()
       : cipher_(
             std::make_shared<MockFactory>(),
-            std::make_shared<CertManager>()) {}
+            std::make_shared<DefaultCertManager>()) {}
 
   ~AeadTicketCipherTest() override = default;
   void SetUp() override {
@@ -102,11 +103,12 @@ class AeadTicketCipherTest : public Test {
     if (!pskContext.empty()) {
       cipher_ = TestAeadTicketCipher(
           std::make_shared<MockFactory>(),
-          std::make_shared<CertManager>(),
+          std::make_shared<DefaultCertManager>(),
           pskContext);
     } else {
       cipher_ = TestAeadTicketCipher(
-          std::make_shared<MockFactory>(), std::make_shared<CertManager>());
+          std::make_shared<MockFactory>(),
+          std::make_shared<DefaultCertManager>());
     }
     cipher_.setPolicy(policy_);
     auto s1 = toIOBuf(ticketSecret1);

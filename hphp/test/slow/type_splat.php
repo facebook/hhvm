@@ -1,6 +1,6 @@
 <?hh
 
-<<file: __EnableUnstableFeatures('open_tuples', 'type_splat')>>
+
 
 function test_variadic(string $s, int... $args):void {
   var_dump($s);

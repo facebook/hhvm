@@ -1,5 +1,5 @@
 <?hh
-<<file: __EnableUnstableFeatures('type_splat', 'open_tuples')>>
+
 
 class Foo<T as (mixed...)> {
   public function expectFun((function(...T): void) $f): void {}

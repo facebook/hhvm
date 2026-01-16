@@ -1,5 +1,5 @@
 <?hh
-<<file: __EnableUnstableFeatures('open_tuples')>>
+
 
 function test1(mixed $m): string {
   $m as (nonnull...);

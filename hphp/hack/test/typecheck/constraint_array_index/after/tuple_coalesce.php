@@ -1,6 +1,6 @@
 <?hh
 
-<<file: __EnableUnstableFeatures('open_tuples')>>
+
 
 function testTuple(
   (int, string, optional bool, optional float, int...) $t,

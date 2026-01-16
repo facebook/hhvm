@@ -1,6 +1,6 @@
 <?hh
 
-<<file: __EnableUnstableFeatures('open_tuples', 'type_splat')>>
+
 
 // Legal tuple types
 type T1 = (bool, ...(int, string));

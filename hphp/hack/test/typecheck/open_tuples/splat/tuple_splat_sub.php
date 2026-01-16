@@ -1,6 +1,6 @@
 <?hh
 
-<<file: __EnableUnstableFeatures('open_tuples', 'type_splat')>>
+
 
 function expectVariadicTuple((arraykey...) $tup): void {}
 function expectIntAndVariadicTuple((int, arraykey...) $tup): void {}

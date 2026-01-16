@@ -1,6 +1,6 @@
 <?hh
 
-<<file: __EnableUnstableFeatures('open_tuples')>>
+
 
 // Illegal tuple types
 type T1 = (int,optional string,bool);

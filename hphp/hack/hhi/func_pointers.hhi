@@ -7,7 +7,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  */
-<<file:__EnableUnstableFeatures('class_type','open_tuples', 'type_splat')>>
+<<file:__EnableUnstableFeatures('class_type')>>
 namespace HH {
 
   // The functions in this file are defined in HHVM and known to the

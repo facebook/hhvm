@@ -1,6 +1,6 @@
 <?hh
 
-<<file: __EnableUnstableFeatures('open_tuples', 'type_splat')>>
+
 
 function proj1<T as (arraykey...)>((int, string, ...T) $tup):void {
   hh_expect_equivalent<int>($tup[0]);

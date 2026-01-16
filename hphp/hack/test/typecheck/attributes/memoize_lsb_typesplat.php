@@ -1,5 +1,5 @@
 <?hh
-<<file: __EnableUnstableFeatures('open_tuples', 'type_splat')>>
+
 
 class Foo<T as (mixed...)> {
   <<__MemoizeLSB>>

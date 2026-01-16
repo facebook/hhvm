@@ -1,6 +1,6 @@
 <?hh
 
-<<file: __EnableUnstableFeatures('open_tuples', 'type_splat')>>
+
 
 function foo(int $i, string $s): void {
   echo($i);

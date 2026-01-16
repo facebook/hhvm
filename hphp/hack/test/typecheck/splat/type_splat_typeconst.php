@@ -1,6 +1,6 @@
 <?hh
 
-<<file: __EnableUnstableFeatures('type_splat', 'open_tuples')>>
+
 
 class Other<T as (mixed...)> { }
 

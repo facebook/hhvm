@@ -1,6 +1,6 @@
 <?hh
 
-<<file: __EnableUnstableFeatures('open_tuples', 'type_splat')>>
+
 function foo<T as (mixed...)>(int $x1, string $x2, ... T $args): void {
   var_dump($x1);
   var_dump($x2);

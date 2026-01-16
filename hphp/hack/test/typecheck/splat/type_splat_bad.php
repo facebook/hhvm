@@ -1,6 +1,6 @@
 <?hh
 
-<<file: __EnableUnstableFeatures('open_tuples', 'type_splat')>>
+
 
 // Illegal because splat is followed by another parameter (two errors)
 function bad1<Targs as (mixed...)>(

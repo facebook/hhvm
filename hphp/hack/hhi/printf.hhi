@@ -7,7 +7,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  */
-<<file: __EnableUnstableFeatures('open_tuples', 'type_splat')>>
+
 namespace {
 
   /**

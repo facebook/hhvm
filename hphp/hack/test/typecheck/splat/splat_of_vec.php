@@ -1,5 +1,5 @@
 <?hh
-<<file: __EnableUnstableFeatures('open_tuples', 'type_splat')>>
+
 
 function expect_generic_splat<T as (mixed...)>(... T $x): void {}
 function expect_fixed_splat(... (mixed...) $x): void {}

@@ -1,5 +1,5 @@
 <?hh
-<<file: __EnableUnstableFeatures('open_tuples', 'type_splat')>>
+
 function expect_int(int $i): void {}
 
 function call_with_open_tuple((float, optional int, nonnull...) $t): void {

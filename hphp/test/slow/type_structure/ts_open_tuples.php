@@ -1,5 +1,5 @@
 <?hh
-<<file: __EnableUnstableFeatures('open_tuples')>>
+
 
 class C {
   const type TV = (int, optional string, optional bool);

@@ -1,5 +1,5 @@
 <?hh
-<<file: __EnableUnstableFeatures('open_tuples')>>
+
 
 interface I {}
 abstract class C implements I {

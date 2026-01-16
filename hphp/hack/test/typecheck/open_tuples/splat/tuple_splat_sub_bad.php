@@ -1,6 +1,6 @@
 <?hh
 
-<<file: __EnableUnstableFeatures('open_tuples', 'type_splat')>>
+
 
 function expectSplatTuple<T as (string, arraykey...)>((int, ...T) $tup): void {
 }

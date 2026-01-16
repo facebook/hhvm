@@ -1,5 +1,5 @@
 <?hh
-<<file: __EnableUnstableFeatures('open_tuples', 'type_splat')>>
+
 
 function test1<T>(...T $x):void { }
 function test2(...int $x):void { }

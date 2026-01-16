@@ -1,6 +1,6 @@
 <?hh
 
-<<file: __EnableUnstableFeatures('open_tuples', 'type_splat')>>
+
 
 function applySplatFun<T as (mixed...)>(
   (function(int, ...T): void) $f,

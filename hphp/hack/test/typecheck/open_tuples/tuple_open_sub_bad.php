@@ -1,6 +1,6 @@
 <?hh
 
-<<file: __EnableUnstableFeatures('open_tuples')>>
+
 
 function expectAnyTuple((mixed...) $x): void {
   expectAnyArraykeyTuple($x);

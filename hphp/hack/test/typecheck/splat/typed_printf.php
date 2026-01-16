@@ -1,5 +1,5 @@
 <?hh
-<<file: __EnableUnstableFeatures('open_tuples', 'type_splat')>>
+
 
 interface I {
   public function format_s(string $s): string;

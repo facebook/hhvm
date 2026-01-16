@@ -1,5 +1,5 @@
 <?hh
-<<file: __EnableUnstableFeatures('open_tuples')>>
+
 namespace HH {
   newtype FormatString<T> as TypedFormatString<T, (mixed...)> = string;
 

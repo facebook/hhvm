@@ -1,6 +1,6 @@
 <?hh
 
-<<file: __EnableUnstableFeatures('open_tuples')>>
+
 
 function testNonVariadicTuple((int, optional string) $t): void {
   $x2 = $t[2] ?? false;

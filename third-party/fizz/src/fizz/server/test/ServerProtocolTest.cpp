@@ -56,12 +56,11 @@ class ServerProtocolTest : public ProtocolTest<ServerTypes, Actions> {
     context_->setClock(clock_);
 
     ON_CALL(*certManager_, getCert(_, _, _, _))
-        .WillByDefault(Return(
-            CertManager::CertMatch(
-                CertManager::CertMatchStruct{
-                    cert_,
-                    SignatureScheme::ecdsa_secp256r1_sha256,
-                    CertManager::MatchType::Direct})));
+        .WillByDefault(Return(CertMatch(
+            CertMatchStruct{
+                cert_,
+                SignatureScheme::ecdsa_secp256r1_sha256,
+                MatchType::Direct})));
     ON_CALL(*certManager_, getCert(_)).WillByDefault(Return(cert_));
 
     ON_CALL(*clock_, getCurrentTime())
@@ -745,11 +744,11 @@ TEST_F(ServerProtocolTest, TestClientHelloFullHandshakeFlow) {
                 serverNameList->server_name_list.front()
                     .hostname->to<std::string>(),
                 "www.hostname.com");
-            return CertManager::CertMatch(
-                CertManager::CertMatchStruct{
+            return CertMatch(
+                CertMatchStruct{
                     cert_,
                     SignatureScheme::ecdsa_secp256r1_sha256,
-                    CertManager::MatchType::Direct});
+                    MatchType::Direct});
           }));
   EXPECT_CALL(*cert_, _getCertMessage(_));
   EXPECT_CALL(*mockHandshakeContext_, appendToTranscript(_))
@@ -1027,11 +1026,11 @@ TEST_F(ServerProtocolTest, TestClientHelloCompressedCertFlow) {
                 serverNameList->server_name_list.front()
                     .hostname->to<std::string>(),
                 "www.hostname.com");
-            return CertManager::CertMatch(
-                CertManager::CertMatchStruct{
+            return CertMatch(
+                CertMatchStruct{
                     cert_,
                     SignatureScheme::ecdsa_secp256r1_sha256,
-                    CertManager::MatchType::Direct});
+                    MatchType::Direct});
           }));
   context_->setSupportedCompressionAlgorithms(
       {CertificateCompressionAlgorithm::zlib});
@@ -1369,11 +1368,11 @@ TEST_F(ServerProtocolTest, TestECHDecryptionSuccess) {
                 serverNameList->server_name_list.front()
                     .hostname->to<std::string>(),
                 "www.hostname.com");
-            return CertManager::CertMatch(
-                CertManager::CertMatchStruct{
+            return CertMatch(
+                CertMatchStruct{
                     cert_,
                     SignatureScheme::ecdsa_secp256r1_sha256,
-                    CertManager::MatchType::Direct});
+                    MatchType::Direct});
           }));
   EXPECT_CALL(*cert_, _getCertMessage(_));
   EXPECT_CALL(*mockHandshakeContext_, appendToTranscript(_))
@@ -1708,11 +1707,11 @@ TEST_F(ServerProtocolTest, TestECHDecryptionFailure) {
                 serverNameList->server_name_list.front()
                     .hostname->to<std::string>(),
                 "www.fakehostname.com");
-            return CertManager::CertMatch(
-                CertManager::CertMatchStruct{
+            return CertMatch(
+                CertMatchStruct{
                     cert_,
                     SignatureScheme::ecdsa_secp256r1_sha256,
-                    CertManager::MatchType::Direct});
+                    MatchType::Direct});
           }));
   EXPECT_CALL(*cert_, _getCertMessage(_));
   EXPECT_CALL(*mockHandshakeContext_, appendToTranscript(_))
@@ -1994,11 +1993,11 @@ TEST_F(ServerProtocolTest, TestClientHelloCertRequestFlow) {
                 serverNameList->server_name_list.front()
                     .hostname->to<std::string>(),
                 "www.hostname.com");
-            return CertManager::CertMatch(
-                CertManager::CertMatchStruct{
+            return CertMatch(
+                CertMatchStruct{
                     cert_,
                     SignatureScheme::ecdsa_secp256r1_sha256,
-                    CertManager::MatchType::Direct});
+                    MatchType::Direct});
           }));
   EXPECT_CALL(*cert_, _getCertMessage(_));
   EXPECT_CALL(*mockHandshakeContext_, appendToTranscript(_))
@@ -2801,11 +2800,11 @@ TEST_F(ServerProtocolTest, TestRetryClientHelloFullHandshakeFlow) {
                 serverNameList->server_name_list.front()
                     .hostname->to<std::string>(),
                 "www.hostname.com");
-            return CertManager::CertMatch(
-                CertManager::CertMatchStruct{
+            return CertMatch(
+                CertMatchStruct{
                     cert_,
                     SignatureScheme::ecdsa_secp256r1_sha256,
-                    CertManager::MatchType::Direct});
+                    MatchType::Direct});
           }));
   EXPECT_CALL(*cert_, _getCertMessage(_));
   EXPECT_CALL(*mockHandshakeContext_, appendToTranscript(_))
@@ -3340,11 +3339,11 @@ TEST_F(ServerProtocolTest, TestRetryClientHelloECHFlow) {
                 serverNameList->server_name_list.front()
                     .hostname->to<std::string>(),
                 "www.hostname.com");
-            return CertManager::CertMatch(
-                CertManager::CertMatchStruct{
+            return CertMatch(
+                CertMatchStruct{
                     cert_,
                     SignatureScheme::ecdsa_secp256r1_sha256,
-                    CertManager::MatchType::Direct});
+                    MatchType::Direct});
           }));
   EXPECT_CALL(*cert_, _getCertMessage(_));
   EXPECT_CALL(*mockHandshakeContext_, appendToTranscript(_))
@@ -3634,11 +3633,11 @@ TEST_F(ServerProtocolTest, TestRetryClientHelloECHRejectedFlow) {
                 serverNameList->server_name_list.front()
                     .hostname->to<std::string>(),
                 "www.fakehostname.com");
-            return CertManager::CertMatch(
-                CertManager::CertMatchStruct{
+            return CertMatch(
+                CertMatchStruct{
                     cert_,
                     SignatureScheme::ecdsa_secp256r1_sha256,
-                    CertManager::MatchType::Direct});
+                    MatchType::Direct});
           }));
   EXPECT_CALL(*cert_, _getCertMessage(_));
   EXPECT_CALL(*mockHandshakeContext_, appendToTranscript(_))

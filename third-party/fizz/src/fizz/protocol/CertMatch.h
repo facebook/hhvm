@@ -13,16 +13,11 @@
 #include <fizz/protocol/Certificate.h>
 
 namespace fizz {
-class CertManagerBase {
- public:
-  enum class MatchType { Direct, Default };
-  struct CertMatchStruct {
-    std::shared_ptr<SelfCert> cert;
-    SignatureScheme scheme;
-    MatchType type;
-  };
-  using CertMatch = folly::Optional<CertMatchStruct>;
-
-  using SigSchemeMap = std::map<SignatureScheme, std::shared_ptr<SelfCert>>;
+enum class MatchType { Direct, Default };
+struct CertMatchStruct {
+  std::shared_ptr<SelfCert> cert;
+  SignatureScheme scheme;
+  MatchType type;
 };
+using CertMatch = folly::Optional<CertMatchStruct>;
 } // namespace fizz

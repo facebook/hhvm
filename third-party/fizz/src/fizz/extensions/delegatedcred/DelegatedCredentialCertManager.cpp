@@ -12,7 +12,7 @@ using namespace fizz::server;
 namespace fizz {
 namespace extensions {
 
-CertManager::CertMatch DelegatedCredentialCertManager::getCert(
+CertMatch DelegatedCredentialCertManager::getCert(
     const folly::Optional<std::string>& sni,
     const std::vector<SignatureScheme>& supportedSigSchemes,
     const std::vector<SignatureScheme>& peerSigSchemes,

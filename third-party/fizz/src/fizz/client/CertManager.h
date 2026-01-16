@@ -10,12 +10,12 @@
 
 #include <map>
 
-#include <fizz/protocol/CertManagerBase.h>
+#include <fizz/protocol/CertMatch.h>
 
 namespace fizz {
 namespace client {
 
-class CertManager : public CertManagerBase {
+class CertManager {
  public:
   virtual ~CertManager() = default;
   /**
@@ -45,7 +45,7 @@ class CertManager : public CertManagerBase {
  protected:
   void addCert(std::shared_ptr<SelfCert> cert, bool overrideExistingEntry);
 
-  SigSchemeMap certs_;
+  std::map<SignatureScheme, std::shared_ptr<SelfCert>> certs_;
 };
 } // namespace client
 } // namespace fizz

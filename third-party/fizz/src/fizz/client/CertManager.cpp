@@ -13,7 +13,7 @@ using namespace folly;
 namespace fizz {
 namespace client {
 
-CertManager::CertMatch CertManager::getCert(
+CertMatch CertManager::getCert(
     const folly::Optional<std::string>& /* sni */,
     const std::vector<SignatureScheme>& supportedSigSchemes,
     const std::vector<SignatureScheme>& peerSigSchemes,

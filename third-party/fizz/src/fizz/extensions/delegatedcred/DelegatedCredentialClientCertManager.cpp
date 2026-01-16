@@ -11,8 +11,7 @@
 namespace fizz {
 namespace extensions {
 
-fizz::client::CertManager::CertMatch
-DelegatedCredentialClientCertManager::getCert(
+CertMatch DelegatedCredentialClientCertManager::getCert(
     const folly::Optional<std::string>& sni,
     const std::vector<SignatureScheme>& supportedSigSchemes,
     const std::vector<SignatureScheme>& peerSigSchemes,

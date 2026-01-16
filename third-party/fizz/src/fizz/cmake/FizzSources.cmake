@@ -201,7 +201,7 @@ set(
         extensions/tokenbinding/Validator.h
         protocol/Actions.h
         protocol/AsyncFizzBase.h
-        protocol/CertManagerBase.h
+        protocol/CertMatch.h
         protocol/Certificate.h
         protocol/CertificateVerifier.h
         protocol/DefaultCertificateVerifier.h

@@ -11,12 +11,12 @@
 #include <map>
 #include <unordered_map>
 
-#include <fizz/protocol/CertManagerBase.h>
+#include <fizz/protocol/CertMatch.h>
 
 namespace fizz {
 namespace server {
 
-class CertManager : public CertManagerBase {
+class CertManager {
  public:
   virtual ~CertManager() = default;
   /**
@@ -43,6 +43,7 @@ class CertManager : public CertManagerBase {
 
   bool hasCerts() const;
 
+  using SigSchemeMap = std::map<SignatureScheme, std::shared_ptr<SelfCert>>;
   const std::unordered_map<std::string, SigSchemeMap>&
   getCertificatesByIdentity() const;
 

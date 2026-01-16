@@ -16,7 +16,7 @@ namespace fizz {
 namespace server {
 
 // Find a matching cert given a key.
-CertManager::CertMatch CertManager::findCert(
+CertMatch CertManager::findCert(
     const std::string& key,
     const std::vector<SignatureScheme>& supportedSigSchemes,
     const std::vector<SignatureScheme>& peerSigSchemes) const {
@@ -37,7 +37,7 @@ CertManager::CertMatch CertManager::findCert(
   return none;
 }
 
-CertManager::CertMatch CertManager::getCert(
+CertMatch CertManager::getCert(
     const Optional<std::string>& sni,
     const std::vector<SignatureScheme>& supportedSigSchemes,
     const std::vector<SignatureScheme>& peerSigSchemes,

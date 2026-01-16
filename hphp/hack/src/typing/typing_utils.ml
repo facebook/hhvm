@@ -503,7 +503,9 @@ let get_concrete_supertypes
 (** Run a function on an intersection represented by a list of types.
     We stay liberal with errors:
     discard the result of any run which has produced an error.
-    If all runs have produced an error, gather all errors and results and add errors. *)
+    If all runs have produced an error, gather all errors and results and add errors.
+    Note: warnings should NOT affect which results are considered valid
+     *)
 let run_on_intersection :
     'env -> f:('env -> locl_ty -> 'env * 'a) -> locl_ty list -> 'env * 'a list =
  fun env ~f tyl ->
@@ -512,15 +514,29 @@ let run_on_intersection :
         let (errors, (env, result)) = Errors.do_ @@ fun () -> f env ty in
         (env, (result, errors)))
   in
+
+  let has_only_warnings err =
+    Errors.is_empty (Errors.filter_out_warnings err)
+  in
   let valid_resl =
-    List.filter resl_errors ~f:(fun (_, err) -> Errors.is_empty err)
+    List.filter resl_errors ~f:(fun (_, err) -> has_only_warnings err)
     |> List.map ~f:fst
   in
+  (* Always merge warnings from all branches so they're not lost *)
+  List.iter resl_errors ~f:(fun (_, err) ->
+      let warnings_only =
+        Errors.filter err ~f:(fun _path error ->
+            match error.User_error.severity with
+            | User_error.Warning -> true
+            | User_error.Err -> false)
+      in
+      Errors.merge_into_current warnings_only);
   let resl =
     if not (List.is_empty valid_resl) then
       valid_resl
     else (
-      List.iter resl_errors ~f:(fun (_, err) -> Errors.merge_into_current err);
+      List.iter resl_errors ~f:(fun (_, err) ->
+          Errors.merge_into_current (Errors.filter_out_warnings err));
       List.map ~f:fst resl_errors
     )
   in

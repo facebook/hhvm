@@ -35,6 +35,7 @@ use hhbc::TraitReqKind;
 use hhbc::TypeConstant;
 use hhbc::TypeInfo;
 use hhbc::TypedValue;
+use hhbc::VerifyKind;
 use hhbc::Visibility;
 use hhbc::string_id;
 use hhbc_string_utils as string_utils;
@@ -377,7 +378,7 @@ fn emit_reified_init_body<'a>(
             instr::pop_c(),
         ])
     };
-    let return_instr = InstrSeq::gather(vec![instr::null(), instr::ret_c()]);
+    let return_instr = InstrSeq::gather(vec![instr::null(), instr::ret_c(VerifyKind::None)]);
     Ok(if ast_class.extends.is_empty() {
         InstrSeq::gather(vec![set_prop, return_instr])
     } else {
@@ -466,7 +467,7 @@ fn make_init_method(
             .collect(),
     );
     if has_inits {
-        let instrs = InstrSeq::gather(vec![instrs, instr::null(), instr::ret_c()]);
+        let instrs = InstrSeq::gather(vec![instrs, instr::null(), instr::ret_c(VerifyKind::None)]);
         Ok(Some(make_86method(
             emitter,
             MethodName::intern(name),
@@ -690,7 +691,7 @@ pub fn emit_class<'a>(emitter: &mut Emitter, ast_class: &'a ast::Class_) -> Resu
                             instr::label(label),
                             init_instrs,
                             emit_pos::emit_pos(pos),
-                            instr::ret_c(),
+                            instr::ret_c(VerifyKind::None),
                         ])
                     })
                     .collect(),

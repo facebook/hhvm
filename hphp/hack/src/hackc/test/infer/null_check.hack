@@ -21,23 +21,15 @@ class A {
 // CHECK: // .column 7
 // CHECK:   prune ! $builtins.hack_is_true(n2)
 // CHECK: // .column 5
-// CHECK:   n3 = $builtins.hhbc_is_type_str($builtins.hack_string("default"))
-// CHECK: // .column 5
-// CHECK:   n4 = $builtins.hhbc_verify_type_pred($builtins.hack_string("default"), n3)
-// CHECK: // .column 5
 // CHECK:   ret $builtins.hack_string("default")
 // CHECK: #b2:
 // CHECK: // .column 7
 // CHECK:   prune $builtins.hack_is_true(n2)
 // CHECK: // .column 12
-// CHECK:   n5: *HackMixed = load &$arg
-// CHECK:   n6: *HackMixed = load n5.?.prop1
+// CHECK:   n3: *HackMixed = load &$arg
+// CHECK:   n4: *HackMixed = load n3.?.prop1
 // CHECK: // .column 5
-// CHECK:   n7 = $builtins.hhbc_is_type_str(n6)
-// CHECK: // .column 5
-// CHECK:   n8 = $builtins.hhbc_verify_type_pred(n6, n7)
-// CHECK: // .column 5
-// CHECK:   ret n6
+// CHECK:   ret n4
 // CHECK: }
 function f1_nonnull(?A $arg): string {
   if ($arg is nonnull) {
@@ -63,18 +55,10 @@ function f1_nonnull(?A $arg): string {
 // CHECK:   n2: *HackMixed = load &$arg
 // CHECK:   n3: *HackMixed = load n2.?.prop1
 // CHECK: // .column 5
-// CHECK:   n4 = $builtins.hhbc_is_type_str(n3)
-// CHECK: // .column 5
-// CHECK:   n5 = $builtins.hhbc_verify_type_pred(n3, n4)
-// CHECK: // .column 5
 // CHECK:   ret n3
 // CHECK: #b2:
 // CHECK: // .column 7
 // CHECK:   prune $builtins.hack_is_true(n1)
-// CHECK: // .column 5
-// CHECK:   n6 = $builtins.hhbc_is_type_str($builtins.hack_string("default"))
-// CHECK: // .column 5
-// CHECK:   n7 = $builtins.hhbc_verify_type_pred($builtins.hack_string("default"), n6)
 // CHECK: // .column 5
 // CHECK:   ret $builtins.hack_string("default")
 // CHECK: }
@@ -117,25 +101,21 @@ function f2_null(?A $arg): string {
 // CHECK: // .column 11
 // CHECK:   n4: *HackMixed = load n1.?.prop1
 // CHECK: // .column 3
-// CHECK:   n5 = $builtins.hhbc_is_type_str(n4)
-// CHECK: // .column 3
-// CHECK:   n6 = $builtins.hhbc_verify_type_pred(n4, n5)
-// CHECK: // .column 3
 // CHECK:   ret n4
 // CHECK: #b4:
 // CHECK: // .column 11
 // CHECK:   prune ! $builtins.hack_is_true(n3)
 // CHECK: // .column 11
-// CHECK:   n7: *HackMixed = load &$0
+// CHECK:   n5: *HackMixed = load &$0
 // CHECK: // .column 11
-// CHECK:   n8 = $builtins.hhbc_throw_as_type_struct_exception(n1, n7)
+// CHECK:   n6 = $builtins.hhbc_throw_as_type_struct_exception(n1, n5)
 // CHECK:   unreachable
 // CHECK:   .handlers b5
-// CHECK: #b5(n9: *HackMixed):
+// CHECK: #b5(n7: *HackMixed):
 // CHECK: // .column 11
 // CHECK:   store &$0 <- null: *HackMixed
 // CHECK: // .column 11
-// CHECK:   throw n9
+// CHECK:   throw n7
 // CHECK: }
 function f3_as_nonnull(?A $arg): string {
   return ($arg as nonnull)->prop1;

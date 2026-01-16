@@ -845,7 +845,6 @@ fn cmp_instr_hhbc((a, a_func): (&Hhbc, &Func), (b, b_func): (&Hhbc, &Func)) -> R
         | (Hhbc::VerifyOutType(_, _, _), _)
         | (Hhbc::VerifyParamType(_, _, _), _)
         | (Hhbc::VerifyParamTypeTS(_, _, _), _)
-        | (Hhbc::VerifyRetTypeC(_, _), _)
         | (Hhbc::VerifyRetTypeTS(_, _), _)
         | (Hhbc::VerifyTypeTS(_, _), _)
         | (Hhbc::WHResult(_, _), _)
@@ -934,7 +933,7 @@ fn cmp_instr_member_op_base(
     #[rustfmt::skip]
     match (a, b) {
         (BaseOp::BaseC { mode: a_mode, loc: a_loc },
-         BaseOp::BaseC { mode: b_mode, loc: b_loc }) 
+         BaseOp::BaseC { mode: b_mode, loc: b_loc })
          => {
             cmp_eq(a_mode, b_mode).qualified("mode")?;
             cmp_loc_id((*a_loc, a_func), (*b_loc, b_func)).qualified("loc")?;
@@ -1144,6 +1143,12 @@ fn cmp_instr_terminator(a: &Terminator, b: &Terminator) -> Result {
              Terminator::JmpOp { cond: _, pred: b_pred, targets: _, loc: _, }, ) => {
                 cmp_eq(a_pred, b_pred)?;
             }
+            (Terminator::Ret(_, kind0, _),
+             Terminator::Ret(_, kind1, _))
+                | (Terminator::RetM(_, kind0, _),
+                   Terminator::RetM(_, kind1, _)) => {
+                cmp_eq(kind0, kind1)?;
+            }
             (Terminator::Switch { cond: _, bounded: a_kind, base: a_base, targets: _, loc: _, },
              Terminator::Switch { cond: _, bounded: b_kind, base: b_base, targets: _, loc: _, }, ) => {
                 cmp_eq(a_kind, b_kind)?;
@@ -1162,9 +1167,7 @@ fn cmp_instr_terminator(a: &Terminator, b: &Terminator) -> Result {
                 | (Terminator::MemoGet(_), _)
                 | (Terminator::MemoGetEager(_), _)
                 | (Terminator::NativeImpl(_), _)
-                | (Terminator::Ret(_, _), _)
                 | (Terminator::RetCSuspended(_, _), _)
-                | (Terminator::RetM(_, _), _)
                 | (Terminator::Throw(_, _), _)
                 | (Terminator::ThrowAsTypeStructException(_, _, _), _)
                 | (Terminator::Unreachable, _) => {}
@@ -1177,7 +1180,9 @@ fn cmp_instr_terminator(a: &Terminator, b: &Terminator) -> Result {
                 | Terminator::IterNext(..)
                 | Terminator::JmpOp { .. }
                 | Terminator::Switch { .. }
-                | Terminator::SSwitch { .. },
+                | Terminator::SSwitch { .. }
+                | Terminator::Ret{ .. }
+                | Terminator::RetM{ .. },
                 _,
             ) => unreachable!(),
         };

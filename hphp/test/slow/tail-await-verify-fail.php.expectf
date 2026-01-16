@@ -1,0 +1,3 @@
+string(16) "Invoked userAuto"
+
+Catchable fatal error: Value returned from async method A::baz() must be of type ?HH\dict, HH\Map given in %s on line 22

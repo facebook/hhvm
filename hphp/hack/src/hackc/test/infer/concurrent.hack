@@ -45,10 +45,6 @@ namespace Concurrent {
   // CHECK: // .column 16
   // CHECK:   n8 = $builtins.hhbc_concat(n7, n6)
   // CHECK: // .column 5
-  // CHECK:   n9 = $builtins.hhbc_is_type_str(n8)
-  // CHECK: // .column 5
-  // CHECK:   n10 = $builtins.hhbc_verify_type_pred(n8, n9)
-  // CHECK: // .column 5
   // CHECK:   ret n8
   // CHECK: }
   async function genTest1(): Awaitable<string> {
@@ -131,10 +127,6 @@ namespace Concurrent {
   // CHECK: // .column 22
   // CHECK:   n15 = $builtins.hhbc_add(n13, n14)
   // CHECK: // .column 5
-  // CHECK:   n16 = $builtins.hhbc_is_type_int(n15)
-  // CHECK: // .column 5
-  // CHECK:   n17 = $builtins.hhbc_verify_type_pred(n15, n16)
-  // CHECK: // .column 5
   // CHECK:   ret n15
   // CHECK: }
   async function genTest3(): Awaitable<int> {
@@ -190,10 +182,6 @@ namespace Concurrent {
   // CHECK:   n8: *HackMixed = load &$x
   // CHECK: // .column 15
   // CHECK:   n9 = $builtins.hhbc_concat(n8, n7)
-  // CHECK: // .column 5
-  // CHECK:   n10 = $builtins.hhbc_is_type_str(n9)
-  // CHECK: // .column 5
-  // CHECK:   n11 = $builtins.hhbc_verify_type_pred(n9, n10)
   // CHECK: // .column 5
   // CHECK:   ret n9
   // CHECK: }

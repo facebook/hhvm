@@ -180,7 +180,6 @@ impl<'a> PushCount<'a> for instr::Hhbc {
             | Hhbc::This(_)
             | Hhbc::VerifyOutType(..)
             | Hhbc::VerifyParamType(..)
-            | Hhbc::VerifyRetTypeC(..)
             | Hhbc::VerifyRetTypeTS(..)
             | Hhbc::VerifyTypeTS(..)
             | Hhbc::WHResult(..)

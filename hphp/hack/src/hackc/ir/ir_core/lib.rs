@@ -106,6 +106,7 @@ pub use hhbc::TypedValue;
 pub use hhbc::Typedef;
 pub use hhbc::UnitImpl;
 pub use hhbc::UpperBound;
+pub use hhbc::VerifyKind;
 pub use hhbc::Visibility;
 pub use hhbc::dict_get;
 pub use hhbc::intern;

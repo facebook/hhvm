@@ -11,10 +11,6 @@ class C {
   // CHECK: // .column 17
   // CHECK:   n2 = $builtins.hhbc_add(n1, n0)
   // CHECK: // .column 5
-  // CHECK:   n3 = $builtins.hhbc_is_type_int(n2)
-  // CHECK: // .column 5
-  // CHECK:   n4 = $builtins.hhbc_verify_type_pred(n2, n3)
-  // CHECK: // .column 5
   // CHECK:   ret n2
   // CHECK: }
   <<__Memoize>>
@@ -32,10 +28,6 @@ class C {
   // CHECK: // .column 17
   // CHECK:   n2 = $builtins.hhbc_add(n1, n0)
   // CHECK: // .column 5
-  // CHECK:   n3 = $builtins.hhbc_is_type_int(n2)
-  // CHECK: // .column 5
-  // CHECK:   n4 = $builtins.hhbc_verify_type_pred(n2, n3)
-  // CHECK: // .column 5
   // CHECK:   ret n2
   // CHECK: }
   <<__Memoize>>
@@ -52,10 +44,6 @@ class C {
   // CHECK:   n1: *HackMixed = load &$a
   // CHECK: // .column 17
   // CHECK:   n2 = $builtins.hhbc_add(n1, n0)
-  // CHECK: // .column 5
-  // CHECK:   n3 = $builtins.hhbc_is_type_int(n2)
-  // CHECK: // .column 5
-  // CHECK:   n4 = $builtins.hhbc_verify_type_pred(n2, n3)
   // CHECK: // .column 5
   // CHECK:   ret n2
   // CHECK: }
@@ -75,10 +63,6 @@ class C {
 // CHECK: // .column 15
 // CHECK:   n2 = $builtins.hhbc_add(n1, n0)
 // CHECK: // .column 3
-// CHECK:   n3 = $builtins.hhbc_is_type_int(n2)
-// CHECK: // .column 3
-// CHECK:   n4 = $builtins.hhbc_verify_type_pred(n2, n3)
-// CHECK: // .column 3
 // CHECK:   ret n2
 // CHECK: }
 
@@ -96,10 +80,6 @@ function memofunc(int $a, int $b)[]: int {
 // CHECK:   n1: *HackMixed = load &$a
 // CHECK: // .column 15
 // CHECK:   n2 = $builtins.hhbc_add(n1, n0)
-// CHECK: // .column 3
-// CHECK:   n3 = $builtins.hhbc_is_type_int(n2)
-// CHECK: // .column 3
-// CHECK:   n4 = $builtins.hhbc_verify_type_pred(n2, n3)
 // CHECK: // .column 3
 // CHECK:   ret n2
 // CHECK: }

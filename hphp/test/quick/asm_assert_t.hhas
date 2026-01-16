@@ -7,7 +7,7 @@
 
   .method [public] N returns_int {
     Int 12
-    RetC
+    RetC None
   }
 }
 
@@ -27,7 +27,7 @@
   AssertRATL $sub Obj<=Foo
   AssertRATL $sub Obj=Bar
   Int 1
-  RetC
+  RetC None
 }
 
 .function N make_bar() {
@@ -42,7 +42,7 @@
   AssertRATStk 0 Obj=Bar
   LockObj
   AssertRATStk 0 Obj=Bar
-  RetC
+  RetC None
 }
 
 .function N obj_type2() {
@@ -57,7 +57,7 @@
   SetL $x
   PopC
   Int 1
-  RetC
+  RetC None
 }
 
 .function N foo() {
@@ -65,7 +65,7 @@
   Jmp stuff
 out:
   Null
-  RetC
+  RetC None
 
 stuff:
   NewObjD "Foo"
@@ -124,6 +124,6 @@ stuff:
   PopC
 
   Int 1
-  RetC
+  RetC None
 }
 

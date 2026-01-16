@@ -14,6 +14,7 @@ use ir_core::Instr;
 use ir_core::IrRepr;
 use ir_core::LocId;
 use ir_core::ValueId;
+use ir_core::VerifyKind;
 use ir_core::instr;
 
 /// Given a simple CFG description, create a Func that matches it.
@@ -108,10 +109,10 @@ impl Block {
         let null_iid = fb.emit_imm(Immediate::Null);
 
         let terminator = match &self.terminator {
-            Terminator::Ret => Instr::ret(null_iid, loc),
+            Terminator::Ret => Instr::ret(null_iid, VerifyKind::All, loc),
             Terminator::RetValue(arg) => {
                 let arg = *name_to_vid.get(arg).unwrap();
-                Instr::ret(arg, loc)
+                Instr::ret(arg, VerifyKind::All, loc)
             }
             Terminator::Jmp(a) => {
                 let a = bid_for(a);

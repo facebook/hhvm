@@ -16,10 +16,6 @@ class D {
   // CHECK:   n2: *HackMixed = load &$this
   // CHECK:   n3: *HackMixed = load n2.?.foo
   // CHECK: // .column 5
-  // CHECK:   n4 = $builtins.hhbc_is_type_int(n3)
-  // CHECK: // .column 5
-  // CHECK:   n5 = $builtins.hhbc_verify_type_pred(n3, n4)
-  // CHECK: // .column 5
   // CHECK:   ret n3
   // CHECK: }
   public function mop_baseh_querym_pt(): int {
@@ -35,10 +31,6 @@ class D {
   // CHECK:   n1: *HackMixed = load n0.?.bar
   // CHECK:   n2: *HackMixed = load n1.?.foo
   // CHECK: // .column 5
-  // CHECK:   n3 = $builtins.hhbc_is_type_int(n2)
-  // CHECK: // .column 5
-  // CHECK:   n4 = $builtins.hhbc_verify_type_pred(n2, n3)
-  // CHECK: // .column 5
   // CHECK:   ret n2
   // CHECK: }
   public function mop_basesc_querym_pt(): int {
@@ -53,10 +45,6 @@ class D {
 // CHECK:   n0 = $root.ret_c(null)
 // CHECK: // .column 10
 // CHECK:   n1: *HackMixed = load n0.?.foo
-// CHECK: // .column 3
-// CHECK:   n2 = $builtins.hhbc_is_type_int(n1)
-// CHECK: // .column 3
-// CHECK:   n3 = $builtins.hhbc_verify_type_pred(n1, n2)
 // CHECK: // .column 3
 // CHECK:   ret n1
 // CHECK: }
@@ -76,10 +64,6 @@ function mop_basec_querym_pc(): int {
 // CHECK:   n3 = $builtins.hack_int(5)
 // CHECK:   n4: *HackMixed = load &$a
 // CHECK:   n5 = $builtins.hack_array_get(n4, n3)
-// CHECK: // .column 3
-// CHECK:   n6 = $builtins.hhbc_is_type_int(n5)
-// CHECK: // .column 3
-// CHECK:   n7 = $builtins.hhbc_verify_type_pred(n5, n6)
 // CHECK: // .column 3
 // CHECK:   ret n5
 // CHECK: }
@@ -101,10 +85,6 @@ function mop_basel_querym_ei(vec<int> $a): int {
 // CHECK:   n5 = $builtins.hack_array_get_quiet(n4, n3)
 // CHECK:   n6 = $builtins.hhbc_is_type_null(n5)
 // CHECK: // .column 3
-// CHECK:   n7 = $builtins.hhbc_is_type_bool(n6)
-// CHECK: // .column 3
-// CHECK:   n8 = $builtins.hhbc_verify_type_pred(n6, n7)
-// CHECK: // .column 3
 // CHECK:   ret n6
 // CHECK: }
 function mop_basel_querym_ei_isset(vec<int> $a): bool {
@@ -119,10 +99,6 @@ function mop_basel_querym_ei_isset(vec<int> $a): bool {
 // CHECK: // .column 10
 // CHECK:   n1: *HackMixed = load &$a
 // CHECK:   n2 = $builtins.hack_prop_get(n1, n0, false)
-// CHECK: // .column 3
-// CHECK:   n3 = $builtins.hhbc_is_type_int(n2)
-// CHECK: // .column 3
-// CHECK:   n4 = $builtins.hhbc_verify_type_pred(n2, n3)
 // CHECK: // .column 3
 // CHECK:   ret n2
 // CHECK: }
@@ -140,10 +116,6 @@ function mop_basel_querym_pc(C $a): int {
 // CHECK:   n0: *HackMixed = load &$b
 // CHECK:   n1: *HackMixed = load &$a
 // CHECK:   n2 = $builtins.hack_prop_get(n1, n0, false)
-// CHECK: // .column 3
-// CHECK:   n3 = $builtins.hhbc_is_type_int(n2)
-// CHECK: // .column 3
-// CHECK:   n4 = $builtins.hhbc_verify_type_pred(n2, n3)
 // CHECK: // .column 3
 // CHECK:   ret n2
 // CHECK: }
@@ -166,10 +138,6 @@ function mop_basel_querym_pl(C $a): int {
 // CHECK:   n4: *HackMixed = load &$a
 // CHECK:   n5 = $builtins.hack_array_get(n4, n3)
 // CHECK: // .column 3
-// CHECK:   n6 = $builtins.hhbc_is_type_int(n5)
-// CHECK: // .column 3
-// CHECK:   n7 = $builtins.hhbc_verify_type_pred(n5, n6)
-// CHECK: // .column 3
 // CHECK:   ret n5
 // CHECK: }
 function mop_basel_querym_el(vec<int> $a, int $b): int {
@@ -189,10 +157,6 @@ function mop_basel_querym_el(vec<int> $a, int $b): int {
 // CHECK:   n4: *HackMixed = load &$a
 // CHECK:   n5 = $builtins.hack_array_get(n4, n3)
 // CHECK: // .column 3
-// CHECK:   n6 = $builtins.hhbc_is_type_int(n5)
-// CHECK: // .column 3
-// CHECK:   n7 = $builtins.hhbc_verify_type_pred(n5, n6)
-// CHECK: // .column 3
 // CHECK:   ret n5
 // CHECK: }
 function mop_basel_querym_et(dict<string, int> $a): int {
@@ -206,10 +170,6 @@ function mop_basel_querym_et(dict<string, int> $a): int {
 // CHECK:   n0: *HackMixed = load &$a
 // CHECK:   n1: *HackMixed = load n0.?.foo
 // CHECK: // .column 3
-// CHECK:   n2 = $builtins.hhbc_is_type_int(n1)
-// CHECK: // .column 3
-// CHECK:   n3 = $builtins.hhbc_verify_type_pred(n1, n2)
-// CHECK: // .column 3
 // CHECK:   ret n1
 // CHECK: }
 function mop_basel_querym_pt(C $a): int {
@@ -222,25 +182,6 @@ function mop_basel_querym_pt(C $a): int {
 // CHECK: // .column 10
 // CHECK:   n0: *HackMixed = load &$a
 // CHECK:   n1 = $builtins.hack_prop_get(n0, "foo", true)
-// CHECK: // .column 3
-// CHECK:   n2 = $builtins.hhbc_is_type_null(n1)
-// CHECK: // .column 3
-// CHECK:   jmp b1, b2
-// CHECK: #b1:
-// CHECK: // .column 3
-// CHECK:   prune $builtins.hack_is_true(n2)
-// CHECK: // .column 3
-// CHECK:   jmp b3($builtins.hack_bool(true))
-// CHECK: #b2:
-// CHECK: // .column 3
-// CHECK:   prune ! $builtins.hack_is_true(n2)
-// CHECK: // .column 3
-// CHECK:   n3 = $builtins.hhbc_is_type_int(n1)
-// CHECK: // .column 3
-// CHECK:   jmp b3(n3)
-// CHECK: #b3(n4: *HackMixed):
-// CHECK: // .column 3
-// CHECK:   n5 = $builtins.hhbc_verify_type_pred(n1, n4)
 // CHECK: // .column 3
 // CHECK:   ret n1
 // CHECK: }
@@ -284,10 +225,6 @@ function mop_basel_setm_w(vec<int> $a): void {
 // CHECK:   n7: *HackMixed = load &$a
 // CHECK:   n8 = $builtins.hack_array_cow_set(n7, n3, n6)
 // CHECK:   store &$a <- n8: *HackMixed
-// CHECK: // .column 3
-// CHECK:   n9 = $builtins.hhbc_is_type_int(n5)
-// CHECK: // .column 3
-// CHECK:   n10 = $builtins.hhbc_verify_type_pred(n5, n9)
 // CHECK: // .column 3
 // CHECK:   ret n5
 // CHECK: }
@@ -343,10 +280,6 @@ function mop_basel_unset_pt(C $a): void {
 // CHECK:   n4: *HackMixed = load &$d
 // CHECK:   n5 = $builtins.hack_array_get(n4, n3)
 // CHECK: // .column 3
-// CHECK:   n6 = $builtins.hhbc_is_type_int(n5)
-// CHECK: // .column 3
-// CHECK:   n7 = $builtins.hhbc_verify_type_pred(n5, n6)
-// CHECK: // .column 3
 // CHECK:   ret n5
 // CHECK: }
 function mop_basec_querym_cget(dict<string, int> $d): int {
@@ -382,10 +315,6 @@ function mop_basec_querym_cget(dict<string, int> $d): int {
 // CHECK: // .column 21
 // CHECK:   jmp b3($builtins.hack_int(42))
 // CHECK: #b3(n8: *HackMixed):
-// CHECK: // .column 3
-// CHECK:   n9 = $builtins.hhbc_is_type_int(n8)
-// CHECK: // .column 3
-// CHECK:   n10 = $builtins.hhbc_verify_type_pred(n8, n9)
 // CHECK: // .column 3
 // CHECK:   ret n8
 // CHECK: }

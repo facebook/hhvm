@@ -170,6 +170,9 @@ inline const char* prettytype(SetRangeOp) { return "SetRangeOp"; }
 inline const char* prettytype(TypeStructResolveOp) {
   return "TypeStructResolveOp";
 }
+inline const char* prettytype(VerifyKind) {
+  return "VerifyKind";
+}
 inline const char* prettytype(TypeStructEnforceKind) {
   return "TypeStructEnforceKind";
 }
@@ -2167,7 +2170,36 @@ OPTBLD_INLINE JitResumeAddr ret(PC& pc) {
   return jitReturnPost(jitReturn);
 }
 
-OPTBLD_INLINE JitResumeAddr iopRetC(PC& pc) {
+namespace {
+
+OPTBLD_INLINE void verifyRetTypeImpl(size_t ind, HPHP::VerifyKind kind) {
+  auto const func = vmfp()->func();
+  auto const& constraints = func->returnTypeConstraints();
+  auto const& retVal = vmStack().indC(ind);
+  switch (kind) {
+    case HPHP::VerifyKind::None:
+      break;
+    case HPHP::VerifyKind::NonNull:
+      for (auto const& tc : constraints.range()) {
+        if (tc.isNullable()) continue;
+        auto const ctx = tc.isThis() ? frameStaticClass(vmfp()) : nullptr;
+        tc.verifyReturnNonNull(retVal, ctx, func);
+      }
+      break;
+    case HPHP::VerifyKind::All:
+      for (auto const& tc : constraints.range()) {
+        if (!tc.isCheckable()) continue;
+        auto const ctx = tc.isThis() ? frameStaticClass(vmfp()) : nullptr;
+        tc.verifyReturn(retVal, ctx, func);
+      }
+      break;
+  }
+}
+
+} // namespace
+
+OPTBLD_INLINE JitResumeAddr iopRetC(PC& pc, HPHP::VerifyKind kind) {
+  verifyRetTypeImpl(0, kind);
   return ret<false>(pc);
 }
 
@@ -2177,7 +2209,8 @@ OPTBLD_INLINE JitResumeAddr iopRetCSuspended(PC& pc) {
   return ret<true>(pc);
 }
 
-OPTBLD_INLINE JitResumeAddr iopRetM(PC& pc, uint32_t numRet) {
+OPTBLD_INLINE JitResumeAddr iopRetM(PC& pc, uint32_t numRet, HPHP::VerifyKind kind) {
+  verifyRetTypeImpl(numRet - 1, kind);
   auto const jitReturn = jitReturnPre(vmfp());
 
   req::vector<TypedValue> retvals;
@@ -4626,24 +4659,6 @@ OPTBLD_INLINE void iopVerifyOutType(local_var param) {
   }
 }
 
-namespace {
-
-OPTBLD_INLINE void verifyRetTypeImpl(size_t ind) {
-  const auto func = vmfp()->func();
-  for (auto const& tc : func->returnTypeConstraints().range()) {
-    if (tc.isCheckable()) {
-      auto const ctx = tc.isThis() ? frameStaticClass(vmfp()) : nullptr;
-      tc.verifyReturn(vmStack().indC(ind), ctx, func);
-    }
-  }
-}
-
-} // namespace
-
-OPTBLD_INLINE void iopVerifyRetTypeC() {
-  verifyRetTypeImpl(0); // TypedValue is on the top of the stack
-}
-
 OPTBLD_INLINE void iopVerifyRetTypeTS() {
   auto const ts = vmStack().topC();
   assertx(tvIsDict(ts));
@@ -4679,16 +4694,6 @@ OPTBLD_INLINE void iopVerifyTypeTS() {
     }
   }
   vmStack().popC();
-}
-
-OPTBLD_INLINE void iopVerifyRetNonNullC() {
-  auto const func = vmfp()->func();
-  auto const& constraints = func->returnTypeConstraints();
-  for (auto const& tc : constraints.range()) {
-    if (tc.isNullable()) continue;
-    auto const ctx = tc.isThis() ? frameStaticClass(vmfp()) : nullptr;
-    tc.verifyReturnNonNull(vmStack().topC(), ctx, func);
-  }
 }
 
 OPTBLD_INLINE JitResumeAddr iopNativeImpl(PC& pc) {

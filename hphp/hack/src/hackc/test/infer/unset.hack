@@ -19,10 +19,6 @@ class C {
   // CHECK: // .column 12
   // CHECK:   n6: *HackMixed = load &$this
   // CHECK: // .column 5
-  // CHECK:   n7 = $builtins.hhbc_is_late_bound_cls(n6)
-  // CHECK: // .column 5
-  // CHECK:   n8 = $builtins.hhbc_verify_type_pred(n6, n7)
-  // CHECK: // .column 5
   // CHECK:   ret n6
   // CHECK: }
   public function test1(int $idx): this {

@@ -1715,7 +1715,7 @@ void TypeConstraint::verifyReturnNonNull(TypedValue* tv,
     auto vm = &*g_context;
     always_assert_flog(
       check(tv, ctx),
-      "HHBBC incorrectly converted VerifyRetTypeC to VerifyRetNonNull in {}:{}",
+      "HHBBC incorrectly converted RetC All to RetC NonNull in {}:{}",
       vm->getContainingFileName()->data(),
       vm->getLine()
     );

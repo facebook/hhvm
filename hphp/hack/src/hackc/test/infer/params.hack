@@ -53,10 +53,6 @@ class InternalGeneric<T> {}
 // CHECK: // .column 10
 // CHECK:   n9 = $builtins.hhbc_lock_obj(n6)
 // CHECK: // .column 3
-// CHECK:   n10 = $builtins.hack_bool(__sil_instanceof(n6, <Internal>, 0))
-// CHECK: // .column 3
-// CHECK:   n11 = $builtins.hhbc_verify_type_pred(n6, n10)
-// CHECK: // .column 3
 // CHECK:   ret n6
 // CHECK: }
 function internalClassParam(int $a, Internal $b) : Internal {
@@ -111,10 +107,6 @@ function internalClassParam(int $a, Internal $b) : Internal {
 // CHECK: // .column 10
 // CHECK:   n9 = $builtins.hhbc_lock_obj(n6)
 // CHECK: // .column 3
-// CHECK:   n10 = $builtins.hack_bool(__sil_instanceof(n6, <External>, 0))
-// CHECK: // .column 3
-// CHECK:   n11 = $builtins.hhbc_verify_type_pred(n6, n10)
-// CHECK: // .column 3
 // CHECK:   ret n6
 // CHECK: }
 function externalClassParam(bool $a, External $b): External {
@@ -129,10 +121,6 @@ function externalClassParam(bool $a, External $b): External {
 // CHECK:   n1: *HackMixed = load &$b
 // CHECK: // .column 7
 // CHECK:   n2 = $builtins.hhbc_verify_param_type_ts(n1, n0)
-// CHECK: // .column 3
-// CHECK:   n3 = $builtins.hhbc_is_type_int($builtins.hack_int(42))
-// CHECK: // .column 3
-// CHECK:   n4 = $builtins.hhbc_verify_type_pred($builtins.hack_int(42), n3)
 // CHECK: // .column 3
 // CHECK:   ret $builtins.hack_int(42)
 // CHECK: }

@@ -20,10 +20,6 @@ abstract class C {
   // CHECK: // .column 12
   // CHECK:   n2 = $builtins.hhbc_is_type_struct_c(n1, n0, $builtins.hack_int(1), $builtins.hack_int(0))
   // CHECK: // .column 5
-  // CHECK:   n3 = $builtins.hhbc_is_type_bool(n2)
-  // CHECK: // .column 5
-  // CHECK:   n4 = $builtins.hhbc_verify_type_pred(n2, n3)
-  // CHECK: // .column 5
   // CHECK:   ret n2
   // CHECK: }
   public static function check2(mixed $a): bool {
@@ -64,10 +60,6 @@ class D extends C {
 // CHECK: // .column 10
 // CHECK:   n2 = $builtins.hhbc_is_type_struct_c(n1, n0, $builtins.hack_int(1), $builtins.hack_int(0))
 // CHECK: // .column 3
-// CHECK:   n3 = $builtins.hhbc_is_type_bool(n2)
-// CHECK: // .column 3
-// CHECK:   n4 = $builtins.hhbc_verify_type_pred(n2, n3)
-// CHECK: // .column 3
 // CHECK:   ret n2
 // CHECK: }
 function check1(mixed $a): bool {
@@ -98,23 +90,21 @@ function check1(mixed $a): bool {
 // CHECK: // .column 10
 // CHECK:   store &$0 <- null: *HackMixed
 // CHECK: // .column 3
-// CHECK:   n3 = $builtins.hhbc_verify_type_pred(n0, $builtins.hack_bool(true))
-// CHECK: // .column 3
 // CHECK:   ret n0
 // CHECK: #b3:
 // CHECK: // .column 10
 // CHECK:   prune ! $builtins.hack_is_true(n2)
 // CHECK: // .column 10
-// CHECK:   n4: *HackMixed = load &$0
+// CHECK:   n3: *HackMixed = load &$0
 // CHECK: // .column 10
-// CHECK:   n5 = $builtins.hhbc_throw_as_type_struct_exception(n0, n4)
+// CHECK:   n4 = $builtins.hhbc_throw_as_type_struct_exception(n0, n3)
 // CHECK:   unreachable
 // CHECK:   .handlers b4
-// CHECK: #b4(n6: *HackMixed):
+// CHECK: #b4(n5: *HackMixed):
 // CHECK: // .column 10
 // CHECK:   store &$0 <- null: *HackMixed
 // CHECK: // .column 10
-// CHECK:   throw n6
+// CHECK:   throw n5
 // CHECK: }
 function check2(): D::TMyShape {
   return dict[] as D::TMyShape;

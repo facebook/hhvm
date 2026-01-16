@@ -677,7 +677,7 @@ Index make_index() {
       &hhas,
       "    .function N {}() {{\n"
       "      Null\n"
-      "      RetC\n"
+      "      RetC None\n"
       "    }}\n",
       f
     );

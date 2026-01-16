@@ -100,3 +100,8 @@ union Potahto {
   3: string tah;
   4: bool to;
 }
+
+exception SimpleException {
+  1: string message;
+  2: i32 code;
+}

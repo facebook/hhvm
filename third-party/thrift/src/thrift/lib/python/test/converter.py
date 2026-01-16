@@ -177,6 +177,14 @@ class Py3ToPythonConverterTest(unittest.TestCase):
             python_types.Color.RED,
         )
 
+    def test_exception(self) -> None:
+        exception = py3_types.SimpleException(
+            message="Test error", code=42
+        )._to_python()
+        self.assertIsInstance(exception, python_types.SimpleException)
+        self.assertEqual(exception.message, "Test error")
+        self.assertEqual(exception.code, 42)
+
 
 class PyDeprecatedToPythonConverterTest(unittest.TestCase):
     def test_simple(self) -> None:
@@ -334,6 +342,14 @@ class PyDeprecatedToPythonConverterTest(unittest.TestCase):
         )
         self.assertEqual(to.type, python_types.Potahto.Type.to)
         self.assertEqual(to.value, True)
+
+    def test_exception(self) -> None:
+        exception = py_deprecated_types.SimpleException(
+            message="Test error", code=42
+        )._to_python()
+        self.assertIsInstance(exception, python_types.SimpleException)
+        self.assertEqual(exception.message, "Test error")
+        self.assertEqual(exception.code, 42)
 
 
 class PyDeprecatedToMutablePythonConverterTest(unittest.TestCase):
@@ -527,6 +543,20 @@ class PythonToPythonConverterTest(unittest.TestCase):
                 simple,
             ),
         )
+
+    def test_exception(self) -> None:
+        exception = python_types.SimpleException(message="Test error", code=42)
+        self.assertIs(exception, exception._to_python())
+
+
+class MutablePythonToPythonConverterTest(unittest.TestCase):
+    def test_exception(self) -> None:
+        exception = python_mutable_types.SimpleException(
+            message="Test error", code=42
+        )._to_python()
+        self.assertIsInstance(exception, python_types.SimpleException)
+        self.assertEqual(exception.message, "Test error")
+        self.assertEqual(exception.code, 42)
 
 
 class NoneToPythonConverterTest(unittest.TestCase):

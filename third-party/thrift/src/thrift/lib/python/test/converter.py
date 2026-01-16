@@ -544,7 +544,6 @@ class PyDeprecatedToMutablePythonConverterTest(unittest.TestCase):
         )
         self.assertEqual(to.fbthrift_current_value, True)
 
-    @unittest.expectedFailure
     def test_exception(self) -> None:
         exception = py_deprecated_types.SimpleException(
             message="Test error", code=42
@@ -555,7 +554,6 @@ class PyDeprecatedToMutablePythonConverterTest(unittest.TestCase):
 
 
 class PythonToMutablePythonConverterTest(unittest.TestCase):
-    @unittest.expectedFailure
     def test_exception(self) -> None:
         exception = python_types.SimpleException(
             message="Test error", code=42

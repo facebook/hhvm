@@ -34,6 +34,9 @@ from thrift.python.types cimport (
     EnumTypeInfo,
     BadEnum,
 )
+from thrift.python.mutable_exceptions import MutableGeneratedError
+from thrift.python.exceptions import GeneratedError
+import thrift.py3.exceptions as py3_exceptions
 cimport thrift.py3.types as py3_types
 
 
@@ -77,7 +80,7 @@ cdef object _to_mutable_python_struct_or_union(
 
     See `to_mutable_python_struct_or_union()`.
     """
-    if issubclass(mutable_thrift_python_cls, MutableStruct):
+    if issubclass(mutable_thrift_python_cls, (MutableStruct, MutableGeneratedError)):
         mutable_struct_info = (
             <MutableStructInfo>mutable_thrift_python_cls._fbthrift_mutable_struct_info
         )
@@ -109,7 +112,7 @@ cdef object _to_mutable_python_struct_or_union(
         return mutable_thrift_python_cls()
     else:
         raise TypeError(
-            f"{mutable_thrift_python_cls} is not a (Mutable) Struct or Union"
+            f"{mutable_thrift_python_cls} is not a (Mutable) Struct, Union, or Exception"
         )
 
 
@@ -123,11 +126,11 @@ cdef object _get_src_struct_field_value(object src_struct, FieldInfo field):
 
     """
     # thrift-py3
-    if isinstance(src_struct, py3_types.Struct):
+    if isinstance(src_struct, (py3_types.Struct, py3_exceptions.GeneratedError)):
         return getattr(src_struct, field.py_name, None)
 
     # immutable thrift-python
-    if isinstance(src_struct, Struct):
+    if isinstance(src_struct, (Struct, GeneratedError)):
         return getattr(src_struct, field.py_name, None)
 
     # py-deprecated types do not inherit from a specific class, so we consider them as

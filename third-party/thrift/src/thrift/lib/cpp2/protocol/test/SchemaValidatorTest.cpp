@@ -757,3 +757,323 @@ TEST(SchemaValidatorTest, StringTypeConforming) {
   auto result = validateBlob<CompactProtocolReader>(*serialized, typeRef);
   EXPECT_EQ(result, SchemaValidationResult::Maybe);
 }
+
+// ============================================================================
+// Tests for validateBlobWithPaths
+// ============================================================================
+
+// Test list of structs with type mismatch inside struct element
+TEST(SchemaValidatorTest, ListOfStructsWithTypeMismatchInElement) {
+  using def = TypeSystemBuilder::DefinitionHelper;
+  TypeSystemBuilder builder;
+
+  // Define nested struct: struct Item { 1: string name; 2: i32 quantity; }
+  builder.addType(
+      "facebook.com/thrift/test/Item",
+      def::Struct({
+          def::Field(def::Identity(1, "name"), def::Optional, TypeIds::String),
+          def::Field(def::Identity(2, "quantity"), def::Optional, TypeIds::I32),
+      }));
+
+  // Define container: struct Order { 1: list<Item> items; }
+  builder.addType(
+      "facebook.com/thrift/test/Order",
+      def::Struct({
+          def::Field(
+              def::Identity(1, "items"),
+              def::Optional,
+              TypeIds::list(TypeIds::uri("facebook.com/thrift/test/Item"))),
+      }));
+
+  auto typeSystem = std::move(builder).build();
+  auto orderType =
+      typeSystem->getUserDefinedType(Uri("facebook.com/thrift/test/Order"));
+  ASSERT_TRUE(orderType.has_value());
+  auto typeRef = TypeRef::fromDefinition(*orderType);
+
+  // Serialize Order with a list containing items where one has wrong type
+  folly::IOBufQueue queue;
+  CompactProtocolWriter writer;
+  writer.setOutput(&queue);
+  writer.writeStructBegin(nullptr); // Order
+  writer.writeFieldBegin("items", protocol::TType::T_LIST, 1);
+  writer.writeListBegin(protocol::TType::T_STRUCT, 2);
+
+  // First item - valid
+  writer.writeStructBegin(nullptr);
+  writer.writeFieldBegin("name", protocol::TType::T_STRING, 1);
+  writer.writeString("Widget");
+  writer.writeFieldEnd();
+  writer.writeFieldBegin("quantity", protocol::TType::T_I32, 2);
+  writer.writeI32(10);
+  writer.writeFieldEnd();
+  writer.writeFieldStop();
+  writer.writeStructEnd();
+
+  // Second item - type mismatch (quantity as bool instead of i32)
+  writer.writeStructBegin(nullptr);
+  writer.writeFieldBegin("name", protocol::TType::T_STRING, 1);
+  writer.writeString("Gadget");
+  writer.writeFieldEnd();
+  writer.writeFieldBegin("quantity", protocol::TType::T_BOOL, 2); // Wrong type!
+  writer.writeBool(true);
+  writer.writeFieldEnd();
+  writer.writeFieldStop();
+  writer.writeStructEnd();
+
+  writer.writeListEnd();
+  writer.writeFieldEnd();
+  writer.writeFieldStop();
+  writer.writeStructEnd();
+  auto serialized = queue.move();
+
+  // Validate - should return No due to type mismatch inside list element
+  auto result = validateBlob<CompactProtocolReader>(*serialized, typeRef);
+  EXPECT_EQ(result, SchemaValidationResult::No);
+}
+
+// Test list of structs with unknown field inside struct element
+TEST(SchemaValidatorTest, ListOfStructsWithUnknownFieldInElement) {
+  using def = TypeSystemBuilder::DefinitionHelper;
+  TypeSystemBuilder builder;
+
+  // Define nested struct with only field 1: struct Item { 1: string name; }
+  builder.addType(
+      "facebook.com/thrift/test/Item",
+      def::Struct({
+          def::Field(def::Identity(1, "name"), def::Optional, TypeIds::String),
+      }));
+
+  // Define container: struct Order { 1: list<Item> items; }
+  builder.addType(
+      "facebook.com/thrift/test/Order",
+      def::Struct({
+          def::Field(
+              def::Identity(1, "items"),
+              def::Optional,
+              TypeIds::list(TypeIds::uri("facebook.com/thrift/test/Item"))),
+      }));
+
+  auto typeSystem = std::move(builder).build();
+  auto orderType =
+      typeSystem->getUserDefinedType(Uri("facebook.com/thrift/test/Order"));
+  ASSERT_TRUE(orderType.has_value());
+  auto typeRef = TypeRef::fromDefinition(*orderType);
+
+  // Serialize Order with a list containing item with unknown field
+  folly::IOBufQueue queue;
+  CompactProtocolWriter writer;
+  writer.setOutput(&queue);
+  writer.writeStructBegin(nullptr); // Order
+  writer.writeFieldBegin("items", protocol::TType::T_LIST, 1);
+  writer.writeListBegin(protocol::TType::T_STRUCT, 1);
+
+  // Item with unknown field (quantity not in schema)
+  writer.writeStructBegin(nullptr);
+  writer.writeFieldBegin("name", protocol::TType::T_STRING, 1);
+  writer.writeString("Widget");
+  writer.writeFieldEnd();
+  writer.writeFieldBegin("quantity", protocol::TType::T_I32, 2); // Unknown!
+  writer.writeI32(10);
+  writer.writeFieldEnd();
+  writer.writeFieldStop();
+  writer.writeStructEnd();
+
+  writer.writeListEnd();
+  writer.writeFieldEnd();
+  writer.writeFieldStop();
+  writer.writeStructEnd();
+  auto serialized = queue.move();
+
+  // Validate - should return MaybeWithUnknownFields
+  auto result = validateBlob<CompactProtocolReader>(*serialized, typeRef);
+  EXPECT_EQ(result, SchemaValidationResult::MaybeWithUnknownFields);
+}
+
+// Test validateBlobWithPaths returns unknown field paths
+TEST(SchemaValidatorTest, WithPaths_UnknownFieldsReturned) {
+  using def = TypeSystemBuilder::DefinitionHelper;
+  TypeSystemBuilder builder;
+
+  // Define a struct with only field 1: struct Person { 1: string name; }
+  builder.addType(
+      "facebook.com/thrift/test/Person",
+      def::Struct({
+          def::Field(def::Identity(1, "name"), def::Optional, TypeIds::String),
+      }));
+
+  auto typeSystem = std::move(builder).build();
+  auto personType =
+      typeSystem->getUserDefinedType(Uri("facebook.com/thrift/test/Person"));
+  ASSERT_TRUE(personType.has_value());
+  auto typeRef = TypeRef::fromDefinition(*personType);
+
+  // Serialize a struct with an extra field (field 2)
+  folly::IOBufQueue queue;
+  CompactProtocolWriter writer;
+  writer.setOutput(&queue);
+  writer.writeStructBegin(nullptr);
+  writer.writeFieldBegin("name", protocol::TType::T_STRING, 1);
+  writer.writeString("Alice");
+  writer.writeFieldEnd();
+  writer.writeFieldBegin("age", protocol::TType::T_I32, 2); // Unknown field
+  writer.writeI32(30);
+  writer.writeFieldEnd();
+  writer.writeFieldStop();
+  writer.writeStructEnd();
+  auto serialized = queue.move();
+
+  // Validate with paths
+  auto result =
+      validateBlobWithPaths<CompactProtocolReader>(*serialized, typeRef);
+  EXPECT_EQ(result.result, SchemaValidationResult::MaybeWithUnknownFields);
+  ASSERT_EQ(result.unknownFields.size(), 1);
+  EXPECT_EQ(result.unknownFields[0].parentPath.toString(), "Person");
+  EXPECT_EQ(result.unknownFields[0].fieldIdentifier, "2");
+  EXPECT_TRUE(result.mismatchedFields.empty());
+}
+
+// Test validateBlobWithPaths returns mismatched field paths
+TEST(SchemaValidatorTest, WithPaths_MismatchedFieldsReturned) {
+  using def = TypeSystemBuilder::DefinitionHelper;
+  TypeSystemBuilder builder;
+
+  // Define a struct: struct Person { 1: string name; 2: i32 age; }
+  builder.addType(
+      "facebook.com/thrift/test/Person",
+      def::Struct({
+          def::Field(def::Identity(1, "name"), def::Optional, TypeIds::String),
+          def::Field(def::Identity(2, "age"), def::Optional, TypeIds::I32),
+      }));
+
+  auto typeSystem = std::move(builder).build();
+  auto personType =
+      typeSystem->getUserDefinedType(Uri("facebook.com/thrift/test/Person"));
+  ASSERT_TRUE(personType.has_value());
+  auto typeRef = TypeRef::fromDefinition(*personType);
+
+  // Serialize with wrong type for field 2 (bool instead of i32)
+  folly::IOBufQueue queue;
+  CompactProtocolWriter writer;
+  writer.setOutput(&queue);
+  writer.writeStructBegin(nullptr);
+  writer.writeFieldBegin("name", protocol::TType::T_STRING, 1);
+  writer.writeString("Alice");
+  writer.writeFieldEnd();
+  writer.writeFieldBegin("age", protocol::TType::T_BOOL, 2); // Wrong type!
+  writer.writeBool(true);
+  writer.writeFieldEnd();
+  writer.writeFieldStop();
+  writer.writeStructEnd();
+  auto serialized = queue.move();
+
+  // Validate with paths
+  auto result =
+      validateBlobWithPaths<CompactProtocolReader>(*serialized, typeRef);
+  EXPECT_EQ(result.result, SchemaValidationResult::No);
+  EXPECT_TRUE(result.unknownFields.empty());
+  ASSERT_EQ(result.mismatchedFields.size(), 1);
+  EXPECT_EQ(result.mismatchedFields[0].path.toString(), "Person.age");
+}
+
+// Test validateBlobWithPaths with nested structs having unknown fields
+TEST(SchemaValidatorTest, WithPaths_NestedUnknownFieldsReturned) {
+  using def = TypeSystemBuilder::DefinitionHelper;
+  TypeSystemBuilder builder;
+
+  // Define nested structs, Address schema has only field 1
+  builder.addType(
+      "facebook.com/thrift/test/Address",
+      def::Struct({
+          def::Field(def::Identity(1, "city"), def::Optional, TypeIds::String),
+      }));
+
+  builder.addType(
+      "facebook.com/thrift/test/Person",
+      def::Struct({
+          def::Field(def::Identity(1, "name"), def::Optional, TypeIds::String),
+          def::Field(
+              def::Identity(2, "address"),
+              def::Optional,
+              TypeIds::uri("facebook.com/thrift/test/Address")),
+      }));
+
+  auto typeSystem = std::move(builder).build();
+  auto personType =
+      typeSystem->getUserDefinedType(Uri("facebook.com/thrift/test/Person"));
+  ASSERT_TRUE(personType.has_value());
+  auto typeRef = TypeRef::fromDefinition(*personType);
+
+  // Serialize nested structure with unknown field in Address
+  folly::IOBufQueue queue;
+  CompactProtocolWriter writer;
+  writer.setOutput(&queue);
+  writer.writeStructBegin(nullptr); // Person
+  writer.writeFieldBegin("name", protocol::TType::T_STRING, 1);
+  writer.writeString("Alice");
+  writer.writeFieldEnd();
+  writer.writeFieldBegin("address", protocol::TType::T_STRUCT, 2);
+  writer.writeStructBegin(nullptr); // Address
+  writer.writeFieldBegin("city", protocol::TType::T_STRING, 1);
+  writer.writeString("Seattle");
+  writer.writeFieldEnd();
+  writer.writeFieldBegin("zip", protocol::TType::T_I32, 2); // Unknown field
+  writer.writeI32(98101);
+  writer.writeFieldEnd();
+  writer.writeFieldStop();
+  writer.writeStructEnd();
+  writer.writeFieldEnd();
+  writer.writeFieldStop();
+  writer.writeStructEnd();
+  auto serialized = queue.move();
+
+  // Validate with paths
+  auto result =
+      validateBlobWithPaths<CompactProtocolReader>(*serialized, typeRef);
+  EXPECT_EQ(result.result, SchemaValidationResult::MaybeWithUnknownFields);
+  ASSERT_EQ(result.unknownFields.size(), 1);
+  EXPECT_EQ(result.unknownFields[0].parentPath.toString(), "Person.address");
+  EXPECT_EQ(result.unknownFields[0].fieldIdentifier, "2");
+  EXPECT_TRUE(result.mismatchedFields.empty());
+}
+
+// Test validateBlobWithPaths with valid blob returns empty paths
+TEST(SchemaValidatorTest, WithPaths_ValidBlobReturnsEmptyPaths) {
+  using def = TypeSystemBuilder::DefinitionHelper;
+  TypeSystemBuilder builder;
+
+  builder.addType(
+      "facebook.com/thrift/test/Person",
+      def::Struct({
+          def::Field(def::Identity(1, "name"), def::Optional, TypeIds::String),
+          def::Field(def::Identity(2, "age"), def::Optional, TypeIds::I32),
+      }));
+
+  auto typeSystem = std::move(builder).build();
+  auto personType =
+      typeSystem->getUserDefinedType(Uri("facebook.com/thrift/test/Person"));
+  ASSERT_TRUE(personType.has_value());
+  auto typeRef = TypeRef::fromDefinition(*personType);
+
+  // Serialize a conforming struct
+  folly::IOBufQueue queue;
+  CompactProtocolWriter writer;
+  writer.setOutput(&queue);
+  writer.writeStructBegin(nullptr);
+  writer.writeFieldBegin("name", protocol::TType::T_STRING, 1);
+  writer.writeString("Alice");
+  writer.writeFieldEnd();
+  writer.writeFieldBegin("age", protocol::TType::T_I32, 2);
+  writer.writeI32(30);
+  writer.writeFieldEnd();
+  writer.writeFieldStop();
+  writer.writeStructEnd();
+  auto serialized = queue.move();
+
+  // Validate with paths
+  auto result =
+      validateBlobWithPaths<CompactProtocolReader>(*serialized, typeRef);
+  EXPECT_EQ(result.result, SchemaValidationResult::Maybe);
+  EXPECT_TRUE(result.unknownFields.empty());
+  EXPECT_TRUE(result.mismatchedFields.empty());
+}

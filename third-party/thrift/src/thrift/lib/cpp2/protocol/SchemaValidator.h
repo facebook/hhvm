@@ -16,7 +16,10 @@
 
 #pragma once
 
+#include <thrift/lib/cpp2/dynamic/Path.h>
 #include <thrift/lib/cpp2/protocol/detail/DynamicCursorSerializer.h>
+
+#include <vector>
 
 namespace apache::thrift {
 
@@ -43,6 +46,41 @@ enum class SchemaValidationResult {
 };
 
 /**
+ * Information about a field that exists in the blob but not in the schema.
+ */
+struct UnknownFieldInfo {
+  // Path to the parent struct containing the unknown field
+  dynamic::Path parentPath;
+  // Field identifier (field ID or name if available)
+  std::string fieldIdentifier;
+};
+
+/**
+ * Information about a field where the wire type doesn't match the schema type.
+ */
+struct MismatchedFieldInfo {
+  // Path to the mismatched field
+  dynamic::Path path;
+  // Human-readable description of the expected type
+  std::string expectedType;
+  // Human-readable description of the actual type
+  std::string actualType;
+};
+
+/**
+ * Detailed result of schema validation including paths to problematic fields.
+ */
+struct SchemaValidationResultWithPaths {
+  SchemaValidationResult result;
+
+  // Fields that exist in the blob but not in the schema
+  std::vector<UnknownFieldInfo> unknownFields;
+
+  // Fields where the wire type doesn't match the schema type
+  std::vector<MismatchedFieldInfo> mismatchedFields;
+};
+
+/**
  * Validates that a serialized blob conforms to a TypeRef schema.
  *
  * This function validates any TypeRef type (structured, container, or
@@ -59,30 +97,74 @@ template <typename ProtocolReader>
 SchemaValidationResult validateBlob(
     const folly::IOBuf& serializedData, const type_system::TypeRef& typeRef);
 
+/**
+ * Validates that a serialized blob conforms to a TypeRef schema.
+ * Returns detailed information about validation failures including paths.
+ *
+ * @param serializedData The serialized blob to validate
+ * @param typeRef The TypeRef schema to validate against
+ * @return SchemaValidationResultWithPaths containing:
+ *   - result: The overall validation result
+ *   - unknownFieldPaths: Paths to fields in the blob not found in the schema
+ *   - mismatchedFieldPaths: Paths to fields with type mismatches
+ */
+template <typename ProtocolReader>
+SchemaValidationResultWithPaths validateBlobWithPaths(
+    const folly::IOBuf& serializedData, const type_system::TypeRef& typeRef);
+
 namespace detail {
+
+/**
+ * Optional state object for tracking paths during validation.
+ * When provided, the validation functions will record paths to unknown
+ * and mismatched fields.
+ */
+struct ValidationState {
+  dynamic::PathBuilder& pathBuilder;
+  std::vector<UnknownFieldInfo>& unknownFields;
+  std::vector<MismatchedFieldInfo>& mismatchedFields;
+
+  ValidationState(
+      dynamic::PathBuilder& pb,
+      std::vector<UnknownFieldInfo>& unknown,
+      std::vector<MismatchedFieldInfo>& mismatched)
+      : pathBuilder(pb), unknownFields(unknown), mismatchedFields(mismatched) {}
+};
 
 // Forward declarations for internal functions
 template <typename ProtocolReader>
 SchemaValidationResult validateStructuredImpl(
     StructuredDynamicCursorReader<ProtocolReader, false>& reader,
-    const type_system::TypeRef& typeRef);
+    const type_system::TypeRef& typeRef,
+    ValidationState* state = nullptr);
 
 template <typename ProtocolReader>
 SchemaValidationResult validateContainer(
     ContainerDynamicCursorReader<ProtocolReader, false>& reader,
-    const type_system::TypeRef& containerTypeRef);
+    const type_system::TypeRef& containerTypeRef,
+    ValidationState* state = nullptr);
 
 /**
  * Helper to validate a primitive type and skip the value.
  */
 template <typename TypeTag, typename Reader>
 SchemaValidationResult validatePrimitive(
-    Reader& reader, protocol::TType actualType) {
+    Reader& reader,
+    protocol::TType actualType,
+    const type_system::TypeRef& expectedTypeRef,
+    ValidationState* state) {
   try {
     ensureTypesCompatible<TypeTag>(actualType);
     reader.skip();
     return SchemaValidationResult::Maybe;
   } catch (const std::runtime_error&) {
+    if (state) {
+      state->mismatchedFields.push_back(
+          MismatchedFieldInfo{
+              state->pathBuilder.path(),
+              dynamic::detail::typeDisplayName(expectedTypeRef),
+              fmt::format("{}", actualType)});
+    }
     return SchemaValidationResult::No;
   }
 }
@@ -96,24 +178,39 @@ template <typename Reader>
 SchemaValidationResult validateElement(
     Reader& reader,
     const type_system::TypeRef& elementTypeRef,
-    protocol::TType actualType) {
+    protocol::TType actualType,
+    ValidationState* state = nullptr) {
   if (elementTypeRef.isStructured()) {
     if (actualType != protocol::TType::T_STRUCT) {
+      if (state) {
+        state->mismatchedFields.push_back(
+            MismatchedFieldInfo{
+                state->pathBuilder.path(),
+                dynamic::detail::typeDisplayName(elementTypeRef),
+                fmt::format("{}", actualType)});
+      }
       return SchemaValidationResult::No;
     }
     auto childReader = reader.beginReadStructured();
-    auto result = validateStructuredImpl(childReader, elementTypeRef);
+    auto result = validateStructuredImpl(childReader, elementTypeRef, state);
     reader.endRead(std::move(childReader));
     return result;
   } else if (
       elementTypeRef.isList() || elementTypeRef.isSet() ||
       elementTypeRef.isMap()) {
     auto childReader = reader.beginReadContainer();
-    auto result = validateContainer(childReader, elementTypeRef);
+    auto result = validateContainer(childReader, elementTypeRef, state);
     reader.endRead(std::move(childReader));
     return result;
   } else if (elementTypeRef.isAny()) {
     if (actualType != protocol::TType::T_STRUCT) {
+      if (state) {
+        state->mismatchedFields.push_back(
+            MismatchedFieldInfo{
+                state->pathBuilder.path(),
+                dynamic::detail::typeDisplayName(elementTypeRef),
+                fmt::format("{}", actualType)});
+      }
       return SchemaValidationResult::No;
     }
     // In the future we could recursively validate the contents of the Any
@@ -122,27 +219,37 @@ SchemaValidationResult validateElement(
   } else if (elementTypeRef.isOpaqueAlias()) {
     // Validate against the underlying target type
     return validateElement(
-        reader, elementTypeRef.asOpaqueAlias().targetType(), actualType);
+        reader, elementTypeRef.asOpaqueAlias().targetType(), actualType, state);
   } else if (elementTypeRef.isEnum()) {
-    return validatePrimitive<type::i32_t>(reader, actualType);
+    return validatePrimitive<type::i32_t>(
+        reader, actualType, elementTypeRef, state);
   } else if (elementTypeRef.isBool()) {
-    return validatePrimitive<type::bool_t>(reader, actualType);
+    return validatePrimitive<type::bool_t>(
+        reader, actualType, elementTypeRef, state);
   } else if (elementTypeRef.isByte()) {
-    return validatePrimitive<type::byte_t>(reader, actualType);
+    return validatePrimitive<type::byte_t>(
+        reader, actualType, elementTypeRef, state);
   } else if (elementTypeRef.isI16()) {
-    return validatePrimitive<type::i16_t>(reader, actualType);
+    return validatePrimitive<type::i16_t>(
+        reader, actualType, elementTypeRef, state);
   } else if (elementTypeRef.isI32()) {
-    return validatePrimitive<type::i32_t>(reader, actualType);
+    return validatePrimitive<type::i32_t>(
+        reader, actualType, elementTypeRef, state);
   } else if (elementTypeRef.isI64()) {
-    return validatePrimitive<type::i64_t>(reader, actualType);
+    return validatePrimitive<type::i64_t>(
+        reader, actualType, elementTypeRef, state);
   } else if (elementTypeRef.isFloat()) {
-    return validatePrimitive<type::float_t>(reader, actualType);
+    return validatePrimitive<type::float_t>(
+        reader, actualType, elementTypeRef, state);
   } else if (elementTypeRef.isDouble()) {
-    return validatePrimitive<type::double_t>(reader, actualType);
+    return validatePrimitive<type::double_t>(
+        reader, actualType, elementTypeRef, state);
   } else if (elementTypeRef.isString()) {
-    return validatePrimitive<type::string_t>(reader, actualType);
+    return validatePrimitive<type::string_t>(
+        reader, actualType, elementTypeRef, state);
   } else if (elementTypeRef.isBinary()) {
-    return validatePrimitive<type::binary_t>(reader, actualType);
+    return validatePrimitive<type::binary_t>(
+        reader, actualType, elementTypeRef, state);
   } else {
     folly::throw_exception<std::runtime_error>(
         "Unsupported TypeRef kind in schema validation");
@@ -155,22 +262,64 @@ SchemaValidationResult validateElement(
 template <typename ProtocolReader>
 SchemaValidationResult validateContainer(
     ContainerDynamicCursorReader<ProtocolReader, false>& reader,
-    [[maybe_unused]] const type_system::TypeRef& containerTypeRef) {
+    const type_system::TypeRef& containerTypeRef,
+    ValidationState* state) {
   bool hasUnknownFields = false;
+  std::size_t index = 0;
 
-  while (reader.remaining() > 0) {
+  // Helper to validate an element with optional path tracking
+  auto validateWithPath = [&](auto&& enterPath) -> SchemaValidationResult {
     auto elementTypeRef = reader.nextTypeRef();
     DCHECK(elementTypeRef);
-
     protocol::TType actualType = reader.nextTType();
 
-    auto result = validateElement(reader, *elementTypeRef, actualType);
+    if (state) {
+      auto guard = enterPath();
+      return validateElement(reader, *elementTypeRef, actualType, state);
+    }
+    return validateElement(reader, *elementTypeRef, actualType, state);
+  };
+
+  while (reader.remaining() > 0) {
+    SchemaValidationResult result;
+
+    if (state) {
+      if (containerTypeRef.isList()) {
+        result = validateWithPath(
+            [&] { return state->pathBuilder.enterListElement(index); });
+      } else if (containerTypeRef.isSet()) {
+        result = validateWithPath(
+            [&] { return state->pathBuilder.enterSetElement(index); });
+      } else if (containerTypeRef.isMap()) {
+        // For maps, alternate between key and value
+        if (index % 2 == 0) {
+          result = validateWithPath(
+              [&] { return state->pathBuilder.enterMapKey(index / 2); });
+        } else {
+          result = validateWithPath(
+              [&] { return state->pathBuilder.enterMapValue(index / 2); });
+        }
+      } else {
+        // Unknown container type - just validate without path
+        auto elementTypeRef = reader.nextTypeRef();
+        DCHECK(elementTypeRef);
+        protocol::TType actualType = reader.nextTType();
+        result = validateElement(reader, *elementTypeRef, actualType, state);
+      }
+    } else {
+      auto elementTypeRef = reader.nextTypeRef();
+      DCHECK(elementTypeRef);
+      protocol::TType actualType = reader.nextTType();
+      result = validateElement(reader, *elementTypeRef, actualType, state);
+    }
+
     if (result == SchemaValidationResult::No) {
       return SchemaValidationResult::No;
     }
     if (result == SchemaValidationResult::MaybeWithUnknownFields) {
       hasUnknownFields = true;
     }
+    ++index;
   }
 
   return hasUnknownFields ? SchemaValidationResult::MaybeWithUnknownFields
@@ -183,8 +332,16 @@ SchemaValidationResult validateContainer(
 template <typename ProtocolReader>
 SchemaValidationResult validateStructuredImpl(
     StructuredDynamicCursorReader<ProtocolReader, false>& reader,
-    const type_system::TypeRef& typeRef) {
+    const type_system::TypeRef& typeRef,
+    ValidationState* state) {
   if (!typeRef.isStructured()) {
+    if (state) {
+      state->mismatchedFields.push_back(
+          MismatchedFieldInfo{
+              state->pathBuilder.path(),
+              dynamic::detail::typeDisplayName(typeRef),
+              "T_STRUCT"});
+    }
     return SchemaValidationResult::No;
   }
 
@@ -198,6 +355,11 @@ SchemaValidationResult validateStructuredImpl(
     // Check if field exists in schema
     if (fieldId == 0 || !structuredNode.hasField(type::FieldId{fieldId})) {
       // Unknown field detected
+      if (state) {
+        state->unknownFields.push_back(
+            UnknownFieldInfo{
+                state->pathBuilder.path(), fmt::format("{}", fieldId)});
+      }
       hasUnknownFields = true;
       reader.skip();
       continue;
@@ -207,7 +369,17 @@ SchemaValidationResult validateStructuredImpl(
     auto fieldTypeRef = reader.fieldTypeRef();
     DCHECK(fieldTypeRef);
 
-    auto result = validateElement(reader, *fieldTypeRef, fieldTType);
+    SchemaValidationResult result;
+    if (state) {
+      // Get field name for path
+      auto handle = structuredNode.fieldHandleFor(type::FieldId{fieldId});
+      const auto& fieldDef = structuredNode.at(handle);
+      auto guard = state->pathBuilder.enterField(fieldDef.identity().name());
+      result = validateElement(reader, *fieldTypeRef, fieldTType, state);
+    } else {
+      result = validateElement(reader, *fieldTypeRef, fieldTType, state);
+    }
+
     if (result == SchemaValidationResult::No) {
       return SchemaValidationResult::No;
     }
@@ -222,45 +394,58 @@ SchemaValidationResult validateStructuredImpl(
 
 } // namespace detail
 
+namespace detail {
+
+/**
+ * Maps a TypeRef to its expected TType.
+ */
+inline protocol::TType getExpectedTType(const type_system::TypeRef& typeRef) {
+  if (typeRef.isStructured() || typeRef.isAny()) {
+    return protocol::TType::T_STRUCT;
+  } else if (typeRef.isList()) {
+    return protocol::TType::T_LIST;
+  } else if (typeRef.isSet()) {
+    return protocol::TType::T_SET;
+  } else if (typeRef.isMap()) {
+    return protocol::TType::T_MAP;
+  } else if (typeRef.isBool()) {
+    return protocol::TType::T_BOOL;
+  } else if (typeRef.isByte()) {
+    return protocol::TType::T_BYTE;
+  } else if (typeRef.isI16()) {
+    return protocol::TType::T_I16;
+  } else if (typeRef.isI32() || typeRef.isEnum()) {
+    return protocol::TType::T_I32;
+  } else if (typeRef.isI64()) {
+    return protocol::TType::T_I64;
+  } else if (typeRef.isFloat()) {
+    return protocol::TType::T_FLOAT;
+  } else if (typeRef.isDouble()) {
+    return protocol::TType::T_DOUBLE;
+  } else if (typeRef.isString() || typeRef.isBinary()) {
+    return protocol::TType::T_STRING;
+  } else {
+    throw std::runtime_error("Unsupported TypeRef kind in schema validation");
+  }
+}
+
+/**
+ * Internal implementation shared by validateBlob and validateBlobWithPaths.
+ */
 template <typename ProtocolReader>
-SchemaValidationResult validateBlob(
-    const folly::IOBuf& serializedData, const type_system::TypeRef& typeRef) {
+SchemaValidationResult validateBlobImpl(
+    const folly::IOBuf& serializedData,
+    const type_system::TypeRef& typeRef,
+    ValidationState* state) {
   ProtocolReader reader;
   reader.setInput(&serializedData);
 
   if (typeRef.isOpaqueAlias()) {
-    return validateBlob<ProtocolReader>(
-        serializedData, typeRef.asOpaqueAlias().targetType());
+    return validateBlobImpl<ProtocolReader>(
+        serializedData, typeRef.asOpaqueAlias().targetType(), state);
   }
 
-  protocol::TType expectedTType;
-  if (typeRef.isStructured() || typeRef.isAny()) {
-    expectedTType = protocol::TType::T_STRUCT;
-  } else if (typeRef.isList()) {
-    expectedTType = protocol::TType::T_LIST;
-  } else if (typeRef.isSet()) {
-    expectedTType = protocol::TType::T_SET;
-  } else if (typeRef.isMap()) {
-    expectedTType = protocol::TType::T_MAP;
-  } else if (typeRef.isBool()) {
-    expectedTType = protocol::TType::T_BOOL;
-  } else if (typeRef.isByte()) {
-    expectedTType = protocol::TType::T_BYTE;
-  } else if (typeRef.isI16()) {
-    expectedTType = protocol::TType::T_I16;
-  } else if (typeRef.isI32() || typeRef.isEnum()) {
-    expectedTType = protocol::TType::T_I32;
-  } else if (typeRef.isI64()) {
-    expectedTType = protocol::TType::T_I64;
-  } else if (typeRef.isFloat()) {
-    expectedTType = protocol::TType::T_FLOAT;
-  } else if (typeRef.isDouble()) {
-    expectedTType = protocol::TType::T_DOUBLE;
-  } else if (typeRef.isString() || typeRef.isBinary()) {
-    expectedTType = protocol::TType::T_STRING;
-  } else {
-    throw std::runtime_error("Unsupported TypeRef kind in schema validation");
-  }
+  protocol::TType expectedTType = getExpectedTType(typeRef);
 
   // For structured types, perform deep validation
   if (typeRef.isStructured()) {
@@ -269,10 +454,10 @@ SchemaValidationResult validateBlob(
         CompactProtocolWriter,
         BinaryProtocolWriter>;
 
-    detail::DynamicCursorSerializationWrapper<ProtocolReader, ProtocolWriter>
-        wrapper(serializedData.clone(), typeRef);
+    DynamicCursorSerializationWrapper<ProtocolReader, ProtocolWriter> wrapper(
+        serializedData.clone(), typeRef);
     auto structReader = wrapper.beginRead();
-    auto result = detail::validateStructuredImpl(structReader, typeRef);
+    auto result = validateStructuredImpl(structReader, typeRef, state);
     wrapper.endRead(std::move(structReader));
 
     if (result == SchemaValidationResult::No) {
@@ -300,6 +485,44 @@ SchemaValidationResult validateBlob(
   }
 
   return SchemaValidationResult::Maybe;
+}
+
+} // namespace detail
+
+template <typename ProtocolReader>
+SchemaValidationResult validateBlob(
+    const folly::IOBuf& serializedData, const type_system::TypeRef& typeRef) {
+  return detail::validateBlobImpl<ProtocolReader>(
+      serializedData, typeRef, nullptr);
+}
+
+template <typename ProtocolReader>
+SchemaValidationResultWithPaths validateBlobWithPaths(
+    const folly::IOBuf& serializedData, const type_system::TypeRef& typeRef) {
+  SchemaValidationResultWithPaths resultWithPaths;
+  resultWithPaths.result = SchemaValidationResult::Maybe;
+
+  if (typeRef.isOpaqueAlias()) {
+    return validateBlobWithPaths<ProtocolReader>(
+        serializedData, typeRef.asOpaqueAlias().targetType());
+  }
+
+  if (typeRef.isStructured()) {
+    // Create path builder with the root type
+    dynamic::PathBuilder pathBuilder(typeRef);
+    detail::ValidationState state(
+        pathBuilder,
+        resultWithPaths.unknownFields,
+        resultWithPaths.mismatchedFields);
+
+    resultWithPaths.result = detail::validateBlobImpl<ProtocolReader>(
+        serializedData, typeRef, &state);
+  } else {
+    resultWithPaths.result = detail::validateBlobImpl<ProtocolReader>(
+        serializedData, typeRef, nullptr);
+  }
+
+  return resultWithPaths;
 }
 
 } // namespace apache::thrift

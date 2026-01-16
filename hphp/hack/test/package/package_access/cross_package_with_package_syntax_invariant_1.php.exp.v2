@@ -1,0 +1,27 @@
+error: Typing[4472] Cannot access a function defined in package pkg4 from package pkg1 [1]
+-> foo is defined in cross_package_with_package_syntax_invariant_1.php--foo.php [2]
+-> cross_package_with_package_syntax_invariant_1.php--foo.php belongs to package pkg4 by this package override [3]
+-> cross_package_with_package_syntax_invariant_1.php--bar.php is in package pkg1 by this package config assignment [4]
+-> And package pkg1 does not include package pkg4 [4]
+
+cross_package_with_package_syntax_invariant_1.php--bar.php:6:3
+    4 | function bar(): void {
+    5 |   invariant(package pkg4, "pkg4 not loaded");
+[1] 6 |   foo();  // FIXME: this should be allowed by invariant
+    7 | }
+
+cross_package_with_package_syntax_invariant_1.php--foo.php:6:10
+    2 | 
+    3 | // package pkg4 (disjoint from pkg1)
+[3] 4 | <<file: __PackageOverride('pkg4')>>
+    5 | 
+[2] 6 | function foo(): void {}
+
+PACKAGES.toml:3:11
+    1 | [packages]
+    2 | 
+[4] 3 | [packages.pkg1]
+    4 | include_paths=["//"]
+    5 | 
+
+1 error found

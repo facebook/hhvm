@@ -20,13 +20,6 @@ import pickle
 import unittest
 from typing import Hashable, Mapping, Union
 
-from apache.thrift.test.terse_write.terse_write.types import (
-    EmptyStruct,
-    FieldLevelTerseStruct,
-    MyEnum,
-    MyStruct,
-    MyUnion,
-)
 from testing.thrift_types import easy as python_easy, hard as python_hard
 from testing.types import (
     Digits,
@@ -53,6 +46,13 @@ from thrift.py3.serializer import (
 )
 from thrift.py3.types import Struct
 from thrift.python.types import Struct as PythonStruct
+from thrift.test.terse_write.types import (
+    EmptyStruct,
+    FieldLevelTerseStruct,
+    MyEnum,
+    MyStruct,
+    MyUnion,
+)
 
 
 class SerializerTestBase(unittest.TestCase):
@@ -278,9 +278,8 @@ class SerializerTests(SerializerTestBase):
     def test_unpickle_stored_enum(self) -> None:
         control = MyEnum.ME1
         stored = (
-            b"\x80\x05\x95E\x00\x00\x00\x00\x00\x00\x00\x8c0apache.thrift.test."
-            b"terse_write.terse_write.types\x94\x8c\x06MyEnum\x94\x93\x94K\x01"
-            b"\x85\x94R\x94."
+            b"\x80\x04\x959\x00\x00\x00\x00\x00\x00\x00\x8c$thrift.test.terse_write."
+            b"thrift_enums\x94\x8c\x06MyEnum\x94\x93\x94K\x01\x85\x94R\x94."
         )
         self.assert_unpickle_compat(stored, control)
 

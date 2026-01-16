@@ -26,26 +26,14 @@ import unittest
 from collections.abc import Sequence, Set
 from typing import Any, Iterable, Mapping, Type, TypeVar, Union
 
-import apache.thrift.test.terse_write.terse_write.thrift_mutable_types as mutable_terse_types
-import apache.thrift.test.terse_write.terse_write.thrift_types as immutable_terse_types
 import python_test.containers.thrift_mutable_types as mutable_containers_types
 import python_test.containers.thrift_types as immutable_containers_types
 import testing.thrift_mutable_types as mutable_types
 import testing.thrift_types as immutable_types
 import thrift.python.mutable_serializer as mutable_serializer
 import thrift.python.serializer as immutable_serializer
-from apache.thrift.test.terse_write.terse_write.thrift_types import (
-    EmptyStruct,
-    FieldLevelTerseStruct,
-    MyEnum,
-    MyStruct,
-    MyUnion,
-    TerseSafePatch,
-    TerseStructs,
-    TerseStructs1,
-    TerseStructs2,
-    TerseStructs3,
-)
+import thrift.test.terse_write.thrift_mutable_types as mutable_terse_types
+import thrift.test.terse_write.thrift_types as immutable_terse_types
 from folly.iobuf import IOBuf
 from parameterized import parameterized_class
 from python_test.containers.thrift_types import (
@@ -96,6 +84,18 @@ from thrift.python.mutable_types import (
 )
 from thrift.python.serializer import Protocol
 from thrift.python.types import StructOrUnion
+from thrift.test.terse_write.thrift_types import (
+    EmptyStruct,
+    FieldLevelTerseStruct,
+    MyEnum,
+    MyStruct,
+    MyUnion,
+    TerseSafePatch,
+    TerseStructs,
+    TerseStructs1,
+    TerseStructs2,
+    TerseStructs3,
+)
 
 ListT = TypeVar("ListT")
 SetT = TypeVar("SetT")

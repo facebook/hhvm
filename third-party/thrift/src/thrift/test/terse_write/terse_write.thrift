@@ -24,7 +24,7 @@ cpp_include "thrift/test/AdapterTest.h"
 package "facebook.com/thrift/test/terse_write"
 
 namespace cpp2 apache.thrift.test.terse_write
-namespace py3 apache.thrift.test.terse_write
+namespace py3 thrift.test
 
 enum MyEnum {
   ME0 = 0,

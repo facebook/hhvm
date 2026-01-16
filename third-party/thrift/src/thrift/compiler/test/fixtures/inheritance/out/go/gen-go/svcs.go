@@ -49,6 +49,10 @@ func NewMyRootChannelClient(channel thrift.RequestChannel) MyRootClient {
     }
 }
 
+func init() {
+    thrift.InternalRegisterClientConstructor[MyRootClient](NewMyRootChannelClient)
+}
+
 func (c *myRootClientImpl) Close() error {
     return c.ch.Close()
 }
@@ -172,6 +176,10 @@ func NewMyNodeChannelClient(channel thrift.RequestChannel) MyNodeClient {
     }
 }
 
+func init() {
+    thrift.InternalRegisterClientConstructor[MyNodeClient](NewMyNodeChannelClient)
+}
+
 func (c *myNodeClientImpl) Close() error {
     return c.ch.Close()
 }
@@ -266,6 +274,10 @@ func NewMyLeafChannelClient(channel thrift.RequestChannel) MyLeafClient {
         MyNodeClient: NewMyNodeChannelClient(channel),
         ch: channel,
     }
+}
+
+func init() {
+    thrift.InternalRegisterClientConstructor[MyLeafClient](NewMyLeafChannelClient)
 }
 
 func (c *myLeafClientImpl) Close() error {

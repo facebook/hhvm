@@ -57,6 +57,10 @@ func New{{service:go_name}}ChannelClient(channel thrift.RequestChannel) {{servic
     }
 }
 
+func init() {
+    thrift.InternalRegisterClientConstructor[{{service:go_name}}Client](New{{service:go_name}}ChannelClient)
+}
+
 func (c *{{service:go_client_name}}) Close() error {
     return c.ch.Close()
 }

@@ -93,6 +93,10 @@ func NewGetEntityChannelClient(channel thrift.RequestChannel) GetEntityClient {
     }
 }
 
+func init() {
+    thrift.InternalRegisterClientConstructor[GetEntityClient](NewGetEntityChannelClient)
+}
+
 func (c *getEntityClientImpl) Close() error {
     return c.ch.Close()
 }

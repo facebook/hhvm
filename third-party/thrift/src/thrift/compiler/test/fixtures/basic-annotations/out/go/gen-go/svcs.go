@@ -48,6 +48,10 @@ func NewBadInteractionChannelClient(channel thrift.RequestChannel) BadInteractio
     }
 }
 
+func init() {
+    thrift.InternalRegisterClientConstructor[BadInteractionClient](NewBadInteractionChannelClient)
+}
+
 func (c *badInteractionClientImpl) Close() error {
     return c.ch.Close()
 }
@@ -180,6 +184,10 @@ func NewMyServiceChannelClient(channel thrift.RequestChannel) MyServiceClient {
     return &myServiceClientImpl{
         ch: channel,
     }
+}
+
+func init() {
+    thrift.InternalRegisterClientConstructor[MyServiceClient](NewMyServiceChannelClient)
 }
 
 func (c *myServiceClientImpl) Close() error {
@@ -561,6 +569,10 @@ func NewMyServicePrioParentChannelClient(channel thrift.RequestChannel) MyServic
     }
 }
 
+func init() {
+    thrift.InternalRegisterClientConstructor[MyServicePrioParentClient](NewMyServicePrioParentChannelClient)
+}
+
 func (c *myServicePrioParentClientImpl) Close() error {
     return c.ch.Close()
 }
@@ -727,6 +739,10 @@ func NewMyServicePrioChildChannelClient(channel thrift.RequestChannel) MyService
     }
 }
 
+func init() {
+    thrift.InternalRegisterClientConstructor[MyServicePrioChildClient](NewMyServicePrioChildChannelClient)
+}
+
 func (c *myServicePrioChildClientImpl) Close() error {
     return c.ch.Close()
 }
@@ -812,6 +828,10 @@ func NewBadServiceChannelClient(channel thrift.RequestChannel) BadServiceClient 
     return &badServiceClientImpl{
         ch: channel,
     }
+}
+
+func init() {
+    thrift.InternalRegisterClientConstructor[BadServiceClient](NewBadServiceChannelClient)
 }
 
 func (c *badServiceClientImpl) Close() error {
@@ -931,6 +951,10 @@ func NewFooBarBazServiceChannelClient(channel thrift.RequestChannel) FooBarBazSe
     return &fooBarBazServiceClientImpl{
         ch: channel,
     }
+}
+
+func init() {
+    thrift.InternalRegisterClientConstructor[FooBarBazServiceClient](NewFooBarBazServiceChannelClient)
 }
 
 func (c *fooBarBazServiceClientImpl) Close() error {

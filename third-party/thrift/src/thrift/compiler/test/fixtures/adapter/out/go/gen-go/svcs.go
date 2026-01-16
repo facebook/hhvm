@@ -49,6 +49,10 @@ func NewServiceChannelClient(channel thrift.RequestChannel) ServiceClient {
     }
 }
 
+func init() {
+    thrift.InternalRegisterClientConstructor[ServiceClient](NewServiceChannelClient)
+}
+
 func (c *serviceClientImpl) Close() error {
     return c.ch.Close()
 }
@@ -168,6 +172,10 @@ func NewAdapterServiceChannelClient(channel thrift.RequestChannel) AdapterServic
     return &adapterServiceClientImpl{
         ch: channel,
     }
+}
+
+func init() {
+    thrift.InternalRegisterClientConstructor[AdapterServiceClient](NewAdapterServiceChannelClient)
 }
 
 func (c *adapterServiceClientImpl) Close() error {

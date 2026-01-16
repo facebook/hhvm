@@ -171,3 +171,17 @@ func DecodeSimpleJSON(data []byte, msg types.ReadableStruct) error {
 func WithFrameworkMetadata(ctx context.Context, metadata []byte) context.Context {
 	return rocket.WithFrameworkMetadata(ctx, metadata)
 }
+
+// THIS FUNCTION IS FOR INTERNAL USE ONLY.
+// InternalRegisterClientConstructor registers a constructor function for a client type.
+// This is intended to be called from generated code's init() function.
+func InternalRegisterClientConstructor[T any](constructor func(channel RequestChannel) T) {
+	types.InternalRegisterClientConstructor(constructor)
+}
+
+// THIS FUNCTION IS FOR INTERNAL USE ONLY.
+// InternalConstructClientFromRegistry creates a client of type T from a channel using the registered constructor.
+// Returns the client or an error if no constructor was found for the type.
+func InternalConstructClientFromRegistry[T any](channel RequestChannel) (T, error) {
+	return types.InternalConstructClientFromRegistry[T](channel)
+}

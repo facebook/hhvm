@@ -57,6 +57,10 @@ func NewFinderChannelClient(channel thrift.RequestChannel) FinderClient {
     }
 }
 
+func init() {
+    thrift.InternalRegisterClientConstructor[FinderClient](NewFinderChannelClient)
+}
+
 func (c *finderClientImpl) Close() error {
     return c.ch.Close()
 }

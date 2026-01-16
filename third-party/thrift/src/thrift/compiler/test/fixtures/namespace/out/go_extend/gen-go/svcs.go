@@ -60,6 +60,10 @@ func NewExtendTestServiceChannelClient(channel thrift.RequestChannel) ExtendTest
     }
 }
 
+func init() {
+    thrift.InternalRegisterClientConstructor[ExtendTestServiceClient](NewExtendTestServiceChannelClient)
+}
+
 func (c *extendTestServiceClientImpl) Close() error {
     return c.ch.Close()
 }

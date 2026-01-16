@@ -55,6 +55,10 @@ func NewCChannelClient(channel thrift.RequestChannel) CClient {
     }
 }
 
+func init() {
+    thrift.InternalRegisterClientConstructor[CClient](NewCChannelClient)
+}
+
 func (c *cClientImpl) Close() error {
     return c.ch.Close()
 }

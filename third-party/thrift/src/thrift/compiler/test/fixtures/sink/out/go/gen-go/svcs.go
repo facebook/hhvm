@@ -47,6 +47,10 @@ func NewSinkServiceChannelClient(channel thrift.RequestChannel) SinkServiceClien
     }
 }
 
+func init() {
+    thrift.InternalRegisterClientConstructor[SinkServiceClient](NewSinkServiceChannelClient)
+}
+
 func (c *sinkServiceClientImpl) Close() error {
     return c.ch.Close()
 }

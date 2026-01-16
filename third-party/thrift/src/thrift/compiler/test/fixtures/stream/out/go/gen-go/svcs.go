@@ -65,6 +65,10 @@ func NewPubSubStreamingServiceChannelClient(channel thrift.RequestChannel) PubSu
     }
 }
 
+func init() {
+    thrift.InternalRegisterClientConstructor[PubSubStreamingServiceClient](NewPubSubStreamingServiceChannelClient)
+}
+
 func (c *pubSubStreamingServiceClientImpl) Close() error {
     return c.ch.Close()
 }

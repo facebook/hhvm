@@ -57,6 +57,10 @@ func NewNestedContainersChannelClient(channel thrift.RequestChannel) NestedConta
     }
 }
 
+func init() {
+    thrift.InternalRegisterClientConstructor[NestedContainersClient](NewNestedContainersChannelClient)
+}
+
 func (c *nestedContainersClientImpl) Close() error {
     return c.ch.Close()
 }

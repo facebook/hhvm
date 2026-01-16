@@ -55,6 +55,10 @@ func NewRaiserChannelClient(channel thrift.RequestChannel) RaiserClient {
     }
 }
 
+func init() {
+    thrift.InternalRegisterClientConstructor[RaiserClient](NewRaiserChannelClient)
+}
+
 func (c *raiserClientImpl) Close() error {
     return c.ch.Close()
 }

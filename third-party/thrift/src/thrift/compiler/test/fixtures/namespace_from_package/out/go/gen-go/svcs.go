@@ -49,6 +49,10 @@ func NewTestServiceChannelClient(channel thrift.RequestChannel) TestServiceClien
     }
 }
 
+func init() {
+    thrift.InternalRegisterClientConstructor[TestServiceClient](NewTestServiceChannelClient)
+}
+
 func (c *testServiceClientImpl) Close() error {
     return c.ch.Close()
 }

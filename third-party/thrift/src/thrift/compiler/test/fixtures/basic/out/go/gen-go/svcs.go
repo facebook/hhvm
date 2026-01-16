@@ -49,6 +49,10 @@ func NewFooServiceChannelClient(channel thrift.RequestChannel) FooServiceClient 
     }
 }
 
+func init() {
+    thrift.InternalRegisterClientConstructor[FooServiceClient](NewFooServiceChannelClient)
+}
+
 func (c *fooServiceClientImpl) Close() error {
     return c.ch.Close()
 }
@@ -161,6 +165,10 @@ func NewFB303ServiceChannelClient(channel thrift.RequestChannel) FB303ServiceCli
     return &fB303ServiceClientImpl{
         ch: channel,
     }
+}
+
+func init() {
+    thrift.InternalRegisterClientConstructor[FB303ServiceClient](NewFB303ServiceChannelClient)
 }
 
 func (c *fB303ServiceClientImpl) Close() error {
@@ -296,6 +304,10 @@ func NewMyServiceChannelClient(channel thrift.RequestChannel) MyServiceClient {
     return &myServiceClientImpl{
         ch: channel,
     }
+}
+
+func init() {
+    thrift.InternalRegisterClientConstructor[MyServiceClient](NewMyServiceChannelClient)
 }
 
 func (c *myServiceClientImpl) Close() error {
@@ -803,6 +815,10 @@ func NewDbMixedStackArgumentsChannelClient(channel thrift.RequestChannel) DbMixe
     return &dbMixedStackArgumentsClientImpl{
         ch: channel,
     }
+}
+
+func init() {
+    thrift.InternalRegisterClientConstructor[DbMixedStackArgumentsClient](NewDbMixedStackArgumentsChannelClient)
 }
 
 func (c *dbMixedStackArgumentsClientImpl) Close() error {

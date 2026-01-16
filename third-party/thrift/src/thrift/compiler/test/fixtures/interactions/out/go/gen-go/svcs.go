@@ -54,6 +54,10 @@ func NewMyInteractionChannelClient(channel thrift.RequestChannel) MyInteractionC
     }
 }
 
+func init() {
+    thrift.InternalRegisterClientConstructor[MyInteractionClient](NewMyInteractionChannelClient)
+}
+
 func (c *myInteractionClientImpl) Close() error {
     return c.ch.Close()
 }
@@ -331,6 +335,10 @@ func NewMyInteractionFastChannelClient(channel thrift.RequestChannel) MyInteract
     }
 }
 
+func init() {
+    thrift.InternalRegisterClientConstructor[MyInteractionFastClient](NewMyInteractionFastChannelClient)
+}
+
 func (c *myInteractionFastClientImpl) Close() error {
     return c.ch.Close()
 }
@@ -598,6 +606,10 @@ func NewSerialInteractionChannelClient(channel thrift.RequestChannel) SerialInte
     }
 }
 
+func init() {
+    thrift.InternalRegisterClientConstructor[SerialInteractionClient](NewSerialInteractionChannelClient)
+}
+
 func (c *serialInteractionClientImpl) Close() error {
     return c.ch.Close()
 }
@@ -717,6 +729,10 @@ func NewBoxedInteractionChannelClient(channel thrift.RequestChannel) BoxedIntera
     return &boxedInteractionClientImpl{
         ch: channel,
     }
+}
+
+func init() {
+    thrift.InternalRegisterClientConstructor[BoxedInteractionClient](NewBoxedInteractionChannelClient)
 }
 
 func (c *boxedInteractionClientImpl) Close() error {
@@ -846,6 +862,10 @@ func NewMyServiceChannelClient(channel thrift.RequestChannel) MyServiceClient {
     return &myServiceClientImpl{
         ch: channel,
     }
+}
+
+func init() {
+    thrift.InternalRegisterClientConstructor[MyServiceClient](NewMyServiceChannelClient)
 }
 
 func (c *myServiceClientImpl) Close() error {
@@ -1181,6 +1201,10 @@ func NewFactoriesChannelClient(channel thrift.RequestChannel) FactoriesClient {
     }
 }
 
+func init() {
+    thrift.InternalRegisterClientConstructor[FactoriesClient](NewFactoriesChannelClient)
+}
+
 func (c *factoriesClientImpl) Close() error {
     return c.ch.Close()
 }
@@ -1508,6 +1532,10 @@ func NewPerformChannelClient(channel thrift.RequestChannel) PerformClient {
     }
 }
 
+func init() {
+    thrift.InternalRegisterClientConstructor[PerformClient](NewPerformChannelClient)
+}
+
 func (c *performClientImpl) Close() error {
     return c.ch.Close()
 }
@@ -1620,6 +1648,10 @@ func NewInteractWithSharedChannelClient(channel thrift.RequestChannel) InteractW
     return &interactWithSharedClientImpl{
         ch: channel,
     }
+}
+
+func init() {
+    thrift.InternalRegisterClientConstructor[InteractWithSharedClient](NewInteractWithSharedChannelClient)
 }
 
 func (c *interactWithSharedClientImpl) Close() error {
@@ -1735,6 +1767,10 @@ func NewBoxServiceChannelClient(channel thrift.RequestChannel) BoxServiceClient 
     return &boxServiceClientImpl{
         ch: channel,
     }
+}
+
+func init() {
+    thrift.InternalRegisterClientConstructor[BoxServiceClient](NewBoxServiceChannelClient)
 }
 
 func (c *boxServiceClientImpl) Close() error {

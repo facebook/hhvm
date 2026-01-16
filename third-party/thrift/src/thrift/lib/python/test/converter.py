@@ -352,6 +352,18 @@ class PyDeprecatedToPythonConverterTest(unittest.TestCase):
         self.assertEqual(exception.code, 42)
 
 
+class Py3ToMutablePythonConverterTest(unittest.TestCase):
+    @unittest.expectedFailure
+    def test_exception(self) -> None:
+        # pyre-ignore[16]: _to_mutable_python() does not exist on py3 exceptions
+        exception = py3_types.SimpleException(
+            message="Test error", code=42
+        )._to_mutable_python()
+        self.assertIsInstance(exception, python_mutable_types.SimpleException)
+        self.assertEqual(exception.message, "Test error")
+        self.assertEqual(exception.code, 42)
+
+
 class PyDeprecatedToMutablePythonConverterTest(unittest.TestCase):
     def test_simple(self) -> None:
         simple = py_deprecated_types.Simple(
@@ -531,6 +543,32 @@ class PyDeprecatedToMutablePythonConverterTest(unittest.TestCase):
             python_mutable_types.Potahto.FbThriftUnionFieldEnum.to,
         )
         self.assertEqual(to.fbthrift_current_value, True)
+
+    @unittest.expectedFailure
+    def test_exception(self) -> None:
+        exception = py_deprecated_types.SimpleException(
+            message="Test error", code=42
+        )._to_mutable_python()
+        self.assertIsInstance(exception, python_mutable_types.SimpleException)
+        self.assertEqual(exception.message, "Test error")
+        self.assertEqual(exception.code, 42)
+
+
+class PythonToMutablePythonConverterTest(unittest.TestCase):
+    @unittest.expectedFailure
+    def test_exception(self) -> None:
+        exception = python_types.SimpleException(
+            message="Test error", code=42
+        )._to_mutable_python()
+        self.assertIsInstance(exception, python_mutable_types.SimpleException)
+        self.assertEqual(exception.message, "Test error")
+        self.assertEqual(exception.code, 42)
+
+
+class MutablePythonToMutablePythonConverterTest(unittest.TestCase):
+    def test_exception(self) -> None:
+        exception = python_mutable_types.SimpleException(message="Test error", code=42)
+        self.assertIs(exception, exception._to_mutable_python())
 
 
 class PythonToPythonConverterTest(unittest.TestCase):

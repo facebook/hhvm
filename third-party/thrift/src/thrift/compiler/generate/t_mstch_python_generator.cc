@@ -277,9 +277,6 @@ class python_generator_context {
         is_patch_file_(is_patch_file),
         type_kind_(type_kind) {}
 
-  python_generator_context(python_generator_context&&) = default;
-  python_generator_context& operator=(python_generator_context&&) = default;
-
   void reset(
       const types_file_kind& types_file_kind,
       const type_kind& type_kind) noexcept {

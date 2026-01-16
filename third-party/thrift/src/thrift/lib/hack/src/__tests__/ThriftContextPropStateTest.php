@@ -572,7 +572,10 @@ final class ThriftContextPropStateTest extends WWWTest {
     ThriftContextPropState::initFromString($e);
     $tcps = ThriftContextPropState::get();
     $serialized_before = $tcps->getSerialized();
-    MCPContext::setGlobal__UNSAFE(MCPOriginIDs::INTEGRITY);
+    MCPContext::setGlobal__UNSAFE(
+      MCPOriginIDs::INTEGRITY,
+      WwwHackTestAssetXID::get(nameof static),
+    );
     $serialized_after = $tcps->getSerialized();
     expect($serialized_before)->toNotEqual($serialized_after);
   }

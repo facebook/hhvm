@@ -20,6 +20,13 @@
 final class ProductIdContextHandlerTest extends WWWTest {
   use MethodLevelTest;
 
+  private static function setMCPOriginId(MCPOriginIDs $origin_id): void {
+    MCPContext::setGlobal__UNSAFE(
+      $origin_id,
+      WwwHackTestAssetXID::get(nameof static),
+    );
+  }
+
   public async function testProductIdDifferentFromTFM(): Awaitable<void> {
     $params = shape();
     $mutable_tfm = ThriftFrameworkMetadata::withDefaultValues();
@@ -83,7 +90,7 @@ final class ProductIdContextHandlerTest extends WWWTest {
     );
 
     // product id in ThriftContextPropState is set
-    MCPContext::setGlobal__UNSAFE(MCPOriginIDs::XI_INTEL);
+    self::setMCPOriginId(MCPOriginIDs::XI_INTEL);
 
     $transport =
       TServiceRouterTransport::create('sample_service_name', dict[], dict[]);
@@ -133,7 +140,7 @@ final class ProductIdContextHandlerTest extends WWWTest {
     );
 
     // product id in ThriftContextPropState is set
-    MCPContext::setGlobal__UNSAFE(MCPOriginIDs::XI_INTEL);
+    self::setMCPOriginId(MCPOriginIDs::XI_INTEL);
 
     $transport =
       TServiceRouterTransport::create('sample_service_name', dict[], dict[]);

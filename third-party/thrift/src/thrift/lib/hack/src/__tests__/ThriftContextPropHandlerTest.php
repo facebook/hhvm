@@ -30,7 +30,10 @@ final class ThriftContextPropHandlerTest extends WWWTest {
 
   public function testValue(): void {
     ThriftContextPropState::get()->setRequestId("abcba");
-    MCPContext::setGlobal__UNSAFE(MCPOriginIDs::INTEGRITY);
+    MCPContext::setGlobal__UNSAFE(
+      MCPOriginIDs::INTEGRITY,
+      WwwHackTestAssetXID::get(nameof static),
+    );
     $v = ThriftContextPropHandler::makeV();
     if ($v !== null) {
       $transport = Base64::decode($v);

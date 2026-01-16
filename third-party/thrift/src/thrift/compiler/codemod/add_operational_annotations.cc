@@ -28,7 +28,7 @@ namespace {
 class add_operational_annotations {
  public:
   add_operational_annotations(source_manager& sm, t_program& program)
-      : fm_(sm, program), prog_(program) {}
+      : fm_(sm, program) {}
 
   void add_includes() {
     // Get the file content
@@ -223,7 +223,6 @@ class add_operational_annotations {
 
  private:
   file_manager fm_;
-  const t_program& prog_;
   const std::string target_string =
       "@universe.Universe{id = universe.UniverseIdentifier.OPERATIONAL}";
   const std::string zone_policy_string = "@zone_policy.PurposePolicy";

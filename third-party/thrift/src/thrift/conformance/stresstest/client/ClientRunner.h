@@ -53,8 +53,6 @@ class ClientRunner : public folly::AsyncSocket::ConnectCallback {
  private:
   ClientConfig config_;
   bool started_{false};
-  bool stopped_{false};
-  bool continuous_{false};
   bool useLoadGenerator_;
 
   folly::Latch latch_;

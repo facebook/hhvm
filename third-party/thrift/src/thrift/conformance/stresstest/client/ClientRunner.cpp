@@ -237,7 +237,6 @@ class ClientThread : public folly::HHWheelTimer::Callback {
 
 ClientRunner::ClientRunner(const ClientConfig& config)
     : config_(config),
-      continuous_(config.continuous),
       useLoadGenerator_(config.useLoadGenerator),
       latch_(config.numClientThreads * config.numConnectionsPerThread),
       clientThreads_() {

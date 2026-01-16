@@ -15,21 +15,27 @@
  */
 
 #include <gtest/gtest.h>
-#include <fatal/type/array.h>
-#include <thrift/lib/cpp2/reflection/reflection.h>
-#include <thrift/test/reflection/gen-cpp2/troublesome_fatal_all.h>
+#include <thrift/lib/cpp2/op/Get.h>
+#include <thrift/test/reflection/gen-cpp2/troublesome_types.h>
 
 namespace apache::thrift::test::reflection {
 namespace {
 
-TEST(TroublesomeTest, FatalReflection) {
-  EXPECT_STREQ(fatal::z_data<troublesome_tags::strings::strings>(), "strings");
-  EXPECT_STREQ(fatal::z_data<troublesome_tags::structs::structs>(), "structs");
-  EXPECT_STREQ(fatal::z_data<troublesome_tags::enums::enums>(), "enums");
-  EXPECT_STREQ(
-      fatal::z_data<troublesome_tags::constants::constants>(), "constants");
-  EXPECT_STREQ(
-      fatal::z_data<troublesome_tags::services::services>(), "services");
+// Test that types with "troublesome" names (names that could conflict with
+// internal reflection names) work correctly with modern always-on reflection.
+TEST(TroublesomeTest, ModernReflection) {
+  // Verify struct names
+  EXPECT_EQ(op::get_class_name_v<strings>, "strings");
+  EXPECT_EQ(op::get_class_name_v<structs>, "structs");
+  EXPECT_EQ(op::get_class_name_v<name>, "name");
+  EXPECT_EQ(op::get_class_name_v<members>, "members");
+
+  // Verify union names
+  EXPECT_EQ(op::get_class_name_v<unions>, "unions");
+  EXPECT_EQ(op::get_class_name_v<member>, "member");
+
+  // Verify exception names
+  EXPECT_EQ(op::get_class_name_v<exceptions>, "exceptions");
 }
 
 } // namespace

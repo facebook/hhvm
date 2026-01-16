@@ -121,7 +121,7 @@ class OmniClient : public apache::thrift::TClientBase {
       const apache::thrift::RpcKind rpcKind =
           apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE);
 
-  uint16_t getChannelProtocolId() const noexcept;
+  uint16_t getChannelProtocolId() const;
 
   RequestChannelShared getChannelShared() const noexcept;
 
@@ -150,7 +150,7 @@ class OmniClient : public apache::thrift::TClientBase {
       apache::thrift::MethodMetadata::Data&& metadata);
 };
 
-inline uint16_t OmniClient::getChannelProtocolId() const noexcept {
+inline uint16_t OmniClient::getChannelProtocolId() const {
   return channel_->getProtocolId();
 }
 

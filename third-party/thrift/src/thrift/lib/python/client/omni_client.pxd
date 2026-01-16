@@ -103,7 +103,7 @@ cdef extern from "thrift/lib/python/client/OmniClient.h" namespace "::apache::th
             const RpcKind rpcKind,
         )
         shared_ptr[cRequestChannel] getChannelShared()
-        uint16_t getChannelProtocolId()
+        uint16_t getChannelProtocolId() except+
         void clearEventHandlers()
         void addEventHandler(const shared_ptr[cTProcessorEventHandler]& handler)
 

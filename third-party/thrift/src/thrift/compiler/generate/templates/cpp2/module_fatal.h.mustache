@@ -35,41 +35,6 @@ struct __fbthrift_strings_{{program:name}} {
   {{/program:fatal_identifiers}}
 };
 
-struct {{program:name}}_module_traits {
-  using strings = __fbthrift_strings_{{program:name}};
-  using name = strings::{{program:name}};
-  using namespaces = ::fatal::list<
-      {{#program:fatal_languages}}{{#fatal_languages:items}}
-      ::fatal::pair<strings::{{language:safe_name}}, strings::{{language:safe_namespace}}>{{^last?}},{{/last?}}
-      {{/fatal_languages:items}}{{/program:fatal_languages}}
-  >;
-  using enums = ::fatal::list<
-      {{#program:fatal_enums}}{{#fatal_strings:items}}
-      ::fatal::pair<::{{program:cpp_qualified_namespace}}::{{fatal_string:name}}, strings::{{fatal_string:name}}>{{^last?}},{{/last?}}
-      {{/fatal_strings:items}}{{/program:fatal_enums}}
-  >;
-  using unions = ::fatal::list<
-      {{#program:fatal_unions}}{{#fatal_strings:items}}
-      ::fatal::pair<::{{program:cpp_qualified_namespace}}::{{fatal_string:name}}, strings::{{fatal_string:name}}>{{^last?}},{{/last?}}
-      {{/fatal_strings:items}}{{/program:fatal_unions}}
-  >;
-  using structs = ::fatal::list<
-      {{#program:fatal_structs}}{{#fatal_strings:items}}
-      ::fatal::pair<::{{program:cpp_qualified_namespace}}::{{fatal_string:name}}, strings::{{fatal_string:name}}>{{^last?}},{{/last?}}
-      {{/fatal_strings:items}}{{/program:fatal_structs}}
-  >;
-  using constants = ::fatal::list<
-      {{#program:fatal_constants}}{{#fatal_strings:items}}
-      strings::{{fatal_string:name}}{{^last?}},{{/last?}}
-      {{/fatal_strings:items}}{{/program:fatal_constants}}
-  >;
-  using services = ::fatal::list<
-      {{#program:fatal_services}}{{#fatal_strings:items}}
-      strings::{{fatal_string:name}}{{^last?}},{{/last?}}
-      {{/fatal_strings:items}}{{/program:fatal_services}}
-  >;
-};
-
 } // __fbthrift_refl
 
 class {{program:name}}_tags {

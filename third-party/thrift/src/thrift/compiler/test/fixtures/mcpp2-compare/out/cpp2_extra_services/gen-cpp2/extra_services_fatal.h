@@ -66,26 +66,6 @@ struct __fbthrift_strings_extra_services {
   using throws_function3 = ::fatal::sequence<char, 't', 'h', 'r', 'o', 'w', 's', '_', 'f', 'u', 'n', 'c', 't', 'i', 'o', 'n', '3'>;
 };
 
-struct extra_services_module_traits {
-  using strings = __fbthrift_strings_extra_services;
-  using name = strings::extra_services;
-  using namespaces = ::fatal::list<
-      ::fatal::pair<strings::cpp2, strings::extra__svc>
-  >;
-  using enums = ::fatal::list<
-  >;
-  using unions = ::fatal::list<
-  >;
-  using structs = ::fatal::list<
-      ::fatal::pair<::extra::svc::containerStruct2, strings::containerStruct2>
-  >;
-  using constants = ::fatal::list<
-  >;
-  using services = ::fatal::list<
-      strings::ExtraService
-  >;
-};
-
 } // __fbthrift_refl
 
 class extra_services_tags {

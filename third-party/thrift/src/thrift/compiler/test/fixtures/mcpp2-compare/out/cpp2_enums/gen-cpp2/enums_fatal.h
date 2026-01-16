@@ -49,34 +49,6 @@ struct __fbthrift_strings_enums {
   using fieldA = ::fatal::sequence<char, 'f', 'i', 'e', 'l', 'd', 'A'>;
 };
 
-struct enums_module_traits {
-  using strings = __fbthrift_strings_enums;
-  using name = strings::enums;
-  using namespaces = ::fatal::list<
-      ::fatal::pair<strings::cpp2, strings::facebook__ns__qwerty>
-  >;
-  using enums = ::fatal::list<
-      ::fatal::pair<::facebook::ns::qwerty::AnEnumA, strings::AnEnumA>,
-      ::fatal::pair<::facebook::ns::qwerty::AnEnumB, strings::AnEnumB>,
-      ::fatal::pair<::facebook::ns::qwerty::AnEnumC, strings::AnEnumC>,
-      ::fatal::pair<::facebook::ns::qwerty::AnEnumD, strings::AnEnumD>,
-      ::fatal::pair<::facebook::ns::qwerty::AnEnumE, strings::AnEnumE>
-  >;
-  using unions = ::fatal::list<
-  >;
-  using structs = ::fatal::list<
-      ::fatal::pair<::facebook::ns::qwerty::SomeStruct, strings::SomeStruct>
-  >;
-  using constants = ::fatal::list<
-      strings::MapStringEnum,
-      strings::MapEnumString,
-      strings::ConstantMap1,
-      strings::ConstantMap2
-  >;
-  using services = ::fatal::list<
-  >;
-};
-
 } // __fbthrift_refl
 
 class enums_tags {

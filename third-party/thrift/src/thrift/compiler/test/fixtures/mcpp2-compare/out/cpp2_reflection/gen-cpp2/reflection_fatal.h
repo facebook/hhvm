@@ -25,24 +25,6 @@ struct __fbthrift_strings_reflection {
   using reflection = ::fatal::sequence<char, 'r', 'e', 'f', 'l', 'e', 'c', 't', 'i', 'o', 'n'>;
 };
 
-struct reflection_module_traits {
-  using strings = __fbthrift_strings_reflection;
-  using name = strings::reflection;
-  using namespaces = ::fatal::list<
-  >;
-  using enums = ::fatal::list<
-  >;
-  using unions = ::fatal::list<
-  >;
-  using structs = ::fatal::list<
-      ::fatal::pair<::cpp2::ReflectionStruct, strings::ReflectionStruct>
-  >;
-  using constants = ::fatal::list<
-  >;
-  using services = ::fatal::list<
-  >;
-};
-
 } // __fbthrift_refl
 
 class reflection_tags {

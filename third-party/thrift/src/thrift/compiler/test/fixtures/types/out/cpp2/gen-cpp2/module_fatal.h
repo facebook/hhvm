@@ -202,60 +202,6 @@ struct __fbthrift_strings_module {
   using zero = ::fatal::sequence<char, 'z', 'e', 'r', 'o'>;
 };
 
-struct module_module_traits {
-  using strings = __fbthrift_strings_module;
-  using name = strings::module;
-  using namespaces = ::fatal::list<
-  >;
-  using enums = ::fatal::list<
-      ::fatal::pair<::apache::thrift::fixtures::types::has_bitwise_ops, strings::has_bitwise_ops>,
-      ::fatal::pair<::apache::thrift::fixtures::types::is_unscoped, strings::is_unscoped>,
-      ::fatal::pair<::apache::thrift::fixtures::types::MyForwardRefEnum, strings::MyForwardRefEnum>
-  >;
-  using unions = ::fatal::list<
-  >;
-  using structs = ::fatal::list<
-      ::fatal::pair<::apache::thrift::fixtures::types::empty_struct, strings::empty_struct>,
-      ::fatal::pair<::apache::thrift::fixtures::types::decorated_struct, strings::decorated_struct>,
-      ::fatal::pair<::apache::thrift::fixtures::types::ContainerStruct, strings::ContainerStruct>,
-      ::fatal::pair<::apache::thrift::fixtures::types::CppTypeStruct, strings::CppTypeStruct>,
-      ::fatal::pair<::apache::thrift::fixtures::types::VirtualStruct, strings::VirtualStruct>,
-      ::fatal::pair<::apache::thrift::fixtures::types::MyStructWithForwardRefEnum, strings::MyStructWithForwardRefEnum>,
-      ::fatal::pair<::apache::thrift::fixtures::types::TrivialNumeric, strings::TrivialNumeric>,
-      ::fatal::pair<::apache::thrift::fixtures::types::TrivialNestedWithDefault, strings::TrivialNestedWithDefault>,
-      ::fatal::pair<::apache::thrift::fixtures::types::ComplexString, strings::ComplexString>,
-      ::fatal::pair<::apache::thrift::fixtures::types::ComplexNestedWithDefault, strings::ComplexNestedWithDefault>,
-      ::fatal::pair<::apache::thrift::fixtures::types::MinPadding, strings::MinPadding>,
-      ::fatal::pair<::apache::thrift::fixtures::types::MinPaddingWithCustomType, strings::MinPaddingWithCustomType>,
-      ::fatal::pair<::apache::thrift::fixtures::types::MyStruct, strings::MyStruct>,
-      ::fatal::pair<::apache::thrift::fixtures::types::MyDataItem, strings::MyDataItem>,
-      ::fatal::pair<::apache::thrift::fixtures::types::Renamed, strings::Renamed>,
-      ::fatal::pair<::apache::thrift::fixtures::types::AnnotatedTypes, strings::AnnotatedTypes>,
-      ::fatal::pair<::apache::thrift::fixtures::types::ForwardUsageRoot, strings::ForwardUsageRoot>,
-      ::fatal::pair<::apache::thrift::fixtures::types::ForwardUsageStruct, strings::ForwardUsageStruct>,
-      ::fatal::pair<::apache::thrift::fixtures::types::ForwardUsageByRef, strings::ForwardUsageByRef>,
-      ::fatal::pair<::apache::thrift::fixtures::types::IncompleteMap, strings::IncompleteMap>,
-      ::fatal::pair<::apache::thrift::fixtures::types::IncompleteMapDep, strings::IncompleteMapDep>,
-      ::fatal::pair<::apache::thrift::fixtures::types::CompleteMap, strings::CompleteMap>,
-      ::fatal::pair<::apache::thrift::fixtures::types::CompleteMapDep, strings::CompleteMapDep>,
-      ::fatal::pair<::apache::thrift::fixtures::types::IncompleteList, strings::IncompleteList>,
-      ::fatal::pair<::apache::thrift::fixtures::types::IncompleteListDep, strings::IncompleteListDep>,
-      ::fatal::pair<::apache::thrift::fixtures::types::CompleteList, strings::CompleteList>,
-      ::fatal::pair<::apache::thrift::fixtures::types::CompleteListDep, strings::CompleteListDep>,
-      ::fatal::pair<::apache::thrift::fixtures::types::AdaptedList, strings::AdaptedList>,
-      ::fatal::pair<::apache::thrift::fixtures::types::DependentAdaptedList, strings::DependentAdaptedList>,
-      ::fatal::pair<::apache::thrift::fixtures::types::AllocatorAware, strings::AllocatorAware>,
-      ::fatal::pair<::apache::thrift::fixtures::types::AllocatorAware2, strings::AllocatorAware2>,
-      ::fatal::pair<::apache::thrift::fixtures::types::TypedefStruct, strings::TypedefStruct>,
-      ::fatal::pair<::apache::thrift::fixtures::types::StructWithDoubleUnderscores, strings::StructWithDoubleUnderscores>
-  >;
-  using constants = ::fatal::list<
-  >;
-  using services = ::fatal::list<
-      strings::SomeService
-  >;
-};
-
 } // __fbthrift_refl
 
 class module_tags {

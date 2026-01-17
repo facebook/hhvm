@@ -114,10 +114,6 @@ class HTTPException : public proxygen::Exception {
     partialMsg_ = std::move(partialMsg);
   }
 
-  std::unique_ptr<HTTPMessage> movePartialMsg() {
-    return std::move(partialMsg_);
-  }
-
   [[nodiscard]] HTTPMessage* getPartialMsg() const {
     return partialMsg_.get();
   }

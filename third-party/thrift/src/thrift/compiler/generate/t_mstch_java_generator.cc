@@ -325,6 +325,13 @@ class t_mstch_java_generator : public t_mstch_generator {
       }
       return whisker::make::null;
     });
+    def.property("enumSkipNameMap?", [](const t_type& self) {
+      if (self.get_true_type()->is<t_enum>()) {
+        return self.get_true_type()->has_unstructured_annotation(
+            "java.swift.skip_enum_name_map");
+      }
+      return false;
+    });
 
     return std::move(def).make();
   }

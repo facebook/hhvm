@@ -111,11 +111,13 @@ io.netty.buffer.Unpooled.wrappedBuffer({{value.quotedString}}.getBytes())
     {{/if field_hasAdapter}}
   {{#else if type.enum?}}
 {{#partial types.boxed_type type=type.true_type type_isAdapterSet=false field_hasAdapter=field_hasAdapter}}.
-    {{#if value.enum_value?}}
+    {{#if type.enumSkipNameMap?}}
+fromInteger({{value.integer_value}})
+    {{#else if value.enum_value?}}
 {{value.enum_value.javaConstantName}}
     {{#else}}
 fromInteger({{value.integer_value}})
-    {{/if value.enum_value?}}
+    {{/if type.enumSkipNameMap?}}
 
 {{! Structured types }}
   {{#else if type.structured?}}

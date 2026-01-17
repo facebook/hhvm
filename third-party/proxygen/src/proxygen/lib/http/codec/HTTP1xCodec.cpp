@@ -294,10 +294,6 @@ void HTTP1xCodec::onParserError(const char* what) {
   if (msg_) {
     error.setPartialMsg(std::move(msg_));
   }
-  // store the ingress buffer
-  if (currentIngressBuf_) {
-    error.setCurrentIngressBuf(currentIngressBuf_->cloneOne());
-  }
   if (transportDirection_ == TransportDirection::DOWNSTREAM &&
       egressTxnID_ < ingressTxnID_) {
     error.setHttpStatusCode(400);

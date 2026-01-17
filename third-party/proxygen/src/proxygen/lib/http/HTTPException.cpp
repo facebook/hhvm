@@ -63,9 +63,6 @@ HTTPException::HTTPException(const HTTPException& ex)
       http3ErrorCode_(ex.http3ErrorCode_),
       codecStatusCode_(ex.codecStatusCode_),
       errno_(ex.errno_) {
-  if (ex.currentIngressBuf_) {
-    currentIngressBuf_ = ex.currentIngressBuf_->clone();
-  }
   if (ex.partialMsg_) {
     partialMsg_ = std::make_unique<HTTPMessage>(*ex.partialMsg_.get());
   }

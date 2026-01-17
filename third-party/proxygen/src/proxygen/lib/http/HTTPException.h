@@ -9,7 +9,6 @@
 #pragma once
 
 #include <folly/Memory.h>
-#include <folly/io/IOBufQueue.h>
 #include <proxygen/lib/http/HTTP3ErrorCode.h>
 #include <proxygen/lib/http/HTTPMessage.h>
 #include <proxygen/lib/http/codec/ErrorCode.h>
@@ -111,14 +110,6 @@ class HTTPException : public proxygen::Exception {
     return errno_;
   }
 
-  void setCurrentIngressBuf(std::unique_ptr<folly::IOBuf> buf) {
-    currentIngressBuf_ = std::move(buf);
-  }
-
-  std::unique_ptr<folly::IOBuf> moveCurrentIngressBuf() {
-    return std::move(currentIngressBuf_);
-  }
-
   void setPartialMsg(std::unique_ptr<HTTPMessage> partialMsg) {
     partialMsg_ = std::move(partialMsg);
   }
@@ -139,8 +130,6 @@ class HTTPException : public proxygen::Exception {
   folly::Optional<HTTP3::ErrorCode> http3ErrorCode_;
   folly::Optional<ErrorCode> codecStatusCode_;
   uint32_t errno_{0};
-  // current ingress buffer, may be compressed
-  std::unique_ptr<folly::IOBuf> currentIngressBuf_;
   // partial message that is being parsed
   std::unique_ptr<HTTPMessage> partialMsg_;
 };

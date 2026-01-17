@@ -35,7 +35,6 @@ class empty_struct_struct_traits {
   };
  public:
   using type = ::apache::thrift::fixtures::types::empty_struct;
-  using name = __fbthrift_strings_module::empty_struct;
   using member = __fbthrift_member;
   using members = ::fatal::list<
   >;
@@ -83,7 +82,6 @@ class decorated_struct_struct_traits {
   };
  public:
   using type = ::apache::thrift::fixtures::types::decorated_struct;
-  using name = __fbthrift_strings_module::decorated_struct;
   using member = __fbthrift_member;
   using members = ::fatal::list<
       member::field
@@ -172,7 +170,6 @@ class ContainerStruct_struct_traits {
   };
  public:
   using type = ::apache::thrift::fixtures::types::ContainerStruct;
-  using name = __fbthrift_strings_module::ContainerStruct;
   using member = __fbthrift_member;
   using members = ::fatal::list<
       member::fieldA,
@@ -212,7 +209,6 @@ class CppTypeStruct_struct_traits {
   };
  public:
   using type = ::apache::thrift::fixtures::types::CppTypeStruct;
-  using name = __fbthrift_strings_module::CppTypeStruct;
   using member = __fbthrift_member;
   using members = ::fatal::list<
       member::fieldA
@@ -258,7 +254,6 @@ class VirtualStruct_struct_traits {
   };
  public:
   using type = ::apache::thrift::fixtures::types::VirtualStruct;
-  using name = __fbthrift_strings_module::VirtualStruct;
   using member = __fbthrift_member;
   using members = ::fatal::list<
       member::MyIntField
@@ -299,7 +294,6 @@ class MyStructWithForwardRefEnum_struct_traits {
   };
  public:
   using type = ::apache::thrift::fixtures::types::MyStructWithForwardRefEnum;
-  using name = __fbthrift_strings_module::MyStructWithForwardRefEnum;
   using member = __fbthrift_member;
   using members = ::fatal::list<
       member::a,
@@ -341,7 +335,6 @@ class TrivialNumeric_struct_traits {
   };
  public:
   using type = ::apache::thrift::fixtures::types::TrivialNumeric;
-  using name = __fbthrift_strings_module::TrivialNumeric;
   using member = __fbthrift_member;
   using members = ::fatal::list<
       member::a,
@@ -383,7 +376,6 @@ class TrivialNestedWithDefault_struct_traits {
   };
  public:
   using type = ::apache::thrift::fixtures::types::TrivialNestedWithDefault;
-  using name = __fbthrift_strings_module::TrivialNestedWithDefault;
   using member = __fbthrift_member;
   using members = ::fatal::list<
       member::z,
@@ -425,7 +417,6 @@ class ComplexString_struct_traits {
   };
  public:
   using type = ::apache::thrift::fixtures::types::ComplexString;
-  using name = __fbthrift_strings_module::ComplexString;
   using member = __fbthrift_member;
   using members = ::fatal::list<
       member::a,
@@ -467,7 +458,6 @@ class ComplexNestedWithDefault_struct_traits {
   };
  public:
   using type = ::apache::thrift::fixtures::types::ComplexNestedWithDefault;
-  using name = __fbthrift_strings_module::ComplexNestedWithDefault;
   using member = __fbthrift_member;
   using members = ::fatal::list<
       member::z,
@@ -533,7 +523,6 @@ class MinPadding_struct_traits {
   };
  public:
   using type = ::apache::thrift::fixtures::types::MinPadding;
-  using name = __fbthrift_strings_module::MinPadding;
   using member = __fbthrift_member;
   using members = ::fatal::list<
       member::small,
@@ -602,7 +591,6 @@ class MinPaddingWithCustomType_struct_traits {
   };
  public:
   using type = ::apache::thrift::fixtures::types::MinPaddingWithCustomType;
-  using name = __fbthrift_strings_module::MinPaddingWithCustomType;
   using member = __fbthrift_member;
   using members = ::fatal::list<
       member::small,
@@ -676,7 +664,6 @@ class MyStruct_struct_traits {
   };
  public:
   using type = ::apache::thrift::fixtures::types::MyStruct;
-  using name = __fbthrift_strings_module::MyStruct;
   using member = __fbthrift_member;
   using members = ::fatal::list<
       member::MyIntField,
@@ -717,7 +704,6 @@ class MyDataItem_struct_traits {
   };
  public:
   using type = ::apache::thrift::fixtures::types::MyDataItem;
-  using name = __fbthrift_strings_module::MyDataItem;
   using member = __fbthrift_member;
   using members = ::fatal::list<
   >;
@@ -749,7 +735,6 @@ class Renamed_struct_traits {
   };
  public:
   using type = ::apache::thrift::fixtures::types::Renamed;
-  using name = __fbthrift_strings_module::Renamed;
   using member = __fbthrift_member;
   using members = ::fatal::list<
       member::bar
@@ -790,7 +775,6 @@ class AnnotatedTypes_struct_traits {
   };
  public:
   using type = ::apache::thrift::fixtures::types::AnnotatedTypes;
-  using name = __fbthrift_strings_module::AnnotatedTypes;
   using member = __fbthrift_member;
   using members = ::fatal::list<
       member::binary_field,
@@ -832,7 +816,6 @@ class ForwardUsageRoot_struct_traits {
   };
  public:
   using type = ::apache::thrift::fixtures::types::ForwardUsageRoot;
-  using name = __fbthrift_strings_module::ForwardUsageRoot;
   using member = __fbthrift_member;
   using members = ::fatal::list<
       member::ForwardUsageStruct,
@@ -866,7 +849,6 @@ class ForwardUsageStruct_struct_traits {
   };
  public:
   using type = ::apache::thrift::fixtures::types::ForwardUsageStruct;
-  using name = __fbthrift_strings_module::ForwardUsageStruct;
   using member = __fbthrift_member;
   using members = ::fatal::list<
       member::foo
@@ -899,7 +881,6 @@ class ForwardUsageByRef_struct_traits {
   };
  public:
   using type = ::apache::thrift::fixtures::types::ForwardUsageByRef;
-  using name = __fbthrift_strings_module::ForwardUsageByRef;
   using member = __fbthrift_member;
   using members = ::fatal::list<
       member::foo
@@ -932,7 +913,6 @@ class IncompleteMap_struct_traits {
   };
  public:
   using type = ::apache::thrift::fixtures::types::IncompleteMap;
-  using name = __fbthrift_strings_module::IncompleteMap;
   using member = __fbthrift_member;
   using members = ::fatal::list<
       member::field
@@ -957,7 +937,6 @@ class IncompleteMapDep_struct_traits {
   };
  public:
   using type = ::apache::thrift::fixtures::types::IncompleteMapDep;
-  using name = __fbthrift_strings_module::IncompleteMapDep;
   using member = __fbthrift_member;
   using members = ::fatal::list<
   >;
@@ -989,7 +968,6 @@ class CompleteMap_struct_traits {
   };
  public:
   using type = ::apache::thrift::fixtures::types::CompleteMap;
-  using name = __fbthrift_strings_module::CompleteMap;
   using member = __fbthrift_member;
   using members = ::fatal::list<
       member::field
@@ -1014,7 +992,6 @@ class CompleteMapDep_struct_traits {
   };
  public:
   using type = ::apache::thrift::fixtures::types::CompleteMapDep;
-  using name = __fbthrift_strings_module::CompleteMapDep;
   using member = __fbthrift_member;
   using members = ::fatal::list<
   >;
@@ -1046,7 +1023,6 @@ class IncompleteList_struct_traits {
   };
  public:
   using type = ::apache::thrift::fixtures::types::IncompleteList;
-  using name = __fbthrift_strings_module::IncompleteList;
   using member = __fbthrift_member;
   using members = ::fatal::list<
       member::field
@@ -1071,7 +1047,6 @@ class IncompleteListDep_struct_traits {
   };
  public:
   using type = ::apache::thrift::fixtures::types::IncompleteListDep;
-  using name = __fbthrift_strings_module::IncompleteListDep;
   using member = __fbthrift_member;
   using members = ::fatal::list<
   >;
@@ -1103,7 +1078,6 @@ class CompleteList_struct_traits {
   };
  public:
   using type = ::apache::thrift::fixtures::types::CompleteList;
-  using name = __fbthrift_strings_module::CompleteList;
   using member = __fbthrift_member;
   using members = ::fatal::list<
       member::field
@@ -1128,7 +1102,6 @@ class CompleteListDep_struct_traits {
   };
  public:
   using type = ::apache::thrift::fixtures::types::CompleteListDep;
-  using name = __fbthrift_strings_module::CompleteListDep;
   using member = __fbthrift_member;
   using members = ::fatal::list<
   >;
@@ -1160,7 +1133,6 @@ class AdaptedList_struct_traits {
   };
  public:
   using type = ::apache::thrift::fixtures::types::AdaptedList;
-  using name = __fbthrift_strings_module::AdaptedList;
   using member = __fbthrift_member;
   using members = ::fatal::list<
       member::field
@@ -1193,7 +1165,6 @@ class AdaptedListDep_struct_traits {
   };
  public:
   using type = ::apache::thrift::fixtures::types::detail::AdaptedListDep;
-  using name = __fbthrift_strings_module::AdaptedListDep;
   using member = __fbthrift_member;
   using members = ::fatal::list<
       member::field
@@ -1226,7 +1197,6 @@ class DependentAdaptedList_struct_traits {
   };
  public:
   using type = ::apache::thrift::fixtures::types::DependentAdaptedList;
-  using name = __fbthrift_strings_module::DependentAdaptedList;
   using member = __fbthrift_member;
   using members = ::fatal::list<
       member::field
@@ -1259,7 +1229,6 @@ class DependentAdaptedListDep_struct_traits {
   };
  public:
   using type = ::apache::thrift::fixtures::types::detail::DependentAdaptedListDep;
-  using name = __fbthrift_strings_module::DependentAdaptedListDep;
   using member = __fbthrift_member;
   using members = ::fatal::list<
       member::field
@@ -1353,7 +1322,6 @@ class AllocatorAware_struct_traits {
   };
  public:
   using type = ::apache::thrift::fixtures::types::AllocatorAware;
-  using name = __fbthrift_strings_module::AllocatorAware;
   using member = __fbthrift_member;
   using members = ::fatal::list<
       member::aa_list,
@@ -1413,7 +1381,6 @@ class AllocatorAware2_struct_traits {
   };
  public:
   using type = ::apache::thrift::fixtures::types::AllocatorAware2;
-  using name = __fbthrift_strings_module::AllocatorAware2;
   using member = __fbthrift_member;
   using members = ::fatal::list<
       member::not_a_container,
@@ -1463,7 +1430,6 @@ class TypedefStruct_struct_traits {
   };
  public:
   using type = ::apache::thrift::fixtures::types::TypedefStruct;
-  using name = __fbthrift_strings_module::TypedefStruct;
   using member = __fbthrift_member;
   using members = ::fatal::list<
       member::i32_field,
@@ -1498,7 +1464,6 @@ class StructWithDoubleUnderscores_struct_traits {
   };
  public:
   using type = ::apache::thrift::fixtures::types::StructWithDoubleUnderscores;
-  using name = __fbthrift_strings_module::StructWithDoubleUnderscores;
   using member = __fbthrift_member;
   using members = ::fatal::list<
       member::__field

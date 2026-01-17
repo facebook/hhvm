@@ -52,7 +52,6 @@ class structA_struct_traits {
   };
  public:
   using type = ::test_cpp2::cpp_reflection::structA;
-  using name = __fbthrift_strings_module::structA;
   using member = __fbthrift_member;
   using members = ::fatal::list<
       member::a,
@@ -133,7 +132,6 @@ class structB_struct_traits {
   };
  public:
   using type = ::test_cpp2::cpp_reflection::structB;
-  using name = __fbthrift_strings_module::structB;
   using member = __fbthrift_member;
   using members = ::fatal::list<
       member::c,
@@ -399,7 +397,6 @@ class structC_struct_traits {
   };
  public:
   using type = ::test_cpp2::cpp_reflection::structC;
-  using name = __fbthrift_strings_module::structC;
   using member = __fbthrift_member;
   using members = ::fatal::list<
       member::a,
@@ -501,7 +498,6 @@ class struct1_struct_traits {
   };
  public:
   using type = ::test_cpp2::cpp_reflection::struct1;
-  using name = __fbthrift_strings_module::struct1;
   using member = __fbthrift_member;
   using members = ::fatal::list<
       member::field0,
@@ -587,7 +583,6 @@ class struct2_struct_traits {
   };
  public:
   using type = ::test_cpp2::cpp_reflection::struct2;
-  using name = __fbthrift_strings_module::struct2;
   using member = __fbthrift_member;
   using members = ::fatal::list<
       member::fieldA,
@@ -762,7 +757,6 @@ class struct3_struct_traits {
   };
  public:
   using type = ::test_cpp2::cpp_reflection::struct3;
-  using name = __fbthrift_strings_module::struct3;
   using member = __fbthrift_member;
   using members = ::fatal::list<
       member::fieldA,
@@ -836,7 +830,6 @@ class struct4_struct_traits {
   };
  public:
   using type = ::test_cpp2::cpp_reflection::struct4;
-  using name = __fbthrift_strings_module::struct4;
   using member = __fbthrift_member;
   using members = ::fatal::list<
       member::field0,
@@ -921,7 +914,6 @@ class struct5_struct_traits {
   };
  public:
   using type = ::test_cpp2::cpp_reflection::struct5;
-  using name = __fbthrift_strings_module::struct5;
   using member = __fbthrift_member;
   using members = ::fatal::list<
       member::field0,
@@ -958,7 +950,6 @@ class struct_binary_struct_traits {
   };
  public:
   using type = ::test_cpp2::cpp_reflection::struct_binary;
-  using name = __fbthrift_strings_module::struct_binary;
   using member = __fbthrift_member;
   using members = ::fatal::list<
       member::bi
@@ -1007,7 +998,6 @@ class dep_A_struct_struct_traits {
   };
  public:
   using type = ::test_cpp2::cpp_reflection::dep_A_struct;
-  using name = __fbthrift_strings_module::dep_A_struct;
   using member = __fbthrift_member;
   using members = ::fatal::list<
       member::b,
@@ -1058,7 +1048,6 @@ class dep_B_struct_struct_traits {
   };
  public:
   using type = ::test_cpp2::cpp_reflection::dep_B_struct;
-  using name = __fbthrift_strings_module::dep_B_struct;
   using member = __fbthrift_member;
   using members = ::fatal::list<
       member::b,
@@ -1177,7 +1166,6 @@ class annotated_struct_traits {
   };
  public:
   using type = ::test_cpp2::cpp_reflection::annotated;
-  using name = __fbthrift_strings_module::annotated;
   using member = __fbthrift_member;
   using members = ::fatal::list<
       member::a
@@ -1426,7 +1414,6 @@ class struct_with_special_names_struct_traits {
   };
  public:
   using type = ::test_cpp2::cpp_reflection::struct_with_special_names;
-  using name = __fbthrift_strings_module::struct_with_special_names;
   using member = __fbthrift_member;
   using members = ::fatal::list<
       member::get,
@@ -1486,7 +1473,6 @@ class StructWithFieldAdapter_struct_traits {
   };
  public:
   using type = ::test_cpp2::cpp_reflection::StructWithFieldAdapter;
-  using name = __fbthrift_strings_module::StructWithFieldAdapter;
   using member = __fbthrift_member;
   using members = ::fatal::list<
       member::field

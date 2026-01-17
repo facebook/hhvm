@@ -139,7 +139,6 @@ class containerStruct2_struct_traits {
   };
  public:
   using type = ::extra::svc::containerStruct2;
-  using name = __fbthrift_strings_extra_services::containerStruct2;
   using member = __fbthrift_member;
   using members = ::fatal::list<
       member::fieldA,

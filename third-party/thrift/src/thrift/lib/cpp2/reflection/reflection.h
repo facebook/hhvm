@@ -432,24 +432,14 @@ reflected_struct {
   using type = typename Traits::type;
 
   /**
-   * A compile-time string representing the struct name.
+   * A run-time string representing the struct name.
    *
    * Example:
    *
    *  using info = reflect_struct<MyStruct>;
    *
-   *  // yields `fatal::sequence<
-   *  //   char,
-   *  //   'M', 'y', 'S', 't', 'r', 'u', 'c', 't'
-   *  // >`
-   *  using result = info::name;
-   *
-   * @author: Marcelo Juchem <marcelo@fb.com>
-   */
-  using name [[deprecated("Use name_v instead")]] = typename Traits::name;
-
-  /**
-   * A run-time string representing the struct name.
+   *  // yields "MyStruct"
+   *  using result = info::name_v;
    */
   static inline const auto name_v = op::get_class_name_v<type>;
 

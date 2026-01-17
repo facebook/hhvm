@@ -42,7 +42,6 @@ class ReflectionStruct_struct_traits {
   };
  public:
   using type = ::cpp2::ReflectionStruct;
-  using name = __fbthrift_strings_reflection::ReflectionStruct;
   using member = __fbthrift_member;
   using members = ::fatal::list<
       member::fieldA

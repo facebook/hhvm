@@ -42,7 +42,6 @@ class SomeStruct_struct_traits {
   };
  public:
   using type = ::facebook::ns::qwerty::SomeStruct;
-  using name = __fbthrift_strings_enums::SomeStruct;
   using member = __fbthrift_member;
   using members = ::fatal::list<
       member::fieldA

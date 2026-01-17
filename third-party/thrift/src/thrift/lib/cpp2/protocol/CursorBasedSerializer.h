@@ -920,9 +920,9 @@ class StructuredCursorWriter : detail::BaseCursorWriter<ProtocolWriter> {
   void endWrite(
       StringCursorWriter<ProtocolWriter>&& child, int32_t actualSize) {
     checkState(State::Child);
+    state_ = State::Active;
     child.finalize(actualSize);
     afterWriteField();
-    state_ = State::Active;
   }
 
   /** containers */
@@ -935,8 +935,8 @@ class StructuredCursorWriter : detail::BaseCursorWriter<ProtocolWriter> {
   }
 
   /**
-   * Allows writing containers whose size isn't known until afterwards.
-   * Less efficient than using write().
+   * Allows writing containers whose size is known in advance.
+   * More efficient than beginWrite() without size.
    * See the ContainerCursorWriter docblock for example usage.
    *
    * Note: none of this writer's other methods may be called between
@@ -945,22 +945,42 @@ class StructuredCursorWriter : detail::BaseCursorWriter<ProtocolWriter> {
 
   template <typename Ident>
     requires field_is<Ident, type::container_c>
-  ContainerCursorWriter<type_tag<Ident>, ProtocolWriter> beginWrite() {
+  ContainerCursorWriter<type_tag<Ident>, true, ProtocolWriter> beginWrite(
+      int32_t size) {
     beforeWriteField<Ident>();
     state_ = State::Child;
-    return ContainerCursorWriter<type_tag<Ident>, ProtocolWriter>{protocol_};
+    return ContainerCursorWriter<type_tag<Ident>, true, ProtocolWriter>{
+        size, protocol_};
   }
 
-  template <typename CTag, typename PW>
-  void endWrite(ContainerCursorWriter<CTag, PW>&& child) {
+  /**
+   * Allows writing containers whose size isn't known until afterwards.
+   * Less efficient than using write() or beginWrite(int32_t).
+   * See the ContainerCursorWriter docblock for example usage.
+   *
+   * Note: none of this writer's other methods may be called between
+   * beginWrite() and the corresponding endWrite().
+   */
+
+  template <typename Ident>
+    requires field_is<Ident, type::container_c>
+  ContainerCursorWriter<type_tag<Ident>, false, ProtocolWriter> beginWrite() {
+    beforeWriteField<Ident>();
+    state_ = State::Child;
+    return ContainerCursorWriter<type_tag<Ident>, false, ProtocolWriter>{
+        protocol_};
+  }
+
+  template <typename CTag, bool KS, typename PW>
+  void endWrite(ContainerCursorWriter<CTag, KS, PW>&& child) {
     checkState(State::Child);
+    state_ = State::Active;
     child.finalize();
     afterWriteField();
-    state_ = State::Active;
   }
 
-  template <typename CTag, typename PW>
-  void abandonWrite(ContainerCursorWriter<CTag, PW>&& child) {
+  template <typename CTag, bool KS, typename PW>
+  void abandonWrite(ContainerCursorWriter<CTag, KS, PW>&& child) {
     checkState(State::Child);
     child.abandon();
     state_ = State::Abandoned;
@@ -983,9 +1003,9 @@ class StructuredCursorWriter : detail::BaseCursorWriter<ProtocolWriter> {
   template <typename CTag, typename PW>
   void endWrite(StructuredCursorWriter<CTag, PW>&& child) {
     checkState(State::Child);
+    state_ = State::Active;
     child.finalize();
     afterWriteField();
-    state_ = State::Active;
   }
 
   template <typename CTag, typename PW>
@@ -1112,27 +1132,28 @@ class StructuredCursorWriter : detail::BaseCursorWriter<ProtocolWriter> {
 
   template <typename, typename>
   friend class StructuredCursorWriter;
-  template <typename, typename>
+  template <typename, bool, typename>
   friend class ContainerCursorWriter;
   friend class CursorSerializationWrapper<T>;
   friend struct detail::DefaultValueWriter<Tag, ProtocolWriter>;
 };
 
 /**
- * Allows writing containers (list, set) whose size is not known in advance.
- * Ex:
- *  StructuredCursorWriter writer;
- *  auto child = writer.beginWrite<ident::list_field>();
- *  folly::coro::AsyncGenerator<int32_t> gen = ...;
- *  while (auto val = co_await gen.next()) {
- *    child.write(*val);
+ * Allows writing containers (list, set) whose size may or may not be known in
+ * advance. Ex: StructuredCursorWriter writer; auto child =
+ * writer.beginWrite<ident::list_field>(); folly::coro::AsyncGenerator<int32_t>
+ * gen = ...; while (auto val = co_await gen.next()) { child.write(*val);
  *  }
  *  writer.endWrite(std::move(child));
  * Note: ContainerCursorWriter does not support map type.
  */
-template <typename Tag, typename ProtocolWriter = BinaryProtocolWriter>
-class ContainerCursorWriter : detail::DelayedSizeCursorWriter<ProtocolWriter> {
-  using Base = detail::DelayedSizeCursorWriter<ProtocolWriter>;
+template <
+    typename Tag,
+    bool IsSizeKnown = false,
+    typename ProtocolWriter = BinaryProtocolWriter>
+class ContainerCursorWriter
+    : detail::SizedCursorWriter<IsSizeKnown, ProtocolWriter> {
+  using Base = detail::SizedCursorWriter<IsSizeKnown, ProtocolWriter>;
   using Base::protocol_;
   using Base::state_;
   using State = typename Base::State;
@@ -1153,19 +1174,36 @@ class ContainerCursorWriter : detail::DelayedSizeCursorWriter<ProtocolWriter> {
   }
 
   /**
-   * Allows writing containers whose size isn't known until afterwards.
-   * Less efficient than using write().
+   * Allows writing containers whose size is known in advance.
    * See the ContainerCursorWriter docblock for example usage.
    *
    * Note: none of this writer's other methods may be called between
    * beginWrite() and the corresponding endWrite().
    */
-  ContainerCursorWriter<ElementTag, ProtocolWriter> beginWrite()
+  ContainerCursorWriter<ElementTag, true, ProtocolWriter> beginWrite(
+      int32_t size)
     requires is_supported_element_of_type<type::container_c>
   {
     checkState(State::Active);
     state_ = State::Child;
-    return ContainerCursorWriter<ElementTag, ProtocolWriter>{protocol_};
+    return ContainerCursorWriter<ElementTag, true, ProtocolWriter>{
+        size, protocol_};
+  }
+
+  /**
+   * Allows writing containers whose size isn't known until afterwards.
+   * Less efficient than using write() or beginWrite(int32_t).
+   * See the ContainerCursorWriter docblock for example usage.
+   *
+   * Note: none of this writer's other methods may be called between
+   * beginWrite() and the corresponding endWrite().
+   */
+  ContainerCursorWriter<ElementTag, false, ProtocolWriter> beginWrite()
+    requires is_supported_element_of_type<type::container_c>
+  {
+    checkState(State::Active);
+    state_ = State::Child;
+    return ContainerCursorWriter<ElementTag, false, ProtocolWriter>{protocol_};
   }
 
   /**
@@ -1185,17 +1223,20 @@ class ContainerCursorWriter : detail::DelayedSizeCursorWriter<ProtocolWriter> {
   template <detail::CursorWriter ChildWriter>
   void endWrite(ChildWriter&& child) {
     checkState(State::Child);
+    state_ = State::Active;
     child.finalize();
     ++n;
-    state_ = State::Active;
   }
 
  private:
-  explicit ContainerCursorWriter(ProtocolWriter* p);
+  explicit ContainerCursorWriter(ProtocolWriter* p)
+    requires(!IsSizeKnown);
+  ContainerCursorWriter(int32_t size, ProtocolWriter* p)
+    requires(IsSizeKnown);
 
   template <typename, typename>
   friend class StructuredCursorWriter;
-  template <typename, typename>
+  template <typename, bool, typename>
   friend class ContainerCursorWriter;
 
   void finalize() { Base::finalize(n); }
@@ -1264,9 +1305,10 @@ class CursorSerializationAdapter {
 
 // End public API
 
-template <typename Tag, typename ProtocolWriter>
-ContainerCursorWriter<Tag, ProtocolWriter>::ContainerCursorWriter(
+template <typename Tag, bool IsSizeKnown, typename ProtocolWriter>
+ContainerCursorWriter<Tag, IsSizeKnown, ProtocolWriter>::ContainerCursorWriter(
     ProtocolWriter* p)
+  requires(!IsSizeKnown)
     : Base(p) {
   if constexpr (type::is_a_v<Tag, type::list_c>) {
     protocol_->writeByte(
@@ -1283,6 +1325,29 @@ ContainerCursorWriter<Tag, ProtocolWriter>::ContainerCursorWriter(
     static_assert(!sizeof(Tag), "unexpected tag");
   }
   this->writeSize();
+}
+
+template <typename Tag, bool IsSizeKnown, typename ProtocolWriter>
+ContainerCursorWriter<Tag, IsSizeKnown, ProtocolWriter>::ContainerCursorWriter(
+    int32_t size, ProtocolWriter* p)
+  requires(IsSizeKnown)
+    : Base(p, size) {
+  if constexpr (type::is_a_v<Tag, type::list_c>) {
+    protocol_->writeListBegin(
+        op::typeTagToTType<typename detail::ContainerTraits<Tag>::ElementTag>,
+        size);
+  } else if constexpr (type::is_a_v<Tag, type::set_c>) {
+    protocol_->writeSetBegin(
+        op::typeTagToTType<typename detail::ContainerTraits<Tag>::ElementTag>,
+        size);
+  } else if constexpr (type::is_a_v<Tag, type::map_c>) {
+    protocol_->writeMapBegin(
+        op::typeTagToTType<typename detail::ContainerTraits<Tag>::KeyTag>,
+        op::typeTagToTType<typename detail::ContainerTraits<Tag>::ValueTag>,
+        size);
+  } else {
+    static_assert(!sizeof(Tag), "unexpected tag");
+  }
 }
 
 template <typename Tag, typename ProtocolReader, bool Contiguous>

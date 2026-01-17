@@ -52,7 +52,7 @@ class ContainerCursorIterator;
 
 template <typename T, typename ProtocolWriter>
 class StructuredCursorWriter;
-template <typename Tag, typename ProtocolWriter>
+template <typename Tag, bool IsSizeKnown, typename ProtocolWriter>
 class ContainerCursorWriter;
 template <typename ProtocolWriter>
 class StringCursorWriter;
@@ -375,6 +375,38 @@ class DelayedSizeCursorWriter : public BaseCursorWriter<ProtocolWriter> {
     }
   }
 };
+
+/** Supports writing containers whose size is known in advance and needs only to
+ * be verified. */
+template <typename ProtocolWriter>
+class VerifiedSizeCursorWriter : public BaseCursorWriter<ProtocolWriter> {
+ protected:
+  using BaseCursorWriter<ProtocolWriter>::protocol_;
+  using BaseCursorWriter<ProtocolWriter>::state_;
+  using State = typename BaseCursorWriter<ProtocolWriter>::State;
+  using BaseCursorWriter<ProtocolWriter>::checkState;
+
+  int32_t expectedSize_;
+
+  VerifiedSizeCursorWriter(ProtocolWriter* p, int32_t size)
+      : BaseCursorWriter<ProtocolWriter>(p), expectedSize_(size) {}
+
+  void finalize(int32_t actualSize) {
+    checkState(State::Active);
+    this->state_ = State::Done;
+
+    if (actualSize != expectedSize_) {
+      folly::throw_exception<std::runtime_error>(fmt::format(
+          "Expected {} elements but wrote {}", expectedSize_, actualSize));
+    }
+  }
+};
+
+template <bool IsSizeKnown, typename ProtocolWriter>
+using SizedCursorWriter = std::conditional_t<
+    IsSizeKnown,
+    VerifiedSizeCursorWriter<ProtocolWriter>,
+    DelayedSizeCursorWriter<ProtocolWriter>>;
 
 /** Converts std::string to std::string_view when Contiguous = true, and returns
  * the original type otherwise. */

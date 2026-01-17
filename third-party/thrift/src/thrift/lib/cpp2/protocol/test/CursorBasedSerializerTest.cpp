@@ -622,6 +622,80 @@ TEST(CursorSerializer, ContainerWrite) {
   EXPECT_EQ(*obj.map_field(), map);
 }
 
+TEST(CursorSerializer, KnownSizeContainerWrite) {
+  // Test writing a container with known size from StructuredCursorWriter
+  StructCursor wrapper;
+  auto writer = wrapper.beginWrite();
+  auto list = writer.beginWrite<ident::list_field>(3);
+  list.write('a');
+  list.write('b');
+  list.write('c');
+  writer.endWrite(std::move(list));
+
+  auto map = std::unordered_map<int8_t, int8_t>{{'a', 'b'}, {'c', 'd'}};
+  writer.write<ident::map_field>(map);
+  wrapper.endWrite(std::move(writer));
+
+  auto obj = wrapper.deserialize();
+  EXPECT_THAT(*obj.list_field(), UnorderedElementsAreArray({'a', 'b', 'c'}));
+  EXPECT_EQ(*obj.map_field(), map);
+}
+
+TEST(CursorSerializer, KnownSizeContainerWriteSizeMismatch) {
+  // Test that writing fewer elements than declared throws
+  {
+    StructCursor wrapper;
+    auto writer = wrapper.beginWrite();
+    auto list = writer.beginWrite<ident::list_field>(3);
+    list.write('a');
+    list.write('b');
+    // Only wrote 2 elements but declared 3
+    EXPECT_THAT(
+        [&] { writer.endWrite(std::move(list)); },
+        ThrowsMessage<std::runtime_error>("Expected 3 elements but wrote 2"));
+    // After finalize throws, parent is Active (exception-safe endWrite) and
+    // child is Done (finalize sets state before throwing). Just abandon parent.
+    wrapper.abandonWrite(std::move(writer));
+  }
+
+  // Test that writing more elements than declared throws
+  {
+    StructCursor wrapper;
+    auto writer = wrapper.beginWrite();
+    auto list = writer.beginWrite<ident::list_field>(2);
+    list.write('a');
+    list.write('b');
+    list.write('c');
+    // Wrote 3 elements but declared 2
+    EXPECT_THAT(
+        [&] { writer.endWrite(std::move(list)); },
+        ThrowsMessage<std::runtime_error>("Expected 2 elements but wrote 3"));
+    wrapper.abandonWrite(std::move(writer));
+  }
+}
+
+TEST(CursorSerializer, KnownSizeNestedContainerWrite) {
+  // Test nested containers with known size from ContainerCursorWriter
+  // Using set_nested_field which is list<set<Stringish>>
+  StructCursor wrapper;
+  auto writer = wrapper.beginWrite();
+
+  // Write set_nested_field with known outer size
+  auto outerList = writer.beginWrite<ident::set_nested_field>(1);
+  auto innerSet = outerList.beginWrite();
+  auto unionWriter = innerSet.beginWrite();
+  unionWriter.write<ident::string_field>("test");
+  innerSet.endWrite(std::move(unionWriter));
+  outerList.endWrite(std::move(innerSet));
+  writer.endWrite(std::move(outerList));
+
+  wrapper.endWrite(std::move(writer));
+
+  auto obj = wrapper.deserialize();
+  EXPECT_EQ(obj.set_nested_field()->size(), 1);
+  EXPECT_EQ(obj.set_nested_field()->at(0).size(), 1);
+}
+
 TEST(CursorSerializer, NestedStructWrite) {
   StructCursor wrapper;
   auto writer = wrapper.beginWrite();

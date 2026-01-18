@@ -1,0 +1,2 @@
+--config needs_concrete=true
+--config warnings_generated_files=/generated/,/codegen/,_autogen$

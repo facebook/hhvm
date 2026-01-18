@@ -7,7 +7,58 @@
  *)
 open Hh_prelude
 
-let add_warning = Typing_warning_utils.add
+(** `true` iff the position's filename is matched by a regex in
+ *`warnings_generated_files` (defined in hhconfig or --config).
+ * Note: we check this *after* decl-fetching and computation
+ * for predictable fanout and performance.
+ * TODO(T251491512): delete this once we move warning filtering server-side
+ *)
+let is_warnings_generated_file : Typing_env_types.env -> Pos.t -> bool =
+  (* check each file to see if it's generated only once  *)
+  let cache_for_is_warnings_generated_file : (Relative_path.t * bool) option ref
+      =
+    ref None
+  in
+  (* compile the regexp only once *)
+  let cache_for_regexp = ref None in
+  fun env pos ->
+    if
+      List.is_empty (TypecheckerOptions.warnings_generated_files env.genv.tcopt)
+    then
+      false
+    else
+      let warnings_regexp =
+        match !cache_for_regexp with
+        | Some regexp -> regexp
+        | None ->
+          let regexp =
+            TypecheckerOptions.warnings_generated_files env.genv.tcopt
+            |> String.concat ~sep:{|\||}
+            |> Str.regexp
+          in
+          let () = cache_for_regexp := Some regexp in
+          regexp
+      in
+      let path = Pos.filename pos in
+      let file_path_str = "/" ^ Relative_path.suffix path in
+      match !cache_for_is_warnings_generated_file with
+      | Some (path_in_cache, should_skip)
+        when Relative_path.equal path_in_cache path ->
+        should_skip
+      | None
+      | Some _ ->
+        let res =
+          match Str.search_forward warnings_regexp file_path_str 0 with
+          | (_ : int) -> true
+          | exception Stdlib.Not_found -> false
+        in
+        let () = cache_for_is_warnings_generated_file := Some (path, res) in
+        res
+
+let add_warning env warning =
+  let warning_pos = Tuple3.get1 warning in
+  if not (is_warnings_generated_file env warning_pos) then
+    Typing_warning_utils.add env warning
 
 let check_class_get
     (env : Typing_env_types.env)

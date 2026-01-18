@@ -426,6 +426,8 @@ class Acceptor : public folly::AsyncServerSocket::AcceptCallback,
    */
   virtual bool isPeerAddressAllowlisted(const folly::SocketAddress&);
 
+  void setUnifiedCertManagerPolicy(std::function<bool()>);
+
  protected:
   using OnDataAvailableParams =
       folly::AsyncUDPSocket::ReadCallback::OnDataAvailableParams;

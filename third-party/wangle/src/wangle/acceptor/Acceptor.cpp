@@ -770,4 +770,8 @@ bool Acceptor::AcceptObserverList::remove(AcceptObserver* observer) {
   return true;
 }
 
+void Acceptor::setUnifiedCertManagerPolicy(std::function<bool()> policy) {
+  getFizzPeeker()->setExtendedFizzFallbackStatePolicy(std::move(policy));
+}
+
 } // namespace wangle

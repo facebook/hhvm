@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
+#include <fizz/backend/openssl/certificate/CertUtils.h>
+#include <fizz/crypto/test/TestUtil.h>
+#include <fizz/protocol/test/Mocks.h>
+#include <fizz/server/DefaultCertManager.h>
+#include <folly/FileUtil.h>
 #include <folly/io/async/EventBase.h>
 #include <folly/io/async/test/AsyncSSLSocketTest.h>
 #include <folly/portability/GMock.h>
@@ -104,10 +109,15 @@ class AcceptorTest : public ::testing::TestWithParam<TestSSLConfig> {
   }
 
   std::tuple<std::shared_ptr<TestAcceptor>, std::shared_ptr<AsyncServerSocket>>
-  initTestAcceptorAndSocket(std::shared_ptr<ServerSocketConfig> config) {
+  initTestAcceptorAndSocket(
+      std::shared_ptr<ServerSocketConfig> config,
+      folly::Function<void(std::shared_ptr<TestAcceptor>)> preInit = {}) {
     auto acceptor = std::make_shared<TestAcceptor>(std::move(config));
     auto socket = AsyncServerSocket::newSocket(&evb_);
     socket->addAcceptCallback(acceptor.get(), &evb_);
+    if (preInit) {
+      preInit(acceptor);
+    }
     acceptor->init(socket.get(), &evb_);
     socket->bind(0);
     socket->listen(100);
@@ -646,4 +656,113 @@ TEST_P(
   EXPECT_TRUE(acceptor->removeAcceptObserver(onAcceptCb.get()));
   acceptor = nullptr;
   Mock::VerifyAndClearExpectations(onAcceptCb.get());
+}
+
+TEST_F(AcceptorTest, AcceptorUsesSslCtxConfigIfFizzFallbackStateDisabled) {
+  auto config = std::make_shared<ServerSocketConfig>();
+  wangle::SSLContextConfig sslCtxConfig;
+  sslCtxConfig.setCertificate(
+      find_resource(folly::test::kTestCert).string(),
+      find_resource(folly::test::kTestKey).string(),
+      "");
+  sslCtxConfig.clientVerification =
+      folly::SSLContext::VerifyClientCertificate::DO_NOT_REQUEST;
+  sslCtxConfig.sessionContext = "AcceptorTest";
+  sslCtxConfig.isDefault = true;
+  sslCtxConfig.sessionCacheEnabled = false;
+  config->sslContextConfigs.emplace_back(sslCtxConfig);
+
+  auto fizzCertManager = std::make_shared<fizz::server::DefaultCertManager>();
+
+  auto [acceptor, serverSocket] = initTestAcceptorAndSocket(
+      std::move(config), [fizzCertManager](std::shared_ptr<TestAcceptor> acc) {
+        acc->setFizzCertManager(fizzCertManager);
+        acc->getFizzPeeker()->setExtendedFizzFallbackStatePolicy(
+            []() -> bool { return false; });
+      });
+
+  SocketAddress serverAddress;
+  serverSocket->getAddress(&serverAddress);
+
+  auto sslContext = std::make_shared<folly::SSLContext>(
+      folly::SSLContext::SSLVersion::TLSv1_2);
+  sslContext->setOptions(SSL_OP_NO_TICKET);
+  sslContext->ciphers("ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH");
+  sslContext->disableTLS13();
+  sslContext->setVerificationOption(
+      folly::SSLContext::SSLVerifyPeerEnum::NO_VERIFY);
+
+  auto clientSocket = AsyncSSLSocket::newSocket(std::move(sslContext), &evb_);
+  clientSocket->connect(nullptr, serverAddress);
+
+  evb_.loopForever();
+
+  auto peerCert = clientSocket->getPeerCertificate();
+  ASSERT_NE(peerCert, nullptr);
+  auto opensslCert =
+      dynamic_cast<const folly::OpenSSLTransportCertificate*>(peerCert);
+  ASSERT_NE(opensslCert, nullptr);
+  auto x509 = opensslCert->getX509();
+
+  std::string certPem;
+  folly::readFile(find_resource(folly::test::kTestCert).c_str(), certPem);
+  auto expected = fizz::test::getCert(certPem);
+  EXPECT_EQ(X509_cmp(x509.get(), expected.get()), 0);
+
+  acceptor->forceStop();
+  serverSocket->stopAccepting();
+  evb_.loop();
+}
+
+TEST_F(AcceptorTest, AcceptorUsesFizzCertManagerIfFizzFallbackStateEnabled) {
+  auto config = std::make_shared<ServerSocketConfig>();
+  wangle::SSLContextConfig sslCtxConfig;
+  sslCtxConfig.setCertificate(
+      find_resource(folly::test::kTestCert).string(),
+      find_resource(folly::test::kTestKey).string(),
+      "");
+  sslCtxConfig.clientVerification =
+      folly::SSLContext::VerifyClientCertificate::DO_NOT_REQUEST;
+  sslCtxConfig.sessionContext = "AcceptorTest";
+  sslCtxConfig.isDefault = true;
+  sslCtxConfig.sessionCacheEnabled = false;
+  config->sslContextConfigs.emplace_back(sslCtxConfig);
+
+  auto fizzCert = fizz::openssl::CertUtils::makeSelfCert(
+      fizz::test::kRSACertificate.str(), fizz::test::kRSAKey.str());
+  auto expectedIdentity = fizzCert->getIdentity();
+  auto fizzCertManager = std::make_shared<fizz::server::DefaultCertManager>();
+  fizzCertManager->addCertAndSetDefault(std::move(fizzCert));
+
+  auto [acceptor, serverSocket] = initTestAcceptorAndSocket(
+      std::move(config), [fizzCertManager](std::shared_ptr<TestAcceptor> acc) {
+        acc->setFizzCertManager(fizzCertManager);
+        acc->getFizzPeeker()->setExtendedFizzFallbackStatePolicy(
+            []() -> bool { return true; });
+      });
+
+  SocketAddress serverAddress;
+  serverSocket->getAddress(&serverAddress);
+
+  auto sslContext = std::make_shared<folly::SSLContext>(
+      folly::SSLContext::SSLVersion::TLSv1_2);
+  sslContext->setOptions(SSL_OP_NO_TICKET);
+  sslContext->ciphers("ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH");
+  sslContext->disableTLS13();
+  sslContext->setVerificationOption(
+      folly::SSLContext::SSLVerifyPeerEnum::NO_VERIFY);
+
+  auto clientSocket = AsyncSSLSocket::newSocket(std::move(sslContext), &evb_);
+  clientSocket->connect(nullptr, serverAddress);
+
+  evb_.loopForever();
+
+  auto peerCert = clientSocket->getPeerCertificate();
+  ASSERT_NE(peerCert, nullptr);
+  auto peerIdentity = peerCert->getIdentity();
+  EXPECT_EQ(peerIdentity, expectedIdentity);
+
+  acceptor->forceStop();
+  serverSocket->stopAccepting();
+  evb_.loop();
 }

@@ -14,8 +14,12 @@
  * limitations under the License.
  */
 
+#include <fizz/backend/openssl/certificate/X509ChainWithPkey.h>
+#include <fizz/record/Extensions.h>
+#include <fizz/record/Types.h>
 #include <folly/io/async/PasswordInFile.h>
 #include <wangle/ssl/ClientHelloExtStats.h>
+#include <wangle/ssl/FizzFallbackState.h>
 #include <wangle/ssl/SSLCacheOptions.h>
 #include <wangle/ssl/SSLContextManager.h>
 #include <wangle/ssl/SSLUtil.h>
@@ -205,6 +209,87 @@ TicketSeedHandler* getTicketSeedHandler(
     return nullptr;
   }
   return dynamic_cast<TicketSeedHandler*>(ctx->getTicketHandler());
+}
+
+static folly::Optional<std::string> getSNI(const fizz::ClientHello& chlo) {
+  folly::Optional<std::string> sni;
+  auto serverNameList =
+      fizz::getExtension<fizz::ServerNameList>(chlo.extensions);
+  if (serverNameList && !serverNameList->server_name_list.empty()) {
+    sni = serverNameList->server_name_list.front().hostname->to<std::string>();
+  }
+  return sni;
+}
+
+static int clientHelloCallback(SSL* s, int* al, void* /* arg */) {
+  auto state = FizzFallbackState::tryFromSSL(s);
+  if (!state) {
+    return SSL_CLIENT_HELLO_SUCCESS;
+  }
+
+  if (state->fizzCertManager_ && state->chlo_) {
+    auto sni = getSNI(*state->chlo_);
+    auto maybeRsa = state->fizzCertManager_->getCert(
+        sni,
+        {fizz::SignatureScheme::rsa_pss_sha256},
+        {fizz::SignatureScheme::rsa_pss_sha256},
+        *state->chlo_);
+    auto maybeEc = state->fizzCertManager_->getCert(
+        sni,
+        {fizz::SignatureScheme::ecdsa_secp256r1_sha256},
+        {fizz::SignatureScheme::ecdsa_secp256r1_sha256},
+        *state->chlo_);
+
+    if (!maybeRsa && !maybeEc) {
+      *al = SSL_R_SSLV3_ALERT_HANDSHAKE_FAILURE;
+      return SSL_CLIENT_HELLO_ERROR;
+    }
+
+    SSL_certs_clear(s);
+
+    bool installed{false};
+    for (auto& res : std::array{std::cref(maybeRsa), std::cref(maybeEc)}) {
+      auto& maybeCertMatch = res.get();
+      if (!maybeCertMatch) {
+        continue;
+      }
+      auto certWithChainAndPkey =
+          dynamic_cast<fizz::openssl::X509ChainWithPkey*>(
+              maybeCertMatch->cert.get());
+      if (!certWithChainAndPkey) {
+        continue;
+      }
+      auto xs = certWithChainAndPkey->getX509Chain();
+      auto pkey = certWithChainAndPkey->getEVPPkey();
+
+      if (xs.empty() || !pkey) {
+        continue;
+      }
+
+      auto& leaf = xs.front();
+      folly::ssl::BorrowingStackOfX509UniquePtr chain(sk_X509_new_null());
+      if (!chain) {
+        continue;
+      }
+      for (int i = 1; i < xs.size(); i++) {
+        sk_X509_push(chain.get(), xs[i].get());
+      }
+
+      // fail loudly if openssl rejects our certificate at this point
+      if (SSL_use_cert_and_key(s, leaf.get(), pkey.get(), chain.get(), 1) !=
+          1) {
+        *al = SSL_R_TLSV1_ALERT_INTERNAL_ERROR;
+        return SSL_CLIENT_HELLO_ERROR;
+      };
+      installed = true;
+    }
+
+    if (!installed) {
+      *al = SSL_R_SSLV3_ALERT_HANDSHAKE_FAILURE;
+      return SSL_CLIENT_HELLO_ERROR;
+    }
+  }
+  return SSL_CLIENT_HELLO_SUCCESS;
 }
 } // namespace
 
@@ -619,6 +704,9 @@ SSLContextManager::SslContexts::buildServerSSLContext(
     std::shared_ptr<ServerSSLContext>& newDefault) {
   auto sslCtx = std::make_shared<ServerSSLContext>(ctxConfig.sslVersion);
 
+  SSL_CTX_set_client_hello_cb(
+      sslCtx->getSSLCtx(), clientHelloCallback, nullptr);
+
   std::string commonName;
   bool loaded = false;
   if (ctxConfig.offloadDisabled) {
@@ -980,7 +1068,8 @@ void SSLContextManager::SslContexts::insert(
   }
 
   /**
-   * Some notes from RFC 2818. Only for future quick references in case of bugs
+   * Some notes from RFC 2818. Only for future quick references in case of
+   * bugs
    *
    * RFC 2818 section 3.1:
    * "......
@@ -997,8 +1086,8 @@ void SSLContextManager::SslContexts::insert(
    */
 
   // Not sure if we ever get this kind of X509...
-  // If we do, assume '*' is always in the CN and ignore all subject alternative
-  // names.
+  // If we do, assume '*' is always in the CN and ignore all subject
+  // alternative names.
   if (identitySource == CertIdentitySource::CommonName &&
       identity->length() == 1 && (*identity)[0] == '*') {
     if (!defaultFallback) {

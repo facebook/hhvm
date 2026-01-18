@@ -33,6 +33,10 @@ struct FizzFallbackState {
    * A pre-parsed fizz ClientHello.
    */
   std::shared_ptr<fizz::ClientHello> chlo_;
+
+  static void attachToSSL(std::unique_ptr<FizzFallbackState> state, SSL* ssl);
+
+  static FizzFallbackState* tryFromSSL(SSL* ssl);
 };
 
 } // namespace wangle

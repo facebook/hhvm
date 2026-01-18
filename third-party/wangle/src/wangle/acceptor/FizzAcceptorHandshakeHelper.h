@@ -230,6 +230,7 @@ class FizzAcceptorHandshakeHelper
       public folly::AsyncSSLSocket::HandshakeCB,
       public folly::AsyncDetachFdCallback {
  public:
+  using ExtendedFallbackStatePolicy = std::function<bool()>;
   FizzAcceptorHandshakeHelper(
       std::shared_ptr<const fizz::server::FizzServerContext> context,
       std::shared_ptr<const SSLContextManager> sslContextManager,
@@ -237,7 +238,8 @@ class FizzAcceptorHandshakeHelper
       std::chrono::steady_clock::time_point acceptTime,
       wangle::TransportInfo& tinfo,
       FizzHandshakeOptions&& options,
-      fizz::AsyncFizzBase::TransportOptions transportOptions)
+      fizz::AsyncFizzBase::TransportOptions transportOptions,
+      ExtendedFallbackStatePolicy extendedFallbackStatePolicy)
       : context_(std::move(context)),
         sslContextManager_(std::move(sslContextManager)),
         tokenBindingContext_(std::move(options.tokenBindingCtx_)),
@@ -248,6 +250,7 @@ class FizzAcceptorHandshakeHelper
         handshakeRecordAlignedReads_(options.handshakeRecordAlignedReads_),
         keyUpdateThreshold_(options.keyUpdateThreshold_),
         preferIoUringSocket_(options.preferIoUringSocket_),
+        extendedFallbackStatePolicy_(std::move(extendedFallbackStatePolicy)),
         transportOptions_(transportOptions) {
     DCHECK(context_);
     DCHECK(sslContextManager_);
@@ -329,6 +332,7 @@ class FizzAcceptorHandshakeHelper
 
   fizz::server::AttemptVersionFallback fallback_;
   bool preferIoUringSocket_{false};
+  ExtendedFallbackStatePolicy extendedFallbackStatePolicy_;
   fizz::AsyncFizzBase::TransportOptions transportOptions_;
 };
 
@@ -358,13 +362,23 @@ class DefaultToFizzPeekingCallback
   }
 
   /**
+   * Store a policy function that will be invoked within
+   * FizzAcceptorHandshakeHelper to determine if Fizz will associated additional
+   * fallback state data with the SSL* object that it falls back to.
+   */
+  void setExtendedFizzFallbackStatePolicy(
+      FizzAcceptorHandshakeHelper::ExtendedFallbackStatePolicy policy) {
+    extendedFizzFallbackStatePolicy_ = std::move(policy);
+  }
+
+  /**
    * Return a reference to the `FizzHandshakeOptions` class to customize
    * handshake behavior.
    *
    * CALLER BEWARE: These options are initially set by the base
    * `wangle::Acceptor`'s translation from wangle::ServerSocketConfig. If you
-   * subclass this, ensure to not clobber any of the variables that are directly
-   * managed by the base wangle::Acceptor.
+   * subclass this, ensure to not clobber any of the variables that are
+   * directly managed by the base wangle::Acceptor.
    */
   FizzHandshakeOptions& options() {
     return options_;
@@ -387,7 +401,8 @@ class DefaultToFizzPeekingCallback
             acceptTime,
             tinfo,
             std::move(optionsCopy),
-            transportOptions_));
+            transportOptions_,
+            extendedFizzFallbackStatePolicy_));
   }
 
  protected:
@@ -395,5 +410,7 @@ class DefaultToFizzPeekingCallback
   std::shared_ptr<const SSLContextManager> sslContextManager_;
   FizzHandshakeOptions options_;
   fizz::AsyncFizzBase::TransportOptions transportOptions_;
+  FizzAcceptorHandshakeHelper::ExtendedFallbackStatePolicy
+      extendedFizzFallbackStatePolicy_;
 };
 } // namespace wangle

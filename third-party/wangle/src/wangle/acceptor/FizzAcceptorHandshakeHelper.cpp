@@ -23,6 +23,7 @@
 #include <wangle/acceptor/FizzAcceptorHandshakeHelper.h>
 #include <wangle/acceptor/SSLAcceptorHandshakeHelper.h>
 #include <wangle/ssl/ClientHelloExtStats.h>
+#include <wangle/ssl/FizzFallbackState.h>
 #include <wangle/ssl/SSLContextManager.h>
 
 using namespace fizz::extensions;
@@ -246,6 +247,15 @@ void FizzAcceptorHandshakeHelper::fizzHandshakeAttemptFallback(
   sslSocket_->setPreReceivedData(std::move(fallback_.clientHello));
   sslSocket_->enableClientHelloParsing();
   sslSocket_->forceCacheAddrOnFailure(true);
+  if (extendedFallbackStatePolicy_ && extendedFallbackStatePolicy_()) {
+    sslSocket_->ensureSSL();
+    auto state = std::make_unique<FizzFallbackState>();
+    state->fizzCertManager_ = context_->getCertManager();
+    state->chlo_ = std::make_shared<fizz::ClientHello>(
+        std::move(fallback_.preParsedClientHello));
+    FizzFallbackState::attachToSSL(
+        std::move(state), const_cast<SSL*>(sslSocket_->getSSL()));
+  }
   sslSocket_->sslAccept(this);
 }
 

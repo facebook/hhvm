@@ -77,7 +77,8 @@ class ThriftFizzAcceptorHandshakeHelper
             acceptTime,
             tinfo,
             std::move(options),
-            transportOptions) {}
+            transportOptions,
+            {}) {}
 
   void start(
       folly::AsyncSSLSocket::UniquePtr sock,

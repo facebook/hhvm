@@ -65,6 +65,14 @@ struct TypeStructureResolution {
     contextSensitive |= o.contextSensitive;
     return *this;
   }
+
+  TypeStructureResolution& operator&=(const TypeStructureResolution& o) {
+    type &= o.type;
+    mightFail &= o.mightFail;
+    contextSensitive &= o.contextSensitive;
+    return *this;
+  }
+
 };
 
 /*

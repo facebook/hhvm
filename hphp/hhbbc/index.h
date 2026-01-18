@@ -250,6 +250,10 @@ struct ClsConstLookupResult {
                       // scalar).
   TriBool found;      // If the constant was found
   bool mightThrow;    // If accessing the constant can throw
+
+  template <typename SerDe> void serde(SerDe& sd) {
+    sd(ty)(found)(mightThrow);
+  }
 };
 
 inline ClsConstLookupResult& operator|=(ClsConstLookupResult& a,
@@ -257,6 +261,14 @@ inline ClsConstLookupResult& operator|=(ClsConstLookupResult& a,
   a.ty |= b.ty;
   a.found |= b.found;
   a.mightThrow |= b.mightThrow;
+  return a;
+}
+
+inline ClsConstLookupResult& operator&=(ClsConstLookupResult& a,
+                                        const ClsConstLookupResult& b) {
+  a.ty &= b.ty;
+  a.found &= b.found;
+  a.mightThrow &= b.mightThrow;
   return a;
 }
 
@@ -283,6 +295,19 @@ inline ClsTypeConstLookupResult& operator|=(
     a.abstract |= b.abstract;
   }
   a.found |= b.found;
+  return a;
+}
+
+inline ClsTypeConstLookupResult& operator&=(
+    ClsTypeConstLookupResult& a,
+    const ClsTypeConstLookupResult& b) {
+  a.resolution &= b.resolution;
+  if (b.found == TriBool::Yes) {
+    a.abstract = b.abstract;
+  } else if (a.found != TriBool::Yes) {
+    a.abstract &= b.abstract;
+  }
+  a.found &= b.found;
   return a;
 }
 
@@ -2162,6 +2187,9 @@ struct AnalysisDeps {
   Type add(Func, Type);
 
   bool empty() const;
+
+  // Remove redundant dependencies
+  void clean();
 
   AnalysisDeps& operator|=(const AnalysisDeps&);
 

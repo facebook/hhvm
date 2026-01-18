@@ -4396,6 +4396,90 @@ template <typename SerDe> void FuncInfo2::serde(SerDe& sd) {
 
 //////////////////////////////////////////////////////////////////////
 
+// Stores information about declarations of properties. Using this, a
+// class can find the parent class the property is inherited from,
+// as well as any possible subclasses which have redeclarations.
+struct PropDeclInfo {
+  // The class that declares this prop (if any)
+  SString decl{nullptr};
+  // Subclasses that also declare/override this prop
+  TSStringSet subDecls;
+
+  template <typename SerDe> void serde(SerDe& sd) {
+    sd(decl)
+      (subDecls, string_data_lt_type{})
+      ;
+  }
+};
+
+/*
+ * For a given class (non-type) constant, information about the
+ * constant and any redeclarations in subclasses. ClassInfo2 will have
+ * an entry for every constant declared on the class (or inherited
+ * from parent). It may have entries for constants which are not known
+ * to the class. This represents a constant declared solely in a
+ * subclass. In this case, the presence of an entry is to indicate the
+ * constant may exist (as opposed to definitely not existing).
+ *
+ * This exists to avoid having to visit all subclasses to resolve the
+ * type (which can be expensive).
+ */
+struct ClsCnsSubInfo {
+  // Union of possible ClsConstLookupResults (non-dynamic) which can
+  // result from looking up this constant.
+  ClsConstLookupResult result;
+  // Subclasses which have a dynamic initialization of this constant.
+  SStringSet dynamic;
+
+  ClsCnsSubInfo& operator|=(const ClsCnsSubInfo& o) {
+    result |= o.result;
+    dynamic.insert(begin(o.dynamic), end(o.dynamic));
+    if (result.ty.is(BInitCell) &&
+        result.found == TriBool::Maybe &&
+        result.mightThrow) {
+      dynamic.clear();
+    }
+    return *this;
+  }
+
+  bool isMissing() const { return result.found == TriBool::No; }
+
+  static ClsCnsSubInfo missing() {
+    return ClsCnsSubInfo{
+      ClsConstLookupResult{ TBottom, TriBool::No, false }
+    };
+  }
+
+  static ClsCnsSubInfo conservative() {
+    return ClsCnsSubInfo{
+      ClsConstLookupResult{ TInitCell, TriBool::Maybe, true }
+    };
+  }
+
+  static ClsCnsSubInfo fromCns(const php::Class& cls, const php::Const& cns) {
+    using C = ClsCnsSubInfo;
+    using R = ClsConstLookupResult;
+    if (!cns.val.has_value() || cns.kind != ConstModifierFlags::Kind::Value) {
+      return missing();
+    }
+    if (type(*cns.val) != KindOfUninit) {
+      auto const mightThrow = bool(cls.attrs & AttrInternal);
+      return C{ R{ from_cell(*cns.val), TriBool::Yes, mightThrow }};
+    }
+    C c{ R{ TBottom, TriBool::Yes, true }};
+    c.dynamic.emplace(cls.name);
+    return c;
+  }
+
+  template <typename SerDe> void serde(SerDe& sd) {
+    sd(result)
+      (dynamic, string_data_lt{})
+      ;
+  }
+};
+
+//////////////////////////////////////////////////////////////////////
+
 /*
  * Known information about an instantiatiable class.
  */
@@ -4590,29 +4674,23 @@ struct ClassInfo2 {
   SStringToOneT<ConstIndexAndKind> clsConstants;
 
   // Metadata tracking where a property is declared across the class
-  // hierarchy. For a given property name, this allows one to
-  // identify all relevant declaring classes without walking entire
-  // hierarchies, which is expensive.
+  // hierarchy. For a given property, this allows one to identify all
+  // relevant declaring classes without walking entire hierarchies,
+  // which is expensive.
   //
-  // If there's no entry for a property in the map, the property
-  // cannot be present. If there's an entry, but decl and subDecls are
-  // empty, it means the property isn't declared on this class (or
-  // parents), but at least one subclass does. We are pessimistic in
-  // that case. This saves space in the table and such accesses
-  // shouldn't type-check anyways.
-  struct PropDeclInfo {
-    // The class that declares this property (if any)
-    SString decl{nullptr};
-    // Subclasses that also declare/override this property
-    TSStringSet subDecls;
-
-    template <typename SerDe> void serde(SerDe& sd) {
-      sd(decl)
-        (subDecls, string_data_lt_type{})
-        ;
-    }
-  };
+  // If there's no entry in the map, the prop cannot be present. If
+  // there's an entry, but decl and subDecls are empty, it means the
+  // prop isn't declared on this class (or parents), but at least one
+  // subclass does. We are pessimistic in that case. This saves space
+  // in the table and such accesses shouldn't type-check anyways.
   SStringToOneT<PropDeclInfo> propDeclInfo;
+
+  // For a class constant access like Foo::CNS, information about CNS
+  // which can be used to infer its type (without visiting all
+  // subclasses). The absence of an entry means CNS definitely doesn't
+  // exist. If CNS is not declared on this class (or parents), but is
+  // declared in a subclass, it will still have an entry here.
+  SStringToOneT<ClsCnsSubInfo> cnsSubInfo;
 
   /*
    * Inferred information about this class
@@ -4791,6 +4869,7 @@ struct ClassInfo2 {
       (parent)
       (clsConstants, string_data_lt{})
       (propDeclInfo, string_data_lt{})
+      (cnsSubInfo, string_data_lt{})
       (inferred)
       (traitProps)
       (methods, string_data_lt{})
@@ -6571,7 +6650,9 @@ struct DepTracker {
   // Register dependencies on various entities to the current
   // dependency context.
 
-  void add(Class c, Type t = Type::None) {
+  void add(Class c, Type t = Type::Meta) {
+    assertx(t != Type::None);
+
     auto const fc = context();
     if (index.frozen) {
       if (auto const c2 = fc.cls()) {
@@ -6594,7 +6675,8 @@ struct DepTracker {
     }
   }
 
-  void add(const php::Func& f, Type t = Type::None) {
+  void add(const php::Func& f, Type t = Type::Meta) {
+    assertx(t != Type::None);
     auto const fc = context();
     assertx(!fc.unit());
     if (index.frozen) {
@@ -6620,7 +6702,8 @@ struct DepTracker {
     }
   }
 
-  void add(MethRef m, Type t = Type::None) {
+  void add(MethRef m, Type t = Type::Meta) {
+    assertx(t != Type::None);
     auto const fc = context();
     assertx(!fc.unit());
     if (index.frozen) {
@@ -6644,7 +6727,8 @@ struct DepTracker {
     }
   }
 
-  void add(Func f, Type t = Type::None) {
+  void add(Func f, Type t = Type::Meta) {
+    assertx(t != Type::None);
     auto const fc = context();
     assertx(!fc.unit());
     if (index.frozen) {
@@ -6856,6 +6940,7 @@ struct DepTracker {
   AnalysisDeps take(FuncClsUnit fc) {
     auto it = deps.find(fc);
     if (it == end(deps)) return AnalysisDeps{};
+    it->second.clean();
     return std::move(it->second);
   }
 
@@ -11193,6 +11278,9 @@ private:
     if (cls.parentName) {
       cinfo.clsConstants = index.classInfo(cls.parentName).clsConstants;
       state.m_cnsFromTrait = index.state(cls.parentName).m_cnsFromTrait;
+
+      assertx(cinfo.cnsSubInfo.empty());
+      cinfo.cnsSubInfo = index.classInfo(cls.parentName).cnsSubInfo;
     }
 
     for (auto const iname : cls.interfaceNames) {
@@ -11201,7 +11289,9 @@ private:
       for (auto const& [cnsName, cnsIdx] : iface.clsConstants) {
         auto const added = add_constant(
           index, cinfo, state, cnsName,
-          cnsIdx, ifaceState.m_cnsFromTrait.contains(cnsName)
+          cnsIdx,
+          folly::get_ptr(iface.cnsSubInfo, cnsName),
+          ifaceState.m_cnsFromTrait.contains(cnsName)
         );
         if (!added) return false;
       }
@@ -11211,6 +11301,7 @@ private:
       auto const numConstants = cls.constants.size();
       for (uint32_t idx = 0; idx < numConstants; ++idx) {
         auto const& cns = cls.constants[idx];
+        auto const cnsSubInfo = ClsCnsSubInfo::fromCns(cls, cns);
         auto const added = add_constant(
           index, cinfo, state,
           cns.name,
@@ -11218,6 +11309,7 @@ private:
             ConstIndex { cls.name, idx },
             cns.kind
           },
+          &cnsSubInfo,
           false
         );
         if (!added) return false;
@@ -11231,7 +11323,9 @@ private:
         for (auto const& [cnsName, cnsIdx] : trait.clsConstants) {
           auto const added = add_constant(
             index, cinfo, state, cnsName,
-            cnsIdx, true
+            cnsIdx,
+            folly::get_ptr(trait.cnsSubInfo, cnsName),
+            true
           );
           if (!added) return false;
         }
@@ -11254,7 +11348,7 @@ private:
       for (auto const& [cnsName, cnsIdx] : e.clsConstants) {
         auto const added = add_constant(
           index, cinfo, state, cnsName,
-          cnsIdx, false
+          cnsIdx, folly::get_ptr(e.cnsSubInfo, cnsName), false
         );
         if (!added) return false;
       }
@@ -11345,6 +11439,12 @@ private:
       state.m_cnsFromTrait.erase(copy.name);
       copied.emplace(copy.name);
 
+      if (auto sinfo = ClsCnsSubInfo::fromCns(cls, copy); !sinfo.isMissing()) {
+        cinfo.cnsSubInfo.insert_or_assign(copy.name, std::move(sinfo));
+      } else {
+        cinfo.cnsSubInfo.erase(copy.name);
+      }
+
       cnsIdx.idx.cls = cls.name;
       cnsIdx.idx.idx = cls.constants.size();
       cnsIdx.kind = copy.kind;
@@ -11370,6 +11470,7 @@ private:
                            State& state,
                            SString name,
                            const ClassInfo2::ConstIndexAndKind& cnsIdx,
+                           const ClsCnsSubInfo* fromSubInfo,
                            bool fromTrait) {
     auto [it, emplaced] = cinfo.clsConstants.emplace(name, cnsIdx);
     if (emplaced) {
@@ -11377,6 +11478,14 @@ private:
         always_assert(state.m_cnsFromTrait.emplace(name).second);
       } else {
         always_assert(!state.m_cnsFromTrait.contains(name));
+      }
+
+      if (fromSubInfo && !fromSubInfo->isMissing()) {
+        always_assert(
+          cinfo.cnsSubInfo.emplace(name, *fromSubInfo).second
+        );
+      } else {
+        assertx(!cinfo.cnsSubInfo.contains(name));
       }
       return true;
     }
@@ -11480,6 +11589,13 @@ private:
     } else {
       state.m_cnsFromTrait.erase(name);
     }
+
+    if (fromSubInfo && !fromSubInfo->isMissing()) {
+      cinfo.cnsSubInfo.insert_or_assign(name, *fromSubInfo);
+    } else {
+      cinfo.cnsSubInfo.erase(name);
+    }
+
     existingIdx = cnsIdx;
     return true;
   }
@@ -12154,6 +12270,13 @@ private:
       c.cls = cls.name;
       state.m_cnsFromTrait.erase(c.name);
       cnsIdx.idx.cls = cls.name;
+
+      if (auto sinfo = ClsCnsSubInfo::fromCns(cls, c); !sinfo.isMissing()) {
+        cinfo.cnsSubInfo.insert_or_assign(c.name, std::move(sinfo));
+      } else {
+        cinfo.cnsSubInfo.erase(c.name);
+      }
+
       bool replacedExisting = false;
       if (!c.val) {
         auto it = existingCnsIndexes.find(c.name);
@@ -13747,13 +13870,15 @@ struct BuildSubclassListJob {
     // initial values).
     SStringSet propsWithImplicitNullable;
 
-    // For a given prop name, all subclasses which have a declaration
-    // for the property. If an entry is present, but the set is empty,
-    // it means the property is declared in a subclass, but there's no
-    // declaration in this class or parents. We don't track the
-    // subclasses precisely in that case because the amount of
+    // For a given property name, all subclasses which have a
+    // declaration for the item. If an entry is present, but the set
+    // is empty, it means the property is declared in a subclass, but
+    // there's no declaration in this class or parents. We don't track
+    // the subclasses precisely in that case because the amount of
     // properties can be huge.
     SStringToOneT<TSStringSet> propDeclInfo;
+
+    SStringToOneT<ClsCnsSubInfo> cnsSubInfo;
 
     // The classes for whom isMocked would be true due to one of the
     // classes making up this Data. The classes in this set may not
@@ -13774,6 +13899,7 @@ struct BuildSubclassListJob {
       sd(methods, string_data_lt{})
         (propsWithImplicitNullable, string_data_lt{})
         (propDeclInfo, string_data_lt{}, string_data_lt_type{})
+        (cnsSubInfo, string_data_lt{})
         (mockedClasses, string_data_lt_type{})
         (hasConstProp)
         (hasReifiedGeneric)
@@ -14684,6 +14810,8 @@ protected:
         decls = info.subDecls;
         if (info.decl) decls.emplace(info.decl);
       }
+
+      data.cnsSubInfo = cinfo->cnsSubInfo;
       return data;
     }
 
@@ -14813,6 +14941,22 @@ protected:
 
     for (auto const& [n, d] : childData.propDeclInfo) {
       data.propDeclInfo[n].insert(begin(d), end(d));
+    }
+
+    for (auto& [n, i] : data.cnsSubInfo) {
+      if (childData.cnsSubInfo.contains(n)) continue;
+      i |= ClsCnsSubInfo::missing();
+    }
+    for (auto& [n, i] : childData.cnsSubInfo) {
+      if (auto old = folly::get_ptr(data.cnsSubInfo, n)) {
+        *old |= i;
+        if (old->dynamic.size() > 5000) {
+          *old = ClsCnsSubInfo::conservative();
+        }
+      } else {
+        i |= ClsCnsSubInfo::missing();
+        data.cnsSubInfo.emplace(n, std::move(i));
+      }
     }
 
     data.mockedClasses.insert(
@@ -15177,6 +15321,8 @@ protected:
         info.subDecls = decls;
         info.subDecls.erase(info.decl);
       }
+
+      cinfo->cnsSubInfo = std::move(data.cnsSubInfo);
 
       for (auto& [name, mte] : cinfo->methods) {
         if (is_special_method_name(name)) continue;
@@ -22455,6 +22601,21 @@ AnalysisDeps& AnalysisDeps::operator|=(const AnalysisDeps& o) {
   return *this;
 }
 
+void AnalysisDeps::clean() {
+  // Remove anything from class dependencies which is redundant due to
+  // a more detailed dependency.
+  auto const maybeRemove = [&] (SString cls) {
+    auto const t = folly::get_ptr(classes, cls);
+    if (t && ((*t & kValidForChanges) == Type::None)) {
+      classes.erase(cls);
+    }
+  };
+  for (auto const& cns : clsConstants)   maybeRemove(cns.cls);
+  for (auto const cls : anyClsConstants) maybeRemove(cls);
+  for (auto const& prop : properties)    maybeRemove(prop.cls);
+  for (auto const cls : anyProperties)   maybeRemove(cls);
+}
+
 std::string show(AnalysisDeps::Type t) {
   using T = AnalysisDeps::Type;
   std::string out;
@@ -26853,51 +27014,63 @@ AnalysisIndex::lookup_class_constant(const Type& cls,
   if (!is_specialized_string(name)) return conservative();
   auto const sname = sval_of(name);
 
-  auto const& dcls = dcls_of(cls);
-  if (dcls.isExact()) {
-    auto const rcls = dcls.cls();
-    auto const cinfo = rcls.cinfo2();
-
-    if (!cinfo) {
-      m_data->deps->add(AnalysisDeps::AnyClassConstant { rcls.name() });
-      return conservative();
+  Optional<R> result;
+  Optional<R> iresult;
+  auto const addResult = [&] (R r) {
+    if (!result.has_value()) {
+      result.emplace(std::move(r));
+    } else {
+      *result |= r;
+      ITRACE(4, "  -> {}\n", show(*result));
     }
-    m_data->deps->add(AnalysisDeps::Class { rcls.name() });
+  };
 
-    ITRACE(4, "{}:\n", cinfo->name);
+  auto const process = [&] (const ClassInfo2& cinfo) {
+    ITRACE(4, "{}:\n", cinfo.name);
     Trace::Indent _;
 
-    auto const idxIt = cinfo->clsConstants.find(sname);
-    if (idxIt == end(cinfo->clsConstants)) return notFound();
-    auto const& idx = idxIt->second;
+    // Does the constant exist on this class?
+    auto const idx = folly::get_ptr(cinfo.clsConstants, sname);
+    if (!idx) {
+      addResult(notFound());
+      return;
+    }
 
-    assertx(!m_data->badClasses.contains(idx.idx.cls));
-    if (idx.kind != ConstModifierFlags::Kind::Value) return notFound();
+    // Is it an actual non-type-constant?
+    assertx(!m_data->badClasses.contains(idx->idx.cls));
+    if (idx->kind != ConstModifierFlags::Kind::Value) {
+      addResult(notFound());
+      return;
+    }
 
-    m_data->deps->add(idx.idx);
-    auto const cnsClsIt = m_data->classes.find(idx.idx.cls);
-    if (cnsClsIt == end(m_data->classes)) return conservative();
-    auto const& cnsCls = cnsClsIt->second;
+    m_data->deps->add(idx->idx);
 
-    assertx(idx.idx.idx < cnsCls->constants.size());
-    auto const& cns = cnsCls->constants[idx.idx.idx];
+    auto const cnsCls = folly::get_default(m_data->classes, idx->idx.cls);
+    if (!cnsCls) {
+      addResult(conservative());
+      return;
+    }
+
+    assertx(idx->idx.idx < cnsCls->constants.size());
+    auto const& cns = cnsCls->constants[idx->idx.idx];
     assertx(cns.kind == ConstModifierFlags::Kind::Value);
+    if (!cns.val.has_value()) {
+      addResult(notFound());
+      return;
+    }
 
-    if (!cns.val.has_value()) return notFound();
-
-    auto const r = [&] {
+    auto r = [&] {
       if (type(*cns.val) != KindOfUninit) {
         // Fully resolved constant with a known value. We don't need
         // to register a dependency on the constant because the value
         // will never change.
-        auto mightThrow = bool(cinfo->cls->attrs & AttrInternal);
+        auto mightThrow = bool(cinfo.cls->attrs & AttrInternal);
         return R{ from_cell(*cns.val), TriBool::Yes, mightThrow };
       }
 
       ITRACE(4, "(dynamic)\n");
-      if (!cnsCls->cinfo) return conservative();
 
-      auto info = info_for_class_constant(*cnsCls, cns);
+      auto info = info_for_class_constant(*cinfo.cls, cns);
       return R{
         std::move(info.type),
         TriBool::Yes,
@@ -26905,11 +27078,75 @@ AnalysisIndex::lookup_class_constant(const Type& cls,
       };
     }();
     ITRACE(4, "-> {}\n", show(r));
-    return r;
+    addResult(std::move(r));
+  };
+
+  auto const onSub = [&] (res::Class rcls) {
+    m_data->deps->add(AnalysisDeps::Class { rcls.name() });
+    auto const c = rcls.cls();
+    if (!c || !c->cinfo) {
+      addResult(conservative());
+      return;
+    }
+    auto const sinfo = folly::get_ptr(c->cinfo->cnsSubInfo, sname);
+    if (!sinfo) {
+      addResult(notFound());
+      return;
+    }
+
+    addResult(sinfo->result);
+    for (auto const dynamic : sinfo->dynamic) {
+      m_data->deps->add(AnalysisDeps::Class { dynamic });
+      auto const childInfo = folly::get_default(m_data->cinfos, dynamic);
+      if (childInfo) {
+        process(*childInfo);
+      } else {
+        addResult(conservative());
+      }
+    }
+  };
+
+  auto const& dcls = dcls_of(cls);
+  if (dcls.isExact() || dcls.isIsectAndExact()) {
+    auto const rcls = dcls.smallestCls();
+    m_data->deps->add(AnalysisDeps::Class { rcls.name() });
+    auto const c = rcls.cls();
+    if (!c || !c->cinfo) return conservative();
+    process(*c->cinfo);
+  } else if (dcls.isSub()) {
+    onSub(dcls.smallestCls());
+  } else {
+    assertx(dcls.isIsect());
+    auto const& isect = dcls.isect();
+    assertx(isect.size() > 1);
+    for (auto const rcls : isect) {
+      onSub(rcls);
+      if (!result.has_value()) {
+        if (!iresult.has_value()) {
+          iresult.emplace(notFound());
+        } else {
+          *iresult &= notFound();
+        }
+      } else if (!iresult.has_value()) {
+        iresult = std::move(result);
+      } else {
+        *iresult &= *result;
+      }
+      result.reset();
+    }
   }
 
-  // Subclasses not yet implemented
-  return conservative();
+  if (iresult.has_value()) {
+    assertx(!result.has_value());
+    ITRACE(4, "union -> {}\n", show(*iresult));
+    return *iresult;
+  }
+  if (result.has_value()) {
+    ITRACE(4, "union -> {}\n", show(*result));
+    return *result;
+  }
+
+  return notFound();
 }
 
 ClsTypeConstLookupResult
@@ -26924,7 +27161,7 @@ AnalysisIndex::lookup_class_type_constant(
 
   using R = ClsTypeConstLookupResult;
 
-  auto const conservative = [&] (SString n = nullptr) {
+  auto const conservative = [] {
     ITRACE(4, "conservative\n");
     return R{
       TypeStructureResolution { TSDictN, true },
@@ -26960,35 +27197,49 @@ AnalysisIndex::lookup_class_type_constant(
   if (!is_specialized_string(name)) return conservative();
   auto const sname = sval_of(name);
 
-  auto const& dcls = dcls_of(cls);
-  if (dcls.isExact()) {
-    auto const rcls = dcls.cls();
-    auto const cinfo = rcls.cinfo2();
-    if (!cinfo) {
-      m_data->deps->add(AnalysisDeps::AnyClassConstant { rcls.name() });
-      return conservative(rcls.name());
+  Optional<R> result;
+  auto const addResult = [&] (R r) {
+    if (!result.has_value()) {
+      result.emplace(std::move(r));
+    } else {
+      *result |= r;
+      ITRACE(4, "  -> {}\n", show(*result));
     }
-    m_data->deps->add(AnalysisDeps::Class { rcls.name() });
+  };
 
-    ITRACE(4, "{}:\n", cinfo->name);
+  auto const process = [&] (const ClassInfo2& cinfo) {
+    ITRACE(4, "{}:\n", cinfo.name);
     Trace::Indent _;
 
-    auto const idxIt = cinfo->clsConstants.find(sname);
-    if (idxIt == end(cinfo->clsConstants)) return notFound();
-    auto const& idx = idxIt->second;
+    // Does the type constant exist on this class?
+    auto const idx = folly::get_ptr(cinfo.clsConstants, sname);
+    if (!idx) {
+      addResult(notFound());
+      return;
+    }
 
-    assertx(!m_data->badClasses.contains(idx.idx.cls));
-    if (idx.kind != ConstModifierFlags::Kind::Type) return notFound();
+    // Is it an actual non-abstract type-constant?
+    assertx(!m_data->badClasses.contains(idx->idx.cls));
+    if (idx->kind != ConstModifierFlags::Kind::Type) {
+      addResult(notFound());
+      return;
+    }
 
-    m_data->deps->add(idx.idx);
-    auto const cnsClsIt = m_data->classes.find(idx.idx.cls);
-    if (cnsClsIt == end(m_data->classes)) return conservative(rcls.name());
-    auto const& cnsCls = cnsClsIt->second;
+    m_data->deps->add(idx->idx);
 
-    assertx(idx.idx.idx < cnsCls->constants.size());
-    auto const& cns = cnsCls->constants[idx.idx.idx];
+    auto const cnsCls = folly::get_default(m_data->classes, idx->idx.cls);
+    if (!cnsCls) {
+      addResult(conservative());
+      return;
+    }
+
+    assertx(idx->idx.idx < cnsCls->constants.size());
+    auto const& cns = cnsCls->constants[idx->idx.idx];
     assertx(cns.kind == ConstModifierFlags::Kind::Type);
-    if (!cns.val.has_value()) return abstract();
+    if (!cns.val.has_value()) {
+      addResult(abstract());
+      return;
+    }
     assertx(tvIsDict(*cns.val));
 
     ITRACE(4, "({}) {}\n", cns.cls, show(dict_val(val(*cns.val).parr)));
@@ -26996,9 +27247,9 @@ AnalysisIndex::lookup_class_type_constant(
     // If we've been given a resolver, use it. Otherwise resolve it in
     // the normal way.
     auto resolved = resolver
-      ? resolver(cns, *cinfo->cls)
+      ? resolver(cns, *cinfo.cls)
       : resolve_type_structure(
-        AnalysisIndexAdaptor { *this }, cns, *cinfo->cls
+        AnalysisIndexAdaptor { *this }, cns, *cinfo.cls
       );
 
     // The result of resolve_type_structure isn't, in general,
@@ -27006,17 +27257,45 @@ AnalysisIndex::lookup_class_type_constant(
     // here.
     assertx(resolved.type.is(BBottom) || resolved.type.couldBe(BUnc));
     resolved.type &= TUnc;
-    auto const r = R{
+    auto r = R{
       std::move(resolved),
       TriBool::Yes,
       TriBool::No
     };
     ITRACE(4, "-> {}\n", show(r));
-    return r;
+    addResult(std::move(r));
+  };
+
+  // Can't use what we use for properties here because of the
+  // possibility of contextual sensitive type-constants (we must visit
+  // all subclasses).
+  auto const& dcls = dcls_of(cls);
+  auto const rcls = dcls.smallestCls();
+  if (dcls.isExact() || dcls.isIsectAndExact()) {
+    m_data->deps->add(AnalysisDeps::Class { rcls.name() });
+    auto const c = rcls.cls();
+    if (!c || !c->cinfo) return conservative();
+    process(*c->cinfo);
+  } else {
+    auto const full = rcls.forEachSubclass(
+      [&] (SString c, Attr) {
+        m_data->deps->add(AnalysisDeps::Class { c });
+        auto const childInfo = folly::get_default(m_data->cinfos, c);
+        if (childInfo) {
+          process(*childInfo);
+        } else {
+          addResult(conservative());
+        }
+      }
+    );
+    if (!full) return conservative();
   }
 
-  // Subclasses not yet implemented
-  return conservative();
+  if (result.has_value()) {
+    ITRACE(4, "union -> {}\n", show(*result));
+    return *result;
+  }
+  return notFound();
 }
 
 ClsTypeConstLookupResult
@@ -27174,7 +27453,7 @@ bool AnalysisIndex::visit_prop_decls(const DCls& dcls,
     }
   };
 
-  auto const onDInfo = [&] (const ClassInfo2::PropDeclInfo& dinfo, bool sub) {
+  auto const onDInfo = [&] (const PropDeclInfo& dinfo, bool sub) {
     auto success = true;
 
     if (dinfo.decl) {

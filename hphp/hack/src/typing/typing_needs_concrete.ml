@@ -7,6 +7,8 @@
  *)
 open Hh_prelude
 
+let add_warning = Typing_warning_utils.add
+
 let check_class_get
     (env : Typing_env_types.env)
     (class_get_pos : Pos.t)
@@ -26,8 +28,7 @@ let check_class_get
         callee_is_needs_concrete_method
         && not (Typing_env.static_points_to_concrete_class env)
       then
-        Typing_warning_utils.add
-          env
+        let warning =
           ( class_get_pos,
             Typing_warning.Call_needs_concrete,
             {
@@ -37,7 +38,10 @@ let check_class_get
               decl_pos = def_pos;
               via = (via :> [ `Id | `Static | `Self | `Parent ]);
             } )
+        in
+        add_warning env warning
     in
+
     begin
       match e with
       | CI _ when callee_is_needs_concrete_method ->
@@ -61,8 +65,7 @@ let check_class_get
                     && Lazy.force is_final_non_consistent_construct
                in
                if not is_concrete then
-                 Typing_warning_utils.add
-                   env
+                 let warning =
                    ( class_get_pos,
                      Typing_warning.Call_needs_concrete,
                      {
@@ -72,7 +75,9 @@ let check_class_get
                        meth_name = mid;
                        decl_pos = def_pos;
                        via = `Id;
-                     } ))
+                     } )
+                 in
+                 add_warning env warning)
       | CIself -> check_needs_concrete_call `Self
       | CIparent -> check_needs_concrete_call `Parent
       | CIstatic ->
@@ -87,8 +92,7 @@ let check_class_get
            * `self`/`parent`/classname, etc. is already covered by other type
            * errors such as Primary.Self_abstract_call, Primary.Parent_abstract_call, etc.
            *)
-          Typing_warning_utils.add
-            env
+          let warning =
             ( class_get_pos,
               Typing_warning.Abstract_access_via_static,
               {
@@ -99,6 +103,8 @@ let check_class_get
                 decl_pos = def_pos;
                 containing_method_pos = Some env.genv.function_pos;
               } )
+          in
+          add_warning env warning
       | CI _ -> ()
       | CIexpr _ -> ()
     end
@@ -121,8 +127,7 @@ let check_instantiation
                Folded_class.abstract class_ && Folded_class.final class_
              in
              if not would_be_redundant then
-               Typing_warning_utils.add
-                 env
+               let warning =
                  ( instantiation_pos,
                    Typing_warning.Uninstantiable_class_via_static,
                    {
@@ -130,7 +135,9 @@ let check_instantiation
                        instantiation_pos;
                      class_name = Folded_class.name class_;
                      decl_pos = Folded_class.pos class_;
-                   } ))
+                   } )
+               in
+               add_warning env warning)
     | CIstatic
     | CIself
     | CIparent

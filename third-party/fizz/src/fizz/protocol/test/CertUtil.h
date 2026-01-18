@@ -169,7 +169,12 @@ extendedKeyUsage        = critical, serverAuth, clientAuth
 }
 
 inline CertAndKey createCert(std::string cn, bool ca, CertAndKey* issuer) {
-  return createCert({.cn = std::move(cn), .ca = ca, .issuer = issuer});
+  return createCert(
+      {.cn = std::move(cn),
+       .ca = ca,
+       .issuer = issuer,
+       .notBefore = std::nullopt,
+       .notAfter = std::nullopt});
 }
 
 inline std::shared_ptr<PeerCert> getPeerCert(const CertAndKey& cert) {

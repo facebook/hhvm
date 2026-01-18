@@ -39,11 +39,13 @@ type t = {
   ide_fall_back_to_full_index: bool;
   naming_table_compression_level: int;
   naming_table_compression_threads: int;
-  warnings_generated_files: Str.regexp list; [@show.opaque]
-      (** List of regexps for file paths for which any warning will be ignored.
+  warnings_generated_files: string list;
+      (** List of regex patterns for file paths for which any warning will be ignored.
         Useful to ignore warnings from certain generated files.
         Passing `-Wgenerated` on the command line will override this behavior
-        and show warnings from those files. *)
+        and show warnings from those files.
+        These are sent to Rust via FFI so are not stored as regexes here.
+         *)
 }
 [@@deriving show]
 
@@ -629,6 +631,8 @@ let load ~silent ~from ~(cli_config_overrides : (string * string) list) :
             GlobalOptions.NNone)
         ~warnings_default_all:local_config.warnings_default_all
         ~warnings_in_sandcastle:local_config.warnings_in_sandcastle
+        ~warnings_generated_files:
+          (string_list "warnings_generated_files" ~default:[] config)
         ~hh_distc_exponential_backoff_num_retries:
           local_config.hh_distc_exponential_backoff_num_retries
         ~fanout_strip_class_location:local_config.fanout_strip_class_location
@@ -684,8 +688,7 @@ let load ~silent ~from ~(cli_config_overrides : (string * string) list) :
       naming_table_compression_threads =
         int_ "naming_table_compression_threads" ~default:1 config;
       warnings_generated_files =
-        string_list "warnings_generated_files" ~default:[] config
-        |> List.map ~f:Str.regexp;
+        string_list "warnings_generated_files" ~default:[] config;
     },
     local_config )
 

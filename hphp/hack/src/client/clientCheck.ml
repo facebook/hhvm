@@ -282,7 +282,10 @@ let main_internal
     let error_filter =
       Filter_errors.Filter.make
         ~default_all:local_config.ServerLocalConfig.warnings_default_all
-        ~generated_files:(ServerConfig.warnings_generated_files config)
+        ~generated_files:
+          (List.map
+             ~f:Str.regexp
+             (ServerConfig.warnings_generated_files config))
         args.warning_switches
     in
     (* We don't do streaming errors under [output_json]: our contract
@@ -342,7 +345,10 @@ let main_internal
     let error_filter =
       Filter_errors.Filter.make
         ~default_all:local_config.warnings_default_all
-        ~generated_files:(ServerConfig.warnings_generated_files config)
+        ~generated_files:
+          (List.map
+             ~f:Str.regexp
+             (ServerConfig.warnings_generated_files config))
         args.warning_switches
     in
     let%lwt (((error_list, dropped_count), tasts), telemetry) =
@@ -394,7 +400,10 @@ let main_internal
     let error_filter =
       Filter_errors.Filter.make
         ~default_all:local_config.warnings_default_all
-        ~generated_files:(ServerConfig.warnings_generated_files config)
+        ~generated_files:
+          (List.map
+             ~f:Str.regexp
+             (ServerConfig.warnings_generated_files config))
         args.warning_switches
     in
     let%lwt ((), telemetry) =
@@ -915,7 +924,10 @@ let main_internal
     let error_filter =
       Filter_errors.Filter.make
         ~default_all:local_config.ServerLocalConfig.warnings_default_all
-        ~generated_files:(ServerConfig.warnings_generated_files config)
+        ~generated_files:
+          (List.map
+             ~f:Str.regexp
+             (ServerConfig.warnings_generated_files config))
         args.warning_switches
     in
     let status_cmd =

@@ -71,7 +71,7 @@ val ide_fall_back_to_full_index : t -> bool
 
 val convert_auto_namespace_to_map : string -> (string * string) list
 
-val warnings_generated_files : t -> Str.regexp list
+val warnings_generated_files : t -> string list
 
 val make_sharedmem_config :
   Config_file.t -> ServerLocalConfig.t -> SharedMem.config

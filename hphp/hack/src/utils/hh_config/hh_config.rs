@@ -522,6 +522,9 @@ impl HhConfig {
                 .get_bool_or("warnings_default_all", default.warnings_default_all)?,
             warnings_in_sandcastle: hhconfig
                 .get_bool_or("warnings_in_sandcastle", default.warnings_in_sandcastle)?,
+            warnings_generated_files: hhconfig
+                .get_str("warnings_generated_files")
+                .map_or(default.warnings_generated_files, parse_svec),
             tco_package_allow_typedef_violations: hhconfig.get_bool_or(
                 "package_allow_typedef_violations",
                 default.tco_package_allow_typedef_violations,

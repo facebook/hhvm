@@ -178,6 +178,7 @@ type t = {
   hack_warnings: int none_or_all_except;
   warnings_default_all: bool;
   warnings_in_sandcastle: bool;
+  warnings_generated_files: string list;
   tco_allowed_files_for_ignore_readonly: string list;
   tco_package_exclude_patterns: string list;
   tco_package_allow_typedef_violations: bool;
@@ -302,6 +303,7 @@ let default =
     hack_warnings = All_except [];
     warnings_default_all = false;
     warnings_in_sandcastle = true;
+    warnings_generated_files = [];
     tco_allowed_files_for_ignore_readonly = [];
     tco_package_exclude_patterns =
       [{|.*/__tests__/.*|}; {|.*/flib/intern/makehaste/.*|}];
@@ -425,6 +427,7 @@ let set
     ?hack_warnings
     ?warnings_default_all
     ?warnings_in_sandcastle
+    ?warnings_generated_files
     ?tco_allowed_files_for_ignore_readonly
     ?tco_package_exclude_patterns
     ?tco_package_allow_typedef_violations
@@ -700,6 +703,8 @@ let set
       setting warnings_default_all options.warnings_default_all;
     warnings_in_sandcastle =
       setting warnings_in_sandcastle options.warnings_in_sandcastle;
+    warnings_generated_files =
+      setting warnings_generated_files options.warnings_generated_files;
     tco_allowed_files_for_ignore_readonly =
       setting
         tco_allowed_files_for_ignore_readonly

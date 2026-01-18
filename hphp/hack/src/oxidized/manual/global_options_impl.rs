@@ -129,6 +129,7 @@ impl Default for GlobalOptions {
             hack_warnings: NoneOrAllExcept::AllExcept(vec![]),
             warnings_default_all: false,
             warnings_in_sandcastle: true,
+            warnings_generated_files: vec![],
             tco_allowed_files_for_ignore_readonly: vec![],
             tco_package_exclude_patterns: vec![
                 String::from(".*/__tests__/.*"),

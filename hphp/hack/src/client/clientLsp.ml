@@ -4987,7 +4987,8 @@ let main
   let error_filter =
     Filter_errors.Filter.make
       ~default_all:local_config.ServerLocalConfig.warnings_default_all
-      ~generated_files:(ServerConfig.warnings_generated_files config)
+      ~generated_files:
+        (List.map ~f:Str.regexp (ServerConfig.warnings_generated_files config))
       []
   in
   let ide_service =

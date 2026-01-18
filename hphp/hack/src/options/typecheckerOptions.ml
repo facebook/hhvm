@@ -293,6 +293,8 @@ let disable_physical_equality t = t.GlobalOptions.tco_disable_physical_equality
 
 let hack_warnings t = t.GlobalOptions.hack_warnings
 
+let warnings_generated_files t = t.GlobalOptions.warnings_generated_files
+
 let check_packages t = t.GlobalOptions.tco_check_packages
 
 let allow_require_package_on_interface_methods t =

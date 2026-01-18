@@ -246,6 +246,9 @@ type t = {
   hack_warnings: int none_or_all_except;  (** turn on hack warnings *)
   warnings_default_all: bool;
   warnings_in_sandcastle: bool;
+  warnings_generated_files: string list;
+      (** Matchers for file paths for which any warning will be ignored.
+          Useful to ignore warnings from certain generated files.  *)
   tco_allowed_files_for_ignore_readonly: string list;
   tco_package_exclude_patterns: string list;
       (** Patterns for files excluded from the package boundary check. *)
@@ -405,6 +408,7 @@ val set :
   ?hack_warnings:int none_or_all_except ->
   ?warnings_default_all:bool ->
   ?warnings_in_sandcastle:bool ->
+  ?warnings_generated_files:string list ->
   ?tco_allowed_files_for_ignore_readonly:string list ->
   ?tco_package_exclude_patterns:string list ->
   ?tco_package_allow_typedef_violations:bool ->

@@ -54,8 +54,6 @@ type newable_class_info =
   * Tast.class_id
   * [ `Class of pos_id * Cls.t * locl_ty | `Dynamic ] list
 
-type branch_info = { pkgs: SSet.t }
-
 module Log = struct
   let should_log_check_expected_ty env =
     Typing_log.should_log env ~category:"typing" ~level:1
@@ -2595,14 +2593,11 @@ module rec Expr : sig
 
   (** Build an environment for the true or false branch of
   conditional statements. *)
-  val condition : env -> bool -> Tast.expr -> env * branch_info
+  val condition : env -> bool -> Tast.expr -> env
 
   (** Produce environment transformers for both branches of when using an
       expression as a condition **)
-  val condition_dual :
-    env ->
-    Tast.expr ->
-    env * (env -> env * branch_info) * (env -> env * branch_info)
+  val condition_dual : env -> Tast.expr -> env * (env -> env) * (env -> env)
 
   (** see .mli *)
   val call :
@@ -2940,7 +2935,7 @@ end = struct
     let (cond_ty, cond_pos, _) = tc in
     let env = check_bool_for_condition env cond_pos cond_ty in
     let parent_lenv = env.lenv in
-    let (env, _) = condition env true tc in
+    let env = condition env true tc in
     let (env, te1, ty1) =
       match e1 with
       | None ->
@@ -2959,7 +2954,7 @@ end = struct
     in
     let lenv1 = env.lenv in
     let env = { env with lenv = parent_lenv } in
-    let (env, _) = condition env false tc in
+    let env = condition env false tc in
     let (env, te2, ty2) =
       expr ~expected ~ctxt:Context.{ default with in_await } env e2
     in
@@ -7931,7 +7926,7 @@ end = struct
       let bound_ty =
         (Typing_env.get_local env local_id).Typing_local_types.bound_ty
       in
-      (set_local ~is_defined:true ~bound_ty env locl ty, { pkgs = SSet.empty })
+      set_local ~is_defined:true ~bound_ty env locl ty
     in
     let rec update_env_with_assumptions env assumptions =
       match assumptions with
@@ -8268,14 +8263,15 @@ end = struct
           refine_local ty_false env )
 
   (** [tparamet] = false means the expression is negated. *)
-  and condition env tparamet te =
+  and condition env tparamet te : env =
     let (env, cond_true, cond_false) = condition_dual env te in
     if tparamet then
       cond_true env
     else
       cond_false env
 
-  and condition_dual env ((ty, p, e) as te : Tast.expr) =
+  and condition_dual env ((ty, p, e) as te : Tast.expr) :
+      env * (env -> env) * (env -> env) =
     let default_branch env =
       ( env,
         (fun env -> condition_single env true te),
@@ -8301,11 +8297,10 @@ end = struct
              && String.equal idx SN.Shapes.idx ->
         let field = Tast.to_nast_expr field in
         ( env,
-          (fun env -> (env, { pkgs = SSet.empty })),
+          (fun env -> env),
           fun env ->
-            ( refine_lvalue_type env shape ~refine:(fun env shape_ty ->
-                  Typing_shapes.shapes_idx_not_null env shape_ty field),
-              { pkgs = SSet.empty } ) )
+            refine_lvalue_type env shape ~refine:(fun env shape_ty ->
+                Typing_shapes.shapes_idx_not_null env shape_ty field) )
       | _ ->
         Option.value_or_thunk ~default:(fun () -> default_branch env)
         @@ type_switch env ~p ~ivar ~errs ~reason ~predicate
@@ -8315,7 +8310,7 @@ end = struct
       let (env_inter, cond_true, cond_false) = condition_dual env e1 in
       ( env_inter,
         (fun env ->
-          let (env, { pkgs = pkgs1 }) = cond_true env in
+          let env = cond_true env in
           (* This is necessary in case there is an assignment in e2
              * We essentially redo what has been undone in the
              * `Binop (Ampamp|Barbar)` case of `expr` *)
@@ -8323,13 +8318,15 @@ end = struct
             expr ~expected:None ~ctxt:Context.default env (Tast.to_nast_expr e2)
           in
           let (env, cond_true, _cond_false) = condition_dual env e2 in
-          let (env, { pkgs = pkgs2 }) = cond_true env in
-          let pkgs = SSet.union pkgs1 pkgs2 in
-          (env, { pkgs })),
+          cond_true env),
         fun env ->
-          let (env, _, _) =
-            branch ~join_pos:p env cond_false (fun env ->
-                let (env, _) = cond_true env in
+          let (env, (), ()) =
+            branch
+              ~join_pos:p
+              env
+              (fun env -> (cond_false env, ()))
+              (fun env ->
+                let env = cond_true env in
                 (* Similarly to the conjunction case, there might be an assignment in
                    cond2 which we must account for. Again we redo what has been undone in
                    the `Binop (Ampamp|Barbar)` case of `expr` *)
@@ -8341,16 +8338,20 @@ end = struct
                     (Tast.to_nast_expr e2)
                 in
                 let (env, _cond_true, cond_false) = condition_dual env e2 in
-                cond_false env)
+                (cond_false env, ()))
           in
-          (env, { pkgs = SSet.empty }) )
+          env )
     | Aast.Binop { bop = Ast_defs.Barbar; lhs = e1; rhs = e2 } ->
       let (env_inter, cond_true, cond_false) = condition_dual env e1 in
       ( env_inter,
         (fun env ->
-          let (env, _, _) =
-            branch ~join_pos:p env cond_true (fun env ->
-                let (env, _) = cond_false env in
+          let (env, (), ()) =
+            branch
+              ~join_pos:p
+              env
+              (fun env -> (cond_true env, ()))
+              (fun env ->
+                let env = cond_false env in
                 (* Similarly to the conjunction case, there might be an assignment in
                     cond2 which we must account for. Again we redo what has been undone in
                     the `Binop (Ampamp|Barbar)` case of `expr` *)
@@ -8362,11 +8363,11 @@ end = struct
                     (Tast.to_nast_expr e2)
                 in
                 let (env, cond_true, _cond_false) = condition_dual env e2 in
-                cond_true env)
+                (cond_true env, ()))
           in
-          (env, { pkgs = SSet.empty })),
+          env),
         fun env ->
-          let (env, _) = cond_false env in
+          let env = cond_false env in
           (* This is necessary in case there is an assignment in e2
            * We essentially redo what has been undone in the
            * `Binop (Ampamp|Barbar)` case of `expr` *)
@@ -8374,8 +8375,7 @@ end = struct
             expr ~expected:None ~ctxt:Context.default env (Tast.to_nast_expr e2)
           in
           let (env, _cond_true, cond_false) = condition_dual env e2 in
-          let (env, _) = cond_false env in
-          (env, { pkgs = SSet.empty }) )
+          cond_false env )
     | Aast.Binop
         {
           bop = Ast_defs.Eqeq | Ast_defs.Eqeqeq;
@@ -8449,10 +8449,8 @@ end = struct
   and condition_single env tparamet ((ty, p, e) as te : Tast.expr) =
     match e with
     | Aast.Hole (e, _, _, _) -> condition_single env tparamet e
-    | Aast.True when not tparamet ->
-      (LEnv.drop_cont env C.Next, { pkgs = SSet.empty })
-    | Aast.False when tparamet ->
-      (LEnv.drop_cont env C.Next, { pkgs = SSet.empty })
+    | Aast.True when not tparamet -> LEnv.drop_cont env C.Next
+    | Aast.False when tparamet -> LEnv.drop_cont env C.Next
     | Aast.Binop
         {
           bop = Ast_defs.Eqeq | Ast_defs.Eqeqeq;
@@ -8462,17 +8460,17 @@ end = struct
       when tparamet ->
       let env = refine_for_equality p env lhs rhs_ty in
       let env = refine_for_equality p env rhs lhs_ty in
-      (env, { pkgs = SSet.empty })
+      env
     | Aast.Lvar _
     | Aast.Obj_get _
     | Aast.Class_get _
     | Aast.Assign (_, None, _) ->
       let (env, ety) = Env.expand_type env ty in
       (match get_node ety with
-      | Tprim Tbool -> (env, { pkgs = SSet.empty })
+      | Tprim Tbool -> env
       | _ ->
         let env = condition_nullity ~is_sketchy:true ~nonnull:tparamet env te in
-        (env, { pkgs = SSet.empty }))
+        env)
     | Aast.Binop
         { bop = (Ast_defs.Diff | Ast_defs.Diff2) as op; lhs = e1; rhs = e2 } ->
       let op =
@@ -8499,13 +8497,19 @@ end = struct
       when String.equal class_name SN.Shapes.cShapes
            && String.equal method_name SN.Shapes.keyExists ->
       let env = key_exists env tparamet p shape field in
-      (env, { pkgs = SSet.empty })
+      env
     | Aast.Is (ivar, h) ->
       let reason = Reason.is_refinement p in
       let env = refine_for_is ~hint_first:false env tparamet ivar reason h in
-      (env, { pkgs = SSet.empty })
-    | Aast.Package (_, pkg) when tparamet -> (env, { pkgs = SSet.singleton pkg })
-    | _ -> (env, { pkgs = SSet.empty })
+      env
+    | Aast.Package (_, pkg) ->
+      let status =
+        match tparamet with
+        | true -> Typing_local_packages.Exists_in_deployment
+        | false -> Typing_local_packages.Not_exists_in_deployment
+      in
+      LEnv.assert_package_loaded env pkg status
+    | _ -> env
 
   and string2 env idl =
     let (env, tel) =
@@ -9432,12 +9436,8 @@ end = struct
         branch
           ~join_pos:pos
           env
-          (fun env ->
-            let (env, { pkgs }) = condition_true env in
-            Env.with_packages env pkgs @@ fun env -> block env b1)
-          (fun env ->
-            let (env, { pkgs }) = condition_false env in
-            Env.with_packages env pkgs @@ fun env -> block env b2)
+          (fun env -> block (condition_true env) b1)
+          (fun env -> block (condition_false env) b2)
       in
       (* TODO TAST: annotate with joined types *)
       (env, Aast.If (te, tb1, tb2))
@@ -9562,8 +9562,7 @@ end = struct
                   let (env, te, _) =
                     Expr.expr ~expected:None ~ctxt:Expr.Context.default env e
                   in
-                  let (env, { pkgs; _ }) = Expr.condition env true te in
-                  Env.with_packages env pkgs @@ fun env ->
+                  let env = Expr.condition env true te in
                   let env =
                     LEnv.update_next_from_conts ~join_pos:pos env [C.Do; C.Next]
                   in
@@ -9578,7 +9577,7 @@ end = struct
             in
             let (cond_ty, cond_pos, _) = te in
             let env = check_bool_for_condition env cond_pos cond_ty in
-            let (env, _) = Expr.condition env false te in
+            let env = Expr.condition env false te in
             let env =
               LEnv.update_next_from_conts ~join_pos:pos env [C.Break; C.Next]
             in
@@ -9604,8 +9603,7 @@ end = struct
                   let (env, te, _) =
                     Expr.expr ~expected:None ~ctxt:Expr.Context.default env e
                   in
-                  let (env, { pkgs }) = Expr.condition env true te in
-                  Env.with_packages env pkgs @@ fun env ->
+                  let env = Expr.condition env true te in
                   (* TODO TAST: avoid repeated generation of block *)
                   block env b)
             in
@@ -9617,7 +9615,7 @@ end = struct
             in
             let (cond_ty, cond_pos, _) = te in
             let env = check_bool_for_condition env cond_pos cond_ty in
-            let (env, _) = Expr.condition env false te in
+            let env = Expr.condition env false te in
             let env =
               LEnv.update_next_from_conts env ~join_pos:pos [C.Break; C.Next]
             in
@@ -9672,8 +9670,8 @@ end = struct
                   let (env, te2, _) =
                     Expr.expr ~expected:None ~ctxt:Expr.Context.default env e2
                   in
-                  let (env, { pkgs }) = Expr.condition env true te2 in
-                  Env.with_packages env pkgs @@ fun env ->
+                  let env = Expr.condition env true te2 in
+                  (* Env.with_packages env pkgs @@ fun env -> *)
                   let (env, tb) = block env b in
                   let env =
                     LEnv.update_next_from_conts
@@ -9694,7 +9692,7 @@ end = struct
             in
             let (cond_ty, cond_pos, _) = te2 in
             let env = check_bool_for_condition env cond_pos cond_ty in
-            let (env, _) = Expr.condition env false te2 in
+            let env = Expr.condition env false te2 in
             let env =
               LEnv.update_next_from_conts ~join_pos:pos env [C.Break; C.Next]
             in
@@ -12189,7 +12187,7 @@ end = struct
       let (cond_ty, cond_pos, _) = te1 in
       let env = check_bool_for_condition env cond_pos cond_ty in
       let lenv = env.lenv in
-      let (env, _) = Expr.condition env c te1 in
+      let env = Expr.condition env c te1 in
       let (env, te2, _) =
         check_e2
           (Expr.expr

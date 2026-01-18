@@ -46,7 +46,10 @@ let union union_types env context1 context2 =
   let fake_members =
     Typing_fake_members.join context1.fake_members context2.fake_members
   in
-  (env, { fake_members; local_types; tpenv })
+  let loaded_packages =
+    Typing_local_packages.join context1.loaded_packages context2.loaded_packages
+  in
+  (env, { fake_members; local_types; tpenv; loaded_packages })
 
 let union_opts union_types env ctxopt1 ctxopt2 =
   match (ctxopt1, ctxopt2) with
@@ -93,6 +96,7 @@ let is_sub_entry is_subtype env ctx1 ctx2 =
     ctx1.local_types
     ctx2.local_types
   && Typing_fake_members.sub ctx1.fake_members ctx2.fake_members
+  && Typing_local_packages.sub ctx1.loaded_packages ctx2.loaded_packages
 
 let is_sub_opt_entry is_subtype env ctxopt1 ctxopt2 =
   match (ctxopt1, ctxopt2) with

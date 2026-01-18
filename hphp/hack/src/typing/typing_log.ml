@@ -368,6 +368,9 @@ let per_cont_entry_as_value env f entry =
         Typing_fake_members.as_log_value entry.Typing_per_cont_env.fake_members
       );
       ("tpenv", tpenv_as_value env entry.Typing_per_cont_env.tpenv);
+      ( "loaded_packages",
+        Typing_local_packages.as_log_value
+          entry.Typing_per_cont_env.loaded_packages );
     ]
 
 let continuations_map_as_value f m =
@@ -620,7 +623,6 @@ let env_as_value env =
     rank;
     big_envs = _;
     fun_tast_info;
-    loaded_packages = _;
     emit_string_coercion_error = _;
     check_rank = _;
   } =

@@ -606,14 +606,15 @@ val mark_inconsistent : env -> env
 
 val get_package_by_name : env -> string -> Package.t option
 
-val load_packages : env -> SSet.t -> env
+(** Add the packages in a RequirePackage attribute to the packages assumed
+  * to be loaded *)
+val assert_packages_loaded_from_attr :
+  env -> ('a, 'b) Aast.user_attributes -> env
 
-val load_cross_packages_from_attr : env -> ('a, 'b) Aast.user_attributes -> env
-
-val with_packages : env -> SSet.t -> (env -> env * 'a) -> env * 'a
-
+(** True if package can be assumed to be loaded *)
 val is_package_loaded : env -> string -> bool
 
+(** True if package-boundary checking is enabled by config options *)
 val check_packages : env -> bool
 
 val package_allow_typedef_violations : env -> bool

@@ -13,5 +13,5 @@ function test(): void {
   } else {
     pkg4_call();  // ok
   }
-  pkg4_call(); // error; pakcage info unknown outside if/else branches
+  pkg4_call(); // ok, !(package pkg4) exited early
 }

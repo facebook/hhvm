@@ -273,3 +273,15 @@ let has_next env =
   match get_cont_option env C.Next with
   | None -> false
   | Some _ -> true
+
+let assert_package_loaded env pkg status =
+  let package_info = Env.get_tcopt env |> TypecheckerOptions.package_info in
+  let per_cont_env =
+    LEnvC.assert_package_loaded_in_cont
+      ~package_info
+      C.Next
+      pkg
+      status
+      env.lenv.per_cont_env
+  in
+  { env with lenv = { env.lenv with per_cont_env } }

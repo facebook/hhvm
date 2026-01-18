@@ -12,5 +12,5 @@ function foo(): void {}
 
 function bar(): void {
   invariant(package pkg4, "pkg4 not loaded");
-  foo();  // FIXME: this should be allowed by invariant
+  foo();  // allowed by invariant
 }

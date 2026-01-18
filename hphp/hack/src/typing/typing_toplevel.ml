@@ -119,7 +119,7 @@ let fun_def ctx fd : Tast.fun_def Tast_with_dynamic.t option =
       else
         env
     in
-    let env = Env.load_cross_packages_from_attr env f.f_user_attributes in
+    let env = Env.assert_packages_loaded_from_attr env f.f_user_attributes in
     (* Is sound dynamic enabled, and the function marked <<__SupportDynamicType>> explicitly or implicitly? *)
     let sdt_function = Env.get_support_dynamic_type env in
     List.iter ~f:(Typing_error_utils.add_typing_error ~env)

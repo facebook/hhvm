@@ -468,6 +468,7 @@
   typing_env_return_info
   typing_env_types
   typing_fake_members
+  typing_local_packages
   typing_local_types
   typing_per_cont_env)
  (libraries decl decl_counters typing_ast)

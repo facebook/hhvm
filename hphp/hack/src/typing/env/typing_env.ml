@@ -661,20 +661,20 @@ module M = struct
     PackageInfo.get_package info pkg_name
 
   let is_package_loaded env package =
-    if SSet.mem package env.loaded_packages then
-      true
-    else
-      (* Check if package is in the includes of any loaded package *)
-      let package_info = get_tcopt env |> TypecheckerOptions.package_info in
-      SSet.exists
-        (fun loaded_pkg ->
-          match PackageInfo.get_package package_info loaded_pkg with
-          | None -> false
-          | Some pkg ->
-            List.exists
-              ~f:(fun (_, included_pkg) -> String.equal included_pkg package)
-              pkg.Package.includes)
-        env.loaded_packages
+    let per_cont_env = env.lenv.per_cont_env in
+    match LEnvC.get_cont_option C.Next per_cont_env with
+    | None -> false
+    | Some next_cont -> begin
+      match SMap.find_opt package next_cont.LEnvC.loaded_packages with
+      | None
+      | Some Not_exists_in_deployment ->
+        false
+      | Some Exists_in_deployment
+      | Some Unsatisfiable_package_constraints ->
+        (* this is dead code due to unsatisfiable package checks; returning
+           true to not emit additional errors *)
+        true
+    end
 
   let check_packages env = TypecheckerOptions.check_packages @@ get_tcopt env
 
@@ -702,10 +702,23 @@ module M = struct
     TypecheckerOptions.package_allow_function_pointers_violations
     @@ get_tcopt env
 
-  let load_packages env packages =
-    { env with loaded_packages = SSet.union env.loaded_packages packages }
+  let assert_packages_loaded env packages =
+    let package_info = get_tcopt env |> TypecheckerOptions.package_info in
+    let per_cont_env =
+      SSet.fold
+        (fun package per_cont_env ->
+          LEnvC.assert_package_loaded_in_cont
+            ~package_info
+            C.Next
+            package
+            Typing_local_packages.Exists_in_deployment
+            per_cont_env)
+        packages
+        env.lenv.per_cont_env
+    in
+    { env with lenv = { env.lenv with per_cont_env } }
 
-  let load_cross_packages_from_attr env attr =
+  let assert_packages_loaded_from_attr env attr =
     match
       Naming_attributes.find
         Naming_special_names.UserAttributes.uaRequirePackage
@@ -721,15 +734,8 @@ module M = struct
               | _ -> acc)
           attr.ua_params
       in
-      load_packages env pkgs_to_load
+      assert_packages_loaded env pkgs_to_load
     | _ -> env
-
-  let with_packages env packages f =
-    let old_loaded_packages = env.loaded_packages in
-    let env = load_packages env packages in
-    let (env, result) = f env in
-    let env = { env with loaded_packages = old_loaded_packages } in
-    (env, result)
 
   let get_typedef env x =
     let td =

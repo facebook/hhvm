@@ -40,6 +40,13 @@ type per_cont_entry = {
    * inference, not conclusions.
    *)
   tpenv: Type_parameter_env.t;
+  (* Information about packages that have been tested at runtime for inclusion
+   * in the current deployment.  These include the packages asserted with
+   * RequirePackage and if (package).
+   * Remark: the package the file belongs to is _not included although it can
+   * be safely assumed to be part of the current deployment.
+   *)
+  loaded_packages: Typing_local_packages.t;
 }
 
 type t = per_cont_entry Typing_continuations.Map.t
@@ -73,3 +80,11 @@ val drop_cont : C.t -> t -> t
 val drop_conts : C.t list -> t -> t
 
 val replace_cont : C.t -> per_cont_entry option -> t -> t
+
+val assert_package_loaded_in_cont :
+  package_info:PackageInfo.t ->
+  C.t ->
+  string ->
+  Typing_local_packages.local_package_requirement ->
+  t ->
+  t

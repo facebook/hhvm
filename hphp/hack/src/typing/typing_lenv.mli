@@ -81,3 +81,6 @@ val stash_and_do :
 val env_with_empty_fakes : env -> env
 
 val has_next : env -> bool
+
+val assert_package_loaded :
+  env -> string -> Typing_local_packages.local_package_requirement -> env

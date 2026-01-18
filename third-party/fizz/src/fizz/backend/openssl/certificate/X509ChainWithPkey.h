@@ -8,16 +8,14 @@
 
 #pragma once
 
-#include <fizz/protocol/Certificate.h>
 #include <folly/ssl/OpenSSLPtrTypes.h>
-#include <openssl/evp.h>
 
 namespace fizz {
 namespace openssl {
 
-class OpenSSLSelfCertBase : public SelfCert {
+class X509ChainWithPkey {
  public:
-  virtual ~OpenSSLSelfCertBase() override = default;
+  virtual ~X509ChainWithPkey() = default;
 
   /**
    * Returns the X509 certificate chain.

@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include <fizz/backend/openssl/certificate/OpenSSLSelfCertBase.h>
+#include <fizz/backend/openssl/certificate/X509ChainWithPkey.h>
 #include <fizz/backend/openssl/crypto/signature/Signature.h>
 #include <fizz/compression/CertificateCompressor.h>
 #include <fizz/protocol/Certificate.h>
@@ -22,7 +22,8 @@ enum class CertificateVerifyContext;
 namespace openssl {
 
 template <KeyType T>
-class OpenSSLSelfCertImpl : public OpenSSLSelfCertBase {
+class OpenSSLSelfCertImpl : public SelfCert,
+                            public fizz::openssl::X509ChainWithPkey {
  public:
   /**
    * Private key is the private key associated with the leaf cert.

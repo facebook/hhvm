@@ -71,9 +71,14 @@ type SprintfFormatString = \HH\FormatString<SprintfFormat>;
  * @guide /hack/built-in-types/string
  * @guide /hack/functions/format-strings
  */
-function format(
-  SprintfFormatString $format_string,
-  mixed ...$format_args
+<<__NoAutoLikes>>
+function format<Targs as (mixed...)>(
+  \HH\TypedFormatString<SprintfFormat, Targs> $format_string,
+  ... Targs $format_args,
 )[]: string {
-  return _Str\vsprintf_l(null, $format_string, $format_args);
+  return _Str\vsprintf_l(
+    null,
+    $format_string,
+    HH\FIXME\UNSAFE_CAST<(mixed...), vec<mixed>>($format_args),
+  );
 }

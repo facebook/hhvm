@@ -1,0 +1,6 @@
+test = one
+int 32 float 12.300000
+test = two
+simple
+test = three
+string test

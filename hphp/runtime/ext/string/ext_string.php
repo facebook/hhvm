@@ -2,6 +2,7 @@
 
 namespace HH {
 newtype FormatString<T> = string;
+newtype TypedFormatString<T,Targs as (mixed...)> = string;
 }
 
 namespace {

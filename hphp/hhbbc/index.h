@@ -372,6 +372,7 @@ struct ResolvedClsTypeConst {
   SArray resolved;
   bool contextInsensitive;
   ConstIndex from;
+  php::Const::Invariance invariance;
 };
 
 using ResolvedClsTypeConsts = CompactVector<ResolvedClsTypeConst>;
@@ -1569,12 +1570,6 @@ struct Index {
                                     bool checkUB = false,
                                     bool ignoreConst = false,
                                     bool mustBeReadOnly = false) const;
-
-  /*
-   * Attempt to pre-resolve as many type-structures as possible in
-   * type-constants and type-aliases.
-   */
-  void preresolve_type_structures();
 
   /*
    * Refine the types of the class constants defined by an 86cinit,

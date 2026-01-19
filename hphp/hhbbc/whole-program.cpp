@@ -1570,8 +1570,6 @@ void whole_program(WholeProgramInput inputs,
       callback(std::move(ue));
     };
 
-    index.use_class_dependencies(false);
-    index.preresolve_type_structures();
     index.use_class_dependencies(true);
     analyze_iteratively(index);
     auto cleanup_for_final = std::thread([&] { index.cleanup_for_final(); });

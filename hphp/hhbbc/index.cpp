@@ -14950,7 +14950,7 @@ protected:
     for (auto& [n, i] : childData.cnsSubInfo) {
       if (auto old = folly::get_ptr(data.cnsSubInfo, n)) {
         *old |= i;
-        if (old->dynamic.size() > 5000) {
+        if (old->dynamic.size() > options.preciseSubclassDynamicCNSLimit) {
           *old = ClsCnsSubInfo::conservative();
         }
       } else {
@@ -19958,86 +19958,6 @@ void Index::for_each_unit_class_mutable(php::Unit& unit,
   for (auto const cls : unit.classes) {
     f(*m_data->classes.at(cls));
   }
-}
-
-//////////////////////////////////////////////////////////////////////
-
-void Index::preresolve_type_structures() {
-  trace_time tracer("pre-resolve type-structures", m_data->sample);
-
-  // Now that everything has been updated, calculate the invariance
-  // for each resolved type-structure. For each class constant,
-  // examine all subclasses and see how the resolved type-structure
-  // changes.
-  parallel::for_each(
-    m_data->allClassInfos,
-    [&] (std::unique_ptr<ClassInfo>& cinfo) {
-      if (!cinfo->classGraph.hasCompleteChildren()) return;
-
-      for (auto& cns : const_cast<php::Class*>(cinfo->cls)->constants) {
-        assertx(cns.invariance == php::Const::Invariance::None);
-        if (cns.kind != ConstModifierFlags::Kind::Type) continue;
-        if (!cns.val.has_value()) continue;
-        if (!cns.resolvedTypeStructure) continue;
-
-        auto const checkClassname =
-          tvIsString(cns.resolvedTypeStructure->get(s_classname));
-
-        // Assume it doesn't change
-        auto invariance = php::Const::Invariance::Same;
-        for (auto const g : cinfo->classGraph.children()) {
-          assertx(!g.isMissing());
-          assertx(g.hasCompleteChildren());
-          auto const s = g.cinfo();
-          assertx(s);
-          assertx(invariance != php::Const::Invariance::None);
-          assertx(
-            IMPLIES(!checkClassname,
-                    invariance != php::Const::Invariance::ClassnamePresent)
-          );
-          if (s == cinfo.get()) continue;
-
-          auto const it = s->clsConstants.find(cns.name);
-          assertx(it != s->clsConstants.end());
-          if (it->second.cls != s->cls) continue;
-          auto const& scns = *it->second;
-
-          // Overridden in some strange way. Be pessimistic.
-          if (!scns.val.has_value() ||
-              scns.kind != ConstModifierFlags::Kind::Type) {
-            invariance = php::Const::Invariance::None;
-            break;
-          }
-
-          // The resolved type structure in this subclass is not the
-          // same.
-          if (scns.resolvedTypeStructure != cns.resolvedTypeStructure) {
-            if (!scns.resolvedTypeStructure) {
-              // It's not even resolved here, so we can't assume
-              // anything.
-              invariance = php::Const::Invariance::None;
-              break;
-            }
-            // We might still be able to assert that a classname is
-            // always present, or a resolved type structure at least
-            // exists.
-            if (invariance == php::Const::Invariance::Same ||
-                invariance == php::Const::Invariance::ClassnamePresent) {
-              invariance =
-                (checkClassname &&
-                 tvIsString(scns.resolvedTypeStructure->get(s_classname)))
-                ? php::Const::Invariance::ClassnamePresent
-                : php::Const::Invariance::Present;
-            }
-          }
-        }
-
-        if (invariance != php::Const::Invariance::None) {
-          cns.invariance = invariance;
-        }
-      }
-    }
-  );
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -29603,7 +29523,8 @@ void AnalysisIndex::update_type_consts(const ClassAnalysis& analysis) {
     auto& newCns = [&] () -> php::Const& {
       auto& srcCns = srcCls->constants[update.from.idx];
       if (srcCls == cls) {
-        assertx(!srcCns.resolvedTypeStructure);
+        assertx(!srcCns.resolvedTypeStructure ||
+                srcCns.resolvedTypeStructure == update.resolved);
         return srcCns;
       }
       cinfo->clsConstants[srcCns.name] =
@@ -29617,6 +29538,7 @@ void AnalysisIndex::update_type_consts(const ClassAnalysis& analysis) {
 
     newCns.resolvedTypeStructure = update.resolved;
     newCns.contextInsensitive = update.contextInsensitive;
+    newCns.invariance = update.invariance;
     newCns.resolvedLocally = true;
   }
 }

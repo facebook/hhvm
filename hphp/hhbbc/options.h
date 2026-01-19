@@ -90,6 +90,15 @@ struct Options {
    */
   uint32_t preciseSubclassLimit = 10000;
 
+  /*
+   * Only precisely track the overridden class constants by subclasses
+   * if the number of "dynamic" constants (require runtime
+   * initialization) stay below this limit. This keeps dependencies
+   * from exploding if a class has many subclasses with such
+   * overrides.
+   */
+  uint32_t preciseSubclassDynamicCNSLimit = 5000;
+
   //////////////////////////////////////////////////////////////////////
 
   /*
@@ -167,6 +176,7 @@ struct Options {
       (returnTypeRefineLimit)
       (publicSPropRefineLimit)
       (preciseSubclassLimit)
+      (preciseSubclassDynamicCNSLimit)
       (ContextSensitiveInterp)
       (SourceRootForFileBC)
       (CoreDump)

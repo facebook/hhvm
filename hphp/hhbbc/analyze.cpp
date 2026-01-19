@@ -22,6 +22,8 @@
 #include <string>
 #include <vector>
 
+#include "hphp/runtime/base/type-structure-helpers-defs.h"
+
 #include "hphp/util/configs/eval.h"
 #include "hphp/util/dataflow-worklist.h"
 #include "hphp/util/trace.h"
@@ -715,6 +717,59 @@ void expand_hni_prop_types(ClassAnalysis& clsAnalysis) {
 
 //////////////////////////////////////////////////////////////////////
 
+using Invariance = php::Const::Invariance;
+
+// Try to determine the appropriate invariance field for a (resolved)
+// type class constant. This requires looking at all of the subclasses
+// and comparing how they resolve the same type class constant.
+Invariance determine_invariance(const IIndex& index,
+                                const Context& ctx,
+                                SString name,
+                                SArray resolved) {
+  auto const rcls = index.resolve_class(*ctx.cls);
+  assertx(rcls);
+
+  auto const check = tvIsString(resolved->get(s_classname));
+  auto invariance = Invariance::Same;
+
+  auto const full = rcls->forEachSubclass(
+    [&] (SString subn, Attr) {
+      if (subn->tsame(ctx.cls->name)) return;
+
+      // Subclass isn't present, be conservative.
+      auto const srcls = index.resolve_class(subn);
+      if (!srcls) {
+        invariance = Invariance::None;
+        return;
+      }
+
+      auto const lookup =
+        index.lookup_class_type_constant(clsExact(*srcls, true), sval(name));
+      auto const sresolved = lookup.resolution.sarray();
+      if (!sresolved) {
+        // We can't resolve it, so we can't assume anything.
+        invariance = Invariance::None;
+        return;
+      }
+
+      if (sresolved == resolved) return;
+
+      // The resolved type structure in this subclass is not the
+      // same. We might still be able to assert that a classname is
+      // always present, or a resolved type structure at least exists.
+      if (invariance == Invariance::Same ||
+          invariance == Invariance::ClassnamePresent) {
+        invariance = (check && tvIsString(sresolved->get(s_classname)))
+          ? Invariance::ClassnamePresent
+          : Invariance::Present;
+      }
+    }
+  );
+  // If we don't have complete children here, the only reason is
+  // because this is a conservative class, so be conservative.
+  return full ? invariance : Invariance::None;
+}
+
 void resolve_type_constants(const IIndex& index,
                             const Context& ctx,
                             ClassAnalysis& analysis) {
@@ -728,18 +783,38 @@ void resolve_type_constants(const IIndex& index,
     auto const name = pair.first;
     auto const idx = pair.second;
 
-    if (idx.cls->tsame(ctx.cls->name)) {
-      assertx(idx.idx < ctx.cls->constants.size());
-      auto const& cns = ctx.cls->constants[idx.idx];
-      if (cns.resolvedTypeStructure) continue;
-    }
-
     SCOPE_ASSERT_DETAIL("resolve-type-constants") {
       return folly::sformat(
         "Resolving {}::{} -> {}",
         idx.cls, name, show(ctx)
       );
     };
+
+    if (idx.cls->tsame(ctx.cls->name)) {
+      assertx(idx.idx < ctx.cls->constants.size());
+      auto const& cns = ctx.cls->constants[idx.idx];
+      if (cns.resolvedTypeStructure) {
+        if (cns.invariance != Invariance::None) continue;
+        auto const invariance = determine_invariance(
+          index,
+          ctx,
+          name,
+          cns.resolvedTypeStructure
+        );
+        if (invariance != Invariance::None) {
+          analysis.resolvedTypeConsts.emplace_back(
+            ResolvedClsTypeConst{
+              cns.resolvedTypeStructure,
+              cns.contextInsensitive,
+              idx,
+              invariance
+            }
+          );
+        }
+        continue;
+      }
+    }
+
     FTRACE(2, "{:-^70}\n-- ({}) {}::{}\n", "Resolve", show(ctx), idx.cls, name);
 
     auto const lookup = index.lookup_class_type_constant(*ctx.cls, name, idx);
@@ -755,11 +830,13 @@ void resolve_type_constants(const IIndex& index,
       lookup.resolution.contextSensitive ? " (context sensitive)" : ""
     );
 
+    auto const invariance = determine_invariance(index, ctx, name, ts);
     analysis.resolvedTypeConsts.emplace_back(
       ResolvedClsTypeConst{
         ts,
         !lookup.resolution.contextSensitive,
-        idx
+        idx,
+        invariance
       }
     );
   }

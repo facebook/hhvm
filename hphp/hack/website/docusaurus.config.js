@@ -11,7 +11,7 @@ const darkCodeTheme = require('prism-react-renderer').themes.vsDark;
 (module.exports = {
   title: 'Hack & HHVM Documentation',
   tagline: 'Moving fast with high-performance Hack, a programming language for building reliable websites at epic scale',
-  url: 'https://internalfb.com',
+  url: 'https://docs.hhvm.com',
   baseUrl: process.env.DOCUSAURUS_BASE_URL || '/',
   onBrokenLinks: 'warn', // TODO: change back to 'throw' ones apis/* (and hsl/*) have been populated
   trailingSlash: true,

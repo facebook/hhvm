@@ -239,7 +239,7 @@ class FizzAcceptorHandshakeHelper
       wangle::TransportInfo& tinfo,
       FizzHandshakeOptions&& options,
       fizz::AsyncFizzBase::TransportOptions transportOptions,
-      ExtendedFallbackStatePolicy extendedFallbackStatePolicy)
+      ExtendedFallbackStatePolicy extendedFallbackStatePolicy = {})
       : context_(std::move(context)),
         sslContextManager_(std::move(sslContextManager)),
         tokenBindingContext_(std::move(options.tokenBindingCtx_)),

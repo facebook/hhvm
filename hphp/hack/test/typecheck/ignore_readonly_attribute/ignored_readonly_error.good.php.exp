@@ -1,0 +1,8 @@
+ERROR: File "ignored_readonly_error.good.php", line 30, characters 25-164:
+Invalid return type (Typing[4411])
+  File "ignored_readonly_error.good.php", line 30, characters 25-164:
+  Function readonly mismatch
+  File "ignored_readonly_error.good.php", line 30, characters 25-164:
+  This function is not marked readonly
+  File "ignored_readonly_error.good.php", line 12, characters 19-24:
+  This function is marked readonly

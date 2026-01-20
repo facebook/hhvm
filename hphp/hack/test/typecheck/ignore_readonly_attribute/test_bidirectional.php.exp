@@ -1,0 +1,8 @@
+ERROR: File "test_bidirectional.php", line 15, characters 32-52:
+Invalid return type (Typing[4411])
+  File "test_bidirectional.php", line 5, characters 33-58:
+  Function readonly return mismatch
+  File "test_bidirectional.php", line 5, characters 33-58:
+  This function returns a readonly value
+  File "test_bidirectional.php", line 10, characters 55-71:
+  This function does not return a readonly value

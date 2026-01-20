@@ -9485,6 +9485,7 @@ end = struct
       let expected =
         Some
           (ExpectedTy.make
+             ~ignore_readonly:return_ignore_readonly
              (Aast_utils.get_expr_pos e)
              Reason.URreturn
              return_type)

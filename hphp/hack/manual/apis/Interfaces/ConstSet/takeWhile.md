@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a [` ConstSet `](/docs/apis/Interfaces/ConstSet/) containing the values of the current [` ConstSet `](/docs/apis/Interfaces/ConstSet/) up to
+Returns a [` ConstSet `](/apis/Interfaces/ConstSet/) containing the values of the current [` ConstSet `](/apis/Interfaces/ConstSet/) up to
 but not including the first value that produces `` false `` when passed to the
 specified callback
 
@@ -22,8 +22,8 @@ public function takeWhile(
 
 
 
-The returned [` ConstSet `](/docs/apis/Interfaces/ConstSet/) will always be a proper subset of the current
-[` ConstSet `](/docs/apis/Interfaces/ConstSet/).
+The returned [` ConstSet `](/apis/Interfaces/ConstSet/) will always be a proper subset of the current
+[` ConstSet `](/apis/Interfaces/ConstSet/).
 
 
 
@@ -43,6 +43,6 @@ The returned [` ConstSet `](/docs/apis/Interfaces/ConstSet/) will always be a pr
 
 
 
-* [` ConstSet<Tv> `](/docs/apis/Interfaces/ConstSet/) - A [` ConstSet `](/docs/apis/Interfaces/ConstSet/) that is a proper subset of the current [` ConstSet `](/docs/apis/Interfaces/ConstSet/)
+* [` ConstSet<Tv> `](/apis/Interfaces/ConstSet/) - A [` ConstSet `](/apis/Interfaces/ConstSet/) that is a proper subset of the current [` ConstSet `](/apis/Interfaces/ConstSet/)
   up until the callback returns `` false ``.
 <!-- HHAPIDOC -->

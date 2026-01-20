@@ -51,7 +51,7 @@ Space complexity: O(n)
 
 
 
-* [` Traversable<(Tk, `](/docs/apis/Interfaces/HH/Traversable/)`` Tv)> $entries ``
+* [` Traversable<(Tk, `](/apis/Interfaces/HH/Traversable/)`` Tv)> $entries ``
 
 
 

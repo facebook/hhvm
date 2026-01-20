@@ -42,8 +42,8 @@ combined size of all the ```` ...$rest ````
 
 
 
-+ [` KeyedTraversable<Tk, `](/docs/apis/Interfaces/HH/KeyedTraversable/)`` Tv> $first ``
-+ [` KeyedContainer<Tk, `](/docs/apis/Interfaces/HH/KeyedContainer/)`` Tv> ...$rest ``
++ [` KeyedTraversable<Tk, `](/apis/Interfaces/HH/KeyedTraversable/)`` Tv> $first ``
++ [` KeyedContainer<Tk, `](/apis/Interfaces/HH/KeyedContainer/)`` Tv> ...$rest ``
 
 
 

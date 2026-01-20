@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns an [` ImmVector `](/docs/apis/Classes/HH/ImmVector/) containing the values of the current [` Pair `](/docs/apis/Classes/HH/Pair/) that
+Returns an [` ImmVector `](/apis/Classes/HH/ImmVector/) containing the values of the current [` Pair `](/apis/Classes/HH/Pair/) that
 meet a supplied condition applied to its keys and values
 
 
@@ -22,8 +22,8 @@ public function filterWithKey(
 
 
 Only keys and values that meet a certain criteria are affected by a call to
-[` filterWithKey() `](/docs/apis/Classes/HH/Pair/filterWithKey/), while all values are affected by a call to
-[` mapWithKey() `](/docs/apis/Classes/HH/Pair/mapWithKey/).
+[` filterWithKey() `](/apis/Classes/HH/Pair/filterWithKey/), while all values are affected by a call to
+[` mapWithKey() `](/apis/Classes/HH/Pair/mapWithKey/).
 
 
 
@@ -34,7 +34,7 @@ Only keys and values that meet a certain criteria are affected by a call to
 
 
 + ` (function(int, mixed): bool) $callback ` - The callback containing the condition to apply to the
-  current [` Pair `](/docs/apis/Classes/HH/Pair/) keys and values.
+  current [` Pair `](/apis/Classes/HH/Pair/) keys and values.
 
 
 
@@ -44,7 +44,7 @@ Only keys and values that meet a certain criteria are affected by a call to
 
 
 
-* [` ImmVector<mixed> `](/docs/apis/Classes/HH/ImmVector/) - an [` ImmVector `](/docs/apis/Classes/HH/ImmVector/) containing the values after a user-specified
+* [` ImmVector<mixed> `](/apis/Classes/HH/ImmVector/) - an [` ImmVector `](/apis/Classes/HH/ImmVector/) containing the values after a user-specified
   condition is applied to the keys and values of the current
-  [` Pair `](/docs/apis/Classes/HH/Pair/).
+  [` Pair `](/apis/Classes/HH/Pair/).
 <!-- HHAPIDOC -->

@@ -44,7 +44,7 @@ public function add(
 
 
 
-* [` Awaitable<void> `](/docs/apis/Classes/HH/Awaitable/)
+* [` Awaitable<void> `](/apis/Classes/HH/Awaitable/)
 
 
 
@@ -54,7 +54,7 @@ public function add(
 
 
 
-The following example shows how to use [` MCRouter::add `](/docs/apis/Classes/MCRouter/add/) to add a unique key/value pair to the memcached server. You cannot `` add `` the same key twice; if you need to update a key, use [` MCRouter::set `](/docs/apis/Classes/MCRouter/set/)
+The following example shows how to use [` MCRouter::add `](/apis/Classes/MCRouter/add/) to add a unique key/value pair to the memcached server. You cannot `` add `` the same key twice; if you need to update a key, use [` MCRouter::set `](/apis/Classes/MCRouter/set/)
 
 
 

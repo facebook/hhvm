@@ -34,8 +34,8 @@ interface SeekableHandle implements Handle {...}
 
 
 
-+ [` ->seek(int $offset): void `](</docs/hsl/Interfaces/HH.Lib.IO/SeekableHandle/seek/>)\
++ [` ->seek(int $offset): void `](</hsl/Interfaces/HH.Lib.IO/SeekableHandle/seek/>)\
   Move to a specific offset within a handle
-+ [` ->tell(): int `](</docs/hsl/Interfaces/HH.Lib.IO/SeekableHandle/tell/>)\
++ [` ->tell(): int `](</hsl/Interfaces/HH.Lib.IO/SeekableHandle/tell/>)\
   Get the current pointer position within a handle
 <!-- HHAPIDOC -->

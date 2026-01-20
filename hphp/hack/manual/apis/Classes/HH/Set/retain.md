@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Alters the current [` Set `](/docs/apis/Classes/HH/Set/) so that it only contains the values that meet a
+Alters the current [` Set `](/apis/Classes/HH/Set/) so that it only contains the values that meet a
 supplied condition on each value
 
 
@@ -21,14 +21,14 @@ public function retain(
 
 
 
-This method is like [` filter() `](/docs/apis/Classes/HH/Set/filter/), but mutates the current [` Set `](/docs/apis/Classes/HH/Set/) too in
-addition to returning the current [` Set `](/docs/apis/Classes/HH/Set/).
+This method is like [` filter() `](/apis/Classes/HH/Set/filter/), but mutates the current [` Set `](/apis/Classes/HH/Set/) too in
+addition to returning the current [` Set `](/apis/Classes/HH/Set/).
 
 
 
 
-Future changes made to the current [` Set `](/docs/apis/Classes/HH/Set/) ARE reflected in the returned
-[` Set `](/docs/apis/Classes/HH/Set/), and vice-versa.
+Future changes made to the current [` Set `](/apis/Classes/HH/Set/) ARE reflected in the returned
+[` Set `](/apis/Classes/HH/Set/), and vice-versa.
 
 
 
@@ -48,7 +48,7 @@ Future changes made to the current [` Set `](/docs/apis/Classes/HH/Set/) ARE ref
 
 
 
-* [` Set<Tv> `](/docs/apis/Classes/HH/Set/) - Returns itself.
+* [` Set<Tv> `](/apis/Classes/HH/Set/) - Returns itself.
 
 
 

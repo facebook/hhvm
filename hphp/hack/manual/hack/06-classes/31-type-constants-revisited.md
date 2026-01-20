@@ -82,7 +82,7 @@ function run(): void {
 ```
 
 Notice the syntax `abstract const type <name> [ as <constraint> ];`. All type constants are `const` and use the keyword `type`. You
-specify a name for the constant, along with any possible [constraints](/docs/hack/generics/type-constraints) that
+specify a name for the constant, along with any possible [constraints](/hack/generics/type-constraints) that
 must be adhered to.
 
 ## Using Type Constants
@@ -100,7 +100,7 @@ e.g.,
 this::T
 ```
 
-You can think of `this::` in a similar manner as the [`this` return type](/docs/hack/built-in-types/this).
+You can think of `this::` in a similar manner as the [`this` return type](/hack/built-in-types/this).
 
 This example shows the real benefit of type constants. The property is defined in `Base`, but can have different types depending
 on the context of where it is being used.

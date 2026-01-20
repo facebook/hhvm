@@ -6,8 +6,8 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-For every element in the provided [` Traversable `](/docs/apis/Interfaces/HH/Traversable/), stores a value into the
-current [` Map `](/docs/apis/Classes/HH/Map/) associated with each key, overwriting the previous value
+For every element in the provided [` Traversable `](/apis/Interfaces/HH/Traversable/), stores a value into the
+current [` Map `](/apis/Classes/HH/Map/) associated with each key, overwriting the previous value
 associated with the key
 
 
@@ -22,16 +22,16 @@ public function setAll(
 
 
 
-This method is equivalent to [` Map::addAll() `](/docs/apis/Classes/HH/Map/addAll/). If a key to set does not
-exist in the Map that does exist in the [` Traversable `](/docs/apis/Interfaces/HH/Traversable/), it is created. This
-is inconsistent with, for example, the method [` Vector::setAll() `](/docs/apis/Classes/HH/Vector/setAll/) where if
+This method is equivalent to [` Map::addAll() `](/apis/Classes/HH/Map/addAll/). If a key to set does not
+exist in the Map that does exist in the [` Traversable `](/apis/Interfaces/HH/Traversable/), it is created. This
+is inconsistent with, for example, the method [` Vector::setAll() `](/apis/Classes/HH/Vector/setAll/) where if
 a key is not found, an exception is thrown.
 
 
 
 
-Future changes made to the current [` Map `](/docs/apis/Classes/HH/Map/) ARE reflected in the returned
-[` Map `](/docs/apis/Classes/HH/Map/), and vice-versa.
+Future changes made to the current [` Map `](/apis/Classes/HH/Map/) ARE reflected in the returned
+[` Map `](/apis/Classes/HH/Map/), and vice-versa.
 
 
 
@@ -41,7 +41,7 @@ Future changes made to the current [` Map `](/docs/apis/Classes/HH/Map/) ARE ref
 
 
 
-+ ` ? `[` KeyedTraversable<Tk, `](/docs/apis/Interfaces/HH/KeyedTraversable/)`` Tv> $iterable ``
++ ` ? `[` KeyedTraversable<Tk, `](/apis/Interfaces/HH/KeyedTraversable/)`` Tv> $iterable ``
 
 
 
@@ -51,7 +51,7 @@ Future changes made to the current [` Map `](/docs/apis/Classes/HH/Map/) ARE ref
 
 
 
-* [` Map<Tk, `](/docs/apis/Classes/HH/Map/)`` Tv> `` - Returns itself.
+* [` Map<Tk, `](/apis/Classes/HH/Map/)`` Tv> `` - Returns itself.
 
 
 
@@ -61,7 +61,7 @@ Future changes made to the current [` Map `](/docs/apis/Classes/HH/Map/) ARE ref
 
 
 
-This example shows how [` setAll() `](/docs/apis/Classes/HH/Map/setAll/) can be used with any [` KeyedTraversable `](/docs/apis/Interfaces/HH/KeyedTraversable/):
+This example shows how [` setAll() `](/apis/Classes/HH/Map/setAll/) can be used with any [` KeyedTraversable `](/apis/Interfaces/HH/KeyedTraversable/):
 
 
 

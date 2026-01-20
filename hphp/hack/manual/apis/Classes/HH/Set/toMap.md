@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a ` Map ` based on the values of the current [` Set `](/docs/apis/Classes/HH/Set/)
+Returns a ` Map ` based on the values of the current [` Set `](/apis/Classes/HH/Set/)
 
 
 
@@ -28,7 +28,7 @@ Each key of the ` Map ` will be the same as its value.
 
 
 
-+ [` Map<arraykey, `](/docs/apis/Classes/HH/Map/)`` Tv> `` - a ``` Map ``` that that contains the values of the current [` Set `](/docs/apis/Classes/HH/Set/), with
++ [` Map<arraykey, `](/apis/Classes/HH/Map/)`` Tv> `` - a ``` Map ``` that that contains the values of the current [` Set `](/apis/Classes/HH/Set/), with
   each key of the `` Map `` being the same as its value.
 
 

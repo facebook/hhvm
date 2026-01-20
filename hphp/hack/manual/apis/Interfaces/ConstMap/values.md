@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a [` ConstVector `](/docs/apis/Interfaces/ConstVector/) containing the values of the current [` ConstMap `](/docs/apis/Interfaces/ConstMap/)
+Returns a [` ConstVector `](/apis/Interfaces/ConstVector/) containing the values of the current [` ConstMap `](/apis/Interfaces/ConstMap/)
 
 
 
@@ -18,7 +18,7 @@ public function values(): ConstVector<Tv>;
 
 
 
-The indices of the [` ConstVector `](/docs/apis/Interfaces/ConstVector/)`` will be integer-indexed starting from 0, no matter the keys of the ``ConstMap`.
+The indices of the [` ConstVector `](/apis/Interfaces/ConstVector/)`` will be integer-indexed starting from 0, no matter the keys of the ``ConstMap`.
 
 
 
@@ -28,5 +28,5 @@ The indices of the [` ConstVector `](/docs/apis/Interfaces/ConstVector/)`` will 
 
 
 
-+ [` ConstVector<Tv> `](/docs/apis/Interfaces/ConstVector/) - a [` ConstVector `](/docs/apis/Interfaces/ConstVector/) containing the values of the current [` ConstMap `](/docs/apis/Interfaces/ConstMap/).
++ [` ConstVector<Tv> `](/apis/Interfaces/ConstVector/) - a [` ConstVector `](/apis/Interfaces/ConstVector/) containing the values of the current [` ConstMap `](/apis/Interfaces/ConstMap/).
 <!-- HHAPIDOC -->

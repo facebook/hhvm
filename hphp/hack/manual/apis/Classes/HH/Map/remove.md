@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Removes the specified key (and associated value) from the current [` Map `](/docs/apis/Classes/HH/Map/)
+Removes the specified key (and associated value) from the current [` Map `](/apis/Classes/HH/Map/)
 
 
 
@@ -20,13 +20,13 @@ public function remove(
 
 
 
-This method is interchangeable with [` removeKey() `](/docs/apis/Classes/HH/Map/removeKey/).
+This method is interchangeable with [` removeKey() `](/apis/Classes/HH/Map/removeKey/).
 
 
 
 
-Future changes made to the current [` Map `](/docs/apis/Classes/HH/Map/) ARE reflected in the returned
-[` Map `](/docs/apis/Classes/HH/Map/), and vice-versa.
+Future changes made to the current [` Map `](/apis/Classes/HH/Map/) ARE reflected in the returned
+[` Map `](/apis/Classes/HH/Map/), and vice-versa.
 
 
 
@@ -46,7 +46,7 @@ Future changes made to the current [` Map `](/docs/apis/Classes/HH/Map/) ARE ref
 
 
 
-* [` Map<Tk, `](/docs/apis/Classes/HH/Map/)`` Tv> `` - Returns itself.
+* [` Map<Tk, `](/apis/Classes/HH/Map/)`` Tv> `` - Returns itself.
 
 
 
@@ -56,7 +56,7 @@ Future changes made to the current [` Map `](/docs/apis/Classes/HH/Map/) ARE ref
 
 
 
-Since [` Map::remove() `](/docs/apis/Classes/HH/Map/remove/) returns a [shallow copy](<https://en.wikipedia.org/wiki/Object_copying#Shallow_copy>) of ` $m ` itself, you can chain a bunch of [` remove() `](/docs/apis/Classes/HH/Map/remove/) calls together.
+Since [` Map::remove() `](/apis/Classes/HH/Map/remove/) returns a [shallow copy](<https://en.wikipedia.org/wiki/Object_copying#Shallow_copy>) of ` $m ` itself, you can chain a bunch of [` remove() `](/apis/Classes/HH/Map/remove/) calls together.
 
 
 

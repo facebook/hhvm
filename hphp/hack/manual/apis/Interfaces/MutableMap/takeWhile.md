@@ -6,8 +6,8 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a [` MutableMap `](/docs/apis/Interfaces/MutableMap/) containing the keys and values of the current
-[` MutableMap `](/docs/apis/Interfaces/MutableMap/) up to but not including the first value that produces `` false ``
+Returns a [` MutableMap `](/apis/Interfaces/MutableMap/) containing the keys and values of the current
+[` MutableMap `](/apis/Interfaces/MutableMap/) up to but not including the first value that produces `` false ``
 when passed to the specified callback
 
 
@@ -22,8 +22,8 @@ public function takeWhile(
 
 
 
-The returned [` MutableMap `](/docs/apis/Interfaces/MutableMap/) will always be a proper subset of the current
-[` MutableMap `](/docs/apis/Interfaces/MutableMap/).
+The returned [` MutableMap `](/apis/Interfaces/MutableMap/) will always be a proper subset of the current
+[` MutableMap `](/apis/Interfaces/MutableMap/).
 
 
 
@@ -43,6 +43,6 @@ The returned [` MutableMap `](/docs/apis/Interfaces/MutableMap/) will always be 
 
 
 
-* [` MutableMap<Tk, `](/docs/apis/Interfaces/MutableMap/)`` Tv> `` - A [` MutableMap `](/docs/apis/Interfaces/MutableMap/) that is a proper subset of the current
-  [` MutableMap `](/docs/apis/Interfaces/MutableMap/) up until the callback returns `` false ``.
+* [` MutableMap<Tk, `](/apis/Interfaces/MutableMap/)`` Tv> `` - A [` MutableMap `](/apis/Interfaces/MutableMap/) that is a proper subset of the current
+  [` MutableMap `](/apis/Interfaces/MutableMap/) up until the callback returns `` false ``.
 <!-- HHAPIDOC -->

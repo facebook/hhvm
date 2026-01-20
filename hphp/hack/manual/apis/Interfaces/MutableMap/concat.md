@@ -6,8 +6,8 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a [` MutableVector `](/docs/apis/Interfaces/MutableVector/) that is the concatenation of the values of the
-current [` MutableMap `](/docs/apis/Interfaces/MutableMap/) and the values of the provided [` Traversable `](/docs/apis/Interfaces/HH/Traversable/)
+Returns a [` MutableVector `](/apis/Interfaces/MutableVector/) that is the concatenation of the values of the
+current [` MutableMap `](/apis/Interfaces/MutableMap/) and the values of the provided [` Traversable `](/apis/Interfaces/HH/Traversable/)
 
 
 
@@ -21,8 +21,8 @@ public function concat<Tu super Tv>(
 
 
 
-The provided [` Traversable `](/docs/apis/Interfaces/HH/Traversable/) is concatenated to the end of the current
-[` MutableMap `](/docs/apis/Interfaces/MutableMap/) to produce the returned [` MutableVector `](/docs/apis/Interfaces/MutableVector/).
+The provided [` Traversable `](/apis/Interfaces/HH/Traversable/) is concatenated to the end of the current
+[` MutableMap `](/apis/Interfaces/MutableMap/) to produce the returned [` MutableVector `](/apis/Interfaces/MutableVector/).
 
 
 
@@ -32,7 +32,7 @@ The provided [` Traversable `](/docs/apis/Interfaces/HH/Traversable/) is concate
 
 
 
-+ [Constraints](</docs/hack/generics/type-constraints>)
++ [Constraints](</hack/generics/type-constraints>)
 
 
 
@@ -45,8 +45,8 @@ The provided [` Traversable `](/docs/apis/Interfaces/HH/Traversable/) is concate
 
 
 
-* [` Traversable<Tu> `](/docs/apis/Interfaces/HH/Traversable/)`` $traversable `` - The [` Traversable `](/docs/apis/Interfaces/HH/Traversable/) to concatenate to the current
-  [` MutableMap `](/docs/apis/Interfaces/MutableMap/).
+* [` Traversable<Tu> `](/apis/Interfaces/HH/Traversable/)`` $traversable `` - The [` Traversable `](/apis/Interfaces/HH/Traversable/) to concatenate to the current
+  [` MutableMap `](/apis/Interfaces/MutableMap/).
 
 
 
@@ -56,5 +56,5 @@ The provided [` Traversable `](/docs/apis/Interfaces/HH/Traversable/) is concate
 
 
 
-- [` MutableVector<Tu> `](/docs/apis/Interfaces/MutableVector/) - The integer-indexed concatenated [` MutableVector `](/docs/apis/Interfaces/MutableVector/).
+- [` MutableVector<Tu> `](/apis/Interfaces/MutableVector/) - The integer-indexed concatenated [` MutableVector `](/apis/Interfaces/MutableVector/).
 <!-- HHAPIDOC -->

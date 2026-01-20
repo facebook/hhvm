@@ -33,5 +33,5 @@ public function toVector(): HH\object;
 
 
 
-See [` Set::toVector `](/docs/apis/Classes/HH/Set/toVector/#examples) for usage examples.
+See [` Set::toVector `](/apis/Classes/HH/Set/toVector/#examples) for usage examples.
 <!-- HHAPIDOC -->

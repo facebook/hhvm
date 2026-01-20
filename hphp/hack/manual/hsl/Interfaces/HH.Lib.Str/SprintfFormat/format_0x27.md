@@ -18,5 +18,5 @@ public function format_0x27(): HH\Lib\Str\SprintfFormatQuote;
 
 
 
-+ [` HH\Lib\Str\SprintfFormatQuote `](</docs/hsl/Interfaces/HH.Lib.Str/SprintfFormatQuote/>)
++ [` HH\Lib\Str\SprintfFormatQuote `](</hsl/Interfaces/HH.Lib.Str/SprintfFormatQuote/>)
 <!-- HHAPIDOC -->

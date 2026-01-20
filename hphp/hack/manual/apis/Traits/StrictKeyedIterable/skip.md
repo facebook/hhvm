@@ -30,5 +30,5 @@ public function skip(
 
 
 
-* [` KeyedIterable<Tk, `](/docs/apis/Interfaces/HH/KeyedIterable/)`` Tv> ``
+* [` KeyedIterable<Tk, `](/apis/Interfaces/HH/KeyedIterable/)`` Tv> ``
 <!-- HHAPIDOC -->

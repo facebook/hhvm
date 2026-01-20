@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Creates an [` ImmSet `](/docs/apis/Classes/HH/ImmSet/) from the given [` Traversable `](/docs/apis/Interfaces/HH/Traversable/), or an empty [` ImmSet `](/docs/apis/Classes/HH/ImmSet/) if
+Creates an [` ImmSet `](/apis/Classes/HH/ImmSet/) from the given [` Traversable `](/apis/Interfaces/HH/Traversable/), or an empty [` ImmSet `](/apis/Classes/HH/ImmSet/) if
 `` null `` is passed
 
 
@@ -21,7 +21,7 @@ public static function fromItems(
 
 
 
-This is the static method version of the [` ImmSet::__construct() `](/docs/apis/Classes/HH/ImmSet/__construct/)
+This is the static method version of the [` ImmSet::__construct() `](/apis/Classes/HH/ImmSet/__construct/)
 constructor.
 
 
@@ -32,7 +32,7 @@ constructor.
 
 
 
-+ ` ? `[` Traversable<Tv> `](/docs/apis/Interfaces/HH/Traversable/)`` $iterable ``
++ ` ? `[` Traversable<Tv> `](/apis/Interfaces/HH/Traversable/)`` $iterable ``
 
 
 
@@ -42,8 +42,8 @@ constructor.
 
 
 
-* [` ImmSet<Tv> `](/docs/apis/Classes/HH/ImmSet/) - An [` ImmSet `](/docs/apis/Classes/HH/ImmSet/) with the values from the [` Traversable `](/docs/apis/Interfaces/HH/Traversable/); or an empty
-  [` ImmSet `](/docs/apis/Classes/HH/ImmSet/) if the [` Traversable `](/docs/apis/Interfaces/HH/Traversable/) is `` null ``.
+* [` ImmSet<Tv> `](/apis/Classes/HH/ImmSet/) - An [` ImmSet `](/apis/Classes/HH/ImmSet/) with the values from the [` Traversable `](/apis/Interfaces/HH/Traversable/); or an empty
+  [` ImmSet `](/apis/Classes/HH/ImmSet/) if the [` Traversable `](/apis/Interfaces/HH/Traversable/) is `` null ``.
 
 
 
@@ -53,5 +53,5 @@ constructor.
 
 
 
-See [` Set::fromItems `](/docs/apis/Classes/HH/Set/fromItems/#examples) for usage examples.
+See [` Set::fromItems `](/apis/Classes/HH/Set/fromItems/#examples) for usage examples.
 <!-- HHAPIDOC -->

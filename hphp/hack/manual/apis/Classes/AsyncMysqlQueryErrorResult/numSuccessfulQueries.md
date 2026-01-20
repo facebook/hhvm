@@ -39,7 +39,7 @@ let you know how many of those there were.
 
 
 
-This example shows how we can get the number of successful queries of a multi-query, even though one of those queries gave us an error (which we caught in the exception). This is done via [` AsyncMysqlQueryErrorResult::numSuccessfulQueries `](/docs/apis/Classes/AsyncMysqlQueryErrorResult/numSuccessfulQueries/).
+This example shows how we can get the number of successful queries of a multi-query, even though one of those queries gave us an error (which we caught in the exception). This is done via [` AsyncMysqlQueryErrorResult::numSuccessfulQueries `](/apis/Classes/AsyncMysqlQueryErrorResult/numSuccessfulQueries/).
 
 
 

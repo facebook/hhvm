@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Throws an exception unless the current [` Set `](/docs/apis/Classes/HH/Set/) or the [` Traversable `](/docs/apis/Interfaces/HH/Traversable/) is
+Throws an exception unless the current [` Set `](/apis/Classes/HH/Set/) or the [` Traversable `](/apis/Interfaces/HH/Traversable/) is
 empty
 
 
@@ -21,10 +21,10 @@ public function zip<Tu>(
 
 
 
-Since [` Set `](/docs/apis/Classes/HH/Set/)s only support integers or strings as values, we cannot have
-a [` Pair `](/docs/apis/Classes/HH/Pair/) as a [` Set `](/docs/apis/Classes/HH/Set/) value. So in order to avoid an
-`` InvalidArgumentException ``, either the current [` Set `](/docs/apis/Classes/HH/Set/) or the [` Traversable `](/docs/apis/Interfaces/HH/Traversable/)
-must be empty so that we actually return an empty [` Set `](/docs/apis/Classes/HH/Set/).
+Since [` Set `](/apis/Classes/HH/Set/)s only support integers or strings as values, we cannot have
+a [` Pair `](/apis/Classes/HH/Pair/) as a [` Set `](/apis/Classes/HH/Set/) value. So in order to avoid an
+`` InvalidArgumentException ``, either the current [` Set `](/apis/Classes/HH/Set/) or the [` Traversable `](/apis/Interfaces/HH/Traversable/)
+must be empty so that we actually return an empty [` Set `](/apis/Classes/HH/Set/).
 
 
 
@@ -34,8 +34,8 @@ must be empty so that we actually return an empty [` Set `](/docs/apis/Classes/H
 
 
 
-+ [` Traversable<Tu> `](/docs/apis/Interfaces/HH/Traversable/)`` $traversable `` - The [` Traversable `](/docs/apis/Interfaces/HH/Traversable/) to use to combine with the
-  elements of the current [` Set `](/docs/apis/Classes/HH/Set/).
++ [` Traversable<Tu> `](/apis/Interfaces/HH/Traversable/)`` $traversable `` - The [` Traversable `](/apis/Interfaces/HH/Traversable/) to use to combine with the
+  elements of the current [` Set `](/apis/Classes/HH/Set/).
 
 
 
@@ -45,8 +45,8 @@ must be empty so that we actually return an empty [` Set `](/docs/apis/Classes/H
 
 
 
-* [` Set<HH\nothing> `](/docs/apis/Classes/HH/Set/) - The [` Set `](/docs/apis/Classes/HH/Set/) that combines the values of the current [` Set `](/docs/apis/Classes/HH/Set/) with
-  the provided [` Traversable `](/docs/apis/Interfaces/HH/Traversable/); one of these must be empty or an
+* [` Set<HH\nothing> `](/apis/Classes/HH/Set/) - The [` Set `](/apis/Classes/HH/Set/) that combines the values of the current [` Set `](/apis/Classes/HH/Set/) with
+  the provided [` Traversable `](/apis/Interfaces/HH/Traversable/); one of these must be empty or an
   exception is thrown.
 
 
@@ -57,7 +57,7 @@ must be empty so that we actually return an empty [` Set `](/docs/apis/Classes/H
 
 
 
-This example shows that ` zip ` won't thrown an `` Exception `` if at least one of the current [` Set `](/docs/apis/Classes/HH/Set/) or the `` $traversable `` is empty:
+This example shows that ` zip ` won't thrown an `` Exception `` if at least one of the current [` Set `](/apis/Classes/HH/Set/) or the `` $traversable `` is empty:
 
 
 

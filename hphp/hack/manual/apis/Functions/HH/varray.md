@@ -22,7 +22,7 @@ function varray<Tv>(
 
 
 
-+ [` Traversable<Tv> `](/docs/apis/Interfaces/HH/Traversable/)`` $arr ``
++ [` Traversable<Tv> `](/apis/Interfaces/HH/Traversable/)`` $arr ``
 
 
 

@@ -1,6 +1,6 @@
 # Subtyping
 
-From a typing perspective, one can think of a readonly object as a [supertype](/docs/hack/types/supertypes-and-subtypes) of its mutable counterpart.
+From a typing perspective, one can think of a readonly object as a [supertype](/hack/types/supertypes-and-subtypes) of its mutable counterpart.
 For example, readonly values cannot be passed to a function that takes mutable values.
 
 ```hack error

@@ -32,5 +32,5 @@ public function slice(
 
 
 
-* [` Iterable<Tv> `](/docs/apis/Interfaces/HH/Iterable/)
+* [` Iterable<Tv> `](/apis/Interfaces/HH/Iterable/)
 <!-- HHAPIDOC -->

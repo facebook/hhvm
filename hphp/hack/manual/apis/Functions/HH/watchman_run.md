@@ -34,5 +34,5 @@ function watchman_run(
 
 
 
-* [` Awaitable<string> `](/docs/apis/Classes/HH/Awaitable/)
+* [` Awaitable<string> `](/apis/Classes/HH/Awaitable/)
 <!-- HHAPIDOC -->

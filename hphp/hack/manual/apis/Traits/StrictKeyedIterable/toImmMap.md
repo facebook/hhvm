@@ -18,5 +18,5 @@ public function toImmMap(): ImmMap<Tk, Tv>;
 
 
 
-+ [` ImmMap<Tk, `](/docs/apis/Classes/HH/ImmMap/)`` Tv> ``
++ [` ImmMap<Tk, `](/apis/Classes/HH/ImmMap/)`` Tv> ``
 <!-- HHAPIDOC -->

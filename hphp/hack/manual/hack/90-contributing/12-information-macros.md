@@ -2,7 +2,7 @@
 
 This website supports `note`, `tip`, `caution`, and `danger` macro messages.
 
-These can be added with [admonition](https://docusaurus.io/docs/markdown-features/admonitions) syntax:
+These can be added with [admonition](https://docusaurus.io/markdown-features/admonitions) syntax:
 
 ```markdown
 :::note
@@ -21,7 +21,7 @@ The `noreturn` type can be upcasted to `dynamic`.
 ## Tip message
 
 :::tip
-To start learning Hack, read our [Getting Started](/docs/hack/getting-started/quick-start) documentation!
+To start learning Hack, read our [Getting Started](/hack/getting-started/quick-start) documentation!
 :::
 
 Hack lets you write code quickly, while also having safety features built in, like static type checking.

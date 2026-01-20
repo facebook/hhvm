@@ -30,5 +30,5 @@ public function filter(
 
 
 
-* [` Iterable<Tv> `](/docs/apis/Interfaces/HH/Iterable/)
+* [` Iterable<Tv> `](/apis/Interfaces/HH/Iterable/)
 <!-- HHAPIDOC -->

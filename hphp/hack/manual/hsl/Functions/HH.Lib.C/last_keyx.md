@@ -28,7 +28,7 @@ For possibly empty Traversables, see ` C\last_key `.
 
 
 
-Time complexity: O(1) if ` $traversable ` is a [` Container `](/docs/apis/Interfaces/HH/Container/), O(n) otherwise.
+Time complexity: O(1) if ` $traversable ` is a [` Container `](/apis/Interfaces/HH/Container/), O(n) otherwise.
 Space complexity: O(1)
 
 
@@ -39,7 +39,7 @@ Space complexity: O(1)
 
 
 
-+ [` KeyedTraversable<Tk, `](/docs/apis/Interfaces/HH/KeyedTraversable/)`` Tv> $traversable ``
++ [` KeyedTraversable<Tk, `](/apis/Interfaces/HH/KeyedTraversable/)`` Tv> $traversable ``
 
 
 

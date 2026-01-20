@@ -32,7 +32,7 @@ These numbers are used to control the ordering of guides on the
 website, and are not shown in the UI. They do not need to be
 sequential; there can be gaps.
 
-Within each folder, there are Markdown files (written in [Markdown](https://docusaurus.io/docs/markdown-features)).
+Within each folder, there are Markdown files (written in [Markdown](https://docusaurus.io/markdown-features)).
 
 ```
 $ ls guides/hack/01-getting-started/
@@ -56,7 +56,7 @@ provided, preferably under 15 lines.
 We assume the reader has a relatively recent version of
 HHVM. References to very old features will be removed, but we provide
 [Docker images of historical site
-versions](/docs/hack/contributing/introduction#running-an-old-version) if
+versions](/hack/contributing/introduction#running-an-old-version) if
 needed (from before we migrated to Docusaurus in 2025).
 
 It is not necessary to document all the incorrect ways a feature can be
@@ -66,7 +66,7 @@ Hack type checker to tell them when they have done something wrong.
 ## Links
 
 Internal links should be **absolute paths** without a domain,
-e.g. `/docs/hack/contributing/introduction`.
+e.g. `/hack/contributing/introduction`.
 
 Image paths should be relative to `static`,
 e.g. `/img/imagename.png`.

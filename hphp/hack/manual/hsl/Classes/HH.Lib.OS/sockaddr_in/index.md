@@ -39,12 +39,12 @@ final class sockaddr_in extends sockaddr {...}
 
 
 
-+ [` ->__construct(int $port, in_addr $address) `](/docs/hsl/Classes/HH.Lib.OS/sockaddr_in/__construct/)\
++ [` ->__construct(int $port, in_addr $address) `](/hsl/Classes/HH.Lib.OS/sockaddr_in/__construct/)\
   Construct a `` sockaddr_in ``
-+ [` ->__debugInfo(): darray<string, mixed> `](/docs/hsl/Classes/HH.Lib.OS/sockaddr_in/__debugInfo/)
-+ [` ->getAddress(): in_addr `](/docs/hsl/Classes/HH.Lib.OS/sockaddr_in/getAddress/)\
++ [` ->__debugInfo(): darray<string, mixed> `](/hsl/Classes/HH.Lib.OS/sockaddr_in/__debugInfo/)
++ [` ->getAddress(): in_addr `](/hsl/Classes/HH.Lib.OS/sockaddr_in/getAddress/)\
   Get the IP address, as a 32-bit integer, in host byte order
-+ [` ->getFamily(): AddressFamily `](/docs/hsl/Classes/HH.Lib.OS/sockaddr_in/getFamily/)
-+ [` ->getPort(): int `](/docs/hsl/Classes/HH.Lib.OS/sockaddr_in/getPort/)\
++ [` ->getFamily(): AddressFamily `](/hsl/Classes/HH.Lib.OS/sockaddr_in/getFamily/)
++ [` ->getPort(): int `](/hsl/Classes/HH.Lib.OS/sockaddr_in/getPort/)\
   Get the port, in host byte order
 <!-- HHAPIDOC -->

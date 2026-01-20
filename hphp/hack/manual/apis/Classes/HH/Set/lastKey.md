@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns the last "key" in the current [` Set `](/docs/apis/Classes/HH/Set/)
+Returns the last "key" in the current [` Set `](/apis/Classes/HH/Set/)
 
 
 
@@ -18,12 +18,12 @@ public function lastKey(): ?arraykey;
 
 
 
-Since [` Set `](/docs/apis/Classes/HH/Set/)s do not have keys, it returns the last value.
+Since [` Set `](/apis/Classes/HH/Set/)s do not have keys, it returns the last value.
 
 
 
 
-This method is interchangeable with [` lastValue() `](/docs/apis/Classes/HH/Set/lastValue/).
+This method is interchangeable with [` lastValue() `](/apis/Classes/HH/Set/lastValue/).
 
 
 
@@ -33,8 +33,8 @@ This method is interchangeable with [` lastValue() `](/docs/apis/Classes/HH/Set/
 
 
 
-+ ` ?arraykey ` - The last value in the current [` Set `](/docs/apis/Classes/HH/Set/), or `` null `` if the current
-  [` Set `](/docs/apis/Classes/HH/Set/) is empty.
++ ` ?arraykey ` - The last value in the current [` Set `](/apis/Classes/HH/Set/), or `` null `` if the current
+  [` Set `](/apis/Classes/HH/Set/) is empty.
 
 
 
@@ -44,7 +44,7 @@ This method is interchangeable with [` lastValue() `](/docs/apis/Classes/HH/Set/
 
 
 
-This example shows that ` lastKey ` returns the last value in the [` Set `](/docs/apis/Classes/HH/Set/). An empty [` Set `](/docs/apis/Classes/HH/Set/) will return `` null `` as its last key/value.
+This example shows that ` lastKey ` returns the last value in the [` Set `](/apis/Classes/HH/Set/). An empty [` Set `](/apis/Classes/HH/Set/) will return `` null `` as its last key/value.
 
 
 

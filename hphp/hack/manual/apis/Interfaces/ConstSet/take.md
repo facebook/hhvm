@@ -6,8 +6,8 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a [` ConstSet `](/docs/apis/Interfaces/ConstSet/) containing the first `` n `` values of the current
-[` ConstSet `](/docs/apis/Interfaces/ConstSet/)
+Returns a [` ConstSet `](/apis/Interfaces/ConstSet/) containing the first `` n `` values of the current
+[` ConstSet `](/apis/Interfaces/ConstSet/)
 
 
 
@@ -21,8 +21,8 @@ public function take(
 
 
 
-The returned [` ConstSet `](/docs/apis/Interfaces/ConstSet/) will always be a proper subset of the current
-[` ConstSet `](/docs/apis/Interfaces/ConstSet/).
+The returned [` ConstSet `](/apis/Interfaces/ConstSet/) will always be a proper subset of the current
+[` ConstSet `](/apis/Interfaces/ConstSet/).
 
 
 
@@ -37,7 +37,7 @@ The returned [` ConstSet `](/docs/apis/Interfaces/ConstSet/) will always be a pr
 
 
 
-+ ` int $n ` - The last element that will be included in the [` ConstSet `](/docs/apis/Interfaces/ConstSet/).
++ ` int $n ` - The last element that will be included in the [` ConstSet `](/apis/Interfaces/ConstSet/).
 
 
 
@@ -47,6 +47,6 @@ The returned [` ConstSet `](/docs/apis/Interfaces/ConstSet/) will always be a pr
 
 
 
-* [` ConstSet<Tv> `](/docs/apis/Interfaces/ConstSet/) - A [` ConstSet `](/docs/apis/Interfaces/ConstSet/) that is a proper subset of the current [` ConstSet `](/docs/apis/Interfaces/ConstSet/)
+* [` ConstSet<Tv> `](/apis/Interfaces/ConstSet/) - A [` ConstSet `](/apis/Interfaces/ConstSet/) that is a proper subset of the current [` ConstSet `](/apis/Interfaces/ConstSet/)
   up to `` n `` elements.
 <!-- HHAPIDOC -->

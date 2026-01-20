@@ -3,7 +3,7 @@
 We support x86_64 Linux, and offer prebuilt packages on variety of Ubuntu and
 Debian platforms.
 
-While you can [build from source](/docs/hhvm/installation/building-from-source), it is generally advisable for ease of installation and stability to use a prebuilt package.
+While you can [build from source](/hhvm/installation/building-from-source), it is generally advisable for ease of installation and stability to use a prebuilt package.
 
 These instructions require root; use `su -` or `sudo -i` to get a root shell first.
 

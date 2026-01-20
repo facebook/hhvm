@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a [` Vector `](/docs/apis/Classes/HH/Vector/) containing the keys of the current [` Vector `](/docs/apis/Classes/HH/Vector/)
+Returns a [` Vector `](/apis/Classes/HH/Vector/) containing the keys of the current [` Vector `](/apis/Classes/HH/Vector/)
 
 
 
@@ -23,7 +23,7 @@ public function keys(): Vector<int>;
 
 
 
-+ [` Vector<int> `](/docs/apis/Classes/HH/Vector/) - A [` Vector `](/docs/apis/Classes/HH/Vector/) containing the integer keys of the current [` Vector `](/docs/apis/Classes/HH/Vector/).
++ [` Vector<int> `](/apis/Classes/HH/Vector/) - A [` Vector `](/apis/Classes/HH/Vector/) containing the integer keys of the current [` Vector `](/apis/Classes/HH/Vector/).
 
 
 

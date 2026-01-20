@@ -39,7 +39,7 @@ The string returned will be either ` 'TimedOut' `, representing a timeout, or
 
 
 
-When an error occurs when establishing a connection or on a query, and you catch the exception that is thrown, you will get an [` AsyncMysqlErrorResult `](/docs/apis/Classes/AsyncMysqlErrorResult/). And one of the methods on an [` AsyncMysqlErrorResult `](/docs/apis/Classes/AsyncMysqlErrorResult/) is [` failureType() `](/docs/apis/Classes/AsyncMysqlErrorResult/failureType/), which tells you whether the operation was a timeout (via the string `` TimedOut ``) or a server rejection of our connection or query (via the string ``` Failed ```).
+When an error occurs when establishing a connection or on a query, and you catch the exception that is thrown, you will get an [` AsyncMysqlErrorResult `](/apis/Classes/AsyncMysqlErrorResult/). And one of the methods on an [` AsyncMysqlErrorResult `](/apis/Classes/AsyncMysqlErrorResult/) is [` failureType() `](/apis/Classes/AsyncMysqlErrorResult/failureType/), which tells you whether the operation was a timeout (via the string `` TimedOut ``) or a server rejection of our connection or query (via the string ``` Failed ```).
 
 
 

@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns an [` ImmMap `](/docs/apis/Classes/HH/ImmMap/) containing the keys and values of the current [` ImmMap `](/docs/apis/Classes/HH/ImmMap/)
+Returns an [` ImmMap `](/apis/Classes/HH/ImmMap/) containing the keys and values of the current [` ImmMap `](/apis/Classes/HH/ImmMap/)
 up to but not including the first value that produces `` false `` when passed
 to the specified callback
 
@@ -22,8 +22,8 @@ public function takeWhile(
 
 
 
-The returned [` ImmMap `](/docs/apis/Classes/HH/ImmMap/) will always be a proper subset of the current
-[` ImmMap `](/docs/apis/Classes/HH/ImmMap/).
+The returned [` ImmMap `](/apis/Classes/HH/ImmMap/) will always be a proper subset of the current
+[` ImmMap `](/apis/Classes/HH/ImmMap/).
 
 
 
@@ -43,7 +43,7 @@ The returned [` ImmMap `](/docs/apis/Classes/HH/ImmMap/) will always be a proper
 
 
 
-* [` ImmMap<Tk, `](/docs/apis/Classes/HH/ImmMap/)`` Tv> `` - An [` ImmMap `](/docs/apis/Classes/HH/ImmMap/) that is a proper subset of the current [` ImmMap `](/docs/apis/Classes/HH/ImmMap/) up
+* [` ImmMap<Tk, `](/apis/Classes/HH/ImmMap/)`` Tv> `` - An [` ImmMap `](/apis/Classes/HH/ImmMap/) that is a proper subset of the current [` ImmMap `](/apis/Classes/HH/ImmMap/) up
   until when the callback returns `` false ``.
 
 
@@ -54,5 +54,5 @@ The returned [` ImmMap `](/docs/apis/Classes/HH/ImmMap/) will always be a proper
 
 
 
-See [` Map::takeWhile `](/docs/apis/Classes/HH/Map/takeWhile) for usage examples.
+See [` Map::takeWhile `](/apis/Classes/HH/Map/takeWhile) for usage examples.
 <!-- HHAPIDOC -->

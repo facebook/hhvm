@@ -40,7 +40,7 @@ Space complexity: O(n), where n is the size of `` $traversable ``
 
 
 
-+ [` KeyedTraversable<Tk, `](/docs/apis/Interfaces/HH/KeyedTraversable/)`` Tv> $traversable ``
++ [` KeyedTraversable<Tk, `](/apis/Interfaces/HH/KeyedTraversable/)`` Tv> $traversable ``
 + ` int $n `
 
 

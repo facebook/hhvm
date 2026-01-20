@@ -6,8 +6,8 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a [` MutableVector `](/docs/apis/Interfaces/MutableVector/) containing the values of the current
-[` MutableVector `](/docs/apis/Interfaces/MutableVector/) up to but not including the first value that produces
+Returns a [` MutableVector `](/apis/Interfaces/MutableVector/) containing the values of the current
+[` MutableVector `](/apis/Interfaces/MutableVector/) up to but not including the first value that produces
 `` false `` when passed to the specified callback
 
 
@@ -22,8 +22,8 @@ public function takeWhile(
 
 
 
-The returned [` MutableVector `](/docs/apis/Interfaces/MutableVector/) will always be a proper subset of the current
-[` MutableVector `](/docs/apis/Interfaces/MutableVector/).
+The returned [` MutableVector `](/apis/Interfaces/MutableVector/) will always be a proper subset of the current
+[` MutableVector `](/apis/Interfaces/MutableVector/).
 
 
 
@@ -44,6 +44,6 @@ The returned [` MutableVector `](/docs/apis/Interfaces/MutableVector/) will alwa
 
 
 
-* [` MutableVector<Tv> `](/docs/apis/Interfaces/MutableVector/) - A [` MutableVector `](/docs/apis/Interfaces/MutableVector/) that is a proper subset of the current
-  [` MutableVector `](/docs/apis/Interfaces/MutableVector/) up until the callback returns `` false ``.
+* [` MutableVector<Tv> `](/apis/Interfaces/MutableVector/) - A [` MutableVector `](/apis/Interfaces/MutableVector/) that is a proper subset of the current
+  [` MutableVector `](/apis/Interfaces/MutableVector/) up until the callback returns `` false ``.
 <!-- HHAPIDOC -->

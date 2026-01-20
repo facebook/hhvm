@@ -27,10 +27,10 @@ class DOMNodeList implements IteratorAggregate<?DOMNode, Tnode> {...}
 
 
 
-+ [` ->__construct(): void `](/docs/apis/Classes/DOMNodeList/__construct/)
-+ [` ->__debugInfo(): darray<string, mixed> `](/docs/apis/Classes/DOMNodeList/__debugInfo/)
-+ [` ->getIterator(): Iterator<Tnode> `](/docs/apis/Classes/DOMNodeList/getIterator/)\
++ [` ->__construct(): void `](/apis/Classes/DOMNodeList/__construct/)
++ [` ->__debugInfo(): darray<string, mixed> `](/apis/Classes/DOMNodeList/__debugInfo/)
++ [` ->getIterator(): Iterator<Tnode> `](/apis/Classes/DOMNodeList/getIterator/)\
   Actually returns DOMNodeIterator which is not exposed as an HHI
-+ [` ->item(int $index): Tnode `](/docs/apis/Classes/DOMNodeList/item/)\
++ [` ->item(int $index): Tnode `](/apis/Classes/DOMNodeList/item/)\
   Retrieves a node specified by index within the DOMNodeList object
 <!-- HHAPIDOC -->

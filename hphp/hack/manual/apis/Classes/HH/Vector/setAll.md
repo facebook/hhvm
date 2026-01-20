@@ -6,8 +6,8 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-For every element in the provided [` Traversable `](/docs/apis/Interfaces/HH/Traversable/), stores a value into the
-current [` Vector `](/docs/apis/Classes/HH/Vector/) associated with each key, overwriting the previous value
+For every element in the provided [` Traversable `](/apis/Interfaces/HH/Traversable/), stores a value into the
+current [` Vector `](/apis/Classes/HH/Vector/) associated with each key, overwriting the previous value
 associated with the key
 
 
@@ -22,15 +22,15 @@ public function setAll(
 
 
 
-If a key is not present the current [` Vector `](/docs/apis/Classes/HH/Vector/) that is present in the
-[` Traversable `](/docs/apis/Interfaces/HH/Traversable/), an exception is thrown. If you want to add a value even if a
-key is not present, use [` addAll() `](/docs/apis/Classes/HH/Vector/addAll/).
+If a key is not present the current [` Vector `](/apis/Classes/HH/Vector/) that is present in the
+[` Traversable `](/apis/Interfaces/HH/Traversable/), an exception is thrown. If you want to add a value even if a
+key is not present, use [` addAll() `](/apis/Classes/HH/Vector/addAll/).
 
 
 
 
-Future changes made to the current [` Vector `](/docs/apis/Classes/HH/Vector/) ARE reflected in the
-returned [` Vector `](/docs/apis/Classes/HH/Vector/), and vice-versa.
+Future changes made to the current [` Vector `](/apis/Classes/HH/Vector/) ARE reflected in the
+returned [` Vector `](/apis/Classes/HH/Vector/), and vice-versa.
 
 
 
@@ -40,7 +40,7 @@ returned [` Vector `](/docs/apis/Classes/HH/Vector/), and vice-versa.
 
 
 
-+ ` ? `[` KeyedTraversable<int, `](/docs/apis/Interfaces/HH/KeyedTraversable/)`` Tv> $iterable ``
++ ` ? `[` KeyedTraversable<int, `](/apis/Interfaces/HH/KeyedTraversable/)`` Tv> $iterable ``
 
 
 
@@ -50,7 +50,7 @@ returned [` Vector `](/docs/apis/Classes/HH/Vector/), and vice-versa.
 
 
 
-* [` Vector<Tv> `](/docs/apis/Classes/HH/Vector/) - Returns itself.
+* [` Vector<Tv> `](/apis/Classes/HH/Vector/) - Returns itself.
 
 
 
@@ -60,7 +60,7 @@ returned [` Vector `](/docs/apis/Classes/HH/Vector/), and vice-versa.
 
 
 
-This example shows how [` setAll() `](/docs/apis/Classes/HH/Vector/setAll/) can be used with any [` KeyedTraversable `](/docs/apis/Interfaces/HH/KeyedTraversable/):
+This example shows how [` setAll() `](/apis/Classes/HH/Vector/setAll/) can be used with any [` KeyedTraversable `](/apis/Interfaces/HH/KeyedTraversable/):
 
 
 

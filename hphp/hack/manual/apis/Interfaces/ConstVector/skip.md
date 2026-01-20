@@ -6,8 +6,8 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a [` ConstVector `](/docs/apis/Interfaces/ConstVector/) containing the values after the `` n ``-th element of
-the current [` ConstVector `](/docs/apis/Interfaces/ConstVector/)
+Returns a [` ConstVector `](/apis/Interfaces/ConstVector/) containing the values after the `` n ``-th element of
+the current [` ConstVector `](/apis/Interfaces/ConstVector/)
 
 
 
@@ -21,8 +21,8 @@ public function skip(
 
 
 
-The returned [` ConstVector `](/docs/apis/Interfaces/ConstVector/) will always be a proper subset of the current
-[` ConstVector `](/docs/apis/Interfaces/ConstVector/).
+The returned [` ConstVector `](/apis/Interfaces/ConstVector/) will always be a proper subset of the current
+[` ConstVector `](/apis/Interfaces/ConstVector/).
 
 
 
@@ -38,7 +38,7 @@ The returned [` ConstVector `](/docs/apis/Interfaces/ConstVector/) will always b
 
 
 + ` int $n ` - The last element to be skipped; the $n+1 element will be the
-  first one in the returned [` ConstVector `](/docs/apis/Interfaces/ConstVector/).
+  first one in the returned [` ConstVector `](/apis/Interfaces/ConstVector/).
 
 
 
@@ -48,7 +48,7 @@ The returned [` ConstVector `](/docs/apis/Interfaces/ConstVector/) will always b
 
 
 
-* [` ConstVector<Tv> `](/docs/apis/Interfaces/ConstVector/) - A [` ConstVector `](/docs/apis/Interfaces/ConstVector/) that is a proper subset of the current
-  [` ConstVector `](/docs/apis/Interfaces/ConstVector/) containing values after the specified `` n ``-th
+* [` ConstVector<Tv> `](/apis/Interfaces/ConstVector/) - A [` ConstVector `](/apis/Interfaces/ConstVector/) that is a proper subset of the current
+  [` ConstVector `](/apis/Interfaces/ConstVector/) containing values after the specified `` n ``-th
   element.
 <!-- HHAPIDOC -->

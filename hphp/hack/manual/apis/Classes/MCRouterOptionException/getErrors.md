@@ -28,7 +28,7 @@ public function getErrors(): varray<darray<string>>;
 
 
 
-The following example shows you how to get the errors that are available when bad options are passed to the [` MCRouter `](/docs/apis/Classes/MCRouter/) constructor using [` MCRouterOptionException::getErrors `](/docs/apis/Classes/MCRouterOptionException/getErrors/)
+The following example shows you how to get the errors that are available when bad options are passed to the [` MCRouter `](/apis/Classes/MCRouter/) constructor using [` MCRouterOptionException::getErrors `](/apis/Classes/MCRouterOptionException/getErrors/)
 
 
 

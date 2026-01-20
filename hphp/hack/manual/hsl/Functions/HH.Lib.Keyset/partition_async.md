@@ -47,7 +47,7 @@ in parallel.
 
 
 
-+ [` Container<Tv> `](/docs/apis/Interfaces/HH/Container/)`` $container ``
++ [` Container<Tv> `](/apis/Interfaces/HH/Container/)`` $container ``
 + ` (function(Tv): Awaitable<bool>) $value_predicate `
 
 
@@ -58,5 +58,5 @@ in parallel.
 
 
 
-* [` Awaitable<(keyset<Tv>, `](/docs/apis/Classes/HH/Awaitable/)`` keyset<Tv>)> ``
+* [` Awaitable<(keyset<Tv>, `](/apis/Classes/HH/Awaitable/)`` keyset<Tv>)> ``
 <!-- HHAPIDOC -->

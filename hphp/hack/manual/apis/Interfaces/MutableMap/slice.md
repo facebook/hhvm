@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a subset of the current [` MutableMap `](/docs/apis/Interfaces/MutableMap/) starting from a given key
+Returns a subset of the current [` MutableMap `](/apis/Interfaces/MutableMap/) starting from a given key
 location up to, but not including, the element at the provided length from
 the starting key location
 
@@ -23,14 +23,14 @@ public function slice(
 
 
 
-` $start ` is 0-based. `` $len `` is 1-based. So [` slice(0, `](/docs/apis/Interfaces/MutableMap/slice/)`` 2) `` would return the
+` $start ` is 0-based. `` $len `` is 1-based. So [` slice(0, `](/apis/Interfaces/MutableMap/slice/)`` 2) `` would return the
 keys and values at key location 0 and 1.
 
 
 
 
-The returned [` MutableMap `](/docs/apis/Interfaces/MutableMap/) will always be a proper subset of the current
-[` MutableMap `](/docs/apis/Interfaces/MutableMap/).
+The returned [` MutableMap `](/apis/Interfaces/MutableMap/) will always be a proper subset of the current
+[` MutableMap `](/apis/Interfaces/MutableMap/).
 
 
 
@@ -40,9 +40,9 @@ The returned [` MutableMap `](/docs/apis/Interfaces/MutableMap/) will always be 
 
 
 
-+ ` int $start ` - The starting key location of the current [` MutableMap `](/docs/apis/Interfaces/MutableMap/) for
-  the feturned [` MutableMap `](/docs/apis/Interfaces/MutableMap/).
-+ ` int $len ` - The length of the returned [` MutableMap `](/docs/apis/Interfaces/MutableMap/).
++ ` int $start ` - The starting key location of the current [` MutableMap `](/apis/Interfaces/MutableMap/) for
+  the feturned [` MutableMap `](/apis/Interfaces/MutableMap/).
++ ` int $len ` - The length of the returned [` MutableMap `](/apis/Interfaces/MutableMap/).
 
 
 
@@ -52,7 +52,7 @@ The returned [` MutableMap `](/docs/apis/Interfaces/MutableMap/) will always be 
 
 
 
-* [` MutableMap<Tk, `](/docs/apis/Interfaces/MutableMap/)`` Tv> `` - A [` MutableMap `](/docs/apis/Interfaces/MutableMap/) that is a proper subset of the current
-  [` MutableMap `](/docs/apis/Interfaces/MutableMap/) starting at `` $start `` up to but not including the
+* [` MutableMap<Tk, `](/apis/Interfaces/MutableMap/)`` Tv> `` - A [` MutableMap `](/apis/Interfaces/MutableMap/) that is a proper subset of the current
+  [` MutableMap `](/apis/Interfaces/MutableMap/) starting at `` $start `` up to but not including the
   element ``` $start + $len ```.
 <!-- HHAPIDOC -->

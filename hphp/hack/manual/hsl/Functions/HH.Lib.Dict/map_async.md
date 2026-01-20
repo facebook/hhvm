@@ -47,7 +47,7 @@ parallel.
 
 
 
-+ [` KeyedTraversable<Tk, `](/docs/apis/Interfaces/HH/KeyedTraversable/)`` Tv1> $traversable ``
++ [` KeyedTraversable<Tk, `](/apis/Interfaces/HH/KeyedTraversable/)`` Tv1> $traversable ``
 + ` (function(Tv1): Awaitable<Tv2>) $value_func `
 
 
@@ -58,5 +58,5 @@ parallel.
 
 
 
-* [` Awaitable<dict<Tk, `](/docs/apis/Classes/HH/Awaitable/)`` Tv2>> ``
+* [` Awaitable<dict<Tk, `](/apis/Classes/HH/Awaitable/)`` Tv2>> ``
 <!-- HHAPIDOC -->

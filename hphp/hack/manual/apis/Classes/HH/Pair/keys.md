@@ -6,8 +6,8 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns an [` ImmVector `](/docs/apis/Classes/HH/ImmVector/) with the values being the keys of the current
-[` Pair `](/docs/apis/Classes/HH/Pair/)
+Returns an [` ImmVector `](/apis/Classes/HH/ImmVector/) with the values being the keys of the current
+[` Pair `](/apis/Classes/HH/Pair/)
 
 
 
@@ -19,8 +19,8 @@ public function keys(): ImmVector<int>;
 
 
 
-This method will return an [` ImmVector `](/docs/apis/Classes/HH/ImmVector/) with keys 0 and 1, and values 0 and
-1, since the keys of a [` Pair `](/docs/apis/Classes/HH/Pair/) are 0 and 1.
+This method will return an [` ImmVector `](/apis/Classes/HH/ImmVector/) with keys 0 and 1, and values 0 and
+1, since the keys of a [` Pair `](/apis/Classes/HH/Pair/) are 0 and 1.
 
 
 
@@ -30,8 +30,8 @@ This method will return an [` ImmVector `](/docs/apis/Classes/HH/ImmVector/) wit
 
 
 
-+ [` ImmVector<int> `](/docs/apis/Classes/HH/ImmVector/) - an [` ImmVector `](/docs/apis/Classes/HH/ImmVector/) containing the integer keys of the current
-  [` Pair `](/docs/apis/Classes/HH/Pair/) as values.
++ [` ImmVector<int> `](/apis/Classes/HH/ImmVector/) - an [` ImmVector `](/apis/Classes/HH/ImmVector/) containing the integer keys of the current
+  [` Pair `](/apis/Classes/HH/Pair/) as values.
 
 
 

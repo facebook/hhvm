@@ -1,6 +1,6 @@
 # Keywords
 
-Keywords are reserved; they should not and usually *cannot* be used as names. Other words that shouldn't be used for names are the [built-in types](/docs/hack/built-in-types/introduction).
+Keywords are reserved; they should not and usually *cannot* be used as names. Other words that shouldn't be used for names are the [built-in types](/hack/built-in-types/introduction).
 
 ## Keywords
 ```Hack no-extract

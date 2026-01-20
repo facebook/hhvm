@@ -7,7 +7,7 @@ the Hack LSP instead for complete and up-to-date information.
 :::
 
 Returns a lazy, access elements only when needed view of the current
-[` Iterable `](/docs/apis/Interfaces/HH/Iterable/)
+[` Iterable `](/apis/Interfaces/HH/Iterable/)
 
 
 
@@ -19,9 +19,9 @@ public function lazy(): Iterable<Tv>;
 
 
 
-Normally, memory is allocated for all of the elements of the [` Iterable `](/docs/apis/Interfaces/HH/Iterable/).
+Normally, memory is allocated for all of the elements of the [` Iterable `](/apis/Interfaces/HH/Iterable/).
 With a lazy view, memory is allocated for an element only when needed or
-used in a calculation like in [` map() `](/docs/apis/Interfaces/HH/Iterable/map/) or [` filter() `](/docs/apis/Interfaces/HH/Iterable/filter/).
+used in a calculation like in [` map() `](/apis/Interfaces/HH/Iterable/map/) or [` filter() `](/apis/Interfaces/HH/Iterable/filter/).
 
 
 
@@ -31,7 +31,7 @@ used in a calculation like in [` map() `](/docs/apis/Interfaces/HH/Iterable/map/
 
 
 
-+ [Examples](</docs/hack/arrays-and-collections/introduction>)
++ [Examples](</hack/arrays-and-collections/introduction>)
 
 
 
@@ -44,6 +44,6 @@ used in a calculation like in [` map() `](/docs/apis/Interfaces/HH/Iterable/map/
 
 
 
-* [` Iterable<Tv> `](/docs/apis/Interfaces/HH/Iterable/) - an [` Iterable `](/docs/apis/Interfaces/HH/Iterable/) representing the lazy view into the current
-  [` Iterable `](/docs/apis/Interfaces/HH/Iterable/).
+* [` Iterable<Tv> `](/apis/Interfaces/HH/Iterable/) - an [` Iterable `](/apis/Interfaces/HH/Iterable/) representing the lazy view into the current
+  [` Iterable `](/apis/Interfaces/HH/Iterable/).
 <!-- HHAPIDOC -->

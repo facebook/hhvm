@@ -80,7 +80,7 @@ You may need to use the full path to Composer, depending on how it's installed.
 
 We curl an existing hhconfig from hhast from github. The reason for this is that starting with hhvm version [4.62](https://hhvm.com/blog/2020/06/16/hhvm-4.62.html), it is no longer enough for projects that use external dependencies. Almost all packages you pull in using composer will have a suppression comment in them somewhere. You must whitelist these suppression comments in order to use these packages.
 
-The hhast `.hhconfig` file whitelists all suppression comments used by hsl, hhvm-autoload, hacktest, fbexpect, hhast. Hhast depends on these packages itself, so this should stay up to date. If the result of `hh_client restart && hh_client` does not end with `No errors!` after the last step, please refer to the [error suppression docs](/docs/hack/silencing-errors/introduction).
+The hhast `.hhconfig` file whitelists all suppression comments used by hsl, hhvm-autoload, hacktest, fbexpect, hhast. Hhast depends on these packages itself, so this should stay up to date. If the result of `hh_client restart && hh_client` does not end with `No errors!` after the last step, please refer to the [error suppression docs](/hack/silencing-errors/introduction).
 
 The same commands with their expected output:
 

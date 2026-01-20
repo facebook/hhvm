@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a [` ConstVector `](/docs/apis/Interfaces/ConstVector/) containing the values of the current [` ConstVector `](/docs/apis/Interfaces/ConstVector/)
+Returns a [` ConstVector `](/apis/Interfaces/ConstVector/) containing the values of the current [` ConstVector `](/apis/Interfaces/ConstVector/)
 up to but not including the first value that produces `` false `` when passed
 to the specified callback
 
@@ -22,8 +22,8 @@ public function takeWhile(
 
 
 
-The returned [` ConstVector `](/docs/apis/Interfaces/ConstVector/) will always be a proper subset of the current
-[` ConstVector `](/docs/apis/Interfaces/ConstVector/).
+The returned [` ConstVector `](/apis/Interfaces/ConstVector/) will always be a proper subset of the current
+[` ConstVector `](/apis/Interfaces/ConstVector/).
 
 
 
@@ -44,6 +44,6 @@ The returned [` ConstVector `](/docs/apis/Interfaces/ConstVector/) will always b
 
 
 
-* [` ConstVector<Tv> `](/docs/apis/Interfaces/ConstVector/) - A [` ConstVector `](/docs/apis/Interfaces/ConstVector/) that is a proper subset of the current
-  [` ConstVector `](/docs/apis/Interfaces/ConstVector/) up until the callback returns `` false ``.
+* [` ConstVector<Tv> `](/apis/Interfaces/ConstVector/) - A [` ConstVector `](/apis/Interfaces/ConstVector/) that is a proper subset of the current
+  [` ConstVector `](/apis/Interfaces/ConstVector/) up until the callback returns `` false ``.
 <!-- HHAPIDOC -->

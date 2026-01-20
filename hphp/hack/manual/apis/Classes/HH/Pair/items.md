@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns an [` Iterable `](/docs/apis/Interfaces/HH/Iterable/) view of the current [` Pair `](/docs/apis/Classes/HH/Pair/)
+Returns an [` Iterable `](/apis/Interfaces/HH/Iterable/) view of the current [` Pair `](/apis/Classes/HH/Pair/)
 
 
 
@@ -18,8 +18,8 @@ public function items(): Iterable<mixed>;
 
 
 
-The [` Iterable `](/docs/apis/Interfaces/HH/Iterable/) returned is one that produces the values from the current
-[` Pair `](/docs/apis/Classes/HH/Pair/).
+The [` Iterable `](/apis/Interfaces/HH/Iterable/) returned is one that produces the values from the current
+[` Pair `](/apis/Classes/HH/Pair/).
 
 
 
@@ -29,7 +29,7 @@ The [` Iterable `](/docs/apis/Interfaces/HH/Iterable/) returned is one that prod
 
 
 
-+ [` Iterable<mixed> `](/docs/apis/Interfaces/HH/Iterable/) - The [` Iterable `](/docs/apis/Interfaces/HH/Iterable/) view of the current [` Pair `](/docs/apis/Classes/HH/Pair/).
++ [` Iterable<mixed> `](/apis/Interfaces/HH/Iterable/) - The [` Iterable `](/apis/Interfaces/HH/Iterable/) view of the current [` Pair `](/apis/Classes/HH/Pair/).
 
 
 

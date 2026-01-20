@@ -27,8 +27,8 @@ implements this interface.
 
 
 
-+ [Introduction](</docs/hack/arrays-and-collections/introduction>)
-+ [Interfaces](</docs/hack/arrays-and-collections/introduction>)
++ [Introduction](</hack/arrays-and-collections/introduction>)
++ [Interfaces](</hack/arrays-and-collections/introduction>)
 
 
 
@@ -53,30 +53,30 @@ interface ConstCollection implements Countable, IPureStringishObject {...}
 
 
 
-* [` ->count(): int `](/docs/apis/Interfaces/ConstCollection/count/)\
+* [` ->count(): int `](/apis/Interfaces/ConstCollection/count/)\
   Get the number of items in the collection
 
-* [` ->isEmpty(): bool `](/docs/apis/Interfaces/ConstCollection/isEmpty/)\
+* [` ->isEmpty(): bool `](/apis/Interfaces/ConstCollection/isEmpty/)\
   Is the collection empty?
 
-* [` ->items(): HH\Iterable<Te> `](/docs/apis/Interfaces/ConstCollection/items/)\
+* [` ->items(): HH\Iterable<Te> `](/apis/Interfaces/ConstCollection/items/)\
   Get access to the items in the collection
 
-* [` ->toDArray(): darray `](/docs/apis/Interfaces/ConstCollection/toDArray/)
+* [` ->toDArray(): darray `](/apis/Interfaces/ConstCollection/toDArray/)
 
-* [` ->toVArray(): varray `](/docs/apis/Interfaces/ConstCollection/toVArray/)
-
-
+* [` ->toVArray(): varray `](/apis/Interfaces/ConstCollection/toVArray/)
 
 
 
 
 
 
-### Public Methods ([` IPureStringishObject `](/docs/apis/Interfaces/IPureStringishObject/))
+
+
+### Public Methods ([` IPureStringishObject `](/apis/Interfaces/IPureStringishObject/))
 
 
 
 
-- [` ->__toString(): string `](/docs/apis/Interfaces/IPureStringishObject/__toString/)
+- [` ->__toString(): string `](/apis/Interfaces/IPureStringishObject/__toString/)
 <!-- HHAPIDOC -->

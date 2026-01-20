@@ -34,7 +34,7 @@ public function warningCount(): int;
 
 
 
-The following example shows how to get the number of errors or warnings on the last SQL query via [` AsyncMysqlConnection::warningCount `](/docs/apis/Classes/AsyncMysqlConnection/warningCount/).
+The following example shows how to get the number of errors or warnings on the last SQL query via [` AsyncMysqlConnection::warningCount `](/apis/Classes/AsyncMysqlConnection/warningCount/).
 
 
 

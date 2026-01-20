@@ -39,9 +39,9 @@ O(n)
 
 
 
-+ [` Traversable<Tv1> `](/docs/apis/Interfaces/HH/Traversable/)`` $first ``
-+ [` Traversable<Tv2> `](/docs/apis/Interfaces/HH/Traversable/)`` $second ``
-+ [` Container<Tv2> `](/docs/apis/Interfaces/HH/Container/)`` ...$rest ``
++ [` Traversable<Tv1> `](/apis/Interfaces/HH/Traversable/)`` $first ``
++ [` Traversable<Tv2> `](/apis/Interfaces/HH/Traversable/)`` $second ``
++ [` Container<Tv2> `](/apis/Interfaces/HH/Container/)`` ...$rest ``
 
 
 

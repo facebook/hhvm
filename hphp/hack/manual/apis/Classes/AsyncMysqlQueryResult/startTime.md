@@ -33,7 +33,7 @@ public function startTime(): float;
 
 
 
-Every successful query has a result. And one of the methods on an [` AsyncMysqlQueryResult `](/docs/apis/Classes/AsyncMysqlQueryResult/) is [` startTime() `](/docs/apis/Classes/AsyncMysqlQueryResult/startTime/), which tells you the time when we started to get our result.
+Every successful query has a result. And one of the methods on an [` AsyncMysqlQueryResult `](/apis/Classes/AsyncMysqlQueryResult/) is [` startTime() `](/apis/Classes/AsyncMysqlQueryResult/startTime/), which tells you the time when we started to get our result.
 
 
 

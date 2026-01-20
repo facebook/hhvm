@@ -18,5 +18,5 @@ public function current(): ?DOMNode;
 
 
 
-+ ` ? `[` DOMNode `](/docs/apis/Classes/DOMNode/)
++ ` ? `[` DOMNode `](/apis/Classes/DOMNode/)
 <!-- HHAPIDOC -->

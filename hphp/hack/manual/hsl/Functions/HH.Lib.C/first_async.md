@@ -46,7 +46,7 @@ Space complexity: O(1)
 
 
 
-+ [` Awaitable<Traversable<T>> `](/docs/apis/Classes/HH/Awaitable/)`` $awaitable ``
++ [` Awaitable<Traversable<T>> `](/apis/Classes/HH/Awaitable/)`` $awaitable ``
 
 
 
@@ -56,5 +56,5 @@ Space complexity: O(1)
 
 
 
-* [` Awaitable<?T> `](/docs/apis/Classes/HH/Awaitable/)
+* [` Awaitable<?T> `](/apis/Classes/HH/Awaitable/)
 <!-- HHAPIDOC -->

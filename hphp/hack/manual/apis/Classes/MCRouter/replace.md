@@ -44,7 +44,7 @@ public function replace(
 
 
 
-* [` Awaitable<void> `](/docs/apis/Classes/HH/Awaitable/)
+* [` Awaitable<void> `](/apis/Classes/HH/Awaitable/)
 
 
 
@@ -54,7 +54,7 @@ public function replace(
 
 
 
-The following example shows how to use [` MCRouter::replace `](/docs/apis/Classes/MCRouter/replace/) to replace a key/value pair in the memcached server. You can only call `` replace `` on a currently existing key (e.g., one that has been added via [` MCRouter::add `](/docs/apis/Classes/MCRouter/add/) or [` MCRouter::set `](/docs/apis/Classes/MCRouter/set/)). In many cases a call to `` set/set `` is the same as a call to ``` add/replace ```, accomplishing the same thing.
+The following example shows how to use [` MCRouter::replace `](/apis/Classes/MCRouter/replace/) to replace a key/value pair in the memcached server. You can only call `` replace `` on a currently existing key (e.g., one that has been added via [` MCRouter::add `](/apis/Classes/MCRouter/add/) or [` MCRouter::set `](/apis/Classes/MCRouter/set/)). In many cases a call to `` set/set `` is the same as a call to ``` add/replace ```, accomplishing the same thing.
 
 
 

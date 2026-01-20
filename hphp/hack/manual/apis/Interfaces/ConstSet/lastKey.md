@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns the last "key" in the current [` ConstSet `](/docs/apis/Interfaces/ConstSet/)
+Returns the last "key" in the current [` ConstSet `](/apis/Interfaces/ConstSet/)
 
 
 
@@ -23,7 +23,7 @@ Since sets do not have keys, it returns the last value.
 
 
 
-This method is interchangeable with [` lastValue() `](/docs/apis/Interfaces/ConstSet/lastValue/).
+This method is interchangeable with [` lastValue() `](/apis/Interfaces/ConstSet/lastValue/).
 
 
 
@@ -33,6 +33,6 @@ This method is interchangeable with [` lastValue() `](/docs/apis/Interfaces/Cons
 
 
 
-+ ` ?arraykey ` - The last value in the current [` ConstSet `](/docs/apis/Interfaces/ConstSet/), or `` null `` if the
-  current [` ConstSet `](/docs/apis/Interfaces/ConstSet/) is empty.
++ ` ?arraykey ` - The last value in the current [` ConstSet `](/apis/Interfaces/ConstSet/), or `` null `` if the
+  current [` ConstSet `](/apis/Interfaces/ConstSet/) is empty.
 <!-- HHAPIDOC -->

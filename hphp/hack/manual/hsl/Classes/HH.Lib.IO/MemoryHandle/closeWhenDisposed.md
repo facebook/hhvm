@@ -18,5 +18,5 @@ public function closeWhenDisposed(): IDisposable;
 
 
 
-+ [` IDisposable `](/docs/apis/Interfaces/IDisposable/)
++ [` IDisposable `](/apis/Interfaces/IDisposable/)
 <!-- HHAPIDOC -->

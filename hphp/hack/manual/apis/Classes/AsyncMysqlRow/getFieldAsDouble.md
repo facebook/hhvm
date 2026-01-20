@@ -52,7 +52,7 @@ type, then an ` Exception ` is thrown.
 
 
 
-The following example shows how to get a field value as a ` float ` value via [` AsyncMysqlRow::getFieldAsDouble `](/docs/apis/Classes/AsyncMysqlRow/getFieldAsDouble/). Assume this was the SQL used to create the example table:
+The following example shows how to get a field value as a ` float ` value via [` AsyncMysqlRow::getFieldAsDouble `](/apis/Classes/AsyncMysqlRow/getFieldAsDouble/). Assume this was the SQL used to create the example table:
 
 
 

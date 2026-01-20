@@ -29,5 +29,5 @@ interface FDHandle implements Handle {...}
 
 
 
-+ [` ->getFileDescriptor(): \HH\Lib\OS\FileDescriptor `](</docs/hsl/Interfaces/HH.Lib.IO/FDHandle/getFileDescriptor/>)
++ [` ->getFileDescriptor(): \HH\Lib\OS\FileDescriptor `](</hsl/Interfaces/HH.Lib.IO/FDHandle/getFileDescriptor/>)
 <!-- HHAPIDOC -->

@@ -9,7 +9,7 @@ An *include file* is a file that is suitable for *inclusion* by another file. Th
 the *including file*, while the one being included is the *included file*. A file can be either an including file or
 an included file, both, or neither.
 
-The recommended way to approach this is to [use an autoloader](/docs/hack/getting-started/starting-a-real-project#autoloading) - however, first you need to include
+The recommended way to approach this is to [use an autoloader](/hack/getting-started/starting-a-real-project#autoloading) - however, first you need to include
 the autoloader itself.
 
 The `require_once()` directive is used for this:
@@ -36,7 +36,7 @@ We expect to make autoloading fully-automatic, and remove inclusion directives f
 
 ## Legacy Issues
 
-For relative paths, the configuration directive [`include_path`](/docs/hhvm/configuration/INI-settings#supported-php-ini-settings) is used to resolve the include file's location.
+For relative paths, the configuration directive [`include_path`](/hhvm/configuration/INI-settings#supported-php-ini-settings) is used to resolve the include file's location.
 
 It is currently possible (though strongly discoraged) for top-level code to exist in a file, without
 being in a function. In this cases, including a file may execute code, not just import definitions.

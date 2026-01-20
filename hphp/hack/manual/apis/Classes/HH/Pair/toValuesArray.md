@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns an ` varray ` containing the values from the current [` Pair `](/docs/apis/Classes/HH/Pair/)
+Returns an ` varray ` containing the values from the current [` Pair `](/apis/Classes/HH/Pair/)
 
 
 
@@ -18,7 +18,7 @@ public function toValuesArray<Tu>(): varray<Tu>;
 
 
 
-This method is interchangeable with [` toVArray() `](/docs/apis/Classes/HH/Pair/toVArray/).
+This method is interchangeable with [` toVArray() `](/apis/Classes/HH/Pair/toVArray/).
 
 
 
@@ -28,7 +28,7 @@ This method is interchangeable with [` toVArray() `](/docs/apis/Classes/HH/Pair/
 
 
 
-+ ` varray<Tu> ` - an `` varray `` containing the values from the current [` Pair `](/docs/apis/Classes/HH/Pair/).
++ ` varray<Tu> ` - an `` varray `` containing the values from the current [` Pair `](/apis/Classes/HH/Pair/).
 
 
 

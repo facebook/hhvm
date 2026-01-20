@@ -48,5 +48,5 @@ will apply separately to the IPv4 and IPv6 connection attempts.
 
 
 
-* [` Awaitable<CloseableSocket> `](/docs/apis/Classes/HH/Awaitable/)
+* [` Awaitable<CloseableSocket> `](/apis/Classes/HH/Awaitable/)
 <!-- HHAPIDOC -->

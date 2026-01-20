@@ -30,7 +30,7 @@ The regex pattern follows the PCRE library: https://www.pcre.org/original/doc/ht
 
 
 
-Throws [` InvariantException `](/docs/apis/Classes/HH/InvariantException/) if `` $offset `` is not within plus/minus the length of ``` $haystack ```.
+Throws [` InvariantException `](/apis/Classes/HH/InvariantException/) if `` $offset `` is not within plus/minus the length of ``` $haystack ```.
 
 
 
@@ -40,7 +40,7 @@ Throws [` InvariantException `](/docs/apis/Classes/HH/InvariantException/) if ``
 
 
 
-+ [String](</docs/hack/built-in-types/string>)
++ [String](</hack/built-in-types/string>)
 
 
 

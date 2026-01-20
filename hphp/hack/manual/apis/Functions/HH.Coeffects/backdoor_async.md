@@ -42,5 +42,5 @@ EXTREMELY UNSAFE. USE WITH CAUTION.
 
 
 
-* [` Awaitable<Tout> `](/docs/apis/Classes/HH/Awaitable/)
+* [` Awaitable<Tout> `](/apis/Classes/HH/Awaitable/)
 <!-- HHAPIDOC -->

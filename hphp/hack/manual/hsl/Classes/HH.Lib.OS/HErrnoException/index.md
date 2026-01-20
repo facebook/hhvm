@@ -34,6 +34,6 @@ final class HErrnoException extends \Exception {...}
 
 
 
-+ [` ->__construct(HErrno $errno, string $message) `](/docs/hsl/Classes/HH.Lib.OS/HErrnoException/__construct/)
-+ [` ->getHErrno(): HErrno `](/docs/hsl/Classes/HH.Lib.OS/HErrnoException/getHErrno/)
++ [` ->__construct(HErrno $errno, string $message) `](/hsl/Classes/HH.Lib.OS/HErrnoException/__construct/)
++ [` ->getHErrno(): HErrno `](/hsl/Classes/HH.Lib.OS/HErrnoException/getHErrno/)
 <!-- HHAPIDOC -->

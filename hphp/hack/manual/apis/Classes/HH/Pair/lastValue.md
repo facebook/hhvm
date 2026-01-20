@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns the last value in the current [` Pair `](/docs/apis/Classes/HH/Pair/)
+Returns the last value in the current [` Pair `](/apis/Classes/HH/Pair/)
 
 
 
@@ -23,7 +23,7 @@ public function lastValue(): Tv2;
 
 
 
-+ ` Tv2 ` - The last value in the current [` Pair `](/docs/apis/Classes/HH/Pair/).
++ ` Tv2 ` - The last value in the current [` Pair `](/apis/Classes/HH/Pair/).
 
 
 

@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Remove all the elements from the current [` Set `](/docs/apis/Classes/HH/Set/)
+Remove all the elements from the current [` Set `](/apis/Classes/HH/Set/)
 
 
 
@@ -18,8 +18,8 @@ public function clear(): Set<Tv>;
 
 
 
-Future changes made to the current [` Set `](/docs/apis/Classes/HH/Set/) ARE reflected in the returned
-[` Set `](/docs/apis/Classes/HH/Set/), and vice-versa.
+Future changes made to the current [` Set `](/apis/Classes/HH/Set/) ARE reflected in the returned
+[` Set `](/apis/Classes/HH/Set/), and vice-versa.
 
 
 
@@ -29,7 +29,7 @@ Future changes made to the current [` Set `](/docs/apis/Classes/HH/Set/) ARE ref
 
 
 
-+ [` Set<Tv> `](/docs/apis/Classes/HH/Set/) - Returns itself.
++ [` Set<Tv> `](/apis/Classes/HH/Set/) - Returns itself.
 
 
 

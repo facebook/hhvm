@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns an ` array ` containing the values from the current [` Map `](/docs/apis/Classes/HH/Map/)
+Returns an ` array ` containing the values from the current [` Map `](/apis/Classes/HH/Map/)
 
 
 
@@ -24,7 +24,7 @@ public function toValuesArray(): varray<Tv>;
 
 
 + ` varray<Tv> ` - an integer-indexed `` array `` containing the values from the
-  current [` Map `](/docs/apis/Classes/HH/Map/).
+  current [` Map `](/apis/Classes/HH/Map/).
 
 
 

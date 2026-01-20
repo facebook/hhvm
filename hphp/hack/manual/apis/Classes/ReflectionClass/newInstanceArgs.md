@@ -33,7 +33,7 @@ the class constructor.
 
 
 
-+ [` Traversable<mixed> `](/docs/apis/Interfaces/HH/Traversable/)`` $args = vec [ ] ``
++ [` Traversable<mixed> `](/apis/Interfaces/HH/Traversable/)`` $args = vec [ ] ``
 
 
 

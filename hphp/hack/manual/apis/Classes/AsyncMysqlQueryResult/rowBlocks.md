@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a [` Vector `](/docs/apis/Classes/HH/Vector/) representing all row blocks returned by the successful
+Returns a [` Vector `](/apis/Classes/HH/Vector/) representing all row blocks returned by the successful
 query
 
 
@@ -40,7 +40,7 @@ result could come back in multiple blocks.
 
 
 
-+ [` Vector<AsyncMysqlRowBlock> `](/docs/apis/Classes/HH/Vector/) - A [` Vector `](/docs/apis/Classes/HH/Vector/) of [` AsyncMysqlRowBlock `](/docs/apis/Classes/AsyncMysqlRowBlock/) objects, the total number
++ [` Vector<AsyncMysqlRowBlock> `](/apis/Classes/HH/Vector/) - A [` Vector `](/apis/Classes/HH/Vector/) of [` AsyncMysqlRowBlock `](/apis/Classes/AsyncMysqlRowBlock/) objects, the total number
   of which represent the full result of the query.
 
 
@@ -51,12 +51,12 @@ result could come back in multiple blocks.
 
 
 
-The following example shows how a call to [` AsyncMysqlQueryResult::rowBlocks `](/docs/apis/Classes/AsyncMysqlQueryResult/rowBlocks/) gets you a [` Vector `](/docs/apis/Classes/HH/Vector/) of [` AsyncMysqlRowBlock `](/docs/apis/Classes/AsyncMysqlRowBlock/) objects. Each object can then be queried for statistical data on that row, such as the number of fields that came back with the result, etc.
+The following example shows how a call to [` AsyncMysqlQueryResult::rowBlocks `](/apis/Classes/AsyncMysqlQueryResult/rowBlocks/) gets you a [` Vector `](/apis/Classes/HH/Vector/) of [` AsyncMysqlRowBlock `](/apis/Classes/AsyncMysqlRowBlock/) objects. Each object can then be queried for statistical data on that row, such as the number of fields that came back with the result, etc.
 
 
 
 
-**NOTE**: A call to [` rowBlocks() `](/docs/apis/Classes/AsyncMysqlQueryResult/rowBlocks/) actually pops the first element of that [` Vector `](/docs/apis/Classes/HH/Vector/). So, for example, if you have the following:
+**NOTE**: A call to [` rowBlocks() `](/apis/Classes/AsyncMysqlQueryResult/rowBlocks/) actually pops the first element of that [` Vector `](/apis/Classes/HH/Vector/). So, for example, if you have the following:
 
 
 
@@ -72,7 +72,7 @@ object(HH\Vector)#9 (1) {
 
 
 
-a call to [` rowBlocks() `](/docs/apis/Classes/AsyncMysqlQueryResult/rowBlocks/) will make it so that you know have:
+a call to [` rowBlocks() `](/apis/Classes/AsyncMysqlQueryResult/rowBlocks/) will make it so that you know have:
 
 
 
@@ -85,7 +85,7 @@ object(HH\Vector)#9 (0) {
 
 
 
-and thus a subsequent call to [` rowBlocks() `](/docs/apis/Classes/AsyncMysqlQueryResult/rowBlocks/) will return an empty [` Vector `](/docs/apis/Classes/HH/Vector/).
+and thus a subsequent call to [` rowBlocks() `](/apis/Classes/AsyncMysqlQueryResult/rowBlocks/) will return an empty [` Vector `](/apis/Classes/HH/Vector/).
 
 
 

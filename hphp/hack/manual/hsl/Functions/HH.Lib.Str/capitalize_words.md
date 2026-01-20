@@ -40,7 +40,7 @@ vertical tab by default, but you can specify custom delimiters.
 
 
 
-* [String](</docs/hack/built-in-types/string>)
+* [String](</hack/built-in-types/string>)
 
 
 

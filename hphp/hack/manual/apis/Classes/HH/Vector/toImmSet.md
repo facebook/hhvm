@@ -7,7 +7,7 @@ the Hack LSP instead for complete and up-to-date information.
 :::
 
 Returns an immutable set (` ImmSet `) based on the values of the current
-[` Vector `](/docs/apis/Classes/HH/Vector/)
+[` Vector `](/apis/Classes/HH/Vector/)
 
 
 
@@ -24,7 +24,7 @@ public function toImmSet(): ImmSet<Tv>;
 
 
 
-+ [` ImmSet<Tv> `](/docs/apis/Classes/HH/ImmSet/) - An `` ImmSet `` containing the unique values of the current [` Vector `](/docs/apis/Classes/HH/Vector/).
++ [` ImmSet<Tv> `](/apis/Classes/HH/ImmSet/) - An `` ImmSet `` containing the unique values of the current [` Vector `](/apis/Classes/HH/Vector/).
 
 
 
@@ -34,7 +34,7 @@ public function toImmSet(): ImmSet<Tv>;
 
 
 
-This example shows that converting a [` Vector `](/docs/apis/Classes/HH/Vector/) to an `` ImmSet `` also removes duplicate values:
+This example shows that converting a [` Vector `](/apis/Classes/HH/Vector/) to an `` ImmSet `` also removes duplicate values:
 
 
 

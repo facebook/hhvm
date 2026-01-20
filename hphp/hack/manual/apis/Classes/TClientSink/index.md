@@ -27,10 +27,10 @@ final class TClientSink {...}
 
 
 
-+ [` ->__construct(): void `](/docs/apis/Classes/TClientSink/__construct/)
-+ [` ->genCreditsOrFinalResponse(): Awaitable<?(int, ?string, ?string)> `](/docs/apis/Classes/TClientSink/genCreditsOrFinalResponse/)
-+ [` ->genCreditsOrFinalResponseHelper(): Awaitable<(int, ?string, ?Exception)> `](/docs/apis/Classes/TClientSink/genCreditsOrFinalResponseHelper/)
-+ [` ->genSink<TSinkType, TFinalResponseType>(HH\AsyncGenerator<null, TSinkType, void> $payload_generator, (function(?TSinkType, ?Exception): (string, ?bool)) $payloadEncode, (function(?string, ?Exception): TFinalResponseType) $finalResponseDecode): Awaitable<TFinalResponseType> `](/docs/apis/Classes/TClientSink/genSink/)
-+ [` ->sendClientException(string $ex_encoded_string, ?string $ex_msg): void `](/docs/apis/Classes/TClientSink/sendClientException/)
-+ [` ->sendPayloadOrSinkComplete(?string $payload): bool `](/docs/apis/Classes/TClientSink/sendPayloadOrSinkComplete/)
++ [` ->__construct(): void `](/apis/Classes/TClientSink/__construct/)
++ [` ->genCreditsOrFinalResponse(): Awaitable<?(int, ?string, ?string)> `](/apis/Classes/TClientSink/genCreditsOrFinalResponse/)
++ [` ->genCreditsOrFinalResponseHelper(): Awaitable<(int, ?string, ?Exception)> `](/apis/Classes/TClientSink/genCreditsOrFinalResponseHelper/)
++ [` ->genSink<TSinkType, TFinalResponseType>(HH\AsyncGenerator<null, TSinkType, void> $payload_generator, (function(?TSinkType, ?Exception): (string, ?bool)) $payloadEncode, (function(?string, ?Exception): TFinalResponseType) $finalResponseDecode): Awaitable<TFinalResponseType> `](/apis/Classes/TClientSink/genSink/)
++ [` ->sendClientException(string $ex_encoded_string, ?string $ex_msg): void `](/apis/Classes/TClientSink/sendClientException/)
++ [` ->sendPayloadOrSinkComplete(?string $payload): bool `](/apis/Classes/TClientSink/sendPayloadOrSinkComplete/)
 <!-- HHAPIDOC -->

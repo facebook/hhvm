@@ -6,8 +6,8 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-For every element in the provided [` Traversable `](/docs/apis/Interfaces/HH/Traversable/), add the value into the
-current [` Set `](/docs/apis/Classes/HH/Set/)
+For every element in the provided [` Traversable `](/apis/Interfaces/HH/Traversable/), add the value into the
+current [` Set `](/apis/Classes/HH/Set/)
 
 
 
@@ -21,8 +21,8 @@ public function addAll(
 
 
 
-Future changes made to the original [` Set `](/docs/apis/Classes/HH/Set/) ARE reflected in the returned
-[` Set `](/docs/apis/Classes/HH/Set/), and vice-versa.
+Future changes made to the original [` Set `](/apis/Classes/HH/Set/) ARE reflected in the returned
+[` Set `](/apis/Classes/HH/Set/), and vice-versa.
 
 
 
@@ -32,7 +32,7 @@ Future changes made to the original [` Set `](/docs/apis/Classes/HH/Set/) ARE re
 
 
 
-+ ` ? `[` Traversable<Tv> `](/docs/apis/Interfaces/HH/Traversable/)`` $iterable ``
++ ` ? `[` Traversable<Tv> `](/apis/Interfaces/HH/Traversable/)`` $iterable ``
 
 
 
@@ -42,7 +42,7 @@ Future changes made to the original [` Set `](/docs/apis/Classes/HH/Set/) ARE re
 
 
 
-* [` Set<Tv> `](/docs/apis/Classes/HH/Set/) - Returns itself.
+* [` Set<Tv> `](/apis/Classes/HH/Set/) - Returns itself.
 
 
 
@@ -52,7 +52,7 @@ Future changes made to the original [` Set `](/docs/apis/Classes/HH/Set/) ARE re
 
 
 
-The following example adds a collection of values to the [` Set `](/docs/apis/Classes/HH/Set/) `` $s `` and also adds multiple collections of values to ``` $s ``` through chaining. Since [` Set::addAll() `](/docs/apis/Classes/HH/Set/addAll/) returns a [shallow copy](<https://en.wikipedia.org/wiki/Object_copying#Shallow_copy>) of ` $s ` itself, you can chain a bunch of [` addAll() `](/docs/apis/Classes/HH/Set/addAll/) calls together, and that will add all those collection of values to `` $s ``.
+The following example adds a collection of values to the [` Set `](/apis/Classes/HH/Set/) `` $s `` and also adds multiple collections of values to ``` $s ``` through chaining. Since [` Set::addAll() `](/apis/Classes/HH/Set/addAll/) returns a [shallow copy](<https://en.wikipedia.org/wiki/Object_copying#Shallow_copy>) of ` $s ` itself, you can chain a bunch of [` addAll() `](/apis/Classes/HH/Set/addAll/) calls together, and that will add all those collection of values to `` $s ``.
 
 
 

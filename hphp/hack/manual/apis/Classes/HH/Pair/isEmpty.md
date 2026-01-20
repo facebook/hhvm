@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns ` false `; a [` Pair `](/docs/apis/Classes/HH/Pair/) cannot be empty
+Returns ` false `; a [` Pair `](/apis/Classes/HH/Pair/) cannot be empty
 
 
 
@@ -33,7 +33,7 @@ public function isEmpty(): bool;
 
 
 
-This example shows that a [` Pair `](/docs/apis/Classes/HH/Pair/) can never be empty:
+This example shows that a [` Pair `](/apis/Classes/HH/Pair/) can never be empty:
 
 
 

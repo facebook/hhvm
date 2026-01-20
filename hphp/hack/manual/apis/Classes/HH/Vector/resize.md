@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Resize the current [` Vector `](/docs/apis/Classes/HH/Vector/)
+Resize the current [` Vector `](/apis/Classes/HH/Vector/)
 
 
 
@@ -21,10 +21,10 @@ public function resize(
 
 
 
-Resize the current [` Vector `](/docs/apis/Classes/HH/Vector/) to contain `` $sz `` elements. If ``` $sz ``` is smaller
-than the current size of the current [` Vector `](/docs/apis/Classes/HH/Vector/), elements are removed from
-the end of the current [` Vector `](/docs/apis/Classes/HH/Vector/). If `` $sz `` is greater than the current size
-of the current [` Vector `](/docs/apis/Classes/HH/Vector/), the current [` Vector `](/docs/apis/Classes/HH/Vector/) is extended by appending as
+Resize the current [` Vector `](/apis/Classes/HH/Vector/) to contain `` $sz `` elements. If ``` $sz ``` is smaller
+than the current size of the current [` Vector `](/apis/Classes/HH/Vector/), elements are removed from
+the end of the current [` Vector `](/apis/Classes/HH/Vector/). If `` $sz `` is greater than the current size
+of the current [` Vector `](/apis/Classes/HH/Vector/), the current [` Vector `](/apis/Classes/HH/Vector/) is extended by appending as
 many copies of `` $value `` as needed to reach a size of ``` $sz ``` elements.
 
 
@@ -47,7 +47,7 @@ If ` $sz ` is less than zero, an exception is thrown.
 
 + ` int $size `
 + ` Tv $value ` - The value to use as the filler if we are increasing the
-  size of the current [` Vector `](/docs/apis/Classes/HH/Vector/).
+  size of the current [` Vector `](/apis/Classes/HH/Vector/).
 
 
 
@@ -67,7 +67,7 @@ If ` $sz ` is less than zero, an exception is thrown.
 
 
 
-This example shows how ` resize ` can be used to decrease and increase the size of a [` Vector `](/docs/apis/Classes/HH/Vector/):
+This example shows how ` resize ` can be used to decrease and increase the size of a [` Vector `](/apis/Classes/HH/Vector/):
 
 
 

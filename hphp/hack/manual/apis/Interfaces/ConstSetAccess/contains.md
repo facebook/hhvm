@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Checks whether a value is in the current [` Set `](/docs/apis/Classes/HH/Set/)
+Checks whether a value is in the current [` Set `](/apis/Classes/HH/Set/)
 
 
 
@@ -35,5 +35,5 @@ public function contains(
 
 
 
-* ` bool ` - `` true `` if the value is in the current [` Set `](/docs/apis/Classes/HH/Set/); `` false `` otherwise.
+* ` bool ` - `` true `` if the value is in the current [` Set `](/apis/Classes/HH/Set/); `` false `` otherwise.
 <!-- HHAPIDOC -->

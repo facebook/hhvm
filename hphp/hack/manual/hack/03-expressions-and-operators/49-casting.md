@@ -1,7 +1,7 @@
 # Casting
 
 Casts in Hack convert values to different types. To assert a type
-without changing its value, see [type assertions](/docs/hack/expressions-and-operators/type-assertions).
+without changing its value, see [type assertions](/hack/expressions-and-operators/type-assertions).
 
 ``` Hack
 (float)1; // 1.0
@@ -13,5 +13,5 @@ without changing its value, see [type assertions](/docs/hack/expressions-and-ope
 ```
 
 Casts are only supported for `bool`, `int`, `float` and `string`. See
-[type conversions](/docs/hack/types/type-conversion) to understand what
+[type conversions](/hack/types/type-conversion) to understand what
 value will be produced.

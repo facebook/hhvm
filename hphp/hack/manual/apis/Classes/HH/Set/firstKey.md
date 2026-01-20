@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns the first "key" in the current [` Set `](/docs/apis/Classes/HH/Set/)
+Returns the first "key" in the current [` Set `](/apis/Classes/HH/Set/)
 
 
 
@@ -18,12 +18,12 @@ public function firstKey(): ?arraykey;
 
 
 
-Since [` Set `](/docs/apis/Classes/HH/Set/)s do not have keys, it returns the first value.
+Since [` Set `](/apis/Classes/HH/Set/)s do not have keys, it returns the first value.
 
 
 
 
-This method is interchangeable with [` firstValue() `](/docs/apis/Classes/HH/Set/firstValue/).
+This method is interchangeable with [` firstValue() `](/apis/Classes/HH/Set/firstValue/).
 
 
 
@@ -33,7 +33,7 @@ This method is interchangeable with [` firstValue() `](/docs/apis/Classes/HH/Set
 
 
 
-+ ` ?arraykey ` - The first value in the current [` Set `](/docs/apis/Classes/HH/Set/), or `` null `` if the [` Set `](/docs/apis/Classes/HH/Set/) is
++ ` ?arraykey ` - The first value in the current [` Set `](/apis/Classes/HH/Set/), or `` null `` if the [` Set `](/apis/Classes/HH/Set/) is
   empty.
 
 
@@ -44,7 +44,7 @@ This method is interchangeable with [` firstValue() `](/docs/apis/Classes/HH/Set
 
 
 
-This example shows that ` firstKey ` returns the first value in the [` Set `](/docs/apis/Classes/HH/Set/). An empty [` Set `](/docs/apis/Classes/HH/Set/) will return `` null `` as its first key.
+This example shows that ` firstKey ` returns the first value in the [` Set `](/apis/Classes/HH/Set/). An empty [` Set `](/apis/Classes/HH/Set/) will return `` null `` as its first key.
 
 
 

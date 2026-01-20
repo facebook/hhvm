@@ -6,8 +6,8 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns an [` ImmVector `](/docs/apis/Classes/HH/ImmVector/) containing the results of applying an operation to
-each key/value pair in the current [` ImmVector `](/docs/apis/Classes/HH/ImmVector/)
+Returns an [` ImmVector `](/apis/Classes/HH/ImmVector/) containing the results of applying an operation to
+each key/value pair in the current [` ImmVector `](/apis/Classes/HH/ImmVector/)
 
 
 
@@ -21,10 +21,10 @@ public function mapWithKey<Tu>(
 
 
 
-[` mapWithKey() `](/docs/apis/Classes/HH/ImmVector/mapWithKey/)'s result contains a value for every key/value pair in the
-current [` ImmVector `](/docs/apis/Classes/HH/ImmVector/); unlike [` filterWithKey() `](/docs/apis/Classes/HH/ImmVector/filterWithKey/), where only values whose
+[` mapWithKey() `](/apis/Classes/HH/ImmVector/mapWithKey/)'s result contains a value for every key/value pair in the
+current [` ImmVector `](/apis/Classes/HH/ImmVector/); unlike [` filterWithKey() `](/apis/Classes/HH/ImmVector/filterWithKey/), where only values whose
 key/value pairs meet a certain criterion are included in the resulting
-[` ImmVector `](/docs/apis/Classes/HH/ImmVector/).
+[` ImmVector `](/apis/Classes/HH/ImmVector/).
 
 
 
@@ -44,9 +44,9 @@ key/value pairs meet a certain criterion are included in the resulting
 
 
 
-* [` ImmVector<Tu> `](/docs/apis/Classes/HH/ImmVector/) - An [` ImmVector `](/docs/apis/Classes/HH/ImmVector/) containing the results of applying a
+* [` ImmVector<Tu> `](/apis/Classes/HH/ImmVector/) - An [` ImmVector `](/apis/Classes/HH/ImmVector/) containing the results of applying a
   user-specified operation to each key/value pair of the current
-  [` ImmVector `](/docs/apis/Classes/HH/ImmVector/) in turn.
+  [` ImmVector `](/apis/Classes/HH/ImmVector/) in turn.
 
 
 
@@ -56,5 +56,5 @@ key/value pairs meet a certain criterion are included in the resulting
 
 
 
-See [` Vector::mapWithKey `](/docs/apis/Classes/HH/Vector/mapWithKey/#examples) for usage examples.
+See [` Vector::mapWithKey `](/apis/Classes/HH/Vector/mapWithKey/#examples) for usage examples.
 <!-- HHAPIDOC -->

@@ -29,7 +29,7 @@ interface ScalarFormat {...}
 
 
 
-+ [` ->format_d(?int $int): string `](/docs/apis/Interfaces/HH.Lib.SQL/ScalarFormat/format_d/)
-+ [` ->format_f(?float $s): string `](/docs/apis/Interfaces/HH.Lib.SQL/ScalarFormat/format_f/)
-+ [` ->format_s(?string $string): string `](/docs/apis/Interfaces/HH.Lib.SQL/ScalarFormat/format_s/)
++ [` ->format_d(?int $int): string `](/apis/Interfaces/HH.Lib.SQL/ScalarFormat/format_d/)
++ [` ->format_f(?float $s): string `](/apis/Interfaces/HH.Lib.SQL/ScalarFormat/format_f/)
++ [` ->format_s(?string $string): string `](/apis/Interfaces/HH.Lib.SQL/ScalarFormat/format_s/)
 <!-- HHAPIDOC -->

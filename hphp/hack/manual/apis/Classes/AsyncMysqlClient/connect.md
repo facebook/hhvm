@@ -42,9 +42,9 @@ MySQL client.
 
 
 If you want to be able to pool up a bunch of connections, you would call
-[` setPoolsConnectionLimit() `](/docs/apis/Classes/AsyncMysqlClient/setPoolsConnectionLimit/), create a default pool of connections with
-[` AsyncMysqlConnectionPool()::__construct() `](/docs/apis/Classes/AsyncMysqlConnectionPool/), which now
-has that limit set, and then call [` AsyncMysqlConnectionPool()::connect() `](/docs/apis/Classes/AsyncMysqlConnectionPool/).
+[` setPoolsConnectionLimit() `](/apis/Classes/AsyncMysqlClient/setPoolsConnectionLimit/), create a default pool of connections with
+[` AsyncMysqlConnectionPool()::__construct() `](/apis/Classes/AsyncMysqlConnectionPool/), which now
+has that limit set, and then call [` AsyncMysqlConnectionPool()::connect() `](/apis/Classes/AsyncMysqlConnectionPool/).
 
 
 
@@ -78,7 +78,7 @@ has that limit set, and then call [` AsyncMysqlConnectionPool()::connect() `](/d
 
 
 
-* [` Awaitable<AsyncMysqlConnection> `](/docs/apis/Classes/HH/Awaitable/) - an [` Awaitable `](/docs/apis/Classes/HH/Awaitable/) representing an [` AsyncMysqlConnection `](/docs/apis/Classes/AsyncMysqlConnection/). `` await ``
+* [` Awaitable<AsyncMysqlConnection> `](/apis/Classes/HH/Awaitable/) - an [` Awaitable `](/apis/Classes/HH/Awaitable/) representing an [` AsyncMysqlConnection `](/apis/Classes/AsyncMysqlConnection/). `` await ``
   or ``` join ``` this result to obtain the actual connection.
 
 
@@ -89,13 +89,13 @@ has that limit set, and then call [` AsyncMysqlConnectionPool()::connect() `](/d
 
 
 
-The following example shows how to use [` AsyncMysqlClient::connect() `](/docs/apis/Classes/AsyncMysqlClient/connect/) to connect to a database asynchronously and get a result from that connection. Notice a couple of things:
+The following example shows how to use [` AsyncMysqlClient::connect() `](/apis/Classes/AsyncMysqlClient/connect/) to connect to a database asynchronously and get a result from that connection. Notice a couple of things:
 
 
 
 
-- The parameters to [` connect() `](/docs/apis/Classes/AsyncMysqlClient/connect/) are very similar to that of a normal [` mysqli ` connection](<http://php.net/manual/en/mysqli.construct.php>).
-- With [` AsyncMysqlClient `](/docs/apis/Classes/AsyncMysqlClient/), we are able to take full advantage of [async](</docs/hack/asynchronous-operations/introduction>) to perform other DB connection or I/O operations while waiting for this connection to return.
+- The parameters to [` connect() `](/apis/Classes/AsyncMysqlClient/connect/) are very similar to that of a normal [` mysqli ` connection](<http://php.net/manual/en/mysqli.construct.php>).
+- With [` AsyncMysqlClient `](/apis/Classes/AsyncMysqlClient/), we are able to take full advantage of [async](</hack/asynchronous-operations/introduction>) to perform other DB connection or I/O operations while waiting for this connection to return.
 
 
 

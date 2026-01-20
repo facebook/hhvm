@@ -7,7 +7,7 @@ the Hack LSP instead for complete and up-to-date information.
 :::
 
 Returns an ImmVector that is the concatenation of the values of the
-current [` ImmMap `](/docs/apis/Classes/HH/ImmMap/) and the values of the provided [` Traversable `](/docs/apis/Interfaces/HH/Traversable/)
+current [` ImmMap `](/apis/Classes/HH/ImmMap/) and the values of the provided [` Traversable `](/apis/Interfaces/HH/Traversable/)
 
 
 
@@ -21,8 +21,8 @@ public function concat<Tu super Tv>(
 
 
 
-The provided [` Traversable `](/docs/apis/Interfaces/HH/Traversable/) is concatenated to the end of the current
-[` ImmMap `](/docs/apis/Classes/HH/ImmMap/) to produce the returned [` ImmVector `](/docs/apis/Classes/HH/ImmVector/).
+The provided [` Traversable `](/apis/Interfaces/HH/Traversable/) is concatenated to the end of the current
+[` ImmMap `](/apis/Classes/HH/ImmMap/) to produce the returned [` ImmVector `](/apis/Classes/HH/ImmVector/).
 
 
 
@@ -32,7 +32,7 @@ The provided [` Traversable `](/docs/apis/Interfaces/HH/Traversable/) is concate
 
 
 
-+ [Constraints](</docs/hack/generics/type-constraints>)
++ [Constraints](</hack/generics/type-constraints>)
 
 
 
@@ -45,7 +45,7 @@ The provided [` Traversable `](/docs/apis/Interfaces/HH/Traversable/) is concate
 
 
 
-* [` Traversable<Tu> `](/docs/apis/Interfaces/HH/Traversable/)`` $traversable `` - The [` Traversable `](/docs/apis/Interfaces/HH/Traversable/) to concatenate to this [` ImmMap `](/docs/apis/Classes/HH/ImmMap/).
+* [` Traversable<Tu> `](/apis/Interfaces/HH/Traversable/)`` $traversable `` - The [` Traversable `](/apis/Interfaces/HH/Traversable/) to concatenate to this [` ImmMap `](/apis/Classes/HH/ImmMap/).
 
 
 
@@ -55,7 +55,7 @@ The provided [` Traversable `](/docs/apis/Interfaces/HH/Traversable/) is concate
 
 
 
-- [` ImmVector<Tu> `](/docs/apis/Classes/HH/ImmVector/) - The integer-indexed concatenated [` ImmVector `](/docs/apis/Classes/HH/ImmVector/).
+- [` ImmVector<Tu> `](/apis/Classes/HH/ImmVector/) - The integer-indexed concatenated [` ImmVector `](/apis/Classes/HH/ImmVector/).
 
 
 
@@ -65,5 +65,5 @@ The provided [` Traversable `](/docs/apis/Interfaces/HH/Traversable/) is concate
 
 
 
-See [`Map::concat`](/docs/apis/Classes/HH/Map/concat/#examples) for usage examples.
+See [`Map::concat`](/apis/Classes/HH/Map/concat/#examples) for usage examples.
 <!-- HHAPIDOC -->

@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns an [` ImmVector `](/docs/apis/Classes/HH/ImmVector/) containing the values of the current [` ImmVector `](/docs/apis/Classes/HH/ImmVector/) up
+Returns an [` ImmVector `](/apis/Classes/HH/ImmVector/) containing the values of the current [` ImmVector `](/apis/Classes/HH/ImmVector/) up
 to but not including the first value that produces `` false `` when passed to
 the specified callback
 
@@ -23,13 +23,13 @@ public function takeWhile(
 
 
 That is, takes the continuous prefix of values in
-the current [` ImmVector `](/docs/apis/Classes/HH/ImmVector/) for which the specified callback returns `` true ``.
+the current [` ImmVector `](/apis/Classes/HH/ImmVector/) for which the specified callback returns `` true ``.
 
 
 
 
-The returned [` ImmVector `](/docs/apis/Classes/HH/ImmVector/) will always be a subset (but not necessarily a
-proper subset) of the current [` ImmVector `](/docs/apis/Classes/HH/ImmVector/).
+The returned [` ImmVector `](/apis/Classes/HH/ImmVector/) will always be a subset (but not necessarily a
+proper subset) of the current [` ImmVector `](/apis/Classes/HH/ImmVector/).
 
 
 
@@ -49,7 +49,7 @@ proper subset) of the current [` ImmVector `](/docs/apis/Classes/HH/ImmVector/).
 
 
 
-* [` ImmVector<Tv> `](/docs/apis/Classes/HH/ImmVector/) - An [` ImmVector `](/docs/apis/Classes/HH/ImmVector/) that is a subset of the current [` ImmVector `](/docs/apis/Classes/HH/ImmVector/) up
+* [` ImmVector<Tv> `](/apis/Classes/HH/ImmVector/) - An [` ImmVector `](/apis/Classes/HH/ImmVector/) that is a subset of the current [` ImmVector `](/apis/Classes/HH/ImmVector/) up
   until when the callback returns `` false ``.
 
 
@@ -60,5 +60,5 @@ proper subset) of the current [` ImmVector `](/docs/apis/Classes/HH/ImmVector/).
 
 
 
-See [` Vector::takeWhile `](/docs/apis/Classes/HH/Vector/takeWhile/#examples) for usage examples.
+See [` Vector::takeWhile `](/apis/Classes/HH/Vector/takeWhile/#examples) for usage examples.
 <!-- HHAPIDOC -->

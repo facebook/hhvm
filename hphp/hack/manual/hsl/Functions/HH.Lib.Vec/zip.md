@@ -45,8 +45,8 @@ size of ```` $second ````
 
 
 
-+ [` Traversable<Tv> `](/docs/apis/Interfaces/HH/Traversable/)`` $first ``
-+ [` Traversable<Tu> `](/docs/apis/Interfaces/HH/Traversable/)`` $second ``
++ [` Traversable<Tv> `](/apis/Interfaces/HH/Traversable/)`` $first ``
++ [` Traversable<Tu> `](/apis/Interfaces/HH/Traversable/)`` $second ``
 
 
 

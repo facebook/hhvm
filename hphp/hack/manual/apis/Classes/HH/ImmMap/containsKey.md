@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Determines if the specified key is in the current [` ImmMap `](/docs/apis/Classes/HH/ImmMap/)
+Determines if the specified key is in the current [` ImmMap `](/apis/Classes/HH/ImmMap/)
 
 
 
@@ -20,7 +20,7 @@ public function containsKey(
 
 
 
-This function is interchangeable with [` contains() `](/docs/apis/Classes/HH/ImmMap/contains/).
+This function is interchangeable with [` contains() `](/apis/Classes/HH/ImmMap/contains/).
 
 
 
@@ -30,7 +30,7 @@ This function is interchangeable with [` contains() `](/docs/apis/Classes/HH/Imm
 
 
 
-+ [Constraints](</docs/hack/generics/type-constraints>)
++ [Constraints](</hack/generics/type-constraints>)
 
 
 
@@ -53,7 +53,7 @@ This function is interchangeable with [` contains() `](/docs/apis/Classes/HH/Imm
 
 
 
-- ` bool ` - `` true `` if the specified key is present in the current [` ImmMap `](/docs/apis/Classes/HH/ImmMap/);
+- ` bool ` - `` true `` if the specified key is present in the current [` ImmMap `](/apis/Classes/HH/ImmMap/);
   `` false `` otherwise.
 
 
@@ -64,5 +64,5 @@ This function is interchangeable with [` contains() `](/docs/apis/Classes/HH/Imm
 
 
 
-See [`Map::containsKey`](/docs/apis/Classes/HH/Map/containsKey/#examples) for usage examples.
+See [`Map::containsKey`](/apis/Classes/HH/Map/containsKey/#examples) for usage examples.
 <!-- HHAPIDOC -->

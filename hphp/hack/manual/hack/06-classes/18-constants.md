@@ -21,7 +21,7 @@ function main(): void {
 Class constants are always public, and can not be explicitly declared as `public`, `protected`, or `private`.
 
 ## Selection
-Inside a parent class, use `self::foo` to access a named constant `foo`. Outside a parent class, a class constant's name must be fully qualified with the class and constant name (e.g. `Bar::foo`). For more information, see [scope-resolution operator, `::`](/docs/hack/expressions-and-operators/scope-resolution).
+Inside a parent class, use `self::foo` to access a named constant `foo`. Outside a parent class, a class constant's name must be fully qualified with the class and constant name (e.g. `Bar::foo`). For more information, see [scope-resolution operator, `::`](/hack/expressions-and-operators/scope-resolution).
 
 ## Type Inference
 If a class constant's type is omitted, it can be inferred. For example:

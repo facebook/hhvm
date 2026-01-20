@@ -34,7 +34,7 @@ Previously known as ` implode ` in PHP.
 
 
 
-+ [String](</docs/hack/built-in-types/string>)
++ [String](</hack/built-in-types/string>)
 
 
 
@@ -47,7 +47,7 @@ Previously known as ` implode ` in PHP.
 
 
 
-* [` Traversable<arraykey> `](/docs/apis/Interfaces/HH/Traversable/)`` $pieces ``
+* [` Traversable<arraykey> `](/apis/Interfaces/HH/Traversable/)`` $pieces ``
 * ` string $glue `
 
 

@@ -30,5 +30,5 @@ public function getTypeConstant(
 
 
 
-* [` ReflectionTypeConstant `](/docs/apis/Classes/ReflectionTypeConstant/)
+* [` ReflectionTypeConstant `](/apis/Classes/ReflectionTypeConstant/)
 <!-- HHAPIDOC -->

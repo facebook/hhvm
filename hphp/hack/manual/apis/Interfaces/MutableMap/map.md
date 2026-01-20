@@ -6,8 +6,8 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a [` MutableMap `](/docs/apis/Interfaces/MutableMap/) after an operation has been applied to each value
-in the current [` MutableMap `](/docs/apis/Interfaces/MutableMap/)
+Returns a [` MutableMap `](/apis/Interfaces/MutableMap/) after an operation has been applied to each value
+in the current [` MutableMap `](/apis/Interfaces/MutableMap/)
 
 
 
@@ -21,14 +21,14 @@ public function map<Tu>(
 
 
 
-Every value in the current Map is affected by a call to [` map() `](/docs/apis/Interfaces/MutableMap/map/), unlike
-[` filter() `](/docs/apis/Interfaces/MutableMap/filter/) where only values that meet a certain criteria are affected.
+Every value in the current Map is affected by a call to [` map() `](/apis/Interfaces/MutableMap/map/), unlike
+[` filter() `](/apis/Interfaces/MutableMap/filter/) where only values that meet a certain criteria are affected.
 
 
 
 
-The keys will remain unchanged from the current [` MutableMap `](/docs/apis/Interfaces/MutableMap/) to the
-returned [` MutableMap `](/docs/apis/Interfaces/MutableMap/).
+The keys will remain unchanged from the current [` MutableMap `](/apis/Interfaces/MutableMap/) to the
+returned [` MutableMap `](/apis/Interfaces/MutableMap/).
 
 
 
@@ -38,7 +38,7 @@ returned [` MutableMap `](/docs/apis/Interfaces/MutableMap/).
 
 
 
-+ [Examples](</docs/hack/arrays-and-collections/introduction>)
++ [Examples](</hack/arrays-and-collections/introduction>)
 
 
 
@@ -52,7 +52,7 @@ returned [` MutableMap `](/docs/apis/Interfaces/MutableMap/).
 
 
 * ` (function(Tv): Tu) $fn ` - The callback containing the operation to apply to the current
-  [` MutableMap `](/docs/apis/Interfaces/MutableMap/) values.
+  [` MutableMap `](/apis/Interfaces/MutableMap/) values.
 
 
 
@@ -62,6 +62,6 @@ returned [` MutableMap `](/docs/apis/Interfaces/MutableMap/).
 
 
 
-- [` MutableMap<Tk, `](/docs/apis/Interfaces/MutableMap/)`` Tu> `` - a [` MutableMap `](/docs/apis/Interfaces/MutableMap/) containing key/value pairs after a user-specified
+- [` MutableMap<Tk, `](/apis/Interfaces/MutableMap/)`` Tu> `` - a [` MutableMap `](/apis/Interfaces/MutableMap/) containing key/value pairs after a user-specified
   operation is applied.
 <!-- HHAPIDOC -->

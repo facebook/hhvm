@@ -10,7 +10,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-The interface for all [` Set `](/docs/apis/Classes/HH/Set/)s to enable access its values
+The interface for all [` Set `](/apis/Classes/HH/Set/)s to enable access its values
 
 
 
@@ -20,8 +20,8 @@ The interface for all [` Set `](/docs/apis/Classes/HH/Set/)s to enable access it
 
 
 
-+ [Introduction](</docs/hack/arrays-and-collections/introduction>)
-+ [Interfaces](</docs/hack/arrays-and-collections/introduction>)
++ [Introduction](</hack/arrays-and-collections/introduction>)
++ [Interfaces](</hack/arrays-and-collections/introduction>)
 
 
 
@@ -46,6 +46,6 @@ interface ConstSetAccess {...}
 
 
 
-* [` ->contains(arraykey $m): bool `](/docs/apis/Interfaces/ConstSetAccess/contains/)\
-  Checks whether a value is in the current [` Set `](/docs/apis/Classes/HH/Set/)
+* [` ->contains(arraykey $m): bool `](/apis/Interfaces/ConstSetAccess/contains/)\
+  Checks whether a value is in the current [` Set `](/apis/Classes/HH/Set/)
 <!-- HHAPIDOC -->

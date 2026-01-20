@@ -33,5 +33,5 @@ public function toVector(): HH\object;
 
 
 
-See [` Map::toVector `](/docs/apis/Classes/HH/Map/toVector/#examples) for usage examples.
+See [` Map::toVector `](/apis/Classes/HH/Map/toVector/#examples) for usage examples.
 <!-- HHAPIDOC -->

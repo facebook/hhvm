@@ -259,7 +259,7 @@ function soft_func(): void {}
 
 When not provided, the sample rate defaults to 1 (log every call).
 
-For detailed migration workflows using `__SoftRequirePackage`, see the [Migration Guide](/docs/hack/packages/migration-guide).
+For detailed migration workflows using `__SoftRequirePackage`, see the [Migration Guide](/hack/packages/migration-guide).
 
 ## Method Overriding and Inheritance
 

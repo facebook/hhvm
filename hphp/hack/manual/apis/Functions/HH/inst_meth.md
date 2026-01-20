@@ -31,7 +31,7 @@ to an instance method on the specified object instance.
 
 When using ` inst_meth ` all function calls will go to the single object
 instance specified.  To call the same function on a collection
-of objects of compatible types, use [` meth_caller `](/docs/apis/Functions/HH/meth_caller/).
+of objects of compatible types, use [` meth_caller `](/apis/Functions/HH/meth_caller/).
 
 
 
@@ -42,11 +42,11 @@ methods for delegation.  The methods in this group are:
 
 
 
-+ [` class_meth `](/docs/apis/Functions/HH/class_meth/) for static methods on a class
-+ [` fun `](/docs/apis/Functions/HH/fun/) for global functions
-+ [` inst_meth `](/docs/apis/Functions/HH/inst_meth/) for instance methods on a single object
-+ [` meth_caller `](/docs/apis/Functions/HH/meth_caller/) for an instance method where the instance will be determined later
-+ Or use anonymous code within a [lambda](</docs/hack/functions/anonymous-functions>) expression.
++ [` class_meth `](/apis/Functions/HH/class_meth/) for static methods on a class
++ [` fun `](/apis/Functions/HH/fun/) for global functions
++ [` inst_meth `](/apis/Functions/HH/inst_meth/) for instance methods on a single object
++ [` meth_caller `](/apis/Functions/HH/meth_caller/) for an instance method where the instance will be determined later
++ Or use anonymous code within a [lambda](</hack/functions/anonymous-functions>) expression.
 
 
 

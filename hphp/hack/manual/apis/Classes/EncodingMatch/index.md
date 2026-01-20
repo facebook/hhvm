@@ -32,19 +32,19 @@ class EncodingMatch {...}
 
 
 
-+ [` ->getConfidence(): int `](/docs/apis/Classes/EncodingMatch/getConfidence/)\
++ [` ->getConfidence(): int `](/apis/Classes/EncodingMatch/getConfidence/)\
   Gets the confidence number of the encoding match
 
-+ [` ->getEncoding(): string `](/docs/apis/Classes/EncodingMatch/getEncoding/)\
++ [` ->getEncoding(): string `](/apis/Classes/EncodingMatch/getEncoding/)\
   Gets the name of the detected encoding
 
-+ [` ->getLanguage(): string `](/docs/apis/Classes/EncodingMatch/getLanguage/)\
++ [` ->getLanguage(): string `](/apis/Classes/EncodingMatch/getLanguage/)\
   Gets a rough guess at the language of the encoded bytes
 
-+ [` ->getUTF8(): string `](/docs/apis/Classes/EncodingMatch/getUTF8/)\
++ [` ->getUTF8(): string `](/apis/Classes/EncodingMatch/getUTF8/)\
   Gets the UTF-8 encoded version of the encoded byte array
 
-+ [` ->isValid(): bool `](/docs/apis/Classes/EncodingMatch/isValid/)\
++ [` ->isValid(): bool `](/apis/Classes/EncodingMatch/isValid/)\
   Checks if the encoding match succeeded
 
 <!-- HHAPIDOC -->

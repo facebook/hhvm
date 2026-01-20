@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns an [` Iterable `](/docs/apis/Interfaces/HH/Iterable/) containing the values of the current [` Iterable `](/docs/apis/Interfaces/HH/Iterable/)
+Returns an [` Iterable `](/apis/Interfaces/HH/Iterable/) containing the values of the current [` Iterable `](/apis/Interfaces/HH/Iterable/)
 starting after and including the first value that produces `` true `` when
 passed to the specified callback
 
@@ -22,8 +22,8 @@ public function skipWhile(
 
 
 
-The returned [` Iterable `](/docs/apis/Interfaces/HH/Iterable/) will always be a proper subset of the current
-[` Iterable `](/docs/apis/Interfaces/HH/Iterable/).
+The returned [` Iterable `](/apis/Interfaces/HH/Iterable/) will always be a proper subset of the current
+[` Iterable `](/apis/Interfaces/HH/Iterable/).
 
 
 
@@ -34,7 +34,7 @@ The returned [` Iterable `](/docs/apis/Interfaces/HH/Iterable/) will always be a
 
 
 + ` (function(Tv): bool) $fn ` - The callback used to determine the starting element for the
-  returned [` Iterable `](/docs/apis/Interfaces/HH/Iterable/).
+  returned [` Iterable `](/apis/Interfaces/HH/Iterable/).
 
 
 
@@ -44,6 +44,6 @@ The returned [` Iterable `](/docs/apis/Interfaces/HH/Iterable/) will always be a
 
 
 
-* [` Iterable<Tv> `](/docs/apis/Interfaces/HH/Iterable/) - An [` Iterable `](/docs/apis/Interfaces/HH/Iterable/) that is a proper subset of the current [` Iterable `](/docs/apis/Interfaces/HH/Iterable/)
+* [` Iterable<Tv> `](/apis/Interfaces/HH/Iterable/) - An [` Iterable `](/apis/Interfaces/HH/Iterable/) that is a proper subset of the current [` Iterable `](/apis/Interfaces/HH/Iterable/)
   starting after the callback returns `` true ``.
 <!-- HHAPIDOC -->

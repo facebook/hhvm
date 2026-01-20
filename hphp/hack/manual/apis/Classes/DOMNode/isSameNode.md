@@ -31,7 +31,7 @@ not based on content
 
 
 
-+ [` DOMNode `](/docs/apis/Classes/DOMNode/)`` $node `` - The compared node.
++ [` DOMNode `](/apis/Classes/DOMNode/)`` $node `` - The compared node.
 
 
 

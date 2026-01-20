@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns an [` ImmSet `](/docs/apis/Classes/HH/ImmSet/) containing all the values from the specified
+Returns an [` ImmSet `](/apis/Classes/HH/ImmSet/) containing all the values from the specified
 `` array ``(s)
 
 
@@ -26,7 +26,7 @@ public static function fromArrays(
 
 
 
-+ ` ...$argv ` - The `` array ``(s) to convert to an [` ImmSet `](/docs/apis/Classes/HH/ImmSet/).
++ ` ...$argv ` - The `` array ``(s) to convert to an [` ImmSet `](/apis/Classes/HH/ImmSet/).
 
 
 
@@ -36,7 +36,7 @@ public static function fromArrays(
 
 
 
-* [` ImmSet<Tv> `](/docs/apis/Classes/HH/ImmSet/) - An [` ImmSet `](/docs/apis/Classes/HH/ImmSet/) with the values from the passed `` array ``(s).
+* [` ImmSet<Tv> `](/apis/Classes/HH/ImmSet/) - An [` ImmSet `](/apis/Classes/HH/ImmSet/) with the values from the passed `` array ``(s).
 
 
 
@@ -46,5 +46,5 @@ public static function fromArrays(
 
 
 
-See [` Set::fromArrays `](/docs/apis/Classes/HH/Set/fromArrays/#examples) for usage examples.
+See [` Set::fromArrays `](/apis/Classes/HH/Set/fromArrays/#examples) for usage examples.
 <!-- HHAPIDOC -->

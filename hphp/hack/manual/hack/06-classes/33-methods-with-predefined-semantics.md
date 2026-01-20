@@ -5,14 +5,14 @@ signature, and semantics:
 
 Method Name     | Description
 ------------|-------------
-[`__construct`](/docs/hack/classes/constructors) | A constructor
+[`__construct`](/hack/classes/constructors) | A constructor
 [`__dispose`](#method-__dispose) | Performs object-cleanup
 [`__disposeAsync`](#method-__disposeasync) | Performs object-cleanup
 `__toString` | Returns a string representation of the instance on which it is called
 
 ## Method __construct
 
-See [Constructors](/docs/hack/classes/constructors).
+See [Constructors](/hack/classes/constructors).
 
 ## Method __dispose
 
@@ -28,7 +28,7 @@ class Example implements IDisposable {
 This method is called implicitly by the runtime when the instance goes out of scope, provided the attributes `<<__ReturnDisposable>>`
 and `<<__AcceptDisposable>>` are *not* present.
 
-See [object disposal](/docs/hack/classes/object-disposal) for an example of its use and a discussion of these attributes.
+See [object disposal](/hack/classes/object-disposal) for an example of its use and a discussion of these attributes.
 
 ## Method __disposeAsync
 
@@ -42,4 +42,4 @@ public async function __disposeAsync(): Awaitable<void>;
 This method is called implicitly by the runtime when the instance goes out of scope, provided the attributes `<<__ReturnDisposable>>`
 and `<<__AcceptDisposable>>` are *not* present.
 
-See [object disposal](/docs/hack/classes/object-disposal) for a discussion of disposal and these attributes.
+See [object disposal](/hack/classes/object-disposal) for a discussion of disposal and these attributes.

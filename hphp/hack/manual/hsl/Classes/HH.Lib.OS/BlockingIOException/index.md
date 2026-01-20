@@ -29,8 +29,8 @@ final class BlockingIOException extends ErrnoException {...}
 
 
 
-+ [` ::_getValidErrnos(): keyset<Errno> `](/docs/hsl/Classes/HH.Lib.OS/BlockingIOException/_getValidErrnos/)
-+ [` ->__construct(Errno $code, string $message) `](/docs/hsl/Classes/HH.Lib.OS/BlockingIOException/__construct/)
++ [` ::_getValidErrnos(): keyset<Errno> `](/hsl/Classes/HH.Lib.OS/BlockingIOException/_getValidErrnos/)
++ [` ->__construct(Errno $code, string $message) `](/hsl/Classes/HH.Lib.OS/BlockingIOException/__construct/)
 
 
 
@@ -38,12 +38,12 @@ final class BlockingIOException extends ErrnoException {...}
 
 
 
-### Public Methods ([` HH\Lib\OS\ErrnoException `](/docs/hsl/Classes/HH.Lib.OS/ErrnoException/))
+### Public Methods ([` HH\Lib\OS\ErrnoException `](/hsl/Classes/HH.Lib.OS/ErrnoException/))
 
 
 
 
-* [` ->getCode(): Errno `](/docs/hsl/Classes/HH.Lib.OS/ErrnoException/getCode/)\
+* [` ->getCode(): Errno `](/hsl/Classes/HH.Lib.OS/ErrnoException/getCode/)\
   Deprecated for clarity, and potential future ambiguity
-* [` ->getErrno(): Errno `](/docs/hsl/Classes/HH.Lib.OS/ErrnoException/getErrno/)
+* [` ->getErrno(): Errno `](/hsl/Classes/HH.Lib.OS/ErrnoException/getErrno/)
 <!-- HHAPIDOC -->

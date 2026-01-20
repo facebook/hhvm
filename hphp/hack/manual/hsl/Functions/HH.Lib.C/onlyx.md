@@ -47,7 +47,7 @@ Space complexity: O(1)
 
 
 
-+ [` Traversable<T> `](/docs/apis/Interfaces/HH/Traversable/)`` $traversable ``
++ [` Traversable<T> `](/apis/Interfaces/HH/Traversable/)`` $traversable ``
 + ` ?\HH\Lib\Str\SprintfFormatString $format_string = NULL `
 + ` mixed ...$format_args `
 

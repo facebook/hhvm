@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns an ` array ` with the values from the current [` Iterable `](/docs/apis/Interfaces/HH/Iterable/)
+Returns an ` array ` with the values from the current [` Iterable `](/apis/Interfaces/HH/Iterable/)
 
 
 
@@ -18,7 +18,7 @@ public function toValuesArray(): varray<Tv>;
 
 
 
-The keys in the current [` Iterable `](/docs/apis/Interfaces/HH/Iterable/) are discarded and replaced with integer
+The keys in the current [` Iterable `](/apis/Interfaces/HH/Iterable/) are discarded and replaced with integer
 indices, starting with 0.
 
 
@@ -29,5 +29,5 @@ indices, starting with 0.
 
 
 
-+ ` varray<Tv> ` - an `` array `` containing the values from the current [` Iterable `](/docs/apis/Interfaces/HH/Iterable/).
++ ` varray<Tv> ` - an `` array `` containing the values from the current [` Iterable `](/apis/Interfaces/HH/Iterable/).
 <!-- HHAPIDOC -->

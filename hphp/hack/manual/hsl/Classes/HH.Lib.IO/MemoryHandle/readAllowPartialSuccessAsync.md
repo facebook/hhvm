@@ -32,5 +32,5 @@ public function readAllowPartialSuccessAsync(
 
 
 
-* [` Awaitable<string> `](/docs/apis/Classes/HH/Awaitable/)
+* [` Awaitable<string> `](/apis/Classes/HH/Awaitable/)
 <!-- HHAPIDOC -->

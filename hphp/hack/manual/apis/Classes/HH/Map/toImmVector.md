@@ -7,7 +7,7 @@ the Hack LSP instead for complete and up-to-date information.
 :::
 
 Returns an immutable vector (` ImmVector `) with the values of the current
-[` Map `](/docs/apis/Classes/HH/Map/)
+[` Map `](/apis/Classes/HH/Map/)
 
 
 
@@ -24,7 +24,7 @@ public function toImmVector(): ImmVector<Tv>;
 
 
 
-+ [` ImmVector<Tv> `](/docs/apis/Classes/HH/ImmVector/) - an `` ImmVector `` that is an immutable copy of the current [` Map `](/docs/apis/Classes/HH/Map/).
++ [` ImmVector<Tv> `](/apis/Classes/HH/ImmVector/) - an `` ImmVector `` that is an immutable copy of the current [` Map `](/apis/Classes/HH/Map/).
 
 
 
@@ -34,7 +34,7 @@ public function toImmVector(): ImmVector<Tv>;
 
 
 
-This example shows that ` toImmVector ` returns an immutable copy of the [` Map `](/docs/apis/Classes/HH/Map/)'s values. Mutating the `` Vector `` of values doesn't affect the original [` Map `](/docs/apis/Classes/HH/Map/) and vice-versa.
+This example shows that ` toImmVector ` returns an immutable copy of the [` Map `](/apis/Classes/HH/Map/)'s values. Mutating the `` Vector `` of values doesn't affect the original [` Map `](/apis/Classes/HH/Map/) and vice-versa.
 
 
 

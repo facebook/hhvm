@@ -37,5 +37,5 @@ foreach ($reader->linesIterator() await as $line) {
 
 
 
-+ [` AsyncIterator<string> `](/docs/apis/Interfaces/HH/AsyncIterator/)
++ [` AsyncIterator<string> `](/apis/Interfaces/HH/AsyncIterator/)
 <!-- HHAPIDOC -->

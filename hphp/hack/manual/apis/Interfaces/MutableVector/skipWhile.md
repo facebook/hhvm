@@ -6,8 +6,8 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a [` MutableVector `](/docs/apis/Interfaces/MutableVector/) containing the values of the current
-[` MutableVector `](/docs/apis/Interfaces/MutableVector/) starting after and including the first value that produces
+Returns a [` MutableVector `](/apis/Interfaces/MutableVector/) containing the values of the current
+[` MutableVector `](/apis/Interfaces/MutableVector/) starting after and including the first value that produces
 `` true `` when passed to the specified callback
 
 
@@ -22,8 +22,8 @@ public function skipWhile(
 
 
 
-The returned [` MutableVector `](/docs/apis/Interfaces/MutableVector/) will always be a proper subset of the current
-[` MutableVector `](/docs/apis/Interfaces/MutableVector/).
+The returned [` MutableVector `](/apis/Interfaces/MutableVector/) will always be a proper subset of the current
+[` MutableVector `](/apis/Interfaces/MutableVector/).
 
 
 
@@ -34,7 +34,7 @@ The returned [` MutableVector `](/docs/apis/Interfaces/MutableVector/) will alwa
 
 
 + ` (function(Tv): bool) $fn ` - The callback used to determine the starting element for the
-  returned [` MutableVector `](/docs/apis/Interfaces/MutableVector/).
+  returned [` MutableVector `](/apis/Interfaces/MutableVector/).
 
 
 
@@ -44,6 +44,6 @@ The returned [` MutableVector `](/docs/apis/Interfaces/MutableVector/) will alwa
 
 
 
-* [` MutableVector<Tv> `](/docs/apis/Interfaces/MutableVector/) - A [` MutableVector `](/docs/apis/Interfaces/MutableVector/) that is a proper subset of the current
-  [` MutableVector `](/docs/apis/Interfaces/MutableVector/) starting after the callback returns `` true ``.
+* [` MutableVector<Tv> `](/apis/Interfaces/MutableVector/) - A [` MutableVector `](/apis/Interfaces/MutableVector/) that is a proper subset of the current
+  [` MutableVector `](/apis/Interfaces/MutableVector/) starting after the callback returns `` true ``.
 <!-- HHAPIDOC -->

@@ -33,7 +33,7 @@ If the multiplier is 0, the empty string will be returned.
 
 
 
-+ [String](</docs/hack/built-in-types/string>)
++ [String](</hack/built-in-types/string>)
 
 
 

@@ -23,7 +23,7 @@ public function toVector(): Vector<Tv>;
 
 
 
-+ [` Vector<Tv> `](/docs/apis/Classes/HH/Vector/) - A `` Vector `` that is a copy of the current ``` Vector ```.
++ [` Vector<Tv> `](/apis/Classes/HH/Vector/) - A `` Vector `` that is a copy of the current ``` Vector ```.
 
 
 
@@ -33,7 +33,7 @@ public function toVector(): Vector<Tv>;
 
 
 
-This example shows how [` toVector() `](/docs/apis/Classes/HH/Vector/toVector/) returns a copy of `` $v `` (a new ``` Vector ``` object), so mutating this new ```` Vector ```` doesn't affect the original.
+This example shows how [` toVector() `](/apis/Classes/HH/Vector/toVector/) returns a copy of `` $v `` (a new ``` Vector ``` object), so mutating this new ```` Vector ```` doesn't affect the original.
 
 
 
@@ -55,7 +55,7 @@ $v2->add('purple');
 
 
 
-This example shows how [` toVector() `](/docs/apis/Classes/HH/Vector/toVector/) returns a shallow copy of `` $v `` (a new ``` Vector ``` object containing the same elements)
+This example shows how [` toVector() `](/apis/Classes/HH/Vector/toVector/) returns a shallow copy of `` $v `` (a new ``` Vector ``` object containing the same elements)
 rather than a deep copy (a new ```` Vector ```` object containing copies of the elements of ````` $v ````` that are themselves objects).
 
 

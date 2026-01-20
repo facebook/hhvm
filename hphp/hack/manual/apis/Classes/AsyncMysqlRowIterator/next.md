@@ -33,7 +33,7 @@ public function next(): void;
 
 
 
-The following example shows you how to use [` AsyncMysqlRowIterator::next `](/docs/apis/Classes/AsyncMysqlRowIterator/next/) to move on to the next field in the iterator, assuming one exists.
+The following example shows you how to use [` AsyncMysqlRowIterator::next `](/apis/Classes/AsyncMysqlRowIterator/next/) to move on to the next field in the iterator, assuming one exists.
 
 
 

@@ -38,23 +38,23 @@ class EncodingDetector {...}
 
 
 
-+ [` ->__construct(): void `](/docs/apis/Classes/EncodingDetector/__construct/)\
++ [` ->__construct(): void `](/apis/Classes/EncodingDetector/__construct/)\
   Creates an encoding detector
 
-+ [` ->detect(): EncodingMatch `](/docs/apis/Classes/EncodingDetector/detect/)\
++ [` ->detect(): EncodingMatch `](/apis/Classes/EncodingDetector/detect/)\
   Returns an EncodingMatch object containing the best guess
   for the encoding of the byte array
 
-+ [` ->detectAll(): varray<EncodingMatch> `](/docs/apis/Classes/EncodingDetector/detectAll/)\
++ [` ->detectAll(): varray<EncodingMatch> `](/apis/Classes/EncodingDetector/detectAll/)\
   Returns an array of EncodingMatch objects containing all guesses
   for the encoding of the byte array
 
-+ [` ->setDeclaredEncoding(string $encoding): void `](/docs/apis/Classes/EncodingDetector/setDeclaredEncoding/)\
++ [` ->setDeclaredEncoding(string $encoding): void `](/apis/Classes/EncodingDetector/setDeclaredEncoding/)\
   If the user provided an encoding in metadata
   (like an HTTP or XML declaration),
   this can be used as an additional hint to the detector
 
-+ [` ->setText(string $text): void `](/docs/apis/Classes/EncodingDetector/setText/)\
++ [` ->setText(string $text): void `](/apis/Classes/EncodingDetector/setText/)\
   Sets the input byte array whose encoding is to be guessed
 
 <!-- HHAPIDOC -->

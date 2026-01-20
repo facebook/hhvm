@@ -30,7 +30,7 @@ condition like exceeding network packet parameters.
 
 
 You can get an instance of ` AsyncMysqlRowBlock ` via the
-[` AsyncMysqlQueryResult::rowBlocks() `](/docs/apis/Classes/AsyncMysqlQueryResult/rowBlocks/) call.
+[` AsyncMysqlQueryResult::rowBlocks() `](/apis/Classes/AsyncMysqlQueryResult/rowBlocks/) call.
 
 
 
@@ -40,8 +40,8 @@ You can get an instance of ` AsyncMysqlRowBlock ` via the
 
 
 
-+ [Introduction](</docs/hack/asynchronous-operations/introduction>)
-+ [Extensions](</docs/hack/asynchronous-operations/extensions>)
++ [Introduction](</hack/asynchronous-operations/introduction>)
++ [Extensions](</hack/asynchronous-operations/extensions>)
 
 
 
@@ -66,31 +66,31 @@ final class AsyncMysqlRowBlock implements IteratorAggregate, Countable, KeyedTra
 
 
 
-* [` ->at(int $row, mixed $field): mixed `](/docs/apis/Classes/AsyncMysqlRowBlock/at/)\
+* [` ->at(int $row, mixed $field): mixed `](/apis/Classes/AsyncMysqlRowBlock/at/)\
   Get a field (column) value
-* [` ->count(): int `](/docs/apis/Classes/AsyncMysqlRowBlock/count/)\
+* [` ->count(): int `](/apis/Classes/AsyncMysqlRowBlock/count/)\
   Returns the number of rows in the current row block
-* [` ->fieldFlags(mixed $field): int `](/docs/apis/Classes/AsyncMysqlRowBlock/fieldFlags/)\
+* [` ->fieldFlags(mixed $field): int `](/apis/Classes/AsyncMysqlRowBlock/fieldFlags/)\
   Returns the flags of the field (column)
-* [` ->fieldName(int $field): string `](/docs/apis/Classes/AsyncMysqlRowBlock/fieldName/)\
+* [` ->fieldName(int $field): string `](/apis/Classes/AsyncMysqlRowBlock/fieldName/)\
   Returns the name of the field (column)
-* [` ->fieldType(mixed $field): int `](/docs/apis/Classes/AsyncMysqlRowBlock/fieldType/)\
+* [` ->fieldType(mixed $field): int `](/apis/Classes/AsyncMysqlRowBlock/fieldType/)\
   Returns the type of the field (column)
-* [` ->fieldsCount(): int `](/docs/apis/Classes/AsyncMysqlRowBlock/fieldsCount/)\
+* [` ->fieldsCount(): int `](/apis/Classes/AsyncMysqlRowBlock/fieldsCount/)\
   Returns the number of fields (columns) associated with the current row
   block
-* [` ->getFieldAsDouble(int $row, mixed $field): float `](/docs/apis/Classes/AsyncMysqlRowBlock/getFieldAsDouble/)\
+* [` ->getFieldAsDouble(int $row, mixed $field): float `](/apis/Classes/AsyncMysqlRowBlock/getFieldAsDouble/)\
   Get a certain field (column) value from a certain row as `` double ``
-* [` ->getFieldAsInt(int $row, mixed $field): int `](/docs/apis/Classes/AsyncMysqlRowBlock/getFieldAsInt/)\
+* [` ->getFieldAsInt(int $row, mixed $field): int `](/apis/Classes/AsyncMysqlRowBlock/getFieldAsInt/)\
   Get a certain field (column) value from a certain row as `` int ``
-* [` ->getFieldAsString(int $row, mixed $field): string `](/docs/apis/Classes/AsyncMysqlRowBlock/getFieldAsString/)\
+* [` ->getFieldAsString(int $row, mixed $field): string `](/apis/Classes/AsyncMysqlRowBlock/getFieldAsString/)\
   Get a certain field (column) value from a certain row as `` string ``
-* [` ->getIterator(): KeyedIterator<int, AsyncMysqlRow> `](/docs/apis/Classes/AsyncMysqlRowBlock/getIterator/)\
+* [` ->getIterator(): KeyedIterator<int, AsyncMysqlRow> `](/apis/Classes/AsyncMysqlRowBlock/getIterator/)\
   Get the iterator for the rows in the block
-* [` ->getRow(int $row): AsyncMysqlRow `](/docs/apis/Classes/AsyncMysqlRowBlock/getRow/)\
+* [` ->getRow(int $row): AsyncMysqlRow `](/apis/Classes/AsyncMysqlRowBlock/getRow/)\
   Get a certain row in the current row block
-* [` ->isEmpty(): bool `](/docs/apis/Classes/AsyncMysqlRowBlock/isEmpty/)\
+* [` ->isEmpty(): bool `](/apis/Classes/AsyncMysqlRowBlock/isEmpty/)\
   Returns whether there were any rows are returned in the current row block
-* [` ->isNull(int $row, mixed $field): bool `](/docs/apis/Classes/AsyncMysqlRowBlock/isNull/)\
+* [` ->isNull(int $row, mixed $field): bool `](/apis/Classes/AsyncMysqlRowBlock/isNull/)\
   Returns whether a field (column) value is `` null ``
 <!-- HHAPIDOC -->

@@ -27,7 +27,7 @@ queries.
 
 
 
-We strongly recommend using [` queryf() `](/docs/apis/Classes/AsyncMysqlConnection/queryf/) instead, which automatically
+We strongly recommend using [` queryf() `](/apis/Classes/AsyncMysqlConnection/queryf/) instead, which automatically
 escapes string parameters.
 
 
@@ -64,15 +64,15 @@ This method is equivalent to PHP's
 
 
 
-The following example shows you how to use [` AsyncMysqlConnection::escapeString `](/docs/apis/Classes/AsyncMysqlConnection/escapeString/)
+The following example shows you how to use [` AsyncMysqlConnection::escapeString `](/apis/Classes/AsyncMysqlConnection/escapeString/)
 in order to make sure any string pass to something like
-[` AsyncMysqlConnection::query `](/docs/apis/Classes/AsyncMysqlConnection/query/) is safe for a database query. This is similar to
+[` AsyncMysqlConnection::query `](/apis/Classes/AsyncMysqlConnection/query/) is safe for a database query. This is similar to
 [` mysql_real_escape_string `](<http://php.net/manual/en/function.mysql-real-escape-string.php>).
 
 
 
 
-We *strongly* recommend using an API like [` AsyncMysqlConnection::queryf `](/docs/apis/Classes/AsyncMysqlConnection/queryf/) instead,
+We *strongly* recommend using an API like [` AsyncMysqlConnection::queryf `](/apis/Classes/AsyncMysqlConnection/queryf/) instead,
 which automatically escapes strings passed to `` %s `` placeholders.
 
 

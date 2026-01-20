@@ -6,8 +6,8 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a [` KeyedIterable `](/docs/apis/Interfaces/HH/KeyedIterable/) containing the values after the `` n ``-th element
-of the current [` KeyedIterable `](/docs/apis/Interfaces/HH/KeyedIterable/)
+Returns a [` KeyedIterable `](/apis/Interfaces/HH/KeyedIterable/) containing the values after the `` n ``-th element
+of the current [` KeyedIterable `](/apis/Interfaces/HH/KeyedIterable/)
 
 
 
@@ -21,8 +21,8 @@ public function skip(
 
 
 
-The returned [` KeyedIterable `](/docs/apis/Interfaces/HH/KeyedIterable/) will always be a proper subset of the current
-[` KeyedIterable `](/docs/apis/Interfaces/HH/KeyedIterable/).
+The returned [` KeyedIterable `](/apis/Interfaces/HH/KeyedIterable/) will always be a proper subset of the current
+[` KeyedIterable `](/apis/Interfaces/HH/KeyedIterable/).
 
 
 
@@ -38,7 +38,7 @@ The returned [` KeyedIterable `](/docs/apis/Interfaces/HH/KeyedIterable/) will a
 
 
 + ` int $n ` - The last element to be skipped; the `` $n+1 `` element will be
-  the first one in the returned [` KeyedIterable `](/docs/apis/Interfaces/HH/KeyedIterable/).
+  the first one in the returned [` KeyedIterable `](/apis/Interfaces/HH/KeyedIterable/).
 
 
 
@@ -48,7 +48,7 @@ The returned [` KeyedIterable `](/docs/apis/Interfaces/HH/KeyedIterable/) will a
 
 
 
-* [` KeyedIterable<Tk, `](/docs/apis/Interfaces/HH/KeyedIterable/)`` Tv> `` - A [` KeyedIterable `](/docs/apis/Interfaces/HH/KeyedIterable/) that is a proper subset of the current
-  [` KeyedIterable `](/docs/apis/Interfaces/HH/KeyedIterable/)  containing values after the specified `` n ``-th
+* [` KeyedIterable<Tk, `](/apis/Interfaces/HH/KeyedIterable/)`` Tv> `` - A [` KeyedIterable `](/apis/Interfaces/HH/KeyedIterable/) that is a proper subset of the current
+  [` KeyedIterable `](/apis/Interfaces/HH/KeyedIterable/)  containing values after the specified `` n ``-th
   element.
 <!-- HHAPIDOC -->

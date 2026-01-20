@@ -6,8 +6,8 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns an [` ImmVector `](/docs/apis/Classes/HH/ImmVector/) that is the concatenation of the values of the
-current [` ImmSet `](/docs/apis/Classes/HH/ImmSet/) and the values of the provided [` Traversable `](/docs/apis/Interfaces/HH/Traversable/)
+Returns an [` ImmVector `](/apis/Classes/HH/ImmVector/) that is the concatenation of the values of the
+current [` ImmSet `](/apis/Classes/HH/ImmSet/) and the values of the provided [` Traversable `](/apis/Interfaces/HH/Traversable/)
 
 
 
@@ -21,8 +21,8 @@ public function concat<Tu super Tv>(
 
 
 
-The values of the provided [` Traversable `](/docs/apis/Interfaces/HH/Traversable/) is concatenated to the end of the
-current [` ImmSet `](/docs/apis/Classes/HH/ImmSet/) to produce the returned [` ImmVector `](/docs/apis/Classes/HH/ImmVector/).
+The values of the provided [` Traversable `](/apis/Interfaces/HH/Traversable/) is concatenated to the end of the
+current [` ImmSet `](/apis/Classes/HH/ImmSet/) to produce the returned [` ImmVector `](/apis/Classes/HH/ImmVector/).
 
 
 
@@ -32,7 +32,7 @@ current [` ImmSet `](/docs/apis/Classes/HH/ImmSet/) to produce the returned [` I
 
 
 
-+ [Constraints](</docs/hack/generics/type-constraints>)
++ [Constraints](</hack/generics/type-constraints>)
 
 
 
@@ -45,8 +45,8 @@ current [` ImmSet `](/docs/apis/Classes/HH/ImmSet/) to produce the returned [` I
 
 
 
-* [` Traversable<Tu> `](/docs/apis/Interfaces/HH/Traversable/)`` $traversable `` - The [` Traversable `](/docs/apis/Interfaces/HH/Traversable/) to concatenate to the current
-  [` ImmSet `](/docs/apis/Classes/HH/ImmSet/).
+* [` Traversable<Tu> `](/apis/Interfaces/HH/Traversable/)`` $traversable `` - The [` Traversable `](/apis/Interfaces/HH/Traversable/) to concatenate to the current
+  [` ImmSet `](/apis/Classes/HH/ImmSet/).
 
 
 
@@ -56,7 +56,7 @@ current [` ImmSet `](/docs/apis/Classes/HH/ImmSet/) to produce the returned [` I
 
 
 
-- [` ImmVector<Tu> `](/docs/apis/Classes/HH/ImmVector/) - The concatenated [` ImmVector `](/docs/apis/Classes/HH/ImmVector/).
+- [` ImmVector<Tu> `](/apis/Classes/HH/ImmVector/) - The concatenated [` ImmVector `](/apis/Classes/HH/ImmVector/).
 
 
 
@@ -66,5 +66,5 @@ current [` ImmSet `](/docs/apis/Classes/HH/ImmSet/) to produce the returned [` I
 
 
 
-See [` Set::concat `](/docs/apis/Classes/HH/Set/concat/#examples) for usage examples.
+See [` Set::concat `](/apis/Classes/HH/Set/concat/#examples) for usage examples.
 <!-- HHAPIDOC -->

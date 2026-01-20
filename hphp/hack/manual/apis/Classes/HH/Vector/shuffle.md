@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Shuffles the values of the current [` Vector `](/docs/apis/Classes/HH/Vector/) randomly in place
+Shuffles the values of the current [` Vector `](/apis/Classes/HH/Vector/) randomly in place
 
 
 

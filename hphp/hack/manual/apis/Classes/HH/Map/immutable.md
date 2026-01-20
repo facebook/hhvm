@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a deep, immutable copy ([` ImmMap `](/docs/apis/Classes/HH/ImmMap/)) of this [` Map `](/docs/apis/Classes/HH/Map/)
+Returns a deep, immutable copy ([` ImmMap `](/apis/Classes/HH/ImmMap/)) of this [` Map `](/apis/Classes/HH/Map/)
 
 
 
@@ -18,7 +18,7 @@ public function immutable(): ImmMap<Tk, Tv>;
 
 
 
-This method is interchangeable with [` toImmMap() `](/docs/apis/Classes/HH/Map/toImmMap/).
+This method is interchangeable with [` toImmMap() `](/apis/Classes/HH/Map/toImmMap/).
 
 
 
@@ -28,7 +28,7 @@ This method is interchangeable with [` toImmMap() `](/docs/apis/Classes/HH/Map/t
 
 
 
-+ [` ImmMap<Tk, `](/docs/apis/Classes/HH/ImmMap/)`` Tv> `` - an [` ImmMap `](/docs/apis/Classes/HH/ImmMap/) that is a deep copy of this [` Map `](/docs/apis/Classes/HH/Map/).
++ [` ImmMap<Tk, `](/apis/Classes/HH/ImmMap/)`` Tv> `` - an [` ImmMap `](/apis/Classes/HH/ImmMap/) that is a deep copy of this [` Map `](/apis/Classes/HH/Map/).
 
 
 

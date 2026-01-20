@@ -21,7 +21,7 @@ public function at(
 
 
 If the key is not present, an exception is thrown. If you don't want an
-exception to be thrown, use [` get() `](/docs/apis/Interfaces/ConstIndexAccess/get/) instead.
+exception to be thrown, use [` get() `](/apis/Interfaces/ConstIndexAccess/get/) instead.
 
 
 

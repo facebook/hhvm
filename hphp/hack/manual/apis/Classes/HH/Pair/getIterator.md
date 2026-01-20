@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns an iterator that points to beginning of the current [` Pair `](/docs/apis/Classes/HH/Pair/)
+Returns an iterator that points to beginning of the current [` Pair `](/apis/Classes/HH/Pair/)
 
 
 
@@ -23,7 +23,7 @@ public function getIterator(): KeyedIterator<int, mixed>;
 
 
 
-+ [` KeyedIterator<int, `](/docs/apis/Interfaces/HH/KeyedIterator/)`` mixed> `` - A [` KeyedIterator `](/docs/apis/Interfaces/HH/KeyedIterator/) that allows you to traverse the current [` Pair `](/docs/apis/Classes/HH/Pair/).
++ [` KeyedIterator<int, `](/apis/Interfaces/HH/KeyedIterator/)`` mixed> `` - A [` KeyedIterator `](/apis/Interfaces/HH/KeyedIterator/) that allows you to traverse the current [` Pair `](/apis/Classes/HH/Pair/).
 
 
 
@@ -33,7 +33,7 @@ public function getIterator(): KeyedIterator<int, mixed>;
 
 
 
-This example shows how to get an iterator from a [` Pair `](/docs/apis/Classes/HH/Pair/) and how to consume it:
+This example shows how to get an iterator from a [` Pair `](/apis/Classes/HH/Pair/) and how to consume it:
 
 
 

@@ -6,8 +6,8 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns an [` ImmMap `](/docs/apis/Classes/HH/ImmMap/) containing the first `` n `` key/values of the current
-[` ImmMap `](/docs/apis/Classes/HH/ImmMap/)
+Returns an [` ImmMap `](/apis/Classes/HH/ImmMap/) containing the first `` n `` key/values of the current
+[` ImmMap `](/apis/Classes/HH/ImmMap/)
 
 
 
@@ -21,8 +21,8 @@ public function take(
 
 
 
-The returned [` ImmMap `](/docs/apis/Classes/HH/ImmMap/) will always be a proper subset of the current
-[` ImmMap `](/docs/apis/Classes/HH/ImmMap/).
+The returned [` ImmMap `](/apis/Classes/HH/ImmMap/) will always be a proper subset of the current
+[` ImmMap `](/apis/Classes/HH/ImmMap/).
 
 
 
@@ -38,7 +38,7 @@ The returned [` ImmMap `](/docs/apis/Classes/HH/ImmMap/) will always be a proper
 
 
 + ` int $n ` - The last element that will be included in the returned
-  [` ImmMap `](/docs/apis/Classes/HH/ImmMap/).
+  [` ImmMap `](/apis/Classes/HH/ImmMap/).
 
 
 
@@ -48,7 +48,7 @@ The returned [` ImmMap `](/docs/apis/Classes/HH/ImmMap/) will always be a proper
 
 
 
-* [` ImmMap<Tk, `](/docs/apis/Classes/HH/ImmMap/)`` Tv> `` - An [` ImmMap `](/docs/apis/Classes/HH/ImmMap/) that is a proper subset of the current [` ImmMap `](/docs/apis/Classes/HH/ImmMap/) up
+* [` ImmMap<Tk, `](/apis/Classes/HH/ImmMap/)`` Tv> `` - An [` ImmMap `](/apis/Classes/HH/ImmMap/) that is a proper subset of the current [` ImmMap `](/apis/Classes/HH/ImmMap/) up
   to `` n `` elements.
 
 
@@ -59,5 +59,5 @@ The returned [` ImmMap `](/docs/apis/Classes/HH/ImmMap/) will always be a proper
 
 
 
-See [` Map::take `](/docs/apis/Classes/HH/Map/take/#examples) for usage examples.
+See [` Map::take `](/apis/Classes/HH/Map/take/#examples) for usage examples.
 <!-- HHAPIDOC -->

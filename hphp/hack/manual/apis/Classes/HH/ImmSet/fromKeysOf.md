@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Creates an [` ImmSet `](/docs/apis/Classes/HH/ImmSet/) from the keys of the specified container
+Creates an [` ImmSet `](/apis/Classes/HH/ImmSet/) from the keys of the specified container
 
 
 
@@ -20,7 +20,7 @@ public static function fromKeysOf<Tk as arraykey>(
 
 
 
-The keys of the container will be the values of the [` ImmSet `](/docs/apis/Classes/HH/ImmSet/).
+The keys of the container will be the values of the [` ImmSet `](/apis/Classes/HH/ImmSet/).
 
 
 
@@ -30,8 +30,8 @@ The keys of the container will be the values of the [` ImmSet `](/docs/apis/Clas
 
 
 
-+ ` ? `[` KeyedContainer<Tk, `](/docs/apis/Interfaces/HH/KeyedContainer/)`` mixed> $container `` - The container with the keys used to create the
-  [` ImmSet `](/docs/apis/Classes/HH/ImmSet/).
++ ` ? `[` KeyedContainer<Tk, `](/apis/Interfaces/HH/KeyedContainer/)`` mixed> $container `` - The container with the keys used to create the
+  [` ImmSet `](/apis/Classes/HH/ImmSet/).
 
 
 
@@ -41,7 +41,7 @@ The keys of the container will be the values of the [` ImmSet `](/docs/apis/Clas
 
 
 
-* [` ImmSet<Tk> `](/docs/apis/Classes/HH/ImmSet/) - An [` ImmSet `](/docs/apis/Classes/HH/ImmSet/) built from the keys of the specified container.
+* [` ImmSet<Tk> `](/apis/Classes/HH/ImmSet/) - An [` ImmSet `](/apis/Classes/HH/ImmSet/) built from the keys of the specified container.
 
 
 
@@ -51,5 +51,5 @@ The keys of the container will be the values of the [` ImmSet `](/docs/apis/Clas
 
 
 
-See [` Set::fromKeysOf `](/docs/apis/Classes/HH/Set/fromKeysOf/#examples) for usage examples.
+See [` Set::fromKeysOf `](/apis/Classes/HH/Set/fromKeysOf/#examples) for usage examples.
 <!-- HHAPIDOC -->

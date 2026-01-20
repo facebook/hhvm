@@ -25,7 +25,7 @@ function invariant_violation(
 
 It calls the
 function you registered with ` invariant_callback_register ` and then throws
-an [` InvariantException `](/docs/apis/Classes/HH/InvariantException/)
+an [` InvariantException `](/apis/Classes/HH/InvariantException/)
 
 
 

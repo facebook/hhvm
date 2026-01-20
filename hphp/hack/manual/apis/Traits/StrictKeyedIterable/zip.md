@@ -20,7 +20,7 @@ public function zip<Tu>(
 
 
 
-+ [` Traversable<Tu> `](/docs/apis/Interfaces/HH/Traversable/)`` $traversable ``
++ [` Traversable<Tu> `](/apis/Interfaces/HH/Traversable/)`` $traversable ``
 
 
 
@@ -30,5 +30,5 @@ public function zip<Tu>(
 
 
 
-* [` KeyedIterable<Tk, `](/docs/apis/Interfaces/HH/KeyedIterable/)`` Pair<Tv, Tu>> ``
+* [` KeyedIterable<Tk, `](/apis/Interfaces/HH/KeyedIterable/)`` Pair<Tv, Tu>> ``
 <!-- HHAPIDOC -->

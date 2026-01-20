@@ -6,8 +6,8 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a [` ConstMap `](/docs/apis/Interfaces/ConstMap/) containing the first `` n `` key/values of the current
-[` ConstMap `](/docs/apis/Interfaces/ConstMap/)
+Returns a [` ConstMap `](/apis/Interfaces/ConstMap/) containing the first `` n `` key/values of the current
+[` ConstMap `](/apis/Interfaces/ConstMap/)
 
 
 
@@ -21,8 +21,8 @@ public function take(
 
 
 
-The returned [` ConstMap `](/docs/apis/Interfaces/ConstMap/) will always be a proper subset of the current
-[` ConstMap `](/docs/apis/Interfaces/ConstMap/).
+The returned [` ConstMap `](/apis/Interfaces/ConstMap/) will always be a proper subset of the current
+[` ConstMap `](/apis/Interfaces/ConstMap/).
 
 
 
@@ -37,7 +37,7 @@ The returned [` ConstMap `](/docs/apis/Interfaces/ConstMap/) will always be a pr
 
 
 
-+ ` int $n ` - The last element that will be included in the [` ConstMap `](/docs/apis/Interfaces/ConstMap/).
++ ` int $n ` - The last element that will be included in the [` ConstMap `](/apis/Interfaces/ConstMap/).
 
 
 
@@ -47,6 +47,6 @@ The returned [` ConstMap `](/docs/apis/Interfaces/ConstMap/) will always be a pr
 
 
 
-* [` ConstMap<Tk, `](/docs/apis/Interfaces/ConstMap/)`` Tv> `` - A [` ConstMap `](/docs/apis/Interfaces/ConstMap/) that is a proper subset of the current [` ConstMap `](/docs/apis/Interfaces/ConstMap/)
+* [` ConstMap<Tk, `](/apis/Interfaces/ConstMap/)`` Tv> `` - A [` ConstMap `](/apis/Interfaces/ConstMap/) that is a proper subset of the current [` ConstMap `](/apis/Interfaces/ConstMap/)
   up to `` n `` elements.
 <!-- HHAPIDOC -->

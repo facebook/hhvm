@@ -10,11 +10,11 @@ Generators can be `async` functions; an async generator behaves similarly to a n
 
 ## Async Iterators
 
-To yield values or key/value pairs from async generators, we return [HH\AsyncIterator](/docs/apis/Interfaces/HH/AsyncIterator/) or
-[HH\AsyncKeyedIterator](/docs/apis/Interfaces/HH/AsyncKeyedIterator/), respectively.
+To yield values or key/value pairs from async generators, we return [HH\AsyncIterator](/apis/Interfaces/HH/AsyncIterator/) or
+[HH\AsyncKeyedIterator](/apis/Interfaces/HH/AsyncKeyedIterator/), respectively.
 
-Here is an example of using the [async utility function](/docs/hack/asynchronous-operations/utility-functions)
-[`usleep`](/docs/apis/Functions/HH.Asio/usleep/) to imitate a second-by-second countdown clock. Note that in the
+Here is an example of using the [async utility function](/hack/asynchronous-operations/utility-functions)
+[`usleep`](/apis/Functions/HH.Asio/usleep/) to imitate a second-by-second countdown clock. Note that in the
 `happy_new_year` `foreach` loop we have the syntax `await as`. This is shorthand for calling `await $ait->next()`.
 
 ```hack
@@ -50,18 +50,18 @@ function run(): void {
 We must use `await as`; otherwise we'll not get the iterated value.
 
 Although `await as` is just like calling `await $gen->next()`, we should always use `await as`. Calling the
-[`AsyncGenerator`](/docs/apis/Classes/HH/AsyncGenerator/) methods directly is rarely needed. Also note that on async iterators,
-`await as` or a call to [`next`](/docs/apis/Classes/HH/AsyncGenerator/next/) actually returns a value (instead of `void` like in a normal iterator).
+[`AsyncGenerator`](/apis/Classes/HH/AsyncGenerator/) methods directly is rarely needed. Also note that on async iterators,
+`await as` or a call to [`next`](/apis/Classes/HH/AsyncGenerator/next/) actually returns a value (instead of `void` like in a normal iterator).
 
 ## Sending and Raising
 
 **Calling these methods directly should be rarely needed; `await as` should be the most common way to access values returned by an iterator.**
 
-We can send a value to a generator using [`send`](/docs/apis/Classes/HH/AsyncGenerator/send/) and raise an exception upon a
-generator using [`raise`](/docs/apis/Classes/HH/AsyncGenerator/raise/).
+We can send a value to a generator using [`send`](/apis/Classes/HH/AsyncGenerator/send/) and raise an exception upon a
+generator using [`raise`](/apis/Classes/HH/AsyncGenerator/raise/).
 
 If we are doing either of these two things, our generator must return `AsyncGenerator`. An `AsyncGenenator` has three type
-parameters: the key, the value. And the type being passed to [`send`](/docs/apis/Classes/HH/AsyncGenerator/send/).
+parameters: the key, the value. And the type being passed to [`send`](/apis/Classes/HH/AsyncGenerator/send/).
 
 ```hack
 const int HALF_SECOND = 500000; // microseconds

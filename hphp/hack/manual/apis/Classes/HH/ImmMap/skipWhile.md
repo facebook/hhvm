@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns an [` ImmMap `](/docs/apis/Classes/HH/ImmMap/) containing the values of the current [` ImmMap `](/docs/apis/Classes/HH/ImmMap/) starting
+Returns an [` ImmMap `](/apis/Classes/HH/ImmMap/) containing the values of the current [` ImmMap `](/apis/Classes/HH/ImmMap/) starting
 after and including the first value that produces `` true `` when passed to
 the specified callback
 
@@ -22,8 +22,8 @@ public function skipWhile(
 
 
 
-The returned [` ImmMap `](/docs/apis/Classes/HH/ImmMap/) will always be a proper subset of the current
-[` ImmMap `](/docs/apis/Classes/HH/ImmMap/).
+The returned [` ImmMap `](/apis/Classes/HH/ImmMap/) will always be a proper subset of the current
+[` ImmMap `](/apis/Classes/HH/ImmMap/).
 
 
 
@@ -34,7 +34,7 @@ The returned [` ImmMap `](/docs/apis/Classes/HH/ImmMap/) will always be a proper
 
 
 + ` (function(Tv): bool) $fn ` - The callback used to determine the starting element for the
-  [` ImmMap `](/docs/apis/Classes/HH/ImmMap/).
+  [` ImmMap `](/apis/Classes/HH/ImmMap/).
 
 
 
@@ -44,7 +44,7 @@ The returned [` ImmMap `](/docs/apis/Classes/HH/ImmMap/) will always be a proper
 
 
 
-* [` ImmMap<Tk, `](/docs/apis/Classes/HH/ImmMap/)`` Tv> `` - An [` ImmMap `](/docs/apis/Classes/HH/ImmMap/) that is a proper subset of the current [` ImmMap `](/docs/apis/Classes/HH/ImmMap/)
+* [` ImmMap<Tk, `](/apis/Classes/HH/ImmMap/)`` Tv> `` - An [` ImmMap `](/apis/Classes/HH/ImmMap/) that is a proper subset of the current [` ImmMap `](/apis/Classes/HH/ImmMap/)
   starting after the callback returns `` true ``.
 
 
@@ -55,5 +55,5 @@ The returned [` ImmMap `](/docs/apis/Classes/HH/ImmMap/) will always be a proper
 
 
 
-See [` Map::skipWhile `](/docs/apis/Classes/HH/Map/skipWhile) for usage examples.
+See [` Map::skipWhile `](/apis/Classes/HH/Map/skipWhile) for usage examples.
 <!-- HHAPIDOC -->

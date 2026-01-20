@@ -95,7 +95,7 @@ function demo(): void {
 
 The value of a scope-resolution expression ending in `::class` is a string containing the fully qualified name of the current
 class, which for a static qualifier, means the current class context.  A class identifier followed by `::class` results in a
-constant whose value has the [`classname` type](/docs/hack/built-in-types/classname) parameterized by the class.  For example:
+constant whose value has the [`classname` type](/hack/built-in-types/classname) parameterized by the class.  For example:
 
 ```hack
 namespace NS_cn;

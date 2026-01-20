@@ -24,12 +24,12 @@ interface ReadWriteHandle implements WriteHandle, ReadHandle, \HH\Lib\IO\Seekabl
 
 
 
-### Public Methods ([` HH\Lib\File\WriteHandle `](</docs/hsl/Interfaces/HH.Lib.File/WriteHandle/>))
+### Public Methods ([` HH\Lib\File\WriteHandle `](</hsl/Interfaces/HH.Lib.File/WriteHandle/>))
 
 
 
 
-+ [` ->truncate(?int $length = NULL): void `](</docs/hsl/Interfaces/HH.Lib.File/WriteHandle/truncate/>)
++ [` ->truncate(?int $length = NULL): void `](</hsl/Interfaces/HH.Lib.File/WriteHandle/truncate/>)
 
 
 
@@ -37,18 +37,18 @@ interface ReadWriteHandle implements WriteHandle, ReadHandle, \HH\Lib\IO\Seekabl
 
 
 
-### Public Methods ([` HH\Lib\File\Handle `](</docs/hsl/Interfaces/HH.Lib.File/Handle/>))
+### Public Methods ([` HH\Lib\File\Handle `](</hsl/Interfaces/HH.Lib.File/Handle/>))
 
 
 
 
-* [` ->getPath(): string `](</docs/hsl/Interfaces/HH.Lib.File/Handle/getPath/>)\
+* [` ->getPath(): string `](</hsl/Interfaces/HH.Lib.File/Handle/getPath/>)\
   Get the name of this file
-* [` ->getSize(): int `](</docs/hsl/Interfaces/HH.Lib.File/Handle/getSize/>)\
+* [` ->getSize(): int `](</hsl/Interfaces/HH.Lib.File/Handle/getSize/>)\
   Get the size of the file
-* [` ->lock(LockType $type): Lock `](</docs/hsl/Interfaces/HH.Lib.File/Handle/lock/>)\
+* [` ->lock(LockType $type): Lock `](</hsl/Interfaces/HH.Lib.File/Handle/lock/>)\
   Get a shared or exclusive lock on the file
-* [` ->tryLockx(LockType $type): Lock `](</docs/hsl/Interfaces/HH.Lib.File/Handle/tryLockx/>)\
+* [` ->tryLockx(LockType $type): Lock `](</hsl/Interfaces/HH.Lib.File/Handle/tryLockx/>)\
   Immediately get a shared or exclusive lock on a file, or throw
 
 
@@ -57,12 +57,12 @@ interface ReadWriteHandle implements WriteHandle, ReadHandle, \HH\Lib\IO\Seekabl
 
 
 
-### Public Methods ([` HH\Lib\IO\FDHandle `](</docs/hsl/Interfaces/HH.Lib.IO/FDHandle/>))
+### Public Methods ([` HH\Lib\IO\FDHandle `](</hsl/Interfaces/HH.Lib.IO/FDHandle/>))
 
 
 
 
-- [` ->getFileDescriptor(): \HH\Lib\OS\FileDescriptor `](</docs/hsl/Interfaces/HH.Lib.IO/FDHandle/getFileDescriptor/>)
+- [` ->getFileDescriptor(): \HH\Lib\OS\FileDescriptor `](</hsl/Interfaces/HH.Lib.IO/FDHandle/getFileDescriptor/>)
 
 
 
@@ -70,14 +70,14 @@ interface ReadWriteHandle implements WriteHandle, ReadHandle, \HH\Lib\IO\Seekabl
 
 
 
-### Public Methods ([` HH\Lib\IO\SeekableHandle `](</docs/hsl/Interfaces/HH.Lib.IO/SeekableHandle/>))
+### Public Methods ([` HH\Lib\IO\SeekableHandle `](</hsl/Interfaces/HH.Lib.IO/SeekableHandle/>))
 
 
 
 
-+ [` ->seek(int $offset): void `](</docs/hsl/Interfaces/HH.Lib.IO/SeekableHandle/seek/>)\
++ [` ->seek(int $offset): void `](</hsl/Interfaces/HH.Lib.IO/SeekableHandle/seek/>)\
   Move to a specific offset within a handle
-+ [` ->tell(): int `](</docs/hsl/Interfaces/HH.Lib.IO/SeekableHandle/tell/>)\
++ [` ->tell(): int `](</hsl/Interfaces/HH.Lib.IO/SeekableHandle/tell/>)\
   Get the current pointer position within a handle
 
 
@@ -86,14 +86,14 @@ interface ReadWriteHandle implements WriteHandle, ReadHandle, \HH\Lib\IO\Seekabl
 
 
 
-### Public Methods ([` HH\Lib\IO\WriteHandle `](</docs/hsl/Interfaces/HH.Lib.IO/WriteHandle/>))
+### Public Methods ([` HH\Lib\IO\WriteHandle `](</hsl/Interfaces/HH.Lib.IO/WriteHandle/>))
 
 
 
 
-* [` ->writeAllAsync(string $bytes, ?int $timeout_ns = NULL): Awaitable<void> `](</docs/hsl/Interfaces/HH.Lib.IO/WriteHandle/writeAllAsync/>)\
+* [` ->writeAllAsync(string $bytes, ?int $timeout_ns = NULL): Awaitable<void> `](</hsl/Interfaces/HH.Lib.IO/WriteHandle/writeAllAsync/>)\
   Write all of the requested data
-* [` ->writeAllowPartialSuccessAsync(string $bytes, ?int $timeout_ns = NULL): Awaitable<int> `](</docs/hsl/Interfaces/HH.Lib.IO/WriteHandle/writeAllowPartialSuccessAsync/>)\
+* [` ->writeAllowPartialSuccessAsync(string $bytes, ?int $timeout_ns = NULL): Awaitable<int> `](</hsl/Interfaces/HH.Lib.IO/WriteHandle/writeAllowPartialSuccessAsync/>)\
   Write data, waiting if necessary
 
 
@@ -102,18 +102,18 @@ interface ReadWriteHandle implements WriteHandle, ReadHandle, \HH\Lib\IO\Seekabl
 
 
 
-### Public Methods ([` HH\Lib\IO\ReadHandle `](</docs/hsl/Interfaces/HH.Lib.IO/ReadHandle/>))
+### Public Methods ([` HH\Lib\IO\ReadHandle `](</hsl/Interfaces/HH.Lib.IO/ReadHandle/>))
 
 
 
 
-- [` ->readAllAsync(?int $max_bytes = NULL, ?int $timeout_ns = NULL): Awaitable<string> `](</docs/hsl/Interfaces/HH.Lib.IO/ReadHandle/readAllAsync/>)\
+- [` ->readAllAsync(?int $max_bytes = NULL, ?int $timeout_ns = NULL): Awaitable<string> `](</hsl/Interfaces/HH.Lib.IO/ReadHandle/readAllAsync/>)\
   Read until there is no more data to read
-- [` ->readAllowPartialSuccessAsync(?int $max_bytes = NULL, ?int $timeout_ns = NULL): Awaitable<string> `](</docs/hsl/Interfaces/HH.Lib.IO/ReadHandle/readAllowPartialSuccessAsync/>)\
+- [` ->readAllowPartialSuccessAsync(?int $max_bytes = NULL, ?int $timeout_ns = NULL): Awaitable<string> `](</hsl/Interfaces/HH.Lib.IO/ReadHandle/readAllowPartialSuccessAsync/>)\
   Read from the handle, waiting for data if necessary
-- [` ->readFixedSizeAsync(int $size, ?int $timeout_ns = NULL): Awaitable<string> `](</docs/hsl/Interfaces/HH.Lib.IO/ReadHandle/readFixedSizeAsync/>)\
+- [` ->readFixedSizeAsync(int $size, ?int $timeout_ns = NULL): Awaitable<string> `](</hsl/Interfaces/HH.Lib.IO/ReadHandle/readFixedSizeAsync/>)\
   Read a fixed amount of data
-- [` ->readImpl(?int $max_bytes = NULL): string `](</docs/hsl/Interfaces/HH.Lib.IO/ReadHandle/readImpl/>)\
+- [` ->readImpl(?int $max_bytes = NULL): string `](</hsl/Interfaces/HH.Lib.IO/ReadHandle/readImpl/>)\
   An immediate, unordered read
 
 
@@ -122,11 +122,11 @@ interface ReadWriteHandle implements WriteHandle, ReadHandle, \HH\Lib\IO\Seekabl
 
 
 
-### Protected Methods ([` HH\Lib\IO\WriteHandle `](</docs/hsl/Interfaces/HH.Lib.IO/WriteHandle/>))
+### Protected Methods ([` HH\Lib\IO\WriteHandle `](</hsl/Interfaces/HH.Lib.IO/WriteHandle/>))
 
 
 
 
-+ [` ->writeImpl(string $bytes): int `](</docs/hsl/Interfaces/HH.Lib.IO/WriteHandle/writeImpl/>)\
++ [` ->writeImpl(string $bytes): int `](</hsl/Interfaces/HH.Lib.IO/WriteHandle/writeImpl/>)\
   An immediate unordered write
 <!-- HHAPIDOC -->

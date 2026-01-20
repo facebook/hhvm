@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns the last value in the current [` ImmSet `](/docs/apis/Classes/HH/ImmSet/)
+Returns the last value in the current [` ImmSet `](/apis/Classes/HH/ImmSet/)
 
 
 
@@ -18,7 +18,7 @@ public function lastValue(): ?Tv;
 
 
 
-This method is interchangeable with [` lastKey() `](/docs/apis/Classes/HH/ImmSet/lastKey/).
+This method is interchangeable with [` lastKey() `](/apis/Classes/HH/ImmSet/lastKey/).
 
 
 
@@ -28,8 +28,8 @@ This method is interchangeable with [` lastKey() `](/docs/apis/Classes/HH/ImmSet
 
 
 
-+ ` ?Tv ` - The last value in the current [` ImmSet `](/docs/apis/Classes/HH/ImmSet/), or `` null `` if the current
-  [` ImmSet `](/docs/apis/Classes/HH/ImmSet/) is empty.
++ ` ?Tv ` - The last value in the current [` ImmSet `](/apis/Classes/HH/ImmSet/), or `` null `` if the current
+  [` ImmSet `](/apis/Classes/HH/ImmSet/) is empty.
 
 
 
@@ -39,5 +39,5 @@ This method is interchangeable with [` lastKey() `](/docs/apis/Classes/HH/ImmSet
 
 
 
-See [` Set::lastValue `](/docs/apis/Classes/HH/Set/lastValue/#examples) for usage examples.
+See [` Set::lastValue `](/apis/Classes/HH/Set/lastValue/#examples) for usage examples.
 <!-- HHAPIDOC -->

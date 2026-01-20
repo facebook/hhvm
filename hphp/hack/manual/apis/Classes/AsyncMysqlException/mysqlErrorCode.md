@@ -40,7 +40,7 @@ for information on the error numbers.
 
 
 
-The following example shows how to use [` AsyncMysqlException::mysqlErrorCode `](/docs/apis/Classes/AsyncMysqlException/mysqlErrorCode/) to get the raw MySQL error code associated with this exception. The most likely error code for this example will be `` 1045 `` for access denied.
+The following example shows how to use [` AsyncMysqlException::mysqlErrorCode `](/apis/Classes/AsyncMysqlException/mysqlErrorCode/) to get the raw MySQL error code associated with this exception. The most likely error code for this example will be `` 1045 `` for access denied.
 
 
 

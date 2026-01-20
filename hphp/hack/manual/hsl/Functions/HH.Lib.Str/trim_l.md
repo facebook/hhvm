@@ -41,7 +41,7 @@ defined by the locale/encoding.
 
 
 
-* [String](</docs/hack/built-in-types/string>)
+* [String](</hack/built-in-types/string>)
 
 
 

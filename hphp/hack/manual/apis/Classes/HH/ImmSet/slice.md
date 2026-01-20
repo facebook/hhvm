@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a subset of the current [` ImmSet `](/docs/apis/Classes/HH/ImmSet/) starting from a given key up to,
+Returns a subset of the current [` ImmSet `](/apis/Classes/HH/ImmSet/) starting from a given key up to,
 but not including, the element at the provided length from the starting
 key
 
@@ -23,14 +23,14 @@ public function slice(
 
 
 
-` $start ` is 0-based. `` $len `` is 1-based. So [` slice(0, `](/docs/apis/Classes/HH/ImmSet/slice/)`` 2) `` would return the
+` $start ` is 0-based. `` $len `` is 1-based. So [` slice(0, `](/apis/Classes/HH/ImmSet/slice/)`` 2) `` would return the
 elements at key 0 and 1.
 
 
 
 
-The returned [` ImmSet `](/docs/apis/Classes/HH/ImmSet/) will always be a proper subset of the current
-[` ImmSet `](/docs/apis/Classes/HH/ImmSet/).
+The returned [` ImmSet `](/apis/Classes/HH/ImmSet/) will always be a proper subset of the current
+[` ImmSet `](/apis/Classes/HH/ImmSet/).
 
 
 
@@ -40,9 +40,9 @@ The returned [` ImmSet `](/docs/apis/Classes/HH/ImmSet/) will always be a proper
 
 
 
-+ ` int $start ` - The starting value in the current [` ImmSet `](/docs/apis/Classes/HH/ImmSet/) for the
-  returned [` ImmSet `](/docs/apis/Classes/HH/ImmSet/).
-+ ` int $len ` - The length of the returned [` ImmSet `](/docs/apis/Classes/HH/ImmSet/).
++ ` int $start ` - The starting value in the current [` ImmSet `](/apis/Classes/HH/ImmSet/) for the
+  returned [` ImmSet `](/apis/Classes/HH/ImmSet/).
++ ` int $len ` - The length of the returned [` ImmSet `](/apis/Classes/HH/ImmSet/).
 
 
 
@@ -52,7 +52,7 @@ The returned [` ImmSet `](/docs/apis/Classes/HH/ImmSet/) will always be a proper
 
 
 
-* [` ImmSet<Tv> `](/docs/apis/Classes/HH/ImmSet/) - An [` ImmSet `](/docs/apis/Classes/HH/ImmSet/) that is a proper subset of the current [` ImmSet `](/docs/apis/Classes/HH/ImmSet/)
+* [` ImmSet<Tv> `](/apis/Classes/HH/ImmSet/) - An [` ImmSet `](/apis/Classes/HH/ImmSet/) that is a proper subset of the current [` ImmSet `](/apis/Classes/HH/ImmSet/)
   starting at `` $start `` up to but not including the element
   ``` $start + $len ```.
 
@@ -64,5 +64,5 @@ The returned [` ImmSet `](/docs/apis/Classes/HH/ImmSet/) will always be a proper
 
 
 
-See [` Set::slice `](/docs/apis/Classes/HH/Set/slice/#examples) for usage examples.
+See [` Set::slice `](/apis/Classes/HH/Set/slice/#examples) for usage examples.
 <!-- HHAPIDOC -->

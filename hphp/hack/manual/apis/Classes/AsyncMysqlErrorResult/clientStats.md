@@ -29,7 +29,7 @@ MySQL client may have affected the operation that produced the error.
 
 
 
-+ [` AsyncMysqlClientStats `](/docs/apis/Classes/AsyncMysqlClientStats/) - an [` AsyncMysqlClientStats `](/docs/apis/Classes/AsyncMysqlClientStats/) object to query about event and
++ [` AsyncMysqlClientStats `](/apis/Classes/AsyncMysqlClientStats/) - an [` AsyncMysqlClientStats `](/apis/Classes/AsyncMysqlClientStats/) object to query about event and
   callback timing to the MySQL client for whatever caused the
   error.
 
@@ -41,7 +41,7 @@ MySQL client may have affected the operation that produced the error.
 
 
 
-When an error occurs when establishing a connection or on a query, and you catch the exception that is thrown, you will get an [` AsyncMysqlErrorResult `](/docs/apis/Classes/AsyncMysqlErrorResult/). And one of the methods on an [` AsyncMysqlErrorResult `](/docs/apis/Classes/AsyncMysqlErrorResult/) is [` clientStats() `](/docs/apis/Classes/AsyncMysqlErrorResult/clientStats/), which gives you some information about the client you are connecting too.
+When an error occurs when establishing a connection or on a query, and you catch the exception that is thrown, you will get an [` AsyncMysqlErrorResult `](/apis/Classes/AsyncMysqlErrorResult/). And one of the methods on an [` AsyncMysqlErrorResult `](/apis/Classes/AsyncMysqlErrorResult/) is [` clientStats() `](/apis/Classes/AsyncMysqlErrorResult/clientStats/), which gives you some information about the client you are connecting too.
 
 
 

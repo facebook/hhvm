@@ -20,8 +20,8 @@ public function reset(
 
 
 
-If you wish to preserve the position, use [` tell() `](/docs/hsl/Classes/HH.Lib.IO/MemoryHandle/tell/) and [` seek() `](/docs/hsl/Classes/HH.Lib.IO/MemoryHandle/seek/),
-or [` appendToBuffer() `](/docs/hsl/Classes/HH.Lib.IO/MemoryHandle/appendToBuffer/).
+If you wish to preserve the position, use [` tell() `](/hsl/Classes/HH.Lib.IO/MemoryHandle/tell/) and [` seek() `](/hsl/Classes/HH.Lib.IO/MemoryHandle/seek/),
+or [` appendToBuffer() `](/hsl/Classes/HH.Lib.IO/MemoryHandle/appendToBuffer/).
 
 
 

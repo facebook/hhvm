@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns the last key in the current [` Pair `](/docs/apis/Classes/HH/Pair/)
+Returns the last key in the current [` Pair `](/apis/Classes/HH/Pair/)
 
 
 
@@ -18,7 +18,7 @@ public function lastKey(): int;
 
 
 
-The return will always be 1 since a [` Pair `](/docs/apis/Classes/HH/Pair/) only has two keys, 0 and 1.
+The return will always be 1 since a [` Pair `](/apis/Classes/HH/Pair/) only has two keys, 0 and 1.
 
 
 

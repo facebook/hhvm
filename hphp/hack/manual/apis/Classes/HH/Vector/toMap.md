@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns an integer-keyed ` Map ` based on the values of the current [` Vector `](/docs/apis/Classes/HH/Vector/)
+Returns an integer-keyed ` Map ` based on the values of the current [` Vector `](/apis/Classes/HH/Vector/)
 
 
 
@@ -23,8 +23,8 @@ public function toMap(): Map<int, Tv>;
 
 
 
-+ [` Map<int, `](/docs/apis/Classes/HH/Map/)`` Tv> `` - A ``` Map ``` that has the integer keys and associated values of the
-  current [` Vector `](/docs/apis/Classes/HH/Vector/).
++ [` Map<int, `](/apis/Classes/HH/Map/)`` Tv> `` - A ``` Map ``` that has the integer keys and associated values of the
+  current [` Vector `](/apis/Classes/HH/Vector/).
 
 
 

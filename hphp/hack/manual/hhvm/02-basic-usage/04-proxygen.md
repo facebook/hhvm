@@ -1,6 +1,6 @@
 # Proxygen
 
-HHVM has built-in support for two server types: Proxygen and [FastCGI](/docs/hhvm/advanced-usage/fastCGI).
+HHVM has built-in support for two server types: Proxygen and [FastCGI](/hhvm/advanced-usage/fastCGI).
 
 Proxygen is a full web server built directly into HHVM, and is recommended since it is generally the easiest to get up and running. It serves web requests *fast*.  Proxygen provides you a high performance web server that is equivalent to what something like the combination of FastCGI and nginx might provide.
 

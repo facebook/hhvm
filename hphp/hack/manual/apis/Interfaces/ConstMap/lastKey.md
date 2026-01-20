@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns the last key in the current [` ConstMap `](/docs/apis/Interfaces/ConstMap/)
+Returns the last key in the current [` ConstMap `](/apis/Interfaces/ConstMap/)
 
 
 
@@ -23,6 +23,6 @@ public function lastKey(): ?Tk;
 
 
 
-+ ` ?Tk ` - The last key in the current [` ConstMap `](/docs/apis/Interfaces/ConstMap/), or null if the [` ConstMap `](/docs/apis/Interfaces/ConstMap/)
++ ` ?Tk ` - The last key in the current [` ConstMap `](/apis/Interfaces/ConstMap/), or null if the [` ConstMap `](/apis/Interfaces/ConstMap/)
   is empty.
 <!-- HHAPIDOC -->

@@ -39,7 +39,7 @@ Space complexity: O(n)
 
 
 
-+ [` KeyedContainer<Tk, `](/docs/apis/Interfaces/HH/KeyedContainer/)`` Tv> $traversable ``
++ [` KeyedContainer<Tk, `](/apis/Interfaces/HH/KeyedContainer/)`` Tv> $traversable ``
 + ` (function(Tk, Tv): Awaitable<bool>) $predicate `
 
 
@@ -50,5 +50,5 @@ Space complexity: O(n)
 
 
 
-* [` Awaitable<dict<Tk, `](/docs/apis/Classes/HH/Awaitable/)`` Tv>> ``
+* [` Awaitable<dict<Tk, `](/apis/Classes/HH/Awaitable/)`` Tv>> ``
 <!-- HHAPIDOC -->

@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a subset of the current [` Map `](/docs/apis/Classes/HH/Map/) starting from a given key location
+Returns a subset of the current [` Map `](/apis/Classes/HH/Map/) starting from a given key location
 up to, but not including, the element at the provided length from the
 starting key location
 
@@ -23,13 +23,13 @@ public function slice(
 
 
 
-` $start ` is 0-based. `` $len `` is 1-based. So [` slice(0, `](/docs/apis/Classes/HH/Map/slice/)`` 2) `` would return the
+` $start ` is 0-based. `` $len `` is 1-based. So [` slice(0, `](/apis/Classes/HH/Map/slice/)`` 2) `` would return the
 keys and values at key location 0 and 1.
 
 
 
 
-The returned [` Map `](/docs/apis/Classes/HH/Map/) will always be a proper subset of the current [` Map `](/docs/apis/Classes/HH/Map/).
+The returned [` Map `](/apis/Classes/HH/Map/) will always be a proper subset of the current [` Map `](/apis/Classes/HH/Map/).
 
 
 
@@ -39,9 +39,9 @@ The returned [` Map `](/docs/apis/Classes/HH/Map/) will always be a proper subse
 
 
 
-+ ` int $start ` - The starting key location of the current [` Map `](/docs/apis/Classes/HH/Map/) for the
-  returned [` Map `](/docs/apis/Classes/HH/Map/).
-+ ` int $len ` - The length of the returned [` Map `](/docs/apis/Classes/HH/Map/).
++ ` int $start ` - The starting key location of the current [` Map `](/apis/Classes/HH/Map/) for the
+  returned [` Map `](/apis/Classes/HH/Map/).
++ ` int $len ` - The length of the returned [` Map `](/apis/Classes/HH/Map/).
 
 
 
@@ -51,7 +51,7 @@ The returned [` Map `](/docs/apis/Classes/HH/Map/) will always be a proper subse
 
 
 
-* [` Map<Tk, `](/docs/apis/Classes/HH/Map/)`` Tv> `` - A [` Map `](/docs/apis/Classes/HH/Map/) that is a proper subset of the current [` Map `](/docs/apis/Classes/HH/Map/) starting at
+* [` Map<Tk, `](/apis/Classes/HH/Map/)`` Tv> `` - A [` Map `](/apis/Classes/HH/Map/) that is a proper subset of the current [` Map `](/apis/Classes/HH/Map/) starting at
   `` $start `` up to but not including the element ``` $start + $len ```.
 
 

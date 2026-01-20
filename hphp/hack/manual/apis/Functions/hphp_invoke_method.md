@@ -33,7 +33,7 @@ function hphp_invoke_method(
   static method.
 + ` string $cls ` - The name of the class.
 + ` string $name ` - The name of the method.
-+ [` Traversable `](/docs/apis/Interfaces/HH/Traversable/)`` $params `` - The parameters to pass to the method.
++ [` Traversable `](/apis/Interfaces/HH/Traversable/)`` $params `` - The parameters to pass to the method.
 
 
 

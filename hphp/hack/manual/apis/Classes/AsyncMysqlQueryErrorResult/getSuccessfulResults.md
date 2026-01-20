@@ -23,7 +23,7 @@ public function getSuccessfulResults(): Vector<AsyncMysqlQueryResult>;
 
 
 
-+ [` Vector<AsyncMysqlQueryResult> `](/docs/apis/Classes/HH/Vector/) - A [` Vector `](/docs/apis/Classes/HH/Vector/) of [` AsyncMysqlQueryResult `](/docs/apis/Classes/AsyncMysqlQueryResult/) objects for each result
++ [` Vector<AsyncMysqlQueryResult> `](/apis/Classes/HH/Vector/) - A [` Vector `](/apis/Classes/HH/Vector/) of [` AsyncMysqlQueryResult `](/apis/Classes/AsyncMysqlQueryResult/) objects for each result
   produced by a successful query statement.
 
 
@@ -34,7 +34,7 @@ public function getSuccessfulResults(): Vector<AsyncMysqlQueryResult>;
 
 
 
-This example shows how we can get the successful results of a multi-query, even though one of those queries gave us an error (which we caught in the exception). This is done via [` AsyncMysqlQueryErrorResult::getSuccessfulResults `](/docs/apis/Classes/AsyncMysqlQueryErrorResult/getSuccessfulResults/).
+This example shows how we can get the successful results of a multi-query, even though one of those queries gave us an error (which we caught in the exception). This is done via [` AsyncMysqlQueryErrorResult::getSuccessfulResults `](/apis/Classes/AsyncMysqlQueryErrorResult/getSuccessfulResults/).
 
 
 

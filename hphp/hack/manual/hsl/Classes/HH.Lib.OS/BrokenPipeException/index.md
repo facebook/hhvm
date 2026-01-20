@@ -29,8 +29,8 @@ final class BrokenPipeException extends ConnectionException {...}
 
 
 
-+ [` ::_getValidErrnos(): keyset<Errno> `](/docs/hsl/Classes/HH.Lib.OS/BrokenPipeException/_getValidErrnos/)
-+ [` ->__construct(Errno $code, string $message) `](/docs/hsl/Classes/HH.Lib.OS/BrokenPipeException/__construct/)
++ [` ::_getValidErrnos(): keyset<Errno> `](/hsl/Classes/HH.Lib.OS/BrokenPipeException/_getValidErrnos/)
++ [` ->__construct(Errno $code, string $message) `](/hsl/Classes/HH.Lib.OS/BrokenPipeException/__construct/)
 
 
 
@@ -38,12 +38,12 @@ final class BrokenPipeException extends ConnectionException {...}
 
 
 
-### Public Methods ([` HH\Lib\OS\ErrnoException `](/docs/hsl/Classes/HH.Lib.OS/ErrnoException/))
+### Public Methods ([` HH\Lib\OS\ErrnoException `](/hsl/Classes/HH.Lib.OS/ErrnoException/))
 
 
 
 
-* [` ->getCode(): Errno `](/docs/hsl/Classes/HH.Lib.OS/ErrnoException/getCode/)\
+* [` ->getCode(): Errno `](/hsl/Classes/HH.Lib.OS/ErrnoException/getCode/)\
   Deprecated for clarity, and potential future ambiguity
-* [` ->getErrno(): Errno `](/docs/hsl/Classes/HH.Lib.OS/ErrnoException/getErrno/)
+* [` ->getErrno(): Errno `](/hsl/Classes/HH.Lib.OS/ErrnoException/getErrno/)
 <!-- HHAPIDOC -->

@@ -28,5 +28,5 @@ Usage: ` using $handle->closeWhenDisposed(); `
 
 
 
-+ [` IDisposable `](/docs/apis/Interfaces/IDisposable/)
++ [` IDisposable `](/apis/Interfaces/IDisposable/)
 <!-- HHAPIDOC -->

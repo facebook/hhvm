@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns the first key in the current [` Map `](/docs/apis/Classes/HH/Map/)
+Returns the first key in the current [` Map `](/apis/Classes/HH/Map/)
 
 
 
@@ -23,7 +23,7 @@ public function firstKey(): ?Tk;
 
 
 
-+ ` ?Tk ` - The first key in the current [` Map `](/docs/apis/Classes/HH/Map/), or `` null `` if the [` Map `](/docs/apis/Classes/HH/Map/) is
++ ` ?Tk ` - The first key in the current [` Map `](/apis/Classes/HH/Map/), or `` null `` if the [` Map `](/apis/Classes/HH/Map/) is
   empty.
 
 
@@ -34,7 +34,7 @@ public function firstKey(): ?Tk;
 
 
 
-The following example gets the first key from [` Map `](/docs/apis/Classes/HH/Map/). An empty [` Map `](/docs/apis/Classes/HH/Map/) will return `` null `` as its first key.
+The following example gets the first key from [` Map `](/apis/Classes/HH/Map/). An empty [` Map `](/apis/Classes/HH/Map/) will return `` null `` as its first key.
 
 
 

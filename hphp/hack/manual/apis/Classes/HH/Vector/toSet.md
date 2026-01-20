@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a ` Set ` based on the values of the current [` Vector `](/docs/apis/Classes/HH/Vector/)
+Returns a ` Set ` based on the values of the current [` Vector `](/apis/Classes/HH/Vector/)
 
 
 
@@ -23,7 +23,7 @@ public function toSet(): Set<Tv>;
 
 
 
-+ [` Set<Tv> `](/docs/apis/Classes/HH/Set/) - A `` Set `` containing the unique values of the current [` Vector `](/docs/apis/Classes/HH/Vector/).
++ [` Set<Tv> `](/apis/Classes/HH/Set/) - A `` Set `` containing the unique values of the current [` Vector `](/apis/Classes/HH/Vector/).
 
 
 
@@ -33,7 +33,7 @@ public function toSet(): Set<Tv>;
 
 
 
-This example shows that converting a [` Vector `](/docs/apis/Classes/HH/Vector/) to a `` Set `` also removes duplicate values:
+This example shows that converting a [` Vector `](/apis/Classes/HH/Vector/) to a `` Set `` also removes duplicate values:
 
 
 

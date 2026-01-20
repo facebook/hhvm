@@ -7,7 +7,7 @@ the Hack LSP instead for complete and up-to-date information.
 :::
 
 Returns an immutable map (` ImmMap `) based on the keys and values of the
-current [` KeyedIterable `](/docs/apis/Interfaces/HH/KeyedIterable/)
+current [` KeyedIterable `](/apis/Interfaces/HH/KeyedIterable/)
 
 
 
@@ -24,6 +24,6 @@ public function toImmMap(): ImmMap<Tk, Tv>;
 
 
 
-+ [` ImmMap<Tk, `](/docs/apis/Classes/HH/ImmMap/)`` Tv> `` - an ``` ImmMap ``` that has the keys and associated values of the
-  current [` KeyedIterable `](/docs/apis/Interfaces/HH/KeyedIterable/).
++ [` ImmMap<Tk, `](/apis/Classes/HH/ImmMap/)`` Tv> `` - an ``` ImmMap ``` that has the keys and associated values of the
+  current [` KeyedIterable `](/apis/Interfaces/HH/KeyedIterable/).
 <!-- HHAPIDOC -->

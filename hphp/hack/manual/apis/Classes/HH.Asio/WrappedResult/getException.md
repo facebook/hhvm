@@ -7,8 +7,8 @@ the Hack LSP instead for complete and up-to-date information.
 :::
 
 Since this is a successful result wrapper, this always returns an
-[` InvariantException `](/docs/apis/Classes/HH/InvariantException/) saying that there was no exception thrown from
-the [` Awaitable `](/docs/apis/Classes/HH/Awaitable/) operation
+[` InvariantException `](/apis/Classes/HH/InvariantException/) saying that there was no exception thrown from
+the [` Awaitable `](/apis/Classes/HH/Awaitable/) operation
 
 
 
@@ -25,5 +25,5 @@ public function getException(): Exception;
 
 
 
-+ ` Exception ` - An [` InvariantException `](/docs/apis/Classes/HH/InvariantException/).
++ ` Exception ` - An [` InvariantException `](/apis/Classes/HH/InvariantException/).
 <!-- HHAPIDOC -->

@@ -33,5 +33,5 @@ abstract public function elapsedMicros(): int;
 
 
 
-AsyncMysqlResult is abstract. See specific, concrete classes for examples of [` AsyncMysqlResult::elapsedMicros `](/docs/apis/Classes/AsyncMysqlResult/elapsedMicros/) (e.g., AsyncMysqlConnectResult, AsyncMysqlErrorResult)
+AsyncMysqlResult is abstract. See specific, concrete classes for examples of [` AsyncMysqlResult::elapsedMicros `](/apis/Classes/AsyncMysqlResult/elapsedMicros/) (e.g., AsyncMysqlConnectResult, AsyncMysqlErrorResult)
 <!-- HHAPIDOC -->

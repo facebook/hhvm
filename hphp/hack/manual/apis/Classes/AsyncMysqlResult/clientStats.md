@@ -29,7 +29,7 @@ client may have affected the result.
 
 
 
-+ [` AsyncMysqlClientStats `](/docs/apis/Classes/AsyncMysqlClientStats/) - an [` AsyncMysqlClientStats `](/docs/apis/Classes/AsyncMysqlClientStats/) object to query about event and
++ [` AsyncMysqlClientStats `](/apis/Classes/AsyncMysqlClientStats/) - an [` AsyncMysqlClientStats `](/apis/Classes/AsyncMysqlClientStats/) object to query about event and
   callback timing to the MySQL client for the specific result.
 
 
@@ -40,7 +40,7 @@ client may have affected the result.
 
 
 
-AsyncMysqlResult is abstract. See specific, concrete classes for examples of [` AsyncMysqlResult::clientStats `](/docs/apis/Classes/AsyncMysqlResult/clientStats/) (e.g., AsyncMysqlConnectResult, AsyncMysqlErrorResult)
+AsyncMysqlResult is abstract. See specific, concrete classes for examples of [` AsyncMysqlResult::clientStats `](/apis/Classes/AsyncMysqlResult/clientStats/) (e.g., AsyncMysqlConnectResult, AsyncMysqlErrorResult)
 
 
 

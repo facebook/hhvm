@@ -27,5 +27,5 @@ interface IExceptionWithPureGetMessage {...}
 
 
 
-+ [` ->getMessage(): string `](/docs/apis/Interfaces/IExceptionWithPureGetMessage/getMessage/)
++ [` ->getMessage(): string `](/apis/Interfaces/IExceptionWithPureGetMessage/getMessage/)
 <!-- HHAPIDOC -->

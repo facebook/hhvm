@@ -27,8 +27,8 @@ class DebuggerClient {...}
 
 
 
-+ [` ->__construct() `](/docs/apis/Classes/DebuggerClient/__construct/)
-+ [` ->getState() `](/docs/apis/Classes/DebuggerClient/getState/)
-+ [` ->init($options) `](/docs/apis/Classes/DebuggerClient/init/)
-+ [` ->processCmd($cmdName, $args) `](/docs/apis/Classes/DebuggerClient/processCmd/)
++ [` ->__construct() `](/apis/Classes/DebuggerClient/__construct/)
++ [` ->getState() `](/apis/Classes/DebuggerClient/getState/)
++ [` ->init($options) `](/apis/Classes/DebuggerClient/init/)
++ [` ->processCmd($cmdName, $args) `](/apis/Classes/DebuggerClient/processCmd/)
 <!-- HHAPIDOC -->

@@ -33,7 +33,7 @@ public function rewind(): void;
 
 
 
-The following example shows how to use [` AsyncMysqlRowIterator::rewind `](/docs/apis/Classes/AsyncMysqlRowIterator/rewind/) to get back to the beginning of the iterator as necessary.
+The following example shows how to use [` AsyncMysqlRowIterator::rewind `](/apis/Classes/AsyncMysqlRowIterator/rewind/) to get back to the beginning of the iterator as necessary.
 
 
 

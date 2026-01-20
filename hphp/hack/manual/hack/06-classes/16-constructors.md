@@ -1,7 +1,7 @@
 # Constructors
 
 A constructor is a specially named instance method that is used to initialize the instance immediately after it has been created.  A
-constructor is called by the [`new` operator](/docs/hack/expressions-and-operators/new).  For example:
+constructor is called by the [`new` operator](/hack/expressions-and-operators/new).  For example:
 
 ```hack
 class Point {

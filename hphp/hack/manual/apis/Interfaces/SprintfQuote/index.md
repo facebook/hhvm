@@ -27,5 +27,5 @@ interface SprintfQuote {...}
 
 
 
-+ [` ->format_0x3d(): PlainSprintf `](/docs/apis/Interfaces/SprintfQuote/format_0x3d/)
++ [` ->format_0x3d(): PlainSprintf `](/apis/Interfaces/SprintfQuote/format_0x3d/)
 <!-- HHAPIDOC -->

@@ -26,8 +26,8 @@ one until the iterator is not valid any longer.
 
 
 
-+ [Introduction](</docs/hack/asynchronous-operations/introduction>)
-+ [Extensions](</docs/hack/asynchronous-operations/extensions>)
++ [Introduction](</hack/asynchronous-operations/introduction>)
++ [Extensions](</hack/asynchronous-operations/extensions>)
 
 
 
@@ -52,14 +52,14 @@ final class AsyncMysqlRowIterator implements HH\KeyedIterator {...}
 
 
 
-* [` ->current(): string `](/docs/apis/Classes/AsyncMysqlRowIterator/current/)\
+* [` ->current(): string `](/apis/Classes/AsyncMysqlRowIterator/current/)\
   Get the current field (column) name
-* [` ->key(): int `](/docs/apis/Classes/AsyncMysqlRowIterator/key/)\
+* [` ->key(): int `](/apis/Classes/AsyncMysqlRowIterator/key/)\
   Get the current field (column) number
-* [` ->next(): void `](/docs/apis/Classes/AsyncMysqlRowIterator/next/)\
+* [` ->next(): void `](/apis/Classes/AsyncMysqlRowIterator/next/)\
   Advance the iterator to the next field (column)
-* [` ->rewind(): void `](/docs/apis/Classes/AsyncMysqlRowIterator/rewind/)\
+* [` ->rewind(): void `](/apis/Classes/AsyncMysqlRowIterator/rewind/)\
   Reset the iterator to the first field (column)
-* [` ->valid(): bool `](/docs/apis/Classes/AsyncMysqlRowIterator/valid/)\
+* [` ->valid(): bool `](/apis/Classes/AsyncMysqlRowIterator/valid/)\
   Check if the iterator is at a valid field (column)
 <!-- HHAPIDOC -->

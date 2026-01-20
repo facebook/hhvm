@@ -1,7 +1,7 @@
 # This
 
 The type name `this` refers to *the current class type at run time*. As such, it can only be used from within a class, an interface, or
-a trait. (The type name `this` should not be confused with [`$this`](/docs/hack/source-code-fundamentals/names), which refers to *the current
+a trait. (The type name `this` should not be confused with [`$this`](/hack/source-code-fundamentals/names), which refers to *the current
 instance*, whose type is `this`.)  For example:
 
 ```hack

@@ -45,8 +45,8 @@ final class sockaddr_un extends sockaddr {...}
 
 
 
-+ [` ->__construct(?string $path) `](/docs/hsl/Classes/HH.Lib.OS/sockaddr_un/__construct/)
-+ [` ->getFamily(): AddressFamily `](/docs/hsl/Classes/HH.Lib.OS/sockaddr_un/getFamily/)
-+ [` ->getPath(): ?string `](/docs/hsl/Classes/HH.Lib.OS/sockaddr_un/getPath/)\
++ [` ->__construct(?string $path) `](/hsl/Classes/HH.Lib.OS/sockaddr_un/__construct/)
++ [` ->getFamily(): AddressFamily `](/hsl/Classes/HH.Lib.OS/sockaddr_un/getFamily/)
++ [` ->getPath(): ?string `](/hsl/Classes/HH.Lib.OS/sockaddr_un/getPath/)\
   Get the path (if any) of a socket
 <!-- HHAPIDOC -->

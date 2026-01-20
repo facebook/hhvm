@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns the value at the specified key in the current [` Vector `](/docs/apis/Classes/HH/Vector/)
+Returns the value at the specified key in the current [` Vector `](/apis/Classes/HH/Vector/)
 
 
 
@@ -21,7 +21,7 @@ public function at(
 
 
 If the key is not present, an exception is thrown. If you don't want an
-exception to be thrown, use [` get() `](/docs/apis/Classes/HH/Vector/get/) instead.
+exception to be thrown, use [` get() `](/apis/Classes/HH/Vector/get/) instead.
 
 
 
@@ -57,7 +57,7 @@ exception to be thrown, use [` get() `](/docs/apis/Classes/HH/Vector/get/) inste
 
 
 
-This example prints the first and last values of the [` Vector `](/docs/apis/Classes/HH/Vector/):
+This example prints the first and last values of the [` Vector `](/apis/Classes/HH/Vector/):
 
 
 
@@ -75,7 +75,7 @@ $v = Vector {'red', 'green', 'blue', 'yellow'};
 
 
 
-This example throws an ` OutOfBoundsException ` because the [` Vector `](/docs/apis/Classes/HH/Vector/) has no index 10:
+This example throws an ` OutOfBoundsException ` because the [` Vector `](/apis/Classes/HH/Vector/) has no index 10:
 
 
 

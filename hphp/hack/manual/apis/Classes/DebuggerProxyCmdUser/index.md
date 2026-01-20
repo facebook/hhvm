@@ -27,7 +27,7 @@ class DebuggerProxyCmdUser {...}
 
 
 
-+ [` ->__construct() `](/docs/apis/Classes/DebuggerProxyCmdUser/__construct/)
-+ [` ->isLocal() `](/docs/apis/Classes/DebuggerProxyCmdUser/isLocal/)
-+ [` ->send($cmd) `](/docs/apis/Classes/DebuggerProxyCmdUser/send/)
++ [` ->__construct() `](/apis/Classes/DebuggerProxyCmdUser/__construct/)
++ [` ->isLocal() `](/apis/Classes/DebuggerProxyCmdUser/isLocal/)
++ [` ->send($cmd) `](/apis/Classes/DebuggerProxyCmdUser/send/)
 <!-- HHAPIDOC -->

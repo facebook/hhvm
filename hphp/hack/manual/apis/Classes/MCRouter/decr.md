@@ -50,7 +50,7 @@ public function decr(
 
 
 
-The following example shows how to decrement a value of a key by a specified integer using [` MCRouter::incr `](/docs/apis/Classes/MCRouter/incr/). The value **must** be numeric.
+The following example shows how to decrement a value of a key by a specified integer using [` MCRouter::incr `](/apis/Classes/MCRouter/incr/). The value **must** be numeric.
 
 
 

@@ -34,10 +34,10 @@ interface Server {...}
 
 
 
-+ [` ->getLocalAddress(): this::TAddress `](</docs/hsl/Interfaces/HH.Lib.Network/Server/getLocalAddress/>)\
++ [` ->getLocalAddress(): this::TAddress `](</hsl/Interfaces/HH.Lib.Network/Server/getLocalAddress/>)\
   Return the local (listening) address for the server
-+ [` ->nextConnectionAsync(): Awaitable<TSock> `](</docs/hsl/Interfaces/HH.Lib.Network/Server/nextConnectionAsync/>)\
++ [` ->nextConnectionAsync(): Awaitable<TSock> `](</hsl/Interfaces/HH.Lib.Network/Server/nextConnectionAsync/>)\
   Retrieve the next pending connection as a disposable
-+ [` ->stopListening(): void `](</docs/hsl/Interfaces/HH.Lib.Network/Server/stopListening/>)\
++ [` ->stopListening(): void `](</hsl/Interfaces/HH.Lib.Network/Server/stopListening/>)\
   Stop listening; open connection are not closed
 <!-- HHAPIDOC -->

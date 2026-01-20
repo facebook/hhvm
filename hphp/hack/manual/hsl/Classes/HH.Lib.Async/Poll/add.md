@@ -25,7 +25,7 @@ public function add(
 
 
 
-+ [` Awaitable<Tv> `](/docs/apis/Classes/HH/Awaitable/)`` $awaitable ``
++ [` Awaitable<Tv> `](/apis/Classes/HH/Awaitable/)`` $awaitable ``
 
 
 

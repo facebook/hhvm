@@ -37,7 +37,7 @@ may be bigger than ``` $sample_size ```
 
 
 
-+ [` Traversable<Tv> `](/docs/apis/Interfaces/HH/Traversable/)`` $traversable ``
++ [` Traversable<Tv> `](/apis/Interfaces/HH/Traversable/)`` $traversable ``
 + ` int $sample_size `
 
 

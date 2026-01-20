@@ -7,7 +7,7 @@ the Hack LSP instead for complete and up-to-date information.
 :::
 
 Returns an immutable vector (` ImmVector `) converted from the current
-[` Iterable `](/docs/apis/Interfaces/HH/Iterable/)
+[` Iterable `](/apis/Interfaces/HH/Iterable/)
 
 
 
@@ -19,7 +19,7 @@ public function toImmVector(): ImmVector<Tv>;
 
 
 
-Any keys in the current [` Iterable `](/docs/apis/Interfaces/HH/Iterable/) are discarded and replaced with integer
+Any keys in the current [` Iterable `](/apis/Interfaces/HH/Iterable/) are discarded and replaced with integer
 indices, starting with 0.
 
 
@@ -30,5 +30,5 @@ indices, starting with 0.
 
 
 
-+ [` ImmVector<Tv> `](/docs/apis/Classes/HH/ImmVector/) - an `` ImmVector `` converted from the current [` Iterable `](/docs/apis/Interfaces/HH/Iterable/).
++ [` ImmVector<Tv> `](/apis/Classes/HH/ImmVector/) - an `` ImmVector `` converted from the current [` Iterable `](/apis/Interfaces/HH/Iterable/).
 <!-- HHAPIDOC -->

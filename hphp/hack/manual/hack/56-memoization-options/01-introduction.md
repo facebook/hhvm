@@ -14,7 +14,7 @@ The `__Memoize` and `__MemoizeLSB` attributes in Hack support experimental optio
 
 ## Introduction
 
-The Implicit Context (IC) is an experimental feature. It is a value that can be associated with the execution of code and propagated implicitly from caller to callee in a way that is safe for [concurrently running code](/docs/hack/asynchronous-operations/introduction).
+The Implicit Context (IC) is an experimental feature. It is a value that can be associated with the execution of code and propagated implicitly from caller to callee in a way that is safe for [concurrently running code](/hack/asynchronous-operations/introduction).
 
 In order to prevent the problem of "memoization cache poisoning" where results computed using one IC value are available to callers using a different IC value, we require that memoized functions executed with an IC value are explicit about how they should behave relative to the IC value. Broadly, functions can specify one of two choices:
 
@@ -22,7 +22,7 @@ In order to prevent the problem of "memoization cache poisoning" where results c
 * This function's memoization cache key _should not_ incorporate the propagated IC value *AND* this function and its dependencies cannot depend on the propagated IC value.
 
 These requirements are enforced at runtime via thrown exceptions and not statically by the typechecker.
-If static requirements are desired, one can make use of special [contexts and capabilities](/docs/hack/contexts-and-capabilities/introduction) specifically `zoned`.
+If static requirements are desired, one can make use of special [contexts and capabilities](/hack/contexts-and-capabilities/introduction) specifically `zoned`.
 
 ## Available Options
 
@@ -46,7 +46,7 @@ function get_same_random_int(): int {
     * A function must have one of the following contexts to use this option: `defaults` (implicitly or explicitly), `leak_safe_shallow`, `leak_safe_local`
 
 
->Note that this syntax uses “[enum class labels](/docs/hack/built-in-types/enum-class-label)” as arguments. Currently, only the memoization attributes are allowed to use labels as arguments.
+>Note that this syntax uses “[enum class labels](/hack/built-in-types/enum-class-label)” as arguments. Currently, only the memoization attributes are allowed to use labels as arguments.
 
 ## Related classes and functions
 

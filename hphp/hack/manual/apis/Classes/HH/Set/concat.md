@@ -6,8 +6,8 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a [` Vector `](/docs/apis/Classes/HH/Vector/) that is the concatenation of the values of the current
-[` Set `](/docs/apis/Classes/HH/Set/) and the values of the provided [` Traversable `](/docs/apis/Interfaces/HH/Traversable/)
+Returns a [` Vector `](/apis/Classes/HH/Vector/) that is the concatenation of the values of the current
+[` Set `](/apis/Classes/HH/Set/) and the values of the provided [` Traversable `](/apis/Interfaces/HH/Traversable/)
 
 
 
@@ -21,8 +21,8 @@ public function concat<Tu super Tv>(
 
 
 
-The values of the provided [` Traversable `](/docs/apis/Interfaces/HH/Traversable/) is concatenated to the end of the
-current [` Set `](/docs/apis/Classes/HH/Set/) to produce the returned [` Vector `](/docs/apis/Classes/HH/Vector/).
+The values of the provided [` Traversable `](/apis/Interfaces/HH/Traversable/) is concatenated to the end of the
+current [` Set `](/apis/Classes/HH/Set/) to produce the returned [` Vector `](/apis/Classes/HH/Vector/).
 
 
 
@@ -32,7 +32,7 @@ current [` Set `](/docs/apis/Classes/HH/Set/) to produce the returned [` Vector 
 
 
 
-+ [Constraints](</docs/hack/generics/type-constraints>)
++ [Constraints](</hack/generics/type-constraints>)
 
 
 
@@ -45,8 +45,8 @@ current [` Set `](/docs/apis/Classes/HH/Set/) to produce the returned [` Vector 
 
 
 
-* [` Traversable<Tu> `](/docs/apis/Interfaces/HH/Traversable/)`` $traversable `` - The [` Traversable `](/docs/apis/Interfaces/HH/Traversable/) to concatenate to the current
-  [` Set `](/docs/apis/Classes/HH/Set/).
+* [` Traversable<Tu> `](/apis/Interfaces/HH/Traversable/)`` $traversable `` - The [` Traversable `](/apis/Interfaces/HH/Traversable/) to concatenate to the current
+  [` Set `](/apis/Classes/HH/Set/).
 
 
 
@@ -56,7 +56,7 @@ current [` Set `](/docs/apis/Classes/HH/Set/) to produce the returned [` Vector 
 
 
 
-- [` Vector<Tu> `](/docs/apis/Classes/HH/Vector/) - The concatenated [` Vector `](/docs/apis/Classes/HH/Vector/).
+- [` Vector<Tu> `](/apis/Classes/HH/Vector/) - The concatenated [` Vector `](/apis/Classes/HH/Vector/).
 
 
 
@@ -66,7 +66,7 @@ current [` Set `](/docs/apis/Classes/HH/Set/) to produce the returned [` Vector 
 
 
 
-This example creates new [` Set `](/docs/apis/Classes/HH/Set/)s by concatenating other [` Traversable `](/docs/apis/Interfaces/HH/Traversable/)s. Unlike [` Set::addAll() `](/docs/apis/Classes/HH/Set/addAll/) this method returns a new [` Set `](/docs/apis/Classes/HH/Set/) (not a [shallow copy](<https://en.wikipedia.org/wiki/Object_copying#Shallow_copy>)).
+This example creates new [` Set `](/apis/Classes/HH/Set/)s by concatenating other [` Traversable `](/apis/Interfaces/HH/Traversable/)s. Unlike [` Set::addAll() `](/apis/Classes/HH/Set/addAll/) this method returns a new [` Set `](/apis/Classes/HH/Set/) (not a [shallow copy](<https://en.wikipedia.org/wiki/Object_copying#Shallow_copy>)).
 
 
 

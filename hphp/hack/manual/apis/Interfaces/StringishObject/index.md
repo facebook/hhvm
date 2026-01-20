@@ -32,5 +32,5 @@ interface StringishObject implements Stringish {...}
 
 
 
-+ [` ->__toString(): string `](/docs/apis/Interfaces/StringishObject/__toString/)
++ [` ->__toString(): string `](/apis/Interfaces/StringishObject/__toString/)
 <!-- HHAPIDOC -->

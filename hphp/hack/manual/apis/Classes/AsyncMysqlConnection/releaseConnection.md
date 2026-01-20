@@ -18,7 +18,7 @@ public function releaseConnection(): mixed;
 
 
 
-This method will destroy the current [` AsyncMysqlConnection `](/docs/apis/Classes/AsyncMysqlConnection/) object and give
+This method will destroy the current [` AsyncMysqlConnection `](/apis/Classes/AsyncMysqlConnection/) object and give
 you back a vanilla, synchronous MySQL resource.
 
 
@@ -41,7 +41,7 @@ you back a vanilla, synchronous MySQL resource.
 
 
 
-If you ever want to get a plain, vanilla synchronous MySQL connection from your async connection, you call [` AsyncMysqlConnection::releaseConnection `](/docs/apis/Classes/AsyncMysqlConnection/releaseConnection/). This examples show how to get such a connection, noting too that your async connection is destroyed.
+If you ever want to get a plain, vanilla synchronous MySQL connection from your async connection, you call [` AsyncMysqlConnection::releaseConnection `](/apis/Classes/AsyncMysqlConnection/releaseConnection/). This examples show how to get such a connection, noting too that your async connection is destroyed.
 
 
 

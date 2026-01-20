@@ -36,7 +36,7 @@ allowed to trigger the notification.
 
 
 
-+ [` Awaitable<void> `](/docs/apis/Classes/HH/Awaitable/)`` $notifiers ``
++ [` Awaitable<void> `](/apis/Classes/HH/Awaitable/)`` $notifiers ``
 
 
 
@@ -46,5 +46,5 @@ allowed to trigger the notification.
 
 
 
-* [` Awaitable<T> `](/docs/apis/Classes/HH/Awaitable/)
+* [` Awaitable<T> `](/apis/Classes/HH/Awaitable/)
 <!-- HHAPIDOC -->

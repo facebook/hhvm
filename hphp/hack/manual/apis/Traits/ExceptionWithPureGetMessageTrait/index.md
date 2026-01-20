@@ -27,5 +27,5 @@ trait ExceptionWithPureGetMessageTrait implements IExceptionWithPureGetMessage {
 
 
 
-+ [` ->getMessage(): string `](/docs/apis/Traits/ExceptionWithPureGetMessageTrait/getMessage/)
++ [` ->getMessage(): string `](/apis/Traits/ExceptionWithPureGetMessageTrait/getMessage/)
 <!-- HHAPIDOC -->

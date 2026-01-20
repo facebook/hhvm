@@ -6,8 +6,8 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Translate a [` Traversable `](/docs/apis/Interfaces/HH/Traversable/) of `` Awaitables `` into a single [` Awaitable `](/docs/apis/Classes/HH/Awaitable/) of
-[` Vector `](/docs/apis/Classes/HH/Vector/) of `` ResultOrExceptionWrapper ``
+Translate a [` Traversable `](/apis/Interfaces/HH/Traversable/) of `` Awaitables `` into a single [` Awaitable `](/apis/Classes/HH/Awaitable/) of
+[` Vector `](/apis/Classes/HH/Vector/) of `` ResultOrExceptionWrapper ``
 
 
 
@@ -29,22 +29,22 @@ This function is the same as ` v() `, but wraps the results into
 
 
 
-This function takes any [` Traversable `](/docs/apis/Interfaces/HH/Traversable/) object of `` Awaitables `` (i.e., each
-member of the [` Traversable `](/docs/apis/Interfaces/HH/Traversable/) is of type of [` Awaitable `](/docs/apis/Classes/HH/Awaitable/), likely from a call
-to a function that returned [` Awaitable<T> `](/docs/apis/Classes/HH/Awaitable/)), and transforms those
-`` Awaitables `` into one big [` Awaitable `](/docs/apis/Classes/HH/Awaitable/) [` Vector `](/docs/apis/Classes/HH/Vector/) of `` ResultOrExceptionWrapper ``.
+This function takes any [` Traversable `](/apis/Interfaces/HH/Traversable/) object of `` Awaitables `` (i.e., each
+member of the [` Traversable `](/apis/Interfaces/HH/Traversable/) is of type of [` Awaitable `](/apis/Classes/HH/Awaitable/), likely from a call
+to a function that returned [` Awaitable<T> `](/apis/Classes/HH/Awaitable/)), and transforms those
+`` Awaitables `` into one big [` Awaitable `](/apis/Classes/HH/Awaitable/) [` Vector `](/apis/Classes/HH/Vector/) of `` ResultOrExceptionWrapper ``.
 
 
 
 
 This function is called ` vw ` because we are returning a `` v ``ector of
-[` Awaitable `](/docs/apis/Classes/HH/Awaitable/) `` w ``rapped into ``` ResultofExceptionWrapper ```s.
+[` Awaitable `](/apis/Classes/HH/Awaitable/) `` w ``rapped into ``` ResultofExceptionWrapper ```s.
 
 
 
 
-The ` ResultOrExceptionWrapper `s in the [` Vector `](/docs/apis/Classes/HH/Vector/) of the returned [` Awaitable `](/docs/apis/Classes/HH/Awaitable/)
-are not available until you `` await `` or ``` join ``` the returned [` Awaitable `](/docs/apis/Classes/HH/Awaitable/).
+The ` ResultOrExceptionWrapper `s in the [` Vector `](/apis/Classes/HH/Vector/) of the returned [` Awaitable `](/apis/Classes/HH/Awaitable/)
+are not available until you `` await `` or ``` join ``` the returned [` Awaitable `](/apis/Classes/HH/Awaitable/).
 
 
 
@@ -54,7 +54,7 @@ are not available until you `` await `` or ``` join ``` the returned [` Awaitabl
 
 
 
-+ [` Traversable<Awaitable<Tv>> `](/docs/apis/Interfaces/HH/Traversable/)`` $awaitables `` - The collection of [` Traversable `](/docs/apis/Interfaces/HH/Traversable/) awaitables.
++ [` Traversable<Awaitable<Tv>> `](/apis/Interfaces/HH/Traversable/)`` $awaitables `` - The collection of [` Traversable `](/apis/Interfaces/HH/Traversable/) awaitables.
 
 
 
@@ -64,8 +64,8 @@ are not available until you `` await `` or ``` join ``` the returned [` Awaitabl
 
 
 
-* [` Awaitable<Vector<ResultOrExceptionWrapper<Tv>>> `](/docs/apis/Classes/HH/Awaitable/) - An [` Awaitable `](/docs/apis/Classes/HH/Awaitable/) of [` Vector `](/docs/apis/Classes/HH/Vector/) of `` ResultOrExceptionWrapper ``, where
-  the [` Vector `](/docs/apis/Classes/HH/Vector/) was generated from each [` Traversable `](/docs/apis/Interfaces/HH/Traversable/) member in
+* [` Awaitable<Vector<ResultOrExceptionWrapper<Tv>>> `](/apis/Classes/HH/Awaitable/) - An [` Awaitable `](/apis/Classes/HH/Awaitable/) of [` Vector `](/apis/Classes/HH/Vector/) of `` ResultOrExceptionWrapper ``, where
+  the [` Vector `](/apis/Classes/HH/Vector/) was generated from each [` Traversable `](/apis/Interfaces/HH/Traversable/) member in
   `` $awaitables ``.
 
 

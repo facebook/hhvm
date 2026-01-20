@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns 2; a [` Pair `](/docs/apis/Classes/HH/Pair/) always has two values
+Returns 2; a [` Pair `](/apis/Classes/HH/Pair/) always has two values
 
 
 
@@ -33,7 +33,7 @@ public function count(): int;
 
 
 
-This shows that a [` Pair `](/docs/apis/Classes/HH/Pair/) always has a count of `` 2 ``:
+This shows that a [` Pair `](/apis/Classes/HH/Pair/) always has a count of `` 2 ``:
 
 
 

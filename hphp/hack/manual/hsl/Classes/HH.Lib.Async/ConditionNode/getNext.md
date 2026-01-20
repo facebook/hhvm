@@ -18,5 +18,5 @@ public function getNext(): ?HH\Lib\Async\ConditionNode<T>;
 
 
 
-+ ` ? `[` HH\Lib\Async\ConditionNode<T> `](/docs/hsl/Classes/HH.Lib.Async/ConditionNode/)
++ ` ? `[` HH\Lib\Async\ConditionNode<T> `](/hsl/Classes/HH.Lib.Async/ConditionNode/)
 <!-- HHAPIDOC -->

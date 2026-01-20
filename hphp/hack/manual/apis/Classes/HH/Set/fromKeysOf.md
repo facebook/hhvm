@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Creates a [` Set `](/docs/apis/Classes/HH/Set/) from the keys of the specified container
+Creates a [` Set `](/apis/Classes/HH/Set/) from the keys of the specified container
 
 
 
@@ -20,7 +20,7 @@ public static function fromKeysOf<Tk as arraykey>(
 
 
 
-The keys of the container will be the values of the [` Set `](/docs/apis/Classes/HH/Set/).
+The keys of the container will be the values of the [` Set `](/apis/Classes/HH/Set/).
 
 
 
@@ -30,7 +30,7 @@ The keys of the container will be the values of the [` Set `](/docs/apis/Classes
 
 
 
-+ ` ? `[` KeyedContainer<Tk, `](/docs/apis/Interfaces/HH/KeyedContainer/)`` mixed> $container `` - The container with the keys used to create the [` Set `](/docs/apis/Classes/HH/Set/).
++ ` ? `[` KeyedContainer<Tk, `](/apis/Interfaces/HH/KeyedContainer/)`` mixed> $container `` - The container with the keys used to create the [` Set `](/apis/Classes/HH/Set/).
 
 
 
@@ -40,7 +40,7 @@ The keys of the container will be the values of the [` Set `](/docs/apis/Classes
 
 
 
-* [` Set<Tk> `](/docs/apis/Classes/HH/Set/) - A [` Set `](/docs/apis/Classes/HH/Set/) built from the keys of the specified container.
+* [` Set<Tk> `](/apis/Classes/HH/Set/) - A [` Set `](/apis/Classes/HH/Set/) built from the keys of the specified container.
 
 
 
@@ -50,7 +50,7 @@ The keys of the container will be the values of the [` Set `](/docs/apis/Classes
 
 
 
-This example creates new [` Set `](/docs/apis/Classes/HH/Set/)s from a string-keyed [` Map `](/docs/apis/Classes/HH/Map/) and associative array:
+This example creates new [` Set `](/apis/Classes/HH/Set/)s from a string-keyed [` Map `](/apis/Classes/HH/Map/) and associative array:
 
 
 
@@ -78,7 +78,7 @@ $vegetable_names = Set::fromKeysOf($vegetable_calories);
 
 
 
-This example creates new [` Set `](/docs/apis/Classes/HH/Set/)s from an int-keyed [` Map `](/docs/apis/Classes/HH/Map/) and associative array:
+This example creates new [` Set `](/apis/Classes/HH/Set/)s from an int-keyed [` Map `](/apis/Classes/HH/Map/) and associative array:
 
 
 

@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns an [` Iterable `](/docs/apis/Interfaces/HH/Iterable/) view of the current [` Vector `](/docs/apis/Classes/HH/Vector/)
+Returns an [` Iterable `](/apis/Interfaces/HH/Iterable/) view of the current [` Vector `](/apis/Classes/HH/Vector/)
 
 
 
@@ -18,8 +18,8 @@ public function items(): Iterable<Tv>;
 
 
 
-The [` Iterable `](/docs/apis/Interfaces/HH/Iterable/) returned is one that produces the values from the current
-[` Vector `](/docs/apis/Classes/HH/Vector/).
+The [` Iterable `](/apis/Interfaces/HH/Iterable/) returned is one that produces the values from the current
+[` Vector `](/apis/Classes/HH/Vector/).
 
 
 
@@ -29,7 +29,7 @@ The [` Iterable `](/docs/apis/Interfaces/HH/Iterable/) returned is one that prod
 
 
 
-+ [` Iterable<Tv> `](/docs/apis/Interfaces/HH/Iterable/) - The [` Iterable `](/docs/apis/Interfaces/HH/Iterable/) view of the current [` Vector `](/docs/apis/Classes/HH/Vector/).
++ [` Iterable<Tv> `](/apis/Interfaces/HH/Iterable/) - The [` Iterable `](/apis/Interfaces/HH/Iterable/) view of the current [` Vector `](/apis/Classes/HH/Vector/).
 
 
 
@@ -39,7 +39,7 @@ The [` Iterable `](/docs/apis/Interfaces/HH/Iterable/) returned is one that prod
 
 
 
-This example shows that [` items() `](/docs/apis/Classes/HH/Vector/items/) returns an [` Iterable `](/docs/apis/Interfaces/HH/Iterable/) view of the [` Vector `](/docs/apis/Classes/HH/Vector/). The [` Iterable `](/docs/apis/Interfaces/HH/Iterable/) will produce the values of the [` Vector `](/docs/apis/Classes/HH/Vector/) at the time it's iterated.
+This example shows that [` items() `](/apis/Classes/HH/Vector/items/) returns an [` Iterable `](/apis/Interfaces/HH/Iterable/) view of the [` Vector `](/apis/Classes/HH/Vector/). The [` Iterable `](/apis/Interfaces/HH/Iterable/) will produce the values of the [` Vector `](/apis/Classes/HH/Vector/) at the time it's iterated.
 
 
 

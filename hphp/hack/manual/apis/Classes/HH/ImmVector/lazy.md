@@ -7,7 +7,7 @@ the Hack LSP instead for complete and up-to-date information.
 :::
 
 Returns a lazy, access-elements-only-when-needed view of the current
-[` ImmVector `](/docs/apis/Classes/HH/ImmVector/)
+[` ImmVector `](/apis/Classes/HH/ImmVector/)
 
 
 
@@ -19,9 +19,9 @@ public function lazy(): KeyedIterable<int, Tv>;
 
 
 
-Normally, memory is allocated for all of the elements of an [` ImmVector `](/docs/apis/Classes/HH/ImmVector/).
+Normally, memory is allocated for all of the elements of an [` ImmVector `](/apis/Classes/HH/ImmVector/).
 With a lazy view, memory is allocated for an element only when needed or
-used in a calculation like in [` map() `](/docs/apis/Classes/HH/ImmVector/map/) or [` filter() `](/docs/apis/Classes/HH/ImmVector/filter/).
+used in a calculation like in [` map() `](/apis/Classes/HH/ImmVector/map/) or [` filter() `](/apis/Classes/HH/ImmVector/filter/).
 
 
 
@@ -31,7 +31,7 @@ used in a calculation like in [` map() `](/docs/apis/Classes/HH/ImmVector/map/) 
 
 
 
-+ [Examples](</docs/hack/arrays-and-collections/introduction>)
++ [Examples](</hack/arrays-and-collections/introduction>)
 
 
 
@@ -44,8 +44,8 @@ used in a calculation like in [` map() `](/docs/apis/Classes/HH/ImmVector/map/) 
 
 
 
-* [` KeyedIterable<int, `](/docs/apis/Interfaces/HH/KeyedIterable/)`` Tv> `` - An integer-keyed [` KeyedIterable `](/docs/apis/Interfaces/HH/KeyedIterable/) representing the lazy view into
-  the current [` ImmVector `](/docs/apis/Classes/HH/ImmVector/).
+* [` KeyedIterable<int, `](/apis/Interfaces/HH/KeyedIterable/)`` Tv> `` - An integer-keyed [` KeyedIterable `](/apis/Interfaces/HH/KeyedIterable/) representing the lazy view into
+  the current [` ImmVector `](/apis/Classes/HH/ImmVector/).
 
 
 
@@ -55,5 +55,5 @@ used in a calculation like in [` map() `](/docs/apis/Classes/HH/ImmVector/map/) 
 
 
 
-See [` Vector::lazy `](/docs/apis/Classes/HH/Vector/lazy/#examples) for usage examples.
+See [` Vector::lazy `](/apis/Classes/HH/Vector/lazy/#examples) for usage examples.
 <!-- HHAPIDOC -->

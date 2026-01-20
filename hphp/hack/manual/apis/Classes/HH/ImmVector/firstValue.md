@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns the first value in the current [` ImmVector `](/docs/apis/Classes/HH/ImmVector/)
+Returns the first value in the current [` ImmVector `](/apis/Classes/HH/ImmVector/)
 
 
 
@@ -23,8 +23,8 @@ public function firstValue(): ?Tv;
 
 
 
-+ ` ?Tv ` - The first value in the current [` ImmVector `](/docs/apis/Classes/HH/ImmVector/), or `` null `` if the
-  current [` ImmVector `](/docs/apis/Classes/HH/ImmVector/) is empty.
++ ` ?Tv ` - The first value in the current [` ImmVector `](/apis/Classes/HH/ImmVector/), or `` null `` if the
+  current [` ImmVector `](/apis/Classes/HH/ImmVector/) is empty.
 
 
 
@@ -34,5 +34,5 @@ public function firstValue(): ?Tv;
 
 
 
-See [` Vector::firstValue `](/docs/apis/Classes/HH/Vector/firstValue/#examples) for usage examples.
+See [` Vector::firstValue `](/apis/Classes/HH/Vector/firstValue/#examples) for usage examples.
 <!-- HHAPIDOC -->

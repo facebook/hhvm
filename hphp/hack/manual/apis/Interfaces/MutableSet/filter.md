@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a [` MutableSet `](/docs/apis/Interfaces/MutableSet/) containing the values of the current [` MutableSet `](/docs/apis/Interfaces/MutableSet/)
+Returns a [` MutableSet `](/apis/Interfaces/MutableSet/) containing the values of the current [` MutableSet `](/apis/Interfaces/MutableSet/)
 that meet a supplied condition applied to each value
 
 
@@ -22,7 +22,7 @@ public function filter(
 
 
 Only values that meet a certain criteria are affected by a call to
-[` filter() `](/docs/apis/Interfaces/MutableSet/filter/), while all values are affected by a call to [` map() `](/docs/apis/Interfaces/MutableSet/map/).
+[` filter() `](/apis/Interfaces/MutableSet/filter/), while all values are affected by a call to [` map() `](/apis/Interfaces/MutableSet/map/).
 
 
 
@@ -32,7 +32,7 @@ Only values that meet a certain criteria are affected by a call to
 
 
 
-+ [Examples](</docs/hack/arrays-and-collections/introduction>)
++ [Examples](</hack/arrays-and-collections/introduction>)
 
 
 
@@ -46,7 +46,7 @@ Only values that meet a certain criteria are affected by a call to
 
 
 * ` (function(Tv): bool) $fn ` - The callback containing the condition to apply to the
-  current [` MutableSet `](/docs/apis/Interfaces/MutableSet/) values.
+  current [` MutableSet `](/apis/Interfaces/MutableSet/) values.
 
 
 
@@ -56,6 +56,6 @@ Only values that meet a certain criteria are affected by a call to
 
 
 
-- [` MutableSet<Tv> `](/docs/apis/Interfaces/MutableSet/) - a [` MutableSet `](/docs/apis/Interfaces/MutableSet/) containing the values after a user-specified
+- [` MutableSet<Tv> `](/apis/Interfaces/MutableSet/) - a [` MutableSet `](/apis/Interfaces/MutableSet/) containing the values after a user-specified
   condition is applied.
 <!-- HHAPIDOC -->

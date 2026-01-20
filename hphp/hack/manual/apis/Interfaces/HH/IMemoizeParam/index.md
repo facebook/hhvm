@@ -24,8 +24,8 @@ Classes that implement IMemoizeParam may be used as parameters on
 
 
 
-+ [Introduction](</docs/hack/attributes/introduction>)
-+ [Special](</docs/hack/attributes/predefined-attributes>)
++ [Introduction](</hack/attributes/introduction>)
++ [Special](</hack/attributes/predefined-attributes>)
 
 
 
@@ -52,7 +52,7 @@ interface IMemoizeParam {...}
 
 
 
-* [` ->getInstanceKey(): string `](/docs/apis/Interfaces/HH/IMemoizeParam/getInstanceKey/)\
+* [` ->getInstanceKey(): string `](/apis/Interfaces/HH/IMemoizeParam/getInstanceKey/)\
   Serialize this object to a string that can be used as a
   dictionary key to differentiate instances of this class
 <!-- HHAPIDOC -->

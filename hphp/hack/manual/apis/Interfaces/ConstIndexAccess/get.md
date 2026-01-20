@@ -21,7 +21,7 @@ public function get(
 
 
 If the key is not present, ` null ` is returned. If you would rather have an
-exception thrown when a key is not present, then use [` at() `](/docs/apis/Interfaces/ConstIndexAccess/at/).
+exception thrown when a key is not present, then use [` at() `](/apis/Interfaces/ConstIndexAccess/at/).
 
 
 

@@ -11,7 +11,7 @@ import styles from './HomepageFeatures.module.css';
 const FeatureList = [
   {
     title: 'Hack Documentation',
-    href: 'docs/hack-overview',
+    href: 'hack-overview',
     Svg: require('../../static/img/hack.svg').default,
     description: (
       <>
@@ -23,7 +23,7 @@ const FeatureList = [
   },
   {
     title: 'HHVM Documentation',
-    href: 'docs/hhvm-overview',
+    href: 'hhvm-overview',
     Svg: require('../../static/img/hhvm.svg').default,
     description: (
       <>
@@ -35,7 +35,7 @@ const FeatureList = [
   },
   {
     title: 'Library Reference',
-    href: 'docs/hsl/overview',
+    href: 'hsl/overview',
     Svg: require('../../static/img/hsl.svg').default,
     description: (
       <>

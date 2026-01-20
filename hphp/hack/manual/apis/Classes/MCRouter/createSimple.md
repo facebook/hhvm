@@ -28,7 +28,7 @@ public static function createSimple(
 
 
 
-+ [` Vector `](/docs/apis/Classes/HH/Vector/)`` $servers `` - List of memcache servers to connect to
++ [` Vector `](/apis/Classes/HH/Vector/)`` $servers `` - List of memcache servers to connect to
 
 
 
@@ -38,7 +38,7 @@ public static function createSimple(
 
 
 
-* [` MCRouter `](/docs/apis/Classes/MCRouter/) - Instance of MCRouter
+* [` MCRouter `](/apis/Classes/MCRouter/) - Instance of MCRouter
 
 
 
@@ -48,7 +48,7 @@ public static function createSimple(
 
 
 
-The following example shows you how use [` MCRouter::createSimple `](/docs/apis/Classes/MCRouter/createSimple/) to create an instance of [` MCRouter `](/docs/apis/Classes/MCRouter/). You only need to pass it a [` Vector `](/docs/apis/Classes/HH/Vector/) containing one or more locations of Memcached servers; default configurations are used after that (e.g, `` route = 'PoolRoute|P' ``).
+The following example shows you how use [` MCRouter::createSimple `](/apis/Classes/MCRouter/createSimple/) to create an instance of [` MCRouter `](/apis/Classes/MCRouter/). You only need to pass it a [` Vector `](/apis/Classes/HH/Vector/) containing one or more locations of Memcached servers; default configurations are used after that (e.g, `` route = 'PoolRoute|P' ``).
 
 
 

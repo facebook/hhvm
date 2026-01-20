@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a [` Set `](/docs/apis/Classes/HH/Set/) containing the values of the current [` Set `](/docs/apis/Classes/HH/Set/) up to but not
+Returns a [` Set `](/apis/Classes/HH/Set/) containing the values of the current [` Set `](/apis/Classes/HH/Set/) up to but not
 including the first value that produces `` false `` when passed to the
 specified callback
 
@@ -22,7 +22,7 @@ public function takeWhile(
 
 
 
-The returned [` Set `](/docs/apis/Classes/HH/Set/) will always be a proper subset of the current [` Set `](/docs/apis/Classes/HH/Set/).
+The returned [` Set `](/apis/Classes/HH/Set/) will always be a proper subset of the current [` Set `](/apis/Classes/HH/Set/).
 
 
 
@@ -42,7 +42,7 @@ The returned [` Set `](/docs/apis/Classes/HH/Set/) will always be a proper subse
 
 
 
-* [` Set<Tv> `](/docs/apis/Classes/HH/Set/) - A [` Set `](/docs/apis/Classes/HH/Set/) that is a proper subset of the current [` Set `](/docs/apis/Classes/HH/Set/) up until
+* [` Set<Tv> `](/apis/Classes/HH/Set/) - A [` Set `](/apis/Classes/HH/Set/) that is a proper subset of the current [` Set `](/apis/Classes/HH/Set/) up until
   the callback returns `` false ``.
 
 
@@ -53,7 +53,7 @@ The returned [` Set `](/docs/apis/Classes/HH/Set/) will always be a proper subse
 
 
 
-This example shows how ` takeWhile ` can be used to create a new [` Set `](/docs/apis/Classes/HH/Set/) by taking elements from the beginning of an existing [` Set `](/docs/apis/Classes/HH/Set/):
+This example shows how ` takeWhile ` can be used to create a new [` Set `](/apis/Classes/HH/Set/) by taking elements from the beginning of an existing [` Set `](/apis/Classes/HH/Set/):
 
 
 

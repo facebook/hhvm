@@ -297,7 +297,7 @@ function bar(): void {
 **Why it's bad:** Using functions or classes that have been marked as
 deprecated prevents cleanup of old APIs.
 
-**Suggestions:** [`__Deprecated`](/docs/hack/attributes/predefined-attributes#__deprecated) takes a message which describes why
+**Suggestions:** [`__Deprecated`](/hack/attributes/predefined-attributes#__deprecated) takes a message which describes why
 something is deprecated. Take a look at that message to learn the new
 API.
 

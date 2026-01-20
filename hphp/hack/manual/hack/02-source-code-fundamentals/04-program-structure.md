@@ -26,11 +26,11 @@ function main(): void {
 ```
 
 In this example, the start-up function is called `main`; however, that was an arbitrary choice of name; it could just as easily
-have been `run`, `do_it`, or `make_magic`. (What makes `main` the start-up function is the presence of the [attribute `__EntryPoint`](/docs/hack/attributes/predefined-attributes#__entrypoint).)
+have been `run`, `do_it`, or `make_magic`. (What makes `main` the start-up function is the presence of the [attribute `__EntryPoint`](/hack/attributes/predefined-attributes#__entrypoint).)
 
 ## Including Other Files
 
-A file can import another file via [inclusion](/docs/hack/source-code-fundamentals/script-inclusion).
+A file can import another file via [inclusion](/hack/source-code-fundamentals/script-inclusion).
 
 ## Legacy Files
 

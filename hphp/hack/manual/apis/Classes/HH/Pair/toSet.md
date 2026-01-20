@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a ` Set ` with the values of the current [` Pair `](/docs/apis/Classes/HH/Pair/)
+Returns a ` Set ` with the values of the current [` Pair `](/apis/Classes/HH/Pair/)
 
 
 
@@ -23,7 +23,7 @@ public function toSet(): Set<arraykey, mixed>;
 
 
 
-+ [` Set<arraykey, `](/docs/apis/Classes/HH/Set/)`` mixed> `` - a ``` Set ``` with the current values of the current [` Pair `](/docs/apis/Classes/HH/Pair/).
++ [` Set<arraykey, `](/apis/Classes/HH/Set/)`` mixed> `` - a ``` Set ``` with the current values of the current [` Pair `](/apis/Classes/HH/Pair/).
 
 
 
@@ -33,7 +33,7 @@ public function toSet(): Set<arraykey, mixed>;
 
 
 
-This example shows that converting a [` Pair `](/docs/apis/Classes/HH/Pair/) to a `` Set `` also removes duplicate values:
+This example shows that converting a [` Pair `](/apis/Classes/HH/Pair/) to a `` Set `` also removes duplicate values:
 
 
 
@@ -49,7 +49,7 @@ $s = $p->toSet();
 
 
 
-This example shows that converting a [` Pair `](/docs/apis/Classes/HH/Pair/) to a `` Set `` will throw a fatal error if the [` Pair `](/docs/apis/Classes/HH/Pair/) contains a value that's not a `` string `` or an ``` int ```:
+This example shows that converting a [` Pair `](/apis/Classes/HH/Pair/) to a `` Set `` will throw a fatal error if the [` Pair `](/apis/Classes/HH/Pair/) contains a value that's not a `` string `` or an ``` int ```:
 
 
 

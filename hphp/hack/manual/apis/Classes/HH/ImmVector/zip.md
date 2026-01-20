@@ -6,8 +6,8 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns an [` ImmVector `](/docs/apis/Classes/HH/ImmVector/) where each element is a [` Pair `](/docs/apis/Classes/HH/Pair/) that combines the
-element of the current [` ImmVector `](/docs/apis/Classes/HH/ImmVector/) and the provided [` Traversable `](/docs/apis/Interfaces/HH/Traversable/)
+Returns an [` ImmVector `](/apis/Classes/HH/ImmVector/) where each element is a [` Pair `](/apis/Classes/HH/Pair/) that combines the
+element of the current [` ImmVector `](/apis/Classes/HH/ImmVector/) and the provided [` Traversable `](/apis/Interfaces/HH/Traversable/)
 
 
 
@@ -21,8 +21,8 @@ public function zip<Tu>(
 
 
 
-If the number of elements of the current [` ImmVector `](/docs/apis/Classes/HH/ImmVector/) are not equal to the
-number of elements in the [` Traversable `](/docs/apis/Interfaces/HH/Traversable/), then only the combined elements
+If the number of elements of the current [` ImmVector `](/apis/Classes/HH/ImmVector/) are not equal to the
+number of elements in the [` Traversable `](/apis/Interfaces/HH/Traversable/), then only the combined elements
 up to and including the final element of the one with the least number of
 elements is included.
 
@@ -34,8 +34,8 @@ elements is included.
 
 
 
-+ [` Traversable<Tu> `](/docs/apis/Interfaces/HH/Traversable/)`` $traversable `` - The [` Traversable `](/docs/apis/Interfaces/HH/Traversable/) to use to combine with the
-  elements of the current [` ImmVector `](/docs/apis/Classes/HH/ImmVector/).
++ [` Traversable<Tu> `](/apis/Interfaces/HH/Traversable/)`` $traversable `` - The [` Traversable `](/apis/Interfaces/HH/Traversable/) to use to combine with the
+  elements of the current [` ImmVector `](/apis/Classes/HH/ImmVector/).
 
 
 
@@ -45,8 +45,8 @@ elements is included.
 
 
 
-* [` ImmVector<Pair<Tv, `](/docs/apis/Classes/HH/ImmVector/)`` Tu>> `` - An [` ImmVector `](/docs/apis/Classes/HH/ImmVector/) that combines the values of the current
-  [` ImmVector `](/docs/apis/Classes/HH/ImmVector/) with the provided [` Traversable `](/docs/apis/Interfaces/HH/Traversable/).
+* [` ImmVector<Pair<Tv, `](/apis/Classes/HH/ImmVector/)`` Tu>> `` - An [` ImmVector `](/apis/Classes/HH/ImmVector/) that combines the values of the current
+  [` ImmVector `](/apis/Classes/HH/ImmVector/) with the provided [` Traversable `](/apis/Interfaces/HH/Traversable/).
 
 
 
@@ -56,5 +56,5 @@ elements is included.
 
 
 
-See [` Vector::zip `](/docs/apis/Classes/HH/Vector/zip/#examples) for usage examples.
+See [` Vector::zip `](/apis/Classes/HH/Vector/zip/#examples) for usage examples.
 <!-- HHAPIDOC -->

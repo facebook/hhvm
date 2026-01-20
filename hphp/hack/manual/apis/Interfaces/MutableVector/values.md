@@ -6,8 +6,8 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a [` MutableVector `](/docs/apis/Interfaces/MutableVector/) containing the values of the current
-[` MutableVector `](/docs/apis/Interfaces/MutableVector/)
+Returns a [` MutableVector `](/apis/Interfaces/MutableVector/) containing the values of the current
+[` MutableVector `](/apis/Interfaces/MutableVector/)
 
 
 
@@ -19,7 +19,7 @@ public function values(): MutableVector<Tv>;
 
 
 
-Essentially a copy of the current [` MutableVector `](/docs/apis/Interfaces/MutableVector/).
+Essentially a copy of the current [` MutableVector `](/apis/Interfaces/MutableVector/).
 
 
 
@@ -34,6 +34,6 @@ This method is interchangeable with ` toVector() `.
 
 
 
-+ [` MutableVector<Tv> `](/docs/apis/Interfaces/MutableVector/) - a [` MutableVector `](/docs/apis/Interfaces/MutableVector/) containing the values of the current
-  [` MutableVector `](/docs/apis/Interfaces/MutableVector/).
++ [` MutableVector<Tv> `](/apis/Interfaces/MutableVector/) - a [` MutableVector `](/apis/Interfaces/MutableVector/) containing the values of the current
+  [` MutableVector `](/apis/Interfaces/MutableVector/).
 <!-- HHAPIDOC -->

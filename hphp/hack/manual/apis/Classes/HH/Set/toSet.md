@@ -23,7 +23,7 @@ public function toSet(): Set<Tv>;
 
 
 
-+ [` Set<Tv> `](/docs/apis/Classes/HH/Set/) - a `` Set `` that is a deep copy of the current ``` Set ```.
++ [` Set<Tv> `](/apis/Classes/HH/Set/) - a `` Set `` that is a deep copy of the current ``` Set ```.
 
 
 

@@ -6,8 +6,8 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a new [` ImmMap `](/docs/apis/Classes/HH/ImmMap/) with the keys that are in the current [` ImmMap `](/docs/apis/Classes/HH/ImmMap/), but
-not in the provided [` KeyedTraversable `](/docs/apis/Interfaces/HH/KeyedTraversable/)
+Returns a new [` ImmMap `](/apis/Classes/HH/ImmMap/) with the keys that are in the current [` ImmMap `](/apis/Classes/HH/ImmMap/), but
+not in the provided [` KeyedTraversable `](/apis/Interfaces/HH/KeyedTraversable/)
 
 
 
@@ -26,7 +26,7 @@ public function differenceByKey(
 
 
 
-+ [` KeyedTraversable<mixed, `](/docs/apis/Interfaces/HH/KeyedTraversable/)`` mixed> $traversable `` - The [` KeyedTraversable `](/docs/apis/Interfaces/HH/KeyedTraversable/) on which to compare the keys.
++ [` KeyedTraversable<mixed, `](/apis/Interfaces/HH/KeyedTraversable/)`` mixed> $traversable `` - The [` KeyedTraversable `](/apis/Interfaces/HH/KeyedTraversable/) on which to compare the keys.
 
 
 
@@ -36,8 +36,8 @@ public function differenceByKey(
 
 
 
-* [` ImmMap<Tk, `](/docs/apis/Classes/HH/ImmMap/)`` Tv> `` - An [` ImmMap `](/docs/apis/Classes/HH/ImmMap/) containing the keys (and associated values) of the
-  current [` ImmMap `](/docs/apis/Classes/HH/ImmMap/) that are not in the [` KeyedTraversable `](/docs/apis/Interfaces/HH/KeyedTraversable/).
+* [` ImmMap<Tk, `](/apis/Classes/HH/ImmMap/)`` Tv> `` - An [` ImmMap `](/apis/Classes/HH/ImmMap/) containing the keys (and associated values) of the
+  current [` ImmMap `](/apis/Classes/HH/ImmMap/) that are not in the [` KeyedTraversable `](/apis/Interfaces/HH/KeyedTraversable/).
 
 
 
@@ -47,5 +47,5 @@ public function differenceByKey(
 
 
 
-See [`Map::differenceByKey`](/docs/apis/Classes/HH/Map/differenceByKey/#examples) for usage examples.
+See [`Map::differenceByKey`](/apis/Classes/HH/Map/differenceByKey/#examples) for usage examples.
 <!-- HHAPIDOC -->

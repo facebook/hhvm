@@ -27,12 +27,12 @@ interface MysqlRow implements Countable, IteratorAggregate<mixed>, HH\KeyedTrave
 
 
 
-+ [` ->at(mixed $field): ?mixed `](/docs/apis/Interfaces/MysqlRow/at/)
-+ [` ->count(): int `](/docs/apis/Interfaces/MysqlRow/count/)
-+ [` ->fieldType(mixed $field): int `](/docs/apis/Interfaces/MysqlRow/fieldType/)
-+ [` ->getFieldAsDouble(mixed $field): float `](/docs/apis/Interfaces/MysqlRow/getFieldAsDouble/)
-+ [` ->getFieldAsInt(mixed $field): int `](/docs/apis/Interfaces/MysqlRow/getFieldAsInt/)
-+ [` ->getFieldAsString(mixed $field): string `](/docs/apis/Interfaces/MysqlRow/getFieldAsString/)
-+ [` ->getIterator(): KeyedIterator<string, mixed> `](/docs/apis/Interfaces/MysqlRow/getIterator/)
-+ [` ->isNull(mixed $field): bool `](/docs/apis/Interfaces/MysqlRow/isNull/)
++ [` ->at(mixed $field): ?mixed `](/apis/Interfaces/MysqlRow/at/)
++ [` ->count(): int `](/apis/Interfaces/MysqlRow/count/)
++ [` ->fieldType(mixed $field): int `](/apis/Interfaces/MysqlRow/fieldType/)
++ [` ->getFieldAsDouble(mixed $field): float `](/apis/Interfaces/MysqlRow/getFieldAsDouble/)
++ [` ->getFieldAsInt(mixed $field): int `](/apis/Interfaces/MysqlRow/getFieldAsInt/)
++ [` ->getFieldAsString(mixed $field): string `](/apis/Interfaces/MysqlRow/getFieldAsString/)
++ [` ->getIterator(): KeyedIterator<string, mixed> `](/apis/Interfaces/MysqlRow/getIterator/)
++ [` ->isNull(mixed $field): bool `](/apis/Interfaces/MysqlRow/isNull/)
 <!-- HHAPIDOC -->

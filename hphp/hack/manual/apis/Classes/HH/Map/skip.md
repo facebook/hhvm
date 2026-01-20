@@ -6,8 +6,8 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a [` Map `](/docs/apis/Classes/HH/Map/) containing the values after the `` n ``-th element of the
-current [` Map `](/docs/apis/Classes/HH/Map/)
+Returns a [` Map `](/apis/Classes/HH/Map/) containing the values after the `` n ``-th element of the
+current [` Map `](/apis/Classes/HH/Map/)
 
 
 
@@ -21,7 +21,7 @@ public function skip(
 
 
 
-The returned [` Map `](/docs/apis/Classes/HH/Map/) will always be a proper subset of the current [` Map `](/docs/apis/Classes/HH/Map/).
+The returned [` Map `](/apis/Classes/HH/Map/) will always be a proper subset of the current [` Map `](/apis/Classes/HH/Map/).
 
 
 
@@ -37,7 +37,7 @@ The returned [` Map `](/docs/apis/Classes/HH/Map/) will always be a proper subse
 
 
 + ` int $n ` - The last element to be skipped; the `` $n+1 `` element will be the
-  first one in the returned [` Map `](/docs/apis/Classes/HH/Map/).
+  first one in the returned [` Map `](/apis/Classes/HH/Map/).
 
 
 
@@ -47,7 +47,7 @@ The returned [` Map `](/docs/apis/Classes/HH/Map/) will always be a proper subse
 
 
 
-* [` Map<Tk, `](/docs/apis/Classes/HH/Map/)`` Tv> `` - A [` Map `](/docs/apis/Classes/HH/Map/) that is a proper subset of the current [` Map `](/docs/apis/Classes/HH/Map/) containing
+* [` Map<Tk, `](/apis/Classes/HH/Map/)`` Tv> `` - A [` Map `](/apis/Classes/HH/Map/) that is a proper subset of the current [` Map `](/apis/Classes/HH/Map/) containing
   values after the specified `` n ``-th element.
 
 

@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns an [` ImmSet `](/docs/apis/Classes/HH/ImmSet/) containing the values of the current [` ImmSet `](/docs/apis/Classes/HH/ImmSet/) that
+Returns an [` ImmSet `](/apis/Classes/HH/ImmSet/) containing the values of the current [` ImmSet `](/apis/Classes/HH/ImmSet/) that
 meet a supplied condition applied to its "keys" and values
 
 
@@ -21,15 +21,15 @@ public function filterWithKey(
 
 
 
-Since [` ImmSet `](/docs/apis/Classes/HH/ImmSet/)s don't have keys, the callback uses the values as the keys
+Since [` ImmSet `](/apis/Classes/HH/ImmSet/)s don't have keys, the callback uses the values as the keys
 as well.
 
 
 
 
 Only values that meet a certain criteria are affected by a call to
-[` filterWithKey() `](/docs/apis/Classes/HH/ImmSet/filterWithKey/), while all values are affected by a call to
-[` mapWithKey() `](/docs/apis/Classes/HH/ImmSet/mapWithKey/).
+[` filterWithKey() `](/apis/Classes/HH/ImmSet/filterWithKey/), while all values are affected by a call to
+[` mapWithKey() `](/apis/Classes/HH/ImmSet/mapWithKey/).
 
 
 
@@ -49,8 +49,8 @@ Only values that meet a certain criteria are affected by a call to
 
 
 
-* [` ImmSet<Tv> `](/docs/apis/Classes/HH/ImmSet/) - an [` ImmSet `](/docs/apis/Classes/HH/ImmSet/) containing the values after a user-specified
-  condition is applied to the values of the current [` ImmSet `](/docs/apis/Classes/HH/ImmSet/).
+* [` ImmSet<Tv> `](/apis/Classes/HH/ImmSet/) - an [` ImmSet `](/apis/Classes/HH/ImmSet/) containing the values after a user-specified
+  condition is applied to the values of the current [` ImmSet `](/apis/Classes/HH/ImmSet/).
 
 
 
@@ -60,5 +60,5 @@ Only values that meet a certain criteria are affected by a call to
 
 
 
-See [` Set::filterWithKey `](/docs/apis/Classes/HH/Set/filterWithKey) for usage examples.
+See [` Set::filterWithKey `](/apis/Classes/HH/Set/filterWithKey) for usage examples.
 <!-- HHAPIDOC -->

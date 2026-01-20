@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Checks if the current [` ImmVector `](/docs/apis/Classes/HH/ImmVector/) is empty
+Checks if the current [` ImmVector `](/apis/Classes/HH/ImmVector/) is empty
 
 
 
@@ -23,7 +23,7 @@ public function isEmpty(): bool;
 
 
 
-+ ` bool ` - `` true `` if the current [` ImmVector `](/docs/apis/Classes/HH/ImmVector/) is empty; `` false `` otherwise.
++ ` bool ` - `` true `` if the current [` ImmVector `](/apis/Classes/HH/ImmVector/) is empty; `` false `` otherwise.
 
 
 
@@ -33,5 +33,5 @@ public function isEmpty(): bool;
 
 
 
-See [` Vector::isEmpty `](/docs/apis/Classes/HH/Vector/isEmpty/#examples) for usage examples.
+See [` Vector::isEmpty `](/apis/Classes/HH/Vector/isEmpty/#examples) for usage examples.
 <!-- HHAPIDOC -->

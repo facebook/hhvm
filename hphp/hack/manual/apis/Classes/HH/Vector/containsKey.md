@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Determines if the specified key is in the current [` Vector `](/docs/apis/Classes/HH/Vector/)
+Determines if the specified key is in the current [` Vector `](/apis/Classes/HH/Vector/)
 
 
 
@@ -25,7 +25,7 @@ public function containsKey(
 
 
 
-+ [Constraints](</docs/hack/generics/type-constraints>)
++ [Constraints](</hack/generics/type-constraints>)
 
 
 
@@ -48,7 +48,7 @@ public function containsKey(
 
 
 
-- ` bool ` - `` true `` if the specified key is present in the current [` Vector `](/docs/apis/Classes/HH/Vector/);
+- ` bool ` - `` true `` if the specified key is present in the current [` Vector `](/apis/Classes/HH/Vector/);
   returns `` false `` otherwise.
 
 

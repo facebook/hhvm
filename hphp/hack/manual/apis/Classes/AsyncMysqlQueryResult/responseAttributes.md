@@ -26,5 +26,5 @@ public function responseAttributes(): Map<string>;
 
 
 
-+ [`Map<string>`](/docs/apis/Classes/HH/Map/) - A `Map<string, string>` of the response attributes from MySQL
++ [`Map<string>`](/apis/Classes/HH/Map/) - A `Map<string, string>` of the response attributes from MySQL
 <!-- HHAPIDOC -->

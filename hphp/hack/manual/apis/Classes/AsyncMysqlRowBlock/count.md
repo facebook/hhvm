@@ -33,7 +33,7 @@ public function count(): int;
 
 
 
-The following example shows how to use [` AsyncMysqlRowBlock::count `](/docs/apis/Classes/AsyncMysqlRowBlock/count/) to get the number of rows in the given row block.
+The following example shows how to use [` AsyncMysqlRowBlock::count `](/apis/Classes/AsyncMysqlRowBlock/count/) to get the number of rows in the given row block.
 
 
 

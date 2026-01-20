@@ -7,7 +7,7 @@ the Hack LSP instead for complete and up-to-date information.
 :::
 
 Returns an immutable, integer-keyed map (` ImmMap `) based on the values of
-the current [` Vector `](/docs/apis/Classes/HH/Vector/)
+the current [` Vector `](/apis/Classes/HH/Vector/)
 
 
 
@@ -24,8 +24,8 @@ public function toImmMap(): ImmMap<int, Tv>;
 
 
 
-+ [` ImmMap<int, `](/docs/apis/Classes/HH/ImmMap/)`` Tv> `` - An ``` ImmMap ``` that has the integer keys and associated values
-  of the current [` Vector `](/docs/apis/Classes/HH/Vector/).
++ [` ImmMap<int, `](/apis/Classes/HH/ImmMap/)`` Tv> `` - An ``` ImmMap ``` that has the integer keys and associated values
+  of the current [` Vector `](/apis/Classes/HH/Vector/).
 
 
 

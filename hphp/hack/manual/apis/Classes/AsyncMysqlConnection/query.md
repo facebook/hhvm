@@ -29,13 +29,13 @@ use this method. It takes a raw string query that will be executed as-is.
 
 
 
-You may want to call [` escapeString() `](/docs/apis/Classes/AsyncMysqlConnection/escapeString/) to ensure that any queries out of
+You may want to call [` escapeString() `](/apis/Classes/AsyncMysqlConnection/escapeString/) to ensure that any queries out of
 your direct control are safe.
 
 
 
 
-We strongly recommend using [` queryf() `](/docs/apis/Classes/AsyncMysqlConnection/queryf/) instead in all cases, which
+We strongly recommend using [` queryf() `](/apis/Classes/AsyncMysqlConnection/queryf/) instead in all cases, which
 automatically escapes parameters.
 
 
@@ -60,8 +60,8 @@ automatically escapes parameters.
 
 
 
-* [` Awaitable<AsyncMysqlQueryResult> `](/docs/apis/Classes/HH/Awaitable/) - an [` Awaitable `](/docs/apis/Classes/HH/Awaitable/) representing the result of your query. Use
-  `` await `` or ``` join ``` to get the actual [` AsyncMysqlQueryResult `](/docs/apis/Classes/AsyncMysqlQueryResult/)
+* [` Awaitable<AsyncMysqlQueryResult> `](/apis/Classes/HH/Awaitable/) - an [` Awaitable `](/apis/Classes/HH/Awaitable/) representing the result of your query. Use
+  `` await `` or ``` join ``` to get the actual [` AsyncMysqlQueryResult `](/apis/Classes/AsyncMysqlQueryResult/)
   object.
 
 
@@ -72,7 +72,7 @@ automatically escapes parameters.
 
 
 
-The following example shows a basic usage of [` AsyncMysqlConnection::query `](/docs/apis/Classes/AsyncMysqlConnection/query/). First you get a connection from an [` AsyncMysqlConnectionPool `](/docs/apis/Classes/AsyncMysqlConnectionPool/), then you can make the query.
+The following example shows a basic usage of [` AsyncMysqlConnection::query `](/apis/Classes/AsyncMysqlConnection/query/). First you get a connection from an [` AsyncMysqlConnectionPool `](/apis/Classes/AsyncMysqlConnectionPool/), then you can make the query.
 
 
 

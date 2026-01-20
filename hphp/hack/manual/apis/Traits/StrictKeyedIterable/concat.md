@@ -20,7 +20,7 @@ public function concat<Tu super Tv>(
 
 
 
-+ [` Traversable<Tu> `](/docs/apis/Interfaces/HH/Traversable/)`` $traversable ``
++ [` Traversable<Tu> `](/apis/Interfaces/HH/Traversable/)`` $traversable ``
 
 
 
@@ -30,5 +30,5 @@ public function concat<Tu super Tv>(
 
 
 
-* [` Iterable<Tu> `](/docs/apis/Interfaces/HH/Iterable/)
+* [` Iterable<Tu> `](/apis/Interfaces/HH/Iterable/)
 <!-- HHAPIDOC -->

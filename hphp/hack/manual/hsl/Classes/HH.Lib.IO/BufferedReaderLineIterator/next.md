@@ -18,5 +18,5 @@ public function next(): Awaitable<?(mixed, string)>;
 
 
 
-+ [` Awaitable<?(mixed, `](/docs/apis/Classes/HH/Awaitable/)`` string)> ``
++ [` Awaitable<?(mixed, `](/apis/Classes/HH/Awaitable/)`` string)> ``
 <!-- HHAPIDOC -->

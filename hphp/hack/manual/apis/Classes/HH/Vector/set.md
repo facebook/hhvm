@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Stores a value into the current [` Vector `](/docs/apis/Classes/HH/Vector/) with the specified key,
+Stores a value into the current [` Vector `](/apis/Classes/HH/Vector/) with the specified key,
 overwriting the previous value associated with the key
 
 
@@ -23,19 +23,19 @@ public function set(
 
 
 If the key is not present, an exception is thrown. If you want to add
-a value even if the key is not present, use [` add() `](/docs/apis/Classes/HH/Vector/add/).
+a value even if the key is not present, use [` add() `](/apis/Classes/HH/Vector/add/).
 
 
 
 
 ` $vec->set($k,$v) ` is semantically equivalent to `` $vec[$k] = $v `` (except
-that [` set() `](/docs/apis/Classes/HH/Vector/set/) returns the current [` Vector `](/docs/apis/Classes/HH/Vector/)).
+that [` set() `](/apis/Classes/HH/Vector/set/) returns the current [` Vector `](/apis/Classes/HH/Vector/)).
 
 
 
 
-Future changes made to the current [` Vector `](/docs/apis/Classes/HH/Vector/) ARE reflected in the
-returned [` Vector `](/docs/apis/Classes/HH/Vector/), and vice-versa.
+Future changes made to the current [` Vector `](/apis/Classes/HH/Vector/) ARE reflected in the
+returned [` Vector `](/apis/Classes/HH/Vector/), and vice-versa.
 
 
 
@@ -56,7 +56,7 @@ returned [` Vector `](/docs/apis/Classes/HH/Vector/), and vice-versa.
 
 
 
-* [` Vector<Tv> `](/docs/apis/Classes/HH/Vector/) - Returns itself.
+* [` Vector<Tv> `](/apis/Classes/HH/Vector/) - Returns itself.
 
 
 
@@ -66,7 +66,7 @@ returned [` Vector `](/docs/apis/Classes/HH/Vector/), and vice-versa.
 
 
 
-Since [` Vector::set() `](/docs/apis/Classes/HH/Vector/set/) returns a [shallow copy](<https://en.wikipedia.org/wiki/Object_copying#Shallow_copy>) of ` $v ` itself, you can chain a bunch of [` set() `](/docs/apis/Classes/HH/Vector/set/) calls together.
+Since [` Vector::set() `](/apis/Classes/HH/Vector/set/) returns a [shallow copy](<https://en.wikipedia.org/wiki/Object_copying#Shallow_copy>) of ` $v ` itself, you can chain a bunch of [` set() `](/apis/Classes/HH/Vector/set/) calls together.
 
 
 

@@ -33,7 +33,7 @@ For a case-insensitive check, see ` Str\starts_with_ci() `.
 
 
 
-+ [String](</docs/hack/built-in-types/string>)
++ [String](</hack/built-in-types/string>)
 
 
 

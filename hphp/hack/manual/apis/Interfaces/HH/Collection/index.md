@@ -17,8 +17,8 @@ the Hack LSP instead for complete and up-to-date information.
 
 Assuming you want the ability to clear out your collection, you would
 implement this (or a child of this) interface. Otherwise, you can implement
-[` OutputCollection `](/docs/apis/Interfaces/OutputCollection/) only. If your collection to be immutable, implement
-[` ConstCollection `](/docs/apis/Interfaces/ConstCollection/) only instead.
+[` OutputCollection `](/apis/Interfaces/OutputCollection/) only. If your collection to be immutable, implement
+[` ConstCollection `](/apis/Interfaces/ConstCollection/) only instead.
 
 
 
@@ -28,8 +28,8 @@ implement this (or a child of this) interface. Otherwise, you can implement
 
 
 
-+ [Introduction](</docs/hack/arrays-and-collections/introduction>)
-+ [Interfaces](</docs/hack/arrays-and-collections/introduction>)
++ [Introduction](</hack/arrays-and-collections/introduction>)
++ [Interfaces](</hack/arrays-and-collections/introduction>)
 
 
 
@@ -56,7 +56,7 @@ interface Collection implements \ConstCollection<Te>, \OutputCollection<Te> {...
 
 
 
-* [` ->clear() `](/docs/apis/Interfaces/HH/Collection/clear/)\
+* [` ->clear() `](/apis/Interfaces/HH/Collection/clear/)\
   Removes all items from the collection
 
 
@@ -65,37 +65,23 @@ interface Collection implements \ConstCollection<Te>, \OutputCollection<Te> {...
 
 
 
-### Public Methods ([` ConstCollection `](/docs/apis/Interfaces/ConstCollection/))
+### Public Methods ([` ConstCollection `](/apis/Interfaces/ConstCollection/))
 
 
 
 
-- [` ->count(): int `](/docs/apis/Interfaces/ConstCollection/count/)\
+- [` ->count(): int `](/apis/Interfaces/ConstCollection/count/)\
   Get the number of items in the collection
 
-- [` ->isEmpty(): bool `](/docs/apis/Interfaces/ConstCollection/isEmpty/)\
+- [` ->isEmpty(): bool `](/apis/Interfaces/ConstCollection/isEmpty/)\
   Is the collection empty?
 
-- [` ->items(): HH\Iterable<Te> `](/docs/apis/Interfaces/ConstCollection/items/)\
+- [` ->items(): HH\Iterable<Te> `](/apis/Interfaces/ConstCollection/items/)\
   Get access to the items in the collection
 
-- [` ->toDArray(): darray `](/docs/apis/Interfaces/ConstCollection/toDArray/)
+- [` ->toDArray(): darray `](/apis/Interfaces/ConstCollection/toDArray/)
 
-- [` ->toVArray(): varray `](/docs/apis/Interfaces/ConstCollection/toVArray/)
-
-
-
-
-
-
-
-
-### Public Methods ([` IPureStringishObject `](/docs/apis/Interfaces/IPureStringishObject/))
-
-
-
-
-+ [` ->__toString(): string `](/docs/apis/Interfaces/IPureStringishObject/__toString/)
+- [` ->toVArray(): varray `](/apis/Interfaces/ConstCollection/toVArray/)
 
 
 
@@ -103,14 +89,28 @@ interface Collection implements \ConstCollection<Te>, \OutputCollection<Te> {...
 
 
 
-### Public Methods ([` OutputCollection `](/docs/apis/Interfaces/OutputCollection/))
+
+### Public Methods ([` IPureStringishObject `](/apis/Interfaces/IPureStringishObject/))
 
 
 
 
-* [` ->add(Te $e): this `](/docs/apis/Interfaces/OutputCollection/add/)\
++ [` ->__toString(): string `](/apis/Interfaces/IPureStringishObject/__toString/)
+
+
+
+
+
+
+
+### Public Methods ([` OutputCollection `](/apis/Interfaces/OutputCollection/))
+
+
+
+
+* [` ->add(Te $e): this `](/apis/Interfaces/OutputCollection/add/)\
   Add a value to the collection and return the collection itself
-* [` ->addAll(?Traversable<Te> $traversable): this `](/docs/apis/Interfaces/OutputCollection/addAll/)\
-  For every element in the provided [` Traversable `](/docs/apis/Interfaces/HH/Traversable/), append a value into the
+* [` ->addAll(?Traversable<Te> $traversable): this `](/apis/Interfaces/OutputCollection/addAll/)\
+  For every element in the provided [` Traversable `](/apis/Interfaces/HH/Traversable/), append a value into the
   current collection
 <!-- HHAPIDOC -->

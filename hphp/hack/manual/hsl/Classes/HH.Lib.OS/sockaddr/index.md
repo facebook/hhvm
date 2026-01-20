@@ -34,6 +34,6 @@ abstract class sockaddr {...}
 
 
 
-+ [` ->getFamily(): AddressFamily `](/docs/hsl/Classes/HH.Lib.OS/sockaddr/getFamily/)\
++ [` ->getFamily(): AddressFamily `](/hsl/Classes/HH.Lib.OS/sockaddr/getFamily/)\
   Get the address family of the socket
 <!-- HHAPIDOC -->

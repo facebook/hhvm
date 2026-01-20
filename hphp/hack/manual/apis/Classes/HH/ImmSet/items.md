@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns an Iterable view of the current [` ImmSet `](/docs/apis/Classes/HH/ImmSet/)
+Returns an Iterable view of the current [` ImmSet `](/apis/Classes/HH/ImmSet/)
 
 
 
@@ -18,8 +18,8 @@ public function items(): Iterable<Tv>;
 
 
 
-The [` Iterable `](/docs/apis/Interfaces/HH/Iterable/) returned is one that produces the values from the current
-[` ImmSet `](/docs/apis/Classes/HH/ImmSet/).
+The [` Iterable `](/apis/Interfaces/HH/Iterable/) returned is one that produces the values from the current
+[` ImmSet `](/apis/Classes/HH/ImmSet/).
 
 
 
@@ -29,7 +29,7 @@ The [` Iterable `](/docs/apis/Interfaces/HH/Iterable/) returned is one that prod
 
 
 
-+ [` Iterable<Tv> `](/docs/apis/Interfaces/HH/Iterable/) - The [` Iterable `](/docs/apis/Interfaces/HH/Iterable/) view of the current [` ImmSet `](/docs/apis/Classes/HH/ImmSet/).
++ [` Iterable<Tv> `](/apis/Interfaces/HH/Iterable/) - The [` Iterable `](/apis/Interfaces/HH/Iterable/) view of the current [` ImmSet `](/apis/Classes/HH/ImmSet/).
 
 
 
@@ -39,5 +39,5 @@ The [` Iterable `](/docs/apis/Interfaces/HH/Iterable/) returned is one that prod
 
 
 
-See [` Set::items `](/docs/apis/Classes/HH/Set/items/#examples) for usage examples.
+See [` Set::items `](/apis/Classes/HH/Set/items/#examples) for usage examples.
 <!-- HHAPIDOC -->

@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns the last key in the current [` Map `](/docs/apis/Classes/HH/Map/)
+Returns the last key in the current [` Map `](/apis/Classes/HH/Map/)
 
 
 
@@ -23,7 +23,7 @@ public function lastKey(): ?Tk;
 
 
 
-+ ` ?Tk ` - The last key in the current [` Map `](/docs/apis/Classes/HH/Map/), or `` null `` if the [` Map `](/docs/apis/Classes/HH/Map/) is
++ ` ?Tk ` - The last key in the current [` Map `](/apis/Classes/HH/Map/), or `` null `` if the [` Map `](/apis/Classes/HH/Map/) is
   empty.
 
 
@@ -34,7 +34,7 @@ public function lastKey(): ?Tk;
 
 
 
-This example shows how [` lastKey() `](/docs/apis/Classes/HH/Map/lastKey/) can be used even when a [` Map `](/docs/apis/Classes/HH/Map/) may be empty:
+This example shows how [` lastKey() `](/apis/Classes/HH/Map/lastKey/) can be used even when a [` Map `](/apis/Classes/HH/Map/) may be empty:
 
 
 

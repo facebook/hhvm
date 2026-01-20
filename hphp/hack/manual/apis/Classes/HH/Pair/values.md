@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns an [` ImmVector `](/docs/apis/Classes/HH/ImmVector/) containing the values of the current [` Pair `](/docs/apis/Classes/HH/Pair/)
+Returns an [` ImmVector `](/apis/Classes/HH/ImmVector/) containing the values of the current [` Pair `](/apis/Classes/HH/Pair/)
 
 
 
@@ -18,7 +18,7 @@ public function values(): ImmVector<mixed>;
 
 
 
-This method is interchangeable with [` toImmVector() `](/docs/apis/Classes/HH/Pair/toImmVector/).
+This method is interchangeable with [` toImmVector() `](/apis/Classes/HH/Pair/toImmVector/).
 
 
 
@@ -28,7 +28,7 @@ This method is interchangeable with [` toImmVector() `](/docs/apis/Classes/HH/Pa
 
 
 
-+ [` ImmVector<mixed> `](/docs/apis/Classes/HH/ImmVector/) - an [` ImmVector `](/docs/apis/Classes/HH/ImmVector/) containing the values of the current [` Pair `](/docs/apis/Classes/HH/Pair/).
++ [` ImmVector<mixed> `](/apis/Classes/HH/ImmVector/) - an [` ImmVector `](/apis/Classes/HH/ImmVector/) containing the values of the current [` Pair `](/apis/Classes/HH/Pair/).
 
 
 

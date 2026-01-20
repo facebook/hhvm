@@ -23,7 +23,7 @@ public function toImmMap(): ImmMap<Tk, Tv>;
 
 
 
-+ [` ImmMap<Tk, `](/docs/apis/Classes/HH/ImmMap/)`` Tv> `` - an ``` ImmMap ``` that is a copy of this ```` Map ````.
++ [` ImmMap<Tk, `](/apis/Classes/HH/ImmMap/)`` Tv> `` - an ``` ImmMap ``` that is a copy of this ```` Map ````.
 
 
 

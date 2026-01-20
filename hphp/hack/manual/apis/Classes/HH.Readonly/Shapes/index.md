@@ -29,11 +29,11 @@ abstract final class Shapes {...}
 
 
 
-+ [` ::at(shape() $shape, arraykey $index): mixed `](/docs/apis/Classes/HH.Readonly/Shapes/at/)\
++ [` ::at(shape() $shape, arraykey $index): mixed `](/apis/Classes/HH.Readonly/Shapes/at/)\
   Returns the value of the field $index of a readonly $shape,
   throws if the field is missing
-+ [` ::idx(shape(...) $shape, arraykey $index, mixed $default = NULL): mixed `](/docs/apis/Classes/HH.Readonly/Shapes/idx/)\
-  Use [` Readonly\Shapes::idx `](/docs/apis/Classes/HH.Readonly/Shapes/idx/) to retrieve a field value in a shape, when the key may or may not exist
-+ [` ::toArray(shape() $shape): darray<arraykey, mixed> `](/docs/apis/Classes/HH.Readonly/Shapes/toArray/)
-+ [` ::toDict(shape() $shape): dict<arraykey, mixed> `](/docs/apis/Classes/HH.Readonly/Shapes/toDict/)
++ [` ::idx(shape(...) $shape, arraykey $index, mixed $default = NULL): mixed `](/apis/Classes/HH.Readonly/Shapes/idx/)\
+  Use [` Readonly\Shapes::idx `](/apis/Classes/HH.Readonly/Shapes/idx/) to retrieve a field value in a shape, when the key may or may not exist
++ [` ::toArray(shape() $shape): darray<arraykey, mixed> `](/apis/Classes/HH.Readonly/Shapes/toArray/)
++ [` ::toDict(shape() $shape): dict<arraykey, mixed> `](/apis/Classes/HH.Readonly/Shapes/toDict/)
 <!-- HHAPIDOC -->

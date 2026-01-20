@@ -18,5 +18,5 @@ public function nextConnectionAsync(): Awaitable<HH\Lib\TCP\CloseableSocket>;
 
 
 
-+ [` Awaitable<HH\Lib\TCP\CloseableSocket> `](/docs/apis/Classes/HH/Awaitable/)
++ [` Awaitable<HH\Lib\TCP\CloseableSocket> `](/apis/Classes/HH/Awaitable/)
 <!-- HHAPIDOC -->

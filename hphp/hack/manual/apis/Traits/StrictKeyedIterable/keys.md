@@ -18,5 +18,5 @@ public function keys(): Iterable<Tk>;
 
 
 
-+ [` Iterable<Tk> `](/docs/apis/Interfaces/HH/Iterable/)
++ [` Iterable<Tk> `](/apis/Interfaces/HH/Iterable/)
 <!-- HHAPIDOC -->

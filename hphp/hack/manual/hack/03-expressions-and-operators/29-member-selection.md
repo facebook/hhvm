@@ -25,7 +25,7 @@ function main(): void {
 
 ## Null Safe Member Access
 
-The operator `?->` allows access to objects that [may be null](/docs/hack/types/nullable-types).
+The operator `?->` allows access to objects that [may be null](/hack/types/nullable-types).
 
 If the value is null, the result is null. Otherwise, `?->` behaves
 like `->`.
@@ -41,4 +41,4 @@ null. `$x?->foo(bar())` will call `bar()` even if `$x` is null.
 
 ## XHP Attribute Access
 
-The [operator `->:`](/docs/hack/expressions-and-operators/XHP-attribute-selection) is used for accessing XHP attributes.
+The [operator `->:`](/hack/expressions-and-operators/XHP-attribute-selection) is used for accessing XHP attributes.

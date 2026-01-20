@@ -1,7 +1,7 @@
 # Input and Output
 
 A standard API for input and output, known as "HSL IO", is included in the
-[Hack Standard Library (HSL)](/docs/hack/getting-started/hack-standard-library/).
+[Hack Standard Library (HSL)](/hack/getting-started/hack-standard-library/).
 
 <span data-nosnippet class="fbOnly">HSL IO should not yet be used in Facebook www; you want
 the Facebook-specific `Filesystem` class instead. Post in the usual groups

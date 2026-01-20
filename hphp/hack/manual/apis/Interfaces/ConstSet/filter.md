@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a [` ConstSet `](/docs/apis/Interfaces/ConstSet/) containing the values of the current [` ConstSet `](/docs/apis/Interfaces/ConstSet/) that
+Returns a [` ConstSet `](/apis/Interfaces/ConstSet/) containing the values of the current [` ConstSet `](/apis/Interfaces/ConstSet/) that
 meet a supplied condition applied to each value
 
 
@@ -22,7 +22,7 @@ public function filter(
 
 
 Only values that meet a certain criteria are affected by a call to
-[` filter() `](/docs/apis/Interfaces/ConstSet/filter/), while all values are affected by a call to [` map() `](/docs/apis/Interfaces/ConstSet/map/).
+[` filter() `](/apis/Interfaces/ConstSet/filter/), while all values are affected by a call to [` map() `](/apis/Interfaces/ConstSet/map/).
 
 
 
@@ -32,7 +32,7 @@ Only values that meet a certain criteria are affected by a call to
 
 
 
-+ [Examples](</docs/hack/arrays-and-collections/introduction>)
++ [Examples](</hack/arrays-and-collections/introduction>)
 
 
 
@@ -46,7 +46,7 @@ Only values that meet a certain criteria are affected by a call to
 
 
 * ` (function(Tv): bool) $fn ` - The callback containing the condition to apply to the
-  current [` ConstSet `](/docs/apis/Interfaces/ConstSet/) values.
+  current [` ConstSet `](/apis/Interfaces/ConstSet/) values.
 
 
 
@@ -56,6 +56,6 @@ Only values that meet a certain criteria are affected by a call to
 
 
 
-- [` ConstSet<Tv> `](/docs/apis/Interfaces/ConstSet/) - a [` ConstSet `](/docs/apis/Interfaces/ConstSet/) containing the values after a user-specified
+- [` ConstSet<Tv> `](/apis/Interfaces/ConstSet/) - a [` ConstSet `](/apis/Interfaces/ConstSet/) containing the values after a user-specified
   condition is applied.
 <!-- HHAPIDOC -->

@@ -30,7 +30,7 @@ failures happening on connect stage.
 
 
 
-+ [` Vector<string> `](/docs/apis/Classes/HH/Vector/) - a vector of strings containing a collection of the selected
++ [` Vector<string> `](/apis/Classes/HH/Vector/) - a vector of strings containing a collection of the selected
   cert extension values from the server certificate presented
   by MySQL.
 <!-- HHAPIDOC -->

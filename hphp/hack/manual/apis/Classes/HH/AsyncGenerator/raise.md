@@ -20,7 +20,7 @@ public function raise(
 
 
 
-You should always ` await ` the returned [` Awaitable `](/docs/apis/Classes/HH/Awaitable/) to get the actual
+You should always ` await ` the returned [` Awaitable `](/apis/Classes/HH/Awaitable/) to get the actual
 key/value tuple.
 
 
@@ -31,8 +31,8 @@ If ` null ` is returned, that means you have reached the end of iteration.
 
 
 
-You cannot call [` raise() `](/docs/apis/Classes/HH/AsyncGenerator/raise/) without having the value returned from a previous
-call to [` raise() `](/docs/apis/Classes/HH/AsyncGenerator/raise/), [` next() `](/docs/apis/Classes/HH/AsyncGenerator/next/), [` send() `](/docs/apis/Classes/HH/AsyncGenerator/send/), having first `` await ``ed.
+You cannot call [` raise() `](/apis/Classes/HH/AsyncGenerator/raise/) without having the value returned from a previous
+call to [` raise() `](/apis/Classes/HH/AsyncGenerator/raise/), [` next() `](/apis/Classes/HH/AsyncGenerator/next/), [` send() `](/apis/Classes/HH/AsyncGenerator/send/), having first `` await ``ed.
 
 
 
@@ -52,7 +52,7 @@ call to [` raise() `](/docs/apis/Classes/HH/AsyncGenerator/raise/), [` next() `]
 
 
 
-* [` Awaitable<?(Tk, `](/docs/apis/Classes/HH/Awaitable/)`` Tv)> `` - The [` Awaitable `](/docs/apis/Classes/HH/Awaitable/) that produced the yielded key/value tuple after
+* [` Awaitable<?(Tk, `](/apis/Classes/HH/Awaitable/)`` Tv)> `` - The [` Awaitable `](/apis/Classes/HH/Awaitable/) that produced the yielded key/value tuple after
   the exception is processed. What is returned is a tuple or
   `` null ``.
 <!-- HHAPIDOC -->

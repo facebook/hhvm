@@ -42,7 +42,7 @@ Space complexity: O(n), where n is the combined size of all the
 
 
 
-+ [` Traversable<Container<Tv>> `](/docs/apis/Interfaces/HH/Traversable/)`` $traversables ``
++ [` Traversable<Container<Tv>> `](/apis/Interfaces/HH/Traversable/)`` $traversables ``
 
 
 

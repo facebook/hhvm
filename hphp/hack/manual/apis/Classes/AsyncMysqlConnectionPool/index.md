@@ -28,9 +28,9 @@ already exists; this avoids the overhead of establishing a new connection.
 
 
 This is the *highly recommended* way to create connections to a MySQL
-client, as opposed to using the [` AsyncMysqlClient `](/docs/apis/Classes/AsyncMysqlClient/) class which does not give
+client, as opposed to using the [` AsyncMysqlClient `](/apis/Classes/AsyncMysqlClient/) class which does not give
 you nearly the flexibility. In fact, there is discussion about deprecating
-the [` AsyncMysqlClient `](/docs/apis/Classes/AsyncMysqlClient/) class all together.
+the [` AsyncMysqlClient `](/apis/Classes/AsyncMysqlClient/) class all together.
 
 
 
@@ -40,8 +40,8 @@ the [` AsyncMysqlClient `](/docs/apis/Classes/AsyncMysqlClient/) class all toget
 
 
 
-+ [Introduction](</docs/hack/asynchronous-operations/introduction>)
-+ [Extensions](</docs/hack/asynchronous-operations/extensions>)
++ [Introduction](</hack/asynchronous-operations/introduction>)
++ [Extensions](</hack/asynchronous-operations/extensions>)
 
 
 
@@ -66,12 +66,12 @@ class AsyncMysqlConnectionPool {...}
 
 
 
-* [` ->__construct(darray<string, mixed> $pool_options): void `](/docs/apis/Classes/AsyncMysqlConnectionPool/__construct/)\
+* [` ->__construct(darray<string, mixed> $pool_options): void `](/apis/Classes/AsyncMysqlConnectionPool/__construct/)\
   Create a pool of connections to access a MySQL client
-* [` ->connect(string $host, int $port, string $dbname, string $user, string $password, int $timeout_micros = -1, string $extra_key = '', ?MySSLContextProvider $ssl_provider = NULL, int $tcp_timeout_micros = 0, string $sni_server_name = '', string $server_cert_extensions = '', string $server_cert_values = ''): Awaitable<AsyncMysqlConnection> `](/docs/apis/Classes/AsyncMysqlConnectionPool/connect/)\
+* [` ->connect(string $host, int $port, string $dbname, string $user, string $password, int $timeout_micros = -1, string $extra_key = '', ?MySSLContextProvider $ssl_provider = NULL, int $tcp_timeout_micros = 0, string $sni_server_name = '', string $server_cert_extensions = '', string $server_cert_values = ''): Awaitable<AsyncMysqlConnection> `](/apis/Classes/AsyncMysqlConnectionPool/connect/)\
   Begin an async connection to a MySQL instance
-* [` ->connectAndQuery(Traversable<string, arraykey> $queries, string $host, int $port, string $dbname, string $user, string $password, AsyncMysqlConnectionOptions $conn_opts, string $extra_key = '', dict<string> $query_attributes = dict [ ]): Awaitable<(AsyncMysqlConnectResult, Vector<AsyncMysqlQueryResult>)> `](/docs/apis/Classes/AsyncMysqlConnectionPool/connectAndQuery/)
-* [` ->connectWithOpts(string $host, int $port, string $dbname, string $user, string $password, AsyncMysqlConnectionOptions $conn_options, string $extra_key = ''): Awaitable<AsyncMysqlConnection> `](/docs/apis/Classes/AsyncMysqlConnectionPool/connectWithOpts/)
-* [` ->getPoolStats(): darray<string, mixed> `](/docs/apis/Classes/AsyncMysqlConnectionPool/getPoolStats/)\
+* [` ->connectAndQuery(Traversable<string, arraykey> $queries, string $host, int $port, string $dbname, string $user, string $password, AsyncMysqlConnectionOptions $conn_opts, string $extra_key = '', dict<string> $query_attributes = dict [ ]): Awaitable<(AsyncMysqlConnectResult, Vector<AsyncMysqlQueryResult>)> `](/apis/Classes/AsyncMysqlConnectionPool/connectAndQuery/)
+* [` ->connectWithOpts(string $host, int $port, string $dbname, string $user, string $password, AsyncMysqlConnectionOptions $conn_options, string $extra_key = ''): Awaitable<AsyncMysqlConnection> `](/apis/Classes/AsyncMysqlConnectionPool/connectWithOpts/)
+* [` ->getPoolStats(): darray<string, mixed> `](/apis/Classes/AsyncMysqlConnectionPool/getPoolStats/)\
   Returns statistical information for the current pool
 <!-- HHAPIDOC -->

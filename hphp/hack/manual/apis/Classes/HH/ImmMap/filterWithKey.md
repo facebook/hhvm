@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns an [` ImmMap `](/docs/apis/Classes/HH/ImmMap/) containing the values of the current [` ImmMap `](/docs/apis/Classes/HH/ImmMap/) that
+Returns an [` ImmMap `](/apis/Classes/HH/ImmMap/) containing the values of the current [` ImmMap `](/apis/Classes/HH/ImmMap/) that
 meet a supplied condition applied to its keys and values
 
 
@@ -22,14 +22,14 @@ public function filterWithKey(
 
 
 Only keys and values that meet a certain criteria are affected by a call to
-[` filterWithKey() `](/docs/apis/Classes/HH/ImmMap/filterWithKey/), while all values are affected by a call to
-[` mapWithKey() `](/docs/apis/Classes/HH/ImmMap/mapWithKey/).
+[` filterWithKey() `](/apis/Classes/HH/ImmMap/filterWithKey/), while all values are affected by a call to
+[` mapWithKey() `](/apis/Classes/HH/ImmMap/mapWithKey/).
 
 
 
 
-The keys associated with the current [` ImmMap `](/docs/apis/Classes/HH/ImmMap/) remain unchanged in the
-returned [` ImmMap `](/docs/apis/Classes/HH/ImmMap/); the keys will be used in the filtering process only.
+The keys associated with the current [` ImmMap `](/apis/Classes/HH/ImmMap/) remain unchanged in the
+returned [` ImmMap `](/apis/Classes/HH/ImmMap/); the keys will be used in the filtering process only.
 
 
 
@@ -49,9 +49,9 @@ returned [` ImmMap `](/docs/apis/Classes/HH/ImmMap/); the keys will be used in t
 
 
 
-* [` ImmMap<Tk, `](/docs/apis/Classes/HH/ImmMap/)`` Tv> `` - an [` ImmMap `](/docs/apis/Classes/HH/ImmMap/) containing the values after a user-specified
+* [` ImmMap<Tk, `](/apis/Classes/HH/ImmMap/)`` Tv> `` - an [` ImmMap `](/apis/Classes/HH/ImmMap/) containing the values after a user-specified
   condition is applied to the keys and values of the current
-  [` ImmMap `](/docs/apis/Classes/HH/ImmMap/).
+  [` ImmMap `](/apis/Classes/HH/ImmMap/).
 
 
 
@@ -61,5 +61,5 @@ returned [` ImmMap `](/docs/apis/Classes/HH/ImmMap/); the keys will be used in t
 
 
 
-See [`Map::filterWithKey`](/docs/apis/Classes/HH/Map/filterWithKey/#examples) for usage examples.
+See [`Map::filterWithKey`](/apis/Classes/HH/Map/filterWithKey/#examples) for usage examples.
 <!-- HHAPIDOC -->

@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a [` MutableVector `](/docs/apis/Interfaces/MutableVector/) containing the keys of the current [` MutableMap `](/docs/apis/Interfaces/MutableMap/)
+Returns a [` MutableVector `](/apis/Interfaces/MutableVector/) containing the keys of the current [` MutableMap `](/apis/Interfaces/MutableMap/)
 
 
 
@@ -23,6 +23,6 @@ public function keys(): MutableVector<Tk>;
 
 
 
-+ [` MutableVector<Tk> `](/docs/apis/Interfaces/MutableVector/) - a [` MutableVector `](/docs/apis/Interfaces/MutableVector/) containing the keys of the current
-  [` MutableMap `](/docs/apis/Interfaces/MutableMap/).
++ [` MutableVector<Tk> `](/apis/Interfaces/MutableVector/) - a [` MutableVector `](/apis/Interfaces/MutableVector/) containing the keys of the current
+  [` MutableMap `](/apis/Interfaces/MutableMap/).
 <!-- HHAPIDOC -->

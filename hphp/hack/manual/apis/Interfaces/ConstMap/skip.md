@@ -6,8 +6,8 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a [` ConstMap `](/docs/apis/Interfaces/ConstMap/) containing the values after the `` n ``-th element of the
-current [` ConstMap `](/docs/apis/Interfaces/ConstMap/)
+Returns a [` ConstMap `](/apis/Interfaces/ConstMap/) containing the values after the `` n ``-th element of the
+current [` ConstMap `](/apis/Interfaces/ConstMap/)
 
 
 
@@ -21,8 +21,8 @@ public function skip(
 
 
 
-The returned [` ConstMap `](/docs/apis/Interfaces/ConstMap/) will always be a proper subset of the current
-[` ConstMap `](/docs/apis/Interfaces/ConstMap/).
+The returned [` ConstMap `](/apis/Interfaces/ConstMap/) will always be a proper subset of the current
+[` ConstMap `](/apis/Interfaces/ConstMap/).
 
 
 
@@ -38,7 +38,7 @@ The returned [` ConstMap `](/docs/apis/Interfaces/ConstMap/) will always be a pr
 
 
 + ` int $n ` - The last element to be skipped; the `` $n+1 `` element will be the
-  first one in the returned [` ConstMap `](/docs/apis/Interfaces/ConstMap/).
+  first one in the returned [` ConstMap `](/apis/Interfaces/ConstMap/).
 
 
 
@@ -48,6 +48,6 @@ The returned [` ConstMap `](/docs/apis/Interfaces/ConstMap/) will always be a pr
 
 
 
-* [` ConstMap<Tk, `](/docs/apis/Interfaces/ConstMap/)`` Tv> `` - A [` ConstMap `](/docs/apis/Interfaces/ConstMap/) that is a proper subset of the current [` ConstMap `](/docs/apis/Interfaces/ConstMap/)
+* [` ConstMap<Tk, `](/apis/Interfaces/ConstMap/)`` Tv> `` - A [` ConstMap `](/apis/Interfaces/ConstMap/) that is a proper subset of the current [` ConstMap `](/apis/Interfaces/ConstMap/)
   containing values after the specified `` n ``-th element.
 <!-- HHAPIDOC -->

@@ -6,8 +6,8 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a [` KeyedIterable `](/docs/apis/Interfaces/HH/KeyedIterable/) containing the values of the current
-[` KeyedIterable `](/docs/apis/Interfaces/HH/KeyedIterable/) starting after and including the first value that produces
+Returns a [` KeyedIterable `](/apis/Interfaces/HH/KeyedIterable/) containing the values of the current
+[` KeyedIterable `](/apis/Interfaces/HH/KeyedIterable/) starting after and including the first value that produces
 `` true `` when passed to the specified callback
 
 
@@ -22,8 +22,8 @@ public function skipWhile(
 
 
 
-The returned [` KeyedIterable `](/docs/apis/Interfaces/HH/KeyedIterable/) will always be a proper subset of the current
-[` KeyedIterable `](/docs/apis/Interfaces/HH/KeyedIterable/).
+The returned [` KeyedIterable `](/apis/Interfaces/HH/KeyedIterable/) will always be a proper subset of the current
+[` KeyedIterable `](/apis/Interfaces/HH/KeyedIterable/).
 
 
 
@@ -34,7 +34,7 @@ The returned [` KeyedIterable `](/docs/apis/Interfaces/HH/KeyedIterable/) will a
 
 
 + ` (function(Tv): bool) $fn ` - The callback used to determine the starting element for the
-  returned [` KeyedIterable `](/docs/apis/Interfaces/HH/KeyedIterable/).
+  returned [` KeyedIterable `](/apis/Interfaces/HH/KeyedIterable/).
 
 
 
@@ -44,6 +44,6 @@ The returned [` KeyedIterable `](/docs/apis/Interfaces/HH/KeyedIterable/) will a
 
 
 
-* [` KeyedIterable<Tk, `](/docs/apis/Interfaces/HH/KeyedIterable/)`` Tv> `` - A [` KeyedIterable `](/docs/apis/Interfaces/HH/KeyedIterable/) that is a proper subset of the current
-  [` KeyedIterable `](/docs/apis/Interfaces/HH/KeyedIterable/) starting after the callback returns `` true ``.
+* [` KeyedIterable<Tk, `](/apis/Interfaces/HH/KeyedIterable/)`` Tv> `` - A [` KeyedIterable `](/apis/Interfaces/HH/KeyedIterable/) that is a proper subset of the current
+  [` KeyedIterable `](/apis/Interfaces/HH/KeyedIterable/) starting after the callback returns `` true ``.
 <!-- HHAPIDOC -->

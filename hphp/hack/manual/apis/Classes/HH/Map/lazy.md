@@ -7,7 +7,7 @@ the Hack LSP instead for complete and up-to-date information.
 :::
 
 Returns a lazy, access elements only when needed view of the current
-[` Map `](/docs/apis/Classes/HH/Map/)
+[` Map `](/apis/Classes/HH/Map/)
 
 
 
@@ -19,9 +19,9 @@ public function lazy(): KeyedIterable<Tk, Tv>;
 
 
 
-Normally, memory is allocated for all of the elements of the [` Map `](/docs/apis/Classes/HH/Map/). With
+Normally, memory is allocated for all of the elements of the [` Map `](/apis/Classes/HH/Map/). With
 a lazy view, memory is allocated for an element only when needed or used
-in a calculation like in [` map() `](/docs/apis/Classes/HH/Map/map/) or [` filter() `](/docs/apis/Classes/HH/Map/filter/).
+in a calculation like in [` map() `](/apis/Classes/HH/Map/map/) or [` filter() `](/apis/Classes/HH/Map/filter/).
 
 
 
@@ -31,7 +31,7 @@ in a calculation like in [` map() `](/docs/apis/Classes/HH/Map/map/) or [` filte
 
 
 
-+ [Examples](</docs/hack/arrays-and-collections/introduction>)
++ [Examples](</hack/arrays-and-collections/introduction>)
 
 
 
@@ -44,8 +44,8 @@ in a calculation like in [` map() `](/docs/apis/Classes/HH/Map/map/) or [` filte
 
 
 
-* [` KeyedIterable<Tk, `](/docs/apis/Interfaces/HH/KeyedIterable/)`` Tv> `` - a [` KeyedIterable `](/docs/apis/Interfaces/HH/KeyedIterable/) representing the lazy view into the current
-  [` Map `](/docs/apis/Classes/HH/Map/).
+* [` KeyedIterable<Tk, `](/apis/Interfaces/HH/KeyedIterable/)`` Tv> `` - a [` KeyedIterable `](/apis/Interfaces/HH/KeyedIterable/) representing the lazy view into the current
+  [` Map `](/apis/Classes/HH/Map/).
 
 
 
@@ -55,7 +55,7 @@ in a calculation like in [` map() `](/docs/apis/Classes/HH/Map/map/) or [` filte
 
 
 
-This example shows you how to use [` lazy() `](/docs/apis/Classes/HH/Map/lazy/) on a rather large [` Map `](/docs/apis/Classes/HH/Map/) and the time for both a *strict* and *non-strict* version. Since we only need 5 of the elements in the end, the lazy view actually allows us to stop after we meet our required 5 without having to actually filter and allocate all 1000000 elements up front.
+This example shows you how to use [` lazy() `](/apis/Classes/HH/Map/lazy/) on a rather large [` Map `](/apis/Classes/HH/Map/) and the time for both a *strict* and *non-strict* version. Since we only need 5 of the elements in the end, the lazy view actually allows us to stop after we meet our required 5 without having to actually filter and allocate all 1000000 elements up front.
 
 
 

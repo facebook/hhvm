@@ -29,9 +29,9 @@ final class Server implements \HH\Lib\Network\Server<CloseableSocket> {...}
 
 
 
-+ [` ::createAsync(\HH\Lib\Network\IPProtocolVersion $ipv, string $host, int $port, ServerOptions $opts = dict [ ]): Awaitable<this> `](/docs/hsl/Classes/HH.Lib.TCP/Server/createAsync/)\
++ [` ::createAsync(\HH\Lib\Network\IPProtocolVersion $ipv, string $host, int $port, ServerOptions $opts = dict [ ]): Awaitable<this> `](/hsl/Classes/HH.Lib.TCP/Server/createAsync/)\
   Create a bound and listening instance
-+ [` ->getLocalAddress(): (string, int) `](/docs/hsl/Classes/HH.Lib.TCP/Server/getLocalAddress/)
-+ [` ->nextConnectionAsync(): Awaitable<CloseableSocket> `](/docs/hsl/Classes/HH.Lib.TCP/Server/nextConnectionAsync/)
-+ [` ->stopListening(): void `](/docs/hsl/Classes/HH.Lib.TCP/Server/stopListening/)
++ [` ->getLocalAddress(): (string, int) `](/hsl/Classes/HH.Lib.TCP/Server/getLocalAddress/)
++ [` ->nextConnectionAsync(): Awaitable<CloseableSocket> `](/hsl/Classes/HH.Lib.TCP/Server/nextConnectionAsync/)
++ [` ->stopListening(): void `](/hsl/Classes/HH.Lib.TCP/Server/stopListening/)
 <!-- HHAPIDOC -->

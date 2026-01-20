@@ -52,7 +52,7 @@ type, then an ` Exception ` is thrown.
 
 
 
-The following example shows how to get a field value as an ` int ` value via [` AsyncMysqlRow::getFieldAsInt `](/docs/apis/Classes/AsyncMysqlRow/getFieldAsInt/). Assume this was the SQL used to create the example table:
+The following example shows how to get a field value as an ` int ` value via [` AsyncMysqlRow::getFieldAsInt `](/apis/Classes/AsyncMysqlRow/getFieldAsInt/). Assume this was the SQL used to create the example table:
 
 
 

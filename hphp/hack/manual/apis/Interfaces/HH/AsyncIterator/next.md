@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Move the async iterator to the next [` Awaitable `](/docs/apis/Classes/HH/Awaitable/) position
+Move the async iterator to the next [` Awaitable `](/apis/Classes/HH/Awaitable/) position
 
 
 
@@ -35,5 +35,5 @@ The above is the longhand syntax for ` await as $value `.
 
 
 
-+ [` Awaitable<?(mixed, `](/docs/apis/Classes/HH/Awaitable/)`` Tv)> `` - The next [` Awaitable `](/docs/apis/Classes/HH/Awaitable/) in the iterator sequence.
++ [` Awaitable<?(mixed, `](/apis/Classes/HH/Awaitable/)`` Tv)> `` - The next [` Awaitable `](/apis/Classes/HH/Awaitable/) in the iterator sequence.
 <!-- HHAPIDOC -->

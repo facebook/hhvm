@@ -64,7 +64,7 @@ Calls to this function should be removed when safe to do so.
 
 
 
-+ [` KeyedContainer<string, `](/docs/apis/Interfaces/HH/KeyedContainer/)`` string> $pairs ``
++ [` KeyedContainer<string, `](/apis/Interfaces/HH/KeyedContainer/)`` string> $pairs ``
 
 
 

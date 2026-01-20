@@ -6,8 +6,8 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns an [` ImmVector `](/docs/apis/Classes/HH/ImmVector/) containing the values after an operation has been
-applied to each key and value in the current [` Pair `](/docs/apis/Classes/HH/Pair/)
+Returns an [` ImmVector `](/apis/Classes/HH/ImmVector/) containing the values after an operation has been
+applied to each key and value in the current [` Pair `](/apis/Classes/HH/Pair/)
 
 
 
@@ -21,8 +21,8 @@ public function mapWithKey<Tu>(
 
 
 
-Every key and value in the current [` Pair `](/docs/apis/Classes/HH/Pair/) is affected by a call to
-[` mapWithKey() `](/docs/apis/Classes/HH/Pair/mapWithKey/), unlike [` filterWithKey() `](/docs/apis/Classes/HH/Pair/filterWithKey/) where only values that meet a
+Every key and value in the current [` Pair `](/apis/Classes/HH/Pair/) is affected by a call to
+[` mapWithKey() `](/apis/Classes/HH/Pair/mapWithKey/), unlike [` filterWithKey() `](/apis/Classes/HH/Pair/filterWithKey/) where only values that meet a
 certain criteria are affected.
 
 
@@ -34,7 +34,7 @@ certain criteria are affected.
 
 
 + ` (function(int, mixed): Tu) $callback ` - The $allback containing the operation to apply to the
-  current [` Pair `](/docs/apis/Classes/HH/Pair/) keys and values.
+  current [` Pair `](/apis/Classes/HH/Pair/) keys and values.
 
 
 
@@ -44,6 +44,6 @@ certain criteria are affected.
 
 
 
-* [` ImmVector<Tu> `](/docs/apis/Classes/HH/ImmVector/) - an [` ImmVector `](/docs/apis/Classes/HH/ImmVector/) containing the values after a user-specified
-  operation on the current [` Pair `](/docs/apis/Classes/HH/Pair/)'s keys and values is applied.
+* [` ImmVector<Tu> `](/apis/Classes/HH/ImmVector/) - an [` ImmVector `](/apis/Classes/HH/ImmVector/) containing the values after a user-specified
+  operation on the current [` Pair `](/apis/Classes/HH/Pair/)'s keys and values is applied.
 <!-- HHAPIDOC -->

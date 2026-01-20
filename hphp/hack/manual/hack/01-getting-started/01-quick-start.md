@@ -2,7 +2,7 @@
 
 <FbInfo>
 
-Unless you are specifically working on open source Hack code, you want [Facebook's internal documentation](https://our.internmc.facebook.com/intern/wiki/First-app/) instead for dev environment setup. If you're just looking to [learn the Hack language itself](/docs/hack/source-code-fundamentals/introduction), skip this Getting Started section.
+Unless you are specifically working on open source Hack code, you want [Facebook's internal documentation](https://our.internmc.facebook.com/intern/wiki/First-app/) instead for dev environment setup. If you're just looking to [learn the Hack language itself](/hack/source-code-fundamentals/introduction), skip this Getting Started section.
 
 </FbInfo>
 
@@ -11,7 +11,7 @@ Unless you are specifically working on open source Hack code, you want [Facebook
 The HHVM package includes everything you need to work with Hack,
 including the runtime and typechecker.
 
-See the [HHVM installation page](/docs/hhvm/installation/introduction) to
+See the [HHVM installation page](/hhvm/installation/introduction) to
 find the package relevant for your platform.
 
 ### 2. Initialize A Project

@@ -33,7 +33,7 @@ public function mysql_error(): string;
 
 
 
-When an error occurs when establishing a connection or on a query, and you catch the exception that is thrown, you will get an [` AsyncMysqlErrorResult `](/docs/apis/Classes/AsyncMysqlErrorResult/). And one of the methods on an [` AsyncMysqlErrorResult `](/docs/apis/Classes/AsyncMysqlErrorResult/) is [` mysql_error() `](/docs/apis/Classes/AsyncMysqlErrorResult/mysql_error/), which gives you the MySQL error string. In this case, the error string is letting us know that the `` bogus `` table does not exist.
+When an error occurs when establishing a connection or on a query, and you catch the exception that is thrown, you will get an [` AsyncMysqlErrorResult `](/apis/Classes/AsyncMysqlErrorResult/). And one of the methods on an [` AsyncMysqlErrorResult `](/apis/Classes/AsyncMysqlErrorResult/) is [` mysql_error() `](/apis/Classes/AsyncMysqlErrorResult/mysql_error/), which gives you the MySQL error string. In this case, the error string is letting us know that the `` bogus `` table does not exist.
 
 
 

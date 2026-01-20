@@ -65,13 +65,13 @@ Specify the active deployment:
 Eval.Runtime.ActiveDeployment = production
 ```
 
-When running in [repo authoritative](/docs/hhvm/advanced-usage/repo-authoritative) mode, HHVM only compiles and runs files from packages in the specified deployment. References to undeployed packages cause runtime errors (e.g., "Class not found" or "Call to undefined function"). When running in other modes, the active deployment serves only to modify semantics of `package` checks and the `__RequirePackage` attribute.
+When running in [repo authoritative](/hhvm/advanced-usage/repo-authoritative) mode, HHVM only compiles and runs files from packages in the specified deployment. References to undeployed packages cause runtime errors (e.g., "Class not found" or "Call to undefined function"). When running in other modes, the active deployment serves only to modify semantics of `package` checks and the `__RequirePackage` attribute.
 
-**Note:** Files in `__tests__` directories are automatically excluded from all deployments. See [File package membership](/docs/hack/packages/introduction) for details.
+**Note:** Files in `__tests__` directories are automatically excluded from all deployments. See [File package membership](/hack/packages/introduction) for details.
 
 ### Force Symbol References (Legacy)
 
-For migration purposes, one can use the `ForceEnableSymbolRefs` option to allow additional "symbolically-referenced" files to be built alongside the active deployment. Note that this only affects [repo authoritative](/docs/hhvm/advanced-usage/repo-authoritative) mode.
+For migration purposes, one can use the `ForceEnableSymbolRefs` option to allow additional "symbolically-referenced" files to be built alongside the active deployment. Note that this only affects [repo authoritative](/hhvm/advanced-usage/repo-authoritative) mode.
 
 ## Soft Packages (Migration Support)
 
@@ -88,4 +88,4 @@ Accessing soft-deployed package symbols logs a warning instead of throwing an er
 **Rules:**
 - Soft-included packages must be at least soft-deployed
 - Hard-included packages must be hard-deployed
-- `package_exists()` returns `false` for soft packages. See [Cross Package Usage](/docs/hack/packages/cross-package-calls) for details.
+- `package_exists()` returns `false` for soft packages. See [Cross Package Usage](/hack/packages/cross-package-calls) for details.

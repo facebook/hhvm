@@ -49,14 +49,14 @@ final class Poll extends BasePoll<mixed, Tv> implements AsyncIterator<Tv> {...}
 
 
 
-+ [` ::from(Traversable<Awaitable<Tv>> $awaitables): this `](/docs/hsl/Classes/HH.Lib.Async/Poll/from/)\
++ [` ::from(Traversable<Awaitable<Tv>> $awaitables): this `](/hsl/Classes/HH.Lib.Async/Poll/from/)\
   Create a Poll from the specified list of awaitables
-+ [` ->add(Awaitable<Tv> $awaitable): void `](/docs/hsl/Classes/HH.Lib.Async/Poll/add/)\
++ [` ->add(Awaitable<Tv> $awaitable): void `](/hsl/Classes/HH.Lib.Async/Poll/add/)\
   Add an additional awaitable to the poll
-+ [` ->addMulti(Traversable<Awaitable<Tv>> $awaitables): void `](/docs/hsl/Classes/HH.Lib.Async/Poll/addMulti/)\
++ [` ->addMulti(Traversable<Awaitable<Tv>> $awaitables): void `](/hsl/Classes/HH.Lib.Async/Poll/addMulti/)\
   Add multiple additional awaitables to the poll
-+ [` ->waitUntilEmptyAsync(): Awaitable<void> `](/docs/hsl/Classes/HH.Lib.Async/Poll/waitUntilEmptyAsync/)\
-  Wait for all polled [` Awaitable `](/docs/apis/Classes/HH/Awaitable/)s, ignoring the results
++ [` ->waitUntilEmptyAsync(): Awaitable<void> `](/hsl/Classes/HH.Lib.Async/Poll/waitUntilEmptyAsync/)\
+  Wait for all polled [` Awaitable `](/apis/Classes/HH/Awaitable/)s, ignoring the results
 
 
 
@@ -64,14 +64,14 @@ final class Poll extends BasePoll<mixed, Tv> implements AsyncIterator<Tv> {...}
 
 
 
-### Public Methods ([` HH\Lib\Async\BasePoll `](/docs/hsl/Classes/HH.Lib.Async/BasePoll/))
+### Public Methods ([` HH\Lib\Async\BasePoll `](/hsl/Classes/HH.Lib.Async/BasePoll/))
 
 
 
 
-* [` ::create(): this `](/docs/hsl/Classes/HH.Lib.Async/BasePoll/create/)
-* [` ->hasNext(): bool `](/docs/hsl/Classes/HH.Lib.Async/BasePoll/hasNext/)
-* [` ->next(): Awaitable<?(Tk, Tv)> `](/docs/hsl/Classes/HH.Lib.Async/BasePoll/next/)
+* [` ::create(): this `](/hsl/Classes/HH.Lib.Async/BasePoll/create/)
+* [` ->hasNext(): bool `](/hsl/Classes/HH.Lib.Async/BasePoll/hasNext/)
+* [` ->next(): Awaitable<?(Tk, Tv)> `](/hsl/Classes/HH.Lib.Async/BasePoll/next/)
 
 
 
@@ -79,12 +79,12 @@ final class Poll extends BasePoll<mixed, Tv> implements AsyncIterator<Tv> {...}
 
 
 
-### Protected Methods ([` HH\Lib\Async\BasePoll `](/docs/hsl/Classes/HH.Lib.Async/BasePoll/))
+### Protected Methods ([` HH\Lib\Async\BasePoll `](/hsl/Classes/HH.Lib.Async/BasePoll/))
 
 
 
 
-- [` ::fromImpl(KeyedTraversable<Tk, Awaitable<Tv>> $awaitables): this `](/docs/hsl/Classes/HH.Lib.Async/BasePoll/fromImpl/)
-- [` ->addImpl(Tk $key, Awaitable<Tv> $awaitable): void `](/docs/hsl/Classes/HH.Lib.Async/BasePoll/addImpl/)
-- [` ->addMultiImpl(KeyedTraversable<Tk, Awaitable<Tv>> $awaitables): void `](/docs/hsl/Classes/HH.Lib.Async/BasePoll/addMultiImpl/)
+- [` ::fromImpl(KeyedTraversable<Tk, Awaitable<Tv>> $awaitables): this `](/hsl/Classes/HH.Lib.Async/BasePoll/fromImpl/)
+- [` ->addImpl(Tk $key, Awaitable<Tv> $awaitable): void `](/hsl/Classes/HH.Lib.Async/BasePoll/addImpl/)
+- [` ->addMultiImpl(KeyedTraversable<Tk, Awaitable<Tv>> $awaitables): void `](/hsl/Classes/HH.Lib.Async/BasePoll/addMultiImpl/)
 <!-- HHAPIDOC -->

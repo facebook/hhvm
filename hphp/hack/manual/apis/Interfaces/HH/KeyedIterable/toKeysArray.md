@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns an ` array ` with the keys from the current [` KeyedIterable `](/docs/apis/Interfaces/HH/KeyedIterable/)
+Returns an ` array ` with the keys from the current [` KeyedIterable `](/apis/Interfaces/HH/KeyedIterable/)
 
 
 
@@ -24,5 +24,5 @@ public function toKeysArray(): varray;
 
 
 + ` varray ` - an `` array `` containing the values from the current
-  [` KeyedIterable `](/docs/apis/Interfaces/HH/KeyedIterable/).
+  [` KeyedIterable `](/apis/Interfaces/HH/KeyedIterable/).
 <!-- HHAPIDOC -->

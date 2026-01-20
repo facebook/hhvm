@@ -44,7 +44,7 @@ representations, such as UTF-8.
 
 
 
-* [String](</docs/hack/built-in-types/string>)
+* [String](</hack/built-in-types/string>)
 
 
 

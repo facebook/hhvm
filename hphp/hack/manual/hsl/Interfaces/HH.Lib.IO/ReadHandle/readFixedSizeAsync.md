@@ -50,5 +50,5 @@ do not want this to happen.
 
 
 
-* [` Awaitable<string> `](/docs/apis/Classes/HH/Awaitable/)
+* [` Awaitable<string> `](/apis/Classes/HH/Awaitable/)
 <!-- HHAPIDOC -->

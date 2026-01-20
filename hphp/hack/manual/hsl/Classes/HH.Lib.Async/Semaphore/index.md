@@ -47,8 +47,8 @@ final class Semaphore {...}
 
 
 
-+ [` ->__construct(int $concurrentLimit, (function(Tin): Awaitable<Tout>) $f) `](/docs/hsl/Classes/HH.Lib.Async/Semaphore/__construct/)\
++ [` ->__construct(int $concurrentLimit, (function(Tin): Awaitable<Tout>) $f) `](/hsl/Classes/HH.Lib.Async/Semaphore/__construct/)\
   Create a semaphore
-+ [` ->waitForAsync(Tin $value): Awaitable<Tout> `](/docs/hsl/Classes/HH.Lib.Async/Semaphore/waitForAsync/)\
++ [` ->waitForAsync(Tin $value): Awaitable<Tout> `](/hsl/Classes/HH.Lib.Async/Semaphore/waitForAsync/)\
   Produce a `` Tout `` from a ``` Tin ```, respecting the concurrency limit
 <!-- HHAPIDOC -->

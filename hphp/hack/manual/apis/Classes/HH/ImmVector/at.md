@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns the value at the specified key in the current [` ImmVector `](/docs/apis/Classes/HH/ImmVector/)
+Returns the value at the specified key in the current [` ImmVector `](/apis/Classes/HH/ImmVector/)
 
 
 
@@ -21,7 +21,7 @@ public function at(
 
 
 If the key is not present, an exception is thrown. If you don't want an
-exception to be thrown, use [` get() `](/docs/apis/Classes/HH/ImmVector/get/) instead.
+exception to be thrown, use [` get() `](/apis/Classes/HH/ImmVector/get/) instead.
 
 
 
@@ -57,5 +57,5 @@ exception to be thrown, use [` get() `](/docs/apis/Classes/HH/ImmVector/get/) in
 
 
 
-See [` Vector::at `](/docs/apis/Classes/HH/Vector/at/#examples) for usage examples.
+See [` Vector::at `](/apis/Classes/HH/Vector/at/#examples) for usage examples.
 <!-- HHAPIDOC -->

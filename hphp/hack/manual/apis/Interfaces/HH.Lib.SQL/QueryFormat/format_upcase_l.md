@@ -18,5 +18,5 @@ public function format_upcase_l(): HH\Lib\SQL\ListFormat;
 
 
 
-+ [` HH\Lib\SQL\ListFormat `](/docs/apis/Interfaces/HH.Lib.SQL/ListFormat/)
++ [` HH\Lib\SQL\ListFormat `](/apis/Interfaces/HH.Lib.SQL/ListFormat/)
 <!-- HHAPIDOC -->

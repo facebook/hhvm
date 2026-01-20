@@ -17,7 +17,7 @@ establish a connection
 
 
 The ` AsyncMysqlConnectionOptions ` will be passed to
-[` AsyncMysqlClient::connectWithOpts() `](/docs/apis/Classes/AsyncMysqlClient/connectWithOpts/).
+[` AsyncMysqlClient::connectWithOpts() `](/apis/Classes/AsyncMysqlClient/connectWithOpts/).
 
 
 
@@ -27,8 +27,8 @@ The ` AsyncMysqlConnectionOptions ` will be passed to
 
 
 
-+ [Introduction](</docs/hack/asynchronous-operations/introduction>)
-+ [Extensions](</docs/hack/asynchronous-operations/extensions>)
++ [Introduction](</hack/asynchronous-operations/introduction>)
++ [Extensions](</hack/asynchronous-operations/extensions>)
 
 
 
@@ -53,16 +53,16 @@ class AsyncMysqlConnectionOptions {...}
 
 
 
-* [` ->enableChangeUser(): void `](/docs/apis/Classes/AsyncMysqlConnectionOptions/enableChangeUser/)
-* [` ->enableDelayedResetConn(): void `](/docs/apis/Classes/AsyncMysqlConnectionOptions/enableDelayedResetConn/)
-* [` ->enableResetConnBeforeClose(): void `](/docs/apis/Classes/AsyncMysqlConnectionOptions/enableResetConnBeforeClose/)
-* [` ->setConnectAttempts(int $attempts): void `](/docs/apis/Classes/AsyncMysqlConnectionOptions/setConnectAttempts/)
-* [` ->setConnectTcpTimeout(int $timeout): void `](/docs/apis/Classes/AsyncMysqlConnectionOptions/setConnectTcpTimeout/)
-* [` ->setConnectTimeout(int $timeout): void `](/docs/apis/Classes/AsyncMysqlConnectionOptions/setConnectTimeout/)
-* [` ->setConnectionAttributes(darray<string> $attrs): void `](/docs/apis/Classes/AsyncMysqlConnectionOptions/setConnectionAttributes/)
-* [` ->setQueryTimeout(int $timeout): void `](/docs/apis/Classes/AsyncMysqlConnectionOptions/setQueryTimeout/)
-* [` ->setSSLOptionsProvider(?MySSLContextProvider $ssl_context): void `](/docs/apis/Classes/AsyncMysqlConnectionOptions/setSSLOptionsProvider/)
-* [` ->setServerCertValidation(string $extensions = '', string $values = ''): void `](/docs/apis/Classes/AsyncMysqlConnectionOptions/setServerCertValidation/)
-* [` ->setSniServerName(string $sni_server_name): void `](/docs/apis/Classes/AsyncMysqlConnectionOptions/setSniServerName/)
-* [` ->setTotalTimeout(int $timeout): void `](/docs/apis/Classes/AsyncMysqlConnectionOptions/setTotalTimeout/)
+* [` ->enableChangeUser(): void `](/apis/Classes/AsyncMysqlConnectionOptions/enableChangeUser/)
+* [` ->enableDelayedResetConn(): void `](/apis/Classes/AsyncMysqlConnectionOptions/enableDelayedResetConn/)
+* [` ->enableResetConnBeforeClose(): void `](/apis/Classes/AsyncMysqlConnectionOptions/enableResetConnBeforeClose/)
+* [` ->setConnectAttempts(int $attempts): void `](/apis/Classes/AsyncMysqlConnectionOptions/setConnectAttempts/)
+* [` ->setConnectTcpTimeout(int $timeout): void `](/apis/Classes/AsyncMysqlConnectionOptions/setConnectTcpTimeout/)
+* [` ->setConnectTimeout(int $timeout): void `](/apis/Classes/AsyncMysqlConnectionOptions/setConnectTimeout/)
+* [` ->setConnectionAttributes(darray<string> $attrs): void `](/apis/Classes/AsyncMysqlConnectionOptions/setConnectionAttributes/)
+* [` ->setQueryTimeout(int $timeout): void `](/apis/Classes/AsyncMysqlConnectionOptions/setQueryTimeout/)
+* [` ->setSSLOptionsProvider(?MySSLContextProvider $ssl_context): void `](/apis/Classes/AsyncMysqlConnectionOptions/setSSLOptionsProvider/)
+* [` ->setServerCertValidation(string $extensions = '', string $values = ''): void `](/apis/Classes/AsyncMysqlConnectionOptions/setServerCertValidation/)
+* [` ->setSniServerName(string $sni_server_name): void `](/apis/Classes/AsyncMysqlConnectionOptions/setSniServerName/)
+* [` ->setTotalTimeout(int $timeout): void `](/apis/Classes/AsyncMysqlConnectionOptions/setTotalTimeout/)
 <!-- HHAPIDOC -->

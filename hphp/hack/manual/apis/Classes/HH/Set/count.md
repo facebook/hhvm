@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Provides the number of elements in the current [` Set `](/docs/apis/Classes/HH/Set/)
+Provides the number of elements in the current [` Set `](/apis/Classes/HH/Set/)
 
 
 
@@ -23,7 +23,7 @@ public function count(): int;
 
 
 
-+ ` int ` - The number of elements in the current [` Set `](/docs/apis/Classes/HH/Set/).
++ ` int ` - The number of elements in the current [` Set `](/apis/Classes/HH/Set/).
 
 
 

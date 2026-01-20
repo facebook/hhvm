@@ -29,15 +29,15 @@ abstract final class Shapes {...}
 
 
 
-+ [` ::at(shape() $shape, arraykey $index) `](/docs/apis/Classes/HH/Shapes/at/)\
++ [` ::at(shape() $shape, arraykey $index) `](/apis/Classes/HH/Shapes/at/)\
   Returns the value of the field $index of $shape,
   throws if the field is missing
-+ [` ::idx(shape(...) $shape, arraykey $index, mixed $default = NULL) `](/docs/apis/Classes/HH/Shapes/idx/)\
-  Use [` Shapes::idx `](/docs/apis/Classes/HH/Shapes/idx/) to retrieve a field value in a shape, when the key may or may not exist
-+ [` ::keyExists(shape() $shape, arraykey $index): bool `](/docs/apis/Classes/HH/Shapes/keyExists/)\
++ [` ::idx(shape(...) $shape, arraykey $index, mixed $default = NULL) `](/apis/Classes/HH/Shapes/idx/)\
+  Use [` Shapes::idx `](/apis/Classes/HH/Shapes/idx/) to retrieve a field value in a shape, when the key may or may not exist
++ [` ::keyExists(shape() $shape, arraykey $index): bool `](/apis/Classes/HH/Shapes/keyExists/)\
   Check if a field in shape exists
-+ [` ::removeKey<T as shape()>(inout darray $shape, arraykey $index): void `](/docs/apis/Classes/HH/Shapes/removeKey/)\
++ [` ::removeKey<T as shape()>(inout darray $shape, arraykey $index): void `](/apis/Classes/HH/Shapes/removeKey/)\
   Removes the $index field from the $shape (passed in as an inout argument)
-+ [` ::toArray(shape() $shape): darray<arraykey, mixed> `](/docs/apis/Classes/HH/Shapes/toArray/)
-+ [` ::toDict(shape() $shape): dict<arraykey, mixed> `](/docs/apis/Classes/HH/Shapes/toDict/)
++ [` ::toArray(shape() $shape): darray<arraykey, mixed> `](/apis/Classes/HH/Shapes/toArray/)
++ [` ::toDict(shape() $shape): dict<arraykey, mixed> `](/apis/Classes/HH/Shapes/toDict/)
 <!-- HHAPIDOC -->

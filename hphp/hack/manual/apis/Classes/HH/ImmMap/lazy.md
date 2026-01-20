@@ -7,7 +7,7 @@ the Hack LSP instead for complete and up-to-date information.
 :::
 
 Returns a lazy, access elements only when needed view of the current
-[` ImmMap `](/docs/apis/Classes/HH/ImmMap/)
+[` ImmMap `](/apis/Classes/HH/ImmMap/)
 
 
 
@@ -19,9 +19,9 @@ public function lazy(): KeyedIterable<Tk, Tv>;
 
 
 
-Normally, memory is allocated for all of the elements of an [` ImmMap `](/docs/apis/Classes/HH/ImmMap/). With
+Normally, memory is allocated for all of the elements of an [` ImmMap `](/apis/Classes/HH/ImmMap/). With
 a lazy view, memory is allocated for an element only when needed or used
-in a calculation like in [` map() `](/docs/apis/Classes/HH/ImmMap/map/) or [` filter() `](/docs/apis/Classes/HH/ImmMap/filter/).
+in a calculation like in [` map() `](/apis/Classes/HH/ImmMap/map/) or [` filter() `](/apis/Classes/HH/ImmMap/filter/).
 
 
 
@@ -31,7 +31,7 @@ in a calculation like in [` map() `](/docs/apis/Classes/HH/ImmMap/map/) or [` fi
 
 
 
-+ [Examples](</docs/hack/arrays-and-collections/introduction>)
++ [Examples](</hack/arrays-and-collections/introduction>)
 
 
 
@@ -44,8 +44,8 @@ in a calculation like in [` map() `](/docs/apis/Classes/HH/ImmMap/map/) or [` fi
 
 
 
-* [` KeyedIterable<Tk, `](/docs/apis/Interfaces/HH/KeyedIterable/)`` Tv> `` - a [` KeyedIterable `](/docs/apis/Interfaces/HH/KeyedIterable/) representing the lazy view into the current
-  [` ImmMap `](/docs/apis/Classes/HH/ImmMap/).
+* [` KeyedIterable<Tk, `](/apis/Interfaces/HH/KeyedIterable/)`` Tv> `` - a [` KeyedIterable `](/apis/Interfaces/HH/KeyedIterable/) representing the lazy view into the current
+  [` ImmMap `](/apis/Classes/HH/ImmMap/).
 
 
 
@@ -55,5 +55,5 @@ in a calculation like in [` map() `](/docs/apis/Classes/HH/ImmMap/map/) or [` fi
 
 
 
-See [` Map::lazy `](/docs/apis/Classes/HH/Map/lazy/#examples) for usage examples.
+See [` Map::lazy `](/apis/Classes/HH/Map/lazy/#examples) for usage examples.
 <!-- HHAPIDOC -->

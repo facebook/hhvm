@@ -32,6 +32,6 @@ class MCRouterOptionException extends Exception {...}
 
 
 
-+ [` ->__construct(varray<darray<string>> $errors) `](/docs/apis/Classes/MCRouterOptionException/__construct/)
-+ [` ->getErrors(): varray<darray<string>> `](/docs/apis/Classes/MCRouterOptionException/getErrors/)
++ [` ->__construct(varray<darray<string>> $errors) `](/apis/Classes/MCRouterOptionException/__construct/)
++ [` ->getErrors(): varray<darray<string>> `](/apis/Classes/MCRouterOptionException/getErrors/)
 <!-- HHAPIDOC -->

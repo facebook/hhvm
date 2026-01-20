@@ -33,5 +33,5 @@ abstract public function endTime(): float;
 
 
 
-AsyncMysqlResult is abstract. See specific, concrete classes for examples of [` AsyncMysqlResult::endTime `](/docs/apis/Classes/AsyncMysqlResult/endTime/) (e.g., AsyncMysqlConnectResult, AsyncMysqlErrorResult)
+AsyncMysqlResult is abstract. See specific, concrete classes for examples of [` AsyncMysqlResult::endTime `](/apis/Classes/AsyncMysqlResult/endTime/) (e.g., AsyncMysqlConnectResult, AsyncMysqlErrorResult)
 <!-- HHAPIDOC -->

@@ -6,8 +6,8 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns an [` ImmVector `](/docs/apis/Classes/HH/ImmVector/) containing the values after the `` $n ``-th element of
-the current [` ImmVector `](/docs/apis/Classes/HH/ImmVector/)
+Returns an [` ImmVector `](/apis/Classes/HH/ImmVector/) containing the values after the `` $n ``-th element of
+the current [` ImmVector `](/apis/Classes/HH/ImmVector/)
 
 
 
@@ -21,11 +21,11 @@ public function skip(
 
 
 
-The returned [` ImmVector `](/docs/apis/Classes/HH/ImmVector/) will always be a subset (but not necessarily a
-proper subset) of the current [` ImmVector `](/docs/apis/Classes/HH/ImmVector/). If `` $n `` is greater than or equal
-to the length of the current [` ImmVector `](/docs/apis/Classes/HH/ImmVector/), the returned [` ImmVector `](/docs/apis/Classes/HH/ImmVector/) will
-contain no elements. If `` $n `` is negative, the returned [` ImmVector `](/docs/apis/Classes/HH/ImmVector/) will
-contain all elements of the current [` ImmVector `](/docs/apis/Classes/HH/ImmVector/).
+The returned [` ImmVector `](/apis/Classes/HH/ImmVector/) will always be a subset (but not necessarily a
+proper subset) of the current [` ImmVector `](/apis/Classes/HH/ImmVector/). If `` $n `` is greater than or equal
+to the length of the current [` ImmVector `](/apis/Classes/HH/ImmVector/), the returned [` ImmVector `](/apis/Classes/HH/ImmVector/) will
+contain no elements. If `` $n `` is negative, the returned [` ImmVector `](/apis/Classes/HH/ImmVector/) will
+contain all elements of the current [` ImmVector `](/apis/Classes/HH/ImmVector/).
 
 
 
@@ -41,7 +41,7 @@ contain all elements of the current [` ImmVector `](/docs/apis/Classes/HH/ImmVec
 
 
 + ` int $n ` - The last element to be skipped; the `` $n+1 `` element will be the
-  first one in the returned [` ImmVector `](/docs/apis/Classes/HH/ImmVector/).
+  first one in the returned [` ImmVector `](/apis/Classes/HH/ImmVector/).
 
 
 
@@ -51,7 +51,7 @@ contain all elements of the current [` ImmVector `](/docs/apis/Classes/HH/ImmVec
 
 
 
-* [` ImmVector<Tv> `](/docs/apis/Classes/HH/ImmVector/) - An [` ImmVector `](/docs/apis/Classes/HH/ImmVector/) that is a subset of the current [` ImmVector `](/docs/apis/Classes/HH/ImmVector/)
+* [` ImmVector<Tv> `](/apis/Classes/HH/ImmVector/) - An [` ImmVector `](/apis/Classes/HH/ImmVector/) that is a subset of the current [` ImmVector `](/apis/Classes/HH/ImmVector/)
   containing values after the specified `` $n ``-th element.
 
 
@@ -62,5 +62,5 @@ contain all elements of the current [` ImmVector `](/docs/apis/Classes/HH/ImmVec
 
 
 
-See [` Vector::skip `](/docs/apis/Classes/HH/Vector/skip/#examples) for usage examples.
+See [` Vector::skip `](/apis/Classes/HH/Vector/skip/#examples) for usage examples.
 <!-- HHAPIDOC -->

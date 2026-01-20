@@ -35,11 +35,11 @@ class Condition {...}
 
 
 
-+ [` ->fail(\Exception $exception): void `](/docs/hsl/Classes/HH.Lib.Async/Condition/fail/)\
++ [` ->fail(\Exception $exception): void `](/hsl/Classes/HH.Lib.Async/Condition/fail/)\
   Notify the condition variable of failure and set the exception
-+ [` ->succeed(T $result): void `](/docs/hsl/Classes/HH.Lib.Async/Condition/succeed/)\
++ [` ->succeed(T $result): void `](/hsl/Classes/HH.Lib.Async/Condition/succeed/)\
   Notify the condition variable of success and set the result
-+ [` ->waitForNotificationAsync(Awaitable<void> $notifiers): Awaitable<T> `](/docs/hsl/Classes/HH.Lib.Async/Condition/waitForNotificationAsync/)\
++ [` ->waitForNotificationAsync(Awaitable<void> $notifiers): Awaitable<T> `](/hsl/Classes/HH.Lib.Async/Condition/waitForNotificationAsync/)\
   Asynchronously wait for the condition variable to be notified and
   return the result or throw the exception received via notification
 <!-- HHAPIDOC -->

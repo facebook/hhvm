@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns the last key in the current [` MutableVector `](/docs/apis/Interfaces/MutableVector/)
+Returns the last key in the current [` MutableVector `](/apis/Interfaces/MutableVector/)
 
 
 
@@ -23,6 +23,6 @@ public function lastKey(): ?int;
 
 
 
-+ ` ?int ` - The last key in the current [` MutableVector `](/docs/apis/Interfaces/MutableVector/), or `` null `` if the
-  current [` MutableVector `](/docs/apis/Interfaces/MutableVector/) is empty.
++ ` ?int ` - The last key in the current [` MutableVector `](/apis/Interfaces/MutableVector/), or `` null `` if the
+  current [` MutableVector `](/apis/Interfaces/MutableVector/) is empty.
 <!-- HHAPIDOC -->

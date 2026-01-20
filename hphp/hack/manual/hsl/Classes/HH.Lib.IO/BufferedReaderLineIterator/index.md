@@ -29,6 +29,6 @@ final class BufferedReaderLineIterator implements AsyncIterator<string> {...}
 
 
 
-+ [` ->__construct(BufferedReader $reader) `](/docs/hsl/Classes/HH.Lib.IO/BufferedReaderLineIterator/__construct/)
-+ [` ->next(): Awaitable<?(mixed, string)> `](/docs/hsl/Classes/HH.Lib.IO/BufferedReaderLineIterator/next/)
++ [` ->__construct(BufferedReader $reader) `](/hsl/Classes/HH.Lib.IO/BufferedReaderLineIterator/__construct/)
++ [` ->next(): Awaitable<?(mixed, string)> `](/hsl/Classes/HH.Lib.IO/BufferedReaderLineIterator/next/)
 <!-- HHAPIDOC -->

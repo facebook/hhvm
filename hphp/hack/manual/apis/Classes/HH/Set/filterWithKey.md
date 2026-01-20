@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a [` Set `](/docs/apis/Classes/HH/Set/) containing the values of the current [` Set `](/docs/apis/Classes/HH/Set/) that meet
+Returns a [` Set `](/apis/Classes/HH/Set/) containing the values of the current [` Set `](/apis/Classes/HH/Set/) that meet
 a supplied condition applied to its "keys" and values
 
 
@@ -21,15 +21,15 @@ public function filterWithKey(
 
 
 
-Since [` Set `](/docs/apis/Classes/HH/Set/)s don't have keys, the callback uses the values as the keys
+Since [` Set `](/apis/Classes/HH/Set/)s don't have keys, the callback uses the values as the keys
 as well.
 
 
 
 
 Only values that meet a certain criteria are affected by a call to
-[` filterWithKey() `](/docs/apis/Classes/HH/Set/filterWithKey/), while all values are affected by a call to
-[` mapWithKey() `](/docs/apis/Classes/HH/Set/mapWithKey/).
+[` filterWithKey() `](/apis/Classes/HH/Set/filterWithKey/), while all values are affected by a call to
+[` mapWithKey() `](/apis/Classes/HH/Set/mapWithKey/).
 
 
 
@@ -49,6 +49,6 @@ Only values that meet a certain criteria are affected by a call to
 
 
 
-* [` Set<Tv> `](/docs/apis/Classes/HH/Set/) - a [` Set `](/docs/apis/Classes/HH/Set/) containing the values after a user-specified condition
-  is applied to the values of the current [` Set `](/docs/apis/Classes/HH/Set/).
+* [` Set<Tv> `](/apis/Classes/HH/Set/) - a [` Set `](/apis/Classes/HH/Set/) containing the values after a user-specified condition
+  is applied to the values of the current [` Set `](/apis/Classes/HH/Set/).
 <!-- HHAPIDOC -->

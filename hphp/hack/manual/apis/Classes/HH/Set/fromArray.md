@@ -13,7 +13,7 @@ the Hack LSP instead for complete and up-to-date information.
 
 
 
-Returns a [` Set `](/docs/apis/Classes/HH/Set/) containing the values from the specified `` array ``
+Returns a [` Set `](/apis/Classes/HH/Set/) containing the values from the specified `` array ``
 
 
 
@@ -37,7 +37,7 @@ This function is deprecated. Use ` new Set ($arr) ` instead.
 
 
 
-+ ` darray<arraykey, Tv> $arr ` - The `` array `` to convert to a [` Set `](/docs/apis/Classes/HH/Set/).
++ ` darray<arraykey, Tv> $arr ` - The `` array `` to convert to a [` Set `](/apis/Classes/HH/Set/).
 
 
 
@@ -47,5 +47,5 @@ This function is deprecated. Use ` new Set ($arr) ` instead.
 
 
 
-* [` Set<Tv> `](/docs/apis/Classes/HH/Set/) - A [` Set `](/docs/apis/Classes/HH/Set/) with the values from the provided `` array ``.
+* [` Set<Tv> `](/apis/Classes/HH/Set/) - A [` Set `](/apis/Classes/HH/Set/) with the values from the provided `` array ``.
 <!-- HHAPIDOC -->

@@ -160,7 +160,7 @@ is rendered (`toStringAsync()` is called) with any required attributes missing.
 With `check_xhp_attribute=true` (available since HHVM 4.8) this is also a
 typechecker error.
 
-Use the [`->:` operator](/docs/hack/expressions-and-operators/XHP-attribute-selection) to select an attribute.
+Use the [`->:` operator](/hack/expressions-and-operators/XHP-attribute-selection) to select an attribute.
 
 ## HTML Character References
 

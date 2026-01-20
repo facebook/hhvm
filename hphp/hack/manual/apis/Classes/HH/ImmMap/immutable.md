@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns an immutable copy ([` ImmMap `](/docs/apis/Classes/HH/ImmMap/)) of the current [` ImmMap `](/docs/apis/Classes/HH/ImmMap/)
+Returns an immutable copy ([` ImmMap `](/apis/Classes/HH/ImmMap/)) of the current [` ImmMap `](/apis/Classes/HH/ImmMap/)
 
 
 
@@ -18,7 +18,7 @@ public function immutable(): ImmMap<Tk, Tv>;
 
 
 
-This method is interchangeable with [` toImmMap() `](/docs/apis/Classes/HH/ImmMap/toImmMap/).
+This method is interchangeable with [` toImmMap() `](/apis/Classes/HH/ImmMap/toImmMap/).
 
 
 
@@ -28,7 +28,7 @@ This method is interchangeable with [` toImmMap() `](/docs/apis/Classes/HH/ImmMa
 
 
 
-+ [` ImmMap<Tk, `](/docs/apis/Classes/HH/ImmMap/)`` Tv> `` - an [` ImmMap `](/docs/apis/Classes/HH/ImmMap/) representing a copy of the current [` ImmMap `](/docs/apis/Classes/HH/ImmMap/).
++ [` ImmMap<Tk, `](/apis/Classes/HH/ImmMap/)`` Tv> `` - an [` ImmMap `](/apis/Classes/HH/ImmMap/) representing a copy of the current [` ImmMap `](/apis/Classes/HH/ImmMap/).
 
 
 
@@ -38,5 +38,5 @@ This method is interchangeable with [` toImmMap() `](/docs/apis/Classes/HH/ImmMa
 
 
 
-See [` Map::immutable `](/docs/apis/Classes/HH/Map/immutable/#examples) for usage examples.
+See [` Map::immutable `](/apis/Classes/HH/Map/immutable/#examples) for usage examples.
 <!-- HHAPIDOC -->

@@ -6,8 +6,8 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns an [` ImmVector `](/docs/apis/Classes/HH/ImmVector/) containing the first `` n `` values of the current
-[` Pair `](/docs/apis/Classes/HH/Pair/)
+Returns an [` ImmVector `](/apis/Classes/HH/ImmVector/) containing the first `` n `` values of the current
+[` Pair `](/apis/Classes/HH/Pair/)
 
 
 
@@ -22,8 +22,8 @@ public function take(
 
 
 ` n ` is 1-based. So the first element is 1, the second 2. There is no
-element 3 in a [` Pair `](/docs/apis/Classes/HH/Pair/), but if you specify an element greater than 2, it
-will just return all elements in the [` Pair `](/docs/apis/Classes/HH/Pair/).
+element 3 in a [` Pair `](/apis/Classes/HH/Pair/), but if you specify an element greater than 2, it
+will just return all elements in the [` Pair `](/apis/Classes/HH/Pair/).
 
 
 
@@ -33,7 +33,7 @@ will just return all elements in the [` Pair `](/docs/apis/Classes/HH/Pair/).
 
 
 
-+ ` int $n ` - The last element that will be included in the current [` Pair `](/docs/apis/Classes/HH/Pair/).
++ ` int $n ` - The last element that will be included in the current [` Pair `](/apis/Classes/HH/Pair/).
 
 
 
@@ -43,8 +43,8 @@ will just return all elements in the [` Pair `](/docs/apis/Classes/HH/Pair/).
 
 
 
-* [` ImmVector<mixed> `](/docs/apis/Classes/HH/ImmVector/) - An [` ImmVector `](/docs/apis/Classes/HH/ImmVector/) containing the first `` n `` values of the current
-  [` Pair `](/docs/apis/Classes/HH/Pair/).
+* [` ImmVector<mixed> `](/apis/Classes/HH/ImmVector/) - An [` ImmVector `](/apis/Classes/HH/ImmVector/) containing the first `` n `` values of the current
+  [` Pair `](/apis/Classes/HH/Pair/).
 
 
 

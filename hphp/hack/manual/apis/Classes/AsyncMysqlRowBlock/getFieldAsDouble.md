@@ -54,7 +54,7 @@ type, then an ` Exception ` is thrown.
 
 
 
-The following example shows how to get a field value as a ` float ` value via [` AsyncMysqlRowBlock::getFieldAsDouble `](/docs/apis/Classes/AsyncMysqlRowBlock/getFieldAsDouble/). Assume this was the SQL used to create the example table:
+The following example shows how to get a field value as a ` float ` value via [` AsyncMysqlRowBlock::getFieldAsDouble `](/apis/Classes/AsyncMysqlRowBlock/getFieldAsDouble/). Assume this was the SQL used to create the example table:
 
 
 

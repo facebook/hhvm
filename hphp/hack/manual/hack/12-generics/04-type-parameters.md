@@ -35,4 +35,4 @@ function max_value<T>(T $p1, T $p2): T {
 }
 ```
 
-Generic type constraints are discussed in [type constraints](/docs/hack/generics/type-constraints).
+Generic type constraints are discussed in [type constraints](/hack/generics/type-constraints).

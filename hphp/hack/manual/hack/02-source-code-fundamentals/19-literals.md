@@ -157,8 +157,8 @@ Remember: White space is not permitted between the start `id` and its enclosing 
 ## Variable Substitution
 When a variable name is seen inside a double-quoted string, after that variable is evaluated, its value is converted to `string`
 and is substituted into the string in place of the variable-substitution expression. Subscript or property accesses are resolved
-according to the rules of the [subscript operator](/docs/hack/expressions-and-operators/subscript) and
-[member selection operator](/docs/hack/expressions-and-operators/member-selection), respectively. If the character sequence following
+according to the rules of the [subscript operator](/hack/expressions-and-operators/subscript) and
+[member selection operator](/hack/expressions-and-operators/member-selection), respectively. If the character sequence following
 the `$` does not parse as a recognized name, then the `$` character is instead interpreted verbatim and no variable substitution
 is performed.
 

@@ -29,7 +29,7 @@ final class TemporaryFile implements \IDisposable {...}
 
 
 
-+ [` ->__construct(CloseableReadWriteHandle $handle) `](/docs/hsl/Classes/HH.Lib.File/TemporaryFile/__construct/)
-+ [` ->__dispose(): void `](/docs/hsl/Classes/HH.Lib.File/TemporaryFile/__dispose/)
-+ [` ->getHandle(): CloseableReadWriteHandle `](/docs/hsl/Classes/HH.Lib.File/TemporaryFile/getHandle/)
++ [` ->__construct(CloseableReadWriteHandle $handle) `](/hsl/Classes/HH.Lib.File/TemporaryFile/__construct/)
++ [` ->__dispose(): void `](/hsl/Classes/HH.Lib.File/TemporaryFile/__dispose/)
++ [` ->getHandle(): CloseableReadWriteHandle `](/hsl/Classes/HH.Lib.File/TemporaryFile/getHandle/)
 <!-- HHAPIDOC -->

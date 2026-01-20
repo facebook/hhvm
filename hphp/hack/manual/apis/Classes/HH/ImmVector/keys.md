@@ -6,8 +6,8 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns an [` ImmVector `](/docs/apis/Classes/HH/ImmVector/) containing the keys, as values, of the current
-[` ImmVector `](/docs/apis/Classes/HH/ImmVector/)
+Returns an [` ImmVector `](/apis/Classes/HH/ImmVector/) containing the keys, as values, of the current
+[` ImmVector `](/apis/Classes/HH/ImmVector/)
 
 
 
@@ -24,8 +24,8 @@ public function keys(): ImmVector<int>;
 
 
 
-+ [` ImmVector<int> `](/docs/apis/Classes/HH/ImmVector/) - An [` ImmVector `](/docs/apis/Classes/HH/ImmVector/) containing, as values, the integer keys of the
-  current [` ImmVector `](/docs/apis/Classes/HH/ImmVector/).
++ [` ImmVector<int> `](/apis/Classes/HH/ImmVector/) - An [` ImmVector `](/apis/Classes/HH/ImmVector/) containing, as values, the integer keys of the
+  current [` ImmVector `](/apis/Classes/HH/ImmVector/).
 
 
 
@@ -35,5 +35,5 @@ public function keys(): ImmVector<int>;
 
 
 
-See [` Vector::keys `](/docs/apis/Classes/HH/Vector/keys/#examples) for usage examples.
+See [` Vector::keys `](/apis/Classes/HH/Vector/keys/#examples) for usage examples.
 <!-- HHAPIDOC -->

@@ -11,7 +11,7 @@ Concatenation and byte indexing are built-in operations; for example:
 - `"abc"[1]` is `"b"`
 - if the source code is UTF-8, `"a😀c"[1]` is byte `0xf0`, the first of the 4 bytes compromising the "😀" emoji in UTF-8
 
-Other operations are supported by the `Str\` namespace in the [Hack Standard Library](/docs/hsl/overview), such as:
+Other operations are supported by the `Str\` namespace in the [Hack Standard Library](/hsl/overview), such as:
 
 - `Str\length("foo")` is 3
 - `Str\length("foo\0")` is 4

@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns the first "key" in the current [` ImmSet `](/docs/apis/Classes/HH/ImmSet/)
+Returns the first "key" in the current [` ImmSet `](/apis/Classes/HH/ImmSet/)
 
 
 
@@ -18,12 +18,12 @@ public function firstKey(): ?arraykey;
 
 
 
-Since [` ImmSet `](/docs/apis/Classes/HH/ImmSet/)s do not have keys, it returns the first value.
+Since [` ImmSet `](/apis/Classes/HH/ImmSet/)s do not have keys, it returns the first value.
 
 
 
 
-This method is interchangeable with [` firstValue() `](/docs/apis/Classes/HH/ImmSet/firstValue/).
+This method is interchangeable with [` firstValue() `](/apis/Classes/HH/ImmSet/firstValue/).
 
 
 
@@ -33,8 +33,8 @@ This method is interchangeable with [` firstValue() `](/docs/apis/Classes/HH/Imm
 
 
 
-+ ` ?arraykey ` - The first value in the current [` ImmSet `](/docs/apis/Classes/HH/ImmSet/), or `` null `` if the
-  current [` ImmSet `](/docs/apis/Classes/HH/ImmSet/) is empty.
++ ` ?arraykey ` - The first value in the current [` ImmSet `](/apis/Classes/HH/ImmSet/), or `` null `` if the
+  current [` ImmSet `](/apis/Classes/HH/ImmSet/) is empty.
 
 
 
@@ -44,5 +44,5 @@ This method is interchangeable with [` firstValue() `](/docs/apis/Classes/HH/Imm
 
 
 
-See [` Set::firstKey `](/docs/apis/Classes/HH/Set/firstKey/#examples) for usage examples.
+See [` Set::firstKey `](/apis/Classes/HH/Set/firstKey/#examples) for usage examples.
 <!-- HHAPIDOC -->

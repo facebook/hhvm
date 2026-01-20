@@ -28,7 +28,7 @@ function cast_clear_legacy_array_mark<Tk as arraykey, Tv>(
 
 
 
-+ [` KeyedTraversable<Tk, `](/docs/apis/Interfaces/HH/KeyedTraversable/)`` Tv> $x ``
++ [` KeyedTraversable<Tk, `](/apis/Interfaces/HH/KeyedTraversable/)`` Tv> $x ``
 
 
 

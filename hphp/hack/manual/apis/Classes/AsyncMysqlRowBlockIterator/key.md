@@ -37,7 +37,7 @@ public function key(): int;
 
 
 
-The following example shows you how to use [` AsyncMysqlRowBlockIterator::key `](/docs/apis/Classes/AsyncMysqlRowBlockIterator/key/) to get the actual key pointing to an [` AsyncMysqlRow `](/docs/apis/Classes/AsyncMysqlRow/) within the block iterator. The key will be an `` int ``.
+The following example shows you how to use [` AsyncMysqlRowBlockIterator::key `](/apis/Classes/AsyncMysqlRowBlockIterator/key/) to get the actual key pointing to an [` AsyncMysqlRow `](/apis/Classes/AsyncMysqlRow/) within the block iterator. The key will be an `` int ``.
 
 
 

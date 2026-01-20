@@ -29,7 +29,7 @@ final class posix_spawn_file_actions_addchdir_np extends \HH\Lib\_Private\_OS\Po
 
 
 
-+ [` ->__construct(string $path) `](/docs/hsl/Classes/HH.Lib.OS/posix_spawn_file_actions_addchdir_np/__construct/)
++ [` ->__construct(string $path) `](/hsl/Classes/HH.Lib.OS/posix_spawn_file_actions_addchdir_np/__construct/)
 
 
 
@@ -42,5 +42,5 @@ final class posix_spawn_file_actions_addchdir_np extends \HH\Lib\_Private\_OS\Po
 
 
 
-* [` ->forkAndExecveDecorator(\HH\Lib\_Private\_OS\TForkAndExecve $fork_and_execve): \HH\Lib\_Private\_OS\TForkAndExecve `](/docs/hsl/Classes/HH.Lib.OS/posix_spawn_file_actions_addchdir_np/forkAndExecveDecorator/)
+* [` ->forkAndExecveDecorator(\HH\Lib\_Private\_OS\TForkAndExecve $fork_and_execve): \HH\Lib\_Private\_OS\TForkAndExecve `](/hsl/Classes/HH.Lib.OS/posix_spawn_file_actions_addchdir_np/forkAndExecveDecorator/)
 <!-- HHAPIDOC -->

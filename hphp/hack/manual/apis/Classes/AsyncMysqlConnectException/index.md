@@ -15,7 +15,7 @@ The exception associated with a MySQL connection failure
 
 
 
-All methods are the same as the base [` AsyncMysqlException `](/docs/apis/Classes/AsyncMysqlException/).
+All methods are the same as the base [` AsyncMysqlException `](/apis/Classes/AsyncMysqlException/).
 
 
 
@@ -32,25 +32,25 @@ class AsyncMysqlConnectException extends AsyncMysqlException {...}
 
 
 
-### Public Methods ([` AsyncMysqlException `](/docs/apis/Classes/AsyncMysqlException/))
+### Public Methods ([` AsyncMysqlException `](/apis/Classes/AsyncMysqlException/))
 
 
 
 
-+ [` ->__construct(AsyncMysqlErrorResult $result) `](/docs/apis/Classes/AsyncMysqlException/__construct/)\
-  Explicitly construct an [` AsyncMysqlException `](/docs/apis/Classes/AsyncMysqlException/)
-+ [` ->failed(): bool `](/docs/apis/Classes/AsyncMysqlException/failed/)\
++ [` ->__construct(AsyncMysqlErrorResult $result) `](/apis/Classes/AsyncMysqlException/__construct/)\
+  Explicitly construct an [` AsyncMysqlException `](/apis/Classes/AsyncMysqlException/)
++ [` ->failed(): bool `](/apis/Classes/AsyncMysqlException/failed/)\
   Returns whether the type of failure that produced the exception was a
   general connection or query failure
-+ [` ->getResult(): AsyncMysqlErrorResult `](/docs/apis/Classes/AsyncMysqlException/getResult/)\
-  Returns the underlying [` AsyncMysqlErrorResult `](/docs/apis/Classes/AsyncMysqlErrorResult/) associated with the current
++ [` ->getResult(): AsyncMysqlErrorResult `](/apis/Classes/AsyncMysqlException/getResult/)\
+  Returns the underlying [` AsyncMysqlErrorResult `](/apis/Classes/AsyncMysqlErrorResult/) associated with the current
   exception
-+ [` ->mysqlErrorCode(): int `](/docs/apis/Classes/AsyncMysqlException/mysqlErrorCode/)\
++ [` ->mysqlErrorCode(): int `](/apis/Classes/AsyncMysqlException/mysqlErrorCode/)\
   Returns the MySQL error number for that caused the current exception
-+ [` ->mysqlErrorString(): string `](/docs/apis/Classes/AsyncMysqlException/mysqlErrorString/)\
++ [` ->mysqlErrorString(): string `](/apis/Classes/AsyncMysqlException/mysqlErrorString/)\
   Returns a human-readable string for the error encountered in the current
   exception
-+ [` ->timedOut(): bool `](/docs/apis/Classes/AsyncMysqlException/timedOut/)\
++ [` ->timedOut(): bool `](/apis/Classes/AsyncMysqlException/timedOut/)\
   Returns whether the type of failure that produced the exception was a
   timeout
 <!-- HHAPIDOC -->

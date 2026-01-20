@@ -23,9 +23,9 @@ This is particularly useful for ` SELECT ` statements.
 
 
 
-This is complementary to [` numRowsAffected() `](/docs/apis/Classes/AsyncMysqlQueryResult/numRowsAffected/) as they might be the same
+This is complementary to [` numRowsAffected() `](/apis/Classes/AsyncMysqlQueryResult/numRowsAffected/) as they might be the same
 value, but if this was an `` INSERT `` query, for example, then this might be
-0, while [` numRowsAffected() `](/docs/apis/Classes/AsyncMysqlQueryResult/numRowsAffected/) could be non-zero.
+0, while [` numRowsAffected() `](/apis/Classes/AsyncMysqlQueryResult/numRowsAffected/) could be non-zero.
 
 
 
@@ -51,7 +51,7 @@ more information.
 
 
 
-This example shows how to determine the number of rows returned from a given query using [` AsyncMysqlQueryResult::numRows `](/docs/apis/Classes/AsyncMysqlQueryResult/numRows/).
+This example shows how to determine the number of rows returned from a given query using [` AsyncMysqlQueryResult::numRows `](/apis/Classes/AsyncMysqlQueryResult/numRows/).
 
 
 

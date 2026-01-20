@@ -22,7 +22,7 @@ function later(): Awaitable<void>;
 
 
 The common use case for this is if your async function actually has to wait
-for some blocking call, you can tell other [` Awaitable `](/docs/apis/Classes/HH/Awaitable/)s in the async
+for some blocking call, you can tell other [` Awaitable `](/apis/Classes/HH/Awaitable/)s in the async
 scheduler that they can work while this one waits for the blocking call to
 finish (e.g., maybe in a polling situation or something).
 
@@ -34,5 +34,5 @@ finish (e.g., maybe in a polling situation or something).
 
 
 
-+ [` Awaitable<void> `](/docs/apis/Classes/HH/Awaitable/) - [` Awaitable `](/docs/apis/Classes/HH/Awaitable/) of `` void ``.
++ [` Awaitable<void> `](/apis/Classes/HH/Awaitable/) - [` Awaitable `](/apis/Classes/HH/Awaitable/) of `` void ``.
 <!-- HHAPIDOC -->

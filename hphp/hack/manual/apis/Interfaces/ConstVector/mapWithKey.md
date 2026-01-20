@@ -6,8 +6,8 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a [` ConstVector `](/docs/apis/Interfaces/ConstVector/) containing the values after an operation has been
-applied to each key and value in the current [` ConstVector `](/docs/apis/Interfaces/ConstVector/)
+Returns a [` ConstVector `](/apis/Interfaces/ConstVector/) containing the values after an operation has been
+applied to each key and value in the current [` ConstVector `](/apis/Interfaces/ConstVector/)
 
 
 
@@ -21,8 +21,8 @@ public function mapWithKey<Tu>(
 
 
 
-Every key and value in the current [` ConstVector `](/docs/apis/Interfaces/ConstVector/) is affected by a call to
-[` mapWithKey() `](/docs/apis/Interfaces/ConstVector/mapWithKey/), unlike [` filterWithKey() `](/docs/apis/Interfaces/ConstVector/filterWithKey/) where only values that meet a
+Every key and value in the current [` ConstVector `](/apis/Interfaces/ConstVector/) is affected by a call to
+[` mapWithKey() `](/apis/Interfaces/ConstVector/mapWithKey/), unlike [` filterWithKey() `](/apis/Interfaces/ConstVector/filterWithKey/) where only values that meet a
 certain criteria are affected.
 
 
@@ -34,7 +34,7 @@ certain criteria are affected.
 
 
 + ` (function(int, Tv): Tu) $fn ` - The callback containing the operation to apply to the
-  [` ConstVector `](/docs/apis/Interfaces/ConstVector/) keys and values.
+  [` ConstVector `](/apis/Interfaces/ConstVector/) keys and values.
 
 
 
@@ -44,6 +44,6 @@ certain criteria are affected.
 
 
 
-* [` ConstVector<Tu> `](/docs/apis/Interfaces/ConstVector/) - a [` ConstVector `](/docs/apis/Interfaces/ConstVector/) containing the values after a user-specified
+* [` ConstVector<Tu> `](/apis/Interfaces/ConstVector/) - a [` ConstVector `](/apis/Interfaces/ConstVector/) containing the values after a user-specified
   operation on the current Vector's keys and values is applied.
 <!-- HHAPIDOC -->

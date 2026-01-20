@@ -7,7 +7,7 @@ the Hack LSP instead for complete and up-to-date information.
 :::
 
 Returns an immutable vector (` ImmVector `) with the values of the current
-[` ImmSet `](/docs/apis/Classes/HH/ImmSet/)
+[` ImmSet `](/apis/Classes/HH/ImmSet/)
 
 
 
@@ -24,8 +24,8 @@ public function toImmVector(): ImmVector<Tv>;
 
 
 
-+ [` ImmVector<Tv> `](/docs/apis/Classes/HH/ImmVector/) - an `` ImmVector `` (integer-indexed) with the values of the current
-  [` ImmSet `](/docs/apis/Classes/HH/ImmSet/).
++ [` ImmVector<Tv> `](/apis/Classes/HH/ImmVector/) - an `` ImmVector `` (integer-indexed) with the values of the current
+  [` ImmSet `](/apis/Classes/HH/ImmSet/).
 
 
 
@@ -35,5 +35,5 @@ public function toImmVector(): ImmVector<Tv>;
 
 
 
-See [` Set::toImmVector `](/docs/apis/Classes/HH/Set/toImmVector/#examples) for usage examples.
+See [` Set::toImmVector `](/apis/Classes/HH/Set/toImmVector/#examples) for usage examples.
 <!-- HHAPIDOC -->

@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns the first value in the current [` MutableMap `](/docs/apis/Interfaces/MutableMap/)
+Returns the first value in the current [` MutableMap `](/apis/Interfaces/MutableMap/)
 
 
 
@@ -23,6 +23,6 @@ public function firstValue(): ?Tv;
 
 
 
-+ ` ?Tv ` - The first value in the current [` MutableMap `](/docs/apis/Interfaces/MutableMap/),  or `` null `` if the
-  [` MutableMap `](/docs/apis/Interfaces/MutableMap/) is empty.
++ ` ?Tv ` - The first value in the current [` MutableMap `](/apis/Interfaces/MutableMap/),  or `` null `` if the
+  [` MutableMap `](/apis/Interfaces/MutableMap/) is empty.
 <!-- HHAPIDOC -->

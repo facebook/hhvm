@@ -42,5 +42,5 @@ abstract class BuiltinAbstractEnumClass {...}
 
 
 
-+ [` ::nameOf<TType>(EnumClass\Label<this, TType> $label): string `](/docs/apis/Classes/HH/BuiltinAbstractEnumClass/nameOf/)
++ [` ::nameOf<TType>(EnumClass\Label<this, TType> $label): string `](/apis/Classes/HH/BuiltinAbstractEnumClass/nameOf/)
 <!-- HHAPIDOC -->

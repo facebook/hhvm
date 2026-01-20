@@ -42,10 +42,10 @@ and efficiency.
 
 For the common cases where async would provide maximum benefit, HHVM provides convenient extension libraries to help make writing code
 much easier. Depending on the use case scenario, we should liberally use:
-* [MySQL](/docs/hack/asynchronous-operations/extensions#mysql) for database access and queries.
-* [cURL](/docs/hack/asynchronous-operations/extensions#curl) for web page data and transfer.
-* [McRouter](/docs/hack/asynchronous-operations/extensions#mcrouter) for memcached-based operations.
-* [Streams](/docs/hack/asynchronous-operations/extensions#streams) for stream-based resource operations.
+* [MySQL](/hack/asynchronous-operations/extensions#mysql) for database access and queries.
+* [cURL](/hack/asynchronous-operations/extensions#curl) for web page data and transfer.
+* [McRouter](/hack/asynchronous-operations/extensions#mcrouter) for memcached-based operations.
+* [Streams](/hack/asynchronous-operations/extensions#streams) for stream-based resource operations.
 
 ## Do Not Use Async in Loops
 
@@ -353,7 +353,7 @@ use dependencies via awaitables and `await`.
 
 Given that async is commonly used in operations that are time-consuming, memoizing (i.e., caching) the result of an async call can definitely be worthwhile.
 
-The [`<<__Memoize>>`](/docs/hack/attributes/predefined-attributes#__memoize) attribute does the right thing, so, use that. However, if to get
+The [`<<__Memoize>>`](/hack/attributes/predefined-attributes#__memoize) attribute does the right thing, so, use that. However, if to get
 explicit control of the memoization, *memoize the awaitable* and not the result of awaiting it.
 
 ```hack
@@ -428,7 +428,7 @@ function runMe(): void {
 }
 ```
 
-This simply caches the handle and returns it verbatim; [Async Vs Awaitable](/docs/hack/asynchronous-operations/introduction) explains this in more detail.
+This simply caches the handle and returns it verbatim; [Async Vs Awaitable](/hack/asynchronous-operations/introduction) explains this in more detail.
 
 This would also work if it were an async function that awaited the handle after caching. This may seem unintuitive, because the function
 `await`s every time it's executed, even on the cache-hit path. But that's fine: on every execution except the first, `$handle` is not `null`, so
@@ -439,7 +439,7 @@ Either approach works, but the non-async caching wrapper can be easier to reason
 ## Use Lambdas Where Possible
 
 The use of lambdas can cut down on code verbosity that comes with writing full closure syntax. Lambdas are quite useful in conjunction
-with the [async utility helpers](/docs/hack/asynchronous-operations/utility-functions).  For example, look how the following three ways to accomplish the same thing can be
+with the [async utility helpers](/hack/asynchronous-operations/utility-functions).  For example, look how the following three ways to accomplish the same thing can be
 shortened using lambdas.
 
 ```hack
@@ -515,4 +515,4 @@ multitasking). Async still lives in the single-threaded world of normal Hack!
 
 To strike a balance between flexibility, latency, and performance, we require
 that `await`s only appear in **unconditionally consumed expression positions**.
-For more details, see [Await As An Expression](/docs/hack/asynchronous-operations/await-as-an-expression).
+For more details, see [Await As An Expression](/hack/asynchronous-operations/await-as-an-expression).

@@ -56,7 +56,7 @@ $arr = dict['black' => 10, 'white' => null];
 ## Coalescing assignment operator
 
 A coalescing
-[assignment](/docs/hack/expressions-and-operators/assignment)
+[assignment](/hack/expressions-and-operators/assignment)
 operator `??=` is also available.
 
 The `??=` operator can be used for conditionally writing to a variable if it is

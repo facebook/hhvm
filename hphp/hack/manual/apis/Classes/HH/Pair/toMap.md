@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns an integer-keyed ` Map ` based on the elements of the current [` Pair `](/docs/apis/Classes/HH/Pair/)
+Returns an integer-keyed ` Map ` based on the elements of the current [` Pair `](/apis/Classes/HH/Pair/)
 
 
 
@@ -28,7 +28,7 @@ The keys are 0 and 1.
 
 
 
-+ [` Map<int, `](/docs/apis/Classes/HH/Map/)`` mixed> `` - an integer-keyed ``` Map ``` with the values of the current [` Pair `](/docs/apis/Classes/HH/Pair/).
++ [` Map<int, `](/apis/Classes/HH/Map/)`` mixed> `` - an integer-keyed ``` Map ``` with the values of the current [` Pair `](/apis/Classes/HH/Pair/).
 
 
 

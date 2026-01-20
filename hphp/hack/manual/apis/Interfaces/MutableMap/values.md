@@ -6,8 +6,8 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a [` MutableVector `](/docs/apis/Interfaces/MutableVector/) containing the values of the current
-[` MutableMap `](/docs/apis/Interfaces/MutableMap/)
+Returns a [` MutableVector `](/apis/Interfaces/MutableVector/) containing the values of the current
+[` MutableMap `](/apis/Interfaces/MutableMap/)
 
 
 
@@ -19,7 +19,7 @@ public function values(): MutableVector<Tv>;
 
 
 
-The indices of the [` MutableVector `](/docs/apis/Interfaces/MutableVector/)`` will be integer-indexed starting from 0, no matter the keys of the ``MutableMap`.
+The indices of the [` MutableVector `](/apis/Interfaces/MutableVector/)`` will be integer-indexed starting from 0, no matter the keys of the ``MutableMap`.
 
 
 
@@ -29,6 +29,6 @@ The indices of the [` MutableVector `](/docs/apis/Interfaces/MutableVector/)`` w
 
 
 
-+ [` MutableVector<Tv> `](/docs/apis/Interfaces/MutableVector/) - a [` MutableVector `](/docs/apis/Interfaces/MutableVector/) containing the values of the current
-  [` MutableMap `](/docs/apis/Interfaces/MutableMap/).
++ [` MutableVector<Tv> `](/apis/Interfaces/MutableVector/) - a [` MutableVector `](/apis/Interfaces/MutableVector/) containing the values of the current
+  [` MutableMap `](/apis/Interfaces/MutableMap/).
 <!-- HHAPIDOC -->

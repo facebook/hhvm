@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns an ` array ` containing the values from the current [` ImmSet `](/docs/apis/Classes/HH/ImmSet/)
+Returns an ` array ` containing the values from the current [` ImmSet `](/apis/Classes/HH/ImmSet/)
 
 
 
@@ -18,12 +18,12 @@ public function toKeysArray(): varray<Tv>;
 
 
 
-[` Set `](/docs/apis/Classes/HH/Set/)s don't have keys. So this method just returns the values.
+[` Set `](/apis/Classes/HH/Set/)s don't have keys. So this method just returns the values.
 
 
 
 
-This method is interchangeable with [` toValuesArray() `](/docs/apis/Classes/HH/ImmSet/toValuesArray/).
+This method is interchangeable with [` toValuesArray() `](/apis/Classes/HH/ImmSet/toValuesArray/).
 
 
 
@@ -34,7 +34,7 @@ This method is interchangeable with [` toValuesArray() `](/docs/apis/Classes/HH/
 
 
 + ` varray<Tv> ` - an integer-indexed `` array `` containing the values from the
-  current [` ImmSet `](/docs/apis/Classes/HH/ImmSet/).
+  current [` ImmSet `](/apis/Classes/HH/ImmSet/).
 
 
 
@@ -44,5 +44,5 @@ This method is interchangeable with [` toValuesArray() `](/docs/apis/Classes/HH/
 
 
 
-See [` Set::toKeysArray `](/docs/apis/Classes/HH/Set/toKeysArray/#examples) for usage examples.
+See [` Set::toKeysArray `](/apis/Classes/HH/Set/toKeysArray/#examples) for usage examples.
 <!-- HHAPIDOC -->

@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns an ` array ` containing the values from the current [` ImmMap `](/docs/apis/Classes/HH/ImmMap/)
+Returns an ` array ` containing the values from the current [` ImmMap `](/apis/Classes/HH/ImmMap/)
 
 
 
@@ -24,7 +24,7 @@ public function toValuesArray(): varray<Tv>;
 
 
 + ` varray<Tv> ` - an integer-indexed `` array `` containing the values from the
-  current [` ImmMap `](/docs/apis/Classes/HH/ImmMap/).
+  current [` ImmMap `](/apis/Classes/HH/ImmMap/).
 
 
 
@@ -34,5 +34,5 @@ public function toValuesArray(): varray<Tv>;
 
 
 
-See [` Map::toValuesArray `](/docs/apis/Classes/HH/Map/toValuesArray/#examples) for usage examples.
+See [` Map::toValuesArray `](/apis/Classes/HH/Map/toValuesArray/#examples) for usage examples.
 <!-- HHAPIDOC -->

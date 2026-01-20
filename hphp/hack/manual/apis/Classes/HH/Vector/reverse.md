@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Reverse the elements of the current [` Vector `](/docs/apis/Classes/HH/Vector/) in place
+Reverse the elements of the current [` Vector `](/apis/Classes/HH/Vector/) in place
 
 
 

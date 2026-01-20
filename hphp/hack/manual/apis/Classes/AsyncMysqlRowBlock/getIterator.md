@@ -23,7 +23,7 @@ public function getIterator(): KeyedIterator<int, AsyncMysqlRow>;
 
 
 
-+ [` KeyedIterator<int, `](/docs/apis/Interfaces/HH/KeyedIterator/)`` AsyncMysqlRow> `` - An [` AsyncMysqlRowBlockIterator `](/docs/apis/Classes/AsyncMysqlRowBlockIterator/) to iterate over the current
++ [` KeyedIterator<int, `](/apis/Interfaces/HH/KeyedIterator/)`` AsyncMysqlRow> `` - An [` AsyncMysqlRowBlockIterator `](/apis/Classes/AsyncMysqlRowBlockIterator/) to iterate over the current
   row block.
 
 
@@ -34,12 +34,12 @@ public function getIterator(): KeyedIterator<int, AsyncMysqlRow>;
 
 
 
-The following example shows you how to get an iterator of an [` AsyncMysqlRowBlock `](/docs/apis/Classes/AsyncMysqlRowBlock/) via [` getIterator() `](/docs/apis/Classes/AsyncMysqlRowBlock/getIterator/). Getting an iterator of an [` AsyncMysqlRowBlock `](/docs/apis/Classes/AsyncMysqlRowBlock/) gives you an [` AsyncMysqlRowBlockIterator `](/docs/apis/Classes/AsyncMysqlRowBlockIterator/), where each key of that iterator is an `` int `` representing the key to an [` AsyncMysqlRow `](/docs/apis/Classes/AsyncMysqlRow/) of that row block, and each value from `` current() `` is the actual [` AsyncMysqlRow `](/docs/apis/Classes/AsyncMysqlRow/).
+The following example shows you how to get an iterator of an [` AsyncMysqlRowBlock `](/apis/Classes/AsyncMysqlRowBlock/) via [` getIterator() `](/apis/Classes/AsyncMysqlRowBlock/getIterator/). Getting an iterator of an [` AsyncMysqlRowBlock `](/apis/Classes/AsyncMysqlRowBlock/) gives you an [` AsyncMysqlRowBlockIterator `](/apis/Classes/AsyncMysqlRowBlockIterator/), where each key of that iterator is an `` int `` representing the key to an [` AsyncMysqlRow `](/apis/Classes/AsyncMysqlRow/) of that row block, and each value from `` current() `` is the actual [` AsyncMysqlRow `](/apis/Classes/AsyncMysqlRow/).
 
 
 
 
-And then you can perform operations on that [` AsyncMysqlRow `](/docs/apis/Classes/AsyncMysqlRow/), including get an iterator of that as well.
+And then you can perform operations on that [` AsyncMysqlRow `](/apis/Classes/AsyncMysqlRow/), including get an iterator of that as well.
 
 
 

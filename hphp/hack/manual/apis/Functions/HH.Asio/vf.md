@@ -6,8 +6,8 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns an [` Awaitable `](/docs/apis/Classes/HH/Awaitable/) of [` Vector `](/docs/apis/Classes/HH/Vector/) after a filtering operation has been
-applied to each value in the provided [` KeyedTraversable `](/docs/apis/Interfaces/HH/KeyedTraversable/)
+Returns an [` Awaitable `](/apis/Classes/HH/Awaitable/) of [` Vector `](/apis/Classes/HH/Vector/) after a filtering operation has been
+applied to each value in the provided [` KeyedTraversable `](/apis/Interfaces/HH/KeyedTraversable/)
 
 
 
@@ -24,8 +24,8 @@ function vf<Tk, T>(
 
 
 
-This function is similar to [` Vector::filter() `](/docs/apis/Classes/HH/Vector/filter/), but the filtering of the
-values is done using [` Awaitable `](/docs/apis/Classes/HH/Awaitable/)s.
+This function is similar to [` Vector::filter() `](/apis/Classes/HH/Vector/filter/), but the filtering of the
+values is done using [` Awaitable `](/apis/Classes/HH/Awaitable/)s.
 
 
 
@@ -36,13 +36,13 @@ we are doing a ``` f ```iltering operation.
 
 
 
-` $callable ` must return an [` Awaitable `](/docs/apis/Classes/HH/Awaitable/) of `` bool ``.
+` $callable ` must return an [` Awaitable `](/apis/Classes/HH/Awaitable/) of `` bool ``.
 
 
 
 
-The values in the [` Vector `](/docs/apis/Classes/HH/Vector/) of the returned [` Awaitable `](/docs/apis/Classes/HH/Awaitable/) are not available
-until you `` await `` or ``` join ``` the returned [` Awaitable `](/docs/apis/Classes/HH/Awaitable/).
+The values in the [` Vector `](/apis/Classes/HH/Vector/) of the returned [` Awaitable `](/apis/Classes/HH/Awaitable/) are not available
+until you `` await `` or ``` join ``` the returned [` Awaitable `](/apis/Classes/HH/Awaitable/).
 
 
 
@@ -52,8 +52,8 @@ until you `` await `` or ``` join ``` the returned [` Awaitable `](/docs/apis/Cl
 
 
 
-+ [` KeyedTraversable<Tk, `](/docs/apis/Interfaces/HH/KeyedTraversable/)`` T, mixed> $inputs `` - The [` KeyedTraversable `](/docs/apis/Interfaces/HH/KeyedTraversable/) of values to map.
-+ ` (function(T): Awaitable<bool>) $callable ` - The callable containing the [` Awaitable `](/docs/apis/Classes/HH/Awaitable/) operation to
++ [` KeyedTraversable<Tk, `](/apis/Interfaces/HH/KeyedTraversable/)`` T, mixed> $inputs `` - The [` KeyedTraversable `](/apis/Interfaces/HH/KeyedTraversable/) of values to map.
++ ` (function(T): Awaitable<bool>) $callable ` - The callable containing the [` Awaitable `](/apis/Classes/HH/Awaitable/) operation to
   apply to `` $inputs ``.
 
 
@@ -64,7 +64,7 @@ until you `` await `` or ``` join ``` the returned [` Awaitable `](/docs/apis/Cl
 
 
 
-* [` Awaitable<Vector<T>> `](/docs/apis/Classes/HH/Awaitable/) - An [` Awaitable `](/docs/apis/Classes/HH/Awaitable/) of [` Vector `](/docs/apis/Classes/HH/Vector/) after the filtering operation has been
+* [` Awaitable<Vector<T>> `](/apis/Classes/HH/Awaitable/) - An [` Awaitable `](/apis/Classes/HH/Awaitable/) of [` Vector `](/apis/Classes/HH/Vector/) after the filtering operation has been
   applied to the values in  `` $inputs ``.
 
 

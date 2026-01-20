@@ -23,7 +23,7 @@ public function toImmMap(): ImmMap<Tk, Tv>;
 
 
 
-+ [` ImmMap<Tk, `](/docs/apis/Classes/HH/ImmMap/)`` Tv> `` - an ``` ImmMap ``` that is a copy of the current ```` ImmMap ````.
++ [` ImmMap<Tk, `](/apis/Classes/HH/ImmMap/)`` Tv> `` - an ``` ImmMap ``` that is a copy of the current ```` ImmMap ````.
 
 
 
@@ -33,5 +33,5 @@ public function toImmMap(): ImmMap<Tk, Tv>;
 
 
 
-See [` Map::toImmMap `](/docs/apis/Classes/HH/Map) for usage examples.
+See [` Map::toImmMap `](/apis/Classes/HH/Map) for usage examples.
 <!-- HHAPIDOC -->

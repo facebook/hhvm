@@ -18,5 +18,5 @@ public function genNext(): Awaitable<(?vec<string>, ?string)>;
 
 
 
-+ [` Awaitable<(?vec<string>, `](/docs/apis/Classes/HH/Awaitable/)`` ?string)> ``
++ [` Awaitable<(?vec<string>, `](/apis/Classes/HH/Awaitable/)`` ?string)> ``
 <!-- HHAPIDOC -->

@@ -23,6 +23,6 @@ public function getFile(): ReflectionFile;
 
 
 
-+ [` ReflectionFile `](/docs/apis/Classes/ReflectionFile/) - A ReflectionFile object of the file that the
++ [` ReflectionFile `](/apis/Classes/ReflectionFile/) - A ReflectionFile object of the file that the
   reflected type alias is part of.
 <!-- HHAPIDOC -->

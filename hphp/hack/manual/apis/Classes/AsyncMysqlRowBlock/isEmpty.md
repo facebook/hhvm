@@ -33,7 +33,7 @@ public function isEmpty(): bool;
 
 
 
-The following example uses [` AsyncMysqlRowBlock::isEmpty `](/docs/apis/Classes/AsyncMysqlRowBlock/isEmpty/) to determine whether there are actually any row_blocks returned from the call to `` AsyncMysqlRowBlock::rowBlocks() `` method
+The following example uses [` AsyncMysqlRowBlock::isEmpty `](/apis/Classes/AsyncMysqlRowBlock/isEmpty/) to determine whether there are actually any row_blocks returned from the call to `` AsyncMysqlRowBlock::rowBlocks() `` method
 
 
 

@@ -6,8 +6,8 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a [` Set `](/docs/apis/Classes/HH/Set/) containing the values after an operation has been applied
-to each value in the current [` Set `](/docs/apis/Classes/HH/Set/)
+Returns a [` Set `](/apis/Classes/HH/Set/) containing the values after an operation has been applied
+to each value in the current [` Set `](/apis/Classes/HH/Set/)
 
 
 
@@ -21,8 +21,8 @@ public function map<Tu as arraykey>(
 
 
 
-Every value in the current [` Set `](/docs/apis/Classes/HH/Set/) is affected by a call to [` map() `](/docs/apis/Classes/HH/Set/map/), unlike
-[` filter() `](/docs/apis/Classes/HH/Set/filter/) where only values that meet a certain criteria are affected.
+Every value in the current [` Set `](/apis/Classes/HH/Set/) is affected by a call to [` map() `](/apis/Classes/HH/Set/map/), unlike
+[` filter() `](/apis/Classes/HH/Set/filter/) where only values that meet a certain criteria are affected.
 
 
 
@@ -32,7 +32,7 @@ Every value in the current [` Set `](/docs/apis/Classes/HH/Set/) is affected by 
 
 
 
-+ [Examples](</docs/hack/arrays-and-collections/introduction>)
++ [Examples](</hack/arrays-and-collections/introduction>)
 
 
 
@@ -55,7 +55,7 @@ Every value in the current [` Set `](/docs/apis/Classes/HH/Set/) is affected by 
 
 
 
-- [` Set<Tu> `](/docs/apis/Classes/HH/Set/) - a [` Set `](/docs/apis/Classes/HH/Set/) containing the values after a user-specified operation
+- [` Set<Tu> `](/apis/Classes/HH/Set/) - a [` Set `](/apis/Classes/HH/Set/) containing the values after a user-specified operation
   is applied.
 
 
@@ -66,7 +66,7 @@ Every value in the current [` Set `](/docs/apis/Classes/HH/Set/) is affected by 
 
 
 
-In this example the [` Set `](/docs/apis/Classes/HH/Set/)'s elements are mapped to the same type (`` string ``s):
+In this example the [` Set `](/apis/Classes/HH/Set/)'s elements are mapped to the same type (`` string ``s):
 
 
 
@@ -84,7 +84,7 @@ $shortened = $s->map($color ==> \substr($color, 0, 3));
 
 
 
-In this example the [` Set `](/docs/apis/Classes/HH/Set/)'s elements are mapped to a different type (`` int ``s):
+In this example the [` Set `](/apis/Classes/HH/Set/)'s elements are mapped to a different type (`` int ``s):
 
 
 

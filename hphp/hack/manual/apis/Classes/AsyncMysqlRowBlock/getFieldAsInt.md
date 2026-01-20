@@ -54,7 +54,7 @@ type, then an ` Exception ` is thrown.
 
 
 
-The following example shows how to get a field value as an ` int ` value via [` AsyncMysqlRowBlock::getFieldAsInt `](/docs/apis/Classes/AsyncMysqlRowBlock/getFieldAsInt/). Assume this was the SQL used to create the example table:
+The following example shows how to get a field value as an ` int ` value via [` AsyncMysqlRowBlock::getFieldAsInt `](/apis/Classes/AsyncMysqlRowBlock/getFieldAsInt/). Assume this was the SQL used to create the example table:
 
 
 

@@ -7,7 +7,7 @@ the Hack LSP instead for complete and up-to-date information.
 :::
 
 Removes the key/value pair with the specified key from the current
-[` Vector `](/docs/apis/Classes/HH/Vector/)
+[` Vector `](/apis/Classes/HH/Vector/)
 
 
 
@@ -24,19 +24,19 @@ public function removeKey(
 This will cause elements with higher keys to be assigned a new key that is
 one less than their previous key.  That is, values with keys ` $k + 1 ` to
 `` n - 1 `` will be given new keys ``` $k ``` to ```` n - 2 ````, where n is the length of
-the current [` Vector `](/docs/apis/Classes/HH/Vector/) before the call to [` removeKey() `](/docs/apis/Classes/HH/Vector/removeKey/).
+the current [` Vector `](/apis/Classes/HH/Vector/) before the call to [` removeKey() `](/apis/Classes/HH/Vector/removeKey/).
 
 
 
 
 If ` $k ` is negative, or `` $k `` is greater than the largest key in the current
-[` Vector `](/docs/apis/Classes/HH/Vector/), no changes are made.
+[` Vector `](/apis/Classes/HH/Vector/), no changes are made.
 
 
 
 
-Future changes made to the current [` Vector `](/docs/apis/Classes/HH/Vector/) ARE reflected in the
-returned [` Vector `](/docs/apis/Classes/HH/Vector/), and vice-versa.
+Future changes made to the current [` Vector `](/apis/Classes/HH/Vector/) ARE reflected in the
+returned [` Vector `](/apis/Classes/HH/Vector/), and vice-versa.
 
 
 
@@ -56,7 +56,7 @@ returned [` Vector `](/docs/apis/Classes/HH/Vector/), and vice-versa.
 
 
 
-* [` Vector<Tv> `](/docs/apis/Classes/HH/Vector/) - Returns itself.
+* [` Vector<Tv> `](/apis/Classes/HH/Vector/) - Returns itself.
 
 
 
@@ -66,7 +66,7 @@ returned [` Vector `](/docs/apis/Classes/HH/Vector/), and vice-versa.
 
 
 
-Since [` Vector::removeKey() `](/docs/apis/Classes/HH/Vector/removeKey/) returns a [shallow copy](<https://en.wikipedia.org/wiki/Object_copying#Shallow_copy>) of ` $v ` itself, you can chain a bunch of [` removeKey() `](/docs/apis/Classes/HH/Vector/removeKey/) calls together.
+Since [` Vector::removeKey() `](/apis/Classes/HH/Vector/removeKey/) returns a [shallow copy](<https://en.wikipedia.org/wiki/Object_copying#Shallow_copy>) of ` $v ` itself, you can chain a bunch of [` removeKey() `](/apis/Classes/HH/Vector/removeKey/) calls together.
 
 
 

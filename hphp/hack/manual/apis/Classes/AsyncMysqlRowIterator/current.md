@@ -34,7 +34,7 @@ public function current(): string;
 
 
 
-The following example shows you how to use [` AsyncMysqlRowIterator::current `](/docs/apis/Classes/AsyncMysqlRowIterator/current/) to get a field value from the iterator.
+The following example shows you how to use [` AsyncMysqlRowIterator::current `](/apis/Classes/AsyncMysqlRowIterator/current/) to get a field value from the iterator.
 
 
 

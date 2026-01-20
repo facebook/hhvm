@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns an ` array ` containing the values from the current [` Vector `](/docs/apis/Classes/HH/Vector/)
+Returns an ` array ` containing the values from the current [` Vector `](/apis/Classes/HH/Vector/)
 
 
 
@@ -28,7 +28,7 @@ This method is interchangeable with ` toArray() `.
 
 
 
-+ ` varray<Tv> ` - An `` array `` containing the values from the current [` Vector `](/docs/apis/Classes/HH/Vector/).
++ ` varray<Tv> ` - An `` array `` containing the values from the current [` Vector `](/apis/Classes/HH/Vector/).
 
 
 

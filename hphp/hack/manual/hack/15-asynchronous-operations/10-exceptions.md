@@ -56,9 +56,9 @@ function main(): void {
 }
 ```
 
-To get around this, and get the successful results as well, we can use the [utility function](/docs/hack/asynchronous-operations/utility-functions)
-[`HH\Asio\wrap`](/docs/apis/Functions/HH.Asio/wrap/). It takes an awaitable and returns the expected result or the exception
-if one was thrown. The exception it gives back is of the type [`ResultOrExceptionWrapper`](/docs/apis/Interfaces/HH.Asio/ResultOrExceptionWrapper/).
+To get around this, and get the successful results as well, we can use the [utility function](/hack/asynchronous-operations/utility-functions)
+[`HH\Asio\wrap`](/apis/Functions/HH.Asio/wrap/). It takes an awaitable and returns the expected result or the exception
+if one was thrown. The exception it gives back is of the type [`ResultOrExceptionWrapper`](/apis/Interfaces/HH.Asio/ResultOrExceptionWrapper/).
 
 ```hack no-extract
 namespace HH\Asio {
@@ -100,7 +100,7 @@ function main(): void {
 ```
 
 ## Memoized Async Exceptions
-Because [`__Memoize`](/docs/hack/attributes/predefined-attributes#__memoize) caches the awaitable itself, **if an async function
+Because [`__Memoize`](/hack/attributes/predefined-attributes#__memoize) caches the awaitable itself, **if an async function
 is memoized and throws, you will get the same exception backtrace on every
 failed call**.
 

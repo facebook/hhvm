@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a [` Vector `](/docs/apis/Classes/HH/Vector/) containing the values of the current [` Vector `](/docs/apis/Classes/HH/Vector/) that meet
+Returns a [` Vector `](/apis/Classes/HH/Vector/) containing the values of the current [` Vector `](/apis/Classes/HH/Vector/) that meet
 a supplied condition
 
 
@@ -21,9 +21,9 @@ public function filter(
 
 
 
-[` filter() `](/docs/apis/Classes/HH/Vector/filter/)'s result contains only values that meet the provided criterion;
-unlike [` map() `](/docs/apis/Classes/HH/Vector/map/), where a value is included for each value in the original
-[` Vector `](/docs/apis/Classes/HH/Vector/).
+[` filter() `](/apis/Classes/HH/Vector/filter/)'s result contains only values that meet the provided criterion;
+unlike [` map() `](/apis/Classes/HH/Vector/map/), where a value is included for each value in the original
+[` Vector `](/apis/Classes/HH/Vector/).
 
 
 
@@ -33,7 +33,7 @@ unlike [` map() `](/docs/apis/Classes/HH/Vector/map/), where a value is included
 
 
 
-+ [Examples](</docs/hack/arrays-and-collections/introduction>)
++ [Examples](</hack/arrays-and-collections/introduction>)
 
 
 
@@ -56,7 +56,7 @@ unlike [` map() `](/docs/apis/Classes/HH/Vector/map/), where a value is included
 
 
 
-- [` Vector<Tv> `](/docs/apis/Classes/HH/Vector/) - A [` Vector `](/docs/apis/Classes/HH/Vector/) containing the values after a user-specified condition
+- [` Vector<Tv> `](/apis/Classes/HH/Vector/) - A [` Vector `](/apis/Classes/HH/Vector/) containing the values after a user-specified condition
   is applied.
 
 

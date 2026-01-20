@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a ` varray ` whose values are the keys from the current [` Pair `](/docs/apis/Classes/HH/Pair/)
+Returns a ` varray ` whose values are the keys from the current [` Pair `](/apis/Classes/HH/Pair/)
 
 
 
@@ -23,7 +23,7 @@ public function toKeysArray(): varray<int>;
 
 
 
-+ ` varray<int> ` - a `` varray `` with the integer keys from the current [` Pair `](/docs/apis/Classes/HH/Pair/).
++ ` varray<int> ` - a `` varray `` with the integer keys from the current [` Pair `](/apis/Classes/HH/Pair/).
 
 
 

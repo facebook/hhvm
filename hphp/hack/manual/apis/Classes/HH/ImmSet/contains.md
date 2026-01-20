@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Determines if the specified value is in the current [` ImmSet `](/docs/apis/Classes/HH/ImmSet/)
+Determines if the specified value is in the current [` ImmSet `](/apis/Classes/HH/ImmSet/)
 
 
 
@@ -35,7 +35,7 @@ public function contains(
 
 
 
-* ` bool ` - `` true `` if the specified value is present in the current [` ImmSet `](/docs/apis/Classes/HH/ImmSet/);
+* ` bool ` - `` true `` if the specified value is present in the current [` ImmSet `](/apis/Classes/HH/ImmSet/);
   `` false `` otherwise.
 
 
@@ -46,5 +46,5 @@ public function contains(
 
 
 
-See [` Set::contains `](/docs/apis/Classes/HH/Set/contains/#examples) for usage examples.
+See [` Set::contains `](/apis/Classes/HH/Set/contains/#examples) for usage examples.
 <!-- HHAPIDOC -->

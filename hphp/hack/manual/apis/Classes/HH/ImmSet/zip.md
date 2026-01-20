@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Throws an exception unless the current [` ImmSet `](/docs/apis/Classes/HH/ImmSet/) or the [` Traversable `](/docs/apis/Interfaces/HH/Traversable/) is
+Throws an exception unless the current [` ImmSet `](/apis/Classes/HH/ImmSet/) or the [` Traversable `](/apis/Interfaces/HH/Traversable/) is
 empty
 
 
@@ -21,10 +21,10 @@ public function zip<Tu>(
 
 
 
-Since [` ImmSet `](/docs/apis/Classes/HH/ImmSet/)s only support integers or strings as values, we cannot
-have a [` Pair `](/docs/apis/Classes/HH/Pair/) as an [` ImmSet `](/docs/apis/Classes/HH/ImmSet/) value. So in order to avoid an
-`` InvalidArgumentException ``, either the current [` ImmSet `](/docs/apis/Classes/HH/ImmSet/) or the
-[` Traversable `](/docs/apis/Interfaces/HH/Traversable/) must be empty so that we actually return an empty [` ImmSet `](/docs/apis/Classes/HH/ImmSet/).
+Since [` ImmSet `](/apis/Classes/HH/ImmSet/)s only support integers or strings as values, we cannot
+have a [` Pair `](/apis/Classes/HH/Pair/) as an [` ImmSet `](/apis/Classes/HH/ImmSet/) value. So in order to avoid an
+`` InvalidArgumentException ``, either the current [` ImmSet `](/apis/Classes/HH/ImmSet/) or the
+[` Traversable `](/apis/Interfaces/HH/Traversable/) must be empty so that we actually return an empty [` ImmSet `](/apis/Classes/HH/ImmSet/).
 
 
 
@@ -34,8 +34,8 @@ have a [` Pair `](/docs/apis/Classes/HH/Pair/) as an [` ImmSet `](/docs/apis/Cla
 
 
 
-+ [` Traversable<Tu> `](/docs/apis/Interfaces/HH/Traversable/)`` $traversable `` - The [` Traversable `](/docs/apis/Interfaces/HH/Traversable/) to use to combine with the
-  elements of the current [` ImmSet `](/docs/apis/Classes/HH/ImmSet/).
++ [` Traversable<Tu> `](/apis/Interfaces/HH/Traversable/)`` $traversable `` - The [` Traversable `](/apis/Interfaces/HH/Traversable/) to use to combine with the
+  elements of the current [` ImmSet `](/apis/Classes/HH/ImmSet/).
 
 
 
@@ -45,8 +45,8 @@ have a [` Pair `](/docs/apis/Classes/HH/Pair/) as an [` ImmSet `](/docs/apis/Cla
 
 
 
-* [` ImmSet<HH\nothing> `](/docs/apis/Classes/HH/ImmSet/) - The [` ImmSet `](/docs/apis/Classes/HH/ImmSet/) that combines the values of the current [` ImmSet `](/docs/apis/Classes/HH/ImmSet/)
-  with the provided [` Traversable `](/docs/apis/Interfaces/HH/Traversable/); one of these must be empty or
+* [` ImmSet<HH\nothing> `](/apis/Classes/HH/ImmSet/) - The [` ImmSet `](/apis/Classes/HH/ImmSet/) that combines the values of the current [` ImmSet `](/apis/Classes/HH/ImmSet/)
+  with the provided [` Traversable `](/apis/Interfaces/HH/Traversable/); one of these must be empty or
   an exception is thrown.
 
 
@@ -57,5 +57,5 @@ have a [` Pair `](/docs/apis/Classes/HH/Pair/) as an [` ImmSet `](/docs/apis/Cla
 
 
 
-See [` Set::zip `](/docs/apis/Classes/HH/Set/zip/#examples) for usage examples.
+See [` Set::zip `](/apis/Classes/HH/Set/zip/#examples) for usage examples.
 <!-- HHAPIDOC -->

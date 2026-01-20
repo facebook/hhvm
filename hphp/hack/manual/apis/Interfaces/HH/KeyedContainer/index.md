@@ -27,9 +27,9 @@ Without iterating, you can access keys directly: ` $keyed_container[$key] `.
 
 
 
-+ [Introduction](</docs/hack/arrays-and-collections/introduction>)
-+ [Interfaces](</docs/hack/arrays-and-collections/introduction>)
-+ [Read Write](</docs/hack/arrays-and-collections/mutating-values>)
++ [Introduction](</hack/arrays-and-collections/introduction>)
++ [Interfaces](</hack/arrays-and-collections/introduction>)
++ [Read Write](</hack/arrays-and-collections/mutating-values>)
 
 
 

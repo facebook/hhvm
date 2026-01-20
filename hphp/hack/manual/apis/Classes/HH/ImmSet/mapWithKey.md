@@ -6,8 +6,8 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns an [` ImmSet `](/docs/apis/Classes/HH/ImmSet/) containing the values after an operation has been
-applied to each "key" and value in the current [` ImmSet `](/docs/apis/Classes/HH/ImmSet/)
+Returns an [` ImmSet `](/apis/Classes/HH/ImmSet/) containing the values after an operation has been
+applied to each "key" and value in the current [` ImmSet `](/apis/Classes/HH/ImmSet/)
 
 
 
@@ -21,14 +21,14 @@ public function mapWithKey<Tu as arraykey>(
 
 
 
-Since [` ImmSet `](/docs/apis/Classes/HH/ImmSet/)s don't have keys, the callback uses the values as the keys
+Since [` ImmSet `](/apis/Classes/HH/ImmSet/)s don't have keys, the callback uses the values as the keys
 as well.
 
 
 
 
-Every value in the current [` ImmSet `](/docs/apis/Classes/HH/ImmSet/) is affected by a call to
-[` mapWithKey() `](/docs/apis/Classes/HH/ImmSet/mapWithKey/), unlike [` filterWithKey() `](/docs/apis/Classes/HH/ImmSet/filterWithKey/) where only values that meet a
+Every value in the current [` ImmSet `](/apis/Classes/HH/ImmSet/) is affected by a call to
+[` mapWithKey() `](/apis/Classes/HH/ImmSet/mapWithKey/), unlike [` filterWithKey() `](/apis/Classes/HH/ImmSet/filterWithKey/) where only values that meet a
 certain criteria are affected.
 
 
@@ -49,8 +49,8 @@ certain criteria are affected.
 
 
 
-* [` ImmSet<Tu> `](/docs/apis/Classes/HH/ImmSet/) - an [` ImmSet `](/docs/apis/Classes/HH/ImmSet/) containing the values after a user-specified
-  operation on the current [` ImmSet `](/docs/apis/Classes/HH/ImmSet/)'s values is applied.
+* [` ImmSet<Tu> `](/apis/Classes/HH/ImmSet/) - an [` ImmSet `](/apis/Classes/HH/ImmSet/) containing the values after a user-specified
+  operation on the current [` ImmSet `](/apis/Classes/HH/ImmSet/)'s values is applied.
 
 
 
@@ -60,5 +60,5 @@ certain criteria are affected.
 
 
 
-See [` Set::mapWithKey `](/docs/apis/Classes/HH/Set/mapWithKey) for usage examples.
+See [` Set::mapWithKey `](/apis/Classes/HH/Set/mapWithKey) for usage examples.
 <!-- HHAPIDOC -->

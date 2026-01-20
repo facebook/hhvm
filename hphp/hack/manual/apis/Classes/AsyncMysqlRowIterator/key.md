@@ -33,7 +33,7 @@ public function key(): int;
 
 
 
-The following example shows you how to use [` AsyncMysqlRowIterator::key `](/docs/apis/Classes/AsyncMysqlRowIterator/key/) to get the actual `` int `` key pointing to the field within the row iterator.
+The following example shows you how to use [` AsyncMysqlRowIterator::key `](/apis/Classes/AsyncMysqlRowIterator/key/) to get the actual `` int `` key pointing to the field within the row iterator.
 
 
 

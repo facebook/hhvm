@@ -6,8 +6,8 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns an [` Iterable `](/docs/apis/Interfaces/HH/Iterable/) containing the first `` n `` values of the current
-[` Iterable `](/docs/apis/Interfaces/HH/Iterable/)
+Returns an [` Iterable `](/apis/Interfaces/HH/Iterable/) containing the first `` n `` values of the current
+[` Iterable `](/apis/Interfaces/HH/Iterable/)
 
 
 
@@ -21,8 +21,8 @@ public function take(
 
 
 
-The returned [` Iterable `](/docs/apis/Interfaces/HH/Iterable/) will always be a proper subset of the current
-[` Iterable `](/docs/apis/Interfaces/HH/Iterable/).
+The returned [` Iterable `](/apis/Interfaces/HH/Iterable/) will always be a proper subset of the current
+[` Iterable `](/apis/Interfaces/HH/Iterable/).
 
 
 
@@ -38,7 +38,7 @@ The returned [` Iterable `](/docs/apis/Interfaces/HH/Iterable/) will always be a
 
 
 + ` int $n ` - The last element that will be included in the returned
-  [` Iterable `](/docs/apis/Interfaces/HH/Iterable/).
+  [` Iterable `](/apis/Interfaces/HH/Iterable/).
 
 
 
@@ -48,5 +48,5 @@ The returned [` Iterable `](/docs/apis/Interfaces/HH/Iterable/) will always be a
 
 
 
-* [` Iterable<Tv> `](/docs/apis/Interfaces/HH/Iterable/) - An [` Iterable `](/docs/apis/Interfaces/HH/Iterable/)`` that is a proper subset of the current ``Iterable``` up to ```n` elements.
+* [` Iterable<Tv> `](/apis/Interfaces/HH/Iterable/) - An [` Iterable `](/apis/Interfaces/HH/Iterable/)`` that is a proper subset of the current ``Iterable``` up to ```n` elements.
 <!-- HHAPIDOC -->

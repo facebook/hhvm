@@ -16,7 +16,7 @@ a MySQL error
 
 
 
-This class is instantiated when an [` AsyncMysqlQueryException `](/docs/apis/Classes/AsyncMysqlQueryException/) is thrown and
+This class is instantiated when an [` AsyncMysqlQueryException `](/apis/Classes/AsyncMysqlQueryException/) is thrown and
 `` AsyncMysqlQueryException::getResult() `` is called.
 
 
@@ -27,8 +27,8 @@ This class is instantiated when an [` AsyncMysqlQueryException `](/docs/apis/Cla
 
 
 
-+ [Introduction](</docs/hack/asynchronous-operations/introduction>)
-+ [Extensions](</docs/hack/asynchronous-operations/extensions>)
++ [Introduction](</hack/asynchronous-operations/introduction>)
++ [Extensions](</hack/asynchronous-operations/extensions>)
 
 
 
@@ -53,9 +53,9 @@ final class AsyncMysqlQueryErrorResult extends AsyncMysqlErrorResult {...}
 
 
 
-* [` ->getSuccessfulResults(): Vector<AsyncMysqlQueryResult> `](/docs/apis/Classes/AsyncMysqlQueryErrorResult/getSuccessfulResults/)\
+* [` ->getSuccessfulResults(): Vector<AsyncMysqlQueryResult> `](/apis/Classes/AsyncMysqlQueryErrorResult/getSuccessfulResults/)\
   Returns the results that were fetched by the successful query statements
-* [` ->numSuccessfulQueries(): int `](/docs/apis/Classes/AsyncMysqlQueryErrorResult/numSuccessfulQueries/)\
+* [` ->numSuccessfulQueries(): int `](/apis/Classes/AsyncMysqlQueryErrorResult/numSuccessfulQueries/)\
   Returns the number of successfully executed queries
 
 
@@ -64,27 +64,27 @@ final class AsyncMysqlQueryErrorResult extends AsyncMysqlErrorResult {...}
 
 
 
-### Public Methods ([` AsyncMysqlErrorResult `](/docs/apis/Classes/AsyncMysqlErrorResult/))
+### Public Methods ([` AsyncMysqlErrorResult `](/apis/Classes/AsyncMysqlErrorResult/))
 
 
 
 
-- [` ->clientStats(): AsyncMysqlClientStats `](/docs/apis/Classes/AsyncMysqlErrorResult/clientStats/)\
+- [` ->clientStats(): AsyncMysqlClientStats `](/apis/Classes/AsyncMysqlErrorResult/clientStats/)\
   Returns the MySQL client statistics for the events that produced the error
-- [` ->elapsedMicros(): int `](/docs/apis/Classes/AsyncMysqlErrorResult/elapsedMicros/)\
+- [` ->elapsedMicros(): int `](/apis/Classes/AsyncMysqlErrorResult/elapsedMicros/)\
   The total time for the MySQL error condition to occur, in microseconds
-- [` ->endTime(): float `](/docs/apis/Classes/AsyncMysqlErrorResult/endTime/)\
+- [` ->endTime(): float `](/apis/Classes/AsyncMysqlErrorResult/endTime/)\
   The end time when the error was produced, in seconds since epoch
-- [` ->failureType(): string `](/docs/apis/Classes/AsyncMysqlErrorResult/failureType/)\
+- [` ->failureType(): string `](/apis/Classes/AsyncMysqlErrorResult/failureType/)\
   The type of failure that produced this result
-- [` ->mysql_errno(): int `](/docs/apis/Classes/AsyncMysqlErrorResult/mysql_errno/)\
+- [` ->mysql_errno(): int `](/apis/Classes/AsyncMysqlErrorResult/mysql_errno/)\
   Returns the MySQL error number for this result
-- [` ->mysql_error(): string `](/docs/apis/Classes/AsyncMysqlErrorResult/mysql_error/)\
+- [` ->mysql_error(): string `](/apis/Classes/AsyncMysqlErrorResult/mysql_error/)\
   Returns a human-readable string for the error encountered in this result
-- [` ->mysql_normalize_error(): string `](/docs/apis/Classes/AsyncMysqlErrorResult/mysql_normalize_error/)\
+- [` ->mysql_normalize_error(): string `](/apis/Classes/AsyncMysqlErrorResult/mysql_normalize_error/)\
   Returns an alternative, normalized version of the error message provided by
   mysql_error()
-- [` ->startTime(): float `](/docs/apis/Classes/AsyncMysqlErrorResult/startTime/)\
+- [` ->startTime(): float `](/apis/Classes/AsyncMysqlErrorResult/startTime/)\
   The start time when the error was produced, in seconds since epoch
 
 
@@ -93,24 +93,24 @@ final class AsyncMysqlQueryErrorResult extends AsyncMysqlErrorResult {...}
 
 
 
-### Public Methods ([` AsyncMysqlResult `](/docs/apis/Classes/AsyncMysqlResult/))
+### Public Methods ([` AsyncMysqlResult `](/apis/Classes/AsyncMysqlResult/))
 
 
 
 
-+ [` ->getSslCertCn(): string `](/docs/apis/Classes/AsyncMysqlResult/getSslCertCn/)\
++ [` ->getSslCertCn(): string `](/apis/Classes/AsyncMysqlResult/getSslCertCn/)\
   Returns Common Name attribute of the TLS certificate presented
   by MySQL server
-+ [` ->getSslCertExtensions(): Vector<string> `](/docs/apis/Classes/AsyncMysqlResult/getSslCertExtensions/)\
++ [` ->getSslCertExtensions(): Vector<string> `](/apis/Classes/AsyncMysqlResult/getSslCertExtensions/)\
   Returns values from the selected cert extensions of the TLS certificate
   presented by MySQL server
-+ [` ->getSslCertSan(): Vector<string> `](/docs/apis/Classes/AsyncMysqlResult/getSslCertSan/)\
++ [` ->getSslCertSan(): Vector<string> `](/apis/Classes/AsyncMysqlResult/getSslCertSan/)\
   Returns Server Alternative Names attribute of the TLS certificate
   presented by MySQL server
-+ [` ->isSslCertValidationEnforced(): bool `](/docs/apis/Classes/AsyncMysqlResult/isSslCertValidationEnforced/)\
++ [` ->isSslCertValidationEnforced(): bool `](/apis/Classes/AsyncMysqlResult/isSslCertValidationEnforced/)\
   Returns a boolean value indicating if server cert validation was enforced
   for this connection
-+ [` ->sslSessionReused(): bool `](/docs/apis/Classes/AsyncMysqlResult/sslSessionReused/)\
++ [` ->sslSessionReused(): bool `](/apis/Classes/AsyncMysqlResult/sslSessionReused/)\
   Returns whether or not the current connection reused the SSL session
   from another SSL connection
 <!-- HHAPIDOC -->

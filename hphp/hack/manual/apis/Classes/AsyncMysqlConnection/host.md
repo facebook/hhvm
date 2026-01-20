@@ -33,7 +33,7 @@ public function host(): string;
 
 
 
-The following example shows how to get the host of the MySQL server that this connection is associated with via [` AsyncMysqlConnection::host `](/docs/apis/Classes/AsyncMysqlConnection/host/).
+The following example shows how to get the host of the MySQL server that this connection is associated with via [` AsyncMysqlConnection::host `](/apis/Classes/AsyncMysqlConnection/host/).
 
 
 

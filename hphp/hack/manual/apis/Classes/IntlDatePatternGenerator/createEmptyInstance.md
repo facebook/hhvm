@@ -23,5 +23,5 @@ public static function createEmptyInstance(): IntlDatePatternGenerator;
 
 
 
-+ [` IntlDatePatternGenerator `](/docs/apis/Classes/IntlDatePatternGenerator/)
++ [` IntlDatePatternGenerator `](/apis/Classes/IntlDatePatternGenerator/)
 <!-- HHAPIDOC -->

@@ -6,8 +6,8 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a [` KeyedIterable `](/docs/apis/Interfaces/HH/KeyedIterable/) containing the first `` n `` values of the current
-[` KeyedIterable `](/docs/apis/Interfaces/HH/KeyedIterable/)
+Returns a [` KeyedIterable `](/apis/Interfaces/HH/KeyedIterable/) containing the first `` n `` values of the current
+[` KeyedIterable `](/apis/Interfaces/HH/KeyedIterable/)
 
 
 
@@ -21,8 +21,8 @@ public function take(
 
 
 
-The returned [` KeyedIterable `](/docs/apis/Interfaces/HH/KeyedIterable/) will always be a proper subset of the current
-[` Iterable `](/docs/apis/Interfaces/HH/Iterable/).
+The returned [` KeyedIterable `](/apis/Interfaces/HH/KeyedIterable/) will always be a proper subset of the current
+[` Iterable `](/apis/Interfaces/HH/Iterable/).
 
 
 
@@ -38,7 +38,7 @@ The returned [` KeyedIterable `](/docs/apis/Interfaces/HH/KeyedIterable/) will a
 
 
 + ` int $n ` - The last element that will be included in the returned
-  [` KeyedIterable `](/docs/apis/Interfaces/HH/KeyedIterable/).
+  [` KeyedIterable `](/apis/Interfaces/HH/KeyedIterable/).
 
 
 
@@ -48,5 +48,5 @@ The returned [` KeyedIterable `](/docs/apis/Interfaces/HH/KeyedIterable/) will a
 
 
 
-* [` KeyedIterable<Tk, `](/docs/apis/Interfaces/HH/KeyedIterable/)`` Tv> `` - A [` KeyedIterable `](/docs/apis/Interfaces/HH/KeyedIterable/)`` that is a proper subset of the current ``KeyedIterable``` up to ```n` elements.
+* [` KeyedIterable<Tk, `](/apis/Interfaces/HH/KeyedIterable/)`` Tv> `` - A [` KeyedIterable `](/apis/Interfaces/HH/KeyedIterable/)`` that is a proper subset of the current ``KeyedIterable``` up to ```n` elements.
 <!-- HHAPIDOC -->

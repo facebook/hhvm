@@ -42,7 +42,7 @@ See ` Str\trim_l ` for more details.
 
 
 
-* [String](</docs/hack/built-in-types/string>)
+* [String](</hack/built-in-types/string>)
 
 
 

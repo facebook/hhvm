@@ -29,7 +29,7 @@ public function getException(): Exception;
 
 
 
-* ` Exception ` - The exception that the [` Awaitable `](/docs/apis/Classes/HH/Awaitable/) threw upon failure, or an
-  [` InvariantException `](/docs/apis/Classes/HH/InvariantException/) if there is no exception (i.e., because
-  the [` Awaitable `](/docs/apis/Classes/HH/Awaitable/) succeeded).
+* ` Exception ` - The exception that the [` Awaitable `](/apis/Classes/HH/Awaitable/) threw upon failure, or an
+  [` InvariantException `](/apis/Classes/HH/InvariantException/) if there is no exception (i.e., because
+  the [` Awaitable `](/apis/Classes/HH/Awaitable/) succeeded).
 <!-- HHAPIDOC -->

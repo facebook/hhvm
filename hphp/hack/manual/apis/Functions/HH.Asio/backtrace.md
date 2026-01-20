@@ -39,7 +39,7 @@ Following conditions must be met to produce non-empty backtrace:
 
 
 
-* [` Awaitable<T, `](/docs/apis/Classes/HH/Awaitable/)`` mixed> $awaitable `` - Awaitable, to take backtrace from.
+* [` Awaitable<T, `](/apis/Classes/HH/Awaitable/)`` mixed> $awaitable `` - Awaitable, to take backtrace from.
 * ` int $options = \DEBUG_BACKTRACE_PROVIDE_OBJECT ` - bitmask of the following options:
   DEBUG_BACKTRACE_PROVIDE_OBJECT
   DEBUG_BACKTRACE_PROVIDE_METADATA

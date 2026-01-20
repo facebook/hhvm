@@ -1,7 +1,7 @@
 # Type Assertions
 
 Hack provides the `is` and `as` operators for inspecting types at
-runtime. To convert primitive types, see [casting](/docs/hack/expressions-and-operators/casting).
+runtime. To convert primitive types, see [casting](/hack/expressions-and-operators/casting).
 
 The type checker also understands `is` and `as`, so it will infer
 precise types.
@@ -21,7 +21,7 @@ returns a boolean result.
 ```
 
 The type checker understands `is` and [refines
-values](/docs/hack/types/type-refinement) inside conditionals or after
+values](/hack/types/type-refinement) inside conditionals or after
 `invariant` calls.
 
 ```hack no-extract
@@ -114,7 +114,7 @@ function demo(): void {
 However, it throws `TypeAssertionException` if the value has a
 different type. The type checker understands that the value must have
 the type specified afterwards, so it
-[refines](/docs/hack/types/type-refinement) the value.
+[refines](/hack/types/type-refinement) the value.
 
 ```hack
 1 as int;        // 1

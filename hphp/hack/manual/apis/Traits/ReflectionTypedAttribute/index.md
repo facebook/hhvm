@@ -27,5 +27,5 @@ trait ReflectionTypedAttribute {...}
 
 
 
-+ [` ->getAttributeClass(classname $c) `](/docs/apis/Traits/ReflectionTypedAttribute/getAttributeClass/)
++ [` ->getAttributeClass(classname $c) `](/apis/Traits/ReflectionTypedAttribute/getAttributeClass/)
 <!-- HHAPIDOC -->

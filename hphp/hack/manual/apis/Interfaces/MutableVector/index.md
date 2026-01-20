@@ -21,8 +21,8 @@ Represents a write-enabled (mutable) sequence of values, indexed by integers
 
 
 
-+ [Introduction](</docs/hack/arrays-and-collections/introduction>)
-+ [Interfaces](</docs/hack/arrays-and-collections/introduction>)
++ [Introduction](</hack/arrays-and-collections/introduction>)
++ [Interfaces](</hack/arrays-and-collections/introduction>)
 
 
 
@@ -47,61 +47,61 @@ interface MutableVector implements ConstVector<Tv>, HH\Collection<Tv>, IndexAcce
 
 
 
-* [` ->concat<Tu super Tv>(Traversable<Tu> $traversable): MutableVector<Tu> `](/docs/apis/Interfaces/MutableVector/concat/)\
+* [` ->concat<Tu super Tv>(Traversable<Tu> $traversable): MutableVector<Tu> `](/apis/Interfaces/MutableVector/concat/)\
   Returns a `` MutableVector `` that is the concatenation of the values of the
-  current ``` MutableVector ``` and the values of the provided [` Traversable `](/docs/apis/Interfaces/HH/Traversable/)
-* [` ->filter((function(Tv): bool) $fn): MutableVector<Tv> `](/docs/apis/Interfaces/MutableVector/filter/)\
+  current ``` MutableVector ``` and the values of the provided [` Traversable `](/apis/Interfaces/HH/Traversable/)
+* [` ->filter((function(Tv): bool) $fn): MutableVector<Tv> `](/apis/Interfaces/MutableVector/filter/)\
   Returns a `` MutableVector `` containing the values of the current
   ``` MutableVector ``` that meet a supplied condition
-* [` ->filterWithKey((function(int, Tv): bool) $fn): MutableVector<Tv> `](/docs/apis/Interfaces/MutableVector/filterWithKey/)\
+* [` ->filterWithKey((function(int, Tv): bool) $fn): MutableVector<Tv> `](/apis/Interfaces/MutableVector/filterWithKey/)\
   Returns a `` MutableVector `` containing the values of the current
   ``` MutableVector ``` that meet a supplied condition applied to its keys and
   values
-* [` ->firstKey(): ?int `](/docs/apis/Interfaces/MutableVector/firstKey/)\
+* [` ->firstKey(): ?int `](/apis/Interfaces/MutableVector/firstKey/)\
   Returns the first key in the current `` MutableVector ``
-* [` ->firstValue(): ?Tv `](/docs/apis/Interfaces/MutableVector/firstValue/)\
+* [` ->firstValue(): ?Tv `](/apis/Interfaces/MutableVector/firstValue/)\
   Returns the first value in the current `` MutableVector ``
-* [` ->keys(): MutableVector<int> `](/docs/apis/Interfaces/MutableVector/keys/)\
+* [` ->keys(): MutableVector<int> `](/apis/Interfaces/MutableVector/keys/)\
   Returns a `` MutableVector `` containing the keys of the current
   ``` MutableVector ```
-* [` ->lastKey(): ?int `](/docs/apis/Interfaces/MutableVector/lastKey/)\
+* [` ->lastKey(): ?int `](/apis/Interfaces/MutableVector/lastKey/)\
   Returns the last key in the current `` MutableVector ``
-* [` ->lastValue(): ?Tv `](/docs/apis/Interfaces/MutableVector/lastValue/)\
+* [` ->lastValue(): ?Tv `](/apis/Interfaces/MutableVector/lastValue/)\
   Returns the last value in the current `` MutableVector ``
-* [` ->linearSearch(mixed $search_value): int `](/docs/apis/Interfaces/MutableVector/linearSearch/)\
+* [` ->linearSearch(mixed $search_value): int `](/apis/Interfaces/MutableVector/linearSearch/)\
   Returns the index of the first element that matches the search value
-* [` ->map<Tu>((function(Tv): Tu) $fn): MutableVector<Tu> `](/docs/apis/Interfaces/MutableVector/map/)\
+* [` ->map<Tu>((function(Tv): Tu) $fn): MutableVector<Tu> `](/apis/Interfaces/MutableVector/map/)\
   Returns a `` MutableVector `` containing the values after an operation has been
   applied to each value in the current ``` MutableVector ```
-* [` ->mapWithKey<Tu>((function(int, Tv): Tu) $fn): MutableVector<Tu> `](/docs/apis/Interfaces/MutableVector/mapWithKey/)\
+* [` ->mapWithKey<Tu>((function(int, Tv): Tu) $fn): MutableVector<Tu> `](/apis/Interfaces/MutableVector/mapWithKey/)\
   Returns a `` MutableVector `` containing the values after an operation has been
   applied to each key and value in the current ``` MutableVector ```
-* [` ->skip(int $n): MutableVector<Tv> `](/docs/apis/Interfaces/MutableVector/skip/)\
+* [` ->skip(int $n): MutableVector<Tv> `](/apis/Interfaces/MutableVector/skip/)\
   Returns a `` MutableVector `` containing the values after the ``` n ```-th element of
   the current ```` MutableVector ````
-* [` ->skipWhile((function(Tv): bool) $fn): MutableVector<Tv> `](/docs/apis/Interfaces/MutableVector/skipWhile/)\
+* [` ->skipWhile((function(Tv): bool) $fn): MutableVector<Tv> `](/apis/Interfaces/MutableVector/skipWhile/)\
   Returns a `` MutableVector `` containing the values of the current
   ``` MutableVector ``` starting after and including the first value that produces
   ```` true ```` when passed to the specified callback
-* [` ->slice(int $start, int $len): MutableVector<Tv> `](/docs/apis/Interfaces/MutableVector/slice/)\
+* [` ->slice(int $start, int $len): MutableVector<Tv> `](/apis/Interfaces/MutableVector/slice/)\
   Returns a subset of the current `` MutableVector `` starting from a given key
   up to, but not including, the element at the provided length from the
   starting key
-* [` ->take(int $n): MutableVector<Tv> `](/docs/apis/Interfaces/MutableVector/take/)\
+* [` ->take(int $n): MutableVector<Tv> `](/apis/Interfaces/MutableVector/take/)\
   Returns a `` MutableVector `` containing the first ``` n ``` values of the current
   ```` MutableVector ````
-* [` ->takeWhile((function(Tv): bool) $fn): MutableVector<Tv> `](/docs/apis/Interfaces/MutableVector/takeWhile/)\
+* [` ->takeWhile((function(Tv): bool) $fn): MutableVector<Tv> `](/apis/Interfaces/MutableVector/takeWhile/)\
   Returns a `` MutableVector `` containing the values of the current
   ``` MutableVector ``` up to but not including the first value that produces
   ```` false ```` when passed to the specified callback
-* [` ->toDArray(): darray<int, Tv> `](/docs/apis/Interfaces/MutableVector/toDArray/)
-* [` ->toVArray(): varray<Tv> `](/docs/apis/Interfaces/MutableVector/toVArray/)
-* [` ->values(): MutableVector<Tv> `](/docs/apis/Interfaces/MutableVector/values/)\
+* [` ->toDArray(): darray<int, Tv> `](/apis/Interfaces/MutableVector/toDArray/)
+* [` ->toVArray(): varray<Tv> `](/apis/Interfaces/MutableVector/toVArray/)
+* [` ->values(): MutableVector<Tv> `](/apis/Interfaces/MutableVector/values/)\
   Returns a `` MutableVector `` containing the values of the current
   ``` MutableVector ```
-* [` ->zip<Tu>(Traversable<Tu> $traversable): MutableVector<Pair<Tv, Tu>> `](/docs/apis/Interfaces/MutableVector/zip/)\
-  Returns a `` MutableVector `` where each element is a [` Pair `](/docs/apis/Classes/HH/Pair/) that combines the
-  element of the current `` MutableVector `` and the provided [` Traversable `](/docs/apis/Interfaces/HH/Traversable/)
+* [` ->zip<Tu>(Traversable<Tu> $traversable): MutableVector<Pair<Tv, Tu>> `](/apis/Interfaces/MutableVector/zip/)\
+  Returns a `` MutableVector `` where each element is a [` Pair `](/apis/Classes/HH/Pair/) that combines the
+  element of the current `` MutableVector `` and the provided [` Traversable `](/apis/Interfaces/HH/Traversable/)
 
 
 
@@ -109,18 +109,18 @@ interface MutableVector implements ConstVector<Tv>, HH\Collection<Tv>, IndexAcce
 
 
 
-### Public Methods ([` ConstCollection `](/docs/apis/Interfaces/ConstCollection/))
+### Public Methods ([` ConstCollection `](/apis/Interfaces/ConstCollection/))
 
 
 
 
-- [` ->count(): int `](/docs/apis/Interfaces/ConstCollection/count/)\
+- [` ->count(): int `](/apis/Interfaces/ConstCollection/count/)\
   Get the number of items in the collection
 
-- [` ->isEmpty(): bool `](/docs/apis/Interfaces/ConstCollection/isEmpty/)\
+- [` ->isEmpty(): bool `](/apis/Interfaces/ConstCollection/isEmpty/)\
   Is the collection empty?
 
-- [` ->items(): HH\Iterable<Te> `](/docs/apis/Interfaces/ConstCollection/items/)\
+- [` ->items(): HH\Iterable<Te> `](/apis/Interfaces/ConstCollection/items/)\
   Get access to the items in the collection
 
 
@@ -130,12 +130,12 @@ interface MutableVector implements ConstVector<Tv>, HH\Collection<Tv>, IndexAcce
 
 
 
-### Public Methods ([` IPureStringishObject `](/docs/apis/Interfaces/IPureStringishObject/))
+### Public Methods ([` IPureStringishObject `](/apis/Interfaces/IPureStringishObject/))
 
 
 
 
-+ [` ->__toString(): string `](/docs/apis/Interfaces/IPureStringishObject/__toString/)
++ [` ->__toString(): string `](/apis/Interfaces/IPureStringishObject/__toString/)
 
 
 
@@ -143,16 +143,16 @@ interface MutableVector implements ConstVector<Tv>, HH\Collection<Tv>, IndexAcce
 
 
 
-### Public Methods ([` ConstIndexAccess `](/docs/apis/Interfaces/ConstIndexAccess/))
+### Public Methods ([` ConstIndexAccess `](/apis/Interfaces/ConstIndexAccess/))
 
 
 
 
-* [` ->at(Tk $k): Tv `](/docs/apis/Interfaces/ConstIndexAccess/at/)\
+* [` ->at(Tk $k): Tv `](/apis/Interfaces/ConstIndexAccess/at/)\
   Returns the value at the specified key in the current collection
-* [` ->containsKey(mixed $k): bool `](/docs/apis/Interfaces/ConstIndexAccess/containsKey/)\
+* [` ->containsKey(mixed $k): bool `](/apis/Interfaces/ConstIndexAccess/containsKey/)\
   Determines if the specified key is in the current collection
-* [` ->get(Tk $k): ?Tv `](/docs/apis/Interfaces/ConstIndexAccess/get/)\
+* [` ->get(Tk $k): ?Tv `](/apis/Interfaces/ConstIndexAccess/get/)\
   Returns the value at the specified key in the current collection
 
 
@@ -161,22 +161,22 @@ interface MutableVector implements ConstVector<Tv>, HH\Collection<Tv>, IndexAcce
 
 
 
-### Public Methods ([` HH\KeyedIterable `](/docs/apis/Interfaces/HH/KeyedIterable/))
+### Public Methods ([` HH\KeyedIterable `](/apis/Interfaces/HH/KeyedIterable/))
 
 
 
 
-- [` ->getIterator(): KeyedIterator<Tk, Tv> `](/docs/apis/Interfaces/HH/KeyedIterable/getIterator/)\
+- [` ->getIterator(): KeyedIterator<Tk, Tv> `](/apis/Interfaces/HH/KeyedIterable/getIterator/)\
   Returns an iterator that points to beginning of the current
-  [` KeyedIterable `](/docs/apis/Interfaces/HH/KeyedIterable/)
-- [` ->lazy(): KeyedIterable<Tk, Tv> `](/docs/apis/Interfaces/HH/KeyedIterable/lazy/)\
+  [` KeyedIterable `](/apis/Interfaces/HH/KeyedIterable/)
+- [` ->lazy(): KeyedIterable<Tk, Tv> `](/apis/Interfaces/HH/KeyedIterable/lazy/)\
   Returns a lazy, access elements only when needed view of the current
-  [` KeyedIterable `](/docs/apis/Interfaces/HH/KeyedIterable/)
-- [` ->toImmMap(): ImmMap<Tk, Tv> `](/docs/apis/Interfaces/HH/KeyedIterable/toImmMap/)\
-  Returns an immutable map ([` ImmMap `](/docs/apis/Classes/HH/ImmMap/)) based on the keys and values of the
-  current [` KeyedIterable `](/docs/apis/Interfaces/HH/KeyedIterable/)
-- [` ->toKeysArray(): varray `](/docs/apis/Interfaces/HH/KeyedIterable/toKeysArray/)\
-  Returns an `` array `` with the keys from the current [` KeyedIterable `](/docs/apis/Interfaces/HH/KeyedIterable/)
+  [` KeyedIterable `](/apis/Interfaces/HH/KeyedIterable/)
+- [` ->toImmMap(): ImmMap<Tk, Tv> `](/apis/Interfaces/HH/KeyedIterable/toImmMap/)\
+  Returns an immutable map ([` ImmMap `](/apis/Classes/HH/ImmMap/)) based on the keys and values of the
+  current [` KeyedIterable `](/apis/Interfaces/HH/KeyedIterable/)
+- [` ->toKeysArray(): varray `](/apis/Interfaces/HH/KeyedIterable/toKeysArray/)\
+  Returns an `` array `` with the keys from the current [` KeyedIterable `](/apis/Interfaces/HH/KeyedIterable/)
 
 
 
@@ -184,18 +184,18 @@ interface MutableVector implements ConstVector<Tv>, HH\Collection<Tv>, IndexAcce
 
 
 
-### Public Methods ([` HH\Iterable `](/docs/apis/Interfaces/HH/Iterable/))
+### Public Methods ([` HH\Iterable `](/apis/Interfaces/HH/Iterable/))
 
 
 
 
-+ [` ->toImmSet(): ImmSet<Tv> `](/docs/apis/Interfaces/HH/Iterable/toImmSet/)\
-  Returns an immutable set ([` ImmSet `](/docs/apis/Classes/HH/ImmSet/)) converted from the current [` Iterable `](/docs/apis/Interfaces/HH/Iterable/)
-+ [` ->toImmVector(): ImmVector<Tv> `](/docs/apis/Interfaces/HH/Iterable/toImmVector/)\
-  Returns an immutable vector ([` ImmVector `](/docs/apis/Classes/HH/ImmVector/)) converted from the current
-  [` Iterable `](/docs/apis/Interfaces/HH/Iterable/)
-+ [` ->toValuesArray(): varray<Tv> `](/docs/apis/Interfaces/HH/Iterable/toValuesArray/)\
-  Returns an `` array `` with the values from the current [` Iterable `](/docs/apis/Interfaces/HH/Iterable/)
++ [` ->toImmSet(): ImmSet<Tv> `](/apis/Interfaces/HH/Iterable/toImmSet/)\
+  Returns an immutable set ([` ImmSet `](/apis/Classes/HH/ImmSet/)) converted from the current [` Iterable `](/apis/Interfaces/HH/Iterable/)
++ [` ->toImmVector(): ImmVector<Tv> `](/apis/Interfaces/HH/Iterable/toImmVector/)\
+  Returns an immutable vector ([` ImmVector `](/apis/Classes/HH/ImmVector/)) converted from the current
+  [` Iterable `](/apis/Interfaces/HH/Iterable/)
++ [` ->toValuesArray(): varray<Tv> `](/apis/Interfaces/HH/Iterable/toValuesArray/)\
+  Returns an `` array `` with the values from the current [` Iterable `](/apis/Interfaces/HH/Iterable/)
 
 
 
@@ -203,12 +203,12 @@ interface MutableVector implements ConstVector<Tv>, HH\Collection<Tv>, IndexAcce
 
 
 
-### Public Methods ([` HH\Collection `](/docs/apis/Interfaces/HH/Collection/))
+### Public Methods ([` HH\Collection `](/apis/Interfaces/HH/Collection/))
 
 
 
 
-* [` ->clear() `](/docs/apis/Interfaces/HH/Collection/clear/)\
+* [` ->clear() `](/apis/Interfaces/HH/Collection/clear/)\
   Removes all items from the collection
 
 
@@ -217,15 +217,15 @@ interface MutableVector implements ConstVector<Tv>, HH\Collection<Tv>, IndexAcce
 
 
 
-### Public Methods ([` OutputCollection `](/docs/apis/Interfaces/OutputCollection/))
+### Public Methods ([` OutputCollection `](/apis/Interfaces/OutputCollection/))
 
 
 
 
-- [` ->add(Te $e): this `](/docs/apis/Interfaces/OutputCollection/add/)\
+- [` ->add(Te $e): this `](/apis/Interfaces/OutputCollection/add/)\
   Add a value to the collection and return the collection itself
-- [` ->addAll(?Traversable<Te> $traversable): this `](/docs/apis/Interfaces/OutputCollection/addAll/)\
-  For every element in the provided [` Traversable `](/docs/apis/Interfaces/HH/Traversable/), append a value into the
+- [` ->addAll(?Traversable<Te> $traversable): this `](/apis/Interfaces/OutputCollection/addAll/)\
+  For every element in the provided [` Traversable `](/apis/Interfaces/HH/Traversable/), append a value into the
   current collection
 
 
@@ -234,19 +234,19 @@ interface MutableVector implements ConstVector<Tv>, HH\Collection<Tv>, IndexAcce
 
 
 
-### Public Methods ([` IndexAccess `](/docs/apis/Interfaces/IndexAccess/))
+### Public Methods ([` IndexAccess `](/apis/Interfaces/IndexAccess/))
 
 
 
 
-+ [` ->removeKey(Tk $k): this `](/docs/apis/Interfaces/IndexAccess/removeKey/)\
++ [` ->removeKey(Tk $k): this `](/apis/Interfaces/IndexAccess/removeKey/)\
   Removes the specified key (and associated value) from the current
   collection
-+ [` ->set(Tk $k, Tv $v): this `](/docs/apis/Interfaces/IndexAccess/set/)\
++ [` ->set(Tk $k, Tv $v): this `](/apis/Interfaces/IndexAccess/set/)\
   Stores a value into the current collection with the specified key,
   overwriting the previous value associated with the key
-+ [` ->setAll(?KeyedTraversable<Tk, Tv> $traversable): this `](/docs/apis/Interfaces/IndexAccess/setAll/)\
-  For every element in the provided [` Traversable `](/docs/apis/Interfaces/HH/Traversable/), stores a value into the
++ [` ->setAll(?KeyedTraversable<Tk, Tv> $traversable): this `](/apis/Interfaces/IndexAccess/setAll/)\
+  For every element in the provided [` Traversable `](/apis/Interfaces/HH/Traversable/), stores a value into the
   current collection associated with each key, overwriting the previous value
   associated with the key
 <!-- HHAPIDOC -->

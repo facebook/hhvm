@@ -40,19 +40,19 @@ final class WeakRef {...}
 
 
 
-+ [` ->__construct(?T $reference) `](/docs/apis/Classes/WeakRef/__construct/)\
++ [` ->__construct(?T $reference) `](/apis/Classes/WeakRef/__construct/)\
   ( excerpt from
   http://php.net/manual/en/weakref.construct.php )
-+ [` ->acquire(): bool `](/docs/apis/Classes/WeakRef/acquire/)\
++ [` ->acquire(): bool `](/apis/Classes/WeakRef/acquire/)\
   ( excerpt from
   http://php.net/manual/en/weakref.acquire.php )
-+ [` ->get(): ?T `](/docs/apis/Classes/WeakRef/get/)\
++ [` ->get(): ?T `](/apis/Classes/WeakRef/get/)\
   ( excerpt from
   http://php.net/manual/en/weakref.get.php )
-+ [` ->release(): bool `](/docs/apis/Classes/WeakRef/release/)\
++ [` ->release(): bool `](/apis/Classes/WeakRef/release/)\
   ( excerpt from
   http://php.net/manual/en/weakref.release.php )
-+ [` ->valid(): bool `](/docs/apis/Classes/WeakRef/valid/)\
++ [` ->valid(): bool `](/apis/Classes/WeakRef/valid/)\
   ( excerpt from
   http://php.net/manual/en/weakref.valid.php )
 <!-- HHAPIDOC -->

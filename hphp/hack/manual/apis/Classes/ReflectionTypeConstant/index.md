@@ -32,28 +32,28 @@ class ReflectionTypeConstant implements Reflector {...}
 
 
 
-+ [` ::export($class, string $name, $return = false) `](/docs/apis/Classes/ReflectionTypeConstant/export/)
++ [` ::export($class, string $name, $return = false) `](/apis/Classes/ReflectionTypeConstant/export/)
 
-+ [` ->__construct(mixed $class, string $name) `](/docs/apis/Classes/ReflectionTypeConstant/__construct/)\
++ [` ->__construct(mixed $class, string $name) `](/apis/Classes/ReflectionTypeConstant/__construct/)\
   Constructs a new ReflectionTypeConstant
 
-+ [` ->__toString(): string `](/docs/apis/Classes/ReflectionTypeConstant/__toString/)
++ [` ->__toString(): string `](/apis/Classes/ReflectionTypeConstant/__toString/)
 
-+ [` ->getAssignedTypeText(): ?string `](/docs/apis/Classes/ReflectionTypeConstant/getAssignedTypeText/)\
++ [` ->getAssignedTypeText(): ?string `](/apis/Classes/ReflectionTypeConstant/getAssignedTypeText/)\
   Get the type assigned to this type constant as a string
 
-+ [` ->getClass(): ReflectionClass `](/docs/apis/Classes/ReflectionTypeConstant/getClass/)\
++ [` ->getClass(): ReflectionClass `](/apis/Classes/ReflectionTypeConstant/getClass/)\
   Gets the class for the reflected type constant
 
-+ [` ->getDeclaringClass(): ReflectionClass `](/docs/apis/Classes/ReflectionTypeConstant/getDeclaringClass/)\
++ [` ->getDeclaringClass(): ReflectionClass `](/apis/Classes/ReflectionTypeConstant/getDeclaringClass/)\
   Gets the declaring class for the reflected type constant
 
-+ [` ->getName(): string `](/docs/apis/Classes/ReflectionTypeConstant/getName/)\
++ [` ->getName(): string `](/apis/Classes/ReflectionTypeConstant/getName/)\
   Get the name of the type constant
 
-+ [` ->getTypeStructure(): darray `](/docs/apis/Classes/ReflectionTypeConstant/getTypeStructure/)
++ [` ->getTypeStructure(): darray `](/apis/Classes/ReflectionTypeConstant/getTypeStructure/)
 
-+ [` ->isAbstract(): bool `](/docs/apis/Classes/ReflectionTypeConstant/isAbstract/)\
++ [` ->isAbstract(): bool `](/apis/Classes/ReflectionTypeConstant/isAbstract/)\
   Checks if the type constant is abstract
 
 

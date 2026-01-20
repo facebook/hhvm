@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Remove the last element of the current [` Vector `](/docs/apis/Classes/HH/Vector/) and return it
+Remove the last element of the current [` Vector `](/apis/Classes/HH/Vector/) and return it
 
 
 
@@ -18,14 +18,14 @@ public function pop(): Tv;
 
 
 
-This function throws an exception if the current [` Vector `](/docs/apis/Classes/HH/Vector/) is empty.
+This function throws an exception if the current [` Vector `](/apis/Classes/HH/Vector/) is empty.
 
 
 
 
-The current [` Vector `](/docs/apis/Classes/HH/Vector/) will have `` n - 1 `` elements after this operation, where
-``` n ``` is the number of elements in the current [` Vector `](/docs/apis/Classes/HH/Vector/) prior to the call to
-[` pop() `](/docs/apis/Classes/HH/Vector/pop/).
+The current [` Vector `](/apis/Classes/HH/Vector/) will have `` n - 1 `` elements after this operation, where
+``` n ``` is the number of elements in the current [` Vector `](/apis/Classes/HH/Vector/) prior to the call to
+[` pop() `](/apis/Classes/HH/Vector/pop/).
 
 
 
@@ -45,7 +45,7 @@ The current [` Vector `](/docs/apis/Classes/HH/Vector/) will have `` n - 1 `` el
 
 
 
-This example shows that [` pop() `](/docs/apis/Classes/HH/Vector/pop/) returns the last element and removes it from the [` Vector `](/docs/apis/Classes/HH/Vector/):
+This example shows that [` pop() `](/apis/Classes/HH/Vector/pop/) returns the last element and removes it from the [` Vector `](/apis/Classes/HH/Vector/):
 
 
 
@@ -62,7 +62,7 @@ $last_color = $v->pop();
 
 
 
-This example shows that trying to ` pop ` from an empty [` Vector `](/docs/apis/Classes/HH/Vector/) will throw an exception:
+This example shows that trying to ` pop ` from an empty [` Vector `](/apis/Classes/HH/Vector/) will throw an exception:
 
 
 

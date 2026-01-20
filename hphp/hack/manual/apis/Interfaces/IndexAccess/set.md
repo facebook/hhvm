@@ -29,7 +29,7 @@ a value even if a key is not present, use ` add() `.
 
 
 ` $coll->set($k,$v) ` is semantically equivalent to `` $coll[$k] = $v ``
-(except that [` set() `](/docs/apis/Interfaces/IndexAccess/set/) returns the current collection).
+(except that [` set() `](/apis/Interfaces/IndexAccess/set/) returns the current collection).
 
 
 

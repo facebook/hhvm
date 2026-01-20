@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Indicates whether the [` Awaitable `](/docs/apis/Classes/HH/Awaitable/) associated with this wrapper exited
+Indicates whether the [` Awaitable `](/apis/Classes/HH/Awaitable/) associated with this wrapper exited
 abnormally via an exception of somoe sort
 
 
@@ -19,7 +19,7 @@ public function isFailed(): bool;
 
 
 
-If [` isFailed() `](/docs/apis/Interfaces/HH.Asio/ResultOrExceptionWrapper/isFailed/) returns `` true ``, [` isSucceeded() `](/docs/apis/Interfaces/HH.Asio/ResultOrExceptionWrapper/isSucceeded/) returns `` false ``.
+If [` isFailed() `](/apis/Interfaces/HH.Asio/ResultOrExceptionWrapper/isFailed/) returns `` true ``, [` isSucceeded() `](/apis/Interfaces/HH.Asio/ResultOrExceptionWrapper/isSucceeded/) returns `` false ``.
 
 
 
@@ -29,5 +29,5 @@ If [` isFailed() `](/docs/apis/Interfaces/HH.Asio/ResultOrExceptionWrapper/isFai
 
 
 
-+ ` bool ` - `` true `` if the [` Awaitable `](/docs/apis/Classes/HH/Awaitable/) failed; `` false `` otherwise.
++ ` bool ` - `` true `` if the [` Awaitable `](/apis/Classes/HH/Awaitable/) failed; `` false `` otherwise.
 <!-- HHAPIDOC -->

@@ -32,7 +32,7 @@ To find the mean, see ` Math\mean() `.
 
 
 
-+ [` Container<num> `](/docs/apis/Interfaces/HH/Container/)`` $numbers ``
++ [` Container<num> `](/apis/Interfaces/HH/Container/)`` $numbers ``
 
 
 

@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a [` Map `](/docs/apis/Classes/HH/Map/) containing the values of the current [` Map `](/docs/apis/Classes/HH/Map/) that meet
+Returns a [` Map `](/apis/Classes/HH/Map/) containing the values of the current [` Map `](/apis/Classes/HH/Map/) that meet
 a supplied condition applied to its keys and values
 
 
@@ -22,14 +22,14 @@ public function filterWithKey(
 
 
 Only keys and values that meet a certain criteria are affected by a call to
-[` filterWithKey() `](/docs/apis/Classes/HH/Map/filterWithKey/), while all values are affected by a call to
-[` mapWithKey() `](/docs/apis/Classes/HH/Map/mapWithKey/).
+[` filterWithKey() `](/apis/Classes/HH/Map/filterWithKey/), while all values are affected by a call to
+[` mapWithKey() `](/apis/Classes/HH/Map/mapWithKey/).
 
 
 
 
-The keys associated with the current [` Map `](/docs/apis/Classes/HH/Map/) remain unchanged in the
-returned [` Map `](/docs/apis/Classes/HH/Map/); the keys will be used in the filtering process only.
+The keys associated with the current [` Map `](/apis/Classes/HH/Map/) remain unchanged in the
+returned [` Map `](/apis/Classes/HH/Map/); the keys will be used in the filtering process only.
 
 
 
@@ -49,8 +49,8 @@ returned [` Map `](/docs/apis/Classes/HH/Map/); the keys will be used in the fil
 
 
 
-* [` Map<Tk, `](/docs/apis/Classes/HH/Map/)`` Tv> `` - a [` Map `](/docs/apis/Classes/HH/Map/) containing the values after a user-specified condition
-  is applied to the keys and values of the current [` Map `](/docs/apis/Classes/HH/Map/).
+* [` Map<Tk, `](/apis/Classes/HH/Map/)`` Tv> `` - a [` Map `](/apis/Classes/HH/Map/) containing the values after a user-specified condition
+  is applied to the keys and values of the current [` Map `](/apis/Classes/HH/Map/).
 
 
 
@@ -60,7 +60,7 @@ returned [` Map `](/docs/apis/Classes/HH/Map/); the keys will be used in the fil
 
 
 
-This example shows how ` filterWithKey ` allows you to use an element's value and corresponding key to determine whether to include it in the filtered [` Map `](/docs/apis/Classes/HH/Map/).
+This example shows how ` filterWithKey ` allows you to use an element's value and corresponding key to determine whether to include it in the filtered [` Map `](/apis/Classes/HH/Map/).
 
 
 

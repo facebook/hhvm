@@ -32,5 +32,5 @@ public function writeAllAsync(
 
 
 
-* [` Awaitable<void> `](/docs/apis/Classes/HH/Awaitable/)
+* [` Awaitable<void> `](/apis/Classes/HH/Awaitable/)
 <!-- HHAPIDOC -->

@@ -22,13 +22,13 @@ The iteration variable will have a type of ` T `.
 
 
 In addition to Hack collections, PHP ` array `s and anything that implement
-[` Iterator `](/docs/apis/Interfaces/HH/Iterator/) are `` Traversable ``.
+[` Iterator `](/apis/Interfaces/HH/Iterator/) are `` Traversable ``.
 
 
 
 
 In general, if you are implementing your own Hack class, you will want to
-implement [` Iterable `](/docs/apis/Interfaces/HH/Iterable/) instead of `` Traversable `` since ``` Traversable ``` is more
+implement [` Iterable `](/apis/Interfaces/HH/Iterable/) instead of `` Traversable `` since ``` Traversable ``` is more
 of a bridge for PHP ```` array ````s to work well with Hack collections.
 
 
@@ -39,8 +39,8 @@ of a bridge for PHP ```` array ````s to work well with Hack collections.
 
 
 
-+ [Introduction](</docs/hack/arrays-and-collections/introduction>)
-+ [Interfaces](</docs/hack/arrays-and-collections/introduction>)
++ [Introduction](</hack/arrays-and-collections/introduction>)
++ [Interfaces](</hack/arrays-and-collections/introduction>)
 
 
 

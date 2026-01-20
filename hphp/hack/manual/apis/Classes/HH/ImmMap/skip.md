@@ -6,8 +6,8 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns an [` ImmMap `](/docs/apis/Classes/HH/ImmMap/) containing the values after the `` n ``-th element of the
-current [` ImmMap `](/docs/apis/Classes/HH/ImmMap/)
+Returns an [` ImmMap `](/apis/Classes/HH/ImmMap/) containing the values after the `` n ``-th element of the
+current [` ImmMap `](/apis/Classes/HH/ImmMap/)
 
 
 
@@ -21,8 +21,8 @@ public function skip(
 
 
 
-The returned [` ImmMap `](/docs/apis/Classes/HH/ImmMap/) will always be a proper subset of the current
-[` ImmMap `](/docs/apis/Classes/HH/ImmMap/).
+The returned [` ImmMap `](/apis/Classes/HH/ImmMap/) will always be a proper subset of the current
+[` ImmMap `](/apis/Classes/HH/ImmMap/).
 
 
 
@@ -38,7 +38,7 @@ The returned [` ImmMap `](/docs/apis/Classes/HH/ImmMap/) will always be a proper
 
 
 + ` int $n ` - The last element to be skipped; the `` $n+1 `` element will be the
-  first one in the returned [` ImmMap `](/docs/apis/Classes/HH/ImmMap/).
+  first one in the returned [` ImmMap `](/apis/Classes/HH/ImmMap/).
 
 
 
@@ -48,7 +48,7 @@ The returned [` ImmMap `](/docs/apis/Classes/HH/ImmMap/) will always be a proper
 
 
 
-* [` ImmMap<Tk, `](/docs/apis/Classes/HH/ImmMap/)`` Tv> `` - An [` ImmMap `](/docs/apis/Classes/HH/ImmMap/) that is a proper subset of the current [` ImmMap `](/docs/apis/Classes/HH/ImmMap/)
+* [` ImmMap<Tk, `](/apis/Classes/HH/ImmMap/)`` Tv> `` - An [` ImmMap `](/apis/Classes/HH/ImmMap/) that is a proper subset of the current [` ImmMap `](/apis/Classes/HH/ImmMap/)
   containing values after the specified `` n ``-th element.
 
 
@@ -59,5 +59,5 @@ The returned [` ImmMap `](/docs/apis/Classes/HH/ImmMap/) will always be a proper
 
 
 
-See [` Map::skip `](/docs/apis/Classes/HH/Map/skip/#examples) for usage examples.
+See [` Map::skip `](/apis/Classes/HH/Map/skip/#examples) for usage examples.
 <!-- HHAPIDOC -->

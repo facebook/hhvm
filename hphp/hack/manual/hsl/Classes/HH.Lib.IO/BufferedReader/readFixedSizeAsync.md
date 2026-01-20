@@ -32,5 +32,5 @@ public function readFixedSizeAsync(
 
 
 
-* [` Awaitable<string> `](/docs/apis/Classes/HH/Awaitable/)
+* [` Awaitable<string> `](/apis/Classes/HH/Awaitable/)
 <!-- HHAPIDOC -->

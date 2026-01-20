@@ -54,4 +54,4 @@ $x = $tmp;
 ```
 
 The complete set of compound-assignment operators is: `**=`, `*=`, `/=`, `%=`, `+=`, `-=`, `.=`, `<<=`, `>>=`, `&=`, `^=`, `|=`, and
-[`??=`](/docs/hack/expressions-and-operators/coalesce#coalescing-assignment-operator).
+[`??=`](/hack/expressions-and-operators/coalesce#coalescing-assignment-operator).

@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a ` Vector ` with the values of the current [` Map `](/docs/apis/Classes/HH/Map/)
+Returns a ` Vector ` with the values of the current [` Map `](/apis/Classes/HH/Map/)
 
 
 
@@ -23,7 +23,7 @@ public function toVector(): Vector<Tv>;
 
 
 
-+ [` Vector<Tv> `](/docs/apis/Classes/HH/Vector/) - a `` Vector `` that contains the values of the current [` Map `](/docs/apis/Classes/HH/Map/).
++ [` Vector<Tv> `](/apis/Classes/HH/Vector/) - a `` Vector `` that contains the values of the current [` Map `](/apis/Classes/HH/Map/).
 
 
 
@@ -33,7 +33,7 @@ public function toVector(): Vector<Tv>;
 
 
 
-This example shows how [` toVector() `](/docs/apis/Classes/HH/Map/toVector/) returns a `` Vector `` of ``` $m ```'s values, so mutating this new ```` Vector ```` doesn't affect the original [` Map `](/docs/apis/Classes/HH/Map/).
+This example shows how [` toVector() `](/apis/Classes/HH/Map/toVector/) returns a `` Vector `` of ``` $m ```'s values, so mutating this new ```` Vector ```` doesn't affect the original [` Map `](/apis/Classes/HH/Map/).
 
 
 

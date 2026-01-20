@@ -30,7 +30,7 @@ If no element matches the search value, this function returns -1.
 
 
 
-+ [Constraints](</docs/hack/generics/type-constraints>)
++ [Constraints](</hack/generics/type-constraints>)
 
 
 
@@ -44,7 +44,7 @@ If no element matches the search value, this function returns -1.
 
 
 * ` mixed $search_value ` - The value that will be search for in the current
-  [` Pair `](/docs/apis/Classes/HH/Pair/).
+  [` Pair `](/apis/Classes/HH/Pair/).
 
 
 

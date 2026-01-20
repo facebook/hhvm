@@ -35,7 +35,7 @@ public function getRow(
 
 
 
-* [` AsyncMysqlRow `](/docs/apis/Classes/AsyncMysqlRow/) - The [` AsyncMysqlRow `](/docs/apis/Classes/AsyncMysqlRow/) representing one specific row in the current
+* [` AsyncMysqlRow `](/apis/Classes/AsyncMysqlRow/) - The [` AsyncMysqlRow `](/apis/Classes/AsyncMysqlRow/) representing one specific row in the current
   row block.
 
 
@@ -46,7 +46,7 @@ public function getRow(
 
 
 
-The following example shows you how to get a row from a row block via [` AsyncMysqlRowBlock::getRow `](/docs/apis/Classes/AsyncMysqlRowBlock/getRow/). You pass an `` int `` specifying the row of the row block you want.
+The following example shows you how to get a row from a row block via [` AsyncMysqlRowBlock::getRow `](/apis/Classes/AsyncMysqlRowBlock/getRow/). You pass an `` int `` specifying the row of the row block you want.
 
 
 

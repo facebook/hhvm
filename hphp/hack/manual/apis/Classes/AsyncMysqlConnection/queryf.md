@@ -28,7 +28,7 @@ flexibility and automatic escaping in most string cases.
 
 
 For example:
-[` queryf("SELECT `](/docs/apis/Classes/AsyncMysqlConnection/queryf/)`` %C FROM %T WHERE %C %=s", $col1, $table, $col2, $value); ``
+[` queryf("SELECT `](/apis/Classes/AsyncMysqlConnection/queryf/)`` %C FROM %T WHERE %C %=s", $col1, $table, $col2, $value); ``
 
 
 
@@ -51,7 +51,7 @@ The supported placeholders are:
   open you up for SQL injection.
 + ` %Lx `  where `` x `` is one of ``` T ```, ```` C ````, ````` s `````, `````` d ``````, or ``````` f ```````, represents a list
   of table names, column names, nullable strings, integers or
-  floats, respectively. Pass a [` Vector `](/docs/apis/Classes/HH/Vector/) of values to have it
+  floats, respectively. Pass a [` Vector `](/apis/Classes/HH/Vector/) of values to have it
   expanded into a comma-separated list. Parentheses are not
   added automatically around the placeholder in the query string,
   so be sure to add them if necessary.
@@ -83,8 +83,8 @@ escaped.
 
 
 
-- [` Awaitable<AsyncMysqlQueryResult> `](/docs/apis/Classes/HH/Awaitable/) - an [` Awaitable `](/docs/apis/Classes/HH/Awaitable/) representing the result of your query. Use
-  `` await `` or ``` join ``` to get the actual [` AsyncMysqlQueryResult `](/docs/apis/Classes/AsyncMysqlQueryResult/)
+- [` Awaitable<AsyncMysqlQueryResult> `](/apis/Classes/HH/Awaitable/) - an [` Awaitable `](/apis/Classes/HH/Awaitable/) representing the result of your query. Use
+  `` await `` or ``` join ``` to get the actual [` AsyncMysqlQueryResult `](/apis/Classes/AsyncMysqlQueryResult/)
   object.
 
 
@@ -95,7 +95,7 @@ escaped.
 
 
 
-The following example shows how to use [` AsyncMysqlConnection::queryf `](/docs/apis/Classes/AsyncMysqlConnection/queryf/). First you get a connection from an [` AsyncMysqlConnectionPool `](/docs/apis/Classes/AsyncMysqlConnectionPool/); then you decide what parameters you want to pass as query placeholders.
+The following example shows how to use [` AsyncMysqlConnection::queryf `](/apis/Classes/AsyncMysqlConnection/queryf/). First you get a connection from an [` AsyncMysqlConnectionPool `](/apis/Classes/AsyncMysqlConnectionPool/); then you decide what parameters you want to pass as query placeholders.
 
 
 
@@ -212,7 +212,7 @@ await \Hack\UserDocumentation\API\Examples\AsyncMysql\skipif_async();
 
 
 
-The following example shows how to use the ` %L ` placeholder for [` AsyncMysqlConnection::queryf `](/docs/apis/Classes/AsyncMysqlConnection/queryf/). First you get a connection from an [` AsyncMysqlConnectionPool `](/docs/apis/Classes/AsyncMysqlConnectionPool/); then we are passing a vector of ids to used in the placeholder. The placeholder ends up being `` %Ld `` since the ids are integers.
+The following example shows how to use the ` %L ` placeholder for [` AsyncMysqlConnection::queryf `](/apis/Classes/AsyncMysqlConnection/queryf/). First you get a connection from an [` AsyncMysqlConnectionPool `](/apis/Classes/AsyncMysqlConnectionPool/); then we are passing a vector of ids to used in the placeholder. The placeholder ends up being `` %Ld `` since the ids are integers.
 
 
 

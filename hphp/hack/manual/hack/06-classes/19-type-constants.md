@@ -21,4 +21,4 @@ A type constant has public visibility and is implicitly static.
 
 By convention, type constant names begin with an uppercase `T`.
 
-See [inheritance](/docs/hack/classes/inheritance) and [type constants revisited](/docs/hack/classes/type-constants-revisited) for more information.
+See [inheritance](/hack/classes/inheritance) and [type constants revisited](/hack/classes/type-constants-revisited) for more information.

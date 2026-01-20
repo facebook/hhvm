@@ -6,8 +6,8 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns an [` ImmVector `](/docs/apis/Classes/HH/ImmVector/) containing the values after an operation has been
-applied to each value in the current [` Pair `](/docs/apis/Classes/HH/Pair/)
+Returns an [` ImmVector `](/apis/Classes/HH/ImmVector/) containing the values after an operation has been
+applied to each value in the current [` Pair `](/apis/Classes/HH/Pair/)
 
 
 
@@ -21,8 +21,8 @@ public function map<Tu>(
 
 
 
-Every value in the current Pair is affected by a call to [` map() `](/docs/apis/Classes/HH/Pair/map/), unlike
-[` filter() `](/docs/apis/Classes/HH/Pair/filter/) where only values that meet a certain criteria are affected.
+Every value in the current Pair is affected by a call to [` map() `](/apis/Classes/HH/Pair/map/), unlike
+[` filter() `](/apis/Classes/HH/Pair/filter/) where only values that meet a certain criteria are affected.
 
 
 
@@ -32,7 +32,7 @@ Every value in the current Pair is affected by a call to [` map() `](/docs/apis/
 
 
 
-+ [Examples](</docs/hack/arrays-and-collections/introduction>)
++ [Examples](</hack/arrays-and-collections/introduction>)
 
 
 
@@ -46,7 +46,7 @@ Every value in the current Pair is affected by a call to [` map() `](/docs/apis/
 
 
 * ` (function(mixed): Tu) $callback ` - The callback containing the operation to apply to the
-  current [` Pair `](/docs/apis/Classes/HH/Pair/) values.
+  current [` Pair `](/apis/Classes/HH/Pair/) values.
 
 
 
@@ -56,7 +56,7 @@ Every value in the current Pair is affected by a call to [` map() `](/docs/apis/
 
 
 
-- [` ImmVector<Tu> `](/docs/apis/Classes/HH/ImmVector/) - an [` ImmVector `](/docs/apis/Classes/HH/ImmVector/) containing the values after a user-specified
+- [` ImmVector<Tu> `](/apis/Classes/HH/ImmVector/) - an [` ImmVector `](/apis/Classes/HH/ImmVector/) containing the values after a user-specified
   operation is applied.
 
 
@@ -67,7 +67,7 @@ Every value in the current Pair is affected by a call to [` map() `](/docs/apis/
 
 
 
-In this example the [` Pair `](/docs/apis/Classes/HH/Pair/)'s values are mapped to `` 0 `` if they're ``` NULL ```:
+In this example the [` Pair `](/apis/Classes/HH/Pair/)'s values are mapped to `` 0 `` if they're ``` NULL ```:
 
 
 

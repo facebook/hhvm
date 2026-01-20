@@ -90,7 +90,7 @@ switch ($v) {
 Case-label values can be runtime expressions, and the types of sibling case-label values need not be the same.
 
 **Note switch uses `==` equality for comparing the value with the
-different cases.**. See [equality](/docs/hack/expressions-and-operators/equality) for more details.
+different cases.**. See [equality](/hack/expressions-and-operators/equality) for more details.
 
 ```hack
 $v = 30;

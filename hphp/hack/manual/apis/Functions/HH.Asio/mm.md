@@ -6,8 +6,8 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns an [` Awaitable `](/docs/apis/Classes/HH/Awaitable/) of [` Map `](/docs/apis/Classes/HH/Map/) containing after a mapping operation has
-been applied to each value in the provided [` KeyedTraversable `](/docs/apis/Interfaces/HH/KeyedTraversable/)
+Returns an [` Awaitable `](/apis/Classes/HH/Awaitable/) of [` Map `](/apis/Classes/HH/Map/) containing after a mapping operation has
+been applied to each value in the provided [` KeyedTraversable `](/apis/Interfaces/HH/KeyedTraversable/)
 
 
 
@@ -24,8 +24,8 @@ function mm<Tk as arraykey, Tv, Tr>(
 
 
 
-This function is similar to [` Map::map() `](/docs/apis/Classes/HH/Map/map/), but the mapping of the values
-is done using [` Awaitable `](/docs/apis/Classes/HH/Awaitable/)s.
+This function is similar to [` Map::map() `](/apis/Classes/HH/Map/map/), but the mapping of the values
+is done using [` Awaitable `](/apis/Classes/HH/Awaitable/)s.
 
 
 
@@ -36,13 +36,13 @@ This function is called ` mm ` because we are returning a `` m ``ap, and doing a
 
 
 
-` $callable ` must return an [` Awaitable `](/docs/apis/Classes/HH/Awaitable/).
+` $callable ` must return an [` Awaitable `](/apis/Classes/HH/Awaitable/).
 
 
 
 
-The keys and values in the [` Map `](/docs/apis/Classes/HH/Map/) of the returned [` Awaitable `](/docs/apis/Classes/HH/Awaitable/) are not
-available until you `` await `` or ``` join ``` the returned [` Awaitable `](/docs/apis/Classes/HH/Awaitable/).
+The keys and values in the [` Map `](/apis/Classes/HH/Map/) of the returned [` Awaitable `](/apis/Classes/HH/Awaitable/) are not
+available until you `` await `` or ``` join ``` the returned [` Awaitable `](/apis/Classes/HH/Awaitable/).
 
 
 
@@ -52,8 +52,8 @@ available until you `` await `` or ``` join ``` the returned [` Awaitable `](/do
 
 
 
-+ [` KeyedTraversable<Tk, `](/docs/apis/Interfaces/HH/KeyedTraversable/)`` Tv> $inputs `` - The [` KeyedTraversable `](/docs/apis/Interfaces/HH/KeyedTraversable/) of values to map.
-+ ` (function(Tv): Awaitable<Tr>) $callable ` - The callable containing the [` Awaitable `](/docs/apis/Classes/HH/Awaitable/) operation to
++ [` KeyedTraversable<Tk, `](/apis/Interfaces/HH/KeyedTraversable/)`` Tv> $inputs `` - The [` KeyedTraversable `](/apis/Interfaces/HH/KeyedTraversable/) of values to map.
++ ` (function(Tv): Awaitable<Tr>) $callable ` - The callable containing the [` Awaitable `](/apis/Classes/HH/Awaitable/) operation to
   apply to `` $inputs ``.
 
 
@@ -64,7 +64,7 @@ available until you `` await `` or ``` join ``` the returned [` Awaitable `](/do
 
 
 
-* [` Awaitable<Map<Tk, `](/docs/apis/Classes/HH/Awaitable/)`` Tr>> `` - An [` Awaitable `](/docs/apis/Classes/HH/Awaitable/) of [` Map `](/docs/apis/Classes/HH/Map/) after the mapping operation has been
+* [` Awaitable<Map<Tk, `](/apis/Classes/HH/Awaitable/)`` Tr>> `` - An [` Awaitable `](/apis/Classes/HH/Awaitable/) of [` Map `](/apis/Classes/HH/Map/) after the mapping operation has been
   applied to the values in  `` $inputs ``.
 
 

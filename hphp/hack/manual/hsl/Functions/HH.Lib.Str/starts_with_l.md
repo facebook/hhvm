@@ -41,7 +41,7 @@ For a byte-wise check, see `` Str\starts_with() ``
 
 
 
-+ [String](</docs/hack/built-in-types/string>)
++ [String](</hack/built-in-types/string>)
 
 
 

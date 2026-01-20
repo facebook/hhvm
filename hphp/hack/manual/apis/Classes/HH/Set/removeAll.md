@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Removes the values in the current [` Set `](/docs/apis/Classes/HH/Set/) that are also in the [` Traversable `](/docs/apis/Interfaces/HH/Traversable/)
+Removes the values in the current [` Set `](/apis/Classes/HH/Set/) that are also in the [` Traversable `](/apis/Interfaces/HH/Traversable/)
 
 
 
@@ -20,14 +20,14 @@ public function removeAll(
 
 
 
-If a value in the [` Traversable `](/docs/apis/Interfaces/HH/Traversable/) doesn't exist in the current [` Set `](/docs/apis/Classes/HH/Set/), that
-value in the [` Traversable `](/docs/apis/Interfaces/HH/Traversable/) is ignored.
+If a value in the [` Traversable `](/apis/Interfaces/HH/Traversable/) doesn't exist in the current [` Set `](/apis/Classes/HH/Set/), that
+value in the [` Traversable `](/apis/Interfaces/HH/Traversable/) is ignored.
 
 
 
 
-Future changes made to the current [` Set `](/docs/apis/Classes/HH/Set/) ARE reflected in the returned
-[` Set `](/docs/apis/Classes/HH/Set/), and vice-versa.
+Future changes made to the current [` Set `](/apis/Classes/HH/Set/) ARE reflected in the returned
+[` Set `](/apis/Classes/HH/Set/), and vice-versa.
 
 
 
@@ -37,7 +37,7 @@ Future changes made to the current [` Set `](/docs/apis/Classes/HH/Set/) ARE ref
 
 
 
-+ [` Traversable<Tv> `](/docs/apis/Interfaces/HH/Traversable/)`` $iterable ``
++ [` Traversable<Tv> `](/apis/Interfaces/HH/Traversable/)`` $iterable ``
 
 
 
@@ -47,7 +47,7 @@ Future changes made to the current [` Set `](/docs/apis/Classes/HH/Set/) ARE ref
 
 
 
-* [` Set<Tv> `](/docs/apis/Classes/HH/Set/) - Returns itself.
+* [` Set<Tv> `](/apis/Classes/HH/Set/) - Returns itself.
 
 
 
@@ -57,7 +57,7 @@ Future changes made to the current [` Set `](/docs/apis/Classes/HH/Set/) ARE ref
 
 
 
-This example removes multiple values from a [` Set `](/docs/apis/Classes/HH/Set/) and shows that the list of values to be removed can contain duplicates:
+This example removes multiple values from a [` Set `](/apis/Classes/HH/Set/) and shows that the list of values to be removed can contain duplicates:
 
 
 

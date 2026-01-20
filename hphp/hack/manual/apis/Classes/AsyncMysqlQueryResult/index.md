@@ -23,8 +23,8 @@ rows).
 
 
 You get an ` AsyncMysqlQueryResult ` through calls to
-[` AsyncMysqlConnection::query() `](/docs/apis/Classes/AsyncMysqlConnection/query/), `` AsyncMysqlConection::queryf() `` and
-[` AsyncMysqlConnection::multiQuery() `](/docs/apis/Classes/AsyncMysqlConnection/multiQuery/)
+[` AsyncMysqlConnection::query() `](/apis/Classes/AsyncMysqlConnection/query/), `` AsyncMysqlConection::queryf() `` and
+[` AsyncMysqlConnection::multiQuery() `](/apis/Classes/AsyncMysqlConnection/multiQuery/)
 
 
 
@@ -34,8 +34,8 @@ You get an ` AsyncMysqlQueryResult ` through calls to
 
 
 
-+ [Introduction](</docs/hack/asynchronous-operations/introduction>)
-+ [Extensions](</docs/hack/asynchronous-operations/extensions>)
++ [Introduction](</hack/asynchronous-operations/introduction>)
++ [Extensions](</hack/asynchronous-operations/extensions>)
 
 
 
@@ -60,58 +60,58 @@ final class AsyncMysqlQueryResult extends AsyncMysqlResult {...}
 
 
 
-* [` ->clientStats(): AsyncMysqlClientStats `](/docs/apis/Classes/AsyncMysqlQueryResult/clientStats/)\
+* [` ->clientStats(): AsyncMysqlClientStats `](/apis/Classes/AsyncMysqlQueryResult/clientStats/)\
   Returns the MySQL client statistics at the moment the successful query
   ended
 
-* [` ->dictRowsTyped(): vec<dict<string, mixed, arraykey>> `](/docs/apis/Classes/AsyncMysqlQueryResult/dictRowsTyped/)
+* [` ->dictRowsTyped(): vec<dict<string, mixed, arraykey>> `](/apis/Classes/AsyncMysqlQueryResult/dictRowsTyped/)
 
-* [` ->elapsedMicros(): int `](/docs/apis/Classes/AsyncMysqlQueryResult/elapsedMicros/)\
+* [` ->elapsedMicros(): int `](/apis/Classes/AsyncMysqlQueryResult/elapsedMicros/)\
   The total time for the successful query to occur, in microseconds
 
-* [` ->endTime(): float `](/docs/apis/Classes/AsyncMysqlQueryResult/endTime/)\
+* [` ->endTime(): float `](/apis/Classes/AsyncMysqlQueryResult/endTime/)\
   The end time when the successful query began, in seconds since epoch
 
-* [` ->lastInsertId(): int `](/docs/apis/Classes/AsyncMysqlQueryResult/lastInsertId/)\
+* [` ->lastInsertId(): int `](/apis/Classes/AsyncMysqlQueryResult/lastInsertId/)\
   The last ID inserted, if one existed, for the query that produced the
   current result
 
-* [` ->mapRows(): Vector<Map<?string>> `](/docs/apis/Classes/AsyncMysqlQueryResult/mapRows/)\
+* [` ->mapRows(): Vector<Map<?string>> `](/apis/Classes/AsyncMysqlQueryResult/mapRows/)\
   Returns the actual rows returned by the successful query, each row
   including the name and value for each column
 
-* [` ->mapRowsTyped(): Vector<Map<string, mixed>> `](/docs/apis/Classes/AsyncMysqlQueryResult/mapRowsTyped/)\
+* [` ->mapRowsTyped(): Vector<Map<string, mixed>> `](/apis/Classes/AsyncMysqlQueryResult/mapRowsTyped/)\
   Returns the actual rows returned by the successful query, each row
   including the name and typed-value for each column
 
-* [` ->noIndexUsed(): bool `](/docs/apis/Classes/AsyncMysqlQueryResult/noIndexUsed/)\
+* [` ->noIndexUsed(): bool `](/apis/Classes/AsyncMysqlQueryResult/noIndexUsed/)\
   Returns whether or not any of the queries executed did not use an index
   during execution
 
-* [` ->numRows(): int `](/docs/apis/Classes/AsyncMysqlQueryResult/numRows/)\
+* [` ->numRows(): int `](/apis/Classes/AsyncMysqlQueryResult/numRows/)\
   The number of rows in the current result
 
-* [` ->numRowsAffected(): int `](/docs/apis/Classes/AsyncMysqlQueryResult/numRowsAffected/)\
+* [` ->numRowsAffected(): int `](/apis/Classes/AsyncMysqlQueryResult/numRowsAffected/)\
   The number of database rows affected in the current result
 
-* [` ->recvGtid(): string `](/docs/apis/Classes/AsyncMysqlQueryResult/recvGtid/)\
+* [` ->recvGtid(): string `](/apis/Classes/AsyncMysqlQueryResult/recvGtid/)\
   The GTID of database returned for the current commit
 
-* [` ->responseAttributes(): Map<string> `](/docs/apis/Classes/AsyncMysqlQueryResult/responseAttributes/)\
+* [` ->responseAttributes(): Map<string> `](/apis/Classes/AsyncMysqlQueryResult/responseAttributes/)\
   The response attributes returned for the current query
 
-* [` ->rowBlocks(): Vector<AsyncMysqlRowBlock> `](/docs/apis/Classes/AsyncMysqlQueryResult/rowBlocks/)\
-  Returns a [` Vector `](/docs/apis/Classes/HH/Vector/) representing all row blocks returned by the successful
+* [` ->rowBlocks(): Vector<AsyncMysqlRowBlock> `](/apis/Classes/AsyncMysqlQueryResult/rowBlocks/)\
+  Returns a [` Vector `](/apis/Classes/HH/Vector/) representing all row blocks returned by the successful
   query
 
-* [` ->startTime(): float `](/docs/apis/Classes/AsyncMysqlQueryResult/startTime/)\
+* [` ->startTime(): float `](/apis/Classes/AsyncMysqlQueryResult/startTime/)\
   The start time when the successful query began, in seconds since epoch
 
-* [` ->vectorRows(): Vector<KeyedContainer<int, ?string>> `](/docs/apis/Classes/AsyncMysqlQueryResult/vectorRows/)\
+* [` ->vectorRows(): Vector<KeyedContainer<int, ?string>> `](/apis/Classes/AsyncMysqlQueryResult/vectorRows/)\
   Returns the actual rows returned by the successful query, each row
   including the values for each column
 
-* [` ->vectorRowsTyped(): Vector<KeyedContainer<int, mixed>> `](/docs/apis/Classes/AsyncMysqlQueryResult/vectorRowsTyped/)\
+* [` ->vectorRowsTyped(): Vector<KeyedContainer<int, mixed>> `](/apis/Classes/AsyncMysqlQueryResult/vectorRowsTyped/)\
   Returns the actual rows returned by the successful query, each row
   including the typed values for each column
 
@@ -122,24 +122,24 @@ final class AsyncMysqlQueryResult extends AsyncMysqlResult {...}
 
 
 
-### Public Methods ([` AsyncMysqlResult `](/docs/apis/Classes/AsyncMysqlResult/))
+### Public Methods ([` AsyncMysqlResult `](/apis/Classes/AsyncMysqlResult/))
 
 
 
 
-- [` ->getSslCertCn(): string `](/docs/apis/Classes/AsyncMysqlResult/getSslCertCn/)\
+- [` ->getSslCertCn(): string `](/apis/Classes/AsyncMysqlResult/getSslCertCn/)\
   Returns Common Name attribute of the TLS certificate presented
   by MySQL server
-- [` ->getSslCertExtensions(): Vector<string> `](/docs/apis/Classes/AsyncMysqlResult/getSslCertExtensions/)\
+- [` ->getSslCertExtensions(): Vector<string> `](/apis/Classes/AsyncMysqlResult/getSslCertExtensions/)\
   Returns values from the selected cert extensions of the TLS certificate
   presented by MySQL server
-- [` ->getSslCertSan(): Vector<string> `](/docs/apis/Classes/AsyncMysqlResult/getSslCertSan/)\
+- [` ->getSslCertSan(): Vector<string> `](/apis/Classes/AsyncMysqlResult/getSslCertSan/)\
   Returns Server Alternative Names attribute of the TLS certificate
   presented by MySQL server
-- [` ->isSslCertValidationEnforced(): bool `](/docs/apis/Classes/AsyncMysqlResult/isSslCertValidationEnforced/)\
+- [` ->isSslCertValidationEnforced(): bool `](/apis/Classes/AsyncMysqlResult/isSslCertValidationEnforced/)\
   Returns a boolean value indicating if server cert validation was enforced
   for this connection
-- [` ->sslSessionReused(): bool `](/docs/apis/Classes/AsyncMysqlResult/sslSessionReused/)\
+- [` ->sslSessionReused(): bool `](/apis/Classes/AsyncMysqlResult/sslSessionReused/)\
   Returns whether or not the current connection reused the SSL session
   from another SSL connection
 <!-- HHAPIDOC -->

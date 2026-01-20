@@ -6,8 +6,8 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a [` KeyedIterable `](/docs/apis/Interfaces/HH/KeyedIterable/) containing the values of the current
-[` KeyedIterable `](/docs/apis/Interfaces/HH/KeyedIterable/) that meet a supplied condition applied to its keys and
+Returns a [` KeyedIterable `](/apis/Interfaces/HH/KeyedIterable/) containing the values of the current
+[` KeyedIterable `](/apis/Interfaces/HH/KeyedIterable/) that meet a supplied condition applied to its keys and
 values
 
 
@@ -23,8 +23,8 @@ public function filterWithKey(
 
 
 Only keys and values that meet a certain criteria are affected by a call to
-[` filterWithKey() `](/docs/apis/Interfaces/HH/KeyedIterable/filterWithKey/), while all values are affected by a call to
-[` mapWithKey() `](/docs/apis/Interfaces/HH/KeyedIterable/mapWithKey/).
+[` filterWithKey() `](/apis/Interfaces/HH/KeyedIterable/filterWithKey/), while all values are affected by a call to
+[` mapWithKey() `](/apis/Interfaces/HH/KeyedIterable/mapWithKey/).
 
 
 
@@ -44,7 +44,7 @@ Only keys and values that meet a certain criteria are affected by a call to
 
 
 
-* [` KeyedIterable<Tk, `](/docs/apis/Interfaces/HH/KeyedIterable/)`` Tv> `` - a [` KeyedIterable `](/docs/apis/Interfaces/HH/KeyedIterable/) containing the values after a user-specified
+* [` KeyedIterable<Tk, `](/apis/Interfaces/HH/KeyedIterable/)`` Tv> `` - a [` KeyedIterable `](/apis/Interfaces/HH/KeyedIterable/) containing the values after a user-specified
   condition is applied to the keys and values of the current
-  [` KeyedIterable `](/docs/apis/Interfaces/HH/KeyedIterable/).
+  [` KeyedIterable `](/apis/Interfaces/HH/KeyedIterable/).
 <!-- HHAPIDOC -->

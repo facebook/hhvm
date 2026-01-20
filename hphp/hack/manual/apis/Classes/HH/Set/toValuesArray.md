@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns an ` array ` containing the values from the current [` Set `](/docs/apis/Classes/HH/Set/)
+Returns an ` array ` containing the values from the current [` Set `](/apis/Classes/HH/Set/)
 
 
 
@@ -18,7 +18,7 @@ public function toValuesArray(): varray<Tv>;
 
 
 
-This method is interchangeable with [` toKeysArray() `](/docs/apis/Classes/HH/Set/toKeysArray/).
+This method is interchangeable with [` toKeysArray() `](/apis/Classes/HH/Set/toKeysArray/).
 
 
 
@@ -29,7 +29,7 @@ This method is interchangeable with [` toKeysArray() `](/docs/apis/Classes/HH/Se
 
 
 + ` varray<Tv> ` - an integer-indexed `` array `` containing the values from the
-  current [` Set `](/docs/apis/Classes/HH/Set/).
+  current [` Set `](/apis/Classes/HH/Set/).
 
 
 

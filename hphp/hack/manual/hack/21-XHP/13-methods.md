@@ -1,6 +1,6 @@
 # Methods
 
-Remember, all XHP Objects derive from the [`\Facebook\XHP\Core\node`](/docs/hack/XHP/interfaces) base class, which has some public methods that can be called.
+Remember, all XHP Objects derive from the [`\Facebook\XHP\Core\node`](/hack/XHP/interfaces) base class, which has some public methods that can be called.
 
 Method | Description
 --------|------------

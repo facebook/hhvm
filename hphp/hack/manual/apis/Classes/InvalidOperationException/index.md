@@ -22,10 +22,10 @@ class InvalidOperationException extends RuntimeException implements StringishObj
 
 
 
-### Public Methods ([` StringishObject `](/docs/apis/Interfaces/StringishObject/))
+### Public Methods ([` StringishObject `](/apis/Interfaces/StringishObject/))
 
 
 
 
-+ [` ->__toString(): string `](/docs/apis/Interfaces/StringishObject/__toString/)
++ [` ->__toString(): string `](/apis/Interfaces/StringishObject/__toString/)
 <!-- HHAPIDOC -->

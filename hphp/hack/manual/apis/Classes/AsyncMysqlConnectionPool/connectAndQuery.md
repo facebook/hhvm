@@ -29,13 +29,13 @@ public function connectAndQuery(
 
 
 
-+ [` Traversable<string, `](/docs/apis/Interfaces/HH/Traversable/)`` arraykey> $queries ``
++ [` Traversable<string, `](/apis/Interfaces/HH/Traversable/)`` arraykey> $queries ``
 + ` string $host `
 + ` int $port `
 + ` string $dbname `
 + ` string $user `
 + ` string $password `
-+ [` AsyncMysqlConnectionOptions `](/docs/apis/Classes/AsyncMysqlConnectionOptions/)`` $conn_opts ``
++ [` AsyncMysqlConnectionOptions `](/apis/Classes/AsyncMysqlConnectionOptions/)`` $conn_opts ``
 + ` string $extra_key = '' `
 + ` dict<string> $query_attributes = dict [ ] `
 
@@ -47,5 +47,5 @@ public function connectAndQuery(
 
 
 
-* [` Awaitable<(AsyncMysqlConnectResult, `](/docs/apis/Classes/HH/Awaitable/)`` Vector<AsyncMysqlQueryResult>)> ``
+* [` Awaitable<(AsyncMysqlConnectResult, `](/apis/Classes/HH/Awaitable/)`` Vector<AsyncMysqlQueryResult>)> ``
 <!-- HHAPIDOC -->

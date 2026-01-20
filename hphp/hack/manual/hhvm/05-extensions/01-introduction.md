@@ -18,17 +18,17 @@ For the most up-to-date function signatures, please refer to your version of the
 
 * [apache](http://php.net/manual/en/book.apache.php)
 * [array](http://php.net/manual/en/book.array.php)
-* [asio](/docs/hack/asynchronous-operations/utility-functions)
-* [async_mysql](/docs/hack/asynchronous-operations/extensions#mysql)
+* [asio](/hack/asynchronous-operations/utility-functions)
+* [async_mysql](/hack/asynchronous-operations/extensions#mysql)
 * [bc](http://php.net/manual/en/book.bc.php)
 * [bz2](http://php.net/manual/en/book.bzip2.php)
 * [ctype](http://php.net/manual/en/book.ctype.php)
-* [curl](http://php.net/manual/en/book.curl.php) ([async curl](/docs/hack/asynchronous-operations/extensions#curl))
+* [curl](http://php.net/manual/en/book.curl.php) ([async curl](/hack/asynchronous-operations/extensions#curl))
 * [datetime](https://www.php.net/manual/en/book.datetime.php)
 * [debugger (phpdbg)](https://www.php.net/manual/en/book.phpdbg.php)
 * [dom](http://php.net/manual/en/book.dom.php)
 * domdocument
-* [enum](/docs/hack/built-in-types/enum)
+* [enum](/hack/built-in-types/enum)
 * [exif](http://php.net/manual/en/book.exif.php)
 * fb
 * [fileinfo](http://php.net/manual/en/book.fileinfo.php)
@@ -52,7 +52,7 @@ For the most up-to-date function signatures, please refer to your version of the
 * [mail](http://php.net/manual/en/book.mail.php)
 * [mailparse](http://php.net/manual/en/book.mailparse.php)
 * [mbstring](http://php.net/manual/en/book.mbstring.php)
-* [mcrouter](/docs/hack/asynchronous-operations/extensions#mcrouter)
+* [mcrouter](/hack/asynchronous-operations/extensions#mcrouter)
 * [mcrypt](http://php.net/manual/en/book.mcrypt.php)
 * [memcache](http://php.net/manual/en/book.memcache.php)
 * [memcached](http://php.net/manual/en/book.memcached.php)
@@ -74,7 +74,7 @@ For the most up-to-date function signatures, please refer to your version of the
 * [sockets](http://php.net/manual/en/book.sockets.php)
 * [spl](http://php.net/manual/en/book.spl.php)
 * [sqlite3](http://php.net/manual/en/book.sqlite3.php)
-* [stream](http://php.net/manual/en/book.stream.php) ([async streams](/docs/hack/asynchronous-operations/extensions#streams))
+* [stream](http://php.net/manual/en/book.stream.php) ([async streams](/hack/asynchronous-operations/extensions#streams))
 * [string](http://php.net/manual/en/book.strings.php)
 * sysvmsg
 * sysvsem

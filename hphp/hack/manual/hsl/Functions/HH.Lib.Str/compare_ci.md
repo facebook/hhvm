@@ -34,7 +34,7 @@ For a case-sensitive comparison, see ` Str\compare() `.
 
 
 
-+ [String](</docs/hack/built-in-types/string>)
++ [String](</hack/built-in-types/string>)
 
 
 

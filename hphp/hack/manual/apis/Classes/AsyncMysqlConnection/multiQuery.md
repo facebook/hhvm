@@ -23,18 +23,18 @@ public function multiQuery(
 
 
 
-[` AsyncMysqlConnection::multiQuery() `](/docs/apis/Classes/AsyncMysqlConnection/multiQuery/) is similar to
-[` AsyncMysqlConnection::query() `](/docs/apis/Classes/AsyncMysqlConnection/query/), except that you can pass an array of
+[` AsyncMysqlConnection::multiQuery() `](/apis/Classes/AsyncMysqlConnection/multiQuery/) is similar to
+[` AsyncMysqlConnection::query() `](/apis/Classes/AsyncMysqlConnection/query/), except that you can pass an array of
 `` string `` queries to run one after the other. Then when you ``` await ``` or
-```` join ```` on the returned [` Awaitable `](/docs/apis/Classes/HH/Awaitable/), you will get a [` Vector `](/docs/apis/Classes/HH/Vector/) of
-[` AsyncMysqlQueryResult `](/docs/apis/Classes/AsyncMysqlQueryResult/), one result for each query.
+```` join ```` on the returned [` Awaitable `](/apis/Classes/HH/Awaitable/), you will get a [` Vector `](/apis/Classes/HH/Vector/) of
+[` AsyncMysqlQueryResult `](/apis/Classes/AsyncMysqlQueryResult/), one result for each query.
 
 
 
 
-We strongly recommend using multiple calls to [` queryf() `](/docs/apis/Classes/AsyncMysqlConnection/queryf/) instead as it
+We strongly recommend using multiple calls to [` queryf() `](/apis/Classes/AsyncMysqlConnection/queryf/) instead as it
 escapes parameters; multiple queries can be executed simultaneously by
-combining [` queryf() `](/docs/apis/Classes/AsyncMysqlConnection/queryf/) with `` HH\Asio\v() ``.
+combining [` queryf() `](/apis/Classes/AsyncMysqlConnection/queryf/) with `` HH\Asio\v() ``.
 
 
 
@@ -44,7 +44,7 @@ combining [` queryf() `](/docs/apis/Classes/AsyncMysqlConnection/queryf/) with `
 
 
 
-+ [` Traversable<string, `](/docs/apis/Interfaces/HH/Traversable/)`` arraykey, mixed> $queries `` - A [` Vector `](/docs/apis/Classes/HH/Vector/) of queries, with each query being a `` string ``
++ [` Traversable<string, `](/apis/Interfaces/HH/Traversable/)`` arraykey, mixed> $queries `` - A [` Vector `](/apis/Classes/HH/Vector/) of queries, with each query being a `` string ``
   in the array.
 + ` int $timeout_micros = -1 ` - The maximum time, in microseconds, in which the
   query must be completed; -1 for default, 0 for
@@ -59,9 +59,9 @@ combining [` queryf() `](/docs/apis/Classes/AsyncMysqlConnection/queryf/) with `
 
 
 
-* [` Awaitable<Vector<AsyncMysqlQueryResult>> `](/docs/apis/Classes/HH/Awaitable/) - an [` Awaitable `](/docs/apis/Classes/HH/Awaitable/) representing the result of your multi-query. Use
-  `` await `` or ``` join ``` to get the actual [` Vector `](/docs/apis/Classes/HH/Vector/) of
-  [` AsyncMysqlQueryResult `](/docs/apis/Classes/AsyncMysqlQueryResult/) objects.
+* [` Awaitable<Vector<AsyncMysqlQueryResult>> `](/apis/Classes/HH/Awaitable/) - an [` Awaitable `](/apis/Classes/HH/Awaitable/) representing the result of your multi-query. Use
+  `` await `` or ``` join ``` to get the actual [` Vector `](/apis/Classes/HH/Vector/) of
+  [` AsyncMysqlQueryResult `](/apis/Classes/AsyncMysqlQueryResult/) objects.
 
 
 
@@ -71,7 +71,7 @@ combining [` queryf() `](/docs/apis/Classes/AsyncMysqlConnection/queryf/) with `
 
 
 
-[` AsyncMysqlConnection::multiQuery `](/docs/apis/Classes/AsyncMysqlConnection/multiQuery/) is similar to [` AsyncMysqlConnection::query `](/docs/apis/Classes/AsyncMysqlConnection/query/), except that you can pass an array of queries to run one after the other. Then when you `` await `` on the call, you will get a [` Vector `](/docs/apis/Classes/HH/Vector/) of [` AsyncMysqlQueryResult `](/docs/apis/Classes/AsyncMysqlQueryResult/), one result for each query.
+[` AsyncMysqlConnection::multiQuery `](/apis/Classes/AsyncMysqlConnection/multiQuery/) is similar to [` AsyncMysqlConnection::query `](/apis/Classes/AsyncMysqlConnection/query/), except that you can pass an array of queries to run one after the other. Then when you `` await `` on the call, you will get a [` Vector `](/apis/Classes/HH/Vector/) of [` AsyncMysqlQueryResult `](/apis/Classes/AsyncMysqlQueryResult/), one result for each query.
 
 
 

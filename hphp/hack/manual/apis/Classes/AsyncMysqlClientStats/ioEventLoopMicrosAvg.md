@@ -44,7 +44,7 @@ This returns an exponentially-smoothed average.
 
 
 
-The following example describes how to get the average loop time of this SQL client's event handling (in this particular case, performing the connection) via [` AsyncMysqlClientStats::ioEventLoopMicrosAvg `](/docs/apis/Classes/AsyncMysqlClientStats/ioEventLoopMicrosAvg/).
+The following example describes how to get the average loop time of this SQL client's event handling (in this particular case, performing the connection) via [` AsyncMysqlClientStats::ioEventLoopMicrosAvg `](/apis/Classes/AsyncMysqlClientStats/ioEventLoopMicrosAvg/).
 
 
 

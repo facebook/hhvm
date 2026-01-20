@@ -34,7 +34,7 @@ public function fieldsCount(): int;
 
 
 
-The following example shows how to use [` AsyncMysqlRowBlock::fieldsCount `](/docs/apis/Classes/AsyncMysqlRowBlock/fieldsCount/) to get the total number of fields represented in the row block
+The following example shows how to use [` AsyncMysqlRowBlock::fieldsCount `](/apis/Classes/AsyncMysqlRowBlock/fieldsCount/) to get the total number of fields represented in the row block
 
 
 

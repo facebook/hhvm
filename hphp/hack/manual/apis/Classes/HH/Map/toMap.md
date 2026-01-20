@@ -23,7 +23,7 @@ public function toMap(): Map<Tk, Tv>;
 
 
 
-+ [` Map<Tk, `](/docs/apis/Classes/HH/Map/)`` Tv> `` - a ``` Map ``` that is a deep copy of the current ```` Map ````.
++ [` Map<Tk, `](/apis/Classes/HH/Map/)`` Tv> `` - a ``` Map ``` that is a deep copy of the current ```` Map ````.
 
 
 

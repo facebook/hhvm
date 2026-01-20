@@ -55,7 +55,7 @@ See [here](<http://goo.gl/1RCN2l>) for the possible flags.
 
 
 
-The following example shows how to use [` AsyncMysqlRowBlock::fieldFlags `](/docs/apis/Classes/AsyncMysqlRowBlock/fieldFlags/) to get the bitwise `` OR `` combination of the flags that are set for the ``` userID ``` field. The flags are as follows:
+The following example shows how to use [` AsyncMysqlRowBlock::fieldFlags `](/apis/Classes/AsyncMysqlRowBlock/fieldFlags/) to get the bitwise `` OR `` combination of the flags that are set for the ``` userID ``` field. The flags are as follows:
 
 
 

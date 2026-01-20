@@ -48,7 +48,7 @@ of `` $replacements `` therefore doesn't matter.
 
 
 
-* [String](</docs/hack/built-in-types/string>)
+* [String](</hack/built-in-types/string>)
 
 
 
@@ -62,7 +62,7 @@ of `` $replacements `` therefore doesn't matter.
 
 
 - ` string $haystack `
-- [` KeyedContainer<string, `](/docs/apis/Interfaces/HH/KeyedContainer/)`` string> $replacements ``
+- [` KeyedContainer<string, `](/apis/Interfaces/HH/KeyedContainer/)`` string> $replacements ``
 
 
 

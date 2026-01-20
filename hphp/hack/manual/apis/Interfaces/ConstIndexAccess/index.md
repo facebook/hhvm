@@ -20,8 +20,8 @@ The interface for all keyed collections to enable access its values
 
 
 
-+ [Introduction](</docs/hack/arrays-and-collections/introduction>)
-+ [Interfaces](</docs/hack/arrays-and-collections/introduction>)
++ [Introduction](</hack/arrays-and-collections/introduction>)
++ [Interfaces](</hack/arrays-and-collections/introduction>)
 
 
 
@@ -46,10 +46,10 @@ interface ConstIndexAccess {...}
 
 
 
-* [` ->at(Tk $k): Tv `](/docs/apis/Interfaces/ConstIndexAccess/at/)\
+* [` ->at(Tk $k): Tv `](/apis/Interfaces/ConstIndexAccess/at/)\
   Returns the value at the specified key in the current collection
-* [` ->containsKey(mixed $k): bool `](/docs/apis/Interfaces/ConstIndexAccess/containsKey/)\
+* [` ->containsKey(mixed $k): bool `](/apis/Interfaces/ConstIndexAccess/containsKey/)\
   Determines if the specified key is in the current collection
-* [` ->get(Tk $k): ?Tv `](/docs/apis/Interfaces/ConstIndexAccess/get/)\
+* [` ->get(Tk $k): ?Tv `](/apis/Interfaces/ConstIndexAccess/get/)\
   Returns the value at the specified key in the current collection
 <!-- HHAPIDOC -->

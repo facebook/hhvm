@@ -40,9 +40,9 @@ interface WriteHandle implements Handle {...}
 
 
 
-+ [` ->writeAllAsync(string $bytes, ?int $timeout_ns = NULL): Awaitable<void> `](</docs/hsl/Interfaces/HH.Lib.IO/WriteHandle/writeAllAsync/>)\
++ [` ->writeAllAsync(string $bytes, ?int $timeout_ns = NULL): Awaitable<void> `](</hsl/Interfaces/HH.Lib.IO/WriteHandle/writeAllAsync/>)\
   Write all of the requested data
-+ [` ->writeAllowPartialSuccessAsync(string $bytes, ?int $timeout_ns = NULL): Awaitable<int> `](</docs/hsl/Interfaces/HH.Lib.IO/WriteHandle/writeAllowPartialSuccessAsync/>)\
++ [` ->writeAllowPartialSuccessAsync(string $bytes, ?int $timeout_ns = NULL): Awaitable<int> `](</hsl/Interfaces/HH.Lib.IO/WriteHandle/writeAllowPartialSuccessAsync/>)\
   Write data, waiting if necessary
 
 
@@ -56,6 +56,6 @@ interface WriteHandle implements Handle {...}
 
 
 
-* [` ->writeImpl(string $bytes): int `](</docs/hsl/Interfaces/HH.Lib.IO/WriteHandle/writeImpl/>)\
+* [` ->writeImpl(string $bytes): int `](</hsl/Interfaces/HH.Lib.IO/WriteHandle/writeImpl/>)\
   An immediate unordered write
 <!-- HHAPIDOC -->

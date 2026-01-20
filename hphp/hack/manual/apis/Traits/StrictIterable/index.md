@@ -37,25 +37,25 @@ trait StrictIterable implements HH\Iterable<Tv> {...}
 
 
 
-+ [` ->concat<Tu super Tv>(Traversable<Tu> $traversable): Iterable<Tu> `](/docs/apis/Traits/StrictIterable/concat/)
-+ [` ->filter((function(Tv): bool) $fn): Iterable<Tv> `](/docs/apis/Traits/StrictIterable/filter/)
-+ [` ->firstValue(): ?Tv `](/docs/apis/Traits/StrictIterable/firstValue/)
-+ [` ->lastValue(): ?Tv `](/docs/apis/Traits/StrictIterable/lastValue/)
-+ [` ->lazy(): Iterable<Tv> `](/docs/apis/Traits/StrictIterable/lazy/)
-+ [` ->map<Tu>((function(Tv): Tu) $fn): Iterable<Tu> `](/docs/apis/Traits/StrictIterable/map/)
-+ [` ->skip(int $n): Iterable<Tv> `](/docs/apis/Traits/StrictIterable/skip/)
-+ [` ->skipWhile((function(Tv): bool) $fn): Iterable<Tv> `](/docs/apis/Traits/StrictIterable/skipWhile/)
-+ [` ->slice(int $start, int $len): Iterable<Tv> `](/docs/apis/Traits/StrictIterable/slice/)
-+ [` ->take(int $n): Iterable<Tv> `](/docs/apis/Traits/StrictIterable/take/)
-+ [` ->takeWhile((function(Tv): bool) $fn): Iterable<Tv> `](/docs/apis/Traits/StrictIterable/takeWhile/)
-+ [` ->toArray() `](/docs/apis/Traits/StrictIterable/toArray/)
-+ [` ->toImmSet(): ImmSet<Tv> `](/docs/apis/Traits/StrictIterable/toImmSet/)
-+ [` ->toImmVector(): ImmVector<Tv> `](/docs/apis/Traits/StrictIterable/toImmVector/)
-+ [` ->toSet() `](/docs/apis/Traits/StrictIterable/toSet/)
-+ [` ->toValuesArray(): varray<Tv> `](/docs/apis/Traits/StrictIterable/toValuesArray/)
-+ [` ->toVector() `](/docs/apis/Traits/StrictIterable/toVector/)
-+ [` ->values(): Iterable<Tv> `](/docs/apis/Traits/StrictIterable/values/)
-+ [` ->zip<Tu>(Traversable<Tu> $traversable): Iterable<Pair<Tv, Tu>> `](/docs/apis/Traits/StrictIterable/zip/)
++ [` ->concat<Tu super Tv>(Traversable<Tu> $traversable): Iterable<Tu> `](/apis/Traits/StrictIterable/concat/)
++ [` ->filter((function(Tv): bool) $fn): Iterable<Tv> `](/apis/Traits/StrictIterable/filter/)
++ [` ->firstValue(): ?Tv `](/apis/Traits/StrictIterable/firstValue/)
++ [` ->lastValue(): ?Tv `](/apis/Traits/StrictIterable/lastValue/)
++ [` ->lazy(): Iterable<Tv> `](/apis/Traits/StrictIterable/lazy/)
++ [` ->map<Tu>((function(Tv): Tu) $fn): Iterable<Tu> `](/apis/Traits/StrictIterable/map/)
++ [` ->skip(int $n): Iterable<Tv> `](/apis/Traits/StrictIterable/skip/)
++ [` ->skipWhile((function(Tv): bool) $fn): Iterable<Tv> `](/apis/Traits/StrictIterable/skipWhile/)
++ [` ->slice(int $start, int $len): Iterable<Tv> `](/apis/Traits/StrictIterable/slice/)
++ [` ->take(int $n): Iterable<Tv> `](/apis/Traits/StrictIterable/take/)
++ [` ->takeWhile((function(Tv): bool) $fn): Iterable<Tv> `](/apis/Traits/StrictIterable/takeWhile/)
++ [` ->toArray() `](/apis/Traits/StrictIterable/toArray/)
++ [` ->toImmSet(): ImmSet<Tv> `](/apis/Traits/StrictIterable/toImmSet/)
++ [` ->toImmVector(): ImmVector<Tv> `](/apis/Traits/StrictIterable/toImmVector/)
++ [` ->toSet() `](/apis/Traits/StrictIterable/toSet/)
++ [` ->toValuesArray(): varray<Tv> `](/apis/Traits/StrictIterable/toValuesArray/)
++ [` ->toVector() `](/apis/Traits/StrictIterable/toVector/)
++ [` ->values(): Iterable<Tv> `](/apis/Traits/StrictIterable/values/)
++ [` ->zip<Tu>(Traversable<Tu> $traversable): Iterable<Pair<Tv, Tu>> `](/apis/Traits/StrictIterable/zip/)
 
 
 
@@ -63,11 +63,11 @@ trait StrictIterable implements HH\Iterable<Tv> {...}
 
 
 
-### Public Methods ([` HH\Iterable `](/docs/apis/Interfaces/HH/Iterable/))
+### Public Methods ([` HH\Iterable `](/apis/Interfaces/HH/Iterable/))
 
 
 
 
-* [` ->getIterator(): Iterator<Tv> `](/docs/apis/Interfaces/HH/Iterable/getIterator/)\
+* [` ->getIterator(): Iterator<Tv> `](/apis/Interfaces/HH/Iterable/getIterator/)\
   Returns an iterator that points to beginning of the current `` Iterable ``
 <!-- HHAPIDOC -->

@@ -6,8 +6,8 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns an [` ImmVector `](/docs/apis/Classes/HH/ImmVector/) containing the results of applying an operation to
-each value in the current [` ImmVector `](/docs/apis/Classes/HH/ImmVector/)
+Returns an [` ImmVector `](/apis/Classes/HH/ImmVector/) containing the results of applying an operation to
+each value in the current [` ImmVector `](/apis/Classes/HH/ImmVector/)
 
 
 
@@ -21,9 +21,9 @@ public function map<Tu>(
 
 
 
-[` map() `](/docs/apis/Classes/HH/ImmVector/map/)'s result contains a value for every value in the current
-[` ImmVector `](/docs/apis/Classes/HH/ImmVector/); unlike [` filter() `](/docs/apis/Classes/HH/ImmVector/filter/), where only values that meet a certain
-criterion are included in the resulting [` ImmVector `](/docs/apis/Classes/HH/ImmVector/).
+[` map() `](/apis/Classes/HH/ImmVector/map/)'s result contains a value for every value in the current
+[` ImmVector `](/apis/Classes/HH/ImmVector/); unlike [` filter() `](/apis/Classes/HH/ImmVector/filter/), where only values that meet a certain
+criterion are included in the resulting [` ImmVector `](/apis/Classes/HH/ImmVector/).
 
 
 
@@ -33,7 +33,7 @@ criterion are included in the resulting [` ImmVector `](/docs/apis/Classes/HH/Im
 
 
 
-+ [Examples](</docs/hack/arrays-and-collections/introduction>)
++ [Examples](</hack/arrays-and-collections/introduction>)
 
 
 
@@ -56,8 +56,8 @@ criterion are included in the resulting [` ImmVector `](/docs/apis/Classes/HH/Im
 
 
 
-- [` ImmVector<Tu> `](/docs/apis/Classes/HH/ImmVector/) - An [` ImmVector `](/docs/apis/Classes/HH/ImmVector/) containing the results of applying a user-specified
-  operation to each value of the current [` ImmVector `](/docs/apis/Classes/HH/ImmVector/) in turn.
+- [` ImmVector<Tu> `](/apis/Classes/HH/ImmVector/) - An [` ImmVector `](/apis/Classes/HH/ImmVector/) containing the results of applying a user-specified
+  operation to each value of the current [` ImmVector `](/apis/Classes/HH/ImmVector/) in turn.
 
 
 
@@ -67,5 +67,5 @@ criterion are included in the resulting [` ImmVector `](/docs/apis/Classes/HH/Im
 
 
 
-See [` Vector::map `](/docs/apis/Classes/HH/Vector/map/#examples) for usage examples.
+See [` Vector::map `](/apis/Classes/HH/Vector/map/#examples) for usage examples.
 <!-- HHAPIDOC -->

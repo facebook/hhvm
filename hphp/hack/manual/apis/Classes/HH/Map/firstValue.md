@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns the first value in the current [` Map `](/docs/apis/Classes/HH/Map/)
+Returns the first value in the current [` Map `](/apis/Classes/HH/Map/)
 
 
 
@@ -23,7 +23,7 @@ public function firstValue(): ?Tv;
 
 
 
-+ ` ?Tv ` - The first value in the current [` Map `](/docs/apis/Classes/HH/Map/),  or `` null `` if the [` Map `](/docs/apis/Classes/HH/Map/) is
++ ` ?Tv ` - The first value in the current [` Map `](/apis/Classes/HH/Map/),  or `` null `` if the [` Map `](/apis/Classes/HH/Map/) is
   empty.
 
 
@@ -34,7 +34,7 @@ public function firstValue(): ?Tv;
 
 
 
-The following example gets the first value from a [` Map `](/docs/apis/Classes/HH/Map/). An empty [` Map `](/docs/apis/Classes/HH/Map/) will return `` null `` as its first value.
+The following example gets the first value from a [` Map `](/apis/Classes/HH/Map/). An empty [` Map `](/apis/Classes/HH/Map/) will return `` null `` as its first value.
 
 
 

@@ -32,7 +32,7 @@ interface IDisposable {...}
 
 
 
-+ [` ->__dispose(): void `](/docs/apis/Interfaces/IDisposable/__dispose/)\
++ [` ->__dispose(): void `](/apis/Interfaces/IDisposable/__dispose/)\
   This method is invoked exactly once at the end of the scope of the
   using statement, unless the program terminates with a fatal error
 <!-- HHAPIDOC -->

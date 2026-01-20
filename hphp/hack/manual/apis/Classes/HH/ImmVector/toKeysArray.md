@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns an ` array ` whose values are the keys from the current [` ImmVector `](/docs/apis/Classes/HH/ImmVector/)
+Returns an ` array ` whose values are the keys from the current [` ImmVector `](/apis/Classes/HH/ImmVector/)
 
 
 
@@ -23,7 +23,7 @@ public function toKeysArray(): varray<Tv>;
 
 
 
-+ ` varray<Tv> ` - An `` array `` with the integer keys from the current [` ImmVector `](/docs/apis/Classes/HH/ImmVector/).
++ ` varray<Tv> ` - An `` array `` with the integer keys from the current [` ImmVector `](/apis/Classes/HH/ImmVector/).
 
 
 
@@ -33,5 +33,5 @@ public function toKeysArray(): varray<Tv>;
 
 
 
-See [` Vector::toKeysArray `](/docs/apis/Classes/HH/Vector/toKeysArray/#examples) for usage examples.
+See [` Vector::toKeysArray `](/apis/Classes/HH/Vector/toKeysArray/#examples) for usage examples.
 <!-- HHAPIDOC -->

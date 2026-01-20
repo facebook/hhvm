@@ -42,7 +42,7 @@ function main(): void {
 }
 ```
 
-In this example, we define an interface type called `MyCollection` that contains an implicitly static [constant](/docs/hack/classes/constants) and two implicitly
+In this example, we define an interface type called `MyCollection` that contains an implicitly static [constant](/hack/classes/constants) and two implicitly
 abstract methods.  Note how these methods have no bodies; their declarations end in a semicolon, which makes them abstract.  Next, we define two
 classes that each implement this interface.
 
@@ -64,7 +64,7 @@ interface are those specified by its own declaration, and the members inherited 
 
 Interfaces are designed to support classes; an interface cannot be instantiated directly.
 
-An interface can have usage requirements placed on it; see [interface requirements](/docs/hack/traits-and-interfaces/trait-and-interface-requirements) for more information.
+An interface can have usage requirements placed on it; see [interface requirements](/hack/traits-and-interfaces/trait-and-interface-requirements) for more information.
 
 Methods declared in interfaces, and abstract methods in classes, should not use default values for parameters. Instead, they can declare a
 parameter to be `optional`. Any implementation of the interface or abstract method must supply default values for the optional parameters.

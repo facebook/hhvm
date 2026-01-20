@@ -48,7 +48,7 @@ public static function getResultName(
 
 
 
-The following example shows how to use [` MCRouter::getResultName `](/docs/apis/Classes/MCRouter/getResultName/) to get the English readable name for an MCRouter result given as an integer.
+The following example shows how to use [` MCRouter::getResultName `](/apis/Classes/MCRouter/getResultName/) to get the English readable name for an MCRouter result given as an integer.
 
 
 

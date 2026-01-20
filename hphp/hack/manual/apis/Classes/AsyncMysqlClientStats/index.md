@@ -27,7 +27,7 @@ may have affected a given result.
 
 
 
-For example, if you have a [` AsyncMysqlConnection `](/docs/apis/Classes/AsyncMysqlConnection/), you can call:
+For example, if you have a [` AsyncMysqlConnection `](/apis/Classes/AsyncMysqlConnection/), you can call:
 
 
 
@@ -42,7 +42,7 @@ to get round-trip timing information on the connection event itself.
 
 
 
-Basically any concrete implementation of [` AsyncMysqlResult `](/docs/apis/Classes/AsyncMysqlResult/) can provide
+Basically any concrete implementation of [` AsyncMysqlResult `](/apis/Classes/AsyncMysqlResult/) can provide
 these type of statistics by calling its `` clientStats() `` method and a method
 on this class.
 
@@ -54,8 +54,8 @@ on this class.
 
 
 
-+ [Introduction](</docs/hack/asynchronous-operations/introduction>)
-+ [Extensions](</docs/hack/asynchronous-operations/extensions>)
++ [Introduction](</hack/asynchronous-operations/introduction>)
++ [Extensions](</hack/asynchronous-operations/extensions>)
 
 
 
@@ -80,15 +80,15 @@ class AsyncMysqlClientStats {...}
 
 
 
-* [` ->callbackDelayMicrosAvg(): float `](/docs/apis/Classes/AsyncMysqlClientStats/callbackDelayMicrosAvg/)\
+* [` ->callbackDelayMicrosAvg(): float `](/apis/Classes/AsyncMysqlClientStats/callbackDelayMicrosAvg/)\
   Average delay between when a callback is scheduled in the MySQL client
   and when it's actually ran, in microseconds
-* [` ->ioEventLoopMicrosAvg(): float `](/docs/apis/Classes/AsyncMysqlClientStats/ioEventLoopMicrosAvg/)\
+* [` ->ioEventLoopMicrosAvg(): float `](/apis/Classes/AsyncMysqlClientStats/ioEventLoopMicrosAvg/)\
   Average loop time of the MySQL client event, in microseconds
-* [` ->ioThreadBusyMicrosAvg(): float `](/docs/apis/Classes/AsyncMysqlClientStats/ioThreadBusyMicrosAvg/)\
+* [` ->ioThreadBusyMicrosAvg(): float `](/apis/Classes/AsyncMysqlClientStats/ioThreadBusyMicrosAvg/)\
   Average of reported busy time in the client's IO thread
-* [` ->ioThreadIdleMicrosAvg(): float `](/docs/apis/Classes/AsyncMysqlClientStats/ioThreadIdleMicrosAvg/)\
+* [` ->ioThreadIdleMicrosAvg(): float `](/apis/Classes/AsyncMysqlClientStats/ioThreadIdleMicrosAvg/)\
   Average of reported idle time in the client's IO thread
-* [` ->notificationQueueSize(): int `](/docs/apis/Classes/AsyncMysqlClientStats/notificationQueueSize/)\
+* [` ->notificationQueueSize(): int `](/apis/Classes/AsyncMysqlClientStats/notificationQueueSize/)\
   Size of this client's event base notification queue
 <!-- HHAPIDOC -->

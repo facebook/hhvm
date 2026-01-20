@@ -17,7 +17,7 @@ client is made successfully
 
 
 This class is instantiated through a call from the connection object
-via [` AsyncMysqlConnection::connectResult() `](/docs/apis/Classes/AsyncMysqlConnection/connectResult/).
+via [` AsyncMysqlConnection::connectResult() `](/apis/Classes/AsyncMysqlConnection/connectResult/).
 
 
 
@@ -27,8 +27,8 @@ via [` AsyncMysqlConnection::connectResult() `](/docs/apis/Classes/AsyncMysqlCon
 
 
 
-+ [Introduction](</docs/hack/asynchronous-operations/introduction>)
-+ [Extensions](</docs/hack/asynchronous-operations/extensions>)
++ [Introduction](</hack/asynchronous-operations/introduction>)
++ [Extensions](</hack/asynchronous-operations/extensions>)
 
 
 
@@ -53,15 +53,15 @@ final class AsyncMysqlConnectResult extends AsyncMysqlResult {...}
 
 
 
-* [` ->clientStats(): AsyncMysqlClientStats `](/docs/apis/Classes/AsyncMysqlConnectResult/clientStats/)\
+* [` ->clientStats(): AsyncMysqlClientStats `](/apis/Classes/AsyncMysqlConnectResult/clientStats/)\
   Returns the MySQL client statistics at the moment the connection was
   established
-* [` ->elapsedMicros(): int `](/docs/apis/Classes/AsyncMysqlConnectResult/elapsedMicros/)\
+* [` ->elapsedMicros(): int `](/apis/Classes/AsyncMysqlConnectResult/elapsedMicros/)\
   The total time for the establishment of the MySQL connection,
   in microseconds
-* [` ->endTime(): float `](/docs/apis/Classes/AsyncMysqlConnectResult/endTime/)\
+* [` ->endTime(): float `](/apis/Classes/AsyncMysqlConnectResult/endTime/)\
   The end time of the connection operation, in seconds since epoch
-* [` ->startTime(): float `](/docs/apis/Classes/AsyncMysqlConnectResult/startTime/)\
+* [` ->startTime(): float `](/apis/Classes/AsyncMysqlConnectResult/startTime/)\
   The start time for the connection operation, in seconds since epoch
 
 
@@ -70,24 +70,24 @@ final class AsyncMysqlConnectResult extends AsyncMysqlResult {...}
 
 
 
-### Public Methods ([` AsyncMysqlResult `](/docs/apis/Classes/AsyncMysqlResult/))
+### Public Methods ([` AsyncMysqlResult `](/apis/Classes/AsyncMysqlResult/))
 
 
 
 
-- [` ->getSslCertCn(): string `](/docs/apis/Classes/AsyncMysqlResult/getSslCertCn/)\
+- [` ->getSslCertCn(): string `](/apis/Classes/AsyncMysqlResult/getSslCertCn/)\
   Returns Common Name attribute of the TLS certificate presented
   by MySQL server
-- [` ->getSslCertExtensions(): Vector<string> `](/docs/apis/Classes/AsyncMysqlResult/getSslCertExtensions/)\
+- [` ->getSslCertExtensions(): Vector<string> `](/apis/Classes/AsyncMysqlResult/getSslCertExtensions/)\
   Returns values from the selected cert extensions of the TLS certificate
   presented by MySQL server
-- [` ->getSslCertSan(): Vector<string> `](/docs/apis/Classes/AsyncMysqlResult/getSslCertSan/)\
+- [` ->getSslCertSan(): Vector<string> `](/apis/Classes/AsyncMysqlResult/getSslCertSan/)\
   Returns Server Alternative Names attribute of the TLS certificate
   presented by MySQL server
-- [` ->isSslCertValidationEnforced(): bool `](/docs/apis/Classes/AsyncMysqlResult/isSslCertValidationEnforced/)\
+- [` ->isSslCertValidationEnforced(): bool `](/apis/Classes/AsyncMysqlResult/isSslCertValidationEnforced/)\
   Returns a boolean value indicating if server cert validation was enforced
   for this connection
-- [` ->sslSessionReused(): bool `](/docs/apis/Classes/AsyncMysqlResult/sslSessionReused/)\
+- [` ->sslSessionReused(): bool `](/apis/Classes/AsyncMysqlResult/sslSessionReused/)\
   Returns whether or not the current connection reused the SSL session
   from another SSL connection
 <!-- HHAPIDOC -->

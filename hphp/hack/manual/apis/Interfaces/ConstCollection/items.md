@@ -28,6 +28,6 @@ Can be empty.
 
 
 
-+ [` HH\Iterable<Te> `](/docs/apis/Interfaces/HH/Iterable/) - Returns an [` Iterable `](/docs/apis/Interfaces/HH/Iterable/) with access to all of the items in
++ [` HH\Iterable<Te> `](/apis/Interfaces/HH/Iterable/) - Returns an [` Iterable `](/apis/Interfaces/HH/Iterable/) with access to all of the items in
   the collection.
 <!-- HHAPIDOC -->

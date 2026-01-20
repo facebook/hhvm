@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns the first value in the current [` Pair `](/docs/apis/Classes/HH/Pair/)
+Returns the first value in the current [` Pair `](/apis/Classes/HH/Pair/)
 
 
 
@@ -23,7 +23,7 @@ public function firstValue(): Tv1;
 
 
 
-+ ` Tv1 ` - The first value in the current [` Pair `](/docs/apis/Classes/HH/Pair/).
++ ` Tv1 ` - The first value in the current [` Pair `](/apis/Classes/HH/Pair/).
 
 
 

@@ -33,5 +33,5 @@ abstract public function startTime(): float;
 
 
 
-AsyncMysqlResult is abstract. See specific, concrete classes for examples of [` AsyncMysqlResult::startTime `](/docs/apis/Classes/AsyncMysqlResult/startTime/) (e.g., AsyncMysqlConnectResult, AsyncMysqlErrorResult)
+AsyncMysqlResult is abstract. See specific, concrete classes for examples of [` AsyncMysqlResult::startTime `](/apis/Classes/AsyncMysqlResult/startTime/) (e.g., AsyncMysqlConnectResult, AsyncMysqlErrorResult)
 <!-- HHAPIDOC -->

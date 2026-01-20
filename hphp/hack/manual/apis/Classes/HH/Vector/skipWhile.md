@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a [` Vector `](/docs/apis/Classes/HH/Vector/) containing the values of the current [` Vector `](/docs/apis/Classes/HH/Vector/) starting
+Returns a [` Vector `](/apis/Classes/HH/Vector/) containing the values of the current [` Vector `](/apis/Classes/HH/Vector/) starting
 after and including the first value that produces `` false `` when passed to
 the specified callback
 
@@ -23,13 +23,13 @@ public function skipWhile(
 
 
 That is, skips the continuous prefix of values in
-the current [` Vector `](/docs/apis/Classes/HH/Vector/) for which the specified callback returns `` true ``.
+the current [` Vector `](/apis/Classes/HH/Vector/) for which the specified callback returns `` true ``.
 
 
 
 
-The returned [` Vector `](/docs/apis/Classes/HH/Vector/) will always be a subset (but not necessarily a
-proper subset) of the current [` Vector `](/docs/apis/Classes/HH/Vector/).
+The returned [` Vector `](/apis/Classes/HH/Vector/) will always be a subset (but not necessarily a
+proper subset) of the current [` Vector `](/apis/Classes/HH/Vector/).
 
 
 
@@ -40,7 +40,7 @@ proper subset) of the current [` Vector `](/docs/apis/Classes/HH/Vector/).
 
 
 + ` (function(Tv): bool) $fn ` - The callback used to determine the starting element for the
-  returned [` Vector `](/docs/apis/Classes/HH/Vector/).
+  returned [` Vector `](/apis/Classes/HH/Vector/).
 
 
 
@@ -50,7 +50,7 @@ proper subset) of the current [` Vector `](/docs/apis/Classes/HH/Vector/).
 
 
 
-* [` Vector<Tv> `](/docs/apis/Classes/HH/Vector/) - A [` Vector `](/docs/apis/Classes/HH/Vector/) that is a subset of the current [` Vector `](/docs/apis/Classes/HH/Vector/) starting
+* [` Vector<Tv> `](/apis/Classes/HH/Vector/) - A [` Vector `](/apis/Classes/HH/Vector/) that is a subset of the current [` Vector `](/apis/Classes/HH/Vector/) starting
   with the value for which the callback first returns `` false ``.
 
 
@@ -61,7 +61,7 @@ proper subset) of the current [` Vector `](/docs/apis/Classes/HH/Vector/).
 
 
 
-This example shows how ` skipWhile ` can be used to create a new [` Vector `](/docs/apis/Classes/HH/Vector/) by skipping elements at the beginning of an existing [` Vector `](/docs/apis/Classes/HH/Vector/):
+This example shows how ` skipWhile ` can be used to create a new [` Vector `](/apis/Classes/HH/Vector/) by skipping elements at the beginning of an existing [` Vector `](/apis/Classes/HH/Vector/):
 
 
 

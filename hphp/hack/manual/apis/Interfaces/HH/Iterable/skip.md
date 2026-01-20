@@ -6,8 +6,8 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns an [` Iterable `](/docs/apis/Interfaces/HH/Iterable/) containing the values after the `` n ``-th element of the
-current [` Iterable `](/docs/apis/Interfaces/HH/Iterable/)
+Returns an [` Iterable `](/apis/Interfaces/HH/Iterable/) containing the values after the `` n ``-th element of the
+current [` Iterable `](/apis/Interfaces/HH/Iterable/)
 
 
 
@@ -21,8 +21,8 @@ public function skip(
 
 
 
-The returned [` Iterable `](/docs/apis/Interfaces/HH/Iterable/) will always be a proper subset of the current
-[` Iterable `](/docs/apis/Interfaces/HH/Iterable/).
+The returned [` Iterable `](/apis/Interfaces/HH/Iterable/) will always be a proper subset of the current
+[` Iterable `](/apis/Interfaces/HH/Iterable/).
 
 
 
@@ -38,7 +38,7 @@ The returned [` Iterable `](/docs/apis/Interfaces/HH/Iterable/) will always be a
 
 
 + ` int $n ` - The last element to be skipped; the `` $n+1 `` element will be
-  the first one in the returned [` Iterable `](/docs/apis/Interfaces/HH/Iterable/).
+  the first one in the returned [` Iterable `](/apis/Interfaces/HH/Iterable/).
 
 
 
@@ -48,6 +48,6 @@ The returned [` Iterable `](/docs/apis/Interfaces/HH/Iterable/) will always be a
 
 
 
-* [` Iterable<Tv> `](/docs/apis/Interfaces/HH/Iterable/) - An [` Iterable `](/docs/apis/Interfaces/HH/Iterable/) that is a proper subset of the current [` Iterable `](/docs/apis/Interfaces/HH/Iterable/)
+* [` Iterable<Tv> `](/apis/Interfaces/HH/Iterable/) - An [` Iterable `](/apis/Interfaces/HH/Iterable/) that is a proper subset of the current [` Iterable `](/apis/Interfaces/HH/Iterable/)
   containing values after the specified `` n ``-th element.
 <!-- HHAPIDOC -->

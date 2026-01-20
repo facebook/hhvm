@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Appends a value to the end of the current [` Vector `](/docs/apis/Classes/HH/Vector/), assigning it the next
+Appends a value to the end of the current [` Vector `](/apis/Classes/HH/Vector/), assigning it the next
 available integer key
 
 
@@ -21,19 +21,19 @@ public function add(
 
 
 
-If you want to overwrite the value for an existing key, use [` set() `](/docs/apis/Classes/HH/Vector/set/).
+If you want to overwrite the value for an existing key, use [` set() `](/apis/Classes/HH/Vector/set/).
 
 
 
 
 ` $vec->add($v) ` is semantically equivalent to `` $vec[] = $v `` (except that
-[` add() `](/docs/apis/Classes/HH/Vector/add/) returns the current [` Vector `](/docs/apis/Classes/HH/Vector/)).
+[` add() `](/apis/Classes/HH/Vector/add/) returns the current [` Vector `](/apis/Classes/HH/Vector/)).
 
 
 
 
-Future changes made to the current [` Vector `](/docs/apis/Classes/HH/Vector/) ARE reflected in the
-returned [` Vector `](/docs/apis/Classes/HH/Vector/), and vice-versa.
+Future changes made to the current [` Vector `](/apis/Classes/HH/Vector/) ARE reflected in the
+returned [` Vector `](/apis/Classes/HH/Vector/), and vice-versa.
 
 
 
@@ -59,7 +59,7 @@ If ` $v ` is an object, future changes to the added element ARE reflected in
 
 
 
-* [` Vector<Tv> `](/docs/apis/Classes/HH/Vector/) - Returns itself.
+* [` Vector<Tv> `](/apis/Classes/HH/Vector/) - Returns itself.
 
 
 
@@ -69,7 +69,7 @@ If ` $v ` is an object, future changes to the added element ARE reflected in
 
 
 
-The following example adds a single value to the [` Vector `](/docs/apis/Classes/HH/Vector/) `` $v `` and also adds multiple values to ``` $v ``` through chaining. Since [` Vector::add() `](/docs/apis/Classes/HH/Vector/add/) returns a [shallow copy](<https://en.wikipedia.org/wiki/Object_copying#Shallow_copy>) of ` $v ` itself, you can chain a bunch of [` add() `](/docs/apis/Classes/HH/Vector/add/) calls together, and that will add all those values to `` $v ``.
+The following example adds a single value to the [` Vector `](/apis/Classes/HH/Vector/) `` $v `` and also adds multiple values to ``` $v ``` through chaining. Since [` Vector::add() `](/apis/Classes/HH/Vector/add/) returns a [shallow copy](<https://en.wikipedia.org/wiki/Object_copying#Shallow_copy>) of ` $v ` itself, you can chain a bunch of [` add() `](/apis/Classes/HH/Vector/add/) calls together, and that will add all those values to `` $v ``.
 
 
 

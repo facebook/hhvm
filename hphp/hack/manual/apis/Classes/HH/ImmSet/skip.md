@@ -6,8 +6,8 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns an [` ImmSet `](/docs/apis/Classes/HH/ImmSet/) containing the values after the `` n ``-th element of the
-current [` ImmSet `](/docs/apis/Classes/HH/ImmSet/)
+Returns an [` ImmSet `](/apis/Classes/HH/ImmSet/) containing the values after the `` n ``-th element of the
+current [` ImmSet `](/apis/Classes/HH/ImmSet/)
 
 
 
@@ -21,8 +21,8 @@ public function skip(
 
 
 
-The returned [` ImmSet `](/docs/apis/Classes/HH/ImmSet/) will always be a proper subset of the current
-[` ImmSet `](/docs/apis/Classes/HH/ImmSet/).
+The returned [` ImmSet `](/apis/Classes/HH/ImmSet/) will always be a proper subset of the current
+[` ImmSet `](/apis/Classes/HH/ImmSet/).
 
 
 
@@ -38,7 +38,7 @@ The returned [` ImmSet `](/docs/apis/Classes/HH/ImmSet/) will always be a proper
 
 
 + ` int $n ` - The last element to be skipped; the `` $n+1 `` element will be the
-  first one in the returned [` ImmSet `](/docs/apis/Classes/HH/ImmSet/).
+  first one in the returned [` ImmSet `](/apis/Classes/HH/ImmSet/).
 
 
 
@@ -48,7 +48,7 @@ The returned [` ImmSet `](/docs/apis/Classes/HH/ImmSet/) will always be a proper
 
 
 
-* [` ImmSet<Tv> `](/docs/apis/Classes/HH/ImmSet/) - An [` ImmSet `](/docs/apis/Classes/HH/ImmSet/) that is a proper subset of the current [` ImmSet `](/docs/apis/Classes/HH/ImmSet/)
+* [` ImmSet<Tv> `](/apis/Classes/HH/ImmSet/) - An [` ImmSet `](/apis/Classes/HH/ImmSet/) that is a proper subset of the current [` ImmSet `](/apis/Classes/HH/ImmSet/)
   containing values after the specified `` n ``-th element.
 
 
@@ -59,5 +59,5 @@ The returned [` ImmSet `](/docs/apis/Classes/HH/ImmSet/) will always be a proper
 
 
 
-See [` Set::skip `](/docs/apis/Classes/HH/Set/skip/#examples) for usage examples.
+See [` Set::skip `](/apis/Classes/HH/Set/skip/#examples) for usage examples.
 <!-- HHAPIDOC -->

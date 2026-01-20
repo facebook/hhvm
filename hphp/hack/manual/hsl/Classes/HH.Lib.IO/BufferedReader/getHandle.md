@@ -18,5 +18,5 @@ public function getHandle(): HH\Lib\IO\ReadHandle;
 
 
 
-+ [` HH\Lib\IO\ReadHandle `](</docs/hsl/Interfaces/HH.Lib.IO/ReadHandle/>)
++ [` HH\Lib\IO\ReadHandle `](</hsl/Interfaces/HH.Lib.IO/ReadHandle/>)
 <!-- HHAPIDOC -->

@@ -39,9 +39,9 @@ O(n)
 
 
 
-+ [` KeyedTraversable<Tk1, `](/docs/apis/Interfaces/HH/KeyedTraversable/)`` Tv> $first ``
-+ [` KeyedTraversable<Tk2, `](/docs/apis/Interfaces/HH/KeyedTraversable/)`` mixed> $second ``
-+ [` KeyedContainer<Tk2, `](/docs/apis/Interfaces/HH/KeyedContainer/)`` mixed> ...$rest ``
++ [` KeyedTraversable<Tk1, `](/apis/Interfaces/HH/KeyedTraversable/)`` Tv> $first ``
++ [` KeyedTraversable<Tk2, `](/apis/Interfaces/HH/KeyedTraversable/)`` mixed> $second ``
++ [` KeyedContainer<Tk2, `](/apis/Interfaces/HH/KeyedContainer/)`` mixed> ...$rest ``
 
 
 

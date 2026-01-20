@@ -29,6 +29,6 @@ the most derived class in which the type constant is declared.
 
 
 
-+ [` ReflectionClass `](/docs/apis/Classes/ReflectionClass/) - A ReflectionClass object of the class that the
++ [` ReflectionClass `](/apis/Classes/ReflectionClass/) - A ReflectionClass object of the class that the
   reflected type constant is part of.
 <!-- HHAPIDOC -->

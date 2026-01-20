@@ -23,5 +23,5 @@ public function getIterator(): Iterator<Tnode>;
 
 
 
-+ [` Iterator<Tnode> `](/docs/apis/Interfaces/HH/Iterator/)
++ [` Iterator<Tnode> `](/apis/Interfaces/HH/Iterator/)
 <!-- HHAPIDOC -->

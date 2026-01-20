@@ -33,7 +33,7 @@ To split the string on a delimiter, see ` Str\split() `.
 
 
 
-+ [String](</docs/hack/built-in-types/string>)
++ [String](</hack/built-in-types/string>)
 
 
 

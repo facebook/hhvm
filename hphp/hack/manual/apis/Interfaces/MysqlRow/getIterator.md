@@ -18,5 +18,5 @@ public function getIterator(): KeyedIterator<string, mixed>;
 
 
 
-+ [` KeyedIterator<string, `](/docs/apis/Interfaces/HH/KeyedIterator/)`` mixed> ``
++ [` KeyedIterator<string, `](/apis/Interfaces/HH/KeyedIterator/)`` mixed> ``
 <!-- HHAPIDOC -->

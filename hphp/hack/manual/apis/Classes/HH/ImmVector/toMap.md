@@ -33,5 +33,5 @@ public function toMap(): Map;
 
 
 
-See [` Vector::toMap `](/docs/apis/Classes/HH/Vector/toMap/#examples) for usage examples.
+See [` Vector::toMap `](/apis/Classes/HH/Vector/toMap/#examples) for usage examples.
 <!-- HHAPIDOC -->

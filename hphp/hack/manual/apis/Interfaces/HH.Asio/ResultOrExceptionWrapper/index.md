@@ -11,13 +11,13 @@ the Hack LSP instead for complete and up-to-date information.
 :::
 
 Represents a result of operation that either has a successful result of an
-[` Awaitable `](/docs/apis/Classes/HH/Awaitable/) or the exception object if that [` Awaitable `](/docs/apis/Classes/HH/Awaitable/) failed
+[` Awaitable `](/apis/Classes/HH/Awaitable/) or the exception object if that [` Awaitable `](/apis/Classes/HH/Awaitable/) failed
 
 
 
 
 This is an interface. You get generally ` ResultOrExceptionWrapper ` by calling
-`` wrap() ``, passing in the [` Awaitable `](/docs/apis/Classes/HH/Awaitable/), and a `` WrappedResult `` or
+`` wrap() ``, passing in the [` Awaitable `](/apis/Classes/HH/Awaitable/), and a `` WrappedResult `` or
 ``` WrappedException ``` is returned.
 
 
@@ -42,14 +42,14 @@ interface ResultOrExceptionWrapper {...}
 
 
 
-+ [` ->getException(): \Exception `](/docs/apis/Interfaces/HH.Asio/ResultOrExceptionWrapper/getException/)\
++ [` ->getException(): \Exception `](/apis/Interfaces/HH.Asio/ResultOrExceptionWrapper/getException/)\
   Return the underlying exception, or fail with invariant violation
-+ [` ->getResult(): T `](/docs/apis/Interfaces/HH.Asio/ResultOrExceptionWrapper/getResult/)\
++ [` ->getResult(): T `](/apis/Interfaces/HH.Asio/ResultOrExceptionWrapper/getResult/)\
   Return the result of the operation, or throw underlying exception
-+ [` ->isFailed(): bool `](/docs/apis/Interfaces/HH.Asio/ResultOrExceptionWrapper/isFailed/)\
-  Indicates whether the [` Awaitable `](/docs/apis/Classes/HH/Awaitable/) associated with this wrapper exited
++ [` ->isFailed(): bool `](/apis/Interfaces/HH.Asio/ResultOrExceptionWrapper/isFailed/)\
+  Indicates whether the [` Awaitable `](/apis/Classes/HH/Awaitable/) associated with this wrapper exited
   abnormally via an exception of somoe sort
-+ [` ->isSucceeded(): bool `](/docs/apis/Interfaces/HH.Asio/ResultOrExceptionWrapper/isSucceeded/)\
-  Indicates whether the [` Awaitable `](/docs/apis/Classes/HH/Awaitable/) associated with this wrapper exited
++ [` ->isSucceeded(): bool `](/apis/Interfaces/HH.Asio/ResultOrExceptionWrapper/isSucceeded/)\
+  Indicates whether the [` Awaitable `](/apis/Classes/HH/Awaitable/) associated with this wrapper exited
   normally
 <!-- HHAPIDOC -->

@@ -6,8 +6,8 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a [` Vector `](/docs/apis/Classes/HH/Vector/) that is the concatenation of the values of the current
-[` Vector `](/docs/apis/Classes/HH/Vector/) and the values of the provided [` Traversable `](/docs/apis/Interfaces/HH/Traversable/)
+Returns a [` Vector `](/apis/Classes/HH/Vector/) that is the concatenation of the values of the current
+[` Vector `](/apis/Classes/HH/Vector/) and the values of the provided [` Traversable `](/apis/Interfaces/HH/Traversable/)
 
 
 
@@ -21,16 +21,16 @@ public function concat<Tu super Tv>(
 
 
 
-The returned [` Vector `](/docs/apis/Classes/HH/Vector/) is created from the values of the current [` Vector `](/docs/apis/Classes/HH/Vector/),
-followed by the values of the provided [` Traversable `](/docs/apis/Interfaces/HH/Traversable/).
+The returned [` Vector `](/apis/Classes/HH/Vector/) is created from the values of the current [` Vector `](/apis/Classes/HH/Vector/),
+followed by the values of the provided [` Traversable `](/apis/Interfaces/HH/Traversable/).
 
 
 
 
-The returned [` Vector `](/docs/apis/Classes/HH/Vector/) is a new object; the current [` Vector `](/docs/apis/Classes/HH/Vector/) is unchanged.
-Future changes to the current [` Vector `](/docs/apis/Classes/HH/Vector/) will not affect the returned
-[` Vector `](/docs/apis/Classes/HH/Vector/), and future changes to the returned [` Vector `](/docs/apis/Classes/HH/Vector/) will not affect the
-current [` Vector `](/docs/apis/Classes/HH/Vector/).
+The returned [` Vector `](/apis/Classes/HH/Vector/) is a new object; the current [` Vector `](/apis/Classes/HH/Vector/) is unchanged.
+Future changes to the current [` Vector `](/apis/Classes/HH/Vector/) will not affect the returned
+[` Vector `](/apis/Classes/HH/Vector/), and future changes to the returned [` Vector `](/apis/Classes/HH/Vector/) will not affect the
+current [` Vector `](/apis/Classes/HH/Vector/).
 
 
 
@@ -40,7 +40,7 @@ current [` Vector `](/docs/apis/Classes/HH/Vector/).
 
 
 
-+ [Constraints](</docs/hack/generics/type-constraints>)
++ [Constraints](</hack/generics/type-constraints>)
 
 
 
@@ -53,8 +53,8 @@ current [` Vector `](/docs/apis/Classes/HH/Vector/).
 
 
 
-* [` Traversable<Tu> `](/docs/apis/Interfaces/HH/Traversable/)`` $traversable `` - The [` Traversable `](/docs/apis/Interfaces/HH/Traversable/) to concatenate with the current
-  [` Vector `](/docs/apis/Classes/HH/Vector/).
+* [` Traversable<Tu> `](/apis/Interfaces/HH/Traversable/)`` $traversable `` - The [` Traversable `](/apis/Interfaces/HH/Traversable/) to concatenate with the current
+  [` Vector `](/apis/Classes/HH/Vector/).
 
 
 
@@ -64,8 +64,8 @@ current [` Vector `](/docs/apis/Classes/HH/Vector/).
 
 
 
-- [` Vector<Tu> `](/docs/apis/Classes/HH/Vector/) - A new [` Vector `](/docs/apis/Classes/HH/Vector/) containing the values from `` $traversable ``
-  concatenated to the values from the current [` Vector `](/docs/apis/Classes/HH/Vector/).
+- [` Vector<Tu> `](/apis/Classes/HH/Vector/) - A new [` Vector `](/apis/Classes/HH/Vector/) containing the values from `` $traversable ``
+  concatenated to the values from the current [` Vector `](/apis/Classes/HH/Vector/).
 
 
 
@@ -75,7 +75,7 @@ current [` Vector `](/docs/apis/Classes/HH/Vector/).
 
 
 
-This example creates new [` Vector `](/docs/apis/Classes/HH/Vector/)s by concatenating other [` Traversable `](/docs/apis/Interfaces/HH/Traversable/)s. Unlike [` Vector::addAll() `](/docs/apis/Classes/HH/Vector/addAll/) this method returns a new [` Vector `](/docs/apis/Classes/HH/Vector/) (not a [shallow copy](<https://en.wikipedia.org/wiki/Object_copying#Shallow_copy>)).
+This example creates new [` Vector `](/apis/Classes/HH/Vector/)s by concatenating other [` Traversable `](/apis/Interfaces/HH/Traversable/)s. Unlike [` Vector::addAll() `](/apis/Classes/HH/Vector/addAll/) this method returns a new [` Vector `](/apis/Classes/HH/Vector/) (not a [shallow copy](<https://en.wikipedia.org/wiki/Object_copying#Shallow_copy>)).
 
 
 

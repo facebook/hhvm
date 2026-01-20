@@ -30,7 +30,7 @@ MySQL client may have affected the query operation.
 
 
 
-+ [` AsyncMysqlClientStats `](/docs/apis/Classes/AsyncMysqlClientStats/) - an [` AsyncMysqlClientStats `](/docs/apis/Classes/AsyncMysqlClientStats/) object to query about event and
++ [` AsyncMysqlClientStats `](/apis/Classes/AsyncMysqlClientStats/) - an [` AsyncMysqlClientStats `](/apis/Classes/AsyncMysqlClientStats/) object to query about event and
   callback timing to the MySQL client for the query.
 
 
@@ -41,7 +41,7 @@ MySQL client may have affected the query operation.
 
 
 
-You can get some statistical information from the MySQL client when you get an [` AsyncMysqlQueryResult `](/docs/apis/Classes/AsyncMysqlQueryResult/) via the [` clientStats() `](/docs/apis/Classes/AsyncMysqlQueryResult/clientStats/) method.
+You can get some statistical information from the MySQL client when you get an [` AsyncMysqlQueryResult `](/apis/Classes/AsyncMysqlQueryResult/) via the [` clientStats() `](/apis/Classes/AsyncMysqlQueryResult/clientStats/) method.
 
 
 

@@ -18,5 +18,5 @@ public function getIterator(): DOMNodeIterator;
 
 
 
-+ [` DOMNodeIterator `](/docs/apis/Classes/DOMNodeIterator/)
++ [` DOMNodeIterator `](/apis/Classes/DOMNodeIterator/)
 <!-- HHAPIDOC -->

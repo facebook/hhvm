@@ -40,5 +40,5 @@ Fails with EPIPE if the handle is closed or otherwise unreadable.
 
 
 
-* [` Awaitable<string> `](/docs/apis/Classes/HH/Awaitable/)
+* [` Awaitable<string> `](/apis/Classes/HH/Awaitable/)
 <!-- HHAPIDOC -->

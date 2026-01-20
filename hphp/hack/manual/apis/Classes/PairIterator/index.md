@@ -27,16 +27,16 @@ final class PairIterator implements HH\KeyedIterator<int, mixed> {...}
 
 
 
-+ [` ->__construct(): void `](/docs/apis/Classes/PairIterator/__construct/)
-+ [` ->current(): mixed `](/docs/apis/Classes/PairIterator/current/)\
++ [` ->__construct(): void `](/apis/Classes/PairIterator/__construct/)
++ [` ->current(): mixed `](/apis/Classes/PairIterator/current/)\
   Returns the current value that the iterator points to
-+ [` ->key(): int `](/docs/apis/Classes/PairIterator/key/)\
++ [` ->key(): int `](/apis/Classes/PairIterator/key/)\
   Returns the current key that the iterator points to
-+ [` ->next(): void `](/docs/apis/Classes/PairIterator/next/)\
++ [` ->next(): void `](/apis/Classes/PairIterator/next/)\
   Advance this iterator forward one position
-+ [` ->rewind(): void `](/docs/apis/Classes/PairIterator/rewind/)\
++ [` ->rewind(): void `](/apis/Classes/PairIterator/rewind/)\
   Move this iterator back to the first position
-+ [` ->valid(): bool `](/docs/apis/Classes/PairIterator/valid/)\
++ [` ->valid(): bool `](/apis/Classes/PairIterator/valid/)\
   Returns true if the iterator points to a valid value, returns false
   otherwise
 <!-- HHAPIDOC -->

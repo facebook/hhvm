@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Creates a [` Map `](/docs/apis/Classes/HH/Map/) from the given [` Traversable `](/docs/apis/Interfaces/HH/Traversable/), or an empty [` Map `](/docs/apis/Classes/HH/Map/) if
+Creates a [` Map `](/apis/Classes/HH/Map/) from the given [` Traversable `](/apis/Interfaces/HH/Traversable/), or an empty [` Map `](/apis/Classes/HH/Map/) if
 `` null `` is passed
 
 
@@ -21,7 +21,7 @@ public static function fromItems(
 
 
 
-This is the static method version of the [` Map::__construct() `](/docs/apis/Classes/HH/Map/__construct/) constructor.
+This is the static method version of the [` Map::__construct() `](/apis/Classes/HH/Map/__construct/) constructor.
 
 
 
@@ -31,7 +31,7 @@ This is the static method version of the [` Map::__construct() `](/docs/apis/Cla
 
 
 
-+ ` ? `[` Traversable<Pair<Tk, `](/docs/apis/Interfaces/HH/Traversable/)`` Tv>> $iterable ``
++ ` ? `[` Traversable<Pair<Tk, `](/apis/Interfaces/HH/Traversable/)`` Tv>> $iterable ``
 
 
 
@@ -41,8 +41,8 @@ This is the static method version of the [` Map::__construct() `](/docs/apis/Cla
 
 
 
-* [` Map<Tk, `](/docs/apis/Classes/HH/Map/)`` Tv> `` - A [` Map `](/docs/apis/Classes/HH/Map/) with the key/value pairs from the [` Traversable `](/docs/apis/Interfaces/HH/Traversable/); or an
-  empty [` Map `](/docs/apis/Classes/HH/Map/) if the [` Traversable `](/docs/apis/Interfaces/HH/Traversable/) is `` null ``.
+* [` Map<Tk, `](/apis/Classes/HH/Map/)`` Tv> `` - A [` Map `](/apis/Classes/HH/Map/) with the key/value pairs from the [` Traversable `](/apis/Interfaces/HH/Traversable/); or an
+  empty [` Map `](/apis/Classes/HH/Map/) if the [` Traversable `](/apis/Interfaces/HH/Traversable/) is `` null ``.
 
 
 
@@ -52,7 +52,7 @@ This is the static method version of the [` Map::__construct() `](/docs/apis/Cla
 
 
 
-This example shows that a [` Map `](/docs/apis/Classes/HH/Map/) can be created from any [` Traversable `](/docs/apis/Interfaces/HH/Traversable/) of key-value pairs:
+This example shows that a [` Map `](/apis/Classes/HH/Map/) can be created from any [` Traversable `](/apis/Interfaces/HH/Traversable/) of key-value pairs:
 
 
 

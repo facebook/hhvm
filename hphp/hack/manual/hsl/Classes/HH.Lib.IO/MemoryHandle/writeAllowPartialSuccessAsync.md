@@ -32,5 +32,5 @@ public function writeAllowPartialSuccessAsync(
 
 
 
-* [` Awaitable<int> `](/docs/apis/Classes/HH/Awaitable/)
+* [` Awaitable<int> `](/apis/Classes/HH/Awaitable/)
 <!-- HHAPIDOC -->

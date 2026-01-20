@@ -33,9 +33,9 @@ final class FunctionCredential {...}
 
 
 
-+ [` ->__debugInfo(): darray `](/docs/apis/Classes/FunctionCredential/__debugInfo/)
-+ [` ->__getDebugInfo(): darray `](/docs/apis/Classes/FunctionCredential/__getDebugInfo/)
-+ [` ->getClassName(): ?string `](/docs/apis/Classes/FunctionCredential/getClassName/)
-+ [` ->getFilename(): string `](/docs/apis/Classes/FunctionCredential/getFilename/)
-+ [` ->getFunctionName(): string `](/docs/apis/Classes/FunctionCredential/getFunctionName/)
++ [` ->__debugInfo(): darray `](/apis/Classes/FunctionCredential/__debugInfo/)
++ [` ->__getDebugInfo(): darray `](/apis/Classes/FunctionCredential/__getDebugInfo/)
++ [` ->getClassName(): ?string `](/apis/Classes/FunctionCredential/getClassName/)
++ [` ->getFilename(): string `](/apis/Classes/FunctionCredential/getFilename/)
++ [` ->getFunctionName(): string `](/apis/Classes/FunctionCredential/getFunctionName/)
 <!-- HHAPIDOC -->

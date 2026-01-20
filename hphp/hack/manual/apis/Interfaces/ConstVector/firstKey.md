@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns the first key in the current [` ConstVector `](/docs/apis/Interfaces/ConstVector/)
+Returns the first key in the current [` ConstVector `](/apis/Interfaces/ConstVector/)
 
 
 
@@ -23,6 +23,6 @@ public function firstKey(): ?int;
 
 
 
-+ ` ?int ` - The first key in the current [` ConstVector `](/docs/apis/Interfaces/ConstVector/), or `` null `` if the
-  current [` ConstVector `](/docs/apis/Interfaces/ConstVector/) is empty.
++ ` ?int ` - The first key in the current [` ConstVector `](/apis/Interfaces/ConstVector/), or `` null `` if the
+  current [` ConstVector `](/apis/Interfaces/ConstVector/) is empty.
 <!-- HHAPIDOC -->

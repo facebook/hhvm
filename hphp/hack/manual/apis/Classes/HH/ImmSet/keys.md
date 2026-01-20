@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns an [` ImmVector `](/docs/apis/Classes/HH/ImmVector/) containing the values of this [` ImmSet `](/docs/apis/Classes/HH/ImmSet/)
+Returns an [` ImmVector `](/apis/Classes/HH/ImmVector/) containing the values of this [` ImmSet `](/apis/Classes/HH/ImmSet/)
 
 
 
@@ -18,12 +18,12 @@ public function keys(): ImmVector<arraykey>;
 
 
 
-[` ImmSet `](/docs/apis/Classes/HH/ImmSet/)s don't have keys, so this will return the values.
+[` ImmSet `](/apis/Classes/HH/ImmSet/)s don't have keys, so this will return the values.
 
 
 
 
-This method is interchangeable with [` toImmVector() `](/docs/apis/Classes/HH/ImmSet/toImmVector/) and [` values() `](/docs/apis/Classes/HH/ImmSet/values/).
+This method is interchangeable with [` toImmVector() `](/apis/Classes/HH/ImmSet/toImmVector/) and [` values() `](/apis/Classes/HH/ImmSet/values/).
 
 
 
@@ -33,7 +33,7 @@ This method is interchangeable with [` toImmVector() `](/docs/apis/Classes/HH/Im
 
 
 
-+ [` ImmVector<arraykey> `](/docs/apis/Classes/HH/ImmVector/) - an [` ImmVector `](/docs/apis/Classes/HH/ImmVector/) containing the values of the current [` ImmSet `](/docs/apis/Classes/HH/ImmSet/).
++ [` ImmVector<arraykey> `](/apis/Classes/HH/ImmVector/) - an [` ImmVector `](/apis/Classes/HH/ImmVector/) containing the values of the current [` ImmSet `](/apis/Classes/HH/ImmSet/).
 
 
 
@@ -43,5 +43,5 @@ This method is interchangeable with [` toImmVector() `](/docs/apis/Classes/HH/Im
 
 
 
-See [` Set::keys `](/docs/apis/Classes/HH/Set/keys/#examples) for usage examples.
+See [` Set::keys `](/apis/Classes/HH/Set/keys/#examples) for usage examples.
 <!-- HHAPIDOC -->

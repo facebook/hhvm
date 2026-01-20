@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Creates a [` Vector `](/docs/apis/Classes/HH/Vector/) from the given [` Traversable `](/docs/apis/Interfaces/HH/Traversable/), or an empty [` Vector `](/docs/apis/Classes/HH/Vector/) if
+Creates a [` Vector `](/apis/Classes/HH/Vector/) from the given [` Traversable `](/apis/Interfaces/HH/Traversable/), or an empty [` Vector `](/apis/Classes/HH/Vector/) if
 `` null `` is passed
 
 
@@ -21,7 +21,7 @@ public static function fromItems(
 
 
 
-This is the static method version of the [` Vector::__construct() `](/docs/apis/Classes/HH/Vector/__construct/)
+This is the static method version of the [` Vector::__construct() `](/apis/Classes/HH/Vector/__construct/)
 constructor.
 
 
@@ -32,7 +32,7 @@ constructor.
 
 
 
-+ ` ? `[` Traversable<Tv> `](/docs/apis/Interfaces/HH/Traversable/)`` $iterable ``
++ ` ? `[` Traversable<Tv> `](/apis/Interfaces/HH/Traversable/)`` $iterable ``
 
 
 
@@ -42,8 +42,8 @@ constructor.
 
 
 
-* [` Vector<Tv> `](/docs/apis/Classes/HH/Vector/) - A [` Vector `](/docs/apis/Classes/HH/Vector/) with the values from the [` Traversable `](/docs/apis/Interfaces/HH/Traversable/); or an empty
-  [` Vector `](/docs/apis/Classes/HH/Vector/) if the [` Traversable `](/docs/apis/Interfaces/HH/Traversable/) is `` null ``.
+* [` Vector<Tv> `](/apis/Classes/HH/Vector/) - A [` Vector `](/apis/Classes/HH/Vector/) with the values from the [` Traversable `](/apis/Interfaces/HH/Traversable/); or an empty
+  [` Vector `](/apis/Classes/HH/Vector/) if the [` Traversable `](/apis/Interfaces/HH/Traversable/) is `` null ``.
 
 
 

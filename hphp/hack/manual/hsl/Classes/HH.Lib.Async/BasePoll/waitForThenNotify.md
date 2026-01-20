@@ -22,7 +22,7 @@ private function waitForThenNotify(
 
 
 + ` Tk $key `
-+ [` Awaitable<Tv> `](/docs/apis/Classes/HH/Awaitable/)`` $awaitable ``
++ [` Awaitable<Tv> `](/apis/Classes/HH/Awaitable/)`` $awaitable ``
 
 
 
@@ -32,5 +32,5 @@ private function waitForThenNotify(
 
 
 
-* [` Awaitable<void> `](/docs/apis/Classes/HH/Awaitable/)
+* [` Awaitable<void> `](/apis/Classes/HH/Awaitable/)
 <!-- HHAPIDOC -->

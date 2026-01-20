@@ -10,12 +10,12 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-A class to represent an iterator over the rows of a [` AsyncMysqlRowBlock `](/docs/apis/Classes/AsyncMysqlRowBlock/)
+A class to represent an iterator over the rows of a [` AsyncMysqlRowBlock `](/apis/Classes/AsyncMysqlRowBlock/)
 
 
 
 
-You can iterate over all the rows of an [` AsyncMysqlRowBlock `](/docs/apis/Classes/AsyncMysqlRowBlock/) one by one until
+You can iterate over all the rows of an [` AsyncMysqlRowBlock `](/apis/Classes/AsyncMysqlRowBlock/) one by one until
 the iterator is not valid any longer.
 
 
@@ -26,8 +26,8 @@ the iterator is not valid any longer.
 
 
 
-+ [Introduction](</docs/hack/asynchronous-operations/introduction>)
-+ [Extensions](</docs/hack/asynchronous-operations/extensions>)
++ [Introduction](</hack/asynchronous-operations/introduction>)
++ [Extensions](</hack/asynchronous-operations/extensions>)
 
 
 
@@ -52,19 +52,19 @@ final class AsyncMysqlRowBlockIterator implements HH\KeyedIterator {...}
 
 
 
-* [` ->current(): AsyncMysqlRow `](/docs/apis/Classes/AsyncMysqlRowBlockIterator/current/)\
+* [` ->current(): AsyncMysqlRow `](/apis/Classes/AsyncMysqlRowBlockIterator/current/)\
   Get the current row
 
-* [` ->key(): int `](/docs/apis/Classes/AsyncMysqlRowBlockIterator/key/)\
+* [` ->key(): int `](/apis/Classes/AsyncMysqlRowBlockIterator/key/)\
   Get the current row number
 
-* [` ->next(): void `](/docs/apis/Classes/AsyncMysqlRowBlockIterator/next/)\
+* [` ->next(): void `](/apis/Classes/AsyncMysqlRowBlockIterator/next/)\
   Advance the iterator to the next row
 
-* [` ->rewind(): void `](/docs/apis/Classes/AsyncMysqlRowBlockIterator/rewind/)\
+* [` ->rewind(): void `](/apis/Classes/AsyncMysqlRowBlockIterator/rewind/)\
   Reset the iterator to the first row
 
-* [` ->valid(): bool `](/docs/apis/Classes/AsyncMysqlRowBlockIterator/valid/)\
-  Check if iterator is at a valid [` AsyncMysqlRow `](/docs/apis/Classes/AsyncMysqlRow/)
+* [` ->valid(): bool `](/apis/Classes/AsyncMysqlRowBlockIterator/valid/)\
+  Check if iterator is at a valid [` AsyncMysqlRow `](/apis/Classes/AsyncMysqlRow/)
 
 <!-- HHAPIDOC -->

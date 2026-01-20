@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a [` Vector `](/docs/apis/Classes/HH/Vector/) containing the values of the current [` Vector `](/docs/apis/Classes/HH/Vector/) that meet
+Returns a [` Vector `](/apis/Classes/HH/Vector/) containing the values of the current [` Vector `](/apis/Classes/HH/Vector/) that meet
 a supplied condition applied to its keys and values
 
 
@@ -21,9 +21,9 @@ public function filterWithKey(
 
 
 
-[` filterWithKey() `](/docs/apis/Classes/HH/Vector/filterWithKey/)'s result contains only values whose key/value pairs
-satisfy the provided criterion; unlike [` mapWithKey() `](/docs/apis/Classes/HH/Vector/mapWithKey/), which contains
-results derived from every key/value pair in the original [` Vector `](/docs/apis/Classes/HH/Vector/).
+[` filterWithKey() `](/apis/Classes/HH/Vector/filterWithKey/)'s result contains only values whose key/value pairs
+satisfy the provided criterion; unlike [` mapWithKey() `](/apis/Classes/HH/Vector/mapWithKey/), which contains
+results derived from every key/value pair in the original [` Vector `](/apis/Classes/HH/Vector/).
 
 
 
@@ -43,7 +43,7 @@ results derived from every key/value pair in the original [` Vector `](/docs/api
 
 
 
-* [` Vector<Tv> `](/docs/apis/Classes/HH/Vector/) - A [` Vector `](/docs/apis/Classes/HH/Vector/) containing the values of the current [` Vector `](/docs/apis/Classes/HH/Vector/) for
+* [` Vector<Tv> `](/apis/Classes/HH/Vector/) - A [` Vector `](/apis/Classes/HH/Vector/) containing the values of the current [` Vector `](/apis/Classes/HH/Vector/) for
   which a user-specified test condition returns true when applied
   to the corresponding key/value pairs.
 

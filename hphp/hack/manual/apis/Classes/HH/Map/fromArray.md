@@ -13,7 +13,7 @@ the Hack LSP instead for complete and up-to-date information.
 
 
 
-Returns a [` Map `](/docs/apis/Classes/HH/Map/) containing the key/value pairs from the specified `` array ``
+Returns a [` Map `](/apis/Classes/HH/Map/) containing the key/value pairs from the specified `` array ``
 
 
 
@@ -37,7 +37,7 @@ This function is deprecated. Use ` new `Map`` ($arr) `` instead.
 
 
 
-+ ` darray<Tk, Tv> $arr ` - The `` array `` to convert to a [` Map `](/docs/apis/Classes/HH/Map/).
++ ` darray<Tk, Tv> $arr ` - The `` array `` to convert to a [` Map `](/apis/Classes/HH/Map/).
 
 
 
@@ -47,5 +47,5 @@ This function is deprecated. Use ` new `Map`` ($arr) `` instead.
 
 
 
-* [` Map<Tk, `](/docs/apis/Classes/HH/Map/)`` Tv> `` - A [` Map `](/docs/apis/Classes/HH/Map/) with the key/value pairs from the provided `` array ``.
+* [` Map<Tk, `](/apis/Classes/HH/Map/)`` Tv> `` - A [` Map `](/apis/Classes/HH/Map/) with the key/value pairs from the provided `` array ``.
 <!-- HHAPIDOC -->

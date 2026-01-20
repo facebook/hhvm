@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Provides the number of elements in the current [` ImmSet `](/docs/apis/Classes/HH/ImmSet/)
+Provides the number of elements in the current [` ImmSet `](/apis/Classes/HH/ImmSet/)
 
 
 
@@ -23,7 +23,7 @@ public function count(): int;
 
 
 
-+ ` int ` - The number of elements in the current [` ImmSet `](/docs/apis/Classes/HH/ImmSet/).
++ ` int ` - The number of elements in the current [` ImmSet `](/apis/Classes/HH/ImmSet/).
 
 
 
@@ -33,5 +33,5 @@ public function count(): int;
 
 
 
-See [` Set::count `](/docs/apis/Classes/HH/Set/count/#examples) for usage examples.
+See [` Set::count `](/apis/Classes/HH/Set/count/#examples) for usage examples.
 <!-- HHAPIDOC -->

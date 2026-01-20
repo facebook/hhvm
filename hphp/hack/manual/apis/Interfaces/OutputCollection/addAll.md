@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-For every element in the provided [` Traversable `](/docs/apis/Interfaces/HH/Traversable/), append a value into the
+For every element in the provided [` Traversable `](/apis/Interfaces/HH/Traversable/), append a value into the
 current collection
 
 
@@ -32,7 +32,7 @@ collection will be reflected in the returned collection.
 
 
 
-+ ` ? `[` Traversable<Te> `](/docs/apis/Interfaces/HH/Traversable/)`` $traversable `` - The [` Traversable `](/docs/apis/Interfaces/HH/Traversable/) with the new values to set. If
++ ` ? `[` Traversable<Te> `](/apis/Interfaces/HH/Traversable/)`` $traversable `` - The [` Traversable `](/apis/Interfaces/HH/Traversable/) with the new values to set. If
   `` null `` is provided, no changes are made.
 
 

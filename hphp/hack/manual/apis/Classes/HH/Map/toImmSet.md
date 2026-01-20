@@ -7,7 +7,7 @@ the Hack LSP instead for complete and up-to-date information.
 :::
 
 Returns an immutable set (` ImmSet `) based on the values of the current
-[` Map `](/docs/apis/Classes/HH/Map/)
+[` Map `](/apis/Classes/HH/Map/)
 
 
 
@@ -24,7 +24,7 @@ public function toImmSet(): ImmSet<Tv>;
 
 
 
-+ [` ImmSet<Tv> `](/docs/apis/Classes/HH/ImmSet/) - an `` ImmSet `` with the current values of the current [` Map `](/docs/apis/Classes/HH/Map/).
++ [` ImmSet<Tv> `](/apis/Classes/HH/ImmSet/) - an `` ImmSet `` with the current values of the current [` Map `](/apis/Classes/HH/Map/).
 
 
 
@@ -34,7 +34,7 @@ public function toImmSet(): ImmSet<Tv>;
 
 
 
-This example shows that converting a [` Map `](/docs/apis/Classes/HH/Map/) to an `` ImmSet `` also removes duplicate values:
+This example shows that converting a [` Map `](/apis/Classes/HH/Map/) to an `` ImmSet `` also removes duplicate values:
 
 
 

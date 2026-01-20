@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Use [` Shapes::idx `](/docs/apis/Classes/HH/Shapes/idx/) to retrieve a field value in a shape, when the key may or may not exist
+Use [` Shapes::idx `](/apis/Classes/HH/Shapes/idx/) to retrieve a field value in a shape, when the key may or may not exist
 
 
 
@@ -23,26 +23,26 @@ public static function idx(
 
 
 If ` $index ` does not exist in the shape, the default value will be returned (`` $default ``), if one has been set.
-It behaves similarily to [` idx() `](/docs/apis/Classes/HH/Shapes/idx/) for Collections.
+It behaves similarily to [` idx() `](/apis/Classes/HH/Shapes/idx/) for Collections.
 
 
 
 
 A few examples:
 
-+ [` Shapes::idx(shape('x' `](/docs/apis/Classes/HH/Shapes/idx/)`` => 123), 'x') // 123 ``
++ [` Shapes::idx(shape('x' `](/apis/Classes/HH/Shapes/idx/)`` => 123), 'x') // 123 ``
 
-+ [` Shapes::idx(shape('x' `](/docs/apis/Classes/HH/Shapes/idx/)`` => 123), 'y') // null ``
++ [` Shapes::idx(shape('x' `](/apis/Classes/HH/Shapes/idx/)`` => 123), 'y') // null ``
 
-+ [` Shapes::idx(shape('x' `](/docs/apis/Classes/HH/Shapes/idx/)`` => 123), 'y', 456) // 456 ``
++ [` Shapes::idx(shape('x' `](/apis/Classes/HH/Shapes/idx/)`` => 123), 'y', 456) // 456 ``
 
-+ [` Shapes::idx(null, `](/docs/apis/Classes/HH/Shapes/idx/)`` 'y', 456) // 456 ``
-
-
++ [` Shapes::idx(null, `](/apis/Classes/HH/Shapes/idx/)`` 'y', 456) // 456 ``
 
 
 
-Use [` Shapes::idx `](/docs/apis/Classes/HH/Shapes/idx/) when the key in your shape is optional (e.g., `` ?x ``, in ``` shape(?'x' => int ```).
+
+
+Use [` Shapes::idx `](/apis/Classes/HH/Shapes/idx/) when the key in your shape is optional (e.g., `` ?x ``, in ``` shape(?'x' => int ```).
 If the key in your shape is always present, access the value directly: ```` $my_shape['x'] ````.
 
 
@@ -80,7 +80,7 @@ The second argument, ` $index ` must always be a literal.
 
 
 
-This example shows how to use [` Shapes::idx `](/docs/apis/Classes/HH/Shapes/idx/) for keys that may or may not exist in a `` Shape ``:
+This example shows how to use [` Shapes::idx `](/apis/Classes/HH/Shapes/idx/) for keys that may or may not exist in a `` Shape ``:
 
 
 
@@ -106,7 +106,7 @@ function basic_usage_main(): void {
 
 
 
-This example shows that [` Shapes::idx `](/docs/apis/Classes/HH/Shapes/idx/) will only return the default value if the key doesn't exist in the `` Shape ``. If the key exists but is ``` NULL ``` then ```` NULL ```` will be returned.
+This example shows that [` Shapes::idx `](/apis/Classes/HH/Shapes/idx/) will only return the default value if the key doesn't exist in the `` Shape ``. If the key exists but is ``` NULL ``` then ```` NULL ```` will be returned.
 
 
 

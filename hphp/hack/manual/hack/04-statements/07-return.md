@@ -37,7 +37,7 @@ the return value), which is returned.
 
 Returning from a constructor behaves just like returning from a function having a return type of `void`.
 
-The value returned by a [generator function](/docs/hack/expressions-and-operators/yield) must be the literal `null`.  A `return` statement
+The value returned by a [generator function](/hack/expressions-and-operators/yield) must be the literal `null`.  A `return` statement
 inside a generator function causes the generator to terminate.
 
-A return statement must not occur in a finally block or in a function declared [`noreturn`](/docs/hack/built-in-types/noreturn).
+A return statement must not occur in a finally block or in a function declared [`noreturn`](/hack/built-in-types/noreturn).

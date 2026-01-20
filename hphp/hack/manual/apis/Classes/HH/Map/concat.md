@@ -6,8 +6,8 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a [` Vector `](/docs/apis/Classes/HH/Vector/) that is the concatenation of the values of the current
-[` Map `](/docs/apis/Classes/HH/Map/) and the values of the provided [` Traversable `](/docs/apis/Interfaces/HH/Traversable/)
+Returns a [` Vector `](/apis/Classes/HH/Vector/) that is the concatenation of the values of the current
+[` Map `](/apis/Classes/HH/Map/) and the values of the provided [` Traversable `](/apis/Interfaces/HH/Traversable/)
 
 
 
@@ -21,8 +21,8 @@ public function concat<Tu super Tv>(
 
 
 
-The provided [` Traversable `](/docs/apis/Interfaces/HH/Traversable/) is concatenated to the end of the current [` Map `](/docs/apis/Classes/HH/Map/)
-to produce the returned [` Vector `](/docs/apis/Classes/HH/Vector/).
+The provided [` Traversable `](/apis/Interfaces/HH/Traversable/) is concatenated to the end of the current [` Map `](/apis/Classes/HH/Map/)
+to produce the returned [` Vector `](/apis/Classes/HH/Vector/).
 
 
 
@@ -32,7 +32,7 @@ to produce the returned [` Vector `](/docs/apis/Classes/HH/Vector/).
 
 
 
-+ [Constraints](</docs/hack/generics/type-constraints>)
++ [Constraints](</hack/generics/type-constraints>)
 
 
 
@@ -45,8 +45,8 @@ to produce the returned [` Vector `](/docs/apis/Classes/HH/Vector/).
 
 
 
-* [` Traversable<Tu> `](/docs/apis/Interfaces/HH/Traversable/)`` $traversable `` - The [` Traversable `](/docs/apis/Interfaces/HH/Traversable/) to concatenate to the current
-  [` Map `](/docs/apis/Classes/HH/Map/).
+* [` Traversable<Tu> `](/apis/Interfaces/HH/Traversable/)`` $traversable `` - The [` Traversable `](/apis/Interfaces/HH/Traversable/) to concatenate to the current
+  [` Map `](/apis/Classes/HH/Map/).
 
 
 
@@ -56,7 +56,7 @@ to produce the returned [` Vector `](/docs/apis/Classes/HH/Vector/).
 
 
 
-- [` Vector<Tu> `](/docs/apis/Classes/HH/Vector/) - The integer-indexed concatenated [` Vector `](/docs/apis/Classes/HH/Vector/).
+- [` Vector<Tu> `](/apis/Classes/HH/Vector/) - The integer-indexed concatenated [` Vector `](/apis/Classes/HH/Vector/).
 
 
 
@@ -66,7 +66,7 @@ to produce the returned [` Vector `](/docs/apis/Classes/HH/Vector/).
 
 
 
-This example creates new [` Vector `](/docs/apis/Classes/HH/Vector/)s by concatenating the values in a [` Map `](/docs/apis/Classes/HH/Map/) with [` Traversable `](/docs/apis/Interfaces/HH/Traversable/)s:
+This example creates new [` Vector `](/apis/Classes/HH/Vector/)s by concatenating the values in a [` Map `](/apis/Classes/HH/Map/) with [` Traversable `](/apis/Interfaces/HH/Traversable/)s:
 
 
 

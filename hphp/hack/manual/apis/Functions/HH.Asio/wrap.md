@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Wrap an [` Awaitable `](/docs/apis/Classes/HH/Awaitable/) into an [` Awaitable `](/docs/apis/Classes/HH/Awaitable/) of `` ResultOrExceptionWrapper ``
+Wrap an [` Awaitable `](/apis/Classes/HH/Awaitable/) into an [` Awaitable `](/apis/Classes/HH/Awaitable/) of `` ResultOrExceptionWrapper ``
 
 
 
@@ -22,8 +22,8 @@ function wrap<Tv>(
 
 
 
-The actual ` ResultOrExceptionWrapper ` in the returned [` Awaitable `](/docs/apis/Classes/HH/Awaitable/) will only
-be available after you `` await `` or ``` join ``` the returned [` Awaitable `](/docs/apis/Classes/HH/Awaitable/).
+The actual ` ResultOrExceptionWrapper ` in the returned [` Awaitable `](/apis/Classes/HH/Awaitable/) will only
+be available after you `` await `` or ``` join ``` the returned [` Awaitable `](/apis/Classes/HH/Awaitable/).
 
 
 
@@ -33,7 +33,7 @@ be available after you `` await `` or ``` join ``` the returned [` Awaitable `](
 
 
 
-+ [` Awaitable<Tv> `](/docs/apis/Classes/HH/Awaitable/)`` $awaitable `` - The [` Awaitable `](/docs/apis/Classes/HH/Awaitable/) to wrap.
++ [` Awaitable<Tv> `](/apis/Classes/HH/Awaitable/)`` $awaitable `` - The [` Awaitable `](/apis/Classes/HH/Awaitable/) to wrap.
 
 
 
@@ -43,5 +43,5 @@ be available after you `` await `` or ``` join ``` the returned [` Awaitable `](
 
 
 
-* [` Awaitable<ResultOrExceptionWrapper<Tv>> `](/docs/apis/Classes/HH/Awaitable/) - the [` Awaitable `](/docs/apis/Classes/HH/Awaitable/) of `` ResultOrExceptionWrapper ``.
+* [` Awaitable<ResultOrExceptionWrapper<Tv>> `](/apis/Classes/HH/Awaitable/) - the [` Awaitable `](/apis/Classes/HH/Awaitable/) of `` ResultOrExceptionWrapper ``.
 <!-- HHAPIDOC -->

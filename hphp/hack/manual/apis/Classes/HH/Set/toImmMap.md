@@ -7,7 +7,7 @@ the Hack LSP instead for complete and up-to-date information.
 :::
 
 Returns an immutable map (` ImmMap `) based on the values of the current
-[` Set `](/docs/apis/Classes/HH/Set/)
+[` Set `](/apis/Classes/HH/Set/)
 
 
 
@@ -29,7 +29,7 @@ Each key of the ` Map ` will be the same as its value.
 
 
 
-+ [` ImmMap<arraykey, `](/docs/apis/Classes/HH/ImmMap/)`` Tv> `` - an ``` ImmMap ``` that that contains the values of the current [` Set `](/docs/apis/Classes/HH/Set/),
++ [` ImmMap<arraykey, `](/apis/Classes/HH/ImmMap/)`` Tv> `` - an ``` ImmMap ``` that that contains the values of the current [` Set `](/apis/Classes/HH/Set/),
   with each key of the Map being the same as its value.
 
 

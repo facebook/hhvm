@@ -7,7 +7,7 @@ the Hack LSP instead for complete and up-to-date information.
 :::
 
 Returns a lazy, access elements only when needed view of the current
-[` KeyedIterable `](/docs/apis/Interfaces/HH/KeyedIterable/)
+[` KeyedIterable `](/apis/Interfaces/HH/KeyedIterable/)
 
 
 
@@ -20,8 +20,8 @@ public function lazy(): KeyedIterable<Tk, Tv>;
 
 
 Normally, memory is allocated for all of the elements of the
-[` KeyedIterable `](/docs/apis/Interfaces/HH/KeyedIterable/). With a lazy view, memory is allocated for an element only
-when needed or used in a calculation like in [` map() `](/docs/apis/Interfaces/HH/KeyedIterable/map/) or [` filter() `](/docs/apis/Interfaces/HH/KeyedIterable/filter/).
+[` KeyedIterable `](/apis/Interfaces/HH/KeyedIterable/). With a lazy view, memory is allocated for an element only
+when needed or used in a calculation like in [` map() `](/apis/Interfaces/HH/KeyedIterable/map/) or [` filter() `](/apis/Interfaces/HH/KeyedIterable/filter/).
 
 
 
@@ -31,7 +31,7 @@ when needed or used in a calculation like in [` map() `](/docs/apis/Interfaces/H
 
 
 
-+ [Examples](</docs/hack/arrays-and-collections/introduction>)
++ [Examples](</hack/arrays-and-collections/introduction>)
 
 
 
@@ -44,6 +44,6 @@ when needed or used in a calculation like in [` map() `](/docs/apis/Interfaces/H
 
 
 
-* [` KeyedIterable<Tk, `](/docs/apis/Interfaces/HH/KeyedIterable/)`` Tv> `` - a [` KeyedIterable `](/docs/apis/Interfaces/HH/KeyedIterable/) representing the lazy view into the current
-  [` KeyedIterable `](/docs/apis/Interfaces/HH/KeyedIterable/).
+* [` KeyedIterable<Tk, `](/apis/Interfaces/HH/KeyedIterable/)`` Tv> `` - a [` KeyedIterable `](/apis/Interfaces/HH/KeyedIterable/) representing the lazy view into the current
+  [` KeyedIterable `](/apis/Interfaces/HH/KeyedIterable/).
 <!-- HHAPIDOC -->

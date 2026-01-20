@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Removes all the elements from the current [` Vector `](/docs/apis/Classes/HH/Vector/)
+Removes all the elements from the current [` Vector `](/apis/Classes/HH/Vector/)
 
 
 
@@ -18,8 +18,8 @@ public function clear(): Vector<Tv>;
 
 
 
-Future changes made to the current [` Vector `](/docs/apis/Classes/HH/Vector/) ARE reflected in the
-returned [` Vector `](/docs/apis/Classes/HH/Vector/), and vice-versa.
+Future changes made to the current [` Vector `](/apis/Classes/HH/Vector/) ARE reflected in the
+returned [` Vector `](/apis/Classes/HH/Vector/), and vice-versa.
 
 
 
@@ -29,7 +29,7 @@ returned [` Vector `](/docs/apis/Classes/HH/Vector/), and vice-versa.
 
 
 
-+ [` Vector<Tv> `](/docs/apis/Classes/HH/Vector/) - Returns itself.
++ [` Vector<Tv> `](/apis/Classes/HH/Vector/) - Returns itself.
 
 
 

@@ -21,7 +21,7 @@ public function reserve(
 
 
 Reserves enough memory for ` sz ` elements. If `` sz `` is less than or
-equal to the current capacity of this [` Map `](/docs/apis/Classes/HH/Map/), this method does nothing.
+equal to the current capacity of this [` Map `](/apis/Classes/HH/Map/), this method does nothing.
 
 
 
@@ -31,7 +31,7 @@ equal to the current capacity of this [` Map `](/docs/apis/Classes/HH/Map/), thi
 
 
 
-+ ` int $sz ` - The pre-determined size you want for the current [` Map `](/docs/apis/Classes/HH/Map/).
++ ` int $sz ` - The pre-determined size you want for the current [` Map `](/apis/Classes/HH/Map/).
 
 
 
@@ -51,7 +51,7 @@ equal to the current capacity of this [` Map `](/docs/apis/Classes/HH/Map/), thi
 
 
 
-This example reserves space for 1000 elements and then fills the [` Map `](/docs/apis/Classes/HH/Map/) with 1000 integer keys and values:
+This example reserves space for 1000 elements and then fills the [` Map `](/apis/Classes/HH/Map/) with 1000 integer keys and values:
 
 
 

@@ -34,7 +34,7 @@ function max<T as num>(
 
 
 
-* [` Traversable<T> `](/docs/apis/Interfaces/HH/Traversable/)`` $numbers ``
+* [` Traversable<T> `](/apis/Interfaces/HH/Traversable/)`` $numbers ``
 
 
 

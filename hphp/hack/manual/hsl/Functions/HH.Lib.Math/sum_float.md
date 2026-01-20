@@ -32,7 +32,7 @@ For an integer sum, see ` Math\sum() `.
 
 
 
-+ [` Traversable<T> `](/docs/apis/Interfaces/HH/Traversable/)`` $traversable ``
++ [` Traversable<T> `](/apis/Interfaces/HH/Traversable/)`` $traversable ``
 
 
 

@@ -27,7 +27,7 @@ trait ReflectionLegacyAttribute {...}
 
 
 
-+ [` ->getAttribute(string $name): ?varray<mixed> `](/docs/apis/Traits/ReflectionLegacyAttribute/getAttribute/)
-+ [` ->getAttributes(): darray<arraykey, varray<mixed>> `](/docs/apis/Traits/ReflectionLegacyAttribute/getAttributes/)
-+ [` ->hasAttribute(string $name): bool `](/docs/apis/Traits/ReflectionLegacyAttribute/hasAttribute/)
++ [` ->getAttribute(string $name): ?varray<mixed> `](/apis/Traits/ReflectionLegacyAttribute/getAttribute/)
++ [` ->getAttributes(): darray<arraykey, varray<mixed>> `](/apis/Traits/ReflectionLegacyAttribute/getAttributes/)
++ [` ->hasAttribute(string $name): bool `](/apis/Traits/ReflectionLegacyAttribute/hasAttribute/)
 <!-- HHAPIDOC -->

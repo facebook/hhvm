@@ -7,7 +7,7 @@ the Hack LSP instead for complete and up-to-date information.
 :::
 
 Returns an immutable, integer-keyed map (` ImmMap `) based on the elements of
-the current [` Pair `](/docs/apis/Classes/HH/Pair/)
+the current [` Pair `](/apis/Classes/HH/Pair/)
 
 
 
@@ -29,7 +29,7 @@ The keys are 0 and 1.
 
 
 
-+ [` ImmMap<int, `](/docs/apis/Classes/HH/ImmMap/)`` mixed> `` - an ``` ImmMap ``` with the values of the current [` Pair `](/docs/apis/Classes/HH/Pair/).
++ [` ImmMap<int, `](/apis/Classes/HH/ImmMap/)`` mixed> `` - an ``` ImmMap ``` with the values of the current [` Pair `](/apis/Classes/HH/Pair/).
 
 
 

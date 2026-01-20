@@ -1,7 +1,7 @@
 # Nameof
 
 An expression to get the name of a class as a string, replacement for
-[`::class` expressions](/docs/hack/expressions-and-operators/scope-resolution) in
+[`::class` expressions](/hack/expressions-and-operators/scope-resolution) in
 string positions.
 
 ## Quick Start
@@ -44,6 +44,6 @@ function main(): void {
 ```
 
 The type of a `nameof Target` expression is
-[`classname<Target>`](/docs/hack/built-in-types/classname) and `typename<Target>` when `Target`
-is a type alias. [Reified generics](/docs/hack/reified-generics/reified-generics) are not
+[`classname<Target>`](/hack/built-in-types/classname) and `typename<Target>` when `Target`
+is a type alias. [Reified generics](/hack/reified-generics/reified-generics) are not
 supported targets for `nameof`.

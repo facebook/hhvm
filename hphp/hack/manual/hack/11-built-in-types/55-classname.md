@@ -2,7 +2,7 @@
 
 <FbCaution>
 
-This type is under migration, with the class-specific use cases described below shifting to the new [class type](/docs/hack/built-in-types/class). There is [an internal wiki](https://www.internalfb.com/intern/wiki/Hack_Foundation/classnameC_vs._classC/) describing the type separation.
+This type is under migration, with the class-specific use cases described below shifting to the new [class type](/hack/built-in-types/class). There is [an internal wiki](https://www.internalfb.com/intern/wiki/Hack_Foundation/classnameC_vs._classC/) describing the type separation.
 
 </FbCaution>
 

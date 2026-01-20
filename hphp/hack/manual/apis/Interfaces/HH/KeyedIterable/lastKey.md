@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns the last key in the current [` KeyedIterable `](/docs/apis/Interfaces/HH/KeyedIterable/)
+Returns the last key in the current [` KeyedIterable `](/apis/Interfaces/HH/KeyedIterable/)
 
 
 
@@ -23,6 +23,6 @@ public function lastKey(): ?Tk;
 
 
 
-+ ` ?Tk ` - The last key in the current [` KeyedIterable `](/docs/apis/Interfaces/HH/KeyedIterable/), or `` null `` if the
-  current [` KeyedIterable `](/docs/apis/Interfaces/HH/KeyedIterable/) is empty.
++ ` ?Tk ` - The last key in the current [` KeyedIterable `](/apis/Interfaces/HH/KeyedIterable/), or `` null `` if the
+  current [` KeyedIterable `](/apis/Interfaces/HH/KeyedIterable/) is empty.
 <!-- HHAPIDOC -->

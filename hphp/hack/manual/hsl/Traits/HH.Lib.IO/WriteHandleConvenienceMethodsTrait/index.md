@@ -35,5 +35,5 @@ trait WriteHandleConvenienceMethodsTrait {...}
 
 
 
-+ [` ->writeAllAsync(string $data, ?int $timeout_ns = NULL): Awaitable<void> `](/docs/hsl/Traits/HH.Lib.IO/WriteHandleConvenienceMethodsTrait/writeAllAsync/)
++ [` ->writeAllAsync(string $data, ?int $timeout_ns = NULL): Awaitable<void> `](/hsl/Traits/HH.Lib.IO/WriteHandleConvenienceMethodsTrait/writeAllAsync/)
 <!-- HHAPIDOC -->

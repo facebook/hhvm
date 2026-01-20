@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Check if iterator is at a valid [` AsyncMysqlRow `](/docs/apis/Classes/AsyncMysqlRow/)
+Check if iterator is at a valid [` AsyncMysqlRow `](/apis/Classes/AsyncMysqlRow/)
 
 
 
@@ -34,7 +34,7 @@ public function valid(): bool;
 
 
 
-The following example shows how to use [` AsyncMysqlRowBlockIterator::valid `](/docs/apis/Classes/AsyncMysqlRowBlockIterator/valid/) to determine whether the current iterator is still valid (i.e., there was actually something to iterate over, or we have reached the end)
+The following example shows how to use [` AsyncMysqlRowBlockIterator::valid `](/apis/Classes/AsyncMysqlRowBlockIterator/valid/) to determine whether the current iterator is still valid (i.e., there was actually something to iterate over, or we have reached the end)
 
 
 

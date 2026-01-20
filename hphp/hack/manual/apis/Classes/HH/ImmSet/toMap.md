@@ -33,5 +33,5 @@ public function toMap(): HH\object;
 
 
 
-See [` Set::toMap `](/docs/apis/Classes/HH/Set/toMap/#examples) for usage examples.
+See [` Set::toMap `](/apis/Classes/HH/Set/toMap/#examples) for usage examples.
 <!-- HHAPIDOC -->

@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns the first value in the current [` ImmMap `](/docs/apis/Classes/HH/ImmMap/)
+Returns the first value in the current [` ImmMap `](/apis/Classes/HH/ImmMap/)
 
 
 
@@ -23,8 +23,8 @@ public function firstValue(): ?Tv;
 
 
 
-+ ` ?Tv ` - The first value in the current [` ImmMap `](/docs/apis/Classes/HH/ImmMap/), or `` null `` if the current
-  [` ImmMap `](/docs/apis/Classes/HH/ImmMap/) is empty.
++ ` ?Tv ` - The first value in the current [` ImmMap `](/apis/Classes/HH/ImmMap/), or `` null `` if the current
+  [` ImmMap `](/apis/Classes/HH/ImmMap/) is empty.
 
 
 
@@ -34,5 +34,5 @@ public function firstValue(): ?Tv;
 
 
 
-See [`Map::firstValue`](/docs/apis/Classes/HH/Map/firstValue/#examples) for usage examples.
+See [`Map::firstValue`](/apis/Classes/HH/Map/firstValue/#examples) for usage examples.
 <!-- HHAPIDOC -->

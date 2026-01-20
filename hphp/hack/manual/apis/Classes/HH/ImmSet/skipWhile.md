@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns an [` ImmSet `](/docs/apis/Classes/HH/ImmSet/) containing the values of the current [` ImmSet `](/docs/apis/Classes/HH/ImmSet/) starting
+Returns an [` ImmSet `](/apis/Classes/HH/ImmSet/) containing the values of the current [` ImmSet `](/apis/Classes/HH/ImmSet/) starting
 after and including the first value that produces `` true `` when passed to
 the specified callback
 
@@ -22,8 +22,8 @@ public function skipWhile(
 
 
 
-The returned [` ImmSet `](/docs/apis/Classes/HH/ImmSet/) will always be a proper subset of the current
-[` ImmSet `](/docs/apis/Classes/HH/ImmSet/).
+The returned [` ImmSet `](/apis/Classes/HH/ImmSet/) will always be a proper subset of the current
+[` ImmSet `](/apis/Classes/HH/ImmSet/).
 
 
 
@@ -34,7 +34,7 @@ The returned [` ImmSet `](/docs/apis/Classes/HH/ImmSet/) will always be a proper
 
 
 + ` (function(Tv): bool) $fn ` - The callback used to determine the starting element for the
-  [` ImmSet `](/docs/apis/Classes/HH/ImmSet/).
+  [` ImmSet `](/apis/Classes/HH/ImmSet/).
 
 
 
@@ -44,7 +44,7 @@ The returned [` ImmSet `](/docs/apis/Classes/HH/ImmSet/) will always be a proper
 
 
 
-* [` ImmSet<Tv> `](/docs/apis/Classes/HH/ImmSet/) - An [` ImmSet `](/docs/apis/Classes/HH/ImmSet/) that is a proper subset of the current [` ImmSet `](/docs/apis/Classes/HH/ImmSet/)
+* [` ImmSet<Tv> `](/apis/Classes/HH/ImmSet/) - An [` ImmSet `](/apis/Classes/HH/ImmSet/) that is a proper subset of the current [` ImmSet `](/apis/Classes/HH/ImmSet/)
   starting after the callback returns `` true ``.
 
 
@@ -55,5 +55,5 @@ The returned [` ImmSet `](/docs/apis/Classes/HH/ImmSet/) will always be a proper
 
 
 
-See [` Set::skipWhile `](/docs/apis/Classes/HH/Set/skipWhile/#examples) for usage examples.
+See [` Set::skipWhile `](/apis/Classes/HH/Set/skipWhile/#examples) for usage examples.
 <!-- HHAPIDOC -->

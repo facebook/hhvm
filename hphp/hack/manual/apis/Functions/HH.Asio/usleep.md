@@ -25,7 +25,7 @@ function usleep(
 
 This is similar to calling the PHP builtin
 [` usleep `](<http://php.net/manual/en/function.usleep.php>) funciton, but is
-in the context of async, meaning that other [` Awaitable `](/docs/apis/Classes/HH/Awaitable/)s in the async
+in the context of async, meaning that other [` Awaitable `](/apis/Classes/HH/Awaitable/)s in the async
 scheduler can run while the async function that called `` usleep() `` waits until
 the length of time before asking to resume again.
 
@@ -47,5 +47,5 @@ the length of time before asking to resume again.
 
 
 
-* [` Awaitable<void> `](/docs/apis/Classes/HH/Awaitable/) - [` Awaitable `](/docs/apis/Classes/HH/Awaitable/) of `` void ``.
+* [` Awaitable<void> `](/apis/Classes/HH/Awaitable/) - [` Awaitable `](/apis/Classes/HH/Awaitable/) of `` void ``.
 <!-- HHAPIDOC -->

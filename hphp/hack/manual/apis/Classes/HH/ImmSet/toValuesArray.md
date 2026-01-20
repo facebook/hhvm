@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns an ` array ` containing the values from the current [` ImmSet `](/docs/apis/Classes/HH/ImmSet/)
+Returns an ` array ` containing the values from the current [` ImmSet `](/apis/Classes/HH/ImmSet/)
 
 
 
@@ -18,7 +18,7 @@ public function toValuesArray(): varray<Tv>;
 
 
 
-This method is interchangeable with [` toKeysArray() `](/docs/apis/Classes/HH/ImmSet/toKeysArray/).
+This method is interchangeable with [` toKeysArray() `](/apis/Classes/HH/ImmSet/toKeysArray/).
 
 
 
@@ -29,7 +29,7 @@ This method is interchangeable with [` toKeysArray() `](/docs/apis/Classes/HH/Im
 
 
 + ` varray<Tv> ` - an integer-indexed `` array `` containing the values from the
-  current [` ImmSet `](/docs/apis/Classes/HH/ImmSet/).
+  current [` ImmSet `](/apis/Classes/HH/ImmSet/).
 
 
 
@@ -39,5 +39,5 @@ This method is interchangeable with [` toKeysArray() `](/docs/apis/Classes/HH/Im
 
 
 
-See [` Set::toValuesArray `](/docs/apis/Classes/HH/Set/toValuesArray/#examples) for usage examples.
+See [` Set::toValuesArray `](/apis/Classes/HH/Set/toValuesArray/#examples) for usage examples.
 <!-- HHAPIDOC -->

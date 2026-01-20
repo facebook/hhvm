@@ -30,5 +30,5 @@ public function setInteractionId(
 
 
 
-* [` RpcOptions `](/docs/apis/Classes/RpcOptions/)
+* [` RpcOptions `](/apis/Classes/RpcOptions/)
 <!-- HHAPIDOC -->

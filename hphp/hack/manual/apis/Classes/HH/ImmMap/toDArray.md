@@ -33,5 +33,5 @@ public function toDArray(): darray<Tk, Tv>;
 
 
 
-See [` Map::toDArray `](/docs/apis/Classes/HH/Map/toDArray/#examples) for usage examples.
+See [` Map::toDArray `](/apis/Classes/HH/Map/toDArray/#examples) for usage examples.
 <!-- HHAPIDOC -->

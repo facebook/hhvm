@@ -47,7 +47,7 @@ Space complexity: O(n)
 
 
 
-* [` Traversable<Tv> `](/docs/apis/Interfaces/HH/Traversable/)`` $traversable ``
+* [` Traversable<Tv> `](/apis/Interfaces/HH/Traversable/)`` $traversable ``
 * ` ?(function(Tv): bool) $value_predicate = NULL `
 
 

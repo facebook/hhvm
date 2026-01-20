@@ -37,8 +37,8 @@ as the size of ```` $values ````)
 
 
 
-+ [` Traversable<Tk> `](/docs/apis/Interfaces/HH/Traversable/)`` $keys ``
-+ [` Traversable<Tv> `](/docs/apis/Interfaces/HH/Traversable/)`` $values ``
++ [` Traversable<Tk> `](/apis/Interfaces/HH/Traversable/)`` $keys ``
++ [` Traversable<Tv> `](/apis/Interfaces/HH/Traversable/)`` $values ``
 
 
 

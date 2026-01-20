@@ -6,8 +6,8 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a [` MutableVector `](/docs/apis/Interfaces/MutableVector/) containing the first `` n `` values of the current
-[` MutableVector `](/docs/apis/Interfaces/MutableVector/)
+Returns a [` MutableVector `](/apis/Interfaces/MutableVector/) containing the first `` n `` values of the current
+[` MutableVector `](/apis/Interfaces/MutableVector/)
 
 
 
@@ -21,8 +21,8 @@ public function take(
 
 
 
-The returned [` MutableVector `](/docs/apis/Interfaces/MutableVector/) will always be a proper subset of the current
-[` MutableVector `](/docs/apis/Interfaces/MutableVector/).
+The returned [` MutableVector `](/apis/Interfaces/MutableVector/) will always be a proper subset of the current
+[` MutableVector `](/apis/Interfaces/MutableVector/).
 
 
 
@@ -38,7 +38,7 @@ The returned [` MutableVector `](/docs/apis/Interfaces/MutableVector/) will alwa
 
 
 + ` int $n ` - The last element that will be included in the returned
-  [` MutableVector `](/docs/apis/Interfaces/MutableVector/).
+  [` MutableVector `](/apis/Interfaces/MutableVector/).
 
 
 
@@ -48,6 +48,6 @@ The returned [` MutableVector `](/docs/apis/Interfaces/MutableVector/) will alwa
 
 
 
-* [` MutableVector<Tv> `](/docs/apis/Interfaces/MutableVector/) - A [` MutableVector `](/docs/apis/Interfaces/MutableVector/) that is a proper subset of the current
-  [` MutableVector `](/docs/apis/Interfaces/MutableVector/) up to `` n `` elements.
+* [` MutableVector<Tv> `](/apis/Interfaces/MutableVector/) - A [` MutableVector `](/apis/Interfaces/MutableVector/) that is a proper subset of the current
+  [` MutableVector `](/apis/Interfaces/MutableVector/) up to `` n `` elements.
 <!-- HHAPIDOC -->

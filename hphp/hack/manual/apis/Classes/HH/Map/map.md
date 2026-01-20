@@ -9,8 +9,8 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a [` Map `](/docs/apis/Classes/HH/Map/) after an operation has been applied to each value in the
-current [` Map `](/docs/apis/Classes/HH/Map/)
+Returns a [` Map `](/apis/Classes/HH/Map/) after an operation has been applied to each value in the
+current [` Map `](/apis/Classes/HH/Map/)
 
 
 
@@ -24,14 +24,14 @@ public function map<Tu>(
 
 
 
-Every value in the current [` Map `](/docs/apis/Classes/HH/Map/) is affected by a call to [` map() `](/docs/apis/Classes/HH/Map/map/), unlike
-[` filter() `](/docs/apis/Classes/HH/Map/filter/) where only values that meet a certain criteria are affected.
+Every value in the current [` Map `](/apis/Classes/HH/Map/) is affected by a call to [` map() `](/apis/Classes/HH/Map/map/), unlike
+[` filter() `](/apis/Classes/HH/Map/filter/) where only values that meet a certain criteria are affected.
 
 
 
 
-The keys will remain unchanged from the current [` Map `](/docs/apis/Classes/HH/Map/) to the returned
-[` Map `](/docs/apis/Classes/HH/Map/).
+The keys will remain unchanged from the current [` Map `](/apis/Classes/HH/Map/) to the returned
+[` Map `](/apis/Classes/HH/Map/).
 
 
 
@@ -41,7 +41,7 @@ The keys will remain unchanged from the current [` Map `](/docs/apis/Classes/HH/
 
 
 
-+ [Examples](</docs/hack/arrays-and-collections/introduction>)
++ [Examples](</hack/arrays-and-collections/introduction>)
 
 
 
@@ -64,7 +64,7 @@ The keys will remain unchanged from the current [` Map `](/docs/apis/Classes/HH/
 
 
 
-- [` Map<Tk, `](/docs/apis/Classes/HH/Map/)`` Tu> `` - a [` Map `](/docs/apis/Classes/HH/Map/) containing key/value pairs after a user-specified
+- [` Map<Tk, `](/apis/Classes/HH/Map/)`` Tu> `` - a [` Map `](/apis/Classes/HH/Map/) containing key/value pairs after a user-specified
   operation is applied.
 
 
@@ -75,7 +75,7 @@ The keys will remain unchanged from the current [` Map `](/docs/apis/Classes/HH/
 
 
 
-In this example the [` Map `](/docs/apis/Classes/HH/Map/)'s values are mapped to the same type (`` string ``s):
+In this example the [` Map `](/apis/Classes/HH/Map/)'s values are mapped to the same type (`` string ``s):
 
 
 
@@ -98,7 +98,7 @@ $css_colors = $capitalized->map($hex_code ==> "color: {$hex_code};");
 
 
 
-In this example the [` Map `](/docs/apis/Classes/HH/Map/)'s values are mapped to a different type (`` int ``s):
+In this example the [` Map `](/apis/Classes/HH/Map/)'s values are mapped to a different type (`` int ``s):
 
 
 

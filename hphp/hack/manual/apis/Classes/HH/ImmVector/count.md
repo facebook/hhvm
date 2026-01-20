@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns the number of elements in the current [` ImmVector `](/docs/apis/Classes/HH/ImmVector/)
+Returns the number of elements in the current [` ImmVector `](/apis/Classes/HH/ImmVector/)
 
 
 
@@ -23,7 +23,7 @@ public function count(): int;
 
 
 
-+ ` int ` - The number of elements in the current [` ImmVector `](/docs/apis/Classes/HH/ImmVector/).
++ ` int ` - The number of elements in the current [` ImmVector `](/apis/Classes/HH/ImmVector/).
 
 
 
@@ -33,5 +33,5 @@ public function count(): int;
 
 
 
-See [` Vector::count `](/docs/apis/Classes/HH/Vector/count/#examples) for usage examples.
+See [` Vector::count `](/apis/Classes/HH/Vector/count/#examples) for usage examples.
 <!-- HHAPIDOC -->

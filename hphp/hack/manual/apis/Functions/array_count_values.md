@@ -26,7 +26,7 @@ function array_count_values<Tv as arraykey>(
 
 
 
-+ [` AnyArray `](/docs/apis/Classes/HH/AnyArray/)`` $input `` - The array of values to count
++ [` AnyArray `](/apis/Classes/HH/AnyArray/)`` $input `` - The array of values to count
 
 
 

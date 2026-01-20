@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns an [` ImmVector `](/docs/apis/Classes/HH/ImmVector/) containing the values of the current [` Pair `](/docs/apis/Classes/HH/Pair/) up to
+Returns an [` ImmVector `](/apis/Classes/HH/ImmVector/) containing the values of the current [` Pair `](/apis/Classes/HH/Pair/) up to
 but not including the first value that produces `` false `` when passed to the
 specified callback
 
@@ -38,6 +38,6 @@ public function takeWhile(
 
 
 
-* [` ImmVector<mixed> `](/docs/apis/Classes/HH/ImmVector/) - An [` ImmVector `](/docs/apis/Classes/HH/ImmVector/) that contains the values of the current [` Pair `](/docs/apis/Classes/HH/Pair/) up
+* [` ImmVector<mixed> `](/apis/Classes/HH/ImmVector/) - An [` ImmVector `](/apis/Classes/HH/ImmVector/) that contains the values of the current [` Pair `](/apis/Classes/HH/Pair/) up
   until the callback returns `` false ``.
 <!-- HHAPIDOC -->

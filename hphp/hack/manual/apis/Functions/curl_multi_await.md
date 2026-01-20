@@ -34,13 +34,13 @@ Once there is activity, you process the result with
 
 
 
-+ [Introduction](</docs/hack/asynchronous-operations/introduction>)
++ [Introduction](</hack/asynchronous-operations/introduction>)
 + [Extensions
 
 
 
 
-See Curl_exec() Wrt NoFCallBuiltin.](/docs/hack/asynchronous-operations/extensions
+See Curl_exec() Wrt NoFCallBuiltin.](/hack/asynchronous-operations/extensions
 
 
 
@@ -70,7 +70,7 @@ See curl_exec() wrt NoFCallBuiltin.)
 
 
 
-- [` Awaitable<int> `](/docs/apis/Classes/HH/Awaitable/) - - An [` Awaitable `](/docs/apis/Classes/HH/Awaitable/) representing the `` int `` result of the
+- [` Awaitable<int> `](/apis/Classes/HH/Awaitable/) - - An [` Awaitable `](/apis/Classes/HH/Awaitable/) representing the `` int `` result of the
   activity. If returned ``` int ``` is positive, that
   represents the number of handles on which there
   was activity. If ```` 0 ````, that means no activity

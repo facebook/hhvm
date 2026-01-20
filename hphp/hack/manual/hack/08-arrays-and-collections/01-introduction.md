@@ -3,7 +3,7 @@
 Hack includes diverse range of array-like data structures.
 
 Hack arrays are value types for storing iterable data. The types
-available are [`vec`](/docs/hack/arrays-and-collections/vec-keyset-and-dict#vec), [`dict`](/docs/hack/arrays-and-collections/vec-keyset-and-dict#dict) and [`keyset`](/docs/hack/arrays-and-collections/vec-keyset-and-dict#keyset). **When in doubt, use Hack
+available are [`vec`](/hack/arrays-and-collections/vec-keyset-and-dict#vec), [`dict`](/hack/arrays-and-collections/vec-keyset-and-dict#dict) and [`keyset`](/hack/arrays-and-collections/vec-keyset-and-dict#keyset). **When in doubt, use Hack
 arrays**.
 
 Hack collections are **deprecated** object types for storing iterable data. The types
@@ -23,9 +23,9 @@ $d = dict['a' => 1, 'b' => 3];
 
 ## The Hack Standard Library
 There are many helpful functions in the `C`, `Vec`, `Keyset` and `Dict`
-namespaces, which are a part of the [Hack Standard Library (HSL)](/docs/hsl/overview).
+namespaces, which are a part of the [Hack Standard Library (HSL)](/hsl/overview).
 
-For more information on included HSL namespaces, see [Hack Standard Library: Namespaces](/docs/hack/getting-started/hack-standard-library).
+For more information on included HSL namespaces, see [Hack Standard Library: Namespaces](/hack/getting-started/hack-standard-library).
 
 ```hack
 // The C namespace contains generic functions that are relevant to

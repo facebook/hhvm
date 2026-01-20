@@ -46,5 +46,5 @@ Throws InvalidOperationException if autoloading is disabled.
 
 
 
-+ [` Container<string> `](/docs/apis/Interfaces/HH/Container/)
++ [` Container<string> `](/apis/Interfaces/HH/Container/)
 <!-- HHAPIDOC -->

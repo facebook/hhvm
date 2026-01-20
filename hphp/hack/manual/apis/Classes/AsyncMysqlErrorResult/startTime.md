@@ -33,7 +33,7 @@ public function startTime(): float;
 
 
 
-When an error occurs when establishing a connection or on a query, and you catch the exception that is thrown, you will get an [` AsyncMysqlErrorResult `](/docs/apis/Classes/AsyncMysqlErrorResult/). And one of the methods on an [` AsyncMysqlErrorResult `](/docs/apis/Classes/AsyncMysqlErrorResult/) is [` startTime() `](/docs/apis/Classes/AsyncMysqlErrorResult/startTime/), which tells you when the connection operation began.
+When an error occurs when establishing a connection or on a query, and you catch the exception that is thrown, you will get an [` AsyncMysqlErrorResult `](/apis/Classes/AsyncMysqlErrorResult/). And one of the methods on an [` AsyncMysqlErrorResult `](/apis/Classes/AsyncMysqlErrorResult/) is [` startTime() `](/apis/Classes/AsyncMysqlErrorResult/startTime/), which tells you when the connection operation began.
 
 
 

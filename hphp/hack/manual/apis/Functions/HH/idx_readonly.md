@@ -24,7 +24,7 @@ function idx_readonly<Tk as arraykey, Tv>(
 
 
 
-+ ` ? `[` KeyedContainer<Tk, `](/docs/apis/Interfaces/HH/KeyedContainer/)`` Tv> $collection ``
++ ` ? `[` KeyedContainer<Tk, `](/apis/Interfaces/HH/KeyedContainer/)`` Tv> $collection ``
 + ` ?Tk $index `
 + ` $default = NULL `
 

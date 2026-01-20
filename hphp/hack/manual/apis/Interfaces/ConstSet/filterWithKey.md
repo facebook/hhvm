@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a [` ConstSet `](/docs/apis/Interfaces/ConstSet/) containing the values of the current [` ConstSet `](/docs/apis/Interfaces/ConstSet/) that
+Returns a [` ConstSet `](/apis/Interfaces/ConstSet/) containing the values of the current [` ConstSet `](/apis/Interfaces/ConstSet/) that
 meet a supplied condition applied to its "keys" and values
 
 
@@ -28,8 +28,8 @@ as well.
 
 
 Only values that meet a certain criteria are affected by a call to
-[` filterWithKey() `](/docs/apis/Interfaces/ConstSet/filterWithKey/), while all values are affected by a call to
-[` mapWithKey() `](/docs/apis/Interfaces/ConstSet/mapWithKey/).
+[` filterWithKey() `](/apis/Interfaces/ConstSet/filterWithKey/), while all values are affected by a call to
+[` mapWithKey() `](/apis/Interfaces/ConstSet/mapWithKey/).
 
 
 
@@ -40,7 +40,7 @@ Only values that meet a certain criteria are affected by a call to
 
 
 + ` (function(arraykey, Tv): bool) $fn ` - The callback containing the condition to apply to the
-  current [` ConstSet `](/docs/apis/Interfaces/ConstSet/) "keys" and values.
+  current [` ConstSet `](/apis/Interfaces/ConstSet/) "keys" and values.
 
 
 
@@ -50,6 +50,6 @@ Only values that meet a certain criteria are affected by a call to
 
 
 
-* [` ConstSet<Tv> `](/docs/apis/Interfaces/ConstSet/) - a [` ConstSet `](/docs/apis/Interfaces/ConstSet/) containing the values after a user-specified
-  condition is applied to the values of the current [` ConstSet `](/docs/apis/Interfaces/ConstSet/).
+* [` ConstSet<Tv> `](/apis/Interfaces/ConstSet/) - a [` ConstSet `](/apis/Interfaces/ConstSet/) containing the values after a user-specified
+  condition is applied to the values of the current [` ConstSet `](/apis/Interfaces/ConstSet/).
 <!-- HHAPIDOC -->

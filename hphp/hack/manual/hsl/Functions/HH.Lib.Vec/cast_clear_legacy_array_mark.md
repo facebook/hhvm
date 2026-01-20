@@ -28,7 +28,7 @@ function cast_clear_legacy_array_mark<T>(
 
 
 
-+ [` Traversable<T> `](/docs/apis/Interfaces/HH/Traversable/)`` $x ``
++ [` Traversable<T> `](/apis/Interfaces/HH/Traversable/)`` $x ``
 
 
 

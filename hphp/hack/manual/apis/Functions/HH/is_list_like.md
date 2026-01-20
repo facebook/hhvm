@@ -22,7 +22,7 @@ function is_list_like(
 
 
 
-+ [` AnyArray<arraykey, `](/docs/apis/Classes/HH/AnyArray/)`` mixed> $arg ``
++ [` AnyArray<arraykey, `](/apis/Classes/HH/AnyArray/)`` mixed> $arg ``
 
 
 

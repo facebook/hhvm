@@ -25,7 +25,7 @@ public function removeChild(
 
 
 
-+ [` DOMNode `](/docs/apis/Classes/DOMNode/)`` $node `` - The removed child.
++ [` DOMNode `](/apis/Classes/DOMNode/)`` $node `` - The removed child.
 
 
 

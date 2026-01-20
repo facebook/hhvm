@@ -22,7 +22,7 @@ function pop_backx<T as Container<Tv>, Tv>(
 
 
 
-If the Container is empty, an [` InvariantException `](/docs/apis/Classes/HH/InvariantException/) is thrown.
+If the Container is empty, an [` InvariantException `](/apis/Classes/HH/InvariantException/) is thrown.
 
 
 

@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a [` MutableSet `](/docs/apis/Interfaces/MutableSet/) containing the values after an operation has been
+Returns a [` MutableSet `](/apis/Interfaces/MutableSet/) containing the values after an operation has been
 applied to each "key" and value in the current Set
 
 
@@ -27,8 +27,8 @@ as well.
 
 
 
-Every value in the current [` MutableSet `](/docs/apis/Interfaces/MutableSet/) is affected by a call to
-[` mapWithKey() `](/docs/apis/Interfaces/MutableSet/mapWithKey/), unlike [` filterWithKey() `](/docs/apis/Interfaces/MutableSet/filterWithKey/) where only values that meet a
+Every value in the current [` MutableSet `](/apis/Interfaces/MutableSet/) is affected by a call to
+[` mapWithKey() `](/apis/Interfaces/MutableSet/mapWithKey/), unlike [` filterWithKey() `](/apis/Interfaces/MutableSet/filterWithKey/) where only values that meet a
 certain criteria are affected.
 
 
@@ -40,7 +40,7 @@ certain criteria are affected.
 
 
 + ` (function(arraykey, Tv): Tu) $fn ` - The callback containing the operation to apply to the
-  current [` MutableSet `](/docs/apis/Interfaces/MutableSet/) "keys" and values.
+  current [` MutableSet `](/apis/Interfaces/MutableSet/) "keys" and values.
 
 
 
@@ -50,6 +50,6 @@ certain criteria are affected.
 
 
 
-* [` MutableSet<Tu> `](/docs/apis/Interfaces/MutableSet/) - a [` MutableSet `](/docs/apis/Interfaces/MutableSet/) containing the values after a user-specified
-  operation on the current [` MutableSet `](/docs/apis/Interfaces/MutableSet/)'s values is applied.
+* [` MutableSet<Tu> `](/apis/Interfaces/MutableSet/) - a [` MutableSet `](/apis/Interfaces/MutableSet/) containing the values after a user-specified
+  operation on the current [` MutableSet `](/apis/Interfaces/MutableSet/)'s values is applied.
 <!-- HHAPIDOC -->

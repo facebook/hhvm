@@ -18,7 +18,7 @@ public function immutable(): this;
 
 
 
-Because a [` Pair `](/docs/apis/Classes/HH/Pair/) is immutable by default, this just returns the current
+Because a [` Pair `](/apis/Classes/HH/Pair/) is immutable by default, this just returns the current
 object.
 
 
@@ -29,5 +29,5 @@ object.
 
 
 
-+ ` this ` - this [` Pair `](/docs/apis/Classes/HH/Pair/)
++ ` this ` - this [` Pair `](/apis/Classes/HH/Pair/)
 <!-- HHAPIDOC -->

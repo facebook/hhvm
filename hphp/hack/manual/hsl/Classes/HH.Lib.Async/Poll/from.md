@@ -20,7 +20,7 @@ public static function from(
 
 
 
-See ` KeyedPoll ` if you have a [` KeyedTraversable `](/docs/apis/Interfaces/HH/KeyedTraversable/) and want to preserve
+See ` KeyedPoll ` if you have a [` KeyedTraversable `](/apis/Interfaces/HH/KeyedTraversable/) and want to preserve
 keys.
 
 
@@ -31,7 +31,7 @@ keys.
 
 
 
-+ [` Traversable<Awaitable<Tv>> `](/docs/apis/Interfaces/HH/Traversable/)`` $awaitables ``
++ [` Traversable<Awaitable<Tv>> `](/apis/Interfaces/HH/Traversable/)`` $awaitables ``
 
 
 

@@ -23,7 +23,7 @@ public function toImmVector(): ImmVector<Tv>;
 
 
 
-+ [` ImmVector<Tv> `](/docs/apis/Classes/HH/ImmVector/) - A `` Vector `` that is an immutable copy of the current ``` Vector ```.
++ [` ImmVector<Tv> `](/apis/Classes/HH/ImmVector/) - A `` Vector `` that is an immutable copy of the current ``` Vector ```.
 
 
 

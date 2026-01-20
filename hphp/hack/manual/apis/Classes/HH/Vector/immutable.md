@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns an immutable copy ([` ImmVector `](/docs/apis/Classes/HH/ImmVector/)) of the current [` Vector `](/docs/apis/Classes/HH/Vector/)
+Returns an immutable copy ([` ImmVector `](/apis/Classes/HH/ImmVector/)) of the current [` Vector `](/apis/Classes/HH/Vector/)
 
 
 
@@ -18,7 +18,7 @@ public function immutable(): ImmVector<Tv>;
 
 
 
-This method is interchangeable with [` toImmVector() `](/docs/apis/Classes/HH/Vector/toImmVector/).
+This method is interchangeable with [` toImmVector() `](/apis/Classes/HH/Vector/toImmVector/).
 
 
 
@@ -28,7 +28,7 @@ This method is interchangeable with [` toImmVector() `](/docs/apis/Classes/HH/Ve
 
 
 
-+ [` ImmVector<Tv> `](/docs/apis/Classes/HH/ImmVector/) - An [` ImmVector `](/docs/apis/Classes/HH/ImmVector/) copy of the current [` Vector `](/docs/apis/Classes/HH/Vector/).
++ [` ImmVector<Tv> `](/apis/Classes/HH/ImmVector/) - An [` ImmVector `](/apis/Classes/HH/ImmVector/) copy of the current [` Vector `](/apis/Classes/HH/Vector/).
 
 
 

@@ -66,11 +66,11 @@ final class KeyedPoll extends BasePoll<Tk, Tv> implements AsyncKeyedIterator<Tk,
 
 
 
-+ [` ::from(KeyedTraversable<Tk, Awaitable<Tv>> $awaitables): this `](/docs/hsl/Classes/HH.Lib.Async/KeyedPoll/from/)\
++ [` ::from(KeyedTraversable<Tk, Awaitable<Tv>> $awaitables): this `](/hsl/Classes/HH.Lib.Async/KeyedPoll/from/)\
   Create a `` KeyedPoll `` from the specified list of awaitables
-+ [` ->add(Tk $key, Awaitable<Tv> $awaitable): void `](/docs/hsl/Classes/HH.Lib.Async/KeyedPoll/add/)\
++ [` ->add(Tk $key, Awaitable<Tv> $awaitable): void `](/hsl/Classes/HH.Lib.Async/KeyedPoll/add/)\
   Add a single awaitable to the poll
-+ [` ->addMulti(KeyedTraversable<Tk, Awaitable<Tv>> $awaitables): void `](/docs/hsl/Classes/HH.Lib.Async/KeyedPoll/addMulti/)\
++ [` ->addMulti(KeyedTraversable<Tk, Awaitable<Tv>> $awaitables): void `](/hsl/Classes/HH.Lib.Async/KeyedPoll/addMulti/)\
   Add multiple keys and awaitables to the poll
 
 
@@ -79,14 +79,14 @@ final class KeyedPoll extends BasePoll<Tk, Tv> implements AsyncKeyedIterator<Tk,
 
 
 
-### Public Methods ([` HH\Lib\Async\BasePoll `](/docs/hsl/Classes/HH.Lib.Async/BasePoll/))
+### Public Methods ([` HH\Lib\Async\BasePoll `](/hsl/Classes/HH.Lib.Async/BasePoll/))
 
 
 
 
-* [` ::create(): this `](/docs/hsl/Classes/HH.Lib.Async/BasePoll/create/)
-* [` ->hasNext(): bool `](/docs/hsl/Classes/HH.Lib.Async/BasePoll/hasNext/)
-* [` ->next(): Awaitable<?(Tk, Tv)> `](/docs/hsl/Classes/HH.Lib.Async/BasePoll/next/)
+* [` ::create(): this `](/hsl/Classes/HH.Lib.Async/BasePoll/create/)
+* [` ->hasNext(): bool `](/hsl/Classes/HH.Lib.Async/BasePoll/hasNext/)
+* [` ->next(): Awaitable<?(Tk, Tv)> `](/hsl/Classes/HH.Lib.Async/BasePoll/next/)
 
 
 
@@ -94,12 +94,12 @@ final class KeyedPoll extends BasePoll<Tk, Tv> implements AsyncKeyedIterator<Tk,
 
 
 
-### Protected Methods ([` HH\Lib\Async\BasePoll `](/docs/hsl/Classes/HH.Lib.Async/BasePoll/))
+### Protected Methods ([` HH\Lib\Async\BasePoll `](/hsl/Classes/HH.Lib.Async/BasePoll/))
 
 
 
 
-- [` ::fromImpl(KeyedTraversable<Tk, Awaitable<Tv>> $awaitables): this `](/docs/hsl/Classes/HH.Lib.Async/BasePoll/fromImpl/)
-- [` ->addImpl(Tk $key, Awaitable<Tv> $awaitable): void `](/docs/hsl/Classes/HH.Lib.Async/BasePoll/addImpl/)
-- [` ->addMultiImpl(KeyedTraversable<Tk, Awaitable<Tv>> $awaitables): void `](/docs/hsl/Classes/HH.Lib.Async/BasePoll/addMultiImpl/)
+- [` ::fromImpl(KeyedTraversable<Tk, Awaitable<Tv>> $awaitables): this `](/hsl/Classes/HH.Lib.Async/BasePoll/fromImpl/)
+- [` ->addImpl(Tk $key, Awaitable<Tv> $awaitable): void `](/hsl/Classes/HH.Lib.Async/BasePoll/addImpl/)
+- [` ->addMultiImpl(KeyedTraversable<Tk, Awaitable<Tv>> $awaitables): void `](/hsl/Classes/HH.Lib.Async/BasePoll/addMultiImpl/)
 <!-- HHAPIDOC -->

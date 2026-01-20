@@ -5,7 +5,7 @@ checks.
 
 Generic type information is not available at runtime: this is called
 "erasure". If you need this information, consider using [reified
-generics](/docs/hack/reified-generics/reified-generics).
+generics](/hack/reified-generics/reified-generics).
 
 ```hack
 function takes_ints(vec<int> $items): vec<int> {
@@ -41,5 +41,5 @@ following situations:
  * As the type of the exception in a catch block: `catch (T $exception)`
 
 For passing around class names for instantiation, Hack provides
-[`classname<T>`](/docs/hack/built-in-types/classname) that extends the
+[`classname<T>`](/hack/built-in-types/classname) that extends the
 representation of `Foo::class`.

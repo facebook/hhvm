@@ -7,7 +7,7 @@ the Hack LSP instead for complete and up-to-date information.
 :::
 
 Returns a lazy, access elements only when needed view of the current
-[` Set `](/docs/apis/Classes/HH/Set/)
+[` Set `](/apis/Classes/HH/Set/)
 
 
 
@@ -19,9 +19,9 @@ public function lazy(): KeyedIterable<arraykey, Tv>;
 
 
 
-Normally, memory is allocated for all of the elements of the [` Set `](/docs/apis/Classes/HH/Set/). With
+Normally, memory is allocated for all of the elements of the [` Set `](/apis/Classes/HH/Set/). With
 a lazy view, memory is allocated for an element only when needed or used
-in a calculation like in [` map() `](/docs/apis/Classes/HH/Set/map/) or [` filter() `](/docs/apis/Classes/HH/Set/filter/).
+in a calculation like in [` map() `](/apis/Classes/HH/Set/map/) or [` filter() `](/apis/Classes/HH/Set/filter/).
 
 
 
@@ -31,7 +31,7 @@ in a calculation like in [` map() `](/docs/apis/Classes/HH/Set/map/) or [` filte
 
 
 
-+ [Examples](</docs/hack/arrays-and-collections/introduction>)
++ [Examples](</hack/arrays-and-collections/introduction>)
 
 
 
@@ -44,8 +44,8 @@ in a calculation like in [` map() `](/docs/apis/Classes/HH/Set/map/) or [` filte
 
 
 
-* [` KeyedIterable<arraykey, `](/docs/apis/Interfaces/HH/KeyedIterable/)`` Tv> `` - an [` KeyedIterable `](/docs/apis/Interfaces/HH/KeyedIterable/) representing the lazy view into the current
-  [` Set `](/docs/apis/Classes/HH/Set/), where the keys are the same as the values.
+* [` KeyedIterable<arraykey, `](/apis/Interfaces/HH/KeyedIterable/)`` Tv> `` - an [` KeyedIterable `](/apis/Interfaces/HH/KeyedIterable/) representing the lazy view into the current
+  [` Set `](/apis/Classes/HH/Set/), where the keys are the same as the values.
 
 
 
@@ -55,7 +55,7 @@ in a calculation like in [` map() `](/docs/apis/Classes/HH/Set/map/) or [` filte
 
 
 
-This example shows you how to use [` lazy() `](/docs/apis/Classes/HH/Set/lazy/) on a rather large [` Set `](/docs/apis/Classes/HH/Set/) and the time for both a *strict* and *non-strict* version. Since we only need 5 of the elements in the end, the lazy view actually allows us to stop after we meet our required 5 without having to actually filter and allocate all 1000000 elements up front.
+This example shows you how to use [` lazy() `](/apis/Classes/HH/Set/lazy/) on a rather large [` Set `](/apis/Classes/HH/Set/) and the time for both a *strict* and *non-strict* version. Since we only need 5 of the elements in the end, the lazy view actually allows us to stop after we meet our required 5 without having to actually filter and allocate all 1000000 elements up front.
 
 
 

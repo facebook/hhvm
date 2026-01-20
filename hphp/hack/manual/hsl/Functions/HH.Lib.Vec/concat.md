@@ -41,8 +41,8 @@ combined size of all the ```` ...$rest ````
 
 
 
-+ [` Traversable<Tv> `](/docs/apis/Interfaces/HH/Traversable/)`` $first ``
-+ [` Container<Tv> `](/docs/apis/Interfaces/HH/Container/)`` ...$rest ``
++ [` Traversable<Tv> `](/apis/Interfaces/HH/Traversable/)`` $first ``
++ [` Container<Tv> `](/apis/Interfaces/HH/Container/)`` ...$rest ``
 
 
 

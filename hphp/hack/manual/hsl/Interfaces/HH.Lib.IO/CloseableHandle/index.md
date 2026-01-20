@@ -40,8 +40,8 @@ interface CloseableHandle implements Handle {...}
 
 
 
-+ [` ->close(): void `](</docs/hsl/Interfaces/HH.Lib.IO/CloseableHandle/close/>)\
++ [` ->close(): void `](</hsl/Interfaces/HH.Lib.IO/CloseableHandle/close/>)\
   Close the handle
-+ [` ->closeWhenDisposed(): \IDisposable `](</docs/hsl/Interfaces/HH.Lib.IO/CloseableHandle/closeWhenDisposed/>)\
++ [` ->closeWhenDisposed(): \IDisposable `](</hsl/Interfaces/HH.Lib.IO/CloseableHandle/closeWhenDisposed/>)\
   Close the handle when the returned disposable is disposed
 <!-- HHAPIDOC -->

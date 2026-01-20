@@ -20,7 +20,7 @@ public function addMulti(
 
 
 
-See ` KeyedPoll ` if you have a [` KeyedTraversable `](/docs/apis/Interfaces/HH/KeyedTraversable/) and want to preserve keys.
+See ` KeyedPoll ` if you have a [` KeyedTraversable `](/apis/Interfaces/HH/KeyedTraversable/) and want to preserve keys.
 
 
 
@@ -30,7 +30,7 @@ See ` KeyedPoll ` if you have a [` KeyedTraversable `](/docs/apis/Interfaces/HH/
 
 
 
-+ [` Traversable<Awaitable<Tv>> `](/docs/apis/Interfaces/HH/Traversable/)`` $awaitables ``
++ [` Traversable<Awaitable<Tv>> `](/apis/Interfaces/HH/Traversable/)`` $awaitables ``
 
 
 

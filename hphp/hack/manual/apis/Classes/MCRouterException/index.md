@@ -33,7 +33,7 @@ class MCRouterException extends Exception {...}
 
 
 
-+ [` ->__construct(string $message, int $op = MCRouter::mc_op_unknown, int $reply = MCRouter::mc_res_unknown, string $key = '') `](/docs/apis/Classes/MCRouterException/__construct/)
-+ [` ->getKey(): string `](/docs/apis/Classes/MCRouterException/getKey/)
-+ [` ->getOp(): int `](/docs/apis/Classes/MCRouterException/getOp/)
++ [` ->__construct(string $message, int $op = MCRouter::mc_op_unknown, int $reply = MCRouter::mc_res_unknown, string $key = '') `](/apis/Classes/MCRouterException/__construct/)
++ [` ->getKey(): string `](/apis/Classes/MCRouterException/getKey/)
++ [` ->getOp(): int `](/apis/Classes/MCRouterException/getOp/)
 <!-- HHAPIDOC -->

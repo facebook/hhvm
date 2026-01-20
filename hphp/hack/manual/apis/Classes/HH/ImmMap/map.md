@@ -6,8 +6,8 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns an [` ImmMap `](/docs/apis/Classes/HH/ImmMap/) after an operation has been applied to each value in
-the current [` ImmMap `](/docs/apis/Classes/HH/ImmMap/)
+Returns an [` ImmMap `](/apis/Classes/HH/ImmMap/) after an operation has been applied to each value in
+the current [` ImmMap `](/apis/Classes/HH/ImmMap/)
 
 
 
@@ -21,14 +21,14 @@ public function map<Tu>(
 
 
 
-Every value in the current [` ImmMap `](/docs/apis/Classes/HH/ImmMap/) is affected by a call to [` map() `](/docs/apis/Classes/HH/ImmMap/map/),
-unlike [` filter() `](/docs/apis/Classes/HH/ImmMap/filter/) where only values that meet a certain criteria are
+Every value in the current [` ImmMap `](/apis/Classes/HH/ImmMap/) is affected by a call to [` map() `](/apis/Classes/HH/ImmMap/map/),
+unlike [` filter() `](/apis/Classes/HH/ImmMap/filter/) where only values that meet a certain criteria are
 affected.
 
 
 
 
-The keys will remain unchanged from this [` ImmMap `](/docs/apis/Classes/HH/ImmMap/) to the returned [` ImmMap `](/docs/apis/Classes/HH/ImmMap/).
+The keys will remain unchanged from this [` ImmMap `](/apis/Classes/HH/ImmMap/) to the returned [` ImmMap `](/apis/Classes/HH/ImmMap/).
 
 
 
@@ -38,7 +38,7 @@ The keys will remain unchanged from this [` ImmMap `](/docs/apis/Classes/HH/ImmM
 
 
 
-+ [Examples](</docs/hack/arrays-and-collections/introduction>)
++ [Examples](</hack/arrays-and-collections/introduction>)
 
 
 
@@ -61,7 +61,7 @@ The keys will remain unchanged from this [` ImmMap `](/docs/apis/Classes/HH/ImmM
 
 
 
-- [` ImmMap<Tk, `](/docs/apis/Classes/HH/ImmMap/)`` Tu> `` - an [` ImmMap `](/docs/apis/Classes/HH/ImmMap/) containing key/value pairs after a user-specified
+- [` ImmMap<Tk, `](/apis/Classes/HH/ImmMap/)`` Tu> `` - an [` ImmMap `](/apis/Classes/HH/ImmMap/) containing key/value pairs after a user-specified
   operation is applied.
 
 
@@ -72,5 +72,5 @@ The keys will remain unchanged from this [` ImmMap `](/docs/apis/Classes/HH/ImmM
 
 
 
-See [` Map::map `](/docs/apis/Classes/HH/Map/map/#examples) for usage examples.
+See [` Map::map `](/apis/Classes/HH/Map/map/#examples) for usage examples.
 <!-- HHAPIDOC -->

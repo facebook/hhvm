@@ -39,7 +39,7 @@ See ` Str\length() ` (or pass `` Locale\c() ``) for the length in bytes.
 
 
 
-+ [String](</docs/hack/built-in-types/string>)
++ [String](</hack/built-in-types/string>)
 
 
 

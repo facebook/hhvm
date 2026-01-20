@@ -41,5 +41,5 @@ function connect_nd_async(
 
 
 
-* [` Awaitable<CloseableSocket> `](/docs/apis/Classes/HH/Awaitable/)
+* [` Awaitable<CloseableSocket> `](/apis/Classes/HH/Awaitable/)
 <!-- HHAPIDOC -->

@@ -27,5 +27,5 @@ interface ILeakSafeStringishObject implements IZonedStringishObject {...}
 
 
 
-+ [` ->__toString(): string `](/docs/apis/Interfaces/ILeakSafeStringishObject/__toString/)
++ [` ->__toString(): string `](/apis/Interfaces/ILeakSafeStringishObject/__toString/)
 <!-- HHAPIDOC -->

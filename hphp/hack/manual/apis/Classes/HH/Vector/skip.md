@@ -6,8 +6,8 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a [` Vector `](/docs/apis/Classes/HH/Vector/) containing the values after the `` $n ``-th element of the
-current [` Vector `](/docs/apis/Classes/HH/Vector/)
+Returns a [` Vector `](/apis/Classes/HH/Vector/) containing the values after the `` $n ``-th element of the
+current [` Vector `](/apis/Classes/HH/Vector/)
 
 
 
@@ -21,11 +21,11 @@ public function skip(
 
 
 
-The returned [` Vector `](/docs/apis/Classes/HH/Vector/) will always be a subset (but not necessarily a
-proper subset) of the current [` Vector `](/docs/apis/Classes/HH/Vector/). If `` $n `` is greater than or equal to
-the length of the current [` Vector `](/docs/apis/Classes/HH/Vector/), the returned [` Vector `](/docs/apis/Classes/HH/Vector/) will contain no
-elements. If `` $n `` is negative, the returned [` Vector `](/docs/apis/Classes/HH/Vector/) will contain all
-elements of the current [` Vector `](/docs/apis/Classes/HH/Vector/).
+The returned [` Vector `](/apis/Classes/HH/Vector/) will always be a subset (but not necessarily a
+proper subset) of the current [` Vector `](/apis/Classes/HH/Vector/). If `` $n `` is greater than or equal to
+the length of the current [` Vector `](/apis/Classes/HH/Vector/), the returned [` Vector `](/apis/Classes/HH/Vector/) will contain no
+elements. If `` $n `` is negative, the returned [` Vector `](/apis/Classes/HH/Vector/) will contain all
+elements of the current [` Vector `](/apis/Classes/HH/Vector/).
 
 
 
@@ -41,7 +41,7 @@ elements of the current [` Vector `](/docs/apis/Classes/HH/Vector/).
 
 
 + ` int $n ` - The last element to be skipped; the `` $n+1 `` element will be the
-  first one in the returned [` Vector `](/docs/apis/Classes/HH/Vector/).
+  first one in the returned [` Vector `](/apis/Classes/HH/Vector/).
 
 
 
@@ -51,7 +51,7 @@ elements of the current [` Vector `](/docs/apis/Classes/HH/Vector/).
 
 
 
-* [` Vector<Tv> `](/docs/apis/Classes/HH/Vector/) - A [` Vector `](/docs/apis/Classes/HH/Vector/) that is a subset of the current [` Vector `](/docs/apis/Classes/HH/Vector/) containing
+* [` Vector<Tv> `](/apis/Classes/HH/Vector/) - A [` Vector `](/apis/Classes/HH/Vector/) that is a subset of the current [` Vector `](/apis/Classes/HH/Vector/) containing
   values after the specified `` $n ``-th element.
 
 

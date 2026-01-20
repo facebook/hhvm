@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns an [` Iterable `](/docs/apis/Interfaces/HH/Iterable/) containing the values of the current [` Iterable `](/docs/apis/Interfaces/HH/Iterable/) that
+Returns an [` Iterable `](/apis/Interfaces/HH/Iterable/) containing the values of the current [` Iterable `](/apis/Interfaces/HH/Iterable/) that
 meet a supplied condition
 
 
@@ -22,7 +22,7 @@ public function filter(
 
 
 Only values that meet a certain criteria are affected by a call to
-[` filter() `](/docs/apis/Interfaces/HH/Iterable/filter/), while all values are affected by a call to [` map() `](/docs/apis/Interfaces/HH/Iterable/map/).
+[` filter() `](/apis/Interfaces/HH/Iterable/filter/), while all values are affected by a call to [` map() `](/apis/Interfaces/HH/Iterable/map/).
 
 
 
@@ -32,7 +32,7 @@ Only values that meet a certain criteria are affected by a call to
 
 
 
-+ [Examples](</docs/hack/arrays-and-collections/introduction>)
++ [Examples](</hack/arrays-and-collections/introduction>)
 
 
 
@@ -56,6 +56,6 @@ Only values that meet a certain criteria are affected by a call to
 
 
 
-- [` Iterable<Tv> `](/docs/apis/Interfaces/HH/Iterable/) - an [` Iterable `](/docs/apis/Interfaces/HH/Iterable/) containing the values after a user-specified
+- [` Iterable<Tv> `](/apis/Interfaces/HH/Iterable/) - an [` Iterable `](/apis/Interfaces/HH/Iterable/) containing the values after a user-specified
   condition is applied.
 <!-- HHAPIDOC -->

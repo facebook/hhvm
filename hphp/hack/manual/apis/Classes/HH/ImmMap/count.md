@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Provides the number of elements in the current [` ImmMap `](/docs/apis/Classes/HH/ImmMap/)
+Provides the number of elements in the current [` ImmMap `](/apis/Classes/HH/ImmMap/)
 
 
 
@@ -23,7 +23,7 @@ public function count(): int;
 
 
 
-+ ` int ` - The number of elements in current [` ImmMap `](/docs/apis/Classes/HH/ImmMap/).
++ ` int ` - The number of elements in current [` ImmMap `](/apis/Classes/HH/ImmMap/).
 
 
 
@@ -33,5 +33,5 @@ public function count(): int;
 
 
 
-See [`Map::count`](/docs/apis/Classes/HH/Map/count/#examples) for usage examples.
+See [`Map::count`](/apis/Classes/HH/Map/count/#examples) for usage examples.
 <!-- HHAPIDOC -->

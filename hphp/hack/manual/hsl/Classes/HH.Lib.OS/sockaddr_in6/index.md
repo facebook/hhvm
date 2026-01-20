@@ -39,15 +39,15 @@ final class sockaddr_in6 extends sockaddr {...}
 
 
 
-+ [` ->__construct(int $port, int $flowInfo, in6_addr $address, int $scopeID) `](/docs/hsl/Classes/HH.Lib.OS/sockaddr_in6/__construct/)\
++ [` ->__construct(int $port, int $flowInfo, in6_addr $address, int $scopeID) `](/hsl/Classes/HH.Lib.OS/sockaddr_in6/__construct/)\
   Construct an instance
-+ [` ->__debugInfo(): darray<string, mixed> `](/docs/hsl/Classes/HH.Lib.OS/sockaddr_in6/__debugInfo/)
-+ [` ->getAddress(): in6_addr `](/docs/hsl/Classes/HH.Lib.OS/sockaddr_in6/getAddress/)
-+ [` ->getFamily(): AddressFamily `](/docs/hsl/Classes/HH.Lib.OS/sockaddr_in6/getFamily/)
-+ [` ->getFlowInfo(): int `](/docs/hsl/Classes/HH.Lib.OS/sockaddr_in6/getFlowInfo/)\
++ [` ->__debugInfo(): darray<string, mixed> `](/hsl/Classes/HH.Lib.OS/sockaddr_in6/__debugInfo/)
++ [` ->getAddress(): in6_addr `](/hsl/Classes/HH.Lib.OS/sockaddr_in6/getAddress/)
++ [` ->getFamily(): AddressFamily `](/hsl/Classes/HH.Lib.OS/sockaddr_in6/getFamily/)
++ [` ->getFlowInfo(): int `](/hsl/Classes/HH.Lib.OS/sockaddr_in6/getFlowInfo/)\
   Get the flow ID
-+ [` ->getPort(): int `](/docs/hsl/Classes/HH.Lib.OS/sockaddr_in6/getPort/)\
++ [` ->getPort(): int `](/hsl/Classes/HH.Lib.OS/sockaddr_in6/getPort/)\
   Get the port, in host byte order
-+ [` ->getScopeID(): int `](/docs/hsl/Classes/HH.Lib.OS/sockaddr_in6/getScopeID/)\
++ [` ->getScopeID(): int `](/hsl/Classes/HH.Lib.OS/sockaddr_in6/getScopeID/)\
   Get the scope ID
 <!-- HHAPIDOC -->

@@ -20,7 +20,7 @@ public function toString__FOR_DEBUGGING_ONLY(
 
 
 
-+ [` AsyncMysqlConnection `](/docs/apis/Classes/AsyncMysqlConnection/)`` $conn ``
++ [` AsyncMysqlConnection `](/apis/Classes/AsyncMysqlConnection/)`` $conn ``
 
 
 

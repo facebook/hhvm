@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns an iterator that points to beginning of the current [` ImmMap `](/docs/apis/Classes/HH/ImmMap/)
+Returns an iterator that points to beginning of the current [` ImmMap `](/apis/Classes/HH/ImmMap/)
 
 
 
@@ -23,8 +23,8 @@ public function getIterator(): KeyedIterator<Tk, Tv>;
 
 
 
-+ [` KeyedIterator<Tk, `](/docs/apis/Interfaces/HH/KeyedIterator/)`` Tv> `` - A [` KeyedIterator `](/docs/apis/Interfaces/HH/KeyedIterator/) that allows you to traverse the current
-  [` ImmMap `](/docs/apis/Classes/HH/ImmMap/).
++ [` KeyedIterator<Tk, `](/apis/Interfaces/HH/KeyedIterator/)`` Tv> `` - A [` KeyedIterator `](/apis/Interfaces/HH/KeyedIterator/) that allows you to traverse the current
+  [` ImmMap `](/apis/Classes/HH/ImmMap/).
 
 
 
@@ -34,5 +34,5 @@ public function getIterator(): KeyedIterator<Tk, Tv>;
 
 
 
-See [` Map::getIterator `](/docs/apis/Classes/HH/Map/getIterator/#examples) for usage examples.
+See [` Map::getIterator `](/apis/Classes/HH/Map/getIterator/#examples) for usage examples.
 <!-- HHAPIDOC -->

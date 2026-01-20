@@ -10,7 +10,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Represents the result of successful [` Awaitable `](/docs/apis/Classes/HH/Awaitable/) operation
+Represents the result of successful [` Awaitable `](/apis/Classes/HH/Awaitable/) operation
 
 
 
@@ -34,17 +34,17 @@ final class WrappedResult implements ResultOrExceptionWrapper<T> {...}
 
 
 
-+ [` ->__construct(T $result) `](/docs/apis/Classes/HH.Asio/WrappedResult/__construct/)\
++ [` ->__construct(T $result) `](/apis/Classes/HH.Asio/WrappedResult/__construct/)\
   Instantiate a `` WrappedResult ``
-+ [` ->getException(): \Exception `](/docs/apis/Classes/HH.Asio/WrappedResult/getException/)\
++ [` ->getException(): \Exception `](/apis/Classes/HH.Asio/WrappedResult/getException/)\
   Since this is a successful result wrapper, this always returns an
-  [` InvariantException `](/docs/apis/Classes/HH/InvariantException/) saying that there was no exception thrown from
-  the [` Awaitable `](/docs/apis/Classes/HH/Awaitable/) operation
-+ [` ->getResult(): T `](/docs/apis/Classes/HH.Asio/WrappedResult/getResult/)\
+  [` InvariantException `](/apis/Classes/HH/InvariantException/) saying that there was no exception thrown from
+  the [` Awaitable `](/apis/Classes/HH/Awaitable/) operation
++ [` ->getResult(): T `](/apis/Classes/HH.Asio/WrappedResult/getResult/)\
   Since this is a successful result wrapper, this always returns the actual
-  result of the [` Awaitable `](/docs/apis/Classes/HH/Awaitable/) operation
-+ [` ->isFailed(): bool `](/docs/apis/Classes/HH.Asio/WrappedResult/isFailed/)\
+  result of the [` Awaitable `](/apis/Classes/HH/Awaitable/) operation
++ [` ->isFailed(): bool `](/apis/Classes/HH.Asio/WrappedResult/isFailed/)\
   Since this is a successful result wrapper, this always returns `` false ``
-+ [` ->isSucceeded(): bool `](/docs/apis/Classes/HH.Asio/WrappedResult/isSucceeded/)\
++ [` ->isSucceeded(): bool `](/apis/Classes/HH.Asio/WrappedResult/isSucceeded/)\
   Since this is a successful result wrapper, this always returns `` true ``
 <!-- HHAPIDOC -->

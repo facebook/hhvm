@@ -1,6 +1,6 @@
 # Darray Varray Runtime Options
 
-As of [HHVM 4.103](https://hhvm.com/blog/2021/03/31/hhvm-4.103.html), `darray` / `varray` are aliased to `dict` / `vec` respectively. Use [Hack arrays](/docs/hack/arrays-and-collections/vec-keyset-and-dict).
+As of [HHVM 4.103](https://hhvm.com/blog/2021/03/31/hhvm-4.103.html), `darray` / `varray` are aliased to `dict` / `vec` respectively. Use [Hack arrays](/hack/arrays-and-collections/vec-keyset-and-dict).
 
 :::warning Warning
 These runtime options are a migrational feature. This means that they come and go when new hhvm versions are released. Before relying on them, it is recommended to run the given example code. If this does not raise a "Hack Arr Compat Notice" this option is not available in your version of HHVM.
@@ -8,7 +8,7 @@ These runtime options are a migrational feature. This means that they come and g
 
 If you notice that an option doesn't apply anymore and you are running a very modern version of HHVM, please open an issue or pull request against this repository. We'll mark the EOL date of that given runtime option in the documentation. We thank you in advance.
 
-The [runtime options](/docs/hack/arrays-and-collections/introduction) were briefly introduced in the article on [arrays](/docs/hack/arrays-and-collections/introduction). This article builds upon the information given there.
+The [runtime options](/hack/arrays-and-collections/introduction) were briefly introduced in the article on [arrays](/hack/arrays-and-collections/introduction). This article builds upon the information given there.
 
 You can get a list of the runtime options that your current hhvm recognizes from this script.
 This relies on the settings being in your `server.ini`.

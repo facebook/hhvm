@@ -20,14 +20,14 @@ These are the options that are probably the most commonly used on a day-to-day b
 |---------|------|---------|------------
 | `hhvm.server_variables` | `array` | `$_SERVER` | Sets the contents of the `$_SERVER` variable.
 | `hhvm.enable_obj_destruct_call` | `bool` | `false` | If `false`, `__destruct()` methods will not be called on an object at the end of the request. This can be a performance benefit if your system and application can handle the memory requirements. Deallocation can occur all at one time. If `true`, then HHVM will run all `__destruct()` methods in the usual way.
-| `hhvm.hack.lang.look_for_typechecker` | `bool` | `true` | When `true`, HHVM will only process Hack `<?hh` files if the Hack typechecker server is available and running. You normally turn this off in production and it will be turned off automatically in [repo authoritative mode](/docs/hhvm/advanced-usage/repo-authoritative).
-| hhvm.jit | `bool` | `true` | Enables the [JIT](https://en.wikipedia.org/wiki/Just-in-time_compilation) [compiler](http://hhvm.com/blog/2027/faster-and-cheaper-the-evolution-of-the-hhvm-jit). This is turned on by default for all supported distributions. Times when you might want to turn this off is for a [short running script](/docs/hhvm/faq#why-is-my-code-slow-at-startup) that may not make use of the JIT.
+| `hhvm.hack.lang.look_for_typechecker` | `bool` | `true` | When `true`, HHVM will only process Hack `<?hh` files if the Hack typechecker server is available and running. You normally turn this off in production and it will be turned off automatically in [repo authoritative mode](/hhvm/advanced-usage/repo-authoritative).
+| hhvm.jit | `bool` | `true` | Enables the [JIT](https://en.wikipedia.org/wiki/Just-in-time_compilation) [compiler](http://hhvm.com/blog/2027/faster-and-cheaper-the-evolution-of-the-hhvm-jit). This is turned on by default for all supported distributions. Times when you might want to turn this off is for a [short running script](/hhvm/faq#why-is-my-code-slow-at-startup) that may not make use of the JIT.
 | `hhvm.jit_enable_rename_function` | `bool` | `false` | If `false`, `fb_rename_function()` will throw a fatal error. And HHVM knowing that functions cannot be renamed can increase performance.
-| `hhvm.server.thread_count` | `int` | 2x the number of CPU cores | This specifies the number of worker threads used to serve web traffic in [server mode](/docs/hhvm/basic-usage/server). The number to set here is really quite experimental. If you use [`async`](/docs/hack/asynchronous-operations/introduction), then this number can be the default. Otherwise, you might want a higher number.
-| `hhvm.server.source_root` | `string` | working directory of HHVM process | For [server mode](/docs/hhvm/basic-usage/server), this will hold the path to the root of the directory of the code being served up. This setting is *useless* in [repo-authoritative mode](/docs/hhvm/advanced-usage/repo-authoritative).
+| `hhvm.server.thread_count` | `int` | 2x the number of CPU cores | This specifies the number of worker threads used to serve web traffic in [server mode](/hhvm/basic-usage/server). The number to set here is really quite experimental. If you use [`async`](/hack/asynchronous-operations/introduction), then this number can be the default. Otherwise, you might want a higher number.
+| `hhvm.server.source_root` | `string` | working directory of HHVM process | For [server mode](/hhvm/basic-usage/server), this will hold the path to the root of the directory of the code being served up. This setting is *useless* in [repo-authoritative mode](/hhvm/advanced-usage/repo-authoritative).
 | `hhvm.force_hh` | `bool` | `false` | If `true`, all code is treated as Hack code, even if it starts with `<?php`.  This setting affects `hhvm.enable_xhp` by forcing it to be `true` as well. This setting affects `hhvm.hack.lang.ints_overflows_to_ints` and `hhvm.log.always_log_unhandled_exceptions` by being the default value for them when they is not explicitly set. This setting affects `hhvm.server.allow_duplicate_cookies` by being the opposite value for a default when it is not explicitly set.
 | `hhvm.log.file` | `string` | standard error (`stderr`) | The location of the HHVM error log file. If `hhvm.log.use_cronolog` is set, then this setting will be used as the cron output file.
-| `hhvm.repo.authoritative` | `boolean` | `false` | If `true`, you are specifying that you will be using HHVM's [repo-authoritative mode](/docs/hhvm/advanced-usage/repo-authoritative) to serve requests.
+| `hhvm.repo.authoritative` | `boolean` | `false` | If `true`, you are specifying that you will be using HHVM's [repo-authoritative mode](/hhvm/advanced-usage/repo-authoritative) to serve requests.
 | `hhvm.repo.path` | `string` | `""` | The path to the `hhvm.hhbc` file created when you compiled a repo-authoritative repo. (before HHVM 4.115: `hhvm.repo.central.path`)
 | `hhvm.server.type` | `string` | `"Proxygen"` | The type of server you want to serve up requests for the HHVM server. The default is `"proxygen"`, but you can also specify `"fastcgi"`.
 | `hhvm.server.port` | `int` | `80` | The port on which the HHVM server will listen for requests.
@@ -54,7 +54,7 @@ The vast majority of users will want to just set `hhvm.php7.all = 1` to fully en
 
 ## Server Mode
 
-These are settings that are available to you when running HHVM in [server mode](/docs/hhvm/basic-usage/server). In normal, everyday usage, you will not use many of these settings. They are described here for completeness, and in case you might ever need them.
+These are settings that are available to you when running HHVM in [server mode](/hhvm/basic-usage/server). In normal, everyday usage, you will not use many of these settings. They are described here for completeness, and in case you might ever need them.
 
 | Setting | Type | Default | Description
 |---------|------|---------|------------
@@ -71,8 +71,8 @@ These are settings that are available to you when running HHVM in [server mode](
 | `hhvm.server.always_populate_raw_post_data` | `bool` | `false` | Generally, if the content type is multipart/form-data, `$HTTP_RAW_POST_DATA` should not always be available. If this is enabled, then that data will always be available.
 | `hhvm.server.always_use_relative_path` | `bool` | `false` | If enabled, files will be looked up and invoked via a relative path. In [sandbox](#sandbox) mode, files always use a relative path.
 | `hhvm.server.backlog` | `int` | 128 | The maximum queue length for incoming connections.
-| `hhvm.server.connection_limit` | `int` | `0` | The maximum number of connections the server (e.g., [Proxygen](/docs/hhvm/basic-usage/proxygen)) can accept. The default is `0`, which is unlimited.
-| `hhvm.server.connection_timeout_seconds` | `int` | `-1` | The maximum number of seconds a connection is allowed to stand idle after its previous read or write. If `-1`, this defaults to the server default (e.g., for Proxygen](/docs/hhvm/basic-usage/proxygen) this is 50 seconds).
+| `hhvm.server.connection_limit` | `int` | `0` | The maximum number of connections the server (e.g., [Proxygen](/hhvm/basic-usage/proxygen)) can accept. The default is `0`, which is unlimited.
+| `hhvm.server.connection_timeout_seconds` | `int` | `-1` | The maximum number of seconds a connection is allowed to stand idle after its previous read or write. If `-1`, this defaults to the server default (e.g., for Proxygen](/hhvm/basic-usage/proxygen) this is 50 seconds).
 | `hhvm.server.dangling_wait` | `int` | `0` | The number of seconds to wait for a dangling server to respond. A [dangling server](https://github.com/facebook/hhvm/blob/master/hphp/doc/server.dangling_server) allows the possibility for an older version of a server to run on a different port in case a page needs to be served from that old version.
 | `hhvm.server.default_charset_name` | `string` | `''` | This is used for PHP responses in case no other charset has been set explicitly. `"UTF-8"` is an example of a possible setting.
 | `hhvm.server.default_document` | `string` | `"index.php"` | The default document that will be served if a page is not explicitly specified.
@@ -96,7 +96,7 @@ These are settings that are available to you when running HHVM in [server mode](
 | `hhvm.server.fatal_error_message` | `string` | `''` | If this string is not empty, then when you encounter a 500, the message associated with the string is shown.
 | `hhvm.server.file_cache` | `string` | `''` | An absolute path to where the static content (e.g., css, html, etc.) created during compilation should be loaded. `hhvm.server.enable_static_content_from_disk` needs to be enabled for this setting to take effect.
 | `hhvm.server.file_socket` | `string` | `''` | If this string is not empty, then a file socket is used instead of an IP address for the server.
-| `hhvm.server.fix_path_info` | `bool` | `false` | If enabled, this changes [fastcgi](/docs/hhvm/advanced-usage/fastCGI) path from `SCRIPT_FILENAME` to `PATH_TRANSLATED`.
+| `hhvm.server.fix_path_info` | `bool` | `false` | If enabled, this changes [fastcgi](/hhvm/advanced-usage/fastCGI) path from `SCRIPT_FILENAME` to `PATH_TRANSLATED`.
 | `hhvm.server.forbidden_as404` | `bool` | `false` | If the extension of a URI is in the ``hhvm.server.forbidden_file_extensions` map, and this option is enabled, then that extension cannot be used as a 404 option either.
 | `hhvm.server.forbidden_file_extensions` | `Set<string>` | *empty* | Map of filename extensions that will not be loaded by the server. You set them in the form of `hhvm.server.forbidden_file_extensions[]=".exe"`. If you are setting just one, command line `-d` is fine. Otherwise, for multiple settings, use a `.ini` file.
 | `hhvm.server.force_chunked_encoding` | `bool` | `false` | If enabled, the server will only send chunked encoding responses for uncompressed payloads.
@@ -126,27 +126,27 @@ These are settings that are available to you when running HHVM in [server mode](
 | `hhvm.server.port` | `int` | `80` | The port on which the HHVM server will listen for requests.
 | `hhvm.server.psp_cpu_timeout_seconds` | `int` | `0` | The length of CPU time a post-send processing request (PSP) is allocated. If `0`, the timer is reset to the last one. If negative, the timeout is set to that value if there is less than that value remaining. If positive, the timeout is set to that value.
 | `hhvm.server.psp_timeout_seconds` | `int` | `0` | The length of time a post-send processing request (PSP) is allocated. If `0`, the timer is reset to the last one. If negative, the timeout is set to that value if there is less than that value remaining. If positive, the timeout is set to that value.
-| `hhvm.server.request_body_read_limit` | `int` | `-1` | Only valid for a [proxygen](/docs/hhvm/basic-usage/proxygen) server, if set to something other than `-1`, a limit is set on the request buffer and new data won't be added to the buffer until that part of the request is processed.
+| `hhvm.server.request_body_read_limit` | `int` | `-1` | Only valid for a [proxygen](/hhvm/basic-usage/proxygen) server, if set to something other than `-1`, a limit is set on the request buffer and new data won't be added to the buffer until that part of the request is processed.
 | `hhvm.server.request_init_document` | `string` | `''` | The document that is loaded and executed upon the server receiving a request.
 | `hhvm.server.request_init_function` | `string` | `''` | The function that is executed upon the server receiving a request. If both `hhvm.server.request_init_function` and this is specified, the former is executed first.
 | `hhvm.server.request_memory_max_bytes` | `int` | `0` | The maximum number of bytes for a request. If not explicitly set (i.e., remains the default of `0`), this value is set to 16GB or the system's memory limit, which ever is less.
 | `hhvm.server.request_timeout_seconds` | `int` | `0` | The amount of time provided for a request to process before the server times out. If `0` (default), there is no explicit request timeout.
 | `hhvm.server.safe_file_access` | `bool` | `false` | If enabled, then when a file is accessed it ensures that the file is in an allowed directory, is not an absolute path, and is resolvable.
-| `hhvm.server.shutdown_listen_wait` | `int` | `0` | When the [proxygen](/docs/hhvm/basic-usage/proxygen) server is stopped, if this value is set to something positive, then it will continue to listen that number of seconds before actually shutting down.
+| `hhvm.server.shutdown_listen_wait` | `int` | `0` | When the [proxygen](/hhvm/basic-usage/proxygen) server is stopped, if this value is set to something positive, then it will continue to listen that number of seconds before actually shutting down.
 | `hhvm.server.ssl_certificate_dir` | `string` | `''` | The directory where your SSL certificate information is located. `hhvm.server.enable_ssl` must be enabled for this to take effect.
 | `hhvm.server.ssl_certificate_file` | `string` | `''` | The file that contains your SSL certificate. `hhvm.server.enable_ssl` must be enabled for this to take effect.
 | `hhvm.server.ssl_certificate_key_file` | `string` | `''` | The file that contains your SSL certificate key. `hhvm.server.enable_ssl` must be enabled for this to take effect.
 | `hhvm.server.ssl_port` | `int` | `443` | The port for SSL connections. `hhvm.server.enable_ssl` must be enabled for this to take effect.
 | `hhvm.server.stat_cache` | `bool` | `false` | If enabled, the server will cache calls to [stat()](https://en.wikipedia.org/wiki/Stat_(system_call)).
 | `hhvm.server.takeover_filename` | `string` | `''` | Between server instances port takeover, this is the file that is used.
-| `hhvm.server.thread_count` | `int` | 2x the number of CPU cores | This specifies the number of worker threads used to serve web traffic in [server mode](/docs/hhvm/basic-usage/server). The number to set here is really quite experimental. If you use [`async`](/docs/hack/asynchronous-operations/introduction), then this number can be the default. Otherwise, you might want a higher number.
+| `hhvm.server.thread_count` | `int` | 2x the number of CPU cores | This specifies the number of worker threads used to serve web traffic in [server mode](/hhvm/basic-usage/server). The number to set here is really quite experimental. If you use [`async`](/hack/asynchronous-operations/introduction), then this number can be the default. Otherwise, you might want a higher number.
 | `hhvm.server.thread_drop_cache_timeout_seconds` | `int` | `0` | The amount of time for a server thread to drop its cache.
 | `hhvm.server.thread_drop_stack` | `bool` | `false` | If we have timed out via `hhvm.server.thread_drop_cache_timeout_seconds`, if this is enabled, then we also flush the thread stack itself.
 | `hhvm.server.thread_job_lifo_switch_threshold` | `int` | `INT_MAX` | An option where the request processing order can flip between FIFO or LIFO based on the length of the queue. If the job queue is configured to be in FIFO mode, and the current queue length exceeds lifoSwitchThreshold, then the workers will begin work on requests in LIFO order until the queue size is below the threshold in which case we resume in FIFO order.
 | `hhvm.server.thread_job_max_queuing_milli_seconds` | `int` | `-1` | If set to a positive number, this will be the number of milliseconds that will be waited for a job before it expires.
 | `hhvm.server.thread_round_robin` | `bool` | `false` | By default, the last thread serves next. If this setting is enabled, then serving is done round robin style.
-| `hhvm.server.tls_client_cipher_spec` | `string` | `''` | If not empty, then the [SSL ciphers](https://www.openssl.org/docs/manmaster/ssl/SSL_CTX_set_cipher_list.html) are set with the control string provided.
-| `hhvm.server.tls_disable_tls1_2` | `bool` | `false` | If enabled, then the [TLSv1.2 protocol](https://www.openssl.org/docs/manmaster/ssl/SSL_CTX_set_options.html) is disabled.
+| `hhvm.server.tls_client_cipher_spec` | `string` | `''` | If not empty, then the [SSL ciphers](https://www.openssl.org/manmaster/ssl/SSL_CTX_set_cipher_list.html) are set with the control string provided.
+| `hhvm.server.tls_disable_tls1_2` | `bool` | `false` | If enabled, then the [TLSv1.2 protocol](https://www.openssl.org/manmaster/ssl/SSL_CTX_set_options.html) is disabled.
 | `hhvm.server.type` | `string` | `"proxygen"` | The type of server you want to serve up requests for the HHVM server. The default is `"proxygen"`, but you can also specify `"fastcgi"`.
 | `hhvm.server.unserialization_whitelist_check` | `bool` | `false` | If enabled, only classes in the whitelist passed as the second argument to the `unserialize()` method will be allowed to be unserialized.
 | `hhvm.server.unserialization_whitelist_check_warning_only` | `bool` | `true` | If `hhvm.server.unserialization_whitelist_check` is enabled, then if a class is attempted to be unserialized that is not in the whitelist, and this is enabled, only a warning will be displayed instead of erroring.
@@ -393,7 +393,7 @@ These settings enable various features in the runtime, including Hack-specific f
 | `hhvm.enable_short_tags` | `bool` | `false` | If enabled, this allows the `<?` tag.
 | `hhvm.enable_xhp` | `bool` | `false` | If `true`, this will enable XHP support in PHP files. (XHP is always enabled in Hack files.) If `hhvm.force_hh` is set to `true`, then this setting is automatically `true`.
 | `hhvm.enable_zend_compat` | `bool` | `false` | If `true`, this enable the support layer for Zend PHP extensions that we have directly [migrated to HHVM](https://github.com/facebook/hhvm/tree/master/hphp/runtime/ext_zend_compat) (e.g. FTP).
-| `hhvm.authoritative_mode` | `bool` | `false` | If enabled, HHVM disallows constructs that are unavailable in [Repo Authoritative](/docs/hhvm/advanced-usage/repo-authoritative) mode even when you are not in Repo Authoritative mode (i.e., when `hhvm.repo.authoritative` is `false`).
+| `hhvm.authoritative_mode` | `bool` | `false` | If enabled, HHVM disallows constructs that are unavailable in [Repo Authoritative](/hhvm/advanced-usage/repo-authoritative) mode even when you are not in Repo Authoritative mode (i.e., when `hhvm.repo.authoritative` is `false`).
 
 ## Logging
 
@@ -463,7 +463,7 @@ UPGRADEABLE_ERROR = WARNING | USER_WARNING | NOTICE | USER_NOTICE
 
 ## Admin Server
 
-The [admin server](/docs/hhvm/advanced-usage/admin-server) allows the administrator of the HHVM server to query and control the HHVM server process.
+The [admin server](/hhvm/advanced-usage/admin-server) allows the administrator of the HHVM server to query and control the HHVM server process.
 
 | Setting | Type | Default | Description
 |---------|------|---------|------------
@@ -473,7 +473,7 @@ The [admin server](/docs/hhvm/advanced-usage/admin-server) allows the administra
 
 ## CLI Server
 
-The [CLI server](/docs/hhvm/advanced-usage/CLI-server) allows you to run command line scripts on a running HHVM server.  This means the translation cache can persist between runs of your scripts.
+The [CLI server](/hhvm/advanced-usage/CLI-server) allows you to run command line scripts on a running HHVM server.  This means the translation cache can persist between runs of your scripts.
 
 | Setting | Type | Default | Description
 |---------|------|---------|------------
@@ -525,7 +525,7 @@ Here are a few **important** points:
 - The sandbox pattern assumes that you have valid URLs that can be associated with that pattern. You would need to have those URLs bound in something like `/etc/hosts` (e.g., `127.0.0.1 user-another_site.localhost.com`).
 - If you do not specify a sandbox name in the URL, it assumes the default sandbox. e.g., if you type or `curl` `user.localhost.com`, that will assume your default sandbox.
 - If you enable `hhvm.sandbox.from_common_root`, make sure you have running code available from that root, or that root prepended by the value of `hhvm.sandbox.directories_root`, if you have that set as well.
-- If you are using the HHVM builtin webserver [proxygen](/docs/hhvm/basic-usage/proxygen), as long as you are running the server from a location where there is access to your sandbox (e.g., the root of a sandbox directory), all of your sandboxes URLs should be available to you for testing.
+- If you are using the HHVM builtin webserver [proxygen](/hhvm/basic-usage/proxygen), as long as you are running the server from a location where there is access to your sandbox (e.g., the root of a sandbox directory), all of your sandboxes URLs should be available to you for testing.
 
 Below is a general configuration setup for a sandbox that you can use as a template.
 
@@ -571,9 +571,9 @@ another_site.accesslog = /home/user/sites/another-site/logs/access_log
 
 ## Debugger
 
-A sandbox is commonly used in conjunction with [debugging](#debugger) to debug HHVM in [server mode](/docs/hhvm/basic-usage/server). When you connect the debugger to a server mode process, you will be given the option of a sandbox on which to attach the debugger. The first option you will always see (and attach to by default) is the dummy sandbox, which has no document root. It is primarily used for real-time evaluation of code from the debugger prompt.
+A sandbox is commonly used in conjunction with [debugging](#debugger) to debug HHVM in [server mode](/hhvm/basic-usage/server). When you connect the debugger to a server mode process, you will be given the option of a sandbox on which to attach the debugger. The first option you will always see (and attach to by default) is the dummy sandbox, which has no document root. It is primarily used for real-time evaluation of code from the debugger prompt.
 
-These options are used to allow you to use the `hphpd` debugger remotely via a sandbox. HHVM must be running in [server mode](/docs/hhvm/basic-usage/server), as there needs to be a server process on which to attach.
+These options are used to allow you to use the `hphpd` debugger remotely via a sandbox. HHVM must be running in [server mode](/hhvm/basic-usage/server), as there needs to be a server process on which to attach.
 
 These are the common `.ini` file options to set to enable HHVM to start a debugger in server mode.
 
@@ -679,7 +679,7 @@ The [hacker's guide](https://github.com/facebook/hhvm/blob/master/hphp/doc/hacke
 
 | Setting | Type | Default | Description
 |---------|------|---------|------------
-| `hhvm.jit` | `bool` | `true` | Enables the JIT compiler. This is turned on by default for all supported distributions. Times when you might want to turn this off is for a [short running script](/docs/hhvm/faq#why-is-my-code-slow-at-startup) that may not make use of the JIT.
+| `hhvm.jit` | `bool` | `true` | Enables the JIT compiler. This is turned on by default for all supported distributions. Times when you might want to turn this off is for a [short running script](/hhvm/faq#why-is-my-code-slow-at-startup) that may not make use of the JIT.
 | `hhvm.jit_always_interp_one` | `bool` | `false` |
 | `hhvm.jit_disabled_by_hphpd` | `bool` | `false` | If enabled, the JIT is disabled in the debugger.
 | `hhvm.jit_enable_rename_function` | `bool` | `false` | If `false`, `fb_rename_function()` will throw a fatal error. And HHVM knowing that functions cannot be renamed can increase performance.
@@ -714,7 +714,7 @@ The translation cache stores the JIT'd code. It's split into several sections de
 | `hhvm.jit_a_size` | `int` | `62914560` (60 MB) | Size in bytes of main translation cache.
 | `hhvm.jit_a_cold_size` | `int` | `25165824` (24 MB) | Size of cold code cache. Code that is unlikely to be executed is deemed cold. (Recommended: 0.5x `hhvm.jit_a_size`).
 | `hhvm.jit_a_frozen_size` | `int` | `41943040` (40 MB) | Size of extremely cold code cache. Code that is almost never executed, or executed once and then freed up, is deemed frozen. (Recommended: 1x `hhvm.jit_a_size`).
-| `hhvm.jit_a_hot_size` | `int` | `0` | Size of hot code cache. (Enabled only in [RepoAuthoritative mode](/docs/hhvm/advanced-usage/repo-authoritative) when `hhvm.repo.authoritative` is `true`).
+| `hhvm.jit_a_hot_size` | `int` | `0` | Size of hot code cache. (Enabled only in [RepoAuthoritative mode](/hhvm/advanced-usage/repo-authoritative) when `hhvm.repo.authoritative` is `true`).
 | `hhvm.jit_a_prof_size` | `int` | `67108864` (64 MB) | Size of profiling code cache. (Recommended: 1x `hhvm.jit_a_size`).
 | `hhvm.jit_a_max_usage` | `int` | `62914560` (60 MB) | Maximum amount of code to generate. (Recommended: 1x `hhvm.jit_a_size`).
 | `hhvm.jit_global_data_size` | `int` | `15728640` (15 MB) | Size of the global data cache.
@@ -761,7 +761,7 @@ These are custom HHVM settings to the [Alternative PHP Cache (APC)](http://php.n
 
 ## Repo Authoritative
 
-When using HHVM's [Repo-Authoritative](/docs/hhvm/advanced-usage/repo-authoritative) mode, these are the settings that help configure its use.
+When using HHVM's [Repo-Authoritative](/hhvm/advanced-usage/repo-authoritative) mode, these are the settings that help configure its use.
 
 | Setting | Type | Default | Description
 |---------|------|---------|------------
@@ -771,7 +771,7 @@ When using HHVM's [Repo-Authoritative](/docs/hhvm/advanced-usage/repo-authoritat
 | `hhvm.repo.debug_info` | `bool` | `true` | If enabled, the full source locations will be stored in the repo; otherwise, only line numbers will be stored.
 | `hhvm.repo.journal` | `string` | `delete` | If `delete`, then delete the on-disk SQLite journal upon each successful transaction commit. If `memory`, then store the SQLite journal in memory. `delete` is the safer mode to use.
 | `hhvm.repo.local.mode` | `string` | `r-` | `rw` to use the local repo for reading and writing (if file permissions allow). `r-` to use the local repo for reading (if it exists and is readable). `--`` to completely ignore the local repo, even if it exists.
-| `hhvm.repo.local.path` | `string` | `''` | `hhvm.repo.loca.path`or the environment variable `HHVM_REPO_LOCAL_PATH` (the former takes precedence) can be used to specify where the local repo is. If unspecified, then the local repo is `path/to/cli.php.hhbc` in [cli](/docs/hhvm/basic-usage/command-line) mode or `<cwd>/hhvm.hhbc` in [server](/docs/hhvm/basic-usage/server) mode.
+| `hhvm.repo.local.path` | `string` | `''` | `hhvm.repo.loca.path`or the environment variable `HHVM_REPO_LOCAL_PATH` (the former takes precedence) can be used to specify where the local repo is. If unspecified, then the local repo is `path/to/cli.php.hhbc` in [cli](/hhvm/basic-usage/command-line) mode or `<cwd>/hhvm.hhbc` in [server](/hhvm/basic-usage/server) mode.
 | `hhvm.repo.mode` | `string` | `readonly` | `local` to write eval units to the local repo if it is writeable; otherwise write to the central repo. `central` to write eval units to the central repo. `readonly` to not write eval units to a repo, but still search for them in repos.
 | `hhvm.repo.preload` | `bool` | `false` | If enabled, preload all units from the repo in parallel during startup.
 | `hhvm.disable_some_repo_auth_notices` | `bool` | `true` | Make the repo authoritative notices you receive less verbose.

@@ -20,7 +20,7 @@ public function readUntilxAsync(
 
 
 
-This is similar to [` readUntilAsync() `](/docs/hsl/Classes/HH.Lib.IO/BufferedReader/readUntilAsync/), however it raises EPIPE instead
+This is similar to [` readUntilAsync() `](/hsl/Classes/HH.Lib.IO/BufferedReader/readUntilAsync/), however it raises EPIPE instead
 of returning null.
 
 
@@ -41,5 +41,5 @@ of returning null.
 
 
 
-* [` Awaitable<string> `](/docs/apis/Classes/HH/Awaitable/)
+* [` Awaitable<string> `](/apis/Classes/HH/Awaitable/)
 <!-- HHAPIDOC -->

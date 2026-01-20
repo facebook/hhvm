@@ -27,12 +27,12 @@ class DOMNamedNodeMap implements IteratorAggregate<?DOMNode>, KeyedTraversable<s
 
 
 
-+ [` ->__construct(): void `](/docs/apis/Classes/DOMNamedNodeMap/__construct/)
-+ [` ->getIterator(): DOMNodeIterator `](/docs/apis/Classes/DOMNamedNodeMap/getIterator/)
-+ [` ->getNamedItem(string $name): Tnode `](/docs/apis/Classes/DOMNamedNodeMap/getNamedItem/)\
++ [` ->__construct(): void `](/apis/Classes/DOMNamedNodeMap/__construct/)
++ [` ->getIterator(): DOMNodeIterator `](/apis/Classes/DOMNamedNodeMap/getIterator/)
++ [` ->getNamedItem(string $name): Tnode `](/apis/Classes/DOMNamedNodeMap/getNamedItem/)\
   Retrieves a node specified by its nodeName
-+ [` ->getNamedItemNS(string $namespaceuri, string $localname): Tnode `](/docs/apis/Classes/DOMNamedNodeMap/getNamedItemNS/)\
++ [` ->getNamedItemNS(string $namespaceuri, string $localname): Tnode `](/apis/Classes/DOMNamedNodeMap/getNamedItemNS/)\
   Retrieves a node specified by localName and namespaceURI
-+ [` ->item(int $index): Tnode `](/docs/apis/Classes/DOMNamedNodeMap/item/)\
++ [` ->item(int $index): Tnode `](/apis/Classes/DOMNamedNodeMap/item/)\
   Retrieves a node specified by index within the DOMNamedNodeMap object
 <!-- HHAPIDOC -->

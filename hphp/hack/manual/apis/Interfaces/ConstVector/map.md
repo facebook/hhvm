@@ -6,8 +6,8 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a [` ConstVector `](/docs/apis/Interfaces/ConstVector/) containing the values after an operation has been
-applied to each value in the current [` ConstVector `](/docs/apis/Interfaces/ConstVector/)
+Returns a [` ConstVector `](/apis/Interfaces/ConstVector/) containing the values after an operation has been
+applied to each value in the current [` ConstVector `](/apis/Interfaces/ConstVector/)
 
 
 
@@ -21,8 +21,8 @@ public function map<Tu>(
 
 
 
-Every value in the current [` ConstVector `](/docs/apis/Interfaces/ConstVector/) is affected by a call to [` map() `](/docs/apis/Interfaces/ConstVector/map/),
-unlike [` filter() `](/docs/apis/Interfaces/ConstVector/filter/) where only values that meet a certain criteria are
+Every value in the current [` ConstVector `](/apis/Interfaces/ConstVector/) is affected by a call to [` map() `](/apis/Interfaces/ConstVector/map/),
+unlike [` filter() `](/apis/Interfaces/ConstVector/filter/) where only values that meet a certain criteria are
 affected.
 
 
@@ -33,7 +33,7 @@ affected.
 
 
 
-+ [Examples](</docs/hack/arrays-and-collections/introduction>)
++ [Examples](</hack/arrays-and-collections/introduction>)
 
 
 
@@ -47,7 +47,7 @@ affected.
 
 
 * ` (function(Tv): Tu) $fn ` - The callback containing the operation to apply to the
-  [` ConstVector `](/docs/apis/Interfaces/ConstVector/) values.
+  [` ConstVector `](/apis/Interfaces/ConstVector/) values.
 
 
 
@@ -57,6 +57,6 @@ affected.
 
 
 
-- [` ConstVector<Tu> `](/docs/apis/Interfaces/ConstVector/) - a [` ConstVector `](/docs/apis/Interfaces/ConstVector/) containing the values after a user-specified
+- [` ConstVector<Tu> `](/apis/Interfaces/ConstVector/) - a [` ConstVector `](/apis/Interfaces/ConstVector/) containing the values after a user-specified
   operation is applied.
 <!-- HHAPIDOC -->

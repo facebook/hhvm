@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a [` Set `](/docs/apis/Classes/HH/Set/) containing all the values from the specified `` array ``(s)
+Returns a [` Set `](/apis/Classes/HH/Set/) containing all the values from the specified `` array ``(s)
 
 
 
@@ -25,7 +25,7 @@ public static function fromArrays(
 
 
 
-+ ` ...$argv ` - The `` array ``s to convert to a [` Set `](/docs/apis/Classes/HH/Set/).
++ ` ...$argv ` - The `` array ``s to convert to a [` Set `](/apis/Classes/HH/Set/).
 
 
 
@@ -35,7 +35,7 @@ public static function fromArrays(
 
 
 
-* [` Set<Tv> `](/docs/apis/Classes/HH/Set/) - A [` Set `](/docs/apis/Classes/HH/Set/) with the values from the passed `` array ``(s).
+* [` Set<Tv> `](/apis/Classes/HH/Set/) - A [` Set `](/apis/Classes/HH/Set/) with the values from the passed `` array ``(s).
 
 
 
@@ -45,7 +45,7 @@ public static function fromArrays(
 
 
 
-This example shows that duplicate values in the input arrays only appear once in the final [` Set `](/docs/apis/Classes/HH/Set/):
+This example shows that duplicate values in the input arrays only appear once in the final [` Set `](/apis/Classes/HH/Set/):
 
 
 

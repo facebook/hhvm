@@ -27,8 +27,8 @@ each column.
 
 
 
-+ [Introduction](</docs/hack/asynchronous-operations/introduction>)
-+ [Extensions](</docs/hack/asynchronous-operations/extensions>)
++ [Introduction](</hack/asynchronous-operations/introduction>)
++ [Extensions](</hack/asynchronous-operations/extensions>)
 
 
 
@@ -53,20 +53,20 @@ final class AsyncMysqlRow implements MysqlRow {...}
 
 
 
-* [` ->at(mixed $field): mixed `](/docs/apis/Classes/AsyncMysqlRow/at/)\
+* [` ->at(mixed $field): mixed `](/apis/Classes/AsyncMysqlRow/at/)\
   Get field (column) value indexed by the `` field ``
-* [` ->count(): int `](/docs/apis/Classes/AsyncMysqlRow/count/)\
+* [` ->count(): int `](/apis/Classes/AsyncMysqlRow/count/)\
   Get the number of fields (columns) in the current row
-* [` ->fieldType(mixed $field): int `](/docs/apis/Classes/AsyncMysqlRow/fieldType/)\
+* [` ->fieldType(mixed $field): int `](/apis/Classes/AsyncMysqlRow/fieldType/)\
   Returns the type of the field (column)
-* [` ->getFieldAsDouble(mixed $field): float `](/docs/apis/Classes/AsyncMysqlRow/getFieldAsDouble/)\
+* [` ->getFieldAsDouble(mixed $field): float `](/apis/Classes/AsyncMysqlRow/getFieldAsDouble/)\
   Get a certain field (column) value as a `` double ``
-* [` ->getFieldAsInt(mixed $field): int `](/docs/apis/Classes/AsyncMysqlRow/getFieldAsInt/)\
+* [` ->getFieldAsInt(mixed $field): int `](/apis/Classes/AsyncMysqlRow/getFieldAsInt/)\
   Get a certain field (column) value as an `` int ``
-* [` ->getFieldAsString(mixed $field): string `](/docs/apis/Classes/AsyncMysqlRow/getFieldAsString/)\
+* [` ->getFieldAsString(mixed $field): string `](/apis/Classes/AsyncMysqlRow/getFieldAsString/)\
   Get a certain field (column) value as a `` string ``
-* [` ->getIterator(): KeyedIterator<string, mixed> `](/docs/apis/Classes/AsyncMysqlRow/getIterator/)\
+* [` ->getIterator(): KeyedIterator<string, mixed> `](/apis/Classes/AsyncMysqlRow/getIterator/)\
   Get the iterator over the fields in the current row
-* [` ->isNull(mixed $field): bool `](/docs/apis/Classes/AsyncMysqlRow/isNull/)\
+* [` ->isNull(mixed $field): bool `](/apis/Classes/AsyncMysqlRow/isNull/)\
   Returns whether a field (column) value is `` null ``
 <!-- HHAPIDOC -->

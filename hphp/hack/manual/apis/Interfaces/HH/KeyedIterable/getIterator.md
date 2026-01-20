@@ -7,7 +7,7 @@ the Hack LSP instead for complete and up-to-date information.
 :::
 
 Returns an iterator that points to beginning of the current
-[` KeyedIterable `](/docs/apis/Interfaces/HH/KeyedIterable/)
+[` KeyedIterable `](/apis/Interfaces/HH/KeyedIterable/)
 
 
 
@@ -24,6 +24,6 @@ public function getIterator(): KeyedIterator<Tk, Tv>;
 
 
 
-+ [` KeyedIterator<Tk, `](/docs/apis/Interfaces/HH/KeyedIterator/)`` Tv> `` - A [` KeyedIterator `](/docs/apis/Interfaces/HH/KeyedIterator/) that allows you to traverse the current
-  [` KeyedIterable `](/docs/apis/Interfaces/HH/KeyedIterable/).
++ [` KeyedIterator<Tk, `](/apis/Interfaces/HH/KeyedIterator/)`` Tv> `` - A [` KeyedIterator `](/apis/Interfaces/HH/KeyedIterator/) that allows you to traverse the current
+  [` KeyedIterable `](/apis/Interfaces/HH/KeyedIterable/).
 <!-- HHAPIDOC -->

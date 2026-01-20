@@ -45,7 +45,7 @@ public function at(
 
 
 
-The following example shows how to use [` AsyncMysqlRow::at `](/docs/apis/Classes/AsyncMysqlRow/at/) to get a field value from the resulting row block. In this case, we get a [` Vector `](/docs/apis/Classes/HH/Vector/) of [` AsyncMysqlRowBlock `](/docs/apis/Classes/AsyncMysqlRowBlock/)s, then the first row block in that [` Vector `](/docs/apis/Classes/HH/Vector/), then the first [` AsyncMysqlRow `](/docs/apis/Classes/AsyncMysqlRow/) in that row block. Finally, we get the value of the `` age `` field in that row.
+The following example shows how to use [` AsyncMysqlRow::at `](/apis/Classes/AsyncMysqlRow/at/) to get a field value from the resulting row block. In this case, we get a [` Vector `](/apis/Classes/HH/Vector/) of [` AsyncMysqlRowBlock `](/apis/Classes/AsyncMysqlRowBlock/)s, then the first row block in that [` Vector `](/apis/Classes/HH/Vector/), then the first [` AsyncMysqlRow `](/apis/Classes/AsyncMysqlRow/) in that row block. Finally, we get the value of the `` age `` field in that row.
 
 
 

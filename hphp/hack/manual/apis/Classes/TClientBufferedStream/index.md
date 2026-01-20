@@ -27,7 +27,7 @@ final class TClientBufferedStream {...}
 
 
 
-+ [` ->__construct(): void `](/docs/apis/Classes/TClientBufferedStream/__construct/)
-+ [` ->gen<TStreamResponse>((function(?string, ?Exception): TStreamResponse) $streamDecode): HH\AsyncGenerator<null, TStreamResponse, void> `](/docs/apis/Classes/TClientBufferedStream/gen/)
-+ [` ->genNext(): Awaitable<(?vec<string>, ?string)> `](/docs/apis/Classes/TClientBufferedStream/genNext/)
++ [` ->__construct(): void `](/apis/Classes/TClientBufferedStream/__construct/)
++ [` ->gen<TStreamResponse>((function(?string, ?Exception): TStreamResponse) $streamDecode): HH\AsyncGenerator<null, TStreamResponse, void> `](/apis/Classes/TClientBufferedStream/gen/)
++ [` ->genNext(): Awaitable<(?vec<string>, ?string)> `](/apis/Classes/TClientBufferedStream/genNext/)
 <!-- HHAPIDOC -->

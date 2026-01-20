@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns the first "key" in the current [` MutableSet `](/docs/apis/Interfaces/MutableSet/)
+Returns the first "key" in the current [` MutableSet `](/apis/Interfaces/MutableSet/)
 
 
 
@@ -23,7 +23,7 @@ Since sets do not have keys, it returns the first value.
 
 
 
-This method is interchangeable with [` firstValue() `](/docs/apis/Interfaces/MutableSet/firstValue/).
+This method is interchangeable with [` firstValue() `](/apis/Interfaces/MutableSet/firstValue/).
 
 
 
@@ -33,6 +33,6 @@ This method is interchangeable with [` firstValue() `](/docs/apis/Interfaces/Mut
 
 
 
-+ ` ?arraykey ` - The first value in the current [` MutableSet `](/docs/apis/Interfaces/MutableSet/), or `` null `` if the
-  [` MutableSet `](/docs/apis/Interfaces/MutableSet/) is empty.
++ ` ?arraykey ` - The first value in the current [` MutableSet `](/apis/Interfaces/MutableSet/), or `` null `` if the
+  [` MutableSet `](/apis/Interfaces/MutableSet/) is empty.
 <!-- HHAPIDOC -->

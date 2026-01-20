@@ -40,7 +40,7 @@ For numeric elements, see ` Math\min() `.
 
 
 
-+ [` Traversable<T> `](/docs/apis/Interfaces/HH/Traversable/)`` $traversable ``
++ [` Traversable<T> `](/apis/Interfaces/HH/Traversable/)`` $traversable ``
 + ` (function(T): num) $num_func `
 
 

@@ -48,7 +48,7 @@ See ` slice() ` for a byte-based operation.
 
 
 
-+ [String](</docs/hack/built-in-types/string>)
++ [String](</hack/built-in-types/string>)
 
 
 

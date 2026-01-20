@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Checks if the current [` Map `](/docs/apis/Classes/HH/Map/) is empty
+Checks if the current [` Map `](/apis/Classes/HH/Map/) is empty
 
 
 
@@ -23,7 +23,7 @@ public function isEmpty(): bool;
 
 
 
-+ ` bool ` - `` true `` if the current [` Map `](/docs/apis/Classes/HH/Map/) is empty; `` false `` otherwise.
++ ` bool ` - `` true `` if the current [` Map `](/apis/Classes/HH/Map/) is empty; `` false `` otherwise.
 
 
 

@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns the underlying [` AsyncMysqlErrorResult `](/docs/apis/Classes/AsyncMysqlErrorResult/) associated with the current
+Returns the underlying [` AsyncMysqlErrorResult `](/apis/Classes/AsyncMysqlErrorResult/) associated with the current
 exception
 
 
@@ -24,7 +24,7 @@ public function getResult(): AsyncMysqlErrorResult;
 
 
 
-+ [` AsyncMysqlErrorResult `](/docs/apis/Classes/AsyncMysqlErrorResult/) - The [` AsyncMysqlErrorResult `](/docs/apis/Classes/AsyncMysqlErrorResult/) that underlies the current exception.
++ [` AsyncMysqlErrorResult `](/apis/Classes/AsyncMysqlErrorResult/) - The [` AsyncMysqlErrorResult `](/apis/Classes/AsyncMysqlErrorResult/) that underlies the current exception.
 
 
 
@@ -34,7 +34,7 @@ public function getResult(): AsyncMysqlErrorResult;
 
 
 
-The following example shows how to use [` AsyncMysqlException::getResult `](/docs/apis/Classes/AsyncMysqlException/getResult/) to get the [` AsyncMysqlErrorResult `](/docs/apis/Classes/AsyncMysqlErrorResult/) object associated with this exception. Particularly, we call `` elapsedMicros() `` on that object.
+The following example shows how to use [` AsyncMysqlException::getResult `](/apis/Classes/AsyncMysqlException/getResult/) to get the [` AsyncMysqlErrorResult `](/apis/Classes/AsyncMysqlErrorResult/) object associated with this exception. Particularly, we call `` elapsedMicros() `` on that object.
 
 
 

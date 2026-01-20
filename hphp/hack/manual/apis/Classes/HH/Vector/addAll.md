@@ -6,8 +6,8 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-For every element in the provided [` Traversable `](/docs/apis/Interfaces/HH/Traversable/), append a value into this
-[` Vector `](/docs/apis/Classes/HH/Vector/), assigning the next available integer key for each
+For every element in the provided [` Traversable `](/apis/Interfaces/HH/Traversable/), append a value into this
+[` Vector `](/apis/Classes/HH/Vector/), assigning the next available integer key for each
 
 
 
@@ -21,13 +21,13 @@ public function addAll(
 
 
 
-If you want to overwrite the values for existing keys, use [` setAll() `](/docs/apis/Classes/HH/Vector/setAll/).
+If you want to overwrite the values for existing keys, use [` setAll() `](/apis/Classes/HH/Vector/setAll/).
 
 
 
 
-Future changes made to the current [` Vector `](/docs/apis/Classes/HH/Vector/) ARE reflected in the
-returned [` Vector `](/docs/apis/Classes/HH/Vector/), and vice-versa.
+Future changes made to the current [` Vector `](/apis/Classes/HH/Vector/) ARE reflected in the
+returned [` Vector `](/apis/Classes/HH/Vector/), and vice-versa.
 
 
 
@@ -37,7 +37,7 @@ returned [` Vector `](/docs/apis/Classes/HH/Vector/), and vice-versa.
 
 
 
-+ ` ? `[` Traversable<Tv> `](/docs/apis/Interfaces/HH/Traversable/)`` $iterable ``
++ ` ? `[` Traversable<Tv> `](/apis/Interfaces/HH/Traversable/)`` $iterable ``
 
 
 
@@ -47,7 +47,7 @@ returned [` Vector `](/docs/apis/Classes/HH/Vector/), and vice-versa.
 
 
 
-* [` Vector<Tv> `](/docs/apis/Classes/HH/Vector/) - Returns itself.
+* [` Vector<Tv> `](/apis/Classes/HH/Vector/) - Returns itself.
 
 
 
@@ -57,7 +57,7 @@ returned [` Vector `](/docs/apis/Classes/HH/Vector/), and vice-versa.
 
 
 
-The following example adds a collection of values to the [` Vector `](/docs/apis/Classes/HH/Vector/) `` $v `` and also adds multiple collections of values to ``` $v ``` through chaining. Since [` Vector::addAll() `](/docs/apis/Classes/HH/Vector/addAll/) returns a [shallow copy](<https://en.wikipedia.org/wiki/Object_copying#Shallow_copy>) of ` $v ` itself, you can chain a bunch of [` addAll() `](/docs/apis/Classes/HH/Vector/addAll/) calls together, and that will add all those collection of values to `` $v ``.
+The following example adds a collection of values to the [` Vector `](/apis/Classes/HH/Vector/) `` $v `` and also adds multiple collections of values to ``` $v ``` through chaining. Since [` Vector::addAll() `](/apis/Classes/HH/Vector/addAll/) returns a [shallow copy](<https://en.wikipedia.org/wiki/Object_copying#Shallow_copy>) of ` $v ` itself, you can chain a bunch of [` addAll() `](/apis/Classes/HH/Vector/addAll/) calls together, and that will add all those collection of values to `` $v ``.
 
 
 

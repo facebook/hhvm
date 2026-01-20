@@ -28,5 +28,5 @@ public function toVArray(): varray<Tv>;
 
 
 
-See [` Set::toVArray `](/docs/apis/Classes/HH/Set/toVArray/#examples) for usage examples.
+See [` Set::toVArray `](/apis/Classes/HH/Set/toVArray/#examples) for usage examples.
 <!-- HHAPIDOC -->

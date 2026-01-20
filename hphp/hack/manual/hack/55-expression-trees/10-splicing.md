@@ -51,4 +51,4 @@ final class MyDsl {
 }
 ```
 
-For more information, see: [Defining Visitors: Spliceable Types](/docs/hack/expression-trees/defining-dsls#spliceable-types).
+For more information, see: [Defining Visitors: Spliceable Types](/hack/expression-trees/defining-dsls#spliceable-types).

@@ -37,39 +37,39 @@ class ReflectionFunction extends ReflectionFunctionAbstract implements Reflector
 
 
 
-+ [` ::export($name, $return = false) `](/docs/apis/Classes/ReflectionFunction/export/)\
++ [` ::export($name, $return = false) `](/apis/Classes/ReflectionFunction/export/)\
   ( excerpt from http://php.net/manual/en/reflectionfunction.export.php )
 
-+ [` ->__construct($name_or_closure) `](/docs/apis/Classes/ReflectionFunction/__construct/)\
++ [` ->__construct($name_or_closure) `](/apis/Classes/ReflectionFunction/__construct/)\
   ( excerpt from http://php.net/manual/en/reflectionfunction.construct.php
   )
 
-+ [` ->__toString(): string `](/docs/apis/Classes/ReflectionFunction/__toString/)\
++ [` ->__toString(): string `](/apis/Classes/ReflectionFunction/__toString/)\
   ( excerpt from http://php.net/manual/en/reflectionfunction.tostring.php )
 
-+ [` ->getAttributeClass<T as HH\FunctionAttribute>(classname<T> $c): ?T `](/docs/apis/Classes/ReflectionFunction/getAttributeClass/)
++ [` ->getAttributeClass<T as HH\FunctionAttribute>(classname<T> $c): ?T `](/apis/Classes/ReflectionFunction/getAttributeClass/)
 
-+ [` ->getClosure() `](/docs/apis/Classes/ReflectionFunction/getClosure/)
++ [` ->getClosure() `](/apis/Classes/ReflectionFunction/getClosure/)
 
-+ [` ->getClosureScopeClass(): ?ReflectionClass `](/docs/apis/Classes/ReflectionFunction/getClosureScopeClass/)
++ [` ->getClosureScopeClass(): ?ReflectionClass `](/apis/Classes/ReflectionFunction/getClosureScopeClass/)
 
-+ [` ->getClosureThis(): mixed `](/docs/apis/Classes/ReflectionFunction/getClosureThis/)\
++ [` ->getClosureThis(): mixed `](/apis/Classes/ReflectionFunction/getClosureThis/)\
   Returns this pointer bound to closure
 
-+ [` ->getName(): string `](/docs/apis/Classes/ReflectionFunction/getName/)\
++ [` ->getName(): string `](/apis/Classes/ReflectionFunction/getName/)\
   (excerpt from
   http://php.net/manual/en/reflectionfunctionabstract.getname.php )
 
-+ [` ->invoke(...$args) `](/docs/apis/Classes/ReflectionFunction/invoke/)\
++ [` ->invoke(...$args) `](/apis/Classes/ReflectionFunction/invoke/)\
   ( excerpt from http://php.net/manual/en/reflectionfunction.invoke.php )
 
-+ [` ->invokeArgs(varray $args) `](/docs/apis/Classes/ReflectionFunction/invokeArgs/)\
++ [` ->invokeArgs(varray $args) `](/apis/Classes/ReflectionFunction/invokeArgs/)\
   ( excerpt from
   http://php.net/manual/en/reflectionfunction.invokeargs.php )
 
-+ [` ->isClosure(): bool `](/docs/apis/Classes/ReflectionFunction/isClosure/)
++ [` ->isClosure(): bool `](/apis/Classes/ReflectionFunction/isClosure/)
 
-+ [` ->isDisabled(): bool `](/docs/apis/Classes/ReflectionFunction/isDisabled/)\
++ [` ->isDisabled(): bool `](/apis/Classes/ReflectionFunction/isDisabled/)\
   ( excerpt from
   http://php.net/manual/en/reflectionfunction.isdisabled.php )
 

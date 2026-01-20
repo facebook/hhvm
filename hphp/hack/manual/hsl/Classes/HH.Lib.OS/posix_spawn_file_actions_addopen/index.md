@@ -29,7 +29,7 @@ final class posix_spawn_file_actions_addopen extends \HH\Lib\_Private\_OS\PosixS
 
 
 
-+ [` ->__construct(int $filedes, string $path, int $oflag, int $mode) `](/docs/hsl/Classes/HH.Lib.OS/posix_spawn_file_actions_addopen/__construct/)
++ [` ->__construct(int $filedes, string $path, int $oflag, int $mode) `](/hsl/Classes/HH.Lib.OS/posix_spawn_file_actions_addopen/__construct/)
 
 
 
@@ -42,5 +42,5 @@ final class posix_spawn_file_actions_addopen extends \HH\Lib\_Private\_OS\PosixS
 
 
 
-* [` ->forkAndExecveDecorator(\HH\Lib\_Private\_OS\TForkAndExecve $fork_and_execve): \HH\Lib\_Private\_OS\TForkAndExecve `](/docs/hsl/Classes/HH.Lib.OS/posix_spawn_file_actions_addopen/forkAndExecveDecorator/)
+* [` ->forkAndExecveDecorator(\HH\Lib\_Private\_OS\TForkAndExecve $fork_and_execve): \HH\Lib\_Private\_OS\TForkAndExecve `](/hsl/Classes/HH.Lib.OS/posix_spawn_file_actions_addopen/forkAndExecveDecorator/)
 <!-- HHAPIDOC -->

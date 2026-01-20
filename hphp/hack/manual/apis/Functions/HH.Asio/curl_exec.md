@@ -7,7 +7,7 @@ the Hack LSP instead for complete and up-to-date information.
 :::
 
 A convenience wrapper around
-[` curl_multi_await `](/docs/apis/Functions/curl_multi_await/)
+[` curl_multi_await `](/apis/Functions/curl_multi_await/)
 
 
 
@@ -41,8 +41,8 @@ curl_errno can't be used as this function is a wrapper to curl_multi_await.
 
 
 
-+ [Introduction](</docs/hack/asynchronous-operations/introduction>)
-+ [Extensions](</docs/hack/asynchronous-operations/extensions>)
++ [Introduction](</hack/asynchronous-operations/introduction>)
++ [Extensions](</hack/asynchronous-operations/extensions>)
 
 
 
@@ -65,7 +65,7 @@ curl_errno can't be used as this function is a wrapper to curl_multi_await.
 
 
 
-- [` Awaitable<string> `](/docs/apis/Classes/HH/Awaitable/) - - An [` Awaitable `](/docs/apis/Classes/HH/Awaitable/) representing the `` string `` result
+- [` Awaitable<string> `](/apis/Classes/HH/Awaitable/) - - An [` Awaitable `](/apis/Classes/HH/Awaitable/) representing the `` string `` result
   of the cURL request.
 
 

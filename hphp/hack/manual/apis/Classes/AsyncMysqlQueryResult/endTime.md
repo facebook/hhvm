@@ -33,7 +33,7 @@ public function endTime(): float;
 
 
 
-Every successful query has a result. And one of the methods on an [` AsyncMysqlQueryResult `](/docs/apis/Classes/AsyncMysqlQueryResult/) is [` endTime() `](/docs/apis/Classes/AsyncMysqlQueryResult/endTime/), which tells you the time when we finally got our result.
+Every successful query has a result. And one of the methods on an [` AsyncMysqlQueryResult `](/apis/Classes/AsyncMysqlQueryResult/) is [` endTime() `](/apis/Classes/AsyncMysqlQueryResult/endTime/), which tells you the time when we finally got our result.
 
 
 

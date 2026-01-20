@@ -17,7 +17,7 @@ while ($i <= 10) {
 ```
 
 The execution of a `while` statement is impacted by a subordinate
-[`break` or `continue`](/docs/hack/statements/break-and-continue).
+[`break` or `continue`](/hack/statements/break-and-continue).
 
 The controlling expression is often a combination of relational, equality, and logical expressions.  For example:
 

@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Stores a value into the current [` Map `](/docs/apis/Classes/HH/Map/) with the specified key, overwriting
+Stores a value into the current [` Map `](/apis/Classes/HH/Map/) with the specified key, overwriting
 the previous value associated with the key
 
 
@@ -22,21 +22,21 @@ public function set(
 
 
 
-This method is equivalent to [` Map::add() `](/docs/apis/Classes/HH/Map/add/). If the key to set does not exist,
-it is created. This is inconsistent with, for example, [` Vector::set() `](/docs/apis/Classes/HH/Vector/set/)
+This method is equivalent to [` Map::add() `](/apis/Classes/HH/Map/add/). If the key to set does not exist,
+it is created. This is inconsistent with, for example, [` Vector::set() `](/apis/Classes/HH/Vector/set/)
 where if the key is not found, an exception is thrown.
 
 
 
 
-` $map->set($k,$v) ` is equivalent to `` $map[$k] = $v `` (except that [` set() `](/docs/apis/Classes/HH/Map/set/)
-returns the current [` Map `](/docs/apis/Classes/HH/Map/)).
+` $map->set($k,$v) ` is equivalent to `` $map[$k] = $v `` (except that [` set() `](/apis/Classes/HH/Map/set/)
+returns the current [` Map `](/apis/Classes/HH/Map/)).
 
 
 
 
-Future changes made to the current [` Map `](/docs/apis/Classes/HH/Map/) ARE reflected in the returned
-[` Map `](/docs/apis/Classes/HH/Map/), and vice-versa.
+Future changes made to the current [` Map `](/apis/Classes/HH/Map/) ARE reflected in the returned
+[` Map `](/apis/Classes/HH/Map/), and vice-versa.
 
 
 
@@ -57,7 +57,7 @@ Future changes made to the current [` Map `](/docs/apis/Classes/HH/Map/) ARE ref
 
 
 
-* [` Map<Tk, `](/docs/apis/Classes/HH/Map/)`` Tv> `` - Returns itself.
+* [` Map<Tk, `](/apis/Classes/HH/Map/)`` Tv> `` - Returns itself.
 
 
 
@@ -67,7 +67,7 @@ Future changes made to the current [` Map `](/docs/apis/Classes/HH/Map/) ARE ref
 
 
 
-Since [` Map::set() `](/docs/apis/Classes/HH/Map/set/) returns a [shallow copy](<https://en.wikipedia.org/wiki/Object_copying#Shallow_copy>) of ` $m ` itself, you can chain a bunch of [` set() `](/docs/apis/Classes/HH/Map/set/) calls together.
+Since [` Map::set() `](/apis/Classes/HH/Map/set/) returns a [shallow copy](<https://en.wikipedia.org/wiki/Object_copying#Shallow_copy>) of ` $m ` itself, you can chain a bunch of [` set() `](/apis/Classes/HH/Map/set/) calls together.
 
 
 

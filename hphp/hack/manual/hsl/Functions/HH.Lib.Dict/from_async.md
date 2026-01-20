@@ -39,7 +39,7 @@ The IO operations for each Awaitable will happen in parallel.
 
 
 
-+ [` KeyedTraversable<Tk, `](/docs/apis/Interfaces/HH/KeyedTraversable/)`` Awaitable<Tv>> $awaitables ``
++ [` KeyedTraversable<Tk, `](/apis/Interfaces/HH/KeyedTraversable/)`` Awaitable<Tv>> $awaitables ``
 
 
 
@@ -49,5 +49,5 @@ The IO operations for each Awaitable will happen in parallel.
 
 
 
-* [` Awaitable<dict<Tk, `](/docs/apis/Classes/HH/Awaitable/)`` Tv>> ``
+* [` Awaitable<dict<Tk, `](/apis/Classes/HH/Awaitable/)`` Tv>> ``
 <!-- HHAPIDOC -->

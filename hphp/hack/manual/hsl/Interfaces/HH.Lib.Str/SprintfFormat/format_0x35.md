@@ -18,5 +18,5 @@ public function format_0x35(): HH\Lib\Str\SprintfFormat;
 
 
 
-+ [` HH\Lib\Str\SprintfFormat `](</docs/hsl/Interfaces/HH.Lib.Str/SprintfFormat/>)
++ [` HH\Lib\Str\SprintfFormat `](</hsl/Interfaces/HH.Lib.Str/SprintfFormat/>)
 <!-- HHAPIDOC -->

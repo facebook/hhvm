@@ -27,10 +27,10 @@ class SimpleXMLElementIterator implements Iterator<SimpleXMLElement> {...}
 
 
 
-+ [` ->__construct(): void `](/docs/apis/Classes/SimpleXMLElementIterator/__construct/)
-+ [` ->current(): SimpleXMLElement `](/docs/apis/Classes/SimpleXMLElementIterator/current/)
-+ [` ->key(): ?string `](/docs/apis/Classes/SimpleXMLElementIterator/key/)
-+ [` ->next(): void `](/docs/apis/Classes/SimpleXMLElementIterator/next/)
-+ [` ->rewind(): void `](/docs/apis/Classes/SimpleXMLElementIterator/rewind/)
-+ [` ->valid(): bool `](/docs/apis/Classes/SimpleXMLElementIterator/valid/)
++ [` ->__construct(): void `](/apis/Classes/SimpleXMLElementIterator/__construct/)
++ [` ->current(): SimpleXMLElement `](/apis/Classes/SimpleXMLElementIterator/current/)
++ [` ->key(): ?string `](/apis/Classes/SimpleXMLElementIterator/key/)
++ [` ->next(): void `](/apis/Classes/SimpleXMLElementIterator/next/)
++ [` ->rewind(): void `](/apis/Classes/SimpleXMLElementIterator/rewind/)
++ [` ->valid(): bool `](/apis/Classes/SimpleXMLElementIterator/valid/)
 <!-- HHAPIDOC -->

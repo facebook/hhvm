@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a [` Vector `](/docs/apis/Classes/HH/Vector/) containing the values of the current [` Map `](/docs/apis/Classes/HH/Map/)
+Returns a [` Vector `](/apis/Classes/HH/Vector/) containing the values of the current [` Map `](/apis/Classes/HH/Map/)
 
 
 
@@ -18,7 +18,7 @@ public function values(): Vector<Tv>;
 
 
 
-This method is interchangeable with [` toVector() `](/docs/apis/Classes/HH/Map/toVector/).
+This method is interchangeable with [` toVector() `](/apis/Classes/HH/Map/toVector/).
 
 
 
@@ -28,7 +28,7 @@ This method is interchangeable with [` toVector() `](/docs/apis/Classes/HH/Map/t
 
 
 
-+ [` Vector<Tv> `](/docs/apis/Classes/HH/Vector/) - a [` Vector `](/docs/apis/Classes/HH/Vector/) containing the values of the current [` Map `](/docs/apis/Classes/HH/Map/).
++ [` Vector<Tv> `](/apis/Classes/HH/Vector/) - a [` Vector `](/apis/Classes/HH/Vector/) containing the values of the current [` Map `](/apis/Classes/HH/Map/).
 
 
 
@@ -38,7 +38,7 @@ This method is interchangeable with [` toVector() `](/docs/apis/Classes/HH/Map/t
 
 
 
-This example shows how [` values() `](/docs/apis/Classes/HH/Map/values/) is identical to [` toVector() `](/docs/apis/Classes/HH/Map/toVector/). It returns a new [` Vector `](/docs/apis/Classes/HH/Vector/) of `` $m ``'s values, so mutating this new [` Vector `](/docs/apis/Classes/HH/Vector/) doesn't affect the original [` Map `](/docs/apis/Classes/HH/Map/).
+This example shows how [` values() `](/apis/Classes/HH/Map/values/) is identical to [` toVector() `](/apis/Classes/HH/Map/toVector/). It returns a new [` Vector `](/apis/Classes/HH/Vector/) of `` $m ``'s values, so mutating this new [` Vector `](/apis/Classes/HH/Vector/) doesn't affect the original [` Map `](/apis/Classes/HH/Map/).
 
 
 

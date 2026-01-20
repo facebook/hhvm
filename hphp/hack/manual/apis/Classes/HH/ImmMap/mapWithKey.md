@@ -6,8 +6,8 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns an [` ImmMap `](/docs/apis/Classes/HH/ImmMap/) after an operation has been applied to each key and
-value in current [` ImmMap `](/docs/apis/Classes/HH/ImmMap/)
+Returns an [` ImmMap `](/apis/Classes/HH/ImmMap/) after an operation has been applied to each key and
+value in current [` ImmMap `](/apis/Classes/HH/ImmMap/)
 
 
 
@@ -21,15 +21,15 @@ public function mapWithKey<Tu>(
 
 
 
-Every key and value in the current [` ImmMap `](/docs/apis/Classes/HH/ImmMap/) is affected by a call to
-[` mapWithKey() `](/docs/apis/Classes/HH/ImmMap/mapWithKey/), unlike [` filterWithKey() `](/docs/apis/Classes/HH/ImmMap/filterWithKey/) where only values that meet a
+Every key and value in the current [` ImmMap `](/apis/Classes/HH/ImmMap/) is affected by a call to
+[` mapWithKey() `](/apis/Classes/HH/ImmMap/mapWithKey/), unlike [` filterWithKey() `](/apis/Classes/HH/ImmMap/filterWithKey/) where only values that meet a
 certain criteria are affected.
 
 
 
 
-The keys will remain unchanged from the current [` ImmMap `](/docs/apis/Classes/HH/ImmMap/) to the returned
-[` ImmMap `](/docs/apis/Classes/HH/ImmMap/). The keys are only used to help in the operation.
+The keys will remain unchanged from the current [` ImmMap `](/apis/Classes/HH/ImmMap/) to the returned
+[` ImmMap `](/apis/Classes/HH/ImmMap/). The keys are only used to help in the operation.
 
 
 
@@ -49,8 +49,8 @@ The keys will remain unchanged from the current [` ImmMap `](/docs/apis/Classes/
 
 
 
-* [` ImmMap<Tk, `](/docs/apis/Classes/HH/ImmMap/)`` Tu> `` - an [` ImmMap `](/docs/apis/Classes/HH/ImmMap/) containing the values after a user-specified
-  operation on the current [` ImmMap `](/docs/apis/Classes/HH/ImmMap/)'s keys and values is applied.
+* [` ImmMap<Tk, `](/apis/Classes/HH/ImmMap/)`` Tu> `` - an [` ImmMap `](/apis/Classes/HH/ImmMap/) containing the values after a user-specified
+  operation on the current [` ImmMap `](/apis/Classes/HH/ImmMap/)'s keys and values is applied.
 
 
 
@@ -60,5 +60,5 @@ The keys will remain unchanged from the current [` ImmMap `](/docs/apis/Classes/
 
 
 
-See [` Map::mapWithKey `](/docs/apis/Classes/HH/Map/mapWithKey/#examples) for usage examples.
+See [` Map::mapWithKey `](/apis/Classes/HH/Map/mapWithKey/#examples) for usage examples.
 <!-- HHAPIDOC -->

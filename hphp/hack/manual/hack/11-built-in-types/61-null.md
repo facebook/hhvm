@@ -14,7 +14,7 @@ function number_or_default(?int $x): int {
 }
 ```
 
-See [nullable types](/docs/hack/types/nullable-types) for a discussion of `?T`
+See [nullable types](/hack/types/nullable-types) for a discussion of `?T`
 types.
 
 The `null` type is also useful when writing generics. Suppose you want

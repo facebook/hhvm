@@ -29,7 +29,7 @@ final class posix_spawn_file_actions_adddup2 extends \HH\Lib\_Private\_OS\PosixS
 
 
 
-+ [` ->__construct(FileDescriptor $filedes, int $newfiledes) `](/docs/hsl/Classes/HH.Lib.OS/posix_spawn_file_actions_adddup2/__construct/)
++ [` ->__construct(FileDescriptor $filedes, int $newfiledes) `](/hsl/Classes/HH.Lib.OS/posix_spawn_file_actions_adddup2/__construct/)
 
 
 
@@ -42,5 +42,5 @@ final class posix_spawn_file_actions_adddup2 extends \HH\Lib\_Private\_OS\PosixS
 
 
 
-* [` ->forkAndExecveDecorator(\HH\Lib\_Private\_OS\TForkAndExecve $fork_and_execve): \HH\Lib\_Private\_OS\TForkAndExecve `](/docs/hsl/Classes/HH.Lib.OS/posix_spawn_file_actions_adddup2/forkAndExecveDecorator/)
+* [` ->forkAndExecveDecorator(\HH\Lib\_Private\_OS\TForkAndExecve $fork_and_execve): \HH\Lib\_Private\_OS\TForkAndExecve `](/hsl/Classes/HH.Lib.OS/posix_spawn_file_actions_adddup2/forkAndExecveDecorator/)
 <!-- HHAPIDOC -->

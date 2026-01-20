@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns an immutable set (` ImmSet `) with the values of the current [` Pair `](/docs/apis/Classes/HH/Pair/)
+Returns an immutable set (` ImmSet `) with the values of the current [` Pair `](/apis/Classes/HH/Pair/)
 
 
 
@@ -23,7 +23,7 @@ public function toImmSet(): ImmSet<arraykey, mixed>;
 
 
 
-+ [` ImmSet<arraykey, `](/docs/apis/Classes/HH/ImmSet/)`` mixed> `` - an ``` ImmSet ``` with the current values of the current [` Pair `](/docs/apis/Classes/HH/Pair/).
++ [` ImmSet<arraykey, `](/apis/Classes/HH/ImmSet/)`` mixed> `` - an ``` ImmSet ``` with the current values of the current [` Pair `](/apis/Classes/HH/Pair/).
 
 
 
@@ -33,7 +33,7 @@ public function toImmSet(): ImmSet<arraykey, mixed>;
 
 
 
-This example shows that converting a [` Pair `](/docs/apis/Classes/HH/Pair/) to an `` ImmSet `` also removes duplicate values:
+This example shows that converting a [` Pair `](/apis/Classes/HH/Pair/) to an `` ImmSet `` also removes duplicate values:
 
 
 
@@ -49,7 +49,7 @@ $imm_set = $p->toImmSet();
 
 
 
-This example shows that converting a [` Pair `](/docs/apis/Classes/HH/Pair/) to an `` ImmSet `` will throw a fatal error if the [` Pair `](/docs/apis/Classes/HH/Pair/) contains a value that's not a `` string `` or an ``` int ```:
+This example shows that converting a [` Pair `](/apis/Classes/HH/Pair/) to an `` ImmSet `` will throw a fatal error if the [` Pair `](/apis/Classes/HH/Pair/) contains a value that's not a `` string `` or an ``` int ```:
 
 
 

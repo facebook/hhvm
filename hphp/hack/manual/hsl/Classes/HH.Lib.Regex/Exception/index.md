@@ -29,5 +29,5 @@ final class Exception extends \Exception {...}
 
 
 
-+ [` ->__construct(Pattern<Match> $pattern, int $code): void `](/docs/hsl/Classes/HH.Lib.Regex/Exception/__construct/)
++ [` ->__construct(Pattern<Match> $pattern, int $code): void `](/hsl/Classes/HH.Lib.Regex/Exception/__construct/)
 <!-- HHAPIDOC -->

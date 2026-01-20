@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a [` ImmVector `](/docs/apis/Classes/HH/ImmVector/) containing the values of the current [` Pair `](/docs/apis/Classes/HH/Pair/) that
+Returns a [` ImmVector `](/apis/Classes/HH/ImmVector/) containing the values of the current [` Pair `](/apis/Classes/HH/Pair/) that
 meet a supplied condition
 
 
@@ -22,7 +22,7 @@ public function filter(
 
 
 Only values that meet a certain criteria are affected by a call to
-[` filter() `](/docs/apis/Classes/HH/Pair/filter/), while all values are affected by a call to [` map() `](/docs/apis/Classes/HH/Pair/map/).
+[` filter() `](/apis/Classes/HH/Pair/filter/), while all values are affected by a call to [` map() `](/apis/Classes/HH/Pair/map/).
 
 
 
@@ -32,7 +32,7 @@ Only values that meet a certain criteria are affected by a call to
 
 
 
-+ [Examples](</docs/hack/arrays-and-collections/introduction>)
++ [Examples](</hack/arrays-and-collections/introduction>)
 
 
 
@@ -46,7 +46,7 @@ Only values that meet a certain criteria are affected by a call to
 
 
 * ` (function(mixed): bool) $callback ` - The callback containing the condition to apply to the
-  current [` Pair `](/docs/apis/Classes/HH/Pair/) values.
+  current [` Pair `](/apis/Classes/HH/Pair/) values.
 
 
 
@@ -56,7 +56,7 @@ Only values that meet a certain criteria are affected by a call to
 
 
 
-- [` ImmVector<mixed> `](/docs/apis/Classes/HH/ImmVector/) - an [` ImmVector `](/docs/apis/Classes/HH/ImmVector/) containing the values after a user-specified
+- [` ImmVector<mixed> `](/apis/Classes/HH/ImmVector/) - an [` ImmVector `](/apis/Classes/HH/ImmVector/) containing the values after a user-specified
   condition is applied.
 
 

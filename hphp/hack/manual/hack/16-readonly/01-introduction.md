@@ -1,6 +1,6 @@
 # Introduction
 
-`readonly` is a keyword used to create immutable references to [Objects](/docs/hack/classes/introduction) and their properties.
+`readonly` is a keyword used to create immutable references to [Objects](/hack/classes/introduction) and their properties.
 
 ### How does it work?
 Expressions in Hack can be annotated with the `readonly` keyword. When an object or reference is readonly, there are two main constraints on it:
@@ -39,12 +39,12 @@ function test(readonly Bar $x) : void {
 ```
 
 ### How is `readonly` different from contexts and capabilities that control property mutation (such as `write_props`)?
-[Contexts](/docs/hack/contexts-and-capabilities/available-contexts-and-capabilities) such as `write_props` affect an entire function (and all of its callees), whereas readonly affects specific values / expressions.
+[Contexts](/hack/contexts-and-capabilities/available-contexts-and-capabilities) such as `write_props` affect an entire function (and all of its callees), whereas readonly affects specific values / expressions.
 
 
 ### Topics covered in this section
-* [Syntax](/docs/hack/readonly/syntax): Basic syntax for readonly keyword
-* [Subtyping](/docs/hack/readonly/subtyping): Rules and semantics for interacting with readonly and mutable values
-* [Explicit Readonly Keywords](/docs/hack/readonly/explicit-readonly-keywords): Positions where the readonly keyword is explicitly required
-* [Containers and Collections](/docs/hack/readonly/containers-and-collections): Interactions between collections of readonly values
-* [Advanced Features and Semantics](/docs/hack/readonly/advanced-semantics): More complex features and interactions
+* [Syntax](/hack/readonly/syntax): Basic syntax for readonly keyword
+* [Subtyping](/hack/readonly/subtyping): Rules and semantics for interacting with readonly and mutable values
+* [Explicit Readonly Keywords](/hack/readonly/explicit-readonly-keywords): Positions where the readonly keyword is explicitly required
+* [Containers and Collections](/hack/readonly/containers-and-collections): Interactions between collections of readonly values
+* [Advanced Features and Semantics](/hack/readonly/advanced-semantics): More complex features and interactions

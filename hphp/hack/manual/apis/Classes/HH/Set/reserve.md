@@ -21,7 +21,7 @@ public function reserve(
 
 
 Reserves enough memory for ` sz ` elements. If `` sz `` is less than or equal
-to the current capacity of this [` Set `](/docs/apis/Classes/HH/Set/), this method does nothing.
+to the current capacity of this [` Set `](/apis/Classes/HH/Set/), this method does nothing.
 
 
 
@@ -31,7 +31,7 @@ to the current capacity of this [` Set `](/docs/apis/Classes/HH/Set/), this meth
 
 
 
-+ ` int $sz ` - The pre-determined size you want for the current [` Set `](/docs/apis/Classes/HH/Set/).
++ ` int $sz ` - The pre-determined size you want for the current [` Set `](/apis/Classes/HH/Set/).
 
 
 
@@ -51,7 +51,7 @@ to the current capacity of this [` Set `](/docs/apis/Classes/HH/Set/), this meth
 
 
 
-This example reserves space for 1000 elements and then fills the [` Set `](/docs/apis/Classes/HH/Set/) with 1000 integers:
+This example reserves space for 1000 elements and then fills the [` Set `](/apis/Classes/HH/Set/) with 1000 integers:
 
 
 

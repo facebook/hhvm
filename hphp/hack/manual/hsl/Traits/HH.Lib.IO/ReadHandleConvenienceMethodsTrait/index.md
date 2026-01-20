@@ -35,6 +35,6 @@ trait ReadHandleConvenienceMethodsTrait {...}
 
 
 
-+ [` ->readAllAsync(?int $max_bytes = NULL, ?int $timeout_ns = NULL): Awaitable<string> `](/docs/hsl/Traits/HH.Lib.IO/ReadHandleConvenienceMethodsTrait/readAllAsync/)
-+ [` ->readFixedSizeAsync(int $size, ?int $timeout_ns = NULL): Awaitable<string> `](/docs/hsl/Traits/HH.Lib.IO/ReadHandleConvenienceMethodsTrait/readFixedSizeAsync/)
++ [` ->readAllAsync(?int $max_bytes = NULL, ?int $timeout_ns = NULL): Awaitable<string> `](/hsl/Traits/HH.Lib.IO/ReadHandleConvenienceMethodsTrait/readAllAsync/)
++ [` ->readFixedSizeAsync(int $size, ?int $timeout_ns = NULL): Awaitable<string> `](/hsl/Traits/HH.Lib.IO/ReadHandleConvenienceMethodsTrait/readFixedSizeAsync/)
 <!-- HHAPIDOC -->

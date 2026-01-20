@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a [` ConstMap `](/docs/apis/Interfaces/ConstMap/) containing the values of the current [` ConstMap `](/docs/apis/Interfaces/ConstMap/) that
+Returns a [` ConstMap `](/apis/Interfaces/ConstMap/) containing the values of the current [` ConstMap `](/apis/Interfaces/ConstMap/) that
 meet a supplied condition applied to its keys and values
 
 
@@ -22,14 +22,14 @@ public function filterWithKey(
 
 
 Only keys and values that meet a certain criteria are affected by a call to
-[` filterWithKey() `](/docs/apis/Interfaces/ConstMap/filterWithKey/), while all values are affected by a call to
-[` mapWithKey() `](/docs/apis/Interfaces/ConstMap/mapWithKey/).
+[` filterWithKey() `](/apis/Interfaces/ConstMap/filterWithKey/), while all values are affected by a call to
+[` mapWithKey() `](/apis/Interfaces/ConstMap/mapWithKey/).
 
 
 
 
-The keys associated with the current [` ConstMap `](/docs/apis/Interfaces/ConstMap/) remain unchanged in the
-returned [` ConstMap `](/docs/apis/Interfaces/ConstMap/); the keys will be used in the filtering process only.
+The keys associated with the current [` ConstMap `](/apis/Interfaces/ConstMap/) remain unchanged in the
+returned [` ConstMap `](/apis/Interfaces/ConstMap/); the keys will be used in the filtering process only.
 
 
 
@@ -40,7 +40,7 @@ returned [` ConstMap `](/docs/apis/Interfaces/ConstMap/); the keys will be used 
 
 
 + ` (function(Tk, Tv): bool) $fn ` - The callback containing the condition to apply to the current
-  [` ConstMap `](/docs/apis/Interfaces/ConstMap/) keys and values.
+  [` ConstMap `](/apis/Interfaces/ConstMap/) keys and values.
 
 
 
@@ -50,7 +50,7 @@ returned [` ConstMap `](/docs/apis/Interfaces/ConstMap/); the keys will be used 
 
 
 
-* [` ConstMap<Tk, `](/docs/apis/Interfaces/ConstMap/)`` Tv> `` - a [` ConstMap `](/docs/apis/Interfaces/ConstMap/) containing the values after a user-specified
+* [` ConstMap<Tk, `](/apis/Interfaces/ConstMap/)`` Tv> `` - a [` ConstMap `](/apis/Interfaces/ConstMap/) containing the values after a user-specified
   condition is applied to the keys and values of the current
-  [` ConstMap `](/docs/apis/Interfaces/ConstMap/).
+  [` ConstMap `](/apis/Interfaces/ConstMap/).
 <!-- HHAPIDOC -->

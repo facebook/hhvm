@@ -6,9 +6,9 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns an [` Awaitable `](/docs/apis/Classes/HH/Awaitable/) of [` Vector `](/docs/apis/Classes/HH/Vector/) of `` ResultOrExceptionWrapper `` after a
+Returns an [` Awaitable `](/apis/Classes/HH/Awaitable/) of [` Vector `](/apis/Classes/HH/Vector/) of `` ResultOrExceptionWrapper `` after a
 mapping operation has been applied to each value in the provided
-[` Traversable `](/docs/apis/Interfaces/HH/Traversable/)
+[` Traversable `](/apis/Interfaces/HH/Traversable/)
 
 
 
@@ -25,32 +25,32 @@ function vmw<Tv, Tr>(
 
 
 
-This function is similar to ` vm() `, except the [` Vector `](/docs/apis/Classes/HH/Vector/) in the returned
-[` Awaitable `](/docs/apis/Classes/HH/Awaitable/) contains `` ResultOrExceptionWrapper ``s instead of raw values.
+This function is similar to ` vm() `, except the [` Vector `](/apis/Classes/HH/Vector/) in the returned
+[` Awaitable `](/apis/Classes/HH/Awaitable/) contains `` ResultOrExceptionWrapper ``s instead of raw values.
 
 
 
 
-This function is similar to [` Vector::map() `](/docs/apis/Classes/HH/Vector/map/), but the mapping of the values
-is done using [` Awaitable `](/docs/apis/Classes/HH/Awaitable/)s.
+This function is similar to [` Vector::map() `](/apis/Classes/HH/Vector/map/), but the mapping of the values
+is done using [` Awaitable `](/apis/Classes/HH/Awaitable/)s.
 
 
 
 
 This function is called ` vmw ` because we are returning a `` v ``ector, doing a
-``` m ```apping operation and each member of the [` Vector `](/docs/apis/Classes/HH/Vector/) is `` w ``rapped by a
+``` m ```apping operation and each member of the [` Vector `](/apis/Classes/HH/Vector/) is `` w ``rapped by a
 ``` ResultOrExceptionWrapper ```.
 
 
 
 
-` $callable ` must return an [` Awaitable `](/docs/apis/Classes/HH/Awaitable/).
+` $callable ` must return an [` Awaitable `](/apis/Classes/HH/Awaitable/).
 
 
 
 
-The ` ResultOrExceptionWrapper `s in the [` Vector `](/docs/apis/Classes/HH/Vector/) of the returned [` Awaitable `](/docs/apis/Classes/HH/Awaitable/)
-are not available until you `` await `` or ``` join ``` the returned [` Awaitable `](/docs/apis/Classes/HH/Awaitable/).
+The ` ResultOrExceptionWrapper `s in the [` Vector `](/apis/Classes/HH/Vector/) of the returned [` Awaitable `](/apis/Classes/HH/Awaitable/)
+are not available until you `` await `` or ``` join ``` the returned [` Awaitable `](/apis/Classes/HH/Awaitable/).
 
 
 
@@ -60,8 +60,8 @@ are not available until you `` await `` or ``` join ``` the returned [` Awaitabl
 
 
 
-+ [` Traversable<Tv> `](/docs/apis/Interfaces/HH/Traversable/)`` $inputs `` - The [` Traversable `](/docs/apis/Interfaces/HH/Traversable/) of values to map.
-+ ` (function(Tv): Awaitable<Tr>) $callable ` - The callable containing the [` Awaitable `](/docs/apis/Classes/HH/Awaitable/) operation to
++ [` Traversable<Tv> `](/apis/Interfaces/HH/Traversable/)`` $inputs `` - The [` Traversable `](/apis/Interfaces/HH/Traversable/) of values to map.
++ ` (function(Tv): Awaitable<Tr>) $callable ` - The callable containing the [` Awaitable `](/apis/Classes/HH/Awaitable/) operation to
   apply to `` $inputs ``.
 
 
@@ -72,7 +72,7 @@ are not available until you `` await `` or ``` join ``` the returned [` Awaitabl
 
 
 
-* [` Awaitable<Vector<ResultOrExceptionWrapper<Tr>>> `](/docs/apis/Classes/HH/Awaitable/) - An [` Awaitable `](/docs/apis/Classes/HH/Awaitable/) of [` Vector `](/docs/apis/Classes/HH/Vector/) of `` ResultOrExceptionWrapper `` after the
+* [` Awaitable<Vector<ResultOrExceptionWrapper<Tr>>> `](/apis/Classes/HH/Awaitable/) - An [` Awaitable `](/apis/Classes/HH/Awaitable/) of [` Vector `](/apis/Classes/HH/Vector/) of `` ResultOrExceptionWrapper `` after the
   mapping operation has been applied to the values in ``` $inputs ```.
 
 

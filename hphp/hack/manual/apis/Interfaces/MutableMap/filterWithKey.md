@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a [` MutableMap `](/docs/apis/Interfaces/MutableMap/) containing the values of the current [` MutableMap `](/docs/apis/Interfaces/MutableMap/)
+Returns a [` MutableMap `](/apis/Interfaces/MutableMap/) containing the values of the current [` MutableMap `](/apis/Interfaces/MutableMap/)
 that meet a supplied condition applied to its keys and values
 
 
@@ -22,14 +22,14 @@ public function filterWithKey(
 
 
 Only keys and values that meet a certain criteria are affected by a call
-to [` filterWithKey() `](/docs/apis/Interfaces/MutableMap/filterWithKey/), while all values are affected by a call to
-[` mapWithKey() `](/docs/apis/Interfaces/MutableMap/mapWithKey/).
+to [` filterWithKey() `](/apis/Interfaces/MutableMap/filterWithKey/), while all values are affected by a call to
+[` mapWithKey() `](/apis/Interfaces/MutableMap/mapWithKey/).
 
 
 
 
-The keys associated with the current [` MutableMap `](/docs/apis/Interfaces/MutableMap/) remain unchanged in the
-returned [` MutableMap `](/docs/apis/Interfaces/MutableMap/); the keys will be used in the filtering process only.
+The keys associated with the current [` MutableMap `](/apis/Interfaces/MutableMap/) remain unchanged in the
+returned [` MutableMap `](/apis/Interfaces/MutableMap/); the keys will be used in the filtering process only.
 
 
 
@@ -40,7 +40,7 @@ returned [` MutableMap `](/docs/apis/Interfaces/MutableMap/); the keys will be u
 
 
 + ` (function(Tk, Tv): bool) $fn ` - The callback containing the condition to apply to the current
-  [` MutableMap `](/docs/apis/Interfaces/MutableMap/) keys and values.
+  [` MutableMap `](/apis/Interfaces/MutableMap/) keys and values.
 
 
 
@@ -50,7 +50,7 @@ returned [` MutableMap `](/docs/apis/Interfaces/MutableMap/); the keys will be u
 
 
 
-* [` MutableMap<Tk, `](/docs/apis/Interfaces/MutableMap/)`` Tv> `` - a [` MutableMap `](/docs/apis/Interfaces/MutableMap/) containing the values after a user-specified
+* [` MutableMap<Tk, `](/apis/Interfaces/MutableMap/)`` Tv> `` - a [` MutableMap `](/apis/Interfaces/MutableMap/) containing the values after a user-specified
   condition is applied to the keys and values of the current
-  [` MutableMap `](/docs/apis/Interfaces/MutableMap/).
+  [` MutableMap `](/apis/Interfaces/MutableMap/).
 <!-- HHAPIDOC -->

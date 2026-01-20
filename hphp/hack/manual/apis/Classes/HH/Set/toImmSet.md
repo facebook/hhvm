@@ -18,7 +18,7 @@ public function toImmSet(): ImmSet<Tv>;
 
 
 
-This method is interchangeable with [` immutable() `](/docs/apis/Classes/HH/Set/immutable/).
+This method is interchangeable with [` immutable() `](/apis/Classes/HH/Set/immutable/).
 
 
 
@@ -28,7 +28,7 @@ This method is interchangeable with [` immutable() `](/docs/apis/Classes/HH/Set/
 
 
 
-+ [` ImmSet<Tv> `](/docs/apis/Classes/HH/ImmSet/) - an `` ImmSet `` that is a deep copy of the current ``` Set ```.
++ [` ImmSet<Tv> `](/apis/Classes/HH/ImmSet/) - an `` ImmSet `` that is a deep copy of the current ``` Set ```.
 
 
 

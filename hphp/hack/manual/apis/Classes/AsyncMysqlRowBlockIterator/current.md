@@ -23,7 +23,7 @@ public function current(): AsyncMysqlRow;
 
 
 
-+ [` AsyncMysqlRow `](/docs/apis/Classes/AsyncMysqlRow/) - The [` AsyncMysqlRow `](/docs/apis/Classes/AsyncMysqlRow/) associated with the current iterator
++ [` AsyncMysqlRow `](/apis/Classes/AsyncMysqlRow/) - The [` AsyncMysqlRow `](/apis/Classes/AsyncMysqlRow/) associated with the current iterator
   position.
 
 
@@ -34,7 +34,7 @@ public function current(): AsyncMysqlRow;
 
 
 
-The following example shows you how to use [` AsyncMysqlRowBlockIterator::current `](/docs/apis/Classes/AsyncMysqlRowBlockIterator/current/) to get an [` AsyncMysqlRow `](/docs/apis/Classes/AsyncMysqlRow/) from the iterator.
+The following example shows you how to use [` AsyncMysqlRowBlockIterator::current `](/apis/Classes/AsyncMysqlRowBlockIterator/current/) to get an [` AsyncMysqlRow `](/apis/Classes/AsyncMysqlRow/) from the iterator.
 
 
 

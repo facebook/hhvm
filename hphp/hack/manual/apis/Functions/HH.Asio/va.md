@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Translate a varargs of [` Awaitable `](/docs/apis/Classes/HH/Awaitable/)s into a single [` Awaitable<(...)> `](/docs/apis/Classes/HH/Awaitable/)
+Translate a varargs of [` Awaitable `](/apis/Classes/HH/Awaitable/)s into a single [` Awaitable<(...)> `](/apis/Classes/HH/Awaitable/)
 
 
 
@@ -62,5 +62,5 @@ Awaitable<(T1, T2, ..., Tn)>
 
 
 
-* [` Awaitable `](/docs/apis/Classes/HH/Awaitable/)
+* [` Awaitable `](/apis/Classes/HH/Awaitable/)
 <!-- HHAPIDOC -->

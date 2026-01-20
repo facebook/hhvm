@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns the first value in the current [` ConstSet `](/docs/apis/Interfaces/ConstSet/)
+Returns the first value in the current [` ConstSet `](/apis/Interfaces/ConstSet/)
 
 
 
@@ -23,6 +23,6 @@ public function firstValue(): ?Tv;
 
 
 
-+ ` ?Tv ` - The first value in the current [` ConstSet `](/docs/apis/Interfaces/ConstSet/), or `` null `` if the
-  [` ConstSet `](/docs/apis/Interfaces/ConstSet/) is empty.
++ ` ?Tv ` - The first value in the current [` ConstSet `](/apis/Interfaces/ConstSet/), or `` null `` if the
+  [` ConstSet `](/apis/Interfaces/ConstSet/) is empty.
 <!-- HHAPIDOC -->

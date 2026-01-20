@@ -32,5 +32,5 @@ public function setHeader(
 
 
 
-* [` RpcOptions `](/docs/apis/Classes/RpcOptions/)
+* [` RpcOptions `](/apis/Classes/RpcOptions/)
 <!-- HHAPIDOC -->

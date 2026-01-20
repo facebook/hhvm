@@ -6,8 +6,8 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a [` MutableVector `](/docs/apis/Interfaces/MutableVector/) containing the values of the current
-[` MutableVector `](/docs/apis/Interfaces/MutableVector/) that meet a supplied condition applied to its keys and
+Returns a [` MutableVector `](/apis/Interfaces/MutableVector/) containing the values of the current
+[` MutableVector `](/apis/Interfaces/MutableVector/) that meet a supplied condition applied to its keys and
 values
 
 
@@ -23,8 +23,8 @@ public function filterWithKey(
 
 
 Only keys and values that meet a certain criteria are affected by a call to
-[` filterWithKey() `](/docs/apis/Interfaces/MutableVector/filterWithKey/), while all values are affected by a call to
-[` mapWithKey() `](/docs/apis/Interfaces/MutableVector/mapWithKey/).
+[` filterWithKey() `](/apis/Interfaces/MutableVector/filterWithKey/), while all values are affected by a call to
+[` mapWithKey() `](/apis/Interfaces/MutableVector/mapWithKey/).
 
 
 
@@ -35,7 +35,7 @@ Only keys and values that meet a certain criteria are affected by a call to
 
 
 + ` (function(int, Tv): bool) $fn ` - The callback containing the condition to apply to the
-  [` MutableVector `](/docs/apis/Interfaces/MutableVector/) keys and values.
+  [` MutableVector `](/apis/Interfaces/MutableVector/) keys and values.
 
 
 
@@ -45,7 +45,7 @@ Only keys and values that meet a certain criteria are affected by a call to
 
 
 
-* [` MutableVector<Tv> `](/docs/apis/Interfaces/MutableVector/) - a [` MutableVector `](/docs/apis/Interfaces/MutableVector/) containing the values after a user-specified
+* [` MutableVector<Tv> `](/apis/Interfaces/MutableVector/) - a [` MutableVector `](/apis/Interfaces/MutableVector/) containing the values after a user-specified
   condition is applied to the keys and values of the current
-  [` MutableVector `](/docs/apis/Interfaces/MutableVector/).
+  [` MutableVector `](/apis/Interfaces/MutableVector/).
 <!-- HHAPIDOC -->

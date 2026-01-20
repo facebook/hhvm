@@ -38,7 +38,7 @@ public function flushAll(
 
 
 
-* [` Awaitable<void> `](/docs/apis/Classes/HH/Awaitable/)
+* [` Awaitable<void> `](/apis/Classes/HH/Awaitable/)
 
 
 
@@ -48,12 +48,12 @@ public function flushAll(
 
 
 
-The following example shows how to use [` MCRouter::flushAll `](/docs/apis/Classes/MCRouter/flushAll/) to basically flush out the memcached server of all keys and values.
+The following example shows how to use [` MCRouter::flushAll `](/apis/Classes/MCRouter/flushAll/) to basically flush out the memcached server of all keys and values.
 
 
 
 
-It is **imperative** to note that you must manually construct the [` MCRouter `](/docs/apis/Classes/MCRouter/) instance passing `` 'enable_flush_cmd' => true `` as one of your options; otherwise a command disabled exception will be thrown. In other words, you cannot use [` MCRouter::createSimple() `](/docs/apis/Classes/MCRouter/createSimple/) when using `` flushAll ``.
+It is **imperative** to note that you must manually construct the [` MCRouter `](/apis/Classes/MCRouter/) instance passing `` 'enable_flush_cmd' => true `` as one of your options; otherwise a command disabled exception will be thrown. In other words, you cannot use [` MCRouter::createSimple() `](/apis/Classes/MCRouter/createSimple/) when using `` flushAll ``.
 
 
 

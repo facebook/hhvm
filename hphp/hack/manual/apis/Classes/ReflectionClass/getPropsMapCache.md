@@ -30,5 +30,5 @@ private static function getPropsMapCache(
 
 
 
-* [` ImmMap<string, `](/docs/apis/Classes/HH/ImmMap/)`` mixed> ``
+* [` ImmMap<string, `](/apis/Classes/HH/ImmMap/)`` mixed> ``
 <!-- HHAPIDOC -->

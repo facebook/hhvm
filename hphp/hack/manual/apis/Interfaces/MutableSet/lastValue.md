@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns the last value in the current [` MutableSet `](/docs/apis/Interfaces/MutableSet/)
+Returns the last value in the current [` MutableSet `](/apis/Interfaces/MutableSet/)
 
 
 
@@ -23,6 +23,6 @@ public function lastValue(): ?Tv;
 
 
 
-+ ` ?Tv ` - The last value in the current [` MutableSet `](/docs/apis/Interfaces/MutableSet/), or `` null `` if the
-  current [` MutableSet `](/docs/apis/Interfaces/MutableSet/) is empty.
++ ` ?Tv ` - The last value in the current [` MutableSet `](/apis/Interfaces/MutableSet/), or `` null `` if the
+  current [` MutableSet `](/apis/Interfaces/MutableSet/) is empty.
 <!-- HHAPIDOC -->

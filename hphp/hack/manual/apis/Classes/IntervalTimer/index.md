@@ -32,10 +32,10 @@ class IntervalTimer {...}
 
 
 
-+ [` ->__construct(double $interval, float $initial, mixed $callback) `](/docs/apis/Classes/IntervalTimer/__construct/)\
++ [` ->__construct(double $interval, float $initial, mixed $callback) `](/apis/Classes/IntervalTimer/__construct/)\
   Create a new interval timer
-+ [` ->start(): void `](/docs/apis/Classes/IntervalTimer/start/)\
++ [` ->start(): void `](/apis/Classes/IntervalTimer/start/)\
   Start the timer
-+ [` ->stop(): void `](/docs/apis/Classes/IntervalTimer/stop/)\
++ [` ->stop(): void `](/apis/Classes/IntervalTimer/stop/)\
   Stop the timer
 <!-- HHAPIDOC -->

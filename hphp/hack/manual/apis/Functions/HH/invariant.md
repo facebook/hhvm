@@ -58,7 +58,7 @@ invariant(<condition>, 'sprintf format: %s %d', 'string', ...);
 
 See also:
 
-+ [` invariant ` guide](</docs/hack/types/type-refinement/>)
++ [` invariant ` guide](</hack/types/type-refinement/>)
 
 
 

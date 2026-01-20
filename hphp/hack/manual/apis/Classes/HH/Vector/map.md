@@ -6,8 +6,8 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a [` Vector `](/docs/apis/Classes/HH/Vector/) containing the results of applying an operation to each
-value in the current [` Vector `](/docs/apis/Classes/HH/Vector/)
+Returns a [` Vector `](/apis/Classes/HH/Vector/) containing the results of applying an operation to each
+value in the current [` Vector `](/apis/Classes/HH/Vector/)
 
 
 
@@ -21,9 +21,9 @@ public function map<Tu>(
 
 
 
-[` map() `](/docs/apis/Classes/HH/Vector/map/)'s result contains a value for every value in the current [` Vector `](/docs/apis/Classes/HH/Vector/);
-unlike [` filter() `](/docs/apis/Classes/HH/Vector/filter/), where only values that meet a certain criterion are
-included in the resulting [` Vector `](/docs/apis/Classes/HH/Vector/).
+[` map() `](/apis/Classes/HH/Vector/map/)'s result contains a value for every value in the current [` Vector `](/apis/Classes/HH/Vector/);
+unlike [` filter() `](/apis/Classes/HH/Vector/filter/), where only values that meet a certain criterion are
+included in the resulting [` Vector `](/apis/Classes/HH/Vector/).
 
 
 
@@ -33,7 +33,7 @@ included in the resulting [` Vector `](/docs/apis/Classes/HH/Vector/).
 
 
 
-+ [Examples](</docs/hack/arrays-and-collections/introduction>)
++ [Examples](</hack/arrays-and-collections/introduction>)
 
 
 
@@ -56,8 +56,8 @@ included in the resulting [` Vector `](/docs/apis/Classes/HH/Vector/).
 
 
 
-- [` Vector<Tu> `](/docs/apis/Classes/HH/Vector/) - A [` Vector `](/docs/apis/Classes/HH/Vector/) containing the results of applying a user-specified
-  operation to each value of the current [` Vector `](/docs/apis/Classes/HH/Vector/) in turn.
+- [` Vector<Tu> `](/apis/Classes/HH/Vector/) - A [` Vector `](/apis/Classes/HH/Vector/) containing the results of applying a user-specified
+  operation to each value of the current [` Vector `](/apis/Classes/HH/Vector/) in turn.
 
 
 
@@ -67,7 +67,7 @@ included in the resulting [` Vector `](/docs/apis/Classes/HH/Vector/).
 
 
 
-In this example the [` Vector `](/docs/apis/Classes/HH/Vector/)'s elements are mapped to the same type (`` string ``s):
+In this example the [` Vector `](/apis/Classes/HH/Vector/)'s elements are mapped to the same type (`` string ``s):
 
 
 
@@ -85,7 +85,7 @@ $shortened = $v->map($color ==> \substr($color, 0, 3));
 
 
 
-In this example the [` Vector `](/docs/apis/Classes/HH/Vector/)'s elements are mapped to a different type (`` int ``s):
+In this example the [` Vector `](/apis/Classes/HH/Vector/)'s elements are mapped to a different type (`` int ``s):
 
 
 

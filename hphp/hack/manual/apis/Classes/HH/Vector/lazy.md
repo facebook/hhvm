@@ -7,7 +7,7 @@ the Hack LSP instead for complete and up-to-date information.
 :::
 
 Returns a lazy, access-elements-only-when-needed view of the current
-[` Vector `](/docs/apis/Classes/HH/Vector/)
+[` Vector `](/apis/Classes/HH/Vector/)
 
 
 
@@ -19,9 +19,9 @@ public function lazy(): KeyedIterable<int, Tv>;
 
 
 
-Normally, memory is allocated for all of the elements of the [` Vector `](/docs/apis/Classes/HH/Vector/).
+Normally, memory is allocated for all of the elements of the [` Vector `](/apis/Classes/HH/Vector/).
 With a lazy view, memory is allocated for an element only when needed or
-used in a calculation like in [` map() `](/docs/apis/Classes/HH/Vector/map/) or [` filter() `](/docs/apis/Classes/HH/Vector/filter/).
+used in a calculation like in [` map() `](/apis/Classes/HH/Vector/map/) or [` filter() `](/apis/Classes/HH/Vector/filter/).
 
 
 
@@ -31,7 +31,7 @@ used in a calculation like in [` map() `](/docs/apis/Classes/HH/Vector/map/) or 
 
 
 
-+ [Examples](</docs/hack/arrays-and-collections/introduction>)
++ [Examples](</hack/arrays-and-collections/introduction>)
 
 
 
@@ -44,8 +44,8 @@ used in a calculation like in [` map() `](/docs/apis/Classes/HH/Vector/map/) or 
 
 
 
-* [` KeyedIterable<int, `](/docs/apis/Interfaces/HH/KeyedIterable/)`` Tv> `` - An integer-keyed [` KeyedIterable `](/docs/apis/Interfaces/HH/KeyedIterable/) representing the lazy view into
-  the current [` Vector `](/docs/apis/Classes/HH/Vector/).
+* [` KeyedIterable<int, `](/apis/Interfaces/HH/KeyedIterable/)`` Tv> `` - An integer-keyed [` KeyedIterable `](/apis/Interfaces/HH/KeyedIterable/) representing the lazy view into
+  the current [` Vector `](/apis/Classes/HH/Vector/).
 
 
 
@@ -55,7 +55,7 @@ used in a calculation like in [` map() `](/docs/apis/Classes/HH/Vector/map/) or 
 
 
 
-This example shows you how to use [` lazy() `](/docs/apis/Classes/HH/Vector/lazy/) on a rather large [` Vector `](/docs/apis/Classes/HH/Vector/) and the time for both a *strict* and *non-strict* version. Since we only need 5 of the elements in the end, the lazy view actually allows us to stop after we meet our required 5 without having to actually filter and allocate all 1000000 elements up front.
+This example shows you how to use [` lazy() `](/apis/Classes/HH/Vector/lazy/) on a rather large [` Vector `](/apis/Classes/HH/Vector/) and the time for both a *strict* and *non-strict* version. Since we only need 5 of the elements in the end, the lazy view actually allows us to stop after we meet our required 5 without having to actually filter and allocate all 1000000 elements up front.
 
 
 

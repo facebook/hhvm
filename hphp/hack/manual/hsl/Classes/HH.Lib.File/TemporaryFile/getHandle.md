@@ -18,5 +18,5 @@ public function getHandle(): HH\Lib\File\CloseableReadWriteHandle;
 
 
 
-+ [` HH\Lib\File\CloseableReadWriteHandle `](</docs/hsl/Interfaces/HH.Lib.File/CloseableReadWriteHandle/>)
++ [` HH\Lib\File\CloseableReadWriteHandle `](</hsl/Interfaces/HH.Lib.File/CloseableReadWriteHandle/>)
 <!-- HHAPIDOC -->

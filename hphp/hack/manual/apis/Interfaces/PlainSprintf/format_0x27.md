@@ -18,5 +18,5 @@ public function format_0x27(): SprintfQuote;
 
 
 
-+ [` SprintfQuote `](/docs/apis/Interfaces/SprintfQuote/)
++ [` SprintfQuote `](/apis/Interfaces/SprintfQuote/)
 <!-- HHAPIDOC -->

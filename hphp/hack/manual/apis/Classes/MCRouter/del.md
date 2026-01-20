@@ -38,7 +38,7 @@ public function del(
 
 
 
-* [` Awaitable<void> `](/docs/apis/Classes/HH/Awaitable/)
+* [` Awaitable<void> `](/apis/Classes/HH/Awaitable/)
 
 
 
@@ -48,7 +48,7 @@ public function del(
 
 
 
-The following example uses [` MCRouter::del `](/docs/apis/Classes/MCRouter/del/) to delete a key from the memcached server. Once the key is deleted, it is no longer accessible. Nor can you delete a non-existing key.
+The following example uses [` MCRouter::del `](/apis/Classes/MCRouter/del/) to delete a key from the memcached server. Once the key is deleted, it is no longer accessible. Nor can you delete a non-existing key.
 
 
 

@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Remove all the elements from the current [` Map `](/docs/apis/Classes/HH/Map/)
+Remove all the elements from the current [` Map `](/apis/Classes/HH/Map/)
 
 
 
@@ -18,8 +18,8 @@ public function clear(): Map<Tk, Tv>;
 
 
 
-Future changes made to the current [` Map `](/docs/apis/Classes/HH/Map/) ARE reflected in the returned
-[` Map `](/docs/apis/Classes/HH/Map/), and vice-versa.
+Future changes made to the current [` Map `](/apis/Classes/HH/Map/) ARE reflected in the returned
+[` Map `](/apis/Classes/HH/Map/), and vice-versa.
 
 
 
@@ -29,7 +29,7 @@ Future changes made to the current [` Map `](/docs/apis/Classes/HH/Map/) ARE ref
 
 
 
-+ [` Map<Tk, `](/docs/apis/Classes/HH/Map/)`` Tv> `` - Returns itself.
++ [` Map<Tk, `](/apis/Classes/HH/Map/)`` Tv> `` - Returns itself.
 
 
 

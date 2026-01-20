@@ -28,13 +28,13 @@ are also used for documentation.
 Single-line comments start with `//` and end with a newline.
 
 `#` is not a valid comment character, as it is used to represent an
-[Enum Class Label](/docs/hack/built-in-types/enum-class-label).
+[Enum Class Label](/hack/built-in-types/enum-class-label).
 
 A number of special comments are recognized; they are:
 
-- `// FALLTHROUGH` in [switch statements](/docs/hack/statements/switch)
+- `// FALLTHROUGH` in [switch statements](/hack/statements/switch)
 - `// strict` and `// partial` in
-  [headers](/docs/hack/source-code-fundamentals/program-structure)
+  [headers](/hack/source-code-fundamentals/program-structure)
 - `/* HH_FIXME[1234] */` or `/* HH_IGNORE_ERROR[1234] */`, which suppresses
   typechecker error reporting for error 1234.
 - `/* HH_FIXME[12001] */`, which suppresses warning for code 12001

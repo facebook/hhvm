@@ -30,5 +30,5 @@ public function setLoggingContext(
 
 
 
-* [` RpcOptions `](/docs/apis/Classes/RpcOptions/)
+* [` RpcOptions `](/apis/Classes/RpcOptions/)
 <!-- HHAPIDOC -->

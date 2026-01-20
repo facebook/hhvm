@@ -24,12 +24,12 @@ interface SeekableWriteFDHandle implements WriteFDHandle, SeekableFDHandle, Seek
 
 
 
-### Public Methods ([` HH\Lib\IO\FDHandle `](</docs/hsl/Interfaces/HH.Lib.IO/FDHandle/>))
+### Public Methods ([` HH\Lib\IO\FDHandle `](</hsl/Interfaces/HH.Lib.IO/FDHandle/>))
 
 
 
 
-+ [` ->getFileDescriptor(): \HH\Lib\OS\FileDescriptor `](</docs/hsl/Interfaces/HH.Lib.IO/FDHandle/getFileDescriptor/>)
++ [` ->getFileDescriptor(): \HH\Lib\OS\FileDescriptor `](</hsl/Interfaces/HH.Lib.IO/FDHandle/getFileDescriptor/>)
 
 
 
@@ -37,14 +37,14 @@ interface SeekableWriteFDHandle implements WriteFDHandle, SeekableFDHandle, Seek
 
 
 
-### Public Methods ([` HH\Lib\IO\WriteHandle `](</docs/hsl/Interfaces/HH.Lib.IO/WriteHandle/>))
+### Public Methods ([` HH\Lib\IO\WriteHandle `](</hsl/Interfaces/HH.Lib.IO/WriteHandle/>))
 
 
 
 
-* [` ->writeAllAsync(string $bytes, ?int $timeout_ns = NULL): Awaitable<void> `](</docs/hsl/Interfaces/HH.Lib.IO/WriteHandle/writeAllAsync/>)\
+* [` ->writeAllAsync(string $bytes, ?int $timeout_ns = NULL): Awaitable<void> `](</hsl/Interfaces/HH.Lib.IO/WriteHandle/writeAllAsync/>)\
   Write all of the requested data
-* [` ->writeAllowPartialSuccessAsync(string $bytes, ?int $timeout_ns = NULL): Awaitable<int> `](</docs/hsl/Interfaces/HH.Lib.IO/WriteHandle/writeAllowPartialSuccessAsync/>)\
+* [` ->writeAllowPartialSuccessAsync(string $bytes, ?int $timeout_ns = NULL): Awaitable<int> `](</hsl/Interfaces/HH.Lib.IO/WriteHandle/writeAllowPartialSuccessAsync/>)\
   Write data, waiting if necessary
 
 
@@ -53,14 +53,14 @@ interface SeekableWriteFDHandle implements WriteFDHandle, SeekableFDHandle, Seek
 
 
 
-### Public Methods ([` HH\Lib\IO\SeekableHandle `](</docs/hsl/Interfaces/HH.Lib.IO/SeekableHandle/>))
+### Public Methods ([` HH\Lib\IO\SeekableHandle `](</hsl/Interfaces/HH.Lib.IO/SeekableHandle/>))
 
 
 
 
-- [` ->seek(int $offset): void `](</docs/hsl/Interfaces/HH.Lib.IO/SeekableHandle/seek/>)\
+- [` ->seek(int $offset): void `](</hsl/Interfaces/HH.Lib.IO/SeekableHandle/seek/>)\
   Move to a specific offset within a handle
-- [` ->tell(): int `](</docs/hsl/Interfaces/HH.Lib.IO/SeekableHandle/tell/>)\
+- [` ->tell(): int `](</hsl/Interfaces/HH.Lib.IO/SeekableHandle/tell/>)\
   Get the current pointer position within a handle
 
 
@@ -69,11 +69,11 @@ interface SeekableWriteFDHandle implements WriteFDHandle, SeekableFDHandle, Seek
 
 
 
-### Protected Methods ([` HH\Lib\IO\WriteHandle `](</docs/hsl/Interfaces/HH.Lib.IO/WriteHandle/>))
+### Protected Methods ([` HH\Lib\IO\WriteHandle `](</hsl/Interfaces/HH.Lib.IO/WriteHandle/>))
 
 
 
 
-+ [` ->writeImpl(string $bytes): int `](</docs/hsl/Interfaces/HH.Lib.IO/WriteHandle/writeImpl/>)\
++ [` ->writeImpl(string $bytes): int `](</hsl/Interfaces/HH.Lib.IO/WriteHandle/writeImpl/>)\
   An immediate unordered write
 <!-- HHAPIDOC -->

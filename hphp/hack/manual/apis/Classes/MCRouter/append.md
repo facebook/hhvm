@@ -40,7 +40,7 @@ public function append(
 
 
 
-* [` Awaitable<void> `](/docs/apis/Classes/HH/Awaitable/)
+* [` Awaitable<void> `](/apis/Classes/HH/Awaitable/)
 
 
 
@@ -50,7 +50,7 @@ public function append(
 
 
 
-The following example shows how to use the [` MCRouter::append `](/docs/apis/Classes/MCRouter/append/) function.
+The following example shows how to use the [` MCRouter::append `](/apis/Classes/MCRouter/append/) function.
 
 
 

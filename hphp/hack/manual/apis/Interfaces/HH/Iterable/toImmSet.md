@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns an immutable set (` ImmSet `) converted from the current [` Iterable `](/docs/apis/Interfaces/HH/Iterable/)
+Returns an immutable set (` ImmSet `) converted from the current [` Iterable `](/apis/Interfaces/HH/Iterable/)
 
 
 
@@ -18,7 +18,7 @@ public function toImmSet(): ImmSet<Tv>;
 
 
 
-Any keys in the current [` Iterable `](/docs/apis/Interfaces/HH/Iterable/) are discarded.
+Any keys in the current [` Iterable `](/apis/Interfaces/HH/Iterable/) are discarded.
 
 
 
@@ -28,5 +28,5 @@ Any keys in the current [` Iterable `](/docs/apis/Interfaces/HH/Iterable/) are d
 
 
 
-+ [` ImmSet<Tv> `](/docs/apis/Classes/HH/ImmSet/) - an `` ImmSet `` converted from the current [` Iterable `](/docs/apis/Interfaces/HH/Iterable/).
++ [` ImmSet<Tv> `](/apis/Classes/HH/ImmSet/) - an `` ImmSet `` converted from the current [` Iterable `](/apis/Interfaces/HH/Iterable/).
 <!-- HHAPIDOC -->

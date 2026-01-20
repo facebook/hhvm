@@ -36,7 +36,7 @@ public function version(): Awaitable<string>;
 
 
 
-The following example allows you to use [` MCRouter::version `](/docs/apis/Classes/MCRouter/version/) to get the version information of the memcached server you are connected to.
+The following example allows you to use [` MCRouter::version `](/apis/Classes/MCRouter/version/) to get the version information of the memcached server you are connected to.
 
 
 

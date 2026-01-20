@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a [` Map `](/docs/apis/Classes/HH/Map/) containing the values of the current [` Map `](/docs/apis/Classes/HH/Map/) starting after
+Returns a [` Map `](/apis/Classes/HH/Map/) containing the values of the current [` Map `](/apis/Classes/HH/Map/) starting after
 and including the first value that produces `` true `` when passed to the
 specified callback
 
@@ -22,7 +22,7 @@ public function skipWhile(
 
 
 
-The returned [` Map `](/docs/apis/Classes/HH/Map/) will always be a proper subset of this [` Map `](/docs/apis/Classes/HH/Map/).
+The returned [` Map `](/apis/Classes/HH/Map/) will always be a proper subset of this [` Map `](/apis/Classes/HH/Map/).
 
 
 
@@ -33,7 +33,7 @@ The returned [` Map `](/docs/apis/Classes/HH/Map/) will always be a proper subse
 
 
 + ` (function(Tv): bool) $fn ` - The callback used to determine the starting element for the
-  current [` Map `](/docs/apis/Classes/HH/Map/).
+  current [` Map `](/apis/Classes/HH/Map/).
 
 
 
@@ -43,6 +43,6 @@ The returned [` Map `](/docs/apis/Classes/HH/Map/) will always be a proper subse
 
 
 
-* [` Map<Tk, `](/docs/apis/Classes/HH/Map/)`` Tv> `` - A [` Map `](/docs/apis/Classes/HH/Map/) that is a proper subset of the current [` Map `](/docs/apis/Classes/HH/Map/) starting
+* [` Map<Tk, `](/apis/Classes/HH/Map/)`` Tv> `` - A [` Map `](/apis/Classes/HH/Map/) that is a proper subset of the current [` Map `](/apis/Classes/HH/Map/) starting
   after the callback returns `` true ``.
 <!-- HHAPIDOC -->

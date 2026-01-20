@@ -6,8 +6,8 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a new [` ImmVector `](/docs/apis/Classes/HH/ImmVector/) containing the values of the current [` ImmVector `](/docs/apis/Classes/HH/ImmVector/);
-that is, a copy of the current [` ImmVector `](/docs/apis/Classes/HH/ImmVector/)
+Returns a new [` ImmVector `](/apis/Classes/HH/ImmVector/) containing the values of the current [` ImmVector `](/apis/Classes/HH/ImmVector/);
+that is, a copy of the current [` ImmVector `](/apis/Classes/HH/ImmVector/)
 
 
 
@@ -19,11 +19,11 @@ public function values(): ImmVector<Tv>;
 
 
 
-This method is NOT interchangeable with [` toImmVector() `](/docs/apis/Classes/HH/ImmVector/toImmVector/) and [` immutable() `](/docs/apis/Classes/HH/ImmVector/immutable/).
-[` toImmVector() `](/docs/apis/Classes/HH/ImmVector/toImmVector/) and [` immutable() `](/docs/apis/Classes/HH/ImmVector/immutable/) return the current [` ImmVector `](/docs/apis/Classes/HH/ImmVector/), and do
-not incur the cost of copying the current [` ImmVector `](/docs/apis/Classes/HH/ImmVector/), or the memory space
-consumed by the new [` ImmVector `](/docs/apis/Classes/HH/ImmVector/).  This may be significant, for large
-[` ImmVector `](/docs/apis/Classes/HH/ImmVector/)s.
+This method is NOT interchangeable with [` toImmVector() `](/apis/Classes/HH/ImmVector/toImmVector/) and [` immutable() `](/apis/Classes/HH/ImmVector/immutable/).
+[` toImmVector() `](/apis/Classes/HH/ImmVector/toImmVector/) and [` immutable() `](/apis/Classes/HH/ImmVector/immutable/) return the current [` ImmVector `](/apis/Classes/HH/ImmVector/), and do
+not incur the cost of copying the current [` ImmVector `](/apis/Classes/HH/ImmVector/), or the memory space
+consumed by the new [` ImmVector `](/apis/Classes/HH/ImmVector/).  This may be significant, for large
+[` ImmVector `](/apis/Classes/HH/ImmVector/)s.
 
 
 
@@ -33,8 +33,8 @@ consumed by the new [` ImmVector `](/docs/apis/Classes/HH/ImmVector/).  This may
 
 
 
-+ [` ImmVector<Tv> `](/docs/apis/Classes/HH/ImmVector/) - A new [` ImmVector `](/docs/apis/Classes/HH/ImmVector/) containing the values of the current
-  [` ImmVector `](/docs/apis/Classes/HH/ImmVector/).
++ [` ImmVector<Tv> `](/apis/Classes/HH/ImmVector/) - A new [` ImmVector `](/apis/Classes/HH/ImmVector/) containing the values of the current
+  [` ImmVector `](/apis/Classes/HH/ImmVector/).
 
 
 
@@ -44,5 +44,5 @@ consumed by the new [` ImmVector `](/docs/apis/Classes/HH/ImmVector/).  This may
 
 
 
-See [` Vector::values `](/docs/apis/Classes/HH/Vector/values/#examples) for usage examples.
+See [` Vector::values `](/apis/Classes/HH/Vector/values/#examples) for usage examples.
 <!-- HHAPIDOC -->

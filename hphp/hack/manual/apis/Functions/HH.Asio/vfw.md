@@ -6,9 +6,9 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns an [` Awaitable `](/docs/apis/Classes/HH/Awaitable/) of [` Vector `](/docs/apis/Classes/HH/Vector/) of `` ResultOrExceptionWrapper `` after a
+Returns an [` Awaitable `](/apis/Classes/HH/Awaitable/) of [` Vector `](/apis/Classes/HH/Vector/) of `` ResultOrExceptionWrapper `` after a
 filtering operation has been applied to each value in the provided
-[` KeyedTraversable `](/docs/apis/Interfaces/HH/KeyedTraversable/)
+[` KeyedTraversable `](/apis/Interfaces/HH/KeyedTraversable/)
 
 
 
@@ -25,32 +25,32 @@ function vfw<Tk, T>(
 
 
 
-This function is similar to ` vf() `, except the [` Vector `](/docs/apis/Classes/HH/Vector/) in the returned
-[` Awaitable `](/docs/apis/Classes/HH/Awaitable/) contains `` ResultOrExceptionWrapper ``s instead of raw values.
+This function is similar to ` vf() `, except the [` Vector `](/apis/Classes/HH/Vector/) in the returned
+[` Awaitable `](/apis/Classes/HH/Awaitable/) contains `` ResultOrExceptionWrapper ``s instead of raw values.
 
 
 
 
-This function is similar to [` Vector::filter() `](/docs/apis/Classes/HH/Vector/filter/), but the mapping of the values
-is done using [` Awaitable `](/docs/apis/Classes/HH/Awaitable/)s.
+This function is similar to [` Vector::filter() `](/apis/Classes/HH/Vector/filter/), but the mapping of the values
+is done using [` Awaitable `](/apis/Classes/HH/Awaitable/)s.
 
 
 
 
 This function is called ` vfw ` because we are returning a `` v ``ector, doing a
-``` f ```iltering operation and each member of the [` Vector `](/docs/apis/Classes/HH/Vector/) is `` w ``rapped by a
+``` f ```iltering operation and each member of the [` Vector `](/apis/Classes/HH/Vector/) is `` w ``rapped by a
 ``` ResultOrExceptionWrapper ```.
 
 
 
 
-` $callable ` must return an [` Awaitable `](/docs/apis/Classes/HH/Awaitable/) of `` bool ``.
+` $callable ` must return an [` Awaitable `](/apis/Classes/HH/Awaitable/) of `` bool ``.
 
 
 
 
-The ` ResultOrExceptionWrapper `s in the [` Vector `](/docs/apis/Classes/HH/Vector/) of the returned [` Awaitable `](/docs/apis/Classes/HH/Awaitable/)
-are not available until you `` await `` or ``` join ``` the returned [` Awaitable `](/docs/apis/Classes/HH/Awaitable/).
+The ` ResultOrExceptionWrapper `s in the [` Vector `](/apis/Classes/HH/Vector/) of the returned [` Awaitable `](/apis/Classes/HH/Awaitable/)
+are not available until you `` await `` or ``` join ``` the returned [` Awaitable `](/apis/Classes/HH/Awaitable/).
 
 
 
@@ -60,8 +60,8 @@ are not available until you `` await `` or ``` join ``` the returned [` Awaitabl
 
 
 
-+ [` KeyedTraversable<Tk, `](/docs/apis/Interfaces/HH/KeyedTraversable/)`` T, mixed> $inputs `` - The [` KeyedTraversable `](/docs/apis/Interfaces/HH/KeyedTraversable/) of values to map.
-+ ` (function(T): Awaitable<bool>) $callable ` - The callable containing the [` Awaitable `](/docs/apis/Classes/HH/Awaitable/) operation to
++ [` KeyedTraversable<Tk, `](/apis/Interfaces/HH/KeyedTraversable/)`` T, mixed> $inputs `` - The [` KeyedTraversable `](/apis/Interfaces/HH/KeyedTraversable/) of values to map.
++ ` (function(T): Awaitable<bool>) $callable ` - The callable containing the [` Awaitable `](/apis/Classes/HH/Awaitable/) operation to
   apply to `` $inputs ``.
 
 
@@ -72,7 +72,7 @@ are not available until you `` await `` or ``` join ``` the returned [` Awaitabl
 
 
 
-* [` Awaitable<Vector<ResultOrExceptionWrapper<T>>> `](/docs/apis/Classes/HH/Awaitable/) - An [` Awaitable `](/docs/apis/Classes/HH/Awaitable/) of [` Vector `](/docs/apis/Classes/HH/Vector/) of `` ResultOrExceptionWrapper `` after the
+* [` Awaitable<Vector<ResultOrExceptionWrapper<T>>> `](/apis/Classes/HH/Awaitable/) - An [` Awaitable `](/apis/Classes/HH/Awaitable/) of [` Vector `](/apis/Classes/HH/Vector/) of `` ResultOrExceptionWrapper `` after the
   filtering operation has been applied to the values in ``` $inputs ```.
 
 

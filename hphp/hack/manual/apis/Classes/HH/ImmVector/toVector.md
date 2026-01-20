@@ -33,5 +33,5 @@ public function toVector(): Vector;
 
 
 
-See [`Vector::toVector`](/docs/apis/Classes/HH/Vector) for usage examples.
+See [`Vector::toVector`](/apis/Classes/HH/Vector) for usage examples.
 <!-- HHAPIDOC -->

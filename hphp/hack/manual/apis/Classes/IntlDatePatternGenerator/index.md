@@ -92,62 +92,62 @@ class IntlDatePatternGenerator {...}
 
 
 
-+ [` ::createEmptyInstance(): IntlDatePatternGenerator `](/docs/apis/Classes/IntlDatePatternGenerator/createEmptyInstance/)\
++ [` ::createEmptyInstance(): IntlDatePatternGenerator `](/apis/Classes/IntlDatePatternGenerator/createEmptyInstance/)\
   Creates an empty generator, to be constructed with addPattern(...) etc
 
-+ [` ::createInstance(string $locale): IntlDatePatternGenerator `](/docs/apis/Classes/IntlDatePatternGenerator/createInstance/)\
++ [` ::createInstance(string $locale): IntlDatePatternGenerator `](/apis/Classes/IntlDatePatternGenerator/createInstance/)\
   Creates a flexible generator according to the data for a given locale
 
-+ [` ->addPattern(string $pattern, bool $override): int `](/docs/apis/Classes/IntlDatePatternGenerator/addPattern/)\
++ [` ->addPattern(string $pattern, bool $override): int `](/apis/Classes/IntlDatePatternGenerator/addPattern/)\
   Adds a pattern to the generator
 
-+ [` ->getAppendItemFormat(int $field): string `](/docs/apis/Classes/IntlDatePatternGenerator/getAppendItemFormat/)
++ [` ->getAppendItemFormat(int $field): string `](/apis/Classes/IntlDatePatternGenerator/getAppendItemFormat/)
 
-+ [` ->getAppendItemName(int $field): string `](/docs/apis/Classes/IntlDatePatternGenerator/getAppendItemName/)
++ [` ->getAppendItemName(int $field): string `](/apis/Classes/IntlDatePatternGenerator/getAppendItemName/)
 
-+ [` ->getBaseSkeleton(string $pattern): string `](/docs/apis/Classes/IntlDatePatternGenerator/getBaseSkeleton/)\
++ [` ->getBaseSkeleton(string $pattern): string `](/apis/Classes/IntlDatePatternGenerator/getBaseSkeleton/)\
   Utility to return a unique base skeleton from a given pattern
 
-+ [` ->getBaseSkeletons(): IntlIterator `](/docs/apis/Classes/IntlDatePatternGenerator/getBaseSkeletons/)
++ [` ->getBaseSkeletons(): IntlIterator `](/apis/Classes/IntlDatePatternGenerator/getBaseSkeletons/)
 
-+ [` ->getBestPattern(string $skeleton): string `](/docs/apis/Classes/IntlDatePatternGenerator/getBestPattern/)\
++ [` ->getBestPattern(string $skeleton): string `](/apis/Classes/IntlDatePatternGenerator/getBestPattern/)\
   Returns the best pattern matching the input skeleton
 
-+ [` ->getDateTimeFormat(): string `](/docs/apis/Classes/IntlDatePatternGenerator/getDateTimeFormat/)
++ [` ->getDateTimeFormat(): string `](/apis/Classes/IntlDatePatternGenerator/getDateTimeFormat/)
 
-+ [` ->getDecimal(): string `](/docs/apis/Classes/IntlDatePatternGenerator/getDecimal/)\
++ [` ->getDecimal(): string `](/apis/Classes/IntlDatePatternGenerator/getDecimal/)\
   The decimal value is used in formatting fractions of seconds
 
-+ [` ->getErrorCode(): int `](/docs/apis/Classes/IntlDatePatternGenerator/getErrorCode/)\
++ [` ->getErrorCode(): int `](/apis/Classes/IntlDatePatternGenerator/getErrorCode/)\
   Get last error code on the object
 
-+ [` ->getErrorMessage(): string `](/docs/apis/Classes/IntlDatePatternGenerator/getErrorMessage/)\
++ [` ->getErrorMessage(): string `](/apis/Classes/IntlDatePatternGenerator/getErrorMessage/)\
   Get last error message on the object
 
-+ [` ->getPatternForSkeleton(string $skeleton): string `](/docs/apis/Classes/IntlDatePatternGenerator/getPatternForSkeleton/)\
++ [` ->getPatternForSkeleton(string $skeleton): string `](/apis/Classes/IntlDatePatternGenerator/getPatternForSkeleton/)\
   Get the pattern corresponding to a given skeleton
 
-+ [` ->getSkeleton(string $pattern): string `](/docs/apis/Classes/IntlDatePatternGenerator/getSkeleton/)\
++ [` ->getSkeleton(string $pattern): string `](/apis/Classes/IntlDatePatternGenerator/getSkeleton/)\
   Utility to return a unique skeleton from a given pattern
 
-+ [` ->getSkeletons(): IntlIterator `](/docs/apis/Classes/IntlDatePatternGenerator/getSkeletons/)
++ [` ->getSkeletons(): IntlIterator `](/apis/Classes/IntlDatePatternGenerator/getSkeletons/)
 
-+ [` ->replaceFieldTypes(string $pattern, string $skeleton): string `](/docs/apis/Classes/IntlDatePatternGenerator/replaceFieldTypes/)\
++ [` ->replaceFieldTypes(string $pattern, string $skeleton): string `](/apis/Classes/IntlDatePatternGenerator/replaceFieldTypes/)\
   Adjusts the field types (width and subtype) of a pattern to match what is
   in a skeleton
 
-+ [` ->setAppendItemFormat(int $field, string $value): void `](/docs/apis/Classes/IntlDatePatternGenerator/setAppendItemFormat/)\
++ [` ->setAppendItemFormat(int $field, string $value): void `](/apis/Classes/IntlDatePatternGenerator/setAppendItemFormat/)\
   An append item format is a pattern used to append a field if there is no
   good match
 
-+ [` ->setAppendItemName(int $field, string $name): void `](/docs/apis/Classes/IntlDatePatternGenerator/setAppendItemName/)\
++ [` ->setAppendItemName(int $field, string $name): void `](/apis/Classes/IntlDatePatternGenerator/setAppendItemName/)\
   Sets the name of a field, eg "era" in English for ERA
 
-+ [` ->setDateTimeFormat(string $dateTimeFormat): void `](/docs/apis/Classes/IntlDatePatternGenerator/setDateTimeFormat/)\
++ [` ->setDateTimeFormat(string $dateTimeFormat): void `](/apis/Classes/IntlDatePatternGenerator/setDateTimeFormat/)\
   The date time format is a message format pattern used to compose date and
   time patterns
 
-+ [` ->setDecimal(string $decimal): void `](/docs/apis/Classes/IntlDatePatternGenerator/setDecimal/)\
++ [` ->setDecimal(string $decimal): void `](/apis/Classes/IntlDatePatternGenerator/setDecimal/)\
   The decimal value is used in formatting fractions of seconds
 
 <!-- HHAPIDOC -->

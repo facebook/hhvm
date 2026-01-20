@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns the value at the specified key in the current [` ImmMap `](/docs/apis/Classes/HH/ImmMap/)
+Returns the value at the specified key in the current [` ImmMap `](/apis/Classes/HH/ImmMap/)
 
 
 
@@ -21,7 +21,7 @@ public function get(
 
 
 If the key is not present, null is returned. If you would rather have an
-exception thrown when a key is not present, then use [` at() `](/docs/apis/Classes/HH/ImmMap/at/).
+exception thrown when a key is not present, then use [` at() `](/apis/Classes/HH/ImmMap/at/).
 
 
 
@@ -52,5 +52,5 @@ exception thrown when a key is not present, then use [` at() `](/docs/apis/Class
 
 
 
-See [` Map::get `](/docs/apis/Classes/HH/Map/get/#examples) for usage examples.
+See [` Map::get `](/apis/Classes/HH/Map/get/#examples) for usage examples.
 <!-- HHAPIDOC -->

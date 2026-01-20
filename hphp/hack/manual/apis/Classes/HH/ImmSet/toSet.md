@@ -33,5 +33,5 @@ public function toSet(): HH\object;
 
 
 
-See [` Set::toSet `](/docs/apis/Classes/HH/Set/#examples) for usage examples.
+See [` Set::toSet `](/apis/Classes/HH/Set/#examples) for usage examples.
 <!-- HHAPIDOC -->

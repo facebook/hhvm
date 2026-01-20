@@ -18,5 +18,5 @@ public function toImmVector(): ImmVector<Tv>;
 
 
 
-+ [` ImmVector<Tv> `](/docs/apis/Classes/HH/ImmVector/)
++ [` ImmVector<Tv> `](/apis/Classes/HH/ImmVector/)
 <!-- HHAPIDOC -->

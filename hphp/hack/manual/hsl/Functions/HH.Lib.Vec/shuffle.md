@@ -39,7 +39,7 @@ Space complexity: O(n)
 
 
 
-+ [` Traversable<Tv> `](/docs/apis/Interfaces/HH/Traversable/)`` $traversable ``
++ [` Traversable<Tv> `](/apis/Interfaces/HH/Traversable/)`` $traversable ``
 
 
 

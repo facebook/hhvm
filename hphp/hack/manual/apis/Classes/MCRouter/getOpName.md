@@ -48,7 +48,7 @@ public static function getOpName(
 
 
 
-The following example shows how to use [` MCRouter::getOpName `](/docs/apis/Classes/MCRouter/getOpName/) to get the English readable name for an MCRouter operation given as an integer.
+The following example shows how to use [` MCRouter::getOpName `](/apis/Classes/MCRouter/getOpName/) to get the English readable name for an MCRouter operation given as an integer.
 
 
 

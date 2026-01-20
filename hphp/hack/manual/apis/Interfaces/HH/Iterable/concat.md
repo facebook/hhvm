@@ -6,8 +6,8 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns an [` Iterable `](/docs/apis/Interfaces/HH/Iterable/) that is the concatenation of the values of the
-current [` Iterable `](/docs/apis/Interfaces/HH/Iterable/) and the values of the provided [` Traversable `](/docs/apis/Interfaces/HH/Traversable/)
+Returns an [` Iterable `](/apis/Interfaces/HH/Iterable/) that is the concatenation of the values of the
+current [` Iterable `](/apis/Interfaces/HH/Iterable/) and the values of the provided [` Traversable `](/apis/Interfaces/HH/Traversable/)
 
 
 
@@ -21,8 +21,8 @@ public function concat<Tu super Tv>(
 
 
 
-The values of the provided [` Traversable `](/docs/apis/Interfaces/HH/Traversable/) is concatenated to the end of the
-current [` Iterable `](/docs/apis/Interfaces/HH/Iterable/) to produce the returned [` Iterable `](/docs/apis/Interfaces/HH/Iterable/).
+The values of the provided [` Traversable `](/apis/Interfaces/HH/Traversable/) is concatenated to the end of the
+current [` Iterable `](/apis/Interfaces/HH/Iterable/) to produce the returned [` Iterable `](/apis/Interfaces/HH/Iterable/).
 
 
 
@@ -32,7 +32,7 @@ current [` Iterable `](/docs/apis/Interfaces/HH/Iterable/) to produce the return
 
 
 
-+ [Constraints](</docs/hack/generics/type-constraints>)
++ [Constraints](</hack/generics/type-constraints>)
 
 
 
@@ -45,8 +45,8 @@ current [` Iterable `](/docs/apis/Interfaces/HH/Iterable/) to produce the return
 
 
 
-* [` Traversable<Tu> `](/docs/apis/Interfaces/HH/Traversable/)`` $traversable `` - The [` Traversable `](/docs/apis/Interfaces/HH/Traversable/) to concatenate to the current
-  [` Iterable `](/docs/apis/Interfaces/HH/Iterable/).
+* [` Traversable<Tu> `](/apis/Interfaces/HH/Traversable/)`` $traversable `` - The [` Traversable `](/apis/Interfaces/HH/Traversable/) to concatenate to the current
+  [` Iterable `](/apis/Interfaces/HH/Iterable/).
 
 
 
@@ -56,5 +56,5 @@ current [` Iterable `](/docs/apis/Interfaces/HH/Iterable/) to produce the return
 
 
 
-- [` Iterable<Tu> `](/docs/apis/Interfaces/HH/Iterable/) - The concatenated [` Iterable `](/docs/apis/Interfaces/HH/Iterable/).
+- [` Iterable<Tu> `](/apis/Interfaces/HH/Iterable/) - The concatenated [` Iterable `](/apis/Interfaces/HH/Iterable/).
 <!-- HHAPIDOC -->

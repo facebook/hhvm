@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a [` ConstVector `](/docs/apis/Interfaces/ConstVector/) containing the values of the current [` ConstSet `](/docs/apis/Interfaces/ConstSet/)
+Returns a [` ConstVector `](/apis/Interfaces/ConstVector/) containing the values of the current [` ConstSet `](/apis/Interfaces/ConstSet/)
 
 
 
@@ -18,7 +18,7 @@ public function values(): ConstVector<Tv>;
 
 
 
-This method is interchangeable with [` keys() `](/docs/apis/Interfaces/ConstSet/keys/).
+This method is interchangeable with [` keys() `](/apis/Interfaces/ConstSet/keys/).
 
 
 
@@ -28,6 +28,6 @@ This method is interchangeable with [` keys() `](/docs/apis/Interfaces/ConstSet/
 
 
 
-+ [` ConstVector<Tv> `](/docs/apis/Interfaces/ConstVector/) - a [` ConstVector `](/docs/apis/Interfaces/ConstVector/) (integer-indexed) containing the values of the
-  current [` ConstSet `](/docs/apis/Interfaces/ConstSet/).
++ [` ConstVector<Tv> `](/apis/Interfaces/ConstVector/) - a [` ConstVector `](/apis/Interfaces/ConstVector/) (integer-indexed) containing the values of the
+  current [` ConstSet `](/apis/Interfaces/ConstSet/).
 <!-- HHAPIDOC -->

@@ -45,7 +45,7 @@ public function getFieldAsString(
 
 
 
-The following example shows how to get a field value as an ` string ` value via [` AsyncMysqlRow::getFieldAsString `](/docs/apis/Classes/AsyncMysqlRow/getFieldAsString/). Assume this was the SQL used to create the example table:
+The following example shows how to get a field value as an ` string ` value via [` AsyncMysqlRow::getFieldAsString `](/apis/Classes/AsyncMysqlRow/getFieldAsString/). Assume this was the SQL used to create the example table:
 
 
 

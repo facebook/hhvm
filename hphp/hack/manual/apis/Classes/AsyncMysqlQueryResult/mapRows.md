@@ -20,12 +20,12 @@ public function mapRows(): Vector<Map<?string>>;
 
 
 All values come back as ` string `s. If you want typed values, use
-[` mapRowsTyped() `](/docs/apis/Classes/AsyncMysqlQueryResult/mapRowsTyped/).
+[` mapRowsTyped() `](/apis/Classes/AsyncMysqlQueryResult/mapRowsTyped/).
 
 
 
 
-The rows are returned as a [` Vector `](/docs/apis/Classes/HH/Vector/) of [` Map `](/docs/apis/Classes/HH/Map/) objects. The [` Map `](/docs/apis/Classes/HH/Map/) objects map
+The rows are returned as a [` Vector `](/apis/Classes/HH/Vector/) of [` Map `](/apis/Classes/HH/Map/) objects. The [` Map `](/apis/Classes/HH/Map/) objects map
 column names to (possibly `` null ``) ``` string ``` values.
 
 
@@ -36,8 +36,8 @@ column names to (possibly `` null ``) ``` string ``` values.
 
 
 
-+ [` Vector<Map<?string>> `](/docs/apis/Classes/HH/Vector/) - A [` Vector `](/docs/apis/Classes/HH/Vector/) of [` Map `](/docs/apis/Classes/HH/Map/) objects, where the [` Vector `](/docs/apis/Classes/HH/Vector/) elements are the
-  rows and the [` Map `](/docs/apis/Classes/HH/Map/) elements are the column names and values
++ [` Vector<Map<?string>> `](/apis/Classes/HH/Vector/) - A [` Vector `](/apis/Classes/HH/Vector/) of [` Map `](/apis/Classes/HH/Map/) objects, where the [` Vector `](/apis/Classes/HH/Vector/) elements are the
+  rows and the [` Map `](/apis/Classes/HH/Map/) elements are the column names and values
   associated with that row.
 
 
@@ -48,7 +48,7 @@ column names to (possibly `` null ``) ``` string ``` values.
 
 
 
-When executing a query, you can get the rows returned from it in the form of a [` Vector `](/docs/apis/Classes/HH/Vector/) of [` Map `](/docs/apis/Classes/HH/Map/) objects, where each key of the [` Map `](/docs/apis/Classes/HH/Map/) is a column name. This example shows how to use [` AsyncMysqlQueryResult::mapRows `](/docs/apis/Classes/AsyncMysqlQueryResult/mapRows/) to get that [` Map `](/docs/apis/Classes/HH/Map/). A resulting [` Map `](/docs/apis/Classes/HH/Map/) may look like:
+When executing a query, you can get the rows returned from it in the form of a [` Vector `](/apis/Classes/HH/Vector/) of [` Map `](/apis/Classes/HH/Map/) objects, where each key of the [` Map `](/apis/Classes/HH/Map/) is a column name. This example shows how to use [` AsyncMysqlQueryResult::mapRows `](/apis/Classes/AsyncMysqlQueryResult/mapRows/) to get that [` Map `](/apis/Classes/HH/Map/). A resulting [` Map `](/apis/Classes/HH/Map/) may look like:
 
 
 
@@ -71,7 +71,7 @@ object(HH\Vector)#9 (2) {
 
 
 
-Note that all values in the [` Map `](/docs/apis/Classes/HH/Map/) returned from `` mapRows `` will be ``` string ``` or ```` null ````. If you want specifically-typed values, use [` mapRowsTyped `](/docs/apis/Classes/AsyncMysqlQueryResult/mapRowsTyped/)
+Note that all values in the [` Map `](/apis/Classes/HH/Map/) returned from `` mapRows `` will be ``` string ``` or ```` null ````. If you want specifically-typed values, use [` mapRowsTyped `](/apis/Classes/AsyncMysqlQueryResult/mapRowsTyped/)
 
 
 

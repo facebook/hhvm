@@ -27,7 +27,7 @@ function hphp_invoke(
 
 
 + ` string $name ` - The name of the function.
-+ [` Traversable `](/docs/apis/Interfaces/HH/Traversable/)`` $params `` - The parameters to pass to the function.
++ [` Traversable `](/apis/Interfaces/HH/Traversable/)`` $params `` - The parameters to pass to the function.
 
 
 

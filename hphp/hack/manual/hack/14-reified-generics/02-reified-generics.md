@@ -1,6 +1,6 @@
 # Reified Generics
 
-A _Reified Generic_ is a [Generic](/docs/hack/generics/introduction) with type information accessible at runtime.
+A _Reified Generic_ is a [Generic](/hack/generics/introduction) with type information accessible at runtime.
 
 ## Introduction
 
@@ -200,4 +200,4 @@ function foo(): void {
 
 ## Migration Features
 
-In order to make migrating to reified generics easier, we have added some [Migration Features](/docs/hack/reified-generics/reified-generics-migration).
+In order to make migrating to reified generics easier, we have added some [Migration Features](/hack/reified-generics/reified-generics-migration).

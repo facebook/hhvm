@@ -33,7 +33,7 @@ public function elapsedMicros(): int;
 
 
 
-When an error occurs when establishing a connection or on a query, and you catch the exception that is thrown, you will get an [` AsyncMysqlErrorResult `](/docs/apis/Classes/AsyncMysqlErrorResult/). And one of the methods on an [` AsyncMysqlErrorResult `](/docs/apis/Classes/AsyncMysqlErrorResult/) is [` elapsedMicros() `](/docs/apis/Classes/AsyncMysqlErrorResult/elapsedMicros/), which tells you how long the operation took until the error occurred.
+When an error occurs when establishing a connection or on a query, and you catch the exception that is thrown, you will get an [` AsyncMysqlErrorResult `](/apis/Classes/AsyncMysqlErrorResult/). And one of the methods on an [` AsyncMysqlErrorResult `](/apis/Classes/AsyncMysqlErrorResult/) is [` elapsedMicros() `](/apis/Classes/AsyncMysqlErrorResult/elapsedMicros/), which tells you how long the operation took until the error occurred.
 
 
 

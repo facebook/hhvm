@@ -33,7 +33,7 @@ The regex pattern follows the PCRE library: https://www.pcre.org/original/doc/ht
 
 
 
-Throws [` InvariantException `](/docs/apis/Classes/HH/InvariantException/) if `` $limit `` < 2.
+Throws [` InvariantException `](/apis/Classes/HH/InvariantException/) if `` $limit `` < 2.
 
 
 
@@ -43,7 +43,7 @@ Throws [` InvariantException `](/docs/apis/Classes/HH/InvariantException/) if ``
 
 
 
-+ [String](</docs/hack/built-in-types/string>)
++ [String](</hack/built-in-types/string>)
 
 
 

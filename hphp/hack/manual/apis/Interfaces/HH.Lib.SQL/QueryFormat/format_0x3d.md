@@ -18,5 +18,5 @@ public function format_0x3d(): HH\Lib\SQL\ScalarFormat;
 
 
 
-+ [` HH\Lib\SQL\ScalarFormat `](/docs/apis/Interfaces/HH.Lib.SQL/ScalarFormat/)
++ [` HH\Lib\SQL\ScalarFormat `](/apis/Interfaces/HH.Lib.SQL/ScalarFormat/)
 <!-- HHAPIDOC -->

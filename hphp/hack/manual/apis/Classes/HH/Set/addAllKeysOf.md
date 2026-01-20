@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Adds the keys of the specified container to the current [` Set `](/docs/apis/Classes/HH/Set/) as new
+Adds the keys of the specified container to the current [` Set `](/apis/Classes/HH/Set/) as new
 values
 
 
@@ -21,8 +21,8 @@ public function addAllKeysOf(
 
 
 
-Future changes made to the current [` Set `](/docs/apis/Classes/HH/Set/) ARE reflected in the returned
-[` Set `](/docs/apis/Classes/HH/Set/), and vice-versa.
+Future changes made to the current [` Set `](/apis/Classes/HH/Set/) ARE reflected in the returned
+[` Set `](/apis/Classes/HH/Set/), and vice-versa.
 
 
 
@@ -32,7 +32,7 @@ Future changes made to the current [` Set `](/docs/apis/Classes/HH/Set/) ARE ref
 
 
 
-+ ` ? `[` KeyedContainer<Tv, `](/docs/apis/Interfaces/HH/KeyedContainer/)`` mixed> $container `` - The container with the new keys to add.
++ ` ? `[` KeyedContainer<Tv, `](/apis/Interfaces/HH/KeyedContainer/)`` mixed> $container `` - The container with the new keys to add.
 
 
 
@@ -42,7 +42,7 @@ Future changes made to the current [` Set `](/docs/apis/Classes/HH/Set/) ARE ref
 
 
 
-* [` Set<Tv> `](/docs/apis/Classes/HH/Set/) - Returns itself.
+* [` Set<Tv> `](/apis/Classes/HH/Set/) - Returns itself.
 
 
 
@@ -52,7 +52,7 @@ Future changes made to the current [` Set `](/docs/apis/Classes/HH/Set/) ARE ref
 
 
 
-This example adds ` string ` keys from a [` Map `](/docs/apis/Classes/HH/Map/) to a [` Set `](/docs/apis/Classes/HH/Set/) as its values:
+This example adds ` string ` keys from a [` Map `](/apis/Classes/HH/Map/) to a [` Set `](/apis/Classes/HH/Set/) as its values:
 
 
 
@@ -82,7 +82,7 @@ $food_names->addAllKeysOf($vegetable_calories);
 
 
 
-This example adds ` int ` keys from a [` Map `](/docs/apis/Classes/HH/Map/) to a [` Set `](/docs/apis/Classes/HH/Set/) as its values:
+This example adds ` int ` keys from a [` Map `](/apis/Classes/HH/Map/) to a [` Set `](/apis/Classes/HH/Set/) as its values:
 
 
 

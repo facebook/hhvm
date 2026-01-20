@@ -18,5 +18,5 @@ public function format_l(): PlainSprintf;
 
 
 
-+ [` PlainSprintf `](/docs/apis/Interfaces/PlainSprintf/)
++ [` PlainSprintf `](/apis/Interfaces/PlainSprintf/)
 <!-- HHAPIDOC -->

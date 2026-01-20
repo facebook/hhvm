@@ -6,8 +6,8 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a [` ConstMap `](/docs/apis/Interfaces/ConstMap/) after an operation has been applied to each key and
-value in the current [` ConstMap `](/docs/apis/Interfaces/ConstMap/)
+Returns a [` ConstMap `](/apis/Interfaces/ConstMap/) after an operation has been applied to each key and
+value in the current [` ConstMap `](/apis/Interfaces/ConstMap/)
 
 
 
@@ -21,15 +21,15 @@ public function mapWithKey<Tu>(
 
 
 
-Every key and value in the current [` ConstMap `](/docs/apis/Interfaces/ConstMap/) is affected by a call to
-[` mapWithKey() `](/docs/apis/Interfaces/ConstMap/mapWithKey/), unlike [` filterWithKey() `](/docs/apis/Interfaces/ConstMap/filterWithKey/) where only values that meet a
+Every key and value in the current [` ConstMap `](/apis/Interfaces/ConstMap/) is affected by a call to
+[` mapWithKey() `](/apis/Interfaces/ConstMap/mapWithKey/), unlike [` filterWithKey() `](/apis/Interfaces/ConstMap/filterWithKey/) where only values that meet a
 certain criteria are affected.
 
 
 
 
-The keys will remain unchanged from this [` ConstMap `](/docs/apis/Interfaces/ConstMap/) to the returned
-[` ConstMap `](/docs/apis/Interfaces/ConstMap/). The keys are only used to help in the mapping operation.
+The keys will remain unchanged from this [` ConstMap `](/apis/Interfaces/ConstMap/) to the returned
+[` ConstMap `](/apis/Interfaces/ConstMap/). The keys are only used to help in the mapping operation.
 
 
 
@@ -40,7 +40,7 @@ The keys will remain unchanged from this [` ConstMap `](/docs/apis/Interfaces/Co
 
 
 + ` (function(Tk, Tv): Tu) $fn ` - The callback containing the operation to apply to the current
-  [` ConstMap `](/docs/apis/Interfaces/ConstMap/) keys and values.
+  [` ConstMap `](/apis/Interfaces/ConstMap/) keys and values.
 
 
 
@@ -50,6 +50,6 @@ The keys will remain unchanged from this [` ConstMap `](/docs/apis/Interfaces/Co
 
 
 
-* [` ConstMap<Tk, `](/docs/apis/Interfaces/ConstMap/)`` Tu> `` - a [` ConstMap `](/docs/apis/Interfaces/ConstMap/) containing the values after a user-specified
-  operation on the current [` ConstMap `](/docs/apis/Interfaces/ConstMap/)'s keys and values is applied.
+* [` ConstMap<Tk, `](/apis/Interfaces/ConstMap/)`` Tu> `` - a [` ConstMap `](/apis/Interfaces/ConstMap/) containing the values after a user-specified
+  operation on the current [` ConstMap `](/apis/Interfaces/ConstMap/)'s keys and values is applied.
 <!-- HHAPIDOC -->

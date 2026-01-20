@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Creates a [` Vector `](/docs/apis/Classes/HH/Vector/) from the keys of the specified container
+Creates a [` Vector `](/apis/Classes/HH/Vector/) from the keys of the specified container
 
 
 
@@ -20,8 +20,8 @@ public static function fromKeysOf<Tk as arraykey>(
 
 
 
-Every key in the provided [` KeyedContainer `](/docs/apis/Interfaces/HH/KeyedContainer/) will appear sequentially in the
-returned [` Vector `](/docs/apis/Classes/HH/Vector/), with the next available integer key assigned to each.
+Every key in the provided [` KeyedContainer `](/apis/Interfaces/HH/KeyedContainer/) will appear sequentially in the
+returned [` Vector `](/apis/Classes/HH/Vector/), with the next available integer key assigned to each.
 
 
 
@@ -31,8 +31,8 @@ returned [` Vector `](/docs/apis/Classes/HH/Vector/), with the next available in
 
 
 
-+ ` ? `[` KeyedContainer<Tk, `](/docs/apis/Interfaces/HH/KeyedContainer/)`` mixed> $container `` - The container with the keys used to create the
-  [` Vector `](/docs/apis/Classes/HH/Vector/).
++ ` ? `[` KeyedContainer<Tk, `](/apis/Interfaces/HH/KeyedContainer/)`` mixed> $container `` - The container with the keys used to create the
+  [` Vector `](/apis/Classes/HH/Vector/).
 
 
 
@@ -42,7 +42,7 @@ returned [` Vector `](/docs/apis/Classes/HH/Vector/), with the next available in
 
 
 
-* [` Vector<Tk> `](/docs/apis/Classes/HH/Vector/) - A [` Vector `](/docs/apis/Classes/HH/Vector/) built from the keys of the specified container.
+* [` Vector<Tk> `](/apis/Classes/HH/Vector/) - A [` Vector `](/apis/Classes/HH/Vector/) built from the keys of the specified container.
 
 
 
@@ -52,7 +52,7 @@ returned [` Vector `](/docs/apis/Classes/HH/Vector/), with the next available in
 
 
 
-This example adds ` string ` keys from a [` Map `](/docs/apis/Classes/HH/Map/) to a [` Vector `](/docs/apis/Classes/HH/Vector/) as its values:
+This example adds ` string ` keys from a [` Map `](/apis/Classes/HH/Map/) to a [` Vector `](/apis/Classes/HH/Vector/) as its values:
 
 
 
@@ -80,7 +80,7 @@ $vegetable_names = Vector::fromKeysOf($vegetable_calories);
 
 
 
-This example creates new [` Vector `](/docs/apis/Classes/HH/Vector/)s from an int-keyed [` Map `](/docs/apis/Classes/HH/Map/) and an associative array:
+This example creates new [` Vector `](/apis/Classes/HH/Vector/)s from an int-keyed [` Map `](/apis/Classes/HH/Map/) and an associative array:
 
 
 

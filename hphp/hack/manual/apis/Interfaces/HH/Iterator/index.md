@@ -10,7 +10,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-For those entities that are [` Traversable `](/docs/apis/Interfaces/HH/Traversable/), the `` Iterator `` interfaces provides
+For those entities that are [` Traversable `](/apis/Interfaces/HH/Traversable/), the `` Iterator `` interfaces provides
 the methods of iteration
 
 
@@ -27,8 +27,8 @@ iterated over using a `` foreach `` loop.
 
 
 
-+ [Introduction](</docs/hack/arrays-and-collections/introduction>)
-+ [Interfaces](</docs/hack/arrays-and-collections/introduction>)
++ [Introduction](</hack/arrays-and-collections/introduction>)
++ [Interfaces](</hack/arrays-and-collections/introduction>)
 
 
 
@@ -55,14 +55,14 @@ interface Iterator implements Traversable<Tv> {...}
 
 
 
-* [` ->current(): Tv `](/docs/apis/Interfaces/HH/Iterator/current/)\
+* [` ->current(): Tv `](/apis/Interfaces/HH/Iterator/current/)\
   ( excerpt from http://php.net/manual/en/iterator.current.php )
-* [` ->key(): mixed `](/docs/apis/Interfaces/HH/Iterator/key/)\
+* [` ->key(): mixed `](/apis/Interfaces/HH/Iterator/key/)\
   ( excerpt from http://php.net/manual/en/iterator.key.php )
-* [` ->next(): void `](/docs/apis/Interfaces/HH/Iterator/next/)\
+* [` ->next(): void `](/apis/Interfaces/HH/Iterator/next/)\
   ( excerpt from http://php.net/manual/en/iterator.next.php )
-* [` ->rewind(): void `](/docs/apis/Interfaces/HH/Iterator/rewind/)\
+* [` ->rewind(): void `](/apis/Interfaces/HH/Iterator/rewind/)\
   ( excerpt from http://php.net/manual/en/iterator.rewind.php )
-* [` ->valid(): bool `](/docs/apis/Interfaces/HH/Iterator/valid/)\
+* [` ->valid(): bool `](/apis/Interfaces/HH/Iterator/valid/)\
   ( excerpt from http://php.net/manual/en/iterator.valid.php )
 <!-- HHAPIDOC -->

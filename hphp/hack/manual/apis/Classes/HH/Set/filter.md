@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a [` Set `](/docs/apis/Classes/HH/Set/) containing the values of the current [` Set `](/docs/apis/Classes/HH/Set/) that meet
+Returns a [` Set `](/apis/Classes/HH/Set/) containing the values of the current [` Set `](/apis/Classes/HH/Set/) that meet
 a supplied condition applied to each value
 
 
@@ -22,7 +22,7 @@ public function filter(
 
 
 Only values that meet a certain criteria are affected by a call to
-[` filter() `](/docs/apis/Classes/HH/Set/filter/), while all values are affected by a call to [` map() `](/docs/apis/Classes/HH/Set/map/).
+[` filter() `](/apis/Classes/HH/Set/filter/), while all values are affected by a call to [` map() `](/apis/Classes/HH/Set/map/).
 
 
 
@@ -32,7 +32,7 @@ Only values that meet a certain criteria are affected by a call to
 
 
 
-+ [Examples](</docs/hack/arrays-and-collections/introduction>)
++ [Examples](</hack/arrays-and-collections/introduction>)
 
 
 
@@ -55,7 +55,7 @@ Only values that meet a certain criteria are affected by a call to
 
 
 
-- [` Set<Tv> `](/docs/apis/Classes/HH/Set/) - a [` Set `](/docs/apis/Classes/HH/Set/) containing the values after a user-specified condition
+- [` Set<Tv> `](/apis/Classes/HH/Set/) - a [` Set `](/apis/Classes/HH/Set/) containing the values after a user-specified condition
   is applied.
 
 

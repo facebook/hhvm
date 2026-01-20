@@ -20,5 +20,5 @@ function null<T>(): Awaitable<?T>;
 
 
 
-+ [` Awaitable<?T> `](/docs/apis/Classes/HH/Awaitable/)
++ [` Awaitable<?T> `](/apis/Classes/HH/Awaitable/)
 <!-- HHAPIDOC -->

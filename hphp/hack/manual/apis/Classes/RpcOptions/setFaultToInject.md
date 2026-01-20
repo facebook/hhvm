@@ -32,5 +32,5 @@ public function setFaultToInject(
 
 
 
-* [` RpcOptions `](/docs/apis/Classes/RpcOptions/)
+* [` RpcOptions `](/apis/Classes/RpcOptions/)
 <!-- HHAPIDOC -->

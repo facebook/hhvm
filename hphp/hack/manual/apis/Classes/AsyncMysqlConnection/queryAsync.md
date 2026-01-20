@@ -20,7 +20,7 @@ public function queryAsync(
 
 
 
-+ [` HH\Lib\SQL\Query `](/docs/apis/Classes/HH.Lib.SQL/Query/)`` $query ``
++ [` HH\Lib\SQL\Query `](/apis/Classes/HH.Lib.SQL/Query/)`` $query ``
 
 
 
@@ -30,5 +30,5 @@ public function queryAsync(
 
 
 
-* [` Awaitable<AsyncMysqlQueryResult> `](/docs/apis/Classes/HH/Awaitable/)
+* [` Awaitable<AsyncMysqlQueryResult> `](/apis/Classes/HH/Awaitable/)
 <!-- HHAPIDOC -->

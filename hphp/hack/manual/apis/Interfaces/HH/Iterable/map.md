@@ -6,8 +6,8 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns an [` Iterable `](/docs/apis/Interfaces/HH/Iterable/) containing the values after an operation has been
-applied to each value in the current [` Iterable `](/docs/apis/Interfaces/HH/Iterable/)
+Returns an [` Iterable `](/apis/Interfaces/HH/Iterable/) containing the values after an operation has been
+applied to each value in the current [` Iterable `](/apis/Interfaces/HH/Iterable/)
 
 
 
@@ -21,8 +21,8 @@ public function map<Tu>(
 
 
 
-Every value in the current [` Iterable `](/docs/apis/Interfaces/HH/Iterable/) is affected by a call to [` map() `](/docs/apis/Interfaces/HH/Iterable/map/),
-unlike [` filter() `](/docs/apis/Interfaces/HH/Iterable/filter/) where only values that meet a certain criteria are
+Every value in the current [` Iterable `](/apis/Interfaces/HH/Iterable/) is affected by a call to [` map() `](/apis/Interfaces/HH/Iterable/map/),
+unlike [` filter() `](/apis/Interfaces/HH/Iterable/filter/) where only values that meet a certain criteria are
 affected.
 
 
@@ -33,7 +33,7 @@ affected.
 
 
 
-+ [Examples](</docs/hack/arrays-and-collections/introduction>)
++ [Examples](</hack/arrays-and-collections/introduction>)
 
 
 
@@ -47,7 +47,7 @@ affected.
 
 
 * ` (function(Tv): Tu) $fn ` - The callback containing the operation to apply to the
-  [` Iterable `](/docs/apis/Interfaces/HH/Iterable/) values.
+  [` Iterable `](/apis/Interfaces/HH/Iterable/) values.
 
 
 
@@ -57,6 +57,6 @@ affected.
 
 
 
-- [` Iterable<Tu> `](/docs/apis/Interfaces/HH/Iterable/) - an [` Iterable `](/docs/apis/Interfaces/HH/Iterable/) containing the values after a user-specified
+- [` Iterable<Tu> `](/apis/Interfaces/HH/Iterable/) - an [` Iterable `](/apis/Interfaces/HH/Iterable/) containing the values after a user-specified
   operation is applied.
 <!-- HHAPIDOC -->

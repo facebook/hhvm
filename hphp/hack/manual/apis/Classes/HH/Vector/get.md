@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns the value at the specified key in the current [` Vector `](/docs/apis/Classes/HH/Vector/)
+Returns the value at the specified key in the current [` Vector `](/apis/Classes/HH/Vector/)
 
 
 
@@ -21,7 +21,7 @@ public function get(
 
 
 If the key is not present, null is returned. If you would rather have an
-exception thrown when a key is not present, use [` at() `](/docs/apis/Classes/HH/Vector/at/) instead.
+exception thrown when a key is not present, use [` at() `](/apis/Classes/HH/Vector/at/) instead.
 
 
 

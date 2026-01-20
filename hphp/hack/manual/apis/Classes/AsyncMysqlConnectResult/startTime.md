@@ -33,7 +33,7 @@ public function startTime(): float;
 
 
 
-Every connection has a connection result. You get the connection result from a call to [` AsyncMysqlConnection::connectResult `](/docs/apis/Classes/AsyncMysqlConnection/connectResult/). And one of the methods on an [` AsyncMysqlConnectResult `](/docs/apis/Classes/AsyncMysqlConnectResult/) is [` startTime() `](/docs/apis/Classes/AsyncMysqlConnectResult/startTime/), which tells you when the connection operation started.
+Every connection has a connection result. You get the connection result from a call to [` AsyncMysqlConnection::connectResult `](/apis/Classes/AsyncMysqlConnection/connectResult/). And one of the methods on an [` AsyncMysqlConnectResult `](/apis/Classes/AsyncMysqlConnectResult/) is [` startTime() `](/apis/Classes/AsyncMysqlConnectResult/startTime/), which tells you when the connection operation started.
 
 
 

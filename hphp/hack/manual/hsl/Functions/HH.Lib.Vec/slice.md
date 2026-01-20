@@ -48,7 +48,7 @@ Space complexity: O(n), where n is the size of the slice
 
 
 
-* [` Container<Tv> `](/docs/apis/Interfaces/HH/Container/)`` $container ``
+* [` Container<Tv> `](/apis/Interfaces/HH/Container/)`` $container ``
 * ` int $offset `
 * ` ?int $length = NULL `
 

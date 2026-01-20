@@ -7,7 +7,7 @@ the Hack LSP instead for complete and up-to-date information.
 :::
 
 Since this is a failed result wrapper, this always returns the exception
-thrown during the [` Awaitable `](/docs/apis/Classes/HH/Awaitable/) operation
+thrown during the [` Awaitable `](/apis/Classes/HH/Awaitable/) operation
 
 
 
@@ -19,7 +19,7 @@ public function getException(): Te;
 
 
 
-[` getException() `](/docs/apis/Classes/HH.Asio/WrappedException/getException/) is the same as `getResult() in this case.
+[` getException() `](/apis/Classes/HH.Asio/WrappedException/getException/) is the same as `getResult() in this case.
 
 
 
@@ -29,5 +29,5 @@ public function getException(): Te;
 
 
 
-+ ` Te ` - The exception thrown during the [` Awaitable `](/docs/apis/Classes/HH/Awaitable/) operation.
++ ` Te ` - The exception thrown during the [` Awaitable `](/apis/Classes/HH/Awaitable/) operation.
 <!-- HHAPIDOC -->

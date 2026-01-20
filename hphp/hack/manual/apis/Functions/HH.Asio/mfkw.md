@@ -6,9 +6,9 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns an [` Awaitable `](/docs/apis/Classes/HH/Awaitable/) of [` Map `](/docs/apis/Classes/HH/Map/) of `` ResultOrExceptionWrapper `` after a
+Returns an [` Awaitable `](/apis/Classes/HH/Awaitable/) of [` Map `](/apis/Classes/HH/Map/) of `` ResultOrExceptionWrapper `` after a
 filtering operation has been applied to each key/value pair in the provided
-[` KeyedTraversable `](/docs/apis/Interfaces/HH/KeyedTraversable/)
+[` KeyedTraversable `](/apis/Interfaces/HH/KeyedTraversable/)
 
 
 
@@ -25,33 +25,33 @@ function mfkw<Tk as arraykey, T>(
 
 
 
-This function is similar to ` mfk() `, except the [` Map `](/docs/apis/Classes/HH/Map/) in the returned
-[` Awaitable `](/docs/apis/Classes/HH/Awaitable/) contains values of `` ResultOrExceptionWrapper `` instead of raw
+This function is similar to ` mfk() `, except the [` Map `](/apis/Classes/HH/Map/) in the returned
+[` Awaitable `](/apis/Classes/HH/Awaitable/) contains values of `` ResultOrExceptionWrapper `` instead of raw
 values.
 
 
 
 
-This function is similar to [` Map::filterWithKey() `](/docs/apis/Classes/HH/Map/filterWithKey/), but the filtering of the
-keys and values is done using [` Awaitable `](/docs/apis/Classes/HH/Awaitable/)s.
+This function is similar to [` Map::filterWithKey() `](/apis/Classes/HH/Map/filterWithKey/), but the filtering of the
+keys and values is done using [` Awaitable `](/apis/Classes/HH/Awaitable/)s.
 
 
 
 
 This function is called ` mfkw ` because we are returning a `` m ``ap, doing a
 ``` f ```iltering operation on ```` k ````eys and values, and each value member in the
-[` Map `](/docs/apis/Classes/HH/Map/) is `` w ``rapped by a ``` ResultOrExceptionWrapper ```.
+[` Map `](/apis/Classes/HH/Map/) is `` w ``rapped by a ``` ResultOrExceptionWrapper ```.
 
 
 
 
-` $callable ` must return an [` Awaitable `](/docs/apis/Classes/HH/Awaitable/) of `` bool ``.
+` $callable ` must return an [` Awaitable `](/apis/Classes/HH/Awaitable/) of `` bool ``.
 
 
 
 
-The ` ResultOrExceptionWrapper `s in the [` Map `](/docs/apis/Classes/HH/Map/) of the returned [` Awaitable `](/docs/apis/Classes/HH/Awaitable/)
-are not available until you `` await `` or ``` join ``` the returned [` Awaitable `](/docs/apis/Classes/HH/Awaitable/).
+The ` ResultOrExceptionWrapper `s in the [` Map `](/apis/Classes/HH/Map/) of the returned [` Awaitable `](/apis/Classes/HH/Awaitable/)
+are not available until you `` await `` or ``` join ``` the returned [` Awaitable `](/apis/Classes/HH/Awaitable/).
 
 
 
@@ -61,8 +61,8 @@ are not available until you `` await `` or ``` join ``` the returned [` Awaitabl
 
 
 
-+ [` KeyedTraversable<Tk, `](/docs/apis/Interfaces/HH/KeyedTraversable/)`` T> $inputs `` - The [` KeyedTraversable `](/docs/apis/Interfaces/HH/KeyedTraversable/) of keys and values to filter.
-+ ` (function(Tk, T): Awaitable<bool>) $callable ` - The callable containing the [` Awaitable `](/docs/apis/Classes/HH/Awaitable/) operation to
++ [` KeyedTraversable<Tk, `](/apis/Interfaces/HH/KeyedTraversable/)`` T> $inputs `` - The [` KeyedTraversable `](/apis/Interfaces/HH/KeyedTraversable/) of keys and values to filter.
++ ` (function(Tk, T): Awaitable<bool>) $callable ` - The callable containing the [` Awaitable `](/apis/Classes/HH/Awaitable/) operation to
   apply to `` $inputs ``.
 
 
@@ -73,7 +73,7 @@ are not available until you `` await `` or ``` join ``` the returned [` Awaitabl
 
 
 
-* [` Awaitable<Map<Tk, `](/docs/apis/Classes/HH/Awaitable/)`` ResultOrExceptionWrapper<T>>> `` - An [` Awaitable `](/docs/apis/Classes/HH/Awaitable/) of [` Map `](/docs/apis/Classes/HH/Map/) of key/`` ResultOrExceptionWrapper `` pairs
+* [` Awaitable<Map<Tk, `](/apis/Classes/HH/Awaitable/)`` ResultOrExceptionWrapper<T>>> `` - An [` Awaitable `](/apis/Classes/HH/Awaitable/) of [` Map `](/apis/Classes/HH/Map/) of key/`` ResultOrExceptionWrapper `` pairs
   after the filtering operation has been applied to the keys an
   values in ``` $inputs ```.
 

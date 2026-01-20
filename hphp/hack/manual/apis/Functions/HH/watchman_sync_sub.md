@@ -34,5 +34,5 @@ function watchman_sync_sub(
 
 
 
-* [` Awaitable<bool> `](/docs/apis/Classes/HH/Awaitable/)
+* [` Awaitable<bool> `](/apis/Classes/HH/Awaitable/)
 <!-- HHAPIDOC -->

@@ -13,11 +13,11 @@ the Hack LSP instead for complete and up-to-date information.
 
 ## Sections
 
- * [Classes](/docs/apis/Classes)
- * [Functions](/docs/apis/Functions)
- * [Interfaces](/docs/apis/Interfaces)
- * [Traits](/docs/apis/Traits)
+ * [Classes](/apis/Classes)
+ * [Functions](/apis/Functions)
+ * [Interfaces](/apis/Interfaces)
+ * [Traits](/apis/Traits)
 
 :::tip
-See also the [Hack Standard Library](/docs/hsl/overview).
+See also the [Hack Standard Library](/hsl/overview).
 :::

@@ -24,12 +24,12 @@ interface SeekableFDHandle implements FDHandle, SeekableHandle {...}
 
 
 
-### Public Methods ([` HH\Lib\IO\FDHandle `](</docs/hsl/Interfaces/HH.Lib.IO/FDHandle/>))
+### Public Methods ([` HH\Lib\IO\FDHandle `](</hsl/Interfaces/HH.Lib.IO/FDHandle/>))
 
 
 
 
-+ [` ->getFileDescriptor(): \HH\Lib\OS\FileDescriptor `](</docs/hsl/Interfaces/HH.Lib.IO/FDHandle/getFileDescriptor/>)
++ [` ->getFileDescriptor(): \HH\Lib\OS\FileDescriptor `](</hsl/Interfaces/HH.Lib.IO/FDHandle/getFileDescriptor/>)
 
 
 
@@ -37,13 +37,13 @@ interface SeekableFDHandle implements FDHandle, SeekableHandle {...}
 
 
 
-### Public Methods ([` HH\Lib\IO\SeekableHandle `](</docs/hsl/Interfaces/HH.Lib.IO/SeekableHandle/>))
+### Public Methods ([` HH\Lib\IO\SeekableHandle `](</hsl/Interfaces/HH.Lib.IO/SeekableHandle/>))
 
 
 
 
-* [` ->seek(int $offset): void `](</docs/hsl/Interfaces/HH.Lib.IO/SeekableHandle/seek/>)\
+* [` ->seek(int $offset): void `](</hsl/Interfaces/HH.Lib.IO/SeekableHandle/seek/>)\
   Move to a specific offset within a handle
-* [` ->tell(): int `](</docs/hsl/Interfaces/HH.Lib.IO/SeekableHandle/tell/>)\
+* [` ->tell(): int `](</hsl/Interfaces/HH.Lib.IO/SeekableHandle/tell/>)\
   Get the current pointer position within a handle
 <!-- HHAPIDOC -->

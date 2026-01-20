@@ -86,7 +86,7 @@ function main() : void {
 
 Traits can contain both instance and static members. If a trait defines a static property, then each class using the trait has its own instance of the static property.
 
-A trait can access methods and properties of the class that uses it, but these dependencies must be declared using [trait requirements](/docs/hack/traits-and-interfaces/trait-and-interface-requirements).
+A trait can access methods and properties of the class that uses it, but these dependencies must be declared using [trait requirements](/hack/traits-and-interfaces/trait-and-interface-requirements).
 
 ### Resolution of naming conflicts
 

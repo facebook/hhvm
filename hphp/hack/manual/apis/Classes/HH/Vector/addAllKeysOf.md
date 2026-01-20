@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Adds the keys of the specified container to the current [` Vector `](/docs/apis/Classes/HH/Vector/)
+Adds the keys of the specified container to the current [` Vector `](/apis/Classes/HH/Vector/)
 
 
 
@@ -20,14 +20,14 @@ public function addAllKeysOf(
 
 
 
-For every key in the provided [` KeyedContainer `](/docs/apis/Interfaces/HH/KeyedContainer/), append that key into
-the current [` Vector `](/docs/apis/Classes/HH/Vector/), assigning the next available integer key for each.
+For every key in the provided [` KeyedContainer `](/apis/Interfaces/HH/KeyedContainer/), append that key into
+the current [` Vector `](/apis/Classes/HH/Vector/), assigning the next available integer key for each.
 
 
 
 
-Future changes made to the current [` Vector `](/docs/apis/Classes/HH/Vector/) ARE reflected in the
-returned [` Vector `](/docs/apis/Classes/HH/Vector/), and vice-versa.
+Future changes made to the current [` Vector `](/apis/Classes/HH/Vector/) ARE reflected in the
+returned [` Vector `](/apis/Classes/HH/Vector/), and vice-versa.
 
 
 
@@ -37,7 +37,7 @@ returned [` Vector `](/docs/apis/Classes/HH/Vector/), and vice-versa.
 
 
 
-+ ` ? `[` KeyedContainer<Tv, `](/docs/apis/Interfaces/HH/KeyedContainer/)`` mixed> $container `` - The [` KeyedContainer `](/docs/apis/Interfaces/HH/KeyedContainer/) with the new keys to add.
++ ` ? `[` KeyedContainer<Tv, `](/apis/Interfaces/HH/KeyedContainer/)`` mixed> $container `` - The [` KeyedContainer `](/apis/Interfaces/HH/KeyedContainer/) with the new keys to add.
 
 
 
@@ -47,7 +47,7 @@ returned [` Vector `](/docs/apis/Classes/HH/Vector/), and vice-versa.
 
 
 
-* [` Vector<Tv> `](/docs/apis/Classes/HH/Vector/) - Returns itself.
+* [` Vector<Tv> `](/apis/Classes/HH/Vector/) - Returns itself.
 
 
 
@@ -57,7 +57,7 @@ returned [` Vector `](/docs/apis/Classes/HH/Vector/), and vice-versa.
 
 
 
-This example adds ` string ` keys from a [` Map `](/docs/apis/Classes/HH/Map/) to a [` Vector `](/docs/apis/Classes/HH/Vector/) as its values:
+This example adds ` string ` keys from a [` Map `](/apis/Classes/HH/Map/) to a [` Vector `](/apis/Classes/HH/Vector/) as its values:
 
 
 
@@ -87,7 +87,7 @@ $food_names->addAllKeysOf($vegetable_calories);
 
 
 
-This example adds ` int ` keys from a [` Map `](/docs/apis/Classes/HH/Map/) to a [` Vector `](/docs/apis/Classes/HH/Vector/) as its values:
+This example adds ` int ` keys from a [` Map `](/apis/Classes/HH/Map/) to a [` Vector `](/apis/Classes/HH/Vector/) as its values:
 
 
 

@@ -15,7 +15,7 @@ Allows for the iteration over the values provided by an ` async ` function
 
 
 
-If an ` async ` function returns an [` AsyncIterator<T> `](/docs/apis/Interfaces/HH/AsyncIterator/), then you can iterate
+If an ` async ` function returns an [` AsyncIterator<T> `](/apis/Interfaces/HH/AsyncIterator/), then you can iterate
 over the `` T `` values returned from that function.
 
 
@@ -38,8 +38,8 @@ async function use_countdown(): Awaitable<void> {
 
 
 
-+ [Introduction](</docs/hack/asynchronous-operations/introduction>)
-+ [Guidelines](</docs/hack/asynchronous-operations/guidelines>)
++ [Introduction](</hack/asynchronous-operations/introduction>)
++ [Guidelines](</hack/asynchronous-operations/guidelines>)
 
 
 
@@ -66,6 +66,6 @@ interface AsyncIterator {...}
 
 
 
-* [` ->next(): Awaitable<?(mixed, Tv)> `](/docs/apis/Interfaces/HH/AsyncIterator/next/)\
-  Move the async iterator to the next [` Awaitable `](/docs/apis/Classes/HH/Awaitable/) position
+* [` ->next(): Awaitable<?(mixed, Tv)> `](/apis/Interfaces/HH/AsyncIterator/next/)\
+  Move the async iterator to the next [` Awaitable `](/apis/Classes/HH/Awaitable/) position
 <!-- HHAPIDOC -->

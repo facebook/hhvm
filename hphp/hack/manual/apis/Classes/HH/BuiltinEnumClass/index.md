@@ -47,10 +47,10 @@ abstract class BuiltinEnumClass extends BuiltinAbstractEnumClass {...}
 
 
 
-+ [` ::getValues(): darray<string, T> `](/docs/apis/Classes/HH/BuiltinEnumClass/getValues/)\
++ [` ::getValues(): darray<string, T> `](/apis/Classes/HH/BuiltinEnumClass/getValues/)\
   Get the values of the public consts defined on this class,
   indexed by the string name of those consts
-+ [` ::valueOf<TEnum super this, TType>(EnumClass\Label<TEnum, TType> $label): MemberOf<TEnum, TType> `](/docs/apis/Classes/HH/BuiltinEnumClass/valueOf/)
++ [` ::valueOf<TEnum super this, TType>(EnumClass\Label<TEnum, TType> $label): MemberOf<TEnum, TType> `](/apis/Classes/HH/BuiltinEnumClass/valueOf/)
 
 
 
@@ -58,10 +58,10 @@ abstract class BuiltinEnumClass extends BuiltinAbstractEnumClass {...}
 
 
 
-### Public Methods ([` HH\BuiltinAbstractEnumClass `](/docs/apis/Classes/HH/BuiltinAbstractEnumClass/))
+### Public Methods ([` HH\BuiltinAbstractEnumClass `](/apis/Classes/HH/BuiltinAbstractEnumClass/))
 
 
 
 
-* [` ::nameOf<TType>(EnumClass\Label<this, TType> $label): string `](/docs/apis/Classes/HH/BuiltinAbstractEnumClass/nameOf/)
+* [` ::nameOf<TType>(EnumClass\Label<this, TType> $label): string `](/apis/Classes/HH/BuiltinAbstractEnumClass/nameOf/)
 <!-- HHAPIDOC -->

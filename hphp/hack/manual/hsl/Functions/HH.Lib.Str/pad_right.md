@@ -43,7 +43,7 @@ To pad the string to a fixed number of characters, see `` Str\pad_right_l() ``.
 
 
 
-+ [String](</docs/hack/built-in-types/string>)
++ [String](</hack/built-in-types/string>)
 
 
 

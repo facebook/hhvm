@@ -7,7 +7,7 @@ the Hack LSP instead for complete and up-to-date information.
 :::
 
 Returns a lazy, access elements only when needed view of the current
-[` Pair `](/docs/apis/Classes/HH/Pair/)
+[` Pair `](/apis/Classes/HH/Pair/)
 
 
 
@@ -19,15 +19,15 @@ public function lazy(): KeyedIterable<int, mixed>;
 
 
 
-Normally, memory is allocated for all of the elements of the [` Pair `](/docs/apis/Classes/HH/Pair/).
+Normally, memory is allocated for all of the elements of the [` Pair `](/apis/Classes/HH/Pair/).
 With a lazy view, memory is allocated for an element only when needed or
-used in a calculation like in [` map() `](/docs/apis/Classes/HH/Pair/map/) or [` filter() `](/docs/apis/Classes/HH/Pair/filter/).
+used in a calculation like in [` map() `](/apis/Classes/HH/Pair/map/) or [` filter() `](/apis/Classes/HH/Pair/filter/).
 
 
 
 
-That said, [` Pair `](/docs/apis/Classes/HH/Pair/)s only have two elements. So the performance impact on
-a [` Pair `](/docs/apis/Classes/HH/Pair/) will be not be noticeable in the real world.
+That said, [` Pair `](/apis/Classes/HH/Pair/)s only have two elements. So the performance impact on
+a [` Pair `](/apis/Classes/HH/Pair/) will be not be noticeable in the real world.
 
 
 
@@ -37,7 +37,7 @@ a [` Pair `](/docs/apis/Classes/HH/Pair/) will be not be noticeable in the real 
 
 
 
-+ [Examples](</docs/hack/arrays-and-collections/introduction>)
++ [Examples](</hack/arrays-and-collections/introduction>)
 
 
 
@@ -50,6 +50,6 @@ a [` Pair `](/docs/apis/Classes/HH/Pair/) will be not be noticeable in the real 
 
 
 
-* [` KeyedIterable<int, `](/docs/apis/Interfaces/HH/KeyedIterable/)`` mixed> `` - an integer-keyed KeyedIterable representing the lazy view into
-  the current [` Pair `](/docs/apis/Classes/HH/Pair/).
+* [` KeyedIterable<int, `](/apis/Interfaces/HH/KeyedIterable/)`` mixed> `` - an integer-keyed KeyedIterable representing the lazy view into
+  the current [` Pair `](/apis/Classes/HH/Pair/).
 <!-- HHAPIDOC -->

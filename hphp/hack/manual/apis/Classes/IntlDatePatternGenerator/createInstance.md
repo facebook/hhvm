@@ -36,5 +36,5 @@ public static function createInstance(
 
 
 
-* [` IntlDatePatternGenerator `](/docs/apis/Classes/IntlDatePatternGenerator/)
+* [` IntlDatePatternGenerator `](/apis/Classes/IntlDatePatternGenerator/)
 <!-- HHAPIDOC -->

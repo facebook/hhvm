@@ -41,7 +41,7 @@ Space complexity: O(1)
 
 
 
-* ` ? `[` Traversable<T> `](/docs/apis/Interfaces/HH/Traversable/)`` $traversable ``
+* ` ? `[` Traversable<T> `](/apis/Interfaces/HH/Traversable/)`` $traversable ``
 
 
 

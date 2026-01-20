@@ -29,5 +29,5 @@ interface UNSAFESingletonMemoizeParam implements IMemoizeParam {...}
 
 
 
-+ [` ->getInstanceKey(): string `](/docs/apis/Interfaces/HH/UNSAFESingletonMemoizeParam/getInstanceKey/)
++ [` ->getInstanceKey(): string `](/apis/Interfaces/HH/UNSAFESingletonMemoizeParam/getInstanceKey/)
 <!-- HHAPIDOC -->

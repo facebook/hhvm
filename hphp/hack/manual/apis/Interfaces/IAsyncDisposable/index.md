@@ -32,7 +32,7 @@ interface IAsyncDisposable {...}
 
 
 
-+ [` ->__disposeAsync(): Awaitable<void> `](/docs/apis/Interfaces/IAsyncDisposable/__disposeAsync/)\
++ [` ->__disposeAsync(): Awaitable<void> `](/apis/Interfaces/IAsyncDisposable/__disposeAsync/)\
   This method is invoked exactly once at the end of the scope of the
   await using statement, unless the program terminates with a fatal error
 <!-- HHAPIDOC -->

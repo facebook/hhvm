@@ -27,7 +27,7 @@ function has_finished<T>(
 
 
 
-+ [` Awaitable<T, `](/docs/apis/Classes/HH/Awaitable/)`` mixed> $awaitable ``
++ [` Awaitable<T, `](/apis/Classes/HH/Awaitable/)`` mixed> $awaitable ``
 
 
 

@@ -26,8 +26,8 @@ It's only used once (with '=').
 
 
 
-+ [String](</docs/hack/built-in-types/string>)
-+ [Format Strings](</docs/hack/functions/format-strings>)
++ [String](</hack/built-in-types/string>)
++ [Format Strings](</hack/functions/format-strings>)
 
 
 
@@ -54,5 +54,5 @@ interface SprintfFormatQuote {...}
 
 
 
-* [` ->format_0x3d(): SprintfFormat `](</docs/hsl/Interfaces/HH.Lib.Str/SprintfFormatQuote/format_0x3d/>)
+* [` ->format_0x3d(): SprintfFormat `](</hsl/Interfaces/HH.Lib.Str/SprintfFormatQuote/format_0x3d/>)
 <!-- HHAPIDOC -->

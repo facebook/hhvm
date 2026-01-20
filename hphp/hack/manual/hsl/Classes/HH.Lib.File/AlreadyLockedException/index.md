@@ -15,7 +15,7 @@ Indicates that a lock failed, because the file is already locked
 
 
 
-This class does not extend [` OS\ErrnoException `](/docs/hsl/Classes/HH.Lib.OS/ErrnoException/) as an `` EWOULDBLOCK `` after
+This class does not extend [` OS\ErrnoException `](/hsl/Classes/HH.Lib.OS/ErrnoException/) as an `` EWOULDBLOCK `` after
 ``` flock($fd, LOCK_NB) ``` is expected rather than an error; this exception is
 thrown when the caller has explicitly requested an exception for these cases.
 

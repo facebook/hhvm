@@ -6,8 +6,8 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a [` MutableSet `](/docs/apis/Interfaces/MutableSet/) containing the values after the `` n ``-th element of
-the current [` MutableSet `](/docs/apis/Interfaces/MutableSet/)
+Returns a [` MutableSet `](/apis/Interfaces/MutableSet/) containing the values after the `` n ``-th element of
+the current [` MutableSet `](/apis/Interfaces/MutableSet/)
 
 
 
@@ -21,8 +21,8 @@ public function skip(
 
 
 
-The returned [` MutableSet `](/docs/apis/Interfaces/MutableSet/) will always be a proper subset of the current
-[` MutableSet `](/docs/apis/Interfaces/MutableSet/).
+The returned [` MutableSet `](/apis/Interfaces/MutableSet/) will always be a proper subset of the current
+[` MutableSet `](/apis/Interfaces/MutableSet/).
 
 
 
@@ -38,7 +38,7 @@ The returned [` MutableSet `](/docs/apis/Interfaces/MutableSet/) will always be 
 
 
 + ` int $n ` - The last element to be skipped; the `` $n+1 `` element will be the
-  first one in the returned [` MutableSet `](/docs/apis/Interfaces/MutableSet/).
+  first one in the returned [` MutableSet `](/apis/Interfaces/MutableSet/).
 
 
 
@@ -48,7 +48,7 @@ The returned [` MutableSet `](/docs/apis/Interfaces/MutableSet/) will always be 
 
 
 
-* [` MutableSet<Tv> `](/docs/apis/Interfaces/MutableSet/) - A [` MutableSet `](/docs/apis/Interfaces/MutableSet/) that is a proper subset of the current
-  [` MutableSet `](/docs/apis/Interfaces/MutableSet/) containing values after the specified `` n ``-th
+* [` MutableSet<Tv> `](/apis/Interfaces/MutableSet/) - A [` MutableSet `](/apis/Interfaces/MutableSet/) that is a proper subset of the current
+  [` MutableSet `](/apis/Interfaces/MutableSet/) containing values after the specified `` n ``-th
   element.
 <!-- HHAPIDOC -->

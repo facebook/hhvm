@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a [` Set `](/docs/apis/Classes/HH/Set/) containing the first `` n `` values of the current [` Set `](/docs/apis/Classes/HH/Set/)
+Returns a [` Set `](/apis/Classes/HH/Set/) containing the first `` n `` values of the current [` Set `](/apis/Classes/HH/Set/)
 
 
 
@@ -20,7 +20,7 @@ public function take(
 
 
 
-The returned [` Set `](/docs/apis/Classes/HH/Set/) will always be a proper subset of the current [` Set `](/docs/apis/Classes/HH/Set/).
+The returned [` Set `](/apis/Classes/HH/Set/) will always be a proper subset of the current [` Set `](/apis/Classes/HH/Set/).
 
 
 
@@ -35,7 +35,7 @@ The returned [` Set `](/docs/apis/Classes/HH/Set/) will always be a proper subse
 
 
 
-+ ` int $n ` - The last element that will be included in the [` Set `](/docs/apis/Classes/HH/Set/).
++ ` int $n ` - The last element that will be included in the [` Set `](/apis/Classes/HH/Set/).
 
 
 
@@ -45,7 +45,7 @@ The returned [` Set `](/docs/apis/Classes/HH/Set/) will always be a proper subse
 
 
 
-* [` Set<Tv> `](/docs/apis/Classes/HH/Set/) - A [` Set `](/docs/apis/Classes/HH/Set/) that is a proper subset of the current [` Set `](/docs/apis/Classes/HH/Set/) up to `` n ``
+* [` Set<Tv> `](/apis/Classes/HH/Set/) - A [` Set `](/apis/Classes/HH/Set/) that is a proper subset of the current [` Set `](/apis/Classes/HH/Set/) up to `` n ``
   elements.
 
 

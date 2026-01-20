@@ -18,19 +18,19 @@ public function toImmVector(): ImmVector<Tv>;
 
 
 
-Unlike ` Vector `'s [` toVector() `](/docs/apis/Classes/HH/ImmVector/toVector/) method, this does not actually return a copy
+Unlike ` Vector `'s [` toVector() `](/apis/Classes/HH/ImmVector/toVector/) method, this does not actually return a copy
 of the current `` ImmVector ``. Since ``` ImmVector ```s are immutable, there is no
 reason to pay the cost of creating a copy of the current ```` ImmVector ````.
 
 
 
 
-This method is interchangeable with [` immutable() `](/docs/apis/Classes/HH/ImmVector/immutable/).
+This method is interchangeable with [` immutable() `](/apis/Classes/HH/ImmVector/immutable/).
 
 
 
 
-This method is NOT interchangeable with [` values() `](/docs/apis/Classes/HH/ImmVector/values/). [` values() `](/docs/apis/Classes/HH/ImmVector/values/) returns a
+This method is NOT interchangeable with [` values() `](/apis/Classes/HH/ImmVector/values/). [` values() `](/apis/Classes/HH/ImmVector/values/) returns a
 new `` ImmVector `` that is a copy of the current ``` ImmVector ```, and thus incurs
 both the cost of copying the current ```` ImmVector ````, and the memory space
 consumed by the new ````` ImmVector `````.  This may be significant, for large
@@ -44,7 +44,7 @@ consumed by the new ````` ImmVector `````.  This may be significant, for large
 
 
 
-+ [` ImmVector<Tv> `](/docs/apis/Classes/HH/ImmVector/) - The current `` ImmVector ``.
++ [` ImmVector<Tv> `](/apis/Classes/HH/ImmVector/) - The current `` ImmVector ``.
 
 
 
@@ -54,5 +54,5 @@ consumed by the new ````` ImmVector `````.  This may be significant, for large
 
 
 
-See [` Vector::toImmVector `](/docs/apis/Classes/HH/Vector) for usage examples.
+See [` Vector::toImmVector `](/apis/Classes/HH/Vector) for usage examples.
 <!-- HHAPIDOC -->

@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns the last value in the current [` ImmVector `](/docs/apis/Classes/HH/ImmVector/)
+Returns the last value in the current [` ImmVector `](/apis/Classes/HH/ImmVector/)
 
 
 
@@ -23,8 +23,8 @@ public function lastValue(): ?Tv;
 
 
 
-+ ` ?Tv ` - The last value in the current [` ImmVector `](/docs/apis/Classes/HH/ImmVector/), or `` null `` if the
-  current [` ImmVector `](/docs/apis/Classes/HH/ImmVector/) is empty.
++ ` ?Tv ` - The last value in the current [` ImmVector `](/apis/Classes/HH/ImmVector/), or `` null `` if the
+  current [` ImmVector `](/apis/Classes/HH/ImmVector/) is empty.
 
 
 
@@ -34,5 +34,5 @@ public function lastValue(): ?Tv;
 
 
 
-See [` Vector::lastValue `](/docs/apis/Classes/HH/Vector/lastValue/#examples) for usage examples.
+See [` Vector::lastValue `](/apis/Classes/HH/Vector/lastValue/#examples) for usage examples.
 <!-- HHAPIDOC -->

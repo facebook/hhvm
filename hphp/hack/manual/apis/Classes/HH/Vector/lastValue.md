@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns the last value in the current [` Vector `](/docs/apis/Classes/HH/Vector/)
+Returns the last value in the current [` Vector `](/apis/Classes/HH/Vector/)
 
 
 
@@ -23,8 +23,8 @@ public function lastValue(): ?Tv;
 
 
 
-+ ` ?Tv ` - The last value in the current [` Vector `](/docs/apis/Classes/HH/Vector/), or `` null `` if the current
-  [` Vector `](/docs/apis/Classes/HH/Vector/) is empty.
++ ` ?Tv ` - The last value in the current [` Vector `](/apis/Classes/HH/Vector/), or `` null `` if the current
+  [` Vector `](/apis/Classes/HH/Vector/) is empty.
 
 
 
@@ -34,7 +34,7 @@ public function lastValue(): ?Tv;
 
 
 
-This example shows how [` lastValue() `](/docs/apis/Classes/HH/Vector/lastValue/) can be used even when a [` Vector `](/docs/apis/Classes/HH/Vector/) may be empty:
+This example shows how [` lastValue() `](/apis/Classes/HH/Vector/lastValue/) can be used even when a [` Vector `](/apis/Classes/HH/Vector/) may be empty:
 
 
 

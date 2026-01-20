@@ -6,8 +6,8 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a [` Vector `](/docs/apis/Classes/HH/Vector/) containing the results of applying an operation to each
-key/value pair in the current [` Vector `](/docs/apis/Classes/HH/Vector/)
+Returns a [` Vector `](/apis/Classes/HH/Vector/) containing the results of applying an operation to each
+key/value pair in the current [` Vector `](/apis/Classes/HH/Vector/)
 
 
 
@@ -21,10 +21,10 @@ public function mapWithKey<Tu>(
 
 
 
-[` mapWithKey() `](/docs/apis/Classes/HH/Vector/mapWithKey/)'s result contains a value for every key/value pair in the
-current [` Vector `](/docs/apis/Classes/HH/Vector/); unlike [` filterWithKey() `](/docs/apis/Classes/HH/Vector/filterWithKey/), where only values whose
+[` mapWithKey() `](/apis/Classes/HH/Vector/mapWithKey/)'s result contains a value for every key/value pair in the
+current [` Vector `](/apis/Classes/HH/Vector/); unlike [` filterWithKey() `](/apis/Classes/HH/Vector/filterWithKey/), where only values whose
 key/value pairs meet a certain criterion are included in the resulting
-[` Vector `](/docs/apis/Classes/HH/Vector/).
+[` Vector `](/apis/Classes/HH/Vector/).
 
 
 
@@ -44,8 +44,8 @@ key/value pairs meet a certain criterion are included in the resulting
 
 
 
-* [` Vector<Tu> `](/docs/apis/Classes/HH/Vector/) - A [` Vector `](/docs/apis/Classes/HH/Vector/) containing the results of applying a user-specified
-  operation to each key/value pair of the current [` Vector `](/docs/apis/Classes/HH/Vector/) in turn.
+* [` Vector<Tu> `](/apis/Classes/HH/Vector/) - A [` Vector `](/apis/Classes/HH/Vector/) containing the results of applying a user-specified
+  operation to each key/value pair of the current [` Vector `](/apis/Classes/HH/Vector/) in turn.
 
 
 
@@ -55,7 +55,7 @@ key/value pairs meet a certain criterion are included in the resulting
 
 
 
-This example shows how ` mapWithKey ` can be used to create a new [` Vector `](/docs/apis/Classes/HH/Vector/) based on `` $v ``'s keys and values:
+This example shows how ` mapWithKey ` can be used to create a new [` Vector `](/apis/Classes/HH/Vector/) based on `` $v ``'s keys and values:
 
 
 

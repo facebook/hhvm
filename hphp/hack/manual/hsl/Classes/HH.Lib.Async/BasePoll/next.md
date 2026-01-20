@@ -18,5 +18,5 @@ final public function next(): Awaitable<?(Tk, Tv)>;
 
 
 
-+ [` Awaitable<?(Tk, `](/docs/apis/Classes/HH/Awaitable/)`` Tv)> ``
++ [` Awaitable<?(Tk, `](/apis/Classes/HH/Awaitable/)`` Tv)> ``
 <!-- HHAPIDOC -->

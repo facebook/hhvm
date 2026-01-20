@@ -21,8 +21,8 @@ Represents a read-only (immutable) sequence of values, indexed by integers
 
 
 
-+ [Introduction](</docs/hack/arrays-and-collections/introduction>)
-+ [Interfaces](</docs/hack/arrays-and-collections/introduction>)
++ [Introduction](</hack/arrays-and-collections/introduction>)
++ [Interfaces](</hack/arrays-and-collections/introduction>)
 
 
 
@@ -47,59 +47,59 @@ interface ConstVector implements ConstCollection<Tv>, ConstIndexAccess<int, Tv>,
 
 
 
-* [` ->concat<Tu super Tv>(Traversable<Tu> $traversable): ConstVector<Tu> `](/docs/apis/Interfaces/ConstVector/concat/)\
+* [` ->concat<Tu super Tv>(Traversable<Tu> $traversable): ConstVector<Tu> `](/apis/Interfaces/ConstVector/concat/)\
   Returns a `` ConstVector `` that is the concatenation of the values of the
-  current ``` ConstVector ``` and the values of the provided [` Traversable `](/docs/apis/Interfaces/HH/Traversable/)
-* [` ->filter((function(Tv): bool) $fn): ConstVector<Tv> `](/docs/apis/Interfaces/ConstVector/filter/)\
+  current ``` ConstVector ``` and the values of the provided [` Traversable `](/apis/Interfaces/HH/Traversable/)
+* [` ->filter((function(Tv): bool) $fn): ConstVector<Tv> `](/apis/Interfaces/ConstVector/filter/)\
   Returns a `` ConstVector `` containing the values of the current ``` ConstVector ```
   that meet a supplied condition
-* [` ->filterWithKey((function(int, Tv): bool) $fn): ConstVector<Tv> `](/docs/apis/Interfaces/ConstVector/filterWithKey/)\
+* [` ->filterWithKey((function(int, Tv): bool) $fn): ConstVector<Tv> `](/apis/Interfaces/ConstVector/filterWithKey/)\
   Returns a `` ConstVector `` containing the values of the current ``` ConstVector ```
   that meet a supplied condition applied to its keys and values
-* [` ->firstKey(): ?int `](/docs/apis/Interfaces/ConstVector/firstKey/)\
+* [` ->firstKey(): ?int `](/apis/Interfaces/ConstVector/firstKey/)\
   Returns the first key in the current `` ConstVector ``
-* [` ->firstValue(): ?Tv `](/docs/apis/Interfaces/ConstVector/firstValue/)\
+* [` ->firstValue(): ?Tv `](/apis/Interfaces/ConstVector/firstValue/)\
   Returns the first value in the current `` ConstVector ``
-* [` ->keys(): ConstVector<int> `](/docs/apis/Interfaces/ConstVector/keys/)\
+* [` ->keys(): ConstVector<int> `](/apis/Interfaces/ConstVector/keys/)\
   Returns a `` ConstVector `` containing the keys of the current ``` ConstVector ```
-* [` ->lastKey(): ?int `](/docs/apis/Interfaces/ConstVector/lastKey/)\
+* [` ->lastKey(): ?int `](/apis/Interfaces/ConstVector/lastKey/)\
   Returns the last key in the current `` ConstVector ``
-* [` ->lastValue(): ?Tv `](/docs/apis/Interfaces/ConstVector/lastValue/)\
+* [` ->lastValue(): ?Tv `](/apis/Interfaces/ConstVector/lastValue/)\
   Returns the last value in the current `` ConstVector ``
-* [` ->linearSearch(mixed $search_value): int `](/docs/apis/Interfaces/ConstVector/linearSearch/)\
+* [` ->linearSearch(mixed $search_value): int `](/apis/Interfaces/ConstVector/linearSearch/)\
   Returns the index of the first element that matches the search value
-* [` ->map<Tu>((function(Tv): Tu) $fn): ConstVector<Tu> `](/docs/apis/Interfaces/ConstVector/map/)\
+* [` ->map<Tu>((function(Tv): Tu) $fn): ConstVector<Tu> `](/apis/Interfaces/ConstVector/map/)\
   Returns a `` ConstVector `` containing the values after an operation has been
   applied to each value in the current ``` ConstVector ```
-* [` ->mapWithKey<Tu>((function(int, Tv): Tu) $fn): ConstVector<Tu> `](/docs/apis/Interfaces/ConstVector/mapWithKey/)\
+* [` ->mapWithKey<Tu>((function(int, Tv): Tu) $fn): ConstVector<Tu> `](/apis/Interfaces/ConstVector/mapWithKey/)\
   Returns a `` ConstVector `` containing the values after an operation has been
   applied to each key and value in the current ``` ConstVector ```
-* [` ->skip(int $n): ConstVector<Tv> `](/docs/apis/Interfaces/ConstVector/skip/)\
+* [` ->skip(int $n): ConstVector<Tv> `](/apis/Interfaces/ConstVector/skip/)\
   Returns a `` ConstVector `` containing the values after the ``` n ```-th element of
   the current ```` ConstVector ````
-* [` ->skipWhile((function(Tv): bool) $fn): ConstVector<Tv> `](/docs/apis/Interfaces/ConstVector/skipWhile/)\
+* [` ->skipWhile((function(Tv): bool) $fn): ConstVector<Tv> `](/apis/Interfaces/ConstVector/skipWhile/)\
   Returns a `` ConstVector `` containing the values of the current ``` ConstVector ```
   starting after and including the first value that produces ```` true ```` when
   passed to the specified callback
-* [` ->slice(int $start, int $len): ConstVector<Tv> `](/docs/apis/Interfaces/ConstVector/slice/)\
+* [` ->slice(int $start, int $len): ConstVector<Tv> `](/apis/Interfaces/ConstVector/slice/)\
   Returns a subset of the current `` ConstVector `` starting from a given key up
   to, but not including, the element at the provided length from the starting
   key
-* [` ->take(int $n): ConstVector<Tv> `](/docs/apis/Interfaces/ConstVector/take/)\
+* [` ->take(int $n): ConstVector<Tv> `](/apis/Interfaces/ConstVector/take/)\
   Returns a `` ConstVector `` containing the first ``` n ``` values of the current
   ```` ConstVector ````
-* [` ->takeWhile((function(Tv): bool) $fn): ConstVector<Tv> `](/docs/apis/Interfaces/ConstVector/takeWhile/)\
+* [` ->takeWhile((function(Tv): bool) $fn): ConstVector<Tv> `](/apis/Interfaces/ConstVector/takeWhile/)\
   Returns a `` ConstVector `` containing the values of the current ``` ConstVector ```
   up to but not including the first value that produces ```` false ```` when passed
   to the specified callback
-* [` ->toDArray(): darray<int, Tv> `](/docs/apis/Interfaces/ConstVector/toDArray/)
-* [` ->toVArray(): varray<Tv> `](/docs/apis/Interfaces/ConstVector/toVArray/)
-* [` ->values(): ConstVector<Tv> `](/docs/apis/Interfaces/ConstVector/values/)\
+* [` ->toDArray(): darray<int, Tv> `](/apis/Interfaces/ConstVector/toDArray/)
+* [` ->toVArray(): varray<Tv> `](/apis/Interfaces/ConstVector/toVArray/)
+* [` ->values(): ConstVector<Tv> `](/apis/Interfaces/ConstVector/values/)\
   Returns a `` ConstVector `` containing the values of the current
   ``` ConstVector ```
-* [` ->zip<Tu>(Traversable<Tu> $traversable): ConstVector<Pair<Tv, Tu>> `](/docs/apis/Interfaces/ConstVector/zip/)\
-  Returns a `` ConstVector `` where each element is a [` Pair `](/docs/apis/Classes/HH/Pair/) that combines the
-  element of the current `` ConstVector `` and the provided [` Traversable `](/docs/apis/Interfaces/HH/Traversable/)
+* [` ->zip<Tu>(Traversable<Tu> $traversable): ConstVector<Pair<Tv, Tu>> `](/apis/Interfaces/ConstVector/zip/)\
+  Returns a `` ConstVector `` where each element is a [` Pair `](/apis/Classes/HH/Pair/) that combines the
+  element of the current `` ConstVector `` and the provided [` Traversable `](/apis/Interfaces/HH/Traversable/)
 
 
 
@@ -107,18 +107,18 @@ interface ConstVector implements ConstCollection<Tv>, ConstIndexAccess<int, Tv>,
 
 
 
-### Public Methods ([` ConstCollection `](/docs/apis/Interfaces/ConstCollection/))
+### Public Methods ([` ConstCollection `](/apis/Interfaces/ConstCollection/))
 
 
 
 
-- [` ->count(): int `](/docs/apis/Interfaces/ConstCollection/count/)\
+- [` ->count(): int `](/apis/Interfaces/ConstCollection/count/)\
   Get the number of items in the collection
 
-- [` ->isEmpty(): bool `](/docs/apis/Interfaces/ConstCollection/isEmpty/)\
+- [` ->isEmpty(): bool `](/apis/Interfaces/ConstCollection/isEmpty/)\
   Is the collection empty?
 
-- [` ->items(): HH\Iterable<Te> `](/docs/apis/Interfaces/ConstCollection/items/)\
+- [` ->items(): HH\Iterable<Te> `](/apis/Interfaces/ConstCollection/items/)\
   Get access to the items in the collection
 
 
@@ -128,12 +128,12 @@ interface ConstVector implements ConstCollection<Tv>, ConstIndexAccess<int, Tv>,
 
 
 
-### Public Methods ([` IPureStringishObject `](/docs/apis/Interfaces/IPureStringishObject/))
+### Public Methods ([` IPureStringishObject `](/apis/Interfaces/IPureStringishObject/))
 
 
 
 
-+ [` ->__toString(): string `](/docs/apis/Interfaces/IPureStringishObject/__toString/)
++ [` ->__toString(): string `](/apis/Interfaces/IPureStringishObject/__toString/)
 
 
 
@@ -141,16 +141,16 @@ interface ConstVector implements ConstCollection<Tv>, ConstIndexAccess<int, Tv>,
 
 
 
-### Public Methods ([` ConstIndexAccess `](/docs/apis/Interfaces/ConstIndexAccess/))
+### Public Methods ([` ConstIndexAccess `](/apis/Interfaces/ConstIndexAccess/))
 
 
 
 
-* [` ->at(Tk $k): Tv `](/docs/apis/Interfaces/ConstIndexAccess/at/)\
+* [` ->at(Tk $k): Tv `](/apis/Interfaces/ConstIndexAccess/at/)\
   Returns the value at the specified key in the current collection
-* [` ->containsKey(mixed $k): bool `](/docs/apis/Interfaces/ConstIndexAccess/containsKey/)\
+* [` ->containsKey(mixed $k): bool `](/apis/Interfaces/ConstIndexAccess/containsKey/)\
   Determines if the specified key is in the current collection
-* [` ->get(Tk $k): ?Tv `](/docs/apis/Interfaces/ConstIndexAccess/get/)\
+* [` ->get(Tk $k): ?Tv `](/apis/Interfaces/ConstIndexAccess/get/)\
   Returns the value at the specified key in the current collection
 
 
@@ -159,22 +159,22 @@ interface ConstVector implements ConstCollection<Tv>, ConstIndexAccess<int, Tv>,
 
 
 
-### Public Methods ([` HH\KeyedIterable `](/docs/apis/Interfaces/HH/KeyedIterable/))
+### Public Methods ([` HH\KeyedIterable `](/apis/Interfaces/HH/KeyedIterable/))
 
 
 
 
-- [` ->getIterator(): KeyedIterator<Tk, Tv> `](/docs/apis/Interfaces/HH/KeyedIterable/getIterator/)\
+- [` ->getIterator(): KeyedIterator<Tk, Tv> `](/apis/Interfaces/HH/KeyedIterable/getIterator/)\
   Returns an iterator that points to beginning of the current
-  [` KeyedIterable `](/docs/apis/Interfaces/HH/KeyedIterable/)
-- [` ->lazy(): KeyedIterable<Tk, Tv> `](/docs/apis/Interfaces/HH/KeyedIterable/lazy/)\
+  [` KeyedIterable `](/apis/Interfaces/HH/KeyedIterable/)
+- [` ->lazy(): KeyedIterable<Tk, Tv> `](/apis/Interfaces/HH/KeyedIterable/lazy/)\
   Returns a lazy, access elements only when needed view of the current
-  [` KeyedIterable `](/docs/apis/Interfaces/HH/KeyedIterable/)
-- [` ->toImmMap(): ImmMap<Tk, Tv> `](/docs/apis/Interfaces/HH/KeyedIterable/toImmMap/)\
-  Returns an immutable map ([` ImmMap `](/docs/apis/Classes/HH/ImmMap/)) based on the keys and values of the
-  current [` KeyedIterable `](/docs/apis/Interfaces/HH/KeyedIterable/)
-- [` ->toKeysArray(): varray `](/docs/apis/Interfaces/HH/KeyedIterable/toKeysArray/)\
-  Returns an `` array `` with the keys from the current [` KeyedIterable `](/docs/apis/Interfaces/HH/KeyedIterable/)
+  [` KeyedIterable `](/apis/Interfaces/HH/KeyedIterable/)
+- [` ->toImmMap(): ImmMap<Tk, Tv> `](/apis/Interfaces/HH/KeyedIterable/toImmMap/)\
+  Returns an immutable map ([` ImmMap `](/apis/Classes/HH/ImmMap/)) based on the keys and values of the
+  current [` KeyedIterable `](/apis/Interfaces/HH/KeyedIterable/)
+- [` ->toKeysArray(): varray `](/apis/Interfaces/HH/KeyedIterable/toKeysArray/)\
+  Returns an `` array `` with the keys from the current [` KeyedIterable `](/apis/Interfaces/HH/KeyedIterable/)
 
 
 
@@ -182,16 +182,16 @@ interface ConstVector implements ConstCollection<Tv>, ConstIndexAccess<int, Tv>,
 
 
 
-### Public Methods ([` HH\Iterable `](/docs/apis/Interfaces/HH/Iterable/))
+### Public Methods ([` HH\Iterable `](/apis/Interfaces/HH/Iterable/))
 
 
 
 
-+ [` ->toImmSet(): ImmSet<Tv> `](/docs/apis/Interfaces/HH/Iterable/toImmSet/)\
-  Returns an immutable set ([` ImmSet `](/docs/apis/Classes/HH/ImmSet/)) converted from the current [` Iterable `](/docs/apis/Interfaces/HH/Iterable/)
-+ [` ->toImmVector(): ImmVector<Tv> `](/docs/apis/Interfaces/HH/Iterable/toImmVector/)\
-  Returns an immutable vector ([` ImmVector `](/docs/apis/Classes/HH/ImmVector/)) converted from the current
-  [` Iterable `](/docs/apis/Interfaces/HH/Iterable/)
-+ [` ->toValuesArray(): varray<Tv> `](/docs/apis/Interfaces/HH/Iterable/toValuesArray/)\
-  Returns an `` array `` with the values from the current [` Iterable `](/docs/apis/Interfaces/HH/Iterable/)
++ [` ->toImmSet(): ImmSet<Tv> `](/apis/Interfaces/HH/Iterable/toImmSet/)\
+  Returns an immutable set ([` ImmSet `](/apis/Classes/HH/ImmSet/)) converted from the current [` Iterable `](/apis/Interfaces/HH/Iterable/)
++ [` ->toImmVector(): ImmVector<Tv> `](/apis/Interfaces/HH/Iterable/toImmVector/)\
+  Returns an immutable vector ([` ImmVector `](/apis/Classes/HH/ImmVector/)) converted from the current
+  [` Iterable `](/apis/Interfaces/HH/Iterable/)
++ [` ->toValuesArray(): varray<Tv> `](/apis/Interfaces/HH/Iterable/toValuesArray/)\
+  Returns an `` array `` with the values from the current [` Iterable `](/apis/Interfaces/HH/Iterable/)
 <!-- HHAPIDOC -->

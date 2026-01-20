@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns the last key in the current [` Vector `](/docs/apis/Classes/HH/Vector/)
+Returns the last key in the current [` Vector `](/apis/Classes/HH/Vector/)
 
 
 
@@ -23,8 +23,8 @@ public function lastKey(): ?int;
 
 
 
-+ ` ?int ` - The last key (an integer) in the current [` Vector `](/docs/apis/Classes/HH/Vector/), or `` null `` if
-  the [` Vector `](/docs/apis/Classes/HH/Vector/) is empty.
++ ` ?int ` - The last key (an integer) in the current [` Vector `](/apis/Classes/HH/Vector/), or `` null `` if
+  the [` Vector `](/apis/Classes/HH/Vector/) is empty.
 
 
 
@@ -34,7 +34,7 @@ public function lastKey(): ?int;
 
 
 
-This example shows how [` lastKey() `](/docs/apis/Classes/HH/Vector/lastKey/) can be used even when a [` Vector `](/docs/apis/Classes/HH/Vector/) may be empty:
+This example shows how [` lastKey() `](/apis/Classes/HH/Vector/lastKey/) can be used even when a [` Vector `](/apis/Classes/HH/Vector/) may be empty:
 
 
 

@@ -29,8 +29,8 @@ interface ListFormat {...}
 
 
 
-+ [` ->format_d(vec<int> $ints): string `](/docs/apis/Interfaces/HH.Lib.SQL/ListFormat/format_d/)
-+ [` ->format_f(vec<float> $floats): string `](/docs/apis/Interfaces/HH.Lib.SQL/ListFormat/format_f/)
-+ [` ->format_s(vec<string> $strs): string `](/docs/apis/Interfaces/HH.Lib.SQL/ListFormat/format_s/)
-+ [` ->format_upcase_c(vec<string> $cols): string `](/docs/apis/Interfaces/HH.Lib.SQL/ListFormat/format_upcase_c/)
++ [` ->format_d(vec<int> $ints): string `](/apis/Interfaces/HH.Lib.SQL/ListFormat/format_d/)
++ [` ->format_f(vec<float> $floats): string `](/apis/Interfaces/HH.Lib.SQL/ListFormat/format_f/)
++ [` ->format_s(vec<string> $strs): string `](/apis/Interfaces/HH.Lib.SQL/ListFormat/format_s/)
++ [` ->format_upcase_c(vec<string> $cols): string `](/apis/Interfaces/HH.Lib.SQL/ListFormat/format_upcase_c/)
 <!-- HHAPIDOC -->

@@ -6,8 +6,8 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a [` MutableVector `](/docs/apis/Interfaces/MutableVector/) containing the values after the `` n ``-th element of
-the current [` MutableVector `](/docs/apis/Interfaces/MutableVector/)
+Returns a [` MutableVector `](/apis/Interfaces/MutableVector/) containing the values after the `` n ``-th element of
+the current [` MutableVector `](/apis/Interfaces/MutableVector/)
 
 
 
@@ -21,8 +21,8 @@ public function skip(
 
 
 
-The returned [` MutableVector `](/docs/apis/Interfaces/MutableVector/) will always be a proper subset of the current
-[` MutableVector `](/docs/apis/Interfaces/MutableVector/).
+The returned [` MutableVector `](/apis/Interfaces/MutableVector/) will always be a proper subset of the current
+[` MutableVector `](/apis/Interfaces/MutableVector/).
 
 
 
@@ -38,7 +38,7 @@ The returned [` MutableVector `](/docs/apis/Interfaces/MutableVector/) will alwa
 
 
 + ` int $n ` - The last element to be skipped; the $n+1 element will be the
-  first one in the returned [` MutableVector `](/docs/apis/Interfaces/MutableVector/).
+  first one in the returned [` MutableVector `](/apis/Interfaces/MutableVector/).
 
 
 
@@ -48,7 +48,7 @@ The returned [` MutableVector `](/docs/apis/Interfaces/MutableVector/) will alwa
 
 
 
-* [` MutableVector<Tv> `](/docs/apis/Interfaces/MutableVector/) - A [` MutableVector `](/docs/apis/Interfaces/MutableVector/) that is a proper subset of the current
-  [` MutableVector `](/docs/apis/Interfaces/MutableVector/) containing values after the specified `` n ``-th
+* [` MutableVector<Tv> `](/apis/Interfaces/MutableVector/) - A [` MutableVector `](/apis/Interfaces/MutableVector/) that is a proper subset of the current
+  [` MutableVector `](/apis/Interfaces/MutableVector/) containing values after the specified `` n ``-th
   element.
 <!-- HHAPIDOC -->

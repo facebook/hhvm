@@ -47,7 +47,7 @@ Space complexity: O(n)
 
 
 
-+ [` KeyedContainer<Tk, `](/docs/apis/Interfaces/HH/KeyedContainer/)`` Tv> $container ``
++ [` KeyedContainer<Tk, `](/apis/Interfaces/HH/KeyedContainer/)`` Tv> $container ``
 + ` (function(Tv): Ts) $scalar_func `
 
 

@@ -1,6 +1,6 @@
 # FastCGI
 
-HHVM has built-in support for two server types: [Proxygen](/docs/hhvm/basic-usage/proxygen) and FastCGI.
+HHVM has built-in support for two server types: [Proxygen](/hhvm/basic-usage/proxygen) and FastCGI.
 
 FastCGI provides a high performance interface between your codebase and web server (e.g., persistent processes between requests, etc.), but which will also obviously require a front-end compatible web server to serve the requests (e.g., [nginx](http://nginx.org/)).
 
@@ -101,7 +101,7 @@ hhvm -m server -d hhvm.server.type=fastcgi -d hhvm.server.port=9000
 
 and then load [http://localhost/hello.php](http://localhost/hello.php) and verify you see "Hello world".
 
-Note that by default `/usr/share/nginx/html` is only writable by root; use `chown` to set permissions as appropriate, or point `/etc/nginx/sites-available/default` at a different root, or [refer to the nginx documentation](http://nginx.org/en/docs/) to do something more fancy. Basically at this point you know things are working, so you can start from a known-good state as you start customizing your configuration, so it's easy to know if things break later which change broke it.
+Note that by default `/usr/share/nginx/html` is only writable by root; use `chown` to set permissions as appropriate, or point `/etc/nginx/sites-available/default` at a different root, or [refer to the nginx documentation](http://nginx.org/en/) to do something more fancy. Basically at this point you know things are working, so you can start from a known-good state as you start customizing your configuration, so it's easy to know if things break later which change broke it.
 
 *Admin Server in Nginx*
 

@@ -6,8 +6,8 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a [` ConstVector `](/docs/apis/Interfaces/ConstVector/) that is the concatenation of the values of the
-current [` ConstMap `](/docs/apis/Interfaces/ConstMap/) and the values of the provided [` Traversable `](/docs/apis/Interfaces/HH/Traversable/)
+Returns a [` ConstVector `](/apis/Interfaces/ConstVector/) that is the concatenation of the values of the
+current [` ConstMap `](/apis/Interfaces/ConstMap/) and the values of the provided [` Traversable `](/apis/Interfaces/HH/Traversable/)
 
 
 
@@ -21,8 +21,8 @@ public function concat<Tu super Tv>(
 
 
 
-The provided [` Traversable `](/docs/apis/Interfaces/HH/Traversable/) is concatenated to the end of the current
-[` ConstMap `](/docs/apis/Interfaces/ConstMap/) to produce the returned [` ConstVector `](/docs/apis/Interfaces/ConstVector/).
+The provided [` Traversable `](/apis/Interfaces/HH/Traversable/) is concatenated to the end of the current
+[` ConstMap `](/apis/Interfaces/ConstMap/) to produce the returned [` ConstVector `](/apis/Interfaces/ConstVector/).
 
 
 
@@ -32,7 +32,7 @@ The provided [` Traversable `](/docs/apis/Interfaces/HH/Traversable/) is concate
 
 
 
-+ [Constraints](</docs/hack/generics/type-constraints>)
++ [Constraints](</hack/generics/type-constraints>)
 
 
 
@@ -45,8 +45,8 @@ The provided [` Traversable `](/docs/apis/Interfaces/HH/Traversable/) is concate
 
 
 
-* [` Traversable<Tu> `](/docs/apis/Interfaces/HH/Traversable/)`` $traversable `` - The [` Traversable `](/docs/apis/Interfaces/HH/Traversable/) to concatenate to the current
-  [` ConstMap `](/docs/apis/Interfaces/ConstMap/).
+* [` Traversable<Tu> `](/apis/Interfaces/HH/Traversable/)`` $traversable `` - The [` Traversable `](/apis/Interfaces/HH/Traversable/) to concatenate to the current
+  [` ConstMap `](/apis/Interfaces/ConstMap/).
 
 
 
@@ -56,5 +56,5 @@ The provided [` Traversable `](/docs/apis/Interfaces/HH/Traversable/) is concate
 
 
 
-- [` ConstVector<Tu> `](/docs/apis/Interfaces/ConstVector/) - The integer-indexed concatenated [` ConstVector `](/docs/apis/Interfaces/ConstVector/).
+- [` ConstVector<Tu> `](/apis/Interfaces/ConstVector/) - The integer-indexed concatenated [` ConstVector `](/apis/Interfaces/ConstVector/).
 <!-- HHAPIDOC -->

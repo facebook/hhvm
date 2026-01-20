@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a [` Set `](/docs/apis/Classes/HH/Set/) containing the values of the current [` Set `](/docs/apis/Classes/HH/Set/) starting after
+Returns a [` Set `](/apis/Classes/HH/Set/) containing the values of the current [` Set `](/apis/Classes/HH/Set/) starting after
 and including the first value that produces `` true `` when passed to the
 specified callback
 
@@ -22,7 +22,7 @@ public function skipWhile(
 
 
 
-The returned [` Set `](/docs/apis/Classes/HH/Set/) will always be a proper subset of the current [` Set `](/docs/apis/Classes/HH/Set/).
+The returned [` Set `](/apis/Classes/HH/Set/) will always be a proper subset of the current [` Set `](/apis/Classes/HH/Set/).
 
 
 
@@ -33,7 +33,7 @@ The returned [` Set `](/docs/apis/Classes/HH/Set/) will always be a proper subse
 
 
 + ` (function(Tv): bool) $fn ` - The callback used to determine the starting element for the
-  [` Set `](/docs/apis/Classes/HH/Set/).
+  [` Set `](/apis/Classes/HH/Set/).
 
 
 
@@ -43,7 +43,7 @@ The returned [` Set `](/docs/apis/Classes/HH/Set/) will always be a proper subse
 
 
 
-* [` Set<Tv> `](/docs/apis/Classes/HH/Set/) - A [` Set `](/docs/apis/Classes/HH/Set/) that is a proper subset of the current [` Set `](/docs/apis/Classes/HH/Set/) starting
+* [` Set<Tv> `](/apis/Classes/HH/Set/) - A [` Set `](/apis/Classes/HH/Set/) that is a proper subset of the current [` Set `](/apis/Classes/HH/Set/) starting
   after the callback returns `` true ``.
 
 
@@ -54,7 +54,7 @@ The returned [` Set `](/docs/apis/Classes/HH/Set/) will always be a proper subse
 
 
 
-This example shows how ` skipWhile ` can be used to create a new [` Set `](/docs/apis/Classes/HH/Set/) by skipping elements at the beginning of an existing [` Set `](/docs/apis/Classes/HH/Set/):
+This example shows how ` skipWhile ` can be used to create a new [` Set `](/apis/Classes/HH/Set/) by skipping elements at the beginning of an existing [` Set `](/apis/Classes/HH/Set/):
 
 
 

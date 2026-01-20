@@ -32,7 +32,7 @@ The regex pattern follows the PCRE library: https://www.pcre.org/original/doc/ht
 
 
 
-+ [String](</docs/hack/built-in-types/string>)
++ [String](</hack/built-in-types/string>)
 
 
 

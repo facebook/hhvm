@@ -22,7 +22,7 @@ public function genSink<TSinkType, TFinalResponseType>(
 
 
 
-+ [` HH\AsyncGenerator<null, `](/docs/apis/Classes/HH/AsyncGenerator/)`` TSinkType, void> $payload_generator ``
++ [` HH\AsyncGenerator<null, `](/apis/Classes/HH/AsyncGenerator/)`` TSinkType, void> $payload_generator ``
 + ` (function(?TSinkType, ?Exception): (string, ?bool)) $payloadEncode `
 + ` (function(?string, ?Exception): TFinalResponseType) $finalResponseDecode `
 
@@ -34,5 +34,5 @@ public function genSink<TSinkType, TFinalResponseType>(
 
 
 
-* [` Awaitable<TFinalResponseType> `](/docs/apis/Classes/HH/Awaitable/)
+* [` Awaitable<TFinalResponseType> `](/apis/Classes/HH/Awaitable/)
 <!-- HHAPIDOC -->

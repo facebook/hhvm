@@ -6,8 +6,8 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a [` MutableVector `](/docs/apis/Interfaces/MutableVector/) containing the values of the current
-[` MutableVector `](/docs/apis/Interfaces/MutableVector/) that meet a supplied condition
+Returns a [` MutableVector `](/apis/Interfaces/MutableVector/) containing the values of the current
+[` MutableVector `](/apis/Interfaces/MutableVector/) that meet a supplied condition
 
 
 
@@ -22,7 +22,7 @@ public function filter(
 
 
 Only values that meet a certain criteria are affected by a call to
-[` filter() `](/docs/apis/Interfaces/MutableVector/filter/), while all values are affected by a call to [` map() `](/docs/apis/Interfaces/MutableVector/map/).
+[` filter() `](/apis/Interfaces/MutableVector/filter/), while all values are affected by a call to [` map() `](/apis/Interfaces/MutableVector/map/).
 
 
 
@@ -32,7 +32,7 @@ Only values that meet a certain criteria are affected by a call to
 
 
 
-+ [Examples](</docs/hack/arrays-and-collections/introduction>)
++ [Examples](</hack/arrays-and-collections/introduction>)
 
 
 
@@ -46,7 +46,7 @@ Only values that meet a certain criteria are affected by a call to
 
 
 * ` (function(Tv): bool) $fn ` - The $fn containing the condition to apply to the
-  [` MutableVector `](/docs/apis/Interfaces/MutableVector/) values.
+  [` MutableVector `](/apis/Interfaces/MutableVector/) values.
 
 
 
@@ -56,6 +56,6 @@ Only values that meet a certain criteria are affected by a call to
 
 
 
-- [` MutableVector<Tv> `](/docs/apis/Interfaces/MutableVector/) - a [` MutableVector `](/docs/apis/Interfaces/MutableVector/) containing the values after a user-specified
+- [` MutableVector<Tv> `](/apis/Interfaces/MutableVector/) - a [` MutableVector `](/apis/Interfaces/MutableVector/) containing the values after a user-specified
   condition is applied.
 <!-- HHAPIDOC -->

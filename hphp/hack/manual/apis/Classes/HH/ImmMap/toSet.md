@@ -33,5 +33,5 @@ public function toSet(): HH\object;
 
 
 
-See [` Map::toSet `](/docs/apis/Classes/HH/Map/toSet/#examples) for usage examples.
+See [` Map::toSet `](/apis/Classes/HH/Map/toSet/#examples) for usage examples.
 <!-- HHAPIDOC -->

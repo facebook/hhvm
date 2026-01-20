@@ -40,7 +40,7 @@ The first successful activity of the current connection is its creation.
 
 
 
-This example shows how to determine the last time a successful call was made using a given connection via [` AsyncMysqlConnection::lastActivityTime `](/docs/apis/Classes/AsyncMysqlConnection/lastActivityTime/). The value returned is seconds since epoch as a `` float ``.
+This example shows how to determine the last time a successful call was made using a given connection via [` AsyncMysqlConnection::lastActivityTime `](/apis/Classes/AsyncMysqlConnection/lastActivityTime/). The value returned is seconds since epoch as a `` float ``.
 
 
 

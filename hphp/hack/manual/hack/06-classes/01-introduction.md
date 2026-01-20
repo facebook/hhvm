@@ -19,4 +19,4 @@ class Counter {
 ```
 
 To create an instance of a class, use
-[`new`](/docs/hack/expressions-and-operators/new), e.g. `new Counter();`.
+[`new`](/hack/expressions-and-operators/new), e.g. `new Counter();`.

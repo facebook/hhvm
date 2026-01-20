@@ -58,7 +58,7 @@ If there are multiple overlapping matches, the match occuring earlier in
 
 
 
-* [String](</docs/hack/built-in-types/string>)
+* [String](</hack/built-in-types/string>)
 
 
 
@@ -73,7 +73,7 @@ If there are multiple overlapping matches, the match occuring earlier in
 
 - ` \HH\Lib\Locale\Locale $locale `
 - ` string $haystack `
-- [` KeyedContainer<string, `](/docs/apis/Interfaces/HH/KeyedContainer/)`` string> $replacements ``
+- [` KeyedContainer<string, `](/apis/Interfaces/HH/KeyedContainer/)`` string> $replacements ``
 
 
 

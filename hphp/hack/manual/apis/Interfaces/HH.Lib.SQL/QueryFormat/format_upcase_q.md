@@ -20,7 +20,7 @@ public function format_upcase_q(
 
 
 
-+ [` HH\Lib\SQL\Query `](/docs/apis/Classes/HH.Lib.SQL/Query/)`` $q ``
++ [` HH\Lib\SQL\Query `](/apis/Classes/HH.Lib.SQL/Query/)`` $q ``
 
 
 

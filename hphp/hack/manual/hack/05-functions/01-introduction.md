@@ -8,7 +8,7 @@ function add_one(int $x): int {
 }
 ```
 
-The `function` keyword can also be used to define [methods](/docs/hack/classes/methods).
+The `function` keyword can also be used to define [methods](/hack/classes/methods).
 
 ## Default Parameters
 

@@ -7,7 +7,7 @@ the Hack LSP instead for complete and up-to-date information.
 :::
 
 Since this is a successful result wrapper, this always returns the actual
-result of the [` Awaitable `](/docs/apis/Classes/HH/Awaitable/) operation
+result of the [` Awaitable `](/apis/Classes/HH/Awaitable/) operation
 
 
 
@@ -24,5 +24,5 @@ public function getResult(): T;
 
 
 
-+ ` T ` - The result of the [` Awaitable `](/docs/apis/Classes/HH/Awaitable/) operation.
++ ` T ` - The result of the [` Awaitable `](/apis/Classes/HH/Awaitable/) operation.
 <!-- HHAPIDOC -->

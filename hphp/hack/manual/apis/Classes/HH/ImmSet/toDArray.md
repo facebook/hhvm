@@ -41,5 +41,5 @@ with `` foreach($a as $member) ``.
 
 
 
-See [` Set::toDArray `](/docs/apis/Classes/HH/Set/toDArray/#examples) for usage examples.
+See [` Set::toDArray `](/apis/Classes/HH/Set/toDArray/#examples) for usage examples.
 <!-- HHAPIDOC -->

@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a subset of the current [` ImmMap `](/docs/apis/Classes/HH/ImmMap/) starting from a given key
+Returns a subset of the current [` ImmMap `](/apis/Classes/HH/ImmMap/) starting from a given key
 location up to, but not including, the element at the provided length from
 the starting key location
 
@@ -23,14 +23,14 @@ public function slice(
 
 
 
-` $start ` is 0-based. `` $len `` is 1-based. So [` slice(0, `](/docs/apis/Classes/HH/ImmMap/slice/)`` 2) `` would return the
+` $start ` is 0-based. `` $len `` is 1-based. So [` slice(0, `](/apis/Classes/HH/ImmMap/slice/)`` 2) `` would return the
 keys and values at key location 0 and 1.
 
 
 
 
-The returned [` ImmMap `](/docs/apis/Classes/HH/ImmMap/) will always be a proper subset of the current
-[` ImmMap `](/docs/apis/Classes/HH/ImmMap/).
+The returned [` ImmMap `](/apis/Classes/HH/ImmMap/) will always be a proper subset of the current
+[` ImmMap `](/apis/Classes/HH/ImmMap/).
 
 
 
@@ -40,9 +40,9 @@ The returned [` ImmMap `](/docs/apis/Classes/HH/ImmMap/) will always be a proper
 
 
 
-+ ` int $start ` - The starting key location of the current [` ImmMap `](/docs/apis/Classes/HH/ImmMap/) for the
-  returned [` ImmMap `](/docs/apis/Classes/HH/ImmMap/).
-+ ` int $len ` - The length of the returned [` ImmMap `](/docs/apis/Classes/HH/ImmMap/).
++ ` int $start ` - The starting key location of the current [` ImmMap `](/apis/Classes/HH/ImmMap/) for the
+  returned [` ImmMap `](/apis/Classes/HH/ImmMap/).
++ ` int $len ` - The length of the returned [` ImmMap `](/apis/Classes/HH/ImmMap/).
 
 
 
@@ -52,7 +52,7 @@ The returned [` ImmMap `](/docs/apis/Classes/HH/ImmMap/) will always be a proper
 
 
 
-* [` ImmMap<Tk, `](/docs/apis/Classes/HH/ImmMap/)`` Tv> `` - An [` ImmMap `](/docs/apis/Classes/HH/ImmMap/) that is a proper subset of the current [` ImmMap `](/docs/apis/Classes/HH/ImmMap/)
+* [` ImmMap<Tk, `](/apis/Classes/HH/ImmMap/)`` Tv> `` - An [` ImmMap `](/apis/Classes/HH/ImmMap/) that is a proper subset of the current [` ImmMap `](/apis/Classes/HH/ImmMap/)
   starting at `` $start `` up to but not including the element
   ``` $start + $len ```.
 
@@ -64,5 +64,5 @@ The returned [` ImmMap `](/docs/apis/Classes/HH/ImmMap/) will always be a proper
 
 
 
-See [` Map::slice `](/docs/apis/Classes/HH/Map/slice/#examples) for usage examples.
+See [` Map::slice `](/apis/Classes/HH/Map/slice/#examples) for usage examples.
 <!-- HHAPIDOC -->

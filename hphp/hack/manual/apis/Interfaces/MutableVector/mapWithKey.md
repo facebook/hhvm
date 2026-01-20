@@ -6,8 +6,8 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a [` MutableVector `](/docs/apis/Interfaces/MutableVector/) containing the values after an operation has been
-applied to each key and value in the current [` MutableVector `](/docs/apis/Interfaces/MutableVector/)
+Returns a [` MutableVector `](/apis/Interfaces/MutableVector/) containing the values after an operation has been
+applied to each key and value in the current [` MutableVector `](/apis/Interfaces/MutableVector/)
 
 
 
@@ -21,8 +21,8 @@ public function mapWithKey<Tu>(
 
 
 
-Every key and value in the current [` MutableVector `](/docs/apis/Interfaces/MutableVector/) is affected by a call to
-[` mapWithKey() `](/docs/apis/Interfaces/MutableVector/mapWithKey/), unlike [` filterWithKey() `](/docs/apis/Interfaces/MutableVector/filterWithKey/) where only values that meet a
+Every key and value in the current [` MutableVector `](/apis/Interfaces/MutableVector/) is affected by a call to
+[` mapWithKey() `](/apis/Interfaces/MutableVector/mapWithKey/), unlike [` filterWithKey() `](/apis/Interfaces/MutableVector/filterWithKey/) where only values that meet a
 certain criteria are affected.
 
 
@@ -34,7 +34,7 @@ certain criteria are affected.
 
 
 + ` (function(int, Tv): Tu) $fn ` - The callback containing the operation to apply to the
-  [` MutableVector `](/docs/apis/Interfaces/MutableVector/) keys and values.
+  [` MutableVector `](/apis/Interfaces/MutableVector/) keys and values.
 
 
 
@@ -44,6 +44,6 @@ certain criteria are affected.
 
 
 
-* [` MutableVector<Tu> `](/docs/apis/Interfaces/MutableVector/) - a [` MutableVector `](/docs/apis/Interfaces/MutableVector/) containing the values after a user-specified
+* [` MutableVector<Tu> `](/apis/Interfaces/MutableVector/) - a [` MutableVector `](/apis/Interfaces/MutableVector/) containing the values after a user-specified
   operation on the current Vector's keys and values is applied.
 <!-- HHAPIDOC -->

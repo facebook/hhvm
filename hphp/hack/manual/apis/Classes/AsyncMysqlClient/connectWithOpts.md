@@ -37,9 +37,9 @@ MySQL client.
 
 
 If you want to be able to pool up a bunch of connections, you would call
-[` setPoolsConnectionLimit() `](/docs/apis/Classes/AsyncMysqlClient/setPoolsConnectionLimit/), create a default pool of connections with
-[` AsyncMysqlConnectionPool()::__construct() `](/docs/apis/Classes/AsyncMysqlConnectionPool/), which now
-has that limit set, and then call [` AsyncMysqlConnectionPool()::connect() `](/docs/apis/Classes/AsyncMysqlConnectionPool/).
+[` setPoolsConnectionLimit() `](/apis/Classes/AsyncMysqlClient/setPoolsConnectionLimit/), create a default pool of connections with
+[` AsyncMysqlConnectionPool()::__construct() `](/apis/Classes/AsyncMysqlConnectionPool/), which now
+has that limit set, and then call [` AsyncMysqlConnectionPool()::connect() `](/apis/Classes/AsyncMysqlConnectionPool/).
 
 
 
@@ -54,7 +54,7 @@ has that limit set, and then call [` AsyncMysqlConnectionPool()::connect() `](/d
 + ` string $dbname ` - The initial database to use when connecting.
 + ` string $user ` - The user to connect as.
 + ` string $password ` - The password to connect with.
-+ [` AsyncMysqlConnectionOptions `](/docs/apis/Classes/AsyncMysqlConnectionOptions/)`` $conn_opts ``
++ [` AsyncMysqlConnectionOptions `](/apis/Classes/AsyncMysqlConnectionOptions/)`` $conn_opts ``
 
 
 
@@ -64,6 +64,6 @@ has that limit set, and then call [` AsyncMysqlConnectionPool()::connect() `](/d
 
 
 
-* [` Awaitable<AsyncMysqlConnection> `](/docs/apis/Classes/HH/Awaitable/) - an [` Awaitable `](/docs/apis/Classes/HH/Awaitable/) representing an [` AsyncMysqlConnection `](/docs/apis/Classes/AsyncMysqlConnection/). `` await ``
+* [` Awaitable<AsyncMysqlConnection> `](/apis/Classes/HH/Awaitable/) - an [` Awaitable `](/apis/Classes/HH/Awaitable/) representing an [` AsyncMysqlConnection `](/apis/Classes/AsyncMysqlConnection/). `` await ``
   or ``` join ``` this result to obtain the actual connection.
 <!-- HHAPIDOC -->

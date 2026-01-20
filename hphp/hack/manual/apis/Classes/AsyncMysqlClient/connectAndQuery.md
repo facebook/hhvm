@@ -50,13 +50,13 @@ connectWithOpts
 
 
 
-+ [` Traversable<string, `](/docs/apis/Interfaces/HH/Traversable/)`` arraykey> $queries ``
++ [` Traversable<string, `](/apis/Interfaces/HH/Traversable/)`` arraykey> $queries ``
 + ` string $host ` - The hostname to connect to.
 + ` int $port ` - The port to connect to.
 + ` string $dbname ` - The initial database to use when connecting.
 + ` string $user ` - The user to connect as.
 + ` string $password ` - The password to connect with.
-+ [` AsyncMysqlConnectionOptions `](/docs/apis/Classes/AsyncMysqlConnectionOptions/)`` $conn_opts ``
++ [` AsyncMysqlConnectionOptions `](/apis/Classes/AsyncMysqlConnectionOptions/)`` $conn_opts ``
 + ` dict<string> $query_attributes = dict [ ] ` - Query attributes. Empty by default.
 
 
@@ -67,7 +67,7 @@ connectWithOpts
 
 
 
-* [` Awaitable<(AsyncMysqlConnectResult, `](/docs/apis/Classes/HH/Awaitable/)`` Vector<AsyncMysqlQueryResult>)> `` - an [` Awaitable `](/docs/apis/Classes/HH/Awaitable/) representing the result of your connect and query
+* [` Awaitable<(AsyncMysqlConnectResult, `](/apis/Classes/HH/Awaitable/)`` Vector<AsyncMysqlQueryResult>)> `` - an [` Awaitable `](/apis/Classes/HH/Awaitable/) representing the result of your connect and query
   This is a tuple where the latter contains information about the connection
   retrieval, and the former has the query results
 <!-- HHAPIDOC -->

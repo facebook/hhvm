@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns an [` ImmMap `](/docs/apis/Classes/HH/ImmMap/) containing the values of the current [` ImmMap `](/docs/apis/Classes/HH/ImmMap/) that
+Returns an [` ImmMap `](/apis/Classes/HH/ImmMap/) containing the values of the current [` ImmMap `](/apis/Classes/HH/ImmMap/) that
 meet a supplied condition
 
 
@@ -22,13 +22,13 @@ public function filter(
 
 
 Only values that meet a certain criteria are affected by a call to
-[` filter() `](/docs/apis/Classes/HH/ImmMap/filter/), while all values are affected by a call to [` map() `](/docs/apis/Classes/HH/ImmMap/map/).
+[` filter() `](/apis/Classes/HH/ImmMap/filter/), while all values are affected by a call to [` map() `](/apis/Classes/HH/ImmMap/map/).
 
 
 
 
-The keys associated with the current [` ImmMap `](/docs/apis/Classes/HH/ImmMap/) remain unchanged in the
-returned [` Map `](/docs/apis/Classes/HH/Map/).
+The keys associated with the current [` ImmMap `](/apis/Classes/HH/ImmMap/) remain unchanged in the
+returned [` Map `](/apis/Classes/HH/Map/).
 
 
 
@@ -38,7 +38,7 @@ returned [` Map `](/docs/apis/Classes/HH/Map/).
 
 
 
-+ [Examples](</docs/hack/arrays-and-collections/introduction>)
++ [Examples](</hack/arrays-and-collections/introduction>)
 
 
 
@@ -61,7 +61,7 @@ returned [` Map `](/docs/apis/Classes/HH/Map/).
 
 
 
-- [` ImmMap<Tk, `](/docs/apis/Classes/HH/ImmMap/)`` Tv> `` - an [` ImmMap `](/docs/apis/Classes/HH/ImmMap/) containing the values after a user-specified
+- [` ImmMap<Tk, `](/apis/Classes/HH/ImmMap/)`` Tv> `` - an [` ImmMap `](/apis/Classes/HH/ImmMap/) containing the values after a user-specified
   condition is applied.
 
 
@@ -72,5 +72,5 @@ returned [` Map `](/docs/apis/Classes/HH/Map/).
 
 
 
-See [`Map::filter`](/docs/apis/Classes/HH/Map/filter/#examples) for usage examples.
+See [`Map::filter`](/apis/Classes/HH/Map/filter/#examples) for usage examples.
 <!-- HHAPIDOC -->

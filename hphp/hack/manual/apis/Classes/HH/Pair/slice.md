@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a subset of the current [` Pair `](/docs/apis/Classes/HH/Pair/) starting from a given key up to,
+Returns a subset of the current [` Pair `](/apis/Classes/HH/Pair/) starting from a given key up to,
 but not including, the element at the provided length from the starting
 key
 
@@ -23,8 +23,8 @@ public function slice(
 
 
 
-` $start ` is 0-based. `` $len `` is 1-based. So [` slice(0, `](/docs/apis/Classes/HH/Pair/slice/)`` 2) `` would return the
-elements at key 0 and 1 (all of the current [` Pair `](/docs/apis/Classes/HH/Pair/) elements).
+` $start ` is 0-based. `` $len `` is 1-based. So [` slice(0, `](/apis/Classes/HH/Pair/slice/)`` 2) `` would return the
+elements at key 0 and 1 (all of the current [` Pair `](/apis/Classes/HH/Pair/) elements).
 
 
 
@@ -34,9 +34,9 @@ elements at key 0 and 1 (all of the current [` Pair `](/docs/apis/Classes/HH/Pai
 
 
 
-+ ` int $start ` - The starting key of the current [` Pair `](/docs/apis/Classes/HH/Pair/) to begin the
-  returned [` ImmVector `](/docs/apis/Classes/HH/ImmVector/).
-+ ` int $len ` - The length of the returned [` ImmVector `](/docs/apis/Classes/HH/ImmVector/).
++ ` int $start ` - The starting key of the current [` Pair `](/apis/Classes/HH/Pair/) to begin the
+  returned [` ImmVector `](/apis/Classes/HH/ImmVector/).
++ ` int $len ` - The length of the returned [` ImmVector `](/apis/Classes/HH/ImmVector/).
 
 
 
@@ -46,7 +46,7 @@ elements at key 0 and 1 (all of the current [` Pair `](/docs/apis/Classes/HH/Pai
 
 
 
-* [` ImmVector<mixed> `](/docs/apis/Classes/HH/ImmVector/) - An [` ImmVector `](/docs/apis/Classes/HH/ImmVector/) with values from the current [` Pair `](/docs/apis/Classes/HH/Pair/) starting at
+* [` ImmVector<mixed> `](/apis/Classes/HH/ImmVector/) - An [` ImmVector `](/apis/Classes/HH/ImmVector/) with values from the current [` Pair `](/apis/Classes/HH/Pair/) starting at
   `` $start `` up to but not including the element ``` $start + $len ```.
 
 

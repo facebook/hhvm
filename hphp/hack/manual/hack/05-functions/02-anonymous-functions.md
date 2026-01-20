@@ -21,7 +21,7 @@ $three = $f(1, 2);  // result of 3
 ```
 
 Anonymous functions pass _by value_, not by reference. This is also true for any
-[object property](/docs/hack/expressions-and-operators/member-selection) passed to an
+[object property](/hack/expressions-and-operators/member-selection) passed to an
 anonymous function.
 
 ``` Hack

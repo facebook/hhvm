@@ -57,7 +57,7 @@ If $root is non empty, it is prepended to every filename.
 
 
 
-+ [` KeyedContainer<string, `](/docs/apis/Interfaces/HH/KeyedContainer/)`` KeyedContainer<string, string>> $map ``
++ [` KeyedContainer<string, `](/apis/Interfaces/HH/KeyedContainer/)`` KeyedContainer<string, string>> $map ``
 + ` string $root `
 
 

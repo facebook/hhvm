@@ -37,9 +37,9 @@ Space complexity: O(n), where n is size of ```` $first ````
 
 
 
-+ [` Traversable<Tv> `](/docs/apis/Interfaces/HH/Traversable/)`` $first ``
-+ [` Traversable<Tv> `](/docs/apis/Interfaces/HH/Traversable/)`` $second ``
-+ [` Container<Tv> `](/docs/apis/Interfaces/HH/Container/)`` ...$rest ``
++ [` Traversable<Tv> `](/apis/Interfaces/HH/Traversable/)`` $first ``
++ [` Traversable<Tv> `](/apis/Interfaces/HH/Traversable/)`` $second ``
++ [` Container<Tv> `](/apis/Interfaces/HH/Container/)`` ...$rest ``
 
 
 

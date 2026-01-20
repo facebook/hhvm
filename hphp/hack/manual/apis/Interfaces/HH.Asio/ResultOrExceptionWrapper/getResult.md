@@ -29,6 +29,6 @@ public function getResult(): T;
 
 
 
-* ` T ` - the result of the [` Awaitable `](/docs/apis/Classes/HH/Awaitable/) operation upon success or the
+* ` T ` - the result of the [` Awaitable `](/apis/Classes/HH/Awaitable/) operation upon success or the
   exception that was thrown upon failed.
 <!-- HHAPIDOC -->

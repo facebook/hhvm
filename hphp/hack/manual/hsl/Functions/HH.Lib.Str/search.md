@@ -50,7 +50,7 @@ Previously known in PHP as ` strpos `.
 
 
 
-* [String](</docs/hack/built-in-types/string>)
+* [String](</hack/built-in-types/string>)
 
 
 

@@ -33,8 +33,8 @@ function format_l(
 
 
 
-+ [String](</docs/hack/built-in-types/string>)
-+ [Format Strings](</docs/hack/functions/format-strings>)
++ [String](</hack/built-in-types/string>)
++ [Format Strings](</hack/functions/format-strings>)
 
 
 

@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a [` ConstVector `](/docs/apis/Interfaces/ConstVector/) containing the values of the current [` ConstVector `](/docs/apis/Interfaces/ConstVector/)
+Returns a [` ConstVector `](/apis/Interfaces/ConstVector/) containing the values of the current [` ConstVector `](/apis/Interfaces/ConstVector/)
 that meet a supplied condition
 
 
@@ -22,7 +22,7 @@ public function filter(
 
 
 Only values that meet a certain criteria are affected by a call to
-[` filter() `](/docs/apis/Interfaces/ConstVector/filter/), while all values are affected by a call to [` map() `](/docs/apis/Interfaces/ConstVector/map/).
+[` filter() `](/apis/Interfaces/ConstVector/filter/), while all values are affected by a call to [` map() `](/apis/Interfaces/ConstVector/map/).
 
 
 
@@ -32,7 +32,7 @@ Only values that meet a certain criteria are affected by a call to
 
 
 
-+ [Examples](</docs/hack/arrays-and-collections/introduction>)
++ [Examples](</hack/arrays-and-collections/introduction>)
 
 
 
@@ -46,7 +46,7 @@ Only values that meet a certain criteria are affected by a call to
 
 
 * ` (function(Tv): bool) $fn ` - The $fn containing the condition to apply to the
-  [` ConstVector `](/docs/apis/Interfaces/ConstVector/) values.
+  [` ConstVector `](/apis/Interfaces/ConstVector/) values.
 
 
 
@@ -56,6 +56,6 @@ Only values that meet a certain criteria are affected by a call to
 
 
 
-- [` ConstVector<Tv> `](/docs/apis/Interfaces/ConstVector/) - a [` ConstVector `](/docs/apis/Interfaces/ConstVector/) containing the values after a user-specified
+- [` ConstVector<Tv> `](/apis/Interfaces/ConstVector/) - a [` ConstVector `](/apis/Interfaces/ConstVector/) containing the values after a user-specified
   condition is applied.
 <!-- HHAPIDOC -->

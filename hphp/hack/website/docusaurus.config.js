@@ -13,7 +13,7 @@ const darkCodeTheme = require('prism-react-renderer').themes.vsDark;
   tagline: 'Moving fast with high-performance Hack, a programming language for building reliable websites at epic scale',
   url: 'https://docs.hhvm.com',
   baseUrl: process.env.DOCUSAURUS_BASE_URL || '/',
-  onBrokenLinks: 'warn', // TODO: change back to 'throw' ones apis/* (and hsl/*) have been populated
+  onBrokenLinks: 'throw',
   trailingSlash: true,
   favicon: 'img/favicon.ico',
   organizationName: 'facebook',
@@ -38,7 +38,7 @@ const darkCodeTheme = require('prism-react-renderer').themes.vsDark;
       ({
         docs: {
           sidebarPath: require.resolve('./sidebars.js'),
-          routeBasePath: 'docs',
+          routeBasePath: '/',
           path: '../manual/',
           editUrl: 'https://www.internalfb.com/code/fbsource/fbcode/hphp/hack/website',
         },
@@ -110,19 +110,19 @@ const darkCodeTheme = require('prism-react-renderer').themes.vsDark;
             items: [
               {
                 label: 'Overview',
-                to: '/docs/hack-overview',
+                to: '/hack-overview',
               },
               {
                 label: 'Getting Started',
-                to: '/docs/hack/getting-started/quick-start',
+                to: '/hack/getting-started/quick-start',
               },
               {
                 label: 'Tools',
-                to: '/docs/hack/getting-started/tools',
+                to: '/hack/getting-started/tools',
               },
               {
                 label: 'API Reference',
-                to: '/docs/apis/overview',
+                to: '/apis/overview',
               },
             ],
           },
@@ -131,19 +131,19 @@ const darkCodeTheme = require('prism-react-renderer').themes.vsDark;
             items: [
               {
                 label: 'Overview',
-                to: '/docs/hhvm-overview',
+                to: '/hhvm-overview',
               },
               {
                 label: 'Installation',
-                to: '/docs/hhvm/installation/introduction',
+                to: '/hhvm/installation/introduction',
               },
               {
                 label: 'Basic Usage',
-                to: '/docs/hhvm/basic-usage/introduction',
+                to: '/hhvm/basic-usage/introduction',
               },
               {
                 label: 'Configuration',
-                to: '/docs/hhvm/configuration/introduction',
+                to: '/hhvm/configuration/introduction',
               },
             ],
           },

@@ -1,7 +1,7 @@
 # Type Conversion
 
 In a few situations (documented in the following sections) the values of operands are implicitly converted from one type to another. Explicit
-conversion is performed using the [cast operator](/docs/hack/expressions-and-operators/casting).
+conversion is performed using the [cast operator](/hack/expressions-and-operators/casting).
 
 If an expression is converted to its own type, the type and value of the result are the same as the type and value of the expression.
 
@@ -44,7 +44,7 @@ the precision can be preserved, the fractional part is rounded towards zero and 
 
 If the source value is `null`, the result value is 0.
 
-If the source is a [numeric string or leading-numeric string](/docs/hack/built-in-types/string) having integer format, if the precision can be preserved the result
+If the source is a [numeric string or leading-numeric string](/hack/built-in-types/string) having integer format, if the precision can be preserved the result
 value is that string's integer value; otherwise, the result is undefined. If the source is a numeric string or leading-numeric string having
 floating-point format, the string's floating-point value is treated as described above for a conversion from `float`. The trailing non-numeric
 characters in leading-numeric strings are ignored.  For any other string, the result value is 0.
@@ -62,7 +62,7 @@ No non-`float` type can be converted implicitly to `float`. All other conversion
 If the source type is `int`, if the precision can be preserved the result value is the closest approximation to the source value; otherwise, the
 result is undefined.
 
-If the source is a [numeric string or leading-numeric string](/docs/hack/built-in-types/string) having integer format, the string's integer value is treated as described
+If the source is a [numeric string or leading-numeric string](/hack/built-in-types/string) having integer format, the string's integer value is treated as described
 above for a conversion from `int`. If the source is a numeric string or leading-numeric string having floating-point format, the result value is
 the closest approximation to the string's floating-point value. The trailing non-numeric characters in leading-numeric strings are ignored. For
 any other string, the result value is 0.
@@ -80,7 +80,7 @@ are no explicit conversions.
 
 ## Converting to `string`
 
-Except for the type [`classname`](/docs/hack/built-in-types/classname), no non-`string` type can be converted implicitly to `string`. All other conversions must be explicit.
+Except for the type [`classname`](/hack/built-in-types/classname), no non-`string` type can be converted implicitly to `string`. All other conversions must be explicit.
 
 If the source type is `bool`, then if the source value is `false`, the result value is the empty string; otherwise, the result value is "1".
 
@@ -89,13 +89,13 @@ library function `sprintf`).
 
 If the source value is `null`, the result value is an empty string.
 
-If the source is an object, then if that object's class has a [`__toString` method](/docs/hack/classes/methods-with-predefined-semantics), the
+If the source is an object, then if that object's class has a [`__toString` method](/hack/classes/methods-with-predefined-semantics), the
 result value is the
 string returned by that method; otherwise, the conversion is invalid.
 
 If the source is a resource, the result value is an implementation-defined string.
 
-If the source type is the [`classname` type](/docs/hack/built-in-types/classname), the result value is a string containing the corresponding fully qualified class or
+If the source type is the [`classname` type](/hack/built-in-types/classname), the result value is a string containing the corresponding fully qualified class or
 interface name without any leading `\`.
 
 The library function `strval` allows values to be converted to `string`.
@@ -120,7 +120,7 @@ There are no other implicit or explicit conversions.
 
 ## Converting to Resource Type
 
-Standard IO streams returned by [file stream functions](/docs/hack/built-in-types/resources) `HH\\stdin()`, `HH\\stdout()`, and `HH\\stderr()`, can be converted implicitly to resource.
+Standard IO streams returned by [file stream functions](/hack/built-in-types/resources) `HH\\stdin()`, `HH\\stdout()`, and `HH\\stderr()`, can be converted implicitly to resource.
 No other non-resource type can be so converted. No explicit conversions exist.
 
 ## Converting to Mixed Type

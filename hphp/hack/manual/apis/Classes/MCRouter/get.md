@@ -48,7 +48,7 @@ public function get(
 
 
 
-Most of the [` MCRouter `](/docs/apis/Classes/MCRouter/) examples use [` MCRouter::get `](/docs/apis/Classes/MCRouter/get/) in order to demonstrate other functions of the API. This example calls out `` get `` explicitly in its own function to show you how it works. If you try to ``` get ``` on a key that does not exist, an exception will be thrown.
+Most of the [` MCRouter `](/apis/Classes/MCRouter/) examples use [` MCRouter::get `](/apis/Classes/MCRouter/get/) in order to demonstrate other functions of the API. This example calls out `` get `` explicitly in its own function to show you how it works. If you try to ``` get ``` on a key that does not exist, an exception will be thrown.
 
 
 

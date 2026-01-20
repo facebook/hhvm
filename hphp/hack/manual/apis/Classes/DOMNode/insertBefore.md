@@ -33,8 +33,8 @@ returned node.
 
 
 
-+ [` DOMNode `](/docs/apis/Classes/DOMNode/)`` $newnode `` - The new node.
-+ [` DOMNode `](/docs/apis/Classes/DOMNode/)`` $refnode = NULL `` - The reference node. If not supplied, newnode is
++ [` DOMNode `](/apis/Classes/DOMNode/)`` $newnode `` - The new node.
++ [` DOMNode `](/apis/Classes/DOMNode/)`` $refnode = NULL `` - The reference node. If not supplied, newnode is
   appended to the children.
 
 

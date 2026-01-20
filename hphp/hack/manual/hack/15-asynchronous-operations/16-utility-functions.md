@@ -1,7 +1,7 @@
 # Utility Functions
 
 Async can be used effectively with the basic, built in infrastructure in HHVM, along with some HSL functions. This basic infrastructure includes:
-* [`async`](/docs/hack/asynchronous-operations/introduction), [`await`](/docs/hack/asynchronous-operations/awaitables), [`Awaitable`](/docs/hack/asynchronous-operations/awaitables)
+* [`async`](/hack/asynchronous-operations/introduction), [`await`](/hack/asynchronous-operations/awaitables), [`Awaitable`](/hack/asynchronous-operations/awaitables)
 * `HH\Lib\Vec\from_async()`, `HH\Lib\Dict\from_async()`
 
 However, there are cases when we want to convert some collection of values to awaitables or we want to filter some awaitables out

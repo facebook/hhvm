@@ -23,13 +23,13 @@ value.
 
 
 In addition to Hack collections, PHP ` array `s and anything that implement
-[` KeyedIterator `](/docs/apis/Interfaces/HH/KeyedIterator/) are `` KeyedTraversable ``.
+[` KeyedIterator `](/apis/Interfaces/HH/KeyedIterator/) are `` KeyedTraversable ``.
 
 
 
 
 In general, if you are implementing your own Hack class, you will want to
-implement [` KeyedIterable `](/docs/apis/Interfaces/HH/KeyedIterable/) instead of `` KeyedTraversable `` since
+implement [` KeyedIterable `](/apis/Interfaces/HH/KeyedIterable/) instead of `` KeyedTraversable `` since
 ``` KeyedTraversable ``` is more of a bridge for PHP ```` array ````s to work well with
 Hack collections.
 
@@ -41,8 +41,8 @@ Hack collections.
 
 
 
-+ [Introduction](</docs/hack/arrays-and-collections/introduction>)
-+ [Interfaces](</docs/hack/arrays-and-collections/introduction>)
++ [Introduction](</hack/arrays-and-collections/introduction>)
++ [Interfaces](</hack/arrays-and-collections/introduction>)
 
 
 

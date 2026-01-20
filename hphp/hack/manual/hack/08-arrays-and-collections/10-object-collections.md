@@ -13,7 +13,7 @@ support array style syntax. Idiomatic Hack prefers array access syntax over meth
 
 This page focuses on the core operations available, which all have
 array access syntax. Consult the reference pages
-(e.g. [Vector](/docs/apis/Classes/HH/Vector/)) for the full list of
+(e.g. [Vector](/apis/Classes/HH/Vector/)) for the full list of
 methods.
 
 ## `Vector` and `ImmVector`

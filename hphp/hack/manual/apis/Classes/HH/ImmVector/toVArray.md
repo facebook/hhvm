@@ -33,5 +33,5 @@ public function toVArray(): varray<Tv>;
 
 
 
-See [` Vector::toVArray `](/docs/apis/Classes/HH/Vector/toVArray/#examples) for usage examples.
+See [` Vector::toVArray `](/apis/Classes/HH/Vector/toVArray/#examples) for usage examples.
 <!-- HHAPIDOC -->

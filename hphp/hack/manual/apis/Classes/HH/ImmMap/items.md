@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns an [` Iterable `](/docs/apis/Interfaces/HH/Iterable/) view of the current [` ImmMap `](/docs/apis/Classes/HH/ImmMap/)
+Returns an [` Iterable `](/apis/Interfaces/HH/Iterable/) view of the current [` ImmMap `](/apis/Classes/HH/ImmMap/)
 
 
 
@@ -18,8 +18,8 @@ public function items(): Iterable<Pair<Tk, Tv>>;
 
 
 
-The [` Iterable `](/docs/apis/Interfaces/HH/Iterable/) returned is one that produces the key/values from the
-current [` ImmMap `](/docs/apis/Classes/HH/ImmMap/).
+The [` Iterable `](/apis/Interfaces/HH/Iterable/) returned is one that produces the key/values from the
+current [` ImmMap `](/apis/Classes/HH/ImmMap/).
 
 
 
@@ -29,7 +29,7 @@ current [` ImmMap `](/docs/apis/Classes/HH/ImmMap/).
 
 
 
-+ [` Iterable<Pair<Tk, `](/docs/apis/Interfaces/HH/Iterable/)`` Tv>> `` - The [` Iterable `](/docs/apis/Interfaces/HH/Iterable/) view of the current [` ImmMap `](/docs/apis/Classes/HH/ImmMap/).
++ [` Iterable<Pair<Tk, `](/apis/Interfaces/HH/Iterable/)`` Tv>> `` - The [` Iterable `](/apis/Interfaces/HH/Iterable/) view of the current [` ImmMap `](/apis/Classes/HH/ImmMap/).
 
 
 
@@ -39,5 +39,5 @@ current [` ImmMap `](/docs/apis/Classes/HH/ImmMap/).
 
 
 
-See [` Map::items `](/docs/apis/Classes/HH/Map/items/#examples) for usage examples.
+See [` Map::items `](/apis/Classes/HH/Map/items/#examples) for usage examples.
 <!-- HHAPIDOC -->

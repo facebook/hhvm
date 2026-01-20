@@ -40,7 +40,7 @@ the connection pool.
 
 
 
-The following example shows how to make a connection not reusable in a connection pool with [` AsyncMysqlConnection::setReusable `](/docs/apis/Classes/AsyncMysqlConnection/setReusable/) and test it with [` AsyncMysqlConnection::isReusable `](/docs/apis/Classes/AsyncMysqlConnection/isReusable/). By default, connections in pools are reusable. So, here we create a pool connection that is assigned to `` $conn ``. When we close ``` $conn ```, that destroys that connection permanently. So when we get ```` $conn2 ````, a whole new connection will need to be created since we can't use the connection that was associated to ````` $conn `````.
+The following example shows how to make a connection not reusable in a connection pool with [` AsyncMysqlConnection::setReusable `](/apis/Classes/AsyncMysqlConnection/setReusable/) and test it with [` AsyncMysqlConnection::isReusable `](/apis/Classes/AsyncMysqlConnection/isReusable/). By default, connections in pools are reusable. So, here we create a pool connection that is assigned to `` $conn ``. When we close ``` $conn ```, that destroys that connection permanently. So when we get ```` $conn2 ````, a whole new connection will need to be created since we can't use the connection that was associated to ````` $conn `````.
 
 
 

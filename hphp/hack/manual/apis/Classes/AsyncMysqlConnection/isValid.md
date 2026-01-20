@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Checks if the data inside [` AsyncMysqlConnection `](/docs/apis/Classes/AsyncMysqlConnection/) object is valid
+Checks if the data inside [` AsyncMysqlConnection `](/apis/Classes/AsyncMysqlConnection/) object is valid
 
 
 

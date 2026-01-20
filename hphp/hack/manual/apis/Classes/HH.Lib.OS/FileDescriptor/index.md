@@ -29,5 +29,5 @@ final class FileDescriptor {...}
 
 
 
-+ [` ->__debugInfo(): darray `](/docs/apis/Classes/HH.Lib.OS/FileDescriptor/__debugInfo/)
++ [` ->__debugInfo(): darray `](/apis/Classes/HH.Lib.OS/FileDescriptor/__debugInfo/)
 <!-- HHAPIDOC -->

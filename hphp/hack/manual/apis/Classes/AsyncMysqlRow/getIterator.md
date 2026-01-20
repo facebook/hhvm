@@ -23,7 +23,7 @@ public function getIterator(): KeyedIterator<string, mixed>;
 
 
 
-+ [` KeyedIterator<string, `](/docs/apis/Interfaces/HH/KeyedIterator/)`` mixed> `` - An [` AsyncMysqlRowIterator `](/docs/apis/Classes/AsyncMysqlRowIterator/) to iterate over the current row.
++ [` KeyedIterator<string, `](/apis/Interfaces/HH/KeyedIterator/)`` mixed> `` - An [` AsyncMysqlRowIterator `](/apis/Classes/AsyncMysqlRowIterator/) to iterate over the current row.
 
 
 
@@ -33,7 +33,7 @@ public function getIterator(): KeyedIterator<string, mixed>;
 
 
 
-The following example shows you how to get an iterator of an [` AsyncMysqlRow `](/docs/apis/Classes/AsyncMysqlRow/) via [` getIterator() `](/docs/apis/Classes/AsyncMysqlRow/getIterator/). Getting an iterator of an [` AsyncMysqlRow `](/docs/apis/Classes/AsyncMysqlRow/) gives you an [` AsyncMysqlRowIterator `](/docs/apis/Classes/AsyncMysqlRowIterator/), where each key of that iterator is an `` int `` representing the key to the field of the [` AsyncMysqlRow `](/docs/apis/Classes/AsyncMysqlRow/), and each value from `` current() `` is the value of the field of that [` AsyncMysqlRow `](/docs/apis/Classes/AsyncMysqlRow/).
+The following example shows you how to get an iterator of an [` AsyncMysqlRow `](/apis/Classes/AsyncMysqlRow/) via [` getIterator() `](/apis/Classes/AsyncMysqlRow/getIterator/). Getting an iterator of an [` AsyncMysqlRow `](/apis/Classes/AsyncMysqlRow/) gives you an [` AsyncMysqlRowIterator `](/apis/Classes/AsyncMysqlRowIterator/), where each key of that iterator is an `` int `` representing the key to the field of the [` AsyncMysqlRow `](/apis/Classes/AsyncMysqlRow/), and each value from `` current() `` is the value of the field of that [` AsyncMysqlRow `](/apis/Classes/AsyncMysqlRow/).
 
 
 

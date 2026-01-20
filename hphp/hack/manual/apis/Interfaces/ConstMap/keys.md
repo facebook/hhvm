@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a [` ConstVector `](/docs/apis/Interfaces/ConstVector/) containing the keys of the current [` ConstMap `](/docs/apis/Interfaces/ConstMap/)
+Returns a [` ConstVector `](/apis/Interfaces/ConstVector/) containing the keys of the current [` ConstMap `](/apis/Interfaces/ConstMap/)
 
 
 
@@ -23,5 +23,5 @@ public function keys(): ConstVector<Tk>;
 
 
 
-+ [` ConstVector<Tk> `](/docs/apis/Interfaces/ConstVector/) - a [` ConstVector `](/docs/apis/Interfaces/ConstVector/) containing the keys of the current [` ConstMap `](/docs/apis/Interfaces/ConstMap/).
++ [` ConstVector<Tk> `](/apis/Interfaces/ConstVector/) - a [` ConstVector `](/apis/Interfaces/ConstVector/) containing the keys of the current [` ConstMap `](/apis/Interfaces/ConstMap/).
 <!-- HHAPIDOC -->

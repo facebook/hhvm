@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns an [` Iterable `](/docs/apis/Interfaces/HH/Iterable/) view of the current [` Map `](/docs/apis/Classes/HH/Map/)
+Returns an [` Iterable `](/apis/Interfaces/HH/Iterable/) view of the current [` Map `](/apis/Classes/HH/Map/)
 
 
 
@@ -18,8 +18,8 @@ public function items(): Iterable<Pair<Tk, Tv>>;
 
 
 
-The [` Iterable `](/docs/apis/Interfaces/HH/Iterable/) returned is one that produces the key/values from the
-current [` Map `](/docs/apis/Classes/HH/Map/).
+The [` Iterable `](/apis/Interfaces/HH/Iterable/) returned is one that produces the key/values from the
+current [` Map `](/apis/Classes/HH/Map/).
 
 
 
@@ -29,7 +29,7 @@ current [` Map `](/docs/apis/Classes/HH/Map/).
 
 
 
-+ [` Iterable<Pair<Tk, `](/docs/apis/Interfaces/HH/Iterable/)`` Tv>> `` - The [` Iterable `](/docs/apis/Interfaces/HH/Iterable/) view of the current [` Map `](/docs/apis/Classes/HH/Map/).
++ [` Iterable<Pair<Tk, `](/apis/Interfaces/HH/Iterable/)`` Tv>> `` - The [` Iterable `](/apis/Interfaces/HH/Iterable/) view of the current [` Map `](/apis/Classes/HH/Map/).
 
 
 
@@ -39,7 +39,7 @@ current [` Map `](/docs/apis/Classes/HH/Map/).
 
 
 
-This example shows that [` items() `](/docs/apis/Classes/HH/Map/items/) returns an [` Iterable `](/docs/apis/Interfaces/HH/Iterable/) view of the [` Map `](/docs/apis/Classes/HH/Map/). The [` Iterable `](/docs/apis/Interfaces/HH/Iterable/) will produce the key-value pairs of the [` Map `](/docs/apis/Classes/HH/Map/) at the time it's iterated.
+This example shows that [` items() `](/apis/Classes/HH/Map/items/) returns an [` Iterable `](/apis/Interfaces/HH/Iterable/) view of the [` Map `](/apis/Classes/HH/Map/). The [` Iterable `](/apis/Interfaces/HH/Iterable/) will produce the key-value pairs of the [` Map `](/apis/Classes/HH/Map/) at the time it's iterated.
 
 
 

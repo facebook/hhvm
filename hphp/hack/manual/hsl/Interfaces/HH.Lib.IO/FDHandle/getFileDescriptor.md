@@ -18,5 +18,5 @@ public function getFileDescriptor(): HH\Lib\OS\FileDescriptor;
 
 
 
-+ [` HH\Lib\OS\FileDescriptor `](/docs/apis/Classes/HH.Lib.OS/FileDescriptor/)
++ [` HH\Lib\OS\FileDescriptor `](/apis/Classes/HH.Lib.OS/FileDescriptor/)
 <!-- HHAPIDOC -->

@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns the first value in the current [` ImmSet `](/docs/apis/Classes/HH/ImmSet/)
+Returns the first value in the current [` ImmSet `](/apis/Classes/HH/ImmSet/)
 
 
 
@@ -18,7 +18,7 @@ public function firstValue(): ?Tv;
 
 
 
-This method is interchangeable with [` firstKey() `](/docs/apis/Classes/HH/ImmSet/firstKey/).
+This method is interchangeable with [` firstKey() `](/apis/Classes/HH/ImmSet/firstKey/).
 
 
 
@@ -28,8 +28,8 @@ This method is interchangeable with [` firstKey() `](/docs/apis/Classes/HH/ImmSe
 
 
 
-+ ` ?Tv ` - The first value in the current [` ImmSet `](/docs/apis/Classes/HH/ImmSet/), or `` null `` if the
-  current [` ImmSet `](/docs/apis/Classes/HH/ImmSet/) is empty.
++ ` ?Tv ` - The first value in the current [` ImmSet `](/apis/Classes/HH/ImmSet/), or `` null `` if the
+  current [` ImmSet `](/apis/Classes/HH/ImmSet/) is empty.
 
 
 
@@ -39,5 +39,5 @@ This method is interchangeable with [` firstKey() `](/docs/apis/Classes/HH/ImmSe
 
 
 
-See [` Set::firstValue `](/docs/apis/Classes/HH/Set/firstValue/#examples) for usage examples.
+See [` Set::firstValue `](/apis/Classes/HH/Set/firstValue/#examples) for usage examples.
 <!-- HHAPIDOC -->

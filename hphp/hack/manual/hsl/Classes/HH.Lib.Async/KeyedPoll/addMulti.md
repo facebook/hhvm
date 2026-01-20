@@ -25,7 +25,7 @@ public function addMulti(
 
 
 
-+ [` KeyedTraversable<Tk, `](/docs/apis/Interfaces/HH/KeyedTraversable/)`` Awaitable<Tv>> $awaitables ``
++ [` KeyedTraversable<Tk, `](/apis/Interfaces/HH/KeyedTraversable/)`` Awaitable<Tv>> $awaitables ``
 
 
 

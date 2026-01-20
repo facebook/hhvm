@@ -29,7 +29,7 @@ final class Query {...}
 
 
 
-+ [` ->__construct(QueryFormatString $format, mixed ...$args) `](/docs/apis/Classes/HH.Lib.SQL/Query/__construct/)
-+ [` ->toString__FOR_DEBUGGING_ONLY(\AsyncMysqlConnection $conn): string `](/docs/apis/Classes/HH.Lib.SQL/Query/toString__FOR_DEBUGGING_ONLY/)
-+ [` ->toUnescapedString__FOR_DEBUGGING_ONLY__UNSAFE(): string `](/docs/apis/Classes/HH.Lib.SQL/Query/toUnescapedString__FOR_DEBUGGING_ONLY__UNSAFE/)
++ [` ->__construct(QueryFormatString $format, mixed ...$args) `](/apis/Classes/HH.Lib.SQL/Query/__construct/)
++ [` ->toString__FOR_DEBUGGING_ONLY(\AsyncMysqlConnection $conn): string `](/apis/Classes/HH.Lib.SQL/Query/toString__FOR_DEBUGGING_ONLY/)
++ [` ->toUnescapedString__FOR_DEBUGGING_ONLY__UNSAFE(): string `](/apis/Classes/HH.Lib.SQL/Query/toUnescapedString__FOR_DEBUGGING_ONLY__UNSAFE/)
 <!-- HHAPIDOC -->

@@ -21,7 +21,7 @@ global class named `xhp_ui__big_table`.
 A custom XHP class needs to do three things:
 * use the keywords `xhp class` instead of `class`
 * extend `x\element` (`\Facebook\XHP\Core\element`) or, rarely, another
-  [base class](/docs/hack/XHP/interfaces)
+  [base class](/hack/XHP/interfaces)
 * implement the method `renderAsync` to return an XHP object (`x\node`) or the
   respective method of the chosen base class
 
@@ -392,7 +392,7 @@ Before XHP namespace support (in XHP-Lib v3), a special
 
 ## Async
 
-XHP and [async](/docs/hack/asynchronous-operations/introduction) co-exist well together.
+XHP and [async](/hack/asynchronous-operations/introduction) co-exist well together.
 As you may have noticed, all rendering methods (`renderAsync`, `stringifyAsync`)
 are declared to return an `Awaitable` and can therefore be implemented as async
 functions and use `await`.

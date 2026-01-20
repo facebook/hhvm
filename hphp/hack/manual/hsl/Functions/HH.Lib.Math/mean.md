@@ -34,7 +34,7 @@ function mean(
 
 
 
-* [` Container<num> `](/docs/apis/Interfaces/HH/Container/)`` $numbers ``
+* [` Container<num> `](/apis/Interfaces/HH/Container/)`` $numbers ``
 
 
 

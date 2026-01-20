@@ -51,7 +51,7 @@ integer mappings to SQL types.
 
 
 
-The following example shows how to use [` AsyncMysqlRow::fieldType `](/docs/apis/Classes/AsyncMysqlRow/fieldType/) to get the data type of the `` email `` field. Here are the available data types:
+The following example shows how to use [` AsyncMysqlRow::fieldType `](/apis/Classes/AsyncMysqlRow/fieldType/) to get the data type of the `` email `` field. Here are the available data types:
 
 
 

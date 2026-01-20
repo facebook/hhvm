@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns the value at the specified key in the current [` Map `](/docs/apis/Classes/HH/Map/)
+Returns the value at the specified key in the current [` Map `](/apis/Classes/HH/Map/)
 
 
 
@@ -21,7 +21,7 @@ public function at(
 
 
 If the key is not present, an exception is thrown. If you don't want an
-exception to be thrown, use [` get() `](/docs/apis/Classes/HH/Map/get/) instead.
+exception to be thrown, use [` get() `](/apis/Classes/HH/Map/get/) instead.
 
 
 
@@ -57,7 +57,7 @@ exception to be thrown, use [` get() `](/docs/apis/Classes/HH/Map/get/) instead.
 
 
 
-This example prints the values at the keys ` red ` and `` green `` in the [` Map `](/docs/apis/Classes/HH/Map/):
+This example prints the values at the keys ` red ` and `` green `` in the [` Map `](/apis/Classes/HH/Map/):
 
 
 
@@ -80,7 +80,7 @@ $m = Map {
 
 
 
-This example throws an ` OutOfBoundsException ` because the [` Map `](/docs/apis/Classes/HH/Map/) has no key 'blurple':
+This example throws an ` OutOfBoundsException ` because the [` Map `](/apis/Classes/HH/Map/) has no key 'blurple':
 
 
 

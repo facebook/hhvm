@@ -37,7 +37,7 @@ strings used for decimals and commas, respectively.
 
 
 
-+ [String](</docs/hack/built-in-types/string>)
++ [String](</hack/built-in-types/string>)
 
 
 

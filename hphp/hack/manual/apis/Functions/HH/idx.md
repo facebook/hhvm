@@ -179,7 +179,7 @@ Indexing into a string can be done safely like so: `` $string[4] ?? null ``.
 
 
 
-+ ` ? `[` KeyedContainer<Tk, `](/docs/apis/Interfaces/HH/KeyedContainer/)`` Tv> $collection ``
++ ` ? `[` KeyedContainer<Tk, `](/apis/Interfaces/HH/KeyedContainer/)`` Tv> $collection ``
 + ` ?Tk $index `
 + ` mixed $default = NULL ` - Default value to return if index is not found. By
   default, this is null.

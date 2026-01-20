@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Splice the current [` Vector `](/docs/apis/Classes/HH/Vector/) in place
+Splice the current [` Vector `](/apis/Classes/HH/Vector/) in place
 
 
 
@@ -23,7 +23,7 @@ public function splice(
 
 This function provides the functionality of
 [` array_splice() `](<http://php.net/manual/en/function.array-splice.php>)
-for [` Vector `](/docs/apis/Classes/HH/Vector/)s (except that [` splice() `](/docs/apis/Classes/HH/Vector/splice/) does not permit specifying
+for [` Vector `](/apis/Classes/HH/Vector/)s (except that [` splice() `](/apis/Classes/HH/Vector/splice/) does not permit specifying
 replacement values.  If a third ("replacement values") parameter is
 specified, an exception is thrown.
 
@@ -36,7 +36,7 @@ specified, an exception is thrown.
 
 
 
-Note that this function modifies the current [` Vector `](/docs/apis/Classes/HH/Vector/) in place.
+Note that this function modifies the current [` Vector `](/apis/Classes/HH/Vector/) in place.
 
 
 
@@ -48,9 +48,9 @@ Note that this function modifies the current [` Vector `](/docs/apis/Classes/HH/
 
 + ` int $offset ` - The (0-based) key at which to begin the splice. If
   negative, then it starts that far from the end of the
-  current [` Vector `](/docs/apis/Classes/HH/Vector/).
+  current [` Vector `](/apis/Classes/HH/Vector/).
 + ` ?int $len = NULL ` - The length of the splice. If `` null ``, then the current
-  [` Vector `](/docs/apis/Classes/HH/Vector/) is spliced until its end.
+  [` Vector `](/apis/Classes/HH/Vector/) is spliced until its end.
 
 
 

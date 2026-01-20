@@ -31,7 +31,7 @@ public function connectWithOpts(
 + ` string $dbname `
 + ` string $user `
 + ` string $password `
-+ [` AsyncMysqlConnectionOptions `](/docs/apis/Classes/AsyncMysqlConnectionOptions/)`` $conn_options ``
++ [` AsyncMysqlConnectionOptions `](/apis/Classes/AsyncMysqlConnectionOptions/)`` $conn_options ``
 + ` string $extra_key = '' `
 
 
@@ -42,5 +42,5 @@ public function connectWithOpts(
 
 
 
-* [` Awaitable<AsyncMysqlConnection> `](/docs/apis/Classes/HH/Awaitable/)
+* [` Awaitable<AsyncMysqlConnection> `](/apis/Classes/HH/Awaitable/)
 <!-- HHAPIDOC -->

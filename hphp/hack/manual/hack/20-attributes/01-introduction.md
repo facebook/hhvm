@@ -50,7 +50,7 @@ class YourClass {}
 
 Other common attribute interfaces are `HH\FunctionAttribute`,
 `HH\MethodAttribute` and `HH\PropertyAttribute`, but see [the Hack
-interface reference](/docs/apis/Interfaces/) for the full list.
+interface reference](/apis/Interfaces/) for the full list.
 
 
 ## Accessing attribute arguments

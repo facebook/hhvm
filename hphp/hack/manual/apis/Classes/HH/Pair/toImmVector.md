@@ -7,7 +7,7 @@ the Hack LSP instead for complete and up-to-date information.
 :::
 
 Returns an immutable vector (` ImmVector `) containing the elements of the
-current [` Pair `](/docs/apis/Classes/HH/Pair/)
+current [` Pair `](/apis/Classes/HH/Pair/)
 
 
 
@@ -24,7 +24,7 @@ public function toImmVector(): ImmVector<mixed>;
 
 
 
-+ [` ImmVector<mixed> `](/docs/apis/Classes/HH/ImmVector/) - an `` ImmVector `` with the elements of the current [` Pair `](/docs/apis/Classes/HH/Pair/).
++ [` ImmVector<mixed> `](/apis/Classes/HH/ImmVector/) - an `` ImmVector `` with the elements of the current [` Pair `](/apis/Classes/HH/Pair/).
 
 
 

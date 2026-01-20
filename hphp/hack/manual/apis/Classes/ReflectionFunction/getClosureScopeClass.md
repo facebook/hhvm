@@ -18,5 +18,5 @@ public function getClosureScopeClass(): ?ReflectionClass;
 
 
 
-+ ` ? `[` ReflectionClass `](/docs/apis/Classes/ReflectionClass/)
++ ` ? `[` ReflectionClass `](/apis/Classes/ReflectionClass/)
 <!-- HHAPIDOC -->

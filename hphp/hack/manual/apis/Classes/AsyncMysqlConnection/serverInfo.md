@@ -33,7 +33,7 @@ public function serverInfo(): string;
 
 
 
-The following example shows how to get the version of the MySQL server that this connection is associated with via [` AsyncMysqlConnection::serverInfo `](/docs/apis/Classes/AsyncMysqlConnection/serverInfo/).
+The following example shows how to get the version of the MySQL server that this connection is associated with via [` AsyncMysqlConnection::serverInfo `](/apis/Classes/AsyncMysqlConnection/serverInfo/).
 
 
 

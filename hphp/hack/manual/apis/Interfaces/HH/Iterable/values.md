@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns an [` Iterable `](/docs/apis/Interfaces/HH/Iterable/) containing the current [` Iterable `](/docs/apis/Interfaces/HH/Iterable/)'s values
+Returns an [` Iterable `](/apis/Interfaces/HH/Iterable/) containing the current [` Iterable `](/apis/Interfaces/HH/Iterable/)'s values
 
 
 
@@ -28,5 +28,5 @@ Any keys are discarded.
 
 
 
-+ ` An ` - [` Iterable `](/docs/apis/Interfaces/HH/Iterable/) with the values of the current [` Iterable `](/docs/apis/Interfaces/HH/Iterable/).
++ ` An ` - [` Iterable `](/apis/Interfaces/HH/Iterable/) with the values of the current [` Iterable `](/apis/Interfaces/HH/Iterable/).
 <!-- HHAPIDOC -->

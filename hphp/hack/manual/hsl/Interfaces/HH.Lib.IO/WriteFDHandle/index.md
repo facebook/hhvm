@@ -24,12 +24,12 @@ interface WriteFDHandle implements FDHandle, WriteHandle {...}
 
 
 
-### Public Methods ([` HH\Lib\IO\FDHandle `](</docs/hsl/Interfaces/HH.Lib.IO/FDHandle/>))
+### Public Methods ([` HH\Lib\IO\FDHandle `](</hsl/Interfaces/HH.Lib.IO/FDHandle/>))
 
 
 
 
-+ [` ->getFileDescriptor(): \HH\Lib\OS\FileDescriptor `](</docs/hsl/Interfaces/HH.Lib.IO/FDHandle/getFileDescriptor/>)
++ [` ->getFileDescriptor(): \HH\Lib\OS\FileDescriptor `](</hsl/Interfaces/HH.Lib.IO/FDHandle/getFileDescriptor/>)
 
 
 
@@ -37,14 +37,14 @@ interface WriteFDHandle implements FDHandle, WriteHandle {...}
 
 
 
-### Public Methods ([` HH\Lib\IO\WriteHandle `](</docs/hsl/Interfaces/HH.Lib.IO/WriteHandle/>))
+### Public Methods ([` HH\Lib\IO\WriteHandle `](</hsl/Interfaces/HH.Lib.IO/WriteHandle/>))
 
 
 
 
-* [` ->writeAllAsync(string $bytes, ?int $timeout_ns = NULL): Awaitable<void> `](</docs/hsl/Interfaces/HH.Lib.IO/WriteHandle/writeAllAsync/>)\
+* [` ->writeAllAsync(string $bytes, ?int $timeout_ns = NULL): Awaitable<void> `](</hsl/Interfaces/HH.Lib.IO/WriteHandle/writeAllAsync/>)\
   Write all of the requested data
-* [` ->writeAllowPartialSuccessAsync(string $bytes, ?int $timeout_ns = NULL): Awaitable<int> `](</docs/hsl/Interfaces/HH.Lib.IO/WriteHandle/writeAllowPartialSuccessAsync/>)\
+* [` ->writeAllowPartialSuccessAsync(string $bytes, ?int $timeout_ns = NULL): Awaitable<int> `](</hsl/Interfaces/HH.Lib.IO/WriteHandle/writeAllowPartialSuccessAsync/>)\
   Write data, waiting if necessary
 
 
@@ -53,11 +53,11 @@ interface WriteFDHandle implements FDHandle, WriteHandle {...}
 
 
 
-### Protected Methods ([` HH\Lib\IO\WriteHandle `](</docs/hsl/Interfaces/HH.Lib.IO/WriteHandle/>))
+### Protected Methods ([` HH\Lib\IO\WriteHandle `](</hsl/Interfaces/HH.Lib.IO/WriteHandle/>))
 
 
 
 
-- [` ->writeImpl(string $bytes): int `](</docs/hsl/Interfaces/HH.Lib.IO/WriteHandle/writeImpl/>)\
+- [` ->writeImpl(string $bytes): int `](</hsl/Interfaces/HH.Lib.IO/WriteHandle/writeImpl/>)\
   An immediate unordered write
 <!-- HHAPIDOC -->

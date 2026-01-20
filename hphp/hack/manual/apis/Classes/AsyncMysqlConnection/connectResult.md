@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns the [` AsyncMysqlConnectResult `](/docs/apis/Classes/AsyncMysqlConnectResult/) for the current connection
+Returns the [` AsyncMysqlConnectResult `](/apis/Classes/AsyncMysqlConnectResult/) for the current connection
 
 
 
@@ -18,7 +18,7 @@ public function connectResult(): ?AsyncMysqlConnectResult;
 
 
 
-An [` AsyncMysqlConnectResult `](/docs/apis/Classes/AsyncMysqlConnectResult/) provides information about the timing for
+An [` AsyncMysqlConnectResult `](/apis/Classes/AsyncMysqlConnectResult/) provides information about the timing for
 creating the current connection.
 
 
@@ -29,8 +29,8 @@ creating the current connection.
 
 
 
-+ ` ? `[` AsyncMysqlConnectResult `](/docs/apis/Classes/AsyncMysqlConnectResult/) - An [` AsyncMysqlConnectResult `](/docs/apis/Classes/AsyncMysqlConnectResult/) object or `` null `` if the
-  [` AsyncMysqlConnection `](/docs/apis/Classes/AsyncMysqlConnection/) was not created in the MySQL client.
++ ` ? `[` AsyncMysqlConnectResult `](/apis/Classes/AsyncMysqlConnectResult/) - An [` AsyncMysqlConnectResult `](/apis/Classes/AsyncMysqlConnectResult/) object or `` null `` if the
+  [` AsyncMysqlConnection `](/apis/Classes/AsyncMysqlConnection/) was not created in the MySQL client.
 
 
 
@@ -40,7 +40,7 @@ creating the current connection.
 
 
 
-This example shows how to get data about the async MySQL connection you made via a call to [` AsyncMysqlConnection::connectResult `](/docs/apis/Classes/AsyncMysqlConnection/connectResult/). An [` AsyncMysqlConnectResult `](/docs/apis/Classes/AsyncMysqlConnectResult/) is returned and there are various statistical methods you can call. Here, we call `` elapsedTime `` to show the time it took to make the connection.
+This example shows how to get data about the async MySQL connection you made via a call to [` AsyncMysqlConnection::connectResult `](/apis/Classes/AsyncMysqlConnection/connectResult/). An [` AsyncMysqlConnectResult `](/apis/Classes/AsyncMysqlConnectResult/) is returned and there are various statistical methods you can call. Here, we call `` elapsedTime `` to show the time it took to make the connection.
 
 
 

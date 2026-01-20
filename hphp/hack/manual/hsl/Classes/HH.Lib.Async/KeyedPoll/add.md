@@ -32,7 +32,7 @@ The key is retrieved with ` foreach ($poll await as $k => $v) {} `
 
 
 + ` Tk $key `
-+ [` Awaitable<Tv> `](/docs/apis/Classes/HH/Awaitable/)`` $awaitable ``
++ [` Awaitable<Tv> `](/apis/Classes/HH/Awaitable/)`` $awaitable ``
 
 
 

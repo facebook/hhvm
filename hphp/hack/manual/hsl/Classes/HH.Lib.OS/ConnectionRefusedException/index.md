@@ -29,8 +29,8 @@ final class ConnectionRefusedException extends ConnectionException {...}
 
 
 
-+ [` ::_getValidErrno(): Errno `](/docs/hsl/Classes/HH.Lib.OS/ConnectionRefusedException/_getValidErrno/)
-+ [` ->__construct(string $message) `](/docs/hsl/Classes/HH.Lib.OS/ConnectionRefusedException/__construct/)
++ [` ::_getValidErrno(): Errno `](/hsl/Classes/HH.Lib.OS/ConnectionRefusedException/_getValidErrno/)
++ [` ->__construct(string $message) `](/hsl/Classes/HH.Lib.OS/ConnectionRefusedException/__construct/)
 
 
 
@@ -38,12 +38,12 @@ final class ConnectionRefusedException extends ConnectionException {...}
 
 
 
-### Public Methods ([` HH\Lib\OS\ErrnoException `](/docs/hsl/Classes/HH.Lib.OS/ErrnoException/))
+### Public Methods ([` HH\Lib\OS\ErrnoException `](/hsl/Classes/HH.Lib.OS/ErrnoException/))
 
 
 
 
-* [` ->getCode(): Errno `](/docs/hsl/Classes/HH.Lib.OS/ErrnoException/getCode/)\
+* [` ->getCode(): Errno `](/hsl/Classes/HH.Lib.OS/ErrnoException/getCode/)\
   Deprecated for clarity, and potential future ambiguity
-* [` ->getErrno(): Errno `](/docs/hsl/Classes/HH.Lib.OS/ErrnoException/getErrno/)
+* [` ->getErrno(): Errno `](/hsl/Classes/HH.Lib.OS/ErrnoException/getErrno/)
 <!-- HHAPIDOC -->

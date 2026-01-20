@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns an ` array ` whose values are the keys from the current [` Vector `](/docs/apis/Classes/HH/Vector/)
+Returns an ` array ` whose values are the keys from the current [` Vector `](/apis/Classes/HH/Vector/)
 
 
 
@@ -23,7 +23,7 @@ public function toKeysArray(): varray<int>;
 
 
 
-+ ` varray<int> ` - An `` array `` with the integer keys from the current [` Vector `](/docs/apis/Classes/HH/Vector/).
++ ` varray<int> ` - An `` array `` with the integer keys from the current [` Vector `](/apis/Classes/HH/Vector/).
 
 
 

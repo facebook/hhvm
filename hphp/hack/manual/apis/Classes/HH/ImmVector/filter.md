@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a [` ImmVector `](/docs/apis/Classes/HH/ImmVector/) containing the values of the current [` ImmVector `](/docs/apis/Classes/HH/ImmVector/) that
+Returns a [` ImmVector `](/apis/Classes/HH/ImmVector/) containing the values of the current [` ImmVector `](/apis/Classes/HH/ImmVector/) that
 meet a supplied condition
 
 
@@ -21,9 +21,9 @@ public function filter(
 
 
 
-[` filter() `](/docs/apis/Classes/HH/ImmVector/filter/)'s result contains only values that meet the provided criterion;
-unlike [` map() `](/docs/apis/Classes/HH/ImmVector/map/), where a value is included for each value in the original
-[` ImmVector `](/docs/apis/Classes/HH/ImmVector/).
+[` filter() `](/apis/Classes/HH/ImmVector/filter/)'s result contains only values that meet the provided criterion;
+unlike [` map() `](/apis/Classes/HH/ImmVector/map/), where a value is included for each value in the original
+[` ImmVector `](/apis/Classes/HH/ImmVector/).
 
 
 
@@ -33,7 +33,7 @@ unlike [` map() `](/docs/apis/Classes/HH/ImmVector/map/), where a value is inclu
 
 
 
-+ [Examples](</docs/hack/arrays-and-collections/introduction>)
++ [Examples](</hack/arrays-and-collections/introduction>)
 
 
 
@@ -56,7 +56,7 @@ unlike [` map() `](/docs/apis/Classes/HH/ImmVector/map/), where a value is inclu
 
 
 
-- [` ImmVector<Tv> `](/docs/apis/Classes/HH/ImmVector/) - An [` ImmVector `](/docs/apis/Classes/HH/ImmVector/) containing the values after a user-specified
+- [` ImmVector<Tv> `](/apis/Classes/HH/ImmVector/) - An [` ImmVector `](/apis/Classes/HH/ImmVector/) containing the values after a user-specified
   condition is applied.
 
 
@@ -67,5 +67,5 @@ unlike [` map() `](/docs/apis/Classes/HH/ImmVector/map/), where a value is inclu
 
 
 
-See [` Vector::filter `](/docs/apis/Classes/HH/Vector/filter/#examples) for usage examples.
+See [` Vector::filter `](/apis/Classes/HH/Vector/filter/#examples) for usage examples.
 <!-- HHAPIDOC -->

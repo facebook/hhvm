@@ -45,7 +45,7 @@ public function fieldName(
 
 
 
-The following example shows how to use [` AsyncMysqlRowBlock::fieldName `](/docs/apis/Classes/AsyncMysqlRowBlock/fieldName/) to get the name of a field at a given index in the row block
+The following example shows how to use [` AsyncMysqlRowBlock::fieldName `](/apis/Classes/AsyncMysqlRowBlock/fieldName/) to get the name of a field at a given index in the row block
 
 
 

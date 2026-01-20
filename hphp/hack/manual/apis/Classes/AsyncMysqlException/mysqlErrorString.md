@@ -34,7 +34,7 @@ public function mysqlErrorString(): string;
 
 
 
-The following example shows how to use [` AsyncMysqlException::mysqlErrorString `](/docs/apis/Classes/AsyncMysqlException/mysqlErrorString/) to get the raw MySQL error string associated with this exception. For this example, the most likely exception string will be something like:
+The following example shows how to use [` AsyncMysqlException::mysqlErrorString `](/apis/Classes/AsyncMysqlException/mysqlErrorString/) to get the raw MySQL error string associated with this exception. For this example, the most likely exception string will be something like:
 
 
 

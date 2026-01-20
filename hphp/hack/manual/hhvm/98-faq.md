@@ -14,18 +14,18 @@ Facebook's entire site runs on HHVM (desktop, API and mobile), both in developme
 
 ### What platforms is HHVM supported on?
 
-* **Linux**: HHVM has [Linux](/docs/hhvm/installation/linux) support on flavors of Ubuntu and Debian.
-* **Mac OS X**: HHVM has limited [MacOS](/docs/hhvm/installation/mac) support via Homebrew.
+* **Linux**: HHVM has [Linux](/hhvm/installation/linux) support on flavors of Ubuntu and Debian.
+* **Mac OS X**: HHVM has limited [MacOS](/hhvm/installation/mac) support via Homebrew.
 
 ## Users
 
 ### How do I install HHVM? Where are the binaries?
 
-New users should read the [HHVM Introduction](/docs/hhvm/basic-usage/introduction) guide.
+New users should read the [HHVM Introduction](/hhvm/basic-usage/introduction) guide.
 
 ### When does HHVM release a new version?
 
-[Every two weeks](/docs/hhvm/installation/release-schedule); each release is supported
+[Every two weeks](/hhvm/installation/release-schedule); each release is supported
 for 6 weeks.
 
 ### Why is HHVM released every two weeks?
@@ -51,9 +51,9 @@ and [on Slack](https://hhvm.com/slack).
 
 ### Should I use Proxygen or FastCGI?
 
-[Proxygen](/docs/hhvm/basic-usage/proxygen) is strongly recommended, and used in production by Facebook.
+[Proxygen](/hhvm/basic-usage/proxygen) is strongly recommended, and used in production by Facebook.
 
-[FastCGI](/docs/hhvm/advanced-usage/fastCGI) is not recommended, but available for
+[FastCGI](/hhvm/advanced-usage/fastCGI) is not recommended, but available for
 legacy or niche use cases.
 
 ### When will HHVM support Apache or Nginx?

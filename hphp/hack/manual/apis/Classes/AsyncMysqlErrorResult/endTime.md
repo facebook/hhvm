@@ -33,7 +33,7 @@ public function endTime(): float;
 
 
 
-When an error occurs when establishing a connection or on a query, and you catch the exception that is thrown, you will get an [` AsyncMysqlErrorResult `](/docs/apis/Classes/AsyncMysqlErrorResult/). And one of the methods on an [` AsyncMysqlErrorResult `](/docs/apis/Classes/AsyncMysqlErrorResult/) is [` endTime() `](/docs/apis/Classes/AsyncMysqlErrorResult/endTime/), which tells you when the connection operation completed.
+When an error occurs when establishing a connection or on a query, and you catch the exception that is thrown, you will get an [` AsyncMysqlErrorResult `](/apis/Classes/AsyncMysqlErrorResult/). And one of the methods on an [` AsyncMysqlErrorResult `](/apis/Classes/AsyncMysqlErrorResult/) is [` endTime() `](/apis/Classes/AsyncMysqlErrorResult/endTime/), which tells you when the connection operation completed.
 
 
 

@@ -22,7 +22,7 @@ function darray<Tk as arraykey, Tv>(
 
 
 
-+ [` KeyedTraversable<Tk, `](/docs/apis/Interfaces/HH/KeyedTraversable/)`` Tv> $arr ``
++ [` KeyedTraversable<Tk, `](/apis/Interfaces/HH/KeyedTraversable/)`` Tv> $arr ``
 
 
 

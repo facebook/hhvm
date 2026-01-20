@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Creates an [` ImmVector `](/docs/apis/Classes/HH/ImmVector/) from the keys of the specified container
+Creates an [` ImmVector `](/apis/Classes/HH/ImmVector/) from the keys of the specified container
 
 
 
@@ -20,8 +20,8 @@ public static function fromKeysOf<Tk as arraykey>(
 
 
 
-Every key in the provided [` KeyedContainer `](/docs/apis/Interfaces/HH/KeyedContainer/) will appear sequentially in the
-returned [` ImmVector `](/docs/apis/Classes/HH/ImmVector/), with the next available integer key assigned to each.
+Every key in the provided [` KeyedContainer `](/apis/Interfaces/HH/KeyedContainer/) will appear sequentially in the
+returned [` ImmVector `](/apis/Classes/HH/ImmVector/), with the next available integer key assigned to each.
 
 
 
@@ -31,8 +31,8 @@ returned [` ImmVector `](/docs/apis/Classes/HH/ImmVector/), with the next availa
 
 
 
-+ ` ? `[` KeyedContainer<Tk, `](/docs/apis/Interfaces/HH/KeyedContainer/)`` mixed> $container `` - The container with the keys used to create the
-  current [` ImmVector `](/docs/apis/Classes/HH/ImmVector/).
++ ` ? `[` KeyedContainer<Tk, `](/apis/Interfaces/HH/KeyedContainer/)`` mixed> $container `` - The container with the keys used to create the
+  current [` ImmVector `](/apis/Classes/HH/ImmVector/).
 
 
 
@@ -42,7 +42,7 @@ returned [` ImmVector `](/docs/apis/Classes/HH/ImmVector/), with the next availa
 
 
 
-* [` ImmVector<Tk> `](/docs/apis/Classes/HH/ImmVector/) - An [` ImmVector `](/docs/apis/Classes/HH/ImmVector/) built from the keys of the specified container.
+* [` ImmVector<Tk> `](/apis/Classes/HH/ImmVector/) - An [` ImmVector `](/apis/Classes/HH/ImmVector/) built from the keys of the specified container.
 
 
 
@@ -52,5 +52,5 @@ returned [` ImmVector `](/docs/apis/Classes/HH/ImmVector/), with the next availa
 
 
 
-See [` Vector::fromKeysOf `](/docs/apis/Classes/HH/Vector/fromKeysOf/#examples) for usage examples.
+See [` Vector::fromKeysOf `](/apis/Classes/HH/Vector/fromKeysOf/#examples) for usage examples.
 <!-- HHAPIDOC -->

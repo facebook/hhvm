@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Checks whether a provided key exists in the current [` Pair `](/docs/apis/Classes/HH/Pair/)
+Checks whether a provided key exists in the current [` Pair `](/apis/Classes/HH/Pair/)
 
 
 
@@ -21,7 +21,7 @@ public function containsKey<Tu super int>(
 
 
 This will only return ` true ` for provided keys of 0 and 1 since those are
-the only two keys that can exist in a [` Pair `](/docs/apis/Classes/HH/Pair/).
+the only two keys that can exist in a [` Pair `](/apis/Classes/HH/Pair/).
 
 
 
@@ -41,7 +41,7 @@ the only two keys that can exist in a [` Pair `](/docs/apis/Classes/HH/Pair/).
 
 
 
-* ` bool ` - `` true `` if the provided key exists in the [` Pair `](/docs/apis/Classes/HH/Pair/); `` false ``
+* ` bool ` - `` true `` if the provided key exists in the [` Pair `](/apis/Classes/HH/Pair/); `` false ``
   otherwise. This will only return ``` true ``` if the provided key is
   0 or 1.
 

@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns an ImmVector containing the values of the current [` ImmMap `](/docs/apis/Classes/HH/ImmMap/)
+Returns an ImmVector containing the values of the current [` ImmMap `](/apis/Classes/HH/ImmMap/)
 
 
 
@@ -28,7 +28,7 @@ This method is interchangeable with toImmVector().
 
 
 
-+ [` ImmVector<Tv> `](/docs/apis/Classes/HH/ImmVector/) - an ImmVector containing the values of the current [` ImmMap `](/docs/apis/Classes/HH/ImmMap/).
++ [` ImmVector<Tv> `](/apis/Classes/HH/ImmVector/) - an ImmVector containing the values of the current [` ImmMap `](/apis/Classes/HH/ImmMap/).
 
 
 
@@ -38,5 +38,5 @@ This method is interchangeable with toImmVector().
 
 
 
-See [` Map::values `](/docs/apis/Classes/HH/Map/values/#examples) for usage examples.
+See [` Map::values `](/apis/Classes/HH/Map/values/#examples) for usage examples.
 <!-- HHAPIDOC -->

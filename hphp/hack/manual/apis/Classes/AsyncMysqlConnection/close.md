@@ -33,7 +33,7 @@ public function close(): void;
 
 
 
-Closing a database connection is usually a good idea. This example shows the closing of a connection using [` AsyncMysqlConnection::close `](/docs/apis/Classes/AsyncMysqlConnection/close/) and then tries to invoke a query on that connection afterwards.
+Closing a database connection is usually a good idea. This example shows the closing of a connection using [` AsyncMysqlConnection::close `](/apis/Classes/AsyncMysqlConnection/close/) and then tries to invoke a query on that connection afterwards.
 
 
 

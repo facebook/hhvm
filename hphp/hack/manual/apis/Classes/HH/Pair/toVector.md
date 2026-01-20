@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a ` Vector ` containing the elements of the current [` Pair `](/docs/apis/Classes/HH/Pair/)
+Returns a ` Vector ` containing the elements of the current [` Pair `](/apis/Classes/HH/Pair/)
 
 
 
@@ -28,7 +28,7 @@ The returned ` Vector ` will, of course, be mutable.
 
 
 
-+ [` Vector<mixed> `](/docs/apis/Classes/HH/Vector/) - a `` Vector `` with the elements of the current [` Pair `](/docs/apis/Classes/HH/Pair/).
++ [` Vector<mixed> `](/apis/Classes/HH/Vector/) - a `` Vector `` with the elements of the current [` Pair `](/apis/Classes/HH/Pair/).
 
 
 

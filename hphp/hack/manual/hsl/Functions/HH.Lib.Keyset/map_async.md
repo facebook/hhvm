@@ -42,7 +42,7 @@ parallel.
 
 
 
-+ [` Traversable<Tv> `](/docs/apis/Interfaces/HH/Traversable/)`` $traversable ``
++ [` Traversable<Tv> `](/apis/Interfaces/HH/Traversable/)`` $traversable ``
 + ` (function(Tv): Awaitable<Tk>) $async_func `
 
 
@@ -53,5 +53,5 @@ parallel.
 
 
 
-* [` Awaitable<keyset<Tk>> `](/docs/apis/Classes/HH/Awaitable/)
+* [` Awaitable<keyset<Tk>> `](/apis/Classes/HH/Awaitable/)
 <!-- HHAPIDOC -->

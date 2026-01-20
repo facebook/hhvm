@@ -19,7 +19,7 @@ The important thing to note here is that `nothing` is never between two types. `
 
 ## Usages
 
-When defining a function that will never return (it either throws, loops forever, or terminates the request) you can use `nothing` for the return type. This gives more information to the caller than `void` and is more flexible than [noreturn](/docs/hack/built-in-types/noreturn). `nothing` can be used in expressions (like `nullable T ?? nothing`) and it will typecheck "as if it wasn't there", since `(T | nothing)` is _just_ `T`.
+When defining a function that will never return (it either throws, loops forever, or terminates the request) you can use `nothing` for the return type. This gives more information to the caller than `void` and is more flexible than [noreturn](/hack/built-in-types/noreturn). `nothing` can be used in expressions (like `nullable T ?? nothing`) and it will typecheck "as if it wasn't there", since `(T | nothing)` is _just_ `T`.
 
 `nothing` can be used to create a `throw` expression in this way.
 

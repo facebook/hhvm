@@ -29,13 +29,13 @@ interface QueryFormat implements ScalarFormat {...}
 
 
 
-+ [` ->format_0x25(): string `](/docs/apis/Interfaces/HH.Lib.SQL/QueryFormat/format_0x25/)
-+ [` ->format_0x3d(): ScalarFormat `](/docs/apis/Interfaces/HH.Lib.SQL/QueryFormat/format_0x3d/)
-+ [` ->format_upcase_c(string $s): string `](/docs/apis/Interfaces/HH.Lib.SQL/QueryFormat/format_upcase_c/)
-+ [` ->format_upcase_k(string $s): string `](/docs/apis/Interfaces/HH.Lib.SQL/QueryFormat/format_upcase_k/)
-+ [` ->format_upcase_l(): ListFormat `](/docs/apis/Interfaces/HH.Lib.SQL/QueryFormat/format_upcase_l/)
-+ [` ->format_upcase_q(Query $q): string `](/docs/apis/Interfaces/HH.Lib.SQL/QueryFormat/format_upcase_q/)
-+ [` ->format_upcase_t(string $s): string `](/docs/apis/Interfaces/HH.Lib.SQL/QueryFormat/format_upcase_t/)
++ [` ->format_0x25(): string `](/apis/Interfaces/HH.Lib.SQL/QueryFormat/format_0x25/)
++ [` ->format_0x3d(): ScalarFormat `](/apis/Interfaces/HH.Lib.SQL/QueryFormat/format_0x3d/)
++ [` ->format_upcase_c(string $s): string `](/apis/Interfaces/HH.Lib.SQL/QueryFormat/format_upcase_c/)
++ [` ->format_upcase_k(string $s): string `](/apis/Interfaces/HH.Lib.SQL/QueryFormat/format_upcase_k/)
++ [` ->format_upcase_l(): ListFormat `](/apis/Interfaces/HH.Lib.SQL/QueryFormat/format_upcase_l/)
++ [` ->format_upcase_q(Query $q): string `](/apis/Interfaces/HH.Lib.SQL/QueryFormat/format_upcase_q/)
++ [` ->format_upcase_t(string $s): string `](/apis/Interfaces/HH.Lib.SQL/QueryFormat/format_upcase_t/)
 
 
 
@@ -43,12 +43,12 @@ interface QueryFormat implements ScalarFormat {...}
 
 
 
-### Public Methods ([` HH\Lib\SQL\ScalarFormat `](/docs/apis/Interfaces/HH.Lib.SQL/ScalarFormat/))
+### Public Methods ([` HH\Lib\SQL\ScalarFormat `](/apis/Interfaces/HH.Lib.SQL/ScalarFormat/))
 
 
 
 
-* [` ->format_d(?int $int): string `](/docs/apis/Interfaces/HH.Lib.SQL/ScalarFormat/format_d/)
-* [` ->format_f(?float $s): string `](/docs/apis/Interfaces/HH.Lib.SQL/ScalarFormat/format_f/)
-* [` ->format_s(?string $string): string `](/docs/apis/Interfaces/HH.Lib.SQL/ScalarFormat/format_s/)
+* [` ->format_d(?int $int): string `](/apis/Interfaces/HH.Lib.SQL/ScalarFormat/format_d/)
+* [` ->format_f(?float $s): string `](/apis/Interfaces/HH.Lib.SQL/ScalarFormat/format_f/)
+* [` ->format_s(?string $string): string `](/apis/Interfaces/HH.Lib.SQL/ScalarFormat/format_s/)
 <!-- HHAPIDOC -->

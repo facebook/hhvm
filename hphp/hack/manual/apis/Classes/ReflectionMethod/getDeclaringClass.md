@@ -29,6 +29,6 @@ Gets the declaring class for the reflected method.
 
 
 
-+ [` ReflectionClass `](/docs/apis/Classes/ReflectionClass/) - A ReflectionClass object of the class that the
++ [` ReflectionClass `](/apis/Classes/ReflectionClass/) - A ReflectionClass object of the class that the
   reflected method is part of.
 <!-- HHAPIDOC -->

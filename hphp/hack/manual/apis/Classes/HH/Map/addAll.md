@@ -6,8 +6,8 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-For every element in the provided [` Traversable `](/docs/apis/Interfaces/HH/Traversable/), add a key/value pair into
-the current [` Map `](/docs/apis/Classes/HH/Map/)
+For every element in the provided [` Traversable `](/apis/Interfaces/HH/Traversable/), add a key/value pair into
+the current [` Map `](/apis/Classes/HH/Map/)
 
 
 
@@ -21,15 +21,15 @@ public function addAll(
 
 
 
-This method is equivalent to [` Map::setAll() `](/docs/apis/Classes/HH/Map/setAll/). If a key in the [` Traversable `](/docs/apis/Interfaces/HH/Traversable/)
-exists in the [` Map `](/docs/apis/Classes/HH/Map/), then the value associated with that key in the [` Map `](/docs/apis/Classes/HH/Map/)
+This method is equivalent to [` Map::setAll() `](/apis/Classes/HH/Map/setAll/). If a key in the [` Traversable `](/apis/Interfaces/HH/Traversable/)
+exists in the [` Map `](/apis/Classes/HH/Map/), then the value associated with that key in the [` Map `](/apis/Classes/HH/Map/)
 is overwritten.
 
 
 
 
-Future changes made to the current [` Map `](/docs/apis/Classes/HH/Map/) ARE reflected in the returned
-[` Map `](/docs/apis/Classes/HH/Map/), and vice-versa.
+Future changes made to the current [` Map `](/apis/Classes/HH/Map/) ARE reflected in the returned
+[` Map `](/apis/Classes/HH/Map/), and vice-versa.
 
 
 
@@ -39,7 +39,7 @@ Future changes made to the current [` Map `](/docs/apis/Classes/HH/Map/) ARE ref
 
 
 
-+ ` ? `[` Traversable<Pair<Tk, `](/docs/apis/Interfaces/HH/Traversable/)`` Tv>> $iterable ``
++ ` ? `[` Traversable<Pair<Tk, `](/apis/Interfaces/HH/Traversable/)`` Tv>> $iterable ``
 
 
 
@@ -49,7 +49,7 @@ Future changes made to the current [` Map `](/docs/apis/Classes/HH/Map/) ARE ref
 
 
 
-* [` Map<Tk, `](/docs/apis/Classes/HH/Map/)`` Tv> `` - Returns itself.
+* [` Map<Tk, `](/apis/Classes/HH/Map/)`` Tv> `` - Returns itself.
 
 
 
@@ -59,7 +59,7 @@ Future changes made to the current [` Map `](/docs/apis/Classes/HH/Map/) ARE ref
 
 
 
-The following example adds a collection of key-value pairs to the [` Map `](/docs/apis/Classes/HH/Map/) `` $m `` and also adds multiple collections of key-value pairs to ``` $m ``` through chaining. Since [` Map::addAll() `](/docs/apis/Classes/HH/Map/addAll/) returns a [shallow copy](<https://en.wikipedia.org/wiki/Object_copying#Shallow_copy>) of ` $m ` itself, you can chain a bunch of [` addAll() `](/docs/apis/Classes/HH/Map/addAll/) calls together.
+The following example adds a collection of key-value pairs to the [` Map `](/apis/Classes/HH/Map/) `` $m `` and also adds multiple collections of key-value pairs to ``` $m ``` through chaining. Since [` Map::addAll() `](/apis/Classes/HH/Map/addAll/) returns a [shallow copy](<https://en.wikipedia.org/wiki/Object_copying#Shallow_copy>) of ` $m ` itself, you can chain a bunch of [` addAll() `](/apis/Classes/HH/Map/addAll/) calls together.
 
 
 

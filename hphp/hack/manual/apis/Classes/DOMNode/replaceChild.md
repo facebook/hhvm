@@ -33,10 +33,10 @@ replacement succeeds the old node is returned.
 
 
 
-+ [` DOMNode `](/docs/apis/Classes/DOMNode/)`` $newchildobj `` - The new node. It must be a member of the
++ [` DOMNode `](/apis/Classes/DOMNode/)`` $newchildobj `` - The new node. It must be a member of the
   target document, i.e. created by one of the DOMDocument->createXXX()
   methods or imported in the document by DOMDocument::importNode.
-+ [` DOMNode `](/docs/apis/Classes/DOMNode/)`` $oldchildobj `` - The old node.
++ [` DOMNode `](/apis/Classes/DOMNode/)`` $oldchildobj `` - The old node.
 
 
 

@@ -28,5 +28,5 @@ Will wait for new connections if none are pending.
 
 
 
-+ [` Awaitable<TSock> `](/docs/apis/Classes/HH/Awaitable/)
++ [` Awaitable<TSock> `](/apis/Classes/HH/Awaitable/)
 <!-- HHAPIDOC -->

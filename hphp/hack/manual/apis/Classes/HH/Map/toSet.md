@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a ` Set ` based on the values of the current [` Map `](/docs/apis/Classes/HH/Map/)
+Returns a ` Set ` based on the values of the current [` Map `](/apis/Classes/HH/Map/)
 
 
 
@@ -23,7 +23,7 @@ public function toSet(): Set<Tv>;
 
 
 
-+ [` Set<Tv> `](/docs/apis/Classes/HH/Set/) - a `` Set `` with the current values of the current [` Map `](/docs/apis/Classes/HH/Map/).
++ [` Set<Tv> `](/apis/Classes/HH/Set/) - a `` Set `` with the current values of the current [` Map `](/apis/Classes/HH/Map/).
 
 
 
@@ -33,7 +33,7 @@ public function toSet(): Set<Tv>;
 
 
 
-This example shows that converting a [` Map `](/docs/apis/Classes/HH/Map/) to a `` Set `` also removes duplicate values:
+This example shows that converting a [` Map `](/apis/Classes/HH/Map/) to a `` Set `` also removes duplicate values:
 
 
 

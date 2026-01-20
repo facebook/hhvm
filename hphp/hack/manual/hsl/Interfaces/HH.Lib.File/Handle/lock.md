@@ -46,5 +46,5 @@ waiting for a lock.
 
 
 
-* [` HH\Lib\File\Lock `](/docs/hsl/Classes/HH.Lib.File/Lock/)
+* [` HH\Lib\File\Lock `](/hsl/Classes/HH.Lib.File/Lock/)
 <!-- HHAPIDOC -->

@@ -34,7 +34,7 @@ Locale-specific capitalization rules will be respected, e.g. ` I ` -> `` i `` vs
 
 
 
-+ [String](</docs/hack/built-in-types/string>)
++ [String](</hack/built-in-types/string>)
 
 
 

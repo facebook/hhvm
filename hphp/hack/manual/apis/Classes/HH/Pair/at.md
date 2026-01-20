@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns the value at the specified key in the current [` Pair `](/docs/apis/Classes/HH/Pair/)
+Returns the value at the specified key in the current [` Pair `](/apis/Classes/HH/Pair/)
 
 
 
@@ -22,7 +22,7 @@ public function at(
 
 If the key is not present, an exception is thrown. This essentially means
 if you specify a key other than 0 or 1, you will get an exception. If you
-don't want an exception to be thrown, use [` get() `](/docs/apis/Classes/HH/Pair/get/) instead.
+don't want an exception to be thrown, use [` get() `](/apis/Classes/HH/Pair/get/) instead.
 
 
 
@@ -58,7 +58,7 @@ $v = $p->at($k)" is semantically equivalent to ` $v = $p[$k] `.
 
 
 
-This example prints the first and second values of the [` Pair `](/docs/apis/Classes/HH/Pair/):
+This example prints the first and second values of the [` Pair `](/apis/Classes/HH/Pair/):
 
 
 
@@ -76,7 +76,7 @@ $p = Pair {'foo', -1.5};
 
 
 
-This example throws an ` OutOfBoundsException ` because a [` Pair `](/docs/apis/Classes/HH/Pair/) only has the indexes `` 0 `` and ``` 1 ```:
+This example throws an ` OutOfBoundsException ` because a [` Pair `](/apis/Classes/HH/Pair/) only has the indexes `` 0 `` and ``` 1 ```:
 
 
 

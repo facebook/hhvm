@@ -41,7 +41,7 @@ Space complexity: O(n)
 
 
 
-+ [` KeyedTraversable<Tk1, `](/docs/apis/Interfaces/HH/KeyedTraversable/)`` Tv> $traversable ``
++ [` KeyedTraversable<Tk1, `](/apis/Interfaces/HH/KeyedTraversable/)`` Tv> $traversable ``
 + ` (function(Tk1): Tk2) $key_func `
 
 

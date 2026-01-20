@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a [` MutableSet `](/docs/apis/Interfaces/MutableSet/) containing the values of the current [` MutableSet `](/docs/apis/Interfaces/MutableSet/)
+Returns a [` MutableSet `](/apis/Interfaces/MutableSet/) containing the values of the current [` MutableSet `](/apis/Interfaces/MutableSet/)
 up to but not including the first value that produces `` false `` when passed
 to the specified callback
 
@@ -22,8 +22,8 @@ public function takeWhile(
 
 
 
-The returned [` MutableSet `](/docs/apis/Interfaces/MutableSet/) will always be a proper subset of the current
-[` MutableSet `](/docs/apis/Interfaces/MutableSet/).
+The returned [` MutableSet `](/apis/Interfaces/MutableSet/) will always be a proper subset of the current
+[` MutableSet `](/apis/Interfaces/MutableSet/).
 
 
 
@@ -43,6 +43,6 @@ The returned [` MutableSet `](/docs/apis/Interfaces/MutableSet/) will always be 
 
 
 
-* [` MutableSet<Tv> `](/docs/apis/Interfaces/MutableSet/) - A [` MutableSet `](/docs/apis/Interfaces/MutableSet/) that is a proper subset of the current
-  [` MutableSet `](/docs/apis/Interfaces/MutableSet/) up until the callback returns `` false ``.
+* [` MutableSet<Tv> `](/apis/Interfaces/MutableSet/) - A [` MutableSet `](/apis/Interfaces/MutableSet/) that is a proper subset of the current
+  [` MutableSet `](/apis/Interfaces/MutableSet/) up until the callback returns `` false ``.
 <!-- HHAPIDOC -->

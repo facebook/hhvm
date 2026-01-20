@@ -32,23 +32,23 @@ final class ReflectionModule implements Reflector {...}
 
 
 
-+ [` ->__construct(string $name) `](/docs/apis/Classes/ReflectionModule/__construct/)\
++ [` ->__construct(string $name) `](/apis/Classes/ReflectionModule/__construct/)\
   Constructs a new ReflectionModule
 
-+ [` ->__toString(): string `](/docs/apis/Classes/ReflectionModule/__toString/)
++ [` ->__toString(): string `](/apis/Classes/ReflectionModule/__toString/)
 
-+ [` ->getAttribute(string $name): ?varray<mixed> `](/docs/apis/Classes/ReflectionModule/getAttribute/)
++ [` ->getAttribute(string $name): ?varray<mixed> `](/apis/Classes/ReflectionModule/getAttribute/)
 
-+ [` ->getAttributeClass<T as HH\FileAttribute>(classname<T> $c): ?T `](/docs/apis/Classes/ReflectionModule/getAttributeClass/)
++ [` ->getAttributeClass<T as HH\FileAttribute>(classname<T> $c): ?T `](/apis/Classes/ReflectionModule/getAttributeClass/)
 
-+ [` ->getAttributes(): darray<string, varray<mixed>> `](/docs/apis/Classes/ReflectionModule/getAttributes/)
++ [` ->getAttributes(): darray<string, varray<mixed>> `](/apis/Classes/ReflectionModule/getAttributes/)
 
-+ [` ->getAttributesNamespaced(): darray<arraykey, varray<mixed>> `](/docs/apis/Classes/ReflectionModule/getAttributesNamespaced/)\
++ [` ->getAttributesNamespaced(): darray<arraykey, varray<mixed>> `](/apis/Classes/ReflectionModule/getAttributesNamespaced/)\
   Gets all attributes
 
-+ [` ->getName(): string `](/docs/apis/Classes/ReflectionModule/getName/)\
++ [` ->getName(): string `](/apis/Classes/ReflectionModule/getName/)\
   Get the name of the file
 
-+ [` ->hasAttribute(string $name): bool `](/docs/apis/Classes/ReflectionModule/hasAttribute/)
++ [` ->hasAttribute(string $name): bool `](/apis/Classes/ReflectionModule/hasAttribute/)
 
 <!-- HHAPIDOC -->

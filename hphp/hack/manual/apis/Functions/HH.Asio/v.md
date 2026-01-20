@@ -6,8 +6,8 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Translate a [` Traversable `](/docs/apis/Interfaces/HH/Traversable/) of `` Awaitables `` into a single [` Awaitable `](/docs/apis/Classes/HH/Awaitable/) of
-[` Vector `](/docs/apis/Classes/HH/Vector/)
+Translate a [` Traversable `](/apis/Interfaces/HH/Traversable/) of `` Awaitables `` into a single [` Awaitable `](/apis/Classes/HH/Awaitable/) of
+[` Vector `](/apis/Classes/HH/Vector/)
 
 
 
@@ -23,21 +23,21 @@ function v<Tv>(
 
 
 
-This function takes any [` Traversable `](/docs/apis/Interfaces/HH/Traversable/) object of `` Awaitables `` (i.e., each
-member of the [` Traversable `](/docs/apis/Interfaces/HH/Traversable/) is of type of [` Awaitable `](/docs/apis/Classes/HH/Awaitable/), likely from a call
-to a function that returned [` Awaitable<T> `](/docs/apis/Classes/HH/Awaitable/)), and transforms those
-`` Awaitables `` into one big [` Awaitable `](/docs/apis/Classes/HH/Awaitable/) [` Vector `](/docs/apis/Classes/HH/Vector/).
+This function takes any [` Traversable `](/apis/Interfaces/HH/Traversable/) object of `` Awaitables `` (i.e., each
+member of the [` Traversable `](/apis/Interfaces/HH/Traversable/) is of type of [` Awaitable `](/apis/Classes/HH/Awaitable/), likely from a call
+to a function that returned [` Awaitable<T> `](/apis/Classes/HH/Awaitable/)), and transforms those
+`` Awaitables `` into one big [` Awaitable `](/apis/Classes/HH/Awaitable/) [` Vector `](/apis/Classes/HH/Vector/).
 
 
 
 
-This function is called ` v ` we are returning a `` v ``ector of [` Awaitable `](/docs/apis/Classes/HH/Awaitable/).
+This function is called ` v ` we are returning a `` v ``ector of [` Awaitable `](/apis/Classes/HH/Awaitable/).
 
 
 
 
-Only When you ` await ` or `` join `` the resulting [` Awaitable `](/docs/apis/Classes/HH/Awaitable/), will all of the
-values in the [` Vector `](/docs/apis/Classes/HH/Vector/) within the returned [` Awaitable `](/docs/apis/Classes/HH/Awaitable/) be available.
+Only When you ` await ` or `` join `` the resulting [` Awaitable `](/apis/Classes/HH/Awaitable/), will all of the
+values in the [` Vector `](/apis/Classes/HH/Vector/) within the returned [` Awaitable `](/apis/Classes/HH/Awaitable/) be available.
 
 
 
@@ -47,7 +47,7 @@ values in the [` Vector `](/docs/apis/Classes/HH/Vector/) within the returned [`
 
 
 
-+ [` Traversable<Awaitable<Tv>> `](/docs/apis/Interfaces/HH/Traversable/)`` $awaitables `` - The collection of [` Traversable `](/docs/apis/Interfaces/HH/Traversable/) awaitables.
++ [` Traversable<Awaitable<Tv>> `](/apis/Interfaces/HH/Traversable/)`` $awaitables `` - The collection of [` Traversable `](/apis/Interfaces/HH/Traversable/) awaitables.
 
 
 
@@ -57,8 +57,8 @@ values in the [` Vector `](/docs/apis/Classes/HH/Vector/) within the returned [`
 
 
 
-* [` Awaitable<Vector<Tv>> `](/docs/apis/Classes/HH/Awaitable/) - An [` Awaitable `](/docs/apis/Classes/HH/Awaitable/) of [` Vector `](/docs/apis/Classes/HH/Vector/), where the [` Vector `](/docs/apis/Classes/HH/Vector/) was generated from
-  each [` Traversable `](/docs/apis/Interfaces/HH/Traversable/) member in `` $awaitables ``.
+* [` Awaitable<Vector<Tv>> `](/apis/Classes/HH/Awaitable/) - An [` Awaitable `](/apis/Classes/HH/Awaitable/) of [` Vector `](/apis/Classes/HH/Vector/), where the [` Vector `](/apis/Classes/HH/Vector/) was generated from
+  each [` Traversable `](/apis/Interfaces/HH/Traversable/) member in `` $awaitables ``.
 
 
 

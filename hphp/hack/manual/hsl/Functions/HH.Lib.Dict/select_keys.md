@@ -41,8 +41,8 @@ Space complexity: O(k), where k is the size of `` $keys ``.
 
 
 
-+ [` KeyedContainer<Tk, `](/docs/apis/Interfaces/HH/KeyedContainer/)`` Tv> $container ``
-+ [` Traversable<Tk> `](/docs/apis/Interfaces/HH/Traversable/)`` $keys ``
++ [` KeyedContainer<Tk, `](/apis/Interfaces/HH/KeyedContainer/)`` Tv> $container ``
++ [` Traversable<Tk> `](/apis/Interfaces/HH/Traversable/)`` $keys ``
 
 
 

@@ -7,7 +7,7 @@ the Hack LSP instead for complete and up-to-date information.
 :::
 
 Returns a lazy, access elements only when needed view of the current
-[` ImmSet `](/docs/apis/Classes/HH/ImmSet/)
+[` ImmSet `](/apis/Classes/HH/ImmSet/)
 
 
 
@@ -19,9 +19,9 @@ public function lazy(): KeyedIterable<arraykey, Tv>;
 
 
 
-Normally, memory is allocated for all of the elements of an [` ImmSet `](/docs/apis/Classes/HH/ImmSet/). With
+Normally, memory is allocated for all of the elements of an [` ImmSet `](/apis/Classes/HH/ImmSet/). With
 a lazy view, memory is allocated for an element only when needed or used
-in a calculation like in [` map() `](/docs/apis/Classes/HH/ImmSet/map/) or [` filter() `](/docs/apis/Classes/HH/ImmSet/filter/).
+in a calculation like in [` map() `](/apis/Classes/HH/ImmSet/map/) or [` filter() `](/apis/Classes/HH/ImmSet/filter/).
 
 
 
@@ -31,7 +31,7 @@ in a calculation like in [` map() `](/docs/apis/Classes/HH/ImmSet/map/) or [` fi
 
 
 
-+ [Examples](</docs/hack/arrays-and-collections/introduction>)
++ [Examples](</hack/arrays-and-collections/introduction>)
 
 
 
@@ -44,8 +44,8 @@ in a calculation like in [` map() `](/docs/apis/Classes/HH/ImmSet/map/) or [` fi
 
 
 
-* [` KeyedIterable<arraykey, `](/docs/apis/Interfaces/HH/KeyedIterable/)`` Tv> `` - an [` KeyedIterable `](/docs/apis/Interfaces/HH/KeyedIterable/) representing the lazy view into the current
-  [` ImmSet `](/docs/apis/Classes/HH/ImmSet/), where the keys are the same as the values.
+* [` KeyedIterable<arraykey, `](/apis/Interfaces/HH/KeyedIterable/)`` Tv> `` - an [` KeyedIterable `](/apis/Interfaces/HH/KeyedIterable/) representing the lazy view into the current
+  [` ImmSet `](/apis/Classes/HH/ImmSet/), where the keys are the same as the values.
 
 
 
@@ -55,5 +55,5 @@ in a calculation like in [` map() `](/docs/apis/Classes/HH/ImmSet/map/) or [` fi
 
 
 
-See [` Set::lazy `](/docs/apis/Classes/HH/Set/lazy/#examples) for usage examples.
+See [` Set::lazy `](/apis/Classes/HH/Set/lazy/#examples) for usage examples.
 <!-- HHAPIDOC -->

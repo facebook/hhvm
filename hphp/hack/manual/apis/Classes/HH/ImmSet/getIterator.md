@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns an iterator that points to beginning of the current [` ImmSet `](/docs/apis/Classes/HH/ImmSet/)
+Returns an iterator that points to beginning of the current [` ImmSet `](/apis/Classes/HH/ImmSet/)
 
 
 
@@ -18,8 +18,8 @@ public function getIterator(): KeyedIterator<arraykey, Tv>;
 
 
 
-The keys and values when iterating through the [` KeyedIterator `](/docs/apis/Interfaces/HH/KeyedIterator/) will be
-identical since [` ImmSet `](/docs/apis/Classes/HH/ImmSet/)s have no keys, the values are used as keys.
+The keys and values when iterating through the [` KeyedIterator `](/apis/Interfaces/HH/KeyedIterator/) will be
+identical since [` ImmSet `](/apis/Classes/HH/ImmSet/)s have no keys, the values are used as keys.
 
 
 
@@ -29,8 +29,8 @@ identical since [` ImmSet `](/docs/apis/Classes/HH/ImmSet/)s have no keys, the v
 
 
 
-+ [` KeyedIterator<arraykey, `](/docs/apis/Interfaces/HH/KeyedIterator/)`` Tv> `` - A [` KeyedIterator `](/docs/apis/Interfaces/HH/KeyedIterator/) that allows you to traverse the current
-  [` ImmSet `](/docs/apis/Classes/HH/ImmSet/).
++ [` KeyedIterator<arraykey, `](/apis/Interfaces/HH/KeyedIterator/)`` Tv> `` - A [` KeyedIterator `](/apis/Interfaces/HH/KeyedIterator/) that allows you to traverse the current
+  [` ImmSet `](/apis/Classes/HH/ImmSet/).
 
 
 
@@ -40,5 +40,5 @@ identical since [` ImmSet `](/docs/apis/Classes/HH/ImmSet/)s have no keys, the v
 
 
 
-See [` Set::getIterator `](/docs/apis/Classes/HH/Set/getIterator/#examples) for usage examples.
+See [` Set::getIterator `](/apis/Classes/HH/Set/getIterator/#examples) for usage examples.
 <!-- HHAPIDOC -->

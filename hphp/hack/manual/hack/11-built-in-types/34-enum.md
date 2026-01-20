@@ -2,7 +2,7 @@
 
 Use an enum (enumerated type) to create a set of named, constant, immutable values.
 
-In Hack, enums are limited to `int` or `string` (as an [`Arraykey`](/docs/hack/built-in-types/arraykey)), or other `enum` values.
+In Hack, enums are limited to `int` or `string` (as an [`Arraykey`](/hack/built-in-types/arraykey)), or other `enum` values.
 
 ## Quick Start
 To access an enum's value, use its full name, as in `Colors::Blue` or `Permission::Read`.
@@ -25,7 +25,7 @@ enum Permission: string {
 }
 ```
 
-Additionally, by using the [`as`](/docs/hack/expressions-and-operators/type-assertions#enforcing-types-with-as-and-as) operator to enforce type, you can initialize your enum with static expressions that reference other enum values.
+Additionally, by using the [`as`](/hack/expressions-and-operators/type-assertions#enforcing-types-with-as-and-as) operator to enforce type, you can initialize your enum with static expressions that reference other enum values.
 
 ```hack
 enum BitFlags: int as int {
@@ -140,7 +140,7 @@ function main(): void {
 **Note:** Both library methods will, when no exact match is found, attempt to do a cast to the other `arraykey` type. If the cast is not reversible / lossless, or the resulting value is still not a member of the enum after the cast, the failure result occurs, where a failure for assert is throwing an `UnexpectedValueException` and a failure for `coerce` is returning null.
 
 ### `assertAll()`
-`assertAll($traversable)` calls `assert($value)` on every element of the traversable (e.g. [Hack Arrays](/docs/hack/arrays-and-collections/vec-keyset-and-dict)); if at least one value does not exist, throws an `UnexpectedValueException`.
+`assertAll($traversable)` calls `assert($value)` on every element of the traversable (e.g. [Hack Arrays](/hack/arrays-and-collections/vec-keyset-and-dict)); if at least one value does not exist, throws an `UnexpectedValueException`.
 
 
 ```hack
@@ -182,7 +182,7 @@ function main(): void {
 ```
 
 ## `is` / `as`
-The operators [`is`](/docs/hack/expressions-and-operators/type-assertions#checking-types-with-is) and [`as`/`?as`](/docs/hack/expressions-and-operators/type-assertions#enforcing-types-with-as-and-as) behave similarly, but not exactly, to `isValid()` (similar to `is`) and `assert()`/`coerce()` (similar to `as`/`?as`).
+The operators [`is`](/hack/expressions-and-operators/type-assertions#checking-types-with-is) and [`as`/`?as`](/hack/expressions-and-operators/type-assertions#enforcing-types-with-as-and-as) behave similarly, but not exactly, to `isValid()` (similar to `is`) and `assert()`/`coerce()` (similar to `as`/`?as`).
 
 For `is`/`as`/`?as` refinement, the operators validate that a value is a part of a given enum. **Caution:** These operators may perform implicit int/string coercion of enum values to preserve compatibility with `isValid()`.
 

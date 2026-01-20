@@ -39,7 +39,7 @@ The IO operations for each Awaitable will happen in parallel.
 
 
 
-+ [` Traversable<Awaitable<Tv>> `](/docs/apis/Interfaces/HH/Traversable/)`` $awaitables ``
++ [` Traversable<Awaitable<Tv>> `](/apis/Interfaces/HH/Traversable/)`` $awaitables ``
 
 
 
@@ -49,5 +49,5 @@ The IO operations for each Awaitable will happen in parallel.
 
 
 
-* [` Awaitable<vec<Tv>> `](/docs/apis/Classes/HH/Awaitable/)
+* [` Awaitable<vec<Tv>> `](/apis/Classes/HH/Awaitable/)
 <!-- HHAPIDOC -->

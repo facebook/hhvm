@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Wait for all polled [` Awaitable `](/docs/apis/Classes/HH/Awaitable/)s, ignoring the results
+Wait for all polled [` Awaitable `](/apis/Classes/HH/Awaitable/)s, ignoring the results
 
 
 
@@ -18,7 +18,7 @@ public function waitUntilEmptyAsync(): Awaitable<void>;
 
 
 
-This is a convenience function, for when the [` Awaitable `](/docs/apis/Classes/HH/Awaitable/)'s side effects
+This is a convenience function, for when the [` Awaitable `](/apis/Classes/HH/Awaitable/)'s side effects
 are needed instead of the result.
 
 
@@ -29,5 +29,5 @@ are needed instead of the result.
 
 
 
-+ [` Awaitable<void> `](/docs/apis/Classes/HH/Awaitable/)
++ [` Awaitable<void> `](/apis/Classes/HH/Awaitable/)
 <!-- HHAPIDOC -->

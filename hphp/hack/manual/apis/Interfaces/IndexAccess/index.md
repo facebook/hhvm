@@ -21,8 +21,8 @@ keys
 
 
 
-+ [Introduction](</docs/hack/arrays-and-collections/introduction>)
-+ [Interfaces](</docs/hack/arrays-and-collections/introduction>)
++ [Introduction](</hack/arrays-and-collections/introduction>)
++ [Interfaces](</hack/arrays-and-collections/introduction>)
 
 
 
@@ -47,14 +47,14 @@ interface IndexAccess implements ConstIndexAccess<Tk, Tv> {...}
 
 
 
-* [` ->removeKey(Tk $k): this `](/docs/apis/Interfaces/IndexAccess/removeKey/)\
+* [` ->removeKey(Tk $k): this `](/apis/Interfaces/IndexAccess/removeKey/)\
   Removes the specified key (and associated value) from the current
   collection
-* [` ->set(Tk $k, Tv $v): this `](/docs/apis/Interfaces/IndexAccess/set/)\
+* [` ->set(Tk $k, Tv $v): this `](/apis/Interfaces/IndexAccess/set/)\
   Stores a value into the current collection with the specified key,
   overwriting the previous value associated with the key
-* [` ->setAll(?KeyedTraversable<Tk, Tv> $traversable): this `](/docs/apis/Interfaces/IndexAccess/setAll/)\
-  For every element in the provided [` Traversable `](/docs/apis/Interfaces/HH/Traversable/), stores a value into the
+* [` ->setAll(?KeyedTraversable<Tk, Tv> $traversable): this `](/apis/Interfaces/IndexAccess/setAll/)\
+  For every element in the provided [` Traversable `](/apis/Interfaces/HH/Traversable/), stores a value into the
   current collection associated with each key, overwriting the previous value
   associated with the key
 
@@ -64,15 +64,15 @@ interface IndexAccess implements ConstIndexAccess<Tk, Tv> {...}
 
 
 
-### Public Methods ([` ConstIndexAccess `](/docs/apis/Interfaces/ConstIndexAccess/))
+### Public Methods ([` ConstIndexAccess `](/apis/Interfaces/ConstIndexAccess/))
 
 
 
 
-- [` ->at(Tk $k): Tv `](/docs/apis/Interfaces/ConstIndexAccess/at/)\
+- [` ->at(Tk $k): Tv `](/apis/Interfaces/ConstIndexAccess/at/)\
   Returns the value at the specified key in the current collection
-- [` ->containsKey(mixed $k): bool `](/docs/apis/Interfaces/ConstIndexAccess/containsKey/)\
+- [` ->containsKey(mixed $k): bool `](/apis/Interfaces/ConstIndexAccess/containsKey/)\
   Determines if the specified key is in the current collection
-- [` ->get(Tk $k): ?Tv `](/docs/apis/Interfaces/ConstIndexAccess/get/)\
+- [` ->get(Tk $k): ?Tv `](/apis/Interfaces/ConstIndexAccess/get/)\
   Returns the value at the specified key in the current collection
 <!-- HHAPIDOC -->

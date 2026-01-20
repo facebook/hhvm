@@ -30,5 +30,5 @@ public function map<Tu>(
 
 
 
-* [` Iterable<Tu> `](/docs/apis/Interfaces/HH/Iterable/)
+* [` Iterable<Tu> `](/apis/Interfaces/HH/Iterable/)
 <!-- HHAPIDOC -->

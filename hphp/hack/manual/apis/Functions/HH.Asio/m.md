@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Translate a [` KeyedTraversable `](/docs/apis/Interfaces/HH/KeyedTraversable/) of `` Awaitables `` into a single [` Awaitable `](/docs/apis/Classes/HH/Awaitable/)`` of ``Map`
+Translate a [` KeyedTraversable `](/apis/Interfaces/HH/KeyedTraversable/) of `` Awaitables `` into a single [` Awaitable `](/apis/Classes/HH/Awaitable/)`` of ``Map`
 
 
 
@@ -22,21 +22,21 @@ function m<Tk as arraykey, Tv>(
 
 
 
-This function takes any [` KeyedTraversable `](/docs/apis/Interfaces/HH/KeyedTraversable/) object of `` Awaitables `` (i.e.,
-each member of the [` KeyedTraversable `](/docs/apis/Interfaces/HH/KeyedTraversable/) has a value of type of [` Awaitable `](/docs/apis/Classes/HH/Awaitable/),
-likely from a call to a function that returned [` Awaitable<T> `](/docs/apis/Classes/HH/Awaitable/)), and
-transforms those `` Awaitables `` into one big [` Awaitable `](/docs/apis/Classes/HH/Awaitable/) [` Map `](/docs/apis/Classes/HH/Map/).
+This function takes any [` KeyedTraversable `](/apis/Interfaces/HH/KeyedTraversable/) object of `` Awaitables `` (i.e.,
+each member of the [` KeyedTraversable `](/apis/Interfaces/HH/KeyedTraversable/) has a value of type of [` Awaitable `](/apis/Classes/HH/Awaitable/),
+likely from a call to a function that returned [` Awaitable<T> `](/apis/Classes/HH/Awaitable/)), and
+transforms those `` Awaitables `` into one big [` Awaitable `](/apis/Classes/HH/Awaitable/) [` Map `](/apis/Classes/HH/Map/).
 
 
 
 
-This function is called ` m ` because we are returning a `` m ``ap of [` Awaitable `](/docs/apis/Classes/HH/Awaitable/).
+This function is called ` m ` because we are returning a `` m ``ap of [` Awaitable `](/apis/Classes/HH/Awaitable/).
 
 
 
 
-Only When you ` await ` or `` join `` the resulting [` Awaitable `](/docs/apis/Classes/HH/Awaitable/), will all of the
-key/values in the [` Map `](/docs/apis/Classes/HH/Map/) within the returned [` Awaitable `](/docs/apis/Classes/HH/Awaitable/) be available.
+Only When you ` await ` or `` join `` the resulting [` Awaitable `](/apis/Classes/HH/Awaitable/), will all of the
+key/values in the [` Map `](/apis/Classes/HH/Map/) within the returned [` Awaitable `](/apis/Classes/HH/Awaitable/) be available.
 
 
 
@@ -46,7 +46,7 @@ key/values in the [` Map `](/docs/apis/Classes/HH/Map/) within the returned [` A
 
 
 
-+ [` KeyedTraversable<Tk, `](/docs/apis/Interfaces/HH/KeyedTraversable/)`` Awaitable<Tv>> $awaitables `` - The collection of [` KeyedTraversable `](/docs/apis/Interfaces/HH/KeyedTraversable/) awaitables.
++ [` KeyedTraversable<Tk, `](/apis/Interfaces/HH/KeyedTraversable/)`` Awaitable<Tv>> $awaitables `` - The collection of [` KeyedTraversable `](/apis/Interfaces/HH/KeyedTraversable/) awaitables.
 
 
 
@@ -56,8 +56,8 @@ key/values in the [` Map `](/docs/apis/Classes/HH/Map/) within the returned [` A
 
 
 
-* [` Awaitable<Map<Tk, `](/docs/apis/Classes/HH/Awaitable/)`` Tv>> `` - An [` Awaitable `](/docs/apis/Classes/HH/Awaitable/) of [` Map `](/docs/apis/Classes/HH/Map/), where the [` Map `](/docs/apis/Classes/HH/Map/) was generated from
-  each [` KeyedTraversable `](/docs/apis/Interfaces/HH/KeyedTraversable/) member in `` $awaitables ``.
+* [` Awaitable<Map<Tk, `](/apis/Classes/HH/Awaitable/)`` Tv>> `` - An [` Awaitable `](/apis/Classes/HH/Awaitable/) of [` Map `](/apis/Classes/HH/Map/), where the [` Map `](/apis/Classes/HH/Map/) was generated from
+  each [` KeyedTraversable `](/apis/Interfaces/HH/KeyedTraversable/) member in `` $awaitables ``.
 
 
 

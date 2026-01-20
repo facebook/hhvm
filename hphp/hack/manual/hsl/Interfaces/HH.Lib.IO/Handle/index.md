@@ -35,15 +35,15 @@ interfaces; for example:
 
 These can be combined to arbitrary interfaces; for example, if you are
 writing a function that writes some data, you may want to take a
-[` IO\WriteHandle `](</docs/hsl/Interfaces/HH.Lib.IO/WriteHandle/>) - or, if you read, write, and seek,
-[` IO\SeekableReadWriteHandle `](</docs/hsl/Interfaces/HH.Lib.IO/SeekableReadWriteHandle/>); only specify `` Closeable `` if
+[` IO\WriteHandle `](</hsl/Interfaces/HH.Lib.IO/WriteHandle/>) - or, if you read, write, and seek,
+[` IO\SeekableReadWriteHandle `](</hsl/Interfaces/HH.Lib.IO/SeekableReadWriteHandle/>); only specify `` Closeable `` if
 your code requires that the close method is defined.
 
 
 
 
-Some types of handle imply these behaviors; for example, all [` File\Handle `](</docs/hsl/Interfaces/HH.Lib.File/Handle/>)s
-are [` IO\SeekableHandle `](</docs/hsl/Interfaces/HH.Lib.IO/SeekableHandle/>)s.
+Some types of handle imply these behaviors; for example, all [` File\Handle `](</hsl/Interfaces/HH.Lib.File/Handle/>)s
+are [` IO\SeekableHandle `](</hsl/Interfaces/HH.Lib.IO/SeekableHandle/>)s.
 
 
 
@@ -56,8 +56,8 @@ You probably want to start with one of:
 * ` IO\request_input() `, `` IO\request_output() ``, or ``` IO\request_error() ```; these
   used for all kinds of requests, including both HTTP and CLI requests.
 * ` IO\server_output() `, `` IO\server_error() ``
-* ` TCP\connect_async() ` or [` TCP\Server `](/docs/hsl/Classes/HH.Lib.TCP/Server/)
-* ` Unix\connect_async() `, or [` Unix\Server `](/docs/hsl/Classes/HH.Lib.Unix/Server/)
+* ` TCP\connect_async() ` or [` TCP\Server `](/hsl/Classes/HH.Lib.TCP/Server/)
+* ` Unix\connect_async() `, or [` Unix\Server `](/hsl/Classes/HH.Lib.Unix/Server/)
 
 
 

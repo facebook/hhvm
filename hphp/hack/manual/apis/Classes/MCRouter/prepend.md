@@ -40,7 +40,7 @@ public function prepend(
 
 
 
-* [` Awaitable<void> `](/docs/apis/Classes/HH/Awaitable/)
+* [` Awaitable<void> `](/apis/Classes/HH/Awaitable/)
 
 
 
@@ -50,7 +50,7 @@ public function prepend(
 
 
 
-The following example shows how to use the [` MCRouter::prepend `](/docs/apis/Classes/MCRouter/prepend/) function.
+The following example shows how to use the [` MCRouter::prepend `](/apis/Classes/MCRouter/prepend/) function.
 
 
 

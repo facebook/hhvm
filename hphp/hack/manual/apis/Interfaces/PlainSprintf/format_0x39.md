@@ -18,5 +18,5 @@ public function format_0x39(): PlainSprintf;
 
 
 
-+ [` PlainSprintf `](/docs/apis/Interfaces/PlainSprintf/)
++ [` PlainSprintf `](/apis/Interfaces/PlainSprintf/)
 <!-- HHAPIDOC -->

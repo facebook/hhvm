@@ -40,7 +40,7 @@ be stripped: space, tab, newline, carriage return, NUL byte, vertical tab.
 
 
 
-* [String](</docs/hack/built-in-types/string>)
+* [String](</hack/built-in-types/string>)
 
 
 

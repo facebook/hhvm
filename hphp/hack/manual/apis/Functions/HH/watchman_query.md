@@ -45,5 +45,5 @@ details of queries and responses.
 
 
 
-* [` Awaitable<WatchmanResult> `](/docs/apis/Classes/HH/Awaitable/)
+* [` Awaitable<WatchmanResult> `](/apis/Classes/HH/Awaitable/)
 <!-- HHAPIDOC -->

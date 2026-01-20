@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns an immutable ([` ImmSet `](/docs/apis/Classes/HH/ImmSet/)), deep copy of the current [` Set `](/docs/apis/Classes/HH/Set/)
+Returns an immutable ([` ImmSet `](/apis/Classes/HH/ImmSet/)), deep copy of the current [` Set `](/apis/Classes/HH/Set/)
 
 
 
@@ -18,7 +18,7 @@ public function immutable(): ImmSet<Tv>;
 
 
 
-This method is interchangeable with [` toImmSet() `](/docs/apis/Classes/HH/Set/toImmSet/).
+This method is interchangeable with [` toImmSet() `](/apis/Classes/HH/Set/toImmSet/).
 
 
 
@@ -28,7 +28,7 @@ This method is interchangeable with [` toImmSet() `](/docs/apis/Classes/HH/Set/t
 
 
 
-+ [` ImmSet<Tv> `](/docs/apis/Classes/HH/ImmSet/) - an [` ImmSet `](/docs/apis/Classes/HH/ImmSet/) that is a deep copy of the current [` Set `](/docs/apis/Classes/HH/Set/).
++ [` ImmSet<Tv> `](/apis/Classes/HH/ImmSet/) - an [` ImmSet `](/apis/Classes/HH/ImmSet/) that is a deep copy of the current [` Set `](/apis/Classes/HH/Set/).
 
 
 

@@ -24,12 +24,12 @@ interface CloseableReadFDHandle implements ReadFDHandle, CloseableFDHandle, Clos
 
 
 
-### Public Methods ([` HH\Lib\IO\FDHandle `](</docs/hsl/Interfaces/HH.Lib.IO/FDHandle/>))
+### Public Methods ([` HH\Lib\IO\FDHandle `](</hsl/Interfaces/HH.Lib.IO/FDHandle/>))
 
 
 
 
-+ [` ->getFileDescriptor(): \HH\Lib\OS\FileDescriptor `](</docs/hsl/Interfaces/HH.Lib.IO/FDHandle/getFileDescriptor/>)
++ [` ->getFileDescriptor(): \HH\Lib\OS\FileDescriptor `](</hsl/Interfaces/HH.Lib.IO/FDHandle/getFileDescriptor/>)
 
 
 
@@ -37,18 +37,18 @@ interface CloseableReadFDHandle implements ReadFDHandle, CloseableFDHandle, Clos
 
 
 
-### Public Methods ([` HH\Lib\IO\ReadHandle `](</docs/hsl/Interfaces/HH.Lib.IO/ReadHandle/>))
+### Public Methods ([` HH\Lib\IO\ReadHandle `](</hsl/Interfaces/HH.Lib.IO/ReadHandle/>))
 
 
 
 
-* [` ->readAllAsync(?int $max_bytes = NULL, ?int $timeout_ns = NULL): Awaitable<string> `](</docs/hsl/Interfaces/HH.Lib.IO/ReadHandle/readAllAsync/>)\
+* [` ->readAllAsync(?int $max_bytes = NULL, ?int $timeout_ns = NULL): Awaitable<string> `](</hsl/Interfaces/HH.Lib.IO/ReadHandle/readAllAsync/>)\
   Read until there is no more data to read
-* [` ->readAllowPartialSuccessAsync(?int $max_bytes = NULL, ?int $timeout_ns = NULL): Awaitable<string> `](</docs/hsl/Interfaces/HH.Lib.IO/ReadHandle/readAllowPartialSuccessAsync/>)\
+* [` ->readAllowPartialSuccessAsync(?int $max_bytes = NULL, ?int $timeout_ns = NULL): Awaitable<string> `](</hsl/Interfaces/HH.Lib.IO/ReadHandle/readAllowPartialSuccessAsync/>)\
   Read from the handle, waiting for data if necessary
-* [` ->readFixedSizeAsync(int $size, ?int $timeout_ns = NULL): Awaitable<string> `](</docs/hsl/Interfaces/HH.Lib.IO/ReadHandle/readFixedSizeAsync/>)\
+* [` ->readFixedSizeAsync(int $size, ?int $timeout_ns = NULL): Awaitable<string> `](</hsl/Interfaces/HH.Lib.IO/ReadHandle/readFixedSizeAsync/>)\
   Read a fixed amount of data
-* [` ->readImpl(?int $max_bytes = NULL): string `](</docs/hsl/Interfaces/HH.Lib.IO/ReadHandle/readImpl/>)\
+* [` ->readImpl(?int $max_bytes = NULL): string `](</hsl/Interfaces/HH.Lib.IO/ReadHandle/readImpl/>)\
   An immediate, unordered read
 
 
@@ -57,13 +57,13 @@ interface CloseableReadFDHandle implements ReadFDHandle, CloseableFDHandle, Clos
 
 
 
-### Public Methods ([` HH\Lib\IO\CloseableHandle `](</docs/hsl/Interfaces/HH.Lib.IO/CloseableHandle/>))
+### Public Methods ([` HH\Lib\IO\CloseableHandle `](</hsl/Interfaces/HH.Lib.IO/CloseableHandle/>))
 
 
 
 
-- [` ->close(): void `](</docs/hsl/Interfaces/HH.Lib.IO/CloseableHandle/close/>)\
+- [` ->close(): void `](</hsl/Interfaces/HH.Lib.IO/CloseableHandle/close/>)\
   Close the handle
-- [` ->closeWhenDisposed(): \IDisposable `](</docs/hsl/Interfaces/HH.Lib.IO/CloseableHandle/closeWhenDisposed/>)\
+- [` ->closeWhenDisposed(): \IDisposable `](</hsl/Interfaces/HH.Lib.IO/CloseableHandle/closeWhenDisposed/>)\
   Close the handle when the returned disposable is disposed
 <!-- HHAPIDOC -->

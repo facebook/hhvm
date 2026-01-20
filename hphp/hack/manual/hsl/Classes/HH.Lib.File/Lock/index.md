@@ -47,6 +47,6 @@ final class Lock implements \IDisposable {...}
 
 
 
-+ [` ->__construct(\HH\Lib\OS\FileDescriptor $fd) `](/docs/hsl/Classes/HH.Lib.File/Lock/__construct/)
-+ [` ->__dispose(): void `](/docs/hsl/Classes/HH.Lib.File/Lock/__dispose/)
++ [` ->__construct(\HH\Lib\OS\FileDescriptor $fd) `](/hsl/Classes/HH.Lib.File/Lock/__construct/)
++ [` ->__dispose(): void `](/hsl/Classes/HH.Lib.File/Lock/__dispose/)
 <!-- HHAPIDOC -->

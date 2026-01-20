@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Checks if the current [` ImmMap `](/docs/apis/Classes/HH/ImmMap/) is empty
+Checks if the current [` ImmMap `](/apis/Classes/HH/ImmMap/) is empty
 
 
 
@@ -23,7 +23,7 @@ public function isEmpty(): bool;
 
 
 
-+ ` bool ` - `` true `` if the current [` ImmMap `](/docs/apis/Classes/HH/ImmMap/) is empty; `` false `` otherwise.
++ ` bool ` - `` true `` if the current [` ImmMap `](/apis/Classes/HH/ImmMap/) is empty; `` false `` otherwise.
 
 
 
@@ -33,5 +33,5 @@ public function isEmpty(): bool;
 
 
 
-See [` Map::isEmpty `](/docs/apis/Classes/HH/Map/isEmpty/#examples) for usage examples.
+See [` Map::isEmpty `](/apis/Classes/HH/Map/isEmpty/#examples) for usage examples.
 <!-- HHAPIDOC -->

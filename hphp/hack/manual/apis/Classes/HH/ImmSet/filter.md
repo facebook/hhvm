@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns an [` ImmSet `](/docs/apis/Classes/HH/ImmSet/) containing the values of the current [` ImmSet `](/docs/apis/Classes/HH/ImmSet/) that
+Returns an [` ImmSet `](/apis/Classes/HH/ImmSet/) containing the values of the current [` ImmSet `](/apis/Classes/HH/ImmSet/) that
 meet a supplied condition applied to each value
 
 
@@ -22,7 +22,7 @@ public function filter(
 
 
 Only values that meet a certain criteria are affected by a call to
-[` filter() `](/docs/apis/Classes/HH/ImmSet/filter/), while all values are affected by a call to [` map() `](/docs/apis/Classes/HH/ImmSet/map/).
+[` filter() `](/apis/Classes/HH/ImmSet/filter/), while all values are affected by a call to [` map() `](/apis/Classes/HH/ImmSet/map/).
 
 
 
@@ -32,7 +32,7 @@ Only values that meet a certain criteria are affected by a call to
 
 
 
-+ [Examples](</docs/hack/arrays-and-collections/introduction>)
++ [Examples](</hack/arrays-and-collections/introduction>)
 
 
 
@@ -55,7 +55,7 @@ Only values that meet a certain criteria are affected by a call to
 
 
 
-- [` ImmSet<Tv> `](/docs/apis/Classes/HH/ImmSet/) - an [` ImmSet `](/docs/apis/Classes/HH/ImmSet/) containing the values after a user-specified
+- [` ImmSet<Tv> `](/apis/Classes/HH/ImmSet/) - an [` ImmSet `](/apis/Classes/HH/ImmSet/) containing the values after a user-specified
   condition is applied.
 
 
@@ -66,5 +66,5 @@ Only values that meet a certain criteria are affected by a call to
 
 
 
-See [` Set::filter `](/docs/apis/Classes/HH/Set/filter/#examples) for usage examples.
+See [` Set::filter `](/apis/Classes/HH/Set/filter/#examples) for usage examples.
 <!-- HHAPIDOC -->

@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns the last value in the current [` Set `](/docs/apis/Classes/HH/Set/)
+Returns the last value in the current [` Set `](/apis/Classes/HH/Set/)
 
 
 
@@ -23,8 +23,8 @@ public function lastValue(): ?Tv;
 
 
 
-+ ` ?Tv ` - The last value in the current [` Set `](/docs/apis/Classes/HH/Set/), or `` null `` if the current
-  [` Set `](/docs/apis/Classes/HH/Set/) is empty.
++ ` ?Tv ` - The last value in the current [` Set `](/apis/Classes/HH/Set/), or `` null `` if the current
+  [` Set `](/apis/Classes/HH/Set/) is empty.
 
 
 
@@ -34,7 +34,7 @@ public function lastValue(): ?Tv;
 
 
 
-This example shows how [` lastValue() `](/docs/apis/Classes/HH/Set/lastValue/) can be used even when a [` Set `](/docs/apis/Classes/HH/Set/) may be empty:
+This example shows how [` lastValue() `](/apis/Classes/HH/Set/lastValue/) can be used even when a [` Set `](/apis/Classes/HH/Set/) may be empty:
 
 
 

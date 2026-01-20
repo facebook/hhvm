@@ -36,7 +36,7 @@ Space complexity: O(1)
 
 
 
-+ [` Traversable<Tv> `](/docs/apis/Interfaces/HH/Traversable/)`` $traversable ``
++ [` Traversable<Tv> `](/apis/Interfaces/HH/Traversable/)`` $traversable ``
 + ` (function(Ta, Tv): Ta) $accumulator `
 + ` Ta $initial `
 

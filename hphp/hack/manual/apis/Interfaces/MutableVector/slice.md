@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a subset of the current [` MutableVector `](/docs/apis/Interfaces/MutableVector/) starting from a given key
+Returns a subset of the current [` MutableVector `](/apis/Interfaces/MutableVector/) starting from a given key
 up to, but not including, the element at the provided length from the
 starting key
 
@@ -23,14 +23,14 @@ public function slice(
 
 
 
-` $start ` is 0-based. $len is 1-based. So [` slice(0, `](/docs/apis/Interfaces/MutableVector/slice/)`` 2) `` would return the
+` $start ` is 0-based. $len is 1-based. So [` slice(0, `](/apis/Interfaces/MutableVector/slice/)`` 2) `` would return the
 elements at key 0 and 1.
 
 
 
 
-The returned [` MutableVector `](/docs/apis/Interfaces/MutableVector/) will always be a proper subset of this
-[` MutableVector `](/docs/apis/Interfaces/MutableVector/).
+The returned [` MutableVector `](/apis/Interfaces/MutableVector/) will always be a proper subset of this
+[` MutableVector `](/apis/Interfaces/MutableVector/).
 
 
 
@@ -41,8 +41,8 @@ The returned [` MutableVector `](/docs/apis/Interfaces/MutableVector/) will alwa
 
 
 + ` int $start ` - The starting key of this Vector to begin the returned
-  [` MutableVector `](/docs/apis/Interfaces/MutableVector/).
-+ ` int $len ` - The length of the returned [` MutableVector `](/docs/apis/Interfaces/MutableVector/).
+  [` MutableVector `](/apis/Interfaces/MutableVector/).
++ ` int $len ` - The length of the returned [` MutableVector `](/apis/Interfaces/MutableVector/).
 
 
 
@@ -52,7 +52,7 @@ The returned [` MutableVector `](/docs/apis/Interfaces/MutableVector/) will alwa
 
 
 
-* [` MutableVector<Tv> `](/docs/apis/Interfaces/MutableVector/) - A [` MutableVector `](/docs/apis/Interfaces/MutableVector/) that is a proper subset of the current
-  [` MutableVector `](/docs/apis/Interfaces/MutableVector/) starting at `` $start `` up to but not including the
+* [` MutableVector<Tv> `](/apis/Interfaces/MutableVector/) - A [` MutableVector `](/apis/Interfaces/MutableVector/) that is a proper subset of the current
+  [` MutableVector `](/apis/Interfaces/MutableVector/) starting at `` $start `` up to but not including the
   element ``` $start + $len ```.
 <!-- HHAPIDOC -->

@@ -39,19 +39,19 @@ final class MemoryHandle implements CloseableSeekableReadWriteHandle {...}
 
 
 
-+ [` ->__construct(string $buffer = '', MemoryHandleWriteMode $writeMode = MemoryHandleWriteMode::OVERWRITE) `](/docs/hsl/Classes/HH.Lib.IO/MemoryHandle/__construct/)
-+ [` ->appendToBuffer(string $data): void `](/docs/hsl/Classes/HH.Lib.IO/MemoryHandle/appendToBuffer/)\
++ [` ->__construct(string $buffer = '', MemoryHandleWriteMode $writeMode = MemoryHandleWriteMode::OVERWRITE) `](/hsl/Classes/HH.Lib.IO/MemoryHandle/__construct/)
++ [` ->appendToBuffer(string $data): void `](/hsl/Classes/HH.Lib.IO/MemoryHandle/appendToBuffer/)\
   Append data to the internal buffer, preserving position
-+ [` ->close(): void `](/docs/hsl/Classes/HH.Lib.IO/MemoryHandle/close/)
-+ [` ->closeWhenDisposed(): \IDisposable `](/docs/hsl/Classes/HH.Lib.IO/MemoryHandle/closeWhenDisposed/)
-+ [` ->getBuffer(): string `](/docs/hsl/Classes/HH.Lib.IO/MemoryHandle/getBuffer/)
-+ [` ->readAllowPartialSuccessAsync(?int $max_bytes = NULL, ?int $_timeout_nanos = NULL): Awaitable<string> `](/docs/hsl/Classes/HH.Lib.IO/MemoryHandle/readAllowPartialSuccessAsync/)
-+ [` ->readImpl(?int $max_bytes = NULL): string `](/docs/hsl/Classes/HH.Lib.IO/MemoryHandle/readImpl/)
-+ [` ->reset(string $data = ''): void `](/docs/hsl/Classes/HH.Lib.IO/MemoryHandle/reset/)\
++ [` ->close(): void `](/hsl/Classes/HH.Lib.IO/MemoryHandle/close/)
++ [` ->closeWhenDisposed(): \IDisposable `](/hsl/Classes/HH.Lib.IO/MemoryHandle/closeWhenDisposed/)
++ [` ->getBuffer(): string `](/hsl/Classes/HH.Lib.IO/MemoryHandle/getBuffer/)
++ [` ->readAllowPartialSuccessAsync(?int $max_bytes = NULL, ?int $_timeout_nanos = NULL): Awaitable<string> `](/hsl/Classes/HH.Lib.IO/MemoryHandle/readAllowPartialSuccessAsync/)
++ [` ->readImpl(?int $max_bytes = NULL): string `](/hsl/Classes/HH.Lib.IO/MemoryHandle/readImpl/)
++ [` ->reset(string $data = ''): void `](/hsl/Classes/HH.Lib.IO/MemoryHandle/reset/)\
   Set the internal buffer and reset position to the beginning of the file
-+ [` ->seek(int $pos): void `](/docs/hsl/Classes/HH.Lib.IO/MemoryHandle/seek/)
-+ [` ->tell(): int `](/docs/hsl/Classes/HH.Lib.IO/MemoryHandle/tell/)
-+ [` ->writeAllowPartialSuccessAsync(string $data, ?int $timeout_nanos = NULL): Awaitable<int> `](/docs/hsl/Classes/HH.Lib.IO/MemoryHandle/writeAllowPartialSuccessAsync/)
++ [` ->seek(int $pos): void `](/hsl/Classes/HH.Lib.IO/MemoryHandle/seek/)
++ [` ->tell(): int `](/hsl/Classes/HH.Lib.IO/MemoryHandle/tell/)
++ [` ->writeAllowPartialSuccessAsync(string $data, ?int $timeout_nanos = NULL): Awaitable<int> `](/hsl/Classes/HH.Lib.IO/MemoryHandle/writeAllowPartialSuccessAsync/)
 
 
 
@@ -59,12 +59,12 @@ final class MemoryHandle implements CloseableSeekableReadWriteHandle {...}
 
 
 
-### Public Methods ([` HH\Lib\IO\WriteHandle `](</docs/hsl/Interfaces/HH.Lib.IO/WriteHandle/>))
+### Public Methods ([` HH\Lib\IO\WriteHandle `](</hsl/Interfaces/HH.Lib.IO/WriteHandle/>))
 
 
 
 
-* [` ->writeAllAsync(string $bytes, ?int $timeout_ns = NULL): Awaitable<void> `](</docs/hsl/Interfaces/HH.Lib.IO/WriteHandle/writeAllAsync/>)\
+* [` ->writeAllAsync(string $bytes, ?int $timeout_ns = NULL): Awaitable<void> `](</hsl/Interfaces/HH.Lib.IO/WriteHandle/writeAllAsync/>)\
   Write all of the requested data
 
 
@@ -73,14 +73,14 @@ final class MemoryHandle implements CloseableSeekableReadWriteHandle {...}
 
 
 
-### Public Methods ([` HH\Lib\IO\ReadHandle `](</docs/hsl/Interfaces/HH.Lib.IO/ReadHandle/>))
+### Public Methods ([` HH\Lib\IO\ReadHandle `](</hsl/Interfaces/HH.Lib.IO/ReadHandle/>))
 
 
 
 
-- [` ->readAllAsync(?int $max_bytes = NULL, ?int $timeout_ns = NULL): Awaitable<string> `](</docs/hsl/Interfaces/HH.Lib.IO/ReadHandle/readAllAsync/>)\
+- [` ->readAllAsync(?int $max_bytes = NULL, ?int $timeout_ns = NULL): Awaitable<string> `](</hsl/Interfaces/HH.Lib.IO/ReadHandle/readAllAsync/>)\
   Read until there is no more data to read
-- [` ->readFixedSizeAsync(int $size, ?int $timeout_ns = NULL): Awaitable<string> `](</docs/hsl/Interfaces/HH.Lib.IO/ReadHandle/readFixedSizeAsync/>)\
+- [` ->readFixedSizeAsync(int $size, ?int $timeout_ns = NULL): Awaitable<string> `](</hsl/Interfaces/HH.Lib.IO/ReadHandle/readFixedSizeAsync/>)\
   Read a fixed amount of data
 
 
@@ -94,5 +94,5 @@ final class MemoryHandle implements CloseableSeekableReadWriteHandle {...}
 
 
 
-+ [` ->writeImpl(string $data): int `](/docs/hsl/Classes/HH.Lib.IO/MemoryHandle/writeImpl/)
++ [` ->writeImpl(string $data): int `](/hsl/Classes/HH.Lib.IO/MemoryHandle/writeImpl/)
 <!-- HHAPIDOC -->

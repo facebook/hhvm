@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Creates a [` Set `](/docs/apis/Classes/HH/Set/) from the given [` Traversable `](/docs/apis/Interfaces/HH/Traversable/), or an empty [` Set `](/docs/apis/Classes/HH/Set/) if `` null ``
+Creates a [` Set `](/apis/Classes/HH/Set/) from the given [` Traversable `](/apis/Interfaces/HH/Traversable/), or an empty [` Set `](/apis/Classes/HH/Set/) if `` null ``
 is passed
 
 
@@ -21,7 +21,7 @@ public static function fromItems(
 
 
 
-This is the static method version of the [` Set::__construct() `](/docs/apis/Classes/HH/Set/__construct/) constructor.
+This is the static method version of the [` Set::__construct() `](/apis/Classes/HH/Set/__construct/) constructor.
 
 
 
@@ -31,7 +31,7 @@ This is the static method version of the [` Set::__construct() `](/docs/apis/Cla
 
 
 
-+ ` ? `[` Traversable<Tv> `](/docs/apis/Interfaces/HH/Traversable/)`` $iterable ``
++ ` ? `[` Traversable<Tv> `](/apis/Interfaces/HH/Traversable/)`` $iterable ``
 
 
 
@@ -41,8 +41,8 @@ This is the static method version of the [` Set::__construct() `](/docs/apis/Cla
 
 
 
-* [` Set<Tv> `](/docs/apis/Classes/HH/Set/) - A [` Set `](/docs/apis/Classes/HH/Set/) with the values from the [` Traversable `](/docs/apis/Interfaces/HH/Traversable/); or an empty [` Set `](/docs/apis/Classes/HH/Set/)
-  if the [` Traversable `](/docs/apis/Interfaces/HH/Traversable/) is `` null ``.
+* [` Set<Tv> `](/apis/Classes/HH/Set/) - A [` Set `](/apis/Classes/HH/Set/) with the values from the [` Traversable `](/apis/Interfaces/HH/Traversable/); or an empty [` Set `](/apis/Classes/HH/Set/)
+  if the [` Traversable `](/apis/Interfaces/HH/Traversable/) is `` null ``.
 
 
 

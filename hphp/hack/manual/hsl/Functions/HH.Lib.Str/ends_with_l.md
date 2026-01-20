@@ -41,7 +41,7 @@ For a case-insensitive check, see ` Str\ends_with_ci_l() `.
 
 
 
-+ [String](</docs/hack/built-in-types/string>)
++ [String](</hack/built-in-types/string>)
 
 
 

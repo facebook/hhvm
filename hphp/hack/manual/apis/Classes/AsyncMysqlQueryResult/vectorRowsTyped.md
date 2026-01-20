@@ -19,7 +19,7 @@ public function vectorRowsTyped(): Vector<KeyedContainer<int, mixed>>;
 
 
 
-The rows are returned as a [` Vector `](/docs/apis/Classes/HH/Vector/) of [` Vector `](/docs/apis/Classes/HH/Vector/) objects which hold the
+The rows are returned as a [` Vector `](/apis/Classes/HH/Vector/) of [` Vector `](/apis/Classes/HH/Vector/) objects which hold the
 (possibly `` null ``) ``` mixed ``` values of each column in the order of the
 original query (e.g., an ```` INTEGER ```` column will come back as an ````` int `````.).
 
@@ -31,8 +31,8 @@ original query (e.g., an ```` INTEGER ```` column will come back as an ````` int
 
 
 
-+ [` Vector<KeyedContainer<int, `](/docs/apis/Classes/HH/Vector/)`` mixed>> `` - A [` Vector `](/docs/apis/Classes/HH/Vector/) of [` Vector `](/docs/apis/Classes/HH/Vector/) objects, where the outer [` Vector `](/docs/apis/Classes/HH/Vector/)
-  represents the rows and each inner [` Vector `](/docs/apis/Classes/HH/Vector/) represent the typed
++ [` Vector<KeyedContainer<int, `](/apis/Classes/HH/Vector/)`` mixed>> `` - A [` Vector `](/apis/Classes/HH/Vector/) of [` Vector `](/apis/Classes/HH/Vector/) objects, where the outer [` Vector `](/apis/Classes/HH/Vector/)
+  represents the rows and each inner [` Vector `](/apis/Classes/HH/Vector/) represent the typed
   column values for each row.
 
 
@@ -43,7 +43,7 @@ original query (e.g., an ```` INTEGER ```` column will come back as an ````` int
 
 
 
-When executing a query, you can get the rows returned from it in the form of a [` Vector `](/docs/apis/Classes/HH/Vector/) of [` Vector `](/docs/apis/Classes/HH/Vector/) objects, where each value of the [` Vector `](/docs/apis/Classes/HH/Vector/) is a column value. This example shows how to use [` AsyncMysqlQueryResult::vectorRowsTyped `](/docs/apis/Classes/AsyncMysqlQueryResult/vectorRowsTyped/) to get that [` Vector `](/docs/apis/Classes/HH/Vector/). A resulting [` Vector `](/docs/apis/Classes/HH/Vector/) may look like:
+When executing a query, you can get the rows returned from it in the form of a [` Vector `](/apis/Classes/HH/Vector/) of [` Vector `](/apis/Classes/HH/Vector/) objects, where each value of the [` Vector `](/apis/Classes/HH/Vector/) is a column value. This example shows how to use [` AsyncMysqlQueryResult::vectorRowsTyped `](/apis/Classes/AsyncMysqlQueryResult/vectorRowsTyped/) to get that [` Vector `](/apis/Classes/HH/Vector/). A resulting [` Vector `](/apis/Classes/HH/Vector/) may look like:
 
 
 
@@ -70,12 +70,12 @@ object(HH\Vector)#9 (2) {
 
 
 
-Note that all values in the [` Vector `](/docs/apis/Classes/HH/Vector/) returned from `` vectorRowsTyped `` will be the actual typed representation of the database type, or ``` null ```. Above you can see we have ```` string ```` and ````` int `````. If you want just `````` string `````` values for everything, use [` vectorRows `](/docs/apis/Classes/AsyncMysqlQueryResult/vectorRows/)
+Note that all values in the [` Vector `](/apis/Classes/HH/Vector/) returned from `` vectorRowsTyped `` will be the actual typed representation of the database type, or ``` null ```. Above you can see we have ```` string ```` and ````` int `````. If you want just `````` string `````` values for everything, use [` vectorRows `](/apis/Classes/AsyncMysqlQueryResult/vectorRows/)
 
 
 
 
-Also understand that if you want the actual column names associated with the values in the [` Vector `](/docs/apis/Classes/HH/Vector/), you should use [` mapRowsTyped `](/docs/apis/Classes/AsyncMysqlQueryResult/mapRowsTyped/) instead.
+Also understand that if you want the actual column names associated with the values in the [` Vector `](/apis/Classes/HH/Vector/), you should use [` mapRowsTyped `](/apis/Classes/AsyncMysqlQueryResult/mapRowsTyped/) instead.
 
 
 

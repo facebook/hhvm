@@ -7,7 +7,7 @@ the Hack LSP instead for complete and up-to-date information.
 :::
 
 :::warning
-**Deprecated:** Use [`getErrno()`](/docs/hsl/Classes/HH.Lib.OS/ErrnoException/getErrno/) instead.
+**Deprecated:** Use [`getErrno()`](/hsl/Classes/HH.Lib.OS/ErrnoException/getErrno/) instead.
 :::
 
 

@@ -12,7 +12,7 @@ the Hack LSP instead for complete and up-to-date information.
 
 Represents an entity that can be iterated over using ` foreach `, without
 requiring a key, except it does not include objects that implement
-[` Iterator `](/docs/apis/Interfaces/HH/Iterator/)
+[` Iterator `](/apis/Interfaces/HH/Iterator/)
 
 
 
@@ -32,8 +32,8 @@ In addition to Hack collections, PHP ` array `s are `` Container ``s.
 
 
 
-+ [Introduction](</docs/hack/arrays-and-collections/introduction>)
-+ [Interfaces](</docs/hack/arrays-and-collections/introduction>)
++ [Introduction](</hack/arrays-and-collections/introduction>)
++ [Interfaces](</hack/arrays-and-collections/introduction>)
 
 
 

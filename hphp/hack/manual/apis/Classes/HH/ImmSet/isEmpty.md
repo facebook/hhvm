@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Checks if the current [` ImmSet `](/docs/apis/Classes/HH/ImmSet/) is empty
+Checks if the current [` ImmSet `](/apis/Classes/HH/ImmSet/) is empty
 
 
 
@@ -23,7 +23,7 @@ public function isEmpty(): bool;
 
 
 
-+ ` bool ` - `` true `` if the current [` ImmSet `](/docs/apis/Classes/HH/ImmSet/) is empty; `` false `` otherwise.
++ ` bool ` - `` true `` if the current [` ImmSet `](/apis/Classes/HH/ImmSet/) is empty; `` false `` otherwise.
 
 
 
@@ -33,5 +33,5 @@ public function isEmpty(): bool;
 
 
 
-See [` Set::isEmpty `](/docs/apis/Classes/HH/Set/isEmpty/#examples) for usage examples.
+See [` Set::isEmpty `](/apis/Classes/HH/Set/isEmpty/#examples) for usage examples.
 <!-- HHAPIDOC -->

@@ -44,7 +44,7 @@ To pad the string to a fixed number of bytes, see `` Str\pad_left() ``.
 
 
 
-+ [String](</docs/hack/built-in-types/string>)
++ [String](</hack/built-in-types/string>)
 
 
 

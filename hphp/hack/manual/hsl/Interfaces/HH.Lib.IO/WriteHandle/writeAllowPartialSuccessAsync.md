@@ -22,7 +22,7 @@ public function writeAllowPartialSuccessAsync(
 
 
 A wrapper around ` write() ` that will wait if `` write() `` would throw
-an [` OS\BlockingIOException `](/docs/hsl/Classes/HH.Lib.OS/BlockingIOException/)
+an [` OS\BlockingIOException `](/hsl/Classes/HH.Lib.OS/BlockingIOException/)
 
 
 

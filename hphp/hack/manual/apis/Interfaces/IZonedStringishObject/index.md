@@ -27,5 +27,5 @@ interface IZonedStringishObject implements StringishObject {...}
 
 
 
-+ [` ->__toString(): string `](/docs/apis/Interfaces/IZonedStringishObject/__toString/)
++ [` ->__toString(): string `](/apis/Interfaces/IZonedStringishObject/__toString/)
 <!-- HHAPIDOC -->

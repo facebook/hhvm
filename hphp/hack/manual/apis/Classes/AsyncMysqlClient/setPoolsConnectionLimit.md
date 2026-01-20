@@ -23,7 +23,7 @@ public static function setPoolsConnectionLimit(
 Use this function to toggle the number of allowed async connections on the
 pools connecting to MySQL with this current client. For example, if you
 set the limit to 2, and you try a third connection on the same pool, an
-[` AsyncMysqlConnectException `](/docs/apis/Classes/AsyncMysqlConnectException/) exception will be thrown.
+[` AsyncMysqlConnectException `](/apis/Classes/AsyncMysqlConnectException/) exception will be thrown.
 
 
 
@@ -53,7 +53,7 @@ set the limit to 2, and you try a third connection on the same pool, an
 
 
 
-You can use [` AsyncMysqlClient::setPoolsConnectionLimit() `](/docs/apis/Classes/AsyncMysqlClient/setPoolsConnectionLimit/) to toggle the number of allowed async connections on the client. In this example, we are setting the number of allowed pool connections to be 2, but trying to do 3 connections, and that ends up giving an exception.
+You can use [` AsyncMysqlClient::setPoolsConnectionLimit() `](/apis/Classes/AsyncMysqlClient/setPoolsConnectionLimit/) to toggle the number of allowed async connections on the client. In this example, we are setting the number of allowed pool connections to be 2, but trying to do 3 connections, and that ends up giving an exception.
 
 
 

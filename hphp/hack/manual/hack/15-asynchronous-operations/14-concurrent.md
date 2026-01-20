@@ -1,8 +1,8 @@
 # Concurrent
 
-`concurrent` concurrently awaits all `await`s within a `concurrent` block and it works with [`await`-as-an-expression](/docs/hack/asynchronous-operations/await-as-an-expression) as well!
+`concurrent` concurrently awaits all `await`s within a `concurrent` block and it works with [`await`-as-an-expression](/hack/asynchronous-operations/await-as-an-expression) as well!
 
-Note: [concurrent doesn't mean multithreading](/docs/hack/asynchronous-operations/introduction#limitations)
+Note: [concurrent doesn't mean multithreading](/hack/asynchronous-operations/introduction#limitations)
 
 ## Syntax
 

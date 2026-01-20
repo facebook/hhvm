@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns an immutable copy ([` ImmSet `](/docs/apis/Classes/HH/ImmSet/)) of the current [` ImmSet `](/docs/apis/Classes/HH/ImmSet/)
+Returns an immutable copy ([` ImmSet `](/apis/Classes/HH/ImmSet/)) of the current [` ImmSet `](/apis/Classes/HH/ImmSet/)
 
 
 
@@ -18,7 +18,7 @@ public function immutable(): ImmSet<Tv>;
 
 
 
-This method is interchangeable with [` toImmSet() `](/docs/apis/Classes/HH/ImmSet/toImmSet/).
+This method is interchangeable with [` toImmSet() `](/apis/Classes/HH/ImmSet/toImmSet/).
 
 
 
@@ -28,7 +28,7 @@ This method is interchangeable with [` toImmSet() `](/docs/apis/Classes/HH/ImmSe
 
 
 
-+ [` ImmSet<Tv> `](/docs/apis/Classes/HH/ImmSet/) - an [` ImmSet `](/docs/apis/Classes/HH/ImmSet/) that is a copy of the current [` ImmSet `](/docs/apis/Classes/HH/ImmSet/).
++ [` ImmSet<Tv> `](/apis/Classes/HH/ImmSet/) - an [` ImmSet `](/apis/Classes/HH/ImmSet/) that is a copy of the current [` ImmSet `](/apis/Classes/HH/ImmSet/).
 
 
 
@@ -38,5 +38,5 @@ This method is interchangeable with [` toImmSet() `](/docs/apis/Classes/HH/ImmSe
 
 
 
-See [` Set::immutable `](/docs/apis/Classes/HH/Set/immutable/#examples) for usage examples.
+See [` Set::immutable `](/apis/Classes/HH/Set/immutable/#examples) for usage examples.
 <!-- HHAPIDOC -->

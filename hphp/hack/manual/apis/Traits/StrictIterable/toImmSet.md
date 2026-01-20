@@ -18,5 +18,5 @@ public function toImmSet(): ImmSet<Tv>;
 
 
 
-+ [` ImmSet<Tv> `](/docs/apis/Classes/HH/ImmSet/)
++ [` ImmSet<Tv> `](/apis/Classes/HH/ImmSet/)
 <!-- HHAPIDOC -->

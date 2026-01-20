@@ -22,7 +22,7 @@ final protected function addImpl(
 
 
 + ` Tk $key `
-+ [` Awaitable<Tv> `](/docs/apis/Classes/HH/Awaitable/)`` $awaitable ``
++ [` Awaitable<Tv> `](/apis/Classes/HH/Awaitable/)`` $awaitable ``
 
 
 

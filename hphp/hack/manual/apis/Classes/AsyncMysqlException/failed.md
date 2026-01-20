@@ -19,7 +19,7 @@ public function failed(): bool;
 
 
 
-An [` AsyncMysqlErrorResult `](/docs/apis/Classes/AsyncMysqlErrorResult/) can occur due to `` 'TimedOut' ``, representing a
+An [` AsyncMysqlErrorResult `](/apis/Classes/AsyncMysqlErrorResult/) can occur due to `` 'TimedOut' ``, representing a
 timeout, or ``` 'Failed' ```, representing the server rejecting the connection
 or query.
 
@@ -42,7 +42,7 @@ or query.
 
 
 
-The following example shows how to use [` AsyncMysqlException::failed `](/docs/apis/Classes/AsyncMysqlException/failed/) to determine if the connection failed in some other way than a timeout.
+The following example shows how to use [` AsyncMysqlException::failed `](/apis/Classes/AsyncMysqlException/failed/) to determine if the connection failed in some other way than a timeout.
 
 
 

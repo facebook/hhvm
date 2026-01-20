@@ -6,8 +6,8 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a [` MutableVector `](/docs/apis/Interfaces/MutableVector/) that is the concatenation of the values of the
-current [` MutableVector `](/docs/apis/Interfaces/MutableVector/) and the values of the provided [` Traversable `](/docs/apis/Interfaces/HH/Traversable/)
+Returns a [` MutableVector `](/apis/Interfaces/MutableVector/) that is the concatenation of the values of the
+current [` MutableVector `](/apis/Interfaces/MutableVector/) and the values of the provided [` Traversable `](/apis/Interfaces/HH/Traversable/)
 
 
 
@@ -21,8 +21,8 @@ public function concat<Tu super Tv>(
 
 
 
-The values of the provided [` Traversable `](/docs/apis/Interfaces/HH/Traversable/) is concatenated to the end of the
-current [` MutableVector `](/docs/apis/Interfaces/MutableVector/) to produce the returned [` MutableVector `](/docs/apis/Interfaces/MutableVector/).
+The values of the provided [` Traversable `](/apis/Interfaces/HH/Traversable/) is concatenated to the end of the
+current [` MutableVector `](/apis/Interfaces/MutableVector/) to produce the returned [` MutableVector `](/apis/Interfaces/MutableVector/).
 
 
 
@@ -32,7 +32,7 @@ current [` MutableVector `](/docs/apis/Interfaces/MutableVector/) to produce the
 
 
 
-+ [Constraints](</docs/hack/generics/type-constraints>)
++ [Constraints](</hack/generics/type-constraints>)
 
 
 
@@ -45,8 +45,8 @@ current [` MutableVector `](/docs/apis/Interfaces/MutableVector/) to produce the
 
 
 
-* [` Traversable<Tu> `](/docs/apis/Interfaces/HH/Traversable/)`` $traversable `` - The [` Traversable `](/docs/apis/Interfaces/HH/Traversable/) to concatenate to the current
-  [` MutableVector `](/docs/apis/Interfaces/MutableVector/).
+* [` Traversable<Tu> `](/apis/Interfaces/HH/Traversable/)`` $traversable `` - The [` Traversable `](/apis/Interfaces/HH/Traversable/) to concatenate to the current
+  [` MutableVector `](/apis/Interfaces/MutableVector/).
 
 
 
@@ -56,5 +56,5 @@ current [` MutableVector `](/docs/apis/Interfaces/MutableVector/) to produce the
 
 
 
-- [` MutableVector<Tu> `](/docs/apis/Interfaces/MutableVector/) - The concatenated [` MutableVector `](/docs/apis/Interfaces/MutableVector/).
+- [` MutableVector<Tu> `](/apis/Interfaces/MutableVector/) - The concatenated [` MutableVector `](/apis/Interfaces/MutableVector/).
 <!-- HHAPIDOC -->

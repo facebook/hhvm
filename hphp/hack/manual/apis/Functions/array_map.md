@@ -37,7 +37,7 @@ of HSL functions like ` Vec\map ` or `` Dict\map ``.
 
 
 * ` (function(Tin): Tout) $callback `
-* [` KeyedContainer<Tk, `](/docs/apis/Interfaces/HH/KeyedContainer/)`` Tin> $arr ``
+* [` KeyedContainer<Tk, `](/apis/Interfaces/HH/KeyedContainer/)`` Tin> $arr ``
 
 
 
@@ -47,5 +47,5 @@ of HSL functions like ` Vec\map ` or `` Dict\map ``.
 
 
 
-- [` KeyedContainer<Tk, `](/docs/apis/Interfaces/HH/KeyedContainer/)`` Tout> ``
+- [` KeyedContainer<Tk, `](/apis/Interfaces/HH/KeyedContainer/)`` Tout> ``
 <!-- HHAPIDOC -->

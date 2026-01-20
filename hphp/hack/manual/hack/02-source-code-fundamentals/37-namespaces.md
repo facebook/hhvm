@@ -25,10 +25,10 @@ The namespaces `HH`, `PHP`, `php`, and sub-namespaces beginning with those prefi
 ## XHP and the `HTML` Namespace
 As of HHVM 4.73 and XHP-Lib v4, standard XHP elements like `<p>` are defined in `Facebook\XHP\HTML` (for this example, specifically `Facebook\XHP\HTML\p`).
 
-For more information, see [XHP Namespace Syntax](/docs/hack/XHP/basic-usage#namespace-syntax).
+For more information, see [XHP Namespace Syntax](/hack/XHP/basic-usage#namespace-syntax).
 
 ## Special Constants
-When debugging, use the predefined constant [`__NAMESPACE__`](/docs/hack/source-code-fundamentals/constants#context-dependent-constants) to access the name of the current namespace.
+When debugging, use the predefined constant [`__NAMESPACE__`](/hack/source-code-fundamentals/constants#context-dependent-constants) to access the name of the current namespace.
 
 ## Declaring a Namespace
 Namespace declarations can be file-scoped with `namespace MyNS;`, or block-scoped with `namespace MyNS { ... }`.

@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns an iterator that points to beginning of the current [` Iterable `](/docs/apis/Interfaces/HH/Iterable/)
+Returns an iterator that points to beginning of the current [` Iterable `](/apis/Interfaces/HH/Iterable/)
 
 
 
@@ -23,5 +23,5 @@ public function getIterator(): Iterator<Tv>;
 
 
 
-+ [` Iterator<Tv> `](/docs/apis/Interfaces/HH/Iterator/) - An `` Iterator `` that allows you to traverse the current [` Iterable `](/docs/apis/Interfaces/HH/Iterable/).
++ [` Iterator<Tv> `](/apis/Interfaces/HH/Iterator/) - An `` Iterator `` that allows you to traverse the current [` Iterable `](/apis/Interfaces/HH/Iterable/).
 <!-- HHAPIDOC -->

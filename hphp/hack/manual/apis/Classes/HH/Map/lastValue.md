@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns the last value in the current [` Map `](/docs/apis/Classes/HH/Map/)
+Returns the last value in the current [` Map `](/apis/Classes/HH/Map/)
 
 
 
@@ -23,7 +23,7 @@ public function lastValue(): ?Tv;
 
 
 
-+ ` ?Tv ` - The last value in the current [` Map `](/docs/apis/Classes/HH/Map/), or `` null `` if the [` Map `](/docs/apis/Classes/HH/Map/) is
++ ` ?Tv ` - The last value in the current [` Map `](/apis/Classes/HH/Map/), or `` null `` if the [` Map `](/apis/Classes/HH/Map/) is
   empty.
 
 
@@ -34,7 +34,7 @@ public function lastValue(): ?Tv;
 
 
 
-This example shows how [` lastValue() `](/docs/apis/Classes/HH/Map/lastValue/) can be used even when a [` Map `](/docs/apis/Classes/HH/Map/) may be empty:
+This example shows how [` lastValue() `](/apis/Classes/HH/Map/lastValue/) can be used even when a [` Map `](/apis/Classes/HH/Map/) may be empty:
 
 
 

@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Removes the specified value from the current [` Set `](/docs/apis/Classes/HH/Set/)
+Removes the specified value from the current [` Set `](/apis/Classes/HH/Set/)
 
 
 
@@ -20,8 +20,8 @@ public function remove(
 
 
 
-Future changes made to the current [` Set `](/docs/apis/Classes/HH/Set/) ARE reflected in the returned
-[` Set `](/docs/apis/Classes/HH/Set/), and vice-versa.
+Future changes made to the current [` Set `](/apis/Classes/HH/Set/) ARE reflected in the returned
+[` Set `](/apis/Classes/HH/Set/), and vice-versa.
 
 
 
@@ -41,7 +41,7 @@ Future changes made to the current [` Set `](/docs/apis/Classes/HH/Set/) ARE ref
 
 
 
-* [` Set<Tv> `](/docs/apis/Classes/HH/Set/) - Returns itself.
+* [` Set<Tv> `](/apis/Classes/HH/Set/) - Returns itself.
 
 
 
@@ -51,7 +51,7 @@ Future changes made to the current [` Set `](/docs/apis/Classes/HH/Set/) ARE ref
 
 
 
-This example shows that removing a value that doesn't exist in the [` Set `](/docs/apis/Classes/HH/Set/) has no effect:
+This example shows that removing a value that doesn't exist in the [` Set `](/apis/Classes/HH/Set/) has no effect:
 
 
 

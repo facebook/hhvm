@@ -10,7 +10,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Represents the result of failed [` Awaitable `](/docs/apis/Classes/HH/Awaitable/) operation
+Represents the result of failed [` Awaitable `](/apis/Classes/HH/Awaitable/) operation
 
 
 
@@ -34,16 +34,16 @@ final class WrappedException implements ResultOrExceptionWrapper<Tr> {...}
 
 
 
-+ [` ->__construct(Te $exception) `](/docs/apis/Classes/HH.Asio/WrappedException/__construct/)\
++ [` ->__construct(Te $exception) `](/apis/Classes/HH.Asio/WrappedException/__construct/)\
   Instantiate a `` WrappedException ``
-+ [` ->getException(): Te `](/docs/apis/Classes/HH.Asio/WrappedException/getException/)\
++ [` ->getException(): Te `](/apis/Classes/HH.Asio/WrappedException/getException/)\
   Since this is a failed result wrapper, this always returns the exception
-  thrown during the [` Awaitable `](/docs/apis/Classes/HH/Awaitable/) operation
-+ [` ->getResult(): Tr `](/docs/apis/Classes/HH.Asio/WrappedException/getResult/)\
+  thrown during the [` Awaitable `](/apis/Classes/HH/Awaitable/) operation
++ [` ->getResult(): Tr `](/apis/Classes/HH.Asio/WrappedException/getResult/)\
   Since this is a failed result wrapper, this always returns the exception
-  thrown during the [` Awaitable `](/docs/apis/Classes/HH/Awaitable/) operation
-+ [` ->isFailed(): bool `](/docs/apis/Classes/HH.Asio/WrappedException/isFailed/)\
+  thrown during the [` Awaitable `](/apis/Classes/HH/Awaitable/) operation
++ [` ->isFailed(): bool `](/apis/Classes/HH.Asio/WrappedException/isFailed/)\
   Since this is a failed result wrapper, this always returns `` true ``
-+ [` ->isSucceeded(): bool `](/docs/apis/Classes/HH.Asio/WrappedException/isSucceeded/)\
++ [` ->isSucceeded(): bool `](/apis/Classes/HH.Asio/WrappedException/isSucceeded/)\
   Since this is a failed result wrapper, this always returns `` false ``
 <!-- HHAPIDOC -->

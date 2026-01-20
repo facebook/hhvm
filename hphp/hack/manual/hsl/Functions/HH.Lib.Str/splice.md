@@ -60,7 +60,7 @@ Previously known in PHP as ` substr_replace `.
 
 
 
-* [String](</docs/hack/built-in-types/string>)
+* [String](</hack/built-in-types/string>)
 
 
 

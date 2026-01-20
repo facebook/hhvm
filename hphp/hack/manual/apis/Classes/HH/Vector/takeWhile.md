@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a [` Vector `](/docs/apis/Classes/HH/Vector/) containing the values of the current [` Vector `](/docs/apis/Classes/HH/Vector/) up to but
+Returns a [` Vector `](/apis/Classes/HH/Vector/) containing the values of the current [` Vector `](/apis/Classes/HH/Vector/) up to but
 not including the first value that produces `` false `` when passed to the
 specified callback
 
@@ -23,13 +23,13 @@ public function takeWhile(
 
 
 That is, takes the continuous prefix of values in
-the current [` Vector `](/docs/apis/Classes/HH/Vector/) for which the specified callback returns `` true ``.
+the current [` Vector `](/apis/Classes/HH/Vector/) for which the specified callback returns `` true ``.
 
 
 
 
-The returned [` Vector `](/docs/apis/Classes/HH/Vector/) will always be a subset (but not necessarily a
-proper subset) of the current [` Vector `](/docs/apis/Classes/HH/Vector/).
+The returned [` Vector `](/apis/Classes/HH/Vector/) will always be a subset (but not necessarily a
+proper subset) of the current [` Vector `](/apis/Classes/HH/Vector/).
 
 
 
@@ -49,7 +49,7 @@ proper subset) of the current [` Vector `](/docs/apis/Classes/HH/Vector/).
 
 
 
-* [` Vector<Tv> `](/docs/apis/Classes/HH/Vector/) - A [` Vector `](/docs/apis/Classes/HH/Vector/) that is a subset of the current [` Vector `](/docs/apis/Classes/HH/Vector/) up until the
+* [` Vector<Tv> `](/apis/Classes/HH/Vector/) - A [` Vector `](/apis/Classes/HH/Vector/) that is a subset of the current [` Vector `](/apis/Classes/HH/Vector/) up until the
   callback returns `` false ``.
 
 
@@ -60,7 +60,7 @@ proper subset) of the current [` Vector `](/docs/apis/Classes/HH/Vector/).
 
 
 
-This example shows how ` takeWhile ` can be used to create a new [` Vector `](/docs/apis/Classes/HH/Vector/) by taking elements from the beginning of an existing [` Vector `](/docs/apis/Classes/HH/Vector/):
+This example shows how ` takeWhile ` can be used to create a new [` Vector `](/apis/Classes/HH/Vector/) by taking elements from the beginning of an existing [` Vector `](/apis/Classes/HH/Vector/):
 
 
 

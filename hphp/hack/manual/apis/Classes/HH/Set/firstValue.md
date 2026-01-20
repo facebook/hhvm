@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns the first value in the current [` Set `](/docs/apis/Classes/HH/Set/)
+Returns the first value in the current [` Set `](/apis/Classes/HH/Set/)
 
 
 
@@ -23,7 +23,7 @@ public function firstValue(): ?Tv;
 
 
 
-+ ` ?Tv ` - The first value in the current [` Set `](/docs/apis/Classes/HH/Set/), or `` null `` if the [` Set `](/docs/apis/Classes/HH/Set/) is
++ ` ?Tv ` - The first value in the current [` Set `](/apis/Classes/HH/Set/), or `` null `` if the [` Set `](/apis/Classes/HH/Set/) is
   empty.
 
 
@@ -34,7 +34,7 @@ public function firstValue(): ?Tv;
 
 
 
-The following example gets the first value from a [` Set `](/docs/apis/Classes/HH/Set/). An empty [` Set `](/docs/apis/Classes/HH/Set/) will return `` null `` as its first value.
+The following example gets the first value from a [` Set `](/apis/Classes/HH/Set/). An empty [` Set `](/apis/Classes/HH/Set/) will return `` null `` as its first value.
 
 
 

@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns an ` array ` containing the values from the current [` ImmVector `](/docs/apis/Classes/HH/ImmVector/)
+Returns an ` array ` containing the values from the current [` ImmVector `](/apis/Classes/HH/ImmVector/)
 
 
 
@@ -28,7 +28,7 @@ This method is interchangeable with ` toArray() `.
 
 
 
-+ ` varray<Tv> ` - An `` array `` containing the values from the current [` ImmVector `](/docs/apis/Classes/HH/ImmVector/).
++ ` varray<Tv> ` - An `` array `` containing the values from the current [` ImmVector `](/apis/Classes/HH/ImmVector/).
 
 
 
@@ -38,5 +38,5 @@ This method is interchangeable with ` toArray() `.
 
 
 
-See [` Vector::toValuesArray `](/docs/apis/Classes/HH/Vector/toValuesArray/#examples) for usage examples.
+See [` Vector::toValuesArray `](/apis/Classes/HH/Vector/toValuesArray/#examples) for usage examples.
 <!-- HHAPIDOC -->

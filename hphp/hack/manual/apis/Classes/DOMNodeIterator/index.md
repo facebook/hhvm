@@ -27,10 +27,10 @@ class DOMNodeIterator implements Iterator<?DOMNode> {...}
 
 
 
-+ [` ->__construct(): void `](/docs/apis/Classes/DOMNodeIterator/__construct/)
-+ [` ->current(): ?DOMNode `](/docs/apis/Classes/DOMNodeIterator/current/)
-+ [` ->key(): mixed `](/docs/apis/Classes/DOMNodeIterator/key/)
-+ [` ->next(): void `](/docs/apis/Classes/DOMNodeIterator/next/)
-+ [` ->rewind(): void `](/docs/apis/Classes/DOMNodeIterator/rewind/)
-+ [` ->valid(): bool `](/docs/apis/Classes/DOMNodeIterator/valid/)
++ [` ->__construct(): void `](/apis/Classes/DOMNodeIterator/__construct/)
++ [` ->current(): ?DOMNode `](/apis/Classes/DOMNodeIterator/current/)
++ [` ->key(): mixed `](/apis/Classes/DOMNodeIterator/key/)
++ [` ->next(): void `](/apis/Classes/DOMNodeIterator/next/)
++ [` ->rewind(): void `](/apis/Classes/DOMNodeIterator/rewind/)
++ [` ->valid(): bool `](/apis/Classes/DOMNodeIterator/valid/)
 <!-- HHAPIDOC -->

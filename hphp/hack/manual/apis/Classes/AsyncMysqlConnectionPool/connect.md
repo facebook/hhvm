@@ -70,7 +70,7 @@ use one of the recently available connections from the pool itself.
 
 
 
-* [` Awaitable<AsyncMysqlConnection> `](/docs/apis/Classes/HH/Awaitable/) - an [` Awaitable `](/docs/apis/Classes/HH/Awaitable/) representing an [` AsyncMysqlConnection `](/docs/apis/Classes/AsyncMysqlConnection/). `` await ``
+* [` Awaitable<AsyncMysqlConnection> `](/apis/Classes/HH/Awaitable/) - an [` Awaitable `](/apis/Classes/HH/Awaitable/) representing an [` AsyncMysqlConnection `](/apis/Classes/AsyncMysqlConnection/). `` await ``
   or ``` join ``` this result to obtain the actual connection.
 
 

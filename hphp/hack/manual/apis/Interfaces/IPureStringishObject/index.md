@@ -27,5 +27,5 @@ interface IPureStringishObject implements ILeakSafeStringishObject {...}
 
 
 
-+ [` ->__toString(): string `](/docs/apis/Interfaces/IPureStringishObject/__toString/)
++ [` ->__toString(): string `](/apis/Interfaces/IPureStringishObject/__toString/)
 <!-- HHAPIDOC -->

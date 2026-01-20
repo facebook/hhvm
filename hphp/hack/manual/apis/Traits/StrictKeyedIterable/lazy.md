@@ -18,5 +18,5 @@ public function lazy(): KeyedIterable<Tk, Tv>;
 
 
 
-+ [` KeyedIterable<Tk, `](/docs/apis/Interfaces/HH/KeyedIterable/)`` Tv> ``
++ [` KeyedIterable<Tk, `](/apis/Interfaces/HH/KeyedIterable/)`` Tv> ``
 <!-- HHAPIDOC -->

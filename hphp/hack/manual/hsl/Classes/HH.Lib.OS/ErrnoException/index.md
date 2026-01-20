@@ -79,8 +79,8 @@ class ErrnoException extends \Exception {...}
 
 
 
-* [` ->__construct(Errno $errno, string $message) `](/docs/hsl/Classes/HH.Lib.OS/ErrnoException/__construct/)
-* [` ->getCode(): Errno `](/docs/hsl/Classes/HH.Lib.OS/ErrnoException/getCode/)\
+* [` ->__construct(Errno $errno, string $message) `](/hsl/Classes/HH.Lib.OS/ErrnoException/__construct/)
+* [` ->getCode(): Errno `](/hsl/Classes/HH.Lib.OS/ErrnoException/getCode/)\
   Deprecated for clarity, and potential future ambiguity
-* [` ->getErrno(): Errno `](/docs/hsl/Classes/HH.Lib.OS/ErrnoException/getErrno/)
+* [` ->getErrno(): Errno `](/hsl/Classes/HH.Lib.OS/ErrnoException/getErrno/)
 <!-- HHAPIDOC -->

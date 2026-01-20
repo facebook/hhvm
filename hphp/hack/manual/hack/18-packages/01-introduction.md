@@ -94,4 +94,4 @@ include_paths = ["//"]
 
 This creates a package that captures all files not in other packages.
 
-Once you've defined a set of packages, you can deploy them using [deployments](/docs/hack/packages/deployments).
+Once you've defined a set of packages, you can deploy them using [deployments](/hack/packages/deployments).

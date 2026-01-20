@@ -30,5 +30,5 @@ public function mapWithKey<Tu>(
 
 
 
-* [` KeyedIterable<Tk, `](/docs/apis/Interfaces/HH/KeyedIterable/)`` Tu> ``
+* [` KeyedIterable<Tk, `](/apis/Interfaces/HH/KeyedIterable/)`` Tu> ``
 <!-- HHAPIDOC -->

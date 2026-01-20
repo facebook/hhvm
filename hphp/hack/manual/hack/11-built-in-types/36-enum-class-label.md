@@ -2,7 +2,7 @@
 
 ## Values v. Bindings
 
-With [enum types](/docs/hack/built-in-types/enum) and [enum classes](/docs/hack/built-in-types/enum-class), most of the focus is given to their values.
+With [enum types](/hack/built-in-types/enum) and [enum classes](/hack/built-in-types/enum-class), most of the focus is given to their values.
 Expressions like `E::A` denote the value of `A` in `E`, but the fact that `A` was used to access it is lost.
 
 ```hack

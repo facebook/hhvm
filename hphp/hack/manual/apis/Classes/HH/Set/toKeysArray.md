@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns an ` array ` containing the values from the current [` Set `](/docs/apis/Classes/HH/Set/)
+Returns an ` array ` containing the values from the current [` Set `](/apis/Classes/HH/Set/)
 
 
 
@@ -18,12 +18,12 @@ public function toKeysArray(): varray<Tv>;
 
 
 
-[` Set `](/docs/apis/Classes/HH/Set/)s don't have keys. So this method just returns the values.
+[` Set `](/apis/Classes/HH/Set/)s don't have keys. So this method just returns the values.
 
 
 
 
-This method is interchangeable with [` toValuesArray() `](/docs/apis/Classes/HH/Set/toValuesArray/).
+This method is interchangeable with [` toValuesArray() `](/apis/Classes/HH/Set/toValuesArray/).
 
 
 
@@ -34,7 +34,7 @@ This method is interchangeable with [` toValuesArray() `](/docs/apis/Classes/HH/
 
 
 + ` varray<Tv> ` - an integer-indexed `` array `` containing the values from the
-  current [` Set `](/docs/apis/Classes/HH/Set/).
+  current [` Set `](/apis/Classes/HH/Set/).
 
 
 
@@ -44,7 +44,7 @@ This method is interchangeable with [` toValuesArray() `](/docs/apis/Classes/HH/
 
 
 
-This example shows that ` toKeysArray ` is the same as [` toValuesArray `](/docs/apis/Classes/HH/Set/toValuesArray/) because [` Set `](/docs/apis/Classes/HH/Set/)s don't have keys:
+This example shows that ` toKeysArray ` is the same as [` toValuesArray `](/apis/Classes/HH/Set/toValuesArray/) because [` Set `](/apis/Classes/HH/Set/)s don't have keys:
 
 
 

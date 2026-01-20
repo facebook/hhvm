@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a ` Vector ` of the current [` Set `](/docs/apis/Classes/HH/Set/) values
+Returns a ` Vector ` of the current [` Set `](/apis/Classes/HH/Set/) values
 
 
 
@@ -23,8 +23,8 @@ public function toVector(): Vector<Tv>;
 
 
 
-+ [` Vector<Tv> `](/docs/apis/Classes/HH/Vector/) - a `` Vector `` (integer-indexed) that contains the values of the
-  current [` Set `](/docs/apis/Classes/HH/Set/).
++ [` Vector<Tv> `](/apis/Classes/HH/Vector/) - a `` Vector `` (integer-indexed) that contains the values of the
+  current [` Set `](/apis/Classes/HH/Set/).
 
 
 

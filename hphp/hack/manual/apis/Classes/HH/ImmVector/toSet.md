@@ -33,5 +33,5 @@ public function toSet(): Set;
 
 
 
-See [` Vector::toSet `](/docs/apis/Classes/HH/Vector/toSet/#examples) for usage examples.
+See [` Vector::toSet `](/apis/Classes/HH/Vector/toSet/#examples) for usage examples.
 <!-- HHAPIDOC -->

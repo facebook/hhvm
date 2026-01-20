@@ -6,8 +6,8 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a [` ConstSet `](/docs/apis/Interfaces/ConstSet/) containing the values after an operation has been
-applied to each value in the current [` ConstSet `](/docs/apis/Interfaces/ConstSet/)
+Returns a [` ConstSet `](/apis/Interfaces/ConstSet/) containing the values after an operation has been
+applied to each value in the current [` ConstSet `](/apis/Interfaces/ConstSet/)
 
 
 
@@ -21,8 +21,8 @@ public function map<Tu as arraykey>(
 
 
 
-Every value in the current [` ConstSet `](/docs/apis/Interfaces/ConstSet/) is affected by a call to [` map() `](/docs/apis/Interfaces/ConstSet/map/),
-unlike [` filter() `](/docs/apis/Interfaces/ConstSet/filter/) where only values that meet a certain criteria are
+Every value in the current [` ConstSet `](/apis/Interfaces/ConstSet/) is affected by a call to [` map() `](/apis/Interfaces/ConstSet/map/),
+unlike [` filter() `](/apis/Interfaces/ConstSet/filter/) where only values that meet a certain criteria are
 affected.
 
 
@@ -33,7 +33,7 @@ affected.
 
 
 
-+ [Examples](</docs/hack/arrays-and-collections/introduction>)
++ [Examples](</hack/arrays-and-collections/introduction>)
 
 
 
@@ -47,7 +47,7 @@ affected.
 
 
 * ` (function(Tv): Tu) $fn ` - The callback containing the operation to apply to the
-  current [` ConstSet `](/docs/apis/Interfaces/ConstSet/) values.
+  current [` ConstSet `](/apis/Interfaces/ConstSet/) values.
 
 
 
@@ -57,6 +57,6 @@ affected.
 
 
 
-- [` ConstSet<Tu> `](/docs/apis/Interfaces/ConstSet/) - a [` ConstSet `](/docs/apis/Interfaces/ConstSet/) containing the values after a user-specified
+- [` ConstSet<Tu> `](/apis/Interfaces/ConstSet/) - a [` ConstSet `](/apis/Interfaces/ConstSet/) containing the values after a user-specified
   operation is applied.
 <!-- HHAPIDOC -->

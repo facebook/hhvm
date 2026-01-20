@@ -60,7 +60,7 @@ b is the sum of distinct key lengths (length is the length of ` $haystack `)
 
 
 
-* [String](</docs/hack/built-in-types/string>)
+* [String](</hack/built-in-types/string>)
 
 
 
@@ -74,7 +74,7 @@ b is the sum of distinct key lengths (length is the length of ` $haystack `)
 
 
 - ` string $haystack `
-- [` KeyedContainer<string, `](/docs/apis/Interfaces/HH/KeyedContainer/)`` string> $replacements ``
+- [` KeyedContainer<string, `](/apis/Interfaces/HH/KeyedContainer/)`` string> $replacements ``
 
 
 

@@ -33,7 +33,7 @@ public function elapsedMicros(): int;
 
 
 
-Every successful query has a result. And one of the methods on an [` AsyncMysqlQueryResult `](/docs/apis/Classes/AsyncMysqlQueryResult/) is [` elapsedMicros() `](/docs/apis/Classes/AsyncMysqlQueryResult/elapsedMicros/), which tells you how long it took to perform the query and get the result.
+Every successful query has a result. And one of the methods on an [` AsyncMysqlQueryResult `](/apis/Classes/AsyncMysqlQueryResult/) is [` elapsedMicros() `](/apis/Classes/AsyncMysqlQueryResult/elapsedMicros/), which tells you how long it took to perform the query and get the result.
 
 
 

@@ -21,7 +21,7 @@ public function reserve(
 
 
 Reserves enough memory for ` $sz ` elements. If `` $sz `` is less than or
-equal to the current capacity of the current [` Vector `](/docs/apis/Classes/HH/Vector/), this method does
+equal to the current capacity of the current [` Vector `](/apis/Classes/HH/Vector/), this method does
 nothing.
 
 
@@ -37,7 +37,7 @@ If ` $sz ` is less than zero, an exception is thrown.
 
 
 
-+ ` int $sz ` - The pre-determined size you want for the current [` Vector `](/docs/apis/Classes/HH/Vector/).
++ ` int $sz ` - The pre-determined size you want for the current [` Vector `](/apis/Classes/HH/Vector/).
 
 
 
@@ -57,7 +57,7 @@ If ` $sz ` is less than zero, an exception is thrown.
 
 
 
-This example reserves space for 1000 elements and then fills the [` Vector `](/docs/apis/Classes/HH/Vector/) with 1000 integers:
+This example reserves space for 1000 elements and then fills the [` Vector `](/apis/Classes/HH/Vector/) with 1000 integers:
 
 
 

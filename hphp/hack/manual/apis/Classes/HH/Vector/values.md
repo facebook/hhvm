@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a [` Vector `](/docs/apis/Classes/HH/Vector/) containing the values of the current [` Vector `](/docs/apis/Classes/HH/Vector/)
+Returns a [` Vector `](/apis/Classes/HH/Vector/) containing the values of the current [` Vector `](/apis/Classes/HH/Vector/)
 
 
 
@@ -18,12 +18,12 @@ public function values(): Vector<Tv>;
 
 
 
-Essentially a copy of the current [` Vector `](/docs/apis/Classes/HH/Vector/).
+Essentially a copy of the current [` Vector `](/apis/Classes/HH/Vector/).
 
 
 
 
-This method is interchangeable with [` toVector() `](/docs/apis/Classes/HH/Vector/toVector/).
+This method is interchangeable with [` toVector() `](/apis/Classes/HH/Vector/toVector/).
 
 
 
@@ -33,7 +33,7 @@ This method is interchangeable with [` toVector() `](/docs/apis/Classes/HH/Vecto
 
 
 
-+ [` Vector<Tv> `](/docs/apis/Classes/HH/Vector/) - A [` Vector `](/docs/apis/Classes/HH/Vector/) containing the values of the current [` Vector `](/docs/apis/Classes/HH/Vector/).
++ [` Vector<Tv> `](/apis/Classes/HH/Vector/) - A [` Vector `](/apis/Classes/HH/Vector/) containing the values of the current [` Vector `](/apis/Classes/HH/Vector/).
 
 
 
@@ -43,7 +43,7 @@ This method is interchangeable with [` toVector() `](/docs/apis/Classes/HH/Vecto
 
 
 
-This example shows how [` values() `](/docs/apis/Classes/HH/Vector/values/) is identical to [` toVector() `](/docs/apis/Classes/HH/Vector/toVector/). It returns a deep copy of `` $v ``, so mutating this new [` Vector `](/docs/apis/Classes/HH/Vector/) doesn't affect the original.
+This example shows how [` values() `](/apis/Classes/HH/Vector/values/) is identical to [` toVector() `](/apis/Classes/HH/Vector/toVector/). It returns a deep copy of `` $v ``, so mutating this new [` Vector `](/apis/Classes/HH/Vector/) doesn't affect the original.
 
 
 

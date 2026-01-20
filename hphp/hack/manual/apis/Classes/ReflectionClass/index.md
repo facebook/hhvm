@@ -37,231 +37,231 @@ class ReflectionClass implements Reflector {...}
 
 
 
-+ [` ::export(mixed $argument, bool $return = false): ?string `](/docs/apis/Classes/ReflectionClass/export/)\
++ [` ::export(mixed $argument, bool $return = false): ?string `](/apis/Classes/ReflectionClass/export/)\
   ( excerpt from http://php.net/manual/en/reflectionclass.export.php )
 
-+ [` ->__clone() `](/docs/apis/Classes/ReflectionClass/__clone/)
++ [` ->__clone() `](/apis/Classes/ReflectionClass/__clone/)
 
-+ [` ->__construct(mixed $name_or_obj) `](/docs/apis/Classes/ReflectionClass/__construct/)\
++ [` ->__construct(mixed $name_or_obj) `](/apis/Classes/ReflectionClass/__construct/)\
   ( excerpt from http://php.net/manual/en/reflectionclass.construct.php )
 
-+ [` ->__toString(): string `](/docs/apis/Classes/ReflectionClass/__toString/)\
++ [` ->__toString(): string `](/apis/Classes/ReflectionClass/__toString/)\
   ( excerpt from http://php.net/manual/en/reflectionclass.tostring.php )
 
-+ [` ->getAbstractConstantNames(): darray<string> `](/docs/apis/Classes/ReflectionClass/getAbstractConstantNames/)\
++ [` ->getAbstractConstantNames(): darray<string> `](/apis/Classes/ReflectionClass/getAbstractConstantNames/)\
   ( excerpt from
   http://php.net/manual/en/reflectionclass.getabstractconstantnames.php
   )
 
-+ [` ->getAttribute(string $name): ?varray<mixed> `](/docs/apis/Classes/ReflectionClass/getAttribute/)
++ [` ->getAttribute(string $name): ?varray<mixed> `](/apis/Classes/ReflectionClass/getAttribute/)
 
-+ [` ->getAttributeClass<T as HH\ClassLikeAttribute>(classname<T> $c): ?T `](/docs/apis/Classes/ReflectionClass/getAttributeClass/)
++ [` ->getAttributeClass<T as HH\ClassLikeAttribute>(classname<T> $c): ?T `](/apis/Classes/ReflectionClass/getAttributeClass/)
 
-+ [` ->getAttributes(): darray<string, varray<mixed>> `](/docs/apis/Classes/ReflectionClass/getAttributes/)
++ [` ->getAttributes(): darray<string, varray<mixed>> `](/apis/Classes/ReflectionClass/getAttributes/)
 
-+ [` ->getAttributesNamespaced(): darray<string, varray<mixed>> `](/docs/apis/Classes/ReflectionClass/getAttributesNamespaced/)
++ [` ->getAttributesNamespaced(): darray<string, varray<mixed>> `](/apis/Classes/ReflectionClass/getAttributesNamespaced/)
 
-+ [` ->getAttributesRecursiveNamespaced(): darray<string, varray<mixed>> `](/docs/apis/Classes/ReflectionClass/getAttributesRecursiveNamespaced/)
++ [` ->getAttributesRecursiveNamespaced(): darray<string, varray<mixed>> `](/apis/Classes/ReflectionClass/getAttributesRecursiveNamespaced/)
 
-+ [` ->getConstant(string $name): mixed `](/docs/apis/Classes/ReflectionClass/getConstant/)\
++ [` ->getConstant(string $name): mixed `](/apis/Classes/ReflectionClass/getConstant/)\
   ( excerpt from http://php.net/manual/en/reflectionclass.getconstant.php
   )
 
-+ [` ->getConstants(): darray<string, mixed> `](/docs/apis/Classes/ReflectionClass/getConstants/)\
++ [` ->getConstants(): darray<string, mixed> `](/apis/Classes/ReflectionClass/getConstants/)\
   ( excerpt from http://php.net/manual/en/reflectionclass.getconstants.php
   )
 
-+ [` ->getConstructor(): ?ReflectionMethod `](/docs/apis/Classes/ReflectionClass/getConstructor/)\
++ [` ->getConstructor(): ?ReflectionMethod `](/apis/Classes/ReflectionClass/getConstructor/)\
   ( excerpt from
   http://php.net/manual/en/reflectionclass.getconstructor.php )
 
-+ [` ->getDefaultProperties(): darray<string, mixed> `](/docs/apis/Classes/ReflectionClass/getDefaultProperties/)\
++ [` ->getDefaultProperties(): darray<string, mixed> `](/apis/Classes/ReflectionClass/getDefaultProperties/)\
   ( excerpt from
   http://php.net/manual/en/reflectionclass.getdefaultproperties.php )
 
-+ [` ->getDocComment(): mixed `](/docs/apis/Classes/ReflectionClass/getDocComment/)\
++ [` ->getDocComment(): mixed `](/apis/Classes/ReflectionClass/getDocComment/)\
   ( excerpt from
   http://php.net/manual/en/reflectionclass.getdoccomment.php )
 
-+ [` ->getEndLine(): int `](/docs/apis/Classes/ReflectionClass/getEndLine/)\
++ [` ->getEndLine(): int `](/apis/Classes/ReflectionClass/getEndLine/)\
   ( excerpt from http://php.net/manual/en/reflectionclass.getendline.php )
 
-+ [` ->getEnumUnderlyingType(): string `](/docs/apis/Classes/ReflectionClass/getEnumUnderlyingType/)\
++ [` ->getEnumUnderlyingType(): string `](/apis/Classes/ReflectionClass/getEnumUnderlyingType/)\
   Returns the underlying type of this ReflectionClass, given that it
   represents an enum
 
-+ [` ->getExtension(): ?ReflectionExtension `](/docs/apis/Classes/ReflectionClass/getExtension/)\
++ [` ->getExtension(): ?ReflectionExtension `](/apis/Classes/ReflectionClass/getExtension/)\
   ( excerpt from http://php.net/manual/en/reflectionclass.getextension.php
   )
 
-+ [` ->getExtensionName(): string `](/docs/apis/Classes/ReflectionClass/getExtensionName/)\
++ [` ->getExtensionName(): string `](/apis/Classes/ReflectionClass/getExtensionName/)\
   ( excerpt from
   http://php.net/manual/en/reflectionclass.getextensionname.php )
 
-+ [` ->getFile(): ReflectionFile `](/docs/apis/Classes/ReflectionClass/getFile/)\
++ [` ->getFile(): ReflectionFile `](/apis/Classes/ReflectionClass/getFile/)\
   Gets the declaring file for the reflected class
 
-+ [` ->getFileName(): mixed `](/docs/apis/Classes/ReflectionClass/getFileName/)\
++ [` ->getFileName(): mixed `](/apis/Classes/ReflectionClass/getFileName/)\
   ( excerpt from http://php.net/manual/en/reflectionclass.getfilename.php
   )
 
-+ [` ->getInterfaceNames(): varray<string> `](/docs/apis/Classes/ReflectionClass/getInterfaceNames/)\
++ [` ->getInterfaceNames(): varray<string> `](/apis/Classes/ReflectionClass/getInterfaceNames/)\
   ( excerpt from
   http://php.net/manual/en/reflectionclass.getinterfacenames.php )
 
-+ [` ->getInterfaces(): darray<string, ReflectionClass> `](/docs/apis/Classes/ReflectionClass/getInterfaces/)\
++ [` ->getInterfaces(): darray<string, ReflectionClass> `](/apis/Classes/ReflectionClass/getInterfaces/)\
   ( excerpt from
   http://php.net/manual/en/reflectionclass.getinterfaces.php )
 
-+ [` ->getMethod(string $name): ReflectionMethod `](/docs/apis/Classes/ReflectionClass/getMethod/)\
++ [` ->getMethod(string $name): ReflectionMethod `](/apis/Classes/ReflectionClass/getMethod/)\
   ( excerpt from http://php.net/manual/en/reflectionclass.getmethod.php )
 
-+ [` ->getMethods(?int $filter = NULL): varray<ReflectionMethod> `](/docs/apis/Classes/ReflectionClass/getMethods/)\
++ [` ->getMethods(?int $filter = NULL): varray<ReflectionMethod> `](/apis/Classes/ReflectionClass/getMethods/)\
   ( excerpt from http://php.net/manual/en/reflectionclass.getmethods.php )
 
-+ [` ->getModifiers(): int `](/docs/apis/Classes/ReflectionClass/getModifiers/)\
++ [` ->getModifiers(): int `](/apis/Classes/ReflectionClass/getModifiers/)\
   ( excerpt from http://php.net/manual/en/reflectionclass.getmodifiers.php
   )
 
-+ [` ->getModule(): ?string `](/docs/apis/Classes/ReflectionClass/getModule/)
++ [` ->getModule(): ?string `](/apis/Classes/ReflectionClass/getModule/)
 
-+ [` ->getName(): string `](/docs/apis/Classes/ReflectionClass/getName/)
++ [` ->getName(): string `](/apis/Classes/ReflectionClass/getName/)
 
-+ [` ->getNamespaceName(): string `](/docs/apis/Classes/ReflectionClass/getNamespaceName/)\
++ [` ->getNamespaceName(): string `](/apis/Classes/ReflectionClass/getNamespaceName/)\
   ( excerpt from
   http://php.net/manual/en/reflectionclass.functionabstract.php )
 
-+ [` ->getParentClass(): mixed `](/docs/apis/Classes/ReflectionClass/getParentClass/)\
++ [` ->getParentClass(): mixed `](/apis/Classes/ReflectionClass/getParentClass/)\
   ( excerpt from
   http://php.net/manual/en/reflectionclass.getparentclass.php )
 
-+ [` ->getProperties(int $filter = 65535): varray<ReflectionProperty> `](/docs/apis/Classes/ReflectionClass/getProperties/)\
++ [` ->getProperties(int $filter = 65535): varray<ReflectionProperty> `](/apis/Classes/ReflectionClass/getProperties/)\
   ( excerpt* http://php.net/manual/en/reflectionclass.getproperties.php )
 
-+ [` ->getProperty(string $name): ReflectionProperty `](/docs/apis/Classes/ReflectionClass/getProperty/)\
++ [` ->getProperty(string $name): ReflectionProperty `](/apis/Classes/ReflectionClass/getProperty/)\
   ( excerpt from http://php.net/manual/en/reflectionclass.getproperty.php
   )
 
-+ [` ->getReifiedTypeParamInfo(): varray<shape('is_reified' => bool, 'is_soft' => bool, 'is_warn' => bool)> `](/docs/apis/Classes/ReflectionClass/getReifiedTypeParamInfo/)
++ [` ->getReifiedTypeParamInfo(): varray<shape('is_reified' => bool, 'is_soft' => bool, 'is_warn' => bool)> `](/apis/Classes/ReflectionClass/getReifiedTypeParamInfo/)
 
-+ [` ->getRequirementNames(): varray<string> `](/docs/apis/Classes/ReflectionClass/getRequirementNames/)\
++ [` ->getRequirementNames(): varray<string> `](/apis/Classes/ReflectionClass/getRequirementNames/)\
   Gets the list of implemented interfaces/inherited classes needed to
   implement an interface / use a trait
 
-+ [` ->getRequirements(): darray<string, ReflectionClass> `](/docs/apis/Classes/ReflectionClass/getRequirements/)\
++ [` ->getRequirements(): darray<string, ReflectionClass> `](/apis/Classes/ReflectionClass/getRequirements/)\
   Gets ReflectionClass-es for the requirements of this class
 
-+ [` ->getShortName(): string `](/docs/apis/Classes/ReflectionClass/getShortName/)\
++ [` ->getShortName(): string `](/apis/Classes/ReflectionClass/getShortName/)\
   ( excerpt from
   http://php.net/manual/en/reflectionclass.getshortname.php )
 
-+ [` ->getStartLine(): int `](/docs/apis/Classes/ReflectionClass/getStartLine/)\
++ [` ->getStartLine(): int `](/apis/Classes/ReflectionClass/getStartLine/)\
   ( excerpt from http://php.net/manual/en/reflectionclass.getstartline.php
   )
 
-+ [` ->getStaticProperties(): darray<string, mixed> `](/docs/apis/Classes/ReflectionClass/getStaticProperties/)\
++ [` ->getStaticProperties(): darray<string, mixed> `](/apis/Classes/ReflectionClass/getStaticProperties/)\
   ( excerpt from
   http://php.net/manual/en/reflectionclass.getstaticproperties.php )
 
-+ [` ->getStaticPropertyValue(string $name, mixed ...$def_value = NULL): mixed `](/docs/apis/Classes/ReflectionClass/getStaticPropertyValue/)\
++ [` ->getStaticPropertyValue(string $name, mixed ...$def_value = NULL): mixed `](/apis/Classes/ReflectionClass/getStaticPropertyValue/)\
   ( excerpt from
   http://php.net/manual/en/reflectionclass.getstaticpropertyvalue.php )
 
-+ [` ->getTraitAliases(): darray<string, string> `](/docs/apis/Classes/ReflectionClass/getTraitAliases/)
++ [` ->getTraitAliases(): darray<string, string> `](/apis/Classes/ReflectionClass/getTraitAliases/)
 
-+ [` ->getTraitNames(): varray<string> `](/docs/apis/Classes/ReflectionClass/getTraitNames/)\
++ [` ->getTraitNames(): varray<string> `](/apis/Classes/ReflectionClass/getTraitNames/)\
   ( excerpt from
   http://php.net/manual/en/reflectionclass.gettraitnames.php )
 
-+ [` ->getTraits(): darray<string, ReflectionClass> `](/docs/apis/Classes/ReflectionClass/getTraits/)\
++ [` ->getTraits(): darray<string, ReflectionClass> `](/apis/Classes/ReflectionClass/getTraits/)\
   ( excerpt from http://php.net/manual/en/reflectionclass.gettraits.php )
 
-+ [` ->getTypeConstant(string $name): ReflectionTypeConstant `](/docs/apis/Classes/ReflectionClass/getTypeConstant/)
++ [` ->getTypeConstant(string $name): ReflectionTypeConstant `](/apis/Classes/ReflectionClass/getTypeConstant/)
 
-+ [` ->getTypeConstants(): varray<ReflectionTypeConstant> `](/docs/apis/Classes/ReflectionClass/getTypeConstants/)
++ [` ->getTypeConstants(): varray<ReflectionTypeConstant> `](/apis/Classes/ReflectionClass/getTypeConstants/)
 
-+ [` ->hasAttribute(string $name): bool `](/docs/apis/Classes/ReflectionClass/hasAttribute/)
++ [` ->hasAttribute(string $name): bool `](/apis/Classes/ReflectionClass/hasAttribute/)
 
-+ [` ->hasConstant(string $name): bool `](/docs/apis/Classes/ReflectionClass/hasConstant/)\
++ [` ->hasConstant(string $name): bool `](/apis/Classes/ReflectionClass/hasConstant/)\
   ( excerpt from http://php.net/manual/en/reflectionclass.hasconstant.php
   )
 
-+ [` ->hasMethod(string $name): bool `](/docs/apis/Classes/ReflectionClass/hasMethod/)\
++ [` ->hasMethod(string $name): bool `](/apis/Classes/ReflectionClass/hasMethod/)\
   ( excerpt from http://php.net/manual/en/reflectionclass.hasmethod.php )
 
-+ [` ->hasProperty(string $name): bool `](/docs/apis/Classes/ReflectionClass/hasProperty/)\
++ [` ->hasProperty(string $name): bool `](/apis/Classes/ReflectionClass/hasProperty/)\
   ( excerpt from http://php.net/manual/en/reflectionclass.hasproperty.php
   )
 
-+ [` ->hasTypeConstant(string $name): bool `](/docs/apis/Classes/ReflectionClass/hasTypeConstant/)
++ [` ->hasTypeConstant(string $name): bool `](/apis/Classes/ReflectionClass/hasTypeConstant/)
 
-+ [` ->implementsInterface(string $interface): bool `](/docs/apis/Classes/ReflectionClass/implementsInterface/)\
++ [` ->implementsInterface(string $interface): bool `](/apis/Classes/ReflectionClass/implementsInterface/)\
   ( excerpt from
   http://php.net/manual/en/reflectionclass.implementsinterface.php )
 
-+ [` ->inNamespace(): bool `](/docs/apis/Classes/ReflectionClass/inNamespace/)\
++ [` ->inNamespace(): bool `](/apis/Classes/ReflectionClass/inNamespace/)\
   ( excerpt from http://php.net/manual/en/reflectionclass.innamespace.php
   )
 
-+ [` ->isAbstract(): bool `](/docs/apis/Classes/ReflectionClass/isAbstract/)\
++ [` ->isAbstract(): bool `](/apis/Classes/ReflectionClass/isAbstract/)\
   ( excerpt from http://php.net/manual/en/reflectionclass.isabstract.php )
 
-+ [` ->isCloneable(): bool `](/docs/apis/Classes/ReflectionClass/isCloneable/)\
++ [` ->isCloneable(): bool `](/apis/Classes/ReflectionClass/isCloneable/)\
   ( excerpt from
   http://php.net/manual/en/reflectionclass.iscloneable.php )
 
-+ [` ->isEnum(): bool `](/docs/apis/Classes/ReflectionClass/isEnum/)\
++ [` ->isEnum(): bool `](/apis/Classes/ReflectionClass/isEnum/)\
   Returns whether this ReflectionClass represents an enum
 
-+ [` ->isFinal(): bool `](/docs/apis/Classes/ReflectionClass/isFinal/)\
++ [` ->isFinal(): bool `](/apis/Classes/ReflectionClass/isFinal/)\
   ( excerpt from http://php.net/manual/en/reflectionclass.isfinal.php )
 
-+ [` ->isHack(): bool `](/docs/apis/Classes/ReflectionClass/isHack/)
++ [` ->isHack(): bool `](/apis/Classes/ReflectionClass/isHack/)
 
-+ [` ->isInstance(mixed $obj): bool `](/docs/apis/Classes/ReflectionClass/isInstance/)\
++ [` ->isInstance(mixed $obj): bool `](/apis/Classes/ReflectionClass/isInstance/)\
   ( excerpt from http://php.net/manual/en/reflectionclass.isinstance.php )
 
-+ [` ->isInstantiable(): bool `](/docs/apis/Classes/ReflectionClass/isInstantiable/)\
++ [` ->isInstantiable(): bool `](/apis/Classes/ReflectionClass/isInstantiable/)\
   ( excerpt from
   http://php.net/manual/en/reflectionclass.isinstantiable.php )
 
-+ [` ->isInterface(): bool `](/docs/apis/Classes/ReflectionClass/isInterface/)\
++ [` ->isInterface(): bool `](/apis/Classes/ReflectionClass/isInterface/)\
   ( excerpt from http://php.net/manual/en/reflectionclass.isinterface.php
   )
 
-+ [` ->isInternal(): bool `](/docs/apis/Classes/ReflectionClass/isInternal/)\
++ [` ->isInternal(): bool `](/apis/Classes/ReflectionClass/isInternal/)\
   ( excerpt from http://php.net/manual/en/reflectionclass.isinternal.php )
 
-+ [` ->isInternalToModule(): bool `](/docs/apis/Classes/ReflectionClass/isInternalToModule/)\
++ [` ->isInternalToModule(): bool `](/apis/Classes/ReflectionClass/isInternalToModule/)\
   Checks if a class is internal
 
-+ [` ->isIterateable(): bool `](/docs/apis/Classes/ReflectionClass/isIterateable/)\
++ [` ->isIterateable(): bool `](/apis/Classes/ReflectionClass/isIterateable/)\
   ( excerpt from
   http://php.net/manual/en/reflectionclass.isiterateable.php )
 
-+ [` ->isSubclassOf(mixed $class): bool `](/docs/apis/Classes/ReflectionClass/isSubclassOf/)\
++ [` ->isSubclassOf(mixed $class): bool `](/apis/Classes/ReflectionClass/isSubclassOf/)\
   ( excerpt from http://php.net/manual/en/reflectionclass.issubclassof.php
   )
 
-+ [` ->isTrait(): bool `](/docs/apis/Classes/ReflectionClass/isTrait/)\
++ [` ->isTrait(): bool `](/apis/Classes/ReflectionClass/isTrait/)\
   ( excerpt from http://php.net/manual/en/reflectionclass.istrait.php )
 
-+ [` ->isUserDefined(): bool `](/docs/apis/Classes/ReflectionClass/isUserDefined/)
++ [` ->isUserDefined(): bool `](/apis/Classes/ReflectionClass/isUserDefined/)
 
-+ [` ->newInstance(...$args) `](/docs/apis/Classes/ReflectionClass/newInstance/)\
++ [` ->newInstance(...$args) `](/apis/Classes/ReflectionClass/newInstance/)\
   ( excerpt from http://php.net/manual/en/reflectionclass.newinstance.php
   )
 
-+ [` ->newInstanceArgs(Traversable<mixed> $args = vec [ ]) `](/docs/apis/Classes/ReflectionClass/newInstanceArgs/)\
++ [` ->newInstanceArgs(Traversable<mixed> $args = vec [ ]) `](/apis/Classes/ReflectionClass/newInstanceArgs/)\
   ( excerpt from
   http://php.net/manual/en/reflectionclass.newinstanceargs.php )
 
-+ [` ->newInstanceWithoutConstructor() `](/docs/apis/Classes/ReflectionClass/newInstanceWithoutConstructor/)\
++ [` ->newInstanceWithoutConstructor() `](/apis/Classes/ReflectionClass/newInstanceWithoutConstructor/)\
   ( excerpt from
   http://php.net/manual/en/reflectionclass.newinstancewithoutconstructor.php
   )
 
-+ [` ->setStaticPropertyValue(string $name, mixed $value): void `](/docs/apis/Classes/ReflectionClass/setStaticPropertyValue/)\
++ [` ->setStaticPropertyValue(string $name, mixed $value): void `](/apis/Classes/ReflectionClass/setStaticPropertyValue/)\
   ( excerpt from
   http://php.net/manual/en/reflectionclass.setstaticpropertyvalue.php )
 

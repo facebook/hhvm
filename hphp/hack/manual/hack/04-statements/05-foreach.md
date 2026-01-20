@@ -34,4 +34,4 @@ We can cause each element's value to be ignored, using `$_`, as follows:
 ```
 
 We can also use `list()` here `foreach($vec_of_tuples as list($here, $there))` and here `foreach($vec_of_tuples as $key => list($here, $there))`.
-For more information about lists, see [list](/docs/hack/expressions-and-operators/list).
+For more information about lists, see [list](/hack/expressions-and-operators/list).

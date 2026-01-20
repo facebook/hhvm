@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns the last "key" in the current [` ImmSet `](/docs/apis/Classes/HH/ImmSet/)
+Returns the last "key" in the current [` ImmSet `](/apis/Classes/HH/ImmSet/)
 
 
 
@@ -18,12 +18,12 @@ public function lastKey(): ?arraykey;
 
 
 
-Since [` ImmSet `](/docs/apis/Classes/HH/ImmSet/)s do not have keys, it returns the last value.
+Since [` ImmSet `](/apis/Classes/HH/ImmSet/)s do not have keys, it returns the last value.
 
 
 
 
-This method is interchangeable with [` lastValue() `](/docs/apis/Classes/HH/ImmSet/lastValue/).
+This method is interchangeable with [` lastValue() `](/apis/Classes/HH/ImmSet/lastValue/).
 
 
 
@@ -33,8 +33,8 @@ This method is interchangeable with [` lastValue() `](/docs/apis/Classes/HH/ImmS
 
 
 
-+ ` ?arraykey ` - The last value in the current [` ImmSet `](/docs/apis/Classes/HH/ImmSet/), or `` null `` if the current
-  [` ImmSet `](/docs/apis/Classes/HH/ImmSet/) is empty.
++ ` ?arraykey ` - The last value in the current [` ImmSet `](/apis/Classes/HH/ImmSet/), or `` null `` if the current
+  [` ImmSet `](/apis/Classes/HH/ImmSet/) is empty.
 
 
 
@@ -44,5 +44,5 @@ This method is interchangeable with [` lastValue() `](/docs/apis/Classes/HH/ImmS
 
 
 
-See [` Set::lastKey `](/docs/apis/Classes/HH/Set/lastKey/#examples) for usage examples.
+See [` Set::lastKey `](/apis/Classes/HH/Set/lastKey/#examples) for usage examples.
 <!-- HHAPIDOC -->

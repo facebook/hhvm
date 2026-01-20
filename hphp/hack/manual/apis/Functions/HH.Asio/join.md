@@ -33,7 +33,7 @@ until the provided Awaitable is finished.
 
 
 
-+ [` Awaitable<T> `](/docs/apis/Classes/HH/Awaitable/)`` $awaitable ``
++ [` Awaitable<T> `](/apis/Classes/HH/Awaitable/)`` $awaitable ``
 
 
 

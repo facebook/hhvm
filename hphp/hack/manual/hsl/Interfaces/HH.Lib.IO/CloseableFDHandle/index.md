@@ -24,12 +24,12 @@ interface CloseableFDHandle implements FDHandle, CloseableHandle {...}
 
 
 
-### Public Methods ([` HH\Lib\IO\FDHandle `](</docs/hsl/Interfaces/HH.Lib.IO/FDHandle/>))
+### Public Methods ([` HH\Lib\IO\FDHandle `](</hsl/Interfaces/HH.Lib.IO/FDHandle/>))
 
 
 
 
-+ [` ->getFileDescriptor(): \HH\Lib\OS\FileDescriptor `](</docs/hsl/Interfaces/HH.Lib.IO/FDHandle/getFileDescriptor/>)
++ [` ->getFileDescriptor(): \HH\Lib\OS\FileDescriptor `](</hsl/Interfaces/HH.Lib.IO/FDHandle/getFileDescriptor/>)
 
 
 
@@ -37,13 +37,13 @@ interface CloseableFDHandle implements FDHandle, CloseableHandle {...}
 
 
 
-### Public Methods ([` HH\Lib\IO\CloseableHandle `](</docs/hsl/Interfaces/HH.Lib.IO/CloseableHandle/>))
+### Public Methods ([` HH\Lib\IO\CloseableHandle `](</hsl/Interfaces/HH.Lib.IO/CloseableHandle/>))
 
 
 
 
-* [` ->close(): void `](</docs/hsl/Interfaces/HH.Lib.IO/CloseableHandle/close/>)\
+* [` ->close(): void `](</hsl/Interfaces/HH.Lib.IO/CloseableHandle/close/>)\
   Close the handle
-* [` ->closeWhenDisposed(): \IDisposable `](</docs/hsl/Interfaces/HH.Lib.IO/CloseableHandle/closeWhenDisposed/>)\
+* [` ->closeWhenDisposed(): \IDisposable `](</hsl/Interfaces/HH.Lib.IO/CloseableHandle/closeWhenDisposed/>)\
   Close the handle when the returned disposable is disposed
 <!-- HHAPIDOC -->

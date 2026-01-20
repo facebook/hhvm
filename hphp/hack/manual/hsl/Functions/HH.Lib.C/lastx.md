@@ -29,7 +29,7 @@ function lastx<T>(
 
 
 
-Time complexity: O(1) if ` $traversable ` is a [` Container `](/docs/apis/Interfaces/HH/Container/), O(n) otherwise.
+Time complexity: O(1) if ` $traversable ` is a [` Container `](/apis/Interfaces/HH/Container/), O(n) otherwise.
 Space complexity: O(1)
 
 
@@ -40,7 +40,7 @@ Space complexity: O(1)
 
 
 
-* [` Traversable<T> `](/docs/apis/Interfaces/HH/Traversable/)`` $traversable ``
+* [` Traversable<T> `](/apis/Interfaces/HH/Traversable/)`` $traversable ``
 
 
 

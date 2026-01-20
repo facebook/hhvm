@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a [` Map `](/docs/apis/Classes/HH/Map/) containing the values of the current [` Map `](/docs/apis/Classes/HH/Map/) that meet
+Returns a [` Map `](/apis/Classes/HH/Map/) containing the values of the current [` Map `](/apis/Classes/HH/Map/) that meet
 a supplied condition
 
 
@@ -22,13 +22,13 @@ public function filter(
 
 
 Only values that meet a certain criteria are affected by a call to
-[` filter() `](/docs/apis/Classes/HH/Map/filter/), while all values are affected by a call to [` map() `](/docs/apis/Classes/HH/Map/map/).
+[` filter() `](/apis/Classes/HH/Map/filter/), while all values are affected by a call to [` map() `](/apis/Classes/HH/Map/map/).
 
 
 
 
-The keys associated with the current [` Map `](/docs/apis/Classes/HH/Map/) remain unchanged in the returned
-[` Map `](/docs/apis/Classes/HH/Map/).
+The keys associated with the current [` Map `](/apis/Classes/HH/Map/) remain unchanged in the returned
+[` Map `](/apis/Classes/HH/Map/).
 
 
 
@@ -38,7 +38,7 @@ The keys associated with the current [` Map `](/docs/apis/Classes/HH/Map/) remai
 
 
 
-+ [Examples](</docs/hack/arrays-and-collections/introduction>)
++ [Examples](</hack/arrays-and-collections/introduction>)
 
 
 
@@ -61,7 +61,7 @@ The keys associated with the current [` Map `](/docs/apis/Classes/HH/Map/) remai
 
 
 
-- [` Map<Tk, `](/docs/apis/Classes/HH/Map/)`` Tv> `` - a [` Map `](/docs/apis/Classes/HH/Map/) containing the values after a user-specified condition
+- [` Map<Tk, `](/apis/Classes/HH/Map/)`` Tv> `` - a [` Map `](/apis/Classes/HH/Map/) containing the values after a user-specified condition
   is applied.
 
 
@@ -72,7 +72,7 @@ The keys associated with the current [` Map `](/docs/apis/Classes/HH/Map/) remai
 
 
 
-This example shows how ` filter ` returns a new [` Map `](/docs/apis/Classes/HH/Map/) containing only the values (and their corresponding keys) for which `` $callback `` returned ``` true ```:
+This example shows how ` filter ` returns a new [` Map `](/apis/Classes/HH/Map/) containing only the values (and their corresponding keys) for which `` $callback `` returned ``` true ```:
 
 
 

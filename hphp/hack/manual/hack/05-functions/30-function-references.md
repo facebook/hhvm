@@ -1,7 +1,7 @@
 # Function References
 
 It is often useful to refer to a function
-(or a [method](/docs/hack/classes/methods))
+(or a [method](/hack/classes/methods))
 without actually calling it&mdash;for example,
 as an argument for functions like `Vec\map`.
 
@@ -19,7 +19,7 @@ of arguments has been omitted (the missing parentheses).
 
 The following example stores a function reference in a variable and later calls
 the function. Note that the type checker keeps track of the
-[function's type](/docs/hack/functions/introduction)
+[function's type](/hack/functions/introduction)
 and correctly checks all calls.
 
 ```hack no-extract
@@ -122,7 +122,7 @@ fizz<string, _>;
 fizz<string, int>;
 ```
 
-Example with [reified generics](/docs/hack/reified-generics/reified-generics):
+Example with [reified generics](/hack/reified-generics/reified-generics):
 
 ```hack no-extract
 function buzz<reify T as arraykey>(T $x): mixed { ... }
@@ -175,7 +175,7 @@ are identical, e.g. `foo<>` is equivalent to `fun('foo')`.
 
 There is also no equivalent syntax for referencing non-static methods. For
 those, use the built-in functions `inst_meth` and `meth_caller`, or use an
-[anonymous function](/docs/hack/functions/anonymous-functions) instead:
+[anonymous function](/hack/functions/anonymous-functions) instead:
 
 ```hack no-extract
 class C {

@@ -14,7 +14,7 @@ function something_went_wrong(): noreturn {
 
 `noreturn` informs the typesystem that code execution can not continue past a certain line.
 In combination with a conditional, you can refine variables, since the typesystem will take note.
-This is actually how [invariant](/docs/hack/expressions-and-operators/invariant) is [implemented](/docs/apis/Functions/HH/invariant).
+This is actually how [invariant](/hack/expressions-and-operators/invariant) is [implemented](/apis/Functions/HH/invariant).
 
 ```hack
 <<__EntryPoint>>
@@ -32,7 +32,7 @@ function takes_int(int $int): void {
 }
 ```
 
-If you want to, you can also use [nothing](/docs/hack/built-in-types/nothing) instead. This allows you use the return value of the function.
+If you want to, you can also use [nothing](/hack/built-in-types/nothing) instead. This allows you use the return value of the function.
 This makes it more explicit to the reader of your code that you are depending on the fact that this function influences typechecking.
 
 ```hack

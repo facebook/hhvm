@@ -1,6 +1,6 @@
 # Enum Class
 
-In comparison to [enumerated types (enums)](/docs/hack/built-in-types/enum), enum classes are not restricted to int and string values.
+In comparison to [enumerated types (enums)](/hack/built-in-types/enum), enum classes are not restricted to int and string values.
 
 ## Enum types v. Enum class
 Built-in enum types limit the base type of an enum to `arraykey` -- an integer or string -- or another enum.
@@ -9,7 +9,7 @@ The base type of an _enum class_ can be any type: they are not required to be co
 
 ## Declaring a new enum class
 
-Enum classes are syntactically different from [enum types](/docs/hack/built-in-types/enum), as they require:
+Enum classes are syntactically different from [enum types](/hack/built-in-types/enum), as they require:
 
 * the `enum class` keyword rather than the `enum` keyword
 * that each value is annotated with its precise type: for example, `string` in `string s = ...`
@@ -66,7 +66,7 @@ Once declared, enum values are accessed using the `::` operator: `Names::Hello`,
 
 ### Control over enum values
 
-Using [coeffects](/docs/hack/contexts-and-capabilities/introduction), you can have control over which expressions are allowed as enum class constants.
+Using [coeffects](/hack/contexts-and-capabilities/introduction), you can have control over which expressions are allowed as enum class constants.
 
 By default, all enum classes are under the `write_props` context. It is not possible to override this explicitly.
 
@@ -169,7 +169,7 @@ If either `D1`, `D2` or `D3` tries to define a constant named `Age`, there will 
 
 ### Control over inheritance
 
-Though the `final` keyword is not supported, Enum classes support the [`__Sealed`](/docs/hack/attributes/predefined-attributes#__sealed) attribute. Using `__Sealed`, you can specify which other enum classes, if any, are allowed to extend from your enum class.
+Though the `final` keyword is not supported, Enum classes support the [`__Sealed`](/hack/attributes/predefined-attributes#__sealed) attribute. Using `__Sealed`, you can specify which other enum classes, if any, are allowed to extend from your enum class.
 
 
 ## Abstract enum classes

@@ -35,5 +35,5 @@ public function waitForAsync(
 
 
 
-* [` Awaitable<Tout> `](/docs/apis/Classes/HH/Awaitable/)
+* [` Awaitable<Tout> `](/apis/Classes/HH/Awaitable/)
 <!-- HHAPIDOC -->

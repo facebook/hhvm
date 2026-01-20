@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns an [` ImmSet `](/docs/apis/Classes/HH/ImmSet/) containing the values of the current [` ImmSet `](/docs/apis/Classes/HH/ImmSet/) up to
+Returns an [` ImmSet `](/apis/Classes/HH/ImmSet/) containing the values of the current [` ImmSet `](/apis/Classes/HH/ImmSet/) up to
 but not including the first value that produces `` false `` when passed to the
 specified callback
 
@@ -22,8 +22,8 @@ public function takeWhile(
 
 
 
-The returned [` ImmSet `](/docs/apis/Classes/HH/ImmSet/) will always be a proper subset of the current
-[` ImmSet `](/docs/apis/Classes/HH/ImmSet/).
+The returned [` ImmSet `](/apis/Classes/HH/ImmSet/) will always be a proper subset of the current
+[` ImmSet `](/apis/Classes/HH/ImmSet/).
 
 
 
@@ -43,7 +43,7 @@ The returned [` ImmSet `](/docs/apis/Classes/HH/ImmSet/) will always be a proper
 
 
 
-* [` ImmSet<Tv> `](/docs/apis/Classes/HH/ImmSet/) - An [` ImmSet `](/docs/apis/Classes/HH/ImmSet/) that is a proper subset of the current [` ImmSet `](/docs/apis/Classes/HH/ImmSet/) up
+* [` ImmSet<Tv> `](/apis/Classes/HH/ImmSet/) - An [` ImmSet `](/apis/Classes/HH/ImmSet/) that is a proper subset of the current [` ImmSet `](/apis/Classes/HH/ImmSet/) up
   until the callback returns `` false ``.
 
 
@@ -54,5 +54,5 @@ The returned [` ImmSet `](/docs/apis/Classes/HH/ImmSet/) will always be a proper
 
 
 
-See [` Set::takeWhile `](/docs/apis/Classes/HH/Set/takeWhile/#examples) for usage examples.
+See [` Set::takeWhile `](/apis/Classes/HH/Set/takeWhile/#examples) for usage examples.
 <!-- HHAPIDOC -->

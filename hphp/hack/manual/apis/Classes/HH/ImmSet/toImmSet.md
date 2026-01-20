@@ -18,7 +18,7 @@ public function toImmSet(): ImmSet<Tv>;
 
 
 
-This function is interchangeable with [` immutable() `](/docs/apis/Classes/HH/ImmSet/immutable/).
+This function is interchangeable with [` immutable() `](/apis/Classes/HH/ImmSet/immutable/).
 
 
 
@@ -28,7 +28,7 @@ This function is interchangeable with [` immutable() `](/docs/apis/Classes/HH/Im
 
 
 
-+ [` ImmSet<Tv> `](/docs/apis/Classes/HH/ImmSet/) - an `` ImmSet `` that is a copy of the current ``` ImmSet ```.
++ [` ImmSet<Tv> `](/apis/Classes/HH/ImmSet/) - an `` ImmSet `` that is a copy of the current ``` ImmSet ```.
 
 
 
@@ -38,5 +38,5 @@ This function is interchangeable with [` immutable() `](/docs/apis/Classes/HH/Im
 
 
 
-See [` Set::toImmSet `](/docs/apis/Classes/HH/Set/#examples) for usage examples.
+See [` Set::toImmSet `](/apis/Classes/HH/Set/#examples) for usage examples.
 <!-- HHAPIDOC -->

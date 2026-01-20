@@ -35,5 +35,5 @@ public static function createAsync(
 
 
 
-* [` Awaitable<this> `](/docs/apis/Classes/HH/Awaitable/)
+* [` Awaitable<this> `](/apis/Classes/HH/Awaitable/)
 <!-- HHAPIDOC -->

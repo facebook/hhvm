@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a [` ConstMap `](/docs/apis/Interfaces/ConstMap/) containing the values of the current [` ConstMap `](/docs/apis/Interfaces/ConstMap/) that
+Returns a [` ConstMap `](/apis/Interfaces/ConstMap/) containing the values of the current [` ConstMap `](/apis/Interfaces/ConstMap/) that
 meet a supplied condition
 
 
@@ -22,13 +22,13 @@ public function filter(
 
 
 Only values that meet a certain criteria are affected by a call to
-[` filter() `](/docs/apis/Interfaces/ConstMap/filter/), while all values are affected by a call to [` map() `](/docs/apis/Interfaces/ConstMap/map/).
+[` filter() `](/apis/Interfaces/ConstMap/filter/), while all values are affected by a call to [` map() `](/apis/Interfaces/ConstMap/map/).
 
 
 
 
-The keys associated with the current [` ConstMap `](/docs/apis/Interfaces/ConstMap/) remain unchanged in the
-returned [` ConstMap `](/docs/apis/Interfaces/ConstMap/).
+The keys associated with the current [` ConstMap `](/apis/Interfaces/ConstMap/) remain unchanged in the
+returned [` ConstMap `](/apis/Interfaces/ConstMap/).
 
 
 
@@ -38,7 +38,7 @@ returned [` ConstMap `](/docs/apis/Interfaces/ConstMap/).
 
 
 
-+ [Examples](</docs/hack/arrays-and-collections/introduction>)
++ [Examples](</hack/arrays-and-collections/introduction>)
 
 
 
@@ -52,7 +52,7 @@ returned [` ConstMap `](/docs/apis/Interfaces/ConstMap/).
 
 
 * ` (function(Tv): bool) $fn ` - The callback containing the condition to apply to the current
-  [` ConstMap `](/docs/apis/Interfaces/ConstMap/) values.
+  [` ConstMap `](/apis/Interfaces/ConstMap/) values.
 
 
 
@@ -62,6 +62,6 @@ returned [` ConstMap `](/docs/apis/Interfaces/ConstMap/).
 
 
 
-- [` ConstMap<Tk, `](/docs/apis/Interfaces/ConstMap/)`` Tv> `` - a Map containing the values after a user-specified condition
+- [` ConstMap<Tk, `](/apis/Interfaces/ConstMap/)`` Tv> `` - a Map containing the values after a user-specified condition
   is applied.
 <!-- HHAPIDOC -->

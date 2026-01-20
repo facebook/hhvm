@@ -18,5 +18,5 @@ public function genCreditsOrFinalResponseHelper(): Awaitable<(int, ?string, ?Exc
 
 
 
-+ [` Awaitable<(int, `](/docs/apis/Classes/HH/Awaitable/)`` ?string, ?Exception)> ``
++ [` Awaitable<(int, `](/apis/Classes/HH/Awaitable/)`` ?string, ?Exception)> ``
 <!-- HHAPIDOC -->

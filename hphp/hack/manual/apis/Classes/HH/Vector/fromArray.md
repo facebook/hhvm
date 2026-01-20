@@ -13,7 +13,7 @@ the Hack LSP instead for complete and up-to-date information.
 
 
 
-Returns a [` Vector `](/docs/apis/Classes/HH/Vector/) containing the values from the specified `` array ``
+Returns a [` Vector `](/apis/Classes/HH/Vector/) containing the values from the specified `` array ``
 
 
 
@@ -37,7 +37,7 @@ This function is deprecated. Use ` new Vector($arr) ` instead.
 
 
 
-+ ` darray<arraykey, Tv> $arr ` - The `` array `` to convert to a [` Vector `](/docs/apis/Classes/HH/Vector/).
++ ` darray<arraykey, Tv> $arr ` - The `` array `` to convert to a [` Vector `](/apis/Classes/HH/Vector/).
 
 
 
@@ -47,5 +47,5 @@ This function is deprecated. Use ` new Vector($arr) ` instead.
 
 
 
-* [` Vector<Tv> `](/docs/apis/Classes/HH/Vector/) - A [` Vector `](/docs/apis/Classes/HH/Vector/) with the values from the provided `` array ``.
+* [` Vector<Tv> `](/apis/Classes/HH/Vector/) - A [` Vector `](/apis/Classes/HH/Vector/) with the values from the provided `` array ``.
 <!-- HHAPIDOC -->

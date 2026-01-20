@@ -21,7 +21,7 @@ var_dump(array_keys($x)[0]);
 
 #### Use Hack Arrays
 
-As of [HHVM 4.103](https://hhvm.com/blog/2021/03/31/hhvm-4.103.html), `varray` is aliased to `vec`. Use [`vec`](/docs/hack/arrays-and-collections/vec-keyset-and-dict#vec).
+As of [HHVM 4.103](https://hhvm.com/blog/2021/03/31/hhvm-4.103.html), `varray` is aliased to `vec`. Use [`vec`](/hack/arrays-and-collections/vec-keyset-and-dict#vec).
 
 #### Working with varrays
 
@@ -74,7 +74,7 @@ varray(keyset[10, 11]); // vec[10, 11]
 
 #### Use Hack Arrays
 
-As of [HHVM 4.103](https://hhvm.com/blog/2021/03/31/hhvm-4.103.html), `darray` is aliased to `dict`. Use [`dict`](/docs/hack/arrays-and-collections/vec-keyset-and-dict#dict).
+As of [HHVM 4.103](https://hhvm.com/blog/2021/03/31/hhvm-4.103.html), `darray` is aliased to `dict`. Use [`dict`](/hack/arrays-and-collections/vec-keyset-and-dict#dict).
 
 #### Working with darrays
 
@@ -161,4 +161,4 @@ The available runtime options change frequently; to get an up-to-date list, sear
 
 The `hhvm.hack_arr_compat_notices` option must be set to true for any of the `hhvm.hack_arr_` options to have an effect.
 
-Individual runtime settings are documented [here](/docs/hack/built-in-types/darray-varray-runtime-options).
+Individual runtime settings are documented [here](/hack/built-in-types/darray-varray-runtime-options).

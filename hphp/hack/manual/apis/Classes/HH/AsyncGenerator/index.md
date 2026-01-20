@@ -19,7 +19,7 @@ except that we are combining async with generators
 
 An async generator is just like a normal generator with the addition of
 allowing ` await ` statements in it because getting to the next yielded value
-involves getting and awaiting on an [` Awaitable `](/docs/apis/Classes/HH/Awaitable/).
+involves getting and awaiting on an [` Awaitable `](/apis/Classes/HH/Awaitable/).
 
 
 
@@ -37,7 +37,7 @@ There are three type parameters associated with an AsyncGenerator:
 
 + ` Tk `: The type of key returned by the generator
 + ` Tv `: The type of value returned by the generator
-+ ` Ts `: The type that will be passed on a call to [` send() `](/docs/apis/Classes/HH/AsyncGenerator/send/)
++ ` Ts `: The type that will be passed on a call to [` send() `](/apis/Classes/HH/AsyncGenerator/send/)
 
 
 
@@ -47,7 +47,7 @@ There are three type parameters associated with an AsyncGenerator:
 
 
 
-* [Generators](</docs/hack/asynchronous-operations/generators>)
+* [Generators](</hack/asynchronous-operations/generators>)
 
 
 
@@ -74,11 +74,11 @@ final class AsyncGenerator implements AsyncKeyedIterator<Tk, Tv> {...}
 
 
 
-- [` ->next(): Awaitable<?(Tk, Tv)> `](/docs/apis/Classes/HH/AsyncGenerator/next/)\
-  Return the [` Awaitable `](/docs/apis/Classes/HH/Awaitable/) associated with the next key/value tuple in the
+- [` ->next(): Awaitable<?(Tk, Tv)> `](/apis/Classes/HH/AsyncGenerator/next/)\
+  Return the [` Awaitable `](/apis/Classes/HH/Awaitable/) associated with the next key/value tuple in the
   async generator, or `` null ``
-- [` ->raise(\Exception $exception): Awaitable<?(Tk, Tv)> `](/docs/apis/Classes/HH/AsyncGenerator/raise/)\
+- [` ->raise(\Exception $exception): Awaitable<?(Tk, Tv)> `](/apis/Classes/HH/AsyncGenerator/raise/)\
   Raise an exception to the async generator
-- [` ->send(?Ts $value): Awaitable<?(Tk, Tv)> `](/docs/apis/Classes/HH/AsyncGenerator/send/)\
+- [` ->send(?Ts $value): Awaitable<?(Tk, Tv)> `](/apis/Classes/HH/AsyncGenerator/send/)\
   Send a value to the async generator and resumes execution of the generator
 <!-- HHAPIDOC -->

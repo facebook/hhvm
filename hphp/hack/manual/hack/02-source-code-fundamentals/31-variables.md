@@ -1,7 +1,7 @@
 # Variables
 
 A variable is a named area of data storage that has a type and a value.  Distinct variables may have the same name provided
-they are in different [scopes](/docs/hack/source-code-fundamentals/scope).  A [constant](/docs/hack/source-code-fundamentals/constants) is a variable that, once initialized, its value cannot
+they are in different [scopes](/hack/source-code-fundamentals/scope).  A [constant](/hack/source-code-fundamentals/constants) is a variable that, once initialized, its value cannot
 be changed.   Based on the context in which it is declared, a variable has a scope.
 
 The following kinds of variable may exist in a script:
@@ -62,9 +62,9 @@ the function calls, so this function `f` outputs "`$lv = 1`" each time.
 An array is created via a vec-literal, a dict-literal, a
 keyset-literal. At the same time, one or more elements may be created
 for that array. New elements are inserted into an existing array via
-the [simple-assignment](/docs/hack/expressions-and-operators/assignment)
+the [simple-assignment](/hack/expressions-and-operators/assignment)
 operator in conjunction with the [subscript
-`[]`](/docs/hack/expressions-and-operators/subscript) operator.
+`[]`](/hack/expressions-and-operators/subscript) operator.
 
 The scope of an array element is the same as the scope of that array's name.
 
@@ -77,12 +77,12 @@ $colors2[4] = "black";               // create element 4 with value "black"
 
 ## Instance Properties
 
-These are described in the [class instance properties](/docs/hack/classes/properties) section. They have class scope.
+These are described in the [class instance properties](/hack/classes/properties) section. They have class scope.
 
 ## Static Properties
 
-These are described in the [class static properties](/docs/hack/classes/properties) section. They have class scope.
+These are described in the [class static properties](/hack/classes/properties) section. They have class scope.
 
 ## Class and Interface Constants
 
-These are described in the [class constants](/docs/hack/classes/constants) section. They have class or interface scope.
+These are described in the [class constants](/hack/classes/constants) section. They have class or interface scope.

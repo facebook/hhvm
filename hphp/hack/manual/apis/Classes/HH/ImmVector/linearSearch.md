@@ -30,7 +30,7 @@ If no element matches the search value, this function returns -1.
 
 
 
-+ [Constraints](</docs/hack/generics/type-constraints>)
++ [Constraints](</hack/generics/type-constraints>)
 
 
 
@@ -44,7 +44,7 @@ If no element matches the search value, this function returns -1.
 
 
 * ` mixed $search_value ` - The value that will be searched for in the current
-  [` ImmVector `](/docs/apis/Classes/HH/ImmVector/).
+  [` ImmVector `](/apis/Classes/HH/ImmVector/).
 
 
 
@@ -64,5 +64,5 @@ If no element matches the search value, this function returns -1.
 
 
 
-See [` Vector::linearSearch `](/docs/apis/Classes/HH/Vector/linearSearch/#examples) for usage examples.
+See [` Vector::linearSearch `](/apis/Classes/HH/Vector/linearSearch/#examples) for usage examples.
 <!-- HHAPIDOC -->

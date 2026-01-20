@@ -6,8 +6,8 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns an [` ImmVector `](/docs/apis/Classes/HH/ImmVector/) that is the concatenation of the values of the
-current [` Pair `](/docs/apis/Classes/HH/Pair/) and the values of the provided [` Traversable `](/docs/apis/Interfaces/HH/Traversable/)
+Returns an [` ImmVector `](/apis/Classes/HH/ImmVector/) that is the concatenation of the values of the
+current [` Pair `](/apis/Classes/HH/Pair/) and the values of the provided [` Traversable `](/apis/Interfaces/HH/Traversable/)
 
 
 
@@ -21,8 +21,8 @@ public function concat<Tu super mixed>(
 
 
 
-The values of the provided [` Traversable `](/docs/apis/Interfaces/HH/Traversable/) is concatenated to the end of the
-current [` Pair `](/docs/apis/Classes/HH/Pair/) to produce the returned [` ImmVector `](/docs/apis/Classes/HH/ImmVector/).
+The values of the provided [` Traversable `](/apis/Interfaces/HH/Traversable/) is concatenated to the end of the
+current [` Pair `](/apis/Classes/HH/Pair/) to produce the returned [` ImmVector `](/apis/Classes/HH/ImmVector/).
 
 
 
@@ -32,7 +32,7 @@ current [` Pair `](/docs/apis/Classes/HH/Pair/) to produce the returned [` ImmVe
 
 
 
-+ [Constraints](</docs/hack/generics/type-constraints>)
++ [Constraints](</hack/generics/type-constraints>)
 
 
 
@@ -45,8 +45,8 @@ current [` Pair `](/docs/apis/Classes/HH/Pair/) to produce the returned [` ImmVe
 
 
 
-* [` Traversable<mixed, `](/docs/apis/Interfaces/HH/Traversable/)`` Tu> $traversable `` - The [` Traversable `](/docs/apis/Interfaces/HH/Traversable/) to concatenate to the current
-  [` Pair `](/docs/apis/Classes/HH/Pair/).
+* [` Traversable<mixed, `](/apis/Interfaces/HH/Traversable/)`` Tu> $traversable `` - The [` Traversable `](/apis/Interfaces/HH/Traversable/) to concatenate to the current
+  [` Pair `](/apis/Classes/HH/Pair/).
 
 
 
@@ -56,7 +56,7 @@ current [` Pair `](/docs/apis/Classes/HH/Pair/) to produce the returned [` ImmVe
 
 
 
-- [` ImmVector<mixed, `](/docs/apis/Classes/HH/ImmVector/)`` Tu> `` - The concatenated [` ImmVector `](/docs/apis/Classes/HH/ImmVector/).
+- [` ImmVector<mixed, `](/apis/Classes/HH/ImmVector/)`` Tu> `` - The concatenated [` ImmVector `](/apis/Classes/HH/ImmVector/).
 
 
 
@@ -66,7 +66,7 @@ current [` Pair `](/docs/apis/Classes/HH/Pair/) to produce the returned [` ImmVe
 
 
 
-This example creates a new [` ImmVector `](/docs/apis/Classes/HH/ImmVector/) by concatenating a [` Traversable `](/docs/apis/Interfaces/HH/Traversable/) with the values in the [` Pair `](/docs/apis/Classes/HH/Pair/).
+This example creates a new [` ImmVector `](/apis/Classes/HH/ImmVector/) by concatenating a [` Traversable `](/apis/Interfaces/HH/Traversable/) with the values in the [` Pair `](/apis/Classes/HH/Pair/).
 
 
 

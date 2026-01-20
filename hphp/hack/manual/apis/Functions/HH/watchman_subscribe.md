@@ -40,5 +40,5 @@ function watchman_subscribe(
 
 
 
-* [` Awaitable<void> `](/docs/apis/Classes/HH/Awaitable/)
+* [` Awaitable<void> `](/apis/Classes/HH/Awaitable/)
 <!-- HHAPIDOC -->

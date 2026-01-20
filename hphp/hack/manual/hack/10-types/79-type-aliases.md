@@ -12,7 +12,7 @@ type Complex = shape('real' => float, 'imag' => float);
 newtype Point = (float, float);
 ```
 
-A type alias can include [Generics](/docs/hack/generics/introduction) as parameters.
+A type alias can include [Generics](/hack/generics/introduction) as parameters.
 
 ## Using `type`
 An alias created using `type` (such as `Complex` above) is a *transparent type alias*. For a given type, that type and all transparent aliases

@@ -44,7 +44,7 @@ public function set(
 
 
 
-* [` Awaitable<void> `](/docs/apis/Classes/HH/Awaitable/)
+* [` Awaitable<void> `](/apis/Classes/HH/Awaitable/)
 
 
 
@@ -54,7 +54,7 @@ public function set(
 
 
 
-The following example shows how to use [` MCRouter::set `](/docs/apis/Classes/MCRouter/set/) to set key/value pair to the memcached server. While you cannot [` MCRouter::add `](/docs/apis/Classes/MCRouter/add/) the same key twice, you can reset a value for a given key via `` set ``. It is quite possible to always use ``` set ``` instead of [` add `](/docs/apis/Classes/MCRouter/add/) since it is generally superset of functionality, but [` add `](/docs/apis/Classes/MCRouter/add/) can be good if you explicitly want to catch someone trying to set a key to a different value.
+The following example shows how to use [` MCRouter::set `](/apis/Classes/MCRouter/set/) to set key/value pair to the memcached server. While you cannot [` MCRouter::add `](/apis/Classes/MCRouter/add/) the same key twice, you can reset a value for a given key via `` set ``. It is quite possible to always use ``` set ``` instead of [` add `](/apis/Classes/MCRouter/add/) since it is generally superset of functionality, but [` add `](/apis/Classes/MCRouter/add/) can be good if you explicitly want to catch someone trying to set a key to a different value.
 
 
 

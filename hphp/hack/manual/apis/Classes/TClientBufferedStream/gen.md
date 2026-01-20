@@ -30,5 +30,5 @@ public function gen<TStreamResponse>(
 
 
 
-* [` HH\AsyncGenerator<null, `](/docs/apis/Classes/HH/AsyncGenerator/)`` TStreamResponse, void> ``
+* [` HH\AsyncGenerator<null, `](/apis/Classes/HH/AsyncGenerator/)`` TStreamResponse, void> ``
 <!-- HHAPIDOC -->

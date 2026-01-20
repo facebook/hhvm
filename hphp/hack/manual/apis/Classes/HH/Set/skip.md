@@ -6,8 +6,8 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a [` Set `](/docs/apis/Classes/HH/Set/) containing the values after the `` n ``-th element of the
-current [` Set `](/docs/apis/Classes/HH/Set/)
+Returns a [` Set `](/apis/Classes/HH/Set/) containing the values after the `` n ``-th element of the
+current [` Set `](/apis/Classes/HH/Set/)
 
 
 
@@ -21,7 +21,7 @@ public function skip(
 
 
 
-The returned [` Set `](/docs/apis/Classes/HH/Set/) will always be a proper subset of the current [` Set `](/docs/apis/Classes/HH/Set/).
+The returned [` Set `](/apis/Classes/HH/Set/) will always be a proper subset of the current [` Set `](/apis/Classes/HH/Set/).
 
 
 
@@ -37,7 +37,7 @@ The returned [` Set `](/docs/apis/Classes/HH/Set/) will always be a proper subse
 
 
 + ` int $n ` - The last element to be skipped; the `` $n+1 `` element will be
-  the first one in the returned [` Set `](/docs/apis/Classes/HH/Set/).
+  the first one in the returned [` Set `](/apis/Classes/HH/Set/).
 
 
 
@@ -47,7 +47,7 @@ The returned [` Set `](/docs/apis/Classes/HH/Set/) will always be a proper subse
 
 
 
-* [` Set<Tv> `](/docs/apis/Classes/HH/Set/) - A [` Set `](/docs/apis/Classes/HH/Set/) that is a proper subset of the current [` Set `](/docs/apis/Classes/HH/Set/) containing
+* [` Set<Tv> `](/apis/Classes/HH/Set/) - A [` Set `](/apis/Classes/HH/Set/) that is a proper subset of the current [` Set `](/apis/Classes/HH/Set/) containing
   values after the specified `` n ``-th element.
 
 

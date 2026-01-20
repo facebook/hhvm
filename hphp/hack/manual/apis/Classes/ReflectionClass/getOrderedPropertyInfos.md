@@ -18,5 +18,5 @@ private function getOrderedPropertyInfos(): ConstMap<string, mixed>;
 
 
 
-+ [` ConstMap<string, `](/docs/apis/Interfaces/ConstMap/)`` mixed> ``
++ [` ConstMap<string, `](/apis/Interfaces/ConstMap/)`` mixed> ``
 <!-- HHAPIDOC -->

@@ -45,7 +45,7 @@ public function isNull(
 
 
 
-The following example uses [` AsyncMysqlRow::isNull `](/docs/apis/Classes/AsyncMysqlRow/isNull/) to check if a field value is `` null `` (e.g., if a field was set in SQL to something like ``` age SMALLINT NULL ```, then that field *could* be ```` null ````).
+The following example uses [` AsyncMysqlRow::isNull `](/apis/Classes/AsyncMysqlRow/isNull/) to check if a field value is `` null `` (e.g., if a field was set in SQL to something like ``` age SMALLINT NULL ```, then that field *could* be ```` null ````).
 
 
 

@@ -44,8 +44,8 @@ of ````` $second ````` -- note that this is bigger than O(n)
 
 
 
-+ [` Traversable<Tv> `](/docs/apis/Interfaces/HH/Traversable/)`` $first ``
-+ [` Traversable<Tv> `](/docs/apis/Interfaces/HH/Traversable/)`` $second ``
++ [` Traversable<Tv> `](/apis/Interfaces/HH/Traversable/)`` $first ``
++ [` Traversable<Tv> `](/apis/Interfaces/HH/Traversable/)`` $second ``
 + ` (function(Tv): Ts) $scalar_func `
 
 

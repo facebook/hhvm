@@ -28,7 +28,7 @@ public function getOp(): int;
 
 
 
-The following example shows how to retrieve the memcached operation from an [` MCRouterException `](/docs/apis/Classes/MCRouterException/) using its `` getOp `` method. Then we get its friendly name via [` MCRouter::getOpName() `](/docs/apis/Classes/MCRouter/getOpName/).
+The following example shows how to retrieve the memcached operation from an [` MCRouterException `](/apis/Classes/MCRouterException/) using its `` getOp `` method. Then we get its friendly name via [` MCRouter::getOpName() `](/apis/Classes/MCRouter/getOpName/).
 
 
 

@@ -6,8 +6,8 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a [` ConstVector `](/docs/apis/Interfaces/ConstVector/) that is the concatenation of the values of the
-current [` ConstSet `](/docs/apis/Interfaces/ConstSet/) and the values of the provided [` Traversable `](/docs/apis/Interfaces/HH/Traversable/)
+Returns a [` ConstVector `](/apis/Interfaces/ConstVector/) that is the concatenation of the values of the
+current [` ConstSet `](/apis/Interfaces/ConstSet/) and the values of the provided [` Traversable `](/apis/Interfaces/HH/Traversable/)
 
 
 
@@ -21,8 +21,8 @@ public function concat<Tu super Tv>(
 
 
 
-The values of the provided [` Traversable `](/docs/apis/Interfaces/HH/Traversable/) is concatenated to the end of the
-current [` ConstSet `](/docs/apis/Interfaces/ConstSet/) to produce the returned [` ConstVector `](/docs/apis/Interfaces/ConstVector/).
+The values of the provided [` Traversable `](/apis/Interfaces/HH/Traversable/) is concatenated to the end of the
+current [` ConstSet `](/apis/Interfaces/ConstSet/) to produce the returned [` ConstVector `](/apis/Interfaces/ConstVector/).
 
 
 
@@ -32,7 +32,7 @@ current [` ConstSet `](/docs/apis/Interfaces/ConstSet/) to produce the returned 
 
 
 
-+ [Constraints](</docs/hack/generics/type-constraints>)
++ [Constraints](</hack/generics/type-constraints>)
 
 
 
@@ -45,8 +45,8 @@ current [` ConstSet `](/docs/apis/Interfaces/ConstSet/) to produce the returned 
 
 
 
-* [` Traversable<Tu> `](/docs/apis/Interfaces/HH/Traversable/)`` $traversable `` - The [` Traversable `](/docs/apis/Interfaces/HH/Traversable/) to concatenate to the current
-  [` ConstSet `](/docs/apis/Interfaces/ConstSet/).
+* [` Traversable<Tu> `](/apis/Interfaces/HH/Traversable/)`` $traversable `` - The [` Traversable `](/apis/Interfaces/HH/Traversable/) to concatenate to the current
+  [` ConstSet `](/apis/Interfaces/ConstSet/).
 
 
 
@@ -56,5 +56,5 @@ current [` ConstSet `](/docs/apis/Interfaces/ConstSet/) to produce the returned 
 
 
 
-- [` ConstVector<Tu> `](/docs/apis/Interfaces/ConstVector/) - The concatenated [` ConstVector `](/docs/apis/Interfaces/ConstVector/).
+- [` ConstVector<Tu> `](/apis/Interfaces/ConstVector/) - The concatenated [` ConstVector `](/apis/Interfaces/ConstVector/).
 <!-- HHAPIDOC -->

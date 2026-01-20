@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns an iterator that points to beginning of the current [` ImmVector `](/docs/apis/Classes/HH/ImmVector/)
+Returns an iterator that points to beginning of the current [` ImmVector `](/apis/Classes/HH/ImmVector/)
 
 
 
@@ -23,8 +23,8 @@ public function getIterator(): KeyedIterator<int, Tv>;
 
 
 
-+ [` KeyedIterator<int, `](/docs/apis/Interfaces/HH/KeyedIterator/)`` Tv> `` - A [` KeyedIterator `](/docs/apis/Interfaces/HH/KeyedIterator/) that allows you to traverse the current
-  [` ImmVector `](/docs/apis/Classes/HH/ImmVector/).
++ [` KeyedIterator<int, `](/apis/Interfaces/HH/KeyedIterator/)`` Tv> `` - A [` KeyedIterator `](/apis/Interfaces/HH/KeyedIterator/) that allows you to traverse the current
+  [` ImmVector `](/apis/Classes/HH/ImmVector/).
 
 
 
@@ -34,5 +34,5 @@ public function getIterator(): KeyedIterator<int, Tv>;
 
 
 
-See [` Vector::getIterator `](/docs/apis/Classes/HH/Vector/getIterator/#examples) for usage examples.
+See [` Vector::getIterator `](/apis/Classes/HH/Vector/getIterator/#examples) for usage examples.
 <!-- HHAPIDOC -->

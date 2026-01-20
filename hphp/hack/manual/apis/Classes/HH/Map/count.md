@@ -6,7 +6,7 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Provides the number of elements in the current [` Map `](/docs/apis/Classes/HH/Map/)
+Provides the number of elements in the current [` Map `](/apis/Classes/HH/Map/)
 
 
 
@@ -23,7 +23,7 @@ public function count(): int;
 
 
 
-+ ` int ` - The number of elements in the current [` Map `](/docs/apis/Classes/HH/Map/).
++ ` int ` - The number of elements in the current [` Map `](/apis/Classes/HH/Map/).
 
 
 

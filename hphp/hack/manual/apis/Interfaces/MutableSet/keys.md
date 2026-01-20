@@ -6,8 +6,8 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a [` MutableVector `](/docs/apis/Interfaces/MutableVector/) containing the values of the current
-[` MutableSet `](/docs/apis/Interfaces/MutableSet/)
+Returns a [` MutableVector `](/apis/Interfaces/MutableVector/) containing the values of the current
+[` MutableSet `](/apis/Interfaces/MutableSet/)
 
 
 
@@ -24,7 +24,7 @@ Sets don't have keys, so this will return the values.
 
 
 
-This method is interchangeable with [` values() `](/docs/apis/Interfaces/MutableSet/values/).
+This method is interchangeable with [` values() `](/apis/Interfaces/MutableSet/values/).
 
 
 
@@ -34,6 +34,6 @@ This method is interchangeable with [` values() `](/docs/apis/Interfaces/Mutable
 
 
 
-+ [` MutableVector<arraykey> `](/docs/apis/Interfaces/MutableVector/) - a [` MutableVector `](/docs/apis/Interfaces/MutableVector/) (integer-indexed) containing the values of the
-  current [` MutableSet `](/docs/apis/Interfaces/MutableSet/).
++ [` MutableVector<arraykey> `](/apis/Interfaces/MutableVector/) - a [` MutableVector `](/apis/Interfaces/MutableVector/) (integer-indexed) containing the values of the
+  current [` MutableSet `](/apis/Interfaces/MutableSet/).
 <!-- HHAPIDOC -->

@@ -33,7 +33,7 @@ simply by using any other node.
 
 
 
-+ [` DOMNode `](/docs/apis/Classes/DOMNode/)`` $newnode `` - The appended child.
++ [` DOMNode `](/apis/Classes/DOMNode/)`` $newnode `` - The appended child.
 
 
 

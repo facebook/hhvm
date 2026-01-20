@@ -6,8 +6,8 @@ and recommend users to refer to the built-in signature helpers available in
 the Hack LSP instead for complete and up-to-date information.
 :::
 
-Returns a [` Map `](/docs/apis/Classes/HH/Map/) after an operation has been applied to each key and
-value in the current [` Map `](/docs/apis/Classes/HH/Map/)
+Returns a [` Map `](/apis/Classes/HH/Map/) after an operation has been applied to each key and
+value in the current [` Map `](/apis/Classes/HH/Map/)
 
 
 
@@ -21,15 +21,15 @@ public function mapWithKey<Tu>(
 
 
 
-Every key and value in the current [` Map `](/docs/apis/Classes/HH/Map/) is affected by a call to
-[` mapWithKey() `](/docs/apis/Classes/HH/Map/mapWithKey/), unlike [` filterWithKey() `](/docs/apis/Classes/HH/Map/filterWithKey/) where only values that meet a
+Every key and value in the current [` Map `](/apis/Classes/HH/Map/) is affected by a call to
+[` mapWithKey() `](/apis/Classes/HH/Map/mapWithKey/), unlike [` filterWithKey() `](/apis/Classes/HH/Map/filterWithKey/) where only values that meet a
 certain criteria are affected.
 
 
 
 
-The keys will remain unchanged from the current [` Map `](/docs/apis/Classes/HH/Map/) to the returned
-[` Map `](/docs/apis/Classes/HH/Map/). The keys are only used to help in the mapping operation.
+The keys will remain unchanged from the current [` Map `](/apis/Classes/HH/Map/) to the returned
+[` Map `](/apis/Classes/HH/Map/). The keys are only used to help in the mapping operation.
 
 
 
@@ -49,8 +49,8 @@ The keys will remain unchanged from the current [` Map `](/docs/apis/Classes/HH/
 
 
 
-* [` Map<Tk, `](/docs/apis/Classes/HH/Map/)`` Tu> `` - a [` Map `](/docs/apis/Classes/HH/Map/) containing the values after a user-specified operation
-  on the current [` Map `](/docs/apis/Classes/HH/Map/)'s keys and values is applied.
+* [` Map<Tk, `](/apis/Classes/HH/Map/)`` Tu> `` - a [` Map `](/apis/Classes/HH/Map/) containing the values after a user-specified operation
+  on the current [` Map `](/apis/Classes/HH/Map/)'s keys and values is applied.
 
 
 
@@ -60,7 +60,7 @@ The keys will remain unchanged from the current [` Map `](/docs/apis/Classes/HH/
 
 
 
-This example shows how ` mapWithKey ` can be used to create a new [` Map `](/docs/apis/Classes/HH/Map/) based on `` $m ``'s keys and values:
+This example shows how ` mapWithKey ` can be used to create a new [` Map `](/apis/Classes/HH/Map/) based on `` $m ``'s keys and values:
 
 
 

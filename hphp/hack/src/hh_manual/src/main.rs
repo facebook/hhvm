@@ -51,6 +51,11 @@ enum Commands {
     /// // that it actually produces an error.
     /// ```
     ///
+    /// ```hack warning
+    /// // This is extracted as a .hack_warning file, and tests will ensure
+    /// // that it actually produces a warning.
+    /// ```
+    ///
     /// ```hack file:foo.hack
     /// // This is extracted as a file named foo.hack. Multiple code blocks
     /// // can use file:foo.hack, and the result will be concatenated.
@@ -64,7 +69,7 @@ enum Commands {
     ///   // This code block is extracted as-is.
     /// }
     /// ```
-    /// Any previous *.hack, *.hack_error or *.php files are deleted from the destination
+    /// Any previous *.hack, *.hack_error, *.hack_warning or *.php files are deleted from the destination
     /// directory.
     ///
     /// Other files are untouched, so you can create HH_FLAGS files for any chapters in
@@ -76,11 +81,18 @@ enum Commands {
     },
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum ExpectedResult {
+    Ok,
+    Warning,
+    Error,
+}
+
 #[derive(Debug, Clone)]
 struct CodeBlock {
     filename: Option<String>,
     content: String,
-    error: bool,
+    expected: ExpectedResult,
 }
 
 /// Does `src` look like toplevel code, such as a class or function
@@ -167,7 +179,7 @@ fn extract_hack_blocks(src: &str) -> Result<Vec<CodeBlock>> {
                     if let Some(hack_info) = info.to_lowercase().trim().strip_prefix("hack") {
                         let mut filename = None;
                         let mut should_extract = true;
-                        let mut error = false;
+                        let mut expected = ExpectedResult::Ok;
 
                         for part in hack_info.trim().split(' ') {
                             if part.is_empty() {
@@ -177,7 +189,9 @@ fn extract_hack_blocks(src: &str) -> Result<Vec<CodeBlock>> {
                                 should_extract = false;
                                 break;
                             } else if part == "error" {
-                                error = true;
+                                expected = ExpectedResult::Error;
+                            } else if part == "warning" {
+                                expected = ExpectedResult::Warning;
                             } else if part.starts_with("file:") {
                                 filename = Some(part.trim_start_matches("file:").to_owned());
                             } else {
@@ -205,7 +219,7 @@ fn extract_hack_blocks(src: &str) -> Result<Vec<CodeBlock>> {
                             res.push(CodeBlock {
                                 filename,
                                 content,
-                                error,
+                                expected,
                             });
                         }
                     }
@@ -294,11 +308,12 @@ fn write_extracted_examples(
             format!("{}-{}", page_name, filename)
         } else {
             i += 1;
-            if code_block.error {
-                format!("{}-{:02}.hack_error", page_name, i)
-            } else {
-                format!("{}-{:02}.hack", page_name, i)
-            }
+            let extension = match code_block.expected {
+                ExpectedResult::Ok => "hack",
+                ExpectedResult::Warning => "hack_warning",
+                ExpectedResult::Error => "hack_error",
+            };
+            format!("{}-{:02}.{}", page_name, i, extension)
         };
 
         let out_path = out_dir.join(out_name);
@@ -356,7 +371,7 @@ fn write_chapter_examples(chapter_dir: &Path, test_dir: &Path, hack_dir: &Path) 
     Ok(())
 }
 
-/// Remove any *.php, *.hack or *.hack_error files from `path`, so we
+/// Remove any *.php, *.hack, *.hack_error or *.hack_warning files from `path`, so we
 /// don't have leftover extracted files that are no longer in the
 /// markdown.
 fn remove_existing_examples(path: &Path) -> Result<()> {
@@ -366,6 +381,7 @@ fn remove_existing_examples(path: &Path) -> Result<()> {
             if file_path.extension() == Some(&OsString::from("php"))
                 || (file_path.extension() == Some(&OsString::from("hack")))
                 || (file_path.extension() == Some(&OsString::from("hack_error")))
+                || (file_path.extension() == Some(&OsString::from("hack_warning")))
             {
                 std::fs::remove_file(file_path)?;
             }

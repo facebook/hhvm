@@ -9475,7 +9475,7 @@ end = struct
     | Return (Some e) ->
       let env = Typing_return.check_inout_return pos env in
       let Typing_env_return_info.
-            { return_type; return_disposable; return_ignore_readonly = _ } =
+            { return_type; return_disposable; return_ignore_readonly } =
         Env.get_return env
       in
       let return_type =
@@ -9520,6 +9520,7 @@ end = struct
        * statement is the problem, not the return type itself. *)
       let (env, ty_err_opt) =
         Typing_coercion.coerce_type
+          ~ignore_readonly:return_ignore_readonly
           (Aast_utils.get_expr_pos e)
           Reason.URreturn
           env

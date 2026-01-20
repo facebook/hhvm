@@ -17,4 +17,7 @@ type t = {
   return_type: Typing_defs.locl_ty;
   (* Does the function or function type have the <<__ReturnDisposable>> attribute? *)
   return_disposable: bool;
+  (* Should we ignore readonly errors when checking return types?
+   * This is set when the parameter has <<__IgnoreReadonlyError>> attribute. *)
+  return_ignore_readonly: bool;
 }

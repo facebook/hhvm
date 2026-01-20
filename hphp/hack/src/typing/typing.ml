@@ -237,7 +237,7 @@ module Env_help : sig
     pessimisable_builtin:bool ->
     env ->
     ExpectedTy.t option ->
-    env * (pos * Reason.ureason * bool * locl_ty * locl_phase ty_) option
+    env * (pos * Reason.ureason * bool * locl_ty * locl_phase ty_ * bool) option
 end = struct
   let unbox ~strip_supportdyn ~pessimisable_builtin env ty =
     let rec aux ~under_supportdyn env ty =
@@ -292,7 +292,7 @@ end = struct
       ~strip_supportdyn
       ~pessimisable_builtin
       env
-      ExpectedTy.{ pos = p; reason = ur; ty; _ } =
+      ExpectedTy.{ pos = p; reason = ur; ty; ignore_readonly; _ } =
     let (env, res) = unbox ~strip_supportdyn ~pessimisable_builtin env ty in
     match res with
     | None -> (env, None)
@@ -300,7 +300,7 @@ end = struct
       if supportdyn && not strip_supportdyn then
         (env, None)
       else
-        (env, Some (p, ur, supportdyn, uty, get_node uty))
+        (env, Some (p, ur, supportdyn, uty, get_node uty, ignore_readonly))
 
   let expand_expected_opt
       ~strip_supportdyn ~pessimisable_builtin env expected_ty_opt =
@@ -3352,7 +3352,7 @@ end = struct
               env
               expected
           with
-          | (env, Some (pos, ur, _, ety, _)) -> begin
+          | (env, Some (pos, ur, _, ety, _, _)) -> begin
             match get_expected_kind ety with
             | Some (env, vty) -> (env, Some (ExpectedTy.make pos ur vty), None)
             | None -> (env, None, None)
@@ -3404,8 +3404,8 @@ end = struct
               env
               expected
           with
-          | (env, Some (pos, reason, _, ety, _)) when not (List.is_empty l) ->
-          begin
+          | (env, Some (pos, reason, _, ety, _, _)) when not (List.is_empty l)
+            -> begin
             match get_expected_kind ety with
             | Some (env, kty, vty) ->
               let k_expected = ExpectedTy.make pos reason kty in
@@ -3535,7 +3535,7 @@ end = struct
       in
       begin
         match expected with
-        | Some (_pos, _ur, _, _, Tnewtype (fs, [ty; _], _))
+        | Some (_pos, _ur, _, _, Tnewtype (fs, [ty; _], _), _)
           when SN.Classes.is_typed_format_string fs ->
           let (env, fpl) = Typing_exts.parse_printf_string env s p ty in
           let tuple_ty =
@@ -3828,7 +3828,7 @@ end = struct
       let (env, tel, tyl) =
         match expected with
         (* TODO: optional and variadic fields T201398626 T201398652 *)
-        | Some (pos, ur, _, _, Ttuple { t_required = expected_tyl; _ }) ->
+        | Some (pos, ur, _, _, Ttuple { t_required = expected_tyl; _ }, _) ->
           let expected_tys =
             List.map expected_tyl ~f:(ExpectedTy.make pos ur)
           in
@@ -3863,7 +3863,7 @@ end = struct
               expected
           in
           (match expected with
-          | Some (pos, ur, _, _, Ttuple { t_required = expected_tyl; _ }) ->
+          | Some (pos, ur, _, _, Ttuple { t_required = expected_tyl; _ }, _) ->
             let expected_tys =
               List.map expected_tyl ~f:(ExpectedTy.make pos ur)
             in
@@ -3901,7 +3901,7 @@ end = struct
                env
                expected
            with
-          | (env, Some (pos, reason, _, _ty, Tclass ((_, k), _, [ty1; ty2])))
+          | (env, Some (pos, reason, _, _ty, Tclass ((_, k), _, [ty1; ty2]), _))
             when String.equal k SN.Collections.cPair ->
             let ty1_expected = ExpectedTy.make pos reason ty1 in
             let ty2_expected = ExpectedTy.make pos reason ty2 in
@@ -4967,7 +4967,8 @@ end = struct
             env
             expected
         with
-        | (env, Some (pos, ur, _, _, Tshape { s_fields = expected_fdm; _ })) ->
+        | (env, Some (pos, ur, _, _, Tshape { s_fields = expected_fdm; _ }, _))
+          ->
           List.map_env
             env
             ~f:(fun env ((k, _) as ke) ->
@@ -9473,7 +9474,8 @@ end = struct
       (env, Aast.Return None)
     | Return (Some e) ->
       let env = Typing_return.check_inout_return pos env in
-      let Typing_env_return_info.{ return_type; return_disposable } =
+      let Typing_env_return_info.
+            { return_type; return_disposable; return_ignore_readonly = _ } =
         Env.get_return env
       in
       let return_type =
@@ -10624,6 +10626,7 @@ end = struct
       ~closure_class_name
       ~is_expr_tree_virtual_expr
       ~should_invalidate_fakes
+      ?(ignore_readonly = false)
       env
       lambda_pos
       decl_ft
@@ -10926,7 +10929,13 @@ end = struct
     let env =
       Env.set_return
         env
-        (Typing_return.make_info hint_pos f.f_fun_kind [] env hret)
+        (Typing_return.make_info
+           ~ignore_readonly
+           hint_pos
+           f.f_fun_kind
+           []
+           env
+           hret)
     in
     let local_tpenv = Env.get_tpenv env in
     let sound_dynamic_check_saved_env = env in
@@ -11098,13 +11107,15 @@ end = struct
     (* Is the return type declared? *)
     let is_explicit = Option.is_some (hint_of_type_hint f.f_ret) in
     let check_body_under_known_params
-        ~ty_mismatch_opt ~supportdyn env ?ret_ty ft : env * _ * locl_ty =
+        ~ty_mismatch_opt ~supportdyn ?(ignore_readonly = false) env ?ret_ty ft :
+        env * _ * locl_ty =
       let (env, (tefun, ft, support_dynamic_type)) =
         closure_make
           ~should_invalidate_fakes
           ~supportdyn
           ~closure_class_name
           ~is_expr_tree_virtual_expr
+          ~ignore_readonly
           ?ret_ty
           env
           p
@@ -11140,7 +11151,8 @@ end = struct
      *)
       when Tast.is_under_dynamic_assumptions env.checked ->
       make_result env p Aast.Omitted (MakeType.dynamic (Reason.witness p))
-    | Some (_pos, _ur, supportdyn, ty, Tfun expected_ft)
+    | Some
+        (_pos, _ur, supportdyn, ty, Tfun expected_ft, expected_ignore_readonly)
       when expected_ft.ft_instantiated ->
       (* First check that arities match up *)
       let arity_ok =
@@ -11220,10 +11232,17 @@ end = struct
       check_body_under_known_params
         ~ty_mismatch_opt
         ~supportdyn
+        ~ignore_readonly:expected_ignore_readonly
         env
         ?ret_ty
         expected_ft
     | _ ->
+      (* Extract ignore_readonly from expected type if present *)
+      let expected_ignore_readonly =
+        match eexpected with
+        | Some (_, _, _, _, _, ignore_readonly) -> ignore_readonly
+        | None -> false
+      in
       (* If all parameters are annotated with explicit types, then type-check
        * the body under those assumptions and pick up the result type *)
       let all_explicit_params =
@@ -11243,11 +11262,12 @@ end = struct
         check_body_under_known_params
           ~ty_mismatch_opt:None
           ~supportdyn:false
+          ~ignore_readonly:expected_ignore_readonly
           env
           declared_ft
       ) else (
         match eexpected with
-        | Some (_pos, _ur, supportdyn, expected_ty, _)
+        | Some (_pos, _ur, supportdyn, expected_ty, _, _)
           when TUtils.is_mixed env expected_ty
                || is_nonnull expected_ty
                || is_dynamic expected_ty ->
@@ -11297,6 +11317,7 @@ end = struct
           check_body_under_known_params
             ~ty_mismatch_opt:None
             ~supportdyn
+            ~ignore_readonly:expected_ignore_readonly
             env
             expected_ft
         | _ ->
@@ -11318,6 +11339,7 @@ end = struct
           check_body_under_known_params
             ~ty_mismatch_opt:None
             ~supportdyn
+            ~ignore_readonly:expected_ignore_readonly
             env
             ~ret_ty:declared_ft.ft_ret
             declared_ft
@@ -12217,7 +12239,7 @@ end = struct
       in
       let (env, expected) =
         match expected with
-        | Some (pos, ur, _, _, Tnewtype (fs, [ty; _], bound))
+        | Some (pos, ur, _, _, Tnewtype (fs, [ty; _], bound), _)
           when SN.Classes.is_typed_format_string fs ->
           let (env, fresh_ty) = Env.fresh_type env p in
           let expected =

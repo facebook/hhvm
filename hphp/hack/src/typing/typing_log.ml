@@ -298,11 +298,15 @@ let type_as_value env ty = Atom (Pr.debug env ty)
 let decl_type_as_value env ty = Atom (Pr.debug_decl env ty)
 
 let return_info_as_value env return_info =
-  let Typing_env_return_info.{ return_type; return_disposable } = return_info in
+  let Typing_env_return_info.
+        { return_type; return_disposable; return_ignore_readonly } =
+    return_info
+  in
   make_map
     [
       ("return_type", type_as_value env return_type);
       ("return_disposable", Bool return_disposable);
+      ("return_ignore_readonly", Bool return_ignore_readonly);
     ]
 
 let local_id_map_as_value f m =

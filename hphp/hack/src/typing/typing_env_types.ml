@@ -107,6 +107,7 @@ let empty ?origin ?(mode = FileInfo.Mstrict) ctx file ~droot =
             (* Actually should get set straight away anyway *)
             Typing_env_return_info.return_type = mk (Reason.none, Tunion []);
             return_disposable = false;
+            return_ignore_readonly = false;
           };
         params = Local_id.Map.empty;
         self = None;

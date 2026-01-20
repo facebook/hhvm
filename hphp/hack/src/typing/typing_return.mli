@@ -12,6 +12,7 @@ open Typing_env_types
 (** Typing code concerned with return types. *)
 
 val make_info :
+  ?ignore_readonly:bool ->
   Pos.t ->
   Ast_defs.fun_kind ->
   Nast.user_attribute list ->

@@ -45,11 +45,12 @@ let has_attribute attr l =
 let has_return_disposable_attribute attrs =
   has_attribute SN.UserAttributes.uaReturnDisposable attrs
 
-let make_info ret_pos fun_kind attributes env return_type =
+let make_info
+    ?(ignore_readonly = false) ret_pos fun_kind attributes env return_type =
   let return_disposable = has_return_disposable_attribute attributes in
   if not return_disposable then
     enforce_return_not_disposable ret_pos fun_kind env return_type;
-  { return_type; return_disposable }
+  { return_type; return_disposable; return_ignore_readonly = ignore_readonly }
 
 (* Make a fresh Awaitable<_> etc making sure that any constraints (e.g. supportdyn)
  * are added to the type variable

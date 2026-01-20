@@ -21,9 +21,7 @@
 
 #include <thrift/lib/cpp2/Thrift.h>
 
-namespace apache {
-namespace thrift {
-namespace test {
+namespace apache::thrift::test {
 
 template <class T>
 struct WrappedType {
@@ -44,6 +42,4 @@ struct WrappedTypeMethod : WrappedType<T> {
   FBTHRIFT_CPP_DEFINE_MEMBER_INDIRECTION_FN(rawAccessor());
 };
 
-} // namespace test
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::test

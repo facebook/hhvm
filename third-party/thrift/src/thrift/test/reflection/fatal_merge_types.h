@@ -22,9 +22,7 @@
 
 #include <boost/operators.hpp>
 
-namespace apache {
-namespace thrift {
-namespace test {
+namespace apache::thrift::test {
 
 struct CppHasANumber : private boost::totally_ordered<CppHasANumber> {
   FBTHRIFT_CPP_DEFINE_MEMBER_INDIRECTION_FN(number);
@@ -35,6 +33,4 @@ struct CppHasANumber : private boost::totally_ordered<CppHasANumber> {
   bool operator==(CppHasANumber that) const { return number == that.number; }
   bool operator<(CppHasANumber that) const { return number < that.number; }
 };
-} // namespace test
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::test

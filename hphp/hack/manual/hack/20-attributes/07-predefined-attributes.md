@@ -20,6 +20,7 @@ The following attributes are defined:
 - [\_\_MemoizeLSB](#__memoizelsb)
 - [\_\_MockClass](#__mockclass)
 - [\_\_ModuleLevelTrait](#__moduleleveltrait)
+- [\_\_NeedsConcrete](#__needsconcrete)
 - [\_\_Newable](#__newable)
 - [\_\_Override](#__override)
 - [\_\_PHPStdLib](#__phpstdlib)
@@ -399,6 +400,87 @@ Mock classes *cannot* extend types `vec`, `dict`, and `keyset`, or the Hack lega
 ## __ModuleLevelTrait
 
 Can be used on public traits.  The elements of a trait annotated with `<<__ModuleLevelTrait>>` are considered to belong to the module where the trait is defined, and can access other internal symbols of the module.  For more information see [Traits and Modules](/docs/hack/modules/traits).
+
+## __NeedsConcrete
+
+This attribute marks a static method that requires the runtime class to be concrete. A class is concrete if all its members are implemented. For example, all non-abstract classes are concrete.
+
+### When you need this attribute
+
+Consider this code that produces a type checker warning:
+
+```hack warning
+abstract class Animal {
+  public static function introduce(): void {
+    echo "I say: ";
+    static::speak(); // Warning: static might refer to an abstract class
+  }
+
+  public static abstract function speak(): void;
+}
+
+class Dog extends Animal {
+  public static function speak(): void {
+    echo "Woof!";
+  }
+}
+
+
+<<__EntryPoint>>
+function main(): void {
+  Animal::introduce(); // runtime error
+}
+
+```
+
+When you call a static method using `static::`, [late static binding](/docs/hack/expressions-and-operators/scope-resolution) determines the class whose method gets called at runtime. The type checker warns here because if `static` refers to an abstract class (like `Animal`), calling `static::speak()` would fail—you can't call an abstract method.
+
+### How to fix the warning
+
+Adding `<<__NeedsConcrete>>` tells the type checker: "This method is only safe to call when the runtime class is concrete." This resolves the warning:
+
+```hack
+abstract class Animal {
+  <<__NeedsConcrete>>
+  public static function introduce(): void {
+    echo "I say: ";
+    static::speak(); // OK because of `__NeedsConcrete` attribute
+  }
+
+  public static abstract function speak(): void;
+}
+
+class Dog extends Animal {
+  public static function speak(): void {
+    echo "Woof!";
+  }
+}
+```
+
+### How the attribute affects call sites
+
+Once you add `<<__NeedsConcrete>>`, the type checker will warn about calls where the receiver class might not be concrete.
+
+```hack warning
+abstract class Animal {
+  <<__NeedsConcrete>>
+  public static function introduce(): void {
+    static::speak();
+  }
+
+  public static abstract function speak(): void;
+}
+
+<<__EntryPoint>>
+function main(): void {
+  Animal::introduce(); // Warning: Animal is not concrete
+}
+```
+
+Safe calls include:
+- Calling on a concrete class directly: `Dog::introduce()`
+- Calling via `static::` from another `<<__NeedsConcrete>>` method
+- Calling from within a concrete class
 
 ## __Newable
 

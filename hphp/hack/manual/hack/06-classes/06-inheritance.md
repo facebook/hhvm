@@ -128,7 +128,7 @@ class MyChild extends MyParent {
 
 ## Abstract Classes
 
-An abstract class cannot be instantiated.
+An abstract class cannot be instantiated. Attempting to create an instance of an abstract class or call an unimplemented abstract method causes a runtime error. The type checker helps prevent these errors. Given the following code:
 
 ``` Hack
 abstract class Animal {
@@ -143,11 +143,52 @@ class Dog extends Animal {
 }
 ```
 
-This allows `new Dog()` but not `new Animal()`.
+`new Dog()` is allowed but not `new Animal()`.
 
 Abstract classes are similar to
 [interfaces](/docs/hack/traits-and-interfaces/implementing-an-interface), but they can include
 implementations of methods.
+
+### Static Methods and Late Static Binding
+
+Abstract classes can have abstract static methods. When you use `static::` inside a method, [late static binding](/docs/hack/expressions-and-operators/scope-resolution) determines which class's method runs based on the runtime class.
+
+This creates a potential problem: what if someone calls your method in a context where `static` refers to an abstract class?
+
+```hack warning
+abstract class Animal {
+  public static function introduce(): void {
+    echo "I say: ";
+    static::speak(); // Warning: static might be abstract at runtime
+  }
+
+  public static abstract function speak(): void;
+}
+
+class Dog extends Animal {
+  public static function speak(): void {
+    echo "Woof!";
+  }
+}
+```
+
+When you call `Dog::introduce()`, `static::speak()` successfully resolves to `Dog::speak()`. But if someone calls `Animal::introduce()` directly, `static::speak()` calls an abstract method, causing a runtime error.
+
+The type checker tries to prevent such problems. To fix the warning, use the [`<<__NeedsConcrete>>`](/docs/hack/attributes/predefined-attributes#__needsconcrete) attribute:
+
+```hack warning
+abstract class Animal {
+  <<__NeedsConcrete>>
+  public static function introduce(): void {
+    echo "I say: ";
+    static::speak(); // OK: attribute indicates `static` should resolve to a concrete class
+  }
+
+  public static abstract function speak(): void;
+}
+```
+
+This tells the type checker that `introduce()` should only be called when the runtime class is concrete. See the [\_\_NeedsConcrete documentation](/docs/hack/attributes/predefined-attributes#__needsconcrete) for more details.
 
 ## Final Classes
 

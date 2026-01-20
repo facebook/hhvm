@@ -439,8 +439,11 @@ reflected_struct {
    *  using info = reflect_struct<MyStruct>;
    *
    *  // yields "MyStruct"
-   *  using result = info::name_v;
+   *  auto result = info::getName();
    */
+  static auto getName() { return op::get_class_name_v<type>; }
+
+  [[deprecated("Use getName() instead")]]
   static inline const auto name_v = op::get_class_name_v<type>;
 
   /**
@@ -554,11 +557,16 @@ struct reflected_struct_data_member {
    *
    * @author: Marcelo Juchem <marcelo@fb.com>
    */
-  using name [[deprecated("Use name_v instead")]] = typename Traits::name;
+  using name [[deprecated("Use getName() instead")]] = typename Traits::name;
 
   /**
    * A run-time string representing the struct field name.
    */
+  static auto getName() {
+    return op::get_name_v<typename Traits::owner, typename Traits::tag>;
+  }
+
+  [[deprecated("Use getName() instead")]]
   static inline const auto name_v =
       op::get_name_v<typename Traits::owner, typename Traits::tag>;
 

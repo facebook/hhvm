@@ -75,17 +75,17 @@ TEST(FatalStruct, Struct1SanityCheck) {
   using traits = apache::thrift::reflect_struct<struct1>;
 
   EXPECT_SAME<struct1, traits::type>();
-  EXPECT_EQ("struct1", traits::name_v);
+  EXPECT_EQ("struct1", traits::getName());
 
   EXPECT_SAME<traits, apache::thrift::try_reflect_struct<struct1, void>>();
   EXPECT_SAME<void, apache::thrift::try_reflect_struct<int, void>>();
 
-  EXPECT_EQ("field0", traits::member::field0::name_v);
-  EXPECT_EQ("field1", traits::member::field1::name_v);
-  EXPECT_EQ("field2", traits::member::field2::name_v);
-  EXPECT_EQ("field3", traits::member::field3::name_v);
-  EXPECT_EQ("field4", traits::member::field4::name_v);
-  EXPECT_EQ("field5", traits::member::field5::name_v);
+  EXPECT_EQ("field0", traits::member::field0::getName());
+  EXPECT_EQ("field1", traits::member::field1::getName());
+  EXPECT_EQ("field2", traits::member::field2::getName());
+  EXPECT_EQ("field3", traits::member::field3::getName());
+  EXPECT_EQ("field4", traits::member::field4::getName());
+  EXPECT_EQ("field5", traits::member::field5::getName());
 
   struct1 pod;
   *pod.field0() = 19;
@@ -527,7 +527,7 @@ TEST(FatalStruct, FieldRefGetter) {
 TEST(FatalStruct, RenamedField) {
   using meta = apache::thrift::reflect_struct<struct_with_renamed_field>;
   using fmeta = meta::member::boring_cxx_name;
-  auto fname = fmeta::name_v.str();
+  auto fname = fmeta::getName().str();
   EXPECT_EQ("fancy.idl.name", fname);
 }
 
@@ -587,14 +587,14 @@ TEST(FatalStruct, InvokeByFieldName) {
 
   for (auto name : {"field0", "field1", "field2", "field3", "field4"}) {
     invokeByFieldName<traits::members>(name, [name]<class Member>(Member) {
-      EXPECT_STREQ(Member::type::name_v.data(), name);
+      EXPECT_STREQ(Member::type::getName().data(), name);
     });
   }
 
   bool found = invokeByFieldName<traits::members>(
       "field0",
       []<class Member>(Member, int input) {
-        EXPECT_STREQ(Member::type::name_v.data(), "field0");
+        EXPECT_STREQ(Member::type::getName().data(), "field0");
         EXPECT_EQ(input, 10);
       },
       10);

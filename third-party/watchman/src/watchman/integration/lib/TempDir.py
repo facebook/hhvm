@@ -14,8 +14,6 @@ import sys
 import tempfile
 import time
 
-import pywatchman
-
 from . import path_utils as path
 
 

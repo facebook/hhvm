@@ -63,8 +63,8 @@ let on_expr_top_down
     (* -- Always valid ------------------------------------------------------ *)
     | Aast.(
         ( Id _ | Null | True | False | Int _ | Float _ | String _
-        | FunctionPointer _ | Eif _ | Tuple _ | Shape _ | Upcast _ | Package _ ))
-      ->
+        | FunctionPointer _ | Eif _ | Tuple _ | Shape _ | Upcast _ | Package _
+        | PrefixedString _ )) ->
       (ctx, Ok expr)
     (* -- Markers ----------------------------------------------------------- *)
     | Aast.(Invalid _ | Hole _) -> (ctx, Ok expr)
@@ -135,8 +135,8 @@ let on_expr_top_down
         ( This | Lvar _ | Lplaceholder _ | Array_get _ | Await _ | Cast _
         | Class_get _ | Clone _ | Dollardollar _ | ET_Splice _ | Efun _
         | EnumClassLabel _ | ExpressionTree _ | Is _ | Lfun _ | List _
-        | Method_caller _ | New _ | Obj_get _ | Pair _ | Pipe _
-        | PrefixedString _ | ReadonlyExpr _ | String2 _ | Yield _ | Xml _ )) ->
+        | Method_caller _ | New _ | Obj_get _ | Pair _ | Pipe _ | ReadonlyExpr _
+        | String2 _ | Yield _ | Xml _ )) ->
       on_error (Err.naming @@ Naming_error.Illegal_constant pos);
       (ctx, Error (Err.invalid_expr expr))
     (* -- Unexpected expressions -------------------------------------------- *)

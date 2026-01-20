@@ -1,8 +1,1 @@
-ERROR: File "prefixed_string_in_constants.php", line 4, characters 52-63:
-Expected constant expression for initializer (Parsing[1002])
-ERROR: File "prefixed_string_in_constants.php", line 6, characters 5-23:
-Expected constant expression for initializer (Parsing[1002])
-ERROR: File "prefixed_string_in_constants.php", line 4, characters 52-63:
-Illegal constant value (Naming[2023])
-ERROR: File "prefixed_string_in_constants.php", line 6, characters 5-23:
-Illegal constant value (Naming[2023])
+No errors

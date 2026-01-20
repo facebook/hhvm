@@ -10,7 +10,6 @@
 import json
 import os
 import os.path
-import time
 import unittest
 
 from watchman.integration.lib import WatchmanTestCase

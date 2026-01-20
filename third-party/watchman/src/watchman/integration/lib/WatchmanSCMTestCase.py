@@ -10,8 +10,6 @@
 import os
 import subprocess
 
-import pywatchman
-
 from . import WatchmanTestCase
 
 

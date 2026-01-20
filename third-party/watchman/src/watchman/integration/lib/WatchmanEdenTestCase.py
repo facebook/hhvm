@@ -10,7 +10,6 @@
 
 import os
 import sys
-from typing import Optional
 
 from . import WatchmanTestCase
 

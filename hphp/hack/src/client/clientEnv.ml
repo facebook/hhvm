@@ -62,7 +62,6 @@ type client_mode =
   | MODE_REWRITE_DECLARATIONS
   | MODE_REWRITE_LAMBDA_PARAMETERS of string list
   | MODE_SAVE_NAMING of string
-  | MODE_SAVE_STATE of string
   | MODE_SEARCH of string
   | MODE_SERVER_RAGE
   | MODE_STATS
@@ -92,7 +91,6 @@ type client_check_env = {
   force_dormant_start: bool;
   from: string;
   show_spinner: bool;
-  gen_saved_ignore_type_errors: bool;
   ignore_hh_version: bool;
   saved_state_ignore_hhconfig: bool;
   paths: string list;

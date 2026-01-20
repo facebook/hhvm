@@ -456,12 +456,10 @@ let remove_items_from_reverse_naming_table_or_build_new_reverse_naming_table
   HackEventLogger.naming_from_saved_state_end t;
   Hh_logger.log_duration "NAMING_FROM_SAVED_STATE_END" t
 
-(* Prechecked files are gated with a flag and not supported in AI/check/saving
- * of saved state modes. *)
+(* Prechecked files are gated with a flag and not supported in AI/check modes. *)
 let use_prechecked_files (genv : ServerEnv.genv) : bool =
   ServerPrecheckedFiles.should_use genv.options genv.local_config
-  && (not (ServerArgs.check_mode genv.options))
-  && Option.is_none (ServerArgs.save_filename genv.options)
+  && not (ServerArgs.check_mode genv.options)
 
 let file_names_to_deps names deps =
   let open Typing_deps in

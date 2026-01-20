@@ -31,7 +31,6 @@ let debug_describe_t : type a. a t -> string = function
   | LINT_ALL _ -> "LINT_ALL"
   | IN_MEMORY_DEP_TABLE_SIZE -> "IN_MEMORY_DEP_TABLE_SIZE"
   | SAVE_NAMING _ -> "SAVE_NAMING"
-  | SAVE_STATE _ -> "SAVE_STATE"
   | STATS -> "STATS"
   | DUMP_FULL_FIDELITY_PARSE _ -> "DUMP_FULL_FIDELITY_PARSE"
   | RAGE -> "RAGE"

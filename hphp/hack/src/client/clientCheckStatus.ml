@@ -63,7 +63,6 @@ let go status error_format ~is_interactive ~output_json ~max_errors =
         ~output_json
         ~error_format
         ~error_list
-        ~save_state_result:None
         ~recheck_stats:last_recheck_stats;
       0
     ) else

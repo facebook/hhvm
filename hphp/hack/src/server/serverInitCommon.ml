@@ -161,11 +161,8 @@ let defer_or_do_type_check
     (t : float)
     ~(telemetry_label : string)
     ~(cgroup_steps : CgroupProfiler.step_group) : ServerEnv.env * float =
-  if
-    ServerArgs.check_mode genv.options
-    || Option.is_some (ServerArgs.save_filename genv.options)
-  then (
-    (* Prechecked files are not supported in check/saving-state modes, we
+  if ServerArgs.check_mode genv.options then (
+    (* Prechecked files are not supported in check mode, we
      * should always recheck everything necessary up-front. *)
     assert (
       match env.prechecked_files with

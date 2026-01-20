@@ -41,8 +41,6 @@ val dump_fanout : options -> bool
 
 val from : options -> string
 
-val gen_saved_ignore_type_errors : options -> bool
-
 val ignore_hh_version : options -> bool
 
 val saved_state_ignore_hhconfig : options -> bool
@@ -56,8 +54,6 @@ val no_load : options -> bool
 val prechecked : options -> bool option
 
 val root : options -> Path.t
-
-val save_filename : options -> string option
 
 val save_64bit : options -> string option
 
@@ -89,8 +85,6 @@ val set_ai_mode : options -> Ai_options.t option -> options
 
 val set_check_mode : options -> bool -> options
 
-val set_gen_saved_ignore_type_errors : options -> bool -> options
-
 val set_max_procs : options -> int -> options
 
 val set_no_load : options -> bool -> options
@@ -102,8 +96,6 @@ val set_from : options -> string -> options
 val set_save_64bit : options -> string option -> options
 
 val set_save_naming_filename : options -> string option -> options
-
-val set_save_filename : options -> string option -> options
 
 (****************************************************************************)
 (* Misc *)

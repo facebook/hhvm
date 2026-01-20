@@ -101,62 +101,7 @@ let get_hot_classes (filename : string) : SSet.t =
     |> List.map ~f:Hh_json.get_string_exn
     |> SSet.of_list
 
-(** Dumps the naming-table (a saveable form of FileInfo), and errors if any,
-  and hot class decls. *)
-let dump_naming_and_errors
-    (output_filename : string)
-    (naming_table : Naming_table.t)
-    (errors : Errors.t) : unit =
-  let naming_sql_filename = output_filename ^ "_naming.sql" in
-  let (save_result : Naming_sqlite.save_result) =
-    Naming_table.save naming_table naming_sql_filename
-  in
-  Hh_logger.log
-    "Inserted symbols into the naming table:\n%s"
-    (Naming_sqlite.show_save_result save_result);
-  Hh_logger.log
-    "Finished saving naming table with %d errors."
-    (List.length save_result.Naming_sqlite.errors);
-
-  if List.length save_result.Naming_sqlite.errors > 0 then
-    Exit.exit Exit_status.Sql_assertion_failure;
-
-  assert (Sys.file_exists naming_sql_filename);
-  Hh_logger.log "Saved naming table sqlite to '%s'" naming_sql_filename;
-  (* Let's not write empty error files. *)
-  (if Errors.is_empty errors then
-    ()
-  else
-    let error_files : saved_state_errors = Errors.get_failed_files errors in
-    save_contents (get_errors_filename output_filename) error_files);
-  ()
-
-(** Sorts and dumps the error relative paths in JSON format.
- * An empty JSON list will be dumped if there are no errors.*)
-let dump_errors_json (output_filename : string) (errors : Errors.t) : unit =
-  let error_files = Errors.get_failed_files errors in
-  let errors_json =
-    Hh_json.(
-      JSON_Array
-        (List.rev
-           (Relative_path.Set.fold
-              ~init:[]
-              ~f:(fun relative_path acc ->
-                JSON_String (Relative_path.suffix relative_path) :: acc)
-              error_files)))
-  in
-  let chan = Stdlib.open_out (get_errors_filename_json output_filename) in
-  Hh_json.json_to_output chan errors_json;
-  Stdlib.close_out chan
-
 let saved_state_info_file_name ~base_file_name = base_file_name ^ "_info.json"
-
-let saved_state_build_revision_write ~(base_file_name : string) : unit =
-  let info_file = saved_state_info_file_name ~base_file_name in
-  let open Hh_json in
-  Out_channel.with_file info_file ~f:(fun fh ->
-      json_to_output fh
-      @@ JSON_Object [("build_revision", string_ Build_id.build_revision)])
 
 let saved_state_build_revision_read ~(base_file_name : string) : string =
   let info_file = saved_state_info_file_name ~base_file_name in
@@ -164,81 +109,6 @@ let saved_state_build_revision_read ~(base_file_name : string) : string =
   let json = Some (Hh_json.json_of_string contents) in
   let build_revision = Hh_json_helpers.Jget.string_exn json "build_revision" in
   build_revision
-
-let dump_dep_graph_64bit ~mode ~db_name ~incremental_info_file =
-  let t = Unix.gettimeofday () in
-  let base_dep_graph =
-    match mode with
-    | Typing_deps_mode.InMemoryMode base_dep_graph -> base_dep_graph
-    | Typing_deps_mode.SaveToDiskMode { graph; _ } -> graph
-  in
-  let () =
-    let open Hh_json in
-    Out_channel.with_file incremental_info_file ~f:(fun fh ->
-        json_to_output fh
-        @@ JSON_Object [("base_dep_graph", string_opt base_dep_graph)])
-  in
-  let dep_table_edges_added =
-    Typing_deps.save_discovered_edges
-      mode
-      ~dest:db_name
-      ~reset_state_after_saving:false
-  in
-  let (_ : float) = Hh_logger.log_duration "Writing discovered edges took" t in
-  { dep_table_edges_added }
-
-(** Saves the saved state to the given path. Returns number of dependency
-* edges dumped into the database. *)
-let save_state (env : ServerEnv.env) (output_filename : string) :
-    save_state_result =
-  let () = Sys_utils.mkdir_p (Filename.dirname output_filename) in
-  let db_name =
-    match env.ServerEnv.deps_mode with
-    | Typing_deps_mode.InMemoryMode _
-    | Typing_deps_mode.SaveToDiskMode _ ->
-      output_filename ^ "_64bit_dep_graph.delta"
-  in
-  let () =
-    if Sys.file_exists output_filename then
-      failwith
-        (Printf.sprintf "Cowardly refusing to overwrite '%s'." output_filename)
-    else
-      ()
-  in
-  let () =
-    if Sys.file_exists db_name then
-      failwith (Printf.sprintf "Cowardly refusing to overwrite '%s'." db_name)
-    else
-      ()
-  in
-  let (_ : float) =
-    let naming_table = env.ServerEnv.naming_table in
-    let errors = env.ServerEnv.errorl in
-    let t = Unix.gettimeofday () in
-    dump_naming_and_errors output_filename naming_table errors;
-    Hh_logger.log_duration "Saving saved-state naming+errors took" t
-  in
-  match env.ServerEnv.deps_mode with
-  | Typing_deps_mode.InMemoryMode _ ->
-    let incremental_info_file = output_filename ^ "_incremental_info.json" in
-    dump_errors_json output_filename env.ServerEnv.errorl;
-    saved_state_build_revision_write ~base_file_name:output_filename;
-    dump_dep_graph_64bit
-      ~mode:env.ServerEnv.deps_mode
-      ~db_name
-      ~incremental_info_file
-  | Typing_deps_mode.SaveToDiskMode
-      { graph = _; new_edges_dir; human_readable_dep_map_dir } ->
-    dump_errors_json output_filename env.ServerEnv.errorl;
-    saved_state_build_revision_write ~base_file_name:output_filename;
-    Hh_logger.warn
-      "saveStateService: not saving 64-bit dep graph edges to disk, because they are already in %s"
-      new_edges_dir;
-    (match human_readable_dep_map_dir with
-    | None -> ()
-    | Some dir ->
-      Hh_logger.warn "saveStateService: human readable dep map dir: %s" dir);
-    { dep_table_edges_added = 0 }
 
 let go_naming (naming_table : Naming_table.t) (output_filename : string) :
     (save_naming_result, string) result =
@@ -256,11 +126,4 @@ let go_naming (naming_table : Naming_table.t) (output_filename : string) :
           nt_files_added = save_result.Naming_sqlite.files_added;
           nt_symbols_added = save_result.Naming_sqlite.symbols_added;
         })
-  |> Result.map_error ~f:(fun e -> Exception.get_ctor_string e)
-
-(* If successful, returns the # of edges from the dependency table that were written. *)
-(* TODO: write some other stats, e.g., the number of names, the number of errors, etc. *)
-let go (env : ServerEnv.env) (output_filename : string) :
-    (save_state_result, string) result =
-  Utils.try_with_stack (fun () -> save_state env output_filename)
   |> Result.map_error ~f:(fun e -> Exception.get_ctor_string e)

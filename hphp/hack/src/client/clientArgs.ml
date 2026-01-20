@@ -144,7 +144,6 @@ let parse_check_args cmd ~from_default : ClientEnv.client_check_env =
   let from = ref from_default in
   let show_spinner = ref None in
   let show_tast = ref false in
-  let gen_saved_ignore_type_errors = ref false in
   let ignore_hh_version = ref false in
   let save_64bit = ref None in
   let save_human_readable_64bit_dep_map = ref None in
@@ -414,10 +413,6 @@ let parse_check_args cmd ~from_default : ClientEnv.client_check_env =
           end,
         " (mode) for each entry in input list get list of function dependencies [file:line:character list]"
       );
-      ( "--gen-saved-ignore-type-errors",
-        Arg.Set gen_saved_ignore_type_errors,
-        " generate a saved state even if there are type errors (default: false)."
-      );
       ( "--get-method-name",
         Arg.String (fun x -> set_mode (MODE_IDENTIFY_SYMBOL3 x)),
         (* alias for --identify-function *) "" );
@@ -669,10 +664,6 @@ rewrite to the function names to something like `foo_1` and `foo_2`.
         Arg.String (fun x -> set_mode (MODE_SAVE_NAMING x)),
         " (mode) Save the naming table to the given file."
         ^ " Returns the number of files and symbols written to disk." );
-      ( "--save-state",
-        Arg.String (fun x -> set_mode (MODE_SAVE_STATE x)),
-        " (mode) Save a saved state to the given file."
-        ^ " Returns number of edges dumped from memory to the database." );
       ( "--save-64bit",
         Arg.String (fun x -> save_64bit := Some x),
         " save discovered 64-bit to the given directory" );
@@ -899,7 +890,6 @@ rewrite to the function names to something like `foo_1` and `foo_2`.
     force_dormant_start = !force_dormant_start;
     from = !from;
     show_spinner = Option.value ~default:is_interactive !show_spinner;
-    gen_saved_ignore_type_errors = !gen_saved_ignore_type_errors;
     ignore_hh_version = !ignore_hh_version;
     saved_state_ignore_hhconfig = !saved_state_ignore_hhconfig;
     paths;

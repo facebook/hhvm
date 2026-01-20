@@ -422,9 +422,6 @@ type _ t =
   | SAVE_NAMING :
       string
       -> (SaveStateServiceTypes.save_naming_result, string) Stdlib.result t
-  | SAVE_STATE :
-      (string * bool)
-      -> (SaveStateServiceTypes.save_state_result, string) Stdlib.result t
   | CHECK_LIVENESS : unit t
   | LINT : string list -> ServerLintTypes.result t
   | LINT_STDIN : lint_stdin_input -> ServerLintTypes.result t
@@ -505,7 +502,6 @@ let rpc_command_needs_full_check : type a. a t -> bool =
   | METHOD_JUMP (_, _, find_children) -> find_children (* uses find refs *)
   | FIND_MY_TESTS _ -> true
   | SAVE_NAMING _ -> false
-  | SAVE_STATE _ -> true
   (* Codebase-wide rename, uses find references *)
   | RENAME _ -> true
   | IDE_RENAME_BY_SYMBOL _ -> true

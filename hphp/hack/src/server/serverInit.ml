@@ -13,36 +13,6 @@ open ServerEnv
 module SLC = ServerLocalConfig
 include ServerInitTypes
 
-let save_state
-    (genv : ServerEnv.genv) (env : ServerEnv.env) (output_filename : string) :
-    SaveStateServiceTypes.save_state_result option =
-  let ignore_errors =
-    ServerArgs.gen_saved_ignore_type_errors genv.ServerEnv.options
-  in
-  let has_errors = not (Errors.is_empty env.errorl) in
-  let do_save_state =
-    if ignore_errors then (
-      if has_errors then
-        Printf.eprintf
-          "WARNING: BROKEN SAVED STATE! Generating saved state. Ignoring type errors.\n%!"
-      else
-        Printf.eprintf
-          "Generating saved state and ignoring type errors, but there were none.\n%!";
-      true
-    ) else if has_errors then (
-      Printf.eprintf
-        "Refusing to generate saved state. There are type errors\n%!";
-      Printf.eprintf "and --gen-saved-ignore-type-errors was not provided.\n%!";
-      false
-    ) else
-      true
-  in
-  if not do_save_state then
-    None
-  else
-    let result = SaveStateService.save_state env output_filename in
-    Some result
-
 let post_init genv (env, _t) =
   ignore genv;
   SharedMem.SMTelemetry.init_done ();

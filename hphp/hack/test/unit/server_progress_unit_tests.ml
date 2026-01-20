@@ -547,7 +547,6 @@ let env =
       force_dormant_start = false;
       from = "test";
       show_spinner = false;
-      gen_saved_ignore_type_errors = false;
       ignore_hh_version = true;
       saved_state_ignore_hhconfig = true;
       paths = [];

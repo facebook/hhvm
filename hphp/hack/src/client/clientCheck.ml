@@ -12,18 +12,6 @@ open Ocaml_overrides
 module SyntaxTree =
   Full_fidelity_syntax_tree.WithSyntax (Full_fidelity_positioned_syntax)
 
-module SaveStateResultPrinter = ClientResultPrinter.Make (struct
-  type t = SaveStateServiceTypes.save_state_result
-
-  let to_string t =
-    Printf.sprintf
-      "Dependency table edges added: %d"
-      t.SaveStateServiceTypes.dep_table_edges_added
-
-  let to_json (t : SaveStateServiceTypes.save_state_result) =
-    Hh_json.JSON_Object (ServerError.get_save_state_result_props_json t)
-end)
-
 module SaveNamingResultPrinter = ClientResultPrinter.Make (struct
   type t = SaveStateServiceTypes.save_naming_result
 
@@ -138,7 +126,6 @@ let connect
     custom_telemetry_data;
     preexisting_warnings;
     error_format = _;
-    gen_saved_ignore_type_errors = _;
     paths = _;
     max_errors = _;
     mode = _;
@@ -821,18 +808,6 @@ let main_internal
       rpc args @@ ServerCommandTypes.SAVE_NAMING (Path.to_string path)
     in
     SaveNamingResultPrinter.go result args.output_json;
-    Lwt.return (Exit_status.No_error, telemetry)
-  | ClientEnv.MODE_SAVE_STATE path ->
-    let () = Sys_utils.mkdir_p (Filename.dirname path) in
-    (* Convert to real path because Client and Server may have
-     * different cwd and we want to use the client processes' cwd. *)
-    let path = Path.make path in
-    let%lwt (result, telemetry) =
-      rpc args
-      @@ ServerCommandTypes.SAVE_STATE
-           (Path.to_string path, args.gen_saved_ignore_type_errors)
-    in
-    SaveStateResultPrinter.go result args.output_json;
     Lwt.return (Exit_status.No_error, telemetry)
   | ClientEnv.MODE_SEARCH query ->
     if not (String.equal query "this_is_just_to_check_liveness_of_hh_server")

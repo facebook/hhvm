@@ -45,10 +45,7 @@ module Program = struct
     Sys_utils.set_signal Sys.sigpipe Sys.Signal_ignore;
     ()
 
-  let run_once_and_exit
-      genv
-      env
-      (save_state_result : SaveStateServiceTypes.save_state_result option) =
+  let run_once_and_exit genv env =
     let recheck_stats =
       Option.map
         ~f:ServerEnv.RecheckLoopStats.to_user_telemetry
@@ -61,24 +58,17 @@ module Program = struct
       ~error_format:(Some Errors.Raw)
       ~error_list:
         (List.map (Errors.get_error_list env.errorl) ~f:User_error.to_absolute)
-      ~save_state_result
       ~recheck_stats;
 
     WorkerController.force_quit_all ();
 
     let has_errors = not (Errors.is_empty env.errorl) in
-    let is_saving_state_and_ignoring_errors =
-      ServerArgs.gen_saved_ignore_type_errors genv.options
-      && Option.is_some (ServerArgs.save_filename genv.options)
-    in
     let error_code =
       if has_errors then
         if Option.is_some (ServerArgs.write_symbol_info genv.options) then
           32
-        else if not is_saving_state_and_ignoring_errors then
-          1
         else
-          0
+          1
       else
         0
     in
@@ -954,15 +944,10 @@ let serve genv env in_fds =
  * 6. Otherwise, load it normally!
  *)
 let resolve_init_approach genv : ServerInit.init_approach * string =
-  if
-    Option.is_some (ServerArgs.save_naming_filename genv.options)
-    && Option.is_none (ServerArgs.save_filename genv.options)
-  then
+  if Option.is_some (ServerArgs.save_naming_filename genv.options) then
     (ServerInit.Parse_only_init, "Server_args_saving_naming")
   else if ServerArgs.no_load genv.options then
     (ServerInit.Full_init, "Server_args_no_load")
-  else if Option.is_some (ServerArgs.save_filename genv.options) then
-    (ServerInit.Full_init, "Server_args_saving_state")
   else if
     (not genv.local_config.ServerLocalConfig.use_saved_state)
     && Option.is_none (ServerArgs.write_symbol_info genv.options)
@@ -1379,16 +1364,10 @@ let run_once options config local_config =
 
   (* The type-checking happens here *)
   let env = program_init genv env in
-  (* All of saving state happens here *)
-  let (env, save_state_results) =
-    match ServerArgs.save_filename genv.options with
-    | None -> (env, None)
-    | Some filename -> (env, ServerInit.save_state genv env filename)
-  in
   possibly_save_naming_table env genv;
   (* Finish up by generating the output and the exit code *)
   Hh_logger.log "Running in check mode";
-  Program.run_once_and_exit genv env save_state_results
+  Program.run_once_and_exit genv env
 
 let log_pid_cgroup () =
   let pid = Unix.getpid () in

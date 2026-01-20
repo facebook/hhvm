@@ -14,9 +14,7 @@ open Hh_prelude
 open ServerEnv
 
 let make_genv options config local_config workers =
-  Typing_deps.trace :=
-    (not (ServerArgs.check_mode options))
-    || Option.is_some (ServerArgs.save_filename options);
+  Typing_deps.trace := not (ServerArgs.check_mode options);
   let (notifier, indexer) =
     ServerNotifier.init options local_config ~num_workers:(List.length workers)
   in

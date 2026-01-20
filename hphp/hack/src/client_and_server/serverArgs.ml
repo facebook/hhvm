@@ -24,7 +24,6 @@ type options = {
   custom_telemetry_data: (string * string) list;
   dump_fanout: bool;
   from: string;
-  gen_saved_ignore_type_errors: bool;
   preexisting_warnings: bool;
       (** Whether to show preexisting warnings in typechecked files. *)
   ignore_hh_version: bool;
@@ -34,7 +33,6 @@ type options = {
   no_load: bool;
   prechecked: bool option;
   root: Path.t;
-  save_filename: string option;
   save_64bit: string option;
   save_human_readable_64bit_dep_map: string option;
   save_naming_filename: string option;
@@ -80,9 +78,6 @@ module Messages = struct
 
   let from_hhclient = " DEPRECATED"
 
-  let gen_saved_ignore_type_errors =
-    " generate a saved state even if there are type errors."
-
   let ignore_hh_version = " ignore hh_version check when loading saved states"
 
   let saved_state_ignore_hhconfig =
@@ -97,8 +92,6 @@ module Messages = struct
   let prechecked = " override value of \"prechecked_files\" flag from hh.conf"
 
   let profile_log = " enable profile logging"
-
-  let save_state = " save server state to file"
 
   let save_naming = " save naming table to file"
 
@@ -140,7 +133,6 @@ let parse_options () : options =
   let from_emacs = ref false in
   let from_hhclient = ref false in
   let from_vim = ref false in
-  let gen_saved_ignore_type_errors = ref false in
   let preexisting_warnings = ref false in
   let ignore_hh = ref false in
   let saved_state_ignore_hhconfig = ref false in
@@ -149,7 +141,6 @@ let parse_options () : options =
   let no_load = ref false in
   let prechecked = ref None in
   let root = ref "" in
-  let save = ref None in
   let save_64bit = ref None in
   let save_human_readable_64bit_dep_map = ref None in
   let save_naming = ref None in
@@ -162,7 +153,6 @@ let parse_options () : options =
   let write_symbol_info = ref None in
   let set_ai s = ai_mode := Some (Ai_options.prepare ~server:true s) in
   let set_max_procs n = max_procs := Some n in
-  let set_save_state s = save := Some s in
   let set_save_naming s = save_naming := Some s in
   let set_wait fd = waiting_client := Some (Handle.wrap_handle fd) in
   let set_with_saved_state s = with_saved_state := Some s in
@@ -197,9 +187,6 @@ let parse_options () : options =
       ("--from-hhclient", Arg.Set from_hhclient, Messages.from_hhclient);
       ("--from-vim", Arg.Set from_vim, Messages.from_vim);
       ("--from", Arg.String set_from, Messages.from);
-      ( "--gen-saved-ignore-type-errors",
-        Arg.Set gen_saved_ignore_type_errors,
-        Messages.gen_saved_ignore_type_errors );
       ( "--preexisting-warnings",
         Arg.Set preexisting_warnings,
         " show all preexisting warnings in typechecked files (default: false)"
@@ -217,9 +204,7 @@ let parse_options () : options =
       ( "--profile-log",
         Arg.Unit (fun () -> config := ("profile_log", "true") :: !config),
         Messages.profile_log );
-      ("--save-mini", Arg.String set_save_state, Messages.save_state);
       ("--save-naming", Arg.String set_save_naming, Messages.save_naming);
-      ("--save-state", Arg.String set_save_state, Messages.save_state);
       ( "--save-64bit",
         Arg.String (fun s -> save_64bit := Some s),
         Messages.save_64bit );
@@ -241,7 +226,6 @@ let parse_options () : options =
         Arg.String set_write_symbol_info,
         Messages.write_symbol_info );
       ("-d", Arg.Set should_detach, Messages.daemon);
-      ("-s", Arg.String set_save_state, Messages.save_state);
     ]
   in
   let options = Arg.align options in
@@ -253,12 +237,9 @@ let parse_options () : options =
       print_endline Hh_version.version;
     exit 0
   );
-  (* --json, --save, --write-symbol-info all imply check *)
+  (* --json, --write-symbol-info all imply check *)
   let check_mode =
-    Option.is_some !write_symbol_info
-    || !check_mode
-    || !json_mode
-    || Option.is_some !save
+    Option.is_some !write_symbol_info || !check_mode || !json_mode
   in
   if check_mode && Option.is_some !waiting_client then (
     Printf.eprintf "--check is incompatible with wait modes!\n";
@@ -277,11 +258,6 @@ let parse_options () : options =
   | _ -> ());
   let root_path = Path.make !root in
   Wwwroot.assert_www_directory root_path;
-  if !gen_saved_ignore_type_errors && not (Option.is_some !save) then (
-    Printf.eprintf
-      "--gen-saved-ignore-type-errors is only valid when combined with --save-state\n%!";
-    exit 1
-  );
   {
     ai_mode = !ai_mode;
     check_mode;
@@ -290,7 +266,6 @@ let parse_options () : options =
     custom_telemetry_data = !custom_telemetry_data;
     dump_fanout = !dump_fanout;
     from = !from;
-    gen_saved_ignore_type_errors = !gen_saved_ignore_type_errors;
     preexisting_warnings = !preexisting_warnings;
     ignore_hh_version = !ignore_hh;
     saved_state_ignore_hhconfig = !saved_state_ignore_hhconfig;
@@ -299,7 +274,6 @@ let parse_options () : options =
     no_load = !no_load;
     prechecked = !prechecked;
     root = root_path;
-    save_filename = !save;
     save_64bit = !save_64bit;
     save_human_readable_64bit_dep_map = !save_human_readable_64bit_dep_map;
     save_naming_filename = !save_naming;
@@ -321,7 +295,6 @@ let default_options ~root =
     custom_telemetry_data = [];
     dump_fanout = false;
     from = "";
-    gen_saved_ignore_type_errors = false;
     preexisting_warnings = false;
     ignore_hh_version = false;
     saved_state_ignore_hhconfig = false;
@@ -330,7 +303,6 @@ let default_options ~root =
     no_load = true;
     prechecked = None;
     root = Path.make root;
-    save_filename = None;
     save_64bit = None;
     save_human_readable_64bit_dep_map = None;
     save_naming_filename = None;
@@ -365,8 +337,6 @@ let dump_fanout options = options.dump_fanout
 
 let from options = options.from
 
-let gen_saved_ignore_type_errors options = options.gen_saved_ignore_type_errors
-
 let ignore_hh_version options = options.ignore_hh_version
 
 let saved_state_ignore_hhconfig options = options.saved_state_ignore_hhconfig
@@ -380,8 +350,6 @@ let no_load options = options.no_load
 let prechecked options = options.prechecked
 
 let root options = options.root
-
-let save_filename options = options.save_filename
 
 let save_64bit options = options.save_64bit
 
@@ -417,9 +385,6 @@ let set_ai_mode options ai_mode = { options with ai_mode }
 
 let set_check_mode options check_mode = { options with check_mode }
 
-let set_gen_saved_ignore_type_errors options ignore_type_errors =
-  { options with gen_saved_ignore_type_errors = ignore_type_errors }
-
 let set_max_procs options procs = { options with max_procs = Some procs }
 
 let set_no_load options is_no_load = { options with no_load = is_no_load }
@@ -433,8 +398,6 @@ let set_save_64bit options save_64bit = { options with save_64bit }
 let set_save_naming_filename options save_naming_filename =
   { options with save_naming_filename }
 
-let set_save_filename options save_filename = { options with save_filename }
-
 (****************************************************************************)
 (* Misc *)
 (****************************************************************************)
@@ -447,7 +410,6 @@ let to_string
       custom_telemetry_data;
       dump_fanout;
       from;
-      gen_saved_ignore_type_errors;
       preexisting_warnings;
       ignore_hh_version;
       saved_state_ignore_hhconfig;
@@ -456,7 +418,6 @@ let to_string
       no_load;
       prechecked;
       root;
-      save_filename;
       save_64bit;
       save_human_readable_64bit_dep_map;
       save_naming_filename;
@@ -484,11 +445,6 @@ let to_string
   in
   let custom_hhi_path_str =
     match custom_hhi_path with
-    | None -> "<>"
-    | Some path -> path
-  in
-  let save_filename_str =
-    match save_filename with
     | None -> "<>"
     | Some path -> path
   in
@@ -556,9 +512,6 @@ let to_string
     "from: ";
     from;
     ", ";
-    "gen_saved_ignore_type_errors: ";
-    string_of_bool gen_saved_ignore_type_errors;
-    ", ";
     "preexisting_warnings: ";
     string_of_bool preexisting_warnings;
     ", ";
@@ -582,9 +535,6 @@ let to_string
     ", ";
     "root: ";
     Path.to_string root;
-    ", ";
-    "save_filename: ";
-    save_filename_str;
     ", ";
     "save_64bit: ";
     save_64bit_str;

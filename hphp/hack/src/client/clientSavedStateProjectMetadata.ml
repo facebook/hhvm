@@ -32,7 +32,6 @@ let main (env : ClientEnv.client_check_env) (config : ServerLocalConfig.t) :
     force_dormant_start = _;
     from = _;
     show_spinner = _;
-    gen_saved_ignore_type_errors = _;
     paths = _;
     max_errors = _;
     preexisting_warnings = _;

@@ -365,11 +365,6 @@ let handle :
     (env, Ok 0)
   | ServerCommandTypes.SAVE_NAMING filename ->
     (env, SaveStateService.go_naming env.ServerEnv.naming_table filename)
-  | ServerCommandTypes.SAVE_STATE (filename, gen_saved_ignore_type_errors) ->
-    if Errors.is_empty env.ServerEnv.errorl || gen_saved_ignore_type_errors then
-      (env, SaveStateService.go env filename)
-    else
-      (env, Error "There are typecheck errors; cannot generate saved state.")
   | ServerCommandTypes.CHECK_LIVENESS ->
     (* This is for the client to know "is the server available to process requests?" *)
     (env, ())

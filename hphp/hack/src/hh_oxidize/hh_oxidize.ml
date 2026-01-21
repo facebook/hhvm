@@ -223,8 +223,7 @@ let parse_args () =
         ^ " are defined within the set of files being oxidized" );
       ( "--copy-types-file",
         Arg.String (fun s -> copy_types_file := Some s),
-        " Do not use references for the types listed in this file"
-        ^ " (when --by-ref is enabled)" );
+        " Derive Copy for the types listed in this file" );
       ( "--safe-ints-types-file",
         Arg.String (fun s -> safe_ints_types_file := Some s),
         " Convert integers to ocamlrep::OCamlInt (instead of isize) for these type declarations"

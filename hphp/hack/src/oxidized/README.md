@@ -7,26 +7,27 @@ code.
 ## Overview
 
 The `oxidized` crate contains Rust type definitions generated from OCaml source
-code using the `hh_oxidize` tool in **ByBox mode**. Unlike the `oxidized_by_ref`
-crate which uses references and arena allocation, this crate uses owned data
-structures (`Box`, `Vec`, `String`) for heap allocation, making it suitable for
-contexts where data needs to be owned and persisted.
+code using the `hh_oxidize` tool. This crate uses owned data structures (`Box`,
+`Vec`, `String`) for heap allocation, making it suitable for contexts where data
+needs to be owned and persisted.
 
-## Key Differences: ByBox vs ByRef Mode
+## Summary
 
-| Aspect                  | ByBox Mode (`oxidized`)         | ByRef Mode (`oxidized_by_ref`) |
-| ----------------------- | ------------------------------- | ------------------------------ |
-| **Recursive Types**     | `Box<T>`                        | `&'a T`                        |
-| **Collections**         | `Vec<T>`                        | `&'a [T]`                      |
-| **Strings**             | `String`                        | `&'a str`                      |
-| **Memory Management**   | Heap allocation                 | Arena allocation               |
-| **Lifetime Parameters** | None                            | `<'a>` where needed            |
-| **Use Cases**           | Data persistence, serialization | High-performance type checking |
-| **Memory Overhead**     | Higher (individual allocations) | Lower (arena chunks)           |
+| Aspect                  | Description                         |
+| ----------------------- | ----------------------------------- |
+| **Recursive Types**     | `Box<T>`                            |
+| **Collections**         | `Vec<T>`                            |
+| **Strings**             | `String`                            |
+| **Memory Management**   | Heap allocation                     |
+| **Lifetime Parameters** | None                                |
+| **Memory Overhead**     | High (individual allocations)       |
+| **Use Cases**           | Data persistence, serialization     |
+| **Configuration Files** | 2 files (copy_types, safe_ints)     |
+| **Generated Structure** | Rich (manual/, visitor/, impl_gen/) |
 
 ## Configuration Files
 
-The oxidation process for ByBox mode is controlled by two configuration files:
+The oxidation process is controlled by two configuration files:
 
 ### 1. `copy_types.txt` (138 types)
 
@@ -215,18 +216,6 @@ pub type Stmt = aast_defs::Stmt<(), ()>;
 pub type Program = aast_defs::Program<(), ()>;
 ```
 
-## Comparison with `oxidized_by_ref`
-
-| Feature                       | `oxidized` (ByBox)              | `oxidized_by_ref` (ByRef)                       |
-| ----------------------------- | ------------------------------- | ----------------------------------------------- |
-| **Configuration Files**       | 2 files (copy_types, safe_ints) | 3 files (copy_types, owned_types, extern_types) |
-| **Copy Types Count**          | 138                             | 290                                             |
-| **Manual Implementations**    | ✅ Extensive (40+ files)        | ❌ Minimal                                      |
-| **Visitor Pattern**           | ✅ Full implementation          | ❌ Not provided                                 |
-| **Generated Implementations** | ✅ Additional impl_gen          | ❌ Simple generation                            |
-| **Memory Model**              | Heap allocated, owned           | Arena allocated, borrowed                       |
-| **Use Case**                  | Serialization, persistence      | High-performance processing                     |
-
 ## Type Safety Guidelines
 
 ### ✅ Safe for `copy_types.txt`
@@ -390,7 +379,6 @@ The `oxidized` crate serves as the foundation for:
 ## Further Reading
 
 - `hh_oxidize/` - Core oxidation tool implementation
-- `oxidized_by_ref/` - The arena-allocated variant for comparison
 - `manual/` directory - Examples of hand-written implementations
 - `aast_visitor/` - Visitor pattern documentation and examples
 - OCamlRep documentation for interoperability details

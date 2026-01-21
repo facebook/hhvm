@@ -57,7 +57,7 @@ std::string base64Encode(folly::ByteRange text) {
 
 // MD5 encode using openssl
 std::string md5Encode(folly::ByteRange text) {
-  static_assert(MD5_DIGEST_LENGTH == 16, "");
+  static_assert(MD5_DIGEST_LENGTH == 16);
 
   unsigned char digest[MD5_DIGEST_LENGTH];
   MD5(text.begin(), text.size(), digest);

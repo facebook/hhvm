@@ -31,7 +31,7 @@ namespace apache::thrift {
  * serializeFrameworkMetadata().
  */
 using InterceptorFrameworkMetadataStorage =
-    util::TypeErasedValue<1024, alignof(std::max_align_t)>;
+    util::TypeErasedValue<640, alignof(std::max_align_t)>;
 
 namespace detail {
 

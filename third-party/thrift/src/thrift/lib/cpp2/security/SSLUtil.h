@@ -21,12 +21,19 @@
 #include <folly/io/async/AsyncSocket.h>
 
 namespace apache::thrift {
+
+extern const std::string kSecurityProtocolStopTLS;
 /*
  * Takes an existing transport and creates a new socket with the same
- * underlying fd while trying to preserve as much information as possible. The
- * intended use case is to downgrade a secure transport to a plaintext one.
+ * underlying fd while trying to preserve as much information as possible.
+ *
+ * read() and write() I/O go to the `fd` directly, much like an AsyncSocket.
+ *
+ * Some of the TLS layer state (e.g. negotiated certificates, exporter secrets,
+ * etc.) is retained.
  */
 template <class FizzSocket>
-folly::AsyncSocketTransport::UniquePtr moveToPlaintext(FizzSocket* socket);
+folly::AsyncSocketTransport::UniquePtr toFDSocket(
+    FizzSocket* socket, const std::string& securityProtocol);
 
 } // namespace apache::thrift

@@ -28,14 +28,18 @@
 
 namespace apache::thrift {
 
-// private class meant to encapsulate all the information that needs to be
-// preserved across sockets for the tls downgrade scenario
+const std::string kSecurityProtocolStopTLS = "stopTLS";
+
 namespace {
 
+/**
+ * FDTransport acts as a `Parent`, but allows explicit setting and overriding
+ * of properties that will allow it to emulate a TLS-like transport.
+ */
 template <class Parent>
-class StopTLSSocket : public Parent {
+class FDTransport : public Parent {
  public:
-  StopTLSSocket(
+  FDTransport(
       folly::EventBase* evb,
       folly::NetworkSocket fd,
       uint32_t zeroCopyBufId,
@@ -45,7 +49,7 @@ class StopTLSSocket : public Parent {
         selfCert_(std::move(selfCert)),
         peerCert_(std::move(peerCert)) {}
 
-  StopTLSSocket(
+  FDTransport(
       folly::EventBase* evb,
       folly::NetworkSocket fd,
       std::shared_ptr<const fizz::Cert> selfCert,
@@ -54,7 +58,7 @@ class StopTLSSocket : public Parent {
         selfCert_(std::move(selfCert)),
         peerCert_(std::move(peerCert)) {}
 
-  StopTLSSocket(
+  FDTransport(
       folly::EventBase* evb,
       std::shared_ptr<const fizz::Cert> selfCert,
       std::shared_ptr<const fizz::Cert> peerCert)
@@ -62,7 +66,11 @@ class StopTLSSocket : public Parent {
         selfCert_(std::move(selfCert)),
         peerCert_(std::move(peerCert)) {}
 
-  std::string getSecurityProtocol() const override { return "stopTLS"; }
+  void setSecurityProtocol(std::string securityProtocol) {
+    securityProtocol_ = std::move(securityProtocol);
+  }
+
+  std::string getSecurityProtocol() const override { return securityProtocol_; }
 
   std::string getApplicationProtocol() const noexcept override { return alpn_; }
 
@@ -107,6 +115,7 @@ class StopTLSSocket : public Parent {
 
  private:
   // alpn of original socket, must save
+  std::string securityProtocol_;
   std::string alpn_;
   std::shared_ptr<const fizz::Cert> selfCert_;
   std::shared_ptr<const fizz::Cert> peerCert_;
@@ -116,7 +125,8 @@ class StopTLSSocket : public Parent {
 } // namespace
 
 template <class FizzSocket>
-folly::AsyncSocketTransport::UniquePtr moveToPlaintext(FizzSocket* fizzSock) {
+folly::AsyncSocketTransport::UniquePtr toFDSocket(
+    FizzSocket* fizzSock, const std::string& securityProtocol) {
   if (fizzSock == nullptr) {
     return nullptr;
   }
@@ -132,18 +142,19 @@ folly::AsyncSocketTransport::UniquePtr moveToPlaintext(FizzSocket* fizzSock) {
   }
 
   auto sock = fizzSock->template getUnderlyingTransport<folly::AsyncSocket>();
-  folly::AsyncSocketTransport::UniquePtr plaintextTransport;
+  folly::AsyncSocketTransport::UniquePtr ret;
 #if defined(__linux__) && __has_include(<liburing.h>)
   if (!sock &&
       fizzSock->template getUnderlyingTransport<folly::AsyncIoUringSocket>()) {
     // `AsyncFdSocket` currently lacks uring support, so hardcode `AsyncSocket`
-    auto stopTLSSocket = new StopTLSSocket<folly::AsyncSocket>(
+    auto fdTransport = new FDTransport<folly::AsyncSocket>(
         fizzSock->getEventBase(), selfCert, peerCert);
     if (cipher.hasValue()) {
-      stopTLSSocket->setCipher(cipher.value());
-      stopTLSSocket->setExportedMasterSecret(std::move(exportedMasterSecret));
+      fdTransport->setCipher(cipher.value());
+      fdTransport->setExportedMasterSecret(std::move(exportedMasterSecret));
     }
-    auto newSocket = folly::AsyncTransport::UniquePtr(stopTLSSocket);
+    fdTransport->setSecurityProtocol(securityProtocol);
+    auto newSocket = folly::AsyncTransport::UniquePtr(fdTransport);
     folly::AsyncIoUringSocket::UniquePtr io =
         fizzSock->template tryExchangeUnderlyingTransport<
             folly::AsyncIoUringSocket>(newSocket);
@@ -152,24 +163,25 @@ folly::AsyncSocketTransport::UniquePtr moveToPlaintext(FizzSocket* fizzSock) {
       io->setApplicationProtocol(fizzSock->getApplicationProtocol());
       io->setSelfCertificate(selfCert);
       io->setPeerCertificate(peerCert);
-      plaintextTransport = std::move(io);
+      ret = std::move(io);
     }
   }
 #endif
-  if (!plaintextTransport) {
+  if (!ret) {
     DCHECK(sock);
     auto eb = sock->getEventBase();
     auto fd = sock->detachNetworkSocket();
     auto zcId = sock->getZeroCopyBufId();
 
     // Create new socket from old, make sure not to throw
-    auto populateStopTLSSocket = [&](auto stopTLSSock) -> folly::AsyncSocket* {
-      stopTLSSock->setApplicationProtocol(fizzSock->getApplicationProtocol());
+    auto populate = [&](auto socket) -> folly::AsyncSocket* {
+      socket->setApplicationProtocol(fizzSock->getApplicationProtocol());
       if (cipher.hasValue()) {
-        stopTLSSock->setCipher(cipher.value());
-        stopTLSSock->setExportedMasterSecret(std::move(exportedMasterSecret));
+        socket->setCipher(cipher.value());
+        socket->setExportedMasterSecret(std::move(exportedMasterSecret));
       }
-      return stopTLSSock;
+      socket->setSecurityProtocol(securityProtocol);
+      return socket;
     };
 #if !defined(_WIN32) // No FD-passing on Windows, don't try to make it build.
     folly::SocketAddress addr;
@@ -177,7 +189,7 @@ folly::AsyncSocketTransport::UniquePtr moveToPlaintext(FizzSocket* fizzSock) {
     if (addr.getFamily() == AF_UNIX) {
       DCHECK_EQ(0, zcId) << "Zero-copy not supported on AF_UNIX sockets";
       auto newFdSock =
-          new StopTLSSocket<folly::AsyncFdSocket>(eb, fd, selfCert, peerCert);
+          new FDTransport<folly::AsyncFdSocket>(eb, fd, selfCert, peerCert);
       if (auto oldFdSock =
               fizzSock
                   ->template getUnderlyingTransport<folly::AsyncFdSocket>()) {
@@ -187,33 +199,32 @@ folly::AsyncSocketTransport::UniquePtr moveToPlaintext(FizzSocket* fizzSock) {
         // If the handshake was NOT negotiated over an `AsyncFdSocket`, then
         // the following race condition could happen:
         //  - Server closes TLS.
-        //  - Client succeeds at `moveToPlaintext`, sends an FD-bearing request
+        //  - Client succeeds at `toFDSocket`, sends an FD-bearing request
         //  - Server receives the data of the FD-bearing request on the
-        //    `FizzSocket` because `moveToPlaintext` has not yet succeeded.
+        //    `FizzSocket` because `toFDSocket` has not yet succeeded.
         //    The FDs are lost (or leaked), because the `recvmsg` in
         //    `AsyncSocket` does not know to read them from the received
         //    ancillary data.
         //  - In `ThriftFizzAcceptorHandshakeHelper::stopTLSSuccess` (more docs
-        //    there), server finished `moveToPlaintext` and moves the
+        //    there), server finished `toFDSocket` and moves the
         //    previously received request data to the new `AsyncFdSocket`.
         //  - Rocket parses a request that expects FDs, but fails to pop
         //    them from the `AsyncFdSocket` because it never got FDs.
         LOG(DFATAL) << "For AF_UNIX, AsyncFizzServer must always be backed by "
                     << "an underlying AsyncFdSocket";
       }
-      plaintextTransport.reset(populateStopTLSSocket(newFdSock));
+      ret.reset(populate(newFdSock));
     } else
 #endif
     {
-      plaintextTransport.reset(
-          populateStopTLSSocket(new StopTLSSocket<folly::AsyncSocket>(
-              eb, fd, zcId, selfCert, peerCert)));
+      ret.reset(populate(new FDTransport<folly::AsyncSocket>(
+          eb, fd, zcId, selfCert, peerCert)));
     }
   }
-  return plaintextTransport;
+  return ret;
 }
-template folly::AsyncSocketTransport::UniquePtr moveToPlaintext(
-    fizz::client::AsyncFizzClient* socket);
-template folly::AsyncSocketTransport::UniquePtr moveToPlaintext(
-    fizz::server::AsyncFizzServer* socket);
+template folly::AsyncSocketTransport::UniquePtr toFDSocket(
+    fizz::client::AsyncFizzClient* socket, const std::string& securityProtocol);
+template folly::AsyncSocketTransport::UniquePtr toFDSocket(
+    fizz::server::AsyncFizzServer* socket, const std::string& securityProtocol);
 } // namespace apache::thrift

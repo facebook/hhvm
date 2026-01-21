@@ -108,7 +108,8 @@ void ThriftFizzAcceptorHandshakeHelper::fizzHandshakeSuccess(
 void ThriftFizzAcceptorHandshakeHelper::stopTLSSuccess(
     std::unique_ptr<folly::IOBuf> endOfData) {
   auto appProto = transport_->getApplicationProtocol();
-  auto plaintextTransport = moveToPlaintext(transport_.get());
+  auto plaintextTransport =
+      toFDSocket(transport_.get(), kSecurityProtocolStopTLS);
   tinfo_.securityType = plaintextTransport->getSecurityProtocol();
 
   detail::setSockOptStopTLS(*plaintextTransport);

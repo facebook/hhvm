@@ -35,7 +35,6 @@ void compare(const Message& expected, const Message& actual) {
 
 class McAsciiParserHarness {
  public:
-  explicit McAsciiParserHarness(folly::IOBuf data) : data_(std::move(data)) {}
   explicit McAsciiParserHarness(const char* str)
       : data_(IOBuf::COPY_BUFFER, str, strlen(str)) {}
 

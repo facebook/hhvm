@@ -28,6 +28,7 @@
 #include <thrift/lib/cpp2/Flags.h>
 #include <thrift/lib/cpp2/async/ResponseChannel.h>
 #include <thrift/lib/cpp2/security/extensions/ThriftParametersContext.h>
+#include <thrift/lib/cpp2/security/extensions/ThriftParametersServerExtension.h>
 #include <thrift/lib/cpp2/server/Cpp2Connection.h>
 #include <thrift/lib/cpp2/server/LoggingEvent.h>
 #include <thrift/lib/cpp2/server/ThriftServer.h>
@@ -385,15 +386,12 @@ wangle::AcceptorHandshakeHelper::UniquePtr Cpp2Worker::makeHandshaker(
 
     auto transportOptions = server_->getFizzConfig().transportOptions;
 
-    std::shared_ptr<ThriftParametersContext> thriftParametersContext;
-    if (auto tpCtx = getThriftParametersContext(clientAddr)) {
-      thriftParametersContext = folly::copy_to_shared_ptr(*tpCtx);
-    }
+    auto thriftServerExtension = makeThriftServerExtension(clientAddr);
 
     folly::DelayedDestructionUniquePtr<ThriftFizzAcceptorHandshakeHelper>
         handshaker;
     handshaker.reset(new ThriftFizzAcceptorHandshakeHelper(
-        thriftParametersContext,
+        std::move(thriftServerExtension),
         fizzContext,
         sslContextManager,
         clientAddr,
@@ -423,26 +421,27 @@ bool Cpp2Worker::shouldPerformSSL(
   }
 }
 
-std::optional<ThriftParametersContext> Cpp2Worker::getThriftParametersContext(
-    const folly::SocketAddress& clientAddr) {
+std::shared_ptr<ThriftParametersServerExtension>
+Cpp2Worker::makeThriftServerExtension(const folly::SocketAddress& clientAddr) {
   auto thriftConfigBase =
       folly::get_ptr(accConfig_->customConfigMap, "thrift_tls_config");
   if (!thriftConfigBase) {
-    return std::nullopt;
+    return nullptr;
   }
   assert(static_cast<ThriftTlsConfig*>((*thriftConfigBase).get()));
   auto thriftConfig = static_cast<ThriftTlsConfig*>((*thriftConfigBase).get());
   if (!thriftConfig->enableThriftParamsNegotiation) {
-    return std::nullopt;
+    return nullptr;
   }
 
-  auto thriftParametersContext = ThriftParametersContext();
-  thriftParametersContext.setUseStopTLS(
+  auto thriftParametersContext = std::make_shared<ThriftParametersContext>();
+  thriftParametersContext->setUseStopTLS(
       clientAddr.getFamily() == AF_UNIX || thriftConfig->enableStopTLS ||
       **ThriftServer::enableStopTLS());
-  thriftParametersContext.setUseStopTLSV2(
+  thriftParametersContext->setUseStopTLSV2(
       thriftConfig->enableStopTLSV2 || **ThriftServer::enableStopTLSV2());
-  return thriftParametersContext;
+  return std::make_shared<ThriftParametersServerExtension>(
+      thriftParametersContext);
 }
 
 wangle::AcceptorHandshakeHelper::UniquePtr Cpp2Worker::getHelper(

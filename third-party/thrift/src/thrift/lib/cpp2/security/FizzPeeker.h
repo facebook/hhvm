@@ -63,8 +63,8 @@ class ThriftFizzAcceptorHandshakeHelper
       private AsyncStopTLS::Callback {
  public:
   ThriftFizzAcceptorHandshakeHelper(
-      std::shared_ptr<apache::thrift::ThriftParametersContext>
-          thriftParametersContext,
+      std::shared_ptr<apache::thrift::ThriftParametersServerExtension>
+          thriftExtension,
       std::shared_ptr<const fizz::server::FizzServerContext> context,
       std::shared_ptr<const wangle::SSLContextManager> sslContextManager,
       const folly::SocketAddress& clientAddr,
@@ -81,7 +81,7 @@ class ThriftFizzAcceptorHandshakeHelper
             std::move(options),
             transportOptions,
             {}),
-        thriftParametersContext_(thriftParametersContext) {}
+        thriftExtension_(std::move(thriftExtension)) {}
 
   void start(
       folly::AsyncSSLSocket::UniquePtr sock,
@@ -101,8 +101,6 @@ class ThriftFizzAcceptorHandshakeHelper
     callback_->connectionError(transport_.get(), ew, sslError_);
   }
 
-  std::shared_ptr<apache::thrift::ThriftParametersContext>
-      thriftParametersContext_;
   std::shared_ptr<apache::thrift::ThriftParametersServerExtension>
       thriftExtension_;
   AsyncStopTLS::UniquePtr stopTLSAsyncFrame_;

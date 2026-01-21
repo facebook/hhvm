@@ -40,11 +40,6 @@ void ThriftFizzAcceptorHandshakeHelper::start(
     wangle::AcceptorHandshakeHelper::Callback* callback) noexcept {
   callback_ = callback;
 
-  if (thriftParametersContext_) {
-    thriftExtension_ =
-        std::make_shared<apache::thrift::ThriftParametersServerExtension>(
-            thriftParametersContext_);
-  }
   transport_ = createFizzServer(
       std::move(sock), context_, thriftExtension_, transportOptions_);
   transport_->accept(this);

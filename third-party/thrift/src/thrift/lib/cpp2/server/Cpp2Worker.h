@@ -425,7 +425,7 @@ class Cpp2Worker : public IOWorkerContext,
       const std::vector<uint8_t>& bytes,
       const folly::SocketAddress& clientAddr);
 
-  std::optional<ThriftParametersContext> getThriftParametersContext(
+  std::shared_ptr<ThriftParametersServerExtension> makeThriftServerExtension(
       const folly::SocketAddress& clientAddr);
 
   static const std::string& errorCodeFromTapplicationException(

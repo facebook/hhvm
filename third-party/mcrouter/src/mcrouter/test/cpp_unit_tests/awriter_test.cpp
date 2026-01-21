@@ -40,11 +40,6 @@ class AtomicCounter {
     cond_.notify_all();
   }
 
-  void reset() {
-    std::lock_guard<std::mutex> lg(lock_);
-    cnt_ = 0;
-  }
-
   void wait(std::function<bool(int)> f) {
     std::unique_lock<std::mutex> ulock(lock_);
     cond_.wait(ulock, [&]() { return f(cnt_); });
@@ -60,12 +55,6 @@ struct counts {
   size_t success{0};
   size_t failure{0};
   AtomicCounter cnt;
-
-  void reset() {
-    success = 0;
-    failure = 0;
-    cnt.reset();
-  }
 };
 
 struct writelog_entry_t {

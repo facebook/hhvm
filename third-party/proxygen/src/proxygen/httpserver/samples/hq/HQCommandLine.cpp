@@ -148,10 +148,6 @@ DEFINE_uint32(key_update_interval,
               quic::kDefaultKeyUpdatePacketCountInterval,
               "Number of packets to be sent before initiating a key update (if "
               "initiate_key_updates is true)");
-DEFINE_bool(
-    writer_backpressure,
-    false,
-    "Enable backpressure in the batch writer. Only for non-batched writer");
 DEFINE_bool(use_l4s_ecn, false, "Whether to use L4S for ECN marking");
 DEFINE_bool(read_ecn,
             false,
@@ -266,8 +262,6 @@ void initializeTransportSettings(HQToolParams& hqUberParams) {
   hqParams.transportSettings.batchingMode =
       quic::getQuicBatchingMode(FLAGS_quic_batching_mode);
   hqParams.transportSettings.maxBatchSize = FLAGS_quic_batch_size;
-  hqParams.transportSettings.enableWriterBackpressure =
-      FLAGS_writer_backpressure;
   if (hqUberParams.mode == HQMode::CLIENT) {
     // There is no good reason to keep the socket around for a drain period
     // for a commandline client

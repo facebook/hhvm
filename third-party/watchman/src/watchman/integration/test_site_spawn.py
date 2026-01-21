@@ -12,7 +12,6 @@ import os
 import sys
 import unittest
 
-import pywatchman
 from watchman.integration.lib import HELPER_ROOT, WatchmanInstance
 
 SITE_SPAWN = os.path.join(HELPER_ROOT, "site_spawn.py")

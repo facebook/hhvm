@@ -8,8 +8,6 @@
 # pyre-unsafe
 
 
-import binascii
-import collections
 import inspect
 import os
 import struct
@@ -21,7 +19,6 @@ import uuid
 from pywatchman import (
     bser,
     client,
-    load,
     pybser,
     SocketConnectError,
     SocketTimeout,

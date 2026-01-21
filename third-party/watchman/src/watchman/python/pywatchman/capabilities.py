@@ -6,9 +6,6 @@
 # pyre-unsafe
 
 
-import re
-
-
 def parse_version(vstr) -> int:
     res = 0
     for n in vstr.split("."):

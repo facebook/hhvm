@@ -11,7 +11,6 @@ import os
 import sys
 import unittest
 
-import pywatchman
 from watchman.integration.lib import WatchmanInstance
 
 

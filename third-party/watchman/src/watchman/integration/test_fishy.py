@@ -8,8 +8,6 @@
 
 import os
 import subprocess
-import sys
-import unittest
 
 from watchman.integration.lib import WatchmanTestCase
 

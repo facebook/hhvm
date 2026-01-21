@@ -10,7 +10,6 @@ import binascii
 import collections.abc as collections_abc
 import ctypes
 import struct
-import sys
 
 
 BSER_ARRAY = b"\x00"

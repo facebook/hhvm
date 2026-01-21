@@ -127,8 +127,6 @@ class HTTPHeaders {
   void add(headers_initializer_list l);
   void rawAdd(const std::string& name, const std::string& value);
 
-  void addFromCodec(const char* str, size_t len, std::string&& value);
-
   /**
    * For the header 'name', set its value to the single header 'value',
    * removing any other instances of this header.

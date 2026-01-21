@@ -900,14 +900,11 @@ bool HTTP1xCodec::pushHeaderNameAndValue(HTTPHeaders& hdrs) {
       return false;
     }
   }
-  if (LIKELY(currentHeaderName_.empty())) {
-    hdrs.addFromCodec(currentHeaderNameStringPiece_.begin(),
-                      currentHeaderNameStringPiece_.size(),
-                      std::move(currentHeaderValue_));
-  } else {
-    hdrs.add(currentHeaderName_, std::move(currentHeaderValue_));
-    currentHeaderName_.clear();
-  }
+  auto headerName = currentHeaderName_.empty()
+                        ? currentHeaderNameStringPiece_
+                        : folly::StringPiece(currentHeaderName_);
+  hdrs.add(headerName, std::move(currentHeaderValue_));
+  currentHeaderName_.clear();
   currentHeaderNameStringPiece_.clear();
   currentHeaderValue_.clear();
   return true;

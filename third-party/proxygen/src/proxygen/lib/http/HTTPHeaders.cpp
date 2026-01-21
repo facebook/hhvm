@@ -63,15 +63,6 @@ void HTTPHeaders::rawAdd(const std::string& name, const std::string& value) {
   add(name, value);
 }
 
-void HTTPHeaders::addFromCodec(const char* str, size_t len, string&& value) {
-  const HTTPHeaderCode code = HTTPCommonHeaders::hash(str, len);
-  auto namePtr = (code == HTTP_HEADER_OTHER)
-                     ? new string(str, len)
-                     : (std::string*)HTTPCommonHeaders::getPointerToName(code);
-
-  emplace_back(code, namePtr, std::move(value));
-}
-
 bool HTTPHeaders::exists(folly::StringPiece name) const {
   const HTTPHeaderCode code = HTTPCommonHeaders::hash(name.data(), name.size());
   if (code != HTTP_HEADER_OTHER) {

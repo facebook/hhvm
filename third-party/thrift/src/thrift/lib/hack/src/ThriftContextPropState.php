@@ -132,6 +132,9 @@ final class ThriftContextPropState {
         $tfm = self::getTfmFromString($s, $skip_experiment_id_ingestion);
         self::get()->storage = $tfm;
         self::get()->dirty();
+        MCPUnsafeGlobalContext::set__FOR_THRIFT_CONTEXT_PROP_ONLY(
+          $tfm->origin_id,
+        );
 
         $rid = $tfm->request_id;
         if ($rid !== null && !Str\is_empty($rid)) {

@@ -198,3 +198,21 @@ func NewClient(opts ...ClientOption) (RequestChannel, error) {
 
 	return channel, nil
 }
+
+// NewClientV2 creates a new thrift client of type T.
+// Example usage:
+//
+//	client, err := thrift.NewClientV2[myservice.MyServiceClient](thrift.WithUpgradeToRocket(), thrift.WithTLS(...))
+func NewClientV2[T any](opts ...ClientOption) (T, error) {
+	var zero T
+	channel, err := NewClient(opts...)
+	if err != nil {
+		return zero, err
+	}
+	client, err := InternalConstructClientFromRegistry[T](channel)
+	if err != nil {
+		channel.Close()
+		return zero, err
+	}
+	return client, nil
+}

@@ -217,3 +217,39 @@ func TestValidTransportRequired(t *testing.T) {
 		NewClient( /* no transport option given */ )
 	})
 }
+
+func TestNewClientV2(t *testing.T) {
+	listener, err := net.Listen("tcp", ":0")
+	require.NoError(t, err)
+
+	processor := dummyif.NewDummyProcessor(&dummy.DummyHandler{})
+	server := NewServer(processor, listener, TransportIDUpgradeToRocket)
+
+	serverCtx, serverCancel := context.WithCancel(context.Background())
+	var serverEG errgroup.Group
+	serverEG.Go(func() error {
+		return server.ServeContext(serverCtx)
+	})
+
+	addr := listener.Addr()
+
+	client, err := NewClientV2[dummyif.DummyClient](
+		WithUpgradeToRocket(),
+		WithDialer(func() (net.Conn, error) {
+			return net.DialTimeout(addr.Network(), addr.String(), 5*time.Second)
+		}),
+	)
+	require.NoError(t, err)
+	require.NotNil(t, client)
+
+	response, err := client.Echo(context.Background(), "hello")
+	require.NoError(t, err)
+	require.Equal(t, "hello", response)
+
+	err = client.Close()
+	require.NoError(t, err)
+
+	serverCancel()
+	err = serverEG.Wait()
+	require.ErrorIs(t, err, context.Canceled)
+}

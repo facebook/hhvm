@@ -3575,7 +3575,7 @@ dependencies = [
  "serde_json",
  "strum",
  "thiserror 2.0.17",
- "toml 0.9.8",
+ "toml 0.9.11+spec-1.1.0",
 ]
 
 [[package]]
@@ -3588,7 +3588,7 @@ dependencies = [
  "once_cell",
  "regex",
  "serde",
- "toml 0.9.8",
+ "toml 0.9.11+spec-1.1.0",
 ]
 
 [[package]]
@@ -5396,9 +5396,9 @@ dependencies = [
 
 [[package]]
 name = "toml"
-version = "0.9.8"
+version = "0.9.11+spec-1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f0dc8b1fb61449e27716ec0e1bdf0f6b8f3e8f6b05391e8497b8b6d7804ea6d8"
+checksum = "f3afc9a848309fe1aaffaed6e1546a7a14de1f935dc9d89d32afd9a44bab7c46"
 dependencies = [
  "indexmap 2.12.1",
  "serde_core",

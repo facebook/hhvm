@@ -21,4 +21,4 @@ indexmap = { version = "2.9.0", features = ["arbitrary", "rayon", "serde"] }
 serde = { version = "1.0.219", features = ["derive", "rc"] }
 signed_source = { version = "0.0.0", path = "../../utils/rust/signed_source" }
 syn = { version = "1.0.109", features = ["extra-traits", "fold", "full", "visit", "visit-mut"] }
-toml = { version = "0.9.8", features = ["preserve_order"] }
+toml = { version = "0.9.11", features = ["preserve_order"] }

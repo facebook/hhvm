@@ -301,7 +301,7 @@ class THeader final {
   // these work with read headers
   void setReadHeaders(StringToStringMap&&);
   void setReadHeader(std::string_view key, std::string&& value);
-  void eraseReadHeader(const std::string& key);
+  void eraseReadHeader(std::string_view key);
   const StringToStringMap& getHeaders() const;
   StringToStringMap releaseHeaders();
 

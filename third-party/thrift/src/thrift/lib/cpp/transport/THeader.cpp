@@ -708,7 +708,7 @@ void THeader::setReadHeaders(THeader::StringToStringMap&& headers) {
   c_.readHeaders_ = std::move(headers);
 }
 
-void THeader::eraseReadHeader(const std::string& key) {
+void THeader::eraseReadHeader(std::string_view key) {
   if (c_.readHeaders_) {
     c_.readHeaders_->erase(key);
   }

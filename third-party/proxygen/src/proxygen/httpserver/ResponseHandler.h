@@ -47,8 +47,7 @@ class ResponseHandler {
       : upstream_(CHECK_NOTNULL(upstream)) {
   }
 
-  virtual ~ResponseHandler() {
-  }
+  virtual ~ResponseHandler() = default;
 
   /**
    * NOTE: We take response message as non-const reference, to allow filters

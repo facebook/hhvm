@@ -88,8 +88,7 @@ void HTTPServerAcceptor::setCompletionCallback(std::function<void()> f) {
   completionCallback_ = f;
 }
 
-HTTPServerAcceptor::~HTTPServerAcceptor() {
-}
+HTTPServerAcceptor::~HTTPServerAcceptor() = default;
 
 HTTPTransactionHandler* HTTPServerAcceptor::newHandler(
     HTTPTransaction& txn, HTTPMessage* msg) noexcept {

@@ -69,8 +69,7 @@ class HTTPTransactionHandlerAdaptor : public RequestHandler {
   void onEgressResumed() noexcept override {
     handler_->onEgressResumed();
   }
-  ~HTTPTransactionHandlerAdaptor() {
-  }
+  ~HTTPTransactionHandlerAdaptor() = default;
 
  private:
   HTTPTransactionHandler* handler_;

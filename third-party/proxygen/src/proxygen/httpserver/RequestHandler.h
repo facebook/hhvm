@@ -112,8 +112,7 @@ class RequestHandler {
     return downstream_;
   }
 
-  virtual ~RequestHandler() {
-  }
+  virtual ~RequestHandler() = default;
 
  protected:
   /**

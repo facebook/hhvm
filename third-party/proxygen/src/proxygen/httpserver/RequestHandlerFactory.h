@@ -17,8 +17,7 @@ namespace proxygen {
  */
 class RequestHandlerFactory {
  public:
-  virtual ~RequestHandlerFactory() {
-  }
+  virtual ~RequestHandlerFactory() = default;
 
   /**
    * Invoked in each thread server is going to handle requests

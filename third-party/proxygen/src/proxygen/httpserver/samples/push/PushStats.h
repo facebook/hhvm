@@ -19,8 +19,7 @@ namespace PushService {
  */
 class PushStats {
  public:
-  virtual ~PushStats() {
-  }
+  virtual ~PushStats() = default;
 
   // NOTE: We make the following methods `virtual` so that we can
   //       mock them using Gmock for our C++ unit-tests. PushStats

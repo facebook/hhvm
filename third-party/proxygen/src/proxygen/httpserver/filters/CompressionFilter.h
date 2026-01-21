@@ -25,8 +25,7 @@ class CompressionFilter : public Filter {
       : Filter(downstream), params_(std::move(params)) {
   }
 
-  virtual ~CompressionFilter() override {
-  }
+  virtual ~CompressionFilter() override = default;
 
   CompressionFilter(const CompressionFilter&) = delete;
   CompressionFilter& operator=(const CompressionFilter&) = delete;
@@ -154,8 +153,7 @@ class CompressionFilterFactory : public RequestHandlerFactory {
   CompressionFilterFactory(const Options& opts) : options_(opts) {
   }
 
-  virtual ~CompressionFilterFactory() {
-  }
+  virtual ~CompressionFilterFactory() = default;
 
   CompressionFilterFactory(const CompressionFilterFactory&) = delete;
   CompressionFilterFactory& operator=(const CompressionFilterFactory&) = delete;

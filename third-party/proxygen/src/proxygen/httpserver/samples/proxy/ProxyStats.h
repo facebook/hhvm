@@ -19,8 +19,7 @@ namespace ProxyService {
  */
 class ProxyStats {
  public:
-  virtual ~ProxyStats() {
-  }
+  virtual ~ProxyStats() = default;
 
   // NOTE: We make the following methods `virtual` so that we can
   //       mock them using Gmock for our C++ unit-tests. ProxyStats

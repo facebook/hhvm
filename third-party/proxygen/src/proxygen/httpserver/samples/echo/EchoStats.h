@@ -19,8 +19,7 @@ namespace EchoService {
  */
 class EchoStats {
  public:
-  virtual ~EchoStats() {
-  }
+  virtual ~EchoStats() = default;
 
   // NOTE: We make the following methods `virtual` so that we can
   //       mock them using Gmock for our C++ unit-tests. EchoStats

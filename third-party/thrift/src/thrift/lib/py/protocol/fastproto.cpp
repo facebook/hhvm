@@ -927,7 +927,7 @@ static PyObject* decode_val(
       reader->readMapBegin(ktype, vtype, len);
       if (ktype != parsedargs.ktype || vtype != parsedargs.vtype) {
         if (len == 0 &&
-            std::is_same<Reader, CompactProtocolReaderWithRefill>::value) {
+            std::is_same_v<Reader, CompactProtocolReaderWithRefill>) {
           reader->readMapEnd();
           return PyDict_New();
         }

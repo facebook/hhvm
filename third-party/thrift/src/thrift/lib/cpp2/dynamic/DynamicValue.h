@@ -24,6 +24,137 @@
 #include <string>
 #include <variant>
 
+// DynamicValue.h
+// ────────────────────────────────────────────────────────────────────────────
+// A C++ API for type-erased, type-safe Thrift values
+//
+// DynamicValue is the dynamic analog to Thrift's conventional code generation
+// layer. It provides a way to operate on Thrift values whose types are not
+// known at compile-time, while still maintaining full type safety through
+// runtime schema validation via the TypeSystem API.
+//
+// ────────────────────────────────────────────────────────────────────────────
+// Static Thrift vs. Dynamic Thrift
+// ────────────────────────────────────────────────────────────────────────────
+//
+// Static Thrift (compile-time schema):
+//
+//     Foo f;
+//     f.field_1() = 75;
+//     f.field_2() = "Hello world";
+//     serialize(f);
+//
+// Dynamic Thrift (run-time schema):
+//
+//     const type_system::TypeSystem& ts = ...;
+//     const type_system::StructNode& schema = ts.getUserDefinedTypeOrThrow(
+//         "meta.com/foo/Foo").asStruct();
+//     DynamicValue d = DynamicValue::makeDefault(schema.asRef());
+//     Struct& s = d.asStruct();
+//     s.setField("field_1", DynamicValue::makeI64(75));
+//     s.setField(FieldId{2}, DynamicValue::makeString("Hello world"));
+//     serialize(d);
+//
+// ────────────────────────────────────────────────────────────────────────────
+// Key Properties
+// ────────────────────────────────────────────────────────────────────────────
+//
+// Type-Safe:
+//   Every operation is validated against the runtime schema (via TypeSystem).
+//   Accessing the wrong type or a nonexistent field throws an exception.
+//
+// Owning:
+//   DynamicValue owns its data using C++ value semantics (copy and move).
+//   This means a DynamicValue may be mutable.
+//
+// ────────────────────────────────────────────────────────────────────────────
+// Class Hierarchy
+// ────────────────────────────────────────────────────────────────────────────
+//
+// clang-format off
+//
+//   ┌─────────────────────────────────────────────────────────────────────────┐
+//   │                          DynamicValue                                   │
+//   │                    (owning, type-safe value)                            │
+//   │                                                                         │
+//   │  - Owns its data (copy/move semantics)                                  │
+//   │  - Mutable access via as*() methods                                     │
+//   │  - Factory methods: makeBool(), makeI32(), makeStruct(), etc.           │
+//   └─────────────────────────────────────────────────────────────────────────┘
+//                                       │
+//                              can be viewed through
+//                                       │
+//                ┌──────────────────────┴────────────────────────┐
+//                │                                               │
+//                ▼                                               ▼
+//   ┌─────────────────────────┐                     ┌─────────────────────────┐
+//   │      DynamicRef         │      implicit       │    DynamicConstRef      │
+//   │                         │     conversion      │                         │
+//   │  - Non-owning           │────────────────────▶│  - Non-owning           │
+//   │  - Mutable access       │                     │  - Read-only access     │
+//   └─────────────────────────┘                     └─────────────────────────┘
+//
+// clang-format on
+//
+// ────────────────────────────────────────────────────────────────────────────
+// Supported Thrift Types
+// ────────────────────────────────────────────────────────────────────────────
+//
+// All Thrift types are supported, including Any and opaque alias types.
+//
+// ────────────────────────────────────────────────────────────────────────────
+// Comparison with Other APIs
+// ────────────────────────────────────────────────────────────────────────────
+//
+// vs. protocol::Value:
+//   DynamicValue is type-safe, supports all Thrift serialization protocols, and
+//   is generally more performant. It should replace most scenarios where
+//   protocol::Value is used but type information is available.
+//   protocol::Value is still useful for unschematized views of
+//   compact/binary-encoded data.
+//
+// vs. thrift::Any:
+//   Any is for shuttling data whose schema you don't care about across system
+//   boundaries. DynamicValue is for interacting with data whose schema you do
+//   care about, but is only available at runtime.
+//   These may be combined — a service method may accept an `Any` and its schema
+//   as arguments and operate on it using `DynamicValue`.
+//
+// vs. Protobuf DynamicMessage:
+//   DynamicValue is the Thrift equivalent, but with stricter type safety and
+//   full protocol support.
+//
+// ────────────────────────────────────────────────────────────────────────────
+// Summary of Types
+// ────────────────────────────────────────────────────────────────────────────
+//
+// DynamicValue:
+//   An owning, type-safe, type-erased Thrift value. Supports mutable
+//   operations and follows C++ value semantics (copy/move).
+//
+// DynamicRef:
+//   A non-owning, mutable reference to a DynamicValue. Use this to provide
+//   a view into container elements without copying. The referenced data must
+//   remain valid for the lifetime of the DynamicRef.
+//
+// DynamicConstRef:
+//   A non-owning, const reference to a DynamicValue. Use this for read-only
+//   access to container elements. Implicitly convertible from DynamicRef.
+//   The referenced data must remain valid for the lifetime of the
+//   DynamicConstRef.
+//
+// Handle Types (defined in separate headers):
+//   - String:  UTF-8 encoded string value
+//   - Binary:  Arbitrary byte sequence (via folly::IOBuf)
+//   - Any:     Type-erased Thrift value (via type::AnyData)
+//   - List:    Ordered sequence of homogeneous elements
+//   - Set:     Unordered collection of unique elements
+//   - Map:     Key-value associative container
+//   - Struct:  Named, typed fields with field ID access
+//   - Union:   Exactly one active field at a time
+
+// WARNING: This code is highly experimental.
+// DO NOT USE for any production code.
 namespace apache::thrift::dynamic {
 
 // Forward declarations

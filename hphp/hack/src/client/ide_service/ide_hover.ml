@@ -115,13 +115,19 @@ let callee_def_pos ctx recv : Pos_or_decl.t option =
       Option.map c ~f:Folded_class.pos)
 
 (* Return the name of the [n]th parameter in [params], handling
-   variadics correctly. *)
+   variadics and splat parameters correctly.
+   For splat parameters, we suffix [i] on the parameter name to indicate
+   that it's the i'th element of the splat tuple.
+*)
 let nth_param_name (params : ('a, 'b) Aast.fun_param list) (n : int) :
     string option =
   let param =
     if n >= List.length params then
       match List.last params with
-      | Some param when Aast_utils.is_param_variadic param -> Some param
+      | Some param
+        when Aast_utils.is_param_variadic param
+             || Aast_utils.is_param_splat param ->
+        Some param
       | _ -> None
     else
       List.nth params n
@@ -129,6 +135,11 @@ let nth_param_name (params : ('a, 'b) Aast.fun_param list) (n : int) :
   Option.map param ~f:(fun param ->
       if Aast_utils.is_param_variadic param then
         "..." ^ param.Aast.param_name
+      else if Aast_utils.is_param_splat param then
+        Printf.sprintf
+          "%s[%d]"
+          param.Aast.param_name
+          (n - List.length params + 1)
       else
         param.Aast.param_name)
 

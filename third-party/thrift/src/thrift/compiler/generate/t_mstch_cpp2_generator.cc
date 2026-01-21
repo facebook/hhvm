@@ -1567,9 +1567,6 @@ class cpp_mstch_type : public mstch_type {
              &cpp_mstch_type::transitively_refers_to_struct},
             {"type:string_or_binary?", &cpp_mstch_type::is_string_or_binary},
             {"type:non_empty_struct?", &cpp_mstch_type::is_non_empty_struct},
-            {"type:cpp_declare_hash", &cpp_mstch_type::cpp_declare_hash},
-            {"type:cpp_declare_equal_to",
-             &cpp_mstch_type::cpp_declare_equal_to},
             {"type:type_class", &cpp_mstch_type::type_class},
             {"type:type_tag", &cpp_mstch_type::type_tag},
             {"type:cpp_use_allocator?", &cpp_mstch_type::cpp_use_allocator},
@@ -1640,18 +1637,6 @@ class cpp_mstch_type : public mstch_type {
   }
   mstch::node is_string_or_binary() {
     return resolved_type_->is_string_or_binary();
-  }
-  mstch::node cpp_declare_hash() {
-    return resolved_type_->has_unstructured_annotation(
-               {"cpp.declare_hash", "cpp2.declare_hash"}) ||
-        resolved_type_->has_structured_annotation(
-            kCppDeclareHashSpecialization);
-  }
-  mstch::node cpp_declare_equal_to() {
-    return resolved_type_->has_unstructured_annotation(
-               {"cpp.declare_equal_to", "cpp2.declare_equal_to"}) ||
-        resolved_type_->has_structured_annotation(
-            kCppDeclareEqualToSpecialization);
   }
   mstch::node cpp_use_allocator() {
     return !!t_typedef::get_first_unstructured_annotation_or_null(

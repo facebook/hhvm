@@ -174,10 +174,12 @@ void AnyPatch<Patch>::patchIfTypeIsImpl(
 template <class Patch>
 void AnyPatch<Patch>::patchIfTypeIsImpl(
     type::Type type, protocol::DynamicPatch dynamicPatch, bool after) {
-  if (after) {
-    data_.patchIfTypeIsAfter()[type].merge(std::move(dynamicPatch));
-  } else {
-    data_.patchIfTypeIsPrior()[type].merge(std::move(dynamicPatch));
+  auto& map = after ? *data_.patchIfTypeIsAfter() : *data_.patchIfTypeIsPrior();
+  auto [it, inserted] = map.try_emplace(type, std::move(dynamicPatch));
+  if (!inserted) {
+    // conditional move didn't happen
+    // @lint-ignore CLANGTIDY bugprone-use-after-move
+    it->second.merge(std::move(dynamicPatch));
   }
 }
 

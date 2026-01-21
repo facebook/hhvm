@@ -37,23 +37,22 @@ const char CRLF[] = "\r\n";
  * @param dst    Location to which the value will be written.
  * @return Number of bytes written.
  */
-unsigned u64toa(uint64_t value, void* dst) {
+unsigned u64toa(uint64_t value, char* dst) {
   // Write backwards.
-  char* next = (char*)dst;
-  char* start = next;
+  char* start = dst;
   do {
-    *next++ = '0' + (value % 10);
+    *dst++ = '0' + (value % 10);
     value /= 10;
   } while (value != 0);
-  unsigned length = next - start;
+  unsigned length = dst - start;
 
   // Reverse in-place.
-  next--;
-  while (next > start) {
-    char swap = *next;
-    *next = *start;
+  dst--;
+  while (dst > start) {
+    char swap = *dst;
+    *dst = *start;
     *start = swap;
-    next--;
+    dst--;
     start++;
   }
   return length;

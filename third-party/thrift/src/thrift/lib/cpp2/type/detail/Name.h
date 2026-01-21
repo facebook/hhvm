@@ -17,9 +17,8 @@
 #pragma once
 
 #include <fmt/core.h>
-#include <fatal/type/array.h>
 #include <folly/lang/Pretty.h>
-#include <thrift/lib/cpp2/reflection/reflection.h>
+#include <thrift/lib/cpp2/Thrift.h>
 #include <thrift/lib/cpp2/type/NativeType.h>
 #include <thrift/lib/cpp2/type/ThriftType.h>
 

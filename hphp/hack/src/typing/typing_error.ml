@@ -761,6 +761,11 @@ module Primary = struct
         class_id: string;
         id: string;
       }
+    | Needs_concrete_in_final_class of {
+        pos: Pos.t;
+        class_name: string;
+        meth_name: string;
+      }
     | Trivial_strict_eq of {
         pos: Pos.t;
         result: bool;

@@ -791,6 +791,7 @@ module Typing = struct
     | LambdaNamedParamMismatch [@value 4502]
     | OverrideSealed [@value 4503]
     | ExpectBoolForCondition [@value 4504]
+    | NeedsConcreteInFinalClass [@value 4505]
   (* Add new Typing codes here! Comment out when deprecating. *)
   [@@deriving enum, show { with_path = false }]
 

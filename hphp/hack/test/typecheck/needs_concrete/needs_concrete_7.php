@@ -8,7 +8,7 @@ abstract class C {
   public abstract static function bar(): void;
 }
 
-final class D extends C {
+class D extends C {
   public static function bar(): void {
     echo "D::bar\n";
   }

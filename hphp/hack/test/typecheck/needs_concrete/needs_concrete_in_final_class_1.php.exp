@@ -1,0 +1,2 @@
+ERROR: File "needs_concrete_in_final_class_1.php", line 5, characters 26-27:
+The `__NeedsConcrete` attribute is not allowed on `Finale::m1` because `Finale` is a final class. The `__NeedsConcrete` attribute is for safe inheritance so should only be used in non-final classes. (Typing[4505])

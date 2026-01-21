@@ -1936,6 +1936,7 @@ let class_def_ env c tc =
     class_wellformedness_checks env c tc parents
   in
   let env = class_hierarchy_checks env c tc parents in
+  Typing_needs_concrete.check_class_def env c tc;
   let ( env,
         ( typed_consts,
           typed_typeconsts,

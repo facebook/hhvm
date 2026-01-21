@@ -2698,6 +2698,22 @@ end = struct
     in
     create ~code:Error_code.ShouldNotBeOverride ~claim ()
 
+  let needs_concrete_in_final_class pos class_name meth_name =
+    let claim =
+      lazy
+        ( pos,
+          Printf.sprintf
+            "The %s attribute is not allowed on %s because %s is a final class. The %s attribute is for safe inheritance so should only be used in non-final classes."
+            (Markdown_lite.md_codify
+               Naming_special_names.UserAttributes.uaNeedsConcrete)
+            (Markdown_lite.md_codify
+               (Render.strip_ns class_name ^ "::" ^ meth_name))
+            (Markdown_lite.md_codify (Render.strip_ns class_name))
+            (Markdown_lite.md_codify
+               Naming_special_names.UserAttributes.uaNeedsConcrete) )
+    in
+    create ~code:Error_code.NeedsConcreteInFinalClass ~claim ()
+
   let typedef_trail_entry pos = (pos, "Typedef definition comes from here")
 
   let trivial_strict_eq p b left right left_trail right_trail =
@@ -4829,6 +4845,8 @@ end = struct
       override_per_trait (pos, class_name) meth_name trait_name meth_pos
     | Should_not_be_override { pos; class_id; id } ->
       should_not_be_override pos class_id id
+    | Needs_concrete_in_final_class { pos; class_name; meth_name } ->
+      needs_concrete_in_final_class pos class_name meth_name
     | Trivial_strict_eq { pos; result; left; right; left_trail; right_trail } ->
       trivial_strict_eq pos result left right left_trail right_trail
     | Trivial_strict_not_nullable_compare_null { pos; result; ty_reason_msg } ->

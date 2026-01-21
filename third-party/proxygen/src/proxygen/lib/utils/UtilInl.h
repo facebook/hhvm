@@ -23,11 +23,7 @@ namespace proxygen {
 
 // Case-insensitive string comparison
 inline bool caseInsensitiveEqual(folly::StringPiece s, folly::StringPiece t) {
-  if (s.size() != t.size()) {
-    return false;
-  }
-  return std::equal(
-      s.begin(), s.end(), t.begin(), folly::AsciiCaseInsensitive());
+  return s.equals(t, folly::AsciiCaseInsensitive{});
 }
 
 struct AsciiCaseUnderscoreInsensitive {
@@ -45,12 +41,7 @@ struct AsciiCaseUnderscoreInsensitive {
 // Case-insensitive string comparison
 inline bool caseUnderscoreInsensitiveEqual(folly::StringPiece s,
                                            folly::StringPiece t) {
-  if (s.size() != t.size()) {
-    return false;
-  }
-  bool result = std::equal(
-      s.begin(), s.end(), t.begin(), AsciiCaseUnderscoreInsensitive());
-  return result;
+  return s.equals(t, AsciiCaseUnderscoreInsensitive{});
 }
 
 enum class URLValidateMode { STRICT_COMPAT, STRICT };

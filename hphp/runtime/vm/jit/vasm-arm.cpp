@@ -1263,30 +1263,38 @@ void Vgen::emit(const unpcklpd& i) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void Vgen::emit(const cmpsd& i) {
-  /*
-   * cmpsd doesn't update SD, so read the flags into a temp.
-   * Use one of the macroassembler scratch regs .
-   */
-  a->SetScratchRegisters(vixl::NoReg, vixl::NoReg);
-  a->Mrs(rVixlScratch0, NZCV);
+/*
+ * Use of comparison to zero in unordered
+ * case may not be obvious. 
+ *
+ * fcmeq                fcmeqz
+ * ===================  =======
+ * op1   op2    result  result2
+ * ----  ----   ------  -------
+ * Num == Num     T     F
+ * Num != Num     F     T
+ * Num    SNaN    F     T
+ * Num    QNaN    F     T
+ * SNaN   Num     F     T
+ * SNaN   SNaN    F     T
+ * SNaN   QNaN    F     T
+ * QNaN   Num     F     T
+ * QNaN   SNaN    F     T
+ * QNaN   QNaN    F     T
+ */
 
-  a->Fcmp(D(i.s0), D(i.s1));
+void Vgen::emit(const cmpsd& i) {
   switch (i.pred) {
   case ComparisonPred::eq_ord:
-    a->Csetm(rAsm, C(jit::CC_E));
+    a->fcmeq(D(i.d), D(i.s0), D(i.s1));
     break;
   case ComparisonPred::ne_unord:
-    a->Csetm(rAsm, C(jit::CC_NE));
+    a->fcmeq(D(i.d), D(i.s0), D(i.s1));
+    a->fcmeqz(D(i.d), D(i.d));
     break;
   default:
     always_assert(false);
   }
-  a->Fmov(D(i.d), rAsm);
-
-  /* Copy the flags back to the system register. */
-  a->Msr(NZCV, rVixlScratch0);
-  a->SetScratchRegisters(rVixlScratch0, rVixlScratch1);
 }
 
 
@@ -2094,9 +2102,7 @@ void lower(const VLS& e, movtql& i, Vlabel b, size_t z) {
 
 void lower(const VLS& e, movtdb& i, Vlabel b, size_t z) {
   lower_impl(e.unit, b, z, [&] (Vout& v) {
-    auto d = v.makeReg();
-    v << copy{i.s, d};
-    v << movtqb{d, i.d};
+    v << copy{i.s, i.d};
   });
 }
 

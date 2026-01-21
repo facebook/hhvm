@@ -2052,6 +2052,16 @@ void Simulator::VisitFPDataProcessing3Source(Instruction* instr) {
 }
 
 
+void Simulator::VisitSIMDScalarThreeSame(Instruction* instr) {
+  VisitUnimplemented(instr);
+}
+
+
+void Simulator::VisitSIMDScalarTwoMisc(Instruction* instr) {
+  VisitUnimplemented(instr);
+}
+
+
 double Simulator::FPMax(double a, double b) {
   if (std::isnan(a)) {
     return a;

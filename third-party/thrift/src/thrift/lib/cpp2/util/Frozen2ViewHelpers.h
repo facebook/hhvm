@@ -34,8 +34,7 @@ struct ViewHelper {
 template <typename ViewT>
 struct ViewHelper<
     ViewT,
-    std::enable_if_t<
-        std::is_arithmetic<ViewT>::value || std::is_enum<ViewT>::value>> {
+    std::enable_if_t<std::is_arithmetic_v<ViewT> || std::is_enum_v<ViewT>>> {
   using ViewType = ViewT;
   using ObjectType = ViewT;
 

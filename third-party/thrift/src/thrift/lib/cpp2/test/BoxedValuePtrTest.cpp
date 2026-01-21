@@ -164,8 +164,8 @@ TEST(BoxedPtrTest, UniquePtrConstructor) {
 }
 
 TEST(BoxedPtrTest, CopyConstructorAndAssignment) {
-  static_assert(!std::is_copy_constructible<boxed_ptr<TestStruct>>::value);
-  static_assert(!std::is_copy_assignable<boxed_ptr<TestStruct>>::value);
+  static_assert(!std::is_copy_constructible_v<boxed_ptr<TestStruct>>);
+  static_assert(!std::is_copy_assignable_v<boxed_ptr<TestStruct>>);
 }
 
 TEST(BoxedPtrTest, MoveConstructor) {

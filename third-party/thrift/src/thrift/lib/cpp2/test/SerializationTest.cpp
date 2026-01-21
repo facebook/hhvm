@@ -425,16 +425,16 @@ TEST(SerializationTest, UnsignedIntStruct) {
   TestUnsignedIntStruct s;
 
   static_assert(
-      std::is_same<decltype(s.u8())::value_type, uint8_t>::value,
+      std::is_same_v<decltype(s.u8())::value_type, uint8_t>,
       "Unexpected type for s.u8");
   static_assert(
-      std::is_same<decltype(s.u16())::value_type, uint16_t>::value,
+      std::is_same_v<decltype(s.u16())::value_type, uint16_t>,
       "Unexpected type for s.u16");
   static_assert(
-      std::is_same<decltype(s.u32())::value_type, uint32_t>::value,
+      std::is_same_v<decltype(s.u32())::value_type, uint32_t>,
       "Unexpected type for s.u32");
   static_assert(
-      std::is_same<decltype(s.u64())::value_type, uint64_t>::value,
+      std::is_same_v<decltype(s.u64())::value_type, uint64_t>,
       "Unexpected type for s.u64");
 
   *s.u8() = 128U;
@@ -455,16 +455,16 @@ TEST(SerializationTest, UnsignedIntUnion) {
   TestUnsignedIntUnion u;
 
   static_assert(
-      std::is_same<decltype(u.get_u8()), const uint8_t&>::value,
+      std::is_same_v<decltype(u.get_u8()), const uint8_t&>,
       "Unexpected return value type for u.get_u8()");
   static_assert(
-      std::is_same<decltype(u.get_u16()), const uint16_t&>::value,
+      std::is_same_v<decltype(u.get_u16()), const uint16_t&>,
       "Unexpected return value type for u.get_u16()");
   static_assert(
-      std::is_same<decltype(u.get_u32()), const uint32_t&>::value,
+      std::is_same_v<decltype(u.get_u32()), const uint32_t&>,
       "Unexpected return value type for u.get_u32()");
   static_assert(
-      std::is_same<decltype(u.get_u64()), const uint64_t&>::value,
+      std::is_same_v<decltype(u.get_u64()), const uint64_t&>,
       "Unexpected return value type for s.get_u64()");
 
   u.u64() = 9223372036854775808ULL;
@@ -482,7 +482,7 @@ TEST(SerializationTest, UnsignedInt32ListStruct) {
   TestUnsignedInt32ListStruct s;
 
   static_assert(
-      std::is_same<decltype(s.l())::value_type, std::vector<uint32_t>>::value,
+      std::is_same_v<decltype(s.l())::value_type, std::vector<uint32_t>>,
       "Unexpected type for s.l");
 
   s.l()->push_back(1073741824UL);
@@ -503,8 +503,7 @@ TEST(SerializationTest, UnsignedIntMap) {
   TestUnsignedIntMapStruct s;
 
   static_assert(
-      std::is_same<decltype(s.m())::value_type, std::map<uint32_t, uint64_t>>::
-          value,
+      std::is_same_v<decltype(s.m())::value_type, std::map<uint32_t, uint64_t>>,
       "Unexpected type for s.m");
 
   s.m()[1073741824UL] = 4611686018427387904ULL;

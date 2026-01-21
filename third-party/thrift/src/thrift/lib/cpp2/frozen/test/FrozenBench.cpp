@@ -197,9 +197,9 @@ template <
     typename M,
     typename T,
     std::enable_if_t<
-        !std::is_same<
+        !std::is_same_v<
             typename M::key_type,
-            detail::FixedSizeStringLayout<FixedSizeString<8>>::View>::value,
+            detail::FixedSizeStringLayout<FixedSizeString<8>>::View>,
         bool> = true>
 typename M::const_iterator mapFind(const M& map, const T& key) {
   return map.find(key);
@@ -211,12 +211,12 @@ template <
     typename M,
     typename T,
     std::enable_if_t<
-        std::is_same<
+        std::is_same_v<
             typename M::key_type,
-            detail::FixedSizeStringLayout<FixedSizeString<8>>::View>::value,
+            detail::FixedSizeStringLayout<FixedSizeString<8>>::View>,
         bool> = true>
 typename M::const_iterator mapFind(const M& map, const T& key) {
-  static_assert(std::is_same<T, FixedSizeString<8>>::value);
+  static_assert(std::is_same_v<T, FixedSizeString<8>>);
   auto keyView = folly::ByteRange{
       reinterpret_cast<const uint8_t*>(key.data()), key.size()};
   return map.find(keyView);

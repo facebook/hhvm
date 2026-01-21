@@ -259,8 +259,7 @@ class THeader final {
   }
   [[deprecated("Use setTTransforms instead.")]]
   void setTransforms(const std::vector<uint16_t>& trans) {
-    static_assert(
-        std::is_same_v<std::underlying_type<TTransform>::type, uint16_t>);
+    static_assert(std::is_same_v<std::underlying_type_t<TTransform>, uint16_t>);
     setTTransforms(reinterpret_cast<const std::vector<TTransform>&>(trans));
   }
 
@@ -269,16 +268,14 @@ class THeader final {
   }
   [[deprecated("Use getTTransforms instead.")]]
   const std::vector<uint16_t>& getTransforms() const {
-    static_assert(
-        std::is_same_v<std::underlying_type<TTransform>::type, uint16_t>);
+    static_assert(std::is_same_v<std::underlying_type_t<TTransform>, uint16_t>);
     return reinterpret_cast<const std::vector<uint16_t>&>(getTTransforms());
   }
 
   std::vector<TTransform>& getWriteTTransforms() { return c_.writeTrans_; }
   [[deprecated("Use getWriteTTransforms instead.")]]
   std::vector<uint16_t>& getWriteTransforms() {
-    static_assert(
-        std::is_same_v<std::underlying_type<TTransform>::type, uint16_t>);
+    static_assert(std::is_same_v<std::underlying_type_t<TTransform>, uint16_t>);
     return reinterpret_cast<std::vector<uint16_t>&>(getWriteTTransforms());
   }
 

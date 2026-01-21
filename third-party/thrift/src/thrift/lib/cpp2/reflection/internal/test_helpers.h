@@ -44,7 +44,7 @@ struct expect_same {
         line_caption,
         line_,
         lhs_name == rhs_name ? lhs_name.c_str() : rhs_name.c_str(),
-        std::is_same<LHS, RHS>::value);
+        std::is_same_v<LHS, RHS>);
     EXPECT_EQ(lhs, rhs);
   }
 

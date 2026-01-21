@@ -47,7 +47,7 @@ class DebugHasher {
   std::string&& getResult() && { return std::move(result_); }
 
   template <typename Value>
-  typename std::enable_if<std::is_arithmetic<Value>::value, void>::type combine(
+  std::enable_if_t<std::is_arithmetic_v<Value>, void> combine(
       const Value& value) {
     handlePrefix();
     combine(folly::to<std::string>(value));

@@ -27,14 +27,14 @@ template <uint64_t x>
 // TODO: Replace `encode_<base64url(name)>` with encode_thrift_header, and add
 // that header to proxygen/lib/http/HTTPCommonHeaders.txt
 // encode_C2VYDMLJZXJVDXRLCJPOB3BFCGF0AA = "servicerouter:hop_path"
-typename std::enable_if<(x > 200), bool>::type isEncodeHeader(
+std::enable_if_t<(x > 200), bool> isEncodeHeader(
     proxygen::HTTPHeaderCode code, const std::string& key) {
   return code == proxygen::HTTP_HEADER_ENCODE_C2VYDMLJZXJVDXRLCJPOB3BFCGF0AA ||
       (code == proxygen::HTTP_HEADER_OTHER &&
        folly::StringPiece(key).startsWith("encode_"));
 }
 template <uint64_t x>
-typename std::enable_if<(x <= 200), bool>::type isEncodeHeader(
+std::enable_if_t<(x <= 200), bool> isEncodeHeader(
     proxygen::HTTPHeaderCode code, const std::string& key) {
   return (
       code == proxygen::HTTP_HEADER_OTHER &&

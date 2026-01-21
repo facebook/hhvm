@@ -87,7 +87,7 @@ T reading_cpp2(ByteRange input, function<T(R&)> f) {
 
 template <typename T>
 T reading_cpp2(StringPiece input, function<T(R&)>&& f) {
-  using F = typename std::remove_reference<decltype(f)>::type;
+  using F = std::remove_reference_t<decltype(f)>;
   return reading_cpp2(ByteRange(input), std::forward<F>(f));
 }
 

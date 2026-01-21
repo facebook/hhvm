@@ -143,8 +143,7 @@ struct TrivialFreezer {
 template <class T>
 struct Freezer<
     T,
-    typename std::enable_if<
-        std::is_pod<T>::value && !std::is_const<T>::value>::type>
+    std::enable_if_t<std::is_pod<T>::value && !std::is_const_v<T>>>
     : TrivialFreezer<T> {};
 
 /**
@@ -185,7 +184,7 @@ struct z {
 } // namespace frzn_dtl
 
 template <typename T>
-using FrozenSizeOf = frzn_dtl::z<typename std::decay<T>::type>;
+using FrozenSizeOf = frzn_dtl::z<std::decay_t<T>>;
 
 /**
  * frozenSize - Total space needed to store a frozen representation of 'src'.
@@ -441,10 +440,9 @@ template <
     class FrozenItem,
     class Range,
     class = decltype(std::declval<Range>().begin())>
-typename std::
-    enable_if<!apache::thrift::detail::IsFrozenRange<Range>::value, bool>::type
-    operator<(
-        const Range& range, const FrozenRange<ThawedItem, FrozenItem>& frozen) {
+std::enable_if_t<!apache::thrift::detail::IsFrozenRange<Range>::value, bool>
+operator<(
+    const Range& range, const FrozenRange<ThawedItem, FrozenItem>& frozen) {
   return frozen > range;
 }
 
@@ -453,10 +451,9 @@ template <
     class FrozenItem,
     class Range,
     class = decltype(std::declval<Range>().begin())>
-typename std::
-    enable_if<!apache::thrift::detail::IsFrozenRange<Range>::value, bool>::type
-    operator==(
-        const Range& range, const FrozenRange<ThawedItem, FrozenItem>& frozen) {
+std::enable_if_t<!apache::thrift::detail::IsFrozenRange<Range>::value, bool>
+operator==(
+    const Range& range, const FrozenRange<ThawedItem, FrozenItem>& frozen) {
   return range.size() == frozen.size() &&
       std::equal(range.begin(), range.end(), frozen.begin());
 }

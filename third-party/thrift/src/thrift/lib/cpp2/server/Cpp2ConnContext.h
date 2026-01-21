@@ -666,8 +666,7 @@ class Cpp2RequestContext : public apache::thrift::server::TConnectionContext {
   }
 
   virtual std::vector<uint16_t>& getTransforms() {
-    static_assert(
-        std::is_same_v<std::underlying_type<TTransform>::type, uint16_t>);
+    static_assert(std::is_same_v<std::underlying_type_t<TTransform>, uint16_t>);
     return reinterpret_cast<std::vector<uint16_t>&>(
         header_->getWriteTTransforms());
   }

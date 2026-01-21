@@ -575,8 +575,7 @@ unique_ptr<IOBuf> THeader::untransform(
 
 /* static */ unique_ptr<IOBuf> THeader::untransform(
     unique_ptr<IOBuf> buf, std::vector<uint16_t>& readTrans) {
-  static_assert(
-      std::is_same_v<std::underlying_type<TTransform>::type, uint16_t>);
+  static_assert(std::is_same_v<std::underlying_type_t<TTransform>, uint16_t>);
   return untransform(
       std::move(buf), reinterpret_cast<std::vector<TTransform>&>(readTrans));
 }
@@ -608,8 +607,7 @@ unique_ptr<IOBuf> THeader::untransform(
     std::unique_ptr<folly::IOBuf> buf,
     std::vector<uint16_t>& writeTrans,
     size_t minCompressBytes) {
-  static_assert(
-      std::is_same_v<std::underlying_type<TTransform>::type, uint16_t>);
+  static_assert(std::is_same_v<std::underlying_type_t<TTransform>, uint16_t>);
   return transform(
       std::move(buf),
       reinterpret_cast<std::vector<TTransform>&>(writeTrans),

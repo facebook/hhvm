@@ -53,7 +53,7 @@ class BaseDerived {
 template <typename T, typename Tag = infer_tag<T>>
 class Wrap {
  public:
-  static_assert(std::is_same<native_type<Tag>, T>::value);
+  static_assert(std::is_same_v<native_type<Tag>, T>);
 
   using underlying_type = T;
   using underlying_tag = Tag;

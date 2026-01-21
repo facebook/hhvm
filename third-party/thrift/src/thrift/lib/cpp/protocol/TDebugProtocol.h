@@ -232,14 +232,12 @@ class TDebugProtocolEx : public apache::thrift::protocol::TDebugProtocol {
       : TDebugProtocol(trans) {}
 
   template <typename T>
-  typename std::enable_if<!std::is_enum<T>::value, void>::type write(
-      const T& t) {
+  std::enable_if_t<!std::is_enum_v<T>, void> write(const T& t) {
     t.write(this);
   }
 
   template <typename T>
-  typename std::enable_if<std::is_enum<T>::value, void>::type write(
-      const T value) {
+  std::enable_if_t<std::is_enum_v<T>, void> write(const T value) {
     write(folly::to_underlying(value));
   }
 

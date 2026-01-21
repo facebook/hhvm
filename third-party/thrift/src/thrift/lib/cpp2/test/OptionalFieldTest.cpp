@@ -171,7 +171,7 @@ void StatelessHashTest() {
   int x = 0;
   uint8_t y = 0;
   Optional<int&> f(x, y);
-  if (std::is_same<Optional<int&>, apache::thrift::field_ref<int&>>::value) {
+  if (std::is_same_v<Optional<int&>, apache::thrift::field_ref<int&>>) {
     EXPECT_EQ(hash(f), Hasher<int>()(0));
   } else {
     EXPECT_EQ(
@@ -189,7 +189,7 @@ void StatefulHashTest() {
   Tag x;
   uint8_t y = 0;
   Optional<Tag&> f(x, y);
-  if (std::is_same<Optional<int&>, apache::thrift::field_ref<int&>>::value) {
+  if (std::is_same_v<Optional<int&>, apache::thrift::field_ref<int&>>) {
     EXPECT_EQ(hash(f), 42);
   } else {
     EXPECT_EQ(

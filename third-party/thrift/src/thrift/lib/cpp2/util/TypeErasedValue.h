@@ -100,11 +100,10 @@ class TypeErasedValue final {
     static_assert(sizeof(T) <= max_size(), "Size of type is too large");
     static_assert(alignof(T) <= alignment(), "Alignment of type is too large");
     static_assert(
-        std::is_nothrow_move_constructible<T>::value,
+        std::is_nothrow_move_constructible_v<T>,
         "Class move constructor cannot throw");
     static_assert(
-        std::is_nothrow_destructible<T>::value,
-        "Class destructor cannot throw");
+        std::is_nothrow_destructible_v<T>, "Class destructor cannot throw");
   }
 
  public:

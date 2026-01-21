@@ -69,7 +69,7 @@ template <typename T1, typename T2, typename F>
     "https://github.com/facebook/fbthrift/blob/main/thrift/lib/cpp2/op/Get.h")]]
 void for_each_field(T1&& t1, T2&& t2, F f) {
   static_assert(
-      std::is_same<folly::remove_cvref_t<T1>, folly::remove_cvref_t<T2>>::value,
+      std::is_same_v<folly::remove_cvref_t<T1>, folly::remove_cvref_t<T2>>,
       "type mismatch");
   apache::thrift::detail::ForEachField<folly::remove_cvref_t<T1>>()(
       detail::MetadataForwarder<T1, F>{std::move(f)},

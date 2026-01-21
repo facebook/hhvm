@@ -584,7 +584,7 @@ struct Encode<type::struct_t<T>> {
     constexpr bool useWrite =
         folly::IsOneOf<Protocol, CompactProtocolWriter, BinaryProtocolWriter>::
             value ||
-        (std::is_same<Protocol, SimpleJSONProtocolWriter>::value &&
+        (std::is_same_v<Protocol, SimpleJSONProtocolWriter> &&
          decltype(apache::thrift::detail::st::struct_private_access::
                       __fbthrift_cpp2_gen_json<T>())::value);
     if constexpr (useWrite) {

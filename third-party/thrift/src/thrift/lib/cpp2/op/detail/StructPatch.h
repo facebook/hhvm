@@ -807,7 +807,7 @@ class StructPatch : public BaseEnsurePatch<Patch, StructPatch<Patch>> {
     op::for_each_field_id<Patch>([&](auto id) {
       using Id = decltype(id);
       using Tag = op::get_type_tag<Patch, Id>;
-      constexpr bool isRemoveField = std::is_same<Id, PatchOpRemoveId>::value;
+      constexpr bool isRemoveField = std::is_same_v<Id, PatchOpRemoveId>;
 
       auto&& field = op::get<Id>(data_);
 

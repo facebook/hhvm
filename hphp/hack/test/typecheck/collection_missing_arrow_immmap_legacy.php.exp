@@ -1,0 +1,6 @@
+ERROR: File "collection_missing_arrow_immmap_legacy.php", line 5, characters 8-28:
+Cannot use value initializer for `ImmMap`. It requires `key => value`. (Parsing[1002])
+ERROR: File "collection_missing_arrow_immmap_legacy.php", line 5, characters 16-27:
+Keys must be specified for `\HH\ImmMap` initialization (Naming[2034])
+ERROR: File "collection_missing_arrow_immmap_legacy.php", line 5, characters 16-27:
+Variable `__internal_placeholder` is undefined, or not always defined. (Naming[2050])

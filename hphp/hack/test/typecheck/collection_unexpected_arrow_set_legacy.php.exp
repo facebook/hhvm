@@ -1,0 +1,4 @@
+ERROR: File "collection_unexpected_arrow_set_legacy.php", line 5, characters 8-29:
+Cannot use key value initializer for `Set`. It does not allow keys. (Parsing[1002])
+ERROR: File "collection_unexpected_arrow_set_legacy.php", line 5, characters 13-17:
+Keys may not be specified for \HH\Set initialization (Naming[2051])

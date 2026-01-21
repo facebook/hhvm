@@ -1,0 +1,4 @@
+ERROR: File "foreach_expected_variable.php", line 7, characters 28-35:
+You cannot use this syntax as the iterator variable in a `foreach` loop. (Parsing[1002])
+ERROR: File "foreach_expected_variable.php", line 7, characters 28-35:
+Was expecting a variable name (Naming[2014])

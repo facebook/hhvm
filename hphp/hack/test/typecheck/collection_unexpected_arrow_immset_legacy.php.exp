@@ -1,0 +1,4 @@
+ERROR: File "collection_unexpected_arrow_immset_legacy.php", line 5, characters 8-32:
+Cannot use key value initializer for `ImmSet`. It does not allow keys. (Parsing[1002])
+ERROR: File "collection_unexpected_arrow_immset_legacy.php", line 5, characters 16-20:
+Keys may not be specified for \HH\ImmSet initialization (Naming[2051])

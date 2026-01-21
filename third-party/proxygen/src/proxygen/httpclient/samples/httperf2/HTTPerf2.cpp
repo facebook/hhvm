@@ -32,6 +32,7 @@
 
 #include <csignal>
 #include <iostream>
+#include <memory>
 #include <random>
 
 using folly::SocketAddress;
@@ -303,14 +304,14 @@ ClientRunner::ClientRunner(HTTPerfStats& parentStats,
     remainingClients_ = 0x7fffffff;
   }
 
-  ticketSSLParams_.first.reset(new folly::SSLContext());
+  ticketSSLParams_.first = std::make_shared<folly::SSLContext>();
   ticketSSLParams_.first->setOptions(SSL_OP_NO_COMPRESSION);
   if (FLAGS_ciphers.length() > 0) {
     ticketSSLParams_.first->ciphers(FLAGS_ciphers);
   }
   ticketSSLParams_.second = nullptr;
 
-  sessionSSLParams_.first.reset(new folly::SSLContext());
+  sessionSSLParams_.first = std::make_shared<folly::SSLContext>();
   sessionSSLParams_.first->setOptions(SSL_OP_NO_COMPRESSION | SSL_OP_NO_TICKET);
   if (FLAGS_ciphers.length() > 0) {
     sessionSSLParams_.first->ciphers(FLAGS_ciphers);

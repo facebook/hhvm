@@ -385,9 +385,8 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
   template <typename VPatch>
   void patchIfTypeIsImpl(const VPatch& patch, bool after) {
     auto type = type::Type::get<type::infer_tag<typename VPatch::value_type>>();
-    auto anyStruct =
-        type::AnyData::toAny<type::infer_tag<VPatch>>(patch).toThrift();
-    patchIfTypeIsImpl(type, std::move(anyStruct), after);
+    patchIfTypeIsImpl(
+        type, protocol::DynamicPatch::fromObject(patch.toObject()), after);
   }
 
   void patchIfTypeIsImpl(type::Type type, type::AnyStruct any, bool after);

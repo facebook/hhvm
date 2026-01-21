@@ -41,6 +41,8 @@
 // workloads that rely on passing FDs over Unix sockets + Thrift.
 THRIFT_FLAG_DEFINE_bool(enable_server_async_fd_socket, /* default = */ true);
 
+THRIFT_FLAG_DEFINE_int64(thrift_key_update_threshold, 0);
+
 namespace apache::thrift {
 
 namespace {
@@ -357,22 +359,49 @@ void Cpp2Worker::updateSSLStats(
   }
 }
 
-wangle::AcceptorHandshakeHelper::UniquePtr Cpp2Worker::createSSLHelper(
+wangle::AcceptorHandshakeHelper::UniquePtr Cpp2Worker::makeHandshaker(
     const std::vector<uint8_t>& bytes,
     const folly::SocketAddress& clientAddr,
     std::chrono::steady_clock::time_point acceptTime,
     wangle::TransportInfo& tInfo) {
+  // Cpp2Worker has set itself up to be the first (and only) PeekCallback that
+  // will be invoked. This method is responsible for returning the
+  // HandshakeHelper that will be used to drive the rest of the connection
+  // establishment procedure to completion.
   if (accConfig_->fizzConfig.enableFizz) {
-    auto helper =
-        fizzPeeker_.getThriftHelper(bytes, clientAddr, acceptTime, tInfo);
-    if (!helper) {
+    // The Fizz related settings are installed on the parent wangle::Acceptor
+    // fizz peeker
+    auto fizzPeeker = getFizzPeeker();
+    auto fizzContext = fizzPeeker->getContext();
+    auto sslContextManager = fizzPeeker->getSSLContextManager();
+
+    if (!(fizzContext && sslContextManager)) {
       return nullptr;
     }
-    if (auto parametersContext = getThriftParametersContext(clientAddr)) {
-      helper->setThriftParametersContext(
-          folly::copy_to_shared_ptr(*parametersContext));
+
+    auto fizzHandshakeOptions = fizzPeeker->options();
+    fizzHandshakeOptions.setkeyUpdateThreshold(
+        THRIFT_FLAG(thrift_key_update_threshold));
+
+    auto transportOptions = server_->getFizzConfig().transportOptions;
+
+    std::shared_ptr<ThriftParametersContext> thriftParametersContext;
+    if (auto tpCtx = getThriftParametersContext(clientAddr)) {
+      thriftParametersContext = folly::copy_to_shared_ptr(*tpCtx);
     }
-    return helper;
+
+    folly::DelayedDestructionUniquePtr<ThriftFizzAcceptorHandshakeHelper>
+        handshaker;
+    handshaker.reset(new ThriftFizzAcceptorHandshakeHelper(
+        thriftParametersContext,
+        fizzContext,
+        sslContextManager,
+        clientAddr,
+        acceptTime,
+        tInfo,
+        std::move(fizzHandshakeOptions),
+        std::move(transportOptions)));
+    return handshaker;
   }
   return defaultPeekingCallback_.getHelper(
       bytes, clientAddr, acceptTime, tInfo);
@@ -425,7 +454,7 @@ wangle::AcceptorHandshakeHelper::UniquePtr Cpp2Worker::getHelper(
     return wangle::AcceptorHandshakeHelper::UniquePtr(
         new wangle::UnencryptedAcceptorHandshakeHelper());
   }
-  return createSSLHelper(bytes, clientAddr, acceptTime, ti);
+  return makeHandshaker(bytes, clientAddr, acceptTime, ti);
 }
 
 void Cpp2Worker::requestStop() {

@@ -295,9 +295,6 @@ class Cpp2Worker : public IOWorkerContext,
     if (!eventBase) {
       eventBase = folly::EventBaseManager::get()->getEventBase();
     }
-    if (server) {
-      fizzPeeker_.setTransportOptions(server->getFizzConfig().transportOptions);
-    }
     init(nullptr, eventBase, nullptr, fizzContext);
     initRequestsRegistry();
 
@@ -347,20 +344,20 @@ class Cpp2Worker : public IOWorkerContext,
   // returns false if timed out due to deadline
   bool waitForStop(std::chrono::steady_clock::time_point deadline);
 
-  virtual wangle::AcceptorHandshakeHelper::UniquePtr createSSLHelper(
+  MemoryTracker& getIngressMemoryTracker() { return *ingressMemoryTracker_; }
+  MemoryTracker& getEgressMemoryTracker() { return *egressMemoryTracker_; }
+
+ private:
+  /**
+   * Constructs an object to drive the asynchronous handshake performed past
+   * initial TCP socket acceptance.
+   */
+  wangle::AcceptorHandshakeHelper::UniquePtr makeHandshaker(
       const std::vector<uint8_t>& bytes,
       const folly::SocketAddress& clientAddr,
       std::chrono::steady_clock::time_point acceptTime,
       wangle::TransportInfo& tinfo);
 
-  wangle::DefaultToFizzPeekingCallback* getFizzPeeker() override {
-    return &fizzPeeker_;
-  }
-
-  MemoryTracker& getIngressMemoryTracker() { return *ingressMemoryTracker_; }
-  MemoryTracker& getEgressMemoryTracker() { return *egressMemoryTracker_; }
-
- private:
   void onNewConnectionThatMayThrow(
       folly::AsyncTransport::UniquePtr,
       const folly::SocketAddress*,
@@ -372,8 +369,6 @@ class Cpp2Worker : public IOWorkerContext,
 
   /// The mother ship.
   ThriftServer* server_;
-
-  FizzPeeker fizzPeeker_;
 
   // We expect to have one processor factory per InterfaceKind. Using F14NodeMap
   // guarantees reference stability.

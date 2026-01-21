@@ -21,8 +21,6 @@
 #include <wangle/acceptor/FizzAcceptorHandshakeHelper.h>
 #include <wangle/acceptor/SSLAcceptorHandshakeHelper.h>
 
-THRIFT_FLAG_DEFINE_int64(thrift_key_update_threshold, 0);
-
 namespace apache::thrift {
 
 namespace detail {
@@ -129,35 +127,5 @@ void ThriftFizzAcceptorHandshakeHelper::stopTLSSuccess(
       std::move(appProto),
       SecureTransportType::TLS,
       wangle::SSLErrorEnum::NO_ERROR);
-}
-
-wangle::AcceptorHandshakeHelper::UniquePtr FizzPeeker::getHelper(
-    const std::vector<uint8_t>& bytes,
-    const folly::SocketAddress& clientAddr,
-    std::chrono::steady_clock::time_point acceptTime,
-    wangle::TransportInfo& tinfo) {
-  return getThriftHelper(bytes, clientAddr, acceptTime, tinfo);
-}
-
-folly::DelayedDestructionUniquePtr<ThriftFizzAcceptorHandshakeHelper>
-FizzPeeker::getThriftHelper(
-    const std::vector<uint8_t>& /* bytes */,
-    const folly::SocketAddress& clientAddr,
-    std::chrono::steady_clock::time_point acceptTime,
-    wangle::TransportInfo& tinfo) {
-  if (!(context_ && sslContextManager_)) {
-    return nullptr;
-  }
-  auto optionsCopy = options_;
-  optionsCopy.setkeyUpdateThreshold(THRIFT_FLAG(thrift_key_update_threshold));
-  return folly::DelayedDestructionUniquePtr<ThriftFizzAcceptorHandshakeHelper>(
-      new ThriftFizzAcceptorHandshakeHelper(
-          context_,
-          sslContextManager_,
-          clientAddr,
-          acceptTime,
-          tinfo,
-          std::move(optionsCopy),
-          transportOptions_));
 }
 } // namespace apache::thrift

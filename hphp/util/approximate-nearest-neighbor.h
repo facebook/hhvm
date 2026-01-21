@@ -540,7 +540,7 @@ ApproximateNearestNeighbor<E, I>::ApproximateNearestNeighbor(R&& prng,
   , numRounds{findSizes(lower, higher).first}
   , perExperiment{findSizes(lower, higher).second}
   , perSet{numSets}
-  , elemShift{std::bit_width(numElems-1)}
+  , elemShift{static_cast<size_t>(std::bit_width(numElems-1))}
   , hasher{prng}
 {
   always_assert(numElems > 0);

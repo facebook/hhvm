@@ -74,6 +74,34 @@ void appendString(IOBufQueue& queue, size_t& len, StringPiece str) {
   len += str.size();
 }
 
+using namespace proxygen;
+// discard messages with multiple content-length headers, if they differ
+// (t12767790)
+bool validateContentLen(const HTTPHeaders& hdrs) noexcept {
+  const std::string* contentLen{nullptr};
+  bool ok = !hdrs.forEachValueOfHeader(
+      HTTP_HEADER_CONTENT_LENGTH, [&](const std::string& value) -> bool {
+        if (!contentLen) {
+          contentLen = &value;
+          return false; // continue
+        }
+        return *contentLen != value; // stop if different
+      });
+  LOG_IF(ERROR, !ok) << "Invalid message, multiple Content-Length headers";
+  return ok;
+}
+
+// only supports transfer-encoding of "chunked" (identical to http_parser.cpp)
+bool validateTransferEncoding(const HTTPHeaders& hdrs) noexcept {
+  bool ok = !hdrs.forEachValueOfHeader(
+      HTTP_HEADER_TRANSFER_ENCODING, [&](folly::StringPiece value) -> bool {
+        bool err = !value.equals(kChunked, folly::AsciiCaseInsensitive{});
+        LOG_IF(ERROR, err) << "invalid transfer-encoding val=" << value;
+        return err; // stop on err
+      });
+  return ok;
+}
+
 } // anonymous namespace
 
 namespace proxygen {
@@ -906,6 +934,7 @@ bool HTTP1xCodec::pushHeaderNameAndValue(HTTPHeaders& hdrs) {
   currentHeaderName_.clear();
   currentHeaderNameStringPiece_.clear();
   currentHeaderValue_.clear();
+
   return true;
 }
 
@@ -978,34 +1007,12 @@ int HTTP1xCodec::onHeadersComplete(size_t len) {
     }
   }
 
-  // discard messages with folded or multiple valued Transfer-Encoding headers
-  // ex : "chunked , zorg\r\n" or "\r\n chunked \r\n" (t12767790)
   HTTPHeaders& hdrs = msg_->getHeaders();
-  const std::string& headerVal =
-      hdrs.getSingleOrEmpty(HTTP_HEADER_TRANSFER_ENCODING);
-  if (!headerVal.empty() && !caseInsensitiveEqual(headerVal, kChunked)) {
-    LOG(ERROR) << "Invalid Transfer-Encoding header. Value =" << headerVal;
+  if (!validateContentLen(hdrs)) {
     return -1;
   }
-
-  // discard messages with multiple content-length headers (t12767790)
-  if (hdrs.getNumberOfValues(HTTP_HEADER_CONTENT_LENGTH) > 1) {
-    // Only reject the message if the Content-Length headers have different
-    // values
-    folly::Optional<folly::StringPiece> contentLen;
-    bool error = hdrs.forEachValueOfHeader(
-        HTTP_HEADER_CONTENT_LENGTH, [&](folly::StringPiece value) -> bool {
-          if (!contentLen.has_value()) {
-            contentLen = value;
-            return false;
-          }
-          return (contentLen.value() != value);
-        });
-
-    if (error) {
-      LOG(ERROR) << "Invalid message, multiple Content-Length headers";
-      return -1;
-    }
+  if (!validateTransferEncoding(hdrs)) {
+    return -1;
   }
 
   // Update the HTTPMessage with the values parsed from the header

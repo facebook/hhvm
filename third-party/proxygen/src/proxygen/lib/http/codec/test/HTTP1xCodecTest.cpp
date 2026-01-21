@@ -624,8 +624,11 @@ TEST(HTTP1xCodecTest, TestBadTransferEncodingHeader) {
   folly::IOBufQueue writeBuf(folly::IOBufQueue::cacheChainLength());
 
   auto reqBuf = folly::IOBuf::copyBuffer(
-      "POST /www.facebook.com HTTP/1.1\r\nHost: www.facebook.com\r\n"
-      "Transfer-Encoding: chunked, zorg\r\n\r\n");
+      "POST /www.facebook.com HTTP/1.1\r\n"
+      "Host: www.facebook.com\r\n"
+      "Transfer-Encoding: chunked, zorg\r\n"
+      "Transfer-Encoding: chunked, zorg\r\n"
+      "\r\n");
   downstream.onIngress(*reqBuf);
 
   // Check that the request fails before the codec finishes parsing the headers

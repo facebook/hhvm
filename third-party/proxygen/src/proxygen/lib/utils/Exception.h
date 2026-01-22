@@ -24,7 +24,7 @@ namespace proxygen {
  */
 class Exception : public std::exception {
  public:
-  explicit Exception(std::string const& msg);
+  explicit Exception(std::string msg);
   explicit Exception(const char* msg);
   Exception(const Exception&);
   Exception(Exception& other) : Exception(std::as_const(other)) {

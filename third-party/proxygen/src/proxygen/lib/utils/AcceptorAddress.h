@@ -12,6 +12,8 @@
 
 #include <folly/SocketAddress.h>
 
+#include <utility>
+
 namespace proxygen {
 
 struct AcceptorAddress {
@@ -19,7 +21,7 @@ struct AcceptorAddress {
 
   AcceptorAddress() = delete;
   AcceptorAddress(folly::SocketAddress address, AcceptorType protocol)
-      : address(address), protocol(protocol) {
+      : address(std::move(address)), protocol(protocol) {
   }
 
   folly::SocketAddress address;

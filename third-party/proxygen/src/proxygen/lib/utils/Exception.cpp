@@ -8,9 +8,11 @@
 
 #include <proxygen/lib/utils/Exception.h>
 
+#include <utility>
+
 namespace proxygen {
 
-Exception::Exception(std::string const& msg) : msg_(msg), code_(0) {
+Exception::Exception(std::string msg) : msg_(std::move(msg)), code_(0) {
 }
 
 Exception::Exception(const char* msg) : msg_(msg), code_(0) {

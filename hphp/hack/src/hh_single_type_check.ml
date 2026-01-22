@@ -60,6 +60,7 @@ type mode =
       use_snippet_edits: bool;
     }
   | Ide_diagnostics
+  | Ide_signature_help
   | Find_local of File_content.Position.t
   | Get_member of string
   | Outline
@@ -442,6 +443,12 @@ let parse_options () =
       ( "--ide-diagnostics",
         Arg.Unit (set_mode Ide_diagnostics),
         " Compute where IDE diagnostics (squiggles and dotted lines) will be displayed."
+      );
+      ( "--ide-signature-help",
+        Arg.Unit (set_mode Ide_signature_help),
+        " Show signature help at the position indicated by `^ at-caret` comment."
+        ^ "Exercises most of the functionality of textDocument/signatureHelp."
+        (* https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#signatureHelp *)
       );
       ( "--dump-classish-positions",
         Arg.Unit (set_mode Dump_classish_positions),
@@ -1956,6 +1963,17 @@ let handle_mode
       compute_tasts_expand_types ctx files_info files_contents
     in
     Ide_diagnostics_cli_lib.run ctx entry errors
+  | Ide_signature_help ->
+    let path = expect_single_file () in
+    let (ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in
+    let src = Provider_context.read_file_contents_exn entry in
+    let pos = caret_pos_exn src "^ at-caret" in
+    let result = ServerSignatureHelp.go_quarantined ~ctx ~entry pos in
+    print_endline "textDocument/signatureHelp response:\n";
+    result
+    |> Lsp_fmt.print_signatureHelp
+    |> Hh_json.json_to_string ~sort_keys:true ~pretty:true
+    |> print_endline
   | Dump_classish_positions ->
     let path = expect_single_file () in
     let (ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in

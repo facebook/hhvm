@@ -14,7 +14,7 @@ This comment concerns the following caches:
 * [Provider_backend.local_memory.folded_class_cache]
 * [Provider_backend.local_memory.decl_cache]
 * [Provider_backend.local_memory.decls_reflect_this_file]
-* [Provider_context.entry.all_errors]
+* [Provider_context.entry.all_diagnostics]
 * [Provider_context.entry.tast]
 
 The way things are used in ClientIdeDaemon is

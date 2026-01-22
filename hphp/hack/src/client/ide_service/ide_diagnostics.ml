@@ -9,7 +9,7 @@
 open Hh_prelude
 
 let convert_error ~classish_positions (error, diagnostic_hash) =
-  let quickfixes = User_error.quickfixes error in
+  let quickfixes = User_diagnostic.quickfixes error in
   let hint_styles = List.bind ~f:Quickfix.get_hint_styles quickfixes in
   let related_hints =
     List.filter_map
@@ -27,7 +27,7 @@ let convert_error ~classish_positions (error, diagnostic_hash) =
       diagnostic_hash;
     }
 
-(** Convert a list of [Errors.finalized_error] to [ClientIdeMessage.diagnostic] *)
+(** Convert a list of [Diagnostics.finalized_diagnostic] to [ClientIdeMessage.diagnostic] *)
 let convert ~(ctx : Provider_context.t) ~(entry : Provider_context.entry) errors
     =
   let cst = Ast_provider.compute_cst ~ctx ~entry in

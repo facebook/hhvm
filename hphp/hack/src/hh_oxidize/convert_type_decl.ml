@@ -154,9 +154,9 @@ module DeriveSkipLists : sig
 end = struct
   let skip_list_for_ty ty =
     match ty with
-    (* A custom implementation of Ord for Error_ matches the sorting behavior of
-       errors in OCaml. *)
-    | "user_error::UserError" -> ["Ord"; "PartialOrd"]
+    (* A custom implementation of Ord for UserDiagnostic matches the sorting behavior of
+       diagnostics in OCaml. *)
+    | "user_diagnostic::UserDiagnostic" -> ["Ord"; "PartialOrd"]
     (* GlobalOptions contains a couple floats, which only implement PartialEq
        and PartialOrd, and do not implement Hash. *)
     | "global_options::GlobalOptions" ->
@@ -251,10 +251,11 @@ let derived_traits ty =
 let denylisted_types () =
   [
     ("aast_defs", "ByteString");
-    ("errors", "FinalizedError");
-    ("errors", "Marker");
-    ("errors", "MarkedMessage");
-    ("errors", "PositionGroup");
+    ("diagnostics", "FinalizedError");
+    ("diagnostics", "FinalizedDiagnostic");
+    ("diagnostics", "Marker");
+    ("diagnostics", "MarkedMessage");
+    ("diagnostics", "PositionGroup");
     ("file_info", "Saved");
     ("typing_defs", "ExpandEnv");
     ("typing_defs", "PhaseTy");
@@ -290,7 +291,7 @@ let tuple_aliases =
   [
     ("ast_defs", "Pstring");
     ("ast_defs", "PositionedByteString");
-    ("errors", "Message");
+    ("diagnostics", "Message");
     ("typing_reason", "PosId");
   ]
 

@@ -79,7 +79,7 @@ type completion_request = { is_manually_invoked: bool }
 (** Currently, a diagnostic is always an error with (optionally) a list
 of locations where a "hint" should be displayed for that error. *)
 type diagnostic = {
-  diagnostic_error: Errors.finalized_error;
+  diagnostic_error: Diagnostics.finalized_diagnostic;
   diagnostic_hash: int;
   diagnostic_related_hints: Pos.absolute list;
       (** Note that these will be displayed in the IDE, so this field
@@ -119,7 +119,7 @@ type _ t =
       modified contents and squiggles appropriate to the modified contents,
       (2) user closes file without saving. In this scenario we must
       restore squiggles to what would be appropriate for the file on disk.
-      It'd be possible to return an [Errors.t option], and only return [Some]
+      It'd be possible to return an [Diagnostics.t option], and only return [Some]
       if the file had been closed while modified, if perf here is ever a concern. *)
   | Diagnostics : document -> diagnostic list t
       (** Obtains latest diagnostics for file. *)
@@ -183,11 +183,11 @@ type _ t =
   | Code_action :
       document * Ide_api_types.range
       -> (Lsp.CodeAction.command_or_action list
-         * Errors.finalized_error list option)
+         * Diagnostics.finalized_diagnostic list option)
          t
       (** Handles "textDocument/codeActions" LSP messages.
 
-      Also, we take this as a handy opportunity to send updated [Errors.t]
+      Also, we take this as a handy opportunity to send updated [Diagnostics.t]
       to clientLsp so it can publish them. We return [None] if the TAST+errors
       haven't changed since they were last sent to clientLsp (through didOpen,
       didChange, didClose or an earlier codeAction), and [Some] if they have
@@ -338,5 +338,5 @@ type daemon_args = {
   verbose_to_file: bool;
   shm_handle: SharedMem.handle;
   client_lsp_log_fn: string;
-  error_filter: Filter_errors.Filter.t;
+  error_filter: Filter_diagnostics.Filter.t;
 }

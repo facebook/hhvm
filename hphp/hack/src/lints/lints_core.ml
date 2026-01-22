@@ -93,7 +93,7 @@ let add_lint lint =
 let to_absolute ({ pos; _ } as lint) = { lint with pos = Pos.to_absolute pos }
 
 let to_string lint =
-  let code = User_error.error_code_to_string lint.code in
+  let code = User_diagnostic.error_code_to_string lint.code in
   Printf.sprintf "%s\n%s (%s)" (Pos.string lint.pos) lint.message code
 
 let to_contextual_string lint =
@@ -105,18 +105,18 @@ let to_contextual_string lint =
     | Lint_disabled ->
       Tty.Default
   in
-  User_error.make_absolute
-    User_error.Warning
+  User_diagnostic.make_absolute
+    User_diagnostic.Warning
     lint.code
     [(lint.pos, lint.message)]
-  |> Contextual_error_formatter.to_string ~claim_color
+  |> Contextual_diagnostic_formatter.to_string ~claim_color
 
 let to_highlighted_string (lint : string Pos.pos t) =
-  User_error.make_absolute
-    User_error.Warning
+  User_diagnostic.make_absolute
+    User_diagnostic.Warning
     lint.code
     [(lint.pos, lint.message)]
-  |> Highlighted_error_formatter.to_string
+  |> Highlighted_diagnostic_formatter.to_string
 
 let to_json { pos; code; severity; message; bypass_changed_lines; autofix; _ } =
   let (line, scol, ecol) = Pos.info_pos pos in
@@ -124,7 +124,7 @@ let to_json { pos; code; severity; message; bypass_changed_lines; autofix; _ } =
     match autofix with
     | Some (replacement, replacement_pos) ->
       let path = Pos.filename (Pos.to_absolute replacement_pos) in
-      let lines = Errors.read_lines path in
+      let lines = Diagnostics.read_lines path in
       let src = String.concat ~sep:"\n" lines in
       let original = Pos.get_text_from_pos ~content:src replacement_pos in
       let (start_offset, end_offset) = Pos.info_raw replacement_pos in

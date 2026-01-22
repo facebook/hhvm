@@ -472,11 +472,11 @@ let check_subtype_methods
  *)
 (* TODO(jjwu): get rid of this for type constants too, and we can delete *)
 let check_ambiguous_inheritance f parent child pos class_ origin on_error ~env =
-  Errors.try_when
+  Diagnostics.try_when
     (f parent child)
     ~if_error_and:(fun () ->
       String.( <> ) (Cls.name class_) origin
-      && Errors.has_no_errors (f child parent))
+      && Diagnostics.has_no_errors (f child parent))
     ~then_:(fun error ->
       Typing_error_utils.ambiguous_inheritance
         pos
@@ -1652,7 +1652,7 @@ let check_inherited_member_is_dynamically_callable
                    env
                    fun_ty)
             then
-              Errors.method_is_not_dynamically_callable
+              Diagnostics.method_is_not_dynamically_callable
                 inheriting_class_pos
                 member_name
                 (Cls.name inheriting_class)

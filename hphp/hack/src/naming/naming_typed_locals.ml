@@ -92,9 +92,9 @@ let join envs before_env custom_err_config =
   in
   Map.iter
     (fun id (id_pos, def_pos) ->
-      Errors.add_error
+      Diagnostics.add_diagnostic
         Naming_error_utils.(
-          to_user_error
+          to_user_diagnostic
             (Naming_error.Illegal_typed_local
                { join = true; id_pos; id_name = Local_id.to_string id; def_pos })
             custom_err_config))
@@ -141,9 +141,9 @@ let rec check_stmt on_expr env (id_pos, stmt_) custom_err_config =
       let env = add_declared_id env name in
       env
     | Some def_pos ->
-      Errors.add_error
+      Diagnostics.add_diagnostic
         Naming_error_utils.(
-          to_user_error
+          to_user_diagnostic
             Naming_error.(
               Illegal_typed_local
                 {

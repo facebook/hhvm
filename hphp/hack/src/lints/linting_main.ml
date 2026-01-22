@@ -61,7 +61,7 @@ let lint_tast ctx (tast : Tast.program) =
  * right after parsing. *)
 let parse_and_lint fn content ctx =
   let parser_result =
-    Errors.ignore_ (fun () ->
+    Diagnostics.ignore_ (fun () ->
         Full_fidelity_ast.defensive_program
           ~elaborate_namespaces:true
           (Provider_context.get_popt ctx)
@@ -84,7 +84,7 @@ let lint_nast tcopt fn pr =
 let lint ctx fn content =
   let orig_trace = !Typing_deps.trace in
   Typing_deps.trace := false;
-  Errors.ignore_ (fun () ->
+  Diagnostics.ignore_ (fun () ->
       let parser_return = parse_and_lint fn content ctx in
       let { Parser_return.file_mode; ast = full_ast; _ } = parser_return in
       (* naming and typing currently don't produce any lint errors *)

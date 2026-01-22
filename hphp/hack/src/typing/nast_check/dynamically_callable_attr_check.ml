@@ -37,8 +37,9 @@ let handler =
       let attr = m.m_user_attributes in
       let check_reified_callable p =
         if has_reified_generics m.m_tparams then
-          Errors.add_error
-            Nast_check_error.(to_user_error @@ Dynamically_callable_reified p)
+          Diagnostics.add_diagnostic
+            Nast_check_error.(
+              to_user_diagnostic @@ Dynamically_callable_reified p)
       in
       match
         ( Naming_attributes.mem_pos SN.UserAttributes.uaDynamicallyCallable attr,
@@ -57,8 +58,8 @@ let handler =
           | ProtectedInternal -> Naming_error.Vprotected_internal
         in
         let custom_err_config = Nast_check_env.get_custom_error_config env in
-        Errors.add_error
-          (Naming_error_utils.to_user_error
+        Diagnostics.add_diagnostic
+          (Naming_error_utils.to_user_diagnostic
              (Naming_error.Illegal_use_of_dynamically_callable
                 { attr_pos = p; meth_pos = pos; vis })
              custom_err_config);
@@ -72,8 +73,9 @@ let handler =
       with
       | Some p ->
         if has_reified_generics fd.fd_tparams then
-          Errors.add_error
-            Nast_check_error.(to_user_error @@ Dynamically_callable_reified p);
+          Diagnostics.add_diagnostic
+            Nast_check_error.(
+              to_user_diagnostic @@ Dynamically_callable_reified p);
         ()
       | _ -> ()
   end

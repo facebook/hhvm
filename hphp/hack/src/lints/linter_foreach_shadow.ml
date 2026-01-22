@@ -84,7 +84,7 @@ module VisitorFunctor (Parent : BodyVisitorModule) : BodyVisitorModule = struct
               match List.find_opt (fun (_, id2) -> id1 = id2) env with
               | None -> ()
               | Some (p2, _) ->
-                Lints_errors.loop_variable_shadows_local_variable p1 id1 p2)
+                Lints_diagnostics.loop_variable_shadows_local_variable p1 id1 p2)
           (as_expr_lvars as_expr);
         parent#on_as_expr () as_expr
 

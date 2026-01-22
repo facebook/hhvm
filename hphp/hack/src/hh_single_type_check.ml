@@ -82,7 +82,7 @@ type options = {
   files: string list;
   extra_builtins: string list;
   mode: mode;
-  error_format: Errors.format option;
+  error_format: Diagnostics.format option;
   no_builtins: bool;
   max_errors: int option;
   tcopt: GlobalOptions.t;
@@ -137,17 +137,18 @@ let die str =
 let print_error format ?(oc = stderr) l =
   let formatter =
     match format with
-    | Errors.Context -> (fun e -> Contextual_error_formatter.to_string e)
-    | Errors.Raw -> (fun e -> Raw_error_formatter.to_string e)
-    | Errors.Plain -> (fun e -> Errors.to_string e)
-    | Errors.Highlighted -> Highlighted_error_formatter.to_string
-    | Errors.Extended -> Extended_error_formatter.to_string
+    | Diagnostics.Context ->
+      (fun e -> Contextual_diagnostic_formatter.to_string e)
+    | Diagnostics.Raw -> (fun e -> Raw_diagnostic_formatter.to_string e)
+    | Diagnostics.Plain -> (fun e -> Diagnostics.to_string e)
+    | Diagnostics.Highlighted -> Highlighted_diagnostic_formatter.to_string
+    | Diagnostics.Extended -> Extended_diagnostic_formatter.to_string
   in
-  let absolute_errors = User_error.to_absolute l in
+  let absolute_errors = User_diagnostic.to_absolute l in
   Out_channel.output_string oc (formatter absolute_errors)
 
-let write_error_list format (errors : Errors.t) oc max_errors =
-  let errors = Errors.get_sorted_error_list errors in
+let write_error_list format (errors : Diagnostics.t) oc max_errors =
+  let errors = Diagnostics.get_sorted_diagnostic_list errors in
   let (shown_errors, dropped_errors) =
     match max_errors with
     | Some max_errors -> List.split_n errors max_errors
@@ -156,7 +157,7 @@ let write_error_list format (errors : Errors.t) oc max_errors =
   if not (List.is_empty errors) then (
     List.iter ~f:(print_error format ~oc) shown_errors;
     match
-      Errors.format_summary
+      Diagnostics.format_summary
         format
         ~error_count:(List.length errors)
         ~warning_count:0
@@ -169,8 +170,8 @@ let write_error_list format (errors : Errors.t) oc max_errors =
     Out_channel.output_string oc "No errors\n";
   Out_channel.close oc
 
-let print_error_list format (errors : Errors.t) max_errors =
-  let errors = Errors.get_sorted_error_list errors in
+let print_error_list format (errors : Diagnostics.t) max_errors =
+  let errors = Diagnostics.get_sorted_diagnostic_list errors in
   let (shown_errors, dropped_errors) =
     match max_errors with
     | Some max_errors -> List.split_n errors max_errors
@@ -179,7 +180,7 @@ let print_error_list format (errors : Errors.t) max_errors =
   if not (List.is_empty errors) then (
     List.iter ~f:(print_error format) shown_errors;
     match
-      Errors.format_summary
+      Diagnostics.format_summary
         format
         ~error_count:(List.length errors)
         ~warning_count:0
@@ -191,13 +192,14 @@ let print_error_list format (errors : Errors.t) max_errors =
   ) else
     Printf.printf "No errors\n"
 
-let print_errors format (errors : Errors.t) max_errors : unit =
+let print_errors format (errors : Diagnostics.t) max_errors : unit =
   print_error_list format errors max_errors
 
-let print_errors_if_present (errors : Errors.t) =
-  if not (Errors.is_empty errors) then (
+let print_errors_if_present (errors : Diagnostics.t) =
+  if not (Diagnostics.is_empty errors) then (
     let errors_output =
-      Errors.convert_errors_to_string @@ Errors.get_sorted_error_list errors
+      Diagnostics.convert_errors_to_string
+      @@ Diagnostics.get_sorted_diagnostic_list errors
     in
     Printf.printf "Errors:\n";
     List.iter errors_output ~f:(fun err_output ->
@@ -390,11 +392,11 @@ let parse_options () =
         Arg.String
           (fun s ->
             match s with
-            | "raw" -> error_format := Some Errors.Raw
-            | "context" -> error_format := Some Errors.Context
-            | "highlighted" -> error_format := Some Errors.Highlighted
-            | "plain" -> error_format := Some Errors.Plain
-            | "extended" -> error_format := Some Errors.Extended
+            | "raw" -> error_format := Some Diagnostics.Raw
+            | "context" -> error_format := Some Diagnostics.Context
+            | "highlighted" -> error_format := Some Diagnostics.Highlighted
+            | "plain" -> error_format := Some Diagnostics.Plain
+            | "extended" -> error_format := Some Diagnostics.Extended
             | _ -> print_string "Warning: unrecognized error format.\n"),
         "<extended|raw|context|highlighted|plain> Error formatting style; (default: highlighted)"
       );
@@ -967,7 +969,7 @@ let parse_options () =
   in
   let tcopt = ServerConfig.load_config config tcopt in
 
-  Errors.allowed_fixme_codes_strict :=
+  Diagnostics.allowed_fixme_codes_strict :=
     GlobalOptions.allowed_fixme_codes_strict tcopt;
 
   let tco_experimental_features =
@@ -1053,8 +1055,8 @@ let print_elapsed fn desc ~start_time =
     elapsed_ms
 
 let check_file
-    ctx (errors : Errors.t) files_info ~profile_type_check_multi ~memtrace :
-    Errors.t =
+    ctx (errors : Diagnostics.t) files_info ~profile_type_check_multi ~memtrace
+    : Diagnostics.t =
   let profiling = Option.is_some profile_type_check_multi in
   if profiling then
     Relative_path.Map.iter files_info ~f:(fun fn (_fileinfo : FileInfo.t) ->
@@ -1080,7 +1082,7 @@ let check_file
     let timings = Relative_path.Map.update fn add_sample timings in
     (result, timings)
   in
-  let rec go n timings : Errors.t * _ =
+  let rec go n timings : Diagnostics.t * _ =
     let (errors, timings) =
       Relative_path.Map.fold
         files_info
@@ -1090,7 +1092,7 @@ let check_file
             add_timing fn timings
             @@ lazy (Typing_check_job.calc_errors_and_tast ctx fn ~full_ast)
           in
-          (Errors.merge errors new_errors, timings))
+          (Diagnostics.merge errors new_errors, timings))
         ~init:(errors, timings)
     in
     if n > 1 then
@@ -1121,8 +1123,8 @@ let create_nasts ctx files_info =
     let (syntax_errors, ast) =
       Ast_provider.get_ast_with_error ~full:true ctx fn
     in
-    let error_list = Errors.get_sorted_error_list syntax_errors in
-    List.iter error_list ~f:Errors.add_error;
+    let error_list = Diagnostics.get_sorted_diagnostic_list syntax_errors in
+    List.iter error_list ~f:Diagnostics.add_diagnostic;
     Naming.program ctx ast
   in
   Relative_path.Map.mapi ~f:build_nast files_info
@@ -1133,7 +1135,7 @@ let parse_and_name ctx files_contents =
   Relative_path.Map.mapi files_contents ~f:(fun fn contents ->
       (* Get parse errors. *)
       let () =
-        Errors.run_in_context fn (fun () ->
+        Diagnostics.run_in_context fn (fun () ->
             let popt = Provider_context.get_popt ctx in
             let parsed_file =
               Full_fidelity_ast.defensive_program popt fn contents
@@ -1157,7 +1159,7 @@ and the side-effect of updating the global reverse naming table (and
 picking up duplicate-name errors along the way), and for the side effect
 of updating the decl heap (and picking up decling errors along the way). *)
 let parse_name_and_decl ctx files_contents =
-  Errors.do_ (fun () ->
+  Diagnostics.do_ (fun () ->
       let files_info = parse_and_name ctx files_contents in
       Relative_path.Map.iter files_info ~f:(fun fn fileinfo ->
           let _failed_naming_fns =
@@ -1185,13 +1187,13 @@ let compute_nasts ctx files_info interesting_files =
 
 (* Returns a list of Tast defs, along with associated type environments. *)
 let compute_tasts ?(drop_fixmed = true) ctx files_info interesting_files :
-    Errors.t * Tast.program Relative_path.Map.t =
+    Diagnostics.t * Tast.program Relative_path.Map.t =
   let _f _k nast x =
     match (nast, x) with
     | (Some nast, Some _) -> Some nast
     | _ -> None
   in
-  Errors.do_ ~drop_fixmed (fun () ->
+  Diagnostics.do_ ~drop_fixmed (fun () ->
       let nasts = compute_nasts ctx files_info interesting_files in
       let tasts =
         Relative_path.Map.map nasts ~f:(fun nast ->
@@ -1203,9 +1205,9 @@ let compute_tasts ?(drop_fixmed = true) ctx files_info interesting_files :
       tasts)
 
 let compute_tasts_by_name ?(drop_fixmed = true) ctx files_info interesting_files
-    : Errors.t * Tast.by_names Relative_path.Map.t =
+    : Diagnostics.t * Tast.by_names Relative_path.Map.t =
   let (nast_errors, nasts) =
-    Errors.do_ ~drop_fixmed (fun () ->
+    Diagnostics.do_ ~drop_fixmed (fun () ->
         compute_nasts ctx files_info interesting_files)
   in
   let errors_and_tasts =
@@ -1217,7 +1219,10 @@ let compute_tasts_by_name ?(drop_fixmed = true) ctx files_info interesting_files
     Relative_path.Map.values errors_and_tasts |> List.map ~f:fst
   in
 
-  ( List.fold (nast_errors :: tast_errors) ~init:Errors.empty ~f:Errors.merge,
+  ( List.fold
+      (nast_errors :: tast_errors)
+      ~init:Diagnostics.empty
+      ~f:Diagnostics.merge,
     tasts )
 
 let caret_pos (src : string) (marker : string) : _ option =
@@ -1308,8 +1313,8 @@ let decl_parse_typecheck_and_then ctx files_contents f =
   let (errors, _tasts) =
     compute_tasts_expand_types ctx files_info files_contents
   in
-  let errors = Errors.merge parse_errors errors in
-  if Errors.is_empty errors then
+  let errors = Diagnostics.merge parse_errors errors in
+  if Diagnostics.is_empty errors then
     f files_info
   else
     print_errors_if_present errors
@@ -1399,7 +1404,7 @@ let handle_constraint_mode
   in
   let print_errors errors =
     List.iter
-      (Errors.get_sorted_error_list errors)
+      (Diagnostics.get_sorted_diagnostic_list errors)
       ~f:(print_error ~oc:stdout error_format)
   in
   (* Process a multifile that is not typechecked *)
@@ -1413,7 +1418,7 @@ let handle_constraint_mode
     let check_errors =
       check_file ctx parse_errors file_info ~profile_type_check_multi ~memtrace
     in
-    if not (Errors.is_empty check_errors) then
+    if not (Diagnostics.is_empty check_errors) then
       print_errors check_errors
     else
       Relative_path.Map.iter file_info ~f:process_file
@@ -1511,7 +1516,8 @@ module File_deps = struct
     let open Hh_prelude in
     let nast = Ast_provider.get_ast ctx ~full:true file in
     let names =
-      Errors.ignore_ (fun () -> Naming.program ctx nast) |> scrape_class_names
+      Diagnostics.ignore_ (fun () -> Naming.program ctx nast)
+      |> scrape_class_names
     in
     let resolve_to_path names ~resolve =
       SSet.fold
@@ -1745,7 +1751,7 @@ let handle_mode
     builtins
     files_contents
     files_info
-    (parse_errors : Errors.t)
+    (parse_errors : Diagnostics.t)
     max_errors
     error_format
     batch_mode
@@ -1994,7 +2000,9 @@ let handle_mode
         in
         FileOutline.print ~short_pos:true results)
   | Dump_nast ->
-    let (errors, nasts) = Errors.do_ (fun () -> create_nasts ctx files_info) in
+    let (errors, nasts) =
+      Diagnostics.do_ (fun () -> create_nasts ctx files_info)
+    in
     print_errors_if_present errors;
 
     print_nasts
@@ -2005,7 +2013,7 @@ let handle_mode
     let (errors, tasts) =
       compute_tasts_expand_types ctx files_info files_contents
     in
-    print_errors_if_present (Errors.merge parse_errors errors);
+    print_errors_if_present (Diagnostics.merge parse_errors errors);
     print_tasts ~should_print_position tasts ctx
   | Dump_stripped_tast ->
     iter_over_files (fun filename ->
@@ -2122,7 +2130,7 @@ let handle_mode
           Out_channel.create (Relative_path.to_absolute filename ^ out_extension)
         in
         (* This means builtins had errors, so lets just print those if we see them *)
-        if not (Errors.is_empty parse_errors) then
+        if not (Diagnostics.is_empty parse_errors) then
           (* This closes the out channel *)
           write_error_list error_format parse_errors oc max_errors
         else (
@@ -2152,7 +2160,7 @@ let handle_mode
       check_file ctx parse_errors files_info ~profile_type_check_multi ~memtrace
     in
     print_error_list error_format errors max_errors;
-    if not (Errors.is_empty errors) then exit 2
+    if not (Diagnostics.is_empty errors) then exit 2
   | Get_member class_and_member_id ->
     let (cid, mid) =
       match Str.split (Str.regexp "::") class_and_member_id with
@@ -2276,10 +2284,10 @@ let handle_mode
     let src = Relative_path.Map.find files_contents path in
 
     let quickfixes =
-      Errors.get_error_list ~drop_fixmed:false errors
+      Diagnostics.get_diagnostic_list ~drop_fixmed:false errors
       |> List.map ~f:(fun e ->
              (* If an error has multiple possible quickfixes, take the first. *)
-             List.hd (User_error.quickfixes e))
+             List.hd (User_diagnostic.quickfixes e))
       |> List.filter_opt
     in
 
@@ -2307,7 +2315,7 @@ let handle_mode
     let (errors, tasts) =
       compute_tasts_expand_types ctx files_info files_contents
     in
-    if not @@ Errors.is_empty errors then (
+    if not @@ Diagnostics.is_empty errors then (
       print_errors error_format errors max_errors;
       Printf.printf
         "Did not count imprecise types because there are typing errors.";
@@ -2344,7 +2352,7 @@ let handle_mode
             Printf.printf "  %s\n" result))
   | Map_reduce_mode ->
     let (errors, tasts) = compute_tasts_by_name ctx files_info files_contents in
-    print_errors_if_present (Errors.merge parse_errors errors);
+    print_errors_if_present (Diagnostics.merge parse_errors errors);
     let mapped =
       Relative_path.Map.elements tasts
       |> List.map ~f:(fun (fn, tasts) -> Map_reduce.map ctx fn tasts errors)
@@ -2490,7 +2498,7 @@ let decl_and_run_mode
     Typing_deps.add_dependency_callback ~name:"get_debug_trace" get_debug_trace
   | _ -> ());
   let (package_config_errors, package_info) =
-    Errors.do_ @@ fun () ->
+    Diagnostics.do_ @@ fun () ->
     match packages_config_path with
     | None -> PackageInfo.empty
     | Some pkgs_config_relpath ->
@@ -2553,8 +2561,10 @@ let decl_and_run_mode
   let (naming_and_parsing_errors, files_info) =
     parse_name_and_decl ctx to_decl
   in
-  let errors = Errors.merge package_config_errors naming_and_parsing_errors in
-  let error_format = Errors.format_or_default error_format in
+  let errors =
+    Diagnostics.merge package_config_errors naming_and_parsing_errors
+  in
+  let error_format = Diagnostics.format_or_default error_format in
   handle_mode
     mode
     files

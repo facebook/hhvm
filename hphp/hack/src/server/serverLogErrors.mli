@@ -12,6 +12,6 @@ val go :
   MultiWorker.worker list option ->
   ServerEnv.env ->
   string list ->
-  Filter_errors.Filter.t ->
+  Filter_diagnostics.Filter.t ->
   bool ->
   Telemetry.t

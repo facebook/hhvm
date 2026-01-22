@@ -22,16 +22,16 @@ let check__toString m =
   let (pos, name) = m.m_name in
   if String.equal name SN.Members.__toString then (
     if (not (Aast.equal_visibility m.m_visibility Public)) || m.m_static then
-      Errors.add_error
-        Nast_check_error.(to_user_error @@ ToString_visibility pos);
+      Diagnostics.add_diagnostic
+        Nast_check_error.(to_user_diagnostic @@ ToString_visibility pos);
     match hint_of_type_hint m.m_ret with
     | Some (_, Happly ((_, id), _))
     | Some (_, Hlike (_, Happly ((_, id), _)))
       when String.equal SN.Classes.cString id ->
       ()
     | Some (p, _) ->
-      Errors.add_error
-        Nast_check_error.(to_user_error @@ ToString_returns_string p)
+      Diagnostics.add_diagnostic
+        Nast_check_error.(to_user_diagnostic @@ ToString_returns_string p)
     | None -> ()
   )
 

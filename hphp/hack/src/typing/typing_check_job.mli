@@ -39,7 +39,7 @@ val calc_errors_and_tast :
   ?drop_fixmed:bool ->
   Relative_path.t ->
   full_ast:Nast.program ->
-  Errors.t * Tast.by_names
+  Diagnostics.t * Tast.by_names
 
 val calc_errors_and_tast_for :
   Provider_context.t ->
@@ -48,4 +48,4 @@ val calc_errors_and_tast_for :
   (Provider_context.t -> full_ast:'def -> 'res option) ->
   full_ast:'def ->
   FileInfo.id ->
-  Errors.t * 'res SMap.t
+  Diagnostics.t * 'res SMap.t

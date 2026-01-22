@@ -35,7 +35,7 @@ use crate::*;
 #[rust_to_ocaml(attr = "deriving show")]
 #[repr(C, u8)]
 pub enum Event {
-    Errors(errors::Errors),
+    Errors(diagnostics::Diagnostics),
     TypingStart(isize),
     TypingProgress(isize),
 }

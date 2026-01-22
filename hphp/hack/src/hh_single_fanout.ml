@@ -198,7 +198,7 @@ let compute_fanout_and_resolve_deps
     (ctx : Provider_context.t)
     (options : options)
     files_with_changes
-    (errors : Errors.t)
+    (errors : Diagnostics.t)
     (old_naming_table, old_symbols_to_files)
     (new_naming_table, new_symbols_to_files)
     (dep_to_symbol_map : _ Typing_deps.Dep.variant Typing_deps.DepMap.t) :
@@ -252,7 +252,7 @@ let compute_fanout_and_resolve_deps
     let files_to_recheck_if_errors =
       get_files_for_symbols to_recheck_if_errors_symbols old_symbols_to_files
     in
-    let files_with_errors = Errors.get_failed_files errors in
+    let files_with_errors = Diagnostics.get_failed_files errors in
     Relative_path.Set.inter files_to_recheck_if_errors files_with_errors
     |> ServerIncremental.add_files_with_stale_errors
          ctx
@@ -386,14 +386,17 @@ let make_naming_table
 
 (** Type check given files. Create the dependency graph as a side effect. *)
 let type_check_make_depgraph ctx options (files : Relative_path.Set.t) :
-    Errors.t =
+    Diagnostics.t =
   let errors =
-    Relative_path.Set.fold files ~init:Errors.empty ~f:(fun file errors_acc ->
+    Relative_path.Set.fold
+      files
+      ~init:Diagnostics.empty
+      ~f:(fun file errors_acc ->
         let full_ast = Ast_provider.get_ast ctx file ~full:true in
         let (errors, _tasts) =
           Typing_check_job.calc_errors_and_tast ctx file ~full_ast
         in
-        Errors.merge errors_acc errors)
+        Diagnostics.merge errors_acc errors)
   in
   if options.debug then (
     Printf.printf "DEPENDENCY GRAPH:\n";
@@ -408,7 +411,7 @@ let type_check_make_depgraph ctx options (files : Relative_path.Set.t) :
   Only the naming table is returned. The reverse naming table and depgraph are
   produced as side effects. *)
 let process_pre_changes ctx options (files : Relative_path.Set.t) :
-    Errors.t * naming_table =
+    Diagnostics.t * naming_table =
   (* TODO builtins and hhi stuff *)
   let defs_per_file = parse_defs ctx files in
   let naming_table = make_naming_table ctx options defs_per_file in

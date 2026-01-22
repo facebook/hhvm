@@ -26,8 +26,8 @@ let save ~logging_init =
     saved_hhi = Path.make Relative_path.(path_of_prefix Hhi);
     saved_tmp = Path.make Relative_path.(path_of_prefix Tmp);
     trace = !Typing_deps.trace;
-    allowed_fixme_codes_strict = !Errors.allowed_fixme_codes_strict;
-    code_agnostic_fixme = !Errors.code_agnostic_fixme;
+    allowed_fixme_codes_strict = !Diagnostics.allowed_fixme_codes_strict;
+    code_agnostic_fixme = !Diagnostics.code_agnostic_fixme;
     paths_to_ignore = FilesToIgnore.get_paths_to_ignore ();
     no_load = ServerLoadFlag.get_no_load ();
     logging_init;
@@ -60,11 +60,11 @@ let restore
   Relative_path.(set_path_prefix Tmp saved_tmp);
   Typing_deps.trace := trace;
   Typing_deps.worker_id := Some worker_id;
-  Errors.allowed_fixme_codes_strict := allowed_fixme_codes_strict;
-  Errors.code_agnostic_fixme := code_agnostic_fixme;
+  Diagnostics.allowed_fixme_codes_strict := allowed_fixme_codes_strict;
+  Diagnostics.code_agnostic_fixme := code_agnostic_fixme;
   FilesToIgnore.set_paths_to_ignore paths_to_ignore;
   ServerLoadFlag.set_no_load no_load;
-  Errors.set_allow_errors_in_default_path false;
+  Diagnostics.set_allow_errors_in_default_path false;
   CgroupProfiler.use_initial_reading cgroup_initial_reading;
   logging_init ()
 

@@ -47,8 +47,8 @@ let test () =
         (c_file_name, c_contents);
       ]
   in
-  Test.assert_env_errors env errors;
+  Test.assert_env_diagnostics env errors;
 
   let (env, _) = Test.change_files env [(b_file_name, b_contents_after)] in
-  Test.assert_no_errors env;
+  Test.assert_no_diagnostics env;
   ()

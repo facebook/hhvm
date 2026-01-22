@@ -267,7 +267,7 @@ let main_internal
         rpc args ServerCommandTypes.NO_PRECHECKED_FILES
     in
     let error_filter =
-      Filter_errors.Filter.make
+      Filter_diagnostics.Filter.make
         ~default_all:local_config.ServerLocalConfig.warnings_default_all
         ~generated_files:
           (List.map
@@ -330,7 +330,7 @@ let main_internal
     in
     let file_inputs = List.map ~f:file_input filenames in
     let error_filter =
-      Filter_errors.Filter.make
+      Filter_diagnostics.Filter.make
         ~default_all:local_config.warnings_default_all
         ~generated_files:
           (List.map
@@ -385,7 +385,7 @@ let main_internal
   | ClientEnv.MODE_LOG_ERRORS { log_file; preexisting_warnings; _ } ->
     let files = filter_real_paths ~allow_directories:false args.paths in
     let error_filter =
-      Filter_errors.Filter.make
+      Filter_diagnostics.Filter.make
         ~default_all:local_config.warnings_default_all
         ~generated_files:
           (List.map
@@ -832,7 +832,7 @@ let main_internal
         let%lwt (results, telemetry) =
           rpc args @@ ServerCommandTypes.LINT fnl
         in
-        let error_format = Errors.format_or_default args.error_format in
+        let error_format = Diagnostics.format_or_default args.error_format in
         ClientLint.go results args.output_json error_format;
         Lwt.return (Exit_status.No_error, telemetry)
     end
@@ -862,7 +862,7 @@ let main_internal
         @@ ServerCommandTypes.LINT_STDIN
              { ServerCommandTypes.filename; contents }
       in
-      let error_format = Errors.format_or_default args.error_format in
+      let error_format = Diagnostics.format_or_default args.error_format in
       ClientLint.go results args.output_json error_format;
       Lwt.return (Exit_status.No_error, telemetry)
   end
@@ -870,7 +870,7 @@ let main_internal
     let%lwt (results, telemetry) =
       rpc args @@ ServerCommandTypes.LINT_ALL code
     in
-    let error_format = Errors.format_or_default args.error_format in
+    let error_format = Diagnostics.format_or_default args.error_format in
     ClientLint.go results args.output_json error_format;
     Lwt.return (Exit_status.No_error, telemetry)
   | ClientEnv.MODE_STATS ->
@@ -897,7 +897,7 @@ let main_internal
     end
   | ClientEnv.MODE_REMOVE_DEAD_UNSAFE_CASTS ->
     let error_filter =
-      Filter_errors.Filter.make
+      Filter_diagnostics.Filter.make
         ~default_all:local_config.ServerLocalConfig.warnings_default_all
         ~generated_files:
           (List.map

@@ -35,7 +35,8 @@ let log_remaining_prop env =
       let n_disj = TL.n_disj prop in
       let n_conj = TL.n_conj prop in
       TypingLogger.InferenceCnstr.log p_as_string ~pos ~size ~n_disj ~n_conj);
-    if (not (Errors.currently_has_errors ())) && not (TL.is_valid prop) then
+    if (not (Diagnostics.currently_has_errors ())) && not (TL.is_valid prop)
+    then
       Typing_log.log_prop
         1
         (Pos_or_decl.of_raw_pos env.genv.callable_pos)

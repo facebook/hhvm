@@ -40,7 +40,7 @@ let default_genv =
     debug_channels = None;
   }
 
-let make_env ~init_id ~deps_mode ?errorl config : ServerEnv.env =
+let make_env ~init_id ~deps_mode ?diagnostics config : ServerEnv.env =
   {
     tcopt = ServerConfig.typechecker_options config;
     popt = ServerConfig.parser_options config;
@@ -48,7 +48,7 @@ let make_env ~init_id ~deps_mode ?errorl config : ServerEnv.env =
     swriteopt = ServerConfig.symbol_write_options config;
     naming_table = Naming_table.empty;
     deps_mode;
-    errorl = Option.value errorl ~default:Errors.empty;
+    diagnostics = Option.value diagnostics ~default:Diagnostics.empty;
     failed_naming = Relative_path.Set.empty;
     last_command_time = 0.0;
     last_notifier_check_time = 0.0;

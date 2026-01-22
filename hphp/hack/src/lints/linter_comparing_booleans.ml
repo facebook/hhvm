@@ -44,13 +44,17 @@ let handler =
           | Some (name, boolean_var) ->
             (match lhs with
             | (_, pos_exp1, _) ->
-              Lints_errors.comparing_booleans pos pos_exp1 name boolean_var)
+              Lints_diagnostics.comparing_booleans pos pos_exp1 name boolean_var)
           | None ->
             (match checking_the_expression rhs lhs with
             | Some (name, boolean_var) ->
               (match rhs with
               | (_, pos_exp2, _) ->
-                Lints_errors.comparing_booleans pos pos_exp2 name boolean_var)
+                Lints_diagnostics.comparing_booleans
+                  pos
+                  pos_exp2
+                  name
+                  boolean_var)
             | None -> ()))
         | _ -> ())
       | _ -> ()

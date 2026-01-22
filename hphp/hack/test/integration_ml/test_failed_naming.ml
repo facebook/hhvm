@@ -34,7 +34,7 @@ let test () =
       env
       [(test, test_contents); (f1, c_contents); (f2, d_contents)]
   in
-  Test.assert_no_errors env;
+  Test.assert_no_diagnostics env;
 
   (* Rename C to (duplicate of) D *)
   let (env, _) =
@@ -48,4 +48,4 @@ let test () =
     Test.(
       run_loop_once env { default_loop_input with disk_changes = [(f1, "")] })
   in
-  Test.assert_env_errors env errors
+  Test.assert_env_diagnostics env errors

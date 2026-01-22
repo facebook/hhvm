@@ -41,8 +41,8 @@ let require_package_strict_inclusion env attr =
           Provider_context.get_tcopt env.Nast_check_env.ctx
           |> TypecheckerOptions.custom_error_config
         in
-        Errors.add_error
-          (Naming_error_utils.to_user_error
+        Diagnostics.add_diagnostic
+          (Naming_error_utils.to_user_diagnostic
              (Naming_error.Unbound_name
                 {
                   pos = name_pos;
@@ -76,9 +76,9 @@ let require_package_strict_inclusion env attr =
           | Package.Unrelated
           | Package.Soft_includes ->
             let required_pos = Package.get_package_pos required_package in
-            Errors.add_error
+            Diagnostics.add_diagnostic
               Nast_check_error.(
-                to_user_error
+                to_user_diagnostic
                 @@ Require_package_strict_inclusion
                      {
                        required_pos = name_pos;
@@ -94,9 +94,9 @@ let require_package_strict_inclusion env attr =
           (match Package.relationship current_package required_package with
           | Package.Soft_includes ->
             let required_pos = Package.get_package_pos current_package in
-            Errors.add_error
+            Diagnostics.add_diagnostic
               Nast_check_error.(
-                to_user_error
+                to_user_diagnostic
                 @@ Require_package_strict_inclusion
                      {
                        required_pos = name_pos;

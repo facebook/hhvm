@@ -26,9 +26,9 @@ let error_if_repeated_attribute (attribs : ('ex, 'en) xhp_attribute list) =
   let rec loop attribs (seen : SSet.t) =
     match attribs with
     | Xhp_simple { xs_name = (pos, name); _ } :: _ when SSet.mem name seen ->
-      Errors.add_error
+      Diagnostics.add_diagnostic
         Parsing_error.(
-          to_user_error
+          to_user_diagnostic
           @@ Xhp_parsing_error
                { pos; msg = Printf.sprintf "Cannot redeclare %s" name })
     | Xhp_simple { xs_name = (_, name); _ } :: attribs ->

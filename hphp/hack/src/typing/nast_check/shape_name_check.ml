@@ -21,8 +21,8 @@ let error_if_duplicate_names fdl custom_err_config =
   let _ =
     List.fold_left fdl ~init:ShapeSet.empty ~f:(fun seen (name, _) ->
         if ShapeSet.mem name seen then
-          Errors.add_error
-            (Naming_error_utils.to_user_error
+          Diagnostics.add_diagnostic
+            (Naming_error_utils.to_user_diagnostic
                (Naming_error.Field_name_already_bound (get_pos name))
                custom_err_config);
         ShapeSet.add name seen)

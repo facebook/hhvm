@@ -15,7 +15,8 @@ let on_method
     match m_ret with
     | (_, Some (_, Hprim Tvoid)) -> ()
     | (_, Some (p, _)) ->
-      Errors.add_error Nast_check_error.(to_user_error @@ Clone_return_type p)
+      Diagnostics.add_diagnostic
+        Nast_check_error.(to_user_diagnostic @@ Clone_return_type p)
     | _ -> ()
   else
     ();

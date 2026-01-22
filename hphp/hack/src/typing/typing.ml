@@ -1940,7 +1940,7 @@ let check_lambda_arity env lambda_pos def_pos lambda_ft expected_ft =
                 hint_convert_to_optional;
               }));
     not (too_few || too_many)
-    (* Errors.typing_too_many_args expected_min lambda_min lambda_pos def_pos *)
+    (* Diagnostics.typing_too_many_args expected_min lambda_min lambda_pos def_pos *)
   | (_, _) -> true
 
 let param_modes
@@ -2894,7 +2894,7 @@ end = struct
     try expr_ ~expected ~ctxt env e with
     | Inf.InconsistentTypeVarState _ as exn ->
       (* we don't want to catch unwanted exceptions here, eg Timeouts *)
-      Errors.exception_occurred p (Exception.wrap exn);
+      Diagnostics.exception_occurred p (Exception.wrap exn);
       expr_error env p e
 
   (* Some (legacy) special functions are allowed in initializers,
@@ -3262,7 +3262,7 @@ end = struct
         and telemetry =
           Telemetry.(create () |> string_ ~key:"class name" ~value:name)
         in
-        Errors.invariant_violation p telemetry desc ~report_to_user:false;
+        Diagnostics.invariant_violation p telemetry desc ~report_to_user:false;
         (* Continue typechecking without performing the check on a best effort
            basis. *)
         env
@@ -3561,7 +3561,7 @@ end = struct
       make_result env p (Aast.String2 tel) (MakeType.string (Reason.witness p))
     | PrefixedString (n, e) ->
       if String.( <> ) n "re" then (
-        Errors.experimental_feature
+        Diagnostics.experimental_feature
           p
           "String prefixes other than `re` are not yet supported.";
         expr_error env p outer
@@ -4533,7 +4533,7 @@ end = struct
         | Tdynamic when Tast.is_under_dynamic_assumptions env.checked ->
           expected_return
         | _ ->
-          Errors.internal_error p "Return type is not a generator";
+          Diagnostics.internal_error p "Return type is not a generator";
           MakeType.union (Reason.yield_send p) []
       in
       let is_async =
@@ -6746,7 +6746,7 @@ end = struct
           in
           (env, fty)
         | _ ->
-          Errors.internal_error p "Expected function type for constructor";
+          Diagnostics.internal_error p "Expected function type for constructor";
           Env.fresh_type_error env p
       in
       let (env, (tel, typed_unpack_element, _ty, should_forget_fakes)) =
@@ -9873,13 +9873,17 @@ end = struct
             in
             (env, (pos, Expr te))
           | None ->
-            Errors.internal_error pos "Missing type while checking Concurrent";
+            Diagnostics.internal_error
+              pos
+              "Missing type while checking Concurrent";
             stmt env s)
         | Expr _e ->
           (match te_ty_opt with
           | Some (te, _ty) -> (env, (pos, Expr te))
           | None ->
-            Errors.internal_error pos "Missing type while checking Concurrent";
+            Diagnostics.internal_error
+              pos
+              "Missing type while checking Concurrent";
             stmt env s)
         | _ -> stmt env s
       in
@@ -9963,7 +9967,7 @@ end = struct
        * where $x is non-null. *)
       let finally_w_cont env _key = finally_w_cont fb env in
       let (env, locals_map) =
-        Errors.ignore_ (fun () ->
+        Diagnostics.ignore_ (fun () ->
             CMap.map_env finally_w_cont env initial_locals)
       in
       let union env _key = LEnv.union_contextopts ~join_pos env in
@@ -10019,9 +10023,9 @@ end = struct
       if (not (List.is_empty block)) && not last then
         match LEnv.get_cont_option env C.Next with
         | Some _ ->
-          Errors.add_error
+          Diagnostics.add_diagnostic
             Nast_check_error.(
-              to_user_error
+              to_user_diagnostic
               @@
               if is_default then
                 Default_fallthrough switch_pos
@@ -10564,7 +10568,7 @@ end = struct
         let (env, tb) =
           if disable then
             let () =
-              Errors.internal_error
+              Diagnostics.internal_error
                 pos
                 ("Type inference for this function has been disabled by the "
                 ^ SN.UserAttributes.uaDisableTypecheckerInternal
@@ -10647,12 +10651,12 @@ end = struct
     in
 
     let (env, dynamic_body) =
-      Errors.try_with_result
+      Diagnostics.try_with_result
         (fun () ->
           fun_ ~disable env dynamic_return_info pos f.f_body f.f_fun_kind)
         (fun env_and_dynamic_body error ->
           if not @@ TCO.everything_sdt env.genv.tcopt then
-            Errors.function_is_not_dynamically_callable name error;
+            Diagnostics.function_is_not_dynamically_callable name error;
           env_and_dynamic_body)
     in
     (env, dynamic_params, dynamic_body, dynamic_return_ty)
@@ -11674,7 +11678,7 @@ end = struct
           (env, mk (Reason.witness p, Tclass (c, exact, tyl)))
         | None ->
           (* Naming phase has already checked and replaced CIself with CI if outside a class *)
-          Errors.internal_error p "Unexpected CIself";
+          Diagnostics.internal_error p "Unexpected CIself";
           Env.fresh_type_error env p
       in
       make_result env [] Aast.CIself ty
@@ -12146,7 +12150,7 @@ end = struct
       let (_, _, lval_) = e1 in
       (match (op, lval_) with
       | (Ast_defs.QuestionQuestion, Class_get _) ->
-        Errors.experimental_feature
+        Diagnostics.experimental_feature
           p
           "null coalesce assignment operator with static properties";
         expr_error env p outer
@@ -13799,7 +13803,7 @@ end = struct
   let file_attributes env file_attrs =
     (* Disable checking of error positions, as file attributes have spans that
      * aren't subspans of the class or function into which they are copied *)
-    Errors.run_with_span Pos.none @@ fun () ->
+    Diagnostics.run_with_span Pos.none @@ fun () ->
     List.map_env env file_attrs ~f:(fun env fa ->
         let (env, user_attributes) =
           User_attribute.attributes_check_def

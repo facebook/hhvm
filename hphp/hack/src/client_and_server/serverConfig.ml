@@ -658,9 +658,10 @@ let load ~silent ~from ~(cli_config_overrides : (string * string) list) :
       global_opts_without_package_info
   in
 
-  Errors.allowed_fixme_codes_strict :=
+  Diagnostics.allowed_fixme_codes_strict :=
     GlobalOptions.allowed_fixme_codes_strict global_opts;
-  Errors.code_agnostic_fixme := GlobalOptions.code_agnostic_fixme global_opts;
+  Diagnostics.code_agnostic_fixme :=
+    GlobalOptions.code_agnostic_fixme global_opts;
   ( {
       version;
       load_script_timeout =

@@ -58,7 +58,7 @@ let send_to_lint_error pos str line1 line2 bol1 bol2 col1 col2 =
           pos_cnum = col2;
         }
   in
-  Lints_errors.calling_pointless_boolean pos pos_quickfix str
+  Lints_diagnostics.calling_pointless_boolean pos pos_quickfix str
 
 let handler =
   object

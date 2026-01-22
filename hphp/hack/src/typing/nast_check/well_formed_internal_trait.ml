@@ -28,15 +28,15 @@ let handler =
                        SN.UserAttributes.uaModuleLevelTrait
                        c.c_user_attributes)
                 then
-                  Errors.add_error
+                  Diagnostics.add_diagnostic
                     Nast_check_error.(
-                      to_user_error
+                      to_user_diagnostic
                       @@ Internal_member_inside_public_trait
                            { member_pos = pos member; trait_pos; is_method })
               end else
-                Errors.add_error
+                Diagnostics.add_diagnostic
                   Nast_check_error.(
-                    to_user_error
+                    to_user_diagnostic
                     @@ Internal_member_inside_public_trait
                          { member_pos = pos member; trait_pos; is_method })
             end

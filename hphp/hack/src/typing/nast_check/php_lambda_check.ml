@@ -18,7 +18,7 @@ let handler =
       if TypecheckerOptions.error_php_lambdas (get_tcopt env) then
         match expr with
         | Efun _ ->
-          Errors.add_error
-            Nast_check_error.(to_user_error @@ Php_lambda_disallowed pos)
+          Diagnostics.add_diagnostic
+            Nast_check_error.(to_user_diagnostic @@ Php_lambda_disallowed pos)
         | _ -> ()
   end

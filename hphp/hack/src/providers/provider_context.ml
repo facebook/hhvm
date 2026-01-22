@@ -22,10 +22,10 @@ type entry = {
   mutable contents: entry_contents;
   mutable source_text: Full_fidelity_source_text.t option;
   mutable parser_return: Parser_return.t option;
-  mutable ast_errors: Errors.t option;
+  mutable ast_diagnostics: Diagnostics.t option;
   mutable cst: PositionedSyntaxTree.t option;
   mutable tast: Tast.program Tast_with_dynamic.t option;
-  mutable all_errors: Errors.t option;
+  mutable all_diagnostics: Diagnostics.t option;
   mutable symbols: Relative_path.t SymbolOccurrence.t list option;
 }
 
@@ -75,10 +75,10 @@ let make_entry ~(path : Relative_path.t) ~(contents : entry_contents) : entry =
     contents;
     source_text = None;
     parser_return = None;
-    ast_errors = None;
+    ast_diagnostics = None;
     cst = None;
     tast = None;
-    all_errors = None;
+    all_diagnostics = None;
     symbols = None;
   }
 

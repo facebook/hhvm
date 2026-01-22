@@ -58,8 +58,8 @@ let handle_unbound_name env custom_err_config (pos, name) kind =
               kind_str = Naming_error_utils.unbound_name_kind kind;
             } )
     else
-      Errors.add_error
-        (Naming_error_utils.to_user_error
+      Diagnostics.add_diagnostic
+        (Naming_error_utils.to_user_diagnostic
            (Naming_error.Unbound_name { pos; name; kind })
            custom_err_config);
     (* In addition to reporting errors, we also add to the global dependency table *)
@@ -85,8 +85,8 @@ let has_canon_name env custom_err_config get_name get_pos (pos, name) =
     match get_pos env.ctx suggest_name with
     | None -> false
     | Some suggest_pos ->
-      Errors.add_error
-        (Naming_error_utils.to_user_error
+      Diagnostics.add_diagnostic
+        (Naming_error_utils.to_user_diagnostic
            (Naming_error.Did_you_mean { pos; name; suggest_pos; suggest_name })
            custom_err_config);
       true
@@ -134,8 +134,8 @@ let check_package_name env custom_err_config (pos, name) =
   then
     ()
   else
-    Errors.add_error
-      (Naming_error_utils.to_user_error
+    Diagnostics.add_diagnostic
+      (Naming_error_utils.to_user_diagnostic
          (Naming_error.Unbound_name
             { pos; name; kind = Name_context.PackageNamespace })
          custom_err_config)
@@ -154,18 +154,19 @@ let check_type_name
     | Some reified ->
       (* TODO: These throw typing errors instead of naming errors *)
       if not allow_generics then
-        Errors.add_error
-          Nast_check_error.(to_user_error @@ Generics_not_allowed pos);
+        Diagnostics.add_diagnostic
+          Nast_check_error.(to_user_diagnostic @@ Generics_not_allowed pos);
       begin
         match reified with
         | Aast.Erased ->
-          Errors.add_error
+          Diagnostics.add_diagnostic
             Nast_check_error.(
-              to_user_error @@ Generic_at_runtime { pos; prefix = "Erased" })
+              to_user_diagnostic
+              @@ Generic_at_runtime { pos; prefix = "Erased" })
         | Aast.SoftReified ->
-          Errors.add_error
+          Diagnostics.add_diagnostic
             Nast_check_error.(
-              to_user_error
+              to_user_diagnostic
               @@ Generic_at_runtime { pos; prefix = "Soft reified" })
         | Aast.Reified -> ()
       end
@@ -178,8 +179,8 @@ let check_type_name
         let (decl_pos, _) =
           Naming_global.GEnv.get_type_full_pos env.ctx (def_pos, name)
         in
-        Errors.add_error
-          (Naming_error_utils.to_user_error
+        Diagnostics.add_diagnostic
+          (Naming_error_utils.to_user_diagnostic
              (Naming_error.Unexpected_typedef
                 { pos; decl_pos; expected_kind = kind })
              custom_err_config)

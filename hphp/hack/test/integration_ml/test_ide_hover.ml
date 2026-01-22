@@ -1256,7 +1256,7 @@ let test () =
       ~hhi_files:(Hhi.get_raw_hhi_contents () |> Array.to_list)
   in
   let env = Test.setup_disk env files in
-  Test.assert_no_errors env;
+  Test.assert_no_diagnostics env;
 
   let failed_cases =
     List.filter_map cases ~f:(fun ((file, line, column), expectedHover) ->

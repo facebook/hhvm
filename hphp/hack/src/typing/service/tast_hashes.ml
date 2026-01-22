@@ -89,12 +89,14 @@ let map ctx path tasts errors : t =
         let tasts = Tast.map_by_names tasts ~f:(Tast_expand.expand_def ctx) in
         let tast_hashes = hash_tasts tasts in
         let error_hashes =
-          let errors = Errors.get_file_errors ~drop_fixmed:true errors path in
-          Errors.fold_per_file_errors
+          let errors =
+            Diagnostics.get_file_diagnostics ~drop_fixmed:true errors path
+          in
+          Diagnostics.fold_per_file_diagnostics
             errors
             ~init:ISet.empty
             ~f:(fun hashes error ->
-              let hash = Errors.hash_error error in
+              let hash = Diagnostics.hash_diagnostic error in
               ISet.add hash hashes)
         in
         { tast_hashes; error_hashes })

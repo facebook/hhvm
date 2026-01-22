@@ -23,12 +23,12 @@ val get_old_and_new_defs_in_files :
   @param reparsed   Set of files that were reparsed (so their ASTs and positions
                     in them could have changed.
 
-  @param errors     Current global error list
+  @param diagnostics     Current global diagnostic list
 *)
 val add_files_with_stale_errors :
   Provider_context.t ->
   reparsed:Relative_path.Set.t ->
-  Errors.t ->
+  Diagnostics.t ->
   Relative_path.Set.t ->
   Relative_path.Set.t
 
@@ -44,5 +44,5 @@ val get_files_to_recheck :
   ServerEnv.env ->
   Fanout.t ->
   reparsed:Relative_path.Set.t ->
-  errors:Errors.t ->
+  diagnostics:Diagnostics.t ->
   Relative_path.Set.t

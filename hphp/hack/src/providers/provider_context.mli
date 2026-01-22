@@ -66,11 +66,12 @@ type entry = {
   mutable parser_return: Parser_return.t option;
       (** this parser_return, if present, came from source_text via Ast_provider.parse
       under ~full:true *)
-  mutable ast_errors: Errors.t option;  (** same invariant as parser_return *)
+  mutable ast_diagnostics: Diagnostics.t option;
+      (** same invariant as parser_return *)
   mutable cst: PositionedSyntaxTree.t option;
   mutable tast: Tast.program Tast_with_dynamic.t option;
       (** NOT monotonic: depends on the decls of other files. See invariants in Provider_utils.mli. *)
-  mutable all_errors: Errors.t option;
+  mutable all_diagnostics: Diagnostics.t option;
       (** NOT monotonic for the same reason as [tast]. *)
   mutable symbols: Relative_path.t SymbolOccurrence.t list option;
 }

@@ -53,7 +53,9 @@ let test () =
   let env =
     Test.setup_disk env [("e.php", e_contents); ("f.php", f_contents)]
   in
-  Test.assertSingleError f_errors (Errors.get_error_list env.ServerEnv.errorl);
+  Test.assertSingleDiagnostic
+    f_errors
+    (Diagnostics.get_diagnostic_list env.ServerEnv.diagnostics);
 
   let (env, _) =
     Test.(
@@ -61,4 +63,4 @@ let test () =
         env
         { default_loop_input with disk_changes = [("e.php", e_changes)] })
   in
-  Test.assert_no_errors env
+  Test.assert_no_diagnostics env

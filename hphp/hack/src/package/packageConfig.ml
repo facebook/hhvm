@@ -39,11 +39,12 @@ let parse (strict : bool) (disable_transitivity_check : bool) (path : string) =
           let reasons =
             List.map ~f:(fun (p, s) -> (Pos_or_decl.of_raw_pos p, s)) reasons
           in
-          User_error.(
+          User_diagnostic.(
             to_string
               (to_absolute
                  Parsing_error.(
-                   to_user_error @@ Package_config_error { pos; msg; reasons }))))
+                   to_user_diagnostic
+                   @@ Package_config_error { pos; msg; reasons }))))
         errors
     in
     failwith (String.concat strings)

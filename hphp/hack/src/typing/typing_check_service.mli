@@ -30,7 +30,7 @@ type distc_config = distc_config_options option
 type seconds_since_epoch = float
 
 type process_file_results = {
-  file_errors: Errors.t;
+  file_diagnostics: Diagnostics.t;
   file_map_reduce_data: Map_reduce.t;
   deferred_decls: Deferred_decl.deferment list;
 }
@@ -44,7 +44,7 @@ val process_file :
   process_file_results
 
 type result = {
-  errors: Errors.t;
+  diagnostics: Diagnostics.t;
   warnings_saved_state: Warnings_saved_state.t option;
   telemetry: Telemetry.t;
   time_first_error: seconds_since_epoch option;

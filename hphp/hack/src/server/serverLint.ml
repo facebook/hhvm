@@ -31,7 +31,7 @@ let lint ctx _acc (files_with_contents : lint_target list) =
         fun acc { filename; contents } ->
           let (errs, ()) =
             Lints_core.do_ (fun () ->
-                Errors.ignore_ (fun () ->
+                Diagnostics.ignore_ (fun () ->
                     let contents =
                       match contents with
                       | Some contents -> contents

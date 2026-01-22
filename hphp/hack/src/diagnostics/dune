@@ -1,0 +1,154 @@
+(rule
+ (target error_message_sentinel.fb.ml)
+ (action
+  (copy# facebook/error_message_sentinel.ml error_message_sentinel.fb.ml)))
+
+(library
+  (name error_codes)
+  (wrapped false)
+  (preprocess
+   (pps ppx_deriving.std))
+  (modules
+    error_codes
+  )
+  (libraries
+   utils_core)
+)
+
+(library
+ (name warnings_saved_state)
+ (wrapped false)
+ (modules
+  warnings_saved_state)
+ (libraries
+  utils_core)
+ (preprocess
+   (pps
+    ppx_deriving.std)))
+
+(library
+  (name explanation)
+  (wrapped false)
+  (preprocess
+   (pps
+    ppx_deriving.std
+    ppx_hash))
+  (modules
+    explanation)
+  (libraries
+    core_kernel
+    hh_autoimport
+    ))
+
+(library
+  (name user_error)
+  (wrapped false)
+  (preprocess
+   (pps
+    ppx_deriving.std
+    ppx_hash))
+  (modules
+    markdown_lite
+    render
+    message
+    quickfix
+    user_diagnostic)
+  (libraries
+    core_kernel
+    classish_positions
+    explanation
+    pos_or_decl
+    hh_autoimport
+    utils_multifile
+    error_codes
+  )
+)
+
+(library
+ (name classish_positions)
+ (wrapped false)
+ (preprocess
+  (pps
+   ppx_deriving.std
+   ppx_hash))
+ (modules
+   classish_positions
+   classish_positions_types)
+ (libraries
+  core_kernel
+  full_fidelity
+  hh_autoimport
+  logging
+  pos_or_decl
+  ast
+  utils_exit
+  utils_multifile))
+
+
+(library
+ (name classish_positions_cli_lib)
+ (wrapped true)
+ (modules classish_positions_cli_lib)
+ (libraries
+  full_fidelity
+  file_provider
+  lsp
+  pos
+  provider_context
+  provider_utils
+  ide_diagnostics
+  utils_core)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std)))
+
+
+(library
+ (name errors)
+ (wrapped false)
+ (preprocess
+  (pps
+   ppx_deriving.std
+   ppx_hash))
+ (modules
+   contextual_diagnostic_formatter
+   error_category
+   diagnostics
+   extended_diagnostic_formatter
+   highlighted_diagnostic_formatter
+   phase_error
+   raw_diagnostic_formatter
+   error_message_sentinel)
+ (foreign_archives diagnostics_ffi)
+ (libraries
+  core_kernel
+  classish_positions
+  error_codes
+  full_fidelity
+  hh_autoimport
+  logging
+  pos_or_decl
+  ast
+  server_load_flag
+  utils_exit
+  utils_multifile
+  user_error
+  warnings_saved_state
+  (select
+   error_message_sentinel.ml
+   from
+   (facebook -> error_message_sentinel.fb.ml)
+   (-> error_message_sentinel.stubs.ml))))
+
+(library
+ (name diagnostics_ffi)
+ (modules)
+ (wrapped false)
+ (foreign_archives diagnostics_ffi))
+
+(rule
+ (targets libdiagnostics_ffi.a)
+ (deps
+  (source_tree %{workspace_root}/hack/src))
+ (locks /cargo)
+ (action
+  (run %{workspace_root}/hack/scripts/invoke_cargo.sh diagnostics_ffi diagnostics_ffi)))

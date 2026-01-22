@@ -11,7 +11,7 @@ use lint_rust::LintError;
 use ocamlrep::FromOcamlRep;
 use ocamlrep::ToOcamlRep;
 use oxidized::aast::Program;
-use oxidized::errors::Error;
+use oxidized::diagnostics::Diagnostic;
 use oxidized::experimental_features::FeatureName;
 use oxidized::file_info;
 use oxidized::namespace_env::Mode as NamespaceMode;
@@ -58,7 +58,7 @@ pub struct ParserResult {
     pub aast: Program<(), ()>,
     pub lowerer_parsing_errors: Vec<(Pos, String)>,
     pub syntax_errors: Vec<SyntaxError>,
-    pub errors: Vec<Error>,
+    pub errors: Vec<Diagnostic>,
     pub lint_errors: Vec<LintError>,
     #[ocamlrep(skip)]
     pub profile: ParserProfile,

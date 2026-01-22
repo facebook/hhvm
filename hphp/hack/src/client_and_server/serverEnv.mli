@@ -180,19 +180,19 @@ type env = {
   popt: ParserOptions.t;
   gleanopt: GleanOptions.t;
   swriteopt: SymbolWriteOptions.t;
-  errorl: Errors.t; [@opaque]
-      (** Errors are indexed by files that were known to GENERATE errors in
-          corresponding phases. Note that this is different from HAVING errors -
-          it's possible for checking of A to generate error in B - in this case
-          Errors.get_failed_files Typing should contain A, not B.
+  diagnostics: Diagnostics.t; [@opaque]
+      (** Diagnostics are indexed by files that were known to GENERATE diagnostics in
+          corresponding phases. Note that this is different from HAVING diagnostics -
+          it's possible for checking of A to generate a diagnostic in B - in this case
+          Diagnostics.get_failed_files Typing should contain A, not B.
           Conversly, if declaring A will require declaring B, we should put
           B in failed decl. Same if checking A will cause declaring B (via lazy
           decl).
 
           During recheck, we add those files to the set of files to reanalyze
-          at each stage in order to regenerate their error lists. So those
+          at each stage in order to regenerate their diagnostic lists. So those
           failed_ sets are the main piece of mutable state that incremental mode
-          needs to maintain - the errors themselves are more of a cache, and should
+          needs to maintain - the diagnostics themselves are more of a cache, and should
           always be possible to be regenerated based on those sets. *)
   failed_naming: Relative_path.Set.t;
       (** failed_naming is used as kind of a dependency tracking mechanism:

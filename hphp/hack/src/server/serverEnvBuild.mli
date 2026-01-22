@@ -19,6 +19,6 @@ val default_genv : ServerEnv.genv
 val make_env :
   init_id:string ->
   deps_mode:Typing_deps_mode.t ->
-  ?errorl:Errors.t ->
+  ?diagnostics:Diagnostics.t ->
   ServerConfig.t ->
   ServerEnv.env

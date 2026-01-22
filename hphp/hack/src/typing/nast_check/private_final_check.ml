@@ -25,7 +25,7 @@ let handler =
       | (Some Ast_defs.Ctrait, _, _) -> ()
       | (_, Private, true) ->
         let (pos, _) = m.m_name in
-        Errors.add_error
-          Nast_check_error.(to_user_error @@ Private_and_final pos)
+        Diagnostics.add_diagnostic
+          Nast_check_error.(to_user_diagnostic @@ Private_and_final pos)
       | _ -> ()
   end

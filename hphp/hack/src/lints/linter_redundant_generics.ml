@@ -79,9 +79,13 @@ let ft_redundant_tparams (env : Tast_env.env) overlapping tparams ty =
           begin
             match super_bounds with
             | [] ->
-              Lints_errors.redundant_covariant pos name bounds_message "nothing"
+              Lints_diagnostics.redundant_covariant
+                pos
+                name
+                bounds_message
+                "nothing"
             | [(_, t)] ->
-              Lints_errors.redundant_covariant
+              Lints_diagnostics.redundant_covariant
                 pos
                 name
                 bounds_message
@@ -101,13 +105,13 @@ let ft_redundant_tparams (env : Tast_env.env) overlapping tparams ty =
           begin
             match as_bounds with
             | [] ->
-              Lints_errors.redundant_contravariant
+              Lints_diagnostics.redundant_contravariant
                 pos
                 name
                 bounds_message
                 "mixed"
             | [(_, t)] ->
-              Lints_errors.redundant_contravariant
+              Lints_diagnostics.redundant_contravariant
                 pos
                 name
                 bounds_message
@@ -118,13 +122,13 @@ let ft_redundant_tparams (env : Tast_env.env) overlapping tparams ty =
               (* We can't denote this in source code so don't emit lint warning *)
               | None -> ()
               | Some locl_ty ->
-                Lints_errors.redundant_contravariant
+                Lints_diagnostics.redundant_contravariant
                   pos
                   name
                   bounds_message
                   (Tast_env.print_ty env locl_ty))
           end
-        | (None, None) -> Lints_errors.redundant_generic pos name)
+        | (None, None) -> Lints_diagnostics.redundant_generic pos name)
 
 let check_redundant_generics_class_method env (_method_name, method_) =
   match method_.ce_type with

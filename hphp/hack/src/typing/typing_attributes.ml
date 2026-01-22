@@ -50,9 +50,9 @@ let check_implements
                   attr_interface
                   ~equal:String.equal
         then
-          Errors.add_error
+          Diagnostics.add_diagnostic
             Nast_check_error.(
-              to_user_error
+              to_user_diagnostic
               @@ Wrong_expression_kind_builtin_attribute
                    { expr_kind; pos = attr_pos; attr_name });
         true
@@ -89,8 +89,8 @@ let check_implements
         let custom_err_config =
           TypecheckerOptions.custom_error_config (Typing_env.get_tcopt env)
         in
-        Errors.add_error
-          (Naming_error_utils.to_user_error
+        Diagnostics.add_diagnostic
+          (Naming_error_utils.to_user_diagnostic
              (Naming_error.Unbound_attribute_name
                 { pos = attr_pos; attr_name; closest_attr_name })
              custom_err_config)
@@ -130,8 +130,8 @@ let check_implements
       let custom_err_config =
         TypecheckerOptions.custom_error_config (Typing_env.get_tcopt env)
       in
-      Errors.add_error
-        (Naming_error_utils.to_user_error
+      Diagnostics.add_diagnostic
+        (Naming_error_utils.to_user_diagnostic
            (Naming_error.Unbound_attribute_name
               { pos = attr_pos; attr_name; closest_attr_name = None })
            custom_err_config);

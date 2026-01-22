@@ -78,13 +78,15 @@ val fail : string -> 'noreturn
 
 val assertEqual : string -> string -> unit
 
-val assert_no_errors : ServerEnv.env -> unit
+val assert_no_diagnostics : ServerEnv.env -> unit
 
-val assert_errors : Errors.t -> string -> unit
+val assert_diagnostics : Diagnostics.t -> string -> unit
 
-val assert_env_errors : ServerEnv.env -> string -> unit
+val assert_env_diagnostics : ServerEnv.env -> string -> unit
 
-val assertSingleError : string -> Errors.error list -> unit
+val assertSingleDiagnostic : string -> Diagnostics.diagnostic list -> unit
+
+val diagnostic_strings : Diagnostics.diagnostic list -> string list
 
 val assert_ide_completions : AutocompleteTypes.ide_result -> string list -> unit
 
@@ -102,5 +104,3 @@ val assert_rename :
 val assert_needs_recheck : ServerEnv.env -> string -> unit
 
 val assert_needs_no_recheck : ServerEnv.env -> string -> unit
-
-val error_strings : Errors.error list -> string list

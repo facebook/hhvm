@@ -30,7 +30,7 @@ let test () =
   in
   if not loop_output.did_read_disk_changes then
     Test.fail "Expected the server to process disk updates";
-  (match Errors.get_error_list env.errorl with
+  (match Diagnostics.get_diagnostic_list env.diagnostics with
   | [] -> ()
   | _ -> Test.fail "Expected no errors");
   let (env, loop_output) =
@@ -50,4 +50,6 @@ let test () =
     ^ "  File \"/foo.php\", line 3, characters 20-22:\n"
     ^ "  But got `string`\n"
   in
-  Test.assertSingleError expected_error (Errors.get_error_list env.errorl)
+  Test.assertSingleDiagnostic
+    expected_error
+    (Diagnostics.get_diagnostic_list env.diagnostics)

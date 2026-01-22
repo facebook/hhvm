@@ -30,7 +30,7 @@
 (library
  (name lints_errors)
  (wrapped false)
- (modules lints_errors)
+ (modules lints_diagnostics)
  (preprocess
   (pps ppx_deriving.std))
  (libraries
@@ -68,7 +68,7 @@
    lints_core
    linting_main
    lints_codes
-   lints_errors
+   lints_diagnostics
    linting_visitors))
  (libraries
   decl

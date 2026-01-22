@@ -141,7 +141,7 @@ let check_methods ctx c cls ~static =
                (List.hd m.m_user_attributes)
            in
 
-           Lints_errors.missing_override_attribute
+           Lints_diagnostics.missing_override_attribute
              ~meth_pos:m.m_span
              ~name_pos:p
              ~first_attr_pos

@@ -19,7 +19,7 @@ let error_if_static_prop_is_const env cv =
     && Naming_attributes.mem SN.UserAttributes.uaConst cv.cv_user_attributes
   then
     let pos = fst cv.cv_id in
-    Errors.experimental_feature pos "Const properties cannot be static."
+    Diagnostics.experimental_feature pos "Const properties cannot be static."
 
 (* Non-static properties cannot have attribute __LSB *)
 let error_if_nonstatic_prop_with_lsb cv custom_err_config =
@@ -28,8 +28,8 @@ let error_if_nonstatic_prop_with_lsb cv custom_err_config =
       Naming_attributes.mem_pos SN.UserAttributes.uaLSB cv.cv_user_attributes
     in
     Option.iter lsb_pos ~f:(fun pos ->
-        Errors.add_error
-          (Naming_error_utils.to_user_error
+        Diagnostics.add_diagnostic
+          (Naming_error_utils.to_user_diagnostic
              (Naming_error.Nonstatic_property_with_lsb pos)
              custom_err_config))
 
@@ -40,8 +40,8 @@ let unnecessary_lsb c cv custom_err_config =
   | Some pos ->
     let (class_pos, class_name) = c.c_name in
     let suggestion = None in
-    Errors.add_error
-      (Naming_error_utils.to_user_error
+    Diagnostics.add_diagnostic
+      (Naming_error_utils.to_user_diagnostic
          (Naming_error.Unnecessary_attribute
             { pos; attr; class_pos; class_name; suggestion })
          custom_err_config)

@@ -76,11 +76,11 @@ let handler =
         (match simple_body fb_ast with
         | Some (ty, e) ->
           if async_lambda_cond env ty e f_fun_kind then
-            Lints_errors.async_lambda pos
+            Lints_diagnostics.async_lambda pos
           else if awaitable_awaitable_cond env f_ret then
-            Lints_errors.awaitable_awaitable pos
+            Lints_diagnostics.awaitable_awaitable pos
         | None ->
           if awaitable_awaitable_cond env f_ret then
-            Lints_errors.awaitable_awaitable pos)
+            Lints_diagnostics.awaitable_awaitable pos)
       | _ -> ()
   end

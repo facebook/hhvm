@@ -16,14 +16,14 @@ end
 module Compute_tast_and_errors : sig
   type t = {
     tast: Tast.program Tast_with_dynamic.t;
-    errors: Errors.t;
+    diagnostics: Diagnostics.t;
     telemetry: Telemetry.t;
   }
 end
 
 module ErrorFilter : sig
   type t = {
-    error_filter: Filter_errors.Filter.t;
+    error_filter: Filter_diagnostics.Filter.t;
     warnings_saved_state: Warnings_saved_state.t option;
   }
 

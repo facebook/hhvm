@@ -138,9 +138,9 @@ let visitor custom_err_config =
                 (Local_id.to_string lid)
                 Naming_special_names.SpecialIdents.this
             then (
-              Errors.add_error
+              Diagnostics.add_diagnostic
                 Naming_error_utils.(
-                  to_user_error
+                  to_user_diagnostic
                     (Naming_error.This_as_lexical_variable p)
                     custom_err_config);
               false

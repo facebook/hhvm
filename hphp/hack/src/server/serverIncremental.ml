@@ -73,12 +73,15 @@ let get_old_and_new_defs_in_files
   @param reparsed   Set of files that were reparsed (so their ASTs and positions
                     in them could have changed.
 
-  @param errors     Current global error list
+  @param diagnostics Current global diagnostic list
 *)
-let add_files_with_stale_errors ctx ~reparsed errors files_acc =
-  Errors.fold_errors errors ~init:files_acc ~f:(fun source error acc ->
+let add_files_with_stale_errors ctx ~reparsed diagnostics files_acc =
+  Diagnostics.fold_errors
+    diagnostics
+    ~init:files_acc
+    ~f:(fun source error acc ->
       if
-        List.exists (User_error.to_list_ error) ~f:(fun e ->
+        List.exists (User_diagnostic.to_list_ error) ~f:(fun e ->
             Relative_path.Set.mem
               reparsed
               (fst e |> Naming_provider.resolve_position ctx |> Pos.filename))
@@ -105,7 +108,9 @@ let resolve_files ctx ~reparsed env (fanout : Fanout.t) : Relative_path.Set.t =
   let to_recheck = Typing_deps.DepSet.union dependent_on_files to_recheck in
   let files_to_recheck = Naming_provider.get_files ctx to_recheck in
   let files_with_errors_to_recheck =
-    let files_with_errors = Errors.get_failed_files env.ServerEnv.errorl in
+    let files_with_errors =
+      Diagnostics.get_failed_files env.ServerEnv.diagnostics
+    in
     let files_to_recheck_if_errors =
       Naming_provider.get_files ctx to_recheck_if_errors
     in
@@ -126,8 +131,8 @@ let resolve_files ctx ~reparsed env (fanout : Fanout.t) : Relative_path.Set.t =
     |> String.concat ~sep:"\n");
   files
 
-let get_files_to_recheck ctx env fanout ~reparsed ~errors =
+let get_files_to_recheck ctx env fanout ~reparsed ~diagnostics =
   resolve_files ~reparsed ctx env fanout
   (* We want to also recheck files that have typing errors referring to files that were
    * reparsed, since positions in those errors can be now stale. *)
-  |> add_files_with_stale_errors ctx ~reparsed errors
+  |> add_files_with_stale_errors ctx ~reparsed diagnostics

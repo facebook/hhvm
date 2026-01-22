@@ -104,15 +104,15 @@ let update_reverse_naming_table_from_env_and_get_duplicate_name_errors
     ~start_t:t;
   (env, Hh_logger.log_duration ("Naming " ^ telemetry_label) t)
 
-let validate_no_errors (errors : Errors.t) : unit =
+let validate_no_errors (errors : Diagnostics.t) : unit =
   let witness_opt =
-    Errors.fold_errors errors ~init:None ~f:(fun path error _acc ->
+    Diagnostics.fold_errors errors ~init:None ~f:(fun path error _acc ->
         Some (path, error))
   in
   match witness_opt with
   | None -> ()
   | Some (path, error) ->
-    let error = User_error.to_absolute error |> Errors.to_string in
+    let error = User_diagnostic.to_absolute error |> Diagnostics.to_string in
     Hh_logger.log "Unexpected error during init: %s" error;
     HackEventLogger.invariant_violation_bug
       "unexpected error during init"
@@ -139,7 +139,7 @@ let log_type_check_end
     |> Telemetry.object_ ~key:"hash" ~value:hash_telemetry
     |> Telemetry.object_
          ~key:"errors"
-         ~value:(Errors.as_telemetry_summary env.errorl)
+         ~value:(Diagnostics.as_telemetry_summary env.diagnostics)
     |> Telemetry.object_
          ~key:"repo_states"
          ~value:(Watchman.RepoStates.get_as_telemetry ())
@@ -204,7 +204,7 @@ let defer_or_do_type_check
     in
     Hh_logger.log "Begin %s" logstring;
     let {
-      Typing_check_service.errors = errorl;
+      Typing_check_service.diagnostics = errorl;
       telemetry = typecheck_telemetry;
       _;
     } =
@@ -248,7 +248,9 @@ let defer_or_do_type_check
              env)
         ~warnings_saved_state:ServerEnv.(env.init_env.mergebase_warning_hashes)
     in
-    let env = { env with errorl = Errors.merge errorl env.errorl } in
+    let env =
+      { env with diagnostics = Diagnostics.merge errorl env.diagnostics }
+    in
     log_type_check_end
       env
       genv

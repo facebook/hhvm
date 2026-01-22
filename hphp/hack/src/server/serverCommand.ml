@@ -43,7 +43,7 @@ let actually_handle genv client msg full_recheck_needed ~is_stale env =
   Hh_logger.debug "SeverCommand.actually_handle preamble";
   with_dependency_table_reads env.ServerEnv.deps_mode full_recheck_needed
   @@ fun () ->
-  Errors.ignore_ @@ fun () ->
+  Diagnostics.ignore_ @@ fun () ->
   assert (
     (not full_recheck_needed)
     || ServerEnv.(is_full_check_done env.full_check_status));

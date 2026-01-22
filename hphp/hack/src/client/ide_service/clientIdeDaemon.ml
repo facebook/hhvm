@@ -66,11 +66,11 @@ type common_state = {
 
 type open_file_state = {
   entry: Provider_context.entry;
-  errors: Errors.t option ref;
+  diagnostics: Diagnostics.t option ref;
 }
 
-(** The [entry] caches the TAST+errors; the [Errors.t option] stores what was
-the most recent version of the errors to have been returned to clientLsp
+(** The [entry] caches the TAST+diagnostics; the [Diagnostics.t option] stores what was
+the most recent version of the diagnostics to have been returned to clientLsp
 by didOpen/didChange/didClose/codeAction. *)
 type open_files_state = open_file_state Relative_path.Map.t
 
@@ -387,7 +387,7 @@ let initialize1
                  Provider_context.make_entry
                    ~path
                    ~contents:Provider_context.Raise_exn_on_attempt_to_read;
-               errors = ref None;
+               diagnostics = ref None;
              } ))
     |> Relative_path.Map.of_list
   in
@@ -498,7 +498,7 @@ let open_or_change_file_during_init
     Relative_path.Map.add
       dstate.dopen_files
       ~key:path
-      ~data:{ entry; errors = ref None }
+      ~data:{ entry; diagnostics = ref None }
   in
   { dstate with dopen_files }
 
@@ -516,14 +516,14 @@ contents haven't changed then the existing open file's AST and TAST
 will be left intact. *)
 let update_file
     (open_files : open_files_state) (document : ClientIdeMessage.document) :
-    open_files_state * Provider_context.entry * Errors.t option ref =
+    open_files_state * Provider_context.entry * Diagnostics.t option ref =
   let path =
     document.ClientIdeMessage.file_path
     |> Path.to_string
     |> Relative_path.create_detect_prefix
   in
   let contents = document.ClientIdeMessage.file_contents in
-  let (entry, errors) =
+  let (entry, prev_diagnostics) =
     match Relative_path.Map.find_opt open_files path with
     | None ->
       (* This is a common scenario although I'm not quite sure why *)
@@ -531,13 +531,13 @@ let update_file
           ~path
           ~contents:(Provider_context.Provided_contents contents),
         ref None )
-    | Some { entry; errors }
+    | Some { entry; diagnostics }
       when Option.equal
              String.equal
              (Some contents)
              (Provider_context.get_file_contents_if_present entry) ->
       (* we can just re-use the existing entry; contents haven't changed *)
-      (entry, errors)
+      (entry, diagnostics)
     | Some _ ->
       (* We'll create a new entry; existing entry caches, if present, will be dropped
          But first, need to clear the Fixme cache. This is a global cache
@@ -549,15 +549,21 @@ let update_file
         ref None )
   in
   let open_files =
-    Relative_path.Map.add open_files ~key:path ~data:{ entry; errors }
+    Relative_path.Map.add
+      open_files
+      ~key:path
+      ~data:{ entry; diagnostics = prev_diagnostics }
   in
-  (open_files, entry, errors)
+  (open_files, entry, prev_diagnostics)
 
 (** like [update_file], but for convenience also produces a ctx for
 use in typechecking. Also ensures that hhi files haven't been deleted
 by tmp_cleaner, so that type-checking will succeed. *)
 let update_file_ctx (istate : istate) (document : ClientIdeMessage.document) :
-    istate * Provider_context.t * Provider_context.entry * Errors.t option ref =
+    istate
+    * Provider_context.t
+    * Provider_context.entry
+    * Diagnostics.t option ref =
   let istate = restore_hhi_root_if_necessary istate in
   let (iopen_files, entry, published_errors) =
     update_file istate.iopen_files document
@@ -568,14 +574,14 @@ let update_file_ctx (istate : istate) (document : ClientIdeMessage.document) :
 (** We avoid showing typing errors if there are parsing errors. *)
 let get_user_facing_errors
     ~(ctx : Provider_context.t) ~error_filter ~(entry : Provider_context.entry)
-    : Errors.t =
+    : Diagnostics.t =
   let (_, ast_errors) =
     Ast_provider.compute_parser_return_and_ast_errors
       ~popt:(Provider_context.get_popt ctx)
       ~entry
   in
-  if Errors.is_empty ast_errors then
-    let { Tast_provider.Compute_tast_and_errors.errors = all_errors; _ } =
+  if Diagnostics.is_empty ast_errors then
+    let { Tast_provider.Compute_tast_and_errors.diagnostics = all_errors; _ } =
       Tast_provider.compute_tast_and_errors_quarantined
         ~ctx
         ~entry
@@ -585,9 +591,10 @@ let get_user_facing_errors
   else
     ast_errors
 
-(** Computes the Errors.t for what's on disk at a given path.
+(** Computes the Diagnostics.t for what's on disk at a given path.
 We provide [istate] just in case we can benefit from a cached answer. *)
-let get_errors_for_path (istate : istate) (path : Relative_path.t) : Errors.t =
+let get_diagnostics_for_path (istate : istate) (path : Relative_path.t) :
+    Diagnostics.t =
   let disk_content_opt =
     Sys_utils.cat_or_failed (Relative_path.to_absolute path)
   in
@@ -626,7 +633,7 @@ let get_errors_for_path (istate : istate) (path : Relative_path.t) : Errors.t =
   match entry_opt with
   | None ->
     (* file couldn't be read off disk (maybe absent); therefore, by definition, no errors *)
-    Errors.empty
+    Diagnostics.empty
   | Some entry ->
     (* Here we'll get either cached errors from the cached entry, or will recompute errors
        from the partially cached entry, or will compute errors from the file on disk. *)
@@ -742,11 +749,13 @@ let handle_request
   | (Initialized istate, Did_close file_path) ->
     let path = path_to_relative_path file_path in
     let errors =
-      Errors.get_sorted_error_list (get_errors_for_path istate path)
+      Diagnostics.get_sorted_diagnostic_list
+        (get_diagnostics_for_path istate path)
     in
     let error_hashes =
       List.map errors ~f:(fun err ->
-          (User_error.to_absolute err, User_error.hash_error_for_saved_state err))
+          ( User_diagnostic.to_absolute err,
+            User_diagnostic.hash_diagnostic_for_saved_state err ))
     in
     let diagnostics =
       List.map
@@ -775,10 +784,11 @@ let handle_request
       get_user_facing_errors ~ctx ~error_filter:istate.error_filter ~entry
     in
     published_errors_ref := Some errors;
-    let errors = Errors.get_sorted_error_list errors in
+    let errors = Diagnostics.get_sorted_diagnostic_list errors in
     let error_hashes =
       List.map errors ~f:(fun err ->
-          (User_error.to_absolute err, User_error.hash_error_for_saved_state err))
+          ( User_diagnostic.to_absolute err,
+            User_diagnostic.hash_diagnostic_for_saved_state err ))
     in
     let diagnostics = Ide_diagnostics.convert ~ctx ~entry error_hashes in
     (Initialized istate, Ok diagnostics)
@@ -1211,7 +1221,7 @@ let handle_request
            Might happen because a decl change invalidated TAST+errors and we are the first action since
            the decl change. Or because for some reason didOpen didn't arrive prior to codeAction. *)
         published_errors_ref := Some errors;
-        Some (Errors.sort_and_finalize errors)
+        Some (Diagnostics.sort_and_finalize errors)
     in
     (Initialized istate, Ok (results, errors_opt))
   (* Code action resolve (refactorings, quickfixes) *)

@@ -36,7 +36,7 @@ let test () =
   let env =
     Test.setup_disk env [(a_file_name, a_contents); (b_file_name, "")]
   in
-  Test.assert_env_errors env errors;
+  Test.assert_env_diagnostics env errors;
 
   let (env, _) =
     Test.(
@@ -44,6 +44,6 @@ let test () =
         env
         { default_loop_input with disk_changes = [(b_file_name, b_contents)] })
   in
-  Test.assert_no_errors env;
+  Test.assert_no_diagnostics env;
   ignore env;
   ()

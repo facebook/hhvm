@@ -77,13 +77,8 @@ error_codes::Parsing
 error_codes::Typing
 error_codes::Warning
 error_codes::GlobalAccessCheck
-errors::ErrorCode
-errors::FixmeIssue
-errors::Format
-errors::NameContext
-errors::Phase
-errors::NamingError
-errors::NastCheckError
+diagnostics::ErrorCode
+diagnostics::Format
 experimental_features::FeatureName
 experimental_features::FeatureStatus
 nast_check_error::Verb
@@ -132,7 +127,6 @@ typing_reason::PessimiseReason
 typing_reason::PrjAsymm
 typing_reason::Side
 typing_reason::VarianceDir
-user_error::Level
-user_error::Severity
+user_diagnostic::Severity
 xhp_attribute::Tag
 xhp_attribute::XhpAttribute

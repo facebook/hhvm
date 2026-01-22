@@ -36,26 +36,28 @@ let handler =
           | None -> None
           | Some sid -> Some (fst sid)
         in
-        Errors.add_error
+        Diagnostics.add_diagnostic
           Nast_check_error.(
-            to_user_error @@ Await_in_sync_function { pos = p; func_pos })
+            to_user_diagnostic @@ Await_in_sync_function { pos = p; func_pos })
       | _ -> ()
 
     method! at_stmt env =
       function
       | (_, Using { us_has_await; us_exprs; _ })
         when us_has_await && is_sync env ->
-        Errors.add_error
+        Diagnostics.add_diagnostic
           Nast_check_error.(
-            to_user_error
+            to_user_diagnostic
             @@ Await_in_sync_function { pos = fst us_exprs; func_pos = None })
       | (_, Foreach (_, (Await_as_v (p, _) | Await_as_kv (p, _, _)), _))
       | (p, Awaitall _)
         when is_sync env ->
-        Errors.add_error
+        Diagnostics.add_diagnostic
           Nast_check_error.(
-            to_user_error @@ Await_in_sync_function { pos = p; func_pos = None })
+            to_user_diagnostic
+            @@ Await_in_sync_function { pos = p; func_pos = None })
       | (p, Return (Some _)) when is_generator env ->
-        Errors.add_error Nast_check_error.(to_user_error @@ Return_in_gen p)
+        Diagnostics.add_diagnostic
+          Nast_check_error.(to_user_diagnostic @@ Return_in_gen p)
       | _ -> ()
   end

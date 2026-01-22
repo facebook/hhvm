@@ -212,29 +212,31 @@ let change_files env disk_changes =
 
 let setup_disk env disk_changes = fst @@ change_files env disk_changes
 
-let error_strings err_list =
-  List.map ~f:(fun x -> Errors.to_string (User_error.to_absolute x)) err_list
+let diagnostic_strings diag_list =
+  List.map
+    ~f:(fun x -> Diagnostics.to_string (User_diagnostic.to_absolute x))
+    diag_list
 
-let assertSingleError expected err_list =
-  let error_strings = error_strings err_list in
-  match error_strings with
+let assertSingleDiagnostic expected diag_list =
+  let diagnostic_strings = diagnostic_strings diag_list in
+  match diagnostic_strings with
   | [x] -> assertEqual expected x
   | _ ->
-    let err_count = List.length err_list in
+    let diag_count = List.length diag_list in
     let fmt_expected = indent_string_with " < " expected in
-    let fmt_actual = indent_strings_with " > " error_strings in
+    let fmt_actual = indent_strings_with " > " diagnostic_strings in
     let msg =
       Printf.sprintf
-        "Expected to have exactly one error, namely:
+        "Expected to have exactly one diagnostic, namely:
 
 %s
 
-... but got %d errors...
+... but got %d diagnostics...
 
 %s
 "
         fmt_expected
-        err_count
+        diag_count
         fmt_actual
     in
     fail msg
@@ -265,20 +267,21 @@ let start_initial_full_check env =
   assert (total_rechecked_count >= 1);
   (env, total_rechecked_count - 1)
 
-let errors_to_string buf x =
-  List.iter x ~f:(fun error ->
-      Printf.bprintf buf "%s\n" (Errors.to_string error))
+let diagnostics_to_string buf x =
+  List.iter x ~f:(fun diagnostic ->
+      Printf.bprintf buf "%s\n" (Diagnostics.to_string diagnostic))
 
-let assert_errors errors expected =
+let assert_diagnostics diagnostics expected =
   let buf = Buffer.create 1024 in
-  Errors.get_error_list errors
-  |> List.map ~f:User_error.to_absolute
-  |> errors_to_string buf;
+  Diagnostics.get_diagnostic_list diagnostics
+  |> List.map ~f:User_diagnostic.to_absolute
+  |> diagnostics_to_string buf;
   assertEqual expected (Buffer.contents buf)
 
-let assert_env_errors env expected = assert_errors env.ServerEnv.errorl expected
+let assert_env_diagnostics env expected =
+  assert_diagnostics env.ServerEnv.diagnostics expected
 
-let assert_no_errors env = assert_env_errors env ""
+let assert_no_diagnostics env = assert_env_diagnostics env ""
 
 let in_daemon f =
   let handle =
@@ -435,7 +438,7 @@ module Client = struct
         Printf.bprintf
           buf
           "%s\n"
-          (Errors.to_string diagnostic.ClientIdeMessage.diagnostic_error))
+          (Diagnostics.to_string diagnostic.ClientIdeMessage.diagnostic_error))
 
   let diagnostics_to_string (x : ClientIdeMessage.diagnostic list SMap.t) =
     let buf = Buffer.create 1024 in

@@ -36,9 +36,11 @@ let test () =
       ^ "A semicolon `;` is expected here. (Parsing[1002])";
     ]
   in
-  match List.zip expected_errors (Errors.get_error_list env.errorl) with
+  match
+    List.zip expected_errors (Diagnostics.get_diagnostic_list env.diagnostics)
+  with
   | List.Or_unequal_lengths.Ok errs ->
     List.iter
-      ~f:(fun (expected, err) -> Test.assertSingleError expected [err])
+      ~f:(fun (expected, err) -> Test.assertSingleDiagnostic expected [err])
       errs
   | List.Or_unequal_lengths.Unequal_lengths -> Test.fail "Expected 1 error."

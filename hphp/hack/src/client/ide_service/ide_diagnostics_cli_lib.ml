@@ -158,7 +158,7 @@ let diagnostic_to_underlines
     List.map ~f:(pos_to_underlines source_text) diagnostic_related_hints
   in
   let error_uls =
-    pos_to_underlines source_text (User_error.get_pos diagnostic_error)
+    pos_to_underlines source_text (User_diagnostic.get_pos diagnostic_error)
   in
   error_uls :: hint_uls
 
@@ -180,10 +180,11 @@ let diagnostics_to_underlines
         m)
 
 let run_exn ctx entry errors =
-  let errors = Errors.get_sorted_error_list errors in
+  let errors = Diagnostics.get_sorted_diagnostic_list errors in
   let error_hashes =
     List.map errors ~f:(fun err ->
-        (User_error.to_absolute err, User_error.hash_error_for_saved_state err))
+        ( User_diagnostic.to_absolute err,
+          User_diagnostic.hash_diagnostic_for_saved_state err ))
   in
   let diagnostics = Ide_diagnostics.convert ~ctx ~entry error_hashes in
   let path = entry.Provider_context.path in

@@ -49,7 +49,7 @@ let type_collector =
         [(env, Typing_defs.DeclTy ty)]
   end
 
-let collect_types tast = Errors.ignore_ (fun () -> type_collector#go tast)
+let collect_types tast = Diagnostics.ignore_ (fun () -> type_collector#go tast)
 
 (*
   Ideally this would be just Pos.AbsolutePosMap.find_opt, however the positions

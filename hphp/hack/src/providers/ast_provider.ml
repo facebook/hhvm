@@ -40,13 +40,14 @@ module LocalParserCache =
 let parse
     (popt : ParserOptions.t)
     ~(full : bool)
-    ~(source_text : Full_fidelity_source_text.t) : Errors.t * Parser_return.t =
+    ~(source_text : Full_fidelity_source_text.t) :
+    Diagnostics.t * Parser_return.t =
   let path = source_text.Full_fidelity_source_text.file_path in
   let parser_env =
     Full_fidelity_ast.make_env ~quick_mode:(not full) ~parser_options:popt path
   in
   let (err, result) =
-    Errors.do_with_context path @@ fun () ->
+    Diagnostics.do_with_context path @@ fun () ->
     Full_fidelity_ast.from_source_text_with_legacy parser_env source_text
   in
   let ast = result.Parser_return.ast in
@@ -65,7 +66,7 @@ let parse
   If not found, look up in Ide_parser_cache.
   If not found, actually parse the file. *)
 let get_from_local_cache ~full ctx file_name =
-  let with_no_err ast = (Errors.empty, ast) in
+  let with_no_err ast = (Diagnostics.empty, ast) in
   let fn = Relative_path.to_absolute file_name in
   match LocalParserCache.get file_name with
   | Some ast -> with_no_err ast
@@ -87,7 +88,7 @@ let get_from_local_cache ~full ctx file_name =
         | Some _ ->
           (* It's up to Parsing_service to add parsing errors. *)
           let (err, result) =
-            Errors.do_with_context file_name @@ fun () ->
+            Diagnostics.do_with_context file_name @@ fun () ->
             Full_fidelity_ast.defensive_program
               ~quick:(not full)
               popt
@@ -111,7 +112,7 @@ let get_from_local_cache ~full ctx file_name =
       else
         ast
     in
-    if full && Errors.is_empty err then LocalParserCache.add file_name ast;
+    if full && Diagnostics.is_empty err then LocalParserCache.add file_name ast;
     (err, ast)
 
 let compute_source_text ~(entry : Provider_context.entry) :
@@ -131,10 +132,10 @@ let compute_source_text ~(entry : Provider_context.entry) :
    errors are not generated unless necessary. *)
 let compute_parser_return_and_ast_errors
     ~(popt : ParserOptions.t) ~(entry : Provider_context.entry) :
-    Parser_return.t * Errors.t =
+    Parser_return.t * Diagnostics.t =
   match entry with
   | {
-   Provider_context.ast_errors = Some ast_errors;
+   Provider_context.ast_diagnostics = Some ast_errors;
    parser_return = Some parser_return;
    _;
   } ->
@@ -142,7 +143,7 @@ let compute_parser_return_and_ast_errors
   | _ ->
     let source_text = compute_source_text ~entry in
     let (ast_errors, parser_return) = parse popt ~full:true ~source_text in
-    entry.Provider_context.ast_errors <- Some ast_errors;
+    entry.Provider_context.ast_diagnostics <- Some ast_errors;
     entry.Provider_context.parser_return <- Some parser_return;
     (parser_return, ast_errors)
 
@@ -160,7 +161,7 @@ let compute_cst ~(ctx : Provider_context.t) ~(entry : Provider_context.entry) :
 
 let compute_ast_with_error
     ~(popt : ParserOptions.t) ~(entry : Provider_context.entry) :
-    Errors.t * Nast.program =
+    Diagnostics.t * Nast.program =
   let ({ Parser_return.ast; _ }, ast_errors) =
     compute_parser_return_and_ast_errors ~popt ~entry
   in
@@ -194,7 +195,7 @@ let get_ast_with_error ~(full : bool) ctx path =
       in
       (err, ast)
     else
-      (Errors.empty, [])
+      (Diagnostics.empty, [])
   in
 
   (* If there's a ctx, and this file is in the ctx, then use ctx.
@@ -229,7 +230,7 @@ let get_ast_with_error ~(full : bool) ctx path =
     | (Some (ast, Decl), false)
     | (Some (ast, Full), (true | false)) ->
       (* It's in the parser-heap! hurrah! *)
-      (Errors.empty, ast)
+      (Diagnostics.empty, ast)
     | (None, true)
     | (Some (_, Decl), true) ->
       (* If we need full, and parser-heap can't provide it, then we
@@ -238,7 +239,7 @@ let get_ast_with_error ~(full : bool) ctx path =
     | (None, false) ->
       (* This is the case where we will write into the parser heap. *)
       let (err, ast) = get_from_local_cache ~full ctx path in
-      if Errors.is_empty err then ParserHeap.add path (ast, Decl);
+      if Diagnostics.is_empty err then ParserHeap.add path (ast, Decl);
       (err, ast)
   end
   | (_, Provider_backend.Analysis) -> begin
@@ -248,7 +249,7 @@ let get_ast_with_error ~(full : bool) ctx path =
     match (ParserHeap.get path, full) with
     | (Some (ast, Full), _) ->
       (* It's in the parser-heap! hurrah! *)
-      (Errors.empty, ast)
+      (Diagnostics.empty, ast)
     | _ -> parse_from_disk_no_caching ~apply_file_filter:false
   end
   | (_, Provider_backend.Local_memory _) ->

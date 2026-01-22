@@ -10,27 +10,29 @@
 open Hh_prelude
 open ServerCommandTypes
 
-let print_error_raw e = Printf.printf "%s" (Raw_error_formatter.to_string e)
+let print_diagnostic_raw e =
+  Printf.printf "%s" (Raw_diagnostic_formatter.to_string e)
 
-let print_error_plain e = Printf.printf "%s" (Errors.to_string e)
+let print_diagnostic_plain e = Printf.printf "%s" (Diagnostics.to_string e)
 
-let print_error_contextual e =
-  Printf.printf "%s" (Contextual_error_formatter.to_string e)
+let print_diagnostic_contextual e =
+  Printf.printf "%s" (Contextual_diagnostic_formatter.to_string e)
 
-let print_error_highlighted e =
-  Printf.printf "%s" (Highlighted_error_formatter.to_string e)
+let print_diagnostic_highlighted e =
+  Printf.printf "%s" (Highlighted_diagnostic_formatter.to_string e)
 
-let print_error_extended e =
-  Printf.printf "%s" (Extended_error_formatter.to_string e)
+let print_diagnostic_extended e =
+  Printf.printf "%s" (Extended_diagnostic_formatter.to_string e)
 
-let print_error ~(error_format : Errors.format) (e : Errors.finalized_error) :
-    unit =
+let print_diagnostic
+    ~(error_format : Diagnostics.format) (e : Diagnostics.finalized_diagnostic)
+    : unit =
   match error_format with
-  | Errors.Raw -> print_error_raw e
-  | Errors.Plain -> print_error_plain e
-  | Errors.Context -> print_error_contextual e
-  | Errors.Highlighted -> print_error_highlighted e
-  | Errors.Extended -> print_error_extended e
+  | Diagnostics.Raw -> print_diagnostic_raw e
+  | Diagnostics.Plain -> print_diagnostic_plain e
+  | Diagnostics.Context -> print_diagnostic_contextual e
+  | Diagnostics.Highlighted -> print_diagnostic_highlighted e
+  | Diagnostics.Extended -> print_diagnostic_extended e
 
 let is_stale_msg liveness =
   match liveness with
@@ -66,13 +68,13 @@ let go status error_format ~is_interactive ~output_json ~max_errors =
         ~recheck_stats:last_recheck_stats;
       0
     ) else
-      let error_format = Errors.format_or_default error_format in
-      List.iter error_list ~f:(print_error ~error_format);
+      let error_format = Diagnostics.format_or_default error_format in
+      List.iter error_list ~f:(print_diagnostic ~error_format);
       let (error_count, warning_count) =
-        Errors.count_errors_and_warnings error_list
+        Diagnostics.count_errors_and_warnings error_list
       in
       Option.iter
-        (Errors.format_summary
+        (Diagnostics.format_summary
            error_format
            ~error_count
            ~warning_count
@@ -99,42 +101,46 @@ let end_sentinel_short_string = function
   | Watch_error _ -> "Killed"
   | Completed c -> Server_progress.show_completion_reason c
 
-module ErrorsInfo = struct
-  type t = { errors_count: int * int }
+module DiagnosticsInfo = struct
+  type t = { diagnostics_count: int * int }
 
-  let empty = { errors_count = (0, 0) }
+  let empty = { diagnostics_count = (0, 0) }
 
   let add_tuples (i, j) (k, l) = (i + k, j + l)
 
   let accumulate
-      { errors_count }
-      (errors : (Errors.finalized_error * int) list Relative_path.Map.t) =
-    let errors_count =
+      { diagnostics_count }
+      (diagnostics :
+        (Diagnostics.finalized_diagnostic * int) list Relative_path.Map.t) =
+    let diagnostics_count =
       Relative_path.Map.fold
-        errors
-        ~init:errors_count
-        ~f:(fun _ errors error_counts ->
-          Errors.count_errors_and_warnings (List.map ~f:fst errors)
-          |> add_tuples error_counts)
+        diagnostics
+        ~init:diagnostics_count
+        ~f:(fun _ diagnostics diagnostic_counts ->
+          Diagnostics.count_errors_and_warnings (List.map ~f:fst diagnostics)
+          |> add_tuples diagnostic_counts)
     in
-    { errors_count }
+    { diagnostics_count }
 
-  let total_count { errors_count = (e, w); _ } = e + w
+  let total_count { diagnostics_count = (e, w); _ } = e + w
 end
 
-module ErrorPrinter : sig
+module DiagnosticPrinter : sig
   type t
 
   val init : max_errors:int option -> t
 
-  val print_error_if_below_limit :
-    t -> Errors.finalized_error -> error_format:Errors.format -> t
+  val print_diagnostic_if_below_limit :
+    t ->
+    Diagnostics.finalized_diagnostic ->
+    error_format:Diagnostics.format ->
+    t
 
-  val print_extra_errors_if_any : t -> t
+  val print_extra_diagnostics_if_any : t -> t
 
-  (** Whether we've been printing the counts of extra errors
+  (** Whether we've been printing the counts of extra diagnostics
       after hitting the --max-error limit.
-      Used to skip printing the error summary
+      Used to skip printing the diagnostic summary
       (e.g. "1 error, 2 warnings") if true. *)
   val has_printed_counts : t -> bool
 end = struct
@@ -145,8 +151,8 @@ end = struct
     extra_warning_count: int;
     has_already_printed_extra: bool;
         (** Whether we've been printing the counts of extra
-            errors after hitting the --max-error limit.
-            Used to skip printing the error summary
+            diagnostics after hitting the --max-error limit.
+            Used to skip printing the diagnostic summary
             (e.g. "1 error, 2 warnings") if true. *)
   }
 
@@ -159,18 +165,18 @@ end = struct
       has_already_printed_extra = false;
     }
 
-  let print_error_if_below_limit state error ~error_format : t =
+  let print_diagnostic_if_below_limit state diagnostic ~error_format : t =
     if state.printed_count < state.max_errors then (
-      print_error ~error_format error;
+      print_diagnostic ~error_format diagnostic;
       { state with printed_count = state.printed_count + 1 }
     ) else
-      match error.User_error.severity with
-      | User_error.Err ->
+      match diagnostic.User_diagnostic.severity with
+      | User_diagnostic.Err ->
         { state with extra_error_count = state.extra_error_count + 1 }
-      | User_error.Warning ->
+      | User_diagnostic.Warning ->
         { state with extra_warning_count = state.extra_warning_count + 1 }
 
-  let print_extra_errors_if_any
+  let print_extra_diagnostics_if_any
       ({
          max_errors;
          extra_error_count;
@@ -205,8 +211,8 @@ end = struct
     has_already_printed_extra
 end
 
-(** This function produces streaming errors: it reads the errors.bin opened
-  as [fd], displays errors as they come using the [args.error_format] over stdout, and
+(** This function produces streaming diagnostics: it reads the errors.bin opened
+  as [fd], displays diagnostics as they come using the [args.error_format] over stdout, and
   displays a progress-spinner over stderr if [args.show_spinner]. It keeps "tailing"
   [fd] until eventually the producing process writes an end-sentinel in it (signalling
   that the typecheck has been completed or restarted or aborted), or until the producing
@@ -215,7 +221,7 @@ let go_streaming_on_fd
     ~(pid : int)
     (fd : Unix.file_descr)
     (args : ClientEnv.client_check_env)
-    (error_filter : Filter_errors.Filter.t)
+    (error_filter : Filter_diagnostics.Filter.t)
     ~(partial_telemetry_ref : Telemetry.t option ref)
     ~(initial_telemetry : Telemetry.t)
     ~(progress_callback : string option -> unit) :
@@ -262,55 +268,64 @@ let go_streaming_on_fd
     show_progress ()
   in
 
-  let error_format = Errors.format_or_default error_format in
-  (* this lwt process consumes errors from the errors.bin file by polling
+  let error_format = Diagnostics.format_or_default error_format in
+  (* this lwt process consumes diagnostics from the errors.bin file by polling
      every 0.2s, and displays them. It terminates once the errors.bin file has an "end"
      sentinel written to it, or the process that was writing errors.bin terminates. *)
-  let rec consume (errors_info : ErrorsInfo.t) (printer : ErrorPrinter.t) :
-      (ErrorsInfo.t * end_sentinel * ErrorPrinter.t) Lwt.t =
-    let%lwt errors = Lwt_stream.get errors_stream in
-    match errors with
+  let rec consume
+      (diagnostics_info : DiagnosticsInfo.t) (printer : DiagnosticPrinter.t) :
+      (DiagnosticsInfo.t * end_sentinel * DiagnosticPrinter.t) Lwt.t =
+    let%lwt diagnostics = Lwt_stream.get errors_stream in
+    match diagnostics with
     | None ->
       (* The contract of [errors_stream] (from [Server_progress_lwt.watch_errors_file]) is
          that it will always have a single [Some error] item as its last item, before the
          stream is closed and hence subsequent [Lwt_stream.get] return [None].
          If we're here, it means that contract has been violated. *)
       failwith "Expected end_sentinel before end of stream"
-    | Some (Error error) -> Lwt.return (errors_info, Watch_error error, printer)
+    | Some (Error error) ->
+      Lwt.return (diagnostics_info, Watch_error error, printer)
     | Some (Ok (Server_progress.ErrorsRead.RCompleted (x, _))) ->
-      Lwt.return (errors_info, Completed x, printer)
+      Lwt.return (diagnostics_info, Completed x, printer)
     | Some (Ok (Server_progress.ErrorsRead.RItem item)) ->
       (match item with
       | Server_progress.Telemetry telemetry_item ->
         errors_file_telemetry :=
           Telemetry.merge !errors_file_telemetry telemetry_item;
-        update_partial_telemetry (ErrorsInfo.total_count errors_info);
-        consume errors_info printer
+        update_partial_telemetry (DiagnosticsInfo.total_count diagnostics_info);
+        consume diagnostics_info printer
       | Server_progress.Errors { errors; timestamp = _ } ->
         first_error_time :=
           Option.first_some !first_error_time (Some (Unix.gettimeofday ()));
-        (* We'll clear the spinner, print errs to stdout, flush stdout, and restore the spinner *)
+        (* We'll clear the spinner, print diagnostics to stdout, flush stdout, and restore the spinner *)
         progress_callback None;
-        let errors =
+        let diagnostics =
           Relative_path.Map.map
             errors
-            ~f:(Filter_errors.filter_with_hash error_filter)
+            ~f:(Filter_diagnostics.filter_with_hash error_filter)
         in
-        let errors_info = ErrorsInfo.accumulate errors_info errors in
+        let diagnostics_info =
+          DiagnosticsInfo.accumulate diagnostics_info diagnostics
+        in
         let printer =
           try
             let printer =
               Relative_path.Map.fold
-                errors
+                diagnostics
                 ~init:printer
-                ~f:(fun _path errors_in_file acc ->
-                  List.fold errors_in_file ~init:acc ~f:(fun acc (err, _) ->
-                      ErrorPrinter.print_error_if_below_limit
+                ~f:(fun _path diagnostics_in_file acc ->
+                  List.fold
+                    diagnostics_in_file
+                    ~init:acc
+                    ~f:(fun acc (diag, _) ->
+                      DiagnosticPrinter.print_diagnostic_if_below_limit
                         ~error_format
                         acc
-                        err))
+                        diag))
             in
-            let printer = ErrorPrinter.print_extra_errors_if_any printer in
+            let printer =
+              DiagnosticPrinter.print_extra_diagnostics_if_any printer
+            in
             Printf.printf "%!";
             printer
           with
@@ -324,18 +339,18 @@ let go_streaming_on_fd
               backtrace
         in
         progress_callback !latest_progress;
-        update_partial_telemetry (ErrorsInfo.total_count errors_info);
-        consume errors_info printer)
+        update_partial_telemetry (DiagnosticsInfo.total_count diagnostics_info);
+        consume diagnostics_info printer)
   in
 
   (* We will show progress indefinitely until "consume" finishes,
      at which Lwt.pick will cancel show_progress. *)
-  let%lwt ( { ErrorsInfo.errors_count = (error_count, warning_count) },
+  let%lwt ( { DiagnosticsInfo.diagnostics_count = (error_count, warning_count) },
             end_sentinel,
             printer ) =
     Lwt.pick
       [
-        consume ErrorsInfo.empty (ErrorPrinter.init ~max_errors);
+        consume DiagnosticsInfo.empty (DiagnosticPrinter.init ~max_errors);
         show_progress ();
       ]
   in
@@ -346,9 +361,9 @@ let go_streaming_on_fd
     match end_sentinel with
     | Completed (Server_progress.Complete telemetry) ->
       (* complete either because the server completed, or we truncated early *)
-      if not @@ ErrorPrinter.has_printed_counts printer then
+      if not @@ DiagnosticPrinter.has_printed_counts printer then
         Option.iter
-          (Errors.format_summary
+          (Diagnostics.format_summary
              error_format
              ~error_count
              ~warning_count
@@ -896,7 +911,7 @@ let rec keep_trying_to_open
 let go_streaming
     (args : ClientEnv.client_check_env)
     (local_config : ServerLocalConfig.t)
-    (error_filter : Filter_errors.Filter.t)
+    (error_filter : Filter_diagnostics.Filter.t)
     ~(partial_telemetry_ref : Telemetry.t option ref)
     ~(connect_then_close : unit -> unit Lwt.t) :
     (Exit_status.t * Telemetry.t) Lwt.t =

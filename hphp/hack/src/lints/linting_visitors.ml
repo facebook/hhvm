@@ -100,10 +100,10 @@ class virtual ['a] abstract_file_visitor :
       List.fold_left ast ~init:context ~f:(fun context def ->
           match def with
           | Fun f ->
-            let f = Errors.ignore_ (fun () -> Naming.fun_def ctx f) in
+            let f = Diagnostics.ignore_ (fun () -> Naming.fun_def ctx f) in
             this#on_fun_def context env f
           | Class c ->
-            let c = Errors.ignore_ (fun () -> Naming.class_ ctx c) in
+            let c = Diagnostics.ignore_ (fun () -> Naming.class_ ctx c) in
             this#on_class context env c
           | _ -> context)
 

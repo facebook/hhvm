@@ -14,7 +14,7 @@ module type MapReducer = sig
   val is_enabled : TypecheckerOptions.t -> bool
 
   val map :
-    Provider_context.t -> Relative_path.t -> Tast.by_names -> Errors.t -> t
+    Provider_context.t -> Relative_path.t -> Tast.by_names -> Diagnostics.t -> t
 
   val reduce : t -> t -> t
 

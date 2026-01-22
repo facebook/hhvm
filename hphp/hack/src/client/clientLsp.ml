@@ -1182,7 +1182,7 @@ let ide_diagnostics_to_lsp_diagnostics
       diagnostic
     in
     let {
-      User_error.severity;
+      User_diagnostic.severity;
       code;
       claim = _;
       reasons = _;
@@ -1195,7 +1195,7 @@ let ide_diagnostics_to_lsp_diagnostics
       diagnostic_error
     in
     let all_messages =
-      User_error.to_list diagnostic_error |> List.map ~f:location_message
+      User_diagnostic.to_list diagnostic_error |> List.map ~f:location_message
     in
     let (first_message, additional_messages) =
       match all_messages with
@@ -1240,8 +1240,8 @@ let ide_diagnostics_to_lsp_diagnostics
         severity =
           Some
             (match severity with
-            | User_error.Err -> Lsp.PublishDiagnostics.Error
-            | User_error.Warning -> Lsp.PublishDiagnostics.Warning);
+            | User_diagnostic.Err -> Lsp.PublishDiagnostics.Error
+            | User_diagnostic.Warning -> Lsp.PublishDiagnostics.Warning);
         code = PublishDiagnostics.IntCode code;
         source = Some "Hack";
         message;
@@ -3176,7 +3176,8 @@ let do_codeAction
     (ref_unblocked_time : float ref)
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
     (params : CodeActionRequest.params) :
-    (CodeAction.result * Path.t * Errors.finalized_error list option) Lwt.t =
+    (CodeAction.result * Path.t * Diagnostics.finalized_diagnostic list option)
+    Lwt.t =
   let (document, range, file_path) =
     location_of_code_action_request editor_open_files params
   in
@@ -3514,7 +3515,8 @@ let handle_errors_file_item
         Server_progress_lwt.watch_error )
       result
       option)
-    (error_filter : Filter_errors.Filter.t) : result_telemetry option Lwt.t =
+    (error_filter : Filter_diagnostics.Filter.t) : result_telemetry option Lwt.t
+    =
   (* a small helper, to send the actual lsp message *)
   let publish params =
     notify_jsonrpc ~powered_by:Hh_server (PublishDiagnosticsNotification params)
@@ -3643,7 +3645,7 @@ let handle_errors_file_item
               acc
             | _ ->
               let file_errors =
-                Filter_errors.filter_with_hash error_filter file_errors
+                Filter_diagnostics.filter_with_hash error_filter file_errors
               in
               (* We do not precompute additional diagnostic information (like
                  where to display additional LSP visual hints) for errors
@@ -4985,7 +4987,7 @@ let main
   env := { args; hhconfig_version_and_switch; root; local_config };
 
   let error_filter =
-    Filter_errors.Filter.make
+    Filter_diagnostics.Filter.make
       ~default_all:local_config.ServerLocalConfig.warnings_default_all
       ~generated_files:
         (List.map ~f:Str.regexp (ServerConfig.warnings_generated_files config))

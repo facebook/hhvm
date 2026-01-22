@@ -140,7 +140,7 @@ val try_delete : unit -> unit
   * As mentioned above, when the errors-file is complete, it contains the full
     set of errors that hh_server knows about for the project.
   * The error file is in a binary format consisting of a header followed by a series of
-    Errors.error list Relative_path.map along with timestamp,
+    Diagnostics.diagnostic list Relative_path.map along with timestamp,
     followed by an "end sentinel" if the typecheck has finished or been interrupted.
     Let's call each of these maps an error report. Each encompasses
     several files, and for each file it has a sorted list of errors. Currently we make
@@ -196,7 +196,7 @@ val completion_reason_short_description : completion_reason -> string
 (** Each item that a consumer reads from the errors-file is one of these. *)
 type errors_file_item =
   | Errors of {
-      errors: (Errors.finalized_error * int) list Relative_path.Map.t;
+      errors: (Diagnostics.finalized_diagnostic * int) list Relative_path.Map.t;
       timestamp: float;
     }
   | Telemetry of Telemetry.t
@@ -219,7 +219,7 @@ module ErrorsWrite : sig
   (** To be called during typechecking.
   Anyone reading the current errors file will get this error report as [Ok errors].
   This call will failwith if called before [new_empty_file], or after [complete]/[unlink_at_server_stop]. *)
-  val report : Errors.t -> unit
+  val report : Diagnostics.t -> unit
 
   (** To be called during typechecking.
   Anyone reading the current errors file will get this as [Ok Telemetry].

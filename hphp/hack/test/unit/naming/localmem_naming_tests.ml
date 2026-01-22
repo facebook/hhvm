@@ -8,16 +8,21 @@
 
 open Hh_prelude
 
-let errors_to_string (errors : Errors.t) : string list =
-  let error_to_string (error : Errors.error) : string =
-    let error = User_error.to_absolute_for_test error in
-    let code = User_error.get_code error in
+let errors_to_string (errors : Diagnostics.t) : string list =
+  let error_to_string (error : Diagnostics.diagnostic) : string =
+    let error = User_diagnostic.to_absolute_for_test error in
+    let code = User_diagnostic.get_code error in
     let message =
-      error |> User_error.to_list |> List.map ~f:snd |> String.concat ~sep:"; "
+      error
+      |> User_diagnostic.to_list
+      |> List.map ~f:snd
+      |> String.concat ~sep:"; "
     in
     Printf.sprintf "[%d] %s" code message
   in
-  errors |> Errors.get_sorted_error_list |> List.map ~f:error_to_string
+  errors
+  |> Diagnostics.get_sorted_diagnostic_list
+  |> List.map ~f:error_to_string
 
 let test_unsaved_symbol_change ~(sqlite : bool) () =
   Provider_backend.set_local_memory_backend_with_defaults_for_test ();
@@ -33,7 +38,7 @@ let test_unsaved_symbol_change ~(sqlite : bool) () =
       ~path:foo_path
       ~contents:foo_contents
   in
-  let { Tast_provider.Compute_tast_and_errors.telemetry; errors; _ } =
+  let { Tast_provider.Compute_tast_and_errors.telemetry; diagnostics; _ } =
     Tast_provider.compute_tast_and_errors_unquarantined
       ~ctx
       ~entry
@@ -52,7 +57,7 @@ let test_unsaved_symbol_change ~(sqlite : bool) () =
       "[2006] Could not find `foo`.; Did you mean `~~F~~oo` instead (which only differs by case)?";
       "[4110] Invalid return type; Expected `int`; But got `string`";
     ]
-    (errors_to_string errors)
+    (errors_to_string diagnostics)
     "unsaved: compute_tast(class Foo) should have these errors";
 
   (* Make an unsaved change which affects a symbol definition that's used *)
@@ -65,7 +70,7 @@ let test_unsaved_symbol_change ~(sqlite : bool) () =
       ~path:foo_path
       ~contents:foo_contents1
   in
-  let { Tast_provider.Compute_tast_and_errors.telemetry; errors; _ } =
+  let { Tast_provider.Compute_tast_and_errors.telemetry; diagnostics; _ } =
     Tast_provider.compute_tast_and_errors_unquarantined
       ~ctx
       ~entry
@@ -85,7 +90,7 @@ let test_unsaved_symbol_change ~(sqlite : bool) () =
       "[2049] Unbound name: `foo`";
       "[4110] Invalid return type; Expected `int`; But got `string`";
     ]
-    (errors_to_string errors)
+    (errors_to_string diagnostics)
     "unsaved: compute_tast(class Foo1) should have these errors";
 
   (* go back to original unsaved content *)
@@ -95,7 +100,7 @@ let test_unsaved_symbol_change ~(sqlite : bool) () =
       ~path:foo_path
       ~contents:foo_contents
   in
-  let { Tast_provider.Compute_tast_and_errors.telemetry; errors; _ } =
+  let { Tast_provider.Compute_tast_and_errors.telemetry; diagnostics; _ } =
     Tast_provider.compute_tast_and_errors_unquarantined
       ~ctx
       ~entry
@@ -114,7 +119,7 @@ let test_unsaved_symbol_change ~(sqlite : bool) () =
       "[2006] Could not find `foo`.; Did you mean `~~F~~oo` instead (which only differs by case)?";
       "[4110] Invalid return type; Expected `int`; But got `string`";
     ]
-    (errors_to_string errors)
+    (errors_to_string diagnostics)
     "unsaved: compute_tast(class Foo again) should have these errors";
 
   true

@@ -38,13 +38,13 @@ let output_text oc el format =
   else
     let f =
       match format with
-      | Errors.Extended
-      | Errors.Context ->
+      | Diagnostics.Extended
+      | Diagnostics.Context ->
         Lint.to_contextual_string
-      | Errors.Raw
-      | Errors.Plain ->
+      | Diagnostics.Raw
+      | Diagnostics.Plain ->
         Lint.to_string
-      | Errors.Highlighted -> Lint.to_highlighted_string
+      | Diagnostics.Highlighted -> Lint.to_highlighted_string
     in
     let sl = List.map el ~f in
     List.iter sl ~f:(fun s -> Printf.fprintf oc "%s\n%!" s));

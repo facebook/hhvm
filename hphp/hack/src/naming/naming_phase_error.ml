@@ -76,11 +76,14 @@ let add t = function
   | Parsing err -> { t with parsing = err :: t.parsing }
 
 let emit_experimental_feature = function
-  | Supportdyn pos -> Errors.experimental_feature pos "supportdyn type hint"
+  | Supportdyn pos ->
+    Diagnostics.experimental_feature pos "supportdyn type hint"
   | Const_attr pos ->
-    Errors.experimental_feature pos "The __Const attribute is not supported."
+    Diagnostics.experimental_feature
+      pos
+      "The __Const attribute is not supported."
   | Const_static_prop pos ->
-    Errors.experimental_feature pos "Const properties cannot be static."
+    Diagnostics.experimental_feature pos "Const properties cannot be static."
 
 let emit
     {
@@ -93,18 +96,19 @@ let emit
     }
     ~custom_err_config =
   List.iter naming ~f:(fun err ->
-      Errors.add_error (Naming_error_utils.to_user_error err custom_err_config));
+      Diagnostics.add_diagnostic
+        (Naming_error_utils.to_user_diagnostic err custom_err_config));
   List.iter nast_check ~f:(fun err ->
-      Errors.add_error (Nast_check_error.to_user_error err));
+      Diagnostics.add_diagnostic (Nast_check_error.to_user_diagnostic err));
   List.iter unexpected_hints ~f:(fun pos ->
-      Errors.internal_error pos "Unexpected hint not present on legacy AST");
+      Diagnostics.internal_error pos "Unexpected hint not present on legacy AST");
   List.iter malformed_accesses ~f:(fun pos ->
-      Errors.internal_error
+      Diagnostics.internal_error
         pos
         "Malformed hint: expected Haccess (Happly ...) from ast_to_nast");
   List.iter experimental_features ~f:emit_experimental_feature;
   List.iter parsing ~f:(fun err ->
-      Errors.add_error @@ Parsing_error.to_user_error err)
+      Diagnostics.add_diagnostic @@ Parsing_error.to_user_diagnostic err)
 
 (* Helper for constructing expression to be substituted for invalid expressions
    TODO[mjt] this probably belongs with the AAST defs

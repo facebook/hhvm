@@ -10,7 +10,7 @@ val print_error_list :
   Out_channel.t ->
   stale_msg:string option ->
   output_json:bool ->
-  error_format:Errors.format option ->
-  error_list:Errors.finalized_error list ->
+  error_format:Diagnostics.format option ->
+  error_list:Diagnostics.finalized_diagnostic list ->
   recheck_stats:Telemetry.t option ->
   unit

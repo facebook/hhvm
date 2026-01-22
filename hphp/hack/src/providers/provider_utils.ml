@@ -415,7 +415,7 @@ let invalidate_upon_file_changes
      a file that you'd previously been editing). *)
   Relative_path.Map.iter tasts_to_invalidate ~f:(fun _path entry ->
       entry.Provider_context.tast <- None;
-      entry.Provider_context.all_errors <- None);
+      entry.Provider_context.all_diagnostics <- None);
 
   Option.value telemetry_opt ~default:(Telemetry.create ())
   |> Telemetry.duration ~key:"invalidate_upon_file_changes_ms" ~start_time
@@ -573,14 +573,14 @@ let respect_but_quarantine_unsaved_changes
     end;
     backend_pushed := true;
     Ide_parser_cache.activate ();
-    Errors.set_allow_errors_in_default_path true;
+    Diagnostics.set_allow_errors_in_default_path true;
     Provider_context.set_is_quarantined_internal ();
     quarantine_set := true;
     ()
   in
   let leave_quarantine_exn () =
     if !quarantine_set then Provider_context.unset_is_quarantined_internal ();
-    Errors.set_allow_errors_in_default_path false;
+    Diagnostics.set_allow_errors_in_default_path false;
     Ide_parser_cache.deactivate ();
     if !backend_pushed then
       match Provider_context.get_backend ctx with
@@ -608,7 +608,7 @@ let respect_but_quarantine_unsaved_changes
       | _ -> ()
   in
   let (_errors, result) =
-    Errors.do_ (fun () ->
+    Diagnostics.do_ (fun () ->
         Utils.try_finally
           ~f:(fun () ->
             enter_quarantine_exn ();

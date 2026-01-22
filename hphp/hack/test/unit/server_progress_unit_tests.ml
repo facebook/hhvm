@@ -49,26 +49,27 @@ let try_with_tmp (f : root:Path.t -> unit Lwt.t) : unit Lwt.t =
       Sys_utils.rm_dir_tree ~skip_mocking:true (Path.to_string tmp);
       Lwt.return_unit)
 
-type simple_error = int * string * string [@@deriving ord, eq, show]
+type simple_diagnostic = int * string * string [@@deriving ord, eq, show]
 
-type simple_error_list = simple_error list [@@deriving show]
+type simple_diagnostic_list = simple_diagnostic list [@@deriving show]
 
-let make_errors (errors : (int * string * string) list) : Errors.t =
-  let errors =
-    List.map errors ~f:(fun (code, rel_path, message) ->
+let make_diagnostics (diagnostics : (int * string * string) list) :
+    Diagnostics.t =
+  let diagnostics =
+    List.map diagnostics ~f:(fun (code, rel_path, message) ->
         let path = Relative_path.from_root ~suffix:rel_path in
-        let error =
-          User_error.make_err
+        let diagnostic =
+          User_diagnostic.make_err
             code
             (Pos.make_from path, message)
             []
             Explanation.empty
         in
-        (path, error))
+        (path, diagnostic))
   in
-  Errors.from_file_error_list errors
+  Diagnostics.from_file_diagnostic_list diagnostics
 
-let an_error : Errors.t = make_errors [(101, "c", "oops")]
+let a_diagnostic : Diagnostics.t = make_diagnostics [(101, "c", "oops")]
 
 let test_completed () : bool Lwt.t =
   let%lwt () =
@@ -79,9 +80,10 @@ let test_completed () : bool Lwt.t =
           ~ignore_hh_version:false
           ~cancel_reason;
         Server_progress.ErrorsWrite.report
-          (make_errors
+          (make_diagnostics
              [(101, "a", "hello"); (101, "a", "there"); (101, "b", "world")]);
-        Server_progress.ErrorsWrite.report (make_errors [(101, "c", "oops")]);
+        Server_progress.ErrorsWrite.report
+          (make_diagnostics [(101, "c", "oops")]);
         Server_progress.ErrorsWrite.complete telemetry;
         let fd = Unix.openfile errors_file_path [Unix.O_RDONLY] 0 in
         assert (Server_progress.ErrorsRead.openfile fd |> Result.is_ok);
@@ -168,7 +170,7 @@ let test_read_restarted () : bool Lwt.t =
           ~clock:None
           ~ignore_hh_version:false
           ~cancel_reason;
-        Server_progress.ErrorsWrite.report an_error;
+        Server_progress.ErrorsWrite.report a_diagnostic;
         let fd = Unix.openfile errors_file_path [Unix.O_RDONLY] 0 in
         Server_progress.ErrorsWrite.new_empty_file
           ~clock:None
@@ -244,7 +246,7 @@ let test_produce_disordered () : bool Lwt.t =
     try_with_tmp (fun ~root:_ ->
         (* Actions from state "Absent"... *)
         expect_state "Absent";
-        expect_exn (fun () -> Server_progress.ErrorsWrite.report an_error);
+        expect_exn (fun () -> Server_progress.ErrorsWrite.report a_diagnostic);
         expect_state "Absent";
         expect_exn (fun () -> Server_progress.ErrorsWrite.complete telemetry);
         expect_state "Absent";
@@ -270,7 +272,7 @@ let test_produce_disordered () : bool Lwt.t =
           ~ignore_hh_version:false
           ~cancel_reason;
         expect_state "Reporting[0]";
-        Server_progress.ErrorsWrite.report an_error;
+        Server_progress.ErrorsWrite.report a_diagnostic;
         expect_state "Reporting[1]";
         Server_progress.ErrorsWrite.new_empty_file
           ~clock:None
@@ -294,16 +296,16 @@ let test_produce_disordered () : bool Lwt.t =
           ~clock:None
           ~ignore_hh_version:false
           ~cancel_reason;
-        Server_progress.ErrorsWrite.report an_error;
+        Server_progress.ErrorsWrite.report a_diagnostic;
         expect_state "Reporting[1]";
         Server_progress.ErrorsWrite.new_empty_file
           ~clock:None
           ~ignore_hh_version:false
           ~cancel_reason;
         expect_state "Reporting[0]";
-        Server_progress.ErrorsWrite.report an_error;
+        Server_progress.ErrorsWrite.report a_diagnostic;
         expect_state "Reporting[1]";
-        Server_progress.ErrorsWrite.report an_error;
+        Server_progress.ErrorsWrite.report a_diagnostic;
         expect_state "Reporting[2]";
         Server_progress.ErrorsWrite.complete telemetry;
         expect_state "Closed";
@@ -311,7 +313,7 @@ let test_produce_disordered () : bool Lwt.t =
           ~clock:None
           ~ignore_hh_version:false
           ~cancel_reason;
-        Server_progress.ErrorsWrite.report an_error;
+        Server_progress.ErrorsWrite.report a_diagnostic;
         expect_state "Reporting[1]";
         Server_progress.ErrorsWrite.unlink_at_server_stop ();
         expect_state "Absent";
@@ -333,7 +335,7 @@ let test_produce_disordered () : bool Lwt.t =
         expect_state "Reporting[0]";
         Server_progress.ErrorsWrite.complete telemetry;
         expect_state "Closed";
-        expect_exn (fun () -> Server_progress.ErrorsWrite.report an_error);
+        expect_exn (fun () -> Server_progress.ErrorsWrite.report a_diagnostic);
         expect_state "Closed";
         expect_exn (fun () -> Server_progress.ErrorsWrite.complete telemetry);
         expect_state "Closed";
@@ -352,9 +354,10 @@ let test_async_read_completed () : bool Lwt.t =
           ~ignore_hh_version:false
           ~cancel_reason;
         Server_progress.ErrorsWrite.report
-          (make_errors
+          (make_diagnostics
              [(101, "a", "hello"); (101, "a", "there"); (101, "b", "world")]);
-        Server_progress.ErrorsWrite.report (make_errors [(101, "c", "oops")]);
+        Server_progress.ErrorsWrite.report
+          (make_diagnostics [(101, "c", "oops")]);
         Server_progress.ErrorsWrite.complete telemetry;
         let fd = Unix.openfile errors_file_path [Unix.O_RDONLY] 0 in
         let _open = Server_progress.ErrorsRead.openfile fd in
@@ -382,7 +385,7 @@ let test_async_read_partial () : bool Lwt.t =
         let%lwt () = expect_qitem q "nothing" in
         (* we'll put in one report, and after this there should be exactly one item available *)
         Server_progress.ErrorsWrite.report
-          (make_errors
+          (make_diagnostics
              [(101, "a", "hello"); (101, "a", "there"); (101, "b", "world")]);
         let%lwt () = expect_qitem q "Errors [a=2,b=1]" in
         let%lwt () = expect_qitem q "nothing" in
@@ -543,7 +546,7 @@ let env =
       config = [];
       custom_hhi_path = None;
       custom_telemetry_data = [];
-      error_format = Some Errors.Plain;
+      error_format = Some Diagnostics.Plain;
       force_dormant_start = false;
       from = "test";
       show_spinner = false;
@@ -574,7 +577,7 @@ let env =
     }
 
 let make_error_filter env =
-  Filter_errors.Filter.make
+  Filter_diagnostics.Filter.make
     ~default_all:true
     ~generated_files:[]
     env.ClientEnv.warning_switches
@@ -640,7 +643,8 @@ let test_check_errors () : bool Lwt.t =
           ~clock:None
           ~ignore_hh_version:false
           ~cancel_reason;
-        Server_progress.ErrorsWrite.report (make_errors [(101, "c", "oops")]);
+        Server_progress.ErrorsWrite.report
+          (make_diagnostics [(101, "c", "oops")]);
         Server_progress.ErrorsWrite.complete telemetry;
         let%lwt (exit_status, _telemetry) = check_future in
         let exit_status = Exit_status.show exit_status in
@@ -743,41 +747,41 @@ let test_check_connect_failure () : bool Lwt.t =
   in
   Lwt.return_true
 
-let assert_errors ~expected ~(actual : Errors.finalized_error list) =
-  let expected = List.sort expected ~compare:compare_simple_error in
+let assert_errors ~expected ~(actual : Diagnostics.finalized_diagnostic list) =
+  let expected = List.sort expected ~compare:compare_simple_diagnostic in
   let actual =
     List.fold actual ~init:[] ~f:(fun acc err ->
-        ( User_error.get_code err,
-          User_error.get_pos err
+        ( User_diagnostic.get_code err,
+          User_diagnostic.get_pos err
           |> Pos.filename
           |> String.chop_prefix_exn ~prefix:(Path.to_string root ^ "/"),
-          User_error.get_messages err |> List.hd_exn |> snd )
+          User_diagnostic.get_messages err |> List.hd_exn |> snd )
         :: acc)
-    |> List.sort ~compare:compare_simple_error
+    |> List.sort ~compare:compare_simple_diagnostic
   in
-  if not @@ List.equal equal_simple_error expected actual then (
+  if not @@ List.equal equal_simple_diagnostic expected actual then (
     Printf.eprintf
       "Expected \n%s\nbut got\n%s"
-      (show_simple_error_list expected)
-      (show_simple_error_list actual);
+      (show_simple_diagnostic_list expected)
+      (show_simple_diagnostic_list actual);
     assert false
   )
 
 let test_filter_warnings () : bool =
   let error_filter =
-    Filter_errors.Filter.make
+    Filter_diagnostics.Filter.make
       ~default_all:true
       ~generated_files:[Str.regexp "gen/"]
       [
-        Filter_errors.Code_off Error_codes.Warning.SketchyEquality;
-        Filter_errors.Ignored_files (Str.regexp "def");
-        Filter_errors.Code_off Error_codes.Warning.SketchyNullCheck;
-        Filter_errors.Code_on Error_codes.Warning.SketchyEquality;
-        Filter_errors.Ignored_files (Str.regexp "abc");
+        Filter_diagnostics.Code_off Error_codes.Warning.SketchyEquality;
+        Filter_diagnostics.Ignored_files (Str.regexp "def");
+        Filter_diagnostics.Code_off Error_codes.Warning.SketchyNullCheck;
+        Filter_diagnostics.Code_on Error_codes.Warning.SketchyEquality;
+        Filter_diagnostics.Ignored_files (Str.regexp "abc");
       ]
   in
   let errors =
-    make_errors
+    make_diagnostics
       [
         (12001, "a", "SketchyEquality in non-ignored file. Show");
         (12003, "a", "SketchyNullCheck in non-ignored file. Hide");
@@ -787,9 +791,9 @@ let test_filter_warnings () : bool =
         (4110, "gen/", "non-warning in generated file. Show");
         (12004, "gen/", "other warning in generated file. Hide");
       ]
-    |> Errors.sort_and_finalize
+    |> Diagnostics.sort_and_finalize
   in
-  let actual = Filter_errors.filter error_filter errors in
+  let actual = Filter_diagnostics.filter error_filter errors in
   let expected =
     [
       (12001, "a", "SketchyEquality in non-ignored file. Show");
@@ -802,17 +806,17 @@ let test_filter_warnings () : bool =
 
 let test_filter_warnings_generated () : bool =
   let error_filter =
-    Filter_errors.Filter.make
+    Filter_diagnostics.Filter.make
       ~default_all:true
       ~generated_files:[Str.regexp "gen/"; Str.regexp "gen2"]
       [
-        Filter_errors.Ignored_files (Str.regexp "def");
-        Filter_errors.Ignored_files (Str.regexp "gen2");
-        Filter_errors.Generated_files_on;
+        Filter_diagnostics.Ignored_files (Str.regexp "def");
+        Filter_diagnostics.Ignored_files (Str.regexp "gen2");
+        Filter_diagnostics.Generated_files_on;
       ]
   in
   let errors =
-    make_errors
+    make_diagnostics
       [
         (12001, "defgh", "warning in ignored file. Hide");
         (12004, "abcd", "unrelated. show");
@@ -822,9 +826,9 @@ let test_filter_warnings_generated () : bool =
           "gen2/",
           "warning in generated file with -Wgenerated but ignored. Hide" );
       ]
-    |> Errors.sort_and_finalize
+    |> Diagnostics.sort_and_finalize
   in
-  let actual = Filter_errors.filter error_filter errors in
+  let actual = Filter_diagnostics.filter error_filter errors in
   let expected =
     [
       (12004, "abcd", "unrelated. show");

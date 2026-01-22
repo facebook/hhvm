@@ -75,7 +75,7 @@ let rec collect_legacy_class
              * the inheritance hierarchy into the shared memory heaps. When that
              * invariant no longer holds, the following will no longer work. *)
             let (_ : _ option) =
-              Errors.run_in_decl_mode (fun () ->
+              Diagnostics.run_in_decl_mode (fun () ->
                   Decl_folded_class.class_decl_if_missing
                     ~sh:SharedMem.Uses
                     ctx

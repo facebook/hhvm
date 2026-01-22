@@ -153,7 +153,7 @@ let test () =
       ~hhi_files:(Hhi.get_raw_hhi_contents () |> Array.to_list)
   in
   let env = Integration_test_base.setup_disk env files in
-  Integration_test_base.assert_no_errors env;
+  Integration_test_base.assert_no_diagnostics env;
 
   let path = Relative_path.from_root ~suffix:"source.php" in
   let (ctx, entry) =

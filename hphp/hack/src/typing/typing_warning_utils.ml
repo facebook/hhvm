@@ -10,7 +10,7 @@ open Core
 module Codes = Error_codes.Warning
 module SN = Naming_special_names
 
-let severity = User_error.Warning
+let severity = User_diagnostic.Warning
 
 module type Warning = sig
   type t
@@ -897,9 +897,9 @@ let add_ tcopt (type a x) ((pos, kind, warning) : (x, a) Typing_warning.t) :
     unit =
   let (module M) = module_of kind in
   if code_is_enabled tcopt (M.code warning) then
-    Errors.add_error
+    Diagnostics.add_diagnostic
       {
-        User_error.severity;
+        User_diagnostic.severity;
         code = Codes.to_enum (M.code warning);
         claim = (pos, M.claim warning);
         reasons = M.reasons warning;
@@ -921,7 +921,8 @@ let add_for_migration
     let (pos, kind, warning) = warning in
     let (module M) = module_of_migrated kind in
     Lints_core.add
-      ~autofix:(M.lint_quickfix warning |> Option.map ~f:Lints_errors.quickfix)
+      ~autofix:
+        (M.lint_quickfix warning |> Option.map ~f:Lints_diagnostics.quickfix)
       (M.lint_code warning)
       ~check_status
       (M.lint_severity warning)

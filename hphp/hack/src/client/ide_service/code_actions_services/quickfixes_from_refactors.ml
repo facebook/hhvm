@@ -12,13 +12,13 @@ open Hh_prelude
  * as correct behavior is dependent on matching specific strings and error codes (which can change).
  *)
 
-let select_refactoring_from_parse_error (e : Errors.error) :
+let select_refactoring_from_parse_error (e : Diagnostics.diagnostic) :
     Code_action_types.find_refactor option =
   let msg_str =
-    let User_error.{ claim; _ } = e in
+    let User_diagnostic.{ claim; _ } = e in
     Message.get_message_str claim
   in
-  match Error_codes.Parsing.of_enum e.User_error.code with
+  match Error_codes.Parsing.of_enum e.User_diagnostic.code with
   | Some Error_codes.Parsing.ParsingError -> begin
     match msg_str with
     | "`await` cannot be used as an expression in this location because it's conditionally executed."
@@ -28,13 +28,13 @@ let select_refactoring_from_parse_error (e : Errors.error) :
   end
   | _ -> None
 
-let select_refactoring_from_type_error (e : Errors.error) :
+let select_refactoring_from_type_error (e : Diagnostics.diagnostic) :
     Code_action_types.find_refactor option =
-  match Error_codes.Typing.of_enum e.User_error.code with
+  match Error_codes.Typing.of_enum e.User_diagnostic.code with
   | Some Error_codes.Typing.DiscardedAwaitable -> Some Await_expression.find
   | _ -> None
 
-let select_refactoring (e : Errors.error) :
+let select_refactoring (e : Diagnostics.diagnostic) :
     Code_action_types.find_refactor option =
   match select_refactoring_from_parse_error e with
   | Some fn -> Some fn
@@ -43,10 +43,10 @@ let select_refactoring (e : Errors.error) :
 let quickfix_from_refactor Code_action_types.(Refactor edit_data) =
   Code_action_types.(Quickfix edit_data)
 
-let find ctx entry (e : Errors.error) =
+let find ctx entry (e : Diagnostics.diagnostic) =
   select_refactoring e
   |> Option.map ~f:(fun find_refactors ->
-         let e_pos = User_error.get_pos e in
+         let e_pos = User_diagnostic.get_pos e in
          let refactors = find_refactors ~entry e_pos ctx in
          List.map refactors ~f:quickfix_from_refactor)
   |> Option.value ~default:[]

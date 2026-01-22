@@ -21,8 +21,8 @@ let error_if_no_typehint
       | Float _ -> "float"
       | _ -> "mixed"
     in
-    Errors.add_error
-      (Naming_error_utils.to_user_error
+    Diagnostics.add_diagnostic
+      (Naming_error_utils.to_user_diagnostic
          (Naming_error.Const_without_typehint { pos; const_name; ty_name })
          custom_err_config)
 
@@ -32,8 +32,8 @@ let error_if_pseudo_constant gconst custom_err_config =
     let name = Utils.strip_all_ns name in
     if Naming_special_names.PseudoConsts.is_pseudo_const (Utils.add_ns name)
     then
-      Errors.add_error
-        (Naming_error_utils.to_user_error
+      Diagnostics.add_diagnostic
+        (Naming_error_utils.to_user_diagnostic
            (Naming_error.Name_is_reserved { pos; name })
            custom_err_config)
 

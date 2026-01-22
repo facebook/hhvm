@@ -20,8 +20,8 @@ let error_if_duplicate_method_names methods custom_err_config =
       ~init:SSet.empty
       ~f:(fun seen_methods { m_name = (pos, meth_name); _ } ->
         if SSet.mem meth_name seen_methods then
-          Errors.add_error
-            (Naming_error_utils.to_user_error
+          Diagnostics.add_diagnostic
+            (Naming_error_utils.to_user_diagnostic
                (Naming_error.Method_name_already_bound { pos; meth_name })
                custom_err_config);
         SSet.add meth_name seen_methods)
@@ -30,9 +30,9 @@ let error_if_duplicate_method_names methods custom_err_config =
 
 let error_if_abstract_method_is_memoized method_ =
   if method_.m_abstract && is_memoizable method_.m_user_attributes then
-    Errors.add_error
+    Diagnostics.add_diagnostic
       Nast_check_error.(
-        to_user_error @@ Abstract_method_memoize (fst method_.m_name))
+        to_user_diagnostic @@ Abstract_method_memoize (fst method_.m_name))
 
 let handler =
   object

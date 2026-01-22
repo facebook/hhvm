@@ -60,9 +60,9 @@ let convert_quickfix
       })
 
 let quickfix_positions_for_error
-    (classish_positions : Pos.t Classish_positions.t) (error : Errors.error) :
-    Pos.t list =
-  let quickfixes = User_error.quickfixes error in
+    (classish_positions : Pos.t Classish_positions.t)
+    (error : Diagnostics.diagnostic) : Pos.t list =
+  let quickfixes = User_diagnostic.quickfixes error in
   let hint_styles = List.bind ~f:Quickfix.get_hint_styles quickfixes in
   let available_positions =
     List.filter_map
@@ -74,16 +74,16 @@ let quickfix_positions_for_error
           | HintStyleHint p ->
             Classish_positions.find p classish_positions)
   in
-  User_error.get_pos error :: available_positions
+  User_diagnostic.get_pos error :: available_positions
 
 let errors_to_quickfixes
     (ctx : Provider_context.t)
     (entry : Provider_context.entry)
-    (errors : Errors.t)
+    (errors : Diagnostics.t)
     (path : Relative_path.t)
     (classish_positions : Pos.t Classish_positions.t)
     (selection : Pos.t) : Code_action_types.quickfix list =
-  let errors = Errors.get_error_list ~drop_fixmed:false errors in
+  let errors = Diagnostics.get_diagnostic_list ~drop_fixmed:false errors in
   let errors_here =
     List.filter errors ~f:(fun e ->
         let available_positions =
@@ -91,7 +91,7 @@ let errors_to_quickfixes
         in
         List.exists available_positions ~f:(fun p -> Pos.contains p selection))
   in
-  let quickfixes = List.bind ~f:User_error.quickfixes errors_here in
+  let quickfixes = List.bind ~f:User_diagnostic.quickfixes errors_here in
   let standard_quickfixes =
     List.map quickfixes ~f:(convert_quickfix ctx entry path classish_positions)
   in
@@ -111,8 +111,8 @@ let find ~entry pos ctx ~error_filter : Code_action_types.quickfix list =
     | None -> Classish_positions.empty
   in
 
-  let { Tast_provider.Compute_tast_and_errors.errors; _ } =
+  let { Tast_provider.Compute_tast_and_errors.diagnostics; _ } =
     Tast_provider.compute_tast_and_errors_quarantined ~ctx ~entry ~error_filter
   in
   let path = entry.Provider_context.path in
-  errors_to_quickfixes ctx entry errors path classish_positions pos
+  errors_to_quickfixes ctx entry diagnostics path classish_positions pos

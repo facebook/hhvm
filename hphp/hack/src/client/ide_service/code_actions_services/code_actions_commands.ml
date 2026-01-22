@@ -27,7 +27,7 @@ let extract_prompt_context buf ~ctxt_pos ~claim_pos =
     (start_ln - 1, end_ln - 1, start_col - 1, end_col - 1)
   in
   let line_num_width = 1 + (String.length @@ string_of_int end_ln) in
-  List.iteri (Errors.read_lines path) ~f:(fun ln str ->
+  List.iteri (Diagnostics.read_lines path) ~f:(fun ln str ->
       if ln < ctxt_start_ln || ln > ctxt_end_ln then
         (* This line isn't in our containing span so skip it *)
         ()
@@ -85,7 +85,7 @@ let extract_prompt_context buf ~ctxt_pos ~claim_pos =
 
 let user_prompt_prefix buf ctxt_pos user_error =
   let claim_pos =
-    Message.get_message_pos (User_error.claim_message user_error)
+    Message.get_message_pos (User_diagnostic.claim_message user_error)
   in
   Buffer.add_string
     buf
@@ -119,9 +119,9 @@ let extended_diagnostics buf user_error =
     "The code fragments are given with line numbers to help you understand the context of the error. You should never use those line numbers in suggested edits.\n";
 
   Buffer.add_string buf "<DIAGNOSTIC>\n\n```hack\n";
-  Buffer.add_string buf (Extended_error_formatter.to_string user_error);
+  Buffer.add_string buf (Extended_diagnostic_formatter.to_string user_error);
   Buffer.add_string buf "\n```\n\n</DIAGNOSTIC>\n\n";
-  match User_error.custom_errors user_error with
+  match User_diagnostic.custom_errors user_error with
   | [] -> ()
   | msgs ->
     List.iter msgs ~f:(fun str ->
@@ -129,9 +129,9 @@ let extended_diagnostics buf user_error =
 
 let legacy_diagnostics buf user_error =
   Buffer.add_string buf "<DIAGNOSTIC>\n";
-  Buffer.add_string buf (snd (User_error.claim_message user_error));
+  Buffer.add_string buf (snd (User_diagnostic.claim_message user_error));
   Buffer.add_string buf "\n</DIAGNOSTIC>\n";
-  match User_error.reason_messages user_error with
+  match User_diagnostic.reason_messages user_error with
   | [] -> ()
   | msgs ->
     List.iter msgs ~f:(fun (pos, str) ->
@@ -184,13 +184,13 @@ let agentic_suffix =
 
 let create_agentic_user_prompt ctxt_pos user_error =
   let claim_pos =
-    Message.get_message_pos (User_error.claim_message user_error)
+    Message.get_message_pos (User_diagnostic.claim_message user_error)
   in
   let buf = Buffer.create 5000 in
   Buffer.add_string buf agentic_prefix;
   Buffer.add_string buf "\n\n```hack\n";
   extract_prompt_context buf ~ctxt_pos ~claim_pos;
-  if is_subtyping_error (User_error.get_code user_error) then
+  if is_subtyping_error (User_diagnostic.get_code user_error) then
     extended_diagnostics buf user_error
   else
     legacy_diagnostics buf user_error;
@@ -200,7 +200,7 @@ let create_agentic_user_prompt ctxt_pos user_error =
 (* -- Generate code actions from errors ------------------------------------- *)
 
 let error_to_show_inline_chat_command user_error line_agnostic_hash =
-  let claim = User_error.claim_message user_error in
+  let claim = User_diagnostic.claim_message user_error in
   let override_selection =
     let default = fst claim in
     Option.value_map ~default ~f:(fun pos ->
@@ -213,14 +213,14 @@ let error_to_show_inline_chat_command user_error line_agnostic_hash =
           default
         else
           pos)
-    @@ User_error.function_pos user_error
+    @@ User_diagnostic.function_pos user_error
   in
   (* LSP uses 0-based line numbers *)
   let webview_start_line = Pos.line override_selection - 1 in
   let display_prompt = Format.sprintf {|Devmate Quick Fix - %s|} (snd claim) in
   (* Only use extended reasons for subtyping errors *)
   let user_prompt =
-    if is_subtyping_error (User_error.get_code user_error) then
+    if is_subtyping_error (User_diagnostic.get_code user_error) then
       create_user_prompt override_selection user_error
     else
       create_legacy_user_prompt override_selection user_error
@@ -261,7 +261,7 @@ let error_to_show_inline_chat_command user_error line_agnostic_hash =
   Code_action_types.{ title; command_args }
 
 let error_to_show_sidebar_chat_command user_error line_agnostic_hash =
-  let claim = User_error.claim_message user_error in
+  let claim = User_diagnostic.claim_message user_error in
   let override_selection =
     let default = fst claim in
     Option.value_map ~default ~f:(fun pos ->
@@ -274,7 +274,7 @@ let error_to_show_sidebar_chat_command user_error line_agnostic_hash =
           default
         else
           pos)
-    @@ User_error.function_pos user_error
+    @@ User_diagnostic.function_pos user_error
   in
   let command_args =
     Code_action_types.(
@@ -300,12 +300,12 @@ let error_to_show_sidebar_chat_command user_error line_agnostic_hash =
 
 let errors_to_commands errors selection =
   List.concat_map
-    (Errors.get_error_list ~drop_fixmed:false errors)
+    (Diagnostics.get_diagnostic_list ~drop_fixmed:false errors)
     ~f:(fun user_error ->
-      if Pos.contains (User_error.get_pos user_error) selection then
+      if Pos.contains (User_diagnostic.get_pos user_error) selection then
         let line_agnostic_hash =
-          User_error.hash_error_for_saved_state user_error
-        and finalized_error = User_error.to_absolute user_error in
+          User_diagnostic.hash_diagnostic_for_saved_state user_error
+        and finalized_error = User_diagnostic.to_absolute user_error in
         [
           error_to_show_inline_chat_command finalized_error line_agnostic_hash;
           error_to_show_sidebar_chat_command finalized_error line_agnostic_hash;
@@ -428,9 +428,10 @@ let generate_simplihack_commands ctx tast pos =
     prompts
 
 let find ~entry pos ctx ~error_filter : Code_action_types.command list =
-  let { Tast_provider.Compute_tast_and_errors.errors; tast; telemetry = _ } =
+  let { Tast_provider.Compute_tast_and_errors.diagnostics; tast; telemetry = _ }
+      =
     Tast_provider.compute_tast_and_errors_quarantined ~ctx ~entry ~error_filter
   in
-  let error_commands = errors_to_commands errors pos in
+  let error_commands = errors_to_commands diagnostics pos in
   let simplihack_commands = generate_simplihack_commands ctx tast pos in
   error_commands @ simplihack_commands

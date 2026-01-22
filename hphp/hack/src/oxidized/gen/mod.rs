@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c30a30111850638a10c49209b71c885c>>
+// @generated SignedSource<<5d6c2586c5b05a0d3ee4fe39cda684c3>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -17,10 +17,10 @@ pub mod decl_defs;
 pub mod decl_fold_options;
 pub mod decl_parser_options;
 pub mod decl_reference;
+pub mod diagnostics;
 pub mod edenfs_watcher_types;
 pub mod error_codes;
 pub mod error_message;
-pub mod errors;
 pub mod experimental_features;
 pub mod explanation;
 pub mod files_to_ignore;
@@ -66,7 +66,7 @@ pub mod typing_defs_core;
 pub mod typing_kinding_defs;
 pub mod typing_reason;
 pub mod typing_tyvar_occurrences;
-pub mod user_error;
+pub mod user_diagnostic;
 pub mod validation_err;
 pub mod warnings_saved_state;
 pub mod xhp_attribute;

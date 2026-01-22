@@ -138,7 +138,9 @@ let get_kvc_kind name =
   | x when String.equal x SN.Collections.cImmMap -> ImmMap
   | x when String.equal x SN.Collections.cDict -> Dict
   | _ ->
-    Errors.internal_error Pos.none ("Invalid KeyValueCollection name: " ^ name);
+    Diagnostics.internal_error
+      Pos.none
+      ("Invalid KeyValueCollection name: " ^ name);
     Map
 
 let kvc_kind_to_name kind =
@@ -164,7 +166,7 @@ let get_vc_kind name =
   | x when String.equal x SN.Collections.cImmSet -> ImmSet
   | x when String.equal x SN.Collections.cKeyset -> Keyset
   | _ ->
-    Errors.internal_error Pos.none ("Invalid ValueCollection name: " ^ name);
+    Diagnostics.internal_error Pos.none ("Invalid ValueCollection name: " ^ name);
     Set
 
 let vc_kind_to_name kind =

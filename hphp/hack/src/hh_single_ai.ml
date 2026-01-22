@@ -31,10 +31,10 @@ let die str =
   exit 2
 
 let print_error ?(oc = stderr) l =
-  let absolute_errors = User_error.to_absolute l in
+  let absolute_errors = User_diagnostic.to_absolute l in
   Out_channel.output_string
     oc
-    (Highlighted_error_formatter.to_string absolute_errors)
+    (Highlighted_diagnostic_formatter.to_string absolute_errors)
 
 let comma_string_to_iset (s : string) : ISet.t =
   Str.split (Str.regexp ", *") s |> List.map ~f:int_of_string |> ISet.of_list
@@ -118,16 +118,16 @@ let parse_options () =
       ~tco_check_xhp_attribute:false
       GlobalOptions.default
   in
-  Errors.allowed_fixme_codes_strict :=
+  Diagnostics.allowed_fixme_codes_strict :=
     GlobalOptions.allowed_fixme_codes_strict tcopt;
   ( { files = fns; extra_builtins = !extra_builtins; ai_options; tcopt },
     Ai_options.modify_shared_mem ai_options SharedMem.default_config )
 
 let get_parse_errors ctx files_contents =
-  Errors.do_ (fun () ->
+  Diagnostics.do_ (fun () ->
       Relative_path.Map.iter files_contents ~f:(fun fn contents ->
           (* Get parse errors *)
-          Errors.run_in_context fn (fun () ->
+          Diagnostics.run_in_context fn (fun () ->
               let popt = Provider_context.get_popt ctx in
               let _ = Full_fidelity_ast.defensive_program popt fn contents in
               ())))
@@ -140,7 +140,7 @@ let parse_and_name ctx files_contents =
       | Some decls -> Direct_decl_utils.decls_to_fileinfo fn decls)
 
 let parse_name_and_skip_decl ctx files_contents =
-  Errors.do_ (fun () ->
+  Diagnostics.do_ (fun () ->
       let files_info = parse_and_name ctx files_contents in
       Relative_path.Map.iter files_info ~f:(fun fn fileinfo ->
           let _failed_naming_fns =
@@ -269,9 +269,13 @@ let decl_and_run_mode
   *)
   let parse_errors = get_parse_errors ctx files_contents in
   let (naming_errors, files_info) = parse_name_and_skip_decl ctx to_decl in
-  let errors = Errors.merge parse_errors naming_errors in
+  let errors = Diagnostics.merge parse_errors naming_errors in
   let ctx = Provider_context.set_backend ctx Provider_backend.Analysis in
-  handle_mode ai_options ctx files_info (Errors.get_sorted_error_list errors)
+  handle_mode
+    ai_options
+    ctx
+    files_info
+    (Diagnostics.get_sorted_diagnostic_list errors)
 
 let write_file_to_root ~(root : Path.t) ~file =
   let write (file, content) =

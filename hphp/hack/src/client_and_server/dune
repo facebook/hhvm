@@ -244,9 +244,9 @@
   (pps lwt_ppx ppx_deriving.std)))
 
 (library
- (name filter_errors)
+ (name filter_diagnostics)
  (modules
-  filter_errors)
+  filter_diagnostics)
  (libraries
   error_codes
   errors
@@ -275,7 +275,7 @@
  (libraries
   base64
   connection_tracker
-  filter_errors
+  filter_diagnostics
   full_fidelity
   hh_json
   ide_rpc_api_types

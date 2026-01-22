@@ -71,7 +71,7 @@ let test () =
         (bar_name 2, bar_contents 2);
       ]
   in
-  Test.assert_no_errors env;
+  Test.assert_no_diagnostics env;
 
   (* This change will recheck all files and reveal errors in bar1 and bar2 *)
   let loop_input =
@@ -91,4 +91,4 @@ let test () =
   let (env, _) = Test.run_loop_once env loop_input in
   (* We'll get all the errors anyway due to server looping until check is
    * fully finished *)
-  Test.assert_env_errors env expected_errors
+  Test.assert_env_diagnostics env expected_errors

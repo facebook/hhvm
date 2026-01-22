@@ -71,11 +71,11 @@ let test () =
     ^ "  Previous definition is here\n"
   in
   (* We should get exactly these two errors *)
-  match Errors.get_error_list env.errorl with
+  match Diagnostics.get_diagnostic_list env.diagnostics with
   | [x; y] ->
-    Test.assertSingleError qux_error [y];
-    Test.assertSingleError bar_error [x]
+    Test.assertSingleDiagnostic qux_error [y];
+    Test.assertSingleDiagnostic bar_error [x]
   | errs ->
     Test.fail
     @@ "Expected exactly two errors, but got:\n"
-    ^ String.concat ~sep:"\n" (Test.error_strings errs)
+    ^ String.concat ~sep:"\n" (Test.diagnostic_strings errs)

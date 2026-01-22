@@ -11,7 +11,7 @@ val ambiguous_inheritance :
   Pos_or_decl.t ->
   string ->
   string ->
-  (Pos.t, Pos_or_decl.t) User_error.t ->
+  (Pos.t, Pos_or_decl.t) User_diagnostic.t ->
   Typing_error.Reasons_callback.t ->
   env:Typing_env_types.env ->
   unit

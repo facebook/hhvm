@@ -44,8 +44,8 @@ let handler =
           let tcopt = Tast_env.get_tcopt env in
           TypecheckerOptions.custom_error_config tcopt
         in
-        Errors.add_error
-          (Naming_error_utils.to_user_error
+        Diagnostics.add_diagnostic
+          (Naming_error_utils.to_user_diagnostic
              (Naming_error.Lvar_in_obj_get { pos; lvar_pos; lvar_name })
              custom_err_config)
       | _ -> ()

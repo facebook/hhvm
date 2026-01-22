@@ -44,7 +44,7 @@ class Child2 extends ParentClass {
 let errors_to_string errors =
   List.fold_left
     (fun str error ->
-      str ^ (error |> User_error.to_absolute |> Errors.to_string))
+      str ^ (error |> User_diagnostic.to_absolute |> Diagnostics.to_string))
     ""
   @@ errors
 
@@ -60,7 +60,7 @@ let () =
           disk_changes = make_disk_changes init_base_content;
         })
   in
-  let errors = Errors.get_sorted_error_list env.errorl in
+  let errors = Diagnostics.get_sorted_diagnostic_list env.diagnostics in
   if errors <> [] then
     Test.fail ("Expected no errors. Got:\n" ^ errors_to_string errors);
 
@@ -74,7 +74,9 @@ let () =
           disk_changes = make_disk_changes err_base_content;
         })
   in
-  let expected_errors = Errors.get_sorted_error_list env.errorl in
+  let expected_errors =
+    Diagnostics.get_sorted_diagnostic_list env.diagnostics
+  in
   if expected_errors = [] then Test.fail "Expected there to be errors!";
 
   (* We reset the disk changes to the initial state. Should be no errors *)
@@ -87,7 +89,7 @@ let () =
           disk_changes = make_disk_changes init_base_content;
         })
   in
-  let errors = Errors.get_sorted_error_list env.errorl in
+  let errors = Diagnostics.get_sorted_diagnostic_list env.diagnostics in
   if errors <> [] then
     Test.fail ("Expected no errors. Got:\n" ^ errors_to_string errors);
 
@@ -101,7 +103,9 @@ let () =
           disk_changes = [("base.php", err_base_content)];
         })
   in
-  let incremental_errors = Errors.get_sorted_error_list env.errorl in
+  let incremental_errors =
+    Diagnostics.get_sorted_diagnostic_list env.diagnostics
+  in
   if incremental_errors <> expected_errors then
     Test.fail
       ("Incremental mode gave different errors than a full type check.\n\n"

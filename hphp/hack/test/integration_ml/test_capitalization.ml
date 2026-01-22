@@ -41,7 +41,7 @@ let test () =
     ^ "  File \"/foo1.php\", line 2, characters 9-11:\n"
     ^ "  Previous definition is here\n"
   in
-  Test.assert_env_errors env expected_error;
+  Test.assert_env_diagnostics env expected_error;
 
   (* Change a wholly unrelated file. *)
   let (env, loop_output) =
@@ -54,4 +54,4 @@ let test () =
     Test.fail "Expected the server to process disk updates";
 
   (* The same errors should still be there *)
-  Test.assert_env_errors env expected_error
+  Test.assert_env_diagnostics env expected_error

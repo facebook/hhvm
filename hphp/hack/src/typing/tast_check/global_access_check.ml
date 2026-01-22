@@ -91,7 +91,7 @@ let raise_global_access_error
     ^ " A global variable is "
     ^ error_message
   in
-  Errors.global_access_error error_code pos message
+  Diagnostics.global_access_error error_code pos message
 
 (* Various types of data sources for a local variable. *)
 type data_source =

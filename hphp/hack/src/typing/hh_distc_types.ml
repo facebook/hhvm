@@ -7,7 +7,7 @@
  *)
 
 type event =
-  | Errors of Errors.t
+  | Errors of Diagnostics.t
   | TypingStart of int
   | TypingProgress of int
 [@@deriving show]

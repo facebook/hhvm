@@ -55,14 +55,16 @@ module Program = struct
       stdout
       ~stale_msg:None
       ~output_json:(ServerArgs.json_mode genv.options)
-      ~error_format:(Some Errors.Raw)
+      ~error_format:(Some Diagnostics.Raw)
       ~error_list:
-        (List.map (Errors.get_error_list env.errorl) ~f:User_error.to_absolute)
+        (List.map
+           (Diagnostics.get_diagnostic_list env.diagnostics)
+           ~f:User_diagnostic.to_absolute)
       ~recheck_stats;
 
     WorkerController.force_quit_all ();
 
-    let has_errors = not (Errors.is_empty env.errorl) in
+    let has_errors = not (Diagnostics.is_empty env.diagnostics) in
     let error_code =
       if has_errors then
         if Option.is_some (ServerArgs.write_symbol_info genv.options) then
@@ -532,12 +534,12 @@ let idle_if_no_client env waiting_client =
       env
   | ClientProvider.Select_new _ -> env
 
-let log_recheck_end (stats : ServerEnv.RecheckLoopStats.t) ~errors =
+let log_recheck_end (stats : ServerEnv.RecheckLoopStats.t) ~diagnostics =
   let telemetry =
     ServerEnv.RecheckLoopStats.to_user_telemetry stats
     |> Telemetry.object_
          ~key:"errors"
-         ~value:(Errors.as_telemetry_summary errors)
+         ~value:(Diagnostics.as_telemetry_summary diagnostics)
   in
   let {
     RecheckLoopStats.duration;
@@ -676,7 +678,7 @@ let serve_one_iteration genv env client_provider =
     }
   in
 
-  if did_work then log_recheck_end stats ~errors:env.errorl;
+  if did_work then log_recheck_end stats ~diagnostics:env.diagnostics;
 
   let env =
     match selected_client with
@@ -909,7 +911,7 @@ let serve genv env in_fds =
   let (_ : bool) =
     Typing_deps.allow_dependency_table_reads env.deps_mode false
   in
-  let () = Errors.set_allow_errors_in_default_path false in
+  let () = Diagnostics.set_allow_errors_in_default_path false in
   MultiThreadedCall.on_exception (fun e -> ServerUtils.exit_on_exception e);
   let client_provider = ClientProvider.provider_from_file_descriptors in_fds in
 

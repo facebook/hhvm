@@ -1886,11 +1886,11 @@ and Reasons_callback : sig
 
   (** Replace the current list of reasons with those supplied. This is typically
        used in combination with `retain_reasons` to fix the `reasons` of the
-      `User_error.t` that is obtained when the callback is applied
+      `User_diagnostic.t` that is obtained when the callback is applied
   *)
   val with_reasons : t -> reasons:Pos_or_decl.t Message.t list Lazy.t -> t
 
-  (** Add a `quickfix` to the `User_error.t` generated when the callback is
+  (** Add a `quickfix` to the `User_diagnostic.t` generated when the callback is
       applied
   *)
   val add_quickfixes : t -> Pos.t Quickfix.t list -> t
@@ -1907,21 +1907,21 @@ and Reasons_callback : sig
   (** When applied, prepend the supplied reasons to the current list of reasons *)
   val prepend_incoming_reasons : t -> t
 
-  (** Ignore the incoming error code argument when evaluating to a `User_error.t`.
+  (** Ignore the incoming error code argument when evaluating to a `User_diagnostic.t`.
 
       This is equivalent to the following function, given some callback `on_error`:
       `(fun ?code:_ ?quickfixes reasons -> on_error ?quickfixes reasons)`
   *)
   val retain_code : t -> t
 
-  (** Ignore the incoming reasons argument when evaluating to a `User_error.t`.
+  (** Ignore the incoming reasons argument when evaluating to a `User_diagnostic.t`.
 
       This is equivalent to the following function, given some callback `on_error`:
       `(fun ?code ?quickfixes _ -> on_error ?code ?quickfixes)`
   *)
   val retain_reasons : t -> t
 
-  (** Ignore the incoming quickfixes component when evaluating to a `User_error.t`.
+  (** Ignore the incoming quickfixes component when evaluating to a `User_diagnostic.t`.
 
       This is equivalent to the following function, given some callback `on_error`:
       `(fun ?code ?quickfixes:_ reasons -> on_error ?code reasons)`
@@ -2101,7 +2101,7 @@ val multiple_opt : t list -> t option
     `multiple [t1;t2]`*)
 val both : t -> t -> t
 
-(** Modify the code that will be reported when evaluated to a `User_error.t`  *)
+(** Modify the code that will be reported when evaluated to a `User_diagnostic.t`  *)
 val with_code : t -> code:Error_code.t -> t
 
 val count : t -> int

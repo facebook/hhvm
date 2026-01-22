@@ -13,7 +13,7 @@ let go
     (workers : MultiWorker.worker list option)
     (env : ServerEnv.env)
     (files : string list)
-    (error_filter : Filter_errors.Filter.t)
+    (error_filter : Filter_diagnostics.Filter.t)
     (preexisting_warnings : bool) : Telemetry.t =
   let file_names =
     List.map files ~f:(fun filename -> ServerCommandTypes.FileName filename)
@@ -43,10 +43,10 @@ let go
      This differs from `hh --json` to align with the information sent to VSCode
      (similar structure, though not identical). The `hh --json` format includes
      unnecessary extra fields that aren't needed for this use case. *)
-  let error_to_json : Errors.error -> Hh_json.json =
+  let error_to_json : Diagnostics.diagnostic -> Hh_json.json =
    fun err ->
     let {
-      User_error.severity;
+      User_diagnostic.severity;
       code = _;
       claim = (pos, claim_msg);
       reasons;
@@ -56,7 +56,7 @@ let go
       is_fixmed = _;
       function_pos = _;
     } =
-      User_error.to_absolute err
+      User_diagnostic.to_absolute err
     in
     let msg_to_json msg =
       Hh_json.string_ @@ Markdown_lite.render ~add_bold:false msg
@@ -68,18 +68,21 @@ let go
     Hh_json.JSON_Object
       [
         ( "severity",
-          Hh_json.string_ @@ User_error.Severity.to_all_caps_string severity );
+          Hh_json.string_
+          @@ User_diagnostic.Severity.to_all_caps_string severity );
         ("range", Pos.multiline_json_no_filename pos);
         ("message", msg_to_json claim_msg);
         ("relatedInformation", Hh_json.array_ reason_to_json reasons);
         ("customErrors", Hh_json.array_ msg_to_json custom_msgs);
         ( "lineAgnosticHash",
           Hh_json.string_
-          @@ Printf.sprintf "%x" (User_error.hash_error_for_saved_state err) );
+          @@ Printf.sprintf
+               "%x"
+               (User_diagnostic.hash_diagnostic_for_saved_state err) );
       ]
   in
-  let errors = Errors.drop_fixmed_errors_in_files errors in
-  let file_to_errors = Errors.as_map errors in
+  let errors = Diagnostics.drop_fixmed_errors_in_files errors in
+  let file_to_errors = Diagnostics.as_map errors in
   let file_to_error_json =
     Relative_path.Map.map ~f:(List.map ~f:error_to_json) file_to_errors
   in

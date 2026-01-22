@@ -2511,7 +2511,7 @@ let go_ctx
   let tast = tast.Tast_with_dynamic.under_normal_assumptions in
   (visitor ctx autocomplete_context sienv_ref naming_table tast)#go ctx tast;
 
-  Errors.ignore_ (fun () ->
+  Diagnostics.ignore_ (fun () ->
       let start_time = Unix.gettimeofday () in
       let autocomplete_items = !autocomplete_items in
       let results =

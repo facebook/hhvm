@@ -17,7 +17,7 @@ use oxidized::ast;
 use oxidized::ast::Def;
 use oxidized::ast::Pos;
 use oxidized::ast::Program;
-use oxidized::errors;
+use oxidized::diagnostics;
 use oxidized::experimental_features::FeatureName;
 use oxidized::namespace_env::Mode;
 use oxidized::parser_options::ParserOptions;
@@ -554,7 +554,12 @@ fn convert_aast_error(err: AastError, src: &str, internal_offset: usize, span: S
     }
 }
 
-fn convert_error(err: &errors::Error, src: &str, internal_offset: usize, span: Span) -> Result<()> {
+fn convert_error(
+    err: &diagnostics::Diagnostic,
+    src: &str,
+    internal_offset: usize,
+    span: Span,
+) -> Result<()> {
     let err_span = span_for_pos(src, internal_offset, span, &err.claim.0);
     Err(Error::new(err_span, err.claim.1.to_string()))
 }

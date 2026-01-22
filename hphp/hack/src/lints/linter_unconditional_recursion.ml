@@ -108,8 +108,8 @@ let rec check_unconditional_recursion
       ()
     else if is_recursive_call head is_fun_or_method then
       match is_fun_or_method with
-      | Is_fun f_prop -> Lints_errors.unconditional_recursion f_prop.pos
-      | Is_method m_prop -> Lints_errors.unconditional_recursion m_prop.pos
+      | Is_fun f_prop -> Lints_diagnostics.unconditional_recursion f_prop.pos
+      | Is_method m_prop -> Lints_diagnostics.unconditional_recursion m_prop.pos
     else
       check_unconditional_recursion tail is_fun_or_method
   | [] -> ()

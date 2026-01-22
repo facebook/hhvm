@@ -17,8 +17,8 @@ let error_if_repeated_name member_or_const custom_err_config =
   List.iter member_or_const ~f:(fun (pos, name) ->
       match Stdlib.Hashtbl.find_opt seen name with
       | Some p' ->
-        Errors.add_error
-          (Naming_error_utils.to_user_error
+        Diagnostics.add_diagnostic
+          (Naming_error_utils.to_user_diagnostic
              (Naming_error.Error_name_already_bound { pos; name; prev_pos = p' })
              custom_err_config)
       | None -> Stdlib.Hashtbl.replace seen name pos)

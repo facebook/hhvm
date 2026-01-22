@@ -333,10 +333,10 @@ let any_inf_err_code imap =
   aux inf_err_codes
 
 let () =
-  (Errors.get_hh_fixme_pos :=
+  (Diagnostics.get_hh_fixme_pos :=
      fun err_pos err_code ->
        get_fixmes_for_pos err_pos |> fun imap ->
-       if !Errors.code_agnostic_fixme then
+       if !Diagnostics.code_agnostic_fixme then
          if IMap.is_empty imap then
            None
          else
@@ -345,6 +345,6 @@ let () =
          match IMap.find_opt err_code imap with
          | None when is_inf_err_code err_code -> any_inf_err_code imap
          | x -> x);
-  Errors.get_disallowed_fixme_pos := get_disallowed_fixme_pos;
-  Errors.get_ignore_pos := get_ignore_pos;
+  Diagnostics.get_disallowed_fixme_pos := get_disallowed_fixme_pos;
+  Diagnostics.get_ignore_pos := get_ignore_pos;
   ()

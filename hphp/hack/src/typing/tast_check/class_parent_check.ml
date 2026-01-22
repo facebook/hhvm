@@ -30,31 +30,31 @@ let check_is_class env ~require_constraint_check (p, h) =
       let name = Cls.name cls in
       if Ast_defs.is_c_class kind then (
         if Cls.final cls && not is_req_class_check then
-          Errors.add_error
+          Diagnostics.add_diagnostic
             Nast_check_error.(
-              to_user_error
+              to_user_diagnostic
               @@ Requires_final_class { pos = p; name; is_req_this_as_check })
         else if Cls.final cls && is_req_this_as_check then
-          Errors.add_error
+          Diagnostics.add_diagnostic
             Nast_check_error.(
-              to_user_error
+              to_user_diagnostic
               @@ Requires_final_class { pos = p; name; is_req_this_as_check })
       ) else
-        Errors.add_error
+        Diagnostics.add_diagnostic
           Nast_check_error.(
-            to_user_error
+            to_user_diagnostic
             @@ Requires_non_class
                  { pos = p; name; kind = Ast_defs.string_of_classish_kind kind })
   end
   | Aast.Habstr name ->
-    Errors.add_error
+    Diagnostics.add_diagnostic
       Nast_check_error.(
-        to_user_error
+        to_user_diagnostic
         @@ Requires_non_class { pos = p; name; kind = "a generic" })
   | _ ->
-    Errors.add_error
+    Diagnostics.add_diagnostic
       Nast_check_error.(
-        to_user_error
+        to_user_diagnostic
         @@ Requires_non_class
              { pos = p; name = "This"; kind = "an invalid type hint" })
 
@@ -67,20 +67,20 @@ let check_is_interface (env, error_verb) (p, h) =
       ()
     | Decl_entry.Found cls when Ast_defs.is_c_interface (Cls.kind cls) -> ()
     | Decl_entry.Found cls ->
-      Errors.add_error
+      Diagnostics.add_diagnostic
         Nast_check_error.(
-          to_user_error
+          to_user_diagnostic
           @@ Non_interface { pos = p; name = Cls.name cls; verb = error_verb })
   end
   | Aast.Habstr _ ->
-    Errors.add_error
+    Diagnostics.add_diagnostic
       Nast_check_error.(
-        to_user_error
+        to_user_diagnostic
         @@ Non_interface { pos = p; name = "generic"; verb = error_verb })
   | _ ->
-    Errors.add_error
+    Diagnostics.add_diagnostic
       Nast_check_error.(
-        to_user_error
+        to_user_diagnostic
         @@ Non_interface
              { pos = p; name = "invalid type hint"; verb = error_verb })
 
@@ -97,9 +97,9 @@ let check_is_trait env (p, h) =
       | Decl_entry.Found cls ->
         let name = Cls.name cls in
         let kind = Cls.kind cls in
-        Errors.add_error
+        Diagnostics.add_diagnostic
           Nast_check_error.(
-            to_user_error
+            to_user_diagnostic
             @@ Uses_non_trait
                  { pos = p; name; kind = Ast_defs.string_of_classish_kind kind })
     end

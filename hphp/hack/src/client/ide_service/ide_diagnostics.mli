@@ -6,9 +6,9 @@
  *
  *)
 
-(** Convert a list of [Errors.finalized_error] to [ClientIdeMessage.diagnostic] *)
+(** Convert a list of [Diagnostics.finalized_diagnostic] to [ClientIdeMessage.diagnostic] *)
 val convert :
   ctx:Provider_context.t ->
   entry:Provider_context.entry ->
-  (Errors.finalized_error * int) list ->
+  (Diagnostics.finalized_diagnostic * int) list ->
   ClientIdeMessage.diagnostic list

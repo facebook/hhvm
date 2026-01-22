@@ -25,7 +25,7 @@ let check_internal_classname pos ci env =
   in
   match class_result with
   | Decl_entry.Found cls when Cls.internal cls ->
-    Lints_errors.internal_classname pos
+    Lints_diagnostics.internal_classname pos
   | _ -> ()
 
 (* Checks creation of a ::class from an internal class *)

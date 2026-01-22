@@ -22,7 +22,7 @@ let test () =
   in
   if not loop_output.did_read_disk_changes then
     Test.fail "Expected the server to process disk updates";
-  (match Errors.get_error_list env.errorl with
+  (match Diagnostics.get_diagnostic_list env.diagnostics with
   | [] -> ()
   | _ -> Test.fail "Expected no errors");
   let (env, loop_output) =
@@ -43,4 +43,6 @@ let test () =
     ^ "  File \"/bar.php\", line 2, characters 11-13:\n"
     ^ "  Previous definition is here\n"
   in
-  Test.assertSingleError expected_result (Errors.get_error_list env.errorl)
+  Test.assertSingleDiagnostic
+    expected_result
+    (Diagnostics.get_diagnostic_list env.diagnostics)

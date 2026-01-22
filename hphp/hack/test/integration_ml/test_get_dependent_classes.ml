@@ -32,7 +32,7 @@ let files =
 let test () =
   let env = Test.setup_server () in
   let env = Test.setup_disk env files in
-  Test.assert_no_errors env;
+  Test.assert_no_diagnostics env;
   let ctx = Provider_utils.ctx_from_server_env env in
 
   let get_classes path =

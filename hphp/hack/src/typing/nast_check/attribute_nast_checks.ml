@@ -26,8 +26,9 @@ let check_soft_internal_without_internal
     (internal : bool) (attrs : Nast.user_attribute list) =
   match find_attribute SN.UserAttributes.uaSoftInternal attrs with
   | Some { ua_name = (pos, _); _ } when not internal ->
-    Errors.add_error
-      Nast_check_error.(to_user_error @@ Soft_internal_without_internal pos)
+    Diagnostics.add_diagnostic
+      Nast_check_error.(
+        to_user_diagnostic @@ Soft_internal_without_internal pos)
   | _ -> ()
 
 let check_soft_internal_on_param fp =
@@ -38,12 +39,13 @@ let check_soft_internal_on_param fp =
     match fp.param_visibility with
     | Some Internal -> ()
     | Some _ ->
-      Errors.add_error
-        Nast_check_error.(to_user_error @@ Soft_internal_without_internal pos)
-    | None ->
-      Errors.add_error
+      Diagnostics.add_diagnostic
         Nast_check_error.(
-          to_user_error
+          to_user_diagnostic @@ Soft_internal_without_internal pos)
+    | None ->
+      Diagnostics.add_diagnostic
+        Nast_check_error.(
+          to_user_diagnostic
           @@ Wrong_expression_kind_builtin_attribute
                { expr_kind = "a parameter"; pos; attr_name })
   end
@@ -58,13 +60,13 @@ let check_attribute_arity attrs attr_name arg_spec =
       Some
         (Nast_check_error.Attribute_too_few_arguments
            { pos; name = attr_name; expected = min_args })
-      (* Errors.attribute_too_few_arguments pos attr_name min_args *)
+      (* Diagnostics.attribute_too_few_arguments pos attr_name min_args *)
     | (`Range (_, max_args), Some { ua_name = (pos, _); ua_params })
       when List.length ua_params > max_args ->
       Some
         (Nast_check_error.Attribute_too_many_arguments
            { pos; name = attr_name; expected = max_args })
-      (* Errors.attribute_too_many_arguments pos attr_name max_args *)
+      (* Diagnostics.attribute_too_many_arguments pos attr_name max_args *)
     | (`Exact expected_args, Some { ua_name = (pos, _); ua_params })
       when List.length ua_params <> expected_args ->
       Some
@@ -78,7 +80,8 @@ let check_attribute_arity attrs attr_name arg_spec =
     | _ -> None
   in
   Option.iter
-    (fun err -> Errors.add_error Nast_check_error.(to_user_error err))
+    (fun err ->
+      Diagnostics.add_diagnostic Nast_check_error.(to_user_diagnostic err))
     prim_err_opt
 
 let attr_pos (attr : ('a, 'b) user_attribute) : Pos.t = fst attr.ua_name
@@ -89,9 +92,9 @@ let check_duplicate_memoize (attrs : Nast.user_attribute list) : unit =
   let memoize_lsb = find_attribute SN.UserAttributes.uaMemoizeLSB attrs in
   match (memoize, memoize_lsb) with
   | (Some memoize, Some memoize_lsb) ->
-    Errors.add_error
+    Diagnostics.add_diagnostic
       Nast_check_error.(
-        to_user_error
+        to_user_diagnostic
         @@ Attribute_conflicting_memoize
              { pos = attr_pos memoize; second_pos = attr_pos memoize_lsb })
   | _ -> ()
@@ -103,9 +106,9 @@ let check_deprecated_static attrs =
   | Some { ua_name = _; ua_params = [msg; _] } -> begin
     match Nast_eval.static_string msg with
     | Error p ->
-      Errors.add_error
+      Diagnostics.add_diagnostic
         Nast_check_error.(
-          to_user_error
+          to_user_diagnostic
           @@ Attribute_param_type { pos = p; x = "static string literal" })
     | _ -> ()
   end
@@ -119,9 +122,9 @@ let check_autocomplete_valid_text attrs =
   | Some { ua_name = _; ua_params = [msg] } -> begin
     match Nast_eval.static_string msg with
     | Error p ->
-      Errors.add_error
+      Diagnostics.add_diagnostic
         Nast_check_error.(
-          to_user_error
+          to_user_diagnostic
           @@ Attribute_param_type { pos = p; x = "static string literal" })
     | _ -> ()
   end
@@ -135,8 +138,8 @@ let check_no_auto_dynamic env attrs =
     let attr = Naming_attributes.find SN.UserAttributes.uaNoAutoDynamic attrs in
     match attr with
     | Some { ua_name = (pos, _); _ } when not (Pos.is_hhi pos) ->
-      Errors.add_error
-        Nast_check_error.(to_user_error @@ Attribute_no_auto_dynamic pos)
+      Diagnostics.add_diagnostic
+        Nast_check_error.(to_user_diagnostic @@ Attribute_no_auto_dynamic pos)
     | _ -> ()
 
 let check_implemented_by (env : Nast_check_env.env) attrs =
@@ -148,37 +151,37 @@ let check_implemented_by (env : Nast_check_env.env) attrs =
     let path_str = Relative_path.suffix filename in
     let is_hhi = Filename.check_suffix path_str ".hhi" in
     if not is_hhi then
-      Errors.add_error
+      Diagnostics.add_diagnostic
         Nast_check_error.(
-          to_user_error
+          to_user_diagnostic
           @@ Attribute_implemented_by_restriction
                { restriction = ".hhi files"; pos });
     (* Check its in a final class *)
     (match (env.classish_kind, env.is_final) with
     | (Some (Cclass _), true) -> ()
     | _ ->
-      Errors.add_error
+      Diagnostics.add_diagnostic
         Nast_check_error.(
-          to_user_error
+          to_user_diagnostic
           @@ Attribute_implemented_by_restriction
                { restriction = "final classes"; pos }));
     (* Check parameter count and type *)
     (match ua_params with
     | [] ->
-      Errors.add_error
+      Diagnostics.add_diagnostic
         Nast_check_error.(
-          to_user_error
+          to_user_diagnostic
           @@ Attribute_too_few_arguments { pos; name; expected = 1 })
     | [(_, _, String _)] -> () (* Valid: one string parameter *)
     | [(_, p, _)] ->
-      Errors.add_error
+      Diagnostics.add_diagnostic
         Nast_check_error.(
-          to_user_error
+          to_user_diagnostic
           @@ Attribute_param_type { pos = p; x = "a string literal" })
     | _ ->
-      Errors.add_error
+      Diagnostics.add_diagnostic
         Nast_check_error.(
-          to_user_error
+          to_user_diagnostic
           @@ Attribute_too_many_arguments { pos; name; expected = 1 }))
   | _ -> ()
 
@@ -193,14 +196,14 @@ let check_dynamically_referenced attrs =
     | [] -> ()
     | [(_, _, Int _)] -> ()
     | [(_, p, _)] ->
-      Errors.add_error
+      Diagnostics.add_diagnostic
         Nast_check_error.(
-          to_user_error
+          to_user_diagnostic
           @@ Attribute_param_type { pos = p; x = "an integer literal" })
     | _ ->
-      Errors.add_error
+      Diagnostics.add_diagnostic
         Nast_check_error.(
-          to_user_error
+          to_user_diagnostic
           @@ Attribute_too_many_arguments { pos; name; expected = 1 }))
 
 let check_no_sealed_on_constructors m =
@@ -208,9 +211,9 @@ let check_no_sealed_on_constructors m =
   if String.equal method_name SN.Members.__construct then begin
     match find_attribute SN.UserAttributes.uaSealed m.m_user_attributes with
     | Some { ua_name = (pos, attr_name); _ } ->
-      Errors.add_error
+      Diagnostics.add_diagnostic
         Nast_check_error.(
-          to_user_error
+          to_user_diagnostic
           @@ Wrong_expression_kind_builtin_attribute
                { expr_kind = "a constructor"; pos; attr_name })
     | None -> ()
@@ -220,9 +223,9 @@ let check_no_sealed_on_private_methods m =
   if Aast.equal_visibility m.m_visibility Private then begin
     match find_attribute SN.UserAttributes.uaSealed m.m_user_attributes with
     | Some { ua_name = (pos, attr_name); _ } ->
-      Errors.add_error
+      Diagnostics.add_diagnostic
         Nast_check_error.(
-          to_user_error
+          to_user_diagnostic
           @@ Wrong_expression_kind_builtin_attribute
                { expr_kind = "a private method"; pos; attr_name })
     | None -> ()
@@ -237,9 +240,9 @@ let check_no_sealed_on_interface_methods env m =
   if inside_interface then begin
     match find_attribute SN.UserAttributes.uaSealed m.m_user_attributes with
     | Some { ua_name = (pos, attr_name); _ } ->
-      Errors.add_error
+      Diagnostics.add_diagnostic
         Nast_check_error.(
-          to_user_error
+          to_user_diagnostic
           @@ Wrong_expression_kind_builtin_attribute
                {
                  expr_kind = "a method declaration in an interface";
@@ -264,9 +267,9 @@ let check_no_require_package_on_interface_methods env m =
       find_attribute SN.UserAttributes.uaRequirePackage m.m_user_attributes
     with
     | Some { ua_name = (pos, attr_name); _ } ->
-      Errors.add_error
+      Diagnostics.add_diagnostic
         Nast_check_error.(
-          to_user_error
+          to_user_diagnostic
           @@ Wrong_expression_kind_builtin_attribute
                {
                  expr_kind = "a method declaration in an interface";
@@ -292,13 +295,14 @@ let handler =
         (match f.f_params with
         | [] -> ()
         | param :: _ ->
-          Errors.add_error
+          Diagnostics.add_diagnostic
             Nast_check_error.(
-              to_user_error @@ Entrypoint_arguments param.param_pos));
+              to_user_diagnostic @@ Entrypoint_arguments param.param_pos));
         match variadic_param with
         | Some p ->
-          Errors.add_error
-            Nast_check_error.(to_user_error @@ Entrypoint_arguments p.param_pos)
+          Diagnostics.add_diagnostic
+            Nast_check_error.(
+              to_user_diagnostic @@ Entrypoint_arguments p.param_pos)
         | None -> ()
       end;
 
@@ -306,8 +310,9 @@ let handler =
       (if has_attribute "__Memoize" f.f_user_attributes then
         match variadic_param with
         | Some p ->
-          Errors.add_error
-            Nast_check_error.(to_user_error @@ Variadic_memoize p.param_pos)
+          Diagnostics.add_diagnostic
+            Nast_check_error.(
+              to_user_diagnostic @@ Variadic_memoize p.param_pos)
         | None -> ());
       check_attribute_arity
         f.f_user_attributes
@@ -346,9 +351,9 @@ let handler =
         match fd.fd_tparams with
         | [] -> ()
         | tparam :: _ ->
-          Errors.add_error
+          Diagnostics.add_diagnostic
             Nast_check_error.(
-              to_user_error @@ Entrypoint_generics (fst tparam.tp_name))
+              to_user_diagnostic @@ Entrypoint_generics (fst tparam.tp_name))
       end;
 
       check_soft_internal_without_internal
@@ -398,8 +403,9 @@ let handler =
       then
         match variadic_param with
         | Some p ->
-          Errors.add_error
-            Nast_check_error.(to_user_error @@ Variadic_memoize p.param_pos)
+          Diagnostics.add_diagnostic
+            Nast_check_error.(
+              to_user_diagnostic @@ Variadic_memoize p.param_pos)
         | None -> ()
 
     method! at_class_ env c =

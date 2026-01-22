@@ -114,7 +114,7 @@ JOB-INPUT: all the fields are empty
 JOB-OUTPUT: process_files will merge what it discovered into the typing_result output by each job.
 ACCUMULATE: we start with all fields empty, and then merge in the output of each job as it's done. *)
 type typing_result = {
-  errors: Errors.t;
+  diagnostics: Diagnostics.t;
   map_reduce_data: Map_reduce.t;
   dep_edges: Typing_deps.dep_edges;
   profiling_info: Telemetry.t;
@@ -125,7 +125,7 @@ type typing_result = {
 
 let make_typing_result () =
   {
-    errors = Errors.empty;
+    diagnostics = Diagnostics.empty;
     map_reduce_data = Map_reduce.empty;
     dep_edges = Typing_deps.dep_edges_make ();
     profiling_info = Telemetry.create ();
@@ -135,7 +135,10 @@ let accumulate_job_output
     (produced_by_job : typing_result) (accumulated_so_far : typing_result) :
     typing_result =
   {
-    errors = Errors.merge produced_by_job.errors accumulated_so_far.errors;
+    diagnostics =
+      Diagnostics.merge
+        produced_by_job.diagnostics
+        accumulated_so_far.diagnostics;
     map_reduce_data =
       Map_reduce.reduce
         produced_by_job.map_reduce_data

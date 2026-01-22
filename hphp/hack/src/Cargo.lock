@@ -1358,6 +1358,27 @@ dependencies = [
 ]
 
 [[package]]
+name = "diagnostics_ffi"
+version = "0.0.0"
+dependencies = [
+ "ocamlrep_ocamlpool",
+ "oxidized",
+]
+
+[[package]]
+name = "diagnostics_rs"
+version = "0.0.0"
+dependencies = [
+ "ansi_term",
+ "oxidized",
+ "rc_pos",
+ "relative_path",
+ "serde",
+ "serde_derive",
+ "serde_json",
+]
+
+[[package]]
 name = "diff"
 version = "0.1.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1708,14 +1729,6 @@ dependencies = [
  "hhvm_hhbc_defs_ffi",
  "oxidized",
  "thiserror 2.0.17",
-]
-
-[[package]]
-name = "errors_ffi"
-version = "0.0.0"
-dependencies = [
- "ocamlrep_ocamlpool",
- "oxidized",
 ]
 
 [[package]]

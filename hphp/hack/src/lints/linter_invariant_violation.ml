@@ -80,7 +80,7 @@ module VisitorFunctor (Parent : BodyVisitorModule) : BodyVisitorModule = struct
         in
         begin
           match err_msg with
-          | Some err_msg -> Lints_errors.if_literal p err_msg
+          | Some err_msg -> Lints_diagnostics.if_literal p err_msg
           | None -> ()
         end;
         parent#on_if () (ty, p, e) b1 b2

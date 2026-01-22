@@ -26,6 +26,7 @@ let handler =
         | _ -> None
       in
       Option.iter
-        (fun err -> Errors.add_error Nast_check_error.(to_user_error err))
+        (fun err ->
+          Diagnostics.add_diagnostic Nast_check_error.(to_user_diagnostic err))
         err_opt
   end

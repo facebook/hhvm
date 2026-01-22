@@ -2397,14 +2397,14 @@ end = struct
     let (_ : unit) =
       let (_ : unit) =
         if not ft_sub.ft_instantiated then
-          Errors.internal_error
+          Diagnostics.internal_error
             (Pos_or_decl.unsafe_to_raw_pos @@ Typing_reason.to_pos r_sub)
             "Unexpected polymorphic function type"
         else
           ()
       in
       if not ft_super.ft_instantiated then
-        Errors.internal_error
+        Diagnostics.internal_error
           (Pos_or_decl.unsafe_to_raw_pos @@ Typing_reason.to_pos r_super)
           "Unexpected polymorphic function type"
       else

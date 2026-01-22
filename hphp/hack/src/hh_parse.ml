@@ -44,10 +44,10 @@ let print_full_fidelity_error source_text error =
   Printf.printf "%s\n" text
 
 let print_ast_check_errors errors =
-  let error_list = Errors.get_error_list errors in
+  let error_list = Diagnostics.get_diagnostic_list errors in
   List.iter
     (fun e ->
-      let text = Errors.to_string (User_error.to_absolute e) in
+      let text = Diagnostics.to_string (User_diagnostic.to_absolute e) in
       if Core.String.is_substring text ~substring:SyntaxError.this_in_static
       then
         Printf.eprintf "%s\n%!" text)
@@ -126,7 +126,8 @@ let handle_existing_file args filename =
         in
         try
           let (errors, res) =
-            Errors.do_ (fun () -> Full_fidelity_ast.from_file_with_legacy env)
+            Diagnostics.do_ (fun () ->
+                Full_fidelity_ast.from_file_with_legacy env)
           in
           if print_errors then print_ast_check_errors errors;
           Some res
@@ -135,7 +136,7 @@ let handle_existing_file args filename =
           let err = Base.Exn.to_string e in
           let fn = Relative_path.suffix file in
           (* If we've already found a parsing error, it's okay for lowering to fail *)
-          if not (Errors.currently_has_errors ()) then
+          if not (Diagnostics.currently_has_errors ()) then
             Printf.eprintf
               "Warning, lowering failed for %s\n  - error: %s\n"
               fn

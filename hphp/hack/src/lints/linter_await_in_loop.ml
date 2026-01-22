@@ -28,7 +28,7 @@ class await_visitor =
         match snd stmt with
         | Expr (_, p, Assign (_, _, (_, _, Await _)))
         | Expr (_, p, Await _) ->
-          Lints_errors.await_in_loop p
+          Lints_diagnostics.await_in_loop p
         | _ -> ()
       end;
       parent#on_stmt () stmt

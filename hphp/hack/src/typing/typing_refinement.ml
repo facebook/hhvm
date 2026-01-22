@@ -395,7 +395,7 @@ module TyPredicate = struct
         match IMap.find_opt key instantiation_map with
         | Some ty -> ty
         | None ->
-          Errors.invariant_violation
+          Diagnostics.invariant_violation
             p
             (Telemetry.create ())
             "Unexpected failure to instantiate type from predicate"
@@ -495,7 +495,7 @@ module Uninstantiated_typing_logic = struct
         | (r, Tclass (sub_id, _, sub_args)) ->
           mk (r, Tclass (sub_id, replace_exact_with_loose super_exact, sub_args))
         | _ ->
-          Errors.invariant_violation
+          Diagnostics.invariant_violation
             pos
             (Telemetry.create ())
             "Conversion of a class predicate did not produce a class type"

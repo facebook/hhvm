@@ -12,7 +12,7 @@ open ServerCommandTypes.Symbol_info_service
 
 let recheck_naming ctx filename_l =
   List.iter filename_l ~f:(fun file ->
-      Errors.ignore_ (fun () ->
+      Diagnostics.ignore_ (fun () ->
           (* We only need to name to find references to locals *)
           List.iter (Ast_provider.get_ast ctx file ~full:false) ~f:(function
               | Aast.Fun f ->

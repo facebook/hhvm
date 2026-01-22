@@ -196,7 +196,7 @@ let coerce_type_like_strip
     in
     (* Enforce the invariant - this call should never give us an error *)
     if Option.is_some impossible_error then
-      Errors.internal_error p "Subtype of fresh type variable";
+      Diagnostics.internal_error p "Subtype of fresh type variable";
     let (env2, ty_err_opt_like) =
       coerce_type
         p

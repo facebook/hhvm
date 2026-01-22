@@ -19,5 +19,5 @@
 val find :
   Provider_context.t ->
   Provider_context.entry ->
-  Errors.error ->
+  Diagnostics.diagnostic ->
   Code_action_types.quickfix list

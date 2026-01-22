@@ -46,7 +46,7 @@ Here's how we actually plumb through the workitems and their individual results,
     and returns a degenerate progress {remaining=bucket; completed=[]; deferred=[]}
     which is basically just the bucket of work to be done by the job.
 * neutral : typing_result
-    This value is just the empty typing_result {errors=Empty; deps=Empty; telemetry=Empty}
+    This value is just the empty typing_result {diagnostics=Empty; deps=Empty; telemetry=Empty}
 * job : typing_result -> progress -> (typing_result', progress')
     MultiWorker will invoke this job. For input,
     it provides a copy of the degenerate [typing_result] that it got from [neutral], and
@@ -233,7 +233,7 @@ let should_enable_deferring (file : check_file_workitem) =
   not file.was_already_deferred
 
 type process_file_results = {
-  file_errors: Errors.t;
+  file_diagnostics: Diagnostics.t;
   file_map_reduce_data: Map_reduce.t;
   deferred_decls: Deferred_decl.deferment list;
 }
@@ -257,9 +257,9 @@ let process_file
     ~(decl_cap_mb : int option) : process_file_results =
   let fn = file.path in
   let (file_errors, ast) = Ast_provider.get_ast_with_error ~full:true ctx fn in
-  if not (Errors.is_empty file_errors) then
+  if not (Diagnostics.is_empty file_errors) then
     {
-      file_errors;
+      file_diagnostics = file_errors;
       deferred_decls = [];
       file_map_reduce_data = Map_reduce.empty;
     }
@@ -283,13 +283,13 @@ let process_file
       match result with
       | Ok (file_errors, tasts) ->
         {
-          file_errors;
+          file_diagnostics = file_errors;
           deferred_decls = [];
           file_map_reduce_data = Map_reduce.map ctx fn tasts file_errors;
         }
       | Error () ->
         let deferred_decls =
-          Errors.ignore_ (fun () -> Naming.program ctx ast)
+          Diagnostics.ignore_ (fun () -> Naming.program ctx ast)
           |> scrape_class_names
           |> SSet.elements
           |> List.filter_map ~f:(fun class_name ->
@@ -297,7 +297,7 @@ let process_file
                  (fn, class_name))
         in
         {
-          file_errors = Errors.empty;
+          file_diagnostics = Diagnostics.empty;
           deferred_decls;
           file_map_reduce_data = Map_reduce.empty;
         }
@@ -376,7 +376,7 @@ let get_stats ~include_slightly_costly_stats tally :
 external hh_malloc_trim : unit -> unit = "hh_malloc_trim"
 
 type workitem_accumulator = {
-  errors: Errors.t;
+  diagnostics: Diagnostics.t;
   map_reduce_data: Map_reduce.t;
   tally: ProcessFilesTally.t;
   stats: HackEventLogger.ProfileTypeCheck.stats;
@@ -389,7 +389,7 @@ let process_one_workitem
     ~memory_cap
     ~longlived_workers
     (fn : workitem)
-    ({ errors; map_reduce_data; tally; stats } : workitem_accumulator) :
+    ({ diagnostics; map_reduce_data; tally; stats } : workitem_accumulator) :
     TypingProgress.progress_outcome * workitem_accumulator =
   let decl_cap_mb = None in
   let workitem_cap_mb = Option.value memory_cap ~default:Int.max_value in
@@ -401,13 +401,13 @@ let process_one_workitem
   let ( file,
         decl,
         mid_stats,
-        file_errors,
+        file_diagnostics,
         map_reduce_data,
         deferred_workitems,
         tally ) =
     match fn with
     | Check file ->
-      let { file_errors; file_map_reduce_data; deferred_decls } =
+      let { file_diagnostics; file_map_reduce_data; deferred_decls } =
         process_file ctx file ~decl_cap_mb
       in
       let map_reduce_data =
@@ -434,7 +434,13 @@ let process_one_workitem
           List.map deferred_decls ~f:(fun fn -> Declare fn)
           @ [Check { file with was_already_deferred = true }]
       in
-      (Some file, None, mid_stats, file_errors, map_reduce_data, deferred, tally)
+      ( Some file,
+        None,
+        mid_stats,
+        file_diagnostics,
+        map_reduce_data,
+        deferred,
+        tally )
     | Declare (_path, class_name) ->
       let (_ : Decl_provider.class_decl Decl_entry.t) =
         Decl_provider.get_class ctx class_name
@@ -444,12 +450,12 @@ let process_one_workitem
       ( None,
         Some class_name,
         None,
-        Errors.empty,
+        Diagnostics.empty,
         map_reduce_data,
         [],
         ProcessFilesTally.incr_decls tally )
   in
-  let errors = Errors.merge file_errors errors in
+  let diagnostics = Diagnostics.merge file_diagnostics diagnostics in
   let workitem_ends_under_cap = Gc_utils.get_heap_size () <= workitem_cap_mb in
   let final_stats =
     get_stats
@@ -489,18 +495,19 @@ let process_one_workitem
     ~file_was_already_deferred:
       (Option.map file ~f:(fun file -> file.was_already_deferred))
     ~decl
-    ~error_code:(Errors.choose_code_opt file_errors)
+    ~error_code:(Diagnostics.choose_code_opt file_diagnostics)
     ~workitem_ends_under_cap
     ~workitem_start_stats:stats
     ~workitem_end_stats
     ~workitem_end_second_stats;
 
   ( { TypingProgress.deferred_workitems; continue = workitem_ends_under_cap },
-    { errors; map_reduce_data; tally; stats = final_stats } )
+    { diagnostics; map_reduce_data; tally; stats = final_stats } )
 
 let process_workitems
     (ctx : Provider_context.t)
-    ({ errors; map_reduce_data; dep_edges; profiling_info } : typing_result)
+    ({ diagnostics; map_reduce_data; dep_edges; profiling_info } :
+      typing_result)
     (progress : TypingProgress.t)
     ~(memory_cap : int option)
     ~(longlived_workers : bool)
@@ -527,11 +534,11 @@ let process_workitems
   File_provider.local_changes_push_sharedmem_stack ();
   Ast_provider.local_changes_push_sharedmem_stack ();
 
-  (* Process as many files as we can, and merge in their errors *)
-  let (progress, { errors; map_reduce_data; tally = _; stats = _ }) =
+  (* Process as many files as we can, and merge in their diagnostics *)
+  let (progress, { diagnostics; map_reduce_data; tally = _; stats = _ }) =
     let init =
       {
-        errors;
+        diagnostics;
         map_reduce_data;
         tally = ProcessFilesTally.empty;
         stats =
@@ -571,7 +578,7 @@ let process_workitems
   TypingLogger.flush_buffers ();
   Ast_provider.local_changes_pop_sharedmem_stack ();
   File_provider.local_changes_pop_sharedmem_stack ();
-  ({ errors; map_reduce_data; dep_edges; profiling_info }, progress)
+  ({ diagnostics; map_reduce_data; dep_edges; profiling_info }, progress)
 
 let load_and_process_workitems
     (ctx : Provider_context.t)
@@ -627,12 +634,12 @@ module ErrorStats = struct
 
   let update errors { total_error_count; time_first_error } : t =
     {
-      total_error_count = total_error_count + Errors.count errors;
+      total_error_count = total_error_count + Diagnostics.count errors;
       time_first_error =
         (match time_first_error with
         | Some t -> Some t
         | None ->
-          if Errors.is_empty errors then
+          if Diagnostics.is_empty errors then
             None
           else
             Some (Unix.gettimeofday ()));
@@ -645,7 +652,7 @@ let add_warnings_to_ss mergebase_warning_hashes errors ~discard_warnings :
     Warnings_saved_state.t option =
   Option.map mergebase_warning_hashes ~f:(fun mergebase_warning_hashes ->
       if discard_warnings then
-        let warning_hashes = Errors.make_warning_saved_state errors in
+        let warning_hashes = Diagnostics.make_warning_saved_state errors in
         Warnings_saved_state.union mergebase_warning_hashes warning_hashes
       else
         mergebase_warning_hashes)
@@ -655,7 +662,7 @@ let filter_out_warnings mergebase_warning_hashes errors ~discard_warnings =
     add_warnings_to_ss mergebase_warning_hashes errors ~discard_warnings
   in
   let errors =
-    Errors.filter_out_mergebase_warnings mergebase_warning_hashes errors
+    Diagnostics.filter_out_mergebase_warnings mergebase_warning_hashes errors
   in
   (mergebase_warning_hashes, errors)
 
@@ -673,7 +680,7 @@ end = struct
   let process_errors errors error_stats ~stream_errors ~log_errors : unit =
     error_stats := ErrorStats.update errors !error_stats;
     if log_errors then (
-      let error_count = Errors.count errors in
+      let error_count = Diagnostics.count errors in
       if error_count > 0 then (
         let max_errors = 5 in
         Hh_logger.log
@@ -681,14 +688,14 @@ end = struct
           error_count
           max_errors;
         List.iter
-          (List.take (Errors.get_error_list errors) max_errors)
+          (List.take (Diagnostics.get_diagnostic_list errors) max_errors)
           ~f:(fun error ->
-            let { User_error.severity; claim; code; _ } = error in
+            let { User_diagnostic.severity; claim; code; _ } = error in
             let (pos, msg) = claim in
             let (l1, l2, c1, c2) = Pos.info_pos_extended pos in
             Hh_logger.log
               "%s: %s(%d:%d-%d:%d) [%d] %s"
-              (User_error.Severity.to_all_caps_string severity)
+              (User_diagnostic.Severity.to_all_caps_string severity)
               (Relative_path.suffix @@ Pos.filename pos)
               l1
               c1
@@ -710,14 +717,18 @@ end = struct
       ~discard_warnings
       (error_stats : ErrorStats.t ref) : _ * Typing_service_types.typing_result
       =
-    let (mergebase_warning_hashes, errors) =
+    let (mergebase_warning_hashes, diagnostics) =
       filter_out_warnings
         mergebase_warning_hashes
-        produced_by_job.errors
+        produced_by_job.diagnostics
         ~discard_warnings
     in
-    let produced_by_job = { produced_by_job with errors } in
-    process_errors produced_by_job.errors error_stats ~stream_errors ~log_errors;
+    let produced_by_job = { produced_by_job with diagnostics } in
+    process_errors
+      produced_by_job.diagnostics
+      error_stats
+      ~stream_errors
+      ~log_errors;
 
     Typing_deps.register_discovered_dep_edges produced_by_job.dep_edges;
     Typing_deps.register_discovered_dep_edges acc.dep_edges;
@@ -844,7 +855,7 @@ type distc_config = distc_config_options option
 
 type 'env distc_outcome =
   | Success of
-      Errors.t
+      Diagnostics.t
       * Map_reduce.t
       * Typing_deps.dep_edges
       * Warnings_saved_state.t option
@@ -1190,7 +1201,7 @@ module Mocking =
          (module NoMocking : Mocking_sig))
 
 type result = {
-  errors: Errors.t;
+  diagnostics: Diagnostics.t;
   warnings_saved_state: Warnings_saved_state.t option;
   telemetry: Telemetry.t;
   time_first_error: seconds_since_epoch option;
@@ -1299,10 +1310,11 @@ let go_with_interrupt
           ~tcopt
           ~warnings_saved_state
       with
-      | Success (errors, map_reduce_data, dep_edges, warnings_saved_state, env)
+      | Success
+          (diagnostics, map_reduce_data, dep_edges, warnings_saved_state, env)
         ->
         ( warnings_saved_state,
-          { errors; map_reduce_data; dep_edges; profiling_info },
+          { diagnostics; map_reduce_data; dep_edges; profiling_info },
           telemetry,
           env,
           None,
@@ -1311,7 +1323,7 @@ let go_with_interrupt
         (* Typecheck is cancelled due to interrupt *)
         ( warnings_saved_state,
           {
-            errors = Errors.empty;
+            diagnostics = Diagnostics.empty;
             map_reduce_data = Map_reduce.empty;
             dep_edges = Typing_deps.dep_edges_make ();
             profiling_info;
@@ -1344,7 +1356,9 @@ let go_with_interrupt
         ~typecheck_info
     )
   in
-  let { errors; map_reduce_data; dep_edges; profiling_info } = typing_result in
+  let { diagnostics; map_reduce_data; dep_edges; profiling_info } =
+    typing_result
+  in
   Typing_deps.register_discovered_dep_edges dep_edges;
   Map_reduce.finalize
     ~progress:(fun s -> Server_progress.write "%s" s)
@@ -1354,7 +1368,7 @@ let go_with_interrupt
   let telemetry =
     telemetry |> Telemetry.object_ ~key:"profiling_info" ~value:profiling_info
   in
-  ( (env, { errors; warnings_saved_state; telemetry; time_first_error }),
+  ( (env, { diagnostics; warnings_saved_state; telemetry; time_first_error }),
     cancelled_fnl_and_reason )
 
 let go

@@ -295,7 +295,7 @@ let parse_and_name ctx files_contents =
   Relative_path.Map.mapi files_contents ~f:(fun fn contents ->
       (* Get parse errors. *)
       let () =
-        Errors.run_in_context fn (fun () ->
+        Diagnostics.run_in_context fn (fun () ->
             let popt = Provider_context.get_popt ctx in
             let parsed_file =
               Full_fidelity_ast.defensive_program popt fn contents
@@ -321,7 +321,7 @@ and the side-effect of updating the global reverse naming table (and
 picking up duplicate-name errors along the way), and for the side effect
 of updating the decl heap (and picking up decling errors along the way). *)
 let parse_name_and_decl ctx files_contents =
-  Errors.do_ (fun () ->
+  Diagnostics.do_ (fun () ->
       (* parse_and_name has side effect of reporting errors *)
       let files_info_and_addenda = parse_and_name ctx files_contents in
       (* ndecl_file has side effect of updating the global reverse naming-table,

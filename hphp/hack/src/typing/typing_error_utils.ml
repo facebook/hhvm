@@ -5291,11 +5291,11 @@ module rec Eval_error : sig
     current_span:Pos.t ->
     t Eval_result.t
 
-  val to_user_error :
+  val to_user_diagnostic :
     Typing_error.Error.t ->
     env:Typing_env_types.env ->
     current_span:Pos.t ->
-    (Pos.t, Pos_or_decl.t) User_error.t Eval_result.t
+    (Pos.t, Pos_or_decl.t) User_diagnostic.t Eval_result.t
 end = struct
   type t = {
     code: Error_code.t;
@@ -5399,7 +5399,7 @@ end = struct
       { code; claim; reasons; explanation; quickfixes }
       ~custom_msgs
       ~function_pos =
-    User_error.make_err
+    User_diagnostic.make_err
       (Error_code.to_enum code)
       (Lazy.force claim)
       (Lazy.force reasons)
@@ -5429,7 +5429,7 @@ end = struct
           ^ acc)
       ~init:""
 
-  let to_user_error t ~env ~current_span =
+  let to_user_diagnostic t ~env ~current_span =
     let result = eval t ~env ~current_span in
     let custom_err_config =
       TypecheckerOptions.custom_error_config (Typing_env.get_tcopt env)
@@ -6910,7 +6910,7 @@ and Eval_reasons_callback : sig
     Typing_error.Reasons_callback.t ->
     env:Typing_env_types.env ->
     current_span:Pos.t ->
-    (Pos.t, Pos_or_decl.t) User_error.t Eval_result.t
+    (Pos.t, Pos_or_decl.t) User_diagnostic.t Eval_result.t
 end = struct
   module Error_state = struct
     type t = {
@@ -7124,7 +7124,7 @@ end = struct
 
   let apply eval_snd t ~env ~current_span =
     let f Eval_error.{ code; claim; reasons; explanation; quickfixes } =
-      User_error.make_err
+      User_diagnostic.make_err
         (Error_code.to_enum code)
         ~is_fixmed:false
         ~quickfixes
@@ -7135,32 +7135,32 @@ end = struct
     Eval_result.map ~f @@ apply_help eval_snd t ~env ~current_span
 end
 
-let is_suppressed error = Errors.is_suppressed error
+let is_suppressed error = Diagnostics.is_suppressed error
 
 let add_typing_error err ~env =
-  Eval_result.iter ~f:Errors.add_error
+  Eval_result.iter ~f:Diagnostics.add_diagnostic
   @@ Eval_result.suppress_intersection ~is_suppressed
-  @@ Eval_error.to_user_error
+  @@ Eval_error.to_user_diagnostic
        err
        ~env
-       ~current_span:(Errors.get_current_span ())
+       ~current_span:(Diagnostics.get_current_span ())
 
 let apply_error_from_reasons_callback eval_snd err ~env =
-  Eval_result.iter ~f:Errors.add_error
+  Eval_result.iter ~f:Diagnostics.add_diagnostic
   @@ Eval_result.suppress_intersection ~is_suppressed
   @@ Eval_reasons_callback.apply
        eval_snd
        err
        ~env
-       ~current_span:(Errors.get_current_span ())
+       ~current_span:(Diagnostics.get_current_span ())
 
 let claim_as_reason : Pos.t Message.t -> Pos_or_decl.t Message.t =
  (fun (p, m) -> (Pos_or_decl.of_raw_pos p, m))
 
-(** TODO: Remove use of `User_error.t` representation for nested error &
+(** TODO: Remove use of `User_diagnostic.t` representation for nested error &
     callback application *)
 let ambiguous_inheritance pos class_ origin error on_error ~env =
-  let User_error.{ code; claim; reasons; explanation; _ } = error in
+  let User_diagnostic.{ code; claim; reasons; explanation; _ } = error in
   let origin = Render.strip_ns origin in
   let class_ = Render.strip_ns class_ in
   let message =

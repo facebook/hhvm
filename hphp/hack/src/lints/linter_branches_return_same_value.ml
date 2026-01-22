@@ -98,7 +98,7 @@ let check_block (block : Tast.block) : unit =
   | expr1 :: _ :: _ when are_return_expressions_same ret_list ->
     if not (is_success_ish expr1) then
       List.iter ret_list ~f:(fun (_, pos, _) ->
-          Lints_errors.branches_return_same_value pos)
+          Lints_diagnostics.branches_return_same_value pos)
   | _ -> ()
 
 let handler =

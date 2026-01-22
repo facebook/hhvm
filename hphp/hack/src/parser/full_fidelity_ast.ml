@@ -78,9 +78,11 @@ let pos_of_error path source_text error =
 
 let process_scour_comments (env : env) (sc : Scoured_comments.t) =
   List.iter sc.sc_error_pos ~f:(fun pos ->
-      Errors.add_error Parsing_error.(to_user_error @@ Fixme_format pos));
+      Diagnostics.add_diagnostic
+        Parsing_error.(to_user_diagnostic @@ Fixme_format pos));
   List.iter sc.sc_bad_ignore_pos ~f:(fun pos ->
-      Errors.add_error Parsing_error.(to_user_error @@ Hh_ignore_comment pos));
+      Diagnostics.add_diagnostic
+        Parsing_error.(to_user_diagnostic @@ Hh_ignore_comment pos));
   Fixme_provider.provide_disallowed_fixmes env.file sc.sc_misuses;
   Fixme_provider.provide_ignores env.file sc.sc_ignores;
   if env.quick_mode then
@@ -93,13 +95,13 @@ let process_lowerer_parsing_errors
   if should_surface_errors env then
     List.iter
       ~f:(fun (pos, msg) ->
-        Errors.add_error
+        Diagnostics.add_diagnostic
           Parsing_error.(
-            to_user_error @@ Parsing_error { pos; msg; quickfixes = [] }))
+            to_user_diagnostic @@ Parsing_error { pos; msg; quickfixes = [] }))
       lowerer_parsing_errors
 
-let process_non_syntax_errors (_ : env) (errors : Errors.error list) =
-  List.iter ~f:Errors.add_error errors
+let process_non_syntax_errors (_ : env) (errors : Diagnostics.diagnostic list) =
+  List.iter ~f:Diagnostics.add_diagnostic errors
 
 let process_lint_errors (_ : env) (errors : Pos.t Lint.t list) =
   List.iter ~f:Lint.add_lint errors
@@ -132,9 +134,9 @@ let process_syntax_errors
           Quickfix.make ~title ~edits ~hint_styles:[])
     in
 
-    Errors.add_error
+    Diagnostics.add_diagnostic
       Parsing_error.(
-        to_user_error
+        to_user_diagnostic
         @@ Parsing_error
              { pos = relative_pos e; msg = SyntaxError.message e; quickfixes })
   in
@@ -265,7 +267,7 @@ let defensive_program
     let err = Exn.to_string e in
     let fn = Relative_path.suffix fn in
     (* If we've already found a parsing error, it's okay for lowering to fail *)
-    if not (Errors.currently_has_errors ()) then
+    if not (Diagnostics.currently_has_errors ()) then
       Hh_logger.log "Warning, lowering failed for %s\n  - error: %s\n" fn err;
 
     {

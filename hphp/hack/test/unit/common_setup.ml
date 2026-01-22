@@ -102,7 +102,7 @@ let setup
   let get_next = MultiWorker.next None [foo_path; bar_path] in
   let (file_infos, _errors, _failed_parsing) =
     ( Direct_decl_service.(go ctx None ~get_next ~trace:true ~decl_mode:Normal),
-      Errors.empty,
+      Diagnostics.empty,
       Relative_path.Set.empty )
   in
   let naming_table = Naming_table.create file_infos in

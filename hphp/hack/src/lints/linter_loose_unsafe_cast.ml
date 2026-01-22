@@ -39,7 +39,10 @@ let handler =
         when (not @@ Typing_defs.is_any expr_ty)
              && Typing_subtype.is_sub_type env expr_ty dest_ty ->
         let can_be_captured = Aast_utils.can_be_captured expr in
-        Lints_errors.redundant_unsafe_cast ~can_be_captured hole_pos expr_pos
+        Lints_diagnostics.redundant_unsafe_cast
+          ~can_be_captured
+          hole_pos
+          expr_pos
       | (_, _, Aast.Hole ((exp_ty, hole_pos, _), src_ty, _, Aast.UnsafeCast _))
         when is_mixed src_ty && (not (is_mixed exp_ty)) && T.is_denotable exp_ty
         ->
@@ -52,11 +55,12 @@ let handler =
           else
             None
         in
-        Lints_errors.loose_unsafe_cast_lower_bound
+        Lints_diagnostics.loose_unsafe_cast_lower_bound
           (pos_of_ty ~hole_pos src_ty)
           ty_str_opt
       | (_, _, Aast.Hole ((_, hole_pos, _), _, dst_ty, Aast.UnsafeCast _))
         when is_nothing dst_ty ->
-        Lints_errors.loose_unsafe_cast_upper_bound (pos_of_ty ~hole_pos dst_ty)
+        Lints_diagnostics.loose_unsafe_cast_upper_bound
+          (pos_of_ty ~hole_pos dst_ty)
       | _ -> ()
   end

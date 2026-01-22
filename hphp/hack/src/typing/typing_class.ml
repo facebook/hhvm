@@ -77,7 +77,7 @@ let method_dynamically_callable env cls m params_decl_ty return =
   in
 
   let (env, dynamic_body) =
-    Errors.try_with_result
+    Diagnostics.try_with_result
       (fun () ->
         Typing.fun_
           ~abstract:m.m_abstract
@@ -90,7 +90,7 @@ let method_dynamically_callable env cls m params_decl_ty return =
           m.m_fun_kind)
       (fun env_and_dynamic_body error ->
         if not @@ TCO.everything_sdt env.genv.tcopt then
-          Errors.method_is_not_dynamically_callable
+          Diagnostics.method_is_not_dynamically_callable
             pos
             (snd m.m_name)
             (Cls.name cls)
@@ -137,7 +137,7 @@ let method_def ~is_disposable env cls m =
   let tcopt = Env.get_tcopt env in
   Enable.if_matches_regexp tcopt (Some env) ~default:None m.m_name @@ fun () ->
   Profile.measure_elapsed_time_and_report tcopt (Some env) m.m_name @@ fun () ->
-  Errors.run_with_span m.m_span @@ fun () ->
+  Diagnostics.run_with_span m.m_span @@ fun () ->
   with_timeout env m.m_name @@ fun env ->
   let errs =
     FunUtils.check_params
@@ -302,7 +302,7 @@ let method_def ~is_disposable env cls m =
       m.m_user_attributes
   in
   let ((env, tb), had_errors) =
-    Errors.run_and_check_for_errors (fun () ->
+    Diagnostics.run_and_check_for_errors (fun () ->
         Typing.fun_
           ~abstract:m.m_abstract
           ~native:(Typing_native.is_native_meth ~env m)
@@ -1133,16 +1133,16 @@ let class_const_def ~in_enum_class c cls env cc =
           when (not (is_enum_or_enum_class c.c_kind))
                && TCO.require_types_class_consts tcopt > 0 ->
           let custom_err_config = TCO.custom_error_config tcopt in
-          Errors.add_error
-            (Naming_error_utils.to_user_error
+          Diagnostics.add_diagnostic
+            (Naming_error_utils.to_user_diagnostic
                (Naming_error.Missing_typehint (fst id))
                custom_err_config)
         | _
           when (not (is_enum_or_enum_class c.c_kind))
                && TCO.require_types_class_consts tcopt > 1 ->
           let custom_err_config = TCO.custom_error_config tcopt in
-          Errors.add_error
-            (Naming_error_utils.to_user_error
+          Diagnostics.add_diagnostic
+            (Naming_error_utils.to_user_diagnostic
                (Naming_error.Missing_typehint (fst id))
                custom_err_config)
         | CCAbstract None -> ()
@@ -1154,8 +1154,8 @@ let class_const_def ~in_enum_class c cls env cc =
             && not (Env.is_hhi env)
           then
             let custom_err_config = TCO.custom_error_config tcopt in
-            Errors.add_error
-              (Naming_error_utils.to_user_error
+            Diagnostics.add_diagnostic
+              (Naming_error_utils.to_user_diagnostic
                  (Naming_error.Missing_typehint (fst id))
                  custom_err_config)
       end;
@@ -1383,8 +1383,8 @@ let class_var_def ~is_static ~is_noautodynamic cls env cv =
     in
     let (pos, prop_name) = cv.cv_id in
     let custom_err_config = TCO.custom_error_config tcopt in
-    Errors.add_error
-      (Naming_error_utils.to_user_error
+    Diagnostics.add_diagnostic
+      (Naming_error_utils.to_user_diagnostic
          (Naming_error.Prop_without_typehint { vis; pos; prop_name })
          custom_err_config));
 

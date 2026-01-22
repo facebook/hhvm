@@ -145,15 +145,15 @@ let sequence_visitor ~require_used used_vars =
       in
       let cleanup = List.map ~f:fst in
       if not (List.is_empty conflicting_reads) then
-        Errors.add_error
+        Diagnostics.add_diagnostic
           Nast_check_error.(
-            to_user_error
+            to_user_diagnostic
             @@ Local_variable_modified_and_used
                  { pos = p; pos_useds = cleanup conflicting_reads });
       if not (List.is_empty conflicting_writes) then
-        Errors.add_error
+        Diagnostics.add_diagnostic
           Nast_check_error.(
-            to_user_error
+            to_user_diagnostic
             @@ Local_variable_modified_twice
                  { pos = p; pos_modifieds = cleanup conflicting_writes })
     in
@@ -270,8 +270,8 @@ let sequence_visitor ~require_used used_vars =
      method! on_case acc (e, b) =
        let env = this#on_expr tracking_env e in
        List.iter env.assigned ~f:(fun (p, _) ->
-           Errors.add_error
-             Nast_check_error.(to_user_error @@ Assign_during_case p));
+           Diagnostics.add_diagnostic
+             Nast_check_error.(to_user_diagnostic @@ Assign_during_case p));
        let acc = this#on_block acc b in
        acc
   end

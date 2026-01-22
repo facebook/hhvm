@@ -149,7 +149,7 @@ let handler =
               && SSet.subset trait_names base_names
               && not (trait_implements_interfaces ctx t_cls)
             then
-              Lints_errors.class_overrides_all_trait_methods
+              Lints_diagnostics.class_overrides_all_trait_methods
                 pos
                 bid
                 (Cls.name t_cls)
@@ -184,7 +184,7 @@ let handler =
                 in
                 if (not (String.equal origin bid)) && not has_semantic_meaning
                 then
-                  Lints_errors.trait_requires_class_that_overrides_method
+                  Lints_diagnostics.trait_requires_class_that_overrides_method
                     (SMap.find n base_pos_map)
                     cid
                     bid

@@ -18,28 +18,28 @@ end
 module Compute_tast_and_errors = struct
   type t = {
     tast: Tast.program Tast_with_dynamic.t;
-    errors: Errors.t;
+    diagnostics: Diagnostics.t;
     telemetry: Telemetry.t;
   }
 end
 
 module ErrorFilter = struct
   type t = {
-    error_filter: Filter_errors.Filter.t;
+    error_filter: Filter_diagnostics.Filter.t;
     warnings_saved_state: Warnings_saved_state.t option;
   }
 
   let default =
     {
       error_filter =
-        Filter_errors.Filter.make ~default_all:true ~generated_files:[] [];
+        Filter_diagnostics.Filter.make ~default_all:true ~generated_files:[] [];
       warnings_saved_state = None;
     }
 
   let apply { error_filter; warnings_saved_state } errors =
     errors
-    |> Errors.filter_out_mergebase_warnings warnings_saved_state
-    |> Filter_errors.filter_rel error_filter
+    |> Diagnostics.filter_out_mergebase_warnings warnings_saved_state
+    |> Filter_diagnostics.filter_rel error_filter
 end
 
 type _ compute_tast_mode =
@@ -95,9 +95,13 @@ let log_and_telemetry
     telemetry
     |> Telemetry.object_ ~key:"ctx" ~value:ctx_telemetry
     |> Telemetry.object_ ~key:"gc" ~value:gc_telemetry
-    |> Telemetry.int_ ~key:"errors.ast" ~value:(Errors.count ast_errors)
-    |> Telemetry.int_ ~key:"errors.nast" ~value:(Errors.count naming_errors)
-    |> Telemetry.int_ ~key:"errors.tast" ~value:(Errors.count typing_errors)
+    |> Telemetry.int_ ~key:"errors.ast" ~value:(Diagnostics.count ast_errors)
+    |> Telemetry.int_
+         ~key:"errors.nast"
+         ~value:(Diagnostics.count naming_errors)
+    |> Telemetry.int_
+         ~key:"errors.tast"
+         ~value:(Diagnostics.count typing_errors)
     |> Telemetry.float_
          ~key:"duration_decl_and_typecheck"
          ~value:(Unix.gettimeofday () -. start_time)
@@ -125,12 +129,16 @@ let compute_tast_and_errors_unquarantined_internal
     ~(entry : Provider_context.entry)
     ~(mode : a compute_tast_mode) : a =
   match
-    (mode, entry.Provider_context.tast, entry.Provider_context.all_errors)
+    (mode, entry.Provider_context.tast, entry.Provider_context.all_diagnostics)
   with
   | (Compute_tast_only, Some tast, _) ->
     { Compute_tast.tast; telemetry = Telemetry.create () }
-  | (Compute_tast_and_errors _, Some tast, Some errors) ->
-    { Compute_tast_and_errors.tast; errors; telemetry = Telemetry.create () }
+  | (Compute_tast_and_errors _, Some tast, Some diagnostics) ->
+    {
+      Compute_tast_and_errors.tast;
+      diagnostics;
+      telemetry = Telemetry.create ();
+    }
   | (_, _, _) ->
     let start_telemetry = prepare_logging ctx in
 
@@ -140,7 +148,7 @@ let compute_tast_and_errors_unquarantined_internal
         ~entry
     in
     let (naming_errors, nast) =
-      Errors.do_with_context entry.Provider_context.path (fun () ->
+      Diagnostics.do_with_context entry.Provider_context.path (fun () ->
           Naming.program ctx ast)
     in
     let (typing_errors, tast) =
@@ -149,7 +157,7 @@ let compute_tast_and_errors_unquarantined_internal
         | Compute_tast_only -> false
         | Compute_tast_and_errors _ -> true
       in
-      Errors.do_with_context entry.Provider_context.path (fun () ->
+      Diagnostics.do_with_context entry.Provider_context.path (fun () ->
           Typing_toplevel.nast_to_tast ~do_tast_checks ctx nast)
     in
 
@@ -165,15 +173,15 @@ let compute_tast_and_errors_unquarantined_internal
 
     (match mode with
     | Compute_tast_and_errors error_filter ->
-      let errors =
+      let diagnostics =
         naming_errors
-        |> Errors.merge typing_errors
-        |> Errors.merge ast_errors
+        |> Diagnostics.merge typing_errors
+        |> Diagnostics.merge ast_errors
         |> ErrorFilter.apply error_filter
       in
       entry.Provider_context.tast <- Some tast;
-      entry.Provider_context.all_errors <- Some errors;
-      { Compute_tast_and_errors.tast; errors; telemetry }
+      entry.Provider_context.all_diagnostics <- Some diagnostics;
+      { Compute_tast_and_errors.tast; diagnostics; telemetry }
     | Compute_tast_only ->
       entry.Provider_context.tast <- Some tast;
       { Compute_tast.tast; telemetry })
@@ -198,9 +206,15 @@ let compute_tast_and_errors_quarantined
     ~(ctx : Provider_context.t) ~(entry : Provider_context.entry) ~error_filter
     : Compute_tast_and_errors.t =
   (* If results have already been memoized, don't bother quarantining anything *)
-  match (entry.Provider_context.tast, entry.Provider_context.all_errors) with
-  | (Some tast, Some errors) ->
-    { Compute_tast_and_errors.tast; errors; telemetry = Telemetry.create () }
+  match
+    (entry.Provider_context.tast, entry.Provider_context.all_diagnostics)
+  with
+  | (Some tast, Some diagnostics) ->
+    {
+      Compute_tast_and_errors.tast;
+      diagnostics;
+      telemetry = Telemetry.create ();
+    }
   (* Okay, we don't have memoized results, let's ensure we are quarantined before computing *)
   | _ ->
     let f () =

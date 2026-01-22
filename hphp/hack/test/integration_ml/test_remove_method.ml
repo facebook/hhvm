@@ -77,7 +77,7 @@ let test () =
   (* We need to suppress all the errors (see HH_FIXMEs above), otherwise the
    * logic that always rechecks the files with errors kicks in and does the
    * same job as phase2 fanout. We want to test the latter one in this test. *)
-  Test.assert_no_errors env;
+  Test.assert_no_diagnostics env;
 
   (* restore parent, but with a mismatching return type of f() *)
   let (env, _) =
@@ -89,4 +89,6 @@ let test () =
           disk_changes = [(foo_name, foo_contents_after)];
         })
   in
-  Test.assertSingleError bar_errors (Errors.get_error_list env.ServerEnv.errorl)
+  Test.assertSingleDiagnostic
+    bar_errors
+    (Diagnostics.get_diagnostic_list env.ServerEnv.diagnostics)

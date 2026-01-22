@@ -10,4 +10,4 @@
 - Enables previewing IDE diagnostic indicators from the command line
 - Currently used only in hh_single_type_check
 *)
-val run : Provider_context.t -> Provider_context.entry -> Errors.t -> unit
+val run : Provider_context.t -> Provider_context.entry -> Diagnostics.t -> unit

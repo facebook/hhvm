@@ -43,7 +43,7 @@ val update_reverse_naming_table_from_env_and_get_duplicate_name_errors :
   ServerEnv.env * float
 
 (** Just a quick validation that there are no errors *)
-val validate_no_errors : Errors.t -> unit
+val validate_no_errors : Diagnostics.t -> unit
 
 (** This function has two different behaviors:
 - For the normal case, it adds the provided list of files into [env.needs_recheck].

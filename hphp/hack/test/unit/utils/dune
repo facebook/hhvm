@@ -52,8 +52,8 @@
   unit_test))
 
 (executable
- (name errors_test)
- (modules errors_test)
+ (name diagnostics_test)
+ (modules diagnostics_test)
  (modes exe byte_complete)
  (libraries
   asserter

@@ -22,9 +22,9 @@ let visitor =
         | Habstr tp_name ->
           List.iter state.class_tparams ~f:(fun (c_tp_pos, c_tp_name) ->
               if String.equal c_tp_name tp_name then
-                Errors.add_error
+                Diagnostics.add_diagnostic
                   Nast_check_error.(
-                    to_user_error
+                    to_user_diagnostic
                     @@ Typeconst_depends_on_external_tparam
                          { pos; ext_pos = c_tp_pos; ext_name = c_tp_name }));
           state

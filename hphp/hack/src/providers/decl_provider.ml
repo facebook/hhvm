@@ -45,7 +45,7 @@ let declare_folded_class (ctx : Provider_context.t) (name : type_key) :
     Decl_defs.decl_class_type * Decl_store.class_members option =
   let f () =
     match
-      Errors.run_in_decl_mode (fun () ->
+      Diagnostics.run_in_decl_mode (fun () ->
           Decl_folded_class.class_decl_if_missing ~sh:SharedMem.Uses ctx name)
     with
     | None -> Decl_defs.raise_decl_not_found None name

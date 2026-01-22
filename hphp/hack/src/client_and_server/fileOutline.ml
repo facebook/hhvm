@@ -551,7 +551,7 @@ let add_docblocks defs comments =
 let outline popt source_text =
   let { Parser_return.ast; comments; _ } =
     let ast =
-      Errors.ignore_ (fun () ->
+      Diagnostics.ignore_ (fun () ->
           if Ide_parser_cache.is_enabled () then
             Ide_parser_cache.(
               with_ide_cache @@ fun () ->

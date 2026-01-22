@@ -191,9 +191,9 @@ module Env = struct
       if not @@ SMap.is_empty uninit then
         let prop_names = SMap.bindings uninit |> List.map ~f:fst
         and (pos, class_name) = c.c_name in
-        Errors.add_error
+        Diagnostics.add_diagnostic
           Nast_check_error.(
-            to_user_error
+            to_user_diagnostic
             @@ Constructor_required { pos; class_name; prop_names }));
 
     let ( add_init_not_required_props,
@@ -286,7 +286,7 @@ let class_prop_pos class_name prop_name tenv : Pos_or_decl.t =
                  class_name
                  member_origin
                  prop_name);
-          Errors.internal_error
+          Diagnostics.internal_error
             Pos.none
             ("Invariant violation:  please report this bug via the VSCode bug button. Expected to find prop_name "
             ^ prop_name
@@ -486,9 +486,9 @@ and check_all_init pos env acc =
     begin
       fun prop_name _ ->
         if not (S.mem prop_name acc) then
-          Errors.add_error
+          Diagnostics.add_diagnostic
             Nast_check_error.(
-              to_user_error @@ Call_before_init { pos; prop_name })
+              to_user_diagnostic @@ Call_before_init { pos; prop_name })
     end
     env.props
 
@@ -523,9 +523,9 @@ and expr_ env acc p e =
       && not (SSet.mem vx env.init_not_required_props)
     then (
       let (pos, member_name) = v in
-      Errors.add_error
+      Diagnostics.add_diagnostic
         Nast_check_error.(
-          to_user_error @@ Read_before_write { pos; member_name });
+          to_user_diagnostic @@ Read_before_write { pos; member_name });
       acc
     ) else if
         SSet.mem vx env.parent_cstr_props
@@ -537,9 +537,9 @@ and expr_ env acc p e =
          constructor, but we haven't called the parent constructor
          yet. *)
       let (pos, member_name) = v in
-      Errors.add_error
+      Diagnostics.add_diagnostic
         Nast_check_error.(
-          to_user_error @@ Read_before_write { pos; member_name });
+          to_user_diagnostic @@ Read_before_write { pos; member_name });
       acc
     ) else
       acc
@@ -710,9 +710,9 @@ let class_ tenv c =
     List.iter c.c_vars ~f:(fun cv ->
         match cv.cv_expr with
         | Some _ when is_lateinit cv ->
-          Errors.add_error
+          Diagnostics.add_diagnostic
             Nast_check_error.(
-              to_user_error @@ Lateinit_with_default (fst cv.cv_id))
+              to_user_diagnostic @@ Lateinit_with_default (fst cv.cv_id))
         | None when cv.cv_is_static ->
           let ty_opt =
             Option.map
@@ -726,8 +726,9 @@ let class_ tenv c =
           then
             ()
           else
-            Errors.add_error
-              Nast_check_error.(to_user_error @@ Missing_assign (fst cv.cv_id))
+            Diagnostics.add_diagnostic
+              Nast_check_error.(
+                to_user_diagnostic @@ Missing_assign (fst cv.cv_id))
         | _ -> ());
   let (c_constructor, _, _) = split_methods c.c_methods in
   match c_constructor with
@@ -753,8 +754,8 @@ let class_ tenv c =
       in
       if not (SMap.is_empty uninit_props) then
         if SMap.mem DICheck.parent_init_prop uninit_props then
-          Errors.add_error
-            Nast_check_error.(to_user_error @@ No_construct_parent p)
+          Diagnostics.add_diagnostic
+            Nast_check_error.(to_user_diagnostic @@ No_construct_parent p)
         else
           let class_uninit_props =
             SMap.filter
@@ -762,9 +763,9 @@ let class_ tenv c =
               uninit_props
           in
           if (not (SMap.is_empty class_uninit_props)) && not is_hhi then
-            Errors.add_error
+            Diagnostics.add_diagnostic
               Nast_check_error.(
-                to_user_error
+                to_user_diagnostic
                 @@ Not_initialized
                      {
                        pos = p;

@@ -209,7 +209,7 @@ let completion_reason_short_description = function
 
 type errors_file_item =
   | Errors of {
-      errors: (Errors.finalized_error * int) list Relative_path.Map.t;
+      errors: (Diagnostics.finalized_diagnostic * int) list Relative_path.Map.t;
           (** we convert to finalized_error (i.e. turn paths absolute) before writing in the file,
             because consumers don't know hhi paths. As for the [Relative_path.Map.t], it
             is guaranteed to only have root-relative paths. (we don't have a type to indicate
@@ -468,7 +468,7 @@ module ErrorsWrite = struct
       write_state := Reporting (fd, 0)
     end
 
-  let report (errors : Errors.t) : unit =
+  let report (errors : Diagnostics.t) : unit =
     match errors_file_path () with
     | None -> ()
     | Some _ -> begin
@@ -476,7 +476,7 @@ module ErrorsWrite = struct
       | Absent
       | Closed ->
         failwith ("Cannot report in state " ^ show_write_state !write_state)
-      | Reporting _ when Errors.is_empty ~drop_fixmed:true errors -> ()
+      | Reporting _ when Diagnostics.is_empty ~drop_fixmed:true errors -> ()
       | Reporting (fd, n) ->
         let n = n + 1 in
         if n <= 5 then
@@ -484,7 +484,7 @@ module ErrorsWrite = struct
             "Errors-file: report#%d on %s: %d new errors%s"
             n
             (Sys_utils.show_inode fd)
-            (Errors.count errors)
+            (Diagnostics.count errors)
             (if n = 5 then
               " [won't report any more this typecheck...]"
             else
@@ -492,8 +492,8 @@ module ErrorsWrite = struct
         (* sort and dedupe *)
         let errors =
           errors
-          |> Errors.drop_fixmed_errors_in_files
-          |> Errors.as_map
+          |> Diagnostics.drop_fixmed_errors_in_files
+          |> Diagnostics.as_map
           |> Relative_path.Map.filter ~f:(fun path _errors ->
                  let is_root =
                    Relative_path.is_root (Relative_path.prefix path)
@@ -505,10 +505,10 @@ module ErrorsWrite = struct
                  is_root)
           |> Relative_path.Map.map ~f:(fun errors ->
                  errors
-                 |> Errors.sort
+                 |> Diagnostics.sort
                  |> List.map ~f:(fun err ->
-                        ( User_error.to_absolute err,
-                          User_error.hash_error_for_saved_state err )))
+                        ( User_diagnostic.to_absolute err,
+                          User_diagnostic.hash_diagnostic_for_saved_state err )))
         in
         ErrorsFile.write_message
           fd

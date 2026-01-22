@@ -202,4 +202,4 @@ type t =
       current_package_assignment_kind: string;
     }
 
-val to_user_error : t -> (Pos.t, Pos_or_decl.t) User_error.t
+val to_user_diagnostic : t -> (Pos.t, Pos_or_decl.t) User_diagnostic.t

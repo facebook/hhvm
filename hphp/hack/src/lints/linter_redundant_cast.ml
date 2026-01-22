@@ -29,7 +29,7 @@ let handler =
             in
             let check_status = Tast_env.get_check_status env in
             let can_be_captured = Aast_utils.can_be_captured expr in
-            Lints_errors.redundant_cast
+            Lints_diagnostics.redundant_cast
               ~can_be_captured
               ~check_status
               cast

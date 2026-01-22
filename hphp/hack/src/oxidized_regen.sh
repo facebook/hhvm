@@ -139,19 +139,19 @@ run_hh_oxidize \
   hphp/hack/src/decl/decl_defs.ml                                             \
   hphp/hack/src/decl/pos/pos_or_decl.ml                                       \
   hphp/hack/src/decl/shallow_decl_defs.ml                                     \
-  hphp/hack/src/errors/explanation.ml                                         \
-  hphp/hack/src/errors/user_error.ml                                          \
-  hphp/hack/src/errors/errors.ml                                              \
-  hphp/hack/src/errors/warnings_saved_state.ml                                \
-  hphp/hack/src/errors/error_codes.ml                                         \
-  hphp/hack/src/errors/message.ml                                             \
+  hphp/hack/src/diagnostics/explanation.ml                                         \
+  hphp/hack/src/diagnostics/user_diagnostic.ml                                          \
+  hphp/hack/src/diagnostics/diagnostics.ml                                              \
+  hphp/hack/src/diagnostics/warnings_saved_state.ml                                \
+  hphp/hack/src/diagnostics/error_codes.ml                                         \
+  hphp/hack/src/diagnostics/message.ml                                             \
   hphp/hack/src/facebook/edenfs_watcher/edenfs_watcher_types.ml               \
   hphp/hack/src/naming/name_context.ml                                        \
   hphp/hack/src/naming/naming_error.ml                                        \
   hphp/hack/src/typing/nast_check/nast_check_error.ml                         \
   hphp/hack/src/parser/parsing_error.ml                                       \
-  hphp/hack/src/errors/classish_positions_types.ml                            \
-  hphp/hack/src/errors/quickfix.ml                                             \
+  hphp/hack/src/diagnostics/classish_positions_types.ml                            \
+  hphp/hack/src/diagnostics/quickfix.ml                                             \
   hphp/hack/src/naming/naming_phase_error.ml                                  \
   hphp/hack/src/options/declFoldOptions.ml                                    \
   hphp/hack/src/options/declParserOptions.ml                                  \

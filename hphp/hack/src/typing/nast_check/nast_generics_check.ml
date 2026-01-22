@@ -14,15 +14,15 @@ type tparam_info = pos SMap.t
 
 let error_if_is_this (pos, name) custom_err_config =
   if String.equal (String.lowercase name) "this" then
-    Errors.add_error
-      (Naming_error_utils.to_user_error
+    Diagnostics.add_diagnostic
+      (Naming_error_utils.to_user_diagnostic
          (Naming_error.This_reserved pos)
          custom_err_config)
 
 let error_if_invalid_tparam_name (pos, name) custom_err_config =
   if String.is_empty name || not (Char.equal name.[0] 'T') then
-    Errors.add_error
-      (Naming_error_utils.to_user_error
+    Diagnostics.add_diagnostic
+      (Naming_error_utils.to_user_diagnostic
          (Naming_error.Start_with_T pos)
          custom_err_config)
 
@@ -33,16 +33,16 @@ let check_tparams (seen : tparam_info) tparams custom_err_config =
     error_if_invalid_tparam_name tparam.tp_name custom_err_config;
     let (pos, name) = tparam.tp_name in
     if String.equal name Naming_special_names.Typehints.wildcard then (
-      Errors.add_error
-        (Naming_error_utils.to_user_error
+      Diagnostics.add_diagnostic
+        (Naming_error_utils.to_user_diagnostic
            (Naming_error.Wildcard_tparam_disallowed pos)
            custom_err_config);
       seen
     ) else begin
       (match SMap.find_opt name seen with
       | Some prev_pos ->
-        Errors.add_error
-          (Naming_error_utils.to_user_error
+        Diagnostics.add_diagnostic
+          (Naming_error_utils.to_user_diagnostic
              (Naming_error.Shadowed_tparam { pos; prev_pos; tparam_name = name })
              custom_err_config)
       | None -> ());

@@ -511,12 +511,12 @@ let run_on_intersection :
  fun env ~f tyl ->
   let (env, resl_errors) =
     List.map_env env tyl ~f:(fun env ty ->
-        let (errors, (env, result)) = Errors.do_ @@ fun () -> f env ty in
+        let (errors, (env, result)) = Diagnostics.do_ @@ fun () -> f env ty in
         (env, (result, errors)))
   in
 
   let has_only_warnings err =
-    Errors.is_empty (Errors.filter_out_warnings err)
+    Diagnostics.is_empty (Diagnostics.filter_out_warnings err)
   in
   let valid_resl =
     List.filter resl_errors ~f:(fun (_, err) -> has_only_warnings err)
@@ -525,18 +525,18 @@ let run_on_intersection :
   (* Always merge warnings from all branches so they're not lost *)
   List.iter resl_errors ~f:(fun (_, err) ->
       let warnings_only =
-        Errors.filter err ~f:(fun _path error ->
-            match error.User_error.severity with
-            | User_error.Warning -> true
-            | User_error.Err -> false)
+        Diagnostics.filter err ~f:(fun _path error ->
+            match error.User_diagnostic.severity with
+            | User_diagnostic.Warning -> true
+            | User_diagnostic.Err -> false)
       in
-      Errors.merge_into_current warnings_only);
+      Diagnostics.merge_into_current warnings_only);
   let resl =
     if not (List.is_empty valid_resl) then
       valid_resl
     else (
       List.iter resl_errors ~f:(fun (_, err) ->
-          Errors.merge_into_current (Errors.filter_out_warnings err));
+          Diagnostics.merge_into_current (Diagnostics.filter_out_warnings err));
       List.map ~f:fst resl_errors
     )
   in

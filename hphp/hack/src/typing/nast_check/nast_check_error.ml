@@ -204,7 +204,7 @@ type t =
     }
 
 let repeated_record_field_name pos name prev_pos =
-  User_error.make_err
+  User_diagnostic.make_err
     Error_code.(to_enum RepeatedRecordFieldName)
     ( pos,
       Printf.sprintf "Duplicate record field %s" (Markdown_lite.md_codify name)
@@ -212,7 +212,7 @@ let repeated_record_field_name pos name prev_pos =
     [(prev_pos, "Previous field is here")]
 
 let dynamically_callable_reified attr_pos =
-  User_error.make_err
+  User_diagnostic.make_err
     Error_code.(to_enum DynamicallyCallableReified)
     ( attr_pos,
       "`__DynamicallyCallable` cannot be used on reified functions or methods"
@@ -220,7 +220,7 @@ let dynamically_callable_reified attr_pos =
     []
 
 let no_construct_parent pos =
-  User_error.make_err
+  User_diagnostic.make_err
     Error_code.(to_enum NoConstructParent)
     ( pos,
       Utils.sl
@@ -231,7 +231,7 @@ let no_construct_parent pos =
     []
 
 let nonstatic_method_in_abstract_final_class pos =
-  User_error.make_err
+  User_diagnostic.make_err
     Error_code.(to_enum NonstaticMethodInAbstractFinalClass)
     ( pos,
       "Abstract final classes cannot have nonstatic methods or constructors." )
@@ -242,7 +242,7 @@ let constructor_required pos name prop_names =
   let props_str =
     List.map ~f:Markdown_lite.md_codify prop_names |> String.concat ~sep:" "
   in
-  User_error.make_err
+  User_diagnostic.make_err
     Error_code.(to_enum ConstructorRequired)
     ( pos,
       "Lacking `__construct`, class "
@@ -258,7 +258,7 @@ let not_initialized pos cname props =
         ( pos,
           Markdown_lite.md_codify ("$this->" ^ prop) ^ " is not initialized." ))
   in
-  User_error.make_err
+  User_diagnostic.make_err
     Error_code.(to_enum NotInitialized)
     ( pos,
       "Class "
@@ -268,7 +268,7 @@ let not_initialized pos cname props =
     prop_msgs
 
 let call_before_init pos cv =
-  User_error.make_err
+  User_diagnostic.make_err
     Error_code.(to_enum CallBeforeInit)
     ( pos,
       Utils.sl
@@ -288,13 +288,13 @@ let call_before_init pos cv =
     []
 
 let abstract_with_body pos =
-  User_error.make_err
+  User_diagnostic.make_err
     Error_code.(to_enum AbstractWithBody)
     (pos, "This method is declared as abstract, but has a body")
     []
 
 let not_abstract_without_typeconst pos =
-  User_error.make_err
+  User_diagnostic.make_err
     Error_code.(to_enum NotAbstractWithoutTypeconst)
     ( pos,
       "This type constant is not declared as abstract, it must have"
@@ -311,25 +311,25 @@ let typeconst_depends_on_external_tparam pos ext_pos ext_name =
           (Markdown_lite.md_codify ext_name) );
     ]
   in
-  User_error.make_err
+  User_diagnostic.make_err
     Error_code.(to_enum TypeconstDependsOnExternalTparam)
     claim
     reasons
 
 let interface_with_partial_typeconst pos =
-  User_error.make_err
+  User_diagnostic.make_err
     Error_code.(to_enum InterfaceWithPartialTypeconst)
     (pos, "An interface cannot contain a partially abstract type constant")
     []
 
 let partially_abstract_typeconst_definition pos =
-  User_error.make_err
+  User_diagnostic.make_err
     Error_code.(to_enum PartiallyAbstractTypeconstDefinition)
     (pos, "`as` constraints are only legal on abstract type constants")
     []
 
 let refinement_in_typestruct kind pos =
-  User_error.make_err
+  User_diagnostic.make_err
     Error_code.(to_enum RefinementInTypeStruct)
     ( pos,
       "Type refinements cannot appear on the right-hand side of " ^ kind ^ "."
@@ -337,13 +337,13 @@ let refinement_in_typestruct kind pos =
     []
 
 let multiple_xhp_category pos =
-  User_error.make_err
+  User_diagnostic.make_err
     Error_code.(to_enum MultipleXhpCategory)
     (pos, "XHP classes can only contain one category declaration")
     []
 
 let return_in_gen pos =
-  User_error.make_err
+  User_diagnostic.make_err
     Error_code.(to_enum ReturnInGen)
     ( pos,
       "You cannot return a value in a generator (a generator"
@@ -351,7 +351,7 @@ let return_in_gen pos =
     []
 
 let return_in_finally pos =
-  User_error.make_err
+  User_diagnostic.make_err
     Error_code.(to_enum ReturnInFinally)
     ( pos,
       "Don't use `return` in a `finally` block;"
@@ -359,19 +359,19 @@ let return_in_finally pos =
     []
 
 let toplevel_break pos =
-  User_error.make_err
+  User_diagnostic.make_err
     Error_code.(to_enum ToplevelBreak)
     (pos, "`break` can only be used inside loops or `switch` statements")
     []
 
 let toplevel_continue pos =
-  User_error.make_err
+  User_diagnostic.make_err
     Error_code.(to_enum ToplevelContinue)
     (pos, "`continue` can only be used inside loops")
     []
 
 let continue_in_switch pos =
-  User_error.make_err
+  User_diagnostic.make_err
     Error_code.(to_enum ContinueInSwitch)
     ( pos,
       "In PHP, `continue;` inside a switch statement is equivalent to `break;`."
@@ -393,20 +393,20 @@ let await_in_sync_function pos func_pos =
           fix_pos;
       ]
   in
-  User_error.make_err
+  User_diagnostic.make_err
     Error_code.(to_enum AwaitInSyncFunction)
     ~quickfixes
     (pos, "`await` can only be used inside `async` functions")
     []
 
 let interface_uses_trait pos =
-  User_error.make_err
+  User_diagnostic.make_err
     Error_code.(to_enum InterfaceUsesTrait)
     (pos, "Interfaces cannot use traits")
     []
 
 let static_memoized_function pos =
-  User_error.make_err
+  User_diagnostic.make_err
     Error_code.(to_enum StaticMemoizedFunction)
     ( pos,
       "`memoize` is not allowed on static methods in classes that aren't final "
@@ -414,7 +414,7 @@ let static_memoized_function pos =
     []
 
 let magic pos meth_name =
-  User_error.make_err
+  User_diagnostic.make_err
     Error_code.(to_enum Magic)
     ( pos,
       Format.sprintf "%s is a magic method and cannot be called directly"
@@ -422,37 +422,37 @@ let magic pos meth_name =
     []
 
 let toString_returns_string pos =
-  User_error.make_err
+  User_diagnostic.make_err
     Error_code.(to_enum ToStringReturnsString)
     (pos, "`__toString` should return a string")
     []
 
 let toString_visibility pos =
-  User_error.make_err
+  User_diagnostic.make_err
     Error_code.(to_enum ToStringVisibility)
     (pos, "`__toString` must have public visibility and cannot be static")
     []
 
 let abstract_body pos =
-  User_error.make_err
+  User_diagnostic.make_err
     Error_code.(to_enum AbstractBody)
     (pos, "This method shouldn't have a body")
     []
 
 let interface_with_member_variable pos =
-  User_error.make_err
+  User_diagnostic.make_err
     Error_code.(to_enum InterfaceWithMemberVariable)
     (pos, "Interfaces cannot have member variables")
     []
 
 let interface_with_static_member_variable pos =
-  User_error.make_err
+  User_diagnostic.make_err
     Error_code.(to_enum InterfaceWithStaticMemberVariable)
     (pos, "Interfaces cannot have static variables")
     []
 
 let illegal_function_name pos name =
-  User_error.make_err
+  User_diagnostic.make_err
     Error_code.(to_enum IllegalFunctionName)
     ( pos,
       Format.sprintf
@@ -461,7 +461,7 @@ let illegal_function_name pos name =
     []
 
 let entrypoint_arguments pos =
-  User_error.make_err
+  User_diagnostic.make_err
     Error_code.(to_enum EntryPointArguments)
     ( pos,
       sprintf
@@ -470,7 +470,7 @@ let entrypoint_arguments pos =
     []
 
 let entrypoint_generics pos =
-  User_error.make_err
+  User_diagnostic.make_err
     Error_code.(to_enum EntryPointGenerics)
     ( pos,
       sprintf
@@ -479,56 +479,56 @@ let entrypoint_generics pos =
     []
 
 let variadic_memoize pos =
-  User_error.make_err
+  User_diagnostic.make_err
     Error_code.(to_enum VariadicMemoize)
     ( pos,
       "Memoized functions cannot be variadic or use the type-splat operator." )
     []
 
 let abstract_method_memoize pos =
-  User_error.make_err
+  User_diagnostic.make_err
     Error_code.(to_enum AbstractMethodMemoize)
     (pos, "Abstract methods cannot be memoized.")
     []
 
 let instance_property_in_abstract_final_class pos =
-  User_error.make_err
+  User_diagnostic.make_err
     Error_code.(to_enum InstancePropertyInAbstractFinalClass)
     (pos, "Abstract final classes cannot have instance properties.")
     []
 
 let inout_params_special pos =
-  User_error.make_err
+  User_diagnostic.make_err
     Error_code.(to_enum InoutParamsSpecial)
     (pos, "Methods with special semantics cannot have `inout` parameters.")
     []
 
 let inout_params_memoize pos param_pos =
-  User_error.make_err
+  User_diagnostic.make_err
     Error_code.(to_enum InoutParamsMemoize)
     (pos, "Functions with `inout` parameters cannot be memoized")
     [(Pos_or_decl.of_raw_pos param_pos, "This is an `inout` parameter")]
 
 let inout_in_transformed_pseudofunction pos fn_name =
-  User_error.make_err
+  User_diagnostic.make_err
     Error_code.(to_enum InoutInTransformedPsuedofunction)
     (pos, Printf.sprintf "Unexpected `inout` argument for `%s`" fn_name)
     []
 
 let named_in_transformed_pseudofunction pos fn_name =
-  User_error.make_err
+  User_diagnostic.make_err
     Error_code.(to_enum NamedInTransformedPseudofunction)
     (pos, Printf.sprintf "Unexpected named argument for `%s`" fn_name)
     []
 
 let reading_from_append pos =
-  User_error.make_err
+  User_diagnostic.make_err
     Error_code.(to_enum ReadingFromAppend)
     (pos, "Cannot use `[]` for reading")
     []
 
 let list_rvalue pos =
-  User_error.make_err
+  User_diagnostic.make_err
     Error_code.(to_enum ListRvalue)
     ( pos,
       "`list()` can only be used for destructuring assignment. Did you mean `tuple()` or `vec[]`?"
@@ -536,7 +536,7 @@ let list_rvalue pos =
     []
 
 let illegal_destructor pos =
-  User_error.make_err
+  User_diagnostic.make_err
     Error_code.(to_enum IllegalDestructor)
     ( pos,
       "Destructors are not supported in Hack; use other patterns like "
@@ -544,7 +544,7 @@ let illegal_destructor pos =
     []
 
 let illegal_context pos name =
-  User_error.make_err
+  User_diagnostic.make_err
     Error_code.(to_enum IllegalContext)
     ( pos,
       Format.sprintf
@@ -587,14 +587,14 @@ let case_fallthrough switch_pos case_pos next_pos =
       );
     ]
   in
-  User_error.make_err
+  User_diagnostic.make_err
     ~quickfixes
     Error_code.(to_enum CaseFallthrough)
     claim
     reasons
 
 let default_fallthrough pos =
-  User_error.make_err
+  User_diagnostic.make_err
     Error_code.(to_enum DefaultFallthrough)
     ( pos,
       "This `switch` has a default case that implicitly falls "
@@ -602,7 +602,7 @@ let default_fallthrough pos =
     []
 
 let php_lambda_disallowed pos =
-  User_error.make_err
+  User_diagnostic.make_err
     Error_code.(to_enum PhpLambdaDisallowed)
     (pos, "PHP style anonymous functions are not allowed.")
     []
@@ -613,7 +613,7 @@ let non_interface pos name verb =
     | Vimplement -> "implement"
     | Vreq_implement -> "require implementation of"
   in
-  User_error.make_err
+  User_diagnostic.make_err
     Error_code.(to_enum NonInterface)
     ( pos,
       Format.sprintf
@@ -623,7 +623,7 @@ let non_interface pos name verb =
     []
 
 let uses_non_trait pos name kind =
-  User_error.make_err
+  User_diagnostic.make_err
     Error_code.(to_enum UsesNonTrait)
     ( pos,
       Format.sprintf
@@ -633,7 +633,7 @@ let uses_non_trait pos name kind =
     []
 
 let requires_non_class pos name kind =
-  User_error.make_err
+  User_diagnostic.make_err
     Error_code.(to_enum RequiresNonClass)
     ( pos,
       Format.sprintf
@@ -643,7 +643,7 @@ let requires_non_class pos name kind =
     []
 
 let requires_final_class pos name is_req_this_as_check =
-  User_error.make_err
+  User_diagnostic.make_err
     Error_code.(to_enum RequiresFinalClass)
     ( pos,
       Format.sprintf
@@ -666,19 +666,19 @@ let internal_method_with_invalid_visibility pos vis =
       "`__Internal` methods must be public, they cannot be %s"
       vis_str
   in
-  User_error.make_err
+  User_diagnostic.make_err
     Error_code.(to_enum InternalProtectedOrPrivate)
     (pos, msg)
     []
 
 let private_and_final pos =
-  User_error.make_err
+  User_diagnostic.make_err
     Error_code.(to_enum PrivateAndFinal)
     (pos, "Class methods cannot be both `private` and `final`.")
     []
 
 let soft_internal_without_internal pos =
-  User_error.make_err
+  User_diagnostic.make_err
     Error_code.(to_enum Soft_internal_without_internal)
     ( pos,
       "<<__SoftInternal>> can only be used on internal symbols. Try adding internal to this symbol."
@@ -686,7 +686,7 @@ let soft_internal_without_internal pos =
     []
 
 let internal_member_inside_public_trait member_pos trait_pos is_method =
-  User_error.make_err
+  User_diagnostic.make_err
     Error_code.(to_enum InternalMemberInsidePublicTrait)
     (member_pos, "You cannot make this trait member `internal`")
     [
@@ -700,7 +700,7 @@ let internal_member_inside_public_trait member_pos trait_pos is_method =
     ]
 
 let attribute_conflicting_memoize pos second_pos =
-  User_error.make_err
+  User_diagnostic.make_err
     Error_code.(to_enum AttributeConflictingMemoize)
     ( pos,
       Printf.sprintf
@@ -714,7 +714,7 @@ let attribute_conflicting_memoize pos second_pos =
     ]
 
 let wrong_expression_kind_builtin_attribute pos attr expr_kind =
-  User_error.make_err
+  User_diagnostic.make_err
     Error_codes.Typing.(to_enum WrongExpressionKindAttribute)
     ( pos,
       Printf.sprintf
@@ -724,7 +724,7 @@ let wrong_expression_kind_builtin_attribute pos attr expr_kind =
     []
 
 let attribute_too_many_arguments pos name expected =
-  User_error.make_err
+  User_diagnostic.make_err
     Error_codes.Typing.(to_enum AttributeTooManyArguments)
     ( pos,
       "The attribute "
@@ -734,7 +734,7 @@ let attribute_too_many_arguments pos name expected =
     []
 
 let attribute_too_few_arguments pos name expected =
-  User_error.make_err
+  User_diagnostic.make_err
     Error_codes.Typing.(to_enum AttributeTooFewArguments)
     ( pos,
       "The attribute "
@@ -760,28 +760,28 @@ let attribute_not_exact_number_of_args pos name expected actual =
       | 1 -> "exactly 1 argument"
       | _ -> "exactly " ^ string_of_int expected ^ " arguments" )
   in
-  User_error.make_err Error_codes.Typing.(to_enum code) claim []
+  User_diagnostic.make_err Error_codes.Typing.(to_enum code) claim []
 
 let attribute_param_type pos x =
-  User_error.make_err
+  User_diagnostic.make_err
     Error_codes.Typing.(to_enum AttributeParamType)
     (pos, "This attribute parameter should be " ^ x)
     []
 
 let attribute_no_auto_dynamic pos =
-  User_error.make_err
+  User_diagnostic.make_err
     Error_codes.Typing.(to_enum AttributeNoAutoDynamic)
     (pos, "This attribute is not yet supported in user code")
     []
 
 let attribute_implemented_by_restriction ~restriction pos =
-  User_error.make_err
+  User_diagnostic.make_err
     Error_codes.Naming.(to_enum HhiAttributeRestriction)
     (pos, "This attribute can only be used in " ^ restriction)
     []
 
 let generic_at_runtime p prefix =
-  User_error.make_err
+  User_diagnostic.make_err
     Error_codes.Typing.(to_enum ErasedGenericAtRuntime)
     ( p,
       prefix
@@ -790,14 +790,14 @@ let generic_at_runtime p prefix =
     []
 
 let generics_not_allowed p =
-  User_error.make_err
+  User_diagnostic.make_err
     Error_codes.Typing.(to_enum GenericsNotAllowed)
     (p, "Generics are not allowed in this position.")
     []
 
 let local_variable_modified_and_used pos_modified pos_used_l =
   let used_msg p = (Pos_or_decl.of_raw_pos p, "And accessed here") in
-  User_error.make_err
+  User_diagnostic.make_err
     Error_codes.Typing.(to_enum LocalVariableModifedAndUsed)
     ( pos_modified,
       "Unsequenced modification and access to local variable. Modified here" )
@@ -805,19 +805,19 @@ let local_variable_modified_and_used pos_modified pos_used_l =
 
 let local_variable_modified_twice pos_modified pos_modified_l =
   let modified_msg p = (Pos_or_decl.of_raw_pos p, "And also modified here") in
-  User_error.make_err
+  User_diagnostic.make_err
     Error_codes.Typing.(to_enum LocalVariableModifedTwice)
     (pos_modified, "Unsequenced modifications to local variable. Modified here")
     (List.map pos_modified_l ~f:modified_msg)
 
 let assign_during_case p =
-  User_error.make_err
+  User_diagnostic.make_err
     Error_codes.Typing.(to_enum AssignDuringCase)
     (p, "Don't assign to variables inside of case labels")
     []
 
 let read_before_write (pos, v) =
-  User_error.make_err
+  User_diagnostic.make_err
     Error_codes.Typing.(to_enum ReadBeforeWrite)
     ( pos,
       Utils.sl
@@ -829,19 +829,19 @@ let read_before_write (pos, v) =
     []
 
 let lateinit_with_default pos =
-  User_error.make_err
+  User_diagnostic.make_err
     Error_codes.Typing.(to_enum LateInitWithDefault)
     (pos, "A late-initialized property cannot have a default value")
     []
 
 let missing_assign pos =
-  User_error.make_err
+  User_diagnostic.make_err
     Error_codes.Typing.(to_enum MissingAssign)
     (pos, "Please assign a value")
     []
 
 let clone_return_type pos =
-  User_error.make_err
+  User_diagnostic.make_err
     Error_code.(to_enum CloneReturnType)
     ( pos,
       "The return type of `__clone` should be void. `__clone` is called to mutate the new object side-effect-fully"
@@ -871,7 +871,7 @@ let require_package_strict_inclusion
           required
           current )
   in
-  User_error.make_err
+  User_diagnostic.make_err
     Error_code.(to_enum RequirePackageStrictInclusion)
     (required_pos, Printf.sprintf "Invalid %s" attribute_name)
     [
@@ -884,7 +884,7 @@ let require_package_strict_inclusion
     ]
 
 (* --------------------------------------------- *)
-let to_user_error t =
+let to_user_diagnostic t =
   let f =
     match t with
     | Repeated_record_field_name { pos; name; prev_pos } ->

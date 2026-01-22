@@ -69,7 +69,7 @@ let test () =
       memtrace_dir = None;
     }
   in
-  let { Typing_check_service.errors; telemetry; _ } =
+  let { Typing_check_service.diagnostics; telemetry; _ } =
     Typing_check_service.go
       ctx
       None
@@ -81,8 +81,8 @@ let test () =
       ~check_info
       ~warnings_saved_state:None
   in
-  Test.assert_errors errors "";
-  let { Typing_check_service.errors; telemetry; _ } =
+  Test.assert_diagnostics diagnostics "";
+  let { Typing_check_service.diagnostics; telemetry; _ } =
     Typing_check_service.go
       ctx
       None
@@ -94,9 +94,9 @@ let test () =
       ~check_info
       ~warnings_saved_state:None
   in
-  Test.assert_errors errors "";
+  Test.assert_diagnostics diagnostics "";
 
-  let { Typing_check_service.errors; telemetry; _ } =
+  let { Typing_check_service.diagnostics; telemetry; _ } =
     Typing_check_service.go
       ctx
       None
@@ -108,8 +108,8 @@ let test () =
       ~check_info
       ~warnings_saved_state:None
   in
-  Test.assert_errors errors expected_errors;
-  let { Typing_check_service.errors; _ } =
+  Test.assert_diagnostics diagnostics expected_errors;
+  let { Typing_check_service.diagnostics; _ } =
     Typing_check_service.go
       ctx
       None
@@ -121,7 +121,7 @@ let test () =
       ~check_info
       ~warnings_saved_state:None
   in
-  Test.assert_errors errors expected_errors;
+  Test.assert_diagnostics diagnostics expected_errors;
 
   ignore env;
   ()

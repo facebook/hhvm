@@ -69,7 +69,10 @@ val get_ast : full:bool -> Provider_context.t -> Relative_path.t -> Nast.program
 
 (** `full` determines whether this is producing the full AST or just the decl information. *)
 val get_ast_with_error :
-  full:bool -> Provider_context.t -> Relative_path.t -> Errors.t * Nast.program
+  full:bool ->
+  Provider_context.t ->
+  Relative_path.t ->
+  Diagnostics.t * Nast.program
 
 (** Compute the AST for the given [Provider_context.entry].
     This is cached in the entry itself, but not in the AST provider's cache. *)
@@ -81,7 +84,7 @@ val compute_ast :
 val compute_parser_return_and_ast_errors :
   popt:ParserOptions.t ->
   entry:Provider_context.entry ->
-  Parser_return.t * Errors.t
+  Parser_return.t * Diagnostics.t
 
 (** Compute the comments for the given [Provider_context.entry].
     This is cached in the entry itself, but not in the AST provider's cache. *)

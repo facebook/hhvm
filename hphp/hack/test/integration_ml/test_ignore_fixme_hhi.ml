@@ -59,4 +59,4 @@ let test () =
       ()
   in
   let env = Test.setup_disk env [(file_name, file_contents)] in
-  Test.assert_env_errors env errors
+  Test.assert_env_diagnostics env errors

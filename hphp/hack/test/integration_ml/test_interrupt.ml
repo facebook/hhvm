@@ -87,7 +87,7 @@ let test () =
       memtrace_dir = None;
     }
   in
-  let (((), { Typing_check_service.errors; _ }), cancelled) =
+  let (((), { Typing_check_service.diagnostics; _ }), cancelled) =
     Typing_check_service.go_with_interrupt
       ctx
       workers
@@ -101,7 +101,7 @@ let test () =
       ~check_info
   in
   (* Assert that we got the errors in bar2 only... *)
-  Test.assert_errors errors expected_errors;
+  Test.assert_diagnostics diagnostics expected_errors;
 
   (* ...while bar1 is among cancelled jobs*)
   (match cancelled with

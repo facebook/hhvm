@@ -87,7 +87,7 @@ type client_check_env = {
   config: (string * string) list;
   custom_hhi_path: string option;
   custom_telemetry_data: (string * string) list;
-  error_format: Errors.format option;
+  error_format: Diagnostics.format option;
   force_dormant_start: bool;
   from: string;
   show_spinner: bool;
@@ -115,7 +115,7 @@ type client_check_env = {
   is_interactive: bool;
       (** Determined based on the --from option. Affects UI behaviour in a
       number of places, e.g., error formatting and spinners. *)
-  warning_switches: Filter_errors.switch list;
+  warning_switches: Filter_diagnostics.switch list;
   dump_config: bool;
   find_my_tests_max_distance: int;
   find_my_tests_max_test_files: int option;

@@ -1330,8 +1330,8 @@ module M = struct
       let custom_err_config =
         TypecheckerOptions.custom_error_config (get_tcopt env)
       in
-      Errors.add_error
-        (Naming_error_utils.to_user_error error custom_err_config)
+      Diagnostics.add_diagnostic
+        (Naming_error_utils.to_user_diagnostic error custom_err_config)
     | None -> ()
 
   let get_local_in_ctx ~undefined_err_fun env x ctx_opt =

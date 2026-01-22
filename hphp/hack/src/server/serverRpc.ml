@@ -15,8 +15,8 @@ open Option.Monad_infix
 
   Returns the truncated errors and the dropped error count. *)
 let take_max_errors
-    (max_errors : int option) (error_list : (_, _) User_error.t list) :
-    (_, _) User_error.t list * int =
+    (max_errors : int option) (error_list : (_, _) User_diagnostic.t list) :
+    (_, _) User_diagnostic.t list * int =
   match max_errors with
   | Some max_errors ->
     let (error_list, dropped_errors) = List.split_n error_list max_errors in
@@ -34,8 +34,8 @@ let single_ctx env path file_input =
 
 let log_check_response env =
   HackEventLogger.check_response
-    (Errors.get_error_list env.ServerEnv.errorl
-    |> List.map ~f:(fun { User_error.code; _ } -> code))
+    (Diagnostics.get_diagnostic_list env.ServerEnv.diagnostics
+    |> List.map ~f:(fun { User_diagnostic.code; _ } -> code))
 
 let handle :
     type a.
@@ -49,9 +49,9 @@ let handle :
   | ServerCommandTypes.STATUS { max_errors; error_filter } ->
     log_check_response env;
     let (error_list, dropped_count) =
-      env.ServerEnv.errorl
-      |> Errors.sort_and_finalize
-      |> Filter_errors.filter error_filter
+      env.ServerEnv.diagnostics
+      |> Diagnostics.sort_and_finalize
+      |> Filter_diagnostics.filter error_filter
       |> take_max_errors max_errors
     in
     let liveness =
@@ -102,7 +102,7 @@ let handle :
           }
     in
     let errors =
-      errors |> Errors.sort_and_finalize |> take_max_errors max_errors
+      errors |> Diagnostics.sort_and_finalize |> take_max_errors max_errors
     in
     (* Unforced lazy values are closures which make serialization over RPC fail. *)
     let tasts =

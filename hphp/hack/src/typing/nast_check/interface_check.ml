@@ -14,21 +14,22 @@ let enforce_no_body m =
   match m.m_body.fb_ast with
   | [] -> ()
   | _ ->
-    Errors.add_error
-      Nast_check_error.(to_user_error @@ Abstract_body (fst m.m_name))
+    Diagnostics.add_diagnostic
+      Nast_check_error.(to_user_diagnostic @@ Abstract_body (fst m.m_name))
 
 let check_interface c =
   List.iter c.c_uses ~f:(fun (p, _) ->
-      Errors.add_error
-        Nast_check_error.(to_user_error @@ Interface_uses_trait p));
+      Diagnostics.add_diagnostic
+        Nast_check_error.(to_user_diagnostic @@ Interface_uses_trait p));
 
   let (statics, vars) = split_vars c.c_vars in
   begin
     match vars with
     | hd :: _ ->
       let pos = fst hd.cv_id in
-      Errors.add_error
-        Nast_check_error.(to_user_error @@ Interface_with_member_variable pos)
+      Diagnostics.add_diagnostic
+        Nast_check_error.(
+          to_user_diagnostic @@ Interface_with_member_variable pos)
     | _ -> ()
   end;
 
@@ -36,9 +37,9 @@ let check_interface c =
     match statics with
     | hd :: _ ->
       let pos = fst hd.cv_id in
-      Errors.add_error
+      Diagnostics.add_diagnostic
         Nast_check_error.(
-          to_user_error @@ Interface_with_static_member_variable pos)
+          to_user_diagnostic @@ Interface_with_static_member_variable pos)
     | _ -> ()
   end;
 

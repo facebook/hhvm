@@ -35,7 +35,7 @@ let handle_exn_as_error : type res. Pos.t -> (unit -> res option) -> res option
     Exception.reraise e
   | exn ->
     let e = Exception.wrap exn in
-    Errors.exception_occurred pos e;
+    Diagnostics.exception_occurred pos e;
     None
 
 let type_fun (ctx : Provider_context.t) ~(full_ast : Nast.fun_def) :
@@ -96,7 +96,7 @@ let check_module (ctx : Provider_context.t) ~(full_ast : Nast.module_def) :
       Some def)
 
 let calc_errors_and_tast ctx ?(drop_fixmed = true) fn ~full_ast :
-    Errors.t * Tast.by_names =
+    Diagnostics.t * Tast.by_names =
   let { Nast.funs; classes; typedefs; constants; modules; stmts } =
     Nast.get_defs full_ast
   in
@@ -109,7 +109,7 @@ let calc_errors_and_tast ctx ?(drop_fixmed = true) fn ~full_ast :
         |> Option.fold ~init:acc ~f:(fun acc tast ->
                SMap.add id.FileInfo.name tast acc))
   in
-  Errors.do_with_context ~drop_fixmed fn (fun () ->
+  Diagnostics.do_with_context ~drop_fixmed fn (fun () ->
       (* Some of our tests depend upon the order of [calc_tast] being exactly as follows, i.e. funs
          first, classes next, and so on. This is likely irrelevant to end user experience though,
          since user gets sorted errors. *)
@@ -133,8 +133,8 @@ let calc_errors_and_tast_for
     (fn : Relative_path.t)
     (typecheck : Provider_context.t -> full_ast:def -> res option)
     ~(full_ast : def)
-    (id : FileInfo.id) : Errors.t * res SMap.t =
-  Errors.do_with_context ~drop_fixmed fn (fun () ->
+    (id : FileInfo.id) : Diagnostics.t * res SMap.t =
+  Diagnostics.do_with_context ~drop_fixmed fn (fun () ->
       typecheck ctx ~full_ast
       |> Option.fold ~init:SMap.empty ~f:(fun acc tast ->
              SMap.add id.name tast acc))

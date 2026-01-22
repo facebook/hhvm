@@ -96,15 +96,18 @@ let add_old_decls
 (** This pushes all [phase] errors in errors, that aren't in [files],
 to the errors-file. *)
 let push_errors_outside_files_to_errors_file
-    (errors : Errors.t) ~(files : Relative_path.Set.t) : unit =
+    (errors : Diagnostics.t) ~(files : Relative_path.Set.t) : unit =
   let typing_errors_not_in_files_to_check =
     errors
-    |> Errors.fold_errors ~drop_fixmed:true ~init:[] ~f:(fun path error acc ->
+    |> Diagnostics.fold_errors
+         ~drop_fixmed:true
+         ~init:[]
+         ~f:(fun path error acc ->
            if Relative_path.Set.mem files path then
              acc
            else
              (path, error) :: acc)
-    |> Errors.from_file_error_list
+    |> Diagnostics.from_file_diagnostic_list
   in
   Server_progress.ErrorsWrite.report typing_errors_not_in_files_to_check;
   ()
@@ -275,7 +278,7 @@ let do_redecl
       env
       fanout
       ~reparsed
-      ~errors:env.errorl
+      ~diagnostics:env.diagnostics
   in
   {
     changed = fanout.Fanout.changed;
@@ -286,7 +289,7 @@ let do_redecl
 
 type type_checking_result = {
   env: ServerEnv.env;
-  errors: Errors.t;
+  diagnostics: Diagnostics.t;
   telemetry: Telemetry.t;
   files_checked: Relative_path.Set.t;
   full_check_done: bool;
@@ -299,7 +302,7 @@ type type_checking_result = {
 let do_type_checking
     (genv : ServerEnv.genv)
     (env : ServerEnv.env)
-    ~(errors : Errors.t)
+    ~(diagnostics : Diagnostics.t)
     ~(files_to_check : Relative_path.Set.t)
     ~(lazy_check_later : Relative_path.Set.t)
     ~(check_reason : string)
@@ -346,7 +349,7 @@ let do_type_checking
     @@ fun () ->
     let ( ( env,
             {
-              Typing_check_service.errors = errorl;
+              Typing_check_service.diagnostics = errorl;
               warnings_saved_state = mergebase_warning_hashes;
               telemetry;
               time_first_error;
@@ -411,12 +414,15 @@ let do_type_checking
   (* ... leaving only things that we actually checked, and which can be
    * removed from needs_recheck *)
   let needs_recheck = Relative_path.Set.diff needs_recheck files_checked in
-  (* Here we do errors paradigm (1) env.errorl: merge in typecheck results, to flow into [env.errorl].
+  (* Here we do errors paradigm (1) env.diagnostics: merge in typecheck results, to flow into [env.diagnostics].
      As for paradigms (2) persistent-connection and (3) errors-file, they're handled
      inside [Typing_check_service.go_with_interrupt] because they want to push errors
      as soon as they're discovered. *)
-  let errors =
-    Errors.incremental_update ~old:errors ~new_:errorl' ~rechecked:files_checked
+  let diagnostics =
+    Diagnostics.incremental_update
+      ~old:diagnostics
+      ~new_:errorl'
+      ~rechecked:files_checked
   in
   let full_check_done = Relative_path.Set.is_empty needs_recheck in
 
@@ -427,7 +433,7 @@ let do_type_checking
      I'll revisit once they've been removed. *)
   {
     env;
-    errors;
+    diagnostics;
     telemetry;
     files_checked;
     full_check_done;
@@ -532,7 +538,7 @@ let type_check_core
   (* Parse all changed files. This clears the file contents cache prior
       to parsing. *)
   let telemetry = Telemetry.duration telemetry ~key:"parse_start" ~start_time in
-  let errors = env.errorl in
+  let diagnostics = env.diagnostics in
   let (env, defs_per_file_parsed) =
     indexing genv env files_to_parse cgroup_steps
   in
@@ -702,7 +708,7 @@ let type_check_core
     Typing_deps.allow_dependency_table_reads env.deps_mode deptable_unlocked
   in
 
-  (* Checking this before starting typechecking because we want to attribtue
+  (* Checking this before starting typechecking because we want to attribute
    * big rechecks to rebases, even when restarting is disabled *)
   if genv.local_config.ServerLocalConfig.hg_aware_recheck_restart_threshold = 0
   then
@@ -759,13 +765,13 @@ let type_check_core
 
   (* The errors file must accumulate ALL errors. The call below to [do_type_checking ~files_to_check]
      will report all errors in [files_to_check].
-     But there might be other errors in [env.errorl] from a previous round of typecheck,
+     But there might be other errors in [env.diagnostics] from a previous round of typecheck,
      but which aren't in the current fanout i.e. not in [files_to_check]. We must report those too.
      It remains open for discussion whether the user-experience would be better to have these
      not-in-fanout errors reported here before the typecheck starts, or later after the typecheck
      has finished. We'll report them here for now. *)
   if do_errors_file then begin
-    push_errors_outside_files_to_errors_file errors ~files:to_recheck
+    push_errors_outside_files_to_errors_file diagnostics ~files:to_recheck
   end;
   (* And what about the files in [files_to_check] which we were going to typecheck but then
      the typecheck got interrupted  and they were returned from [do_typechecking] as [needs_recheck]?
@@ -790,7 +796,7 @@ let type_check_core
      files which are open in an IDE buffer). *)
   let {
     env;
-    errors;
+    diagnostics;
     telemetry = typecheck_telemetry;
     files_checked;
     full_check_done = _;
@@ -802,7 +808,7 @@ let type_check_core
     do_type_checking
       genv
       env
-      ~errors
+      ~diagnostics
       ~files_to_check:to_recheck
       ~lazy_check_later
       ~check_reason
@@ -820,7 +826,7 @@ let type_check_core
     Printf.sprintf
       "Typechecked %d files [%d errors]"
       total_rechecked_count
-      (Errors.count errors)
+      (Diagnostics.count diagnostics)
   in
   let t = Hh_logger.log_duration logstring t in
   Hh_logger.log "Total: %f\n%!" (t -. start_time);
@@ -911,7 +917,7 @@ let type_check_core
   let env =
     {
       env with
-      errorl = errors;
+      diagnostics;
       needs_recheck;
       full_check_status;
       init_env = { env.init_env with why_needed_full_check };
@@ -937,7 +943,7 @@ let type_check_core
     telemetry
     |> Telemetry.object_
          ~key:"errors"
-         ~value:(Errors.as_telemetry_summary env.errorl)
+         ~value:(Diagnostics.as_telemetry_summary env.diagnostics)
     |> Telemetry.object_
          ~key:"repo_states"
          ~value:(Watchman.RepoStates.get_as_telemetry ())
@@ -1000,11 +1006,11 @@ let type_check_core
   HackEventLogger.TypingErrors.log_errors
     ~type_check_end_id
     ~data:
-      (Errors.as_telemetry
+      (Diagnostics.as_telemetry
          ~limit:1000
          ~with_context_limit:10
-         ~error_to_string:Contextual_error_formatter.to_string
-         env.errorl);
+         ~error_to_string:Contextual_diagnostic_formatter.to_string
+         env.diagnostics);
   ( env,
     {
       CheckStats.reparse_count;
@@ -1059,8 +1065,8 @@ let type_check :
  fun genv env start_time cgroup_steps ->
   ServerUtils.with_exit_on_exception @@ fun () ->
   (*
-  (1) THE ENV MODEL FOR ERRORS...
-  env.{errorl, needs_recheck, disk_needs_parsing} are all persistent values that
+  (1) THE ENV MODEL FOR DIAGNOSTICS...
+  env.{diagnostics, needs_recheck, disk_needs_parsing} are all persistent values that
   might be adjusted as we go:
   * disk_needs_parsing gets initialized in serverLazyInit, augmented in serverMain both
     at the start of the loop and during file watcher interrupts, and in serverTypeCheck it
@@ -1068,14 +1074,14 @@ let type_check :
     (files-to-recheck is computed from these two).
   * needs_recheck gets augmented in serverTypeCheck from fanout/stale computation,
     and gets discharged by the files we end up typechecking
-  * errorl starts out empty and it grows+shrinks during serverTypeCheck
-    through calls to "errorl = Errors.incremental_update ~errorl ~new_errors ~phase ~files_examined".
-    This will shrink those errors that had been in errorl before, and were in files_examined,
+  * diagnostics starts out empty and it grows+shrinks during serverTypeCheck
+    through calls to "diagnostics = Diagnostics.incremental_update ~diagnostics ~new_errors ~phase ~files_examined".
+    This will shrink those diagnostics that had been in diagnostics before, and were in files_examined,
     but are not in new_errors. It will replace others. It will grow others.
-    And it will leave remaining in errorl anything that was not touched by files_examined
+    And it will leave remaining in diagnostics anything that was not touched by files_examined
     or which came from a different phase.
-    To stress, say you have 10k errors and make a small change in one file,
-    it is very possible that those 10k other files are not checked and the bulk of errorl
+    To stress, say you have 10k diagnostics and make a small change in one file,
+    it is very possible that those 10k other files are not checked and the bulk of diagnostics
     just continues through a recheck loop. (However, we do gather every single file
     mentioned in any of the *reasons* of those 10k files, and where those reasons intersect
     with changed-files then that causes need to redecl and compute fanout, and also need
@@ -1121,7 +1127,7 @@ let type_check :
     ~cancel_reason:env.why_needs_server_type_check;
 
   (* This is the main typecheck function. Its contract is to
-     (1) tweak env.errorl as needed based on what was rechecked , (2) write every single error to errors-file. *)
+     (1) tweak env.diagnostics as needed based on what was rechecked , (2) write every single error to errors-file. *)
   let (env, stats, telemetry, cancel_reason) =
     type_check_unsafe genv env start_time cgroup_steps
   in

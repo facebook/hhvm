@@ -37,10 +37,10 @@ let test () =
   let env =
     Test.setup_disk env [(a_file_name, a_contents); (b_file_name, b_contents)]
   in
-  Test.assert_no_errors env;
+  Test.assert_no_diagnostics env;
 
   let (env, _) =
     Test.change_files env [(a_file_name, a_contents_require_init)]
   in
-  Test.assert_env_errors env errors;
+  Test.assert_env_diagnostics env errors;
   ()

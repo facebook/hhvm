@@ -19,7 +19,7 @@ type status_liveness =
 module Server_status = struct
   type t = {
     liveness: status_liveness;
-    error_list: Errors.finalized_error list;
+    error_list: Diagnostics.finalized_diagnostic list;
     dropped_count: int;
     last_recheck_stats: Telemetry.t option;
     file_watcher_clock: ServerNotifierTypes.clock option;
@@ -357,25 +357,25 @@ type cst_search_input = {
 type _ t =
   | STATUS : {
       max_errors: int option;
-      error_filter: Filter_errors.Filter.t;
+      error_filter: Filter_diagnostics.Filter.t;
     }
       -> Server_status.t t
   | STATUS_SINGLE : {
       file_names: file_input list;
       max_errors: int option;
-      error_filter: Filter_errors.Filter.t;
+      error_filter: Filter_diagnostics.Filter.t;
       return_expanded_tast: bool;
       preexisting_warnings: bool;
           (** Whether to show preexisting warnings
             (the ones that were there prior to saved state revision) *)
     }
-      -> ((Errors.finalized_error list * int)
+      -> ((Diagnostics.finalized_diagnostic list * int)
          * Tast.program Tast_with_dynamic.t Relative_path.Map.t option)
          t
   | LOG_ERRORS : {
       files: string list;
       log_file: string option;
-      error_filter: Filter_errors.Filter.t;
+      error_filter: Filter_diagnostics.Filter.t;
       preexisting_warnings: bool;
     }
       -> unit t
@@ -456,12 +456,12 @@ and streamed =
   | SHOW of string
   | LIST_MODES
 
-type errors = Errors.finalized_error list [@@deriving show]
+type errors = Diagnostics.finalized_diagnostic list [@@deriving show]
 
 let equal_errors errors1 errors2 =
-  let errors1 = Errors.FinalizedErrorSet.of_list errors1 in
-  let errors2 = Errors.FinalizedErrorSet.of_list errors2 in
-  Errors.FinalizedErrorSet.equal errors1 errors2
+  let errors1 = Diagnostics.FinalizedErrorSet.of_list errors1 in
+  let errors2 = Diagnostics.FinalizedErrorSet.of_list errors2 in
+  Diagnostics.FinalizedErrorSet.equal errors1 errors2
 
 type diagnostic_errors = errors SMap.t [@@deriving eq, show]
 

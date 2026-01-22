@@ -69,9 +69,9 @@ let rec validate_capability env pos ty =
       ->
       ()
     | _ ->
-      Errors.add_error
+      Diagnostics.add_diagnostic
         Nast_check_error.(
-          to_user_error
+          to_user_diagnostic
           @@ Illegal_context
                { pos; name = Typing_print.full_decl (Env.get_tcopt env) ty }))
   | Tgeneric name when SN.Coeffects.is_generated_generic name -> ()
@@ -91,9 +91,9 @@ let rec validate_capability env pos ty =
           (match Env.get_typeconst env cls c with
           | Some tc ->
             if not tc.Typing_defs.ttc_is_ctx then
-              Errors.add_error
+              Diagnostics.add_diagnostic
                 Nast_check_error.(
-                  to_user_error
+                  to_user_diagnostic
                   @@ Illegal_context
                        {
                          pos;
@@ -107,9 +107,9 @@ let rec validate_capability env pos ty =
     in
     List.iter ~f:check_ctx_const candidates
   | _ ->
-    Errors.add_error
+    Diagnostics.add_diagnostic
       Nast_check_error.(
-        to_user_error
+        to_user_diagnostic
         @@ Illegal_context
              { pos; name = Typing_print.full_decl (Env.get_tcopt env) ty })
 

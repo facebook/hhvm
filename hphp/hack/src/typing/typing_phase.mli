@@ -42,7 +42,7 @@ type method_instantiation = {
  - Cyclic types
 
  Errors are handled using [ety_env.on_error]. If you want to ignore errors
- during localization, set this to [Errors.ignore_error]. *)
+ during localization, set this to [Diagnostics.ignore_error]. *)
 val localize :
   ety_env:expand_env ->
   env ->

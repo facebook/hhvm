@@ -74,6 +74,7 @@
 #include <folly/Format.h>
 
 #include <algorithm>
+#include <cxxabi.h>
 
 namespace HPHP::jit {
 

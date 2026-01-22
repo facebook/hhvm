@@ -3,10 +3,10 @@
 // when needs_concrete_override_check is enabled
 
 class Base {
-  public function foo(): void {}
+  public static function foo(): void {}
 }
 
 class Child extends Base {
   <<__NeedsConcrete>>
-  public function foo(): void {}
+  public static function foo(): void {}
 }

@@ -771,6 +771,15 @@ module Primary = struct
         class_name: string;
         meth_name: string;
       }
+    | Needs_concrete_on_instance_method of {
+        pos: Pos.t;
+        class_name: string;
+        meth_name: string;
+      }
+    | Needs_concrete_on_constructor of {
+        pos: Pos.t;
+        class_name: string;
+      }
     | Trivial_strict_eq of {
         pos: Pos.t;
         result: bool;

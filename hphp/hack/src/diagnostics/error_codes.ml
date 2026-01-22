@@ -793,6 +793,8 @@ module Typing = struct
     | OverrideSealed [@value 4503]
     | ExpectBoolForCondition [@value 4504]
     | NeedsConcreteInFinalClass [@value 4505]
+    | NeedsConcreteOnInstanceMethod [@value 4506]
+    | NeedsConcreteOnConstructor [@value 4507]
   (* Add new Typing codes here! Comment out when deprecating. *)
   [@@deriving enum, show { with_path = false }]
 

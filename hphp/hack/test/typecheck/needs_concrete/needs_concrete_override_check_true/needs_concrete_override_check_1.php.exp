@@ -1,6 +1,6 @@
-WARN: File "needs_concrete_override_check_1.php", line 11, characters 19-21:
+WARN: File "needs_concrete_override_check_1.php", line 11, characters 26-28:
 This method is declared as `__NeedsConcrete` but overrides a non-`__NeedsConcrete` method. Please add `__NeedsConcrete` to the overridden method or remove it from the current method. (The `__NeedsConcrete` attribute indicates that a method requires `static` to point to a concrete class) (Warn[12027])
-  File "needs_concrete_override_check_1.php", line 11, characters 19-21:
+  File "needs_concrete_override_check_1.php", line 11, characters 26-28:
   It is unsafe to declare this method as `__NeedsConcrete`, since it overrides a non-`__NeedsConcrete` method
-  File "needs_concrete_override_check_1.php", line 6, characters 19-21:
+  File "needs_concrete_override_check_1.php", line 6, characters 26-28:
   Previously defined here

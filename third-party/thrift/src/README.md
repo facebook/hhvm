@@ -31,6 +31,7 @@ Table of Contents
   * [Dependencies](#dependencies)
   * [Build](#build)
   * [Thrift Files](#thrift-files)
+  * [Python Build (thrift-python)](#python-build-thrift-python)
 * [C++ Static Reflection](#c-static-reflection)
 * [C++ Server Metrics](#c-server-metrics)
 
@@ -143,6 +144,77 @@ This generates a library called `file_name-<language>`. That is, for
 `Test.thrift` compiled as cpp2, it will generate the library `Test-cpp2`.
 This should be added as a dependency to any source or header file that contains
 an include to generated code.
+
+### Python Build (thrift-python)
+
+Build and install the thrift-python wheel for Python development.
+
+#### Container Build with Docker BuildKit (Recommended)
+
+```bash
+docker buildx build -t fbthrift-python-build -f .devcontainer/Containerfile .
+docker run -it -v $(pwd):/fbthrift -w /fbthrift fbthrift-python-build bash
+```
+
+#### Build and Test Commands
+
+```bash
+apt-get update
+python3 build/fbcode_builder/getdeps.py install-system-deps --recursive fbthrift-python
+python3 build/fbcode_builder/getdeps.py build fbthrift-python
+python3 build/fbcode_builder/getdeps.py test fbthrift-python
+pip3 install $(python3 build/fbcode_builder/getdeps.py show-inst-dir fbthrift-python)/share/thrift/wheels/thrift-*.whl
+python3 -c "from thrift.python.types import StructMeta; print('thrift-python installed successfully')"
+```
+
+**Note:** The wheel is portable and can be installed into any compatible Python environment (Python 3.8+).
+
+#### Other Ways to Build
+
+**Non-Container Build:**
+
+```bash
+sudo apt-get update
+sudo apt-get install -y python3-dev patchelf
+pip3 install cython auditwheel
+python3 build/fbcode_builder/getdeps.py --allow-system-packages install-system-deps --recursive fbthrift-python
+python3 build/fbcode_builder/getdeps.py --allow-system-packages build fbthrift-python
+python3 build/fbcode_builder/getdeps.py --allow-system-packages test fbthrift-python
+```
+
+**Build with Conda:**
+
+```bash
+conda create -n thrift-python-build python=3.10
+conda activate thrift-python-build
+conda install cython=3.2.2
+pip3 install auditwheel cmake==3.28.0
+sudo apt-get update
+sudo apt-get install -y patchelf
+python3 build/fbcode_builder/getdeps.py --allow-system-packages install-system-deps --recursive fbthrift-python
+python3 build/fbcode_builder/getdeps.py --allow-system-packages build fbthrift-python
+python3 build/fbcode_builder/getdeps.py --allow-system-packages test fbthrift-python
+```
+
+**Building Containers with Other Runtimes:**
+
+Legacy Docker:
+```bash
+docker build -t fbthrift-python-build -f .devcontainer/Containerfile .
+docker run -it -v $(pwd):/fbthrift -w /fbthrift fbthrift-python-build bash
+```
+
+Podman:
+```bash
+podman build -t fbthrift-python-build -f .devcontainer/Containerfile .
+podman run -it -v $(pwd):/fbthrift -w /fbthrift fbthrift-python-build bash
+```
+
+**Install the wheel** (for all non-container builds):
+
+```bash
+pip3 install $(python3 build/fbcode_builder/getdeps.py show-inst-dir fbthrift-python)/share/thrift/wheels/thrift-*.whl
+```
 
 ## C++ Static Reflection
 

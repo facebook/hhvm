@@ -17,11 +17,11 @@ namespace proxygen {
  */
 class ExMessageHandler : public RequestHandler {
  public:
-  virtual void onUpgrade(proxygen::UpgradeProtocol /*prot*/) noexcept override {
+  void onUpgrade(proxygen::UpgradeProtocol /*prot*/) noexcept override {
     LOG(FATAL) << "ExMessageHandler doesn't support upgrade";
   }
 
-  virtual ExMessageHandler* getExHandler() noexcept override {
+  ExMessageHandler* getExHandler() noexcept override {
     LOG(FATAL) << "getExHandler can't be called on ExMessageHandler";
   }
 };

@@ -16,5 +16,4 @@
 
 #pragma once
 
-#include <fatal/type/get_type.h>
-#include <thrift/lib/cpp2/reflection/reflection.h>
+#include <thrift/lib/cpp2/op/Get.h>

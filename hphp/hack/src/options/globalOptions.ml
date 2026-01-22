@@ -155,6 +155,7 @@ type t = {
   tco_strict_value_equality: bool;
   tco_enforce_sealed_subclasses: bool;
   tco_implicit_inherit_sdt: bool;
+  tco_repo_stdlib_path: string option;
   tco_explicit_consistent_constructors: int;
   tco_require_types_class_consts: int;
   tco_check_bool_for_condition: int;
@@ -280,6 +281,7 @@ let default =
     tco_strict_value_equality = false;
     tco_enforce_sealed_subclasses = false;
     tco_implicit_inherit_sdt = false;
+    tco_repo_stdlib_path = None;
     tco_explicit_consistent_constructors = 0;
     tco_require_types_class_consts = 0;
     tco_check_bool_for_condition = 0;
@@ -404,6 +406,7 @@ let set
     ?tco_strict_value_equality
     ?tco_enforce_sealed_subclasses
     ?tco_implicit_inherit_sdt
+    ?tco_repo_stdlib_path
     ?tco_explicit_consistent_constructors
     ?tco_require_types_class_consts
     ?tco_check_bool_for_condition
@@ -640,6 +643,8 @@ let set
         options.tco_enforce_sealed_subclasses;
     tco_implicit_inherit_sdt =
       setting tco_implicit_inherit_sdt options.tco_implicit_inherit_sdt;
+    tco_repo_stdlib_path =
+      setting_opt tco_repo_stdlib_path options.tco_repo_stdlib_path;
     tco_explicit_consistent_constructors =
       setting
         tco_explicit_consistent_constructors

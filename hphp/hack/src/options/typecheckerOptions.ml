@@ -202,6 +202,8 @@ let strict_value_equality t = t.GlobalOptions.tco_strict_value_equality
 
 let enforce_sealed_subclasses t = t.GlobalOptions.tco_enforce_sealed_subclasses
 
+let repo_stdlib_path t = t.GlobalOptions.tco_repo_stdlib_path
+
 let everything_sdt t = t.GlobalOptions.po.ParserOptions.everything_sdt
 
 let implicit_inherit_sdt t = t.GlobalOptions.tco_implicit_inherit_sdt

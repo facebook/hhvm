@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<1b5be01253c6a96178f3754acffe3fd3>>
+// @generated SignedSource<<62eb99fd42a633e69292002a5ff5eb3c>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -300,6 +300,8 @@ pub struct GlobalOptions {
     pub tco_enforce_sealed_subclasses: bool,
     /// Inherit SDT from parents, without writing <<__SupportDynamicType>>
     pub tco_implicit_inherit_sdt: bool,
+    /// Directory of HSL wrappers defined in the repo, warns on unbound name.
+    pub tco_repo_stdlib_path: Option<String>,
     /// Raises an error when a classish is declared <<__ConsistentConstruct>> but lacks an
     /// explicit constructor declaration. 0 does not raise, 1 raises for traits, 2 raises
     /// for all classish

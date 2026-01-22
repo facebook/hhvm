@@ -829,6 +829,7 @@ module Warning = struct
     | NullsafeMemberSelectOnNull [@value 12030]
     | RedundantNullsafePipe [@value 12031]
     | NullsafePipeOnNull [@value 12032]
+    | UnboundNameWarning [@value 12033]
       (* Add new Warning codes here! Comment out when deprecating. *)
   [@@deriving enum, ord, show { with_path = false }]
 end

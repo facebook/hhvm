@@ -460,23 +460,22 @@ let invalid_memoize_label attr_name pos =
         (Markdown_lite.md_codify attr_name) )
     []
 
+let unbound_name_kind = function
+  | Name_context.ConstantNamespace -> " (a global constant)"
+  | Name_context.FunctionNamespace -> " (a global function)"
+  | Name_context.TypeNamespace -> ""
+  | Name_context.ClassContext -> " (an object type)"
+  | Name_context.TraitContext -> " (a trait)"
+  | Name_context.ModuleNamespace -> " (a module)"
+  | Name_context.PackageNamespace -> " (a package)"
+
 let unbound_name pos name kind =
-  let kind_str =
-    match kind with
-    | Name_context.ConstantNamespace -> " (a global constant)"
-    | Name_context.FunctionNamespace -> " (a global function)"
-    | Name_context.TypeNamespace -> ""
-    | Name_context.ClassContext -> " (an object type)"
-    | Name_context.TraitContext -> " (a trait)"
-    | Name_context.ModuleNamespace -> " (a module)"
-    | Name_context.PackageNamespace -> " (a package)"
-  in
   User_error.make_err
     Error_code.(to_enum UnboundName)
     ( pos,
       "Unbound name: "
       ^ Markdown_lite.md_codify (Render.strip_ns name)
-      ^ kind_str )
+      ^ unbound_name_kind kind )
     []
 
 let unbound_attribute_name pos attr_name closest_attr_name =

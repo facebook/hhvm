@@ -6,5 +6,7 @@
  *
  *)
 
+val unbound_name_kind : Name_context.t -> string
+
 val to_user_error :
   Naming_error.t -> Custom_error_config.t -> (Pos.t, Pos_or_decl.t) User_error.t

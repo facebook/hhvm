@@ -617,6 +617,7 @@ impl HhConfig {
                 "allow_require_package_on_interface_methods",
                 default.tco_allow_require_package_on_interface_methods,
             )?,
+            tco_repo_stdlib_path: hhconfig.get_str("repo_stdlib_path").map(|p| p.to_string()),
         };
         let mut c = Self {
             opts,

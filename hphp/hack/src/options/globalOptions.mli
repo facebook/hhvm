@@ -198,6 +198,8 @@ type t = {
       (** All member of the __Sealed whitelist should be subclasses*)
   tco_implicit_inherit_sdt: bool;
       (** Inherit SDT from parents, without writing <<__SupportDynamicType>> *)
+  tco_repo_stdlib_path: string option;
+      (** Directory of HSL wrappers defined in the repo, warns on unbound name. *)
   tco_explicit_consistent_constructors: int;
       (** Raises an error when a classish is declared <<__ConsistentConstruct>> but lacks an
          explicit constructor declaration. 0 does not raise, 1 raises for traits, 2 raises
@@ -385,6 +387,7 @@ val set :
   ?tco_strict_value_equality:bool ->
   ?tco_enforce_sealed_subclasses:bool ->
   ?tco_implicit_inherit_sdt:bool ->
+  ?tco_repo_stdlib_path:string ->
   ?tco_explicit_consistent_constructors:int ->
   ?tco_require_types_class_consts:int ->
   ?tco_check_bool_for_condition:int ->

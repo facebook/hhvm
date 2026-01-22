@@ -51,5 +51,6 @@
   nast_eval
   nast_visitor
   naming_error_utils
+  typing_error_utils
   typing_utils
   utils_core))

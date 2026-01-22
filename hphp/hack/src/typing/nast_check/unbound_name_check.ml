@@ -39,10 +39,29 @@ let handle_unbound_name env custom_err_config (pos, name) kind =
   if String.equal name Naming_special_names.Classes.cUnknown then
     ()
   else begin
-    Errors.add_error
-      (Naming_error_utils.to_user_error
-         (Naming_error.Unbound_name { pos; name; kind })
-         custom_err_config);
+    let tcopt = Provider_context.get_tcopt env.ctx in
+    let warn =
+      match TypecheckerOptions.repo_stdlib_path tcopt with
+      | None -> false
+      | Some prefix ->
+        let file_path = Relative_path.suffix (Pos.filename pos) in
+        String.is_prefix file_path ~prefix
+    in
+    if warn then
+      Typing_warning_utils.add_
+        tcopt
+        Typing_warning.
+          ( pos,
+            Unbound_name_warning,
+            {
+              Unbound_name_warning.name;
+              kind_str = Naming_error_utils.unbound_name_kind kind;
+            } )
+    else
+      Errors.add_error
+        (Naming_error_utils.to_user_error
+           (Naming_error.Unbound_name { pos; name; kind })
+           custom_err_config);
     (* In addition to reporting errors, we also add to the global dependency table *)
     let dep =
       let open Name_context in

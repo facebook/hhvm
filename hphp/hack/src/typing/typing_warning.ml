@@ -233,6 +233,13 @@ module Redundant_nullsafe_operation = struct
   }
 end
 
+module Unbound_name_warning = struct
+  type t = {
+    name: string;
+    kind_str: string;
+  }
+end
+
 type (_, _) kind =
   | Sketchy_equality : (Sketchy_equality.t, warn) kind
   | Is_as_always : (Is_as_always.t, migrated) kind
@@ -256,5 +263,6 @@ type (_, _) kind =
   | Needs_concrete_override : (Needs_concrete_override.t, warn) kind
   | Expect_bool_for_condition : (Expect_bool_for_condition.t, warn) kind
   | Redundant_nullsafe_operation : (Redundant_nullsafe_operation.t, warn) kind
+  | Unbound_name_warning : (Unbound_name_warning.t, warn) kind
 
 type ('x, 'a) t = Pos.t * ('x, 'a) kind * 'x

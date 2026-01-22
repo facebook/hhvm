@@ -452,6 +452,7 @@ let load_config (config : Config_file_common.t) (options : GlobalOptions.t) :
     ?tco_strict_value_equality:(bool_opt "strict_value_equality" config)
     ?tco_enforce_sealed_subclasses:(bool_opt "enforce_sealed_subclasses" config)
     ?tco_implicit_inherit_sdt:(bool_opt "implicit_inherit_sdt" config)
+    ?tco_repo_stdlib_path:(string_opt "repo_stdlib_path" config)
     ?tco_explicit_consistent_constructors:
       (int_opt "explicit_consistent_constructors" config)
     ?tco_require_types_class_consts:

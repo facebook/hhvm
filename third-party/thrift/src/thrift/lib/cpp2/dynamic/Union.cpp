@@ -278,14 +278,16 @@ Union fromRecord(
   }
 
   const auto& [fieldId, fieldValue] = *fieldSet.begin();
+  // Extract fieldValue to a local variable to avoid structured binding capture
+  // issues
+  const auto& fv = fieldValue;
 
   for (size_t i = 0; i < fields.size(); ++i) {
     const auto& fieldDef = fields[i];
     if (fieldDef.identity().id() == fieldId) {
       ret.activeFieldDef_ = &fieldDef;
       ret.activeFieldData_ = fieldDef.type().visit([&](auto&& t) {
-        return ret.makeDatumPtr(
-            detail::Datum::make(fromRecord(fieldValue, t, mr)));
+        return ret.makeDatumPtr(detail::Datum::make(fromRecord(fv, t, mr)));
       });
       break;
     }

@@ -428,8 +428,10 @@ void optimizeJmps(Vunit& unit, bool makeSideExits, bool trustWidths) {
           assertx(unit.tuples[uses].size() == unit.tuples[defs].size());
 
           auto const irctx = code.back().irctx();
+          // uses is a reference into code.back(), must not be used after pop_back()
+          auto instr = copyargs{uses, defs};
           code.pop_back();
-          code.emplace_back(copyargs{uses, defs}, irctx);
+          code.emplace_back(std::move(instr), irctx);
           code.emplace_back(jmp{target}, irctx);
 
           unit.blocks[target].code[0] = nop{};

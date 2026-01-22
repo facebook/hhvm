@@ -41,7 +41,7 @@ module Naming = struct
   type t =
     | AddATypehint [@value 2001]
     (* | TypeparamAlokDEPRECATED [@value 2002] *)
-    | AssertArity [@value 2003]
+    (* | AssertArityDEPRECATED [@value 2003] *)
     | PrimitiveInvalidAlias [@value 2004]
     (* | CyclicConstraintDEPRECATED [@value 2005] *)
     | DidYouMeanNaming [@value 2006]
@@ -62,15 +62,15 @@ module Naming = struct
     | IllegalClass [@value 2021]
     | IllegalClassMeth [@value 2022]
     | IllegalConstant [@value 2023]
-    | IllegalFun [@value 2024]
-    | IllegalInstMeth [@value 2025]
+    (* | IllegalFunDEPRECATED [@value 2024] *)
+    (* | IllegalInstMethDEPRECATED [@value 2025] *)
     | IllegalMethCaller [@value 2026]
-    | IllegalMethFun [@value 2027]
+    (* | IllegalMethFunDEPRECATED [@value 2027] *)
     (* | IntegerInsteadOfIntDEPRECATED [@value 2028] *)
     | InvalidReqExtends [@value 2029]
     | InvalidReqImplements [@value 2030]
     (* | LocalConstDEPRECATED [@value 2031] *)
-    | LowercaseThis [@value 2032]
+    (* | LowercaseThisDEPRECATED [@value 2032] *)
     | MethodNameAlreadyBound [@value 2033]
     | MissingArrow [@value 2034]
     | MissingTypehint [@value 2035]
@@ -92,9 +92,9 @@ module Naming = struct
     | UnexpectedArrow [@value 2051]
     | UnexpectedTypedef [@value 2052]
     | UsingInternalClass [@value 2053]
-    | VoidCast [@value 2054]
+    (* | VoidCastDEPRECATED [@value 2054] *)
     | ObjectCast [@value 2055]
-    | UnsetCast [@value 2056]
+    (* | UnsetCastDEPRECATED [@value 2056] *)
     (* | NullsafePropertyAccessDEPRECATED [@value 2057] *)
     | IllegalTrait [@value 2058]
     (* | ShapeTypehintDEPRECATED [@value 2059] *)
@@ -118,9 +118,9 @@ module Naming = struct
     | ThisAsLexicalVariable [@value 2077]
     | DynamicClassNameInStrictMode [@value 2078]
     | XhpOptionalRequiredAttr [@value 2079]
-    | XhpRequiredWithDefault [@value 2080]
+    (* | XhpRequiredWithDefaultDEPRECATED [@value 2080] *)
     (* | VariableVariablesDisallowedDEPRECATED [@value 2081] *)
-    | ArrayTypehintsDisallowed [@value 2082]
+    (* | ArrayTypehintsDisallowedDEPRECATED [@value 2082] *)
     (* | ArrayLiteralsDisallowedDEPRECATED [@value 2083] *)
     | WildcardHintDisallowed [@value 2084]
     (* | AttributeClassNameConflictDEPRECATED [@value 2085] *)
@@ -140,8 +140,8 @@ module Naming = struct
     (* | InvalidReturnMutableHintDEPRECATED [@value 2099] *)
     (* | NoTparamsOnTypeConstsDEPRECATED [@value 2100] *)
     (* | PocketUniversesDuplicationDEPRECATED [@value 2101] *)
-    | UnsupportedTraitUseAs [@value 2102]
-    | UnsupportedInsteadOf [@value 2103]
+    (* | UnsupportedTraitUseAsDEPRECATED [@value 2102] *)
+    (* | UnsupportedInsteadOfDEPRECATED [@value 2103] *)
     (* | InvalidTraitUseAsVisibilityDEPRECATED [@value 2104] *)
     | InvalidFunPointer [@value 2105]
     | IllegalUseOfDynamicallyCallable [@value 2106]
@@ -160,7 +160,7 @@ module Naming = struct
     | InvalidReqClass [@value 2119]
     | ModuleDeclarationOutsideAllowedFiles [@value 2120]
     | DynamicMethodAccess [@value 2121]
-    | TypeConstantInEnumClassOutsideAllowedLocations [@value 2122]
+    (* | TypeConstantInEnumClassOutsideAllowedLocationsDEPRECATED [@value 2122] *)
     | InvalidBuiltinType [@value 2123]
     | InvalidMemoizeLabel [@value 2124]
     | DynamicHintDisallowed [@value 2125]
@@ -191,9 +191,9 @@ module NastCheck = struct
     | Magic [@value 3011]
     | NoConstructParent [@value 3012]
     | NonInterface [@value 3013]
-    | NotAbstractWithoutBody [@value 3014]
+    (* | NotAbstractWithoutBodyDEPRECATED [@value 3014] *)
     | NotInitialized [@value 3015]
-    | NotPublicInterface [@value 3016]
+    (* | NotPublicInterfaceDEPRECATED [@value 3016] *)
     | RequiresNonClass [@value 3017]
     | ReturnInFinally [@value 3018]
     | ReturnInGen [@value 3019]
@@ -258,8 +258,8 @@ module NastCheck = struct
     (* | ByRefDynamicCallDEPRECATED [@value 3078] *)
     (* | ByRefPropertyDEPRECATED [@value 3079] *)
     (* | ByRefCallDEPRECATED [@value 3080] *)
-    | SwitchNonTerminalDefault [@value 3081]
-    | SwitchMultipleDefault [@value 3082]
+    (* | SwitchNonTerminalDefaultDEPRECATED [@value 3081] *)
+    (* | SwitchMultipleDefaultDEPRECATED [@value 3082] *)
     | RepeatedRecordFieldName [@value 3083]
     | PhpLambdaDisallowed [@value 3084]
     | EntryPointArguments [@value 3085]
@@ -331,7 +331,7 @@ module Typing = struct
     | FieldKinds [@value 4036]
     (* | FieldMissingDEPRECATED [@value 4037] *)
     | FormatString [@value 4038]
-    | FunArityMismatch [@value 4039]
+    (* | FunArityMismatchDEPRECATED [@value 4039] *)
     | FunTooFewArgs [@value 4040]
     | FunTooManyArgs [@value 4041]
     | FunUnexpectedNonvariadic [@value 4042]
@@ -372,7 +372,7 @@ module Typing = struct
     | PreviousDefault [@value 4077]
     (* | PrivateClassMethDEPRECATED [@value 4078] *)
     (* | PrivateInstMethDEPRECATED [@value 4079] *)
-    | PrivateOverride [@value 4080]
+    (* | PrivateOverrideDEPRECATED [@value 4080] *)
     (* | ProtectedClassMethDEPRECATED [@value 4081] *)
     (* | ProtectedInstMethDEPRECATED [@value 4082] *)
     | ReadBeforeWrite [@value 4083]
@@ -415,7 +415,7 @@ module Typing = struct
     | DeclaredCovariant [@value 4120]
     | DeclaredContravariant [@value 4121]
     (* | UnsetInStrictDEPRECATED [@value 4122] *)
-    | StrictMembersNotKnown [@value 4123]
+    (* | StrictMembersNotKnownDEPRECATED [@value 4123] *)
     | ErasedGenericAtRuntime [@value 4124]
     (* | DynamicClassDEPRECATED [@value 4125] *)
     | AttributeTooManyArguments [@value 4126]
@@ -433,7 +433,7 @@ module Typing = struct
     | ShapeFieldsUnknown [@value 4138]
     | InvalidShapeRemoveKey [@value 4139]
     (* | MissingOptionalFieldDEPRECATED [@value 4140] *)
-    | ShapeFieldUnset [@value 4141]
+    (* | ShapeFieldUnsetDEPRECATED [@value 4141] *)
     | AbstractConcreteOverride [@value 4142]
     | LocalVariableModifedAndUsed [@value 4143]
     | LocalVariableModifedTwice [@value 4144]
@@ -456,9 +456,9 @@ module Typing = struct
     (* | AmbiguousMemberDEPRECATED [@value 4161] *)
     (* | InstanceofGenericClassnameDEPRECATED [@value 4162] *)
     | RequiredFieldIsOptional [@value 4163]
-    | FinalProperty [@value 4164]
+    (* | FinalPropertyDEPRECATED [@value 4164] *)
     | ArrayGetWithOptionalField [@value 4165]
-    | UnknownFieldDisallowedInShape [@value 4166]
+    (* | UnknownFieldDisallowedInShapeDEPRECATED [@value 4166] *)
     | NullableCast [@value 4167]
     (* | PassByRefAnnotationMissingDEPRECATED [@value 4168] *)
     (* | NonCallArgumentInSuspendDEPRECATED [@value 4169] *)
@@ -515,12 +515,12 @@ module Typing = struct
     (* | RxEnabledInNonRxContextDEPRECATED [@value 4220] *)
     (* | RxEnabledInLambdasDEPRECATED [@value 4221] *)
     | AmbiguousLambda [@value 4222]
-    | EllipsisStrictMode [@value 4223]
+    (* | EllipsisStrictModeDEPRECATED [@value 4223] *)
     (* | UntypedLambdaStrictModeDEPRECATED [@value 4224] *)
     (* | BindingRefInArrayDEPRECATED [@value 4225] *)
-    | OutputInWrongContext [@value 4226]
+    (* | OutputInWrongContextDEPRECATED [@value 4226] *)
     (* | SuperglobalInReactiveContextDEPRECATED [@value 4227] *)
-    | StaticPropertyInWrongContext [@value 4228]
+    (* | StaticPropertyInWrongContextDEPRECATED [@value 4228] *)
     (* | StaticInReactiveContextDEPRECATED [@value 4229] *)
     (* | GlobalInReactiveContextDEPRECATED [@value 4230] *)
     | WrongExpressionKindAttribute [@value 4231]
@@ -528,7 +528,7 @@ module Typing = struct
     (* | InvalidTypeForOnlyrxIfRxfuncParameterDEPRECATED [@value 4233] *)
     (* | MissingAnnotationForOnlyrxIfRxfuncParameterDEPRECATED [@value 4234] *)
     (* | CannotReturnBorrowedValueAsImmutableDEPRECATED [@value 4235] *)
-    | DeclOverrideMissingHint [@value 4236]
+    (* | DeclOverrideMissingHintDEPRECATED [@value 4236] *)
     (* | InvalidConditionallyReactiveCallDEPRECATED [@value 4237] *)
     | ExtendSealed [@value 4238]
     (* | SealedFinalDEPRECATED [@value 4239] *)
@@ -570,17 +570,17 @@ module Typing = struct
     | BadRegexPattern [@value 4275]
     (* | SketchyTruthinessTestDEPRECATED [@value 4276] *)
     | LateInitWithDefault [@value 4277]
-    | OverrideMemoizeLSB [@value 4278]
+    (* | OverrideMemoizeLSBDEPRECATED [@value 4278] *)
     | ClassVarTypeGenericParam [@value 4279]
-    | InvalidSwitchCaseValueType [@value 4280]
+    (* | InvalidSwitchCaseValueTypeDEPRECATED [@value 4280] *)
     | StringCast [@value 4281]
     | BadLateInitOverride [@value 4282]
     (* | EscapingMutableObjectDEPRECATED [@value 4283] *)
     | OverrideLSB [@value 4284]
     | MultipleConcreteDefs [@value 4285]
     (* | MoveInNonreactiveContextDEPRECATED [@value 4286] *)
-    | InvalidMoveUse [@value 4287]
-    | InvalidMoveTarget [@value 4288]
+    (* | InvalidMoveUseDEPRECATED [@value 4287] *)
+    (* | InvalidMoveTargetDEPRECATED [@value 4288] *)
     (* | IgnoredResultOfFreezeDEPRECATED [@value 4289] *)
     (* | IgnoredResultOfMoveDEPRECATED [@value 4290] *)
     | UnexpectedTy [@value 4291]
@@ -590,7 +590,7 @@ module Typing = struct
     (* | OptionNullDEPRECATED [@value 4295] *)
     | UnknownObjectMember [@value 4296]
     | UnknownType [@value 4297]
-    | InvalidArrayKeyRead [@value 4298]
+    (* | InvalidArrayKeyReadDEPRECATED [@value 4298] *)
     (* | ReferenceExprNotFunctionArgDEPRECATED [@value 4299] *)
     (* | RedundantRxConditionDEPRECATED [@value 4300] *)
     | RedeclaringMissingMethod [@value 4301]
@@ -643,7 +643,7 @@ module Typing = struct
     | ClassConstantTypeMismatch [@value 4348]
     (* | PocketUniversesExpansionDEPRECATED [@value 4349] *)
     (* | PocketUniversesTypingDEPRECATED [@value 4350] *)
-    | RecordInitValueDoesNotMatchHint [@value 4351]
+    (* | RecordInitValueDoesNotMatchHintDEPRECATED [@value 4351] *)
     | AbstractTconstNotAllowed [@value 4352]
     (* | NewAbstractRecordDEPRECATED [@value 4353] *)
     (* | RecordMissingRequiredFieldDEPRECATED [@value 4354] *)
@@ -652,7 +652,7 @@ module Typing = struct
     | InvalidDestructure [@value 4357]
     | StaticMethWithClassReifiedGeneric [@value 4358]
     | SplatArrayRequired [@value 4359]
-    | SplatArrayVariadic [@value 4360]
+    (* | SplatArrayVariadicDEPRECATED [@value 4360] *)
     | ExceptionOccurred [@value 4361]
     | InvalidReifiedFunctionPointer [@value 4362]
     | BadFunctionPointerConstruction [@value 4363]
@@ -670,16 +670,16 @@ module Typing = struct
     | MethCallerTrait [@value 4375]
     (* | PocketUniversesAttributesDEPRECATED [@value 4376] *)
     | DuplicateInterface [@value 4377]
-    | TypeParameterNameAlreadyUsedNonShadow [@value 4378]
-    | IllegalInformationFlow [@value 4379]
-    | ContextImplicitPolicyLeakage [@value 4380]
+    (* | TypeParameterNameAlreadyUsedNonShadowDEPRECATED [@value 4378] *)
+    (* | IllegalInformationFlowDEPRECATED [@value 4379] *)
+    (* | ContextImplicitPolicyLeakageDEPRECATED [@value 4380] *)
     | ReifiedFunctionReference [@value 4381]
     (* | ClassMethAbstractCall [@value 4382] *)
     | KindMismatch [@value 4383]
-    | UnboundNameTypeConstantAccess [@value 4384]
-    | UnknownInformationFlow [@value 4385]
-    | CallsiteCIPPMismatch [@value 4386]
-    | NonpureFunctionCall [@value 4387]
+    (* | UnboundNameTypeConstantAccessDEPRECATED [@value 4384] *)
+    (* | UnknownInformationFlowDEPRECATED [@value 4385] *)
+    (* | CallsiteCIPPMismatchDEPRECATED [@value 4386] *)
+    (* | NonpureFunctionCallDEPRECATED [@value 4387] *)
     | IncompatibleEnumInclusion [@value 4388]
     | RedeclaringClassishConstant [@value 4389]
     | CallCoeffects [@value 4390]
@@ -697,10 +697,10 @@ module Typing = struct
     | ImplementsDynamic [@value 4402]
     | SubtypeCoeffects [@value 4403]
     | ImmutableLocal [@value 4404]
-    | EnumClassesReservedSyntax [@value 4405]
+    (* | EnumClassesReservedSyntaxDEPRECATED [@value 4405] *)
     | NonsenseMemberSelection [@value 4406]
     | ConsiderMethCaller [@value 4407]
-    | EnumSupertypingReservedSyntax [@value 4408]
+    (* | EnumSupertypingReservedSyntaxDEPRECATED [@value 4408] *)
     | ReadonlyValueModified [@value 4409]
     (* | ReadonlyVarMismatchDEPRECATED [@value 4410] *)
     | ReadonlyMismatch [@value 4411]
@@ -749,7 +749,7 @@ module Typing = struct
     | CallLvalue [@value 4454]
     | UnsafeCastAwait [@value 4455]
     | ThisFinal [@value 4457]
-    | ExactClassFinal [@value 4458]
+    (* | ExactClassFinalDEPRECATED [@value 4458] *)
     (* | GlobalVariableWriteDEPRECATED [@value 4459] *)
     (* | GlobalVariableInFunctionCallDEPRECATED [@value 4460] *)
     (* | MemoizedFunctionCallDEPRECATED [@value 4461] *)
@@ -781,7 +781,7 @@ module Typing = struct
     | StringToClassPointer [@value 4488]
     | SwitchNeedsDefault [@value 4489]
     | SimpliHackRunPrompt [@value 4493]
-    | InvalidReifiedArgumentFIXMEable [@value 4494]
+    (* | InvalidReifiedArgumentFIXMEableDEPRECATED [@value 4494] *)
     | SimpliHackEvalError [@value 4495]
     | ProtectedInternalMethCaller [@value 4496]
     | StaticPropOnTrait [@value 4497]
@@ -789,7 +789,7 @@ module Typing = struct
     | MissingNamedArgs [@value 4499]
     | UnexpectedNamedArgs [@value 4500]
     | DuplicateNamedArgs [@value 4501]
-    | LambdaNamedParamMismatch [@value 4502]
+    (* | LambdaNamedParamMismatchDEPRECATED [@value 4502] *)
     | OverrideSealed [@value 4503]
     | ExpectBoolForCondition [@value 4504]
     | NeedsConcreteInFinalClass [@value 4505]

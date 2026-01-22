@@ -25,8 +25,6 @@ type unsupported_feature =
   | Ft_variance
 
 type t =
-  | Unsupported_trait_use_as of Pos.t
-  | Unsupported_instead_of of Pos.t
   | Unexpected_arrow of {
       pos: Pos.t;
       cname: string;
@@ -123,10 +121,6 @@ type t =
       in_req_extends: bool;
     }
   | Nonstatic_property_with_lsb of Pos.t
-  | Lowercase_this of {
-      pos: Pos.t;
-      ty_name: string;
-    }
   | Classname_param of Pos.t
   | Tparam_applied_to_type of {
       pos: Pos.t;
@@ -147,10 +141,7 @@ type t =
     }
   | Illegal_CLASS of Pos.t
   | Illegal_TRAIT of Pos.t
-  | Illegal_fun of Pos.t
   | Illegal_member_variable_class of Pos.t
-  | Illegal_meth_fun of Pos.t
-  | Illegal_inst_meth of Pos.t
   | Illegal_meth_caller of Pos.t
   | Illegal_class_meth of Pos.t
   | Lvar_in_obj_get of {
@@ -198,11 +189,6 @@ type t =
       pos: Pos.t;
       attr_name: string;
     }
-  | Xhp_required_with_default of {
-      pos: Pos.t;
-      attr_name: string;
-    }
-  | Array_typehints_disallowed of Pos.t
   | Wildcard_hint_disallowed of Pos.t
   | Wildcard_tparam_disallowed of Pos.t
   | Illegal_use_of_dynamically_callable of {

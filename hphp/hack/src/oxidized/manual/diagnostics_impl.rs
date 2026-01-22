@@ -204,36 +204,6 @@ impl Naming {
             ],
         )
     }
-
-    pub fn unsupported_trait_use_as(p: Pos) -> Diagnostic {
-        UserDiagnostic::new(
-            Severity::Err,
-            Self::UnsupportedTraitUseAs as isize,
-            Message(
-                p,
-                "Trait use as is a PHP feature that is unsupported in Hack".into(),
-            ),
-            vec![],
-            Explanation::Empty,
-            vec![],
-            vec![],
-        )
-    }
-
-    pub fn unsupported_instead_of(p: Pos) -> Diagnostic {
-        UserDiagnostic::new(
-            Severity::Err,
-            Self::UnsupportedInsteadOf as isize,
-            Message(
-                p,
-                "insteadof is a PHP feature that is unsupported in Hack".into(),
-            ),
-            vec![],
-            Explanation::Empty,
-            vec![],
-            vec![],
-        )
-    }
 }
 
 impl NastCheck {

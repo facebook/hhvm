@@ -127,22 +127,6 @@ let xhp_optional_required_attr pos id =
       ^ " cannot be marked as nullable and `@required`" )
     []
 
-let xhp_required_with_default pos id =
-  User_diagnostic.make_err
-    Error_code.(to_enum XhpRequiredWithDefault)
-    ( pos,
-      "XHP attribute "
-      ^ Markdown_lite.md_codify id
-      ^ " cannot be marked `@required` and provide a default" )
-    []
-
-let array_typehints_disallowed pos =
-  User_diagnostic.make_err
-    Error_code.(to_enum ArrayTypehintsDisallowed)
-    ( pos,
-      "Array typehints are no longer legal; use `varray` or `darray` instead" )
-    []
-
 let wildcard_hint_disallowed pos =
   User_diagnostic.make_err
     Error_code.(to_enum WildcardHintDisallowed)
@@ -182,20 +166,6 @@ let illegal_use_of_dynamically_callable attr_pos meth_pos vis =
       ( Pos_or_decl.of_raw_pos meth_pos,
         sprintf "But this method is %s" (Markdown_lite.md_codify visibility) );
     ]
-
-let unsupported_trait_use_as pos =
-  User_diagnostic.make_err
-    Error_code.(to_enum UnsupportedTraitUseAs)
-    ( pos,
-      "Aliasing with `as` within a trait `use` is a PHP feature that is unsupported in Hack"
-    )
-    []
-
-let unsupported_instead_of pos =
-  User_diagnostic.make_err
-    Error_code.(to_enum UnsupportedInsteadOf)
-    (pos, "`insteadof` is a PHP feature that is unsupported in Hack")
-    []
 
 let unexpected_arrow pos cname =
   User_diagnostic.make_err
@@ -520,7 +490,7 @@ let unbound_attribute_name pos attr_name closest_attr_name =
 let this_no_argument pos =
   User_diagnostic.make_err
     Error_code.(to_enum ThisNoArgument)
-    (pos, "`this` expects no arguments")
+    (pos, "`this` type takes no arguments")
     []
 
 let object_cast pos =
@@ -583,14 +553,6 @@ let nonstatic_property_with_lsb pos =
   User_diagnostic.make_err
     Error_code.(to_enum NonstaticPropertyWithLSB)
     (pos, "`__LSB` attribute may only be used on static properties")
-    []
-
-let lowercase_this pos ty_name =
-  User_diagnostic.make_err
-    Error_code.(to_enum LowercaseThis)
-    ( pos,
-      Format.sprintf "Invalid Hack type %s. Use `this` instead."
-      @@ Markdown_lite.md_codify ty_name )
     []
 
 let classname_param pos =
@@ -670,38 +632,12 @@ let illegal_TRAIT pos =
     (pos, "Using `__TRAIT__` outside a trait")
     []
 
-let illegal_fun pos =
-  User_diagnostic.make_err
-    Error_code.(to_enum IllegalFun)
-    ( pos,
-      "The argument to `fun()` must be a single-quoted, constant "
-      ^ "literal string representing a valid function name." )
-    []
-
 let illegal_member_variable_class pos =
   User_diagnostic.make_err
     Error_code.(to_enum IllegalMemberVariableClass)
     ( pos,
       "Cannot declare a constant named `class`. The name `class` is reserved for the class constant that represents the name of the class"
     )
-    []
-
-let illegal_meth_fun pos =
-  User_diagnostic.make_err
-    Error_code.(to_enum IllegalMethFun)
-    ( pos,
-      "String argument to `fun()` contains `:`;"
-      ^ " for static class methods, use"
-      ^ " `class_meth(Cls::class, 'method_name')`, not `fun('Cls::method_name')`"
-    )
-    []
-
-let illegal_inst_meth pos =
-  User_diagnostic.make_err
-    Error_code.(to_enum IllegalInstMeth)
-    ( pos,
-      "The argument to `inst_meth()` must be an expression and a "
-      ^ "constant literal string representing a valid method name." )
     []
 
 let illegal_meth_caller pos =
@@ -940,8 +876,6 @@ let to_user_diagnostic t custom_err_config =
   in
   let f =
     match t with
-    | Unsupported_trait_use_as pos -> unsupported_trait_use_as pos
-    | Unsupported_instead_of pos -> unsupported_instead_of pos
     | Unexpected_arrow { pos; cname } -> unexpected_arrow pos cname
     | Missing_arrow { pos; cname } -> missing_arrow pos cname
     | Disallowed_xhp_type { pos; ty_name } -> disallowed_xhp_type pos ty_name
@@ -982,7 +916,6 @@ let to_user_diagnostic t custom_err_config =
     | This_type_forbidden { pos; in_extends; in_req_extends } ->
       this_type_forbidden pos in_extends in_req_extends
     | Nonstatic_property_with_lsb pos -> nonstatic_property_with_lsb pos
-    | Lowercase_this { pos; ty_name } -> lowercase_this pos ty_name
     | Classname_param pos -> classname_param pos
     | Tparam_applied_to_type { pos; tparam_name } ->
       tparam_applied_to_type pos tparam_name
@@ -995,10 +928,7 @@ let to_user_diagnostic t custom_err_config =
     | Expected_collection { pos; cname } -> expected_collection pos cname
     | Illegal_CLASS pos -> illegal_CLASS pos
     | Illegal_TRAIT pos -> illegal_TRAIT pos
-    | Illegal_fun pos -> illegal_fun pos
     | Illegal_member_variable_class pos -> illegal_member_variable_class pos
-    | Illegal_meth_fun pos -> illegal_meth_fun pos
-    | Illegal_inst_meth pos -> illegal_inst_meth pos
     | Illegal_meth_caller pos -> illegal_meth_caller pos
     | Illegal_class_meth pos -> illegal_class_meth pos
     | Illegal_constant pos -> illegal_constant pos
@@ -1026,9 +956,6 @@ let to_user_diagnostic t custom_err_config =
       dynamic_class_name_in_strict_mode pos
     | Xhp_optional_required_attr { pos; attr_name } ->
       xhp_optional_required_attr pos attr_name
-    | Xhp_required_with_default { pos; attr_name } ->
-      xhp_required_with_default pos attr_name
-    | Array_typehints_disallowed pos -> array_typehints_disallowed pos
     | Wildcard_hint_disallowed pos -> wildcard_hint_disallowed pos
     | Wildcard_tparam_disallowed pos -> wildcard_param_disallowed pos
     | Illegal_use_of_dynamically_callable { meth_pos; vis; attr_pos } ->

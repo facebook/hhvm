@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<185a65dd88cf546da34034832828aa94>>
+// @generated SignedSource<<6b59d45802f1e159790b0db216682f66>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -124,10 +124,6 @@ arena_deserializer::impl_deserialize_in_arena!(UnsupportedFeature);
 )]
 #[repr(C, u8)]
 pub enum NamingError {
-    #[rust_to_ocaml(name = "Unsupported_trait_use_as")]
-    UnsupportedTraitUseAs(pos::Pos),
-    #[rust_to_ocaml(name = "Unsupported_instead_of")]
-    UnsupportedInsteadOf(pos::Pos),
     #[rust_to_ocaml(name = "Unexpected_arrow")]
     UnexpectedArrow { pos: pos::Pos, cname: String },
     #[rust_to_ocaml(name = "Missing_arrow")]
@@ -228,8 +224,6 @@ pub enum NamingError {
     },
     #[rust_to_ocaml(name = "Nonstatic_property_with_lsb")]
     NonstaticPropertyWithLsb(pos::Pos),
-    #[rust_to_ocaml(name = "Lowercase_this")]
-    LowercaseThis { pos: pos::Pos, ty_name: String },
     #[rust_to_ocaml(name = "Classname_param")]
     ClassnameParam(pos::Pos),
     #[rust_to_ocaml(name = "Tparam_applied_to_type")]
@@ -254,14 +248,8 @@ pub enum NamingError {
     IllegalCLASS(pos::Pos),
     #[rust_to_ocaml(name = "Illegal_TRAIT")]
     IllegalTRAIT(pos::Pos),
-    #[rust_to_ocaml(name = "Illegal_fun")]
-    IllegalFun(pos::Pos),
     #[rust_to_ocaml(name = "Illegal_member_variable_class")]
     IllegalMemberVariableClass(pos::Pos),
-    #[rust_to_ocaml(name = "Illegal_meth_fun")]
-    IllegalMethFun(pos::Pos),
-    #[rust_to_ocaml(name = "Illegal_inst_meth")]
-    IllegalInstMeth(pos::Pos),
     #[rust_to_ocaml(name = "Illegal_meth_caller")]
     IllegalMethCaller(pos::Pos),
     #[rust_to_ocaml(name = "Illegal_class_meth")]
@@ -317,10 +305,6 @@ pub enum NamingError {
     DynamicClassNameInStrictMode(pos::Pos),
     #[rust_to_ocaml(name = "Xhp_optional_required_attr")]
     XhpOptionalRequiredAttr { pos: pos::Pos, attr_name: String },
-    #[rust_to_ocaml(name = "Xhp_required_with_default")]
-    XhpRequiredWithDefault { pos: pos::Pos, attr_name: String },
-    #[rust_to_ocaml(name = "Array_typehints_disallowed")]
-    ArrayTypehintsDisallowed(pos::Pos),
     #[rust_to_ocaml(name = "Wildcard_hint_disallowed")]
     WildcardHintDisallowed(pos::Pos),
     #[rust_to_ocaml(name = "Wildcard_tparam_disallowed")]

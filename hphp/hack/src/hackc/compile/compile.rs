@@ -385,8 +385,6 @@ fn emit_fatal_naming_phase_error(err: &NamingPhaseError) -> Result<Unit, Error> 
 
 fn emit_fatal_naming_error(err: &NamingError) -> Result<Unit, Error> {
     match err {
-        NamingError::UnsupportedTraitUseAs(_) => todo!(),
-        NamingError::UnsupportedInsteadOf(_) => todo!(),
         NamingError::UnexpectedArrow { .. } => todo!(),
         NamingError::MissingArrow { .. } => todo!(),
         NamingError::DisallowedXhpType { .. } => todo!(),
@@ -418,7 +416,6 @@ fn emit_fatal_naming_error(err: &NamingError) -> Result<Unit, Error> {
         NamingError::StaticOutsideClass(_) => todo!(),
         NamingError::ThisTypeForbidden { .. } => todo!(),
         NamingError::NonstaticPropertyWithLsb(_) => todo!(),
-        NamingError::LowercaseThis { .. } => todo!(),
         NamingError::ClassnameParam(_) => todo!(),
         NamingError::TparamAppliedToType { .. } => todo!(),
         NamingError::ShadowedTparam { .. } => todo!(),
@@ -429,10 +426,7 @@ fn emit_fatal_naming_error(err: &NamingError) -> Result<Unit, Error> {
         NamingError::ExpectedCollection { .. } => todo!(),
         NamingError::IllegalCLASS(_) => todo!(),
         NamingError::IllegalTRAIT(_) => todo!(),
-        NamingError::IllegalFun(_) => todo!(),
         NamingError::IllegalMemberVariableClass(_) => todo!(),
-        NamingError::IllegalMethFun(_) => todo!(),
-        NamingError::IllegalInstMeth(_) => todo!(),
         NamingError::IllegalMethCaller(_) => todo!(),
         NamingError::IllegalClassMeth(_) => todo!(),
         NamingError::LvarInObjGet { .. } => todo!(),
@@ -449,8 +443,6 @@ fn emit_fatal_naming_error(err: &NamingError) -> Result<Unit, Error> {
         NamingError::TooFewTypeArguments(_) => todo!(),
         NamingError::DynamicClassNameInStrictMode(_) => todo!(),
         NamingError::XhpOptionalRequiredAttr { .. } => todo!(),
-        NamingError::XhpRequiredWithDefault { .. } => todo!(),
-        NamingError::ArrayTypehintsDisallowed(_) => todo!(),
         NamingError::WildcardHintDisallowed(_) => todo!(),
         NamingError::WildcardTparamDisallowed(_) => todo!(),
         NamingError::IllegalUseOfDynamicallyCallable { .. } => todo!(),

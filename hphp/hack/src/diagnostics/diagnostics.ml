@@ -96,9 +96,6 @@ let get_last error_map =
     | [] -> None
     | e :: _ -> Some e)
 
-let iter t ~f =
-  Relative_path.Map.iter t ~f:(fun _path errors -> List.iter errors ~f)
-
 module Error = struct
   type t = diagnostic [@@deriving ord]
 
@@ -620,10 +617,6 @@ module type Error_category = Error_category.S
 (* HH_FIXMEs hook *)
 (*****************************************************************************)
 
-let error_codes_treated_strictly = ref (ISet.of_list [])
-
-let is_strict_code code = ISet.mem code !error_codes_treated_strictly
-
 (* The 'phps FixmeAllHackErrors' tool must be kept in sync with this list *)
 let hard_banned_codes =
   ISet.of_list
@@ -993,17 +986,6 @@ let fold_errors
   files_t_fold t ~init ~f:(fun source errors acc ->
       List.fold_right errors ~init:acc ~f:(f source))
 
-let fold_errors_in
-    ?(drop_fixmed = true)
-    (t : t)
-    ~(file : Relative_path.t)
-    ~(init : 'a)
-    ~(f : diagnostic -> 'a -> 'a) =
-  let t = drop_fixmes_if t drop_fixmed in
-  match Relative_path.Map.find_opt t file with
-  | None -> init
-  | Some errors -> List.fold_right errors ~init ~f
-
 (** Get paths that have errors which haven't been HH_FIXME'd. *)
 let get_failed_files (err : t) =
   let err = drop_fixmed_errors_in_files err in
@@ -1154,9 +1136,6 @@ let as_telemetry
 (*****************************************************************************)
 (* Error code printing. *)
 (*****************************************************************************)
-
-let unimplemented_feature pos msg =
-  add User_diagnostic.Err 0 pos ("Feature not implemented: " ^ msg)
 
 let experimental_feature pos msg =
   add User_diagnostic.Err 0 pos ("Cannot use experimental feature: " ^ msg)

@@ -29,8 +29,6 @@ type t [@@deriving eq, show]
 
 type severity = User_diagnostic.severity
 
-val iter : t -> f:(diagnostic -> unit) -> unit
-
 module Error : sig
   type t = diagnostic
 
@@ -64,8 +62,6 @@ val add_diagnostic : diagnostic -> unit
 
 (* Error codes that can be suppressed in strict mode with a FIXME based on configuration. *)
 val allowed_fixme_codes_strict : ISet.t ref
-
-val is_strict_code : int -> bool
 
 val set_allow_errors_in_default_path : bool -> unit
 
@@ -183,8 +179,6 @@ val drop_fixmed_errors_in_files : t -> t
 
 val from_file_diagnostic_list : (Relative_path.t * diagnostic) list -> t
 
-val per_file_diagnostic_count : ?drop_fixmed:bool -> per_file_diagnostics -> int
-
 val get_file_diagnostics :
   ?drop_fixmed:bool -> t -> Relative_path.t -> per_file_diagnostics
 
@@ -199,14 +193,6 @@ val fold_errors :
   t ->
   init:'a ->
   f:(Relative_path.t -> diagnostic -> 'a -> 'a) ->
-  'a
-
-val fold_errors_in :
-  ?drop_fixmed:bool ->
-  t ->
-  file:Relative_path.t ->
-  init:'a ->
-  f:(diagnostic -> 'a -> 'a) ->
   'a
 
 (** Get paths that have errors which haven't been HH_FIXME'd. *)
@@ -237,8 +223,6 @@ val sort : diagnostic list -> diagnostic list
  ***************************************)
 
 val internal_error : Pos.t -> string -> unit
-
-val unimplemented_feature : Pos.t -> string -> unit
 
 val experimental_feature : Pos.t -> string -> unit
 

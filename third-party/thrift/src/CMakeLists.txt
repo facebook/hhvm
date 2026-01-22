@@ -93,6 +93,17 @@ option(thriftpy3
   "Include thrift-py3 library and extensions in the build, requires Cython"
   OFF
 )
+option(thrift_python
+  "Include thrift-python library and extensions in the build, requires Cython"
+  OFF
+)
+
+# thrift_python requires position-independent code so static libs can be
+# linked into the extension .so files.
+if (thrift_python)
+  set(CMAKE_POSITION_INDEPENDENT_CODE ON CACHE BOOL
+    "Forced ON because thrift_python requires position-independent code" FORCE)
+endif()
 
 find_package(folly CONFIG REQUIRED)
 

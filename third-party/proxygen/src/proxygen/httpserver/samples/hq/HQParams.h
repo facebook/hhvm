@@ -82,6 +82,9 @@ struct HQServerParams : public HQBaseParams {
   size_t serverThreads{0};
   std::string ccpConfig;
   folly::Optional<int64_t> rateLimitPerThread;
+  // UDP socket buffer sizes (0 = use system default)
+  size_t udpSendBufferSize{0};
+  size_t udpRecvBufferSize{0};
 };
 
 struct HQClientParams : public HQBaseParams {

@@ -10,6 +10,7 @@
 
 #include <ostream>
 
+#include <folly/io/SocketOptionMap.h>
 #include <quic/common/udpsocket/FollyQuicAsyncUDPSocket.h>
 #include <string>
 #include <vector>
@@ -284,6 +285,22 @@ HQServer::HQServer(
   server_->setHealthCheckToken("health");
   server_->setSupportedVersion(params_.quicVersions);
   server_->setFizzContext(std::move(fizzCtx));
+
+  // Apply UDP socket buffer size options if specified
+  folly::SocketOptionMap socketOptions;
+  if (params_.udpRecvBufferSize > 0) {
+    socketOptions[{
+        SOL_SOCKET, SO_RCVBUF, folly::SocketOptionKey::ApplyPos::POST_BIND}] =
+        static_cast<int>(params_.udpRecvBufferSize);
+  }
+  if (params_.udpSendBufferSize > 0) {
+    socketOptions[{
+        SOL_SOCKET, SO_SNDBUF, folly::SocketOptionKey::ApplyPos::POST_BIND}] =
+        static_cast<int>(params_.udpSendBufferSize);
+  }
+  if (!socketOptions.empty()) {
+    server_->setSocketOptions(socketOptions);
+  }
 
   if (params_.rateLimitPerThread) {
     server_->setRateLimit(

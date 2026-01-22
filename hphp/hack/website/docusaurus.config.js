@@ -13,7 +13,8 @@ const darkCodeTheme = require('prism-react-renderer').themes.vsDark;
   tagline: 'Moving fast with high-performance Hack, a programming language for building reliable websites at epic scale',
   url: 'https://docs.hhvm.com',
   baseUrl: process.env.DOCUSAURUS_BASE_URL || '/',
-  onBrokenLinks: 'throw',
+  // temp: use 'warn' to circumvent link-checker getting confused by double `/hack`-prefix on internally hosted static docs
+  onBrokenLinks: 'warn',
   trailingSlash: true,
   favicon: 'img/favicon.ico',
   organizationName: 'facebook',

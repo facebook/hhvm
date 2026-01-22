@@ -22094,10 +22094,14 @@ void Index::refine_public_statics(DependencyContextSet& deps) {
   }
   m_data->seenPublicSPropMutations = true;
 
+  std::vector<DependencyContextSet> deps_vec{parallel::num_threads};
+
   // Refine known class state
   parallel::for_each(
     m_data->allClassInfos,
-    [&] (std::unique_ptr<ClassInfo>& cinfo) {
+    [&] (std::unique_ptr<ClassInfo>& cinfo, size_t worker) {
+      assertx(worker < deps_vec.size());
+
       for (auto const& prop : cinfo->cls->properties) {
         if (!(prop.attrs & (AttrPublic|AttrProtected)) ||
             !(prop.attrs & AttrStatic)) {
@@ -22167,7 +22171,7 @@ void Index::refine_public_statics(DependencyContextSet& deps) {
         // maintain correctness.
         if (effectiveType.strictSubtypeOf(entry.inferredType)) {
           if (entry.refinements + 1 < options.publicSPropRefineLimit) {
-            find_deps(*m_data, &prop, Dep::PublicSProp, deps);
+            find_deps(*m_data, &prop, Dep::PublicSProp, deps_vec[worker]);
             entry.inferredType = std::move(effectiveType);
             ++entry.refinements;
           } else {
@@ -22181,6 +22185,10 @@ void Index::refine_public_statics(DependencyContextSet& deps) {
       }
     }
   );
+
+  for (auto& dv : deps_vec) {
+    for (auto& d : dv) deps.insert(d);
+  }
 }
 
 bool Index::frozen() const {

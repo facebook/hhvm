@@ -62,10 +62,10 @@ std::string name(const std::type_info& type) {
   std::unique_ptr<char, decltype(&std::free)> result(
     __cxxabiv1::__cxa_demangle(type.name(), nullptr, &length, &status),
     &std::free);
-  return result.get();
+  return result.get() ? result.get() : type.name();
 #else
   return type.name();
-#endif // _GNUG_
+#endif // __GNUG__
 }
 
 BytecodeVec decodeBytecodeVec(const Buffer& buffer, size_t& pos);
@@ -96,9 +96,8 @@ T decode(const Buffer& buffer, size_t& pos) {
     result.unchangedBcs = DECODE_MEMBER(unchangedBcs);
     result.replacedBcs  = decodeBytecodeVec(buffer, pos);
     return result;
-  }
 
-  if constexpr (std::is_same<T, FCallArgs>::value) {
+  } else if constexpr (std::is_same<T, FCallArgs>::value) {
     using FCA = FCallArgsBase;
     auto const base     = decode<FCA>(buffer, pos);
     auto const context  = decode<SString>(buffer, pos);
@@ -120,21 +119,18 @@ T decode(const Buffer& buffer, size_t& pos) {
     return FCallArgs(static_cast<FCallArgsFlags>(base.flags & FCA::kInternalFlags),
                      base.numArgs, base.numRets, std::move(inout),
                      std::move(readonly), aeTarget, context);
-  }
 
-  if constexpr (std::is_same<T, IterArgs>::value) {
+  } else if constexpr (std::is_same<T, IterArgs>::value) {
     auto const flags  = DECODE_MEMBER(flags);
     auto const iterId = DECODE_MEMBER(iterId);
     return T(flags, iterId);
-  }
 
-  if constexpr (std::is_same<T, LocalRange>::value) {
+  } else if constexpr (std::is_same<T, LocalRange>::value) {
     auto const first = DECODE_MEMBER(first);
     auto const count = DECODE_MEMBER(count);
     return T{first, count};
-  }
 
-  if constexpr (std::is_same<T, const StringData*>::value) {
+  } else if constexpr (std::is_same<T, const StringData*>::value) {
     auto const lo = decode_as_bytes<uint32_t>(buffer, pos);
     if (!(lo & kStringDataFlag)) {
       return reinterpret_cast<const StringData*>(lo);
@@ -142,9 +138,8 @@ T decode(const Buffer& buffer, size_t& pos) {
     auto const hi = decode_as_bytes<uint32_t>(buffer, pos);
     auto const both = (uint64_t(hi) << 32) | (uint64_t(lo) & ~kStringDataFlag);
     return reinterpret_cast<const StringData*>(both);
-  }
 
-  if constexpr (std::is_same<T, MKey>::value) {
+  } else if constexpr (std::is_same<T, MKey>::value) {
     auto const mcode = DECODE_MEMBER(mcode);
     switch (mcode) {
       case MET: case MPT: case MQT: {
@@ -162,46 +157,44 @@ T decode(const Buffer& buffer, size_t& pos) {
       case MW:
         return T();
     }
-  }
+    always_assert(false);
 
-  if constexpr (std::is_same<T, NamedLocal>::value) {
+  } else if constexpr (std::is_same<T, NamedLocal>::value) {
     auto const base = safe_cast<int32_t>(decode<uint32_t>(buffer, pos));
     auto const name = base + kInvalidLocalName;
     auto const id   = DECODE_MEMBER(id) + NoLocalId;
     return T(name, id);
-  }
 
-  if constexpr (std::is_same<T, SSwitchTabEnt>::value) {
+  } else if constexpr (std::is_same<T, SSwitchTabEnt>::value) {
     auto const first = DECODE_MEMBER(first);
     auto const second = DECODE_MEMBER(second);
     return T{first, second};
-  }
 
-  if constexpr (is_compact_vector<T>::value) {
+  } else if constexpr (is_compact_vector<T>::value) {
     auto data = T(decode<uint32_t>(buffer, pos));
     for (auto& item : data) {
       using Item = typename std::remove_reference<decltype(item)>::type;
       item = decode<Item>(buffer, pos);
     }
     return data;
-  }
 
-  if constexpr (std::is_same<T, uint32_t>::value) {
+  } else if constexpr (std::is_same<T, uint32_t>::value) {
     auto const byte = decode_as_bytes<uint8_t>(buffer, pos);
     return byte == k32BitCode ? decode_as_bytes<uint32_t>(buffer, pos) :
            byte == k16BitCode ? decode_as_bytes<uint16_t>(buffer, pos) : byte;
-  }
 
-  if constexpr (std::is_same<T, Op>::value) {
+  } else if constexpr (std::is_same<T, Op>::value) {
     static_assert(sizeof(Op) <= sizeof(uint16_t), "");
     auto const byte = decode_as_bytes<uint8_t>(buffer, pos);
     if (sizeof(Op) == sizeof(uint8_t) || byte < k9BitOpShift) return Op(byte);
     auto const next = decode_as_bytes<uint8_t>(buffer, pos);
     return Op(safe_cast<uint16_t>(next) + k9BitOpShift);
-  }
 
-  if constexpr (std::is_trivially_copyable<T>::value) {
+  } else if constexpr (std::is_trivially_copyable<T>::value) {
     return decode_as_bytes<T>(buffer, pos);
+
+  } else {
+    static_assert(!sizeof(T), "unhandled type in decode<T>");
   }
 }
 
@@ -341,21 +334,35 @@ void encode(Buffer& buffer, const T& data) {
 #define IMM_FIVE(x, y, z, n, m)   IMM_FOUR(x, y, z, n) IMM(m, 5)
 #define IMM_SIX(x, y, z, n, m, o) IMM_FIVE(x, y, z, n, m) IMM(o, 6)
 
+#define USE_NA
+#define USE_ONE(x)                USE(x, 1)
+#define USE_TWO(x, y)             USE_ONE(x) USE(y, 2)
+#define USE_THREE(x, y, z)        USE_TWO(x, y) USE(z, 3)
+#define USE_FOUR(x, y, z, n)      USE_THREE(x, y, z) USE(n, 4)
+#define USE_FIVE(x, y, z, n, m)   USE_FOUR(x, y, z, n) USE(m, 5)
+#define USE_SIX(x, y, z, n, m, o) USE_FIVE(x, y, z, n, m) USE(o, 6)
+
+// Decode immediates into temporaries first (t1, t2, ...), then pass them
+// to the constructor. This ensures deterministic evaluation order, since
+// the order of evaluation in a parameter list is implementation-defined.
+#define IMM(type, n) \
+  auto t##n = decode<decltype(std::declval<T>().IMM_NAME_##type(n))>(buffer, pos);
+#define USE(type, n) std::move(t##n),
+#define O(op, imms, ...)                                             \
+  bc::op decode##op(const Buffer& buffer, size_t& pos) {             \
+    using T = bc::op;                                                \
+    IMM_##imms                                                       \
+    return T { USE_##imms };                                         \
+  }
+  OPCODES
+#undef O
+#undef USE
+#undef IMM
+
 BytecodeVec decodeBytecodeVec(const Buffer& buffer, size_t& pos) {
   FTRACE(3, "\ndecodeBytecodeVec: {} bytes\n", buffer.size());
   Trace::Indent _;
   auto bcs = BytecodeVec{};
-
-#define IMM(type, n) \
-  decode<decltype(std::declval<T>().IMM_NAME_##type(n))>(buffer, pos),
-#define O(op, imms, ...)           \
-    auto const decode_##op = [&] { \
-      using T = bc::op;            \
-      return T { IMM_##imms };     \
-    };
-    OPCODES
-#undef O
-#undef IMM
 
   bcs.resize(decode<uint32_t>(buffer, pos));
   for (auto& inst : bcs) {
@@ -364,7 +371,7 @@ BytecodeVec decodeBytecodeVec(const Buffer& buffer, size_t& pos) {
     ITRACE(4, "at {}: {}:\n", pos, opcodeToName(inst.op));
     Trace::Indent _;
 #define O(op, ...) \
-  case Op::op: new (&inst.op) bc::op(decode_##op()); break;
+  case Op::op: new (&inst.op) bc::op(decode##op(buffer, pos)); break;
     switch (inst.op) { OPCODES }
 #undef O
   }
@@ -373,18 +380,18 @@ BytecodeVec decodeBytecodeVec(const Buffer& buffer, size_t& pos) {
   return bcs;
 }
 
+#define IMM(type, n) encode(buffer, data.IMM_NAME_##type(n));
+#define O(op, imms, ...)                                             \
+  void encode##op(Buffer& buffer, const bc::op& data) {              \
+    IMM_##imms                                                       \
+  }
+  OPCODES
+#undef O
+#undef IMM
+
 void encodeBytecodeVec(Buffer& buffer, const BytecodeVec& bcs) {
   FTRACE(3, "\nencodeBytecodeVec: {} elements\n", bcs.size());
   Trace::Indent _;
-
-#define IMM(type, n) encode(buffer, data.IMM_NAME_##type(n));
-#define O(op, imms, ...)                               \
-    auto const encode_##op = [&](const bc::op& data) { \
-      IMM_##imms                                       \
-    };
-    OPCODES
-#undef O
-#undef IMM
 
   encode(buffer, safe_cast<uint32_t>(bcs.size()));
   for (auto const& inst : bcs) {
@@ -392,7 +399,7 @@ void encodeBytecodeVec(Buffer& buffer, const BytecodeVec& bcs) {
     encode(buffer, safe_cast<uint32_t>(inst.srcLoc - kNoSrcLoc));
     ITRACE(4, "at {}: {}\n", buffer.size(), opcodeToName(inst.op));
     Trace::Indent _;
-#define O(op, ...) case Op::op: encode_##op(inst.op); break;
+#define O(op, ...) case Op::op: encode##op(buffer, inst.op); break;
     switch (inst.op) { OPCODES }
 #undef O
   }
@@ -405,6 +412,14 @@ void encodeBytecodeVec(Buffer& buffer, const BytecodeVec& bcs) {
 #undef IMM_FOUR
 #undef IMM_FIVE
 #undef IMM_SIX
+
+#undef USE_NA
+#undef USE_ONE
+#undef USE_TWO
+#undef USE_THREE
+#undef USE_FOUR
+#undef USE_FIVE
+#undef USE_SIX
 
 //////////////////////////////////////////////////////////////////////
 

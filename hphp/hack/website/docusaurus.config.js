@@ -6,6 +6,7 @@
 
 const lightCodeTheme = require('prism-react-renderer').themes.github;
 const darkCodeTheme = require('prism-react-renderer').themes.vsDark;
+const { fbContent } = require('docusaurus-plugin-internaldocs-fb/internal');
 
 /** @type {import('@docusaurus/types').DocusaurusConfig} */
 (module.exports = {
@@ -13,12 +14,11 @@ const darkCodeTheme = require('prism-react-renderer').themes.vsDark;
   tagline: 'Moving fast with high-performance Hack, a programming language for building reliable websites at epic scale',
   url: 'https://docs.hhvm.com',
   baseUrl: process.env.DOCUSAURUS_BASE_URL || '/',
-  // temp: use 'warn' to circumvent link-checker getting confused by double `/hack`-prefix on internally hosted static docs
-  onBrokenLinks: 'warn',
+  onBrokenLinks: 'throw',
   trailingSlash: true,
   favicon: 'img/favicon.ico',
   organizationName: 'facebook',
-  projectName: 'hack',
+  projectName: 'hackstack',
   customFields: {
     fbRepoName: 'fbsource',
     ossRepoPath: 'fbcode/hphp/hack/website',
@@ -41,7 +41,10 @@ const darkCodeTheme = require('prism-react-renderer').themes.vsDark;
           sidebarPath: require.resolve('./sidebars.js'),
           routeBasePath: '/',
           path: '../manual/',
-          editUrl: 'https://www.internalfb.com/code/fbsource/fbcode/hphp/hack/website',
+          editUrl: fbContent({
+              internal: 'https://www.internalfb.com/code/fbsource/fbcode/hphp/hack/manual/',
+              external: 'https://github.com/hhvm/user-documentation/edit/main/manual/',
+          }),
         },
         experimentalXRepoSnippets: {
           baseDir: '.',
@@ -52,6 +55,7 @@ const darkCodeTheme = require('prism-react-renderer').themes.vsDark;
         theme: {
           customCss: require.resolve('./src/css/custom.css'),
         },
+        enableEditor: true,
       }),
     ],
   ],

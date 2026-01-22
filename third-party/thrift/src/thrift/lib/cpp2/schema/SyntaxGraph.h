@@ -1364,9 +1364,11 @@ class FunctionNode final : folly::MoveOnly,
                            detail::WithResolver,
                            detail::WithName,
                            detail::WithAnnotations,
+                           detail::WithDocBlock,
                            public detail::WithDebugPrinting<FunctionNode> {
  public:
   using detail::WithAnnotations::annotations;
+  using detail::WithDocBlock::docBlock;
   using detail::WithName::name;
   /**
    * A reference to the service or interaction that contains this function.
@@ -1397,6 +1399,7 @@ class FunctionNode final : folly::MoveOnly,
       std::vector<Annotation>&& annotations,
       Response&& response,
       std::string_view name,
+      std::optional<std::string_view> docBlock,
       std::vector<Param>&& params,
       std::vector<Exception>&& exceptions,
       type::FunctionQualifier qualifier,

@@ -146,3 +146,21 @@ struct StructWithDocBlock {
   /** Field documentation */
   1: i32 field1;
 }
+
+/**
+ * A dummy service for testing docblock exposure on services and functions.
+ * This service has multiple methods with documentation.
+ */
+service ServiceWithDocBlock {
+  /**
+   * Performs a ping operation.
+   * Returns true if the service is alive.
+   */
+  bool ping();
+
+  /**
+   * Echoes the input string back to the caller.
+   * Useful for testing connectivity.
+   */
+  string echo(1: string input);
+}

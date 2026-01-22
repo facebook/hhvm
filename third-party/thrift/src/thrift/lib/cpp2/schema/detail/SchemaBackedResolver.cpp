@@ -873,6 +873,11 @@ FunctionNode SchemaIndex::createFunction(
     }
   }();
 
+  std::optional<std::string_view> docBlock;
+  if (!op::isEmpty<>(*function.attrs()->docs())) {
+    docBlock = *function.attrs()->docs()->contents();
+  }
+
   std::vector<FunctionNode::Param> params;
   for (const type::Field& param : *function.paramlist()->fields()) {
     params.emplace_back(
@@ -892,6 +897,7 @@ FunctionNode SchemaIndex::createFunction(
           std::move(interaction),
           std::move(sinkOrStream)),
       *function.name(),
+      docBlock,
       std::move(params),
       collectExceptions(*function.exceptions()),
       *function.qualifier(),

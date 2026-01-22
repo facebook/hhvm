@@ -1,0 +1,12 @@
+multiply
+  INSERT multiply
+  ~MyFunc<(int, int)>
+SORT TEXT: none
+increment
+  INSERT increment
+  ~MyFunc<(int)>
+SORT TEXT: none
+add
+  INSERT add
+  ~MyFunc<(int, int)>
+SORT TEXT: none

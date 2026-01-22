@@ -5722,6 +5722,35 @@ end = struct
     let make_call env func targs args unpacked_arg ty =
       make_result env p (Aast.Call { func; targs; args; unpacked_arg }) ty
     in
+    let matches_auto_complete_suffix x =
+      String.is_suffix x ~suffix:AutocompleteTypes.autocomplete_token
+    in
+    (* When autocompleting a call such as
+     *   foo(#AUTO332
+     * to a function whose signature is similar to
+     *   function foo<Targs as (mixed...)>(HH\EnumClass\Label<C, Targs> $label, ...Targs $args): void
+     * we filter the possible values for $label according to the type, which includes a Targs generic.
+     * Unfortunately, in the absence of any arguments, we end up inferring () for Targs, and so we lose
+     * enum constants that make sense if there are other arguments.
+     *
+     * A somewhat hacky fix is to pretend that there may be more arguments by adding a bogus
+     * unpacked element. This stops type inference from eagerly filling in
+     * an empty tuple for a splat parameter.
+     *)
+    let unpacked_element =
+      if
+        Option.is_none unpacked_element
+        && List.exists el ~f:(fun arg ->
+               match arg with
+               | Aast_defs.Anormal (_, _, EnumClassLabel (None, n))
+                 when matches_auto_complete_suffix n ->
+                 true
+               | _ -> false)
+      then
+        Some ((), p, Aast.Omitted)
+      else
+        unpacked_element
+    in
     (* For special functions and pseudofunctions with a definition in an HHI
      * file.
      *)

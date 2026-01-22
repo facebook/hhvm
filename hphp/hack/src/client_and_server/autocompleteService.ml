@@ -101,15 +101,7 @@ let expand_and_strip_dynamic env ty =
   ty
 
 let matches_auto_complete_suffix x =
-  String.length x >= AutocompleteTypes.autocomplete_token_length
-  &&
-  let suffix =
-    String.sub
-      x
-      ~pos:(String.length x - AutocompleteTypes.autocomplete_token_length)
-      ~len:AutocompleteTypes.autocomplete_token_length
-  in
-  String.equal suffix AutocompleteTypes.autocomplete_token
+  String.is_suffix x ~suffix:AutocompleteTypes.autocomplete_token
 
 (* Does [str] look like something we should offer code completion on? *)
 let is_auto_complete str : bool =

@@ -43,7 +43,7 @@ const { fbContent } = require('docusaurus-plugin-internaldocs-fb/internal');
           path: '../manual/',
           editUrl: fbContent({
               internal: 'https://www.internalfb.com/code/fbsource/fbcode/hphp/hack/manual/',
-              external: 'https://github.com/hhvm/user-documentation/edit/main/manual/',
+              external: 'https://github.com/hhvm/user-documentation/edit/main/',
           }),
         },
         experimentalXRepoSnippets: {

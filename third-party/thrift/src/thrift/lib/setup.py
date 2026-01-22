@@ -433,6 +433,104 @@ else:
         ),
     ]
 
+    # Test extension modules - only built if THRIFT_BUILD_TESTS=1
+    # (set by add_subdirectory(test) in CMakeLists.txt)
+    if os.environ.get("THRIFT_BUILD_TESTS", "0") == "1":
+        test_extensions = [
+            Extension(
+                "thrift.python.test.request_context_extractor.request_context_extractor",
+                sources=[
+                    "thrift/python/test/request_context_extractor/request_context_extractor.pyx"
+                ],
+                **common_options,
+            ),
+            Extension(
+                "thrift.python.test.python_async_processor_factory_test",
+                sources=["thrift/python/test/python_async_processor_factory_test.pyx"],
+                **common_options,
+            ),
+            Extension(
+                "thrift.python.test.typeinfo_test",
+                sources=["thrift/python/test/typeinfo_test.pyx"],
+                **common_options,
+            ),
+            # client/test Cython helpers (thrift.python.* namespace for internal use)
+            Extension(
+                "thrift.python.client.test.event_handler_helper",
+                sources=["thrift/python/client/test/event_handler_helper.pyx"],
+                **common_options,
+            ),
+            Extension(
+                "thrift.python.client.test.exceptions_helper",
+                sources=["thrift/python/client/test/exceptions_helper.pyx"],
+                **common_options,
+            ),
+            # client/test Cython helpers (thrift.lib.python.* namespace for test imports)
+            Extension(
+                "thrift.lib.python.client.test.event_handler_helper",
+                sources=["thrift/lib/python/client/test/event_handler_helper.pyx"],
+                **common_options,
+            ),
+            Extension(
+                "thrift.lib.python.client.test.exceptions_helper",
+                sources=["thrift/lib/python/client/test/exceptions_helper.pyx"],
+                **common_options,
+            ),
+            Extension(
+                "thrift.lib.python.client.test.client_event_handler.helper",
+                sources=[
+                    "thrift/lib/python/client/test/client_event_handler/helper.pyx"
+                ],
+                **common_options,
+            ),
+            # event_handlers/helper extension for client_server tests
+            Extension(
+                "thrift.lib.python.test.event_handlers.helper",
+                sources=["thrift/lib/python/test/event_handlers/helper.pyx"],
+                **common_options,
+            ),
+            # http2_helper extension for client tests - requires proxygen
+            # This extension is only built if proxygen is available
+            Extension(
+                "thrift.lib.python.client.test.http2_helper",
+                sources=["thrift/lib/python/client/test/http2_helper.pyx"],
+                language="c++",
+                include_dirs=include_dirs,
+                library_dirs=lib_search_paths,
+                libraries=dynamic_libs
+                + ["proxygen", "proxygenhttpserver"]
+                + [python_lib],
+                extra_compile_args=["-std=c++20", "-fcoroutines"],
+                extra_link_args=extra_link_args,
+            ),
+            # metadata_response extension for metadata response tests
+            # Uses header-only C++ implementation in metadata_response.h
+            Extension(
+                "thrift.lib.python.test.metadata_response.metadata_response",
+                sources=[
+                    "thrift/lib/python/test/metadata_response/metadata_response.pyx"
+                ],
+                **common_options,
+            ),
+        ]
+
+        # Filter to extensions whose source files exist
+        available = {ext for ext in test_extensions if os.path.exists(ext.sources[0])}
+        missing_names = {ext.name for ext in test_extensions if ext not in available}
+
+        if missing_names:
+            print(
+                f"WARNING: THRIFT_BUILD_TESTS=1 but {len(missing_names)} test extension(s) missing source files:"
+            )
+            for name in sorted(missing_names):
+                print(f"  - {name}")
+
+        print(f"Building {len(available)} test extension(s)")
+        exts.extend(available)
+    else:
+        print("Skipping test extensions (THRIFT_BUILD_TESTS not set)")
+
+    # Base packages always included
     packages = [
         "thrift",
         "thrift.python",

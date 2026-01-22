@@ -632,6 +632,11 @@ ${_cybld}/thrift/python/server_impl/interceptor/${_target_file} -> ${_src}"
 endforeach()
 
 #####
+# Generate thrift-python test types
+#####
+add_subdirectory(test)
+
+#####
 # Now build everything else in lib/python, including all remaining Cython
 # modules that depend on types_api.h and thrift_python_cpp.
 #####
@@ -643,6 +648,7 @@ add_custom_target(
     create_binding_symlink_python
     create_binding_symlink_py3
     create_binding_symlink_server_impl
+    create_binding_symlink_lib_test
     thriftcpp2
     thrift_python_cpp
     thrift_python_types_bindings

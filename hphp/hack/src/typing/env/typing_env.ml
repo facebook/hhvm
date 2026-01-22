@@ -646,6 +646,8 @@ module M = struct
   let set_current_package_membership env package =
     { env with genv = { env.genv with current_package = package } }
 
+  let get_soft_package_requirement env = env.genv.soft_package_requirement
+
   let make_depend_on_current_module env =
     Option.iter
       Typing_env_types.(env.genv.current_module)
@@ -735,6 +737,19 @@ module M = struct
           attr.ua_params
       in
       assert_packages_loaded env pkgs_to_load
+    | _ -> env
+
+  let set_soft_package_from_attr env (attr : Nast.user_attribute list) =
+    match
+      Naming_attributes.find
+        Naming_special_names.UserAttributes.uaSoftRequirePackage
+        attr
+    with
+    | Some { ua_params = [(_, _, Aast.String pkg_name)]; ua_name = (pos, _) } ->
+      {
+        env with
+        genv = { env.genv with soft_package_requirement = Some (pos, pkg_name) };
+      }
     | _ -> env
 
   let get_typedef env x =

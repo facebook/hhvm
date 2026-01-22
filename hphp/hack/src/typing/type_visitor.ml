@@ -101,7 +101,6 @@ class virtual ['a] decl_type_visitor : ['a] decl_type_visitor_type =
           ft_tparams;
           ft_ret;
           ft_flags = _;
-          ft_require_package = _;
           ft_instantiated = _;
           ft_implicit_params;
           ft_where_constraints;

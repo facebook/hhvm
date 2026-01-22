@@ -41,6 +41,7 @@ module Make (Provider : Decl_enforceability.ShallowProvider) = struct
          sm_flags = _;
          sm_attributes = _;
          sm_sort_text = _;
+         sm_package_requirement;
        } :
         Shallow_decl_defs.shallow_method) : Typing_defs.fun_elt =
     {
@@ -54,6 +55,7 @@ module Make (Provider : Decl_enforceability.ShallowProvider) = struct
       fe_support_dynamic_type = false;
       fe_no_auto_dynamic = false;
       fe_no_auto_likes = false;
+      fe_package_requirement = sm_package_requirement;
     }
 
   let build_method
@@ -68,6 +70,7 @@ module Make (Provider : Decl_enforceability.ShallowProvider) = struct
          sm_flags;
          sm_attributes;
          sm_sort_text = _;
+         sm_package_requirement;
        } :
         Shallow_decl_defs.shallow_method) : Typing_defs.fun_elt =
     let (pos, _id) = sm_name in
@@ -123,5 +126,6 @@ module Make (Provider : Decl_enforceability.ShallowProvider) = struct
       fe_support_dynamic_type = support_dynamic_type;
       fe_no_auto_dynamic;
       fe_no_auto_likes;
+      fe_package_requirement = sm_package_requirement;
     }
 end

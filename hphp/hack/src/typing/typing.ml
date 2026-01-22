@@ -1314,14 +1314,25 @@ end = struct
   let validate
       ?(is_function_pointer = false)
       (use_pos, name)
-      require_package
-      { fe_pos = def_pos; fe_deprecated; fe_module; fe_internal; fe_package; _ }
+      {
+        fe_pos = def_pos;
+        fe_deprecated;
+        fe_module;
+        fe_internal;
+        fe_package;
+        fe_package_requirement;
+        _;
+      }
       env =
     let other_errs =
       List.filter_opt
         [
           TVis.check_deprecated ~use_pos ~def_pos env fe_deprecated;
-          TVis.check_cross_package ~use_pos ~def_pos env require_package;
+          TVis.check_cross_package
+            ~use_pos
+            ~def_pos
+            env
+            (Some fe_package_requirement);
         ]
     and access_errs =
       TVis.check_top_level_access
@@ -1472,14 +1483,7 @@ end = struct
       fun_id
       decl_entry
       env =
-    let () =
-      validate
-        ~is_function_pointer
-        fun_id
-        fun_ty.ft_require_package
-        decl_entry
-        env
-    in
+    let () = validate ~is_function_pointer fun_id decl_entry env in
     let { fe_pos; fe_support_dynamic_type; _ } = decl_entry in
     let fun_ty =
       Typing_enforceability.compute_enforced_and_pessimize_fun_type
@@ -2790,7 +2794,6 @@ end = struct
                 { capability = CapDefaults (Pos_or_decl.of_raw_pos p) };
               ft_ret;
               ft_flags;
-              ft_require_package = None;
               ft_instantiated = true;
             } ) )
 
@@ -6440,7 +6443,6 @@ end = struct
                       (set_returns_readonly
                          ctxt.support_readonly_return
                          default));
-                ft_require_package = None;
                 ft_instantiated = true;
               } )
         in
@@ -6632,8 +6634,14 @@ end = struct
       let ty = MakeType.default_construct r in
       (env, tel, None, ty, should_forget_fakes)
     | Some
-        { ce_visibility = vis; ce_type = (lazy m); ce_deprecated; ce_flags; _ }
-      ->
+        {
+          ce_visibility = vis;
+          ce_type = (lazy m);
+          ce_deprecated;
+          ce_flags;
+          ce_package_requirement;
+          _;
+        } ->
       let def_pos = get_pos m in
       Option.iter
         ~f:(Typing_error_utils.add_typing_error ~env)
@@ -6664,7 +6672,7 @@ end = struct
                ~use_pos:p
                ~def_pos
                env
-               ft.ft_require_package);
+               ce_package_requirement);
 
           (* This creates type variables for non-denotable type parameters on constructors.
            * These are notably different from the tparams on the class, which are handled
@@ -13604,6 +13612,7 @@ end = struct
                  ce_visibility = vis;
                  ce_type = (lazy member_decl_ty);
                  ce_deprecated;
+                 ce_package_requirement;
                  _;
                } as ce) ->
             let def_pos = get_pos member_decl_ty in
@@ -13647,7 +13656,7 @@ end = struct
                      ~use_pos:p
                      ~def_pos
                      env
-                     ft.ft_require_package);
+                     ce_package_requirement);
 
                 let ((env, ty_err_opt1), explicit_targs) =
                   Phase.localize_targs

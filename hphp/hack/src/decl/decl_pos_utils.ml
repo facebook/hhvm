@@ -114,6 +114,7 @@ struct
       fe_type = ty fe.fe_type;
       fe_pos = pos_or_decl fe.fe_pos;
       fe_package = Option.map fe.fe_package ~f:package_membership;
+      fe_package_requirement = package_requirement fe.fe_package_requirement;
     }
 
   and where_constraint (ty1, c, ty2) = (ty ty1, c, ty ty2)
@@ -170,6 +171,12 @@ struct
     match m with
     | PackageOverride (p, name) -> PackageOverride (pos p, name)
     | PackageConfigAssignment name -> PackageConfigAssignment name
+
+  and package_requirement r =
+    match r with
+    | RPRequire (p, s) -> RPRequire (pos_or_decl p, s)
+    | RPSoft (p, s) -> RPSoft (pos_or_decl p, s)
+    | RPNormal -> RPNormal
 
   and class_type dc =
     {
@@ -327,6 +334,7 @@ struct
       sm_flags = sm.sm_flags;
       sm_attributes = sm.sm_attributes;
       sm_sort_text = sm.sm_sort_text;
+      sm_package_requirement = package_requirement sm.sm_package_requirement;
     }
 
   and shallow_req_constraint src =

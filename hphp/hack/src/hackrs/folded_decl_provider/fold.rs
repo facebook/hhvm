@@ -320,6 +320,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
             sealed_allowlist: None,
             sort_text: None,
             overlapping_tparams: None,
+            package_requirement: None,
         };
         props.insert(prop, elt);
     }
@@ -361,6 +362,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
             sealed_allowlist: None,
             sort_text: None,
             overlapping_tparams: None,
+            package_requirement: None,
         };
         static_props.insert(prop, elt);
     }
@@ -439,6 +441,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
             sealed_allowlist,
             sort_text,
             overlapping_tparams: self.get_overlapping_tparams(sm),
+            package_requirement: Some(sm.package_requirement.to_owned()),
         };
 
         methods.insert(meth, elt);
@@ -488,6 +491,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
                 sealed_allowlist: None,
                 sort_text: sm.sort_text.to_owned(),
                 overlapping_tparams: None,
+                package_requirement: Some(sm.package_requirement.to_owned()),
             }
         });
 

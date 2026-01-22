@@ -1,0 +1,211 @@
+error: Typing[4341] The method err is not compatible with the overridden method [1]
+-> Mismatch in __RequirePackage attribute [2]
+-> This method requires package pkg3 [2]
+-> It cannot override a method that requires package pkg2 [3]
+-> Because pkg2 does not include pkg3 [4]
+
+cross_package_with_requirepackage_attr_inheritance_errors.php:18:19
+     7 |   <<__RequirePackage("pkg3")>>
+     8 |   public function ok(): void {}
+[3]  9 |   <<__RequirePackage("pkg2")>>
+    10 |   public function err(): void {}
+    11 |   <<__RequirePackage("pkg2")>>
+       :
+    15 |   <<__Override, __RequirePackage("pkg2")>>
+    16 |   public function ok(): void {}
+[2] 17 |   <<__Override, __RequirePackage("pkg3")>>
+[1] 18 |   public function err(): void {}
+    19 |   <<__Override, __RequirePackage("pkg2_soft")>>
+    20 |   public function soft(): void {}
+
+PACKAGES.toml:6:11
+     4 | include_paths=["//"]
+     5 | 
+[4]  6 | [packages.pkg2]
+     7 | include_paths=[
+     8 |     "//cross_package_access_internal1_foo.php",
+
+error: Typing[4341] The method soft is not compatible with the overridden method [1]
+-> Mismatch in __RequirePackage attribute [2]
+-> This method requires package pkg2_soft [2]
+-> It cannot override a method that requires package pkg2 [3]
+-> Because pkg2 only soft-includes pkg2_soft [4]
+
+cross_package_with_requirepackage_attr_inheritance_errors.php:20:19
+     9 |   <<__RequirePackage("pkg2")>>
+    10 |   public function err(): void {}
+[3] 11 |   <<__RequirePackage("pkg2")>>
+    12 |   public function soft(): void {}
+    13 | }
+       :
+    17 |   <<__Override, __RequirePackage("pkg3")>>
+    18 |   public function err(): void {}
+[2] 19 |   <<__Override, __RequirePackage("pkg2_soft")>>
+[1] 20 |   public function soft(): void {}
+    21 | }
+    22 | 
+
+PACKAGES.toml:6:11
+     4 | include_paths=["//"]
+     5 | 
+[4]  6 | [packages.pkg2]
+     7 | include_paths=[
+     8 |     "//cross_package_access_internal1_foo.php",
+
+error: Typing[4341] The method err is not compatible with the overridden method [1]
+-> Mismatch in __RequirePackage attribute [2]
+-> This method requires package pkg2 [2]
+-> The parent method has a __SoftRequirePackage attribute. The override must have a weaker requirement. [3]
+
+cross_package_with_requirepackage_attr_inheritance_errors.php:29:19
+    23 | class Soft_req {
+    24 |   <<__SoftRequirePackage("pkg2")>>
+[3] 25 |   public function err(): void {}
+    26 | }
+    27 | class Soft_req2 extends Soft_req {
+[2] 28 |   <<__Override, __RequirePackage("pkg2")>>
+[1] 29 |   public function err(): void {}
+    30 | }
+    31 | 
+
+error: Typing[4341] The method err is not compatible with the overridden method [1]
+-> Mismatch in __RequirePackage attribute [2]
+-> This method requires package pkg2 [2]
+-> The parent method does not have a __RequirePackage attribute. The override must have a weaker requirement. [3]
+
+cross_package_with_requirepackage_attr_inheritance_errors.php:37:19
+    31 | 
+    32 | class Normal_req {
+[3] 33 |   public function err(): void {}
+    34 | }
+    35 | class Normal_req2 extends Normal_req {
+[2] 36 |   <<__Override, __RequirePackage("pkg2")>>
+[1] 37 |   public function err(): void {}
+    38 | }
+    39 | 
+
+error: Typing[4341] The method err is not compatible with the overridden method [1]
+-> Mismatch in __RequirePackage attribute [2]
+-> This method soft-requires package pkg3 [2]
+-> It cannot override a method that requires package pkg2 [3]
+-> Because pkg2 does not include pkg3 [4]
+
+cross_package_with_requirepackage_attr_inheritance_errors.php:52:19
+    41 |   <<__RequirePackage("pkg3")>>
+    42 |   public function ok(): void {}
+[3] 43 |   <<__RequirePackage("pkg2")>>
+    44 |   public function err(): void {}
+    45 |   <<__RequirePackage("pkg2")>>
+       :
+    49 |   <<__Override, __SoftRequirePackage("pkg2")>>
+    50 |   public function ok(): void {}
+[2] 51 |   <<__Override, __SoftRequirePackage("pkg3")>>
+[1] 52 |   public function err(): void {}
+    53 |   <<__Override, __SoftRequirePackage("pkg2_soft")>>
+    54 |   public function soft(): void {}
+
+PACKAGES.toml:6:11
+     4 | include_paths=["//"]
+     5 | 
+[4]  6 | [packages.pkg2]
+     7 | include_paths=[
+     8 |     "//cross_package_access_internal1_foo.php",
+
+error: Typing[4341] The method soft is not compatible with the overridden method [1]
+-> Mismatch in __RequirePackage attribute [2]
+-> This method soft-requires package pkg2_soft [2]
+-> It cannot override a method that requires package pkg2 [3]
+-> Because pkg2 only soft-includes pkg2_soft [4]
+
+cross_package_with_requirepackage_attr_inheritance_errors.php:54:19
+    43 |   <<__RequirePackage("pkg2")>>
+    44 |   public function err(): void {}
+[3] 45 |   <<__RequirePackage("pkg2")>>
+    46 |   public function soft(): void {}
+    47 | }
+       :
+    51 |   <<__Override, __SoftRequirePackage("pkg3")>>
+    52 |   public function err(): void {}
+[2] 53 |   <<__Override, __SoftRequirePackage("pkg2_soft")>>
+[1] 54 |   public function soft(): void {}
+    55 | }
+    56 | 
+
+PACKAGES.toml:6:11
+     4 | include_paths=["//"]
+     5 | 
+[4]  6 | [packages.pkg2]
+     7 | include_paths=[
+     8 |     "//cross_package_access_internal1_foo.php",
+
+error: Typing[4341] The method err is not compatible with the overridden method [1]
+-> Mismatch in __RequirePackage attribute [2]
+-> This method soft-requires package pkg3 [2]
+-> It cannot override a method that soft-requires package pkg2 [3]
+-> Because pkg2 does not include pkg3 [4]
+
+cross_package_with_requirepackage_attr_inheritance_errors.php:69:19
+    58 |   <<__SoftRequirePackage("pkg3")>>
+    59 |   public function ok(): void {}
+[3] 60 |   <<__SoftRequirePackage("pkg2")>>
+    61 |   public function err(): void {}
+    62 |   <<__SoftRequirePackage("pkg2")>>
+       :
+    66 |   <<__Override, __SoftRequirePackage("pkg2")>>
+    67 |   public function ok(): void {}
+[2] 68 |   <<__Override, __SoftRequirePackage("pkg3")>>
+[1] 69 |   public function err(): void {}
+    70 |   <<__Override, __SoftRequirePackage("pkg2_soft")>>
+    71 |   public function soft(): void {}
+
+PACKAGES.toml:6:11
+     4 | include_paths=["//"]
+     5 | 
+[4]  6 | [packages.pkg2]
+     7 | include_paths=[
+     8 |     "//cross_package_access_internal1_foo.php",
+
+error: Typing[4341] The method soft is not compatible with the overridden method [1]
+-> Mismatch in __RequirePackage attribute [2]
+-> This method soft-requires package pkg2_soft [2]
+-> It cannot override a method that soft-requires package pkg2 [3]
+-> Because pkg2 only soft-includes pkg2_soft [4]
+
+cross_package_with_requirepackage_attr_inheritance_errors.php:71:19
+    60 |   <<__SoftRequirePackage("pkg2")>>
+    61 |   public function err(): void {}
+[3] 62 |   <<__SoftRequirePackage("pkg2")>>
+    63 |   public function soft(): void {}
+    64 | }
+       :
+    68 |   <<__Override, __SoftRequirePackage("pkg3")>>
+    69 |   public function err(): void {}
+[2] 70 |   <<__Override, __SoftRequirePackage("pkg2_soft")>>
+[1] 71 |   public function soft(): void {}
+    72 | }
+    73 | 
+
+PACKAGES.toml:6:11
+     4 | include_paths=["//"]
+     5 | 
+[4]  6 | [packages.pkg2]
+     7 | include_paths=[
+     8 |     "//cross_package_access_internal1_foo.php",
+
+error: Typing[4341] The method err is not compatible with the overridden method [1]
+-> Mismatch in __RequirePackage attribute [2]
+-> This method soft-requires package pkg2 [2]
+-> The parent method does not have a __SoftRequirePackage attribute. The override must have a weaker requirement. [3]
+
+cross_package_with_requirepackage_attr_inheritance_errors.php:79:19
+    73 | 
+    74 | class Normal_soft {
+[3] 75 |   public function err(): void {}
+    76 | }
+    77 | class Normal_soft2 extends Normal_soft {
+[2] 78 |   <<__Override, __SoftRequirePackage("pkg2")>>
+[1] 79 |   public function err(): void {}
+    80 | }
+    81 | 
+
+9 errors found

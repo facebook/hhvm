@@ -400,6 +400,7 @@ let build_constructor
       elt_sealed_allowlist = None;
       elt_sort_text = method_.sm_sort_text;
       elt_overlapping_tparams = get_overlapping_tparams method_;
+      elt_package_requirement = Some method_.sm_package_requirement;
     }
   in
   let fe = build_constructor_fun_elt ~ctx ~elt_origin:class_name ~method_ in
@@ -535,6 +536,7 @@ let prop_decl_eager
       elt_sealed_allowlist = None;
       elt_sort_text = None;
       elt_overlapping_tparams = None;
+      elt_package_requirement = None;
     }
   in
   let acc = SMap.add (snd sp.sp_name) (elt, Some ty) acc in
@@ -575,6 +577,7 @@ let static_prop_decl_eager
       elt_sealed_allowlist = None;
       elt_sort_text = None;
       elt_overlapping_tparams = None;
+      elt_package_requirement = None;
     }
   in
   let acc = SMap.add (snd sp.sp_name) (elt, Some ty) acc in
@@ -762,6 +765,7 @@ let method_decl_eager
       elt_sealed_allowlist = sealed_allowlist;
       elt_sort_text = sort_text;
       elt_overlapping_tparams = get_overlapping_tparams m;
+      elt_package_requirement = Some m.sm_package_requirement;
     }
   in
   let fe =

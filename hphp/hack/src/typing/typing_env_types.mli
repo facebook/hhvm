@@ -101,6 +101,8 @@ and genv = {
       (** The module of the top-level definition that we are checking *)
   current_package: Aast_defs.package_membership option;
       (** The package membership of a top-level definition that we're checking *)
+  soft_package_requirement: Ast_defs.id option;
+      (** The __SoftRequirePackage annotation on the current function/method if present *)
   this_internal: bool;
       (** Is the definition that we are checking marked internal? *)
   this_support_dynamic_type: bool;

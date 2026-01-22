@@ -740,7 +740,6 @@ let to_locl_ty ?(keytrace = []) (ctx : Provider_context.t) (json : Hh_json.json)
             (* Dummy values: these aren't currently serialized. *)
             ft_where_constraints = [];
             ft_flags = Typing_defs_flags.Fun.default;
-            ft_require_package = None;
             ft_instantiated;
           }
         in

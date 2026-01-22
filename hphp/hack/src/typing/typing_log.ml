@@ -529,6 +529,7 @@ let genv_as_value env genv =
     file = _;
     current_module;
     current_package;
+    soft_package_requirement;
     this_internal;
     this_support_dynamic_type;
     no_auto_likes;
@@ -560,6 +561,13 @@ let genv_as_value env genv =
       | Some Aast_defs.(PackageConfigAssignment pkg | PackageOverride (_, pkg))
         ->
         [("current_package", string_as_value pkg)]
+      | None -> [])
+    @ (match soft_package_requirement with
+      | Some soft_package_requirement ->
+        [
+          ( "soft_package_requirement",
+            string_as_value @@ Ast_defs.show_id soft_package_requirement );
+        ]
       | None -> [])
     @ (match parent with
       | Some (parent_id, parent_ty) ->

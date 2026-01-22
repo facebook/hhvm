@@ -15,6 +15,9 @@ FoldedClass {
             sealed_allowlist: None,
             sort_text: None,
             overlapping_tparams: None,
+            package_requirement: Some(
+                RPNormal,
+            ),
         },
         "bar": FoldedElement {
             flags: ClassEltFlags(
@@ -26,6 +29,9 @@ FoldedClass {
             sealed_allowlist: None,
             sort_text: None,
             overlapping_tparams: None,
+            package_requirement: Some(
+                RPNormal,
+            ),
         },
     },
     consts: {

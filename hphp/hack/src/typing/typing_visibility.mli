@@ -37,6 +37,7 @@ val check_obj_access :
   ce_visibility ->
   Typing_error.t option
 
+(** Checks whether access to a symbol is permitted according to package visibility rules. *)
 val check_package_access :
   should_check_package_boundary:Typing_packages.check_reason ->
   use_pos:Pos.t ->
@@ -87,9 +88,17 @@ val is_visible :
   Decl_provider.class_decl ->
   bool
 
+(** Checks whether a function call satisfies the callee's package requirement annotation
+  * (RequirePackage or SoftRequirePackage).
+
+  * This function validates that the caller's per-continuation package environment
+  * includes the required package. For soft requirements, it also considers whether
+  * the caller has a matching [__SoftRequirePackage] annotation to allow soft-to-soft
+  * calls during migration.
+  *)
 val check_cross_package :
   use_pos:Pos.t ->
   def_pos:Pos_or_decl.t ->
   env ->
-  string option ->
+  package_requirement option ->
   Typing_error.t option

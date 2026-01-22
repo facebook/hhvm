@@ -1158,13 +1158,7 @@ let test_cross_pkg_access_with_requirepackage _ =
   let prim_err =
     Primary.Package
       (Primary.Package.Cross_pkg_access_with_requirepackage
-         {
-           pos;
-           decl_pos = Pos_or_decl.none;
-           (* Everything else is currently not matched on in the custom error *)
-           current_package_opt = None;
-           target_package_opt = None;
-         })
+         { pos; decl_pos = Pos_or_decl.none; target_package = "test_package" })
   in
   let err = Typing_error.primary prim_err in
   (* match 'foo/*' *)

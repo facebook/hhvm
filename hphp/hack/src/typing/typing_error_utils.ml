@@ -1341,36 +1341,60 @@ end = struct
       create ~code ~claim ~reasons ()
 
     let cross_pkg_access_with_requirepackage
-        (pos : Pos.t)
-        (decl_pos : Pos_or_decl.t)
-        (current_package_opt : string option)
-        (target_package_opt : string option) =
-      let current_package = get_package_str current_package_opt in
-      let target_package =
-        match target_package_opt with
-        | Some s -> s
-        | None ->
-          failwith "target package can't be default for RequirePackage call"
-      in
-      let claim =
-        lazy
-          ( pos,
-            Printf.sprintf
-              "Cannot reference this RequirePackage method defined in package %s from %s"
-              target_package
-              current_package )
+        (pos : Pos.t) (decl_pos : Pos_or_decl.t) (target_package : string) =
+      let claim = lazy (pos, "Cannot reference this __RequirePackage function")
       and reasons =
         lazy
           [
             ( decl_pos,
               Printf.sprintf
-                "This function is marked with __RequirePackage(\"%s\"), so requires the package %s to be loaded. You can check if package %s is loaded by placing this call inside a block like `if(package %s)`"
-                target_package
-                target_package
-                target_package
+                "This function is marked with `__RequirePackage(\"%s\")`"
+                target_package );
+            ( Pos_or_decl.of_raw_pos
+                pos (* TODO(T246617508) better position with per-cont env *),
+              Printf.sprintf
+                "%s is not included in the current environment"
                 target_package );
           ]
       in
+      create ~code:Error_code.InvalidCrossPackage ~claim ~reasons ()
+
+    let cross_pkg_access_with_softrequirepackage
+        (pos : Pos.t)
+        (decl_pos : Pos_or_decl.t)
+        (current_soft_package_opt : (Pos.t * string) option)
+        (target_package : string) =
+      let claim =
+        lazy (pos, "Cannot reference this `__SoftRequirePackage` function")
+      and reasons =
+        lazy
+          (( decl_pos,
+             Printf.sprintf
+               "This function is marked with `__SoftRequirePackage(\"%s\")`, which is a transition feature to help move a function to `__RequirePackage(\"%s\")`. It does not allow calling into %s itself, but it can only be called from functions that have access to %s."
+               target_package
+               target_package
+               target_package
+               target_package )
+          ::
+          (match current_soft_package_opt with
+          | Some (pos, package) ->
+            [
+              ( Pos_or_decl.of_raw_pos pos,
+                Printf.sprintf
+                  "The current function soft-requires package %s, which does not include %s"
+                  package
+                  target_package );
+            ]
+          | None ->
+            [
+              ( Pos_or_decl.of_raw_pos
+                  pos (* TODO(T246617508) report per-continuation packages *),
+                Printf.sprintf
+                  "%s is not included in the current environment"
+                  target_package );
+            ]))
+      in
+
       create ~code:Error_code.InvalidCrossPackage ~claim ~reasons ()
 
     let to_error t ~env:_ =
@@ -1407,13 +1431,16 @@ end = struct
           target_id
           target_symbol_spec
           false (* Soft *)
-      | Cross_pkg_access_with_requirepackage
-          { pos; decl_pos; current_package_opt; target_package_opt } ->
-        cross_pkg_access_with_requirepackage
+      | Cross_pkg_access_with_requirepackage { pos; decl_pos; target_package }
+        ->
+        cross_pkg_access_with_requirepackage pos decl_pos target_package
+      | Cross_pkg_access_with_softrequirepackage
+          { pos; decl_pos; current_soft_package_opt; target_package } ->
+        cross_pkg_access_with_softrequirepackage
           pos
           decl_pos
-          current_package_opt
-          target_package_opt
+          current_soft_package_opt
+          target_package
       | Soft_included_access
           {
             pos;
@@ -6210,7 +6237,9 @@ end = struct
       Lazy.(
         reason_sub >>= fun reason_sub ->
         reason_super >>= fun reason_super ->
-        return (((pos, "Require package mismatch") :: reason_sub) @ reason_super))
+        return
+          (((pos, "Mismatch in `__RequirePackage` attribute") :: reason_sub)
+          @ reason_super))
     in
     create ~code:Error_code.InvalidCrossPackage ~reasons ()
 

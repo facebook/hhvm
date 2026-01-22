@@ -41,14 +41,15 @@ File root|module_hint.php--here.php
                   is_function_pointer = false; returns_readonly = false;
                   readonly_this = false; support_dynamic_type = false;
                   is_memoized = false; variadic = false };
-                ft_require_package = None; ft_instantiated = true }));
+                ft_instantiated = true }));
           sm_visibility = Public; sm_deprecated = None;
           sm_flags =
           { Shallow_decl_defs.MethodFlags.abstract = false; final = false;
             override = false; dynamicallycallable = false;
             php_std_lib = false; support_dynamic_type = false;
             no_auto_likes = false; needs_concrete = false };
-          sm_attributes = []; sm_sort_text = None }
+          sm_attributes = []; sm_sort_text = None;
+          sm_package_requirement = Typing_defs.RPNormal }
          ];
        sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None;
        sc_package = None }))
@@ -155,10 +156,11 @@ File root|module_hint.php--everywhere.php
                is_function_pointer = false; returns_readonly = false;
                readonly_this = false; support_dynamic_type = false;
                is_memoized = false; variadic = false };
-             ft_require_package = None; ft_instantiated = true }));
+             ft_instantiated = true }));
        fe_pos = [3:10-16]; fe_php_std_lib = false;
        fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
-       fe_no_auto_likes = false }));
+       fe_no_auto_likes = false;
+       fe_package_requirement = Typing_defs.RPNormal }));
   ("\\MyList",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;

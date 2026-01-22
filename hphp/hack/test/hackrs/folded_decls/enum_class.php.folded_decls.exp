@@ -31,6 +31,9 @@ FoldedClass {
             sealed_allowlist: None,
             sort_text: None,
             overlapping_tparams: None,
+            package_requirement: Some(
+                RPNormal,
+            ),
         },
     },
     consts: {
@@ -131,6 +134,9 @@ FoldedClass {
             sealed_allowlist: None,
             sort_text: None,
             overlapping_tparams: None,
+            package_requirement: Some(
+                RPNormal,
+            ),
         },
         "getValues": FoldedElement {
             flags: ClassEltFlags(
@@ -142,6 +148,9 @@ FoldedClass {
             sealed_allowlist: None,
             sort_text: None,
             overlapping_tparams: None,
+            package_requirement: Some(
+                RPNormal,
+            ),
         },
         "valueOf": FoldedElement {
             flags: ClassEltFlags(
@@ -153,6 +162,9 @@ FoldedClass {
             sealed_allowlist: None,
             sort_text: None,
             overlapping_tparams: None,
+            package_requirement: Some(
+                RPNormal,
+            ),
         },
     },
     consts: {

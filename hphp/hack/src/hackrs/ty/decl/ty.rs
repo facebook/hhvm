@@ -20,6 +20,7 @@ pub use oxidized::ast_defs::ClassishKind;
 pub use oxidized::ast_defs::ConstraintKind;
 pub use oxidized::ast_defs::Visibility;
 pub use oxidized::typing_defs::ClassConstKind;
+pub use oxidized::typing_defs::PackageRequirement;
 pub use oxidized::typing_defs::Requirement;
 pub use oxidized::typing_defs_core::ConsistentKind;
 pub use oxidized::typing_defs_core::Enforcement;
@@ -610,7 +611,6 @@ pub struct FunType<R: Reason, TY> {
     /// Carries through the sync/async information from the aast
     pub ret: TY,
     pub flags: typing_defs_flags::FunTypeFlags,
-    pub require_package: Option<Symbol>,
     pub instantiated: bool,
 }
 
@@ -699,6 +699,7 @@ pub struct FunElt<R: Reason> {
     pub support_dynamic_type: bool,
     pub no_auto_dynamic: bool,
     pub no_auto_likes: bool,
+    pub package_requirement: PackageRequirement,
 }
 
 walkable!(FunElt<R> => [ty]);

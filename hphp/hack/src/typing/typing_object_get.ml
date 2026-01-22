@@ -627,7 +627,13 @@ and obj_get_concrete_class_with_member_info
   let dflt_rval_mismatch =
     Option.map ~f:(fun (_, _, ty) -> Ok ty) args.coerce_from_ty
   and dflt_lval_mismatch = Ok concrete_ty in
-  let { ce_visibility = vis; ce_type = (lazy member_); ce_deprecated; _ } =
+  let {
+    ce_visibility = vis;
+    ce_type = (lazy member_);
+    ce_deprecated;
+    ce_package_requirement;
+    _;
+  } =
     member_info
   in
   let mem_pos = get_pos member_ in
@@ -666,6 +672,11 @@ and obj_get_concrete_class_with_member_info
         env
         vis;
       TVis.check_deprecated ~use_pos:id_pos ~def_pos:mem_pos env ce_deprecated;
+      TVis.check_cross_package
+        ~use_pos:id_pos
+        ~def_pos:mem_pos
+        env
+        ce_package_requirement;
       (if args.is_parent_call && get_ce_abstract member_info then
         Some
           Typing_error.(
@@ -720,13 +731,6 @@ and obj_get_concrete_class_with_member_info
             ~def_pos:mem_pos
             env
             ft)
-      in
-      let cross_pkg_error_opt =
-        TVis.check_cross_package
-          ~use_pos:id_pos
-          ~def_pos:mem_pos
-          env
-          ft.ft_require_package
       in
       let should_wrap = get_ce_support_dynamic_type member_info in
       let (ft_ty1, lval_mismatch) =
@@ -786,7 +790,6 @@ and obj_get_concrete_class_with_member_info
       in
       let ty_err_opt =
         Option.merge lclz_ty_err_opt ft_ty_err_opt ~f:Typing_error.both
-        |> Option.merge cross_pkg_error_opt ~f:Typing_error.both
       in
 
       ((env, ty_err_opt), ft_ty, explicit_targs, Unenforced, lval_mismatch)
@@ -890,7 +893,6 @@ and obj_get_concrete_class_without_member_info
           { capability = CapTy (MakeType.intersection Reason.none []) };
         ft_ret = MakeType.void Reason.none;
         ft_flags = Typing_defs_flags.Fun.default;
-        ft_require_package = None;
         ft_instantiated = true;
       }
     in

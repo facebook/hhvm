@@ -678,7 +678,6 @@ fn get_signature(ty: &Ty_) -> Vec<ExtDeclSignature> {
                 return_type: extract_type_name(&ft.ret),
                 params: get_method_params(&ft.params),
                 implicit_params,
-                require_package: str_or_empty(ft.require_package.as_deref()),
                 return_disposable: ft.flags.return_disposable(),
                 is_coroutine: ft.flags.is_coroutine(),
                 is_async: ft.flags.is_async(),

@@ -194,6 +194,7 @@ let method_def ~is_disposable env cls m =
       env
   in
   let env = Env.assert_packages_loaded_from_attr env m.m_user_attributes in
+  let env = Env.set_soft_package_from_attr env m.m_user_attributes in
   let (env, cap_ty, unsafe_cap_ty) =
     Typing_coeffects.type_capability env m.m_ctxs m.m_unsafe_ctxs (fst m.m_name)
   in

@@ -1,94 +1,87 @@
-error: Typing[4341] The method test2 is not compatible with the overridden method [1]
--> Method test2 has type (function(): void) in A [1]
--> But it has type (function(): void) in parent IA [2]
--> Type (function(): void) is not a subtype of (function(): void) [1]
--> Require package mismatch [1]
--> This function is marked <<__RequirePackage('pkg1')>>, so it's only compatible with other functions marked <<__RequirePackage('pkg1')>> [1]
--> This function is marked <<__RequirePackage('pkg2')>> [2]
+error: NastCheck[3107] Invalid __RequirePackage [1]
+-> This function is defined in package pkg1 by this package config assignment [2]
+-> The required package pkg1 must strictly include (i.e. cannot equal) pkg1 [2]
 
-cross_package_with_requirepackage_attr_inheritance.php--a.php:14:19
-     4 | interface IA {
-     5 |   <<__RequirePackage("pkg2")>>
-[2]  6 |   public function test2(): void;
-     7 | }
-     8 | 
-       :
+cross_package_with_requirepackage_attr_inheritance.php--a.php:13:5
+    11 |   public function test() : void {
     12 |   }
-    13 |   <<__RequirePackage("pkg1")>> // error cross package mismatch
-[1] 14 |   public function test2(): void {
+[1] 13 |   <<__RequirePackage("pkg1")>> // error, equal to outer package
+    14 |   public function test2(): void {
     15 |   }
-    16 | }
 
-error: Typing[4341] Some members in class B are incompatible with those declared in type IA [1]
--> The method test2 is not compatible with the overridden method [2]
--> Method test2 has type (function(): void) in B and comes from ancestor or trait A [2]
--> But it has type (function(): void) in parent IA [3]
--> Type (function(): void) is not a subtype of (function(): void) [2]
--> Require package mismatch [2]
--> This function is marked <<__RequirePackage('pkg1')>>, so it's only compatible with other functions marked <<__RequirePackage('pkg1')>> [2]
--> This function is marked <<__RequirePackage('pkg2')>> [3]
-
-cross_package_with_requirepackage_attr_inheritance.php--a.php:17:30
-     4 | interface IA {
-     5 |   <<__RequirePackage("pkg2")>>
-[3]  6 |   public function test2(): void;
-     7 | }
-     8 | 
-       :
-    12 |   }
-    13 |   <<__RequirePackage("pkg1")>> // error cross package mismatch
-[2] 14 |   public function test2(): void {
-    15 |   }
-    16 | }
-[1] 17 | class B extends A implements IA  {
-    18 |   <<__Override>>
-    19 |   public function test(): void {} // ok
-
-error: Typing[4341] Some members in class C are incompatible with those declared in type IA [1]
--> The method test2 is not compatible with the overridden method [2]
--> Method test2 has type (function(): void) in C and comes from ancestor or trait A [2]
--> But it has type (function(): void) in parent IA [3]
--> Type (function(): void) is not a subtype of (function(): void) [2]
--> Require package mismatch [2]
--> This function is marked <<__RequirePackage('pkg1')>>, so it's only compatible with other functions marked <<__RequirePackage('pkg1')>> [2]
--> This function is marked <<__RequirePackage('pkg2')>> [3]
-
-cross_package_with_requirepackage_attr_inheritance.php--a.php:21:30
-     4 | interface IA {
-     5 |   <<__RequirePackage("pkg2")>>
-[3]  6 |   public function test2(): void;
-     7 | }
-     8 | 
-       :
-    12 |   }
-    13 |   <<__RequirePackage("pkg1")>> // error cross package mismatch
-[2] 14 |   public function test2(): void {
-    15 |   }
-    16 | }
-       :
-    19 |   public function test(): void {} // ok
-    20 | }
-[1] 21 | class C extends B implements IA  {
-    22 |   <<__Override, __RequirePackage("pkg2")>>
-    23 |   public function test(): void {} // error
+PACKAGES.toml:3:11
+     1 | [packages]
+     2 | 
+[2]  3 | [packages.pkg1]
+     4 | include_paths=["//"]
+     5 | 
 
 error: Typing[4341] The method test is not compatible with the overridden method [1]
--> Method test has type (function(): void) in C [1]
--> But it has type (function(): void) in parent B [2]
--> Type (function(): void) is not a subtype of (function(): void) [1]
--> Require package mismatch [1]
--> This function is marked <<__RequirePackage('pkg2')>>, so it's only compatible with other functions marked <<__RequirePackage('pkg2')>> [1]
--> This function does not have a __RequirePackage attribute [2]
+-> Mismatch in __RequirePackage attribute [2]
+-> This method requires package pkg2 [2]
+-> The parent method does not have a __RequirePackage attribute. The override must have a weaker requirement. [3]
 
 cross_package_with_requirepackage_attr_inheritance.php--a.php:23:19
     17 | class B extends A implements IA  {
     18 |   <<__Override>>
-[2] 19 |   public function test(): void {} // ok
+[3] 19 |   public function test(): void {} // ok
     20 | }
     21 | class C extends B implements IA  {
-    22 |   <<__Override, __RequirePackage("pkg2")>>
+[2] 22 |   <<__Override, __RequirePackage("pkg2")>>
 [1] 23 |   public function test(): void {} // error
     24 | }
     25 | 
+
+error: NastCheck[3107] Invalid __RequirePackage [1]
+-> This function is defined in package pkg2 by this package override [2]
+-> pkg2 soft-includes the required package pkg2_soft, so this requirement is not allowed [3]
+
+cross_package_with_requirepackage_attr_inheritance.php--b.php:9:5
+    1 | <?hh
+    2 | // package pkg2
+[2] 3 | <<file: __PackageOverride('pkg2')>>
+    4 | 
+    5 | // package pkg2 includes pkg1, so this is okay
+    6 | class D extends A {
+    7 |   public function test(): void {}
+    8 | 
+[1] 9 |   <<__RequirePackage("pkg2_soft")>> // err, pkg2 soft-includes pkg2_soft
+   10 |   public function test2(): void {
+   11 | 
+
+PACKAGES.toml:6:11
+    4 | include_paths=["//"]
+    5 | 
+[3] 6 | [packages.pkg2]
+    7 | include_paths=[
+    8 |     "//cross_package_access_internal1_foo.php",
+
+error: Typing[4341] The method test2 is not compatible with the overridden method [1]
+-> Mismatch in __RequirePackage attribute [2]
+-> This method requires package pkg2_soft [2]
+-> It cannot override a method that requires package pkg1 [3]
+-> Because pkg1 does not include pkg2_soft [4]
+
+cross_package_with_requirepackage_attr_inheritance.php--b.php:10:19
+     7 |   public function test(): void {}
+     8 | 
+[2]  9 |   <<__RequirePackage("pkg2_soft")>> // err, pkg2 soft-includes pkg2_soft
+[1] 10 |   public function test2(): void {
+    11 | 
+    12 |   }
+
+cross_package_with_requirepackage_attr_inheritance.php--a.php:13:22
+    11 |   public function test() : void {
+    12 |   }
+[3] 13 |   <<__RequirePackage("pkg1")>> // error, equal to outer package
+    14 |   public function test2(): void {
+    15 |   }
+
+PACKAGES.toml:3:11
+     1 | [packages]
+     2 | 
+[4]  3 | [packages.pkg1]
+     4 | include_paths=["//"]
+     5 | 
 
 4 errors found

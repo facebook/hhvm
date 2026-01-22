@@ -191,5 +191,15 @@ type t =
   | Lateinit_with_default of Pos.t
   | Missing_assign of Pos.t
   | Clone_return_type of Pos.t
+  | Require_package_strict_inclusion of {
+      required_pos: Pos.t;
+      required: string;
+      def_pos: Pos_or_decl.t;
+      current: string;
+      current_pos: Pos.t;
+      attribute_name: string;
+      soft_included: bool;
+      current_package_assignment_kind: string;
+    }
 
 val to_user_error : t -> (Pos.t, Pos_or_decl.t) User_error.t

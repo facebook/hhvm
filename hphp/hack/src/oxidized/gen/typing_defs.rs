@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<00b926796647bdca3b802c1d41011dcd>>
+// @generated SignedSource<<9b313221c57bf31108da347472a57cab>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -130,6 +130,29 @@ pub struct ConstDecl {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (eq, show)")]
+#[repr(C, u8)]
+pub enum PackageRequirement {
+    RPRequire(PosString),
+    RPSoft(PosString),
+    RPNormal,
+}
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
 #[rust_to_ocaml(attr = "deriving show")]
 #[rust_to_ocaml(prefix = "ce_")]
 #[repr(C)]
@@ -145,6 +168,7 @@ pub struct ClassElt {
     pub sealed_allowlist: Option<s_set::SSet>,
     pub sort_text: Option<String>,
     pub overlapping_tparams: Option<s_set::SSet>,
+    pub package_requirement: Option<PackageRequirement>,
 }
 
 #[derive(
@@ -177,6 +201,7 @@ pub struct FunElt {
     pub support_dynamic_type: bool,
     pub no_auto_dynamic: bool,
     pub no_auto_likes: bool,
+    pub package_requirement: PackageRequirement,
 }
 
 #[derive(

@@ -1,1 +1,25 @@
-No errors
+error: NastCheck[3107] Invalid __RequirePackage [1]
+-> This function is defined in package pkg2 by this package override [2]
+-> The required package pkg1 must strictly include (i.e. cannot equal) pkg2 [3]
+
+cross_package_with_requirepackage_attr_call.php--a.php:13:3
+     1 | <?hh
+     2 | // package pkg2
+[2]  3 | <<file: __PackageOverride('pkg2')>>
+     4 | 
+     5 | class A {
+       :
+    11 |   }
+    12 | }
+[1] 13 | <<__RequirePackage("pkg1")>>
+    14 | function test_pkg1(): void {
+    15 | }
+
+PACKAGES.toml:3:11
+     1 | [packages]
+     2 | 
+[3]  3 | [packages.pkg1]
+     4 | include_paths=["//"]
+     5 | 
+
+1 error found

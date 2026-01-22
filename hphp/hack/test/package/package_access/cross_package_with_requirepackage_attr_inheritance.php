@@ -11,7 +11,7 @@ class A implements IA {
   <<__RequirePackage("pkg2")>>
   public function test() : void {
   }
-  <<__RequirePackage("pkg1")>> // error cross package mismatch
+  <<__RequirePackage("pkg1")>> // error, equal to outer package
   public function test2(): void {
   }
 }
@@ -44,4 +44,8 @@ class F implements IA  {
 class D extends A {
   public function test(): void {}
 
+  <<__RequirePackage("pkg2_soft")>> // err, pkg2 soft-includes pkg2_soft
+  public function test2(): void {
+
+  }
 }

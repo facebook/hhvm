@@ -44,7 +44,7 @@
                     is_function_pointer = false; returns_readonly = false;
                     readonly_this = false; support_dynamic_type = false;
                     is_memoized = false; variadic = false };
-                  ft_require_package = None; ft_instantiated = true })),
+                  ft_instantiated = true })),
             [])]
           ));
        td_is_ctx = false; td_attributes = []; td_internal = false;

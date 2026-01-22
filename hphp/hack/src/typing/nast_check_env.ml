@@ -27,6 +27,7 @@ type env = {
   control_context: control_context;
   array_append_allowed: bool;
   module_: Ast_defs.id option;
+  package: Aast_defs.package_membership option;
 }
 
 let get_tcopt env = Provider_context.get_tcopt env.ctx
@@ -43,6 +44,7 @@ let fun_def_env env fd =
     function_name = Some fd.fd_name;
     file_mode = fd.fd_mode;
     module_ = fd.fd_module;
+    package = fd.fd_package;
   }
 
 let method_env env m =
@@ -56,6 +58,7 @@ let class_env env c =
     is_final = c.c_final;
     file_mode = c.c_mode;
     module_ = c.c_module;
+    package = c.c_package;
   }
 
 let typedef_env env t = { env with file_mode = t.t_mode; module_ = t.t_module }
@@ -73,6 +76,7 @@ let get_empty_env ctx =
     control_context = Toplevel;
     array_append_allowed = false;
     module_ = None;
+    package = None;
   }
 
 let def_env ctx x =

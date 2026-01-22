@@ -426,9 +426,9 @@ let check_class_access ~is_method ~use_pos ~def_pos env (vis, lsb) cid class_ =
     (is_visible_for_class ~is_method env (vis, lsb) cid class_)
     ~f:(fun msg -> visibility_error use_pos msg (def_pos, vis))
 
-let check_cross_package ~use_pos ~def_pos env (cross_package : string option) =
-  match cross_package with
-  | Some target ->
+let check_cross_package ~use_pos ~def_pos:_ env package_requirement =
+  let can_call_in_continuation env target =
+    (* TODO(T246617508) This info will be replaced by per-cont env *)
     let current_pkg =
       Env.get_current_package_membership env
       |> Option.bind ~f:(function
@@ -437,19 +437,56 @@ let check_cross_package ~use_pos ~def_pos env (cross_package : string option) =
              -> Env.get_package_by_name env pkg_name)
     in
     let target_pkg = Env.get_package_by_name env target in
-    (match Typing_packages.get_package_violation env current_pkg target_pkg with
+    Typing_packages.get_package_violation env current_pkg target_pkg
+  in
+  match package_requirement with
+  | Some (RPRequire (target_pos, target)) ->
+    (match can_call_in_continuation env target with
     | Some _ ->
       Some
         (Typing_error.package
            (Cross_pkg_access_with_requirepackage
-              {
-                pos = use_pos;
-                decl_pos = def_pos;
-                current_package_opt =
-                  Option.map ~f:Package.get_package_name current_pkg;
-                target_package_opt = cross_package;
-              }))
+              { pos = use_pos; decl_pos = target_pos; target_package = target }))
     | _ -> None)
+  | Some (RPSoft (soft_pos, soft)) ->
+    (* If the per-continuation environment does not provide the softly-required
+     * package, we have one more option -- a __SoftRequirePackage function may
+     * call another __SoftRequirePackage function to aid monolithic migration
+     * to __RequirePackage. In the soft-soft case, the choice of error is
+     * arbitrary; we'll focus on the soft annotation rather than the per-cont
+     * environment packages. *)
+    (match can_call_in_continuation env soft with
+    | Some _ ->
+      (match Env.get_soft_package_requirement env with
+      | Some (env_soft_pos, env_soft) ->
+        let env_soft_pkg = Env.get_package_by_name env env_soft in
+        let soft_pkg = Env.get_package_by_name env soft in
+        (match
+           Typing_packages.get_package_violation env env_soft_pkg soft_pkg
+         with
+        | Some _ ->
+          Some
+            (Typing_error.package
+               (Cross_pkg_access_with_softrequirepackage
+                  {
+                    pos = use_pos;
+                    decl_pos = soft_pos;
+                    current_soft_package_opt = Some (env_soft_pos, env_soft);
+                    target_package = soft;
+                  }))
+        | None -> None)
+      | None ->
+        Some
+          (Typing_error.package
+             (Cross_pkg_access_with_softrequirepackage
+                {
+                  pos = use_pos;
+                  decl_pos = soft_pos;
+                  current_soft_package_opt = None;
+                  target_package = soft;
+                })))
+    | _ -> None)
+  | Some RPNormal -> None
   | None -> None
 
 let check_deprecated ~use_pos ~def_pos env deprecated =

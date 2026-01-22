@@ -298,7 +298,6 @@ let default_construct (type ph) r : ph ty =
               ~is_memoized:false
               ~variadic:false;
           ft_ret = void r;
-          ft_require_package = None;
           ft_instantiated = true;
         } )
 
@@ -338,6 +337,5 @@ let make_dynamic_tfun r : locl_ty =
               ~is_memoized:false
               ~variadic:true;
           ft_ret = dynamic r;
-          ft_require_package = None;
           ft_instantiated = true;
         } )

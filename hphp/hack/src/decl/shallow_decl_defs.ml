@@ -237,6 +237,7 @@ type shallow_method = {
   sm_flags: MethodFlags.t;
   sm_attributes: user_attribute list;
   sm_sort_text: string option;
+  sm_package_requirement: package_requirement;
 }
 [@@deriving eq, show]
 

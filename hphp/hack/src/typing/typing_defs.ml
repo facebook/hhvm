@@ -85,6 +85,12 @@ type const_decl = {
 }
 [@@deriving show, eq]
 
+type package_requirement =
+  | RPRequire of pos_string
+  | RPSoft of pos_string
+  | RPNormal
+[@@deriving eq, show]
+
 type class_elt = {
   ce_visibility: ce_visibility;
   ce_type: decl_ty Lazy.t;
@@ -95,6 +101,7 @@ type class_elt = {
   ce_sealed_allowlist: SSet.t option;
   ce_sort_text: string option;
   ce_overlapping_tparams: SSet.t option;
+  ce_package_requirement: package_requirement option;
 }
 [@@deriving show]
 
@@ -110,6 +117,7 @@ type fun_elt = {
   fe_support_dynamic_type: bool;
   fe_no_auto_dynamic: bool;
   fe_no_auto_likes: bool;
+  fe_package_requirement: package_requirement;
 }
 [@@deriving show, eq]
 

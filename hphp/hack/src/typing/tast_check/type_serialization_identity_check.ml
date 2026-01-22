@@ -82,7 +82,6 @@ let rec strip_ty ty =
           ft_tparams = [];
           ft_where_constraints = [];
           ft_flags = Typing_defs_flags.Fun.default;
-          ft_require_package = None;
           ft_instantiated = true;
         }
     | Tshape

@@ -56,10 +56,11 @@
                 is_function_pointer = false; returns_readonly = false;
                 readonly_this = false; support_dynamic_type = false;
                 is_memoized = false; variadic = false };
-              ft_require_package = None; ft_instantiated = true }));
+              ft_instantiated = true }));
         fe_pos = [5:10-21]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
-        fe_no_auto_likes = false }));
+        fe_no_auto_likes = false;
+        fe_package_requirement = Typing_defs.RPNormal }));
   ("\\returns_shape",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None; fe_module = None;
@@ -99,10 +100,11 @@
                 is_function_pointer = false; returns_readonly = false;
                 readonly_this = false; support_dynamic_type = false;
                 is_memoized = false; variadic = false };
-              ft_require_package = None; ft_instantiated = true }));
+              ft_instantiated = true }));
         fe_pos = [9:10-23]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
-        fe_no_auto_likes = false }));
+        fe_no_auto_likes = false;
+        fe_package_requirement = Typing_defs.RPNormal }));
   ("\\generic_shape",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None; fe_module = None;
@@ -148,10 +150,11 @@
                 is_function_pointer = false; returns_readonly = false;
                 readonly_this = false; support_dynamic_type = false;
                 is_memoized = false; variadic = false };
-              ft_require_package = None; ft_instantiated = true }));
+              ft_instantiated = true }));
         fe_pos = [15:10-23]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
-        fe_no_auto_likes = false }));
+        fe_no_auto_likes = false;
+        fe_package_requirement = Typing_defs.RPNormal }));
   ("\\TaggedCoordinate",
    (Shallow_decl_defs.Typedef
       { Typing_defs.td_module = None; td_pos = [19:6-22]; td_tparams = [];

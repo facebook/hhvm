@@ -14,6 +14,7 @@ FoldedClass {
             sealed_allowlist: None,
             sort_text: None,
             overlapping_tparams: None,
+            package_requirement: None,
         },
     },
     consts: {

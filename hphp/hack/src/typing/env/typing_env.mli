@@ -317,6 +317,10 @@ val get_current_package_membership : env -> Aast_defs.package_membership option
 val set_current_package_membership :
   env -> Aast_defs.package_membership option -> env
 
+val get_soft_package_requirement : env -> Ast_defs.id option
+
+val set_soft_package_from_attr : env -> Nast.user_attribute list -> env
+
 (** Register the current top-level structure as being dependent on the current
     module *)
 val make_depend_on_current_module : Typing_env_types.env -> unit

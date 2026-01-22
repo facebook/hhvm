@@ -283,6 +283,7 @@ module NastCheck = struct
     | CloneReturnType [@value 3104]
     (* | PackageExprInInvariantDEPRECATED [@value 3105] *)
     | NamedInTransformedPseudofunction [@value 3106]
+    | RequirePackageStrictInclusion [@value 3107]
   (* Add new NastCheck codes here! Comment out when deprecating. *)
   [@@deriving enum, show { with_path = false }]
 

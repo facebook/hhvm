@@ -123,7 +123,6 @@ mod ffi {
         return_type: String,
         params: Vec<ExtDeclMethodParam>,
         implicit_params: String,
-        require_package: String,
         return_disposable: bool,
         is_coroutine: bool,
         is_async: bool,

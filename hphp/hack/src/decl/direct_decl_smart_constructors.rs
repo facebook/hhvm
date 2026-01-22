@@ -63,6 +63,7 @@ use oxidized::typing_defs::FunImplicitParams;
 use oxidized::typing_defs::FunParam;
 use oxidized::typing_defs::FunParams;
 use oxidized::typing_defs::FunType;
+use oxidized::typing_defs::PackageRequirement;
 use oxidized::typing_defs::ParamMode;
 use oxidized::typing_defs::PosByteString;
 use oxidized::typing_defs::PosId;
@@ -1187,10 +1188,10 @@ struct Attributes {
     no_support_dynamic_type: bool,
     no_auto_likes: bool,
     safe_global_variable: bool,
-    require_package: Option<String>,
     sort_text: Option<String>,
     dynamically_referenced: bool,
     needs_concrete: bool,
+    require_package: Option<PackageRequirement>,
 }
 
 impl<'o, 't> Impl<'o, 't> {
@@ -1616,17 +1617,16 @@ impl<'o, 't> DirectDeclSmartConstructors<'o, 't> {
             no_support_dynamic_type: false,
             no_auto_likes: false,
             safe_global_variable: false,
-            require_package: None,
             sort_text: None,
             dynamically_referenced: false,
             needs_concrete: false,
+            require_package: None,
         };
 
         let nodes = match node {
             Node::List(nodes) | Node::BracketedList(box (_, nodes, _)) => nodes,
             _ => return attributes,
         };
-
         // Iterate in reverse, to match the behavior of OCaml decl in error conditions.
         for attribute in nodes.iter().rev() {
             if let Node::Attribute(box attribute) = attribute {
@@ -1692,12 +1692,6 @@ impl<'o, 't> DirectDeclSmartConstructors<'o, 't> {
                     "__SafeForGlobalAccessCheck" => {
                         attributes.safe_global_variable = true;
                     }
-                    "__RequirePackage" => {
-                        attributes.require_package = attribute
-                            .string_literal_param
-                            .as_ref()
-                            .map(|(_, x)| Self::str_from_utf8(x).into_owned());
-                    }
                     "__AutocompleteSortText" => {
                         attributes.sort_text = attribute
                             .string_literal_param
@@ -1706,6 +1700,30 @@ impl<'o, 't> DirectDeclSmartConstructors<'o, 't> {
                     }
                     "__NeedsConcrete" => {
                         attributes.needs_concrete = true;
+                    }
+                    "__RequirePackage" => {
+                        attributes.require_package =
+                            attribute.string_literal_param.as_ref().map(|(pos, x)| {
+                                let pkg_name = Self::str_from_utf8(x).into_owned();
+                                return PackageRequirement::RPRequire(
+                                    oxidized::typing_defs_core::PosString(
+                                        pos.clone().into(),
+                                        pkg_name,
+                                    ),
+                                );
+                            });
+                    }
+                    "__SoftRequirePackage" => {
+                        attributes.require_package =
+                            attribute.string_literal_param.as_ref().map(|(pos, x)| {
+                                let pkg_name = Self::str_from_utf8(x).into_owned();
+                                return PackageRequirement::RPSoft(
+                                    oxidized::typing_defs_core::PosString(
+                                        pos.clone().into(),
+                                        pkg_name,
+                                    ),
+                                );
+                            });
                     }
                     _ => {}
                 }
@@ -1905,8 +1923,6 @@ impl<'o, 't> DirectDeclSmartConstructors<'o, 't> {
             flags |= FunTypeFlags::VARIADIC
         }
 
-        let require_package = attributes.require_package;
-
         // Pop the type params stack only after creating all inner types.
         let tparams = self.pop_type_params(header.type_params);
 
@@ -1929,7 +1945,6 @@ impl<'o, 't> DirectDeclSmartConstructors<'o, 't> {
             implicit_params,
             ret: type_,
             flags,
-            require_package,
             instantiated: true,
         };
 
@@ -4006,6 +4021,9 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
                     no_auto_dynamic: self.under_no_auto_dynamic,
                     no_auto_likes: parsed_attributes.no_auto_likes,
                     package: self.package.clone(),
+                    package_requirement: parsed_attributes
+                        .require_package
+                        .unwrap_or(PackageRequirement::RPNormal),
                 };
                 let this = Rc::make_mut(&mut self.state);
                 this.fun_decl(name, fun_elt)
@@ -5004,6 +5022,9 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
             flags,
             attributes: user_attributes,
             sort_text,
+            package_requirement: attributes
+                .require_package
+                .unwrap_or(PackageRequirement::RPNormal),
         };
         if !self.inside_no_auto_dynamic_class {
             let this = Rc::make_mut(&mut self.state);
@@ -6072,7 +6093,6 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
             implicit_params,
             ret: pess_return_type,
             flags,
-            require_package: None,
             instantiated,
         });
 

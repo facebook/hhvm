@@ -318,8 +318,13 @@ module Primary : sig
       | Cross_pkg_access_with_requirepackage of {
           pos: Pos.t;
           decl_pos: Pos_or_decl.t;
-          current_package_opt: string option;
-          target_package_opt: string option;
+          target_package: string;
+        }
+      | Cross_pkg_access_with_softrequirepackage of {
+          pos: Pos.t;
+          decl_pos: Pos_or_decl.t;
+          current_soft_package_opt: (Pos.t * string) option;
+          target_package: string;
         }
       | Soft_included_access of {
           pos: Pos.t;

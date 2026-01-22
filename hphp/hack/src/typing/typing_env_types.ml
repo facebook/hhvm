@@ -68,6 +68,7 @@ and genv = {
   file: Relative_path.t;
   current_module: Ast_defs.id option;
   current_package: Aast_defs.package_membership option;
+  soft_package_requirement: Ast_defs.id option;
   this_internal: bool;
   this_support_dynamic_type: bool;
   no_auto_likes: bool;
@@ -119,6 +120,7 @@ let empty ?origin ?(mode = FileInfo.Mstrict) ctx file ~droot =
         file;
         current_module = None;
         current_package = None;
+        soft_package_requirement = None;
         this_internal = false;
         this_support_dynamic_type = false;
         no_auto_likes = false;

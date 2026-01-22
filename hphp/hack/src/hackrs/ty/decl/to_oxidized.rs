@@ -269,7 +269,6 @@ impl<R: Reason> ToOxidized for FunType<R, Ty<R>> {
             implicit_params: self.implicit_params.to_oxidized(),
             ret: self.ret.to_oxidized(),
             flags: self.flags,
-            require_package: self.require_package.to_oxidized(),
             instantiated: self.instantiated,
         }
     }
@@ -557,6 +556,7 @@ impl ToOxidized for folded::FoldedElement {
             sealed_allowlist: self.sealed_allowlist.to_oxidized(),
             sort_text: self.sort_text,
             overlapping_tparams: self.overlapping_tparams.to_oxidized(),
+            package_requirement: self.package_requirement,
         }
     }
 }
@@ -619,6 +619,7 @@ impl<R: Reason> ToOxidized for shallow::ShallowMethod<R> {
             flags,
             attributes,
             sort_text,
+            package_requirement,
         } = self;
         o::shallow_decl_defs::ShallowMethod {
             name: name.to_oxidized(),
@@ -628,6 +629,7 @@ impl<R: Reason> ToOxidized for shallow::ShallowMethod<R> {
             flags: o::method_flags::MethodFlags::from_bits_truncate(flags.bits()),
             attributes: attributes.to_oxidized(),
             sort_text,
+            package_requirement,
         }
     }
 }
@@ -787,6 +789,7 @@ impl<R: Reason> ToOxidized for shallow::FunDecl<R> {
             support_dynamic_type,
             no_auto_dynamic,
             no_auto_likes,
+            package_requirement,
         } = self;
         o::shallow_decl_defs::FunDecl {
             deprecated: deprecated.map(|s| String::from_utf8_lossy(s.as_bytes()).to_string()),
@@ -802,6 +805,7 @@ impl<R: Reason> ToOxidized for shallow::FunDecl<R> {
                 o::ast_defs::Id(pos, id)
             }),
             package,
+            package_requirement,
         }
     }
 }

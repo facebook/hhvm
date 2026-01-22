@@ -24,7 +24,7 @@
                   is_function_pointer = false; returns_readonly = false;
                   readonly_this = false; support_dynamic_type = false;
                   is_memoized = false; variadic = false };
-                ft_require_package = None; ft_instantiated = true }));
+                ft_instantiated = true }));
           sm_visibility = Public; sm_deprecated = None;
           sm_flags =
           { Shallow_decl_defs.MethodFlags.abstract = false; final = false;
@@ -36,7 +36,8 @@
              ua_params = [(Typing_defs_core.String "hi there")];
              ua_raw_val = None }
             ];
-          sm_sort_text = None };
+          sm_sort_text = None; sm_package_requirement = Typing_defs.RPNormal
+          };
          { Shallow_decl_defs.sm_name = ([8:19-26], "attrInt");
            sm_type =
            (Rwitness_from_decl ([8:19-26]),
@@ -51,7 +52,7 @@
                    is_function_pointer = false; returns_readonly = false;
                    readonly_this = false; support_dynamic_type = false;
                    is_memoized = false; variadic = false };
-                 ft_require_package = None; ft_instantiated = true }));
+                 ft_instantiated = true }));
            sm_visibility = Public; sm_deprecated = None;
            sm_flags =
            { Shallow_decl_defs.MethodFlags.abstract = false; final = false;
@@ -64,7 +65,8 @@
               [(Typing_defs_core.Int "0x42"); (Typing_defs_core.Int "123")];
               ua_raw_val = None }
              ];
-           sm_sort_text = None };
+           sm_sort_text = None; sm_package_requirement = Typing_defs.RPNormal
+           };
          { Shallow_decl_defs.sm_name = ([11:19-30], "attrECLabel");
            sm_type =
            (Rwitness_from_decl ([11:19-30]),
@@ -79,7 +81,7 @@
                    is_function_pointer = false; returns_readonly = false;
                    readonly_this = false; support_dynamic_type = false;
                    is_memoized = false; variadic = false };
-                 ft_require_package = None; ft_instantiated = true }));
+                 ft_instantiated = true }));
            sm_visibility = Public; sm_deprecated = None;
            sm_flags =
            { Shallow_decl_defs.MethodFlags.abstract = false; final = false;
@@ -93,7 +95,8 @@
                 (Typing_defs_core.EnumClassLabel "Label2")];
               ua_raw_val = None }
              ];
-           sm_sort_text = None };
+           sm_sort_text = None; sm_package_requirement = Typing_defs.RPNormal
+           };
          { Shallow_decl_defs.sm_name = ([14:19-30], "attrClsName");
            sm_type =
            (Rwitness_from_decl ([14:19-30]),
@@ -108,7 +111,7 @@
                    is_function_pointer = false; returns_readonly = false;
                    readonly_this = false; support_dynamic_type = false;
                    is_memoized = false; variadic = false };
-                 ft_require_package = None; ft_instantiated = true }));
+                 ft_instantiated = true }));
            sm_visibility = Public; sm_deprecated = None;
            sm_flags =
            { Shallow_decl_defs.MethodFlags.abstract = false; final = false;
@@ -120,7 +123,8 @@
               ua_params = [(Typing_defs_core.Classname "\\SomeClass")];
               ua_raw_val = None }
              ];
-           sm_sort_text = None };
+           sm_sort_text = None; sm_package_requirement = Typing_defs.RPNormal
+           };
          { Shallow_decl_defs.sm_name = ([17:19-30], "attrCompute");
            sm_type =
            (Rwitness_from_decl ([17:19-30]),
@@ -135,7 +139,7 @@
                    is_function_pointer = false; returns_readonly = false;
                    readonly_this = false; support_dynamic_type = false;
                    is_memoized = false; variadic = false };
-                 ft_require_package = None; ft_instantiated = true }));
+                 ft_instantiated = true }));
            sm_visibility = Public; sm_deprecated = None;
            sm_flags =
            { Shallow_decl_defs.MethodFlags.abstract = false; final = false;
@@ -146,7 +150,8 @@
            [{ Typing_defs_core.ua_name = ([16:5-8], "\\Foo"); ua_params = [];
               ua_raw_val = None }
              ];
-           sm_sort_text = None };
+           sm_sort_text = None; sm_package_requirement = Typing_defs.RPNormal
+           };
          { Shallow_decl_defs.sm_name = ([20:19-29], "attrConcat");
            sm_type =
            (Rwitness_from_decl ([20:19-29]),
@@ -161,7 +166,7 @@
                    is_function_pointer = false; returns_readonly = false;
                    readonly_this = false; support_dynamic_type = false;
                    is_memoized = false; variadic = false };
-                 ft_require_package = None; ft_instantiated = true }));
+                 ft_instantiated = true }));
            sm_visibility = Public; sm_deprecated = None;
            sm_flags =
            { Shallow_decl_defs.MethodFlags.abstract = false; final = false;
@@ -173,7 +178,8 @@
               ua_params = [(Typing_defs_core.String "barBaz")];
               ua_raw_val = None }
              ];
-           sm_sort_text = None };
+           sm_sort_text = None; sm_package_requirement = Typing_defs.RPNormal
+           };
          { Shallow_decl_defs.sm_name = ([23:19-26], "attrVec");
            sm_type =
            (Rwitness_from_decl ([23:19-26]),
@@ -188,7 +194,7 @@
                    is_function_pointer = false; returns_readonly = false;
                    readonly_this = false; support_dynamic_type = false;
                    is_memoized = false; variadic = false };
-                 ft_require_package = None; ft_instantiated = true }));
+                 ft_instantiated = true }));
            sm_visibility = Public; sm_deprecated = None;
            sm_flags =
            { Shallow_decl_defs.MethodFlags.abstract = false; final = false;
@@ -199,7 +205,8 @@
            [{ Typing_defs_core.ua_name = ([22:5-8], "\\Foo"); ua_params = [];
               ua_raw_val = None }
              ];
-           sm_sort_text = None };
+           sm_sort_text = None; sm_package_requirement = Typing_defs.RPNormal
+           };
          { Shallow_decl_defs.sm_name = ([26:19-27], "attrDict");
            sm_type =
            (Rwitness_from_decl ([26:19-27]),
@@ -214,7 +221,7 @@
                    is_function_pointer = false; returns_readonly = false;
                    readonly_this = false; support_dynamic_type = false;
                    is_memoized = false; variadic = false };
-                 ft_require_package = None; ft_instantiated = true }));
+                 ft_instantiated = true }));
            sm_visibility = Public; sm_deprecated = None;
            sm_flags =
            { Shallow_decl_defs.MethodFlags.abstract = false; final = false;
@@ -225,7 +232,8 @@
            [{ Typing_defs_core.ua_name = ([25:5-8], "\\Foo"); ua_params = [];
               ua_raw_val = None }
              ];
-           sm_sort_text = None };
+           sm_sort_text = None; sm_package_requirement = Typing_defs.RPNormal
+           };
          { Shallow_decl_defs.sm_name = ([29:19-29], "attrKeyset");
            sm_type =
            (Rwitness_from_decl ([29:19-29]),
@@ -240,7 +248,7 @@
                    is_function_pointer = false; returns_readonly = false;
                    readonly_this = false; support_dynamic_type = false;
                    is_memoized = false; variadic = false };
-                 ft_require_package = None; ft_instantiated = true }));
+                 ft_instantiated = true }));
            sm_visibility = Public; sm_deprecated = None;
            sm_flags =
            { Shallow_decl_defs.MethodFlags.abstract = false; final = false;
@@ -251,7 +259,8 @@
            [{ Typing_defs_core.ua_name = ([28:5-8], "\\Foo"); ua_params = [];
               ua_raw_val = None }
              ];
-           sm_sort_text = None };
+           sm_sort_text = None; sm_package_requirement = Typing_defs.RPNormal
+           };
          { Shallow_decl_defs.sm_name = ([32:19-28], "attrShape");
            sm_type =
            (Rwitness_from_decl ([32:19-28]),
@@ -266,7 +275,7 @@
                    is_function_pointer = false; returns_readonly = false;
                    readonly_this = false; support_dynamic_type = false;
                    is_memoized = false; variadic = false };
-                 ft_require_package = None; ft_instantiated = true }));
+                 ft_instantiated = true }));
            sm_visibility = Public; sm_deprecated = None;
            sm_flags =
            { Shallow_decl_defs.MethodFlags.abstract = false; final = false;
@@ -277,7 +286,8 @@
            [{ Typing_defs_core.ua_name = ([31:5-8], "\\Foo"); ua_params = [];
               ua_raw_val = None }
              ];
-           sm_sort_text = None };
+           sm_sort_text = None; sm_package_requirement = Typing_defs.RPNormal
+           };
          { Shallow_decl_defs.sm_name = ([35:19-32], "attrClsNameof");
            sm_type =
            (Rwitness_from_decl ([35:19-32]),
@@ -292,7 +302,7 @@
                    is_function_pointer = false; returns_readonly = false;
                    readonly_this = false; support_dynamic_type = false;
                    is_memoized = false; variadic = false };
-                 ft_require_package = None; ft_instantiated = true }));
+                 ft_instantiated = true }));
            sm_visibility = Public; sm_deprecated = None;
            sm_flags =
            { Shallow_decl_defs.MethodFlags.abstract = false; final = false;
@@ -304,7 +314,8 @@
               ua_params = [(Typing_defs_core.Classname "\\SomeClass")];
               ua_raw_val = None }
              ];
-           sm_sort_text = None };
+           sm_sort_text = None; sm_package_requirement = Typing_defs.RPNormal
+           };
          { Shallow_decl_defs.sm_name = ([38:19-35], "attrConcatNameof");
            sm_type =
            (Rwitness_from_decl ([38:19-35]),
@@ -319,7 +330,7 @@
                    is_function_pointer = false; returns_readonly = false;
                    readonly_this = false; support_dynamic_type = false;
                    is_memoized = false; variadic = false };
-                 ft_require_package = None; ft_instantiated = true }));
+                 ft_instantiated = true }));
            sm_visibility = Public; sm_deprecated = None;
            sm_flags =
            { Shallow_decl_defs.MethodFlags.abstract = false; final = false;
@@ -331,7 +342,8 @@
               ua_params = [(Typing_defs_core.String "barBaz")];
               ua_raw_val = None }
              ];
-           sm_sort_text = None }
+           sm_sort_text = None; sm_package_requirement = Typing_defs.RPNormal
+           }
          ];
        sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None;
        sc_package = None }))

@@ -1,10 +1,12 @@
-error: Typing[4472] Cannot reference this RequirePackage method defined in package pkg2 from package pkg1 [1]
--> This function is marked with __RequirePackage("pkg2"), so requires the package pkg2 to be loaded. You can check if package pkg2 is loaded by placing this call inside a block like if(package pkg2) [2]
+error: Typing[4472] Cannot reference this __RequirePackage function [1]
+-> This function is marked with __RequirePackage("pkg2") [2]
+-> pkg2 is not included in the current environment [1]
 
 illegal_cross_package_with_requirepackage_attr2.php--a.php:11:7
+     3 | 
      4 | class A {
-     5 |   <<__RequirePackage("pkg2")>>
-[2]  6 |   public function test() : void {
+[2]  5 |   <<__RequirePackage("pkg2")>>
+     6 |   public function test() : void {
      7 |   }
      8 | }
      9 | function test(): void {

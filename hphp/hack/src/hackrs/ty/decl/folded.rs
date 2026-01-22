@@ -38,6 +38,7 @@ use crate::decl::XhpAttribute;
 pub use crate::decl::subst::Subst;
 use crate::decl::ty::ConsistentKind;
 use crate::decl::ty::Enforceable;
+use crate::decl::ty::PackageRequirement;
 use crate::decl::ty::XhpEnumValue;
 use crate::decl_error::DeclError;
 use crate::reason::Reason;
@@ -55,6 +56,7 @@ pub struct FoldedElement {
     pub sealed_allowlist: Option<IndexSet<TypeName>>,
     pub sort_text: Option<String>,
     pub overlapping_tparams: Option<IndexSet<Symbol>>,
+    pub package_requirement: Option<PackageRequirement>,
 }
 
 /// A substitution context contains all the information necessary for changing

@@ -387,6 +387,8 @@ module UserAttributes = struct
 
   let uaRequirePackage = "__RequirePackage"
 
+  let uaSoftRequirePackage = "__SoftRequirePackage"
+
   (* <<__SafeForGlobalAccessCheck>> marks global variables as safe from mutations.
      This attribute merely ensures that the global_access_check does NOT raise
      errors/warnings from writing to the annotated global variable, and it
@@ -829,7 +831,17 @@ module UserAttributes = struct
             {
               contexts = [fn; mthd];
               autocomplete = true;
-              doc = "Enables access to elements from other package(s).";
+              doc =
+                "This function will only execute if the target package is loaded in the current deployment (invariant_violation otherwise)."
+                ^ " Hack will enforce this constraint on callers by raising an error unless the caller has this package.";
+            } );
+          ( uaSoftRequirePackage,
+            {
+              contexts = [fn; mthd];
+              autocomplete = true;
+              doc =
+                "Migration attribute for `__RequirePackage`. Raises a notice with optional sample rate if the target package is not loaded."
+                ^ " Does not allow this function to call other functions from the target package.";
             } );
           ( uaStrictSwitch,
             {

@@ -140,6 +140,7 @@ pub struct ShallowMethod<R: Reason> {
     pub flags: MethodFlags,
     pub attributes: Box<[UserAttribute<R::Pos>]>,
     pub sort_text: Option<String>,
+    pub package_requirement: oxidized::typing_defs::PackageRequirement,
 }
 
 walkable!(ShallowMethod<R> => [ty]);

@@ -1784,37 +1784,17 @@ end = struct
     else
       valid env
 
-  and require_package_subtype (c_sub : string option) (c_super : string option)
-      =
-    match (c_sub, c_super) with
-    | (Some s, Some t) -> String.equal s t
-    | (Some _, None) -> false
-    | (None, Some _) -> true
-    | (None, None) -> true
-
   (* Helper function for subtyping on function types: performs all checks that
    * don't involve actual types:
    *   <<__ReturnDisposable>> attribute
    *   variadic arity
    *  <<__Policied>> attribute
    *  Readonlyness
-   * <<__RequirePackage>> attribute
    *)
   and simplify_subtype_funs_attributes
       ~subtype_env (r_sub, ft_sub) (r_super, ft_super) =
     let p_sub = Reason.to_pos r_sub in
     let p_super = Reason.to_pos r_super in
-    let print_require_pkg_reason (c : string option) (is_sub : bool) =
-      match c with
-      | Some s when is_sub ->
-        Printf.sprintf
-          "This function is marked `<<__RequirePackage('%s')>>`, so it's only compatible with other functions marked `<<__RequirePackage('%s')>>`"
-          s
-          s
-      | Some s ->
-        Printf.sprintf "This function is marked <<__RequirePackage('%s')>>" s
-      | None -> "This function does not have a __RequirePackage attribute"
-    in
     let splat_super =
       match List.last ft_super.ft_params with
       | Some fp -> get_fp_splat fp
@@ -1879,42 +1859,6 @@ end = struct
                                 ( p_super,
                                   "This function does not return a readonly value"
                                 );
-                              ];
-                        }))
-      else
-        Ok ()
-    and package_err =
-      if
-        not
-          (require_package_subtype
-             ft_sub.ft_require_package
-             ft_super.ft_require_package)
-      then
-        Error
-          (Option.map
-             subtype_env.Subtype_env.on_error
-             ~f:
-               Typing_error.(
-                 fun on_error ->
-                   apply_reasons ~on_error
-                   @@ Secondary.Require_package_mismatch
-                        {
-                          pos = p_sub;
-                          reason_sub =
-                            lazy
-                              [
-                                ( p_sub,
-                                  print_require_pkg_reason
-                                    ft_sub.ft_require_package
-                                    true );
-                              ];
-                          reason_super =
-                            lazy
-                              [
-                                ( p_super,
-                                  print_require_pkg_reason
-                                    ft_super.ft_require_package
-                                    false );
                               ];
                         }))
       else
@@ -2079,7 +2023,6 @@ end = struct
         [
           readonly_this_err;
           readonly_ret_err;
-          package_err;
           return_disposable_err;
           arity_required_err;
           named_params_err;

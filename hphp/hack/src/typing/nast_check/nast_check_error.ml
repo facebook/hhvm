@@ -192,6 +192,16 @@ type t =
   | Lateinit_with_default of Pos.t
   | Missing_assign of Pos.t
   | Clone_return_type of Pos.t
+  | Require_package_strict_inclusion of {
+      required_pos: Pos.t;
+      required: string;
+      def_pos: Pos_or_decl.t;
+      current: string;
+      current_pos: Pos.t;
+      attribute_name: string;
+      soft_included: bool;
+      current_package_assignment_kind: string;
+    }
 
 let repeated_record_field_name pos name prev_pos =
   User_error.make_err
@@ -838,6 +848,41 @@ let clone_return_type pos =
     )
     []
 
+let require_package_strict_inclusion
+    required_pos
+    required
+    def_pos
+    current
+    current_pos
+    attribute_name
+    soft_included
+    current_package_assignment_kind =
+  let last_reason =
+    if soft_included then
+      ( def_pos,
+        Printf.sprintf
+          "`%s` soft-includes the required package `%s`, so this requirement is not allowed"
+          current
+          required )
+    else
+      ( def_pos,
+        Printf.sprintf
+          "The required package `%s` must strictly include (i.e. cannot equal) `%s`"
+          required
+          current )
+  in
+  User_error.make_err
+    Error_code.(to_enum RequirePackageStrictInclusion)
+    (required_pos, Printf.sprintf "Invalid %s" attribute_name)
+    [
+      ( Pos_or_decl.of_raw_pos current_pos,
+        Printf.sprintf
+          "This function is defined in package `%s` by this %s"
+          current
+          current_package_assignment_kind );
+      last_reason;
+    ]
+
 (* --------------------------------------------- *)
 let to_user_error t =
   let f =
@@ -940,5 +985,25 @@ let to_user_error t =
     | Lateinit_with_default pos -> lateinit_with_default pos
     | Missing_assign pos -> missing_assign pos
     | Clone_return_type pos -> clone_return_type pos
+    | Require_package_strict_inclusion
+        {
+          required_pos;
+          required;
+          def_pos;
+          current;
+          current_pos;
+          attribute_name;
+          soft_included;
+          current_package_assignment_kind;
+        } ->
+      require_package_strict_inclusion
+        required_pos
+        required
+        def_pos
+        current
+        current_pos
+        attribute_name
+        soft_included
+        current_package_assignment_kind
   in
   f Explanation.empty

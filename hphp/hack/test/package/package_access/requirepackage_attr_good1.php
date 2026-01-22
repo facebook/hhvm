@@ -1,14 +1,14 @@
 //// a.php
 <?hh
-// package pkg1
-<<__EntryPoint>>
+<<file: __PackageOverride('pkg3')>>
+
+type AInt = int;
 function f(): void {}
 
 //// c.php
 <?hh
-// package pkg3 (unrelated to pkg1)
 
-<<__EntryPoint, __RequirePackage("pkg1")>>
-function test() : void {
+<<__RequirePackage("pkg3")>>
+function test(AInt $a) : void {
   f();
 }

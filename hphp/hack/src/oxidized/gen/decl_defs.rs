@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<36880d974d036f18d61136467e3900e6>>
+// @generated SignedSource<<b6908fc9c840bea0613e241a20ead3b4>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -172,6 +172,7 @@ pub struct Element {
     pub sealed_allowlist: Option<s_set::SSet>,
     pub sort_text: Option<String>,
     pub overlapping_tparams: Option<s_set::SSet>,
+    pub package_requirement: Option<PackageRequirement>,
 }
 
 #[derive(

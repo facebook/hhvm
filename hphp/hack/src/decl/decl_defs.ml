@@ -107,6 +107,7 @@ type element = {
   elt_sort_text: string option;
   (* Derived from <<__Overlapping(_)>> attribute *)
   elt_overlapping_tparams: SSet.t option;
+  elt_package_requirement: package_requirement option;
 }
 [@@deriving show]
 

@@ -19,6 +19,9 @@ FoldedClass {
             sealed_allowlist: None,
             sort_text: None,
             overlapping_tparams: None,
+            package_requirement: Some(
+                RPNormal,
+            ),
         },
     },
     consts: {
@@ -53,6 +56,9 @@ FoldedClass {
             sealed_allowlist: None,
             sort_text: None,
             overlapping_tparams: None,
+            package_requirement: Some(
+                RPNormal,
+            ),
         },
     },
     consts: {
@@ -87,6 +93,9 @@ FoldedClass {
                 "zzz",
             ),
             overlapping_tparams: None,
+            package_requirement: Some(
+                RPNormal,
+            ),
         },
     },
     consts: {
@@ -119,6 +128,9 @@ FoldedClass {
             sealed_allowlist: None,
             sort_text: None,
             overlapping_tparams: None,
+            package_requirement: Some(
+                RPNormal,
+            ),
         },
     },
     consts: {

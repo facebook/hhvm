@@ -24,9 +24,6 @@ type ce_visibility =
     }
 [@@deriving eq, ord, show]
 
-type require_package_decl = string option
-[@@deriving eq, hash, ord, show { with_path = false }]
-
 (* All the possible types, reason is a trace of why a type
    was inferred in a certain way.
 
@@ -222,7 +219,6 @@ type 'ty fun_type = {
   ft_implicit_params: 'ty fun_implicit_params;
   ft_ret: 'ty;
   ft_flags: Typing_defs_flags.Fun.t;
-  ft_require_package: require_package_decl;
   ft_instantiated: bool;
 }
 [@@deriving eq, hash, show { with_path = false }, map]
@@ -1089,7 +1085,6 @@ let rec ty__compare : type a. ?normalize_lists:bool -> a ty_ -> a ty_ -> int =
       ft_implicit_params = implicit_params1;
       ft_tparams = tparams1;
       ft_where_constraints = where_constraints1;
-      ft_require_package = require_package1;
       ft_instantiated = inst1;
     } =
       fty1
@@ -1101,7 +1096,6 @@ let rec ty__compare : type a. ?normalize_lists:bool -> a ty_ -> a ty_ -> int =
       ft_implicit_params = implicit_params2;
       ft_tparams = tparams2;
       ft_where_constraints = where_constraints2;
-      ft_require_package = require_package2;
       ft_instantiated = inst2;
     } =
       fty2
@@ -1121,12 +1115,7 @@ let rec ty__compare : type a. ?normalize_lists:bool -> a ty_ -> a ty_ -> int =
                         let { capability = capability2 } = implicit_params2 in
                         chain_compare
                           (capability_compare capability1 capability2)
-                          (fun _ ->
-                            chain_compare
-                              (compare_require_package_decl
-                                 require_package1
-                                 require_package2)
-                              (fun _ -> Bool.compare inst1 inst2)))))))
+                          (fun _ -> Bool.compare inst1 inst2))))))
   and capability_compare : type a. a ty capability -> a ty capability -> int =
    fun cap1 cap2 ->
     match (cap1, cap2) with

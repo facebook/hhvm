@@ -294,7 +294,6 @@ impl<R: Reason> From<o::typing_defs::FunType> for ty::FunType<R, Ty<R>> {
             implicit_params: ft.implicit_params.into(),
             ret: ft.ret.into(),
             flags: ft.flags,
-            require_package: ft.require_package.map(|s| s.into()),
             instantiated: ft.instantiated,
         }
     }
@@ -410,6 +409,7 @@ impl<R: Reason> From<o::shallow_decl_defs::ShallowMethod> for shallow::ShallowMe
             attributes: slice(sm.attributes),
             flags: oxidized::method_flags::MethodFlags::from_bits_truncate(sm.flags.bits()),
             sort_text: sm.sort_text,
+            package_requirement: sm.package_requirement,
         }
     }
 }
@@ -513,6 +513,7 @@ impl<R: Reason> From<o::shallow_decl_defs::FunDecl> for shallow::FunDecl<R> {
             no_auto_dynamic: sf.no_auto_dynamic,
             no_auto_likes: sf.no_auto_likes,
             package: sf.package,
+            package_requirement: sf.package_requirement,
         }
     }
 }
@@ -613,6 +614,7 @@ impl From<o::decl_defs::Element> for folded::FoldedElement {
             sealed_allowlist: x.sealed_allowlist.map(map_k),
             sort_text: x.sort_text,
             overlapping_tparams: x.overlapping_tparams.map(map_k),
+            package_requirement: x.package_requirement,
         }
     }
 }

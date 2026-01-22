@@ -25,14 +25,15 @@
                   is_function_pointer = false; returns_readonly = false;
                   readonly_this = false; support_dynamic_type = false;
                   is_memoized = false; variadic = false };
-                ft_require_package = None; ft_instantiated = true }));
+                ft_instantiated = true }));
           sm_visibility = Public; sm_deprecated = None;
           sm_flags =
           { Shallow_decl_defs.MethodFlags.abstract = true; final = false;
             override = false; dynamicallycallable = false;
             php_std_lib = false; support_dynamic_type = false;
             no_auto_likes = false; needs_concrete = false };
-          sm_attributes = []; sm_sort_text = (Some "2getFoo") };
+          sm_attributes = []; sm_sort_text = (Some "2getFoo");
+          sm_package_requirement = Typing_defs.RPNormal };
          { Shallow_decl_defs.sm_name = ([9:26-32], "getBar");
            sm_type =
            (Rwitness_from_decl ([9:26-32]),
@@ -49,14 +50,15 @@
                    is_function_pointer = false; returns_readonly = false;
                    readonly_this = false; support_dynamic_type = false;
                    is_memoized = false; variadic = false };
-                 ft_require_package = None; ft_instantiated = true }));
+                 ft_instantiated = true }));
            sm_visibility = Public; sm_deprecated = None;
            sm_flags =
            { Shallow_decl_defs.MethodFlags.abstract = true; final = false;
              override = false; dynamicallycallable = false;
              php_std_lib = false; support_dynamic_type = false;
              no_auto_likes = false; needs_concrete = false };
-           sm_attributes = []; sm_sort_text = (Some "1getBar") }
+           sm_attributes = []; sm_sort_text = (Some "1getBar");
+           sm_package_requirement = Typing_defs.RPNormal }
          ];
        sc_methods = []; sc_user_attributes = []; sc_enum_type = None;
        sc_docs_url = None; sc_package = None }));
@@ -88,14 +90,15 @@
                    is_function_pointer = false; returns_readonly = false;
                    readonly_this = false; support_dynamic_type = false;
                    is_memoized = false; variadic = false };
-                 ft_require_package = None; ft_instantiated = true }));
+                 ft_instantiated = true }));
            sm_visibility = Public; sm_deprecated = None;
            sm_flags =
            { Shallow_decl_defs.MethodFlags.abstract = true; final = false;
              override = false; dynamicallycallable = false;
              php_std_lib = false; support_dynamic_type = false;
              no_auto_likes = false; needs_concrete = false };
-           sm_attributes = []; sm_sort_text = None };
+           sm_attributes = []; sm_sort_text = None;
+           sm_package_requirement = Typing_defs.RPNormal };
           { Shallow_decl_defs.sm_name = ([17:26-32], "getBar");
             sm_type =
             (Rwitness_from_decl ([17:26-32]),
@@ -112,14 +115,15 @@
                     is_function_pointer = false; returns_readonly = false;
                     readonly_this = false; support_dynamic_type = false;
                     is_memoized = false; variadic = false };
-                  ft_require_package = None; ft_instantiated = true }));
+                  ft_instantiated = true }));
             sm_visibility = Public; sm_deprecated = None;
             sm_flags =
             { Shallow_decl_defs.MethodFlags.abstract = true; final = false;
               override = false; dynamicallycallable = false;
               php_std_lib = false; support_dynamic_type = false;
               no_auto_likes = false; needs_concrete = false };
-            sm_attributes = []; sm_sort_text = None }
+            sm_attributes = []; sm_sort_text = None;
+            sm_package_requirement = Typing_defs.RPNormal }
           ];
         sc_methods = []; sc_user_attributes = []; sc_enum_type = None;
         sc_docs_url = None; sc_package = None }));
@@ -154,14 +158,15 @@
                    is_function_pointer = false; returns_readonly = false;
                    readonly_this = false; support_dynamic_type = false;
                    is_memoized = false; variadic = false };
-                 ft_require_package = None; ft_instantiated = true }));
+                 ft_instantiated = true }));
            sm_visibility = Public; sm_deprecated = None;
            sm_flags =
            { Shallow_decl_defs.MethodFlags.abstract = false; final = false;
              override = false; dynamicallycallable = false;
              php_std_lib = false; support_dynamic_type = false;
              no_auto_likes = false; needs_concrete = false };
-           sm_attributes = []; sm_sort_text = None };
+           sm_attributes = []; sm_sort_text = None;
+           sm_package_requirement = Typing_defs.RPNormal };
           { Shallow_decl_defs.sm_name = ([27:26-32], "getBar");
             sm_type =
             (Rwitness_from_decl ([27:26-32]),
@@ -178,14 +183,15 @@
                     is_function_pointer = false; returns_readonly = false;
                     readonly_this = false; support_dynamic_type = false;
                     is_memoized = false; variadic = false };
-                  ft_require_package = None; ft_instantiated = true }));
+                  ft_instantiated = true }));
             sm_visibility = Public; sm_deprecated = None;
             sm_flags =
             { Shallow_decl_defs.MethodFlags.abstract = false; final = false;
               override = false; dynamicallycallable = false;
               php_std_lib = false; support_dynamic_type = false;
               no_auto_likes = false; needs_concrete = false };
-            sm_attributes = []; sm_sort_text = None }
+            sm_attributes = []; sm_sort_text = None;
+            sm_package_requirement = Typing_defs.RPNormal }
           ];
         sc_methods = []; sc_user_attributes = []; sc_enum_type = None;
         sc_docs_url = None; sc_package = None }));
@@ -220,14 +226,15 @@
                    is_function_pointer = false; returns_readonly = false;
                    readonly_this = false; support_dynamic_type = false;
                    is_memoized = false; variadic = false };
-                 ft_require_package = None; ft_instantiated = true }));
+                 ft_instantiated = true }));
            sm_visibility = Public; sm_deprecated = None;
            sm_flags =
            { Shallow_decl_defs.MethodFlags.abstract = false; final = false;
              override = false; dynamicallycallable = false;
              php_std_lib = false; support_dynamic_type = false;
              no_auto_likes = false; needs_concrete = false };
-           sm_attributes = []; sm_sort_text = None };
+           sm_attributes = []; sm_sort_text = None;
+           sm_package_requirement = Typing_defs.RPNormal };
           { Shallow_decl_defs.sm_name = ([39:26-32], "getBar");
             sm_type =
             (Rwitness_from_decl ([39:26-32]),
@@ -244,14 +251,15 @@
                     is_function_pointer = false; returns_readonly = false;
                     readonly_this = false; support_dynamic_type = false;
                     is_memoized = false; variadic = false };
-                  ft_require_package = None; ft_instantiated = true }));
+                  ft_instantiated = true }));
             sm_visibility = Public; sm_deprecated = None;
             sm_flags =
             { Shallow_decl_defs.MethodFlags.abstract = false; final = false;
               override = false; dynamicallycallable = false;
               php_std_lib = false; support_dynamic_type = false;
               no_auto_likes = false; needs_concrete = false };
-            sm_attributes = []; sm_sort_text = None }
+            sm_attributes = []; sm_sort_text = None;
+            sm_package_requirement = Typing_defs.RPNormal }
           ];
         sc_methods =
         [{ Shallow_decl_defs.sm_name = ([43:19-24], "three");
@@ -268,14 +276,15 @@
                    is_function_pointer = false; returns_readonly = false;
                    readonly_this = false; support_dynamic_type = false;
                    is_memoized = false; variadic = false };
-                 ft_require_package = None; ft_instantiated = true }));
+                 ft_instantiated = true }));
            sm_visibility = Public; sm_deprecated = None;
            sm_flags =
            { Shallow_decl_defs.MethodFlags.abstract = false; final = false;
              override = false; dynamicallycallable = false;
              php_std_lib = false; support_dynamic_type = false;
              no_auto_likes = false; needs_concrete = false };
-           sm_attributes = []; sm_sort_text = None }
+           sm_attributes = []; sm_sort_text = None;
+           sm_package_requirement = Typing_defs.RPNormal }
           ];
         sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None;
         sc_package = None }))

@@ -135,6 +135,7 @@ module ParentClassElt = struct
       ce_sealed_allowlist = _;
       ce_sort_text = _;
       ce_overlapping_tparams = _;
+      ce_package_requirement = _;
     } =
       elt1
     in
@@ -148,6 +149,7 @@ module ParentClassElt = struct
       ce_sealed_allowlist = _;
       ce_sort_text = _;
       ce_overlapping_tparams = _;
+      ce_package_requirement = _;
     } =
       elt2
     in
@@ -575,6 +577,153 @@ let check_sealed_allowlist
           parent_class_elt
           class_elt
           on_error
+
+(* The rules for overriding methods with __RequirePackage follow by analogy to
+ * visibility modifiers -- a method cannot become "less visible" by override.
+ * So, if package a includes package b, a method requiring package a may be
+ * overridden by one requiring package b. *)
+let check_require_package env member_name parent_class_elt class_elt on_error =
+  let (lazy pos) = class_elt.ce_pos in
+  let snd_err =
+    Typing_error.Secondary.Bad_method_override { pos; member_name }
+  in
+  let on_error =
+    Typing_error.Reasons_callback.prepend_on_apply on_error snd_err
+  in
+  let strengthening_error p_super (c_pos, c) ~child_str ~parent_str =
+    Typing_error_utils.add_typing_error
+      ~env
+      Typing_error.(
+        apply_reasons ~on_error
+        @@ Secondary.Require_package_mismatch
+             {
+               pos = c_pos;
+               reason_sub =
+                 lazy
+                   [
+                     ( c_pos,
+                       Format.sprintf "This method %s package `%s`" child_str c
+                     );
+                   ];
+               reason_super =
+                 lazy
+                   [
+                     ( p_super,
+                       Format.sprintf
+                         "The parent method %s attribute. The override must have a weaker requirement."
+                         parent_str );
+                   ];
+             })
+  in
+  let mismatch_error
+      (p_pos, p) (c_pos, c) parent_package ~child_str ~parent_str ~inclusion_str
+      =
+    Typing_error_utils.add_typing_error
+      ~env
+      Typing_error.(
+        apply_reasons ~on_error
+        @@ Secondary.Require_package_mismatch
+             {
+               pos = c_pos;
+               reason_sub =
+                 lazy
+                   [
+                     ( c_pos,
+                       Format.sprintf "This method %s package `%s`" child_str c
+                     );
+                   ];
+               reason_super =
+                 lazy
+                   [
+                     ( p_pos,
+                       Format.sprintf
+                         "It cannot override a method that %s package `%s`"
+                         parent_str
+                         p );
+                     ( Pos_or_decl.of_raw_pos
+                         (Package.get_package_pos parent_package),
+                       Format.sprintf "Because `%s` %s `%s`" p inclusion_str c
+                     );
+                   ];
+             })
+  in
+
+  let check_inclusion p c ~parent_str ~child_str =
+    match
+      (Env.get_package_by_name env (snd p), Env.get_package_by_name env (snd c))
+    with
+    | (Some parent_package, Some child_package) ->
+      Package.(
+        (match relationship parent_package child_package with
+        | Package.Includes
+        | Package.Equal ->
+          ()
+        | Package.Unrelated ->
+          mismatch_error
+            p
+            c
+            parent_package
+            ~child_str
+            ~parent_str
+            ~inclusion_str:"does not include"
+        | Package.Soft_includes ->
+          mismatch_error
+            p
+            c
+            parent_package
+            ~child_str
+            ~parent_str
+            ~inclusion_str:"only soft-includes"))
+    | (None, _)
+    | (_, None) ->
+      (* Required package existence and inclusion of file package checked elsewhere *)
+      ()
+  in
+
+  match
+    (parent_class_elt.ce_package_requirement, class_elt.ce_package_requirement)
+  with
+  | (Some parent_requirent, Some child_requirement) -> begin
+    match (parent_requirent, child_requirement) with
+    | (RPRequire p, RPRequire c) ->
+      let parent_str = "requires" in
+      let child_str = "requires" in
+      check_inclusion p c ~parent_str ~child_str
+    | (RPSoft _, RPRequire c) ->
+      let (lazy p_super) = parent_class_elt.ce_pos in
+      let child_str = "requires" in
+      let parent_str = "has a `__SoftRequirePackage`" in
+      strengthening_error p_super c ~child_str ~parent_str
+    | (RPNormal, RPRequire c) ->
+      let (lazy p_super) = parent_class_elt.ce_pos in
+      let child_str = "requires" in
+      let parent_str = "does not have a `__RequirePackage`" in
+      strengthening_error p_super c ~child_str ~parent_str
+    | (RPRequire p, RPSoft c) ->
+      let parent_str = "requires" in
+      let child_str = "soft-requires" in
+      check_inclusion p c ~parent_str ~child_str
+    | (RPSoft p, RPSoft c) ->
+      let parent_str = "soft-requires" in
+      let child_str = "soft-requires" in
+      check_inclusion p c ~parent_str ~child_str
+    | (RPNormal, RPSoft c) ->
+      let (lazy p_super) = parent_class_elt.ce_pos in
+      let child_str = "soft-requires" in
+      let parent_str = "does not have a `__SoftRequirePackage`" in
+      strengthening_error p_super c ~child_str ~parent_str
+    | (RPSoft _, RPNormal)
+    | (RPRequire _, RPNormal) ->
+      (* Child is less restrictive than the parent, also covered by extends check *)
+      ()
+    | (RPNormal, RPNormal) ->
+      (* Covered by the existing check of the symbol reference in `extends` clause *)
+      ()
+  end
+  (* non-methods *)
+  | (None, _)
+  | (_, None) ->
+    ()
 
 (** Check that we are not overriding an __LSB property *)
 let check_lsb_overrides
@@ -1107,7 +1256,8 @@ let check_override
       parent_class_elt
       class_
       class_elt
-      on_error
+      on_error;
+    check_require_package env member_name parent_class_elt class_elt on_error
   end;
 
   (* Verify that we are not overriding an __LSB property *)
@@ -1814,7 +1964,6 @@ let default_constructor_ce class_ =
       ft_implicit_params = { capability = CapTy (MakeType.mixed r) };
       ft_ret = MakeType.void r;
       ft_flags = Typing_defs_flags.Fun.default;
-      ft_require_package = None;
       ft_instantiated = true;
     }
   in
@@ -1826,6 +1975,7 @@ let default_constructor_ce class_ =
     ce_sort_text = None;
     ce_pos = lazy pos;
     ce_overlapping_tparams = None;
+    ce_package_requirement = Some RPNormal;
     ce_sealed_allowlist = None;
     ce_flags =
       make_ce_flags

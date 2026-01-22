@@ -92,6 +92,7 @@ let element_to_class_elt
        elt_sort_text = ce_sort_text;
        elt_sealed_allowlist = ce_sealed_allowlist;
        elt_overlapping_tparams = ce_overlapping_tparams;
+       elt_package_requirement = ce_package_requirement;
      } :
       Decl_defs.element) : Typing_defs.class_elt =
   let (ce_pos, ce_type) =
@@ -107,6 +108,7 @@ let element_to_class_elt
     ce_sealed_allowlist;
     ce_sort_text;
     ce_overlapping_tparams;
+    ce_package_requirement;
   }
 
 let fun_elt_to_ty fe = (fe.fe_pos, fe.fe_type)

@@ -156,6 +156,9 @@ class DynamicPatchBase {
 
   [[nodiscard]] bool empty(detail::Badge) const { return patch_.empty(); }
 
+  template <typename Protocol>
+  std::uint32_t encode(Protocol&) const;
+
  protected:
   ~DynamicPatchBase() = default;
 
@@ -828,6 +831,9 @@ class DynamicMapPatch {
         put_.empty() && patchPrior_.empty() && patchAfter_.empty();
   }
 
+  template <typename Protocol>
+  std::uint32_t encode(Protocol& prot) const;
+
  private:
   template <class Self, class Visitor>
   static void customVisitImpl(Self&& self, Visitor&& v);
@@ -938,6 +944,9 @@ class DynamicStructurePatch {
 
   // Ensures and patches fields with assign operation from the given object.
   void ensureAndAssignFieldsFromObject(Object obj);
+
+  template <class Protocol>
+  std::uint32_t encode(Protocol& prot) const;
 
  private:
   template <class Self, class Visitor>

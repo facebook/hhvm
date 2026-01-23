@@ -546,6 +546,199 @@ void DynamicMapPatch::fromObject(detail::Badge, Object obj) {
   }
 }
 
+namespace {
+
+template <typename Protocol, typename PatchMap>
+std::uint32_t encodePatchMap(Protocol& prot, const PatchMap& patches) {
+  TType keyType = protocol::T_STRING;
+  if (!patches.empty()) {
+    keyType = detail::getTType(patches.begin()->first);
+  }
+  std::uint32_t ret =
+      prot.writeMapBegin(keyType, TType::T_STRUCT, patches.size());
+  for (const auto& [key, patch] : patches) {
+    ret += serializeValue(prot, key);
+    ret += patch.encode(prot);
+  }
+  ret += prot.writeMapEnd();
+  return ret;
+}
+
+template <typename Protocol, typename FieldPatchMap>
+std::uint32_t encodeFieldPatchStruct(
+    Protocol& prot, const char* name, const FieldPatchMap& patches) {
+  std::uint32_t ret = prot.writeStructBegin(name);
+  for (const auto& [id, patch] : patches) {
+    ret += prot.writeFieldBegin("", TType::T_STRUCT, folly::to_underlying(id));
+    ret += patch.encode(prot);
+    ret += prot.writeFieldEnd();
+  }
+  ret += prot.writeFieldStop();
+  ret += prot.writeStructEnd();
+  return ret;
+}
+
+} // namespace
+
+template <typename Protocol>
+std::uint32_t DynamicMapPatch::encode(Protocol& prot) const {
+  std::uint32_t ret = prot.writeStructBegin("DynamicMapPatch");
+
+  if (assign_) {
+    ret += prot.writeFieldBegin(
+        "assign", TType::T_MAP, folly::to_underlying(op::PatchOp::Assign));
+    ret += detail::serializeMap(prot, *assign_);
+    ret += prot.writeFieldEnd();
+    ret += prot.writeFieldStop();
+    ret += prot.writeStructEnd();
+    return ret;
+  }
+
+  if (clear_) {
+    ret += prot.writeFieldBegin(
+        "clear", TType::T_BOOL, folly::to_underlying(op::PatchOp::Clear));
+    ret += prot.writeBool(true);
+    ret += prot.writeFieldEnd();
+  }
+
+  if (!patchPrior_.empty()) {
+    ret += prot.writeFieldBegin(
+        "patchPrior",
+        TType::T_MAP,
+        folly::to_underlying(op::PatchOp::PatchPrior));
+    ret += encodePatchMap(prot, patchPrior_);
+    ret += prot.writeFieldEnd();
+  }
+
+  if (!patchAfter_.empty()) {
+    ret += prot.writeFieldBegin(
+        "patch", TType::T_MAP, folly::to_underlying(op::PatchOp::PatchAfter));
+    ret += encodePatchMap(prot, patchAfter_);
+    ret += prot.writeFieldEnd();
+  }
+
+  if (!add_.empty()) {
+    ret += prot.writeFieldBegin(
+        "ensure",
+        TType::T_MAP,
+        folly::to_underlying(op::PatchOp::EnsureStruct));
+    ret += serializeMap(prot, add_);
+    ret += prot.writeFieldEnd();
+  }
+
+  if (!remove_.empty()) {
+    ret += prot.writeFieldBegin(
+        "remove", TType::T_SET, folly::to_underlying(op::PatchOp::Remove));
+    ret += serializeSet(prot, remove_);
+    ret += prot.writeFieldEnd();
+  }
+
+  if (!put_.empty()) {
+    ret += prot.writeFieldBegin(
+        "put", TType::T_MAP, folly::to_underlying(op::PatchOp::Put));
+    ret += serializeMap(prot, put_);
+    ret += prot.writeFieldEnd();
+  }
+
+  ret += prot.writeFieldStop();
+  ret += prot.writeStructEnd();
+  return ret;
+}
+
+template std::uint32_t DynamicMapPatch::encode(
+    apache::thrift::BinaryProtocolWriter&) const;
+template std::uint32_t DynamicMapPatch::encode(
+    apache::thrift::CompactProtocolWriter&) const;
+template std::uint32_t DynamicMapPatch::encode(
+    apache::thrift::protocol::detail::ObjectWriter&) const;
+
+template <bool IsUnion>
+template <class Protocol>
+std::uint32_t DynamicStructurePatch<IsUnion>::encode(Protocol& prot) const {
+  std::uint32_t ret = prot.writeStructBegin(
+      IsUnion ? "DynamicUnionPatch" : "DynamicStructPatch");
+
+  if (assign_) {
+    ret += prot.writeFieldBegin(
+        "assign", TType::T_STRUCT, folly::to_underlying(op::PatchOp::Assign));
+    ret += detail::serializeObject(prot, *assign_);
+    ret += prot.writeFieldEnd();
+    ret += prot.writeFieldStop();
+    ret += prot.writeStructEnd();
+    return ret;
+  }
+
+  if (clear_) {
+    ret += prot.writeFieldBegin(
+        "clear", TType::T_BOOL, folly::to_underlying(op::PatchOp::Clear));
+    ret += prot.writeBool(true);
+    ret += prot.writeFieldEnd();
+  }
+
+  if (!remove_.empty()) {
+    ret += prot.writeFieldBegin(
+        "remove", TType::T_LIST, folly::to_underlying(op::PatchOp::Remove));
+    ret += prot.writeListBegin(TType::T_I16, remove_.size());
+    for (auto id : remove_) {
+      ret += prot.writeI16(folly::to_underlying(id));
+    }
+    ret += prot.writeListEnd();
+    ret += prot.writeFieldEnd();
+  }
+
+  if (!ensure_.empty()) {
+    constexpr auto ensureOp =
+        IsUnion ? op::PatchOp::EnsureUnion : op::PatchOp::EnsureStruct;
+    ret += prot.writeFieldBegin(
+        "ensure", TType::T_STRUCT, folly::to_underlying(ensureOp));
+    ret += prot.writeStructBegin("ensure");
+    for (const auto& [id, value] : ensure_) {
+      ret += prot.writeFieldBegin(
+          "", detail::getTType(value), folly::to_underlying(id));
+      ret += detail::serializeValue(prot, value);
+      ret += prot.writeFieldEnd();
+    }
+    ret += prot.writeFieldStop();
+    ret += prot.writeStructEnd();
+    ret += prot.writeFieldEnd();
+  }
+
+  if (!patchPrior_.empty()) {
+    ret += prot.writeFieldBegin(
+        "patchPrior",
+        TType::T_STRUCT,
+        folly::to_underlying(op::PatchOp::PatchPrior));
+    ret += encodeFieldPatchStruct(prot, "patchPrior", patchPrior_);
+    ret += prot.writeFieldEnd();
+  }
+
+  if (!patchAfter_.empty()) {
+    ret += prot.writeFieldBegin(
+        "patch",
+        TType::T_STRUCT,
+        folly::to_underlying(op::PatchOp::PatchAfter));
+    ret += encodeFieldPatchStruct(prot, "patch", patchAfter_);
+    ret += prot.writeFieldEnd();
+  }
+
+  ret += prot.writeFieldStop();
+  ret += prot.writeStructEnd();
+  return ret;
+}
+
+template std::uint32_t DynamicStructPatch::encode(
+    apache::thrift::BinaryProtocolWriter&) const;
+template std::uint32_t DynamicStructPatch::encode(
+    apache::thrift::CompactProtocolWriter&) const;
+template std::uint32_t DynamicStructPatch::encode(
+    apache::thrift::protocol::detail::ObjectWriter&) const;
+template std::uint32_t DynamicUnionPatch::encode(
+    apache::thrift::BinaryProtocolWriter&) const;
+template std::uint32_t DynamicUnionPatch::encode(
+    apache::thrift::CompactProtocolWriter&) const;
+template std::uint32_t DynamicUnionPatch::encode(
+    apache::thrift::protocol::detail::ObjectWriter&) const;
+
 void DynamicMapPatch::insert_or_assign(Value k, Value v) {
   undoChanges(k);
   setOrCheckMapType(k, v);
@@ -891,6 +1084,18 @@ template std::unique_ptr<folly::IOBuf>
 template std::unique_ptr<folly::IOBuf>
     DynamicUnknownPatch::applyToSerializedObject<
         type::StandardProtocol::Binary>(std::unique_ptr<folly::IOBuf>) const;
+
+template <typename Protocol>
+std::uint32_t DynamicPatchBase::encode(Protocol& prot) const {
+  return protocol::detail::serializeObject(prot, patch_);
+}
+
+template std::uint32_t DynamicPatchBase::encode(
+    apache::thrift::BinaryProtocolWriter&) const;
+template std::uint32_t DynamicPatchBase::encode(
+    apache::thrift::CompactProtocolWriter&) const;
+template std::uint32_t DynamicPatchBase::encode(
+    apache::thrift::protocol::detail::ObjectWriter&) const;
 
 DynamicPatch DiffVisitorBase::diff(const Object& src, const Object& dst) {
   return diffStructured(src, dst);
@@ -2160,14 +2365,7 @@ DynamicPatch DynamicPatch::fromPatch(const type::AnyStruct& any) {
 
 template <typename Protocol>
 std::uint32_t DynamicPatch::encode(Protocol& prot) const {
-  return visitPatch([&](const auto& patch) {
-    if constexpr (requires { patch.encode(prot); }) {
-      return patch.encode(prot);
-    } else {
-      // TODO(dokwon): Provide direct encode from DynamicPatch.
-      return protocol::detail::serializeObject(prot, toObject());
-    }
-  });
+  return visitPatch([&](const auto& patch) { return patch.encode(prot); });
 }
 
 template <typename Protocol>

@@ -420,7 +420,7 @@ void CodeCache::SectionImpl<name, code>::ensure(CodeCache& cc, size_t size) {
   auto newState = m_state.load(std::memory_order_acquire);
   if (newState.m_last) {
     if (newState.m_last->canEmit(size)) return;
-    newState.m_used += newState.m_last->size();
+    newState.m_used += newState.m_last->used();
   }
 
   auto block = std::make_unique<DataBlock>(cc.m_all.allocChild(size, name));

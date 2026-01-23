@@ -1818,10 +1818,8 @@ void ThriftServer::callInterceptorsOnStartServing(
     server::DecoratorDataPerRequestBlueprint::Setup& decoratorDataSetup) {
 #if FOLLY_HAS_COROUTINES
   ServiceInterceptorBase::InitParams initParams;
-#ifdef THRIFT_SCHEMA_AVAILABLE
   initParams.serviceSchema =
       decoratedProcessorFactory_->getServiceSchemaNodes();
-#endif
   auto decoratorDataHandleFactory = decoratorDataSetup.getHandleFactory();
   initParams.decoratorDataHandleFactory = &decoratorDataHandleFactory;
   std::vector<folly::coro::Task<void>> tasks;

@@ -61,7 +61,7 @@ void ServerGeneratorStreamBridge::canceled() {
   Ptr(this);
 }
 
-bool ServerGeneratorStreamBridge::onStreamRequestN(uint64_t credits) {
+bool ServerGeneratorStreamBridge::onStreamRequestN(int32_t credits) {
   clientPush(std::move(credits));
   return true;
 }

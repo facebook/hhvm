@@ -102,7 +102,7 @@ class BiDiFiniteServer : public BiDiServerCallback, public SimpleStateBase {
     return true;
   }
 
-  bool onStreamRequestN(uint64_t n) override {
+  bool onStreamRequestN(int32_t n) override {
     DCHECK(isStreamOpen()) << "We can only requestN when stream is open";
 
     LOG(INFO) << "Server received stream requestN " << n
@@ -112,7 +112,7 @@ class BiDiFiniteServer : public BiDiServerCallback, public SimpleStateBase {
       return false;
     }
 
-    for (size_t i = 0; (i < n && chunksToSend_ > 0); i++) {
+    for (int32_t i = 0; (i < n && chunksToSend_ > 0); i++) {
       LOG(INFO) << "  Server will send stream chunk #" << chunksSent_++
                 << ", it has " << chunksToSend_ << " chunks left";
       if (!clientCallback_->onStreamNext(makeStreamPayload())) {

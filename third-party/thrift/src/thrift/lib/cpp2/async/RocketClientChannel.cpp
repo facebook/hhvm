@@ -445,7 +445,7 @@ class FirstRequestProcessorStream : public StreamClientCallback,
   void resetServerCallback(StreamServerCallback&) override { std::terminate(); }
 
   void onStreamCancel() override { clientCallback_ = nullptr; }
-  bool onStreamRequestN(uint64_t) override { return true; }
+  bool onStreamRequestN(int32_t) override { return true; }
   void resetClientCallback(StreamClientCallback& clientCallback) override {
     clientCallback_ = &clientCallback;
   }
@@ -640,7 +640,7 @@ class FirstRequestProcessorBiDi : public BiDiClientCallback,
   bool onStreamComplete() override { std::terminate(); }
 
   bool onStreamCancel() override { std::terminate(); }
-  bool onStreamRequestN(uint64_t) override { std::terminate(); }
+  bool onStreamRequestN(int32_t) override { std::terminate(); }
 
  private:
   const uint16_t protocolId_;

@@ -75,7 +75,7 @@ class BiDiSimplifiedEchoServer
     return isAlive();
   }
 
-  bool onStreamRequestN(uint64_t n) override {
+  bool onStreamRequestN(int32_t n) override {
     DestructionGuard dg(this);
     LOG(INFO) << "Server received stream requestN " << n;
     return isAlive();

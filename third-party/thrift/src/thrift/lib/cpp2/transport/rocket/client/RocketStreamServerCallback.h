@@ -39,7 +39,7 @@ class RocketStreamServerCallback : public StreamServerCallback {
         clientCallback_(&clientCallback),
         streamId_(streamId) {}
 
-  bool onStreamRequestN(uint64_t tokens) override;
+  bool onStreamRequestN(int32_t tokens) override;
   void onStreamCancel() override;
 
   bool onSinkHeaders(HeadersPayload&& payload) override;

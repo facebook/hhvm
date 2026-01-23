@@ -406,7 +406,7 @@ class RocketTestServer::RocketTestServerHandler : public RocketServerHandler {
             n_(n),
             nEchoHeaders_(nEchoHeaders) {}
 
-      bool onStreamRequestN(uint64_t tokens) override {
+      bool onStreamRequestN(int32_t tokens) override {
         while (tokens-- && i_++ < n_) {
           auto alive = clientCallback_->onStreamNext(
               StreamPayload{

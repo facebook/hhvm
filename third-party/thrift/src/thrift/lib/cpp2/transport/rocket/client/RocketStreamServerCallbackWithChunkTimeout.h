@@ -40,7 +40,7 @@ class RocketStreamServerCallbackWithChunkTimeout
         chunkTimeout_(chunkTimeout),
         credits_(initialCredits) {}
 
-  bool onStreamRequestN(uint64_t tokens) override;
+  bool onStreamRequestN(int32_t tokens) override;
 
   bool onInitialPayload(FirstResponsePayload&&, folly::EventBase*);
 

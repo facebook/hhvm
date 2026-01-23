@@ -69,7 +69,7 @@ class ServerCallbackStapler : public BiDiServerCallback,
   // BiDiServerCallback methods
   //
 
-  bool onStreamRequestN(uint64_t n) override {
+  bool onStreamRequestN(int32_t n) override {
     DeletionGuard guard(this);
     std::ignore = stream_->onStreamRequestN(n);
     return sink_ || stream_;

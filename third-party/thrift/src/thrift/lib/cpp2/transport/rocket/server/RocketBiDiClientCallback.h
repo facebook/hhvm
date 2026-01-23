@@ -134,7 +134,7 @@ class RocketBiDiClientCallback final : public BiDiClientCallback {
   RocketBiDiClientCallback(
       StreamId streamId,
       IRocketServerConnection& connection,
-      uint32_t initialTokens)
+      int32_t initialTokens)
       : streamId_(streamId),
         connection_(connection),
         initialTokens_(initialTokens) {}
@@ -169,7 +169,7 @@ class RocketBiDiClientCallback final : public BiDiClientCallback {
   //
 
   // Delegates to BiDiServerCallback::onStreamRequestN
-  bool onStreamRequestN(uint64_t n);
+  bool onStreamRequestN(int32_t n);
 
   // Delegates to BiDiServerCallback::onStreamCancel
   bool onStreamCancel();
@@ -211,7 +211,7 @@ class RocketBiDiClientCallback final : public BiDiClientCallback {
 
   State state_;
 
-  uint64_t initialTokens_{0};
+  int32_t initialTokens_{0};
 
   std::optional<CompressionConfig> compressionConfig_;
 

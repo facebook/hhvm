@@ -230,7 +230,7 @@ class StreamServerCallback {
  public:
   virtual ~StreamServerCallback() = default;
 
-  [[nodiscard]] virtual bool onStreamRequestN(uint64_t) = 0;
+  [[nodiscard]] virtual bool onStreamRequestN(int32_t) = 0;
   virtual void onStreamCancel() = 0;
 
   [[nodiscard]] virtual bool onSinkHeaders(HeadersPayload&&) { return true; }
@@ -410,7 +410,7 @@ class BiDiServerCallback {
  public:
   virtual ~BiDiServerCallback() = default;
 
-  [[nodiscard]] virtual bool onStreamRequestN(uint64_t) = 0;
+  [[nodiscard]] virtual bool onStreamRequestN(int32_t) = 0;
   [[nodiscard]] virtual bool onStreamCancel() = 0;
 
   [[nodiscard]] virtual bool onSinkNext(StreamPayload&&) = 0;

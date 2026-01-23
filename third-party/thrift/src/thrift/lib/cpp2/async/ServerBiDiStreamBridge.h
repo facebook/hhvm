@@ -47,7 +47,7 @@ class ServerBiDiStreamBridge
   //
   // StreamServerCallback methods
   //
-  bool onStreamRequestN(uint64_t credits) override {
+  bool onStreamRequestN(int32_t credits) override {
     clientPush(credits);
     return true;
   }

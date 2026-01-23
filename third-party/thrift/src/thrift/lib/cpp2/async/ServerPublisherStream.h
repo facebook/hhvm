@@ -327,7 +327,7 @@ class ServerPublisherStream : private StreamServerCallback {
   using Queue = typename twowaybridge_detail::
       AtomicQueue<ServerPublisherStream, folly::Try<Payload>>;
 
-  bool onStreamRequestN(uint64_t credits) override {
+  bool onStreamRequestN(int32_t credits) override {
     clientEventBase_->dcheckIsInEventBaseThread();
     notifyStreamCredit(contextStack_.get(), credits);
     if (!creditBuffer_.hasCredit()) {
@@ -463,7 +463,7 @@ class ServerPublisherStream : private StreamServerCallback {
     }
   }
 
-  static void notifyStreamCredit(ContextStack* contextStack, uint64_t credits) {
+  static void notifyStreamCredit(ContextStack* contextStack, int32_t credits) {
     if (contextStack) {
       contextStack->onStreamCredit(static_cast<uint32_t>(credits));
     }

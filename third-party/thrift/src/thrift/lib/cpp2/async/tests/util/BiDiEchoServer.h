@@ -121,7 +121,7 @@ class BiDiEchoServer : public BiDiServerCallback, public SimpleStateBase {
     return false;
   }
 
-  bool onStreamRequestN(uint64_t n) override {
+  bool onStreamRequestN(int32_t n) override {
     DCHECK(isStreamOpen()) << "We can only requestN when stream is open";
 
     LOG(INFO) << "Server received stream requestN " << n

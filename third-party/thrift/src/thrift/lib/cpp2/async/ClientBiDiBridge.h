@@ -111,7 +111,7 @@ class ClientCallbackStapler : public BiDiClientCallback,
 
   /* Stream/sink server methods: return whether that half-contract is alive. */
 
-  bool onStreamRequestN(uint64_t n) override {
+  bool onStreamRequestN(int32_t n) override {
     DeletionGuard guard(this);
     std::ignore = serverCb_->onStreamRequestN(n);
     return stream_;

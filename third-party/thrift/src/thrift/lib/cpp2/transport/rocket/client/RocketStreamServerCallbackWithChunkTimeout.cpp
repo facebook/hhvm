@@ -35,7 +35,7 @@ class TimeoutCallback : public folly::HHWheelTimer::Callback {
 } // namespace
 
 bool RocketStreamServerCallbackWithChunkTimeout::onStreamRequestN(
-    uint64_t tokens) {
+    int32_t tokens) {
   if (credits_ == 0) {
     scheduleTimeout();
   }

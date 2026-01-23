@@ -62,7 +62,7 @@ class RocketBiDiServerCallback : public BiDiServerCallback {
 
   // Stream fns
 
-  bool onStreamRequestN(uint64_t tokens) override;
+  bool onStreamRequestN(int32_t tokens) override;
   bool onStreamCancel() override;
 
   // Connection close special case

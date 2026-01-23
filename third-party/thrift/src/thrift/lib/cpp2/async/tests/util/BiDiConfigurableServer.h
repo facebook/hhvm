@@ -180,7 +180,7 @@ class BiDiConfigurableServer : public BiDiServerCallback,
     return true;
   }
 
-  bool onStreamRequestN(uint64_t n) override {
+  bool onStreamRequestN(int32_t n) override {
     LOG(INFO) << "Server received stream requestN " << n
               << " and will requestN " << n << " sink chunks";
     return clientCallback_->onSinkRequestN(n);

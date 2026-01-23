@@ -76,7 +76,7 @@ class StreamFaultInjectionCallback : public StreamClientCallback,
   }
 
   /** StreamServerCallback methods **/
-  bool onStreamRequestN(uint64_t tokens) override {
+  bool onStreamRequestN(int32_t tokens) override {
     return serverCallback_->onStreamRequestN(tokens);
   }
   void onStreamCancel() override {

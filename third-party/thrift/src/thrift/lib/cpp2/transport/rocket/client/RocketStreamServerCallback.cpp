@@ -21,7 +21,7 @@
 
 namespace apache::thrift::rocket {
 
-bool RocketStreamServerCallback::onStreamRequestN(uint64_t tokens) {
+bool RocketStreamServerCallback::onStreamRequestN(int32_t tokens) {
   return client_.sendRequestN(streamId_, tokens);
 }
 

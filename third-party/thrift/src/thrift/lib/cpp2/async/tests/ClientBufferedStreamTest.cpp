@@ -53,7 +53,7 @@ auto decode(folly::Try<StreamPayload>&& i) -> folly::Try<int> {
 }
 
 struct ServerCallback : StreamServerCallback {
-  bool onStreamRequestN(uint64_t credits) override {
+  bool onStreamRequestN(int32_t credits) override {
     credits_ += credits;
     requested.post();
     return true;

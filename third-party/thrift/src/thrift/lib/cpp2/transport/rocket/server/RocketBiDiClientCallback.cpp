@@ -127,7 +127,7 @@ bool RocketBiDiClientCallback::onStreamComplete() {
 // callback
 //
 
-bool RocketBiDiClientCallback::onStreamRequestN(uint64_t n) {
+bool RocketBiDiClientCallback::onStreamRequestN(int32_t n) {
   DCHECK(state_.isStreamOpen());
   return !serverCallback_->onStreamRequestN(n);
 }

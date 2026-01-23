@@ -113,7 +113,7 @@ class GuardedStreamCallback : public StreamClientCallback,
     serverCallback_ = &callback;
   }
 
-  bool onStreamRequestN(uint64_t n) override {
+  bool onStreamRequestN(int32_t n) override {
     DCHECK(serverCallback_);
     return serverCallback_->onStreamRequestN(n);
   }

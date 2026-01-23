@@ -94,7 +94,7 @@ void RocketBiDiServerCallback::onSinkCancel() {
   }
 }
 
-bool RocketBiDiServerCallback::onStreamRequestN(uint64_t tokens) {
+bool RocketBiDiServerCallback::onStreamRequestN(int32_t tokens) {
   return client_.sendRequestN(streamId_, tokens);
 }
 

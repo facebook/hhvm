@@ -300,7 +300,7 @@ TEST_F(BiDiTransportTest, BothSinkAndStreamGetCancelledOnRequestN) {
   };
 
   class CustomServer : public BiDiSimplifiedEchoServer {
-    bool onStreamRequestN(uint64_t n) override {
+    bool onStreamRequestN(int32_t n) override {
       DestructionGuard dg(this);
       LOG(INFO) << "Server received stream requestN " << n
                 << " and will cancel sink";

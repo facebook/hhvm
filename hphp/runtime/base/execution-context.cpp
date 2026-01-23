@@ -98,6 +98,8 @@ rds::local::AliasedRDSLocal<ExecutionContext,
                             &rds::local::detail::HotRDSLocals::g_context
                            > g_context;
 
+static std::atomic<bool> s_GloballySuppressNonFatals{false};
+
 ExecutionContext::ExecutionContext()
   : m_transport(nullptr)
   , m_sb(nullptr)
@@ -815,6 +817,12 @@ void ExecutionContext::handleError(const std::string& msg,
     mode = ErrorThrowMode::IfUnhandled;
   }
 
+  if (UNLIKELY(s_GloballySuppressNonFatals.load(std::memory_order_relaxed) &&
+               mode == ErrorThrowMode::Never)) {
+    Logger::FError("Suppressing non-Fatal Error({}): {}", errnum, msg);
+    return;
+  }
+
   auto const ee = skipFrame ?
     ExtendedException(ExtendedException::SkipFrame{}, msg) :
     ExtendedException(msg);
@@ -1468,9 +1476,9 @@ void ExecutionContext::requestExit() {
   RequestInfo *ti = RequestInfo::s_requestInfo.getNoCheck();
   RequestId rootReqId = ti->getRootRequestId();
   if (rootReqId != ti->m_id || m_xboxTasksStarted > 0) {
-    // Set the script filename of request group when root request 
+    // Set the script filename of request group when root request
     // is about to finish. It is important that setScriptFilename
-    // is called before decrement. 
+    // is called before decrement.
     if (rootReqId == ti->m_id) {
       requestFanoutLimitSetScriptFilename(rootReqId, ServerNote::Get("DYNO_SCRIPT_FILENAME").c_str());
     }
@@ -2258,6 +2266,16 @@ ThrowAllErrorsSetter::ThrowAllErrorsSetter() {
 
 ThrowAllErrorsSetter::~ThrowAllErrorsSetter() {
   g_context->setThrowAllErrors(m_throwAllErrors);
+}
+
+GloballySuppressNonFatals::GloballySuppressNonFatals() {
+  auto const wasSet = s_GloballySuppressNonFatals.exchange(true);
+  always_assert(!wasSet);
+}
+
+GloballySuppressNonFatals::~GloballySuppressNonFatals() {
+  auto const wasSet = s_GloballySuppressNonFatals.exchange(false);
+  always_assert(wasSet);
 }
 
 }

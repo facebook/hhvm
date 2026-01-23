@@ -132,6 +132,14 @@ private:
   bool m_throwAllErrors;
 };
 
+struct GloballySuppressNonFatals {
+  GloballySuppressNonFatals();
+  ~GloballySuppressNonFatals();
+
+  GloballySuppressNonFatals(GloballySuppressNonFatals&&) = delete;
+  GloballySuppressNonFatals& operator=(GloballySuppressNonFatals&&) = delete;
+};
+
 enum class FileLoadFlags {
   kDup,
   kHitMem,

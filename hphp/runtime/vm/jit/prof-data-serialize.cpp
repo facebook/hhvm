@@ -2326,6 +2326,11 @@ std::string serializeSBProfData(const std::string& root,
 std::string deserializeProfData(const std::string& filename,
                                 int numWorkers,
                                 bool rds) {
+  // We need to suppress warnings and notices here because they can generate
+  // backtraces and alter g_context state. This can break invariants during
+  // deserialization requiring a clean VM state.
+  GloballySuppressNonFatals _;
+
   s_deserializedFile = filename;
   try {
     ProfDataDeserializer ser{filename};

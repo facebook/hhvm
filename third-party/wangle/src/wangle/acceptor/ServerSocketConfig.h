@@ -213,6 +213,12 @@ struct ServerSocketConfig {
    */
   bool reusePort{false};
 
+  /**
+   * Allow multiple sockets to bind to the same address:port.
+   * Enabled by default.
+   */
+  bool enableReuseAddr{true};
+
   FizzConfig fizzConfig;
 
   /**

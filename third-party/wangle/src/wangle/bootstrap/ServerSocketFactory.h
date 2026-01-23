@@ -66,6 +66,7 @@ class AsyncServerSocketFactory : public ServerSocketFactory {
     }
     socket->setMaxNumMessagesInQueue(config.maxNumPendingConnectionsPerWorker);
     socket->setReusePortEnabled(reuse);
+    socket->setEnableReuseAddr(config.enableReuseAddr);
     if (config.enableTCPFastOpen) {
       socket->setTFOEnabled(true, config.fastOpenQueueSize);
     }

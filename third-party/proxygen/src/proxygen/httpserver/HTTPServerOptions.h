@@ -223,6 +223,12 @@ class HTTPServerOptions {
   bool useZeroCopy{false};
 
   /**
+   * Allow multiple sockets to bind to the same address:port. Enabled by
+   * default.
+   */
+  bool enableReuseAddr{true};
+
+  /**
    *  zerocopy enable function
    */
   folly::AsyncWriter::ZeroCopyEnableFunc zeroCopyEnableFunc;

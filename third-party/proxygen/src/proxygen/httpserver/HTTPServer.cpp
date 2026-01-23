@@ -161,6 +161,7 @@ folly::Expected<folly::Unit, std::exception_ptr> HTTPServer::startTcpServer(
         bootstrap_[i].socketConfig.fastOpenQueueSize =
             accConfig->fastOpenQueueSize;
       }
+      bootstrap_[i].socketConfig.enableReuseAddr = accConfig->enableReuseAddr;
       bootstrap_[i].group(accExe, ioExecutor);
       if (accConfig->reusePort) {
         bootstrap_[i].setReusePort(true);

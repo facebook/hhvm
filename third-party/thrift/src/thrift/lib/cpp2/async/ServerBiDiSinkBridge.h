@@ -191,7 +191,7 @@ class ServerBiDiSinkBridge
         DCHECK(!isClientClosed());
 
         auto message = std::move(messages.front());
-        if (!clientCb_->onSinkRequestN(message)) {
+        if (!clientCb_->onSinkRequestN(static_cast<int32_t>(message))) {
           return;
         }
       }

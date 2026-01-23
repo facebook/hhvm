@@ -150,9 +150,11 @@ class ValueWrapper : public ::apache::thrift::type::detail::Wrap<Base> {
   bool __fbthrift_is_empty() const;
 
   static ValueWrapper fromThrift(const Base& base) {
-    return ValueWrapper<>{base};
+    return ValueWrapper{base};
   }
-  static ValueWrapper fromThrift(Base&& base) { return ValueWrapper{base}; }
+  static ValueWrapper fromThrift(Base&& base) {
+    return ValueWrapper{std::move(base)};
+  }
 
   ValueWrapper(ValueWrapper&& other) noexcept = default;
   ValueWrapper(const ValueWrapper& other) = default;
@@ -163,8 +165,11 @@ class ValueWrapper : public ::apache::thrift::type::detail::Wrap<Base> {
   auto getType() const { return toThrift().getType(); }
 
 #define FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE(TYPE)                       \
-  decltype(auto) as_##TYPE() { return *toThrift().TYPE##Value_ref(); }         \
-  decltype(auto) as_##TYPE() const { return *toThrift().TYPE##Value_ref(); }   \
+  decltype(auto) as_##TYPE() & { return *toThrift().TYPE##Value_ref(); }       \
+  decltype(auto) as_##TYPE() const& { return *toThrift().TYPE##Value_ref(); }  \
+  decltype(auto) as_##TYPE() && {                                              \
+    return *std::move(toThrift()).TYPE##Value_ref();                           \
+  }                                                                            \
   bool is_##TYPE() const { return toThrift().TYPE##Value_ref().has_value(); }  \
   decltype(auto) ensure_##TYPE() {                                             \
     return toThrift().TYPE##Value_ref().ensure();                              \

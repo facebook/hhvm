@@ -1783,5 +1783,12 @@ TEST(ObjectTest, EmptyIOBufPtr) {
   EXPECT_EQ(obj[FieldId{1}].as_binary().to<std::string>(), "");
 }
 
+TEST(ObjectTest, MovedValue) {
+  Value value;
+  auto ptr = value.emplace_string(10000, '0').data();
+  auto another = std::move(value).as_string();
+  EXPECT_EQ(ptr, another.data());
+}
+
 } // namespace
 } // namespace apache::thrift::protocol

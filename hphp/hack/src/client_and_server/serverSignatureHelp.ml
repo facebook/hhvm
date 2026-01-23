@@ -168,6 +168,12 @@ let go_quarantined
       | Some info ->
         let ty = ServerInferType.get_type info in
         let tast_env = ServerInferType.get_env info in
+        (* Expand splat parameters e.g.
+         *   function(int $a, ...(string, bool) $b):void
+         * will be shown as
+         *   function(int $a, string $b[0], bool $b[1]):void
+         *)
+        let ty = Tast_env.expand_splat_param_in_function_type tast_env ty in
         let siginfo_label =
           Tast_env.print_ty_with_identity tast_env ty occurrence def_opt
         in

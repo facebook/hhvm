@@ -44,7 +44,101 @@ let print_error_ty = Typing_print.error
 let print_hint env hint =
   print_decl_ty env @@ Decl_hint.hint (get_decl_env env) hint
 
+let make_param_from_tuple ~is_optional ~splat ix pos name ty =
+  Typing_defs.
+    {
+      fp_pos = pos;
+      fp_name =
+        (match name with
+        | None -> None
+        | Some n -> Some (Printf.sprintf "%s[%d]" n ix));
+      fp_type = ty;
+      fp_flags =
+        make_fp_flags
+          ~mode:FPnormal
+          ~accept_disposable:false
+          ~is_optional
+          ~readonly:false
+          ~ignore_readonly_error:false
+          ~splat
+          ~named:false;
+      fp_def_value = None;
+    }
+
+(* Given a function type whose last parameter $p is a type splat of a tuple,
+ * expand the tuple into parameters named $p[0], $p[1] etc.
+ *
+ * For example
+ *   (function(int $x, ...(string, optional bool) $p):void)
+ * expands to
+ *   (function(int $x, string $p[0], optional bool $p[1]):void)
+ *)
+let expand_splat_param_in_function_type env ty =
+  let (_, ty) = Typing_env.expand_type env ty in
+  match Typing_defs.deref ty with
+  | (r, Typing_defs.Tfun ft) ->
+    let (ft_params, ft_flags) =
+      match List.last ft.ft_params with
+      | Some fp when Typing_defs.get_fp_splat fp -> begin
+        let (_, ty) = Typing_env.expand_type env fp.fp_type in
+        match Typing_defs.get_node ty with
+        | Typing_defs.Ttuple { t_required; t_optional; t_extra } ->
+          let ft_params =
+            List.drop_last_exn ft.ft_params
+            @ List.mapi t_required ~f:(fun ix ty ->
+                  make_param_from_tuple
+                    ~is_optional:false
+                    ~splat:false
+                    ix
+                    fp.fp_pos
+                    fp.fp_name
+                    ty)
+            @ List.mapi t_optional ~f:(fun ix ty ->
+                  make_param_from_tuple
+                    ~is_optional:true
+                    ~splat:false
+                    (ix + List.length t_required)
+                    fp.fp_pos
+                    fp.fp_name
+                    ty)
+          in
+          let (extra_params, ft_flags) =
+            match t_extra with
+            (* Closed tuples are represented by a variadic type of nothing *)
+            | Tvariadic ty when Typing_utils.is_nothing env ty ->
+              ([], ft.ft_flags)
+            (* Convert final splat or variadic tuple element into splat or variadic parameter *)
+            | Tvariadic ty
+            | Tsplat ty ->
+              let splat =
+                match t_extra with
+                | Tsplat _ -> true
+                | Tvariadic _ -> false
+              in
+              ( [
+                  make_param_from_tuple
+                    ~is_optional:false
+                    ~splat
+                    (List.length t_optional + List.length t_required)
+                    fp.fp_pos
+                    fp.fp_name
+                    ty;
+                ],
+                if splat then
+                  ft.ft_flags
+                else
+                  Typing_defs_flags.Fun.set_variadic true ft.ft_flags )
+          in
+          (ft_params @ extra_params, ft_flags)
+        | _ -> (ft.ft_params, ft.ft_flags)
+      end
+      | _ -> (ft.ft_params, ft.ft_flags)
+    in
+    Typing_defs.mk (r, Typing_defs.Tfun { ft with ft_params; ft_flags })
+  | _ -> ty
+
 let print_ty_with_identity env ty sym_occurrence sym_definition =
+  let ty = expand_splat_param_in_function_type env ty in
   Typing_print.full_with_identity
     ~hide_internals:true
     env

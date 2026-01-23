@@ -88,6 +88,7 @@ let expand_and_strip_dynamic env ty =
   let ty = Tast_env.strip_dynamic env ty in
   Tast_env.expand_type env ty
 
+(* Strip both ~ and supportdyn off a type *)
 let expand_and_strip_supportdyn env ty =
   let (env, ty) = expand_and_strip_dynamic env ty in
   let (_, _, ty) =
@@ -95,6 +96,16 @@ let expand_and_strip_supportdyn env ty =
     Typing_utils.strip_supportdyn env ty
   in
   ty
+
+(* Strip ~ and supportdyn off a type that is expected to be a function type.
+ * Also expand splatted tuples to multiple parameters
+ *)
+let expand_fun env ty =
+  let ty = expand_and_strip_supportdyn env ty in
+  let ty = Tast_env.expand_splat_param_in_function_type env ty in
+  match get_node ty with
+  | Tfun ft -> Some ft
+  | _ -> None
 
 let expand_and_strip_dynamic env ty =
   let (_, ty) = expand_and_strip_dynamic env ty in
@@ -334,9 +345,8 @@ let insert_text_for_ty
       Tast_env.localize_no_subst env ~ignore_errors:true decl_ty
   in
   (* Functions that support dynamic will be wrapped by supportdyn<_> *)
-  let ty = expand_and_strip_supportdyn env ty in
-  match Typing_defs.get_node ty with
-  | Tfun ft -> insert_text_for_fun_call env autocomplete_context label ft
+  match expand_fun env ty with
+  | Some ft -> insert_text_for_fun_call env autocomplete_context label ft
   | _ -> InsertLiterally label
 
 let autocomplete_shape_key autocomplete_context fields id =
@@ -1142,10 +1152,8 @@ let autocomplete_enum_class_label_call env f args =
     String.equal Naming_special_names.Classes.cEnumClassLabel name
   in
   let (fty, _, _) = f in
-  (* Functions that support dynamic will be wrapped by supportdyn<_> *)
-  let fty = expand_and_strip_supportdyn env fty in
-  match get_node fty with
-  | Tfun { ft_params; _ } ->
+  match expand_fun env fty with
+  | Some { ft_params; _ } ->
     let ty_args = zip_truncate args ft_params in
     List.iter
       ~f:(fun (arg, arg_ty) ->
@@ -2040,14 +2048,13 @@ let visitor
             | _ -> ())
           | _ -> ()
         end
-      | (_, _, Aast.(Call { func = (recv_ty, _, _); args; _ })) ->
-        (* Functions that support dynamic will be wrapped by supportdyn<_> *)
-        let recv_ty = expand_and_strip_supportdyn env recv_ty in
-        (match deref recv_ty with
-        | (_r, Tfun ft) ->
+      | (_, _, Aast.(Call { func = (recv_ty, _, _); args; _ })) -> begin
+        match expand_fun env recv_ty with
+        | Some ft ->
           autocomplete_shape_literal_in_call env ft args;
           autocomplete_enum_value_in_call env ft args
-        | _ -> ())
+        | _ -> ()
+      end
       | (_, p, Aast.EnumClassLabel (opt_cname, n)) when is_auto_complete n ->
         autocomplete_enum_class_label env opt_cname (p, n) None
       | (_, _, Aast.Efun { Aast.ef_fun = f; _ })

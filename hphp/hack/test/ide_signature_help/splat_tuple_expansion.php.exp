@@ -6,8 +6,8 @@ textDocument/signatureHelp response:
   "signatures":[
     {
       "documentation":"Generic instance method with type splat",
-      "label":"public static function genericSplatMethod(\n  Splat<(int, int)> $splat,\n  ...(int, int) $args\n): void",
-      "parameters":[{"label":"$splat"},{"label":"$args"}]
+      "label":"public static function genericSplatMethod(\n  Splat<(int, int)> $splat,\n  int $args[0],\n  int $args[1]\n): void",
+      "parameters":[{"label":"$splat"},{"label":"$args[0]"},{"label":"$args[1]"}]
     }
   ]
 }

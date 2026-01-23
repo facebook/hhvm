@@ -92,6 +92,12 @@ val expand_type : env -> Tast.ty -> env * Tast.ty
     recursively replacing them with the type they refer to. *)
 val fully_expand : env -> Tast.ty -> Tast.ty
 
+(** Eliminate a type splat parameter in a function type that has been
+ * instantiated to a tuple e.g. function(int $i, ...(string,bool) $a)
+ * expands to function(int $i, string $a[0], bool $a[1])
+ *)
+val expand_splat_param_in_function_type : env -> Tast.ty -> Tast.ty
+
 (** Strip ~ from type *)
 val strip_dynamic : env -> Tast.ty -> Tast.ty
 

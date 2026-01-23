@@ -298,3 +298,11 @@ class AdapterTestNotParameterized(unittest.TestCase):
                 ),
             ]
         )
+
+    def test_const_with_adapter_from_included_file(self) -> None:
+        from python_test.adapter_const_only.thrift_types import (
+            CONST_WITH_INCLUDED_ADAPTER,
+        )
+        from thrift.python.test.adapters.included import IncludedAdapterConfig
+
+        self.assertIsInstance(CONST_WITH_INCLUDED_ADAPTER, IncludedAdapterConfig)

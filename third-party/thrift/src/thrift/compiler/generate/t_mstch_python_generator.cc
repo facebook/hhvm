@@ -388,6 +388,11 @@ class python_generator_context {
     });
     visitor.add_const_visitor([&](const context& ctx, const t_const& c) {
       visit_type(&ctx.program(), *c.type());
+      if (&ctx.program() == root_program_) {
+        visit_adapter_annotation(
+            find_structured_adapter_annotation(c),
+            /*add_type_hint_to_adapter_modules=*/true);
+      }
     });
     visitor.add_typedef_visitor([&](const context& ctx, const t_typedef& td) {
       if (&ctx.program() != root_program_) {

@@ -19,9 +19,24 @@ namespace py3 testing
 include "thrift/lib/python/test/sub_dependency.thrift"
 include "thrift/lib/python/test/injected_field.thrift"
 include "thrift/annotation/thrift.thrift"
+include "thrift/annotation/python.thrift"
+include "thrift/annotation/scope.thrift"
 
 @thrift.AllowLegacyMissingUris
 package;
+
+// An adapter-annotated struct that can be used as a transitive annotation
+// from an included file. This tests that adapter type hint imports are
+// generated correctly for adapters from included files.
+// Using a UNIQUE adapter module that's ONLY used via this included file.
+@python.Adapter{
+  name = "thrift.python.test.adapters.included.IncludedAdapterImpl",
+  typeHint = "thrift.python.test.adapters.included.IncludedAdapterConfig[]",
+}
+@scope.Transitive
+struct IncludedAdapter {
+  1: string signature;
+}
 
 enum Status {
   ACTIVE = 1,

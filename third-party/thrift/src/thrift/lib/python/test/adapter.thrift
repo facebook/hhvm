@@ -20,6 +20,7 @@ namespace py3 python_test
 include "thrift/annotation/python.thrift"
 include "thrift/annotation/scope.thrift"
 include "thrift/annotation/thrift.thrift"
+include "thrift/lib/python/test/dependency.thrift"
 
 @python.Adapter{
   name = "thrift.python.test.adapters.datetime.DatetimeAdapter",
@@ -117,3 +118,14 @@ union UnionMapWithInvariantAdaptedValueTypes {
   1: map<AdaptedInt2, Baz> field_1;
   2: map<AdaptedInt2, Baz> field_2;
 }
+
+// Test case: uses an adapter-annotated struct from an included file.
+// This should trigger import of the included adapter module in generated .pyi file.
+struct UsesIncludedAdapter {
+  @dependency.IncludedAdapter{signature = "IncludedAdapterField"}
+  1: i32 adapted_field;
+}
+
+// Test case: const annotated with adapter from included file
+@dependency.IncludedAdapter{signature = "IncludedAdapterConstant"}
+const i32 CONST_WITH_INCLUDED_ADAPTER = 123456789;

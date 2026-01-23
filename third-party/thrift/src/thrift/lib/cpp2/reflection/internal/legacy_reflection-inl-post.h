@@ -241,7 +241,7 @@ struct impl<T, type_class::structure> {
       using member_annotations = typename MemberInfo::annotations::map;
       type_helper::register_into(schema);
       auto& f = (*dt.fields())[MemberInfo::id::value];
-      std::string name = MemberInfo::name_v.str();
+      std::string name = MemberInfo::getName().str();
       impl_structure_util::init(
           f,
           type_helper::id(),

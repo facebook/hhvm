@@ -210,12 +210,8 @@ ErrorCode HTTP2Codec::parseFrame(folly::io::Cursor& cursor) {
     case http2::FrameType::PUSH_PROMISE:
       return parsePushPromise(cursor);
     case http2::FrameType::EX_HEADERS:
-      if (ingressSettings_.getSetting(SettingsId::ENABLE_EX_HEADERS, 0)) {
-        return parseExHeaders(cursor);
-      } else {
-        VLOG(2) << "EX_HEADERS not enabled, ignoring the frame";
-        break;
-      }
+      VLOG(2) << "EX_HEADERS not enabled, ignoring the frame";
+      break;
     case http2::FrameType::PING:
       return parsePing(cursor);
     case http2::FrameType::GOAWAY:
@@ -849,27 +845,6 @@ ErrorCode HTTP2Codec::handleSettings(const std::deque<SettingPair>& settings) {
         break;
       case SettingsId::MAX_HEADER_LIST_SIZE:
         break;
-      case SettingsId::ENABLE_EX_HEADERS: {
-        auto ptr = egressSettings_.getSetting(SettingsId::ENABLE_EX_HEADERS);
-        if (ptr && ptr->value > 0) {
-          VLOG(4) << getTransportDirectionString(getTransportDirection())
-                  << " got ENABLE_EX_HEADERS=" << setting.second;
-          if (setting.second != 0 && setting.second != 1) {
-            goawayErrorMessage_ =
-                folly::to<string>("GOAWAY error: invalid ENABLE_EX_HEADERS=",
-                                  setting.second,
-                                  " for streamID=",
-                                  curHeader_.stream);
-            VLOG(4) << goawayErrorMessage_;
-            return ErrorCode::PROTOCOL_ERROR;
-          }
-          break;
-        } else {
-          // egress ENABLE_EX_HEADERS is disabled, consider the ingress
-          // ENABLE_EX_HEADERS as unknown setting, and ignore it.
-          continue;
-        }
-      }
       case SettingsId::ENABLE_CONNECT_PROTOCOL:
         if (setting.second > 1) {
           goawayErrorMessage_ = folly::to<string>(
@@ -1649,14 +1624,6 @@ size_t HTTP2Codec::generateSettings(folly::IOBufQueue& writeBuf) {
         break;
       case SettingsId::MAX_HEADER_LIST_SIZE:
         headerCodec_.setMaxUncompressed(setting.value);
-        break;
-      case SettingsId::ENABLE_EX_HEADERS:
-        CHECK(setting.value == 0 || setting.value == 1);
-        if (setting.value == 0) {
-          continue; // just skip the experimental setting if disabled
-        } else {
-          VLOG(4) << "generating ENABLE_EX_HEADERS=" << setting.value;
-        }
         break;
       case SettingsId::ENABLE_CONNECT_PROTOCOL:
         if (setting.value == 0) {

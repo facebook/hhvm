@@ -23,27 +23,16 @@ void HTTPDownstreamSession::startNow() {
 void HTTPDownstreamSession::setupOnHeadersComplete(HTTPTransaction* txn,
                                                    HTTPMessage* msg) {
   VLOG(5) << "setupOnHeadersComplete txn=" << txn << ", id=" << txn->getID()
-          << ", handlder=" << txn->getHandler() << ", msg=" << msg;
-  if (txn->getHandler()) {
-    // handler is installed before setupOnHeadersComplete callback. It must be
-    // an EX_HEADERS from client side, and ENABLE_EX_HEADERS == 1
-    const auto* settings = codec_->getIngressSettings();
-    CHECK(settings && settings->getSetting(SettingsId::ENABLE_EX_HEADERS, 0));
-    CHECK(txn->getControlStream());
-    return;
-  }
-
+          << ", handler=" << txn->getHandler() << ", msg=" << msg;
   // We need to find a Handler to process the transaction.
   // Note: The handler is responsible for freeing itself
   // when it has finished processing the transaction.  The
   // transaction is responsible for freeing itself when both the
   // ingress and egress messages have completed (or failed).
-  HTTPTransaction::Handler* handler = nullptr;
 
   // In the general case, delegate to the handler factory to generate
   // a handler for the transaction.
-  handler = getController()->getRequestHandler(*txn, msg);
-  CHECK(handler);
+  auto* handler = CHECK_NOTNULL(getController()->getRequestHandler(*txn, msg));
 
   DestructorGuard dg(this);
   txn->setHandler(handler);

@@ -170,7 +170,6 @@ class HTTPUpstreamTest
     httpSession_->setFlowControl(
         flowControl_[0], flowControl_[1], flowControl_[2]);
     httpSession_->setMaxConcurrentOutgoingStreams(10);
-    httpSession_->setEgressSettings({{SettingsId::ENABLE_EX_HEADERS, 1}});
     httpSession_->startNow();
     eventBase_.loop();
     ASSERT_EQ(this->sessionDestroyed_, false);
@@ -187,15 +186,8 @@ class HTTPUpstreamTest
 
     auto clientCodec = makeClientCodec<HTTP2Codec>(2);
     folly::IOBufQueue c2s{folly::IOBufQueue::cacheChainLength()};
-    clientCodec->getEgressSettings()->setSetting(SettingsId::ENABLE_EX_HEADERS,
-                                                 1);
     clientCodec->generateConnectionPreface(c2s);
     clientCodec->generateSettings(c2s);
-
-    // set ENABLE_EX_HEADERS to 1 in egressSettings
-    serverCodec->getEgressSettings()->setSetting(SettingsId::ENABLE_EX_HEADERS,
-                                                 1);
-    // set ENABLE_EX_HEADERS to 1 in ingressSettings
     auto setup = c2s.move();
     serverCodec->onIngress(*setup);
   }
@@ -616,103 +608,6 @@ TEST_F(HTTP2UpstreamSessionTest, TestSetControllerInitHeaderIndexingStrat) {
   eventBase_.loop();
 
   EXPECT_CALL(mockController, detachSession(_));
-  httpSession_->destroy();
-}
-
-/*
- * The sequence of streams are generated in the following order:
- * - [client --> server] setup the control stream (getGetRequest())
- * - [server --> client] respond to 1st stream (OK, without EOM)
- * - [server --> client] request 2nd stream (pub, EOM)
- * - [client --> server] abort the 2nd stream
- * - [server --> client] respond to 1st stream (EOM)
- */
-
-TEST_F(HTTP2UpstreamSessionTest, ExheaderFromServer) {
-  folly::IOBufQueue queue{folly::IOBufQueue::cacheChainLength()};
-
-  // generate enable_ex_headers setting
-  auto serverCodec = makeServerCodec();
-  enableExHeader(serverCodec.get());
-  serverCodec->generateSettings(queue);
-  // generate the response for control stream, but EOM
-  auto cStreamId = HTTPCodec::StreamID(1);
-  serverCodec->generateHeader(
-      queue, cStreamId, getResponse(200, 0), false, nullptr);
-  // generate a request from server, encapsulated in EX_HEADERS frame
-  serverCodec->generateExHeader(queue,
-                                2,
-                                getGetRequest("/messaging"),
-                                HTTPCodec::ExAttributes(cStreamId, false),
-                                true,
-                                nullptr);
-  serverCodec->generateEOM(queue, 1);
-
-  auto cHandler = openTransaction();
-  cHandler->sendRequest(getGetRequest("/cc"));
-
-  NiceMock<MockHTTPHandler> pubHandler;
-  InSequence handlerSequence;
-  cHandler->expectHeaders([&](std::shared_ptr<HTTPMessage> msg) {
-    EXPECT_EQ(200, msg->getStatusCode());
-  });
-
-  EXPECT_CALL(*cHandler, _onExTransaction(_))
-      .WillOnce(Invoke([&pubHandler](HTTPTransaction* pubTxn) {
-        pubTxn->setHandler(&pubHandler);
-        pubHandler.txn_ = pubTxn;
-      }));
-  pubHandler.expectHeaders([&](std::shared_ptr<HTTPMessage> msg) {
-    EXPECT_EQ(msg->getPathAsStringPiece(), "/messaging");
-  });
-  pubHandler.expectEOM([&]() { pubHandler.txn_->sendAbort(); });
-  pubHandler.expectDetachTransaction();
-
-  cHandler->expectEOM();
-  cHandler->expectDetachTransaction();
-
-  auto buf = queue.move();
-  buf->coalesce();
-  readAndLoop(buf.get());
-
-  httpSession_->destroy();
-}
-
-TEST_F(HTTP2UpstreamSessionTest, InvalidControlStream) {
-  folly::IOBufQueue queue{folly::IOBufQueue::cacheChainLength()};
-
-  // generate enable_ex_headers setting
-  auto serverCodec = makeServerCodec();
-  enableExHeader(serverCodec.get());
-  serverCodec->generateSettings(queue);
-  // generate the response for control stream, but EOM
-  auto cStreamId = HTTPCodec::StreamID(1);
-  serverCodec->generateHeader(
-      queue, cStreamId, getResponse(200, 0), false, nullptr);
-  // generate a EX_HEADERS frame with non-existing control stream
-  serverCodec->generateExHeader(queue,
-                                2,
-                                getGetRequest("/messaging"),
-                                HTTPCodec::ExAttributes(cStreamId + 2, false),
-                                true,
-                                nullptr);
-  serverCodec->generateEOM(queue, 1);
-
-  auto cHandler = openTransaction();
-  cHandler->sendRequest(getGetRequest("/cc"));
-
-  InSequence handlerSequence;
-  cHandler->expectHeaders([&](std::shared_ptr<HTTPMessage> msg) {
-    EXPECT_EQ(200, msg->getStatusCode());
-  });
-  EXPECT_CALL(*cHandler, _onExTransaction(_)).Times(0);
-  cHandler->expectEOM();
-  cHandler->expectDetachTransaction();
-
-  auto buf = queue.move();
-  buf->coalesce();
-  readAndLoop(buf.get());
-
   httpSession_->destroy();
 }
 
@@ -1861,98 +1756,6 @@ TEST_F(MockHTTPUpstreamTest, IngressGoawayDrain) {
   eventBase_.loop();
 
   // Session will delete itself after getting the response
-}
-
-/*
- * 1. Setup ControlStream 1, respond with 200
- * 2. Send ExStream 3, make HttpSession believes Stream 1 is a ControlStream
- * 3. Trigger GOAWAY, Stream should be aborted.
- */
-
-TEST_F(MockHTTPUpstreamTest, ControlStreamGoaway) {
-  // Tests whether a recognized control stream is aborted
-  // when session receiving a final GOAWAY, but not on a draining GOAWAY
-
-  HTTPSettings settings;
-  settings.setSetting(SettingsId::ENABLE_EX_HEADERS, 1);
-  EXPECT_CALL(*codecPtr_, getEgressSettings())
-      .WillRepeatedly(Return(&settings));
-
-  auto handler = openTransaction();
-
-  // Create a dummy request
-  auto pub = getGetRequest("/sub/fyi");
-  NiceMock<MockHTTPHandler> pubHandler1;
-  NiceMock<MockHTTPHandler> pubHandler2;
-
-  {
-    InSequence enforceOrder;
-    handler->expectHeaders([&] {
-      // Txn 1 completes after draining GOAWAY
-      auto* pubTxn1 = handler->txn_->newExTransaction(&pubHandler1);
-      pubTxn1->setHandler(&pubHandler1);
-      pubHandler1.txn_ = pubTxn1;
-
-      pubTxn1->sendHeaders(pub);
-      pubTxn1->sendBody(makeBuf(200));
-      pubTxn1->sendEOM();
-
-      // Txn 2 completes after cs aborted
-      auto* pubTxn2 = handler->txn_->newExTransaction(&pubHandler2);
-      pubTxn2->setHandler(&pubHandler2);
-      pubHandler2.txn_ = pubTxn2;
-
-      pubTxn2->sendHeaders(pub);
-      pubTxn2->sendBody(makeBuf(200));
-      pubTxn2->sendEOM();
-    });
-  }
-
-  // send response header to stream 1 first, triggers sending 2 dep streams
-  codecCb_->onHeadersComplete(1, makeResponse(200));
-  eventBase_.loopOnce();
-
-  // expect goaway
-  // transactionIds is stored in unordered set(F14FastSet), the invocation
-  // order of each txn's goaway method is not deterministic
-  pubHandler1.expectGoaway();
-  pubHandler2.expectGoaway();
-  handler->expectGoaway();
-
-  // Receive draining GOAWAY, no-op
-  codecCb_->onGoaway(http2::kMaxStreamID, ErrorCode::NO_ERROR);
-  eventBase_.loopOnce();
-
-  // Send a reply to finish stream 3
-  pubHandler1.expectHeaders();
-  pubHandler1.expectEOM();
-  pubHandler1.expectDetachTransaction();
-  codecCb_->onHeadersComplete(3, makeResponse(200));
-  codecCb_->onMessageComplete(3, false);
-
-  {
-    InSequence enforceOrder;
-    handler->expectGoaway();
-    handler->expectError([&](const HTTPException& err) {
-      EXPECT_TRUE(err.hasProxygenError());
-      EXPECT_EQ(err.getProxygenError(), kErrorStreamAbort);
-      ASSERT_EQ("StreamAbort on transaction id: 1", std::string(err.what()));
-    });
-    handler->expectDetachTransaction();
-  }
-
-  // Receive GOAWAY frame with last good stream as 5
-  pubHandler2.expectGoaway();
-  codecCb_->onGoaway(5, ErrorCode::NO_ERROR);
-  eventBase_.loop();
-
-  pubHandler2.expectError();
-  pubHandler2.expectDetachTransaction();
-  // Send a reply to finish stream 5, but it errors because of broken control
-  codecCb_->onHeadersComplete(5, makeResponse(200));
-  codecCb_->onMessageComplete(5, false);
-
-  eventBase_.loop();
 }
 
 TEST_F(MockHTTPUpstreamTest, Goaway) {

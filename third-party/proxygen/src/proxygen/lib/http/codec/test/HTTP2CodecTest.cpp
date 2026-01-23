@@ -110,7 +110,6 @@ class HTTP2CodecTestOmitParsePreface : public HTTP2CodecTest {
 };
 
 TEST_F(HTTP2CodecTest, NoExHeaders) {
-  // do not emit ENABLE_EX_HEADERS setting, if disabled
   SetUpUpstreamTest();
 
   EXPECT_EQ(callbacks_.settings, 0);
@@ -123,98 +122,6 @@ TEST_F(HTTP2CodecTest, NoExHeaders) {
   // only 3 standard settings: HEADER_TABLE_SIZE, ENABLE_PUSH, MAX_FRAME_SIZE.
   EXPECT_EQ(callbacks_.numSettings, 3);
   EXPECT_EQ(false, downstreamCodec_.supportsExTransactions());
-}
-
-TEST_F(HTTP2CodecTest, IgnoreExHeadersSetting) {
-  // disable EX_HEADERS on egress
-  downstreamCodec_.getEgressSettings()->setSetting(
-      SettingsId::ENABLE_EX_HEADERS, 0);
-  auto ptr = downstreamCodec_.getEgressSettings()->getSetting(
-      SettingsId::ENABLE_EX_HEADERS);
-  EXPECT_EQ(0, ptr->value);
-
-  ptr = downstreamCodec_.getIngressSettings()->getSetting(
-      SettingsId::ENABLE_EX_HEADERS);
-  EXPECT_EQ(nullptr, ptr);
-  EXPECT_EQ(false, downstreamCodec_.supportsExTransactions());
-
-  // attempt to enable EX_HEADERS on ingress
-  http2::writeSettings(output_,
-                       {SettingPair(SettingsId::ENABLE_EX_HEADERS, 1)});
-  parse();
-
-  EXPECT_EQ(callbacks_.settings, 1);
-  EXPECT_EQ(callbacks_.sessionErrors, 0);
-  ptr = downstreamCodec_.getIngressSettings()->getSetting(
-      SettingsId::ENABLE_EX_HEADERS);
-  EXPECT_EQ(nullptr, ptr);
-  EXPECT_EQ(false, downstreamCodec_.supportsExTransactions());
-
-  // attempt to disable EX_HEADERS on ingress
-  callbacks_.reset();
-  http2::writeSettings(output_,
-                       {SettingPair(SettingsId::ENABLE_EX_HEADERS, 0)});
-  parse();
-
-  EXPECT_EQ(callbacks_.settings, 1);
-  EXPECT_EQ(callbacks_.sessionErrors, 0);
-  ptr = downstreamCodec_.getIngressSettings()->getSetting(
-      SettingsId::ENABLE_EX_HEADERS);
-  EXPECT_EQ(nullptr, ptr);
-  EXPECT_EQ(false, downstreamCodec_.supportsExTransactions());
-}
-
-TEST_F(HTTP2CodecTest, EnableExHeadersSetting) {
-  // enable EX_HEADERS on egress
-  downstreamCodec_.getEgressSettings()->setSetting(
-      SettingsId::ENABLE_EX_HEADERS, 1);
-
-  auto ptr = downstreamCodec_.getEgressSettings()->getSetting(
-      SettingsId::ENABLE_EX_HEADERS);
-  EXPECT_EQ(1, ptr->value);
-
-  ptr = downstreamCodec_.getIngressSettings()->getSetting(
-      SettingsId::ENABLE_EX_HEADERS);
-  EXPECT_EQ(nullptr, ptr);
-  EXPECT_EQ(false, downstreamCodec_.supportsExTransactions());
-
-  // attempt to enable EX_HEADERS on ingress
-  http2::writeSettings(output_,
-                       {SettingPair(SettingsId::ENABLE_EX_HEADERS, 1)});
-  parse();
-
-  EXPECT_EQ(callbacks_.settings, 1);
-  EXPECT_EQ(callbacks_.sessionErrors, 0);
-  ptr = downstreamCodec_.getIngressSettings()->getSetting(
-      SettingsId::ENABLE_EX_HEADERS);
-  EXPECT_EQ(1, ptr->value);
-  EXPECT_EQ(true, downstreamCodec_.supportsExTransactions());
-
-  // attempt to disable EX_HEADERS on ingress
-  callbacks_.reset();
-  http2::writeSettings(output_,
-                       {SettingPair(SettingsId::ENABLE_EX_HEADERS, 0)});
-  parse();
-
-  EXPECT_EQ(callbacks_.settings, 1);
-  EXPECT_EQ(callbacks_.sessionErrors, 0);
-  ptr = downstreamCodec_.getIngressSettings()->getSetting(
-      SettingsId::ENABLE_EX_HEADERS);
-  EXPECT_EQ(0, ptr->value);
-  EXPECT_EQ(false, downstreamCodec_.supportsExTransactions());
-}
-
-TEST_F(HTTP2CodecTest, InvalidExHeadersSetting) {
-  // enable EX_HEADERS on egress
-  downstreamCodec_.getEgressSettings()->setSetting(
-      SettingsId::ENABLE_EX_HEADERS, 1);
-
-  // attempt to set a invalid ENABLE_EX_HEADERS value
-  http2::writeSettings(output_,
-                       {SettingPair(SettingsId::ENABLE_EX_HEADERS, 110)});
-  parse();
-
-  EXPECT_EQ(callbacks_.sessionErrors, 1);
 }
 
 TEST_F(HTTP2CodecTest, BasicHeader) {
@@ -257,38 +164,6 @@ TEST_F(HTTP2CodecTest, GenerateExtraHeaders) {
   EXPECT_EQ("u=0", headers.getSingleOrEmpty(HTTP_HEADER_PRIORITY));
 }
 
-TEST_F(HTTP2CodecTest, RequestFromServer) {
-  // this is to test EX_HEADERS frame, which carrys the HTTP request initiated
-  // by server side
-  upstreamCodec_.getEgressSettings()->setSetting(SettingsId::ENABLE_EX_HEADERS,
-                                                 1);
-  SetUpUpstreamTest();
-  proxygen::http2::writeSettings(
-      output_, {{proxygen::SettingsId::ENABLE_EX_HEADERS, 1}});
-
-  HTTPMessage req = getGetRequest("/guacamole");
-  req.getHeaders().add(HTTP_HEADER_USER_AGENT, "coolio");
-  req.getHeaders().add("tab-hdr", "coolio\tv2");
-  // Connection header will get dropped
-  req.getHeaders().add(HTTP_HEADER_CONNECTION, "Love");
-  req.setSecure(true);
-
-  HTTPCodec::StreamID stream = folly::Random::rand32(10, 1024) * 2;
-  HTTPCodec::StreamID controlStream = folly::Random::rand32(10, 1024) * 2 + 1;
-  upstreamCodec_.generateExHeader(
-      output_, stream, req, HTTPCodec::ExAttributes(controlStream, true), true);
-
-  parseUpstream();
-  EXPECT_EQ(controlStream, callbacks_.controlStreamId);
-  EXPECT_TRUE(callbacks_.isUnidirectional);
-  callbacks_.expectMessage(true, 3, "/guacamole");
-  EXPECT_TRUE(callbacks_.msg->isSecure());
-  const auto& headers = callbacks_.msg->getHeaders();
-  EXPECT_EQ("coolio", headers.getSingleOrEmpty(HTTP_HEADER_USER_AGENT));
-  EXPECT_EQ("coolio\tv2", headers.getSingleOrEmpty("tab-hdr"));
-  EXPECT_EQ("www.foo.com", headers.getSingleOrEmpty(HTTP_HEADER_HOST));
-}
-
 TEST_F(HTTP2CodecTestOmitParsePreface, OmitSettingsAfterConnPrefaceError) {
   HTTPMessage req = getGetRequest("/test");
   req.getHeaders().add(HTTP_HEADER_USER_AGENT, "rand-user");
@@ -302,86 +177,6 @@ TEST_F(HTTP2CodecTestOmitParsePreface, OmitSettingsAfterConnPrefaceError) {
   EXPECT_EQ(callbacks_.sessionErrors, 1);
   EXPECT_EQ(callbacks_.lastParseError->getCodecStatusCode(),
             ErrorCode::PROTOCOL_ERROR);
-}
-
-TEST_F(HTTP2CodecTest, ResponseFromClient) {
-  // this is to test EX_HEADERS frame, which carrys the HTTP response replied by
-  // client side
-  downstreamCodec_.getEgressSettings()->setSetting(
-      SettingsId::ENABLE_EX_HEADERS, 1);
-  proxygen::http2::writeSettings(
-      output_, {{proxygen::SettingsId::ENABLE_EX_HEADERS, 1}});
-
-  HTTPMessage resp;
-  resp.setStatusCode(200);
-  resp.setStatusMessage("nifty-nice");
-  resp.getHeaders().add(HTTP_HEADER_CONTENT_TYPE, "x-coolio");
-
-  HTTPCodec::StreamID stream = folly::Random::rand32(10, 1024) * 2;
-  HTTPCodec::StreamID controlStream = folly::Random::rand32(10, 1024) * 2 + 1;
-  downstreamCodec_.generateExHeader(
-      output_,
-      stream,
-      resp,
-      HTTPCodec::ExAttributes(controlStream, true),
-      true);
-
-  parse();
-  EXPECT_EQ(controlStream, callbacks_.controlStreamId);
-  EXPECT_TRUE(callbacks_.isUnidirectional);
-  EXPECT_EQ("OK", callbacks_.msg->getStatusMessage());
-  callbacks_.expectMessage(true, 2, 200);
-  const auto& headers = callbacks_.msg->getHeaders();
-  EXPECT_EQ("OK", callbacks_.msg->getStatusMessage());
-  EXPECT_TRUE(callbacks_.msg->getHeaders().exists(HTTP_HEADER_DATE));
-  EXPECT_EQ("x-coolio", headers.getSingleOrEmpty(HTTP_HEADER_CONTENT_TYPE));
-}
-
-TEST_F(HTTP2CodecTest, ExHeadersWithPriority) {
-  downstreamCodec_.getEgressSettings()->setSetting(
-      SettingsId::ENABLE_EX_HEADERS, 1);
-  proxygen::http2::writeSettings(
-      output_, {{proxygen::SettingsId::ENABLE_EX_HEADERS, 1}});
-
-  auto req = getGetRequest();
-  // Test empty path
-  req.setURL("");
-  upstreamCodec_.generateExHeader(
-      output_, 3, req, HTTPCodec::ExAttributes(1, true));
-
-  parse();
-  EXPECT_EQ(callbacks_.streamErrors, 0);
-  EXPECT_EQ(callbacks_.sessionErrors, 0);
-}
-
-TEST_F(HTTP2CodecTest, DuplicateExHeaders) {
-  downstreamCodec_.getEgressSettings()->setSetting(
-      SettingsId::ENABLE_EX_HEADERS, 1);
-  proxygen::http2::writeSettings(
-      output_, {{proxygen::SettingsId::ENABLE_EX_HEADERS, 1}});
-
-  auto req = getGetRequest();
-  upstreamCodec_.generateExHeader(
-      output_, 3, req, HTTPCodec::ExAttributes(1, true), /*eom=*/false);
-  upstreamCodec_.generateExHeader(
-      output_, 3, req, HTTPCodec::ExAttributes(1, true), /*eom=*/true);
-
-  parse();
-  EXPECT_EQ(callbacks_.streamErrors, 0);
-  EXPECT_EQ(callbacks_.sessionErrors, 1);
-}
-
-TEST_F(HTTP2CodecTest, IgnoreExHeadersIfNotEnabled) {
-  downstreamCodec_.getEgressSettings()->setSetting(
-      SettingsId::ENABLE_EX_HEADERS, 0);
-
-  HTTPMessage req = getGetRequest("/guacamole");
-  downstreamCodec_.generateExHeader(
-      output_, 3, req, HTTPCodec::ExAttributes(1, true));
-
-  parse();
-  EXPECT_EQ(callbacks_.streamErrors, 0);
-  EXPECT_EQ(callbacks_.sessionErrors, 0);
 }
 
 TEST_F(HTTP2CodecTest, BadHeaders) {
@@ -2289,7 +2084,6 @@ TEST_F(HTTP2CodecTest, TestAllEgressFrameTypeCallbacks) {
           http2::FrameType::GOAWAY,
           http2::FrameType::WINDOW_UPDATE,
           http2::FrameType::CONTINUATION,
-          http2::FrameType::EX_HEADERS,
       };
 
       for (http2::FrameType type : expectedTypes) {
@@ -2332,11 +2126,6 @@ TEST_F(HTTP2CodecTest, TestAllEgressFrameTypeCallbacks) {
       output_, 17, ErrorCode::ENHANCE_YOUR_CALM, std::move(debugData));
 
   upstreamCodec_.generateWindowUpdate(output_, 0, 10);
-
-  HTTPCodec::StreamID stream = folly::Random::rand32(10, 1024) * 2;
-  HTTPCodec::StreamID controlStream = folly::Random::rand32(10, 1024) * 2 + 1;
-  downstreamCodec_.generateExHeader(
-      output_, stream, req, HTTPCodec::ExAttributes(controlStream, true));
 
   // Tests the continuation frame
   req = getBigGetRequest();

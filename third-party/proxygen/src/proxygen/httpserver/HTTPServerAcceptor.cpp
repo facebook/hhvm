@@ -31,10 +31,6 @@ std::shared_ptr<const AcceptorConfiguration> HTTPServerAcceptor::makeConfig(
   conf->acceptBacklog = opts.listenBacklog;
   conf->maxConcurrentIncomingStreams = opts.maxConcurrentIncomingStreams;
 
-  if (opts.enableExHeaders) {
-    conf->egressSettings.emplace_back(SettingsId::ENABLE_EX_HEADERS, 1);
-  }
-
   if (ipConfig.protocol == HTTPServer::Protocol::HTTP2) {
     conf->plaintextProtocol = http2::kProtocolCleartextString;
   }

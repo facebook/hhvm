@@ -664,37 +664,7 @@ HTTPTransaction* FOLLY_NULLABLE
 HTTPSession::newExTransaction(HTTPTransaction::Handler* handler,
                               HTTPCodec::StreamID controlStream,
                               bool unidirectional) noexcept {
-  CHECK(handler && controlStream > 0);
-  auto eSettings = codec_->getEgressSettings();
-  if (!eSettings || !eSettings->getSetting(SettingsId::ENABLE_EX_HEADERS, 0)) {
-    LOG(ERROR) << getCodecProtocolString(codec_->getProtocol())
-               << " does not support ExTransaction";
-    return nullptr;
-  }
-  if (draining_ || (outgoingStreams_ >= maxConcurrentOutgoingStreamsRemote_)) {
-    LOG(ERROR) << "cannot support any more transactions in " << *this
-               << " isDraining: " << draining_
-               << " outgoing streams: " << outgoingStreams_
-               << " max concurrent outgoing streams: "
-               << maxConcurrentOutgoingStreamsRemote_;
-    return nullptr;
-  }
-
-  DCHECK(started_);
-  HTTPTransaction* txn =
-      createTransaction(codec_->createStream(),
-                        HTTPCodec::NoStream,
-                        HTTPCodec::ExAttributes(controlStream, unidirectional));
-  if (!txn) {
-    return nullptr;
-  }
-
-  // we find a control stream, let's track it
-  controlStreamIds_.emplace(controlStream);
-
-  DestructorGuard dg(this);
-  txn->setHandler(handler);
-  return txn;
+  return nullptr;
 }
 
 size_t HTTPSession::getCodecSendWindowSize() const {

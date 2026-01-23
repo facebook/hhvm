@@ -470,15 +470,6 @@ class HTTPSessionBase : public wangle::ManagedConnection {
   virtual folly::Optional<const HTTPMessage::HTTP2Priority> getHTTPPriority(
       uint8_t level) = 0;
 
-  /**
-   * Enable to use Ex Headers in HTTPSession
-   */
-  void enableExHeadersSettings() noexcept;
-
-  bool isExHeadersEnabled() noexcept {
-    return exHeadersEnabled_;
-  }
-
   void setConnectionToken(
       const HTTPTransaction::ConnectionToken& token) noexcept {
     connectionToken_ = token;
@@ -808,11 +799,6 @@ class HTTPSessionBase : public wangle::ManagedConnection {
   uint32_t pendingReadSize_{0};
 
   bool h2PrioritiesEnabled_ : 1;
-
-  /**
-   * Indicates whether Ex Headers is supported in HTTPSession
-   */
-  bool exHeadersEnabled_ : 1;
 
   /**
    * Indicates whether quic stream ID limit is exceeded.

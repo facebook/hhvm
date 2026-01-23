@@ -133,8 +133,7 @@ class HTTP2Codec
     return ingressSettings_.getSetting(SettingsId::ENABLE_CONNECT_PROTOCOL);
   }
   bool supportsExTransactions() const override {
-    return ingressSettings_.getSetting(SettingsId::ENABLE_EX_HEADERS, 0) &&
-           egressSettings_.getSetting(SettingsId::ENABLE_EX_HEADERS, 0);
+    return false;
   }
   void setHeaderCodecStats(HeaderCodec::Stats* hcStats) override {
     headerCodec_.setStats(hcStats);

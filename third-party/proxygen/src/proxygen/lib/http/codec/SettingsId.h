@@ -29,7 +29,6 @@ enum class SettingsId : uint64_t {
   THRIFT_CHANNEL_ID_DEPRECATED = 100,
 
   // 0xf000 and 0xffff being reserved for Experimental Use
-  ENABLE_EX_HEADERS = 0xfbfb,
   THRIFT_CHANNEL_ID = 0xf100,
 
   // For secondary authentication in HTTP/2

@@ -272,6 +272,7 @@ if (APPLE)
 endif()
 
 if (LINUX)
+  find_package(systemd REQUIRED)
   find_package(Bpf REQUIRED)
 endif()
 
@@ -337,7 +338,7 @@ macro(hphp_link target)
   target_link_libraries(${target} ${VISIBILITY} glog)
 
   if (LINUX)
-    target_link_libraries(${target} ${VISIBILITY} ${BPF_LIBRARIES})
+    target_link_libraries(${target} ${VISIBILITY} ${BPF_LIBRARIES} ${SYSTEMD_LIBRARIES})
   endif()
 
   if (LIBINOTIFY_LIBRARY)

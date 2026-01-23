@@ -387,14 +387,16 @@ apache::thrift::ServiceRequestInfoMap SomeServiceServiceInfoHolder::staticReques
      "SomeService.bounce_map",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
-     std::nullopt}},
+     std::nullopt,
+     ::apache::thrift::detail::getFunctionNode<::apache::thrift::fixtures::types::SomeService>("bounce_map")}},
   {"binary_keyed_map",
     { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "SomeService.binary_keyed_map",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
-     std::nullopt}},
+     std::nullopt,
+     ::apache::thrift::detail::getFunctionNode<::apache::thrift::fixtures::types::SomeService>("binary_keyed_map")}},
   };
 
   return requestInfoMap;

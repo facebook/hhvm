@@ -229,7 +229,8 @@ apache::thrift::ServiceRequestInfoMap MyServicePrioChildServiceInfoHolder::stati
      "MyServicePrioChild.pang",
      std::nullopt,
      apache::thrift::concurrency::BEST_EFFORT,
-     std::nullopt}},
+     std::nullopt,
+     ::apache::thrift::detail::getFunctionNode<::cpp2::MyServicePrioChild>("pang")}},
   };
   apache::thrift::ServiceRequestInfoMap parentMap = ::cpp2::MyServicePrioParentServiceInfoHolder::staticRequestInfoMap();
   requestInfoMap.insert(std::begin(parentMap), std::end(parentMap));

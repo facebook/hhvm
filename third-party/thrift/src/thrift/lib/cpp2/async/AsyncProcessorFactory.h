@@ -32,8 +32,9 @@ class AsyncProcessor;
 class ServiceHandlerBase;
 class ServerRequest;
 namespace syntax_graph {
+class FunctionNode;
 class ServiceNode;
-}
+} // namespace syntax_graph
 
 // Returned by resource pool components when a request is rejected.
 class ServerRequestRejection {
@@ -119,13 +120,15 @@ class AsyncProcessorFactory {
         RpcKind kind,
         concurrency::PRIORITY prio,
         const std::optional<std::string>& interactName,
-        bool createsInteract)
+        bool createsInteract,
+        const syntax_graph::FunctionNode* fnNode = nullptr)
         : executorType(executor),
           interactionType(interaction),
           rpcKind(kind),
           priority(prio),
           interactionName(interactName),
-          createsInteraction(createsInteract) {}
+          createsInteraction(createsInteract),
+          functionNode(fnNode) {}
 
    protected:
     MethodMetadata(const MethodMetadata& other)
@@ -134,7 +137,8 @@ class AsyncProcessorFactory {
           rpcKind(other.rpcKind),
           priority(other.priority),
           interactionName(other.interactionName),
-          createsInteraction(other.createsInteraction) {}
+          createsInteraction(other.createsInteraction),
+          functionNode(other.functionNode) {}
 
     std::string describeFields() const;
 
@@ -161,6 +165,7 @@ class AsyncProcessorFactory {
     const std::optional<concurrency::PRIORITY> priority{};
     const std::optional<std::string> interactionName{};
     const bool createsInteraction{false};
+    const syntax_graph::FunctionNode* functionNode{nullptr};
 
    private:
     enum class WildcardStatus : std::uint8_t { UNKNOWN, NO, YES };

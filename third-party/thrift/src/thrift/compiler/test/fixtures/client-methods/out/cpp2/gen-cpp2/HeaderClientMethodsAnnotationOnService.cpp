@@ -387,14 +387,16 @@ apache::thrift::ServiceRequestInfoMap HeaderClientMethodsAnnotationOnServiceServ
      "HeaderClientMethodsAnnotationOnService.echo",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
-     std::nullopt}},
+     std::nullopt,
+     ::apache::thrift::detail::getFunctionNode<::cpp2::HeaderClientMethodsAnnotationOnService>("echo")}},
   {"echo_2",
     { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "HeaderClientMethodsAnnotationOnService.echo_2",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
-     std::nullopt}},
+     std::nullopt,
+     ::apache::thrift::detail::getFunctionNode<::cpp2::HeaderClientMethodsAnnotationOnService>("echo_2")}},
   };
 
   return requestInfoMap;

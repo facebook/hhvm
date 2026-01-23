@@ -385,14 +385,16 @@ apache::thrift::ServiceRequestInfoMap MyServiceServiceInfoHolder::staticRequestI
      "MyService.first",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
-     std::nullopt}},
+     std::nullopt,
+     ::apache::thrift::detail::getFunctionNode<::test::fixtures::basic_structured_annotations::MyService>("first")}},
   {"second",
     { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "MyService.second",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
-     std::nullopt}},
+     std::nullopt,
+     ::apache::thrift::detail::getFunctionNode<::test::fixtures::basic_structured_annotations::MyService>("second")}},
   };
 
   return requestInfoMap;

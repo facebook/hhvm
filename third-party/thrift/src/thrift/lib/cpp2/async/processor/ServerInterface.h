@@ -23,6 +23,7 @@
 #include <thrift/lib/cpp2/async/processor/AsyncProcessorFunc.h>
 #include <thrift/lib/cpp2/async/processor/RequestParams.h>
 #include <thrift/lib/cpp2/async/processor/ServiceHandlerBase.h>
+#include <thrift/lib/cpp2/schema/SyntaxGraph.h>
 #include <thrift/lib/cpp2/server/Cpp2ConnContext.h>
 
 namespace apache::thrift {
@@ -151,14 +152,16 @@ class ServerInterface : public virtual AsyncProcessorFactory,
         RpcKind rpcKind,
         concurrency::PRIORITY priority,
         const std::optional<std::string>& interactionName,
-        const bool createsInteraction)
+        const bool createsInteraction,
+        const syntax_graph::FunctionNode* fnNode = nullptr)
         : MethodMetadata(
               executor,
               interaction,
               rpcKind,
               priority,
               interactionName,
-              createsInteraction),
+              createsInteraction,
+              fnNode),
           processFuncs(funcs) {}
 
     AsyncProcessorFunc::ProcessFuncs<Processor> processFuncs;

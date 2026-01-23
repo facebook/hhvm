@@ -1267,7 +1267,8 @@ void populateMethodMetadataMap(
             requestInfo.rpcKind,
             requestInfo.priority,
             std::move(interactionName),
-            requestInfo.createdInteraction.has_value()));
+            requestInfo.createdInteraction.has_value(),
+            requestInfo.functionNode));
   }
   if constexpr (!is_root_async_processor<CurrentProcessor>) {
     populateMethodMetadataMap<

@@ -385,14 +385,16 @@ apache::thrift::ServiceRequestInfoMap MyServiceServiceInfoHolder::staticRequestI
      "MyService.query",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
-     std::nullopt}},
+     std::nullopt,
+     ::apache::thrift::detail::getFunctionNode<::cpp2::MyService>("query")}},
   {"has_arg_docs",
     { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "MyService.has_arg_docs",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
-     std::nullopt}},
+     std::nullopt,
+     ::apache::thrift::detail::getFunctionNode<::cpp2::MyService>("has_arg_docs")}},
   };
 
   return requestInfoMap;

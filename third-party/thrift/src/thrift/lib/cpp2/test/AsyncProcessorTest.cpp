@@ -29,6 +29,7 @@
 #include <thrift/lib/cpp2/async/HTTPClientChannel.h>
 #include <thrift/lib/cpp2/async/HeaderClientChannel.h>
 #include <thrift/lib/cpp2/async/RocketClientChannel.h>
+#include <thrift/lib/cpp2/schema/SyntaxGraph.h>
 #include <thrift/lib/cpp2/server/Cpp2ConnContext.h>
 #include <thrift/lib/cpp2/server/Cpp2Worker.h>
 #include <thrift/lib/cpp2/server/MonitoringServerInterface.h>
@@ -210,6 +211,67 @@ TEST(AsyncProcessorMetadataTest, NonInteractionMetadata) {
           std::nullopt,
           /*createsInteract=*/false),
       *metadata);
+}
+
+TEST(AsyncProcessorMetadataTest, FunctionNodeField) {
+  ChildHandler service;
+  auto createMethodMetadataResult = service.createMethodMetadata();
+  auto& metadataMap = expectMethodMetadataMap(createMethodMetadataResult);
+
+  // Track whether we've seen interaction methods
+  bool foundInteractionMethod = false;
+  bool foundRegularMethod = false;
+
+  // Verify functionNode field is populated for all methods
+  for (const auto& [methodName, metadata] : metadataMap) {
+    // functionNode should be populated by the generated code
+    EXPECT_NE(metadata->functionNode, nullptr)
+        << "functionNode should be populated for method: " << methodName;
+    // Verify the function name matches
+    if (metadata->functionNode != nullptr) {
+      // For interaction methods like "Interaction.interactionMethod",
+      // the function name in the schema is just "interactionMethod"
+      auto dotPos = methodName.find('.');
+      auto expectedName = dotPos != std::string::npos
+          ? methodName.substr(dotPos + 1)
+          : methodName;
+      EXPECT_EQ(metadata->functionNode->name(), expectedName)
+          << "Function name mismatch for method: " << methodName;
+
+      // Track method types
+      if (dotPos != std::string::npos) {
+        foundInteractionMethod = true;
+        // For interaction methods, verify the parent is an interaction
+        const auto& parent = metadata->functionNode->parent();
+        auto interactionName = methodName.substr(0, dotPos);
+        EXPECT_EQ(parent.definition().name(), interactionName)
+            << "Interaction parent mismatch for method: " << methodName;
+      } else {
+        foundRegularMethod = true;
+      }
+    }
+  }
+
+  // Ensure we tested both regular and interaction methods
+  EXPECT_TRUE(foundRegularMethod) << "Test should include regular methods";
+  EXPECT_TRUE(foundInteractionMethod)
+      << "Test should include interaction methods";
+
+  // Explicitly verify the known interaction method exists
+  EXPECT_NE(
+      metadataMap.find("Interaction.interactionMethod"), metadataMap.end())
+      << "Interaction.interactionMethod should exist in the method map";
+
+  // Verify the MethodMetadata constructor accepts functionNode parameter
+  MethodMetadata testMetadata(
+      MethodMetadata::ExecutorType::ANY,
+      MethodMetadata::InteractionType::NONE,
+      RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
+      concurrency::PRIORITY::NORMAL,
+      std::nullopt,
+      /*createsInteract=*/false,
+      /*fnNode=*/nullptr);
+  EXPECT_EQ(testMetadata.functionNode, nullptr);
 }
 
 namespace {

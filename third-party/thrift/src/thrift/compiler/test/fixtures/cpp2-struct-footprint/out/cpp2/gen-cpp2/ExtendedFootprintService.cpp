@@ -230,7 +230,8 @@ apache::thrift::ServiceRequestInfoMap ExtendedFootprintServiceServiceInfoHolder:
      "ExtendedFootprintService.getComplexMap",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
-     std::nullopt}},
+     std::nullopt,
+     ::apache::thrift::detail::getFunctionNode<::cpp2_struct_footprint::ExtendedFootprintService>("getComplexMap")}},
   };
   apache::thrift::ServiceRequestInfoMap parentMap = ::cpp2_struct_footprint::FootprintTestServiceServiceInfoHolder::staticRequestInfoMap();
   requestInfoMap.insert(std::begin(parentMap), std::end(parentMap));

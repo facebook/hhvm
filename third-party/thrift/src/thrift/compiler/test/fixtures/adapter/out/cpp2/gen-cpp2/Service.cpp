@@ -228,7 +228,8 @@ apache::thrift::ServiceRequestInfoMap ServiceServiceInfoHolder::staticRequestInf
      "Service.func",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
-     std::nullopt}},
+     std::nullopt,
+     ::apache::thrift::detail::getFunctionNode<::facebook::thrift::test::fixtures::adapter::Service>("func")}},
   };
 
   return requestInfoMap;

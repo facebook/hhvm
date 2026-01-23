@@ -239,7 +239,8 @@ apache::thrift::ServiceRequestInfoMap ExtendedServiceServiceInfoHolder::staticRe
      "ExtendedService.init",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
-     std::nullopt}},
+     std::nullopt,
+     ::apache::thrift::detail::getFunctionNode<::facebook::thrift::test::fixtures::service_schema::ExtendedService>("init")}},
   };
   apache::thrift::ServiceRequestInfoMap parentMap = ::facebook::thrift::test::fixtures::service_schema::BaseServiceServiceInfoHolder::staticRequestInfoMap();
   requestInfoMap.insert(std::begin(parentMap), std::end(parentMap));

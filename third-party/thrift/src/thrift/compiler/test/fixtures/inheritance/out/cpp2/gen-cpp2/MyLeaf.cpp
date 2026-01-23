@@ -229,7 +229,8 @@ apache::thrift::ServiceRequestInfoMap MyLeafServiceInfoHolder::staticRequestInfo
      "MyLeaf.do_leaf",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
-     std::nullopt}},
+     std::nullopt,
+     ::apache::thrift::detail::getFunctionNode<::cpp2::MyLeaf>("do_leaf")}},
   };
   apache::thrift::ServiceRequestInfoMap parentMap = ::cpp2::MyNodeServiceInfoHolder::staticRequestInfoMap();
   requestInfoMap.insert(std::begin(parentMap), std::end(parentMap));

@@ -387,14 +387,16 @@ apache::thrift::ServiceRequestInfoMap AdapterServiceServiceInfoHolder::staticReq
      "AdapterService.count",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
-     std::nullopt}},
+     std::nullopt,
+     ::apache::thrift::detail::getFunctionNode<::facebook::thrift::test::fixtures::adapter::AdapterService>("count")}},
   {"adaptedTypes",
     { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "AdapterService.adaptedTypes",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
-     std::nullopt}},
+     std::nullopt,
+     ::apache::thrift::detail::getFunctionNode<::facebook::thrift::test::fixtures::adapter::AdapterService>("adaptedTypes")}},
   };
 
   return requestInfoMap;

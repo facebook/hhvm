@@ -229,7 +229,8 @@ apache::thrift::ServiceRequestInfoMap MyRootServiceInfoHolder::staticRequestInfo
      "MyRoot.do_root",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
-     std::nullopt}},
+     std::nullopt,
+     ::apache::thrift::detail::getFunctionNode<::cpp2::MyRoot>("do_root")}},
   };
 
   return requestInfoMap;

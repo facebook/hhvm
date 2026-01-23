@@ -21,6 +21,10 @@
 
 namespace apache::thrift {
 
+namespace syntax_graph {
+class FunctionNode;
+} // namespace syntax_graph
+
 // This contains information about a request that is required in the thrift
 // server prior to the AsyncProcessor::executeRequest interface.
 struct ServiceRequestInfo {
@@ -36,6 +40,7 @@ struct ServiceRequestInfo {
   concurrency::PRIORITY priority; // Method priority set in the IDL
   std::optional<std::string>
       createdInteraction; // The name of the interaction created by the RPC
+  const syntax_graph::FunctionNode* functionNode{nullptr}; // Schema node
 };
 
 using ServiceRequestInfoMap =

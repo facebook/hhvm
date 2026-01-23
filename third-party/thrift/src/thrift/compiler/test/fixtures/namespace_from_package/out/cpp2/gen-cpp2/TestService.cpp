@@ -228,7 +228,8 @@ apache::thrift::ServiceRequestInfoMap TestServiceServiceInfoHolder::staticReques
      "TestService.init",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
-     std::nullopt}},
+     std::nullopt,
+     ::apache::thrift::detail::getFunctionNode<::test::namespace_from_package::module::TestService>("init")}},
   };
 
   return requestInfoMap;

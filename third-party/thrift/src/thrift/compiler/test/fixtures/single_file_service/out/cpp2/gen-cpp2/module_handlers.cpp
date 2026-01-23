@@ -381,14 +381,16 @@ apache::thrift::ServiceRequestInfoMap AServiceInfoHolder::staticRequestInfoMap()
      "A.foo",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
-     std::nullopt}},
+     std::nullopt,
+     ::apache::thrift::detail::getFunctionNode<::cpp2::A>("foo")}},
   {"I.interact",
     { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "A.I.interact",
      "I",
      apache::thrift::concurrency::NORMAL,
-     std::nullopt}},
+     std::nullopt,
+     ::apache::thrift::detail::getInteractionFunctionNode<::cpp2::A>("I", "interact")}},
   };
 
   return requestInfoMap;
@@ -931,21 +933,24 @@ apache::thrift::ServiceRequestInfoMap BServiceInfoHolder::staticRequestInfoMap()
      "B.bar",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
-     std::nullopt}},
+     std::nullopt,
+     ::apache::thrift::detail::getFunctionNode<::cpp2::B>("bar")}},
   {"stream_stuff",
     { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE,
      "B.stream_stuff",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
-     std::nullopt}},
+     std::nullopt,
+     ::apache::thrift::detail::getFunctionNode<::cpp2::B>("stream_stuff")}},
   {"sink_stuff",
     { false,
      apache::thrift::RpcKind::SINK,
      "B.sink_stuff",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
-     std::nullopt}},
+     std::nullopt,
+     ::apache::thrift::detail::getFunctionNode<::cpp2::B>("sink_stuff")}},
   };
   apache::thrift::ServiceRequestInfoMap parentMap = ::cpp2::AServiceInfoHolder::staticRequestInfoMap();
   requestInfoMap.insert(std::begin(parentMap), std::end(parentMap));
@@ -1167,7 +1172,8 @@ apache::thrift::ServiceRequestInfoMap CServiceInfoHolder::staticRequestInfoMap()
      "C.I.interact",
      "I",
      apache::thrift::concurrency::NORMAL,
-     std::nullopt}},
+     std::nullopt,
+     ::apache::thrift::detail::getInteractionFunctionNode<::cpp2::C>("I", "interact")}},
   };
 
   return requestInfoMap;

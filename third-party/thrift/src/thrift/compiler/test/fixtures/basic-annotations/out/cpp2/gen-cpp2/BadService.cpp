@@ -378,14 +378,16 @@ apache::thrift::ServiceRequestInfoMap GoodServiceServiceInfoHolder::staticReques
      "BadService.bar",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
-     std::nullopt}},
+     std::nullopt,
+     ::apache::thrift::detail::getFunctionNode<::cpp2::GoodService>("bar")}},
   {"BadInteraction.foo",
     { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "BadService.BadInteraction.foo",
      "BadInteraction",
      apache::thrift::concurrency::NORMAL,
-     std::nullopt}},
+     std::nullopt,
+     ::apache::thrift::detail::getInteractionFunctionNode<::cpp2::GoodService>("BadInteraction", "foo")}},
   };
 
   return requestInfoMap;

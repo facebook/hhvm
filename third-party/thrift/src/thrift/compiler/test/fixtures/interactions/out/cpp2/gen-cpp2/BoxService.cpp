@@ -368,14 +368,16 @@ apache::thrift::ServiceRequestInfoMap BoxServiceServiceInfoHolder::staticRequest
      "BoxService.getABoxSession",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
-     "BoxedInteraction"}},
+     "BoxedInteraction",
+     ::apache::thrift::detail::getFunctionNode<::cpp2::BoxService>("getABoxSession")}},
   {"BoxedInteraction.getABox",
     { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "BoxService.BoxedInteraction.getABox",
      "BoxedInteraction",
      apache::thrift::concurrency::NORMAL,
-     std::nullopt}},
+     std::nullopt,
+     ::apache::thrift::detail::getInteractionFunctionNode<::cpp2::BoxService>("BoxedInteraction", "getABox")}},
   };
 
   return requestInfoMap;

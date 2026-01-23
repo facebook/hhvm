@@ -228,7 +228,8 @@ apache::thrift::ServiceRequestInfoMap DerivedServiceServiceInfoHolder::staticReq
      "DerivedService.get_six",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
-     std::nullopt}},
+     std::nullopt,
+     ::apache::thrift::detail::getFunctionNode<::py3::simple::DerivedService>("get_six")}},
   };
   apache::thrift::ServiceRequestInfoMap parentMap = ::py3::simple::SimpleServiceServiceInfoHolder::staticRequestInfoMap();
   requestInfoMap.insert(std::begin(parentMap), std::end(parentMap));

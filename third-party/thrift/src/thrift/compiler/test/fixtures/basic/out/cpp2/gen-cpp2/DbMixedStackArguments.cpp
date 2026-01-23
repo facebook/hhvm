@@ -387,14 +387,16 @@ apache::thrift::ServiceRequestInfoMap DbMixedStackArgumentsServiceInfoHolder::st
      "DbMixedStackArguments.getDataByKey0",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
-     std::nullopt}},
+     std::nullopt,
+     ::apache::thrift::detail::getFunctionNode<::test::fixtures::basic::DbMixedStackArguments>("getDataByKey0")}},
   {"getDataByKey1",
     { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "DbMixedStackArguments.getDataByKey1",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
-     std::nullopt}},
+     std::nullopt,
+     ::apache::thrift::detail::getFunctionNode<::test::fixtures::basic::DbMixedStackArguments>("getDataByKey1")}},
   };
 
   return requestInfoMap;

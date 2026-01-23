@@ -581,6 +581,58 @@ inline void ensureSameType(const Value& a, TType b) {
   }
 }
 
+template <class Protocol, class List>
+uint32_t serializeList(Protocol& prot, const List& listVal) {
+  TType elemType = protocol::T_I64;
+  const auto size = listVal.size();
+  if (size > 0) {
+    elemType = getTType(listVal.at(0));
+  }
+  auto serializedSize = prot.writeListBegin(elemType, size);
+  for (const auto& val : listVal) {
+    ensureSameType(val, elemType);
+    serializedSize += serializeValue(prot, val);
+  }
+  serializedSize += prot.writeListEnd();
+  return serializedSize;
+}
+
+template <class Protocol, class Map>
+uint32_t serializeMap(Protocol& prot, const Map& mapVal) {
+  TType keyType = protocol::T_STRING;
+  TType valueType = protocol::T_I64;
+  const auto size = mapVal.size();
+  if (size > 0) {
+    keyType = getTType(mapVal.begin()->first);
+    valueType = getTType(mapVal.begin()->second);
+  }
+  auto serializedSize = prot.writeMapBegin(keyType, valueType, size);
+  for (const auto& [key, val] : mapVal) {
+    ensureSameType(key, keyType);
+    ensureSameType(val, valueType);
+    serializedSize += serializeValue(prot, key);
+    serializedSize += serializeValue(prot, val);
+  }
+  serializedSize += prot.writeMapEnd();
+  return serializedSize;
+}
+
+template <class Protocol, class Set>
+uint32_t serializeSet(Protocol& prot, const Set& setVal) {
+  TType elemType = protocol::T_I64;
+  const auto size = setVal.size();
+  if (size > 0) {
+    elemType = getTType(*setVal.begin());
+  }
+  auto serializedSize = prot.writeSetBegin(elemType, size);
+  for (const auto& val : setVal) {
+    ensureSameType(val, elemType);
+    serializedSize += serializeValue(prot, val);
+  }
+  serializedSize += prot.writeSetEnd();
+  return serializedSize;
+}
+
 template <class Protocol>
 uint32_t serializeValue(Protocol& prot, const Value& value) {
   switch (value.getType()) {
@@ -603,53 +655,13 @@ uint32_t serializeValue(Protocol& prot, const Value& value) {
     case Value::Type::binaryValue:
       return prot.writeBinary(value.as_binary());
     case Value::Type::listValue: {
-      TType elemType = protocol::T_I64;
-      const auto& listVal = value.as_list();
-      const auto size = listVal.size();
-      if (size > 0) {
-        elemType = getTType(listVal.at(0));
-      }
-      auto serializedSize = prot.writeListBegin(elemType, size);
-      for (const auto& val : listVal) {
-        ensureSameType(val, elemType);
-        serializedSize += serializeValue(prot, val);
-      }
-      serializedSize += prot.writeListEnd();
-      return serializedSize;
+      return serializeList(prot, value.as_list());
     }
     case Value::Type::mapValue: {
-      TType keyType = protocol::T_STRING;
-      TType valueType = protocol::T_I64;
-      const auto& mapVal = value.as_map();
-      const auto size = mapVal.size();
-      if (size > 0) {
-        keyType = getTType(mapVal.begin()->first);
-        valueType = getTType(mapVal.begin()->second);
-      }
-      auto serializedSize = prot.writeMapBegin(keyType, valueType, size);
-      for (const auto& [key, val] : mapVal) {
-        ensureSameType(key, keyType);
-        ensureSameType(val, valueType);
-        serializedSize += serializeValue(prot, key);
-        serializedSize += serializeValue(prot, val);
-      }
-      serializedSize += prot.writeMapEnd();
-      return serializedSize;
+      return serializeMap(prot, value.as_map());
     }
     case Value::Type::setValue: {
-      TType elemType = protocol::T_I64;
-      const auto& setVal = value.as_set();
-      const auto size = setVal.size();
-      if (size > 0) {
-        elemType = getTType(*setVal.begin());
-      }
-      auto serializedSize = prot.writeSetBegin(elemType, size);
-      for (const auto& val : setVal) {
-        ensureSameType(val, elemType);
-        serializedSize += serializeValue(prot, val);
-      }
-      serializedSize += prot.writeSetEnd();
-      return serializedSize;
+      return serializeSet(prot, value.as_set());
     }
     case Value::Type::objectValue: {
       return serializeObject(prot, value.as_object());

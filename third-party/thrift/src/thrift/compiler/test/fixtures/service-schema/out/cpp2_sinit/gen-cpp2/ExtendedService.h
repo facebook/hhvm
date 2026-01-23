@@ -53,10 +53,8 @@ class ServiceHandler<::facebook::thrift::test::fixtures::service_schema::Extende
   typedef ::facebook::thrift::test::fixtures::service_schema::ExtendedServiceAsyncProcessor ProcessorType;
   std::unique_ptr<apache::thrift::AsyncProcessor> getProcessor() override;
   CreateMethodMetadataResult createMethodMetadata() override;
-  #if defined(THRIFT_SCHEMA_AVAILABLE)
   std::optional<schema::DefinitionsSchema> getServiceSchema() override;
   std::vector<folly::not_null<const syntax_graph::ServiceNode*>> getServiceSchemaNodes() override;
-  #endif
  private:
   std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const>> getServiceRequestInfoMap() const;
  public:

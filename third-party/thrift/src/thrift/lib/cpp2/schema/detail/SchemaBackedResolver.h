@@ -22,8 +22,6 @@
 
 #include <folly/Synchronized.h>
 
-#ifdef THRIFT_SCHEMA_AVAILABLE
-
 namespace apache::thrift::syntax_graph::detail {
 namespace type = apache::thrift::type;
 class SchemaIndex;
@@ -119,4 +117,3 @@ const DefinitionNode& IncrementalResolver::getDefinitionNode() const {
 }
 
 } // namespace apache::thrift::syntax_graph::detail
-#endif

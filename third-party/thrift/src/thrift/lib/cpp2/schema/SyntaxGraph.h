@@ -18,8 +18,6 @@
 
 #include <thrift/lib/cpp2/schema/SchemaV1.h>
 
-#ifdef THRIFT_SCHEMA_AVAILABLE
-
 #include <folly/CppAttributes.h>
 #include <folly/Overload.h>
 #include <folly/Synchronized.h>
@@ -1963,5 +1961,3 @@ inline TypeRef DefinitionNode::asTypeRef() const {
 }
 
 } // namespace apache::thrift::syntax_graph
-
-#endif // THRIFT_SCHEMA_AVAILABLE

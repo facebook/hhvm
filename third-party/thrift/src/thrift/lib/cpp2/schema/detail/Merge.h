@@ -18,8 +18,6 @@
 
 #include <thrift/lib/cpp2/schema/SchemaV1.h>
 
-#ifdef THRIFT_SCHEMA_AVAILABLE
-
 #include <unordered_set>
 
 namespace apache::thrift::schema::detail {
@@ -39,5 +37,3 @@ void mergeInto(
 std::optional<type::Schema> readSchema(std::string_view data);
 
 } // namespace apache::thrift::schema::detail
-
-#endif

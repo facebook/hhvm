@@ -16,8 +16,6 @@
 
 #include <thrift/lib/cpp2/runtime/SchemaRegistry.h>
 
-#ifdef THRIFT_SCHEMA_AVAILABLE
-
 #include <folly/Indestructible.h>
 #include <thrift/lib/cpp2/schema/SyntaxGraph.h>
 #include <thrift/lib/cpp2/schema/detail/Merge.h>
@@ -143,5 +141,3 @@ const folly::F14FastSet<type_system::Uri>& SchemaRegistry::getTypeSystemUris()
 }
 
 } // namespace apache::thrift
-
-#endif

@@ -63,7 +63,6 @@ class MultiplexAsyncProcessorFactory final : public AsyncProcessorFactory {
  public:
   explicit MultiplexAsyncProcessorFactory(
       std::vector<std::shared_ptr<AsyncProcessorFactory>> processorFactories);
-#if defined(THRIFT_SCHEMA_AVAILABLE)
   std::optional<schema::DefinitionsSchema> getServiceSchema() override;
   /**
    * Returns descriptors of the services that this AsyncProcessorFactory serves.
@@ -71,7 +70,6 @@ class MultiplexAsyncProcessorFactory final : public AsyncProcessorFactory {
    */
   std::vector<folly::not_null<const syntax_graph::ServiceNode*>>
   getServiceSchemaNodes() override;
-#endif
   std::unique_ptr<AsyncProcessor> getProcessor() override;
   CreateMethodMetadataResult createMethodMetadata() override;
 

@@ -22,8 +22,6 @@
 #include <thrift/lib/cpp2/schema/SchemaV1.h>
 #include <thrift/lib/thrift/gen-cpp2/type_id_types.h>
 
-#ifdef THRIFT_SCHEMA_AVAILABLE
-
 namespace apache::thrift::syntax_graph {
 class ProgramNode;
 class DefinitionNode;
@@ -70,4 +68,3 @@ class Resolver {
 
 } // namespace detail
 } // namespace apache::thrift::syntax_graph
-#endif

@@ -41,10 +41,8 @@ class ServiceHandler<{{service:qualified_name}}> : {{#service:extends}}virtual p
   std::unique_ptr<apache::thrift::AsyncProcessor> getProcessor() override;
   CreateMethodMetadataResult createMethodMetadata() override;
   {{#service:has_service_schema}}
-  #if defined(THRIFT_SCHEMA_AVAILABLE)
   std::optional<schema::DefinitionsSchema> getServiceSchema() override;
   std::vector<folly::not_null<const syntax_graph::ServiceNode*>> getServiceSchemaNodes() override;
-  #endif
   {{/service:has_service_schema}}
   {{^service:extends}}
   bool isThriftGenerated() const override final { return true; }

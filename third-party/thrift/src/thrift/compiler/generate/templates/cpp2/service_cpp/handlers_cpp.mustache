@@ -25,7 +25,6 @@ std::unique_ptr<apache::thrift::AsyncProcessor> {{> service_common/service_class
 }
 
 {{#service:has_service_schema}}
-#if defined(THRIFT_SCHEMA_AVAILABLE)
 std::optional<apache::thrift::schema::DefinitionsSchema> {{> service_common/service_class_name}}::getServiceSchema() {
 {{#program}}
 {{#program:has_schema?}}
@@ -43,7 +42,6 @@ std::optional<apache::thrift::schema::DefinitionsSchema> {{> service_common/serv
 std::vector<folly::not_null<const apache::thrift::syntax_graph::ServiceNode*>> {{> service_common/service_class_name}}::getServiceSchemaNodes() {
   return {&apache::thrift::SchemaRegistry::get().getNode<{{service:qualified_name}}>()};
 }
-#endif
 {{/service:has_service_schema}}
 {{#partial decorator_cpp.decorator_definitions service=service:self}}
 

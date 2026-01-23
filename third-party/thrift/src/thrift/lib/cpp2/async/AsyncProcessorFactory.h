@@ -60,7 +60,6 @@ using SelectPoolResult = std::variant<
  */
 class AsyncProcessorFactory {
  public:
-#if defined(THRIFT_SCHEMA_AVAILABLE)
   /**
    * Reflects on the current service's methods, associated structs etc. at
    * runtime. This is useful to, for example, a tool that can send requests to a
@@ -83,7 +82,6 @@ class AsyncProcessorFactory {
   getServiceSchemaNodes() {
     return {};
   }
-#endif
   /**
    * Creates a per-connection processor that will handle requests for this
    * service. The returned AsyncProcessor has an implicit contract with the

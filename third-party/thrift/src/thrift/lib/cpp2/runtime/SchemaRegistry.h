@@ -18,8 +18,6 @@
 
 #include <thrift/lib/cpp2/schema/SchemaV1.h>
 
-#ifdef THRIFT_SCHEMA_AVAILABLE
-
 #include <unordered_set>
 
 #include <folly/synchronization/DelayedInit.h>
@@ -234,5 +232,3 @@ class SchemaRegistry : public type_system::TypeSystem {
 };
 
 } // namespace apache::thrift
-
-#endif

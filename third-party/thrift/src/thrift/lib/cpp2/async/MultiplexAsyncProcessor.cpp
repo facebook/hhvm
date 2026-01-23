@@ -410,7 +410,6 @@ MultiplexAsyncProcessorFactory::flattenProcessorFactories(
   return result;
 }
 
-#if defined(THRIFT_SCHEMA_AVAILABLE)
 std::optional<schema::DefinitionsSchema>
 MultiplexAsyncProcessorFactory::getServiceSchema() {
   std::vector<type::Schema> allSchemas;
@@ -443,7 +442,6 @@ MultiplexAsyncProcessorFactory::getServiceSchemaNodes() {
   }
   return result;
 }
-#endif
 
 std::unique_ptr<AsyncProcessor> MultiplexAsyncProcessorFactory::getProcessor() {
   return getProcessorWithUnderlyingModifications({} /* modifier */);

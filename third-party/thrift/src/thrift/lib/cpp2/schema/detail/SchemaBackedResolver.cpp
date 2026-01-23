@@ -21,8 +21,6 @@
 
 #include <folly/String.h>
 
-#ifdef THRIFT_SCHEMA_AVAILABLE
-
 namespace apache::thrift::syntax_graph::detail {
 namespace type = apache::thrift::type;
 namespace protocol = apache::thrift::protocol;
@@ -1168,4 +1166,3 @@ const DefinitionNode* IncrementalResolver::getDefinitionNodeByUri(
 }
 
 } // namespace apache::thrift::syntax_graph::detail
-#endif

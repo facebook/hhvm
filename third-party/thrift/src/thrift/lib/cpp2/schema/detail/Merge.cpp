@@ -16,8 +16,6 @@
 
 #include <thrift/lib/cpp2/schema/detail/Merge.h>
 
-#ifdef THRIFT_SCHEMA_AVAILABLE
-
 #include <folly/compression/Compression.h>
 #include <thrift/lib/cpp2/protocol/Serializer.h>
 
@@ -136,5 +134,3 @@ type::Schema loadBundledSchema(folly::Range<const std::string_view*> schemas) {
 }
 
 } // namespace apache::thrift::schema::detail
-
-#endif

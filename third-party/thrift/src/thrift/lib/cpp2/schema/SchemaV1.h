@@ -19,7 +19,6 @@
 #include <folly/Portability.h>
 
 #include <thrift/lib/thrift/gen-cpp2/schema_types.h>
-#define THRIFT_SCHEMA_AVAILABLE
 
 namespace apache::thrift::schema {
 struct DefinitionsSchema {

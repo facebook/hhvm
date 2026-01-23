@@ -29,8 +29,6 @@
 #include <queue>
 #include <stdexcept>
 
-#ifdef THRIFT_SCHEMA_AVAILABLE
-
 namespace type = apache::thrift::type;
 namespace protocol = apache::thrift::protocol;
 using apache::thrift::util::enumNameSafe;
@@ -1427,5 +1425,3 @@ TypeRef SyntaxGraph::asSyntaxGraphTypeRef(
 }
 
 } // namespace apache::thrift::syntax_graph
-
-#endif // THRIFT_SCHEMA_AVAILABLE

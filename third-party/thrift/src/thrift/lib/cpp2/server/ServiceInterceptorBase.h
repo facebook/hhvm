@@ -62,11 +62,9 @@ class ServiceInterceptorBase {
   virtual const ServiceInterceptorQualifiedName& getQualifiedName() const = 0;
 
   struct InitParams {
-#ifdef THRIFT_SCHEMA_AVAILABLE
     using ServiceSchema =
         std::vector<folly::not_null<const syntax_graph::ServiceNode*>>;
     ServiceSchema serviceSchema;
-#endif
     server::DecoratorDataHandleFactory* decoratorDataHandleFactory = nullptr;
   };
 

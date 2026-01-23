@@ -53,6 +53,7 @@ Build-Depends:
   libsodium-dev,
   libsqlite3-dev,
   libssl-dev,
+  libsystemd-dev,
   libtool,
   libxml2-dev,
   libxslt1-dev,

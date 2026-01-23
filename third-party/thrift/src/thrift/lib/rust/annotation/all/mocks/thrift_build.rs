@@ -16,7 +16,6 @@ thrift/annotation/python.thrift python //thrift/annotation:python-rust
 thrift/annotation/rust.thrift rust //thrift/annotation:rust-rust
 thrift/annotation/scope.thrift scope //thrift/annotation:scope-rust
 thrift/annotation/thrift.thrift thrift //thrift/annotation:thrift-rust
-thrift/facebook/erlang/annotation.thrift annotations //thrift/facebook/erlang:annotations-rust
 ";
 #[rustfmt::skip]
 fn main() {

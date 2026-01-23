@@ -536,7 +536,7 @@ class FirstRequestProcessorSink : public SinkClientCallback,
   void onFinalResponseError(folly::exception_wrapper) override {
     std::terminate();
   }
-  [[nodiscard]] bool onSinkRequestN(uint64_t) override { std::terminate(); }
+  [[nodiscard]] bool onSinkRequestN(int32_t) override { std::terminate(); }
   void resetServerCallback(SinkServerCallback&) override { std::terminate(); }
 
   bool onSinkNext(StreamPayload&&) override { return true; }
@@ -624,7 +624,7 @@ class FirstRequestProcessorBiDi : public BiDiClientCallback,
         [&](...) { clientCallback_->onFirstResponseError(std::move(ew)); });
   }
 
-  bool onSinkRequestN(uint64_t) override { std::terminate(); }
+  bool onSinkRequestN(int32_t) override { std::terminate(); }
   void resetServerCallback(BiDiServerCallback&) override { std::terminate(); }
 
   bool onSinkNext(StreamPayload&&) override { std::terminate(); }

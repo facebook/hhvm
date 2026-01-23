@@ -87,7 +87,7 @@ class BiDiSimplifiedEchoClient
     return isAlive();
   }
 
-  bool onSinkRequestN(uint64_t n) override {
+  bool onSinkRequestN(int32_t n) override {
     DestructionGuard dg(this);
     LOG(INFO) << "Client received sink requestN " << n;
     std::ignore = serverCallback_->onSinkNext(makeSinkPayload());

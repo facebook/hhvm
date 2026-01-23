@@ -111,7 +111,7 @@ class ChannelKeepAliveSink : public SinkClientCallback {
   void onFinalResponseError(folly::exception_wrapper) override {
     std::terminate();
   }
-  bool onSinkRequestN(uint64_t) override { std::terminate(); }
+  bool onSinkRequestN(int32_t) override { std::terminate(); }
   void resetServerCallback(SinkServerCallback&) override { std::terminate(); }
 
  private:

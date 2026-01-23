@@ -93,7 +93,7 @@ class ClientCallbackStapler : public BiDiClientCallback,
     return stream_ || sink_;
   }
 
-  bool onSinkRequestN(uint64_t tokens) override {
+  bool onSinkRequestN(int32_t tokens) override {
     DeletionGuard guard(this);
     std::ignore = sink_->onSinkRequestN(tokens);
     return stream_ || sink_;
@@ -207,7 +207,7 @@ class ClientBiDiBridge
   bool onStreamError(folly::exception_wrapper) override { std::terminate(); }
   bool onStreamComplete() override { std::terminate(); }
 
-  bool onSinkRequestN(uint64_t) override { std::terminate(); }
+  bool onSinkRequestN(int32_t) override { std::terminate(); }
   bool onSinkCancel() override { std::terminate(); }
 
   void resetServerCallback(BiDiServerCallback&) override { std::terminate(); }

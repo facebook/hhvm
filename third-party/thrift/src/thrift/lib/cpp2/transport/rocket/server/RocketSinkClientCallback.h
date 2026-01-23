@@ -43,7 +43,7 @@ class RocketSinkClientCallback final : public SinkClientCallback {
   void onFinalResponse(StreamPayload&&) override;
   void onFinalResponseError(folly::exception_wrapper) override;
 
-  bool onSinkRequestN(uint64_t) override;
+  bool onSinkRequestN(int32_t) override;
 
   bool onSinkNext(StreamPayload&&);
   bool onSinkError(folly::exception_wrapper);

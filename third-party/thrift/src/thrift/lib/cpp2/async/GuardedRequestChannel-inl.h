@@ -191,7 +191,7 @@ class GuardedSinkCallback : public SinkClientCallback,
     delete this;
   }
 
-  bool onSinkRequestN(uint64_t n) override {
+  bool onSinkRequestN(int32_t n) override {
     DCHECK(clientCallback_);
     return clientCallback_->onSinkRequestN(n);
   }

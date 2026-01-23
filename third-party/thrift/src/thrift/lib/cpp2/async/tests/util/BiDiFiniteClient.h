@@ -121,13 +121,13 @@ class BiDiFiniteClient : public BiDiClientCallback, public SimpleStateBase {
     return true;
   }
 
-  bool onSinkRequestN(uint64_t n) override {
+  bool onSinkRequestN(int32_t n) override {
     DCHECK(isSinkOpen()) << "We can only requestN on a sink that's open";
 
     LOG(INFO) << "Client received sink requestN " << n << ", it has "
               << chunksToSend_ << " more chunks to send";
 
-    for (size_t i = 0; i < n && chunksToSend_ > 0; i++) {
+    for (int32_t i = 0; i < n && chunksToSend_ > 0; i++) {
       LOG(INFO) << "  Client will send sink chunk #" << chunksSent_++
                 << ", it has " << --chunksToSend_
                 << " stream chunks left to send";

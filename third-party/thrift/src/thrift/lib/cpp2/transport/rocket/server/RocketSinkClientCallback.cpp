@@ -164,7 +164,7 @@ void RocketSinkClientCallback::onFinalResponseError(
   }
 }
 
-bool RocketSinkClientCallback::onSinkRequestN(uint64_t n) {
+bool RocketSinkClientCallback::onSinkRequestN(int32_t n) {
   if (timeout_) {
     timeout_->incCredits(n);
   }

@@ -209,7 +209,7 @@ TEST_F(SinkServiceTest, SinkInitialThrowsOnFinalResponseCalled) {
 
     // unused
     void onFirstResponseError(folly::exception_wrapper) override {}
-    bool onSinkRequestN(uint64_t) override { return true; }
+    bool onSinkRequestN(int32_t) override { return true; }
     void onFinalResponseError(folly::exception_wrapper) override {}
     void resetServerCallback(SinkServerCallback&) override {}
   };

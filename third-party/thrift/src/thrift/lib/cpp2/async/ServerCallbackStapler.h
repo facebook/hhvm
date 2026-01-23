@@ -139,7 +139,7 @@ class ServerCallbackStapler : public BiDiServerCallback,
     sink_ = nullptr;
   }
 
-  bool onSinkRequestN(uint64_t n) override {
+  bool onSinkRequestN(int32_t n) override {
     DeletionGuard guard(this);
     std::ignore = clientCb_->onSinkRequestN(n);
     return sink_;

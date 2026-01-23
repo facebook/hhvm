@@ -154,7 +154,7 @@ class RocketBiDiClientCallback final : public BiDiClientCallback {
       BiDiServerCallback* serverCallback) override;
   void onFirstResponseError(folly::exception_wrapper ew) override;
   bool onSinkCancel() override;
-  bool onSinkRequestN(uint64_t n) override;
+  bool onSinkRequestN(int32_t n) override;
   bool onStreamNext(StreamPayload&& payload) override;
   bool onStreamError(folly::exception_wrapper ew) override;
   bool onStreamComplete() override;

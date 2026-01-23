@@ -21,7 +21,7 @@ namespace apache::thrift::detail {
 // Explicitly instantiate the base of ClientSinkBridge
 template class TwoWayBridge<
     QueueConsumer,
-    std::variant<folly::Try<StreamPayload>, uint64_t>,
+    std::variant<folly::Try<StreamPayload>, int32_t>,
     ClientSinkBridge,
     folly::Try<StreamPayload>,
     ClientSinkBridge>;
@@ -94,7 +94,7 @@ folly::coro::Task<folly::Try<StreamPayload>> ClientSinkBridge::sink(
 
       for (auto queue = clientGetMessages(); !queue.empty(); queue.pop()) {
         auto& message = queue.front();
-        if (auto* n = std::get_if<uint64_t>(&message)) {
+        if (auto* n = std::get_if<int32_t>(&message)) {
           credits += *n;
         } else {
           co_return std::get<folly::Try<StreamPayload>>(std::move(message));
@@ -207,7 +207,7 @@ void ClientSinkBridge::onFinalResponseError(folly::exception_wrapper ew) {
   close();
 }
 
-bool ClientSinkBridge::onSinkRequestN(uint64_t n) {
+bool ClientSinkBridge::onSinkRequestN(int32_t n) {
   serverPush(n);
   return true;
 }

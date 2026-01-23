@@ -313,7 +313,7 @@ class SinkClientCallback {
   virtual void onFinalResponse(StreamPayload&&) = 0;
   virtual void onFinalResponseError(folly::exception_wrapper) = 0;
 
-  [[nodiscard]] virtual bool onSinkRequestN(uint64_t) = 0;
+  [[nodiscard]] virtual bool onSinkRequestN(int32_t) = 0;
 
   // not terminating
   virtual void resetServerCallback(SinkServerCallback&) = 0;
@@ -432,7 +432,7 @@ class BiDiClientCallback {
   [[nodiscard]] virtual bool onStreamError(folly::exception_wrapper) = 0;
   [[nodiscard]] virtual bool onStreamComplete() = 0;
 
-  [[nodiscard]] virtual bool onSinkRequestN(uint64_t) = 0;
+  [[nodiscard]] virtual bool onSinkRequestN(int32_t) = 0;
   [[nodiscard]] virtual bool onSinkCancel() = 0;
 
   virtual void resetServerCallback(BiDiServerCallback&) = 0;

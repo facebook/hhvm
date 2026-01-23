@@ -57,7 +57,7 @@ class RocketBiDiServerCallback : public BiDiServerCallback {
   bool onInitialPayload(FirstResponsePayload&&, folly::EventBase*);
   void onInitialError(folly::exception_wrapper);
 
-  void onSinkRequestN(uint64_t tokens);
+  void onSinkRequestN(int32_t tokens);
   void onSinkCancel();
 
   // Stream fns

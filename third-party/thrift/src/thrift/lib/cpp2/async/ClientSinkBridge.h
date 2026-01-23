@@ -41,7 +41,7 @@ extern template class TwoWayBridge<
 
 class ClientSinkBridge : public TwoWayBridge<
                              QueueConsumer,
-                             std::variant<folly::Try<StreamPayload>, uint64_t>,
+                             std::variant<folly::Try<StreamPayload>, int32_t>,
                              ClientSinkBridge,
                              folly::Try<StreamPayload>,
                              ClientSinkBridge>,
@@ -87,7 +87,7 @@ class ClientSinkBridge : public TwoWayBridge<
 
   void onFinalResponseError(folly::exception_wrapper ew) override;
 
-  bool onSinkRequestN(uint64_t n) override;
+  bool onSinkRequestN(int32_t n) override;
 
   void resetServerCallback(SinkServerCallback& serverCallback) override;
 

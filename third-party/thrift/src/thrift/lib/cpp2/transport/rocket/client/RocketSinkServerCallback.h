@@ -59,7 +59,7 @@ class RocketSinkServerCallback : public SinkServerCallback {
   void onFinalResponse(StreamPayload&&);
   void onFinalResponseError(folly::exception_wrapper);
 
-  void onSinkRequestN(uint64_t tokens);
+  void onSinkRequestN(int32_t tokens);
 
   StreamId streamId() const noexcept { return streamId_; }
 

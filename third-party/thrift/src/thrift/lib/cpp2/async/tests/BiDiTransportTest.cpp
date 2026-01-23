@@ -287,7 +287,7 @@ TEST_F(BiDiTransportTest, BothSinkAndStreamGetCancelledOnRequestN) {
     explicit CustomClient(std::shared_ptr<CompletionSignal> done)
         : BiDiSimplifiedEchoClient(3, std::move(done)) {}
 
-    bool onSinkRequestN(uint64_t n) override {
+    bool onSinkRequestN(int32_t n) override {
       DestructionGuard dg(this);
       LOG(INFO) << "Client received sink requestN " << n
                 << " and will cancel stream";

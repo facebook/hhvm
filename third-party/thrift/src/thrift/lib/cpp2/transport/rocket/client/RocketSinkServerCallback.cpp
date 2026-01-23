@@ -92,7 +92,7 @@ void RocketSinkServerCallback::onFinalResponseError(
       [&](...) { clientCallback_->onFinalResponseError(std::move(ew)); });
 }
 
-void RocketSinkServerCallback::onSinkRequestN(uint64_t tokens) {
+void RocketSinkServerCallback::onSinkRequestN(int32_t tokens) {
   switch (state_) {
     case State::BothOpen:
       std::ignore = clientCallback_->onSinkRequestN(tokens);

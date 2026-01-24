@@ -129,7 +129,6 @@ class t_hack_generator : public t_concat_generator {
     mangled_services_ = option_is_set(options, "mangledsvcs", false);
     typedef_ = option_is_specified(options, "typedef");
     server_stream_ = option_is_specified(options, "server_stream");
-    server_sink_ = option_is_specified(options, "server_sink");
     skip_constants_ = option_is_specified(options, "skip_constants");
 
     union_logger_rollout_ =
@@ -1094,7 +1093,7 @@ class t_hack_generator : public t_concat_generator {
       return server_stream_ && async;
     }
     if (func->sink()) {
-      return server_sink_ && async;
+      return server_stream_ && async;
     }
     return true;
   }
@@ -1255,11 +1254,6 @@ class t_hack_generator : public t_concat_generator {
    * True to generate service code for streaming methods
    */
   bool server_stream_;
-
-  /**
-   * True to generate service code for sink methods
-   */
-  bool server_sink_;
 
   bool has_hack_namespace;
 

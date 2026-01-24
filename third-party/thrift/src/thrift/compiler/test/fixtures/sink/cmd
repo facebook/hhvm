@@ -1,6 +1,6 @@
 cpp2: mstch_cpp2 src/module.thrift
 py3: mstch_py3 src/module.thrift
-hack: hack:hack_collections=1,server,server_sink src/module.thrift
+hack: hack:hack_collections=1,server,server_stream src/module.thrift
 java: mstch_java src/module.thrift
 rust: mstch_rust src/module.thrift
 pyi: mstch_pyi src/module.thrift

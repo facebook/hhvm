@@ -168,7 +168,7 @@ class Map::Iterator {
   template <typename IterType>
   Iterator(IterType&& it, const type_system::TypeRef::Map* mapType);
 
-  detail::SmallBuffer<16> concreteIt_;
+  detail::F14IteratorBuffer concreteIt_;
   const type_system::TypeRef::Map* mapType_;
 
   friend class Map;
@@ -213,7 +213,7 @@ class Map::ConstIterator {
   template <typename IterType>
   ConstIterator(IterType&& it, const type_system::TypeRef::Map* mapType);
 
-  detail::SmallBuffer<16> concreteIt_{};
+  detail::F14IteratorBuffer concreteIt_{};
   const type_system::TypeRef::Map* mapType_;
 
   friend class Map;
@@ -234,5 +234,3 @@ Map fromRecord(
     std::pmr::memory_resource* mr);
 
 } // namespace apache::thrift::dynamic
-
-// foo

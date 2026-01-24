@@ -153,7 +153,7 @@ class Set::ConstIterator {
   template <typename IterType>
   ConstIterator(IterType&& it, const type_system::TypeRef::Set* setType);
 
-  detail::SmallBuffer<16> concreteIt_{};
+  detail::F14IteratorBuffer concreteIt_{};
   const type_system::TypeRef::Set* setType_;
 
   friend class Set;

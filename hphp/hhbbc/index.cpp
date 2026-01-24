@@ -21107,7 +21107,7 @@ Index::ReturnType Index::lookup_return_type(Context ctx,
 
   auto const funcFamily = [&] (FuncFamily* fam, bool regularOnly) {
     add_dependency(*m_data, fam, ctx, dep);
-    return fam->infoFor(regularOnly).m_returnTy.get(
+    auto ty = fam->infoFor(regularOnly).m_returnTy.get(
       [&] {
         auto ret = TBottom;
         auto effectFree = true;
@@ -21115,13 +21115,14 @@ Index::ReturnType Index::lookup_return_type(Context ctx,
           if (regularOnly && !pf.inRegular()) continue;
           auto const finfo = func_info(*m_data, pf.ptr());
           if (!finfo->func) return R{ TInitCell, false };
-          ret |= unctx(finfo->returnTy);
+          ret |= finfo->returnTy;
           effectFree &= finfo->effectFree;
           if (!ret.strictSubtypeOf(BInitCell) && !effectFree) break;
         }
         return R{ std::move(ret), effectFree };
       }
     );
+    return R{ unctx(std::move(ty.t)), ty.effectFree };
   };
   auto const meth = [&] (const php::Func* func) {
     if (methods) {
@@ -22232,14 +22233,14 @@ AnalysisIndex::return_type_for_func(const php::Func& func) const {
   using R = Index::ReturnType;
 
   auto const& finfo = func_info(*m_data, func);
-  auto const inferred = unctx(unserialize_type(finfo.inferred.returnTy));
+  auto const inferred = unserialize_type(finfo.inferred.returnTy);
   auto effectFree = finfo.inferred.effectFree;
   auto ret = inferred;
 
   if (auto const rinfo = retained_for_context(*m_data)) {
     auto better = false;
     if (auto const info = rinfo->get(finfo)) {
-      ret &= unctx(unserialize_type(info->returnTy));
+      ret &= unserialize_type(info->returnTy);
       better = ret.strictSubtypeOf(inferred);
       if (!effectFree && info->effectFree) {
         effectFree = true;
@@ -26864,7 +26865,7 @@ Type AnalysisIndex::lookup_constant(SString name) const {
     // explicit dependence on the constant, we might not have the init
     // func present.
     if (fit == end(m_data->finfos)) return TInitCell;
-    return return_type_for_func(*fit->second->func).t;
+    return unctx(return_type_for_func(*fit->second->func).t);
   }
   return m_data->badConstants.contains(name) ? TBottom : TInitCell;
 }
@@ -27751,15 +27752,19 @@ Index::ReturnType AnalysisIndex::lookup_return_type(MethodsInfo* methods,
                                                     res::Func rfunc) const {
   using R = Index::ReturnType;
 
+  auto const remove = [] (R ret) {
+    return R { unctx(std::move(ret.t)), ret.effectFree };
+  };
+
   auto const fromFInfo = [&] (const FuncInfo2& finfo) {
     m_data->deps->add(*finfo.func, AnalysisDeps::Type::RetType);
-    return return_type_for_func(*finfo.func);
+    return remove(return_type_for_func(*finfo.func));
   };
 
   auto const meth = [&] (const FuncInfo2& finfo) {
     if (methods) {
       if (auto ret = methods->lookupReturnType(*finfo.func)) {
-        return R{ unctx(std::move(ret->t)), ret->effectFree };
+        return remove(std::move(*ret));
       }
     }
     return fromFInfo(finfo);
@@ -27802,20 +27807,43 @@ AnalysisIndex::lookup_return_type(MethodsInfo* methods,
                                   res::Func rfunc) const {
   using R = Index::ReturnType;
 
-  auto ty = lookup_return_type(methods, rfunc);
-
-  auto const contextual = [&] (const FuncInfo2& finfo) {
+  auto const contextual = [&] (const FuncInfo2& finfo, R ret) {
     return context_sensitive_return_type(
       *m_data,
       { finfo.func, args, context },
-      std::move(ty)
+      std::move(ret)
     );
+  };
+
+  auto const fromFInfo = [&] (const FuncInfo2& finfo) {
+    m_data->deps->add(*finfo.func, AnalysisDeps::Type::RetType);
+    return contextual(finfo, return_type_for_func(*finfo.func));
+  };
+
+  auto const meth = [&] (const FuncInfo2& finfo) {
+    if (methods) {
+      if (auto ret = methods->lookupReturnType(*finfo.func)) {
+        return contextual(finfo, std::move(*ret));
+      }
+    }
+    return fromFInfo(finfo);
   };
 
   return match<R>(
     rfunc.val,
-    [&] (res::Func::FuncName)           { return ty; },
-    [&] (res::Func::MethodName)         { return ty; },
+    [&] (res::Func::FuncName f) {
+      m_data->deps->add(
+        AnalysisDeps::Func { f.name },
+        AnalysisDeps::Type::RetType
+      );
+      return R{ TInitCell, false };
+    },
+    [&] (res::Func::MethodName m) {
+      // If we know the name of the class, we can register a
+      // dependency on it. If not, nothing we can do.
+      if (m.cls) m_data->deps->add(AnalysisDeps::Class { m.cls });
+      return R{ TInitCell, false };
+    },
     [&] (res::Func::Fun)                -> R { always_assert(false); },
     [&] (res::Func::Method)             -> R { always_assert(false); },
     [&] (res::Func::MethodFamily)       -> R { always_assert(false); },
@@ -27823,10 +27851,10 @@ AnalysisIndex::lookup_return_type(MethodsInfo* methods,
     [&] (res::Func::MissingFunc)        { return R{ TBottom, false }; },
     [&] (res::Func::MissingMethod)      { return R{ TBottom, false }; },
     [&] (const res::Func::Isect&)       -> R { always_assert(false); },
-    [&] (res::Func::Fun2 f)             { return contextual(*f.finfo); },
-    [&] (res::Func::Method2 m)          { return contextual(*m.finfo); },
+    [&] (res::Func::Fun2 f)             { return fromFInfo(*f.finfo); },
+    [&] (res::Func::Method2 m)          { return meth(*m.finfo); },
     [&] (res::Func::MethodFamily2)      -> R { always_assert(false); },
-    [&] (res::Func::MethodOrMissing2 m) { return contextual(*m.finfo); },
+    [&] (res::Func::MethodOrMissing2 m) { return meth(*m.finfo); },
     [&] (const res::Func::Isect2&)      -> R { always_assert(false); }
   );
 }
@@ -27915,7 +27943,7 @@ AnalysisIndex::lookup_foldable_return_type(const CallContext& calleeCtx) const {
     return R{ TInitCell, false };
   }
 
-  auto const insensitive = return_type_for_func(func).t;
+  auto const insensitive = unctx(return_type_for_func(func).t);
 
   ITRACE_MOD(
     Trace::hhbbc, 4,

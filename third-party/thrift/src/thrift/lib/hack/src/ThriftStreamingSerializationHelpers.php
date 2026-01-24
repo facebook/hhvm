@@ -67,9 +67,16 @@ final abstract class ThriftStreamingSerializationHelpers {
           );
         }
       }
-      if ($protocol is \TBinaryProtocolAccelerated) {
-        thrift_protocol_write_binary_struct($protocol, $result);
-      } else if ($protocol is \TCompactProtocolAccelerated) {
+      if ($protocol is TBinaryProtocolAccelerated) {
+        if (TBinarySerializer::useBinaryStruct()) {
+          return tuple(
+            thrift_protocol_write_binary_struct_to_string($result),
+            $is_application_ex,
+          );
+        } else {
+          thrift_protocol_write_binary_struct($protocol, $result);
+        }
+      } else if ($protocol is TCompactProtocolAccelerated) {
         if (TCompactSerializer::useCompactStruct()) {
           return tuple(
             thrift_protocol_write_compact_struct_to_string(
@@ -118,7 +125,7 @@ final abstract class ThriftStreamingSerializationHelpers {
           "Stream/Sink methods require TMemoryBuffer transport",
         );
         if (
-          $protocol is \TCompactProtocolAccelerated &&
+          $protocol is TCompactProtocolAccelerated &&
           TCompactSerializer::useCompactStruct()
         ) {
           $result = thrift_protocol_read_compact_struct_from_string(
@@ -126,6 +133,15 @@ final abstract class ThriftStreamingSerializationHelpers {
             HH\class_to_classname($payload_classname),
             0, //options
             TCompactProtocolBase::VERSION,
+          );
+        } else if (
+          $protocol is TBinaryProtocolAccelerated &&
+          TBinarySerializer::useBinaryStruct()
+        ) {
+          $result = thrift_protocol_read_binary_struct_from_string(
+            $stream_payload as nonnull,
+            HH\class_to_classname($payload_classname),
+            0, //options
           );
         } else {
           $transport->resetBuffer();

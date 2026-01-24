@@ -25,6 +25,14 @@ use namespace FlibSL\{C, Math, Str, Vec}; // @oss-enable
 // @oss-disable: <<Oncalls('thrift')>>
 final class TBinarySerializer extends TProtocolSerializer {
 
+  <<__Memoize>>
+  public static function useBinaryStruct()[write_props]: bool {
+    return HH\Coeffects\fb\backdoor_from_write_props__DO_NOT_USE(
+      ()[defaults] ==> JustKnobs::eval('thrift/hack:binary_struct'),
+      'Need to gate the change',
+    );
+  }
+
   // NOTE(rmarin): Because thrift_protocol_write_binary
   // adds a begin message prefix, you cannot specify
   // a transport in which to serialize an object. It has to
@@ -35,6 +43,13 @@ final class TBinarySerializer extends TProtocolSerializer {
     IThriftStruct $object,
     bool $disable_hphp_extension = false,
   )[write_props, read_globals]: string {
+    if (self::useBinaryStruct() && !$disable_hphp_extension) {
+      return HH\Coeffects\fb\backdoor_from_write_props__DO_NOT_USE(
+        ()[defaults] ==> thrift_protocol_write_binary_struct_to_string($object),
+        'Binary with memory buffer would have write_props, but Hack doesn\'t '.
+        'have a way to express this atm.',
+      );
+    }
     $transport = new TMemoryBuffer();
     $protocol = new TBinaryProtocolAccelerated($transport);
     if (!$disable_hphp_extension) {
@@ -81,6 +96,17 @@ final class TBinarySerializer extends TProtocolSerializer {
     bool $should_leave_extra = false,
     int $options = 0,
   )[read_globals, write_props]: T {
+    if (self::useBinaryStruct() && !$disable_hphp_extension) {
+      return HH\Coeffects\fb\backdoor_from_write_props__DO_NOT_USE(
+        ()[defaults] ==> thrift_protocol_read_binary_struct_from_string(
+          $str,
+          get_class($object),
+          $options,
+        ),
+        'Binary with memory buffer is write_props, but Hack doesn\'t have a '.
+        'way to express this atm.',
+      );
+    }
     $transport = new TMemoryBuffer();
     $protocol = (new TBinaryProtocolAccelerated($transport))
       ->setOptions($options);

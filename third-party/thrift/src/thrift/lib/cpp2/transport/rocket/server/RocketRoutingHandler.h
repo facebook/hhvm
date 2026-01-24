@@ -19,7 +19,6 @@
 #include <thrift/lib/cpp2/PluggableFunction.h>
 #include <thrift/lib/cpp2/server/ThriftServer.h>
 #include <thrift/lib/cpp2/server/TransportRoutingHandler.h>
-#include <thrift/lib/cpp2/server/metrics/StreamMetricCallback.h>
 #include <thrift/lib/cpp2/transport/rocket/server/IRocketServerConnection.h>
 #include <thrift/lib/cpp2/transport/rocket/server/SetupFrameHandler.h>
 #include <thrift/lib/cpp2/transport/rocket/server/SetupFrameInterceptor.h>
@@ -82,6 +81,5 @@ class RocketRoutingHandler : public TransportRoutingHandler {
   std::vector<std::unique_ptr<rocket::SetupFrameHandler>> setupFrameHandlers_;
   std::vector<std::unique_ptr<rocket::SetupFrameInterceptor>>
       setupFrameInterceptors_;
-  StreamMetricCallback& streamMetricCallback_;
 };
 } // namespace apache::thrift

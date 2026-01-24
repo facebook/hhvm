@@ -95,7 +95,6 @@ RocketServerConnection::RocketServerConnection(
     std::unique_ptr<RocketServerHandler> frameHandler,
     MemoryTracker& ingressMemoryTracker,
     MemoryTracker& egressMemoryTracker,
-    StreamMetricCallback& streamMetricCallback,
     const Config& cfg)
     : IRocketServerConnection(),
       evb_(*socket->getEventBase()),
@@ -117,8 +116,7 @@ RocketServerConnection::RocketServerConnection(
           cfg.writeBatchingByteSize),
       socketDrainer_(*this),
       ingressMemoryTracker_(ingressMemoryTracker),
-      egressMemoryTracker_(egressMemoryTracker),
-      streamMetricCallback_(streamMetricCallback) {
+      egressMemoryTracker_(egressMemoryTracker) {
   CHECK(socket_);
   CHECK(frameHandler_);
 
@@ -151,14 +149,6 @@ RocketServerConnection::RocketServerConnection(
   this->initializeObserverContainer();
 }
 
-namespace {
-StreamMetricCallback& getNoopStreamMetricCallback() {
-  static folly::Indestructible<NoopStreamMetricCallback>
-      kNoopStreamMetricCallback;
-  return *kNoopStreamMetricCallback;
-}
-} // namespace
-
 RocketStreamClientCallback* FOLLY_NULLABLE
 RocketServerConnection::createStreamClientCallback(
     StreamId streamId,
@@ -171,10 +161,7 @@ RocketServerConnection::createStreamClientCallback(
   auto cb = std::make_unique<RocketStreamClientCallback>(
       streamId,
       static_cast<RocketServerConnection&>(connection),
-      initialRequestN,
-      THRIFT_FLAG(thrift_enable_stream_counters)
-          ? streamMetricCallback_
-          : getNoopStreamMetricCallback());
+      initialRequestN);
   auto cbPtr = cb.get();
   it->second = std::move(cb);
   return cbPtr;

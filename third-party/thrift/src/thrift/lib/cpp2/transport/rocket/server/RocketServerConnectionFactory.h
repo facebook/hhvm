@@ -20,7 +20,6 @@
 
 #include <folly/io/async/AsyncTransport.h>
 #include <thrift/lib/cpp2/server/MemoryTracker.h>
-#include <thrift/lib/cpp2/server/metrics/StreamMetricCallback.h>
 #include <thrift/lib/cpp2/transport/rocket/server/IRocketServerConnection.h>
 #include <thrift/lib/cpp2/transport/rocket/server/RocketServerHandler.h>
 
@@ -41,7 +40,6 @@ class RocketServerConnectionFactory {
    * @param frameHandler The frame handler for processing requests
    * @param ingressMemoryTracker Tracker for ingress memory usage
    * @param egressMemoryTracker Tracker for egress memory usage
-   * @param streamMetricCallback Callback for stream metrics
    * @param cfg Configuration for the connection
    * @return Unique pointer to the created connection
    */
@@ -50,7 +48,6 @@ class RocketServerConnectionFactory {
       std::unique_ptr<RocketServerHandler> frameHandler,
       MemoryTracker& ingressMemoryTracker,
       MemoryTracker& egressMemoryTracker,
-      StreamMetricCallback& streamMetricCallback,
       const IRocketServerConnection::Config& cfg);
 };
 

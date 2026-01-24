@@ -70,9 +70,7 @@ THRIFT_PLUGGABLE_FUNC_REGISTER(
 }
 } // namespace detail
 
-RocketRoutingHandler::RocketRoutingHandler(ThriftServer& server)
-    : streamMetricCallback_(
-          detail::ThriftServerInternals(server).getStreamMetricCallback()) {
+RocketRoutingHandler::RocketRoutingHandler(ThriftServer& server) {
   auto addSetupFramehandler = [&](auto&& handlerFactory) {
     if (auto handler = handlerFactory(server)) {
       setupFrameHandlers_.push_back(std::move(handler));
@@ -180,7 +178,6 @@ void RocketRoutingHandler::handleConnection(
           setupFrameInterceptors_),
       worker->getIngressMemoryTracker(),
       worker->getEgressMemoryTracker(),
-      streamMetricCallback_,
       cfg);
   auto* const connectionPtr = connection.release();
   onConnection(*connectionPtr);

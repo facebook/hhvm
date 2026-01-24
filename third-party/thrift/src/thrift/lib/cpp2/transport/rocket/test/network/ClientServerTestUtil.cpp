@@ -299,8 +299,7 @@ class RocketTestServerAcceptor final : public wangle::Acceptor {
         std::move(socket),
         frameHandlerFactory_(),
         memoryTracker_, // (ingress)
-        memoryTracker_, // (egress)
-        streamMetricCallback_);
+        memoryTracker_); // (egress)
 
     getConnectionManager()->addConnection(connection);
   }
@@ -331,7 +330,6 @@ class RocketTestServerAcceptor final : public wangle::Acceptor {
   size_t connections_{0};
   folly::Optional<size_t> expectedRemainingStreams_ = folly::none;
   MemoryTracker memoryTracker_;
-  NoopStreamMetricCallback streamMetricCallback_;
 };
 } // namespace
 

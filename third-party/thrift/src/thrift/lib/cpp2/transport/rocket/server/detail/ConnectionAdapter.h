@@ -131,11 +131,6 @@ class ConnectionAdapter {
   void setStreamsPaused(bool paused) { connection_->streamsPaused_ = paused; }
 
   /**
-   * Get the stream metric callback for stream metrics tracking.
-   */
-  auto& getStreamMetricCallback() { return connection_->streamMetricCallback_; }
-
-  /**
    * Create a stream client callback for REQUEST_STREAM handling.
    * Returns true if successful, false if streamId is already in use.
    * Delegates to the underlying connection to avoid circular dependencies.

@@ -22,7 +22,6 @@
 #include <thrift/lib/cpp/ContextStack.h>
 #include <thrift/lib/cpp2/Flags.h>
 #include <thrift/lib/cpp2/async/StreamCallbacks.h>
-#include <thrift/lib/cpp2/server/metrics/StreamMetricCallback.h>
 #include <thrift/lib/cpp2/transport/rocket/Types.h>
 #include <thrift/lib/cpp2/transport/rocket/compression/CompressionManager.h>
 #include <thrift/lib/cpp2/transport/rocket/server/IRocketServerConnection.h>
@@ -38,8 +37,7 @@ class RocketStreamClientCallback final : public StreamClientCallback {
   RocketStreamClientCallback(
       StreamId streamId,
       IRocketServerConnection& connection,
-      uint32_t initialRequestN,
-      StreamMetricCallback& streamMetricCallback);
+      uint32_t initialRequestN);
   ~RocketStreamClientCallback() override = default;
 
   bool onFirstResponse(
@@ -182,7 +180,6 @@ class RocketStreamClientCallback final : public StreamClientCallback {
   protocol::PROTOCOL_TYPES protoId_;
   std::unique_ptr<CompressionConfig> compressionConfig_;
   std::string rpcMethodName_{"<unknown_stream_method>"};
-  StreamMetricCallback& streamMetricCallback_;
   std::shared_ptr<ContextStack> contextStack_{nullptr};
 
   // Tracks chunks in memory (received but not yet sent).

@@ -90,7 +90,6 @@
 #include <thrift/lib/cpp2/server/ThriftServerConfig.h>
 #include <thrift/lib/cpp2/server/TransportRoutingHandler.h>
 #include <thrift/lib/cpp2/server/metrics/InterceptorMetricCallback.h>
-#include <thrift/lib/cpp2/server/metrics/StreamMetricCallback.h>
 #include <thrift/lib/cpp2/transport/rocket/RequestPayload.h>
 #include <thrift/lib/cpp2/transport/rocket/Types.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/parser/AllocatingParserStrategy.h>
@@ -977,10 +976,6 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
   // lifetime of *this.
   folly::Synchronized<std::shared_ptr<server::TServerObserver>> observer_;
   std::atomic<server::TServerObserver*> observerPtr_{nullptr};
-
-  // Interface for instrumenting streams
-  std::shared_ptr<StreamMetricCallback> streamMetricCallback_{
-      std::make_shared<NoopStreamMetricCallback>()};
 
   // Interface for instrumenting interceptors
   std::shared_ptr<InterceptorMetricCallback> interceptorMetricCallback_{

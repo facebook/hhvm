@@ -54,7 +54,6 @@
 #include <thrift/lib/cpp2/transport/rocket/server/detail/OutgoingFrameHandler.h>
 
 THRIFT_FLAG_DECLARE_bool(enable_rocket_connection_observers);
-THRIFT_FLAG_DECLARE_bool(thrift_enable_stream_counters);
 THRIFT_FLAG_DEFINE_bool(rocket_use_outgoing_frame_handler, true);
 
 namespace apache::thrift::rocket {
@@ -64,7 +63,6 @@ RefactoredRocketServerConnection::RefactoredRocketServerConnection(
     std::unique_ptr<RocketServerHandler> frameHandler,
     MemoryTracker& ingressMemoryTracker,
     MemoryTracker& egressMemoryTracker,
-    StreamMetricCallback& streamMetricCallback,
     const IRocketServerConnection::Config& cfg)
     : IRocketServerConnection(),
       evb_(*socket->getEventBase()),
@@ -82,7 +80,6 @@ RefactoredRocketServerConnection::RefactoredRocketServerConnection(
       socketDrainer_(*this),
       ingressMemoryTracker_(ingressMemoryTracker),
       egressMemoryTracker_(egressMemoryTracker),
-      streamMetricCallback_(streamMetricCallback),
       connectionAdapter_(*this),
       writeBatcher_(
           connectionAdapter_,
@@ -143,14 +140,6 @@ RefactoredRocketServerConnection::RefactoredRocketServerConnection(
   this->initializeObserverContainer();
 }
 
-namespace {
-StreamMetricCallback& getNoopStreamMetricCallback() {
-  static folly::Indestructible<NoopStreamMetricCallback>
-      kNoopStreamMetricCallback;
-  return *kNoopStreamMetricCallback;
-}
-} // namespace
-
 RocketStreamClientCallback* FOLLY_NULLABLE
 RefactoredRocketServerConnection::createStreamClientCallback(
     StreamId streamId,
@@ -162,12 +151,7 @@ RefactoredRocketServerConnection::createStreamClientCallback(
   }
 
   auto cb = std::make_unique<RocketStreamClientCallback>(
-      streamId,
-      connection,
-      initialRequestN,
-      THRIFT_FLAG(thrift_enable_stream_counters)
-          ? streamMetricCallback_
-          : getNoopStreamMetricCallback());
+      streamId, connection, initialRequestN);
 
   auto cbPtr = cb.get();
   it->second = std::move(cb);

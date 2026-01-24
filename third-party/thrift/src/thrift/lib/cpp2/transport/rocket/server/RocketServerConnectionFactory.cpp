@@ -31,7 +31,6 @@ std::unique_ptr<IRocketServerConnection> RocketServerConnectionFactory::create(
     std::unique_ptr<RocketServerHandler> frameHandler,
     MemoryTracker& ingressMemoryTracker,
     MemoryTracker& egressMemoryTracker,
-    StreamMetricCallback& streamMetricCallback,
     const IRocketServerConnection::Config& cfg) {
   if (THRIFT_FLAG(rocket_use_factored_server_connection)) {
     auto* connection = new RefactoredRocketServerConnection(
@@ -39,7 +38,6 @@ std::unique_ptr<IRocketServerConnection> RocketServerConnectionFactory::create(
         std::move(frameHandler),
         ingressMemoryTracker,
         egressMemoryTracker,
-        streamMetricCallback,
         cfg);
     return std::unique_ptr<IRocketServerConnection>(connection);
   }
@@ -64,7 +62,6 @@ std::unique_ptr<IRocketServerConnection> RocketServerConnectionFactory::create(
       std::move(frameHandler),
       ingressMemoryTracker,
       egressMemoryTracker,
-      streamMetricCallback,
       rocketCfg);
 
   return std::unique_ptr<IRocketServerConnection>(connection);

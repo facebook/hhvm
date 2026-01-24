@@ -21,6 +21,8 @@
 
 namespace apache::thrift::dynamic {
 
+#if FOLLY_HAVE_MEMORY_RESOURCE
+
 Binary::Binary(const Binary& other) : Binary(other.clone(other.mr_)) {}
 
 Binary& Binary::operator=(const Binary& other) {
@@ -30,15 +32,35 @@ Binary& Binary::operator=(const Binary& other) {
   return *this;
 }
 
-folly::io::Cursor Binary::cursor() const {
-  return folly::io::Cursor(data_.get());
+Binary Binary::clone(std::pmr::memory_resource* mr) const {
+  if (!data_) {
+    return Binary(mr);
+  }
+  return Binary(data_->clone(mr));
+}
+
+#else
+
+Binary::Binary(const Binary& other) : Binary(other.clone()) {}
+
+Binary& Binary::operator=(const Binary& other) {
+  if (this != &other) {
+    *this = other.clone();
+  }
+  return *this;
 }
 
 Binary Binary::clone(std::pmr::memory_resource* mr) const {
   if (!data_) {
     return Binary(mr);
   }
-  return Binary(data_->clone(mr));
+  return Binary(data_->clone());
+}
+
+#endif // FOLLY_HAVE_MEMORY_RESOURCE
+
+folly::io::Cursor Binary::cursor() const {
+  return folly::io::Cursor(data_.get());
 }
 
 bool operator==(const Binary& lhs, const Binary& rhs) noexcept {

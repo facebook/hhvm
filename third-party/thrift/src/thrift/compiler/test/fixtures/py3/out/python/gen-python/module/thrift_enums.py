@@ -34,10 +34,10 @@ class AnEnum(_fbthrift_python_types.Enum, int):
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return gen_metadata_enum_AnEnum()
 
-    def _to_python(self) -> "AnEnum":
+    def _to_python(self) -> _std_python_typing.Self:
         return self
 
-    def _to_py3(self) -> "AnEnum":
+    def _to_py3(self) -> _std_python_typing.Self:
         return self
 
     # pyre-ignore[11]: Annotation `module.ttypes.AnEnum` is not defined as a type.
@@ -63,10 +63,10 @@ class AnEnumRenamed(_fbthrift_python_types.Enum, int):
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return gen_metadata_enum_AnEnumRenamed()
 
-    def _to_python(self) -> "AnEnumRenamed":
+    def _to_python(self) -> _std_python_typing.Self:
         return self
 
-    def _to_py3(self) -> "AnEnumRenamed":
+    def _to_py3(self) -> _std_python_typing.Self:
         return self
 
     # pyre-ignore[11]: Annotation `module.ttypes.AnEnumRenamed` is not defined as a type.
@@ -93,10 +93,10 @@ class Flags(_fbthrift_python_types.Flag):
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return gen_metadata_enum_Flags()
 
-    def _to_python(self) -> "Flags":
+    def _to_python(self) -> _std_python_typing.Self:
         return self
 
-    def _to_py3(self) -> "Flags":
+    def _to_py3(self) -> _std_python_typing.Self:
         return self
 
     # pyre-ignore[11]: Annotation `module.ttypes.Flags` is not defined as a type.

@@ -33,10 +33,10 @@ class has_bitwise_ops(_fbthrift_python_types.Enum, int):
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return gen_metadata_enum_has_bitwise_ops()
 
-    def _to_python(self) -> "has_bitwise_ops":
+    def _to_python(self) -> _std_python_typing.Self:
         return self
 
-    def _to_py3(self) -> "has_bitwise_ops":
+    def _to_py3(self) -> _std_python_typing.Self:
         return self
 
     # pyre-ignore[11]: Annotation `module.ttypes.has_bitwise_ops` is not defined as a type.
@@ -61,10 +61,10 @@ class is_unscoped(_fbthrift_python_types.Enum, int):
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return gen_metadata_enum_is_unscoped()
 
-    def _to_python(self) -> "is_unscoped":
+    def _to_python(self) -> _std_python_typing.Self:
         return self
 
-    def _to_py3(self) -> "is_unscoped":
+    def _to_py3(self) -> _std_python_typing.Self:
         return self
 
     # pyre-ignore[11]: Annotation `module.ttypes.is_unscoped` is not defined as a type.
@@ -89,10 +89,10 @@ class MyForwardRefEnum(_fbthrift_python_types.Enum, int):
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return gen_metadata_enum_MyForwardRefEnum()
 
-    def _to_python(self) -> "MyForwardRefEnum":
+    def _to_python(self) -> _std_python_typing.Self:
         return self
 
-    def _to_py3(self) -> "MyForwardRefEnum":
+    def _to_py3(self) -> _std_python_typing.Self:
         return self
 
     # pyre-ignore[11]: Annotation `module.ttypes.MyForwardRefEnum` is not defined as a type.

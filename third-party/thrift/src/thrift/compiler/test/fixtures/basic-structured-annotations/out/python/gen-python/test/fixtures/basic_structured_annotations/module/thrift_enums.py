@@ -31,10 +31,10 @@ class MyEnum(_fbthrift_python_types.Enum, int):
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return gen_metadata_enum_MyEnum()
 
-    def _to_python(self) -> "MyEnum":
+    def _to_python(self) -> _std_python_typing.Self:
         return self
 
-    def _to_py3(self) -> "MyEnum":
+    def _to_py3(self) -> _std_python_typing.Self:
         return self
 
     # pyre-ignore[11]: Annotation `module.ttypes.MyEnum` is not defined as a type.

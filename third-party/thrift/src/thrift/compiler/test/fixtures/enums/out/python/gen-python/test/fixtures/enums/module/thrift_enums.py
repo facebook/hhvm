@@ -32,10 +32,10 @@ class Metasyntactic(_fbthrift_python_types.Enum, int):
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return gen_metadata_enum_Metasyntactic()
 
-    def _to_python(self) -> "Metasyntactic":
+    def _to_python(self) -> _std_python_typing.Self:
         return self
 
-    def _to_py3(self) -> "Metasyntactic":
+    def _to_py3(self) -> _std_python_typing.Self:
         return self
 
     # pyre-ignore[11]: Annotation `module.ttypes.Metasyntactic` is not defined as a type.
@@ -64,10 +64,10 @@ class MyEnum1(_fbthrift_python_types.Enum, int):
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return gen_metadata_enum_MyEnum1()
 
-    def _to_python(self) -> "MyEnum1":
+    def _to_python(self) -> _std_python_typing.Self:
         return self
 
-    def _to_py3(self) -> "MyEnum1":
+    def _to_py3(self) -> _std_python_typing.Self:
         return self
 
     # pyre-ignore[11]: Annotation `module.ttypes.MyEnum1` is not defined as a type.
@@ -93,10 +93,10 @@ class MyEnum2(_fbthrift_python_types.Enum, int):
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return gen_metadata_enum_MyEnum2()
 
-    def _to_python(self) -> "MyEnum2":
+    def _to_python(self) -> _std_python_typing.Self:
         return self
 
-    def _to_py3(self) -> "MyEnum2":
+    def _to_py3(self) -> _std_python_typing.Self:
         return self
 
     # pyre-ignore[11]: Annotation `module.ttypes.MyEnum2` is not defined as a type.
@@ -125,10 +125,10 @@ class MyEnum3(_fbthrift_python_types.Enum, int):
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return gen_metadata_enum_MyEnum3()
 
-    def _to_python(self) -> "MyEnum3":
+    def _to_python(self) -> _std_python_typing.Self:
         return self
 
-    def _to_py3(self) -> "MyEnum3":
+    def _to_py3(self) -> _std_python_typing.Self:
         return self
 
     # pyre-ignore[11]: Annotation `module.ttypes.MyEnum3` is not defined as a type.
@@ -155,10 +155,10 @@ class MyEnum4(_fbthrift_python_types.Enum, int):
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return gen_metadata_enum_MyEnum4()
 
-    def _to_python(self) -> "MyEnum4":
+    def _to_python(self) -> _std_python_typing.Self:
         return self
 
-    def _to_py3(self) -> "MyEnum4":
+    def _to_py3(self) -> _std_python_typing.Self:
         return self
 
     # pyre-ignore[11]: Annotation `module.ttypes.MyEnum4` is not defined as a type.
@@ -184,10 +184,10 @@ class MyBitmaskEnum1(_fbthrift_python_types.Enum, int):
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return gen_metadata_enum_MyBitmaskEnum1()
 
-    def _to_python(self) -> "MyBitmaskEnum1":
+    def _to_python(self) -> _std_python_typing.Self:
         return self
 
-    def _to_py3(self) -> "MyBitmaskEnum1":
+    def _to_py3(self) -> _std_python_typing.Self:
         return self
 
     # pyre-ignore[11]: Annotation `module.ttypes.MyBitmaskEnum1` is not defined as a type.
@@ -213,10 +213,10 @@ class MyBitmaskEnum2(_fbthrift_python_types.Enum, int):
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return gen_metadata_enum_MyBitmaskEnum2()
 
-    def _to_python(self) -> "MyBitmaskEnum2":
+    def _to_python(self) -> _std_python_typing.Self:
         return self
 
-    def _to_py3(self) -> "MyBitmaskEnum2":
+    def _to_py3(self) -> _std_python_typing.Self:
         return self
 
     # pyre-ignore[11]: Annotation `module.ttypes.MyBitmaskEnum2` is not defined as a type.

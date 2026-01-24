@@ -69,10 +69,10 @@ class {{enum.py_name}}(_fbthrift_python_types.{{#if enum.flags?}}Flag{{#else}}En
         return gen_metadata_enum_{{enum.py_name}}()
 
 {{/if (not (has_compiler_option? "no_metadata"))}}
-    def _to_python(self) -> "{{enum.py_name}}":
+    def _to_python(self) -> _std_python_typing.Self:
         return self
 
-    def _to_py3(self) -> "{{enum.py_name}}":
+    def _to_py3(self) -> _std_python_typing.Self:
     {{! NB: thrift-py3 now uses thrift-python enums}}
         return self
 

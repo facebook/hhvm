@@ -23,10 +23,10 @@ class MyEnum(_fbthrift_python_types.Enum, int):
     def __get_thrift_uri__() -> _std_python_typing.Optional[builtins.str]:
         return "test.dev/fixtures/basic/MyEnum"
 
-    def _to_python(self) -> "MyEnum":
+    def _to_python(self) -> _std_python_typing.Self:
         return self
 
-    def _to_py3(self) -> "MyEnum":
+    def _to_py3(self) -> _std_python_typing.Self:
         return self
 
     # pyre-ignore[11]: Annotation `module.ttypes.MyEnum` is not defined as a type.
@@ -47,10 +47,10 @@ class HackEnum(_fbthrift_python_types.Enum, int):
     def __get_thrift_uri__() -> _std_python_typing.Optional[builtins.str]:
         return "test.dev/fixtures/basic/HackEnum"
 
-    def _to_python(self) -> "HackEnum":
+    def _to_python(self) -> _std_python_typing.Self:
         return self
 
-    def _to_py3(self) -> "HackEnum":
+    def _to_py3(self) -> _std_python_typing.Self:
         return self
 
     # pyre-ignore[11]: Annotation `module.ttypes.HackEnum` is not defined as a type.

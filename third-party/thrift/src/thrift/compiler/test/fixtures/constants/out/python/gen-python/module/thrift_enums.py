@@ -27,10 +27,10 @@ class EmptyEnum(_fbthrift_python_types.Enum, int):
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return gen_metadata_enum_EmptyEnum()
 
-    def _to_python(self) -> "EmptyEnum":
+    def _to_python(self) -> _std_python_typing.Self:
         return self
 
-    def _to_py3(self) -> "EmptyEnum":
+    def _to_py3(self) -> _std_python_typing.Self:
         return self
 
     # pyre-ignore[11]: Annotation `module.ttypes.EmptyEnum` is not defined as a type.
@@ -57,10 +57,10 @@ class City(_fbthrift_python_types.Enum, int):
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return gen_metadata_enum_City()
 
-    def _to_python(self) -> "City":
+    def _to_python(self) -> _std_python_typing.Self:
         return self
 
-    def _to_py3(self) -> "City":
+    def _to_py3(self) -> _std_python_typing.Self:
         return self
 
     # pyre-ignore[11]: Annotation `module.ttypes.City` is not defined as a type.
@@ -88,10 +88,10 @@ class Company(_fbthrift_python_types.Enum, int):
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return gen_metadata_enum_Company()
 
-    def _to_python(self) -> "Company":
+    def _to_python(self) -> _std_python_typing.Self:
         return self
 
-    def _to_py3(self) -> "Company":
+    def _to_py3(self) -> _std_python_typing.Self:
         return self
 
     # pyre-ignore[11]: Annotation `module.ttypes.Company` is not defined as a type.

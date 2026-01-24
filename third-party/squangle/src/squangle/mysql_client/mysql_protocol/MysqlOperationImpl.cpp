@@ -6,6 +6,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+#include <boost/polymorphic_cast.hpp>
 #include <fmt/chrono.h>
 
 #include "squangle/mysql_client/Connection.h"
@@ -40,19 +41,13 @@ void MysqlOperationImpl::invokeActionable() {
 /*static*/
 MysqlConnection* MysqlOperationImpl::getMysqlConnection(
     InternalConnection* conn) {
-  // We don't want to pay the cost of doing a dynamic_cast in prod when this
-  // should _always_ be a MysqlConnection.  Thus just validate on debug builds.
-  DCHECK(dynamic_cast<MysqlConnection*>(conn));
-  return static_cast<MysqlConnection*>(conn);
+  return boost::polymorphic_cast<MysqlConnection*>(conn);
 }
 
 /*static*/
 const MysqlConnection* MysqlOperationImpl::getMysqlConnection(
     const InternalConnection* conn) {
-  // We don't want to pay the cost of doing a dynamic_cast in prod when this
-  // should _always_ be a MysqlConnection.  Thus just validate on debug builds.
-  DCHECK(dynamic_cast<const MysqlConnection*>(conn));
-  return static_cast<const MysqlConnection*>(conn);
+  return boost::polymorphic_cast<const MysqlConnection*>(conn);
 }
 
 const MysqlConnection* MysqlOperationImpl::getMysqlConnection() const {

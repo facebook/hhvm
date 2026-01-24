@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include <boost/polymorphic_cast.hpp>
 #include <folly/synchronization/Baton.h>
 
 #include "squangle/mysql_client/ConnectOperation.h"
@@ -90,11 +91,11 @@ class ConnectPoolOperation : public ConnectOperation {
 
  protected:
   ConnectPoolOperationImpl<Client>* impl() override {
-    return dynamic_cast<ConnectPoolOperationImpl<Client>*>(
+    return boost::polymorphic_cast<ConnectPoolOperationImpl<Client>*>(
         ConnectOperation::impl());
   }
   const ConnectPoolOperationImpl<Client>* impl() const override {
-    return dynamic_cast<const ConnectPoolOperationImpl<Client>*>(
+    return boost::polymorphic_cast<const ConnectPoolOperationImpl<Client>*>(
         ConnectOperation::impl());
   }
 

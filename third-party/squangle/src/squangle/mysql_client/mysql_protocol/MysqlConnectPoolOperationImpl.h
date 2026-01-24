@@ -8,6 +8,8 @@
 
 #pragma once
 
+#include <boost/polymorphic_cast.hpp>
+
 #include "squangle/mysql_client/ConnectPoolOperation.h"
 #include "squangle/mysql_client/mysql_protocol/MysqlConnectOperationImpl.h"
 
@@ -31,7 +33,7 @@ class MysqlConnectPoolOperationImpl : public MysqlConnectOperationImpl,
         pool_(pool) {}
 
   ConnectPoolOperation<Client>& getConnectPoolOp() const {
-    return *dynamic_cast<ConnectPoolOperation<Client>*>(op_);
+    return *boost::polymorphic_downcast<ConnectPoolOperation<Client>*>(op_);
   }
 
  protected:

@@ -6,6 +6,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+#include <boost/polymorphic_cast.hpp>
 #include <memory>
 
 #include "squangle/mysql_client/ConnectOperation.h"
@@ -129,8 +130,8 @@ void ConnectOperationImpl::setSSLOptionsProvider(
 }
 
 ConnectOperation& ConnectOperationImpl::op() const {
-  DCHECK(op_ && dynamic_cast<ConnectOperation*>(op_) != nullptr);
-  return *(ConnectOperation*)op_;
+  DCHECK(op_);
+  return *(boost::polymorphic_downcast<ConnectOperation*>(op_));
 }
 
 [[nodiscard]] const InternalConnection&

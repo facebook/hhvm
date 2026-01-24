@@ -8,6 +8,7 @@
 
 #include "squangle/base/ConnectionKey.h"
 
+#include <boost/polymorphic_cast.hpp>
 #include <folly/hash/Hash.h>
 
 namespace facebook {
@@ -44,26 +45,18 @@ bool MysqlConnectionKey::operator==(
 }
 
 bool MysqlConnectionKey::operator==(const ConnectionKey& rhs) const noexcept {
-  try {
-    const auto& key = dynamic_cast<const MysqlConnectionKey&>(rhs);
-    return *this == key;
-  } catch (const std::bad_cast& /*e*/) {
-    // `rhs` was not a MysqlConnectionKey object
-    return false;
-  }
+  // Faster than dynamic_cast.  Only MysqlConnectionKey objects are expected
+  // here.
+  return *this == boost::polymorphic_downcast<const MysqlConnectionKey&>(rhs);
 }
 
 bool MysqlConnectionKey::partialEqual(const ConnectionKey& rhs) const noexcept {
-  try {
-    const auto& key = dynamic_cast<const MysqlConnectionKey&>(rhs);
-    return partialHash_ == key.partialHash_ && host_ == key.host_ &&
-        port_ == key.port_ && user_ == key.user_ &&
-        password_ == key.password_ && specialTag_ == key.specialTag_ &&
-        unixSocketPath_ == key.unixSocketPath_;
-  } catch (const std::bad_cast& /*e*/) {
-    // `rhs` was not a MysqlConnectionKey object
-    return false;
-  }
+  // Faster than dynamic_cast.  Only MysqlConnectionKey objects are expected
+  // here.
+  const auto& key = boost::polymorphic_downcast<const MysqlConnectionKey&>(rhs);
+  return partialHash_ == key.partialHash_ && host_ == key.host_ &&
+      port_ == key.port_ && user_ == key.user_ && password_ == key.password_ &&
+      specialTag_ == key.specialTag_ && unixSocketPath_ == key.unixSocketPath_;
 }
 
 std::string MysqlConnectionKey::getDisplayString(bool level2) const {

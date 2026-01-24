@@ -6,13 +6,15 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+#include <boost/polymorphic_cast.hpp>
+
 #include "squangle/mysql_client/SpecialOperation.h"
 
 namespace facebook::common::mysql_client {
 
 SpecialOperation& SpecialOperationImpl::getOp() const {
-  DCHECK(op_ && dynamic_cast<SpecialOperation*>(op_) != nullptr);
-  return *(SpecialOperation*)op_;
+  DCHECK(op_);
+  return *(boost::polymorphic_downcast<SpecialOperation*>(op_));
 }
 
 InternalConnection::Status SpecialOperationImpl::runSpecialOperation() {

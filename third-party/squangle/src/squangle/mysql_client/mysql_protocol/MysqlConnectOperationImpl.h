@@ -8,6 +8,8 @@
 
 #pragma once
 
+#include <boost/polymorphic_cast.hpp>
+
 #include "squangle/mysql_client/ConnectOperation.h"
 #include "squangle/mysql_client/mysql_protocol/MysqlOperationImpl.h"
 
@@ -72,8 +74,7 @@ class MysqlConnectOperationImpl : public MysqlOperationImpl,
   bool isDoneWithTcpHandShake();
 
   const MysqlConnectionKey& getMysqlKeyRef() const {
-    DCHECK(dynamic_cast<const MysqlConnectionKey*>(conn_key_.get()));
-    return *((const MysqlConnectionKey*)conn_key_.get());
+    return boost::polymorphic_downcast<const MysqlConnectionKey&>(*conn_key_);
   }
 
   static int mysqlCertValidator(

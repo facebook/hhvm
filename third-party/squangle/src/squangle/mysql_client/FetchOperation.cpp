@@ -9,6 +9,7 @@
 #include "squangle/mysql_client/FetchOperation.h"
 #include "squangle/mysql_client/Connection.h"
 
+#include <boost/polymorphic_cast.hpp>
 #include <re2/re2.h>
 
 namespace facebook::common::mysql_client {
@@ -185,8 +186,8 @@ AttributeMap FetchOperationImpl::readResponseAttributes() {
 }
 
 FetchOperation& FetchOperationImpl::getOp() const {
-  DCHECK(op_ && dynamic_cast<FetchOperation*>(op_) != nullptr);
-  return *(FetchOperation*)op_;
+  DCHECK(op_);
+  return *(boost::polymorphic_downcast<FetchOperation*>(op_));
 }
 
 folly::StringPiece FetchOperationImpl::toString(FetchAction action) {

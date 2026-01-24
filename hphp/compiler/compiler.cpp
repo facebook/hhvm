@@ -682,6 +682,17 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
     Config::ParseHdfString(confString, config);
   }
   applyBuildOverrides(ini, config, po);
+
+  // Re-apply the ini and hdf cli strings, in case the build overrides
+  // overrode any command line option we set. This ensures CLI options
+  // always win, matching the behavior in RuntimeOption::Load.
+  for (auto const& iniString : po.iniStrings) {
+    Config::ParseIniString(iniString, ini);
+  }
+  for (auto const& confString : po.confStrings) {
+    Config::ParseHdfString(confString, config);
+  }
+
   Hdf runtime = config["Runtime"];
   // The configuration command line strings were already processed above
   // Don't process them again.

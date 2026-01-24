@@ -34,7 +34,14 @@ const FieldNameToIndex& fieldNameToIndex() {
     FieldNameToIndex ret;
     std::size_t index = 0;
     fatal::foreach<Members>([&]<class Member>(Member) {
-      ret[fatal::z_data<typename Member::type::name>()] = index++;
+      auto get_name = [] {
+        if constexpr (requires { Member::type::getName(); }) {
+          return Member::type::getName().data();
+        } else {
+          return fatal::z_data<typename Member::type::name>();
+        }
+      };
+      ret[get_name()] = index++;
     });
     return ret;
   });

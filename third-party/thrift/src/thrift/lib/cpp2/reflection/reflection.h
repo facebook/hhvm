@@ -443,9 +443,6 @@ reflected_struct {
    */
   static auto getName() { return op::get_class_name_v<type>; }
 
-  [[deprecated("Use getName() instead")]]
-  static inline const auto name_v = op::get_class_name_v<type>;
-
   /**
    * An implementation defined type template that provides the appropriate
    * `reflected_struct_data_member` for each data member as a member type alias
@@ -565,10 +562,6 @@ struct reflected_struct_data_member {
   static auto getName() {
     return op::get_name_v<typename Traits::owner, typename Traits::tag>;
   }
-
-  [[deprecated("Use getName() instead")]]
-  static inline const auto name_v =
-      op::get_name_v<typename Traits::owner, typename Traits::tag>;
 
   /**
    * The type of the data member.

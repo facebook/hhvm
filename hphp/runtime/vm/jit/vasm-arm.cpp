@@ -216,6 +216,7 @@ struct Vgen {
     , next(env.next)
     , jmps(env.jmps)
     , jccs(env.jccs)
+    , cmpbrs(env.cmpbrs)
     , catches(env.catches)
     , vveneers(env.vveneers)
   {}
@@ -228,6 +229,8 @@ struct Vgen {
   static void handleLiterals(Venv& env);
   static void retargetBinds(Venv& env);
   static void patch(Venv& env);
+  void doCompareBranch(vixl::Register r, const Vlabel targets[2],
+                       StringTag tag, bool BranchOnZero);
 
   static void pad(CodeBlock& cb) {
     vixl::MacroAssembler a { cb };
@@ -324,6 +327,10 @@ struct Vgen {
     a->Sub(vixl::xzr, rVixlScratch0, X(i.s1), UF(i.fl));
     a->Mov(X(i.d), rVixlScratch0);
   }
+  void emit(const cbzl& i);
+  void emit(const cbnzl& i);
+  void emit(const cbzq& i);
+  void emit(const cbnzq& i);
   void emit(const cmovb& i) { a->Csel(W(i.d), W(i.t), W(i.f), C(i.cc)); }
   void emit(const cmovw& i) { a->Csel(W(i.d), W(i.t), W(i.f), C(i.cc)); }
   void emit(const cmovl& i) { a->Csel(W(i.d), W(i.t), W(i.f), C(i.cc)); }
@@ -479,6 +486,7 @@ private:
   const Vlabel next;
   jit::vector<Venv::LabelPatch>& jmps;
   jit::vector<Venv::LabelPatch>& jccs;
+  jit::vector<Venv::LabelPatch>& cmpbrs;
   jit::vector<Venv::LabelPatch>& catches;
   jit::vector<Venv::LabelPatch>& vveneers;
 };
@@ -550,10 +558,24 @@ void Vgen::emitVeneers(Venv& env) {
       always_assert(is_int28(offset));
       at.bl(offset >> kInstructionSizeLog2);
 
-    } else if (sourceInst->IsCondBranchImm()) {
-      auto const cond = static_cast<Condition>(sourceInst->ConditionBranch());
+    } else if (sourceInst->IsCondBranchImm() || sourceInst->IsCompareBranch()) {
+      auto getCbDetails = [&]() {
+        Register reg = Register(sourceInst->Rt(),
+                                sourceInst->Bit(31) ? kXRegSize : kWRegSize);
+        return std::pair<Register,bool>(reg, sourceInst->Bit(24));
+      };
+
       if (is_int21(offset)) {
-        at.b(offset >> kInstructionSizeLog2, cond);
+        if (sourceInst->IsCompareBranch()) {
+          auto cb_details = getCbDetails();
+          if (cb_details.second)
+            at.cbnz(cb_details.first, offset >> kInstructionSizeLog2);
+          else
+            at.cbz(cb_details.first, offset >> kInstructionSizeLog2);
+        } else {
+          auto const cond = static_cast<Condition>(sourceInst->ConditionBranch());
+          at.b(offset >> kInstructionSizeLog2, cond);
+        }
       } else {
         // The offset doesn't fit in a conditional jump. Hopefully it still fits
         // in an unconditional jump, in which case we add an appendix to the
@@ -577,8 +599,18 @@ void Vgen::emitVeneers(Venv& env) {
         at.b(offset >> kInstructionSizeLog2);
 
         // Emit appendix.
-        auto const appendix = cb->frontier();
-        av.b(-2 /* veneer starts 2 instructions before the appendix */, cond);
+        auto const appendix = cb->frontier(); // This is a TCA
+        int imm19 = -2 /* veneer starts 2 instructions before the appendix */;
+        if (sourceInst->IsCondBranchImm()) {
+          auto const cond = static_cast<Condition>(sourceInst->ConditionBranch());
+          av.b(imm19, cond);
+        } else {
+          auto cb_details = getCbDetails();
+          if (cb_details.second)
+            av.cbnz(cb_details.first, imm19);
+          else
+            av.cbz(cb_details.first, imm19);
+        }
         const int64_t nextOffset = (veneer.source + kInstructionSize) - // NEXT
           (vaddr + 3 * kInstructionSize); // addr of "B NEXT"
         always_assert(is_int28(nextOffset));
@@ -718,6 +750,22 @@ void Vgen::patch(Venv& env) {
     } else {
       assertx(Instruction::Cast(addr)->IsCondBranchImm());
       // If the jcc starts with a conditional jump, patch the next instruction
+      // (which should start with a LDR).
+      addr += kInstructionSize;
+    }
+    patch(addr, target);
+  }
+  for (auto const& p : env.cmpbrs) {
+    auto addr = env.text.toDestAddress(p.instr);
+    auto const target = env.addrs[p.target];
+    assertx(target);
+    if (env.meta.smashableLocations.contains(p.instr)) {
+      assertx(possiblySmashableCb(addr));
+      // Update `addr' to point to the veneer.
+      addr = TCA(vixl::Instruction::Cast(addr)->ImmPCOffsetTarget());
+    } else {
+      assertx(Instruction::Cast(addr)->IsCompareBranch());
+      // If the cbz/cbnz starts with a conditional jump, patch the next instruction
       // (which should start with a LDR).
       addr += kInstructionSize;
     }
@@ -1043,6 +1091,70 @@ void Vgen::emit(const decqmlocknosf& i) {
   a->SetScratchRegisters(rVixlScratch0, rVixlScratch1);
 }
 
+void Vgen::doCompareBranch(vixl::Register r, const Vlabel targets[2], StringTag tag,
+                           bool BranchOnZero) {
+  if (targets[1] != targets[0]) {
+    if (next == targets[1]) {
+      const Vlabel new_targets[2] = {targets[1], targets[0]};
+      return doCompareBranch(r, new_targets, tag, !BranchOnZero);
+    }
+    auto taken = targets[1];
+
+    // If the taken block is in a different code area than the jcc, we emit a
+    // veneer and jump through it to the taken block.  This avoids having to
+    // flip the branch and penalizing the fall-through path.  Otherwise, we flip
+    // the branch and emit a "far JCC" sequence that should be optimized later
+    // during relocation's optimizeFarCondBranch, which will flip the branch back.
+    if (env.unit.blocks[env.current].area_idx != env.unit.blocks[taken].area_idx) {
+      auto source = a->frontier();
+      vveneers.push_back({source, taken});
+      vixl::Label veneer_addr;
+      a->bind(&veneer_addr);
+      if (BranchOnZero) {
+        a->Cbz(r, &veneer_addr);
+      } else {
+        a->Cbnz(r, &veneer_addr);
+      }
+      // NB: this will be patched later.
+    } else {
+      cmpbrs.push_back({a->frontier(), taken});
+      vixl::Label skip, data;
+
+      // Emit a "far JCC" sequence for easy patching later.  Static relocation
+      // might be able to simplify this later (see optimizeFarCondBranch()).
+      recordAddressImmediate();
+      if (BranchOnZero)
+        a->Cbnz(r, &skip);
+      else
+        a->Cbz(r, &skip);
+      recordAddressImmediate();
+      poolLiteral(*env.cb, env.meta, (uint64_t)makeTarget32(a->frontier()),
+                  32, false);
+      a->bind(&data);  // This will be remmaped during the handleLiterals phase.
+      a->Ldr(rAsm_w, &data);
+      a->Br(rAsm);
+      a->bind(&skip);
+    }
+  }
+  emit(jmp{targets[0]});
+}
+
+void Vgen::emit(const cbzl& i) {
+  doCompareBranch(W(i.s), i.targets, i.tag, true);
+}
+
+void Vgen::emit(const cbnzl& i) {
+  doCompareBranch(W(i.s), i.targets, i.tag, false);
+}
+
+void Vgen::emit(const cbzq& i) {
+  doCompareBranch(X(i.s), i.targets, i.tag, true);
+}
+
+void Vgen::emit(const cbnzq& i) {
+  doCompareBranch(X(i.s), i.targets, i.tag, false);
+}
+
 void Vgen::emit(const jcc& i) {
   if (i.targets[1] != i.targets[0]) {
     if (next == i.targets[1]) {
@@ -1054,7 +1166,7 @@ void Vgen::emit(const jcc& i) {
     // veneer and jump through it to the taken block.  This avoids having to
     // flip the branch and penalizing the fall-through path.  Otherwise, we flip
     // the branch and emit a "far JCC" sequence that should be optimized later
-    // during relocation's optimizeFarJcc, which will flip the branch back.
+    // during relocation's optimizeFarCondBranch, which will flip the branch back.
     if (env.unit.blocks[env.current].area_idx != env.unit.blocks[taken].area_idx) {
       auto source = a->frontier();
       vveneers.push_back({source, taken});
@@ -1066,7 +1178,7 @@ void Vgen::emit(const jcc& i) {
       vixl::Label skip, data;
 
       // Emit a "far JCC" sequence for easy patching later.  Static relocation
-      // might be able to simplify this later (see optimizeFarJcc()).
+      // might be able to simplify this later (see optimizeFarCondBranch()).
       recordAddressImmediate();
       a->B(&skip, vixl::InvertCondition(C(i.cc)));
       recordAddressImmediate();

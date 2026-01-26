@@ -367,6 +367,10 @@ struct Vunit;
   O(loadpairl, Inone, U(s), D(d0) D(d1))\
   O(storepair, Inone, U(s0) U(s1) UW(d), Dn)\
   O(storepairl, Inone, U(s0) U(s1) UW(d), Dn)\
+  O(cbzl, Inone, U(s), Dn)\
+  O(cbnzl, Inone, U(s), Dn)\
+  O(cbzq, Inone, U(s), Dn)\
+  O(cbnzq, Inone, U(s), Dn)\
   /* */
 
 /*
@@ -1286,6 +1290,10 @@ struct loadpair { Vptr128 s; Vreg64 d0, d1; };
 struct loadpairl { Vptr64 s; Vreg32 d0, d1; };
 struct storepair { Vreg64 s0, s1; Vptr128 d; };
 struct storepairl { Vreg32 s0, s1; Vptr64 d; };
+struct cbzl { Vreg32 s; Vlabel targets[2]; StringTag tag; };
+struct cbnzl { Vreg32 s; Vlabel targets[2]; StringTag tag; };
+struct cbzq { Vreg64 s; Vlabel targets[2]; StringTag tag; };
+struct cbnzq { Vreg64 s; Vlabel targets[2]; StringTag tag; };
 
 ///////////////////////////////////////////////////////////////////////////////
 

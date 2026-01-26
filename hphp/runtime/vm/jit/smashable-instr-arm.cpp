@@ -179,6 +179,14 @@ bool possiblySmashableJcc(TCA inst) {
   return b->IsCondBranchImm() && isVeneer(b->ImmPCOffsetTarget());
 }
 
+bool possiblySmashableCb(TCA inst) {
+  using namespace vixl;
+
+  auto const b = Instruction::Cast(inst);
+
+  return b->IsCompareBranch() && isVeneer(b->ImmPCOffsetTarget());
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 void smashMovq(TCA inst, uint64_t target) {

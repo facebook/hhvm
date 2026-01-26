@@ -19,6 +19,17 @@ constexpr std::string_view kNoAddr{"No valid address or name found"};
 };
 
 namespace proxygen {
+bool DNSResolver::Answer::operator==(const Answer& rhs) const noexcept {
+  return type == rhs.type && address == rhs.address && name == rhs.name &&
+         canonicalName == rhs.canonicalName && port == rhs.port &&
+         priority == rhs.priority;
+}
+
+size_t DNSResolver::AnswerHash::operator()(const Answer& a) const noexcept {
+  // Hash by discriminant + relevant payload used in operator<
+  return folly::hash::hash_combine(
+      a.type, a.address.hash(), a.priority, a.name, a.canonicalName, a.port);
+}
 
 // public static
 folly::exception_wrapper DNSResolver::makeNoNameException() noexcept {

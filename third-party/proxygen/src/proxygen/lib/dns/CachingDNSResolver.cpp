@@ -29,7 +29,7 @@ void CachingDNSResolver::resolveHostname(DNSResolver::ResolutionCallback* cb,
 
   if ((c_iter = cache_.find(name)) != cache_.end()) {
     CacheEntry& entry = c_iter->second;
-    std::set<Answer>& res = entry.answers_;
+    auto& res = entry.answers_;
     bool needQuery = false;       // true if no or only expired answer exists
     bool hasCachedAnswer = false; // with respect to TTR
     bool isPartialMiss = false;
@@ -103,7 +103,7 @@ void CachingDNSResolver::insertCache(
   auto iter = cache.find(name);
   if (iter != cache.end()) {
     CacheEntry& entry = iter->second;
-    std::set<Answer>& res = entry.answers_;
+    auto& res = entry.answers_;
     for (auto& a : res) {
       if (entry.baseTime_ + a.ttl >= newEntry.baseTime_) {
         Answer ans(a);
@@ -150,7 +150,7 @@ void CachingDNSResolver::searchCache(std::string name,
   auto iter = cache.find(name);
   if (iter != cache.end()) {
     CacheEntry& entry = iter->second;
-    std::set<Answer>& res = entry.answers_;
+    auto& res = entry.answers_;
     for (auto& answer : res) {
       if (answer.type != Answer::AnswerType::AT_ADDRESS) {
         continue;

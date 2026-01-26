@@ -191,35 +191,15 @@ class DNSResolver : public folly::DelayedDestruction {
     //default ctor
     Answer() = default;
 
-    // for unit tests
-    bool operator==(const Answer& rhs) const {
-      return !(operator<(rhs)) && !(rhs < (*this));
-    }
+    bool operator==(const Answer& rhs) const noexcept;
 
-    bool operator<(const Answer& rhs) const {
-      if (type != rhs.type) {
-        return type < rhs.type;
-      }
-
-      if (type == AT_ADDRESS) {
-        if (address != rhs.address) {
-          return address < rhs.address;
-        }
-      } else if (type == AT_MX) {
-        if (priority != rhs.priority) {
-          return priority < rhs.priority;
-        } else if (name != rhs.name) {
-          return name < rhs.name;
-        }
-      } else {  // AT_NAME or AT_CNAME
-        if (name != rhs.name) {
-          return name < rhs.name;
-        }
-      }
-
-      return false;
-    }
   };
+
+  struct AnswerHash {
+  size_t operator()(const Answer& a) const noexcept;
+};
+
+
 
   /**
    * Callback interface for resolution requests.

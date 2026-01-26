@@ -13,6 +13,7 @@
 #include <vector>
 
 #include <folly/container/EvictingCacheMap.h>
+#include <folly/container/F14Set.h>
 #include <proxygen/lib/utils/Time.h>
 
 #include "proxygen/lib/dns/DNSResolver.h"
@@ -93,7 +94,7 @@ class CachingDNSResolver : public DNSResolver {
     // The answers are stored in a set to aid in removing duplicates when we
     // merge in answers from the old set. We explicitly shuffle the results
     // when we return them from the cache.
-    std::set<Answer> answers_;
+    folly::F14FastSet<Answer, AnswerHash> answers_;
     TimePoint baseTime_;
   };
 

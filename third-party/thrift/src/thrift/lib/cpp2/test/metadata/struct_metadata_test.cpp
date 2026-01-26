@@ -16,8 +16,9 @@
 
 #include <gtest/gtest.h>
 
-#include <thrift/lib/cpp2/test/metadata/gen-cpp2/nested_structs_test_metadata.h> // @manual=:nested_structs_test_thrift-cpp2-metadata
-#include <thrift/lib/cpp2/test/metadata/gen-cpp2/simple_structs_test_metadata.h> // @manual=:simple_structs_test_thrift-cpp2-metadata
+#include <thrift/lib/cpp2/gen/module_metadata_h.h>
+#include <thrift/lib/cpp2/test/metadata/gen-cpp2/nested_structs_test_types.h> // @manual=:nested_structs_test_thrift-cpp2-metadata
+#include <thrift/lib/cpp2/test/metadata/gen-cpp2/simple_structs_test_types.h> // @manual=:simple_structs_test_thrift-cpp2-metadata
 
 namespace apache::thrift::detail::md {
 

@@ -41,10 +41,6 @@ void TestARequest::deserialize(carbon::CarbonProtocolReader& reader) {
         reader.readField(dummy2_ref(), fieldType);
         break;
       }
-      case 3: {
-        reader.readField(ticket_ref(), fieldType);
-        break;
-      }
       default: {
         reader.skip(fieldType);
         break;

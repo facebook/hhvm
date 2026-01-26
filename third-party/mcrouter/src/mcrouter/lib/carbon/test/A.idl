@@ -8,9 +8,6 @@ thrift_namespace carbon.test.A.thrift;
 
 import "mcrouter/lib/network/Common.idl"
 import "mcrouter/lib/carbon/test/B.idl"
-thrift_import "graphene/ticket/if/ticket_rep.thrift"
-include "graphene/ticket/if/gen-cpp2/ticket_rep_types.h"
-cpp2_include "mcrouter/lib/carbon/test/gen/BMessages.h"
 
 request TestARequest {
   id: 3;
@@ -19,7 +16,6 @@ request TestARequest {
 
   1: carbon::Keys<folly::IOBuf> key;
   2: bool dummy2;
-  3: optional B::TRep ticket;
 };
 
 reply TestAReply {

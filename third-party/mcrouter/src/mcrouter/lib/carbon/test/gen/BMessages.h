@@ -29,20 +29,14 @@
 #include <mcrouter/lib/carbon/Result.h>
 #include <mcrouter/lib/carbon/TypeList.h>
 #include <mcrouter/lib/carbon/Variant.h>
-#include <mcrouter/lib/carbon/facebook/ThriftUtil.h>
-#include <mcrouter/lib/carbon/facebook/ThriftWrapper.h>
 
 #include "mcrouter/lib/carbon/test/gen/gen-cpp2/B_types.h"
 
 #include "mcrouter/lib/network/gen/CommonMessages.h"
 
-#include "graphene/ticket/if/gen-cpp2/ticket_rep_types.h"
-
 namespace carbon {
 namespace test {
 namespace B {
-
-using TRep = carbon::util::ThriftWrapperStruct<graphene::ticket::cpp2::TicketRep>;
 
 class TestBReply;
 

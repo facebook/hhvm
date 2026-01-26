@@ -35,8 +35,6 @@
 #include "mcrouter/lib/network/gen/CommonMessages.h"
 #include "mcrouter/lib/carbon/test/gen/BMessages.h"
 
-#include "graphene/ticket/if/gen-cpp2/ticket_rep_types.h"
-
 namespace carbon {
 namespace test {
 namespace A {

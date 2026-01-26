@@ -23,7 +23,6 @@ void TestBRequest::serialize(Writer&& writer) const {
   writer.writeStructBegin();
   writer.writeField(1 /* field id */, key_ref());
   writer.writeField(2 /* field id */, dummy2_ref());
-  writer.writeField(3 /* field id */, ticket_ref());
   writer.writeFieldStop();
   writer.writeStructEnd();
 }
@@ -36,9 +35,6 @@ void TestBRequest::visitFields(V&& v) {
   if (!v.visitField(2, "dummy2", *this->dummy2_ref())) {
     return;
   }
-  if (!v.visitField(3, "ticket", this->ticket_ref())) {
-    return;
-  }
 }
 
 template <class V>
@@ -47,9 +43,6 @@ void TestBRequest::visitFields(V&& v) const {
     return;
   }
   if (!v.visitField(2, "dummy2", *this->dummy2_ref())) {
-    return;
-  }
-  if (!v.visitField(3, "ticket", this->ticket_ref())) {
     return;
   }
 }
@@ -89,31 +82,6 @@ void TestBReply::visitFields(V&& v) const {
 
 namespace apache {
 namespace thrift {
-template <>
-class Cpp2Ops<carbon::test::B::TRep> {
- public:
-  typedef carbon::test::B::TRep Type;
-  static constexpr protocol::TType thriftType() {
-    return protocol::T_STRUCT;
-  }
-  template <class Protocol>
-  static uint32_t write(Protocol* prot, const Type* value) {
-    return value->write(prot);
-  }
-  template <class Protocol>
-  static void read(Protocol* prot, Type* value) {
-    value->read(prot);
-  }
-  template <class Protocol>
-  static uint32_t serializedSize(Protocol* prot, const Type* value) {
-    return value->serializedSize(prot);
-  }
-  template <class Protocol>
-  static uint32_t serializedSizeZC(Protocol* prot, const Type* value) {
-    return value->serializedSizeZC(prot);
-  }
-};
-
 template <>
 class Cpp2Ops<carbon::test::B::TestBRequest> {
  public:

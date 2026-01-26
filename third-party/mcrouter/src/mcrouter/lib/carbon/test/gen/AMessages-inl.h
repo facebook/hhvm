@@ -23,7 +23,6 @@ void TestARequest::serialize(Writer&& writer) const {
   writer.writeStructBegin();
   writer.writeField(1 /* field id */, key_ref());
   writer.writeField(2 /* field id */, dummy2_ref());
-  writer.writeField(3 /* field id */, ticket_ref());
   writer.writeFieldStop();
   writer.writeStructEnd();
 }
@@ -36,9 +35,6 @@ void TestARequest::visitFields(V&& v) {
   if (!v.visitField(2, "dummy2", *this->dummy2_ref())) {
     return;
   }
-  if (!v.visitField(3, "ticket", this->ticket_ref())) {
-    return;
-  }
 }
 
 template <class V>
@@ -47,9 +43,6 @@ void TestARequest::visitFields(V&& v) const {
     return;
   }
   if (!v.visitField(2, "dummy2", *this->dummy2_ref())) {
-    return;
-  }
-  if (!v.visitField(3, "ticket", this->ticket_ref())) {
     return;
   }
 }

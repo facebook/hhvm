@@ -17,11 +17,8 @@ include "mcrouter/lib/carbon/carbon_result.thrift"
 include "thrift/annotation/cpp.thrift"
 include "thrift/annotation/thrift.thrift"
 include "mcrouter/lib/network/gen/Common.thrift"
-include "graphene/ticket/if/ticket_rep.thrift"
 
 cpp_include "<mcrouter/lib/carbon/CarbonProtocolReader.h>"
-
-cpp_include "<mcrouter/lib/carbon/facebook/ThriftWrapper.h>"
 
 namespace cpp2 carbon.test.B.thrift
 namespace py3 carbon.test.B.thrift
@@ -47,7 +44,6 @@ namespace py3 carbon.test.B.thrift
 struct TestBRequest {
   1: carbon.IOBufKey key
   2: bool dummy2
-  3: optional ticket_rep_TicketRep ticket
 }
 @thrift.DeprecatedUnvalidatedAnnotations{
   items = {
@@ -72,5 +68,3 @@ struct TestBReply {
   2: i32 valInt32
 }
 
-@cpp.Type{name = "carbon::util::ThriftWrapperStruct<graphene::ticket::cpp2::TicketRep>"}
-typedef ticket_rep.TicketRep ticket_rep_TicketRep

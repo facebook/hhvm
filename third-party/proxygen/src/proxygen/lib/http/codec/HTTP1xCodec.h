@@ -26,6 +26,9 @@ class HTTP1xCodec : public HTTPCodec {
   ~HTTP1xCodec() override;
 
   HTTP1xCodec(HTTP1xCodec&&) = default;
+  HTTP1xCodec& operator=(HTTP1xCodec&&) = default;
+  HTTP1xCodec(const HTTP1xCodec&) = delete;
+  HTTP1xCodec& operator=(const HTTP1xCodec&) = delete;
 
   // Returns codec for response generation, allowing to set flags that are
   // normally set during request processing.

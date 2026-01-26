@@ -253,6 +253,8 @@ class HTTP2Codec
     DeferredParseError() = default;
     DeferredParseError(DeferredParseError&& goner) = default;
     DeferredParseError& operator=(DeferredParseError&& goner) = default;
+    ~DeferredParseError() = default;
+    DeferredParseError& operator=(const DeferredParseError&) = delete;
     DeferredParseError(const DeferredParseError& other)
         : errorCode(other.errorCode),
           connectionError(other.connectionError),

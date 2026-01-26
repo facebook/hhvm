@@ -29,8 +29,8 @@ final class TBinarySerializerTest extends WWWTest {
   // Verifies if two objects of type CountersInformation
   // have the same content (counters value).
   private function checkEqualCounters(
-    \fb303\CountersInformation $obj1,
-    \fb303\CountersInformation $obj2,
+    fb303\CountersInformation $obj1,
+    fb303\CountersInformation $obj2,
     string $message,
   ): void {
     expect(C\count($obj2->data))->toBePHPEqual(
@@ -45,7 +45,7 @@ final class TBinarySerializerTest extends WWWTest {
   }
 
   // Serializes a thrift object using normal write call on protocol.
-  private function normalSerialize(\fb303\CountersInformation $object): string {
+  private function normalSerialize(fb303\CountersInformation $object): string {
     $transport = new TMemoryBuffer();
     $protocol = new TBinaryProtocolAccelerated($transport);
     $object->write($protocol);
@@ -67,8 +67,9 @@ final class TBinarySerializerTest extends WWWTest {
 
   // Tests serialization and deserialization methods
   // of TBinarySerializer.
+  <<JKBoolDataProvider('thrift/hack:binary_struct')>>
   public function testSerializeAndDeserialize(): void {
-    $obj1 = new \fb303\CountersInformation();
+    $obj1 = new fb303\CountersInformation();
 
     for ($i = 0; $i < 5; $i++) {
       $obj1->data['random_counter_'.$i] = $i;
@@ -91,13 +92,13 @@ final class TBinarySerializerTest extends WWWTest {
 
     $this->checkEqualCounters(
       $obj1,
-      $obj2 as \fb303\CountersInformation,
+      $obj2 as fb303\CountersInformation,
       'Looks like our normalSerialize'.' / Deserialize is broken',
     );
 
     $obj3 = TBinarySerializer::deserialize(
       $obj2_string,
-      new \fb303\CountersInformation(),
+      new fb303\CountersInformation(),
     );
     $this->checkEqualCounters(
       $obj1,
@@ -105,5 +106,29 @@ final class TBinarySerializerTest extends WWWTest {
       'TBinarySerializer::deserialize_DEPRECATED is broken',
     );
 
+  }
+
+  <<JKBoolDataProvider('thrift/hack:binary_struct')>>
+  public function testSerializeDeserializeComplexStruct(): void {
+    $struct = CompactTestStruct::withDefaultValues();
+    $struct->i1 = 42;
+    $struct->b2 = true;
+    $struct->doubles = vec[1.5, 2.5, 3.5];
+    $struct->ints = dict[1 => true, 2 => true, 3 => true];
+    $struct->m1 = dict['key1' => 10, 'key2' => 20];
+    $struct->s = 'test string';
+
+    $serialized = TBinarySerializer::serialize($struct);
+    $deserialized = TBinarySerializer::deserialize(
+      $serialized,
+      CompactTestStruct::withDefaultValues(),
+    );
+
+    expect($deserialized->i1)->toEqual($struct->i1);
+    expect($deserialized->b2)->toEqual($struct->b2);
+    expect($deserialized->doubles)->toEqual($struct->doubles);
+    expect($deserialized->ints)->toEqual($struct->ints);
+    expect($deserialized->m1)->toEqual($struct->m1);
+    expect($deserialized->s)->toEqual($struct->s);
   }
 }

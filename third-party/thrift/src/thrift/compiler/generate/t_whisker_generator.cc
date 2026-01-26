@@ -773,6 +773,12 @@ prototype<t_function>::ptr t_whisker_generator::make_prototype_for_function(
   def.property("sink_has_first_response?", [](const t_function& self) {
     return !self.has_void_initial_response() && self.sink() != nullptr;
   });
+  def.property("sink_exceptions?", [](const t_function& self) {
+    return !get_elems(self.sink()->sink_exceptions()).empty();
+  });
+  def.property("sink_final_response_exceptions?", [](const t_function& self) {
+    return !get_elems(self.sink()->final_response_exceptions()).empty();
+  });
 
   // Stream methods
   def.property("stream?", [](const t_function& self) {

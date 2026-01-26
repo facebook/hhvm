@@ -620,6 +620,28 @@ struct RequestSetupMetadata {
   14: optional CompressionSetupRequest compressionSetupRequest;
 } // next-id: 15
 
+// Describes the security policy exchanged from server to client during connection setup (via SetupResponse).
+struct SecurityPolicy {
+  // Defines the level of authorization (permission checking) enforcement on the server.
+  1: optional SecurityPolicyStatus authorization;
+
+  // Defines the AuthWall enforcement status on the server.
+  2: optional SecurityPolicyStatus authWall;
+}
+
+// Defines the enforcement level of a security policy.
+enum SecurityPolicyStatus {
+  // Security policy is not installed or is explicitly turned off.
+  DISABLED = 0,
+
+  // Security policy is installed and operational. However, it may be in logging mode,
+  // which allows non-compliant connections or requests to proceed while violations are logged but not blocked.
+  ENABLED = 1,
+
+  // Security policy is fully enforced. Connections or requests that do not comply with the policy will be blocked or terminated.
+  ENFORCED = 2,
+}
+
 struct SetupResponse {
   // The Rocket protocol version that server picked. SHOULD be set. MUST be a
   // value between minVersion and maxVersion. If not set client SHOULD assume
@@ -632,6 +654,8 @@ struct SetupResponse {
   2: optional bool zstdSupported;
   // If compression setup is successful, the setup response will be returned here.
   3: optional CompressionSetupResponse compressionSetupResponse;
+  // Describes the server's security policies and their enforcement levels.
+  4: optional SecurityPolicy securityPolicy;
 }
 
 struct StreamHeadersPush {

@@ -61,11 +61,11 @@ final class ThriftServiceMethodNameVirtualPolicyEnforcer
     return ThriftPolicyEnforcer::isTrusted($caller, $asset_type);
   }
 
-  public static function extractEnforcableAssets(
+  public static async function genExtractEnforcableAssets(
     string $func_name,
     ?IThriftStruct $args,
-    ?string $smc_service_name,
-  )[leak_safe]: keyset<string> {
+    string $smc_service_name,
+  )[leak_safe]: Awaitable<keyset<string>> {
     // does not matter, thrift always return service name as enforcable asset
     // see TClientPoliciedAsyncHandler::extractPolicyEnforcerClsAndAssets for more details
     return keyset[];

@@ -18,11 +18,13 @@
 #include <folly/Executor.h>
 #include <thrift/lib/cpp/TApplicationException.h>
 #include <thrift/lib/cpp/concurrency/ThreadManager.h>
+#include <thrift/lib/cpp2/async/AsyncProcessorFactory.h>
 #include <thrift/lib/cpp2/async/Interaction.h>
 #include <thrift/lib/cpp2/async/RpcTypes.h>
 #include <thrift/lib/cpp2/async/ServerSinkBridge.h>
 #include <thrift/lib/cpp2/async/ServerStream.h>
 #include <thrift/lib/cpp2/async/processor/HandlerCallbackBase.h>
+#include <thrift/lib/cpp2/server/LazyDynamicArguments.h>
 
 // Default to ture, so it can be used for killswitch.
 THRIFT_FLAG_DEFINE_bool(thrift_enable_streaming_tracking, false);
@@ -372,6 +374,18 @@ HandlerCallbackBase::processServiceInterceptorsOnRequest(
       serviceInterceptors = server->getServiceInterceptors();
   std::vector<std::pair<std::size_t, std::exception_ptr>> exceptions;
 
+  // Construct LazyDynamicArguments if schema is available
+  std::optional<LazyDynamicArguments> lazyArgs;
+  if (serializedRequest.buffer) {
+    if (auto* fn = reqCtx_->getFunctionNode()) {
+      lazyArgs.emplace(
+          serializedRequest.buffer.get(),
+          fn,
+          static_cast<protocol::PROTOCOL_TYPES>(
+              reqCtx_->getHeader()->getProtocolId()));
+    }
+  }
+
   for (std::size_t i = 0; i < serviceInterceptors.size(); ++i) {
     auto* connectionCtx = reqCtx_->getConnectionContext();
     auto connectionInfo = ServiceInterceptorBase::ConnectionInfo{
@@ -389,6 +403,7 @@ HandlerCallbackBase::processServiceInterceptorsOnRequest(
         .frameworkMetadata = reqCtx_->getInterceptorFrameworkMetadata(),
         .decoratorData = &decoratorData,
         .serializedRequestBuffer = serializedRequest.buffer.get(),
+        .dynamicArguments = lazyArgs.has_value() ? &*lazyArgs : nullptr,
     };
     try {
       co_await serviceInterceptors[i]->internal_onRequest(

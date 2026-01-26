@@ -1107,6 +1107,9 @@ void process(
   static_assert(std::is_final_v<Metadata>);
   AsyncProcessorHelper::expectMetadataOfType<Metadata>(methodMetadata);
 
+  // Set the FunctionNode in the request context for access by interceptors
+  ctx->setFunctionNode(methodMetadata.functionNode);
+
   if (methodMetadata.interactionType !=
           AsyncProcessor::MethodMetadata::InteractionType::INTERACTION_V1 &&
       !ctx->getInteractionId()) {
@@ -1176,6 +1179,10 @@ void execute(
 
   const auto& methodMetadata =
       AsyncProcessorHelper::expectMetadataOfType<Metadata>(metadata);
+
+  // Set the FunctionNode in the request context for access by interceptors
+  request.requestContext()->setFunctionNode(methodMetadata.functionNode);
+
   switch (protType) {
     case protocol::T_BINARY_PROTOCOL: {
       auto pfn = getExecuteFuncFromProtocol(

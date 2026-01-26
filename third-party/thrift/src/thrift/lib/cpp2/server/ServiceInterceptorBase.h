@@ -25,6 +25,7 @@
 #include <thrift/lib/cpp2/schema/SyntaxGraph.h>
 #include <thrift/lib/cpp2/server/DecoratorData.h>
 #include <thrift/lib/cpp2/server/DecoratorDataRuntime.h>
+#include <thrift/lib/cpp2/server/LazyDynamicArguments.h>
 #include <thrift/lib/cpp2/server/ServiceInterceptorStorage.h>
 #include <thrift/lib/cpp2/server/metrics/InterceptorMetricCallback.h>
 
@@ -130,6 +131,16 @@ class ServiceInterceptorBase {
      * this is made available for logging purposes.
      */
     const folly::IOBuf* serializedRequestBuffer = nullptr;
+
+    /**
+     * Provides lazy access to method arguments as DynamicValue objects.
+     * Arguments are deserialized on-demand from the serialized request buffer
+     * using schema information. This allows interceptors to inspect arguments
+     * dynamically without knowing compile-time types.
+     *
+     * Returns nullptr if schema information is not available for this method.
+     */
+    const LazyDynamicArguments* dynamicArguments = nullptr;
   };
   virtual folly::coro::Task<void> internal_onRequest(
       ConnectionInfo, RequestInfo, InterceptorMetricCallback&) = 0;

@@ -155,6 +155,15 @@ class SchemaRegistry : public type_system::TypeSystem {
   }
 
   /**
+   * Converts a SyntaxGraph TypeRef to a TypeSystem TypeRef.
+   * This is needed for dynamic deserialization of values using schema types.
+   */
+  type_system::TypeRef getTypeSystemTypeRef(
+      const syntax_graph::TypeRef& ref) const {
+    return syntaxGraph_->asTypeSystemTypeRef(ref);
+  }
+
+  /**
    * Gets TypeSystem node for given source identifier, or nullopt if not found.
    */
   std::optional<type_system::DefinitionRef>

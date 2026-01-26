@@ -47,6 +47,10 @@ using apache::thrift::concurrency::PriorityThreadManager;
 
 namespace apache::thrift {
 
+namespace syntax_graph {
+class FunctionNode;
+} // namespace syntax_graph
+
 namespace rocket {
 class ThriftRocketServerHandler;
 }
@@ -831,6 +835,22 @@ class Cpp2RequestContext : public apache::thrift::server::TConnectionContext {
 
   size_t getWiredRequestBytes() const { return wiredRequestBytes_; }
 
+  /**
+   * Gets the FunctionNode for this request's method from the schema.
+   * Returns nullptr if schema information is not available.
+   */
+  const syntax_graph::FunctionNode* getFunctionNode() const {
+    return functionNode_;
+  }
+
+  /**
+   * Sets the FunctionNode for this request. Called during request processing
+   * when the method metadata is available.
+   */
+  void setFunctionNode(const syntax_graph::FunctionNode* functionNode) {
+    functionNode_ = functionNode;
+  }
+
   detail::ServiceInterceptorOnRequestStorage*
   getStorageForServiceInterceptorOnRequestByIndex(std::size_t index) {
     DCHECK(serviceInterceptorsStorage_.onRequest.get() != nullptr);
@@ -883,6 +903,7 @@ class Cpp2RequestContext : public apache::thrift::server::TConnectionContext {
   DecoratorDataStorage decoratorDataStorage_;
   detail::RequestInternalFieldsT internalFields_;
   size_t wiredRequestBytes_{0};
+  const syntax_graph::FunctionNode* functionNode_{nullptr};
 
   friend class detail::Cpp2RequestContextUnsafeAPI;
 };

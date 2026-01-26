@@ -1364,6 +1364,40 @@ CO_TEST_P(ServiceInterceptorTestP, RequestArguments) {
       EXPECT_THROW(
           requestInfo.arguments.get(2)->value<std::int32_t>(), std::bad_cast);
       EXPECT_FALSE(requestInfo.arguments.get(3).has_value());
+
+      // Also verify dynamicArguments API
+      if (requestInfo.dynamicArguments) {
+        dynamicArgsAvailable = true;
+        dynamicArgsCount = requestInfo.dynamicArguments->count();
+
+        // Access by index
+        dynamicArg1 = requestInfo.dynamicArguments->get(0).asI32();
+        dynamicArg2 =
+            std::string(requestInfo.dynamicArguments->get(1).asString());
+        {
+          const auto& s = requestInfo.dynamicArguments->get(2).asStruct();
+          if (auto fooField = s.getField("foo")) {
+            dynamicArg3Foo = fooField->asI32();
+          }
+          if (auto barField = s.getField("bar")) {
+            dynamicArg3Bar = std::string(barField->asString());
+          }
+        }
+
+        // Access by name
+        dynamicArg1ByName =
+            requestInfo.dynamicArguments->get("primitive").asI32();
+
+        // Out of bounds should throw
+        dynamicArg3OutOfBoundsThrows = true;
+        try {
+          requestInfo.dynamicArguments->get(3);
+          dynamicArg3OutOfBoundsThrows = false;
+        } catch (const std::out_of_range&) {
+          // Expected
+        }
+      }
+
       co_return std::nullopt;
     }
 
@@ -1371,6 +1405,15 @@ CO_TEST_P(ServiceInterceptorTestP, RequestArguments) {
     std::int32_t arg1 = 0;
     std::string arg2;
     test::RequestArgsStruct arg3;
+
+    bool dynamicArgsAvailable = false;
+    std::size_t dynamicArgsCount = 0;
+    std::int32_t dynamicArg1 = 0;
+    std::string dynamicArg2;
+    std::int32_t dynamicArg3Foo = 0;
+    std::string dynamicArg3Bar;
+    std::int32_t dynamicArg1ByName = 0;
+    bool dynamicArg3OutOfBoundsThrows = false;
   };
   auto interceptor =
       std::make_shared<ServiceInterceptorWithRequestArguments>("Interceptor1");
@@ -1389,6 +1432,15 @@ CO_TEST_P(ServiceInterceptorTestP, RequestArguments) {
   EXPECT_EQ(interceptor->arg1, 1);
   EXPECT_EQ(interceptor->arg2, "hello");
   EXPECT_EQ(interceptor->arg3, requestArgs);
+
+  EXPECT_TRUE(interceptor->dynamicArgsAvailable);
+  EXPECT_EQ(interceptor->dynamicArgsCount, 3);
+  EXPECT_EQ(interceptor->dynamicArg1, 1);
+  EXPECT_EQ(interceptor->dynamicArg2, "hello");
+  EXPECT_EQ(interceptor->dynamicArg3Foo, 1);
+  EXPECT_EQ(interceptor->dynamicArg3Bar, "hello");
+  EXPECT_EQ(interceptor->dynamicArg1ByName, 1);
+  EXPECT_TRUE(interceptor->dynamicArg3OutOfBoundsThrows);
 }
 
 namespace {

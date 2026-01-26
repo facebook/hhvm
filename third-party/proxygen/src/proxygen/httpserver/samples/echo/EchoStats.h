@@ -19,7 +19,12 @@ namespace EchoService {
  */
 class EchoStats {
  public:
+  EchoStats() = default;
   virtual ~EchoStats() = default;
+  EchoStats(const EchoStats&) = delete;
+  EchoStats& operator=(const EchoStats&) = delete;
+  EchoStats(EchoStats&&) = delete;
+  EchoStats& operator=(EchoStats&&) = delete;
 
   // NOTE: We make the following methods `virtual` so that we can
   //       mock them using Gmock for our C++ unit-tests. EchoStats

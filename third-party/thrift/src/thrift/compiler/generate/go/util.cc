@@ -289,6 +289,27 @@ void codegen_data::compute_thrift_metadata_types() {
           }
         }
       }
+      if (func.sink() != nullptr) {
+        add_to_thrift_metadata_types(
+            func.sink()->elem_type().get_type(), visited_type_names);
+        if (func.sink()->sink_exceptions() != nullptr) {
+          for (const auto& exception :
+               func.sink()->sink_exceptions()->fields()) {
+            auto type = exception.type().get_type();
+            add_to_thrift_metadata_types(type, visited_type_names);
+          }
+        }
+
+        add_to_thrift_metadata_types(
+            func.sink()->final_response_type().get_type(), visited_type_names);
+        if (func.sink()->final_response_exceptions() != nullptr) {
+          for (const auto& exception :
+               func.sink()->final_response_exceptions()->fields()) {
+            auto type = exception.type().get_type();
+            add_to_thrift_metadata_types(type, visited_type_names);
+          }
+        }
+      }
     }
   }
 }
@@ -756,6 +777,61 @@ void make_func_req_resp_structs(
       }
     }
     req_resp_structs.push_back(stream_struct);
+  }
+  if (func->sink()) {
+    auto sink_struct_name =
+        go::munge_ident("sink" + prefix + funcGoName, false);
+    auto sink_struct = new t_struct(func->program(), sink_struct_name);
+    sink_struct->set_generated();
+    auto elem_field = std::make_unique<t_field>(
+        func->sink()->elem_type(), DEFAULT_RETVAL_FIELD_NAME, 0);
+    elem_field->set_qualifier(t_field_qualifier::optional);
+    sink_struct->append_field(std::move(elem_field));
+    if (func->sink()->sink_exceptions() != nullptr) {
+      for (const auto& xs : func->sink()->sink_exceptions()->fields()) {
+        // TODO(T244354071): Second unique_ptr over the same underlying object.
+        // See explanation on go::codegen_data::req_resp_structs
+        auto xc_ptr = std::unique_ptr<t_field>(const_cast<t_field*>(&xs));
+
+        // TODO(T244354071): This is a mutation of `xs` (which is const, from a
+        // const t_function), since the mutable unique_ptr xc_ptr is pointing to
+        // the same object. It mutates the original field to force it to be
+        // optional, and the code-generator relies on this behaviour. The
+        // template/code-gen should be refactored to generate optional fields
+        // for exceptions rather than mutating the AST.
+        xc_ptr->set_qualifier(t_field_qualifier::optional);
+        sink_struct->append_field(std::move(xc_ptr));
+      }
+    }
+    req_resp_structs.push_back(sink_struct);
+
+    auto final_response_struct_name =
+        go::munge_ident("finalResponse" + prefix + funcGoName, false);
+    auto final_response_struct =
+        new t_struct(func->program(), final_response_struct_name);
+    final_response_struct->set_generated();
+    auto final_response_field = std::make_unique<t_field>(
+        func->sink()->final_response_type(), DEFAULT_RETVAL_FIELD_NAME, 0);
+    final_response_field->set_qualifier(t_field_qualifier::optional);
+    final_response_struct->append_field(std::move(final_response_field));
+    if (func->sink()->final_response_exceptions() != nullptr) {
+      for (const auto& xs :
+           func->sink()->final_response_exceptions()->fields()) {
+        // TODO(T244354071): Second unique_ptr over the same underlying object.
+        // See explanation on go::codegen_data::req_resp_structs
+        auto xc_ptr = std::unique_ptr<t_field>(const_cast<t_field*>(&xs));
+
+        // TODO(T244354071): This is a mutation of `xs` (which is const, from a
+        // const t_function), since the mutable unique_ptr xc_ptr is pointing to
+        // the same object. It mutates the original field to force it to be
+        // optional, and the code-generator relies on this behaviour. The
+        // template/code-gen should be refactored to generate optional fields
+        // for exceptions rather than mutating the AST.
+        xc_ptr->set_qualifier(t_field_qualifier::optional);
+        final_response_struct->append_field(std::move(xc_ptr));
+      }
+    }
+    req_resp_structs.push_back(final_response_struct);
   }
 }
 

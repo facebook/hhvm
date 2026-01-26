@@ -1,0 +1,4 @@
+ERROR: File "requirethis_05.bad.php", line 15, characters 16-18:
+You cannot access this member (Typing[4112])
+  File "requirethis_05.bad.php", line 8, characters 22-24:
+  This member is private

@@ -71,10 +71,7 @@ TEST(Reflection, Basic) {
     EXPECT_EQ(int(Type::TYPE_STRING), *f.type());
     EXPECT_EQ("d", *f.name());
     EXPECT_EQ(3, *f.order());
-    EXPECT_TRUE(f.annotations().has_value());
-    EXPECT_EQ("hello", f.annotations()->at("some.field.annotation"));
-    EXPECT_EQ("1", f.annotations()->at("some.other.annotation"));
-    EXPECT_EQ("1", f.annotations()->at("annotation.without.value"));
+    EXPECT_FALSE(f.annotations().has_value());
   }
 }
 

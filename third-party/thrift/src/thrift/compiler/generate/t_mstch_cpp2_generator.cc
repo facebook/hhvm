@@ -123,19 +123,6 @@ bool same_types(const t_type* a, const t_type* b) {
   return true;
 }
 
-std::vector<t_annotation> get_fatal_annotations(
-    const deprecated_annotation_map& annotations) {
-  std::vector<t_annotation> fatal_annotations;
-  for (const auto& iter : annotations) {
-    if (is_annotation_blacklisted_in_fatal(iter.first)) {
-      continue;
-    }
-    fatal_annotations.emplace_back(iter.first, iter.second);
-  }
-
-  return fatal_annotations;
-}
-
 std::string get_fatal_string_short_id(const std::string& key) {
   return boost::algorithm::replace_all_copy(
       boost::algorithm::replace_all_copy(key, ".", "_"), "/", "_");
@@ -434,20 +421,6 @@ int get_split_count(const t_mstch_generator::compiler_options_map& options) {
       iter->second, "Invalid types_cpp_splits value: `" + iter->second + "`");
 }
 
-whisker::object make_whisker_annotations(
-    const std::vector<t_annotation>& annotations) {
-  whisker::array::raw result;
-  result.reserve(annotations.size());
-  for (const t_annotation& a : annotations) {
-    result.push_back(
-        whisker::make::map({
-            {"key", whisker::make::string(a.first)},
-            {"value", whisker::make::string(a.second.value)},
-        }));
-  }
-  return whisker::make::array(std::move(result));
-}
-
 class t_mstch_cpp2_generator : public t_mstch_generator {
  public:
   using t_mstch_generator::t_mstch_generator;
@@ -457,7 +430,6 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
     opts.allowed_undefined_variables = {
         "program:autogen_path",
         "service:autogen_path",
-        "field:fatal_annotations?",
     };
     return opts;
   }
@@ -1707,9 +1679,6 @@ class cpp_mstch_struct : public mstch_struct {
             {"struct:write_lazy_field_checksum",
              &cpp_mstch_struct::write_lazy_field_checksum},
             {"struct:is_large?", &cpp_mstch_struct::is_large},
-            {"struct:fatal_annotations?",
-             &cpp_mstch_struct::has_fatal_annotations},
-            {"struct:fatal_annotations", &cpp_mstch_struct::fatal_annotations},
             {"struct:legacy_api?", &cpp_mstch_struct::legacy_api},
             {"struct:metadata_name", &cpp_mstch_struct::metadata_name},
             {"struct:mixin_fields", &cpp_mstch_struct::mixin_fields},
@@ -1988,14 +1957,6 @@ class cpp_mstch_struct : public mstch_struct {
       }
     }
     return false;
-  }
-  mstch::node has_fatal_annotations() {
-    return get_fatal_annotations(struct_->unstructured_annotations()).size() >
-        0;
-  }
-  whisker::object fatal_annotations() {
-    return make_whisker_annotations(
-        get_fatal_annotations(struct_->unstructured_annotations()));
   }
   mstch::node legacy_api() { return true; }
   mstch::node metadata_name() {
@@ -2299,9 +2260,6 @@ class cpp_mstch_field : public mstch_field {
             {"field:deprecated_terse_writes_with_non_redundant_custom_default?",
              &cpp_mstch_field::
                  deprecated_terse_writes_with_non_redundant_custom_default},
-            {"field:fatal_annotations?",
-             &cpp_mstch_field::has_fatal_annotations},
-            {"field:fatal_annotations", &cpp_mstch_field::fatal_annotations},
             {"field:fatal_required_qualifier",
              &cpp_mstch_field::fatal_required_qualifier},
             {"field:visibility", &cpp_mstch_field::visibility},
@@ -2505,14 +2463,7 @@ class cpp_mstch_field : public mstch_field {
   mstch::node zero_copy_arg() {
     return zero_copy_arg_impl(*field_->type()) ? "true" : "false";
   }
-  mstch::node has_fatal_annotations() {
-    return get_fatal_annotations(field_->unstructured_annotations()).size() > 0;
-  }
   mstch::node has_isset() { return cpp2::field_has_isset(field_); }
-  whisker::object fatal_annotations() {
-    return make_whisker_annotations(
-        get_fatal_annotations(field_->unstructured_annotations()));
-  }
   mstch::node fatal_required_qualifier() {
     switch (field_->qualifier()) {
       case t_field_qualifier::required:

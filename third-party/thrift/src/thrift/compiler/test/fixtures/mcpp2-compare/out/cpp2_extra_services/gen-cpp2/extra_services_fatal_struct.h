@@ -21,105 +21,70 @@ namespace __fbthrift_refl {
 namespace __fbthrift_refl_impl = ::apache::thrift::detail::reflection_impl;
 
 class containerStruct2_struct_traits {
-  class __fbthrift_annotations : public __fbthrift_refl_impl::no_annotations {
-    class __fbthrift_members {
-     public:
-      using fieldA = __fbthrift_refl_impl::reflected_no_annotations;
-      using req_fieldA = __fbthrift_refl_impl::reflected_no_annotations;
-      using opt_fieldA = __fbthrift_refl_impl::reflected_no_annotations;
-      using fieldB = __fbthrift_refl_impl::reflected_no_annotations;
-      using req_fieldB = __fbthrift_refl_impl::reflected_no_annotations;
-      using opt_fieldB = __fbthrift_refl_impl::reflected_no_annotations;
-      using fieldC = __fbthrift_refl_impl::reflected_no_annotations;
-      using req_fieldC = __fbthrift_refl_impl::reflected_no_annotations;
-      using opt_fieldC = __fbthrift_refl_impl::reflected_no_annotations;
-      using fieldD = __fbthrift_refl_impl::reflected_no_annotations;
-      using fieldE = __fbthrift_refl_impl::reflected_no_annotations;
-      using req_fieldE = __fbthrift_refl_impl::reflected_no_annotations;
-      using opt_fieldE = __fbthrift_refl_impl::reflected_no_annotations;
-    };
-
-   public:
-    using members = __fbthrift_members;
-  };
-
   struct __fbthrift_member_fieldA {
     using owner = ::extra::svc::containerStruct2;
     using name = __fbthrift_strings_extra_services::__fbthrift_hash_a003c1938a10c7729197e235918bdad7bc795ec24b19f24c66e4f24374526ad8;
     using tag = ::apache::thrift::ident::fieldA;
-    using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::fieldA>;
   };
   struct __fbthrift_member_req_fieldA {
     using owner = ::extra::svc::containerStruct2;
     using name = __fbthrift_strings_extra_services::__fbthrift_hash_5c3b94a8e304a4356159a39553a29b9ba5d46658be8683264a16f34ba323fbfc;
     using tag = ::apache::thrift::ident::req_fieldA;
-    using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::req_fieldA>;
   };
   struct __fbthrift_member_opt_fieldA {
     using owner = ::extra::svc::containerStruct2;
     using name = __fbthrift_strings_extra_services::__fbthrift_hash_19bdb7a3067217940c2b50b0b5221b2d567285f43296c6f40e62b2b860a6fe2b;
     using tag = ::apache::thrift::ident::opt_fieldA;
-    using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::opt_fieldA>;
   };
   struct __fbthrift_member_fieldB {
     using owner = ::extra::svc::containerStruct2;
     using name = __fbthrift_strings_extra_services::__fbthrift_hash_c7e10d053d5c1a0a0743c1dfc0a38c439cd181cc30829f18cc684e286d0baf27;
     using tag = ::apache::thrift::ident::fieldB;
-    using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::fieldB>;
   };
   struct __fbthrift_member_req_fieldB {
     using owner = ::extra::svc::containerStruct2;
     using name = __fbthrift_strings_extra_services::__fbthrift_hash_a93a0375706770237da363401aec269f1d6ad07d41bb42463ddd1c792185810c;
     using tag = ::apache::thrift::ident::req_fieldB;
-    using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::req_fieldB>;
   };
   struct __fbthrift_member_opt_fieldB {
     using owner = ::extra::svc::containerStruct2;
     using name = __fbthrift_strings_extra_services::__fbthrift_hash_5a736b7ef4c69ca7479ecf23288415bbeee1751449d5a26721ce85d0c810728c;
     using tag = ::apache::thrift::ident::opt_fieldB;
-    using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::opt_fieldB>;
   };
   struct __fbthrift_member_fieldC {
     using owner = ::extra::svc::containerStruct2;
     using name = __fbthrift_strings_extra_services::__fbthrift_hash_7a60aa9f6a5416b61206a441ce84695a835326c0edc0c9b86b92b618f29eb9ed;
     using tag = ::apache::thrift::ident::fieldC;
-    using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::fieldC>;
   };
   struct __fbthrift_member_req_fieldC {
     using owner = ::extra::svc::containerStruct2;
     using name = __fbthrift_strings_extra_services::__fbthrift_hash_bf973e4523774cc2e393efe85aaeaecdfc90a464b96a36f42e93d457237aee7f;
     using tag = ::apache::thrift::ident::req_fieldC;
-    using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::req_fieldC>;
   };
   struct __fbthrift_member_opt_fieldC {
     using owner = ::extra::svc::containerStruct2;
     using name = __fbthrift_strings_extra_services::__fbthrift_hash_ec9bc154cafd382fcf46ef9489c25b9df04efacf81018fcf5e4c7ce728f25a1c;
     using tag = ::apache::thrift::ident::opt_fieldC;
-    using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::opt_fieldC>;
   };
   struct __fbthrift_member_fieldD {
     using owner = ::extra::svc::containerStruct2;
     using name = __fbthrift_strings_extra_services::__fbthrift_hash_a73c4974ccb5981437f75c22da908dd553c1389729210c7d554a65e1b0f4045a;
     using tag = ::apache::thrift::ident::fieldD;
-    using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::fieldD>;
   };
   struct __fbthrift_member_fieldE {
     using owner = ::extra::svc::containerStruct2;
     using name = __fbthrift_strings_extra_services::__fbthrift_hash_ba2a88de7258832d40bb04e70c8d37d66141754f3561ecfa366dc9496c9a7704;
     using tag = ::apache::thrift::ident::fieldE;
-    using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::fieldE>;
   };
   struct __fbthrift_member_req_fieldE {
     using owner = ::extra::svc::containerStruct2;
     using name = __fbthrift_strings_extra_services::__fbthrift_hash_59ee7a3ea45725149c15fa11ce6bf5c8cc5336a3641edf62fd3265fdcab97bba;
     using tag = ::apache::thrift::ident::req_fieldE;
-    using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::req_fieldE>;
   };
   struct __fbthrift_member_opt_fieldE {
     using owner = ::extra::svc::containerStruct2;
     using name = __fbthrift_strings_extra_services::__fbthrift_hash_d0ddd5cb59fc0d5c728d0572d06ad2305f2140665e2a75a4928198f7f678a0a6;
     using tag = ::apache::thrift::ident::opt_fieldE;
-    using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::opt_fieldE>;
   };
 
   struct __fbthrift_member {
@@ -154,9 +119,6 @@ class containerStruct2_struct_traits {
       member::fieldE,
       member::req_fieldE,
       member::opt_fieldE
-  >;
-  using metadata = ::apache::thrift::detail::type_common_metadata_impl<
-      ::apache::thrift::reflected_annotations<__fbthrift_annotations>
   >;
 };
 

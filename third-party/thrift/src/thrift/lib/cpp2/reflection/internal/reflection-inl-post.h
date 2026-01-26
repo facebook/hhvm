@@ -29,22 +29,6 @@ class Optional;
 namespace apache {
 namespace thrift {
 namespace detail {
-namespace reflection_impl {
-
-struct no_annotations {
-  using keys = void;
-  using values = void;
-  using map = ::fatal::list<>;
-};
-
-using reflected_no_annotations = reflected_annotations<no_annotations>;
-
-} // namespace reflection_impl
-
-template <typename Annotations>
-struct type_common_metadata_impl {
-  using annotations = Annotations;
-};
 
 template <typename T>
 struct [[deprecated(
@@ -81,13 +65,6 @@ reflect_module_tag_selector<type_class::structure, T, IsTry> {
 };
 
 } // namespace detail
-
-template <>
-struct reflected_annotations<void> {
-  struct keys {};
-  struct values {};
-  using map = fatal::list<>;
-};
 
 } // namespace thrift
 } // namespace apache

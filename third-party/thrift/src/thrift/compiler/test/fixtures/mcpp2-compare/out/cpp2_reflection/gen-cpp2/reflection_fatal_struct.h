@@ -20,21 +20,10 @@ namespace __fbthrift_refl {
 namespace __fbthrift_refl_impl = ::apache::thrift::detail::reflection_impl;
 
 class ReflectionStruct_struct_traits {
-  class __fbthrift_annotations : public __fbthrift_refl_impl::no_annotations {
-    class __fbthrift_members {
-     public:
-      using fieldA = __fbthrift_refl_impl::reflected_no_annotations;
-    };
-
-   public:
-    using members = __fbthrift_members;
-  };
-
   struct __fbthrift_member_fieldA {
     using owner = ::cpp2::ReflectionStruct;
     using name = __fbthrift_strings_reflection::__fbthrift_hash_a003c1938a10c7729197e235918bdad7bc795ec24b19f24c66e4f24374526ad8;
     using tag = ::apache::thrift::ident::fieldA;
-    using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::fieldA>;
   };
 
   struct __fbthrift_member {
@@ -45,9 +34,6 @@ class ReflectionStruct_struct_traits {
   using member = __fbthrift_member;
   using members = ::fatal::list<
       member::fieldA
-  >;
-  using metadata = ::apache::thrift::detail::type_common_metadata_impl<
-      ::apache::thrift::reflected_annotations<__fbthrift_annotations>
   >;
 };
 

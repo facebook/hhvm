@@ -217,9 +217,6 @@ using getter_direct_getter_t = folly::_t<getter_direct_getter<G>>;
       Struct,                                               \
       ::apache::thrift::reflected_struct<Traits>)
 
-template <typename = void>
-struct reflected_annotations;
-
 } // namespace thrift
 } // namespace apache
 

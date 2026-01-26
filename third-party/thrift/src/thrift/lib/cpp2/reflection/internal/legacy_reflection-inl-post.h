@@ -212,18 +212,11 @@ struct impl_structure_util {
       id_t type,
       size_t index,
       optionality opt,
-      std::string& name,
-      size_t n_annots) {
+      std::string& name) {
     *field.isRequired() = opt != optionality::optional;
     *field.type() = type;
     *field.name() = name;
     *field.order() = index;
-    auto annotations = field.annotations();
-    if (n_annots > 0) {
-      annotations = {};
-    } else {
-      annotations.reset();
-    }
   }
 };
 
@@ -238,24 +231,11 @@ struct impl<T, type_class::structure> {
       using type = deref_inner_t<decltype(getter{}(std::declval<T&>()))>;
       using type_class = typename MemberInfo::type_class;
       using type_helper = get_helper<type, type_class>;
-      using member_annotations = typename MemberInfo::annotations::map;
       type_helper::register_into(schema);
       auto& f = (*dt.fields())[MemberInfo::id::value];
       std::string name = MemberInfo::getName().str();
       impl_structure_util::init(
-          f,
-          type_helper::id(),
-          Index,
-          MemberInfo::optional::value,
-          name,
-          fatal::size<member_annotations>());
-      auto annotations = f.annotations_ref();
-      fatal::foreach<member_annotations>([&](auto tag) {
-        using annotation = decltype(fatal::tag_type(tag));
-        annotations->emplace(
-            fatal::to_instance<std::string, typename annotation::key>(),
-            fatal::to_instance<std::string, typename annotation::value>());
-      });
+          f, type_helper::id(), Index, MemberInfo::optional::value, name);
     }
   };
   static std::string rname() {

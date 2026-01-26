@@ -225,34 +225,6 @@ TEST(FatalUnion, ByType) {
   EXPECT_EQ(enum1::field1, traits::get<enum1>(ur));
 }
 
-FATAL_S(unionA_annotation1k, "another.annotation");
-FATAL_S(unionA_annotation1v, "some more text");
-FATAL_S(unionA_annotation2k, "sample.annotation");
-FATAL_S(unionA_annotation2v, "some text here");
-
-TEST(FatalUnion, Annotations) {
-  EXPECT_SAME<
-      fatal::list<>,
-      apache::thrift::reflect_variant<union2>::annotations::map>();
-
-  EXPECT_SAME<
-      fatal::list<>,
-      apache::thrift::reflect_variant<union3>::annotations::map>();
-
-  using actual_unionA = apache::thrift::reflect_variant<unionA>::annotations;
-
-  EXPECT_SAME<unionA_annotation1k, actual_unionA::keys::another_annotation>();
-  EXPECT_SAME<unionA_annotation1v, actual_unionA::values::another_annotation>();
-  EXPECT_SAME<unionA_annotation2k, actual_unionA::keys::sample_annotation>();
-  EXPECT_SAME<unionA_annotation2v, actual_unionA::values::sample_annotation>();
-
-  EXPECT_SAME<
-      fatal::list<
-          apache::thrift::annotation<unionA_annotation1k, unionA_annotation1v>,
-          apache::thrift::annotation<unionA_annotation2k, unionA_annotation2v>>,
-      actual_unionA::map>();
-}
-
 TEST(FatalUnion, ByName) {
   using id_traits = fatal::enum_traits<union1::Type>;
   using info = apache::thrift::reflect_variant<union1>;

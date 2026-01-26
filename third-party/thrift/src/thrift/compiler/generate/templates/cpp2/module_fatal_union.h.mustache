@@ -44,35 +44,6 @@ class {{struct:cpp_name}}_tenum_traits {
   struct __fbthrift_value_{{field:cpp_name}} {
     using name = __fbthrift_strings_{{program:name}}::{{field:name_hash}};
     using value = std::integral_constant<type, type::{{field:cpp_name}}>;
-    {{#field:fatal_annotations?}}
-    class annotations {
-      struct __fbthrift_keys {
-        {{#each field:fatal_annotations as |annotation|}}
-        {{#let safe_key = (cpp_fatal_string_id annotation.key)}}
-        using {{safe_key}} = __fbthrift_strings_{{program:name}}::{{safe_key}};
-        {{/each}}
-      };
-
-      struct __fbthrift_values {
-        {{#each field:fatal_annotations as |annotation|}}
-        using {{(cpp_fatal_string_id annotation.key)}} = {{(cpp_render_fatal annotation.value)}};
-        {{/each}}
-      };
-
-     public:
-      using keys = __fbthrift_keys;
-      using values = __fbthrift_values;
-      using map = ::fatal::list<
-          {{#each (array.enumerate field:fatal_annotations with_last=true) as |index annotation last?|}}
-          {{#let safe_key = (cpp_fatal_string_id annotation.key)}}
-          ::apache::thrift::annotation<keys::{{safe_key}}, values::{{safe_key}}>{{#if (not last?)}},{{/if}}
-          {{/each}}
-      >;
-    };
-    {{/field:fatal_annotations?}}
-    {{^field:fatal_annotations?}}
-    using annotations = __fbthrift_refl_impl::no_annotations;
-    {{/field:fatal_annotations?}}
   };
 
   {{/struct:fields}}
@@ -90,8 +61,6 @@ class {{struct:cpp_name}}_tenum_traits {
       member::{{field:cpp_name}}{{^last?}},{{/last?}}
       {{/struct:fields}}
   >;
-
-  using annotations = __fbthrift_refl_impl::no_annotations;
 
   static char const *to_string(type e, char const *fallback) {
     switch (e) {
@@ -153,36 +122,6 @@ class {{struct:cpp_name}}_variant_traits {
     {{/struct:fields}}
   >;
 
-  {{#struct:fatal_annotations?}}
-  class annotations {
-    struct __fbthrift_keys {
-      {{#each struct:fatal_annotations as |annotation|}}
-      {{#let safe_key = (cpp_fatal_string_id annotation.key)}}
-      using {{safe_key}} = __fbthrift_strings_{{program:name}}::{{safe_key}};
-      {{/each}}
-    };
-
-    struct __fbthrift_values {
-      {{#each struct:fatal_annotations as |annotation|}}
-      using {{(cpp_fatal_string_id annotation.key)}} = {{(cpp_render_fatal annotation.value)}};
-      {{/each}}
-    };
-
-   public:
-    using keys = __fbthrift_keys;
-    using values = __fbthrift_values;
-    using map = ::fatal::list<
-        {{#each (array.enumerate struct:fatal_annotations with_last=true) as |index annotation last?|}}
-        {{#let safe_key = (cpp_fatal_string_id annotation.key)}}
-        ::apache::thrift::annotation<keys::{{safe_key}}, values::{{safe_key}}>{{#if (not last?)}},{{/if}}
-        {{/each}}
-    >;
-  };
-  {{/struct:fatal_annotations?}}
-  {{^struct:fatal_annotations?}}
-  using annotations = __fbthrift_refl_impl::no_annotations;
-  {{/struct:fatal_annotations?}}
-
   static id get_id(type const &variant) {
     return variant.getType();
   }
@@ -199,17 +138,7 @@ class {{struct:cpp_name}}_variant_traits {
 } // __fbthrift_refl
 
 {{#program:structs}}{{#struct:union?}}
-FATAL_REGISTER_ENUM_TRAITS(
-  __fbthrift_refl::{{struct:cpp_name}}_tenum_traits,
-  ::apache::thrift::detail::type_common_metadata_impl<
-      ::apache::thrift::reflected_annotations<__fbthrift_refl::{{struct:cpp_name}}_tenum_traits::annotations>
-  >
-);
-FATAL_REGISTER_VARIANT_TRAITS(
-  __fbthrift_refl::{{struct:cpp_name}}_variant_traits,
-  ::apache::thrift::detail::type_common_metadata_impl<
-      ::apache::thrift::reflected_annotations<__fbthrift_refl::{{struct:cpp_name}}_variant_traits::annotations>
-  >
-);
+FATAL_REGISTER_ENUM_TRAITS(__fbthrift_refl::{{struct:cpp_name}}_tenum_traits);
+FATAL_REGISTER_VARIANT_TRAITS(__fbthrift_refl::{{struct:cpp_name}}_variant_traits);
 {{/struct:union?}}{{/program:structs}}
 } // namespace {{program:cpp_qualified_namespace}}

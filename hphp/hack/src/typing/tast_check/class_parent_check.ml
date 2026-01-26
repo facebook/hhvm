@@ -28,6 +28,7 @@ let check_is_class env ~require_constraint_check (p, h) =
     | Decl_entry.Found cls ->
       let kind = Cls.kind cls in
       let name = Cls.name cls in
+      let is_interface = Ast_defs.is_c_interface (Cls.kind cls) in
       if Ast_defs.is_c_class kind then (
         if Cls.final cls && not is_req_class_check then
           Diagnostics.add_diagnostic
@@ -44,19 +45,38 @@ let check_is_class env ~require_constraint_check (p, h) =
           Nast_check_error.(
             to_user_diagnostic
             @@ Requires_non_class
-                 { pos = p; name; kind = Ast_defs.string_of_classish_kind kind })
+                 {
+                   pos = p;
+                   name;
+                   kind = Ast_defs.string_of_classish_kind kind;
+                   is_interface;
+                   is_req_this_as_check;
+                 })
   end
   | Aast.Habstr name ->
     Diagnostics.add_diagnostic
       Nast_check_error.(
         to_user_diagnostic
-        @@ Requires_non_class { pos = p; name; kind = "a generic" })
+        @@ Requires_non_class
+             {
+               pos = p;
+               name;
+               kind = "a generic";
+               is_interface = false;
+               is_req_this_as_check;
+             })
   | _ ->
     Diagnostics.add_diagnostic
       Nast_check_error.(
         to_user_diagnostic
         @@ Requires_non_class
-             { pos = p; name = "This"; kind = "an invalid type hint" })
+             {
+               pos = p;
+               name = "This";
+               kind = "an invalid type hint";
+               is_interface = false;
+               is_req_this_as_check;
+             })
 
 let check_is_interface (env, error_verb) (p, h) =
   match h with

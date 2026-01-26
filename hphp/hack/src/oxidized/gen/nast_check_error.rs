@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<7d1cce9ab45e44adbe805ee5d84f79e0>>
+// @generated SignedSource<<c2c92aa563f43993231b16002ec3023c>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -158,6 +158,8 @@ pub enum NastCheckError {
         pos: pos::Pos,
         name: String,
         kind: String,
+        is_interface: bool,
+        is_req_this_as_check: bool,
     },
     #[rust_to_ocaml(name = "Requires_final_class")]
     RequiresFinalClass {

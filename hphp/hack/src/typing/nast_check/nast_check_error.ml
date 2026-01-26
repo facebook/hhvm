@@ -81,6 +81,8 @@ type t =
       pos: Pos.t;
       name: string;
       kind: string;
+      is_interface: bool;
+      is_req_this_as_check: bool;
     }
   | Requires_final_class of {
       pos: Pos.t;
@@ -632,7 +634,7 @@ let uses_non_trait pos name kind =
         kind )
     []
 
-let requires_non_class pos name kind =
+let requires_non_class pos name kind ~is_interface ~is_req_this_as_check =
   User_diagnostic.make_err
     Error_code.(to_enum RequiresNonClass)
     ( pos,
@@ -640,7 +642,13 @@ let requires_non_class pos name kind =
         "%s is not a class. It is %s."
         (Markdown_lite.md_codify @@ Render.strip_ns name)
         kind )
-    []
+    (if is_req_this_as_check && is_interface then
+      [
+        ( Pos_or_decl.of_raw_pos pos,
+          "Try using `require implements` instead of `require this as`." );
+      ]
+    else
+      [])
 
 let requires_final_class pos name is_req_this_as_check =
   User_diagnostic.make_err
@@ -949,7 +957,9 @@ let to_user_diagnostic t =
     | Php_lambda_disallowed pos -> php_lambda_disallowed pos
     | Non_interface { pos; name; verb } -> non_interface pos name verb
     | Uses_non_trait { pos; name; kind } -> uses_non_trait pos name kind
-    | Requires_non_class { pos; name; kind } -> requires_non_class pos name kind
+    | Requires_non_class { pos; name; kind; is_interface; is_req_this_as_check }
+      ->
+      requires_non_class pos name kind ~is_interface ~is_req_this_as_check
     | Requires_final_class { pos; name; is_req_this_as_check } ->
       requires_final_class pos name is_req_this_as_check
     | Internal_method_with_invalid_visibility { pos; vis } ->

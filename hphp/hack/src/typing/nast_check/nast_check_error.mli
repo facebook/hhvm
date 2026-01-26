@@ -80,6 +80,8 @@ type t =
       pos: Pos.t;
       name: string;
       kind: string;
+      is_interface: bool;
+      is_req_this_as_check: bool;
     }
   | Requires_final_class of {
       pos: Pos.t;

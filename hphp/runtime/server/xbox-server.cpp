@@ -17,6 +17,7 @@
 #include "hphp/runtime/server/xbox-server.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/request-fanout-limit-wrapper.h"
+#include "hphp/runtime/ext/server/ext_server.h"
 #include "hphp/runtime/server/xbox-request-handler.h"
 #include "hphp/runtime/server/satellite-server.h"
 #include "hphp/runtime/server/job-queue-vm-stack.h"
@@ -324,7 +325,9 @@ OptResource XboxServer::TaskStart(
         event->setJob(job);
       }
 
-      if (Cfg::Server::TrackRequestFanout) {
+      // If server_uptime() is -1, it means we are not yet running in server mode
+      // and are serving warmup requests. Excempt warmup requests from fanout enforcement.
+      if (Cfg::Server::TrackRequestFanout && HHVM_FN(server_uptime)() >= 0) {
         requestFanoutLimitIncrement(root_req_id);
       }
 

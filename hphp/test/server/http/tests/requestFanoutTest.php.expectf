@@ -1,0 +1,10 @@
+Requesting 'request_fanout_enforcement.php?count=1'
+string(%d) "In proxygen
+int(1)
+proxygen done."
+Requesting 'request_fanout_enforcement.php?count=2'
+string(33) "In proxygen
+int(2)
+proxygen done."
+Requesting 'request_fanout_enforcement.php?count=3'
+NULL

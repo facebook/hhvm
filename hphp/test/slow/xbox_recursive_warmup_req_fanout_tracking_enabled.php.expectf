@@ -19,5 +19,4 @@ Handling request %d, associated root request %d
 receiving xbox_process_call_message
 In xbox
 xbox done.
-int(0)
-%AAll children requests of %d completed%A
+int(0)%A

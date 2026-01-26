@@ -957,7 +957,7 @@ bool HTTPQuicCoroSession::checkAndHandlePushPromiseComplete(
   // This stream is awaiting the push promise
   auto pushID = *stream.currentPushID;
   stream.currentPushID.reset();
-  StreamState* pushStreamPtr;
+  StreamState* pushStreamPtr = nullptr;
   auto it = pushStreamsAwaitingPromises_.find(pushID);
   if (it == pushStreamsAwaitingPromises_.end()) {
     // stream has not yet arrived
@@ -3059,7 +3059,7 @@ folly::coro::Task<void> HTTPUniplexTransportSession::writeLoop() noexcept {
         (writableStreams_.empty() || sendWindow_.getSize() == 0)) {
       writeEvent_.reset();
       XLOG(DBG6) << "Waiting for writeEvent sess=" << *this;
-      TimedBaton::Status status;
+      TimedBaton::Status status = TimedBaton::Status::signalled;
       {
         auto guard = writeExec_.acquireGuard();
         status =

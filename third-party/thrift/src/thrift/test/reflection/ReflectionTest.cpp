@@ -42,7 +42,6 @@ TEST(Reflection, Basic) {
     EXPECT_EQ(int(Type::TYPE_I32), *f.type());
     EXPECT_EQ("a", *f.name());
     EXPECT_EQ(1, *f.order());
-    EXPECT_FALSE(f.annotations().has_value());
   }
 
   {
@@ -51,7 +50,6 @@ TEST(Reflection, Basic) {
     EXPECT_EQ(int(Type::TYPE_I32), *f.type());
     EXPECT_EQ("b", *f.name());
     EXPECT_EQ(2, *f.order());
-    EXPECT_FALSE(f.annotations().has_value());
   }
 
   {
@@ -62,7 +60,6 @@ TEST(Reflection, Basic) {
     EXPECT_EQ(int(Type::TYPE_I32), *f.type());
     EXPECT_EQ("c", *f.name());
     EXPECT_EQ(0, *f.order());
-    EXPECT_FALSE(f.annotations().has_value());
   }
 
   {
@@ -71,7 +68,6 @@ TEST(Reflection, Basic) {
     EXPECT_EQ(int(Type::TYPE_STRING), *f.type());
     EXPECT_EQ("d", *f.name());
     EXPECT_EQ(3, *f.order());
-    EXPECT_FALSE(f.annotations().has_value());
   }
 }
 

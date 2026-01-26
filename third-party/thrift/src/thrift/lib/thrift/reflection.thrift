@@ -56,8 +56,9 @@ struct StructField {
   1: bool isRequired;
   2: i64 type;
   3: string name;
-  @cpp.Type{template = "std::unordered_map"}
-  4: optional map<string, string> annotations;
+  // Unstructured annotations are no longer supported in legacy reflection.
+  // @cpp.Type{template = "std::unordered_map"}
+  // REMOVED: 4: optional map<string, string> annotations;
   5: i16 order; // lexical order of this field, 0-based
 }
 

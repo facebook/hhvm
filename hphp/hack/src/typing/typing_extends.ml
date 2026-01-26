@@ -517,29 +517,6 @@ let check_override_concrete_static_prop
           Static_property_override.{ prop_name = member_name; child_prop_pos }
         )
 
-(** Checks that methods annotated with __DynamicallyCallable are only overridden with
-    dynamically callable method. *)
-let check_dynamically_callable
-    env member_name parent_class_elt class_elt on_error =
-  if
-    get_ce_dynamicallycallable parent_class_elt
-    && not (get_ce_dynamicallycallable class_elt)
-  then
-    let (lazy parent_pos) = parent_class_elt.ce_pos in
-    let (lazy pos) = class_elt.ce_pos in
-    let (snd_err1, snd_err2) =
-      Typing_error.Secondary.
-        ( Bad_method_override { pos; member_name },
-          Method_not_dynamically_callable { pos; parent_pos } )
-    in
-    (* Modify the callback so that we append `snd_err2` to `snd_err1` when
-       evaluating *)
-    let on_error =
-      Typing_error.Reasons_callback.prepend_on_apply on_error snd_err1
-    in
-    Typing_error_utils.add_typing_error ~env
-    @@ Typing_error.apply_reasons ~on_error snd_err2
-
 let bad_sealed_override_error
     env member_name parent_class_elt class_elt on_error =
   let (lazy parent_pos) = parent_class_elt.ce_pos in
@@ -1243,12 +1220,6 @@ let check_override
      * own code-path with this check, see `check_constructors`
      *)
     check_override_final_method env parent_class_elt class_elt on_error;
-    check_dynamically_callable
-      env
-      member_name
-      parent_class_elt
-      class_elt
-      on_error;
     check_sealed_allowlist
       env
       member_name

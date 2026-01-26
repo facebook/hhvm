@@ -1,0 +1,20 @@
+> lines and columns in ranges are 1-indexed
+received code:
+1 <?hh
+2 // Regression test for deleting newlines at the top of the file (T252565225)
+3 
+4 
+5 
+6 class C {}
+
+New text at range 3:1-5:1 (1-indexed) is
+''
+
+Code after applying language server edits:
+'<?hh
+// Regression test for deleting newlines at the top of the file (T252565225)
+
+class C {}
+'
+
+Matched Hackfmt result

@@ -20,7 +20,6 @@
 #include <thrift/test/reflection/gen-cpp2/reflection_for_each_field.h>
 
 #include <gtest/gtest.h>
-#include <folly/String.h>
 
 using namespace apache::thrift;
 using namespace test_cpp2::cpp_reflection;

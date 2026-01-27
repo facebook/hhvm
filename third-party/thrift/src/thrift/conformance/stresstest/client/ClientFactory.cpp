@@ -24,6 +24,7 @@
 #include <folly/FileUtil.h>
 #include <folly/executors/IOThreadPoolExecutor.h>
 #include <folly/experimental/io/AsyncIoUringSocket.h>
+#include <folly/experimental/io/AsyncIoUringSocketFactory.h>
 #include <folly/experimental/io/IoUringBackend.h>
 #include <folly/io/async/AsyncSSLSocket.h>
 #include <folly/io/async/AsyncSocket.h>
@@ -280,6 +281,10 @@ folly::AsyncTransport::UniquePtr createFizzSocket(
 folly::AsyncTransport::UniquePtr createIOUring(
     folly::EventBase* evb, const ClientConnectionConfig& cfg) {
   auto ring = new folly::AsyncIoUringSocket(evb);
+  if (cfg.ioUringZcrx) {
+    folly::AsyncIoUringSocketFactory::bindSocketForZcRx(
+        *ring, cfg.serverHost.getIPAddress(), cfg.serverHost.getPort());
+  }
   ring->connect(cfg.connectCb, cfg.serverHost);
   return folly::AsyncTransport::UniquePtr(ring);
 }
@@ -288,6 +293,10 @@ folly::AsyncTransport::UniquePtr createIOUringTLS(
     folly::EventBase* evb, const ClientConnectionConfig& cfg) {
   auto sock = folly::AsyncSSLSocket::newSocket(getSslContext(cfg), evb);
   auto ring = new folly::AsyncIoUringSocket(std::move(sock));
+  if (cfg.ioUringZcrx) {
+    folly::AsyncIoUringSocketFactory::bindSocketForZcRx(
+        *ring, cfg.serverHost.getIPAddress(), cfg.serverHost.getPort());
+  }
   ring->connect(cfg.connectCb, cfg.serverHost);
   return folly::AsyncTransport::UniquePtr(ring);
 }
@@ -295,6 +304,10 @@ folly::AsyncTransport::UniquePtr createIOUringTLS(
 folly::AsyncTransport::UniquePtr createIOUringFizz(
     folly::EventBase* evb, const ClientConnectionConfig& cfg) {
   auto sock = new folly::AsyncIoUringSocket(evb);
+  if (cfg.ioUringZcrx) {
+    folly::AsyncIoUringSocketFactory::bindSocketForZcRx(
+        *sock, cfg.serverHost.getIPAddress(), cfg.serverHost.getPort());
+  }
   auto fizzClient = fizz::client::AsyncFizzClient::UniquePtr(
       new fizz::client::AsyncFizzClient(
           folly::AsyncTransport::UniquePtr(sock), getFizzContext(cfg)));

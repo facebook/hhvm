@@ -655,6 +655,10 @@ class TypeRef final {
 
   template <Kind k>
   using KindConstant = std::integral_constant<Kind, k>;
+  template <typename... Cases>
+  using MatchKindResult = decltype(folly::overload(FOLLY_DECLVAL(Cases)...)(
+      KindConstant<Kind::BOOL>{}));
+
   /**
    * Invokes the provided visitor function with `KindConstant<kind>` where
    * `kind` is provided at runtime. For example:
@@ -670,7 +674,7 @@ class TypeRef final {
    *     the behavior is undefined.
    */
   template <typename... F>
-  FOLLY_ALWAYS_INLINE decltype(auto) matchKind(F&&... visitors) const;
+  MatchKindResult<F...> matchKind(F&&... visitors) const;
 
  private:
   Alternative type_;
@@ -1362,7 +1366,11 @@ inline TypeRef TypeSystem::UserDefined(UriView uri) const {
 
 // TypeRef::matchKind implementation (defined after OpaqueAliasNode is complete)
 template <typename... F>
-FOLLY_ALWAYS_INLINE decltype(auto) TypeRef::matchKind(F&&... visitors) const {
+TypeRef::MatchKindResult<F...> TypeRef::matchKind(F&&... visitors) const {
+  if (isOpaqueAlias()) {
+    return asOpaqueAlias().targetType().matchKind(std::forward<F>(visitors)...);
+  }
+
   // Intentionally does not support pointer-to-member callables or &&-qualified
   // operator() for build speed.
   auto invokeWith = folly::overload(std::forward<F>(visitors)...);
@@ -1400,9 +1408,9 @@ FOLLY_ALWAYS_INLINE decltype(auto) TypeRef::matchKind(F&&... visitors) const {
     case Kind::ENUM:
       return invokeWith(KindConstant<Kind::ENUM>{});
     case Kind::OPAQUE_ALIAS:
-      return asOpaqueAliasUnchecked().targetType().matchKind(
-          std::forward<F>(visitors)...);
+      break;
   }
+  folly::assume_unreachable();
 }
 
 } // namespace apache::thrift::type_system

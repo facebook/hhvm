@@ -18,9 +18,11 @@ package stats
 
 import (
 	"runtime"
+	"slices"
 	"sync"
 	"testing"
 	"time"
+	"unsafe"
 
 	"github.com/stretchr/testify/require"
 )
@@ -125,9 +127,12 @@ func TestBasicTimeseries(t *testing.T) {
 	}
 	ts := NewTimingSeries(&config)
 	var sum float64
-	for _, datum := range testData {
+	durations := make([]time.Duration, len(testData))
+	for i, datum := range testData {
 		sum += datum
-		ts.Record(time.Duration(datum * float64(time.Second)))
+		d := time.Duration(datum * float64(time.Second))
+		durations[i] = d
+		ts.Record(d)
 	}
 	avg := sum / float64(len(testData))
 	// now wait at least one interval so summary will include all data
@@ -137,6 +142,77 @@ func TestBasicTimeseries(t *testing.T) {
 	require.Len(t, testData, int(summary.Count))
 	// verify avg error is < 10x precision
 	require.InEpsilon(t, avg, summary.Average.Seconds(), config.Precision.Seconds()*10.0)
+
+	// compare Z-score based percentile estimation against exact percentiles
+	// calculated from the full dataset. The Z-score method assumes normal
+	// distribution (X = μ + Zσ), real latency data is often right-skewed
+	// so we allow up to 30% error.
+	//
+	// Exact percentiles require sorting to find the value at position n*p,
+	// while Z-score estimation only needs mean and standard deviation.
+	//
+	// Example output:
+	//   P90: exact=6.52ms, estimated=6.464ms, error=-0.9%
+	//   P95: exact=8.305ms, estimated=7.464ms, error=-10.1%
+	//   P99: exact=12.506ms, estimated=9.342ms, error=-25.3%
+	slices.Sort(durations)
+	n := len(durations)
+	exactP90 := durations[int(float64(n)*0.90)]
+	exactP95 := durations[int(float64(n)*0.95)]
+	exactP99 := durations[int(float64(n)*0.99)]
+
+	t.Logf("Percentile accuracy (Z-score approximation vs exact):")
+	t.Logf("  P90: exact=%v, estimated=%v, error=%.1f%%", exactP90, summary.P90, percentError(exactP90, summary.P90))
+	t.Logf("  P95: exact=%v, estimated=%v, error=%.1f%%", exactP95, summary.P95, percentError(exactP95, summary.P95))
+	t.Logf("  P99: exact=%v, estimated=%v, error=%.1f%%", exactP99, summary.P99, percentError(exactP99, summary.P99))
+
+	require.InEpsilon(t, exactP90.Seconds(), summary.P90.Seconds(), 0.30)
+	require.InEpsilon(t, exactP95.Seconds(), summary.P95.Seconds(), 0.30)
+	require.InEpsilon(t, exactP99.Seconds(), summary.P99.Seconds(), 0.30)
+}
+
+func percentError(exact, estimated time.Duration) float64 {
+	if exact == 0 {
+		return 0
+	}
+	return 100.0 * float64(estimated-exact) / float64(exact)
+}
+
+func TestMemoryUsageComparison(t *testing.T) {
+	// Compare memory usage between storing raw data vs Z-score estimation.
+	//
+	// Raw storage: O(n) - must store all values for exact percentiles
+	// Z-score:     O(buckets) - fixed size regardless of sample count
+	//
+	// Example output:
+	//   Memory comparison for 1000000 samples with 1m0s history:
+	//     Raw storage:     8000000 bytes (7.63 MB)
+	//     Z-score storage: 3840 bytes (3.75 KB)
+	//     Savings:         2083x smaller
+
+	const numSamples = 1_000_000
+	config := &TimingConfig{
+		History:   60 * time.Second,
+		Precision: time.Microsecond,
+		Interval:  time.Second,
+	}
+
+	// Raw storage: each time.Duration is 8 bytes (int64)
+	rawBytes := numSamples * int(unsafe.Sizeof(time.Duration(0)))
+
+	// Z-score storage: fixed number of buckets
+	numBuckets := int(config.History / config.Interval)
+	bucketBytes := int(unsafe.Sizeof(bucket{}))
+	zscoreBytes := numBuckets * bucketBytes
+
+	savings := float64(rawBytes) / float64(zscoreBytes)
+
+	t.Logf("Memory comparison for %d samples with %v history:", numSamples, config.History)
+	t.Logf("  Raw storage:     %d bytes (%.2f MB)", rawBytes, float64(rawBytes)/(1024*1024))
+	t.Logf("  Z-score storage: %d bytes (%.2f KB)", zscoreBytes, float64(zscoreBytes)/1024)
+	t.Logf("  Savings:         %.0fx smaller", savings)
+
+	require.Greater(t, savings, 100.0)
 }
 
 func TestMultiThreadedTimeseries(t *testing.T) {

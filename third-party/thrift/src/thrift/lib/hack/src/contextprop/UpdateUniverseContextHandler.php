@@ -17,8 +17,10 @@
  */
 
 final class UpdateUniverseContextHandler implements IContextHandler {
+
   use TThriftPoliciedOptOutList;
-  use PZ2UniversePropagationTrait;
+  use TPZ2UniversePropagation;
+  use TPrivacyLibPZ2UniversePropagation;
 
   public function onIncomingDownstream(
     ThriftContextPropState $mutable_ctx,
@@ -113,7 +115,7 @@ final class UpdateUniverseContextHandler implements IContextHandler {
       );
       $privacy_lib =
         ThriftServiceMethodNamePrivacyLib::get($xid, $sr_config_service_name);
-      $asset_universe = self::getPLArtifactUniverse($privacy_lib);
+      $asset_universe = self::getArtifactUniverseForPropagation($privacy_lib);
       if ($asset_universe is nonnull) {
         if ($asset_universe->shouldDynamicallyPropagate()) {
           $current_universe =

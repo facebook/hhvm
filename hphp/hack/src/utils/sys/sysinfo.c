@@ -14,16 +14,13 @@
 #include <caml/mlvalues.h>
 
 #include <assert.h>
-#ifdef __linux__
 #include <sys/sysinfo.h>
-#endif
 
 #include <unistd.h>
 
 // This function returns an option of a 9-int-member struct
 value hh_sysinfo(void) {
   CAMLparam0();
-#ifdef __linux__
   CAMLlocal2(result, some);
   result = caml_alloc_tuple(9);
   struct sysinfo info = {0}; // this initializes all members to 0
@@ -42,14 +39,6 @@ value hh_sysinfo(void) {
   some = caml_alloc(1, 0);
   Store_field(some, 0, result);
   CAMLreturn(some);
-#else
-  CAMLreturn(Val_int(0)); // None
-#endif
-}
-
-CAMLprim value hh_sysinfo_is_apple_os(void) {
-  CAMLparam0();
-  return Val_bool(0);
 }
 
 value hh_nproc(void) {
@@ -57,29 +46,4 @@ value hh_nproc(void) {
   CAMLlocal1(result);
   result = Val_long(sysconf(_SC_NPROCESSORS_ONLN));
   CAMLreturn(result);
-}
-
-/**
- * There are a bunch of functions that you expect to return a pid,
- * like Unix.getpid() and Unix.create_process(). However, on
- * Windows, instead of returning the process ID, they return a
- * process handle.
- *
- * Process handles seem act like pointers to a process. You can have
- * more than one handle that points to a single process (unlike
- * pids, where there is a single pid for a process).
- *
- * This isn't a problem normally, since functons like Unix.waitpid()
- * will take the process handle on Windows. But if you want to print
- * or log the pid, then you need to dereference the handle and get
- * the pid. And that's what this function does.
- */
-value pid_of_handle(value handle) {
-  CAMLparam1(handle);
-  CAMLreturn(handle);
-}
-
-value handle_of_pid_for_termination(value pid) {
-  CAMLparam1(pid);
-  CAMLreturn(pid);
 }

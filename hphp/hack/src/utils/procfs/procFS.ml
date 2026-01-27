@@ -84,7 +84,7 @@ let asset_procfs_supported =
     | Some supported -> supported
     | None ->
       let supported =
-        if Sys.unix && Sys.file_exists "/proc" then
+        if Sys.file_exists "/proc" then
           Ok ()
         else
           Error "Proc filesystem not supported"

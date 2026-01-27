@@ -22,10 +22,6 @@ type ('in_, 'out) handle = {
   pid: int;
 }
 
-(* Windows: ensure that the serialize/deserialize functions
-   for the custom block of "Unix.file_descr" are registred. *)
-let () = Lazy.force Handle.init
-
 let to_channel :
     'a out_channel ->
     ?flags:Marshal.extern_flags list ->
@@ -50,16 +46,11 @@ let cast_in ic = ic
 
 let cast_out oc = oc
 
-(* We cannot fork() on Windows, so in order to emulate this in a
- * cross-platform way, we use create_process() and set the HH_SERVER_DAEMON
- * environment variable to indicate which function the child should
- * execute. On Unix, create_process() does fork + exec, so global state is
- * not copied; in particular, if you have set a mutable reference the
- * daemon will not see it. All state must be explicitly passed via
- * environment variables; see set/get_context() below.
- *
- * With some factoring we could make the daemons into separate binaries
- * altogether and dispense with this emulation. *)
+(* We use create_process() and set the HH_SERVER_DAEMON environment variable
+ * to indicate which function the child should execute. create_process() does
+ * fork + exec, so global state is not copied; in particular, if you have set
+ * a mutable reference the daemon will not see it. All state must be explicitly
+ * passed via environment variables; see set/get_context() below. *)
 
 module Entry : sig
   (* All the 'untyped' operations---that are required for the
@@ -162,14 +153,12 @@ end = struct
 
   exception Context_not_found
 
-  (* How this works on Unix: It may appear like we are passing file descriptors
-   * from one process to another here, but in_handle / out_handle are actually
-   * file descriptors that are already open in the current process -- they were
-   * created by the parent process before it did fork + exec. However, since
-   * exec causes the child to "forget" everything, we have to pass the numbers
-   * of these file descriptors as arguments.
-   *
-   * I'm not entirely sure what this does on Windows.
+  (* It may appear like we are passing file descriptors from one process to
+   * another here, but in_handle / out_handle are actually file descriptors
+   * that are already open in the current process -- they were created by the
+   * parent process before it did fork + exec. However, since exec causes the
+   * child to "forget" everything, we have to pass the numbers of these file
+   * descriptors as arguments.
    *
    * Might raise {!Context_not_found} *)
   let get_context () =

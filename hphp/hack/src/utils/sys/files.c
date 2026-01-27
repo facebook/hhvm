@@ -18,10 +18,8 @@
 
 #include <sys/time.h>
 
-#ifdef __linux__
 #include <linux/magic.h>
 #include <sys/vfs.h>
-#endif
 
 void hh_lutimes(value filename_v) {
   CAMLparam1(filename_v);
@@ -35,7 +33,6 @@ void hh_lutimes(value filename_v) {
 
 value hh_is_nfs(value filename_v) {
   CAMLparam1(filename_v);
-#ifdef __linux__
   struct statfs buf;
   const char* filename = String_val(filename_v);
   int success = statfs(filename, &buf);
@@ -52,8 +49,6 @@ value hh_is_nfs(value filename_v) {
     default:
       CAMLreturn(Val_bool(0));
   }
-#endif
-  CAMLreturn(Val_bool(0));
 }
 
 // C89 spec: "The primary use of the freopen function is to change the file associated

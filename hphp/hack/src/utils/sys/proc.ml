@@ -18,65 +18,57 @@ let cmdline_delimiter_re = Str.regexp "\x00"
 
 (* Takes a PID and returns the full command line the process was started with *)
 let get_cmdline (pid : int) : (string, string) result =
-  (* NOTE: Linux's OS type is Unix *)
-  if not Sys.unix then
-    Error "Getting cmdline is not implemented for non-Unix OS types"
-  else
-    let cmdline_path = Printf.sprintf "/proc/%d/cmdline" pid in
-    try
-      let line =
-        Str.global_replace cmdline_delimiter_re " " (Disk.cat cmdline_path)
-      in
-      Ok line
-    with
-    | e ->
-      let error =
-        Printf.sprintf
-          "No 'cmdline' file found for PID %d: '%s'"
-          pid
-          (Exn.to_string e)
-      in
-      Error error
+  let cmdline_path = Printf.sprintf "/proc/%d/cmdline" pid in
+  try
+    let line =
+      Str.global_replace cmdline_delimiter_re " " (Disk.cat cmdline_path)
+    in
+    Ok line
+  with
+  | e ->
+    let error =
+      Printf.sprintf
+        "No 'cmdline' file found for PID %d: '%s'"
+        pid
+        (Exn.to_string e)
+    in
+    Error error
 
 (* Takes a PID and returns the information about the process, including
    the name and the PID of the parent process (PPID) *)
 let get_proc_stat (pid : int) : (proc_stat, string) result =
-  (* NOTE: Linux's OS type is Unix *)
-  if not Sys.unix then
-    Error "Getting cmdline is not implemented for non-Unix OS types"
-  else
-    let stat_path = Printf.sprintf "/proc/%d/stat" pid in
+  let stat_path = Printf.sprintf "/proc/%d/stat" pid in
+  try
+    let stat = Scanf.Scanning.from_string (Disk.cat stat_path) in
     try
-      let stat = Scanf.Scanning.from_string (Disk.cat stat_path) in
-      try
-        let record =
-          Scanf.bscanf
-            stat
-            "%d (%s@) %c %d"
-            (fun _my_pid _comm _state ppid : (proc_stat, string) result ->
-              match get_cmdline pid with
-              | Ok cmdline -> Ok { cmdline; ppid }
-              | Error err -> Error err)
-        in
-        record
-      with
-      | e ->
-        let error =
-          Printf.sprintf
-            "Error reading 'stat' for PID %d: %s"
-            pid
-            (Exn.to_string e)
-        in
-        Error error
+      let record =
+        Scanf.bscanf
+          stat
+          "%d (%s@) %c %d"
+          (fun _my_pid _comm _state ppid : (proc_stat, string) result ->
+            match get_cmdline pid with
+            | Ok cmdline -> Ok { cmdline; ppid }
+            | Error err -> Error err)
+      in
+      record
     with
     | e ->
       let error =
         Printf.sprintf
-          "No 'stat' file found for PID %d: '%s'"
+          "Error reading 'stat' for PID %d: %s"
           pid
           (Exn.to_string e)
       in
       Error error
+  with
+  | e ->
+    let error =
+      Printf.sprintf
+        "No 'stat' file found for PID %d: '%s'"
+        pid
+        (Exn.to_string e)
+    in
+    Error error
 
 (** This returns the cmdlines of all callers in the PPID stack, with the ancestor caller at head
 e.g. "/usr/lib/systemd/systemd --system" and the cmdline of the [pid] parameter at the tail.
@@ -163,23 +155,19 @@ that the process wants you to see.
 3. Can we send SIGKILL 0 to it? If this succeeds without throwing an exception,
 then the process is alive. *)
 let is_alive ~(pid : int) ~(expected : string) : bool =
-  if not Sys.unix then
-    failwith "is_alive only implemented on Linux"
-  else begin
-    (* 1. Can we fetch /proc/<pid>/cmdline ? *)
-    match get_cmdline pid with
-    | Error _ -> false
-    | Ok cmdline ->
-      (* 2. Is /proc/<pid>/cmdline the process-name that we expected? *)
-      (* To consider: it would be more accurate, but less usable, to test whether /proc/stat
-         records the same starttime as expected. See 'man proc' for more details. *)
-      if String.is_substring cmdline ~substring:expected then
-        try
-          (* 3. Does "SIGKILL <pid> 0" succeed to send a message to the process? *)
-          Unix.kill pid 0;
-          true
-        with
-        | _ -> false
-      else
-        false
-  end
+  (* 1. Can we fetch /proc/<pid>/cmdline ? *)
+  match get_cmdline pid with
+  | Error _ -> false
+  | Ok cmdline ->
+    (* 2. Is /proc/<pid>/cmdline the process-name that we expected? *)
+    (* To consider: it would be more accurate, but less usable, to test whether /proc/stat
+       records the same starttime as expected. See 'man proc' for more details. *)
+    if String.is_substring cmdline ~substring:expected then
+      try
+        (* 3. Does "SIGKILL <pid> 0" succeed to send a message to the process? *)
+        Unix.kill pid 0;
+        true
+      with
+      | _ -> false
+    else
+      false

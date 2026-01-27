@@ -19,7 +19,6 @@
    files
    gc_profiling
    getrusage
-   handle_stubs
    priorities
    processor_info
    realpath

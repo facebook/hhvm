@@ -11,8 +11,8 @@ open Hh_prelude
 
 (** What is the path to the hh_server binary?
 1. If HH_SERVER_PATH environment variable is defined, use this (even if it doesn't exist on disk!)
-2. Otherwise, if "dirname(realpath(executable_name))/hh_server[.exe]" exists then use this
-3. Otherwise, use unqualified "hh_server[.exe]" (hence search on PATH).
+2. Otherwise, if "dirname(realpath(executable_name))/hh_server" exists then use this
+3. Otherwise, use unqualified "hh_server" (hence search on PATH).
 The third case is currently what happens for "hh switch buck2" *)
 let get_hhserver_path () =
   match Sys.getenv_opt "HH_SERVER_PATH" with
@@ -65,32 +65,29 @@ type env = {
  * systemd might not have a proper working user session, so we might not be
  * able to run commands via systemd-run as a user process *)
 let can_run_systemd () =
-  if not Sys.unix then
+  (* Verify systemd-run is in the path *)
+  let systemd_binary =
+    try
+      Unix.open_process_in "which systemd-run 2> /dev/null"
+      |> In_channel.input_line
+    with
+    | _ -> None
+  in
+  if is_none systemd_binary then
     false
   else
-    (* if we're on Unix, verify systemd-run is in the path *)
-    let systemd_binary =
-      try
-        Unix.open_process_in "which systemd-run 2> /dev/null"
-        |> In_channel.input_line
-      with
-      | _ -> None
+    (* Use `timeout` in case it hangs mysteriously.
+     * `--quiet` only suppresses stdout. *)
+    let ic =
+      Unix.open_process_in
+        "timeout 1 systemd-run --scope --quiet --user -- true 2> /dev/null"
     in
-    if is_none systemd_binary then
-      false
-    else
-      (* Use `timeout` in case it hangs mysteriously.
-       * `--quiet` only suppresses stdout. *)
-      let ic =
-        Unix.open_process_in
-          "timeout 1 systemd-run --scope --quiet --user -- true 2> /dev/null"
-      in
-      (* If all goes right, `systemd-run` will return immediately with exit code 0
-       * and run `true` asynchronously as a service. If it goes wrong, it will exit
-       * with a non-zero exit code *)
-      match Unix.close_process_in ic with
-      | Unix.WEXITED 0 -> true
-      | _ -> false
+    (* If all goes right, `systemd-run` will return immediately with exit code 0
+     * and run `true` asynchronously as a service. If it goes wrong, it will exit
+     * with a non-zero exit code *)
+    match Unix.close_process_in ic with
+    | Unix.WEXITED 0 -> true
+    | _ -> false
 
 let start_server (env : env) =
   let {
@@ -152,7 +149,9 @@ let start_server (env : env) =
          *
          * Note: Yes, the FD is available in the monitor process as well, but
          * it doesn't, and shouldn't, use it. *)
-        [| "--waiting-client"; string_of_int (Handle.get_handle out_fd) |];
+        [|
+          "--waiting-client"; string_of_int (Sys_utils.fd_to_int_naughty out_fd);
+        |];
         (if ignore_hh_version then
           [| "--ignore-hh-version" |]
         else

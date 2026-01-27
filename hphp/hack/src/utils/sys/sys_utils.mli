@@ -10,8 +10,6 @@ external realpath : string -> string option = "hh_realpath"
 
 external is_nfs : string -> bool = "hh_is_nfs"
 
-external is_apple_os : unit -> bool = "hh_sysinfo_is_apple_os"
-
 (** E.g. freopen "file.txt" "a" Unix.stdout will redirect stdout to the file. *)
 external freopen : string -> string -> Unix.file_descr -> unit = "hh_freopen"
 
@@ -32,6 +30,16 @@ val null_path : string
 val temp_dir_name : string
 
 val getenv_path : unit -> string option
+
+(** AVOID
+  * These "_naughty" functions break the abstraction of OCaml's Unix.file_descr
+  * type by using Obj.magic to convert between file descriptors and integers.
+  * Current usage is primarily for passing fd numbers across process boundaries
+  * via command line arguments. *)
+val fd_to_int_naughty : Unix.file_descr -> int
+
+(** AVOID, see {!fd_to_int_naughty} *)
+val int_to_fd_naughty : int -> Unix.file_descr
 
 (** This is a string "fd123:456" which uniquely identifies this file's inode *)
 val show_inode : Unix.file_descr -> string
@@ -196,16 +204,9 @@ val nbr_procs : int
 external set_priorities : cpu_priority:int -> io_priority:int -> unit
   = "hh_set_priorities"
 
-external pid_of_handle : int -> int = "pid_of_handle"
-
-external handle_of_pid_for_termination : int -> int
-  = "handle_of_pid_for_termination"
-
 val terminate_process : int -> unit
 
 val lstat : string -> Unix.stats
-
-val normalize_filename_dir_sep : string -> string
 
 val name_of_signal : int -> string
 

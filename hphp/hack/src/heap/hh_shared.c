@@ -174,15 +174,7 @@
 #endif //#ifdef __linux__
 
 #ifndef MAP_NORESERVE
-  // This flag was unimplemented in FreeBSD and then later removed
 #  define MAP_NORESERVE 0
-#endif
-
-// The following 'typedef' won't be required anymore
-// when dropping support for OCaml < 4.03
-#ifdef __MINGW64__
-typedef unsigned __int32 uint32_t;
-typedef unsigned __int64 uint64_t;
 #endif
 
 

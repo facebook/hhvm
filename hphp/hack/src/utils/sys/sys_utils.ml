@@ -14,8 +14,6 @@ external realpath : string -> string option = "hh_realpath"
 
 external is_nfs : string -> bool = "hh_is_nfs"
 
-external is_apple_os : unit -> bool = "hh_sysinfo_is_apple_os"
-
 external freopen : string -> string -> Unix.file_descr -> unit = "hh_freopen"
 
 external open_tmpfile :
@@ -40,7 +38,6 @@ let getenv_home () =
 
 let getenv_term () =
   let term_var = "TERM" in
-  (* This variable does not exist on windows. *)
   get_env term_var
 
 let path_sep = ":"
@@ -51,7 +48,6 @@ let temp_dir_name = "/tmp"
 
 let getenv_path () =
   let path_var = "PATH" in
-  (* Same variable on windows *)
   get_env path_var
 
 let open_in_no_fail fn =
@@ -494,22 +490,9 @@ let uptime () =
 external set_priorities : cpu_priority:int -> io_priority:int -> unit
   = "hh_set_priorities"
 
-external pid_of_handle : int -> int = "pid_of_handle"
-
-external handle_of_pid_for_termination : int -> int
-  = "handle_of_pid_for_termination"
-
 let terminate_process pid = Unix.kill pid Sys.sigkill
 
 let lstat = Unix.lstat
-
-let normalize_filename_dir_sep =
-  let dir_sep_char = Filename.dir_sep.[0] in
-  String.map ~f:(fun c ->
-      if Char.equal c dir_sep_char then
-        '/'
-      else
-        c)
 
 let name_of_signal = function
   | s when s = Sys.sigabrt -> "SIGABRT (Abnormal termination)"
@@ -556,7 +539,21 @@ type processor_info = {
 
 external processor_info : unit -> processor_info = "hh_processor_info"
 
+(* This assertion allows us to safely use Obj.magic to
+   * convert between Unix.file_descr and int below.
+   * This assertion will fail on Windows, but we don't support Windows anyway. *)
+let () = assert (Obj.is_int (Obj.repr Unix.stdin))
+
 let string_of_fd (fd : Unix.file_descr) : string = string_of_int (Obj.magic fd)
+
+(** AVOID. Breaks the abstraction of OCaml's Unix.file_descr
+ * The assertion above ensures this is safe-ish. Use sparingly.
+ * This Obj.magic has been present since D2332777 (15f9ac332fe5, Aug 2015)
+ * via Handle.get_handle/wrap_handle, which were defined as `Obj.magic` for Unix-style OSs *)
+let fd_to_int_naughty (fd : Unix.file_descr) : int = Obj.magic fd
+
+(** AVOID, see {!fd_to_int_naughty} *)
+let int_to_fd_naughty (i : int) : Unix.file_descr = Obj.magic i
 
 let show_inode (fd : Unix.file_descr) : string =
   let stat = Unix.fstat fd in
@@ -704,8 +701,6 @@ let atomically_create_and_init_file
     ~(wr : bool)
     (file_perm : Unix.file_perm)
     ~(init : Unix.file_descr -> unit) : Unix.file_descr option =
-  if not Sys.unix then
-    failwith "O_TMPFILE, linkat and /proc/fd all require linux";
   (* There's no way to pass O_TMPFILE to Unix.openfile. So, we need our own version... *)
   let fd = open_tmpfile ~rd ~wr ~dir:(Filename.dirname path) ~file_perm in
   try

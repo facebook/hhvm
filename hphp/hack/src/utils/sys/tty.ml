@@ -190,7 +190,7 @@ let eprintf fmt =
  * [1]: http://invisible-island.net/ncurses/man/tput.1.html
  *)
 let get_term_cols () =
-  if (not Sys.unix) || not (supports_color ()) then
+  if not (supports_color ()) then
     None
   else
     Option.map ~f:int_of_string (Sys_utils.exec_read "tput cols")

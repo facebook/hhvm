@@ -1,0 +1,13 @@
+string(25) "O:1:"A":1:{s:1:"x";i:12;}"
+string(30) "D:2:{s:1:"a";i:1;s:1:"b";i:2;}"
+string(18) "v:3:{i:1;i:2;i:3;}"
+string(18) "k:3:{i:1;i:2;i:3;}"
+string(4) "i:1;"
+string(6) "d:1.5;"
+string(10) "s:3:"foo";"
+string(4) "b:1;"
+string(2) "N;"
+threw InvalidOperationException: Cannot serialize collection due to options
+threw InvalidOperationException: Cannot serialize collection due to options
+threw InvalidOperationException: Cannot serialize collection due to options
+threw InvalidOperationException: Cannot serialize collection due to options

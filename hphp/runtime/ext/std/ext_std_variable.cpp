@@ -444,6 +444,7 @@ struct SerializeOptions {
   bool ignoreLateInit = false;
   bool serializeProvenanceAndLegacy = false;
   bool disallowObjects = false;
+  bool disallowCollections = false;
   // When serializing a class or lazy class, do not promote them to strings
   bool keepClasses = false;
 };
@@ -518,6 +519,7 @@ ALWAYS_INLINE String serialize_impl(const Variant& value,
   if (opts.ignoreLateInit)      vs.setIgnoreLateInit();
   if (opts.serializeProvenanceAndLegacy) vs.setSerializeProvenanceAndLegacy();
   if (opts.disallowObjects)     vs.setDisallowObjects();
+  if (opts.disallowCollections) vs.setDisallowCollections();
   if (opts.keepClasses)         vs.setKeepClasses();
   if (pure) vs.setPure();
   // Keep the count so recursive calls to serialize() embed references properly.
@@ -541,6 +543,7 @@ const StaticString
   s_warnOnPHPArrays("warnOnPHPArrays"),
   s_ignoreLateInit("ignoreLateInit"),
   s_disallowObjects("disallowObjects"),
+  s_disallowCollections("disallowCollections"),
   s_serializeProvenanceAndLegacy("serializeProvenanceAndLegacy"),
   s_keepClasses("keepClasses");
 
@@ -562,6 +565,8 @@ String HHVM_FUNCTION(HH_serialize_with_options,
     options[s_serializeProvenanceAndLegacy].toBoolean();
   opts.disallowObjects = options.exists(s_disallowObjects) &&
     options[s_disallowObjects].toBoolean();
+  opts.disallowCollections = options.exists(s_disallowCollections) &&
+    options[s_disallowCollections].toBoolean();
   opts.keepClasses = options.exists(s_keepClasses) &&
     options[s_keepClasses].toBoolean();
   return serialize_impl(value, opts, false);

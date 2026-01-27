@@ -129,6 +129,8 @@ struct VariableSerializer {
 
   void setDisallowObjects() { m_disallowObjects = true; }
 
+  void setDisallowCollections() { m_disallowCollections = true; }
+
   void setKeepClasses() { m_keepClasses = true; }
 
   // Should we be calling the pure callbacks
@@ -295,6 +297,7 @@ private:
   bool m_ignoreLateInit{false};  // ignore uninitalized late init props
   bool m_skipJsonSerializable{false};  // skip JsonSerializable handling for JSON
   bool m_disallowObjects{false};  // throw if serializing non-collection object
+  bool m_disallowCollections{false}; // throw if serializing collection object
   bool m_keepClasses{false};     // emit lazy class if serializing class or lazy class
   bool m_hasHackWarned{false};   // have we already warned on Hack arrays?
   bool m_hasDictWarned{false};   // have we already warned on dicts?

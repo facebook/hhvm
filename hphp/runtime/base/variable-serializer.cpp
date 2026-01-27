@@ -662,6 +662,7 @@ void VariableSerializer::write(const String& v) {
 const StaticString
   s_invalidMethCallerAPC("Cannot store meth_caller in APC"),
   s_invalidMethCallerSerde("Cannot serialize meth_caller"),
+  s_disallowedCollectionSerde("Cannot serialize collection due to options"),
   s_disallowedObjectSerde("Cannot serialize object due to options");
 
 void VariableSerializer::write(const Object& v) {
@@ -2120,6 +2121,12 @@ void VariableSerializer::serializeCollection(ObjectData* obj) {
   using AK = VariableSerializer::ArrayKind;
   int64_t sz = collections::getSize(obj);
   auto type = obj->collectionType();
+
+  if (m_disallowCollections) {
+    SystemLib::throwInvalidOperationExceptionObject(
+      VarNR{s_disallowedCollectionSerde.get()}
+    );
+  }
 
   if (isMapCollection(type)) {
     pushObjectInfo(obj->getClassName(),'K');

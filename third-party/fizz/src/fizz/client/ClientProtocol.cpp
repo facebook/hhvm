@@ -931,6 +931,7 @@ EventHandler<ClientTypes, StateEnum::Uninitialized, Event::Connect>::handle(
       connect.extensions.get());
 
   std::vector<ExtensionType> requestedExtensions;
+  requestedExtensions.reserve(chlo.extensions.size() + 2);
   for (const auto& extension : chlo.extensions) {
     requestedExtensions.push_back(extension.extension_type);
   }

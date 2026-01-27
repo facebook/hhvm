@@ -701,7 +701,7 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 - bool Eval.EnableAsyncJIT = false, UNKNOWN
 - bool Eval.EnableAsyncJITLive = false, arnabde
 - bool Eval.EnableAsyncJITProfile = true, UNKNOWN
-- int Eval.AsyncJitWorkerThreads = 4, UNKNOWN
+- int Eval.AsyncJitWorkerThreads, UNKNOWN
 
 - bool Eval.EnableSBProfSerialize = false, arnabde
 - bool Eval.EnableSBProfDeserialize = false, arnabde

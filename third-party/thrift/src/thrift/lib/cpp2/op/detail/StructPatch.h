@@ -27,6 +27,11 @@
 #include <thrift/lib/cpp2/type/Field.h>
 #include <thrift/lib/cpp2/type/Id.h>
 
+namespace apache::thrift::protocol {
+template <bool IsUnion>
+class DynamicStructurePatch;
+}
+
 namespace apache::thrift::op::detail {
 
 template <typename T>
@@ -882,6 +887,9 @@ class StructPatch : public BaseEnsurePatch<Patch, StructPatch<Patch>> {
     });
     return removed;
   }
+
+  template <bool>
+  friend class protocol::DynamicStructurePatch;
 };
 
 /// Patch for a Thrift union.

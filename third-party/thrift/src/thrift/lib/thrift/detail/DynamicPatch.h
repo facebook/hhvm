@@ -18,10 +18,22 @@
 
 #include <folly/lang/Badge.h>
 #include <thrift/lib/cpp2/op/Patch.h>
+#include <thrift/lib/cpp2/op/detail/PatchTraits.h>
 #include <thrift/lib/cpp2/protocol/FieldMask.h>
 #include <thrift/lib/cpp2/protocol/Object.h>
 #include <thrift/lib/cpp2/protocol/Patch.h>
 #include <thrift/lib/cpp2/protocol/detail/DynamicCursorSerializer.h>
+
+namespace apache::thrift::ident {
+struct add;
+struct append;
+struct assign;
+struct remove;
+struct ensure;
+struct put;
+struct patch;
+struct patchPrior;
+} // namespace apache::thrift::ident
 
 namespace apache::thrift::op::detail {
 template <typename>
@@ -81,6 +93,51 @@ void convertStringToBinary(ValueList& v);
 void convertStringToBinary(ValueSet& v);
 void convertStringToBinary(ValueMap& v);
 void convertStringToBinary(Object& obj);
+
+template <class Tag>
+struct ConvertStringTagToBinaryTag {
+  using type = Tag;
+};
+
+template <>
+struct ConvertStringTagToBinaryTag<type::string_t> {
+  using type = type::binary_t;
+};
+
+template <class Tag>
+struct ConvertStringTagToBinaryTag<type::list<Tag>> {
+  using type = type::list<typename ConvertStringTagToBinaryTag<Tag>::type>;
+};
+
+template <class Tag>
+struct ConvertStringTagToBinaryTag<type::set<Tag>> {
+  using type = type::set<typename ConvertStringTagToBinaryTag<Tag>::type>;
+};
+
+template <class KTag, class VTag>
+struct ConvertStringTagToBinaryTag<type::map<KTag, VTag>> {
+  using type = type::map<
+      typename ConvertStringTagToBinaryTag<KTag>::type,
+      typename ConvertStringTagToBinaryTag<VTag>::type>;
+};
+
+template <class Adapter, class Tag>
+struct ConvertStringTagToBinaryTag<type::adapted<Adapter, Tag>> {
+  using type =
+      type::adapted<Adapter, typename ConvertStringTagToBinaryTag<Tag>::type>;
+};
+
+template <class T, class Tag>
+struct ConvertStringTagToBinaryTag<type::cpp_type<T, Tag>> {
+  using type =
+      type::cpp_type<T, typename ConvertStringTagToBinaryTag<Tag>::type>;
+};
+
+template <class Tag, class T>
+auto asValueStructAndConvertStringToBinary(T&& t) {
+  return asValueStruct<typename ConvertStringTagToBinaryTag<Tag>::type>(
+      std::forward<T>(t));
+}
 
 struct DynamicPatchOptions {
   // If users are confident their input doesn't contain string, we can skip
@@ -164,6 +221,11 @@ class DynamicPatchBase {
 
   [[nodiscard]] Value& get(op::PatchOp patchOp) {
     return patch_[static_cast<FieldId>(patchOp)];
+  }
+
+  void set(op::PatchOp patchOp, protocol::Value v) {
+    patch_.members()->insert_or_assign(
+        folly::to_underlying(patchOp), std::move(v));
   }
 
   [[nodiscard]] Value* get_ptr(op::PatchOp patchOp) {
@@ -367,6 +429,10 @@ class DynamicListPatch : public DynamicPatchBase {
     }
   }
 
+  template <class Patch>
+  static DynamicListPatch fromStaticPatch(
+      const apache::thrift::op::detail::ListPatch<Patch>& patch);
+
  private:
   template <class Self, class Visitor>
   static void customVisitImpl(Self&& self, Visitor&& v) {
@@ -460,6 +526,10 @@ class DynamicSetPatch : public DynamicPatchBase {
     remove.eraseInto(
         remove.begin(), remove.end(), [&](auto&& k) { erase(std::move(k)); });
   }
+
+  template <class Patch>
+  static DynamicSetPatch fromStaticPatch(
+      const apache::thrift::op::detail::SetPatch<Patch>& patch);
 
  private:
   template <class Self, class Visitor>
@@ -564,6 +634,10 @@ class DynamicPatch {
 
   /// Convert Patch stored in Protocol Object to DynamicPatch.
   [[nodiscard]] static DynamicPatch fromObject(Object);
+
+  /// Convert static patch to dynamic patch
+  template <class Patch>
+  [[nodiscard]] static DynamicPatch fromStaticPatch(Patch&& patch);
 
   /// Retrieves the stored patch by the specified tag. Can be used to assert the
   /// type of DynamicUnknownPatch. Throws if the patch cannot be retrieved with
@@ -834,6 +908,10 @@ class DynamicMapPatch {
   template <typename Protocol>
   std::uint32_t encode(Protocol& prot) const;
 
+  template <class Patch>
+  static DynamicMapPatch fromStaticPatch(
+      const apache::thrift::op::detail::MapPatch<Patch>& patch);
+
  private:
   template <class Self, class Visitor>
   static void customVisitImpl(Self&& self, Visitor&& v);
@@ -886,6 +964,9 @@ extern template DynamicPatch& DynamicMapPatch::patchByKeyImpl(
 
 extern template DynamicPatch& DynamicMapPatch::patchByKeyImpl(
     Value k, DynamicPatch&& p);
+
+class DynamicStructPatch;
+class DynamicUnionPatch;
 
 template <bool IsUnion>
 class DynamicStructurePatch {
@@ -1047,12 +1128,25 @@ class DynamicStructurePatch {
     }
   }
 
+  template <class Patch>
+    requires(!IsUnion)
+  static DynamicStructPatch fromStaticPatch(
+      const apache::thrift::op::detail::StructPatch<Patch>& patch);
+
+  template <class Patch>
+    requires(IsUnion)
+  static DynamicUnionPatch fromStaticPatch(
+      const apache::thrift::op::detail::UnionPatch<Patch>& patch);
+
  private:
   void undoChanges(FieldId);
   void ensurePatchable();
 
   void ensureStruct(FieldId, Value);
   void ensureUnion(FieldId, Value);
+
+  template <class Patch, class AdaptedPatch>
+  static DynamicStructurePatch fromStaticPatchImpl(const AdaptedPatch& patch);
 
  private:
   std::optional<Object> assign_;
@@ -1261,6 +1355,215 @@ bool patchContainsAssignOrClear(T& patch) {
 }
 
 } // namespace detail
+
+template <class T>
+DynamicPatch DynamicPatch::fromStaticPatch(T&& t) {
+  using P = folly::remove_cvref_t<T>;
+  if constexpr (folly::is_one_of_v<
+                    P,
+                    op::BoolPatch,
+                    op::BytePatch,
+                    op::I16Patch,
+                    op::I32Patch,
+                    op::I64Patch,
+                    op::FloatPatch,
+                    op::DoublePatch,
+                    op::StringPatch,
+                    op::BinaryPatch,
+                    op::AnyPatch>) {
+    return DynamicPatch(std::forward<T>(t));
+  } else if constexpr (op::detail::is_list_patch_v<P>) {
+    return DynamicPatch(DynamicListPatch::fromStaticPatch(std::forward<T>(t)));
+  } else if constexpr (op::detail::is_set_patch_v<P>) {
+    return DynamicPatch(DynamicSetPatch::fromStaticPatch(std::forward<T>(t)));
+  } else if constexpr (op::detail::is_map_patch_v<P>) {
+    return DynamicPatch(DynamicMapPatch::fromStaticPatch(std::forward<T>(t)));
+  } else if constexpr (op::detail::is_struct_patch_v<P>) {
+    return DynamicPatch(
+        DynamicStructPatch::fromStaticPatch(std::forward<T>(t)));
+  } else if constexpr (op::detail::is_union_patch_v<P>) {
+    return DynamicPatch(DynamicUnionPatch::fromStaticPatch(std::forward<T>(t)));
+  } else {
+    return DynamicPatch::fromObject(std::forward<T>(t).toObject());
+  }
+}
+
+// Implementation of DynamicListPatch::fromStaticPatch
+template <class Patch>
+DynamicListPatch DynamicListPatch::fromStaticPatch(
+    const apache::thrift::op::detail::ListPatch<Patch>& patch) {
+  // @lint-ignore CLANGTIDY clang-diagnostic-deprecated-declarations
+  auto& patchStruct = patch.toThrift();
+  DynamicListPatch ret;
+  if (auto assign = patchStruct.assign()) {
+    using Tag = op::get_type_tag<Patch, ident::assign>;
+    ret.set(
+        op::PatchOp::Assign,
+        detail::asValueStructAndConvertStringToBinary<Tag>(*assign));
+  }
+  if (*patchStruct.clear()) {
+    ret.get(op::PatchOp::Clear).emplace_bool(true);
+  }
+  if (!patchStruct.append()->empty()) {
+    using Tag = op::get_type_tag<Patch, ident::append>;
+    ret.set(
+        op::PatchOp::Put,
+        detail::asValueStructAndConvertStringToBinary<Tag>(
+            *patchStruct.append()));
+  }
+  return ret;
+}
+
+// Implementation of DynamicSetPatch::fromStaticPatch
+template <class Patch>
+DynamicSetPatch DynamicSetPatch::fromStaticPatch(
+    const apache::thrift::op::detail::SetPatch<Patch>& patch) {
+  // @lint-ignore CLANGTIDY clang-diagnostic-deprecated-declarations
+  auto& patchStruct = patch.toThrift();
+  DynamicSetPatch ret;
+  if (auto assign = patchStruct.assign()) {
+    using Tag = op::get_type_tag<Patch, ident::assign>;
+    ret.set(
+        op::PatchOp::Assign,
+        detail::asValueStructAndConvertStringToBinary<Tag>(*assign));
+  }
+  if (*patchStruct.clear()) {
+    ret.get(op::PatchOp::Clear).emplace_bool(true);
+  }
+  if (!patchStruct.add()->empty()) {
+    using Tag = op::get_type_tag<Patch, ident::add>;
+    ret.set(
+        op::PatchOp::Add,
+        detail::asValueStructAndConvertStringToBinary<Tag>(*patchStruct.add()));
+  }
+  if (!patchStruct.remove()->empty()) {
+    using Tag = op::get_type_tag<Patch, ident::remove>;
+    ret.set(
+        op::PatchOp::Remove,
+        detail::asValueStructAndConvertStringToBinary<Tag>(
+            *patchStruct.remove()));
+  }
+  return ret;
+}
+
+// Implementation of DynamicMapPatch::fromStaticPatch
+template <class Patch>
+DynamicMapPatch DynamicMapPatch::fromStaticPatch(
+    const apache::thrift::op::detail::MapPatch<Patch>& patch) {
+  // @lint-ignore CLANGTIDY clang-diagnostic-deprecated-declarations
+  auto& patchStruct = patch.toThrift();
+  DynamicMapPatch ret;
+
+  if (auto assign = patchStruct.assign()) {
+    ret.assign_ = detail::asValueStructAndConvertStringToBinary<
+                      op::get_type_tag<Patch, ident::assign>>(*assign)
+                      .as_map();
+    return ret;
+  }
+
+  ret.clear_ = *patchStruct.clear();
+  ret.add_ = detail::asValueStructAndConvertStringToBinary<
+                 op::get_type_tag<Patch, ident::add>>(*patchStruct.add())
+                 .as_map();
+  ret.remove_ =
+      detail::asValueStructAndConvertStringToBinary<
+          op::get_type_tag<Patch, ident::remove>>(*patchStruct.remove())
+          .as_set();
+  ret.put_ = detail::asValueStructAndConvertStringToBinary<
+                 op::get_type_tag<Patch, ident::put>>(*patchStruct.put())
+                 .as_map();
+
+  using MapTag = op::get_type_tag<Patch, ident::patch>;
+  using KeyTag = typename MapTag::key_tag;
+
+  for (const auto& [k, v] : *patchStruct.patchPrior()) {
+    ret.patchPrior_.insert_or_assign(
+        detail::asValueStructAndConvertStringToBinary<KeyTag>(k),
+        DynamicPatch::fromStaticPatch(v));
+  }
+
+  for (const auto& [k, v] : *patchStruct.patch()) {
+    ret.patchAfter_.insert_or_assign(
+        detail::asValueStructAndConvertStringToBinary<KeyTag>(k),
+        DynamicPatch::fromStaticPatch(v));
+  }
+  return ret;
+}
+
+template <bool IsUnion>
+template <class Patch, class AdaptedPatch>
+DynamicStructurePatch<IsUnion>
+DynamicStructurePatch<IsUnion>::fromStaticPatchImpl(const AdaptedPatch& patch) {
+  // @lint-ignore CLANGTIDY clang-diagnostic-deprecated-declarations
+  auto& patchStruct = patch.toThrift();
+  DynamicStructurePatch ret;
+
+  if (auto assign = patchStruct.assign()) {
+    using Tag = op::get_type_tag<Patch, ident::assign>;
+    ret.assign_ =
+        detail::asValueStructAndConvertStringToBinary<Tag>(*assign).as_object();
+    return ret;
+  }
+
+  ret.clear_ = *patchStruct.clear();
+
+  using FieldPatch =
+      folly::remove_cvref_t<decltype(patchStruct.patchPrior()->toThrift())>;
+  op::for_each_field_id<FieldPatch>([&](auto id) {
+    using Id = decltype(id);
+    using Tag = op::get_field_tag<FieldPatch, Id>;
+    constexpr FieldId fieldId{Id::value};
+    auto&& priorPatch = op::get<Id>(patchStruct.patchPrior()->toThrift());
+    if (op::detail::should_write<Tag>(priorPatch)) {
+      ret.patchPrior_.insert_or_assign(
+          fieldId, DynamicPatch::fromStaticPatch(*priorPatch));
+    }
+    auto&& afterPatch = op::get<Id>(patchStruct.patch()->toThrift());
+    if (op::detail::should_write<Tag>(afterPatch)) {
+      ret.patchAfter_.insert_or_assign(
+          fieldId, DynamicPatch::fromStaticPatch(*afterPatch));
+    }
+  });
+
+  using Ensure = folly::remove_cvref_t<decltype(*patchStruct.ensure())>;
+  op::for_each_field_id<Ensure>([&](auto id) {
+    using Id = decltype(id);
+    using Tag = op::get_type_tag<Ensure, Id>;
+    constexpr FieldId fieldId{Id::value};
+    if (auto ensureVal = op::get<Id>(*patchStruct.ensure())) {
+      ret.ensure_.insert_or_assign(
+          fieldId,
+          detail::asValueStructAndConvertStringToBinary<Tag>(*ensureVal));
+    }
+  });
+
+  if constexpr (!IsUnion) {
+    // Note: we can't use patchStruct.remove() directly since we can also
+    // use `clear()` to remove a field.
+    // StructPatch::removedFields takes care both cases.
+    for (auto fieldId : patch.removedFields()) {
+      ret.remove_.emplace(fieldId);
+    }
+  }
+
+  return ret;
+}
+
+template <bool IsUnion>
+template <class Patch>
+  requires(!IsUnion)
+DynamicStructPatch DynamicStructurePatch<IsUnion>::fromStaticPatch(
+    const apache::thrift::op::detail::StructPatch<Patch>& patch) {
+  return DynamicStructPatch{fromStaticPatchImpl<Patch>(patch)};
+}
+
+template <bool IsUnion>
+template <class Patch>
+  requires(IsUnion)
+DynamicUnionPatch DynamicStructurePatch<IsUnion>::fromStaticPatch(
+    const apache::thrift::op::detail::UnionPatch<Patch>& patch) {
+  return DynamicUnionPatch{fromStaticPatchImpl<Patch>(patch)};
+}
 
 template <class Reader, bool _>
 void DynamicPatch::applyOneFieldInStream(

@@ -94,6 +94,14 @@ template <typename T>
 using MapPatchAdapter = InlineAdapter<MapPatch<T>>;
 
 template <class>
+constexpr inline bool is_list_patch_v = false;
+template <class Patch>
+constexpr inline bool is_list_patch_v<ListPatch<Patch>> = true;
+template <class>
+constexpr inline bool is_set_patch_v = false;
+template <class Patch>
+constexpr inline bool is_set_patch_v<SetPatch<Patch>> = true;
+template <class>
 constexpr inline bool is_map_patch_v = false;
 template <class Patch>
 constexpr inline bool is_map_patch_v<MapPatch<Patch>> = true;
@@ -103,6 +111,14 @@ template <class Patch>
 constexpr inline bool is_structured_patch_v<StructPatch<Patch>> = true;
 template <class Patch>
 constexpr inline bool is_structured_patch_v<UnionPatch<Patch>> = true;
+template <class>
+constexpr inline bool is_struct_patch_v = false;
+template <class Patch>
+constexpr inline bool is_struct_patch_v<StructPatch<Patch>> = true;
+template <class>
+constexpr inline bool is_union_patch_v = false;
+template <class Patch>
+constexpr inline bool is_union_patch_v<UnionPatch<Patch>> = true;
 template <class>
 constexpr inline bool is_any_patch_v = false;
 template <class Patch>

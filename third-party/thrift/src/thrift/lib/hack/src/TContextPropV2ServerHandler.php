@@ -106,4 +106,21 @@ final class TContextPropV2ServerHandler extends TProcessorEventHandler {
     );
   }
 
+  <<__Override>>
+  public function handlerException(
+    mixed $handler_context,
+    string $fn_name,
+    Exception $exception,
+  ): void {
+    get_artillery_controller_observer()->observeException($exception);
+  }
+
+  <<__Override>>
+  public function handlerError(
+    mixed $handler_context,
+    string $fn_name,
+    Exception $exception,
+  ): void {
+    get_artillery_controller_observer()->observeException($exception);
+  }
 }

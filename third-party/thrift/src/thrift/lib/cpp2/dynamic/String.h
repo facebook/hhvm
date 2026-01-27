@@ -17,6 +17,7 @@
 #pragma once
 
 #include <memory_resource>
+#include <string>
 #include <string_view>
 
 namespace apache::thrift::dynamic {

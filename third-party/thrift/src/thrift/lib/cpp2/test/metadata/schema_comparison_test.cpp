@@ -28,18 +28,13 @@
 #include <thrift/lib/cpp2/test/metadata/gen-cpp2/RepeatedTestService.h>
 #include <thrift/lib/cpp2/test/metadata/gen-cpp2/SimpleStructsTestService.h>
 #include <thrift/lib/cpp2/test/metadata/gen-cpp2/StreamTestService.h>
-#include <thrift/lib/cpp2/test/metadata/gen-cpp2/StructUnionTestService.h>
 #include <thrift/lib/cpp2/test/metadata/gen-cpp2/TypedefTestService.h>
 #include <thrift/lib/cpp2/test/metadata/gen-cpp2/enum_test_types.h>
-#include <thrift/lib/cpp2/test/metadata/gen-cpp2/exception_test_types.h>
 #include <thrift/lib/cpp2/test/metadata/gen-cpp2/include_test_types.h>
 #include <thrift/lib/cpp2/test/metadata/gen-cpp2/nested_structs_test_types.h>
 #include <thrift/lib/cpp2/test/metadata/gen-cpp2/no_namespace_types.h>
 #include <thrift/lib/cpp2/test/metadata/gen-cpp2/repeated_types.h>
-#include <thrift/lib/cpp2/test/metadata/gen-cpp2/service_test_types.h>
-#include <thrift/lib/cpp2/test/metadata/gen-cpp2/service_test_with_package_name_types.h>
 #include <thrift/lib/cpp2/test/metadata/gen-cpp2/simple_structs_test_types.h>
-#include <thrift/lib/cpp2/test/metadata/gen-cpp2/stream_test_types.h>
 #include <thrift/lib/cpp2/test/metadata/gen-cpp2/struct_union_test_types.h>
 #include <thrift/lib/cpp2/test/metadata/gen-cpp2/typedef_test_types.h>
 

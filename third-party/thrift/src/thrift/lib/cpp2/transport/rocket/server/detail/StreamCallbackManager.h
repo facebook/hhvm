@@ -19,13 +19,9 @@
 #include <folly/Indestructible.h>
 #include <folly/Overload.h>
 #include <thrift/lib/cpp2/Flags.h>
-#include <thrift/lib/cpp2/server/metrics/StreamMetricCallback.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/Frames.h>
 
 #include <thrift/lib/cpp2/transport/rocket/server/detail/ConnectionAdapter.h>
-
-// Declare the flag that's defined in various .cpp files
-THRIFT_FLAG_DECLARE_bool(thrift_enable_stream_counters);
 
 namespace apache::thrift::rocket {
 
@@ -42,13 +38,6 @@ template <
     typename RocketStreamClientCallback>
 class StreamCallbackManager {
   using Connection = ConnectionAdapter<ConnectionT>;
-
- private:
-  StreamMetricCallback& getNoopStreamMetricCallback() {
-    static folly::Indestructible<NoopStreamMetricCallback>
-        kNoopStreamMetricCallback;
-    return *kNoopStreamMetricCallback;
-  }
 
  public:
   explicit StreamCallbackManager(Connection* connection) noexcept
@@ -68,12 +57,7 @@ class StreamCallbackManager {
     }
 
     auto cb = std::make_unique<RocketStreamClientCallback>(
-        streamId,
-        *connection_->getWrappedConnection(),
-        initialRequestN,
-        THRIFT_FLAG(thrift_enable_stream_counters)
-            ? connection_->getStreamMetricCallback()
-            : getNoopStreamMetricCallback());
+        streamId, *connection_->getWrappedConnection(), initialRequestN);
 
     auto cbPtr = cb.get();
     it->second = std::move(cb);

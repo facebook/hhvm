@@ -129,6 +129,11 @@ class TSocket
    */
   ~TSocket() override;
 
+  TSocket(const TSocket&) = delete;
+  TSocket& operator=(const TSocket&) = delete;
+  TSocket(TSocket&&) = delete;
+  TSocket& operator=(TSocket&&) = delete;
+
   /**
    * Whether the socket is alive.
    *

@@ -100,7 +100,7 @@ val format_summary :
   max_errors:int option ->
   string option
 
-(** Run a computation; if it produces an error, call the error handler instead of
+(** Run a callback; if it produces an error, call the error handler instead of
     adding the error to the error map. Warnings are added to the error map and
     don't trigger the error handler. *)
 val try_ : (unit -> 'a) -> (diagnostic -> 'a) -> 'a
@@ -110,6 +110,9 @@ val try_ : (unit -> 'a) -> (diagnostic -> 'a) -> 'a
     See {!try_} for warning behavior. *)
 val try_with_result : (unit -> 'a) -> ('a -> diagnostic -> 'a) -> 'a
 
+(** Runs callback and returns `true` iff error count changed.
+* This seems evil, please avoid. Current uses are for sound dynamic
+*)
 val run_and_check_for_errors : (unit -> 'a) -> 'a * bool
 
 (** Return the list of errors caused by the function passed as parameter
@@ -145,7 +148,10 @@ val try_when :
   then_:(diagnostic -> unit) ->
   'res
 
-val has_no_errors : (unit -> 'res) -> bool
+(** Run the callback and return [true] iff no errors, [false] otherwise.
+    Warnings (severity=Warning) do not affect the return value.
+    The result of the callback is discarded. *)
+val try_no_errors : (unit -> 'res) -> bool
 
 val currently_has_errors : unit -> bool
 
@@ -160,7 +166,20 @@ val incremental_update : old:t -> new_:t -> rechecked:Relative_path.Set.t -> t
 
 val empty : t
 
-val is_empty : ?drop_fixmed:bool -> t -> bool
+(** [has_no_errors_or_warnings t] returns true if there are no errors or warnings.
+    Please use this function *only* where you want to know if there's anything to show
+    the user (e.g., deciding whether to print an "Errors:" section).
+    Avoid using this for anything non-display related, and especially do not have
+    different type checker code paths based on warnings. *)
+val has_no_errors_or_warnings : ?drop_fixmed:bool -> t -> bool
+
+(** [has_errors t] returns true iff there is at least one actual error in [t].
+    Warnings (severity=Warning) do not affect return value.
+ *)
+val has_errors : ?drop_fixmed:bool -> t -> bool
+
+(** [has_no_errors t] is [not (has_errors t)]. *)
+val has_no_errors : ?drop_fixmed:bool -> t -> bool
 
 val count : ?drop_fixmed:bool -> t -> int
 

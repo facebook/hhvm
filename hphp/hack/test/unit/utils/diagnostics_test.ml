@@ -29,6 +29,13 @@ let error_in file =
       @@ Parsing_error
            { pos = Pos.make_from (create_path file); msg = ""; quickfixes = [] })
 
+let warning_in file =
+  Diagnostics.add_diagnostic
+    (User_diagnostic.make_warning
+       1002
+       (Pos.make_from (create_path file), "test warning")
+       [])
+
 let expect_error_in =
   Printf.sprintf
     "ERROR: File \"/%s\", line 0, characters 0-0:\n (Parsing[1002])\n\n"
@@ -244,8 +251,9 @@ let test_from_diagnostic_list () =
     "get_diagnostic_list(from_diagnostic_list(x)) == x";
   Asserter.Bool_asserter.assert_equals
     true
-    Diagnostics.([] |> from_diagnostic_list |> is_empty)
-    "is_empty(from_diagnostic_list([])) == true";
+    (Diagnostics.has_no_errors_or_warnings
+       (Diagnostics.from_diagnostic_list []))
+    "has_no_errors_or_warnings(from_diagnostic_list([])) == true";
   true
 
 let test_phases () =
@@ -337,7 +345,7 @@ let test_incremental_update () =
   in
   Asserter.Bool_asserter.assert_equals
     true
-    (Diagnostics.is_empty errors)
+    (Diagnostics.has_no_errors_or_warnings errors)
     "Incremental update should clear errors if a rechecked file has no errors";
   true
 
@@ -422,6 +430,202 @@ let test_performance () =
   let errors = aux Diagnostics.empty n in
   List.length (Diagnostics.get_diagnostic_list errors) = n
 
+(** Tests for has_no_errors: should return true when there are only warnings,
+    false when there are actual errors *)
+let test_has_no_errors () =
+  Asserter.Bool_asserter.assert_equals
+    true
+    (Diagnostics.has_no_errors Diagnostics.empty)
+    "has_no_errors(empty) == true";
+
+  (* has_no_errors can be true when there are warnings *)
+  let (warnings_only, ()) =
+    Diagnostics.do_ (fun () ->
+        warning_in "A";
+        warning_in "B";
+        ())
+  in
+  Asserter.Bool_asserter.assert_equals
+    true
+    (Diagnostics.has_no_errors warnings_only)
+    "has_no_errors(warnings_only) == true";
+
+  (* Errors with actual errors should have errors *)
+  let (with_errors, ()) =
+    Diagnostics.do_ (fun () ->
+        error_in "A";
+        ())
+  in
+  Asserter.Bool_asserter.assert_equals
+    false
+    (Diagnostics.has_no_errors with_errors)
+    "has_no_errors(with_errors) == false";
+
+  (* Errors with both warnings and errors should have errors *)
+  let (mixed, ()) =
+    Diagnostics.do_ (fun () ->
+        warning_in "A";
+        error_in "B";
+        ())
+  in
+  Asserter.Bool_asserter.assert_equals
+    false
+    (Diagnostics.has_no_errors mixed)
+    "has_no_errors(mixed) == false";
+  true
+
+(** Tests for has_no_errors_or_warnings: should return false when there are
+    any errors OR warnings *)
+let test_has_no_errors_or_warnings () =
+  Asserter.Bool_asserter.assert_equals
+    true
+    (Diagnostics.has_no_errors_or_warnings Diagnostics.empty)
+    "has_no_errors_or_warnings(empty) == true";
+
+  let (warnings_only, ()) =
+    Diagnostics.do_ (fun () ->
+        warning_in "A";
+        ())
+  in
+  Asserter.Bool_asserter.assert_equals
+    false
+    (Diagnostics.has_no_errors_or_warnings warnings_only)
+    "has_no_errors_or_warnings(warnings_only) == false";
+
+  let (with_errors, ()) =
+    Diagnostics.do_ (fun () ->
+        error_in "A";
+        ())
+  in
+  Asserter.Bool_asserter.assert_equals
+    false
+    (Diagnostics.has_no_errors_or_warnings with_errors)
+    "has_no_errors_or_warnings(with_errors) == false";
+
+  (* Mixed warnings and errors should also return false *)
+  let (mixed, ()) =
+    Diagnostics.do_ (fun () ->
+        warning_in "A";
+        error_in "B";
+        ())
+  in
+  Asserter.Bool_asserter.assert_equals
+    false
+    (Diagnostics.has_no_errors_or_warnings mixed)
+    "has_no_errors_or_warnings(mixed) == false";
+  true
+
+(** Tests for currently_has_errors: should only detect actual errors,
+    not warnings *)
+let test_currently_has_errors () =
+  (* No errors should mean currently_has_errors returns false *)
+  let (_, no_errors_result) =
+    Diagnostics.do_ (fun () -> Diagnostics.currently_has_errors ())
+  in
+  Asserter.Bool_asserter.assert_equals
+    false
+    no_errors_result
+    "currently_has_errors() == false when no errors";
+
+  (* Adding only warnings should not trigger currently_has_errors *)
+  let (_, warnings_only_result) =
+    Diagnostics.do_ (fun () ->
+        warning_in "A";
+        Diagnostics.currently_has_errors ())
+  in
+  Asserter.Bool_asserter.assert_equals
+    false
+    warnings_only_result
+    "currently_has_errors() == false when only warnings";
+
+  (* Adding errors should trigger currently_has_errors *)
+  let (_, with_errors_result) =
+    Diagnostics.do_ (fun () ->
+        error_in "A";
+        Diagnostics.currently_has_errors ())
+  in
+  Asserter.Bool_asserter.assert_equals
+    true
+    with_errors_result
+    "currently_has_errors() == true when errors present";
+
+  (* Adding warnings after errors should still show errors *)
+  let (_, mixed_result) =
+    Diagnostics.do_ (fun () ->
+        error_in "A";
+        warning_in "B";
+        Diagnostics.currently_has_errors ())
+  in
+  Asserter.Bool_asserter.assert_equals
+    true
+    mixed_result
+    "currently_has_errors() == true when errors and warnings present";
+  true
+
+(** Tests for run_and_check_for_errors: should only detect new actual errors,
+    not new warnings *)
+let test_run_and_check_for_errors () =
+  (* No errors added should return false *)
+  let (_, (_, had_errors)) =
+    Diagnostics.do_ (fun () ->
+        Diagnostics.run_and_check_for_errors (fun () -> ()))
+  in
+  Asserter.Bool_asserter.assert_equals
+    false
+    had_errors
+    "run_and_check_for_errors returns false when no errors added";
+
+  (* Adding only warnings should not trigger error detection *)
+  let (_, (_, had_errors)) =
+    Diagnostics.do_ (fun () ->
+        Diagnostics.run_and_check_for_errors (fun () -> warning_in "A"))
+  in
+  Asserter.Bool_asserter.assert_equals
+    false
+    had_errors
+    "run_and_check_for_errors returns false when only warnings added";
+
+  (* Adding errors should trigger error detection *)
+  let (_, (_, had_errors)) =
+    Diagnostics.do_ (fun () ->
+        Diagnostics.run_and_check_for_errors (fun () -> error_in "A"))
+  in
+  Asserter.Bool_asserter.assert_equals
+    true
+    had_errors
+    "run_and_check_for_errors returns true when errors added";
+
+  (* Adding both errors and warnings should trigger error detection *)
+  let (_, (_, had_errors)) =
+    Diagnostics.do_ (fun () ->
+        Diagnostics.run_and_check_for_errors (fun () ->
+            warning_in "A";
+            error_in "B"))
+  in
+  Asserter.Bool_asserter.assert_equals
+    true
+    had_errors
+    "run_and_check_for_errors returns true when errors and warnings added";
+  true
+
+(** Tests for try_no_errors: should return true when no errors,
+    false when errors *)
+let test_try_no_errors () =
+  (* No errors should return true *)
+  let result = Diagnostics.try_no_errors (fun () -> ()) in
+  Asserter.Bool_asserter.assert_equals
+    true
+    result
+    "try_no_errors returns true when no errors";
+
+  (* Adding errors should return false *)
+  let result = Diagnostics.try_no_errors (fun () -> error_in "A") in
+  Asserter.Bool_asserter.assert_equals
+    false
+    result
+    "try_no_errors returns false when errors added";
+  true
+
 let tests =
   [
     ("test", test_do);
@@ -434,6 +638,11 @@ let tests =
        "test_incremental_update", test_incremental_update; *)
     ("test_merge_into_current", test_merge_into_current);
     ("test_performance", test_performance);
+    ("test_has_no_errors", test_has_no_errors);
+    ("test_has_no_errors_or_warnings", test_has_no_errors_or_warnings);
+    ("test_currently_has_errors", test_currently_has_errors);
+    ("test_run_and_check_for_errors", test_run_and_check_for_errors);
+    ("test_try_no_errors", test_try_no_errors);
   ]
 
 let () =

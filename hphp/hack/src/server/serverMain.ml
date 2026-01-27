@@ -64,7 +64,7 @@ module Program = struct
 
     WorkerController.force_quit_all ();
 
-    let has_errors = not (Diagnostics.is_empty env.diagnostics) in
+    let has_errors = Diagnostics.has_errors env.diagnostics in
     let error_code =
       if has_errors then
         if Option.is_some (ServerArgs.write_symbol_info genv.options) then

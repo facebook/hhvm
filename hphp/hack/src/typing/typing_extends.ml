@@ -476,7 +476,7 @@ let check_ambiguous_inheritance f parent child pos class_ origin on_error ~env =
     (f parent child)
     ~if_error_and:(fun () ->
       String.( <> ) (Cls.name class_) origin
-      && Diagnostics.has_no_errors (f child parent))
+      && Diagnostics.try_no_errors (f child parent))
     ~then_:(fun error ->
       Typing_error_utils.ambiguous_inheritance
         pos

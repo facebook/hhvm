@@ -580,7 +580,7 @@ let get_user_facing_errors
       ~popt:(Provider_context.get_popt ctx)
       ~entry
   in
-  if Diagnostics.is_empty ast_errors then
+  if Diagnostics.has_no_errors ast_errors then
     let { Tast_provider.Compute_tast_and_errors.diagnostics = all_errors; _ } =
       Tast_provider.compute_tast_and_errors_quarantined
         ~ctx

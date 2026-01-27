@@ -49,6 +49,11 @@ type t = diagnostic list Relative_path.Map.t [@@deriving eq, show]
 
 type severity = User_diagnostic.severity
 
+let has_severity_err (e : diagnostic) : bool =
+  match e.User_diagnostic.severity with
+  | User_diagnostic.Err -> true
+  | User_diagnostic.Warning -> false
+
 let files_t_fold v ~f ~init =
   Relative_path.Map.fold v ~init ~f:(fun path v acc -> f path v acc)
 
@@ -430,11 +435,11 @@ let set_current_list file_t_map new_list =
 
 let run_and_check_for_errors (f : unit -> 'res) : 'res * bool =
   let old_error_list = get_current_list !error_map in
-
-  let old_count = List.length old_error_list in
+  let count_errors lst = List.count lst ~f:has_severity_err in
+  let old_count = count_errors old_error_list in
   let result = f () in
   let new_error_list = get_current_list !error_map in
-  let new_count = List.length new_error_list in
+  let new_count = count_errors new_error_list in
   (result, not (Int.equal old_count new_count))
 
 let do_with_context ?(drop_fixmed = true) path f =
@@ -598,8 +603,9 @@ let add_error_impl error =
     else
       Utils.assert_false_log_backtrace (Some msg)
 
-(* Whether we've found at least one error *)
-let currently_has_errors () = not (List.is_empty (get_current_list !error_map))
+(* Whether we've found at least one error (not warning) *)
+let currently_has_errors () =
+  List.exists (get_current_list !error_map) ~f:has_severity_err
 
 module Parsing = Error_codes.Parsing
 module Naming = Error_codes.Naming
@@ -912,8 +918,15 @@ let count ?(drop_fixmed = true) err =
     ~f:(fun _ x acc -> acc + List.length x)
     ~init:0
 
-let is_empty ?(drop_fixmed = true) err =
+let has_no_errors_or_warnings ?(drop_fixmed = true) err =
   Relative_path.Map.is_empty (drop_fixmes_if err drop_fixmed)
+
+let has_errors ?(drop_fixmed = true) err =
+  let err = drop_fixmes_if err drop_fixmed in
+  Relative_path.Map.exists err ~f:(fun _path errors ->
+      List.exists errors ~f:has_severity_err)
+
+let has_no_errors ?(drop_fixmed = true) err = not (has_errors ~drop_fixmed err)
 
 let get_current_span () = !current_span
 
@@ -1363,7 +1376,7 @@ let convert_errors_to_string
 
 let try_ f1 f2 = try_with_result f1 (fun _ err -> f2 err)
 
-let has_no_errors (f : unit -> 'a) : bool =
+let try_no_errors (f : unit -> 'a) : bool =
   try_
     (fun () ->
       let _ = f () in

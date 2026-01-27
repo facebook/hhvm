@@ -257,7 +257,7 @@ let process_file
     ~(decl_cap_mb : int option) : process_file_results =
   let fn = file.path in
   let (file_errors, ast) = Ast_provider.get_ast_with_error ~full:true ctx fn in
-  if not (Diagnostics.is_empty file_errors) then
+  if Diagnostics.has_errors file_errors then
     {
       file_diagnostics = file_errors;
       deferred_decls = [];
@@ -639,10 +639,10 @@ module ErrorStats = struct
         (match time_first_error with
         | Some t -> Some t
         | None ->
-          if Diagnostics.is_empty errors then
-            None
+          if Diagnostics.has_errors errors then
+            Some (Unix.gettimeofday ())
           else
-            Some (Unix.gettimeofday ()));
+            None);
     }
 end
 

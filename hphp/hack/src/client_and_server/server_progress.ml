@@ -476,7 +476,9 @@ module ErrorsWrite = struct
       | Absent
       | Closed ->
         failwith ("Cannot report in state " ^ show_write_state !write_state)
-      | Reporting _ when Diagnostics.is_empty ~drop_fixmed:true errors -> ()
+      | Reporting _
+        when Diagnostics.has_no_errors_or_warnings ~drop_fixmed:true errors ->
+        ()
       | Reporting (fd, n) ->
         let n = n + 1 in
         if n <= 5 then

@@ -112,7 +112,8 @@ let get_from_local_cache ~full ctx file_name =
       else
         ast
     in
-    if full && Diagnostics.is_empty err then LocalParserCache.add file_name ast;
+    if full && Diagnostics.has_no_errors err then
+      LocalParserCache.add file_name ast;
     (err, ast)
 
 let compute_source_text ~(entry : Provider_context.entry) :
@@ -239,7 +240,7 @@ let get_ast_with_error ~(full : bool) ctx path =
     | (None, false) ->
       (* This is the case where we will write into the parser heap. *)
       let (err, ast) = get_from_local_cache ~full ctx path in
-      if Diagnostics.is_empty err then ParserHeap.add path (ast, Decl);
+      if Diagnostics.has_no_errors err then ParserHeap.add path (ast, Decl);
       (err, ast)
   end
   | (_, Provider_backend.Analysis) -> begin

@@ -196,7 +196,7 @@ let print_errors format (errors : Diagnostics.t) max_errors : unit =
   print_error_list format errors max_errors
 
 let print_errors_if_present (errors : Diagnostics.t) =
-  if not (Diagnostics.is_empty errors) then (
+  if not (Diagnostics.has_no_errors_or_warnings errors) then (
     let errors_output =
       Diagnostics.convert_errors_to_string
       @@ Diagnostics.get_sorted_diagnostic_list errors
@@ -1206,7 +1206,7 @@ let decl_parse_typecheck_and_then ctx files_contents f =
     compute_tasts_expand_types ctx files_info files_contents
   in
   let errors = Diagnostics.merge parse_errors errors in
-  if Diagnostics.is_empty errors then
+  if Diagnostics.has_no_errors errors then
     f files_info
   else
     print_errors_if_present errors
@@ -1310,7 +1310,7 @@ let handle_constraint_mode
     let check_errors =
       check_file ctx parse_errors file_info ~profile_type_check_multi ~memtrace
     in
-    if not (Diagnostics.is_empty check_errors) then
+    if not (Diagnostics.has_no_errors_or_warnings check_errors) then
       print_errors check_errors
     else
       Relative_path.Map.iter file_info ~f:process_file
@@ -2022,7 +2022,7 @@ let handle_mode
           Out_channel.create (Relative_path.to_absolute filename ^ out_extension)
         in
         (* This means builtins had errors, so lets just print those if we see them *)
-        if not (Diagnostics.is_empty parse_errors) then
+        if not (Diagnostics.has_no_errors_or_warnings parse_errors) then
           (* This closes the out channel *)
           write_error_list error_format parse_errors oc max_errors
         else (
@@ -2052,7 +2052,7 @@ let handle_mode
       check_file ctx parse_errors files_info ~profile_type_check_multi ~memtrace
     in
     print_error_list error_format errors max_errors;
-    if not (Diagnostics.is_empty errors) then exit 2
+    if Diagnostics.has_errors errors then exit 2
   | Get_member class_and_member_id ->
     let (cid, mid) =
       match Str.split (Str.regexp "::") class_and_member_id with
@@ -2207,7 +2207,7 @@ let handle_mode
     let (errors, tasts) =
       compute_tasts_expand_types ctx files_info files_contents
     in
-    if not @@ Diagnostics.is_empty errors then (
+    if Diagnostics.has_errors errors then (
       print_errors error_format errors max_errors;
       Printf.printf
         "Did not count imprecise types because there are typing errors.";

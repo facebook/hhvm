@@ -515,11 +515,8 @@ let run_on_intersection :
         (env, (result, errors)))
   in
 
-  let has_only_warnings err =
-    Diagnostics.is_empty (Diagnostics.filter_out_warnings err)
-  in
   let valid_resl =
-    List.filter resl_errors ~f:(fun (_, err) -> has_only_warnings err)
+    List.filter resl_errors ~f:(fun (_, err) -> Diagnostics.has_no_errors err)
     |> List.map ~f:fst
   in
   (* Always merge warnings from all branches so they're not lost *)

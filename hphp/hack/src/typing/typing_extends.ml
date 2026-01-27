@@ -2156,34 +2156,29 @@ let tconst_subsumption
         env
     in
 
-    (* Don't recheck inherited type constants: errors will
-     * have been emitted already for the parent *)
-    (if inherited then
-      ()
-    else
-      match (child_typeconst.ttc_kind, parent_tconst_enforceable) with
-      | (TCAbstract { atc_default = Some ty; _ }, (tp_pos, true))
-      | (TCConcrete { tc_type = ty }, (tp_pos, true)) ->
-        let emit_error pos ty_info =
-          Typing_error_utils.add_typing_error
-            ~env
-            Typing_error.(
-              primary
-              @@ Primary.Invalid_enforceable_type
-                   { pos; ty_info; kind = `constant; tp_pos; tp_name = name })
-        in
-        Typing_enforceable_hint.validate_type
-          env
-          (fst child_typeconst.ttc_name |> Pos_or_decl.unsafe_to_raw_pos)
-          ty
-          emit_error
-      | _ ->
-        ();
-
-        (match parent_typeconst.ttc_reifiable with
+    (match (child_typeconst.ttc_kind, parent_tconst_enforceable) with
+    | (TCAbstract { atc_default = Some ty; _ }, (tp_pos, true))
+    | (TCConcrete { tc_type = ty }, (tp_pos, true)) ->
+      let emit_error pos ty_info =
+        Typing_error_utils.add_typing_error
+          ~env
+          Typing_error.(
+            primary
+            @@ Primary.Invalid_enforceable_type
+                 { pos; ty_info; kind = `constant; tp_pos; tp_name = name })
+      in
+      Typing_enforceable_hint.validate_type
+        env
+        (fst child_typeconst.ttc_name |> Pos_or_decl.unsafe_to_raw_pos)
+        ty
+        emit_error
+    | _ ->
+      if not inherited then (
+        match parent_typeconst.ttc_reifiable with
         | None -> ()
         | Some pos ->
-          Typing_const_reifiable.check_reifiable env child_typeconst pos));
+          Typing_const_reifiable.check_reifiable env child_typeconst pos
+      ));
 
     (* If the parent cannot be overridden, we unify the types otherwise we ensure
      * the child's assigned type is compatible with the parent's

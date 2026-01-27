@@ -1,0 +1,6 @@
+ERROR: File "enforceable_inherited.php", line 13, characters 1-66:
+Invalid type (Typing[4302])
+  File "enforceable_inherited.php", line 5, characters 5-17:
+  Type constant `TType` was declared `__Enforceable` here
+  File "enforceable_inherited.php", line 10, characters 37-47:
+  This type is not enforceable because it has a type with an erased generic type argument

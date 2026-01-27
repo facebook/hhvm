@@ -12,6 +12,7 @@ import (
     "errors"
     "fmt"
     "io"
+    "iter"
     "reflect"
     "sync"
 
@@ -24,6 +25,7 @@ var _ = context.Background
 var _ = errors.New
 var _ = fmt.Printf
 var _ = io.EOF
+var _ = iter.Pull[bool]
 var _ = reflect.Ptr
 var _ = sync.OnceFunc
 var _ = thrift.VOID

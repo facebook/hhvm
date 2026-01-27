@@ -105,6 +105,7 @@ class codegen_data {
       {"context", 0},
       {"errors", 0},
       {"fmt", 0},
+      {"iter", 0},
       {"sync", 0},
       {"metadata", 0},
       {"maps", 0},

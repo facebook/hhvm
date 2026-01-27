@@ -1387,6 +1387,7 @@ CO_TEST_P(ServiceInterceptorTestP, RequestArguments) {
         // Access by name
         dynamicArg1ByName =
             requestInfo.dynamicArguments->get("primitive").asI32();
+        EXPECT_EQ(requestInfo.dynamicArguments->name(0), "primitive");
 
         // Out of bounds should throw
         dynamicArg3OutOfBoundsThrows = true;

@@ -41,6 +41,18 @@ std::size_t LazyDynamicArguments::count() const {
   return functionNode_->params().size();
 }
 
+std::string_view LazyDynamicArguments::name(std::size_t index) const {
+  const auto& params = functionNode_->params();
+  if (index >= params.size()) {
+    throw std::out_of_range(
+        fmt::format(
+            "Argument index {} out of range, function has {} parameters",
+            index,
+            params.size()));
+  }
+  return params[index].name();
+}
+
 const LazyDynamicArguments::ArgsMap& LazyDynamicArguments::ensureDeserialized()
     const {
   return cachedArgs_.try_emplace_with([this]() {

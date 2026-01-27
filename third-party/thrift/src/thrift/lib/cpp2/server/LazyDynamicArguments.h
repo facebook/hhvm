@@ -63,6 +63,12 @@ class LazyDynamicArguments {
   std::size_t count() const;
 
   /**
+   * Get the name of a parameter by 0-based index.
+   * @throws std::out_of_range if index is out of bounds.
+   */
+  std::string_view name(std::size_t index) const;
+
+  /**
    * Get argument by 0-based index. Lazily deserializes on first access.
    * Missing parameters are filled with default values.
    * @throws std::out_of_range if index is out of bounds.

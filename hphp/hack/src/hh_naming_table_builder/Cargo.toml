@@ -28,5 +28,5 @@ oxidized = { version = "0.0.0", path = "../oxidized" }
 rayon = "1.11.0"
 relative_path = { version = "0.0.0", path = "../utils/rust/relative_path" }
 si_addendum = { version = "0.0.0", path = "../utils/cargo/si_addendum" }
-slog = { version = "2.7", features = ["max_level_trace", "nested-values"] }
+slog = { version = "2.8.2", features = ["max_level_trace", "nested-values"] }
 tempfile = "3.22"

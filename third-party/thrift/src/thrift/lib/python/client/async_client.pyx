@@ -22,9 +22,11 @@ cimport folly.iobuf
 import folly.executor
 
 from cython.operator cimport dereference as deref
+from folly cimport cFollyTry
 from folly.executor cimport get_executor
 from folly.futures cimport bridgeSemiFutureWith, bridgeFutureWith
 from folly.iobuf cimport IOBuf
+from libc.stdint cimport uint16_t
 from libcpp.memory cimport make_unique, static_pointer_cast
 from libcpp.utility cimport move as cmove
 from thrift.python.client.omni_client cimport cOmniClientResponseWithHeaders, RpcKind, cOmniInteractionClient, createOmniInteractionClient, cData, FunctionQualifier, InteractionMethodPosition
@@ -166,7 +168,10 @@ cdef class AsyncClient:
         RpcOptions rpc_options = None,
         is_mutable_types = False,
     ):
-        protocol = deref(self._omni_client).getChannelProtocolId()
+        cdef cFollyTry[uint16_t] protocol_try = deref(self._omni_client).getChannelProtocolId()
+        if protocol_try.hasException():
+            raise create_py_exception(protocol_try.exception(), rpc_options)
+        cdef uint16_t protocol = protocol_try.value()
         cdef IOBuf args_iobuf = (
             serialize_iobuf(args, protocol=protocol)
             if not is_mutable_types

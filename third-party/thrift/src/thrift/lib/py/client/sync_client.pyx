@@ -16,7 +16,9 @@
 
 from copy import copy
 from cython.operator cimport dereference as deref
+from folly cimport cFollyTry
 from folly.iobuf cimport IOBuf, from_unique_ptr
+from libc.stdint cimport uint16_t
 from libcpp.memory cimport make_unique
 from libcpp.string cimport string
 from libcpp.utility cimport move as cmove
@@ -54,7 +56,10 @@ cdef class SyncClient:
         if not self._omni_client:
             raise RuntimeError("Connection already closed")
 
-        protocol = deref(self._omni_client).getChannelProtocolId()
+        cdef cFollyTry[uint16_t] protocol_try = deref(self._omni_client).getChannelProtocolId()
+        if protocol_try.hasException():
+            raise create_py_exception(protocol_try.exception())
+        cdef uint16_t protocol = protocol_try.value()
         if protocol == Protocol.BINARY:
             protocol_factory = TBinaryProtocol.TBinaryProtocolFactory()
         elif protocol == Protocol.COMPACT:

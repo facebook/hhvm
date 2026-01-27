@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from libcpp cimport bool
-from folly cimport cFollyExceptionWrapper, cFollyExecutor, cFollySemiFuture, cFollyFuture
+from folly cimport cFollyExceptionWrapper, cFollyExecutor, cFollySemiFuture, cFollyFuture, cFollyTry
 from folly.expected cimport cExpected
 from folly.iobuf cimport cIOBuf
 from libc.stdint cimport uint16_t
@@ -103,7 +103,7 @@ cdef extern from "thrift/lib/python/client/OmniClient.h" namespace "::apache::th
             const RpcKind rpcKind,
         )
         shared_ptr[cRequestChannel] getChannelShared()
-        uint16_t getChannelProtocolId() except+
+        cFollyTry[uint16_t] getChannelProtocolId()
         void clearEventHandlers()
         void addEventHandler(const shared_ptr[cTProcessorEventHandler]& handler)
 

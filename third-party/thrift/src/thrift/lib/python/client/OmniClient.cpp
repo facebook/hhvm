@@ -272,8 +272,10 @@ folly::SemiFuture<OmniClientResponseWithHeaders> OmniClient::semifuture_send(
         });
   }
   return std::move(future)
-      .deferValue([protocol = getChannelProtocolId(),
+      .deferValue([protocolTry = getChannelProtocolId(),
                    rpcKind](ClientReceiveState&& state) {
+        // Extract protocol, throws if exception (caught by deferError below)
+        auto protocol = protocolTry.value();
         if (state.isException()) {
           state.exception().throw_exception();
         }
@@ -362,9 +364,12 @@ void OmniClient::sendImpl(
     std::unique_ptr<RequestCallback> callback,
     const apache::thrift::RpcKind rpcKind,
     apache::thrift::MethodMetadata::Data&& metadata) {
+  // Get protocol ID once, throws if channel_->getProtocolId() fails
+  auto protocolId = getChannelProtocolId().value();
+
   // Create the request context.
   auto [ctx, header] = makeOmniClientRequestContext(
-      channel_->getProtocolId(),
+      protocolId,
       rpcOptions.releaseWriteHeaders(),
       handlers_,
       // TODO(praihan): Enable ClientInterceptors for Python
@@ -372,7 +377,7 @@ void OmniClient::sendImpl(
       serviceName,
       functionName);
   RequestCallback::Context callbackContext;
-  callbackContext.protocolId = channel_->getProtocolId();
+  callbackContext.protocolId = protocolId;
   callbackContext.ctx = std::move(ctx);
 
   if (callbackContext.ctx) {
@@ -380,8 +385,7 @@ void OmniClient::sendImpl(
   }
 
   SerializedMessage smsg;
-  smsg.protocolType =
-      apache::thrift::protocol::PROTOCOL_TYPES(getChannelProtocolId());
+  smsg.protocolType = apache::thrift::protocol::PROTOCOL_TYPES(protocolId);
   smsg.buffer = args.get();
   smsg.methodName = functionName;
   if (callbackContext.ctx) {

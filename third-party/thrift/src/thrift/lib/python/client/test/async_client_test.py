@@ -401,3 +401,41 @@ class AsyncClientTests(IsolatedAsyncioTestCase):
                         TestService, host=addr.ip, port=addr.port
                     ) as client:
                         await client.add(1, 2)
+
+    async def test_protocol_id_retrieval_with_binary_protocol(self) -> None:
+        """Test that getChannelProtocolId works correctly with binary protocol.
+
+        This verifies that the folly::Try<uint16_t> return type from
+        getChannelProtocolId() is properly handled in the Cython layer.
+        """
+        # pyre-fixme[16]: `AsyncContextManager` has no attribute `__aenter__`.
+        async with server_in_event_loop() as addr:
+            async with get_client(
+                TestService,
+                host=addr.ip,
+                port=addr.port,
+                protocol=Protocol.BINARY,
+            ) as client:
+                # If getChannelProtocolId() failed, this call would raise
+                # an exception before the request is sent
+                result = await client.add(1, 2)
+                self.assertEqual(3, result)
+
+    async def test_protocol_id_retrieval_with_compact_protocol(self) -> None:
+        """Test that getChannelProtocolId works correctly with compact protocol.
+
+        This verifies that the folly::Try<uint16_t> return type from
+        getChannelProtocolId() is properly handled in the Cython layer.
+        """
+        # pyre-fixme[16]: `AsyncContextManager` has no attribute `__aenter__`.
+        async with server_in_event_loop() as addr:
+            async with get_client(
+                TestService,
+                host=addr.ip,
+                port=addr.port,
+                protocol=Protocol.COMPACT,
+            ) as client:
+                # If getChannelProtocolId() failed, this call would raise
+                # an exception before the request is sent
+                result = await client.add(1, 2)
+                self.assertEqual(3, result)

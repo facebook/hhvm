@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import time
 import unittest
+from unittest import IsolatedAsyncioTestCase
 
 from thrift.lib.python.client.test.client_event_handler.helper import (
     TestHelper as ClientEventHandlerTestHelper,
@@ -48,7 +49,7 @@ TEST_HEADER_KEY = "headerKey"
 TEST_HEADER_VALUE = "headerValue"
 
 
-class SyncClientTests(unittest.TestCase):
+class SyncClientTests(IsolatedAsyncioTestCase):
     def test_basic(self) -> None:
         with server_in_another_process() as path:
             with get_sync_client(TestService, path=path) as client:
@@ -202,3 +203,37 @@ class SyncClientTests(unittest.TestCase):
             with get_sync_client(TestService, path=path) as client:
                 client.clear_event_handlers()
                 self.assertEqual(3, client.add(1, 2))
+
+    def test_protocol_id_retrieval_with_binary_protocol(self) -> None:
+        """Test that getChannelProtocolId works correctly with binary protocol.
+
+        This verifies that the folly::Try<uint16_t> return type from
+        getChannelProtocolId() is properly handled in the Cython layer.
+        """
+        with server_in_another_process() as path:
+            with get_sync_client(
+                TestService,
+                path=path,
+                protocol=Protocol.BINARY,
+            ) as client:
+                # If getChannelProtocolId() failed, this call would raise
+                # an exception before the request is sent
+                result = client.add(1, 2)
+                self.assertEqual(3, result)
+
+    def test_protocol_id_retrieval_with_compact_protocol(self) -> None:
+        """Test that getChannelProtocolId works correctly with compact protocol.
+
+        This verifies that the folly::Try<uint16_t> return type from
+        getChannelProtocolId() is properly handled in the Cython layer.
+        """
+        with server_in_another_process() as path:
+            with get_sync_client(
+                TestService,
+                path=path,
+                protocol=Protocol.COMPACT,
+            ) as client:
+                # If getChannelProtocolId() failed, this call would raise
+                # an exception before the request is sent
+                result = client.add(1, 2)
+                self.assertEqual(3, result)

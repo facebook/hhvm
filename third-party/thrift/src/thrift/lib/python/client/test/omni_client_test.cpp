@@ -531,3 +531,25 @@ TEST_F(OmniClientTest, CountSinkTest) {
         co_return co_await sink.sink(chunkBufGenerator(request));
       });
 }
+
+TEST_F(OmniClientTest, GetChannelProtocolIdReturnsValidProtocol) {
+  // Test that getChannelProtocolId returns a valid folly::Try with the correct
+  // protocol ID when using CompactSerializer
+  connectToServer<CompactSerializer>(
+      [](OmniClient& client) -> folly::coro::Task<void> {
+        auto protocolTry = client.getChannelProtocolId();
+        EXPECT_FALSE(protocolTry.hasException());
+        EXPECT_EQ(protocolTry.value(), protocol::T_COMPACT_PROTOCOL);
+        co_return;
+      });
+
+  // Test that getChannelProtocolId returns a valid folly::Try with the correct
+  // protocol ID when using BinarySerializer
+  connectToServer<BinarySerializer>(
+      [](OmniClient& client) -> folly::coro::Task<void> {
+        auto protocolTry = client.getChannelProtocolId();
+        EXPECT_FALSE(protocolTry.hasException());
+        EXPECT_EQ(protocolTry.value(), protocol::T_BINARY_PROTOCOL);
+        co_return;
+      });
+}

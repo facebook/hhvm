@@ -17,6 +17,7 @@
 #pragma once
 
 #include <folly/Expected.h>
+#include <folly/Try.h>
 #include <folly/futures/Future.h>
 #include <folly/io/IOBuf.h>
 #include <folly/io/async/DelayedDestruction.h>
@@ -121,7 +122,7 @@ class OmniClient : public apache::thrift::TClientBase {
       const apache::thrift::RpcKind rpcKind =
           apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE);
 
-  uint16_t getChannelProtocolId() const;
+  folly::Try<uint16_t> getChannelProtocolId() const;
 
   RequestChannelShared getChannelShared() const noexcept;
 
@@ -150,8 +151,8 @@ class OmniClient : public apache::thrift::TClientBase {
       apache::thrift::MethodMetadata::Data&& metadata);
 };
 
-inline uint16_t OmniClient::getChannelProtocolId() const {
-  return channel_->getProtocolId();
+inline folly::Try<uint16_t> OmniClient::getChannelProtocolId() const {
+  return folly::makeTryWith([this] { return channel_->getProtocolId(); });
 }
 
 inline RequestChannelShared OmniClient::getChannelShared() const noexcept {

@@ -1,2 +1,2 @@
---union-intersection-type-hints
+--config union_intersection_type_hints=true
 --config everything_sdt=false

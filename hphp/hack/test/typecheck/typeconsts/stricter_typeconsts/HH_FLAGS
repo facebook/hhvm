@@ -1,2 +1,2 @@
---typeconst-concrete-concrete-error
---require-extends-implements-ancestors
+--config typeconst_concrete_concrete_error=true
+--config require_extends_implements_ancestors=true

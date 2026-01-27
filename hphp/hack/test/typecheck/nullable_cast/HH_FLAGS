@@ -1,1 +1,1 @@
---forbid_nullable_cast
+--config enable_experimental_tc_features=forbid_nullable_cast

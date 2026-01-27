@@ -1,1 +1,1 @@
---is-systemlib
+--config is_systemlib=true

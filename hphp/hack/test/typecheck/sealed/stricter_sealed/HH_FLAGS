@@ -1,1 +1,1 @@
---enable-sealed-subclasses
+--config enforce_sealed_subclasses=true

@@ -1,1 +1,1 @@
---disallow-php-lambdas
+--config error_php_lambdas=true

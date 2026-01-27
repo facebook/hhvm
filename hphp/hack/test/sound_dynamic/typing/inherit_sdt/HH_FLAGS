@@ -1,1 +1,1 @@
---enable-supportdyn-hint --union-intersection-type-hints  --config implicit_inherit_sdt=true
+--enable-supportdyn-hint --config union_intersection_type_hints=true  --config implicit_inherit_sdt=true

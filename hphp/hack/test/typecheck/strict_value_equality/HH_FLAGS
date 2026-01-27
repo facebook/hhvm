@@ -1,1 +1,1 @@
---strict-value-equality
+--config strict_value_equality=true

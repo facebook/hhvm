@@ -241,7 +241,6 @@ let parse_options () =
   in
   let config_overrides = ref [] in
   let error_format = ref None in
-  let forbid_nullable_cast = ref false in
   let deregister_attributes = ref None in
   let auto_namespace_map = ref None in
   let log_inference_constraints = ref None in
@@ -253,49 +252,29 @@ let parse_options () =
   let skip_tast_checks = ref false in
   let skip_check_under_dynamic = ref false in
   let out_extension = ref ".out" in
-  let union_intersection_type_hints = ref false in
   let call_coeffects = ref true in
   let local_coeffects = ref true in
   let strict_contexts = ref true in
-  let check_xhp_attribute = ref false in
   let check_redundant_generics = ref false in
   let disallow_static_memoized = ref false in
   let enable_supportdyn_hint = ref false in
   let disable_legacy_soft_typehints = ref false in
-  let allow_toplevel_requires = ref false in
-  let const_static_props = ref false in
   let disable_legacy_attribute_syntax = ref false in
-  let const_attribute = ref false in
   let type_refinement_partition_shapes = ref false in
-  let const_default_func_args = ref false in
-  let const_default_lambda_args = ref false in
-  let disallow_silence = ref false in
-  let abstract_static_props = ref false in
   let glean_reponame = ref (GleanOptions.reponame GlobalOptions.default) in
-  let disallow_func_ptrs_in_constants = ref false in
-  let error_php_lambdas = ref false in
-  let disallow_discarded_nullable_awaitables = ref false in
   let disable_xhp_element_mangling = ref false in
   let keep_user_attributes = ref false in
-  let disable_xhp_children_declarations = ref false in
   let enable_xhp_class_modifier = ref false in
-  let disable_hh_ignore_error = ref 0 in
-  let is_systemlib = ref false in
   let allowed_fixme_codes_strict = ref None in
   let allowed_decl_fixme_codes = ref None in
   let report_pos_from_reason = ref false in
   let consider_type_const_enforceable = ref false in
   let interpret_soft_types_as_like_types = ref false in
-  let ignore_unsafe_cast = ref false in
-  let typeconst_concrete_concrete_error = ref false in
   let meth_caller_only_public_visibility = ref true in
-  let require_extends_implements_ancestors = ref false in
-  let strict_value_equality = ref false in
   let naming_table = ref None in
   let root = ref None in
   let sharedmem_config = ref SharedMem.default_config in
   let print_position = ref true in
-  let enforce_sealed_subclasses = ref false in
   let custom_hhi_path = ref None in
   let force_allow_builtins_in_custom_hhi_path = ref false in
   let explicit_consistent_constructors = ref 0 in
@@ -530,9 +509,6 @@ let parse_options () =
                    ());
            ]),
         "<pos> Highlight all usages of a symbol at given line and column" );
-      ( "--forbid_nullable_cast",
-        Arg.Set forbid_nullable_cast,
-        " Forbid casting from nullable values." );
       ( "--get-member",
         Arg.String
           (fun class_and_member_id ->
@@ -560,9 +536,6 @@ let parse_options () =
       ( "--disallow-static-memoized",
         Arg.Set disallow_static_memoized,
         " Disallow static memoized methods on non-final methods" );
-      ( "--check-xhp-attribute",
-        Arg.Set check_xhp_attribute,
-        " Typechecks xhp required attributes" );
       ( "--rust-provider-backend",
         Arg.Set rust_provider_backend,
         " Use the Rust implementation of Provider_backend (including decl-folding)"
@@ -576,10 +549,6 @@ let parse_options () =
       ( "--skip-check-under-dynamic",
         Arg.Set skip_check_under_dynamic,
         " Do not apply second check to functions and methods under dynamic assumptions"
-      );
-      ( "--union-intersection-type-hints",
-        Arg.Set union_intersection_type_hints,
-        " Allows union and intersection types to be written in type hint positions"
       );
       ( "--implicit-pess",
         Arg.Unit (fun () -> set_bool_ enable_supportdyn_hint ()),
@@ -598,43 +567,12 @@ let parse_options () =
         Arg.Set disable_legacy_soft_typehints,
         " Disables the legacy @ syntax for soft typehints (use __Soft instead)"
       );
-      ( "--allow-toplevel-requires",
-        Arg.Set allow_toplevel_requires,
-        " Allow `require()` and similar at the top-level" );
-      ( "--const-static-props",
-        Arg.Set const_static_props,
-        " Enable static properties to be const" );
       ( "--disable-legacy-attribute-syntax",
         Arg.Set disable_legacy_attribute_syntax,
         " Disable the legacy <<...>> user attribute syntax" );
-      ("--const-attribute", Arg.Set const_attribute, " Allow __Const attribute");
-      ( "--const-default-func-args",
-        Arg.Set const_default_func_args,
-        " Statically check default function arguments are constant initializers"
-      );
-      ( "--const-default-lambda-args",
-        Arg.Set const_default_lambda_args,
-        " Statically check default lambda args are constant."
-        ^ " Produces a subset of errors of const-default-func-args" );
-      ( "--disallow-silence",
-        Arg.Set disallow_silence,
-        " Disallow the error suppression operator, @" );
-      ( "--abstract-static-props",
-        Arg.Set abstract_static_props,
-        " Static properties can be abstract" );
       ( "--glean-reponame",
         Arg.String (fun str -> glean_reponame := str),
         " glean repo name" );
-      ( "--disallow-func-ptrs-in-constants",
-        Arg.Set disallow_func_ptrs_in_constants,
-        " Disallow use of HH\\fun and HH\\class_meth in constants and constant initializers"
-      );
-      ( "--disallow-php-lambdas",
-        Arg.Set error_php_lambdas,
-        " Disallow php style anonymous functions." );
-      ( "--disallow-discarded-nullable-awaitables",
-        Arg.Set disallow_discarded_nullable_awaitables,
-        " Error on using discarded nullable awaitables" );
       ( "--disable-xhp-element-mangling",
         Arg.Set disable_xhp_element_mangling,
         " Disable mangling of XHP elements :foo. That is, :foo:bar is now \\foo\\bar, not xhp_foo__bar"
@@ -642,20 +580,10 @@ let parse_options () =
       ( "--keep-user-attributes",
         Arg.Set keep_user_attributes,
         " Keep user attributes when parsing decls" );
-      ( "--disable-xhp-children-declarations",
-        Arg.Set disable_xhp_children_declarations,
-        " Disable XHP children declarations, e.g. children (foo, bar+)" );
       ( "--enable-xhp-class-modifier",
         Arg.Set enable_xhp_class_modifier,
         " Enable the XHP class modifier, xhp class name {} will define an xhp class."
       );
-      ( "--disable-hh-ignore-error",
-        Arg.Int (( := ) disable_hh_ignore_error),
-        " Forbid HH_IGNORE_ERROR comments as an alternative to HH_FIXME, or treat them as normal comments."
-      );
-      ( "--is-systemlib",
-        Arg.Set is_systemlib,
-        " Enable systemlib annotations and other internal-only features" );
       ( "--allowed-fixme-codes-strict",
         Arg.String
           (fun s -> allowed_fixme_codes_strict := Some (comma_string_to_iset s)),
@@ -674,13 +602,6 @@ let parse_options () =
       ( "--interpret-soft-types-as-like-types",
         Arg.Set interpret_soft_types_as_like_types,
         " Types declared with <<__Soft>> (runtime logs but doesn't throw) become like types."
-      );
-      ( "--ignore-unsafe-cast",
-        Arg.Set ignore_unsafe_cast,
-        " Ignore unsafe_cast and retain the original type of the expression" );
-      ( "--typeconst-concrete-concrete-error",
-        Arg.Set typeconst_concrete_concrete_error,
-        " Raise an error when a concrete type constant is overridden by a concrete type constant in a child class."
       );
       ( "--meth-caller-only-public-visibility",
         Arg.Bool (fun x -> meth_caller_only_public_visibility := x),
@@ -705,17 +626,6 @@ let parse_options () =
         Arg.Unit (fun () -> set_mode Apply_quickfixes ()),
         " Apply quickfixes for all the errors in the file, and print the resulting code. Prefer --ide-code-actions, which tests more."
       );
-      ( "--require-extends-implements-ancestors",
-        Arg.Set require_extends_implements_ancestors,
-        " Consider `require extends` and `require implements` as ancestors when checking a class"
-      );
-      ( "--strict-value-equality",
-        Arg.Set strict_value_equality,
-        " Emit an error when \"==\" or \"!=\" is used to compare values that are incompatible types."
-      );
-      ( "--enable-sealed-subclasses",
-        Arg.Set enforce_sealed_subclasses,
-        " Require all __Sealed arguments to be subclasses" );
       ( "--custom-hhi-path",
         Arg.String (fun s -> custom_hhi_path := Some s),
         " Use custom hhis" );
@@ -890,16 +800,18 @@ let parse_options () =
         use_legacy_experimental_feature_config = false;
         allow_unstable_features = true;
         (* The remainder are set by the command line options *)
-        is_systemlib = !is_systemlib;
+        is_systemlib = default.is_systemlib;
         disable_legacy_soft_typehints = !disable_legacy_soft_typehints;
         disable_legacy_attribute_syntax = !disable_legacy_attribute_syntax;
-        const_default_func_args = !const_default_func_args;
-        const_default_lambda_args = !const_default_lambda_args;
-        const_static_props = !const_static_props;
-        abstract_static_props = !abstract_static_props;
-        disallow_func_ptrs_in_constants = !disallow_func_ptrs_in_constants;
+        const_default_func_args = default.const_default_func_args;
+        const_default_lambda_args = default.const_default_lambda_args;
+        const_static_props = default.const_static_props;
+        abstract_static_props = default.abstract_static_props;
+        disallow_func_ptrs_in_constants =
+          default.disallow_func_ptrs_in_constants;
         disable_xhp_element_mangling = !disable_xhp_element_mangling;
-        disable_xhp_children_declarations = !disable_xhp_children_declarations;
+        disable_xhp_children_declarations =
+          default.disable_xhp_children_declarations;
         enable_xhp_class_modifier = !enable_xhp_class_modifier;
         interpret_soft_types_as_like_types = !interpret_soft_types_as_like_types;
         keep_user_attributes = !keep_user_attributes;
@@ -907,9 +819,9 @@ let parse_options () =
         deregister_php_stdlib =
           !deregister_attributes >?? default.deregister_php_stdlib;
         everything_sdt = true;
-        union_intersection_type_hints = !union_intersection_type_hints;
-        disallow_silence = !disallow_silence;
-        disable_hh_ignore_error = !disable_hh_ignore_error;
+        union_intersection_type_hints = default.union_intersection_type_hints;
+        disallow_silence = default.disallow_silence;
+        disable_hh_ignore_error = default.disable_hh_ignore_error;
         allowed_decl_fixme_codes =
           Option.value !allowed_decl_fixme_codes ~default:ISet.empty;
         package_info = default.package_info;
@@ -931,7 +843,6 @@ let parse_options () =
       ?tco_timeout:!timeout
       ~allowed_fixme_codes_strict:
         (Option.value !allowed_fixme_codes_strict ~default:ISet.empty)
-      ~tco_check_xhp_attribute:!check_xhp_attribute
       ~tco_check_redundant_generics:!check_redundant_generics
       ~tco_skip_hierarchy_checks:!skip_hierarchy_checks
       ~tco_skip_tast_checks:!skip_tast_checks
@@ -940,24 +851,13 @@ let parse_options () =
       ~tco_coeffects_local:!local_coeffects
       ~tco_like_casts:false
       ~log_levels:!log_levels
-      ~po_disallow_toplevel_requires:(not !allow_toplevel_requires)
-      ~tco_const_attribute:!const_attribute
       ~tco_check_attribute_locations:true
       ~tco_type_refinement_partition_shapes:!type_refinement_partition_shapes
-      ~tco_error_php_lambdas:!error_php_lambdas
-      ~tco_disallow_discarded_nullable_awaitables:
-        !disallow_discarded_nullable_awaitables
       ~glean_reponame:!glean_reponame
       ~tco_skip_check_under_dynamic:!skip_check_under_dynamic
       ~tco_global_access_check_enabled:!enable_global_access_check
-      ~tco_ignore_unsafe_cast:!ignore_unsafe_cast
-      ~tco_typeconst_concrete_concrete_error:!typeconst_concrete_concrete_error
       ~tco_meth_caller_only_public_visibility:
         !meth_caller_only_public_visibility
-      ~tco_require_extends_implements_ancestors:
-        !require_extends_implements_ancestors
-      ~tco_strict_value_equality:!strict_value_equality
-      ~tco_enforce_sealed_subclasses:!enforce_sealed_subclasses
       ~tco_explicit_consistent_constructors:!explicit_consistent_constructors
       ~tco_require_types_class_consts:!require_types_class_consts
       ~tco_type_printer_fuel:!type_printer_fuel
@@ -974,14 +874,6 @@ let parse_options () =
 
   let tco_experimental_features =
     tcopt.GlobalOptions.tco_experimental_features
-  in
-  let tco_experimental_features =
-    if !forbid_nullable_cast then
-      SSet.add
-        TypecheckerOptions.experimental_forbid_nullable_cast
-        tco_experimental_features
-    else
-      tco_experimental_features
   in
   let tco_experimental_features =
     if !disallow_static_memoized then

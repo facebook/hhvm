@@ -1,1 +1,1 @@
---disable-xhp-children-declarations
+--config disable_xhp_children_declarations=true

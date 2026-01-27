@@ -1,1 +1,1 @@
---disallow-func-ptrs-in-constants
+--config disallow_func_ptrs_in_constants=true

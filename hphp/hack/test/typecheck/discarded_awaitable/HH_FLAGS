@@ -1,1 +1,1 @@
---disallow-discarded-nullable-awaitables
+--config disallow_discarded_nullable_awaitables=true

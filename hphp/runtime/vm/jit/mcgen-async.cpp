@@ -334,7 +334,7 @@ std::atomic<size_t> s_rejectPrologue;
 std::atomic<size_t> s_activePrologue;
 
 InitFiniNode s_logJitStats([]{
-  if ((!Cfg::Eval::EnableAsyncJIT && !Cfg::Eval::EnableAsyncJITLive) ||
+  if ((!Cfg::Eval::EnableAsyncJIT && !Cfg::Eval::EnableAsyncJITLive && !Cfg::Eval::EnableAsyncJITProfile) ||
       !isStandardRequest() ||
       !StructuredLog::coinflip(Cfg::Eval::AsyncJitLogStatsRate)) return;
   StructuredLogEntry ent;
@@ -416,7 +416,7 @@ struct AsyncTranslationWorker
           enqueuedSKs().dequeue(ctx.sk);
         }
       } else {
-        assertx(Cfg::Eval::EnableAsyncJITLive);
+        assertx(Cfg::Eval::EnableAsyncJITLive || Cfg::Eval::EnableAsyncJITProfile);
         ctx.sk.func()->atomicFlags().unset(Func::Flags::LockedForAsyncJit);
       }
       s_activeTrans--;
@@ -650,7 +650,7 @@ bool mayEnqueueAsyncTranslateRequest(const SrcKey& sk) {
       return enqueuedSKs().enqueue(sk);
     }
   } else {
-    assertx(Cfg::Eval::EnableAsyncJITLive);
+    assertx(Cfg::Eval::EnableAsyncJITLive || Cfg::Eval::EnableAsyncJITProfile);
     auto const func = sk.func();
     return !func->atomicFlags().set(Func::Flags::LockedForAsyncJit);
   }
@@ -754,7 +754,8 @@ bool isAsyncJitEnabled(TransKind kind) {
   if (!Cfg::Repo::Authoritative) {
     return Cfg::Eval::EnableAsyncJIT;
   } else {
-    return isLive(kind) && Cfg::Eval::EnableAsyncJITLive;
+    return (isLive(kind) && Cfg::Eval::EnableAsyncJITLive) ||
+           (isProfiling(kind) && Cfg::Eval::EnableAsyncJITProfile);
   }
 }
 

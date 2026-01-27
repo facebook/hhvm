@@ -873,7 +873,7 @@ function hhvm_cmd_impl(
       // Stick to a single thread for retranslate-all
       '-vEval.JitWorkerThreads=1',
       '-vEval.JitWorkerThreadsForSerdes=1',
-
+      '-vEval.AsyncJitWorkerThreads=1',
       '-vDebug.CoreDumpReportDirectory='.Status::getWorkingDir(),
 
       $options->args ?? '',
@@ -896,6 +896,7 @@ function hhvm_cmd_impl(
       // Set to timeout.  We want requests to trigger retranslate all.
       $args[] = '-vEval.JitRetranslateAllSeconds=' . TIMEOUT_SECONDS;
     }
+    $args[] = '-vEval.EnableAsyncJITProfile=' . ($options->retranslate_all is nonnull ? '1' : '0');
 
     if ($options->recycle_tc is nonnull) {
       $args[] = '--count='.$options->recycle_tc;

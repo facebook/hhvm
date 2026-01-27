@@ -700,7 +700,7 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 
 - bool Eval.EnableAsyncJIT = false, UNKNOWN
 - bool Eval.EnableAsyncJITLive = false, arnabde
-
+- bool Eval.EnableAsyncJITProfile = true, UNKNOWN
 - int Eval.AsyncJitWorkerThreads = 4, UNKNOWN
 
 - bool Eval.EnableSBProfSerialize = false, arnabde
@@ -1786,7 +1786,7 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 - bool Jit.ProfileWarmupRequests = false, UNKNOWN
 - uint32_t Jit.ProfileBCSize, UNKNOWN
 - bool Jit.EnableProfileBCSizeMultiplier = false, UNKNOWN
-- double Jit.ProfileBCSizeMultiplier = 1.3, UNKNOWN
+- double Jit.ProfileBCSizeMultiplier = 2.5, UNKNOWN
 - uint32_t Jit.ResetProfCountersRequest, UNKNOWN
 - uint32_t Jit.RetranslateAllRequest, UNKNOWN
 - uint32_t Jit.RetranslateAllSeconds, UNKNOWN

@@ -17,7 +17,7 @@ import folly.iobuf as _fbthrift_iobuf
 import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 import thrift.python.mutable_containers as _fbthrift_python_mutable_containers
 from thrift.python.mutable_serializer import serialize_iobuf, deserialize, Protocol
-from thrift.python.server import ServiceInterface, RpcKind, PythonUserException
+from thrift.python.server import ServiceInterface as _fbthrift_ServiceInterface, RpcKind, PythonUserException
 
 import test.fixtures.interactions.module.thrift_mutable_types as _fbthrift__test__fixtures__interactions__module__thrift_mutable_types
 import test.fixtures.interactions.module.thrift_metadata as _fbthrift__test__fixtures__interactions__module__thrift_metadata
@@ -25,7 +25,7 @@ import test.fixtures.another_interactions.shared.thrift_mutable_services
 import test.fixtures.another_interactions.shared.thrift_mutable_types as _fbthrift__test__fixtures__another_interactions__shared__thrift_mutable_types
 
 class MyServiceInterface(
-    ServiceInterface,
+    _fbthrift_ServiceInterface,
     metaclass=ABCMeta
 ):
 
@@ -113,7 +113,7 @@ class MyServiceInterface(
         return (serialize_iobuf(return_struct, protocol), return_stream)
 
 class FactoriesInterface(
-    ServiceInterface,
+    _fbthrift_ServiceInterface,
     metaclass=ABCMeta
 ):
 
@@ -201,7 +201,7 @@ class FactoriesInterface(
         return (serialize_iobuf(return_struct, protocol), return_stream)
 
 class PerformInterface(
-    ServiceInterface,
+    _fbthrift_ServiceInterface,
     metaclass=ABCMeta
 ):
 
@@ -241,7 +241,7 @@ class PerformInterface(
         return serialize_iobuf(return_struct, protocol)
 
 class InteractWithSharedInterface(
-    ServiceInterface,
+    _fbthrift_ServiceInterface,
     metaclass=ABCMeta
 ):
 
@@ -281,7 +281,7 @@ class InteractWithSharedInterface(
         return serialize_iobuf(return_struct, protocol)
 
 class BoxServiceInterface(
-    ServiceInterface,
+    _fbthrift_ServiceInterface,
     metaclass=ABCMeta
 ):
 

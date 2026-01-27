@@ -16,7 +16,7 @@ import folly.iobuf as _fbthrift_iobuf
 
 import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 from thrift.python.serializer import serialize_iobuf, deserialize, Protocol
-from thrift.python.server import ServiceInterface, RpcKind, PythonUserException
+from thrift.python.server import ServiceInterface as _fbthrift_ServiceInterface, RpcKind, PythonUserException
 
 import python_module_root.my.namespacing.extend.test.extend.thrift_types as python_module_root__my__namespacing__extend__test__extend__thrift_types
 import python_module_root.my.namespacing.extend.test.extend.thrift_metadata as python_module_root__my__namespacing__extend__test__extend__thrift_metadata

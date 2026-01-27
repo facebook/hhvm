@@ -17,14 +17,14 @@ import folly.iobuf as _fbthrift_iobuf
 import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 import thrift.python.mutable_containers as _fbthrift_python_mutable_containers
 from thrift.python.mutable_serializer import serialize_iobuf, deserialize, Protocol
-from thrift.python.server import ServiceInterface, RpcKind, PythonUserException
+from thrift.python.server import ServiceInterface as _fbthrift_ServiceInterface, RpcKind, PythonUserException
 
 import apache.thrift.fixtures.types.module.thrift_mutable_types as _fbthrift__apache__thrift__fixtures__types__module__thrift_mutable_types
 import apache.thrift.fixtures.types.module.thrift_metadata as _fbthrift__apache__thrift__fixtures__types__module__thrift_metadata
 import apache.thrift.fixtures.types.included.thrift_mutable_types as _fbthrift__apache__thrift__fixtures__types__included__thrift_mutable_types
 
 class SomeServiceInterface(
-    ServiceInterface,
+    _fbthrift_ServiceInterface,
     metaclass=ABCMeta
 ):
 

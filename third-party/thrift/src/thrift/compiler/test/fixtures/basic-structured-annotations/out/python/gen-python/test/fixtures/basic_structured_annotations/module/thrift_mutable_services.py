@@ -17,7 +17,7 @@ import folly.iobuf as _fbthrift_iobuf
 import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 import thrift.python.mutable_containers as _fbthrift_python_mutable_containers
 from thrift.python.mutable_serializer import serialize_iobuf, deserialize, Protocol
-from thrift.python.server import ServiceInterface, RpcKind, PythonUserException
+from thrift.python.server import ServiceInterface as _fbthrift_ServiceInterface, RpcKind, PythonUserException
 
 import test.fixtures.basic_structured_annotations.module.thrift_mutable_types as _fbthrift__test__fixtures__basic_structured_annotations__module__thrift_mutable_types
 import test.fixtures.basic_structured_annotations.module.thrift_metadata as _fbthrift__test__fixtures__basic_structured_annotations__module__thrift_metadata
@@ -25,7 +25,7 @@ import included.thrift_mutable_types as _fbthrift__included__thrift_mutable_type
 import namespaced.thrift_mutable_types as _fbthrift__namespaced__thrift_mutable_types
 
 class MyServiceInterface(
-    ServiceInterface,
+    _fbthrift_ServiceInterface,
     metaclass=ABCMeta
 ):
 

@@ -16,13 +16,13 @@ import folly.iobuf as _fbthrift_iobuf
 
 import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 from thrift.python.serializer import serialize_iobuf, deserialize, Protocol
-from thrift.python.server import ServiceInterface, RpcKind, PythonUserException
+from thrift.python.server import ServiceInterface as _fbthrift_ServiceInterface, RpcKind, PythonUserException
 
 import emptyns.thrift_types as _fbthrift__emptyns__thrift_types
 import emptyns.thrift_metadata as _fbthrift__emptyns__thrift_metadata
 
 class TestServiceInterface(
-    ServiceInterface,
+    _fbthrift_ServiceInterface,
     metaclass=ABCMeta
 ):
 

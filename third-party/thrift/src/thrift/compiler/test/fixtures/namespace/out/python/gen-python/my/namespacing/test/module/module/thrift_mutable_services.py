@@ -17,13 +17,13 @@ import folly.iobuf as _fbthrift_iobuf
 import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 import thrift.python.mutable_containers as _fbthrift_python_mutable_containers
 from thrift.python.mutable_serializer import serialize_iobuf, deserialize, Protocol
-from thrift.python.server import ServiceInterface, RpcKind, PythonUserException
+from thrift.python.server import ServiceInterface as _fbthrift_ServiceInterface, RpcKind, PythonUserException
 
 import python_module_root.my.namespacing.test.module.module.thrift_mutable_types as python_module_root__my__namespacing__test__module__module__thrift_mutable_types
 import python_module_root.my.namespacing.test.module.module.thrift_metadata as python_module_root__my__namespacing__test__module__module__thrift_metadata
 
 class TestServiceInterface(
-    ServiceInterface,
+    _fbthrift_ServiceInterface,
     metaclass=ABCMeta
 ):
 

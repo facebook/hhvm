@@ -40,7 +40,7 @@ from {{program.base_library_package}}.serializer import serialize_iobuf, deseria
 import {{program.base_library_package}}.mutable_containers as _fbthrift_python_mutable_containers
 from {{program.base_library_package}}.mutable_serializer import serialize_iobuf, deserialize, Protocol
 {{/if python.generate_mutable_types?}}
-from {{program.base_library_package}}.server import ServiceInterface, RpcKind, PythonUserException
+from {{program.base_library_package}}.server import ServiceInterface as _fbthrift_ServiceInterface, RpcKind, PythonUserException
 
 import {{program.module_path}}.{{#partial m_types.import_path}} as {{program.module_mangle}}__{{#partial m_types.import_path}}
 import {{program.module_path}}.thrift_metadata as {{program.module_mangle}}__thrift_metadata
@@ -66,7 +66,7 @@ class {{service.name}}Interface(
     {{service:program.module_path}}.{{> services/service_import_path}}.{{/service:external_program?}}{{service:name}}Interface,
       {{/service.extends}}
     {{#else}}
-    ServiceInterface,
+    _fbthrift_ServiceInterface,
   {{/if (object.notnull? service.extends)}}
     metaclass=ABCMeta
 ):

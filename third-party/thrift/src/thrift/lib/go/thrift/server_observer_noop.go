@@ -48,6 +48,7 @@ func (*noopServerObserver) ServerOverloaded()    {}
 func (*noopServerObserver) ReceivedRequest()     {}
 func (*noopServerObserver) SentReply()           {}
 func (*noopServerObserver) ActiveRequests(_ int) {}
+func (*noopServerObserver) ProcessorPanic()      {}
 
 // Timing stats
 func (*noopServerObserver) ProcessDelay(_ time.Duration) {}

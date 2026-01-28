@@ -207,6 +207,7 @@ func (r *rocketServerTransport) processRocketRequests(ctx context.Context, conn 
 			r.log("panic in rocket processor: %v: %s", err, debug.Stack())
 			// Notify observer that connection was dropped due to panic
 			r.observer.ConnDropped()
+			r.observer.ProcessorPanic()
 		}
 	}()
 
@@ -235,6 +236,7 @@ func (r *rocketServerTransport) processHeaderRequests(ctx context.Context, proto
 	defer func() {
 		if err := recover(); err != nil {
 			r.log("panic in processor: %v: %s", err, debug.Stack())
+			r.observer.ProcessorPanic()
 		}
 	}()
 	defer protocol.Close()

@@ -36,6 +36,7 @@ type ServerObserver interface {
 	ReceivedRequest()               // complete request received and parsed
 	SentReply()                     // response successfully written to connection
 	ActiveRequests(numRequests int) // current count of processing requests
+	ProcessorPanic()                // processor panic recovered during request handling
 
 	// Timing stats
 	ProcessDelay(delay time.Duration)   // time from request received to handler start

@@ -194,6 +194,20 @@ func (s *rocketServer) isOverloaded() bool {
 	return countWithNewRequest > s.maxRequests
 }
 
+// processWithPanicTracking wraps the process call to intercept and track processor panics.
+// It acts as middleware that records the panic metric, then re-panics to let the downstream
+// reactor-go library handle the error response to the client.
+// See: https://github.com/jjeffcaii/reactor-go/blob/v0.5.6/mono/create.go#L35
+func (s *rocketServerSocket) processWithPanicTracking(ctx context.Context, processor Processor, protocol *protocolBuffer) (*types.ApplicationException, error) {
+	defer func() {
+		if r := recover(); r != nil {
+			s.observer.ProcessorPanic()
+			panic(r)
+		}
+	}()
+	return process(ctx, processor, protocol, s.pstats, s.observer)
+}
+
 // getQueueTimeout returns the queue timeout duration from metadata, or max duration if not set
 func getQueueTimeout(metadata *rpcmetadata.RequestRpcMetadata) time.Duration {
 	if metadata.IsSetQueueTimeoutMs() {
@@ -333,7 +347,7 @@ func (s *rocketServerSocket) requestResponse(msg payload.Payload) mono.Mono {
 		}
 
 		// Track actual handler execution time
-		appException, err := process(ctx, processor, protocol, s.pstats, s.observer)
+		appException, err := s.processWithPanicTracking(ctx, processor, protocol)
 		if err != nil {
 			// Notify observer that connection was dropped due to unparseable message begin
 			s.observer.ConnDropped()
@@ -450,7 +464,7 @@ func (s *rocketServerSocket) fireAndForget(msg payload.Payload) {
 		return
 	}
 
-	if _, err := process(context.Background(), s.proc, protocol, s.pstats, s.observer); err != nil {
+	if _, err := s.processWithPanicTracking(context.Background(), s.proc, protocol); err != nil {
 		// Notify observer that connection was dropped due to unparseable message begin
 		s.observer.ConnDropped()
 		s.log("rocketServer fireAndForget process error: %v", err)

@@ -56,10 +56,15 @@ class FOLLY_EXPORT TTransportException
     EARLY_DATA_REJECTED = 16,
     STREAMING_CONTRACT_VIOLATION = 17,
     INVALID_SETUP = 18,
+    // Security policy is missing from server setup response (Rocket protocol)
+    SECURITY_POLICY_MISSING = 19,
+    // Connection terminated due to server security policy violation (Rocket
+    // protocol)
+    SECURITY_POLICY_VIOLATION = 20,
     // Remember to update TTransportExceptionTypeSize if you add an entry here
   };
 
-  using TTransportExceptionTypeSize = std::integral_constant<std::size_t, 19>;
+  using TTransportExceptionTypeSize = std::integral_constant<std::size_t, 21>;
 
   TTransportException()
       : apache::thrift::TLibraryException(),
@@ -154,6 +159,10 @@ class FOLLY_EXPORT TTransportException
           return "TTransportException: Streaming contract violation";
         case INVALID_SETUP:
           return "TTransportException: Setup Frame rejected";
+        case SECURITY_POLICY_MISSING:
+          return "TTransportException: Security policy missing";
+        case SECURITY_POLICY_VIOLATION:
+          return "TTransportException: Connection terminated due to server security policy";
         default:
           return "TTransportException: (Invalid exception type)";
       }

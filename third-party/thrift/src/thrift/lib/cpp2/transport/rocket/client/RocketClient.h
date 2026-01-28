@@ -477,6 +477,7 @@ class RocketClient : public virtual folly::DelayedDestruction,
       std::shared_ptr<rocket::ParserAllocatorType> allocatorPtr = nullptr);
 
   bool encodeMetadataUsingBinary() const { return encodeMetadataUsingBinary_; }
+  virtual void handleSetupResponse(const ServerPushMetadata& serverMeta);
 
  private:
   template <class OnError>

@@ -244,22 +244,7 @@ void RocketClient::handleFrame(std::unique_ptr<folly::IOBuf> frame) {
     }
     switch (serverMeta.getType()) {
       case ServerPushMetadata::Type::setupResponse: {
-        sendTransportMetadataPush();
-        setServerVersion(
-            std::min(
-                serverMeta.setupResponse()->version().value_or(0),
-                (int32_t)std::numeric_limits<int16_t>::max()));
-        serverZstdSupported_ =
-            serverMeta.setupResponse()->zstdSupported().value_or(false);
-
-        if (auto ref = serverMeta.setupResponse()->compressionSetupResponse()) {
-          auto customCompressionRes =
-              handleSetupResponseCustomCompression(*ref);
-          if (customCompressionRes.hasError()) {
-            close(customCompressionRes.error());
-            return;
-          }
-        }
+        handleSetupResponse(serverMeta);
         break;
       }
       case ServerPushMetadata::Type::streamHeadersPush: {
@@ -310,6 +295,24 @@ void RocketClient::handleFrame(std::unique_ptr<folly::IOBuf> frame) {
   }
 
   handleStreamChannelFrame(streamId, frameType, std::move(frame));
+}
+
+void RocketClient::handleSetupResponse(const ServerPushMetadata& serverMeta) {
+  sendTransportMetadataPush();
+  setServerVersion(
+      std::min(
+          serverMeta.setupResponse()->version().value_or(0),
+          (int32_t)std::numeric_limits<int16_t>::max()));
+  serverZstdSupported_ =
+      serverMeta.setupResponse()->zstdSupported().value_or(false);
+
+  if (auto ref = serverMeta.setupResponse()->compressionSetupResponse()) {
+    auto customCompressionRes = handleSetupResponseCustomCompression(*ref);
+    if (customCompressionRes.hasError()) {
+      close(customCompressionRes.error());
+      return;
+    }
+  }
 }
 
 folly::Expected<folly::Unit, transport::TTransportException>

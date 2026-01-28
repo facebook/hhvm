@@ -48,13 +48,13 @@ TEST(TTransportException, invalidTTransportExceptionType) {
 
   // if we provide an empty string it doesn't take precedence
   TTransportException tex6(
-      TTransportException::TTransportExceptionType(20), "");
+      TTransportException::TTransportExceptionType(25), "");
   EXPECT_STREQ(
-      "TTransportException: (Invalid exception type '20')", tex6.what());
+      "TTransportException: (Invalid exception type '25')", tex6.what());
 
   TTransportException tex7(
-      TTransportException::TTransportExceptionType(19), "", 1);
+      TTransportException::TTransportExceptionType(26), "", 1);
   EXPECT_STREQ(
-      "TTransportException: (Invalid exception type '19'): Operation not permitted",
+      "TTransportException: (Invalid exception type '26'): Operation not permitted",
       tex7.what());
 }

@@ -4527,6 +4527,11 @@ OPTBLD_INLINE void iopEval() {
     raise_error("You can't use eval in RepoAuthoritative mode");
   }
 
+  if (UNLIKELY(Cfg::Eval::DisableEval)) {
+    // Fatal when program attempts to use eval() when disabled.
+    raise_error("You can't use eval when disabled");
+  }
+
   auto code = String::attach(prepareKey(*c1));
   String prefixedCode = concat("<?hh ", code);
 

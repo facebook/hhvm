@@ -488,6 +488,10 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 
 - bool Eval.AuthoritativeMode = false, UNKNOWN, postprocess
 
+- bool Eval.DisableEval = false, andywli
+
+  Option to disable PHP\eval(). Will throw an exception if eval() is called and this option is set to true.
+
 - int Eval.CheckCLIClientCommands = 1, UNKNOWN
 
 - int32_t Eval.CheckPropTypeHints = 3, UNKNOWN, globaldata|compileroption(CheckPropTypeHints)

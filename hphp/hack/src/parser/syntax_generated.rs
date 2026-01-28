@@ -591,23 +591,6 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_attribute_specification(_: &C, attribute_specification_attributes: Self) -> Self {
-        let syntax = SyntaxVariant::AttributeSpecification(Box::new(AttributeSpecificationChildren {
-            attribute_specification_attributes,
-        }));
-        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
-        Self::make(syntax, value)
-    }
-
-    fn make_attribute(_: &C, attribute_at: Self, attribute_attribute_name: Self) -> Self {
-        let syntax = SyntaxVariant::Attribute(Box::new(AttributeChildren {
-            attribute_at,
-            attribute_attribute_name,
-        }));
-        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
-        Self::make(syntax, value)
-    }
-
     fn make_inclusion_expression(_: &C, inclusion_require: Self, inclusion_filename: Self) -> Self {
         let syntax = SyntaxVariant::InclusionExpression(Box::new(InclusionExpressionChildren {
             inclusion_require,
@@ -2486,17 +2469,6 @@ where
                 let acc = f(old_attribute_specification_right_double_angle, acc);
                 acc
             },
-            SyntaxVariant::AttributeSpecification(x) => {
-                let AttributeSpecificationChildren { attribute_specification_attributes } = *x;
-                let acc = f(attribute_specification_attributes, acc);
-                acc
-            },
-            SyntaxVariant::Attribute(x) => {
-                let AttributeChildren { attribute_at, attribute_attribute_name } = *x;
-                let acc = f(attribute_at, acc);
-                let acc = f(attribute_attribute_name, acc);
-                acc
-            },
             SyntaxVariant::InclusionExpression(x) => {
                 let InclusionExpressionChildren { inclusion_require, inclusion_filename } = *x;
                 let acc = f(inclusion_require, acc);
@@ -3594,8 +3566,6 @@ where
             SyntaxVariant::NamedArgument {..} => SyntaxKind::NamedArgument,
             SyntaxVariant::ParameterDeclaration {..} => SyntaxKind::ParameterDeclaration,
             SyntaxVariant::OldAttributeSpecification {..} => SyntaxKind::OldAttributeSpecification,
-            SyntaxVariant::AttributeSpecification {..} => SyntaxKind::AttributeSpecification,
-            SyntaxVariant::Attribute {..} => SyntaxKind::Attribute,
             SyntaxVariant::InclusionExpression {..} => SyntaxKind::InclusionExpression,
             SyntaxVariant::InclusionDirective {..} => SyntaxKind::InclusionDirective,
             SyntaxVariant::CompoundStatement {..} => SyntaxKind::CompoundStatement,
@@ -4102,15 +4072,6 @@ where
                  old_attribute_specification_right_double_angle: ts.pop().unwrap(),
                  old_attribute_specification_attributes: ts.pop().unwrap(),
                  old_attribute_specification_left_double_angle: ts.pop().unwrap(),
-                 
-             })),
-             (SyntaxKind::AttributeSpecification, 1) => SyntaxVariant::AttributeSpecification(Box::new(AttributeSpecificationChildren {
-                 attribute_specification_attributes: ts.pop().unwrap(),
-                 
-             })),
-             (SyntaxKind::Attribute, 2) => SyntaxVariant::Attribute(Box::new(AttributeChildren {
-                 attribute_attribute_name: ts.pop().unwrap(),
-                 attribute_at: ts.pop().unwrap(),
                  
              })),
              (SyntaxKind::InclusionExpression, 2) => SyntaxVariant::InclusionExpression(Box::new(InclusionExpressionChildren {
@@ -5077,8 +5038,6 @@ where
             SyntaxVariant::NamedArgument(x) => unsafe { std::slice::from_raw_parts(&x.named_argument_name, 3) },
             SyntaxVariant::ParameterDeclaration(x) => unsafe { std::slice::from_raw_parts(&x.parameter_attribute, 12) },
             SyntaxVariant::OldAttributeSpecification(x) => unsafe { std::slice::from_raw_parts(&x.old_attribute_specification_left_double_angle, 3) },
-            SyntaxVariant::AttributeSpecification(x) => unsafe { std::slice::from_raw_parts(&x.attribute_specification_attributes, 1) },
-            SyntaxVariant::Attribute(x) => unsafe { std::slice::from_raw_parts(&x.attribute_at, 2) },
             SyntaxVariant::InclusionExpression(x) => unsafe { std::slice::from_raw_parts(&x.inclusion_require, 2) },
             SyntaxVariant::InclusionDirective(x) => unsafe { std::slice::from_raw_parts(&x.inclusion_expression, 2) },
             SyntaxVariant::CompoundStatement(x) => unsafe { std::slice::from_raw_parts(&x.compound_left_brace, 3) },
@@ -5269,8 +5228,6 @@ where
             SyntaxVariant::NamedArgument(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.named_argument_name, 3) },
             SyntaxVariant::ParameterDeclaration(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.parameter_attribute, 12) },
             SyntaxVariant::OldAttributeSpecification(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.old_attribute_specification_left_double_angle, 3) },
-            SyntaxVariant::AttributeSpecification(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.attribute_specification_attributes, 1) },
-            SyntaxVariant::Attribute(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.attribute_at, 2) },
             SyntaxVariant::InclusionExpression(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.inclusion_require, 2) },
             SyntaxVariant::InclusionDirective(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.inclusion_expression, 2) },
             SyntaxVariant::CompoundStatement(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.compound_left_brace, 3) },
@@ -5872,19 +5829,6 @@ pub struct OldAttributeSpecificationChildren<T, V> {
     pub old_attribute_specification_left_double_angle: Syntax<T, V>,
     pub old_attribute_specification_attributes: Syntax<T, V>,
     pub old_attribute_specification_right_double_angle: Syntax<T, V>,
-}
-
-#[derive(Debug, Clone)]
-#[repr(C)]
-pub struct AttributeSpecificationChildren<T, V> {
-    pub attribute_specification_attributes: Syntax<T, V>,
-}
-
-#[derive(Debug, Clone)]
-#[repr(C)]
-pub struct AttributeChildren<T, V> {
-    pub attribute_at: Syntax<T, V>,
-    pub attribute_attribute_name: Syntax<T, V>,
 }
 
 #[derive(Debug, Clone)]
@@ -7114,8 +7058,6 @@ pub enum SyntaxVariant<T, V> {
     NamedArgument(Box<NamedArgumentChildren<T, V>>),
     ParameterDeclaration(Box<ParameterDeclarationChildren<T, V>>),
     OldAttributeSpecification(Box<OldAttributeSpecificationChildren<T, V>>),
-    AttributeSpecification(Box<AttributeSpecificationChildren<T, V>>),
-    Attribute(Box<AttributeChildren<T, V>>),
     InclusionExpression(Box<InclusionExpressionChildren<T, V>>),
     InclusionDirective(Box<InclusionDirectiveChildren<T, V>>),
     CompoundStatement(Box<CompoundStatementChildren<T, V>>),
@@ -7784,21 +7726,6 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                         0 => Some(&x.old_attribute_specification_left_double_angle),
                     1 => Some(&x.old_attribute_specification_attributes),
                     2 => Some(&x.old_attribute_specification_right_double_angle),
-                        _ => None,
-                    }
-                })
-            },
-            AttributeSpecification(x) => {
-                get_index(1).and_then(|index| { match index {
-                        0 => Some(&x.attribute_specification_attributes),
-                        _ => None,
-                    }
-                })
-            },
-            Attribute(x) => {
-                get_index(2).and_then(|index| { match index {
-                        0 => Some(&x.attribute_at),
-                    1 => Some(&x.attribute_attribute_name),
                         _ => None,
                     }
                 })

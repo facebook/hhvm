@@ -439,7 +439,6 @@ fn attr_spec_to_node_list<'a>(node: S<'a>) -> impl DoubleEndedIterator<Item = S<
     use itertools::Either::Right;
     let f = |attrs| Left(syntax_to_list_no_separators(attrs));
     match &node.children {
-        AttributeSpecification(x) => f(&x.attributes),
         OldAttributeSpecification(x) => f(&x.attributes),
         FileAttributeSpecification(x) => f(&x.attributes),
         _ => Right(std::iter::empty()),
@@ -451,7 +450,6 @@ fn attr_constructor_call<'a>(
 ) -> &'a SyntaxVariant<'a, PositionedToken<'a>, PositionedValue<'a>> {
     match &node.children {
         ConstructorCall(_) => &node.children,
-        Attribute(x) => &x.attribute_name.children,
         _ => &Missing,
     }
 }
@@ -1316,9 +1314,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
 
     fn attribute_specification_contains(&self, node: S<'a>, name: &str) -> bool {
         match &node.children {
-            AttributeSpecification(_)
-            | OldAttributeSpecification(_)
-            | FileAttributeSpecification(_) => {
+            OldAttributeSpecification(_) | FileAttributeSpecification(_) => {
                 attr_spec_to_node_list(node).any(|node| self.attr_name(node) == Some(name))
             }
             _ => false,
@@ -2493,7 +2489,6 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             {
                 // Get the location of the <<...>> annotation
                 let location = match &f.attribute_spec.children {
-                    AttributeSpecification(x) => make_location_of_node(&x.attributes),
                     OldAttributeSpecification(x) => make_location_of_node(&x.attributes),
                     _ => panic!("Expected attribute specification node"),
                 };
@@ -2811,7 +2806,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
 
     fn no_memoize_attribute_on_lambda(&mut self, node: S<'a>) {
         match &node.children {
-            OldAttributeSpecification(_) | AttributeSpecification(_) => {
+            OldAttributeSpecification(_) => {
                 for node in attr_spec_to_node_list(node) {
                     match self.attr_name(node) {
                         Some(n) if sn::user_attributes::is_memoized(n) => self
@@ -3290,8 +3285,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                     // attr or list item -> syntax list -> attribute
                     match self.parents.iter().rev().nth(2) {
                         Some(a)
-                            if a.is_attribute_specification()
-                                || a.is_old_attribute_specification()
+                            if a.is_old_attribute_specification()
                                 || a.is_file_attribute_specification() => {}
                         _ => {
                             if ctr_call.left_paren.is_missing() || ctr_call.right_paren.is_missing()
@@ -5427,20 +5421,6 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         }
     }
 
-    fn disabled_legacy_attribute_syntax_errors(&mut self, node: S<'a>) {
-        match node.children {
-            OldAttributeSpecification(_)
-                if self.env.parser_options.disable_legacy_attribute_syntax =>
-            {
-                self.errors.push(make_error_from_node(
-                    node,
-                    errors::no_legacy_attribute_syntax,
-                ))
-            }
-            _ => {}
-        }
-    }
-
     fn param_default_decl_errors(&mut self, node: S<'a>) {
         if let ParameterDeclaration(x) = &node.children {
             if !x.named.is_missing() {
@@ -5742,7 +5722,6 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 // properties ...
                 self.check_constant_expression_allow_static(&x.initializer);
             }
-            OldAttributeSpecification(_) => self.disabled_legacy_attribute_syntax_errors(node),
             SoftTypeSpecifier(_) => self.disabled_legacy_soft_typehint_errors(node),
             QualifiedName(_) => self.check_qualified_name(node),
             UnsetStatement(x) => {

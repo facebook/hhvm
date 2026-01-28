@@ -275,14 +275,6 @@ where
         <Self as SyntaxSmartConstructors<S, TF, St>>::make_old_attribute_specification(self, arg0, arg1, arg2)
     }
 
-    fn make_attribute_specification(&mut self, arg0: Self::Output) -> Self::Output {
-        <Self as SyntaxSmartConstructors<S, TF, St>>::make_attribute_specification(self, arg0)
-    }
-
-    fn make_attribute(&mut self, arg0: Self::Output, arg1: Self::Output) -> Self::Output {
-        <Self as SyntaxSmartConstructors<S, TF, St>>::make_attribute(self, arg0, arg1)
-    }
-
     fn make_inclusion_expression(&mut self, arg0: Self::Output, arg1: Self::Output) -> Self::Output {
         <Self as SyntaxSmartConstructors<S, TF, St>>::make_inclusion_expression(self, arg0, arg1)
     }

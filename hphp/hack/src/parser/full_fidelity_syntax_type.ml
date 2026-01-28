@@ -474,11 +474,6 @@ struct
         old_attribute_specification_attributes: t;
         old_attribute_specification_right_double_angle: t;
       }
-    | AttributeSpecification of { attribute_specification_attributes: t }
-    | Attribute of {
-        attribute_at: t;
-        attribute_attribute_name: t;
-      }
     | InclusionExpression of {
         inclusion_require: t;
         inclusion_filename: t;

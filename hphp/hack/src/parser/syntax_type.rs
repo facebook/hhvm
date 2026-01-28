@@ -69,8 +69,6 @@ pub trait SyntaxType<C>: SyntaxTypeBase<C>
     fn make_named_argument(ctx: &C, named_argument_name: Self, named_argument_equal: Self, named_argument_expression: Self) -> Self;
     fn make_parameter_declaration(ctx: &C, parameter_attribute: Self, parameter_visibility: Self, parameter_optional: Self, parameter_call_convention: Self, parameter_named: Self, parameter_readonly: Self, parameter_pre_ellipsis: Self, parameter_type: Self, parameter_ellipsis: Self, parameter_name: Self, parameter_default_value: Self, parameter_parameter_end: Self) -> Self;
     fn make_old_attribute_specification(ctx: &C, old_attribute_specification_left_double_angle: Self, old_attribute_specification_attributes: Self, old_attribute_specification_right_double_angle: Self) -> Self;
-    fn make_attribute_specification(ctx: &C, attribute_specification_attributes: Self) -> Self;
-    fn make_attribute(ctx: &C, attribute_at: Self, attribute_attribute_name: Self) -> Self;
     fn make_inclusion_expression(ctx: &C, inclusion_require: Self, inclusion_filename: Self) -> Self;
     fn make_inclusion_directive(ctx: &C, inclusion_expression: Self, inclusion_semicolon: Self) -> Self;
     fn make_compound_statement(ctx: &C, compound_left_brace: Self, compound_statements: Self, compound_right_brace: Self) -> Self;

@@ -222,10 +222,6 @@ where
         self.kind() == SyntaxKind::NamespaceEmptyBody
     }
 
-    pub fn is_attribute_specification(&self) -> bool {
-        self.kind() == SyntaxKind::AttributeSpecification
-    }
-
     pub fn is_old_attribute_specification(&self) -> bool {
         self.kind() == SyntaxKind::OldAttributeSpecification
     }

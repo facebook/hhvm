@@ -31,8 +31,6 @@ type t = {
   codegen: bool;  (** Are we emitting bytecode? *)
   disable_legacy_soft_typehints: bool;
       (** Disable legacy soft typehint syntax (@int) and only allow the __Soft attribute. *)
-  disable_legacy_attribute_syntax: bool;
-      (** Disable <<...>> attribute syntax *)
   disable_xhp_children_declarations: bool;
       (** Disable `children (foo|bar+|pcdata)` declarations as they can be implemented without special syntax *)
   const_default_lambda_args: bool;
@@ -92,7 +90,6 @@ val default : t
 (* Changes here need to be synchronized with rust_parser_errors_ffi.rs *)
 type ffi_t =
   bool
-  * bool
   * bool
   * bool
   * bool

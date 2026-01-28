@@ -572,9 +572,6 @@ pub const no_const_late_init_props: Error =
     Cow::Borrowed("`__Const` properties may not also be `__LateInit`");
 pub const no_const_abstract_final_class: Error =
     Cow::Borrowed("Cannot apply `__Const` attribute to an abstract final class");
-pub const no_legacy_attribute_syntax: Error = Cow::Borrowed(
-    "The `<<...>>` syntax for user attributes is not allowed. Use the `@` syntax instead.",
-);
 pub const no_silence: Error = Cow::Borrowed("The error suppression operator `@` is not allowed");
 pub const const_mutation: Error = Cow::Borrowed("Cannot mutate a class constant");
 pub const no_attributes_on_variadic_parameter: Error =

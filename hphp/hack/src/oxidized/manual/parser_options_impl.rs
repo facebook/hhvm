@@ -22,7 +22,6 @@ impl Default for ParserOptions {
             hhi_mode: false,
             codegen: false,
             disable_legacy_soft_typehints: true,
-            disable_legacy_attribute_syntax: false,
             disable_xhp_children_declarations: false,
             const_default_lambda_args: false,
             interpret_soft_types_as_like_types: false,

@@ -106,8 +106,6 @@ module WithToken (Token : TokenType) = struct
       | NamedArgument _ -> SyntaxKind.NamedArgument
       | ParameterDeclaration _ -> SyntaxKind.ParameterDeclaration
       | OldAttributeSpecification _ -> SyntaxKind.OldAttributeSpecification
-      | AttributeSpecification _ -> SyntaxKind.AttributeSpecification
-      | Attribute _ -> SyntaxKind.Attribute
       | InclusionExpression _ -> SyntaxKind.InclusionExpression
       | InclusionDirective _ -> SyntaxKind.InclusionDirective
       | CompoundStatement _ -> SyntaxKind.CompoundStatement
@@ -372,10 +370,6 @@ module WithToken (Token : TokenType) = struct
 
     let is_old_attribute_specification =
       has_kind SyntaxKind.OldAttributeSpecification
-
-    let is_attribute_specification = has_kind SyntaxKind.AttributeSpecification
-
-    let is_attribute = has_kind SyntaxKind.Attribute
 
     let is_inclusion_expression = has_kind SyntaxKind.InclusionExpression
 
@@ -1330,13 +1324,6 @@ module WithToken (Token : TokenType) = struct
         let acc = f acc old_attribute_specification_left_double_angle in
         let acc = f acc old_attribute_specification_attributes in
         let acc = f acc old_attribute_specification_right_double_angle in
-        acc
-      | AttributeSpecification { attribute_specification_attributes } ->
-        let acc = f acc attribute_specification_attributes in
-        acc
-      | Attribute { attribute_at; attribute_attribute_name } ->
-        let acc = f acc attribute_at in
-        let acc = f acc attribute_attribute_name in
         acc
       | InclusionExpression { inclusion_require; inclusion_filename } ->
         let acc = f acc inclusion_require in
@@ -3210,10 +3197,6 @@ module WithToken (Token : TokenType) = struct
           old_attribute_specification_attributes;
           old_attribute_specification_right_double_angle;
         ]
-      | AttributeSpecification { attribute_specification_attributes } ->
-        [attribute_specification_attributes]
-      | Attribute { attribute_at; attribute_attribute_name } ->
-        [attribute_at; attribute_attribute_name]
       | InclusionExpression { inclusion_require; inclusion_filename } ->
         [inclusion_require; inclusion_filename]
       | InclusionDirective { inclusion_expression; inclusion_semicolon } ->
@@ -5017,10 +5000,6 @@ module WithToken (Token : TokenType) = struct
           "old_attribute_specification_attributes";
           "old_attribute_specification_right_double_angle";
         ]
-      | AttributeSpecification { attribute_specification_attributes } ->
-        ["attribute_specification_attributes"]
-      | Attribute { attribute_at; attribute_attribute_name } ->
-        ["attribute_at"; "attribute_attribute_name"]
       | InclusionExpression { inclusion_require; inclusion_filename } ->
         ["inclusion_require"; "inclusion_filename"]
       | InclusionDirective { inclusion_expression; inclusion_semicolon } ->
@@ -6968,11 +6947,6 @@ module WithToken (Token : TokenType) = struct
             old_attribute_specification_attributes;
             old_attribute_specification_right_double_angle;
           }
-      | (SyntaxKind.AttributeSpecification, [attribute_specification_attributes])
-        ->
-        AttributeSpecification { attribute_specification_attributes }
-      | (SyntaxKind.Attribute, [attribute_at; attribute_attribute_name]) ->
-        Attribute { attribute_at; attribute_attribute_name }
       | (SyntaxKind.InclusionExpression, [inclusion_require; inclusion_filename])
         ->
         InclusionExpression { inclusion_require; inclusion_filename }
@@ -9145,18 +9119,6 @@ module WithToken (Token : TokenType) = struct
               old_attribute_specification_right_double_angle;
             }
         in
-        let value = ValueBuilder.value_from_syntax syntax in
-        make syntax value
-
-      let make_attribute_specification attribute_specification_attributes =
-        let syntax =
-          AttributeSpecification { attribute_specification_attributes }
-        in
-        let value = ValueBuilder.value_from_syntax syntax in
-        make syntax value
-
-      let make_attribute attribute_at attribute_attribute_name =
-        let syntax = Attribute { attribute_at; attribute_attribute_name } in
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value
 

@@ -295,16 +295,6 @@ where
         Self::Output::make_old_attribute_specification(self.state_mut(), arg0, arg1, arg2)
     }
 
-    fn make_attribute_specification(&mut self, arg0 : Self::Output) -> Self::Output {
-        self.state_mut().next(&[&arg0]);
-        Self::Output::make_attribute_specification(self.state_mut(), arg0)
-    }
-
-    fn make_attribute(&mut self, arg0 : Self::Output, arg1 : Self::Output) -> Self::Output {
-        self.state_mut().next(&[&arg0, &arg1]);
-        Self::Output::make_attribute(self.state_mut(), arg0, arg1)
-    }
-
     fn make_inclusion_expression(&mut self, arg0 : Self::Output, arg1 : Self::Output) -> Self::Output {
         self.state_mut().next(&[&arg0, &arg1]);
         Self::Output::make_inclusion_expression(self.state_mut(), arg0, arg1)

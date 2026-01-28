@@ -4823,10 +4823,6 @@ fn p_user_attribute<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::UserAttri
     match &node.children {
         FileAttributeSpecification(c) => could_map(&c.attributes, env, p_attr),
         OldAttributeSpecification(c) => could_map(&c.attributes, env, p_attr),
-        AttributeSpecification(c) => could_map(&c.attributes, env, |n, e| match &n.children {
-            Attribute(c) => p_attr(&c.attribute_name, e),
-            _ => missing_syntax("attribute", node, e),
-        }),
         _ => missing_syntax("attribute specification", node, env),
     }
     .map(ast::UserAttributes)

@@ -2172,7 +2172,7 @@ where
         // An enum, type alias, function, interface, trait or class may all
         // begin with an attribute.
         let attribute_specification = match self.peek_token_kind() {
-            TokenKind::At | TokenKind::LessThanLessThan => self.parse_attribute_specification_opt(),
+            TokenKind::LessThanLessThan => self.parse_attribute_specification_opt(),
             _ => {
                 let pos = self.pos();
                 self.sc_mut().make_missing(pos)

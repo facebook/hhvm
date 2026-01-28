@@ -439,22 +439,6 @@ pub trait FlattenSmartConstructors: SmartConstructors
         }
     }
 
-    fn make_attribute_specification(&mut self, arg0: Self::Output) -> Self::Output {
-        if Self::is_zero(&arg0) {
-          Self::zero(SyntaxKind::AttributeSpecification)
-        } else {
-          self.flatten(SyntaxKind::AttributeSpecification, vec!(arg0))
-        }
-    }
-
-    fn make_attribute(&mut self, arg0: Self::Output, arg1: Self::Output) -> Self::Output {
-        if Self::is_zero(&arg0) && Self::is_zero(&arg1) {
-          Self::zero(SyntaxKind::Attribute)
-        } else {
-          self.flatten(SyntaxKind::Attribute, vec!(arg0, arg1))
-        }
-    }
-
     fn make_inclusion_expression(&mut self, arg0: Self::Output, arg1: Self::Output) -> Self::Output {
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) {
           Self::zero(SyntaxKind::InclusionExpression)

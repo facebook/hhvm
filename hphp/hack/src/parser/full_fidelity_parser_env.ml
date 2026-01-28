@@ -17,7 +17,6 @@ type t = {
   mode: FileInfo.mode option;
   rust: bool;
   disable_legacy_soft_typehints: bool;
-  disable_legacy_attribute_syntax: bool;
   leak_rust_tree: bool;
   enable_xhp_class_modifier: bool;
   disable_xhp_element_mangling: bool;
@@ -36,7 +35,6 @@ let default =
     rust = true;
     mode = None;
     disable_legacy_soft_typehints = false;
-    disable_legacy_attribute_syntax = false;
     leak_rust_tree = false;
     enable_xhp_class_modifier = false;
     disable_xhp_element_mangling = false;
@@ -53,7 +51,6 @@ let make
     ?mode
     ?(rust = default.rust)
     ?(disable_legacy_soft_typehints = default.disable_legacy_soft_typehints)
-    ?(disable_legacy_attribute_syntax = default.disable_legacy_attribute_syntax)
     ?((* DANGER: if you leak the root tree into OCaml, it's on you to ensure that
          * it's eventually disposed to avoid memory leak. *)
       leak_rust_tree = default.leak_rust_tree)
@@ -73,7 +70,6 @@ let make
     mode;
     rust;
     disable_legacy_soft_typehints;
-    disable_legacy_attribute_syntax;
     leak_rust_tree;
     enable_xhp_class_modifier;
     disable_xhp_element_mangling;
@@ -97,8 +93,6 @@ let is_strict e = e.mode = Some FileInfo.Mstrict
 let rust e = e.rust
 
 let disable_legacy_soft_typehints e = e.disable_legacy_soft_typehints
-
-let disable_legacy_attribute_syntax e = e.disable_legacy_attribute_syntax
 
 let leak_rust_tree e = e.leak_rust_tree
 

@@ -304,9 +304,6 @@ let load_config (config : Config_file_common.t) (options : GlobalOptions.t) :
         disable_legacy_soft_typehints =
           bool_opt "disable_legacy_soft_typehints" config
           >?? po_opt.disable_legacy_soft_typehints;
-        disable_legacy_attribute_syntax =
-          bool_opt "disable_legacy_attribute_syntax" config
-          >?? po_opt.disable_legacy_attribute_syntax;
         const_default_func_args =
           bool_opt "const_default_func_args" config
           >?? po_opt.const_default_func_args;

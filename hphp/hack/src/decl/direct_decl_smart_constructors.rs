@@ -6435,30 +6435,6 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
         )
     }
 
-    fn make_attribute_specification(&mut self, attributes: Self::Output) -> Self::Output {
-        if attributes.contains_marker_attribute("__NoAutoDynamic") {
-            let this = Rc::make_mut(&mut self.state);
-            this.under_no_auto_dynamic = true;
-        }
-        if attributes.contains_marker_attribute("__NoAutoLikes") {
-            let this = Rc::make_mut(&mut self.state);
-            this.under_no_auto_likes = true;
-        }
-        if self.opts.keep_user_attributes {
-            attributes
-        } else {
-            Node::Ignored(SK::AttributeSpecification)
-        }
-    }
-
-    fn make_attribute(&mut self, _at: Self::Output, attribute: Self::Output) -> Self::Output {
-        if self.opts.keep_user_attributes {
-            attribute
-        } else {
-            Node::Ignored(SK::Attribute)
-        }
-    }
-
     // A type specifier preceded by an attribute list. At the time of writing,
     // only the <<__Soft>> attribute is permitted here.
     fn make_attributized_specifier(

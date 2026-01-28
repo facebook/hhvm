@@ -559,21 +559,6 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                     }
                 })
             },
-            AttributeSpecification(x) => {
-                get_index(1).and_then(|index| { match index {
-                        0 => Some(&x.attributes),
-                        _ => None,
-                    }
-                })
-            },
-            Attribute(x) => {
-                get_index(2).and_then(|index| { match index {
-                        0 => Some(&x.at),
-                    1 => Some(&x.attribute_name),
-                        _ => None,
-                    }
-                })
-            },
             InclusionExpression(x) => {
                 get_index(2).and_then(|index| { match index {
                         0 => Some(&x.require),

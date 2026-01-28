@@ -74,8 +74,6 @@ impl<T: LexableToken, V> Syntax<'_, T, V> {
             SyntaxVariant::NamedArgument {..} => SyntaxKind::NamedArgument,
             SyntaxVariant::ParameterDeclaration {..} => SyntaxKind::ParameterDeclaration,
             SyntaxVariant::OldAttributeSpecification {..} => SyntaxKind::OldAttributeSpecification,
-            SyntaxVariant::AttributeSpecification {..} => SyntaxKind::AttributeSpecification,
-            SyntaxVariant::Attribute {..} => SyntaxKind::Attribute,
             SyntaxVariant::InclusionExpression {..} => SyntaxKind::InclusionExpression,
             SyntaxVariant::InclusionDirective {..} => SyntaxKind::InclusionDirective,
             SyntaxVariant::CompoundStatement {..} => SyntaxKind::CompoundStatement,

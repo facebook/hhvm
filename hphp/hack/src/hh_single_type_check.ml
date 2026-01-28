@@ -259,7 +259,6 @@ let parse_options () =
   let disallow_static_memoized = ref false in
   let enable_supportdyn_hint = ref false in
   let disable_legacy_soft_typehints = ref false in
-  let disable_legacy_attribute_syntax = ref false in
   let type_refinement_partition_shapes = ref false in
   let glean_reponame = ref (GleanOptions.reponame GlobalOptions.default) in
   let disable_xhp_element_mangling = ref false in
@@ -567,9 +566,6 @@ let parse_options () =
         Arg.Set disable_legacy_soft_typehints,
         " Disables the legacy @ syntax for soft typehints (use __Soft instead)"
       );
-      ( "--disable-legacy-attribute-syntax",
-        Arg.Set disable_legacy_attribute_syntax,
-        " Disable the legacy <<...>> user attribute syntax" );
       ( "--glean-reponame",
         Arg.String (fun str -> glean_reponame := str),
         " glean repo name" );
@@ -802,7 +798,6 @@ let parse_options () =
         (* The remainder are set by the command line options *)
         is_systemlib = default.is_systemlib;
         disable_legacy_soft_typehints = !disable_legacy_soft_typehints;
-        disable_legacy_attribute_syntax = !disable_legacy_attribute_syntax;
         const_default_func_args = default.const_default_func_args;
         const_default_lambda_args = default.const_default_lambda_args;
         const_static_props = default.const_static_props;

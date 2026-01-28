@@ -509,19 +509,6 @@ ss.serialize_field("old_attribute_specification_attributes", &self.with(attribut
 ss.serialize_field("old_attribute_specification_right_double_angle", &self.with(right_double_angle))?;
       ss.end()
 } 
-SyntaxVariant::AttributeSpecification (AttributeSpecificationChildren{attributes} ) => {
-      let mut ss = s.serialize_struct("", 2)?;
-      ss.serialize_field("kind", "attribute_specification")?;
-      ss.serialize_field("attribute_specification_attributes", &self.with(attributes))?;
-      ss.end()
-} 
-SyntaxVariant::Attribute (AttributeChildren{at,attribute_name} ) => {
-      let mut ss = s.serialize_struct("", 3)?;
-      ss.serialize_field("kind", "attribute")?;
-      ss.serialize_field("attribute_at", &self.with(at))?;
-ss.serialize_field("attribute_attribute_name", &self.with(attribute_name))?;
-      ss.end()
-} 
 SyntaxVariant::InclusionExpression (InclusionExpressionChildren{require,filename} ) => {
       let mut ss = s.serialize_struct("", 3)?;
       ss.serialize_field("kind", "inclusion_expression")?;

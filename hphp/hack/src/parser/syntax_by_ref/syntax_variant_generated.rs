@@ -75,8 +75,6 @@ pub enum SyntaxVariant<'a, T, V> {
     NamedArgument(&'a NamedArgumentChildren<'a, T, V>),
     ParameterDeclaration(&'a ParameterDeclarationChildren<'a, T, V>),
     OldAttributeSpecification(&'a OldAttributeSpecificationChildren<'a, T, V>),
-    AttributeSpecification(&'a AttributeSpecificationChildren<'a, T, V>),
-    Attribute(&'a AttributeChildren<'a, T, V>),
     InclusionExpression(&'a InclusionExpressionChildren<'a, T, V>),
     InclusionDirective(&'a InclusionDirectiveChildren<'a, T, V>),
     CompoundStatement(&'a CompoundStatementChildren<'a, T, V>),
@@ -627,17 +625,6 @@ pub struct OldAttributeSpecificationChildren<'a, T, V> {
     pub left_double_angle: Syntax<'a, T, V>,
     pub attributes: Syntax<'a, T, V>,
     pub right_double_angle: Syntax<'a, T, V>,
-}
-
-#[derive(Debug, Clone)]
-pub struct AttributeSpecificationChildren<'a, T, V> {
-    pub attributes: Syntax<'a, T, V>,
-}
-
-#[derive(Debug, Clone)]
-pub struct AttributeChildren<'a, T, V> {
-    pub at: Syntax<'a, T, V>,
-    pub attribute_name: Syntax<'a, T, V>,
 }
 
 #[derive(Debug, Clone)]

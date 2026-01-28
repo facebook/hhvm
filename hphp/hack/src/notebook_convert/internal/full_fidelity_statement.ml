@@ -82,8 +82,6 @@ let is_statement =
     | DecoratedExpression _
     | ParameterDeclaration _
     | OldAttributeSpecification _
-    | AttributeSpecification _
-    | Attribute _
     | InclusionExpression _
     | InclusionDirective _
     | MarkupSection _

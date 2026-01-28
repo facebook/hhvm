@@ -262,14 +262,6 @@ impl<'o, 't> SmartConstructors for DirectDeclSmartConstructors<'o, 't> {
         <Self as FlattenSmartConstructors>::make_old_attribute_specification(self, left_double_angle, attributes, right_double_angle)
     }
 
-    fn make_attribute_specification(&mut self, attributes: Self::Output) -> Self::Output {
-        <Self as FlattenSmartConstructors>::make_attribute_specification(self, attributes)
-    }
-
-    fn make_attribute(&mut self, at: Self::Output, attribute_name: Self::Output) -> Self::Output {
-        <Self as FlattenSmartConstructors>::make_attribute(self, at, attribute_name)
-    }
-
     fn make_inclusion_expression(&mut self, require: Self::Output, filename: Self::Output) -> Self::Output {
         <Self as FlattenSmartConstructors>::make_inclusion_expression(self, require, filename)
     }

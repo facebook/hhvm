@@ -597,23 +597,6 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_attribute_specification(ctx: &C, attributes: Self) -> Self {
-        let syntax = SyntaxVariant::AttributeSpecification(ctx.get_arena().alloc(AttributeSpecificationChildren {
-            attributes,
-        }));
-        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
-        Self::make(syntax, value)
-    }
-
-    fn make_attribute(ctx: &C, at: Self, attribute_name: Self) -> Self {
-        let syntax = SyntaxVariant::Attribute(ctx.get_arena().alloc(AttributeChildren {
-            at,
-            attribute_name,
-        }));
-        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
-        Self::make(syntax, value)
-    }
-
     fn make_inclusion_expression(ctx: &C, require: Self, filename: Self) -> Self {
         let syntax = SyntaxVariant::InclusionExpression(ctx.get_arena().alloc(InclusionExpressionChildren {
             require,

@@ -33,7 +33,6 @@ type t = {
   files: string list;
   disable_lval_as_an_expression: bool;
   disable_legacy_soft_typehints: bool;
-  disable_legacy_attribute_syntax: bool;
   const_default_func_args: bool;
   const_default_lambda_args: bool;
   const_static_props: bool;
@@ -71,7 +70,6 @@ let make
     files
     disable_lval_as_an_expression
     disable_legacy_soft_typehints
-    disable_legacy_attribute_syntax
     const_default_func_args
     const_default_lambda_args
     const_static_props
@@ -107,7 +105,6 @@ let make
     files;
     disable_lval_as_an_expression;
     disable_legacy_soft_typehints;
-    disable_legacy_attribute_syntax;
     const_default_func_args;
     const_default_lambda_args;
     const_static_props;
@@ -164,7 +161,6 @@ let parse_args () =
   let files = ref [] in
   let push_file file = files := file :: !files in
   let disable_legacy_soft_typehints = ref false in
-  let disable_legacy_attribute_syntax = ref false in
   let const_default_func_args = ref false in
   let const_default_lambda_args = ref false in
   let const_static_props = ref false in
@@ -267,9 +263,6 @@ No errors are filtered out."
         Arg.Set disable_legacy_soft_typehints,
         "Disables the legacy @ syntax for soft typehints (use __Soft instead)"
       );
-      ( "--disable-legacy-attribute-syntax",
-        Arg.Set disable_legacy_attribute_syntax,
-        "Disable the legacy <<...>> user attribute syntax" );
       ( "--const-default-func-args",
         Arg.Set const_default_func_args,
         "Statically check default function arguments are constant initializers"
@@ -355,7 +348,6 @@ No errors are filtered out."
     (List.rev !files)
     !disable_lval_as_an_expression
     !disable_legacy_soft_typehints
-    !disable_legacy_attribute_syntax
     !const_default_func_args
     !const_default_lambda_args
     !const_static_props
@@ -375,7 +367,6 @@ let to_parser_options (args : t) : ParserOptions.t =
     ParserOptions.codegen = args.codegen;
     disable_lval_as_an_expression = args.disable_lval_as_an_expression;
     disable_legacy_soft_typehints = args.disable_legacy_soft_typehints;
-    disable_legacy_attribute_syntax = args.disable_legacy_attribute_syntax;
     const_default_func_args = args.const_default_func_args;
     const_default_lambda_args = args.const_default_lambda_args;
     const_static_props = args.const_static_props;
@@ -392,7 +383,6 @@ let to_parser_env args ~leak_rust_tree ~mode =
   Full_fidelity_parser_env.make
     ~disable_lval_as_an_expression:args.disable_lval_as_an_expression
     ~disable_legacy_soft_typehints:args.disable_legacy_soft_typehints
-    ~disable_legacy_attribute_syntax:args.disable_legacy_attribute_syntax
     ~leak_rust_tree
     ?mode
     ()

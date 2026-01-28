@@ -70,8 +70,6 @@ type t =
   | NamedArgument
   | ParameterDeclaration
   | OldAttributeSpecification
-  | AttributeSpecification
-  | Attribute
   | InclusionExpression
   | InclusionDirective
   | CompoundStatement
@@ -261,8 +259,6 @@ let to_string kind =
   | NamedArgument -> "named_argument"
   | ParameterDeclaration -> "parameter_declaration"
   | OldAttributeSpecification -> "old_attribute_specification"
-  | AttributeSpecification -> "attribute_specification"
-  | Attribute -> "attribute"
   | InclusionExpression -> "inclusion_expression"
   | InclusionDirective -> "inclusion_directive"
   | CompoundStatement -> "compound_statement"

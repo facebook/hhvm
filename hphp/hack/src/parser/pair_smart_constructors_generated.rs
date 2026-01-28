@@ -276,14 +276,6 @@ where
         Node(self.0.make_old_attribute_specification(left_double_angle.0, attributes.0, right_double_angle.0), self.1.make_old_attribute_specification(left_double_angle.1, attributes.1, right_double_angle.1))
     }
 
-    fn make_attribute_specification(&mut self, attributes: Self::Output) -> Self::Output {
-        Node(self.0.make_attribute_specification(attributes.0), self.1.make_attribute_specification(attributes.1))
-    }
-
-    fn make_attribute(&mut self, at: Self::Output, attribute_name: Self::Output) -> Self::Output {
-        Node(self.0.make_attribute(at.0, attribute_name.0), self.1.make_attribute(at.1, attribute_name.1))
-    }
-
     fn make_inclusion_expression(&mut self, require: Self::Output, filename: Self::Output) -> Self::Output {
         Node(self.0.make_inclusion_expression(require.0, filename.0), self.1.make_inclusion_expression(require.1, filename.1))
     }

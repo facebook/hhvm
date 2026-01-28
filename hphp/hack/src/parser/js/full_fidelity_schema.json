@@ -957,21 +957,6 @@
         { "field_name" : "attributes" },
         { "field_name" : "right_double_angle" }
       ] },
-    { "kind_name" : "AttributeSpecification",
-      "type_name" : "attribute_specification",
-      "description" : "attribute_specification",
-      "prefix" : "attribute_specification",
-      "fields" : [
-        { "field_name" : "attributes" }
-      ] },
-    { "kind_name" : "Attribute",
-      "type_name" : "attribute",
-      "description" : "attribute",
-      "prefix" : "attribute",
-      "fields" : [
-        { "field_name" : "at" },
-        { "field_name" : "attribute_name" }
-      ] },
     { "kind_name" : "InclusionExpression",
       "type_name" : "inclusion_expression",
       "description" : "inclusion_expression",

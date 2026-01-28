@@ -259,26 +259,6 @@ Actions ClientStateMachine::processKeyUpdateInitiation(
 
 namespace detail {
 
-static ReportError toReportError(
-    const Error& err,
-    folly::Optional<AlertDescription>& alert) {
-  const char* msg = err.msg();
-  Error::Category errType = err.errorType();
-  alert = (errType == Error::Category::Unknown)
-      ? AlertDescription::unexpected_message
-      : err.alert();
-  switch (errType) {
-    case Error::Category::Fizz:
-    case Error::Category::Unknown:
-      return ReportError(
-          folly::make_exception_wrapper<FizzException>(msg, alert));
-    case Error::Category::Verifier:
-      return ReportError(
-          folly::make_exception_wrapper<FizzVerificationException>(msg, alert));
-  }
-  return ReportError(folly::make_exception_wrapper<FizzException>(msg, alert));
-}
-
 Actions processEvent(const State& state, Param& param) {
   auto event = EventVisitor()(param);
   Actions acts;
@@ -286,9 +266,13 @@ Actions processEvent(const State& state, Param& param) {
     InvocationContext ctx;
     if (sm::StateMachine<ClientTypes>::getHandler(state.state(), event)(
             acts, ctx, state, param) == Status::Fail) {
-      folly::Optional<AlertDescription> alert;
-      ReportError rerr = toReportError(ctx.err, alert);
-      acts = detail::handleError(state, std::move(rerr), alert);
+      folly::Optional<AlertDescription> alert =
+          AlertDescription::unexpected_message;
+      if (ctx.err.hasAlert()) {
+        alert = ctx.err.alert();
+      }
+      acts =
+          detail::handleError(state, ReportError(ctx.err.toException()), alert);
     }
   } catch (const FizzException& e) {
     acts = detail::handleError(

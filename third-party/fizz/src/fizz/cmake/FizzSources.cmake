@@ -97,6 +97,7 @@ set(
         server/State.cpp
         server/TicketCodec.cpp
         util/FizzUtil.cpp
+        util/Status.cpp
         util/Tracing.cpp
 )
 
@@ -229,6 +230,7 @@ set(
         protocol/ech/GreaseECHSetting.h
         protocol/ech/Types-inl.h
         protocol/ech/Types.h
+        record/Alerts.h
         record/BufAndPaddingPolicy.h
         record/EncryptedRecordLayer.h
         record/Extensions-inl.h
@@ -267,10 +269,12 @@ set(
         server/TicketPolicy.h
         server/TicketTypes.h
         server/TokenCipher.h
+        util/Exceptions.h
         util/FizzUtil.h
         util/KeyLogWriter.h
         util/Parse-inl.h
         util/Parse.h
+        util/Status.h
         util/Tracing.h
         util/Variant.h
         util/Workarounds.h

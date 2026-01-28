@@ -8,7 +8,9 @@
 
 #pragma once
 
-#include <fizz/record/Types.h>
+#include <fizz/record/Alerts.h>
+#include <fizz/util/Exceptions.h>
+#include <folly/ExceptionWrapper.h>
 #include <folly/Optional.h>
 
 namespace fizz {
@@ -24,11 +26,18 @@ FOLLY_GNU_DISABLE_WARNING("-Wswitch-default")
 
 enum class [[nodiscard]] Status : uint8_t { Fail, Success };
 
-#define FIZZ_RETURN_ON_ERROR(expr) \
-  do {                             \
-    if ((expr) == Status::Fail) {  \
-      return Status::Fail;         \
-    }                              \
+#define FIZZ_RETURN_ON_ERROR(expr)      \
+  do {                                  \
+    if ((expr) == fizz::Status::Fail) { \
+      return fizz::Status::Fail;        \
+    }                                   \
+  } while (0)
+
+#define FIZZ_THROW_ON_ERROR(expr, err)  \
+  do {                                  \
+    if ((expr) == fizz::Status::Fail) { \
+      err.throwException();             \
+    }                                   \
   } while (0)
 
 /*
@@ -49,19 +58,26 @@ class Error {
   /**
    * Category represents the "exception type".
    *
-   * `Unknown` - A catch all, roughly analagous to any `std::exception` being
-   * thrown.
    * `Verifier` - The error was a result of invoking a user supplied
    * certificate verifier.
    * `Fizz` - Analagous to throwing a `FizzException`.
    * These are generally conditions that the TLS implementation _explicitly_
    * checks for (e.g. argument, protocol validations. etc.).
+   * 'OuterExtensions' - The errors thrown from extension expansion failure.
+   * 'StdXXX' - The errors thrown from the standard library:
+   * runtime_error, overflow_error, login_error, out_of_range, etc.
+   * TODO: Will remove all the exception types except for Verifier and Fizz in
+   * another diff.
    */
   // clang-format off
   enum class Category : uint8_t {
-    Unknown,
     Verifier,
-    Fizz
+    Fizz,
+    OuterExtensions,
+    StdRuntime,
+    StdOverFlow,
+    StdLogic,
+    StdOutOfRange
   };
   // clang-format on
   Error() = default;
@@ -71,7 +87,7 @@ class Error {
       folly::Optional<AlertDescription> alertIn,
       Category type = Category::Fizz) = delete;
 
-  // Record the error with a literal string
+  // Record the fizz error with a literal string
   Status error(
       const char* msg,
       folly::Optional<AlertDescription> alertIn,
@@ -82,7 +98,7 @@ class Error {
     source_ = type;
     return Status::Fail;
   }
-  // Record the error with a dynamically constructed string
+  // Record the fizz error with a dynamically constructed string
   Status error(
       std::string&& msg,
       folly::Optional<AlertDescription> alertIn,
@@ -91,6 +107,22 @@ class Error {
     dynamicMsg_ = std::move(msg);
     alert_ = std::move(alertIn);
     source_ = type;
+    return Status::Fail;
+  }
+  // Record the std::runtime_error with a literal string
+  Status error(const char* msg) {
+    msgType_ = MessageType::Static;
+    staticMsg_ = msg;
+    alert_ = folly::none;
+    source_ = Category::StdRuntime;
+    return Status::Fail;
+  }
+  // Record the std::runtime_error with a dynamically constructed string
+  Status error(std::string&& msg) {
+    msgType_ = MessageType::Dynamic;
+    dynamicMsg_ = std::move(msg);
+    alert_ = folly::none;
+    source_ = Category::StdRuntime;
     return Status::Fail;
   }
   const char* msg() const {
@@ -110,6 +142,16 @@ class Error {
   Category errorType() const {
     return source_;
   }
+
+  // Only Fizz and Verifier have an alert
+  bool hasAlert() const {
+    return source_ == Category::Fizz || source_ == Category::Verifier;
+  }
+
+  // throw the counterpart exception of the error
+  void throwException() const;
+  // Convert the error to a folly::exception_wrapper
+  folly::exception_wrapper toException() const;
 
  private:
   enum class MessageType { None, Static, Dynamic };

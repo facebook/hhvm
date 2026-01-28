@@ -8,11 +8,12 @@
 
 #pragma once
 
+#include <fizz/protocol/Events.h>
+#include <fizz/record/Alerts.h>
+#include <fizz/util/Status.h>
 #include <folly/Optional.h>
 #include <folly/io/Cursor.h>
 #include <folly/io/IOBuf.h>
-
-#include <fizz/protocol/Events.h>
 
 namespace fizz {
 
@@ -117,41 +118,6 @@ enum class ExtensionType : uint16_t {
 };
 
 std::string toString(ExtensionType);
-
-enum class AlertDescription : uint8_t {
-  close_notify = 0,
-  end_of_early_data = 1,
-  unexpected_message = 10,
-  bad_record_mac = 20,
-  record_overflow = 22,
-  handshake_failure = 40,
-  bad_certificate = 42,
-  unsupported_certificate = 43,
-  certificate_revoked = 44,
-  certificate_expired = 45,
-  certificate_unknown = 46,
-  illegal_parameter = 47,
-  unknown_ca = 48,
-  access_denied = 49,
-  decode_error = 50,
-  decrypt_error = 51,
-  protocol_version = 70,
-  insufficient_security = 71,
-  internal_error = 80,
-  inappropriate_fallback = 86,
-  user_canceled = 90,
-  missing_extension = 109,
-  unsupported_extension = 110,
-  certificate_unobtainable = 111,
-  unrecognized_name = 112,
-  bad_certificate_status_response = 113,
-  bad_certificate_hash_value = 114,
-  unknown_psk_identity = 115,
-  certificate_required = 116,
-  no_application_protocol = 120,
-  ech_required = 121
-};
-
 std::string toString(AlertDescription);
 
 enum class CipherSuite : uint16_t {
@@ -402,18 +368,6 @@ struct CloseNotify : EventType<Event::CloseNotify> {
   std::unique_ptr<folly::IOBuf> ignoredPostCloseData;
 };
 
-class FizzException : public std::runtime_error {
- public:
-  FizzException(const std::string& msg, folly::Optional<AlertDescription> alert)
-      : std::runtime_error(msg), alert_(alert) {}
-
-  folly::Optional<AlertDescription> getAlert() const {
-    return alert_;
-  }
-
- private:
-  folly::Optional<AlertDescription> alert_;
-};
 template <class T>
 Buf encode(T&&);
 template <class T>

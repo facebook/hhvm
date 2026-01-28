@@ -19,14 +19,6 @@ namespace fizz {
  */
 enum class VerificationContext { Client, Server };
 
-class FizzVerificationException : public FizzException {
- public:
-  FizzVerificationException(
-      const std::string& msg,
-      folly::Optional<AlertDescription> alert)
-      : FizzException(msg, alert) {}
-};
-
 class CertificateVerifier {
  public:
   virtual ~CertificateVerifier() = default;

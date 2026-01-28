@@ -72,8 +72,11 @@ class ServerHealthCheckerCallback {
   // All new usecases should be defined as struct members.
   struct ExtraInfo : public std::vector<std::pair<std::string, std::string>> {
     ExtraInfo() = default;
+    ~ExtraInfo() = default;
     ExtraInfo(const ExtraInfo&) = default;
+    ExtraInfo& operator=(const ExtraInfo&) = default;
     ExtraInfo(ExtraInfo&&) = default;
+    ExtraInfo& operator=(ExtraInfo&&) = default;
     explicit ExtraInfo(std::vector<std::pair<std::string, std::string>> v)
         : std::vector<std::pair<std::string, std::string>>(std::move(v)) {
     }
@@ -82,7 +85,6 @@ class ServerHealthCheckerCallback {
       std::vector<std::pair<std::string, std::string>>::operator=(v);
       return *this;
     }
-    ExtraInfo& operator=(const ExtraInfo& other) = default;
 
     // Converts all fields within the vector of pairs to a map.
     [[nodiscard]] folly::F14FastMap<std::string, std::string> toMap() const;

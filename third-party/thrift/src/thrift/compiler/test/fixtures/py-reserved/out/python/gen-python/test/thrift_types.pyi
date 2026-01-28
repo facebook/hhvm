@@ -71,7 +71,7 @@ class def_(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.def_):
     def _to_py_deprecated(self) -> "test.ttypes.def_": ...  # type: ignore
 _fbthrift_def_ = def_
 
-and = builtins.int
+and_ = builtins.int
 
 
 class _fbthrift_lambda_global_args(_fbthrift_python_types.Struct):

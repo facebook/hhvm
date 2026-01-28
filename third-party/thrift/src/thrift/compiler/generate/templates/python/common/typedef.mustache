@@ -52,9 +52,9 @@
     {{#if (not typedef.enum?)}}
       {{#if typedef.has_adapter?}}
         {{#let adapter = typedef.adapter}}
-{{typedef.name}} = {{adapter.type_hint}}{{#if adapter.is_generic?}}[{{#partial python_type type=typedef.resolved}}]{{/if}}
+{{typedef.py_name}} = {{adapter.type_hint}}{{#if adapter.is_generic?}}[{{#partial python_type type=typedef.resolved}}]{{/if}}
       {{#else}}
-{{typedef.name}} = {{#partial python_type type=typedef.resolved}}
+{{typedef.py_name}} = {{#partial python_type type=typedef.resolved}}
       {{/if typedef.has_adapter?}}
     {{/if (not typedef.enum?)}}
   {{/each}}

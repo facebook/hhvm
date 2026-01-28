@@ -152,9 +152,9 @@ class {{#partial m_types.unadapted_name type=struct}}({{!
     {{#if (not typedef.enum?)}}
       {{#if typedef.has_adapter?}}
         {{#let adapter = typedef.adapter}}
-{{typedef.name}} = {{adapter.type_hint}}{{#if adapter.is_generic?}}[{{> types/typedef_pep484_type}}]{{/if}}
+{{typedef.py_name}} = {{adapter.type_hint}}{{#if adapter.is_generic?}}[{{> types/typedef_pep484_type}}]{{/if}}
       {{#else}}
-{{typedef.name}} = {{> types/typedef_pep484_type}}
+{{typedef.py_name}} = {{> types/typedef_pep484_type}}
       {{/if typedef.has_adapter?}}
     {{/if (not typedef.enum?)}}
   {{/each}}

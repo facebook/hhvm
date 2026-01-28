@@ -150,9 +150,9 @@ from {{program.module_path}}.thrift_enums import (
   {{#each program.typedefs as |typedef|}}
     {{#if typedef.enum?}}
       {{#if python.is_source_file?}}
-    {{typedef.name}},
+    {{typedef.py_name}},
       {{/if python.is_source_file?}}
-    {{typedef.name}} as {{#partial private_alias_prefix}}{{typedef.name}},
+    {{typedef.py_name}} as {{#partial private_alias_prefix}}{{typedef.py_name}},
     {{/if typedef.enum?}}
 {{/each}}
 )
@@ -174,7 +174,7 @@ from {{program.module_path}}.thrift_enums import (
 {{! Type stub assignments for enum typedefs }}
   {{#each program.typedefs as |typedef|}}
     {{#if typedef.enum?}}
-{{typedef.name}} = {{#partial private_alias_prefix}}{{typedef.name}}
+{{typedef.py_name}} = {{#partial private_alias_prefix}}{{typedef.py_name}}
     {{/if typedef.enum?}}
   {{/each}}
 {{/if python.is_type_stub?}}

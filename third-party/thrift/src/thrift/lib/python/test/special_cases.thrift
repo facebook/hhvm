@@ -53,6 +53,11 @@ enum from {
   VALUE = 1,
 }
 
+// Test that Python reserved keywords are escaped in typedef names.
+// "and" is a Python reserved keyword; using it directly as a variable name
+// would cause a syntax error.
+typedef i64 and
+
 // Reproduces the use-cases where field names in structured types are the same
 // as the typenames that appear in the failures. Once the type-checker
 // encounters the field, it sees that name as the name of the field and not a

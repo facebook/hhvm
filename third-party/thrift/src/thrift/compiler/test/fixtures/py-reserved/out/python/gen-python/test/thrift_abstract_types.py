@@ -82,4 +82,4 @@ class def_(_abc.ABC):
     def _to_py_deprecated(self) -> "test.ttypes.def_": ...  # type: ignore
 _fbthrift_def_ = def_
 
-and = builtins.int
+and_ = builtins.int

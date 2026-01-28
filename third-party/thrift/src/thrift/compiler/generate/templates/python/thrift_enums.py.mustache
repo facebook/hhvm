@@ -135,6 +135,6 @@ def gen_metadata_enum_{{enum.py_name}}() -> {{> metadata/metadata_return_type}}
   {{/if first?}}
   {{#if typedef.enum?}}
     {{#let enum = typedef.true_type}}
-{{typedef.name}} = {{#if enum.need_module_path?}}{{enum.module_mangle}}.{{/if}}{{enum.py_name}}
+{{typedef.py_name}} = {{#if enum.need_module_path?}}{{enum.module_mangle}}.{{/if}}{{enum.py_name}}
   {{/if typedef.enum?}}
 {{/each}}

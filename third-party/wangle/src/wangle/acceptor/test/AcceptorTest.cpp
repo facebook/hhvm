@@ -16,6 +16,7 @@
 
 #include <fizz/backend/openssl/certificate/CertUtils.h>
 #include <fizz/crypto/test/TestUtil.h>
+#include <fizz/protocol/test/CertUtil.h>
 #include <fizz/protocol/test/Mocks.h>
 #include <fizz/server/DefaultCertManager.h>
 #include <folly/FileUtil.h>
@@ -728,11 +729,28 @@ TEST_F(AcceptorTest, AcceptorUsesFizzCertManagerIfFizzFallbackStateEnabled) {
   sslCtxConfig.sessionCacheEnabled = false;
   config->sslContextConfigs.emplace_back(sslCtxConfig);
 
-  auto fizzCert = fizz::openssl::CertUtils::makeSelfCert(
-      fizz::test::kRSACertificate.str(), fizz::test::kRSAKey.str());
-  auto expectedIdentity = fizzCert->getIdentity();
+  auto makeCert = [](std::string cn, fizz::KeyType keyType) {
+    auto certData =
+        fizz::test::createCert(std::move(cn), false, nullptr, keyType);
+    std::vector<folly::ssl::X509UniquePtr> certChain;
+    certChain.push_back(std::move(certData.cert));
+    auto fizzCert = fizz::openssl::CertUtils::makeSelfCert(
+        std::move(certChain), std::move(certData.key));
+    return fizzCert;
+  };
+  auto fuzzCert = makeCert("Bar", fizz::KeyType::RSA);
+  auto fizzEcCert = makeCert("Foo", fizz::KeyType::P256);
+  auto fizzRsaCert = makeCert("Foo", fizz::KeyType::RSA);
+
+  EXPECT_EQ(fizzEcCert->getIdentity(), fizzRsaCert->getIdentity());
+
+  auto nonDefaultIdentity = fuzzCert->getIdentity();
+  auto defaultIdentity = fizzEcCert->getIdentity();
+
   auto fizzCertManager = std::make_shared<fizz::server::DefaultCertManager>();
-  fizzCertManager->addCertAndSetDefault(std::move(fizzCert));
+  fizzCertManager->addCertAndSetDefault(std::move(fizzEcCert));
+  fizzCertManager->addCert(std::move(fizzRsaCert));
+  fizzCertManager->addCert(std::move(fuzzCert));
 
   auto [acceptor, serverSocket] = initTestAcceptorAndSocket(
       std::move(config), [fizzCertManager](std::shared_ptr<TestAcceptor> acc) {
@@ -744,23 +762,43 @@ TEST_F(AcceptorTest, AcceptorUsesFizzCertManagerIfFizzFallbackStateEnabled) {
   SocketAddress serverAddress;
   serverSocket->getAddress(&serverAddress);
 
-  auto sslContext = std::make_shared<folly::SSLContext>(
-      folly::SSLContext::SSLVersion::TLSv1_2);
-  sslContext->setOptions(SSL_OP_NO_TICKET);
-  sslContext->ciphers("ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH");
-  sslContext->disableTLS13();
-  sslContext->setVerificationOption(
-      folly::SSLContext::SSLVerifyPeerEnum::NO_VERIFY);
+  auto createClientSSLContext = []() {
+    auto sslContext = std::make_shared<folly::SSLContext>(
+        folly::SSLContext::SSLVersion::TLSv1_2);
+    sslContext->setOptions(SSL_OP_NO_TICKET);
+    sslContext->setSigAlgsOrThrow("rsa_pss_rsae_sha512:ECDSA+SHA256");
+    sslContext->disableTLS13();
+    sslContext->setVerificationOption(
+        folly::SSLContext::SSLVerifyPeerEnum::NO_VERIFY);
+    return sslContext;
+  };
 
-  auto clientSocket = AsyncSSLSocket::newSocket(std::move(sslContext), &evb_);
-  clientSocket->connect(nullptr, serverAddress);
+  // test direct cert match match with SNI
+  {
+    auto clientSocket =
+        AsyncSSLSocket::newSocket(createClientSSLContext(), &evb_);
+    clientSocket->setServerName("Bar");
+    clientSocket->connect(nullptr, serverAddress);
 
-  evb_.loopForever();
+    evb_.loopForever();
 
-  auto peerCert = clientSocket->getPeerCertificate();
-  ASSERT_NE(peerCert, nullptr);
-  auto peerIdentity = peerCert->getIdentity();
-  EXPECT_EQ(peerIdentity, expectedIdentity);
+    auto peerCert = clientSocket->getPeerCertificate();
+    ASSERT_NE(peerCert, nullptr);
+    EXPECT_EQ(peerCert->getIdentity(), nonDefaultIdentity);
+  }
+
+  // test default cert match
+  {
+    auto clientSocket2 =
+        AsyncSSLSocket::newSocket(createClientSSLContext(), &evb_);
+    clientSocket2->connect(nullptr, serverAddress);
+
+    evb_.loopForever();
+
+    auto peerCert2 = clientSocket2->getPeerCertificate();
+    ASSERT_NE(peerCert2, nullptr);
+    EXPECT_EQ(peerCert2->getIdentity(), defaultIdentity);
+  }
 
   acceptor->forceStop();
   serverSocket->stopAccepting();

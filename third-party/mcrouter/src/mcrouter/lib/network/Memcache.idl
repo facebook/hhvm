@@ -25,6 +25,8 @@ struct MemcacheRequestCommon {
   5: optional int32_t regionalizationEntity;
   # Tenant ID
   6: optional uint32_t mcTenantId;
+  # Optional ticket for consistency read.
+  7: optional std::string ticket;
 };
 
 struct MemcacheReplyCommon {

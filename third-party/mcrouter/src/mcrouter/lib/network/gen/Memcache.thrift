@@ -47,6 +47,7 @@ struct MemcacheRequestCommon {
   4: optional i64 productId
   5: optional i32 regionalizationEntity
   6: optional carbon.ui32 mcTenantId
+  7: optional string ticket
 }
 @thrift.DeprecatedUnvalidatedAnnotations{
   items = {

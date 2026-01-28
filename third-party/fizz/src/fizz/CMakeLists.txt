@@ -211,7 +211,45 @@ target_include_directories(
 
 target_link_libraries(fizz
   PUBLIC
-    ${FOLLY_LIBRARIES}
+    # Granular folly targets matching Buck dependencies
+    Folly::folly_range
+    Folly::folly_io_iobuf
+    Folly::folly_optional
+    Folly::folly_conv
+    Folly::folly_string
+    Folly::folly_c_portability
+    Folly::folly_exception_wrapper
+    Folly::folly_small_vector
+    Folly::folly_io_async_write_flags
+    Folly::folly_executor
+    Folly::folly_io_async_async_socket_exception
+    Folly::folly_io_async_delayed_destruction
+    Folly::folly_io_async_async_socket
+    Folly::folly_io_async_decorated_async_transport_wrapper
+    Folly::folly_file_util
+    Folly::folly_ssl_openssl_cert_utils
+    Folly::folly_ssl_openssl_ptr_types
+    Folly::folly_io_async_async_transport_certificate
+    Folly::folly_io_async_ssl_openssl_transport_certificate
+    Folly::folly_memory
+    Folly::folly_lang_assume
+    Folly::folly_portability_openssl
+    Folly::folly_ssl_openssl_hash
+    Folly::folly_lang_bits
+    Folly::folly_lang_checked_math
+    Folly::folly_overload
+    Folly::folly_tracing_static_tracepoint
+    Folly::folly_futures_core
+    Folly::folly_io_async_async_base
+    Folly::folly_synchronized
+    Folly::folly_container_evicting_cache_map
+    Folly::folly_lang_switch
+    Folly::folly_io_socket_option_map
+    Folly::folly_io_async_password_in_file
+    Folly::folly_io_async_ssl_context
+    Folly::folly_format
+    Folly::folly_portability_unistd
+    Folly::folly_detail_base64_detail_base64_api
     ${OPENSSL_LIBRARIES}
     sodium
     Threads::Threads
@@ -330,6 +368,11 @@ macro(add_gtest test_source test_name)
     ${test_name}
     fizz
     fizz_test_support
+    Folly::folly_init_init
+    Folly::folly_testing_test_util
+    Folly::folly_executors_manual_executor
+    Folly::folly_io_async_scoped_event_base_thread
+    Folly::folly_detail_base64_detail_base64_api
     ${LIBGMOCK_LIBRARIES})
 
   if(NOT ${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC)
@@ -442,7 +485,7 @@ if(BUILD_EXAMPLES)
     DESTINATION ${BIN_INSTALL_DIR}
   )
   add_executable(EncryptedRecordBench record/test/EncryptedRecordBench.cpp)
-  target_link_libraries(EncryptedRecordBench fizz Folly::follybenchmark)
+  target_link_libraries(EncryptedRecordBench fizz Folly::folly_benchmark)
   set_target_properties(
     EncryptedRecordBench PROPERTIES OUTPUT_NAME fizz-encryptedrecordbench
   )

@@ -150,7 +150,7 @@ func (p *rocketClient) SendRequestStream(
 	request WritableStruct,
 	response ReadableStruct,
 	newStreamElemFn func() types.ReadableResult,
-	onStreamNextFn func(Decoder) error,
+	onStreamNextFn func(ReadableStruct),
 	onStreamErrorFn func(error),
 	onStreamCompleteFn func(),
 ) (iter.Seq2[ReadableStruct, error], error) {
@@ -180,7 +180,14 @@ func (p *rocketClient) SendRequestStream(
 		default:
 			return types.NewProtocolException(fmt.Errorf("Unknown protocol id: %d", p.protoID))
 		}
-		return onStreamNextFn(decoder)
+		destStruct := newStreamElemFn()
+		if err := destStruct.Read(decoder); err != nil {
+			return err
+		} else if destEx := destStruct.Exception(); destEx != nil {
+			return destEx
+		}
+		onStreamNextFn(destStruct)
+		return nil
 	}
 
 	var writeHeaders map[string]string

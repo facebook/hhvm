@@ -108,16 +108,9 @@ func (c *myInteractionClientImpl) Truthify(ctx context.Context) (iter.Seq2[bool,
     fbthriftNewStreamElemFn := func() thrift.ReadableResult {
         return newStreamMyInteractionTruthify()
     }
-    fbthriftOnStreamNextFn := func(d thrift.Decoder) error {
-        fbthriftStreamValue := newStreamMyInteractionTruthify()
-        fbthriftSpecErr := fbthriftStreamValue.Read(d)
-        if fbthriftSpecErr != nil {
-            return fbthriftSpecErr
-        } else if fbthriftStreamEx := fbthriftStreamValue.Exception(); fbthriftStreamEx != nil {
-            return fbthriftStreamEx
-        }
+    fbthriftOnStreamNextFn := func(res thrift.ReadableStruct) {
+        fbthriftStreamValue := res.(*streamMyInteractionTruthify)
         fbthriftElemChan <- fbthriftStreamValue.GetSuccess()
-        return nil
     }
     fbthriftStreamSeq := func(yield func(bool, error) bool) {
         for elem := range fbthriftElemChan {
@@ -405,16 +398,9 @@ func (c *myInteractionFastClientImpl) Truthify(ctx context.Context) (iter.Seq2[b
     fbthriftNewStreamElemFn := func() thrift.ReadableResult {
         return newStreamMyInteractionFastTruthify()
     }
-    fbthriftOnStreamNextFn := func(d thrift.Decoder) error {
-        fbthriftStreamValue := newStreamMyInteractionFastTruthify()
-        fbthriftSpecErr := fbthriftStreamValue.Read(d)
-        if fbthriftSpecErr != nil {
-            return fbthriftSpecErr
-        } else if fbthriftStreamEx := fbthriftStreamValue.Exception(); fbthriftStreamEx != nil {
-            return fbthriftStreamEx
-        }
+    fbthriftOnStreamNextFn := func(res thrift.ReadableStruct) {
+        fbthriftStreamValue := res.(*streamMyInteractionFastTruthify)
         fbthriftElemChan <- fbthriftStreamValue.GetSuccess()
-        return nil
     }
     fbthriftStreamSeq := func(yield func(bool, error) bool) {
         for elem := range fbthriftElemChan {
@@ -987,16 +973,9 @@ func (c *myServiceClientImpl) Serialize(ctx context.Context) (SerialInteractionC
     fbthriftNewStreamElemFn := func() thrift.ReadableResult {
         return newStreamMyServiceSerialize()
     }
-    fbthriftOnStreamNextFn := func(d thrift.Decoder) error {
-        fbthriftStreamValue := newStreamMyServiceSerialize()
-        fbthriftSpecErr := fbthriftStreamValue.Read(d)
-        if fbthriftSpecErr != nil {
-            return fbthriftSpecErr
-        } else if fbthriftStreamEx := fbthriftStreamValue.Exception(); fbthriftStreamEx != nil {
-            return fbthriftStreamEx
-        }
+    fbthriftOnStreamNextFn := func(res thrift.ReadableStruct) {
+        fbthriftStreamValue := res.(*streamMyServiceSerialize)
         fbthriftElemChan <- fbthriftStreamValue.GetSuccess()
-        return nil
     }
     fbthriftStreamSeq := func(yield func(int32, error) bool) {
         for elem := range fbthriftElemChan {
@@ -1340,16 +1319,9 @@ func (c *factoriesClientImpl) Serialize(ctx context.Context) (SerialInteractionC
     fbthriftNewStreamElemFn := func() thrift.ReadableResult {
         return newStreamFactoriesSerialize()
     }
-    fbthriftOnStreamNextFn := func(d thrift.Decoder) error {
-        fbthriftStreamValue := newStreamFactoriesSerialize()
-        fbthriftSpecErr := fbthriftStreamValue.Read(d)
-        if fbthriftSpecErr != nil {
-            return fbthriftSpecErr
-        } else if fbthriftStreamEx := fbthriftStreamValue.Exception(); fbthriftStreamEx != nil {
-            return fbthriftStreamEx
-        }
+    fbthriftOnStreamNextFn := func(res thrift.ReadableStruct) {
+        fbthriftStreamValue := res.(*streamFactoriesSerialize)
         fbthriftElemChan <- fbthriftStreamValue.GetSuccess()
-        return nil
     }
     fbthriftStreamSeq := func(yield func(int32, error) bool) {
         for elem := range fbthriftElemChan {

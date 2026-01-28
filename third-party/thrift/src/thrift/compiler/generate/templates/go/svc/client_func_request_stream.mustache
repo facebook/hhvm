@@ -54,16 +54,9 @@ func (c *{{service:go_client_name}}) {{> svc/client_func_signature}} {
     fbthriftNewStreamElemFn := func() thrift.ReadableResult {
         return newStream{{service:go_name}}{{function:go_name}}()
     }
-    fbthriftOnStreamNextFn := func(d thrift.Decoder) error {
-        fbthriftStreamValue := newStream{{service:go_name}}{{function:go_name}}()
-        fbthriftSpecErr := fbthriftStreamValue.Read(d)
-        if fbthriftSpecErr != nil {
-            return fbthriftSpecErr
-        } else if fbthriftStreamEx := fbthriftStreamValue.Exception(); fbthriftStreamEx != nil {
-            return fbthriftStreamEx
-        }
+    fbthriftOnStreamNextFn := func(res thrift.ReadableStruct) {
+        fbthriftStreamValue := res.(*stream{{service:go_name}}{{function:go_name}})
         fbthriftElemChan <- fbthriftStreamValue.Get{{function:retval_field_name}}()
-        return nil
     }
     fbthriftStreamSeq := func(yield func({{#type:structured?}}*{{/type:structured?}}{{#partial types.go_type type=type:self}}, error) bool) {
         for elem := range fbthriftElemChan {

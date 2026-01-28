@@ -110,7 +110,7 @@ func (p *upgradeToRocketClient) SendRequestStream(
 	request WritableStruct,
 	response ReadableStruct,
 	newStreamElemFn func() types.ReadableResult,
-	onStreamNextFn func(Decoder) error,
+	onStreamNextFn func(ReadableStruct),
 	onStreamErrorFn func(error),
 	onStreamCompleteFn func(),
 ) (iter.Seq2[ReadableStruct, error], error) {

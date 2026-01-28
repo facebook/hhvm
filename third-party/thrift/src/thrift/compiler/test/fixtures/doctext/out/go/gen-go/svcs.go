@@ -103,16 +103,9 @@ func (c *cClientImpl) Numbers(ctx context.Context) (iter.Seq2[Number, error], er
     fbthriftNewStreamElemFn := func() thrift.ReadableResult {
         return newStreamCNumbers()
     }
-    fbthriftOnStreamNextFn := func(d thrift.Decoder) error {
-        fbthriftStreamValue := newStreamCNumbers()
-        fbthriftSpecErr := fbthriftStreamValue.Read(d)
-        if fbthriftSpecErr != nil {
-            return fbthriftSpecErr
-        } else if fbthriftStreamEx := fbthriftStreamValue.Exception(); fbthriftStreamEx != nil {
-            return fbthriftStreamEx
-        }
+    fbthriftOnStreamNextFn := func(res thrift.ReadableStruct) {
+        fbthriftStreamValue := res.(*streamCNumbers)
         fbthriftElemChan <- fbthriftStreamValue.GetSuccess()
-        return nil
     }
     fbthriftStreamSeq := func(yield func(Number, error) bool) {
         for elem := range fbthriftElemChan {

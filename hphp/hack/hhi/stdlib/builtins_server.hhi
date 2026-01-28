@@ -63,4 +63,8 @@ namespace HH {
   function server_health_level(): int;
   function server_process_start_time(): int;
   function server_uptime(): int;
+  function jit_jumpstarted()[read_globals]: bool;
+  function jumpstart_source_host()[read_globals]: string;
+  function jumpstart_prof_tag()[read_globals]: string;
+  function mark_server_health(bool $healthy): void;
 }

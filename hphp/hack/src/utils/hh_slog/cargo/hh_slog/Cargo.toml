@@ -16,4 +16,4 @@ locked_file_drain = { version = "0.0.0", path = "../locked_file_drain" }
 slog = { version = "2.8.2", features = ["max_level_trace", "nested-values"] }
 slog-async = { version = "2.3", features = ["nested-values"] }
 slog-envlogger = "2.2"
-slog-term = "2.8"
+slog-term = "2.9.2"

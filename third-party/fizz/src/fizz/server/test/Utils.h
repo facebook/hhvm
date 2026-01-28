@@ -38,8 +38,8 @@ class FizzTestServer : public folly::AsyncServerSocket::AcceptCallback {
       int port = 0,
       const std::string& ip = "")
       : factory_(factory), evb_(evb) {
-    auto certData =
-        fizz::test::createCert("fizz-test-selfsign", false, nullptr);
+    auto certData = fizz::test::createCert(
+        "fizz-test-selfsign", false, nullptr, KeyType::P256);
     std::vector<folly::ssl::X509UniquePtr> certChain;
     certChain.push_back(std::move(certData.cert));
     auto fizzCert =

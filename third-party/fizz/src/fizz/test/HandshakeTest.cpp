@@ -421,7 +421,7 @@ TEST_F(HandshakeTest, CertRequestBadCert) {
    * self signed certificate to the server.
    */
   serverContext_->setClientAuthMode(ClientAuthMode::Required);
-  auto badCert = createCert("foo", false, nullptr);
+  auto badCert = createCert("foo", false, nullptr, KeyType::P256);
   std::vector<folly::ssl::X509UniquePtr> certVec;
   certVec.emplace_back(std::move(badCert.cert));
   auto certMgr = std::make_shared<fizz::client::CertManager>();

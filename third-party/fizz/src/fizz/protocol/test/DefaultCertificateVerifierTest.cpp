@@ -21,8 +21,9 @@ class DefaultCertificateVerifierTest : public testing::Test {
     OpenSSL_add_all_algorithms();
     folly::ssl::X509StoreUniquePtr store(X509_STORE_new());
     ASSERT_TRUE(store);
-    rootCertAndKey_ = createCert("root", true, nullptr);
-    leafCertAndKey_ = createCert("leaf", false, &rootCertAndKey_);
+    rootCertAndKey_ = createCert("root", true, nullptr, KeyType::P256);
+    leafCertAndKey_ =
+        createCert("leaf", false, &rootCertAndKey_, KeyType::P256);
     ASSERT_EQ(X509_STORE_add_cert(store.get(), rootCertAndKey_.cert.get()), 1);
     verifier_ = std::make_unique<DefaultCertificateVerifier>(
         VerificationContext::Client, std::move(store));
@@ -77,8 +78,8 @@ TEST_F(DefaultCertificateVerifierTest, TestVerifySuccess) {
 }
 
 TEST_F(DefaultCertificateVerifierTest, TestVerifyWithIntermediates) {
-  auto subauth = createCert("subauth", true, &rootCertAndKey_);
-  auto subleaf = createCert("subleaf", false, &subauth);
+  auto subauth = createCert("subauth", true, &rootCertAndKey_, KeyType::P256);
+  auto subleaf = createCert("subleaf", false, &subauth, KeyType::P256);
   verifier_->verify({getPeerCert(subleaf), getPeerCert(subauth)});
 
   auto ctx = verifier_->verifyWithX509StoreCtx(
@@ -90,14 +91,14 @@ TEST_F(DefaultCertificateVerifierTest, TestVerifyWithIntermediates) {
 }
 
 TEST_F(DefaultCertificateVerifierTest, TestVerifySelfSignedCert) {
-  auto selfsigned = createCert("self", false, nullptr);
+  auto selfsigned = createCert("self", false, nullptr, KeyType::P256);
   expectThrowWithAlert(
       [&] { verifier_->verify({getPeerCert(selfsigned)}); },
       AlertDescription::unknown_ca);
 }
 
 TEST_F(DefaultCertificateVerifierTest, TestVerifySelfSignedCertWithOverride) {
-  auto selfsigned = createCert("self", false, nullptr);
+  auto selfsigned = createCert("self", false, nullptr, KeyType::P256);
   verifier_->setCustomVerifyCallback(
       &DefaultCertificateVerifierTest::allowSelfSignedLeafCertCallback);
   // Will not throw because the override allows for this type of error.
@@ -110,8 +111,8 @@ TEST_F(DefaultCertificateVerifierTest, TestVerifySelfSignedCertWithOverride) {
 }
 
 TEST_F(DefaultCertificateVerifierTest, TestVerifyWithIntermediateMissing) {
-  auto subauth = createCert("subauth", true, &rootCertAndKey_);
-  auto subleaf = createCert("subleaf", false, &subauth);
+  auto subauth = createCert("subauth", true, &rootCertAndKey_, KeyType::P256);
+  auto subleaf = createCert("subleaf", false, &subauth, KeyType::P256);
   expectThrowWithAlert(
       [&] { verifier_->verify({getPeerCert(subleaf)}); },
       AlertDescription::unknown_ca);
@@ -120,8 +121,8 @@ TEST_F(DefaultCertificateVerifierTest, TestVerifyWithIntermediateMissing) {
 TEST_F(
     DefaultCertificateVerifierTest,
     TestVerifyWithIntermediateMissingWithOverride) {
-  auto subauth = createCert("subauth", true, &rootCertAndKey_);
-  auto subleaf = createCert("subleaf", false, &subauth);
+  auto subauth = createCert("subauth", true, &rootCertAndKey_, KeyType::P256);
+  auto subleaf = createCert("subleaf", false, &subauth, KeyType::P256);
   verifier_->setCustomVerifyCallback(
       &DefaultCertificateVerifierTest::allowSelfSignedLeafCertCallback);
   // The override asserts that self signed certs (chain length = 1) are
@@ -134,17 +135,18 @@ TEST_F(
 }
 
 TEST_F(DefaultCertificateVerifierTest, TestVerifyWithBadIntermediate) {
-  auto subauth = createCert("badsubauth", false, &rootCertAndKey_);
-  auto subleaf = createCert("badsubleaf", false, &subauth);
+  auto subauth =
+      createCert("badsubauth", false, &rootCertAndKey_, KeyType::P256);
+  auto subleaf = createCert("badsubleaf", false, &subauth, KeyType::P256);
   expectThrowWithAlert(
       [&] { verifier_->verify({getPeerCert(subleaf)}); },
       AlertDescription::unknown_ca);
 }
 
 TEST_F(DefaultCertificateVerifierTest, TestVerifyWithBadRoot) {
-  auto newroot = createCert("root2", true, nullptr);
-  auto subauth = createCert("subauth2", true, &newroot);
-  auto subleaf = createCert("leaf2", false, &subauth);
+  auto newroot = createCert("root2", true, nullptr, KeyType::P256);
+  auto subauth = createCert("subauth2", true, &newroot, KeyType::P256);
+  auto subleaf = createCert("leaf2", false, &subauth, KeyType::P256);
   expectThrowWithAlert(
       [&] { verifier_->verify({getPeerCert(subleaf), getPeerCert(subauth)}); },
       AlertDescription::unknown_ca);
@@ -156,6 +158,7 @@ TEST_F(DefaultCertificateVerifierTest, TestVerifyWithExpiredLeafTooOld) {
       .issuer = &rootCertAndKey_,
       .notBefore = now - std::chrono::hours(24),
       .notAfter = now - std::chrono::hours(23),
+      .keyType = KeyType::P256,
   });
 
   expectThrowWithAlert(
@@ -170,6 +173,7 @@ TEST_F(DefaultCertificateVerifierTest, TestVerifyWithExpiredLeafTooNew) {
       .issuer = &rootCertAndKey_,
       .notBefore = now + std::chrono::hours(24),
       .notAfter = now + std::chrono::hours(25),
+      .keyType = KeyType::P256,
   });
 
   expectThrowWithAlert(

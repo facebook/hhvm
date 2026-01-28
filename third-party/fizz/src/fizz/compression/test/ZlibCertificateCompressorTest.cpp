@@ -212,7 +212,8 @@ class ZlibCertificateCompressorTest : public testing::Test {
 };
 
 TEST_F(ZlibCertificateCompressorTest, TestCompressDecompress) {
-  auto certAndKey = createCert("fizz-selfsigned", false, nullptr);
+  auto certAndKey =
+      createCert("fizz-selfsigned", false, nullptr, KeyType::P256);
   std::vector<folly::ssl::X509UniquePtr> certs;
   certs.push_back(std::move(certAndKey.cert));
   auto cert = openssl::CertUtils::makeSelfCert(

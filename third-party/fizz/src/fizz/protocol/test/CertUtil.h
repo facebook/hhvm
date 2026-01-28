@@ -9,6 +9,7 @@
 #pragma once
 
 #include <fizz/backend/openssl/certificate/OpenSSLPeerCertImpl.h>
+#include <fizz/crypto/Crypto.h>
 
 namespace fizz {
 namespace test {
@@ -38,6 +39,7 @@ struct CreateCertOptions {
   CertAndKey* issuer{nullptr};
   std::optional<std::chrono::system_clock::time_point> notBefore;
   std::optional<std::chrono::system_clock::time_point> notAfter;
+  KeyType keyType;
 };
 
 inline folly::ssl::ASN1TimeUniquePtr asn1(
@@ -47,17 +49,7 @@ inline folly::ssl::ASN1TimeUniquePtr asn1(
   return ret;
 }
 
-inline CertAndKey createCert(CreateCertOptions options) {
-  const auto& cn = options.cn;
-  bool ca = options.ca;
-  const auto& issuer = options.issuer;
-
-  folly::ssl::EvpPkeyUniquePtr pk(EVP_PKEY_new());
-  throwIfNull(pk, "private key creation failed");
-
-  folly::ssl::X509UniquePtr crt(X509_new());
-  throwIfNull(crt, "cert creation failed");
-
+inline void generateP256Key(folly::ssl::EvpPkeyUniquePtr& pk) {
   folly::ssl::EcGroupUniquePtr grp(
       EC_GROUP_new_by_curve_name(NID_X9_62_prime256v1));
   throwIfNull(grp, "group creation failed");
@@ -78,6 +70,50 @@ inline CertAndKey createCert(CreateCertOptions options) {
       EVP_PKEY_set1_EC_KEY(pk.get(), ec.get()),
       1,
       "private key assignment failed");
+}
+
+inline void generateRSAKey(folly::ssl::EvpPkeyUniquePtr& pk) {
+  folly::ssl::RsaUniquePtr rsa(RSA_new());
+  throwIfNull(rsa, "rsa key creation error");
+
+  folly::ssl::BIGNUMUniquePtr bn(BN_new());
+  throwIfNull(bn, "bignum creation error");
+
+  throwIfNeq(BN_set_word(bn.get(), RSA_F4), 1, "failed to set RSA exponent");
+
+  throwIfNeq(
+      RSA_generate_key_ex(rsa.get(), 2048, bn.get(), nullptr),
+      1,
+      "rsa generation failed");
+
+  throwIfNeq(
+      EVP_PKEY_set1_RSA(pk.get(), rsa.get()),
+      1,
+      "private key assignment failed");
+}
+
+inline CertAndKey createCert(CreateCertOptions options) {
+  const auto& cn = options.cn;
+  bool ca = options.ca;
+  const auto& issuer = options.issuer;
+  const auto& keyType = options.keyType;
+
+  folly::ssl::EvpPkeyUniquePtr pk(EVP_PKEY_new());
+  throwIfNull(pk, "private key creation failed");
+
+  folly::ssl::X509UniquePtr crt(X509_new());
+  throwIfNull(crt, "cert creation failed");
+
+  switch (keyType) {
+    case KeyType::P256:
+      generateP256Key(pk);
+      break;
+    case KeyType::RSA:
+      generateRSAKey(pk);
+      break;
+    default:
+      throw std::runtime_error("unsupported key type");
+  }
 
   X509_set_version(crt.get(), 2);
   static int serial = 0;
@@ -168,13 +204,15 @@ extendedKeyUsage        = critical, serverAuth, clientAuth
   return {std::move(crt), std::move(pk)};
 }
 
-inline CertAndKey createCert(std::string cn, bool ca, CertAndKey* issuer) {
+inline CertAndKey
+createCert(std::string cn, bool ca, CertAndKey* issuer, KeyType keyType) {
   return createCert(
       {.cn = std::move(cn),
        .ca = ca,
        .issuer = issuer,
        .notBefore = std::nullopt,
-       .notAfter = std::nullopt});
+       .notAfter = std::nullopt,
+       .keyType = keyType});
 }
 
 inline std::shared_ptr<PeerCert> getPeerCert(const CertAndKey& cert) {

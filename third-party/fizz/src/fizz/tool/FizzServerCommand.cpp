@@ -1077,7 +1077,8 @@ int fizzServerCommand(const std::vector<std::string>& args) {
       }
     }
   } else {
-    auto certData = fizz::test::createCert("fizz-self-signed", false, nullptr);
+    auto certData = fizz::test::createCert(
+        "fizz-self-signed", false, nullptr, KeyType::P256);
     std::vector<folly::ssl::X509UniquePtr> certChain;
     certChain.push_back(std::move(certData.cert));
     auto cert =

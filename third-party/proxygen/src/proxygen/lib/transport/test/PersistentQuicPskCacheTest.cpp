@@ -25,10 +25,10 @@ class PersistentQuicPskCacheTest : public Test {
     createCache();
 
     std::shared_ptr<fizz::PeerCert> serverCert = fizz::test::getPeerCert(
-        fizz::test::createCert("server", false, nullptr));
+        fizz::test::createCert("server", false, nullptr, fizz::KeyType::P256));
 
     std::shared_ptr<fizz::PeerCert> clientCert = fizz::test::getPeerCert(
-        fizz::test::createCert("client", false, nullptr));
+        fizz::test::createCert("client", false, nullptr, fizz::KeyType::P256));
 
     auto& fizzPsk1 = quicPsk1_.cachedPsk;
     fizzPsk1.psk = "PSK1";

@@ -956,7 +956,7 @@ EventHandler<ClientTypes, StateEnum::Uninitialized, Event::Connect>::handle(
         earlyWriteRecordLayer =
             context->getFactory()->makeEncryptedWriteRecordLayer(
                 EncryptionLevel::EarlyData);
-        earlyWriteRecordLayer->setProtocolVersion(psk->version);
+        TRY(earlyWriteRecordLayer->setProtocolVersion(ctx.err, psk->version));
         Protocol::setAead(
             *earlyWriteRecordLayer,
             psk->cipher,
@@ -1440,7 +1440,7 @@ Status sm::EventHandler<
   auto handshakeWriteRecordLayer =
       state.context()->getFactory()->makeEncryptedWriteRecordLayer(
           EncryptionLevel::Handshake);
-  handshakeWriteRecordLayer->setProtocolVersion(version);
+  TRY(handshakeWriteRecordLayer->setProtocolVersion(ctx.err, version));
   auto handshakeWriteSecret = scheduler->getSecret(
       HandshakeSecrets::ClientHandshakeTraffic,
       handshakeContext->getHandshakeContext()->coalesce());
@@ -1454,7 +1454,7 @@ Status sm::EventHandler<
   auto handshakeReadRecordLayer =
       state.context()->getFactory()->makeEncryptedReadRecordLayer(
           EncryptionLevel::Handshake);
-  handshakeReadRecordLayer->setProtocolVersion(version);
+  TRY(handshakeReadRecordLayer->setProtocolVersion(ctx.err, version));
   auto handshakeReadSecret = scheduler->getSecret(
       HandshakeSecrets::ServerHandshakeTraffic,
       handshakeContext->getHandshakeContext()->coalesce());
@@ -2379,7 +2379,7 @@ EventHandler<ClientTypes, StateEnum::ExpectingFinished, Event::Finished>::
   auto writeRecordLayer =
       state.context()->getFactory()->makeEncryptedWriteRecordLayer(
           EncryptionLevel::AppTraffic);
-  writeRecordLayer->setProtocolVersion(*state.version());
+  TRY(writeRecordLayer->setProtocolVersion(ctx.err, *state.version()));
   if (state.extensions()) {
     writeRecordLayer->configureClientRecordLayer(state.extensions());
   }
@@ -2395,7 +2395,7 @@ EventHandler<ClientTypes, StateEnum::ExpectingFinished, Event::Finished>::
   auto readRecordLayer =
       state.context()->getFactory()->makeEncryptedReadRecordLayer(
           EncryptionLevel::AppTraffic);
-  readRecordLayer->setProtocolVersion(*state.version());
+  TRY(readRecordLayer->setProtocolVersion(ctx.err, *state.version()));
   if (state.extensions()) {
     readRecordLayer->configureClientRecordLayer(state.extensions());
   }
@@ -2555,7 +2555,7 @@ EventHandler<ClientTypes, StateEnum::Established, Event::KeyUpdateInitiation>::
   auto writeRecordLayer =
       state.context()->getFactory()->makeEncryptedWriteRecordLayer(
           EncryptionLevel::AppTraffic);
-  writeRecordLayer->setProtocolVersion(*state.version());
+  TRY(writeRecordLayer->setProtocolVersion(ctx.err, *state.version()));
   auto writeSecret =
       state.keyScheduler()->getSecret(AppTrafficSecrets::ClientAppTraffic);
   Protocol::setAead(
@@ -2591,7 +2591,7 @@ EventHandler<ClientTypes, StateEnum::Established, Event::KeyUpdate>::handle(
   auto readRecordLayer =
       state.context()->getFactory()->makeEncryptedReadRecordLayer(
           EncryptionLevel::AppTraffic);
-  readRecordLayer->setProtocolVersion(*state.version());
+  TRY(readRecordLayer->setProtocolVersion(ctx.err, *state.version()));
   auto readSecret =
       state.keyScheduler()->getSecret(AppTrafficSecrets::ServerAppTraffic);
   Protocol::setAead(
@@ -2624,7 +2624,7 @@ EventHandler<ClientTypes, StateEnum::Established, Event::KeyUpdate>::handle(
   auto writeRecordLayer =
       state.context()->getFactory()->makeEncryptedWriteRecordLayer(
           EncryptionLevel::AppTraffic);
-  writeRecordLayer->setProtocolVersion(*state.version());
+  TRY(writeRecordLayer->setProtocolVersion(ctx.err, *state.version()));
   auto writeSecret =
       state.keyScheduler()->getSecret(AppTrafficSecrets::ClientAppTraffic);
   Protocol::setAead(

@@ -182,13 +182,15 @@ class WriteRecordLayer {
     return write(std::move(msg), Aead::AeadOptions());
   }
 
-  void setProtocolVersion(ProtocolVersion version) const {
-    auto realVersion = getRealDraftVersion(version);
+  Status setProtocolVersion(Error& err, ProtocolVersion version) const {
+    ProtocolVersion realVersion;
+    FIZZ_RETURN_ON_ERROR(getRealDraftVersion(realVersion, err, version));
     if (realVersion == ProtocolVersion::tls_1_3_23) {
       useAdditionalData_ = false;
     } else {
       useAdditionalData_ = true;
     }
+    return Status::Success;
   }
 
   /**

@@ -43,13 +43,15 @@ class EncryptedReadRecordLayer : public ReadRecordLayer {
     seqNum_ = seq;
   }
 
-  void setProtocolVersion(ProtocolVersion version) {
-    auto realVersion = getRealDraftVersion(version);
+  Status setProtocolVersion(Error& err, ProtocolVersion version) {
+    ProtocolVersion realVersion;
+    FIZZ_RETURN_ON_ERROR(getRealDraftVersion(realVersion, err, version));
     if (realVersion == ProtocolVersion::tls_1_3_23) {
       useAdditionalData_ = false;
     } else {
       useAdditionalData_ = true;
     }
+    return Status::Success;
   }
 
   EncryptionLevel getEncryptionLevel() const override;

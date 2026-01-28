@@ -33,7 +33,7 @@ enum class ProtocolVersion : uint16_t {
   tls_1_3_28 = 0x7f1c,
 };
 
-ProtocolVersion getRealDraftVersion(ProtocolVersion);
+Status getRealDraftVersion(ProtocolVersion& ret, Error& err, ProtocolVersion);
 
 std::string toString(ProtocolVersion);
 

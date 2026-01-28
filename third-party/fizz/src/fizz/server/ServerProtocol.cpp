@@ -1318,7 +1318,9 @@ EventHandler<ServerTypes, StateEnum::ExpectingClientHello, Event::ClientHello>::
     }
   }
 
-  state.writeRecordLayer()->setProtocolVersion(*version);
+  Error err;
+  FIZZ_THROW_ON_ERROR(
+      state.writeRecordLayer()->setProtocolVersion(err, *version), err);
 
   validateClientHello(chlo);
 
@@ -1435,7 +1437,9 @@ EventHandler<ServerTypes, StateEnum::ExpectingClientHello, Event::ClientHello>::
             earlyReadRecordLayer =
                 state.context()->getFactory()->makeEncryptedReadRecordLayer(
                     EncryptionLevel::EarlyData);
-            earlyReadRecordLayer->setProtocolVersion(version);
+            Error err;
+            FIZZ_THROW_ON_ERROR(
+                earlyReadRecordLayer->setProtocolVersion(err, version), err);
 
             Protocol::setAead(
                 *earlyReadRecordLayer,
@@ -1674,7 +1678,10 @@ EventHandler<ServerTypes, StateEnum::ExpectingClientHello, Event::ClientHello>::
               auto handshakeWriteRecordLayer =
                   state.context()->getFactory()->makeEncryptedWriteRecordLayer(
                       EncryptionLevel::Handshake);
-              handshakeWriteRecordLayer->setProtocolVersion(version);
+              Error err;
+              FIZZ_THROW_ON_ERROR(
+                  handshakeWriteRecordLayer->setProtocolVersion(err, version),
+                  err);
               auto handshakeWriteSecret = scheduler->getSecret(
                   HandshakeSecrets::ServerHandshakeTraffic,
                   handshakeContext->getHandshakeContext()->coalesce());
@@ -1688,7 +1695,9 @@ EventHandler<ServerTypes, StateEnum::ExpectingClientHello, Event::ClientHello>::
               auto handshakeReadRecordLayer =
                   state.context()->getFactory()->makeEncryptedReadRecordLayer(
                       EncryptionLevel::Handshake);
-              handshakeReadRecordLayer->setProtocolVersion(version);
+              FIZZ_THROW_ON_ERROR(
+                  handshakeReadRecordLayer->setProtocolVersion(err, version),
+                  err);
               handshakeReadRecordLayer->setSkipFailedDecryption(
                   earlyDataType == EarlyDataType::Rejected);
               auto handshakeReadSecret = scheduler->getSecret(
@@ -1896,7 +1905,11 @@ EventHandler<ServerTypes, StateEnum::ExpectingClientHello, Event::ClientHello>::
                             ->getFactory()
                             ->makeEncryptedWriteRecordLayer(
                                 EncryptionLevel::AppTraffic);
-                    appTrafficWriteRecordLayer->setProtocolVersion(version);
+                    Error err;
+                    FIZZ_THROW_ON_ERROR(
+                        appTrafficWriteRecordLayer->setProtocolVersion(
+                            err, version),
+                        err);
                     if (state.extensions()) {
                       appTrafficWriteRecordLayer->configureServerRecordLayer(
                           state.extensions());
@@ -2360,7 +2373,9 @@ EventHandler<ServerTypes, StateEnum::ExpectingFinished, Event::Finished>::
   auto readRecordLayer =
       state.context()->getFactory()->makeEncryptedReadRecordLayer(
           EncryptionLevel::AppTraffic);
-  readRecordLayer->setProtocolVersion(*state.version());
+  Error err;
+  FIZZ_THROW_ON_ERROR(
+      readRecordLayer->setProtocolVersion(err, *state.version()), err);
   if (state.extensions()) {
     readRecordLayer->configureServerRecordLayer(state.extensions());
   }
@@ -2505,7 +2520,9 @@ Status EventHandler<
   auto writeRecordLayer =
       state.context()->getFactory()->makeEncryptedWriteRecordLayer(
           EncryptionLevel::AppTraffic);
-  writeRecordLayer->setProtocolVersion(*state.version());
+  Error err;
+  FIZZ_THROW_ON_ERROR(
+      writeRecordLayer->setProtocolVersion(err, *state.version()), err);
   if (state.extensions()) {
     writeRecordLayer->configureServerRecordLayer(state.extensions());
   }
@@ -2544,7 +2561,9 @@ EventHandler<ServerTypes, StateEnum::AcceptingData, Event::KeyUpdate>::handle(
   auto readRecordLayer =
       state.context()->getFactory()->makeEncryptedReadRecordLayer(
           EncryptionLevel::AppTraffic);
-  readRecordLayer->setProtocolVersion(*state.version());
+  Error err;
+  FIZZ_THROW_ON_ERROR(
+      readRecordLayer->setProtocolVersion(err, *state.version()), err);
   auto readSecret =
       state.keyScheduler()->getSecret(AppTrafficSecrets::ClientAppTraffic);
   Protocol::setAead(
@@ -2575,7 +2594,8 @@ EventHandler<ServerTypes, StateEnum::AcceptingData, Event::KeyUpdate>::handle(
   auto writeRecordLayer =
       state.context()->getFactory()->makeEncryptedWriteRecordLayer(
           EncryptionLevel::AppTraffic);
-  writeRecordLayer->setProtocolVersion(*state.version());
+  FIZZ_THROW_ON_ERROR(
+      writeRecordLayer->setProtocolVersion(err, *state.version()), err);
   auto writeSecret =
       state.keyScheduler()->getSecret(AppTrafficSecrets::ServerAppTraffic);
   Protocol::setAead(

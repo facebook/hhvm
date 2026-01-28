@@ -15,23 +15,27 @@ namespace fizz {
 constexpr Random HelloRetryRequest::HrrRandom;
 #endif
 
-ProtocolVersion getRealDraftVersion(ProtocolVersion version) {
+Status
+getRealDraftVersion(ProtocolVersion& ret, Error& err, ProtocolVersion version) {
   switch (version) {
     case ProtocolVersion::tls_1_3:
-      return ProtocolVersion::tls_1_3;
+      ret = ProtocolVersion::tls_1_3;
+      break;
     case ProtocolVersion::tls_1_3_23:
     case ProtocolVersion::tls_1_3_23_fb:
-      return ProtocolVersion::tls_1_3_23;
+      ret = ProtocolVersion::tls_1_3_23;
+      break;
     case ProtocolVersion::tls_1_3_26:
     case ProtocolVersion::tls_1_3_26_fb:
-      return ProtocolVersion::tls_1_3_26;
+      ret = ProtocolVersion::tls_1_3_26;
+      break;
     case ProtocolVersion::tls_1_3_28:
-      return ProtocolVersion::tls_1_3_28;
+      ret = ProtocolVersion::tls_1_3_28;
+      break;
     default:
-      throw std::runtime_error(
-          folly::to<std::string>(
-              "getRealDraftVersion() called with ", toString(version)));
+      return err.error("getRealDraftVersion: invalid protocol version");
   }
+  return Status::Success;
 }
 
 std::string toString(ProtocolVersion version) {

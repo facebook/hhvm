@@ -52,7 +52,7 @@ class ThriftEnumWrapper(int):
 all_structs = []
 UTF8STRINGS = bool(0) or sys.version_info.major >= 3
 
-__all__ = ['UTF8STRINGS', 'from_PY_RESERVED_KEYWORD', 'def_PY_RESERVED_KEYWORD']
+__all__ = ['UTF8STRINGS', 'from_PY_RESERVED_KEYWORD', 'def_PY_RESERVED_KEYWORD', 'and_PY_RESERVED_KEYWORD']
 
 class from_PY_RESERVED_KEYWORD:
   def __getattr__(self, name): raise AttributeError(name)
@@ -380,6 +380,7 @@ class def_PY_RESERVED_KEYWORD:
   def _to_py_deprecated(self):
     return self
 
+and_PY_RESERVED_KEYWORD = UnimplementedTypedef()
 all_structs.append(def_PY_RESERVED_KEYWORD)
 def_PY_RESERVED_KEYWORD.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.I64, 'from_PY_RESERVED_KEYWORD', None, None, 2, ), # 1

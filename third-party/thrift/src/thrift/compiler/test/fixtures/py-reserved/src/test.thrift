@@ -42,3 +42,5 @@ service lambda {
 enum from {
   VALUE = 1,
 }
+
+typedef i64 and

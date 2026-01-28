@@ -201,6 +201,8 @@ _fbthrift_all_structs = [
 ]
 _fbthrift_python_mutable_types.fill_specs(*_fbthrift_all_structs)
 
+and = int
+
 
 
 class _fbthrift_lambda_global_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):

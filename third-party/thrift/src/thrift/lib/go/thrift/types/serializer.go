@@ -43,3 +43,9 @@ type WritableResult interface {
 	WritableStruct
 	Exception() WritableException
 }
+
+// ReadableResult is an interface used to encapsulate a result struct that can be read from a protocol
+type ReadableResult interface {
+	ReadableStruct
+	Exception() WritableException
+}

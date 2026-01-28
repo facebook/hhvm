@@ -53,6 +53,7 @@ type RequestChannel interface {
 		method string,
 		request WritableStruct,
 		response ReadableStruct,
+		newStreamElemFn func() ReadableResult,
 		onStreamNextFn func(Decoder) error,
 		onStreamErrorFn func(error),
 		onStreamCompleteFn func(),
@@ -120,12 +121,13 @@ func (c *interactionChannel) SendRequestStream(
 	method string,
 	request WritableStruct,
 	response ReadableStruct,
+	newStreamElemFn func() ReadableResult,
 	onStreamNextFn func(Decoder) error,
 	onStreamErrorFn func(error),
 	onStreamCompleteFn func(),
 ) (iter.Seq2[ReadableStruct, error], error) {
 	ctx = c.withInteractionContext(ctx)
-	return c.channel.SendRequestStream(ctx, method, request, response, onStreamNextFn, onStreamErrorFn, onStreamCompleteFn)
+	return c.channel.SendRequestStream(ctx, method, request, response, newStreamElemFn, onStreamNextFn, onStreamErrorFn, onStreamCompleteFn)
 }
 
 func (c *interactionChannel) Close() error {

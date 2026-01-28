@@ -149,6 +149,7 @@ func (p *rocketClient) SendRequestStream(
 	messageName string,
 	request WritableStruct,
 	response ReadableStruct,
+	newStreamElemFn func() types.ReadableResult,
 	onStreamNextFn func(Decoder) error,
 	onStreamErrorFn func(error),
 	onStreamCompleteFn func(),

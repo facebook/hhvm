@@ -100,6 +100,9 @@ func (c *cClientImpl) Numbers(ctx context.Context) (iter.Seq2[Number, error], er
     fbthriftErrChan := make(chan error, 1)
     fbthriftElemChan := make(chan Number, thrift.DefaultStreamBufferSize)
 
+    fbthriftNewStreamElemFn := func() thrift.ReadableResult {
+        return newStreamCNumbers()
+    }
     fbthriftOnStreamNextFn := func(d thrift.Decoder) error {
         fbthriftStreamValue := newStreamCNumbers()
         fbthriftSpecErr := fbthriftStreamValue.Read(d)
@@ -138,6 +141,7 @@ func (c *cClientImpl) Numbers(ctx context.Context) (iter.Seq2[Number, error], er
         "numbers",
         fbthriftReq,
         fbthriftResp,
+        fbthriftNewStreamElemFn,
         fbthriftOnStreamNextFn,
         fbthriftOnStreamErrorFn,
         fbthriftOnStreamCompleteFn,

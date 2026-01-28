@@ -93,6 +93,9 @@ func (c *pubSubStreamingServiceClientImpl) Returnstream(ctx context.Context, i32
     fbthriftErrChan := make(chan error, 1)
     fbthriftElemChan := make(chan int32, thrift.DefaultStreamBufferSize)
 
+    fbthriftNewStreamElemFn := func() thrift.ReadableResult {
+        return newStreamPubSubStreamingServiceReturnstream()
+    }
     fbthriftOnStreamNextFn := func(d thrift.Decoder) error {
         fbthriftStreamValue := newStreamPubSubStreamingServiceReturnstream()
         fbthriftSpecErr := fbthriftStreamValue.Read(d)
@@ -131,6 +134,7 @@ func (c *pubSubStreamingServiceClientImpl) Returnstream(ctx context.Context, i32
         "returnstream",
         fbthriftReq,
         fbthriftResp,
+        fbthriftNewStreamElemFn,
         fbthriftOnStreamNextFn,
         fbthriftOnStreamErrorFn,
         fbthriftOnStreamCompleteFn,
@@ -162,6 +166,9 @@ func (c *pubSubStreamingServiceClientImpl) Streamthrows(ctx context.Context, foo
     fbthriftErrChan := make(chan error, 1)
     fbthriftElemChan := make(chan int32, thrift.DefaultStreamBufferSize)
 
+    fbthriftNewStreamElemFn := func() thrift.ReadableResult {
+        return newStreamPubSubStreamingServiceStreamthrows()
+    }
     fbthriftOnStreamNextFn := func(d thrift.Decoder) error {
         fbthriftStreamValue := newStreamPubSubStreamingServiceStreamthrows()
         fbthriftSpecErr := fbthriftStreamValue.Read(d)
@@ -200,6 +207,7 @@ func (c *pubSubStreamingServiceClientImpl) Streamthrows(ctx context.Context, foo
         "streamthrows",
         fbthriftReq,
         fbthriftResp,
+        fbthriftNewStreamElemFn,
         fbthriftOnStreamNextFn,
         fbthriftOnStreamErrorFn,
         fbthriftOnStreamCompleteFn,
@@ -231,6 +239,9 @@ func (c *pubSubStreamingServiceClientImpl) Servicethrows(ctx context.Context, fo
     fbthriftErrChan := make(chan error, 1)
     fbthriftElemChan := make(chan int32, thrift.DefaultStreamBufferSize)
 
+    fbthriftNewStreamElemFn := func() thrift.ReadableResult {
+        return newStreamPubSubStreamingServiceServicethrows()
+    }
     fbthriftOnStreamNextFn := func(d thrift.Decoder) error {
         fbthriftStreamValue := newStreamPubSubStreamingServiceServicethrows()
         fbthriftSpecErr := fbthriftStreamValue.Read(d)
@@ -269,6 +280,7 @@ func (c *pubSubStreamingServiceClientImpl) Servicethrows(ctx context.Context, fo
         "servicethrows",
         fbthriftReq,
         fbthriftResp,
+        fbthriftNewStreamElemFn,
         fbthriftOnStreamNextFn,
         fbthriftOnStreamErrorFn,
         fbthriftOnStreamCompleteFn,
@@ -300,6 +312,9 @@ func (c *pubSubStreamingServiceClientImpl) Servicethrows2(ctx context.Context, f
     fbthriftErrChan := make(chan error, 1)
     fbthriftElemChan := make(chan int32, thrift.DefaultStreamBufferSize)
 
+    fbthriftNewStreamElemFn := func() thrift.ReadableResult {
+        return newStreamPubSubStreamingServiceServicethrows2()
+    }
     fbthriftOnStreamNextFn := func(d thrift.Decoder) error {
         fbthriftStreamValue := newStreamPubSubStreamingServiceServicethrows2()
         fbthriftSpecErr := fbthriftStreamValue.Read(d)
@@ -338,6 +353,7 @@ func (c *pubSubStreamingServiceClientImpl) Servicethrows2(ctx context.Context, f
         "servicethrows2",
         fbthriftReq,
         fbthriftResp,
+        fbthriftNewStreamElemFn,
         fbthriftOnStreamNextFn,
         fbthriftOnStreamErrorFn,
         fbthriftOnStreamCompleteFn,
@@ -369,6 +385,9 @@ func (c *pubSubStreamingServiceClientImpl) Boththrows(ctx context.Context, foo i
     fbthriftErrChan := make(chan error, 1)
     fbthriftElemChan := make(chan int32, thrift.DefaultStreamBufferSize)
 
+    fbthriftNewStreamElemFn := func() thrift.ReadableResult {
+        return newStreamPubSubStreamingServiceBoththrows()
+    }
     fbthriftOnStreamNextFn := func(d thrift.Decoder) error {
         fbthriftStreamValue := newStreamPubSubStreamingServiceBoththrows()
         fbthriftSpecErr := fbthriftStreamValue.Read(d)
@@ -407,6 +426,7 @@ func (c *pubSubStreamingServiceClientImpl) Boththrows(ctx context.Context, foo i
         "boththrows",
         fbthriftReq,
         fbthriftResp,
+        fbthriftNewStreamElemFn,
         fbthriftOnStreamNextFn,
         fbthriftOnStreamErrorFn,
         fbthriftOnStreamCompleteFn,
@@ -439,6 +459,9 @@ func (c *pubSubStreamingServiceClientImpl) Responseandstreamstreamthrows(ctx con
     fbthriftErrChan := make(chan error, 1)
     fbthriftElemChan := make(chan int32, thrift.DefaultStreamBufferSize)
 
+    fbthriftNewStreamElemFn := func() thrift.ReadableResult {
+        return newStreamPubSubStreamingServiceResponseandstreamstreamthrows()
+    }
     fbthriftOnStreamNextFn := func(d thrift.Decoder) error {
         fbthriftStreamValue := newStreamPubSubStreamingServiceResponseandstreamstreamthrows()
         fbthriftSpecErr := fbthriftStreamValue.Read(d)
@@ -477,6 +500,7 @@ func (c *pubSubStreamingServiceClientImpl) Responseandstreamstreamthrows(ctx con
         "responseandstreamstreamthrows",
         fbthriftReq,
         fbthriftResp,
+        fbthriftNewStreamElemFn,
         fbthriftOnStreamNextFn,
         fbthriftOnStreamErrorFn,
         fbthriftOnStreamCompleteFn,
@@ -509,6 +533,9 @@ func (c *pubSubStreamingServiceClientImpl) Responseandstreamservicethrows(ctx co
     fbthriftErrChan := make(chan error, 1)
     fbthriftElemChan := make(chan int32, thrift.DefaultStreamBufferSize)
 
+    fbthriftNewStreamElemFn := func() thrift.ReadableResult {
+        return newStreamPubSubStreamingServiceResponseandstreamservicethrows()
+    }
     fbthriftOnStreamNextFn := func(d thrift.Decoder) error {
         fbthriftStreamValue := newStreamPubSubStreamingServiceResponseandstreamservicethrows()
         fbthriftSpecErr := fbthriftStreamValue.Read(d)
@@ -547,6 +574,7 @@ func (c *pubSubStreamingServiceClientImpl) Responseandstreamservicethrows(ctx co
         "responseandstreamservicethrows",
         fbthriftReq,
         fbthriftResp,
+        fbthriftNewStreamElemFn,
         fbthriftOnStreamNextFn,
         fbthriftOnStreamErrorFn,
         fbthriftOnStreamCompleteFn,
@@ -579,6 +607,9 @@ func (c *pubSubStreamingServiceClientImpl) Responseandstreamboththrows(ctx conte
     fbthriftErrChan := make(chan error, 1)
     fbthriftElemChan := make(chan int32, thrift.DefaultStreamBufferSize)
 
+    fbthriftNewStreamElemFn := func() thrift.ReadableResult {
+        return newStreamPubSubStreamingServiceResponseandstreamboththrows()
+    }
     fbthriftOnStreamNextFn := func(d thrift.Decoder) error {
         fbthriftStreamValue := newStreamPubSubStreamingServiceResponseandstreamboththrows()
         fbthriftSpecErr := fbthriftStreamValue.Read(d)
@@ -617,6 +648,7 @@ func (c *pubSubStreamingServiceClientImpl) Responseandstreamboththrows(ctx conte
         "responseandstreamboththrows",
         fbthriftReq,
         fbthriftResp,
+        fbthriftNewStreamElemFn,
         fbthriftOnStreamNextFn,
         fbthriftOnStreamErrorFn,
         fbthriftOnStreamCompleteFn,
@@ -649,6 +681,9 @@ func (c *pubSubStreamingServiceClientImpl) ReturnstreamFast(ctx context.Context,
     fbthriftErrChan := make(chan error, 1)
     fbthriftElemChan := make(chan int32, thrift.DefaultStreamBufferSize)
 
+    fbthriftNewStreamElemFn := func() thrift.ReadableResult {
+        return newStreamPubSubStreamingServiceReturnstreamFast()
+    }
     fbthriftOnStreamNextFn := func(d thrift.Decoder) error {
         fbthriftStreamValue := newStreamPubSubStreamingServiceReturnstreamFast()
         fbthriftSpecErr := fbthriftStreamValue.Read(d)
@@ -687,6 +722,7 @@ func (c *pubSubStreamingServiceClientImpl) ReturnstreamFast(ctx context.Context,
         "returnstreamFast",
         fbthriftReq,
         fbthriftResp,
+        fbthriftNewStreamElemFn,
         fbthriftOnStreamNextFn,
         fbthriftOnStreamErrorFn,
         fbthriftOnStreamCompleteFn,

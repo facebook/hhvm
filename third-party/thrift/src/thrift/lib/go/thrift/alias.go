@@ -59,6 +59,8 @@ type MessageType = types.MessageType
 
 type WritableResult = types.WritableResult
 
+type ReadableResult = types.ReadableResult
+
 type TransportException = types.TransportException
 
 type FormatException = types.ProtocolException

@@ -160,6 +160,7 @@ func (c *serialChannel) SendRequestStream(
 	method string,
 	request WritableStruct,
 	response ReadableStruct,
+	newStreamElemFn func() types.ReadableResult,
 	onStreamNextFn func(Decoder) error,
 	onStreamErrorFn func(error),
 	onStreamCompleteFn func(),

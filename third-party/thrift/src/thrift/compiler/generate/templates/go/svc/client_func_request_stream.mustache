@@ -51,6 +51,9 @@ func (c *{{service:go_client_name}}) {{> svc/client_func_signature}} {
     {{#function:stream_elem_type}}
     fbthriftElemChan := make(chan {{#type:structured?}}*{{/type:structured?}}{{#partial types.go_type type=type:self}}, thrift.DefaultStreamBufferSize)
 
+    fbthriftNewStreamElemFn := func() thrift.ReadableResult {
+        return newStream{{service:go_name}}{{function:go_name}}()
+    }
     fbthriftOnStreamNextFn := func(d thrift.Decoder) error {
         fbthriftStreamValue := newStream{{service:go_name}}{{function:go_name}}()
         fbthriftSpecErr := fbthriftStreamValue.Read(d)
@@ -92,6 +95,7 @@ func (c *{{service:go_client_name}}) {{> svc/client_func_signature}} {
         "{{> svc/func_rpc_name}}",
         fbthriftReq,
         fbthriftResp,
+        fbthriftNewStreamElemFn,
         fbthriftOnStreamNextFn,
         fbthriftOnStreamErrorFn,
         fbthriftOnStreamCompleteFn,

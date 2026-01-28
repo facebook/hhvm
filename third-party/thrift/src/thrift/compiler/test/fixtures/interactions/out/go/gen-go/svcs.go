@@ -105,6 +105,9 @@ func (c *myInteractionClientImpl) Truthify(ctx context.Context) (iter.Seq2[bool,
     fbthriftErrChan := make(chan error, 1)
     fbthriftElemChan := make(chan bool, thrift.DefaultStreamBufferSize)
 
+    fbthriftNewStreamElemFn := func() thrift.ReadableResult {
+        return newStreamMyInteractionTruthify()
+    }
     fbthriftOnStreamNextFn := func(d thrift.Decoder) error {
         fbthriftStreamValue := newStreamMyInteractionTruthify()
         fbthriftSpecErr := fbthriftStreamValue.Read(d)
@@ -143,6 +146,7 @@ func (c *myInteractionClientImpl) Truthify(ctx context.Context) (iter.Seq2[bool,
         "MyInteraction.truthify",
         fbthriftReq,
         fbthriftResp,
+        fbthriftNewStreamElemFn,
         fbthriftOnStreamNextFn,
         fbthriftOnStreamErrorFn,
         fbthriftOnStreamCompleteFn,
@@ -398,6 +402,9 @@ func (c *myInteractionFastClientImpl) Truthify(ctx context.Context) (iter.Seq2[b
     fbthriftErrChan := make(chan error, 1)
     fbthriftElemChan := make(chan bool, thrift.DefaultStreamBufferSize)
 
+    fbthriftNewStreamElemFn := func() thrift.ReadableResult {
+        return newStreamMyInteractionFastTruthify()
+    }
     fbthriftOnStreamNextFn := func(d thrift.Decoder) error {
         fbthriftStreamValue := newStreamMyInteractionFastTruthify()
         fbthriftSpecErr := fbthriftStreamValue.Read(d)
@@ -436,6 +443,7 @@ func (c *myInteractionFastClientImpl) Truthify(ctx context.Context) (iter.Seq2[b
         "MyInteractionFast.truthify",
         fbthriftReq,
         fbthriftResp,
+        fbthriftNewStreamElemFn,
         fbthriftOnStreamNextFn,
         fbthriftOnStreamErrorFn,
         fbthriftOnStreamCompleteFn,
@@ -976,6 +984,9 @@ func (c *myServiceClientImpl) Serialize(ctx context.Context) (SerialInteractionC
     fbthriftErrChan := make(chan error, 1)
     fbthriftElemChan := make(chan int32, thrift.DefaultStreamBufferSize)
 
+    fbthriftNewStreamElemFn := func() thrift.ReadableResult {
+        return newStreamMyServiceSerialize()
+    }
     fbthriftOnStreamNextFn := func(d thrift.Decoder) error {
         fbthriftStreamValue := newStreamMyServiceSerialize()
         fbthriftSpecErr := fbthriftStreamValue.Read(d)
@@ -1014,6 +1025,7 @@ func (c *myServiceClientImpl) Serialize(ctx context.Context) (SerialInteractionC
         "serialize",
         fbthriftReq,
         fbthriftResp,
+        fbthriftNewStreamElemFn,
         fbthriftOnStreamNextFn,
         fbthriftOnStreamErrorFn,
         fbthriftOnStreamCompleteFn,
@@ -1325,6 +1337,9 @@ func (c *factoriesClientImpl) Serialize(ctx context.Context) (SerialInteractionC
     fbthriftErrChan := make(chan error, 1)
     fbthriftElemChan := make(chan int32, thrift.DefaultStreamBufferSize)
 
+    fbthriftNewStreamElemFn := func() thrift.ReadableResult {
+        return newStreamFactoriesSerialize()
+    }
     fbthriftOnStreamNextFn := func(d thrift.Decoder) error {
         fbthriftStreamValue := newStreamFactoriesSerialize()
         fbthriftSpecErr := fbthriftStreamValue.Read(d)
@@ -1363,6 +1378,7 @@ func (c *factoriesClientImpl) Serialize(ctx context.Context) (SerialInteractionC
         "serialize",
         fbthriftReq,
         fbthriftResp,
+        fbthriftNewStreamElemFn,
         fbthriftOnStreamNextFn,
         fbthriftOnStreamErrorFn,
         fbthriftOnStreamCompleteFn,

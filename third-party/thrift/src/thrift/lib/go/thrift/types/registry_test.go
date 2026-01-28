@@ -80,7 +80,7 @@ func (c *mockRequestChannel) SendRequestNoResponse(ctx context.Context, method s
 	return nil
 }
 
-func (c *mockRequestChannel) SendRequestStream(ctx context.Context, method string, request WritableStruct, response ReadableStruct, onStreamNextFn func(Decoder) error, onStreamErrorFn func(error), onStreamCompleteFn func()) (iter.Seq2[ReadableStruct, error], error) {
+func (c *mockRequestChannel) SendRequestStream(ctx context.Context, method string, request WritableStruct, response ReadableStruct, newStreamElemFn func() ReadableResult, onStreamNextFn func(Decoder) error, onStreamErrorFn func(error), onStreamCompleteFn func()) (iter.Seq2[ReadableStruct, error], error) {
 	return nil, nil
 }
 

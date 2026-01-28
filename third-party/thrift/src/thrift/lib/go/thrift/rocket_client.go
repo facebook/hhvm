@@ -150,9 +150,6 @@ func (p *rocketClient) SendRequestStream(
 	request WritableStruct,
 	response ReadableStruct,
 	newStreamElemFn func() types.ReadableResult,
-	_ func(ReadableStruct),
-	_ func(error),
-	_ func(),
 ) (iter.Seq2[ReadableStruct, error], error) {
 	if ctx.Done() == nil {
 		// We require that the context is cancellable, to prevent goroutine leaks.

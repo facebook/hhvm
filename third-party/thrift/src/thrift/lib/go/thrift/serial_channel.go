@@ -161,9 +161,6 @@ func (c *serialChannel) SendRequestStream(
 	request WritableStruct,
 	response ReadableStruct,
 	newStreamElemFn func() types.ReadableResult,
-	onStreamNextFn func(ReadableStruct),
-	onStreamErrorFn func(error),
-	onStreamCompleteFn func(),
 ) (iter.Seq2[ReadableStruct, error], error) {
 	return nil, fmt.Errorf("not implemented")
 }

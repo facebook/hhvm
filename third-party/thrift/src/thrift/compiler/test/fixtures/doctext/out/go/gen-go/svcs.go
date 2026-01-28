@@ -107,9 +107,6 @@ func (c *cClientImpl) Numbers(ctx context.Context) (iter.Seq2[Number, error], er
         fbthriftReq,
         fbthriftResp,
         fbthriftNewStreamElemFn,
-        nil,
-        nil,
-        nil,
     )
     if fbthriftErr != nil {
         fbthriftStreamCancel()

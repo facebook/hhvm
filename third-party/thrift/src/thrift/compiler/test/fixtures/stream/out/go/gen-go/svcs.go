@@ -100,9 +100,6 @@ func (c *pubSubStreamingServiceClientImpl) Returnstream(ctx context.Context, i32
         fbthriftReq,
         fbthriftResp,
         fbthriftNewStreamElemFn,
-        nil,
-        nil,
-        nil,
     )
     if fbthriftErr != nil {
         fbthriftStreamCancel()
@@ -150,9 +147,6 @@ func (c *pubSubStreamingServiceClientImpl) Streamthrows(ctx context.Context, foo
         fbthriftReq,
         fbthriftResp,
         fbthriftNewStreamElemFn,
-        nil,
-        nil,
-        nil,
     )
     if fbthriftErr != nil {
         fbthriftStreamCancel()
@@ -200,9 +194,6 @@ func (c *pubSubStreamingServiceClientImpl) Servicethrows(ctx context.Context, fo
         fbthriftReq,
         fbthriftResp,
         fbthriftNewStreamElemFn,
-        nil,
-        nil,
-        nil,
     )
     if fbthriftErr != nil {
         fbthriftStreamCancel()
@@ -250,9 +241,6 @@ func (c *pubSubStreamingServiceClientImpl) Servicethrows2(ctx context.Context, f
         fbthriftReq,
         fbthriftResp,
         fbthriftNewStreamElemFn,
-        nil,
-        nil,
-        nil,
     )
     if fbthriftErr != nil {
         fbthriftStreamCancel()
@@ -300,9 +288,6 @@ func (c *pubSubStreamingServiceClientImpl) Boththrows(ctx context.Context, foo i
         fbthriftReq,
         fbthriftResp,
         fbthriftNewStreamElemFn,
-        nil,
-        nil,
-        nil,
     )
     if fbthriftErr != nil {
         fbthriftStreamCancel()
@@ -351,9 +336,6 @@ func (c *pubSubStreamingServiceClientImpl) Responseandstreamstreamthrows(ctx con
         fbthriftReq,
         fbthriftResp,
         fbthriftNewStreamElemFn,
-        nil,
-        nil,
-        nil,
     )
     if fbthriftErr != nil {
         fbthriftStreamCancel()
@@ -402,9 +384,6 @@ func (c *pubSubStreamingServiceClientImpl) Responseandstreamservicethrows(ctx co
         fbthriftReq,
         fbthriftResp,
         fbthriftNewStreamElemFn,
-        nil,
-        nil,
-        nil,
     )
     if fbthriftErr != nil {
         fbthriftStreamCancel()
@@ -453,9 +432,6 @@ func (c *pubSubStreamingServiceClientImpl) Responseandstreamboththrows(ctx conte
         fbthriftReq,
         fbthriftResp,
         fbthriftNewStreamElemFn,
-        nil,
-        nil,
-        nil,
     )
     if fbthriftErr != nil {
         fbthriftStreamCancel()
@@ -504,9 +480,6 @@ func (c *pubSubStreamingServiceClientImpl) ReturnstreamFast(ctx context.Context,
         fbthriftReq,
         fbthriftResp,
         fbthriftNewStreamElemFn,
-        nil,
-        nil,
-        nil,
     )
     if fbthriftErr != nil {
         fbthriftStreamCancel()

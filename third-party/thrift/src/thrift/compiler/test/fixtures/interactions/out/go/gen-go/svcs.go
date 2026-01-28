@@ -112,9 +112,6 @@ func (c *myInteractionClientImpl) Truthify(ctx context.Context) (iter.Seq2[bool,
         fbthriftReq,
         fbthriftResp,
         fbthriftNewStreamElemFn,
-        nil,
-        nil,
-        nil,
     )
     if fbthriftErr != nil {
         fbthriftStreamCancel()
@@ -386,9 +383,6 @@ func (c *myInteractionFastClientImpl) Truthify(ctx context.Context) (iter.Seq2[b
         fbthriftReq,
         fbthriftResp,
         fbthriftNewStreamElemFn,
-        nil,
-        nil,
-        nil,
     )
     if fbthriftErr != nil {
         fbthriftStreamCancel()
@@ -945,9 +939,6 @@ func (c *myServiceClientImpl) Serialize(ctx context.Context) (SerialInteractionC
         fbthriftReq,
         fbthriftResp,
         fbthriftNewStreamElemFn,
-        nil,
-        nil,
-        nil,
     )
     if fbthriftErr != nil {
         fbthriftStreamCancel()
@@ -1275,9 +1266,6 @@ func (c *factoriesClientImpl) Serialize(ctx context.Context) (SerialInteractionC
         fbthriftReq,
         fbthriftResp,
         fbthriftNewStreamElemFn,
-        nil,
-        nil,
-        nil,
     )
     if fbthriftErr != nil {
         fbthriftStreamCancel()

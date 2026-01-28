@@ -47,51 +47,19 @@ func (c *{{service:go_client_name}}) {{> svc/client_func_signature}} {
     fbthriftChannel := c.ch
     {{/if function:creates_interaction?}}
 
-    fbthriftErrChan := make(chan error, 1)
-    {{#function:stream_elem_type}}
-    fbthriftElemChan := make(chan {{#type:structured?}}*{{/type:structured?}}{{#partial types.go_type type=type:self}}, thrift.DefaultStreamBufferSize)
-
     fbthriftNewStreamElemFn := func() thrift.ReadableResult {
         return newStream{{service:go_name}}{{function:go_name}}()
     }
-    fbthriftOnStreamNextFn := func(res thrift.ReadableStruct) {
-        fbthriftStreamValue := res.(*stream{{service:go_name}}{{function:go_name}})
-        fbthriftElemChan <- fbthriftStreamValue.Get{{function:retval_field_name}}()
-    }
-    fbthriftStreamSeq := func(yield func({{#type:structured?}}*{{/type:structured?}}{{#partial types.go_type type=type:self}}, error) bool) {
-        for elem := range fbthriftElemChan {
-            if !yield(elem, nil) {
-                return
-            }
-        }
-        for err := range fbthriftErrChan {
-            if !yield({{> common/go_zero_value}}, err) {
-                return
-            }
-        }
-    }
-    {{/function:stream_elem_type}}
-    {{! Both of these callback represent "terminal" state. }}
-    {{! They should be invoked only once. }}
-    fbthriftOnStreamErrorFn := func(err error) {
-        fbthriftErrChan <- err
-        close(fbthriftElemChan)
-        close(fbthriftErrChan)
-    }
-    fbthriftOnStreamCompleteFn := func() {
-        close(fbthriftElemChan)
-        close(fbthriftErrChan)
-    }
 
-    _, fbthriftErr := fbthriftChannel.SendRequestStream(
+    fbthriftStreamSeq, fbthriftErr := fbthriftChannel.SendRequestStream(
         fbthriftStreamCtx,
         "{{> svc/func_rpc_name}}",
         fbthriftReq,
         fbthriftResp,
         fbthriftNewStreamElemFn,
-        fbthriftOnStreamNextFn,
-        fbthriftOnStreamErrorFn,
-        fbthriftOnStreamCompleteFn,
+        nil,
+        nil,
+        nil,
     )
     if fbthriftErr != nil {
         fbthriftStreamCancel()
@@ -100,5 +68,19 @@ func (c *{{service:go_client_name}}) {{> svc/client_func_signature}} {
         fbthriftStreamCancel()
         return {{#function:creates_interaction?}}nil, {{/function:creates_interaction?}}{{#function:stream_has_first_response?}}fbthriftRespZero, {{/function:stream_has_first_response?}}nil, fbthriftEx
     }
-    return {{#function:creates_interaction?}}fbthriftInteractionClient, {{/function:creates_interaction?}}{{#function:stream_has_first_response?}}fbthriftResp.Get{{function:retval_field_name}}(), {{/function:stream_has_first_response?}}fbthriftStreamSeq, nil
+    {{#function:stream_elem_type}}
+    fbthriftStreamSeqAdapter := func(yield func({{#type:structured?}}*{{/type:structured?}}{{#partial types.go_type type=type:self}}, error) bool) {
+        for elem, err := range fbthriftStreamSeq {
+            if err != nil {
+                yield({{> common/go_zero_value}}, err)
+                return
+            }
+            fbthriftRes := elem.(*stream{{service:go_name}}{{function:go_name}})
+            if !yield(fbthriftRes.Get{{function:retval_field_name}}(), nil) {
+                return
+            }
+        }
+    }
+    {{/function:stream_elem_type}}
+    return {{#function:creates_interaction?}}fbthriftInteractionClient, {{/function:creates_interaction?}}{{#function:stream_has_first_response?}}fbthriftResp.Get{{function:retval_field_name}}(), {{/function:stream_has_first_response?}}fbthriftStreamSeqAdapter, nil
 }

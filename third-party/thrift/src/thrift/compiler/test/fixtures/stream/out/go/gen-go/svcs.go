@@ -90,47 +90,19 @@ func (c *pubSubStreamingServiceClientImpl) Returnstream(ctx context.Context, i32
 
     fbthriftChannel := c.ch
 
-    fbthriftErrChan := make(chan error, 1)
-    fbthriftElemChan := make(chan int32, thrift.DefaultStreamBufferSize)
-
     fbthriftNewStreamElemFn := func() thrift.ReadableResult {
         return newStreamPubSubStreamingServiceReturnstream()
     }
-    fbthriftOnStreamNextFn := func(res thrift.ReadableStruct) {
-        fbthriftStreamValue := res.(*streamPubSubStreamingServiceReturnstream)
-        fbthriftElemChan <- fbthriftStreamValue.GetSuccess()
-    }
-    fbthriftStreamSeq := func(yield func(int32, error) bool) {
-        for elem := range fbthriftElemChan {
-            if !yield(elem, nil) {
-                return
-            }
-        }
-        for err := range fbthriftErrChan {
-            if !yield(0, err) {
-                return
-            }
-        }
-    }
-    fbthriftOnStreamErrorFn := func(err error) {
-        fbthriftErrChan <- err
-        close(fbthriftElemChan)
-        close(fbthriftErrChan)
-    }
-    fbthriftOnStreamCompleteFn := func() {
-        close(fbthriftElemChan)
-        close(fbthriftErrChan)
-    }
 
-    _, fbthriftErr := fbthriftChannel.SendRequestStream(
+    fbthriftStreamSeq, fbthriftErr := fbthriftChannel.SendRequestStream(
         fbthriftStreamCtx,
         "returnstream",
         fbthriftReq,
         fbthriftResp,
         fbthriftNewStreamElemFn,
-        fbthriftOnStreamNextFn,
-        fbthriftOnStreamErrorFn,
-        fbthriftOnStreamCompleteFn,
+        nil,
+        nil,
+        nil,
     )
     if fbthriftErr != nil {
         fbthriftStreamCancel()
@@ -139,7 +111,19 @@ func (c *pubSubStreamingServiceClientImpl) Returnstream(ctx context.Context, i32
         fbthriftStreamCancel()
         return nil, fbthriftEx
     }
-    return fbthriftStreamSeq, nil
+    fbthriftStreamSeqAdapter := func(yield func(int32, error) bool) {
+        for elem, err := range fbthriftStreamSeq {
+            if err != nil {
+                yield(0, err)
+                return
+            }
+            fbthriftRes := elem.(*streamPubSubStreamingServiceReturnstream)
+            if !yield(fbthriftRes.GetSuccess(), nil) {
+                return
+            }
+        }
+    }
+    return fbthriftStreamSeqAdapter, nil
 }
 
 func (c *pubSubStreamingServiceClientImpl) Streamthrows(ctx context.Context, foo int32) (iter.Seq2[int32, error], error) {
@@ -156,47 +140,19 @@ func (c *pubSubStreamingServiceClientImpl) Streamthrows(ctx context.Context, foo
 
     fbthriftChannel := c.ch
 
-    fbthriftErrChan := make(chan error, 1)
-    fbthriftElemChan := make(chan int32, thrift.DefaultStreamBufferSize)
-
     fbthriftNewStreamElemFn := func() thrift.ReadableResult {
         return newStreamPubSubStreamingServiceStreamthrows()
     }
-    fbthriftOnStreamNextFn := func(res thrift.ReadableStruct) {
-        fbthriftStreamValue := res.(*streamPubSubStreamingServiceStreamthrows)
-        fbthriftElemChan <- fbthriftStreamValue.GetSuccess()
-    }
-    fbthriftStreamSeq := func(yield func(int32, error) bool) {
-        for elem := range fbthriftElemChan {
-            if !yield(elem, nil) {
-                return
-            }
-        }
-        for err := range fbthriftErrChan {
-            if !yield(0, err) {
-                return
-            }
-        }
-    }
-    fbthriftOnStreamErrorFn := func(err error) {
-        fbthriftErrChan <- err
-        close(fbthriftElemChan)
-        close(fbthriftErrChan)
-    }
-    fbthriftOnStreamCompleteFn := func() {
-        close(fbthriftElemChan)
-        close(fbthriftErrChan)
-    }
 
-    _, fbthriftErr := fbthriftChannel.SendRequestStream(
+    fbthriftStreamSeq, fbthriftErr := fbthriftChannel.SendRequestStream(
         fbthriftStreamCtx,
         "streamthrows",
         fbthriftReq,
         fbthriftResp,
         fbthriftNewStreamElemFn,
-        fbthriftOnStreamNextFn,
-        fbthriftOnStreamErrorFn,
-        fbthriftOnStreamCompleteFn,
+        nil,
+        nil,
+        nil,
     )
     if fbthriftErr != nil {
         fbthriftStreamCancel()
@@ -205,7 +161,19 @@ func (c *pubSubStreamingServiceClientImpl) Streamthrows(ctx context.Context, foo
         fbthriftStreamCancel()
         return nil, fbthriftEx
     }
-    return fbthriftStreamSeq, nil
+    fbthriftStreamSeqAdapter := func(yield func(int32, error) bool) {
+        for elem, err := range fbthriftStreamSeq {
+            if err != nil {
+                yield(0, err)
+                return
+            }
+            fbthriftRes := elem.(*streamPubSubStreamingServiceStreamthrows)
+            if !yield(fbthriftRes.GetSuccess(), nil) {
+                return
+            }
+        }
+    }
+    return fbthriftStreamSeqAdapter, nil
 }
 
 func (c *pubSubStreamingServiceClientImpl) Servicethrows(ctx context.Context, foo int32) (iter.Seq2[int32, error], error) {
@@ -222,47 +190,19 @@ func (c *pubSubStreamingServiceClientImpl) Servicethrows(ctx context.Context, fo
 
     fbthriftChannel := c.ch
 
-    fbthriftErrChan := make(chan error, 1)
-    fbthriftElemChan := make(chan int32, thrift.DefaultStreamBufferSize)
-
     fbthriftNewStreamElemFn := func() thrift.ReadableResult {
         return newStreamPubSubStreamingServiceServicethrows()
     }
-    fbthriftOnStreamNextFn := func(res thrift.ReadableStruct) {
-        fbthriftStreamValue := res.(*streamPubSubStreamingServiceServicethrows)
-        fbthriftElemChan <- fbthriftStreamValue.GetSuccess()
-    }
-    fbthriftStreamSeq := func(yield func(int32, error) bool) {
-        for elem := range fbthriftElemChan {
-            if !yield(elem, nil) {
-                return
-            }
-        }
-        for err := range fbthriftErrChan {
-            if !yield(0, err) {
-                return
-            }
-        }
-    }
-    fbthriftOnStreamErrorFn := func(err error) {
-        fbthriftErrChan <- err
-        close(fbthriftElemChan)
-        close(fbthriftErrChan)
-    }
-    fbthriftOnStreamCompleteFn := func() {
-        close(fbthriftElemChan)
-        close(fbthriftErrChan)
-    }
 
-    _, fbthriftErr := fbthriftChannel.SendRequestStream(
+    fbthriftStreamSeq, fbthriftErr := fbthriftChannel.SendRequestStream(
         fbthriftStreamCtx,
         "servicethrows",
         fbthriftReq,
         fbthriftResp,
         fbthriftNewStreamElemFn,
-        fbthriftOnStreamNextFn,
-        fbthriftOnStreamErrorFn,
-        fbthriftOnStreamCompleteFn,
+        nil,
+        nil,
+        nil,
     )
     if fbthriftErr != nil {
         fbthriftStreamCancel()
@@ -271,7 +211,19 @@ func (c *pubSubStreamingServiceClientImpl) Servicethrows(ctx context.Context, fo
         fbthriftStreamCancel()
         return nil, fbthriftEx
     }
-    return fbthriftStreamSeq, nil
+    fbthriftStreamSeqAdapter := func(yield func(int32, error) bool) {
+        for elem, err := range fbthriftStreamSeq {
+            if err != nil {
+                yield(0, err)
+                return
+            }
+            fbthriftRes := elem.(*streamPubSubStreamingServiceServicethrows)
+            if !yield(fbthriftRes.GetSuccess(), nil) {
+                return
+            }
+        }
+    }
+    return fbthriftStreamSeqAdapter, nil
 }
 
 func (c *pubSubStreamingServiceClientImpl) Servicethrows2(ctx context.Context, foo int32) (iter.Seq2[int32, error], error) {
@@ -288,47 +240,19 @@ func (c *pubSubStreamingServiceClientImpl) Servicethrows2(ctx context.Context, f
 
     fbthriftChannel := c.ch
 
-    fbthriftErrChan := make(chan error, 1)
-    fbthriftElemChan := make(chan int32, thrift.DefaultStreamBufferSize)
-
     fbthriftNewStreamElemFn := func() thrift.ReadableResult {
         return newStreamPubSubStreamingServiceServicethrows2()
     }
-    fbthriftOnStreamNextFn := func(res thrift.ReadableStruct) {
-        fbthriftStreamValue := res.(*streamPubSubStreamingServiceServicethrows2)
-        fbthriftElemChan <- fbthriftStreamValue.GetSuccess()
-    }
-    fbthriftStreamSeq := func(yield func(int32, error) bool) {
-        for elem := range fbthriftElemChan {
-            if !yield(elem, nil) {
-                return
-            }
-        }
-        for err := range fbthriftErrChan {
-            if !yield(0, err) {
-                return
-            }
-        }
-    }
-    fbthriftOnStreamErrorFn := func(err error) {
-        fbthriftErrChan <- err
-        close(fbthriftElemChan)
-        close(fbthriftErrChan)
-    }
-    fbthriftOnStreamCompleteFn := func() {
-        close(fbthriftElemChan)
-        close(fbthriftErrChan)
-    }
 
-    _, fbthriftErr := fbthriftChannel.SendRequestStream(
+    fbthriftStreamSeq, fbthriftErr := fbthriftChannel.SendRequestStream(
         fbthriftStreamCtx,
         "servicethrows2",
         fbthriftReq,
         fbthriftResp,
         fbthriftNewStreamElemFn,
-        fbthriftOnStreamNextFn,
-        fbthriftOnStreamErrorFn,
-        fbthriftOnStreamCompleteFn,
+        nil,
+        nil,
+        nil,
     )
     if fbthriftErr != nil {
         fbthriftStreamCancel()
@@ -337,7 +261,19 @@ func (c *pubSubStreamingServiceClientImpl) Servicethrows2(ctx context.Context, f
         fbthriftStreamCancel()
         return nil, fbthriftEx
     }
-    return fbthriftStreamSeq, nil
+    fbthriftStreamSeqAdapter := func(yield func(int32, error) bool) {
+        for elem, err := range fbthriftStreamSeq {
+            if err != nil {
+                yield(0, err)
+                return
+            }
+            fbthriftRes := elem.(*streamPubSubStreamingServiceServicethrows2)
+            if !yield(fbthriftRes.GetSuccess(), nil) {
+                return
+            }
+        }
+    }
+    return fbthriftStreamSeqAdapter, nil
 }
 
 func (c *pubSubStreamingServiceClientImpl) Boththrows(ctx context.Context, foo int32) (iter.Seq2[int32, error], error) {
@@ -354,47 +290,19 @@ func (c *pubSubStreamingServiceClientImpl) Boththrows(ctx context.Context, foo i
 
     fbthriftChannel := c.ch
 
-    fbthriftErrChan := make(chan error, 1)
-    fbthriftElemChan := make(chan int32, thrift.DefaultStreamBufferSize)
-
     fbthriftNewStreamElemFn := func() thrift.ReadableResult {
         return newStreamPubSubStreamingServiceBoththrows()
     }
-    fbthriftOnStreamNextFn := func(res thrift.ReadableStruct) {
-        fbthriftStreamValue := res.(*streamPubSubStreamingServiceBoththrows)
-        fbthriftElemChan <- fbthriftStreamValue.GetSuccess()
-    }
-    fbthriftStreamSeq := func(yield func(int32, error) bool) {
-        for elem := range fbthriftElemChan {
-            if !yield(elem, nil) {
-                return
-            }
-        }
-        for err := range fbthriftErrChan {
-            if !yield(0, err) {
-                return
-            }
-        }
-    }
-    fbthriftOnStreamErrorFn := func(err error) {
-        fbthriftErrChan <- err
-        close(fbthriftElemChan)
-        close(fbthriftErrChan)
-    }
-    fbthriftOnStreamCompleteFn := func() {
-        close(fbthriftElemChan)
-        close(fbthriftErrChan)
-    }
 
-    _, fbthriftErr := fbthriftChannel.SendRequestStream(
+    fbthriftStreamSeq, fbthriftErr := fbthriftChannel.SendRequestStream(
         fbthriftStreamCtx,
         "boththrows",
         fbthriftReq,
         fbthriftResp,
         fbthriftNewStreamElemFn,
-        fbthriftOnStreamNextFn,
-        fbthriftOnStreamErrorFn,
-        fbthriftOnStreamCompleteFn,
+        nil,
+        nil,
+        nil,
     )
     if fbthriftErr != nil {
         fbthriftStreamCancel()
@@ -403,7 +311,19 @@ func (c *pubSubStreamingServiceClientImpl) Boththrows(ctx context.Context, foo i
         fbthriftStreamCancel()
         return nil, fbthriftEx
     }
-    return fbthriftStreamSeq, nil
+    fbthriftStreamSeqAdapter := func(yield func(int32, error) bool) {
+        for elem, err := range fbthriftStreamSeq {
+            if err != nil {
+                yield(0, err)
+                return
+            }
+            fbthriftRes := elem.(*streamPubSubStreamingServiceBoththrows)
+            if !yield(fbthriftRes.GetSuccess(), nil) {
+                return
+            }
+        }
+    }
+    return fbthriftStreamSeqAdapter, nil
 }
 
 func (c *pubSubStreamingServiceClientImpl) Responseandstreamstreamthrows(ctx context.Context, foo int32) (int32, iter.Seq2[int32, error], error) {
@@ -421,47 +341,19 @@ func (c *pubSubStreamingServiceClientImpl) Responseandstreamstreamthrows(ctx con
 
     fbthriftChannel := c.ch
 
-    fbthriftErrChan := make(chan error, 1)
-    fbthriftElemChan := make(chan int32, thrift.DefaultStreamBufferSize)
-
     fbthriftNewStreamElemFn := func() thrift.ReadableResult {
         return newStreamPubSubStreamingServiceResponseandstreamstreamthrows()
     }
-    fbthriftOnStreamNextFn := func(res thrift.ReadableStruct) {
-        fbthriftStreamValue := res.(*streamPubSubStreamingServiceResponseandstreamstreamthrows)
-        fbthriftElemChan <- fbthriftStreamValue.GetSuccess()
-    }
-    fbthriftStreamSeq := func(yield func(int32, error) bool) {
-        for elem := range fbthriftElemChan {
-            if !yield(elem, nil) {
-                return
-            }
-        }
-        for err := range fbthriftErrChan {
-            if !yield(0, err) {
-                return
-            }
-        }
-    }
-    fbthriftOnStreamErrorFn := func(err error) {
-        fbthriftErrChan <- err
-        close(fbthriftElemChan)
-        close(fbthriftErrChan)
-    }
-    fbthriftOnStreamCompleteFn := func() {
-        close(fbthriftElemChan)
-        close(fbthriftErrChan)
-    }
 
-    _, fbthriftErr := fbthriftChannel.SendRequestStream(
+    fbthriftStreamSeq, fbthriftErr := fbthriftChannel.SendRequestStream(
         fbthriftStreamCtx,
         "responseandstreamstreamthrows",
         fbthriftReq,
         fbthriftResp,
         fbthriftNewStreamElemFn,
-        fbthriftOnStreamNextFn,
-        fbthriftOnStreamErrorFn,
-        fbthriftOnStreamCompleteFn,
+        nil,
+        nil,
+        nil,
     )
     if fbthriftErr != nil {
         fbthriftStreamCancel()
@@ -470,7 +362,19 @@ func (c *pubSubStreamingServiceClientImpl) Responseandstreamstreamthrows(ctx con
         fbthriftStreamCancel()
         return fbthriftRespZero, nil, fbthriftEx
     }
-    return fbthriftResp.GetSuccess(), fbthriftStreamSeq, nil
+    fbthriftStreamSeqAdapter := func(yield func(int32, error) bool) {
+        for elem, err := range fbthriftStreamSeq {
+            if err != nil {
+                yield(0, err)
+                return
+            }
+            fbthriftRes := elem.(*streamPubSubStreamingServiceResponseandstreamstreamthrows)
+            if !yield(fbthriftRes.GetSuccess(), nil) {
+                return
+            }
+        }
+    }
+    return fbthriftResp.GetSuccess(), fbthriftStreamSeqAdapter, nil
 }
 
 func (c *pubSubStreamingServiceClientImpl) Responseandstreamservicethrows(ctx context.Context, foo int32) (int32, iter.Seq2[int32, error], error) {
@@ -488,47 +392,19 @@ func (c *pubSubStreamingServiceClientImpl) Responseandstreamservicethrows(ctx co
 
     fbthriftChannel := c.ch
 
-    fbthriftErrChan := make(chan error, 1)
-    fbthriftElemChan := make(chan int32, thrift.DefaultStreamBufferSize)
-
     fbthriftNewStreamElemFn := func() thrift.ReadableResult {
         return newStreamPubSubStreamingServiceResponseandstreamservicethrows()
     }
-    fbthriftOnStreamNextFn := func(res thrift.ReadableStruct) {
-        fbthriftStreamValue := res.(*streamPubSubStreamingServiceResponseandstreamservicethrows)
-        fbthriftElemChan <- fbthriftStreamValue.GetSuccess()
-    }
-    fbthriftStreamSeq := func(yield func(int32, error) bool) {
-        for elem := range fbthriftElemChan {
-            if !yield(elem, nil) {
-                return
-            }
-        }
-        for err := range fbthriftErrChan {
-            if !yield(0, err) {
-                return
-            }
-        }
-    }
-    fbthriftOnStreamErrorFn := func(err error) {
-        fbthriftErrChan <- err
-        close(fbthriftElemChan)
-        close(fbthriftErrChan)
-    }
-    fbthriftOnStreamCompleteFn := func() {
-        close(fbthriftElemChan)
-        close(fbthriftErrChan)
-    }
 
-    _, fbthriftErr := fbthriftChannel.SendRequestStream(
+    fbthriftStreamSeq, fbthriftErr := fbthriftChannel.SendRequestStream(
         fbthriftStreamCtx,
         "responseandstreamservicethrows",
         fbthriftReq,
         fbthriftResp,
         fbthriftNewStreamElemFn,
-        fbthriftOnStreamNextFn,
-        fbthriftOnStreamErrorFn,
-        fbthriftOnStreamCompleteFn,
+        nil,
+        nil,
+        nil,
     )
     if fbthriftErr != nil {
         fbthriftStreamCancel()
@@ -537,7 +413,19 @@ func (c *pubSubStreamingServiceClientImpl) Responseandstreamservicethrows(ctx co
         fbthriftStreamCancel()
         return fbthriftRespZero, nil, fbthriftEx
     }
-    return fbthriftResp.GetSuccess(), fbthriftStreamSeq, nil
+    fbthriftStreamSeqAdapter := func(yield func(int32, error) bool) {
+        for elem, err := range fbthriftStreamSeq {
+            if err != nil {
+                yield(0, err)
+                return
+            }
+            fbthriftRes := elem.(*streamPubSubStreamingServiceResponseandstreamservicethrows)
+            if !yield(fbthriftRes.GetSuccess(), nil) {
+                return
+            }
+        }
+    }
+    return fbthriftResp.GetSuccess(), fbthriftStreamSeqAdapter, nil
 }
 
 func (c *pubSubStreamingServiceClientImpl) Responseandstreamboththrows(ctx context.Context, foo int32) (int32, iter.Seq2[int32, error], error) {
@@ -555,47 +443,19 @@ func (c *pubSubStreamingServiceClientImpl) Responseandstreamboththrows(ctx conte
 
     fbthriftChannel := c.ch
 
-    fbthriftErrChan := make(chan error, 1)
-    fbthriftElemChan := make(chan int32, thrift.DefaultStreamBufferSize)
-
     fbthriftNewStreamElemFn := func() thrift.ReadableResult {
         return newStreamPubSubStreamingServiceResponseandstreamboththrows()
     }
-    fbthriftOnStreamNextFn := func(res thrift.ReadableStruct) {
-        fbthriftStreamValue := res.(*streamPubSubStreamingServiceResponseandstreamboththrows)
-        fbthriftElemChan <- fbthriftStreamValue.GetSuccess()
-    }
-    fbthriftStreamSeq := func(yield func(int32, error) bool) {
-        for elem := range fbthriftElemChan {
-            if !yield(elem, nil) {
-                return
-            }
-        }
-        for err := range fbthriftErrChan {
-            if !yield(0, err) {
-                return
-            }
-        }
-    }
-    fbthriftOnStreamErrorFn := func(err error) {
-        fbthriftErrChan <- err
-        close(fbthriftElemChan)
-        close(fbthriftErrChan)
-    }
-    fbthriftOnStreamCompleteFn := func() {
-        close(fbthriftElemChan)
-        close(fbthriftErrChan)
-    }
 
-    _, fbthriftErr := fbthriftChannel.SendRequestStream(
+    fbthriftStreamSeq, fbthriftErr := fbthriftChannel.SendRequestStream(
         fbthriftStreamCtx,
         "responseandstreamboththrows",
         fbthriftReq,
         fbthriftResp,
         fbthriftNewStreamElemFn,
-        fbthriftOnStreamNextFn,
-        fbthriftOnStreamErrorFn,
-        fbthriftOnStreamCompleteFn,
+        nil,
+        nil,
+        nil,
     )
     if fbthriftErr != nil {
         fbthriftStreamCancel()
@@ -604,7 +464,19 @@ func (c *pubSubStreamingServiceClientImpl) Responseandstreamboththrows(ctx conte
         fbthriftStreamCancel()
         return fbthriftRespZero, nil, fbthriftEx
     }
-    return fbthriftResp.GetSuccess(), fbthriftStreamSeq, nil
+    fbthriftStreamSeqAdapter := func(yield func(int32, error) bool) {
+        for elem, err := range fbthriftStreamSeq {
+            if err != nil {
+                yield(0, err)
+                return
+            }
+            fbthriftRes := elem.(*streamPubSubStreamingServiceResponseandstreamboththrows)
+            if !yield(fbthriftRes.GetSuccess(), nil) {
+                return
+            }
+        }
+    }
+    return fbthriftResp.GetSuccess(), fbthriftStreamSeqAdapter, nil
 }
 
 func (c *pubSubStreamingServiceClientImpl) ReturnstreamFast(ctx context.Context, i32From int32, i32To int32) (iter.Seq2[int32, error], error) {
@@ -622,47 +494,19 @@ func (c *pubSubStreamingServiceClientImpl) ReturnstreamFast(ctx context.Context,
 
     fbthriftChannel := c.ch
 
-    fbthriftErrChan := make(chan error, 1)
-    fbthriftElemChan := make(chan int32, thrift.DefaultStreamBufferSize)
-
     fbthriftNewStreamElemFn := func() thrift.ReadableResult {
         return newStreamPubSubStreamingServiceReturnstreamFast()
     }
-    fbthriftOnStreamNextFn := func(res thrift.ReadableStruct) {
-        fbthriftStreamValue := res.(*streamPubSubStreamingServiceReturnstreamFast)
-        fbthriftElemChan <- fbthriftStreamValue.GetSuccess()
-    }
-    fbthriftStreamSeq := func(yield func(int32, error) bool) {
-        for elem := range fbthriftElemChan {
-            if !yield(elem, nil) {
-                return
-            }
-        }
-        for err := range fbthriftErrChan {
-            if !yield(0, err) {
-                return
-            }
-        }
-    }
-    fbthriftOnStreamErrorFn := func(err error) {
-        fbthriftErrChan <- err
-        close(fbthriftElemChan)
-        close(fbthriftErrChan)
-    }
-    fbthriftOnStreamCompleteFn := func() {
-        close(fbthriftElemChan)
-        close(fbthriftErrChan)
-    }
 
-    _, fbthriftErr := fbthriftChannel.SendRequestStream(
+    fbthriftStreamSeq, fbthriftErr := fbthriftChannel.SendRequestStream(
         fbthriftStreamCtx,
         "returnstreamFast",
         fbthriftReq,
         fbthriftResp,
         fbthriftNewStreamElemFn,
-        fbthriftOnStreamNextFn,
-        fbthriftOnStreamErrorFn,
-        fbthriftOnStreamCompleteFn,
+        nil,
+        nil,
+        nil,
     )
     if fbthriftErr != nil {
         fbthriftStreamCancel()
@@ -671,7 +515,19 @@ func (c *pubSubStreamingServiceClientImpl) ReturnstreamFast(ctx context.Context,
         fbthriftStreamCancel()
         return nil, fbthriftEx
     }
-    return fbthriftStreamSeq, nil
+    fbthriftStreamSeqAdapter := func(yield func(int32, error) bool) {
+        for elem, err := range fbthriftStreamSeq {
+            if err != nil {
+                yield(0, err)
+                return
+            }
+            fbthriftRes := elem.(*streamPubSubStreamingServiceReturnstreamFast)
+            if !yield(fbthriftRes.GetSuccess(), nil) {
+                return
+            }
+        }
+    }
+    return fbthriftStreamSeqAdapter, nil
 }
 
 

@@ -97,47 +97,19 @@ func (c *cClientImpl) Numbers(ctx context.Context) (iter.Seq2[Number, error], er
 
     fbthriftChannel := c.ch
 
-    fbthriftErrChan := make(chan error, 1)
-    fbthriftElemChan := make(chan Number, thrift.DefaultStreamBufferSize)
-
     fbthriftNewStreamElemFn := func() thrift.ReadableResult {
         return newStreamCNumbers()
     }
-    fbthriftOnStreamNextFn := func(res thrift.ReadableStruct) {
-        fbthriftStreamValue := res.(*streamCNumbers)
-        fbthriftElemChan <- fbthriftStreamValue.GetSuccess()
-    }
-    fbthriftStreamSeq := func(yield func(Number, error) bool) {
-        for elem := range fbthriftElemChan {
-            if !yield(elem, nil) {
-                return
-            }
-        }
-        for err := range fbthriftErrChan {
-            if !yield(0, err) {
-                return
-            }
-        }
-    }
-    fbthriftOnStreamErrorFn := func(err error) {
-        fbthriftErrChan <- err
-        close(fbthriftElemChan)
-        close(fbthriftErrChan)
-    }
-    fbthriftOnStreamCompleteFn := func() {
-        close(fbthriftElemChan)
-        close(fbthriftErrChan)
-    }
 
-    _, fbthriftErr := fbthriftChannel.SendRequestStream(
+    fbthriftStreamSeq, fbthriftErr := fbthriftChannel.SendRequestStream(
         fbthriftStreamCtx,
         "numbers",
         fbthriftReq,
         fbthriftResp,
         fbthriftNewStreamElemFn,
-        fbthriftOnStreamNextFn,
-        fbthriftOnStreamErrorFn,
-        fbthriftOnStreamCompleteFn,
+        nil,
+        nil,
+        nil,
     )
     if fbthriftErr != nil {
         fbthriftStreamCancel()
@@ -146,7 +118,19 @@ func (c *cClientImpl) Numbers(ctx context.Context) (iter.Seq2[Number, error], er
         fbthriftStreamCancel()
         return nil, fbthriftEx
     }
-    return fbthriftStreamSeq, nil
+    fbthriftStreamSeqAdapter := func(yield func(Number, error) bool) {
+        for elem, err := range fbthriftStreamSeq {
+            if err != nil {
+                yield(0, err)
+                return
+            }
+            fbthriftRes := elem.(*streamCNumbers)
+            if !yield(fbthriftRes.GetSuccess(), nil) {
+                return
+            }
+        }
+    }
+    return fbthriftStreamSeqAdapter, nil
 }
 
 func (c *cClientImpl) Thing(ctx context.Context, a int32, b string, c []int32) (string, error) {

@@ -102,47 +102,19 @@ func (c *myInteractionClientImpl) Truthify(ctx context.Context) (iter.Seq2[bool,
 
     fbthriftChannel := c.ch
 
-    fbthriftErrChan := make(chan error, 1)
-    fbthriftElemChan := make(chan bool, thrift.DefaultStreamBufferSize)
-
     fbthriftNewStreamElemFn := func() thrift.ReadableResult {
         return newStreamMyInteractionTruthify()
     }
-    fbthriftOnStreamNextFn := func(res thrift.ReadableStruct) {
-        fbthriftStreamValue := res.(*streamMyInteractionTruthify)
-        fbthriftElemChan <- fbthriftStreamValue.GetSuccess()
-    }
-    fbthriftStreamSeq := func(yield func(bool, error) bool) {
-        for elem := range fbthriftElemChan {
-            if !yield(elem, nil) {
-                return
-            }
-        }
-        for err := range fbthriftErrChan {
-            if !yield(false, err) {
-                return
-            }
-        }
-    }
-    fbthriftOnStreamErrorFn := func(err error) {
-        fbthriftErrChan <- err
-        close(fbthriftElemChan)
-        close(fbthriftErrChan)
-    }
-    fbthriftOnStreamCompleteFn := func() {
-        close(fbthriftElemChan)
-        close(fbthriftErrChan)
-    }
 
-    _, fbthriftErr := fbthriftChannel.SendRequestStream(
+    fbthriftStreamSeq, fbthriftErr := fbthriftChannel.SendRequestStream(
         fbthriftStreamCtx,
         "MyInteraction.truthify",
         fbthriftReq,
         fbthriftResp,
         fbthriftNewStreamElemFn,
-        fbthriftOnStreamNextFn,
-        fbthriftOnStreamErrorFn,
-        fbthriftOnStreamCompleteFn,
+        nil,
+        nil,
+        nil,
     )
     if fbthriftErr != nil {
         fbthriftStreamCancel()
@@ -151,7 +123,19 @@ func (c *myInteractionClientImpl) Truthify(ctx context.Context) (iter.Seq2[bool,
         fbthriftStreamCancel()
         return nil, fbthriftEx
     }
-    return fbthriftStreamSeq, nil
+    fbthriftStreamSeqAdapter := func(yield func(bool, error) bool) {
+        for elem, err := range fbthriftStreamSeq {
+            if err != nil {
+                yield(false, err)
+                return
+            }
+            fbthriftRes := elem.(*streamMyInteractionTruthify)
+            if !yield(fbthriftRes.GetSuccess(), nil) {
+                return
+            }
+        }
+    }
+    return fbthriftStreamSeqAdapter, nil
 }
 
 
@@ -392,47 +376,19 @@ func (c *myInteractionFastClientImpl) Truthify(ctx context.Context) (iter.Seq2[b
 
     fbthriftChannel := c.ch
 
-    fbthriftErrChan := make(chan error, 1)
-    fbthriftElemChan := make(chan bool, thrift.DefaultStreamBufferSize)
-
     fbthriftNewStreamElemFn := func() thrift.ReadableResult {
         return newStreamMyInteractionFastTruthify()
     }
-    fbthriftOnStreamNextFn := func(res thrift.ReadableStruct) {
-        fbthriftStreamValue := res.(*streamMyInteractionFastTruthify)
-        fbthriftElemChan <- fbthriftStreamValue.GetSuccess()
-    }
-    fbthriftStreamSeq := func(yield func(bool, error) bool) {
-        for elem := range fbthriftElemChan {
-            if !yield(elem, nil) {
-                return
-            }
-        }
-        for err := range fbthriftErrChan {
-            if !yield(false, err) {
-                return
-            }
-        }
-    }
-    fbthriftOnStreamErrorFn := func(err error) {
-        fbthriftErrChan <- err
-        close(fbthriftElemChan)
-        close(fbthriftErrChan)
-    }
-    fbthriftOnStreamCompleteFn := func() {
-        close(fbthriftElemChan)
-        close(fbthriftErrChan)
-    }
 
-    _, fbthriftErr := fbthriftChannel.SendRequestStream(
+    fbthriftStreamSeq, fbthriftErr := fbthriftChannel.SendRequestStream(
         fbthriftStreamCtx,
         "MyInteractionFast.truthify",
         fbthriftReq,
         fbthriftResp,
         fbthriftNewStreamElemFn,
-        fbthriftOnStreamNextFn,
-        fbthriftOnStreamErrorFn,
-        fbthriftOnStreamCompleteFn,
+        nil,
+        nil,
+        nil,
     )
     if fbthriftErr != nil {
         fbthriftStreamCancel()
@@ -441,7 +397,19 @@ func (c *myInteractionFastClientImpl) Truthify(ctx context.Context) (iter.Seq2[b
         fbthriftStreamCancel()
         return nil, fbthriftEx
     }
-    return fbthriftStreamSeq, nil
+    fbthriftStreamSeqAdapter := func(yield func(bool, error) bool) {
+        for elem, err := range fbthriftStreamSeq {
+            if err != nil {
+                yield(false, err)
+                return
+            }
+            fbthriftRes := elem.(*streamMyInteractionFastTruthify)
+            if !yield(fbthriftRes.GetSuccess(), nil) {
+                return
+            }
+        }
+    }
+    return fbthriftStreamSeqAdapter, nil
 }
 
 
@@ -967,47 +935,19 @@ func (c *myServiceClientImpl) Serialize(ctx context.Context) (SerialInteractionC
     fbthriftChannel := thrift.NewInteractionChannel(c.ch, "SerialInteraction")
     fbthriftInteractionClient := NewSerialInteractionChannelClient(fbthriftChannel)
 
-    fbthriftErrChan := make(chan error, 1)
-    fbthriftElemChan := make(chan int32, thrift.DefaultStreamBufferSize)
-
     fbthriftNewStreamElemFn := func() thrift.ReadableResult {
         return newStreamMyServiceSerialize()
     }
-    fbthriftOnStreamNextFn := func(res thrift.ReadableStruct) {
-        fbthriftStreamValue := res.(*streamMyServiceSerialize)
-        fbthriftElemChan <- fbthriftStreamValue.GetSuccess()
-    }
-    fbthriftStreamSeq := func(yield func(int32, error) bool) {
-        for elem := range fbthriftElemChan {
-            if !yield(elem, nil) {
-                return
-            }
-        }
-        for err := range fbthriftErrChan {
-            if !yield(0, err) {
-                return
-            }
-        }
-    }
-    fbthriftOnStreamErrorFn := func(err error) {
-        fbthriftErrChan <- err
-        close(fbthriftElemChan)
-        close(fbthriftErrChan)
-    }
-    fbthriftOnStreamCompleteFn := func() {
-        close(fbthriftElemChan)
-        close(fbthriftErrChan)
-    }
 
-    _, fbthriftErr := fbthriftChannel.SendRequestStream(
+    fbthriftStreamSeq, fbthriftErr := fbthriftChannel.SendRequestStream(
         fbthriftStreamCtx,
         "serialize",
         fbthriftReq,
         fbthriftResp,
         fbthriftNewStreamElemFn,
-        fbthriftOnStreamNextFn,
-        fbthriftOnStreamErrorFn,
-        fbthriftOnStreamCompleteFn,
+        nil,
+        nil,
+        nil,
     )
     if fbthriftErr != nil {
         fbthriftStreamCancel()
@@ -1016,7 +956,19 @@ func (c *myServiceClientImpl) Serialize(ctx context.Context) (SerialInteractionC
         fbthriftStreamCancel()
         return nil, fbthriftRespZero, nil, fbthriftEx
     }
-    return fbthriftInteractionClient, fbthriftResp.GetSuccess(), fbthriftStreamSeq, nil
+    fbthriftStreamSeqAdapter := func(yield func(int32, error) bool) {
+        for elem, err := range fbthriftStreamSeq {
+            if err != nil {
+                yield(0, err)
+                return
+            }
+            fbthriftRes := elem.(*streamMyServiceSerialize)
+            if !yield(fbthriftRes.GetSuccess(), nil) {
+                return
+            }
+        }
+    }
+    return fbthriftInteractionClient, fbthriftResp.GetSuccess(), fbthriftStreamSeqAdapter, nil
 }
 
 
@@ -1313,47 +1265,19 @@ func (c *factoriesClientImpl) Serialize(ctx context.Context) (SerialInteractionC
     fbthriftChannel := thrift.NewInteractionChannel(c.ch, "SerialInteraction")
     fbthriftInteractionClient := NewSerialInteractionChannelClient(fbthriftChannel)
 
-    fbthriftErrChan := make(chan error, 1)
-    fbthriftElemChan := make(chan int32, thrift.DefaultStreamBufferSize)
-
     fbthriftNewStreamElemFn := func() thrift.ReadableResult {
         return newStreamFactoriesSerialize()
     }
-    fbthriftOnStreamNextFn := func(res thrift.ReadableStruct) {
-        fbthriftStreamValue := res.(*streamFactoriesSerialize)
-        fbthriftElemChan <- fbthriftStreamValue.GetSuccess()
-    }
-    fbthriftStreamSeq := func(yield func(int32, error) bool) {
-        for elem := range fbthriftElemChan {
-            if !yield(elem, nil) {
-                return
-            }
-        }
-        for err := range fbthriftErrChan {
-            if !yield(0, err) {
-                return
-            }
-        }
-    }
-    fbthriftOnStreamErrorFn := func(err error) {
-        fbthriftErrChan <- err
-        close(fbthriftElemChan)
-        close(fbthriftErrChan)
-    }
-    fbthriftOnStreamCompleteFn := func() {
-        close(fbthriftElemChan)
-        close(fbthriftErrChan)
-    }
 
-    _, fbthriftErr := fbthriftChannel.SendRequestStream(
+    fbthriftStreamSeq, fbthriftErr := fbthriftChannel.SendRequestStream(
         fbthriftStreamCtx,
         "serialize",
         fbthriftReq,
         fbthriftResp,
         fbthriftNewStreamElemFn,
-        fbthriftOnStreamNextFn,
-        fbthriftOnStreamErrorFn,
-        fbthriftOnStreamCompleteFn,
+        nil,
+        nil,
+        nil,
     )
     if fbthriftErr != nil {
         fbthriftStreamCancel()
@@ -1362,7 +1286,19 @@ func (c *factoriesClientImpl) Serialize(ctx context.Context) (SerialInteractionC
         fbthriftStreamCancel()
         return nil, fbthriftRespZero, nil, fbthriftEx
     }
-    return fbthriftInteractionClient, fbthriftResp.GetSuccess(), fbthriftStreamSeq, nil
+    fbthriftStreamSeqAdapter := func(yield func(int32, error) bool) {
+        for elem, err := range fbthriftStreamSeq {
+            if err != nil {
+                yield(0, err)
+                return
+            }
+            fbthriftRes := elem.(*streamFactoriesSerialize)
+            if !yield(fbthriftRes.GetSuccess(), nil) {
+                return
+            }
+        }
+    }
+    return fbthriftInteractionClient, fbthriftResp.GetSuccess(), fbthriftStreamSeqAdapter, nil
 }
 
 

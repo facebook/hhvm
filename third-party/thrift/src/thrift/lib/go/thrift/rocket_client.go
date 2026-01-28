@@ -150,9 +150,9 @@ func (p *rocketClient) SendRequestStream(
 	request WritableStruct,
 	response ReadableStruct,
 	newStreamElemFn func() types.ReadableResult,
-	onStreamNextFn func(ReadableStruct),
-	onStreamErrorFn func(error),
-	onStreamCompleteFn func(),
+	_ func(ReadableStruct),
+	_ func(error),
+	_ func(),
 ) (iter.Seq2[ReadableStruct, error], error) {
 	if ctx.Done() == nil {
 		// We require that the context is cancellable, to prevent goroutine leaks.
@@ -169,7 +169,19 @@ func (p *rocketClient) SendRequestStream(
 	if err != nil {
 		return nil, err
 	}
-	onStreamNextWrapperFn := func(data []byte) error {
+
+	errChan := make(chan error, 1)
+	elemChan := make(chan ReadableStruct, types.DefaultStreamBufferSize)
+	fbthriftOnStreamErrorFn := func(err error) {
+		errChan <- err
+		close(elemChan)
+		close(errChan)
+	}
+	fbthriftOnStreamCompleteFn := func() {
+		close(elemChan)
+		close(errChan)
+	}
+	fbthriftOnStreamNextFn := func(data []byte) error {
 		reader := bytes.NewBuffer(data)
 		var decoder types.Decoder
 		switch p.protoID {
@@ -181,13 +193,26 @@ func (p *rocketClient) SendRequestStream(
 			return types.NewProtocolException(fmt.Errorf("Unknown protocol id: %d", p.protoID))
 		}
 		destStruct := newStreamElemFn()
-		if err := destStruct.Read(decoder); err != nil {
+		err := destStruct.Read(decoder)
+		if err != nil {
 			return err
 		} else if destEx := destStruct.Exception(); destEx != nil {
 			return destEx
 		}
-		onStreamNextFn(destStruct)
+		elemChan <- destStruct
 		return nil
+	}
+	fbthriftStreamSeq := func(yield func(ReadableStruct, error) bool) {
+		for elem := range elemChan {
+			if !yield(elem, nil) {
+				return
+			}
+		}
+		for err := range errChan {
+			if !yield(nil, err) {
+				return
+			}
+		}
 	}
 
 	var writeHeaders map[string]string
@@ -195,7 +220,7 @@ func (p *rocketClient) SendRequestStream(
 		writeHeaders = rpcOpts.GetWriteHeaders()
 	}
 	headers := unionMaps(writeHeaders, p.persistentHeaders)
-	respHeaders, resultData, resultErr := p.client.RequestStream(ctx, messageName, headers, dataBytes, onStreamNextWrapperFn, onStreamErrorFn, onStreamCompleteFn)
+	respHeaders, resultData, resultErr := p.client.RequestStream(ctx, messageName, headers, dataBytes, fbthriftOnStreamNextFn, fbthriftOnStreamErrorFn, fbthriftOnStreamCompleteFn)
 	if resultErr != nil {
 		return nil, resultErr
 	}
@@ -207,7 +232,7 @@ func (p *rocketClient) SendRequestStream(
 	if err != nil {
 		return nil, err
 	}
-	return nil, nil
+	return fbthriftStreamSeq, nil
 }
 
 func (p *rocketClient) TerminateInteraction(interactionID int64) error {

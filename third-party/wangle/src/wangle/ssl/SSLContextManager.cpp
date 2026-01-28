@@ -221,6 +221,69 @@ static folly::Optional<std::string> getSNI(const fizz::ClientHello& chlo) {
   return sni;
 }
 
+static bool install(SSL* s, const std::shared_ptr<fizz::SelfCert>& cert) {
+  auto certWithChainAndPkey =
+      dynamic_cast<fizz::openssl::X509ChainWithPkey*>(cert.get());
+  if (!certWithChainAndPkey) {
+    return false;
+  }
+  auto xs = certWithChainAndPkey->getX509Chain();
+  auto pkey = certWithChainAndPkey->getEVPPkey();
+
+  if (xs.empty() || !pkey) {
+    return false;
+  }
+
+  auto& leaf = xs.front();
+  folly::ssl::BorrowingStackOfX509UniquePtr chain(sk_X509_new_null());
+  if (!chain) {
+    return false;
+  }
+  for (int i = 1; i < xs.size(); i++) {
+    sk_X509_push(chain.get(), xs[i].get());
+  }
+
+  return SSL_use_cert_and_key(s, leaf.get(), pkey.get(), chain.get(), 1) == 1;
+}
+
+static std::vector<std::shared_ptr<fizz::SelfCert>> getCertsToInstall(
+    const fizz::server::CertManager& certManager,
+    const fizz::ClientHello& chlo) {
+  auto sni = getSNI(chlo);
+  auto maybeRsa = certManager.getCert(
+      sni,
+      {fizz::SignatureScheme::rsa_pss_sha256},
+      {fizz::SignatureScheme::rsa_pss_sha256},
+      chlo);
+  auto maybeEc = certManager.getCert(
+      sni,
+      {fizz::SignatureScheme::ecdsa_secp256r1_sha256},
+      {fizz::SignatureScheme::ecdsa_secp256r1_sha256},
+      chlo);
+
+  // We should only use direct matches if there are direct matches, regardless
+  // of any default matches. We will only use default matches in the case that
+  // direct matches are not available.
+  std::vector<std::shared_ptr<fizz::SelfCert>> directMatches;
+  std::vector<std::shared_ptr<fizz::SelfCert>> defaultMatches;
+  auto partitionByMatchType = [&](fizz::CertMatch& certMatch) {
+    if (!certMatch) {
+      return;
+    }
+    if (certMatch->type == fizz::MatchType::Direct) {
+      directMatches.push_back(std::move(certMatch->cert));
+    } else if (certMatch->type == fizz::MatchType::Default) {
+      defaultMatches.push_back(std::move(certMatch->cert));
+    } else {
+      LOG(FATAL) << "Unexpected match type.";
+    }
+  };
+  partitionByMatchType(maybeRsa);
+  partitionByMatchType(maybeEc);
+  return directMatches.size() > 0 ? std::move(directMatches)
+                                  : std::move(defaultMatches);
+}
+
 static int clientHelloCallback(SSL* s, int* al, void* /* arg */) {
   auto state = FizzFallbackState::tryFromSSL(s);
   if (!state) {
@@ -228,65 +291,19 @@ static int clientHelloCallback(SSL* s, int* al, void* /* arg */) {
   }
 
   if (state->fizzCertManager_ && state->chlo_) {
-    auto sni = getSNI(*state->chlo_);
-    auto maybeRsa = state->fizzCertManager_->getCert(
-        sni,
-        {fizz::SignatureScheme::rsa_pss_sha256},
-        {fizz::SignatureScheme::rsa_pss_sha256},
-        *state->chlo_);
-    auto maybeEc = state->fizzCertManager_->getCert(
-        sni,
-        {fizz::SignatureScheme::ecdsa_secp256r1_sha256},
-        {fizz::SignatureScheme::ecdsa_secp256r1_sha256},
-        *state->chlo_);
-
-    if (!maybeRsa && !maybeEc) {
+    const auto& toInstall =
+        getCertsToInstall(*state->fizzCertManager_, *state->chlo_);
+    if (toInstall.empty()) {
       *al = SSL_R_SSLV3_ALERT_HANDSHAKE_FAILURE;
       return SSL_CLIENT_HELLO_ERROR;
     }
 
     SSL_certs_clear(s);
-
-    bool installed{false};
-    for (auto& res : std::array{std::cref(maybeRsa), std::cref(maybeEc)}) {
-      auto& maybeCertMatch = res.get();
-      if (!maybeCertMatch) {
-        continue;
-      }
-      auto certWithChainAndPkey =
-          dynamic_cast<fizz::openssl::X509ChainWithPkey*>(
-              maybeCertMatch->cert.get());
-      if (!certWithChainAndPkey) {
-        continue;
-      }
-      auto xs = certWithChainAndPkey->getX509Chain();
-      auto pkey = certWithChainAndPkey->getEVPPkey();
-
-      if (xs.empty() || !pkey) {
-        continue;
-      }
-
-      auto& leaf = xs.front();
-      folly::ssl::BorrowingStackOfX509UniquePtr chain(sk_X509_new_null());
-      if (!chain) {
-        continue;
-      }
-      for (int i = 1; i < xs.size(); i++) {
-        sk_X509_push(chain.get(), xs[i].get());
-      }
-
-      // fail loudly if openssl rejects our certificate at this point
-      if (SSL_use_cert_and_key(s, leaf.get(), pkey.get(), chain.get(), 1) !=
-          1) {
-        *al = SSL_R_TLSV1_ALERT_INTERNAL_ERROR;
+    for (const auto& cert : toInstall) {
+      if (!install(s, cert)) {
+        *al = SSL_R_SSLV3_ALERT_HANDSHAKE_FAILURE;
         return SSL_CLIENT_HELLO_ERROR;
-      };
-      installed = true;
-    }
-
-    if (!installed) {
-      *al = SSL_R_SSLV3_ALERT_HANDSHAKE_FAILURE;
-      return SSL_CLIENT_HELLO_ERROR;
+      }
     }
   }
   return SSL_CLIENT_HELLO_SUCCESS;

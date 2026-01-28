@@ -19,13 +19,86 @@
 
 #include "hphp/runtime/ext/functioncredential/ext_functioncredential.h"
 
+#include <array>
+#include <chrono>
+
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/tv-uncounted.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/ext/extension.h"
+#include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/native-data.h"
+
+#include <folly/Random.h>
+#include <folly/ScopeGuard.h>
+#include <folly/String.h>
+#include <folly/dynamic.h>
+#include <folly/json.h>
+
+#include <fmt/core.h>
+
+#include <sodium.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+
+namespace {
+
+// Meyer's singleton for per-process authentication key.
+// This ensures FunctionCredential objects can only be unpacked
+// in the same process that packed them.
+class FunctionCredentialAuthKey {
+ public:
+  explicit FunctionCredentialAuthKey(bool testMode = false);
+
+  String sign(const std::string& message) const;
+  String verify(const String& signedMessage) const;
+
+ private:
+  std::array<unsigned char, crypto_auth_KEYBYTES> key_;
+};
+
+// Validity duration for packed credentials (5 minutes)
+constexpr int64_t kValidityDurationSeconds = 5 * 60;
+
+// JSON field names
+constexpr const char* kClassNameField = "class_name";
+constexpr const char* kFunctionNameField = "function_name";
+constexpr const char* kValidUntilField = "valid_until";
+
+// Hex-encoded tag length constants
+constexpr size_t kHexTagLen = crypto_auth_BYTES * 2;
+constexpr size_t kMinSignedMessageLen = kHexTagLen + 1; // At least ":hex_tag"
+
+// Signed message format: "message:hex_auth_tag"
+struct ParsedSignedMessage {
+  folly::StringPiece message;
+  folly::StringPiece hexTag;
+};
+
+void validateSignedMessageFormat(const String& signedMessage);
+ParsedSignedMessage parseSignedMessage(const String& signedMessage);
+std::string decodeAuthTag(folly::StringPiece hexTag);
+void verifyAuthTag(
+    const std::string& tag,
+    folly::StringPiece message,
+    const std::array<unsigned char, crypto_auth_KEYBYTES>& key);
+
+const Func* loadFreeFunctionOrThrow(folly::StringPiece funcName);
+const Func* loadClassMethodOrThrow(
+    folly::StringPiece className,
+    folly::StringPiece funcName);
+const Func* loadFuncOrThrow(
+    folly::StringPiece className,
+    folly::StringPiece funcName);
+void validateCredentialNotExpired(std::int64_t validUntilEpoch);
+
+const FunctionCredentialAuthKey& getAuthKey();
+} // namespace
+
+///////////////////////////////////////////////////////////////////////////////
+// FunctionCredential implementation
 
 // static
 ObjectData* FunctionCredential::newInstance(const Func* func) {
@@ -61,17 +134,258 @@ static StringRet HHVM_METHOD(FunctionCredential, getFilename) {
   return String{makeStaticString(data->func()->filename())};
 }
 
+static StringRet HHVM_METHOD(FunctionCredential, pack) {
+  auto data = FunctionCredential::fromObject(this_);
+  auto func = data->func();
+
+  // Calculate expiration time (current time + 5 minutes)
+  auto now = std::chrono::system_clock::now();
+  auto validUntil = now + std::chrono::seconds(kValidityDurationSeconds);
+  auto validUntilEpoch = std::chrono::duration_cast<std::chrono::seconds>(
+                             validUntil.time_since_epoch())
+                             .count();
+
+  // Build JSON object with class_name, function_name, and valid_until
+  folly::dynamic jsonObj = folly::dynamic::object;
+  auto cls = func->cls();
+  if (cls) {
+    jsonObj[kClassNameField] =
+        std::string(cls->name()->data(), cls->name()->size());
+  } else {
+    jsonObj[kClassNameField] = nullptr;
+  }
+  jsonObj[kFunctionNameField] =
+      std::string(func->name()->data(), func->name()->size());
+  jsonObj[kValidUntilField] = validUntilEpoch;
+
+  std::string jsonStr = folly::toJson(jsonObj);
+
+  return getAuthKey().sign(jsonStr);
+}
+
+static ObjectRet
+HHVM_STATIC_METHOD(FunctionCredential, unpack, const String& packed) {
+  String jsonStr = getAuthKey().verify(packed);
+
+  // Parse the JSON
+  folly::dynamic jsonObj;
+  try {
+    jsonObj =
+        folly::parseJson(folly::StringPiece(jsonStr.data(), jsonStr.size()));
+  } catch (const std::exception&) {
+    SystemLib::throwInvalidArgumentExceptionObject(
+        "Invalid packed FunctionCredential: malformed JSON");
+  }
+
+  if (!jsonObj.isObject()) {
+    SystemLib::throwInvalidArgumentExceptionObject(
+        "Invalid packed FunctionCredential: expected JSON object");
+  }
+
+  // Validate required fields using find API to avoid double lookups
+  auto* funcNamePtr = jsonObj.get_ptr(kFunctionNameField);
+  auto* validUntilPtr = jsonObj.get_ptr(kValidUntilField);
+
+  if (!funcNamePtr || !validUntilPtr || !funcNamePtr->isString() ||
+      !validUntilPtr->isInt()) {
+    SystemLib::throwInvalidArgumentExceptionObject(
+        "Invalid packed FunctionCredential: missing required fields");
+  }
+
+  // Check expiration time
+  validateCredentialNotExpired(validUntilPtr->asInt());
+
+  folly::StringPiece funcNamePiece = funcNamePtr->getString();
+
+  // Extract class name and function name
+  folly::StringPiece classNamePiece = [&jsonObj]() -> folly::StringPiece {
+    if (auto* classNamePtr = jsonObj.get_ptr(kClassNameField);
+        classNamePtr && !classNamePtr->isNull()) {
+      if (!classNamePtr->isString()) {
+        SystemLib::throwInvalidArgumentExceptionObject(
+            "Invalid packed FunctionCredential: class_name is not a string");
+      }
+      return classNamePtr->getString();
+    }
+    return "";
+  }();
+
+  auto func = loadFuncOrThrow(classNamePiece, funcNamePiece);
+  return Object{FunctionCredential::newInstance(func)};
+}
+
 namespace {
+
+FunctionCredentialAuthKey::FunctionCredentialAuthKey(bool testMode)
+    : key_{} // zero initialization for test mode
+{
+  if (!testMode) {
+    folly::Random::secureRandom(key_.data(), key_.size());
+  }
+}
+
+String FunctionCredentialAuthKey::sign(const std::string& message) const {
+  std::array<unsigned char, crypto_auth_BYTES> tag;
+  crypto_auth(
+      tag.data(),
+      reinterpret_cast<const unsigned char*>(message.data()),
+      message.size(),
+      key_.data());
+
+  // Hex-encode the tag and format as "message:hex_tag"
+  auto hexTag = folly::hexlify(folly::ByteRange(tag.data(), tag.size()));
+  return String(fmt::format("{}:{}", message, hexTag));
+}
+
+String FunctionCredentialAuthKey::verify(const String& signedMessage) const {
+  validateSignedMessageFormat(signedMessage);
+  auto parsed = parseSignedMessage(signedMessage);
+  auto tag = decodeAuthTag(parsed.hexTag);
+  verifyAuthTag(tag, parsed.message, key_);
+  return String(parsed.message.data(), parsed.message.size(), CopyString);
+}
+
+void validateSignedMessageFormat(const String& packedMessage) {
+  if (packedMessage.size() < kMinSignedMessageLen) {
+    SystemLib::throwInvalidArgumentExceptionObject(
+        "Invalid packed FunctionCredential: data too short");
+  }
+
+  size_t messageLen = packedMessage.size() - kHexTagLen - 1;
+  if (packedMessage[messageLen] != ':') {
+    SystemLib::throwInvalidArgumentExceptionObject(
+        "Invalid packed FunctionCredential: malformed format");
+  }
+}
+
+ParsedSignedMessage parseSignedMessage(const String& signedMessage) {
+  size_t messageLen = signedMessage.size() - kHexTagLen - 1;
+  return ParsedSignedMessage{
+      folly::StringPiece(signedMessage.data(), messageLen),
+      folly::StringPiece(signedMessage.data() + messageLen + 1, kHexTagLen)};
+}
+
+std::string decodeAuthTag(folly::StringPiece hexTag) {
+  std::string tagStr;
+  if (!folly::unhexlify(hexTag, tagStr) || tagStr.size() != crypto_auth_BYTES) {
+    SystemLib::throwInvalidArgumentExceptionObject(
+        "Invalid packed FunctionCredential: invalid authentication tag");
+  }
+  return tagStr;
+}
+
+void verifyAuthTag(
+    const std::string& tag,
+    folly::StringPiece message,
+    const std::array<unsigned char, crypto_auth_KEYBYTES>& key) {
+  // reinterpret_cast required for libsodium API
+  int result = crypto_auth_verify(
+      reinterpret_cast<const unsigned char*>(tag.data()),
+      reinterpret_cast<const unsigned char*>(message.data()),
+      message.size(),
+      key.data());
+
+  if (result != 0) {
+    SystemLib::throwInvalidArgumentExceptionObject(
+        "Invalid packed FunctionCredential: "
+        "verification failed (packed in a different process?)");
+  }
+}
+
+const Func* loadFreeFunctionOrThrow(folly::StringPiece funcName) {
+  auto funcNameSd = StringData::MakeUncounted(funcName);
+  SCOPE_EXIT {
+    DecRefUncountedString(funcNameSd);
+  };
+
+  auto func = Func::load(funcNameSd);
+  if (!func) {
+    SystemLib::throwInvalidArgumentExceptionObject(
+        folly::sformat("Unable to find function {}", funcName));
+  }
+  return func;
+}
+
+const Func* loadClassMethodOrThrow(
+    folly::StringPiece className,
+    folly::StringPiece funcName) {
+  auto classNameSd = StringData::MakeUncounted(className);
+  SCOPE_EXIT {
+    DecRefUncountedString(classNameSd);
+  };
+
+  auto cls = Class::load(classNameSd);
+  if (!cls) {
+    SystemLib::throwInvalidArgumentExceptionObject(
+        folly::sformat("Unable to find class {}", className));
+  }
+
+  auto funcNameSd = StringData::MakeUncounted(funcName);
+  SCOPE_EXIT {
+    DecRefUncountedString(funcNameSd);
+  };
+
+  auto func = cls->lookupMethod(funcNameSd);
+  if (!func) {
+    SystemLib::throwInvalidArgumentExceptionObject(
+        folly::sformat("Unable to find method {}::{}", className, funcName));
+  }
+  return func;
+}
+
+const Func* loadFuncOrThrow(
+    folly::StringPiece className,
+    folly::StringPiece funcName) {
+  return className.empty() ? loadFreeFunctionOrThrow(funcName)
+                           : loadClassMethodOrThrow(className, funcName);
+}
+
+void validateCredentialNotExpired(std::int64_t validUntilEpoch) {
+  auto now = std::chrono::system_clock::now();
+  auto nowEpoch =
+      std::chrono::duration_cast<std::chrono::seconds>(now.time_since_epoch())
+          .count();
+
+  if (nowEpoch > validUntilEpoch) {
+    SystemLib::throwInvalidArgumentExceptionObject(
+        "Invalid packed FunctionCredential: credential has expired");
+  }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Extension registration
+
 struct FunctionCredentialExtension final : Extension {
-  FunctionCredentialExtension() : Extension("functioncredential", "1.0", NO_ONCALL_YET) {}
+  FunctionCredentialExtension()
+      : Extension("functioncredential", "1.0", NO_ONCALL_YET) {}
+
+  void moduleLoad(const IniSetting::Map& ini, Hdf hdf) override {
+    bool testMode =
+        Config::GetBool(ini, hdf, "FunctionCredential.EnableTestMode", false);
+    key_.emplace(testMode);
+  }
 
   void moduleRegisterNative() override {
     HHVM_ME(FunctionCredential, getClassName);
     HHVM_ME(FunctionCredential, getFunctionName);
     HHVM_ME(FunctionCredential, getFilename);
+    HHVM_ME(FunctionCredential, pack);
+    HHVM_STATIC_ME(FunctionCredential, unpack);
 
     Native::registerNativeDataInfo<FunctionCredential>();
   }
+
+  const FunctionCredentialAuthKey& getAuthKey() const {
+    return key_.value();
+  }
+
+ private:
+  std::optional<FunctionCredentialAuthKey> key_;
+  // NOLINTNEXTLINE(facebook-avoid-non-const-global-variables)
 } s_functioncredential_extension;
+
+const FunctionCredentialAuthKey& getAuthKey() {
+  return s_functioncredential_extension.getAuthKey();
+}
 } // namespace
 } // namespace HPHP

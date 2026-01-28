@@ -1,0 +1,29 @@
+Test 1: Data too short
+Caught exception: Invalid packed FunctionCredential: data too short
+
+Test 2: Invalid auth tag
+Caught exception: Invalid packed FunctionCredential: verification failed (packed in a different process?)
+
+Test 3: Empty string
+Caught exception: Invalid packed FunctionCredential: data too short
+
+Test 4: Invalid hex in auth tag
+Caught exception: Invalid packed FunctionCredential: invalid authentication tag
+
+Test 5: Missing colon delimiter
+Caught exception: Invalid packed FunctionCredential: malformed format
+
+Test 6: Non-existent class
+Caught exception: Unable to find class NonExistentClass
+
+Test 7: Non-existent method
+Caught exception: Unable to find method ExistingClass::nonExistentFunction
+
+Test 8: Non-existent free function
+Caught exception: Unable to find function not_existing_free_function
+
+Test 9: Expired credential
+Caught exception: Invalid packed FunctionCredential: credential has expired
+
+Test 10: Failed Verification
+Caught exception: Invalid packed FunctionCredential: verification failed (packed in a different process?)

@@ -1,0 +1,25 @@
+Packed namespaced function credential
+  Format valid: yes
+Unpacked namespaced function:
+  Class: (null)
+  Function: FunctionCredentialTest\namespaced_function
+
+Packed namespaced static method credential
+  Format valid: yes
+Unpacked namespaced static method:
+  Class: FunctionCredentialTest\NamespacedClass
+  Function: static_method
+
+Packed namespaced instance method credential
+  Format valid: yes
+Unpacked namespaced instance method:
+  Class: FunctionCredentialTest\NamespacedClass
+  Function: instance_method
+
+Verification:
+  Namespaced function class matches: yes
+  Namespaced function name matches: yes
+  Namespaced static method class matches: yes
+  Namespaced static method name matches: yes
+  Namespaced instance method class matches: yes
+  Namespaced instance method name matches: yes

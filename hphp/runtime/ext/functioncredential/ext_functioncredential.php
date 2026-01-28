@@ -18,6 +18,12 @@ final class FunctionCredential {
   <<__Native>>
   public final function getFilename()[]: string;
 
+  <<__Native>>
+  public final function pack()[]: string;
+
+  <<__Native>>
+  public static function unpack(string $packed)[]: FunctionCredential;
+
   public final function __debugInfo(): darray<string, ?string> {
     return dict[
       'class_name' => $this->getClassName(),

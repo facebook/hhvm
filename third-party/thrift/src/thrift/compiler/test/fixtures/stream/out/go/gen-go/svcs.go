@@ -126,7 +126,7 @@ func (c *pubSubStreamingServiceClientImpl) Returnstream(ctx context.Context, i32
         close(fbthriftErrChan)
     }
 
-    fbthriftErr := fbthriftChannel.SendRequestStream(
+    _, fbthriftErr := fbthriftChannel.SendRequestStream(
         fbthriftStreamCtx,
         "returnstream",
         fbthriftReq,
@@ -195,7 +195,7 @@ func (c *pubSubStreamingServiceClientImpl) Streamthrows(ctx context.Context, foo
         close(fbthriftErrChan)
     }
 
-    fbthriftErr := fbthriftChannel.SendRequestStream(
+    _, fbthriftErr := fbthriftChannel.SendRequestStream(
         fbthriftStreamCtx,
         "streamthrows",
         fbthriftReq,
@@ -264,7 +264,7 @@ func (c *pubSubStreamingServiceClientImpl) Servicethrows(ctx context.Context, fo
         close(fbthriftErrChan)
     }
 
-    fbthriftErr := fbthriftChannel.SendRequestStream(
+    _, fbthriftErr := fbthriftChannel.SendRequestStream(
         fbthriftStreamCtx,
         "servicethrows",
         fbthriftReq,
@@ -333,7 +333,7 @@ func (c *pubSubStreamingServiceClientImpl) Servicethrows2(ctx context.Context, f
         close(fbthriftErrChan)
     }
 
-    fbthriftErr := fbthriftChannel.SendRequestStream(
+    _, fbthriftErr := fbthriftChannel.SendRequestStream(
         fbthriftStreamCtx,
         "servicethrows2",
         fbthriftReq,
@@ -402,7 +402,7 @@ func (c *pubSubStreamingServiceClientImpl) Boththrows(ctx context.Context, foo i
         close(fbthriftErrChan)
     }
 
-    fbthriftErr := fbthriftChannel.SendRequestStream(
+    _, fbthriftErr := fbthriftChannel.SendRequestStream(
         fbthriftStreamCtx,
         "boththrows",
         fbthriftReq,
@@ -472,7 +472,7 @@ func (c *pubSubStreamingServiceClientImpl) Responseandstreamstreamthrows(ctx con
         close(fbthriftErrChan)
     }
 
-    fbthriftErr := fbthriftChannel.SendRequestStream(
+    _, fbthriftErr := fbthriftChannel.SendRequestStream(
         fbthriftStreamCtx,
         "responseandstreamstreamthrows",
         fbthriftReq,
@@ -542,7 +542,7 @@ func (c *pubSubStreamingServiceClientImpl) Responseandstreamservicethrows(ctx co
         close(fbthriftErrChan)
     }
 
-    fbthriftErr := fbthriftChannel.SendRequestStream(
+    _, fbthriftErr := fbthriftChannel.SendRequestStream(
         fbthriftStreamCtx,
         "responseandstreamservicethrows",
         fbthriftReq,
@@ -612,7 +612,7 @@ func (c *pubSubStreamingServiceClientImpl) Responseandstreamboththrows(ctx conte
         close(fbthriftErrChan)
     }
 
-    fbthriftErr := fbthriftChannel.SendRequestStream(
+    _, fbthriftErr := fbthriftChannel.SendRequestStream(
         fbthriftStreamCtx,
         "responseandstreamboththrows",
         fbthriftReq,
@@ -682,7 +682,7 @@ func (c *pubSubStreamingServiceClientImpl) ReturnstreamFast(ctx context.Context,
         close(fbthriftErrChan)
     }
 
-    fbthriftErr := fbthriftChannel.SendRequestStream(
+    _, fbthriftErr := fbthriftChannel.SendRequestStream(
         fbthriftStreamCtx,
         "returnstreamFast",
         fbthriftReq,

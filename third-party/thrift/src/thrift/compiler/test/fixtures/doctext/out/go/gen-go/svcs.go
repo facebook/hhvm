@@ -133,7 +133,7 @@ func (c *cClientImpl) Numbers(ctx context.Context) (iter.Seq2[Number, error], er
         close(fbthriftErrChan)
     }
 
-    fbthriftErr := fbthriftChannel.SendRequestStream(
+    _, fbthriftErr := fbthriftChannel.SendRequestStream(
         fbthriftStreamCtx,
         "numbers",
         fbthriftReq,

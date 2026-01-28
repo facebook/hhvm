@@ -21,6 +21,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"iter"
 	"maps"
 	"net"
 	"runtime"
@@ -151,21 +152,21 @@ func (p *rocketClient) SendRequestStream(
 	onStreamNextFn func(Decoder) error,
 	onStreamErrorFn func(error),
 	onStreamCompleteFn func(),
-) error {
+) (iter.Seq2[ReadableStruct, error], error) {
 	if ctx.Done() == nil {
 		// We require that the context is cancellable, to prevent goroutine leaks.
-		return errors.New("context does not support cancellation")
+		return nil, errors.New("context does not support cancellation")
 	}
 	rpcOpts := GetRPCOptions(ctx)
 
 	dataBytes, err := encodeRequest(p.protoID, request)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	err = p.client.SendSetup(ctx)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	onStreamNextWrapperFn := func(data []byte) error {
 		reader := bytes.NewBuffer(data)
@@ -188,7 +189,7 @@ func (p *rocketClient) SendRequestStream(
 	headers := unionMaps(writeHeaders, p.persistentHeaders)
 	respHeaders, resultData, resultErr := p.client.RequestStream(ctx, messageName, headers, dataBytes, onStreamNextWrapperFn, onStreamErrorFn, onStreamCompleteFn)
 	if resultErr != nil {
-		return resultErr
+		return nil, resultErr
 	}
 
 	if rpcOpts != nil {
@@ -196,9 +197,9 @@ func (p *rocketClient) SendRequestStream(
 	}
 	err = decodeResponse(p.protoID, resultData, response)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	return nil, nil
 }
 
 func (p *rocketClient) TerminateInteraction(interactionID int64) error {

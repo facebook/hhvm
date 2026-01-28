@@ -18,6 +18,7 @@ package types
 
 import (
 	"context"
+	"iter"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -79,8 +80,8 @@ func (c *mockRequestChannel) SendRequestNoResponse(ctx context.Context, method s
 	return nil
 }
 
-func (c *mockRequestChannel) SendRequestStream(ctx context.Context, method string, request WritableStruct, response ReadableStruct, onStreamNextFn func(Decoder) error, onStreamErrorFn func(error), onStreamCompleteFn func()) error {
-	return nil
+func (c *mockRequestChannel) SendRequestStream(ctx context.Context, method string, request WritableStruct, response ReadableStruct, onStreamNextFn func(Decoder) error, onStreamErrorFn func(error), onStreamCompleteFn func()) (iter.Seq2[ReadableStruct, error], error) {
+	return nil, nil
 }
 
 func TestRegisterAndConstructClient(t *testing.T) {

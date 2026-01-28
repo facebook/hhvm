@@ -87,7 +87,7 @@ func (c *{{service:go_client_name}}) {{> svc/client_func_signature}} {
         close(fbthriftErrChan)
     }
 
-    fbthriftErr := fbthriftChannel.SendRequestStream(
+    _, fbthriftErr := fbthriftChannel.SendRequestStream(
         fbthriftStreamCtx,
         "{{> svc/func_rpc_name}}",
         fbthriftReq,

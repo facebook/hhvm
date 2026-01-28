@@ -19,6 +19,7 @@ package thrift
 import (
 	"context"
 	"fmt"
+	"iter"
 	"sync"
 
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
@@ -162,6 +163,6 @@ func (c *serialChannel) SendRequestStream(
 	onStreamNextFn func(Decoder) error,
 	onStreamErrorFn func(error),
 	onStreamCompleteFn func(),
-) error {
-	return fmt.Errorf("not implemented")
+) (iter.Seq2[ReadableStruct, error], error) {
+	return nil, fmt.Errorf("not implemented")
 }

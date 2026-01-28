@@ -138,7 +138,7 @@ func (c *myInteractionClientImpl) Truthify(ctx context.Context) (iter.Seq2[bool,
         close(fbthriftErrChan)
     }
 
-    fbthriftErr := fbthriftChannel.SendRequestStream(
+    _, fbthriftErr := fbthriftChannel.SendRequestStream(
         fbthriftStreamCtx,
         "MyInteraction.truthify",
         fbthriftReq,
@@ -431,7 +431,7 @@ func (c *myInteractionFastClientImpl) Truthify(ctx context.Context) (iter.Seq2[b
         close(fbthriftErrChan)
     }
 
-    fbthriftErr := fbthriftChannel.SendRequestStream(
+    _, fbthriftErr := fbthriftChannel.SendRequestStream(
         fbthriftStreamCtx,
         "MyInteractionFast.truthify",
         fbthriftReq,
@@ -1009,7 +1009,7 @@ func (c *myServiceClientImpl) Serialize(ctx context.Context) (SerialInteractionC
         close(fbthriftErrChan)
     }
 
-    fbthriftErr := fbthriftChannel.SendRequestStream(
+    _, fbthriftErr := fbthriftChannel.SendRequestStream(
         fbthriftStreamCtx,
         "serialize",
         fbthriftReq,
@@ -1358,7 +1358,7 @@ func (c *factoriesClientImpl) Serialize(ctx context.Context) (SerialInteractionC
         close(fbthriftErrChan)
     }
 
-    fbthriftErr := fbthriftChannel.SendRequestStream(
+    _, fbthriftErr := fbthriftChannel.SendRequestStream(
         fbthriftStreamCtx,
         "serialize",
         fbthriftReq,

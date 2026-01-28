@@ -19,6 +19,7 @@ package thrift
 import (
 	"context"
 	"crypto/tls"
+	"iter"
 	"net"
 	"time"
 
@@ -111,7 +112,7 @@ func (p *upgradeToRocketClient) SendRequestStream(
 	onStreamNextFn func(Decoder) error,
 	onStreamErrorFn func(error),
 	onStreamCompleteFn func(),
-) error {
+) (iter.Seq2[ReadableStruct, error], error) {
 	p.maybeUpgrade(ctx)
 	return p.actualChannel.SendRequestStream(
 		ctx,

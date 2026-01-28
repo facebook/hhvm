@@ -19,6 +19,7 @@ package types
 import (
 	"context"
 	"io"
+	"iter"
 	"runtime"
 	"sync/atomic"
 )
@@ -55,7 +56,7 @@ type RequestChannel interface {
 		onStreamNextFn func(Decoder) error,
 		onStreamErrorFn func(error),
 		onStreamCompleteFn func(),
-	) error
+	) (iter.Seq2[ReadableStruct, error], error)
 }
 
 // RequestChannelExtended will eventually become part of RequestChannel, once legacy clients are gone (e.g. Header)
@@ -122,7 +123,7 @@ func (c *interactionChannel) SendRequestStream(
 	onStreamNextFn func(Decoder) error,
 	onStreamErrorFn func(error),
 	onStreamCompleteFn func(),
-) error {
+) (iter.Seq2[ReadableStruct, error], error) {
 	ctx = c.withInteractionContext(ctx)
 	return c.channel.SendRequestStream(ctx, method, request, response, onStreamNextFn, onStreamErrorFn, onStreamCompleteFn)
 }

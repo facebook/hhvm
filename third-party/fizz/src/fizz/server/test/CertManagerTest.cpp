@@ -52,6 +52,30 @@ TEST_F(CertManagerTest, TestNoMatchDefault) {
   auto res = manager_.getCert(std::string("test.com"), kRsa, kRsa, getChlo());
   EXPECT_EQ(res->cert, cert);
   EXPECT_TRUE(manager_.hasCerts());
+
+  auto res2 =
+      manager_.getCert(std::string("test.com"), kEcdsa, kEcdsa, getChlo());
+  EXPECT_FALSE(res2.hasValue());
+}
+
+TEST_F(CertManagerTest, TestNoMatchDefaultChooseSigScheme) {
+  auto rsaCert = getCert("blah.com", {}, kRsa);
+  auto ecCert = getCert("blah.com", {}, kEcdsa);
+  manager_.addCertAndSetDefault(rsaCert);
+  manager_.addCert(ecCert);
+  // test that we match against the default cert, but choose the correct sig
+  // scheme
+  {
+    auto res = manager_.getCert(std::string("test.com"), kRsa, kRsa, getChlo());
+    EXPECT_EQ(res->cert, rsaCert);
+    EXPECT_EQ(res->scheme, SignatureScheme::rsa_pss_sha256);
+  }
+  {
+    auto res2 =
+        manager_.getCert(std::string("test.com"), kEcdsa, kEcdsa, getChlo());
+    EXPECT_EQ(res2->cert, ecCert);
+    EXPECT_EQ(res2->scheme, SignatureScheme::ecdsa_secp256r1_sha256);
+  }
 }
 
 TEST_F(CertManagerTest, TestNoSniDefault) {

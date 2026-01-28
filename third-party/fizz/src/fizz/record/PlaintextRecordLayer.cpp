@@ -101,24 +101,32 @@ EncryptionLevel PlaintextReadRecordLayer::getEncryptionLevel() const {
   return EncryptionLevel::Plaintext;
 }
 
-TLSContent PlaintextWriteRecordLayer::write(
+Status PlaintextWriteRecordLayer::write(
+    TLSContent& ret,
+    Error& err,
     TLSMessage&& msg,
     Aead::AeadOptions /*options*/) const {
-  return write(std::move(msg), ProtocolVersion::tls_1_2);
+  return write(ret, err, std::move(msg), ProtocolVersion::tls_1_2);
 }
 
-TLSContent PlaintextWriteRecordLayer::writeInitialClientHello(
+Status PlaintextWriteRecordLayer::writeInitialClientHello(
+    TLSContent& ret,
+    Error& err,
     Buf encodedClientHello) const {
   return write(
+      ret,
+      err,
       TLSMessage{ContentType::handshake, std::move(encodedClientHello)},
       ProtocolVersion::tls_1_0);
 }
 
-TLSContent PlaintextWriteRecordLayer::write(
+Status PlaintextWriteRecordLayer::write(
+    TLSContent& ret,
+    Error& err,
     TLSMessage msg,
     ProtocolVersion recordVersion) const {
   if (msg.type == ContentType::application_data) {
-    throw std::runtime_error("refusing to send plaintext application data");
+    return err.error("refusing to send plaintext application data");
   }
 
   auto fragment = std::move(msg.fragment);
@@ -145,7 +153,8 @@ TLSContent PlaintextWriteRecordLayer::write(
   content.data = std::move(data);
   content.contentType = msg.type;
   content.encryptionLevel = EncryptionLevel::Plaintext;
-  return content;
+  ret = std::move(content);
+  return Status::Success;
 }
 
 EncryptionLevel PlaintextWriteRecordLayer::getEncryptionLevel() const {

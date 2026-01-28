@@ -46,18 +46,29 @@ class PlaintextWriteRecordLayer : public WriteRecordLayer {
  public:
   ~PlaintextWriteRecordLayer() override = default;
 
-  TLSContent write(TLSMessage&& msg, Aead::AeadOptions options) const override;
+  Status write(
+      TLSContent& ret,
+      Error& err,
+      TLSMessage&& msg,
+      Aead::AeadOptions options) const override;
 
   /**
    * Write the initial ClientHello handshake message. This is a separate method
    * as the record encoding can be slightly different since the version has not
    * been negotiated yet.
    */
-  virtual TLSContent writeInitialClientHello(Buf encodedClientHello) const;
+  virtual Status writeInitialClientHello(
+      TLSContent& ret,
+      Error& err,
+      Buf encodedClientHello) const;
 
   EncryptionLevel getEncryptionLevel() const override;
 
  private:
-  TLSContent write(TLSMessage msg, ProtocolVersion recordVersion) const;
+  Status write(
+      TLSContent& ret,
+      Error& err,
+      TLSMessage msg,
+      ProtocolVersion recordVersion) const;
 };
 } // namespace fizz

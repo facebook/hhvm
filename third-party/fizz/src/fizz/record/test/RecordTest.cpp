@@ -32,8 +32,13 @@ class ConcreteWriteRecordLayer : public PlaintextWriteRecordLayer {
       _write,
       (TLSMessage & msg, Aead::AeadOptions options),
       (const));
-  TLSContent write(TLSMessage&& msg, Aead::AeadOptions options) const override {
-    return _write(msg, options);
+  Status write(
+      TLSContent& content,
+      Error& /* err */,
+      TLSMessage&& msg,
+      Aead::AeadOptions options) const override {
+    content = _write(msg, options);
+    return Status::Success;
   }
 };
 
@@ -204,7 +209,12 @@ TEST_F(RecordTest, TestWriteAppData) {
         EXPECT_EQ(msg.type, ContentType::application_data);
         return content;
       }));
-  write_.writeAppData(IOBuf::copyBuffer("hi"), Aead::AeadOptions());
+  Error err;
+  TLSContent content;
+  EXPECT_EQ(
+      write_.writeAppData(
+          content, err, IOBuf::copyBuffer("hi"), Aead::AeadOptions()),
+      Status::Success);
 }
 
 TEST_F(RecordTest, TestWriteAlert) {
@@ -217,7 +227,9 @@ TEST_F(RecordTest, TestWriteAlert) {
         content.data = nullptr;
         return content;
       }));
-  write_.writeAlert(Alert());
+  Error err;
+  TLSContent content;
+  EXPECT_EQ(write_.writeAlert(content, err, Alert()), Status::Success);
 }
 
 TEST_F(RecordTest, TestWriteHandshake) {
@@ -230,7 +242,12 @@ TEST_F(RecordTest, TestWriteHandshake) {
         content.data = nullptr;
         return content;
       }));
-  write_.writeHandshake(IOBuf::copyBuffer("msg1"), IOBuf::copyBuffer("msg2"));
+  Error err;
+  TLSContent content;
+  EXPECT_EQ(
+      write_.writeHandshake(
+          content, err, IOBuf::copyBuffer("msg1"), IOBuf::copyBuffer("msg2")),
+      Status::Success);
 }
 
 } // namespace test

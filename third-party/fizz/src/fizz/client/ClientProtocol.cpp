@@ -243,11 +243,35 @@ Actions ClientStateMachine::processEarlyAppWrite(
 }
 
 Actions ClientStateMachine::processAppClose(const State& state) {
-  return detail::handleAppClose(state);
+  Actions acts;
+  Error err;
+  // TODO: handleAppClose can be potentially unwound due to an
+  // exception from the record layer. Need try catch block to catch it
+  if (detail::handleAppClose(acts, err, state) == Status::Success) {
+    return acts;
+  }
+  folly::Optional<AlertDescription> alert = AlertDescription::decode_error;
+  if (err.hasAlert()) {
+    alert = err.alert();
+  }
+  acts = detail::handleError(state, ReportError(err.toException()), alert);
+  return acts;
 }
 
 Actions ClientStateMachine::processAppCloseImmediate(const State& state) {
-  return detail::handleAppCloseImmediate(state);
+  Actions acts;
+  Error err;
+  // TODO: handleAppCloseImmediate can be potentially unwound due to an
+  // exception from the record layer. Need try catch block to catch it
+  if (detail::handleAppCloseImmediate(acts, err, state) == Status::Success) {
+    return acts;
+  }
+  folly::Optional<AlertDescription> alert = AlertDescription::decode_error;
+  if (err.hasAlert()) {
+    alert = err.alert();
+  }
+  acts = detail::handleError(state, ReportError(err.toException()), alert);
+  return acts;
 }
 
 Actions ClientStateMachine::processKeyUpdateInitiation(
@@ -307,10 +331,14 @@ Actions handleError(
   if (alertDesc && state.writeRecordLayer()) {
     try {
       Alert alert(*alertDesc);
+      Error err;
+      TLSContent content;
       WriteToSocket write;
-      write.contents.emplace_back(
-          state.writeRecordLayer()->writeAlert(std::move(alert)));
-      actions.emplace_back(std::move(write));
+      if (state.writeRecordLayer()->writeAlert(
+              content, err, std::move(alert)) == Status::Success) {
+        write.contents.emplace_back(std::move(content));
+        actions.emplace_back(std::move(write));
+      }
     } catch (...) {
     }
   }
@@ -318,7 +346,7 @@ Actions handleError(
   return actions;
 }
 
-Actions handleAppCloseImmediate(const State& state) {
+Status handleAppCloseImmediate(Actions& ret, Error& err, const State& state) {
   MutateState transition([](State& newState) {
     newState.state() = StateEnum::Closed;
     newState.writeRecordLayer() = nullptr;
@@ -326,16 +354,18 @@ Actions handleAppCloseImmediate(const State& state) {
   });
   if (state.writeRecordLayer()) {
     Alert alert(AlertDescription::close_notify);
+    TLSContent content;
+    TRY(state.writeRecordLayer()->writeAlert(content, err, std::move(alert)));
     WriteToSocket write;
-    write.contents.emplace_back(
-        state.writeRecordLayer()->writeAlert(std::move(alert)));
-    return actions(std::move(transition), std::move(write));
+    write.contents.emplace_back(std::move(content));
+    ret = actions(std::move(transition), std::move(write));
   } else {
-    return actions(std::move(transition));
+    ret = actions(std::move(transition));
   }
+  return Status::Success;
 }
 
-Actions handleAppClose(const State& state) {
+Status handleAppClose(Actions& ret, Error& err, const State& state) {
   if (state.writeRecordLayer()) {
     MutateState transition([](State& newState) {
       newState.state() = StateEnum::ExpectingCloseNotify;
@@ -343,18 +373,20 @@ Actions handleAppClose(const State& state) {
     });
 
     Alert alert(AlertDescription::close_notify);
+    TLSContent content;
     WriteToSocket write;
-    write.contents.emplace_back(
-        state.writeRecordLayer()->writeAlert(std::move(alert)));
-    return actions(std::move(transition), std::move(write));
+    TRY(state.writeRecordLayer()->writeAlert(content, err, std::move(alert)));
+    write.contents.emplace_back(std::move(content));
+    ret = actions(std::move(transition), std::move(write));
   } else {
     MutateState transition([](State& newState) {
       newState.state() = StateEnum::Closed;
       newState.writeRecordLayer() = nullptr;
       newState.readRecordLayer() = nullptr;
     });
-    return actions(std::move(transition));
+    ret = actions(std::move(transition));
   }
+  return Status::Success;
 }
 
 Status handleInvalidEvent(
@@ -1030,9 +1062,11 @@ EventHandler<ClientTypes, StateEnum::Uninitialized, Event::Connect>::handle(
   auto writeRecordLayer =
       context->getFactory()->makePlaintextWriteRecordLayer();
 
+  TLSContent content;
+  TRY(writeRecordLayer->writeInitialClientHello(
+      content, ctx.err, encodedClientHello->clone()));
   WriteToSocket write;
-  write.contents.emplace_back(
-      writeRecordLayer->writeInitialClientHello(encodedClientHello->clone()));
+  write.contents.emplace_back(std::move(content));
 
   EarlyDataType earlyDataType =
       earlyDataParams ? EarlyDataType::Attempted : EarlyDataType::NotAttempted;
@@ -1789,8 +1823,9 @@ Status EventHandler<
       : state.earlyDataType();
 
   WriteToSocket clientFlight;
-  auto chloWrite =
-      state.writeRecordLayer()->writeHandshake(encodedClientHello->clone());
+  TLSContent chloWrite;
+  TRY(state.writeRecordLayer()->writeHandshake(
+      chloWrite, ctx.err, encodedClientHello->clone()));
 
   bool sentCCS = state.sentCCS();
   folly::Optional<client::Action> ccsWrite;
@@ -2293,8 +2328,10 @@ EventHandler<ClientTypes, StateEnum::ExpectingFinished, Event::Finished>::
     auto encodedEndOfEarly = encodeHandshake(EndOfEarlyData());
     state.handshakeContext()->appendToTranscript(encodedEndOfEarly);
     DCHECK(state.earlyWriteRecordLayer());
-    eoedWrite = state.earlyWriteRecordLayer()->writeHandshake(
-        std::move(encodedEndOfEarly));
+    TLSContent content;
+    TRY(state.earlyWriteRecordLayer()->writeHandshake(
+        content, ctx.err, std::move(encodedEndOfEarly)));
+    eoedWrite = std::move(content);
   }
 
   folly::Optional<Buf> encodedCertMessage;
@@ -2358,19 +2395,25 @@ EventHandler<ClientTypes, StateEnum::ExpectingFinished, Event::Finished>::
   if (eoedWrite) {
     clientFlight.contents.emplace_back(std::move(*eoedWrite));
   }
-
+  TLSContent content;
   if (auth == ClientAuthType::RequestedNoMatch) {
-    clientFlight.contents.emplace_back(state.writeRecordLayer()->writeHandshake(
-        std::move(*encodedCertMessage), std::move(encodedFinished)));
+    TRY(state.writeRecordLayer()->writeHandshake(
+        content,
+        ctx.err,
+        std::move(*encodedCertMessage),
+        std::move(encodedFinished)));
   } else if (auth == ClientAuthType::Sent) {
-    clientFlight.contents.emplace_back(state.writeRecordLayer()->writeHandshake(
+    TRY(state.writeRecordLayer()->writeHandshake(
+        content,
+        ctx.err,
         std::move(*encodedCertMessage),
         std::move(*encodedCertVerify),
         std::move(encodedFinished)));
   } else {
-    clientFlight.contents.emplace_back(
-        state.writeRecordLayer()->writeHandshake(std::move(encodedFinished)));
+    TRY(state.writeRecordLayer()->writeHandshake(
+        content, ctx.err, std::move(encodedFinished)));
   }
+  clientFlight.contents.emplace_back(std::move(content));
 
   state.keyScheduler()->deriveAppTrafficSecrets(
       clientFinishedContext->coalesce());
@@ -2517,15 +2560,17 @@ EventHandler<ClientTypes, StateEnum::Established, Event::AppData>::handle(
 Status
 EventHandler<ClientTypes, StateEnum::Established, Event::AppWrite>::handle(
     Actions& ret,
-    InvocationContext& /* ctx */,
+    InvocationContext& ctx,
     const State& state,
     Param& param) {
   auto& appWrite = *param.asAppWrite();
 
   WriteToSocket write;
   write.token = appWrite.token;
-  write.contents.emplace_back(state.writeRecordLayer()->writeAppData(
-      std::move(appWrite.data), appWrite.aeadOptions));
+  TLSContent content;
+  TRY(state.writeRecordLayer()->writeAppData(
+      content, ctx.err, std::move(appWrite.data), appWrite.aeadOptions));
+  write.contents.emplace_back(std::move(content));
   write.flags = appWrite.flags;
 
   ret = actions(std::move(write));
@@ -2546,9 +2591,11 @@ EventHandler<ClientTypes, StateEnum::Established, Event::KeyUpdateInitiation>::
   auto& keyUpdateInitiation = *param.asKeyUpdateInitiation();
   auto encodedKeyUpdated =
       Protocol::getKeyUpdated(keyUpdateInitiation.request_update);
+  TLSContent content;
+  TRY(state.writeRecordLayer()->writeHandshake(
+      content, ctx.err, std::move(encodedKeyUpdated)));
   WriteToSocket write;
-  write.contents.emplace_back(
-      state.writeRecordLayer()->writeHandshake(std::move(encodedKeyUpdated)));
+  write.contents.emplace_back(std::move(content));
 
   state.keyScheduler()->clientKeyUpdate();
 
@@ -2615,9 +2662,11 @@ EventHandler<ClientTypes, StateEnum::Established, Event::KeyUpdate>::handle(
   // update.
   auto encodedKeyUpdated =
       Protocol::getKeyUpdated(KeyUpdateRequest::update_not_requested);
+  TLSContent content;
+  TRY(state.writeRecordLayer()->writeHandshake(
+      content, ctx.err, std::move(encodedKeyUpdated)));
   WriteToSocket write;
-  write.contents.emplace_back(
-      state.writeRecordLayer()->writeHandshake(std::move(encodedKeyUpdated)));
+  write.contents.emplace_back(std::move(content));
 
   state.keyScheduler()->clientKeyUpdate();
 
@@ -2690,8 +2739,9 @@ static Status handleEarlyAppWrite(
       WriteToSocket write;
       write.token = appWrite.token;
       write.flags = appWrite.flags;
-      auto appData = state.earlyWriteRecordLayer()->writeAppData(
-          std::move(appWrite.data), appWrite.aeadOptions);
+      TLSContent appData;
+      TRY(state.earlyWriteRecordLayer()->writeAppData(
+          appData, ctx.err, std::move(appWrite.data), appWrite.aeadOptions));
 
       if (!state.sentCCS() && state.context()->getCompatibilityMode()) {
         TLSContent writeCCS;
@@ -2799,8 +2849,11 @@ EventHandler<ClientTypes, StateEnum::Established, Event::EarlyAppWrite>::handle(
     // the all-or-nothing property of early data.
     WriteToSocket write;
     write.token = appWrite.token;
-    write.contents.emplace_back(state.writeRecordLayer()->writeAppData(
-        std::move(appWrite.data), appWrite.aeadOptions));
+
+    TLSContent content;
+    TRY(state.writeRecordLayer()->writeAppData(
+        content, ctx.err, std::move(appWrite.data), appWrite.aeadOptions));
+    write.contents.emplace_back(std::move(content));
     write.flags = appWrite.flags;
     ret = actions(std::move(write));
   } else {
@@ -2824,9 +2877,11 @@ EventHandler<ClientTypes, StateEnum::Established, Event::CloseNotify>::handle(
     newState.readRecordLayer() = nullptr;
   });
 
+  TLSContent content;
+  TRY(state.writeRecordLayer()->writeAlert(
+      content, ctx.err, Alert(AlertDescription::close_notify)));
   WriteToSocket write;
-  write.contents.emplace_back(state.writeRecordLayer()->writeAlert(
-      Alert(AlertDescription::close_notify)));
+  write.contents.emplace_back(std::move(content));
   ret = actions(
       std::move(write),
       std::move(clearRecordLayers),

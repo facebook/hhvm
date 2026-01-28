@@ -414,7 +414,11 @@ void AsyncKTLSRxSocket::writeAppData(
     folly::AsyncTransportWrapper::WriteCallback* callback,
     std::unique_ptr<folly::IOBuf>&& buf,
     folly::WriteFlags flags) {
-  auto data = writeRecordLayer_->writeAppData(std::move(buf), aeadOptions_);
+  Error err;
+  TLSContent data;
+  FIZZ_THROW_ON_ERROR(
+      writeRecordLayer_->writeAppData(data, err, std::move(buf), aeadOptions_),
+      err);
 
   if (data.data && data.data->computeChainDataLength() > 0) {
     folly::AsyncSocket::writeChain(callback, std::move(data.data), flags);

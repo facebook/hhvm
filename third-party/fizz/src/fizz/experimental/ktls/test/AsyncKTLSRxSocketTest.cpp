@@ -147,8 +147,12 @@ static TrafficParameters serverToClient{
 static fizz::Buf writeAppData(
     fizz::EncryptedWriteRecordLayer& writer,
     std::string_view data) {
-  auto payload = writer.writeAppData(
-      folly::IOBuf::copyBuffer(data.data(), data.size()), {});
+  fizz::Error err;
+  fizz::TLSContent payload;
+  FIZZ_THROW_ON_ERROR(
+      writer.writeAppData(
+          payload, err, folly::IOBuf::copyBuffer(data.data(), data.size()), {}),
+      err);
   payload.data->coalesce();
   return std::move(payload.data);
 }
@@ -277,8 +281,12 @@ TEST_F(KTLSReadTest, BasicReadWrite) {
 TEST_F(KTLSReadTest, ExceptionalAlert) {
   // Client writes decode_error alert to server.
   {
-    auto contents = clientWrite_->writeAlert(
-        fizz::Alert(fizz::AlertDescription::decode_error));
+    fizz::Error err;
+    fizz::TLSContent contents;
+    EXPECT_EQ(
+        clientWrite_->writeAlert(
+            contents, err, fizz::Alert(fizz::AlertDescription::decode_error)),
+        fizz::Status::Success);
     contents.data->coalesce();
     EXPECT_EQ(
         contents.data->computeChainDataLength(),
@@ -309,7 +317,11 @@ TEST_F(KTLSReadTest, CloseNotifyAlert) {
     fizz::Alert alert(fizz::AlertDescription::close_notify);
     alert.level = 0x01;
 
-    auto contents = clientWrite_->writeAlert(std::move(alert));
+    fizz::Error err;
+    fizz::TLSContent contents;
+    EXPECT_EQ(
+        clientWrite_->writeAlert(contents, err, std::move(alert)),
+        fizz::Status::Success);
     contents.data->coalesce();
     EXPECT_EQ(
         contents.data->computeChainDataLength(),
@@ -356,8 +368,12 @@ TEST_F(KTLSReadTest, NoTLSCallbackCausesReadErrOnHandshake) {
     nst.ticket_age_add = 20;
     nst.ticket_nonce = toIOBuf("abc");
     nst.ticket = toIOBuf("123");
-    auto content =
-        clientWrite_->writeHandshake(fizz::encodeHandshake(std::move(nst)));
+    fizz::Error err;
+    fizz::TLSContent content;
+    EXPECT_EQ(
+        clientWrite_->writeHandshake(
+            content, err, fizz::encodeHandshake(std::move(nst))),
+        fizz::Status::Success);
     content.data->coalesce();
     EXPECT_EQ(
         content.data->computeChainDataLength(),
@@ -388,8 +404,12 @@ TEST_F(KTLSReadTest, HandshakeDispatch) {
     nst.ticket_age_add = 20;
     nst.ticket_nonce = toIOBuf("abc");
     nst.ticket = toIOBuf("123");
-    auto content =
-        clientWrite_->writeHandshake(fizz::encodeHandshake(std::move(nst)));
+    fizz::Error err;
+    fizz::TLSContent content;
+    EXPECT_EQ(
+        clientWrite_->writeHandshake(
+            content, err, fizz::encodeHandshake(std::move(nst))),
+        fizz::Status::Success);
     content.data->coalesce();
     EXPECT_EQ(
         content.data->computeChainDataLength(),
@@ -434,8 +454,12 @@ TEST_F(KTLSReadTest, HandshakeRecordSmallBuffer) {
     nst.ticket_age_add = 20;
     nst.ticket_nonce = toIOBuf("abc");
     nst.ticket = toIOBuf("123");
-    auto content =
-        clientWrite_->writeHandshake(fizz::encodeHandshake(std::move(nst)));
+    fizz::Error err;
+    fizz::TLSContent content;
+    EXPECT_EQ(
+        clientWrite_->writeHandshake(
+            content, err, fizz::encodeHandshake(std::move(nst))),
+        fizz::Status::Success);
     content.data->coalesce();
     EXPECT_EQ(
         content.data->computeChainDataLength(),
@@ -487,7 +511,11 @@ TEST_F(KTLSReadTest, HandshakeMessageAcrossRecords) {
 
     // Send the first two records immediately.
     for (size_t i = 0; i < records.size(); i++) {
-      auto encrypted = clientWrite_->write(std::move(records[i]), {});
+      fizz::Error err;
+      fizz::TLSContent encrypted;
+      EXPECT_EQ(
+          clientWrite_->write(encrypted, err, std::move(records[i]), {}),
+          fizz::Status::Success);
       encrypted.data->coalesce();
 
       if (i == records.size() - 1) {
@@ -553,7 +581,11 @@ TEST_F(KTLSReadTest, SplicedHandshakeDataByAppdataFailsConnection) {
     EXPECT_EQ(records.size(), 3);
 
     for (size_t i = 0; i < records.size(); i++) {
-      auto encrypted = clientWrite_->write(std::move(records[i]), {});
+      fizz::Error err;
+      fizz::TLSContent encrypted;
+      EXPECT_EQ(
+          clientWrite_->write(encrypted, err, std::move(records[i]), {}),
+          fizz::Status::Success);
       encrypted.data->coalesce();
       EXPECT_EQ(
           encrypted.data->computeChainDataLength(),
@@ -600,7 +632,11 @@ TEST_F(KTLSReadTest, SplicedHandshakeDataByAlertFailsConnection) {
     EXPECT_EQ(records.size(), 3);
 
     for (size_t i = 0; i < records.size(); i++) {
-      auto encrypted = clientWrite_->write(std::move(records[i]), {});
+      fizz::Error err;
+      fizz::TLSContent encrypted;
+      EXPECT_EQ(
+          clientWrite_->write(encrypted, err, std::move(records[i]), {}),
+          fizz::Status::Success);
       encrypted.data->coalesce();
       EXPECT_EQ(
           encrypted.data->computeChainDataLength(),

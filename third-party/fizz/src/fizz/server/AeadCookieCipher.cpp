@@ -143,10 +143,13 @@ Buf AeadCookieCipher::getStatelessResponse(
 
   auto statelessMessage = getStatelessHelloRetryRequest(
       state.version, state.cipher, state.group, std::move(*cookie));
-
-  return PlaintextWriteRecordLayer()
-      .writeHandshake(std::move(statelessMessage))
-      .data;
+  Error err;
+  TLSContent content;
+  FIZZ_THROW_ON_ERROR(
+      PlaintextWriteRecordLayer().writeHandshake(
+          content, err, std::move(statelessMessage)),
+      err);
+  return std::move(content.data);
 }
 } // namespace server
 } // namespace fizz

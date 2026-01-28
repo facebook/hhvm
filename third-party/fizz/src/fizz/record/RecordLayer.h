@@ -159,27 +159,44 @@ class WriteRecordLayer {
  public:
   virtual ~WriteRecordLayer() = default;
 
-  virtual TLSContent write(TLSMessage&& msg, Aead::AeadOptions options)
-      const = 0;
+  virtual Status write(
+      TLSContent& ret,
+      Error& err,
+      TLSMessage&& msg,
+      Aead::AeadOptions options) const = 0;
 
-  TLSContent writeAlert(Alert&& alert) const {
-    return write(
+  Status writeAlert(TLSContent& ret, Error& err, Alert&& alert) const {
+    FIZZ_RETURN_ON_ERROR(write(
+        ret,
+        err,
         TLSMessage{ContentType::alert, encode(std::move(alert))},
-        Aead::AeadOptions());
+        Aead::AeadOptions()));
+    return Status::Success;
   }
 
-  TLSContent writeAppData(
+  Status writeAppData(
+      TLSContent& ret,
+      Error& err,
       std::unique_ptr<folly::IOBuf>&& appData,
       Aead::AeadOptions options) const {
-    return write(
-        TLSMessage{ContentType::application_data, std::move(appData)}, options);
+    FIZZ_RETURN_ON_ERROR(write(
+        ret,
+        err,
+        TLSMessage{ContentType::application_data, std::move(appData)},
+        options));
+    return Status::Success;
   }
 
   template <typename... Args>
-  TLSContent writeHandshake(Buf&& encodedHandshakeMsg, Args&&... args) const {
+  Status writeHandshake(
+      TLSContent& ret,
+      Error& err,
+      Buf&& encodedHandshakeMsg,
+      Args&&... args) const {
     TLSMessage msg{ContentType::handshake, std::move(encodedHandshakeMsg)};
     addMessage(msg.fragment, std::forward<Args>(args)...);
-    return write(std::move(msg), Aead::AeadOptions());
+    FIZZ_RETURN_ON_ERROR(write(ret, err, std::move(msg), Aead::AeadOptions()));
+    return Status::Success;
   }
 
   Status setProtocolVersion(Error& err, ProtocolVersion version) const {

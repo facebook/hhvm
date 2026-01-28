@@ -168,7 +168,9 @@ EncryptionLevel EncryptedReadRecordLayer::getEncryptionLevel() const {
   return encryptionLevel_;
 }
 
-TLSContent EncryptedWriteRecordLayer::write(
+Status EncryptedWriteRecordLayer::write(
+    TLSContent& ret,
+    Error& err,
     TLSMessage&& msg,
     Aead::AeadOptions options) const {
   folly::IOBufQueue queue;
@@ -203,7 +205,7 @@ TLSContent EncryptedWriteRecordLayer::write(
     }
 
     if (seqNum_ == std::numeric_limits<uint64_t>::max()) {
-      throw std::runtime_error("max write seq num");
+      return err.error("max write seq num");
     }
 
     // we will either be able to memcpy directly into the ciphertext or
@@ -252,7 +254,8 @@ TLSContent EncryptedWriteRecordLayer::write(
   content.data = std::move(outBuf);
   content.contentType = msg.type;
   content.encryptionLevel = encryptionLevel_;
-  return content;
+  ret = std::move(content);
+  return Status::Success;
 }
 
 EncryptionLevel EncryptedWriteRecordLayer::getEncryptionLevel() const {

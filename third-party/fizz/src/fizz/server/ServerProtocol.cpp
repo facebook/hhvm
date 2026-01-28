@@ -304,10 +304,14 @@ Actions handleError(
 
   if (alertDesc && state.writeRecordLayer()) {
     try {
+      Error err;
+      TLSContent content;
       Alert alert(*alertDesc);
+      FIZZ_THROW_ON_ERROR(
+          state.writeRecordLayer()->writeAlert(content, err, std::move(alert)),
+          err);
       WriteToSocket write;
-      write.contents.emplace_back(
-          state.writeRecordLayer()->writeAlert(std::move(alert)));
+      write.contents.emplace_back(std::move(content));
       actions.emplace_back(std::move(write));
     } catch (...) {
     }
@@ -325,9 +329,13 @@ Actions handleAppCloseImmediate(const State& state) {
 
   if (state.writeRecordLayer()) {
     Alert alert(AlertDescription::close_notify);
+    Error err;
+    TLSContent content;
+    FIZZ_THROW_ON_ERROR(
+        state.writeRecordLayer()->writeAlert(content, err, std::move(alert)),
+        err);
     WriteToSocket write;
-    write.contents.emplace_back(
-        state.writeRecordLayer()->writeAlert(std::move(alert)));
+    write.contents.emplace_back(std::move(content));
     return actions(std::move(transition), std::move(write));
   } else {
     return actions(std::move(transition));
@@ -342,9 +350,13 @@ Actions handleAppClose(const State& state) {
     });
 
     Alert alert(AlertDescription::close_notify);
+    Error err;
+    TLSContent content;
+    FIZZ_THROW_ON_ERROR(
+        state.writeRecordLayer()->writeAlert(content, err, std::move(alert)),
+        err);
     WriteToSocket write;
-    write.contents.emplace_back(
-        state.writeRecordLayer()->writeAlert(std::move(alert)));
+    write.contents.emplace_back(std::move(content));
     return actions(std::move(transition), std::move(write));
   } else {
     MutateState transition([](State& newState) {
@@ -1280,6 +1292,7 @@ EventHandler<ServerTypes, StateEnum::ExpectingClientHello, Event::ClientHello>::
   }
 
   if (!version) {
+    Error err;
     if (getExtension<ClientEarlyData>(chlo.extensions)) {
       throw FizzException(
           "supported version mismatch with early data",
@@ -1290,10 +1303,12 @@ EventHandler<ServerTypes, StateEnum::ExpectingClientHello, Event::ClientHello>::
       // Re-encode to put the record layer header back on. This won't
       // necessarily preserve it byte-for-byte, but it isn't authenticated so
       // should be ok.
-      fallback.clientHello =
-          PlaintextWriteRecordLayer()
-              .writeInitialClientHello(std::move(*chlo.originalEncoding))
-              .data;
+      TLSContent content;
+      FIZZ_THROW_ON_ERROR(
+          PlaintextWriteRecordLayer().writeInitialClientHello(
+              content, err, std::move(*chlo.originalEncoding)),
+          err);
+      fallback.clientHello = std::move(content.data);
       // Save SNI extension value to help decide server SSL context.
       auto serverNameList = getExtension<ServerNameList>(chlo.extensions);
       if (serverNameList && !serverNameList->server_name_list.empty()) {
@@ -1511,10 +1526,14 @@ EventHandler<ServerTypes, StateEnum::ExpectingClientHello, Event::ClientHello>::
             auto encodedHelloRetryRequest = encodeHandshake(std::move(hrr));
             handshakeContext->appendToTranscript(encodedHelloRetryRequest);
 
-            WriteToSocket serverFlight;
-            serverFlight.contents.emplace_back(
+            Error err;
+            TLSContent content;
+            FIZZ_THROW_ON_ERROR(
                 state.writeRecordLayer()->writeHandshake(
-                    std::move(encodedHelloRetryRequest)));
+                    content, err, std::move(encodedHelloRetryRequest)),
+                err);
+            WriteToSocket serverFlight;
+            serverFlight.contents.emplace_back(std::move(content));
 
             if (legacySessionId && !legacySessionId->empty()) {
               TLSContent writeCCS;
@@ -1858,13 +1877,18 @@ EventHandler<ServerTypes, StateEnum::ExpectingClientHello, Event::ClientHello>::
                     // Some middleboxes appear to break if the first encrypted
                     // record is larger than ~1300 bytes (likely if it does not
                     // fit in the first packet).
-                    auto serverEncrypted =
+                    Error err;
+                    TLSContent serverEncrypted;
+                    FIZZ_THROW_ON_ERROR(
                         handshakeWriteRecordLayer->writeHandshake(
-                            combined.splitAtMost(1000));
+                            serverEncrypted, err, combined.splitAtMost(1000)),
+                        err);
                     if (!combined.empty()) {
-                      auto splitRecord =
+                      TLSContent splitRecord;
+                      FIZZ_THROW_ON_ERROR(
                           handshakeWriteRecordLayer->writeHandshake(
-                              combined.move());
+                              splitRecord, err, combined.move()),
+                          err);
                       // Split record must have the same encryption level as the
                       // main handshake.
                       DCHECK(
@@ -1873,11 +1897,13 @@ EventHandler<ServerTypes, StateEnum::ExpectingClientHello, Event::ClientHello>::
                       serverEncrypted.data->prependChain(
                           std::move(splitRecord.data));
                     }
-
-                    WriteToSocket serverFlight;
-                    serverFlight.contents.emplace_back(
+                    TLSContent content;
+                    FIZZ_THROW_ON_ERROR(
                         state.writeRecordLayer()->writeHandshake(
-                            std::move(encodedServerHello)));
+                            content, err, std::move(encodedServerHello)),
+                        err);
+                    WriteToSocket serverFlight;
+                    serverFlight.contents.emplace_back(std::move(content));
                     if (legacySessionId && !legacySessionId->empty()) {
                       TLSContent ccsWrite;
                       ccsWrite.encryptionLevel = EncryptionLevel::Plaintext;
@@ -1905,7 +1931,6 @@ EventHandler<ServerTypes, StateEnum::ExpectingClientHello, Event::ClientHello>::
                             ->getFactory()
                             ->makeEncryptedWriteRecordLayer(
                                 EncryptionLevel::AppTraffic);
-                    Error err;
                     FIZZ_THROW_ON_ERROR(
                         appTrafficWriteRecordLayer->setProtocolVersion(
                             err, version),
@@ -2095,10 +2120,15 @@ EventHandler<ServerTypes, StateEnum::AcceptingEarlyData, Event::AppWrite>::
         Param& param) {
   auto& appWrite = *param.asAppWrite();
 
+  Error err;
+  TLSContent content;
+  FIZZ_THROW_ON_ERROR(
+      state.writeRecordLayer()->writeAppData(
+          content, err, std::move(appWrite.data), appWrite.aeadOptions),
+      err);
   WriteToSocket write;
   write.token = appWrite.token;
-  write.contents.emplace_back(state.writeRecordLayer()->writeAppData(
-      std::move(appWrite.data), appWrite.aeadOptions));
+  write.contents.emplace_back(std::move(content));
   write.flags = appWrite.flags;
 
   ret = actions(std::move(write));
@@ -2143,10 +2173,15 @@ EventHandler<ServerTypes, StateEnum::ExpectingFinished, Event::AppWrite>::
         Param& param) {
   auto& appWrite = *param.asAppWrite();
 
+  Error err;
+  TLSContent content;
+  FIZZ_THROW_ON_ERROR(
+      state.writeRecordLayer()->writeAppData(
+          content, err, std::move(appWrite.data), appWrite.aeadOptions),
+      err);
   WriteToSocket write;
   write.token = appWrite.token;
-  write.contents.emplace_back(state.writeRecordLayer()->writeAppData(
-      std::move(appWrite.data), appWrite.aeadOptions));
+  write.contents.emplace_back(std::move(content));
   write.flags = appWrite.flags;
 
   ret = actions(std::move(write));
@@ -2174,9 +2209,12 @@ static WriteToSocket writeNewSessionTicket(
   }
 
   auto encodedNst = encodeHandshake(std::move(nst));
+  Error err;
+  TLSContent content;
+  FIZZ_THROW_ON_ERROR(
+      recordLayer.writeHandshake(content, err, std::move(encodedNst)), err);
   WriteToSocket nstWrite;
-  nstWrite.contents.emplace_back(
-      recordLayer.writeHandshake(std::move(encodedNst)));
+  nstWrite.contents.emplace_back(std::move(content));
   return nstWrite;
 }
 
@@ -2486,10 +2524,15 @@ EventHandler<ServerTypes, StateEnum::AcceptingData, Event::AppWrite>::handle(
     Param& param) {
   auto& appWrite = *param.asAppWrite();
 
+  Error err;
+  TLSContent content;
+  FIZZ_THROW_ON_ERROR(
+      state.writeRecordLayer()->writeAppData(
+          content, err, std::move(appWrite.data), appWrite.aeadOptions),
+      err);
   WriteToSocket write;
   write.token = appWrite.token;
-  write.contents.emplace_back(state.writeRecordLayer()->writeAppData(
-      std::move(appWrite.data), appWrite.aeadOptions));
+  write.contents.emplace_back(std::move(content));
   write.flags = appWrite.flags;
 
   ret = actions(std::move(write));
@@ -2511,16 +2554,20 @@ Status EventHandler<
   auto& keyUpdateInitiation = *param.asKeyUpdateInitiation();
   auto encodedKeyUpdated =
       Protocol::getKeyUpdated(keyUpdateInitiation.request_update);
+  Error err;
+  TLSContent content;
+  FIZZ_THROW_ON_ERROR(
+      state.writeRecordLayer()->writeHandshake(
+          content, err, std::move(encodedKeyUpdated)),
+      err);
   WriteToSocket write;
-  write.contents.emplace_back(
-      state.writeRecordLayer()->writeHandshake(std::move(encodedKeyUpdated)));
+  write.contents.emplace_back(std::move(content));
 
   state.keyScheduler()->serverKeyUpdate();
 
   auto writeRecordLayer =
       state.context()->getFactory()->makeEncryptedWriteRecordLayer(
           EncryptionLevel::AppTraffic);
-  Error err;
   FIZZ_THROW_ON_ERROR(
       writeRecordLayer->setProtocolVersion(err, *state.version()), err);
   if (state.extensions()) {
@@ -2585,9 +2632,13 @@ EventHandler<ServerTypes, StateEnum::AcceptingData, Event::KeyUpdate>::handle(
 
   auto encodedKeyUpdated =
       Protocol::getKeyUpdated(KeyUpdateRequest::update_not_requested);
+  TLSContent content;
+  FIZZ_THROW_ON_ERROR(
+      state.writeRecordLayer()->writeHandshake(
+          content, err, std::move(encodedKeyUpdated)),
+      err);
   WriteToSocket write;
-  write.contents.emplace_back(
-      state.writeRecordLayer()->writeHandshake(std::move(encodedKeyUpdated)));
+  write.contents.emplace_back(std::move(content));
 
   state.keyScheduler()->serverKeyUpdate();
 
@@ -2633,9 +2684,14 @@ EventHandler<ServerTypes, StateEnum::AcceptingData, Event::CloseNotify>::handle(
     newState.readRecordLayer() = nullptr;
   });
 
+  Error err;
+  TLSContent content;
+  FIZZ_THROW_ON_ERROR(
+      state.writeRecordLayer()->writeAlert(
+          content, err, Alert(AlertDescription::close_notify)),
+      err);
   WriteToSocket write;
-  write.contents.emplace_back(state.writeRecordLayer()->writeAlert(
-      Alert(AlertDescription::close_notify)));
+  write.contents.emplace_back(std::move(content));
   ret = actions(
       std::move(write),
       std::move(clearRecordLayers),

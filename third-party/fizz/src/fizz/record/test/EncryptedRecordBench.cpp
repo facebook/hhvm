@@ -96,8 +96,10 @@ void encryptGCM(
   }
 
   TLSContent content;
+  Error err;
   for (auto& msg : msgs) {
-    content = write.write(std::move(msg), Aead::AeadOptions());
+    FIZZ_THROW_ON_ERROR(
+        write.write(content, err, std::move(msg), Aead::AeadOptions()), err);
   }
   folly::doNotOptimizeAway(content);
 }
@@ -112,6 +114,7 @@ void decryptGCM(uint32_t n, size_t size, IOBufAllocation iobufAllocation) {
     auto readAead = openssl::OpenSSLEVPCipher::makeCipher<fizz::AESGCM128>();
     writeAead->setKey(getKey());
     readAead->setKey(getKey());
+    Error err;
     write.setAead(folly::ByteRange(), std::move(writeAead));
     read.setAead(folly::ByteRange(), std::move(readAead));
     for (size_t i = 0; i < n; ++i) {
@@ -122,7 +125,9 @@ void decryptGCM(uint32_t n, size_t size, IOBufAllocation iobufAllocation) {
         msg_clones.push_back(message->clone());
       }
       TLSMessage msg{ContentType::application_data, std::move(message)};
-      auto content = write.write(std::move(msg), Aead::AeadOptions());
+      TLSContent content;
+      FIZZ_THROW_ON_ERROR(
+          write.write(content, err, std::move(msg), Aead::AeadOptions()), err);
       folly::IOBufQueue queue{folly::IOBufQueue::cacheChainLength()};
       queue.append(std::move(content.data));
       folly::doNotOptimizeAway(queue.front());
@@ -223,9 +228,11 @@ void encryptOCB(uint32_t n, size_t size) {
     }
   }
 
+  Error err;
   TLSContent content;
   for (auto& msg : msgs) {
-    content = write.write(std::move(msg), Aead::AeadOptions());
+    FIZZ_THROW_ON_ERROR(
+        write.write(content, err, std::move(msg), Aead::AeadOptions()), err);
   }
   folly::doNotOptimizeAway(content);
 }
@@ -252,9 +259,11 @@ void encryptAEGIS(uint32_t n, size_t size) {
     }
   }
 
+  Error err;
   TLSContent content;
   for (auto& msg : msgs) {
-    content = write.write(std::move(msg), Aead::AeadOptions());
+    FIZZ_THROW_ON_ERROR(
+        write.write(content, err, std::move(msg), Aead::AeadOptions()), err);
   }
   folly::doNotOptimizeAway(content);
 }
@@ -268,11 +277,14 @@ void decryptAEGIS(uint32_t n, size_t size) {
     auto readAead = fizz::libaegis::makeCipher<fizz::AEGIS128L>();
     writeAead->setKey(getAegisKey());
     readAead->setKey(getAegisKey());
+    Error err;
     write.setAead(folly::ByteRange(), std::move(writeAead));
     read.setAead(folly::ByteRange(), std::move(readAead));
     for (size_t i = 0; i < n; ++i) {
       TLSMessage msg{ContentType::application_data, makeRandom(size)};
-      auto content = write.write(std::move(msg), Aead::AeadOptions());
+      TLSContent content;
+      FIZZ_THROW_ON_ERROR(
+          write.write(content, err, std::move(msg), Aead::AeadOptions()), err);
       folly::IOBufQueue queue{folly::IOBufQueue::cacheChainLength()};
       queue.append(std::move(content.data));
       folly::doNotOptimizeAway(queue.front());

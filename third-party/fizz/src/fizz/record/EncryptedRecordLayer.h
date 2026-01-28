@@ -89,7 +89,11 @@ class EncryptedWriteRecordLayer : public WriteRecordLayer {
   explicit EncryptedWriteRecordLayer(EncryptionLevel encryptionLevel)
       : encryptionLevel_(encryptionLevel) {}
 
-  TLSContent write(TLSMessage&& msg, Aead::AeadOptions options) const override;
+  Status write(
+      TLSContent& ret,
+      Error& err,
+      TLSMessage&& msg,
+      Aead::AeadOptions options) const override;
 
   virtual void setAead(
       folly::ByteRange /* baseSecret */,

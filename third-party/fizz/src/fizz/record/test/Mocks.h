@@ -118,15 +118,24 @@ class MockPlaintextWriteRecordLayer : public PlaintextWriteRecordLayer {
       _write,
       (TLSMessage & msg, Aead::AeadOptions options),
       (const));
-  TLSContent write(TLSMessage&& msg, Aead::AeadOptions options) const override {
-    return _write(msg, options);
+  Status write(
+      TLSContent& content,
+      Error& /* err */,
+      TLSMessage&& msg,
+      Aead::AeadOptions options) const override {
+    content = _write(msg, options);
+    return Status::Success;
   }
   MOCK_METHOD(void, configureClientRecordLayer, (const ClientExtensions*));
   MOCK_METHOD(void, configureServerRecordLayer, (const ServerExtensions*));
 
   MOCK_METHOD(TLSContent, _writeInitialClientHello, (Buf&), (const));
-  TLSContent writeInitialClientHello(Buf encoded) const override {
-    return _writeInitialClientHello(encoded);
+  Status writeInitialClientHello(
+      TLSContent& content,
+      Error& /* err */,
+      Buf encoded) const override {
+    content = _writeInitialClientHello(encoded);
+    return Status::Success;
   }
 
   void setDefaults() {
@@ -152,8 +161,13 @@ class MockEncryptedWriteRecordLayer : public EncryptedWriteRecordLayer {
       _write,
       (TLSMessage & msg, Aead::AeadOptions options),
       (const));
-  TLSContent write(TLSMessage&& msg, Aead::AeadOptions options) const override {
-    return _write(msg, options);
+  Status write(
+      TLSContent& content,
+      Error& /* err */,
+      TLSMessage&& msg,
+      Aead::AeadOptions options) const override {
+    content = _write(msg, options);
+    return Status::Success;
   }
   MOCK_METHOD(void, configureClientRecordLayer, (const ClientExtensions*));
   MOCK_METHOD(void, configureServerRecordLayer, (const ServerExtensions*));

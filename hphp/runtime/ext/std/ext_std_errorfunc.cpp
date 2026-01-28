@@ -56,6 +56,7 @@ const int64_t k_DEBUG_BACKTRACE_PROVIDE_OBJECT = (1 << 0);
 const int64_t k_DEBUG_BACKTRACE_IGNORE_ARGS = (1 << 1);
 const int64_t k_DEBUG_BACKTRACE_PROVIDE_METADATA = (1 << 16);
 const int64_t k_DEBUG_BACKTRACE_ONLY_METADATA_FRAMES = (1 << 17);
+const int64_t k_DEBUG_BACKTRACE_SKIP_INLINED = (1 << 18);
 
 const int64_t k_DEBUG_BACKTRACE_HASH_CONSIDER_METADATA = (1 << 0);
 
@@ -66,9 +67,12 @@ Array HHVM_FUNCTION(debug_backtrace, int64_t options /* = 1 */,
   bool provide_metadata = options & k_DEBUG_BACKTRACE_PROVIDE_METADATA;
   bool only_metadata_frames = options & k_DEBUG_BACKTRACE_ONLY_METADATA_FRAMES;
   bool ignore_args = options & k_DEBUG_BACKTRACE_IGNORE_ARGS;
+  bool skip_inlined = options & k_DEBUG_BACKTRACE_SKIP_INLINED;
   return createBacktrace(BacktraceArgs()
                          .withThis(provide_object)
                          .withMetadata(provide_metadata)
+                         .skipTop(skip_inlined)
+                         .skipInlined(skip_inlined)
                          .onlyMetadataFrames(only_metadata_frames)
                          .ignoreArgs(ignore_args)
                          .setLimit(limit));
@@ -457,6 +461,8 @@ void StandardExtension::registerNativeErrorFunc() {
               k_DEBUG_BACKTRACE_ONLY_METADATA_FRAMES);
   HHVM_RC_INT(DEBUG_BACKTRACE_HASH_CONSIDER_METADATA,
               k_DEBUG_BACKTRACE_HASH_CONSIDER_METADATA);
+  HHVM_RC_INT(DEBUG_BACKTRACE_SKIP_INLINED,
+              k_DEBUG_BACKTRACE_SKIP_INLINED);
   HHVM_RC_INT(E_ERROR, (int)ErrorMode::ERROR);
   HHVM_RC_INT(E_WARNING, (int)ErrorMode::WARNING);
   HHVM_RC_INT(E_PARSE, (int)ErrorMode::PARSE);

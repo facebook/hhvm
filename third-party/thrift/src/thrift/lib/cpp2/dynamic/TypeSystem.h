@@ -610,9 +610,10 @@ class TypeRef final {
    */
   template <typename T>
   const T& asType() const {
-    return visit(
-        [](const T& value) -> const T& { return value; },
-        [&](auto&&) -> const T& { throwAccessInactiveKind(); });
+    if (const T* ptr = std::get_if<T>(&type_)) {
+      return *ptr;
+    }
+    throwAccessInactiveKind();
   }
   template <Kind k>
   const std::variant_alternative_t<folly::to_underlying(k), Alternative>&

@@ -569,3 +569,62 @@ TEST(ListTest, StlIteration) {
 
 } // namespace
 } // namespace apache::thrift::dynamic
+
+#include <thrift/lib/cpp2/dynamic/TypeSystemBuilder.h>
+
+namespace apache::thrift::dynamic {
+namespace {
+
+using def = type_system::TypeSystemBuilder::DefinitionHelper;
+
+// Regression test for list<struct> deserialization bug where TypeRef::asKind()
+// failed because asType<StructPtr>() used visit() which applied maybe_deref(),
+// converting the pointer to a reference that didn't match the expected type.
+TEST(ListTest, ListOfStructSerializationRoundTrip) {
+  type_system::TypeSystemBuilder builder;
+
+  builder.addType(
+      "meta.com/thrift/test/Item",
+      def::Struct({
+          def::Field(
+              def::Identity(1, "id"), def::Optional, type_system::TypeIds::I64),
+      }));
+
+  auto typeSystem = std::move(builder).build();
+  const auto& itemNode =
+      typeSystem->getUserDefinedType("meta.com/thrift/test/Item")->asStruct();
+
+  // Create list<Item> type
+  auto listType = typeSystem->ListOf(type_system::TypeRef(itemNode));
+
+  // Create list with one struct element
+  auto listValue = DynamicValue::makeDefault(listType);
+  auto& list = listValue.asList();
+
+  auto itemValue = DynamicValue::makeDefault(type_system::TypeRef(itemNode));
+  auto& itemStruct = itemValue.asStruct();
+  itemStruct.setField("id", DynamicValue::makeI64(42));
+  list.push_back(std::move(itemValue));
+
+  // Serialize
+  folly::IOBufQueue queue;
+  CompactProtocolWriter writer;
+  writer.setOutput(&queue);
+  serializeValue(writer, listValue);
+
+  // Deserialize - this previously crashed with:
+  // "tried to access TypeRef with inactive kind, actual kind was: STRUCT"
+  auto buf = queue.move();
+  CompactProtocolReader reader;
+  reader.setInput(buf.get());
+  auto deserialized = deserializeValue(reader, listType, nullptr);
+
+  // Verify round-trip
+  EXPECT_EQ(listValue, deserialized);
+  auto& deserList = deserialized.asList();
+  ASSERT_EQ(deserList.size(), 1);
+  EXPECT_EQ(deserList[0].asStruct().getField("id")->asI64(), 42);
+}
+
+} // namespace
+} // namespace apache::thrift::dynamic

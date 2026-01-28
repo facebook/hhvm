@@ -130,13 +130,19 @@ class Fields implements \IThriftSyncStruct, \IThriftStructMetadata {
       'fields' => dict[
         'injected_structured_annotation_field' => shape(
           'field' => dict[
-            '\facebook\thrift\annotation\Box' => \facebook\thrift\annotation\Box::withDefaultValues(),
+            '\facebook\thrift\annotation\Box' => \facebook\thrift\annotation\Box::fromShape(
+              shape(
+              )
+            ),
           ],
           'type' => dict[],
         ),
         'injected_unstructured_annotation_field' => shape(
           'field' => dict[
-            '\facebook\thrift\annotation\Box' => \facebook\thrift\annotation\Box::withDefaultValues(),
+            '\facebook\thrift\annotation\Box' => \facebook\thrift\annotation\Box::fromShape(
+              shape(
+              )
+            ),
           ],
           'type' => dict[],
         ),

@@ -406,7 +406,10 @@ class TestServiceWithMethodAnnotationStaticMetadata implements \IThriftServiceSt
       'service' => dict[],
       'functions' => dict[
         'testMethodWithAnnotation' => dict[
-          '\facebook\thrift\annotation\hack\ModuleInternal' => \facebook\thrift\annotation\hack\ModuleInternal::withDefaultValues(),
+          '\facebook\thrift\annotation\hack\ModuleInternal' => \facebook\thrift\annotation\hack\ModuleInternal::fromShape(
+            shape(
+            )
+          ),
         ],
       ],
     );

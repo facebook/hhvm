@@ -221,7 +221,10 @@ class MyBitmaskEnum1_TEnumStaticMetadata implements \IThriftEnumStaticMetadata {
   public static function getAllStructuredAnnotations()[write_props]: \TEnumAnnotations {
     return shape(
       'enum' => dict[
-        '\facebook\thrift\annotation\BitmaskEnum' => \facebook\thrift\annotation\BitmaskEnum::withDefaultValues(),
+        '\facebook\thrift\annotation\BitmaskEnum' => \facebook\thrift\annotation\BitmaskEnum::fromShape(
+          shape(
+          )
+        ),
       ],
       'constants' => dict[
       ],
@@ -256,7 +259,10 @@ class MyBitmaskEnum2_TEnumStaticMetadata implements \IThriftEnumStaticMetadata {
   public static function getAllStructuredAnnotations()[write_props]: \TEnumAnnotations {
     return shape(
       'enum' => dict[
-        '\facebook\thrift\annotation\BitmaskEnum' => \facebook\thrift\annotation\BitmaskEnum::withDefaultValues(),
+        '\facebook\thrift\annotation\BitmaskEnum' => \facebook\thrift\annotation\BitmaskEnum::fromShape(
+          shape(
+          )
+        ),
       ],
       'constants' => dict[
       ],

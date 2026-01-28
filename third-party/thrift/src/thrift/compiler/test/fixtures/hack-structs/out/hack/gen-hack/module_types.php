@@ -79,7 +79,10 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\facebook\thrift\annotation\hack\StructTrait' => \facebook\thrift\annotation\hack\StructTrait::withDefaultValues(),
+        '\facebook\thrift\annotation\hack\StructTrait' => \facebook\thrift\annotation\hack\StructTrait::fromShape(
+          shape(
+          )
+        ),
       ],
       'fields' => dict[
       ],
@@ -165,7 +168,10 @@ class MySecondStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\facebook\thrift\annotation\hack\StructTrait' => \facebook\thrift\annotation\hack\StructTrait::withDefaultValues(),
+        '\facebook\thrift\annotation\hack\StructTrait' => \facebook\thrift\annotation\hack\StructTrait::fromShape(
+          shape(
+          )
+        ),
       ],
       'fields' => dict[
       ],
@@ -341,7 +347,10 @@ class MyFourthStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\facebook\thrift\annotation\hack\StructTrait' => \facebook\thrift\annotation\hack\StructTrait::withDefaultValues(),
+        '\facebook\thrift\annotation\hack\StructTrait' => \facebook\thrift\annotation\hack\StructTrait::fromShape(
+          shape(
+          )
+        ),
       ],
       'fields' => dict[
       ],
@@ -513,7 +522,10 @@ trait MySixthStructTrait implements \IThriftSyncStruct, \IThriftStructMetadata {
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\facebook\thrift\annotation\hack\StructAsTrait' => \facebook\thrift\annotation\hack\StructAsTrait::withDefaultValues(),
+        '\facebook\thrift\annotation\hack\StructAsTrait' => \facebook\thrift\annotation\hack\StructAsTrait::fromShape(
+          shape(
+          )
+        ),
       ],
       'fields' => dict[
       ],
@@ -595,7 +607,10 @@ trait MySeventhStructTrait implements \IThriftSyncStruct, \IThriftStructMetadata
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\facebook\thrift\annotation\hack\StructAsTrait' => \facebook\thrift\annotation\hack\StructAsTrait::withDefaultValues(),
+        '\facebook\thrift\annotation\hack\StructAsTrait' => \facebook\thrift\annotation\hack\StructAsTrait::fromShape(
+          shape(
+          )
+        ),
       ],
       'fields' => dict[
       ],

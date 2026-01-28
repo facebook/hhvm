@@ -617,10 +617,16 @@ class TestServiceStaticMetadata implements \IThriftServiceStaticMetadata {
       'service' => dict[],
       'functions' => dict[
         'ping' => dict[
-          '\facebook\thrift\annotation\hack\GenerateClientMethodsWithHeaders' => \facebook\thrift\annotation\hack\GenerateClientMethodsWithHeaders::withDefaultValues(),
+          '\facebook\thrift\annotation\hack\GenerateClientMethodsWithHeaders' => \facebook\thrift\annotation\hack\GenerateClientMethodsWithHeaders::fromShape(
+            shape(
+            )
+          ),
         ],
         'voidMethod' => dict[
-          '\facebook\thrift\annotation\hack\GenerateClientMethodsWithHeaders' => \facebook\thrift\annotation\hack\GenerateClientMethodsWithHeaders::withDefaultValues(),
+          '\facebook\thrift\annotation\hack\GenerateClientMethodsWithHeaders' => \facebook\thrift\annotation\hack\GenerateClientMethodsWithHeaders::fromShape(
+            shape(
+            )
+          ),
         ],
       ],
     );

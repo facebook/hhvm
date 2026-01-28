@@ -130,7 +130,10 @@ class Foo implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\facebook\thrift\annotation\SerializeInFieldIdOrder' => \facebook\thrift\annotation\SerializeInFieldIdOrder::withDefaultValues(),
+        '\facebook\thrift\annotation\SerializeInFieldIdOrder' => \facebook\thrift\annotation\SerializeInFieldIdOrder::fromShape(
+          shape(
+          )
+        ),
       ],
       'fields' => dict[
       ],

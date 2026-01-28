@@ -404,7 +404,10 @@ class TestServiceWithServiceAnnotationStaticMetadata implements \IThriftServiceS
   public static function getAllStructuredAnnotations()[write_props]: \TServiceAnnotations {
     return shape(
       'service' => dict[
-        '\facebook\thrift\annotation\hack\ModuleInternal' => \facebook\thrift\annotation\hack\ModuleInternal::withDefaultValues(),
+        '\facebook\thrift\annotation\hack\ModuleInternal' => \facebook\thrift\annotation\hack\ModuleInternal::fromShape(
+          shape(
+          )
+        ),
       ],
       'functions' => dict[
       ],

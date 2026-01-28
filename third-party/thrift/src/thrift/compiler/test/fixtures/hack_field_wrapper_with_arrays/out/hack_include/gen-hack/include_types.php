@@ -63,7 +63,10 @@ class AnnotationStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \I
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\facebook\thrift\annotation\Transitive' => \facebook\thrift\annotation\Transitive::withDefaultValues(),
+        '\facebook\thrift\annotation\Transitive' => \facebook\thrift\annotation\Transitive::fromShape(
+          shape(
+          )
+        ),
         '\facebook\thrift\annotation\hack\Wrapper' => \facebook\thrift\annotation\hack\Wrapper::fromShape(
           shape(
             "name" => "\\MyFieldWrapper",
@@ -739,7 +742,10 @@ class MyNestedStruct implements \IThriftAsyncStruct, \IThriftStructMetadata, \IT
         ),
         'annotated_field' => shape(
           'field' => dict[
-            'AnnotationStruct' => AnnotationStruct::withDefaultValues(),
+            'AnnotationStruct' => AnnotationStruct::fromShape(
+              shape(
+              )
+            ),
           ],
           'type' => dict[],
         ),

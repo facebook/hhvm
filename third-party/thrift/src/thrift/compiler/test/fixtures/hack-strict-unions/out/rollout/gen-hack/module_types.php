@@ -359,8 +359,14 @@ class Primitive implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftP
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\facebook\thrift\annotation\hack\MigrationBlockingAllowInheritance' => \facebook\thrift\annotation\hack\MigrationBlockingAllowInheritance::withDefaultValues(),
-        '\facebook\thrift\annotation\hack\MigrationBlockingLegacyJSONSerialization' => \facebook\thrift\annotation\hack\MigrationBlockingLegacyJSONSerialization::withDefaultValues(),
+        '\facebook\thrift\annotation\hack\MigrationBlockingAllowInheritance' => \facebook\thrift\annotation\hack\MigrationBlockingAllowInheritance::fromShape(
+          shape(
+          )
+        ),
+        '\facebook\thrift\annotation\hack\MigrationBlockingLegacyJSONSerialization' => \facebook\thrift\annotation\hack\MigrationBlockingLegacyJSONSerialization::fromShape(
+          shape(
+          )
+        ),
       ],
       'fields' => dict[
         'i64_' => shape(

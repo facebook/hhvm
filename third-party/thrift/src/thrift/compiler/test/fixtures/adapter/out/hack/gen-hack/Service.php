@@ -246,13 +246,19 @@ class Service_func_args implements \IThriftSyncStruct, \IThriftStructMetadata, \
         'arg1' => shape(
           'field' => dict[],
           'type' => dict[
-            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::withDefaultValues(),
+            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
+              shape(
+              )
+            ),
           ],
         ),
         'arg2' => shape(
           'field' => dict[],
           'type' => dict[
-            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::withDefaultValues(),
+            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
+              shape(
+              )
+            ),
             '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::my::Adapter2",
@@ -263,7 +269,10 @@ class Service_func_args implements \IThriftSyncStruct, \IThriftStructMetadata, \
         'arg3' => shape(
           'field' => dict[],
           'type' => dict[
-            '\facebook\thrift\annotation\cpp\EnableCustomTypeOrdering' => \facebook\thrift\annotation\cpp\EnableCustomTypeOrdering::withDefaultValues(),
+            '\facebook\thrift\annotation\cpp\EnableCustomTypeOrdering' => \facebook\thrift\annotation\cpp\EnableCustomTypeOrdering::fromShape(
+              shape(
+              )
+            ),
           ],
         ),
       ],
@@ -413,7 +422,10 @@ class Service_func_result extends \ThriftSyncStructWithResult implements \IThrif
         'success' => shape(
           'field' => dict[],
           'type' => dict[
-            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::withDefaultValues(),
+            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
+              shape(
+              )
+            ),
           ],
         ),
       ],

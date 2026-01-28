@@ -131,7 +131,10 @@ class module_CONSTANTS implements \IThriftConstants {
   public static function nested_adapted()[write_props]: \facebook\thrift\test\fixtures\adapter\MoveOnly{
     return \facebook\thrift\test\fixtures\adapter\MoveOnly::fromShape(
       shape(
-        "ptr" => \facebook\thrift\test\fixtures\adapter\HeapAllocated::withDefaultValues(),
+        "ptr" => \facebook\thrift\test\fixtures\adapter\HeapAllocated::fromShape(
+          shape(
+          )
+        ),
       )
     );
   }

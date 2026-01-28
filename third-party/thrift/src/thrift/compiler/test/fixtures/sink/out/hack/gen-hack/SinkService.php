@@ -3002,7 +3002,10 @@ class SinkServiceStaticMetadata implements \IThriftServiceStaticMetadata {
       'service' => dict[],
       'functions' => dict[
         'methodFast' => dict[
-          '\facebook\thrift\annotation\cpp\ProcessInEbThreadUnsafe' => \facebook\thrift\annotation\cpp\ProcessInEbThreadUnsafe::withDefaultValues(),
+          '\facebook\thrift\annotation\cpp\ProcessInEbThreadUnsafe' => \facebook\thrift\annotation\cpp\ProcessInEbThreadUnsafe::fromShape(
+            shape(
+            )
+          ),
         ],
       ],
     );

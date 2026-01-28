@@ -17,13 +17,17 @@
 package thrift
 
 import (
+	"bytes"
 	"context"
+	"fmt"
+	"iter"
 	"math"
 	"net"
 	"time"
 
 	"golang.org/x/sync/singleflight"
 
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift/format"
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/rocket"
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 	"github.com/facebook/fbthrift/thrift/lib/thrift/rpcmetadata"
@@ -53,10 +57,8 @@ type RSocketClient interface {
 		messageName string,
 		headers map[string]string,
 		dataBytes []byte,
-		onStreamNextFn func([]byte) error,
-		onStreamErrorFn func(error),
-		onStreamComplete func(),
-	) (map[string]string, []byte, error)
+		newStreamElemFn func() ReadableResult,
+	) (map[string]string, []byte, iter.Seq2[ReadableStruct, error], error)
 	MetadataPush(
 		ctx context.Context,
 		metadata *rpcmetadata.ClientPushMetadata,
@@ -218,10 +220,8 @@ func (r *rsocketClient) RequestStream(
 	messageName string,
 	headers map[string]string,
 	dataBytes []byte,
-	onStreamNextFn func([]byte) error,
-	onStreamErrorFn func(error),
-	onStreamComplete func(),
-) (map[string]string, []byte, error) {
+	newStreamElemFn func() ReadableResult,
+) (map[string]string, []byte, iter.Seq2[ReadableStruct, error], error) {
 	r.resetDeadline()
 
 	request, err := rocket.EncodeRequestPayload(
@@ -234,7 +234,7 @@ func (r *rsocketClient) RequestStream(
 		dataBytes,
 	)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 
 	flux := r.client.RequestStream(request)
@@ -245,42 +245,61 @@ func (r *rsocketClient) RequestStream(
 	firstPayload, err := recvStreamNext(streamCtx, streamPayloadChan, streamErrChan)
 	if err != nil {
 		streamCancel()
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 	firstResponse, err := rocket.DecodeResponsePayload(firstPayload)
 	if err != nil {
 		streamCancel()
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 
-	go func() {
+	streamSeq := func(yield func(ReadableStruct, error) bool) {
 		defer streamCancel()
 
 		for {
 			streamPayload, streamErr := recvStreamNext(streamCtx, streamPayloadChan, streamErrChan)
 			if streamErr != nil {
-				onStreamErrorFn(streamErr)
+				yield(nil, streamErr)
 				return
 			} else if streamPayload != nil {
 				streamResponse, err := rocket.DecodeStreamPayload(streamPayload)
 				if err != nil {
-					onStreamErrorFn(err)
+					yield(nil, err)
 					return
 				}
-				err = onStreamNextFn(streamResponse.Data())
+				data := streamResponse.Data()
+				reader := bytes.NewBuffer(data)
+				var decoder types.Decoder
+				switch r.protoID {
+				case rpcmetadata.ProtocolId_BINARY:
+					decoder = format.NewBinaryDecoder(reader)
+				case rpcmetadata.ProtocolId_COMPACT:
+					decoder = format.NewCompactDecoder(reader)
+				default:
+					yield(nil, types.NewProtocolException(fmt.Errorf("Unknown protocol id: %d", r.protoID)))
+					return
+				}
+				destStruct := newStreamElemFn()
+				err = destStruct.Read(decoder)
 				if err != nil {
-					onStreamErrorFn(err)
+					yield(nil, err)
+					return
+				} else if destEx := destStruct.Exception(); destEx != nil {
+					yield(nil, destEx)
+					return
+				}
+
+				if !yield(destStruct, nil) {
 					return
 				}
 			} else {
 				// Stream completion
-				onStreamComplete()
 				return
 			}
 		}
-	}()
+	}
 
-	return firstResponse.Headers(), firstResponse.Data(), nil
+	return firstResponse.Headers(), firstResponse.Data(), streamSeq, nil
 }
 
 func (r *rsocketClient) MetadataPush(_ context.Context, metadata *rpcmetadata.ClientPushMetadata) error {

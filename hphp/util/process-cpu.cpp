@@ -16,6 +16,8 @@
 
 #include "hphp/util/process-cpu.h"
 
+#include <folly/system/HardwareConcurrency.h>
+
 #include <cassert>
 #include <cstring>
 #include <iomanip>
@@ -29,7 +31,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 int Process::GetCPUCount() {
-  return std::thread::hardware_concurrency();
+  return folly::available_concurrency();
 }
 
 #ifdef __x86_64__

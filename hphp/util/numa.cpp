@@ -18,6 +18,7 @@
 #ifdef HAVE_NUMA
 #include "hphp/util/portability.h"
 #include <folly/Bits.h>
+#include <folly/system/HardwareConcurrency.h>
 #include <numaif.h>
 #include <algorithm>
 #include <fstream>
@@ -134,7 +135,7 @@ void enable_numa() {
         inc.push_back(increment);
         usage.push_back(increment);
       }
-      for (unsigned i = 0; i < std::thread::hardware_concurrency(); ++i) {
+      for (unsigned i = 0; i < folly::available_concurrency(); ++i) {
         auto iter = std::min_element(usage.begin(), usage.end());
         auto const node = iter - usage.begin();
         *iter += inc[node];
@@ -154,7 +155,7 @@ void enable_numa() {
           pair_usage.push_back(increment);
         }
       }
-      for (unsigned i = 0; i < std::thread::hardware_concurrency(); ++i) {
+      for (unsigned i = 0; i < folly::available_concurrency(); ++i) {
         auto iter = std::min_element(pair_usage.begin(), pair_usage.end());
         auto const nodes_index = iter - pair_usage.begin();
         *iter += pair_inc[nodes_index];

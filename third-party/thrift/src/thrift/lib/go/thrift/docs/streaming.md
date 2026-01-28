@@ -19,8 +19,8 @@ streaming services in Thrift IDL, please refer to the
 Thrift Streaming allows the server to stream data to the client
 (server-to-client streaming), enabling efficient handling of large datasets or
 real-time data feeds. The server produces a stream of elements that the client
-consumes. Go's implementation uses channels to provide an idiomatic API for
-streaming functionality.
+consumes. Go's implementation uses `iter.Seq2` iterators to provide an idiomatic
+API for streaming functionality.
 
 ## Defining Streaming Services
 
@@ -51,16 +51,16 @@ service FileService {
 
 ### API Signature
 
-The generated client API returns different values depending on whether the
-stream has an initial response:
+The generated client API returns an `iter.Seq2[ElemType, error]` iterator,
+which allows you to iterate over stream elements using Go's range-over-function
+syntax. The values returned depend on whether the stream has an initial response:
 
 **Stream-only (no initial response):**
 
 ```go
 func (c *Client) StreamMethod(ctx context.Context, args...) (
-    <-chan ElemType,  // Element channel
-    <-chan error,     // Error channel
-    error,            // Initial error
+    iter.Seq2[ElemType, error], // Stream iterator
+    error,                      // Initial error
 )
 ```
 
@@ -68,10 +68,9 @@ func (c *Client) StreamMethod(ctx context.Context, args...) (
 
 ```go
 func (c *Client) StreamMethod(ctx context.Context, args...) (
-    *InitialResponse, // First response
-    <-chan ElemType,  // Element channel
-    <-chan error,     // Error channel
-    error,            // Initial error
+    *InitialResponse,           // First response
+    iter.Seq2[ElemType, error], // Stream iterator
+    error,                      // Initial error
 )
 ```
 
@@ -84,15 +83,16 @@ func (c *Client) StreamMethod(ctx context.Context, args...) (
 2. **Check Initial Error**: Always check the initial error first. If non-nil, no
    stream follows.
 
-3. **Consume Element Channel**: Consume elements from the element channel until
-   it's exhausted (closed).
+3. **Iterate with Range**: Use Go's `for elem, err := range streamSeq` syntax
+   to iterate over stream elements.
 
-4. **Check Stream Error**: After consuming all elements, check the error channel
-   once to determine if the stream terminated gracefully or encountered an
-   error.
+4. **Handle Stream Errors**: The error is returned as the second value in each
+   iteration. If an error is returned, handle it as appropriate and note that
+   the iterator will be exhausted (no more elements). Successful completion is
+   indicated when the for-loop exits naturally with no errors received.
 
-5. **Cleanup**: You should NOT worry about cleaning up channels/resources
-   besides providing a reasonable context timeout/cancellation.
+5. **Cleanup**: You should NOT worry about cleaning up resources besides
+   providing a reasonable context timeout/cancellation.
 
 ### Example: Stream-Only Response
 
@@ -101,20 +101,18 @@ func main() {
     ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
     defer cancel()
 
-    elemChan, errChan, err := client.NumberRange(ctx, 1, 100)
+    streamSeq, err := client.NumberRange(ctx, 1, 100)
     if err != nil {
         log.Fatalf("request failed: %v", err)
     }
 
-    for elem := range elemChan {
+    for elem, err := range streamSeq {
+        // Check if streaming encountered an error
+        if err != nil {
+            log.Fatalf("error during stream: %v", err)
+        }
         // Process each element
         fmt.Printf("Received: %d\n", elem)
-    }
-
-    // Check if streaming encountered an error
-    streamErr := <-errChan
-    if streamErr != nil {
-        log.Fatalf("error during stream: %v", streamErr)
     }
 }
 ```
@@ -126,22 +124,20 @@ func main() {
     ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
     defer cancel()
 
-    firstResponse, elemChan, errChan, err := client.GetFile(ctx, "/path/to/file.txt")
+    firstResponse, streamSeq, err := client.GetFile(ctx, "/path/to/file.txt")
     if err != nil {
         log.Fatalf("request failed: %v", err)
     }
 
     fmt.Printf("File size: %d bytes\n", firstResponse.GetFileSize())
 
-    for fileChunk := range elemChan {
+    for fileChunk, err := range streamSeq {
+        // Check if streaming encountered an error
+        if err != nil {
+            log.Fatalf("error during stream: %v", err)
+        }
         // Process each file chunk
         fmt.Printf("Received chunk: %d bytes\n", len(fileChunk.GetData()))
-    }
-
-    // Check if streaming encountered an error
-    streamErr := <-errChan
-    if streamErr != nil {
-        log.Fatalf("error during stream: %v", streamErr)
     }
 }
 ```

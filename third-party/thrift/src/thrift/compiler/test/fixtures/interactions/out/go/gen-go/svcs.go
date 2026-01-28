@@ -41,7 +41,7 @@ type MyInteractionClient interface {
     io.Closer
     Frobnicate(ctx context.Context) (int32, error)
     Ping(ctx context.Context) (error)
-    Truthify(ctx context.Context) (<-chan bool /* elem stream */, <-chan error /* stream err */, error)
+    Truthify(ctx context.Context) (iter.Seq2[bool, error], error)
 }
 
 type myInteractionClientImpl struct {
@@ -89,10 +89,10 @@ func (c *myInteractionClientImpl) Ping(ctx context.Context) (error) {
     return c.ch.SendRequestNoResponse(ctx, "MyInteraction.ping", fbthriftReq)
 }
 
-func (c *myInteractionClientImpl) Truthify(ctx context.Context) (<-chan bool /* elem stream */, <-chan error /* stream err */, error) {
+func (c *myInteractionClientImpl) Truthify(ctx context.Context) (iter.Seq2[bool, error], error) {
     // Must be a cancellable context to prevent goroutine leaks
     if ctx.Done() == nil {
-		return nil, nil, errors.New("context does not support cancellation")
+		return nil, errors.New("context does not support cancellation")
 	}
     fbthriftStreamCtx, fbthriftStreamCancel := context.WithCancel(ctx)
 
@@ -116,6 +116,18 @@ func (c *myInteractionClientImpl) Truthify(ctx context.Context) (<-chan bool /* 
         fbthriftElemChan <- fbthriftStreamValue.GetSuccess()
         return nil
     }
+    fbthriftStreamSeq := func(yield func(bool, error) bool) {
+        for elem := range fbthriftElemChan {
+            if !yield(elem, nil) {
+                return
+            }
+        }
+        for err := range fbthriftErrChan {
+            if !yield(false, err) {
+                return
+            }
+        }
+    }
     fbthriftOnStreamErrorFn := func(err error) {
         fbthriftErrChan <- err
         close(fbthriftElemChan)
@@ -137,12 +149,12 @@ func (c *myInteractionClientImpl) Truthify(ctx context.Context) (<-chan bool /* 
     )
     if fbthriftErr != nil {
         fbthriftStreamCancel()
-        return nil, nil, fbthriftErr
+        return nil, fbthriftErr
     } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
         fbthriftStreamCancel()
-        return nil, nil, fbthriftEx
+        return nil, fbthriftEx
     }
-    return fbthriftElemChan, fbthriftErrChan, nil
+    return fbthriftStreamSeq, nil
 }
 
 
@@ -322,7 +334,7 @@ type MyInteractionFastClient interface {
     io.Closer
     Frobnicate(ctx context.Context) (int32, error)
     Ping(ctx context.Context) (error)
-    Truthify(ctx context.Context) (<-chan bool /* elem stream */, <-chan error /* stream err */, error)
+    Truthify(ctx context.Context) (iter.Seq2[bool, error], error)
 }
 
 type myInteractionFastClientImpl struct {
@@ -370,10 +382,10 @@ func (c *myInteractionFastClientImpl) Ping(ctx context.Context) (error) {
     return c.ch.SendRequestNoResponse(ctx, "MyInteractionFast.ping", fbthriftReq)
 }
 
-func (c *myInteractionFastClientImpl) Truthify(ctx context.Context) (<-chan bool /* elem stream */, <-chan error /* stream err */, error) {
+func (c *myInteractionFastClientImpl) Truthify(ctx context.Context) (iter.Seq2[bool, error], error) {
     // Must be a cancellable context to prevent goroutine leaks
     if ctx.Done() == nil {
-		return nil, nil, errors.New("context does not support cancellation")
+		return nil, errors.New("context does not support cancellation")
 	}
     fbthriftStreamCtx, fbthriftStreamCancel := context.WithCancel(ctx)
 
@@ -397,6 +409,18 @@ func (c *myInteractionFastClientImpl) Truthify(ctx context.Context) (<-chan bool
         fbthriftElemChan <- fbthriftStreamValue.GetSuccess()
         return nil
     }
+    fbthriftStreamSeq := func(yield func(bool, error) bool) {
+        for elem := range fbthriftElemChan {
+            if !yield(elem, nil) {
+                return
+            }
+        }
+        for err := range fbthriftErrChan {
+            if !yield(false, err) {
+                return
+            }
+        }
+    }
     fbthriftOnStreamErrorFn := func(err error) {
         fbthriftErrChan <- err
         close(fbthriftElemChan)
@@ -418,12 +442,12 @@ func (c *myInteractionFastClientImpl) Truthify(ctx context.Context) (<-chan bool
     )
     if fbthriftErr != nil {
         fbthriftStreamCancel()
-        return nil, nil, fbthriftErr
+        return nil, fbthriftErr
     } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
         fbthriftStreamCancel()
-        return nil, nil, fbthriftEx
+        return nil, fbthriftEx
     }
-    return fbthriftElemChan, fbthriftErrChan, nil
+    return fbthriftStreamSeq, nil
 }
 
 
@@ -851,7 +875,7 @@ type MyServiceClient interface {
     Foo(ctx context.Context) (error)
     Interact(ctx context.Context, arg int32) (MyInteractionClient, error)
     InteractFast(ctx context.Context) (MyInteractionFastClient, int32, error)
-    Serialize(ctx context.Context) (SerialInteractionClient, int32, <-chan int32 /* elem stream */, <-chan error /* stream err */, error)
+    Serialize(ctx context.Context) (SerialInteractionClient, int32, iter.Seq2[int32, error], error)
 }
 
 type myServiceClientImpl struct {
@@ -934,11 +958,11 @@ func (c *myServiceClientImpl) InteractFast(ctx context.Context) (MyInteractionFa
     return fbthriftInteractionClient, fbthriftResp.GetSuccess(), nil
 }
 
-func (c *myServiceClientImpl) Serialize(ctx context.Context) (SerialInteractionClient, int32, <-chan int32 /* elem stream */, <-chan error /* stream err */, error) {
+func (c *myServiceClientImpl) Serialize(ctx context.Context) (SerialInteractionClient, int32, iter.Seq2[int32, error], error) {
     var fbthriftRespZero int32
     // Must be a cancellable context to prevent goroutine leaks
     if ctx.Done() == nil {
-		return nil, fbthriftRespZero, nil, nil, errors.New("context does not support cancellation")
+		return nil, fbthriftRespZero, nil, errors.New("context does not support cancellation")
 	}
     fbthriftStreamCtx, fbthriftStreamCancel := context.WithCancel(ctx)
 
@@ -963,6 +987,18 @@ func (c *myServiceClientImpl) Serialize(ctx context.Context) (SerialInteractionC
         fbthriftElemChan <- fbthriftStreamValue.GetSuccess()
         return nil
     }
+    fbthriftStreamSeq := func(yield func(int32, error) bool) {
+        for elem := range fbthriftElemChan {
+            if !yield(elem, nil) {
+                return
+            }
+        }
+        for err := range fbthriftErrChan {
+            if !yield(0, err) {
+                return
+            }
+        }
+    }
     fbthriftOnStreamErrorFn := func(err error) {
         fbthriftErrChan <- err
         close(fbthriftElemChan)
@@ -984,12 +1020,12 @@ func (c *myServiceClientImpl) Serialize(ctx context.Context) (SerialInteractionC
     )
     if fbthriftErr != nil {
         fbthriftStreamCancel()
-        return nil, fbthriftRespZero, nil, nil, fbthriftErr
+        return nil, fbthriftRespZero, nil, fbthriftErr
     } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
         fbthriftStreamCancel()
-        return nil, fbthriftRespZero, nil, nil, fbthriftEx
+        return nil, fbthriftRespZero, nil, fbthriftEx
     }
-    return fbthriftInteractionClient, fbthriftResp.GetSuccess(), fbthriftElemChan, fbthriftErrChan, nil
+    return fbthriftInteractionClient, fbthriftResp.GetSuccess(), fbthriftStreamSeq, nil
 }
 
 
@@ -1188,7 +1224,7 @@ type FactoriesClient interface {
     Foo(ctx context.Context) (error)
     Interact(ctx context.Context, arg int32) (MyInteractionClient, error)
     InteractFast(ctx context.Context) (MyInteractionFastClient, int32, error)
-    Serialize(ctx context.Context) (SerialInteractionClient, int32, <-chan int32 /* elem stream */, <-chan error /* stream err */, error)
+    Serialize(ctx context.Context) (SerialInteractionClient, int32, iter.Seq2[int32, error], error)
 }
 
 type factoriesClientImpl struct {
@@ -1271,11 +1307,11 @@ func (c *factoriesClientImpl) InteractFast(ctx context.Context) (MyInteractionFa
     return fbthriftInteractionClient, fbthriftResp.GetSuccess(), nil
 }
 
-func (c *factoriesClientImpl) Serialize(ctx context.Context) (SerialInteractionClient, int32, <-chan int32 /* elem stream */, <-chan error /* stream err */, error) {
+func (c *factoriesClientImpl) Serialize(ctx context.Context) (SerialInteractionClient, int32, iter.Seq2[int32, error], error) {
     var fbthriftRespZero int32
     // Must be a cancellable context to prevent goroutine leaks
     if ctx.Done() == nil {
-		return nil, fbthriftRespZero, nil, nil, errors.New("context does not support cancellation")
+		return nil, fbthriftRespZero, nil, errors.New("context does not support cancellation")
 	}
     fbthriftStreamCtx, fbthriftStreamCancel := context.WithCancel(ctx)
 
@@ -1300,6 +1336,18 @@ func (c *factoriesClientImpl) Serialize(ctx context.Context) (SerialInteractionC
         fbthriftElemChan <- fbthriftStreamValue.GetSuccess()
         return nil
     }
+    fbthriftStreamSeq := func(yield func(int32, error) bool) {
+        for elem := range fbthriftElemChan {
+            if !yield(elem, nil) {
+                return
+            }
+        }
+        for err := range fbthriftErrChan {
+            if !yield(0, err) {
+                return
+            }
+        }
+    }
     fbthriftOnStreamErrorFn := func(err error) {
         fbthriftErrChan <- err
         close(fbthriftElemChan)
@@ -1321,12 +1369,12 @@ func (c *factoriesClientImpl) Serialize(ctx context.Context) (SerialInteractionC
     )
     if fbthriftErr != nil {
         fbthriftStreamCancel()
-        return nil, fbthriftRespZero, nil, nil, fbthriftErr
+        return nil, fbthriftRespZero, nil, fbthriftErr
     } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
         fbthriftStreamCancel()
-        return nil, fbthriftRespZero, nil, nil, fbthriftEx
+        return nil, fbthriftRespZero, nil, fbthriftEx
     }
-    return fbthriftInteractionClient, fbthriftResp.GetSuccess(), fbthriftElemChan, fbthriftErrChan, nil
+    return fbthriftInteractionClient, fbthriftResp.GetSuccess(), fbthriftStreamSeq, nil
 }
 
 

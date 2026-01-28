@@ -41,7 +41,7 @@ type C interface {
 type CClient interface {
     io.Closer
     F(ctx context.Context) (error)
-    Numbers(ctx context.Context) (<-chan Number /* elem stream */, <-chan error /* stream err */, error)
+    Numbers(ctx context.Context) (iter.Seq2[Number, error], error)
     Thing(ctx context.Context, a int32, b string, c []int32) (string, error)
 }
 
@@ -84,10 +84,10 @@ func (c *cClientImpl) F(ctx context.Context) (error) {
     return nil
 }
 
-func (c *cClientImpl) Numbers(ctx context.Context) (<-chan Number /* elem stream */, <-chan error /* stream err */, error) {
+func (c *cClientImpl) Numbers(ctx context.Context) (iter.Seq2[Number, error], error) {
     // Must be a cancellable context to prevent goroutine leaks
     if ctx.Done() == nil {
-		return nil, nil, errors.New("context does not support cancellation")
+		return nil, errors.New("context does not support cancellation")
 	}
     fbthriftStreamCtx, fbthriftStreamCancel := context.WithCancel(ctx)
 
@@ -111,6 +111,18 @@ func (c *cClientImpl) Numbers(ctx context.Context) (<-chan Number /* elem stream
         fbthriftElemChan <- fbthriftStreamValue.GetSuccess()
         return nil
     }
+    fbthriftStreamSeq := func(yield func(Number, error) bool) {
+        for elem := range fbthriftElemChan {
+            if !yield(elem, nil) {
+                return
+            }
+        }
+        for err := range fbthriftErrChan {
+            if !yield(0, err) {
+                return
+            }
+        }
+    }
     fbthriftOnStreamErrorFn := func(err error) {
         fbthriftErrChan <- err
         close(fbthriftElemChan)
@@ -132,12 +144,12 @@ func (c *cClientImpl) Numbers(ctx context.Context) (<-chan Number /* elem stream
     )
     if fbthriftErr != nil {
         fbthriftStreamCancel()
-        return nil, nil, fbthriftErr
+        return nil, fbthriftErr
     } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
         fbthriftStreamCancel()
-        return nil, nil, fbthriftEx
+        return nil, fbthriftEx
     }
-    return fbthriftElemChan, fbthriftErrChan, nil
+    return fbthriftStreamSeq, nil
 }
 
 func (c *cClientImpl) Thing(ctx context.Context, a int32, b string, c []int32) (string, error) {

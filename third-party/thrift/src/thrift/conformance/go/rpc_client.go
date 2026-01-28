@@ -215,20 +215,18 @@ func (t *rpcClientConformanceTester) StreamBasic(ctx context.Context) error {
 	streamCtx, streamCancel := context.WithCancel(ctx)
 	defer streamCancel()
 
-	elemChan, elemErrChan, err := t.client.StreamBasic(streamCtx, t.instruction.StreamBasic.Request)
+	streamSeq, err := t.client.StreamBasic(streamCtx, t.instruction.StreamBasic.Request)
 	if err != nil {
 		return err
 	}
 
 	responses := make([]*rpc.Response, 0)
-	for elem := range elemChan {
+	for elem, err := range streamSeq {
+		// Check if streaming encountered and error
+		if err != nil {
+			return err
+		}
 		responses = append(responses, elem)
-	}
-
-	// Check if streaming encountered and error
-	streamErr := <-elemErrChan
-	if streamErr != nil {
-		return err
 	}
 
 	responseValue := rpc.NewStreamBasicClientTestResult().
@@ -242,20 +240,18 @@ func (t *rpcClientConformanceTester) StreamInitialResponse(ctx context.Context) 
 	streamCtx, streamCancel := context.WithCancel(ctx)
 	defer streamCancel()
 
-	initElem, elemChan, elemErrChan, err := t.client.StreamInitialResponse(streamCtx, t.instruction.StreamInitialResponse.Request)
+	initElem, streamSeq, err := t.client.StreamInitialResponse(streamCtx, t.instruction.StreamInitialResponse.Request)
 	if err != nil {
 		return err
 	}
 
 	responses := make([]*rpc.Response, 0)
-	for elem := range elemChan {
+	for elem, err := range streamSeq {
+		// Check if streaming encountered and error
+		if err != nil {
+			return err
+		}
 		responses = append(responses, elem)
-	}
-
-	// Check if streaming encountered and error
-	streamErr := <-elemErrChan
-	if streamErr != nil {
-		return err
 	}
 
 	responseValue := rpc.NewStreamInitialResponseClientTestResult().
@@ -270,17 +266,18 @@ func (t *rpcClientConformanceTester) StreamDeclaredException(ctx context.Context
 	streamCtx, streamCancel := context.WithCancel(ctx)
 	defer streamCancel()
 
-	elemChan, elemErrChan, err := t.client.StreamDeclaredException(streamCtx, t.instruction.StreamDeclaredException.Request)
+	streamSeq, err := t.client.StreamDeclaredException(streamCtx, t.instruction.StreamDeclaredException.Request)
 	if err != nil {
 		return err
 	}
 
-	for range elemChan {
-		// Do nothing.
+	var streamErr error
+	for _, err := range streamSeq {
+		if err != nil {
+			streamErr = err
+			break
+		}
 	}
-
-	// Check if streaming encountered and error
-	streamErr := <-elemErrChan
 
 	responseValue := rpc.NewStreamDeclaredExceptionClientTestResult().
 		SetUserException(streamErr.(*rpc.UserException))
@@ -293,17 +290,18 @@ func (t *rpcClientConformanceTester) StreamUndeclaredException(ctx context.Conte
 	streamCtx, streamCancel := context.WithCancel(ctx)
 	defer streamCancel()
 
-	elemChan, elemErrChan, err := t.client.StreamUndeclaredException(streamCtx, t.instruction.StreamUndeclaredException.Request)
+	streamSeq, err := t.client.StreamUndeclaredException(streamCtx, t.instruction.StreamUndeclaredException.Request)
 	if err != nil {
 		return err
 	}
 
-	for range elemChan {
-		// Do nothing.
+	var streamErr error
+	for _, err := range streamSeq {
+		if err != nil {
+			streamErr = err
+			break
+		}
 	}
-
-	// Check if streaming encountered and error
-	streamErr := <-elemErrChan
 
 	responseValue := rpc.NewStreamUndeclaredExceptionClientTestResult().
 		SetExceptionMessage(streamErr.Error())
@@ -316,7 +314,7 @@ func (t *rpcClientConformanceTester) StreamInitialDeclaredException(ctx context.
 	streamCtx, streamCancel := context.WithCancel(ctx)
 	defer streamCancel()
 
-	_, _, err := t.client.StreamInitialDeclaredException(streamCtx, t.instruction.StreamInitialDeclaredException.Request)
+	_, err := t.client.StreamInitialDeclaredException(streamCtx, t.instruction.StreamInitialDeclaredException.Request)
 
 	responseValue := rpc.NewStreamInitialDeclaredExceptionClientTestResult().
 		SetUserException(err.(*rpc.UserException))
@@ -329,7 +327,7 @@ func (t *rpcClientConformanceTester) StreamInitialUndeclaredException(ctx contex
 	streamCtx, streamCancel := context.WithCancel(ctx)
 	defer streamCancel()
 
-	_, _, err := t.client.StreamInitialUndeclaredException(streamCtx, t.instruction.StreamInitialUndeclaredException.Request)
+	_, err := t.client.StreamInitialUndeclaredException(streamCtx, t.instruction.StreamInitialUndeclaredException.Request)
 
 	responseValue := rpc.NewStreamInitialUndeclaredExceptionClientTestResult().
 		SetExceptionMessage(err.Error())
@@ -353,7 +351,7 @@ func (t *rpcClientConformanceTester) StreamInitialTimeout(ctx context.Context) e
 	)
 	defer timeoutCancel()
 
-	_, _, err := t.client.StreamInitialTimeout(timeoutCtx, t.instruction.StreamInitialTimeout.Request)
+	_, err := t.client.StreamInitialTimeout(timeoutCtx, t.instruction.StreamInitialTimeout.Request)
 
 	// We expect to hit a timeout for this test case.
 	isTimeout := (err != nil)

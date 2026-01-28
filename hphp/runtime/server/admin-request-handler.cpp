@@ -310,7 +310,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         "/stop:            stop the web server\n"
         "    instance-id   optional, if specified, instance ID has to match\n"
         "/oom-kill:        abort all requests whose memory usage exceed\n"
-        "                  Server.RequestMemoryOOMKillBytes\n"
+        "                  the adaptive OOMKillThreshold\n"
         "/free-mem:        ask allocator to release unused memory to system\n"
         "/prepare-to-stop: ask the server to prepare for stopping\n"
         "/flush-profile:   flush profiling counters (in -fprofile-gen builds)\n"

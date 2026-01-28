@@ -420,8 +420,7 @@ private:
    * `m_hostOutOfMemory` is a flag used together with MemExceededFlag, to
    * indicate whether the host is running low on memory.  Note that the presence
    * of this flag doesn't necessarily lead to the request being aborted.  A
-   * request is only affected when it satisfies some other criteria, e.g., when
-   * it uses more memory than RequestMemoryOOMKillBytes.  If we do decide to
+   * request is only affected when it satisfies some other criteria.  If we do decide to
    * abort the request, `m_OOMAbort` is set.
    */
   std::atomic<bool> m_hostOutOfMemory{false};

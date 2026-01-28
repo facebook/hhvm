@@ -239,7 +239,6 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 - int Server.ThreadJobLIFOSwitchThreshold, UNKNOWN
 - std::vector<std::string> Server.IncludeSearchPaths = {}, UNKNOWN
 - std::string Server.FontPath = "", UNKNOWN
-- uint64_t Server.RequestMemoryOOMKillBytes = 128ULL << 20, UNKNOWN
 - std::string Server.SourceRoot, UNKNOWN
 - bool Server.SafeFileAccess = false, UNKNOWN
 - std::vector<std::string> Server.AllowedDirectories = {}, UNKNOWN

@@ -35,6 +35,7 @@ void throwIfNull(const A& a, const std::string& msg) {
 
 struct CreateCertOptions {
   std::string cn;
+  std::vector<std::string> sans;
   bool ca{false};
   CertAndKey* issuer{nullptr};
   std::optional<std::chrono::system_clock::time_point> notBefore;
@@ -94,6 +95,7 @@ inline void generateRSAKey(folly::ssl::EvpPkeyUniquePtr& pk) {
 
 inline CertAndKey createCert(CreateCertOptions options) {
   const auto& cn = options.cn;
+  const auto& sans = options.sans;
   bool ca = options.ca;
   const auto& issuer = options.issuer;
   const auto& keyType = options.keyType;
@@ -175,6 +177,17 @@ extendedKeyUsage        = critical, serverAuth, clientAuth
     configuration.append("keyUsage = critical, cRLSign, digitalSignature\n");
   }
 
+  std::vector<std::string> subjectAltNames;
+  for (const auto& san : sans) {
+    std::string dnsSan = "DNS:" + san;
+    subjectAltNames.push_back(std::move(dnsSan));
+  }
+  if (!subjectAltNames.empty()) {
+    std::string sansConfigRow =
+        fmt::format("subjectAltName = {}", folly::join(", ", subjectAltNames));
+    configuration.append(sansConfigRow);
+  }
+
   folly::ssl::BioUniquePtr bio(
       BIO_new_mem_buf(configuration.data(), configuration.size()));
   CONF* c = NCONF_new(nullptr);
@@ -204,10 +217,20 @@ extendedKeyUsage        = critical, serverAuth, clientAuth
   return {std::move(crt), std::move(pk)};
 }
 
-inline CertAndKey
-createCert(std::string cn, bool ca, CertAndKey* issuer, KeyType keyType) {
+inline CertAndKey createCert(
+    std::string cn,
+    bool ca,
+    CertAndKey* issuer,
+    KeyType keyType,
+    std::vector<std::string> sans = {}) {
+  auto it = std::find(sans.begin(), sans.end(), cn);
+  // add CN into SANs if it is not present
+  if (it == sans.end()) {
+    sans.push_back(cn);
+  }
   return createCert(
       {.cn = std::move(cn),
+       .sans = std::move(sans),
        .ca = ca,
        .issuer = issuer,
        .notBefore = std::nullopt,

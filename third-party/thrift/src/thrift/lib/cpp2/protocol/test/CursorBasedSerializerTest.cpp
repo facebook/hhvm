@@ -263,9 +263,9 @@ TEST(CursorSerializer, ContainerRead) {
   auto contiguousReader = wrapper.beginRead</* Contiguous = */ true>();
   auto contiguousListReader =
       contiguousReader.beginRead<ident::lucky_numbers>();
-  for (auto i : contiguousListReader) {
+  if (contiguousListReader.begin() != contiguousListReader.end()) {
+    auto i = *contiguousListReader.begin();
     EXPECT_GT(i, 500);
-    break;
   }
   // Ending read in the middle of iteration still allows reading next field.
   contiguousReader.endRead(std::move(contiguousListReader));

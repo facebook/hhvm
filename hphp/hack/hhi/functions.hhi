@@ -79,7 +79,7 @@ namespace {
 namespace HH {
   // autoload-map
   function could_include(\HH\FIXME\MISSING_PARAM_TYPE $file): bool;
-  function autoload_is_native(): bool;
+  function autoload_is_native()[]: bool;
 
   /**
    * Get the path which uniquely defines the given symbol.
@@ -88,12 +88,12 @@ namespace HH {
    *
    * Throws InvalidOperationException if native autoloading is disabled.
    */
-  function autoload_type_to_path(string $type): ?string;
-  function autoload_function_to_path(string $function): ?string;
-  function autoload_constant_to_path(string $constant): ?string;
-  function autoload_module_to_path(string $module): ?string;
-  function autoload_type_alias_to_path(string $type_alias): ?string;
-  function autoload_type_or_type_alias_to_path(string $type): ?string;
+  function autoload_type_to_path(string $type)[]: ?string;
+  function autoload_function_to_path(string $function)[]: ?string;
+  function autoload_constant_to_path(string $constant)[]: ?string;
+  function autoload_module_to_path(string $module)[]: ?string;
+  function autoload_type_alias_to_path(string $type_alias)[]: ?string;
+  function autoload_type_or_type_alias_to_path(string $type)[]: ?string;
 
   /**
    * Get the types defined in the given path.
@@ -104,11 +104,11 @@ namespace HH {
    *
    * Throws InvalidOperationException if native autoloading is disabled.
    */
-  function autoload_path_to_types(string $path): vec<classname<mixed>>;
-  function autoload_path_to_functions(string $path): vec<string>;
-  function autoload_path_to_constants(string $path): vec<string>;
-  function autoload_path_to_modules(string $path): vec<string>;
-  function autoload_path_to_type_aliases(string $path): vec<string>;
+  function autoload_path_to_types(string $path)[]: vec<classname<mixed>>;
+  function autoload_path_to_functions(string $path)[]: vec<string>;
+  function autoload_path_to_constants(string $path)[]: vec<string>;
+  function autoload_path_to_modules(string $path)[]: vec<string>;
+  function autoload_path_to_type_aliases(string $path)[]: vec<string>;
 
   newtype ParseTree = darray<string, mixed>;
   function ffp_parse_string(string $program)[]: ParseTree;

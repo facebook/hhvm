@@ -18,16 +18,18 @@
     "@docusaurus/core": "^3.9.2",
     "@docusaurus/preset-classic": "^3.9.2",
     "@mdx-js/react": "^3.1.0",
-    "clsx": "^1.2.1",
+    "clsx": "^2.0.0",
     "docusaurus-plugin-internaldocs-fb": "^1.19.1",
+    "@docusaurus/plugin-client-redirects": "^3.9.2",
     "prism-react-renderer": "^2.4.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },
   "resolutions": {
-      "diff": "5.2.2",
-      "lodash": "4.17.23",
-      "lodash-es": "4.17.23"
+    "diff": "5.2.2",
+    "lodash": "4.17.23",
+    "lodash-es": "4.17.23",
+    "baseline-browser-mapping": "^2.9.18"
   },
   "browserslist": {
     "production": [

@@ -32,6 +32,40 @@ const { fbContent } = require('docusaurus-plugin-internaldocs-fb/internal');
       maintainCase: false,
     },
   },
+  plugins: [
+    [
+      '@docusaurus/plugin-client-redirects',
+      {
+        // NOTE: This plugin only generates static redirect assets based on
+        // compile-time path information derived from the directory and file
+        // structure of 'manual/'. We can use this for `/docs/*` to `/*`
+        // redirects for known paths as well as known absolute redirects
+        // such as `(...)/getting-started` -> `(...)/quick-start` below.
+        //
+        // In other words, the plugin does not give us any runtime control
+        // over the router for statically built pages (that we use for our
+        // hosting on GitHub Pages).
+
+        fromExtensions: ['html', 'htm'],
+        redirects: [
+          {
+            to: '/hack/getting-started/quick-start/',
+            from: '/hack/getting-started/getting-started/',
+          },
+        ],
+        createRedirects(existingPathInDocs) {
+          // Conditional should always be true as we do not expect a `docs`-
+          // subdirectory in the `manual/` folder:
+          if (!existingPathInDocs.includes('/docs')) {
+            // For all docs-pages (`X`) in `manual/`, generate static assets
+            // (`/docs/X`) from which we want to redirect to `/X`:
+            return [ `/docs${existingPathInDocs}` ];
+          }
+          return undefined; // no redirect created
+        },
+      },
+    ],
+  ],
   presets: [
     [
       'docusaurus-plugin-internaldocs-fb/docusaurus-preset',

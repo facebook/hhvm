@@ -52,6 +52,7 @@ folly::exception_wrapper Error::toException() const {
     case Error::Category::StdOutOfRange:
       return folly::make_exception_wrapper<std::out_of_range>(msg());
   }
+  return {};
 }
 FOLLY_POP_WARNING
 } // namespace fizz

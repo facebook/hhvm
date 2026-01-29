@@ -1376,8 +1376,8 @@ EventHandler<ServerTypes, StateEnum::ExpectingClientHello, Event::ClientHello>::
        pskMode = resStateResult.pskMode,
        echStatus,
        echState = std::move(echState),
-       obfuscatedAge =
-           resStateResult.obfuscatedAge](FutureResultType result) mutable {
+       obfuscatedAge = resStateResult.obfuscatedAge,
+       err = std::move(err)](FutureResultType result) mutable {
         auto& resumption = *std::get<0>(result);
         auto pskType = resumption.first;
         auto resState = std::move(resumption.second);
@@ -1452,7 +1452,6 @@ EventHandler<ServerTypes, StateEnum::ExpectingClientHello, Event::ClientHello>::
             earlyReadRecordLayer =
                 state.context()->getFactory()->makeEncryptedReadRecordLayer(
                     EncryptionLevel::EarlyData);
-            Error err;
             FIZZ_THROW_ON_ERROR(
                 earlyReadRecordLayer->setProtocolVersion(err, version), err);
 
@@ -1526,7 +1525,6 @@ EventHandler<ServerTypes, StateEnum::ExpectingClientHello, Event::ClientHello>::
             auto encodedHelloRetryRequest = encodeHandshake(std::move(hrr));
             handshakeContext->appendToTranscript(encodedHelloRetryRequest);
 
-            Error err;
             TLSContent content;
             FIZZ_THROW_ON_ERROR(
                 state.writeRecordLayer()->writeHandshake(
@@ -1624,7 +1622,8 @@ EventHandler<ServerTypes, StateEnum::ExpectingClientHello, Event::ClientHello>::
              cookieState = std::move(cookieState),
              resState = std::move(resState),
              // Hold kex until the doKexFuture finished.
-             kex = std::move(kex)](
+             kex = std::move(kex),
+             err = std::move(err)](
                 Optional<AsyncKeyExchange::DoKexResult> kexResult) mutable {
               Optional<Buf> serverShare;
               if (kexResult.hasValue()) {
@@ -1697,7 +1696,7 @@ EventHandler<ServerTypes, StateEnum::ExpectingClientHello, Event::ClientHello>::
               auto handshakeWriteRecordLayer =
                   state.context()->getFactory()->makeEncryptedWriteRecordLayer(
                       EncryptionLevel::Handshake);
-              Error err;
+
               FIZZ_THROW_ON_ERROR(
                   handshakeWriteRecordLayer->setProtocolVersion(err, version),
                   err);
@@ -1844,7 +1843,8 @@ EventHandler<ServerTypes, StateEnum::ExpectingClientHello, Event::ClientHello>::
                    appToken = std::move(appToken),
                    legacySessionId = std::move(legacySessionId),
                    serverCertCompAlgo = certCompressionAlgo,
-                   handshakeTime](Optional<Buf> sig) mutable {
+                   handshakeTime,
+                   err = std::move(err)](Optional<Buf> sig) mutable {
                     Optional<Buf> encodedCertificateVerify;
                     if (sig) {
                       encodedCertificateVerify = getCertificateVerify(
@@ -1877,7 +1877,6 @@ EventHandler<ServerTypes, StateEnum::ExpectingClientHello, Event::ClientHello>::
                     // Some middleboxes appear to break if the first encrypted
                     // record is larger than ~1300 bytes (likely if it does not
                     // fit in the first packet).
-                    Error err;
                     TLSContent serverEncrypted;
                     FIZZ_THROW_ON_ERROR(
                         handshakeWriteRecordLayer->writeHandshake(

@@ -58,7 +58,7 @@ class BiDiConfigurableServer : public BiDiServerCallback,
     switch (sinkErrorAction_) {
       case SinkErrorAction::FATAL: {
         LOG(FATAL) << "onSinkError";
-      } break;
+      }
       case SinkErrorAction::IGNORE: {
         // do nothing
       } break;
@@ -125,7 +125,7 @@ class BiDiConfigurableServer : public BiDiServerCallback,
     switch (sinkCompleteAction_) {
       case SinkCompleteAction::FATAL: {
         LOG(FATAL) << "onSinkComplete";
-      } break;
+      }
       case SinkCompleteAction::IGNORE: {
         // do nothing
       } break;
@@ -196,7 +196,7 @@ class BiDiConfigurableServer : public BiDiServerCallback,
     switch (streamCancelAction_) {
       case StreamCancelAction::FATAL: {
         LOG(FATAL) << "onStreamCancel";
-      } break;
+      }
       case StreamCancelAction::IGNORE: {
         // do nothing
       } break;

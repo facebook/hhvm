@@ -52,7 +52,7 @@ class BiDiFiniteServer : public BiDiServerCallback, public SimpleStateBase {
       switch (sinkLimitAction_) {
         case SinkLimitAction::FATAL: {
           LOG(FATAL) << "onSinkNext";
-        } break;
+        }
         case SinkLimitAction::CANCEL_SINK: {
           LOG(INFO) << "    Server will CANCEL the sink";
 
@@ -127,7 +127,7 @@ class BiDiFiniteServer : public BiDiServerCallback, public SimpleStateBase {
       switch (streamLimitAction_) {
         case StreamLimitAction::FATAL: {
           LOG(FATAL) << "onStreamRequestN";
-        } break;
+        }
         case StreamLimitAction::COMPLETE: {
           LOG(INFO) << "    Server will COMPLETE the stream";
           closeStream();

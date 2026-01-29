@@ -190,7 +190,7 @@ CapturedPtr getEdgeInfo(const HeapGraph& g, int ptr) {
   auto& edge = g.ptrs[ptr];
   auto& from = g.nodes[edge.from];
   int prop_offset = edge.offset;
-  if (!from.is_root) {
+  if (!from.is_root()) {
     auto from_hdr = from.h;
 
     // get the actual ObjectData*. This deals with object kinds that
@@ -359,7 +359,7 @@ Array createPhpNode(HeapGraphContextPtr hgptr, int index) {
   const auto& cnode = hgptr->cnodes[index];
 
   const StringData* kind_str;
-  if (!node.is_root) {
+  if (!node.is_root()) {
     auto k = int(cnode.heap_object.kind);
     kind_str = header_name_strs[k];
     if (!kind_str) {
@@ -383,18 +383,23 @@ Array createPhpNode(HeapGraphContextPtr hgptr, int index) {
                    make_tv<KindOfPersistentString>(makeStaticString(type)));
     }
   }
-  if (!node.is_root) {
+  if (!node.is_root()) {
     if (auto cls = cnode.heap_object.cls) {
       node_arr.set(s_class, make_tv<KindOfPersistentString>(cls->name()));
     }
-  } else {
-    // Add memo function info if this is a memo cache node
-    if (node.funcId != FuncId::Invalid) {
+  } else if (node.rootKind == HeapGraph::RootKind::MemoCache) {
+    // Add memo function info
+    if (!node.funcId.isInvalid()) {
       auto func = Func::fromFuncId(node.funcId);
       node_arr.set(s_func, make_tv<KindOfPersistentString>(func->name()));
       if (func->cls()) {
         node_arr.set(s_class, make_tv<KindOfPersistentString>(func->cls()->name()));
       }
+    }
+  } else if (node.rootKind == HeapGraph::RootKind::SPropCache) {
+    // Add static property info (stored as "ClassName::PropertyName")
+    if (node.sPropName) {
+      node_arr.set(s_prop, make_tv<KindOfPersistentString>(node.sPropName));
     }
   }
 
@@ -479,7 +484,7 @@ OptResource HHVM_FUNCTION(heapgraph_create, void) {
   for (size_t i = 0, n = hg.nodes.size(); i < n; ++i) {
     auto& node = hg.nodes[i];
     auto& cnode = cnodes[i];
-    if (!node.is_root) {
+    if (!node.is_root()) {
       // For non-root nodes, only touch heap_object union member
       auto obj = innerObj(node.h);
       cnode.heap_object.kind = node.h->kind();

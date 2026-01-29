@@ -48,6 +48,9 @@ Property:somestring
 
 Traversing roots for first capture:
 
+Traversing root properties:
+RootClass::myStaticInstance
+
 Getting in edges of root class:
 %A
 

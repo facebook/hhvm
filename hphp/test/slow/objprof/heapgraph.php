@@ -4,6 +4,7 @@ class RootClass {
   public darray<string, mixed> $children = dict[];
   public SomeChildOfMemoize $childWithMemoize;
   public SomeChildOfMemoize $childWithMemoize2;
+  public static InstaneHeldInStaticProp $myStaticInstance;
 
   public function __construct() {
     $this->childWithMemoize = new SomeChildOfMemoize();
@@ -12,10 +13,12 @@ class RootClass {
 
   <<__Memoize>>
   public static function getInstance() :mixed{
+    RootClass::$myStaticInstance = new InstaneHeldInStaticProp();
     return new RootClass();
   }
 }
 
+class InstaneHeldInStaticProp {}
 class InstanceCachedNode1 {}
 class InstanceCachedNode2 {}
 class ParentWithMemoizeAndMemoizeLSB {
@@ -147,9 +150,6 @@ function edgeName($hg, $edge) :mixed{
     $ty = $n['type'];
     if ($ty === 'HPHP::CppStack') return 'onsome-stack';
     if ($ty === 'HPHP::PhpStack') return 'onsome-stack';
-    if ($ty === 'HPHP::StaticPropData') {
-      return "StaticProperty:".$n['class']."::".$n['prop'];
-    }
   }
   if (isset($edge['key'])) return "Key:".$edge['key'];
   if (isset($edge['value'])) return "Value:".$edge['value'];
@@ -159,7 +159,6 @@ function edgeName($hg, $edge) :mixed{
 }
 
 function showTestEdge($edge) :mixed{
-
   $testedges = dict[
     'ArrayKey:MemoizedSingleton' => 1,
     'Property:somestring' => 1,
@@ -198,6 +197,15 @@ function showStaticMemoizations($node, $hg) :mixed{
   }
   $kind = $node['kind'] === "Root" ? "Static: " : "Instance: ";
   echo_buffer("$kind $classname::$func\n");
+}
+
+function showRootProperties($node): void {
+  if (idx($node, 'type') === 'HPHP::StaticPropData') {
+    if (explode(':', $node['prop'])[0] != 'RootClass') {
+      return;
+    }
+    echo_buffer($node['prop']."\n");
+  }
 }
 
 function showAllEdges($hg, $edges) :mixed{
@@ -342,6 +350,10 @@ function entrypoint_heapgraph(): void {
 
   echo "\nTraversing roots for first capture:\n";
   heapgraph_foreach_root($hg, showTestEdge<>);
+  echo_flush();
+
+  echo "\nTraversing root properties:\n";
+  HH\heapgraph_foreach_root_node($hg, showRootProperties<>);
   echo_flush();
 
   // CHILDREN / PARENTS

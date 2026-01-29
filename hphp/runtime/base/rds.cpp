@@ -124,6 +124,12 @@ struct IsProfile {
   bool operator()(T) const { return false; }
 };
 
+struct IsSPropCache {
+  bool operator()(SPropCache) const { return true; }
+  template<typename T>
+  bool operator()(T) const { return false; }
+};
+
 //////////////////////////////////////////////////////////////////////
 
 /*
@@ -510,6 +516,13 @@ void bindOnLinkImpl(std::atomic<Handle>& handle,
         nullptr
       );
       s_profiling.insert(h, ProfilingMeta{profile, sym, mode, size, align});
+    }
+
+    // Populate s_handleTable for SPropCache symbols to enable reverse lookups
+    // (e.g., heap graph). Other symbols bound via Link::bind() don't need this.
+    if (std::visit(IsSPropCache(), sym)) {
+      Guard g(s_allocMutex);
+      s_handleTable.emplace(h, RevLinkEntry{safe_cast<uint32_t>(size), sym});
     }
 
     if (init_val != nullptr && isPersistentHandle(h)) {

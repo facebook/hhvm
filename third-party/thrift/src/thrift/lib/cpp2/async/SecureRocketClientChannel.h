@@ -16,25 +16,29 @@
 
 #pragma once
 
+#include <memory>
+
 #include <folly/io/async/AsyncTransport.h>
 #include <folly/io/async/DelayedDestruction.h>
 
 #include <thrift/lib/cpp2/async/RocketClientChannelBase.h>
-#include <thrift/lib/cpp2/transport/rocket/client/RocketClient.h>
+#include <thrift/lib/cpp2/transport/rocket/client/SecureRocketClient.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
 namespace apache::thrift {
 
 /**
- * Thrift client channel using the Rocket protocol for RPC communication.
+ * Thrift client channel using the Rocket protocol for RPC communication
+ * with logging and security policy validation support.
  */
-class RocketClientChannel final : public RocketClientChannelBase,
-                                  private rocket::RocketClient {
+class SecureRocketClientChannel final : public RocketClientChannelBase,
+                                        private rocket::SecureRocketClient {
  public:
-  using Ptr = std::
-      unique_ptr<RocketClientChannel, folly::DelayedDestruction::Destructor>;
+  using Ptr = std::unique_ptr<
+      SecureRocketClientChannel,
+      folly::DelayedDestruction::Destructor>;
 
-  // Resolve ambiguity between RocketClientChannelBase and RocketClient
+  // Resolve ambiguity between RocketClientChannelBase and SecureRocketClient
   using RocketClientChannelBase::attachEventBase;
   using RocketClientChannelBase::closeNow;
   using RocketClientChannelBase::detachEventBase;
@@ -51,9 +55,14 @@ class RocketClientChannel final : public RocketClientChannelBase,
   using RocketClientChannelBase::setOnDetachable;
   using RocketClientChannelBase::terminateInteraction;
 
-  static Ptr newChannel(folly::AsyncTransport::UniquePtr socket);
+  static Ptr newChannel(
+      folly::AsyncTransport::UniquePtr socket,
+      std::shared_ptr<rocket::RocketClientLogger> logger);
+
   static Ptr newChannelWithMetadata(
-      folly::AsyncTransport::UniquePtr socket, RequestSetupMetadata meta);
+      folly::AsyncTransport::UniquePtr socket,
+      RequestSetupMetadata meta,
+      std::shared_ptr<rocket::RocketClientLogger> logger);
 
  protected:
   rocket::RocketClient& getRocketClientImpl() override { return *this; }
@@ -65,30 +74,32 @@ class RocketClientChannel final : public RocketClientChannelBase,
     return customCompressor_ != nullptr;
   }
   bool encodeMetadataUsingBinary() const override {
-    return rocket::RocketClient::encodeMetadataUsingBinary();
+    return rocket::SecureRocketClient::encodeMetadataUsingBinary();
   }
   uint32_t getDestructorGuardCount() const override {
-    return rocket::RocketClient::getDestructorGuardCount();
+    return rocket::SecureRocketClient::getDestructorGuardCount();
   }
   void closeNowImpl(
       apache::thrift::transport::TTransportException ex) noexcept override {
-    rocket::RocketClient::closeNow(std::move(ex));
+    rocket::SecureRocketClient::closeNow(std::move(ex));
   }
 
  private:
-  RocketClientChannel(
+  SecureRocketClientChannel(
       folly::EventBase* evb,
       folly::AsyncTransport::UniquePtr socket,
       RequestSetupMetadata meta,
+      std::shared_ptr<rocket::RocketClientLogger> logger,
       int32_t keepAliveTimeoutMs = 0,
       std::shared_ptr<rocket::ParserAllocatorType> allocatorPtr = nullptr);
 
-  RocketClientChannel(const RocketClientChannel&) = delete;
-  RocketClientChannel& operator=(const RocketClientChannel&) = delete;
-  RocketClientChannel(RocketClientChannel&&) = delete;
-  RocketClientChannel& operator=(RocketClientChannel&&) = delete;
+  SecureRocketClientChannel(const SecureRocketClientChannel&) = delete;
+  SecureRocketClientChannel& operator=(const SecureRocketClientChannel&) =
+      delete;
+  SecureRocketClientChannel(SecureRocketClientChannel&&) = delete;
+  SecureRocketClientChannel& operator=(SecureRocketClientChannel&&) = delete;
 
-  ~RocketClientChannel() override;
+  ~SecureRocketClientChannel() override;
 };
 
 } // namespace apache::thrift

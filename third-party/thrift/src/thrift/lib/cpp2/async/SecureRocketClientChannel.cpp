@@ -14,42 +14,52 @@
  * limitations under the License.
  */
 
-#include <thrift/lib/cpp2/async/RocketClientChannel.h>
+#include <thrift/lib/cpp2/async/SecureRocketClientChannel.h>
 
 namespace apache::thrift {
 
-RocketClientChannel::RocketClientChannel(
+SecureRocketClientChannel::SecureRocketClientChannel(
     folly::EventBase* evb,
     folly::AsyncTransport::UniquePtr socket,
     RequestSetupMetadata meta,
+    std::shared_ptr<rocket::RocketClientLogger> logger,
     int32_t keepAliveTimeoutMs,
     std::shared_ptr<rocket::ParserAllocatorType> allocatorPtr)
     : RocketClientChannelBase(evb),
-      rocket::RocketClient(
+      rocket::SecureRocketClient(
           *evb,
           std::move(socket),
           populateSetupMetadata(std::move(meta)),
+          std::move(logger),
           keepAliveTimeoutMs,
           std::move(allocatorPtr)) {
   apache::thrift::detail::hookForClientTransport(getTransport());
 }
 
-RocketClientChannel::Ptr RocketClientChannel::newChannel(
-    folly::AsyncTransport::UniquePtr socket) {
+SecureRocketClientChannel::Ptr SecureRocketClientChannel::newChannel(
+    folly::AsyncTransport::UniquePtr socket,
+    std::shared_ptr<rocket::RocketClientLogger> logger) {
   auto evb = socket->getEventBase();
-  return RocketClientChannel::Ptr(
-      new RocketClientChannel(evb, std::move(socket), RequestSetupMetadata()));
+  return SecureRocketClientChannel::Ptr(new SecureRocketClientChannel(
+      evb, std::move(socket), RequestSetupMetadata(), std::move(logger)));
 }
 
-RocketClientChannel::Ptr RocketClientChannel::newChannelWithMetadata(
-    folly::AsyncTransport::UniquePtr socket, RequestSetupMetadata meta) {
+SecureRocketClientChannel::Ptr
+SecureRocketClientChannel::newChannelWithMetadata(
+    folly::AsyncTransport::UniquePtr socket,
+    RequestSetupMetadata meta,
+    std::shared_ptr<rocket::RocketClientLogger> logger) {
   auto evb = socket->getEventBase();
   auto keepAliveTimeoutMs = getMetaKeepAliveTimeoutMs(meta);
-  return RocketClientChannel::Ptr(new RocketClientChannel(
-      evb, std::move(socket), std::move(meta), keepAliveTimeoutMs));
+  return SecureRocketClientChannel::Ptr(new SecureRocketClientChannel(
+      evb,
+      std::move(socket),
+      std::move(meta),
+      std::move(logger),
+      keepAliveTimeoutMs));
 }
 
-RocketClientChannel::~RocketClientChannel() {
+SecureRocketClientChannel::~SecureRocketClientChannel() {
   if (RocketClientChannelBase::evb_) {
     RocketClientChannelBase::evb_->dcheckIsInEventBaseThread();
   }

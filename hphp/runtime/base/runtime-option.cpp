@@ -765,6 +765,7 @@ int RuntimeOption::Fb303ServerWorkerThreads = 1;
 int RuntimeOption::Fb303ServerPoolThreads = 1;
 bool RuntimeOption::Fb303ServerExposeSensitiveMethods = false;
 
+bool RuntimeOption::ServerThreadTuneEnabled = true;
 bool RuntimeOption::ServerThreadTuneDebug = false;
 bool RuntimeOption::ServerThreadTuneSkipWarmup = false;
 double RuntimeOption::ServerThreadTuneAdjustmentPct = 0;
@@ -1585,6 +1586,8 @@ void RuntimeOption::Load(
     Config::Bind(Fb303ServerExposeSensitiveMethods, ini, config,
                  "Fb303Server.ExposeSensitiveMethods", Fb303ServerExposeSensitiveMethods);
 
+    Config::Bind(ServerThreadTuneEnabled, ini, config,
+                 "Server.ThreadTune.Enabled", ServerThreadTuneEnabled);
     Config::Bind(ServerThreadTuneDebug, ini, config,
                  "Server.ThreadTune.Debug", ServerThreadTuneDebug);
     Config::Bind(ServerThreadTuneSkipWarmup, ini, config,

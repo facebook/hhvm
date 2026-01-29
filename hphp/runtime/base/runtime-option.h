@@ -420,7 +420,9 @@ public:
   // will skip the warmup period (jit maturity = 100). Maximum adjustment is
   // defined by the `ThreadTuneAdjustmentPct` of the configured thread count,
   // and the step size is defined by `ThreadTuneStepPct`. Thread tuning is
-  // turned off when `ThreadTuneAdjustmentPct` is set to 0 (default).
+  // turned off when `ThreadTuneEnabled` is set to false or
+  // `ThreadTuneAdjustmentPct` is set to 0 (default).
+  static bool ServerThreadTuneEnabled;
   static bool ServerThreadTuneDebug;
   static bool ServerThreadTuneSkipWarmup;
   static double ServerThreadTuneAdjustmentPct;

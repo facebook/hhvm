@@ -13,6 +13,7 @@
 #include <thread>
 
 #include <boost/filesystem.hpp>
+#include <fmt/format.h>
 #include <folly/FileUtil.h>
 #include <folly/json/dynamic.h>
 #include <folly/testing/TestUtil.h>
@@ -115,6 +116,31 @@ class PreprocessedConfigDumpTest : public ::testing::Test {
   boost::filesystem::path getExpectedFilePath() const {
     return boost::filesystem::path(tempDir_->path().string()) / "test_service" /
         "test_router" / "libmcrouter.test_service.test_flavor.ppc.json";
+  }
+
+  boost::filesystem::path getConfigDirectory() const {
+    return boost::filesystem::path(tempDir_->path().string()) / "test_service" /
+        "test_router";
+  }
+
+  size_t countTimestampedFiles() const {
+    size_t count = 0;
+    auto directory = getConfigDirectory();
+    std::string basePattern = "libmcrouter.test_service.test_flavor.ppc_";
+
+    if (boost::filesystem::exists(directory) &&
+        boost::filesystem::is_directory(directory)) {
+      for (const auto& entry :
+           boost::filesystem::directory_iterator(directory)) {
+        if (boost::filesystem::is_regular_file(entry.path())) {
+          std::string fname = entry.path().filename().string();
+          if (fname.find(basePattern) == 0 && fname.ends_with(".json")) {
+            count++;
+          }
+        }
+      }
+    }
+    return count;
   }
 
   std::unique_ptr<folly::test::TemporaryDirectory> tempDir_;
@@ -356,6 +382,199 @@ TEST_F(PreprocessedConfigDumpTest, EndToEndMissingConfigDumpRoot) {
 
   // Call should not do anything when config_dump_root is empty
   instance.dumpPreprocessedConfigToDiskForTesting();
+}
+
+// Test that timestamped files are NOT created by default (history disabled)
+TEST_F(PreprocessedConfigDumpTest, TimestampedFilesDisabledByDefault) {
+  auto mockConfigApi = std::make_unique<MockConfigApi>();
+  auto* mockPtr = mockConfigApi.get();
+
+  auto opts = createTestOptions();
+  // max_preprocessed_config_history defaults to 0 (disabled)
+
+  EXPECT_CALL(*mockPtr, getConfigFile(::testing::_, ::testing::_))
+      .WillOnce(
+          ::testing::DoAll(
+              ::testing::SetArgReferee<0>(opts.config_str),
+              ::testing::SetArgReferee<1>("test_config_path"),
+              ::testing::Return(true)));
+
+  TestableRouterInstance instance(std::move(opts), std::move(mockConfigApi));
+  instance.dumpPreprocessedConfigToDiskForTesting();
+
+  // Main file should exist
+  auto expectedFile = getExpectedFilePath();
+  EXPECT_TRUE(boost::filesystem::exists(expectedFile));
+
+  // No timestamped files should exist
+  EXPECT_EQ(0, countTimestampedFiles());
+}
+
+// Test that timestamped files ARE created when history is enabled
+TEST_F(PreprocessedConfigDumpTest, TimestampedFilesCreatedWhenEnabled) {
+  auto mockConfigApi = std::make_unique<MockConfigApi>();
+  auto* mockPtr = mockConfigApi.get();
+
+  auto opts = createTestOptions();
+  opts.max_preprocessed_config_history = 5; // Enable history
+
+  EXPECT_CALL(*mockPtr, getConfigFile(::testing::_, ::testing::_))
+      .WillOnce(
+          ::testing::DoAll(
+              ::testing::SetArgReferee<0>(opts.config_str),
+              ::testing::SetArgReferee<1>("test_config_path"),
+              ::testing::Return(true)));
+
+  TestableRouterInstance instance(std::move(opts), std::move(mockConfigApi));
+  instance.dumpPreprocessedConfigToDiskForTesting();
+
+  // Main file should exist
+  auto expectedFile = getExpectedFilePath();
+  EXPECT_TRUE(boost::filesystem::exists(expectedFile));
+
+  // One timestamped file should exist
+  EXPECT_EQ(1, countTimestampedFiles());
+
+  // Verify timestamped file has correct naming pattern
+  auto directory = getConfigDirectory();
+  bool foundTimestampedFile = false;
+  for (const auto& entry : boost::filesystem::directory_iterator(directory)) {
+    std::string fname = entry.path().filename().string();
+    if (fname.find("libmcrouter.test_service.test_flavor.ppc_") == 0 &&
+        fname.ends_with(".json")) {
+      foundTimestampedFile = true;
+      // Verify content matches main file
+      std::string mainContent, timestampedContent;
+      EXPECT_TRUE(folly::readFile(expectedFile.string().c_str(), mainContent));
+      EXPECT_TRUE(
+          folly::readFile(entry.path().string().c_str(), timestampedContent));
+      EXPECT_EQ(mainContent, timestampedContent);
+    }
+  }
+  EXPECT_TRUE(foundTimestampedFile);
+}
+
+// Test that timestamped files are NOT created when content doesn't change
+TEST_F(PreprocessedConfigDumpTest, NoTimestampedFileOnUnchangedContent) {
+  auto mockConfigApi = std::make_unique<MockConfigApi>();
+  auto* mockPtr = mockConfigApi.get();
+
+  auto opts = createTestOptions();
+  opts.max_preprocessed_config_history = 5;
+
+  EXPECT_CALL(*mockPtr, getConfigFile(::testing::_, ::testing::_))
+      .Times(2)
+      .WillRepeatedly(
+          ::testing::DoAll(
+              ::testing::SetArgReferee<0>(opts.config_str),
+              ::testing::SetArgReferee<1>("test_config_path"),
+              ::testing::Return(true)));
+
+  TestableRouterInstance instance(std::move(opts), std::move(mockConfigApi));
+
+  // First dump - should create timestamped file
+  instance.dumpPreprocessedConfigToDiskForTesting();
+  EXPECT_EQ(1, countTimestampedFiles());
+
+  // Second dump with same content - should NOT create new timestamped file
+  instance.dumpPreprocessedConfigToDiskForTesting();
+  EXPECT_EQ(1, countTimestampedFiles()); // Still only 1 file
+}
+
+// Test that old timestamped files are cleaned up (keep only N most recent)
+TEST_F(PreprocessedConfigDumpTest, TimestampedFilesCleanupWorksCorrectly) {
+  auto mockConfigApi = std::make_unique<MockConfigApi>();
+  auto* mockPtr = mockConfigApi.get();
+
+  auto opts = createTestOptions();
+  opts.max_preprocessed_config_history = 3; // Keep only 3 files
+
+  TestableRouterInstance instance(std::move(opts), std::move(mockConfigApi));
+
+  // Create 5 different configs to trigger 5 timestamped files
+  for (int i = 0; i < 5; ++i) {
+    std::string config = fmt::format(
+        R"({{
+      "pools": {{
+        "test_pool_{}": {{
+          "servers": ["test{}:11211"]
+        }}
+      }},
+      "route": "PoolRoute|test_pool_{}"
+    }})",
+        i,
+        i,
+        i);
+
+    EXPECT_CALL(*mockPtr, getConfigFile(::testing::_, ::testing::_))
+        .WillOnce(
+            ::testing::DoAll(
+                ::testing::SetArgReferee<0>(config),
+                ::testing::SetArgReferee<1>("test_config_path"),
+                ::testing::Return(true)));
+
+    instance.dumpPreprocessedConfigToDiskForTesting();
+  }
+
+  // Should only have 3 timestamped files (oldest 2 should be deleted)
+  EXPECT_EQ(3, countTimestampedFiles());
+
+  // Main file should still exist
+  auto expectedFile = getExpectedFilePath();
+  EXPECT_TRUE(boost::filesystem::exists(expectedFile));
+}
+
+// Test timestamped file cleanup with max_preprocessed_config_history = 1
+TEST_F(PreprocessedConfigDumpTest, SingleTimestampedFileKept) {
+  auto mockConfigApi = std::make_unique<MockConfigApi>();
+  auto* mockPtr = mockConfigApi.get();
+
+  auto opts = createTestOptions();
+  opts.max_preprocessed_config_history = 1; // Keep only 1 file
+
+  TestableRouterInstance instance(std::move(opts), std::move(mockConfigApi));
+
+  // Create first config
+  std::string config1 = R"({
+    "pools": {
+      "pool1": {
+        "servers": ["test1:11211"]
+      }
+    },
+    "route": "PoolRoute|pool1"
+  })";
+
+  EXPECT_CALL(*mockPtr, getConfigFile(::testing::_, ::testing::_))
+      .WillOnce(
+          ::testing::DoAll(
+              ::testing::SetArgReferee<0>(config1),
+              ::testing::SetArgReferee<1>("test_config_path"),
+              ::testing::Return(true)));
+
+  instance.dumpPreprocessedConfigToDiskForTesting();
+  EXPECT_EQ(1, countTimestampedFiles());
+
+  // Create second config - should replace the first
+  std::string config2 = R"({
+    "pools": {
+      "pool2": {
+        "servers": ["test2:11211"]
+      }
+    },
+    "route": "PoolRoute|pool2"
+  })";
+
+  EXPECT_CALL(*mockPtr, getConfigFile(::testing::_, ::testing::_))
+      .WillOnce(
+          ::testing::DoAll(
+              ::testing::SetArgReferee<0>(config2),
+              ::testing::SetArgReferee<1>("test_config_path"),
+              ::testing::Return(true)));
+
+  instance.dumpPreprocessedConfigToDiskForTesting();
+
+  // Should still only have 1 timestamped file (the newest one)
+  EXPECT_EQ(1, countTimestampedFiles());
 }
 
 } // namespace facebook::memcache::mcrouter

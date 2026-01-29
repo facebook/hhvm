@@ -959,6 +959,15 @@ MCROUTER_OPTION_INTEGER(
     no_short,
     "Periodically dump preprocessed config to disk for debugging (libmcrouter only) at the specified interval in seconds. 0 means disabled.")
 
+MCROUTER_OPTION_INTEGER(
+    uint32_t,
+    max_preprocessed_config_history,
+    0,
+    "max_preprocessed_config_history",
+    no_short,
+    "Maximum number of timestamped preprocessed config files to keep in history. Set to 0 to disable timestamped backups (default).")
+
+
 #ifdef ADDITIONAL_OPTIONS_FILE
 #include ADDITIONAL_OPTIONS_FILE
 #endif

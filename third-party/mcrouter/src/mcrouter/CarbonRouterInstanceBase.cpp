@@ -7,7 +7,12 @@
 
 #include "CarbonRouterInstanceBase.h"
 
+#include <chrono>
+#include <cstdint>
+#include <limits>
 #include <memory>
+#include <optional>
+#include <utility>
 
 #include <boost/filesystem/operations.hpp>
 #include <fmt/format.h>
@@ -88,6 +93,67 @@ McrouterOptions finalizeOpts(McrouterOptions&& opts) {
 boost::filesystem::path getBackupConfigDirectory(const McrouterOptions& opts) {
   return boost::filesystem::path(opts.config_dump_root) / opts.service_name /
       opts.router_name;
+}
+
+std::string getPpcFilename(
+    const std::string& serviceName,
+    const std::string& flavorName,
+    std::optional<int64_t> timestampMs = std::nullopt) {
+  if (timestampMs.has_value()) {
+    return fmt::format(
+        "libmcrouter.{}.{}.ppc_{}.json", serviceName, flavorName, *timestampMs);
+  }
+  return fmt::format("libmcrouter.{}.{}.ppc.json", serviceName, flavorName);
+}
+
+// Returns the count of timestamped PPC files and the path to the oldest one.
+// Used for cleaning up old timestamped config backups.
+std::pair<size_t, boost::filesystem::path> getTimestampedPpcFiles(
+    const boost::filesystem::path& directory,
+    const std::string& serviceName,
+    const std::string& flavorName) {
+  std::string basePattern =
+      fmt::format("libmcrouter.{}.{}.ppc_", serviceName, flavorName);
+
+  size_t fileCount = 0;
+  int64_t oldestTimestamp = std::numeric_limits<int64_t>::max();
+  boost::filesystem::path oldestFile;
+
+  if (!boost::filesystem::exists(directory) ||
+      !boost::filesystem::is_directory(directory)) {
+    return {fileCount, oldestFile};
+  }
+
+  boost::filesystem::directory_iterator dirIterator(directory);
+  boost::filesystem::directory_iterator endIterator;
+  for (; dirIterator != endIterator; ++dirIterator) {
+    const auto& entry = *dirIterator;
+    if (!boost::filesystem::is_regular_file(entry.path())) {
+      continue;
+    }
+    std::string fname = entry.path().filename().string();
+    if (fname.find(basePattern) != 0 || !fname.ends_with(".json")) {
+      continue;
+    }
+    // Extract timestamp from filename
+    std::string timestampStr = fname.substr(
+        basePattern.length(),
+        fname.length() - basePattern.length() - 5); // -5 for ".json"
+    try {
+      int64_t ts = std::stoll(timestampStr);
+      fileCount++;
+      // Track the oldest file
+      if (ts < oldestTimestamp) {
+        oldestTimestamp = ts;
+        oldestFile = entry.path();
+      }
+    } catch (const std::exception&) {
+      // Skip files with invalid timestamp format
+      continue;
+    }
+  }
+
+  return {fileCount, oldestFile};
 }
 
 bool ensureConfigDirectoryExists(const boost::filesystem::path& directory) {
@@ -339,8 +405,7 @@ void CarbonRouterInstanceBase::dumpPreprocessedConfigToDisk() {
     auto jsonContent = toPrettySortedJson(preprocessedJson);
 
     auto directory = getBackupConfigDirectory(opts_);
-    auto filename = fmt::format(
-        "libmcrouter.{}.{}.ppc.json", opts_.service_name, opts_.flavor_name);
+    auto filename = getPpcFilename(opts_.service_name, opts_.flavor_name);
     auto filePath = (directory / filename).string();
 
     // Check if we need to rewrite
@@ -351,6 +416,56 @@ void CarbonRouterInstanceBase::dumpPreprocessedConfigToDisk() {
         ensureHasPermission(filePath, 0664);
         preprocessedConfigFileMD5Hash_ = contentHash;
         VLOG(1) << "Successfully dumped preprocessed config to: " << filePath;
+
+        // Create timestamped backup only if max_preprocessed_config_history > 0
+        if (opts_.max_preprocessed_config_history > 0) {
+          try {
+            auto timestampMs =
+                std::chrono::duration_cast<std::chrono::milliseconds>(
+                    std::chrono::system_clock::now().time_since_epoch())
+                    .count();
+            auto timestampFilename = getPpcFilename(
+                opts_.service_name, opts_.flavor_name, timestampMs);
+            auto timestampFilePath = (directory / timestampFilename).string();
+
+            if (atomicallyWriteFileToDisk(jsonContent, timestampFilePath)) {
+              ensureHasPermission(timestampFilePath, 0664);
+              VLOG(1) << "Successfully created timestamped PPC backup: "
+                      << timestampFilePath;
+
+              // Clean up old timestamped files, keep only last N (configurable)
+              try {
+                auto [fileCount, oldestFile] = getTimestampedPpcFiles(
+                    directory, opts_.service_name, opts_.flavor_name);
+
+                // If we have more than max_preprocessed_config_history files
+                // (including the new one we just created), remove the oldest
+                // one
+                if (fileCount > opts_.max_preprocessed_config_history &&
+                    !oldestFile.empty()) {
+                  try {
+                    boost::filesystem::remove(oldestFile);
+                    VLOG(2) << "Removed oldest timestamped PPC file: "
+                            << oldestFile;
+                  } catch (const std::exception& e) {
+                    LOG(WARNING)
+                        << "Failed to remove oldest timestamped PPC file "
+                        << oldestFile << ": " << e.what();
+                  }
+                }
+              } catch (const std::exception& e) {
+                LOG(WARNING) << "Error cleaning up old timestamped PPC files: "
+                             << e.what();
+              }
+            } else {
+              LOG(WARNING) << "Failed to create timestamped PPC backup: "
+                           << timestampFilePath;
+            }
+          } catch (const std::exception& e) {
+            LOG(WARNING) << "Error creating timestamped PPC backup: "
+                         << e.what();
+          }
+        }
       } else {
         logFailureEveryN<PreprocessedConfigDumpTag>(
             opts_,

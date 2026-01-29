@@ -111,7 +111,7 @@ class EnableWeakRefCountedPtr {
   /**
    * Returns number of WeakRefCountedPtr pointing to this object.
    */
-  uint64_t numWeakRefCountedPtrs() const {
+  [[nodiscard]] uint64_t numWeakRefCountedPtrs() const {
     if (!state_) {
       return 0;
     }

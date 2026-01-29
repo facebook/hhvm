@@ -102,35 +102,35 @@ class URL {
     }
   }
 
-  bool isValid() const noexcept {
+  [[nodiscard]] bool isValid() const noexcept {
     return valid_;
   }
 
-  const std::string& getUrl() const noexcept {
+  [[nodiscard]] const std::string& getUrl() const noexcept {
     return url_;
   }
 
-  uint16_t getPort() const noexcept {
+  [[nodiscard]] uint16_t getPort() const noexcept {
     return port_;
   }
 
-  const std::string& getScheme() const noexcept {
+  [[nodiscard]] const std::string& getScheme() const noexcept {
     return scheme_;
   }
 
-  bool isSecure() const noexcept {
+  [[nodiscard]] bool isSecure() const noexcept {
     return scheme_ == "https";
   }
 
-  bool hasHost() const noexcept {
+  [[nodiscard]] bool hasHost() const noexcept {
     return valid_ && !host_.empty();
   }
 
-  const std::string& getHost() const noexcept {
+  [[nodiscard]] const std::string& getHost() const noexcept {
     return host_;
   }
 
-  std::string getHostAndPort() const noexcept {
+  [[nodiscard]] std::string getHostAndPort() const noexcept {
     if (port_ == 0) {
       return host_;
     }
@@ -139,7 +139,7 @@ class URL {
     return ss.str();
   }
 
-  std::string getHostAndPortOmitDefault() const noexcept {
+  [[nodiscard]] std::string getHostAndPortOmitDefault() const noexcept {
     bool defaultPort = port_ == 0 || port_ == (isSecure() ? 443 : 80);
     if (defaultPort) {
       return host_;
@@ -149,19 +149,19 @@ class URL {
     return ss.str();
   }
 
-  const std::string& getPath() const noexcept {
+  [[nodiscard]] const std::string& getPath() const noexcept {
     return path_;
   }
 
-  const std::string& getQuery() const noexcept {
+  [[nodiscard]] const std::string& getQuery() const noexcept {
     return query_;
   }
 
-  const std::string& getFragment() const noexcept {
+  [[nodiscard]] const std::string& getFragment() const noexcept {
     return fragment_;
   }
 
-  std::string makeRelativeURL() const noexcept {
+  [[nodiscard]] std::string makeRelativeURL() const noexcept {
     std::stringstream ss;
     if (path_.empty()) {
       ss << "/";

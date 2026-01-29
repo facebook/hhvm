@@ -41,7 +41,7 @@ class WheelTimerInstance {
   // will not be scheduled
   explicit WheelTimerInstance(folly::HHWheelTimer* timer);
 
-  std::chrono::milliseconds getDefaultTimeout() const;
+  [[nodiscard]] std::chrono::milliseconds getDefaultTimeout() const;
   void setDefaultTimeout(std::chrono::milliseconds timeout);
 
   // These timeout callbacks will be scheduled on the current thread
@@ -55,7 +55,7 @@ class WheelTimerInstance {
   // returns true if it is empty
   explicit operator bool() const;
 
-  folly::HHWheelTimer* getWheelTimer() const {
+  [[nodiscard]] folly::HHWheelTimer* getWheelTimer() const {
     return wheelTimerPtr_;
   }
 

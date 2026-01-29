@@ -80,4 +80,4 @@ class SpecialCasesTest(unittest.TestCase):
         self.assertEqual(from_.VALUE.value, 1)
 
     def test_typedef_named_as_python_keyword(self) -> None:
-        from thrift.python.test.special_cases.thrift_types import and_
+        from thrift.python.test.special_cases.thrift_types import and_  # noqa: F401

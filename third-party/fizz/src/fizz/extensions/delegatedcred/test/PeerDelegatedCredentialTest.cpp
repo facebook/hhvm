@@ -136,7 +136,7 @@ class PeerDelegatedCredentialTest : public Test {
     CryptoUtils::init();
   }
 
-  Buf toBuf(const StringPiece& hex) {
+  Buf toBuf(const StringPiece hex) {
     auto data = unhexlify(hex);
     return IOBuf::copyBuffer(data.data(), data.size());
   }

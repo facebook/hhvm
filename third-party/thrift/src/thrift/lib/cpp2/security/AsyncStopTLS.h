@@ -74,7 +74,7 @@ class AsyncStopTLS : public folly::DelayedDestruction,
   void attachEventBase(folly::EventBase* evb);
   void detachEventBase();
 
- private:
+ protected:
   ~AsyncStopTLS() override {
     // We guarantee that if `start()` was invoked, then the terminal callback
     // must have been invoked by the time we are destroyed.

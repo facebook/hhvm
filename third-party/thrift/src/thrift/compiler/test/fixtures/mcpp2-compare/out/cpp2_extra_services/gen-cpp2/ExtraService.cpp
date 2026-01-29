@@ -7,7 +7,7 @@
 
 #include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/ExtraService.h"
 #include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/ExtraService.tcc"
-#include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/extra_services_metadata.h"
+#include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/extra_services_types.h"
 #include <thrift/lib/cpp2/gen/service_cpp.h>
 
 std::unique_ptr<apache::thrift::AsyncProcessor> apache::thrift::ServiceHandler<::extra::svc::ExtraService>::getProcessor() {

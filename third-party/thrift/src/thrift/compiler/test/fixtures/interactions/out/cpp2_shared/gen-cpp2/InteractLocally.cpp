@@ -7,7 +7,7 @@
 
 #include "thrift/compiler/test/fixtures/interactions/gen-cpp2/InteractLocally.h"
 #include "thrift/compiler/test/fixtures/interactions/gen-cpp2/InteractLocally.tcc"
-#include "thrift/compiler/test/fixtures/interactions/gen-cpp2/shared_metadata.h"
+#include "thrift/compiler/test/fixtures/interactions/gen-cpp2/shared_types.h"
 #include <thrift/lib/cpp2/gen/service_cpp.h>
 
 std::unique_ptr<apache::thrift::AsyncProcessor> apache::thrift::ServiceHandler<::thrift::shared_interactions::InteractLocally>::getProcessor() {

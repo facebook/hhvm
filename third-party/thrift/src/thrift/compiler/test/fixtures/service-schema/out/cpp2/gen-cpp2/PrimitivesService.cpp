@@ -7,7 +7,7 @@
 
 #include "thrift/compiler/test/fixtures/service-schema/gen-cpp2/PrimitivesService.h"
 #include "thrift/compiler/test/fixtures/service-schema/gen-cpp2/PrimitivesService.tcc"
-#include "thrift/compiler/test/fixtures/service-schema/gen-cpp2/module_metadata.h"
+#include "thrift/compiler/test/fixtures/service-schema/gen-cpp2/module_types.h"
 #include "thrift/compiler/test/fixtures/service-schema/gen-cpp2/module_constants.h"
 #include <thrift/lib/cpp2/gen/service_cpp.h>
 

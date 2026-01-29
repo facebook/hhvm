@@ -7,7 +7,7 @@
 
 #include "thrift/compiler/test/fixtures/adapter/gen-cpp2/Service.h"
 #include "thrift/compiler/test/fixtures/adapter/gen-cpp2/Service.tcc"
-#include "thrift/compiler/test/fixtures/adapter/gen-cpp2/module_metadata.h"
+#include "thrift/compiler/test/fixtures/adapter/gen-cpp2/module_types.h"
 #include <thrift/lib/cpp2/gen/service_cpp.h>
 
 std::unique_ptr<apache::thrift::AsyncProcessor> apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::adapter::Service>::getProcessor() {

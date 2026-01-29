@@ -7,7 +7,7 @@
 
 #include "thrift/compiler/test/fixtures/py3/gen-py3cpp/NullService.h"
 #include "thrift/compiler/test/fixtures/py3/gen-py3cpp/NullService.tcc"
-#include "thrift/compiler/test/fixtures/py3/gen-py3cpp/empty_metadata.h"
+#include "thrift/compiler/test/fixtures/py3/gen-py3cpp/empty_types.h"
 #include <thrift/lib/cpp2/gen/service_cpp.h>
 
 std::unique_ptr<apache::thrift::AsyncProcessor> apache::thrift::ServiceHandler<::cpp2::NullService>::getProcessor() {

@@ -7,7 +7,7 @@
 
 #include "thrift/compiler/test/fixtures/basic/gen-cpp2/FB303Service.h"
 #include "thrift/compiler/test/fixtures/basic/gen-cpp2/FB303Service.tcc"
-#include "thrift/compiler/test/fixtures/basic/gen-cpp2/module_metadata.h"
+#include "thrift/compiler/test/fixtures/basic/gen-cpp2/module_types.h"
 #include <thrift/lib/cpp2/gen/service_cpp.h>
 
 std::unique_ptr<apache::thrift::AsyncProcessor> apache::thrift::ServiceHandler<::test::fixtures::basic::FB303Service>::getProcessor() {

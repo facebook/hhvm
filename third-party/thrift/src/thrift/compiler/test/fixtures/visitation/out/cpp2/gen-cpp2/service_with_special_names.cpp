@@ -7,7 +7,7 @@
 
 #include "thrift/compiler/test/fixtures/visitation/gen-cpp2/service_with_special_names.h"
 #include "thrift/compiler/test/fixtures/visitation/gen-cpp2/service_with_special_names.tcc"
-#include "thrift/compiler/test/fixtures/visitation/gen-cpp2/module_metadata.h"
+#include "thrift/compiler/test/fixtures/visitation/gen-cpp2/module_types.h"
 #include <thrift/lib/cpp2/gen/service_cpp.h>
 
 std::unique_ptr<apache::thrift::AsyncProcessor> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::getProcessor() {

@@ -7,7 +7,7 @@
 
 #include "thrift/compiler/test/fixtures/py3/gen-py3cpp/SimpleService.h"
 #include "thrift/compiler/test/fixtures/py3/gen-py3cpp/SimpleService.tcc"
-#include "thrift/compiler/test/fixtures/py3/gen-py3cpp/module_metadata.h"
+#include "thrift/compiler/test/fixtures/py3/gen-py3cpp/module_types.h"
 #include <thrift/lib/cpp2/gen/service_cpp.h>
 
 std::unique_ptr<apache::thrift::AsyncProcessor> apache::thrift::ServiceHandler<::py3::simple::SimpleService>::getProcessor() {

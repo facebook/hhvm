@@ -7,7 +7,7 @@
 
 #include "thrift/compiler/test/fixtures/includes/gen-cpp2/MyService.h"
 #include "thrift/compiler/test/fixtures/includes/gen-cpp2/MyService.tcc"
-#include "thrift/compiler/test/fixtures/includes/gen-cpp2/service_metadata.h"
+#include "thrift/compiler/test/fixtures/includes/gen-cpp2/service_types.h"
 #include <thrift/lib/cpp2/gen/service_cpp.h>
 
 std::unique_ptr<apache::thrift::AsyncProcessor> apache::thrift::ServiceHandler<::cpp2::MyService>::getProcessor() {

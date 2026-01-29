@@ -7,7 +7,7 @@
 
 #include "thrift/compiler/test/fixtures/namespace_from_package_without_module_name/gen-cpp2/TestService.h"
 #include "thrift/compiler/test/fixtures/namespace_from_package_without_module_name/gen-cpp2/TestService.tcc"
-#include "thrift/compiler/test/fixtures/namespace_from_package_without_module_name/gen-cpp2/module_metadata.h"
+#include "thrift/compiler/test/fixtures/namespace_from_package_without_module_name/gen-cpp2/module_types.h"
 #include <thrift/lib/cpp2/gen/service_cpp.h>
 
 std::unique_ptr<apache::thrift::AsyncProcessor> apache::thrift::ServiceHandler<::test::namespace_from_package_without_module_name::TestService>::getProcessor() {

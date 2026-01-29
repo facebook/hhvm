@@ -262,8 +262,7 @@ int is_adjacent_vptr64(const Vptr64& a, const Vptr64& b, int32_t step, int32_t m
 }
 
 bool is_valid_reg_for_storepair(Env& env, Vreg s) {
-  if (s.isGP())
-    return true;
+  if (s.isGP()) return true;
 
   auto const op_it = env.unit.regToConst.find(s);
   return op_it != env.unit.regToConst.end() && op_it->second.kind != Vconst::Double;

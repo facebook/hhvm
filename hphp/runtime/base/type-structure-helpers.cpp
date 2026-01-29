@@ -352,6 +352,7 @@ bool typeStructureIsType(
                                                      strict);
     }
     case TypeStructure::Kind::T_tuple:
+      if (get_ts_kind(input) != TypeStructure::Kind::T_tuple) return false;
       return typeStructureIsTypeList(
         get_ts_elem_types(input),
         get_ts_elem_types(type),
@@ -360,6 +361,7 @@ bool typeStructureIsType(
         strict
       );
     case TypeStructure::Kind::T_shape: {
+      if (get_ts_kind(input) != TypeStructure::Kind::T_shape) return false;
       auto const inputFields = get_ts_fields(input);
       auto const typeFields = get_ts_fields(type);
       if (inputFields->size() != typeFields->size()) return false;

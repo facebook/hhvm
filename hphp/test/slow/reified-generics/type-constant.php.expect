@@ -1,0 +1,23 @@
+Expecting to see true:
+bool(true)
+Success!
+
+Testing tuple type constant:
+bool(true)
+bool(false)
+
+Testing multiple type constants:
+bool(true)
+bool(true)
+bool(true)
+
+Testing type constant shape against non-shape:
+bool(false)
+
+Testing type constant tuple against non-tuple:
+bool(false)
+
+Testing nested structures:
+bool(true)
+
+All type constant tests passed!

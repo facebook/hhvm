@@ -111,7 +111,7 @@ class WebTransportImpl : public WebTransport {
     [[nodiscard]] virtual bool isPeerInitiatedStream(
         HTTPCodec::StreamID id) = 0;
 
-    virtual uint64_t getWTInitialSendWindow() const {
+    [[nodiscard]] virtual uint64_t getWTInitialSendWindow() const {
       return quic::kMaxVarInt;
     }
   };

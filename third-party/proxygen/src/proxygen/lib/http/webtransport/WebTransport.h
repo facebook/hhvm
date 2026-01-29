@@ -86,7 +86,7 @@ class WebTransport {
    public:
     virtual ~StreamHandleBase() = default;
 
-    uint64_t getID() const {
+    [[nodiscard]] uint64_t getID() const {
       return id_;
     }
 
@@ -96,7 +96,7 @@ class WebTransport {
     // For StreamWriteHandle in particular, the handle is still valid in a
     // CancellationCallback, but not after that.  If the app doesn't terminate
     // the stream from the callback, the stream will be reset automatically.
-    folly::CancellationToken getCancelToken() const {
+    [[nodiscard]] folly::CancellationToken getCancelToken() const {
       return cs_.getToken();
     }
 
@@ -264,8 +264,8 @@ class WebTransport {
       std::unique_ptr<folly::IOBuf> datagram) = 0;
 
   // Get the local and peer socket addresses
-  virtual const folly::SocketAddress& getLocalAddress() const = 0;
-  virtual const folly::SocketAddress& getPeerAddress() const = 0;
+  [[nodiscard]] virtual const folly::SocketAddress& getLocalAddress() const = 0;
+  [[nodiscard]] virtual const folly::SocketAddress& getPeerAddress() const = 0;
 
   // Close the WebTransport session, with an optional error
   //

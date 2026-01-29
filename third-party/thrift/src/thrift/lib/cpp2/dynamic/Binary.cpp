@@ -21,7 +21,7 @@
 
 namespace apache::thrift::dynamic {
 
-#if FOLLY_HAVE_MEMORY_RESOURCE
+#if FOLLY_HAS_MEMORY_RESOURCE
 
 Binary::Binary(const Binary& other) : Binary(other.clone(other.mr_)) {}
 
@@ -57,7 +57,7 @@ Binary Binary::clone(std::pmr::memory_resource* mr) const {
   return Binary(data_->clone());
 }
 
-#endif // FOLLY_HAVE_MEMORY_RESOURCE
+#endif // FOLLY_HAS_MEMORY_RESOURCE
 
 folly::io::Cursor Binary::cursor() const {
   return folly::io::Cursor(data_.get());

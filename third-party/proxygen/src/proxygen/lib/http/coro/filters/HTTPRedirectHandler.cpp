@@ -6,7 +6,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#include "proxygen/lib/http/coro/client/HTTPRedirectHandler.h"
+#include "proxygen/lib/http/coro/filters/HTTPRedirectHandler.h"
 #include "proxygen/lib/http/coro/HTTPFixedSource.h"
 #include <folly/logging/xlog.h>
 

@@ -141,7 +141,7 @@ set(
     http/coro/server/handlers/ExpectContinueWrapperHandler.cpp
     http/coro/filters/DecompressionFilter.cpp
     http/coro/filters/CompressionFilter.cpp
-    http/coro/client/HTTPRedirectHandler.cpp
+    http/coro/filters/HTTPRedirectHandler.cpp
     http/coro/filters/DecompressionFilterFactory.cpp
     http/coro/filters/MutateFilter.cpp
     http/coro/filters/Logger.cpp

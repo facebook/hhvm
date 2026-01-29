@@ -120,7 +120,8 @@ class HTTPTransactionSink : public HTTPSink {
   [[nodiscard]] bool canSendHeaders() const override {
     return httpTransaction_->canSendHeaders();
   }
-  const wangle::TransportInfo& getSetupTransportInfo() const noexcept override {
+  [[nodiscard]] const wangle::TransportInfo& getSetupTransportInfo()
+      const noexcept override {
     return httpTransaction_->getSetupTransportInfo();
   }
   void getCurrentTransportInfo(wangle::TransportInfo* tinfo) const override {

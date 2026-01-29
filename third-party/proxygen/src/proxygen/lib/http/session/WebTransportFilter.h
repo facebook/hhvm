@@ -326,7 +326,7 @@ class WebTransportFilter
                  : true; // For H2, we use encoded application error codes
   }
 
-  uint64_t getWTInitialSendWindow() const override {
+  [[nodiscard]] uint64_t getWTInitialSendWindow() const override {
     return h3Tp_ ? h3Tp_->getWTInitialSendWindow() : quic::kMaxVarInt;
   }
 
@@ -338,11 +338,11 @@ class WebTransportFilter
     return txn_->isDownstream() ? isClientStream : !isClientStream;
   }
 
-  const folly::SocketAddress& getLocalAddress() const override {
+  [[nodiscard]] const folly::SocketAddress& getLocalAddress() const override {
     return txn_->getLocalAddress();
   }
 
-  const folly::SocketAddress& getPeerAddress() const override {
+  [[nodiscard]] const folly::SocketAddress& getPeerAddress() const override {
     return txn_->getPeerAddress();
   }
 

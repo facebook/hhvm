@@ -60,18 +60,18 @@ abstract class ThriftProcessorBase implements IThriftProcessor {
    */
   final protected function readHelper<TResult as IThriftStruct>(
     classname<TResult> $request_args_class,
-    \TProtocol $input,
+    TProtocol $input,
     string $request_name,
     mixed $handler_ctx,
   ): dynamic {
     $this->eventHandler_->preRead($handler_ctx, $request_name, dict[]);
 
-    if ($input is \TBinaryProtocolAccelerated) {
+    if ($input is TBinaryProtocolAccelerated) {
       $args = thrift_protocol_read_binary_struct(
         $input,
         HH\class_to_classname($request_args_class),
       );
-    } else if ($input is \TCompactProtocolAccelerated) {
+    } else if ($input is TCompactProtocolAccelerated) {
       $args = thrift_protocol_read_compact_struct(
         $input,
         HH\class_to_classname($request_args_class),
@@ -94,11 +94,11 @@ abstract class ThriftProcessorBase implements IThriftProcessor {
     string $request_name,
     int $seqid,
     mixed $handler_ctx,
-    \TProtocol $output,
+    TProtocol $output,
     TMessageType $reply_type,
   ): void {
     $this->eventHandler_->preWrite($handler_ctx, $request_name, $result);
-    if ($output is \TBinaryProtocolAccelerated) {
+    if ($output is TBinaryProtocolAccelerated) {
       thrift_protocol_write_binary(
         $output,
         $request_name,
@@ -107,7 +107,7 @@ abstract class ThriftProcessorBase implements IThriftProcessor {
         $seqid,
         $output->isStrictWrite(),
       );
-    } else if ($output is \TCompactProtocolAccelerated) {
+    } else if ($output is TCompactProtocolAccelerated) {
       thrift_protocol_write_compact2(
         $output,
         $request_name,
@@ -133,13 +133,13 @@ abstract class ThriftProcessorBase implements IThriftProcessor {
   >(
     HH\AsyncGenerator<null, TStreamType, void> $stream,
     class<TStreamResponseType> $stream_response_type,
-    \TProtocol $output,
+    TProtocol $output,
     string $request_name = '',
     mixed $handler_ctx = null,
   ): Awaitable<void> {
     $transport = $output->getTransport();
     invariant(
-      $transport is \TMemoryBuffer,
+      $transport is TMemoryBuffer,
       "Stream methods require TMemoryBuffer transport",
     );
     $encoded_first_response = $transport->getBuffer();
@@ -183,7 +183,7 @@ abstract class ThriftProcessorBase implements IThriftProcessor {
   }
 
   final protected async function genStream<TStreamType>(
-    \TServerStream $server_stream,
+    TServerStream $server_stream,
     HH\AsyncGenerator<null, TStreamType, void> $payload_generator,
     (function(?TStreamType, ?Exception): (string, ?bool)) $payload_encode,
     string $request_name,
@@ -242,24 +242,135 @@ abstract class ThriftProcessorBase implements IThriftProcessor {
     }
   }
 
-  final protected async function genExecuteSink<
-    TSinkPayloadType as IResultThriftStruct with { type TResult = TSinkType },
-    TSinkType,
-    TSinkFinalResponseType as IResultThriftStruct with {
-      type TResult = TSinkFinalType },
-    TSinkFinalType,
-  >(
+  private async function genSinkGenerator<TSinkType>(
+    TServerSink $server_sink,
+    (function(?string, ?Exception): TSinkType) $payload_decoder,
+  ): HH\AsyncGenerator<null, TSinkType, void> {
+    while (true) {
+      // @lint-ignore AWAIT_IN_LOOP Intentional usage.
+      $ready = await $server_sink->genIsSinkReady();
+      if ($ready !== true) {
+        // This will return false / null when sink is no longer active. This typically
+        // will be the case once the final payload is received from the user in
+        // $server_sink->getPayloads()
+        return;
+      }
+
+      try {
+        // Exception can either be the last payload (declared) or an unknown exception
+        // returned as just the string $exception
+        list($payloads, $exception) = $server_sink->getPayloads();
+      } catch (Exception $ex) {
+        // will throw in $payload_decoder, throw clause for typechecker
+        $payload_decoder(null, $ex);
+        break;
+      }
+
+      foreach ($payloads as $payload) {
+        // will throw if last payload is an exception
+        yield $payload_decoder($payload, null);
+      }
+
+      if ($exception !== null) {
+        // will process and throw the exception
+        $payload_decoder(null, new ThriftApplicationException($exception));
+      }
+    }
+  }
+
+  private function copyProtocol(TProtocol $protocol): TProtocol {
+    if ($protocol is TBinaryProtocolAccelerated) {
+      return new TBinaryProtocolAccelerated(new TMemoryBuffer());
+    } else if ($protocol is TCompactProtocolAccelerated) {
+      return new TCompactProtocolAccelerated(new TMemoryBuffer());
+    } else {
+      throw new TApplicationException(
+        "Only TBinaryProtocol and TCompactProtocol are supported",
+        TApplicationException::INVALID_PROTOCOL,
+      );
+    }
+  }
+
+  final protected async function genExecuteSink<TSinkType, TSinkFinalType>(
     (function(
       HH\AsyncGenerator<null, TSinkType, void>,
     ): Awaitable<TSinkFinalType>) $sink,
-    class<TSinkPayloadType> $sink_payload_type,
-    class<TSinkFinalResponseType> $sink_final_type,
+    class<IResultThriftStruct with { type TResult = TSinkType }>
+      $sink_payload_type,
+    class<IResultThriftStruct with { type TResult = TSinkFinalType }>
+      $sink_final_type,
     TProtocol $input,
     TProtocol $output,
     string $request_name = '',
-    mixed $handler_ctx = null,
+    mixed $_handler_ctx = null,
   ): Awaitable<void> {
-    throw new NotImplementedException('genExecuteSink is not implemented');
+    $server_sink = null;
+    try {
+      $transport = $output->getTransport();
+      invariant(
+        $transport is TMemoryBuffer,
+        "Stream methods require TMemoryBuffer transport",
+      );
+      $encoded_first_response = $transport->getBuffer();
+      $transport->resetBuffer();
+      $server_sink = await gen_start_thrift_sink($encoded_first_response);
+
+      if ($server_sink === null) {
+        // Sink was cancelled by the client.
+        return;
+      }
+
+      PHP\hphp_set_error_page(
+        php_root().
+        '/flib/core/runtime/error/error_pages/thrift/handle_thrift_streaming_service_error.php',
+      );
+
+      $payload_decoder =
+        ThriftStreamingSerializationHelpers::decodeStreamHelper(
+          $sink_payload_type,
+          $request_name,
+          $this->copyProtocol($input),
+        );
+
+      $final_response =
+        await $sink($this->genSinkGenerator($server_sink, $payload_decoder));
+
+      // We do not want to send a final response in case of client exception. We
+      // need this check here in case the server code swallows the exception thrown.
+      if ($server_sink->isClientException()) {
+        return;
+      }
+
+      $final_response_encoder =
+        ThriftStreamingSerializationHelpers::encodeStreamHelper(
+          $sink_final_type,
+          $output,
+        );
+
+      list($encoded_final_response, $_) =
+        $final_response_encoder($final_response, null);
+
+      $server_sink->sendFinalResponse($encoded_final_response);
+    } catch (Exception $ex) {
+      if ($server_sink === null) {
+        return;
+      }
+      if ($server_sink->isClientException()) {
+        return;
+      }
+      $payload_encoder =
+        ThriftStreamingSerializationHelpers::encodeStreamHelper(
+          $sink_final_type,
+          $output,
+        );
+      list($serialized_ex, $is_tax) = $payload_encoder(null, $ex);
+      $server_sink->sendServerException(
+        $serialized_ex,
+        $ex->getMessage(),
+        get_class($ex),
+        !$is_tax,
+      );
+    }
   }
 
   final public function isSupportedMethod(string $fname_with_prefix)[]: bool {
@@ -278,18 +389,18 @@ trait GetThriftServiceMetadata {
 
   private function process_getThriftServiceMetadataHelper(
     int $seqid,
-    \TProtocol $input,
-    \TProtocol $output,
-    classname<\IThriftServiceStaticMetadata> $service_metadata_class,
+    TProtocol $input,
+    TProtocol $output,
+    classname<IThriftServiceStaticMetadata> $service_metadata_class,
   ): void {
     $reply_type = TMessageType::REPLY;
 
-    if ($input is \TBinaryProtocolAccelerated) {
+    if ($input is TBinaryProtocolAccelerated) {
       thrift_protocol_read_binary_struct(
         $input,
         '\tmeta_ThriftMetadataService_getThriftServiceMetadata_args',
       );
-    } else if ($input is \TCompactProtocolAccelerated) {
+    } else if ($input is TCompactProtocolAccelerated) {
       thrift_protocol_read_compact_struct(
         $input,
         '\tmeta_ThriftMetadataService_getThriftServiceMetadata_args',
@@ -304,13 +415,13 @@ trait GetThriftServiceMetadata {
       tmeta_ThriftMetadataService_getThriftServiceMetadata_result::withDefaultValues();
     try {
       $result->success = $service_metadata_class::getServiceMetadataResponse();
-    } catch (\Exception $ex) {
+    } catch (Exception $ex) {
       $reply_type = TMessageType::EXCEPTION;
-      $result = new \TApplicationException(
+      $result = new TApplicationException(
         $ex->getMessage()."\n".$ex->getTraceAsString(),
       );
     }
-    if ($output is \TBinaryProtocolAccelerated) {
+    if ($output is TBinaryProtocolAccelerated) {
       thrift_protocol_write_binary(
         $output,
         'getThriftServiceMetadata',
@@ -319,7 +430,7 @@ trait GetThriftServiceMetadata {
         $seqid,
         $output->isStrictWrite(),
       );
-    } else if ($output is \TCompactProtocolAccelerated) {
+    } else if ($output is TCompactProtocolAccelerated) {
       thrift_protocol_write_compact2(
         $output,
         'getThriftServiceMetadata',

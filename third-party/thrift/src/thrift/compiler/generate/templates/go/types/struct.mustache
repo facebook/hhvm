@@ -28,11 +28,11 @@
 {{! methods }}
 {{> types/struct_methods}}
 
-{{#if (or struct:resp? struct:stream?)}}
+{{#if (or struct:resp? struct:stream? struct:sink?)}}
 
 {{! exception }}
 {{> types/struct_method_exception}}
-{{/if (or struct:resp? struct:stream?)}}
+{{/if (or struct:resp? struct:stream? struct:sink?)}}
 
 {{! write (serialize) }}
 {{#if struct:use_reflect_codec?}}

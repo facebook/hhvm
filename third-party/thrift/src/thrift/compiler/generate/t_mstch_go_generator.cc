@@ -515,6 +515,7 @@ class mstch_go_struct : public mstch_struct {
             {"struct:resp?", &mstch_go_struct::is_resp_struct},
             {"struct:req?", &mstch_go_struct::is_req_struct},
             {"struct:stream?", &mstch_go_struct::is_stream_struct},
+            {"struct:sink?", &mstch_go_struct::is_sink_struct},
             {"struct:fields_sorted", &mstch_go_struct::fields_sorted},
         });
   }
@@ -542,6 +543,11 @@ class mstch_go_struct : public mstch_struct {
     // Whether this is a helper stream struct.
     return data_.is_req_resp_struct(*struct_) &&
         struct_->name().starts_with("stream");
+  }
+  mstch::node is_sink_struct() {
+    // Whether this is a helper sink struct.
+    return data_.is_req_resp_struct(*struct_) &&
+        struct_->name().starts_with("sink");
   }
   mstch::node fields_sorted() {
     // Fields (optionally) in the most optimal (memory-saving) layout order.

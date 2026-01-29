@@ -27,13 +27,13 @@ type {{struct:go_name}} struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = (*{{struct:go_name}})(nil)
-{{#if (or struct:resp? struct:stream?)}}
+{{#if (or struct:resp? struct:stream? struct:sink?)}}
 var _ thrift.WritableResult = (*{{struct:go_name}})(nil)
 
 {{! TODO: resp struct is an internal implementation detail. Can we unexport it? }}
 // Deprecated: {{struct:go_public_resp_name}} is deprecated, since it is supposed to be internal.
 type {{struct:go_public_resp_name}} = {{struct:go_name}}
-{{/if (or struct:resp? struct:stream?)}}{{!
+{{/if (or struct:resp? struct:stream? struct:sink?)}}{{!
 }}{{#struct:req?}}
 
 {{! TODO: req struct is an internal implementation detail. Can we unexport it? }}

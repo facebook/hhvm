@@ -157,7 +157,13 @@ FIZZ_DECLARE_EVENT_HANDLER(
 
 FIZZ_DECLARE_EVENT_HANDLER(
     ClientTypes,
-    StateEnum::ExpectingCloseNotify,
+    StateEnum::WriteSideClosed,
+    Event::AppData,
+    StateEnum::Error);
+
+FIZZ_DECLARE_EVENT_HANDLER(
+    ClientTypes,
+    StateEnum::WriteSideClosed,
     Event::CloseNotify,
     StateEnum::Closed);
 } // namespace sm
@@ -368,7 +374,7 @@ Status handleAppCloseImmediate(Actions& ret, Error& err, const State& state) {
 Status handleAppClose(Actions& ret, Error& err, const State& state) {
   if (state.writeRecordLayer()) {
     MutateState transition([](State& newState) {
-      newState.state() = StateEnum::ExpectingCloseNotify;
+      newState.state() = StateEnum::WriteSideClosed;
       newState.writeRecordLayer() = nullptr;
     });
 
@@ -2545,8 +2551,7 @@ EventHandler<ClientTypes, StateEnum::Established, Event::NewSessionTicket>::
   return Status::Success;
 }
 
-Status
-EventHandler<ClientTypes, StateEnum::Established, Event::AppData>::handle(
+Status handleAppData(
     Actions& ret,
     InvocationContext& /* ctx */,
     const State&,
@@ -2554,6 +2559,16 @@ EventHandler<ClientTypes, StateEnum::Established, Event::AppData>::handle(
   auto& appData = *param.asAppData();
 
   ret = actions(DeliverAppData{std::move(appData.data)});
+  return Status::Success;
+}
+
+Status
+EventHandler<ClientTypes, StateEnum::Established, Event::AppData>::handle(
+    Actions& ret,
+    InvocationContext& ctx,
+    const State& state,
+    Param& param) {
+  TRY(handleAppData(ret, ctx, state, param));
   return Status::Success;
 }
 
@@ -2891,7 +2906,17 @@ EventHandler<ClientTypes, StateEnum::Established, Event::CloseNotify>::handle(
 }
 
 Status
-EventHandler<ClientTypes, StateEnum::ExpectingCloseNotify, Event::CloseNotify>::
+EventHandler<ClientTypes, StateEnum::WriteSideClosed, Event::AppData>::handle(
+    Actions& ret,
+    InvocationContext& ctx,
+    const State& state,
+    Param& param) {
+  TRY(handleAppData(ret, ctx, state, param));
+  return Status::Success;
+}
+
+Status
+EventHandler<ClientTypes, StateEnum::WriteSideClosed, Event::CloseNotify>::
     handle(
         Actions& ret,
         InvocationContext& ctx,

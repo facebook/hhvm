@@ -27,7 +27,7 @@ enum class StateEnum {
   ExpectingCertificateVerify,
   ExpectingFinished,
   Established,
-  ExpectingCloseNotify,
+  WriteSideClosed,
   Closed,
   Error,
   NUM_STATES

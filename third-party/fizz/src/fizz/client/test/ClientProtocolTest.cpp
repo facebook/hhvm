@@ -5970,9 +5970,18 @@ TEST_F(ClientProtocolTest, TestEstablishedAppClose) {
   auto write = expectAction<WriteToSocket>(actions);
   EXPECT_EQ(write.contents[0].contentType, ContentType::alert);
   processStateMutations(actions);
-  EXPECT_EQ(state_.state(), StateEnum::ExpectingCloseNotify);
+  EXPECT_EQ(state_.state(), StateEnum::WriteSideClosed);
   EXPECT_NE(state_.readRecordLayer().get(), nullptr);
   EXPECT_EQ(state_.writeRecordLayer().get(), nullptr);
+
+  // Test that half-open state is able to receive AppData
+  fizz::Param appDataParam(TestMessages::appData());
+  actions = detail::processEvent(state_, appDataParam);
+  auto deliveredData = expectSingleAction<DeliverAppData>(std::move(actions));
+  EXPECT_TRUE(
+      folly::IOBufEqualTo()(
+          deliveredData.data, folly::IOBuf::copyBuffer("appdata")));
+  EXPECT_EQ(state_.state(), StateEnum::WriteSideClosed);
 
   EXPECT_CALL(*mockRead_, mockReadEvent()).WillOnce(InvokeWithoutArgs([]() {
     return ReadRecordLayer::ReadResult<Param>::from(CloseNotify());

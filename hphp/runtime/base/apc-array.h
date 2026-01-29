@@ -42,7 +42,8 @@ struct APCArray {
                                           bool unserializeObj);
 
   static APCHandle* MakeUncountedArray(
-      ArrayData* ad, DataWalker::PointerMap* seen);
+      ArrayData* ad, MakeUncountedEnv::ArrayMap* seen,
+      MakeUncountedEnv::StringSet* seenStrings);
 
   static APCHandle::Pair MakeSharedEmptyVec();
   static void Delete(APCHandle* handle);

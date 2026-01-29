@@ -30,7 +30,7 @@ namespace HPHP {
 
 namespace {
 
-size_t getMemSize(DataWalker::PointerMap* seenArrs) {
+size_t getMemSize(MakeUncountedEnv::ArrayMap* seenArrs) {
   always_assert(!use_jemalloc);
   size_t total = 0;
   for (auto kv : *seenArrs) {
@@ -49,13 +49,13 @@ APCHandle::Pair
 APCArray::MakeSharedImpl(ArrayData* arr, APCHandleLevel level,
                          A shared, B serialized, bool pure) {
   if (level == APCHandleLevel::Outer) {
-    auto const seenArrs = apcExtension::ShareUncounted ?
-      req::make_unique<DataWalker::PointerMap>() : nullptr;
+    auto const seenArrays = apcExtension::ShareUncounted ?
+      req::make_unique<MakeUncountedEnv::ArrayMap>() : nullptr;
 
     // We only need to call traverseData() on the top-level array.
     DataWalker walker(DataWalker::LookupFeature::DetectNonPersistable);
     DataWalker::DataFeature features =
-      walker.traverseData(arr, seenArrs.get());
+      walker.traverseData(arr, seenArrays.get());
     if (features.isCircular) {
       auto const s = apc_serialize(Variant{arr}, pure);
       return serialized(s.get());
@@ -64,9 +64,13 @@ APCArray::MakeSharedImpl(ArrayData* arr, APCHandleLevel level,
     if (apcExtension::UseUncounted && !features.hasNonPersistable) {
       auto const base_size = use_jemalloc ?
         tl_heap->getAllocated() - tl_heap->getDeallocated() :
-        seenArrs.get() ? getMemSize(seenArrs.get()) :
+        seenArrays.get() ? getMemSize(seenArrays.get()) :
         ::HPHP::getMemSize(arr, true);
-      auto const uncounted_arr = MakeUncountedArray(arr, seenArrs.get());
+      auto const uncounted_arr = [&]() {
+        auto const seenStrings = apcExtension::ShareUncounted ?
+          req::make_unique<MakeUncountedEnv::StringSet>() : nullptr;
+        return MakeUncountedArray(arr, seenArrays.get(), seenStrings.get());
+      }();
       auto size = use_jemalloc ?
         tl_heap->getAllocated() - tl_heap->getDeallocated() - base_size :
         base_size;
@@ -185,9 +189,10 @@ APCHandle::Pair APCArray::MakeHash(ArrayData* arr, APCKind kind,
 }
 
 APCHandle* APCArray::MakeUncountedArray(
-    ArrayData* ad, DataWalker::PointerMap* seen) {
+    ArrayData* ad, MakeUncountedEnv::ArrayMap* seenArrays,
+    MakeUncountedEnv::StringSet* seenStrings) {
   assertx(apcExtension::UseUncounted);
-  auto const env = MakeUncountedEnv { seen };
+  auto const env = MakeUncountedEnv { seenArrays, seenStrings };
   auto const data = ::HPHP::MakeUncountedArray(ad, env, true);
   return APCTypedValue::ForArray(data)->getHandle();
 }

@@ -135,10 +135,11 @@ ArrayData* MakeUncountedArray(
     }
   }
 
-  HeapObject** seenArr = nullptr;
-  if (env.seen && in->hasMultipleRefs()) {
-    seenArr = &(*env.seen)[in];
-    if (auto const arr = static_cast<ArrayData*>(*seenArr)) {
+  ArrayData** seenArr = nullptr;
+  if (env.seenArrays && in->hasMultipleRefs()) {
+    seenArr = &(*env.seenArrays)[in];
+    auto arr = *seenArr;
+    if (arr) {
       arr->uncountedIncRef();
       return arr;
     }
@@ -147,26 +148,29 @@ ArrayData* MakeUncountedArray(
   auto const result = in->makeUncounted(env, hasApcTv);
   // NOTE: We may have mutated env.seen in makeUncounted, so we must redo
   // the hash table lookup here. We only use seenArr to test for presence.
-  if (seenArr) (*env.seen)[in] = result;
+  if (seenArr) (*env.seenArrays)[in] = result;
   return result;
 }
 
 StringData* MakeUncountedString(StringData* in, const MakeUncountedEnv& env) {
   if (in->persistentIncRef()) return in;
   if (in->empty()) return staticEmptyString();
-  if (auto const st = lookupStaticString(in)) return st;
 
-  HeapObject** seenStr = nullptr;
-  if (env.seen && in->hasMultipleRefs()) {
-    seenStr = &(*env.seen)[in];
-    if (auto const st = static_cast<StringData*>(*seenStr)) {
-      st->uncountedIncRef();
+  if (env.seenStrings) {
+    auto it = env.seenStrings->find(in);
+    if (it != env.seenStrings->end()) {
+      auto st = *it;
+      st->persistentIncRef();
       return st;
     }
   }
 
-  auto const st = StringData::MakeUncounted(in->slice());
-  if (seenStr) *seenStr = st;
+  auto st = lookupStaticString(in);
+  if (!st) {
+    st = StringData::MakeUncounted(in->slice());
+  }
+
+  if (env.seenStrings) env.seenStrings->insert(st);
   return st;
 }
 

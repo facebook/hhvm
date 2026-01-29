@@ -113,7 +113,7 @@ APCHandle::Pair APCCollection::Make(const ObjectData* obj,
     auto const features = walker.traverseData(ad);
     assertx(!features.isCircular);
     if (!features.hasNonPersistable) {
-      auto const arr = APCArray::MakeUncountedArray(ad, /*PointerMap*/nullptr);
+      auto const arr = APCArray::MakeUncountedArray(ad, /*PointerMap*/nullptr, nullptr);
       auto const size = getMemSize(ad) + sizeof(APCTypedValue);
       return WrapArray({arr, size}, obj->collectionType());
     }

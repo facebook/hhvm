@@ -47,13 +47,13 @@ class HTTPConnectAsyncTransport
 
   ~HTTPConnectAsyncTransport() override;
 
-  folly::EventBase* getEventBase() const override {
+  [[nodiscard]] folly::EventBase* getEventBase() const override {
     return connectStream_->eventBase_;
   }
 
   void setReadCB(ReadCallback* callback) override;
 
-  ReadCallback* getReadCallback() const override {
+  [[nodiscard]] ReadCallback* getReadCallback() const override {
     return readCallback_;
   }
   void write(WriteCallback* callback,
@@ -89,22 +89,22 @@ class HTTPConnectAsyncTransport
 
   void shutdownRead();
 
-  bool good() const override {
+  [[nodiscard]] bool good() const override {
     return readable() && writable();
   }
-  bool readable() const override {
+  [[nodiscard]] bool readable() const override {
     // TODO: should only return true when data is available (AsyncSocket calls
     // poll)
     return connectStream_->canRead();
   }
-  bool writable() const override {
+  [[nodiscard]] bool writable() const override {
     return connectStream_->canWrite();
   }
-  bool connecting() const override {
+  [[nodiscard]] bool connecting() const override {
     // Don't hand off the transport until connected
     return false;
   }
-  bool error() const override {
+  [[nodiscard]] bool error() const override {
     return ingressError_ || connectStream_->egressError_;
   }
   void attachEventBase(folly::EventBase* /*eventBase*/) override {
@@ -113,7 +113,7 @@ class HTTPConnectAsyncTransport
   void detachEventBase() override {
     XLOG(FATAL) << "Cannot change eventBase";
   }
-  bool isDetachable() const override {
+  [[nodiscard]] bool isDetachable() const override {
     return false;
   }
   void setSendTimeout(uint32_t sendTimeoutMs) override {
@@ -122,7 +122,7 @@ class HTTPConnectAsyncTransport
           std::chrono::milliseconds(sendTimeoutMs));
     }
   }
-  uint32_t getSendTimeout() const override {
+  [[nodiscard]] uint32_t getSendTimeout() const override {
     return connectStream_->egressSource_->getReadTimeout().count();
   }
   void getLocalAddress(folly::SocketAddress* address) const override {
@@ -132,7 +132,7 @@ class HTTPConnectAsyncTransport
     *address = connectStream_->peerAddr_;
   }
 
-  bool isEorTrackingEnabled() const override {
+  [[nodiscard]] bool isEorTrackingEnabled() const override {
     return false;
   }
 
@@ -143,16 +143,16 @@ class HTTPConnectAsyncTransport
     }
   }
 
-  size_t getAppBytesWritten() const override {
+  [[nodiscard]] size_t getAppBytesWritten() const override {
     return egressOffset_;
   }
-  size_t getRawBytesWritten() const override {
+  [[nodiscard]] size_t getRawBytesWritten() const override {
     return egressOffset_ /* TODO: + HTTP overhead */;
   }
-  size_t getAppBytesReceived() const override {
+  [[nodiscard]] size_t getAppBytesReceived() const override {
     return ingressOffset_;
   }
-  size_t getRawBytesReceived() const override {
+  [[nodiscard]] size_t getRawBytesReceived() const override {
     return ingressOffset_ /* TODO: + HTTP overhead */;
   }
 

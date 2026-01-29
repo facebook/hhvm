@@ -19,7 +19,7 @@ class InsecureVerifierDangerousDoNotUseInProduction
  public:
   ~InsecureVerifierDangerousDoNotUseInProduction() override = default;
 
-  std::shared_ptr<const folly::AsyncTransportCertificate> verify(
+  [[nodiscard]] std::shared_ptr<const folly::AsyncTransportCertificate> verify(
       const std::vector<std::shared_ptr<const fizz::PeerCert>>& certs)
       const override {
     return certs.front();

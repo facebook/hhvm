@@ -72,8 +72,8 @@ class HTTPConnectStream
 
   void close();
 
-  bool canRead() const;
-  bool canWrite() const;
+  [[nodiscard]] bool canRead() const;
+  [[nodiscard]] bool canWrite() const;
   void shutdownRead();
   void shutdownWrite();
 

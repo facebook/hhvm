@@ -228,7 +228,7 @@ class CNameMockResolver : public CAresResolver {
     queryFinishedCount_++;
   }
 
-  int queryFinishedCount() const {
+  [[nodiscard]] int queryFinishedCount() const {
     return queryFinishedCount_;
   }
 

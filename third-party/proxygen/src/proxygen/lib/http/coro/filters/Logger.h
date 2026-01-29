@@ -99,7 +99,7 @@ class Logger {
     return &respFilter;
   }
 
-  HTTPCodec::StreamID getStreamID() const {
+  [[nodiscard]] HTTPCodec::StreamID getStreamID() const {
     if (reqFilter.streamID) {
       return *reqFilter.streamID;
     } else if (respFilter.streamID) {
@@ -109,31 +109,31 @@ class Logger {
     }
   }
 
-  std::chrono::milliseconds timeToFirstHeaderByte() const {
+  [[nodiscard]] std::chrono::milliseconds timeToFirstHeaderByte() const {
     auto endTime = respFilter.finalHeaderTime ? *respFilter.finalHeaderTime
                                               : respFilter.endTime;
     return std::chrono::duration_cast<std::chrono::milliseconds>(endTime -
                                                                  startTime);
   }
 
-  std::chrono::milliseconds timeToFirstByte() const {
+  [[nodiscard]] std::chrono::milliseconds timeToFirstByte() const {
     auto endTime = respFilter.firstByteTime ? *respFilter.firstByteTime
                                             : respFilter.endTime;
     return std::chrono::duration_cast<std::chrono::milliseconds>(endTime -
                                                                  startTime);
   }
 
-  std::chrono::milliseconds timeToLastByte() const {
+  [[nodiscard]] std::chrono::milliseconds timeToLastByte() const {
     return std::chrono::duration_cast<std::chrono::milliseconds>(
         respFilter.endTime - startTime);
   }
 
-  std::string getSecurityType() const {
+  [[nodiscard]] std::string getSecurityType() const {
     return transportInfo.secure ? transportInfo.securityType
                                 : std::string("plaintext");
   }
 
-  std::string getAuthority() const {
+  [[nodiscard]] std::string getAuthority() const {
     if (!reqFilter.host.empty()) {
       return reqFilter.host;
     }
@@ -146,7 +146,7 @@ class Logger {
     return {};
   }
 
-  std::string getPath() const {
+  [[nodiscard]] std::string getPath() const {
     if (!reqFilter.url.empty()) {
       auto parseUrl = ParseURL::parseURL(reqFilter.url);
       if (parseUrl) {

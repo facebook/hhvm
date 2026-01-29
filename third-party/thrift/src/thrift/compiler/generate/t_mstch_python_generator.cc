@@ -1252,10 +1252,7 @@ void t_mstch_python_generator::generate_file(
 }
 
 void t_mstch_python_generator::generate_types() {
-  // DO_BEFORE(satishvk, 20250130): Remove flags related to abstract types after
-  // launch.
-  python_context_->set_enable_abstract_types(
-      !has_compiler_option("disable_abstract_types"));
+  python_context_->set_enable_abstract_types(true);
 
   generate_file(
       "thrift_types.py", types_file_kind::source_file, type_kind::immutable);
@@ -1359,9 +1356,6 @@ THRIFT_REGISTER_GENERATOR(
     mstch_python,
     "Python",
     "    include_prefix:  Use full include paths in generated files.\n"
-    "    disable_abstract_types:\n"
-    "      Disable the use of abstract types with thrift-python"
-    "      immutable and mutable types.\n"
     "    does_not_have_py_deprecated:\n"
     "      Specify that the generated code does not have thrift-py-deprecated.\n"
     "    does_not_have_py_deprecated_asyncio:\n"

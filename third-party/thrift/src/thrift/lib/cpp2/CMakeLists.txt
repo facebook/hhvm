@@ -78,6 +78,7 @@ add_library(
   dynamic/TypeId.cpp
   dynamic/TypeSystem.cpp
   dynamic/TypeSystemBuilder.cpp
+  dynamic/TypeSystemTraits.cpp
   runtime/BaseSchemaRegistry.cpp
   runtime/Init.cpp
   runtime/SchemaRegistry.cpp
@@ -108,6 +109,46 @@ target_link_libraries(
   thriftmetadata
   PUBLIC
     Folly::folly
+)
+
+add_library(
+  thrift_dynamic_value
+
+  dynamic/Any.cpp
+  dynamic/Binary.cpp
+  dynamic/DynamicValue.cpp
+  dynamic/List.cpp
+  dynamic/Map.cpp
+  dynamic/Set.cpp
+  dynamic/String.cpp
+  dynamic/Struct.cpp
+  dynamic/Union.cpp
+  dynamic/detail/ConcreteMapAny.cpp
+  dynamic/detail/ConcreteMapBinary.cpp
+  dynamic/detail/ConcreteMapBool.cpp
+  dynamic/detail/ConcreteMapDouble.cpp
+  dynamic/detail/ConcreteMapFloat.cpp
+  dynamic/detail/ConcreteMapI16.cpp
+  dynamic/detail/ConcreteMapI32.cpp
+  dynamic/detail/ConcreteMapI64.cpp
+  dynamic/detail/ConcreteMapI8.cpp
+  dynamic/detail/ConcreteMapList.cpp
+  dynamic/detail/ConcreteMapMap.cpp
+  dynamic/detail/ConcreteMapSet.cpp
+  dynamic/detail/ConcreteMapString.cpp
+  dynamic/detail/ConcreteMapStruct.cpp
+  dynamic/detail/ConcreteMapUnion.cpp
+  dynamic/detail/ConcreteSet.cpp
+  dynamic/detail/Datum.cpp
+  dynamic/detail/DatumHash.cpp
+)
+add_dependencies(thrift_dynamic_value thriftmetadata thriftprotocol)
+target_link_libraries(
+  thrift_dynamic_value
+  PUBLIC
+    Folly::folly
+    thriftmetadata
+    thriftprotocol
 )
 
 bypass_source_check("${frozen-cpp2-SOURCES}")
@@ -427,6 +468,7 @@ add_dependencies(
   RocketUpgrade-cpp2-target
   thriftannotation
   thriftmetadata
+  thrift_dynamic_value
   thrifttyperep
   thrifttype
   thriftanyrep
@@ -441,6 +483,7 @@ target_link_libraries(
     rpcmetadata
     thriftannotation
     thriftmetadata
+    thrift_dynamic_value
     thriftfrozen2
     thriftprotocol
     thrifttyperep
@@ -486,7 +529,7 @@ install(
 
 if (BUILD_SHARED_LIBS)
   set_target_properties(rpcmetadata thriftannotation thriftmetadata
-    thriftfrozen2 thriftprotocol thriftcpp2 thrifttyperep thrifttype
+    thrift_dynamic_value thriftfrozen2 thriftprotocol thriftcpp2 thrifttyperep thrifttype
     serverdbginfo
     PROPERTIES VERSION ${PACKAGE_VERSION}
     )
@@ -496,6 +539,7 @@ install(
   TARGETS
     rpcmetadata
     thriftmetadata
+    thrift_dynamic_value
     thriftfrozen2
     thrifttyperep
     thrifttype

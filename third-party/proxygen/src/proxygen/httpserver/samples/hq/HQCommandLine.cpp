@@ -313,6 +313,7 @@ void initializeTransportSettings(HQToolParams& hqUberParams) {
     hqParams.transportSettings.enableEcnOnEgress = true;
     hqParams.transportSettings.useL4sEcn = true;
     hqParams.transportSettings.minBurstPackets = 1;
+    hqParams.transportSettings.experimentalPacer = true;
     hqParams.transportSettings.ccaConfig.onlyGrowCwndWhenLimited = true;
     hqParams.transportSettings.ccaConfig.leaveHeadroomForCwndLimited = true;
   }

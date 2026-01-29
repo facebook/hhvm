@@ -71,7 +71,7 @@ inline testing::TestInfo* registerTest(
     const char* file,
     int line,
     Factory factory) {
-  using TestT = typename std::remove_pointer<decltype(factory())>::type;
+  using TestT = std::remove_pointer_t<decltype(factory())>;
 
   class FactoryImpl : public testing::internal::TestFactoryBase {
    public:

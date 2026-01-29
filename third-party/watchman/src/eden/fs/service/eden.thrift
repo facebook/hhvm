@@ -2650,7 +2650,7 @@ service EdenService extends fb303_core.BaseService {
   ) throws (1: EdenError ex);
 
   /**
-   * When eden doctor or another tool noticies that EdenFS is out of sync with
+   * When eden doctor or another tool notices that EdenFS is out of sync with
    * the filesystem this API can be used to poke EdenFS into noticing the file
    * change.
    */

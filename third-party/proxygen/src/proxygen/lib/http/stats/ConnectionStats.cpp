@@ -29,7 +29,7 @@ MinimalConnectionStats::MinimalConnectionStats(const std::string& prefix,
     ingressBodyBytes_.emplace(prefix + "_ingress_body_bytes", SUM, RATE);
 
     totalDuration_.emplace(prefix + "_conn_duration",
-                           facebook::fb303::ExportTypeConsts::kAvg,
+                           facebook::fb303::ExportTypeConsts::kNone,
                            facebook::fb303::QuantileConsts::kP50_P95_P99);
     currConns_.emplace(prefix + "_conn");
     newConns_.emplace(prefix + "_new_conn", SUM);

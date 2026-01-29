@@ -91,6 +91,59 @@ bool simplify(Env& env, const cmovq& inst, Vlabel b, size_t i) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+template <typename reg_type>
+static bool get_const_int(Env& env, reg_type op, uint64_t &Val) {
+  auto const op_it = env.unit.regToConst.find(op);
+  if (op_it == env.unit.regToConst.end()) return false;
+  auto const op_const = op_it->second;
+  assert(op_const.kind != Vconst::Double);
+  if (op_const.isUndef) return false;
+  Val = op_const.val;
+  return true;
+}
+
+bool simplify(Env& env, const shrqi& inst, Vlabel b, size_t i) {
+  if (env.use_counts[inst.d] != 1 || env.use_counts[inst.sf] ||
+      inst.s0.l() > 32) return false;
+
+  return if_inst<Vinstr::testl>(env, b, i + 1, [&] (const testl& tstl) {
+    if (tstl.s1 != inst.d || env.use_counts[tstl.sf] != 1) return false;
+
+    uint64_t Val;
+    if (!get_const_int(env, tstl.s0, Val) || folly::popcount(Val) != 1) {
+      return false;
+    }
+
+    auto shift_amt = inst.s0.l();
+    return simplify_impl(env, b, i, [&] (Vout& v) {
+      uint64_t NewVal = Val << shift_amt;
+      v << testq{env.unit.makeConst(NewVal), inst.s1, tstl.sf, tstl.fl};
+      return 2;
+    });
+  });
+}
+
+bool simplify(Env& env, const testq& inst, Vlabel b, size_t i) {
+  if (env.use_counts[inst.sf] != 1) return false;
+
+  uint64_t Val;
+  if (!get_const_int(env, inst.s0, Val) || Val != 0x8000000000000000ull) {
+    return false;
+  }
+
+  return if_inst<Vinstr::jcc>(env, b, i + 1, [&] (const jcc& jcci) {
+    if (jcci.sf != inst.sf || jcci.cc != CC_E) return false;
+    return simplify_impl(env, b, i, [&] (Vout& v) {
+      auto const sf = v.makeReg();
+      v << cmpqi{0, inst.s1, sf, inst.fl};
+      v << jcc{CC_GE, sf, {jcci.targets[0], jcci.targets[1]}, jcci.tag};
+      return 2;
+    });
+  });
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 template <Vinstr::Opcode ExtOp, typename ExtMov, typename ExtLoad, typename Load>
 bool simplify_load_ext(Env& env, const Load& inst, Vlabel b, size_t i) {
   return if_inst<ExtOp>(env, b, i + 1, [&] (const ExtMov& mov) {

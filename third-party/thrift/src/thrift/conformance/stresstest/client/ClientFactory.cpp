@@ -35,6 +35,7 @@
 #include <quic/common/udpsocket/FollyQuicAsyncUDPSocket.h>
 #include <quic/fizz/client/handshake/FizzClientQuicHandshakeContext.h>
 #include <thrift/conformance/stresstest/client/ClientConfig.h>
+#include <thrift/conformance/stresstest/util/IoUringUtil.h>
 #include <thrift/lib/cpp2/async/RocketClientChannel.h>
 #include <thrift/lib/cpp2/security/extensions/ThriftParametersClientExtension.h>
 #include <thrift/lib/cpp2/security/extensions/ThriftParametersContext.h>
@@ -278,9 +279,17 @@ folly::AsyncTransport::UniquePtr createFizzSocket(
 }
 
 #if FOLLY_HAS_LIBURING
+folly::AsyncIoUringSocket::Options getIoUringSocketOptions() {
+  folly::AsyncIoUringSocket::Options opts;
+  if (FLAGS_io_zctx) {
+    opts.zeroCopyEnable = [](auto&&) { return true; };
+  }
+  return opts;
+}
+
 folly::AsyncTransport::UniquePtr createIOUring(
     folly::EventBase* evb, const ClientConnectionConfig& cfg) {
-  auto ring = new folly::AsyncIoUringSocket(evb);
+  auto ring = new folly::AsyncIoUringSocket(evb, getIoUringSocketOptions());
   if (cfg.ioUringZcrx) {
     folly::AsyncIoUringSocketFactory::bindSocketForZcRx(
         *ring, cfg.serverHost.getIPAddress(), cfg.serverHost.getPort());
@@ -292,7 +301,8 @@ folly::AsyncTransport::UniquePtr createIOUring(
 folly::AsyncTransport::UniquePtr createIOUringTLS(
     folly::EventBase* evb, const ClientConnectionConfig& cfg) {
   auto sock = folly::AsyncSSLSocket::newSocket(getSslContext(cfg), evb);
-  auto ring = new folly::AsyncIoUringSocket(std::move(sock));
+  auto ring =
+      new folly::AsyncIoUringSocket(std::move(sock), getIoUringSocketOptions());
   if (cfg.ioUringZcrx) {
     folly::AsyncIoUringSocketFactory::bindSocketForZcRx(
         *ring, cfg.serverHost.getIPAddress(), cfg.serverHost.getPort());
@@ -303,7 +313,7 @@ folly::AsyncTransport::UniquePtr createIOUringTLS(
 
 folly::AsyncTransport::UniquePtr createIOUringFizz(
     folly::EventBase* evb, const ClientConnectionConfig& cfg) {
-  auto sock = new folly::AsyncIoUringSocket(evb);
+  auto sock = new folly::AsyncIoUringSocket(evb, getIoUringSocketOptions());
   if (cfg.ioUringZcrx) {
     folly::AsyncIoUringSocketFactory::bindSocketForZcRx(
         *sock, cfg.serverHost.getIPAddress(), cfg.serverHost.getPort());

@@ -17,6 +17,7 @@
 #include <thrift/conformance/stresstest/util/IoUringUtil.h>
 
 #include <folly/IPAddress.h>
+#include <folly/memory/IoUringArena.h>
 
 DEFINE_bool(use_iouring_event_eventfd, true, "");
 DEFINE_int32(io_capacity, 0, "");
@@ -31,6 +32,7 @@ DEFINE_int32(io_registers, 2048, "");
 DEFINE_int32(io_prov_buffs_size, 2048, "");
 DEFINE_int32(io_prov_buffs, 2000, "");
 DEFINE_bool(io_zcrx, false, "");
+DEFINE_bool(io_zctx, false, "");
 DEFINE_int32(io_zcrx_num_pages, 16384, "");
 DEFINE_int32(io_zcrx_refill_entries, 16384, "");
 DEFINE_string(io_zcrx_ifname, "eth0", "");
@@ -117,6 +119,13 @@ folly::IoUringBackend::Options getIoUringOptions() {
         .setZeroCopyRxRefillEntries(FLAGS_io_zcrx_refill_entries)
         .setResolveNapiCallback(resolve_napi_callback)
         .setZcrxSrcPortCallback(src_port_callback);
+  }
+
+  if (FLAGS_io_zctx && folly::IoUringArena::initialized()) {
+    options.setArenaRegion(
+        folly::IoUringArena::base(),
+        folly::IoUringArena::regionSize(),
+        folly::IoUringArena::arenaIndex());
   }
 
   return options;

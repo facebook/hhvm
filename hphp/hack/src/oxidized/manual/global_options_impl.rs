@@ -76,11 +76,11 @@ impl Default for GlobalOptions {
             tco_type_refinement_partition_shapes: false,
             tco_error_php_lambdas: false,
             tco_disallow_discarded_nullable_awaitables: false,
-            glean_reponame: String::new(), // "www.autocomplete" in ocaml
+            glean_reponame: String::from("www.hack.light"),
             symbol_write_index_inherited_members: true,
             symbol_write_ownership: false,
-            symbol_write_root_path: String::new(), // "www" in ocaml
-            symbol_write_hhi_path: String::new(),  // "hhi" in ocaml
+            symbol_write_root_path: String::from("www"),
+            symbol_write_hhi_path: String::from("hhi"),
             symbol_write_ignore_paths: vec![],
             symbol_write_index_paths: vec![],
             symbol_write_index_paths_file: None,
@@ -113,7 +113,7 @@ impl Default for GlobalOptions {
             tco_specify_manifold_api_key: false,
             tco_profile_top_level_definitions: false,
             tco_typecheck_if_name_matches_regexp: None,
-            tco_allow_all_files_for_module_declarations: false,
+            tco_allow_all_files_for_module_declarations: true,
             tco_allowed_files_for_module_declarations: vec![],
             tco_record_fine_grained_dependencies: false,
             tco_loop_iteration_upper_bound: None,

@@ -3544,6 +3544,8 @@ dependencies = [
 name = "options_ffi"
 version = "0.0.0"
 dependencies = [
+ "config_file",
+ "hh_config",
  "ocamlrep_ocamlpool",
  "oxidized",
 ]

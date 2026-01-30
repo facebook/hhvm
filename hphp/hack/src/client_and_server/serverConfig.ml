@@ -469,6 +469,7 @@ let load_config (config : Config_file_common.t) (options : GlobalOptions.t) :
       (bool_opt "populate_dead_unsafe_cast_heap" config)
     ?dump_tast_hashes:(bool_opt "dump_tast_hashes" config)
     ?warnings_default_all:(bool_opt "warnings_default_all" config)
+    ?warnings_in_sandcastle:(bool_opt "warnings_in_sandcastle" config)
     ?tco_allowed_files_for_ignore_readonly:
       (string_list_opt "allowed_files_for_ignore_readonly" config)
     ?tco_package_allow_typedef_violations:
@@ -520,6 +521,7 @@ let load_config (config : Config_file_common.t) (options : GlobalOptions.t) :
       (bool_opt "class_pointer_ban_class_array_key" config)
     ?tco_poly_function_pointers:(bool_opt "poly_function_pointers" config)
     ?tco_check_packages:(bool_opt "check_packages" config)
+    ?fanout_strip_class_location:(bool_opt "fanout_strip_class_location" config)
     ?tco_package_config_disable_transitivity_check:
       (bool_opt "package_config_disable_transitivity_check" config)
     ?tco_allow_require_package_on_interface_methods:

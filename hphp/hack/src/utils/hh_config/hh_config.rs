@@ -474,7 +474,10 @@ impl HhConfig {
             tco_record_fine_grained_dependencies: default.tco_record_fine_grained_dependencies,
             tco_loop_iteration_upper_bound: default.tco_loop_iteration_upper_bound,
             tco_populate_dead_unsafe_cast_heap: default.tco_populate_dead_unsafe_cast_heap,
-            dump_tast_hashes: hh_conf.get_bool_or("dump_tast_hashes", default.dump_tast_hashes)?,
+            dump_tast_hashes: hhconfig
+                .get_bool("dump_tast_hashes")
+                .or_else(|| hh_conf.get_bool("dump_tast_hashes"))
+                .unwrap_or(Ok(default.dump_tast_hashes))?,
             dump_tasts: match hh_conf.get_str("dump_tasts") {
                 None => default.dump_tasts,
                 Some(path) => {
@@ -509,7 +512,10 @@ impl HhConfig {
                 default.tco_disable_physical_equality,
             )?,
             hack_warnings: {
-                let is_on = hh_conf.get_bool_or("hack_warnings", true)?;
+                let is_on = hhconfig
+                    .get_bool("hack_warnings")
+                    .or_else(|| hh_conf.get_bool("hack_warnings"))
+                    .unwrap_or(Ok(true))?;
                 if is_on {
                     let disabled_warnings = hhconfig.get_ints_or("disabled_warnings", vec![])?;
                     NoneOrAllExcept::AllExcept(disabled_warnings)

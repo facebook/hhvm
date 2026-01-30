@@ -10,7 +10,7 @@ use crate::package_info::PackageInfo;
 impl Default for ParserOptions {
     fn default() -> Self {
         Self {
-            disable_lval_as_an_expression: false, // true in ocaml
+            disable_lval_as_an_expression: true,
             const_static_props: false,
             const_default_func_args: false,
             abstract_static_props: false,

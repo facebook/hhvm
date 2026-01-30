@@ -1,4 +1,4 @@
-// RUN: %hackc compile-infer --fail-fast %s | FileCheck %s
+// RUN: %hackc compile-infer --fail-fast -vHack.Lang.DisableLvalAsAnExpression=false %s | FileCheck %s
 
 class D {
   public int $foo = 42;

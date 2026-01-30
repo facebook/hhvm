@@ -1,0 +1,13 @@
+name: \C::instance_prop, kind: property, span: line 12, characters 17-29, is_declaration: false
+definition:
+ instance_prop
+   kind: property
+   id: property::C::instance_prop
+   position: line 5, characters 14-27
+   span: line 5, character 14 - line 5, character 31
+   modifiers: public 
+
+
+name: \T::instance_prop, kind: property, span: line 12, characters 17-29, is_declaration: false
+definition: None
+

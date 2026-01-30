@@ -185,4 +185,10 @@ val get_rank : t -> Tvid.t -> int
 
 val get_pos : t -> Pos.t option
 
-val set_pos : t -> Pos.t option -> t
+(** Propagate the position for better error reporting.
+  * Returns a `restore_pos` function.
+  * Call the `restore_pos` function at the end
+  * of the scope in cases where you're not throwing
+  * the `env` away.
+  *)
+val set_pos : t -> Pos.t option -> t * (t -> t)

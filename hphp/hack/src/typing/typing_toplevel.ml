@@ -83,6 +83,7 @@ let fun_def ctx fd : Tast.fun_def Tast_with_dynamic.t option =
     let env = Env.open_tyvars env (fst fd.fd_name) in
     let env = Env.set_env_callable_pos env pos in
     let env = Env.set_env_function_pos env f.f_span in
+    let (env, restore_pos) = Env.set_inference_env_pos env (Some pos) in
     let (env, user_attributes) =
       Typing.attributes_check_def env SN.AttributeKinds.fn f.f_user_attributes
     in
@@ -310,6 +311,7 @@ let fun_def ctx fd : Tast.fun_def Tast_with_dynamic.t option =
       else
         (under_normal_assumptions, None)
     in
+    let env = restore_pos env in
     let ty_err_opt = Option.merge e1 e2 ~f:Typing_error.both in
     Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
     { Tast_with_dynamic.under_normal_assumptions; under_dynamic_assumptions }
@@ -344,6 +346,8 @@ let gconst_def ctx cst =
   in
   let env = EnvFromDef.gconst_env ~origin:Decl_counters.TopLevel ctx cst in
   let env = Env.set_current_package_membership env cst.cst_package in
+  let pos = fst cst.cst_name in
+  let (env, restore_pos) = Env.set_inference_env_pos env (Some pos) in
   List.iter ~f:(Typing_error_utils.add_typing_error ~env)
   @@ Typing_type_wellformedness.global_constant env cst;
   let (typed_cst_value, (env, ty_err_opt)) =
@@ -398,6 +402,7 @@ let gconst_def ctx cst =
   in
 
   Option.iter ty_err_opt ~f:(Typing_error_utils.add_typing_error ~env);
+  let env = restore_pos env in
   {
     Aast.cst_annotation = Env.save (Env.get_tpenv env) env;
     Aast.cst_mode = cst.cst_mode;
@@ -418,6 +423,8 @@ let module_def ctx md =
     check_if_this_def_is_the_winner ctx FileInfo.Module md.md_name
   in
   let env = EnvFromDef.module_env ~origin:Decl_counters.TopLevel ctx md in
+  let pos = fst md.md_name in
+  let (env, restore_pos) = Env.set_inference_env_pos env (Some pos) in
   let (env, file_attributes) =
     Typing.file_attributes env md.md_file_attributes
   in
@@ -427,6 +434,7 @@ let module_def ctx md =
       SN.AttributeKinds.module_
       md.md_user_attributes
   in
+  let env = restore_pos env in
   {
     md with
     Aast.md_annotation = Env.save (Env.get_tpenv env) env;

@@ -407,11 +407,17 @@ let check_fun_tast_info_present env = function
 
 let restore_method_env env m =
   let se = m.m_annotation in
-  restore_saved_env env se
+  let env = restore_saved_env env se in
+  (* Note: OK to not call _restore_pos because each method gets its own env *)
+  let (env, _restore_pos) = set_inference_env_pos env (Some m.m_span) in
+  env
 
 let restore_fun_env env f =
   let se = f.f_annotation in
-  restore_saved_env env se
+  let env = restore_saved_env env se in
+  (* Note: OK to not call _restore_pos because each fn gets its own env *)
+  let (env, _restore_pos) = set_inference_env_pos env (Some f.f_span) in
+  env
 
 let fun_env ctx fd =
   let f = fd.fd_fun in
@@ -426,28 +432,40 @@ let class_env ctx c =
     Provider_context.map_tcopt ctx ~f:(fun _tcopt -> c.c_annotation.tcopt)
   in
   let env = EnvFromDef.class_env ~origin:Decl_counters.Tast ctx c in
-  restore_saved_env env c.c_annotation
+  let env = restore_saved_env env c.c_annotation in
+  (* Note: OK to not call _restore_pos because each class gets its own env *)
+  let (env, _restore_pos) = set_inference_env_pos env (Some c.c_span) in
+  env
 
 let typedef_env ctx t =
   let ctx =
     Provider_context.map_tcopt ctx ~f:(fun _tcopt -> t.t_annotation.tcopt)
   in
   let env = EnvFromDef.typedef_env ~origin:Decl_counters.Tast ctx t in
-  restore_saved_env env t.t_annotation
+  let env = restore_saved_env env t.t_annotation in
+  (* Note: OK to not call _restore_pos because each typedef gets its own env *)
+  let (env, _restore_pos) = set_inference_env_pos env (Some t.t_span) in
+  env
 
 let gconst_env ctx cst =
   let ctx =
     Provider_context.map_tcopt ctx ~f:(fun _tcopt -> cst.cst_annotation.tcopt)
   in
   let env = EnvFromDef.gconst_env ~origin:Decl_counters.Tast ctx cst in
-  restore_saved_env env cst.cst_annotation
+  let env = restore_saved_env env cst.cst_annotation in
+  (* Note: OK to not call _restore_pos because each gconst gets its own env *)
+  let (env, _restore_pos) = set_inference_env_pos env (Some cst.cst_span) in
+  env
 
 let module_env ctx md =
   let ctx =
     Provider_context.map_tcopt ctx ~f:(fun _tcopt -> md.md_annotation.tcopt)
   in
   let env = EnvFromDef.module_env ~origin:Decl_counters.Tast ctx md in
-  restore_saved_env env md.md_annotation
+  let env = restore_saved_env env md.md_annotation in
+  (* Note: OK to not call _restore_pos because module gets its own env *)
+  let (env, _restore_pos) = set_inference_env_pos env (Some md.md_span) in
+  env
 
 let def_env ctx d =
   match d with

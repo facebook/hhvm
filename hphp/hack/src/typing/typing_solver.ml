@@ -771,14 +771,7 @@ let expand_type_and_solve env ?(freshen = true) ~description_of_expected p ty =
      from this function, if it is provided *)
   let vars_solved_to_nothing = ref [] in
   let ty_errs = ref [] in
-  let old_pos = Typing_inference_env.get_pos env.inference_env in
-  let put_pos_in_env env pos =
-    {
-      env with
-      inference_env = Typing_inference_env.set_pos env.inference_env pos;
-    }
-  in
-  let env = put_pos_in_env env (Some p) in
+  let (env, restore_pos) = Env.set_inference_env_pos env (Some p) in
   let (env', ety) =
     TUtils.simplify_unions env ty ~on_tyvar:(fun env r v ->
         let (env, ty_err_opt) = always_solve_tyvar_down ~freshen env r v in
@@ -828,7 +821,7 @@ let expand_type_and_solve env ?(freshen = true) ~description_of_expected p ty =
       let ty_err_opt = Typing_error.multiple_opt !ty_errs in
       ((env', ty_err_opt), ety)
   in
-  ((put_pos_in_env env' old_pos, err), ty)
+  ((restore_pos env', err), ty)
 
 let expand_type_and_solve_eq env ty =
   let ty_err_opts = ref [] in

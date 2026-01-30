@@ -280,6 +280,10 @@ let typedef_def ctx typedef =
   let env = Env.set_current_module env t_module in
   let env = Env.set_internal env t_internal in
   let env = Env.set_current_package_membership env t_package in
+  let (env, restore_pos) =
+    let (pos, _) = t_name in
+    Env.set_inference_env_pos env (Some pos)
+  in
   let (env, file_attributes) = Typing.file_attributes env t_file_attributes in
   let (do_report_cycles, hint_constraints_pairs) =
     match t_assignment with
@@ -367,6 +371,7 @@ let typedef_def ctx typedef =
       t_user_attributes
   in
   let (env, tparams) = List.map_env env t_tparams ~f:Typing.type_param in
+  let env = restore_pos env in
   {
     Aast.t_annotation = Env.save (Env.get_tpenv env) env;
     t_name;

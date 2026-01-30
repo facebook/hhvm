@@ -355,6 +355,13 @@ module M = struct
   let open_tyvars env p =
     { env with inference_env = Inf.open_tyvars env.inference_env p }
 
+  let set_inference_env_pos env pos =
+    let (inference_env, restore_inf) = Inf.set_pos env.inference_env pos in
+    let restore env =
+      { env with inference_env = restore_inf env.inference_env }
+    in
+    ({ env with inference_env }, restore)
+
   let close_tyvars env =
     { env with inference_env = Inf.close_tyvars env.inference_env }
 

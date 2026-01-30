@@ -107,6 +107,9 @@ let trivial_check
           pos
           lhs_ty
       in
+      let (env, restore_pos) =
+        Typing_env.set_inference_env_pos env (Some pos)
+      in
       let env = Typing_env.open_tyvars env pos in
       let (env, rhs_ty) = replace_placeholders_with_tvars env pos rhs_ty in
       let callback = Typing_error.Reasons_callback.unify_error_at pos in
@@ -115,6 +118,7 @@ let trivial_check
       in
       let (env, err_opt2) = Typing_solver.close_tyvars_and_solve env in
       let err_opt = Option.merge err_opt1 err_opt2 ~f:Typing_error.both in
+      let env = restore_pos env in
       if Option.is_none err_opt then always pos lhs_ty rhs_ty env
 
 let handler ~as_lint =

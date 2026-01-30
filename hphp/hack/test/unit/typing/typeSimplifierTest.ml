@@ -45,6 +45,11 @@ end = struct
     in
     let env = Typing_env_types.empty ctx Relative_path.default ~droot:None in
     let env = Env.set_log_level env "show" 2 in
+    (* Set a dummy position to satisfy the invariant check in typing_inference_env.
+       The position must not be Pos.none, so we use a non-default file path. *)
+    let dummy_file = Relative_path.from_root ~suffix:"test.php" in
+    let dummy_pos = Pos.make dummy_file (Lexing.from_string "") in
+    let (env, _restore) = Env.set_inference_env_pos env (Some dummy_pos) in
     env
 
   let tint = MakeType.int Reason.none

@@ -10564,6 +10564,7 @@ end = struct
       f_kind =
     Env.with_env env (fun env ->
         debug_last_pos := pos;
+        let (env, restore_pos) = Env.set_inference_env_pos env (Some pos) in
         let env = Env.set_return env return in
         let (env, tb) =
           if disable then
@@ -10594,6 +10595,7 @@ end = struct
         let env =
           Env.set_fun_tast_info env Tast.{ has_implicit_return; has_readonly }
         in
+        let env = restore_pos env in
         debug_last_pos := Pos.none;
         (env, tb))
 
@@ -11138,6 +11140,7 @@ end = struct
           declared_decl_ft)
     in
     Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
+    let (env, restore_pos) = Env.set_inference_env_pos env (Some p) in
     let used_ids =
       List.map used_ids ~f:(fun ((), ((_, name) as id)) ->
           (* Check that none of the explicit capture variables are from a using clause *)
@@ -11176,6 +11179,7 @@ end = struct
           ty
       in
       let tefun = hole_on_ty_mismatch ~ty_mismatch_opt tefun in
+      let env = restore_pos env in
       (env, tefun, ty)
     in
     let (env, eexpected) =
@@ -11193,6 +11197,7 @@ end = struct
      * maketree_with_type_param needs the lambda to be typed precisely.
      *)
       when Tast.is_under_dynamic_assumptions env.checked ->
+      let env = restore_pos env in
       make_result env p Aast.Omitted (MakeType.dynamic (Reason.witness p))
     | Some
         (_pos, _ur, supportdyn, ty, Tfun expected_ft, expected_ignore_readonly)

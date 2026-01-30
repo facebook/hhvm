@@ -133,6 +133,14 @@ val get_tracing_info : env -> Decl_counters.tracing_info option
 *)
 val open_tyvars : env -> Pos.t -> env
 
+(** Propagate the position for better error reporting.
+  * Returns a `restore_pos` function.
+  * Call the `restore_pos` function at the end
+  * of the scope in cases where you're not throwing
+  * the `env` away.
+  *)
+val set_inference_env_pos : env -> Pos.t option -> env * (env -> env)
+
 (** Generate a fresh type variable type with variance not yet recorded *)
 val fresh_type : env -> Pos.t -> env * locl_ty
 

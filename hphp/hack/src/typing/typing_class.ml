@@ -160,6 +160,7 @@ let method_def ~is_disposable env cls m =
   let env = Env.reinitialize_locals env in
   let env = Env.set_env_callable_pos env pos in
   let env = Env.set_env_function_pos env m.m_span in
+  let (env, restore_pos) = Env.set_inference_env_pos env (Some pos) in
   let (env, user_attributes) =
     Typing.attributes_check_def env SN.AttributeKinds.mthd m.m_user_attributes
   in
@@ -408,6 +409,7 @@ let method_def ~is_disposable env cls m =
     else
       (env, under_normal_assumptions, None)
   in
+  let env = restore_pos env in
   let _env = Env.log_env_change "method_def" initial_env env in
   let ty_err_opt = Option.merge e1 e2 ~f:Typing_error.both in
   Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
@@ -1931,7 +1933,7 @@ let check_class_members env c tc =
   in
   (env, typed_members)
 
-let class_def_ env c tc =
+let class_def_ ~restore_pos env c tc =
   let parents = class_parents_hints_to_types env c in
   let (env, user_attributes, file_attrs) =
     class_wellformedness_checks env c tc parents
@@ -1956,6 +1958,7 @@ let class_def_ env c tc =
   let (env, e1) = Typing_solver.solve_all_unsolved_tyvars env in
   check_SupportDynamicType env c tc;
   Option.iter ~f:(Typing_error_utils.add_typing_error ~env) e1;
+  let env = restore_pos env in
   let mk_class_ typed_methods =
     {
       Aast.c_span = c.c_span;
@@ -2009,6 +2012,8 @@ let setup_env_for_class_def_check ctx c =
 
 let class_def ctx (c : _ class_) =
   let env = setup_env_for_class_def_check ctx c in
+  let pos = fst c.c_name in
+  let (env, restore_pos) = Env.set_inference_env_pos env (Some pos) in
   match Env.get_class env (snd c.c_name) with
   | Decl_entry.DoesNotExist
   | Decl_entry.NotYetAvailable ->
@@ -2023,7 +2028,8 @@ let class_def ctx (c : _ class_) =
     in
     Env.make_depend_on_current_module env;
     Typing_helpers.add_decl_errors ~env (Cls.decl_errors tc);
-    Some (class_def_ env c tc)
+    let result = class_def_ ~restore_pos env c tc in
+    Some result
 
 type class_member_standalone_check_env = {
   cls: Cls.t;
@@ -2033,11 +2039,14 @@ type class_member_standalone_check_env = {
 
 let make_class_member_standalone_check_env ctx class_ =
   let env = setup_env_for_class_def_check ctx class_ in
-
+  let pos = fst class_.c_name in
+  (* env flows out; restore will happen when method_def sets its own position *)
+  let (env, restore_pos) = Env.set_inference_env_pos env (Some pos) in
   let name = Ast_defs.get_id class_.c_name in
   let open Option in
   Env.get_class env name |> Decl_entry.to_option >>| fun cls ->
   let env = check_class_type_parameters_add_constraints env class_ cls in
+  let env = restore_pos env in
   (env, { env; cls; class_ })
 
 let method_def_standalone standalone_env method_name =

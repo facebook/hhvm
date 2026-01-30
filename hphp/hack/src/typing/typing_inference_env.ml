@@ -303,7 +303,22 @@ let add env ?(tyvar_pos = Pos.none) v ty =
   let env = update_tyvar_occurrences env v ty in
   env
 
+(** Call this from any functions below that can produce InconsistentTypeVarState
+* That way we can enforce in tests that we are not making
+* unactionable error messages in prod (errors without even filenames are hard to repro)
+*)
+let check_env_pos_invariant env =
+  match env.pos with
+  | Some pos when Pos.equal pos Pos.none ->
+    HackEventLogger.invariant_violation_bug
+      "missing env.pos. Make sure we're propagating positions correctly, see D91705550."
+  | None ->
+    HackEventLogger.invariant_violation_bug
+      "expected Some pos, but env.pos is None. Make sure we're propagating positions correctly, see D91705550."
+  | Some _ -> ()
+
 let get_type env reason_in tvid_in =
+  check_env_pos_invariant env;
   let rec get r v aliases =
     let shorten_paths () =
       Tvid.Set.fold (fun v' env -> add env v' (mk (r, Tvar v))) aliases env
@@ -418,6 +433,7 @@ let wrap_ty_in_var env id_provider r ty =
 let open_tyvars env p = { env with tyvars_stack = (p, []) :: env.tyvars_stack }
 
 let close_tyvars env =
+  check_env_pos_invariant env;
   match env.tyvars_stack with
   | [] -> raise @@ InconsistentTypeVarState "close_tyvars: empty stack"
   | _ :: rest -> { env with tyvars_stack = rest }
@@ -428,6 +444,7 @@ let get_current_tyvars env =
   | (_, tyvars) :: _ -> tyvars
 
 let get_tyvar_constraints_opt env var =
+  check_env_pos_invariant env;
   match get_solving_info_opt env var with
   | Some (TVIConstraints constraints) -> Some constraints
   | None
@@ -435,6 +452,7 @@ let get_tyvar_constraints_opt env var =
     None
 
 let get_tyvar_constraints_exn env var =
+  check_env_pos_invariant env;
   let error msg =
     match env.pos with
     | None ->
@@ -1156,4 +1174,7 @@ let get_rank { tvenv; _ } tvid =
 
 let get_pos env = env.pos
 
-let set_pos env pos = { env with pos }
+let set_pos env pos =
+  let old_pos = env.pos in
+  let restore env = { env with pos = old_pos } in
+  ({ env with pos }, restore)

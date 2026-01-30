@@ -121,7 +121,6 @@ type t = {
   tco_disallow_unresolved_type_variables: bool;
   tco_custom_error_config: Custom_error_config.t;
   tco_const_attribute: bool;
-  tco_check_attribute_locations: bool;
   tco_type_refinement_partition_shapes: bool;
   glean_reponame: string;
   symbol_write_index_inherited_members: bool;
@@ -247,7 +246,6 @@ let default =
     tco_disallow_unresolved_type_variables = false;
     tco_custom_error_config = Custom_error_config.empty;
     tco_const_attribute = false;
-    tco_check_attribute_locations = true;
     tco_type_refinement_partition_shapes = false;
     glean_reponame = "www.hack.light";
     symbol_write_index_inherited_members = true;
@@ -372,7 +370,6 @@ let set
     ?tco_disallow_unresolved_type_variables
     ?tco_custom_error_config
     ?tco_const_attribute
-    ?tco_check_attribute_locations
     ?tco_type_refinement_partition_shapes
     ?glean_reponame
     ?symbol_write_index_inherited_members
@@ -548,10 +545,6 @@ let set
       setting tco_custom_error_config options.tco_custom_error_config;
     tco_const_attribute =
       setting tco_const_attribute options.tco_const_attribute;
-    tco_check_attribute_locations =
-      setting
-        tco_check_attribute_locations
-        options.tco_check_attribute_locations;
     tco_type_refinement_partition_shapes =
       setting
         tco_type_refinement_partition_shapes

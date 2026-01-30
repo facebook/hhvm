@@ -846,7 +846,6 @@ let parse_options () =
       ~tco_coeffects_local:!local_coeffects
       ~tco_like_casts:false
       ~log_levels:!log_levels
-      ~tco_check_attribute_locations:true
       ~tco_type_refinement_partition_shapes:!type_refinement_partition_shapes
       ~glean_reponame:!glean_reponame
       ~tco_skip_check_under_dynamic:!skip_check_under_dynamic

@@ -38,17 +38,12 @@ let check_implements
     let check_attr map =
       match SMap.find_opt attr_name map with
       | Some attr_info ->
-        let check_locations =
-          TypecheckerOptions.check_attribute_locations
-            (Typing_env.get_tcopt env)
-        in
         if
-          check_locations
-          && not
-             @@ List.mem
-                  attr_info.SN.UserAttributes.contexts
-                  attr_interface
-                  ~equal:String.equal
+          not
+          @@ List.mem
+               attr_info.SN.UserAttributes.contexts
+               attr_interface
+               ~equal:String.equal
         then
           Diagnostics.add_diagnostic
             Nast_check_error.(

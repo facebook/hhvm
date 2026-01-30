@@ -132,7 +132,6 @@ type t = {
   tco_custom_error_config: Custom_error_config.t;
       (** Allows additional error messages to be added to typing errors via config *)
   tco_const_attribute: bool;  (** Allow <<__Const>> attribute *)
-  tco_check_attribute_locations: bool;
   tco_type_refinement_partition_shapes: bool;
       (** Use new type splitting logic for shape refinement *)
   glean_reponame: string;
@@ -353,7 +352,6 @@ val set :
   ?tco_disallow_unresolved_type_variables:bool ->
   ?tco_custom_error_config:Custom_error_config.t ->
   ?tco_const_attribute:bool ->
-  ?tco_check_attribute_locations:bool ->
   ?tco_type_refinement_partition_shapes:bool ->
   ?glean_reponame:string ->
   ?symbol_write_index_inherited_members:bool ->

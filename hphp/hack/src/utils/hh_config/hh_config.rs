@@ -380,7 +380,6 @@ impl HhConfig {
             tco_disallow_unresolved_type_variables: default.tco_disallow_unresolved_type_variables,
             tco_custom_error_config: custom_error_config,
             tco_const_attribute: default.tco_const_attribute,
-            tco_check_attribute_locations: default.tco_check_attribute_locations,
             tco_type_refinement_partition_shapes: default.tco_type_refinement_partition_shapes,
             glean_reponame: default.glean_reponame,
             symbol_write_index_inherited_members: default.symbol_write_index_inherited_members,

@@ -142,8 +142,6 @@ let const_static_props t = t.GlobalOptions.po.ParserOptions.const_static_props
 
 let const_attribute t = t.GlobalOptions.tco_const_attribute
 
-let check_attribute_locations t = t.GlobalOptions.tco_check_attribute_locations
-
 let type_refinement_partition_shapes t =
   t.GlobalOptions.tco_type_refinement_partition_shapes
 

@@ -1,3 +1,5 @@
+WARN: File "array_get_bad.php", line 49, characters 16-22:
+Array access on type `keyset<string>` returns the key (if present) or throws an exception. Consider using `C\contains_key` to check for membership instead. (Warn[12034])
 ERROR: File "array_get_bad.php", line 29, characters 18-20:
 Invalid index type for this vec (Typing[4449])
   File "array_get_bad.php", line 14, characters 3-8:

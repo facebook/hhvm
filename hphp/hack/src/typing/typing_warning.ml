@@ -240,6 +240,17 @@ module Unbound_name_warning = struct
   }
 end
 
+module Set_or_keyset_array_get = struct
+  type kind =
+    | Keyset
+    | ConstSet
+
+  type t = {
+    kind: kind;
+    ty: string;
+  }
+end
+
 type (_, _) kind =
   | Sketchy_equality : (Sketchy_equality.t, warn) kind
   | Is_as_always : (Is_as_always.t, migrated) kind
@@ -264,5 +275,6 @@ type (_, _) kind =
   | Expect_bool_for_condition : (Expect_bool_for_condition.t, warn) kind
   | Redundant_nullsafe_operation : (Redundant_nullsafe_operation.t, warn) kind
   | Unbound_name_warning : (Unbound_name_warning.t, warn) kind
+  | Set_or_keyset_array_get : (Set_or_keyset_array_get.t, warn) kind
 
 type ('x, 'a) t = Pos.t * ('x, 'a) kind * 'x

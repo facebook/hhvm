@@ -42,6 +42,7 @@ let warning_checks =
     (module Equality_check);
     (module Duplicate_properties);
     (module Redundant_nullsafe);
+    (module Set_or_keyset_array_get);
   ]
 
 let visitor ctx =

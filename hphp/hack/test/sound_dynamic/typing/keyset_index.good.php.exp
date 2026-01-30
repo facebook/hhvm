@@ -1,1 +1,46 @@
-No errors
+warning: Warn[12034] Array access on type keyset<int> returns the key (if present) or throws an exception. Consider using C\contains_key to check for membership instead. [1]
+
+keyset_index.good.php:8:8
+    6 |   keyset<arraykey> $ks2,
+    7 | ) : void {
+[1] 8 |   $a = $ks1[$d];
+    9 |   hh_expect_equivalent<int>($a);
+   10 |   $a = $ks2[$d];
+
+warning: Warn[12034] Array access on type keyset<arraykey> returns the key (if present) or throws an exception. Consider using C\contains_key to check for membership instead. [1]
+
+keyset_index.good.php:10:8
+     8 |   $a = $ks1[$d];
+     9 |   hh_expect_equivalent<int>($a);
+[1] 10 |   $a = $ks2[$d];
+    11 |   hh_expect_equivalent<arraykey>($a);
+    12 | }
+
+warning: Warn[12034] Array access on type keyset<Tk> returns the key (if present) or throws an exception. Consider using C\contains_key to check for membership instead. [1]
+
+keyset_index.good.php:22:10
+    20 | 
+    21 |   public function f(dynamic $d): void {
+[1] 22 |     $a = $this->ks1[$d];
+    23 |     hh_expect_equivalent<Tk>($a);
+    24 |     $a = $this->ks2[$d];
+
+warning: Warn[12034] Array access on type keyset<arraykey> returns the key (if present) or throws an exception. Consider using C\contains_key to check for membership instead. [1]
+
+keyset_index.good.php:24:10
+    22 |     $a = $this->ks1[$d];
+    23 |     hh_expect_equivalent<Tk>($a);
+[1] 24 |     $a = $this->ks2[$d];
+    25 |     hh_expect_equivalent<arraykey>($a);
+    26 |     $a = $this->ks3[$d];
+
+warning: Warn[12034] Array access on type keyset<int> returns the key (if present) or throws an exception. Consider using C\contains_key to check for membership instead. [1]
+
+keyset_index.good.php:26:10
+    24 |     $a = $this->ks2[$d];
+    25 |     hh_expect_equivalent<arraykey>($a);
+[1] 26 |     $a = $this->ks3[$d];
+    27 |     hh_expect_equivalent<int>($a);
+    28 |   }
+
+5 errors found

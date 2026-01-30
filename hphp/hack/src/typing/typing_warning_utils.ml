@@ -845,6 +845,32 @@ module Unbound_name_warning = struct
   let quickfixes _ = []
 end
 
+module Set_or_keyset_array_get = struct
+  type t = Typing_warning.Set_or_keyset_array_get.t
+
+  let code = Codes.SetOrKeysetArrayGet
+
+  let codes = [code]
+
+  let code _ = code
+
+  let claim { Typing_warning.Set_or_keyset_array_get.kind; ty } =
+    let suggestion =
+      match kind with
+      | Typing_warning.Set_or_keyset_array_get.Keyset -> "`C\\contains_key`"
+      | Typing_warning.Set_or_keyset_array_get.ConstSet ->
+        "the `contains` method"
+    in
+    Printf.sprintf
+      "Array access on type %s returns the key (if present) or throws an exception. Consider using %s to check for membership instead."
+      (Markdown_lite.md_codify ty)
+      suggestion
+
+  let reasons _ = []
+
+  let quickfixes _ = []
+end
+
 let module_of (type a x) (kind : (x, a) Typing_warning.kind) :
     (module Warning with type t = x) =
   match kind with
@@ -874,6 +900,7 @@ let module_of (type a x) (kind : (x, a) Typing_warning.kind) :
   | Typing_warning.Redundant_nullsafe_operation ->
     (module Redundant_nullsafe_operation)
   | Typing_warning.Unbound_name_warning -> (module Unbound_name_warning)
+  | Typing_warning.Set_or_keyset_array_get -> (module Set_or_keyset_array_get)
 
 let module_of_migrated
     (type x) (kind : (x, Typing_warning.migrated) Typing_warning.kind) :

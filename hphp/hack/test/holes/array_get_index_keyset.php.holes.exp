@@ -1,3 +1,5 @@
+Errors:
+  [6:3-12] Array access on type `keyset<nothing>` returns the key (if present) or throws an exception. Consider using `C\contains_key` to check for membership instead.
 [(Fun
     { fd_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 

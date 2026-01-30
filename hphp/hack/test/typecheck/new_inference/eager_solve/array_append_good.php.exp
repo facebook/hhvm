@@ -1,1 +1,2 @@
-No errors
+WARN: File "array_append_good.php", line 28, characters 18-23:
+Array access on type `keyset<(int | string)>` returns the key (if present) or throws an exception. Consider using `C\contains_key` to check for membership instead. (Warn[12034])

@@ -1,3 +1,5 @@
+WARN: File "exact.php", line 6, characters 3-14:
+Array access on type `keyset<class<C>>` returns the key (if present) or throws an exception. Consider using `C\contains_key` to check for membership instead. (Warn[12034])
 ERROR: File "exact.php", line 5, characters 15-22:
 Using `C::class` in this position will trigger an implicit runtime conversion to string, please use `nameof C` (Typing[4482])
 ERROR: File "exact.php", line 6, characters 6-13:

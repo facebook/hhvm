@@ -1,0 +1,4 @@
+WARN: File "like_keyset_array_get.php", line 4, characters 10-19:
+Array access on type `keyset<string>` returns the key (if present) or throws an exception. Consider using `C\contains_key` to check for membership instead. (Warn[12034])
+WARN: File "like_keyset_array_get.php", line 8, characters 10-18:
+Array access on type `keyset<int>` returns the key (if present) or throws an exception. Consider using `C\contains_key` to check for membership instead. (Warn[12034])

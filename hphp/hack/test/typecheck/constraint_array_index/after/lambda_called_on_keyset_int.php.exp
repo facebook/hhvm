@@ -1,1 +1,2 @@
-No errors
+WARN: File "lambda_called_on_keyset_int.php", line 3, characters 16-20:
+Array access on type `keyset<int>` returns the key (if present) or throws an exception. Consider using `C\contains_key` to check for membership instead. (Warn[12034])

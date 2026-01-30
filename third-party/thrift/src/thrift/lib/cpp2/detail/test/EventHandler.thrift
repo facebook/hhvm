@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-package "apache.org/thrift/test"
+package "apache.org/thrift/test/event_handler"
+
+namespace cpp2 apache.thrift.test
 
 service Foo {
   void foo();

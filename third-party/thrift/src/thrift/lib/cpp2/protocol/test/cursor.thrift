@@ -17,22 +17,22 @@
 include "thrift/annotation/cpp.thrift"
 include "thrift/annotation/thrift.thrift"
 
+namespace cpp2 apache.thrift.test
+
 cpp_include "thrift/lib/cpp2/protocol/CursorBasedSerializer.h"
 cpp_include "thrift/lib/cpp2/util/ManagedStringView.h"
 cpp_include "thrift/test/AdapterTest.h"
 
 @thrift.Experimental
-package "apache.org/thrift/test"
+package "apache.org/thrift/test/cursor"
 
 union Inner {
   1: binary binary_field;
 }
 
-@thrift.AllowLegacyTypedefUri
 @cpp.Adapter{name = "::apache::thrift::CursorSerializationAdapter"}
 typedef Struct StructCursor
 
-@thrift.AllowLegacyTypedefUri
 @cpp.Type{name = "::apache::thrift::ManagedStringViewWithConversions"}
 typedef string ManagedStringViewField
 
@@ -124,7 +124,6 @@ struct Types {
 }
 
 struct Empty {}
-@thrift.AllowLegacyTypedefUri
 @cpp.UseCursorSerialization
 typedef Empty EmptyWrapper
 
@@ -138,7 +137,6 @@ struct ReadRemaining {
   3: bool ccc;
 }
 
-@thrift.AllowLegacyTypedefUri
 @cpp.UseCursorSerialization
 typedef ReadRemaining ReadRemainingWrapper
 

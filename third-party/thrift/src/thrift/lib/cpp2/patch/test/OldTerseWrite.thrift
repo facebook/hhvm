@@ -17,7 +17,9 @@
 include "thrift/annotation/cpp.thrift"
 include "thrift/lib/thrift/patch.thrift"
 
-package "apache.org/thrift/test"
+package "apache.org/thrift/test/old_terse_write"
+
+namespace cpp2 apache.thrift.test
 
 struct Foo {
   @cpp.DeprecatedTerseWrite

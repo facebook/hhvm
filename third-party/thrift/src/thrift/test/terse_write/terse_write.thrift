@@ -139,13 +139,10 @@ struct NestedMixedStruct {
 
 struct EmptyStruct {}
 
-@thrift.AllowLegacyTypedefUri
 @cpp.Adapter{name = "::apache::thrift::test::TemplatedTestAdapter"}
 typedef i32 AdaptedInteger
-@thrift.AllowLegacyTypedefUri
 @cpp.Adapter{name = "::apache::thrift::test::TemplatedTestAdapter"}
 typedef string AdaptedString
-@thrift.AllowLegacyTypedefUri
 @cpp.Adapter{name = "::apache::thrift::test::TemplatedTestAdapter"}
 typedef list<i32> AdaptedList
 

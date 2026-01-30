@@ -24,7 +24,9 @@ cpp_include "thrift/lib/cpp2/protocol/FieldMask.h"
 cpp_include "thrift/lib/cpp2/type/Any.h"
 cpp_include "<unordered_map>"
 
-package "apache.org/thrift/test"
+package "apache.org/thrift/test/field_mask"
+
+namespace cpp2 apache.thrift.test
 
 struct Empty {}
 
@@ -104,7 +106,6 @@ struct SharedConstPointerStruct {
   2: optional Foo2 shared_const;
 }
 
-@thrift.AllowLegacyTypedefUri
 @cpp.Adapter{name = "::apache::thrift::protocol::MaskAdapter<Bar>"}
 typedef field_mask.Mask TypedBarMask
 
@@ -114,7 +115,6 @@ struct MaskStruct {
   2: TypedBarMask mask2;
 }
 
-@thrift.AllowLegacyTypedefUri
 @cpp.Adapter{
   name = "::apache::thrift::InlineAdapter<::apache::thrift::type::AnyData>",
 }

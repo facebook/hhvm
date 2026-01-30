@@ -16,7 +16,9 @@
 
 include "thrift/annotation/thrift.thrift"
 
-package "apache.org/thrift/test"
+package "apache.org/thrift/test/field_ref_const_propagation"
+
+namespace cpp2 apache.thrift.test
 
 struct Unqualified {
   1: string msg;

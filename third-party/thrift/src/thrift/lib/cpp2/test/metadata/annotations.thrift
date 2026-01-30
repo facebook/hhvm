@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-package "apache.org/thrift/test"
+package "apache.org/thrift/test/metadata_annotations"
+
+namespace cpp2 apache.thrift.test
 
 struct Bar {
   1: string baz;

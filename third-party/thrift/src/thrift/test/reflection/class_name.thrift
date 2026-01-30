@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-package "apache.org/thrift/test"
+package "apache.org/thrift/test/reflection_class_name"
+
+namespace cpp2 apache.thrift.test
 
 include "thrift/annotation/cpp.thrift"
 

@@ -18,7 +18,9 @@ include "thrift/annotation/scope.thrift"
 include "thrift/annotation/thrift.thrift"
 include "thrift/annotation/cpp.thrift"
 
-package "apache.org/thrift/test"
+package "apache.org/thrift/test/reflection_annotation"
+
+namespace cpp2 apache.thrift.test
 
 @thrift.RuntimeAnnotation
 @scope.Field

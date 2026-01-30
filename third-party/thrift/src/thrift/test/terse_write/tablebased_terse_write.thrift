@@ -18,14 +18,12 @@ include "thrift/annotation/thrift.thrift"
 include "thrift/annotation/cpp.thrift"
 
 @thrift.Experimental
-package "apache.org/thrift/test"
+package "apache.org/thrift/test/tablebased_terse_write"
 
 namespace cpp2 apache.thrift.test.tablebased_terse_write
 
-@thrift.AllowLegacyTypedefUri
 @cpp.Type{name = "folly::IOBuf"}
 typedef binary IOBuf
-@thrift.AllowLegacyTypedefUri
 @cpp.Type{name = "std::unique_ptr<folly::IOBuf>"}
 typedef binary IOBufPtr
 

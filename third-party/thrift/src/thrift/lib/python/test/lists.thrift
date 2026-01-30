@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-package "thrift.com/python/test"
+package "thrift.com/python/test/lists"
 
 include "thrift/annotation/python.thrift"
-include "thrift/annotation/thrift.thrift"
 
 namespace py3 python_test
 
@@ -25,24 +24,17 @@ const list<i16> int_list = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
 const list<string> unicode_list = ["Bulgaria", "Benin", "Saint Barthélemy"];
 
-@thrift.AllowLegacyTypedefUri
 @python.Adapter{
   name = "thrift.python.test.adapters.atoi.AtoiAdapter",
   typeHint = "int",
 }
 typedef string AtoIValue
 
-@thrift.AllowLegacyTypedefUri
 typedef list<i32> I32List
-@thrift.AllowLegacyTypedefUri
 typedef list<easy> EasyList
-@thrift.AllowLegacyTypedefUri
 typedef list<string> StringList
-@thrift.AllowLegacyTypedefUri
 typedef list<list<string>> StrList2D
-@thrift.AllowLegacyTypedefUri
 typedef list<map<string, i32>> ListOfStrToI32Map
-@thrift.AllowLegacyTypedefUri
 typedef list<AtoIValue> AtoIValueList
 
 struct easy {

@@ -16,7 +16,7 @@
 
 namespace cpp2 apache.thrift.test
 
-package "facebook.com/thrift/test"
+package "facebook.com/thrift/test/get_value_or_null"
 
 include "thrift/annotation/cpp.thrift"
 include "thrift/annotation/thrift.thrift"

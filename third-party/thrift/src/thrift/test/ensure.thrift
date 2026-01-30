@@ -16,7 +16,7 @@
 
 namespace cpp2 apache.thrift.test
 
-package "facebook.com/thrift/test"
+package "facebook.com/thrift/test/ensure"
 
 include "thrift/annotation/cpp.thrift"
 include "thrift/annotation/thrift.thrift"

@@ -31,7 +31,6 @@
 #include "hphp/runtime/vm/native-data.h"
 
 #include <folly/Random.h>
-#include <folly/ScopeGuard.h>
 #include <folly/String.h>
 #include <folly/dynamic.h>
 #include <folly/json.h>
@@ -292,13 +291,11 @@ void verifyAuthTag(
   }
 }
 
-const Func* loadFreeFunctionOrThrow(folly::StringPiece funcName) {
-  auto funcNameSd = StringData::MakeUncounted(funcName);
-  SCOPE_EXIT {
-    DecRefUncountedString(funcNameSd);
-  };
+const Func* loadFreeFunctionOrThrow(folly::StringPiece funcNamePiece) {
+  String funcName{funcNamePiece};
 
-  auto func = Func::load(funcNameSd);
+  const auto* func = Func::load(funcName.get());
+
   if (!func) {
     SystemLib::throwInvalidArgumentExceptionObject(
         folly::sformat("Unable to find function {}", funcName));
@@ -307,25 +304,21 @@ const Func* loadFreeFunctionOrThrow(folly::StringPiece funcName) {
 }
 
 const Func* loadClassMethodOrThrow(
-    folly::StringPiece className,
-    folly::StringPiece funcName) {
-  auto classNameSd = StringData::MakeUncounted(className);
-  SCOPE_EXIT {
-    DecRefUncountedString(classNameSd);
-  };
+    folly::StringPiece classNamePiece,
+    folly::StringPiece funcNamePiece) {
+  String className{classNamePiece};
 
-  auto cls = Class::load(classNameSd);
+  const auto* cls = Class::load(className.get());
+
   if (!cls) {
     SystemLib::throwInvalidArgumentExceptionObject(
         folly::sformat("Unable to find class {}", className));
   }
 
-  auto funcNameSd = StringData::MakeUncounted(funcName);
-  SCOPE_EXIT {
-    DecRefUncountedString(funcNameSd);
-  };
+  String funcName{funcNamePiece};
 
-  auto func = cls->lookupMethod(funcNameSd);
+  const auto* func = cls->lookupMethod(funcName.get());
+
   if (!func) {
     SystemLib::throwInvalidArgumentExceptionObject(
         folly::sformat("Unable to find method {}::{}", className, funcName));

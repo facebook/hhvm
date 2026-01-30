@@ -6,17 +6,4 @@
  */
 #pragma once
 
-#include <vector>
-
-#include <thrift/lib/cpp2/gen/module_metadata_h.h>
 #include "thrift/compiler/test/fixtures/inheritance/gen-cpp2/module_types.h"
-
-namespace cpp2 {
-class MyRoot;
-} // namespace cpp2
-namespace cpp2 {
-class MyNode;
-} // namespace cpp2
-namespace cpp2 {
-class MyLeaf;
-} // namespace cpp2

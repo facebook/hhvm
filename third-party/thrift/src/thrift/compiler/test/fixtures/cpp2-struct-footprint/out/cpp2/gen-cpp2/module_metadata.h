@@ -6,14 +6,4 @@
  */
 #pragma once
 
-#include <vector>
-
-#include <thrift/lib/cpp2/gen/module_metadata_h.h>
 #include "thrift/compiler/test/fixtures/cpp2-struct-footprint/gen-cpp2/module_types.h"
-
-namespace cpp2_struct_footprint {
-class FootprintTestService;
-} // namespace cpp2_struct_footprint
-namespace cpp2_struct_footprint {
-class ExtendedFootprintService;
-} // namespace cpp2_struct_footprint

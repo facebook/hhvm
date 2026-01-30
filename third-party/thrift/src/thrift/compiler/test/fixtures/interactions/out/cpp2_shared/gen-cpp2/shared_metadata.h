@@ -6,11 +6,4 @@
  */
 #pragma once
 
-#include <vector>
-
-#include <thrift/lib/cpp2/gen/module_metadata_h.h>
 #include "thrift/compiler/test/fixtures/interactions/gen-cpp2/shared_types.h"
-
-namespace thrift::shared_interactions {
-class InteractLocally;
-} // namespace thrift::shared_interactions

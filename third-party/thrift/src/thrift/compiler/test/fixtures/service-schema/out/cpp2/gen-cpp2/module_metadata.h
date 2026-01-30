@@ -6,14 +6,4 @@
  */
 #pragma once
 
-#include <vector>
-
-#include <thrift/lib/cpp2/gen/module_metadata_h.h>
 #include "thrift/compiler/test/fixtures/service-schema/gen-cpp2/module_types.h"
-
-namespace facebook::thrift::test::fixtures::service_schema {
-class PrimitivesService;
-} // namespace facebook::thrift::test::fixtures::service_schema
-namespace facebook::thrift::test::fixtures::service_schema {
-class ExtendedService;
-} // namespace facebook::thrift::test::fixtures::service_schema

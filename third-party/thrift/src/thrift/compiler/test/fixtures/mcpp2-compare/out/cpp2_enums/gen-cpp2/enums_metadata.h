@@ -6,8 +6,4 @@
  */
 #pragma once
 
-#include <vector>
-
-#include <thrift/lib/cpp2/gen/module_metadata_h.h>
 #include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/enums_types.h"
-

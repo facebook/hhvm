@@ -6,17 +6,4 @@
  */
 #pragma once
 
-#include <vector>
-
-#include <thrift/lib/cpp2/gen/module_metadata_h.h>
 #include "thrift/compiler/test/fixtures/py3/gen-py3cpp/module_types.h"
-
-namespace py3::simple {
-class SimpleService;
-} // namespace py3::simple
-namespace py3::simple {
-class DerivedService;
-} // namespace py3::simple
-namespace py3::simple {
-class RederivedService;
-} // namespace py3::simple

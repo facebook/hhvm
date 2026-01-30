@@ -6,11 +6,4 @@
  */
 #pragma once
 
-#include <vector>
-
-#include <thrift/lib/cpp2/gen/module_metadata_h.h>
 #include "thrift/compiler/test/fixtures/namespace_from_package_without_module_name/gen-cpp2/module_types.h"
-
-namespace test::namespace_from_package_without_module_name {
-class TestService;
-} // namespace test::namespace_from_package_without_module_name

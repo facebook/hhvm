@@ -806,7 +806,7 @@ void make_func_req_resp_structs(
     req_resp_structs.push_back(sink_struct);
 
     auto final_response_struct_name =
-        go::munge_ident("finalResponse" + prefix + funcGoName, false);
+        go::munge_ident("respFinal" + prefix + funcGoName, false);
     auto final_response_struct =
         new t_struct(func->program(), final_response_struct_name);
     final_response_struct->set_generated();

@@ -626,6 +626,14 @@ val assert_packages_loaded_from_attr :
 (** True if package can be assumed to be loaded *)
 val is_package_loaded : env -> string -> bool
 
+(** Get list of all packages assumed to be loaded in the current environment,
+    along with the position where they were loaded (RequirePackage or if package) *)
+val get_loaded_packages_list : env -> (string * Pos.t) list
+
+(** For error messages.  Computes the list of included packages from both
+    the current package and any loaded packages. *)
+val get_included_packages : env -> (string * string * Pos.t) list
+
 (** True if package-boundary checking is enabled by config options *)
 val check_packages : env -> bool
 

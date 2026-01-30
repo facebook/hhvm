@@ -670,20 +670,63 @@ module M = struct
     PackageInfo.get_package info pkg_name
 
   let is_package_loaded env package =
+    let open Typing_local_packages in
     let per_cont_env = env.lenv.per_cont_env in
     match LEnvC.get_cont_option C.Next per_cont_env with
     | None -> false
     | Some next_cont -> begin
       match SMap.find_opt package next_cont.LEnvC.loaded_packages with
       | None
-      | Some Not_exists_in_deployment ->
+      | Some { status = Not_exists_in_deployment; _ } ->
         false
-      | Some Exists_in_deployment
-      | Some Unsatisfiable_package_constraints ->
+      | Some { status = Exists_in_deployment; _ }
+      | Some { status = Unsatisfiable_package_constraints; _ } ->
         (* this is dead code due to unsatisfiable package checks; returning
            true to not emit additional errors *)
         true
     end
+
+  let get_loaded_packages_list env =
+    let open Typing_local_packages in
+    let per_cont_env = env.lenv.per_cont_env in
+    match LEnvC.get_cont_option C.Next per_cont_env with
+    | None -> []
+    | Some next_cont ->
+      SMap.fold
+        (fun pkg { pos; status; from_includes } acc ->
+          match status with
+          | Exists_in_deployment ->
+            if from_includes then
+              acc
+            else
+              (pkg, pos) :: acc
+          | Not_exists_in_deployment
+          | Unsatisfiable_package_constraints ->
+            acc)
+        next_cont.LEnvC.loaded_packages
+        []
+
+  let get_included_packages env =
+    let current_pkg_includes =
+      match get_current_package env with
+      | None -> []
+      | Some pkg ->
+        let current_pkg_name = snd pkg.Package.name in
+        List.map pkg.Package.includes ~f:(fun (include_pos, included_name) ->
+            (current_pkg_name, included_name, include_pos))
+    in
+    let loaded_packages = get_loaded_packages_list env in
+    let loaded_pkg_includes =
+      List.concat_map loaded_packages ~f:(fun (loaded_pkg_name, _) ->
+          match get_package_by_name env loaded_pkg_name with
+          | None -> []
+          | Some pkg ->
+            List.map
+              pkg.Package.includes
+              ~f:(fun (include_pos, included_name) ->
+                (loaded_pkg_name, included_name, include_pos)))
+    in
+    current_pkg_includes @ loaded_pkg_includes
 
   let check_packages env = TypecheckerOptions.check_packages @@ get_tcopt env
 
@@ -711,22 +754,6 @@ module M = struct
     TypecheckerOptions.package_allow_function_pointers_violations
     @@ get_tcopt env
 
-  let assert_packages_loaded env packages =
-    let package_info = get_tcopt env |> TypecheckerOptions.package_info in
-    let per_cont_env =
-      SSet.fold
-        (fun package per_cont_env ->
-          LEnvC.assert_package_loaded_in_cont
-            ~package_info
-            C.Next
-            package
-            Typing_local_packages.Exists_in_deployment
-            per_cont_env)
-        packages
-        env.lenv.per_cont_env
-    in
-    { env with lenv = { env.lenv with per_cont_env } }
-
   let assert_packages_loaded_from_attr env attr =
     match
       Naming_attributes.find
@@ -734,16 +761,25 @@ module M = struct
         attr
     with
     | Some attr ->
-      let pkgs_to_load =
+      let pos = fst attr.ua_name in
+      let package_info = get_tcopt env |> TypecheckerOptions.package_info in
+      let per_cont_env =
         List.fold
-          ~init:SSet.empty
+          ~init:env.lenv.per_cont_env
           ~f:
-            (fun acc -> function
-              | (_, _, Aast.String pkg) -> SSet.add pkg acc
-              | _ -> acc)
+            (fun per_cont_env -> function
+              | (_, _, Aast.String pkg) ->
+                LEnvC.assert_package_loaded_in_cont
+                  ~package_info
+                  C.Next
+                  pos
+                  pkg
+                  Typing_local_packages.Exists_in_deployment
+                  per_cont_env
+              | _ -> per_cont_env)
           attr.ua_params
       in
-      assert_packages_loaded env pkgs_to_load
+      { env with lenv = { env.lenv with per_cont_env } }
     | _ -> env
 
   let set_soft_package_from_attr env (attr : Nast.user_attribute list) =

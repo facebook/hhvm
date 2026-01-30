@@ -1,8 +1,7 @@
-error: Typing[4472] Cannot access a type constant defined in package pkg2 from package pkg1 [1]
+error: Typing[4472] Cannot access type constant MyInternClass defined in package pkg2 which may not be available [1]
 -> MyInternClass is defined in cross_package_reifiable_typeconsts.php--bar.php [2]
--> cross_package_reifiable_typeconsts.php--bar.php belongs to package pkg2 by this package override [3]
--> cross_package_reifiable_typeconsts.php--foo.php is in package pkg1 by this package config assignment [4]
--> And package pkg1 does not include package pkg2 [4]
+-> MyInternClass belongs to package pkg2 by this package override [3]
+-> package pkg1 is available because the current file belongs to it by this package definition [4]
 
 cross_package_reifiable_typeconsts.php--foo.php:10:19
      8 | 
@@ -24,11 +23,10 @@ PACKAGES.toml:3:11
      4 | include_paths=["//"]
      5 | 
 
-error: Typing[4472] Cannot access a type constant defined in package pkg2 from package pkg1 [1]
+error: Typing[4472] Cannot access type constant MyInternClass defined in package pkg2 which may not be available [1]
 -> MyInternClass is defined in cross_package_reifiable_typeconsts.php--bar.php [2]
--> cross_package_reifiable_typeconsts.php--bar.php belongs to package pkg2 by this package override [3]
--> cross_package_reifiable_typeconsts.php--foo.php is in package pkg1 by this package config assignment [4]
--> And package pkg1 does not include package pkg2 [4]
+-> MyInternClass belongs to package pkg2 by this package override [3]
+-> package pkg1 is available because the current file belongs to it by this package definition [4]
 
 cross_package_reifiable_typeconsts.php--foo.php:11:19
      9 | class MyProd extends MyProdBase {

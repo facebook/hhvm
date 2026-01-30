@@ -1,8 +1,7 @@
-error: Typing[4472] Cannot access a class defined in package pkg2 from package pkg1 [1]
+error: Typing[4472] Cannot access class Foo defined in package pkg2 which may not be available [1]
 -> Foo is defined in illegal_cross_package_with_package_override3.php--foo.php [2]
--> illegal_cross_package_with_package_override3.php--foo.php belongs to package pkg2 by this package override [3]
--> illegal_cross_package_with_package_override3.php--bar.php is in package pkg1 by this package config assignment [4]
--> And package pkg1 does not include package pkg2 [4]
+-> Foo belongs to package pkg2 by this package override [3]
+-> package pkg1 is available because the current file belongs to it by this package definition [4]
 
 illegal_cross_package_with_package_override3.php--bar.php:4:14
     2 | // package pkg1

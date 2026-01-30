@@ -158,9 +158,8 @@ let check_package_access
   match should_check_package_boundary with
   | `No -> None
   | `Yes target_symbol_spec ->
-    let current_package_def_pos =
-      Env.get_current_package_def_pos env |> Option.value ~default:Pos.none
-    in
+    let loaded_packages = Env.get_loaded_packages_list env in
+    let included_packages = Env.get_included_packages env in
     begin
       match
         Typing_packages.can_access_by_package_rules
@@ -173,11 +172,9 @@ let check_package_access
       | `PackageNotSatisfied
           Typing_packages.
             {
-              current_package_pos;
-              current_package_name;
+              current_package;
               current_package_assignment_kind;
-              target_package_name;
-              target_package_pos;
+              target_package;
               target_package_assignment_kind;
               target_id;
             } ->
@@ -189,24 +186,21 @@ let check_package_access
                   decl_pos = def_pos;
                   current_filename = Pos.filename use_pos;
                   target_filename = Pos_or_decl.filename def_pos;
-                  current_package_pos;
-                  current_package_def_pos;
-                  current_package_name;
+                  current_package;
                   current_package_assignment_kind;
-                  target_package_pos;
-                  target_package_name;
+                  target_package;
                   target_package_assignment_kind;
                   target_id;
                   target_symbol_spec;
+                  loaded_packages;
+                  included_packages;
                 }))
       | `PackageSoftIncludes
           Typing_packages.
             {
-              current_package_pos;
-              current_package_name;
+              current_package;
               current_package_assignment_kind;
-              target_package_name;
-              target_package_pos;
+              target_package;
               target_package_assignment_kind;
               target_id;
             } ->
@@ -218,15 +212,14 @@ let check_package_access
                   decl_pos = def_pos;
                   current_filename = Pos.filename use_pos;
                   target_filename = Pos_or_decl.filename def_pos;
-                  current_package_pos;
-                  current_package_def_pos;
-                  current_package_name;
+                  current_package;
                   current_package_assignment_kind;
-                  target_package_pos;
-                  target_package_name;
+                  target_package;
                   target_package_assignment_kind;
                   target_id;
                   target_symbol_spec;
+                  loaded_packages;
+                  included_packages;
                 }))
     end
 
@@ -427,26 +420,34 @@ let check_class_access ~is_method ~use_pos ~def_pos env (vis, lsb) cid class_ =
     ~f:(fun msg -> visibility_error use_pos msg (def_pos, vis))
 
 let check_cross_package ~use_pos ~def_pos:_ env package_requirement =
-  let can_call_in_continuation env target =
-    (* TODO(T246617508) This info will be replaced by per-cont env *)
-    let current_pkg =
-      Env.get_current_package_membership env
-      |> Option.bind ~f:(function
-             | Aast_defs.PackageConfigAssignment pkg_name
-             | Aast_defs.PackageOverride (_, pkg_name)
-             -> Env.get_package_by_name env pkg_name)
-    in
+  let current_pkg = Env.get_current_package env in
+
+  let can_call_in_continuation target =
     let target_pkg = Env.get_package_by_name env target in
     Typing_packages.get_package_violation env current_pkg target_pkg
   in
+
   match package_requirement with
   | Some (RPRequire (target_pos, target)) ->
-    (match can_call_in_continuation env target with
+    (match can_call_in_continuation target with
     | Some _ ->
+      (* Convert from Package.t option to (string * Pos.t) option *)
+      let current_package =
+        Option.map current_pkg ~f:(fun pkg ->
+            let (pos, name) = pkg.Package.name in
+            (name, pos))
+      in
       Some
         (Typing_error.package
            (Cross_pkg_access_with_requirepackage
-              { pos = use_pos; decl_pos = target_pos; target_package = target }))
+              {
+                pos = use_pos;
+                decl_pos = target_pos;
+                target_package = target;
+                current_package;
+                loaded_packages = Env.get_loaded_packages_list env;
+                included_packages = Env.get_included_packages env;
+              }))
     | _ -> None)
   | Some (RPSoft (soft_pos, soft)) ->
     (* If the per-continuation environment does not provide the softly-required
@@ -455,7 +456,7 @@ let check_cross_package ~use_pos ~def_pos:_ env package_requirement =
      * to __RequirePackage. In the soft-soft case, the choice of error is
      * arbitrary; we'll focus on the soft annotation rather than the per-cont
      * environment packages. *)
-    (match can_call_in_continuation env soft with
+    (match can_call_in_continuation soft with
     | Some _ ->
       (match Env.get_soft_package_requirement env with
       | Some (env_soft_pos, env_soft) ->
@@ -473,6 +474,8 @@ let check_cross_package ~use_pos ~def_pos:_ env package_requirement =
                     decl_pos = soft_pos;
                     current_soft_package_opt = Some (env_soft_pos, env_soft);
                     target_package = soft;
+                    loaded_packages = Env.get_loaded_packages_list env;
+                    included_packages = Env.get_included_packages env;
                   }))
         | None -> None)
       | None ->
@@ -484,6 +487,8 @@ let check_cross_package ~use_pos ~def_pos:_ env package_requirement =
                   decl_pos = soft_pos;
                   current_soft_package_opt = None;
                   target_package = soft;
+                  loaded_packages = Env.get_loaded_packages_list env;
+                  included_packages = Env.get_included_packages env;
                 })))
     | _ -> None)
   | Some RPNormal -> None

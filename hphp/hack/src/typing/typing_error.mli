@@ -303,43 +303,46 @@ module Primary : sig
       | Cross_pkg_access of {
           pos: Pos.t;
           decl_pos: Pos_or_decl.t;
-          current_package_pos: Pos.t;
-          current_package_def_pos: Pos.t;
-          current_package_name: string option;
+          current_package: (string * Pos.t) option;
           current_package_assignment_kind: string;
-          target_package_pos: Pos.t;
-          target_package_name: string option;
+          target_package: (string * Pos.t) option;
           target_package_assignment_kind: string;
           current_filename: Relative_path.t;
           target_filename: Relative_path.t;
           target_id: string;
           target_symbol_spec: string;
+          loaded_packages: (string * Pos.t) list;
+          included_packages: (string * string * Pos.t) list;
         }
       | Cross_pkg_access_with_requirepackage of {
           pos: Pos.t;
           decl_pos: Pos_or_decl.t;
           target_package: string;
+          current_package: (string * Pos.t) option;
+          loaded_packages: (string * Pos.t) list;
+          included_packages: (string * string * Pos.t) list;
         }
       | Cross_pkg_access_with_softrequirepackage of {
           pos: Pos.t;
           decl_pos: Pos_or_decl.t;
           current_soft_package_opt: (Pos.t * string) option;
           target_package: string;
+          loaded_packages: (string * Pos.t) list;
+          included_packages: (string * string * Pos.t) list;
         }
       | Soft_included_access of {
           pos: Pos.t;
           decl_pos: Pos_or_decl.t;
-          current_package_pos: Pos.t;
-          current_package_def_pos: Pos.t;
-          current_package_name: string option;
+          current_package: (string * Pos.t) option;
           current_package_assignment_kind: string;
-          target_package_pos: Pos.t;
-          target_package_name: string option;
+          target_package: (string * Pos.t) option;
           target_package_assignment_kind: string;
           current_filename: Relative_path.t;
           target_filename: Relative_path.t;
           target_id: string;
           target_symbol_spec: string;
+          loaded_packages: (string * Pos.t) list;
+          included_packages: (string * string * Pos.t) list;
         }
     [@@deriving show]
   end

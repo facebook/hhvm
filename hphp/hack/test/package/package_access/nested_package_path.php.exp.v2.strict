@@ -1,8 +1,7 @@
-error: Typing[4472] Cannot access a function defined in package pkg6 from package pkg1 [1]
+error: Typing[4472] Cannot access function bar defined in package pkg6 which may not be available [1]
 -> bar is defined in nested_package_path.php--pkg6/bar.php [2]
--> nested_package_path.php--pkg6/bar.php belongs to package pkg6 by this package config assignment [3]
--> nested_package_path.php--foo.php is in package pkg1 by this package config assignment [4]
--> And package pkg1 does not include package pkg6 [4]
+-> bar belongs to package pkg6 by this package definition [3]
+-> package pkg1 is available because the current file belongs to it by this package definition [4]
 
 nested_package_path.php--foo.php:4:3
      2 | 

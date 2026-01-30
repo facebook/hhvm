@@ -13,7 +13,15 @@ type local_package_requirement =
   | Not_exists_in_deployment
   | Unsatisfiable_package_constraints
 
-type t = local_package_requirement SMap.t
+(** Information about a loaded package in the current environment *)
+type loaded_package_info = {
+  pos: Pos.t;
+  status: local_package_requirement;
+  from_includes: bool;
+}
+
+(** Each package maps to its loaded package info *)
+type t = loaded_package_info SMap.t
 
 val show : t -> string
 
@@ -25,9 +33,10 @@ val join : t -> t -> t
 
 val add :
   package_info:PackageInfo.t ->
+  Pos.t ->
   SMap.key ->
   local_package_requirement ->
-  local_package_requirement SMap.t ->
-  local_package_requirement SMap.t
+  loaded_package_info SMap.t ->
+  loaded_package_info SMap.t
 
 val sub : t -> t -> bool

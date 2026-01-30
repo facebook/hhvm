@@ -1097,17 +1097,16 @@ let test_cross_pkg_access _ =
            pos;
            decl_pos = Pos_or_decl.none;
            (* Everything else is currently not matched on in the custom error *)
-           current_package_pos = Pos.none;
-           current_package_def_pos = Pos.none;
-           current_package_name = None;
+           current_package = None;
            current_package_assignment_kind = "whatever";
-           target_package_pos = Pos.none;
-           target_package_name = None;
+           target_package = None;
            target_package_assignment_kind = "whatever";
            current_filename = Relative_path.default;
            target_filename = Relative_path.default;
            target_id = "whatever";
            target_symbol_spec = "whatever";
+           loaded_packages = [];
+           included_packages = [];
          })
   in
   let err = Typing_error.primary prim_err in
@@ -1158,7 +1157,15 @@ let test_cross_pkg_access_with_requirepackage _ =
   let prim_err =
     Primary.Package
       (Primary.Package.Cross_pkg_access_with_requirepackage
-         { pos; decl_pos = Pos_or_decl.none; target_package = "test_package" })
+         {
+           pos;
+           decl_pos = Pos_or_decl.none;
+           (* Everything else is currently not matched on in the custom error *)
+           target_package = "test_package";
+           current_package = None;
+           loaded_packages = [];
+           included_packages = [];
+         })
   in
   let err = Typing_error.primary prim_err in
   (* match 'foo/*' *)
@@ -1212,17 +1219,16 @@ let test_optional_path_segment_missing _ =
            pos;
            decl_pos = Pos_or_decl.none;
            (* Everything else is currently not matched on in the custom error *)
-           current_package_pos = Pos.none;
-           current_package_def_pos = Pos.none;
-           current_package_name = None;
+           current_package = None;
            current_package_assignment_kind = "whatever";
-           target_package_pos = Pos.none;
-           target_package_name = None;
+           target_package = None;
            target_package_assignment_kind = "whatever";
            current_filename = Relative_path.default;
            target_filename = Relative_path.default;
            target_id = "whatever";
            target_symbol_spec = "whatever";
+           loaded_packages = [];
+           included_packages = [];
          })
   in
   let err = Typing_error.primary prim_err in
@@ -1282,17 +1288,16 @@ let test_optional_path_segment_present _ =
            pos;
            decl_pos = Pos_or_decl.none;
            (* Everything else is currently not matched on in the custom error *)
-           current_package_pos = Pos.none;
-           current_package_def_pos = Pos.none;
-           current_package_name = None;
+           current_package = None;
            current_package_assignment_kind = "whatever";
-           target_package_pos = Pos.none;
-           target_package_name = None;
+           target_package = None;
            target_package_assignment_kind = "whatever";
            current_filename = Relative_path.default;
            target_filename = Relative_path.default;
            target_id = "whatever";
            target_symbol_spec = "whatever";
+           loaded_packages = [];
+           included_packages = [];
          })
   in
   let err = Typing_error.primary prim_err in
@@ -1352,17 +1357,16 @@ let test_path_glob _ =
            pos;
            decl_pos = Pos_or_decl.none;
            (* Everything else is currently not matched on in the custom error *)
-           current_package_pos = Pos.none;
-           current_package_def_pos = Pos.none;
-           current_package_name = None;
+           current_package = None;
            current_package_assignment_kind = "whatever";
-           target_package_pos = Pos.none;
-           target_package_name = None;
+           target_package = None;
            target_package_assignment_kind = "whatever";
            current_filename = Relative_path.default;
            target_filename = Relative_path.default;
            target_id = "whatever";
            target_symbol_spec = "whatever";
+           loaded_packages = [];
+           included_packages = [];
          })
   in
   let err = Typing_error.primary prim_err in
@@ -1413,17 +1417,16 @@ let test_path_glob_with_optional_present _ =
            pos;
            decl_pos = Pos_or_decl.none;
            (* Everything else is currently not matched on in the custom error *)
-           current_package_pos = Pos.none;
-           current_package_def_pos = Pos.none;
-           current_package_name = None;
+           current_package = None;
            current_package_assignment_kind = "whatever";
-           target_package_pos = Pos.none;
-           target_package_name = None;
+           target_package = None;
            target_package_assignment_kind = "whatever";
            current_filename = Relative_path.default;
            target_filename = Relative_path.default;
            target_id = "whatever";
            target_symbol_spec = "whatever";
+           loaded_packages = [];
+           included_packages = [];
          })
   in
   let err = Typing_error.primary prim_err in
@@ -1475,17 +1478,16 @@ let test_path_glob_with_optional_missing _ =
            pos;
            decl_pos = Pos_or_decl.none;
            (* Everything else is currently not matched on in the custom error *)
-           current_package_pos = Pos.none;
-           current_package_def_pos = Pos.none;
-           current_package_name = None;
+           current_package = None;
            current_package_assignment_kind = "whatever";
-           target_package_pos = Pos.none;
-           target_package_name = None;
+           target_package = None;
            target_package_assignment_kind = "whatever";
            current_filename = Relative_path.default;
            target_filename = Relative_path.default;
            target_id = "whatever";
            target_symbol_spec = "whatever";
+           loaded_packages = [];
+           included_packages = [];
          })
   in
   let err = Typing_error.primary prim_err in
@@ -1537,17 +1539,16 @@ let test_path_glob_bad _ =
            pos;
            decl_pos = Pos_or_decl.none;
            (* Everything else is currently not matched on in the custom error *)
-           current_package_pos = Pos.none;
-           current_package_def_pos = Pos.none;
-           current_package_name = None;
+           current_package = None;
            current_package_assignment_kind = "whatever";
-           target_package_pos = Pos.none;
-           target_package_name = None;
+           target_package = None;
            target_package_assignment_kind = "whatever";
            current_filename = Relative_path.default;
            target_filename = Relative_path.default;
            target_id = "whatever";
            target_symbol_spec = "whatever";
+           loaded_packages = [];
+           included_packages = [];
          })
   in
   let err = Typing_error.primary prim_err in
@@ -1602,17 +1603,16 @@ let test_path_glob_with_optional_missing_bad _ =
            pos;
            decl_pos = Pos_or_decl.none;
            (* Everything else is currently not matched on in the custom error *)
-           current_package_pos = Pos.none;
-           current_package_def_pos = Pos.none;
-           current_package_name = None;
+           current_package = None;
            current_package_assignment_kind = "whatever";
-           target_package_pos = Pos.none;
-           target_package_name = None;
+           target_package = None;
            target_package_assignment_kind = "whatever";
            current_filename = Relative_path.default;
            target_filename = Relative_path.default;
            target_id = "whatever";
            target_symbol_spec = "whatever";
+           loaded_packages = [];
+           included_packages = [];
          })
   in
   let err = Typing_error.primary prim_err in
@@ -1668,17 +1668,16 @@ let test_path_glob_with_optional_present_bad _ =
            pos;
            decl_pos = Pos_or_decl.none;
            (* Everything else is currently not matched on in the custom error *)
-           current_package_pos = Pos.none;
-           current_package_def_pos = Pos.none;
-           current_package_name = None;
+           current_package = None;
            current_package_assignment_kind = "whatever";
-           target_package_pos = Pos.none;
-           target_package_name = None;
+           target_package = None;
            target_package_assignment_kind = "whatever";
            current_filename = Relative_path.default;
            target_filename = Relative_path.default;
            target_id = "whatever";
            target_symbol_spec = "whatever";
+           loaded_packages = [];
+           included_packages = [];
          })
   in
   let err = Typing_error.primary prim_err in

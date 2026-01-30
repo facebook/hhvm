@@ -1268,69 +1268,79 @@ end = struct
   end
 
   module Eval_package = struct
-    let get_package_str p_opt =
+    let get_package_str_pos p_opt =
       match p_opt with
-      | Some s -> Printf.sprintf "package `%s`" s
-      | None -> "the default package"
+      | Some (s, pos) -> (Printf.sprintf "package `%s`" s, pos)
+      | None -> ("the default package", Pos.none)
 
     let cross_pkg_access
         (pos : Pos.t)
         (decl_pos : Pos_or_decl.t)
-        (current_package_pos : Pos.t)
-        (current_package_def_pos : Pos.t)
-        (current_package_name : string option)
+        (current_package : (string * Pos.t) option)
         (current_package_assignment_kind : string)
-        (target_package_pos : Pos.t)
-        (target_package_name : string option)
+        (target_package : (string * Pos.t) option)
         (target_package_assignment_kind : string)
-        (current_filename : Relative_path.t)
         (target_filename : Relative_path.t)
         (target_id : string)
         (target_symbol_spec : string)
+        (loaded_packages : (string * Pos.t) list)
+        (included_packages : (string * string * Pos.t) list)
         (soft : bool) =
-      let current_filename = Relative_path.suffix current_filename in
-      let target_filename = Relative_path.suffix target_filename in
-      let current_package = get_package_str current_package_name in
-      let target_package = get_package_str target_package_name in
-      let target_id = Markdown_lite.md_codify (Utils.strip_ns target_id) in
-      let relationship =
-        if soft then
-          "only soft includes"
-        else
-          "does not include"
+      let (current_pkg_name, current_pkg_pos) =
+        get_package_str_pos current_package
       in
+      let (target_package_name, target_package_pos) =
+        get_package_str_pos target_package
+      in
+      let target_filename = Relative_path.suffix target_filename in
+      let target_id = Markdown_lite.md_codify (Utils.strip_ns target_id) in
+
       let claim =
         lazy
           ( pos,
             Printf.sprintf
-              "Cannot access a %s defined in %s from %s"
+              "Cannot access %s %s defined in %s which may not be available"
               target_symbol_spec
-              target_package
-              current_package )
+              target_id
+              target_package_name )
       and reasons =
         lazy
-          [
-            ( decl_pos,
-              Printf.sprintf "%s is defined in %s" target_id target_filename );
-            ( Pos_or_decl.of_raw_pos target_package_pos,
-              Printf.sprintf
-                "%s belongs to %s by this %s"
-                target_filename
-                target_package
-                target_package_assignment_kind );
-            ( Pos_or_decl.of_raw_pos current_package_pos,
-              Printf.sprintf
-                "%s is in %s by this %s"
-                current_filename
-                current_package
-                current_package_assignment_kind );
-            ( Pos_or_decl.of_raw_pos current_package_def_pos,
-              Printf.sprintf
-                "And %s %s %s"
-                current_package
-                relationship
-                target_package );
-          ]
+          (let base_reasons =
+             [
+               ( decl_pos,
+                 Printf.sprintf "%s is defined in %s" target_id target_filename
+               );
+               ( Pos_or_decl.of_raw_pos target_package_pos,
+                 Printf.sprintf
+                   "%s belongs to %s by this %s"
+                   target_id
+                   target_package_name
+                   target_package_assignment_kind );
+               ( Pos_or_decl.of_raw_pos current_pkg_pos,
+                 Printf.sprintf
+                   "%s is available because the current file belongs to it by this %s"
+                   current_pkg_name
+                   current_package_assignment_kind );
+             ]
+           in
+           let loaded_reasons =
+             List.map loaded_packages ~f:(fun (pkg, pkg_pos) ->
+                 ( Pos_or_decl.of_raw_pos pkg_pos,
+                   Printf.sprintf
+                     "package `%s` is assumed to be deployed here"
+                     pkg ))
+           in
+           let included_reasons =
+             List.map
+               included_packages
+               ~f:(fun (including_pkg, included_pkg, include_pos) ->
+                 ( Pos_or_decl.of_raw_pos include_pos,
+                   Printf.sprintf
+                     "`%s` includes `%s` via its definition"
+                     including_pkg
+                     included_pkg ))
+           in
+           base_reasons @ loaded_reasons @ included_reasons)
       in
       let code =
         if soft then
@@ -1341,21 +1351,50 @@ end = struct
       create ~code ~claim ~reasons ()
 
     let cross_pkg_access_with_requirepackage
-        (pos : Pos.t) (decl_pos : Pos_or_decl.t) (target_package : string) =
+        (pos : Pos.t)
+        (decl_pos : Pos_or_decl.t)
+        (target_package : string)
+        (current_package : (string * Pos.t) option)
+        (loaded_packages : (string * Pos.t) list)
+        (included_packages : (string * string * Pos.t) list) =
+      let (current_pkg_name, current_pkg_pos) =
+        match current_package with
+        | Some (name, pos) -> (Printf.sprintf "`%s`" name, pos)
+        | None -> ("the default package", Pos.none)
+      in
       let claim = lazy (pos, "Cannot reference this __RequirePackage function")
       and reasons =
         lazy
-          [
-            ( decl_pos,
-              Printf.sprintf
-                "This function is marked with `__RequirePackage(\"%s\")`"
-                target_package );
-            ( Pos_or_decl.of_raw_pos
-                pos (* TODO(T246617508) better position with per-cont env *),
-              Printf.sprintf
-                "%s is not included in the current environment"
-                target_package );
-          ]
+          (let base_reasons =
+             [
+               ( decl_pos,
+                 Printf.sprintf
+                   "This function is marked with `__RequirePackage(\"%s\")`"
+                   target_package );
+               ( Pos_or_decl.of_raw_pos current_pkg_pos,
+                 Printf.sprintf
+                   "the current file belongs to package %s"
+                   current_pkg_name );
+             ]
+           in
+           let loaded_reasons =
+             List.map loaded_packages ~f:(fun (pkg, pkg_pos) ->
+                 ( Pos_or_decl.of_raw_pos pkg_pos,
+                   Printf.sprintf
+                     "package `%s` is assumed to be deployed here"
+                     pkg ))
+           in
+           let included_reasons =
+             List.map
+               included_packages
+               ~f:(fun (including_pkg, included_pkg, include_pos) ->
+                 ( Pos_or_decl.of_raw_pos include_pos,
+                   Printf.sprintf
+                     "`%s` includes `%s` via its definition"
+                     including_pkg
+                     included_pkg ))
+           in
+           base_reasons @ loaded_reasons @ included_reasons)
       in
       create ~code:Error_code.InvalidCrossPackage ~claim ~reasons ()
 
@@ -1363,36 +1402,51 @@ end = struct
         (pos : Pos.t)
         (decl_pos : Pos_or_decl.t)
         (current_soft_package_opt : (Pos.t * string) option)
-        (target_package : string) =
+        (target_package : string)
+        (loaded_packages : (string * Pos.t) list)
+        (included_packages : (string * string * Pos.t) list) =
       let claim =
         lazy (pos, "Cannot reference this `__SoftRequirePackage` function")
       and reasons =
         lazy
-          (( decl_pos,
-             Printf.sprintf
-               "This function is marked with `__SoftRequirePackage(\"%s\")`, which is a transition feature to help move a function to `__RequirePackage(\"%s\")`. It does not allow calling into %s itself, but it can only be called from functions that have access to %s."
-               target_package
-               target_package
-               target_package
-               target_package )
-          ::
-          (match current_soft_package_opt with
-          | Some (pos, package) ->
-            [
-              ( Pos_or_decl.of_raw_pos pos,
-                Printf.sprintf
-                  "The current function soft-requires package %s, which does not include %s"
-                  package
-                  target_package );
-            ]
-          | None ->
-            [
-              ( Pos_or_decl.of_raw_pos
-                  pos (* TODO(T246617508) report per-continuation packages *),
-                Printf.sprintf
-                  "%s is not included in the current environment"
-                  target_package );
-            ]))
+          (let base_reasons =
+             ( decl_pos,
+               Printf.sprintf
+                 "This function is marked with `__SoftRequirePackage(\"%s\")`, which is a transition feature to help move a function to `__RequirePackage(\"%s\")`. It does not allow calling into %s itself, but it can only be called from functions that have access to %s."
+                 target_package
+                 target_package
+                 target_package
+                 target_package )
+             ::
+             (match current_soft_package_opt with
+             | Some (pos, package) ->
+               [
+                 ( Pos_or_decl.of_raw_pos pos,
+                   Printf.sprintf
+                     "The current function soft-requires package %s, which does not include %s"
+                     package
+                     target_package );
+               ]
+             | None -> [])
+           in
+           let loaded_reasons =
+             List.map loaded_packages ~f:(fun (pkg, pkg_pos) ->
+                 ( Pos_or_decl.of_raw_pos pkg_pos,
+                   Printf.sprintf
+                     "package `%s` is assumed to be deployed here"
+                     pkg ))
+           in
+           let included_reasons =
+             List.map
+               included_packages
+               ~f:(fun (including_pkg, included_pkg, include_pos) ->
+                 ( Pos_or_decl.of_raw_pos include_pos,
+                   Printf.sprintf
+                     "`%s` includes `%s` via its definition"
+                     including_pkg
+                     included_pkg ))
+           in
+           base_reasons @ loaded_reasons @ included_reasons)
       in
 
       create ~code:Error_code.InvalidCrossPackage ~claim ~reasons ()
@@ -1404,73 +1458,89 @@ end = struct
           {
             pos;
             decl_pos;
-            current_package_pos;
-            current_package_def_pos;
-            current_package_name;
+            current_package;
             current_package_assignment_kind;
-            target_package_pos;
-            target_package_name;
+            target_package;
             target_package_assignment_kind;
-            current_filename;
+            current_filename = _;
             target_filename;
             target_id;
             target_symbol_spec;
+            loaded_packages;
+            included_packages;
           } ->
         cross_pkg_access
           pos
           decl_pos
-          current_package_pos
-          current_package_def_pos
-          current_package_name
+          current_package
           current_package_assignment_kind
-          target_package_pos
-          target_package_name
+          target_package
           target_package_assignment_kind
-          current_filename
           target_filename
           target_id
           target_symbol_spec
+          loaded_packages
+          included_packages
           false (* Soft *)
-      | Cross_pkg_access_with_requirepackage { pos; decl_pos; target_package }
-        ->
-        cross_pkg_access_with_requirepackage pos decl_pos target_package
+      | Cross_pkg_access_with_requirepackage
+          {
+            pos;
+            decl_pos;
+            target_package;
+            current_package;
+            loaded_packages;
+            included_packages;
+          } ->
+        cross_pkg_access_with_requirepackage
+          pos
+          decl_pos
+          target_package
+          current_package
+          loaded_packages
+          included_packages
       | Cross_pkg_access_with_softrequirepackage
-          { pos; decl_pos; current_soft_package_opt; target_package } ->
+          {
+            pos;
+            decl_pos;
+            current_soft_package_opt;
+            target_package;
+            loaded_packages;
+            included_packages;
+          } ->
         cross_pkg_access_with_softrequirepackage
           pos
           decl_pos
           current_soft_package_opt
           target_package
+          loaded_packages
+          included_packages
       | Soft_included_access
           {
             pos;
             decl_pos;
-            current_package_pos;
-            current_package_def_pos;
-            current_package_name;
+            current_package;
             current_package_assignment_kind;
-            target_package_pos;
-            target_package_name;
+            target_package;
             target_package_assignment_kind;
-            current_filename;
+            current_filename = _;
             target_filename;
             target_id;
             target_symbol_spec;
+            loaded_packages;
+            included_packages;
           } ->
         cross_pkg_access
           pos
           decl_pos
-          current_package_pos
-          current_package_def_pos
-          current_package_name
+          current_package
           current_package_assignment_kind
-          target_package_pos
-          target_package_name
+          target_package
           target_package_assignment_kind
-          current_filename
           target_filename
           target_id
           target_symbol_spec
+          loaded_packages
+          included_packages
           true (* Soft *)
   end
 

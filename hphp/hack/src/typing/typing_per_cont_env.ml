@@ -103,12 +103,17 @@ let replace_cont key valueopt map =
   | None -> drop_cont key map
   | Some value -> CMap.add key value map
 
-let assert_package_loaded_in_cont ~package_info name pkg status m =
+let assert_package_loaded_in_cont ~package_info name pos pkg status m =
   match CMap.find_opt name m with
   | None -> m
   | Some cont ->
     let loaded_packages =
-      Typing_local_packages.add ~package_info pkg status cont.loaded_packages
+      Typing_local_packages.add
+        ~package_info
+        pos
+        pkg
+        status
+        cont.loaded_packages
     in
     let cont = { cont with loaded_packages } in
     CMap.add name cont m

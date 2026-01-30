@@ -33,11 +33,9 @@ let get_package_violation env current_pkg target_pkg =
           Some r))
 
 type package_error_info = {
-  current_package_pos: Pos.t;
-  current_package_name: string option;
+  current_package: (string * Pos.t) option;
   current_package_assignment_kind: string;
-  target_package_name: string option;
-  target_package_pos: Pos.t;
+  target_package: (string * Pos.t) option;
   target_package_assignment_kind: string;
   target_id: string;
 }
@@ -55,11 +53,11 @@ let is_excluded env (file : Relative_path.t) =
   List.exists excluded_patterns ~f:(fun pattern ->
       Str.(string_match (regexp pattern) filename 0))
 
-(* package, package name, package memeberhip position, package membership kind *)
+(* package, package info (name * pos), package membership kind *)
 let get_package_profile
     (env : Typing_env_types.env)
     (pkg_membership : Aast_defs.package_membership option) :
-    Package.t option * string option * Pos.t * string =
+    Package.t option * (string * Pos.t) option * string =
   match pkg_membership with
   | Some (Aast_defs.PackageConfigAssignment pkg_name) ->
     let pkg = Env.get_package_by_name env pkg_name in
@@ -68,13 +66,12 @@ let get_package_profile
       | Some p -> Package.get_package_pos p
       | None -> Pos.none
     in
-    (pkg, Some pkg_name, pos, "package config assignment")
+    (pkg, Some (pkg_name, pos), "package definition")
   | Some (Aast_defs.PackageOverride (pkg_pos, pkg_name)) ->
     ( Env.get_package_by_name env pkg_name,
-      Some pkg_name,
-      pkg_pos,
+      Some (pkg_name, pkg_pos),
       "package override" )
-  | _ -> (None, None, Pos.none, "")
+  | _ -> (None, None, "")
 
 let can_access_by_package_rules
     ~(env : Typing_env_types.env)
@@ -98,16 +95,10 @@ let can_access_by_package_rules
   then
     `Yes
   else
-    let ( current_pkg,
-          current_package_name,
-          current_package_pos,
-          current_package_assignment_kind ) =
+    let (current_pkg, current_package, current_package_assignment_kind) =
       Env.get_current_package_membership env |> get_package_profile env
     in
-    let ( target_pkg,
-          target_package_name,
-          target_package_pos,
-          target_package_assignment_kind ) =
+    let (target_pkg, target_package, target_package_assignment_kind) =
       get_package_profile env target_package_membership
     in
     match get_package_violation env current_pkg target_pkg with
@@ -115,11 +106,9 @@ let can_access_by_package_rules
     | Some pkg_relationship ->
       let err_info =
         {
-          current_package_pos;
-          current_package_name;
+          current_package;
           current_package_assignment_kind;
-          target_package_name;
-          target_package_pos;
+          target_package;
           target_package_assignment_kind;
           target_id;
         }

@@ -7,11 +7,9 @@
  *)
 
 type package_error_info = {
-  current_package_pos: Pos.t;
-  current_package_name: string option;
+  current_package: (string * Pos.t) option;
   current_package_assignment_kind: string;
-  target_package_name: string option;
-  target_package_pos: Pos.t;
+  target_package: (string * Pos.t) option;
   target_package_assignment_kind: string;
   target_id: string;
 }

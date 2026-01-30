@@ -1,177 +1,189 @@
-error: Typing[4472] Cannot access a function defined in package pkg5 from package pkg3 [1]
+error: Typing[4472] Cannot access function pkg5_call defined in package pkg5 which may not be available [1]
 -> pkg5_call is defined in cross_package_with_package_syntax_if_disjunction.php--pkg5.php [2]
--> cross_package_with_package_syntax_if_disjunction.php--pkg5.php belongs to package pkg5 by this package override [3]
--> cross_package_with_package_syntax_if_disjunction.php--pkg3.php is in package pkg3 by this package override [4]
--> And package pkg3 does not include package pkg5 [5]
+-> pkg5_call belongs to package pkg5 by this package override [3]
+-> package pkg3 is available because the current file belongs to it by this package override [4]
+-> pkg3 includes pkg2 via its definition [5]
+-> pkg3 includes pkg2_soft via its definition [6]
+-> pkg3 includes pkg1 via its definition [7]
 
 cross_package_with_package_syntax_if_disjunction.php--pkg3.php:6:5
-     1 | <?hh
-[4]  2 | <<file: __PackageOverride('pkg3')>>
-     3 | function test(): void {
-     4 |   if (package pkg4 || package pkg5) {
-     5 |     // neither is allowed as we cannot be sure
-[1]  6 |     pkg5_call();
-     7 |     pkg4_call();
-     8 |   } else {
+         1 | <?hh
+[4]      2 | <<file: __PackageOverride('pkg3')>>
+         3 | function test(): void {
+         4 |   if (package pkg4 || package pkg5) {
+         5 |     // neither is allowed as we cannot be sure
+[1]      6 |     pkg5_call();
+         7 |     pkg4_call();
+         8 |   } else {
 
 cross_package_with_package_syntax_if_disjunction.php--pkg5.php:3:10
-     1 | <?hh
-[3]  2 | <<file: __PackageOverride('pkg5')>>
-[2]  3 | function pkg5_call(): void {}
+         1 | <?hh
+[3]      2 | <<file: __PackageOverride('pkg5')>>
+[2]      3 | function pkg5_call(): void {}
 
-PACKAGES.toml:17:11
-    15 | includes=["pkg2", "pkg1"]
-    16 | 
-[5] 17 | [packages.pkg3]
-    18 | includes = ["pkg2", "pkg2_soft", "pkg1"]
-    19 | 
+PACKAGES.toml:18:13
+        16 | 
+        17 | [packages.pkg3]
+[5,6,7] 18 | includes = ["pkg2", "pkg2_soft", "pkg1"]
+        19 | 
+        20 | [packages.pkg4]
 
-error: Typing[4472] Cannot access a function defined in package pkg4 from package pkg3 [1]
+error: Typing[4472] Cannot access function pkg4_call defined in package pkg4 which may not be available [1]
 -> pkg4_call is defined in cross_package_with_package_syntax_if_disjunction.php--pkg4.php [2]
--> cross_package_with_package_syntax_if_disjunction.php--pkg4.php belongs to package pkg4 by this package override [3]
--> cross_package_with_package_syntax_if_disjunction.php--pkg3.php is in package pkg3 by this package override [4]
--> And package pkg3 does not include package pkg4 [5]
+-> pkg4_call belongs to package pkg4 by this package override [3]
+-> package pkg3 is available because the current file belongs to it by this package override [4]
+-> pkg3 includes pkg2 via its definition [5]
+-> pkg3 includes pkg2_soft via its definition [6]
+-> pkg3 includes pkg1 via its definition [7]
 
 cross_package_with_package_syntax_if_disjunction.php--pkg3.php:7:5
-     1 | <?hh
-[4]  2 | <<file: __PackageOverride('pkg3')>>
-     3 | function test(): void {
-     4 |   if (package pkg4 || package pkg5) {
-     5 |     // neither is allowed as we cannot be sure
-     6 |     pkg5_call();
-[1]  7 |     pkg4_call();
-     8 |   } else {
-     9 |     // similarly here, both are rejected
+         1 | <?hh
+[4]      2 | <<file: __PackageOverride('pkg3')>>
+         3 | function test(): void {
+         4 |   if (package pkg4 || package pkg5) {
+         5 |     // neither is allowed as we cannot be sure
+         6 |     pkg5_call();
+[1]      7 |     pkg4_call();
+         8 |   } else {
+         9 |     // similarly here, both are rejected
 
 cross_package_with_package_syntax_if_disjunction.php--pkg4.php:3:10
-     1 | <?hh
-[3]  2 | <<file: __PackageOverride('pkg4')>>
-[2]  3 | function pkg4_call(): void {}
+         1 | <?hh
+[3]      2 | <<file: __PackageOverride('pkg4')>>
+[2]      3 | function pkg4_call(): void {}
 
-PACKAGES.toml:17:11
-    15 | includes=["pkg2", "pkg1"]
-    16 | 
-[5] 17 | [packages.pkg3]
-    18 | includes = ["pkg2", "pkg2_soft", "pkg1"]
-    19 | 
+PACKAGES.toml:18:13
+        16 | 
+        17 | [packages.pkg3]
+[5,6,7] 18 | includes = ["pkg2", "pkg2_soft", "pkg1"]
+        19 | 
+        20 | [packages.pkg4]
 
-error: Typing[4472] Cannot access a function defined in package pkg5 from package pkg3 [1]
+error: Typing[4472] Cannot access function pkg5_call defined in package pkg5 which may not be available [1]
 -> pkg5_call is defined in cross_package_with_package_syntax_if_disjunction.php--pkg5.php [2]
--> cross_package_with_package_syntax_if_disjunction.php--pkg5.php belongs to package pkg5 by this package override [3]
--> cross_package_with_package_syntax_if_disjunction.php--pkg3.php is in package pkg3 by this package override [4]
--> And package pkg3 does not include package pkg5 [5]
+-> pkg5_call belongs to package pkg5 by this package override [3]
+-> package pkg3 is available because the current file belongs to it by this package override [4]
+-> pkg3 includes pkg2 via its definition [5]
+-> pkg3 includes pkg2_soft via its definition [6]
+-> pkg3 includes pkg1 via its definition [7]
 
 cross_package_with_package_syntax_if_disjunction.php--pkg3.php:10:5
-     1 | <?hh
-[4]  2 | <<file: __PackageOverride('pkg3')>>
-     3 | function test(): void {
-     4 |   if (package pkg4 || package pkg5) {
-       :
-     8 |   } else {
-     9 |     // similarly here, both are rejected
-[1] 10 |     pkg5_call();
-    11 |     pkg4_call();
-    12 |   }
+         1 | <?hh
+[4]      2 | <<file: __PackageOverride('pkg3')>>
+         3 | function test(): void {
+         4 |   if (package pkg4 || package pkg5) {
+           :
+         8 |   } else {
+         9 |     // similarly here, both are rejected
+[1]     10 |     pkg5_call();
+        11 |     pkg4_call();
+        12 |   }
 
 cross_package_with_package_syntax_if_disjunction.php--pkg5.php:3:10
-     1 | <?hh
-[3]  2 | <<file: __PackageOverride('pkg5')>>
-[2]  3 | function pkg5_call(): void {}
+         1 | <?hh
+[3]      2 | <<file: __PackageOverride('pkg5')>>
+[2]      3 | function pkg5_call(): void {}
 
-PACKAGES.toml:17:11
-    15 | includes=["pkg2", "pkg1"]
-    16 | 
-[5] 17 | [packages.pkg3]
-    18 | includes = ["pkg2", "pkg2_soft", "pkg1"]
-    19 | 
+PACKAGES.toml:18:13
+        16 | 
+        17 | [packages.pkg3]
+[5,6,7] 18 | includes = ["pkg2", "pkg2_soft", "pkg1"]
+        19 | 
+        20 | [packages.pkg4]
 
-error: Typing[4472] Cannot access a function defined in package pkg4 from package pkg3 [1]
+error: Typing[4472] Cannot access function pkg4_call defined in package pkg4 which may not be available [1]
 -> pkg4_call is defined in cross_package_with_package_syntax_if_disjunction.php--pkg4.php [2]
--> cross_package_with_package_syntax_if_disjunction.php--pkg4.php belongs to package pkg4 by this package override [3]
--> cross_package_with_package_syntax_if_disjunction.php--pkg3.php is in package pkg3 by this package override [4]
--> And package pkg3 does not include package pkg4 [5]
+-> pkg4_call belongs to package pkg4 by this package override [3]
+-> package pkg3 is available because the current file belongs to it by this package override [4]
+-> pkg3 includes pkg2 via its definition [5]
+-> pkg3 includes pkg2_soft via its definition [6]
+-> pkg3 includes pkg1 via its definition [7]
 
 cross_package_with_package_syntax_if_disjunction.php--pkg3.php:11:5
-     1 | <?hh
-[4]  2 | <<file: __PackageOverride('pkg3')>>
-     3 | function test(): void {
-     4 |   if (package pkg4 || package pkg5) {
-       :
-     9 |     // similarly here, both are rejected
-    10 |     pkg5_call();
-[1] 11 |     pkg4_call();
-    12 |   }
-    13 |   // and here, both are rejected
+         1 | <?hh
+[4]      2 | <<file: __PackageOverride('pkg3')>>
+         3 | function test(): void {
+         4 |   if (package pkg4 || package pkg5) {
+           :
+         9 |     // similarly here, both are rejected
+        10 |     pkg5_call();
+[1]     11 |     pkg4_call();
+        12 |   }
+        13 |   // and here, both are rejected
 
 cross_package_with_package_syntax_if_disjunction.php--pkg4.php:3:10
-     1 | <?hh
-[3]  2 | <<file: __PackageOverride('pkg4')>>
-[2]  3 | function pkg4_call(): void {}
+         1 | <?hh
+[3]      2 | <<file: __PackageOverride('pkg4')>>
+[2]      3 | function pkg4_call(): void {}
 
-PACKAGES.toml:17:11
-    15 | includes=["pkg2", "pkg1"]
-    16 | 
-[5] 17 | [packages.pkg3]
-    18 | includes = ["pkg2", "pkg2_soft", "pkg1"]
-    19 | 
+PACKAGES.toml:18:13
+        16 | 
+        17 | [packages.pkg3]
+[5,6,7] 18 | includes = ["pkg2", "pkg2_soft", "pkg1"]
+        19 | 
+        20 | [packages.pkg4]
 
-error: Typing[4472] Cannot access a function defined in package pkg5 from package pkg3 [1]
+error: Typing[4472] Cannot access function pkg5_call defined in package pkg5 which may not be available [1]
 -> pkg5_call is defined in cross_package_with_package_syntax_if_disjunction.php--pkg5.php [2]
--> cross_package_with_package_syntax_if_disjunction.php--pkg5.php belongs to package pkg5 by this package override [3]
--> cross_package_with_package_syntax_if_disjunction.php--pkg3.php is in package pkg3 by this package override [4]
--> And package pkg3 does not include package pkg5 [5]
+-> pkg5_call belongs to package pkg5 by this package override [3]
+-> package pkg3 is available because the current file belongs to it by this package override [4]
+-> pkg3 includes pkg2 via its definition [5]
+-> pkg3 includes pkg2_soft via its definition [6]
+-> pkg3 includes pkg1 via its definition [7]
 
 cross_package_with_package_syntax_if_disjunction.php--pkg3.php:14:3
-     1 | <?hh
-[4]  2 | <<file: __PackageOverride('pkg3')>>
-     3 | function test(): void {
-     4 |   if (package pkg4 || package pkg5) {
-       :
-    12 |   }
-    13 |   // and here, both are rejected
-[1] 14 |   pkg5_call();
-    15 |   pkg4_call();
-    16 | }
+         1 | <?hh
+[4]      2 | <<file: __PackageOverride('pkg3')>>
+         3 | function test(): void {
+         4 |   if (package pkg4 || package pkg5) {
+           :
+        12 |   }
+        13 |   // and here, both are rejected
+[1]     14 |   pkg5_call();
+        15 |   pkg4_call();
+        16 | }
 
 cross_package_with_package_syntax_if_disjunction.php--pkg5.php:3:10
-     1 | <?hh
-[3]  2 | <<file: __PackageOverride('pkg5')>>
-[2]  3 | function pkg5_call(): void {}
+         1 | <?hh
+[3]      2 | <<file: __PackageOverride('pkg5')>>
+[2]      3 | function pkg5_call(): void {}
 
-PACKAGES.toml:17:11
-    15 | includes=["pkg2", "pkg1"]
-    16 | 
-[5] 17 | [packages.pkg3]
-    18 | includes = ["pkg2", "pkg2_soft", "pkg1"]
-    19 | 
+PACKAGES.toml:18:13
+        16 | 
+        17 | [packages.pkg3]
+[5,6,7] 18 | includes = ["pkg2", "pkg2_soft", "pkg1"]
+        19 | 
+        20 | [packages.pkg4]
 
-error: Typing[4472] Cannot access a function defined in package pkg4 from package pkg3 [1]
+error: Typing[4472] Cannot access function pkg4_call defined in package pkg4 which may not be available [1]
 -> pkg4_call is defined in cross_package_with_package_syntax_if_disjunction.php--pkg4.php [2]
--> cross_package_with_package_syntax_if_disjunction.php--pkg4.php belongs to package pkg4 by this package override [3]
--> cross_package_with_package_syntax_if_disjunction.php--pkg3.php is in package pkg3 by this package override [4]
--> And package pkg3 does not include package pkg4 [5]
+-> pkg4_call belongs to package pkg4 by this package override [3]
+-> package pkg3 is available because the current file belongs to it by this package override [4]
+-> pkg3 includes pkg2 via its definition [5]
+-> pkg3 includes pkg2_soft via its definition [6]
+-> pkg3 includes pkg1 via its definition [7]
 
 cross_package_with_package_syntax_if_disjunction.php--pkg3.php:15:3
-     1 | <?hh
-[4]  2 | <<file: __PackageOverride('pkg3')>>
-     3 | function test(): void {
-     4 |   if (package pkg4 || package pkg5) {
-       :
-    13 |   // and here, both are rejected
-    14 |   pkg5_call();
-[1] 15 |   pkg4_call();
-    16 | }
+         1 | <?hh
+[4]      2 | <<file: __PackageOverride('pkg3')>>
+         3 | function test(): void {
+         4 |   if (package pkg4 || package pkg5) {
+           :
+        13 |   // and here, both are rejected
+        14 |   pkg5_call();
+[1]     15 |   pkg4_call();
+        16 | }
 
 cross_package_with_package_syntax_if_disjunction.php--pkg4.php:3:10
-     1 | <?hh
-[3]  2 | <<file: __PackageOverride('pkg4')>>
-[2]  3 | function pkg4_call(): void {}
+         1 | <?hh
+[3]      2 | <<file: __PackageOverride('pkg4')>>
+[2]      3 | function pkg4_call(): void {}
 
-PACKAGES.toml:17:11
-    15 | includes=["pkg2", "pkg1"]
-    16 | 
-[5] 17 | [packages.pkg3]
-    18 | includes = ["pkg2", "pkg2_soft", "pkg1"]
-    19 | 
+PACKAGES.toml:18:13
+        16 | 
+        17 | [packages.pkg3]
+[5,6,7] 18 | includes = ["pkg2", "pkg2_soft", "pkg1"]
+        19 | 
+        20 | [packages.pkg4]
 
 6 errors found

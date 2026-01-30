@@ -84,6 +84,7 @@ val replace_cont : C.t -> per_cont_entry option -> t -> t
 val assert_package_loaded_in_cont :
   package_info:PackageInfo.t ->
   C.t ->
+  Pos.t ->
   string ->
   Typing_local_packages.local_package_requirement ->
   t ->

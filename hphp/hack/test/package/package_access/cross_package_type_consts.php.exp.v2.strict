@@ -1,8 +1,7 @@
-error: Typing[4472] Cannot access a type constant defined in package pkg2 from package pkg1 [1]
+error: Typing[4472] Cannot access type constant BarImpl defined in package pkg2 which may not be available [1]
 -> BarImpl is defined in cross_package_type_consts.php--foo.php [2]
--> cross_package_type_consts.php--foo.php belongs to package pkg2 by this package override [3]
--> cross_package_type_consts.php--bar.php is in package pkg1 by this package config assignment [4]
--> And package pkg1 does not include package pkg2 [4]
+-> BarImpl belongs to package pkg2 by this package override [3]
+-> package pkg1 is available because the current file belongs to it by this package definition [4]
 
 cross_package_type_consts.php--bar.php:5:19
     3 | 
@@ -26,11 +25,10 @@ PACKAGES.toml:3:11
     4 | include_paths=["//"]
     5 | 
 
-error: Typing[4472] Cannot access a type constant defined in package pkg2 from package pkg1 [1]
+error: Typing[4472] Cannot access type constant TFoo1 defined in package pkg2 which may not be available [1]
 -> TFoo1 is defined in cross_package_type_consts.php--foo.php [2]
--> cross_package_type_consts.php--foo.php belongs to package pkg2 by this package override [3]
--> cross_package_type_consts.php--bar.php is in package pkg1 by this package config assignment [4]
--> And package pkg1 does not include package pkg2 [4]
+-> TFoo1 belongs to package pkg2 by this package override [3]
+-> package pkg1 is available because the current file belongs to it by this package definition [4]
 
 cross_package_type_consts.php--bar.php:6:19
     4 | class Bar {
@@ -54,11 +52,10 @@ PACKAGES.toml:3:11
     4 | include_paths=["//"]
     5 | 
 
-error: Typing[4472] Cannot access a type constant defined in package pkg2 from package pkg1 [1]
+error: Typing[4472] Cannot access type constant TFoo2 defined in package pkg2 which may not be available [1]
 -> TFoo2 is defined in cross_package_type_consts.php--foo.php [2]
--> cross_package_type_consts.php--foo.php belongs to package pkg2 by this package override [3]
--> cross_package_type_consts.php--bar.php is in package pkg1 by this package config assignment [4]
--> And package pkg1 does not include package pkg2 [4]
+-> TFoo2 belongs to package pkg2 by this package override [3]
+-> package pkg1 is available because the current file belongs to it by this package definition [4]
 
 cross_package_type_consts.php--bar.php:7:19
     5 |   const type T1 = BarImpl;

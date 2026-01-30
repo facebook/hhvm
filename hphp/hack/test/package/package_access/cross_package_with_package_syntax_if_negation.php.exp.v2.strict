@@ -1,28 +1,30 @@
-error: Typing[4472] Cannot access a function defined in package pkg4 from package pkg3 [1]
+error: Typing[4472] Cannot access function pkg4_call defined in package pkg4 which may not be available [1]
 -> pkg4_call is defined in cross_package_with_package_syntax_if_negation.php--pkg4.php [2]
--> cross_package_with_package_syntax_if_negation.php--pkg4.php belongs to package pkg4 by this package override [3]
--> cross_package_with_package_syntax_if_negation.php--pkg3.php is in package pkg3 by this package override [4]
--> And package pkg3 does not include package pkg4 [5]
+-> pkg4_call belongs to package pkg4 by this package override [3]
+-> package pkg3 is available because the current file belongs to it by this package override [4]
+-> pkg3 includes pkg2 via its definition [5]
+-> pkg3 includes pkg2_soft via its definition [6]
+-> pkg3 includes pkg1 via its definition [7]
 
 cross_package_with_package_syntax_if_negation.php--pkg3.php:5:5
-     1 | <?hh
-[4]  2 | <<file: __PackageOverride('pkg3')>>
-     3 | function test(): void {
-     4 |   if (!(package pkg4)) {
-[1]  5 |     pkg4_call();   // error; pkg4 is not loaded
-     6 |     return;
-     7 |   } else {
+         1 | <?hh
+[4]      2 | <<file: __PackageOverride('pkg3')>>
+         3 | function test(): void {
+         4 |   if (!(package pkg4)) {
+[1]      5 |     pkg4_call();   // error; pkg4 is not loaded
+         6 |     return;
+         7 |   } else {
 
 cross_package_with_package_syntax_if_negation.php--pkg4.php:3:10
-     1 | <?hh
-[3]  2 | <<file: __PackageOverride('pkg4')>>
-[2]  3 | function pkg4_call(): void {}
+         1 | <?hh
+[3]      2 | <<file: __PackageOverride('pkg4')>>
+[2]      3 | function pkg4_call(): void {}
 
-PACKAGES.toml:17:11
-    15 | includes=["pkg2", "pkg1"]
-    16 | 
-[5] 17 | [packages.pkg3]
-    18 | includes = ["pkg2", "pkg2_soft", "pkg1"]
-    19 | 
+PACKAGES.toml:18:13
+        16 | 
+        17 | [packages.pkg3]
+[5,6,7] 18 | includes = ["pkg2", "pkg2_soft", "pkg1"]
+        19 | 
+        20 | [packages.pkg4]
 
 1 error found

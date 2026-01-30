@@ -1,8 +1,7 @@
-error: Typing[4472] Cannot access a reified generic defined in package pkg2 from package pkg1 [1]
+error: Typing[4472] Cannot access reified generic TFoo defined in package pkg2 which may not be available [1]
 -> TFoo is defined in cross_package_reified_generics.php--foo.php [2]
--> cross_package_reified_generics.php--foo.php belongs to package pkg2 by this package override [3]
--> cross_package_reified_generics.php--bar.php is in package pkg1 by this package config assignment [4]
--> And package pkg1 does not include package pkg2 [4]
+-> TFoo belongs to package pkg2 by this package override [3]
+-> package pkg1 is available because the current file belongs to it by this package definition [4]
 
 cross_package_reified_generics.php--bar.php:9:7
     7 |   // No errors when package_allow_reified_generics is on
@@ -25,11 +24,10 @@ PACKAGES.toml:3:11
     4 | include_paths=["//"]
     5 | 
 
-error: Typing[4472] Cannot access a reified generic defined in package pkg2 from package pkg1 [1]
+error: Typing[4472] Cannot access reified generic Foo defined in package pkg2 which may not be available [1]
 -> Foo is defined in cross_package_reified_generics.php--foo.php [2]
--> cross_package_reified_generics.php--foo.php belongs to package pkg2 by this package override [3]
--> cross_package_reified_generics.php--bar.php is in package pkg1 by this package config assignment [4]
--> And package pkg1 does not include package pkg2 [4]
+-> Foo belongs to package pkg2 by this package override [3]
+-> package pkg1 is available because the current file belongs to it by this package definition [4]
 
 cross_package_reified_generics.php--bar.php:10:7
      8 |   // All error when package_allow_reified_generics is off
@@ -52,11 +50,10 @@ PACKAGES.toml:3:11
      4 | include_paths=["//"]
      5 | 
 
-error: Typing[4472] Cannot access a reified generic defined in package pkg2 from package pkg1 [1]
+error: Typing[4472] Cannot access reified generic TFoo defined in package pkg2 which may not be available [1]
 -> TFoo is defined in cross_package_reified_generics.php--foo.php [2]
--> cross_package_reified_generics.php--foo.php belongs to package pkg2 by this package override [3]
--> cross_package_reified_generics.php--bar.php is in package pkg1 by this package config assignment [4]
--> And package pkg1 does not include package pkg2 [4]
+-> TFoo belongs to package pkg2 by this package override [3]
+-> package pkg1 is available because the current file belongs to it by this package definition [4]
 
 cross_package_reified_generics.php--bar.php:11:16
      9 |   bar<TFoo>();
@@ -79,11 +76,10 @@ PACKAGES.toml:3:11
      4 | include_paths=["//"]
      5 | 
 
-error: Typing[4472] Cannot access a reified generic defined in package pkg2 from package pkg1 [1]
+error: Typing[4472] Cannot access reified generic Foo defined in package pkg2 which may not be available [1]
 -> Foo is defined in cross_package_reified_generics.php--foo.php [2]
--> cross_package_reified_generics.php--foo.php belongs to package pkg2 by this package override [3]
--> cross_package_reified_generics.php--bar.php is in package pkg1 by this package config assignment [4]
--> And package pkg1 does not include package pkg2 [4]
+-> Foo belongs to package pkg2 by this package override [3]
+-> package pkg1 is available because the current file belongs to it by this package definition [4]
 
 cross_package_reified_generics.php--bar.php:12:16
     10 |   bar<Foo>();

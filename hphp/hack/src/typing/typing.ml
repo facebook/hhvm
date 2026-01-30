@@ -8540,13 +8540,13 @@ end = struct
       let reason = Reason.is_refinement p in
       let env = refine_for_is ~hint_first:false env tparamet ivar reason h in
       env
-    | Aast.Package (_, pkg) ->
+    | Aast.Package (pos, pkg) ->
       let status =
         match tparamet with
         | true -> Typing_local_packages.Exists_in_deployment
         | false -> Typing_local_packages.Not_exists_in_deployment
       in
-      LEnv.assert_package_loaded env pkg status
+      LEnv.assert_package_loaded env pos pkg status
     | _ -> env
 
   and string2 env idl =

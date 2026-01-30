@@ -20,6 +20,7 @@
 #include <thrift/lib/cpp2/async/StreamCallbacks.h>
 #include <thrift/lib/cpp2/transport/rocket/Types.h>
 #include <thrift/lib/cpp2/transport/rocket/compression/CompressionManager.h>
+#include <thrift/lib/cpp2/transport/rocket/server/BidirectionalStreamState.h>
 #include <thrift/lib/cpp2/transport/rocket/server/IRocketServerConnection.h>
 
 namespace apache::thrift::rocket {
@@ -30,105 +31,6 @@ class RocketBiDiClientCallback final : public BiDiClientCallback {
       ::apache::thrift::detail::EncodedFirstResponseError;
   using EncodedError = ::apache::thrift::detail::EncodedError;
   using EncodedStreamError = ::apache::thrift::detail::EncodedStreamError;
-
-  // TODO(sazonovk): T237365280 Unify BiDiChannelState used by
-  // RocketBiDiClientCallback and RocketBiDiServerCallback
-  class State {
-   public:
-    bool isTerminal() const {
-      return cancelledEarly_ ||
-          (firstResponseSent_ && !sinkOpen_ && !streamOpen_);
-    }
-
-    bool isAlive() const { return !isTerminal(); }
-
-    bool isCancelledEarly() const { return cancelledEarly_; }
-
-    bool isAwaitingFirstResponse() const {
-      return !cancelledEarly_ && !firstResponseSent_;
-    }
-
-    bool isSinkOpen() const { return sinkOpen_; }
-
-    bool isStreamOpen() const { return streamOpen_; }
-
-    bool isAnyOpen() const { return sinkOpen_ || streamOpen_; }
-
-    bool isBothOpen() const { return sinkOpen_ && streamOpen_; }
-
-    void onFirstResponseSent() {
-      // clang-format off
-      DCHECK(!cancelledEarly_)    << "First response can't be sent if BiDi is cancelled early";
-      DCHECK(!firstResponseSent_) << "First response can only be sent once";
-      DCHECK(!sinkOpen_)         << "Sink can't be alive before first response gets sent";
-      DCHECK(!streamOpen_)       << "Stream can't be alive before first response gets sent";
-      // clang-format on
-
-      firstResponseSent_ = true;
-      sinkOpen_ = true;
-      streamOpen_ = true;
-    }
-
-    void onFirstResponseError() {
-      // clang-format off
-      DCHECK(!cancelledEarly_);
-      DCHECK(!firstResponseSent_);
-      DCHECK(!sinkOpen_);
-      DCHECK(!streamOpen_);
-      // clang-format on
-
-      firstResponseSent_ = true;
-      sinkOpen_ = false;
-      streamOpen_ = false;
-      DCHECK(isTerminal())
-          << "onFirstResponseError() must lead to a terminal state";
-    }
-
-    void onStreamComplete() {
-      DCHECK(streamOpen_) << "Stream must be open to be able to complete";
-      streamOpen_ = false;
-    }
-
-    void onStreamError() {
-      DCHECK(streamOpen_) << "Stream must be open to be able to error";
-      streamOpen_ = false;
-    }
-
-    void onStreamCancel() {
-      DCHECK(streamOpen_) << "Stream must be open to be able to be cancelled";
-      streamOpen_ = false;
-    }
-
-    void onSinkComplete() {
-      DCHECK(sinkOpen_) << "Sink must be open to be able to complete";
-      sinkOpen_ = false;
-    }
-
-    void onSinkError() {
-      DCHECK(sinkOpen_) << "Sink must be open to be able to error";
-      sinkOpen_ = false;
-    }
-
-    void onSinkCancel() {
-      DCHECK(sinkOpen_) << "Sink must be open to be able to be cancelled";
-      sinkOpen_ = false;
-    }
-
-    void onCancelEarly() {
-      // clang-format off
-      DCHECK(!firstResponseSent_) << "BiDi can only be cancelled early before first response gets sent";
-      DCHECK(!cancelledEarly_)    << "BiDi can only be cancelled early once";
-      // clang-format on
-
-      cancelledEarly_ = true;
-    }
-
-   private:
-    bool cancelledEarly_{false};
-    bool firstResponseSent_{false};
-    bool sinkOpen_{false};
-    bool streamOpen_{false};
-  };
 
  public:
   RocketBiDiClientCallback(
@@ -209,7 +111,7 @@ class RocketBiDiClientCallback final : public BiDiClientCallback {
   IRocketServerConnection& connection_;
   BiDiServerCallback* serverCallback_{nullptr};
 
-  State state_;
+  BidirectionalStreamState state_;
 
   int32_t initialTokens_{0};
 

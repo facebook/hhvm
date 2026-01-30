@@ -202,6 +202,7 @@ impl ClassParser {
                 "extends" => TraitReqKind::MustExtend,
                 "implements" => TraitReqKind::MustImplement,
                 "must_be_class" => TraitReqKind::MustBeClass,
+                "must_be_as" => TraitReqKind::MustBeAs,
                 _ => return None,
             })
         })?;

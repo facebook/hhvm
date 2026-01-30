@@ -423,15 +423,22 @@ fn assemble_ctx_constant(token_iter: &mut Lexer<'_>) -> Result<hhbc::CtxConstant
 }
 
 /// Ex:
-/// .require extends <C>;
+/// .require extends/implements/class <C>;
+/// .require this as <C>;
 fn assemble_requirement(token_iter: &mut Lexer<'_>) -> Result<hhbc::Requirement> {
-    parse!(token_iter, ".require" <tok:id> "<" <name:assemble_class_name()> ">" ";");
+    token_iter.expect_str(Token::is_decl, ".require")?;
+    let tok = token_iter.expect(Token::is_identifier)?;
     let kind = match tok.into_identifier()? {
         b"extends" => hhbc::TraitReqKind::MustExtend,
         b"implements" => hhbc::TraitReqKind::MustImplement,
         b"class" => hhbc::TraitReqKind::MustBeClass,
+        b"this" => {
+            token_iter.expect_str(Token::is_identifier, "as")?;
+            hhbc::TraitReqKind::MustBeAs
+        }
         _ => return Err(tok.error("Expected TraitReqKind")),
     };
+    parse!(token_iter, "<" <name:assemble_class_name()> ">" ";");
     Ok(hhbc::Requirement { name, kind })
 }
 

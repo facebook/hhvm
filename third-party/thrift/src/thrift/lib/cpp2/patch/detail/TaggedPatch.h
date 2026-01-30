@@ -439,6 +439,10 @@ class Owned : public Ref {
 
   void reset() { *this = Owned{}; }
 
+  DynamicPatch toDynamicPatch() const& { return DynamicPatch{*value_}; }
+  DynamicPatch toDynamicPatch() & { return DynamicPatch{*value_}; }
+  DynamicPatch toDynamicPatch() && { return DynamicPatch{std::move(*value_)}; }
+
  private:
   // We need a Secret argument, otherwise code like `ListPatch = {0}` won't work
   // since it will pick this constructor rather than invoking

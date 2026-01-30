@@ -18,6 +18,7 @@ package thrift
 
 import (
 	"crypto/tls"
+	"io"
 	"maps"
 	"net"
 	"time"
@@ -203,7 +204,7 @@ func NewClient(opts ...ClientOption) (RequestChannel, error) {
 // Example usage:
 //
 //	client, err := thrift.NewClientV2[myservice.MyServiceClient](thrift.WithUpgradeToRocket(), thrift.WithTLS(...))
-func NewClientV2[T any](opts ...ClientOption) (T, error) {
+func NewClientV2[T io.Closer](opts ...ClientOption) (T, error) {
 	var zero T
 	channel, err := NewClient(opts...)
 	if err != nil {

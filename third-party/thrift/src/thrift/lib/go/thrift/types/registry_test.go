@@ -51,6 +51,7 @@ func newMockChannelClient(channel RequestChannel) mockClient {
 // Another mock client for testing different types
 type anotherMockClient interface {
 	DoOtherThing() int
+	Close() error
 }
 
 type anotherMockClientImpl struct {
@@ -59,6 +60,10 @@ type anotherMockClientImpl struct {
 
 func (c *anotherMockClientImpl) DoOtherThing() int {
 	return 42
+}
+
+func (c *anotherMockClientImpl) Close() error {
+	return c.channel.Close()
 }
 
 func newAnotherMockChannelClient(channel RequestChannel) anotherMockClient {
@@ -99,6 +104,7 @@ func TestConstructClientNotRegistered(t *testing.T) {
 	// unregisteredClient is not registered
 	type unregisteredClient interface {
 		Unregistered() bool
+		Close() error
 	}
 
 	channel := &mockRequestChannel{}

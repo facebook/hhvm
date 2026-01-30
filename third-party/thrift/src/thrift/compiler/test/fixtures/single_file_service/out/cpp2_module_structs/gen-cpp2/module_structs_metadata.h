@@ -6,4 +6,8 @@
  */
 #pragma once
 
+#include <vector>
+
+#include <thrift/lib/cpp2/gen/module_metadata_h.h>
 #include "thrift/compiler/test/fixtures/single_file_service/gen-cpp2/module_structs_types.h"
+

@@ -6,4 +6,11 @@
  */
 #pragma once
 
+#include <vector>
+
+#include <thrift/lib/cpp2/gen/module_metadata_h.h>
 #include "thrift/compiler/test/fixtures/py3/gen-py3cpp/empty_types.h"
+
+namespace cpp2 {
+class NullService;
+} // namespace cpp2

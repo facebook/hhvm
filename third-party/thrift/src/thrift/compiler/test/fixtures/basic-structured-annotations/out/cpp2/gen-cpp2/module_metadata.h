@@ -6,4 +6,11 @@
  */
 #pragma once
 
+#include <vector>
+
+#include <thrift/lib/cpp2/gen/module_metadata_h.h>
 #include "thrift/compiler/test/fixtures/basic-structured-annotations/gen-cpp2/module_types.h"
+
+namespace test::fixtures::basic_structured_annotations {
+class MyService;
+} // namespace test::fixtures::basic_structured_annotations

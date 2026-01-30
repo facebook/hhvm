@@ -6,4 +6,14 @@
  */
 #pragma once
 
+#include <vector>
+
+#include <thrift/lib/cpp2/gen/module_metadata_h.h>
 #include "thrift/compiler/test/fixtures/split/gen-cpp2/module_types.h"
+
+namespace cpp2 {
+class MyService;
+} // namespace cpp2
+namespace cpp2 {
+class DbMixedStackArguments;
+} // namespace cpp2

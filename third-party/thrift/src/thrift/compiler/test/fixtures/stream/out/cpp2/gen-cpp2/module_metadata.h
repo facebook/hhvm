@@ -6,4 +6,11 @@
  */
 #pragma once
 
+#include <vector>
+
+#include <thrift/lib/cpp2/gen/module_metadata_h.h>
 #include "thrift/compiler/test/fixtures/stream/gen-cpp2/module_types.h"
+
+namespace cpp2 {
+class PubSubStreamingService;
+} // namespace cpp2

@@ -6,4 +6,23 @@
  */
 #pragma once
 
+#include <vector>
+
+#include <thrift/lib/cpp2/gen/module_metadata_h.h>
 #include "thrift/compiler/test/fixtures/basic-annotations/gen-cpp2/module_types.h"
+
+namespace cpp2 {
+class MyService;
+} // namespace cpp2
+namespace cpp2 {
+class MyServicePrioParent;
+} // namespace cpp2
+namespace cpp2 {
+class MyServicePrioChild;
+} // namespace cpp2
+namespace cpp2 {
+class GoodService;
+} // namespace cpp2
+namespace cpp2 {
+class FooBarBazService;
+} // namespace cpp2

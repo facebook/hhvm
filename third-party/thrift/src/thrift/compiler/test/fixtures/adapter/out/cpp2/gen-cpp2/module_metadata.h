@@ -6,4 +6,14 @@
  */
 #pragma once
 
+#include <vector>
+
+#include <thrift/lib/cpp2/gen/module_metadata_h.h>
 #include "thrift/compiler/test/fixtures/adapter/gen-cpp2/module_types.h"
+
+namespace facebook::thrift::test::fixtures::adapter {
+class Service;
+} // namespace facebook::thrift::test::fixtures::adapter
+namespace facebook::thrift::test::fixtures::adapter {
+class AdapterService;
+} // namespace facebook::thrift::test::fixtures::adapter

@@ -6,4 +6,17 @@
  */
 #pragma once
 
+#include <vector>
+
+#include <thrift/lib/cpp2/gen/module_metadata_h.h>
 #include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/module_types.h"
+
+namespace some::valid::ns {
+class EmptyService;
+} // namespace some::valid::ns
+namespace some::valid::ns {
+class ReturnService;
+} // namespace some::valid::ns
+namespace some::valid::ns {
+class ParamService;
+} // namespace some::valid::ns

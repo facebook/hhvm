@@ -6,4 +6,8 @@
  */
 #pragma once
 
+#include <vector>
+
+#include <thrift/lib/cpp2/gen/module_metadata_h.h>
 #include "thrift/compiler/test/fixtures/frozen-struct/gen-cpp2/include1_types.h"
+

@@ -386,7 +386,7 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
   void patchIfTypeIsImpl(const VPatch& patch, bool after) {
     auto type = type::Type::get<type::infer_tag<typename VPatch::value_type>>();
     patchIfTypeIsImpl(
-        type, protocol::DynamicPatch::fromObject(patch.toObject()), after);
+        type, protocol::DynamicPatch::fromStaticPatch(patch), after);
   }
 
   void patchIfTypeIsImpl(type::Type type, type::AnyStruct any, bool after);

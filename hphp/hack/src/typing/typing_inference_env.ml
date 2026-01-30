@@ -445,12 +445,11 @@ let get_tyvar_constraints_exn env var =
            (Typing_log_value.var_as_string var))
     | Some pos ->
       InconsistentTypeVarState
-        (Format.asprintf
-           "Attempting to get constraints for %s type variable %s at %a."
+        (Format.sprintf
+           "Attempting to get constraints for %s type variable %s at %s"
            msg
            (Typing_log_value.var_as_string var)
-           Pos.pp
-           pos)
+           (Pos.string (Pos.to_absolute pos)))
   in
   match get_solving_info_opt env var with
   | None -> raise (error "non-existing")

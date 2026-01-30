@@ -411,7 +411,15 @@ let assign_array_get ~array_pos ~expr_pos ur env ty1 (key : Nast.expr) tkey ty2
     env
     ety1
     (fun env ~supportdyn ety1 ->
-      let (r, ety1_) = deref ety1 in
+      let (r, ety1_) =
+        begin
+          match get_node ety1 with
+          | Toption ty when Tast.is_under_dynamic_assumptions env.checked ->
+            (* If we're under dynamic assumptions just check that the target supports dynamic *)
+            deref ty
+          | _ -> deref ety1
+        end
+      in
       let arity_error (_, name) =
         Typing_error_utils.add_typing_error
           ~env

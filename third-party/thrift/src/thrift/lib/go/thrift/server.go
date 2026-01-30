@@ -23,7 +23,6 @@ import (
 	"net"
 	"runtime"
 	"strconv"
-	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -598,15 +597,9 @@ func (s *rocketServerSocket) requestStream(msg payload.Payload) flux.Flux {
 					// Response should be empty to adhere to spec
 					dataBytes = nil
 				} else if streamResult, ok := streamStruct.(types.WritableResult); ok && streamResult.Exception() != nil {
-					// TODO: implement support for getting this info from the underlying exception type
 					declaredErr := streamResult.Exception()
-					exType := fmt.Sprintf("%T", declaredErr)
-					lastDotIndex := strings.LastIndex(exType, ".")
-					if lastDotIndex != -1 && lastDotIndex < len(exType)-1 {
-						exType = exType[lastDotIndex+1:]
-					}
 					exceptionMetadataBase = rocket.NewPayloadExceptionMetadataBase(
-						exType,
+						declaredErr.TypeName(),
 						declaredErr.Error(),
 						rocket.RocketExceptionDeclared,
 						rpcmetadata.ErrorKind_UNSPECIFIED,

@@ -16,6 +16,21 @@
 
 #include <proxygen/external/http_parser/http_parser.h>
 
+namespace {
+
+// Helper function for C++17 compatibility (starts_with is C++20)
+constexpr inline bool startsWith(std::string_view str,
+                                 std::string_view prefix) noexcept {
+#if __cplusplus >= 202002L
+  return str.starts_with(prefix);
+#else
+  return str.size() >= prefix.size() &&
+         str.compare(0, prefix.size(), prefix) == 0;
+#endif
+}
+
+} // namespace
+
 namespace proxygen {
 
 /**
@@ -259,7 +274,7 @@ std::optional<std::string_view> ParseURL::getQueryParam(
   while (!query.empty()) {
     std::string_view param = query.substr(0, query.find('&'));
     query.remove_prefix(std::min(query.size(), param.size() + 1));
-    if (!param.starts_with(name)) {
+    if (!startsWith(param, name)) {
       continue;
     }
     param.remove_prefix(name.size());

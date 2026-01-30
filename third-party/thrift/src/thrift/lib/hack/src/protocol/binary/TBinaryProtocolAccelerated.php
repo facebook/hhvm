@@ -40,4 +40,56 @@ class TBinaryProtocolAccelerated extends TBinaryProtocolBase {
   public function isStrictWrite()[]: bool {
     return $this->strictWrite;
   }
+
+  <<__Override>>
+  public function writeRPCMessage(
+    string $fname,
+    TMessageType $type,
+    IThriftStruct $message_struct,
+    int $seq_id,
+    bool $is_one_way = false,
+  ): void {
+    thrift_protocol_write_binary(
+      $this,
+      $fname,
+      $type,
+      $message_struct,
+      $seq_id,
+      $this->isStrictWrite(),
+      $is_one_way,
+    );
+  }
+
+  <<__Override>>
+  public function readRPCMessage<TMessageStruct as IThriftStruct>(
+    classname<TMessageStruct> $message_struct_class,
+    string $_fname,
+    ?int $_expected_seq_id,
+    int $options = 0,
+    bool $_compare_seq_id = false,
+  ): TMessageStruct {
+    return thrift_protocol_read_binary(
+      $this,
+      $message_struct_class,
+      $this->isStrictRead(),
+      $options,
+    );
+  }
+
+  <<__Override>>
+  public function readRPCStruct<TStruct as IThriftStruct>(
+    classname<TStruct> $struct_class,
+    int $options = 0,
+  ): TStruct {
+    return thrift_protocol_read_binary_struct(
+      $this,
+      HH\class_to_classname($struct_class),
+      $options,
+    );
+  }
+
+  <<__Override>>
+  public function writeRPCStruct(IThriftStruct $struct): void {
+    thrift_protocol_write_binary_struct($this, $struct);
+  }
 }

@@ -109,4 +109,16 @@ final class TBinaryProtocolAcceleratedTestCase extends WWWTest {
     );
   }
 
+  public function testWriteReadRPCStruct(): void {
+    $buffer = new TMemoryBuffer();
+    $prot = new TBinaryProtocolAccelerated($buffer);
+
+    $input =
+      LogEntry::fromShape(shape('category' => 'test', 'message' => 'hello'));
+    $prot->writeRPCStruct($input);
+    $prot->getTransport()->flush();
+
+    $output = $prot->readRPCStruct(LogEntry::class);
+    expect($output)->toBePHPEqual($input);
+  }
 }

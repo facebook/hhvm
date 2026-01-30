@@ -203,9 +203,21 @@ final class TCompactProtocolAcceleratedTest extends WWWTest {
     expect($output->structs)->toBeNull();
     expect($output->s)->toBePHPEqual($full->s);
   }
+
+  public function testWriteReadRPCStruct(): void {
+    $buffer = new TMemoryBuffer();
+    $prot = new TCompactProtocolAccelerated($buffer);
+
+    $input = $this->getTestData();
+    $prot->writeRPCStruct($input);
+    $prot->getTransport()->flush();
+
+    $output = $prot->readRPCStruct(CompactTestStruct::class);
+    expect($output)->toBePHPEqual($input);
+  }
 }
 
-<<Oncalls('thrift')>>
+<<Oncalls('thrift_hack')>>
 final class TCompactProtocolAcceleratedTestServer extends METAThriftServer {
   const type TProcessor = CompactTestServiceAsyncProcessor;
   public bool $throwExn = false;

@@ -471,4 +471,75 @@ abstract class TProtocol {
         );
     }
   }
+
+  public function writeRPCMessage(
+    string $fname,
+    TMessageType $type,
+    IThriftStruct $message_struct,
+    int $seq_id,
+    bool $is_one_way = false,
+  ): void {
+    $this->writeMessageBegin($fname, $type, $seq_id);
+    $this->writeRPCStruct($message_struct);
+    $this->writeMessageEnd();
+    if ($is_one_way) {
+      $this->trans_->onewayFlush();
+    } else {
+      $this->trans_->flush();
+    }
+  }
+
+  public function readRPCMessage<TMessageStruct as IThriftStruct>(
+    classname<TMessageStruct> $message_struct_class,
+    string $fname,
+    ?int $expected_seq_id,
+    int $options = 0,
+    bool $compare_seq_id = true,
+  ): TMessageStruct {
+    // Read the message header
+    $recv_seqid = 0;
+    $recv_fname = '';
+    $recv_type = 0;
+    $this->readMessageBegin(
+      inout $recv_fname,
+      inout $recv_type,
+      inout $recv_seqid,
+    );
+    if ($recv_type === TMessageType::EXCEPTION) {
+      throw $this->readRPCStruct(
+        HH\class_to_classname(TApplicationException::class),
+        $options,
+      );
+    }
+    $result = $this->readRPCStruct($message_struct_class, $options);
+    $this->readMessageEnd();
+    // For backwards compatibility, make this check optional
+    // Accelerated implementations don't support this check.
+    // This will likely fail for other implementations as well when same client
+    // is used for concurrent requests to Hack service.
+    // Hack servers use a new processor instance for each request,
+    // so $recv_seqid will always be 0.
+    if (
+      $compare_seq_id &&
+      $expected_seq_id !== null &&
+      ($recv_seqid !== $expected_seq_id)
+    ) {
+      throw
+        new TProtocolException($fname." failed: sequence id is out of order");
+    }
+    return $result;
+  }
+
+  public function readRPCStruct<TStruct as IThriftStruct>(
+    classname<TStruct> $struct_class,
+    int $_options = 0,
+  ): TStruct {
+    $struct = $struct_class::withDefaultValues();
+    $struct->read($this);
+    return $struct;
+  }
+
+  public function writeRPCStruct(IThriftStruct $struct): void {
+    $struct->write($this);
+  }
 }

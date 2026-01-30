@@ -441,6 +441,7 @@ type Bang struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = (*Bang)(nil)
+var _ thrift.WritableException = (*Bang)(nil)
 
 func NewBang() *Bang {
     return (&Bang{}).setDefaults()
@@ -562,6 +563,11 @@ func (x *Bang) GetThriftStructMetadata() *metadata.ThriftException {
 func (x *Bang) Error() string {
     return x.String()
 }
+
+func (x *Bang) TypeName() string {
+    return "Bang"
+}
+
 type reqCF struct {
 }
 // Compile time interface enforcer

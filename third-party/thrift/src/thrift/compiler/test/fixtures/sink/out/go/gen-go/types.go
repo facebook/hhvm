@@ -516,6 +516,7 @@ type InitialException struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = (*InitialException)(nil)
+var _ thrift.WritableException = (*InitialException)(nil)
 
 func NewInitialException() *InitialException {
     return (&InitialException{}).setDefaults()
@@ -637,11 +638,17 @@ func (x *InitialException) GetThriftStructMetadata() *metadata.ThriftException {
 func (x *InitialException) Error() string {
     return x.String()
 }
+
+func (x *InitialException) TypeName() string {
+    return "InitialException"
+}
+
 type SinkException1 struct {
     Reason string `thrift:"reason,1" json:"reason" db:"reason"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = (*SinkException1)(nil)
+var _ thrift.WritableException = (*SinkException1)(nil)
 
 func NewSinkException1() *SinkException1 {
     return (&SinkException1{}).setDefaults()
@@ -763,11 +770,17 @@ func (x *SinkException1) GetThriftStructMetadata() *metadata.ThriftException {
 func (x *SinkException1) Error() string {
     return x.String()
 }
+
+func (x *SinkException1) TypeName() string {
+    return "SinkException1"
+}
+
 type SinkException2 struct {
     Reason int64 `thrift:"reason,1" json:"reason" db:"reason"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = (*SinkException2)(nil)
+var _ thrift.WritableException = (*SinkException2)(nil)
 
 func NewSinkException2() *SinkException2 {
     return (&SinkException2{}).setDefaults()
@@ -889,6 +902,11 @@ func (x *SinkException2) GetThriftStructMetadata() *metadata.ThriftException {
 func (x *SinkException2) Error() string {
     return x.String()
 }
+
+func (x *SinkException2) TypeName() string {
+    return "SinkException2"
+}
+
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {

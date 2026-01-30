@@ -24,6 +24,7 @@ type Fiery struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = (*Fiery)(nil)
+var _ thrift.WritableException = (*Fiery)(nil)
 
 func NewFiery() *Fiery {
     return (&Fiery{}).setDefaults()
@@ -145,11 +146,17 @@ func (x *Fiery) GetThriftStructMetadata() *metadata.ThriftException {
 func (x *Fiery) Error() string {
     return x.String()
 }
+
+func (x *Fiery) TypeName() string {
+    return "Fiery"
+}
+
 type Serious struct {
     Sonnet *string `thrift:"sonnet,1,optional" json:"sonnet,omitempty" db:"sonnet"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = (*Serious)(nil)
+var _ thrift.WritableException = (*Serious)(nil)
 
 func NewSerious() *Serious {
     return (&Serious{}).setDefaults()
@@ -282,12 +289,18 @@ func (x *Serious) GetThriftStructMetadata() *metadata.ThriftException {
 func (x *Serious) Error() string {
     return x.String()
 }
+
+func (x *Serious) TypeName() string {
+    return "Serious"
+}
+
 type ComplexFieldNames struct {
     ErrorMessage string `thrift:"error_message,1" json:"error_message" db:"error_message"`
     InternalErrorMessage string `thrift:"internal_error_message,2" json:"internal_error_message" db:"internal_error_message"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = (*ComplexFieldNames)(nil)
+var _ thrift.WritableException = (*ComplexFieldNames)(nil)
 
 func NewComplexFieldNames() *ComplexFieldNames {
     return (&ComplexFieldNames{}).setDefaults()
@@ -455,12 +468,18 @@ func (x *ComplexFieldNames) GetThriftStructMetadata() *metadata.ThriftException 
 func (x *ComplexFieldNames) Error() string {
     return x.String()
 }
+
+func (x *ComplexFieldNames) TypeName() string {
+    return "ComplexFieldNames"
+}
+
 type CustomFieldNames struct {
     ErrorMessage string `thrift:"error_message,1" json:"error_message" db:"error_message"`
     InternalErrorMessage string `thrift:"internal_error_message,2" json:"internal_error_message" db:"internal_error_message"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = (*CustomFieldNames)(nil)
+var _ thrift.WritableException = (*CustomFieldNames)(nil)
 
 func NewCustomFieldNames() *CustomFieldNames {
     return (&CustomFieldNames{}).setDefaults()
@@ -628,12 +647,18 @@ func (x *CustomFieldNames) GetThriftStructMetadata() *metadata.ThriftException {
 func (x *CustomFieldNames) Error() string {
     return x.String()
 }
+
+func (x *CustomFieldNames) TypeName() string {
+    return "CustomFieldNames"
+}
+
 type ExceptionWithPrimitiveField struct {
     Message string `thrift:"message,1" json:"message" db:"message"`
     ErrorCode int32 `thrift:"error_code,2" json:"error_code" db:"error_code"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = (*ExceptionWithPrimitiveField)(nil)
+var _ thrift.WritableException = (*ExceptionWithPrimitiveField)(nil)
 
 func NewExceptionWithPrimitiveField() *ExceptionWithPrimitiveField {
     return (&ExceptionWithPrimitiveField{}).setDefaults()
@@ -801,12 +826,18 @@ func (x *ExceptionWithPrimitiveField) GetThriftStructMetadata() *metadata.Thrift
 func (x *ExceptionWithPrimitiveField) Error() string {
     return x.String()
 }
+
+func (x *ExceptionWithPrimitiveField) TypeName() string {
+    return "ExceptionWithPrimitiveField"
+}
+
 type ExceptionWithStructuredAnnotation struct {
     MessageField string `thrift:"message_field,1" json:"message_field" db:"message_field"`
     ErrorCode int32 `thrift:"error_code,2" json:"error_code" db:"error_code"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = (*ExceptionWithStructuredAnnotation)(nil)
+var _ thrift.WritableException = (*ExceptionWithStructuredAnnotation)(nil)
 
 func NewExceptionWithStructuredAnnotation() *ExceptionWithStructuredAnnotation {
     return (&ExceptionWithStructuredAnnotation{}).setDefaults()
@@ -974,10 +1005,16 @@ func (x *ExceptionWithStructuredAnnotation) GetThriftStructMetadata() *metadata.
 func (x *ExceptionWithStructuredAnnotation) Error() string {
     return x.String()
 }
+
+func (x *ExceptionWithStructuredAnnotation) TypeName() string {
+    return "ExceptionWithStructuredAnnotation"
+}
+
 type Banal struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = (*Banal)(nil)
+var _ thrift.WritableException = (*Banal)(nil)
 
 func NewBanal() *Banal {
     return (&Banal{}).setDefaults()
@@ -1053,6 +1090,11 @@ func (x *Banal) GetThriftStructMetadata() *metadata.ThriftException {
 func (x *Banal) Error() string {
     return x.String()
 }
+
+func (x *Banal) TypeName() string {
+    return "Banal"
+}
+
 type reqRaiserDoBland struct {
 }
 // Compile time interface enforcer

@@ -27,6 +27,9 @@ type {{struct:go_name}} struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = (*{{struct:go_name}})(nil)
+{{#struct:exception?}}
+var _ thrift.WritableException = (*{{struct:go_name}})(nil)
+{{/struct:exception?}}
 {{#if (or struct:resp? struct:stream? struct:sink?)}}
 var _ thrift.WritableResult = (*{{struct:go_name}})(nil)
 

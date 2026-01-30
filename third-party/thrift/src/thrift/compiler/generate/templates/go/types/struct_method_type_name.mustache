@@ -16,10 +16,10 @@
 
 }}{{!
 
-  This template creates an Error method for Thrift structs (exceptions).
+  This template creates a TypeName method for Thrift structs.
 
 }}
-func (x *{{struct:go_name}}) Error() string {
-    return x.String()
+func (x *{{struct:go_name}}) TypeName() string {
+    return "{{struct:name}}"
 }
 {{!newline}}

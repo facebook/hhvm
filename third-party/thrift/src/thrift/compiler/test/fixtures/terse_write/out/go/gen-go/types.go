@@ -4295,6 +4295,7 @@ type TerseException struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = (*TerseException)(nil)
+var _ thrift.WritableException = (*TerseException)(nil)
 
 func NewTerseException() *TerseException {
     return (&TerseException{}).setDefaults()
@@ -4416,6 +4417,11 @@ func (x *TerseException) GetThriftStructMetadata() *metadata.ThriftException {
 func (x *TerseException) Error() string {
     return x.String()
 }
+
+func (x *TerseException) TypeName() string {
+    return "TerseException"
+}
+
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {

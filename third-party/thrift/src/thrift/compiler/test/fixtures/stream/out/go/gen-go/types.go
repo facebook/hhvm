@@ -23,6 +23,7 @@ type FooStreamEx struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = (*FooStreamEx)(nil)
+var _ thrift.WritableException = (*FooStreamEx)(nil)
 
 func NewFooStreamEx() *FooStreamEx {
     return (&FooStreamEx{}).setDefaults()
@@ -98,10 +99,16 @@ func (x *FooStreamEx) GetThriftStructMetadata() *metadata.ThriftException {
 func (x *FooStreamEx) Error() string {
     return x.String()
 }
+
+func (x *FooStreamEx) TypeName() string {
+    return "FooStreamEx"
+}
+
 type FooEx struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = (*FooEx)(nil)
+var _ thrift.WritableException = (*FooEx)(nil)
 
 func NewFooEx() *FooEx {
     return (&FooEx{}).setDefaults()
@@ -177,10 +184,16 @@ func (x *FooEx) GetThriftStructMetadata() *metadata.ThriftException {
 func (x *FooEx) Error() string {
     return x.String()
 }
+
+func (x *FooEx) TypeName() string {
+    return "FooEx"
+}
+
 type FooEx2 struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = (*FooEx2)(nil)
+var _ thrift.WritableException = (*FooEx2)(nil)
 
 func NewFooEx2() *FooEx2 {
     return (&FooEx2{}).setDefaults()
@@ -256,6 +269,11 @@ func (x *FooEx2) GetThriftStructMetadata() *metadata.ThriftException {
 func (x *FooEx2) Error() string {
     return x.String()
 }
+
+func (x *FooEx2) TypeName() string {
+    return "FooEx2"
+}
+
 type reqPubSubStreamingServiceReturnstream struct {
     I32From int32 `thrift:"i32_from,1" json:"i32_from" db:"i32_from"`
     I32To int32 `thrift:"i32_to,2" json:"i32_to" db:"i32_to"`

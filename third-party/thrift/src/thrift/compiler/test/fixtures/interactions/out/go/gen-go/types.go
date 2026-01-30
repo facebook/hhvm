@@ -26,6 +26,7 @@ type CustomException struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = (*CustomException)(nil)
+var _ thrift.WritableException = (*CustomException)(nil)
 
 func NewCustomException() *CustomException {
     return (&CustomException{}).setDefaults()
@@ -147,6 +148,11 @@ func (x *CustomException) GetThriftStructMetadata() *metadata.ThriftException {
 func (x *CustomException) Error() string {
     return x.String()
 }
+
+func (x *CustomException) TypeName() string {
+    return "CustomException"
+}
+
 type ShouldBeBoxed struct {
     SessionId string `thrift:"sessionId,1" json:"sessionId" db:"sessionId"`
 }

@@ -1497,6 +1497,7 @@ type MyException struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = (*MyException)(nil)
+var _ thrift.WritableException = (*MyException)(nil)
 
 func NewMyException() *MyException {
     return (&MyException{}).setDefaults()
@@ -1782,6 +1783,11 @@ func (x *MyException) GetThriftStructMetadata() *metadata.ThriftException {
 func (x *MyException) Error() string {
     return x.String()
 }
+
+func (x *MyException) TypeName() string {
+    return "MyException"
+}
+
 type MyExceptionWithMessage struct {
     MyIntField int64 `thrift:"MyIntField,1" json:"MyIntField" db:"MyIntField"`
     MyStringField string `thrift:"MyStringField,2" json:"MyStringField" db:"MyStringField"`
@@ -1790,6 +1796,7 @@ type MyExceptionWithMessage struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = (*MyExceptionWithMessage)(nil)
+var _ thrift.WritableException = (*MyExceptionWithMessage)(nil)
 
 func NewMyExceptionWithMessage() *MyExceptionWithMessage {
     return (&MyExceptionWithMessage{}).setDefaults()
@@ -2075,6 +2082,11 @@ func (x *MyExceptionWithMessage) GetThriftStructMetadata() *metadata.ThriftExcep
 func (x *MyExceptionWithMessage) Error() string {
     return x.String()
 }
+
+func (x *MyExceptionWithMessage) TypeName() string {
+    return "MyExceptionWithMessage"
+}
+
 type ReservedKeyword struct {
     ReservedField int32 `thrift:"reserved_field,1" json:"reserved_field" db:"reserved_field"`
 }

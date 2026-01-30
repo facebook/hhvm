@@ -826,7 +826,7 @@ int32_t RocketClientChannelBase::getMetaKeepAliveTimeoutMs(
 }
 
 RequestSetupMetadata RocketClientChannelBase::populateSetupMetadata(
-    RequestSetupMetadata&& meta) {
+    RequestSetupMetadata&& meta, std::string_view clientName) {
   meta.maxVersion() =
       std::min(kRocketClientMaxVersion, THRIFT_FLAG(rocket_client_max_version));
   meta.minVersion() = kRocketClientMinVersion;
@@ -851,7 +851,7 @@ RequestSetupMetadata RocketClientChannelBase::populateSetupMetadata(
   }
 
   if (!clientMetadata.agent()) {
-    clientMetadata.agent() = "RocketClientChannelBase.cpp";
+    clientMetadata.agent() = clientName;
   }
 
   return meta;

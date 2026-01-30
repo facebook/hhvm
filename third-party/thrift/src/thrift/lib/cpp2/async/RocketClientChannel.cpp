@@ -18,6 +18,8 @@
 
 namespace apache::thrift {
 
+constexpr auto kClientName = "RocketClientChannel.cpp";
+
 RocketClientChannel::RocketClientChannel(
     folly::EventBase* evb,
     folly::AsyncTransport::UniquePtr socket,
@@ -28,7 +30,7 @@ RocketClientChannel::RocketClientChannel(
       rocket::RocketClient(
           *evb,
           std::move(socket),
-          populateSetupMetadata(std::move(meta)),
+          populateSetupMetadata(std::move(meta), kClientName),
           keepAliveTimeoutMs,
           std::move(allocatorPtr)) {
   apache::thrift::detail::hookForClientTransport(getTransport());

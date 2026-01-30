@@ -237,7 +237,8 @@ class RocketClientChannelBase : public ClientChannel {
   template <typename CallbackPtr>
   bool canHandleRequest(CallbackPtr& cb);
 
-  RequestSetupMetadata populateSetupMetadata(RequestSetupMetadata&& meta);
+  RequestSetupMetadata populateSetupMetadata(
+      RequestSetupMetadata&& meta, std::string_view clientName);
 
   int32_t getServerVersion() const;
 

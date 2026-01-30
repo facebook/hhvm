@@ -18,6 +18,8 @@
 
 namespace apache::thrift {
 
+constexpr auto kClientName = "SecureRocketClientChannel.cpp";
+
 SecureRocketClientChannel::SecureRocketClientChannel(
     folly::EventBase* evb,
     folly::AsyncTransport::UniquePtr socket,
@@ -29,7 +31,7 @@ SecureRocketClientChannel::SecureRocketClientChannel(
       rocket::SecureRocketClient(
           *evb,
           std::move(socket),
-          populateSetupMetadata(std::move(meta)),
+          populateSetupMetadata(std::move(meta), kClientName),
           std::move(logger),
           keepAliveTimeoutMs,
           std::move(allocatorPtr)) {

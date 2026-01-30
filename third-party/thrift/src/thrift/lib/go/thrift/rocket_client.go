@@ -79,7 +79,6 @@ func newRocketClient(
 }
 
 func (p *rocketClient) SendRequestNoResponse(ctx context.Context, messageName string, request WritableStruct) error {
-	rpcOpts := GetRPCOptions(ctx)
 	dataBytes, err := encodeRequest(p.protoID, request)
 	if err != nil {
 		return err
@@ -96,16 +95,11 @@ func (p *rocketClient) SendRequestNoResponse(ctx context.Context, messageName st
 		return err
 	}
 
-	var writeHeaders map[string]string
-	if rpcOpts != nil {
-		writeHeaders = rpcOpts.GetWriteHeaders()
-	}
-	headers := unionMaps(writeHeaders, p.persistentHeaders)
+	headers := p.getWriteHeaders(ctx)
 	return p.client.FireAndForget(ctx, messageName, headers, dataBytes)
 }
 
 func (p *rocketClient) SendRequestResponse(ctx context.Context, messageName string, request WritableStruct, response ReadableStruct) error {
-	rpcOpts := GetRPCOptions(ctx)
 	dataBytes, err := encodeRequest(p.protoID, request)
 	if err != nil {
 		return err
@@ -122,16 +116,13 @@ func (p *rocketClient) SendRequestResponse(ctx context.Context, messageName stri
 		return err
 	}
 
-	var writeHeaders map[string]string
-	if rpcOpts != nil {
-		writeHeaders = rpcOpts.GetWriteHeaders()
-	}
-	headers := unionMaps(writeHeaders, p.persistentHeaders)
+	headers := p.getWriteHeaders(ctx)
 	respHeaders, resultData, resultErr := p.client.RequestResponse(ctx, messageName, headers, dataBytes)
 	if resultErr != nil {
 		return resultErr
 	}
 
+	rpcOpts := GetRPCOptions(ctx)
 	if rpcOpts != nil {
 		rpcOpts.SetReadHeaders(respHeaders)
 	}
@@ -153,7 +144,6 @@ func (p *rocketClient) SendRequestStream(
 		// We require that the context is cancellable, to prevent goroutine leaks.
 		return nil, errors.New("context does not support cancellation")
 	}
-	rpcOpts := GetRPCOptions(ctx)
 
 	dataBytes, err := encodeRequest(p.protoID, request)
 	if err != nil {
@@ -165,16 +155,13 @@ func (p *rocketClient) SendRequestStream(
 		return nil, err
 	}
 
-	var writeHeaders map[string]string
-	if rpcOpts != nil {
-		writeHeaders = rpcOpts.GetWriteHeaders()
-	}
-	headers := unionMaps(writeHeaders, p.persistentHeaders)
+	headers := p.getWriteHeaders(ctx)
 	respHeaders, resultData, streamSeq, resultErr := p.client.RequestStream(ctx, messageName, headers, dataBytes, newStreamElemFn)
 	if resultErr != nil {
 		return nil, resultErr
 	}
 
+	rpcOpts := GetRPCOptions(ctx)
 	if rpcOpts != nil {
 		rpcOpts.SetReadHeaders(respHeaders)
 	}
@@ -191,6 +178,15 @@ func (p *rocketClient) TerminateInteraction(interactionID int64) error {
 	metadata := rpcmetadata.NewClientPushMetadata().
 		SetInteractionTerminate(interactionTerminate)
 	return p.client.MetadataPush(context.Background(), metadata)
+}
+
+func (p *rocketClient) getWriteHeaders(ctx context.Context) map[string]string {
+	rpcOpts := GetRPCOptions(ctx)
+	var writeHeaders map[string]string
+	if rpcOpts != nil {
+		writeHeaders = rpcOpts.GetWriteHeaders()
+	}
+	return unionMaps(writeHeaders, p.persistentHeaders)
 }
 
 func encodeRequest(protoID types.ProtocolID, request WritableStruct) ([]byte, error) {

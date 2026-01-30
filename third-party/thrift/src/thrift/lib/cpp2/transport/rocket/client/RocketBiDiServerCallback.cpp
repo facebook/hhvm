@@ -23,7 +23,7 @@
 namespace apache::thrift::rocket {
 
 bool RocketBiDiServerCallback::onSinkNext(StreamPayload&& payload) {
-  DCHECK(state_.sinkAlive());
+  DCHECK(state_.isSinkOpen());
   // apply compression if client has specified compression codec
   if (compressionConfig_) {
     CompressionManager().setCompressionCodec(
@@ -35,8 +35,8 @@ bool RocketBiDiServerCallback::onSinkNext(StreamPayload&& payload) {
 }
 
 bool RocketBiDiServerCallback::onSinkError(folly::exception_wrapper ew) {
-  state_.closeSink();
-  bool alive = state_.streamAlive();
+  state_.onSinkError();
+  bool alive = state_.isStreamOpen();
   ew.handle(
       [&](RocketException& rex) {
         alive = client_.sendError(streamId_, std::move(rex), !alive) && alive;
@@ -63,33 +63,33 @@ bool RocketBiDiServerCallback::onSinkError(folly::exception_wrapper ew) {
 }
 
 bool RocketBiDiServerCallback::onSinkComplete() {
-  state_.closeSink();
-  bool alive = state_.streamAlive();
+  state_.onSinkComplete();
+  bool alive = state_.isStreamOpen();
   return client_.sendComplete(streamId_, !alive) && alive;
 }
 
 bool RocketBiDiServerCallback::onInitialPayload(
     FirstResponsePayload&& payload, folly::EventBase* evb) {
-  state_.markFirstResponseSent();
+  state_.onFirstResponseSent();
   return clientCallback_->onFirstResponse(std::move(payload), evb, this);
 }
 
 void RocketBiDiServerCallback::onInitialError(folly::exception_wrapper ew) {
-  state_.earlyClose();
+  state_.onFirstResponseError();
   clientCallback_->onFirstResponseError(std::move(ew));
   std::ignore =
       client_.sendError(streamId_, RocketException(ErrorCode::CANCELED));
 }
 
 void RocketBiDiServerCallback::onSinkRequestN(int32_t tokens) {
-  if (state_.sinkAlive()) {
+  if (state_.isSinkOpen()) {
     std::ignore = clientCallback_->onSinkRequestN(tokens);
   }
 }
 
 void RocketBiDiServerCallback::onSinkCancel() {
-  if (state_.sinkAlive()) {
-    state_.closeSink();
+  if (state_.isSinkOpen()) {
+    state_.onSinkCancel();
     std::ignore = clientCallback_->onSinkCancel();
   }
 }
@@ -99,17 +99,17 @@ bool RocketBiDiServerCallback::onStreamRequestN(int32_t tokens) {
 }
 
 bool RocketBiDiServerCallback::onStreamCancel() {
-  state_.closeStream();
-  bool alive = state_.sinkAlive();
+  state_.onStreamCancel();
+  bool alive = state_.isSinkOpen();
   client_.cancelStream(streamId_, !alive);
   return alive;
 }
 
 void RocketBiDiServerCallback::onConnectionClosed(folly::exception_wrapper ew) {
-  if (state_.streamAlive()) {
+  if (state_.isStreamOpen()) {
     onStreamError(std::move(ew));
   }
-  if (state_.sinkAlive()) {
+  if (state_.isSinkOpen()) {
     onSinkCancel();
   }
 }
@@ -119,17 +119,17 @@ bool RocketBiDiServerCallback::onStreamPayload(StreamPayload&& payload) {
 }
 
 bool RocketBiDiServerCallback::onStreamFinalPayload(StreamPayload&& payload) {
-  state_.closeStream();
+  state_.onStreamComplete();
   return onStreamPayload(std::move(payload)) && onStreamComplete();
 }
 
 bool RocketBiDiServerCallback::onStreamComplete() {
-  state_.closeStream();
+  state_.onStreamComplete();
   return clientCallback_->onStreamComplete();
 }
 
 void RocketBiDiServerCallback::onStreamError(folly::exception_wrapper ew) {
-  state_.closeStream();
+  state_.onStreamError();
   ew.handle(
       [&](RocketException& ex) {
         if (ex.hasErrorData()) {

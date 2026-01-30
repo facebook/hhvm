@@ -27,6 +27,7 @@
 #include <thrift/lib/cpp2/async/RpcOptions.h>
 #include <thrift/lib/cpp2/async/StreamCallbacks.h>
 #include <thrift/lib/cpp2/transport/rocket/Types.h>
+#include <thrift/lib/cpp2/transport/rocket/server/BidirectionalStreamState.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
 namespace apache::thrift::rocket {
@@ -75,13 +76,13 @@ class RocketBiDiServerCallback : public BiDiServerCallback {
 
   StreamId streamId() const noexcept { return streamId_; }
 
-  BiDiChannelState& state() noexcept { return state_; }
+  BidirectionalStreamState& state() noexcept { return state_; }
 
  private:
   RocketClient& client_;
   BiDiClientCallback* clientCallback_;
   StreamId streamId_;
-  BiDiChannelState state_;
+  BidirectionalStreamState state_;
   std::unique_ptr<CompressionConfig> compressionConfig_;
 };
 

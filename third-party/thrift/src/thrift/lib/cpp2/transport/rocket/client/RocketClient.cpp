@@ -559,7 +559,7 @@ void RocketClient::handleFirstResponse(
     } else if constexpr (std::is_same_v<
                              CallbackType,
                              RocketBiDiServerCallback>) {
-      bool needsFree = !serverCallback.state().sinkAlive();
+      bool needsFree = !serverCallback.state().isSinkOpen();
       std::ignore = serverCallback.onStreamComplete();
       if (needsFree) {
         freeStream(streamId);
@@ -713,7 +713,7 @@ void RocketClient::handleBiDiResponse(
     auto streamPayload = getPayloadSerializer()->unpack<StreamPayload>(
         std::move(fullPayload), encodeMetadataUsingBinary_);
     if (streamPayload.hasException()) {
-      bool needsFree = !serverCallback.state().sinkAlive();
+      bool needsFree = !serverCallback.state().isSinkOpen();
       serverCallback.onStreamError(std::move(streamPayload.exception()));
       if (needsFree) {
         freeStream(streamId);
@@ -732,7 +732,7 @@ void RocketClient::handleBiDiResponse(
     if (payloadMetadataRef &&
         payloadMetadataRef->getType() ==
             PayloadMetadata::Type::exceptionMetadata) {
-      bool needsFree = !serverCallback.state().sinkAlive();
+      bool needsFree = !serverCallback.state().isSinkOpen();
       serverCallback.onStreamError(
           apache::thrift::detail::EncodedStreamError(
               std::move(streamPayload.value())));
@@ -742,7 +742,7 @@ void RocketClient::handleBiDiResponse(
       return;
     }
     if (complete) {
-      bool needsFree = !serverCallback.state().sinkAlive();
+      bool needsFree = !serverCallback.state().isSinkOpen();
       std::ignore =
           serverCallback.onStreamFinalPayload(std::move(*streamPayload));
       if (needsFree) {
@@ -755,7 +755,7 @@ void RocketClient::handleBiDiResponse(
   }
 
   if (complete) {
-    bool needsFree = !serverCallback.state().sinkAlive();
+    bool needsFree = !serverCallback.state().isSinkOpen();
     std::ignore = serverCallback.onStreamComplete();
     if (needsFree) {
       freeStream(streamId);
@@ -783,7 +783,7 @@ void RocketClient::handleErrorFrame(
     serverCallback.onFinalResponseError(std::move(ew));
   } else if constexpr (std::is_same_v<CallbackType, RocketBiDiServerCallback>) {
     // TODO(T235448311): this should probably close the sink too
-    bool needsFree = !serverCallback.state().sinkAlive();
+    bool needsFree = !serverCallback.state().isSinkOpen();
     serverCallback.onStreamError(std::move(ew));
     if (needsFree) {
       freeStream(streamId);
@@ -833,10 +833,10 @@ void RocketClient::handleCancelFrame(
   }
 
   if constexpr (std::is_same_v<CallbackType, RocketBiDiServerCallback>) {
-    if (!serverCallback.state().sinkAlive()) {
+    if (!serverCallback.state().isSinkOpen()) {
       return;
     }
-    bool needsFree = !serverCallback.state().streamAlive();
+    bool needsFree = !serverCallback.state().isStreamOpen();
     serverCallback.onSinkCancel();
     if (needsFree) {
       freeStream(streamId);

@@ -35,20 +35,30 @@ class BidirectionalStreamState {
   }
 
   bool isSinkOpen() const {
-    return state_ == State::StreamAndSinkOpen || state_ == State::OnlySinkOpen;
+    return state_ == State::AwaitingFirstResponse ||
+        state_ == State::StreamAndSinkOpen || state_ == State::OnlySinkOpen;
   }
 
   bool isStreamOpen() const {
-    return state_ == State::StreamAndSinkOpen ||
-        state_ == State::OnlyStreamOpen;
+    return state_ == State::AwaitingFirstResponse ||
+        state_ == State::StreamAndSinkOpen || state_ == State::OnlyStreamOpen;
   }
 
   bool isAnyOpen() const {
-    return state_ == State::StreamAndSinkOpen ||
-        state_ == State::OnlyStreamOpen || state_ == State::OnlySinkOpen;
+    return state_ == State::AwaitingFirstResponse ||
+        state_ == State::StreamAndSinkOpen || state_ == State::OnlyStreamOpen ||
+        state_ == State::OnlySinkOpen;
   }
 
-  bool isBothOpen() const { return state_ == State::StreamAndSinkOpen; }
+  bool isBothOpen() const {
+    return state_ == State::AwaitingFirstResponse ||
+        state_ == State::StreamAndSinkOpen;
+  }
+
+  bool firstResponseSent() const {
+    return state_ != State::AwaitingFirstResponse &&
+        state_ != State::CancelledEarly;
+  }
 
   void onFirstResponseSent();
   void onFirstResponseError();

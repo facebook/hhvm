@@ -21,15 +21,23 @@
 namespace apache::thrift::rocket {
 
 void BidirectionalStreamState::onFirstResponseSent() {
-  DCHECK(state_ == State::AwaitingFirstResponse)
-      << "First response can only be sent from AwaitingFirstResponse state";
-  state_ = State::StreamAndSinkOpen;
+  if (state_ == State::AwaitingFirstResponse) {
+    state_ = State::StreamAndSinkOpen;
+  } else {
+    DCHECK(isTerminal()) << "First response can only be sent from "
+                         << "AwaitingFirstResponse or terminal state, "
+                         << "but was in state " << static_cast<int>(state_);
+  }
 }
 
 void BidirectionalStreamState::onFirstResponseError() {
-  DCHECK(state_ == State::AwaitingFirstResponse)
-      << "First response error can only occur from AwaitingFirstResponse state";
-  state_ = State::Closed;
+  if (state_ == State::AwaitingFirstResponse) {
+    state_ = State::Closed;
+  } else {
+    DCHECK(isTerminal()) << "First response error can only occur from "
+                         << "AwaitingFirstResponse or terminal state, "
+                         << "but was in state " << static_cast<int>(state_);
+  }
 }
 
 void BidirectionalStreamState::onStreamComplete() {
@@ -38,7 +46,8 @@ void BidirectionalStreamState::onStreamComplete() {
   } else if (state_ == State::OnlyStreamOpen) {
     state_ = State::Closed;
   } else {
-    DCHECK(false) << "Stream must be open to be able to complete";
+    DCHECK(isTerminal()) << "Cannot transition onStreamComplete from state "
+                         << static_cast<int>(state_);
   }
 }
 
@@ -48,7 +57,8 @@ void BidirectionalStreamState::onStreamError() {
   } else if (state_ == State::OnlyStreamOpen) {
     state_ = State::Closed;
   } else {
-    DCHECK(false) << "Stream must be open to be able to error";
+    DCHECK(isTerminal()) << "Cannot transition onStreamError from state "
+                         << static_cast<int>(state_);
   }
 }
 
@@ -58,7 +68,8 @@ void BidirectionalStreamState::onStreamCancel() {
   } else if (state_ == State::OnlyStreamOpen) {
     state_ = State::Closed;
   } else {
-    DCHECK(false) << "Stream must be open to be able to be cancelled";
+    DCHECK(isTerminal()) << "Cannot transition onStreamCancel from state "
+                         << static_cast<int>(state_);
   }
 }
 
@@ -68,7 +79,8 @@ void BidirectionalStreamState::onSinkComplete() {
   } else if (state_ == State::OnlySinkOpen) {
     state_ = State::Closed;
   } else {
-    DCHECK(false) << "Sink must be open to be able to complete";
+    DCHECK(isTerminal()) << "Cannot transition onSinkComplete from state "
+                         << static_cast<int>(state_);
   }
 }
 
@@ -78,7 +90,8 @@ void BidirectionalStreamState::onSinkError() {
   } else if (state_ == State::OnlySinkOpen) {
     state_ = State::Closed;
   } else {
-    DCHECK(false) << "Sink must be open to be able to error";
+    DCHECK(isTerminal()) << "Cannot transition onSinkError from state "
+                         << static_cast<int>(state_);
   }
 }
 
@@ -88,13 +101,15 @@ void BidirectionalStreamState::onSinkCancel() {
   } else if (state_ == State::OnlySinkOpen) {
     state_ = State::Closed;
   } else {
-    DCHECK(false) << "Sink must be open to be able to be cancelled";
+    DCHECK(isTerminal()) << "Cannot transition onSinkCancel from state "
+                         << static_cast<int>(state_);
   }
 }
 
 void BidirectionalStreamState::onCancelEarly() {
   DCHECK(state_ == State::AwaitingFirstResponse)
-      << "BiDi can only be cancelled early from AwaitingFirstResponse state";
+      << "BiDi can only be cancelled early from AwaitingFirstResponse state, "
+      << "but was in state " << static_cast<int>(state_);
   state_ = State::CancelledEarly;
 }
 

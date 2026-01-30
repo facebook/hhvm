@@ -11864,7 +11864,7 @@ private:
         }
         cinfo.extraMethods.emplace(MethRef { *method });
       }
-    } catch (const TMIOps::TMIException& exn) {
+    } catch ([[maybe_unused]] const TMIOps::TMIException& exn) {
       ITRACE(
         2,
         "Adding methods failed for `{}' importing traits: {}\n",

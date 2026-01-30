@@ -918,10 +918,10 @@ RegionDescPtr selectRegion(const RegionContext& context,
         }
       }
       not_reached();
-    } catch (const FailedIRGen& e) {
+    } catch ([[maybe_unused]] const FailedIRGen& e) {
       FTRACE(1, "region selector threw: {}\n", e.what());
       return RegionDescPtr{nullptr};
-    } catch (const ResourceExceededException& e) {
+    } catch ([[maybe_unused]] const ResourceExceededException& e) {
       FTRACE(1, "region selector fataled: {}\n", e.what());
       return RegionDescPtr{nullptr};
     } catch (const std::exception& e) {

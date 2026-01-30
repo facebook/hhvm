@@ -7,9 +7,10 @@
 
 #pragma once
 
+#include <thrift/lib/cpp2/gen/module_metadata_h.h>
 #include <thrift/lib/thrift/gen-cpp2/metadata_types.h>
 
-#include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/includes_metadata.h"
+#include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/includes_types.h"
 
 namespace a {
 namespace different {

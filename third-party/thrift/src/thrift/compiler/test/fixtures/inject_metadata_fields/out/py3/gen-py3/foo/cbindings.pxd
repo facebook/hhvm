@@ -36,11 +36,11 @@ from thrift.python.common cimport cThriftMetadata as __fbthrift_cThriftMetadata
 cimport injected_field.cbindings as _injected_field_cbindings
 
 
-cdef extern from "thrift/compiler/test/fixtures/inject_metadata_fields/gen-cpp2/foo_metadata.h" namespace "apache::thrift::detail::md":
+cdef extern from "thrift/lib/cpp2/gen/module_metadata_h.h" namespace "apache::thrift::detail::md":
     cdef cppclass ExceptionMetadata[T]:
         @staticmethod
         void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/inject_metadata_fields/gen-cpp2/foo_metadata.h" namespace "apache::thrift::detail::md":
+cdef extern from "thrift/lib/cpp2/gen/module_metadata_h.h" namespace "apache::thrift::detail::md":
     cdef cppclass StructMetadata[T]:
         @staticmethod
         void gen(__fbthrift_cThriftMetadata &metadata)

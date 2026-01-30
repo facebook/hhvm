@@ -27,9 +27,10 @@ C++ header to store py3 specific Enum and Union type enum data
 #include <functional>
 #include <folly/Range.h>
 
+#include <thrift/lib/cpp2/gen/module_metadata_h.h>
+
 #include "{{program:include_prefix}}{{program:cpp_gen_path}}/{{program:name}}_data.h"
 #include "{{program:include_prefix}}{{program:cpp_gen_path}}/{{program:name}}_types.h"
-#include "{{program:include_prefix}}{{program:cpp_gen_path}}/{{program:name}}_metadata.h"
 namespace thrift {
 namespace py3 {
 

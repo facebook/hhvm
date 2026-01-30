@@ -37,7 +37,7 @@ from thrift.python.common cimport cThriftMetadata as __fbthrift_cThriftMetadata
 cdef extern from "folly/sorted_vector_types.h":
   pass
 
-cdef extern from "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/includes_metadata.h" namespace "apache::thrift::detail::md":
+cdef extern from "thrift/lib/cpp2/gen/module_metadata_h.h" namespace "apache::thrift::detail::md":
     cdef cppclass EnumMetadata[T]:
         @staticmethod
         void gen(__fbthrift_cThriftMetadata &metadata)
@@ -45,11 +45,11 @@ cdef extern from "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/includes_
     cdef cppclass cAnEnum "::a::different::ns::AnEnum":
         pass
 
-cdef extern from "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/includes_metadata.h" namespace "apache::thrift::detail::md":
+cdef extern from "thrift/lib/cpp2/gen/module_metadata_h.h" namespace "apache::thrift::detail::md":
     cdef cppclass ExceptionMetadata[T]:
         @staticmethod
         void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/includes_metadata.h" namespace "apache::thrift::detail::md":
+cdef extern from "thrift/lib/cpp2/gen/module_metadata_h.h" namespace "apache::thrift::detail::md":
     cdef cppclass StructMetadata[T]:
         @staticmethod
         void gen(__fbthrift_cThriftMetadata &metadata)

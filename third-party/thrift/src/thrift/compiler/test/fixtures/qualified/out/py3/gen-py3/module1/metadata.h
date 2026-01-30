@@ -7,9 +7,10 @@
 
 #pragma once
 
+#include <thrift/lib/cpp2/gen/module_metadata_h.h>
 #include <thrift/lib/thrift/gen-cpp2/metadata_types.h>
 
-#include "thrift/compiler/test/fixtures/qualified/gen-cpp2/module1_metadata.h"
+#include "thrift/compiler/test/fixtures/qualified/gen-cpp2/module1_types.h"
 
 namespace module1 {
 ::apache::thrift::metadata::ThriftMetadata module1_getThriftModuleMetadata();

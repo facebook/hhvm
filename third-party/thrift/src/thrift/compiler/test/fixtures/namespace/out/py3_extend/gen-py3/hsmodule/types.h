@@ -10,9 +10,10 @@
 #include <functional>
 #include <folly/Range.h>
 
+#include <thrift/lib/cpp2/gen/module_metadata_h.h>
+
 #include "thrift/compiler/test/fixtures/namespace/gen-cpp2/hsmodule_data.h"
 #include "thrift/compiler/test/fixtures/namespace/gen-cpp2/hsmodule_types.h"
-#include "thrift/compiler/test/fixtures/namespace/gen-cpp2/hsmodule_metadata.h"
 namespace thrift {
 namespace py3 {
 

@@ -21,7 +21,7 @@ This is a template for exposing cpp enums in .pxd
 }}
 {{#program:enums}}
 {{#first?}}
-cdef extern from "{{program:include_prefix}}{{program:cpp_gen_path}}/{{program:name}}_metadata.h" namespace "apache::thrift::detail::md":
+cdef extern from "thrift/lib/cpp2/gen/module_metadata_h.h" namespace "apache::thrift::detail::md":
     cdef cppclass EnumMetadata[T]:
         @staticmethod
         void gen(__fbthrift_cThriftMetadata &metadata)

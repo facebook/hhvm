@@ -72,7 +72,7 @@ cdef extern from * nogil:
         bint empty()
 
 
-cdef extern from "thrift/compiler/test/fixtures/basic-annotations/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
+cdef extern from "thrift/lib/cpp2/gen/module_metadata_h.h" namespace "apache::thrift::detail::md":
     cdef cppclass EnumMetadata[T]:
         @staticmethod
         void gen(__fbthrift_cThriftMetadata &metadata)
@@ -80,11 +80,11 @@ cdef extern from "thrift/compiler/test/fixtures/basic-annotations/gen-cpp2/modul
     cdef cppclass cMyEnum "::cpp2::YourEnum":
         pass
 
-cdef extern from "thrift/compiler/test/fixtures/basic-annotations/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
+cdef extern from "thrift/lib/cpp2/gen/module_metadata_h.h" namespace "apache::thrift::detail::md":
     cdef cppclass ExceptionMetadata[T]:
         @staticmethod
         void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/basic-annotations/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
+cdef extern from "thrift/lib/cpp2/gen/module_metadata_h.h" namespace "apache::thrift::detail::md":
     cdef cppclass StructMetadata[T]:
         @staticmethod
         void gen(__fbthrift_cThriftMetadata &metadata)

@@ -36,7 +36,7 @@ from thrift.python.common cimport cThriftMetadata as __fbthrift_cThriftMetadata
 cimport test.fixtures.enums.included_enum.cbindings as _test_fixtures_enums_included_enum_cbindings
 
 
-cdef extern from "thrift/compiler/test/fixtures/enums/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
+cdef extern from "thrift/lib/cpp2/gen/module_metadata_h.h" namespace "apache::thrift::detail::md":
     cdef cppclass EnumMetadata[T]:
         @staticmethod
         void gen(__fbthrift_cThriftMetadata &metadata)
@@ -62,11 +62,11 @@ cdef extern from "thrift/compiler/test/fixtures/enums/gen-cpp2/module_types.h" n
     cdef cppclass cMyBitmaskEnum2 "::test::fixtures::enums::MyBitmaskEnum2":
         pass
 
-cdef extern from "thrift/compiler/test/fixtures/enums/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
+cdef extern from "thrift/lib/cpp2/gen/module_metadata_h.h" namespace "apache::thrift::detail::md":
     cdef cppclass ExceptionMetadata[T]:
         @staticmethod
         void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/enums/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
+cdef extern from "thrift/lib/cpp2/gen/module_metadata_h.h" namespace "apache::thrift::detail::md":
     cdef cppclass StructMetadata[T]:
         @staticmethod
         void gen(__fbthrift_cThriftMetadata &metadata)

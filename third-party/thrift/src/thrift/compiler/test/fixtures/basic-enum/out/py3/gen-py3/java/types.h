@@ -10,9 +10,10 @@
 #include <functional>
 #include <folly/Range.h>
 
+#include <thrift/lib/cpp2/gen/module_metadata_h.h>
+
 #include "thrift/compiler/test/fixtures/basic-enum/gen-cpp2/java_data.h"
 #include "thrift/compiler/test/fixtures/basic-enum/gen-cpp2/java_types.h"
-#include "thrift/compiler/test/fixtures/basic-enum/gen-cpp2/java_metadata.h"
 namespace thrift {
 namespace py3 {
 

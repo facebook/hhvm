@@ -20,9 +20,10 @@
 
 #pragma once
 
+#include <thrift/lib/cpp2/gen/module_metadata_h.h>
 #include <thrift/lib/thrift/gen-cpp2/metadata_types.h>
 
-#include "{{program:include_prefix}}{{program:cpp_gen_path}}/{{program:name}}_metadata.h"
+#include "{{program:include_prefix}}{{program:cpp_gen_path}}/{{program:name}}_types.h"
 
 {{#program:cppNamespaces}}namespace {{value}} {
 {{/program:cppNamespaces}}

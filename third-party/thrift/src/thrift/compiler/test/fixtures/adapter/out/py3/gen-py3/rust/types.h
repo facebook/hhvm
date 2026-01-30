@@ -10,9 +10,10 @@
 #include <functional>
 #include <folly/Range.h>
 
+#include <thrift/lib/cpp2/gen/module_metadata_h.h>
+
 #include "thrift/compiler/test/fixtures/adapter/gen-cpp2/rust_data.h"
 #include "thrift/compiler/test/fixtures/adapter/gen-cpp2/rust_types.h"
-#include "thrift/compiler/test/fixtures/adapter/gen-cpp2/rust_metadata.h"
 namespace thrift {
 namespace py3 {
 

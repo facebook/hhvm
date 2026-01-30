@@ -7,9 +7,10 @@
 
 #pragma once
 
+#include <thrift/lib/cpp2/gen/module_metadata_h.h>
 #include <thrift/lib/thrift/gen-cpp2/metadata_types.h>
 
-#include "thrift/compiler/test/fixtures/py3/gen-py3cpp/empty_metadata.h"
+#include "thrift/compiler/test/fixtures/py3/gen-py3cpp/empty_types.h"
 
 namespace cpp2 {
 ::apache::thrift::metadata::ThriftMetadata empty_getThriftModuleMetadata();

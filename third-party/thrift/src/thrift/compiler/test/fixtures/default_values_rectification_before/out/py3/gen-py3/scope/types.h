@@ -10,9 +10,10 @@
 #include <functional>
 #include <folly/Range.h>
 
+#include <thrift/lib/cpp2/gen/module_metadata_h.h>
+
 #include "thrift/compiler/test/fixtures/default_values_rectification_before/gen-cpp2/scope_data.h"
 #include "thrift/compiler/test/fixtures/default_values_rectification_before/gen-cpp2/scope_types.h"
-#include "thrift/compiler/test/fixtures/default_values_rectification_before/gen-cpp2/scope_metadata.h"
 namespace thrift {
 namespace py3 {
 

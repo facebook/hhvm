@@ -20,6 +20,10 @@ endif()
 
 project("wangle" VERSION ${PACKAGE_VERSION} LANGUAGES CXX C)
 
+# Set for FetchContent to skip find_package(wangle)
+set(wangle_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}"
+  CACHE INTERNAL "wangle source directory")
+
 if (NOT DEFINED CPACK_GENERATOR)
   set(CPACK_GENERATOR "RPM")
 endif()
@@ -64,9 +68,14 @@ set(CMAKE_INSTALL_DIR lib/cmake/wangle CACHE STRING
 # Try finding folly via its installed CMake configuration file.
 # This will also automatically find several libraries that we depend on through
 # folly.
-find_package(folly CONFIG REQUIRED)
+# If folly/fizz are being built from source (FetchContent), skip find_package
+if (NOT DEFINED folly_SOURCE_DIR)
+  find_package(folly CONFIG REQUIRED)
+endif()
 
-find_package(fizz CONFIG REQUIRED)
+if (NOT DEFINED fizz_SOURCE_DIR)
+  find_package(fizz CONFIG REQUIRED)
+endif()
 find_package(fmt CONFIG REQUIRED)
 find_package(OpenSSL REQUIRED)
 find_package(Glog REQUIRED)
@@ -86,118 +95,77 @@ endif()
 
 include(CheckAtomic)
 
-set(WANGLE_HEADER_DIRS
-  acceptor
-  bootstrap
-  channel
-  client
-  codec
-  service
-  ssl
-  util
-)
+# =============================================================================
+# Granular CMake targets
+# =============================================================================
 
-foreach(dir ${WANGLE_HEADER_DIRS})
-  file(GLOB_RECURSE headers ${dir}/*.h)
-  set(WANGLE_HEADERS
-    ${WANGLE_HEADERS}
-    ${headers})
-endforeach()
+# Include wangle functions for granular library targets
+include(cmake/WangleFunctions.cmake)
 
-set(WANGLE_SOURCES
-  acceptor/Acceptor.cpp
-  acceptor/AcceptorHandshakeManager.cpp
-  acceptor/ConnectionManager.cpp
-  acceptor/EvbHandshakeHelper.cpp
-  acceptor/FizzAcceptorHandshakeHelper.cpp
-  acceptor/FizzConfigUtil.cpp
-  acceptor/LoadShedConfiguration.cpp
-  acceptor/ManagedConnection.cpp
-  acceptor/SecureTransportType.cpp
-  acceptor/SocketOptions.cpp
-  acceptor/SSLAcceptorHandshakeHelper.cpp
-  acceptor/TLSPlaintextPeekingCallback.cpp
-  acceptor/TransportInfo.cpp
-  bootstrap/ServerBootstrap.cpp
-  channel/FileRegion.cpp
-  channel/Pipeline.cpp
-  client/persistence/FilePersistenceLayer.cpp
-  client/persistence/PersistentCacheCommon.cpp
-  client/ssl/SSLSessionCacheData.cpp
-  client/ssl/SSLSessionCacheUtils.cpp
-  client/ssl/SSLSessionCallbacks.cpp
-  codec/LengthFieldBasedFrameDecoder.cpp
-  codec/LengthFieldPrepender.cpp
-  codec/LineBasedFrameDecoder.cpp
-  ssl/FizzFallbackState.cpp
-  ssl/PasswordInFileFactory.cpp
-  ssl/ServerSSLContext.cpp
-  ssl/SSLContextManager.cpp
-  ssl/SSLSessionCacheManager.cpp
-  ssl/SSLUtil.cpp
-  ssl/TLSTicketKeyManager.cpp
-  ssl/TLSCredProcessor.cpp
-  ssl/TLSInMemoryTicketProcessor.cpp
-  util/FilePoller.cpp
-)
+# Set base directory for wangle includes
+set(WANGLE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+set(WANGLE_BASE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/..)
 
-add_library(wangle
-  ${WANGLE_HEADERS}
-  ${WANGLE_SOURCES}
-)
-
+# Check for SSL_SESSION_dup for granular targets
 include(CheckLibraryExists)
-check_library_exists(ssl SSL_SESSION_dup "${OPENSSL_SSL_LIBRARY}" WANGLE_HAVE_SSL_SESSION_DUP)
+check_library_exists(
+  ssl SSL_SESSION_dup "${OPENSSL_SSL_LIBRARY}" WANGLE_HAVE_SSL_SESSION_DUP
+)
+
+# Add subdirectories with granular targets (order matters for dependencies)
+add_subdirectory(util)
+add_subdirectory(ssl)
+add_subdirectory(acceptor)
+add_subdirectory(channel)
+add_subdirectory(codec)
+add_subdirectory(bootstrap)
+add_subdirectory(service)
+add_subdirectory(client/persistence)
+add_subdirectory(client/ssl)
+
+# Create the monolithic wangle library for backward compatibility
+wangle_create_monolithic_library()
+
+# Resolve deferred dependencies between wangle targets
+wangle_resolve_deferred_dependencies()
+
+# Add SSL_SESSION_dup define to monolithic library
 if(WANGLE_HAVE_SSL_SESSION_DUP)
   target_compile_definitions(wangle PRIVATE WANGLE_HAVE_SSL_SESSION_DUP)
 endif()
 
-if (BUILD_SHARED_LIBS)
-  set_target_properties(wangle
-    PROPERTIES VERSION ${PACKAGE_VERSION})
-endif()
-
-target_include_directories(
-  wangle
-  PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/..>
-    $<INSTALL_INTERFACE:${INCLUDE_INSTALL_DIR}>
-    ${FIZZ_INCLUDE_DIR}
-    ${FOLLY_INCLUDE_DIR}
-    ${Boost_INCLUDE_DIRS}
-    ${OPENSSL_INCLUDE_DIR}
-    ${GLOG_INCLUDE_DIRS}
-    ${GFLAGS_INCLUDE_DIRS}
-    ${LIBEVENT_INCLUDE_DIR}
-    ${DOUBLE_CONVERSION_INCLUDE_DIR}
-)
-target_link_libraries(wangle PUBLIC
-  ${FOLLY_LIBRARIES}
-  ${FIZZ_LIBRARIES}
-  ${Boost_LIBRARIES}
-  ${OPENSSL_LIBRARIES}
-  ${GLOG_LIBRARIES}
-  ${GFLAGS_LIBRARIES}
-  ${LIBEVENT_LIB}
-  ${DOUBLE_CONVERSION_LIBRARY}
-  ${CMAKE_DL_LIBS}
-  ${LIBRT_LIBRARIES}
-  Threads::Threads)
-
+# Install the monolithic wangle library
 install(
   TARGETS wangle
   EXPORT wangle-exports
-  DESTINATION ${LIB_INSTALL_DIR}
+  LIBRARY DESTINATION ${LIB_INSTALL_DIR}
+  ARCHIVE DESTINATION ${LIB_INSTALL_DIR}
 )
-# We unfortunately cannot install wangle's headers with the install()
-# statement above.  install(TARGETS) appears to only support installing
-# PUBLIC_HEADER in a flat include directory, and not a deeper tree.
-foreach(dir ${WANGLE_HEADER_DIRS})
-  install(DIRECTORY ${dir} DESTINATION "${INCLUDE_INSTALL_DIR}/wangle"
-          FILES_MATCHING PATTERN "*.h")
-endforeach()
 
-# Install CMake package configuration files for wangle
+# =============================================================================
+# Header installation
+# =============================================================================
+
+# Collect all headers via recursive glob (like folly/fizz does)
+file(GLOB_RECURSE WANGLE_HEADERS "${CMAKE_CURRENT_SOURCE_DIR}/*.h")
+# Filter out test, facebook, and other non-public directories
+list(FILTER WANGLE_HEADERS EXCLUDE REGEX "/test/")
+list(FILTER WANGLE_HEADERS EXCLUDE REGEX "/facebook/")
+list(FILTER WANGLE_HEADERS EXCLUDE REGEX "/build/")
+list(FILTER WANGLE_HEADERS EXCLUDE REGEX "/example/")
+
+# Collect test headers separately
+file(GLOB_RECURSE WANGLE_TEST_HEADERS "${CMAKE_CURRENT_SOURCE_DIR}/*.h")
+list(FILTER WANGLE_TEST_HEADERS INCLUDE REGEX "/test/")
+list(FILTER WANGLE_TEST_HEADERS EXCLUDE REGEX "/facebook/")
+
+# Install headers preserving directory structure
+wangle_install_headers(wangle ${CMAKE_CURRENT_SOURCE_DIR} ${WANGLE_HEADERS})
+
+# =============================================================================
+# CMake package configuration
+# =============================================================================
+
 include(CMakePackageConfigHelpers)
 configure_package_config_file(
   cmake/wangle-config.cmake.in
@@ -215,6 +183,10 @@ install(EXPORT wangle-exports
         FILE wangle-targets.cmake
         NAMESPACE wangle::
         DESTINATION ${CMAKE_INSTALL_DIR})
+
+# =============================================================================
+# Tests
+# =============================================================================
 
 IF(CMAKE_CROSSCOMPILING)
    option(BUILD_TESTS "BUILD_TESTS" OFF)
@@ -273,7 +245,8 @@ if(BUILD_TESTS)
   )
   target_link_libraries(
     ${test_name}
-    Folly::folly_test_util
+    Folly::folly_init_init
+    Folly::folly_testing_test_util
     wangle
     ${LIBGMOCK_LIBRARIES}
     ${LIBEVENT_LIB}
@@ -283,14 +256,25 @@ if(BUILD_TESTS)
 
   # this test segfaults
   add_gtest(acceptor/test/ConnectionManagerTest.cpp ConnectionManagerTest)
-  add_gtest(acceptor/test/LoadShedConfigurationTest.cpp LoadShedConfigurationTest)
-  add_gtest(acceptor/test/PeekingAcceptorHandshakeHelperTest.cpp PeekingAcceptorHandshakeHelperTest)
+  add_gtest(
+    acceptor/test/LoadShedConfigurationTest.cpp LoadShedConfigurationTest
+  )
+  add_gtest(
+    acceptor/test/PeekingAcceptorHandshakeHelperTest.cpp
+    PeekingAcceptorHandshakeHelperTest
+  )
   add_gtest(bootstrap/test/BootstrapTest.cpp BootstrapTest)
-  add_gtest(channel/broadcast/test/BroadcastHandlerTest.cpp BroadcastHandlerTest)
+  add_gtest(
+    channel/broadcast/test/BroadcastHandlerTest.cpp BroadcastHandlerTest
+  )
   add_gtest(channel/broadcast/test/BroadcastPoolTest.cpp BroadcastPoolTest)
-  add_gtest(channel/broadcast/test/ObservingHandlerTest.cpp ObservingHandlerTest)
+  add_gtest(
+    channel/broadcast/test/ObservingHandlerTest.cpp ObservingHandlerTest
+  )
   add_gtest(channel/test/AsyncSocketHandlerTest.cpp AsyncSocketHandlerTest)
-  add_gtest(channel/test/OutputBufferingHandlerTest.cpp OutputBufferingHandlerTest)
+  add_gtest(
+    channel/test/OutputBufferingHandlerTest.cpp OutputBufferingHandlerTest
+  )
   add_gtest(channel/test/PipelineTest.cpp PipelineTest)
   add_gtest(codec/test/CodecTest.cpp CodecTest)
   # this test fails with an exception
@@ -299,9 +283,20 @@ if(BUILD_TESTS)
   #  add_gtest(ssl/test/SSLCacheTest.cpp SSLCacheTest)
   add_gtest(ssl/test/SSLContextManagerTest.cpp SSLContextManagerTest)
   add_gtest(ssl/test/TLSCredProcessorTest.cpp TLSCredProcessorTest)
-  add_gtest(ssl/test/TLSInMemoryTicketProcessorTest.cpp TLSInMemoryTicketProcessorTest)
+  add_gtest(
+    ssl/test/TLSInMemoryTicketProcessorTest.cpp TLSInMemoryTicketProcessorTest
+  )
   add_gtest(util/test/FilePollerTest.cpp FilePollerTest)
+
+  # Install test headers using recursive glob
+  wangle_install_headers(
+    wangle ${CMAKE_CURRENT_SOURCE_DIR} ${WANGLE_TEST_HEADERS}
+  )
 endif()
+
+# =============================================================================
+# Examples
+# =============================================================================
 
 option(BUILD_EXAMPLES "BUILD_EXAMPLES" OFF)
 
@@ -316,7 +311,9 @@ if(BUILD_EXAMPLES)
   target_link_libraries(TelnetServer wangle)
   add_executable(ProxyServer example/proxy/Proxy.cpp)
   target_link_libraries(ProxyServer wangle)
-  add_executable(AcceptServer example/accept_steering/accept_steering_server.cpp)
+  add_executable(
+    AcceptServer example/accept_steering/accept_steering_server.cpp
+  )
   target_link_libraries(AcceptServer wangle)
   add_executable(BroadcastProxy example/broadcast/BroadcastProxy.cpp)
   target_link_libraries(BroadcastProxy wangle)

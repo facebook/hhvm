@@ -9,9 +9,6 @@
 open Hh_prelude
 open Aast
 open Typing_defs
-module Env = Tast_env
-module SN = Naming_special_names
-module MakeType = Typing_make_type
 
 let warning_kind = Typing_warning.Set_or_keyset_array_get
 
@@ -19,22 +16,28 @@ let error_codes = Typing_warning_utils.codes warning_kind
 
 let is_keyset env ty =
   let r = Typing_reason.none in
-  Env.is_sub_type env ty (MakeType.keyset r (MakeType.arraykey r))
+  Tast_env.is_sub_type
+    env
+    ty
+    (Typing_make_type.keyset r (Typing_make_type.arraykey r))
 
 let is_nothing env ty =
   let r = Typing_reason.none in
-  Env.is_sub_type env ty (MakeType.nothing r)
+  Tast_env.is_sub_type env ty (Typing_make_type.nothing r)
 
 let is_const_set env ty =
   let r = Typing_reason.none in
-  Env.is_sub_type
+  Tast_env.is_sub_type
     env
     ty
-    (MakeType.class_type r SN.Collections.cConstSet [MakeType.arraykey r])
+    (Typing_make_type.class_type
+       r
+       Naming_special_names.Collections.cConstSet
+       [Typing_make_type.arraykey r])
 
 let rec check_array_get env pos ty =
-  let (env, expanded_ty) = Env.expand_type env ty in
-  let expanded_ty = Env.strip_dynamic env expanded_ty in
+  let (env, expanded_ty) = Tast_env.expand_type env ty in
+  let expanded_ty = Tast_env.strip_dynamic env expanded_ty in
   match get_node expanded_ty with
   | Tunion tyl -> List.iter tyl ~f:(check_array_get env pos)
   | Toption inner_ty -> check_array_get env pos inner_ty
@@ -53,13 +56,13 @@ let rec check_array_get env pos ty =
     in
     (match kind_opt with
     | Some kind ->
-      Env.add_warning
+      Tast_env.add_warning
         env
         ( pos,
           Typing_warning.Set_or_keyset_array_get,
           {
             Typing_warning.Set_or_keyset_array_get.kind;
-            ty = Env.print_ty env expanded_ty;
+            ty = Tast_env.print_ty env expanded_ty;
           } )
     | None -> ())
 
@@ -77,8 +80,8 @@ let visitor =
       match expr with
       (* Detect unset($arr[key]) - mark children as in_unset context *)
       | Call { func = (_, _, Id (_, name)); args; _ }
-        when String.equal name SN.PseudoFunctions.unset
-             || String.equal name SN.PseudoFunctions.isset ->
+        when String.equal name Naming_special_names.PseudoFunctions.unset
+             || String.equal name Naming_special_names.PseudoFunctions.isset ->
         List.iter args ~f:(fun arg ->
             this#on_expr (env, true) (Aast_utils.arg_to_expr arg))
       | Assign (e1, _op, e2) ->

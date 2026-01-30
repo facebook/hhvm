@@ -1547,7 +1547,7 @@ void emitLoggingDiamond(
 
       try {
         emitBespoke(env, ni, emitVanilla);
-      } catch (const FailedIRGen& exn) {
+      } catch ([[maybe_unused]] const FailedIRGen& exn) {
         FTRACE_MOD(Trace::region, 1,
           "bespoke irgen for {} failed with {} while vanilla irgen succeeded\n",
            ni.toString(), exn.what());

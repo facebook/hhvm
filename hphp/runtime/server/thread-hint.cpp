@@ -71,7 +71,7 @@ static int receiveFd(const std::string_view path) {
       FTRACE(1, "ThreadHint: Failed to connect to {}: {}\n", path, folly::errnoStr(errno));
       return -1;
     }
-  } catch (const std::exception& ex) {
+  } catch ([[maybe_unused]] const std::exception& ex) {
     FTRACE(1, "ThreadHint: Failed to set socket path {}: {}\n", path, ex.what());
     return -1;
   }

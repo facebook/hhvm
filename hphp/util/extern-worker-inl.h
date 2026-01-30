@@ -1048,7 +1048,7 @@ Client::Impl::tryWithThrottling(size_t retries,
     for (size_t i = 0; i < retries-1; ++i) {
       try {
         co_return co_await f();
-      } catch (const detail::Throttle& e) {
+      } catch ([[maybe_unused]] const detail::Throttle& e) {
         ++throttles;
         FTRACE(
           2, "Received throttle: \"{}\" (Total: {})\n",

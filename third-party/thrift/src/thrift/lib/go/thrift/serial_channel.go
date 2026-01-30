@@ -123,7 +123,7 @@ func (c *serialChannel) Close() error {
 
 // SendRequestResponse will call the given method with the given thrift struct, and read the response
 // into the given response struct. It only allows one outstanding request at once, but is thread-safe.
-func (c *serialChannel) SendRequestResponse(ctx context.Context, method string, request WritableStruct, response ReadableStruct) error {
+func (c *serialChannel) SendRequestResponse(ctx context.Context, method string, request WritableStruct, response ReadableResult) error {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
@@ -159,7 +159,7 @@ func (c *serialChannel) SendRequestStream(
 	ctx context.Context,
 	method string,
 	request WritableStruct,
-	response ReadableStruct,
+	response ReadableResult,
 	newStreamElemFn func() types.ReadableResult,
 ) (iter.Seq2[ReadableStruct, error], error) {
 	return nil, fmt.Errorf("not implemented")

@@ -99,7 +99,7 @@ func (p *rocketClient) SendRequestNoResponse(ctx context.Context, messageName st
 	return p.client.FireAndForget(ctx, messageName, headers, dataBytes)
 }
 
-func (p *rocketClient) SendRequestResponse(ctx context.Context, messageName string, request WritableStruct, response ReadableStruct) error {
+func (p *rocketClient) SendRequestResponse(ctx context.Context, messageName string, request WritableStruct, response ReadableResult) error {
 	dataBytes, err := encodeRequest(p.protoID, request)
 	if err != nil {
 		return err
@@ -137,7 +137,7 @@ func (p *rocketClient) SendRequestStream(
 	ctx context.Context,
 	messageName string,
 	request WritableStruct,
-	response ReadableStruct,
+	response ReadableResult,
 	newStreamElemFn func() ReadableResult,
 ) (iter.Seq2[ReadableStruct, error], error) {
 	if ctx.Done() == nil {

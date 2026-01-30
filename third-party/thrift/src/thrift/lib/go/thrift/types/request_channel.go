@@ -41,7 +41,7 @@ type RequestChannel interface {
 		ctx context.Context,
 		method string,
 		request WritableStruct,
-		response ReadableStruct,
+		response ReadableResult,
 	) error
 	SendRequestNoResponse(
 		ctx context.Context,
@@ -52,7 +52,7 @@ type RequestChannel interface {
 		ctx context.Context,
 		method string,
 		request WritableStruct,
-		response ReadableStruct,
+		response ReadableResult,
 		newStreamElemFn func() ReadableResult,
 	) (iter.Seq2[ReadableStruct, error], error)
 }
@@ -98,7 +98,7 @@ func (c *interactionChannel) SendRequestResponse(
 	ctx context.Context,
 	method string,
 	request WritableStruct,
-	response ReadableStruct,
+	response ReadableResult,
 ) error {
 	ctx = c.withInteractionContext(ctx)
 	return c.channel.SendRequestResponse(ctx, method, request, response)
@@ -117,7 +117,7 @@ func (c *interactionChannel) SendRequestStream(
 	ctx context.Context,
 	method string,
 	request WritableStruct,
-	response ReadableStruct,
+	response ReadableResult,
 	newStreamElemFn func() ReadableResult,
 ) (iter.Seq2[ReadableStruct, error], error) {
 	ctx = c.withInteractionContext(ctx)

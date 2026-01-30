@@ -89,7 +89,7 @@ func (p *upgradeToRocketClient) SendRequestResponse(
 	ctx context.Context,
 	method string,
 	request WritableStruct,
-	response ReadableStruct,
+	response ReadableResult,
 ) error {
 	p.maybeUpgrade(ctx)
 	return p.actualChannel.SendRequestResponse(ctx, method, request, response)
@@ -108,7 +108,7 @@ func (p *upgradeToRocketClient) SendRequestStream(
 	ctx context.Context,
 	method string,
 	request WritableStruct,
-	response ReadableStruct,
+	response ReadableResult,
 	newStreamElemFn func() types.ReadableResult,
 ) (iter.Seq2[ReadableStruct, error], error) {
 	p.maybeUpgrade(ctx)

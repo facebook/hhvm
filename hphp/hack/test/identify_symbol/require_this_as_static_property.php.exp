@@ -1,3 +1,10 @@
 name: \T::static_prop, kind: property, span: line 14, characters 16-27, is_declaration: false
-definition: None
+definition:
+ static_prop
+   kind: property
+   id: property::C::static_prop
+   position: line 7, characters 21-32
+   span: line 7, character 21 - line 7, character 36
+   modifiers: public static 
+
 

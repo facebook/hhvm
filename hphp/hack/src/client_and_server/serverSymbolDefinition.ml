@@ -94,6 +94,29 @@ let get_member_def (ctx : Provider_context.t) (x : class_element) =
         String.equal (snd t.c_tconst_name) member_name)
     >>= fun t -> Some (FileOutline.summarize_class_typeconst member_origin t)
 
+(** For a trait with `require class Foo` or `require this as Foo`, search `Foo` static methods/property *)
+let get_static_member_from_req_constraints ctx class_ member_name kind :
+    (class_element_ * byte_string * byte_string) option =
+  let req_constraints =
+    List.map
+      (Cls.all_ancestor_req_constraints_requirements class_)
+      ~f:(fun cr -> snd (to_requirement cr))
+  in
+  List.find_map req_constraints ~f:(fun req_ty ->
+      match Typing_defs.get_node req_ty with
+      | Typing_defs.Tapply ((_, cn), _) ->
+        Decl_provider.get_class ctx cn |> Decl_entry.to_option
+        >>= fun req_class ->
+        (match kind with
+        | Static_method ->
+          Cls.get_smethod req_class member_name >>| fun m ->
+          (kind, m.ce_origin, member_name)
+        | Static_property ->
+          Cls.get_sprop req_class ("$" ^ member_name) >>| fun m ->
+          (kind, m.ce_origin, member_name)
+        | _ -> None)
+      | _ -> None)
+
 let get_local_var_def ast name p =
   let (line, char, _) = Pos.info_pos p in
   let pos = File_content.Position.from_one_based line char in
@@ -144,8 +167,16 @@ let go ctx ast (result : _ SymbolOccurrence.t) : _ SymbolDefinition.t option =
       match Cls.get_method class_ method_name with
       | Some m -> get_member_def ctx (Method, m.ce_origin, method_name)
       | None ->
-        Cls.get_smethod class_ method_name >>= fun m ->
-        get_member_def ctx (Static_method, m.ce_origin, method_name)
+        (match Cls.get_smethod class_ method_name with
+        | Some m -> get_member_def ctx (Static_method, m.ce_origin, method_name)
+        | None ->
+          (* Method not found in class - check require constraints for traits *)
+          get_static_member_from_req_constraints
+            ctx
+            class_
+            method_name
+            Static_method
+          >>= get_member_def ctx)
     )
   | SO.Method (SO.UnknownClass, _) -> None
   | SO.Keyword _ -> None
@@ -160,8 +191,17 @@ let go ctx ast (result : _ SymbolOccurrence.t) : _ SymbolDefinition.t option =
       match Cls.get_prop class_ property_name with
       | Some m -> get_member_def ctx (Property, m.ce_origin, property_name)
       | None ->
-        Cls.get_sprop class_ ("$" ^ property_name) >>= fun m ->
-        get_member_def ctx (Static_property, m.ce_origin, property_name)
+        (match Cls.get_sprop class_ ("$" ^ property_name) with
+        | Some m ->
+          get_member_def ctx (Static_property, m.ce_origin, property_name)
+        | None ->
+          (* Property not found in class - check require constraints for traits *)
+          get_static_member_from_req_constraints
+            ctx
+            class_
+            property_name
+            Static_property
+          >>= get_member_def ctx)
     end
   | SO.Property (SO.UnknownClass, _) -> None
   | SO.ClassConst (SO.ClassName c_name, const_name) ->

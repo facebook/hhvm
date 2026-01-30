@@ -853,6 +853,7 @@ dependencies = [
  "hhbc",
  "hhbc_string_utils",
  "intern",
+ "itertools",
  "libc",
  "options",
  "oxidized",
@@ -1746,6 +1747,7 @@ version = "0.0.0"
 dependencies = [
  "hash",
  "hhbc_string_utils",
+ "itertools",
  "naming_special_names_rust",
  "oxidized",
  "serde",

@@ -103,6 +103,7 @@ const int kDeriveKindExtends = 0;
 const int kDeriveKindRequireExtends = 1;
 const int kDeriveKindRequireImplements = 2;
 const int kDeriveKindRequireClass = 3;
+const int kDeriveKindRequireThisAs = 4;
 
 constexpr int toDBEnum(DeriveKind kind) {
   switch (kind) {
@@ -114,6 +115,8 @@ constexpr int toDBEnum(DeriveKind kind) {
       return kDeriveKindRequireImplements;
     case DeriveKind::RequireClass:
       return kDeriveKindRequireClass;
+    case DeriveKind::RequireThisAs:
+      return kDeriveKindRequireThisAs;
   }
   return -1;
 }

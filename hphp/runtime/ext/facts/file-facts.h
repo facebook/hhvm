@@ -63,12 +63,14 @@ enum class DeriveKind {
   // This should be merged into RequireExtends.
   RequireImplements = 1 << 2,
   RequireClass = 1 << 3,
+  RequireThisAs = 1 << 4,
 };
 constexpr DeriveKindMask kDeriveKindAll =
     static_cast<int>(DeriveKind::Extends) |
     static_cast<int>(DeriveKind::RequireExtends) |
     static_cast<int>(DeriveKind::RequireImplements) |
-    static_cast<int>(DeriveKind::RequireClass);
+    static_cast<int>(DeriveKind::RequireClass) |
+    static_cast<int>(DeriveKind::RequireThisAs);
 
 using hackc::AttrFacts;
 using hackc::FileFacts;

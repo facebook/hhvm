@@ -295,6 +295,7 @@ mod ffi {
         require_extends: Vec<String>,
         require_implements: Vec<String>,
         require_class: Vec<String>,
+        require_this_as: Vec<String>,
 
         // Nested/Complex Types
         user_attributes: Vec<ExtDeclAttribute>,
@@ -349,6 +350,9 @@ mod ffi {
 
         /// List of classes which this `require class`
         pub require_class: Vec<String>,
+
+        /// List of classes which this `require this as`
+        pub require_this_as: Vec<String>,
 
         /// List of classes or interfaces which this `require extends`
         pub require_extends: Vec<String>,

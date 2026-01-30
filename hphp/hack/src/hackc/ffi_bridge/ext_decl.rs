@@ -9,6 +9,8 @@ use std::fmt::Write;
 use hhbc_string_utils::mangle_xhp_id;
 use hhbc_string_utils::strip_global_ns;
 use hhbc_string_utils::strip_hh_ns;
+use itertools::Either;
+use itertools::Itertools;
 use oxidized::ast_defs::Id;
 use oxidized::direct_decl_parser::ParsedFile;
 use oxidized::file_info::Mode;
@@ -444,6 +446,7 @@ where
 // ========== Complex fields ==========
 
 fn get_class_impl(class: &ShallowClass) -> ExtDeclClass {
+    let (require_class, require_this_as) = extract_type_name_cr_vecs(&class.req_constraints);
     ExtDeclClass {
         kind: enum_class_kind(class.kind), // ClassishKind (cls, iface, trait, enum)
         name: fmt_type(&class.name.1),
@@ -472,7 +475,8 @@ fn get_class_impl(class: &ShallowClass) -> ExtDeclClass {
         implements: extract_type_name_vec(&class.implements),
         require_extends: extract_type_name_vec(&class.req_extends),
         require_implements: extract_type_name_vec(&class.req_implements),
-        require_class: extract_type_name_cr_vec(&class.req_constraints),
+        require_class,
+        require_this_as,
         xhp_attr_uses: extract_type_name_vec(&class.xhp_attr_uses),
 
         // Nested Types
@@ -861,13 +865,11 @@ fn extract_type_name_vec(arr: &[Ty]) -> Vec<String> {
     arr.iter().map(extract_type_name).collect()
 }
 
-fn extract_type_name_cr_vec(arr: &[DeclConstraintRequirement]) -> Vec<String> {
-    arr.iter()
-        .filter_map(|cr| match cr {
-            DeclConstraintRequirement::DCREqual(t) => Some(extract_type_name(t)),
-            DeclConstraintRequirement::DCRSubtype(_) => None,
-        })
-        .collect()
+fn extract_type_name_cr_vecs(arr: &[DeclConstraintRequirement]) -> (Vec<String>, Vec<String>) {
+    arr.iter().partition_map(|dcr| match dcr {
+        DeclConstraintRequirement::DCREqual(ty) => Either::Left(extract_type_name(ty)),
+        DeclConstraintRequirement::DCRSubtype(ty) => Either::Right(extract_type_name(ty)),
+    })
 }
 
 fn fmt_type(original_name: &str) -> String {

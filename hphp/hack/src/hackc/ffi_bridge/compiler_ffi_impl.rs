@@ -50,6 +50,7 @@ impl ffi::FileFacts {
                     require_extends: tf.require_extends.into_iter().collect(),
                     require_implements: tf.require_implements.into_iter().collect(),
                     require_class: tf.require_class.into_iter().collect(),
+                    require_this_as: tf.require_this_as.into_iter().collect(),
                     methods: (tf.methods.into_iter())
                         .map(|(name, mf)| ffi::MethodFacts {
                             name,
@@ -129,7 +130,7 @@ mod tests {
                 ..Default::default()
             },
         );
-        // verify requireImplements, requireExtends and requireClass are skipped if empty and Class kind
+        // verify requireImplements, requireExtends, requireClass and requireThisAs are skipped if empty and Class kind
         types.insert(
             String::from("include_empty_neither_when_class_kind"),
             facts::TypeFacts {
@@ -162,6 +163,7 @@ mod tests {
                 require_extends: BTreeSet::from_iter(vec!["extends1".into()]),
                 require_implements: BTreeSet::from_iter(vec!["iter1".into()]),
                 require_class: BTreeSet::from_iter(vec!["class1".into()]),
+                require_this_as: BTreeSet::from_iter(vec!["class2".into()]),
                 ..Default::default()
             },
         );

@@ -10,6 +10,8 @@ use std::collections::BTreeSet;
 use hash::IndexSet;
 use hhbc_string_utils::mangle_xhp_id;
 use hhbc_string_utils::strip_global_ns;
+use itertools::Either;
+use itertools::Itertools;
 use naming_special_names_rust::user_attributes;
 use oxidized::ast_defs::Abstraction;
 use oxidized::ast_defs::ClassishKind;
@@ -109,6 +111,7 @@ pub struct TypeFacts {
     pub require_extends: BTreeSet<String>,
     pub require_implements: BTreeSet<String>,
     pub require_class: BTreeSet<String>,
+    pub require_this_as: BTreeSet<String>,
     pub methods: BTreeMap<String, MethodFacts>,
 }
 
@@ -322,19 +325,14 @@ impl TypeFacts {
                 }
             })
             .collect();
-        let require_class = req_constraints
-            .iter()
-            .filter_map(|dcr| {
-                if check_require {
-                    match dcr {
-                        DeclConstraintRequirement::DCREqual(ty) => Some(extract_type_name(ty)),
-                        DeclConstraintRequirement::DCRSubtype(_) => None,
-                    }
-                } else {
-                    None
-                }
+        let (require_class, require_this_as) = if check_require {
+            req_constraints.iter().partition_map(|dcr| match dcr {
+                DeclConstraintRequirement::DCREqual(ty) => Either::Left(extract_type_name(ty)),
+                DeclConstraintRequirement::DCRSubtype(ty) => Either::Right(extract_type_name(ty)),
             })
-            .collect();
+        } else {
+            Default::default()
+        };
 
         // TODO(T101762617): modify the direct decl parser to
         // preserve the attribute params that facts expects
@@ -362,6 +360,7 @@ impl TypeFacts {
             flags,
             require_implements,
             require_class,
+            require_this_as,
             attributes,
             methods,
         }

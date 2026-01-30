@@ -1491,6 +1491,13 @@ void SymbolMap::updateDBPath(
           DeriveKind::RequireClass,
           as_slice(baseType));
     }
+    for (auto const& baseType : type.require_this_as) {
+      db.insertBaseType(
+          path,
+          as_slice(type.name),
+          DeriveKind::RequireThisAs,
+          as_slice(baseType));
+    }
     for (auto const& attribute : type.attributes) {
       if (attribute.args.empty()) {
         db.insertTypeAttribute(
@@ -1777,6 +1784,11 @@ void SymbolMap::Data::updatePath(
         path,
         DeriveKind::RequireClass,
         std::move(type.require_class));
+    m_inheritanceInfo.setBaseTypes(
+        typeName,
+        path,
+        DeriveKind::RequireThisAs,
+        std::move(type.require_this_as));
     m_inheritanceInfo.setBaseTypes(
         typeName,
         path,

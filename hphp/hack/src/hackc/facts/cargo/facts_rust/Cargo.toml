@@ -13,6 +13,7 @@ path = "../../facts.rs"
 [dependencies]
 hash = { version = "0.0.0", path = "../../../../utils/hash" }
 hhbc_string_utils = { version = "0.0.0", path = "../../../utils/cargo/hhbc_string_utils" }
+itertools = "0.14.0"
 naming_special_names_rust = { version = "0.0.0", path = "../../../../naming" }
 oxidized = { version = "0.0.0", path = "../../../../oxidized" }
 serde = { version = "1.0.219", features = ["derive", "rc"] }

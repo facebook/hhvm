@@ -433,6 +433,13 @@ inline void readStringBody(StrType& str, folly::io::Cursor& in, size_t size) {
 
 inline void readStringBody(
     std::string& str, folly::io::Cursor& in, size_t size) {
+  // Check if buffer has enough data before allocating memory.
+  // This prevents memory exhaustion attacks where a small packet can claim
+  // a large string size, causing massive memory allocation.
+  // See: CVE-2019-3553, CVE-2019-11938, CVE-2019-11939
+  if (!in.canAdvance(size)) {
+    protocol::TProtocolException::throwTruncatedData();
+  }
   folly::resizeWithoutInitialization(str, size);
   if (in.pullAtMost(str.data(), size) < size) {
     str.clear();

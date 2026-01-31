@@ -218,6 +218,10 @@ func (p *NestedContainersProcessor) PackageName() string {
     return "module"
 }
 
+func (p *NestedContainersProcessor) GetInteractionProcessors() []thrift.Processor {
+    return []thrift.Processor{}
+}
+
 func (p *NestedContainersProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
     return GetThriftMetadataForService("module.NestedContainers")
 }

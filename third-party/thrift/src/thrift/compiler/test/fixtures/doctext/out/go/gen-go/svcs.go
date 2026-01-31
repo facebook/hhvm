@@ -199,6 +199,10 @@ func (p *CProcessor) PackageName() string {
     return "module"
 }
 
+func (p *CProcessor) GetInteractionProcessors() []thrift.Processor {
+    return []thrift.Processor{}
+}
+
 func (p *CProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
     return GetThriftMetadataForService("module.C")
 }

@@ -33,17 +33,19 @@ type CompositeProcessor interface {
 // compositeProcessor allows different ComposableProcessor to sit under one
 // server as long as their functions carry distinct names
 type compositeProcessor struct {
-	processorFunctionMap map[string]types.ProcessorFunction
-	functionServiceMap   map[string]string
-	metadata             *metadata.ThriftMetadata
+	processorFunctionMap  map[string]types.ProcessorFunction
+	functionServiceMap    map[string]string
+	metadata              *metadata.ThriftMetadata
+	interactionProcessors []types.Processor
 }
 
 // NewCompositeProcessor creates a new CompositeProcessor
 func NewCompositeProcessor() CompositeProcessor {
 	return &compositeProcessor{
-		processorFunctionMap: make(map[string]types.ProcessorFunction),
-		functionServiceMap:   make(map[string]string),
-		metadata:             metadata.NewThriftMetadata(),
+		processorFunctionMap:  make(map[string]types.ProcessorFunction),
+		functionServiceMap:    make(map[string]string),
+		metadata:              metadata.NewThriftMetadata(),
+		interactionProcessors: []types.Processor{},
 	}
 }
 
@@ -61,6 +63,8 @@ func (p *compositeProcessor) Include(processor Processor) {
 	maps.Copy(p.metadata.Structs, metadata.GetStructs())
 	maps.Copy(p.metadata.Exceptions, metadata.GetExceptions())
 	maps.Copy(p.metadata.Services, metadata.GetServices())
+
+	p.interactionProcessors = append(p.interactionProcessors, processor.GetInteractionProcessors()...)
 }
 
 // GetProcessorFunction multiplexes redirects to the appropriate Processor
@@ -80,4 +84,10 @@ func (p *compositeProcessor) FunctionServiceMap() map[string]string {
 
 func (p *compositeProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
 	return p.metadata
+}
+
+// GetInteractionProcessors returns the collected interaction processors
+// from all included processors that provide interactions.
+func (p *compositeProcessor) GetInteractionProcessors() []types.Processor {
+	return p.interactionProcessors
 }

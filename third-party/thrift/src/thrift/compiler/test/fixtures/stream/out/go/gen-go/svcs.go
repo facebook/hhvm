@@ -562,6 +562,10 @@ func (p *PubSubStreamingServiceProcessor) PackageName() string {
     return "module"
 }
 
+func (p *PubSubStreamingServiceProcessor) GetInteractionProcessors() []thrift.Processor {
+    return []thrift.Processor{}
+}
+
 func (p *PubSubStreamingServiceProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
     return GetThriftMetadataForService("module.PubSubStreamingService")
 }

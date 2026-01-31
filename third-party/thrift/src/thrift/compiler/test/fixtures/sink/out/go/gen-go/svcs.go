@@ -98,6 +98,10 @@ func (p *SinkServiceProcessor) PackageName() string {
     return "module"
 }
 
+func (p *SinkServiceProcessor) GetInteractionProcessors() []thrift.Processor {
+    return []thrift.Processor{}
+}
+
 func (p *SinkServiceProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
     return GetThriftMetadataForService("module.SinkService")
 }

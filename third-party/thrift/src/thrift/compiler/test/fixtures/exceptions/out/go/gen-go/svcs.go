@@ -190,6 +190,10 @@ func (p *RaiserProcessor) PackageName() string {
     return "module"
 }
 
+func (p *RaiserProcessor) GetInteractionProcessors() []thrift.Processor {
+    return []thrift.Processor{}
+}
+
 func (p *RaiserProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
     return GetThriftMetadataForService("module.Raiser")
 }

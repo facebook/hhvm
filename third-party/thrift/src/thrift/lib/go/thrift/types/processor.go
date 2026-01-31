@@ -28,3 +28,10 @@ type ProcessorFunction interface {
 	// RunContext processes a message handing it to the client handler.
 	RunContext(ctx context.Context, args ReadableStruct) (WritableStruct, error)
 }
+
+// Processor is the interface for thrift processors.
+type Processor interface {
+	ProcessorFunctionMap() map[string]ProcessorFunction
+	FunctionServiceMap() map[string]string
+	GetInteractionProcessors() []Processor
+}

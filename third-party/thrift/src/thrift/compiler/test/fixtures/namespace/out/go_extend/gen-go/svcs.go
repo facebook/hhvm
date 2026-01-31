@@ -106,6 +106,10 @@ func NewExtendTestServiceProcessor(handler ExtendTestService) *ExtendTestService
     return p
 }
 
+func (p *ExtendTestServiceProcessor) GetInteractionProcessors() []thrift.Processor {
+    return []thrift.Processor{}
+}
+
 func (p *ExtendTestServiceProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
     return GetThriftMetadataForService("extend.ExtendTestService")
 }

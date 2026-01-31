@@ -148,6 +148,10 @@ func (p *SomeServiceProcessor) PackageName() string {
     return "module"
 }
 
+func (p *SomeServiceProcessor) GetInteractionProcessors() []thrift.Processor {
+    return []thrift.Processor{}
+}
+
 func (p *SomeServiceProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
     return GetThriftMetadataForService("module.SomeService")
 }

@@ -121,6 +121,10 @@ func (p *MyRootProcessor) PackageName() string {
     return "module"
 }
 
+func (p *MyRootProcessor) GetInteractionProcessors() []thrift.Processor {
+    return []thrift.Processor{}
+}
+
 func (p *MyRootProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
     return GetThriftMetadataForService("module.MyRoot")
 }
@@ -221,6 +225,10 @@ func NewMyNodeProcessor(handler MyNode) *MyNodeProcessor {
     return p
 }
 
+func (p *MyNodeProcessor) GetInteractionProcessors() []thrift.Processor {
+    return []thrift.Processor{}
+}
+
 func (p *MyNodeProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
     return GetThriftMetadataForService("module.MyNode")
 }
@@ -319,6 +327,10 @@ func NewMyLeafProcessor(handler MyLeaf) *MyLeafProcessor {
     p.AddToFunctionServiceMap("do_leaf", "MyLeaf")
 
     return p
+}
+
+func (p *MyLeafProcessor) GetInteractionProcessors() []thrift.Processor {
+    return []thrift.Processor{}
 }
 
 func (p *MyLeafProcessor) GetThriftMetadata() *metadata.ThriftMetadata {

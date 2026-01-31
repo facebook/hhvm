@@ -120,6 +120,10 @@ func (p *BadInteractionProcessor) PackageName() string {
     return "module"
 }
 
+func (p *BadInteractionProcessor) GetInteractionProcessors() []thrift.Processor {
+    return []thrift.Processor{}
+}
+
 func (p *BadInteractionProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
     return GetThriftMetadataForService("module.BadInteraction")
 }
@@ -375,6 +379,10 @@ func (p *MyServiceProcessor) FunctionServiceMap() map[string]string {
 
 func (p *MyServiceProcessor) PackageName() string {
     return "module"
+}
+
+func (p *MyServiceProcessor) GetInteractionProcessors() []thrift.Processor {
+    return []thrift.Processor{}
 }
 
 func (p *MyServiceProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
@@ -662,6 +670,10 @@ func (p *MyServicePrioParentProcessor) PackageName() string {
     return "module"
 }
 
+func (p *MyServicePrioParentProcessor) GetInteractionProcessors() []thrift.Processor {
+    return []thrift.Processor{}
+}
+
 func (p *MyServicePrioParentProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
     return GetThriftMetadataForService("module.MyServicePrioParent")
 }
@@ -784,6 +796,10 @@ func NewMyServicePrioChildProcessor(handler MyServicePrioChild) *MyServicePrioCh
     return p
 }
 
+func (p *MyServicePrioChildProcessor) GetInteractionProcessors() []thrift.Processor {
+    return []thrift.Processor{}
+}
+
 func (p *MyServicePrioChildProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
     return GetThriftMetadataForService("module.MyServicePrioChild")
 }
@@ -900,6 +916,12 @@ func (p *BadServiceProcessor) FunctionServiceMap() map[string]string {
 
 func (p *BadServiceProcessor) PackageName() string {
     return "module"
+}
+
+func (p *BadServiceProcessor) GetInteractionProcessors() []thrift.Processor {
+    return []thrift.Processor{
+        NewBadInteractionProcessor(nil),
+    }
 }
 
 func (p *BadServiceProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
@@ -1065,6 +1087,10 @@ func (p *FooBarBazServiceProcessor) FunctionServiceMap() map[string]string {
 
 func (p *FooBarBazServiceProcessor) PackageName() string {
     return "module"
+}
+
+func (p *FooBarBazServiceProcessor) GetInteractionProcessors() []thrift.Processor {
+    return []thrift.Processor{}
 }
 
 func (p *FooBarBazServiceProcessor) GetThriftMetadata() *metadata.ThriftMetadata {

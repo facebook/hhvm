@@ -86,6 +86,19 @@ func (p *{{service:go_name}}Processor) PackageName() string {
 }
 {{/service:extends?}}
 
+func (p *{{service:go_name}}Processor) GetInteractionProcessors() []thrift.Processor {
+{{#service:interactions?}}
+    return []thrift.Processor{
+    {{#service:interactions}}
+        New{{service:go_name}}Processor(nil),
+    {{/service:interactions}}
+    }
+{{/service:interactions?}}
+{{^service:interactions?}}
+    return []thrift.Processor{}
+{{/service:interactions?}}
+}
+
 {{#program:gen_metadata?}}
 func (p *{{service:go_name}}Processor) GetThriftMetadata() *{{program:metadata_qualifier}}ThriftMetadata {
     return GetThriftMetadataForService("{{service:scoped_name}}")

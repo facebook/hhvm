@@ -122,6 +122,10 @@ func (p *TestServiceProcessor) PackageName() string {
     return "emptyns"
 }
 
+func (p *TestServiceProcessor) GetInteractionProcessors() []thrift.Processor {
+    return []thrift.Processor{}
+}
+
 func (p *TestServiceProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
     return GetThriftMetadataForService("emptyns.TestService")
 }

@@ -646,6 +646,10 @@ func (p *GetEntityProcessor) PackageName() string {
     return "module"
 }
 
+func (p *GetEntityProcessor) GetInteractionProcessors() []thrift.Processor {
+    return []thrift.Processor{}
+}
+
 func (p *GetEntityProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
     return GetThriftMetadataForService("module.GetEntity")
 }

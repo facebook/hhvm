@@ -124,6 +124,10 @@ func (p *ServiceProcessor) PackageName() string {
     return "module"
 }
 
+func (p *ServiceProcessor) GetInteractionProcessors() []thrift.Processor {
+    return []thrift.Processor{}
+}
+
 func (p *ServiceProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
     return GetThriftMetadataForService("module.Service")
 }
@@ -266,6 +270,10 @@ func (p *AdapterServiceProcessor) FunctionServiceMap() map[string]string {
 
 func (p *AdapterServiceProcessor) PackageName() string {
     return "module"
+}
+
+func (p *AdapterServiceProcessor) GetInteractionProcessors() []thrift.Processor {
+    return []thrift.Processor{}
 }
 
 func (p *AdapterServiceProcessor) GetThriftMetadata() *metadata.ThriftMetadata {

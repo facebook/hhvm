@@ -42,6 +42,7 @@ type Processor interface {
 	ProcessorFunctionMap() map[string]types.ProcessorFunction
 	GetThriftMetadata() *metadata.ThriftMetadata
 	FunctionServiceMap() map[string]string
+	GetInteractionProcessors() []types.Processor
 }
 
 func errorType(err error) string {

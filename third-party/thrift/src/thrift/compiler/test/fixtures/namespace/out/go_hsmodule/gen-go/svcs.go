@@ -122,6 +122,10 @@ func (p *HsTestServiceProcessor) PackageName() string {
     return "test"
 }
 
+func (p *HsTestServiceProcessor) GetInteractionProcessors() []thrift.Processor {
+    return []thrift.Processor{}
+}
+
 func (p *HsTestServiceProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
     return GetThriftMetadataForService("hsmodule.HsTestService")
 }

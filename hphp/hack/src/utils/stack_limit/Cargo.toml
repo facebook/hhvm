@@ -11,5 +11,5 @@ license = "MIT"
 path = "lib.rs"
 
 [dependencies]
-psm = "0.1.17"
+psm = "0.1.29"
 stacker = "0.1.14"

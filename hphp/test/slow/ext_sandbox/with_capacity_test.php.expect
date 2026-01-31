@@ -1,0 +1,17 @@
+Testing HH\Sandbox\dict_with_capacity...
+Created empty dict with capacity 1000
+Dict count: 0
+After adding 100 elements, count: 100
+Dict value verification passed
+
+Testing HH\Sandbox\vec_with_capacity...
+Created empty vec with capacity 500
+Vec count: 0
+After adding 100 elements, count: 100
+Vec value verification passed
+
+Testing error handling...
+Correctly threw InvalidArgumentException for capacity 0
+Correctly threw InvalidArgumentException for capacity -1
+
+All tests passed!

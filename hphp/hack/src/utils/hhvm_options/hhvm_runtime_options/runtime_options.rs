@@ -203,6 +203,7 @@ pub fn apply_tier_overrides_with_params(
             }
         }
     }
+    matched_tiers.sort();
     Ok((config, matched_tiers, traced_rules))
 }
 
@@ -631,7 +632,7 @@ mod test {
             Some(1),
             Some(2),
             Some(6),
-            vec!["disable_shards".into(), "baz_tier".into()],
+            vec!["baz_tier".into(), "disable_shards".into()],
         )?;
 
         // Match on foo and baz in shard range, and foo_baz
@@ -643,7 +644,7 @@ mod test {
             None,
             None,
             Some(5),
-            vec!["foo_tier".into(), "baz_tier".into(), "foo_baz_tier".into()],
+            vec!["baz_tier".into(), "foo_baz_tier".into(), "foo_tier".into()],
         )?;
         Ok(())
     }

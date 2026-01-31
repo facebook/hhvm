@@ -45,6 +45,11 @@ safe permanent server exception DummyException {
 
 interaction Summer {
   i32 add(1: i32 val);
+  i32 addTwo();
+}
+
+interaction Waiter {
+  void wait(1: i64 milliseconds);
 }
 
 service Dummy {
@@ -66,6 +71,7 @@ service Dummy {
   i32, stream<i32> ResponseAndStreamWithUndeclaredException();
 
   Summer createSummer();
+  Waiter createWaiter();
 }
 
 service DummyTwo {

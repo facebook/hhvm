@@ -19,6 +19,7 @@ package dummy
 import (
 	"context"
 	"errors"
+	"sync/atomic"
 	"time"
 
 	"github.com/facebook/fbthrift/thrift/test/go/if/dummy"
@@ -134,11 +135,27 @@ func (h *DummyHandler) CreateSummer(_ context.Context) (*dummy.SummerProcessor, 
 	return dummy.NewSummerProcessor(&SummerHandler{}), nil
 }
 
+func (h *DummyHandler) CreateWaiter(_ context.Context) (*dummy.WaiterProcessor, error) {
+	return dummy.NewWaiterProcessor(&WaiterHandler{}), nil
+}
+
 type SummerHandler struct {
-	sum int32
+	sum atomic.Int32
 }
 
 func (h *SummerHandler) Add(_ context.Context, val int32) (int32, error) {
-	h.sum += val
-	return h.sum, nil
+	h.sum.Add(val)
+	return h.sum.Load(), nil
+}
+
+func (h *SummerHandler) AddTwo(_ context.Context) (int32, error) {
+	h.sum.Add(2)
+	return h.sum.Load(), nil
+}
+
+type WaiterHandler struct{}
+
+func (h *WaiterHandler) Wait(_ context.Context, milliseconds int64) error {
+	time.Sleep(time.Duration(milliseconds) * time.Millisecond)
+	return nil
 }

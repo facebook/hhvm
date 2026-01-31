@@ -7,6 +7,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  */
+<<file: __EnableUnstableFeatures('readonly')>>
 
 /**
  * Object of this type is returned by `__FUNCTION_CREDENTIAL__`
@@ -15,11 +16,11 @@
 final class FunctionCredential {
   private function __construct() {}
 
-  public function getClassName()[]: ?string;
+  public readonly function getClassName()[]: ?string;
 
-  public function getFunctionName()[]: string;
+  public readonly function getFunctionName()[]: string;
 
-  public function getFilename()[]: string;
+  public readonly function getFilename()[]: string;
 
   /**
    * Packs this FunctionCredential into a signed string representation.
@@ -33,7 +34,7 @@ final class FunctionCredential {
    *
    * Use unpack() to reconstruct a FunctionCredential from the packed string.
    */
-  public function pack()[]: string;
+  public readonly function pack()[]: string;
 
   /**
    * Unpacks a FunctionCredential from its signed string representation.
@@ -50,5 +51,5 @@ final class FunctionCredential {
    */
   public static function unpack(string $packed)[]: FunctionCredential;
 
-  public function __debugInfo(): darray<string, ?string>;
+  public readonly function __debugInfo(): darray<string, ?string>;
 }

@@ -63,10 +63,10 @@ let make_gc_control config =
     GlobalConfig.gc_control
   in
   let minor_heap_size =
-    int_ "gc_minor_heap_size" ~default:minor_heap_size config
+    int_ Config_keys.gc_minor_heap_size ~default:minor_heap_size config
   in
   let space_overhead =
-    int_ "gc_space_overhead" ~default:space_overhead config
+    int_ Config_keys.gc_space_overhead ~default:space_overhead config
   in
   { GlobalConfig.gc_control with Gc.Control.minor_heap_size; space_overhead }
 
@@ -75,27 +75,37 @@ let make_sharedmem_config config local_config =
     SharedMem.default_config
   in
   let shm_dirs = local_config.ServerLocalConfig.shm_dirs in
-  let global_size = int_ "sharedmem_global_size" ~default:global_size config in
-  let heap_size = int_ "sharedmem_heap_size" ~default:heap_size config in
-  let hash_table_pow = int_ "sharedmem_hash_table_pow" ~default:18 config in
-  let log_level = int_ "sharedmem_log_level" ~default:0 config in
-  let sample_rate = float_ "sharedmem_sample_rate" ~default:0.0 config in
-  let compression = int_ "sharedmem_compression" ~default:0 config in
-  let shm_dirs = string_list "sharedmem_dirs" ~default:shm_dirs config in
+  let global_size =
+    int_ Config_keys.sharedmem_global_size ~default:global_size config
+  in
+  let heap_size =
+    int_ Config_keys.sharedmem_heap_size ~default:heap_size config
+  in
+  let hash_table_pow =
+    int_ Config_keys.sharedmem_hash_table_pow ~default:18 config
+  in
+  let log_level = int_ Config_keys.sharedmem_log_level ~default:0 config in
+  let sample_rate =
+    float_ Config_keys.sharedmem_sample_rate ~default:0.0 config
+  in
+  let compression = int_ Config_keys.sharedmem_compression ~default:0 config in
+  let shm_dirs =
+    string_list Config_keys.sharedmem_dirs ~default:shm_dirs config
+  in
   let shm_use_sharded_hashtbl =
     bool_
-      "shm_use_sharded_hashtbl"
+      Config_keys.shm_use_sharded_hashtbl
       ~default:local_config.ServerLocalConfig.shm_use_sharded_hashtbl
       config
   in
   let shm_cache_size =
     int_
-      "shm_cache_size"
+      Config_keys.shm_cache_size
       ~default:local_config.ServerLocalConfig.shm_cache_size
       config
   in
   let shm_min_avail =
-    int_ "sharedmem_minimum_available" ~default:shm_min_avail config
+    int_ Config_keys.sharedmem_minimum_available ~default:shm_min_avail config
   in
   {
     SharedMem.global_size;
@@ -120,14 +130,18 @@ let process_experimental sl =
 
 let config_experimental_tc_features config =
   Option.map
-    (Config_file.Getters.string_opt "enable_experimental_tc_features" config)
+    (Config_file.Getters.string_opt
+       Config_keys.enable_experimental_tc_features
+       config)
     ~f:(fun list_str ->
       let sl = Str.split config_list_regexp list_str in
       process_experimental sl)
 
 let config_experimental_stx_features config =
   Option.map
-    (Config_file.Getters.string_opt "enable_experimental_stx_features" config)
+    (Config_file.Getters.string_opt
+       Config_keys.enable_experimental_stx_features
+       config)
     ~f:(fun str ->
       let json = Hh_json.json_of_string ~strict:true str in
       let pairs = Hh_json.get_object_exn json in
@@ -146,7 +160,9 @@ let process_migration_flags sl =
 
 let config_tc_migration_flags config =
   Option.map
-    (Config_file.Getters.string_opt "enable_tc_migration_flags" config)
+    (Config_file.Getters.string_opt
+       Config_keys.enable_tc_migration_flags
+       config)
     ~f:(fun list_str ->
       Str.split config_list_regexp list_str
       |> List.map ~f:String.lowercase
@@ -163,7 +179,7 @@ let convert_paths str =
     l
 
 let process_ignored_paths config =
-  Config_file.Getters.string_opt "ignored_paths" config
+  Config_file.Getters.string_opt Config_keys.ignored_paths config
   |> Option.value_map ~f:convert_paths ~default:[]
 
 let maybe_relative_path fn =
@@ -178,12 +194,12 @@ let maybe_relative_path fn =
     end
 
 let process_extra_paths config =
-  match Config_file.Getters.string_opt "extra_paths" config with
+  match Config_file.Getters.string_opt Config_keys.extra_paths config with
   | Some s -> Str.split config_list_regexp s |> List.map ~f:maybe_relative_path
   | _ -> []
 
 let process_untrusted_mode config =
-  match Config_file.Getters.string_opt "untrusted_mode" config with
+  match Config_file.Getters.string_opt Config_keys.untrusted_mode config with
   | Some s ->
     if bool_of_string s then
       let blacklist =
@@ -236,7 +252,7 @@ let convert_auto_namespace_to_map map =
 
 let prepare_auto_namespace_map config =
   Option.map
-    (Config_file.Getters.string_opt "auto_namespace_map" config)
+    (Config_file.Getters.string_opt Config_keys.auto_namespace_map config)
     ~f:convert_auto_namespace_to_map
 
 let extract_log_level = function
@@ -254,7 +270,7 @@ let convert_log_levels_to_map map =
 
 let prepare_log_levels config =
   Option.map
-    (Config_file.Getters.string_opt "log_levels" config)
+    (Config_file.Getters.string_opt Config_keys.log_levels config)
     ~f:convert_log_levels_to_map
 
 let prepare_iset config config_name =
@@ -266,10 +282,12 @@ let prepare_iset config config_name =
       |> List.fold_right ~init:ISet.empty ~f:ISet.add)
 
 let prepare_allowed_decl_fixme_codes config =
-  prepare_iset config "allowed_decl_fixme_codes"
+  prepare_iset config Config_keys.allowed_decl_fixme_codes
 
 let reasons_config_opt config =
-  Option.bind (string_opt "extended_reasons" config) ~f:(fun data_str ->
+  Option.bind
+    (string_opt Config_keys.extended_reasons config)
+    ~f:(fun data_str ->
       if String.equal data_str "debug" then
         Some GlobalOptions.Debug
       else if String.equal data_str "legacy" then
@@ -297,61 +315,67 @@ let load_config (config : Config_file_common.t) (options : GlobalOptions.t) :
         (* Never use the legacy mode for hh_server *)
         use_legacy_experimental_feature_config = false;
         (* The remainder are set in the config file *)
-        is_systemlib = bool_opt "is_systemlib" config >?? po_opt.is_systemlib;
+        is_systemlib =
+          bool_opt Config_keys.is_systemlib config >?? po_opt.is_systemlib;
         disable_lval_as_an_expression =
-          bool_opt "disable_lval_as_an_expression" config
+          bool_opt Config_keys.disable_lval_as_an_expression config
           >?? po_opt.disable_lval_as_an_expression;
         disable_legacy_soft_typehints =
-          bool_opt "disable_legacy_soft_typehints" config
+          bool_opt Config_keys.disable_legacy_soft_typehints config
           >?? po_opt.disable_legacy_soft_typehints;
         const_default_func_args =
-          bool_opt "const_default_func_args" config
+          bool_opt Config_keys.const_default_func_args config
           >?? po_opt.const_default_func_args;
         const_default_lambda_args =
-          bool_opt "const_default_lambda_args" config
+          bool_opt Config_keys.const_default_lambda_args config
           >?? po_opt.const_default_lambda_args;
         const_static_props =
-          bool_opt "const_static_props" config >?? po_opt.const_static_props;
+          bool_opt Config_keys.const_static_props config
+          >?? po_opt.const_static_props;
         abstract_static_props =
-          bool_opt "abstract_static_props" config
+          bool_opt Config_keys.abstract_static_props config
           >?? po_opt.abstract_static_props;
         disallow_func_ptrs_in_constants =
-          bool_opt "disallow_func_ptrs_in_constants" config
+          bool_opt Config_keys.disallow_func_ptrs_in_constants config
           >?? po_opt.disallow_func_ptrs_in_constants;
         disable_xhp_element_mangling =
-          bool_opt "disable_xhp_element_mangling" config
+          bool_opt Config_keys.disable_xhp_element_mangling config
           >?? po_opt.disable_xhp_element_mangling;
         disable_xhp_children_declarations =
-          bool_opt "disable_xhp_children_declarations" config
+          bool_opt Config_keys.disable_xhp_children_declarations config
           >?? po_opt.disable_xhp_children_declarations;
         enable_xhp_class_modifier =
-          bool_opt "enable_xhp_class_modifier" config
+          bool_opt Config_keys.enable_xhp_class_modifier config
           >?? po_opt.enable_xhp_class_modifier;
         interpret_soft_types_as_like_types =
-          bool_opt "interpret_soft_types_as_like_types" config
+          bool_opt Config_keys.interpret_soft_types_as_like_types config
           >?? po_opt.interpret_soft_types_as_like_types;
         disallow_static_constants_in_default_func_args =
-          bool_opt "disallow_static_constants_in_default_func_args" config
+          bool_opt
+            Config_keys.disallow_static_constants_in_default_func_args
+            config
           >?? po_opt.disallow_static_constants_in_default_func_args;
         auto_namespace_map =
           prepare_auto_namespace_map config >?? po_opt.auto_namespace_map;
         everything_sdt =
-          bool_opt "everything_sdt" config >?? po_opt.everything_sdt;
+          bool_opt Config_keys.everything_sdt config >?? po_opt.everything_sdt;
         keep_user_attributes =
-          bool_opt "keep_user_attributes" config >?? po_opt.keep_user_attributes;
+          bool_opt Config_keys.keep_user_attributes config
+          >?? po_opt.keep_user_attributes;
         deregister_php_stdlib =
-          bool_opt "deregister_php_stdlib" config
+          bool_opt Config_keys.deregister_php_stdlib config
           >?? po_opt.deregister_php_stdlib;
         union_intersection_type_hints =
-          bool_opt "union_intersection_type_hints" config
+          bool_opt Config_keys.union_intersection_type_hints config
           >?? po_opt.union_intersection_type_hints;
         disallow_silence =
-          bool_opt "disallow_silence" config >?? po_opt.disallow_silence;
+          bool_opt Config_keys.disallow_silence config
+          >?? po_opt.disallow_silence;
         allowed_decl_fixme_codes =
           prepare_allowed_decl_fixme_codes config
           >?? po_opt.allowed_decl_fixme_codes;
         disable_hh_ignore_error =
-          int_opt "disable_hh_ignore_error" config
+          int_opt Config_keys.disable_hh_ignore_error config
           >?? po_opt.disable_hh_ignore_error;
         experimental_features =
           experimental_features >?? po_opt.experimental_features;
@@ -362,169 +386,188 @@ let load_config (config : Config_file_common.t) (options : GlobalOptions.t) :
           Option.is_none experimental_features;
         package_info = po_opt.package_info;
         package_support_multifile_tests =
-          bool_opt "package_support_multifile_tests" config
+          bool_opt Config_keys.package_support_multifile_tests config
           >?? po_opt.package_support_multifile_tests;
         enable_class_pointer_hint =
-          bool_opt "enable_class_pointer_hint" config
+          bool_opt Config_keys.enable_class_pointer_hint config
           >?? po_opt.enable_class_pointer_hint;
         disallow_non_annotated_memoize =
-          bool_opt "disallow_non_annotated_memoize" config
+          bool_opt Config_keys.disallow_non_annotated_memoize config
           >?? po_opt.disallow_non_annotated_memoize;
         treat_non_annotated_memoize_as_kbic =
-          bool_opt "treat_non_annotated_memoize_as_kbic" config
+          bool_opt Config_keys.treat_non_annotated_memoize_as_kbic config
           >?? po_opt.treat_non_annotated_memoize_as_kbic;
         ignore_string_methods =
-          bool_opt "ignore_string_methods" config
+          bool_opt Config_keys.ignore_string_methods config
           >?? po_opt.ignore_string_methods;
       }
   in
   GlobalOptions.set
     ~po
-    ?tco_language_feature_logging:(bool_opt "language_feature_logging" config)
-    ?tco_timeout:(int_opt "timeout" config)
+    ?tco_language_feature_logging:
+      (bool_opt Config_keys.language_feature_logging config)
+    ?tco_timeout:(int_opt Config_keys.timeout config)
     ?tco_constraint_array_index_assign:
-      (bool_opt "constraint_array_index_assign" config)
-    ?tco_constraint_method_call:(bool_opt "constraint_method_call" config)
-    ?code_agnostic_fixme:(bool_opt "code_agnostic_fixme" config)
+      (bool_opt Config_keys.constraint_array_index_assign config)
+    ?tco_constraint_method_call:
+      (bool_opt Config_keys.constraint_method_call config)
+    ?code_agnostic_fixme:(bool_opt Config_keys.code_agnostic_fixme config)
     ?allowed_fixme_codes_strict:
-      (prepare_iset config "allowed_fixme_codes_strict")
+      (prepare_iset config Config_keys.allowed_fixme_codes_strict)
     ?tco_experimental_features:(config_experimental_tc_features config)
     ?tco_migration_flags:(config_tc_migration_flags config)
-    ?tco_coeffects:(bool_opt "call_coeffects" config)
-    ?tco_coeffects_local:(bool_opt "local_coeffects" config)
-    ?tco_like_casts:(bool_opt "like_casts" config)
-    ?tco_check_xhp_attribute:(bool_opt "check_xhp_attribute" config)
-    ?tco_check_redundant_generics:(bool_opt "check_redundant_generics" config)
+    ?tco_coeffects:(bool_opt Config_keys.call_coeffects config)
+    ?tco_coeffects_local:(bool_opt Config_keys.local_coeffects config)
+    ?tco_like_casts:(bool_opt Config_keys.like_casts config)
+    ?tco_check_xhp_attribute:(bool_opt Config_keys.check_xhp_attribute config)
+    ?tco_check_redundant_generics:
+      (bool_opt Config_keys.check_redundant_generics config)
     ?tco_disallow_unresolved_type_variables:
-      (bool_opt "disallow_unresolved_type_variables" config)
-    ?tco_locl_cache_capacity:(int_opt "locl_cache_capacity" config)
-    ?tco_locl_cache_node_threshold:(int_opt "locl_cache_node_threshold" config)
+      (bool_opt Config_keys.disallow_unresolved_type_variables config)
+    ?tco_locl_cache_capacity:(int_opt Config_keys.locl_cache_capacity config)
+    ?tco_locl_cache_node_threshold:
+      (int_opt Config_keys.locl_cache_node_threshold config)
     ?po_disallow_toplevel_requires:
-      (bool_opt "disallow_toplevel_requires" config)
-    ?tco_const_attribute:(bool_opt "const_attribute" config)
+      (bool_opt Config_keys.disallow_toplevel_requires config)
+    ?tco_const_attribute:(bool_opt Config_keys.const_attribute config)
     ?tco_type_refinement_partition_shapes:
-      (bool_opt "type_refinement_partition_shapes" config)
-    ?glean_reponame:(string_opt "glean_reponame" config)
+      (bool_opt Config_keys.type_refinement_partition_shapes config)
+    ?glean_reponame:(string_opt Config_keys.glean_reponame config)
     ?symbol_write_index_inherited_members:
-      (bool_opt "symbol_write_index_inherited_members" config)
-    ?symbol_write_ownership:(bool_opt "symbol_write_ownership" config)
-    ?symbol_write_root_path:(string_opt "symbol_write_root_path" config)
-    ?symbol_write_hhi_path:(string_opt "symbol_write_hhi_path" config)
+      (bool_opt Config_keys.symbol_write_index_inherited_members config)
+    ?symbol_write_ownership:(bool_opt Config_keys.symbol_write_ownership config)
+    ?symbol_write_root_path:
+      (string_opt Config_keys.symbol_write_root_path config)
+    ?symbol_write_hhi_path:(string_opt Config_keys.symbol_write_hhi_path config)
     ?symbol_write_ignore_paths:
-      (string_list_opt "symbol_write_ignore_paths" config)
+      (string_list_opt Config_keys.symbol_write_ignore_paths config)
     ?symbol_write_index_paths:
-      (string_list_opt "symbol_write_index_paths" config)
+      (string_list_opt Config_keys.symbol_write_index_paths config)
     ?symbol_write_index_paths_file:
-      (string_opt "symbol_write_index_paths_file" config)
+      (string_opt Config_keys.symbol_write_index_paths_file config)
     ?symbol_write_index_paths_file_output:
-      (string_opt "symbol_write_index_paths_file_output" config)
-    ?symbol_write_include_hhi:(bool_opt "symbol_write_include_hhi" config)
-    ?symbol_write_sym_hash_in:(string_opt "symbol_write_sym_hash_in" config)
-    ?symbol_write_exclude_out:(string_opt "symbol_write_exclude_out" config)
+      (string_opt Config_keys.symbol_write_index_paths_file_output config)
+    ?symbol_write_include_hhi:
+      (bool_opt Config_keys.symbol_write_include_hhi config)
+    ?symbol_write_sym_hash_in:
+      (string_opt Config_keys.symbol_write_sym_hash_in config)
+    ?symbol_write_exclude_out:
+      (string_opt Config_keys.symbol_write_exclude_out config)
     ?symbol_write_referenced_out:
-      (string_opt "symbol_write_referenced_out" config)
-    ?symbol_write_reindexed_out:(string_opt "symbol_write_reindexed_out" config)
-    ?symbol_write_sym_hash_out:(bool_opt "symbol_write_sym_hash_out" config)
-    ?tco_error_php_lambdas:(bool_opt "error_php_lambdas" config)
+      (string_opt Config_keys.symbol_write_referenced_out config)
+    ?symbol_write_reindexed_out:
+      (string_opt Config_keys.symbol_write_reindexed_out config)
+    ?symbol_write_sym_hash_out:
+      (bool_opt Config_keys.symbol_write_sym_hash_out config)
+    ?tco_error_php_lambdas:(bool_opt Config_keys.error_php_lambdas config)
     ?tco_disallow_discarded_nullable_awaitables:
-      (bool_opt "disallow_discarded_nullable_awaitables" config)
-    ?tco_typecheck_sample_rate:(float_opt "typecheck_sample_rate" config)
-    ?tco_pessimise_builtins:(bool_opt "pessimise_builtins" config)
-    ?tco_enable_no_auto_dynamic:(bool_opt "enable_no_auto_dynamic" config)
-    ?tco_skip_check_under_dynamic:(bool_opt "skip_check_under_dynamic" config)
+      (bool_opt Config_keys.disallow_discarded_nullable_awaitables config)
+    ?tco_typecheck_sample_rate:
+      (float_opt Config_keys.typecheck_sample_rate config)
+    ?tco_pessimise_builtins:(bool_opt Config_keys.pessimise_builtins config)
+    ?tco_enable_no_auto_dynamic:
+      (bool_opt Config_keys.enable_no_auto_dynamic config)
+    ?tco_skip_check_under_dynamic:
+      (bool_opt Config_keys.skip_check_under_dynamic config)
     ?tco_enable_function_references:
-      (bool_opt "enable_function_references" config)
-    ?tco_ignore_unsafe_cast:(bool_opt "ignore_unsafe_cast" config)
+      (bool_opt Config_keys.enable_function_references config)
+    ?tco_ignore_unsafe_cast:(bool_opt Config_keys.ignore_unsafe_cast config)
     ?tco_allowed_expression_tree_visitors:
       (Option.map
-         (string_list_opt "allowed_expression_tree_visitors" config)
+         (string_list_opt Config_keys.allowed_expression_tree_visitors config)
          ~f:(fun l -> List.map l ~f:Utils.add_ns))
     ?tco_typeconst_concrete_concrete_error:
-      (bool_opt "typeconst_concrete_concrete_error" config)
+      (bool_opt Config_keys.typeconst_concrete_concrete_error config)
     ?tco_meth_caller_only_public_visibility:
-      (bool_opt "meth_caller_only_public_visibility" config)
+      (bool_opt Config_keys.meth_caller_only_public_visibility config)
     ?tco_require_extends_implements_ancestors:
-      (bool_opt "require_extends_implements_ancestors" config)
-    ?tco_strict_value_equality:(bool_opt "strict_value_equality" config)
-    ?tco_enforce_sealed_subclasses:(bool_opt "enforce_sealed_subclasses" config)
-    ?tco_implicit_inherit_sdt:(bool_opt "implicit_inherit_sdt" config)
-    ?tco_repo_stdlib_path:(string_opt "repo_stdlib_path" config)
+      (bool_opt Config_keys.require_extends_implements_ancestors config)
+    ?tco_strict_value_equality:
+      (bool_opt Config_keys.strict_value_equality config)
+    ?tco_enforce_sealed_subclasses:
+      (bool_opt Config_keys.enforce_sealed_subclasses config)
+    ?tco_implicit_inherit_sdt:(bool_opt Config_keys.implicit_inherit_sdt config)
+    ?tco_repo_stdlib_path:(string_opt Config_keys.repo_stdlib_path config)
     ?tco_explicit_consistent_constructors:
-      (int_opt "explicit_consistent_constructors" config)
+      (int_opt Config_keys.explicit_consistent_constructors config)
     ?tco_require_types_class_consts:
-      (int_opt "require_types_tco_require_types_class_consts" config)
-    ?tco_check_bool_for_condition:(int_opt "check_bool_for_condition" config)
-    ?tco_type_printer_fuel:(int_opt "type_printer_fuel" config)
+      (int_opt Config_keys.require_types_tco_require_types_class_consts config)
+    ?tco_check_bool_for_condition:
+      (int_opt Config_keys.check_bool_for_condition config)
+    ?tco_type_printer_fuel:(int_opt Config_keys.type_printer_fuel config)
     ?tco_profile_top_level_definitions:
-      (bool_opt "profile_top_level_definitions" config)
+      (bool_opt Config_keys.profile_top_level_definitions config)
     ?tco_typecheck_if_name_matches_regexp:
-      (string_opt "typecheck_if_name_matches_regexp" config)
+      (string_opt Config_keys.typecheck_if_name_matches_regexp config)
     ?log_levels:(prepare_log_levels config)
     ?tco_allowed_files_for_module_declarations:
-      (string_list_opt "allowed_files_for_module_declarations" config)
+      (string_list_opt Config_keys.allowed_files_for_module_declarations config)
     ?tco_allow_all_files_for_module_declarations:
-      (bool_opt "allow_all_files_for_module_declarations" config)
+      (bool_opt Config_keys.allow_all_files_for_module_declarations config)
     ?tco_populate_dead_unsafe_cast_heap:
-      (bool_opt "populate_dead_unsafe_cast_heap" config)
-    ?dump_tast_hashes:(bool_opt "dump_tast_hashes" config)
-    ?warnings_default_all:(bool_opt "warnings_default_all" config)
+      (bool_opt Config_keys.populate_dead_unsafe_cast_heap config)
+    ?dump_tast_hashes:(bool_opt Config_keys.dump_tast_hashes config)
+    ?warnings_default_all:(bool_opt Config_keys.warnings_default_all config)
     ?warnings_in_sandcastle:(bool_opt "warnings_in_sandcastle" config)
     ?tco_allowed_files_for_ignore_readonly:
-      (string_list_opt "allowed_files_for_ignore_readonly" config)
+      (string_list_opt Config_keys.allowed_files_for_ignore_readonly config)
     ?tco_package_allow_typedef_violations:
-      (bool_opt "package_allow_typedef_violations" config)
+      (bool_opt Config_keys.package_allow_typedef_violations config)
     ?tco_package_allow_classconst_violations:
-      (bool_opt "package_allow_classconst_violations" config)
+      (bool_opt Config_keys.package_allow_classconst_violations config)
     ?tco_package_allow_reifiable_tconst_violations:
-      (bool_opt "package_allow_reifiable_tconst_violations" config)
+      (bool_opt Config_keys.package_allow_reifiable_tconst_violations config)
     ?tco_package_allow_reified_generics_violations:
-      (bool_opt "package_allow_reified_generics_violations" config)
+      (bool_opt Config_keys.package_allow_reified_generics_violations config)
     ?tco_package_allow_all_tconst_violations:
-      (bool_opt "package_allow_all_tconst_violations" config)
+      (bool_opt Config_keys.package_allow_all_tconst_violations config)
     ?tco_package_allow_all_generics_violations:
-      (bool_opt "package_allow_all_generics_violations" config)
+      (bool_opt Config_keys.package_allow_all_generics_violations config)
     ?tco_package_allow_function_pointers_violations:
-      (bool_opt "package_allow_function_pointers_violations" config)
+      (bool_opt Config_keys.package_allow_function_pointers_violations config)
     ?tco_package_exclude_patterns:
-      (string_list_opt "package_exclude_patterns" config)
+      (string_list_opt Config_keys.package_exclude_patterns config)
     ?tco_extended_reasons:(reasons_config_opt config)
-    ?tco_disable_physical_equality:(bool_opt "disable_physical_equality" config)
-    ?re_no_cache:(bool_opt "re_no_cache" config)
+    ?tco_disable_physical_equality:
+      (bool_opt Config_keys.disable_physical_equality config)
+    ?re_no_cache:(bool_opt Config_keys.re_no_cache config)
     ?hh_distc_should_disable_trace_store:
-      (bool_opt "hh_distc_should_disable_trace_store" config)
+      (bool_opt Config_keys.hh_distc_should_disable_trace_store config)
     ?hh_distc_exponential_backoff_num_retries:
-      (int_opt "hh_distc_exponential_backoff_num_retries" config)
+      (int_opt Config_keys.hh_distc_exponential_backoff_num_retries config)
     ?tco_enable_abstract_method_optional_parameters:
-      (bool_opt "enable_abstract_method_optional_parameters" config)
+      (bool_opt Config_keys.enable_abstract_method_optional_parameters config)
     ?hack_warnings:
-      (bool_opt "hack_warnings" config
+      (bool_opt Config_keys.hack_warnings config
       |> Option.map ~f:(function
              | true -> GlobalOptions.All_except []
              | false -> GlobalOptions.NNone))
-    ?recursive_case_types:(bool_opt "recursive_case_types" config)
-    ?class_sub_classname:(bool_opt "class_sub_classname" config)
-    ?class_class_type:(bool_opt "class_class_type" config)
-    ?needs_concrete:(bool_opt "needs_concrete" config)
+    ?recursive_case_types:(bool_opt Config_keys.recursive_case_types config)
+    ?class_sub_classname:(bool_opt Config_keys.class_sub_classname config)
+    ?class_class_type:(bool_opt Config_keys.class_class_type config)
+    ?needs_concrete:(bool_opt Config_keys.needs_concrete config)
     ?needs_concrete_override_check:
-      (bool_opt "needs_concrete_override_check" config)
-    ?allow_class_string_cast:(bool_opt "allow_class_string_cast" config)
+      (bool_opt Config_keys.needs_concrete_override_check config)
+    ?allow_class_string_cast:
+      (bool_opt Config_keys.allow_class_string_cast config)
     ?class_pointer_ban_classname_new:
-      (int_opt "class_pointer_ban_classname_new" config)
+      (int_opt Config_keys.class_pointer_ban_classname_new config)
     ?class_pointer_ban_classname_type_structure:
-      (int_opt "class_pointer_ban_classname_type_structure" config)
+      (int_opt Config_keys.class_pointer_ban_classname_type_structure config)
     ?class_pointer_ban_classname_static_meth:
-      (int_opt "class_pointer_ban_classname_static_meth" config)
+      (int_opt Config_keys.class_pointer_ban_classname_static_meth config)
     ?class_pointer_ban_classname_class_const:
-      (int_opt "class_pointer_ban_classname_class_const" config)
+      (int_opt Config_keys.class_pointer_ban_classname_class_const config)
     ?class_pointer_ban_class_array_key:
-      (bool_opt "class_pointer_ban_class_array_key" config)
-    ?tco_poly_function_pointers:(bool_opt "poly_function_pointers" config)
-    ?tco_check_packages:(bool_opt "check_packages" config)
+      (bool_opt Config_keys.class_pointer_ban_class_array_key config)
+    ?tco_poly_function_pointers:
+      (bool_opt Config_keys.poly_function_pointers config)
+    ?tco_check_packages:(bool_opt Config_keys.check_packages config)
     ?fanout_strip_class_location:(bool_opt "fanout_strip_class_location" config)
     ?tco_package_config_disable_transitivity_check:
-      (bool_opt "package_config_disable_transitivity_check" config)
+      (bool_opt Config_keys.package_config_disable_transitivity_check config)
     ?tco_allow_require_package_on_interface_methods:
-      (bool_opt "allow_require_package_on_interface_methods" config)
+      (bool_opt Config_keys.allow_require_package_on_interface_methods config)
     options
 
 (** Load local config from the following sources:
@@ -542,10 +585,10 @@ let load_local_config
     ~silent
     ~from : ServerLocalConfig.t =
   let current_rolled_out_flag_idx =
-    int_ "current_saved_state_rollout_flag_index" ~default:0 config
+    int_ Config_keys.current_saved_state_rollout_flag_index ~default:0 config
   in
   let deactivate_saved_state_rollout =
-    bool_ "deactivate_saved_state_rollout" ~default:false config
+    bool_ Config_keys.deactivate_saved_state_rollout ~default:false config
   in
   ServerLocalConfigLoad.load
     ~silent
@@ -568,14 +611,15 @@ let load ~silent ~from ~(cli_config_overrides : (string * string) list) :
   in
   process_untrusted_mode config;
   let version =
-    Config_file.parse_version (Config_file.Getters.string_opt "version" config)
+    Config_file.parse_version
+      (Config_file.Getters.string_opt Config_keys.version config)
   in
   let local_config =
     load_local_config config version ~command_line_overrides ~silent ~from
   in
   Option.iter
     ~f:Config_file_common.set_pkgconfig_path
-    (string_opt "packages_config_path" config);
+    (string_opt Config_keys.packages_config_path config);
   let pkgs_config_abs_path =
     Relative_path.(
       to_absolute
@@ -624,14 +668,14 @@ let load ~silent ~from ~(cli_config_overrides : (string * string) list) :
         ~hack_warnings:
           (if local_config.hack_warnings then
             GlobalOptions.All_except
-              (int_list_opt "disabled_warnings" config
+              (int_list_opt Config_keys.disabled_warnings config
               |> Option.value ~default:[])
           else
             GlobalOptions.NNone)
         ~warnings_default_all:local_config.warnings_default_all
         ~warnings_in_sandcastle:local_config.warnings_in_sandcastle
         ~warnings_generated_files:
-          (string_list "warnings_generated_files" ~default:[] config)
+          (string_list Config_keys.warnings_generated_files ~default:[] config)
         ~hh_distc_exponential_backoff_num_retries:
           local_config.hh_distc_exponential_backoff_num_retries
         ~fanout_strip_class_location:local_config.fanout_strip_class_location
@@ -665,7 +709,7 @@ let load ~silent ~from ~(cli_config_overrides : (string * string) list) :
       load_script_timeout =
         (* Since we use the unix alarm() for our timeouts, a timeout value of 0 means
          * to wait indefinitely *)
-        int_ "load_script_timeout" ~default:0 config;
+        int_ Config_keys.load_script_timeout ~default:0 config;
       gc_control = make_gc_control config;
       sharedmem_config = make_sharedmem_config config local_config;
       tc_options = global_opts;
@@ -674,21 +718,21 @@ let load ~silent ~from ~(cli_config_overrides : (string * string) list) :
       symbol_write_options = global_opts;
       formatter_override =
         Option.map
-          (Config_file.Getters.string_opt "formatter_override" config)
+          (Config_file.Getters.string_opt Config_keys.formatter_override config)
           ~f:maybe_relative_path;
       config_hash = Some config_hash;
       ignored_paths = process_ignored_paths config;
       extra_paths = process_extra_paths config;
       warn_on_non_opt_build =
-        bool_ "warn_on_non_opt_build" ~default:false config;
+        bool_ Config_keys.warn_on_non_opt_build ~default:false config;
       ide_fall_back_to_full_index =
-        bool_ "ide_fall_back_to_full_index" ~default:true config;
+        bool_ Config_keys.ide_fall_back_to_full_index ~default:true config;
       naming_table_compression_level =
-        int_ "naming_table_compression_level" ~default:6 config;
+        int_ Config_keys.naming_table_compression_level ~default:6 config;
       naming_table_compression_threads =
-        int_ "naming_table_compression_threads" ~default:1 config;
+        int_ Config_keys.naming_table_compression_threads ~default:1 config;
       warnings_generated_files =
-        string_list "warnings_generated_files" ~default:[] config;
+        string_list Config_keys.warnings_generated_files ~default:[] config;
     },
     local_config )
 

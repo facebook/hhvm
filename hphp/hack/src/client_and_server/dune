@@ -366,12 +366,14 @@
   (name server_config)
   (wrapped false)
   (modules
+   config_keys
    serverConfig
    serverLocalConfig
    serverLocalConfigLoad)
   (libraries
    custom_error_config
    server_args
+   collections
    errors
    experiments_config_file
    heap_shared_mem

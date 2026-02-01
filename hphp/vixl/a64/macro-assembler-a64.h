@@ -29,7 +29,6 @@
 #include "hphp/vixl/a64/assembler-a64.h"
 #include "hphp/vixl/a64/debugger-a64.h"
 
-
 #define LS_MACRO_LIST(V)                                      \
   V(Ldrb, Register&, rt, LDRB_w)                              \
   V(Strb, Register&, rt, STRB_w)                              \
@@ -45,8 +44,8 @@ namespace vixl {
 
 class MacroAssembler : public Assembler {
  public:
-  explicit MacroAssembler(HPHP::CodeBlock& cb)
-      : Assembler(cb),
+  explicit MacroAssembler(HPHP::CodeBlock& cb, HPHP::jit::CGMeta* meta = nullptr)
+      : Assembler(cb, meta),
 #ifndef NDEBUG
         allow_macro_instructions_(true),
 #endif

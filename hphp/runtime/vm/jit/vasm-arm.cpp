@@ -209,7 +209,7 @@ bool flagRequired(Vflags flags, StatusFlags flag) {
 struct Vgen {
   explicit Vgen(Venv& env)
     : env(env)
-    , assem(*env.cb)
+    , assem(*env.cb, &env.meta)
     , a(&assem)
     , base(a->frontier())
     , current(env.current)
@@ -622,12 +622,11 @@ void Vgen::handleLiterals(Venv& env) {
     if (pl.width == 32) {
       cb->dword(static_cast<uint32_t>(pl.value));
     } else if (pl.width == 64) {
-      if (pl.smashable) {
-        // Although the region is actually dead, we mark it as live, so that
-        // the relocator can remove the padding.
-        align(*cb, &env.meta, Alignment::QuadWordSmashable, AlignContext::Live);
-        literalAddress = cb->frontier();
-      }
+      // Although the region is actually dead, we mark it as live, so that
+      // the relocator can remove the padding.
+      align(*cb, &env.meta, Alignment::QuadWordSmashable,
+            pl.smashable ? AlignContext::Live : AlignContext::Dead);
+      literalAddress = cb->frontier();
       cb->qword(pl.value);
     } else {
       not_reached();
@@ -799,11 +798,18 @@ void Vgen::emit(const fallthru& /*i*/) {
 
 #define Y(vasm_opc, simd_w, vr_w, gpr_w, imm) \
 void Vgen::emit(const vasm_opc& i) {          \
+  vixl::Label data;                           \
   if (i.d.isSIMD()) {                         \
     emitSimdImmInt(a, static_cast<uint##vr_w##_t>(i.s.simd_w()), i.d);     \
   } else {                                    \
     Vreg##vr_w d = i.d;                       \
-    a->Mov(gpr_w(d), imm);                    \
+    if constexpr(vr_w > 16) {                 \
+      poolLiteral(*env.cb, env.meta, imm, vr_w, false); \
+      a->bind(&data);                         \
+      a->Ldr(gpr_w(d), &data);                \
+    } else {                                  \
+      a->Mov(gpr_w(d), imm);                  \
+    }                                         \
   }                                           \
 }
 
@@ -857,9 +863,13 @@ void Vgen::emit(const mcprep& i) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void Vgen::emit(const call& i) {
+  vixl::Label data;
   if (!i.stackUnaligned) trap_unaligned_stack();
   recordAddressImmediate();
-  a->Mov(rAsm, i.target);
+
+  poolLiteral(*env.cb, env.meta, (uint64_t)i.target, 32, false);
+  a->bind(&data); // This will be remapped during the handleLiterals phase.
+  a->Ldr(rAsm_w, &data);
   a->Blr(rAsm);
   if (i.watch) {
     *i.watch = a->frontier();
@@ -1135,7 +1145,6 @@ void Vgen::emit(const lea& i) {
 
 void Vgen::emit(const leap& i) {
   vixl::Label imm_data;
-  vixl::Label after_data;
 
   // Cannot use simple a->Mov() since such a sequence cannot be
   // adjusted while live following a relocation.
@@ -1147,8 +1156,12 @@ void Vgen::emit(const leap& i) {
 }
 
 void Vgen::emit(const lead& i) {
+  vixl::Label imm_data;
+
   recordAddressImmediate();
-  a->Mov(X(i.d), i.s.get());
+  poolLiteral(*env.cb, env.meta, (uint64_t)i.s.get(), 32, false);
+  a->bind(&imm_data);  // This will be remapped during the handleLiterals phase.
+  a->Ldr(W(i.d), &imm_data);
 }
 
 #define Y(vasm_opc, arm_opc, src_dst, m)                             \

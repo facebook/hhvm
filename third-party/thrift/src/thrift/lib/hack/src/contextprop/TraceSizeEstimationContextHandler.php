@@ -8,6 +8,13 @@ final class TraceSizeEstimationContextHandler implements IContextHandler {
 
   private static ?TraceSizeEstimationContextHandler $instance = null;
 
+  /**
+   * Cache for shouldBlockTraceContinuationOnOutgoingRequest result.
+   * Once breadth exceeds the limit, all subsequent requests will also exceed it,
+   * so we can cache the result to avoid redundant checks.
+   */
+  private static bool $shouldBlockTraceContinuation = false;
+
   private function __construct()[defaults] {
     $upstream_depth = ThriftContextPropState::get()->getDepth() ?? 0;
     $upstream_breadth = ThriftContextPropState::get()->getBreadth() ?? 0;
@@ -29,6 +36,61 @@ final class TraceSizeEstimationContextHandler implements IContextHandler {
    */
   public static function resetInstance()[globals]: void {
     self::$instance = null;
+    self::$shouldBlockTraceContinuation = false;
+  }
+
+  /**
+   * Get the current breadth value.
+   */
+  public function getBreadth()[]: int {
+    return $this->breadth;
+  }
+
+  /**
+   * Bump the breadth counter for non-Thrift service calls (TAO, Memcache).
+   * This ensures breadth is properly tracked across all service types.
+   */
+  public function bumpBreadth()[write_props]: void {
+    $this->breadth++;
+  }
+
+  private static function bumpBreadthRateLimitedCounter(): void {
+    CategorizedOBC::typedGet(ODSCategoryID::ODS_ARTILLERY)->bumpEntityKey(
+      'artillery_trace_continuation',
+      'breadth_rate_limited',
+    );
+  }
+
+  /**
+   * Determines if trace continuation should be blocked on outgoing requests
+   * based on the current breadth exceeding the max allowed breadth.
+   *
+   */
+  public static function shouldBlockTraceContinuationOnOutgoingRequest(): bool {
+    // If we've already determined trace should be blocked, bump ODS counter and return cached result
+    if (self::$shouldBlockTraceContinuation) {
+      self::bumpBreadthRateLimitedCounter();
+      return true;
+    }
+
+    $breadth = self::getInstance()->getBreadth();
+    $max_breadth = JustKnobs::getInt(
+      'artillery/sdk_www:max_breadth_allowed_for_trace_continuation',
+    );
+    if ($max_breadth != 0 && $breadth > $max_breadth) {
+      self::bumpBreadthRateLimitedCounter();
+      // Only log to request block on first detection and if requested
+      $block_props = new BlockProperties();
+      $block_props->recordUserAnnotation(
+        'serviceCallSuppressed',
+        (string)$breadth,
+      );
+      ArtilleryInstrumentation::logToRequestBlock($block_props);
+      // Cache the result so subsequent calls skip JK lookup and breadth check
+      self::$shouldBlockTraceContinuation = true;
+      return true;
+    }
+    return false;
   }
 
   public function onIncomingDownstream(

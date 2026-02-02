@@ -97,7 +97,7 @@ class HTTPDownstreamTest : public testing::Test {
 
     // Ensure the H2 header indexing strategy was setup correctly if applicable
     if (rawCodec_->getProtocol() == CodecProtocol::HTTP_2) {
-      HTTP2Codec* recastedCodec = dynamic_cast<HTTP2Codec*>(rawCodec_);
+      auto* recastedCodec = dynamic_cast<HTTP2Codec*>(rawCodec_);
       EXPECT_EQ(recastedCodec->getHeaderIndexingStrategy(),
                 &testH2IndexingStrat_);
     }
@@ -1390,8 +1390,7 @@ TEST_F(HTTPDownstreamSessionTest, HttpWithAckTimingPipeline) {
 }
 
 TEST_F(HTTPDownstreamSessionTest, HttpWithAckTimingPipelineError) {
-  HTTPDirectResponseHandler* errorHandler =
-      new HTTPDirectResponseHandler(400, "Bad Request");
+  auto* errorHandler = new HTTPDirectResponseHandler(400, "Bad Request");
   EXPECT_CALL(mockController_, getParseErrorHandler(_, _, _))
       .WillOnce(Return(errorHandler));
 
@@ -1443,8 +1442,7 @@ TEST_F(HTTPDownstreamSessionTest, HttpWithAckTimingPipelineError) {
 TEST_F(HTTPDownstreamSessionTest, HttpWithAckTimingConnError) {
   // Send a request, response waits on a byte event
   // Then send an error.  The session should close when the byte event completes
-  HTTPDirectResponseHandler* errorHandler =
-      new HTTPDirectResponseHandler(400, "Bad Request");
+  auto* errorHandler = new HTTPDirectResponseHandler(400, "Bad Request");
   EXPECT_CALL(mockController_, getParseErrorHandler(_, _, _))
       .WillOnce(Return(errorHandler));
 

@@ -600,7 +600,7 @@ TEST_F(HTTP2UpstreamSessionTest, TestSetControllerInitHeaderIndexingStrat) {
   auto handler = openTransaction();
   handler->expectDetachTransaction();
 
-  const HTTP2Codec* h2Codec =
+  const auto* h2Codec =
       static_cast<const HTTP2Codec*>(&handler->txn_->getTransport().getCodec());
   EXPECT_EQ(h2Codec->getHeaderIndexingStrategy(), &testH2IndexingStrat);
 
@@ -1366,7 +1366,7 @@ void HTTPUpstreamTest<CodecPair>::testSimpleUpgrade(
                         "\r\n"));
 
   if (respCodecVersion == CodecProtocol::HTTP_2) {
-    const HTTP2Codec* codec =
+    const auto* codec =
         dynamic_cast<const HTTP2Codec*>(&txn->getTransport().getCodec());
     ASSERT_NE(codec, nullptr);
     EXPECT_EQ(codec->getHeaderIndexingStrategy(), &testH2IndexingStrat);

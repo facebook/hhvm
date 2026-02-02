@@ -81,7 +81,7 @@ TLHeaderCodecStats::TLHeaderCodecStats(const string& prefix) {
 
 void TLHeaderCodecStats::recordEncode(HeaderCodec::Type type,
                                       HTTPHeaderSize& size) {
-  uint32_t i = (uint32_t)type;
+  auto i = (uint32_t)type;
   CHECK(i < encodes_.size());
   encodes_[i].add(1);
   CHECK(i < encodeCompr_.size());
@@ -92,7 +92,7 @@ void TLHeaderCodecStats::recordEncode(HeaderCodec::Type type,
 
 void TLHeaderCodecStats::recordDecode(HeaderCodec::Type type,
                                       HTTPHeaderSize& size) {
-  uint32_t i = (uint32_t)type;
+  auto i = (uint32_t)type;
   CHECK(i < decodes_.size());
   decodes_[i].add(1);
   CHECK(i < decodeCompr_.size());
@@ -102,13 +102,13 @@ void TLHeaderCodecStats::recordDecode(HeaderCodec::Type type,
 }
 
 void TLHeaderCodecStats::recordDecodeError(HeaderCodec::Type type) {
-  uint32_t i = (uint32_t)type;
+  auto i = (uint32_t)type;
   CHECK(i < decodeErrors_.size());
   decodeErrors_[i].add(1);
 }
 
 void TLHeaderCodecStats::recordDecodeTooLarge(HeaderCodec::Type type) {
-  uint32_t i = (uint32_t)type;
+  auto i = (uint32_t)type;
   CHECK(i < decodeTooLarge_.size());
   decodeTooLarge_[i].add(1);
 }

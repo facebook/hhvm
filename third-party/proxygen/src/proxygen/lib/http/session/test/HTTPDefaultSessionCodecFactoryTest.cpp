@@ -26,7 +26,7 @@ TEST(HTTPDefaultSessionCodecFactoryTest, GetCodecH2) {
   HTTPDefaultSessionCodecFactory factory(std::move(conf));
   auto codec = factory.getCodec(
       "http/1.1", TransportDirection::DOWNSTREAM, false /* isTLS */);
-  HTTP2Codec* httpCodec = dynamic_cast<HTTP2Codec*>(codec.get());
+  auto* httpCodec = dynamic_cast<HTTP2Codec*>(codec.get());
   EXPECT_NE(httpCodec, nullptr);
   EXPECT_EQ(httpCodec->getProtocol(), CodecProtocol::HTTP_2);
 
@@ -34,7 +34,7 @@ TEST(HTTPDefaultSessionCodecFactoryTest, GetCodecH2) {
   // negotiated through ALPN.
   codec = factory.getCodec(
       "http/1.1", TransportDirection::UPSTREAM, true /* isTLS */);
-  HTTP1xCodec* http1Codec = dynamic_cast<HTTP1xCodec*>(codec.get());
+  auto* http1Codec = dynamic_cast<HTTP1xCodec*>(codec.get());
   EXPECT_NE(http1Codec, nullptr);
   EXPECT_EQ(http1Codec->getProtocol(), CodecProtocol::HTTP_1_1);
 }
@@ -46,13 +46,13 @@ TEST(HTTPDefaultSessionCodecFactoryTest, GetCodec) {
   // Empty protocol should default to http/1.1
   auto codec =
       factory.getCodec("", TransportDirection::DOWNSTREAM, false /* isTLS */);
-  HTTP1xCodec* http1Codec = dynamic_cast<HTTP1xCodec*>(codec.get());
+  auto* http1Codec = dynamic_cast<HTTP1xCodec*>(codec.get());
   EXPECT_NE(http1Codec, nullptr);
   EXPECT_EQ(http1Codec->getProtocol(), CodecProtocol::HTTP_1_1);
 
   codec =
       factory.getCodec("h2", TransportDirection::DOWNSTREAM, false /* isTLS */);
-  HTTP2Codec* httpCodec = dynamic_cast<HTTP2Codec*>(codec.get());
+  auto* httpCodec = dynamic_cast<HTTP2Codec*>(codec.get());
   EXPECT_NE(httpCodec, nullptr);
   EXPECT_EQ(httpCodec->getProtocol(), CodecProtocol::HTTP_2);
 

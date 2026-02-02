@@ -45,6 +45,7 @@ DECLARE_string(compression_config);
 DECLARE_string(compression_level);
 DECLARE_string(thrift_protocol);
 DECLARE_bool(enable_rocket_frame_relative_alignment);
+DECLARE_bool(src_port_bind);
 
 namespace apache::thrift::stress {
 
@@ -66,6 +67,7 @@ struct ClientConnectionConfig {
   bool useQuic{false};
   bool stopTLSv1{false};
   bool stopTLSv2{false};
+  bool srcPortBind{false};
   protocol::PROTOCOL_TYPES thriftProtocol{protocol::T_COMPACT_PROTOCOL};
   folly::AsyncSocket::ConnectCallback* connectCb;
 };

@@ -17,6 +17,7 @@
 #include <thrift/conformance/stresstest/client/ClientRunner.h>
 
 #include <folly/coro/BlockingWait.h>
+#include <folly/io/async/AsyncIoUringSocketFactory.h>
 #include <thrift/conformance/stresstest/common/TimeoutCallbacks.h>
 #include <thrift/conformance/stresstest/util/Util.h>
 #include <thrift/lib/cpp2/transport/rocket/client/RocketClient.h>
@@ -171,6 +172,27 @@ class ClientThread : public folly::HHWheelTimer::Callback {
     clients_.push_back(std::move(client));
   }
 
+  void bindSocketsForZcRx(const folly::IPAddress& destAddr, uint16_t destPort) {
+    for (auto& client : clients_) {
+      auto* socketTransport =
+          client->getTransport()
+              ->getUnderlyingTransport<folly::AsyncSocketTransport>();
+      if (socketTransport == nullptr) {
+        LOG(ERROR) << "Failed to get AsyncSocketTransport for client: "
+                   << client->getTransport()->getLocalAddress();
+        continue;
+      }
+      bool bindRes = folly::AsyncIoUringSocketFactory::bindSocketForZcRx(
+          *socketTransport, destAddr, destPort);
+      if (!bindRes) {
+        LOG(ERROR) << "Failed to find src port to bind with for dest addr: "
+                   << destAddr << ", dest port: " << destPort
+                   << ", and client: "
+                   << client->getTransport()->getLocalAddress();
+      }
+    }
+  }
+
   std::vector<std::unique_ptr<StressTestClient>> removeClients(
       std::unordered_map<int, ClientThread*>& threads) {
     std::unordered_map<int, folly::EventBase*> evbs;
@@ -269,27 +291,35 @@ void ClientRunner::run(const StressTestBase* test) {
   latch_.wait();
 
   if (config_.connConfig.ioUringZcrx) {
-    for (auto& thread : clientThreads_) {
-      auto napiId = thread->getEventBase()->getBackend()->getNapiId();
-      napiToThreads_.emplace(napiId, thread.get());
-    }
-
-    std::vector<std::unique_ptr<StressTestClient>> shuffleClients;
-    for (auto& thread : clientThreads_) {
-      auto clients = thread->removeClients(napiToThreads_);
-      shuffleClients.insert(
-          shuffleClients.end(),
-          std::make_move_iterator(clients.begin()),
-          std::make_move_iterator(clients.end()));
-    }
-
-    for (auto& client : shuffleClients) {
-      auto id = client->getTransport()->getNapiId();
-      auto it = napiToThreads_.find(id);
-      if (it == napiToThreads_.end()) {
-        LOG(FATAL) << "Could not find EVB with NAPI ID: " << id;
+    if (config_.connConfig.srcPortBind) {
+      for (auto& thread : clientThreads_) {
+        thread->bindSocketsForZcRx(
+            config_.connConfig.serverHost.getIPAddress(),
+            config_.connConfig.serverHost.getPort());
       }
-      it->second->addClient(std::move(client));
+    } else {
+      for (auto& thread : clientThreads_) {
+        auto napiId = thread->getEventBase()->getBackend()->getNapiId();
+        napiToThreads_.emplace(napiId, thread.get());
+      }
+
+      std::vector<std::unique_ptr<StressTestClient>> shuffleClients;
+      for (auto& thread : clientThreads_) {
+        auto clients = thread->removeClients(napiToThreads_);
+        shuffleClients.insert(
+            shuffleClients.end(),
+            std::make_move_iterator(clients.begin()),
+            std::make_move_iterator(clients.end()));
+      }
+
+      for (auto& client : shuffleClients) {
+        auto id = client->getTransport()->getNapiId();
+        auto it = napiToThreads_.find(id);
+        if (it == napiToThreads_.end()) {
+          LOG(FATAL) << "Could not find EVB with NAPI ID: " << id;
+        }
+        it->second->addClient(std::move(client));
+      }
     }
   }
 

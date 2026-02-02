@@ -82,13 +82,13 @@ void HTTPConnectorWithFizz::connectSuccess() noexcept {
   transportInfo_.securityType = transport->getSecurityProtocol();
   std::unique_ptr<HTTPCodec> codec = httpCodecFactory_->getCodec(
       socket_->getApplicationProtocol(), TransportDirection::UPSTREAM, true);
-  HTTPUpstreamSession* session = new HTTPUpstreamSession(timeout_,
-                                                         std::move(socket_),
-                                                         localAddress,
-                                                         peerAddress,
-                                                         std::move(codec),
-                                                         transportInfo_,
-                                                         nullptr);
+  auto* session = new HTTPUpstreamSession(timeout_,
+                                          std::move(socket_),
+                                          localAddress,
+                                          peerAddress,
+                                          std::move(codec),
+                                          transportInfo_,
+                                          nullptr);
 
   cb_->connectSuccess(session);
 }

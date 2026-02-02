@@ -85,7 +85,7 @@ void CachingDNSResolver::resolveHostname(DNSResolver::ResolutionCallback* cb,
     }
   }
 
-  Query* q = new Query(cb, name, family, this);
+  auto* q = new Query(cb, name, family, this);
   cb->insertQuery(q);
   resolver_->resolveHostname(q, name, timeout, family, std::move(teContext));
 }

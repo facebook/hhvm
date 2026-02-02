@@ -225,7 +225,7 @@ void CAresResolver::Query::checkForCName(Query* self, hostent* host) {
 
 void CAresResolver::Query::queryCallback(
     void* data, int status, int /*timeouts*/, unsigned char* abuf, int alen) {
-  Query* self = static_cast<Query*>(data);
+  auto* self = static_cast<Query*>(data);
 
   // Record the RCODE value for this query. Note that we ignore the
   // recordStats_ stat, as that's only for aggregated end-of-resolution
@@ -996,7 +996,7 @@ void CAresResolver::dnsSocketReady(void* data,
                                    ares_socket_t sock,
                                    int read,
                                    int write) {
-  CAresResolver* self = static_cast<CAresResolver*>(data);
+  auto* self = static_cast<CAresResolver*>(data);
   auto it = self->socketHandlers_.find(sock);
 
   // Ares is done with this socket; stop watching it

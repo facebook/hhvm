@@ -129,8 +129,7 @@ void HTTPConnector::connectSuccess() noexcept {
   std::string* proto{&protoCopy};
   transportInfo_.acceptTime = getCurrentTime();
   if (transportInfo_.secure) {
-    AsyncSSLSocket* sslSocket =
-        socket_->getUnderlyingTransport<AsyncSSLSocket>();
+    auto* sslSocket = socket_->getUnderlyingTransport<AsyncSSLSocket>();
 
     if (sslSocket) {
       transportInfo_.appProtocol =
@@ -162,13 +161,13 @@ void HTTPConnector::connectSuccess() noexcept {
     return;
   }
 
-  HTTPUpstreamSession* session = new HTTPUpstreamSession(timeout_,
-                                                         std::move(socket_),
-                                                         localAddress,
-                                                         peerAddress,
-                                                         std::move(codec),
-                                                         transportInfo_,
-                                                         nullptr);
+  auto* session = new HTTPUpstreamSession(timeout_,
+                                          std::move(socket_),
+                                          localAddress,
+                                          peerAddress,
+                                          std::move(codec),
+                                          transportInfo_,
+                                          nullptr);
 
   XLOG(DBG5) << " connectSuccess, HTTPUpstreamSession " << session;
   cb_->connectSuccess(session);

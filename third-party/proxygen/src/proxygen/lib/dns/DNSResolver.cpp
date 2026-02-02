@@ -151,7 +151,7 @@ std::string describe(const DNSResolver::ResolutionStatus status, bool details) {
       DNSRESOLVER_RESOLUTION_STATUS_GEN(DNSRESOLVER_RESOLUTION_STATUS_DETAILS)};
 #undef DNSRESOLVER_RESOLUTION_STATUS_DETAILS
 
-  size_t idx = static_cast<size_t>(status);
+  auto idx = static_cast<size_t>(status);
 
   if (!details) {
     return errorTable[idx];

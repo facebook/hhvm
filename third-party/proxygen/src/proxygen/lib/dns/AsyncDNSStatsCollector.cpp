@@ -52,8 +52,7 @@ AsyncDNSStatsCollector::AsyncDNSStatsCollector(const std::string& prefix)
       cachePartialMisses_(prefix + "cache_partial_miss", RATE, SUM),
       staleCacheHits_(prefix + "stale_cache_hit", RATE, SUM) {
   for (uint8_t i = 0; i <= static_cast<size_t>(DNSResolver::UNKNOWN); ++i) {
-    DNSResolver::ResolutionStatus status =
-        static_cast<DNSResolver::ResolutionStatus>(i);
+    auto status = static_cast<DNSResolver::ResolutionStatus>(i);
     status_[i] = std::make_unique<BaseStats::TLTimeseries>(
         folly::to<std::string>(prefix, "status.", describe(status, false)),
         RATE,

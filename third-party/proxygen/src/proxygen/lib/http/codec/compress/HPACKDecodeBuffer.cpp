@@ -60,7 +60,7 @@ DecodeError HPACKDecodeBuffer::decodeLiteral(uint8_t nbit,
     return DecodeError::BUFFER_UNDERFLOW;
   }
   auto byte = peek();
-  uint8_t huffmanCheck = uint8_t(1 << nbit);
+  auto huffmanCheck = uint8_t(1 << nbit);
   bool huffman = byte & huffmanCheck;
   // extract the size
   uint64_t size;

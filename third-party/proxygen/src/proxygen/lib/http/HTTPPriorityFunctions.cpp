@@ -65,7 +65,7 @@ folly::Optional<HTTPPriority> httpPriorityFromString(
   bool oMissing = false;
   bool pMissing = false;
   bool malformed = false;
-  int64_t urgency = getWithDefault<int64_t>(
+  auto urgency = getWithDefault<int64_t>(
       dict, "u", (int64_t)kDefaultHttpPriorityUrgency, uMissing, malformed);
   bool incremental = getWithDefault(dict, "i", false, iMissing, malformed);
   auto orderId = getWithDefault<int64_t>(dict, "o", 0, oMissing, malformed);

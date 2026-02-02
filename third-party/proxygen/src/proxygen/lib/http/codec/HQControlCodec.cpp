@@ -258,7 +258,7 @@ size_t HQControlCodec::generatePriority(folly::IOBufQueue& writeBuf,
                << (uint64_t)priority.urgency;
     return 0;
   }
-  std::string updateString = folly::to<std::string>(
+  auto updateString = folly::to<std::string>(
       "u=", priority.urgency, (priority.incremental ? ",i" : ""));
   auto writeRet = hq::writePriorityUpdate(writeBuf, stream, updateString);
   if (writeRet.hasError()) {
@@ -278,7 +278,7 @@ size_t HQControlCodec::generatePushPriority(folly::IOBufQueue& writeBuf,
         << (uint64_t)priority.urgency;
     return 0;
   }
-  std::string updateString = folly::to<std::string>(
+  auto updateString = folly::to<std::string>(
       "u=", priority.urgency, (priority.incremental ? ",i" : ""));
   auto writeRet = hq::writePushPriorityUpdate(writeBuf, pushId, updateString);
   if (writeRet.hasError()) {

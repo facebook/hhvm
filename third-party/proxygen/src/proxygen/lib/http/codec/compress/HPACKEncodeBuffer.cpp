@@ -108,7 +108,7 @@ uint32_t HPACKEncodeBuffer::encodeHuffman(uint8_t instruction,
   uint32_t size = huffmanTree.getEncodeSize(literal);
   // add the length
   DCHECK_LE(nbit, 7);
-  uint8_t huffmanOn = uint8_t(1 << nbit);
+  auto huffmanOn = uint8_t(1 << nbit);
   DCHECK_EQ(instruction & huffmanOn, 0);
   uint32_t count = encodeInteger(size, instruction | huffmanOn, nbit);
   // ensure we have enough bytes before performing the encoding

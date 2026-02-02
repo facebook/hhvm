@@ -274,7 +274,7 @@ ErrorCode parseFrameHeader(Cursor& cursor, FrameHeader& header) noexcept {
   DCHECK_LE(kFrameHeaderSize, cursor.totalLength());
 
   // MUST ignore the 2 bits before the length
-  uint32_t lengthAndType = cursor.readBE<uint32_t>();
+  auto lengthAndType = cursor.readBE<uint32_t>();
   header.length = kLengthMask & (lengthAndType >> 8);
   uint8_t type = lengthAndType & 0xff;
   header.type = FrameType(type);
@@ -434,8 +434,8 @@ ErrorCode parseSettings(Cursor& cursor,
     return ErrorCode::FRAME_SIZE_ERROR;
   }
   for (auto length = header.length; length > 0; length -= 6) {
-    uint16_t id = cursor.readBE<uint16_t>();
-    uint32_t val = cursor.readBE<uint32_t>();
+    auto id = cursor.readBE<uint16_t>();
+    auto val = cursor.readBE<uint32_t>();
     settings.emplace_back(SettingsId(id), val);
   }
   return ErrorCode::NO_ERROR;

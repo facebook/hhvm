@@ -1254,7 +1254,7 @@ int HTTP1xCodec::onMessageComplete() {
 }
 
 int HTTP1xCodec::onMessageBeginCB(http_parser* parser) {
-  HTTP1xCodec* codec = static_cast<HTTP1xCodec*>(parser->data);
+  auto* codec = static_cast<HTTP1xCodec*>(parser->data);
   DCHECK(codec != nullptr);
   DCHECK_EQ(&codec->parser_, parser);
 
@@ -1267,7 +1267,7 @@ int HTTP1xCodec::onMessageBeginCB(http_parser* parser) {
 }
 
 int HTTP1xCodec::onUrlCB(http_parser* parser, const char* buf, size_t len) {
-  HTTP1xCodec* codec = static_cast<HTTP1xCodec*>(parser->data);
+  auto* codec = static_cast<HTTP1xCodec*>(parser->data);
   DCHECK(codec != nullptr);
   DCHECK_EQ(&codec->parser_, parser);
 
@@ -1280,7 +1280,7 @@ int HTTP1xCodec::onUrlCB(http_parser* parser, const char* buf, size_t len) {
 }
 
 int HTTP1xCodec::onReasonCB(http_parser* parser, const char* buf, size_t len) {
-  HTTP1xCodec* codec = static_cast<HTTP1xCodec*>(parser->data);
+  auto* codec = static_cast<HTTP1xCodec*>(parser->data);
   DCHECK(codec != nullptr);
   DCHECK_EQ(&codec->parser_, parser);
 
@@ -1295,7 +1295,7 @@ int HTTP1xCodec::onReasonCB(http_parser* parser, const char* buf, size_t len) {
 int HTTP1xCodec::onHeaderFieldCB(http_parser* parser,
                                  const char* buf,
                                  size_t len) {
-  HTTP1xCodec* codec = static_cast<HTTP1xCodec*>(parser->data);
+  auto* codec = static_cast<HTTP1xCodec*>(parser->data);
   DCHECK(codec != nullptr);
   DCHECK_EQ(&codec->parser_, parser);
 
@@ -1310,7 +1310,7 @@ int HTTP1xCodec::onHeaderFieldCB(http_parser* parser,
 int HTTP1xCodec::onHeaderValueCB(http_parser* parser,
                                  const char* buf,
                                  size_t len) {
-  HTTP1xCodec* codec = static_cast<HTTP1xCodec*>(parser->data);
+  auto* codec = static_cast<HTTP1xCodec*>(parser->data);
   DCHECK(codec != nullptr);
   DCHECK_EQ(&codec->parser_, parser);
 
@@ -1325,7 +1325,7 @@ int HTTP1xCodec::onHeaderValueCB(http_parser* parser,
 int HTTP1xCodec::onHeadersCompleteCB(http_parser* parser,
                                      const char* /*buf*/,
                                      size_t len) {
-  HTTP1xCodec* codec = static_cast<HTTP1xCodec*>(parser->data);
+  auto* codec = static_cast<HTTP1xCodec*>(parser->data);
   DCHECK(codec != nullptr);
   DCHECK_EQ(&codec->parser_, parser);
 
@@ -1338,7 +1338,7 @@ int HTTP1xCodec::onHeadersCompleteCB(http_parser* parser,
 }
 
 int HTTP1xCodec::onBodyCB(http_parser* parser, const char* buf, size_t len) {
-  HTTP1xCodec* codec = static_cast<HTTP1xCodec*>(parser->data);
+  auto* codec = static_cast<HTTP1xCodec*>(parser->data);
   DCHECK(codec != nullptr);
   DCHECK_EQ(&codec->parser_, parser);
 
@@ -1357,7 +1357,7 @@ int HTTP1xCodec::onBodyCB(http_parser* parser, const char* buf, size_t len) {
 }
 
 int HTTP1xCodec::onChunkHeaderCB(http_parser* parser) {
-  HTTP1xCodec* codec = static_cast<HTTP1xCodec*>(parser->data);
+  auto* codec = static_cast<HTTP1xCodec*>(parser->data);
   DCHECK(codec != nullptr);
   DCHECK_EQ(&codec->parser_, parser);
 
@@ -1370,7 +1370,7 @@ int HTTP1xCodec::onChunkHeaderCB(http_parser* parser) {
 }
 
 int HTTP1xCodec::onChunkCompleteCB(http_parser* parser) {
-  HTTP1xCodec* codec = static_cast<HTTP1xCodec*>(parser->data);
+  auto* codec = static_cast<HTTP1xCodec*>(parser->data);
   DCHECK(codec != nullptr);
   DCHECK_EQ(&codec->parser_, parser);
 
@@ -1383,7 +1383,7 @@ int HTTP1xCodec::onChunkCompleteCB(http_parser* parser) {
 }
 
 int HTTP1xCodec::onMessageCompleteCB(http_parser* parser) {
-  HTTP1xCodec* codec = static_cast<HTTP1xCodec*>(parser->data);
+  auto* codec = static_cast<HTTP1xCodec*>(parser->data);
   DCHECK(codec != nullptr);
   DCHECK_EQ(&codec->parser_, parser);
 

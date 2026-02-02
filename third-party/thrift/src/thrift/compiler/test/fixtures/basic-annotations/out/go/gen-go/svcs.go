@@ -71,8 +71,6 @@ func (c *badInteractionClientImpl) Foo(ctx context.Context) (error) {
     )
     if fbthriftErr != nil {
         return fbthriftErr
-    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
-        return fbthriftEx
     }
     return nil
 }
@@ -213,8 +211,6 @@ func (c *myServiceClientImpl) Ping(ctx context.Context) (error) {
     )
     if fbthriftErr != nil {
         return fbthriftErr
-    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
-        return fbthriftEx
     }
     return nil
 }
@@ -232,8 +228,6 @@ func (c *myServiceClientImpl) GetRandomData(ctx context.Context) (string, error)
     )
     if fbthriftErr != nil {
         return "", fbthriftErr
-    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
-        return "", fbthriftEx
     }
     return fbthriftResp.GetSuccess(), nil
 }
@@ -252,8 +246,6 @@ func (c *myServiceClientImpl) HasDataById(ctx context.Context, id int64) (bool, 
     )
     if fbthriftErr != nil {
         return false, fbthriftErr
-    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
-        return false, fbthriftEx
     }
     return fbthriftResp.GetSuccess(), nil
 }
@@ -272,8 +264,6 @@ func (c *myServiceClientImpl) GoGetDataById(ctx context.Context, id int64) (stri
     )
     if fbthriftErr != nil {
         return "", fbthriftErr
-    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
-        return "", fbthriftEx
     }
     return fbthriftResp.GetSuccess(), nil
 }
@@ -293,8 +283,6 @@ func (c *myServiceClientImpl) PutDataById(ctx context.Context, id int64, data st
     )
     if fbthriftErr != nil {
         return fbthriftErr
-    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
-        return fbthriftEx
     }
     return nil
 }
@@ -320,8 +308,6 @@ func (c *myServiceClientImpl) GoDoNothing(ctx context.Context) (error) {
     )
     if fbthriftErr != nil {
         return fbthriftErr
-    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
-        return fbthriftEx
     }
     return nil
 }
@@ -600,8 +586,6 @@ func (c *myServicePrioParentClientImpl) Ping(ctx context.Context) (error) {
     )
     if fbthriftErr != nil {
         return fbthriftErr
-    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
-        return fbthriftEx
     }
     return nil
 }
@@ -619,8 +603,6 @@ func (c *myServicePrioParentClientImpl) Pong(ctx context.Context) (error) {
     )
     if fbthriftErr != nil {
         return fbthriftErr
-    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
-        return fbthriftEx
     }
     return nil
 }
@@ -774,8 +756,6 @@ func (c *myServicePrioChildClientImpl) Pang(ctx context.Context) (error) {
     )
     if fbthriftErr != nil {
         return fbthriftErr
-    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
-        return fbthriftEx
     }
     return nil
 }
@@ -869,8 +849,6 @@ func (c *badServiceClientImpl) Bar(ctx context.Context) (int32, error) {
     )
     if fbthriftErr != nil {
         return 0, fbthriftErr
-    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
-        return 0, fbthriftEx
     }
     return fbthriftResp.GetSuccess(), nil
 }
@@ -998,8 +976,6 @@ func (c *fooBarBazServiceClientImpl) FooStructured(ctx context.Context) (error) 
     )
     if fbthriftErr != nil {
         return fbthriftErr
-    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
-        return fbthriftEx
     }
     return nil
 }
@@ -1017,8 +993,6 @@ func (c *fooBarBazServiceClientImpl) BarNonStructured(ctx context.Context) (erro
     )
     if fbthriftErr != nil {
         return fbthriftErr
-    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
-        return fbthriftEx
     }
     return nil
 }
@@ -1036,8 +1010,6 @@ func (c *fooBarBazServiceClientImpl) Baz(ctx context.Context) (error) {
     )
     if fbthriftErr != nil {
         return fbthriftErr
-    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
-        return fbthriftEx
     }
     return nil
 }

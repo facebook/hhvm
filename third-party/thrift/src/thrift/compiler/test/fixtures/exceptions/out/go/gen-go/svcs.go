@@ -78,8 +78,6 @@ func (c *raiserClientImpl) DoBland(ctx context.Context) (error) {
     )
     if fbthriftErr != nil {
         return fbthriftErr
-    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
-        return fbthriftEx
     }
     return nil
 }
@@ -97,8 +95,6 @@ func (c *raiserClientImpl) DoRaise(ctx context.Context) (error) {
     )
     if fbthriftErr != nil {
         return fbthriftErr
-    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
-        return fbthriftEx
     }
     return nil
 }
@@ -116,8 +112,6 @@ func (c *raiserClientImpl) Get200(ctx context.Context) (string, error) {
     )
     if fbthriftErr != nil {
         return "", fbthriftErr
-    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
-        return "", fbthriftEx
     }
     return fbthriftResp.GetSuccess(), nil
 }
@@ -135,8 +129,6 @@ func (c *raiserClientImpl) Get500(ctx context.Context) (string, error) {
     )
     if fbthriftErr != nil {
         return "", fbthriftErr
-    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
-        return "", fbthriftEx
     }
     return fbthriftResp.GetSuccess(), nil
 }

@@ -136,7 +136,10 @@ func (c *serialChannel) SendRequestResponse(ctx context.Context, method string, 
 	if err != nil {
 		return err
 	}
-
+	// Declared exception (inside the response)
+	if exception := response.Exception(); exception != nil {
+		return exception
+	}
 	return nil
 }
 

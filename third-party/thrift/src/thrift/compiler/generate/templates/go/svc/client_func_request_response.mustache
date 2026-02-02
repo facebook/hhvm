@@ -42,8 +42,6 @@ func (c *{{service:go_client_name}}) {{> svc/client_func_signature}} {
     )
     if fbthriftErr != nil {
         return {{#function:creates_interaction?}}nil, {{/function:creates_interaction?}}{{#function:return_type}}{{^type:void?}}{{> common/go_zero_value}}, {{/type:void?}}{{/function:return_type}}fbthriftErr
-    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
-        return {{#function:creates_interaction?}}nil, {{/function:creates_interaction?}}{{#function:return_type}}{{^type:void?}}{{> common/go_zero_value}}, {{/type:void?}}{{/function:return_type}}fbthriftEx
     }
     return {{#function:creates_interaction?}}fbthriftInteractionClient, {{/function:creates_interaction?}}{{#function:return_type}}{{^type:void?}}fbthriftResp.Get{{function:retval_field_name}}(), {{/type:void?}}{{/function:return_type}}nil
 }

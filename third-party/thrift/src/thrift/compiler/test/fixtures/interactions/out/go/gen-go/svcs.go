@@ -77,8 +77,6 @@ func (c *myInteractionClientImpl) Frobnicate(ctx context.Context) (int32, error)
     )
     if fbthriftErr != nil {
         return 0, fbthriftErr
-    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
-        return 0, fbthriftEx
     }
     return fbthriftResp.GetSuccess(), nil
 }
@@ -116,9 +114,6 @@ func (c *myInteractionClientImpl) Truthify(ctx context.Context) (iter.Seq2[bool,
     if fbthriftErr != nil {
         fbthriftStreamCancel()
         return nil, fbthriftErr
-    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
-        fbthriftStreamCancel()
-        return nil, fbthriftEx
     }
     fbthriftStreamSeqAdapter := func(yield func(bool, error) bool) {
         for elem, err := range fbthriftStreamSeq {
@@ -352,8 +347,6 @@ func (c *myInteractionFastClientImpl) Frobnicate(ctx context.Context) (int32, er
     )
     if fbthriftErr != nil {
         return 0, fbthriftErr
-    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
-        return 0, fbthriftEx
     }
     return fbthriftResp.GetSuccess(), nil
 }
@@ -391,9 +384,6 @@ func (c *myInteractionFastClientImpl) Truthify(ctx context.Context) (iter.Seq2[b
     if fbthriftErr != nil {
         fbthriftStreamCancel()
         return nil, fbthriftErr
-    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
-        fbthriftStreamCancel()
-        return nil, fbthriftEx
     }
     fbthriftStreamSeqAdapter := func(yield func(bool, error) bool) {
         for elem, err := range fbthriftStreamSeq {
@@ -617,8 +607,6 @@ func (c *serialInteractionClientImpl) Frobnicate(ctx context.Context) (error) {
     )
     if fbthriftErr != nil {
         return fbthriftErr
-    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
-        return fbthriftEx
     }
     return nil
 }
@@ -746,8 +734,6 @@ func (c *boxedInteractionClientImpl) GetABox(ctx context.Context) (*ShouldBeBoxe
     )
     if fbthriftErr != nil {
         return nil, fbthriftErr
-    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
-        return nil, fbthriftEx
     }
     return fbthriftResp.GetSuccess(), nil
 }
@@ -883,8 +869,6 @@ func (c *myServiceClientImpl) Foo(ctx context.Context) (error) {
     )
     if fbthriftErr != nil {
         return fbthriftErr
-    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
-        return fbthriftEx
     }
     return nil
 }
@@ -904,8 +888,6 @@ func (c *myServiceClientImpl) Interact(ctx context.Context, arg int32) (MyIntera
     )
     if fbthriftErr != nil {
         return nil, fbthriftErr
-    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
-        return nil, fbthriftEx
     }
     return fbthriftInteractionClient, nil
 }
@@ -924,8 +906,6 @@ func (c *myServiceClientImpl) InteractFast(ctx context.Context) (MyInteractionFa
     )
     if fbthriftErr != nil {
         return nil, 0, fbthriftErr
-    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
-        return nil, 0, fbthriftEx
     }
     return fbthriftInteractionClient, fbthriftResp.GetSuccess(), nil
 }
@@ -959,9 +939,6 @@ func (c *myServiceClientImpl) Serialize(ctx context.Context) (SerialInteractionC
     if fbthriftErr != nil {
         fbthriftStreamCancel()
         return nil, fbthriftRespZero, nil, fbthriftErr
-    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
-        fbthriftStreamCancel()
-        return nil, fbthriftRespZero, nil, fbthriftEx
     }
     fbthriftStreamSeqAdapter := func(yield func(int32, error) bool) {
         for elem, err := range fbthriftStreamSeq {
@@ -1218,8 +1195,6 @@ func (c *factoriesClientImpl) Foo(ctx context.Context) (error) {
     )
     if fbthriftErr != nil {
         return fbthriftErr
-    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
-        return fbthriftEx
     }
     return nil
 }
@@ -1239,8 +1214,6 @@ func (c *factoriesClientImpl) Interact(ctx context.Context, arg int32) (MyIntera
     )
     if fbthriftErr != nil {
         return nil, fbthriftErr
-    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
-        return nil, fbthriftEx
     }
     return fbthriftInteractionClient, nil
 }
@@ -1259,8 +1232,6 @@ func (c *factoriesClientImpl) InteractFast(ctx context.Context) (MyInteractionFa
     )
     if fbthriftErr != nil {
         return nil, 0, fbthriftErr
-    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
-        return nil, 0, fbthriftEx
     }
     return fbthriftInteractionClient, fbthriftResp.GetSuccess(), nil
 }
@@ -1294,9 +1265,6 @@ func (c *factoriesClientImpl) Serialize(ctx context.Context) (SerialInteractionC
     if fbthriftErr != nil {
         fbthriftStreamCancel()
         return nil, fbthriftRespZero, nil, fbthriftErr
-    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
-        fbthriftStreamCancel()
-        return nil, fbthriftRespZero, nil, fbthriftEx
     }
     fbthriftStreamSeqAdapter := func(yield func(int32, error) bool) {
         for elem, err := range fbthriftStreamSeq {
@@ -1547,8 +1515,6 @@ func (c *performClientImpl) Foo(ctx context.Context) (error) {
     )
     if fbthriftErr != nil {
         return fbthriftErr
-    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
-        return fbthriftEx
     }
     return nil
 }
@@ -1673,8 +1639,6 @@ func (c *interactWithSharedClientImpl) DoSomeSimilarThings(ctx context.Context) 
     )
     if fbthriftErr != nil {
         return nil, fbthriftErr
-    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
-        return nil, fbthriftEx
     }
     return fbthriftResp.GetSuccess(), nil
 }
@@ -1801,8 +1765,6 @@ func (c *boxServiceClientImpl) GetABoxSession(ctx context.Context, req *ShouldBe
     )
     if fbthriftErr != nil {
         return nil, nil, fbthriftErr
-    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
-        return nil, nil, fbthriftEx
     }
     return fbthriftInteractionClient, fbthriftResp.GetSuccess(), nil
 }

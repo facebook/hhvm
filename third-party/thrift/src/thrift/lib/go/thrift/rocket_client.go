@@ -130,6 +130,10 @@ func (p *rocketClient) SendRequestResponse(ctx context.Context, messageName stri
 	if err != nil {
 		return err
 	}
+	// Declared exception (inside the response)
+	if exception := response.Exception(); exception != nil {
+		return exception
+	}
 	return nil
 }
 
@@ -168,6 +172,10 @@ func (p *rocketClient) SendRequestStream(
 	err = decodeResponse(p.protoID, resultData, response)
 	if err != nil {
 		return nil, err
+	}
+	// Declared exception (inside the response)
+	if exception := response.Exception(); exception != nil {
+		return nil, exception
 	}
 	return streamSeq, nil
 }

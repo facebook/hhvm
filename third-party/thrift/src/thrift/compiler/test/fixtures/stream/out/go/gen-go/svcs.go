@@ -104,9 +104,6 @@ func (c *pubSubStreamingServiceClientImpl) Returnstream(ctx context.Context, i32
     if fbthriftErr != nil {
         fbthriftStreamCancel()
         return nil, fbthriftErr
-    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
-        fbthriftStreamCancel()
-        return nil, fbthriftEx
     }
     fbthriftStreamSeqAdapter := func(yield func(int32, error) bool) {
         for elem, err := range fbthriftStreamSeq {
@@ -151,9 +148,6 @@ func (c *pubSubStreamingServiceClientImpl) Streamthrows(ctx context.Context, foo
     if fbthriftErr != nil {
         fbthriftStreamCancel()
         return nil, fbthriftErr
-    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
-        fbthriftStreamCancel()
-        return nil, fbthriftEx
     }
     fbthriftStreamSeqAdapter := func(yield func(int32, error) bool) {
         for elem, err := range fbthriftStreamSeq {
@@ -198,9 +192,6 @@ func (c *pubSubStreamingServiceClientImpl) Servicethrows(ctx context.Context, fo
     if fbthriftErr != nil {
         fbthriftStreamCancel()
         return nil, fbthriftErr
-    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
-        fbthriftStreamCancel()
-        return nil, fbthriftEx
     }
     fbthriftStreamSeqAdapter := func(yield func(int32, error) bool) {
         for elem, err := range fbthriftStreamSeq {
@@ -245,9 +236,6 @@ func (c *pubSubStreamingServiceClientImpl) Servicethrows2(ctx context.Context, f
     if fbthriftErr != nil {
         fbthriftStreamCancel()
         return nil, fbthriftErr
-    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
-        fbthriftStreamCancel()
-        return nil, fbthriftEx
     }
     fbthriftStreamSeqAdapter := func(yield func(int32, error) bool) {
         for elem, err := range fbthriftStreamSeq {
@@ -292,9 +280,6 @@ func (c *pubSubStreamingServiceClientImpl) Boththrows(ctx context.Context, foo i
     if fbthriftErr != nil {
         fbthriftStreamCancel()
         return nil, fbthriftErr
-    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
-        fbthriftStreamCancel()
-        return nil, fbthriftEx
     }
     fbthriftStreamSeqAdapter := func(yield func(int32, error) bool) {
         for elem, err := range fbthriftStreamSeq {
@@ -340,9 +325,6 @@ func (c *pubSubStreamingServiceClientImpl) Responseandstreamstreamthrows(ctx con
     if fbthriftErr != nil {
         fbthriftStreamCancel()
         return fbthriftRespZero, nil, fbthriftErr
-    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
-        fbthriftStreamCancel()
-        return fbthriftRespZero, nil, fbthriftEx
     }
     fbthriftStreamSeqAdapter := func(yield func(int32, error) bool) {
         for elem, err := range fbthriftStreamSeq {
@@ -388,9 +370,6 @@ func (c *pubSubStreamingServiceClientImpl) Responseandstreamservicethrows(ctx co
     if fbthriftErr != nil {
         fbthriftStreamCancel()
         return fbthriftRespZero, nil, fbthriftErr
-    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
-        fbthriftStreamCancel()
-        return fbthriftRespZero, nil, fbthriftEx
     }
     fbthriftStreamSeqAdapter := func(yield func(int32, error) bool) {
         for elem, err := range fbthriftStreamSeq {
@@ -436,9 +415,6 @@ func (c *pubSubStreamingServiceClientImpl) Responseandstreamboththrows(ctx conte
     if fbthriftErr != nil {
         fbthriftStreamCancel()
         return fbthriftRespZero, nil, fbthriftErr
-    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
-        fbthriftStreamCancel()
-        return fbthriftRespZero, nil, fbthriftEx
     }
     fbthriftStreamSeqAdapter := func(yield func(int32, error) bool) {
         for elem, err := range fbthriftStreamSeq {
@@ -484,9 +460,6 @@ func (c *pubSubStreamingServiceClientImpl) ReturnstreamFast(ctx context.Context,
     if fbthriftErr != nil {
         fbthriftStreamCancel()
         return nil, fbthriftErr
-    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
-        fbthriftStreamCancel()
-        return nil, fbthriftEx
     }
     fbthriftStreamSeqAdapter := func(yield func(int32, error) bool) {
         for elem, err := range fbthriftStreamSeq {

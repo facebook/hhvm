@@ -72,8 +72,6 @@ func (c *myRootClientImpl) DoRoot(ctx context.Context) (error) {
     )
     if fbthriftErr != nil {
         return fbthriftErr
-    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
-        return fbthriftEx
     }
     return nil
 }
@@ -203,8 +201,6 @@ func (c *myNodeClientImpl) DoMid(ctx context.Context) (error) {
     )
     if fbthriftErr != nil {
         return fbthriftErr
-    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
-        return fbthriftEx
     }
     return nil
 }
@@ -307,8 +303,6 @@ func (c *myLeafClientImpl) DoLeaf(ctx context.Context) (error) {
     )
     if fbthriftErr != nil {
         return fbthriftErr
-    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
-        return fbthriftEx
     }
     return nil
 }

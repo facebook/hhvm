@@ -81,8 +81,6 @@ func (c *nestedContainersClientImpl) MapList(ctx context.Context, foo map[int32]
     )
     if fbthriftErr != nil {
         return fbthriftErr
-    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
-        return fbthriftEx
     }
     return nil
 }
@@ -101,8 +99,6 @@ func (c *nestedContainersClientImpl) MapSet(ctx context.Context, foo map[int32][
     )
     if fbthriftErr != nil {
         return fbthriftErr
-    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
-        return fbthriftEx
     }
     return nil
 }
@@ -121,8 +117,6 @@ func (c *nestedContainersClientImpl) ListMap(ctx context.Context, foo []map[int3
     )
     if fbthriftErr != nil {
         return fbthriftErr
-    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
-        return fbthriftEx
     }
     return nil
 }
@@ -141,8 +135,6 @@ func (c *nestedContainersClientImpl) ListSet(ctx context.Context, foo [][]int32)
     )
     if fbthriftErr != nil {
         return fbthriftErr
-    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
-        return fbthriftEx
     }
     return nil
 }
@@ -161,8 +153,6 @@ func (c *nestedContainersClientImpl) Turtles(ctx context.Context, foo [][]map[in
     )
     if fbthriftErr != nil {
         return fbthriftErr
-    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
-        return fbthriftEx
     }
     return nil
 }

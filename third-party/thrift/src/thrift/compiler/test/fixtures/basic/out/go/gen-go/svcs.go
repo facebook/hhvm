@@ -72,8 +72,6 @@ func (c *fooServiceClientImpl) SimpleRPC(ctx context.Context) (error) {
     )
     if fbthriftErr != nil {
         return fbthriftErr
-    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
-        return fbthriftEx
     }
     return nil
 }
@@ -195,8 +193,6 @@ func (c *fB303ServiceClientImpl) SimpleRPC(ctx context.Context, intParameter int
     )
     if fbthriftErr != nil {
         return nil, fbthriftErr
-    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
-        return nil, fbthriftEx
     }
     return fbthriftResp.GetSuccess(), nil
 }
@@ -337,8 +333,6 @@ func (c *myServiceClientImpl) Ping(ctx context.Context) (error) {
     )
     if fbthriftErr != nil {
         return fbthriftErr
-    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
-        return fbthriftEx
     }
     return nil
 }
@@ -356,8 +350,6 @@ func (c *myServiceClientImpl) GetRandomData(ctx context.Context) (string, error)
     )
     if fbthriftErr != nil {
         return "", fbthriftErr
-    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
-        return "", fbthriftEx
     }
     return fbthriftResp.GetSuccess(), nil
 }
@@ -376,8 +368,6 @@ func (c *myServiceClientImpl) Sink(ctx context.Context, sink int64) (error) {
     )
     if fbthriftErr != nil {
         return fbthriftErr
-    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
-        return fbthriftEx
     }
     return nil
 }
@@ -397,8 +387,6 @@ func (c *myServiceClientImpl) PutDataById(ctx context.Context, id int64, data st
     )
     if fbthriftErr != nil {
         return fbthriftErr
-    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
-        return fbthriftEx
     }
     return nil
 }
@@ -417,8 +405,6 @@ func (c *myServiceClientImpl) HasDataById(ctx context.Context, id int64) (bool, 
     )
     if fbthriftErr != nil {
         return false, fbthriftErr
-    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
-        return false, fbthriftEx
     }
     return fbthriftResp.GetSuccess(), nil
 }
@@ -437,8 +423,6 @@ func (c *myServiceClientImpl) GetDataById(ctx context.Context, id int64) (string
     )
     if fbthriftErr != nil {
         return "", fbthriftErr
-    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
-        return "", fbthriftEx
     }
     return fbthriftResp.GetSuccess(), nil
 }
@@ -457,8 +441,6 @@ func (c *myServiceClientImpl) DeleteDataById(ctx context.Context, id int64) (err
     )
     if fbthriftErr != nil {
         return fbthriftErr
-    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
-        return fbthriftEx
     }
     return nil
 }
@@ -484,8 +466,6 @@ func (c *myServiceClientImpl) InvalidReturnForHack(ctx context.Context) ([]float
     )
     if fbthriftErr != nil {
         return nil, fbthriftErr
-    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
-        return nil, fbthriftEx
     }
     return fbthriftResp.GetSuccess(), nil
 }
@@ -503,8 +483,6 @@ func (c *myServiceClientImpl) RpcSkippedCodegen(ctx context.Context) (error) {
     )
     if fbthriftErr != nil {
         return fbthriftErr
-    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
-        return fbthriftEx
     }
     return nil
 }
@@ -853,8 +831,6 @@ func (c *dbMixedStackArgumentsClientImpl) GetDataByKey0(ctx context.Context, key
     )
     if fbthriftErr != nil {
         return nil, fbthriftErr
-    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
-        return nil, fbthriftEx
     }
     return fbthriftResp.GetSuccess(), nil
 }
@@ -873,8 +849,6 @@ func (c *dbMixedStackArgumentsClientImpl) GetDataByKey1(ctx context.Context, key
     )
     if fbthriftErr != nil {
         return nil, fbthriftErr
-    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
-        return nil, fbthriftEx
     }
     return fbthriftResp.GetSuccess(), nil
 }

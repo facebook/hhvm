@@ -61,9 +61,6 @@ func (c *{{service:go_client_name}}) {{> svc/client_func_signature}} {
     if fbthriftErr != nil {
         fbthriftStreamCancel()
         return {{#function:creates_interaction?}}nil, {{/function:creates_interaction?}}{{#function:stream_has_first_response?}}fbthriftRespZero, {{/function:stream_has_first_response?}}nil, fbthriftErr
-    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
-        fbthriftStreamCancel()
-        return {{#function:creates_interaction?}}nil, {{/function:creates_interaction?}}{{#function:stream_has_first_response?}}fbthriftRespZero, {{/function:stream_has_first_response?}}nil, fbthriftEx
     }
     {{#function:stream_elem_type}}
     fbthriftStreamSeqAdapter := func(yield func({{#type:structured?}}*{{/type:structured?}}{{#partial types.go_type type=type:self}}, error) bool) {

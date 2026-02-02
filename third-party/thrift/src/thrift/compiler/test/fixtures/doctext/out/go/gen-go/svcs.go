@@ -78,8 +78,6 @@ func (c *cClientImpl) F(ctx context.Context) (error) {
     )
     if fbthriftErr != nil {
         return fbthriftErr
-    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
-        return fbthriftEx
     }
     return nil
 }
@@ -111,9 +109,6 @@ func (c *cClientImpl) Numbers(ctx context.Context) (iter.Seq2[Number, error], er
     if fbthriftErr != nil {
         fbthriftStreamCancel()
         return nil, fbthriftErr
-    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
-        fbthriftStreamCancel()
-        return nil, fbthriftEx
     }
     fbthriftStreamSeqAdapter := func(yield func(Number, error) bool) {
         for elem, err := range fbthriftStreamSeq {
@@ -146,8 +141,6 @@ func (c *cClientImpl) Thing(ctx context.Context, a int32, b string, c []int32) (
     )
     if fbthriftErr != nil {
         return "", fbthriftErr
-    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
-        return "", fbthriftEx
     }
     return fbthriftResp.GetSuccess(), nil
 }

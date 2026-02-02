@@ -81,8 +81,6 @@ func (c *finderClientImpl) ByPlate(ctx context.Context, plate Plate) (*Automobil
     )
     if fbthriftErr != nil {
         return nil, fbthriftErr
-    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
-        return nil, fbthriftEx
     }
     return fbthriftResp.GetSuccess(), nil
 }
@@ -101,8 +99,6 @@ func (c *finderClientImpl) AliasByPlate(ctx context.Context, plate Plate) (*Car,
     )
     if fbthriftErr != nil {
         return nil, fbthriftErr
-    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
-        return nil, fbthriftEx
     }
     return fbthriftResp.GetSuccess(), nil
 }
@@ -121,8 +117,6 @@ func (c *finderClientImpl) PreviousPlate(ctx context.Context, plate Plate) (Plat
     )
     if fbthriftErr != nil {
         return "", fbthriftErr
-    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
-        return "", fbthriftEx
     }
     return fbthriftResp.GetSuccess(), nil
 }

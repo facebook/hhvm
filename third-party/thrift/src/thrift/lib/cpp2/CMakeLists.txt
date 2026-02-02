@@ -338,8 +338,10 @@ add_library(
   async/ResponseChannel.cpp
   async/RetryingRequestChannel.cpp
   async/RocketClientChannel.cpp
+  async/RocketClientChannelBase.cpp
   async/RpcOptions.cpp
   async/RpcTypes.cpp
+  async/SecureRocketClientChannel.cpp
   async/ServerBiDiStreamFactory.cpp
   async/ServerGeneratorStreamBridge.cpp
   async/ServerRequestData.cpp
@@ -425,6 +427,7 @@ add_library(
   transport/rocket/client/RequestContext.cpp
   transport/rocket/client/RequestContextQueue.cpp
   transport/rocket/client/RocketClient.cpp
+  transport/rocket/client/SecureRocketClient.cpp
   transport/rocket/client/KeepAliveWatcher.cpp
   transport/rocket/client/RocketStreamServerCallback.cpp
   transport/rocket/client/RocketStreamServerCallbackWithChunkTimeout.cpp
@@ -440,6 +443,7 @@ add_library(
   transport/rocket/framing/Util.cpp
   transport/rocket/payload/DefaultPayloadSerializerStrategy.cpp
   transport/rocket/payload/PayloadSerializer.cpp
+  transport/rocket/server/BidirectionalStreamState.cpp
   transport/rocket/server/InteractionOverload.cpp
   transport/rocket/server/RocketRoutingHandler.cpp
   transport/rocket/server/RocketServerConnection.cpp
@@ -452,6 +456,8 @@ add_library(
   transport/rocket/server/RocketThriftRequests.cpp
   transport/rocket/server/RocketServerConnectionFactory.cpp
   transport/rocket/server/ThriftRocketServerHandler.cpp
+  transport/rocket/server/detail/RocketContextUtils.cpp
+  transport/rocket/server/detail/RocketErrorHandler.cpp
   transport/rocket/server/detail/WriteBatcher.cpp
   util/Checksum.cpp
   util/DebugString.cpp

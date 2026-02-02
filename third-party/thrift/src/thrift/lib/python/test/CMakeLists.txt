@@ -477,6 +477,17 @@ thrift_python_library_for_test(
 )
 
 thrift_python_library_for_test(
+  "adapter_const_only"
+  ""
+  ""
+  "${TEST_THRIFT_DIR}"
+  "${CMAKE_CURRENT_BINARY_DIR}"
+  ""
+  THRIFT_INCLUDE_DIRECTORIES "${CMAKE_SOURCE_DIR}"
+  NAMESPACE "python_test"
+)
+
+thrift_python_library_for_test(
   "containers"
   ""
   ""
@@ -590,17 +601,6 @@ thrift_python_library_for_test(
 
 # Files without namespace py3 - use empty namespace
 # (output to gen-python/<file_name>/)
-thrift_python_library_for_test(
-  "abstract_types_flags"
-  ""
-  ""
-  "${TEST_THRIFT_DIR}"
-  "${CMAKE_CURRENT_BINARY_DIR}"
-  ""
-  THRIFT_INCLUDE_DIRECTORIES "${CMAKE_SOURCE_DIR}"
-  NAMESPACE "thrift.python.test"
-)
-
 thrift_python_library_for_test(
   "annotations"
   ""
@@ -944,6 +944,7 @@ add_dependencies(thrift_python_test_package
   schema_evolution_test-python-target
   # python_test namespace
   adapter-python-target
+  adapter_const_only-python-target
   containers-python-target
   enums-python-target
   refs-python-target

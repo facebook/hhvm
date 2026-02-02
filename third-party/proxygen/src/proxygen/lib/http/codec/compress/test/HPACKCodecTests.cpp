@@ -211,7 +211,7 @@ TEST_F(HPACKCodecTests, UncompressedSizeLimit) {
   // generate lots of small headers
   string contentLength = "Content-Length";
   for (int i = 0; i < 10000; i++) {
-    string value = folly::to<string>(i);
+    auto value = folly::to<string>(i);
     vector<string> header = {contentLength, value};
     headers.push_back(header);
   }
@@ -228,7 +228,7 @@ TEST_F(HPACKCodecTests, SizeLimitStats) {
   // generate lots of small headers
   string contentLength = "Content-Length";
   for (int i = 0; i < 10000; i++) {
-    string value = folly::to<string>(i);
+    auto value = folly::to<string>(i);
     vector<string> header = {contentLength, value};
     headers.push_back(header);
   }

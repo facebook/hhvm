@@ -174,7 +174,7 @@ TEST_F(HPACKHeaderNameTest, TestOperators) {
 
 TEST_F(HPACKHeaderNameTest, TestIsCommonHeader) {
   for (uint64_t j = 0; j < HTTPCommonHeaders::num_codes; ++j) {
-    HTTPHeaderCode code = static_cast<HTTPHeaderCode>(j);
+    auto code = static_cast<HTTPHeaderCode>(j);
     HPACKHeader testHPACKHeader(*HTTPCommonHeaders::getPointerToName(code), "");
 
     bool checkResult = j >= HTTPHeaderCodeCommonOffset;

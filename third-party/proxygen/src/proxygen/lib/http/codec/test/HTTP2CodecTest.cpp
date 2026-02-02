@@ -997,7 +997,7 @@ TEST_F(HTTP2CodecTest, BasicData) {
 
 TEST_F(HTTP2CodecTest, LongData) {
   // Hack the max frame size artificially low
-  HTTPSettings* settings = (HTTPSettings*)upstreamCodec_.getIngressSettings();
+  auto* settings = (HTTPSettings*)upstreamCodec_.getIngressSettings();
   settings->setSetting(SettingsId::MAX_FRAME_SIZE, 16);
   auto buf = makeBuf(100);
   upstreamCodec_.generateBody(

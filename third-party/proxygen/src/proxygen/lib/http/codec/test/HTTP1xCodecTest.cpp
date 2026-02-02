@@ -1198,10 +1198,10 @@ TEST(HTTP1xCodecTest, HugeURL) {
   HTTP1xCodec codec(TransportDirection::DOWNSTREAM);
   MockHTTPCodecCallback callbacks;
   codec.setCallback(&callbacks);
-  std::string request = folly::to<std::string>("GET /echo?q=",
-                                               std::string(84 * 1024, 'a'),
-                                               " HTTP/1.1\r\n"
-                                               "Host: foo\r\n\r\n");
+  auto request = folly::to<std::string>("GET /echo?q=",
+                                        std::string(84 * 1024, 'a'),
+                                        " HTTP/1.1\r\n"
+                                        "Host: foo\r\n\r\n");
   EXPECT_CALL(callbacks, onMessageBegin(1, _));
   EXPECT_CALL(callbacks, onError(1, _, _))
       .WillOnce(Invoke(
@@ -1249,7 +1249,7 @@ TEST(HTTP1xCodecTest, ExtraCRLF) {
   HTTP1xCodec codec(TransportDirection::DOWNSTREAM);
   MockHTTPCodecCallback callbacks;
   codec.setCallback(&callbacks);
-  std::string requests = folly::to<std::string>(
+  auto requests = folly::to<std::string>(
       "\r"
       "GET /echo HTTP/1.1\r\n\r\n",
       "\n"
@@ -1289,7 +1289,7 @@ TEST(HTTP1xCodecTest, HugeChunkLength) {
   HTTP1xCodec codec(TransportDirection::DOWNSTREAM);
   MockHTTPCodecCallback callbacks;
   codec.setCallback(&callbacks);
-  std::string request = folly::to<std::string>(
+  auto request = folly::to<std::string>(
       "POST /echo HTTP/1.1\r\n"
       "Transfer-Encoding: chunked\r\n"
       "\r\n"
@@ -1308,7 +1308,7 @@ TEST(HTTP1xCodecTest, HugeContentLength) {
   HTTP1xCodec codec(TransportDirection::DOWNSTREAM);
   MockHTTPCodecCallback callbacks;
   codec.setCallback(&callbacks);
-  std::string request = folly::to<std::string>(
+  auto request = folly::to<std::string>(
       "POST /echo HTTP/1.1\r\n"
       "Content-Length: ffffffffffffffff\r\n");
   EXPECT_CALL(callbacks, onMessageBegin(1, _));
@@ -1542,7 +1542,7 @@ TEST(HTTP1xCodecTest, TrailersNonChunked) {
   folly::IOBufQueue buf;
   codec.generateHeader(buf, id, req, true);
 
-  std::string response = folly::to<std::string>(
+  auto response = folly::to<std::string>(
       "HTTP/1.1 200 Ok\r\n"
       "Content-Length: 10\r\n"
       "\r\n"

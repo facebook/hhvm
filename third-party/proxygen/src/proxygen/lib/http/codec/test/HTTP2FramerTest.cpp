@@ -62,7 +62,7 @@ class HTTP2FramerTest : public testing::Test {
   void dataFrameTest(std::unique_ptr<IOBuf> body,
                      uint32_t dataLen,
                      folly::Optional<uint8_t> padLen) {
-    uint32_t frameLen = uint32_t(dataLen);
+    auto frameLen = uint32_t(dataLen);
     if (padLen) {
       frameLen += 1 + *padLen;
     }

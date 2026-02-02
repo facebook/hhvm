@@ -21,11 +21,11 @@ TEST(DefaultHTTPCodecFactoryTest, GetCodec) {
 
   auto codec = factory.getCodec(
       http2::kProtocolString, TransportDirection::UPSTREAM, true);
-  HTTP2Codec* http2Codec = dynamic_cast<HTTP2Codec*>(codec.get());
+  auto* http2Codec = dynamic_cast<HTTP2Codec*>(codec.get());
   EXPECT_NE(http2Codec, nullptr);
 
   codec = factory.getCodec("http/1.1", TransportDirection::UPSTREAM, true);
-  HTTP1xCodec* http1xCodec = dynamic_cast<HTTP1xCodec*>(codec.get());
+  auto* http1xCodec = dynamic_cast<HTTP1xCodec*>(codec.get());
   EXPECT_NE(http1xCodec, nullptr);
 
   codec = factory.getCodec("", TransportDirection::UPSTREAM, true);

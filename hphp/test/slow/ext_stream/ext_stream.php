@@ -38,12 +38,14 @@ function retry_bind_server($udp = false) :mixed{
 
     $errno = null;
     $errstr = null;
+    $old_error_reporting = error_reporting(0);
     if ($udp) {
       $server = stream_socket_server($address, inout $errno, inout $errstr,
                                      STREAM_SERVER_BIND);
     } else {
       $server = stream_socket_server($address, inout $errno, inout $errstr);
     }
+    error_reporting($old_error_reporting);
     if ($server !== false) {
       // assing $server into a static property to make sure, it stays alive
       // until next retry_bind_server call.
@@ -62,12 +64,14 @@ function retry_bind_server6($udp = false) :mixed{
 
     $errno = null;
     $errstr = null;
+    $old_error_reporting = error_reporting(0);
     if ($udp) {
       $server = stream_socket_server($address, inout $errno, inout $errstr,
                                      STREAM_SERVER_BIND);
     } else {
       $server = stream_socket_server($address, inout $errno, inout $errstr);
     }
+    error_reporting($old_error_reporting);
     if ($server !== false) {
       // assing $server into a static property to make sure, it stays alive
       // until next retry_bind_server call.

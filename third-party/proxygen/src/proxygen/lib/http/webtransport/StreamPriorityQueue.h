@@ -11,7 +11,7 @@
 #include <optional>
 #include <quic/priority/PriorityQueue.h>
 
-namespace proxygen::coro::detail {
+namespace proxygen::detail {
 
 /**
  * A thin wrapper around quic::PriorityQueue for managing stream egress.
@@ -109,4 +109,4 @@ class StreamPriorityQueue {
   uint64_t count_{0};
 };
 
-} // namespace proxygen::coro::detail
+} // namespace proxygen::detail

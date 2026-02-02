@@ -501,7 +501,7 @@ void HTTPUniplexTransportSession::start() {
     codec_.addFilters(std::move(rateLimitFilter));
   }
   codec_.setCallback(this);
-  detail::setEgressWtHttpSettings(codec_->getEgressSettings());
+  ::proxygen::detail::setEgressWtHttpSettings(codec_->getEgressSettings());
   sendPreface();
 }
 
@@ -3715,7 +3715,8 @@ folly::coro::Task<WtReqResult> makeInternalEx(std::string_view err) {
       HTTPError{HTTPErrorCode::INTERNAL_ERROR, std::string(err)});
 }
 
-struct CoroWtSessionImpl : public detail::CoroWtSession {
+class CoroWtSessionImpl : public detail::CoroWtSession {
+ public:
   using CoroWtSession::CoroWtSession;
   HTTPSessionContextPtr ka_{}; // ensures session isn't destructed prior to
                                // WtHandle
@@ -3744,7 +3745,7 @@ folly::coro::Task<WtReqResult> HTTPCoroSession::sendWtReq(
     return makeInternalEx("Invalid reservation");
   }
 
-  const bool wtEnabled = detail::supportsWt(
+  const bool wtEnabled = ::proxygen::detail::supportsWt(
       {codec_->getIngressSettings(), codec_->getEgressSettings()});
   const bool validWtReq = HTTPWebTransport::isConnectMessage(msg);
   if (!(wtEnabled && validWtReq)) {
@@ -3794,9 +3795,9 @@ folly::coro::Task<WtReqResult> HTTPUniplexTransportSession::sendWtReq(
   // wt upgrade successful
   auto wt = std::make_shared<CoroWtSessionImpl>(
       eventBase_.get(),
-      detail::WtDir::Client,
-      detail::getWtConfig(codec_->getIngressSettings(),
-                          codec_->getEgressSettings()),
+      ::proxygen::detail::WtDir::Client,
+      ::proxygen::detail::getWtConfig(codec_->getIngressSettings(),
+                                      codec_->getEgressSettings()),
       std::move(wtHandler));
   wt->ka_ = acquireKeepAlive();
   wt->start(wt, std::move(*res), std::move(egressSource));

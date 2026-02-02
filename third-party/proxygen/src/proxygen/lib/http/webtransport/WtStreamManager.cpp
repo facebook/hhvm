@@ -80,7 +80,7 @@ struct WriteHandle;
 
 }; // namespace
 
-namespace proxygen::coro::detail {
+namespace proxygen::detail {
 
 // Accessor needs to be a complete type before anon namespace below for
 // ReadHandle & WriteHandle. This struct is a friend of WtStreamManager and
@@ -116,7 +116,7 @@ struct WtStreamManager::Accessor {
   WtStreamManager& sm_;
 };
 
-} // namespace proxygen::coro::detail
+} // namespace proxygen::detail
 
 namespace {
 
@@ -131,8 +131,7 @@ size_t computeChainLength(std::unique_ptr<folly::IOBuf>& buf) {
   return buf ? buf->computeChainDataLength() : 0;
 }
 
-using namespace proxygen::coro;
-using namespace proxygen::coro::detail;
+using namespace proxygen::detail;
 using ReadPromise = WtStreamManager::ReadPromise;
 ReadPromise emptyReadPromise() {
   return ReadPromise::makeEmpty();
@@ -203,12 +202,12 @@ struct WriteHandle : public WebTransport::StreamWriteHandle {
 
 } // namespace
 
-namespace proxygen::coro::detail {
+namespace proxygen::detail {
 
 /**
- * If rh == nullptr, ::maybeGrantFc only releases connection-level flow control.
- * This is set to nullptr if a fin/reset_stream have been received on a
- * stream, as releasing stream-level flow control is no longer
+ * If rh == nullptr, ::maybeGrantFc only releases connection-level flow
+ * control. This is set to nullptr if a fin/reset_stream have been received on
+ * a stream, as releasing stream-level flow control is no longer
  * necessary/reasonable.
  *
  * Otherwise release both connection- and stream-level flow control
@@ -279,10 +278,10 @@ void Accessor::done(ReadHandle& rh) noexcept {
 }
 
 /**
- * MaxStreams (and StreamsCounter) is indexed by the *type* of the stream, which
- * is derived from the least two significant bits of the stream id, as per
- * rfc9000 (i.e. the array must be created in the following order: client bidi
- * (0x00), server bidi (0x01), client uni (0x02), server uni (0x03))
+ * MaxStreams (and StreamsCounter) is indexed by the *type* of the stream,
+ * which is derived from the least two significant bits of the stream id, as
+ * per rfc9000 (i.e. the array must be created in the following order: client
+ * bidi (0x00), server bidi (0x01), client uni (0x02), server uni (0x03))
  */
 /*static*/ auto WtStreamManager::maxStreams(WtDir dir,
                                             const WtConfig& config) noexcept
@@ -371,8 +370,8 @@ bool WtStreamManager::isEgress(uint64_t streamId) const {
 }
 
 /**
- * Enqueues an event into events. If this is the first event to be enqueued, it
- * will invoke the Callback (edge-triggered).
+ * Enqueues an event into events. If this is the first event to be enqueued,
+ * it will invoke the Callback (edge-triggered).
  */
 void WtStreamManager::enqueueEvent(Event&& ev) noexcept {
   bool wasEmpty = !hasEvent();
@@ -384,7 +383,8 @@ void WtStreamManager::enqueueEvent(Event&& ev) noexcept {
 
 WtStreamManager::Result WtStreamManager::onMaxStreams(MaxStreamsBidi bidi) {
   XCHECK_LE(bidi.maxStreams, kMaxVarint);
-  // the "StreamType" is derived from a self bidi id, simply use nextStreamIds_
+  // the "StreamType" is derived from a self bidi id, simply use
+  // nextStreamIds_
   auto& maxBidi = maxStreams_.getMaxStreams(nextStreamIds_.bidi);
   bool valid = bidi.maxStreams >= maxBidi;
   maxBidi = std::max(maxBidi, bidi.maxStreams);
@@ -413,16 +413,16 @@ struct WtStreamManager::BidiHandle {
     if (sm.isPeer(id)) {
       /**
        * NOTE: & TODO: This is intentionally invoked now, before the stream is
-       * inserted into the map. This is to prevent the case where an application
-       * bidirectionally resets a stream inline (from
+       * inserted into the map. This is to prevent the case where an
+       * application bidirectionally resets a stream inline (from
        * IngressCallback::onNewPeerStream) and causes its subsequent
        * deallocation while the handle is returned to the backing transport
        * (e.g. the ::getOrCreateBidiHandle invocation that caused this stream
        * allocation in the first place).
        *
-       * The backing transport must accumulate these streams and deliver them to
-       * the application in the next EventBase loop. The more appropriate fix
-       * here is for the containing class to pass in a folly::Executor to
+       * The backing transport must accumulate these streams and deliver them
+       * to the application in the next EventBase loop. The more appropriate
+       * fix here is for the containing class to pass in a folly::Executor to
        * StreamManager, allowing WtStreamManager to defer invoking
        * ::onNewPeerStream (effectively asynchronous w.r.t stream allocation).
        */
@@ -713,7 +713,7 @@ WtStreamManager::WtWriteHandle* WtStreamManager::nextWritable() const noexcept {
              : nullptr;
 }
 
-} // namespace proxygen::coro::detail
+} // namespace proxygen::detail
 
 /**
  * ReadHandle & WriteHandle implementations here

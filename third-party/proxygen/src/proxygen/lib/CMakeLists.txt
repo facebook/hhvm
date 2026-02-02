@@ -251,6 +251,7 @@ add_library(
     http/webtransport/WebTransportImpl.cpp
     http/webtransport/WtEgressContainer.cpp
     http/webtransport/WtStreamManager.cpp
+    http/webtransport/WtUtils.cpp
     pools/generators/FileServerListGenerator.cpp
     pools/generators/ServerListGenerator.cpp
     sampling/Sampling.cpp

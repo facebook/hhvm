@@ -11,7 +11,6 @@
 #include <cstdint>
 #include <map>
 #include <memory>
-#include <set>
 #include <variant>
 
 #include <folly/container/F14Set.h>
@@ -71,7 +70,7 @@
  * nullptr.
  */
 
-namespace proxygen::coro::detail {
+namespace proxygen::detail {
 
 // value maps to lsb of stream id as per rfc9000
 enum WtDir : uint8_t { Client = 0, Server = 1 };
@@ -403,4 +402,4 @@ struct WtStreamManager {
   static StreamType streamType(uint64_t streamId) noexcept;
 };
 
-} // namespace proxygen::coro::detail
+} // namespace proxygen::detail

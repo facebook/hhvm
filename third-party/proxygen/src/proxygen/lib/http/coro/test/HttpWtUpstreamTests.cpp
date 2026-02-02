@@ -15,6 +15,7 @@
 
 using namespace proxygen;
 using namespace testing;
+using namespace proxygen::detail;
 
 using folly::coro::co_awaitTry;
 using folly::coro::co_reschedule_on_current_executor;
@@ -393,7 +394,7 @@ class WtTest : public H2WtUpstreamSessionTest {
   }
 
   void grantMaxData(uint64_t streamId, uint64_t offset) {
-    if (streamId == detail::kInvalidVarint) {
+    if (streamId == kInvalidVarint) {
       writeWTMaxData(wtBuf, {offset});
     } else {
       writeWTMaxStreamData(wtBuf,
@@ -466,7 +467,7 @@ CO_TEST_P_X(WtTest, SimpleUniEgress) {
   // http settings is assumed to be 0)
   evb_.runInLoop([&]() {
     // grant conn- and stream-level fc
-    grantMaxData(detail::kInvalidVarint, kBufLen);
+    grantMaxData(kInvalidVarint, kBufLen);
     grantMaxData(id, kBufLen);
   });
 
@@ -499,7 +500,7 @@ CO_TEST_P_X(WtTest, SimpleUniEgress) {
 
   // release 1 byte of connection-level wt fc; buffered data will be dequeued
   // from WtStreamManager
-  grantMaxData(detail::kInvalidVarint, kBufLen + 1);
+  grantMaxData(kInvalidVarint, kBufLen + 1);
   co_await wtCodecCb.waitForEvent(); // ouch, this needs 5 loops otherwise
                                      // (i.e. co_await rescheduleN(5))
   streamEvent = std::exchange(wtCodecCb.stream, {});
@@ -606,7 +607,7 @@ CO_TEST_P_X(WtTest, SimpleBidiEcho) {
 
   // asynchronously advertise MaxData & MaxStreamData
   evb_.runInLoop([&]() {
-    grantMaxData(detail::kInvalidVarint, kBufLen);
+    grantMaxData(kInvalidVarint, kBufLen);
     grantMaxData(id, kBufLen);
   });
 

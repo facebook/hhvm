@@ -12,7 +12,7 @@
 
 #include <folly/io/IOBufQueue.h>
 
-namespace proxygen::coro {
+namespace proxygen::detail {
 
 /**
  * This is needed due to the asynchronous nature of CoroWtSession in
@@ -129,4 +129,4 @@ class WtBufferedStreamData {
   BufferedFlowController window_;
 };
 
-} // namespace proxygen::coro
+} // namespace proxygen::detail

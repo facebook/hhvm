@@ -9,7 +9,7 @@
 #include <folly/logging/xlog.h>
 #include <proxygen/lib/http/webtransport/WtEgressContainer.h>
 
-namespace proxygen::coro {
+namespace proxygen::detail {
 
 WtBufferedStreamData::FcRes WtBufferedStreamData::enqueue(
     std::unique_ptr<folly::IOBuf> data, bool fin) noexcept {
@@ -33,4 +33,4 @@ WtBufferedStreamData::DequeueResult WtBufferedStreamData::dequeue(
   return res;
 }
 
-}; // namespace proxygen::coro
+}; // namespace proxygen::detail

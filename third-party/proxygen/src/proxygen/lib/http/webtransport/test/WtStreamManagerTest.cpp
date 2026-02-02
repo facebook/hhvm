@@ -12,8 +12,6 @@
 #include <folly/portability/GTest.h>
 #include <quic/priority/HTTPPriorityQueue.h>
 
-using namespace proxygen::coro::detail;
-
 namespace proxygen::coro::test {
 
 using WtStreamManager = detail::WtStreamManager;

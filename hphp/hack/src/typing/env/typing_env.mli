@@ -213,8 +213,6 @@ val env_with_constructor_droot_member : env -> env
 
 val add_parent_dep : env -> skip_constructor_dep:bool -> string -> unit
 
-val most_similar : string -> 'a list -> ('a -> string) -> 'a option
-
 val suggest_static_member :
   bool -> class_decl -> string -> (Pos_or_decl.t * string) option
 

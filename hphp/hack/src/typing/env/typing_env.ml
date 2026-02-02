@@ -971,49 +971,12 @@ module M = struct
     Deps.add_member_dep ~is_method ~is_static:true env class_ mid ce_opt;
     ce_opt
 
-  (* Given a list of [possibilities] whose name we can extract with [f], return
-     the item whose name is closest to [name]. *)
-  let most_similar (name : string) (possibilities : 'a list) (f : 'a -> string)
-      : 'a option =
-    (* Compare strings case-insensitively. *)
-    let name = String.lowercase name in
-    let f x = String.lowercase (f x) in
-
-    let distance upper_bound = String_utils.levenshtein_distance ~upper_bound in
-    let choose_closest ~best:(best, best_distance) candidate =
-      let candidate_distance =
-        distance (best_distance + 1) (f candidate) name
-      in
-      if best_distance <= candidate_distance then
-        (best, best_distance)
-      else
-        (candidate, candidate_distance)
-    in
-    match possibilities with
-    | [] -> None
-    | [x] -> Some x
-    | x :: xs ->
-      (* The initial distance upper bound here is chosen practically. It reduces
-         the amount of work we do while computing the Levenshtein distance, but
-         does not regress any of the suggestions in the test suite. *)
-      let init = (x, distance 10 (f x) name) in
-      Some
-        (fst
-        @@ List.fold
-             xs
-             ~init
-             ~f:(fun (current_best, best_distance) possibility ->
-               let (new_best, new_best_distance) =
-                 choose_closest ~best:(current_best, best_distance) possibility
-               in
-               (new_best, new_best_distance)))
-
   let suggest_member members mid =
     let pairs =
       List.map members ~f:(fun (x, { ce_type = (lazy ty); _ }) ->
           (get_pos ty, x))
     in
-    most_similar mid pairs snd
+    String_utils.most_similar mid pairs snd
 
   let suggest_static_member is_method class_ mid =
     let mid = String.lowercase mid in
@@ -1350,7 +1313,7 @@ module M = struct
             (all_outer_locals ())
         in
         let var_name (k, _, _) = LID.to_string k in
-        match most_similar lid all_locals var_name with
+        match String_utils.most_similar lid all_locals var_name with
         | Some (k, local, dsl) ->
           (Some (LID.to_string k, local.Typing_local_types.pos), dsl)
         | None -> (None, None)

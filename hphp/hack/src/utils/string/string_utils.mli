@@ -135,4 +135,11 @@ module CharSet : sig
   val to_string : t -> string
 end
 
-val levenshtein_distance : ?upper_bound:int -> string -> string -> int
+(** Extracts a name with [f] then returns the closest candidate
+  * by case-insensitive edit distance.
+  *
+  * If [max_edit_distance] (value <= 10) is provided, only returns a `Some _` if the edit
+  * distance is at most that value.
+  * *)
+val most_similar :
+  ?max_edit_distance:int -> string -> 'a list -> ('a -> string) -> 'a option

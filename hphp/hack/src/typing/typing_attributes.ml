@@ -75,10 +75,7 @@ let check_implements
         in
 
         let closest_attr_name =
-          Typing_env.most_similar
-            attr_name
-            all_valid_user_attributes
-            (fun name -> name)
+          String_utils.most_similar attr_name all_valid_user_attributes Fn.id
         in
 
         let custom_err_config =

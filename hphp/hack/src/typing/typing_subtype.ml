@@ -8349,7 +8349,7 @@ end = struct
               @@ Reason.to_pos r
             in
             let (most_similar, quickfixes_opt) =
-              match Env.most_similar name consts fst with
+              match String_utils.most_similar name consts fst with
               | Some (name, const) ->
                 let new_text = name in
                 ( Some (new_text, const.cc_pos),

@@ -256,3 +256,38 @@ let levenshtein_distance ?(upper_bound = max_int) (xs : string) (ys : string) =
   in
   let res = min (d xs_len ys_len) upper_bound in
   res
+
+let most_similar
+    ?max_edit_distance (name : string) (candidates : 'a list) (f : 'a -> string)
+    : 'a option =
+  (* Compare strings case-insensitively. *)
+  let name = String.lowercase_ascii name in
+  let f x = String.lowercase_ascii (f x) in
+
+  let max_distance =
+    match max_edit_distance with
+    | Some n -> n
+    | None -> max_int
+  in
+  let upper_bound =
+    match max_edit_distance with
+    (* 10 was a pre-existing hard-coded upper bound "optimization"
+       Distances >= 10 are indistinguishable, so we may return a candidate
+       whose true edit distance exceeds 10 if no closer match exists.
+       Keeping so we don't change behavior
+    *)
+    | Some n -> min (n + 1) 10
+    | None -> 10
+  in
+  let distance = levenshtein_distance ~upper_bound in
+
+  fst
+    (List.fold_left
+       (fun (best_candidate, best_d) candidate ->
+         let d = distance (f candidate) name in
+         if d < best_d && d <= max_distance then
+           (Some candidate, d)
+         else
+           (best_candidate, best_d))
+       (None, max_int)
+       candidates)

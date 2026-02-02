@@ -320,3 +320,10 @@ val current_saved_state_rollout_flag_index : string
 val deactivate_saved_state_rollout : string
 
 val override_hhconfig_hash : string
+
+(* validation *)
+
+(** When a configuration key looks like a typo, we make a suggestion *)
+type did_you_mean = Did_you_mean of string option
+
+val validate : config_key:string -> (unit, did_you_mean) result

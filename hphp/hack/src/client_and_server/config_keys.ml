@@ -6,8 +6,12 @@
  *
  *)
 
-(* Used to do something worthwhile in the next commit *)
-let key name = name
+(* used for validation below *)
+let registered_keys : SSet.t ref = ref SSet.empty
+
+let key (name : string) : string =
+  registered_keys := SSet.add name !registered_keys;
+  name
 
 (* parser options *)
 
@@ -339,3 +343,23 @@ let current_saved_state_rollout_flag_index =
 let deactivate_saved_state_rollout = key "deactivate_saved_state_rollout"
 
 let override_hhconfig_hash = key "override_hhconfig_hash"
+
+(* validation *)
+
+type did_you_mean = Did_you_mean of string option
+
+let all_keys = !registered_keys
+
+let validate ~(config_key : string) : (unit, did_you_mean) result =
+  let all_keys_list = lazy (SSet.elements all_keys) in
+  if SSet.mem config_key all_keys then
+    Ok ()
+  else
+    let suggestion =
+      String_utils.most_similar
+        ~max_edit_distance:3
+        config_key
+        (Lazy.force all_keys_list)
+        Fun.id
+    in
+    Error (Did_you_mean suggestion)

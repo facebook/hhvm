@@ -225,6 +225,22 @@ let load_and_parse_custom_error_config path =
       msg;
     None
 
+let exit_if_invalid_config_keys (config : Config_file_common.t) : unit =
+  let config_keys = Config_file_common.keys config in
+  List.iter config_keys ~f:(fun key ->
+      match Config_keys.validate ~config_key:key with
+      | Ok () -> ()
+      | Error (Config_keys.Did_you_mean suggestion) ->
+        let msg =
+          match suggestion with
+          | None -> Printf.sprintf "Unknown config option: %s\n" key
+          | Some s ->
+            Printf.sprintf "Unknown config option: %s. Did you mean %s?\n" key s
+        in
+        Out_channel.output_string Out_channel.stderr msg;
+        Out_channel.flush Out_channel.stderr;
+        Exit.exit Exit_status.Input_error)
+
 let parse_options () =
   let fn_ref = ref [] in
   let extra_builtins = ref [] in
@@ -724,6 +740,7 @@ let parse_options () =
         let c = Config_file_common.parse_contents setting in
         Config_file_common.apply_overrides ~config ~overrides:c ~log_reason:None)
   in
+  let () = exit_if_invalid_config_keys config in
   let packages_config_path =
     config |> Config_file.Getters.string_opt "packages_config_path"
   in

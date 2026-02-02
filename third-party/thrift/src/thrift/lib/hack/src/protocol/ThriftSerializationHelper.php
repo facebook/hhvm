@@ -34,6 +34,14 @@ abstract final class ThriftSerializationHelper {
     );
   }
 
+  public static function useStructToStringRPCHelpers()[write_props]: bool {
+    return HH\Coeffects\fb\backdoor_from_write_props__DO_NOT_USE(
+      ()[defaults] ==>
+        JustKnobs::eval('thrift/hack:use_struct_to_string_extensions_in_rpc'),
+      'Need to gate the change',
+    );
+  }
+
   public static function readStruct(
     TProtocol $protocol,
     IThriftStruct $object,

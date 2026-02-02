@@ -44,6 +44,19 @@ class TCompactProtocolAccelerated extends TCompactProtocolBase {
     int $seq_id,
     bool $is_one_way = false,
   ): void {
+    if (ThriftSerializationHelper::useStructToStringRPCHelpers()) {
+      // This should not be reset, but for backwards compatibility
+      // using what the client/processor already uses.
+      $this->version = TCompactProtocolBase::VERSION;
+      parent::writeRPCMessage(
+        $fname,
+        $type,
+        $message_struct,
+        $seq_id,
+        $is_one_way,
+      );
+      return;
+    }
     thrift_protocol_write_compact2(
       $this,
       $fname,
@@ -60,11 +73,27 @@ class TCompactProtocolAccelerated extends TCompactProtocolBase {
   <<__Override>>
   public function readRPCMessage<TMessageStruct as IThriftStruct>(
     classname<TMessageStruct> $message_struct_class,
-    string $_fname,
-    ?int $_expected_seq_id,
+    string $fname,
+    ?int $expected_seq_id,
     int $options = 0,
     bool $_compare_seq_id = false,
   ): TMessageStruct {
+    if (
+      ThriftSerializationHelper::useStructToStringRPCHelpers() &&
+      $this->trans_ is TMemoryBuffer
+    ) {
+      return parent::readRPCMessage(
+        $message_struct_class,
+        $fname,
+        $expected_seq_id,
+        $options,
+        // This is set to false because hhvm extension doesn't support
+        // it yet. So this is mainly for backwards compatibility.
+        // Plus the comparison doesn't work when using the same client for concurrent
+        // requests regardless of protocol.
+        false, // compare_seq_id
+      );
+    }
     return thrift_protocol_read_compact($this, $message_struct_class, $options);
   }
 
@@ -73,15 +102,41 @@ class TCompactProtocolAccelerated extends TCompactProtocolBase {
     classname<TStruct> $struct_class,
     int $options = 0,
   ): TStruct {
-    return thrift_protocol_read_compact_struct(
-      $this,
-      HH\class_to_classname($struct_class),
-      $options,
-    );
+
+    if (
+      ThriftSerializationHelper::useStructToStringRPCHelpers() &&
+      $this->trans_ is TMemoryBuffer
+    ) {
+      $buffer = $this->trans_->getBuffer();
+      // This is necessary for concurrent requests to work with the same client
+      // Extension does this at the end by calling putBack()
+      // and advancing index pointer as data is read from the buffer.
+      $this->trans_->resetBuffer();
+      $struct = thrift_protocol_read_compact_struct_from_string(
+        $buffer,
+        HH\class_to_classname($struct_class),
+        $options,
+        $this->version,
+      );
+    } else {
+      $struct = thrift_protocol_read_compact_struct(
+        $this,
+        HH\class_to_classname($struct_class),
+        $options,
+      );
+    }
+    $this->readMessageEnd();
+    return $struct;
   }
 
   <<__Override>>
   public function writeRPCStruct(IThriftStruct $struct): void {
+    if (ThriftSerializationHelper::useStructToStringRPCHelpers()) {
+      $buffer =
+        thrift_protocol_write_compact_struct_to_string($struct, $this->version);
+      $this->trans_->write($buffer);
+      return;
+    }
     thrift_protocol_write_compact_struct($this, $struct, $this->version);
   }
 }

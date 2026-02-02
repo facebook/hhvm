@@ -141,7 +141,12 @@ final class TCompactProtocolAcceleratedTest extends WWWTest {
     return ($prot->getTransport() as TMemoryBuffer)->getBuffer();
   }
 
-  <<JKBoolDataProvider('thrift/hack:use_common_rpc_helpers')>>
+  <<
+    JKBoolDataProvider(
+      'thrift/hack:use_common_rpc_helpers',
+      'thrift/hack:use_struct_to_string_extensions_in_rpc',
+    ),
+  >>
   public async function testEncode(): Awaitable<void> {
     $reference = await $this->genEncode($this->getReferenceProtocol());
     $accelerated = await $this->genEncode($this->getAcceleratedProtocol());
@@ -158,7 +163,12 @@ final class TCompactProtocolAcceleratedTest extends WWWTest {
     return await $client->test($this->getTestData());
   }
 
-  <<JKBoolDataProvider('thrift/hack:use_common_rpc_helpers')>>
+  <<
+    JKBoolDataProvider(
+      'thrift/hack:use_common_rpc_helpers',
+      'thrift/hack:use_struct_to_string_extensions_in_rpc',
+    ),
+  >>
   public async function testgenRoundTrip(): Awaitable<void> {
     $reference = await $this->genRoundTrip(false);
     $accelerated = await $this->genRoundTrip(true);
@@ -167,7 +177,12 @@ final class TCompactProtocolAcceleratedTest extends WWWTest {
     expect($accelerated)->toBePHPEqual($this->getTestData());
   }
 
-  <<JKBoolDataProvider('thrift/hack:use_common_rpc_helpers')>>
+  <<
+    JKBoolDataProvider(
+      'thrift/hack:use_common_rpc_helpers',
+      'thrift/hack:use_struct_to_string_extensions_in_rpc',
+    ),
+  >>
   public async function testExn(): Awaitable<void> {
     $reference = 'reference did not throw';
     try {

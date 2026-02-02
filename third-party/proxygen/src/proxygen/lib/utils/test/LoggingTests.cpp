@@ -70,7 +70,7 @@ TEST_F(LoggingTests, DumpBin) {
 
 TEST_F(LoggingTests, DumpBinToFile) {
   struct stat fstat;
-  string tmpfile(folly::to<string>("/tmp/test_", getpid(), ".bin"));
+  auto tmpfile(folly::to<string>("/tmp/test_", getpid(), ".bin"));
 
   unlink(tmpfile.c_str());
   unique_ptr<IOBuf> buf = IOBuf::create(128);

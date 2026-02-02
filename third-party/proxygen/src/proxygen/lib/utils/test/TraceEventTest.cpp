@@ -134,9 +134,8 @@ TEST(TraceEventTest, VectorDataVectorValue) {
   data.emplace_back("C");
   traceEvent.addMeta(TraceFieldType::Protocol, data);
 
-  std::vector<std::string> extractedData(
-      traceEvent.getTraceFieldDataAs<std::vector<std::string>>(
-          TraceFieldType::Protocol));
+  auto extractedData(traceEvent.getTraceFieldDataAs<std::vector<std::string>>(
+      TraceFieldType::Protocol));
 
   EXPECT_THAT(extractedData, testing::ContainerEq(data));
 }

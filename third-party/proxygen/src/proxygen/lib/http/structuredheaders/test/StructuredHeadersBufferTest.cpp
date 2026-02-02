@@ -216,7 +216,7 @@ TEST_F(StructuredHeadersBufferTest, TestIntegerUnderflow) {
 
 TEST_F(StructuredHeadersBufferTest, TestBool) {
   for (auto i = 0; i < 2; i++) {
-    std::string input = folly::to<std::string>("?", i);
+    auto input = folly::to<std::string>("?", i);
     StructuredHeadersBuffer shd(input);
     StructuredHeaderItem output;
     auto err = shd.parseItem(output);

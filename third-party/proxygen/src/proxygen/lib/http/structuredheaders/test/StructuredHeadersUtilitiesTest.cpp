@@ -17,7 +17,7 @@ class StructuredHeadersUtilitiesTest : public testing::Test {};
 
 TEST_F(StructuredHeadersUtilitiesTest, TestLcalpha) {
   for (uint32_t i = 0; i < 256; i++) {
-    uint8_t c = (uint8_t)i;
+    auto c = (uint8_t)i;
     if (c >= 'a' && c <= 'z') {
       EXPECT_TRUE(isLcAlpha(c));
     } else {
@@ -28,7 +28,7 @@ TEST_F(StructuredHeadersUtilitiesTest, TestLcalpha) {
 
 TEST_F(StructuredHeadersUtilitiesTest, TestIsValidIdentifierChar) {
   for (uint32_t i = 0; i < 256; i++) {
-    uint8_t c = (uint8_t)i;
+    auto c = (uint8_t)i;
     if ((c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') ||
         (c == '_' || c == '-' || c == '*' || c == '/')) {
       EXPECT_TRUE(isValidIdentifierChar(c));

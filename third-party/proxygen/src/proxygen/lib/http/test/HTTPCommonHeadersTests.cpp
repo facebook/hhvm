@@ -74,7 +74,7 @@ TEST_F(HTTPCommonHeadersTests, TestGetHeaderCodeFromTableCommonHeaderName) {
   for (uint64_t j = HTTPHeaderCodeCommonOffset;
        j < HTTPCommonHeaders::num_codes;
        ++j) {
-    HTTPHeaderCode code = static_cast<HTTPHeaderCode>(j);
+    auto code = static_cast<HTTPHeaderCode>(j);
     EXPECT_TRUE(code == HTTPCommonHeaders::getCodeFromTableName(
                             HTTPCommonHeaders::getPointerToName(code),
                             HTTPCommonHeaderTableType::TABLE_CAMELCASE));

@@ -96,7 +96,7 @@ string BinPrinter::print(const IOBuf* buf) {
 string IOBufPrinter::printChain(const IOBuf* buf,
                                 Format format,
                                 bool coalesce) {
-  uint8_t index = (uint8_t)format;
+  auto index = (uint8_t)format;
   if (printers.size() <= index) {
     LOG(ERROR) << "invalid format: " << index;
     return "";

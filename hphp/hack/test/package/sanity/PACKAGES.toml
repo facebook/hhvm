@@ -1,4 +1,0 @@
-[packages]
-
-[packages.pkg1]
-uses=["a.*"]

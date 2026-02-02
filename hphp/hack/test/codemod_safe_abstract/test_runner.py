@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+# pyre-unsafe
+
 """
 Generates snapshots of the codemod safe abstract orchestrator output for testing.
 See ./BUCK for how to run this.

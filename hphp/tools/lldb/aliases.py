@@ -1,3 +1,4 @@
+# pyre-unsafe
 import abc
 from typing import List
 

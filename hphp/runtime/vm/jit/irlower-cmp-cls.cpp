@@ -242,7 +242,7 @@ static void implInstanceOfBitmask(IRLS& env, const IRInstruction* inst,
   int offset;
   uint8_t mask;
   if (!InstanceBits::getMask(rhsName, offset, mask)) {
-    always_assert(!"cgInstanceOfBitmask had no bitmask");
+    always_assert(false && "cgInstanceOfBitmask had no bitmask");
   }
 
   auto const sf = v.makeReg();

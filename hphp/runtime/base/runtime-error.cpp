@@ -274,7 +274,7 @@ static void raise_notice_helper(ErrorMode mode, bool skipTop,
       HANDLE_ERROR(true, Never, "\nDeprecated: ", skipTop);
       break;
     default:
-      always_assert(!"Unhandled type of error");
+      always_assert(false && "Unhandled type of error");
   }
 }
 

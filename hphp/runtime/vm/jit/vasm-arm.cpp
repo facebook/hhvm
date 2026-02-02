@@ -1592,7 +1592,7 @@ void lowerVptr(Vptr& p, Vout& v, ImmediateStyle is = kLegacyStyle, ImmediateStyl
           (p.disp % ImmediateCharacteristics[alt].immStep) == 0)
         break;
       if (ImmediateCharacteristics[is].assertOnOutOfRange) {
-        always_assert(!"Immediate value out of range");
+        always_assert(false && "Immediate value out of range");
       }
 
       // #imm is out of range, convert to [base, index]

@@ -56,7 +56,7 @@ static String zone_type_to_string(int zoneType, req::ptr<DateTime> dt) {
       return dt->toString(s_formatAbbr);
   }
 
-  always_assert(!"Bad zone type");
+  always_assert(false && "Bad zone type");
 }
 
 struct DateGlobals {

@@ -35,16 +35,16 @@ size_t encodeQuicIntegerWithAtLeast(uint64_t value,
   numBytes = std::max(numBytes, atLeast);
   CHECK(numBytes == 1 || numBytes == 2 || numBytes == 4 || numBytes == 8);
   if (numBytes == 1) {
-    uint8_t modified = static_cast<uint8_t>(value);
+    auto modified = static_cast<uint8_t>(value);
     appender.writeBE(modified);
     return sizeof(modified);
   } else if (numBytes == 2) {
-    uint16_t reduced = static_cast<uint16_t>(value);
+    auto reduced = static_cast<uint16_t>(value);
     uint16_t modified = reduced | 0x4000;
     appender.writeBE(modified);
     return sizeof(modified);
   } else if (numBytes == 4) {
-    uint32_t reduced = static_cast<uint32_t>(value);
+    auto reduced = static_cast<uint32_t>(value);
     uint32_t modified = reduced | 0x80000000;
     appender.writeBE(modified);
     return sizeof(modified);

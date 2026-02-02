@@ -243,7 +243,7 @@ IOBufQueue RFC1867Codec::readToBoundary(bool& foundBoundary) {
           // If the last read char is a CR omit from result
           Cursor c(head);
           c.skip(readlen - 1);
-          uint8_t ch = c.read<uint8_t>();
+          auto ch = c.read<uint8_t>();
           if (ch == '\r') {
             --readlen;
             hasCr = true;

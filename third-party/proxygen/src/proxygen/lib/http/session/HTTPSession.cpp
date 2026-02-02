@@ -155,7 +155,7 @@ uint32_t HTTPSession::getCertAuthSettingVal() {
   }
   if (ekm && ekm->computeChainDataLength() == settingLen) {
     folly::io::Cursor cursor(ekm.get());
-    uint32_t ekmVal = cursor.readBE<uint32_t>();
+    auto ekmVal = cursor.readBE<uint32_t>();
     certAuthSettingVal = (ekmVal & 0x3fffffff) | 0x80000000;
   }
   return certAuthSettingVal;
@@ -181,7 +181,7 @@ bool HTTPSession::verifyCertAuthSetting(uint32_t value) {
   }
   if (ekm && ekm->computeChainDataLength() == settingLen) {
     folly::io::Cursor cursor(ekm.get());
-    uint32_t ekmVal = cursor.readBE<uint32_t>();
+    auto ekmVal = cursor.readBE<uint32_t>();
     certAuthSettingVal = (ekmVal & 0x3fffffff) | 0x80000000;
   } else {
     return false;

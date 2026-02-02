@@ -648,7 +648,7 @@ TEST_P(HQUpstreamSessionTest, GetAddresses) {
 }
 
 TEST_P(HQUpstreamSessionTest, GetAddressesFromBase) {
-  HTTPSessionBase* sessionBase = dynamic_cast<HTTPSessionBase*>(hqSession_);
+  auto* sessionBase = dynamic_cast<HTTPSessionBase*>(hqSession_);
   EXPECT_EQ(socketDriver_->localAddress_, sessionBase->getLocalAddress());
   EXPECT_EQ(socketDriver_->peerAddress_, sessionBase->getPeerAddress());
   hqSession_->dropConnection();
@@ -708,8 +708,7 @@ TEST_P(HQUpstreamSessionTest, NotifyConnectCallbackBeforeDestruct) {
 
 TEST_P(HQUpstreamSessionTest, DropFromConnectError) {
   MockConnectCallback connectCb;
-  HQUpstreamSession* upstreamSess =
-      dynamic_cast<HQUpstreamSession*>(hqSession_);
+  auto* upstreamSess = dynamic_cast<HQUpstreamSession*>(hqSession_);
   upstreamSess->setConnectCallback(&connectCb);
   EXPECT_CALL(connectCb, connectError(_)).WillOnce(InvokeWithoutArgs([&] {
     hqSession_->dropConnection();
@@ -720,8 +719,7 @@ TEST_P(HQUpstreamSessionTest, DropFromConnectError) {
 
 TEST_P(HQUpstreamSessionTest, FirstPeerPacketProcessed) {
   MockConnectCallback connectCb;
-  HQUpstreamSession* upstreamSess =
-      dynamic_cast<HQUpstreamSession*>(hqSession_);
+  auto* upstreamSess = dynamic_cast<HQUpstreamSession*>(hqSession_);
   upstreamSess->setConnectCallback(&connectCb);
   EXPECT_CALL(connectCb, onFirstPeerPacketProcessed());
   upstreamSess->onFirstPeerPacketProcessed();
@@ -732,8 +730,7 @@ TEST_P(HQUpstreamSessionTest, FirstPeerPacketProcessed) {
 
 TEST_P(HQUpstreamSessionTest, NotifyReplaySafeAfterTransportReady) {
   MockConnectCallback connectCb;
-  HQUpstreamSession* upstreamSess =
-      dynamic_cast<HQUpstreamSession*>(hqSession_);
+  auto* upstreamSess = dynamic_cast<HQUpstreamSession*>(hqSession_);
   upstreamSess->setConnectCallback(&connectCb);
 
   // onTransportReady gets called in SetUp() already

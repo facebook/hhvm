@@ -1887,7 +1887,7 @@ TEST_P(HQDownstreamSessionTest, GetAddresses) {
 }
 
 TEST_P(HQDownstreamSessionTest, GetAddressesFromBase) {
-  HTTPSessionBase* sessionBase = dynamic_cast<HTTPSessionBase*>(hqSession_);
+  auto* sessionBase = dynamic_cast<HTTPSessionBase*>(hqSession_);
   EXPECT_EQ(socketDriver_->localAddress_, sessionBase->getLocalAddress());
   EXPECT_EQ(socketDriver_->peerAddress_, sessionBase->getPeerAddress());
   hqSession_->dropConnection();

@@ -107,7 +107,7 @@ SecondaryAuthManager::verifyContext(
       fizz::ExportedAuthenticator::getAuthenticatorContext(
           std::move(authenticator));
   folly::io::Cursor cursor(certRequestContext.get());
-  uint16_t requestId = cursor.readBE<uint16_t>();
+  auto requestId = cursor.readBE<uint16_t>();
   if (outstandingRequests_.find(requestId) == outstandingRequests_.end()) {
     VLOG(4) << "No previous CERTIFICATE_REQUEST matches the the CERTIFICATE "
                "with Request-ID="

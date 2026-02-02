@@ -90,15 +90,14 @@ void HTTPSessionAcceptor::onNewConnection(folly::AsyncTransport::UniquePtr sock,
   VLOG(4) << "Created new " << nextProtocol << " session for peer "
           << *peerAddress;
   auto codecProtocol = codec->getProtocol();
-  HTTPDownstreamSession* session =
-      new HTTPDownstreamSession(getTransactionTimeoutSet(),
-                                std::move(sock),
-                                localAddress,
-                                *peerAddress,
-                                controller.get(),
-                                std::move(codec),
-                                tinfo,
-                                sessionInfoCb);
+  auto* session = new HTTPDownstreamSession(getTransactionTimeoutSet(),
+                                            std::move(sock),
+                                            localAddress,
+                                            *peerAddress,
+                                            controller.get(),
+                                            std::move(codec),
+                                            tinfo,
+                                            sessionInfoCb);
   if (getConfig()->maxConcurrentIncomingStreams) {
     session->setMaxConcurrentIncomingStreams(
         getConfig()->maxConcurrentIncomingStreams);

@@ -93,7 +93,7 @@ void ByteEventTracker::addLastByteEvent(HTTPTransaction* txn,
                                         uint64_t byteNo,
                                         ByteEvent::Callback callback) noexcept {
   VLOG(5) << " adding last byte event for " << byteNo;
-  TransactionByteEvent* event =
+  auto* event =
       new TransactionByteEvent(byteNo, ByteEvent::LAST_BYTE, txn, callback);
   byteEvents_.push_back(*event);
 }
@@ -103,7 +103,7 @@ void ByteEventTracker::addTrackedByteEvent(
     uint64_t byteNo,
     ByteEvent::Callback callback) noexcept {
   VLOG(5) << " adding tracked byte event for " << byteNo;
-  TransactionByteEvent* event =
+  auto* event =
       new TransactionByteEvent(byteNo, ByteEvent::TRACKED_BYTE, txn, callback);
   byteEvents_.push_back(*event);
 }

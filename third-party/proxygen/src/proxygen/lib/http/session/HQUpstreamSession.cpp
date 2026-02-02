@@ -348,7 +348,7 @@ void HQUpstreamSession::HQIngressPushStream::bindTo(quic::StreamId streamId) {
   // will throw bad-cast
   HQUpstreamSession& session = dynamic_cast<HQUpstreamSession&>(session_);
 #else
-  HQUpstreamSession& session = static_cast<HQUpstreamSession&>(session_);
+  auto& session = static_cast<HQUpstreamSession&>(session_);
 #endif
   // Initialize this stream's codec with the id of the transport stream
   auto codec = session.createCodec(streamId);

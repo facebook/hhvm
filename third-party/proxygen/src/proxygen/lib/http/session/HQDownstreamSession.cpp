@@ -241,7 +241,7 @@ void HQDownstreamSession::HQEgressPushStream::sendPushPromise(
 #if DEBUG
   HQDownstreamSession& session = dynamic_cast<HQDownstreamSession&>(session_);
 #else
-  HQDownstreamSession& session = static_cast<HQDownstreamSession&>(session_);
+  auto& session = static_cast<HQDownstreamSession&>(session_);
 #endif
   auto parentStream = session.findNonDetachedStream(*parentStreamId);
   if (!parentStream) {

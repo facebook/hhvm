@@ -190,3 +190,21 @@ val overridden_method :
   is_static:bool ->
   get_class:(Provider_context.t -> string -> t option) ->
   class_elt option
+
+(** For a trait with `require class Foo` or `require this as Foo`, search `Foo`
+    for a static method. Returns the class element if found.
+    Intended for use in IDE and Glean after the innitial decl search failed. *)
+val get_smethod_from_req_constraints :
+  t ->
+  string ->
+  get_class:(Provider_context.t -> string -> t option) ->
+  class_elt option
+
+(** For a trait with `require class Foo` or `require this as Foo`, search `Foo`
+    for a static property. Returns the class element if found.
+    Intended for use in IDE and Glean after the innitial decl search failed. *)
+val get_sprop_from_req_constraints :
+  t ->
+  string ->
+  get_class:(Provider_context.t -> string -> t option) ->
+  class_elt option

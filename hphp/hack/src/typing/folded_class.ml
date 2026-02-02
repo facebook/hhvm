@@ -377,6 +377,35 @@ module ApiEager = struct
     let (cls, _members) = t in
     Decl_provider_internals.get_shallow_class ctx cls.Decl_defs.dc_name
     >>= Decl_inherit.find_overridden_method ~get_method
+
+  let get_static_member_from_req_constraints
+      (decl, t, ctx) ~get_member ~get_class =
+    let open Option.Monad_infix in
+    Decl_counters.count_subdecl decl Decl_counters.All_ancestor_reqs
+    @@ fun () ->
+    ctx >>= fun ctx ->
+    let req_constraints =
+      List.map
+        (all_ancestor_req_constraints_requirements (decl, t, Some ctx))
+        ~f:(fun cr -> snd (to_requirement cr))
+    in
+    List.find_map req_constraints ~f:(fun req_ty ->
+        match get_node req_ty with
+        | Tapply ((_, cn), _) ->
+          get_class ctx cn >>= fun req_class -> get_member req_class
+        | _ -> None)
+
+  let get_smethod_from_req_constraints cls method_name ~get_class =
+    get_static_member_from_req_constraints
+      cls
+      ~get_member:(fun req_class -> ApiLazy.get_smethod req_class method_name)
+      ~get_class
+
+  let get_sprop_from_req_constraints cls prop_name ~get_class =
+    get_static_member_from_req_constraints
+      cls
+      ~get_member:(fun req_class -> ApiLazy.get_sprop req_class prop_name)
+      ~get_class
 end
 
 type t =

@@ -58,6 +58,9 @@ let get_only_const class_ const_name =
 
 let resolve ctx SO.{ name; type_; _ } =
   let open Typing_defs in
+  let get_class ctx class_name =
+    Decl_provider.get_class ctx class_name |> Decl_entry.to_option
+  in
   match type_ with
   | SO.Attribute (Some { SO.class_name; method_name; is_static }) ->
     let matching_method =
@@ -90,7 +93,15 @@ let resolve ctx SO.{ name; type_; _ } =
     else
       (match Folded_class.get_method class_ method_name with
       | Some m -> Some m
-      | None -> Folded_class.get_smethod class_ method_name)
+      | None ->
+        (match Folded_class.get_smethod class_ method_name with
+        | Some m -> Some m
+        | None ->
+          (* Method not found in class - check require constraints for traits *)
+          Folded_class.get_smethod_from_req_constraints
+            class_
+            method_name
+            ~get_class))
       >>| fun m -> Method { class_name = m.ce_origin; name = method_name }
   | SO.Property (SO.ClassName c_name, property_name)
   | SO.XhpLiteralAttr (c_name, property_name) ->
@@ -98,7 +109,15 @@ let resolve ctx SO.{ name; type_; _ } =
     let name = IdentifySymbolService.clean_member_name property_name in
     (match Folded_class.get_prop class_ property_name with
     | Some m -> Some m
-    | None -> Folded_class.get_sprop class_ ("$" ^ property_name))
+    | None ->
+      (match Folded_class.get_sprop class_ ("$" ^ property_name) with
+      | Some m -> Some m
+      | None ->
+        (* Property not found in class - check require constraints for traits *)
+        Folded_class.get_sprop_from_req_constraints
+          class_
+          ("$" ^ property_name)
+          ~get_class))
     >>| fun m -> Property { class_name = m.ce_origin; name }
   | SO.Property (SO.UnknownClass, _) -> None
   | SO.ClassConst (SO.ClassName _, "class") -> None

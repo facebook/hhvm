@@ -84,6 +84,11 @@ enum class TypeConstraintFlags : uint16_t {
    * Indicates that a type-constraint came from an upper-bound constraint.
    */
   UpperBound = 0x200,
+  /*
+   * Temporary flag intended to identify type constraints that have been
+   * inherited from overidden methods.
+   */
+  Inherited = 0x400,
 };
 
 static_assert(uint8_t(TypeConstraintFlags::SingleTypeConstraint) == 0x1);

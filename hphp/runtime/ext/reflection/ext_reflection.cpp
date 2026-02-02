@@ -828,12 +828,12 @@ static Array get_function_param_info(const Func* func) {
     param.set(s_index, make_tv<KindOfInt64>(i));
     param.set(s_name, make_tv<KindOfPersistentString>(func->localNames()[i]));
 
-    auto const nonExtendedConstraint =
-      fpi.typeConstraints.main().hasConstraint() &&
-      !fpi.typeConstraints.main().isDisplayNullable() &&
-      !fpi.typeConstraints.main().isSoft();
+    auto const main = fpi.typeConstraints.firstNonInheritedType();
+    auto const nonExtendedConstraint = main->hasConstraint()
+      && !main->isDisplayNullable()
+      && !main->isSoft();
     auto const type = nonExtendedConstraint
-      ? fpi.typeConstraints.main().typeName()
+      ? main->typeName()
       : staticEmptyString();
 
     param.set(s_type, make_tv<KindOfPersistentString>(type));
@@ -844,9 +844,7 @@ static Array get_function_param_info(const Func* func) {
     param.set(s_type_hint, make_tv<KindOfPersistentString>(typeHint));
 
     // callable typehint considered builtin; stdClass typehint is not
-    auto const isBuiltinTC =
-      fpi.typeConstraints.main().isCallable()
-      || fpi.typeConstraints.main().isPrecise();
+    auto const isBuiltinTC = main->isCallable() || main->isPrecise();
     param.set(s_type_hint_builtin, make_tv<KindOfBoolean>(isBuiltinTC));
 
     param.set(s_function, make_tv<KindOfPersistentString>(func->name()));
@@ -859,7 +857,7 @@ static Array get_function_param_info(const Func* func) {
         )
       );
     }
-    if (!nonExtendedConstraint || fpi.typeConstraints.main().isNullable()) {
+    if (!nonExtendedConstraint || main->isNullable()) {
       param.set(s_nullable, make_tv<KindOfBoolean>(true));
       param.set(s_type_hint_nullable, make_tv<KindOfBoolean>(true));
     } else {
@@ -929,14 +927,14 @@ static Array HHVM_METHOD(ReflectionFunctionAbstract, getRetTypeInfo) {
   auto name = HHVM_MN(ReflectionFunctionAbstract, getReturnTypeHint)(this_);
   if (name && !name.empty()) {
     auto const func = ReflectionFuncHandle::GetFuncFor(this_);
-    auto retType = func->returnTypeConstraints().main();
-    if (retType.isNullable()) {
+    auto const retType = func->returnTypeConstraints().firstNonInheritedType();
+    if (retType->isNullable()) {
       retTypeInfo.set(s_type_hint_nullable, make_tv<KindOfBoolean>(true));
     } else {
       retTypeInfo.set(s_type_hint_nullable, make_tv<KindOfBoolean>(false));
     }
 
-    auto const isBuiltinTC = retType.isCallable() || retType.isPrecise();
+    auto const isBuiltinTC = retType->isCallable() || retType->isPrecise();
     retTypeInfo.set(s_type_hint_builtin, make_tv<KindOfBoolean>(isBuiltinTC));
   } else {
     name = staticEmptyString();

@@ -4,6 +4,8 @@ string(7) "HH\this"
 bool(false)
 string(9) "HH\string"
 string(9) "HH\string"
+string(1) "T"
+string(9) "HH\string"
 string(11) "HH\arraykey"
 string(1) "T"
 string(1) "C"

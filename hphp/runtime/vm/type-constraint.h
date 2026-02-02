@@ -370,6 +370,7 @@ struct TypeConstraint {
   bool isDisplayNullable() const {
     return contains(m_flags, TypeConstraintFlags::DisplayNullable);
   }
+  bool isInherited() const { return contains(m_flags, TypeConstraintFlags::Inherited); }
 
   bool isPrecise()  const { return !isUnion() && metaType() == MetaType::Precise; }
   bool isMixed()    const { return !isUnion() && m_u.single.type == Type::Mixed; }
@@ -740,7 +741,6 @@ struct TypeIntersectionConstraint {
   explicit TypeIntersectionConstraint(TypeConstraint&& tc) {
     m_u.m_typeConstraint = std::move(tc);
     m_u.m_typeConstraint.addFlags(TypeConstraintFlags::SingleTypeConstraint);
-    assertx(mainPtr());
   }
 
   explicit TypeIntersectionConstraint(
@@ -749,7 +749,6 @@ struct TypeIntersectionConstraint {
       auto& tc = constraints[0];
       m_u.m_typeConstraint = std::move(tc);
       m_u.m_typeConstraint.addFlags(TypeConstraintFlags::SingleTypeConstraint);
-      assertx(mainPtr());
     } else {
       m_u.m_constraints = std::move(constraints);
     }
@@ -796,11 +795,10 @@ struct TypeIntersectionConstraint {
         m_u.m_typeConstraint = TypeConstraint();
       }
       sd(m_u.m_typeConstraint);
-      assertx(mainPtr());
     } else {
       sd(m_u.m_constraints);
-      assertx(mainPtr());
     }
+    assertx(firstNonInheritedType());
   }
 
   std::string show() const {
@@ -810,24 +808,6 @@ struct TypeIntersectionConstraint {
       os << tc.debugName() << ",";
     }
     return os.str();
-  }
-
-  template<typename T>
-  static const TypeConstraint* mainPtr(const T& tcs) {
-    assertx(tcs.size() > 0);
-    const TypeConstraint* main = &tcs[0];
-    for (auto const& tc : tcs) {
-      if (!tc.isUpperBound()) {
-        assertx(main == &tc);
-      }
-    }
-    assertx(main);
-    return main;
-  }
-
-  static const TypeConstraint& main(
-    const std::vector<TypeConstraint>& tcs) {
-    return *(TypeIntersectionConstraint::mainPtr(tcs));
   }
 
   template<typename T>
@@ -871,21 +851,21 @@ struct TypeIntersectionConstraint {
   }
 
   /*
-   * This function serves as a temporary measure until all instances of
-   * TypeConstraint are updated to consider both the main type constraint and
-   * the upper bounds. The function includes asserts to verify that there is
-   * precisely one main constraint.
+   * This function  is a temporary workaround until all usages of
+   * TypeIntersectionConstraint are updated to stop treating upperbounds
+   * differently from the main type constraint.
+   *
+   * Please do not introduce any new uses of this method.
    */
-  const TypeConstraint& main() const {
+  const TypeConstraint* firstNonInheritedType() const {
     assertx(!isTop());
-    return *mainPtr();
-  }
-
-  const TypeConstraint* mainPtr() const {
     if (isSimple()) {
       return &m_u.m_typeConstraint;
     }
-    return TypeIntersectionConstraint::mainPtr(m_u.m_constraints);
+    for (auto const& tc : m_u.m_constraints) {
+      if (!tc.isInherited() && !tc.isUpperBound()) return &tc;
+    }
+    always_assert(false);
   }
 
   bool isTop() const {

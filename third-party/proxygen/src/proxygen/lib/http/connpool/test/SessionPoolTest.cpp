@@ -632,7 +632,7 @@ TEST_F(SessionPoolFixture, WritePausedSessionNotMarkedAsIdle) {
 
   auto txn = p1.getTransaction(this);
   ASSERT_NE(txn, (HTTPTransaction*)nullptr);
-  TestAsyncTransport* transport =
+  auto* transport =
       session->getTransport()->getUnderlyingTransport<TestAsyncTransport>();
   transport->pauseWrites();
   HTTPMessage req;

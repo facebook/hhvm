@@ -176,7 +176,7 @@ class HTTPUpstreamSessionTest : public HTTPCoroSessionTest {
       pushStreamID = muxTransport_->nextUnidirectionalStreamId_;
       muxTransport_->nextUnidirectionalStreamId_ += 4;
       pushID = multiCodec_->nextPushID();
-      uint64_t streamType = uint64_t(hq::UnidirectionalStreamType::PUSH);
+      auto streamType = uint64_t(hq::UnidirectionalStreamType::PUSH);
       folly::IOBufQueue writeBuf{folly::IOBufQueue::cacheChainLength()};
       bool flushPushStream = false;
       if (!pushStreamBuf) {
@@ -696,7 +696,7 @@ CO_TEST_P_X(H2UpstreamSessionTest, PushParentReset) {
   //
   // Note, we need the PUSH_PROMISE to have a continuation, so give the server
   // codec a ridiculously small MAX_FRAME_SIZE.
-  HTTPSettings *settings = (HTTPSettings *)serverCodec_->getIngressSettings();
+  auto *settings = (HTTPSettings *)serverCodec_->getIngressSettings();
   settings->setSetting(SettingsId::MAX_FRAME_SIZE, 5);
 
   // send a request for GET /

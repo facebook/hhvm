@@ -28,7 +28,7 @@ constexpr int CORO_SSL_TRANSPORT_RETRY = -1;
 CoroSSLTransport* transportFromBio(BIO* bio) {
   auto appData = OpenSSLUtils::getBioAppData(bio);
   XCHECK(appData);
-  CoroSSLTransport* transport = reinterpret_cast<CoroSSLTransport*>(appData);
+  auto* transport = reinterpret_cast<CoroSSLTransport*>(appData);
   XCHECK(transport);
   return transport;
 }

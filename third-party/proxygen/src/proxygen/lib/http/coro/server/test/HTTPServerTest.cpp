@@ -549,7 +549,7 @@ TEST_P(HTTPStatsFilterTests, TestSimplePostStatsFilter) {
 
   // send post request with random body
   constexpr uint8_t bodyLen = 200;
-  std::string body = makeBuf(bodyLen)->to<std::string>();
+  auto body = makeBuf(bodyLen)->to<std::string>();
   auto url = fmt::format("https://{}/test", server_->address()->describe());
   auto useQuic = GetParam() == TransportType::QUIC;
   EventBase evb;
@@ -592,7 +592,7 @@ TEST_P(HTTPStatsFilterTests, TestServerErrorHandler) {
 
   // send post request with random body
   constexpr uint16_t bodyLen = 300;
-  std::string body = makeBuf(bodyLen)->to<std::string>();
+  auto body = makeBuf(bodyLen)->to<std::string>();
   auto url = fmt::format("https://{}/test", server_->address()->describe());
   auto useQuic = GetParam() == TransportType::QUIC;
 

@@ -178,7 +178,7 @@ CO_TEST_F_X(HTTPConnectIntegrationTest, Simple) {
   auto proxySess = co_await getProxySess();
 
   // establish tunnel to server via proxy
-  std::string authority = folly::to<std::string>(
+  auto authority = folly::to<std::string>(
       "https://localhost:", getServAddr().getPort(), "/");
   auto serverSess = co_await co_awaitTry(proxyConnect(proxySess, authority));
   XCHECK(!serverSess.hasException())
@@ -205,7 +205,7 @@ CO_TEST_F_X(HTTPConnectIntegrationTest, TimeoutConnectTransportRead) {
   auto proxySess = co_await getProxySess();
 
   // establish tunnel to server via proxy
-  std::string authority = folly::to<std::string>(
+  auto authority = folly::to<std::string>(
       "https://localhost:", getServAddr().getPort(), "/");
 
   // set a 200ms read timeout on the connect transport

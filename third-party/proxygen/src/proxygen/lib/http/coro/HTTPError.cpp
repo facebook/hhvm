@@ -296,7 +296,7 @@ ProxygenError HTTPErrorCode2ProxygenError(HTTPErrorCode code) {
 HTTPException HTTPErrorToHTTPException(const HTTPError& err) {
   HTTPException ex(HTTPException::Direction::INGRESS_AND_EGRESS, err.what());
   ex.setProxygenError(HTTPErrorCode2ProxygenError(err.code));
-  ErrorCode ec = static_cast<ErrorCode>(err.code);
+  auto ec = static_cast<ErrorCode>(err.code);
   if (ec >= ErrorCode::PROTOCOL_ERROR && ec <= ErrorCode::HTTP_1_1_REQUIRED) {
     ex.setCodecStatusCode(ec);
   }

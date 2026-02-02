@@ -44,7 +44,10 @@ final class TBinaryProtocolAcceleratedTestCase extends WWWTest {
     ];
   }
 
-  <<DataProvider('providerTBinaryProtocolAccelerated')>>
+  <<
+    DataProvider('providerTBinaryProtocolAccelerated'),
+    JKBoolDataProvider('thrift/hack:use_common_rpc_helpers'),
+  >>
   public async function testTBinaryProtocolAccelerated(
     KeyedContainer<int, LogEntry> $messages,
   ): Awaitable<void> {
@@ -76,7 +79,10 @@ final class TBinaryProtocolAcceleratedTestCase extends WWWTest {
     );
   }
 
-  <<DataProvider('providerTBinaryProtocolAccelerated')>>
+  <<
+    DataProvider('providerTBinaryProtocolAccelerated'),
+    JKBoolDataProvider('thrift/hack:use_common_rpc_helpers'),
+  >>
   public async function testTBinaryProtocolAcceleratedBufferedTransport(
     KeyedContainer<int, LogEntry> $messages,
   ): Awaitable<void> {

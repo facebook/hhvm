@@ -24,6 +24,16 @@ use namespace FlibSL\{C, Math, Str, Vec}; // @oss-enable
 // @oss-disable: <<Oncalls('thrift')>>
 abstract final class ThriftSerializationHelper {
 
+  public static function useCommonRPCHelpers(
+    string $switchval,
+  )[write_props]: bool {
+    return HH\Coeffects\fb\backdoor_from_write_props__DO_NOT_USE(
+      ()[defaults] ==>
+        JustKnobs::eval('thrift/hack:use_common_rpc_helpers', null, $switchval),
+      'Need to gate the change',
+    );
+  }
+
   public static function readStruct(
     TProtocol $protocol,
     IThriftStruct $object,

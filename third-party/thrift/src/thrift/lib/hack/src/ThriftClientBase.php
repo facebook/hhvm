@@ -147,41 +147,51 @@ abstract class ThriftClientBase implements IThriftClient {
     try {
       $this->eventHandler_
         ->preSend($function_name, $args, $currentseqid, $service_name);
-      if ($this->output_ is \TBinaryProtocolAccelerated) {
-        thrift_protocol_write_binary(
-          $this->output_,
-          $function_name,
-          TMessageType::CALL,
-          $args,
-          $currentseqid,
-          $this->output_->isStrictWrite(),
-          $is_one_way,
-        );
-      } else if ($this->output_ is \TCompactProtocolAccelerated) {
-        thrift_protocol_write_compact2(
-          $this->output_,
+      if (ThriftSerializationHelper::useCommonRPCHelpers(get_class($this))) {
+        $this->output_->writeRPCMessage(
           $function_name,
           TMessageType::CALL,
           $args,
           $currentseqid,
           $is_one_way,
-          TCompactProtocolBase::VERSION,
         );
       } else {
-        $this->output_->writeMessageBegin(
-          $function_name,
-          TMessageType::CALL,
-          $currentseqid,
-        );
-        $args->write($this->output_);
-        $this->output_->writeMessageEnd();
-        if ($is_one_way) {
-          $this->output_->getTransport()->onewayFlush();
+        if ($this->output_ is TBinaryProtocolAccelerated) {
+          thrift_protocol_write_binary(
+            $this->output_,
+            $function_name,
+            TMessageType::CALL,
+            $args,
+            $currentseqid,
+            $this->output_->isStrictWrite(),
+            $is_one_way,
+          );
+        } else if ($this->output_ is TCompactProtocolAccelerated) {
+          thrift_protocol_write_compact2(
+            $this->output_,
+            $function_name,
+            TMessageType::CALL,
+            $args,
+            $currentseqid,
+            $is_one_way,
+            TCompactProtocolBase::VERSION,
+          );
         } else {
-          $this->output_->getTransport()->flush();
+          $this->output_->writeMessageBegin(
+            $function_name,
+            TMessageType::CALL,
+            $currentseqid,
+          );
+          $args->write($this->output_);
+          $this->output_->writeMessageEnd();
+          if ($is_one_way) {
+            $this->output_->getTransport()->onewayFlush();
+          } else {
+            $this->output_->getTransport()->flush();
+          }
         }
       }
-    } catch (\THandlerShortCircuitException $ex) {
+    } catch (THandlerShortCircuitException $ex) {
       switch ($ex->resultType) {
         case THandlerShortCircuitException::R_EXPECTED_EX:
         case THandlerShortCircuitException::R_UNEXPECTED_EX:
@@ -193,7 +203,7 @@ abstract class ThriftClientBase implements IThriftClient {
           $this->eventHandler_->postSend($function_name, $args, $currentseqid);
           return $currentseqid;
       }
-    } catch (\Exception $ex) {
+    } catch (Exception $ex) {
       $this->eventHandler_
         ->sendError($function_name, $args, $currentseqid, $ex);
       throw $ex;
@@ -214,39 +224,50 @@ abstract class ThriftClientBase implements IThriftClient {
   ): TRet {
     try {
       $this->eventHandler_->preRecv($name, $expectedsequenceid);
-      if ($this->input_ is \TBinaryProtocolAccelerated) {
-        $result = thrift_protocol_read_binary(
-          $this->input_,
-          HH\class_to_classname($result),
-          $this->input_->isStrictRead(),
-          Shapes::idx($options, 'read_options', 0),
-        );
-      } else if ($this->input_ is \TCompactProtocolAccelerated) {
-        $result = thrift_protocol_read_compact(
-          $this->input_,
-          HH\class_to_classname($result),
+      if (ThriftSerializationHelper::useCommonRPCHelpers(get_class($this))) {
+        $result = $this->input_->readRPCMessage(
+          $result,
+          $name,
+          $expectedsequenceid,
           Shapes::idx($options, 'read_options', 0),
         );
       } else {
-        $rseqid = 0;
-        $fname = '';
-        $mtype = 0;
-
-        $this->input_
-          ->readMessageBegin(inout $fname, inout $mtype, inout $rseqid);
-        if ($mtype === TMessageType::EXCEPTION) {
-          $x = new \TApplicationException();
-          $x->read($this->input_);
-          $this->input_->readMessageEnd();
-          throw $x;
-        }
-        $result = $result::withDefaultValues();
-        $result->read($this->input_);
-        $this->input_->readMessageEnd();
-        if ($expectedsequenceid !== null && ($rseqid !== $expectedsequenceid)) {
-          throw new \TProtocolException(
-            $name." failed: sequence id is out of order",
+        if ($this->input_ is TBinaryProtocolAccelerated) {
+          $result = thrift_protocol_read_binary(
+            $this->input_,
+            HH\class_to_classname($result),
+            $this->input_->isStrictRead(),
+            Shapes::idx($options, 'read_options', 0),
           );
+        } else if ($this->input_ is TCompactProtocolAccelerated) {
+          $result = thrift_protocol_read_compact(
+            $this->input_,
+            HH\class_to_classname($result),
+            Shapes::idx($options, 'read_options', 0),
+          );
+        } else {
+          $rseqid = 0;
+          $fname = '';
+          $mtype = 0;
+
+          $this->input_
+            ->readMessageBegin(inout $fname, inout $mtype, inout $rseqid);
+          if ($mtype === TMessageType::EXCEPTION) {
+            $x = new TApplicationException();
+            $x->read($this->input_);
+            $this->input_->readMessageEnd();
+            throw $x;
+          }
+          $result = $result::withDefaultValues();
+          $result->read($this->input_);
+          $this->input_->readMessageEnd();
+          if (
+            $expectedsequenceid !== null && ($rseqid !== $expectedsequenceid)
+          ) {
+            throw new TProtocolException(
+              $name." failed: sequence id is out of order",
+            );
+          }
         }
       }
     } catch (THandlerShortCircuitException $ex) {
@@ -266,7 +287,7 @@ abstract class ThriftClientBase implements IThriftClient {
           // this should just always be null in the ThriftSyncStructWithoutResult case
           return $ex->result;
       }
-    } catch (\Exception $ex) {
+    } catch (Exception $ex) {
       $this->eventHandler_->recvError($name, $expectedsequenceid, $ex);
       throw $ex;
     }

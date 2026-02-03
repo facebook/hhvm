@@ -907,6 +907,3406 @@ func (x *SinkException2) TypeName() string {
     return "SinkException2"
 }
 
+type reqSinkServiceMethod struct {
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*reqSinkServiceMethod)(nil)
+
+// Deprecated: SinkServiceMethodArgsDeprecated is deprecated, since it is supposed to be internal.
+type SinkServiceMethodArgsDeprecated = reqSinkServiceMethod
+
+func newReqSinkServiceMethod() *reqSinkServiceMethod {
+    return (&reqSinkServiceMethod{}).setDefaults()
+}
+
+
+
+func (x *reqSinkServiceMethod) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("reqSinkServiceMethod"); err != nil {
+        return thrift.PrependError("reqSinkServiceMethod write struct begin error: ", err)
+    }
+
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("reqSinkServiceMethod write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("reqSinkServiceMethod write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *reqSinkServiceMethod) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("reqSinkServiceMethod read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("reqSinkServiceMethod field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("reqSinkServiceMethod read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *reqSinkServiceMethod) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *reqSinkServiceMethod) setDefaults() *reqSinkServiceMethod {
+    return x
+}
+
+type respSinkServiceMethod struct {
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*respSinkServiceMethod)(nil)
+var _ thrift.WritableResult = (*respSinkServiceMethod)(nil)
+
+// Deprecated: SinkServiceMethodResultDeprecated is deprecated, since it is supposed to be internal.
+type SinkServiceMethodResultDeprecated = respSinkServiceMethod
+
+func newRespSinkServiceMethod() *respSinkServiceMethod {
+    return (&respSinkServiceMethod{}).setDefaults()
+}
+
+
+
+func (x *respSinkServiceMethod) Exception() thrift.WritableException {
+    return nil
+}
+
+func (x *respSinkServiceMethod) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("respSinkServiceMethod"); err != nil {
+        return thrift.PrependError("respSinkServiceMethod write struct begin error: ", err)
+    }
+
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("respSinkServiceMethod write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("respSinkServiceMethod write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *respSinkServiceMethod) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("respSinkServiceMethod read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("respSinkServiceMethod field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("respSinkServiceMethod read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *respSinkServiceMethod) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *respSinkServiceMethod) setDefaults() *respSinkServiceMethod {
+    return x
+}
+
+type sinkSinkServiceMethod struct {
+    Success *SinkPayload `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*sinkSinkServiceMethod)(nil)
+var _ thrift.WritableResult = (*sinkSinkServiceMethod)(nil)
+
+// Deprecated: sinkSinkServiceMethodResultDeprecated is deprecated, since it is supposed to be internal.
+type sinkSinkServiceMethodResultDeprecated = sinkSinkServiceMethod
+
+func newSinkSinkServiceMethod() *sinkSinkServiceMethod {
+    return (&sinkSinkServiceMethod{}).setDefaults()
+}
+
+func (x *sinkSinkServiceMethod) GetSuccess() *SinkPayload {
+    if !x.IsSetSuccess() {
+        return nil
+    }
+    return x.Success
+}
+
+func (x *sinkSinkServiceMethod) SetSuccessNonCompat(value *SinkPayload) *sinkSinkServiceMethod {
+    x.Success = value
+    return x
+}
+
+func (x *sinkSinkServiceMethod) SetSuccess(value *SinkPayload) *sinkSinkServiceMethod {
+    x.Success = value
+    return x
+}
+
+func (x *sinkSinkServiceMethod) IsSetSuccess() bool {
+    return x != nil && x.Success != nil
+}
+
+func (x *sinkSinkServiceMethod) writeField0(p thrift.Encoder) error {  // Success
+    if !x.IsSetSuccess() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("success", thrift.STRUCT, 0); err != nil {
+        return thrift.PrependError("sinkSinkServiceMethod write field begin error: ", err)
+    }
+
+    item := x.Success
+    if err := item.Write(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("sinkSinkServiceMethod write field end error: ", err)
+    }
+    return nil
+}
+
+func (x *sinkSinkServiceMethod) readField0(p thrift.Decoder) error {  // Success
+    result := NewSinkPayload()
+    err := result.Read(p)
+    if err != nil {
+        return err
+    }
+
+    x.Success = result
+    return nil
+}
+
+
+
+
+func (x *sinkSinkServiceMethod) Exception() thrift.WritableException {
+    return nil
+}
+
+func (x *sinkSinkServiceMethod) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("sinkSinkServiceMethod"); err != nil {
+        return thrift.PrependError("sinkSinkServiceMethod write struct begin error: ", err)
+    }
+
+    if err := x.writeField0(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("sinkSinkServiceMethod write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("sinkSinkServiceMethod write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *sinkSinkServiceMethod) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("sinkSinkServiceMethod read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("sinkSinkServiceMethod field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        case ((id == 0 && wireType == thrift.STRUCT) || (id == thrift.NO_FIELD_ID && fieldName == "success")):  // success
+            fieldReadErr = x.readField0(p)
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("sinkSinkServiceMethod read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *sinkSinkServiceMethod) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *sinkSinkServiceMethod) setDefaults() *sinkSinkServiceMethod {
+    return x
+}
+
+type respFinalSinkServiceMethod struct {
+    Success *FinalResponse `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*respFinalSinkServiceMethod)(nil)
+var _ thrift.WritableResult = (*respFinalSinkServiceMethod)(nil)
+
+// Deprecated: FinalSinkServiceMethodResultDeprecated is deprecated, since it is supposed to be internal.
+type FinalSinkServiceMethodResultDeprecated = respFinalSinkServiceMethod
+
+func newRespFinalSinkServiceMethod() *respFinalSinkServiceMethod {
+    return (&respFinalSinkServiceMethod{}).setDefaults()
+}
+
+func (x *respFinalSinkServiceMethod) GetSuccess() *FinalResponse {
+    if !x.IsSetSuccess() {
+        return nil
+    }
+    return x.Success
+}
+
+func (x *respFinalSinkServiceMethod) SetSuccessNonCompat(value *FinalResponse) *respFinalSinkServiceMethod {
+    x.Success = value
+    return x
+}
+
+func (x *respFinalSinkServiceMethod) SetSuccess(value *FinalResponse) *respFinalSinkServiceMethod {
+    x.Success = value
+    return x
+}
+
+func (x *respFinalSinkServiceMethod) IsSetSuccess() bool {
+    return x != nil && x.Success != nil
+}
+
+func (x *respFinalSinkServiceMethod) writeField0(p thrift.Encoder) error {  // Success
+    if !x.IsSetSuccess() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("success", thrift.STRUCT, 0); err != nil {
+        return thrift.PrependError("respFinalSinkServiceMethod write field begin error: ", err)
+    }
+
+    item := x.Success
+    if err := item.Write(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("respFinalSinkServiceMethod write field end error: ", err)
+    }
+    return nil
+}
+
+func (x *respFinalSinkServiceMethod) readField0(p thrift.Decoder) error {  // Success
+    result := NewFinalResponse()
+    err := result.Read(p)
+    if err != nil {
+        return err
+    }
+
+    x.Success = result
+    return nil
+}
+
+
+
+
+func (x *respFinalSinkServiceMethod) Exception() thrift.WritableException {
+    return nil
+}
+
+func (x *respFinalSinkServiceMethod) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("respFinalSinkServiceMethod"); err != nil {
+        return thrift.PrependError("respFinalSinkServiceMethod write struct begin error: ", err)
+    }
+
+    if err := x.writeField0(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("respFinalSinkServiceMethod write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("respFinalSinkServiceMethod write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *respFinalSinkServiceMethod) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("respFinalSinkServiceMethod read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("respFinalSinkServiceMethod field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        case ((id == 0 && wireType == thrift.STRUCT) || (id == thrift.NO_FIELD_ID && fieldName == "success")):  // success
+            fieldReadErr = x.readField0(p)
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("respFinalSinkServiceMethod read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *respFinalSinkServiceMethod) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *respFinalSinkServiceMethod) setDefaults() *respFinalSinkServiceMethod {
+    return x
+}
+
+type reqSinkServiceMethodAndReponse struct {
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*reqSinkServiceMethodAndReponse)(nil)
+
+// Deprecated: SinkServiceMethodAndReponseArgsDeprecated is deprecated, since it is supposed to be internal.
+type SinkServiceMethodAndReponseArgsDeprecated = reqSinkServiceMethodAndReponse
+
+func newReqSinkServiceMethodAndReponse() *reqSinkServiceMethodAndReponse {
+    return (&reqSinkServiceMethodAndReponse{}).setDefaults()
+}
+
+
+
+func (x *reqSinkServiceMethodAndReponse) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("reqSinkServiceMethodAndReponse"); err != nil {
+        return thrift.PrependError("reqSinkServiceMethodAndReponse write struct begin error: ", err)
+    }
+
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("reqSinkServiceMethodAndReponse write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("reqSinkServiceMethodAndReponse write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *reqSinkServiceMethodAndReponse) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("reqSinkServiceMethodAndReponse read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("reqSinkServiceMethodAndReponse field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("reqSinkServiceMethodAndReponse read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *reqSinkServiceMethodAndReponse) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *reqSinkServiceMethodAndReponse) setDefaults() *reqSinkServiceMethodAndReponse {
+    return x
+}
+
+type respSinkServiceMethodAndReponse struct {
+    Success *InitialResponse `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*respSinkServiceMethodAndReponse)(nil)
+var _ thrift.WritableResult = (*respSinkServiceMethodAndReponse)(nil)
+
+// Deprecated: SinkServiceMethodAndReponseResultDeprecated is deprecated, since it is supposed to be internal.
+type SinkServiceMethodAndReponseResultDeprecated = respSinkServiceMethodAndReponse
+
+func newRespSinkServiceMethodAndReponse() *respSinkServiceMethodAndReponse {
+    return (&respSinkServiceMethodAndReponse{}).setDefaults()
+}
+
+func (x *respSinkServiceMethodAndReponse) GetSuccess() *InitialResponse {
+    if !x.IsSetSuccess() {
+        return nil
+    }
+    return x.Success
+}
+
+func (x *respSinkServiceMethodAndReponse) SetSuccessNonCompat(value *InitialResponse) *respSinkServiceMethodAndReponse {
+    x.Success = value
+    return x
+}
+
+func (x *respSinkServiceMethodAndReponse) SetSuccess(value *InitialResponse) *respSinkServiceMethodAndReponse {
+    x.Success = value
+    return x
+}
+
+func (x *respSinkServiceMethodAndReponse) IsSetSuccess() bool {
+    return x != nil && x.Success != nil
+}
+
+func (x *respSinkServiceMethodAndReponse) writeField0(p thrift.Encoder) error {  // Success
+    if !x.IsSetSuccess() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("success", thrift.STRUCT, 0); err != nil {
+        return thrift.PrependError("respSinkServiceMethodAndReponse write field begin error: ", err)
+    }
+
+    item := x.Success
+    if err := item.Write(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("respSinkServiceMethodAndReponse write field end error: ", err)
+    }
+    return nil
+}
+
+func (x *respSinkServiceMethodAndReponse) readField0(p thrift.Decoder) error {  // Success
+    result := NewInitialResponse()
+    err := result.Read(p)
+    if err != nil {
+        return err
+    }
+
+    x.Success = result
+    return nil
+}
+
+
+
+
+func (x *respSinkServiceMethodAndReponse) Exception() thrift.WritableException {
+    return nil
+}
+
+func (x *respSinkServiceMethodAndReponse) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("respSinkServiceMethodAndReponse"); err != nil {
+        return thrift.PrependError("respSinkServiceMethodAndReponse write struct begin error: ", err)
+    }
+
+    if err := x.writeField0(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("respSinkServiceMethodAndReponse write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("respSinkServiceMethodAndReponse write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *respSinkServiceMethodAndReponse) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("respSinkServiceMethodAndReponse read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("respSinkServiceMethodAndReponse field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        case ((id == 0 && wireType == thrift.STRUCT) || (id == thrift.NO_FIELD_ID && fieldName == "success")):  // success
+            fieldReadErr = x.readField0(p)
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("respSinkServiceMethodAndReponse read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *respSinkServiceMethodAndReponse) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *respSinkServiceMethodAndReponse) setDefaults() *respSinkServiceMethodAndReponse {
+    return x
+}
+
+type sinkSinkServiceMethodAndReponse struct {
+    Success *SinkPayload `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*sinkSinkServiceMethodAndReponse)(nil)
+var _ thrift.WritableResult = (*sinkSinkServiceMethodAndReponse)(nil)
+
+// Deprecated: sinkSinkServiceMethodAndReponseResultDeprecated is deprecated, since it is supposed to be internal.
+type sinkSinkServiceMethodAndReponseResultDeprecated = sinkSinkServiceMethodAndReponse
+
+func newSinkSinkServiceMethodAndReponse() *sinkSinkServiceMethodAndReponse {
+    return (&sinkSinkServiceMethodAndReponse{}).setDefaults()
+}
+
+func (x *sinkSinkServiceMethodAndReponse) GetSuccess() *SinkPayload {
+    if !x.IsSetSuccess() {
+        return nil
+    }
+    return x.Success
+}
+
+func (x *sinkSinkServiceMethodAndReponse) SetSuccessNonCompat(value *SinkPayload) *sinkSinkServiceMethodAndReponse {
+    x.Success = value
+    return x
+}
+
+func (x *sinkSinkServiceMethodAndReponse) SetSuccess(value *SinkPayload) *sinkSinkServiceMethodAndReponse {
+    x.Success = value
+    return x
+}
+
+func (x *sinkSinkServiceMethodAndReponse) IsSetSuccess() bool {
+    return x != nil && x.Success != nil
+}
+
+func (x *sinkSinkServiceMethodAndReponse) writeField0(p thrift.Encoder) error {  // Success
+    if !x.IsSetSuccess() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("success", thrift.STRUCT, 0); err != nil {
+        return thrift.PrependError("sinkSinkServiceMethodAndReponse write field begin error: ", err)
+    }
+
+    item := x.Success
+    if err := item.Write(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("sinkSinkServiceMethodAndReponse write field end error: ", err)
+    }
+    return nil
+}
+
+func (x *sinkSinkServiceMethodAndReponse) readField0(p thrift.Decoder) error {  // Success
+    result := NewSinkPayload()
+    err := result.Read(p)
+    if err != nil {
+        return err
+    }
+
+    x.Success = result
+    return nil
+}
+
+
+
+
+func (x *sinkSinkServiceMethodAndReponse) Exception() thrift.WritableException {
+    return nil
+}
+
+func (x *sinkSinkServiceMethodAndReponse) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("sinkSinkServiceMethodAndReponse"); err != nil {
+        return thrift.PrependError("sinkSinkServiceMethodAndReponse write struct begin error: ", err)
+    }
+
+    if err := x.writeField0(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("sinkSinkServiceMethodAndReponse write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("sinkSinkServiceMethodAndReponse write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *sinkSinkServiceMethodAndReponse) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("sinkSinkServiceMethodAndReponse read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("sinkSinkServiceMethodAndReponse field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        case ((id == 0 && wireType == thrift.STRUCT) || (id == thrift.NO_FIELD_ID && fieldName == "success")):  // success
+            fieldReadErr = x.readField0(p)
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("sinkSinkServiceMethodAndReponse read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *sinkSinkServiceMethodAndReponse) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *sinkSinkServiceMethodAndReponse) setDefaults() *sinkSinkServiceMethodAndReponse {
+    return x
+}
+
+type respFinalSinkServiceMethodAndReponse struct {
+    Success *FinalResponse `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*respFinalSinkServiceMethodAndReponse)(nil)
+var _ thrift.WritableResult = (*respFinalSinkServiceMethodAndReponse)(nil)
+
+// Deprecated: FinalSinkServiceMethodAndReponseResultDeprecated is deprecated, since it is supposed to be internal.
+type FinalSinkServiceMethodAndReponseResultDeprecated = respFinalSinkServiceMethodAndReponse
+
+func newRespFinalSinkServiceMethodAndReponse() *respFinalSinkServiceMethodAndReponse {
+    return (&respFinalSinkServiceMethodAndReponse{}).setDefaults()
+}
+
+func (x *respFinalSinkServiceMethodAndReponse) GetSuccess() *FinalResponse {
+    if !x.IsSetSuccess() {
+        return nil
+    }
+    return x.Success
+}
+
+func (x *respFinalSinkServiceMethodAndReponse) SetSuccessNonCompat(value *FinalResponse) *respFinalSinkServiceMethodAndReponse {
+    x.Success = value
+    return x
+}
+
+func (x *respFinalSinkServiceMethodAndReponse) SetSuccess(value *FinalResponse) *respFinalSinkServiceMethodAndReponse {
+    x.Success = value
+    return x
+}
+
+func (x *respFinalSinkServiceMethodAndReponse) IsSetSuccess() bool {
+    return x != nil && x.Success != nil
+}
+
+func (x *respFinalSinkServiceMethodAndReponse) writeField0(p thrift.Encoder) error {  // Success
+    if !x.IsSetSuccess() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("success", thrift.STRUCT, 0); err != nil {
+        return thrift.PrependError("respFinalSinkServiceMethodAndReponse write field begin error: ", err)
+    }
+
+    item := x.Success
+    if err := item.Write(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("respFinalSinkServiceMethodAndReponse write field end error: ", err)
+    }
+    return nil
+}
+
+func (x *respFinalSinkServiceMethodAndReponse) readField0(p thrift.Decoder) error {  // Success
+    result := NewFinalResponse()
+    err := result.Read(p)
+    if err != nil {
+        return err
+    }
+
+    x.Success = result
+    return nil
+}
+
+
+
+
+func (x *respFinalSinkServiceMethodAndReponse) Exception() thrift.WritableException {
+    return nil
+}
+
+func (x *respFinalSinkServiceMethodAndReponse) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("respFinalSinkServiceMethodAndReponse"); err != nil {
+        return thrift.PrependError("respFinalSinkServiceMethodAndReponse write struct begin error: ", err)
+    }
+
+    if err := x.writeField0(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("respFinalSinkServiceMethodAndReponse write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("respFinalSinkServiceMethodAndReponse write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *respFinalSinkServiceMethodAndReponse) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("respFinalSinkServiceMethodAndReponse read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("respFinalSinkServiceMethodAndReponse field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        case ((id == 0 && wireType == thrift.STRUCT) || (id == thrift.NO_FIELD_ID && fieldName == "success")):  // success
+            fieldReadErr = x.readField0(p)
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("respFinalSinkServiceMethodAndReponse read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *respFinalSinkServiceMethodAndReponse) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *respFinalSinkServiceMethodAndReponse) setDefaults() *respFinalSinkServiceMethodAndReponse {
+    return x
+}
+
+type reqSinkServiceMethodThrow struct {
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*reqSinkServiceMethodThrow)(nil)
+
+// Deprecated: SinkServiceMethodThrowArgsDeprecated is deprecated, since it is supposed to be internal.
+type SinkServiceMethodThrowArgsDeprecated = reqSinkServiceMethodThrow
+
+func newReqSinkServiceMethodThrow() *reqSinkServiceMethodThrow {
+    return (&reqSinkServiceMethodThrow{}).setDefaults()
+}
+
+
+
+func (x *reqSinkServiceMethodThrow) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("reqSinkServiceMethodThrow"); err != nil {
+        return thrift.PrependError("reqSinkServiceMethodThrow write struct begin error: ", err)
+    }
+
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("reqSinkServiceMethodThrow write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("reqSinkServiceMethodThrow write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *reqSinkServiceMethodThrow) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("reqSinkServiceMethodThrow read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("reqSinkServiceMethodThrow field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("reqSinkServiceMethodThrow read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *reqSinkServiceMethodThrow) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *reqSinkServiceMethodThrow) setDefaults() *reqSinkServiceMethodThrow {
+    return x
+}
+
+type respSinkServiceMethodThrow struct {
+    Ex *InitialException `thrift:"ex,1,optional" json:"ex,omitempty" db:"ex"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*respSinkServiceMethodThrow)(nil)
+var _ thrift.WritableResult = (*respSinkServiceMethodThrow)(nil)
+
+// Deprecated: SinkServiceMethodThrowResultDeprecated is deprecated, since it is supposed to be internal.
+type SinkServiceMethodThrowResultDeprecated = respSinkServiceMethodThrow
+
+func newRespSinkServiceMethodThrow() *respSinkServiceMethodThrow {
+    return (&respSinkServiceMethodThrow{}).setDefaults()
+}
+
+func (x *respSinkServiceMethodThrow) GetEx() *InitialException {
+    if !x.IsSetEx() {
+        return nil
+    }
+    return x.Ex
+}
+
+func (x *respSinkServiceMethodThrow) SetExNonCompat(value *InitialException) *respSinkServiceMethodThrow {
+    x.Ex = value
+    return x
+}
+
+func (x *respSinkServiceMethodThrow) SetEx(value *InitialException) *respSinkServiceMethodThrow {
+    x.Ex = value
+    return x
+}
+
+func (x *respSinkServiceMethodThrow) IsSetEx() bool {
+    return x != nil && x.Ex != nil
+}
+
+func (x *respSinkServiceMethodThrow) writeField1(p thrift.Encoder) error {  // Ex
+    if !x.IsSetEx() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("ex", thrift.STRUCT, 1); err != nil {
+        return thrift.PrependError("respSinkServiceMethodThrow write field begin error: ", err)
+    }
+
+    item := x.Ex
+    if err := item.Write(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("respSinkServiceMethodThrow write field end error: ", err)
+    }
+    return nil
+}
+
+func (x *respSinkServiceMethodThrow) readField1(p thrift.Decoder) error {  // Ex
+    result := NewInitialException()
+    err := result.Read(p)
+    if err != nil {
+        return err
+    }
+
+    x.Ex = result
+    return nil
+}
+
+
+
+
+func (x *respSinkServiceMethodThrow) Exception() thrift.WritableException {
+    if x.Ex != nil {
+        return x.Ex
+    }
+    return nil
+}
+
+func (x *respSinkServiceMethodThrow) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("respSinkServiceMethodThrow"); err != nil {
+        return thrift.PrependError("respSinkServiceMethodThrow write struct begin error: ", err)
+    }
+
+    if err := x.writeField1(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("respSinkServiceMethodThrow write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("respSinkServiceMethodThrow write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *respSinkServiceMethodThrow) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("respSinkServiceMethodThrow read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("respSinkServiceMethodThrow field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        case ((id == 1 && wireType == thrift.STRUCT) || (id == thrift.NO_FIELD_ID && fieldName == "ex")):  // ex
+            fieldReadErr = x.readField1(p)
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("respSinkServiceMethodThrow read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *respSinkServiceMethodThrow) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *respSinkServiceMethodThrow) setDefaults() *respSinkServiceMethodThrow {
+    return x
+}
+
+type sinkSinkServiceMethodThrow struct {
+    Success *SinkPayload `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*sinkSinkServiceMethodThrow)(nil)
+var _ thrift.WritableResult = (*sinkSinkServiceMethodThrow)(nil)
+
+// Deprecated: sinkSinkServiceMethodThrowResultDeprecated is deprecated, since it is supposed to be internal.
+type sinkSinkServiceMethodThrowResultDeprecated = sinkSinkServiceMethodThrow
+
+func newSinkSinkServiceMethodThrow() *sinkSinkServiceMethodThrow {
+    return (&sinkSinkServiceMethodThrow{}).setDefaults()
+}
+
+func (x *sinkSinkServiceMethodThrow) GetSuccess() *SinkPayload {
+    if !x.IsSetSuccess() {
+        return nil
+    }
+    return x.Success
+}
+
+func (x *sinkSinkServiceMethodThrow) SetSuccessNonCompat(value *SinkPayload) *sinkSinkServiceMethodThrow {
+    x.Success = value
+    return x
+}
+
+func (x *sinkSinkServiceMethodThrow) SetSuccess(value *SinkPayload) *sinkSinkServiceMethodThrow {
+    x.Success = value
+    return x
+}
+
+func (x *sinkSinkServiceMethodThrow) IsSetSuccess() bool {
+    return x != nil && x.Success != nil
+}
+
+func (x *sinkSinkServiceMethodThrow) writeField0(p thrift.Encoder) error {  // Success
+    if !x.IsSetSuccess() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("success", thrift.STRUCT, 0); err != nil {
+        return thrift.PrependError("sinkSinkServiceMethodThrow write field begin error: ", err)
+    }
+
+    item := x.Success
+    if err := item.Write(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("sinkSinkServiceMethodThrow write field end error: ", err)
+    }
+    return nil
+}
+
+func (x *sinkSinkServiceMethodThrow) readField0(p thrift.Decoder) error {  // Success
+    result := NewSinkPayload()
+    err := result.Read(p)
+    if err != nil {
+        return err
+    }
+
+    x.Success = result
+    return nil
+}
+
+
+
+
+func (x *sinkSinkServiceMethodThrow) Exception() thrift.WritableException {
+    return nil
+}
+
+func (x *sinkSinkServiceMethodThrow) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("sinkSinkServiceMethodThrow"); err != nil {
+        return thrift.PrependError("sinkSinkServiceMethodThrow write struct begin error: ", err)
+    }
+
+    if err := x.writeField0(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("sinkSinkServiceMethodThrow write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("sinkSinkServiceMethodThrow write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *sinkSinkServiceMethodThrow) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("sinkSinkServiceMethodThrow read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("sinkSinkServiceMethodThrow field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        case ((id == 0 && wireType == thrift.STRUCT) || (id == thrift.NO_FIELD_ID && fieldName == "success")):  // success
+            fieldReadErr = x.readField0(p)
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("sinkSinkServiceMethodThrow read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *sinkSinkServiceMethodThrow) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *sinkSinkServiceMethodThrow) setDefaults() *sinkSinkServiceMethodThrow {
+    return x
+}
+
+type respFinalSinkServiceMethodThrow struct {
+    Success *FinalResponse `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*respFinalSinkServiceMethodThrow)(nil)
+var _ thrift.WritableResult = (*respFinalSinkServiceMethodThrow)(nil)
+
+// Deprecated: FinalSinkServiceMethodThrowResultDeprecated is deprecated, since it is supposed to be internal.
+type FinalSinkServiceMethodThrowResultDeprecated = respFinalSinkServiceMethodThrow
+
+func newRespFinalSinkServiceMethodThrow() *respFinalSinkServiceMethodThrow {
+    return (&respFinalSinkServiceMethodThrow{}).setDefaults()
+}
+
+func (x *respFinalSinkServiceMethodThrow) GetSuccess() *FinalResponse {
+    if !x.IsSetSuccess() {
+        return nil
+    }
+    return x.Success
+}
+
+func (x *respFinalSinkServiceMethodThrow) SetSuccessNonCompat(value *FinalResponse) *respFinalSinkServiceMethodThrow {
+    x.Success = value
+    return x
+}
+
+func (x *respFinalSinkServiceMethodThrow) SetSuccess(value *FinalResponse) *respFinalSinkServiceMethodThrow {
+    x.Success = value
+    return x
+}
+
+func (x *respFinalSinkServiceMethodThrow) IsSetSuccess() bool {
+    return x != nil && x.Success != nil
+}
+
+func (x *respFinalSinkServiceMethodThrow) writeField0(p thrift.Encoder) error {  // Success
+    if !x.IsSetSuccess() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("success", thrift.STRUCT, 0); err != nil {
+        return thrift.PrependError("respFinalSinkServiceMethodThrow write field begin error: ", err)
+    }
+
+    item := x.Success
+    if err := item.Write(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("respFinalSinkServiceMethodThrow write field end error: ", err)
+    }
+    return nil
+}
+
+func (x *respFinalSinkServiceMethodThrow) readField0(p thrift.Decoder) error {  // Success
+    result := NewFinalResponse()
+    err := result.Read(p)
+    if err != nil {
+        return err
+    }
+
+    x.Success = result
+    return nil
+}
+
+
+
+
+func (x *respFinalSinkServiceMethodThrow) Exception() thrift.WritableException {
+    return nil
+}
+
+func (x *respFinalSinkServiceMethodThrow) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("respFinalSinkServiceMethodThrow"); err != nil {
+        return thrift.PrependError("respFinalSinkServiceMethodThrow write struct begin error: ", err)
+    }
+
+    if err := x.writeField0(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("respFinalSinkServiceMethodThrow write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("respFinalSinkServiceMethodThrow write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *respFinalSinkServiceMethodThrow) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("respFinalSinkServiceMethodThrow read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("respFinalSinkServiceMethodThrow field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        case ((id == 0 && wireType == thrift.STRUCT) || (id == thrift.NO_FIELD_ID && fieldName == "success")):  // success
+            fieldReadErr = x.readField0(p)
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("respFinalSinkServiceMethodThrow read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *respFinalSinkServiceMethodThrow) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *respFinalSinkServiceMethodThrow) setDefaults() *respFinalSinkServiceMethodThrow {
+    return x
+}
+
+type reqSinkServiceMethodSinkThrow struct {
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*reqSinkServiceMethodSinkThrow)(nil)
+
+// Deprecated: SinkServiceMethodSinkThrowArgsDeprecated is deprecated, since it is supposed to be internal.
+type SinkServiceMethodSinkThrowArgsDeprecated = reqSinkServiceMethodSinkThrow
+
+func newReqSinkServiceMethodSinkThrow() *reqSinkServiceMethodSinkThrow {
+    return (&reqSinkServiceMethodSinkThrow{}).setDefaults()
+}
+
+
+
+func (x *reqSinkServiceMethodSinkThrow) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("reqSinkServiceMethodSinkThrow"); err != nil {
+        return thrift.PrependError("reqSinkServiceMethodSinkThrow write struct begin error: ", err)
+    }
+
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("reqSinkServiceMethodSinkThrow write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("reqSinkServiceMethodSinkThrow write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *reqSinkServiceMethodSinkThrow) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("reqSinkServiceMethodSinkThrow read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("reqSinkServiceMethodSinkThrow field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("reqSinkServiceMethodSinkThrow read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *reqSinkServiceMethodSinkThrow) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *reqSinkServiceMethodSinkThrow) setDefaults() *reqSinkServiceMethodSinkThrow {
+    return x
+}
+
+type respSinkServiceMethodSinkThrow struct {
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*respSinkServiceMethodSinkThrow)(nil)
+var _ thrift.WritableResult = (*respSinkServiceMethodSinkThrow)(nil)
+
+// Deprecated: SinkServiceMethodSinkThrowResultDeprecated is deprecated, since it is supposed to be internal.
+type SinkServiceMethodSinkThrowResultDeprecated = respSinkServiceMethodSinkThrow
+
+func newRespSinkServiceMethodSinkThrow() *respSinkServiceMethodSinkThrow {
+    return (&respSinkServiceMethodSinkThrow{}).setDefaults()
+}
+
+
+
+func (x *respSinkServiceMethodSinkThrow) Exception() thrift.WritableException {
+    return nil
+}
+
+func (x *respSinkServiceMethodSinkThrow) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("respSinkServiceMethodSinkThrow"); err != nil {
+        return thrift.PrependError("respSinkServiceMethodSinkThrow write struct begin error: ", err)
+    }
+
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("respSinkServiceMethodSinkThrow write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("respSinkServiceMethodSinkThrow write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *respSinkServiceMethodSinkThrow) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("respSinkServiceMethodSinkThrow read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("respSinkServiceMethodSinkThrow field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("respSinkServiceMethodSinkThrow read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *respSinkServiceMethodSinkThrow) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *respSinkServiceMethodSinkThrow) setDefaults() *respSinkServiceMethodSinkThrow {
+    return x
+}
+
+type sinkSinkServiceMethodSinkThrow struct {
+    Success *SinkPayload `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
+    Ex *SinkException1 `thrift:"ex,1,optional" json:"ex,omitempty" db:"ex"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*sinkSinkServiceMethodSinkThrow)(nil)
+var _ thrift.WritableResult = (*sinkSinkServiceMethodSinkThrow)(nil)
+
+// Deprecated: sinkSinkServiceMethodSinkThrowResultDeprecated is deprecated, since it is supposed to be internal.
+type sinkSinkServiceMethodSinkThrowResultDeprecated = sinkSinkServiceMethodSinkThrow
+
+func newSinkSinkServiceMethodSinkThrow() *sinkSinkServiceMethodSinkThrow {
+    return (&sinkSinkServiceMethodSinkThrow{}).setDefaults()
+}
+
+func (x *sinkSinkServiceMethodSinkThrow) GetSuccess() *SinkPayload {
+    if !x.IsSetSuccess() {
+        return nil
+    }
+    return x.Success
+}
+
+func (x *sinkSinkServiceMethodSinkThrow) GetEx() *SinkException1 {
+    if !x.IsSetEx() {
+        return nil
+    }
+    return x.Ex
+}
+
+func (x *sinkSinkServiceMethodSinkThrow) SetSuccessNonCompat(value *SinkPayload) *sinkSinkServiceMethodSinkThrow {
+    x.Success = value
+    return x
+}
+
+func (x *sinkSinkServiceMethodSinkThrow) SetSuccess(value *SinkPayload) *sinkSinkServiceMethodSinkThrow {
+    x.Success = value
+    return x
+}
+
+func (x *sinkSinkServiceMethodSinkThrow) SetExNonCompat(value *SinkException1) *sinkSinkServiceMethodSinkThrow {
+    x.Ex = value
+    return x
+}
+
+func (x *sinkSinkServiceMethodSinkThrow) SetEx(value *SinkException1) *sinkSinkServiceMethodSinkThrow {
+    x.Ex = value
+    return x
+}
+
+func (x *sinkSinkServiceMethodSinkThrow) IsSetSuccess() bool {
+    return x != nil && x.Success != nil
+}
+
+func (x *sinkSinkServiceMethodSinkThrow) IsSetEx() bool {
+    return x != nil && x.Ex != nil
+}
+
+func (x *sinkSinkServiceMethodSinkThrow) writeField0(p thrift.Encoder) error {  // Success
+    if !x.IsSetSuccess() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("success", thrift.STRUCT, 0); err != nil {
+        return thrift.PrependError("sinkSinkServiceMethodSinkThrow write field begin error: ", err)
+    }
+
+    item := x.Success
+    if err := item.Write(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("sinkSinkServiceMethodSinkThrow write field end error: ", err)
+    }
+    return nil
+}
+
+func (x *sinkSinkServiceMethodSinkThrow) writeField1(p thrift.Encoder) error {  // Ex
+    if !x.IsSetEx() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("ex", thrift.STRUCT, 1); err != nil {
+        return thrift.PrependError("sinkSinkServiceMethodSinkThrow write field begin error: ", err)
+    }
+
+    item := x.Ex
+    if err := item.Write(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("sinkSinkServiceMethodSinkThrow write field end error: ", err)
+    }
+    return nil
+}
+
+func (x *sinkSinkServiceMethodSinkThrow) readField0(p thrift.Decoder) error {  // Success
+    result := NewSinkPayload()
+    err := result.Read(p)
+    if err != nil {
+        return err
+    }
+
+    x.Success = result
+    return nil
+}
+
+func (x *sinkSinkServiceMethodSinkThrow) readField1(p thrift.Decoder) error {  // Ex
+    result := NewSinkException1()
+    err := result.Read(p)
+    if err != nil {
+        return err
+    }
+
+    x.Ex = result
+    return nil
+}
+
+
+
+
+
+func (x *sinkSinkServiceMethodSinkThrow) Exception() thrift.WritableException {
+    if x.Ex != nil {
+        return x.Ex
+    }
+    return nil
+}
+
+func (x *sinkSinkServiceMethodSinkThrow) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("sinkSinkServiceMethodSinkThrow"); err != nil {
+        return thrift.PrependError("sinkSinkServiceMethodSinkThrow write struct begin error: ", err)
+    }
+
+    if err := x.writeField0(p); err != nil {
+        return err
+    }
+    if err := x.writeField1(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("sinkSinkServiceMethodSinkThrow write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("sinkSinkServiceMethodSinkThrow write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *sinkSinkServiceMethodSinkThrow) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("sinkSinkServiceMethodSinkThrow read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("sinkSinkServiceMethodSinkThrow field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        case ((id == 0 && wireType == thrift.STRUCT) || (id == thrift.NO_FIELD_ID && fieldName == "success")):  // success
+            fieldReadErr = x.readField0(p)
+        case ((id == 1 && wireType == thrift.STRUCT) || (id == thrift.NO_FIELD_ID && fieldName == "ex")):  // ex
+            fieldReadErr = x.readField1(p)
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("sinkSinkServiceMethodSinkThrow read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *sinkSinkServiceMethodSinkThrow) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *sinkSinkServiceMethodSinkThrow) setDefaults() *sinkSinkServiceMethodSinkThrow {
+    return x
+}
+
+type respFinalSinkServiceMethodSinkThrow struct {
+    Success *FinalResponse `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*respFinalSinkServiceMethodSinkThrow)(nil)
+var _ thrift.WritableResult = (*respFinalSinkServiceMethodSinkThrow)(nil)
+
+// Deprecated: FinalSinkServiceMethodSinkThrowResultDeprecated is deprecated, since it is supposed to be internal.
+type FinalSinkServiceMethodSinkThrowResultDeprecated = respFinalSinkServiceMethodSinkThrow
+
+func newRespFinalSinkServiceMethodSinkThrow() *respFinalSinkServiceMethodSinkThrow {
+    return (&respFinalSinkServiceMethodSinkThrow{}).setDefaults()
+}
+
+func (x *respFinalSinkServiceMethodSinkThrow) GetSuccess() *FinalResponse {
+    if !x.IsSetSuccess() {
+        return nil
+    }
+    return x.Success
+}
+
+func (x *respFinalSinkServiceMethodSinkThrow) SetSuccessNonCompat(value *FinalResponse) *respFinalSinkServiceMethodSinkThrow {
+    x.Success = value
+    return x
+}
+
+func (x *respFinalSinkServiceMethodSinkThrow) SetSuccess(value *FinalResponse) *respFinalSinkServiceMethodSinkThrow {
+    x.Success = value
+    return x
+}
+
+func (x *respFinalSinkServiceMethodSinkThrow) IsSetSuccess() bool {
+    return x != nil && x.Success != nil
+}
+
+func (x *respFinalSinkServiceMethodSinkThrow) writeField0(p thrift.Encoder) error {  // Success
+    if !x.IsSetSuccess() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("success", thrift.STRUCT, 0); err != nil {
+        return thrift.PrependError("respFinalSinkServiceMethodSinkThrow write field begin error: ", err)
+    }
+
+    item := x.Success
+    if err := item.Write(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("respFinalSinkServiceMethodSinkThrow write field end error: ", err)
+    }
+    return nil
+}
+
+func (x *respFinalSinkServiceMethodSinkThrow) readField0(p thrift.Decoder) error {  // Success
+    result := NewFinalResponse()
+    err := result.Read(p)
+    if err != nil {
+        return err
+    }
+
+    x.Success = result
+    return nil
+}
+
+
+
+
+func (x *respFinalSinkServiceMethodSinkThrow) Exception() thrift.WritableException {
+    return nil
+}
+
+func (x *respFinalSinkServiceMethodSinkThrow) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("respFinalSinkServiceMethodSinkThrow"); err != nil {
+        return thrift.PrependError("respFinalSinkServiceMethodSinkThrow write struct begin error: ", err)
+    }
+
+    if err := x.writeField0(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("respFinalSinkServiceMethodSinkThrow write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("respFinalSinkServiceMethodSinkThrow write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *respFinalSinkServiceMethodSinkThrow) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("respFinalSinkServiceMethodSinkThrow read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("respFinalSinkServiceMethodSinkThrow field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        case ((id == 0 && wireType == thrift.STRUCT) || (id == thrift.NO_FIELD_ID && fieldName == "success")):  // success
+            fieldReadErr = x.readField0(p)
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("respFinalSinkServiceMethodSinkThrow read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *respFinalSinkServiceMethodSinkThrow) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *respFinalSinkServiceMethodSinkThrow) setDefaults() *respFinalSinkServiceMethodSinkThrow {
+    return x
+}
+
+type reqSinkServiceMethodFinalThrow struct {
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*reqSinkServiceMethodFinalThrow)(nil)
+
+// Deprecated: SinkServiceMethodFinalThrowArgsDeprecated is deprecated, since it is supposed to be internal.
+type SinkServiceMethodFinalThrowArgsDeprecated = reqSinkServiceMethodFinalThrow
+
+func newReqSinkServiceMethodFinalThrow() *reqSinkServiceMethodFinalThrow {
+    return (&reqSinkServiceMethodFinalThrow{}).setDefaults()
+}
+
+
+
+func (x *reqSinkServiceMethodFinalThrow) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("reqSinkServiceMethodFinalThrow"); err != nil {
+        return thrift.PrependError("reqSinkServiceMethodFinalThrow write struct begin error: ", err)
+    }
+
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("reqSinkServiceMethodFinalThrow write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("reqSinkServiceMethodFinalThrow write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *reqSinkServiceMethodFinalThrow) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("reqSinkServiceMethodFinalThrow read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("reqSinkServiceMethodFinalThrow field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("reqSinkServiceMethodFinalThrow read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *reqSinkServiceMethodFinalThrow) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *reqSinkServiceMethodFinalThrow) setDefaults() *reqSinkServiceMethodFinalThrow {
+    return x
+}
+
+type respSinkServiceMethodFinalThrow struct {
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*respSinkServiceMethodFinalThrow)(nil)
+var _ thrift.WritableResult = (*respSinkServiceMethodFinalThrow)(nil)
+
+// Deprecated: SinkServiceMethodFinalThrowResultDeprecated is deprecated, since it is supposed to be internal.
+type SinkServiceMethodFinalThrowResultDeprecated = respSinkServiceMethodFinalThrow
+
+func newRespSinkServiceMethodFinalThrow() *respSinkServiceMethodFinalThrow {
+    return (&respSinkServiceMethodFinalThrow{}).setDefaults()
+}
+
+
+
+func (x *respSinkServiceMethodFinalThrow) Exception() thrift.WritableException {
+    return nil
+}
+
+func (x *respSinkServiceMethodFinalThrow) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("respSinkServiceMethodFinalThrow"); err != nil {
+        return thrift.PrependError("respSinkServiceMethodFinalThrow write struct begin error: ", err)
+    }
+
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("respSinkServiceMethodFinalThrow write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("respSinkServiceMethodFinalThrow write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *respSinkServiceMethodFinalThrow) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("respSinkServiceMethodFinalThrow read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("respSinkServiceMethodFinalThrow field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("respSinkServiceMethodFinalThrow read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *respSinkServiceMethodFinalThrow) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *respSinkServiceMethodFinalThrow) setDefaults() *respSinkServiceMethodFinalThrow {
+    return x
+}
+
+type sinkSinkServiceMethodFinalThrow struct {
+    Success *SinkPayload `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*sinkSinkServiceMethodFinalThrow)(nil)
+var _ thrift.WritableResult = (*sinkSinkServiceMethodFinalThrow)(nil)
+
+// Deprecated: sinkSinkServiceMethodFinalThrowResultDeprecated is deprecated, since it is supposed to be internal.
+type sinkSinkServiceMethodFinalThrowResultDeprecated = sinkSinkServiceMethodFinalThrow
+
+func newSinkSinkServiceMethodFinalThrow() *sinkSinkServiceMethodFinalThrow {
+    return (&sinkSinkServiceMethodFinalThrow{}).setDefaults()
+}
+
+func (x *sinkSinkServiceMethodFinalThrow) GetSuccess() *SinkPayload {
+    if !x.IsSetSuccess() {
+        return nil
+    }
+    return x.Success
+}
+
+func (x *sinkSinkServiceMethodFinalThrow) SetSuccessNonCompat(value *SinkPayload) *sinkSinkServiceMethodFinalThrow {
+    x.Success = value
+    return x
+}
+
+func (x *sinkSinkServiceMethodFinalThrow) SetSuccess(value *SinkPayload) *sinkSinkServiceMethodFinalThrow {
+    x.Success = value
+    return x
+}
+
+func (x *sinkSinkServiceMethodFinalThrow) IsSetSuccess() bool {
+    return x != nil && x.Success != nil
+}
+
+func (x *sinkSinkServiceMethodFinalThrow) writeField0(p thrift.Encoder) error {  // Success
+    if !x.IsSetSuccess() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("success", thrift.STRUCT, 0); err != nil {
+        return thrift.PrependError("sinkSinkServiceMethodFinalThrow write field begin error: ", err)
+    }
+
+    item := x.Success
+    if err := item.Write(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("sinkSinkServiceMethodFinalThrow write field end error: ", err)
+    }
+    return nil
+}
+
+func (x *sinkSinkServiceMethodFinalThrow) readField0(p thrift.Decoder) error {  // Success
+    result := NewSinkPayload()
+    err := result.Read(p)
+    if err != nil {
+        return err
+    }
+
+    x.Success = result
+    return nil
+}
+
+
+
+
+func (x *sinkSinkServiceMethodFinalThrow) Exception() thrift.WritableException {
+    return nil
+}
+
+func (x *sinkSinkServiceMethodFinalThrow) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("sinkSinkServiceMethodFinalThrow"); err != nil {
+        return thrift.PrependError("sinkSinkServiceMethodFinalThrow write struct begin error: ", err)
+    }
+
+    if err := x.writeField0(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("sinkSinkServiceMethodFinalThrow write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("sinkSinkServiceMethodFinalThrow write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *sinkSinkServiceMethodFinalThrow) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("sinkSinkServiceMethodFinalThrow read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("sinkSinkServiceMethodFinalThrow field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        case ((id == 0 && wireType == thrift.STRUCT) || (id == thrift.NO_FIELD_ID && fieldName == "success")):  // success
+            fieldReadErr = x.readField0(p)
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("sinkSinkServiceMethodFinalThrow read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *sinkSinkServiceMethodFinalThrow) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *sinkSinkServiceMethodFinalThrow) setDefaults() *sinkSinkServiceMethodFinalThrow {
+    return x
+}
+
+type respFinalSinkServiceMethodFinalThrow struct {
+    Success *FinalResponse `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
+    Ex *SinkException2 `thrift:"ex,1,optional" json:"ex,omitempty" db:"ex"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*respFinalSinkServiceMethodFinalThrow)(nil)
+var _ thrift.WritableResult = (*respFinalSinkServiceMethodFinalThrow)(nil)
+
+// Deprecated: FinalSinkServiceMethodFinalThrowResultDeprecated is deprecated, since it is supposed to be internal.
+type FinalSinkServiceMethodFinalThrowResultDeprecated = respFinalSinkServiceMethodFinalThrow
+
+func newRespFinalSinkServiceMethodFinalThrow() *respFinalSinkServiceMethodFinalThrow {
+    return (&respFinalSinkServiceMethodFinalThrow{}).setDefaults()
+}
+
+func (x *respFinalSinkServiceMethodFinalThrow) GetSuccess() *FinalResponse {
+    if !x.IsSetSuccess() {
+        return nil
+    }
+    return x.Success
+}
+
+func (x *respFinalSinkServiceMethodFinalThrow) GetEx() *SinkException2 {
+    if !x.IsSetEx() {
+        return nil
+    }
+    return x.Ex
+}
+
+func (x *respFinalSinkServiceMethodFinalThrow) SetSuccessNonCompat(value *FinalResponse) *respFinalSinkServiceMethodFinalThrow {
+    x.Success = value
+    return x
+}
+
+func (x *respFinalSinkServiceMethodFinalThrow) SetSuccess(value *FinalResponse) *respFinalSinkServiceMethodFinalThrow {
+    x.Success = value
+    return x
+}
+
+func (x *respFinalSinkServiceMethodFinalThrow) SetExNonCompat(value *SinkException2) *respFinalSinkServiceMethodFinalThrow {
+    x.Ex = value
+    return x
+}
+
+func (x *respFinalSinkServiceMethodFinalThrow) SetEx(value *SinkException2) *respFinalSinkServiceMethodFinalThrow {
+    x.Ex = value
+    return x
+}
+
+func (x *respFinalSinkServiceMethodFinalThrow) IsSetSuccess() bool {
+    return x != nil && x.Success != nil
+}
+
+func (x *respFinalSinkServiceMethodFinalThrow) IsSetEx() bool {
+    return x != nil && x.Ex != nil
+}
+
+func (x *respFinalSinkServiceMethodFinalThrow) writeField0(p thrift.Encoder) error {  // Success
+    if !x.IsSetSuccess() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("success", thrift.STRUCT, 0); err != nil {
+        return thrift.PrependError("respFinalSinkServiceMethodFinalThrow write field begin error: ", err)
+    }
+
+    item := x.Success
+    if err := item.Write(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("respFinalSinkServiceMethodFinalThrow write field end error: ", err)
+    }
+    return nil
+}
+
+func (x *respFinalSinkServiceMethodFinalThrow) writeField1(p thrift.Encoder) error {  // Ex
+    if !x.IsSetEx() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("ex", thrift.STRUCT, 1); err != nil {
+        return thrift.PrependError("respFinalSinkServiceMethodFinalThrow write field begin error: ", err)
+    }
+
+    item := x.Ex
+    if err := item.Write(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("respFinalSinkServiceMethodFinalThrow write field end error: ", err)
+    }
+    return nil
+}
+
+func (x *respFinalSinkServiceMethodFinalThrow) readField0(p thrift.Decoder) error {  // Success
+    result := NewFinalResponse()
+    err := result.Read(p)
+    if err != nil {
+        return err
+    }
+
+    x.Success = result
+    return nil
+}
+
+func (x *respFinalSinkServiceMethodFinalThrow) readField1(p thrift.Decoder) error {  // Ex
+    result := NewSinkException2()
+    err := result.Read(p)
+    if err != nil {
+        return err
+    }
+
+    x.Ex = result
+    return nil
+}
+
+
+
+
+
+func (x *respFinalSinkServiceMethodFinalThrow) Exception() thrift.WritableException {
+    if x.Ex != nil {
+        return x.Ex
+    }
+    return nil
+}
+
+func (x *respFinalSinkServiceMethodFinalThrow) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("respFinalSinkServiceMethodFinalThrow"); err != nil {
+        return thrift.PrependError("respFinalSinkServiceMethodFinalThrow write struct begin error: ", err)
+    }
+
+    if err := x.writeField0(p); err != nil {
+        return err
+    }
+    if err := x.writeField1(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("respFinalSinkServiceMethodFinalThrow write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("respFinalSinkServiceMethodFinalThrow write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *respFinalSinkServiceMethodFinalThrow) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("respFinalSinkServiceMethodFinalThrow read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("respFinalSinkServiceMethodFinalThrow field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        case ((id == 0 && wireType == thrift.STRUCT) || (id == thrift.NO_FIELD_ID && fieldName == "success")):  // success
+            fieldReadErr = x.readField0(p)
+        case ((id == 1 && wireType == thrift.STRUCT) || (id == thrift.NO_FIELD_ID && fieldName == "ex")):  // ex
+            fieldReadErr = x.readField1(p)
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("respFinalSinkServiceMethodFinalThrow read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *respFinalSinkServiceMethodFinalThrow) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *respFinalSinkServiceMethodFinalThrow) setDefaults() *respFinalSinkServiceMethodFinalThrow {
+    return x
+}
+
+type reqSinkServiceMethodBothThrow struct {
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*reqSinkServiceMethodBothThrow)(nil)
+
+// Deprecated: SinkServiceMethodBothThrowArgsDeprecated is deprecated, since it is supposed to be internal.
+type SinkServiceMethodBothThrowArgsDeprecated = reqSinkServiceMethodBothThrow
+
+func newReqSinkServiceMethodBothThrow() *reqSinkServiceMethodBothThrow {
+    return (&reqSinkServiceMethodBothThrow{}).setDefaults()
+}
+
+
+
+func (x *reqSinkServiceMethodBothThrow) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("reqSinkServiceMethodBothThrow"); err != nil {
+        return thrift.PrependError("reqSinkServiceMethodBothThrow write struct begin error: ", err)
+    }
+
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("reqSinkServiceMethodBothThrow write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("reqSinkServiceMethodBothThrow write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *reqSinkServiceMethodBothThrow) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("reqSinkServiceMethodBothThrow read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("reqSinkServiceMethodBothThrow field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("reqSinkServiceMethodBothThrow read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *reqSinkServiceMethodBothThrow) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *reqSinkServiceMethodBothThrow) setDefaults() *reqSinkServiceMethodBothThrow {
+    return x
+}
+
+type respSinkServiceMethodBothThrow struct {
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*respSinkServiceMethodBothThrow)(nil)
+var _ thrift.WritableResult = (*respSinkServiceMethodBothThrow)(nil)
+
+// Deprecated: SinkServiceMethodBothThrowResultDeprecated is deprecated, since it is supposed to be internal.
+type SinkServiceMethodBothThrowResultDeprecated = respSinkServiceMethodBothThrow
+
+func newRespSinkServiceMethodBothThrow() *respSinkServiceMethodBothThrow {
+    return (&respSinkServiceMethodBothThrow{}).setDefaults()
+}
+
+
+
+func (x *respSinkServiceMethodBothThrow) Exception() thrift.WritableException {
+    return nil
+}
+
+func (x *respSinkServiceMethodBothThrow) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("respSinkServiceMethodBothThrow"); err != nil {
+        return thrift.PrependError("respSinkServiceMethodBothThrow write struct begin error: ", err)
+    }
+
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("respSinkServiceMethodBothThrow write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("respSinkServiceMethodBothThrow write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *respSinkServiceMethodBothThrow) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("respSinkServiceMethodBothThrow read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("respSinkServiceMethodBothThrow field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("respSinkServiceMethodBothThrow read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *respSinkServiceMethodBothThrow) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *respSinkServiceMethodBothThrow) setDefaults() *respSinkServiceMethodBothThrow {
+    return x
+}
+
+type sinkSinkServiceMethodBothThrow struct {
+    Success *SinkPayload `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
+    Ex *SinkException1 `thrift:"ex,1,optional" json:"ex,omitempty" db:"ex"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*sinkSinkServiceMethodBothThrow)(nil)
+var _ thrift.WritableResult = (*sinkSinkServiceMethodBothThrow)(nil)
+
+// Deprecated: sinkSinkServiceMethodBothThrowResultDeprecated is deprecated, since it is supposed to be internal.
+type sinkSinkServiceMethodBothThrowResultDeprecated = sinkSinkServiceMethodBothThrow
+
+func newSinkSinkServiceMethodBothThrow() *sinkSinkServiceMethodBothThrow {
+    return (&sinkSinkServiceMethodBothThrow{}).setDefaults()
+}
+
+func (x *sinkSinkServiceMethodBothThrow) GetSuccess() *SinkPayload {
+    if !x.IsSetSuccess() {
+        return nil
+    }
+    return x.Success
+}
+
+func (x *sinkSinkServiceMethodBothThrow) GetEx() *SinkException1 {
+    if !x.IsSetEx() {
+        return nil
+    }
+    return x.Ex
+}
+
+func (x *sinkSinkServiceMethodBothThrow) SetSuccessNonCompat(value *SinkPayload) *sinkSinkServiceMethodBothThrow {
+    x.Success = value
+    return x
+}
+
+func (x *sinkSinkServiceMethodBothThrow) SetSuccess(value *SinkPayload) *sinkSinkServiceMethodBothThrow {
+    x.Success = value
+    return x
+}
+
+func (x *sinkSinkServiceMethodBothThrow) SetExNonCompat(value *SinkException1) *sinkSinkServiceMethodBothThrow {
+    x.Ex = value
+    return x
+}
+
+func (x *sinkSinkServiceMethodBothThrow) SetEx(value *SinkException1) *sinkSinkServiceMethodBothThrow {
+    x.Ex = value
+    return x
+}
+
+func (x *sinkSinkServiceMethodBothThrow) IsSetSuccess() bool {
+    return x != nil && x.Success != nil
+}
+
+func (x *sinkSinkServiceMethodBothThrow) IsSetEx() bool {
+    return x != nil && x.Ex != nil
+}
+
+func (x *sinkSinkServiceMethodBothThrow) writeField0(p thrift.Encoder) error {  // Success
+    if !x.IsSetSuccess() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("success", thrift.STRUCT, 0); err != nil {
+        return thrift.PrependError("sinkSinkServiceMethodBothThrow write field begin error: ", err)
+    }
+
+    item := x.Success
+    if err := item.Write(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("sinkSinkServiceMethodBothThrow write field end error: ", err)
+    }
+    return nil
+}
+
+func (x *sinkSinkServiceMethodBothThrow) writeField1(p thrift.Encoder) error {  // Ex
+    if !x.IsSetEx() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("ex", thrift.STRUCT, 1); err != nil {
+        return thrift.PrependError("sinkSinkServiceMethodBothThrow write field begin error: ", err)
+    }
+
+    item := x.Ex
+    if err := item.Write(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("sinkSinkServiceMethodBothThrow write field end error: ", err)
+    }
+    return nil
+}
+
+func (x *sinkSinkServiceMethodBothThrow) readField0(p thrift.Decoder) error {  // Success
+    result := NewSinkPayload()
+    err := result.Read(p)
+    if err != nil {
+        return err
+    }
+
+    x.Success = result
+    return nil
+}
+
+func (x *sinkSinkServiceMethodBothThrow) readField1(p thrift.Decoder) error {  // Ex
+    result := NewSinkException1()
+    err := result.Read(p)
+    if err != nil {
+        return err
+    }
+
+    x.Ex = result
+    return nil
+}
+
+
+
+
+
+func (x *sinkSinkServiceMethodBothThrow) Exception() thrift.WritableException {
+    if x.Ex != nil {
+        return x.Ex
+    }
+    return nil
+}
+
+func (x *sinkSinkServiceMethodBothThrow) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("sinkSinkServiceMethodBothThrow"); err != nil {
+        return thrift.PrependError("sinkSinkServiceMethodBothThrow write struct begin error: ", err)
+    }
+
+    if err := x.writeField0(p); err != nil {
+        return err
+    }
+    if err := x.writeField1(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("sinkSinkServiceMethodBothThrow write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("sinkSinkServiceMethodBothThrow write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *sinkSinkServiceMethodBothThrow) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("sinkSinkServiceMethodBothThrow read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("sinkSinkServiceMethodBothThrow field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        case ((id == 0 && wireType == thrift.STRUCT) || (id == thrift.NO_FIELD_ID && fieldName == "success")):  // success
+            fieldReadErr = x.readField0(p)
+        case ((id == 1 && wireType == thrift.STRUCT) || (id == thrift.NO_FIELD_ID && fieldName == "ex")):  // ex
+            fieldReadErr = x.readField1(p)
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("sinkSinkServiceMethodBothThrow read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *sinkSinkServiceMethodBothThrow) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *sinkSinkServiceMethodBothThrow) setDefaults() *sinkSinkServiceMethodBothThrow {
+    return x
+}
+
+type respFinalSinkServiceMethodBothThrow struct {
+    Success *FinalResponse `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
+    Ex *SinkException2 `thrift:"ex,1,optional" json:"ex,omitempty" db:"ex"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*respFinalSinkServiceMethodBothThrow)(nil)
+var _ thrift.WritableResult = (*respFinalSinkServiceMethodBothThrow)(nil)
+
+// Deprecated: FinalSinkServiceMethodBothThrowResultDeprecated is deprecated, since it is supposed to be internal.
+type FinalSinkServiceMethodBothThrowResultDeprecated = respFinalSinkServiceMethodBothThrow
+
+func newRespFinalSinkServiceMethodBothThrow() *respFinalSinkServiceMethodBothThrow {
+    return (&respFinalSinkServiceMethodBothThrow{}).setDefaults()
+}
+
+func (x *respFinalSinkServiceMethodBothThrow) GetSuccess() *FinalResponse {
+    if !x.IsSetSuccess() {
+        return nil
+    }
+    return x.Success
+}
+
+func (x *respFinalSinkServiceMethodBothThrow) GetEx() *SinkException2 {
+    if !x.IsSetEx() {
+        return nil
+    }
+    return x.Ex
+}
+
+func (x *respFinalSinkServiceMethodBothThrow) SetSuccessNonCompat(value *FinalResponse) *respFinalSinkServiceMethodBothThrow {
+    x.Success = value
+    return x
+}
+
+func (x *respFinalSinkServiceMethodBothThrow) SetSuccess(value *FinalResponse) *respFinalSinkServiceMethodBothThrow {
+    x.Success = value
+    return x
+}
+
+func (x *respFinalSinkServiceMethodBothThrow) SetExNonCompat(value *SinkException2) *respFinalSinkServiceMethodBothThrow {
+    x.Ex = value
+    return x
+}
+
+func (x *respFinalSinkServiceMethodBothThrow) SetEx(value *SinkException2) *respFinalSinkServiceMethodBothThrow {
+    x.Ex = value
+    return x
+}
+
+func (x *respFinalSinkServiceMethodBothThrow) IsSetSuccess() bool {
+    return x != nil && x.Success != nil
+}
+
+func (x *respFinalSinkServiceMethodBothThrow) IsSetEx() bool {
+    return x != nil && x.Ex != nil
+}
+
+func (x *respFinalSinkServiceMethodBothThrow) writeField0(p thrift.Encoder) error {  // Success
+    if !x.IsSetSuccess() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("success", thrift.STRUCT, 0); err != nil {
+        return thrift.PrependError("respFinalSinkServiceMethodBothThrow write field begin error: ", err)
+    }
+
+    item := x.Success
+    if err := item.Write(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("respFinalSinkServiceMethodBothThrow write field end error: ", err)
+    }
+    return nil
+}
+
+func (x *respFinalSinkServiceMethodBothThrow) writeField1(p thrift.Encoder) error {  // Ex
+    if !x.IsSetEx() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("ex", thrift.STRUCT, 1); err != nil {
+        return thrift.PrependError("respFinalSinkServiceMethodBothThrow write field begin error: ", err)
+    }
+
+    item := x.Ex
+    if err := item.Write(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("respFinalSinkServiceMethodBothThrow write field end error: ", err)
+    }
+    return nil
+}
+
+func (x *respFinalSinkServiceMethodBothThrow) readField0(p thrift.Decoder) error {  // Success
+    result := NewFinalResponse()
+    err := result.Read(p)
+    if err != nil {
+        return err
+    }
+
+    x.Success = result
+    return nil
+}
+
+func (x *respFinalSinkServiceMethodBothThrow) readField1(p thrift.Decoder) error {  // Ex
+    result := NewSinkException2()
+    err := result.Read(p)
+    if err != nil {
+        return err
+    }
+
+    x.Ex = result
+    return nil
+}
+
+
+
+
+
+func (x *respFinalSinkServiceMethodBothThrow) Exception() thrift.WritableException {
+    if x.Ex != nil {
+        return x.Ex
+    }
+    return nil
+}
+
+func (x *respFinalSinkServiceMethodBothThrow) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("respFinalSinkServiceMethodBothThrow"); err != nil {
+        return thrift.PrependError("respFinalSinkServiceMethodBothThrow write struct begin error: ", err)
+    }
+
+    if err := x.writeField0(p); err != nil {
+        return err
+    }
+    if err := x.writeField1(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("respFinalSinkServiceMethodBothThrow write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("respFinalSinkServiceMethodBothThrow write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *respFinalSinkServiceMethodBothThrow) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("respFinalSinkServiceMethodBothThrow read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("respFinalSinkServiceMethodBothThrow field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        case ((id == 0 && wireType == thrift.STRUCT) || (id == thrift.NO_FIELD_ID && fieldName == "success")):  // success
+            fieldReadErr = x.readField0(p)
+        case ((id == 1 && wireType == thrift.STRUCT) || (id == thrift.NO_FIELD_ID && fieldName == "ex")):  // ex
+            fieldReadErr = x.readField1(p)
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("respFinalSinkServiceMethodBothThrow read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *respFinalSinkServiceMethodBothThrow) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *respFinalSinkServiceMethodBothThrow) setDefaults() *respFinalSinkServiceMethodBothThrow {
+    return x
+}
+
+type reqSinkServiceMethodFast struct {
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*reqSinkServiceMethodFast)(nil)
+
+// Deprecated: SinkServiceMethodFastArgsDeprecated is deprecated, since it is supposed to be internal.
+type SinkServiceMethodFastArgsDeprecated = reqSinkServiceMethodFast
+
+func newReqSinkServiceMethodFast() *reqSinkServiceMethodFast {
+    return (&reqSinkServiceMethodFast{}).setDefaults()
+}
+
+
+
+func (x *reqSinkServiceMethodFast) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("reqSinkServiceMethodFast"); err != nil {
+        return thrift.PrependError("reqSinkServiceMethodFast write struct begin error: ", err)
+    }
+
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("reqSinkServiceMethodFast write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("reqSinkServiceMethodFast write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *reqSinkServiceMethodFast) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("reqSinkServiceMethodFast read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("reqSinkServiceMethodFast field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("reqSinkServiceMethodFast read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *reqSinkServiceMethodFast) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *reqSinkServiceMethodFast) setDefaults() *reqSinkServiceMethodFast {
+    return x
+}
+
+type respSinkServiceMethodFast struct {
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*respSinkServiceMethodFast)(nil)
+var _ thrift.WritableResult = (*respSinkServiceMethodFast)(nil)
+
+// Deprecated: SinkServiceMethodFastResultDeprecated is deprecated, since it is supposed to be internal.
+type SinkServiceMethodFastResultDeprecated = respSinkServiceMethodFast
+
+func newRespSinkServiceMethodFast() *respSinkServiceMethodFast {
+    return (&respSinkServiceMethodFast{}).setDefaults()
+}
+
+
+
+func (x *respSinkServiceMethodFast) Exception() thrift.WritableException {
+    return nil
+}
+
+func (x *respSinkServiceMethodFast) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("respSinkServiceMethodFast"); err != nil {
+        return thrift.PrependError("respSinkServiceMethodFast write struct begin error: ", err)
+    }
+
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("respSinkServiceMethodFast write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("respSinkServiceMethodFast write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *respSinkServiceMethodFast) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("respSinkServiceMethodFast read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("respSinkServiceMethodFast field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("respSinkServiceMethodFast read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *respSinkServiceMethodFast) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *respSinkServiceMethodFast) setDefaults() *respSinkServiceMethodFast {
+    return x
+}
+
+type sinkSinkServiceMethodFast struct {
+    Success *SinkPayload `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*sinkSinkServiceMethodFast)(nil)
+var _ thrift.WritableResult = (*sinkSinkServiceMethodFast)(nil)
+
+// Deprecated: sinkSinkServiceMethodFastResultDeprecated is deprecated, since it is supposed to be internal.
+type sinkSinkServiceMethodFastResultDeprecated = sinkSinkServiceMethodFast
+
+func newSinkSinkServiceMethodFast() *sinkSinkServiceMethodFast {
+    return (&sinkSinkServiceMethodFast{}).setDefaults()
+}
+
+func (x *sinkSinkServiceMethodFast) GetSuccess() *SinkPayload {
+    if !x.IsSetSuccess() {
+        return nil
+    }
+    return x.Success
+}
+
+func (x *sinkSinkServiceMethodFast) SetSuccessNonCompat(value *SinkPayload) *sinkSinkServiceMethodFast {
+    x.Success = value
+    return x
+}
+
+func (x *sinkSinkServiceMethodFast) SetSuccess(value *SinkPayload) *sinkSinkServiceMethodFast {
+    x.Success = value
+    return x
+}
+
+func (x *sinkSinkServiceMethodFast) IsSetSuccess() bool {
+    return x != nil && x.Success != nil
+}
+
+func (x *sinkSinkServiceMethodFast) writeField0(p thrift.Encoder) error {  // Success
+    if !x.IsSetSuccess() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("success", thrift.STRUCT, 0); err != nil {
+        return thrift.PrependError("sinkSinkServiceMethodFast write field begin error: ", err)
+    }
+
+    item := x.Success
+    if err := item.Write(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("sinkSinkServiceMethodFast write field end error: ", err)
+    }
+    return nil
+}
+
+func (x *sinkSinkServiceMethodFast) readField0(p thrift.Decoder) error {  // Success
+    result := NewSinkPayload()
+    err := result.Read(p)
+    if err != nil {
+        return err
+    }
+
+    x.Success = result
+    return nil
+}
+
+
+
+
+func (x *sinkSinkServiceMethodFast) Exception() thrift.WritableException {
+    return nil
+}
+
+func (x *sinkSinkServiceMethodFast) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("sinkSinkServiceMethodFast"); err != nil {
+        return thrift.PrependError("sinkSinkServiceMethodFast write struct begin error: ", err)
+    }
+
+    if err := x.writeField0(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("sinkSinkServiceMethodFast write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("sinkSinkServiceMethodFast write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *sinkSinkServiceMethodFast) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("sinkSinkServiceMethodFast read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("sinkSinkServiceMethodFast field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        case ((id == 0 && wireType == thrift.STRUCT) || (id == thrift.NO_FIELD_ID && fieldName == "success")):  // success
+            fieldReadErr = x.readField0(p)
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("sinkSinkServiceMethodFast read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *sinkSinkServiceMethodFast) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *sinkSinkServiceMethodFast) setDefaults() *sinkSinkServiceMethodFast {
+    return x
+}
+
+type respFinalSinkServiceMethodFast struct {
+    Success *FinalResponse `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*respFinalSinkServiceMethodFast)(nil)
+var _ thrift.WritableResult = (*respFinalSinkServiceMethodFast)(nil)
+
+// Deprecated: FinalSinkServiceMethodFastResultDeprecated is deprecated, since it is supposed to be internal.
+type FinalSinkServiceMethodFastResultDeprecated = respFinalSinkServiceMethodFast
+
+func newRespFinalSinkServiceMethodFast() *respFinalSinkServiceMethodFast {
+    return (&respFinalSinkServiceMethodFast{}).setDefaults()
+}
+
+func (x *respFinalSinkServiceMethodFast) GetSuccess() *FinalResponse {
+    if !x.IsSetSuccess() {
+        return nil
+    }
+    return x.Success
+}
+
+func (x *respFinalSinkServiceMethodFast) SetSuccessNonCompat(value *FinalResponse) *respFinalSinkServiceMethodFast {
+    x.Success = value
+    return x
+}
+
+func (x *respFinalSinkServiceMethodFast) SetSuccess(value *FinalResponse) *respFinalSinkServiceMethodFast {
+    x.Success = value
+    return x
+}
+
+func (x *respFinalSinkServiceMethodFast) IsSetSuccess() bool {
+    return x != nil && x.Success != nil
+}
+
+func (x *respFinalSinkServiceMethodFast) writeField0(p thrift.Encoder) error {  // Success
+    if !x.IsSetSuccess() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("success", thrift.STRUCT, 0); err != nil {
+        return thrift.PrependError("respFinalSinkServiceMethodFast write field begin error: ", err)
+    }
+
+    item := x.Success
+    if err := item.Write(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("respFinalSinkServiceMethodFast write field end error: ", err)
+    }
+    return nil
+}
+
+func (x *respFinalSinkServiceMethodFast) readField0(p thrift.Decoder) error {  // Success
+    result := NewFinalResponse()
+    err := result.Read(p)
+    if err != nil {
+        return err
+    }
+
+    x.Success = result
+    return nil
+}
+
+
+
+
+func (x *respFinalSinkServiceMethodFast) Exception() thrift.WritableException {
+    return nil
+}
+
+func (x *respFinalSinkServiceMethodFast) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("respFinalSinkServiceMethodFast"); err != nil {
+        return thrift.PrependError("respFinalSinkServiceMethodFast write struct begin error: ", err)
+    }
+
+    if err := x.writeField0(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("respFinalSinkServiceMethodFast write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("respFinalSinkServiceMethodFast write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *respFinalSinkServiceMethodFast) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("respFinalSinkServiceMethodFast read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("respFinalSinkServiceMethodFast field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        case ((id == 0 && wireType == thrift.STRUCT) || (id == thrift.NO_FIELD_ID && fieldName == "success")):  // success
+            fieldReadErr = x.readField0(p)
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("respFinalSinkServiceMethodFast read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *respFinalSinkServiceMethodFast) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *respFinalSinkServiceMethodFast) setDefaults() *respFinalSinkServiceMethodFast {
+    return x
+}
+
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {

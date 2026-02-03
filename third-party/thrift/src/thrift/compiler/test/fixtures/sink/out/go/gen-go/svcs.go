@@ -35,6 +35,13 @@ type SinkService interface {
 
 type SinkServiceClient interface {
     io.Closer
+    Method(ctx context.Context) (func(iter.Seq2[*SinkPayload, error]) (*FinalResponse, error), error)
+    MethodAndReponse(ctx context.Context) (*InitialResponse, func(iter.Seq2[*SinkPayload, error]) (*FinalResponse, error), error)
+    MethodThrow(ctx context.Context) (func(iter.Seq2[*SinkPayload, error]) (*FinalResponse, error), error)
+    MethodSinkThrow(ctx context.Context) (func(iter.Seq2[*SinkPayload, error]) (*FinalResponse, error), error)
+    MethodFinalThrow(ctx context.Context) (func(iter.Seq2[*SinkPayload, error]) (*FinalResponse, error), error)
+    MethodBothThrow(ctx context.Context) (func(iter.Seq2[*SinkPayload, error]) (*FinalResponse, error), error)
+    MethodFast(ctx context.Context) (func(iter.Seq2[*SinkPayload, error]) (*FinalResponse, error), error)
 }
 
 type sinkServiceClientImpl struct {
@@ -55,6 +62,34 @@ func init() {
 
 func (c *sinkServiceClientImpl) Close() error {
     return c.ch.Close()
+}
+
+func (c *sinkServiceClientImpl) Method(ctx context.Context) (func(iter.Seq2[*SinkPayload, error]) (*FinalResponse, error), error) {
+    panic("sink not implemented")
+}
+
+func (c *sinkServiceClientImpl) MethodAndReponse(ctx context.Context) (*InitialResponse, func(iter.Seq2[*SinkPayload, error]) (*FinalResponse, error), error) {
+    panic("sink not implemented")
+}
+
+func (c *sinkServiceClientImpl) MethodThrow(ctx context.Context) (func(iter.Seq2[*SinkPayload, error]) (*FinalResponse, error), error) {
+    panic("sink not implemented")
+}
+
+func (c *sinkServiceClientImpl) MethodSinkThrow(ctx context.Context) (func(iter.Seq2[*SinkPayload, error]) (*FinalResponse, error), error) {
+    panic("sink not implemented")
+}
+
+func (c *sinkServiceClientImpl) MethodFinalThrow(ctx context.Context) (func(iter.Seq2[*SinkPayload, error]) (*FinalResponse, error), error) {
+    panic("sink not implemented")
+}
+
+func (c *sinkServiceClientImpl) MethodBothThrow(ctx context.Context) (func(iter.Seq2[*SinkPayload, error]) (*FinalResponse, error), error) {
+    panic("sink not implemented")
+}
+
+func (c *sinkServiceClientImpl) MethodFast(ctx context.Context) (func(iter.Seq2[*SinkPayload, error]) (*FinalResponse, error), error) {
+    panic("sink not implemented")
 }
 
 

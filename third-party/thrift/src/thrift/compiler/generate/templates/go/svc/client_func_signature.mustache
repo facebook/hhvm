@@ -29,7 +29,7 @@
 }}{{#if function:oneway?}}{{!
   }}(error){{!
 }}{{#else if function:sink?}}{{!
-  }}NOT_IMPLEMENTED{{!
+  }}({{#function:creates_interaction?}}{{function:created_interaction.go_name}}Client, {{/function:creates_interaction?}}{{#function:sink_first_response_type}}{{#type:structured?}}*{{/type:structured?}}{{#partial types.go_type type=type:self}}, {{/function:sink_first_response_type}}func(iter.Seq2[{{#function:sink_elem_type}}{{#type:structured?}}*{{/type:structured?}}{{#partial types.go_type type=type:self}}{{/function:sink_elem_type}}, error]) ({{#function:sink_final_response_type}}{{#type:structured?}}*{{/type:structured?}}{{#partial types.go_type type=type:self}}, {{/function:sink_final_response_type}}error), error){{!
 }}{{#else if function:stream?}}{{!
   }}({{#function:creates_interaction?}}{{function:created_interaction.go_name}}Client, {{/function:creates_interaction?}}{{#function:stream_first_response_type}}{{#type:structured?}}*{{/type:structured?}}{{#partial types.go_type type=type:self}}, {{/function:stream_first_response_type}}iter.Seq2[{{#function:stream_elem_type}}{{#type:structured?}}*{{/type:structured?}}{{#partial types.go_type type=type:self}}{{/function:stream_elem_type}}, error], error){{!
 }}{{#else}}{{!

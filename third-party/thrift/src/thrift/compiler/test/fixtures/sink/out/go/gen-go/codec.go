@@ -91,6 +91,13 @@ var (
                 NewFunc:    func() thrift.Struct { return NewSinkException2() },
             },
     }
+    premadeCodecTypeSpec_void = &thrift.TypeSpec{
+        FullName: "void",
+        CodecPrimitiveSpec:
+            &thrift.CodecPrimitiveSpec{
+                PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_VOID,
+            },
+    }
 )
 
 // Premade struct specs
@@ -263,6 +270,590 @@ var (
                 "reason": 0,
             },
         }
+    premadeStructSpec_reqSinkServiceMethod =
+        &thrift.StructSpec{
+            Name:                 "reqSinkServiceMethod",
+            ScopedName:           "module.reqSinkServiceMethod",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
+    premadeStructSpec_respSinkServiceMethod =
+        &thrift.StructSpec{
+            Name:                 "respSinkServiceMethod",
+            ScopedName:           "module.respSinkServiceMethod",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
+    premadeStructSpec_sinkSinkServiceMethod =
+        &thrift.StructSpec{
+            Name:                 "sinkSinkServiceMethod",
+            ScopedName:           "module.sinkSinkServiceMethod",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   0,
+                    WireType:             thrift.STRUCT,
+                    Name:                 "success",
+                    ReflectIndex:         0,
+                    IsOptional:           true,
+                    ValueTypeSpec:        premadeCodecTypeSpec_module_SinkPayload,
+                    MustBeSetToSerialize: true,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                0: 0,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "success": 0,
+            },
+        }
+    premadeStructSpec_respFinalSinkServiceMethod =
+        &thrift.StructSpec{
+            Name:                 "respFinalSinkServiceMethod",
+            ScopedName:           "module.respFinalSinkServiceMethod",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   0,
+                    WireType:             thrift.STRUCT,
+                    Name:                 "success",
+                    ReflectIndex:         0,
+                    IsOptional:           true,
+                    ValueTypeSpec:        premadeCodecTypeSpec_module_FinalResponse,
+                    MustBeSetToSerialize: true,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                0: 0,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "success": 0,
+            },
+        }
+    premadeStructSpec_reqSinkServiceMethodAndReponse =
+        &thrift.StructSpec{
+            Name:                 "reqSinkServiceMethodAndReponse",
+            ScopedName:           "module.reqSinkServiceMethodAndReponse",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
+    premadeStructSpec_respSinkServiceMethodAndReponse =
+        &thrift.StructSpec{
+            Name:                 "respSinkServiceMethodAndReponse",
+            ScopedName:           "module.respSinkServiceMethodAndReponse",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   0,
+                    WireType:             thrift.STRUCT,
+                    Name:                 "success",
+                    ReflectIndex:         0,
+                    IsOptional:           true,
+                    ValueTypeSpec:        premadeCodecTypeSpec_module_InitialResponse,
+                    MustBeSetToSerialize: true,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                0: 0,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "success": 0,
+            },
+        }
+    premadeStructSpec_sinkSinkServiceMethodAndReponse =
+        &thrift.StructSpec{
+            Name:                 "sinkSinkServiceMethodAndReponse",
+            ScopedName:           "module.sinkSinkServiceMethodAndReponse",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   0,
+                    WireType:             thrift.STRUCT,
+                    Name:                 "success",
+                    ReflectIndex:         0,
+                    IsOptional:           true,
+                    ValueTypeSpec:        premadeCodecTypeSpec_module_SinkPayload,
+                    MustBeSetToSerialize: true,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                0: 0,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "success": 0,
+            },
+        }
+    premadeStructSpec_respFinalSinkServiceMethodAndReponse =
+        &thrift.StructSpec{
+            Name:                 "respFinalSinkServiceMethodAndReponse",
+            ScopedName:           "module.respFinalSinkServiceMethodAndReponse",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   0,
+                    WireType:             thrift.STRUCT,
+                    Name:                 "success",
+                    ReflectIndex:         0,
+                    IsOptional:           true,
+                    ValueTypeSpec:        premadeCodecTypeSpec_module_FinalResponse,
+                    MustBeSetToSerialize: true,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                0: 0,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "success": 0,
+            },
+        }
+    premadeStructSpec_reqSinkServiceMethodThrow =
+        &thrift.StructSpec{
+            Name:                 "reqSinkServiceMethodThrow",
+            ScopedName:           "module.reqSinkServiceMethodThrow",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
+    premadeStructSpec_respSinkServiceMethodThrow =
+        &thrift.StructSpec{
+            Name:                 "respSinkServiceMethodThrow",
+            ScopedName:           "module.respSinkServiceMethodThrow",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   1,
+                    WireType:             thrift.STRUCT,
+                    Name:                 "ex",
+                    ReflectIndex:         0,
+                    IsOptional:           true,
+                    ValueTypeSpec:        premadeCodecTypeSpec_module_InitialException,
+                    MustBeSetToSerialize: true,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                1: 0,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "ex": 0,
+            },
+        }
+    premadeStructSpec_sinkSinkServiceMethodThrow =
+        &thrift.StructSpec{
+            Name:                 "sinkSinkServiceMethodThrow",
+            ScopedName:           "module.sinkSinkServiceMethodThrow",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   0,
+                    WireType:             thrift.STRUCT,
+                    Name:                 "success",
+                    ReflectIndex:         0,
+                    IsOptional:           true,
+                    ValueTypeSpec:        premadeCodecTypeSpec_module_SinkPayload,
+                    MustBeSetToSerialize: true,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                0: 0,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "success": 0,
+            },
+        }
+    premadeStructSpec_respFinalSinkServiceMethodThrow =
+        &thrift.StructSpec{
+            Name:                 "respFinalSinkServiceMethodThrow",
+            ScopedName:           "module.respFinalSinkServiceMethodThrow",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   0,
+                    WireType:             thrift.STRUCT,
+                    Name:                 "success",
+                    ReflectIndex:         0,
+                    IsOptional:           true,
+                    ValueTypeSpec:        premadeCodecTypeSpec_module_FinalResponse,
+                    MustBeSetToSerialize: true,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                0: 0,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "success": 0,
+            },
+        }
+    premadeStructSpec_reqSinkServiceMethodSinkThrow =
+        &thrift.StructSpec{
+            Name:                 "reqSinkServiceMethodSinkThrow",
+            ScopedName:           "module.reqSinkServiceMethodSinkThrow",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
+    premadeStructSpec_respSinkServiceMethodSinkThrow =
+        &thrift.StructSpec{
+            Name:                 "respSinkServiceMethodSinkThrow",
+            ScopedName:           "module.respSinkServiceMethodSinkThrow",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
+    premadeStructSpec_sinkSinkServiceMethodSinkThrow =
+        &thrift.StructSpec{
+            Name:                 "sinkSinkServiceMethodSinkThrow",
+            ScopedName:           "module.sinkSinkServiceMethodSinkThrow",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   0,
+                    WireType:             thrift.STRUCT,
+                    Name:                 "success",
+                    ReflectIndex:         0,
+                    IsOptional:           true,
+                    ValueTypeSpec:        premadeCodecTypeSpec_module_SinkPayload,
+                    MustBeSetToSerialize: true,
+                },
+                {
+                    ID:                   1,
+                    WireType:             thrift.STRUCT,
+                    Name:                 "ex",
+                    ReflectIndex:         1,
+                    IsOptional:           true,
+                    ValueTypeSpec:        premadeCodecTypeSpec_module_SinkException1,
+                    MustBeSetToSerialize: true,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                0: 0,
+                1: 1,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "success": 0,
+                "ex": 1,
+            },
+        }
+    premadeStructSpec_respFinalSinkServiceMethodSinkThrow =
+        &thrift.StructSpec{
+            Name:                 "respFinalSinkServiceMethodSinkThrow",
+            ScopedName:           "module.respFinalSinkServiceMethodSinkThrow",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   0,
+                    WireType:             thrift.STRUCT,
+                    Name:                 "success",
+                    ReflectIndex:         0,
+                    IsOptional:           true,
+                    ValueTypeSpec:        premadeCodecTypeSpec_module_FinalResponse,
+                    MustBeSetToSerialize: true,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                0: 0,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "success": 0,
+            },
+        }
+    premadeStructSpec_reqSinkServiceMethodFinalThrow =
+        &thrift.StructSpec{
+            Name:                 "reqSinkServiceMethodFinalThrow",
+            ScopedName:           "module.reqSinkServiceMethodFinalThrow",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
+    premadeStructSpec_respSinkServiceMethodFinalThrow =
+        &thrift.StructSpec{
+            Name:                 "respSinkServiceMethodFinalThrow",
+            ScopedName:           "module.respSinkServiceMethodFinalThrow",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
+    premadeStructSpec_sinkSinkServiceMethodFinalThrow =
+        &thrift.StructSpec{
+            Name:                 "sinkSinkServiceMethodFinalThrow",
+            ScopedName:           "module.sinkSinkServiceMethodFinalThrow",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   0,
+                    WireType:             thrift.STRUCT,
+                    Name:                 "success",
+                    ReflectIndex:         0,
+                    IsOptional:           true,
+                    ValueTypeSpec:        premadeCodecTypeSpec_module_SinkPayload,
+                    MustBeSetToSerialize: true,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                0: 0,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "success": 0,
+            },
+        }
+    premadeStructSpec_respFinalSinkServiceMethodFinalThrow =
+        &thrift.StructSpec{
+            Name:                 "respFinalSinkServiceMethodFinalThrow",
+            ScopedName:           "module.respFinalSinkServiceMethodFinalThrow",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   0,
+                    WireType:             thrift.STRUCT,
+                    Name:                 "success",
+                    ReflectIndex:         0,
+                    IsOptional:           true,
+                    ValueTypeSpec:        premadeCodecTypeSpec_module_FinalResponse,
+                    MustBeSetToSerialize: true,
+                },
+                {
+                    ID:                   1,
+                    WireType:             thrift.STRUCT,
+                    Name:                 "ex",
+                    ReflectIndex:         1,
+                    IsOptional:           true,
+                    ValueTypeSpec:        premadeCodecTypeSpec_module_SinkException2,
+                    MustBeSetToSerialize: true,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                0: 0,
+                1: 1,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "success": 0,
+                "ex": 1,
+            },
+        }
+    premadeStructSpec_reqSinkServiceMethodBothThrow =
+        &thrift.StructSpec{
+            Name:                 "reqSinkServiceMethodBothThrow",
+            ScopedName:           "module.reqSinkServiceMethodBothThrow",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
+    premadeStructSpec_respSinkServiceMethodBothThrow =
+        &thrift.StructSpec{
+            Name:                 "respSinkServiceMethodBothThrow",
+            ScopedName:           "module.respSinkServiceMethodBothThrow",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
+    premadeStructSpec_sinkSinkServiceMethodBothThrow =
+        &thrift.StructSpec{
+            Name:                 "sinkSinkServiceMethodBothThrow",
+            ScopedName:           "module.sinkSinkServiceMethodBothThrow",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   0,
+                    WireType:             thrift.STRUCT,
+                    Name:                 "success",
+                    ReflectIndex:         0,
+                    IsOptional:           true,
+                    ValueTypeSpec:        premadeCodecTypeSpec_module_SinkPayload,
+                    MustBeSetToSerialize: true,
+                },
+                {
+                    ID:                   1,
+                    WireType:             thrift.STRUCT,
+                    Name:                 "ex",
+                    ReflectIndex:         1,
+                    IsOptional:           true,
+                    ValueTypeSpec:        premadeCodecTypeSpec_module_SinkException1,
+                    MustBeSetToSerialize: true,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                0: 0,
+                1: 1,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "success": 0,
+                "ex": 1,
+            },
+        }
+    premadeStructSpec_respFinalSinkServiceMethodBothThrow =
+        &thrift.StructSpec{
+            Name:                 "respFinalSinkServiceMethodBothThrow",
+            ScopedName:           "module.respFinalSinkServiceMethodBothThrow",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   0,
+                    WireType:             thrift.STRUCT,
+                    Name:                 "success",
+                    ReflectIndex:         0,
+                    IsOptional:           true,
+                    ValueTypeSpec:        premadeCodecTypeSpec_module_FinalResponse,
+                    MustBeSetToSerialize: true,
+                },
+                {
+                    ID:                   1,
+                    WireType:             thrift.STRUCT,
+                    Name:                 "ex",
+                    ReflectIndex:         1,
+                    IsOptional:           true,
+                    ValueTypeSpec:        premadeCodecTypeSpec_module_SinkException2,
+                    MustBeSetToSerialize: true,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                0: 0,
+                1: 1,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "success": 0,
+                "ex": 1,
+            },
+        }
+    premadeStructSpec_reqSinkServiceMethodFast =
+        &thrift.StructSpec{
+            Name:                 "reqSinkServiceMethodFast",
+            ScopedName:           "module.reqSinkServiceMethodFast",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
+    premadeStructSpec_respSinkServiceMethodFast =
+        &thrift.StructSpec{
+            Name:                 "respSinkServiceMethodFast",
+            ScopedName:           "module.respSinkServiceMethodFast",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
+    premadeStructSpec_sinkSinkServiceMethodFast =
+        &thrift.StructSpec{
+            Name:                 "sinkSinkServiceMethodFast",
+            ScopedName:           "module.sinkSinkServiceMethodFast",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   0,
+                    WireType:             thrift.STRUCT,
+                    Name:                 "success",
+                    ReflectIndex:         0,
+                    IsOptional:           true,
+                    ValueTypeSpec:        premadeCodecTypeSpec_module_SinkPayload,
+                    MustBeSetToSerialize: true,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                0: 0,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "success": 0,
+            },
+        }
+    premadeStructSpec_respFinalSinkServiceMethodFast =
+        &thrift.StructSpec{
+            Name:                 "respFinalSinkServiceMethodFast",
+            ScopedName:           "module.respFinalSinkServiceMethodFast",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   0,
+                    WireType:             thrift.STRUCT,
+                    Name:                 "success",
+                    ReflectIndex:         0,
+                    IsOptional:           true,
+                    ValueTypeSpec:        premadeCodecTypeSpec_module_FinalResponse,
+                    MustBeSetToSerialize: true,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                0: 0,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "success": 0,
+            },
+        }
 )
 
 var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {
@@ -276,6 +867,7 @@ var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_SinkException1.FullName] = premadeCodecTypeSpec_module_SinkException1
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_i64.FullName] = premadeCodecTypeSpec_i64
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_SinkException2.FullName] = premadeCodecTypeSpec_module_SinkException2
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_void.FullName] = premadeCodecTypeSpec_void
     return fbthriftTypeSpecsMap
 }()
 

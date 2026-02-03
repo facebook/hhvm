@@ -42,6 +42,7 @@ type MyInteractionClient interface {
     Frobnicate(ctx context.Context) (int32, error)
     Ping(ctx context.Context) (error)
     Truthify(ctx context.Context) (iter.Seq2[bool, error], error)
+    Encode(ctx context.Context) ([]int32, func(iter.Seq2[string, error]) ([]byte, error), error)
 }
 
 type myInteractionClientImpl struct {
@@ -128,6 +129,10 @@ func (c *myInteractionClientImpl) Truthify(ctx context.Context) (iter.Seq2[bool,
         }
     }
     return fbthriftStreamSeqAdapter, nil
+}
+
+func (c *myInteractionClientImpl) Encode(ctx context.Context) ([]int32, func(iter.Seq2[string, error]) ([]byte, error), error) {
+    panic("sink not implemented")
 }
 
 
@@ -312,6 +317,7 @@ type MyInteractionFastClient interface {
     Frobnicate(ctx context.Context) (int32, error)
     Ping(ctx context.Context) (error)
     Truthify(ctx context.Context) (iter.Seq2[bool, error], error)
+    Encode(ctx context.Context) ([]int32, func(iter.Seq2[string, error]) ([]byte, error), error)
 }
 
 type myInteractionFastClientImpl struct {
@@ -398,6 +404,10 @@ func (c *myInteractionFastClientImpl) Truthify(ctx context.Context) (iter.Seq2[b
         }
     }
     return fbthriftStreamSeqAdapter, nil
+}
+
+func (c *myInteractionFastClientImpl) Encode(ctx context.Context) ([]int32, func(iter.Seq2[string, error]) ([]byte, error), error) {
+    panic("sink not implemented")
 }
 
 

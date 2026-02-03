@@ -122,6 +122,8 @@ func (t *rpcClientConformanceTester) execute() {
 		err = t.SinkDeclaredException(testCaseCtx)
 	case t.instruction.SinkUndeclaredException != nil:
 		err = t.SinkUndeclaredException(testCaseCtx)
+	case t.instruction.SinkInitialDeclaredException != nil:
+		err = t.SinkInitialDeclaredException(testCaseCtx)
 	case t.instruction.InteractionConstructor != nil:
 		err = t.InteractionConstructor(testCaseCtx)
 	case t.instruction.InteractionFactoryFunction != nil:
@@ -364,23 +366,157 @@ func (t *rpcClientConformanceTester) StreamInitialTimeout(ctx context.Context) e
 }
 
 func (t *rpcClientConformanceTester) SinkBasic(ctx context.Context) error {
-	return errors.New("not supported")
+	sinkPayloads := t.instruction.SinkBasic.SinkPayloads
+
+	sinkCallback, err := t.client.SinkBasic(ctx, t.instruction.SinkBasic.Request)
+	if err != nil {
+		return err
+	}
+
+	payloadSeq := func(yield func(*rpc.Request, error) bool) {
+		for _, payload := range sinkPayloads {
+			if !yield(payload, nil) {
+				return
+			}
+		}
+	}
+
+	finalResponse, err := sinkCallback(payloadSeq)
+	if err != nil {
+		return err
+	}
+
+	responseValue := rpc.NewSinkBasicClientTestResult().
+		SetFinalResponse(finalResponse)
+	clientTestResult := rpc.NewClientTestResult().
+		SetSinkBasic(responseValue)
+	return t.client.SendTestResult(ctx, clientTestResult)
 }
 
 func (t *rpcClientConformanceTester) SinkChunkTimeout(ctx context.Context) error {
-	return errors.New("not supported")
+	sinkPayloads := t.instruction.SinkChunkTimeout.SinkPayloads
+	chunkTimeoutMs := t.instruction.SinkChunkTimeout.GetChunkTimeoutMs()
+
+	sinkCallback, err := t.client.SinkChunkTimeout(ctx, t.instruction.SinkChunkTimeout.Request)
+	if err != nil {
+		return err
+	}
+
+	payloadSeq := func(yield func(*rpc.Request, error) bool) {
+		for _, payload := range sinkPayloads {
+			// Sleep before sending each payload to potentially trigger chunk timeout
+			time.Sleep(time.Duration(chunkTimeoutMs) * time.Millisecond)
+			if !yield(payload, nil) {
+				return
+			}
+		}
+	}
+
+	_, sinkErr := sinkCallback(payloadSeq)
+
+	// We expect to hit a chunk timeout for this test case.
+	isChunkTimeout := (sinkErr != nil)
+
+	responseValue := rpc.NewSinkChunkTimeoutClientTestResult().
+		SetChunkTimeoutException(isChunkTimeout)
+	clientTestResult := rpc.NewClientTestResult().
+		SetSinkChunkTimeout(responseValue)
+	return t.client.SendTestResult(ctx, clientTestResult)
 }
 
 func (t *rpcClientConformanceTester) SinkInitialResponse(ctx context.Context) error {
-	return errors.New("not supported")
+	sinkPayloads := t.instruction.SinkInitialResponse.SinkPayloads
+
+	initialResponse, sinkCallback, err := t.client.SinkInitialResponse(ctx, t.instruction.SinkInitialResponse.Request)
+	if err != nil {
+		return err
+	}
+
+	payloadSeq := func(yield func(*rpc.Request, error) bool) {
+		for _, payload := range sinkPayloads {
+			if !yield(payload, nil) {
+				return
+			}
+		}
+	}
+
+	finalResponse, err := sinkCallback(payloadSeq)
+	if err != nil {
+		return err
+	}
+
+	responseValue := rpc.NewSinkInitialResponseClientTestResult().
+		SetInitialResponse(initialResponse).
+		SetFinalResponse(finalResponse)
+	clientTestResult := rpc.NewClientTestResult().
+		SetSinkInitialResponse(responseValue)
+	return t.client.SendTestResult(ctx, clientTestResult)
 }
 
 func (t *rpcClientConformanceTester) SinkDeclaredException(ctx context.Context) error {
-	return errors.New("not supported")
+	userException := t.instruction.SinkDeclaredException.UserException
+
+	sinkCallback, err := t.client.SinkDeclaredException(ctx, t.instruction.SinkDeclaredException.Request)
+	if err != nil {
+		return err
+	}
+
+	payloadSeq := func(yield func(*rpc.Request, error) bool) {
+		// Send exception if provided
+		if userException != nil {
+			yield(nil, userException)
+			return
+		}
+	}
+
+	_, sinkErr := sinkCallback(payloadSeq)
+
+	sinkThrew := (sinkErr != nil)
+
+	responseValue := rpc.NewSinkDeclaredExceptionClientTestResult().
+		SetSinkThrew(sinkThrew)
+	clientTestResult := rpc.NewClientTestResult().
+		SetSinkDeclaredException(responseValue)
+	return t.client.SendTestResult(ctx, clientTestResult)
 }
 
 func (t *rpcClientConformanceTester) SinkUndeclaredException(ctx context.Context) error {
-	return errors.New("not supported")
+	exceptionMessage := t.instruction.SinkUndeclaredException.ExceptionMessage
+
+	sinkCallback, err := t.client.SinkUndeclaredException(ctx, t.instruction.SinkUndeclaredException.Request)
+	if err != nil {
+		return err
+	}
+
+	payloadSeq := func(yield func(*rpc.Request, error) bool) {
+		// Send exception if provided
+		if exceptionMessage != nil {
+			yield(nil, errors.New(*exceptionMessage))
+			return
+		}
+	}
+
+	_, sinkErr := sinkCallback(payloadSeq)
+
+	sinkThrew := (sinkErr != nil)
+
+	responseValue := rpc.NewSinkUndeclaredExceptionClientTestResult().
+		SetSinkThrew(sinkThrew)
+	clientTestResult := rpc.NewClientTestResult().
+		SetSinkUndeclaredException(responseValue)
+	return t.client.SendTestResult(ctx, clientTestResult)
+}
+
+func (t *rpcClientConformanceTester) SinkInitialDeclaredException(ctx context.Context) error {
+	_, err := t.client.SinkInitialDeclaredException(ctx, t.instruction.SinkInitialDeclaredException.Request)
+
+	sinkThrew := (err != nil)
+
+	responseValue := rpc.NewSinkInitialDeclaredExceptionClientTestResult().
+		SetSinkThrew(sinkThrew)
+	clientTestResult := rpc.NewClientTestResult().
+		SetSinkInitialDeclaredException(responseValue)
+	return t.client.SendTestResult(ctx, clientTestResult)
 }
 
 func (t *rpcClientConformanceTester) InteractionConstructor(ctx context.Context) error {

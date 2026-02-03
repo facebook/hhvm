@@ -78,6 +78,11 @@ var (
                     Name: "module.SinkException2",
                 },
         }
+    premadeThriftType_void =
+        &metadata.ThriftType{
+            TPrimitive:
+                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE),
+        }
 )
 
 // Premade struct metadatas
@@ -183,6 +188,7 @@ var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
     fbthriftThriftTypesMap["module.SinkException1"] = premadeThriftType_module_SinkException1
     fbthriftThriftTypesMap["i64"] = premadeThriftType_i64
     fbthriftThriftTypesMap["module.SinkException2"] = premadeThriftType_module_SinkException2
+    fbthriftThriftTypesMap["void"] = premadeThriftType_void
     return fbthriftThriftTypesMap
 }()
 

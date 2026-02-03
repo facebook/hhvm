@@ -73,7 +73,9 @@ func (c *{{service:go_client_name}}) {{> svc/client_func_signature}} {
                     {{/function:sink_exceptions?}}
                     return
                 }
+                {{#function:sink_elem_type}}
                 sinkPayload.{{function:retval_field_name}} = {{^type:nilable?}}&{{/type:nilable?}}elem
+                {{/function:sink_elem_type}}
                 if !yield(sinkPayload, nil) {
                     return
                 }

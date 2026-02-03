@@ -157,7 +157,7 @@ func (c *myInteractionClientImpl) Encode(ctx context.Context) ([]int32, func(ite
                     yield(nil, err)
                     return
                 }
-                sinkPayload.Success = elem
+                sinkPayload.Success = &elem
                 if !yield(sinkPayload, nil) {
                     return
                 }
@@ -473,7 +473,7 @@ func (c *myInteractionFastClientImpl) Encode(ctx context.Context) ([]int32, func
                     yield(nil, err)
                     return
                 }
-                sinkPayload.Success = elem
+                sinkPayload.Success = &elem
                 if !yield(sinkPayload, nil) {
                     return
                 }

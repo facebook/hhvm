@@ -210,7 +210,18 @@ struct VariantControllerImpl {
   static HPHP::serialize::Type mapKeyType(const Variant& k) {
     return type(k);
   }
+  static int64_t mapKeyFromInt64(int64_t key) {
+    return key;
+  }
   static int64_t mapKeyAsInt64(const Variant& k) { return k.toInt64(); }
+  static bool mapExistsInt64Key(const MapType& map, int64_t key) {
+    return map.exists(key);
+  }
+  static VariantType mapAtInt64Key(
+      const MapType& map,
+      int64_t key) {
+    return map[key];
+  }
   static String mapKeyAsString(const Variant& k) {
     return k.toString();
   }

@@ -16,6 +16,9 @@
 
 #pragma once
 
+#include <variant>
+
+#include <folly/Overload.h>
 #include <folly/Portability.h>
 #include <folly/Try.h>
 #include <folly/coro/AsyncGenerator.h>
@@ -24,6 +27,7 @@
 #include <folly/coro/Task.h>
 #include <thrift/lib/cpp2/async/ServerStreamDetail.h>
 #include <thrift/lib/cpp2/async/StreamCallbacks.h>
+#include <thrift/lib/cpp2/async/StreamMessage.h>
 #include <thrift/lib/cpp2/async/TwoWayBridge.h>
 #include <thrift/lib/cpp2/async/TwoWayBridgeUtil.h>
 
@@ -32,25 +36,30 @@ namespace test {
 class TestProducerCallback;
 }
 
-struct StreamControl {
-  enum Code : int32_t { CANCEL = -1, PAUSE = -2, RESUME = -3 };
-};
+using ServerStreamMessageServerToClient =
+    std::variant<StreamMessage::PayloadOrError, StreamMessage::Complete>;
+
+using ServerStreamMessageClientToServer = std::variant<
+    StreamMessage::RequestN,
+    StreamMessage::Cancel,
+    StreamMessage::Pause,
+    StreamMessage::Resume>;
 
 class ServerGeneratorStreamBridge;
 
 // This template explicitly instantiated in ServerGeneratorStreamBridge.cpp
 extern template class TwoWayBridge<
     ServerGeneratorStreamBridge,
-    folly::Try<StreamPayload>,
+    ServerStreamMessageServerToClient,
     QueueConsumer,
-    int64_t,
+    ServerStreamMessageClientToServer,
     ServerGeneratorStreamBridge>;
 
 class ServerGeneratorStreamBridge : public TwoWayBridge<
                                         ServerGeneratorStreamBridge,
-                                        folly::Try<StreamPayload>,
+                                        ServerStreamMessageServerToClient,
                                         QueueConsumer,
-                                        int64_t,
+                                        ServerStreamMessageClientToServer,
                                         ServerGeneratorStreamBridge>,
                                     private StreamServerCallback {
  public:
@@ -171,26 +180,34 @@ class ServerGeneratorStreamBridge : public TwoWayBridge<
       {
         auto queue = stream->serverGetMessages();
         while (!queue.empty()) {
-          auto next = queue.front();
-          queue.pop();
-          switch (next) {
-            case detail::StreamControl::CANCEL:
-              co_return;
-            case detail::StreamControl::PAUSE:
-              notifyStreamPause(
-                  contextStack.get(),
-                  details::STREAM_PAUSE_REASON::EXPLICIT_PAUSE);
-              pauseStream = true;
-              break;
-            case detail::StreamControl::RESUME:
-              notifyStreamResumeReceive(contextStack.get());
-              pauseStream = false;
-              break;
-            default:
-              notifyStreamCredit(contextStack.get(), next);
-              credits += next;
-              break;
+          auto& next = queue.front();
+          bool cancelled = folly::variant_match(
+              next,
+              [&](StreamMessage::RequestN requestN) {
+                notifyStreamCredit(contextStack.get(), requestN.n);
+                credits += requestN.n;
+                return false;
+              },
+              [&](StreamMessage::Cancel) { return true; },
+              [&](StreamMessage::Pause) {
+                notifyStreamPause(
+                    contextStack.get(),
+                    details::STREAM_PAUSE_REASON::EXPLICIT_PAUSE);
+                pauseStream = true;
+                return false;
+              },
+              [&](StreamMessage::Resume) {
+                notifyStreamResumeReceive(contextStack.get());
+                pauseStream = false;
+                return false;
+              });
+          if (cancelled) {
+            co_return;
           }
+          queue.pop();
+          // TODO(ezou) the original implentation seems to discard the messages
+          // if the stream is paused - that sounds like a bug to me but we
+          // may want to consider it here.
         }
       }
 
@@ -202,11 +219,15 @@ class ServerGeneratorStreamBridge : public TwoWayBridge<
           folly::coro::co_withCancellation(
               stream->cancelSource_.getToken(), gen_.next()));
       if (next.hasException()) {
-        stream->serverPush((*encode)(std::move(next.exception())));
+        // The encoding returns a Try(), but StreamElementEncode will always
+        // populate this with an exception wrapper.
+        stream->serverPush(
+            StreamMessage::PayloadOrError{
+                (*encode)(std::move(next.exception()))});
         co_return;
       }
       if (!next->has_value()) {
-        stream->serverPush({});
+        stream->serverPush(StreamMessage::Complete{});
         co_return;
       }
 
@@ -215,12 +236,13 @@ class ServerGeneratorStreamBridge : public TwoWayBridge<
         folly::Try<StreamPayload> sp =
             encodeMessageVariant(encode, std::move(item));
         bool hasPayload = sp->payload || sp->isOrderedHeader;
-        stream->serverPush(std::move(sp));
+        stream->serverPush(StreamMessage::PayloadOrError{std::move(sp)});
         if (hasPayload) {
           --credits;
         }
       } else {
-        stream->serverPush((*encode)(std::move(item)));
+        stream->serverPush(
+            StreamMessage::PayloadOrError{(*encode)(std::move(item))});
         --credits;
       }
 

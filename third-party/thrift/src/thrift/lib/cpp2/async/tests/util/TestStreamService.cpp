@@ -18,6 +18,7 @@
 #include <thrift/lib/cpp2/transport/rocket/server/RocketStreamClientCallback.h>
 
 #include <gtest/gtest.h>
+#include <folly/Overload.h>
 #include <folly/coro/AsyncScope.h>
 
 namespace apache::thrift::detail::test {
@@ -348,13 +349,14 @@ class TestProducerCallback
       if (credits_ == 0 && updateCreditsOrCancel()) {
         return;
       }
-      stream_->serverPush((*encoder_)(int(i)));
+      stream_->serverPush(StreamMessage::PayloadOrError{(*encoder_)(int(i))});
       --credits_;
     }
     if (ew_) {
-      stream_->serverPush((*encoder_)(std::move(ew_)));
+      stream_->serverPush(
+          StreamMessage::PayloadOrError{(*encoder_)(std::move(ew_))});
     } else {
-      stream_->serverPush({});
+      stream_->serverPush(StreamMessage::Complete{});
     }
   }
 
@@ -367,18 +369,25 @@ class TestProducerCallback
 
     auto queue = stream_->serverGetMessages();
     while (!queue.empty()) {
-      auto next = queue.front();
+      auto& next = queue.front();
+      bool cancelled = folly::variant_match(
+          next,
+          [&](StreamMessage::RequestN requestN) {
+            credits_ += requestN.n;
+            return false;
+          },
+          [&](StreamMessage::Cancel) { return true; },
+          [&](StreamMessage::Pause) {
+            // ignore pause events
+            return false;
+          },
+          [&](StreamMessage::Resume) {
+            // ignore resume events
+            return false;
+          });
       queue.pop();
-      switch (next) {
-        case StreamControl::CANCEL:
-          return true;
-        case StreamControl::PAUSE:
-        case StreamControl::RESUME:
-          // ignore pause/resume events
-          continue;
-        default:
-          credits_ += next;
-          break;
+      if (cancelled) {
+        return true;
       }
     }
     return false;

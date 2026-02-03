@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <folly/Overload.h>
 #include <thrift/lib/cpp/StreamEventHandler.h>
 #include <thrift/lib/cpp2/async/ServerGeneratorStreamBridge.h>
 
@@ -22,9 +23,9 @@ namespace apache::thrift::detail {
 // Explicitly instantiate the base of ServerGeneratorStreamBridge
 template class TwoWayBridge<
     ServerGeneratorStreamBridge,
-    folly::Try<StreamPayload>,
+    ServerStreamMessageServerToClient,
     QueueConsumer,
-    int64_t,
+    ServerStreamMessageClientToServer,
     ServerGeneratorStreamBridge>;
 
 ServerGeneratorStreamBridge::ServerGeneratorStreamBridge(
@@ -62,7 +63,7 @@ void ServerGeneratorStreamBridge::canceled() {
 }
 
 bool ServerGeneratorStreamBridge::onStreamRequestN(int32_t credits) {
-  clientPush(std::move(credits));
+  clientPush(StreamMessage::RequestN{static_cast<int32_t>(credits)});
   return true;
 }
 
@@ -70,7 +71,7 @@ void ServerGeneratorStreamBridge::onStreamCancel() {
 #if FOLLY_HAS_COROUTINES
   cancelSource_.requestCancellation();
 #endif
-  clientPush(detail::StreamControl::CANCEL);
+  clientPush(StreamMessage::Cancel{});
   clientClose();
 }
 
@@ -80,11 +81,11 @@ void ServerGeneratorStreamBridge::resetClientCallback(
 }
 
 void ServerGeneratorStreamBridge::pauseStream() {
-  clientPush(detail::StreamControl::PAUSE);
+  clientPush(StreamMessage::Pause{});
 }
 
 void ServerGeneratorStreamBridge::resumeStream() {
-  clientPush(detail::StreamControl::RESUME);
+  clientPush(StreamMessage::Resume{});
 }
 
 void ServerGeneratorStreamBridge::processClientMessages() {
@@ -93,21 +94,38 @@ void ServerGeneratorStreamBridge::processClientMessages() {
     for (auto messages = clientGetMessages(); !messages.empty();
          messages.pop()) {
       DCHECK(!isClientClosed());
-      auto& payload = messages.front();
-      if (payload.hasValue()) {
-        auto alive = payload->payload || payload->isOrderedHeader
-            ? clientCallback_->onStreamNext(std::move(payload.value()))
-            : clientCallback_->onStreamHeaders(
-                  HeadersPayload(std::move(payload->metadata)));
-        if (!alive) {
-          break;
-        }
-      } else if (payload.hasException()) {
-        clientCallback_->onStreamError(std::move(payload.exception()));
-        Ptr(this);
-        return;
-      } else {
-        clientCallback_->onStreamComplete();
+      auto& message = messages.front();
+      bool reachedTerminalState = folly::variant_match(
+          message,
+          [&](StreamMessage::PayloadOrError& payloadOrError) {
+            auto& payload = payloadOrError.streamPayloadTry;
+            if (payload.hasValue()) {
+              bool alive = true;
+              if (payload->payload || payload->isOrderedHeader) {
+                alive =
+                    clientCallback_->onStreamNext(std::move(payload.value()));
+              } else {
+                alive = clientCallback_->onStreamHeaders(
+                    HeadersPayload(std::move(payload->metadata)));
+              }
+              // TODO(ezou) this probably needs some followup. In practice,
+              // onStreamNext and onStreamHeaders never return false at least
+              // for RocketStreamClientCallback. There do exist unit tests
+              // (ServerStreamTest) that do test this behavior, but the behavior
+              // is not really clear. The previous implementation would break
+              // from the loop, but it does not make sense to continue if the
+              // client callback is no longer alive.
+              return !alive;
+            } else {
+              clientCallback_->onStreamError(std::move(payload.exception()));
+              return true;
+            }
+          },
+          [&](StreamMessage::Complete) {
+            clientCallback_->onStreamComplete();
+            return true;
+          });
+      if (reachedTerminalState) {
         Ptr(this);
         return;
       }

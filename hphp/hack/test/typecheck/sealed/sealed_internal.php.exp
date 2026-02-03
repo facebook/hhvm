@@ -1,1 +1,2 @@
-No errors
+WARN: File "sealed_internal.php--a.php", line 8, characters 12-19:
+Class `D` in sealed allowlist for `C`, but does not extend `C` (Warn[12035])

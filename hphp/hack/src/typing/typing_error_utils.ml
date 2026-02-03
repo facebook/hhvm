@@ -4221,33 +4221,6 @@ end = struct
     and reasons = lazy [(parent_pos, "Declaration is here")] in
     create ~code:Error_code.ExtendSealed ~claim ~reasons ()
 
-  let sealed_not_subtype parent_pos parent_name child_name child_kind child_pos
-      =
-    let claim =
-      lazy
-        (let parent_name = Render.strip_ns parent_name
-         and child_name = Render.strip_ns child_name
-         and (child_kind, verb) =
-           match child_kind with
-           | Ast_defs.Cclass _ -> ("Class", "extend")
-           | Ast_defs.Cinterface -> ("Interface", "implement")
-           | Ast_defs.Ctrait -> ("Trait", "use")
-           | Ast_defs.Cenum -> ("Enum", "use")
-           | Ast_defs.Cenum_class _ -> ("Enum Class", "extend")
-         in
-         ( parent_pos,
-           child_kind
-           ^ " "
-           ^ Markdown_lite.md_codify child_name
-           ^ " in sealed allowlist for "
-           ^ Markdown_lite.md_codify parent_name
-           ^ ", but does not "
-           ^ verb
-           ^ " "
-           ^ Markdown_lite.md_codify parent_name ))
-    and reasons = lazy [(child_pos, "Definition is here")] in
-    create ~code:Error_code.SealedNotSubtype ~claim ~reasons ()
-
   let trait_prop_const_class pos x =
     create
       ~code:Error_code.TraitPropConstClass
@@ -5287,8 +5260,6 @@ end = struct
     | Extend_final { pos; name; decl_pos } -> extend_final pos decl_pos name
     | Extend_sealed { pos; parent_pos; parent_name; parent_kind; verb } ->
       extend_sealed pos parent_pos parent_name parent_kind verb
-    | Sealed_not_subtype { pos; name; child_kind; child_pos; child_name } ->
-      sealed_not_subtype pos name child_name child_kind child_pos
     | Trait_prop_const_class { pos; name } -> trait_prop_const_class pos name
     | Implement_abstract
         { pos; is_final; decl_pos; trace; name; kind; quickfixes } ->

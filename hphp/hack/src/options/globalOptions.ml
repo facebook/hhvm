@@ -152,7 +152,6 @@ type t = {
   tco_meth_caller_only_public_visibility: bool;
   tco_require_extends_implements_ancestors: bool;
   tco_strict_value_equality: bool;
-  tco_enforce_sealed_subclasses: bool;
   tco_implicit_inherit_sdt: bool;
   tco_repo_stdlib_path: string option;
   tco_explicit_consistent_constructors: int;
@@ -277,7 +276,6 @@ let default =
     tco_meth_caller_only_public_visibility = true;
     tco_require_extends_implements_ancestors = false;
     tco_strict_value_equality = false;
-    tco_enforce_sealed_subclasses = false;
     tco_implicit_inherit_sdt = false;
     tco_repo_stdlib_path = None;
     tco_explicit_consistent_constructors = 0;
@@ -401,7 +399,6 @@ let set
     ?tco_meth_caller_only_public_visibility
     ?tco_require_extends_implements_ancestors
     ?tco_strict_value_equality
-    ?tco_enforce_sealed_subclasses
     ?tco_implicit_inherit_sdt
     ?tco_repo_stdlib_path
     ?tco_explicit_consistent_constructors
@@ -630,10 +627,6 @@ let set
         options.tco_require_extends_implements_ancestors;
     tco_strict_value_equality =
       setting tco_strict_value_equality options.tco_strict_value_equality;
-    tco_enforce_sealed_subclasses =
-      setting
-        tco_enforce_sealed_subclasses
-        options.tco_enforce_sealed_subclasses;
     tco_implicit_inherit_sdt =
       setting tco_implicit_inherit_sdt options.tco_implicit_inherit_sdt;
     tco_repo_stdlib_path =

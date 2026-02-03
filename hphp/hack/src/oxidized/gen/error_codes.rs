@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<0cc28ae99bc1061db33ccad8126c8ba3>>
+// @generated SignedSource<<1979bd32cde8ff3069353e3a5093c26e>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -519,7 +519,6 @@ pub enum Typing {
     RigidTVarEscape = 4442,
     StrictEqValueIncompatibleTypes = 4443,
     ModuleError = 4444,
-    SealedNotSubtype = 4445,
     ModuleHintError = 4446,
     MemoizeObjectWithoutGlobals = 4447,
     ExpressionTreeNonPublicProperty = 4448,
@@ -625,6 +624,7 @@ pub enum Warning {
     NullsafePipeOnNull = 12032,
     UnboundNameWarning = 12033,
     SetOrKeysetArrayGet = 12034,
+    SealedNotSubtype = 12035,
 }
 impl TrivialDrop for Warning {}
 arena_deserializer::impl_deserialize_in_arena!(Warning);

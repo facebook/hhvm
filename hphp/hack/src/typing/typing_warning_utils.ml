@@ -871,6 +871,40 @@ module Set_or_keyset_array_get = struct
   let quickfixes _ = []
 end
 
+module Sealed_not_subtype = struct
+  type t = Typing_warning.Sealed_not_subtype.t
+
+  let code = Codes.SealedNotSubtype
+
+  let codes = [code]
+
+  let code _ = code
+
+  let claim
+      {
+        Typing_warning.Sealed_not_subtype.verb;
+        parent_name;
+        child_name;
+        child_kind;
+        _;
+      } =
+    let parent_name = Utils.strip_ns parent_name in
+    let child_name = Utils.strip_ns child_name in
+    child_kind
+    ^ " "
+    ^ Markdown_lite.md_codify child_name
+    ^ " in sealed allowlist for "
+    ^ Markdown_lite.md_codify parent_name
+    ^ ", but does not "
+    ^ verb
+    ^ " "
+    ^ Markdown_lite.md_codify parent_name
+
+  let reasons _ = []
+
+  let quickfixes _ = []
+end
+
 let module_of (type a x) (kind : (x, a) Typing_warning.kind) :
     (module Warning with type t = x) =
   match kind with
@@ -901,6 +935,7 @@ let module_of (type a x) (kind : (x, a) Typing_warning.kind) :
     (module Redundant_nullsafe_operation)
   | Typing_warning.Unbound_name_warning -> (module Unbound_name_warning)
   | Typing_warning.Set_or_keyset_array_get -> (module Set_or_keyset_array_get)
+  | Typing_warning.Sealed_not_subtype -> (module Sealed_not_subtype)
 
 let module_of_migrated
     (type x) (kind : (x, Typing_warning.migrated) Typing_warning.kind) :

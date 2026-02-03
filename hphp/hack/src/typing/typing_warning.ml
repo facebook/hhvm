@@ -251,6 +251,15 @@ module Set_or_keyset_array_get = struct
   }
 end
 
+module Sealed_not_subtype = struct
+  type t = {
+    verb: string;
+    parent_name: string;
+    child_name: string;
+    child_kind: string;
+  }
+end
+
 type (_, _) kind =
   | Sketchy_equality : (Sketchy_equality.t, warn) kind
   | Is_as_always : (Is_as_always.t, migrated) kind
@@ -276,5 +285,6 @@ type (_, _) kind =
   | Redundant_nullsafe_operation : (Redundant_nullsafe_operation.t, warn) kind
   | Unbound_name_warning : (Unbound_name_warning.t, warn) kind
   | Set_or_keyset_array_get : (Set_or_keyset_array_get.t, warn) kind
+  | Sealed_not_subtype : (Sealed_not_subtype.t, warn) kind
 
 type ('x, 'a) t = Pos.t * ('x, 'a) kind * 'x

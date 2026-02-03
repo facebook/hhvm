@@ -484,8 +484,6 @@ let load_config (config : Config_file_common.t) (options : GlobalOptions.t) :
       (bool_opt Config_keys.require_extends_implements_ancestors config)
     ?tco_strict_value_equality:
       (bool_opt Config_keys.strict_value_equality config)
-    ?tco_enforce_sealed_subclasses:
-      (bool_opt Config_keys.enforce_sealed_subclasses config)
     ?tco_implicit_inherit_sdt:(bool_opt Config_keys.implicit_inherit_sdt config)
     ?tco_repo_stdlib_path:(string_opt Config_keys.repo_stdlib_path config)
     ?tco_explicit_consistent_constructors:

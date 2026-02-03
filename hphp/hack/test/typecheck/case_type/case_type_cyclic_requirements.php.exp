@@ -1,1 +1,2 @@
-No errors
+WARN: File "case_type_cyclic_requirements.php", line 4, characters 12-24:
+Trait `Trait1` in sealed allowlist for `I1`, but does not implement `I1` (Warn[12035])

@@ -1,0 +1,2 @@
+WARN: File "sealed_trait.php", line 5, characters 3-10:
+Class `B` in sealed allowlist for `T`, but does not extend `T` (Warn[12035])

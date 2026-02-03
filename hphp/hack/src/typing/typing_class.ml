@@ -445,10 +445,10 @@ let check_parent env class_def class_type =
     ()
 
 (** If the class is sealed, check that the elements of the whitelist
-    are descendants of the class. Error or lint depending on option
-    enforce_sealed_subclasses. *)
-let sealed_subtype (c : Nast.class_) ~is_enum ~hard_error ~env =
+    are descendants of the class and emit a warning if not. *)
+let sealed_subtype (c : Nast.class_) ~is_enum ~env =
   let parent_name = snd c.c_name in
+  let parent_kind = c.c_kind in
   let is_sealed (attr : Nast.user_attribute) =
     String.equal (snd attr.ua_name) SN.UserAttributes.uaSealed
   in
@@ -481,37 +481,30 @@ let sealed_subtype (c : Nast.class_) ~is_enum ~hard_error ~env =
           in
           if not includes_ancestor then
             let parent_pos = pos in
-            let child_pos = Cls.pos decl in
             let child_name = Cls.name decl in
             let class_kind = Cls.kind decl in
             let (child_kind, verb) =
-              match class_kind with
-              | Ast_defs.Cclass _ -> ("Class", "extend")
-              | Ast_defs.Cinterface -> ("Interface", "implement")
-              | Ast_defs.Ctrait -> ("Trait", "use")
-              | Ast_defs.Cenum -> ("Enum", "use")
-              | Ast_defs.Cenum_class _ -> ("Enum Class", "extend")
+              Ast_defs.(
+                match (parent_kind, class_kind) with
+                | (Cinterface, Cclass _) -> ("Class", "implement")
+                | (_, Cclass _) -> ("Class", "extend")
+                | (Cinterface, Cinterface) -> ("Interface", "extend")
+                | (_, Cinterface) -> ("Interface", "implement")
+                | (Cinterface, Ctrait) -> ("Trait", "implement")
+                | (_, Ctrait) -> ("Trait", "use")
+                | (_, Cenum) -> ("Enum", "use")
+                | (_, Cenum_class _) -> ("Enum Class", "extend"))
             in
-            if hard_error then
-              Typing_error_utils.add_typing_error
-                ~env
-                Typing_error.(
-                  primary
-                  @@ Primary.Sealed_not_subtype
-                       {
-                         pos = parent_pos;
-                         child_pos;
-                         name = parent_name;
-                         child_name;
-                         child_kind = class_kind;
-                       })
-            else
-              Lint.sealed_not_subtype
-                verb
-                parent_pos
-                parent_name
-                child_name
-                child_kind)
+            Typing_warning_utils.add
+              env
+              ( parent_pos,
+                Typing_warning.Sealed_not_subtype,
+                {
+                  Typing_warning.Sealed_not_subtype.verb;
+                  parent_name;
+                  child_name;
+                  child_kind;
+                } ))
       (* unit below is fine because error cases are handled as Parsing[1002] *)
       | _ -> ()
     in
@@ -1644,12 +1637,11 @@ let check_override_keyword env c tc =
   check_used_methods_with_override env c tc
 
 (** If the class is sealed, check that the elements of the whitelist
-    are descendants of the class. Error or lint depending on option
-    enforce_sealed_subclasses. *)
+    are descendants of the class and emit a warning if not.
+    *)
 let check_sealed env c =
-  let hard_error = TCO.enforce_sealed_subclasses (Env.get_tcopt env) in
   let is_enum = is_enum_or_enum_class c.c_kind in
-  sealed_subtype c ~is_enum ~hard_error ~env
+  sealed_subtype c ~is_enum ~env
 
 let check_class_require_non_strict_constraints env c tc =
   let req_non_strict_constraints =

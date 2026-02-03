@@ -737,7 +737,7 @@ module Typing = struct
     | RigidTVarEscape [@value 4442]
     | StrictEqValueIncompatibleTypes [@value 4443]
     | ModuleError [@value 4444]
-    | SealedNotSubtype [@value 4445]
+    (* | SealedNotSubtypeDEPRECATED [@value 4445] *)
     | ModuleHintError [@value 4446]
     | MemoizeObjectWithoutGlobals [@value 4447]
     | ExpressionTreeNonPublicProperty [@value 4448]
@@ -833,6 +833,7 @@ module Warning = struct
     | NullsafePipeOnNull [@value 12032]
     | UnboundNameWarning [@value 12033]
     | SetOrKeysetArrayGet [@value 12034]
+    | SealedNotSubtype [@value 12035]
       (* Add new Warning codes here! Comment out when deprecating. *)
   [@@deriving enum, ord, show { with_path = false }]
 end

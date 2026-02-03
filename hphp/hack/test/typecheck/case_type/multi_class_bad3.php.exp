@@ -1,3 +1,5 @@
+WARN: File "multi_class_bad3.php", line 13, characters 12-20:
+Interface `IB` in sealed allowlist for `I`, but does not extend `I` (Warn[12035])
 ERROR: File "multi_class_bad3.php", line 4, characters 11-20:
 Invalid case type declaration. More than one variant of `MultiClass` could contain values with the same runtime tag (Typing[4475])
   File "multi_class_bad3.php", line 4, characters 24-25:

@@ -1,3 +1,5 @@
+WARN: File "interface_disjoint.php", line 11, characters 12-19:
+Trait `T` in sealed allowlist for `SealedI`, but does not implement `SealedI` (Warn[12035])
 ERROR: File "interface_disjoint.php", line 27, characters 12-14:
 Invalid return type (Typing[4110])
   File "interface_disjoint.php", line 24, characters 26-32:

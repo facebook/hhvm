@@ -1189,13 +1189,6 @@ module Primary = struct
         parent_kind: [ `intf | `trait | `class_ | `enum | `enum_class ];
         verb: [ `extend | `implement | `use ];
       }
-    | Sealed_not_subtype of {
-        pos: Pos.t;
-        name: string;
-        child_kind: Ast_defs.classish_kind;
-        child_pos: Pos_or_decl.t;
-        child_name: string;
-      }
     | Trait_prop_const_class of {
         pos: Pos.t;
         name: string;

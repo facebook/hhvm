@@ -1,0 +1,6 @@
+WARN: File "interface_class.php", line 3, characters 12-19:
+Class `B` in sealed allowlist for `A`, but does not implement `A` (Warn[12035])
+ERROR: File "interface_class.php", line 8, characters 7-7:
+You cannot implement sealed interface `A` (Typing[4238])
+  File "interface_class.php", line 4, characters 11-11:
+  Declaration is here

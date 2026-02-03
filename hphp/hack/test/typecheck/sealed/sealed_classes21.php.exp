@@ -1,3 +1,5 @@
+WARN: File "sealed_classes21.php", line 2, characters 12-19:
+Class `X` in sealed allowlist for `X`, but does not extend `X` (Warn[12035])
 ERROR: File "sealed_classes21.php", line 2, characters 22-27:
 `__Sealed` can only be used with named types, e.g. `Foo::class` (Parsing[1002])
 ERROR: File "sealed_classes21.php", line 2, characters 22-27:

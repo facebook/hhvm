@@ -130,16 +130,6 @@ class HQFramedCodec : public HTTPCodec {
     folly::assume_unreachable();
   }
 
-  // Not Supported for the time being
-  void generateExHeader(folly::IOBufQueue& /*writeBuf*/,
-                        StreamID /*stream*/,
-                        const HTTPMessage& /*msg*/,
-                        const HTTPCodec::ExAttributes& /*exAttributes*/,
-                        bool /*eom = false*/,
-                        HTTPHeaderSize* /*size = nullptr*/) override {
-    LOG(FATAL) << __func__ << " not supported on this codec";
-  }
-
   // only valid for the Stream Codec
   size_t generateBody(folly::IOBufQueue& /* writeBuf*/,
                       StreamID /*stream*/,

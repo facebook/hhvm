@@ -647,11 +647,8 @@ HTTPTransaction* HTTPSession::newPushedTransaction(
     return nullptr;
   }
 
-  HTTPTransaction* txn = createTransaction(codec_->createStream(),
-                                           assocStreamId,
-                                           HTTPCodec::NoExAttributes,
-                                           http2::DefaultPriority,
-                                           error);
+  HTTPTransaction* txn = createTransaction(
+      codec_->createStream(), assocStreamId, http2::DefaultPriority, error);
   if (!txn) {
     return nullptr;
   }
@@ -697,8 +694,7 @@ void HTTPSession::onMessageBegin(HTTPCodec::StreamID streamID,
     infoCallback_->onRequestBegin(*this);
   }
 
-  txn = createTransaction(
-      streamID, HTTPCodec::NoStream, HTTPCodec::NoExAttributes);
+  txn = createTransaction(streamID, HTTPCodec::NoStream);
   if (!txn) {
     return; // This could happen if the socket is bad.
   }
@@ -764,8 +760,7 @@ void HTTPSession::onPushMessageBegin(HTTPCodec::StreamID streamID,
     return;
   }
 
-  auto txn =
-      createTransaction(streamID, assocStreamID, HTTPCodec::NoExAttributes);
+  auto txn = createTransaction(streamID, assocStreamID);
   if (!txn) {
     return; // This could happen if the socket is bad.
   }
@@ -778,42 +773,6 @@ void HTTPSession::onPushMessageBegin(HTTPCodec::StreamID streamID,
         folly::to<std::string>("Failed to add pushed transaction ", streamID));
     ex.setCodecStatusCode(ErrorCode::REFUSED_STREAM);
     onError(streamID, ex, true);
-  }
-}
-
-void HTTPSession::onExMessageBegin(HTTPCodec::StreamID streamID,
-                                   HTTPCodec::StreamID controlStream,
-                                   bool unidirectional,
-                                   HTTPMessage* msg) {
-  VLOG(4) << "processing new ExMessage=" << streamID
-          << " on controlStream=" << controlStream << ", " << *this;
-  if (infoCallback_) {
-    infoCallback_->onRequestBegin(*this);
-  }
-  if (controlStream == 0) {
-    LOG(ERROR) << "ExMessage=" << streamID << " should have an active control "
-               << "stream=" << controlStream << ", " << *this;
-    invalidStream(streamID, ErrorCode::PROTOCOL_ERROR);
-    return;
-  }
-
-  HTTPTransaction* controlTxn = findTransaction(controlStream);
-  if (!controlTxn) {
-    // control stream is broken, or remote sends a bogus stream id
-    LOG(ERROR) << "no control stream=" << controlStream << ", " << *this;
-    return;
-  }
-
-  auto txn =
-      createTransaction(streamID,
-                        HTTPCodec::NoStream,
-                        HTTPCodec::ExAttributes(controlStream, unidirectional));
-  if (!txn) {
-    return; // This could happen if the socket is bad.
-  }
-  // control stream may be paused if the upstream is not ready yet
-  if (controlTxn->isIngressPaused()) {
-    txn->pauseIngress();
   }
 }
 
@@ -868,33 +827,7 @@ void HTTPSession::onHeadersComplete(HTTPCodec::StreamID streamID,
   msg->setSecureInfo(transportInfo_.sslVersion, sslCipher);
   msg->setSecure(transportInfo_.secure);
 
-  auto controlStreamID = txn->getControlStream();
-  if (controlStreamID) {
-    auto controlTxn = findTransaction(*controlStreamID);
-    if (!controlTxn) {
-      VLOG(2) << "txn=" << streamID
-              << " with a broken controlTxn=" << *controlStreamID << " "
-              << *this;
-      HTTPException ex(
-          HTTPException::Direction::INGRESS_AND_EGRESS,
-          folly::to<std::string>("broken controlTxn ", *controlStreamID));
-      onError(streamID, ex, true);
-      return;
-    }
-
-    // Call onExTransaction() only for requests.
-    if (txn->isRemoteInitiated() && !controlTxn->onExTransaction(txn)) {
-      VLOG(2) << "Failed to add exTxn=" << streamID
-              << " to controlTxn=" << *controlStreamID << ", " << *this;
-      HTTPException ex(HTTPException::Direction::INGRESS_AND_EGRESS,
-                       folly::to<std::string>("Fail to add exTxn ", streamID));
-      ex.setCodecStatusCode(ErrorCode::REFUSED_STREAM);
-      onError(streamID, ex, true);
-      return;
-    }
-  } else {
-    setupOnHeadersComplete(txn, msg.get());
-  }
+  setupOnHeadersComplete(txn, msg.get());
 
   // The txn may have already been aborted by the handler.
   // Verify that the txn is not done.
@@ -1066,8 +999,7 @@ void HTTPSession::onError(HTTPCodec::StreamID streamID,
     if (error.hasHttpStatusCode() && streamID != 0) {
       // If the error has an HTTP code, then parsing was fine, it just was
       // illegal in a higher level way
-      txn = createTransaction(
-          streamID, HTTPCodec::NoStream, HTTPCodec::NoExAttributes);
+      txn = createTransaction(streamID, HTTPCodec::NoStream);
       if (infoCallback_) {
         infoCallback_->onRequestBegin(*this);
       }
@@ -1485,12 +1417,8 @@ void HTTPSession::sendHeaders(HTTPTransaction* txn,
 
   const bool wasReusable = codec_->isReusable();
   const uint64_t oldOffset = sessionByteOffset();
-  auto exAttributes = txn->getExAttributes();
   auto assocStream = txn->getAssocTxnId();
-  if (exAttributes) {
-    codec_->generateExHeader(
-        writeBuf_, txn->getID(), headers, *exAttributes, includeEOM, size);
-  } else if (headers.isRequest() && assocStream) {
+  if (headers.isRequest() && assocStream) {
     // Only PUSH_PROMISE (not push response) has an associated stream
     codec_->generatePushPromise(
         writeBuf_, txn->getID(), headers, *assocStream, includeEOM, size);
@@ -1860,12 +1788,6 @@ void HTTPSession::detach(HTTPTransaction* txn) noexcept {
     auto assocTxn = findTransaction(*txn->getAssocTxnId());
     if (assocTxn) {
       assocTxn->removePushedTransaction(streamID);
-    }
-  }
-  if (txn->getControlStream()) {
-    auto controlTxn = findTransaction(*txn->getControlStream());
-    if (controlTxn) {
-      controlTxn->removeExTransaction(streamID);
     }
   }
 
@@ -2627,7 +2549,6 @@ HTTPTransaction* HTTPSession::findTransaction(HTTPCodec::StreamID streamID) {
 HTTPTransaction* HTTPSession::createTransaction(
     HTTPCodec::StreamID streamID,
     const folly::Optional<HTTPCodec::StreamID>& assocStreamID,
-    const folly::Optional<HTTPCodec::ExAttributes>& exAttributes,
     const http2::PriorityUpdate& priority,
     ProxygenError* error) {
   if (!sock_->good() || writesShutdown()) {
@@ -2671,7 +2592,6 @@ HTTPTransaction* HTTPSession::createTransaction(
                             getCodecSendWindowSize(),
                             priority,
                             assocStreamID,
-                            exAttributes,
                             setIngressTimeoutAfterEom_));
 
   CHECK(matchPair.second) << "Emplacement failed, despite earlier "

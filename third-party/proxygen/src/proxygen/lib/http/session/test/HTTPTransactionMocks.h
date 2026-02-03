@@ -300,9 +300,7 @@ class MockHTTPTransaction : public HTTPTransaction {
       uint32_t receiveInitialWindowSize = 0,
       uint32_t sendInitialWindowSize = 0,
       http2::PriorityUpdate priority = http2::DefaultPriority,
-      folly::Optional<HTTPCodec::StreamID> assocStreamId = HTTPCodec::NoStream,
-      folly::Optional<HTTPCodec::ExAttributes> exAttributes =
-          HTTPCodec::NoExAttributes)
+      folly::Optional<HTTPCodec::StreamID> assocStreamId = HTTPCodec::NoStream)
       : HTTPTransaction(direction,
                         id,
                         seqNo,
@@ -315,8 +313,7 @@ class MockHTTPTransaction : public HTTPTransaction {
                         receiveInitialWindowSize,
                         sendInitialWindowSize,
                         priority,
-                        assocStreamId,
-                        exAttributes),
+                        assocStreamId),
         defaultAddress_("127.0.0.1", 80) {
     EXPECT_CALL(mockTransport_, getLocalAddressNonConst())
         .WillRepeatedly(testing::ReturnRef(defaultAddress_));
@@ -356,9 +353,7 @@ class MockHTTPTransaction : public HTTPTransaction {
       uint32_t receiveInitialWindowSize = 0,
       uint32_t sendInitialWindowSize = 0,
       http2::PriorityUpdate priority = http2::DefaultPriority,
-      folly::Optional<HTTPCodec::StreamID> assocStreamId = HTTPCodec::NoStream,
-      folly::Optional<HTTPCodec::ExAttributes> exAttributes =
-          HTTPCodec::NoExAttributes)
+      folly::Optional<HTTPCodec::StreamID> assocStreamId = HTTPCodec::NoStream)
       : MockHTTPTransaction(direction,
                             id,
                             seqNo,
@@ -370,30 +365,7 @@ class MockHTTPTransaction : public HTTPTransaction {
                             receiveInitialWindowSize,
                             sendInitialWindowSize,
                             priority,
-                            assocStreamId,
-                            exAttributes) {
-  }
-
-  MockHTTPTransaction(TransportDirection direction,
-                      HTTPCodec::StreamID id,
-                      uint32_t seqNo,
-                      // Must be const for gmock
-                      const HTTP2PriorityQueue& egressQueue,
-                      const WheelTimerInstance& timeout,
-                      folly::Optional<HTTPCodec::ExAttributes> exAttributes)
-      : MockHTTPTransaction(direction,
-                            id,
-                            seqNo,
-                            egressQueue,
-                            timeout.getWheelTimer(),
-                            timeout.getDefaultTimeout(),
-                            nullptr,
-                            false,
-                            0,
-                            0,
-                            http2::DefaultPriority,
-                            HTTPCodec::NoStream,
-                            exAttributes) {
+                            assocStreamId) {
   }
 
   MOCK_METHOD(bool, extraResponseExpected, (), (const));

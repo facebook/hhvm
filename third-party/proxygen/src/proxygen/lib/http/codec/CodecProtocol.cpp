@@ -122,8 +122,6 @@ extern bool serverAcceptedUpgrade(const std::string& clientUpgrade,
   return false;
 }
 
-const folly::Optional<HTTPCodec::ExAttributes> HTTPCodec::NoExAttributes =
-    folly::none;
 const folly::Optional<HTTPCodec::StreamID> HTTPCodec::NoStream = folly::none;
 const folly::Optional<uint8_t> HTTPCodec::NoPadding = folly::none;
 

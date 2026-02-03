@@ -59,8 +59,8 @@ size_t computeLengthAndType(uint32_t length,
   // Add or remove padding flags
   if (padding) {
     flags |= PADDED;
-    DCHECK(FrameType::HEADERS == type || FrameType::EX_HEADERS == type ||
-           FrameType::DATA == type || FrameType::PUSH_PROMISE == type);
+    DCHECK(FrameType::HEADERS == type || FrameType::DATA == type ||
+           FrameType::PUSH_PROMISE == type);
     length += *padding + 1;
     headerSize += 1;
   } else {
@@ -183,7 +183,6 @@ ErrorCode parsePadding(Cursor& cursor,
                        uint8_t& padding,
                        uint32_t& lefttoparse) noexcept {
   DCHECK(header.type == FrameType::DATA || header.type == FrameType::HEADERS ||
-         header.type == FrameType::EX_HEADERS ||
          header.type == FrameType::PUSH_PROMISE);
   lefttoparse = header.length;
   if (frameHasPadding(header)) {
@@ -230,9 +229,6 @@ bool isValidFrameType(FrameType type) {
            type == FrameType::PADDING || type == FrameType::RFC9218_PRIORITY;
   } else {
     switch (type) {
-      case FrameType::EX_HEADERS:
-        // Include the frame types added into FrameType enum for secondary
-        // authentication.
       case FrameType::CERTIFICATE_REQUEST:
       case FrameType::CERTIFICATE:
         return true;
@@ -343,44 +339,6 @@ ErrorCode parseHeaders(Cursor& cursor,
     skipPriority(cursor);
     lefttoparse -= kFramePrioritySize;
   }
-  cursor.clone(outBuf, lefttoparse);
-  return skipPadding(cursor, padding, kStrictPadding);
-}
-
-ErrorCode parseExHeaders(Cursor& cursor,
-                         const FrameHeader& header,
-                         HTTPCodec::ExAttributes& outExAttributes,
-                         std::unique_ptr<IOBuf>& outBuf) noexcept {
-  DCHECK_LE(header.length, cursor.totalLength());
-  if (header.stream == 0) {
-    return ErrorCode::PROTOCOL_ERROR;
-  }
-
-  uint8_t padding;
-  uint32_t lefttoparse;
-  auto err = parsePadding(cursor, header, padding, lefttoparse);
-  RETURN_IF_ERROR(err);
-
-  // the regular HEADERS frame starts from here
-  if (header.flags & PRIORITY) {
-    if (lefttoparse < kFramePrioritySize) {
-      return ErrorCode::FRAME_SIZE_ERROR;
-    }
-    skipPriority(cursor);
-    lefttoparse -= kFramePrioritySize;
-  }
-  outExAttributes.unidirectional = header.flags & UNIDIRECTIONAL;
-
-  if (lefttoparse < kFrameStreamIDSize) {
-    return ErrorCode::FRAME_SIZE_ERROR;
-  }
-  outExAttributes.controlStream = parseUint31(cursor);
-  lefttoparse -= kFrameStreamIDSize;
-  if (!(outExAttributes.controlStream & 0x1)) {
-    // control stream ID should be odd because it is initiated by client
-    return ErrorCode::PROTOCOL_ERROR;
-  }
-
   cursor.clone(outBuf, lefttoparse);
   return skipPadding(cursor, padding, kStrictPadding);
 }
@@ -655,12 +613,10 @@ size_t writePadding(IOBufQueue& queue,
 }
 
 uint8_t calculatePreHeaderBlockSize(bool hasAssocStream,
-                                    bool hasExAttributes,
                                     bool hasPriority,
                                     bool hasPadding) {
   uint8_t headerSize =
-      http2::kFrameHeaderSize +
-      ((hasAssocStream || hasExAttributes) ? sizeof(uint32_t) : 0);
+      http2::kFrameHeaderSize + ((hasAssocStream) ? sizeof(uint32_t) : 0);
   if (hasPriority && !hasAssocStream) {
     headerSize += http2::kFramePrioritySize;
   }
@@ -694,48 +650,6 @@ size_t writeHeaders(uint8_t* header,
                                          flags,
                                          stream,
                                          padding);
-  writePadding(queue, padding);
-  return kFrameHeaderSize + frameLen;
-}
-
-size_t writeExHeaders(uint8_t* header,
-                      size_t headerLen,
-                      IOBufQueue& queue,
-                      size_t headersLen,
-                      uint32_t stream,
-                      const HTTPCodec::ExAttributes& exAttributes,
-                      const folly::Optional<uint8_t>& padding,
-                      bool endStream,
-                      bool endHeaders) noexcept {
-  DCHECK_NE(0, stream);
-  DCHECK_NE(0, exAttributes.controlStream);
-  DCHECK_EQ(0, ~kUint31Mask & stream);
-  DCHECK_EQ(0, ~kUint31Mask & exAttributes.controlStream);
-  DCHECK(0x1 & exAttributes.controlStream)
-      << "controlStream should be initiated by client";
-
-  uint32_t flags = 0;
-  if (endStream) {
-    flags |= END_STREAM;
-  }
-  if (endHeaders) {
-    flags |= END_HEADERS;
-  }
-  if (exAttributes.unidirectional) {
-    flags |= UNIDIRECTIONAL;
-  }
-
-  const auto frameLen = writeFrameHeader(header,
-                                         headerLen,
-                                         headersLen + kFrameStreamIDSize,
-                                         FrameType::EX_HEADERS,
-                                         flags,
-                                         stream,
-                                         padding);
-  uint8_t* csPtr = header + kFrameHeaderSize + ((padding) ? 1 : 0);
-  auto controlStream = htonl(exAttributes.controlStream);
-  memcpy(csPtr, &controlStream, sizeof(controlStream));
-  QueueAppender appender(&queue, frameLen);
   writePadding(queue, padding);
   return kFrameHeaderSize + frameLen;
 }
@@ -985,8 +899,6 @@ const char* getFrameTypeString(FrameType type) {
       return "RFC9218_PRIORITY";
     case FrameType::PADDING:
       return "PADDING";
-    case FrameType::EX_HEADERS:
-      return "EX_HEADERS";
     case FrameType::CERTIFICATE_REQUEST:
       return "CERTIFICATE_REQUEST";
     case FrameType::CERTIFICATE:

@@ -1144,13 +1144,6 @@ class HQSession
                             HTTPCodec::StreamID /* parentTxnId */,
                             HTTPMessage* /* msg */) override;
 
-    void onExMessageBegin(HTTPCodec::StreamID /* streamID */,
-                          HTTPCodec::StreamID /* controlStream */,
-                          bool /* unidirectional */,
-                          HTTPMessage* /* msg */) override {
-      LOG(ERROR) << "exMessage: txn=" << txn_ << " TODO";
-    }
-
     virtual void onPushPromiseHeadersComplete(
         hq::PushId /* pushID */,
         HTTPCodec::StreamID /* assoc streamID */,

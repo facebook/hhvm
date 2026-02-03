@@ -63,12 +63,6 @@ class HTTP2Codec
                            StreamID assocStream,
                            bool eom = false,
                            HTTPHeaderSize* size = nullptr) override;
-  void generateExHeader(folly::IOBufQueue& writeBuf,
-                        StreamID stream,
-                        const HTTPMessage& msg,
-                        const HTTPCodec::ExAttributes& exAttributes,
-                        bool eom = false,
-                        HTTPHeaderSize* size = nullptr) override;
   size_t generateBody(folly::IOBufQueue& writeBuf,
                       StreamID stream,
                       std::unique_ptr<folly::IOBuf> chain,
@@ -199,7 +193,6 @@ class HTTP2Codec
                           StreamID stream,
                           const HTTPMessage& msg,
                           const folly::Optional<StreamID>& assocStream,
-                          const folly::Optional<ExAttributes>& exAttributes,
                           bool eom,
                           HTTPHeaderSize* size,
                           const folly::Optional<HTTPHeaders>& extraHeaders);
@@ -231,8 +224,7 @@ class HTTP2Codec
   ErrorCode parseCertificate(folly::io::Cursor& cursor);
   ErrorCode parseHeadersImpl(folly::io::Cursor& cursor,
                              std::unique_ptr<folly::IOBuf> headerBuf,
-                             const folly::Optional<uint32_t>& promisedStream,
-                             const folly::Optional<ExAttributes>& exAttributes);
+                             const folly::Optional<uint32_t>& promisedStream);
 
   struct DeferredParseError {
     ErrorCode errorCode{ErrorCode::NO_ERROR};
@@ -267,7 +259,7 @@ class HTTP2Codec
   };
 
   folly::Expected<std::unique_ptr<HTTPMessage>, DeferredParseError>
-  parseHeadersDecodeFrames(const folly::Optional<ExAttributes>& exAttributes);
+  parseHeadersDecodeFrames();
   void deliverDeferredParseError(const DeferredParseError& parseError);
 
   folly::Optional<ErrorCode> parseHeadersCheckConcurrentStreams();

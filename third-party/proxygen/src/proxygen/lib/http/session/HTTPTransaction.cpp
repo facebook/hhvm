@@ -81,7 +81,6 @@ HTTPTransaction::HTTPTransaction(
     uint32_t sendInitialWindowSize,
     http2::PriorityUpdate priority,
     folly::Optional<HTTPCodec::StreamID> assocId,
-    folly::Optional<HTTPCodec::ExAttributes> exAttributes,
     bool setIngressTimeoutAfterEom)
     : deferredEgressBody_(folly::IOBufQueue::cacheChainLength()),
       direction_(direction),
@@ -126,17 +125,6 @@ HTTPTransaction::HTTPTransaction(
       egressState_ = HTTPTransactionEgressSM::State::SendingDone;
     } else {
       ingressState_ = HTTPTransactionIngressSM::State::ReceivingDone;
-    }
-  }
-
-  if (exAttributes) {
-    exAttributes_ = exAttributes;
-    if (exAttributes_->unidirectional) {
-      if (isRemoteInitiated()) {
-        egressState_ = HTTPTransactionEgressSM::State::SendingDone;
-      } else {
-        ingressState_ = HTTPTransactionIngressSM::State::ReceivingDone;
-      }
     }
   }
 
@@ -760,21 +748,18 @@ void HTTPTransaction::processIngressError(const HTTPException& error) {
         // dead and we need to kill this transaction.
         markIngressComplete();
       }
-      if (wasEgressComplete &&
-          !shouldNotifyExTxnError(HTTPException::Direction::EGRESS)) {
+      if (wasEgressComplete) {
         notify = false;
       }
       break;
     case HTTPException::Direction::INGRESS:
-      if (isIngressEOMSeen() &&
-          !shouldNotifyExTxnError(HTTPException::Direction::INGRESS)) {
+      if (isIngressEOMSeen()) {
         // Not an error, for now
         ingressErrorSeen_ = true;
         return;
       }
       markIngressComplete();
-      if (wasIngressComplete &&
-          !shouldNotifyExTxnError(HTTPException::Direction::INGRESS)) {
+      if (wasIngressComplete) {
         notify = false;
       }
       break;
@@ -1749,7 +1734,6 @@ bool HTTPTransaction::onPushedTransaction(HTTPTransaction* pushTxn) {
 
 bool HTTPTransaction::onExTransaction(HTTPTransaction* exTxn) {
   DestructorGuard g(this);
-  INVARIANT_RETURN(*(exTxn->getControlStream()) == id_, false);
   if (!handler_) {
     LOG(ERROR) << "Cannot add a exTxn to an unhandled txn";
     return false;

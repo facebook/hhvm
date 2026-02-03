@@ -419,10 +419,6 @@ class HTTPSession
   void onPushMessageBegin(HTTPCodec::StreamID streamID,
                           HTTPCodec::StreamID assocStreamID,
                           HTTPMessage* msg) override;
-  void onExMessageBegin(HTTPCodec::StreamID streamID,
-                        HTTPCodec::StreamID controlStream,
-                        bool unidirectional,
-                        HTTPMessage* msg) override;
   void onHeadersComplete(HTTPCodec::StreamID streamID,
                          std::unique_ptr<HTTPMessage> msg) override;
   void onBody(HTTPCodec::StreamID streamID,
@@ -611,7 +607,6 @@ class HTTPSession
   HTTPTransaction* createTransaction(
       HTTPCodec::StreamID streamID,
       const folly::Optional<HTTPCodec::StreamID>& assocStreamID,
-      const folly::Optional<HTTPCodec::ExAttributes>& exAttributes,
       const http2::PriorityUpdate& priority = http2::DefaultPriority,
       ProxygenError* error = nullptr);
 

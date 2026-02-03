@@ -630,11 +630,6 @@ class HTTPCoroSession
   void onMessageBegin(HTTPCodec::StreamID streamID,
                       HTTPMessage* /*msg*/) override;
   // onPushMessageBegin
-  void onExMessageBegin(HTTPCodec::StreamID /*streamID*/,
-                        HTTPCodec::StreamID /*controlStream*/,
-                        bool /*unidirectional*/,
-                        HTTPMessage* /*msg*/) override {
-  }
   void onHeadersComplete(HTTPCodec::StreamID streamID,
                          std::unique_ptr<HTTPMessage> msg
                          /* bool eom!*/) override;

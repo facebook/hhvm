@@ -127,14 +127,6 @@ class FakeHTTPCodecCallback : public HTTPCodec::Callback {
     pushId = pushPromiseId;
     assocStreamId = assocStream;
   }
-  void onExMessageBegin(HTTPCodec::StreamID /*stream*/,
-                        HTTPCodec::StreamID controlStream,
-                        bool unidirectional,
-                        HTTPMessage*) override {
-    messageBegin++;
-    controlStreamId = controlStream;
-    isUnidirectional = unidirectional;
-  }
   void onHeadersComplete(HTTPCodec::StreamID stream,
                          std::unique_ptr<HTTPMessage> inMsg) override {
     headersComplete++;

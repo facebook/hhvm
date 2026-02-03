@@ -22,13 +22,6 @@ void PassThroughHTTPCodecFilter::onPushMessageBegin(StreamID stream,
   callback_->onPushMessageBegin(stream, assocStream, msg);
 }
 
-void PassThroughHTTPCodecFilter::onExMessageBegin(StreamID stream,
-                                                  StreamID controlStream,
-                                                  bool unidirectional,
-                                                  HTTPMessage* msg) {
-  callback_->onExMessageBegin(stream, controlStream, unidirectional, msg);
-}
-
 void PassThroughHTTPCodecFilter::onHeadersComplete(
     StreamID stream, std::unique_ptr<HTTPMessage> msg) {
   callback_->onHeadersComplete(stream, std::move(msg));
@@ -239,17 +232,6 @@ void PassThroughHTTPCodecFilter::generatePushPromise(folly::IOBufQueue& buf,
                                                      bool eom,
                                                      HTTPHeaderSize* size) {
   return call_->generatePushPromise(buf, stream, msg, assocStream, eom, size);
-}
-
-void PassThroughHTTPCodecFilter::generateExHeader(
-    folly::IOBufQueue& writeBuf,
-    StreamID stream,
-    const HTTPMessage& msg,
-    const HTTPCodec::ExAttributes& exAttributes,
-    bool eom,
-    HTTPHeaderSize* size) {
-  return call_->generateExHeader(
-      writeBuf, stream, msg, exAttributes, eom, size);
 }
 
 size_t PassThroughHTTPCodecFilter::generateBody(

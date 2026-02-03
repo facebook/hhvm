@@ -66,8 +66,8 @@ class HTTP2CodecTest : public HTTPParallelCodecTest {
                     bool endStream,
                     bool endHeaders) {
     auto headersLen = headers ? headers->computeChainDataLength() : 0;
-    auto headerSize = http2::calculatePreHeaderBlockSize(
-        false, false, false, padding.has_value());
+    auto headerSize =
+        http2::calculatePreHeaderBlockSize(false, false, padding.has_value());
     auto header = writeBuf.preallocate(headerSize, 32);
     writeBuf.postallocate(headerSize);
     writeBuf.append(std::move(headers));

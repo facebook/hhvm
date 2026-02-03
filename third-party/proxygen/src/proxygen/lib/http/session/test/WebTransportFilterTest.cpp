@@ -135,8 +135,7 @@ class WebTransportFilterTest : public Test {
         1024,                   // receive window
         1024,                   // send window
         http2::DefaultPriority, // priority
-        folly::none,            // assoc stream id
-        folly::none             // ex attributes
+        folly::none             // assoc stream id
     );
 
     filter_ =

@@ -122,8 +122,7 @@ class DownstreamTransactionTest : public testing::Test {
                                              0,
                                              0,
                                              http2::DefaultPriority,
-                                             HTTPCodec::NoStream,
-                                             HTTPCodec::ExAttributes(1, true));
+                                             HTTPCodec::NoStream);
     return *txn_;
   }
 };

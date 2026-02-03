@@ -746,8 +746,6 @@ class HTTPTransaction
       uint32_t sendInitialWindowSize = 0,
       http2::PriorityUpdate = http2::DefaultPriority,
       folly::Optional<HTTPCodec::StreamID> assocStreamId = HTTPCodec::NoStream,
-      folly::Optional<HTTPCodec::ExAttributes> exAttributes =
-          HTTPCodec::NoExAttributes,
       bool setIngressTimeoutAfterEom = false);
 
   ~HTTPTransaction() override;
@@ -1438,33 +1436,6 @@ class HTTPTransaction
     return assocStreamId_.has_value();
   }
 
-  bool isExTransaction() const {
-    return exAttributes_.has_value();
-  }
-
-  bool isUnidirectional() const {
-    return isExTransaction() && exAttributes_->unidirectional;
-  }
-
-  /**
-   * @return true iff we should notify the error occured on EX_TXN
-   * This logic only applies to EX_TXN with QoS 0
-   */
-  bool shouldNotifyExTxnError(HTTPException::Direction errorDirection) const {
-    if (isUnidirectional()) {
-      if (isRemoteInitiated()) {
-        // We care about EGRESS errors in this case,
-        // because we marked EGRESS state to be completed
-        // If EGRESS error is happening, we need to know
-        // Same for INGRESS direction, when EX_TXN is not remoteInitiated()
-        return errorDirection == HTTPException::Direction::EGRESS;
-      } else {
-        return errorDirection == HTTPException::Direction::INGRESS;
-      }
-    }
-    return false;
-  }
-
   /**
    * Overrides the default idle timeout value.
    */
@@ -1479,21 +1450,6 @@ class HTTPTransaction
    */
   folly::Optional<HTTPCodec::StreamID> getAssocTxnId() const {
     return assocStreamId_;
-  }
-
-  /**
-   * Returns the control channel transaction ID for this transaction,
-   * folly::none otherwise
-   */
-  folly::Optional<HTTPCodec::StreamID> getControlStream() const {
-    return exAttributes_ ? exAttributes_->controlStream : HTTPCodec::NoStream;
-  }
-
-  /*
-   * Returns attributes of EX stream (folly::none if not an EX transaction)
-   */
-  folly::Optional<HTTPCodec::ExAttributes> getExAttributes() const {
-    return exAttributes_;
   }
 
   /**
@@ -1837,7 +1793,7 @@ class HTTPTransaction
 
   // Whether the stream has been upgraded to some other protocol
   bool isUpgraded() const {
-    return upgraded_ || wtConnectStream_ || isExTransaction();
+    return upgraded_ || wtConnectStream_;
   }
 
   // Whether we have bytes event observers
@@ -1964,11 +1920,6 @@ class HTTPTransaction
    * ID of request transaction (for pushed txns only)
    */
   folly::Optional<HTTPCodec::StreamID> assocStreamId_;
-
-  /**
-   * Attributes of http2 Ex_HEADERS
-   */
-  folly::Optional<HTTPCodec::ExAttributes> exAttributes_;
 
   /**
    * Set of all push transactions IDs associated with this transaction.

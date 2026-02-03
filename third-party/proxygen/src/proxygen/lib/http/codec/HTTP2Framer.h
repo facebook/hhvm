@@ -47,9 +47,6 @@ enum class FrameType : uint8_t {
   PADDING = 0xbb, // not in current draft, nor likely to ever be used, so will
                   // be ignored
 
-  // experimental use
-  EX_HEADERS = 0xfb,
-
   // For secondary certificate authentication in HTTP/2 as specified in the
   // draft-ietf-httpbis-http2-secondary-certs-02.
   CERTIFICATE_REQUEST = 0xf0,
@@ -165,11 +162,6 @@ ErrorCode parseDataEnd(folly::io::Cursor& cursor,
 ErrorCode parseHeaders(folly::io::Cursor& cursor,
                        const FrameHeader& header,
                        std::unique_ptr<folly::IOBuf>& outBuf) noexcept;
-
-ErrorCode parseExHeaders(folly::io::Cursor& cursor,
-                         const FrameHeader& header,
-                         HTTPCodec::ExAttributes& outExAttributes,
-                         std::unique_ptr<folly::IOBuf>& outBuf) noexcept;
 
 /**
  * This function parses the section of the PRIORITY frame after the common
@@ -417,36 +409,6 @@ size_t writeHeaders(uint8_t* headerBuf,
                     bool endHeaders) noexcept;
 
 /**
- * Generate an experimental ExHEADERS frame, including the common frame
- * header. The combined length of the data buffer and the padding and priority
- * fields MUST NOT exceed 2^14 - 1, which is kMaxFramePayloadLength.
- *
- * @param headerBuf Buffer that will contain the frame header and other fields
- *                  before the header block.  Must be sized correctly and
- *                  in the queue.  Call calculatePreHeaderBlockSize/preallocate/
- *                  postallocate.
- * @param headeBufLen Length of headerBuf
- * @param queue The output queue to write to. It may grow or add
- *                 underlying buffers inside this function.
- * @param headersLen The length encoded headers (already in queue).
- * @param stream The stream identifier of the ExHEADERS frame.
- * @param exAttributes Attributes specific to ExHEADERS frame.
- * @param padding If not kNoPadding, adds 1 byte pad len and @padding pad bytes
- * @param endStream True iff this frame ends the stream.
- * @param endHeaders True iff no CONTINUATION frames will follow this frame.
- * @return The number of bytes written to writeBuf.
- */
-size_t writeExHeaders(uint8_t* headerBuf,
-                      size_t headerBufLen,
-                      folly::IOBufQueue& queue,
-                      size_t headersLen,
-                      uint32_t stream,
-                      const HTTPCodec::ExAttributes& exAttributes,
-                      const folly::Optional<uint8_t>& padding,
-                      bool endStream,
-                      bool endHeaders) noexcept;
-
-/**
  * Generate an entire PRIORITY frame, including the common frame header.
  *
  * @param writeBuf The output queue to write to. It may grow or add
@@ -664,7 +626,6 @@ const char* getFrameTypeString(FrameType type);
  * @param hasPadding Set if there is padding
  */
 uint8_t calculatePreHeaderBlockSize(bool hasAssocStream,
-                                    bool hasExAttributes,
                                     bool hasPriority,
                                     bool hasPadding);
 

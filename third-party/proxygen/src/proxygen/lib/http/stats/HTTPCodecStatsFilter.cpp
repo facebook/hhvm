@@ -30,14 +30,6 @@ void HTTPCodecStatsFilter::onPushMessageBegin(StreamID stream,
   callback_->onPushMessageBegin(stream, assocStream, msg);
 }
 
-void HTTPCodecStatsFilter::onExMessageBegin(StreamID stream,
-                                            StreamID controlStream,
-                                            bool unidirectional,
-                                            HTTPMessage* msg) {
-  counters_->recordIngressExStream();
-  callback_->onExMessageBegin(stream, controlStream, unidirectional, msg);
-}
-
 void HTTPCodecStatsFilter::onHeadersComplete(StreamID stream,
                                              std::unique_ptr<HTTPMessage> msg) {
   if (call_->getTransportDirection() == TransportDirection::DOWNSTREAM ||
@@ -131,17 +123,6 @@ void HTTPCodecStatsFilter::generatePushPromise(folly::IOBufQueue& writeBuf,
   counters_->recordEgressPushPromise();
   return call_->generatePushPromise(
       writeBuf, stream, msg, assocStream, eom, size);
-}
-
-void HTTPCodecStatsFilter::generateExHeader(
-    folly::IOBufQueue& writeBuf,
-    StreamID stream,
-    const HTTPMessage& msg,
-    const HTTPCodec::ExAttributes& exAttributes,
-    bool eom,
-    HTTPHeaderSize* size) {
-  counters_->recordEgressExStream();
-  call_->generateExHeader(writeBuf, stream, msg, exAttributes, eom, size);
 }
 
 size_t HTTPCodecStatsFilter::generateBody(folly::IOBufQueue& writeBuf,

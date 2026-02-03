@@ -53,18 +53,6 @@ class HTTPCodec {
 
   static constexpr StreamID MaxStreamID = std::numeric_limits<StreamID>::max();
 
-  struct ExAttributes {
-    ExAttributes() = default;
-    ExAttributes(StreamID controlStreamId, bool isUnidirectional)
-        : controlStream(controlStreamId), unidirectional(isUnidirectional) {
-    }
-
-    StreamID controlStream;
-    bool unidirectional;
-  };
-
-  static const folly::Optional<ExAttributes> NoExAttributes;
-
   class PriorityQueue {
    public:
     virtual ~PriorityQueue() = default;
@@ -95,20 +83,6 @@ class HTTPCodec {
     virtual void onPushMessageBegin(StreamID /* stream */,
                                     StreamID /* assocStream */,
                                     HTTPMessage* /* msg */) {
-    }
-
-    /**
-     * Called when a new extended message is seen while parsing the ingress.
-     *
-     * @param stream   The stream ID
-     * @param controlStream The stream ID of the associated stream,
-     *                 which can never be 0
-     * @param msg      A newly allocated HTTPMessage
-     */
-    virtual void onExMessageBegin(StreamID /* stream */,
-                                  StreamID /* controlStream */,
-                                  bool /* unidirectional */,
-                                  HTTPMessage* /* msg */) {
     }
 
     /**
@@ -546,14 +520,6 @@ class HTTPCodec {
                                    StreamID /* assocStream */,
                                    bool /* eom = false */,
                                    HTTPHeaderSize* /* size = nullptr */) {
-  }
-
-  virtual void generateExHeader(folly::IOBufQueue& /* writeBuf */,
-                                StreamID /* stream */,
-                                const HTTPMessage& /* msg */,
-                                const HTTPCodec::ExAttributes& /*exAttributes*/,
-                                bool /* eom = false */,
-                                HTTPHeaderSize* /* size = nullptr */) {
   }
 
   /**

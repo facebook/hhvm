@@ -493,10 +493,6 @@ class HTTPSession
       HTTPCodec::StreamID assocStreamId,
       HTTPTransaction::PushHandler* handler,
       ProxygenError* error = nullptr) noexcept override;
-  HTTPTransaction* newExTransaction(
-      HTTPTransaction::Handler* handler,
-      HTTPCodec::StreamID controlStream,
-      bool unidirectional = false) noexcept override;
   bool serverEarlyResponseEnabled() const noexcept override {
     return HTTPSessionBase::getServerEarlyResponseEnabled();
   }

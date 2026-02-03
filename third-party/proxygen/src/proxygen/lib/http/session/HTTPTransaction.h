@@ -265,13 +265,6 @@ class HTTPTransactionHandler : public TraceEventObserver {
   }
 
   /**
-   * Ask the handler to construct a handler for a ExTransaction associated
-   * with its transaction.
-   */
-  virtual void onExTransaction(HTTPTransaction* /* txn */) noexcept {
-  }
-
-  /**
    * Inform the handler that a GOAWAY has been received on the
    * transport. This callback will only be invoked if the transport is
    * HTTP/2 or HTTP/3. It may be invoked multiple times.
@@ -539,10 +532,6 @@ class HTTPTransaction
         HTTPCodec::StreamID assocStreamId,
         HTTPTransaction::PushHandler* handler,
         ProxygenError* error = nullptr) noexcept = 0;
-
-    virtual HTTPTransaction* newExTransaction(HTTPTransaction::Handler* handler,
-                                              HTTPCodec::StreamID controlStream,
-                                              bool unidirectional) noexcept = 0;
 
     virtual std::string getSecurityProtocol() const = 0;
 
@@ -1399,35 +1388,12 @@ class HTTPTransaction
   }
 
   /**
-   * Create a new extended transaction associated with this transaction,
-   * and assign the given handler and priority.
-   *
-   * @return the new transaction for pubsub, or nullptr if a new push
-   * transaction is impossible right now.
-   */
-  virtual HTTPTransaction* newExTransaction(HTTPTransactionHandler* handler,
-                                            bool unidirectional = false) {
-    auto txn = transport_.newExTransaction(handler, id_, unidirectional);
-    if (txn) {
-      exTransactions_.insert(txn->getID());
-    }
-    return txn;
-  }
-
-  /**
    * Invoked by the session (upstream only) when a new pushed transaction
    * arrives.  The txn's handler will be notified and is responsible for
    * installing a handler.  If no handler is installed in the callback,
    * the pushed transaction will be aborted.
    */
   bool onPushedTransaction(HTTPTransaction* txn);
-
-  /**
-   * Invoked by the session when a new ExTransaction arrives.  The txn's handler
-   * will be notified and is responsible for installing a handler.  If no
-   * handler is installed in the callback, the transaction will be aborted.
-   */
-  bool onExTransaction(HTTPTransaction* txn);
 
   /**
    * True if this transaction is a server push transaction
@@ -1460,25 +1426,11 @@ class HTTPTransaction
   }
 
   /**
-   * Get a set of exTransactions associated with this transaction.
-   */
-  std::set<HTTPCodec::StreamID> getExTransactions() const {
-    return exTransactions_;
-  }
-
-  /**
    * Remove the pushed txn ID from the set of pushed txns
    * associated with this txn.
    */
   void removePushedTransaction(HTTPCodec::StreamID pushStreamId) {
     pushedTransactions_.erase(pushStreamId);
-  }
-
-  /**
-   * Remove the exTxn ID from the control stream txn.
-   */
-  void removeExTransaction(HTTPCodec::StreamID exStreamId) {
-    exTransactions_.erase(exStreamId);
   }
 
   /**
@@ -1925,11 +1877,6 @@ class HTTPTransaction
    * Set of all push transactions IDs associated with this transaction.
    */
   std::set<HTTPCodec::StreamID> pushedTransactions_;
-
-  /**
-   * Set of all exTransaction IDs associated with this transaction.
-   */
-  std::set<HTTPCodec::StreamID> exTransactions_;
 
   /**
    * Priority of this transaction

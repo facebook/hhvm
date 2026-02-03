@@ -9,7 +9,6 @@
 #include <proxygen/httpserver/RequestHandlerAdaptor.h>
 
 #include <folly/Range.h>
-#include <proxygen/httpserver/ExMessageHandler.h>
 #include <proxygen/httpserver/PushHandler.h>
 #include <proxygen/httpserver/RequestHandler.h>
 #include <proxygen/httpserver/ResponseBuilder.h>
@@ -156,15 +155,6 @@ void RequestHandlerAdaptor::onEgressResumed() noexcept {
   upstream_->onEgressResumed();
 }
 
-void RequestHandlerAdaptor::onExTransaction(HTTPTransaction* txn) noexcept {
-  if (!upstream_) {
-    return;
-  }
-  // Create handler for child EX transaction.
-  auto handler = new RequestHandlerAdaptor(upstream_->getExHandler());
-  txn->setHandler(handler);
-}
-
 void RequestHandlerAdaptor::sendHeaders(HTTPMessage& msg) noexcept {
   txn_->sendHeaders(msg);
 }
@@ -223,13 +213,6 @@ RequestHandlerAdaptor::newPushedResponse(PushHandler* pushHandler) noexcept {
   }
   pushHandlerAdaptor->setTransaction(pushTxn);
   return pushHandlerAdaptor;
-}
-
-ResponseHandler* RequestHandlerAdaptor::newExMessage(
-    ExMessageHandler* exHandler, bool unidirectional) noexcept {
-  RequestHandlerAdaptor* handler = new RequestHandlerAdaptor(exHandler);
-  getTransaction()->newExTransaction(handler, unidirectional);
-  return handler;
 }
 
 const wangle::TransportInfo& RequestHandlerAdaptor::getSetupTransportInfo()

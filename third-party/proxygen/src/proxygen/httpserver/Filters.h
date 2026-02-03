@@ -84,10 +84,6 @@ class Filter
     return upstream_->canHandleExpect();
   }
 
-  ExMessageHandler* getExHandler() noexcept override {
-    return upstream_->getExHandler();
-  }
-
   // Response handler
   void sendHeaders(HTTPMessage& msg) noexcept override {
     downstream_->sendHeaders(msg);
@@ -128,11 +124,6 @@ class Filter
   folly::Expected<ResponseHandler*, ProxygenError> newPushedResponse(
       PushHandler* handler) noexcept override {
     return downstream_->newPushedResponse(handler);
-  }
-
-  ResponseHandler* newExMessage(ExMessageHandler* exHandler,
-                                bool unidirectional) noexcept override {
-    return downstream_->newExMessage(exHandler, unidirectional);
   }
 
   [[nodiscard]] const wangle::TransportInfo& getSetupTransportInfo()

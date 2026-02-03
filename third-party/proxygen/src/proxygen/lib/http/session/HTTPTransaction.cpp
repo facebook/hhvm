@@ -1732,21 +1732,6 @@ bool HTTPTransaction::onPushedTransaction(HTTPTransaction* pushTxn) {
   return true;
 }
 
-bool HTTPTransaction::onExTransaction(HTTPTransaction* exTxn) {
-  DestructorGuard g(this);
-  if (!handler_) {
-    LOG(ERROR) << "Cannot add a exTxn to an unhandled txn";
-    return false;
-  }
-  handler_->onExTransaction(exTxn);
-  if (!exTxn->getHandler()) {
-    LOG(ERROR) << "Failed to create a handler for ExTransaction";
-    return false;
-  }
-  exTransactions_.insert(exTxn->getID());
-  return true;
-}
-
 void HTTPTransaction::setIdleTimeout(std::chrono::milliseconds idleTimeout) {
   idleTimeout_ = idleTimeout;
   VLOG(4) << "HTTPTransaction: idle timeout is set to  "

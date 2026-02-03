@@ -657,13 +657,6 @@ HTTPTransaction* HTTPSession::newPushedTransaction(
   return txn;
 }
 
-HTTPTransaction* FOLLY_NULLABLE
-HTTPSession::newExTransaction(HTTPTransaction::Handler* handler,
-                              HTTPCodec::StreamID controlStream,
-                              bool unidirectional) noexcept {
-  return nullptr;
-}
-
 size_t HTTPSession::getCodecSendWindowSize() const {
   const HTTPSettings* settings = codec_->getIngressSettings();
   if (settings) {
@@ -1058,11 +1051,6 @@ void HTTPSession::onAbort(HTTPCodec::StreamID streamID, ErrorCode code) {
     }
   }
 
-  for (auto assocExId : txn->getExTransactions()) {
-    if (auto exTxn = findTransaction(assocExId)) {
-      exTxn->onError(ex);
-    }
-  }
   txn->onError(ex);
 }
 
@@ -1327,13 +1315,6 @@ void HTTPSession::pauseIngress(HTTPTransaction* txn) noexcept {
           << ", liveTransactions_ was " << liveTransactions_;
   CHECK_GT(liveTransactions_, 0);
   --liveTransactions_;
-  auto exTxns = txn->getExTransactions();
-  for (auto it = exTxns.begin(); it != exTxns.end(); ++it) {
-    auto exTxn = findTransaction(*it);
-    if (exTxn) {
-      exTxn->pauseIngress();
-    }
-  }
 
   if (liveTransactions_ == 0) {
     pauseReads();
@@ -1344,13 +1325,6 @@ void HTTPSession::resumeIngress(HTTPTransaction* txn) noexcept {
   VLOG(4) << *this << " resuming streamID=" << txn->getID()
           << ", liveTransactions_ was " << liveTransactions_;
   ++liveTransactions_;
-  auto exTxns = txn->getExTransactions();
-  for (auto it = exTxns.begin(); it != exTxns.end(); ++it) {
-    auto exTxn = findTransaction(*it);
-    if (exTxn) {
-      exTxn->resumeIngress();
-    }
-  }
 
   // This function can be called from detach(), in which case liveTransactions_
   // may go to 1 briefly, even though we are still anit-pipelining.

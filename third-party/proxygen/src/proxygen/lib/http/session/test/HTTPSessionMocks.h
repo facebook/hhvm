@@ -285,11 +285,6 @@ class MockHTTPHandler
   }
   MOCK_METHOD(void, _onPushedTransaction, (HTTPTransaction*));
 
-  void onExTransaction(HTTPTransaction* txn) noexcept override {
-    _onExTransaction(txn);
-  }
-  MOCK_METHOD(void, _onExTransaction, (HTTPTransaction*));
-
   void expectTransaction(std::function<void(HTTPTransaction* txn)> callback) {
     EXPECT_CALL(*this, _setTransaction(testing::_))
         .WillOnce(testing::Invoke(callback))

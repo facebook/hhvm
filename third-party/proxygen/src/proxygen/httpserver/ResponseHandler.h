@@ -78,13 +78,6 @@ class ResponseHandler {
   virtual folly::Expected<ResponseHandler*, ProxygenError> newPushedResponse(
       PushHandler* pushHandler) noexcept = 0;
 
-  virtual ResponseHandler* newExMessage(
-      ExMessageHandler* /*exHandler*/,
-      bool /*unidirectional*/ = false) noexcept {
-    LOG(FATAL) << "newExMessage not supported";
-    folly::assume_unreachable();
-  }
-
   // Accessors for Transport/Connection information
   [[nodiscard]] virtual const wangle::TransportInfo& getSetupTransportInfo()
       const noexcept = 0;

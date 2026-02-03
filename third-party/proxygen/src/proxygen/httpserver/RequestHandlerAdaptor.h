@@ -52,7 +52,6 @@ class RequestHandlerAdaptor
   void onGoaway(ErrorCode code) noexcept override;
   void onEgressPaused() noexcept override;
   void onEgressResumed() noexcept override;
-  void onExTransaction(HTTPTransaction* txn) noexcept override;
 
   // ResponseHandler
   void sendHeaders(HTTPMessage& msg) noexcept override;
@@ -66,8 +65,6 @@ class RequestHandlerAdaptor
   void resumeIngress() noexcept override;
   folly::Expected<ResponseHandler*, ProxygenError> newPushedResponse(
       PushHandler* pushHandler) noexcept override;
-  ResponseHandler* newExMessage(ExMessageHandler* exHandler,
-                                bool unidirectional) noexcept override;
   [[nodiscard]] const wangle::TransportInfo& getSetupTransportInfo()
       const noexcept override;
   void getCurrentTransportInfo(wangle::TransportInfo* tinfo) const override;

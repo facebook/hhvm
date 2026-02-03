@@ -1411,14 +1411,6 @@ class HQSession
       folly::assume_unreachable();
     }
 
-    HTTPTransaction* newExTransaction(
-        HTTPTransactionHandler* /* handler */,
-        HTTPCodec::StreamID /* controlStream */,
-        bool /* unidirectional */) noexcept override {
-      VLOG(4) << __func__ << " txn=" << txn_;
-      return nullptr;
-    }
-
     std::string getSecurityProtocol() const override {
       VLOG(4) << __func__ << " txn=" << txn_;
       return "quic/tls1.3";

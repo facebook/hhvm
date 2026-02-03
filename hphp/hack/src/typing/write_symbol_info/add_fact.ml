@@ -246,7 +246,10 @@ let container_defn source_text clss decl_id members fa =
   let (module_, fa) = module_field clss.c_module clss.c_internal fa in
   let attributes = Build_fact.attributes source_text clss.c_user_attributes in
   (* T207902686: add Glean support for experimental require this as C constraints *)
-  let (req_extends_hints, req_implements_hints, req_class_hints, _) =
+  let ( req_extends_hints,
+        req_implements_hints,
+        req_class_hints,
+        req_this_as_hints ) =
     Aast.partition_map_require_kind ~f:(fun x -> x) clss.c_reqs
   in
   let (require_extends, fa) =
@@ -257,6 +260,9 @@ let container_defn source_text clss decl_id members fa =
   in
   let (require_class, fa) =
     parent_decls_class (List.map req_class_hints ~f:fst) fa
+  in
+  let (require_this_as, fa) =
+    parent_decls_class (List.map req_this_as_hints ~f:fst) fa
   in
   match Predicate.get_parent_kind clss.c_kind with
   | Predicate.InterfaceContainer ->
@@ -290,6 +296,7 @@ let container_defn source_text clss decl_id members fa =
           require_extends;
           require_implements;
           require_class = Some require_class;
+          require_this_as;
           module_;
         }
         |> to_json_key)

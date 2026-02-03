@@ -66,6 +66,7 @@ and TraitDefinition: sig
     require_implements: InterfaceDeclaration.t list;
     module_: ModuleMembership.t option;
     require_class: ClassDeclaration.t list option;
+    require_this_as: ClassDeclaration.t list;
   }
   [@@deriving ord]
 
@@ -90,6 +91,7 @@ end = struct
     require_implements: InterfaceDeclaration.t list;
     module_: ModuleMembership.t option;
     require_class: ClassDeclaration.t list option;
+    require_this_as: ClassDeclaration.t list;
   }
   [@@deriving ord]
 
@@ -97,7 +99,7 @@ end = struct
     | Id f -> Util.id f
     | Key t -> Util.key (to_json_key t)
 
-  and to_json_key {declaration; members; implements_; uses; attributes; type_params; require_extends; require_implements; module_; require_class} =
+  and to_json_key {declaration; members; implements_; uses; attributes; type_params; require_extends; require_implements; module_; require_class; require_this_as} =
     let fields = [
       ("declaration", TraitDeclaration.to_json declaration);
       ("members", JSON_Array (List.map ~f:(fun x -> Declaration.to_json x) members));
@@ -107,6 +109,7 @@ end = struct
       ("typeParams", JSON_Array (List.map ~f:(fun x -> TypeParameter.to_json x) type_params));
       ("requireExtends", JSON_Array (List.map ~f:(fun x -> ClassDeclaration.to_json x) require_extends));
       ("requireImplements", JSON_Array (List.map ~f:(fun x -> InterfaceDeclaration.to_json x) require_implements));
+      ("requireThisAs", JSON_Array (List.map ~f:(fun x -> ClassDeclaration.to_json x) require_this_as));
     ] in
     let fields =
       match module_ with
@@ -115,7 +118,7 @@ end = struct
     let fields =
       match require_class with
       | None -> fields
-      | Some require_class -> ("requireClass", JSON_Array (List.map ~f:(fun x -> ClassDeclaration.to_json x) require_class)) :: fields in
+      | Some require_class -> ("requireClass", JSON_Array (List.map ~f:(fun x -> ClassDeclaration.to_json x) require_class)) :: fields in      
     JSON_Object fields
 
 end

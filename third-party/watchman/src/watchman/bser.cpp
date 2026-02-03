@@ -525,7 +525,7 @@ class BserParser {
       case BSER_INT64:
         return parseInteger<int64_t>();
     }
-    assert(!"invalid integer type");
+    assert(false && "invalid integer type");
     abort();
   }
 

@@ -1,0 +1,18 @@
+ERROR: File "interface_extends_extends.php", line 18, characters 26-27:
+Some members in class `I3` are incompatible with those declared in type `I2` (Typing[4340])
+  File "interface_extends_extends.php", line 18, characters 26-27:
+  Some members in class `I3` are incompatible with those declared in type `I2`
+  File "interface_extends_extends.php", line 10, characters 23-24:
+  The constraint on this type constant is inconsistent with its parent
+  File "interface_extends_extends.php", line 14, characters 29-39:
+  Expected `UpperBound2`
+  File "interface_extends_extends.php", line 10, characters 29-39:
+  But got `UpperBound1`
+  File "interface_extends_extends.php", line 10, characters 23-24:
+  This declaration was inherited from an object of type `I1`. Redeclare this member in `I3` with a compatible signature.
+ERROR: File "interface_extends_extends.php", line 19, characters 28-39:
+Invalid type hint (Typing[4090])
+  File "interface_extends_extends.php", line 19, characters 38-39:
+  No type constant `T2` in `UpperBound1`
+  File "interface_extends_extends.php", line 3, characters 11-21:
+  Declaration of `UpperBound1` is here

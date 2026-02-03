@@ -1,0 +1,28 @@
+ERROR: File "interface_extends_extends_bounds_not_subtypes.php", line 22, characters 26-27:
+Some members in class `I3` are incompatible with those declared in type `I2` (Typing[4340])
+  File "interface_extends_extends_bounds_not_subtypes.php", line 14, characters 23-24:
+  The constraint on this type constant is inconsistent with its parent
+  File "interface_extends_extends_bounds_not_subtypes.php", line 18, characters 29-39:
+  Expected `UpperBound2`
+  File "interface_extends_extends_bounds_not_subtypes.php", line 14, characters 29-39:
+  But got `UpperBound1`
+ERROR: File "interface_extends_extends_bounds_not_subtypes.php", line 24, characters 28-39:
+Invalid type hint (Typing[4090])
+  File "interface_extends_extends_bounds_not_subtypes.php", line 24, characters 38-39:
+  No type constant `T3` in `UpperBound1`
+  File "interface_extends_extends_bounds_not_subtypes.php", line 3, characters 11-21:
+  Declaration of `UpperBound1` is here
+ERROR: File "interface_extends_extends_bounds_not_subtypes.php", line 28, characters 26-27:
+Some members in class `I4` are incompatible with those declared in type `I1` (Typing[4340])
+  File "interface_extends_extends_bounds_not_subtypes.php", line 18, characters 23-24:
+  The constraint on this type constant is inconsistent with its parent
+  File "interface_extends_extends_bounds_not_subtypes.php", line 14, characters 29-39:
+  Expected `UpperBound1`
+  File "interface_extends_extends_bounds_not_subtypes.php", line 18, characters 29-39:
+  But got `UpperBound2`
+ERROR: File "interface_extends_extends_bounds_not_subtypes.php", line 29, characters 28-39:
+Invalid type hint (Typing[4090])
+  File "interface_extends_extends_bounds_not_subtypes.php", line 29, characters 38-39:
+  No type constant `T2` in `UpperBound2`
+  File "interface_extends_extends_bounds_not_subtypes.php", line 7, characters 11-21:
+  Declaration of `UpperBound2` is here

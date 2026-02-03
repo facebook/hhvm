@@ -1,0 +1,18 @@
+ERROR: File "class_implements_use.php", line 27, characters 7-9:
+Some members in class `C3` are incompatible with those declared in type `Tr1` (Typing[4340])
+  File "class_implements_use.php", line 27, characters 7-9:
+  Some members in class `C3` are incompatible with those declared in type `Tr1`
+  File "class_implements_use.php", line 10, characters 23-24:
+  The constraint on this type constant is inconsistent with its parent
+  File "class_implements_use.php", line 14, characters 29-39:
+  Expected `UpperBound2`
+  File "class_implements_use.php", line 10, characters 29-39:
+  But got `UpperBound1`
+  File "class_implements_use.php", line 10, characters 23-24:
+  This declaration was inherited from an object of type `I1`. Redeclare this member in `C3` with a compatible signature.
+ERROR: File "class_implements_use.php", line 28, characters 28-39:
+Invalid type hint (Typing[4090])
+  File "class_implements_use.php", line 28, characters 38-39:
+  No type constant `T2` in `UpperBound1`
+  File "class_implements_use.php", line 3, characters 11-21:
+  Declaration of `UpperBound1` is here

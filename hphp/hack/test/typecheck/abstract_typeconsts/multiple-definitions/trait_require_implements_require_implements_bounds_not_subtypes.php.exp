@@ -1,0 +1,12 @@
+ERROR: File "trait_require_implements_require_implements_bounds_not_subtypes.php", line 25, characters 28-39:
+Invalid type hint (Typing[4090])
+  File "trait_require_implements_require_implements_bounds_not_subtypes.php", line 25, characters 38-39:
+  No type constant `T2` in `UpperBound2`
+  File "trait_require_implements_require_implements_bounds_not_subtypes.php", line 7, characters 11-21:
+  Declaration of `UpperBound2` is here
+ERROR: File "trait_require_implements_require_implements_bounds_not_subtypes.php", line 34, characters 28-39:
+Invalid type hint (Typing[4090])
+  File "trait_require_implements_require_implements_bounds_not_subtypes.php", line 34, characters 38-39:
+  No type constant `T3` in `UpperBound1`
+  File "trait_require_implements_require_implements_bounds_not_subtypes.php", line 3, characters 11-21:
+  Declaration of `UpperBound1` is here

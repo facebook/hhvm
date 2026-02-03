@@ -1,0 +1,18 @@
+ERROR: File "class_extends_use.php", line 32, characters 27-28:
+Some members in class `C4` are incompatible with those declared in type `C2` (Typing[4340])
+  File "class_extends_use.php", line 32, characters 27-28:
+  Some members in class `C4` are incompatible with those declared in type `C2`
+  File "class_extends_use.php", line 22, characters 23-24:
+  The constraint on this type constant is inconsistent with its parent
+  File "class_extends_use.php", line 18, characters 29-39:
+  Expected `UpperBound2`
+  File "class_extends_use.php", line 22, characters 29-39:
+  But got `UpperBound1`
+  File "class_extends_use.php", line 22, characters 23-24:
+  This declaration was inherited from an object of type `Tr2`. Redeclare this member in `C4` with a compatible signature.
+ERROR: File "class_extends_use.php", line 34, characters 28-39:
+Invalid type hint (Typing[4090])
+  File "class_extends_use.php", line 34, characters 38-39:
+  No type constant `T2` in `UpperBound1`
+  File "class_extends_use.php", line 3, characters 11-21:
+  Declaration of `UpperBound1` is here

@@ -194,8 +194,6 @@ let meth_caller_only_public_visibility t =
 let require_extends_implements_ancestors t =
   t.GlobalOptions.tco_require_extends_implements_ancestors
 
-let strict_value_equality t = t.GlobalOptions.tco_strict_value_equality
-
 let repo_stdlib_path t = t.GlobalOptions.tco_repo_stdlib_path
 
 let everything_sdt t = t.GlobalOptions.po.ParserOptions.everything_sdt

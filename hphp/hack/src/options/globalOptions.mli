@@ -189,8 +189,6 @@ type t = {
       (** meth_caller can only reference public methods *)
   tco_require_extends_implements_ancestors: bool;
       (** Consider `require extends` and `require implements` as ancestors when checking a class *)
-  tco_strict_value_equality: bool;
-      (** Emit an error when "==" or "!=" is used to compare values that are incompatible types *)
   tco_implicit_inherit_sdt: bool;
       (** Inherit SDT from parents, without writing <<__SupportDynamicType>> *)
   tco_repo_stdlib_path: string option;
@@ -377,7 +375,6 @@ val set :
   ?tco_typeconst_concrete_concrete_error:bool ->
   ?tco_meth_caller_only_public_visibility:bool ->
   ?tco_require_extends_implements_ancestors:bool ->
-  ?tco_strict_value_equality:bool ->
   ?tco_implicit_inherit_sdt:bool ->
   ?tco_repo_stdlib_path:string ->
   ?tco_explicit_consistent_constructors:int ->

@@ -101,7 +101,6 @@ impl Default for GlobalOptions {
             tco_typeconst_concrete_concrete_error: false,
             tco_meth_caller_only_public_visibility: true,
             tco_require_extends_implements_ancestors: false,
-            tco_strict_value_equality: false,
             tco_implicit_inherit_sdt: false,
             tco_explicit_consistent_constructors: 0,
             tco_require_types_class_consts: 0,

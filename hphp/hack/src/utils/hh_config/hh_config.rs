@@ -435,7 +435,6 @@ impl HhConfig {
             tco_meth_caller_only_public_visibility: default.tco_meth_caller_only_public_visibility,
             tco_require_extends_implements_ancestors: default
                 .tco_require_extends_implements_ancestors,
-            tco_strict_value_equality: default.tco_strict_value_equality,
             tco_implicit_inherit_sdt: default.tco_implicit_inherit_sdt,
             tco_explicit_consistent_constructors: hhconfig.get_int_or(
                 "explicit_consistent_constructors",

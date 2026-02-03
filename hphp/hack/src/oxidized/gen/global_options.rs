@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<577ca862f56a1f16cf2a76d71e9bb120>>
+// @generated SignedSource<<b1f8bf47491c9b6732afeefd2866b8e3>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -291,8 +291,6 @@ pub struct GlobalOptions {
     pub tco_meth_caller_only_public_visibility: bool,
     /// Consider `require extends` and `require implements` as ancestors when checking a class
     pub tco_require_extends_implements_ancestors: bool,
-    /// Emit an error when "==" or "!=" is used to compare values that are incompatible types
-    pub tco_strict_value_equality: bool,
     /// Inherit SDT from parents, without writing <<__SupportDynamicType>>
     pub tco_implicit_inherit_sdt: bool,
     /// Directory of HSL wrappers defined in the repo, warns on unbound name.

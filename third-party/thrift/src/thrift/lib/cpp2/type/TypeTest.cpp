@@ -343,6 +343,46 @@ TEST(TypeTest, DebugString) {
 
   EXPECT_THROW(Type().debugString(), std::runtime_error);
 }
+TEST(TypeTest, Hash) {
+  std::set<size_t> hashes;
+  std::hash<Type> hasher;
+  Type t;
+
+  t.toThrift().name()->i16Type().ensure();
+  EXPECT_FALSE(hashes.contains(hasher(t)));
+  hashes.insert(hasher(t));
+
+  t.toThrift().name()->i32Type().ensure();
+  EXPECT_FALSE(hashes.contains(hasher(t)));
+  hashes.insert(hasher(t));
+
+  t.toThrift().name()->structType().ensure().scopedName() = "foo";
+  EXPECT_FALSE(hashes.contains(hasher(t)));
+  hashes.insert(hasher(t));
+
+  t.toThrift().name()->structType().ensure().scopedName() = "bar";
+  EXPECT_FALSE(hashes.contains(hasher(t)));
+  hashes.insert(hasher(t));
+
+  t.toThrift().name()->structType().ensure().uri() = "bar";
+  EXPECT_FALSE(hashes.contains(hasher(t)));
+  hashes.insert(hasher(t));
+
+  t.toThrift().name()->structType().ensure().typeHashPrefixSha2_256() = "bar";
+  EXPECT_FALSE(hashes.contains(hasher(t)));
+  hashes.insert(hasher(t));
+
+  t.toThrift().params()->emplace_back().name()->i16Type().ensure();
+  EXPECT_FALSE(hashes.contains(hasher(t)));
+  hashes.insert(hasher(t));
+
+  t.toThrift().params()->back().name()->i32Type().ensure();
+  EXPECT_FALSE(hashes.contains(hasher(t)));
+  hashes.insert(hasher(t));
+
+  t.toThrift().params()->pop_back();
+  EXPECT_TRUE(hashes.contains(hasher(t)));
+}
 } // namespace
 } // namespace type
 } // namespace apache::thrift

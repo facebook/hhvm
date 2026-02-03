@@ -230,4 +230,9 @@ inline bool identicalType(const Type& lhs, const Type& rhs) {
 
 } // namespace apache::thrift::type
 
-FBTHRIFT_STD_HASH_WRAP_DATA(apache::thrift::type::Type)
+namespace std {
+template <>
+struct hash<apache::thrift::type::Type> {
+  size_t operator()(const apache::thrift::type::Type& value) const;
+};
+} // namespace std

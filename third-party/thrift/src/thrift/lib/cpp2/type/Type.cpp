@@ -256,4 +256,43 @@ std::string Type::debugString() const {
   return debugStringImpl(toThrift());
 }
 
+namespace {
+
+struct UnionHasher {
+  template <class U>
+    requires(is_thrift_union_v<U>)
+  std::size_t operator()(const U& u) {
+    return op::visit_union_with_tag(
+        u,
+        [](auto tag, auto& value) {
+          using Ident = folly::type_list_element_t<0, decltype(tag)>;
+          constexpr auto id = op::get_field_id_v<U, Ident>;
+          static_assert(id != FieldId{0});
+          return folly::hash::hash_combine(id, UnionHasher{}(value));
+        },
+        [] { return size_t{0}; });
+  }
+
+  // Non-union values (e.g., integers, strings) are passed as they are.
+  template <class T>
+    requires(!is_thrift_union_v<T>)
+  const T& operator()(const T& t) {
+    return t;
+  }
+};
+
+size_t hashTypeStruct(const TypeStruct& type) {
+  size_t hash = UnionHasher{}(*type.name());
+  for (const auto& param : *type.params()) {
+    hash = folly::hash::hash_combine(hash, hashTypeStruct(param));
+  }
+  return hash;
+}
+
+} // namespace
 } // namespace apache::thrift::type
+
+size_t std::hash<apache::thrift::type::Type>::operator()(
+    const apache::thrift::type::Type& value) const {
+  return apache::thrift::type::hashTypeStruct(value.toThrift());
+}

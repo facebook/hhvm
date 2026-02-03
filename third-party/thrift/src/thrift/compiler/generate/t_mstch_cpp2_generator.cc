@@ -2793,6 +2793,8 @@ void t_mstch_cpp2_generator::generate_out_of_line_services(
       context, "module_handlers_out_of_line.h", module_name + "_handlers.h");
   render_to_file(
       context, "module_clients_out_of_line.h", module_name + "_clients.h");
+  render_to_file(
+      context, "module_clients_fwd.h", module_name + "_clients_fwd.h");
 }
 
 void t_mstch_cpp2_generator::generate_inline_services(

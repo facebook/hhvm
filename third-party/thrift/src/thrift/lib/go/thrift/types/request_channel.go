@@ -55,6 +55,12 @@ type RequestChannel interface {
 		response ReadableResult,
 		newStreamElemFn func() ReadableResult,
 	) (iter.Seq2[ReadableStruct, error], error)
+	SendRequestSink(
+		ctx context.Context,
+		method string,
+		request WritableStruct,
+		firstResponse ReadableResult,
+	) (func(sinkSeq iter.Seq2[WritableResult, error], finalResponse ReadableStruct) error, error)
 }
 
 // RequestChannelExtended will eventually become part of RequestChannel, once legacy clients are gone (e.g. Header)
@@ -122,6 +128,16 @@ func (c *interactionChannel) SendRequestStream(
 ) (iter.Seq2[ReadableStruct, error], error) {
 	ctx = c.withInteractionContext(ctx)
 	return c.channel.SendRequestStream(ctx, method, request, response, newStreamElemFn)
+}
+
+func (c *interactionChannel) SendRequestSink(
+	ctx context.Context,
+	method string,
+	request WritableStruct,
+	firstResponse ReadableResult,
+) (func(sinkSeq iter.Seq2[WritableResult, error], finalResponse ReadableStruct) error, error) {
+	ctx = c.withInteractionContext(ctx)
+	return c.channel.SendRequestSink(ctx, method, request, firstResponse)
 }
 
 func (c *interactionChannel) Close() error {

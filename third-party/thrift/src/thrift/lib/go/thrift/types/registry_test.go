@@ -89,6 +89,10 @@ func (c *mockRequestChannel) SendRequestStream(ctx context.Context, method strin
 	return nil, nil
 }
 
+func (c *mockRequestChannel) SendRequestSink(ctx context.Context, method string, request WritableStruct, firstResponse ReadableResult) (func(sinkSeq iter.Seq2[WritableResult, error], finalResponse ReadableStruct) error, error) {
+	return nil, nil
+}
+
 func TestRegisterAndConstructClient(t *testing.T) {
 	InternalRegisterClientConstructor[mockClient](newMockChannelClient)
 

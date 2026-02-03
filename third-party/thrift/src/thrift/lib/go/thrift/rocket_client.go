@@ -180,6 +180,15 @@ func (p *rocketClient) SendRequestStream(
 	return streamSeq, nil
 }
 
+func (p *rocketClient) SendRequestSink(
+	ctx context.Context,
+	messageName string,
+	request WritableStruct,
+	firstResponse ReadableResult,
+) (func(sinkSeq iter.Seq2[WritableResult, error], finalResponse ReadableStruct) error, error) {
+	return nil, errors.New("not implemented")
+}
+
 func (p *rocketClient) TerminateInteraction(interactionID int64) error {
 	interactionTerminate := rpcmetadata.NewInteractionTerminate().
 		SetInteractionId(interactionID)

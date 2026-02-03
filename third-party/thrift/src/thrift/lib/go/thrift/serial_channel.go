@@ -167,3 +167,13 @@ func (c *serialChannel) SendRequestStream(
 ) (iter.Seq2[ReadableStruct, error], error) {
 	return nil, fmt.Errorf("not implemented")
 }
+
+// SendRequestSink performs a request-sink call.
+func (c *serialChannel) SendRequestSink(
+	ctx context.Context,
+	method string,
+	request WritableStruct,
+	firstResponse ReadableResult,
+) (func(sinkSeq iter.Seq2[WritableResult, error], finalResponse ReadableStruct) error, error) {
+	return nil, fmt.Errorf("not implemented")
+}

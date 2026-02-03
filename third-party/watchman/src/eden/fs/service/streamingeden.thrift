@@ -58,6 +58,7 @@ struct FsEvent {
   8: eden.RequestInfo requestInfo;
 
   /**
+   * For POSIX filesystems:
    * The result code sent back to the kernel.
    *
    * Positive is success, and, depending on the operation, may contain a nonzero result.
@@ -67,6 +68,12 @@ struct FsEvent {
    * request to future FUSE requests on that inode.
    *
    * Negative indicates an error.
+   *
+   * For ProjFs on Windows:
+   * The HRESULT code sent back to the kernel.
+   *
+   * Interpreted as an HRESULT (https://en.wikipedia.org/wiki/HRESULT), only the lower 32 bits should be considered valid. After conversion, all of the normal HRESULT semantics apply.
+   *
    */
   9: optional i64 result;
 }

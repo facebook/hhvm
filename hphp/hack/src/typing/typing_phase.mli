@@ -110,6 +110,14 @@ val localize_hint_no_subst_report_cycles :
   Aast.hint ->
   (env * Typing_error.t option * Type_expansions.cycle_reporter list) * locl_ty
 
+val localize_typedef_structure :
+  env ->
+  ignore_errors:bool ->
+  report_cycle:Pos.t * Type_expansions.Expandable.t ->
+  string option ->
+  Aast.hint ->
+  (env * Typing_error.t option * Type_expansions.cycle_reporter list) * locl_ty
+
 val localize_hint_for_refinement :
   env -> Aast.hint -> (env * Typing_error.t option) * locl_ty
 

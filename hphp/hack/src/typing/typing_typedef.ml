@@ -208,13 +208,19 @@ let casetype_def env typedef =
     env
 
 let check_cycles env (t_pos, t_name) t_assignment hints =
+  let case_type_root =
+    match t_assignment with
+    | SimpleTypeDef _ -> None
+    | CaseType _ -> Some t_name
+  in
   let (env, cycles) =
     List.fold_left hints ~init:(env, []) ~f:(fun (env, cycles) hint ->
         let ((env, _ty_err_opt, new_cycles), _ty) =
-          Phase.localize_hint_no_subst_report_cycles
+          Phase.localize_typedef_structure
             env
             ~ignore_errors:true
             ~report_cycle:(t_pos, Type_expansions.Expandable.Type_alias t_name)
+            case_type_root
             hint
         in
         (env, new_cycles @ cycles))

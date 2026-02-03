@@ -212,6 +212,11 @@ type visibility_behavior =
   | Always_expand_newtype
   | Expand_visible_newtype_only
   | Never_expand_newtype
+  (* Approximate HHVM's resolution of type structures, where types and newtypes are
+   * fully expanded, but recursive references to the current type become opaque leaf
+   * nodes i.e. TypeStructureKind::T_recursiveUnion. Where this differs is, for regular
+   * type alias roots, we do not expand case types. *)
+  | Resolve_type_structure of string option
 [@@deriving show]
 
 val is_default_visibility_behaviour : visibility_behavior -> bool

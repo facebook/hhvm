@@ -20,10 +20,11 @@ module MakeType = Typing_make_type
 
 type expansion =
   | Rhs of decl_ty
-  | Opaque of (* constraint *) decl_ty
+  | Opaque
 
 type expand_result = {
   tparams: decl_tparam list;
+  cstr: decl_ty;
   expansion: expansion;
 }
 
@@ -54,6 +55,11 @@ let expand_typedef_decl
     force_expand
     || Env.should_expand_type_alias ~visibility_behavior env ~name:x td
   in
+  let cstr =
+    match td_as_constraint with
+    | None -> MakeType.mixed (Reason.implicit_upper_bound (td_pos, "?nonnull"))
+    | Some cstr -> cstr
+  in
   let expansion =
     if should_expand then
       let td_type =
@@ -65,12 +71,8 @@ let expand_typedef_decl
       Rhs td_type
     else
       Opaque
-        (match td_as_constraint with
-        | None ->
-          MakeType.mixed (Reason.implicit_upper_bound (td_pos, "?nonnull"))
-        | Some cstr -> cstr)
   in
-  { tparams = td_tparams; expansion }
+  { tparams = td_tparams; cstr; expansion }
 
 (** [expand_typedef_ ~force_expand ety_env env r name ty_args] looks up the type
   alias [name] in the decls and returns the value of the type alias as a locl_ty, with
@@ -111,6 +113,7 @@ let expand_typedef_ ~force_expand ety_env env r (x : string) argl :
          able to make proper conclusions about the cycle. *)
       match ety_env.visibility_behavior with
       | Always_expand_newtype -> mk (r, Tnewtype (x, argl, mixed))
+      | Resolve_type_structure _
       | Never_expand_newtype
       | Expand_visible_newtype_only ->
         mixed
@@ -119,7 +122,7 @@ let expand_typedef_ ~force_expand ety_env env r (x : string) argl :
         { env; ty_err_opt = None; cycles = [cycle]; ty; bound = mixed },
       ety_env )
   | Ok ety_env ->
-    let { tparams; expansion } =
+    let { tparams; cstr; expansion } =
       expand_typedef_decl
         ~force_expand
         ~visibility_behavior:ety_env.visibility_behavior
@@ -144,22 +147,25 @@ let expand_typedef_ ~force_expand ety_env env r (x : string) argl :
     else
       let substs = Subst.make_locl tparams argl in
       let ety_env = { ety_env with substs } in
+      let ((env, cstr_err, cstr_cycles), cstr) =
+        (* Special case for supportdyn<T> defined with "as T" in order to
+         * avoid supportdynamic.hhi appearing in reason *)
+        if String.equal x SN.Classes.cSupportDyn then
+          ((env, None, []), List.hd_exn argl)
+        else
+          Phase.localize_rec ~ety_env env cstr
+      in
       let ((env, err, cycles), expanded_ty, bound) =
         match expansion with
         | Rhs ty ->
-          let ((env, err, cycles), ty) = Phase.localize_rec ~ety_env env ty in
-          ((env, err, cycles), ty, ty)
-        | Opaque cstr_ty ->
-          let ((env, err, cycles), cstr_ty) =
-            (* Special case for supportdyn<T> defined with "as T" in order to
-             * avoid supportdynamic.hhi appearing in reason *)
-            if String.equal x SN.Classes.cSupportDyn then
-              ((env, None, []), List.hd_exn argl)
-            else
-              Phase.localize_rec ~ety_env env cstr_ty
+          let ((env, rhs_err, rhs_cycles), ty) =
+            Phase.localize_rec ~ety_env env ty
           in
-          let ty = mk (r, Tnewtype (x, argl, cstr_ty)) in
-          ((env, err, cycles), ty, cstr_ty)
+          let err = Option.merge cstr_err rhs_err ~f:Typing_error.both in
+          ((env, err, rhs_cycles @ cstr_cycles), ty, ty)
+        | Opaque ->
+          let ty = mk (r, Tnewtype (x, argl, cstr)) in
+          ((env, cstr_err, cstr_cycles), ty, cstr)
       in
       ( { env; ty_err_opt = err; cycles; ty = with_reason expanded_ty r; bound },
         ety_env )

@@ -292,6 +292,7 @@ type visibility_behavior =
   | Always_expand_newtype
   | Expand_visible_newtype_only
   | Never_expand_newtype
+  | Resolve_type_structure of string option
 [@@deriving show { with_path = false }]
 
 let is_default_visibility_behaviour = function

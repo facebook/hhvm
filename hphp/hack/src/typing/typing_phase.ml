@@ -831,12 +831,7 @@ and localize_class_instantiation
     else
       let tparams = Cls.tparams class_info in
       let ((env, err, cycles), tyl) =
-        localize_targs_constrain_wildcards
-          ~ety_env:
-            { ety_env with visibility_behavior = default_visibility_behaviour }
-          env
-          tyargs
-          tparams
+        localize_targs_constrain_wildcards ~ety_env env tyargs tparams
       in
       (* Hide the class type if its internal and outside of the module *)
       if
@@ -1497,6 +1492,26 @@ let localize_hint_no_subst_report_cycles_ env ~ignore_errors ?report_cycle h =
     ~ish_weakening:false
     ?report_cycle
     h
+
+let localize_typedef_structure env ~ignore_errors ~report_cycle name h =
+  let (pos, _) = h in
+  let ty = Decl_hint.hint env.decl_env h in
+  let ety_env =
+    {
+      empty_expand_env with
+      visibility_behavior = Resolve_type_structure name;
+      type_expansions =
+        Type_expansions.empty_w_cycle_report ~report_cycle:(Some report_cycle);
+      on_error =
+        (if ignore_errors then
+          None
+        else
+          Some (Typing_error.Reasons_callback.invalid_type_hint pos));
+      wildcard_action = Wildcard_illegal;
+      ish_weakening = false;
+    }
+  in
+  localize env ty ~ety_env
 
 let localize_hint_no_subst env ~ignore_errors h =
   let ((env, err, _cycles), ty) =

@@ -818,6 +818,8 @@ module M = struct
     | CaseType _ ->
       (match visibility_behavior with
       | Always_expand_newtype -> true
+      | Resolve_type_structure None -> false
+      | Resolve_type_structure (Some t) -> String.(t <> name)
       | Expand_visible_newtype_only
       | Never_expand_newtype ->
         false)
@@ -826,7 +828,9 @@ module M = struct
       (match td_vis with
       | Aast.Opaque ->
         (match visibility_behavior with
-        | Always_expand_newtype -> true
+        | Resolve_type_structure _
+        | Always_expand_newtype ->
+          true
         | Never_expand_newtype -> false
         | Expand_visible_newtype_only ->
           let td_path = Naming_provider.get_typedef_path (get_ctx env) name in
@@ -835,7 +839,9 @@ module M = struct
           | None -> (* Not the right place to raise an error *) false))
       | Aast.OpaqueModule ->
         (match visibility_behavior with
-        | Always_expand_newtype -> true
+        | Resolve_type_structure _
+        | Always_expand_newtype ->
+          true
         | Never_expand_newtype -> false
         | Expand_visible_newtype_only ->
           Option.equal

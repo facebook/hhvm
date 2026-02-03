@@ -4,6 +4,9 @@ ERROR: File "typedef_cycles_via_constraints0.php", line 6, characters 9-9:
 Cyclic type definition (Typing[4014])
   File "typedef_cycles_via_constraints0.php", line 6, characters 16-16:
   Cyclic use is here
+ERROR: File "typedef_cycles_via_constraints0.php", line 9, characters 14-14:
+Cyclic type constant:
+  `C::T` -> `D` -> `C::T` (Typing[4131])
 ERROR: File "typedef_cycles_via_constraints0.php", line 11, characters 9-9:
 Cyclic type definition (Typing[4014])
   File "typedef_cycles_via_constraints0.php", line 9, characters 18-18:

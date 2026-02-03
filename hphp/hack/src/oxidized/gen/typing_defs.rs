@@ -3,12 +3,11 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<9b313221c57bf31108da347472a57cab>>
+// @generated SignedSource<<e269113b4bb46a8bb1439e75a1b4a68b>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
 
-use arena_trait::TrivialDrop;
 use eq_modulo_pos::EqModuloPos;
 use no_pos_hash::NoPosHash;
 use ocamlrep::FromOcamlRep;
@@ -602,13 +601,11 @@ pub enum DeserializationError {
 
 #[derive(
     Clone,
-    Copy,
     Debug,
     Deserialize,
     Eq,
     EqModuloPos,
     FromOcamlRep,
-    FromOcamlRepIn,
     Hash,
     NoPosHash,
     Ord,
@@ -618,7 +615,7 @@ pub enum DeserializationError {
     ToOcamlRep
 )]
 #[rust_to_ocaml(attr = "deriving show { with_path = false }")]
-#[repr(u8)]
+#[repr(C, u8)]
 pub enum VisibilityBehavior {
     #[rust_to_ocaml(name = "Always_expand_newtype")]
     AlwaysExpandNewtype,
@@ -626,6 +623,6 @@ pub enum VisibilityBehavior {
     ExpandVisibleNewtypeOnly,
     #[rust_to_ocaml(name = "Never_expand_newtype")]
     NeverExpandNewtype,
+    #[rust_to_ocaml(name = "Resolve_type_structure")]
+    ResolveTypeStructure(Option<String>),
 }
-impl TrivialDrop for VisibilityBehavior {}
-arena_deserializer::impl_deserialize_in_arena!(VisibilityBehavior);

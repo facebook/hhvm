@@ -132,7 +132,48 @@ func (c *myInteractionClientImpl) Truthify(ctx context.Context) (iter.Seq2[bool,
 }
 
 func (c *myInteractionClientImpl) Encode(ctx context.Context) ([]int32, func(iter.Seq2[string, error]) ([]byte, error), error) {
-    panic("sink not implemented")
+    var fbthriftFirstRespZero []int32
+    fbthriftReq := &reqMyInteractionEncode{
+    }
+    fbthriftFirstResp := newRespMyInteractionEncode()
+
+    fbthriftChannel := c.ch
+
+    fbthriftSinkFn, fbthriftErr := fbthriftChannel.SendRequestSink(
+        ctx,
+        "MyInteraction.encode",
+        fbthriftReq,
+        fbthriftFirstResp,
+    )
+    if fbthriftErr != nil {
+        return fbthriftFirstRespZero, nil, fbthriftErr
+    }
+
+    fbthriftSinkCallback := func(elemSeq iter.Seq2[string, error]) ([]byte, error) {
+        sinkPayloadSeq := func(yield func(thrift.WritableResult, error) bool) {
+            for elem, err := range elemSeq {
+                sinkPayload := newSinkMyInteractionEncode()
+                if err != nil {
+                    yield(nil, err)
+                    return
+                }
+                sinkPayload.Success = elem
+                if !yield(sinkPayload, nil) {
+                    return
+                }
+            }
+        }
+        fbthriftFinalResp := newRespFinalMyInteractionEncode()
+        fbthriftFinalErr := fbthriftSinkFn(sinkPayloadSeq, fbthriftFinalResp)
+        if fbthriftFinalErr != nil {
+            return nil, fbthriftFinalErr
+        } else if fbthriftFinalEx := fbthriftFinalResp.Exception(); fbthriftFinalEx != nil {
+            return nil, fbthriftFinalEx
+        }
+        return fbthriftFinalResp.GetSuccess(), nil
+    }
+
+    return fbthriftFirstResp.GetSuccess(), fbthriftSinkCallback, nil
 }
 
 
@@ -407,7 +448,48 @@ func (c *myInteractionFastClientImpl) Truthify(ctx context.Context) (iter.Seq2[b
 }
 
 func (c *myInteractionFastClientImpl) Encode(ctx context.Context) ([]int32, func(iter.Seq2[string, error]) ([]byte, error), error) {
-    panic("sink not implemented")
+    var fbthriftFirstRespZero []int32
+    fbthriftReq := &reqMyInteractionFastEncode{
+    }
+    fbthriftFirstResp := newRespMyInteractionFastEncode()
+
+    fbthriftChannel := c.ch
+
+    fbthriftSinkFn, fbthriftErr := fbthriftChannel.SendRequestSink(
+        ctx,
+        "MyInteractionFast.encode",
+        fbthriftReq,
+        fbthriftFirstResp,
+    )
+    if fbthriftErr != nil {
+        return fbthriftFirstRespZero, nil, fbthriftErr
+    }
+
+    fbthriftSinkCallback := func(elemSeq iter.Seq2[string, error]) ([]byte, error) {
+        sinkPayloadSeq := func(yield func(thrift.WritableResult, error) bool) {
+            for elem, err := range elemSeq {
+                sinkPayload := newSinkMyInteractionFastEncode()
+                if err != nil {
+                    yield(nil, err)
+                    return
+                }
+                sinkPayload.Success = elem
+                if !yield(sinkPayload, nil) {
+                    return
+                }
+            }
+        }
+        fbthriftFinalResp := newRespFinalMyInteractionFastEncode()
+        fbthriftFinalErr := fbthriftSinkFn(sinkPayloadSeq, fbthriftFinalResp)
+        if fbthriftFinalErr != nil {
+            return nil, fbthriftFinalErr
+        } else if fbthriftFinalEx := fbthriftFinalResp.Exception(); fbthriftFinalEx != nil {
+            return nil, fbthriftFinalEx
+        }
+        return fbthriftFinalResp.GetSuccess(), nil
+    }
+
+    return fbthriftFirstResp.GetSuccess(), fbthriftSinkCallback, nil
 }
 
 

@@ -65,31 +65,324 @@ func (c *sinkServiceClientImpl) Close() error {
 }
 
 func (c *sinkServiceClientImpl) Method(ctx context.Context) (func(iter.Seq2[*SinkPayload, error]) (*FinalResponse, error), error) {
-    panic("sink not implemented")
+    fbthriftReq := &reqSinkServiceMethod{
+    }
+    fbthriftFirstResp := newRespSinkServiceMethod()
+
+    fbthriftChannel := c.ch
+
+    fbthriftSinkFn, fbthriftErr := fbthriftChannel.SendRequestSink(
+        ctx,
+        "method",
+        fbthriftReq,
+        fbthriftFirstResp,
+    )
+    if fbthriftErr != nil {
+        return nil, fbthriftErr
+    }
+
+    fbthriftSinkCallback := func(elemSeq iter.Seq2[*SinkPayload, error]) (*FinalResponse, error) {
+        sinkPayloadSeq := func(yield func(thrift.WritableResult, error) bool) {
+            for elem, err := range elemSeq {
+                sinkPayload := newSinkSinkServiceMethod()
+                if err != nil {
+                    yield(nil, err)
+                    return
+                }
+                sinkPayload.Success = elem
+                if !yield(sinkPayload, nil) {
+                    return
+                }
+            }
+        }
+        fbthriftFinalResp := newRespFinalSinkServiceMethod()
+        fbthriftFinalErr := fbthriftSinkFn(sinkPayloadSeq, fbthriftFinalResp)
+        if fbthriftFinalErr != nil {
+            return nil, fbthriftFinalErr
+        } else if fbthriftFinalEx := fbthriftFinalResp.Exception(); fbthriftFinalEx != nil {
+            return nil, fbthriftFinalEx
+        }
+        return fbthriftFinalResp.GetSuccess(), nil
+    }
+
+    return fbthriftSinkCallback, nil
 }
 
 func (c *sinkServiceClientImpl) MethodAndReponse(ctx context.Context) (*InitialResponse, func(iter.Seq2[*SinkPayload, error]) (*FinalResponse, error), error) {
-    panic("sink not implemented")
+    var fbthriftFirstRespZero *InitialResponse
+    fbthriftReq := &reqSinkServiceMethodAndReponse{
+    }
+    fbthriftFirstResp := newRespSinkServiceMethodAndReponse()
+
+    fbthriftChannel := c.ch
+
+    fbthriftSinkFn, fbthriftErr := fbthriftChannel.SendRequestSink(
+        ctx,
+        "methodAndReponse",
+        fbthriftReq,
+        fbthriftFirstResp,
+    )
+    if fbthriftErr != nil {
+        return fbthriftFirstRespZero, nil, fbthriftErr
+    }
+
+    fbthriftSinkCallback := func(elemSeq iter.Seq2[*SinkPayload, error]) (*FinalResponse, error) {
+        sinkPayloadSeq := func(yield func(thrift.WritableResult, error) bool) {
+            for elem, err := range elemSeq {
+                sinkPayload := newSinkSinkServiceMethodAndReponse()
+                if err != nil {
+                    yield(nil, err)
+                    return
+                }
+                sinkPayload.Success = elem
+                if !yield(sinkPayload, nil) {
+                    return
+                }
+            }
+        }
+        fbthriftFinalResp := newRespFinalSinkServiceMethodAndReponse()
+        fbthriftFinalErr := fbthriftSinkFn(sinkPayloadSeq, fbthriftFinalResp)
+        if fbthriftFinalErr != nil {
+            return nil, fbthriftFinalErr
+        } else if fbthriftFinalEx := fbthriftFinalResp.Exception(); fbthriftFinalEx != nil {
+            return nil, fbthriftFinalEx
+        }
+        return fbthriftFinalResp.GetSuccess(), nil
+    }
+
+    return fbthriftFirstResp.GetSuccess(), fbthriftSinkCallback, nil
 }
 
 func (c *sinkServiceClientImpl) MethodThrow(ctx context.Context) (func(iter.Seq2[*SinkPayload, error]) (*FinalResponse, error), error) {
-    panic("sink not implemented")
+    fbthriftReq := &reqSinkServiceMethodThrow{
+    }
+    fbthriftFirstResp := newRespSinkServiceMethodThrow()
+
+    fbthriftChannel := c.ch
+
+    fbthriftSinkFn, fbthriftErr := fbthriftChannel.SendRequestSink(
+        ctx,
+        "methodThrow",
+        fbthriftReq,
+        fbthriftFirstResp,
+    )
+    if fbthriftErr != nil {
+        return nil, fbthriftErr
+    }
+
+    fbthriftSinkCallback := func(elemSeq iter.Seq2[*SinkPayload, error]) (*FinalResponse, error) {
+        sinkPayloadSeq := func(yield func(thrift.WritableResult, error) bool) {
+            for elem, err := range elemSeq {
+                sinkPayload := newSinkSinkServiceMethodThrow()
+                if err != nil {
+                    yield(nil, err)
+                    return
+                }
+                sinkPayload.Success = elem
+                if !yield(sinkPayload, nil) {
+                    return
+                }
+            }
+        }
+        fbthriftFinalResp := newRespFinalSinkServiceMethodThrow()
+        fbthriftFinalErr := fbthriftSinkFn(sinkPayloadSeq, fbthriftFinalResp)
+        if fbthriftFinalErr != nil {
+            return nil, fbthriftFinalErr
+        } else if fbthriftFinalEx := fbthriftFinalResp.Exception(); fbthriftFinalEx != nil {
+            return nil, fbthriftFinalEx
+        }
+        return fbthriftFinalResp.GetSuccess(), nil
+    }
+
+    return fbthriftSinkCallback, nil
 }
 
 func (c *sinkServiceClientImpl) MethodSinkThrow(ctx context.Context) (func(iter.Seq2[*SinkPayload, error]) (*FinalResponse, error), error) {
-    panic("sink not implemented")
+    fbthriftReq := &reqSinkServiceMethodSinkThrow{
+    }
+    fbthriftFirstResp := newRespSinkServiceMethodSinkThrow()
+
+    fbthriftChannel := c.ch
+
+    fbthriftSinkFn, fbthriftErr := fbthriftChannel.SendRequestSink(
+        ctx,
+        "methodSinkThrow",
+        fbthriftReq,
+        fbthriftFirstResp,
+    )
+    if fbthriftErr != nil {
+        return nil, fbthriftErr
+    }
+
+    fbthriftSinkCallback := func(elemSeq iter.Seq2[*SinkPayload, error]) (*FinalResponse, error) {
+        sinkPayloadSeq := func(yield func(thrift.WritableResult, error) bool) {
+            for elem, err := range elemSeq {
+                sinkPayload := newSinkSinkServiceMethodSinkThrow()
+                if err != nil {
+                    switch v := err.(type) {
+                    case *SinkException1:
+                        sinkPayload.Ex = v
+                        yield(sinkPayload, nil)
+                    default:
+                        yield(nil, err)
+                    }
+                    return
+                }
+                sinkPayload.Success = elem
+                if !yield(sinkPayload, nil) {
+                    return
+                }
+            }
+        }
+        fbthriftFinalResp := newRespFinalSinkServiceMethodSinkThrow()
+        fbthriftFinalErr := fbthriftSinkFn(sinkPayloadSeq, fbthriftFinalResp)
+        if fbthriftFinalErr != nil {
+            return nil, fbthriftFinalErr
+        } else if fbthriftFinalEx := fbthriftFinalResp.Exception(); fbthriftFinalEx != nil {
+            return nil, fbthriftFinalEx
+        }
+        return fbthriftFinalResp.GetSuccess(), nil
+    }
+
+    return fbthriftSinkCallback, nil
 }
 
 func (c *sinkServiceClientImpl) MethodFinalThrow(ctx context.Context) (func(iter.Seq2[*SinkPayload, error]) (*FinalResponse, error), error) {
-    panic("sink not implemented")
+    fbthriftReq := &reqSinkServiceMethodFinalThrow{
+    }
+    fbthriftFirstResp := newRespSinkServiceMethodFinalThrow()
+
+    fbthriftChannel := c.ch
+
+    fbthriftSinkFn, fbthriftErr := fbthriftChannel.SendRequestSink(
+        ctx,
+        "methodFinalThrow",
+        fbthriftReq,
+        fbthriftFirstResp,
+    )
+    if fbthriftErr != nil {
+        return nil, fbthriftErr
+    }
+
+    fbthriftSinkCallback := func(elemSeq iter.Seq2[*SinkPayload, error]) (*FinalResponse, error) {
+        sinkPayloadSeq := func(yield func(thrift.WritableResult, error) bool) {
+            for elem, err := range elemSeq {
+                sinkPayload := newSinkSinkServiceMethodFinalThrow()
+                if err != nil {
+                    yield(nil, err)
+                    return
+                }
+                sinkPayload.Success = elem
+                if !yield(sinkPayload, nil) {
+                    return
+                }
+            }
+        }
+        fbthriftFinalResp := newRespFinalSinkServiceMethodFinalThrow()
+        fbthriftFinalErr := fbthriftSinkFn(sinkPayloadSeq, fbthriftFinalResp)
+        if fbthriftFinalErr != nil {
+            return nil, fbthriftFinalErr
+        } else if fbthriftFinalEx := fbthriftFinalResp.Exception(); fbthriftFinalEx != nil {
+            return nil, fbthriftFinalEx
+        }
+        return fbthriftFinalResp.GetSuccess(), nil
+    }
+
+    return fbthriftSinkCallback, nil
 }
 
 func (c *sinkServiceClientImpl) MethodBothThrow(ctx context.Context) (func(iter.Seq2[*SinkPayload, error]) (*FinalResponse, error), error) {
-    panic("sink not implemented")
+    fbthriftReq := &reqSinkServiceMethodBothThrow{
+    }
+    fbthriftFirstResp := newRespSinkServiceMethodBothThrow()
+
+    fbthriftChannel := c.ch
+
+    fbthriftSinkFn, fbthriftErr := fbthriftChannel.SendRequestSink(
+        ctx,
+        "methodBothThrow",
+        fbthriftReq,
+        fbthriftFirstResp,
+    )
+    if fbthriftErr != nil {
+        return nil, fbthriftErr
+    }
+
+    fbthriftSinkCallback := func(elemSeq iter.Seq2[*SinkPayload, error]) (*FinalResponse, error) {
+        sinkPayloadSeq := func(yield func(thrift.WritableResult, error) bool) {
+            for elem, err := range elemSeq {
+                sinkPayload := newSinkSinkServiceMethodBothThrow()
+                if err != nil {
+                    switch v := err.(type) {
+                    case *SinkException1:
+                        sinkPayload.Ex = v
+                        yield(sinkPayload, nil)
+                    default:
+                        yield(nil, err)
+                    }
+                    return
+                }
+                sinkPayload.Success = elem
+                if !yield(sinkPayload, nil) {
+                    return
+                }
+            }
+        }
+        fbthriftFinalResp := newRespFinalSinkServiceMethodBothThrow()
+        fbthriftFinalErr := fbthriftSinkFn(sinkPayloadSeq, fbthriftFinalResp)
+        if fbthriftFinalErr != nil {
+            return nil, fbthriftFinalErr
+        } else if fbthriftFinalEx := fbthriftFinalResp.Exception(); fbthriftFinalEx != nil {
+            return nil, fbthriftFinalEx
+        }
+        return fbthriftFinalResp.GetSuccess(), nil
+    }
+
+    return fbthriftSinkCallback, nil
 }
 
 func (c *sinkServiceClientImpl) MethodFast(ctx context.Context) (func(iter.Seq2[*SinkPayload, error]) (*FinalResponse, error), error) {
-    panic("sink not implemented")
+    fbthriftReq := &reqSinkServiceMethodFast{
+    }
+    fbthriftFirstResp := newRespSinkServiceMethodFast()
+
+    fbthriftChannel := c.ch
+
+    fbthriftSinkFn, fbthriftErr := fbthriftChannel.SendRequestSink(
+        ctx,
+        "methodFast",
+        fbthriftReq,
+        fbthriftFirstResp,
+    )
+    if fbthriftErr != nil {
+        return nil, fbthriftErr
+    }
+
+    fbthriftSinkCallback := func(elemSeq iter.Seq2[*SinkPayload, error]) (*FinalResponse, error) {
+        sinkPayloadSeq := func(yield func(thrift.WritableResult, error) bool) {
+            for elem, err := range elemSeq {
+                sinkPayload := newSinkSinkServiceMethodFast()
+                if err != nil {
+                    yield(nil, err)
+                    return
+                }
+                sinkPayload.Success = elem
+                if !yield(sinkPayload, nil) {
+                    return
+                }
+            }
+        }
+        fbthriftFinalResp := newRespFinalSinkServiceMethodFast()
+        fbthriftFinalErr := fbthriftSinkFn(sinkPayloadSeq, fbthriftFinalResp)
+        if fbthriftFinalErr != nil {
+            return nil, fbthriftFinalErr
+        } else if fbthriftFinalEx := fbthriftFinalResp.Exception(); fbthriftFinalEx != nil {
+            return nil, fbthriftFinalEx
+        }
+        return fbthriftFinalResp.GetSuccess(), nil
+    }
+
+    return fbthriftSinkCallback, nil
 }
 
 

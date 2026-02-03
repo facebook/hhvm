@@ -64,7 +64,7 @@ func newRocketClient(
 	default:
 		return nil, fmt.Errorf("unsupported ProtocolID: %d", protoID)
 	}
-	rsocketClient := newRSocketClient(conn, rpcProtocolID)
+	rsocketClient := newRSocketClient(conn, rpcProtocolID, protoID)
 	p := &rocketClient{
 		client:            rsocketClient,
 		protoID:           protoID,
@@ -186,7 +186,35 @@ func (p *rocketClient) SendRequestSink(
 	request WritableStruct,
 	firstResponse ReadableResult,
 ) (func(sinkSeq iter.Seq2[WritableResult, error], finalResponse ReadableStruct) error, error) {
-	return nil, errors.New("not implemented")
+	dataBytes, err := encodeRequest(p.protoID, request)
+	if err != nil {
+		return nil, err
+	}
+
+	err = p.client.SendSetup(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	headers := p.getWriteHeaders(ctx)
+	respHeaders, resultData, sinkCallback, resultErr := p.client.RequestChannel(ctx, messageName, headers, dataBytes)
+	if resultErr != nil {
+		return nil, resultErr
+	}
+
+	rpcOpts := GetRPCOptions(ctx)
+	if rpcOpts != nil {
+		rpcOpts.SetReadHeaders(respHeaders)
+	}
+	err = decodeResponse(p.protoID, resultData, firstResponse)
+	if err != nil {
+		return nil, err
+	}
+	// Declared exception (inside the response)
+	if exception := firstResponse.Exception(); exception != nil {
+		return nil, exception
+	}
+	return sinkCallback, nil
 }
 
 func (p *rocketClient) TerminateInteraction(interactionID int64) error {

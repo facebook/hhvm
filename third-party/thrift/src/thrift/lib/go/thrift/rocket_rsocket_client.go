@@ -35,6 +35,7 @@ import (
 	rsocket "github.com/rsocket/rsocket-go"
 	"github.com/rsocket/rsocket-go/core/transport"
 	"github.com/rsocket/rsocket-go/payload"
+	"github.com/rsocket/rsocket-go/rx/flux"
 )
 
 // RSocketClient is a client that uses a rsocket library.
@@ -59,6 +60,12 @@ type RSocketClient interface {
 		dataBytes []byte,
 		newStreamElemFn func() ReadableResult,
 	) (map[string]string, []byte, iter.Seq2[ReadableStruct, error], error)
+	RequestChannel(
+		ctx context.Context,
+		messageName string,
+		headers map[string]string,
+		dataBytes []byte,
+	) (map[string]string, []byte, func(sinkSeq iter.Seq2[WritableResult, error], finalResponse ReadableStruct) error, error)
 	MetadataPush(
 		ctx context.Context,
 		metadata *rpcmetadata.ClientPushMetadata,
@@ -76,14 +83,16 @@ type rsocketClient struct {
 
 	useZstd bool
 
-	protoID rpcmetadata.ProtocolId
+	protoID       rpcmetadata.ProtocolId
+	thriftProtoID types.ProtocolID
 }
 
-func newRSocketClient(conn net.Conn, protoID rpcmetadata.ProtocolId) RSocketClient {
+func newRSocketClient(conn net.Conn, protoID rpcmetadata.ProtocolId, thriftProtoID types.ProtocolID) RSocketClient {
 	return &rsocketClient{
 		conn:            conn,
 		clientScheduler: scheduler.NewElastic(math.MaxInt32),
 		protoID:         protoID,
+		thriftProtoID:   thriftProtoID,
 	}
 }
 
@@ -310,6 +319,168 @@ func (r *rsocketClient) MetadataPush(_ context.Context, metadata *rpcmetadata.Cl
 	}
 	r.client.MetadataPush(payload)
 	return nil
+}
+
+func (r *rsocketClient) RequestChannel(
+	ctx context.Context,
+	messageName string,
+	headers map[string]string,
+	dataBytes []byte,
+) (map[string]string, []byte, func(sinkSeq iter.Seq2[WritableResult, error], finalResponse ReadableStruct) error, error) {
+	r.resetDeadline()
+
+	request, err := rocket.EncodeRequestPayload(
+		ctx,
+		messageName,
+		r.protoID,
+		rpcmetadata.RpcKind_SINK,
+		headers,
+		rpcmetadata.CompressionAlgorithm_NONE,
+		dataBytes,
+	)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+
+	// Create a flux that yields the initial request payload and then waits for sink items
+	sinkPayloadChan := make(chan payload.Payload, types.DefaultStreamBufferSize)
+	sendingDoneChan := make(chan struct{}, 1)
+	sendingFlux := flux.Create(func(fluxCtx context.Context, sink flux.Sink) {
+		defer close(sendingDoneChan)
+
+		// First, send the initial request payload
+		sink.Next(request)
+
+		// Then, send payloads from the sink channel until it's closed or context is done
+		for {
+			select {
+			case p, ok := <-sinkPayloadChan:
+				if !ok {
+					// Channel closed, complete the flux
+					sink.Complete()
+					return
+				}
+				sink.Next(p)
+			case <-fluxCtx.Done():
+				sink.Error(fluxCtx.Err())
+				return
+			}
+		}
+	})
+
+	receivingFlux := r.client.RequestChannel(sendingFlux)
+
+	channelCtx, channelCancel := context.WithCancel(ctx)
+	receivingPayloadChan, receivingErrChan := receivingFlux.ToChan(channelCtx, types.DefaultStreamBufferSize)
+
+	// Receive the first response payload
+	firstPayload, err := recvStreamNext(channelCtx, receivingPayloadChan, receivingErrChan)
+	if err != nil {
+		channelCancel()
+		close(sinkPayloadChan)
+		return nil, nil, nil, err
+	}
+	firstResponse, err := rocket.DecodeResponsePayload(firstPayload)
+	if err != nil {
+		channelCancel()
+		close(sinkPayloadChan)
+		return nil, nil, nil, err
+	}
+
+	// Create sink callback that will be called by the user to send sink items
+	sinkCallback := func(sinkSeq iter.Seq2[WritableResult, error], finalResponse ReadableStruct) error {
+		defer channelCancel()
+
+		sendAllSinkItems := func() error {
+			defer func() {
+				close(sinkPayloadChan)
+				<-sendingDoneChan
+			}()
+
+			for item, itemErr := range sinkSeq {
+				var finalErr error
+				payloadMetadata := rpcmetadata.NewPayloadMetadata()
+				if itemErr != nil {
+					exceptionMetadataBase := rocket.NewPayloadExceptionMetadataBase(
+						"ApplicationException",
+						itemErr.Error(),
+						rocket.RocketExceptionAppUnknown,
+						rpcmetadata.ErrorKind_UNSPECIFIED,
+						rpcmetadata.ErrorBlame_UNSPECIFIED,
+						rpcmetadata.ErrorSafety_UNSPECIFIED,
+					)
+					payloadMetadata.SetExceptionMetadata(exceptionMetadataBase)
+					finalErr = itemErr
+				} else if declaredException := item.Exception(); declaredException != nil {
+					exceptionMetadataBase := rocket.NewPayloadExceptionMetadataBase(
+						declaredException.TypeName(),
+						declaredException.Error(),
+						rocket.RocketExceptionDeclared,
+						rpcmetadata.ErrorKind_UNSPECIFIED,
+						rpcmetadata.ErrorBlame_UNSPECIFIED,
+						rpcmetadata.ErrorSafety_UNSPECIFIED,
+					)
+					payloadMetadata.SetExceptionMetadata(exceptionMetadataBase)
+					finalErr = declaredException
+				} else {
+					responseMetadata := rpcmetadata.NewPayloadResponseMetadata()
+					payloadMetadata.SetResponseMetadata(responseMetadata)
+				}
+
+				metadata := rpcmetadata.NewStreamPayloadMetadata().
+					SetCompression(Pointerize(rpcmetadata.CompressionAlgorithm_NONE)).
+					SetPayloadMetadata(payloadMetadata)
+
+				// Encode the sink item
+				var itemBytes []byte
+				if item != nil {
+					itemBytes, err = encodeRequest(r.thriftProtoID, item)
+					if err != nil {
+						return err
+					}
+				}
+
+				sinkPayload, err := rocket.EncodePayloadMetadataAndData(metadata, itemBytes, rpcmetadata.CompressionAlgorithm_NONE)
+				if err != nil {
+					return err
+				}
+
+				select {
+				case sinkPayloadChan <- sinkPayload:
+				case <-ctx.Done():
+					return ctx.Err()
+				}
+
+				if finalErr != nil {
+					return finalErr
+				}
+			}
+			return nil
+		}
+		err = sendAllSinkItems()
+		if err != nil {
+			return err
+		}
+
+		// Wait for the final response
+		finalPayload, err := recvStreamNext(channelCtx, receivingPayloadChan, receivingErrChan)
+		if err != nil {
+			return err
+		}
+		if finalPayload == nil {
+			return fmt.Errorf("expected final response but channel completed")
+		}
+
+		finalRespPayload, err := rocket.DecodeStreamPayload(finalPayload)
+		if err != nil {
+			return err
+		}
+
+		// Decode the final response
+		return decodeResponse(r.thriftProtoID, finalRespPayload.Data(), finalResponse)
+	}
+
+	return firstResponse.Headers(), firstResponse.Data(), sinkCallback, nil
 }
 
 func (r *rsocketClient) Close() error {

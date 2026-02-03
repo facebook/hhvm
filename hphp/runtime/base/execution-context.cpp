@@ -100,6 +100,11 @@ rds::local::AliasedRDSLocal<ExecutionContext,
 
 static std::atomic<bool> s_GloballySuppressNonFatals{false};
 
+static auto s_pspEntryCounter = ServiceData::createTimeSeries(
+    "psp_entry", {ServiceData::StatsType::COUNT});
+static auto s_pspSuccessCounter = ServiceData::createTimeSeries(
+    "psp_success", {ServiceData::StatsType::COUNT});
+
 ExecutionContext::ExecutionContext()
   : m_transport(nullptr)
   , m_sb(nullptr)
@@ -715,7 +720,9 @@ void ExecutionContext::onShutdownPostSend() {
   try {
     try {
       ServerStatsHelper ssh("psp", ServerStatsHelper::TRACK_HWINST);
+      s_pspEntryCounter->addValue(1);
       executeFunctions(PostSend);
+      s_pspSuccessCounter->addValue(1);
     } catch (...) {
       try {
         bump_counter_and_rethrow(true /* isPsp */, this);

@@ -7,7 +7,7 @@
 
 #include "thrift/compiler/test/fixtures/method_decorators/gen-cpp2/module_handlers.h"
 #include "thrift/compiler/test/fixtures/method_decorators/gen-cpp2/module_handlers-inl.h"
-#include "thrift/compiler/test/fixtures/method_decorators/gen-cpp2/module_metadata.h"
+#include "thrift/compiler/test/fixtures/method_decorators/gen-cpp2/module_types.h"
 
 #include <thrift/lib/cpp2/gen/service_cpp.h>
 

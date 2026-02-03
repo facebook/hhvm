@@ -7,7 +7,7 @@
 
 #include "thrift/compiler/test/fixtures/single_file_service/gen-cpp2/module_structs_handlers.h"
 #include "thrift/compiler/test/fixtures/single_file_service/gen-cpp2/module_structs_handlers-inl.h"
-#include "thrift/compiler/test/fixtures/single_file_service/gen-cpp2/module_structs_metadata.h"
+#include "thrift/compiler/test/fixtures/single_file_service/gen-cpp2/module_structs_types.h"
 
 #include <thrift/lib/cpp2/gen/service_cpp.h>
 

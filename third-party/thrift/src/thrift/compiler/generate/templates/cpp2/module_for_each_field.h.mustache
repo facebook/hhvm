@@ -18,15 +18,8 @@
 {{> Autogen}}
 #pragma once
 
-#include "{{program:include_prefix}}{{program:name}}_types.h"
+#include "{{program:include_prefix}}{{program:name}}_metadata.h"
 #include <thrift/lib/cpp2/visitation/for_each.h>
-
-{{! TODO: The forward declarations exist due to historical reason. We should migrate and remove it. }}
-{{#program:services}}
-namespace {{service:cpp_qualified_namespace}} {
-class {{service:cpp_name}};
-} // namespace {{service:cpp_qualified_namespace}}
-{{/program:services}}
 
 namespace apache {
 namespace thrift {

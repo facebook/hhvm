@@ -6,15 +6,8 @@
  */
 #pragma once
 
-#include "thrift/compiler/test/fixtures/cpp2-struct-footprint/gen-cpp2/module_types.h"
+#include "thrift/compiler/test/fixtures/cpp2-struct-footprint/gen-cpp2/module_metadata.h"
 #include <thrift/lib/cpp2/visitation/for_each.h>
-
-namespace cpp2_struct_footprint {
-class FootprintTestService;
-} // namespace cpp2_struct_footprint
-namespace cpp2_struct_footprint {
-class ExtendedFootprintService;
-} // namespace cpp2_struct_footprint
 
 namespace apache {
 namespace thrift {

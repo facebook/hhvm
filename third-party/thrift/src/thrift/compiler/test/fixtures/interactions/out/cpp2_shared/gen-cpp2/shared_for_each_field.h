@@ -6,12 +6,8 @@
  */
 #pragma once
 
-#include "thrift/compiler/test/fixtures/interactions/gen-cpp2/shared_types.h"
+#include "thrift/compiler/test/fixtures/interactions/gen-cpp2/shared_metadata.h"
 #include <thrift/lib/cpp2/visitation/for_each.h>
-
-namespace thrift::shared_interactions {
-class InteractLocally;
-} // namespace thrift::shared_interactions
 
 namespace apache {
 namespace thrift {

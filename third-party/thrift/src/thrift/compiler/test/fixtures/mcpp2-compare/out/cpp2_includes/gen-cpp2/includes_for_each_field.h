@@ -6,9 +6,8 @@
  */
 #pragma once
 
-#include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/includes_types.h"
+#include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/includes_metadata.h"
 #include <thrift/lib/cpp2/visitation/for_each.h>
-
 
 namespace apache {
 namespace thrift {

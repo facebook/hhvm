@@ -6,12 +6,8 @@
  */
 #pragma once
 
-#include "thrift/compiler/test/fixtures/params/gen-cpp2/module_types.h"
+#include "thrift/compiler/test/fixtures/params/gen-cpp2/module_metadata.h"
 #include <thrift/lib/cpp2/visitation/for_each.h>
-
-namespace cpp2 {
-class NestedContainers;
-} // namespace cpp2
 
 namespace apache {
 namespace thrift {

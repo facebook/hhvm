@@ -6,9 +6,8 @@
  */
 #pragma once
 
-#include "thrift/compiler/test/fixtures/frozen-struct/gen-cpp2/include1_types.h"
+#include "thrift/compiler/test/fixtures/frozen-struct/gen-cpp2/include1_metadata.h"
 #include <thrift/lib/cpp2/visitation/for_each.h>
-
 
 namespace apache {
 namespace thrift {

@@ -6,12 +6,8 @@
  */
 #pragma once
 
-#include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/extra_services_types.h"
+#include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/extra_services_metadata.h"
 #include <thrift/lib/cpp2/visitation/for_each.h>
-
-namespace extra::svc {
-class ExtraService;
-} // namespace extra::svc
 
 namespace apache {
 namespace thrift {

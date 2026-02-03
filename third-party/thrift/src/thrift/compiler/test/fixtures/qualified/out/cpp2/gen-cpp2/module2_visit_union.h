@@ -6,10 +6,8 @@
  */
 #pragma once
 
-#include "thrift/compiler/test/fixtures/qualified/gen-cpp2/module2_types.h"
+#include "thrift/compiler/test/fixtures/qualified/gen-cpp2/module2_metadata.h"
 #include <thrift/lib/cpp2/visitation/visit_union.h>
-
-
 
 namespace apache {
 namespace thrift {

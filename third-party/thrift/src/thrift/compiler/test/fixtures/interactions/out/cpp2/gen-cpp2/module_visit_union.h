@@ -6,25 +6,8 @@
  */
 #pragma once
 
-#include "thrift/compiler/test/fixtures/interactions/gen-cpp2/module_types.h"
+#include "thrift/compiler/test/fixtures/interactions/gen-cpp2/module_metadata.h"
 #include <thrift/lib/cpp2/visitation/visit_union.h>
-
-namespace cpp2 {
-class MyService;
-} // namespace cpp2
-namespace cpp2 {
-class Factories;
-} // namespace cpp2
-namespace cpp2 {
-class Perform;
-} // namespace cpp2
-namespace cpp2 {
-class InteractWithShared;
-} // namespace cpp2
-namespace cpp2 {
-class BoxService;
-} // namespace cpp2
-
 
 namespace apache {
 namespace thrift {

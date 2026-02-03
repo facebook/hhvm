@@ -6,10 +6,8 @@
  */
 #pragma once
 
-#include "thrift/compiler/test/fixtures/python_capi/gen-cpp2/serialized_dep_types.h"
+#include "thrift/compiler/test/fixtures/python_capi/gen-cpp2/serialized_dep_metadata.h"
 #include <thrift/lib/cpp2/visitation/visit_union.h>
-
-
 
 namespace apache {
 namespace thrift {

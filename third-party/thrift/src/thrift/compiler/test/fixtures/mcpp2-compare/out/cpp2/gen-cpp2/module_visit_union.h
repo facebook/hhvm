@@ -6,19 +6,8 @@
  */
 #pragma once
 
-#include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/module_types.h"
+#include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/module_metadata.h"
 #include <thrift/lib/cpp2/visitation/visit_union.h>
-
-namespace some::valid::ns {
-class EmptyService;
-} // namespace some::valid::ns
-namespace some::valid::ns {
-class ReturnService;
-} // namespace some::valid::ns
-namespace some::valid::ns {
-class ParamService;
-} // namespace some::valid::ns
-
 
 namespace apache {
 namespace thrift {

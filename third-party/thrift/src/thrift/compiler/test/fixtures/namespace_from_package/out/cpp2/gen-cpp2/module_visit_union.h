@@ -6,13 +6,8 @@
  */
 #pragma once
 
-#include "thrift/compiler/test/fixtures/namespace_from_package/gen-cpp2/module_types.h"
+#include "thrift/compiler/test/fixtures/namespace_from_package/gen-cpp2/module_metadata.h"
 #include <thrift/lib/cpp2/visitation/visit_union.h>
-
-namespace test::namespace_from_package::module {
-class TestService;
-} // namespace test::namespace_from_package::module
-
 
 namespace apache {
 namespace thrift {

@@ -6,12 +6,8 @@
  */
 #pragma once
 
-#include "thrift/compiler/test/fixtures/types/gen-cpp2/module_types.h"
+#include "thrift/compiler/test/fixtures/types/gen-cpp2/module_metadata.h"
 #include <thrift/lib/cpp2/visitation/for_each.h>
-
-namespace apache::thrift::fixtures::types {
-class SomeService;
-} // namespace apache::thrift::fixtures::types
 
 namespace apache {
 namespace thrift {

@@ -6,13 +6,8 @@
  */
 #pragma once
 
-#include "thrift/compiler/test/fixtures/bidi/gen-cpp2/module_types.h"
+#include "thrift/compiler/test/fixtures/bidi/gen-cpp2/module_metadata.h"
 #include <thrift/lib/cpp2/visitation/visit_union.h>
-
-namespace cpp2 {
-class BiDiService;
-} // namespace cpp2
-
 
 namespace apache {
 namespace thrift {

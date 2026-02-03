@@ -6,15 +6,8 @@
  */
 #pragma once
 
-#include "thrift/compiler/test/fixtures/client-methods/gen-cpp2/module_types.h"
+#include "thrift/compiler/test/fixtures/client-methods/gen-cpp2/module_metadata.h"
 #include <thrift/lib/cpp2/visitation/for_each.h>
-
-namespace cpp2 {
-class HeaderClientMethodsAnnotationOnService;
-} // namespace cpp2
-namespace cpp2 {
-class HeaderClientMethodsAnnotationOnFunction;
-} // namespace cpp2
 
 namespace apache {
 namespace thrift {

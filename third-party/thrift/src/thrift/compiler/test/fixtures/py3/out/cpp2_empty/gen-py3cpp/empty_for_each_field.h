@@ -6,12 +6,8 @@
  */
 #pragma once
 
-#include "thrift/compiler/test/fixtures/py3/gen-py3cpp/empty_types.h"
+#include "thrift/compiler/test/fixtures/py3/gen-py3cpp/empty_metadata.h"
 #include <thrift/lib/cpp2/visitation/for_each.h>
-
-namespace cpp2 {
-class NullService;
-} // namespace cpp2
 
 namespace apache {
 namespace thrift {

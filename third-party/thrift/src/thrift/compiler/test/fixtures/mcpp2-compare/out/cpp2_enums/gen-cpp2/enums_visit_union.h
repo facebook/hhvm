@@ -6,10 +6,8 @@
  */
 #pragma once
 
-#include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/enums_types.h"
+#include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/enums_metadata.h"
 #include <thrift/lib/cpp2/visitation/visit_union.h>
-
-
 
 namespace apache {
 namespace thrift {

@@ -6,8 +6,27 @@
  */
 #pragma once
 
-#include "thrift/compiler/test/fixtures/method_decorators/gen-cpp2/module_metadata.h"
+#include "thrift/compiler/test/fixtures/method_decorators/gen-cpp2/module_types.h"
 #include <thrift/lib/cpp2/visitation/for_each.h>
+
+namespace cpp2 {
+class DecoratedService;
+} // namespace cpp2
+namespace cpp2 {
+class UndecoratedService;
+} // namespace cpp2
+namespace cpp2 {
+class DecoratedService_ExtendsUndecoratedService;
+} // namespace cpp2
+namespace cpp2 {
+class DecoratedService_ExtendsDecoratedService;
+} // namespace cpp2
+namespace cpp2 {
+class UndecoratedService_ExtendsDecoratedService;
+} // namespace cpp2
+namespace cpp2 {
+class DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService;
+} // namespace cpp2
 
 namespace apache {
 namespace thrift {

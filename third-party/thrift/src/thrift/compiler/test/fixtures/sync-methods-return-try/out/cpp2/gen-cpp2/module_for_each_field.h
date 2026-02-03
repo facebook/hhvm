@@ -6,8 +6,15 @@
  */
 #pragma once
 
-#include "thrift/compiler/test/fixtures/sync-methods-return-try/gen-cpp2/module_metadata.h"
+#include "thrift/compiler/test/fixtures/sync-methods-return-try/gen-cpp2/module_types.h"
 #include <thrift/lib/cpp2/visitation/for_each.h>
+
+namespace cpp2 {
+class SinkService;
+} // namespace cpp2
+namespace cpp2 {
+class PubSubStreamingService;
+} // namespace cpp2
 
 namespace apache {
 namespace thrift {

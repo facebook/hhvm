@@ -6,8 +6,21 @@
  */
 #pragma once
 
-#include "thrift/compiler/test/fixtures/fatal/gen-cpp2/module_metadata.h"
+#include "thrift/compiler/test/fixtures/fatal/gen-cpp2/module_types.h"
 #include <thrift/lib/cpp2/visitation/for_each.h>
+
+namespace test_cpp2::cpp_reflection {
+class service1;
+} // namespace test_cpp2::cpp_reflection
+namespace test_cpp2::cpp_reflection {
+class service2;
+} // namespace test_cpp2::cpp_reflection
+namespace test_cpp2::cpp_reflection {
+class service3;
+} // namespace test_cpp2::cpp_reflection
+namespace test_cpp2::cpp_reflection {
+class service_with_special_names;
+} // namespace test_cpp2::cpp_reflection
 
 namespace apache {
 namespace thrift {

@@ -6,8 +6,18 @@
  */
 #pragma once
 
-#include "thrift/compiler/test/fixtures/inheritance/gen-cpp2/module_metadata.h"
+#include "thrift/compiler/test/fixtures/inheritance/gen-cpp2/module_types.h"
 #include <thrift/lib/cpp2/visitation/for_each.h>
+
+namespace cpp2 {
+class MyRoot;
+} // namespace cpp2
+namespace cpp2 {
+class MyNode;
+} // namespace cpp2
+namespace cpp2 {
+class MyLeaf;
+} // namespace cpp2
 
 namespace apache {
 namespace thrift {

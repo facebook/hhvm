@@ -6,8 +6,16 @@
  */
 #pragma once
 
-#include "thrift/compiler/test/fixtures/adapter/gen-cpp2/module_metadata.h"
+#include "thrift/compiler/test/fixtures/adapter/gen-cpp2/module_types.h"
 #include <thrift/lib/cpp2/visitation/visit_union.h>
+
+namespace facebook::thrift::test::fixtures::adapter {
+class Service;
+} // namespace facebook::thrift::test::fixtures::adapter
+namespace facebook::thrift::test::fixtures::adapter {
+class AdapterService;
+} // namespace facebook::thrift::test::fixtures::adapter
+
 
 namespace apache {
 namespace thrift {

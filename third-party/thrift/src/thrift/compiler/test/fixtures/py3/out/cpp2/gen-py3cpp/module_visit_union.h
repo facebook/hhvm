@@ -6,8 +6,19 @@
  */
 #pragma once
 
-#include "thrift/compiler/test/fixtures/py3/gen-py3cpp/module_metadata.h"
+#include "thrift/compiler/test/fixtures/py3/gen-py3cpp/module_types.h"
 #include <thrift/lib/cpp2/visitation/visit_union.h>
+
+namespace py3::simple {
+class SimpleService;
+} // namespace py3::simple
+namespace py3::simple {
+class DerivedService;
+} // namespace py3::simple
+namespace py3::simple {
+class RederivedService;
+} // namespace py3::simple
+
 
 namespace apache {
 namespace thrift {

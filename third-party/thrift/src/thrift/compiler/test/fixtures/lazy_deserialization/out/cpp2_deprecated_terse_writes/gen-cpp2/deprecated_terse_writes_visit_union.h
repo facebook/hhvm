@@ -6,8 +6,10 @@
  */
 #pragma once
 
-#include "thrift/compiler/test/fixtures/lazy_deserialization/gen-cpp2/deprecated_terse_writes_metadata.h"
+#include "thrift/compiler/test/fixtures/lazy_deserialization/gen-cpp2/deprecated_terse_writes_types.h"
 #include <thrift/lib/cpp2/visitation/visit_union.h>
+
+
 
 namespace apache {
 namespace thrift {

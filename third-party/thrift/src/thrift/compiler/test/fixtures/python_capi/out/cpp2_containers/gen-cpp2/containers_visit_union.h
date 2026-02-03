@@ -6,8 +6,10 @@
  */
 #pragma once
 
-#include "thrift/compiler/test/fixtures/python_capi/gen-cpp2/containers_metadata.h"
+#include "thrift/compiler/test/fixtures/python_capi/gen-cpp2/containers_types.h"
 #include <thrift/lib/cpp2/visitation/visit_union.h>
+
+
 
 namespace apache {
 namespace thrift {

@@ -6,8 +6,21 @@
  */
 #pragma once
 
-#include "thrift/compiler/test/fixtures/basic/gen-cpp2/module_metadata.h"
+#include "thrift/compiler/test/fixtures/basic/gen-cpp2/module_types.h"
 #include <thrift/lib/cpp2/visitation/for_each.h>
+
+namespace test::fixtures::basic {
+class FooService;
+} // namespace test::fixtures::basic
+namespace test::fixtures::basic {
+class FB303Service;
+} // namespace test::fixtures::basic
+namespace test::fixtures::basic {
+class MyService;
+} // namespace test::fixtures::basic
+namespace test::fixtures::basic {
+class DbMixedStackArguments;
+} // namespace test::fixtures::basic
 
 namespace apache {
 namespace thrift {

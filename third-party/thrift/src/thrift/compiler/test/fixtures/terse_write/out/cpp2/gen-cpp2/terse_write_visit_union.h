@@ -6,8 +6,10 @@
  */
 #pragma once
 
-#include "thrift/compiler/test/fixtures/terse_write/gen-cpp2/terse_write_metadata.h"
+#include "thrift/compiler/test/fixtures/terse_write/gen-cpp2/terse_write_types.h"
 #include <thrift/lib/cpp2/visitation/visit_union.h>
+
+
 
 namespace apache {
 namespace thrift {

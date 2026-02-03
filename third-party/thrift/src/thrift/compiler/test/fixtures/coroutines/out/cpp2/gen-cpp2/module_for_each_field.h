@@ -6,8 +6,12 @@
  */
 #pragma once
 
-#include "thrift/compiler/test/fixtures/coroutines/gen-cpp2/module_metadata.h"
+#include "thrift/compiler/test/fixtures/coroutines/gen-cpp2/module_types.h"
 #include <thrift/lib/cpp2/visitation/for_each.h>
+
+namespace cpp2 {
+class MyService;
+} // namespace cpp2
 
 namespace apache {
 namespace thrift {

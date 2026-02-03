@@ -396,7 +396,6 @@ impl HhConfig {
             symbol_write_referenced_out: default.symbol_write_referenced_out,
             symbol_write_reindexed_out: default.symbol_write_reindexed_out,
             symbol_write_sym_hash_out: default.symbol_write_sym_hash_out,
-            tco_error_php_lambdas: default.tco_error_php_lambdas,
             tco_disallow_discarded_nullable_awaitables: default
                 .tco_disallow_discarded_nullable_awaitables,
             tco_typecheck_sample_rate: hhconfig

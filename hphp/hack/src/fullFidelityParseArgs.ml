@@ -38,7 +38,6 @@ type t = {
   const_static_props: bool;
   abstract_static_props: bool;
   disallow_func_ptrs_in_constants: bool;
-  error_php_lambdas: bool;
   disallow_discarded_nullable_awaitables: bool;
   disable_xhp_element_mangling: bool;
   allow_unstable_features: bool;
@@ -75,7 +74,6 @@ let make
     const_static_props
     abstract_static_props
     disallow_func_ptrs_in_constants
-    error_php_lambdas
     disallow_discarded_nullable_awaitables
     disable_xhp_element_mangling
     allow_unstable_features
@@ -110,7 +108,6 @@ let make
     const_static_props;
     abstract_static_props;
     disallow_func_ptrs_in_constants;
-    error_php_lambdas;
     disallow_discarded_nullable_awaitables;
     disable_xhp_element_mangling;
     allow_unstable_features;
@@ -166,7 +163,6 @@ let parse_args () =
   let const_static_props = ref false in
   let abstract_static_props = ref false in
   let disallow_func_ptrs_in_constants = ref false in
-  let error_php_lambdas = ref false in
   let disallow_discarded_nullable_awaitables = ref false in
   let disable_xhp_element_mangling = ref false in
   let allow_unstable_features = ref false in
@@ -281,9 +277,6 @@ No errors are filtered out."
         Arg.Set disallow_func_ptrs_in_constants,
         "Disallow use of HH\\fun and HH\\class_meth in constants and constant initializers"
       );
-      ( "--error-php-lambdas",
-        Arg.Set error_php_lambdas,
-        "Report errors on php style anonymous functions" );
       ( "--disallow-discarded-nullable-awaitables",
         Arg.Set disallow_discarded_nullable_awaitables,
         "Error on using discarded nullable awaitables" );
@@ -353,7 +346,6 @@ No errors are filtered out."
     !const_static_props
     !abstract_static_props
     !disallow_func_ptrs_in_constants
-    !error_php_lambdas
     !disallow_discarded_nullable_awaitables
     !disable_xhp_element_mangling
     !allow_unstable_features

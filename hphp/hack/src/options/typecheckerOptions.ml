@@ -145,8 +145,6 @@ let const_attribute t = t.GlobalOptions.tco_const_attribute
 let type_refinement_partition_shapes t =
   t.GlobalOptions.tco_type_refinement_partition_shapes
 
-let error_php_lambdas t = t.GlobalOptions.tco_error_php_lambdas
-
 let disallow_discarded_nullable_awaitables t =
   t.GlobalOptions.tco_disallow_discarded_nullable_awaitables
 

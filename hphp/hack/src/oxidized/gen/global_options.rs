@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<dca96768b0528150f35179020488742c>>
+// @generated SignedSource<<577ca862f56a1f16cf2a76d71e9bb120>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -263,8 +263,6 @@ pub struct GlobalOptions {
     pub symbol_write_reindexed_out: Option<String>,
     /// Generate reindexed files
     pub symbol_write_sym_hash_out: bool,
-    /// Flag to report an error on php style anonymous functions
-    pub tco_error_php_lambdas: bool,
     /// Flag to error on using discarded nullable awaitables
     pub tco_disallow_discarded_nullable_awaitables: bool,
     /// Type check this proportion of all files. Default is 1.0.

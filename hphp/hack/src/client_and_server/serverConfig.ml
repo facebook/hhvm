@@ -459,7 +459,6 @@ let load_config (config : Config_file_common.t) (options : GlobalOptions.t) :
       (string_opt Config_keys.symbol_write_reindexed_out config)
     ?symbol_write_sym_hash_out:
       (bool_opt Config_keys.symbol_write_sym_hash_out config)
-    ?tco_error_php_lambdas:(bool_opt Config_keys.error_php_lambdas config)
     ?tco_disallow_discarded_nullable_awaitables:
       (bool_opt Config_keys.disallow_discarded_nullable_awaitables config)
     ?tco_typecheck_sample_rate:

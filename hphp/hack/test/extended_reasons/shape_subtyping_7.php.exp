@@ -20,7 +20,7 @@ File shape_subtyping_7.php, line 7, character 3 - line 7, character 19:
  8 | ): void {
  9 | }
 
-The field b is defined
+The field b is required here
 
 File shape_subtyping_7.php, line 4, character 24 - line 4, character 26:
 
@@ -175,7 +175,7 @@ File shape_subtyping_7.php, line 12, character 3 - line 12, character 11:
  14 |   expects_required_a_at_int_alias($s);
  15 | }
 
-The field a is defined
+The field a is required here
 
 File shape_subtyping_7.php, line 3, character 32 - line 3, character 34:
 

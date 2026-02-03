@@ -3,4 +3,4 @@ Invalid return type (Typing[4057])
   File "supertype_shape_must_include_optional_fields_in_subtype_shape.php", line 3, characters 64-70:
   The field `a` is missing
   File "supertype_shape_must_include_optional_fields_in_subtype_shape.php", line 3, characters 22-24:
-  The field `a` is defined
+  The field `a` is required here

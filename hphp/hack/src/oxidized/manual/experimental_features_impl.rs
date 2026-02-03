@@ -63,6 +63,7 @@ impl FeatureName {
             CapturePipeVariables => Unstable,
             AllowExtendedAwaitSyntax => Unstable,
             AllowConditionalAwaitSyntax => Unstable,
+            ShapeFieldPunning => Unstable,
         }
     }
 

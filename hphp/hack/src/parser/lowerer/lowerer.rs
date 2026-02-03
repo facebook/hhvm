@@ -794,6 +794,17 @@ where
             let value = f(&c.value, env)?;
             Ok((name, value))
         }
+        VariableExpression(c) => {
+            // Shape field punning: $foo becomes 'foo' => $foo
+            let pos = p_pos(node, env);
+            let var_name = text_str(&c.expression, env);
+            // Strip the '$' prefix to get the field name
+            let field_name = var_name.strip_prefix('$').unwrap_or(var_name);
+            let shape_field_name =
+                ast::ShapeFieldName::SFlitStr((pos, field_name.to_string().into()));
+            let value = f(node, env)?;
+            Ok((shape_field_name, value))
+        }
         _ => missing_syntax("shape field", node, env),
     }
 }

@@ -1,0 +1,18 @@
+=== Trailing commas ===
+int(1)
+int(2)
+
+=== Nested shapes ===
+int(42)
+string(5) "outer"
+int(1)
+int(2)
+
+=== Empty and single field ===
+dict(0) {
+}
+dict(1) {
+  ["only"]=>
+  string(4) "solo"
+}
+string(4) "solo"

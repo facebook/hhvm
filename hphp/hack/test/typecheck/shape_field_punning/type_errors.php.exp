@@ -1,0 +1,36 @@
+ERROR: File "type_errors.php", line 8, characters 3-34:
+hh_expect type mismatch (Typing[4453])
+  File "type_errors.php", line 8, characters 26-28:
+  Expected `int`
+  File "type_errors.php", line 5, characters 8-21:
+  But got `string`
+ERROR: File "type_errors.php", line 8, characters 32-33:
+Invalid argument (Typing[4110])
+  File "type_errors.php", line 8, characters 26-28:
+  Expected `int`
+  File "type_errors.php", line 5, characters 8-21:
+  But got `string`
+ERROR: File "type_errors.php", line 15, characters 28-29:
+Invalid argument (Typing[4057])
+  File "type_errors.php", line 14, characters 8-20:
+  The field `correct` is missing
+  File "type_errors.php", line 18, characters 41-49:
+  The field `correct` is required here
+ERROR: File "type_errors.php", line 15, characters 28-29:
+Invalid argument (Typing[4057])
+  File "type_errors.php", line 18, characters 35-57:
+  The field `wrong` is missing
+  File "type_errors.php", line 14, characters 14-19:
+  The field `wrong` is required here
+ERROR: File "type_errors.php", line 24, characters 31-32:
+Invalid argument (Typing[4057])
+  File "type_errors.php", line 23, characters 8-16:
+  The field `b` is missing
+  File "type_errors.php", line 27, characters 56-58:
+  The field `b` is required here
+ERROR: File "type_errors.php", line 34, characters 22-23:
+Invalid argument (Typing[4057])
+  File "type_errors.php", line 37, characters 29-45:
+  The field `b` is missing
+  File "type_errors.php", line 33, characters 18-19:
+  The field `b` is required here

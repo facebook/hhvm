@@ -1,0 +1,2 @@
+ERROR: File "disabled.php", line 6, characters 14-17:
+Cannot use unstable feature: `shape_field_punning` (Parsing[1002])

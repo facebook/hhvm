@@ -21,10 +21,10 @@ Invalid assignment (Typing[4057])
   File "simple.bad.php", line 10, characters 33-47:
   The field `a` is missing
   File "simple.bad.php", line 10, characters 9-11:
-  The field `a` is defined
+  The field `a` is required here
 ERROR: File "simple.bad.php", line 11, characters 3-46:
 Invalid assignment (Typing[4057])
   File "simple.bad.php", line 11, characters 3-18:
   The field `a` is missing
   File "simple.bad.php", line 11, characters 28-30:
-  The field `a` is defined
+  The field `a` is required here

@@ -2583,6 +2583,28 @@ where
         self.sc_mut().make_field_initializer(name, arrow, value)
     }
 
+    fn parse_shape_field(&mut self) -> S::Output {
+        // SPEC extension for shape field punning:
+        // shape-field:
+        //   field-initializer
+        //   variable  (shorthand for 'var_name' => $var_name)
+        //
+        // If we see a variable followed by , or ) we treat it as shorthand syntax.
+        // Otherwise, we fall back to the regular field initializer syntax.
+
+        if self.peek_token_kind() == TokenKind::Variable {
+            let next_kind = self.peek_token_kind_with_lookahead(1);
+            if next_kind == TokenKind::Comma || next_kind == TokenKind::RightParen {
+                // Shorthand syntax: $foo becomes 'foo' => $foo
+                let token = self.next_token();
+                let variable = self.sc_mut().make_token(token);
+                return self.sc_mut().make_variable_expression(variable);
+            }
+        }
+        // Fall back to regular field initializer
+        self.parse_field_initializer()
+    }
+
     fn parse_shape_expression(&mut self) -> S::Output {
         // SPEC
         // shape-literal:
@@ -2594,9 +2616,14 @@ where
         // field-initializers:
         //   field-initializer
         //   field-initializers  ,  field-initializer
+        //
+        // Extended for shape field punning:
+        //   shape-field:
+        //     field-initializer
+        //     variable  (shorthand for 'var_name' => $var_name)
         let shape = self.assert_token(TokenKind::Shape);
         let (left_paren, fields, right_paren) =
-            self.parse_parenthesized_comma_list_opt_allow_trailing(|p| p.parse_field_initializer());
+            self.parse_parenthesized_comma_list_opt_allow_trailing(|p| p.parse_shape_field());
         self.sc_mut()
             .make_shape_expression(shape, left_paren, fields, right_paren)
     }

@@ -1,0 +1,75 @@
+=== Basic punning ===
+int(42)
+string(5) "hello"
+dict(2) {
+  ["foo"]=>
+  int(42)
+  ["bar"]=>
+  string(5) "hello"
+}
+
+=== Mixed syntax ===
+int(100)
+int(200)
+dict(2) {
+  ["punned"]=>
+  int(100)
+  ["explicit"]=>
+  int(200)
+}
+
+=== Multiple types ===
+int(42)
+string(4) "text"
+bool(true)
+float(3.14)
+NULL
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+
+=== Position flexibility ===
+dict(2) {
+  ["first"]=>
+  int(1)
+  ["explicit"]=>
+  int(99)
+}
+dict(3) {
+  ["a"]=>
+  int(10)
+  ["middle"]=>
+  int(2)
+  ["b"]=>
+  int(20)
+}
+dict(2) {
+  ["x"]=>
+  int(50)
+  ["last"]=>
+  int(3)
+}
+dict(3) {
+  ["first"]=>
+  int(1)
+  ["middle"]=>
+  int(2)
+  ["last"]=>
+  int(3)
+}
+
+=== Variable name edge cases ===
+int(1)
+int(2)
+int(3)
+int(4)
+int(5)
+int(6)
+
+=== Shape operations ===
+string(5) "Alice"
+int(30)
+string(5) "Alice"
+int(30)

@@ -2706,11 +2706,16 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
     }
 
     fn invalid_shape_field_check(&mut self, node: S<'a>) {
-        if let FieldInitializer(x) = &node.children {
-            self.invalid_shape_initializer_name(&x.name)
-        } else {
-            self.errors
-                .push(make_error_from_node(node, errors::invalid_shape_field_name))
+        match &node.children {
+            FieldInitializer(x) => self.invalid_shape_initializer_name(&x.name),
+            VariableExpression(_) => {
+                // Shape field punning: $foo becomes 'foo' => $foo
+                // Check if the feature is enabled
+                self.check_can_use_feature(node, &FeatureName::ShapeFieldPunning);
+            }
+            _ => self
+                .errors
+                .push(make_error_from_node(node, errors::invalid_shape_field_name)),
         }
     }
 

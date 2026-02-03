@@ -39,7 +39,7 @@ Invalid argument (Typing[4057])
   File "multi.php", line 11, characters 15-43:
   The field `c` is missing
   File "multi.php", line 6, characters 53-55:
-  The field `c` is defined
+  The field `c` is required here
 ERROR: File "multi.php", line 13, characters 15-16:
 Invalid argument (Typing[4110])
   File "multi.php", line 6, characters 35-37:
@@ -57,4 +57,4 @@ Invalid argument (Typing[4057])
   File "multi.php", line 12, characters 8-36:
   The field `c` is missing
   File "multi.php", line 6, characters 53-55:
-  The field `c` is defined
+  The field `c` is required here

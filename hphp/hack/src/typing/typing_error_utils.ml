@@ -5977,7 +5977,8 @@ end = struct
       lazy
         [
           (pos, "The field " ^ Markdown_lite.md_codify name ^ " is missing");
-          (decl_pos, "The field " ^ Markdown_lite.md_codify name ^ " is defined");
+          ( decl_pos,
+            "The field " ^ Markdown_lite.md_codify name ^ " is required here" );
         ]
     in
     let reason_super = Typing_reason.reverse_flow reason_super in

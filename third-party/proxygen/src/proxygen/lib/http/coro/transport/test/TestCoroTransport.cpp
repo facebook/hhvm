@@ -57,7 +57,7 @@ folly::coro::Task<size_t> TestCoroTransport::read(
       co_return 0;
     } else if (isCancelErr) {
       XLOG(DBG8) << "::read(); readError=" << *state_->readError;
-      co_yield folly::coro::co_error(folly::OperationCancelled{});
+      co_yield folly::coro::co_stopped_may_throw;
     } else {
       readEvent_.reset();
       auto status = co_await readEvent_.timedWait(evb_, timeout);
@@ -123,7 +123,7 @@ folly::coro::Task<folly::Unit> TestCoroTransport::write(
     folly::WriteFlags writeFlags,
     WriteInfo *writeInfo) {
   if (state_->writesClosed) {
-    co_yield folly::coro::co_error(folly::OperationCancelled());
+    co_yield folly::coro::co_stopped_may_throw;
   }
   folly::IOBufQueue bufQueue{folly::IOBufQueue::cacheChainLength()};
   bufQueue.append(std::move(buf));

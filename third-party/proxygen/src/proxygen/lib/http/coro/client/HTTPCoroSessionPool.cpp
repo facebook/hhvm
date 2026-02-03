@@ -428,7 +428,7 @@ folly::coro::Task<void> HTTPCoroSessionPool::addNewConnection() {
       if (!sessionTry.hasException()) {
         sessionTry.value()->initiateDrain();
       }
-      co_yield co_error(folly::OperationCancelled{});
+      co_yield folly::coro::co_stopped_may_throw;
     }
     if (sessionTry.hasException()) {
       XLOG(DBG3) << "Failed to get connection for pool=" << *this

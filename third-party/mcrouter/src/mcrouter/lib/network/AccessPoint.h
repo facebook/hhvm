@@ -167,6 +167,14 @@ struct AccessPoint {
     return serviceId_;
   }
 
+  std::optional<std::string> getTwJob() const {
+    return twJob_;
+  }
+
+  void setTwJob(std::string twJob) {
+    twJob_ = std::move(twJob);
+  }
+
  private:
   std::string serviceName_;
   std::string host_;
@@ -180,6 +188,7 @@ struct AccessPoint {
   uint32_t failureDomain_{0};
   std::optional<uint16_t> taskId_{std::nullopt};
   std::optional<std::string> serviceId_{std::nullopt};
+  std::optional<std::string> twJob_{std::nullopt};
 };
 
 } // namespace memcache

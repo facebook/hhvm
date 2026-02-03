@@ -10,7 +10,3 @@
 
 #include <thrift/lib/cpp2/gen/module_metadata_h.h>
 #include "thrift/compiler/test/fixtures/bidi/gen-cpp2/module_types.h"
-
-namespace cpp2 {
-class BiDiService;
-} // namespace cpp2

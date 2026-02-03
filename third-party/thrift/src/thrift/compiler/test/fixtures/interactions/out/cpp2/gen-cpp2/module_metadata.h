@@ -10,19 +10,3 @@
 
 #include <thrift/lib/cpp2/gen/module_metadata_h.h>
 #include "thrift/compiler/test/fixtures/interactions/gen-cpp2/module_types.h"
-
-namespace cpp2 {
-class MyService;
-} // namespace cpp2
-namespace cpp2 {
-class Factories;
-} // namespace cpp2
-namespace cpp2 {
-class Perform;
-} // namespace cpp2
-namespace cpp2 {
-class InteractWithShared;
-} // namespace cpp2
-namespace cpp2 {
-class BoxService;
-} // namespace cpp2

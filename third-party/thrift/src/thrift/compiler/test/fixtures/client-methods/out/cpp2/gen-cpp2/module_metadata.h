@@ -10,10 +10,3 @@
 
 #include <thrift/lib/cpp2/gen/module_metadata_h.h>
 #include "thrift/compiler/test/fixtures/client-methods/gen-cpp2/module_types.h"
-
-namespace cpp2 {
-class HeaderClientMethodsAnnotationOnService;
-} // namespace cpp2
-namespace cpp2 {
-class HeaderClientMethodsAnnotationOnFunction;
-} // namespace cpp2

@@ -22,10 +22,3 @@
 
 #include <thrift/lib/cpp2/gen/module_metadata_h.h>
 #include "{{program:include_prefix}}{{program:name}}_types.h"
-
-{{! Note: ServiceTag below is not related to metadata, however, we can't remove it from this file yet since some codebases rely on it. }}
-{{#program:services}}
-namespace {{service:cpp_qualified_namespace}} {
-class {{service:cpp_name}};
-} // namespace {{service:cpp_qualified_namespace}}
-{{/program:services}}

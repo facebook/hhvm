@@ -10,7 +10,3 @@
 
 #include <thrift/lib/cpp2/gen/module_metadata_h.h>
 #include "thrift/compiler/test/fixtures/types/gen-cpp2/module_types.h"
-
-namespace apache::thrift::fixtures::types {
-class SomeService;
-} // namespace apache::thrift::fixtures::types

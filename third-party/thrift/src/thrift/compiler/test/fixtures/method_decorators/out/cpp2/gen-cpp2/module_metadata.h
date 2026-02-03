@@ -10,22 +10,3 @@
 
 #include <thrift/lib/cpp2/gen/module_metadata_h.h>
 #include "thrift/compiler/test/fixtures/method_decorators/gen-cpp2/module_types.h"
-
-namespace cpp2 {
-class DecoratedService;
-} // namespace cpp2
-namespace cpp2 {
-class UndecoratedService;
-} // namespace cpp2
-namespace cpp2 {
-class DecoratedService_ExtendsUndecoratedService;
-} // namespace cpp2
-namespace cpp2 {
-class DecoratedService_ExtendsDecoratedService;
-} // namespace cpp2
-namespace cpp2 {
-class UndecoratedService_ExtendsDecoratedService;
-} // namespace cpp2
-namespace cpp2 {
-class DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService;
-} // namespace cpp2

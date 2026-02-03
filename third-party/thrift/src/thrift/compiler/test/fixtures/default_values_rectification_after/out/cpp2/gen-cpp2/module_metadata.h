@@ -10,4 +10,3 @@
 
 #include <thrift/lib/cpp2/gen/module_metadata_h.h>
 #include "thrift/compiler/test/fixtures/default_values_rectification_after/gen-cpp2/module_types.h"
-

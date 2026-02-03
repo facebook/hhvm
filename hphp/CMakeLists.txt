@@ -71,14 +71,6 @@ add_library(hhvm_base_headers INTERFACE)
 hphp_link(hhvm_base_headers INTERFACE)
 target_include_directories(hhvm_base_headers INTERFACE ${CMAKE_SOURCE_DIR})
 
-# Only thing to do directly in tools is install this one script. Tools also has
-# its own Makefile, so just do it here instead of dealing with moving that all
-# around.
-install(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/tools/oss-repo-mode
-  RENAME hhvm-repo-mode
-  DESTINATION bin
-  COMPONENT dev)
-
 add_definitions("-DUSE_CMAKE")
 
 enable_language(ASM)
@@ -86,10 +78,6 @@ enable_language(ASM)
 if (NOT PCRE_LIBRARY)
   link_libraries(pcre)
 endif()
-
-add_subdirectory(tools/hfsort)
-add_subdirectory(tools/version)
-add_subdirectory(tools/tc-print)
 
 add_subdirectory(compiler)
 add_subdirectory(hack)
@@ -117,7 +105,5 @@ if (TEST_BIN)
   add_subdirectory(test)
 endif ()
 
-add_subdirectory(tools/gdb)
-
 # Keep this last
-add_subdirectory(tools/hphpize)
+add_subdirectory(tools)

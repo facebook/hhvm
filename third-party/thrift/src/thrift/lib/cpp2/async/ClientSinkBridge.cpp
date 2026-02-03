@@ -105,7 +105,7 @@ folly::coro::Task<folly::Try<StreamPayload>> ClientSinkBridge::sink(
         clientPush(
             folly::Try<apache::thrift::StreamPayload>(
                 rocket::RocketException(rocket::ErrorCode::CANCELED)));
-        co_yield folly::coro::co_cancelled;
+        co_yield folly::coro::co_stopped_may_throw;
       }
     }
 
@@ -119,7 +119,7 @@ folly::coro::Task<folly::Try<StreamPayload>> ClientSinkBridge::sink(
       clientPush(
           folly::Try<apache::thrift::StreamPayload>(
               rocket::RocketException(rocket::ErrorCode::CANCELED)));
-      co_yield folly::coro::co_cancelled;
+      co_yield folly::coro::co_stopped_may_throw;
     }
 
     if (item.has_value()) {

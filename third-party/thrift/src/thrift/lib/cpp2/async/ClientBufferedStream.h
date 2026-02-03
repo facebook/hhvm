@@ -233,7 +233,7 @@ class ClientBufferedStream {
           // we've been cancelled
           apache::thrift::detail::ClientStreamBridge::Ptr(
               streamBridge.release());
-          co_yield folly::coro::co_cancelled;
+          co_yield folly::coro::co_stopped_may_throw;
         }
       }
 
@@ -391,7 +391,7 @@ class ClientBufferedStream {
             // we've been cancelled
             apache::thrift::detail::ClientStreamBridge::Ptr(
                 streamBridge.release());
-            co_yield folly::coro::co_cancelled;
+            co_yield folly::coro::co_stopped_may_throw;
           }
         } else {
           incoming = streamBridge->getMessages();

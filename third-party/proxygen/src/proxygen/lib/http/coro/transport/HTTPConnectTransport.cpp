@@ -196,7 +196,7 @@ folly::coro::Task<folly::Unit> HTTPConnectTransport::write(
     co_yield co_error(AsyncSocketException(AsyncSocketException::TIMED_OUT,
                                            "Write timed out"));
   } else if (res == TimedBaton::Status::cancelled) {
-    co_yield folly::coro::co_cancelled;
+    co_yield folly::coro::co_stopped_may_throw;
   }
   if (!connectStream_->egressSource_) {
     co_yield co_error(AsyncSocketException(

@@ -160,6 +160,8 @@ class Path {
   std::vector<Component> components_;
 
   friend class PathBuilder;
+  friend class DynamicRef;
+  friend class DynamicConstRef;
 };
 
 /**

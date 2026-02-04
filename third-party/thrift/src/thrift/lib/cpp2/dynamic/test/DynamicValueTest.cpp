@@ -20,7 +20,14 @@
 
 #include <folly/io/IOBuf.h>
 #include <folly/io/IOBufQueue.h>
+#include <thrift/lib/cpp2/dynamic/List.h>
+#include <thrift/lib/cpp2/dynamic/Map.h>
+#include <thrift/lib/cpp2/dynamic/Path.h>
 #include <thrift/lib/cpp2/dynamic/Serialization.h>
+#include <thrift/lib/cpp2/dynamic/Set.h>
+#include <thrift/lib/cpp2/dynamic/Struct.h>
+#include <thrift/lib/cpp2/dynamic/TypeSystemBuilder.h>
+#include <thrift/lib/cpp2/dynamic/Union.h>
 #include <thrift/lib/cpp2/dynamic/detail/ConcreteList.h>
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
 
@@ -514,6 +521,255 @@ TEST(DynamicConstRefTest, EqualityRefVsConstRef) {
   EXPECT_TRUE(concreteRef1 == ref1);
   EXPECT_FALSE(ref1 == concreteRef2);
   EXPECT_FALSE(concreteRef2 == ref1);
+}
+
+// ============================================================================
+// Traverse tests
+// ============================================================================
+
+using def = type_system::TypeSystemBuilder::DefinitionHelper;
+using type_system::TypeIds;
+
+// Helper fixture for traverse tests
+struct TraverseTest : ::testing::Test {
+  std::unique_ptr<type_system::TypeSystem> typeSystem;
+
+  static constexpr auto kInnerUri = "facebook.com/thrift/test/Inner";
+  static constexpr auto kOuterUri = "facebook.com/thrift/test/Outer";
+  static constexpr auto kTestUnionUri = "facebook.com/thrift/test/TestUnion";
+
+  TraverseTest() {
+    type_system::TypeSystemBuilder builder;
+
+    // struct Inner { 1: i32 value }
+    builder.addType(
+        kInnerUri,
+        def::Struct({
+            def::Field(
+                def::Identity(1, "value"), def::AlwaysPresent, TypeIds::I32),
+        }));
+
+    // struct Outer {
+    //   1: Inner inner
+    //   2: optional Inner optionalInner
+    //   3: list<i32> numbers
+    //   4: map<string, i32> scores
+    //   5: set<string> tags
+    // }
+    builder.addType(
+        kOuterUri,
+        def::Struct({
+            def::Field(
+                def::Identity(1, "inner"),
+                def::AlwaysPresent,
+                TypeIds::uri(kInnerUri)),
+            def::Field(
+                def::Identity(2, "optionalInner"),
+                def::Optional,
+                TypeIds::uri(kInnerUri)),
+            def::Field(
+                def::Identity(3, "numbers"),
+                def::AlwaysPresent,
+                TypeIds::list(TypeIds::I32)),
+            def::Field(
+                def::Identity(4, "scores"),
+                def::AlwaysPresent,
+                TypeIds::map(TypeIds::String, TypeIds::I32)),
+            def::Field(
+                def::Identity(5, "tags"),
+                def::AlwaysPresent,
+                TypeIds::set(TypeIds::String)),
+        }));
+
+    // union TestUnion { 1: i32 intValue; 2: string strValue }
+    builder.addType(
+        kTestUnionUri,
+        def::Union({
+            def::Field(
+                def::Identity(1, "intValue"), def::Optional, TypeIds::I32),
+            def::Field(
+                def::Identity(2, "strValue"), def::Optional, TypeIds::String),
+        }));
+
+    typeSystem = std::move(builder).build();
+  }
+
+  const type_system::StructNode& outerNode() {
+    return typeSystem->getUserDefinedTypeOrThrow(kOuterUri).asStruct();
+  }
+
+  const type_system::StructNode& innerNode() {
+    return typeSystem->getUserDefinedTypeOrThrow(kInnerUri).asStruct();
+  }
+
+  const type_system::UnionNode& unionNode() {
+    return typeSystem->getUserDefinedTypeOrThrow(kTestUnionUri).asUnion();
+  }
+};
+
+TEST_F(TraverseTest, TraverseStructFields) {
+  // Create an Outer struct with nested inner.value = 42
+  auto outer = DynamicValue::makeDefault(outerNode().asRef());
+  outer.asStruct().getField("inner")->asStruct().setField(
+      "value", DynamicValue::makeI32(42));
+
+  // Build path to inner.value
+  PathBuilder pathBuilder{outerNode().asRef()};
+  auto g1 = pathBuilder.enterField("inner");
+  auto g2 = pathBuilder.enterField("value");
+  Path path = pathBuilder.path();
+
+  // Test const traverse via DynamicConstRef
+  ASSERT_TRUE(DynamicConstRef(outer).traverse(path).has_value());
+  EXPECT_EQ(DynamicConstRef(outer).traverse(path)->asI32(), 42);
+
+  // Test mutable traverse via DynamicRef - modify and verify
+  auto result = DynamicRef(outer).traverse(path);
+  ASSERT_TRUE(result.has_value());
+  result->asI32() = 100;
+  EXPECT_EQ(
+      outer.asStruct().getField("inner")->asStruct().getField("value")->asI32(),
+      100);
+
+  // Test traverse directly on DynamicValue (const and mutable)
+  outer.asStruct().getField("inner")->asStruct().setField(
+      "value", DynamicValue::makeI32(200));
+  const auto& constOuter = outer;
+  EXPECT_EQ(constOuter.traverse(path)->asI32(), 200);
+  outer.traverse(path)->asI32() = 300;
+  EXPECT_EQ(
+      outer.asStruct().getField("inner")->asStruct().getField("value")->asI32(),
+      300);
+
+  // Test unset optional field returns nullopt
+  PathBuilder optPathBuilder{outerNode().asRef()};
+  auto og1 = optPathBuilder.enterField("optionalInner");
+  auto og2 = optPathBuilder.enterField("value");
+  EXPECT_FALSE(
+      DynamicConstRef(outer).traverse(optPathBuilder.path()).has_value());
+}
+
+TEST_F(TraverseTest, TraverseList) {
+  auto outer = DynamicValue::makeDefault(outerNode().asRef());
+  auto& numbers = outer.asStruct().getField("numbers")->asList();
+  numbers.push_back(DynamicValue::makeI32(10));
+  numbers.push_back(DynamicValue::makeI32(20));
+
+  // Build path to numbers[1]
+  PathBuilder pathBuilder{outerNode().asRef()};
+  auto g1 = pathBuilder.enterField("numbers");
+  auto g2 = pathBuilder.enterListElement(1);
+  Path path = pathBuilder.path();
+
+  // Valid index - use mutable DynamicValue::traverse and modify
+  auto result = outer.traverse(path);
+  ASSERT_TRUE(result.has_value());
+  EXPECT_EQ(result->asI32(), 20);
+  result->asI32() = 200;
+  EXPECT_EQ(numbers.at(1).asI32(), 200);
+
+  // Out of bounds - use const DynamicValue::traverse
+  PathBuilder oobPathBuilder{outerNode().asRef()};
+  auto og1 = oobPathBuilder.enterField("numbers");
+  auto og2 = oobPathBuilder.enterListElement(99);
+  const auto& constOuter = outer;
+  EXPECT_FALSE(constOuter.traverse(oobPathBuilder.path()).has_value());
+}
+
+TEST_F(TraverseTest, TraverseMap) {
+  auto outer = DynamicValue::makeDefault(outerNode().asRef());
+  outer.asStruct().getField("scores")->asMap().insert(
+      DynamicValue::makeString("alice"), DynamicValue::makeI32(100));
+
+  // Build path to scores["alice"]
+  PathBuilder pathBuilder{outerNode().asRef()};
+  auto g1 = pathBuilder.enterField("scores");
+  auto g2 = pathBuilder.enterMapValue("alice");
+  Path path = pathBuilder.path();
+
+  // Existing key - use DynamicRef::traverse and modify
+  auto result = DynamicRef(outer).traverse(path);
+  ASSERT_TRUE(result.has_value());
+  EXPECT_EQ(result->asI32(), 100);
+  result->asI32() = 999;
+  EXPECT_EQ(
+      outer.asStruct()
+          .getField("scores")
+          ->asMap()
+          .get(DynamicValue::makeString("alice"))
+          ->asI32(),
+      999);
+
+  // Missing key - use DynamicValue::traverse directly
+  PathBuilder missingPathBuilder{outerNode().asRef()};
+  auto mg1 = missingPathBuilder.enterField("scores");
+  auto mg2 = missingPathBuilder.enterMapValue("missing");
+  EXPECT_FALSE(outer.traverse(missingPathBuilder.path()).has_value());
+}
+
+TEST_F(TraverseTest, TraverseSet) {
+  auto outer = DynamicValue::makeDefault(outerNode().asRef());
+  outer.asStruct().getField("tags")->asSet().insert(
+      DynamicValue::makeString("important"));
+
+  // Build path to tags{"important"}
+  PathBuilder pathBuilder{outerNode().asRef()};
+  auto g1 = pathBuilder.enterField("tags");
+  auto g2 = pathBuilder.enterSetElement("important");
+  Path path = pathBuilder.path();
+
+  // Existing element - use const DynamicValue::traverse
+  // (set elements are immutable, so mutable access throws)
+  const auto& constOuter = outer;
+  auto result = constOuter.traverse(path);
+  ASSERT_TRUE(result.has_value());
+  EXPECT_EQ(result->asString().view(), "important");
+
+  // Missing element - also use const access
+  PathBuilder missingPathBuilder{outerNode().asRef()};
+  auto mg1 = missingPathBuilder.enterField("tags");
+  auto mg2 = missingPathBuilder.enterSetElement("missing");
+  EXPECT_FALSE(constOuter.traverse(missingPathBuilder.path()).has_value());
+}
+
+TEST_F(TraverseTest, TraverseUnion) {
+  auto unionVal = DynamicValue::makeDefault(unionNode().asRef());
+  unionVal.asUnion().setField("intValue", DynamicValue::makeI32(42));
+
+  // Build path to intValue (active field) - use mutable DynamicValue::traverse
+  PathBuilder activePathBuilder{unionNode().asRef()};
+  auto ag1 = activePathBuilder.enterField("intValue");
+  auto result = unionVal.traverse(activePathBuilder.path());
+  ASSERT_TRUE(result.has_value());
+  EXPECT_EQ(result->asI32(), 42);
+  result->asI32() = 100;
+  EXPECT_EQ(unionVal.asUnion().getField("intValue").asI32(), 100);
+
+  // Build path to strValue (inactive field) - use const DynamicValue::traverse
+  PathBuilder inactivePathBuilder{unionNode().asRef()};
+  auto ig1 = inactivePathBuilder.enterField("strValue");
+  const auto& constUnion = unionVal;
+  EXPECT_FALSE(constUnion.traverse(inactivePathBuilder.path()).has_value());
+}
+
+TEST_F(TraverseTest, TraverseTypeMismatchThrows) {
+  // Try to access a field on a list type - should throw during path building
+  PathBuilder pathBuilder{outerNode().asRef()};
+  auto g1 = pathBuilder.enterField("numbers");
+  EXPECT_THROW(
+      (void)pathBuilder.enterField("nonexistent"), InvalidPathAccessError);
+}
+
+TEST_F(TraverseTest, TraverseEmptyPath) {
+  auto value = DynamicValue::makeI32(42);
+  PathBuilder pathBuilder{type_system::TypeSystem::I32()};
+  Path path = pathBuilder.path();
+
+  // Use DynamicValue::traverse directly (both const and mutable)
+  const auto& constValue = value;
+  EXPECT_EQ(constValue.traverse(path)->asI32(), 42);
+  value.traverse(path)->asI32() = 100;
+  EXPECT_EQ(value.asI32(), 100);
 }
 
 } // namespace

@@ -16,11 +16,13 @@
 
 #pragma once
 
+#include <thrift/lib/cpp2/dynamic/Path.h>
 #include <thrift/lib/cpp2/dynamic/TypeSystem.h>
 #include <thrift/lib/cpp2/dynamic/detail/Datum.h>
 #include <thrift/lib/cpp2/dynamic/fwd.h>
 
 #include <iosfwd>
+#include <optional>
 #include <string>
 #include <variant>
 
@@ -257,7 +259,29 @@ class DynamicConstRef final {
    */
   std::string debugString() const;
 
+  /**
+   * Traverse this value using a Path and return a reference to the value
+   * at the end of the traversal.
+   *
+   * Returns nullopt if the traversal reaches a missing value (unset optional
+   * field, out-of-bounds list index, missing map key, missing set element,
+   * or inactive union field).
+   *
+   * Throws:
+   *   - InvalidPathAccessError if the path is incompatible with the current
+   *     type (e.g., FieldAccess on a list, ListElement on a struct)
+   *   - std::runtime_error if AnyType traversal is attempted (not supported)
+   */
+  std::optional<DynamicConstRef> traverse(const Path& path) const;
+
  private:
+  /**
+   * Template helper for traverse() implementation.
+   * Used by both DynamicConstRef and DynamicRef to avoid code duplication.
+   */
+  template <typename RefType>
+  static std::optional<RefType> traverseImpl(RefType start, const Path& path);
+
   template <typename T>
   DynamicConstRef(const type_system::TypeRef& type, const T& value)
       : type_(&type), ptr_(std::in_place_type<const T*>, &value) {}
@@ -298,6 +322,7 @@ class DynamicConstRef final {
   template <typename K, typename V>
   friend class detail::ConcreteMap;
   friend struct detail::DatumHash;
+  friend class DynamicRef;
 
   /**
    * Variant of const pointers to all possible Thrift value types.
@@ -425,6 +450,21 @@ class DynamicRef final {
    * Human-readable string representation.
    */
   std::string debugString() const;
+
+  /**
+   * Traverse this value using a Path and return a reference to the value
+   * at the end of the traversal.
+   *
+   * Returns nullopt if the traversal reaches a missing value (unset optional
+   * field, out-of-bounds list index, missing map key, missing set element,
+   * or inactive union field).
+   *
+   * Throws:
+   *   - InvalidPathAccessError if the path is incompatible with the current
+   *     type (e.g., FieldAccess on a list, ListElement on a struct)
+   *   - std::runtime_error if AnyType traversal is attempted (not supported)
+   */
+  std::optional<DynamicRef> traverse(const Path& path);
 
  private:
   template <typename T>
@@ -617,6 +657,22 @@ class DynamicValue final {
    * Human-readable string representation.
    */
   std::string debugString() const;
+
+  /**
+   * Traverse this value using a Path and return a reference to the value
+   * at the end of the traversal.
+   *
+   * Returns nullopt if the traversal reaches a missing value (unset optional
+   * field, out-of-bounds list index, missing map key, missing set element,
+   * or inactive union field).
+   *
+   * Throws:
+   *   - InvalidPathAccessError if the path is incompatible with the current
+   *     type (e.g., FieldAccess on a list, ListElement on a struct)
+   *   - std::runtime_error if AnyType traversal is attempted (not supported)
+   */
+  std::optional<DynamicRef> traverse(const Path& path) &;
+  std::optional<DynamicConstRef> traverse(const Path& path) const&;
 
  private:
   /**

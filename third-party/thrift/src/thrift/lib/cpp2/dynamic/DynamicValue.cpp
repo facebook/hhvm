@@ -18,14 +18,17 @@
 
 #include <thrift/lib/cpp2/dynamic/List.h>
 #include <thrift/lib/cpp2/dynamic/Map.h>
+#include <thrift/lib/cpp2/dynamic/Path.h>
 #include <thrift/lib/cpp2/dynamic/Serialization.h>
 #include <thrift/lib/cpp2/dynamic/Set.h>
 #include <thrift/lib/cpp2/dynamic/Struct.h>
 #include <thrift/lib/cpp2/dynamic/Union.h>
 #include <thrift/lib/cpp2/dynamic/detail/DatumHash.h>
 #include <thrift/lib/cpp2/protocol/DebugProtocol.h>
+#include <thrift/lib/cpp2/protocol/SimpleJSONProtocol.h>
 
 #include <fmt/core.h>
+#include <folly/Overload.h>
 
 #include <iostream>
 #include <utility>
@@ -372,6 +375,14 @@ std::string DynamicValue::debugString() const {
   return ret;
 }
 
+std::optional<DynamicRef> DynamicValue::traverse(const Path& path) & {
+  return DynamicRef(*this).traverse(path);
+}
+
+std::optional<DynamicConstRef> DynamicValue::traverse(const Path& path) const& {
+  return DynamicConstRef(*this).traverse(path);
+}
+
 std::string DynamicRef::debugString() const {
   return DynamicConstRef(*this).debugString();
 }
@@ -691,6 +702,212 @@ std::ostream& operator<<(std::ostream& os, const DynamicConstRef& value) {
 
 std::ostream& operator<<(std::ostream& os, const DynamicValue& value) {
   return os << value.debugString();
+}
+
+// ============================================================================
+// traverse implementation
+// ============================================================================
+
+namespace {
+
+/**
+ * Deserialize a primitive key from its SimpleJSON representation.
+ * Only supports primitive types that can be used as map/set keys.
+ */
+DynamicValue deserializePrimitiveKeyFromSimpleJSON(
+    std::string_view json, type_system::TypeRef keyType) {
+  auto buf = folly::IOBuf::copyBuffer(json);
+  SimpleJSONProtocolReader reader;
+  reader.setInput(buf.get());
+
+  using Kind = type_system::TypeRef::Kind;
+  switch (keyType.kind()) {
+    case Kind::BOOL: {
+      bool val;
+      reader.readBool(val);
+      return DynamicValue::makeBool(val);
+    }
+    case Kind::BYTE: {
+      int8_t val;
+      reader.readByte(val);
+      return DynamicValue::makeByte(val);
+    }
+    case Kind::I16: {
+      int16_t val;
+      reader.readI16(val);
+      return DynamicValue::makeI16(val);
+    }
+    case Kind::I32:
+    case Kind::ENUM: {
+      int32_t val;
+      reader.readI32(val);
+      return DynamicValue::makeI32(val);
+    }
+    case Kind::I64: {
+      int64_t val;
+      reader.readI64(val);
+      return DynamicValue::makeI64(val);
+    }
+    case Kind::FLOAT: {
+      float val;
+      reader.readFloat(val);
+      return DynamicValue::makeFloat(val);
+    }
+    case Kind::DOUBLE: {
+      double val;
+      reader.readDouble(val);
+      return DynamicValue::makeDouble(val);
+    }
+    case Kind::STRING: {
+      std::string val;
+      reader.readString(val);
+      return DynamicValue::makeString(val);
+    }
+    case Kind::BINARY: {
+      std::unique_ptr<folly::IOBuf> val;
+      reader.readBinary(val);
+      return DynamicValue::makeBinary(std::move(val));
+    }
+    default:
+      throw std::runtime_error(
+          fmt::format(
+              "Unsupported key type for path traversal: {}",
+              detail::typeDisplayName(keyType)));
+  }
+}
+
+} // namespace
+
+template <typename RefType>
+std::optional<RefType> DynamicConstRef::traverseImpl(
+    RefType start, const Path& path) {
+  std::optional<RefType> current = start;
+
+  for (const auto& component : path.components()) {
+    auto next = folly::variant_match(
+        component,
+        [&](const Path::FieldAccess& f) -> std::optional<RefType> {
+          const auto& currentType = current->type();
+
+          if (currentType.isStruct()) {
+            auto& structVal = current->asStruct();
+            return structVal.getField(f.handle);
+          } else if (currentType.isUnion()) {
+            auto& unionVal = current->asUnion();
+            // Check if this field is the active field
+            if (!unionVal.hasField(f.handle)) {
+              // Field is not active in union
+              return std::nullopt;
+            }
+            return unionVal.getField(f.handle);
+          } else {
+            folly::throw_exception<InvalidPathAccessError>(fmt::format(
+                "cannot access field on non-structured type '{}'",
+                detail::typeDisplayName(currentType)));
+          }
+        },
+        [&](const Path::ListElement& l) -> std::optional<RefType> {
+          const auto& currentType = current->type();
+          if (!currentType.isList()) {
+            folly::throw_exception<InvalidPathAccessError>(fmt::format(
+                "cannot access list element on non-list type '{}'",
+                detail::typeDisplayName(currentType)));
+          }
+          auto& listVal = current->asList();
+          if (l.index >= listVal.size()) {
+            return std::nullopt;
+          }
+          return listVal[l.index];
+        },
+        [&](const Path::SetElement& s) -> std::optional<RefType> {
+          const auto& currentType = current->type();
+          if (!currentType.isSet()) {
+            folly::throw_exception<InvalidPathAccessError>(fmt::format(
+                "cannot access set element on non-set type '{}'",
+                detail::typeDisplayName(currentType)));
+          }
+          if constexpr (std::is_same_v<RefType, DynamicRef>) {
+            (void)s; // Suppress unused parameter warning
+            // Sets don't support mutable access to elements
+            folly::throw_exception<InvalidPathAccessError>(
+                "cannot get mutable reference to set element");
+          } else {
+            const auto& setVal = current->asSet();
+            auto keyValue = deserializePrimitiveKeyFromSimpleJSON(
+                s.value, setVal.elementType());
+            if (!setVal.contains(keyValue)) {
+              return std::nullopt;
+            }
+            // For sets, find and return the element
+            for (auto elem : setVal) {
+              if (elem.copy() == keyValue) {
+                return elem;
+              }
+            }
+            return std::nullopt;
+          }
+        },
+        [&](const Path::MapKey& m) -> std::optional<RefType> {
+          const auto& currentType = current->type();
+          if (!currentType.isMap()) {
+            folly::throw_exception<InvalidPathAccessError>(fmt::format(
+                "cannot access map key on non-map type '{}'",
+                detail::typeDisplayName(currentType)));
+          }
+          if constexpr (std::is_same_v<RefType, DynamicRef>) {
+            (void)m; // Suppress unused parameter warning
+            // Map keys are immutable
+            folly::throw_exception<InvalidPathAccessError>(
+                "cannot get mutable reference to map key");
+          } else {
+            const auto& mapVal = current->asMap();
+            auto keyValue =
+                deserializePrimitiveKeyFromSimpleJSON(m.key, mapVal.keyType());
+            if (!mapVal.contains(keyValue)) {
+              return std::nullopt;
+            }
+            // For map keys, find and return the key
+            for (auto [key, value] : mapVal) {
+              if (key.copy() == keyValue) {
+                return key;
+              }
+            }
+            return std::nullopt;
+          }
+        },
+        [&](const Path::MapValue& m) -> std::optional<RefType> {
+          const auto& currentType = current->type();
+          if (!currentType.isMap()) {
+            folly::throw_exception<InvalidPathAccessError>(fmt::format(
+                "cannot access map value on non-map type '{}'",
+                detail::typeDisplayName(currentType)));
+          }
+          auto& mapVal = current->asMap();
+          auto keyValue =
+              deserializePrimitiveKeyFromSimpleJSON(m.key, mapVal.keyType());
+          return mapVal.get(keyValue);
+        },
+        [&](const Path::AnyType&) -> std::optional<RefType> {
+          throw std::runtime_error("AnyType traversal is not supported");
+        });
+
+    if (!next.has_value()) {
+      current.reset();
+      break;
+    }
+    current.emplace(*next);
+  }
+
+  return current;
+}
+
+std::optional<DynamicConstRef> DynamicConstRef::traverse(
+    const Path& path) const {
+  return traverseImpl(*this, path);
+}
+
+std::optional<DynamicRef> DynamicRef::traverse(const Path& path) {
+  return DynamicConstRef::traverseImpl(*this, path);
 }
 
 } // namespace apache::thrift::dynamic

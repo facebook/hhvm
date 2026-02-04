@@ -26,9 +26,9 @@ namespace apache::thrift::detail {
 // Explicitly instantiate the base of ServerSinkBridge
 template class TwoWayBridge<
     ServerSinkBridge,
-    std::variant<folly::Try<StreamPayload>, uint64_t>,
+    ServerSinkMessageServerToClient,
     QueueConsumer,
-    folly::Try<StreamPayload>,
+    ServerSinkMessageClientToServer,
     ServerSinkBridge>;
 
 ServerSinkBridge::ServerSinkBridge(
@@ -56,7 +56,9 @@ ServerSinkBridge::Ptr ServerSinkBridge::create(
 // SinkServerCallback method
 bool ServerSinkBridge::onSinkNext(StreamPayload&& payload) {
   notifySinkNext();
-  clientPush(folly::Try<StreamPayload>(std::move(payload)));
+  clientPush(
+      StreamMessage::PayloadOrError{
+          folly::Try<StreamPayload>(std::move(payload))});
   return true;
 }
 
@@ -67,12 +69,12 @@ void ServerSinkBridge::onSinkError(folly::exception_wrapper ew) {
   auto payload = rex
       ? folly::Try<StreamPayload>(EncodedError(rex->moveErrorData()))
       : folly::Try<StreamPayload>(std::move(ew));
-  clientPush(std::move(payload));
+  clientPush(StreamMessage::PayloadOrError{std::move(payload)});
   close();
 }
 
 bool ServerSinkBridge::onSinkComplete() {
-  clientPush({});
+  clientPush(StreamMessage::Complete{});
   sinkComplete_ = true;
   return true;
 }
@@ -84,7 +86,8 @@ void ServerSinkBridge::resetClientCallback(SinkClientCallback& clientCallback) {
 
 // start should be called on thread manager's thread
 folly::coro::Task<void> ServerSinkBridge::start() {
-  serverPush(consumer_.bufferSize);
+  serverPush(
+      StreamMessage::RequestN{static_cast<int32_t>(consumer_.bufferSize)});
   folly::Try<StreamPayload> finalResponse =
       co_await consumer_.consumer(makeGenerator());
 
@@ -92,7 +95,7 @@ folly::coro::Task<void> ServerSinkBridge::start() {
     co_return;
   }
 
-  serverPush(std::move(finalResponse));
+  serverPush(StreamMessage::PayloadOrError{std::move(finalResponse)});
 }
 
 // TwoWayBridge consumer
@@ -105,7 +108,7 @@ folly::coro::AsyncGenerator<folly::Try<StreamPayload>&&>
 ServerSinkBridge::makeGenerator() {
   notifySinkSubscribe();
 
-  uint64_t counter = 0;
+  int32_t counter = 0;
   while (true) {
     CoroConsumer consumer;
     if (serverWait(&consumer)) {
@@ -119,10 +122,14 @@ ServerSinkBridge::makeGenerator() {
     co_await folly::coro::co_safe_point;
     for (auto messages = serverGetMessages(); !messages.empty();
          messages.pop()) {
-      folly::Try<StreamPayload> payload = std::move(messages.front());
-      if (!payload.hasValue() && !payload.hasException()) {
+      auto& message = messages.front();
+
+      if (std::holds_alternative<StreamMessage::Complete>(message)) {
         co_return;
       }
+
+      auto& payload =
+          std::get<StreamMessage::PayloadOrError>(message).streamPayloadTry;
 
       if (payload.hasException()) {
         clientException_ = true;
@@ -133,8 +140,8 @@ ServerSinkBridge::makeGenerator() {
       co_yield std::move(payload);
       notifySinkConsumed();
       counter++;
-      if (counter > consumer_.bufferSize / 2) {
-        serverPush(counter);
+      if (counter > static_cast<int32_t>(consumer_.bufferSize) / 2) {
+        serverPush(StreamMessage::RequestN{counter});
         counter = 0;
       }
     }
@@ -150,12 +157,11 @@ void ServerSinkBridge::processClientMessages() {
   do {
     for (auto messages = clientGetMessages(); !messages.empty();
          messages.pop()) {
-      bool terminated = false;
       auto& message = messages.front();
-      folly::variant_match(
+      bool terminated = folly::variant_match(
           message,
-          [&](folly::Try<StreamPayload>& payload) {
-            terminated = true;
+          [&](StreamMessage::PayloadOrError& payloadOrError) {
+            auto& payload = payloadOrError.streamPayloadTry;
             if (payload.hasValue()) {
               notifySinkFinally(details::SINK_ENDING_TYPES::COMPLETE);
               clientCallback_->onFinalResponse(std::move(payload).value());
@@ -166,8 +172,12 @@ void ServerSinkBridge::processClientMessages() {
               clientCallback_->onFinalResponseError(
                   std::move(payload).exception());
             }
+            return true;
           },
-          [&](int64_t n) { credits += n; });
+          [&](StreamMessage::RequestN requestN) {
+            credits += requestN.n;
+            return false;
+          });
       if (terminated) {
         close();
         return;

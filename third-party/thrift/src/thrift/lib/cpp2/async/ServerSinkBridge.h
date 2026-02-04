@@ -29,6 +29,7 @@
 #include <thrift/lib/cpp/ContextStack.h>
 #include <thrift/lib/cpp2/async/Interaction.h>
 #include <thrift/lib/cpp2/async/StreamCallbacks.h>
+#include <thrift/lib/cpp2/async/StreamMessage.h>
 #include <thrift/lib/cpp2/async/TwoWayBridge.h>
 #include <thrift/lib/cpp2/transport/rocket/RocketException.h>
 
@@ -51,21 +52,28 @@ struct SinkConsumerImpl {
 class ServerSinkFactory;
 
 #if FOLLY_HAS_COROUTINES
+
+using ServerSinkMessageServerToClient =
+    std::variant<StreamMessage::PayloadOrError, StreamMessage::RequestN>;
+
+using ServerSinkMessageClientToServer =
+    std::variant<StreamMessage::PayloadOrError, StreamMessage::Complete>;
+
 class ServerSinkBridge;
 
 // This template explicitly instantiated in ServerSinkBridge.cpp
 extern template class TwoWayBridge<
     ServerSinkBridge,
-    std::variant<folly::Try<StreamPayload>, uint64_t>,
+    ServerSinkMessageServerToClient,
     QueueConsumer,
-    folly::Try<StreamPayload>,
+    ServerSinkMessageClientToServer,
     ServerSinkBridge>;
 
 class ServerSinkBridge : public TwoWayBridge<
                              ServerSinkBridge,
-                             std::variant<folly::Try<StreamPayload>, uint64_t>,
+                             ServerSinkMessageServerToClient,
                              QueueConsumer,
-                             folly::Try<StreamPayload>,
+                             ServerSinkMessageClientToServer,
                              ServerSinkBridge>,
                          public SinkServerCallback {
  public:

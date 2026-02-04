@@ -119,7 +119,7 @@ ServerSinkFactory::ServerSinkFactory(
     std::ignore = clientCallback->onFirstResponse(
         std::move(firstResponsePayload), evb, sink);
 
-    sink->serverPush(bufferSize);
+    sink->serverPush(StreamMessage::RequestN{static_cast<int32_t>(bufferSize)});
     consumerCallback->provideSink(std::move(sinkPtr));
   };
 }

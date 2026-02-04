@@ -301,8 +301,7 @@ class RequestsRegistry {
    *
    * The memory layout is as follows:
    *   +---------------------------------------------------------------------+
-   *   | DebugStub | TRequest | defined by TRequest::colocateWithDebugStub()
-   * |
+   *   | DebugStub | TRequest | defined by TRequest::colocateWithDebugStub() |
    *   +---------------------------------------------------------------------+
    */
   template <typename TRequest>

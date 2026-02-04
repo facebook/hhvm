@@ -863,7 +863,7 @@ struct TypeIntersectionConstraint {
       return &m_u.m_typeConstraint;
     }
     for (auto const& tc : m_u.m_constraints) {
-      if (!tc.isInherited() && !tc.isUpperBound()) return &tc;
+      if (!tc.isInherited()) return &tc;
     }
     always_assert(false);
   }

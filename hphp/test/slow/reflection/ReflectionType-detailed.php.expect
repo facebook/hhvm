@@ -82,3 +82,8 @@ bool(true)
 bool(false)
 bool(false)
 string(4) "Test"
+** Function/method return type 4
+bool(true)
+bool(true)
+bool(true)
+string(1) "T"

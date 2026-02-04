@@ -9,8 +9,10 @@
 #include <proxygen/lib/transport/PersistentQuicPskCache.h>
 
 #include <fizz/backend/openssl/certificate/CertUtils.h>
+#include <fizz/record/Types.h>
 #include <folly/Conv.h>
 #include <folly/json/dynamic.h>
+#include <quic/client/handshake/CachedServerTransportParametersSerialization.h>
 
 namespace {
 constexpr auto FIZZ_PSK = "psk";
@@ -52,32 +54,8 @@ quic::Optional<quic::QuicCachedPsk> PersistentQuicPskCache::getPsk(
     auto buf = folly::IOBuf::wrapBuffer(cachedPsk->quicParams.data(),
                                         cachedPsk->quicParams.length());
     folly::io::Cursor cursor(buf.get());
-    fizz::detail::read(quicCachedPsk.transportParams.idleTimeout, cursor);
-    fizz::detail::read(quicCachedPsk.transportParams.maxRecvPacketSize, cursor);
-    fizz::detail::read(quicCachedPsk.transportParams.initialMaxData, cursor);
-    fizz::detail::read(
-        quicCachedPsk.transportParams.initialMaxStreamDataBidiLocal, cursor);
-    fizz::detail::read(
-        quicCachedPsk.transportParams.initialMaxStreamDataBidiRemote, cursor);
-    fizz::detail::read(quicCachedPsk.transportParams.initialMaxStreamDataUni,
-                       cursor);
-    fizz::detail::read(quicCachedPsk.transportParams.initialMaxStreamsBidi,
-                       cursor);
-    fizz::detail::read(quicCachedPsk.transportParams.initialMaxStreamsUni,
-                       cursor);
-    uint8_t knobFrameSupport;
-    fizz::detail::read(knobFrameSupport, cursor);
-    quicCachedPsk.transportParams.knobFrameSupport = knobFrameSupport > 0;
-    uint8_t ackReceiveTimestampsEnabled;
-    fizz::detail::read(ackReceiveTimestampsEnabled, cursor);
-    quicCachedPsk.transportParams.ackReceiveTimestampsEnabled =
-        ackReceiveTimestampsEnabled > 0;
-    fizz::detail::read(quicCachedPsk.transportParams.maxReceiveTimestampsPerAck,
-                       cursor);
-    fizz::detail::read(quicCachedPsk.transportParams.receiveTimestampsExponent,
-                       cursor);
-    fizz::detail::read(quicCachedPsk.transportParams.extendedAckFeatures,
-                       cursor);
+    quic::readCachedServerTransportParameters(cursor,
+                                              quicCachedPsk.transportParams);
 
     std::unique_ptr<folly::IOBuf> appParams;
     fizz::detail::readBuf<uint16_t>(appParams, cursor);
@@ -105,31 +83,8 @@ void PersistentQuicPskCache::putPsk(const std::string& identity,
 
   auto quicParams = folly::IOBuf::create(0);
   folly::io::Appender appender(quicParams.get(), 512);
-  fizz::detail::write(quicCachedPsk.transportParams.idleTimeout, appender);
-  fizz::detail::write(quicCachedPsk.transportParams.maxRecvPacketSize,
-                      appender);
-  fizz::detail::write(quicCachedPsk.transportParams.initialMaxData, appender);
-  fizz::detail::write(
-      quicCachedPsk.transportParams.initialMaxStreamDataBidiLocal, appender);
-  fizz::detail::write(
-      quicCachedPsk.transportParams.initialMaxStreamDataBidiRemote, appender);
-  fizz::detail::write(quicCachedPsk.transportParams.initialMaxStreamDataUni,
-                      appender);
-  fizz::detail::write(quicCachedPsk.transportParams.initialMaxStreamsBidi,
-                      appender);
-  fizz::detail::write(quicCachedPsk.transportParams.initialMaxStreamsUni,
-                      appender);
-  uint8_t knobSupport = quicCachedPsk.transportParams.knobFrameSupport ? 1 : 0;
-  fizz::detail::write(knobSupport, appender);
-  uint8_t ackReceiveTimestampsEnabled =
-      quicCachedPsk.transportParams.ackReceiveTimestampsEnabled ? 1 : 0;
-  fizz::detail::write(ackReceiveTimestampsEnabled, appender);
-  fizz::detail::write(quicCachedPsk.transportParams.maxReceiveTimestampsPerAck,
-                      appender);
-  fizz::detail::write(quicCachedPsk.transportParams.receiveTimestampsExponent,
-                      appender);
-  fizz::detail::write(quicCachedPsk.transportParams.extendedAckFeatures,
-                      appender);
+  quic::writeCachedServerTransportParameters(quicCachedPsk.transportParams,
+                                             appender);
 
   fizz::detail::writeBuf<uint16_t>(
       folly::IOBuf::wrapBuffer(folly::StringPiece(quicCachedPsk.appParams)),

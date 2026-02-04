@@ -21,6 +21,7 @@
 #include <variant>
 
 #include <folly/GLog.h>
+#include <folly/Overload.h>
 #include <folly/Portability.h>
 #include <folly/coro/AsyncGenerator.h>
 #include <folly/coro/Baton.h>
@@ -87,28 +88,38 @@ class ClientBufferedStream {
       }
 
       {
-        auto& payload = queue.front();
-        if (payload.hasValue()) {
-          if (!payload->payload) {
-            FB_LOG_EVERY_MS(WARNING, 1000)
-                << "Dropping unhandled stream header frame";
-            queue.pop();
-            continue;
-          }
-          payloadDataSize += payload->payload->computeChainDataLength();
-        }
-        auto value = decode_(std::move(payload));
-        queue.pop();
-        bool done = !value.hasValue();
-        using Res = std::invoke_result_t<OnNextTry, folly::Try<T>>;
-        if constexpr (std::is_same_v<Res, bool>) {
-          done |= !onNextTry(std::move(value));
-        } else {
-          static_assert(
-              std::is_void_v<Res>, "onNextTry must return bool or void");
-          onNextTry(std::move(value));
-        }
-        if (done) {
+        auto& message = queue.front();
+        bool completed = folly::variant_match(
+            message,
+            [&](StreamMessage::PayloadOrError& payloadOrError) {
+              auto& payload = payloadOrError.streamPayloadTry;
+              if (payload.hasValue()) {
+                if (!payload->payload) {
+                  FB_LOG_EVERY_MS(WARNING, 1000)
+                      << "Dropping unhandled stream header frame";
+                  queue.pop();
+                  return false;
+                }
+                payloadDataSize += payload->payload->computeChainDataLength();
+              }
+              auto value = decode_(std::move(payload));
+              queue.pop();
+              bool done = !value.hasValue();
+              using Res = std::invoke_result_t<OnNextTry, folly::Try<T>>;
+              if constexpr (std::is_same_v<Res, bool>) {
+                done |= !onNextTry(std::move(value));
+              } else {
+                static_assert(
+                    std::is_void_v<Res>, "onNextTry must return bool or void");
+                onNextTry(std::move(value));
+              }
+              return done;
+            },
+            [&](StreamMessage::Complete) {
+              onNextTry(folly::Try<T>());
+              return true;
+            });
+        if (completed) {
           break;
         }
       }
@@ -238,10 +249,12 @@ class ClientBufferedStream {
       }
 
       {
-        auto& payload = queue.front();
-        if (!payload.hasValue() && !payload.hasException()) {
+        auto& message = queue.front();
+        if (std::holds_alternative<StreamMessage::Complete>(message)) {
           break;
         }
+        auto& payloadOrError = std::get<StreamMessage::PayloadOrError>(message);
+        auto& payload = payloadOrError.streamPayloadTry;
         const size_t payloadSize = payload.hasValue() && payload->payload
             ? payload->payload->computeChainDataLength()
             : 0;
@@ -400,18 +413,26 @@ class ClientBufferedStream {
         // Sum sizes of new buffered messages and append to queue
         queue.append(
             apache::thrift::detail::ClientStreamBridge::ClientQueueWithTailPtr(
-                std::move(incoming), [&](auto& payload) {
-                  if (payload.hasValue() && payload->payload) {
-                    bufferMemSize += payload->payload->computeChainDataLength();
+                std::move(incoming), [&](auto& message) {
+                  if (auto* payloadOrError =
+                          std::get_if<StreamMessage::PayloadOrError>(
+                              &message)) {
+                    auto& payload = payloadOrError->streamPayloadTry;
+                    if (payload.hasValue() && payload->payload) {
+                      bufferMemSize +=
+                          payload->payload->computeChainDataLength();
+                    }
                   }
                 }));
       }
 
       {
-        auto& payload = queue.front();
-        if (!payload.hasValue() && !payload.hasException()) {
+        auto& message = queue.front();
+        if (std::holds_alternative<StreamMessage::Complete>(message)) {
           break;
         }
+        auto& payloadOrError = std::get<StreamMessage::PayloadOrError>(message);
+        auto& payload = payloadOrError.streamPayloadTry;
         const size_t payloadSize = payload.hasValue() && payload->payload
             ? payload->payload->computeChainDataLength()
             : 0;
@@ -544,25 +565,32 @@ class ClientBufferedStream {
         }
 
         {
-          auto& payload = queue.front();
-          if (!payload.hasValue() && !payload.hasException()) {
-            onNextTry_(folly::Try<T>());
-            return;
-          }
-          if (payload.hasValue()) {
-            if (!payload->payload) {
-              FB_LOG_EVERY_MS(WARNING, 1000)
-                  << "Dropping unhandled stream header frame";
-              queue.pop();
-              continue;
-            }
-            payloadDataSize_ += payload->payload->computeChainDataLength();
-          }
-          auto value = decode_(std::move(payload));
-          queue.pop();
-          const auto hasException = value.hasException();
-          onNextTry_(std::move(value));
-          if (hasException) {
+          auto& message = queue.front();
+          bool completed = folly::variant_match(
+              message,
+              [&](StreamMessage::PayloadOrError& payloadOrError) {
+                auto& payload = payloadOrError.streamPayloadTry;
+                if (payload.hasValue()) {
+                  if (!payload->payload) {
+                    FB_LOG_EVERY_MS(WARNING, 1000)
+                        << "Dropping unhandled stream header frame";
+                    queue.pop();
+                    return false;
+                  }
+                  payloadDataSize_ +=
+                      payload->payload->computeChainDataLength();
+                }
+                auto value = decode_(std::move(payload));
+                queue.pop();
+                const auto hasException = value.hasException();
+                onNextTry_(std::move(value));
+                return hasException;
+              },
+              [&](StreamMessage::Complete) {
+                onNextTry_(folly::Try<T>());
+                return true;
+              });
+          if (completed) {
             return;
           }
         }

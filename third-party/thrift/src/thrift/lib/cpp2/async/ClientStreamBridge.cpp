@@ -16,14 +16,16 @@
 
 #include <thrift/lib/cpp2/async/ClientStreamBridge.h>
 
+#include <folly/Overload.h>
+
 namespace apache::thrift::detail {
 
 // Explicitly instantiate the base of ClientStreamBridge
 template class TwoWayBridge<
     QueueConsumer,
-    folly::Try<StreamPayload>,
+    ClientStreamMessageServerToClient,
     ClientStreamBridge,
-    int64_t,
+    ClientStreamMessageClientToServer,
     ClientStreamBridge>;
 
 ClientStreamBridge::ClientStreamBridge(FirstResponseCallback* callback)
@@ -50,11 +52,11 @@ ClientStreamBridge::ClientQueue ClientStreamBridge::getMessages() {
 }
 
 void ClientStreamBridge::requestN(int64_t credits) {
-  clientPush(std::move(credits));
+  clientPush(StreamMessage::RequestN{static_cast<int32_t>(credits)});
 }
 
 void ClientStreamBridge::cancel() {
-  clientPush(-1);
+  clientPush(StreamMessage::Cancel{});
   clientClose();
 }
 
@@ -91,22 +93,27 @@ void ClientStreamBridge::onFirstResponseError(folly::exception_wrapper ew) {
 }
 
 bool ClientStreamBridge::onStreamNext(StreamPayload&& payload) {
-  serverPush(folly::Try<StreamPayload>(std::move(payload)));
+  serverPush(
+      StreamMessage::PayloadOrError{
+          folly::Try<StreamPayload>(std::move(payload))});
   return true;
 }
 
 void ClientStreamBridge::onStreamError(folly::exception_wrapper ew) {
-  serverPush(folly::Try<StreamPayload>(std::move(ew)));
+  serverPush(
+      StreamMessage::PayloadOrError{folly::Try<StreamPayload>(std::move(ew))});
   serverClose();
 }
 
 void ClientStreamBridge::onStreamComplete() {
-  serverPush(folly::Try<StreamPayload>());
+  serverPush(StreamMessage::Complete{});
   serverClose();
 }
 
 bool ClientStreamBridge::onStreamHeaders(HeadersPayload&& payload) {
-  serverPush(folly::Try<StreamPayload>(StreamPayload(std::move(payload))));
+  serverPush(
+      StreamMessage::PayloadOrError{
+          folly::Try<StreamPayload>(StreamPayload(std::move(payload)))});
   return true;
 }
 
@@ -126,12 +133,19 @@ void ClientStreamBridge::processCredits() {
   while (!serverWait(this)) {
     for (auto messages = serverGetMessages(); !messages.empty();
          messages.pop()) {
-      if (messages.front() == -1) {
+      auto& message = messages.front();
+      bool cancelled = folly::variant_match(
+          message,
+          [&](StreamMessage::RequestN requestN) {
+            credits += requestN.n;
+            return false;
+          },
+          [&](StreamMessage::Cancel) { return true; });
+      if (cancelled) {
         streamServerCallback_->onStreamCancel();
         serverCleanup();
         return;
       }
-      credits += messages.front();
     }
   }
 

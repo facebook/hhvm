@@ -16,9 +16,13 @@
 
 #pragma once
 
+#include <variant>
+
+#include <folly/Overload.h>
 #include <folly/Try.h>
 
 #include <thrift/lib/cpp2/async/StreamCallbacks.h>
+#include <thrift/lib/cpp2/async/StreamMessage.h>
 #include <thrift/lib/cpp2/async/TwoWayBridge.h>
 #include <thrift/lib/cpp2/async/TwoWayBridgeUtil.h>
 
@@ -38,19 +42,25 @@ namespace detail {
 
 class ClientStreamBridge;
 
+using ClientStreamMessageServerToClient =
+    std::variant<StreamMessage::PayloadOrError, StreamMessage::Complete>;
+
+using ClientStreamMessageClientToServer =
+    std::variant<StreamMessage::RequestN, StreamMessage::Cancel>;
+
 // This template explicitly instantiated in ClientStreamBridge.cpp
 extern template class TwoWayBridge<
     QueueConsumer,
-    folly::Try<StreamPayload>,
+    ClientStreamMessageServerToClient,
     ClientStreamBridge,
-    int64_t,
+    ClientStreamMessageClientToServer,
     ClientStreamBridge>;
 
 class ClientStreamBridge : public TwoWayBridge<
                                QueueConsumer,
-                               folly::Try<StreamPayload>,
+                               ClientStreamMessageServerToClient,
                                ClientStreamBridge,
-                               int64_t,
+                               ClientStreamMessageClientToServer,
                                ClientStreamBridge>,
                            private StreamClientCallback {
  public:

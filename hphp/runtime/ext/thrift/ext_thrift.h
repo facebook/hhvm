@@ -308,24 +308,28 @@ struct TClientBufferedStream : SystemLib::ClassLoader<"TClientBufferedStream"> {
     std::vector<std::unique_ptr<folly::IOBuf>> bufferVec;
     TClientStreamError error;
     while (!queue_.empty()) {
-      auto& payload = queue_.front();
-      if (!payload.hasValue() && !payload.hasException()) {
-        queue_.pop();
-        endStream();
-        break;
-      }
-      if (payload.hasException()) {
-        error = TClientStreamError::create(payload.exception());
-        queue_.pop();
-        endStream();
-        break;
-      }
-      if (payload->payload) {
-        payloadDataSize_ += payload->payload->computeChainDataLength();
-        bufferVec.push_back(std::move(payload->payload));
-        --outstanding_;
-      }
+      auto& message = queue_.front();
+      bool streamEnded = folly::variant_match(
+          message,
+          [&](apache::thrift::StreamMessage::PayloadOrError& payloadOrError) {
+            auto& payload = payloadOrError.streamPayloadTry;
+            if (payload.hasException()) {
+              error = TClientStreamError::create(payload.exception());
+              return true;
+            }
+            if (payload->payload) {
+              payloadDataSize_ += payload->payload->computeChainDataLength();
+              bufferVec.push_back(std::move(payload->payload));
+              --outstanding_;
+            }
+            return false;
+          },
+          [&](apache::thrift::StreamMessage::Complete) { return true; });
       queue_.pop();
+      if (streamEnded) {
+        endStream();
+        break;
+      }
       if (shouldRequestMore()) {
         break;
       }

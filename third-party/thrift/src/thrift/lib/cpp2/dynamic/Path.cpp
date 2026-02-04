@@ -82,7 +82,7 @@ std::string typeDisplayName(const type_system::TypeRef& type) {
 
 // Path implementation
 
-Path::Path(std::string rootTypeName) : rootTypeName_(std::move(rootTypeName)) {}
+Path::Path(type_system::TypeRef rootType) : rootType_(std::move(rootType)) {}
 
 void Path::push(Component component) {
   components_.push_back(std::move(component));
@@ -93,13 +93,14 @@ void Path::pop() {
 }
 
 std::string Path::toString() const {
-  std::string result = rootTypeName_;
+  std::string result = detail::typeDisplayName(rootType_);
 
   for (const auto& component : components_) {
     folly::variant_match(
         component,
         [&](const FieldAccess& f) {
-          result += fmt::format(".{}", f.fieldName);
+          const auto& field = f.structuredType.asStructured().at(f.handle);
+          result += fmt::format(".{}", field.identity().name());
         },
         [&](const ListElement& l) { result += fmt::format("[{}]", l.index); },
         [&](const SetElement& s) { result += fmt::format("{{{}}}", s.value); },
@@ -121,8 +122,7 @@ PathBuilder::ScopeGuard::~ScopeGuard() {
   }
 }
 
-PathBuilder::PathBuilder(type_system::TypeRef rootType)
-    : path_(detail::typeDisplayName(rootType)) {
+PathBuilder::PathBuilder(type_system::TypeRef rootType) : path_(rootType) {
   typeStack_.push_back(rootType);
 }
 
@@ -166,7 +166,7 @@ PathBuilder::ScopeGuard PathBuilder::enterFieldImpl(T id) {
 
   const auto& field = structured.at(handle);
   typeStack_.push_back(field.type());
-  path_.push(Path::FieldAccess{field.identity().name()});
+  path_.push(Path::FieldAccess{current, handle});
 
   return ScopeGuard(this);
 }

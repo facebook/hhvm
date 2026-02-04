@@ -100,52 +100,41 @@ class Path {
    * Access types for path components.
    */
   struct FieldAccess {
-    std::string fieldName;
-
-    bool operator==(const FieldAccess&) const = default;
+    type_system::TypeRef structuredType; // The struct/union type
+    type_system::FastFieldHandle handle;
   };
 
   struct ListElement {
     std::size_t index;
-
-    bool operator==(const ListElement&) const = default;
   };
 
   struct SetElement {
     // Serialized value - may replace with DynamicValue so shouldn't expose.
     std::string value;
-
-    bool operator==(const SetElement&) const = default;
   };
 
   struct MapKey {
     // Serialized key - may replace with DynamicValue so shouldn't expose.
     std::string key;
-
-    bool operator==(const MapKey&) const = default;
   };
 
   struct MapValue {
     // Serialized key - may replace with DynamicValue so shouldn't expose.
     std::string key;
-
-    bool operator==(const MapValue&) const = default;
   };
 
   struct AnyType {
     // URI/typeId - may replace with TypeRef so shouldn't expose.
     std::string typeId;
-
-    bool operator==(const AnyType&) const = default;
   };
 
   using Component = std::
       variant<FieldAccess, ListElement, SetElement, MapKey, MapValue, AnyType>;
 
   /**
-   * Returns the root type name.
+   * Returns the root type.
    */
-  const std::string& rootTypeName() const { return rootTypeName_; }
+  const type_system::TypeRef& rootType() const { return rootType_; }
 
   /**
    * Returns the path components.
@@ -153,9 +142,9 @@ class Path {
   std::span<const Component> components() const { return components_; }
 
   /**
-   * Construct a Path with a root type name.
+   * Construct a Path with a root type.
    */
-  explicit Path(std::string rootTypeName);
+  explicit Path(type_system::TypeRef rootType);
 
   /**
    * Add a component to the path.
@@ -167,7 +156,7 @@ class Path {
    */
   void pop();
 
-  std::string rootTypeName_;
+  type_system::TypeRef rootType_;
   std::vector<Component> components_;
 
   friend class PathBuilder;

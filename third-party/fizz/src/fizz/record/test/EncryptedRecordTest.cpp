@@ -59,7 +59,9 @@ class EncryptedRecordTest : public testing::Test {
 };
 
 TEST_F(EncryptedRecordTest, TestReadEmpty) {
-  auto msg = read_.read(queue_, Aead::AeadOptions());
+  Error err;
+  ReadRecordLayer::ReadResult<TLSMessage> msg;
+  EXPECT_EQ(read_.read(msg, err, queue_, Aead::AeadOptions()), Status::Success);
   EXPECT_FALSE(msg.has_value());
   EXPECT_EQ(kEncryptedHeaderSize, msg.sizeHint);
 }
@@ -74,7 +76,9 @@ TEST_F(EncryptedRecordTest, TestReadHandshake) {
         expectSame(buf, "0123456789");
         return getBuf("abcdef16");
       }));
-  auto msg = read_.read(queue_, Aead::AeadOptions());
+  Error err;
+  ReadRecordLayer::ReadResult<TLSMessage> msg;
+  EXPECT_EQ(read_.read(msg, err, queue_, Aead::AeadOptions()), Status::Success);
   EXPECT_EQ(msg->type, ContentType::handshake);
   expectSame(msg->fragment, "abcdef");
   EXPECT_TRUE(queue_.empty());
@@ -91,7 +95,9 @@ TEST_F(EncryptedRecordTest, TestReadAlert) {
         expectSame(buf, "0123456789");
         return getBuf("020215");
       }));
-  auto msg = read_.read(queue_, Aead::AeadOptions());
+  Error err;
+  ReadRecordLayer::ReadResult<TLSMessage> msg;
+  EXPECT_EQ(read_.read(msg, err, queue_, Aead::AeadOptions()), Status::Success);
   EXPECT_EQ(msg->type, ContentType::alert);
   expectSame(msg->fragment, "0202");
   EXPECT_TRUE(queue_.empty());
@@ -109,7 +115,9 @@ TEST_F(EncryptedRecordTest, TestReadAppData) {
         expectSame(buf, "0123456789");
         return getBuf("1234abcd17");
       }));
-  auto msg = read_.read(queue_, Aead::AeadOptions());
+  Error err;
+  ReadRecordLayer::ReadResult<TLSMessage> msg;
+  EXPECT_EQ(read_.read(msg, err, queue_, Aead::AeadOptions()), Status::Success);
   EXPECT_EQ(msg->type, ContentType::application_data);
   expectSame(msg->fragment, "1234abcd");
   EXPECT_TRUE(queue_.empty());
@@ -126,12 +134,17 @@ TEST_F(EncryptedRecordTest, TestReadUnknown) {
         expectSame(buf, "0123456789");
         return getBuf("1234abcd20");
       }));
-  EXPECT_ANY_THROW(read_.read(queue_, Aead::AeadOptions()));
+  Error err;
+  ReadRecordLayer::ReadResult<TLSMessage> result;
+  EXPECT_ANY_THROW(FIZZ_THROW_ON_ERROR(
+      read_.read(result, err, queue_, Aead::AeadOptions()), err));
 }
 
 TEST_F(EncryptedRecordTest, TestWaitForData) {
   addToQueue("1703010010012345");
-  auto msg = read_.read(queue_, Aead::AeadOptions());
+  Error err;
+  ReadRecordLayer::ReadResult<TLSMessage> msg;
+  EXPECT_EQ(read_.read(msg, err, queue_, Aead::AeadOptions()), Status::Success);
   EXPECT_FALSE(msg.has_value());
   EXPECT_EQ(queue_.chainLength(), 8);
   EXPECT_EQ(13, msg.sizeHint);
@@ -139,7 +152,9 @@ TEST_F(EncryptedRecordTest, TestWaitForData) {
 
 TEST_F(EncryptedRecordTest, TestWaitForHeader) {
   addToQueue("16030102");
-  auto msg = read_.read(queue_, Aead::AeadOptions());
+  Error err;
+  ReadRecordLayer::ReadResult<TLSMessage> msg;
+  EXPECT_EQ(read_.read(msg, err, queue_, Aead::AeadOptions()), Status::Success);
   EXPECT_FALSE(msg.has_value());
   EXPECT_EQ(queue_.chainLength(), 4);
   EXPECT_EQ(1, msg.sizeHint);
@@ -147,7 +162,9 @@ TEST_F(EncryptedRecordTest, TestWaitForHeader) {
 
 TEST_F(EncryptedRecordTest, TestMaxSize) {
   addToQueue("1603014100");
-  auto msg = read_.read(queue_, Aead::AeadOptions());
+  Error err;
+  ReadRecordLayer::ReadResult<TLSMessage> msg;
+  EXPECT_EQ(read_.read(msg, err, queue_, Aead::AeadOptions()), Status::Success);
   EXPECT_FALSE(msg.has_value());
   EXPECT_EQ(queue_.chainLength(), 5);
   EXPECT_EQ(0x4100, msg.sizeHint);
@@ -155,7 +172,10 @@ TEST_F(EncryptedRecordTest, TestMaxSize) {
 
 TEST_F(EncryptedRecordTest, TestOverSize) {
   addToQueue("1603015000");
-  EXPECT_ANY_THROW(read_.read(queue_, Aead::AeadOptions()));
+  Error err;
+  ReadRecordLayer::ReadResult<TLSMessage> result;
+  EXPECT_ANY_THROW(FIZZ_THROW_ON_ERROR(
+      read_.read(result, err, queue_, Aead::AeadOptions()), err));
 }
 
 TEST_F(EncryptedRecordTest, TestDataRemaining) {
@@ -168,7 +188,9 @@ TEST_F(EncryptedRecordTest, TestDataRemaining) {
         expectSame(buf, "0123456789");
         return getBuf("abcdef16");
       }));
-  auto msg = read_.read(queue_, Aead::AeadOptions());
+  Error err;
+  ReadRecordLayer::ReadResult<TLSMessage> msg;
+  EXPECT_EQ(read_.read(msg, err, queue_, Aead::AeadOptions()), Status::Success);
   EXPECT_EQ(msg.sizeHint, 0);
   EXPECT_EQ(queue_.chainLength(), 1);
 }
@@ -183,7 +205,9 @@ TEST_F(EncryptedRecordTest, TestPadding) {
         expectSame(buf, "0123456789");
         return getBuf("1234abcd17000000");
       }));
-  auto msg = read_.read(queue_, Aead::AeadOptions());
+  Error err;
+  ReadRecordLayer::ReadResult<TLSMessage> msg;
+  EXPECT_EQ(read_.read(msg, err, queue_, Aead::AeadOptions()), Status::Success);
   EXPECT_EQ(msg.sizeHint, 0);
   EXPECT_EQ(msg->type, ContentType::application_data);
   expectSame(msg->fragment, "1234abcd");
@@ -200,7 +224,9 @@ TEST_F(EncryptedRecordTest, TestAllPaddingAppData) {
         expectSame(buf, "0123456789");
         return getBuf("17000000");
       }));
-  auto msg = read_.read(queue_, Aead::AeadOptions());
+  Error err;
+  ReadRecordLayer::ReadResult<TLSMessage> msg;
+  EXPECT_EQ(read_.read(msg, err, queue_, Aead::AeadOptions()), Status::Success);
   EXPECT_EQ(msg->type, ContentType::application_data);
   EXPECT_TRUE(msg->fragment->empty());
   EXPECT_TRUE(queue_.empty());
@@ -216,7 +242,10 @@ TEST_F(EncryptedRecordTest, TestAllPaddingHandshake) {
         expectSame(buf, "0123456789");
         return getBuf("16000000");
       }));
-  EXPECT_ANY_THROW(read_.read(queue_, Aead::AeadOptions()));
+  Error err;
+  ReadRecordLayer::ReadResult<TLSMessage> result;
+  EXPECT_ANY_THROW(FIZZ_THROW_ON_ERROR(
+      read_.read(result, err, queue_, Aead::AeadOptions()), err));
 }
 
 TEST_F(EncryptedRecordTest, TestNoContentType) {
@@ -229,7 +258,10 @@ TEST_F(EncryptedRecordTest, TestNoContentType) {
         expectSame(buf, "0123456789");
         return getBuf("00000000");
       }));
-  EXPECT_ANY_THROW(read_.read(queue_, Aead::AeadOptions()));
+  Error err;
+  ReadRecordLayer::ReadResult<TLSMessage> result;
+  EXPECT_ANY_THROW(FIZZ_THROW_ON_ERROR(
+      read_.read(result, err, queue_, Aead::AeadOptions()), err));
 }
 
 TEST_F(EncryptedRecordTest, TestReadSeqNum) {
@@ -243,7 +275,10 @@ TEST_F(EncryptedRecordTest, TestReadSeqNum) {
           expectSame(buf, "0123456789");
           return getBuf("1234abcd17");
         }));
-    auto msg = read_.read(queue_, Aead::AeadOptions());
+    Error err;
+    ReadRecordLayer::ReadResult<TLSMessage> msg;
+    EXPECT_EQ(
+        read_.read(msg, err, queue_, Aead::AeadOptions()), Status::Success);
     EXPECT_EQ(msg.sizeHint, 0);
   }
 }
@@ -256,7 +291,11 @@ TEST_F(EncryptedRecordTest, TestSkipAndWait) {
                           const IOBuf*,
                           uint64_t,
                           Aead::AeadOptions) { return folly::none; }));
-  auto msg = read_.read(queue_, Aead::AeadOptions());
+  Error err;
+  ReadRecordLayer::ReadResult<TLSMessage> msg;
+  EXPECT_EQ(read_.read(msg, err, queue_, Aead::AeadOptions()), Status::Success);
+
+  // We skipped the failed record
 
   // We skipped the failed record; it is effectively treated as a 0 byte read,
   // so we still need to read the header.
@@ -285,7 +324,9 @@ TEST_F(EncryptedRecordTest, TestSkipAndRead) {
         expectSame(buf, "0123456789");
         return getBuf("1234abcd17");
       }));
-  auto msg = read_.read(queue_, Aead::AeadOptions());
+  Error err;
+  ReadRecordLayer::ReadResult<TLSMessage> msg;
+  EXPECT_EQ(read_.read(msg, err, queue_, Aead::AeadOptions()), Status::Success);
   EXPECT_EQ(msg.sizeHint, 0);
   EXPECT_EQ(msg->type, ContentType::application_data);
   expectSame(msg->fragment, "1234abcd");
@@ -299,7 +340,7 @@ TEST_F(EncryptedRecordTest, TestSkipAndRead) {
         expectSame(buf, "01234567aa");
         return getBuf("1234abaa17");
       }));
-  msg = read_.read(queue_, Aead::AeadOptions());
+  EXPECT_EQ(read_.read(msg, err, queue_, Aead::AeadOptions()), Status::Success);
   EXPECT_EQ(msg.sizeHint, 0);
   EXPECT_EQ(msg->type, ContentType::application_data);
   expectSame(msg->fragment, "1234abaa");

@@ -45,14 +45,19 @@ class PlaintextRecordTest : public testing::Test {
 };
 
 TEST_F(PlaintextRecordTest, TestReadEmpty) {
-  auto result = read_.read(queue_, Aead::AeadOptions());
+  Error err;
+  ReadRecordLayer::ReadResult<TLSMessage> result;
+  EXPECT_EQ(
+      read_.read(result, err, queue_, Aead::AeadOptions()), Status::Success);
   EXPECT_FALSE(result.has_value());
   EXPECT_EQ(result.sizeHint, kPlaintextHeaderSize);
 }
 
 TEST_F(PlaintextRecordTest, TestReadHandshake) {
   addToQueue("16030100050123456789");
-  auto msg = read_.read(queue_, Aead::AeadOptions());
+  Error err;
+  ReadRecordLayer::ReadResult<TLSMessage> msg;
+  EXPECT_EQ(read_.read(msg, err, queue_, Aead::AeadOptions()), Status::Success);
   EXPECT_EQ(msg->type, ContentType::handshake);
   expectSame(msg->fragment, "0123456789");
   EXPECT_TRUE(queue_.empty());
@@ -61,7 +66,9 @@ TEST_F(PlaintextRecordTest, TestReadHandshake) {
 
 TEST_F(PlaintextRecordTest, TestReadAlert) {
   addToQueue("15030100050123456789");
-  auto msg = read_.read(queue_, Aead::AeadOptions());
+  Error err;
+  ReadRecordLayer::ReadResult<TLSMessage> msg;
+  EXPECT_EQ(read_.read(msg, err, queue_, Aead::AeadOptions()), Status::Success);
   EXPECT_EQ(msg->type, ContentType::alert);
   expectSame(msg->fragment, "0123456789");
   EXPECT_TRUE(queue_.empty());
@@ -70,12 +77,18 @@ TEST_F(PlaintextRecordTest, TestReadAlert) {
 
 TEST_F(PlaintextRecordTest, TestReadAppData) {
   addToQueue("17030100050123456789");
-  EXPECT_ANY_THROW(read_.read(queue_, Aead::AeadOptions()));
+  Error err;
+  ReadRecordLayer::ReadResult<TLSMessage> result;
+  EXPECT_ANY_THROW(FIZZ_THROW_ON_ERROR(
+      read_.read(result, err, queue_, Aead::AeadOptions()), err));
 }
 
 TEST_F(PlaintextRecordTest, TestWaitForData) {
   addToQueue("160301000512345678");
-  auto result = read_.read(queue_, Aead::AeadOptions());
+  Error err;
+  ReadRecordLayer::ReadResult<TLSMessage> result;
+  EXPECT_EQ(
+      read_.read(result, err, queue_, Aead::AeadOptions()), Status::Success);
   EXPECT_FALSE(result.has_value());
   EXPECT_EQ(1, result.sizeHint);
   EXPECT_EQ(queue_.chainLength(), 9);
@@ -83,7 +96,10 @@ TEST_F(PlaintextRecordTest, TestWaitForData) {
 
 TEST_F(PlaintextRecordTest, TestWaitForHeader) {
   addToQueue("16030102");
-  auto result = read_.read(queue_, Aead::AeadOptions());
+  Error err;
+  ReadRecordLayer::ReadResult<TLSMessage> result;
+  EXPECT_EQ(
+      read_.read(result, err, queue_, Aead::AeadOptions()), Status::Success);
   EXPECT_FALSE(result.has_value());
   EXPECT_EQ(queue_.chainLength(), 4);
   EXPECT_EQ(1, result.sizeHint);
@@ -91,7 +107,10 @@ TEST_F(PlaintextRecordTest, TestWaitForHeader) {
 
 TEST_F(PlaintextRecordTest, TestMaxSize) {
   addToQueue("1603014000");
-  auto result = read_.read(queue_, Aead::AeadOptions());
+  Error err;
+  ReadRecordLayer::ReadResult<TLSMessage> result;
+  EXPECT_EQ(
+      read_.read(result, err, queue_, Aead::AeadOptions()), Status::Success);
   EXPECT_FALSE(result.has_value());
   EXPECT_EQ(0x4000, result.sizeHint);
   EXPECT_EQ(queue_.chainLength(), 5);
@@ -99,17 +118,25 @@ TEST_F(PlaintextRecordTest, TestMaxSize) {
 
 TEST_F(PlaintextRecordTest, TestOverSize) {
   addToQueue("1603014001");
-  EXPECT_ANY_THROW(read_.read(queue_, Aead::AeadOptions()));
+  Error err;
+  ReadRecordLayer::ReadResult<TLSMessage> result;
+  EXPECT_ANY_THROW(FIZZ_THROW_ON_ERROR(
+      read_.read(result, err, queue_, Aead::AeadOptions()), err));
 }
 
 TEST_F(PlaintextRecordTest, TestEmpty) {
   addToQueue("1603010000aa");
-  EXPECT_ANY_THROW(read_.read(queue_, Aead::AeadOptions()));
+  Error err;
+  ReadRecordLayer::ReadResult<TLSMessage> result;
+  EXPECT_ANY_THROW(FIZZ_THROW_ON_ERROR(
+      read_.read(result, err, queue_, Aead::AeadOptions()), err));
 }
 
 TEST_F(PlaintextRecordTest, TestDataRemaining) {
   addToQueue("16030100050123456789160301");
-  auto msg = read_.read(queue_, Aead::AeadOptions());
+  Error err;
+  ReadRecordLayer::ReadResult<TLSMessage> msg;
+  EXPECT_EQ(read_.read(msg, err, queue_, Aead::AeadOptions()), Status::Success);
   EXPECT_EQ(msg->type, ContentType::handshake);
   expectSame(msg->fragment, "0123456789");
   EXPECT_EQ(queue_.chainLength(), 3);
@@ -119,7 +146,9 @@ TEST_F(PlaintextRecordTest, TestDataRemaining) {
 TEST_F(PlaintextRecordTest, TestSkipAndWait) {
   read_.setSkipEncryptedRecords(true);
   addToQueue("17030100050123456789");
-  auto msg = read_.read(queue_, Aead::AeadOptions());
+  Error err;
+  ReadRecordLayer::ReadResult<TLSMessage> msg;
+  EXPECT_EQ(read_.read(msg, err, queue_, Aead::AeadOptions()), Status::Success);
   EXPECT_FALSE(msg.has_value());
   EXPECT_TRUE(queue_.empty());
   EXPECT_EQ(kPlaintextHeaderSize, msg.sizeHint);
@@ -131,7 +160,9 @@ TEST_F(PlaintextRecordTest, TestSkipOversizedRecord) {
   auto longBuf = IOBuf::create(0xfffb);
   longBuf->append(0xfffb);
   queue_.append(std::move(longBuf));
-  auto msg = read_.read(queue_, Aead::AeadOptions());
+  Error err;
+  ReadRecordLayer::ReadResult<TLSMessage> msg;
+  EXPECT_EQ(read_.read(msg, err, queue_, Aead::AeadOptions()), Status::Success);
   EXPECT_FALSE(msg.has_value());
   EXPECT_TRUE(queue_.empty());
   EXPECT_EQ(kPlaintextHeaderSize, msg.sizeHint);
@@ -140,7 +171,9 @@ TEST_F(PlaintextRecordTest, TestSkipOversizedRecord) {
 TEST_F(PlaintextRecordTest, TestWaitBeforeSkip) {
   read_.setSkipEncryptedRecords(true);
   addToQueue("170301000501234567");
-  auto msg = read_.read(queue_, Aead::AeadOptions());
+  Error err;
+  ReadRecordLayer::ReadResult<TLSMessage> msg;
+  EXPECT_EQ(read_.read(msg, err, queue_, Aead::AeadOptions()), Status::Success);
   EXPECT_FALSE(msg.has_value());
   EXPECT_EQ(1, msg.sizeHint);
   expectSame(queue_.move(), "170301000501234567");
@@ -149,7 +182,9 @@ TEST_F(PlaintextRecordTest, TestWaitBeforeSkip) {
 TEST_F(PlaintextRecordTest, TestSkipAndRead) {
   read_.setSkipEncryptedRecords(true);
   addToQueue("170301000501234567891703010005012345678916030100050123456789");
-  auto msg = read_.read(queue_, Aead::AeadOptions());
+  Error err;
+  ReadRecordLayer::ReadResult<TLSMessage> msg;
+  EXPECT_EQ(read_.read(msg, err, queue_, Aead::AeadOptions()), Status::Success);
   EXPECT_EQ(msg->type, ContentType::handshake);
   expectSame(msg->fragment, "0123456789");
   EXPECT_TRUE(queue_.empty());

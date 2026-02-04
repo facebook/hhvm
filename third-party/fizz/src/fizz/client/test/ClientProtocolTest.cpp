@@ -5983,9 +5983,14 @@ TEST_F(ClientProtocolTest, TestEstablishedAppClose) {
           deliveredData.data, folly::IOBuf::copyBuffer("appdata")));
   EXPECT_EQ(state_.state(), StateEnum::WriteSideClosed);
 
-  EXPECT_CALL(*mockRead_, mockReadEvent()).WillOnce(InvokeWithoutArgs([]() {
-    return ReadRecordLayer::ReadResult<Param>::from(CloseNotify());
-  }));
+  EXPECT_CALL(*mockRead_, mockReadEvent(_, _, _, _))
+      .WillOnce(Invoke([](ReadRecordLayer::ReadResult<Param>& ret,
+                          Error&,
+                          folly::IOBufQueue&,
+                          Aead::AeadOptions) {
+        ret = ReadRecordLayer::ReadResult<Param>::from(CloseNotify());
+        return Status::Success;
+      }));
 
   mockRead_->useMockReadEvent(true);
   folly::IOBufQueue queue;
@@ -6022,7 +6027,7 @@ TEST_F(ClientProtocolTest, TestEstablishedAppCloseImmediate) {
 
 TEST_F(ClientProtocolTest, TestDecodeErrorAlert) {
   setupAcceptingData();
-  EXPECT_CALL(*mockRead_, read(_, _))
+  EXPECT_CALL(*mockRead_, _read(_, _))
       .WillOnce(
           InvokeWithoutArgs([]() -> ReadRecordLayer::ReadResult<TLSMessage> {
             throw std::runtime_error("read record layer error");
@@ -6039,7 +6044,7 @@ TEST_F(ClientProtocolTest, TestDecodeErrorAlert) {
 
 TEST_F(ClientProtocolTest, TestSocketDataFizzExceptionAlert) {
   setupAcceptingData();
-  EXPECT_CALL(*mockRead_, read(_, _))
+  EXPECT_CALL(*mockRead_, _read(_, _))
       .WillOnce(
           InvokeWithoutArgs([]() -> ReadRecordLayer::ReadResult<TLSMessage> {
             throw FizzException(
@@ -6060,7 +6065,7 @@ TEST_F(ClientProtocolTest, TestSocketDataFizzExceptionAlert) {
 
 TEST_F(ClientProtocolTest, TestSocketDataFizzExceptionNoAlert) {
   setupAcceptingData();
-  EXPECT_CALL(*mockRead_, read(_, _))
+  EXPECT_CALL(*mockRead_, _read(_, _))
       .WillOnce(
           InvokeWithoutArgs([]() -> ReadRecordLayer::ReadResult<TLSMessage> {
             throw FizzException(
@@ -6077,7 +6082,7 @@ TEST_F(ClientProtocolTest, TestSocketDataFizzExceptionNoAlert) {
 
 TEST_F(ClientProtocolTest, TestWaitForDataSizeHint) {
   setupAcceptingData();
-  EXPECT_CALL(*mockRead_, read(_, _))
+  EXPECT_CALL(*mockRead_, _read(_, _))
       .WillOnce(
           InvokeWithoutArgs([]() -> ReadRecordLayer::ReadResult<TLSMessage> {
             return ReadRecordLayer::ReadResult<TLSMessage>::noneWithSizeHint(

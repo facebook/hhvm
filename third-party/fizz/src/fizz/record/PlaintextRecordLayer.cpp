@@ -20,15 +20,18 @@ static constexpr uint16_t kMaxPlaintextRecordSize = 0x4000; // 16k
 static constexpr size_t kPlaintextHeaderSize =
     sizeof(ContentType) + sizeof(ProtocolVersion) + sizeof(uint16_t);
 
-PlaintextReadRecordLayer::ReadResult<TLSMessage> PlaintextReadRecordLayer::read(
+Status PlaintextReadRecordLayer::read(
+    ReadResult<TLSMessage>& ret,
+    Error& err,
     folly::IOBufQueue& buf,
     Aead::AeadOptions) {
   while (true) {
     folly::io::Cursor cursor(buf.front());
 
     if (buf.empty() || !cursor.canAdvance(kPlaintextHeaderSize)) {
-      return ReadResult<TLSMessage>::noneWithSizeHint(
+      ret = ReadResult<TLSMessage>::noneWithSizeHint(
           kPlaintextHeaderSize - buf.chainLength());
+      return Status::Success;
     }
 
     TLSMessage msg;
@@ -40,7 +43,8 @@ PlaintextReadRecordLayer::ReadResult<TLSMessage> PlaintextReadRecordLayer::read(
         auto length = cursor.readBE<uint16_t>();
         if (buf.chainLength() < (cursor - buf.front()) + length) {
           auto missing = ((cursor - buf.front()) + length) - buf.chainLength();
-          return ReadResult<TLSMessage>::noneWithSizeHint(missing);
+          ret = ReadResult<TLSMessage>::noneWithSizeHint(missing);
+          return Status::Success;
         }
         buf.trimStart(static_cast<size_t>(kPlaintextHeaderSize) + length);
         continue;
@@ -56,7 +60,7 @@ PlaintextReadRecordLayer::ReadResult<TLSMessage> PlaintextReadRecordLayer::read(
       case ContentType::change_cipher_spec:
         break;
       default:
-        throw std::runtime_error(
+        return err.error(
             folly::to<std::string>(
                 "received plaintext content type ",
                 static_cast<ContentTypeType>(msg.type),
@@ -69,14 +73,15 @@ PlaintextReadRecordLayer::ReadResult<TLSMessage> PlaintextReadRecordLayer::read(
 
     auto length = cursor.readBE<uint16_t>();
     if (length > kMaxPlaintextRecordSize) {
-      throw std::runtime_error("received too long plaintext record");
+      return err.error("received too long plaintext record");
     }
     if (length == 0) {
-      throw std::runtime_error("received empty plaintext record");
+      return err.error("received empty plaintext record");
     }
     if (buf.chainLength() < (cursor - buf.front()) + length) {
       auto missing = ((cursor - buf.front()) + length) - buf.chainLength();
-      return ReadResult<TLSMessage>::noneWithSizeHint(missing);
+      ret = ReadResult<TLSMessage>::noneWithSizeHint(missing);
+      return Status::Success;
     }
 
     cursor.clone(msg.fragment, length);
@@ -88,12 +93,12 @@ PlaintextReadRecordLayer::ReadResult<TLSMessage> PlaintextReadRecordLayer::read(
       if (msg.fragment->length() == 1 && *msg.fragment->data() == 0x01) {
         continue;
       } else {
-        throw FizzException(
-            "received ccs", AlertDescription::illegal_parameter);
+        return err.error("received ccs", AlertDescription::illegal_parameter);
       }
     }
 
-    return ReadResult<TLSMessage>::from(std::move(msg));
+    ret = ReadResult<TLSMessage>::from(std::move(msg));
+    return Status::Success;
   }
 }
 

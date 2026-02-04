@@ -522,10 +522,15 @@ TEST_F(ServerProtocolTest, TestAppClose) {
   EXPECT_NE(state_.readRecordLayer().get(), nullptr);
   EXPECT_EQ(state_.writeRecordLayer().get(), nullptr);
 
-  EXPECT_CALL(*appRead_, mockReadEvent()).WillOnce(InvokeWithoutArgs([]() {
-    Param p = CloseNotify(folly::IOBuf::copyBuffer("ignoreddata"));
-    return ReadRecordLayer::ReadResult<Param>::from(std::move(p));
-  }));
+  EXPECT_CALL(*appRead_, mockReadEvent(_, _, _, _))
+      .WillOnce(Invoke([](ReadRecordLayer::ReadResult<Param>& param,
+                          Error&,
+                          folly::IOBufQueue&,
+                          Aead::AeadOptions) {
+        param = ReadRecordLayer::ReadResult<Param>::from(
+            CloseNotify(folly::IOBuf::copyBuffer("ignoreddata")));
+        return Status::Success;
+      }));
 
   appRead_->useMockReadEvent(true);
   folly::IOBufQueue queue;
@@ -6840,7 +6845,7 @@ TEST_F(ServerProtocolTest, TestEarlyWriteError) {
 
 TEST_F(ServerProtocolTest, TestDecodeErrorAlert) {
   setUpAcceptingData();
-  EXPECT_CALL(*appRead_, read(_, _))
+  EXPECT_CALL(*appRead_, _read(_, _))
       .WillOnce(
           InvokeWithoutArgs([]() -> ReadRecordLayer::ReadResult<TLSMessage> {
             throw std::runtime_error("read record layer error");
@@ -6857,7 +6862,7 @@ TEST_F(ServerProtocolTest, TestDecodeErrorAlert) {
 
 TEST_F(ServerProtocolTest, TestSocketDataFizzExceptionAlert) {
   setUpAcceptingData();
-  EXPECT_CALL(*appRead_, read(_, _))
+  EXPECT_CALL(*appRead_, _read(_, _))
       .WillOnce(
           InvokeWithoutArgs([]() -> ReadRecordLayer::ReadResult<TLSMessage> {
             throw FizzException(
@@ -6878,7 +6883,7 @@ TEST_F(ServerProtocolTest, TestSocketDataFizzExceptionAlert) {
 
 TEST_F(ServerProtocolTest, TestSocketDataFizzExceptionNoAlert) {
   setUpAcceptingData();
-  EXPECT_CALL(*appRead_, read(_, _))
+  EXPECT_CALL(*appRead_, _read(_, _))
       .WillOnce(
           InvokeWithoutArgs([]() -> ReadRecordLayer::ReadResult<TLSMessage> {
             throw FizzException(
@@ -6896,7 +6901,7 @@ TEST_F(ServerProtocolTest, TestSocketDataFizzExceptionNoAlert) {
 TEST_F(ServerProtocolTest, TestWaitForDataSizeHint) {
   setUpExpectingClientHello();
   folly::IOBufQueue buf;
-  EXPECT_CALL(*mockRead_, read(_, _))
+  EXPECT_CALL(*mockRead_, _read(_, _))
       .WillOnce(Invoke(
           [&](auto&& b, auto&&) -> ReadRecordLayer::ReadResult<TLSMessage> {
             EXPECT_EQ(&buf, &b);

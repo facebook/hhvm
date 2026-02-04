@@ -96,7 +96,9 @@ class ReadRecordLayer {
    * insuficient data available. Throws if data malformed. On success, advances
    * buf the amount read.
    */
-  virtual ReadResult<TLSMessage> read(
+  virtual Status read(
+      ReadResult<TLSMessage>& ret,
+      Error& err,
       folly::IOBufQueue& buf,
       Aead::AeadOptions options) = 0;
 
@@ -104,7 +106,9 @@ class ReadRecordLayer {
    * Get a message from the record layer. Returns none if insufficient data was
    * available on the socket. Throws on parse error.
    */
-  virtual ReadResult<Param> readEvent(
+  virtual Status readEvent(
+      ReadResult<Param>& ret,
+      Error& err,
       folly::IOBufQueue& socketBuf,
       Aead::AeadOptions options);
 
@@ -132,7 +136,10 @@ class ReadRecordLayer {
     return RecordLayerState{};
   }
 
-  static folly::Optional<Param> decodeHandshakeMessage(folly::IOBufQueue& buf);
+  static Status decodeHandshakeMessage(
+      folly::Optional<Param>& ret,
+      Error& err,
+      folly::IOBufQueue& buf);
 
   /**
    * Configure the record layer for client-specific behavior.

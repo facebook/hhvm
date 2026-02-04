@@ -198,11 +198,22 @@ folly::AsyncSocket::ReadResult AsyncKTLSSocket::processHandshakeData(
   // an internal IOBufQueue.
   VLOG(10) << "AsyncKTLSSocket::processHandshakeData()";
   folly::Optional<fizz::Param> handshakeMessage;
-
+  auto getReadErrorResult = [](const char* what) {
+    return ReadResult(
+        READ_ERROR,
+        std::make_unique<folly::AsyncSocketException>(
+            folly::AsyncSocketException::SSL_ERROR,
+            folly::to<std::string>(
+                "error decoding handshake data received by ktls: ", what)));
+  };
   // TODO: This can probably be simplified
   try {
+    Error err;
     if (FOLLY_LIKELY(unparsedHandshakeData_ == nullptr)) {
-      handshakeMessage = fizz::ReadRecordLayer::decodeHandshakeMessage(payload);
+      if (fizz::ReadRecordLayer::decodeHandshakeMessage(
+              handshakeMessage, err, payload) == Status::Fail) {
+        return getReadErrorResult(err.msg());
+      }
       if (!handshakeMessage) {
         unparsedHandshakeData_ = std::make_unique<folly::IOBufQueue>(
             folly::IOBufQueue::cacheChainLength());
@@ -216,8 +227,11 @@ folly::AsyncSocket::ReadResult AsyncKTLSSocket::processHandshakeData(
       auto buf = payload.move();
       buf->makeManaged();
       unparsedHandshakeData_->append(buf->clone());
-      handshakeMessage = fizz::ReadRecordLayer::decodeHandshakeMessage(
-          *unparsedHandshakeData_);
+
+      if (fizz::ReadRecordLayer::decodeHandshakeMessage(
+              handshakeMessage, err, *unparsedHandshakeData_) == Status::Fail) {
+        return getReadErrorResult(err.msg());
+      }
       if (!handshakeMessage) {
         return ReadResult(READ_BLOCKING);
       } else {
@@ -226,13 +240,7 @@ folly::AsyncSocket::ReadResult AsyncKTLSSocket::processHandshakeData(
     }
   } catch (std::exception& ex) {
     // TODO: Send a decode_error alert
-    return ReadResult(
-        READ_ERROR,
-        std::make_unique<folly::AsyncSocketException>(
-            folly::AsyncSocketException::SSL_ERROR,
-            folly::to<std::string>(
-                "error decoding handshake data received by ktls: ",
-                ex.what())));
+    return getReadErrorResult(std::move(ex.what()));
   }
 
   // At this point, `handshakeMessage` is guaranteed to be valid.

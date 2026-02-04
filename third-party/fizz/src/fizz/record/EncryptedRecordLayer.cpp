@@ -19,8 +19,9 @@ static constexpr uint16_t kMaxEncryptedRecordSize = 0x4000 + 256; // 16k + 256
 static constexpr size_t kEncryptedHeaderSize =
     sizeof(ContentType) + sizeof(ProtocolVersion) + sizeof(uint16_t);
 
-EncryptedReadRecordLayer::ReadResult<Buf>
-EncryptedReadRecordLayer::getDecryptedBuf(
+Status EncryptedReadRecordLayer::getDecryptedBuf(
+    ReadResult<Buf>& ret,
+    Error& err,
     folly::IOBufQueue& buf,
     Aead::AeadOptions options) {
   while (true) {
@@ -30,8 +31,9 @@ EncryptedReadRecordLayer::getDecryptedBuf(
     folly::io::Cursor cursor(frontBuf);
 
     if (buf.empty() || !cursor.canAdvance(kEncryptedHeaderSize)) {
-      return ReadResult<Buf>::noneWithSizeHint(
+      ret = ReadResult<Buf>::noneWithSizeHint(
           kEncryptedHeaderSize - buf.chainLength());
+      return Status::Success;
     }
 
     std::array<uint8_t, kEncryptedHeaderSize> ad;
@@ -45,20 +47,21 @@ EncryptedReadRecordLayer::getDecryptedBuf(
 
     auto length = cursor.readBE<uint16_t>();
     if (length == 0) {
-      throw std::runtime_error("received 0 length encrypted record");
+      return err.error("received 0 length encrypted record");
     }
     if (length > kMaxEncryptedRecordSize) {
-      throw std::runtime_error("received too long encrypted record");
+      return err.error("received too long encrypted record");
     }
     auto consumedBytes = cursor - frontBuf;
     if (buf.chainLength() < consumedBytes + length) {
       auto remaining = (consumedBytes + length) - buf.chainLength();
-      return ReadResult<Buf>::noneWithSizeHint(remaining);
+      ret = ReadResult<Buf>::noneWithSizeHint(remaining);
+      return Status::Success;
     }
 
     if (contentType == ContentType::alert && length == 2) {
       auto alert = decode<Alert>(cursor);
-      throw std::runtime_error(
+      return err.error(
           folly::to<std::string>(
               "received plaintext alert in encrypted record: ",
               toString(alert.description)));
@@ -79,13 +82,12 @@ EncryptedReadRecordLayer::getDecryptedBuf(
       if (encrypted->length() == 1 && *encrypted->data() == 0x01) {
         continue;
       } else {
-        throw FizzException(
-            "received ccs", AlertDescription::illegal_parameter);
+        return err.error("received ccs", AlertDescription::illegal_parameter);
       }
     }
 
     if (seqNum_ == std::numeric_limits<uint64_t>::max()) {
-      throw std::runtime_error("max read seq num");
+      return err.error("max read seq num");
     }
     if (skipFailedDecryption_) {
       auto decryptAttempt = aead_->tryDecrypt(
@@ -96,26 +98,33 @@ EncryptedReadRecordLayer::getDecryptedBuf(
       if (decryptAttempt) {
         seqNum_++;
         skipFailedDecryption_ = false;
-        return ReadResult<Buf>::from(std::move(decryptAttempt).value());
+        ret = ReadResult<Buf>::from(std::move(decryptAttempt).value());
+        return Status::Success;
       } else {
         continue;
       }
     } else {
-      return ReadResult<Buf>::from(aead_->decrypt(
+      ret = ReadResult<Buf>::from(aead_->decrypt(
           std::move(encrypted),
           useAdditionalData_ ? &adBuf : nullptr,
           seqNum_++,
           options));
+      return Status::Success;
     }
   }
 }
 
-EncryptedReadRecordLayer::ReadResult<TLSMessage> EncryptedReadRecordLayer::read(
+Status EncryptedReadRecordLayer::read(
+    ReadResult<TLSMessage>& ret,
+    Error& err,
     folly::IOBufQueue& buf,
     Aead::AeadOptions options) {
-  auto decryptedBuf = getDecryptedBuf(buf, std::move(options));
+  ReadResult<Buf> decryptedBuf;
+  FIZZ_RETURN_ON_ERROR(
+      getDecryptedBuf(decryptedBuf, err, buf, std::move(options)));
   if (!decryptedBuf) {
-    return ReadResult<TLSMessage>::noneWithSizeHint(decryptedBuf.sizeHint);
+    ret = ReadResult<TLSMessage>::noneWithSizeHint(decryptedBuf.sizeHint);
+    return Status::Success;
   }
 
   TLSMessage msg{};
@@ -137,7 +146,7 @@ EncryptedReadRecordLayer::ReadResult<TLSMessage> EncryptedReadRecordLayer::read(
     currentBuf->trimEnd(currentBuf->length() - i);
   } while (!nonZeroFound && currentBuf != decryptedBuf->get());
   if (!nonZeroFound) {
-    throw std::runtime_error("No content type found");
+    return err.error("No content type found");
   }
   msg.fragment = std::move(*decryptedBuf);
 
@@ -147,7 +156,7 @@ EncryptedReadRecordLayer::ReadResult<TLSMessage> EncryptedReadRecordLayer::read(
     case ContentType::application_data:
       break;
     default:
-      throw std::runtime_error(
+      return err.error(
           folly::to<std::string>(
               "received encrypted content type ",
               static_cast<ContentTypeType>(msg.type)));
@@ -157,11 +166,11 @@ EncryptedReadRecordLayer::ReadResult<TLSMessage> EncryptedReadRecordLayer::read(
     if (msg.type == ContentType::application_data) {
       msg.fragment = folly::IOBuf::create(0);
     } else {
-      throw std::runtime_error("received empty fragment");
+      return err.error("received empty fragment");
     }
   }
-
-  return ReadResult<TLSMessage>::from(std::move(msg));
+  ret = ReadResult<TLSMessage>::from(std::move(msg));
+  return Status::Success;
 }
 
 EncryptionLevel EncryptedReadRecordLayer::getEncryptionLevel() const {

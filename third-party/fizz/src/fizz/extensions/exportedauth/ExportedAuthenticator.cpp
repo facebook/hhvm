@@ -67,7 +67,11 @@ Buf ExportedAuthenticator::getAuthenticator(
 Buf ExportedAuthenticator::getAuthenticatorContext(Buf authenticator) {
   folly::IOBufQueue authQueue{folly::IOBufQueue::cacheChainLength()};
   authQueue.append(std::move(authenticator));
-  auto param = fizz::ReadRecordLayer::decodeHandshakeMessage(authQueue);
+  folly::Optional<Param> param;
+  Error err;
+  FIZZ_THROW_ON_ERROR(
+      fizz::ReadRecordLayer::decodeHandshakeMessage(param, err, authQueue),
+      err);
   auto certMsgPtr = param->asCertificateMsg();
   if (!certMsgPtr) {
     throw std::runtime_error("Param isn't cert msg");
@@ -175,7 +179,11 @@ folly::Optional<std::vector<CertificateEntry>> ExportedAuthenticator::validate(
   // authenticator.
   auto authClone = authenticator->clone();
   authQueue.append(std::move(authenticator));
-  auto param = fizz::ReadRecordLayer::decodeHandshakeMessage(authQueue);
+  folly::Optional<Param> param;
+  Error err;
+  FIZZ_THROW_ON_ERROR(
+      fizz::ReadRecordLayer::decodeHandshakeMessage(param, err, authQueue),
+      err);
   if (!param) {
     return folly::none;
   }
@@ -193,11 +201,17 @@ folly::Optional<std::vector<CertificateEntry>> ExportedAuthenticator::validate(
       return folly::none;
     }
   }
-  auto param2 = fizz::ReadRecordLayer::decodeHandshakeMessage(authQueue);
+  folly::Optional<Param> param2;
+  FIZZ_THROW_ON_ERROR(
+      fizz::ReadRecordLayer::decodeHandshakeMessage(param2, err, authQueue),
+      err);
   if (!param2) {
     return folly::none;
   }
-  auto param3 = fizz::ReadRecordLayer::decodeHandshakeMessage(authQueue);
+  folly::Optional<Param> param3;
+  FIZZ_THROW_ON_ERROR(
+      fizz::ReadRecordLayer::decodeHandshakeMessage(param3, err, authQueue),
+      err);
   if (!param3) {
     return folly::none;
   }

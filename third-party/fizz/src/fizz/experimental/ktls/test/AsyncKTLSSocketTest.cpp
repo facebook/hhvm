@@ -263,8 +263,12 @@ TEST_F(KTLSReadTest, BasicReadWrite) {
     PCHECK(nread > 0);
 
     clientReadQueue_.append(folly::IOBuf::copyBuffer(buf.data(), nread));
-    auto message =
-        clientRead_->read(clientReadQueue_, fizz::Aead::AeadOptions());
+    fizz::Error err;
+    fizz::ReadRecordLayer::ReadResult<fizz::TLSMessage> message;
+    EXPECT_EQ(
+        clientRead_->read(
+            message, err, clientReadQueue_, fizz::Aead::AeadOptions()),
+        fizz::Status::Success);
     ASSERT_TRUE(message.has_value());
     EXPECT_EQ(message->type, fizz::ContentType::application_data);
     auto data = message->fragment->to<std::string>();

@@ -21,8 +21,16 @@ class ConcreteReadRecordLayer : public PlaintextReadRecordLayer {
  public:
   MOCK_METHOD(
       ReadRecordLayer::ReadResult<TLSMessage>,
-      read,
+      _read,
       (folly::IOBufQueue & buf, Aead::AeadOptions options));
+  Status read(
+      ReadRecordLayer::ReadResult<TLSMessage>& msgOut,
+      Error& /* err */,
+      folly::IOBufQueue& buf,
+      Aead::AeadOptions options) override {
+    msgOut = _read(buf, options);
+    return Status::Success;
+  }
 };
 
 class ConcreteWriteRecordLayer : public PlaintextWriteRecordLayer {
@@ -63,54 +71,74 @@ class RecordTest : public testing::Test {
 };
 
 TEST_F(RecordTest, TestNoData) {
-  EXPECT_CALL(read_, read(_, _)).WillOnce(InvokeWithoutArgs([]() {
+  EXPECT_CALL(read_, _read(_, _)).WillOnce(InvokeWithoutArgs([]() {
     return ReadRecordLayer::ReadResult<TLSMessage>::none();
   }));
-  EXPECT_FALSE(read_.readEvent(queue_, Aead::AeadOptions()).has_value());
+  ReadRecordLayer::ReadResult<Param> param;
+  Error err;
+  EXPECT_EQ(
+      read_.readEvent(param, err, queue_, Aead::AeadOptions()),
+      Status::Success);
+  EXPECT_FALSE(param.has_value());
   EXPECT_FALSE(read_.getRecordLayerState().key.has_value());
   EXPECT_FALSE(read_.getRecordLayerState().sequence.has_value());
 }
 
 TEST_F(RecordTest, TestReadAppData) {
-  EXPECT_CALL(read_, read(_, _)).WillOnce(InvokeWithoutArgs([]() {
+  EXPECT_CALL(read_, _read(_, _)).WillOnce(InvokeWithoutArgs([]() {
     return ReadRecordLayer::ReadResult<TLSMessage>::from(
         TLSMessage{ContentType::application_data, IOBuf::copyBuffer("hi")});
   }));
-  auto param = read_.readEvent(queue_, Aead::AeadOptions());
+  ReadRecordLayer::ReadResult<Param> param;
+  Error err;
+  EXPECT_EQ(
+      read_.readEvent(param, err, queue_, Aead::AeadOptions()),
+      Status::Success);
   auto& appData = *param->asAppData();
   EXPECT_TRUE(eq_(appData.data, IOBuf::copyBuffer("hi")));
 }
 
 TEST_F(RecordTest, TestAlert) {
-  EXPECT_CALL(read_, read(_, _)).WillOnce(InvokeWithoutArgs([]() {
+  EXPECT_CALL(read_, _read(_, _)).WillOnce(InvokeWithoutArgs([]() {
     return ReadRecordLayer::ReadResult<TLSMessage>::from(
         TLSMessage{ContentType::alert, getBuf("0202")});
   }));
-  auto param = read_.readEvent(queue_, Aead::AeadOptions());
+  ReadRecordLayer::ReadResult<Param> param;
+  Error err;
+  EXPECT_EQ(
+      read_.readEvent(param, err, queue_, Aead::AeadOptions()),
+      Status::Success);
   EXPECT_TRUE(param->asAlert() != nullptr);
 }
 
 TEST_F(RecordTest, TestHandshake) {
-  EXPECT_CALL(read_, read(_, _)).WillOnce(InvokeWithoutArgs([]() {
+  EXPECT_CALL(read_, _read(_, _)).WillOnce(InvokeWithoutArgs([]() {
     return ReadRecordLayer::ReadResult<TLSMessage>::from(
         TLSMessage{ContentType::handshake, getBuf("140000023232")});
   }));
-  auto param = read_.readEvent(queue_, Aead::AeadOptions());
+  ReadRecordLayer::ReadResult<Param> param;
+  Error err;
+  EXPECT_EQ(
+      read_.readEvent(param, err, queue_, Aead::AeadOptions()),
+      Status::Success);
   auto& finished = *param->asFinished();
   expectSame(finished.verify_data, "3232");
   expectSame(*finished.originalEncoding, "140000023232");
 }
 
 TEST_F(RecordTest, TestHandshakeTooLong) {
-  EXPECT_CALL(read_, read(_, _)).WillOnce(InvokeWithoutArgs([]() {
+  EXPECT_CALL(read_, _read(_, _)).WillOnce(InvokeWithoutArgs([]() {
     return ReadRecordLayer::ReadResult<TLSMessage>::from(
         TLSMessage{ContentType::handshake, getBuf("14400000")});
   }));
-  EXPECT_ANY_THROW(read_.readEvent(queue_, Aead::AeadOptions()));
+  ReadRecordLayer::ReadResult<Param> param;
+  Error err;
+  EXPECT_ANY_THROW(FIZZ_THROW_ON_ERROR(
+      read_.readEvent(param, err, queue_, Aead::AeadOptions()), err));
 }
 
 TEST_F(RecordTest, TestHandshakeFragmentedImmediate) {
-  EXPECT_CALL(read_, read(_, _))
+  EXPECT_CALL(read_, _read(_, _))
       .WillOnce(InvokeWithoutArgs([]() {
         return ReadRecordLayer::ReadResult<TLSMessage>::from(
             TLSMessage{ContentType::handshake, getBuf("14000008aabbccdd")});
@@ -119,47 +147,64 @@ TEST_F(RecordTest, TestHandshakeFragmentedImmediate) {
         return ReadRecordLayer::ReadResult<TLSMessage>::from(
             TLSMessage{ContentType::handshake, getBuf("11223344")});
       }));
-  auto param = read_.readEvent(queue_, Aead::AeadOptions());
+  ReadRecordLayer::ReadResult<Param> param;
+  Error err;
+  EXPECT_EQ(
+      read_.readEvent(param, err, queue_, Aead::AeadOptions()),
+      Status::Success);
   EXPECT_FALSE(read_.hasUnparsedHandshakeData());
   auto& finished = *param->asFinished();
   expectSame(finished.verify_data, "aabbccdd11223344");
 }
 
 TEST_F(RecordTest, TestHandshakeFragmentedDelayed) {
-  EXPECT_CALL(read_, read(_, _))
+  EXPECT_CALL(read_, _read(_, _))
       .WillOnce(InvokeWithoutArgs([]() {
         return ReadRecordLayer::ReadResult<TLSMessage>::from(
             TLSMessage{ContentType::handshake, getBuf("14000008aabbccdd")});
       }))
       .WillOnce(InvokeWithoutArgs([]() { return folly::none; }));
-  EXPECT_FALSE(read_.readEvent(queue_, Aead::AeadOptions()).has_value());
+  ReadRecordLayer::ReadResult<Param> param;
+  Error err;
+  EXPECT_EQ(
+      read_.readEvent(param, err, queue_, Aead::AeadOptions()),
+      Status::Success);
+  EXPECT_FALSE(param.has_value());
   EXPECT_TRUE(read_.hasUnparsedHandshakeData());
-  EXPECT_CALL(read_, read(_, _)).WillOnce(InvokeWithoutArgs([]() {
+  EXPECT_CALL(read_, _read(_, _)).WillOnce(InvokeWithoutArgs([]() {
     return ReadRecordLayer::ReadResult<TLSMessage>::from(
         TLSMessage{ContentType::handshake, getBuf("11223344")});
   }));
-  auto param = read_.readEvent(queue_, Aead::AeadOptions());
+  EXPECT_EQ(
+      read_.readEvent(param, err, queue_, Aead::AeadOptions()),
+      Status::Success);
   auto& finished = *param->asFinished();
   expectSame(finished.verify_data, "aabbccdd11223344");
 }
 
 TEST_F(RecordTest, TestHandshakeCoalesced) {
-  EXPECT_CALL(read_, read(_, _)).WillOnce(InvokeWithoutArgs([]() {
+  EXPECT_CALL(read_, _read(_, _)).WillOnce(InvokeWithoutArgs([]() {
     return ReadRecordLayer::ReadResult<TLSMessage>::from(
         TLSMessage{ContentType::handshake, getBuf("14000002aabb14000002ccdd")});
   }));
-  auto param = read_.readEvent(queue_, Aead::AeadOptions());
+  ReadRecordLayer::ReadResult<Param> param;
+  Error err;
+  EXPECT_EQ(
+      read_.readEvent(param, err, queue_, Aead::AeadOptions()),
+      Status::Success);
   auto& finished = *param->asFinished();
   expectSame(finished.verify_data, "aabb");
   EXPECT_TRUE(read_.hasUnparsedHandshakeData());
-  param = read_.readEvent(queue_, Aead::AeadOptions());
+  EXPECT_EQ(
+      read_.readEvent(param, err, queue_, Aead::AeadOptions()),
+      Status::Success);
   auto& finished2 = *param->asFinished();
   expectSame(finished2.verify_data, "ccdd");
   EXPECT_FALSE(read_.hasUnparsedHandshakeData());
 }
 
 TEST_F(RecordTest, TestHandshakeSpliced) {
-  EXPECT_CALL(read_, read(_, _))
+  EXPECT_CALL(read_, _read(_, _))
       .WillOnce(InvokeWithoutArgs([]() {
         return ReadRecordLayer::ReadResult<TLSMessage>::from(
             TLSMessage{ContentType::handshake, getBuf("01000010abcd")});
@@ -168,11 +213,14 @@ TEST_F(RecordTest, TestHandshakeSpliced) {
         return ReadRecordLayer::ReadResult<TLSMessage>::from(
             TLSMessage{ContentType::application_data, IOBuf::copyBuffer("hi")});
       }));
-  EXPECT_ANY_THROW(read_.readEvent(queue_, Aead::AeadOptions()));
+  ReadRecordLayer::ReadResult<Param> param;
+  Error err;
+  EXPECT_ANY_THROW(FIZZ_THROW_ON_ERROR(
+      read_.readEvent(param, err, queue_, Aead::AeadOptions()), err));
 }
 
 TEST_F(RecordTest, TestMultipleHandshakeMessages) {
-  EXPECT_CALL(read_, read(_, _))
+  EXPECT_CALL(read_, _read(_, _))
       .WillOnce(InvokeWithoutArgs([]() {
         return ReadRecordLayer::ReadResult<TLSMessage>::from(
             TLSMessage{ContentType::handshake, getBuf("14000002aabb14000002")});
@@ -189,11 +237,17 @@ TEST_F(RecordTest, TestMultipleHandshakeMessages) {
         return ReadRecordLayer::ReadResult<TLSMessage>::from(
             TLSMessage{ContentType::handshake, std::move(message)});
       }));
-  auto param = read_.readEvent(queue_, Aead::AeadOptions());
+  ReadRecordLayer::ReadResult<Param> param;
+  Error err;
+  EXPECT_EQ(
+      read_.readEvent(param, err, queue_, Aead::AeadOptions()),
+      Status::Success);
   auto& finished = *param->asFinished();
   expectSame(finished.verify_data, "aabb");
   EXPECT_TRUE(read_.hasUnparsedHandshakeData());
-  param = read_.readEvent(queue_, Aead::AeadOptions());
+  EXPECT_EQ(
+      read_.readEvent(param, err, queue_, Aead::AeadOptions()),
+      Status::Success);
   auto& finished2 = *param->asFinished();
   expectSame(finished2.verify_data, "ccdd");
   EXPECT_TRUE(read_.hasUnparsedHandshakeData());

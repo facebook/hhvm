@@ -134,10 +134,10 @@ void decryptGCM(uint32_t n, size_t size, IOBufAllocation iobufAllocation) {
       contents.push_back(std::move(queue));
     }
   }
-
+  Error err;
   ReadRecordLayer::ReadResult<TLSMessage> msg;
   for (auto& buf : contents) {
-    msg = read.read(buf, Aead::AeadOptions());
+    FIZZ_THROW_ON_ERROR(read.read(msg, err, buf, Aead::AeadOptions()), err);
   }
   folly::doNotOptimizeAway(msg);
 }
@@ -292,14 +292,15 @@ void decryptAEGIS(uint32_t n, size_t size) {
     }
   }
 
+  Error err;
   ReadRecordLayer::ReadResult<TLSMessage> msg;
   for (auto& buf : contents) {
-    msg = read.read(buf, Aead::AeadOptions());
+    FIZZ_THROW_ON_ERROR(read.read(msg, err, buf, Aead::AeadOptions()), err);
   }
   folly::doNotOptimizeAway(msg);
 }
 
-// Because AEGIS currently has not implemented in place encrypt/decrypt
+// Because AEGIS currently has not implemented
 // optimization, we will compare aegis vs gcm without optimization
 BENCHMARK_PARAM(encryptAEGIS, 10);
 BENCHMARK_PARAM(encryptAEGIS, 100);

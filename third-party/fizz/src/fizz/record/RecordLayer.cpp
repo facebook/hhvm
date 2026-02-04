@@ -15,41 +15,50 @@ using HandshakeTypeType = typename std::underlying_type<HandshakeType>::type;
 static constexpr size_t kHandshakeHeaderSize =
     sizeof(HandshakeType) + detail::bits24::size;
 
-ReadRecordLayer::ReadResult<Param> ReadRecordLayer::readEvent(
+#define TRY FIZZ_RETURN_ON_ERROR
+
+Status ReadRecordLayer::readEvent(
+    ReadResult<Param>& ret,
+    Error& err,
     folly::IOBufQueue& socketBuf,
     Aead::AeadOptions options) {
   if (!unparsedHandshakeData_.empty()) {
-    auto param = decodeHandshakeMessage(unparsedHandshakeData_);
+    folly::Optional<Param> param;
+    TRY(decodeHandshakeMessage(param, err, unparsedHandshakeData_));
     if (param) {
       VLOG(8) << "Received handshake message "
               << toString(EventVisitor()(*param));
-      return ReadResult<Param>::from(std::move(param).value());
+      ret = ReadResult<Param>::from(std::move(param).value());
+      return Status::Success;
     }
   }
 
   while (true) {
     // Read one record. We read one record at a time since records could cause
     // a change in the record layer.
-    auto messageResult = read(socketBuf, options);
+    ReadResult<TLSMessage> messageResult;
+    TRY(read(messageResult, err, socketBuf, options));
     if (!messageResult) {
-      return ReadResult<Param>::noneWithSizeHint(messageResult.sizeHint);
+      ret = ReadResult<Param>::noneWithSizeHint(messageResult.sizeHint);
+      return Status::Success;
     }
 
     auto& message = messageResult.message;
 
     if (!unparsedHandshakeData_.empty() &&
         message->type != ContentType::handshake) {
-      throw std::runtime_error("spliced handshake data");
+      return err.error("spliced handshake data");
     }
 
     switch (message->type) {
       case ContentType::alert: {
         auto alert = decode<Alert>(std::move(message->fragment));
         if (alert.description == AlertDescription::close_notify) {
-          return ReadResult<Param>::from(Param(CloseNotify(socketBuf.move())));
+          ret = ReadResult<Param>::from(Param(CloseNotify(socketBuf.move())));
         } else {
-          return ReadResult<Param>::from(Param(std::move(alert)));
+          ret = ReadResult<Param>::from(Param(std::move(alert)));
         }
+        return Status::Success;
       }
       case ContentType::handshake: {
         std::unique_ptr<folly::IOBuf> handshakeMessage =
@@ -80,11 +89,13 @@ ReadRecordLayer::ReadResult<Param> ReadRecordLayer::readEvent(
             message->fragment->length());
         handshakeMessage->append(message->fragment->length());
         unparsedHandshakeData_.append(std::move(handshakeMessage));
-        auto param = decodeHandshakeMessage(unparsedHandshakeData_);
+        folly::Optional<Param> param;
+        TRY(decodeHandshakeMessage(param, err, unparsedHandshakeData_));
         if (param) {
           VLOG(8) << "Received handshake message "
                   << toString(EventVisitor()(*param));
-          return ReadResult<Param>::from(std::move(param).value());
+          ret = ReadResult<Param>::from(std::move(param).value());
+          return Status::Success;
         } else {
           // If we read handshake data but didn't have enough to get a full
           // message we immediately try to read another record.
@@ -93,23 +104,33 @@ ReadRecordLayer::ReadResult<Param> ReadRecordLayer::readEvent(
         }
       }
       case ContentType::application_data:
-        return ReadResult<Param>::from(
+        ret = ReadResult<Param>::from(
             Param(AppData(std::move(message->fragment))));
+        return Status::Success;
       default:
-        throw std::runtime_error("unknown content type");
+        return err.error("unknown content type");
     }
   }
 }
 
 template <typename T>
-static Param parse(Buf handshakeMsg, Buf original) {
+static Status parse(
+    folly::Optional<Param>& ret,
+    Error& /* err */,
+    Buf handshakeMsg,
+    Buf original) {
   auto msg = decode<T>(std::move(handshakeMsg));
   msg.originalEncoding = std::move(original);
-  return std::move(msg);
+  ret = std::move(msg);
+  return Status::Success;
 }
 
 template <>
-Param parse<ServerHello>(Buf handshakeMsg, Buf original) {
+Status parse<ServerHello>(
+    folly::Optional<Param>& ret,
+    Error& /* err */,
+    Buf handshakeMsg,
+    Buf original) {
   auto shlo = decode<ServerHello>(std::move(handshakeMsg));
   if (shlo.random == HelloRetryRequest::HrrRandom) {
     HelloRetryRequest hrr;
@@ -120,19 +141,23 @@ Param parse<ServerHello>(Buf handshakeMsg, Buf original) {
     hrr.extensions = std::move(shlo.extensions);
 
     hrr.originalEncoding = std::move(original);
-    return std::move(hrr);
+    ret = std::move(hrr);
   } else {
     shlo.originalEncoding = std::move(original);
-    return std::move(shlo);
+    ret = std::move(shlo);
   }
+  return Status::Success;
 }
 
-folly::Optional<Param> ReadRecordLayer::decodeHandshakeMessage(
+Status ReadRecordLayer::decodeHandshakeMessage(
+    folly::Optional<Param>& ret,
+    Error& err,
     folly::IOBufQueue& buf) {
   folly::io::Cursor cursor(buf.front());
 
   if (!cursor.canAdvance(kHandshakeHeaderSize)) {
-    return folly::none;
+    ret = folly::none;
+    return Status::Success;
   }
 
   auto handshakeType =
@@ -140,10 +165,11 @@ folly::Optional<Param> ReadRecordLayer::decodeHandshakeMessage(
   auto length = detail::readBits24(cursor);
 
   if (length > kMaxHandshakeSize) {
-    throw std::runtime_error("handshake record too big");
+    return err.error("handshake record too big");
   }
   if (buf.chainLength() < (cursor - buf.front()) + length) {
-    return folly::none;
+    ret = folly::none;
+    return Status::Success;
   }
 
   Buf handshakeMsg;
@@ -152,39 +178,42 @@ folly::Optional<Param> ReadRecordLayer::decodeHandshakeMessage(
 
   switch (handshakeType) {
     case HandshakeType::client_hello:
-      return parse<ClientHello>(std::move(handshakeMsg), std::move(original));
+      return parse<ClientHello>(
+          ret, err, std::move(handshakeMsg), std::move(original));
     case HandshakeType::server_hello:
-      return parse<ServerHello>(std::move(handshakeMsg), std::move(original));
+      return parse<ServerHello>(
+          ret, err, std::move(handshakeMsg), std::move(original));
     case HandshakeType::end_of_early_data:
       return parse<EndOfEarlyData>(
-          std::move(handshakeMsg), std::move(original));
+          ret, err, std::move(handshakeMsg), std::move(original));
     case HandshakeType::new_session_ticket:
       return parse<NewSessionTicket>(
-          std::move(handshakeMsg), std::move(original));
+          ret, err, std::move(handshakeMsg), std::move(original));
     case HandshakeType::encrypted_extensions:
       return parse<EncryptedExtensions>(
-          std::move(handshakeMsg), std::move(original));
+          ret, err, std::move(handshakeMsg), std::move(original));
     case HandshakeType::certificate:
       return parse<CertificateMsg>(
-          std::move(handshakeMsg), std::move(original));
+          ret, err, std::move(handshakeMsg), std::move(original));
     case HandshakeType::compressed_certificate:
       return parse<CompressedCertificate>(
-          std::move(handshakeMsg), std::move(original));
+          ret, err, std::move(handshakeMsg), std::move(original));
     case HandshakeType::certificate_request:
       return parse<CertificateRequest>(
-          std::move(handshakeMsg), std::move(original));
+          ret, err, std::move(handshakeMsg), std::move(original));
     case HandshakeType::certificate_verify:
       return parse<CertificateVerify>(
-          std::move(handshakeMsg), std::move(original));
+          ret, err, std::move(handshakeMsg), std::move(original));
     case HandshakeType::finished:
-      return parse<Finished>(std::move(handshakeMsg), std::move(original));
+      return parse<Finished>(
+          ret, err, std::move(handshakeMsg), std::move(original));
     case HandshakeType::key_update:
-      return parse<KeyUpdate>(std::move(handshakeMsg), std::move(original));
+      return parse<KeyUpdate>(
+          ret, err, std::move(handshakeMsg), std::move(original));
     default:
-      throw std::runtime_error("unknown handshake type");
+      return err.error("unknown handshake type");
   }
 }
-
 bool ReadRecordLayer::hasUnparsedHandshakeData() const {
   return !unparsedHandshakeData_.empty();
 }

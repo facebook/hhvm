@@ -47,20 +47,34 @@ class MockPlaintextReadRecordLayer : public PlaintextReadRecordLayer {
  public:
   MOCK_METHOD(
       ReadResult<TLSMessage>,
-      read,
-      (folly::IOBufQueue & buf, Aead::AeadOptions));
+      _read,
+      (folly::IOBufQueue & buf, Aead::AeadOptions Options));
+  Status read(
+      ReadResult<TLSMessage>& ret,
+      Error& /* err */,
+      folly::IOBufQueue& buf,
+      Aead::AeadOptions options) override {
+    ret = _read(buf, options);
+    return Status::Success;
+  }
   MOCK_METHOD(bool, hasUnparsedHandshakeData, (), (const));
   MOCK_METHOD(void, setSkipEncryptedRecords, (bool));
-  MOCK_METHOD(ReadResult<Param>, mockReadEvent, ());
+  MOCK_METHOD(
+      Status,
+      mockReadEvent,
+      (ReadResult<Param>&, Error&, folly::IOBufQueue&, Aead::AeadOptions));
   MOCK_METHOD(void, configureClientRecordLayer, (const ClientExtensions*));
   MOCK_METHOD(void, configureServerRecordLayer, (const ServerExtensions*));
 
-  ReadResult<Param> readEvent(folly::IOBufQueue& buf, Aead::AeadOptions options)
-      override {
+  Status readEvent(
+      ReadResult<Param>& ret,
+      Error& err,
+      folly::IOBufQueue& buf,
+      Aead::AeadOptions options) override {
     if (useMockReadEvent_) {
-      return mockReadEvent();
+      return mockReadEvent(ret, err, buf, options);
     } else {
-      return PlaintextReadRecordLayer::readEvent(buf, options);
+      return PlaintextReadRecordLayer::readEvent(ret, err, buf, options);
     }
   }
 
@@ -79,8 +93,16 @@ class MockEncryptedReadRecordLayer : public EncryptedReadRecordLayer {
 
   MOCK_METHOD(
       ReadResult<TLSMessage>,
-      read,
+      _read,
       (folly::IOBufQueue & buf, Aead::AeadOptions options));
+  Status read(
+      ReadResult<TLSMessage>& ret,
+      Error& /* err */,
+      folly::IOBufQueue& buf,
+      Aead::AeadOptions options) override {
+    ret = _read(buf, options);
+    return Status::Success;
+  }
   MOCK_METHOD(bool, hasUnparsedHandshakeData, (), (const));
   MOCK_METHOD(void, configureClientRecordLayer, (const ClientExtensions*));
   MOCK_METHOD(void, configureServerRecordLayer, (const ServerExtensions*));
@@ -92,14 +114,20 @@ class MockEncryptedReadRecordLayer : public EncryptedReadRecordLayer {
   }
 
   MOCK_METHOD(void, setSkipFailedDecryption, (bool));
-  MOCK_METHOD(ReadResult<Param>, mockReadEvent, ());
+  MOCK_METHOD(
+      Status,
+      mockReadEvent,
+      (ReadResult<Param>&, Error&, folly::IOBufQueue&, Aead::AeadOptions));
 
-  ReadResult<Param> readEvent(folly::IOBufQueue& buf, Aead::AeadOptions options)
-      override {
+  Status readEvent(
+      ReadResult<Param>& ret,
+      Error& err,
+      folly::IOBufQueue& buf,
+      Aead::AeadOptions options) override {
     if (useMockReadEvent_) {
-      return mockReadEvent();
+      return mockReadEvent(ret, err, buf, options);
     } else {
-      return EncryptedReadRecordLayer::readEvent(buf, options);
+      return EncryptedReadRecordLayer::readEvent(ret, err, buf, options);
     }
   }
 

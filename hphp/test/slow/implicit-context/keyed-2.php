@@ -39,7 +39,6 @@ function main() :mixed{
     f();
     ClassContext::start(new C(0), f<>);
     ic_inaccessible();
-    HH\ImplicitContext\soft_run_with(f<>, "SOFT_KEY");
   }
   echo "No arg ran: " . Counter::$noArg . " times\n";
   echo "With arg ran: " . Counter::$withArg . " times\n";

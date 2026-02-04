@@ -55,4 +55,3 @@ Meta developers should not use these symbols directly and instead should only us
 </FbInfo>
 
 * Executing code with an IC value and accessing the propagated value is done by extending and using methods of the class `HH\ImplicitContext`.
-* Functions `HH\ImplicitContext\soft_run_with` and `HH\ImplicitContext\soft_run_with_async` are passthrough functions that do not affect the Implicit Context state.

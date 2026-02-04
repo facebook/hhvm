@@ -18,11 +18,3 @@ vec(0) {
 memo_ic_inaccessible passed
   After: C
 ------------------------
-memo_normal passed
-------------------------
-string(0) ""
-
-memo_keyed passed
-------------------------
-memo_ic_inaccessible passed
-------------------------

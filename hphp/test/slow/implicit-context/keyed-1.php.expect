@@ -45,15 +45,6 @@ memoNoArg passed
 memoWithArg passed
   After: null
 ------------------------
->>>>> from soft run with
-  Before: null
-memoNoArg passed
-  After: null
-------------------------
-  Before: null
-memoWithArg passed
-  After: null
-------------------------
 >>>>> final report
 No arg ran: 2 times
 With arg ran: 2 times

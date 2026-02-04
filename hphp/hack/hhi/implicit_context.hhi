@@ -4,16 +4,6 @@ namespace HH {
 
   namespace ImplicitContext {
 
-    async function soft_run_with_async<Tout>(
-      (function()[_]: Awaitable<Tout>) $f,
-      string $key,
-    )[zoned, ctx $f]: Awaitable<Tout>;
-
-    function soft_run_with<Tout>(
-      (function()[_]: Tout) $f,
-      string $key,
-    )[zoned, ctx $f]: Tout;
-
     /**
      * Captures the current IC state and returns a new closure that calls the
      * input closure using that state.

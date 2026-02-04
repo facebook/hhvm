@@ -4,20 +4,6 @@ namespace HH {
 
 namespace ImplicitContext {
 
-async function soft_run_with_async<Tout>(
-  (function ()[_]: Awaitable<Tout>) $f,
-  string $key,
-)[zoned, ctx $f]: Awaitable<Tout> {
-  return await $f();
-}
-
-function soft_run_with<Tout>(
-  (function ()[_]: Tout) $f,
-  string $key,
-)[zoned, ctx $f]: Tout {
-  return $f();
-}
-
 function embed_implicit_context_state_in_closure<T>(
   (function ()[defaults]: T) $f,
 )[zoned]: (function ()[defaults]: T) {

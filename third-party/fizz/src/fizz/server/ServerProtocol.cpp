@@ -884,6 +884,7 @@ static Optional<std::string> negotiateAlpn(
   std::vector<std::string> clientProtocols;
   // Check whether client supports ALPN
   if (ext) {
+    clientProtocols.reserve(ext->protocol_name_list.size());
     for (auto& protocol : ext->protocol_name_list) {
       clientProtocols.push_back(protocol.name->to<std::string>());
     }

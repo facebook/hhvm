@@ -72,6 +72,16 @@ namespace HH {
 
     protected static function exists()[this::CRun]: bool;
     protected static function get()[this::CRun]: ?this::TData;
+
+    abstract protected static function runWithAsync<Tout>(
+      this::TData $context,
+      (function ()[_]: Awaitable<Tout>) $f,
+    )[this::CRun, ctx $f]: Awaitable<Tout>;
+
+    abstract protected static function runWith<Tout>(
+      this::TData $context,
+      (function ()[_]: Tout) $f,
+    )[this::CRun, ctx $f]: Tout;
   }
 
   /**

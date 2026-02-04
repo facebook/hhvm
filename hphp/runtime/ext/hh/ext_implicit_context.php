@@ -131,14 +131,31 @@ abstract class MemoAgnosticImplicitContext extends ImplicitContextBase {
     this::TData $context,
     (function ()[_]: Awaitable<Tout>) $f,
   )[this::CRun, ctx $f]: Awaitable<Tout> {
-    return await self::runWithImplAsync(self::createContext($context), $f);
+    $prev = ImplicitContext\_Private\set_implicit_context_by_value(
+      self::createContext($context)
+    );
+    try {
+      $result = $f();
+    } finally {
+      ImplicitContext\_Private\set_implicit_context_by_value($prev);
+    }
+    // Needs to be awaited here so that context dependency is established
+    // between parent/child functions
+    return await $result;
   }
 
   final protected static function runWith<Tout>(
     this::TData $context,
     (function ()[_]: Tout) $f,
   )[this::CRun, ctx $f]: Tout {
-    return self::runWithImpl(self::createContext($context), $f);
+    $prev = ImplicitContext\_Private\set_implicit_context_by_value(
+      self::createContext($context)
+    );
+    try {
+      return $f();
+    } finally {
+      ImplicitContext\_Private\set_implicit_context_by_value($prev);
+    }
   }
 
   private static function createContext(
@@ -158,14 +175,31 @@ abstract class MemoSensitiveImplicitContext extends ImplicitContextBase {
     this::TData $context,
     (function ()[_]: Awaitable<Tout>) $f,
   )[this::CRun, ctx $f]: Awaitable<Tout> {
-    return await self::runWithImplAsync(self::createContext($context), $f);
+    $prev = ImplicitContext\_Private\set_implicit_context_by_value(
+      self::createContext($context)
+    );
+    try {
+      $result = $f();
+    } finally {
+      ImplicitContext\_Private\set_implicit_context_by_value($prev);
+    }
+    // Needs to be awaited here so that context dependency is established
+    // between parent/child functions
+    return await $result;
   }
 
   final protected static function runWith<Tout>(
     this::TData $context,
     (function ()[_]: Tout) $f,
   )[this::CRun, ctx $f]: Tout {
-    return self::runWithImpl(self::createContext($context), $f);
+    $prev = ImplicitContext\_Private\set_implicit_context_by_value(
+      self::createContext($context)
+    );
+    try {
+      return $f();
+    } finally {
+      ImplicitContext\_Private\set_implicit_context_by_value($prev);
+    }
   }
 
   private static function createContext(
@@ -192,32 +226,15 @@ abstract class ImplicitContextBase {
     return ImplicitContext\_Private\get_implicit_context(static::class);
   }
 
-  final protected static async function runWithImplAsync<Tout>(
-    ImplicitContext\_Private\ImplicitContextData $context,
-    (function ()[_]: Awaitable<Tout>) $f,
-  )[this::CRun, ctx $f]: Awaitable<Tout> {
-    $prev = ImplicitContext\_Private\set_implicit_context_by_value($context);
-    try {
-      $result = $f();
-    } finally {
-      ImplicitContext\_Private\set_implicit_context_by_value($prev);
-    }
-    // Needs to be awaited here so that context dependency is established
-    // between parent/child functions
-    return await $result;
-  }
+  abstract protected static function runWithAsync<Tout>(
+    this::TData $context,
+    (function()[_]: Awaitable<Tout>) $f,
+  )[this::CRun, ctx $f]: Awaitable<Tout>;
 
-  final protected static function runWithImpl<Tout>(
-    ImplicitContext\_Private\ImplicitContextData $context,
-    (function ()[_]: Tout) $f,
-  )[this::CRun, ctx $f]: Tout {
-    $prev = ImplicitContext\_Private\set_implicit_context_by_value($context);
-    try {
-      return $f();
-    } finally {
-      ImplicitContext\_Private\set_implicit_context_by_value($prev);
-    }
-  }
+  abstract protected static function runWith<Tout>(
+    this::TData $context,
+    (function()[_]: Tout) $f,
+  )[this::CRun, ctx $f]: Tout;
 }
 
 // These will come handy if we decide to seal the PHP classes

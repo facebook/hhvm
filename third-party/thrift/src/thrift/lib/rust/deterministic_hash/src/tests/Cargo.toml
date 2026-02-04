@@ -28,7 +28,7 @@ anyhow = "1.0.98"
 codegen_includer_proc_macro = { version = "0.1.0", git = "https://github.com/facebookexperimental/rust-shed.git", branch = "main" }
 fbthrift = { version = "0.0.1+unstable", path = "../../.." }
 futures = { version = "0.3.31", features = ["async-await", "compat"] }
-indexmap = { version = "2.9.0", features = ["arbitrary", "rayon", "serde"] }
+indexmap = { version = "2.13.0", features = ["arbitrary", "rayon", "serde"] }
 ref-cast = "1.0.18"
 smallvec = { version = "1.15", features = ["impl_bincode", "serde", "specialization", "union"] }
 thiserror = "2.0.12"

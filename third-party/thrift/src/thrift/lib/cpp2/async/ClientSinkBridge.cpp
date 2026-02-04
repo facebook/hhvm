@@ -16,14 +16,16 @@
 
 #include <thrift/lib/cpp2/async/ClientSinkBridge.h>
 
+#include <folly/Overload.h>
+
 namespace apache::thrift::detail {
 
 // Explicitly instantiate the base of ClientSinkBridge
 template class TwoWayBridge<
     QueueConsumer,
-    std::variant<folly::Try<StreamPayload>, int32_t>,
+    ClientSinkMessageServerToClient,
     ClientSinkBridge,
-    folly::Try<StreamPayload>,
+    ClientSinkMessageClientToServer,
     ClientSinkBridge>;
 
 void ClientSinkBridge::ClientDeleter::operator()(ClientSinkBridge* ptr) {
@@ -57,7 +59,7 @@ bool ClientSinkBridge::wait(QueueConsumer* consumer) {
 }
 
 void ClientSinkBridge::push(folly::Try<StreamPayload>&& value) {
-  clientPush(std::move(value));
+  clientPush(StreamMessage::PayloadOrError{std::move(value)});
 }
 
 ClientSinkBridge::ClientQueue ClientSinkBridge::getMessages() {
@@ -94,17 +96,25 @@ folly::coro::Task<folly::Try<StreamPayload>> ClientSinkBridge::sink(
 
       for (auto queue = clientGetMessages(); !queue.empty(); queue.pop()) {
         auto& message = queue.front();
-        if (auto* n = std::get_if<int32_t>(&message)) {
-          credits += *n;
-        } else {
-          co_return std::get<folly::Try<StreamPayload>>(std::move(message));
+        bool gotResponse = folly::variant_match(
+            message,
+            [&](StreamMessage::RequestN& requestN) {
+              credits += requestN.n;
+              return false;
+            },
+            [](StreamMessage::PayloadOrError&) { return true; });
+        if (gotResponse) {
+          co_return std::move(
+              std::get<StreamMessage::PayloadOrError>(message)
+                  .streamPayloadTry);
         }
       }
 
       if (clientCancelToken.isCancellationRequested()) {
         clientPush(
-            folly::Try<apache::thrift::StreamPayload>(
-                rocket::RocketException(rocket::ErrorCode::CANCELED)));
+            StreamMessage::PayloadOrError{
+                folly::Try<apache::thrift::StreamPayload>(
+                    rocket::RocketException(rocket::ErrorCode::CANCELED))});
         co_yield folly::coro::co_stopped_may_throw;
       }
     }
@@ -117,23 +127,24 @@ folly::coro::Task<folly::Try<StreamPayload>> ClientSinkBridge::sink(
 
     if (clientCancelToken.isCancellationRequested()) {
       clientPush(
-          folly::Try<apache::thrift::StreamPayload>(
-              rocket::RocketException(rocket::ErrorCode::CANCELED)));
+          StreamMessage::PayloadOrError{
+              folly::Try<apache::thrift::StreamPayload>(
+                  rocket::RocketException(rocket::ErrorCode::CANCELED))});
       co_yield folly::coro::co_stopped_may_throw;
     }
 
     if (item.has_value()) {
       if ((*item).hasValue()) {
-        clientPush(std::move(*item));
+        clientPush(StreamMessage::PayloadOrError{std::move(*item)});
       } else {
-        clientPush(std::move(*item));
+        clientPush(StreamMessage::PayloadOrError{std::move(*item)});
         // AsyncGenerator who serialized and yield the exception also in
         // charge of propagating it back to user, just return empty Try
         // here.
         co_return folly::Try<StreamPayload>();
       }
     } else {
-      clientPush({});
+      clientPush(StreamMessage::Complete{});
       // release generator
       generator = {};
       break;
@@ -149,8 +160,9 @@ folly::coro::Task<folly::Try<StreamPayload>> ClientSinkBridge::sink(
 
     for (auto queue = clientGetMessages(); !queue.empty(); queue.pop()) {
       auto& message = queue.front();
-      if (auto* response = std::get_if<folly::Try<StreamPayload>>(&message)) {
-        co_return std::move(*response);
+      if (auto* payloadOrError =
+              std::get_if<StreamMessage::PayloadOrError>(&message)) {
+        co_return std::move(payloadOrError->streamPayloadTry);
       }
     }
 
@@ -166,7 +178,7 @@ folly::coro::Task<folly::Try<StreamPayload>> ClientSinkBridge::sink(
 void ClientSinkBridge::cancel(folly::Try<StreamPayload> payload) {
   CHECK(payload.hasException());
   DCHECK(evb_);
-  clientPush(std::move(payload));
+  clientPush(StreamMessage::PayloadOrError{std::move(payload)});
   evb_.reset();
 }
 
@@ -191,7 +203,9 @@ void ClientSinkBridge::onFirstResponseError(folly::exception_wrapper ew) {
 }
 
 void ClientSinkBridge::onFinalResponse(StreamPayload&& payload) {
-  serverPush(folly::Try<StreamPayload>(std::move(payload)));
+  serverPush(
+      StreamMessage::PayloadOrError{
+          folly::Try<StreamPayload>(std::move(payload))});
   serverCancelSource_.requestCancellation();
   close();
 }
@@ -202,13 +216,13 @@ void ClientSinkBridge::onFinalResponseError(folly::exception_wrapper ew) {
   auto payload = rex && rex->hasErrorData()
       ? folly::Try<StreamPayload>(EncodedError(rex->moveErrorData()))
       : folly::Try<StreamPayload>(std::move(ew));
-  serverPush(std::move(payload));
+  serverPush(StreamMessage::PayloadOrError{std::move(payload)});
   serverCancelSource_.requestCancellation();
   close();
 }
 
 bool ClientSinkBridge::onSinkRequestN(int32_t n) {
-  serverPush(n);
+  serverPush(StreamMessage::RequestN{n});
   return true;
 }
 
@@ -230,17 +244,22 @@ void ClientSinkBridge::processServerMessages() {
   do {
     for (auto messages = serverGetMessages(); !messages.empty();
          messages.pop()) {
-      bool terminated = false;
-      auto& payload = messages.front();
-      if (payload.hasException()) {
-        serverCallback_->onSinkError(std::move(payload).exception());
-        close();
-        terminated = true;
-      } else if (payload.hasValue()) {
-        terminated = !serverCallback_->onSinkNext(std::move(payload).value());
-      } else {
-        terminated = !serverCallback_->onSinkComplete();
-      }
+      auto& message = messages.front();
+      bool terminated = folly::variant_match(
+          message,
+          [&](StreamMessage::PayloadOrError& payloadOrError) {
+            auto& payload = payloadOrError.streamPayloadTry;
+            if (payload.hasException()) {
+              serverCallback_->onSinkError(std::move(payload).exception());
+              close();
+              return true;
+            } else {
+              return !serverCallback_->onSinkNext(std::move(payload).value());
+            }
+          },
+          [&](StreamMessage::Complete) {
+            return !serverCallback_->onSinkComplete();
+          });
 
       if (terminated) {
         return;

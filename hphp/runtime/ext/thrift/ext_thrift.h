@@ -427,11 +427,13 @@ struct TClientSink : SystemLib::ClassLoader<"TClientSink"> {
       auto& message = creditsQueue_.front();
       folly::variant_match(
           message,
-          [&](folly::Try<apache::thrift::StreamPayload>& payload) {
-            response = std::move(payload);
+          [&](apache::thrift::StreamMessage::PayloadOrError& payloadOrError) {
+            response = std::move(payloadOrError.streamPayloadTry);
             responseAvailable = true;
           },
-          [&](uint64_t n) { credits += n; });
+          [&](apache::thrift::StreamMessage::RequestN& requestN) {
+            credits += requestN.n;
+          });
       creditsQueue_.pop();
     }
     if (responseAvailable) {

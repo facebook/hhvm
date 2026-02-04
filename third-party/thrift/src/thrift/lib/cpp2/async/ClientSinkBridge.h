@@ -16,13 +16,17 @@
 
 #pragma once
 
+#include <variant>
+
 #include <folly/CancellationToken.h>
+#include <folly/Overload.h>
 #include <folly/Portability.h>
 #include <folly/coro/AsyncGenerator.h>
 #include <folly/coro/Baton.h>
 #include <folly/coro/Task.h>
 
 #include <thrift/lib/cpp2/async/StreamCallbacks.h>
+#include <thrift/lib/cpp2/async/StreamMessage.h>
 #include <thrift/lib/cpp2/async/TwoWayBridge.h>
 #include <thrift/lib/cpp2/async/TwoWayBridgeUtil.h>
 #include <thrift/lib/cpp2/transport/rocket/RocketException.h>
@@ -31,19 +35,27 @@ namespace apache::thrift::detail {
 
 class ClientSinkBridge;
 
+// Server to Client: PayloadOrError (final response/error) or RequestN (credits)
+using ClientSinkMessageServerToClient =
+    std::variant<StreamMessage::PayloadOrError, StreamMessage::RequestN>;
+
+// Client to Server: PayloadOrError (payload/error) or Complete (stream done)
+using ClientSinkMessageClientToServer =
+    std::variant<StreamMessage::PayloadOrError, StreamMessage::Complete>;
+
 // Instantiated in ClientSinkBridge.cpp
 extern template class TwoWayBridge<
     QueueConsumer,
-    std::variant<folly::Try<StreamPayload>, uint64_t>,
+    ClientSinkMessageServerToClient,
     ClientSinkBridge,
-    folly::Try<StreamPayload>,
+    ClientSinkMessageClientToServer,
     ClientSinkBridge>;
 
 class ClientSinkBridge : public TwoWayBridge<
                              QueueConsumer,
-                             std::variant<folly::Try<StreamPayload>, int32_t>,
+                             ClientSinkMessageServerToClient,
                              ClientSinkBridge,
-                             folly::Try<StreamPayload>,
+                             ClientSinkMessageClientToServer,
                              ClientSinkBridge>,
                          public SinkClientCallback {
  public:

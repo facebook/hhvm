@@ -468,6 +468,8 @@ let load_config (config : Config_file_common.t) (options : GlobalOptions.t) :
       (bool_opt Config_keys.enable_no_auto_dynamic config)
     ?tco_skip_check_under_dynamic:
       (bool_opt Config_keys.skip_check_under_dynamic config)
+    ?tco_silence_errors_under_dynamic:
+      (bool_opt Config_keys.silence_errors_under_dynamic config)
     ?tco_enable_function_references:
       (bool_opt Config_keys.enable_function_references config)
     ?tco_ignore_unsafe_cast:(bool_opt Config_keys.ignore_unsafe_cast config)
@@ -649,6 +651,8 @@ let load ~silent ~from ~(cli_config_overrides : (string * string) list) :
         ~tco_skip_hierarchy_checks:
           local_config.ServerLocalConfig.skip_hierarchy_checks
         ~tco_skip_tast_checks:local_config.ServerLocalConfig.skip_tast_checks
+        ~tco_silence_errors_under_dynamic:
+          local_config.ServerLocalConfig.silence_errors_under_dynamic
         ~tco_saved_state:local_config.ServerLocalConfig.saved_state
         ~tco_log_inference_constraints:
           local_config.ServerLocalConfig.log_inference_constraints

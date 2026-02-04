@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<b1f8bf47491c9b6732afeefd2866b8e3>>
+// @generated SignedSource<<cfc721a554d2965247c86f655b913a76>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -210,6 +210,8 @@ pub struct GlobalOptions {
     /// Skip checks on hierarchy e.g. overrides, require extend, etc.
     /// Set to true only for debugging purposes!
     pub tco_skip_hierarchy_checks: bool,
+    /// Do not report errors under the dynamic pass of the typechecker
+    pub tco_silence_errors_under_dynamic: bool,
     /// Skip checks implemented with TAST visitors.
     /// Set to true only for debugging purposes!
     pub tco_skip_tast_checks: bool,

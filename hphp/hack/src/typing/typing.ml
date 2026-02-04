@@ -10657,7 +10657,7 @@ end = struct
         (fun () ->
           fun_ ~disable env dynamic_return_info pos f.f_body f.f_fun_kind)
         (fun env_and_dynamic_body error ->
-          if not @@ TCO.everything_sdt env.genv.tcopt then
+          if not (TCO.silence_errors_under_dynamic env.genv.tcopt) then
             Diagnostics.function_is_not_dynamically_callable name error;
           env_and_dynamic_body)
     in
@@ -10984,7 +10984,10 @@ end = struct
     in
     let local_tpenv = Env.get_tpenv env in
     let sound_dynamic_check_saved_env = env in
-    let (env, tb) = Stmt.block env f.f_body.fb_ast in
+    let ((env, tb), had_errors) =
+      Diagnostics.run_and_check_for_errors (fun () ->
+          Stmt.block env f.f_body.fb_ast)
+    in
     let has_implicit_return = LEnv.has_next env in
     let env =
       if not has_implicit_return then
@@ -11019,7 +11022,7 @@ end = struct
       Env.set_fun_tast_info env Tast.{ has_implicit_return; has_readonly }
     in
     let env =
-      if sdt_dynamic_check_required then begin
+      if sdt_dynamic_check_required && not had_errors then begin
         Fn.ignore
         @@ check_function_dynamically_callable
              ~this_class

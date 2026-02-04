@@ -69,6 +69,7 @@ let default =
     fetch_remote_old_decls = true;
     skip_hierarchy_checks = false;
     skip_tast_checks = false;
+    silence_errors_under_dynamic = false;
     num_local_workers = None;
     defer_class_declaration_threshold = None;
     produce_streaming_errors = true;
@@ -547,6 +548,13 @@ let load_
     bool_if_min_version
       "skip_tast_checks"
       ~default:default.skip_tast_checks
+      ~current_version
+      config
+  in
+  let silence_errors_under_dynamic =
+    bool_if_min_version
+      "silence_errors_under_dynamic"
+      ~default:default.silence_errors_under_dynamic
       ~current_version
       config
   in
@@ -1032,6 +1040,7 @@ let load_
     fetch_remote_old_decls;
     skip_hierarchy_checks;
     skip_tast_checks;
+    silence_errors_under_dynamic;
     num_local_workers;
     defer_class_declaration_threshold;
     produce_streaming_errors;

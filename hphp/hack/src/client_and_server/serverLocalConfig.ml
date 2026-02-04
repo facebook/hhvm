@@ -283,6 +283,8 @@ type t = {
   skip_tast_checks: bool;
       (** Skip checks implemented using TAST visitors.
       Set to true only for debugging purposes! *)
+  silence_errors_under_dynamic: bool;
+      (** Do not report errors under the dynamic pass of the typechecker *)
   num_local_workers: int option;
       (** If None, only the type check delegate's logic will be used.
       If the delegate fails to type check, the typing check service as a whole

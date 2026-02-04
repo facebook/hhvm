@@ -2,9 +2,9 @@ ERROR: File "xhp.php", line 15, characters 19-28:
 xhp is not supported in expression trees. (Parsing[1002])
 ERROR: File "xhp.php", line 15, characters 19-28:
 Invalid return type (Typing[4110])
-  File "expr_tree.php", line 90, characters 21-26:
+  File "expr_tree.php", line 87, characters 21-26:
   Expected `string`
-  File "expr_tree.php", line 104, characters 29-44:
+  File "expr_tree.php", line 100, characters 29-44:
     resulting from expanding the type constant `ExampleDsl::TAst`
   File "xhp.php", line 15, characters 20-25:
   But got `:my:xhp`

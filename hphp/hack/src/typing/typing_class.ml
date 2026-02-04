@@ -89,7 +89,7 @@ let method_dynamically_callable env cls m params_decl_ty return =
           m.m_body
           m.m_fun_kind)
       (fun env_and_dynamic_body error ->
-        if not @@ TCO.everything_sdt env.genv.tcopt then
+        if not (TCO.silence_errors_under_dynamic env.genv.tcopt) then
           Diagnostics.method_is_not_dynamically_callable
             pos
             (snd m.m_name)

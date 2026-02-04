@@ -10,9 +10,9 @@ Invalid return type (Typing[4110])
   Expected `float`
   File "pipe4.php", line 12, characters 22-49:
   But got `int`
-  File "expr_tree.php", line 130, characters 24-29:
+  File "expr_tree.php", line 124, characters 24-29:
     via this generic `TInfer`
-  File "expr_tree.php", line 593, characters 52-52:
+  File "expr_tree.php", line 587, characters 52-52:
     via this generic `T`
-  File "expr_tree.php", line 105, characters 26-31:
+  File "expr_tree.php", line 101, characters 26-31:
     via this generic `TInfer`

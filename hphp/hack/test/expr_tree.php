@@ -58,14 +58,12 @@ case type ExprTreeOpType<+T as ExampleMixedOpType> =
   | T;
 
 final class ExprTree<TInfer> implements ExampleExpression<TInfer> {
-  <<__NoAutoLikes>>
   public function __construct(
     private ?ExprPos $pos,
     private ?ExprTreeInfo<TInfer> $metadata,
     private (function(ExampleDsl): ExampleDsl::TAst) $ast,
   )[] {}
 
-  <<__NoAutoLikes>>
   public function visit(ExampleDsl $v): ExampleDsl::TAst {
     return ($this->ast)($v);
   }
@@ -78,7 +76,6 @@ final class ExprTree<TInfer> implements ExampleExpression<TInfer> {
     return Shapes::idx($this->metadata, 'lexically_enclosing_tree', null);
   }
 
-  <<__NoAutoLikes>>
   public function getSplices(): dict<string, mixed> {
     return Shapes::idx($this->metadata, 'splices', dict[]);
   }
@@ -90,7 +87,6 @@ class ExampleDsl {
   const type TAst = string;
 
   // The desugared expression tree literal will call this method.
-  <<__NoAutoLikes>>
   public static function makeTree<TInfer>(
     ?ExprPos $pos,
     ~?shape(
@@ -106,7 +102,6 @@ class ExampleDsl {
     return new ExprTree($pos, $metadata, $ast);
   }
 
-  <<__NoAutoLikes>>
   private static function autolift(
     ExampleDsl $visitor,
     ?ExampleAutoLiftable $e,
@@ -124,7 +119,6 @@ class ExampleDsl {
     }
   }
 
-  <<__NoAutoLikes>>
   public static function lift<THack as TInfer as ?ExampleAutoLiftable, TInfer>(
     ExampleUnion<THack, TInfer> $e,
   ): ExampleExpression<TInfer> {

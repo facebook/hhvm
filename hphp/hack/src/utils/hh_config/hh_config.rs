@@ -397,6 +397,10 @@ impl HhConfig {
             tco_fetch_remote_old_decls: default.tco_fetch_remote_old_decls,
             tco_populate_member_heaps: default.tco_populate_member_heaps,
             tco_skip_hierarchy_checks: default.tco_skip_hierarchy_checks,
+            tco_silence_errors_under_dynamic: hhconfig.get_bool_or(
+                "silence_errors_under_dynamic",
+                default.tco_silence_errors_under_dynamic,
+            )?,
             tco_skip_tast_checks: default.tco_skip_tast_checks,
             tco_coeffects: default.tco_coeffects,
             tco_coeffects_local: default.tco_coeffects_local,

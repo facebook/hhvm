@@ -2,14 +2,14 @@ ERROR: File "shape_at_wrong.php", line 9, characters 10-98:
 Invalid return type (Typing[4110])
   File "shape_at_wrong.php", line 8, characters 15-43:
   Expected `dynamic`
-  File "shape_at_wrong.php", line 9, characters 21-97:
-  But got `ExampleExpression<_>` because method or function was called on dynamic or like-type
+  File "expr_tree.php", line 101, characters 8-32:
+  But got `ExampleExpression<_>`
 ERROR: File "shape_at_wrong.php", line 9, characters 10-98:
 Invalid return type (Typing[4110])
   File "shape_at_wrong.php", line 8, characters 15-43:
   Expected `~ExampleExpression<int>`
   File "shape_at_wrong.php", line 9, characters 21-97:
-  But got `ExampleExpression<_>` because method or function was called on dynamic or like-type
+  But got `~ExampleExpression<_>` because method or function was called on dynamic or like-type
 ERROR: File "shape_at_wrong.php", line 9, characters 10-98:
 Invalid return type (Typing[4110])
   File "shape_at_wrong.php", line 8, characters 33-42:

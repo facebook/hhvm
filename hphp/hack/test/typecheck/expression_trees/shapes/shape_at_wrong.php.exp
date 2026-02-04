@@ -2,7 +2,7 @@ ERROR: File "shape_at_wrong.php", line 9, characters 10-98:
 Invalid return type (Typing[4110])
   File "shape_at_wrong.php", line 8, characters 33-42:
   Expected `int`
-  File "expr_tree.php", line 153, characters 40-45:
+  File "expr_tree.php", line 147, characters 40-45:
   But got `string`
 ERROR: File "shape_at_wrong.php", line 18, characters 5-41:
 Too many positional arguments (expected 2 but got 3) (Typing[4105])

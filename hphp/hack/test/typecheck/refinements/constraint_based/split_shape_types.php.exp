@@ -20,7 +20,7 @@ ERROR: File "split_shape_types.php", line 32, characters 74-75:
 Invalid argument (Typing[4110])
   File "split_shape_types.php", line 32, characters 26-71:
   Expected `shape('x' => int, 'y' => string, 'z' => float)`
-  File "hh_single_type_check_magic.hhi", line 5, characters 86-86:
+  File "hh_single_type_check_magic.hhi", line 5, characters 108-108:
     via this generic `T`
   File "split_shape_types.php", line 29, characters 13-56:
   But got `(shape('x' => int, 'y' => string, 'z' => num) & not shape('z' => int, 'y' => string, 'x' => int))` from this `is` expression test
@@ -28,7 +28,7 @@ ERROR: File "split_shape_types.php", line 32, characters 74-75:
 Invalid argument (Typing[4110])
   File "split_shape_types.php", line 32, characters 26-71:
   Expected `shape('x' => int, 'y' => string, 'z' => float)`
-  File "hh_single_type_check_magic.hhi", line 5, characters 86-86:
+  File "hh_single_type_check_magic.hhi", line 5, characters 108-108:
     via this generic `T`
   File "split_shape_types.php", line 29, characters 13-56:
   But got `not shape('z' => int, 'y' => string, 'x' => int)` from this `is` expression test

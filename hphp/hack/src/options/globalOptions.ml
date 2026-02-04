@@ -111,6 +111,7 @@ type t = {
   tco_fetch_remote_old_decls: bool;
   tco_populate_member_heaps: bool;
   tco_skip_hierarchy_checks: bool;
+  tco_silence_errors_under_dynamic: bool;
   tco_skip_tast_checks: bool;
   tco_coeffects: bool;
   tco_coeffects_local: bool;
@@ -233,6 +234,7 @@ let default =
     tco_fetch_remote_old_decls = true;
     tco_populate_member_heaps = true;
     tco_skip_hierarchy_checks = false;
+    tco_silence_errors_under_dynamic = false;
     tco_skip_tast_checks = false;
     tco_coeffects = true;
     tco_coeffects_local = true;
@@ -354,6 +356,7 @@ let set
     ?tco_fetch_remote_old_decls
     ?tco_populate_member_heaps
     ?tco_skip_hierarchy_checks
+    ?tco_silence_errors_under_dynamic
     ?tco_skip_tast_checks
     ?tco_coeffects
     ?tco_coeffects_local
@@ -516,6 +519,10 @@ let set
       setting tco_populate_member_heaps options.tco_populate_member_heaps;
     tco_skip_hierarchy_checks =
       setting tco_skip_hierarchy_checks options.tco_skip_hierarchy_checks;
+    tco_silence_errors_under_dynamic =
+      setting
+        tco_silence_errors_under_dynamic
+        options.tco_silence_errors_under_dynamic;
     tco_skip_tast_checks =
       setting tco_skip_tast_checks options.tco_skip_tast_checks;
     tco_coeffects = setting tco_coeffects options.tco_coeffects;

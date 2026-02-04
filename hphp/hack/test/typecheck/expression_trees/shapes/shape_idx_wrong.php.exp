@@ -4,7 +4,7 @@ Invalid return type (Typing[4110])
   Expected `int`
   File "shape_idx_wrong.php", line 11, characters 12-40:
   But got `?(_ | _)`
-  File "expr_tree.php", line 105, characters 26-31:
+  File "expr_tree.php", line 101, characters 26-31:
     via this generic `TInfer`
 ERROR: File "shape_idx_wrong.php", line 11, characters 37-39:
 You are calling `Shapes::idx()` on a field known to not exist (Typing[4251])
@@ -20,13 +20,13 @@ Invalid return type (Typing[4110])
   Expected `int`
   File "shape_idx_wrong.php", line 28, characters 12-40:
   But got `?(_ | _ | string)`
-  File "expr_tree.php", line 105, characters 26-31:
+  File "expr_tree.php", line 101, characters 26-31:
     via this generic `TInfer`
 ERROR: File "shape_idx_wrong.php", line 34, characters 10-94:
 Invalid return type (Typing[4110])
   File "shape_idx_wrong.php", line 33, characters 34-43:
   Expected `int`
-  File "expr_tree.php", line 153, characters 40-45:
+  File "expr_tree.php", line 147, characters 40-45:
   But got `string`
 ERROR: File "shape_idx_wrong.php", line 36, characters 37-39:
 You are calling `Shapes::idx()` on a field known to not exist (Typing[4251])
@@ -54,5 +54,5 @@ Invalid return type (Typing[4110])
   Expected `string`
   File "shape_idx_wrong.php", line 63, characters 24-33:
   But got `mixed` because the field `y` may be set to any type in this shape
-  File "expr_tree.php", line 105, characters 26-31:
+  File "expr_tree.php", line 101, characters 26-31:
     via this generic `TInfer`

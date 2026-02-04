@@ -108,6 +108,9 @@ let populate_member_heaps t = t.GlobalOptions.tco_populate_member_heaps
 
 let skip_hierarchy_checks t = t.GlobalOptions.tco_skip_hierarchy_checks
 
+let silence_errors_under_dynamic t =
+  t.GlobalOptions.tco_silence_errors_under_dynamic
+
 let set_skip_hierarchy_checks t =
   GlobalOptions.{ t with tco_skip_hierarchy_checks = true }
 

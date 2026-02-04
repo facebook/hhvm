@@ -114,6 +114,8 @@ type t = {
   tco_skip_hierarchy_checks: bool;
       (** Skip checks on hierarchy e.g. overrides, require extend, etc.
         Set to true only for debugging purposes! *)
+  tco_silence_errors_under_dynamic: bool;
+      (** Do not report errors under the dynamic pass of the typechecker *)
   tco_skip_tast_checks: bool;
       (** Skip checks implemented with TAST visitors.
         Set to true only for debugging purposes! *)
@@ -336,6 +338,7 @@ val set :
   ?tco_fetch_remote_old_decls:bool ->
   ?tco_populate_member_heaps:bool ->
   ?tco_skip_hierarchy_checks:bool ->
+  ?tco_silence_errors_under_dynamic:bool ->
   ?tco_skip_tast_checks:bool ->
   ?tco_coeffects:bool ->
   ?tco_coeffects_local:bool ->

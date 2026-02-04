@@ -344,6 +344,8 @@ let deactivate_saved_state_rollout = key "deactivate_saved_state_rollout"
 
 let override_hhconfig_hash = key "override_hhconfig_hash"
 
+let silence_errors_under_dynamic = key "silence_errors_under_dynamic"
+
 (* validation *)
 
 type did_you_mean = Did_you_mean of string option

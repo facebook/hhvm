@@ -321,6 +321,8 @@ val deactivate_saved_state_rollout : string
 
 val override_hhconfig_hash : string
 
+val silence_errors_under_dynamic : string
+
 (* validation *)
 
 (** When a configuration key looks like a typo, we make a suggestion *)

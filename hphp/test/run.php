@@ -480,7 +480,7 @@ function get_options(
     if ($options->repo || $options->repo_single) {
       error("repo-single/repo and hhbbc2 are mutually exclusive options");
     }
-    if (isset($options['mode'])) {
+    if (isset(HH\FIXME\UNSAFE_CAST<mixed,dynamic>($options)['mode'])) {
       error("hhbbc2 doesn't support modes; it compares hhas, doesn't run code");
     }
   }

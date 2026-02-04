@@ -43,7 +43,6 @@ use crate::ResultType;
 use crate::Serialize;
 use crate::SerializedMessage;
 use crate::Transport;
-use crate::serialize;
 
 // Note: `variants_by_number` must be sorted by the i32 values.
 pub fn enum_display(

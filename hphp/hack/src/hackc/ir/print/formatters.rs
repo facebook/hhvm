@@ -767,6 +767,9 @@ impl Display for FmtTypedValue<'_> {
                 write!(f, "lazy({})", FmtQuotedStringId(lit.as_bytes_id()))
             }
             TypedValue::Null => f.write_str("null"),
+            TypedValue::EnumClassLabel(l) => {
+                write!(f, "enum_class_label({})", FmtEscapedString(l.as_bytes()),)
+            }
             TypedValue::Vec(values) => {
                 write!(
                     f,

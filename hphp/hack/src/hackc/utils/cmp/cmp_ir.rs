@@ -1457,6 +1457,9 @@ fn cmp_typed_value(a: &TypedValue, b: &TypedValue) -> Result {
         (TypedValue::Bool(a), TypedValue::Bool(b)) => cmp_eq(a, b).qualified("bool")?,
         (TypedValue::Float(a), TypedValue::Float(b)) => cmp_eq(a, b).qualified("float")?,
         (TypedValue::String(a), TypedValue::String(b)) => cmp_eq(*a, *b).qualified("string")?,
+        (TypedValue::EnumClassLabel(a), TypedValue::EnumClassLabel(b)) => {
+            cmp_eq(*a, *b).qualified("enum_class_label")?
+        }
         (TypedValue::LazyClass(a), TypedValue::LazyClass(b)) => {
             cmp_eq(*a, *b).qualified("lazy_class")?
         }
@@ -1492,7 +1495,8 @@ fn cmp_typed_value(a: &TypedValue, b: &TypedValue) -> Result {
             | TypedValue::Null
             | TypedValue::Vec(_)
             | TypedValue::Keyset(_)
-            | TypedValue::Dict(_),
+            | TypedValue::Dict(_)
+            | TypedValue::EnumClassLabel(_),
             _,
         ) => unreachable!(),
     }

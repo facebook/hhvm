@@ -717,6 +717,10 @@ inline const UserAttributeMap& Func::userAttributes() const {
   return shared()->m_userAttributes;
 }
 
+inline Array Func::userAttributesArray() const {
+  return userAttributes().getArray();
+}
+
 inline bool Func::isPersistent() const {
   return m_attrs & AttrPersistent;
 }

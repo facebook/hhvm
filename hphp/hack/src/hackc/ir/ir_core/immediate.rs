@@ -58,6 +58,7 @@ impl From<TypedValue> for Immediate {
             TypedValue::Vec(v) => Self::Vec(v),
             TypedValue::Dict(v) => Self::Dict(v),
             TypedValue::Keyset(v) => Self::Keyset(v),
+            TypedValue::EnumClassLabel(l) => Self::EnumClassLabel(l),
         }
     }
 }
@@ -79,9 +80,9 @@ impl TryFrom<Immediate> for TypedValue {
             Immediate::Vec(v) => Ok(Self::Vec(v)),
             Immediate::Dict(v) => Ok(Self::Dict(v)),
             Immediate::Keyset(v) => Ok(Self::Keyset(v)),
+            Immediate::EnumClassLabel(l) => Ok(Self::EnumClassLabel(l)),
 
             imm @ (Immediate::Dir
-            | Immediate::EnumClassLabel(_)
             | Immediate::File
             | Immediate::FuncCred
             | Immediate::Method

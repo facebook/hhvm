@@ -47,5 +47,6 @@ pub(crate) fn typed_value_expr(tv: &TypedValue) -> Expr {
                 .collect_vec();
             hack::expr_builtin(Builtin::NewDict, args)
         }
+        TypedValue::EnumClassLabel(_) => Expr::Const(Const::EnumClassLabel),
     }
 }

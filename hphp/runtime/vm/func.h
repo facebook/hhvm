@@ -988,6 +988,11 @@ public:
   const UserAttributeMap& userAttributes() const;
 
   /*
+   * Get a dict containing user attributes of the function.
+   */
+  Array userAttributesArray() const;
+
+  /*
    * Whether to ignore this function's frame in backtraces.
    */
   bool isNoInjection() const;

@@ -876,12 +876,12 @@ fn assemble_typed_value(src: &[u8], line: Line) -> Result<hhbc::TypedValue> {
             ))
         }
 
-        /// s:s.len():"(escaped s)"; or l:s.len():"(escaped s)";
-        fn deserialize_string_or_lazyclass<'a>(
+        /// s:s.len():"(escaped s)"; or l:s.len():"(escaped s)"; or e:...
+        fn deserialize_stringish<'a>(
             src: &'a [u8],
-            s_or_l: StringOrLazyClass,
+            kind: Stringish,
         ) -> Result<(&'a [u8], hhbc::TypedValue)> {
-            let src = expect(src, s_or_l.prefix())?;
+            let src = expect(src, kind.prefix())?;
             let src = expect(src, b":")?;
             let (len, src) = expect_usize(src)?;
             let src = expect(src, b":")?;
@@ -898,29 +898,34 @@ fn assemble_typed_value(src: &[u8], line: Line) -> Result<hhbc::TypedValue> {
             let src = &src[len..];
             let src = expect(src, b"\"")?;
             let src = expect(src, b";")?;
-            Ok((src, s_or_l.build(s)?))
+            Ok((src, kind.build(s)?))
         }
 
         #[derive(PartialEq)]
-        pub enum StringOrLazyClass {
+        pub enum Stringish {
             String,
             LazyClass,
+            EnumClassLabel,
         }
 
-        impl StringOrLazyClass {
+        impl Stringish {
             pub fn prefix(&self) -> &[u8] {
                 match self {
-                    StringOrLazyClass::String => b"s",
-                    StringOrLazyClass::LazyClass => b"l",
+                    Stringish::String => b"s",
+                    Stringish::LazyClass => b"l",
+                    Stringish::EnumClassLabel => b"e",
                 }
             }
 
             pub fn build(&self, content: &[u8]) -> Result<hhbc::TypedValue, std::str::Utf8Error> {
                 match self {
-                    StringOrLazyClass::String => Ok(hhbc::TypedValue::intern_string(content)),
-                    StringOrLazyClass::LazyClass => Ok(hhbc::TypedValue::intern_lazy_class(
+                    Stringish::String => Ok(hhbc::TypedValue::intern_string(content)),
+                    Stringish::LazyClass => Ok(hhbc::TypedValue::intern_lazy_class(
                         std::str::from_utf8(content)?,
                     )),
+                    Stringish::EnumClassLabel => {
+                        Ok(hhbc::TypedValue::intern_enum_class_label(content))
+                    }
                 }
             }
         }
@@ -992,15 +997,17 @@ fn assemble_typed_value(src: &[u8], line: Line) -> Result<hhbc::TypedValue> {
                 b'd' => deserialize_float(src).context("Assembling a TV float")?,
                 b'N' => deserialize_null(src).context("Assembling a TV Null")?,
                 b'u' => deserialize_uninit(src).context("Assembling a uninit")?,
-                b's' => deserialize_string_or_lazyclass(src, StringOrLazyClass::String)
+                b's' => deserialize_stringish(src, Stringish::String)
                     .context("Assembling a TV string")?,
                 b'v' => deserialize_vec_or_keyset(src, VecOrKeyset::Vec)
                     .context("Assembling a TV vec")?,
                 b'k' => deserialize_vec_or_keyset(src, VecOrKeyset::Keyset)
                     .context("Assembling a TV keyset")?,
                 b'D' => deserialize_dict(src).context("Assembling a TV dict")?,
-                b'l' => deserialize_string_or_lazyclass(src, StringOrLazyClass::LazyClass)
+                b'l' => deserialize_stringish(src, Stringish::LazyClass)
                     .context("Assembling a LazyClass")?,
+                b'e' => deserialize_stringish(src, Stringish::EnumClassLabel)
+                    .context("Assembling an EnumClassLabel")?,
                 _ => bail!("Unknown tv: {}", src[0]),
             };
             Ok((src, tr))

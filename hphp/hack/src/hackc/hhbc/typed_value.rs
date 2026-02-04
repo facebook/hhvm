@@ -88,6 +88,9 @@ pub enum TypedValue {
 
     /// Hack dict<T>
     Dict(ArcVec<Entry<TypedValue, TypedValue>>),
+
+    /// Hack EnumClassLabel (#FieldName, EnumName#FieldName)
+    EnumClassLabel(BytesId),
 }
 
 /// A reference counted Vector<T>
@@ -135,6 +138,10 @@ pub type DictEntry = Entry<TypedValue, TypedValue>;
 impl TypedValue {
     pub fn intern_string(x: impl AsRef<[u8]>) -> Self {
         Self::String(intern::string::intern_bytes(x.as_ref()))
+    }
+
+    pub fn intern_enum_class_label(x: impl AsRef<[u8]>) -> Self {
+        Self::EnumClassLabel(intern::string::intern_bytes(x.as_ref()))
     }
 
     pub fn intern_lazy_class(x: impl AsRef<str>) -> Self {

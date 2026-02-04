@@ -82,6 +82,7 @@ impl TypeInfo {
             TypedValue::String(_) => BUILTIN_NAME_STRING,
             TypedValue::Uninit => return TypeInfo::empty(),
             TypedValue::Vec(_) => BUILTIN_NAME_VEC,
+            TypedValue::EnumClassLabel(_) => BUILTIN_NAME_ENUM_CLASS_LABEL,
         };
         let name = crate::intern(name);
         Self {
@@ -184,6 +185,8 @@ pub static BUILTIN_NAME_VEC_OR_DICT: &str =
     strip_slash(naming_special_names::typehints::HH_VEC_OR_DICT);
 pub static BUILTIN_NAME_VOID: &str = strip_slash(naming_special_names::typehints::HH_VOID);
 pub static BUILTIN_NAME_SOFT_VOID: &str = r"@HH\void";
+pub static BUILTIN_NAME_ENUM_CLASS_LABEL: &str =
+    strip_slash(naming_special_names::classes::ENUM_CLASS_LABEL);
 
 #[cfg(test)]
 mod test {

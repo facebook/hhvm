@@ -130,6 +130,15 @@ struct BacktraceArgs {
   }
 
   /**
+   * For each frame in the backtrace include an "user_attributes" field with
+   * the user defined attributes dictionary for that function.
+   */
+  BacktraceArgs& includeAttrs(bool inclAttrs = true) {
+    m_inclAttrs = inclAttrs;
+    return *this;
+  }
+
+  /**
    * Include the current frame on top of the stack. If both skipTop and withSelf
    * are set then first frame is skipped and the second is added.
    */
@@ -222,6 +231,7 @@ struct BacktraceArgs {
     return
       Cfg::Eval::EnableCompactBacktrace &&
       !m_skipInlined &&
+      !m_inclAttrs &&
       !m_withSelf &&
       (!Cfg::Eval::EnableArgsInBacktraces || !m_withThis) &&
       !m_withMetadata &&
@@ -237,6 +247,7 @@ struct BacktraceArgs {
 private:
   bool m_skipTop{false};
   bool m_skipInlined{false};
+  bool m_inclAttrs{false};
   bool m_withSelf{false};
   bool m_withThis{false};
   bool m_withMetadata{false};

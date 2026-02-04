@@ -53,6 +53,7 @@ const StaticString
   s_include("include"),
   s_main("{main}"),
   s_metadata("metadata"),
+  s_user_attrs("user_attributes"),
   s_arrow("->"),
   s_double_colon("::");
 
@@ -66,7 +67,8 @@ const size_t
   s_class_idx(4),
   s_object_idx(5),
   s_type_idx(6),
-  s_metadata_idx(7);
+  s_metadata_idx(7),
+  s_user_attr_idx(8);
 
 const StaticString s_stableIdentifier("HPHP::createBacktrace");
 
@@ -80,6 +82,7 @@ RuntimeStruct* runtimeStructForBacktraceFrame() {
     {s_object_idx, s_object},
     {s_type_idx, s_type},
     {s_metadata_idx, s_metadata},
+    {s_user_attr_idx, s_user_attrs},
   };
   return RuntimeStruct::registerRuntimeStruct(s_stableIdentifier, s_structFields);
 }
@@ -445,8 +448,8 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
     if (!includeFrame) {
       continue;
     }
-    
-    StructDictInit frame(s_runtimeStruct, 8);
+
+    StructDictInit frame(s_runtimeStruct, 9);
     auto const curUnit = func->unit();
 
     // Builtins and generators don't have a file and line number.
@@ -535,6 +538,10 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
     // Add metadata if we found it earlier
     if (metadataVal) {
       frame.set(s_metadata_idx, s_metadata, *metadataVal);
+    }
+
+    if (btArgs.m_inclAttrs && !func->isBuiltin()) {
+      frame.set(s_user_attr_idx, s_user_attrs, func->userAttributesArray());
     }
 
     bt.append(frame.toVariant());

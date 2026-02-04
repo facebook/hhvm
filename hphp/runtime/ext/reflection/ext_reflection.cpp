@@ -1002,50 +1002,9 @@ static bool HHVM_METHOD(ReflectionFunctionAbstract, returnsReadonly) {
   return func->attrs() & AttrReadonlyReturn;
 }
 
-const StaticString
-  s_Memoize("__Memoize"),
-  s_MemoizeLSB("__MemoizeLSB"),
-  s_KeyedByIC("KeyedByIC"),
-  s_MakeICInaccessible("MakeICInaccessible"),
-  s_NotKeyedByICAndLeakIC("NotKeyedByICAndLeakIC__DO_NOT_USE");
-
-ALWAYS_INLINE
-static Array get_function_user_attributes(const Func* func) {
-  auto userAttrs = func->userAttributes();
-
-  DictInit ai(userAttrs.size());
-  for (auto it = userAttrs.begin(); it != userAttrs.end(); ++it) {
-    auto const attrName = StrNR(it->first).asString();
-    // __Memoize and LSB attributes may contain EnumClassLabels
-    if (func->isMemoizeWrapper() &&
-        (attrName.get()->tsame(s_Memoize.get()) ||
-         attrName.get()->tsame(s_MemoizeLSB.get()))) {
-      assertx(tvIsVec(it->second));
-      auto const ad = it->second.m_data.parr;
-      VecInit args(ad->size());
-      IterateV(ad, [&] (TypedValue tv) {
-        if (!tvIsString(tv)) {
-          args.append(tv);
-        } else {
-          auto const sd = tv.m_data.pstr;
-          if (sd->same(s_KeyedByIC.get()) ||
-              sd->same(s_MakeICInaccessible.get()) ||
-              sd->same(s_NotKeyedByICAndLeakIC.get())) {
-              args.append(make_tv<KindOfEnumClassLabel>(sd));
-          }
-        }
-      });
-      ai.set(attrName, args.toArray());
-    } else {
-      ai.set(attrName, it->second);
-    }
-  }
-  return ai.toArray();
-}
-
 static Array HHVM_METHOD(ReflectionFunctionAbstract, getAttributesNamespaced) {
   auto const func = ReflectionFuncHandle::GetFuncFor(this_);
-  return get_function_user_attributes(func);
+  return func->userAttributesArray();
 }
 
 // ------------------------- class ReflectionMethod
@@ -2618,7 +2577,7 @@ static void set_debugger_reflection_function_info(Array& ret,
   ret.set(s_params, get_function_param_info(func));
 
   // user attributes
-  ret.set(s_attributes, get_function_user_attributes(func));
+  ret.set(s_attributes, func->userAttributesArray());
 
   ret.set(s_is_async, func->isAsync());
   ret.set(s_is_closure, func->isClosureBody());

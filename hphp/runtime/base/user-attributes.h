@@ -26,6 +26,8 @@
 
 namespace HPHP {
 
+struct Array;
+
 //////////////////////////////////////////////////////////////////////
 
 /*
@@ -102,6 +104,11 @@ public:
   serde(SerDe& sd) const {
     sd(map());
   }
+
+  /*
+   * A hack representation of these user attributes as a dict
+   */
+  Array getArray() const;
 
 private:
   struct MapCompare;

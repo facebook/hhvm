@@ -281,6 +281,8 @@ pub fn expr_to_typed_value_(
             Expr_::Id(id) if id.1 == math::INF => Ok(TypedValue::float(f64::INFINITY)),
             Expr_::Id(_) => Err(Error::UserDefinedConstant),
 
+            Expr_::EnumClassLabel(ecl) => enum_class_label_expr_to_typed_value(ecl.1.as_bytes()),
+
             Expr_::Collection(x) if x.0.name().eq("keyset") => {
                 keyset_expr_to_typed_value(emitter, scope, x)
             }
@@ -478,6 +480,10 @@ fn string_expr_to_typed_value(s: &[u8]) -> Result<TypedValue, Error> {
     Ok(TypedValue::intern_string(s))
 }
 
+fn enum_class_label_expr_to_typed_value(s: &[u8]) -> Result<TypedValue, Error> {
+    Ok(TypedValue::intern_enum_class_label(s))
+}
+
 fn int_expr_to_typed_value(s: &str) -> Result<TypedValue, Error> {
     Ok(TypedValue::Int(try_type_intlike(s).unwrap_or(i64::MAX)))
 }
@@ -551,6 +557,10 @@ fn value_to_expr_(v: TypedValue) -> Result<ast::Expr_, Error> {
         TypedValue::Float(f) => Ok(Expr_::Float(hhbc_string_utils::float::to_string(
             f.to_f64(),
         ))),
+        TypedValue::EnumClassLabel(l) => {
+            let s = unsafe { std::str::from_utf8_unchecked(l.as_bytes()) };
+            Ok(Expr_::EnumClassLabel(Box::new((None, s.to_owned()))))
+        }
         TypedValue::Bool(false) => Ok(Expr_::False),
         TypedValue::Bool(true) => Ok(Expr_::True),
         TypedValue::String(s) => Ok(Expr_::String(s.as_bytes().into())),
@@ -821,6 +831,7 @@ pub fn cast_to_bool(x: TypedValue) -> bool {
         TypedValue::Bool(b) => b,
         TypedValue::Null => false,
         TypedValue::String(s) => !s.is_empty() && s.as_bytes() != b"0",
+        TypedValue::EnumClassLabel(_) => true,
         TypedValue::LazyClass(_) => true,
         TypedValue::Int(i) => i != 0,
         TypedValue::Float(f) => f.to_f64() != 0.0,

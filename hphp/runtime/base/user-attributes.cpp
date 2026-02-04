@@ -15,9 +15,12 @@
 */
 
 #include "hphp/runtime/base/user-attributes.h"
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/tv-comparisons.h"
+#include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/vm/disas.h"
 
+#include <folly/concurrency/ConcurrentHashMap.h>
 #include <tbb/concurrent_unordered_set.h>
 
 namespace HPHP {
@@ -79,6 +82,23 @@ void UserAttributeMap::lookup(Map&& m) {
   } else {
     m_map = *ret.first;
   }
+}
+
+Array UserAttributeMap::getArray() const {
+  static folly::ConcurrentHashMap<copy_ptr<Map>, ArrayData*,
+                                  UserAttributeMap::MapCompare,
+                                  UserAttributeMap::MapCompare> s_cache;
+
+  if (empty()) return empty_dict_array();
+  if (auto const ad = folly::get_default(s_cache, m_map)) return ArrNR{ad};
+
+  DictInit ai(size());
+  for (auto [k, v] : map()) ai.set(StrNR{k}, v);
+  auto arr = ai.toArray();
+  arr.setEvalScalar();
+
+  s_cache.insert(m_map, arr.get());
+  return arr;
 }
 
 //////////////////////////////////////////////////////////////////////

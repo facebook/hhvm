@@ -305,7 +305,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
     auto const getICType = [&] (TypedValue tv) {
       assertx(tvIsVec(tv));
       IterateV(tv.m_data.parr, [&](TypedValue elem) {
-        if (tvIsString(elem)) {
+        if (tvIsEnumClassLabel(elem)) {
           assertx(tv.m_data.parr->size() == 1);
           if (elem.m_data.pstr->same(s_KeyedByIC.get())) {
             icType = Func::MemoizeICType::KeyedByIC;

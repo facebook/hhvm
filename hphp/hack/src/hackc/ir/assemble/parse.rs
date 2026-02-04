@@ -776,6 +776,10 @@ pub(crate) fn parse_typed_value(tokenizer: &mut Tokenizer<'_>) -> Result<TypedVa
             parse!(tokenizer, "(" <id:parse_class_name> ")");
             TypedValue::LazyClass(id)
         }
+        Token::Identifier(s, _) if s == "enum_class_label" => {
+            parse!(tokenizer, "(" <id:parse_string_id> ")");
+            TypedValue::EnumClassLabel(id)
+        }
         Token::Identifier(s, _) if s == "nan" => TypedValue::Float(FloatBits(f64::NAN)),
         Token::Identifier(s, _) if s == "null" => TypedValue::Null,
         Token::Identifier(s, _) if s == "true" => TypedValue::Bool(true),

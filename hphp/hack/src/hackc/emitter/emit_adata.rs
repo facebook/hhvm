@@ -23,6 +23,7 @@ pub fn typed_value_into_instr(e: &mut Emitter, tv: TypedValue) -> Result<InstrSe
         TypedValue::Keyset(_) => Ok(instr::keyset(intern_array(e, tv))),
         TypedValue::Vec(_) => Ok(instr::vec(intern_array(e, tv))),
         TypedValue::Dict(_) => Ok(instr::dict(intern_array(e, tv))),
+        TypedValue::EnumClassLabel(l) => Ok(instr::enum_class_label(l)),
     }
 }
 

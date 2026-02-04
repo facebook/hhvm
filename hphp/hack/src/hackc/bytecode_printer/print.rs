@@ -737,6 +737,14 @@ fn print_adata(ctx: &Context<'_>, w: &mut dyn Write, tv: &TypedValue) -> Result<
                 escaper::escape_bstr(s.as_bytes().as_bstr())
             )
         }
+        TypedValue::EnumClassLabel(s) => {
+            write_bytes!(
+                w,
+                r#"e:{}:\"{}\";"#,
+                s.len(),
+                escaper::escape_bstr(s.as_bytes().as_bstr())
+            )
+        }
         TypedValue::LazyClass(s) => {
             write_bytes!(
                 w,

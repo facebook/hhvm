@@ -76,7 +76,7 @@ fn is_memoize_with(attrs: impl AsRef<[Attribute]>, arg: &str) -> bool {
     attrs.as_ref().iter().any(|attr| {
         ua::is_memoized(attr.name.as_str())
             && attr.arguments.as_ref().iter().any(|tv| match *tv {
-                TypedValue::String(s0) => s0.as_bytes() == arg.as_bytes(),
+                TypedValue::EnumClassLabel(l0) => l0.as_bytes() == arg.as_bytes(),
                 _ => false,
             })
     })

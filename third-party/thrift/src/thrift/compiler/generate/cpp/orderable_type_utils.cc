@@ -120,9 +120,7 @@ bool type_is_orderable_walk(
                      field,
                      &type,
                      context,
-                     enable_custom_type_ordering(*asStructured) ||
-                         (context.enableCustomTypeOrderingIfStructureHasUri &&
-                          !asStructured->uri().empty()));
+                     enable_custom_type_ordering(*asStructured));
                });
   } else if (const t_list* asList = type.try_as<t_list>()) {
     return result = type_is_orderable_walk(
@@ -306,23 +304,19 @@ bool structure_has_custom_set_or_map_field(const t_structured& s) {
 
 } // namespace
 
-bool OrderableTypeUtils::is_orderable(
-    const t_structured& structured_type,
-    bool enableCustomTypeOrderingIfStructureHasUri) {
+bool OrderableTypeUtils::is_orderable(const t_structured& structured_type) {
   // Thrift struct could self-reference, so have to perform a two-stage walk:
   std::unordered_map<const t_type*, bool> memo;
-  return is_orderable(
-      memo, structured_type, enableCustomTypeOrderingIfStructureHasUri);
+  return is_orderable(memo, structured_type);
 }
 
 bool OrderableTypeUtils::is_orderable(
     std::unordered_map<const t_type*, bool>& memo,
-    const t_structured& structured_type,
-    bool enableCustomTypeOrderingIfStructureHasUri) {
+    const t_structured& structured_type) {
   // Thrift struct could self-reference, so have to perform a two-stage walk:
   // first all self-references are speculated, then negative classification is
   // back-propagated through the traversed dependencies.
-  is_orderable_walk_context context{enableCustomTypeOrderingIfStructureHasUri};
+  is_orderable_walk_context context;
 
   // NOTE: The initial value of `forceCustomTypeOrderable` passed below is
   // ignored: it is merely a placeholder for recursive calls. Since the first
@@ -343,75 +337,21 @@ bool OrderableTypeUtils::is_orderable(
 
 OrderableTypeUtils::StructuredOrderableCondition
 OrderableTypeUtils::get_orderable_condition(
-    const t_structured& structured_type,
-    bool enableCustomTypeOrderingIfStructureHasUri) {
-  const bool isOrderedWithoutImplicitCustomTypeOrdering = is_orderable(
-      structured_type, false /* enableCustomTypeOrderingIfStructureHasUri */);
+    const t_structured& structured_type) {
+  const bool isOrderedWithoutImplicitCustomTypeOrdering =
+      is_orderable(structured_type);
   const bool hasCustomSetOrMapField =
       structure_has_custom_set_or_map_field(structured_type);
-  const bool hasEnableCustomTypeOrderingAnnotation =
-      enable_custom_type_ordering(structured_type);
 
   if (isOrderedWithoutImplicitCustomTypeOrdering) {
     if (hasCustomSetOrMapField) {
-      // Assumption violation: orderable type has custom set/map, but no
-      // @cpp.EnableCustomTypeOrdering annotation
-      assert(hasEnableCustomTypeOrderingAnnotation);
       return StructuredOrderableCondition::OrderableByExplicitAnnotation;
     } else {
       return StructuredOrderableCondition::Always;
     }
   }
 
-  // structured_type is not ordered without implicit ordering (if URI is set).
-
-  if (!enableCustomTypeOrderingIfStructureHasUri ||
-      !is_orderable(
-          structured_type,
-          true /* enableCustomTypeOrderingIfStructureHasUri */)) {
-    return StructuredOrderableCondition::NotOrderable;
-  }
-
-  // structured_type is orderable when implicit custom type ordering is enabled.
-  //
-  // 1. Struct does not have custom sets or maps:
-  //   it was not orderable merely becaue of nested struct fields, that are now
-  //   implicitly made orderable. The nested struct types need to be annotated,
-  //   but this type does not (and, in fact, having the annotation would be
-  //   redundant and lear to a validation error).
-  //   => OrderableByNestedLegacyImplicitLogicEnabledByUri
-  //
-  // 2. Struct has custom sets or maps:
-  //   a. Struct is annotated with @cpp.EnableCustomTypeOrdering. Since it was
-  //      not orderable without implicit ordering enabled, this means there
-  //      were also some nested fields that were unorderable without implicit
-  //      ordering.
-  //      => OrderableByExplicitAnnotationAndNestedLegacyImplicitLogic
-  //   b. Struct is not annotated with @cpp.EnableCustomTypeOrdering. It
-  //      therefore needs (at least) the annotation, since the type contains
-  //      custom sets/maps. It may also need nested struct fields to be made
-  //      explicitly orderable (see (a)), but needs the annotation nonetheless.
-  //      => OrderableByLegacyImplicitLogicEnabledByUri
-
-  if (!hasCustomSetOrMapField) {
-    // Assumption violation: type is orderable implicitly due to URI, and does
-    // not have custom set/map, so should not be annotated:
-    assert(!hasEnableCustomTypeOrderingAnnotation);
-    return StructuredOrderableCondition::
-        OrderableByNestedLegacyImplicitLogicEnabledByUri;
-  }
-
-  // hasCustomSetOrMapField == true
-
-  // Assumption violation: type is orderable implicitly due to URI, but URI is
-  // empty.
-  assert(!structured_type.uri().empty());
-
-  return hasEnableCustomTypeOrderingAnnotation
-      ? StructuredOrderableCondition::
-            OrderableByExplicitAnnotationAndNestedLegacyImplicitLogic
-      : StructuredOrderableCondition::
-            OrderableByLegacyImplicitLogicEnabledByUri;
+  return StructuredOrderableCondition::NotOrderable;
 }
 
 } // namespace apache::thrift::compiler::cpp2

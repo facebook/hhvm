@@ -166,161 +166,12 @@ TEST(OrderableTypeUtilsTest, is_orderable_set_template) {
   t_program program_p("path/to/program.thrift", "path/to/program.thrift");
   t_struct struct_s(&program_p, "struct_name");
   struct_s.create_field(set_t, "set_field", 1);
-  EXPECT_FALSE(OrderableTypeUtils::is_orderable(struct_s, true));
-
-  struct_s.set_uri("facebook.com/path/to/struct_name");
-  EXPECT_TRUE(OrderableTypeUtils::is_orderable(struct_s, true));
-  EXPECT_FALSE(OrderableTypeUtils::is_orderable(struct_s, false));
-
-  struct_s.set_uri(""); // remove uri
-  EXPECT_FALSE(OrderableTypeUtils::is_orderable(struct_s, true));
-  EXPECT_FALSE(OrderableTypeUtils::is_orderable(struct_s, false));
+  EXPECT_FALSE(OrderableTypeUtils::is_orderable(struct_s));
 
   auto builder =
       gen::cpp_annotation_builder::EnableCustomTypeOrdering(program_p);
   struct_s.add_structured_annotation(builder.make());
-  EXPECT_TRUE(OrderableTypeUtils::is_orderable(struct_s, true));
-  EXPECT_TRUE(OrderableTypeUtils::is_orderable(struct_s, false));
-}
-
-TEST(OrderableTypeUtilsTest, is_orderable_struct) {
-  t_program program_p("path/to/program.thrift", "path/to/program.thrift");
-  t_struct struct_s(&program_p, "struct_name");
-  struct_s.create_field(t_primitive_type::t_string(), "field_name", 1);
-  EXPECT_TRUE(OrderableTypeUtils::is_orderable(struct_s, true));
-}
-
-TEST(OrderableTypeUtilsTest, is_orderable_struct_self_reference) {
-  t_program program_p("path/to/program.thrift", "path/to/program.thrift");
-
-  t_set set_t(t_primitive_type::t_double());
-  set_t.set_unstructured_annotation("cpp2.template", "blah");
-
-  t_struct struct_c(&program_p, "C");
-  struct_c.create_field(set_t, "set_field", 1);
-  EXPECT_FALSE(OrderableTypeUtils::is_orderable(struct_c, true));
-
-  t_struct struct_b(&program_p, "B");
-  t_struct struct_a(&program_p, "A");
-
-  struct_b.create_field(struct_a, "struct_a", 1);
-  struct_a.create_field(struct_b, "struct_b", 1);
-  struct_a.create_field(struct_c, "struct_c", 2);
-
-  EXPECT_FALSE(OrderableTypeUtils::is_orderable(struct_a, true));
-  EXPECT_FALSE(OrderableTypeUtils::is_orderable(struct_b, true));
-
-  std::unordered_map<t_type const*, bool> memo;
-  EXPECT_FALSE(OrderableTypeUtils::is_orderable(memo, struct_a, true));
-  EXPECT_FALSE(OrderableTypeUtils::is_orderable(memo, struct_b, true));
-  EXPECT_FALSE(OrderableTypeUtils::is_orderable(memo, struct_c, true));
-}
-
-void checkCustomSetOrderabilityWithoutUri(const t_program& program) {
-  EXPECT_FALSE(
-      OrderableTypeUtils::is_orderable(
-          get_structured_named(program, "StructWithCustomSetCppTemplate"),
-          true));
-  EXPECT_FALSE(
-      OrderableTypeUtils::is_orderable(
-          get_structured_named(program, "StructWithCustomSetCppType"), true));
-  EXPECT_FALSE(
-      OrderableTypeUtils::is_orderable(
-          get_structured_named(program, "StructWithCustomSetAdapter"), true));
-  EXPECT_FALSE(
-      OrderableTypeUtils::is_orderable(
-          get_structured_named(
-              program, "StructWithCustomSetUnstructuredCppTemplate"),
-          true));
-  EXPECT_FALSE(
-      OrderableTypeUtils::is_orderable(
-          get_structured_named(
-              program, "StructWithCustomSetUnstructuredCppType"),
-          true));
-  EXPECT_FALSE(
-      OrderableTypeUtils::is_orderable(
-          get_structured_named(program, "StructWithListOfCustomSetCppTemplate"),
-          true));
-  EXPECT_FALSE(
-      OrderableTypeUtils::is_orderable(
-          get_structured_named(program, "StructWithCustomSetCppTemplateField"),
-          true));
-  EXPECT_FALSE(
-      OrderableTypeUtils::is_orderable(
-          get_structured_named(program, "StructWithCustomMapCppTemplateField"),
-          true));
-  EXPECT_FALSE(
-      OrderableTypeUtils::is_orderable(
-          get_structured_named(program, "StructWithI32AndCustomSetCppTemplate"),
-          true));
-  EXPECT_FALSE(
-      OrderableTypeUtils::is_orderable(
-          get_structured_named(program, "StructWithCustomSetCppTemplateRef"),
-          true));
-  EXPECT_FALSE(
-      OrderableTypeUtils::is_orderable(
-          get_structured_named(program, "StructWithCustomSetCppTemplateBox"),
-          true));
-
-  EXPECT_TRUE(
-      OrderableTypeUtils::is_orderable(
-          get_structured_named(program, "StructWithSet"), true));
-  EXPECT_TRUE(
-      OrderableTypeUtils::is_orderable(
-          get_structured_named(program, "StructWithCustomListCppTemplate"),
-          true));
-  EXPECT_FALSE(
-      OrderableTypeUtils::is_orderable(
-          get_structured_named(
-              program, "StructWithStructWithCustomSetCppTemplate"),
-          true));
-  EXPECT_FALSE(
-      OrderableTypeUtils::is_orderable(
-          get_structured_named(
-              program,
-              "StructWithMapToStructWithCustomSetUnstructuredCppTemplate"),
-          true));
-
-  EXPECT_TRUE(
-      OrderableTypeUtils::is_orderable(
-          get_structured_named(program, "StructWithSetAdapterField"), true));
-  EXPECT_FALSE(
-      OrderableTypeUtils::is_orderable(
-          get_structured_named(program, "StructWithCustomSetCppTypeFieldNoUri"),
-          true));
-  EXPECT_FALSE(
-      OrderableTypeUtils::is_orderable(
-          get_structured_named(
-              program, "StructWithUriAndStructWithCustomSetCppTypeFieldNoUri"),
-          true));
-  EXPECT_TRUE(
-      OrderableTypeUtils::is_orderable(
-          get_structured_named(
-              program,
-              "StructWithCustomSetCppTypeWithEnableCustomTypeOrdering"),
-          true));
-}
-
-TEST(OrderableTypeUtilsTest, CustomSetOrderabilityWithoutUri) {
-  source_manager source_mgr;
-  std::shared_ptr<t_program> program = dedent_and_parse_to_program(
-      source_mgr,
-      kHeaderNoUri + kOrderabilityTestProgram,
-      parsing_params{},
-      sema_params{.skip_lowering_cpp_type_annotations = false});
-  checkCustomSetOrderabilityWithoutUri(*program);
-}
-
-TEST(
-    OrderableTypeUtilsTest,
-    CustomSetOrderabilityWithoutUriSkipLoweringCppTypeAnnotations) {
-  source_manager source_mgr;
-  std::shared_ptr<t_program> program = dedent_and_parse_to_program(
-      source_mgr,
-      kHeaderNoUri + kOrderabilityTestProgram,
-      parsing_params{},
-      sema_params{.skip_lowering_cpp_type_annotations = true});
-  checkCustomSetOrderabilityWithoutUri(*program);
+  EXPECT_TRUE(OrderableTypeUtils::is_orderable(struct_s));
 }
 
 // The orderability should be the same as previous test case
@@ -328,86 +179,64 @@ void checkCustomSetOrderabilityWithUriButPreservedOldBehavior(
     const t_program& program) {
   EXPECT_FALSE(
       OrderableTypeUtils::is_orderable(
-          get_structured_named(program, "StructWithCustomSetCppTemplate"),
-          false));
+          get_structured_named(program, "StructWithCustomSetCppTemplate")));
   EXPECT_FALSE(
       OrderableTypeUtils::is_orderable(
-          get_structured_named(program, "StructWithCustomSetCppType"), false));
+          get_structured_named(program, "StructWithCustomSetCppType")));
   EXPECT_FALSE(
       OrderableTypeUtils::is_orderable(
-          get_structured_named(program, "StructWithCustomSetAdapter"), false));
+          get_structured_named(program, "StructWithCustomSetAdapter")));
+  EXPECT_FALSE(
+      OrderableTypeUtils::is_orderable(get_structured_named(
+          program, "StructWithCustomSetUnstructuredCppTemplate")));
+  EXPECT_FALSE(
+      OrderableTypeUtils::is_orderable(get_structured_named(
+          program, "StructWithCustomSetUnstructuredCppType")));
+  EXPECT_FALSE(
+      OrderableTypeUtils::is_orderable(get_structured_named(
+          program, "StructWithListOfCustomSetCppTemplate")));
+  EXPECT_FALSE(
+      OrderableTypeUtils::is_orderable(get_structured_named(
+          program, "StructWithCustomSetCppTemplateField")));
+  EXPECT_FALSE(
+      OrderableTypeUtils::is_orderable(get_structured_named(
+          program, "StructWithCustomMapCppTemplateField")));
+  EXPECT_FALSE(
+      OrderableTypeUtils::is_orderable(get_structured_named(
+          program, "StructWithI32AndCustomSetCppTemplate")));
   EXPECT_FALSE(
       OrderableTypeUtils::is_orderable(
-          get_structured_named(
-              program, "StructWithCustomSetUnstructuredCppTemplate"),
-          false));
+          get_structured_named(program, "StructWithCustomSetCppTemplateRef")));
   EXPECT_FALSE(
       OrderableTypeUtils::is_orderable(
-          get_structured_named(
-              program, "StructWithCustomSetUnstructuredCppType"),
-          false));
-  EXPECT_FALSE(
-      OrderableTypeUtils::is_orderable(
-          get_structured_named(program, "StructWithListOfCustomSetCppTemplate"),
-          false));
-  EXPECT_FALSE(
-      OrderableTypeUtils::is_orderable(
-          get_structured_named(program, "StructWithCustomSetCppTemplateField"),
-          false));
-  EXPECT_FALSE(
-      OrderableTypeUtils::is_orderable(
-          get_structured_named(program, "StructWithCustomMapCppTemplateField"),
-          false));
-  EXPECT_FALSE(
-      OrderableTypeUtils::is_orderable(
-          get_structured_named(program, "StructWithI32AndCustomSetCppTemplate"),
-          false));
-  EXPECT_FALSE(
-      OrderableTypeUtils::is_orderable(
-          get_structured_named(program, "StructWithCustomSetCppTemplateRef"),
-          false));
-  EXPECT_FALSE(
-      OrderableTypeUtils::is_orderable(
-          get_structured_named(program, "StructWithCustomSetCppTemplateBox"),
-          false));
+          get_structured_named(program, "StructWithCustomSetCppTemplateBox")));
 
   EXPECT_TRUE(
       OrderableTypeUtils::is_orderable(
-          get_structured_named(program, "StructWithSet"), false));
+          get_structured_named(program, "StructWithSet")));
   EXPECT_TRUE(
       OrderableTypeUtils::is_orderable(
-          get_structured_named(program, "StructWithCustomListCppTemplate"),
-          false));
+          get_structured_named(program, "StructWithCustomListCppTemplate")));
   EXPECT_FALSE(
-      OrderableTypeUtils::is_orderable(
-          get_structured_named(
-              program, "StructWithStructWithCustomSetCppTemplate"),
-          false));
+      OrderableTypeUtils::is_orderable(get_structured_named(
+          program, "StructWithStructWithCustomSetCppTemplate")));
   EXPECT_FALSE(
-      OrderableTypeUtils::is_orderable(
-          get_structured_named(
-              program,
-              "StructWithMapToStructWithCustomSetUnstructuredCppTemplate"),
-          false));
+      OrderableTypeUtils::is_orderable(get_structured_named(
+          program,
+          "StructWithMapToStructWithCustomSetUnstructuredCppTemplate")));
 
   EXPECT_TRUE(
       OrderableTypeUtils::is_orderable(
-          get_structured_named(program, "StructWithSetAdapterField"), false));
+          get_structured_named(program, "StructWithSetAdapterField")));
   EXPECT_FALSE(
-      OrderableTypeUtils::is_orderable(
-          get_structured_named(program, "StructWithCustomSetCppTypeFieldNoUri"),
-          false));
+      OrderableTypeUtils::is_orderable(get_structured_named(
+          program, "StructWithCustomSetCppTypeFieldNoUri")));
   EXPECT_FALSE(
-      OrderableTypeUtils::is_orderable(
-          get_structured_named(
-              program, "StructWithUriAndStructWithCustomSetCppTypeFieldNoUri"),
-          false));
+      OrderableTypeUtils::is_orderable(get_structured_named(
+          program, "StructWithUriAndStructWithCustomSetCppTypeFieldNoUri")));
   EXPECT_TRUE(
-      OrderableTypeUtils::is_orderable(
-          get_structured_named(
-              program,
-              "StructWithCustomSetCppTypeWithEnableCustomTypeOrdering"),
-          false));
+      OrderableTypeUtils::is_orderable(get_structured_named(
+          program, "StructWithCustomSetCppTypeWithEnableCustomTypeOrdering")));
 }
 TEST(
     OrderableTypeUtilsTest,
@@ -431,111 +260,6 @@ TEST(
       parsing_params{},
       sema_params{.skip_lowering_cpp_type_annotations = true});
   checkCustomSetOrderabilityWithUriButPreservedOldBehavior(*program);
-}
-
-void checkCustomSetOrderabilityWithUri(const t_program& program) {
-  EXPECT_TRUE(
-      OrderableTypeUtils::is_orderable(
-          get_structured_named(program, "StructWithCustomSetCppTemplate"),
-          true));
-  EXPECT_TRUE(
-      OrderableTypeUtils::is_orderable(
-          get_structured_named(program, "StructWithCustomSetCppType"), true));
-  EXPECT_TRUE(
-      OrderableTypeUtils::is_orderable(
-          get_structured_named(program, "StructWithCustomSetAdapter"), true));
-  EXPECT_TRUE(
-      OrderableTypeUtils::is_orderable(
-          get_structured_named(
-              program, "StructWithCustomSetUnstructuredCppTemplate"),
-          true));
-  EXPECT_TRUE(
-      OrderableTypeUtils::is_orderable(
-          get_structured_named(
-              program, "StructWithCustomSetUnstructuredCppType"),
-          true));
-  EXPECT_TRUE(
-      OrderableTypeUtils::is_orderable(
-          get_structured_named(program, "StructWithListOfCustomSetCppTemplate"),
-          true));
-  EXPECT_TRUE(
-      OrderableTypeUtils::is_orderable(
-          get_structured_named(program, "StructWithCustomSetCppTemplateField"),
-          true));
-  EXPECT_TRUE(
-      OrderableTypeUtils::is_orderable(
-          get_structured_named(program, "StructWithCustomMapCppTemplateField"),
-          true));
-  EXPECT_TRUE(
-      OrderableTypeUtils::is_orderable(
-          get_structured_named(program, "StructWithI32AndCustomSetCppTemplate"),
-          true));
-  EXPECT_TRUE(
-      OrderableTypeUtils::is_orderable(
-          get_structured_named(program, "StructWithCustomSetCppTemplateRef"),
-          true));
-  EXPECT_TRUE(
-      OrderableTypeUtils::is_orderable(
-          get_structured_named(program, "StructWithCustomSetCppTemplateBox"),
-          true));
-
-  EXPECT_TRUE(
-      OrderableTypeUtils::is_orderable(
-          get_structured_named(program, "StructWithSet"), true));
-  EXPECT_TRUE(
-      OrderableTypeUtils::is_orderable(
-          get_structured_named(program, "StructWithCustomListCppTemplate"),
-          true));
-  EXPECT_TRUE(
-      OrderableTypeUtils::is_orderable(
-          get_structured_named(
-              program, "StructWithStructWithCustomSetCppTemplate"),
-          true));
-  EXPECT_TRUE(
-      OrderableTypeUtils::is_orderable(
-          get_structured_named(
-              program,
-              "StructWithMapToStructWithCustomSetUnstructuredCppTemplate"),
-          true));
-
-  EXPECT_TRUE(
-      OrderableTypeUtils::is_orderable(
-          get_structured_named(program, "StructWithSetAdapterField"), true));
-  EXPECT_FALSE(
-      OrderableTypeUtils::is_orderable(
-          get_structured_named(program, "StructWithCustomSetCppTypeFieldNoUri"),
-          true));
-  EXPECT_FALSE(
-      OrderableTypeUtils::is_orderable(
-          get_structured_named(
-              program, "StructWithUriAndStructWithCustomSetCppTypeFieldNoUri"),
-          true));
-  EXPECT_TRUE(
-      OrderableTypeUtils::is_orderable(
-          get_structured_named(
-              program,
-              "StructWithCustomSetCppTypeWithEnableCustomTypeOrdering"),
-          true));
-}
-TEST(OrderableTypeUtilsTest, CustomSetOrderabilityWithUri) {
-  source_manager source_mgr;
-  std::shared_ptr<t_program> program = dedent_and_parse_to_program(
-      source_mgr,
-      kHeaderWithUri + kOrderabilityTestProgram,
-      parsing_params{},
-      sema_params{.skip_lowering_cpp_type_annotations = false});
-  checkCustomSetOrderabilityWithUri(*program);
-}
-TEST(
-    OrderableTypeUtilsTest,
-    CustomSetOrderabilityWithUriSkipLoweringCppTypeAnnotations) {
-  source_manager source_mgr;
-  std::shared_ptr<t_program> program = dedent_and_parse_to_program(
-      source_mgr,
-      kHeaderWithUri + kOrderabilityTestProgram,
-      parsing_params{},
-      sema_params{.skip_lowering_cpp_type_annotations = true});
-  checkCustomSetOrderabilityWithUri(*program);
 }
 
 namespace {
@@ -624,112 +348,16 @@ struct TestStructTypedefCustomSetWithAnnotation {
 void checkGetOrderableCondition(const t_program& program) {
   EXPECT_EQ(
       OrderableTypeUtils::get_orderable_condition(
-          get_structured_named(program, "TestStructAlwaysOrderable"),
-          true /* enableCustomTypeOrderingIfStructureHasUri */
-          ),
-      OrderableTypeUtils::StructuredOrderableCondition::Always);
-
-  EXPECT_EQ(
-      OrderableTypeUtils::get_orderable_condition(
-          get_structured_named(program, "TestUnionAlwaysOrderable"),
-          true /* enableCustomTypeOrderingIfStructureHasUri */
-          ),
-      OrderableTypeUtils::StructuredOrderableCondition::Always);
-
-  EXPECT_EQ(
-      OrderableTypeUtils::get_orderable_condition(
-          get_structured_named(program, "TestStructTypedefNonCustomSet"),
-          true /* enableCustomTypeOrderingIfStructureHasUri */
-          ),
-      OrderableTypeUtils::StructuredOrderableCondition::Always);
-
-  EXPECT_EQ(
-      OrderableTypeUtils::get_orderable_condition(
-          get_structured_named(program, "TestStructTypedefCustomSet"),
-          true /* enableCustomTypeOrderingIfStructureHasUri */
-          ),
+          get_structured_named(program, "TestStructTypedefCustomSetWithUri")),
       OrderableTypeUtils::StructuredOrderableCondition::NotOrderable);
 
   EXPECT_EQ(
-      OrderableTypeUtils::get_orderable_condition(
-          get_structured_named(program, "TestStructTypedefAliasToCustomSet"),
-          true /* enableCustomTypeOrderingIfStructureHasUri */
-          ),
-      OrderableTypeUtils::StructuredOrderableCondition::NotOrderable);
-
-  EXPECT_EQ(
-      OrderableTypeUtils::get_orderable_condition(
-          get_structured_named(program, "TestStructTypedefCustomSetWithUri"),
-          true /* enableCustomTypeOrderingIfStructureHasUri */
-          ),
-      OrderableTypeUtils::StructuredOrderableCondition::
-          OrderableByLegacyImplicitLogicEnabledByUri);
-
-  EXPECT_EQ(
-      OrderableTypeUtils::get_orderable_condition(
-          get_structured_named(program, "TestStructTypedefCustomSetWithUri"),
-          false /* enableCustomTypeOrderingIfStructureHasUri */
-          ),
-      OrderableTypeUtils::StructuredOrderableCondition::NotOrderable);
-
-  EXPECT_EQ(
-      OrderableTypeUtils::get_orderable_condition(
-          get_structured_named(
-              program, "TestStructTypedefCustomSetWithAnnotation"),
-          true /* enableCustomTypeOrderingIfStructureHasUri */
-          ),
-      OrderableTypeUtils::StructuredOrderableCondition::
-          OrderableByExplicitAnnotation);
-  EXPECT_EQ(
-      OrderableTypeUtils::get_orderable_condition(
-          get_structured_named(program, "TestStructCustomTypeNoOrdering"),
-          true /* enableCustomTypeOrderingIfStructureHasUri */
-          ),
+      OrderableTypeUtils::get_orderable_condition(get_structured_named(
+          program, "TestStructCustomTypeOrderingImplicitlyEnabled")),
       OrderableTypeUtils::StructuredOrderableCondition::NotOrderable);
   EXPECT_EQ(
-      OrderableTypeUtils::get_orderable_condition(
-          get_structured_named(
-              program, "TestStructCustomTypeOrderingExplicitlyEnabled"),
-          true /* enableCustomTypeOrderingIfStructureHasUri */
-          ),
-      OrderableTypeUtils::StructuredOrderableCondition::
-          OrderableByExplicitAnnotation);
-  EXPECT_EQ(
-      OrderableTypeUtils::get_orderable_condition(
-          get_structured_named(
-              program, "TestStructCustomTypeOrderingImplicitlyEnabled"),
-          true /* enableCustomTypeOrderingIfStructureHasUri */
-          ),
-      OrderableTypeUtils::StructuredOrderableCondition::
-          OrderableByLegacyImplicitLogicEnabledByUri);
-  EXPECT_EQ(
-      OrderableTypeUtils::get_orderable_condition(
-          get_structured_named(
-              program, "TestStructCustomTypeOrderingImplicitlyEnabled"),
-          false /* enableCustomTypeOrderingIfStructureHasUri */
-          ),
-      OrderableTypeUtils::StructuredOrderableCondition::NotOrderable);
-  EXPECT_EQ(
-      OrderableTypeUtils::get_orderable_condition(
-          get_structured_named(
-              program, "TestStructTypedefNonCustomSetWithCppType"),
-          true /* enableCustomTypeOrderingIfStructureHasUri */
-          ),
-      OrderableTypeUtils::StructuredOrderableCondition::NotOrderable);
-  EXPECT_EQ(
-      OrderableTypeUtils::get_orderable_condition(
-          get_structured_named(
-              program, "TestStructWithNestedImplicitlyOrderableStruct"),
-          true /* enableCustomTypeOrderingIfStructureHasUri */
-          ),
-      OrderableTypeUtils::StructuredOrderableCondition::
-          OrderableByNestedLegacyImplicitLogicEnabledByUri);
-  EXPECT_EQ(
-      OrderableTypeUtils::get_orderable_condition(
-          get_structured_named(
-              program, "TestStructWithNestedImplicitlyOrderableStruct"),
-          false /* enableCustomTypeOrderingIfStructureHasUri */
-          ),
+      OrderableTypeUtils::get_orderable_condition(get_structured_named(
+          program, "TestStructWithNestedImplicitlyOrderableStruct")),
       OrderableTypeUtils::StructuredOrderableCondition::NotOrderable);
 }
 

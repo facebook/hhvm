@@ -2958,13 +2958,6 @@ struct UnorderableCustomType {
   1: set<i32> a;
 }
 
-@thrift.Uri{value = "facebook.com/thrift/ImplicitlyEnabledCustomType"}
-# expected-warning@-1: Type `ImplicitlyEnabledCustomType` is implicitly made orderable in C++ because it has a URI. This legacy behavior is being deprecated: enable ordering explicitly by annotating the type with `@cpp.EnableCustomTypeOrdering`.
-struct ImplicitlyEnabledCustomType {
-  @cpp.Type{name = "custom"}
-  1: set<i32> a;
-}
-
 @cpp.EnableCustomTypeOrdering
 struct ExplicitlyEnabledCustomType {
   @cpp.Type{name = "custom"}

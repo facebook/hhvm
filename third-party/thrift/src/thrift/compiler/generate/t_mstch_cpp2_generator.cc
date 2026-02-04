@@ -295,13 +295,9 @@ class cpp2_generator_context {
   cpp2_generator_context(const cpp2_generator_context&) = delete;
   cpp2_generator_context& operator=(const cpp2_generator_context&) = delete;
 
-  bool is_orderable(
-      const t_structured& structured_type,
-      bool enableCustomTypeOrderingIfStructureHasUri) {
+  bool is_orderable(const t_structured& structured_type) {
     return cpp2::OrderableTypeUtils::is_orderable(
-        is_orderable_memo_,
-        structured_type,
-        enableCustomTypeOrderingIfStructureHasUri);
+        is_orderable_memo_, structured_type);
   }
 
   cpp_name_resolver& resolver() { return resolver_; }
@@ -1755,10 +1751,7 @@ class cpp_mstch_struct : public mstch_struct {
   }
 
   mstch::node is_struct_orderable() {
-    return cpp_context_->is_orderable(
-               *struct_,
-               !context_.options->contains(
-                   "disable_custom_type_ordering_if_structure_has_uri")) &&
+    return cpp_context_->is_orderable(*struct_) &&
         !struct_->has_unstructured_annotation("no_default_comparators");
   }
   mstch::node nondefault_copy_ctor_and_assignment() {
@@ -3139,7 +3132,7 @@ THRIFT_REGISTER_GENERATOR(
       Enable deprecated terse writes, which are discouraged in favor of
       @thrift.TerseWrite. See:
       https://github.com/facebook/fbthrift/blob/main/thrift/doc/idl/field-qualifiers.md#terse-writes-compiler-option
-    disable_custom_type_ordering_if_structure_has_uri
+    disable_custom_type_ordering_if_structure_has_uri (IGNORED - ALWAYS SET)
       Without this option, custom set/map are considered orderable if parent structure has uri.
     frozen[=packed]
       Enable frozen structs. If the packed parameter is given, structure members

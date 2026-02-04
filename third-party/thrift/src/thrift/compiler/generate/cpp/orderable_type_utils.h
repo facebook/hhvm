@@ -54,19 +54,12 @@ class OrderableTypeUtils final {
    * mechanisms:
    * 1. The given type (or its enclosing package) is annotated with
    *    `@cpp.EnableCustomTypeOrdering`, or
-   * 2. The given type has a URI and
-   *    `enableCustomTypeOrderingIfStructureHasUri` is `true`. Note that in
-   *    practice, in the Thrift IDL, the URI can either be set explicitly (via
-   *    `@thrift.Uri`) or implicitly by specifying a [non-empty
-   *    `package`](https://github.com/facebook/fbthrift/blob/main/thrift/doc/idl/index.md#package-declaration).
    *
    * It follows that this function returns `false` iff `structured_type` has
    * unordered container field(s) with custom types AND custom type ordering is
    * disabled.
    */
-  static bool is_orderable(
-      const t_structured& structured_type,
-      bool enableCustomTypeOrderingIfStructureHasUri);
+  static bool is_orderable(const t_structured& structured_type);
 
   /**
    * Same as `is_orderable()` above, but with an explicitly provided memoization
@@ -74,8 +67,7 @@ class OrderableTypeUtils final {
    */
   static bool is_orderable(
       std::unordered_map<const t_type*, bool>& memo,
-      const t_structured& structured_type,
-      bool enableCustomTypeOrderingIfStructureHasUri);
+      const t_structured& structured_type);
 
   enum class StructuredOrderableCondition {
     /**
@@ -88,7 +80,7 @@ class OrderableTypeUtils final {
      * The generated structured type cannot be ordered as such, because it
      * contains unordered container field(s) with custom types, and custom type
      * ordering is not enabled. Enabling custom type ordering (via explicit
-     * annotation or implicit legacy URI-based logic) would make it orderable.
+     * annotation) would make it orderable.
      */
     NotOrderable,
 
@@ -98,19 +90,6 @@ class OrderableTypeUtils final {
      * `@cpp.EnableCustomTypeOrdering`, thus making it orderable.
      */
     OrderableByExplicitAnnotation,
-
-    /**
-     * The generated structured type has unordered container field(s) with
-     * custom types and is NOT explicitly annotated with
-     * `@cpp.EnableCustomTypeOrdering`, however it is orderable because the
-     * (legacy) logic that implicitly treats custom types as orderable when the
-     * structured type has a URI is enabled.
-     */
-    OrderableByLegacyImplicitLogicEnabledByUri,
-
-    OrderableByNestedLegacyImplicitLogicEnabledByUri,
-
-    OrderableByExplicitAnnotationAndNestedLegacyImplicitLogic
   };
 
   /**
@@ -125,8 +104,7 @@ class OrderableTypeUtils final {
    * but may be faster.
    */
   static StructuredOrderableCondition get_orderable_condition(
-      const t_structured& structured_type,
-      bool enableCustomTypeOrderingIfStructureHasUri);
+      const t_structured& structured_type);
 };
 
 } // namespace apache::thrift::compiler::cpp2

@@ -524,11 +524,8 @@ void validate_exception_message_annotation_is_only_in_exceptions(
 
 void validate_orderable_structured_types(
     sema_context& ctx, const t_structured& node) {
-  switch (OrderableTypeUtils::get_orderable_condition(
-      node, true /* enableCustomTypeOrderingIfStructureHasUri */)) {
-    case OrderableTypeUtils::StructuredOrderableCondition::Always:
-    case OrderableTypeUtils::StructuredOrderableCondition::
-        OrderableByNestedLegacyImplicitLogicEnabledByUri: {
+  switch (OrderableTypeUtils::get_orderable_condition(node)) {
+    case OrderableTypeUtils::StructuredOrderableCondition::Always: {
       const t_const* annotation = ctx.program().inherit_annotation_or_null(
           node, kCppEnableCustomTypeOrdering);
       if (annotation == nullptr) {
@@ -546,23 +543,9 @@ void validate_orderable_structured_types(
           node.name());
       return;
     }
-    case OrderableTypeUtils::StructuredOrderableCondition::
-        OrderableByLegacyImplicitLogicEnabledByUri: {
-      // warn("Ordering enabled, add @cpp.EnableCustomTypeOrdering");
-      ctx.warning(
-          node,
-          "Type `{}` is implicitly made orderable in C++ because it has a "
-          "URI. This legacy behavior is being deprecated: enable ordering "
-          "explicitly by annotating the type with "
-          "`@cpp.EnableCustomTypeOrdering`.",
-          node.name());
-      return;
-    }
     case OrderableTypeUtils::StructuredOrderableCondition::NotOrderable:
     case OrderableTypeUtils::StructuredOrderableCondition::
         OrderableByExplicitAnnotation:
-    case OrderableTypeUtils::StructuredOrderableCondition::
-        OrderableByExplicitAnnotationAndNestedLegacyImplicitLogic:
       // Nothing to do
       return;
   }

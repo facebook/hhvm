@@ -923,10 +923,7 @@ class py3_mstch_struct : public mstch_struct {
   }
 
   mstch::node isStructOrderable() {
-    return cpp2::OrderableTypeUtils::is_orderable(
-               *struct_,
-               !context_.options->contains(
-                   "disable_custom_type_ordering_if_structure_has_uri")) &&
+    return cpp2::OrderableTypeUtils::is_orderable(*struct_) &&
         !struct_->has_unstructured_annotation("no_default_comparators");
   }
 

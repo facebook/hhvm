@@ -90,6 +90,7 @@
 #include <thrift/lib/cpp2/server/ThriftServerConfig.h>
 #include <thrift/lib/cpp2/server/TransportRoutingHandler.h>
 #include <thrift/lib/cpp2/server/metrics/InterceptorMetricCallback.h>
+#include <thrift/lib/cpp2/transport/core/ManagedConnectionIf.h>
 #include <thrift/lib/cpp2/transport/rocket/RequestPayload.h>
 #include <thrift/lib/cpp2/transport/rocket/Types.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/parser/AllocatingParserStrategy.h>
@@ -3199,6 +3200,7 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
     size_t numActiveRequests{0};
     size_t numPendingWrites{0};
     std::chrono::steady_clock::time_point creationTime;
+    std::vector<InteractionInfo> interactions;
   };
   using RequestSnapshots = std::vector<RequestSnapshot>;
   using ConnectionSnapshots =

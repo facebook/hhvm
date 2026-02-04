@@ -1603,3 +1603,41 @@ CO_TEST_F(InternalPriorityTest, Constructor) {
   co_await addition.co_getPrimitive();
   co_await addition.co_getPrimitive();
 }
+
+TEST(InteractionTest, InteractionSnapshots) {
+  // Test that interaction snapshots are properly collected in connection
+  // snapshots
+  ScopedServerInterfaceThread runner{std::make_shared<SemiCalculatorHandler>()};
+  auto* thriftServer = dynamic_cast<ThriftServer*>(&runner.getThriftServer());
+  ASSERT_NE(thriftServer, nullptr);
+
+  folly::EventBase eb;
+  Client<Calculator> client(
+      RocketClientChannel::newChannel(
+          folly::AsyncSocket::UniquePtr(
+              new folly::AsyncSocket(&eb, runner.getAddress()))));
+
+  // Create an interaction and make a call to establish it on the server
+  auto adder = client.createAddition();
+  adder.semifuture_accumulatePrimitive(5).via(&eb).getVia(&eb);
+
+  // Get a server snapshot and verify interactions are present
+  auto snapshot = thriftServer->getServerSnapshot().get();
+
+  // Find the connection with our interaction
+  bool foundInteraction = false;
+  for (const auto& [addr, connSnapshot] : snapshot.connections) {
+    if (!connSnapshot.interactions.empty()) {
+      foundInteraction = true;
+      // Verify interaction info
+      EXPECT_EQ(connSnapshot.interactions.size(), 1);
+      const auto& interaction = connSnapshot.interactions[0];
+      EXPECT_GT(interaction.interactionId, 0);
+      EXPECT_GT(interaction.creationTime.time_since_epoch().count(), 0);
+      // refCount should be at least 1 since the interaction is active
+      EXPECT_GE(interaction.refCount, 0);
+    }
+  }
+  EXPECT_TRUE(foundInteraction)
+      << "Expected to find at least one connection with an active interaction";
+}

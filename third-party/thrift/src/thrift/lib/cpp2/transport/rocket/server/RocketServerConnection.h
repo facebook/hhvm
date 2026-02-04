@@ -210,6 +210,8 @@ class RocketServerConnection final : public IRocketServerConnection {
 
   folly::AsyncSocket* getRawSocket() const override { return rawSocket_; }
 
+  std::vector<InteractionInfo> getInteractionSnapshots() const override;
+
  private:
   void startDrain(std::optional<DrainCompleteCode> drainCompleteCode);
 

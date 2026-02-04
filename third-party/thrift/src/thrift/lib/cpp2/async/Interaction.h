@@ -159,6 +159,8 @@ class TileInternalAPI {
     return tile_.getOverloadPolicy();
   }
 
+  size_t getRefCount() const { return tile_.refCount_; }
+
  private:
   Tile& tile_;
 };

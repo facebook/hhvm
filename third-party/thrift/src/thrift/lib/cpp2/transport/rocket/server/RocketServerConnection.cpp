@@ -39,6 +39,7 @@
 #include <wangle/acceptor/ConnectionManager.h>
 
 #include <thrift/lib/cpp/TApplicationException.h>
+#include <thrift/lib/cpp2/server/Cpp2ConnContext.h>
 #include <thrift/lib/cpp2/server/LoggingEvent.h>
 #include <thrift/lib/cpp2/server/LoggingEventTransportMetadata.h>
 #include <thrift/lib/cpp2/transport/rocket/FdSocket.h>
@@ -1438,6 +1439,21 @@ bool RocketServerConnection::incMemoryUsage(uint32_t memSize) {
 
 RocketServerHandler& RocketServerConnection::getFrameHandler() {
   return *frameHandler_;
+}
+
+std::vector<InteractionInfo> RocketServerConnection::getInteractionSnapshots()
+    const {
+  std::vector<InteractionInfo> result;
+  if (auto* ctx = frameHandler_->getCpp2ConnContext()) {
+    apache::thrift::detail::Cpp2ConnContextInternalAPI api(*ctx);
+    api.forEachTile([&result](int64_t id, Tile& tile) {
+      apache::thrift::detail::TileInternalAPI tileApi(tile);
+      result.push_back(
+          InteractionInfo{
+              id, tile.getInteractionCreationTime(), tileApi.getRefCount()});
+    });
+  }
+  return result;
 }
 
 } // namespace apache::thrift::rocket

@@ -601,6 +601,15 @@ class Cpp2ConnContextInternalAPI {
     return connContext_.findTile(interactionId);
   }
 
+  template <typename Func>
+  void forEachTile(Func&& fn) const {
+    for (const auto& [id, tilePtr] : connContext_.tiles_) {
+      fn(id, *tilePtr);
+    }
+  }
+
+  size_t getNumTiles() const { return connContext_.tiles_.size(); }
+
  private:
   Cpp2ConnContext& connContext_;
 };

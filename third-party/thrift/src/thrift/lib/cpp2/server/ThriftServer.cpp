@@ -2232,25 +2232,33 @@ folly::SemiFuture<ThriftServer::ServerSnapshot> ThriftServer::getServerSnapshot(
           // ConnectionManager can be nullptr if the worker didn't have any
           // open connections during shutdown
           if (auto connectionManager = worker->getConnectionManager()) {
-            connectionManager->forEachConnection([&](wangle::ManagedConnection*
-                                                         wangleConnection) {
-              if (auto managedConnection =
-                      dynamic_cast<ManagedConnectionIf*>(wangleConnection)) {
-                auto numActiveRequests =
-                    managedConnection->getNumActiveRequests();
-                auto numPendingWrites =
-                    managedConnection->getNumPendingWrites();
-                auto creationTime = managedConnection->getCreationTime();
-                auto minCreationTime = snapshotTime - options.connectionsAgeMax;
-                if (numActiveRequests > 0 || numPendingWrites > 0 ||
-                    creationTime > minCreationTime) {
-                  connectionSnapshots.emplace(
-                      managedConnection->getPeerAddress(),
-                      ConnectionSnapshot{
-                          numActiveRequests, numPendingWrites, creationTime});
-                }
-              }
-            });
+            connectionManager->forEachConnection(
+                [&](wangle::ManagedConnection* wangleConnection) {
+                  if (auto managedConnection =
+                          dynamic_cast<ManagedConnectionIf*>(
+                              wangleConnection)) {
+                    auto numActiveRequests =
+                        managedConnection->getNumActiveRequests();
+                    auto numPendingWrites =
+                        managedConnection->getNumPendingWrites();
+                    auto creationTime = managedConnection->getCreationTime();
+                    auto minCreationTime =
+                        snapshotTime - options.connectionsAgeMax;
+                    auto interactions =
+                        managedConnection->getInteractionSnapshots();
+                    if (numActiveRequests > 0 || numPendingWrites > 0 ||
+                        creationTime > minCreationTime ||
+                        !interactions.empty()) {
+                      connectionSnapshots.emplace(
+                          managedConnection->getPeerAddress(),
+                          ConnectionSnapshot{
+                              numActiveRequests,
+                              numPendingWrites,
+                              creationTime,
+                              std::move(interactions)});
+                    }
+                  }
+                });
           }
 
           ServerIOMemory serverIOMemory;

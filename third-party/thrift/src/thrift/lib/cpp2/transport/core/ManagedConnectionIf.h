@@ -18,12 +18,22 @@
 
 #include <chrono>
 #include <cstdint>
+#include <vector>
 
 #include <folly/SocketAddress.h>
 
 #include <wangle/acceptor/ManagedConnection.h>
 
 namespace apache::thrift {
+
+/**
+ * Information about an active interaction (tile) on a connection.
+ */
+struct InteractionInfo {
+  int64_t interactionId{0};
+  std::chrono::steady_clock::time_point creationTime{};
+  size_t refCount{0};
+};
 
 /**
  * A companion to wangle::ManagedConnection exposing more information about the
@@ -35,6 +45,14 @@ class ManagedConnectionIf : public wangle::ManagedConnection {
 
   virtual size_t getNumActiveRequests() const = 0;
   virtual size_t getNumPendingWrites() const = 0;
+
+  /**
+   * Returns information about all active interactions on this connection.
+   * Default implementation returns an empty vector for non-Rocket connections.
+   */
+  virtual std::vector<InteractionInfo> getInteractionSnapshots() const {
+    return {};
+  }
 
   ~ManagedConnectionIf() override = default;
 };

@@ -281,6 +281,7 @@ enum mc_msg_flags_t {
   MC_MSG_FLAG_ZSTD_COMPRESSED = 0x40000,
   MC_MSG_FLAG_MANAGED_COMPRESSION_COMPRESSED = 0x80000,
   MC_MSG_FLAG_HIGH_PRIORITY = 0x100000,
+  MC_MSG_FLAG_INCONSISTENT_WITH_TICKET = 0x200000,
 
   /* Bits reserved for application-specific extension flags: */
   MC_MSG_FLAG_USER_1 = 0x100000000LL,
@@ -375,6 +376,8 @@ static inline const char* mc_flag_to_string(const enum mc_msg_flags_t flag) {
       return "USER_15";
     case MC_MSG_FLAG_USER_16:
       return "USER_16";
+    case MC_MSG_FLAG_INCONSISTENT_WITH_TICKET:
+      return "INCONSISTENT_WITH_TICKET";
   }
   return "UNKNOWN";
 }

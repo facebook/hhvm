@@ -230,10 +230,6 @@ TEST_F(ThriftClientTest, SyncCallOneWay) {
       ++numCalls_;
       condvar_.notify_all();
     }
-    int32_t numCalls() const {
-      std::lock_guard<std::mutex> l(lock_);
-      return numCalls_;
-    }
     void waitUntilNumCalls(int32_t goal) {
       std::unique_lock<std::mutex> l(lock_);
       auto deadline = std::chrono::system_clock::now() + 200ms;
@@ -360,10 +356,6 @@ TEST_F(ThriftClientTest, FutureCallOneWay) {
       std::lock_guard<std::mutex> l(lock_);
       ++numCalls_;
       condvar_.notify_all();
-    }
-    int32_t numCalls() const {
-      std::lock_guard<std::mutex> l(lock_);
-      return numCalls_;
     }
     void waitUntilNumCalls(int32_t goal) {
       std::unique_lock<std::mutex> l(lock_);

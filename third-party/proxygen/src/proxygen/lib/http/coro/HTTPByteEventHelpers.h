@@ -31,7 +31,7 @@ class PendingByteEvent : public folly::HHWheelTimer::Callback {
 
   ~PendingByteEvent() override {
     if (callback) {
-      XLOG_IF(DFATAL, "Cancelled PendingByteEvent with active callback");
+      XLOG(DFATAL) << "Cancelled PendingByteEvent with active callback";
       HTTPError err(HTTPErrorCode::CANCEL, "ByteEvent Cancelled");
       callback->onByteEventCanceled(byteEvent, std::move(err));
     }

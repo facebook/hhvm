@@ -1017,12 +1017,13 @@ EventHandler<ClientTypes, StateEnum::Uninitialized, Event::Connect>::handle(
             context->getFactory()->makeEncryptedWriteRecordLayer(
                 EncryptionLevel::EarlyData);
         TRY(earlyWriteRecordLayer->setProtocolVersion(ctx.err, psk->version));
-        Protocol::setAead(
+        TRY(Protocol::setAead(
+            ctx.err,
             *earlyWriteRecordLayer,
             psk->cipher,
             folly::range(earlyWriteSecret.secret),
             *context->getFactory(),
-            *keyScheduler);
+            *keyScheduler));
       }
       earlyWriteSecretAvailable = SecretAvailable(std::move(earlyWriteSecret));
 
@@ -1506,12 +1507,13 @@ Status sm::EventHandler<
   auto handshakeWriteSecret = scheduler->getSecret(
       HandshakeSecrets::ClientHandshakeTraffic,
       handshakeContext->getHandshakeContext()->coalesce());
-  Protocol::setAead(
+  TRY(Protocol::setAead(
+      ctx.err,
       *handshakeWriteRecordLayer,
       cipher,
       folly::range(handshakeWriteSecret.secret),
       *state.context()->getFactory(),
-      *scheduler);
+      *scheduler));
 
   auto handshakeReadRecordLayer =
       state.context()->getFactory()->makeEncryptedReadRecordLayer(
@@ -1520,12 +1522,13 @@ Status sm::EventHandler<
   auto handshakeReadSecret = scheduler->getSecret(
       HandshakeSecrets::ServerHandshakeTraffic,
       handshakeContext->getHandshakeContext()->coalesce());
-  Protocol::setAead(
+  TRY(Protocol::setAead(
+      ctx.err,
       *handshakeReadRecordLayer,
       cipher,
       folly::range(handshakeReadSecret.secret),
       *state.context()->getFactory(),
-      *scheduler);
+      *scheduler));
 
   auto clientHandshakeSecret =
       folly::IOBuf::copyBuffer(handshakeWriteSecret.secret);
@@ -2456,12 +2459,13 @@ EventHandler<ClientTypes, StateEnum::ExpectingFinished, Event::Finished>::
   }
   auto writeSecret =
       state.keyScheduler()->getSecret(AppTrafficSecrets::ClientAppTraffic);
-  Protocol::setAead(
+  TRY(Protocol::setAead(
+      ctx.err,
       *writeRecordLayer,
       *state.cipher(),
       folly::range(writeSecret.secret),
       *state.context()->getFactory(),
-      *state.keyScheduler());
+      *state.keyScheduler()));
 
   auto readRecordLayer =
       state.context()->getFactory()->makeEncryptedReadRecordLayer(
@@ -2472,12 +2476,13 @@ EventHandler<ClientTypes, StateEnum::ExpectingFinished, Event::Finished>::
   }
   auto readSecret =
       state.keyScheduler()->getSecret(AppTrafficSecrets::ServerAppTraffic);
-  Protocol::setAead(
+  TRY(Protocol::setAead(
+      ctx.err,
       *readRecordLayer,
       *state.cipher(),
       folly::range(readSecret.secret),
       *state.context()->getFactory(),
-      *state.keyScheduler());
+      *state.keyScheduler()));
 
   ReportHandshakeSuccess reportSuccess;
   reportSuccess.earlyDataAccepted =
@@ -2642,12 +2647,13 @@ EventHandler<ClientTypes, StateEnum::Established, Event::KeyUpdateInitiation>::
   TRY(writeRecordLayer->setProtocolVersion(ctx.err, *state.version()));
   auto writeSecret =
       state.keyScheduler()->getSecret(AppTrafficSecrets::ClientAppTraffic);
-  Protocol::setAead(
+  TRY(Protocol::setAead(
+      ctx.err,
       *writeRecordLayer,
       *state.cipher(),
       folly::range(writeSecret.secret),
       *state.context()->getFactory(),
-      *state.keyScheduler());
+      *state.keyScheduler()));
   ret = actions(
       MutateState([wRecordLayer =
                        std::move(writeRecordLayer)](State& newState) mutable {
@@ -2678,12 +2684,13 @@ EventHandler<ClientTypes, StateEnum::Established, Event::KeyUpdate>::handle(
   TRY(readRecordLayer->setProtocolVersion(ctx.err, *state.version()));
   auto readSecret =
       state.keyScheduler()->getSecret(AppTrafficSecrets::ServerAppTraffic);
-  Protocol::setAead(
+  TRY(Protocol::setAead(
+      ctx.err,
       *readRecordLayer,
       *state.cipher(),
       folly::range(readSecret.secret),
       *state.context()->getFactory(),
-      *state.keyScheduler());
+      *state.keyScheduler()));
 
   if (keyUpdate.request_update == KeyUpdateRequest::update_not_requested) {
     ret = actions(
@@ -2713,12 +2720,13 @@ EventHandler<ClientTypes, StateEnum::Established, Event::KeyUpdate>::handle(
   TRY(writeRecordLayer->setProtocolVersion(ctx.err, *state.version()));
   auto writeSecret =
       state.keyScheduler()->getSecret(AppTrafficSecrets::ClientAppTraffic);
-  Protocol::setAead(
+  TRY(Protocol::setAead(
+      ctx.err,
       *writeRecordLayer,
       *state.cipher(),
       folly::range(writeSecret.secret),
       *state.context()->getFactory(),
-      *state.keyScheduler());
+      *state.keyScheduler()));
   ret = actions(
       MutateState([rRecordLayer = std::move(readRecordLayer),
                    wRecordLayer =

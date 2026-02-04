@@ -82,7 +82,9 @@ void encryptGCM(
   BENCHMARK_SUSPEND {
     aead = openssl::OpenSSLEVPCipher::makeCipher<fizz::AESGCM128>();
     aead->setKey(getKey());
-    write.setAead(folly::ByteRange(), std::move(aead));
+    Error err;
+    FIZZ_THROW_ON_ERROR(
+        write.setAead(err, folly::ByteRange(), std::move(aead)), err);
     for (size_t i = 0; i < n; ++i) {
       auto message = makeRandom(size, num);
       // if choosing not to optimize, clone IOBuf of the message
@@ -115,8 +117,10 @@ void decryptGCM(uint32_t n, size_t size, IOBufAllocation iobufAllocation) {
     writeAead->setKey(getKey());
     readAead->setKey(getKey());
     Error err;
-    write.setAead(folly::ByteRange(), std::move(writeAead));
-    read.setAead(folly::ByteRange(), std::move(readAead));
+    FIZZ_THROW_ON_ERROR(
+        write.setAead(err, folly::ByteRange(), std::move(writeAead)), err);
+    FIZZ_THROW_ON_ERROR(
+        read.setAead(err, folly::ByteRange(), std::move(readAead)), err);
     for (size_t i = 0; i < n; ++i) {
       auto message = makeRandom(size);
       // if choosing not to optimize, clone IOBuf of the message
@@ -221,7 +225,9 @@ void encryptOCB(uint32_t n, size_t size) {
   BENCHMARK_SUSPEND {
     aead = openssl::OpenSSLEVPCipher::makeCipher<fizz::AESOCB128>();
     aead->setKey(getKey());
-    write.setAead(folly::ByteRange(), std::move(aead));
+    Error err;
+    FIZZ_THROW_ON_ERROR(
+        write.setAead(err, folly::ByteRange(), std::move(aead)), err);
     for (size_t i = 0; i < n; ++i) {
       TLSMessage msg{ContentType::application_data, makeRandom(size)};
       msgs.push_back(std::move(msg));
@@ -252,7 +258,9 @@ void encryptAEGIS(uint32_t n, size_t size) {
   BENCHMARK_SUSPEND {
     aead = fizz::libaegis::makeCipher<fizz::AEGIS128L>();
     aead->setKey(getAegisKey());
-    write.setAead(folly::ByteRange(), std::move(aead));
+    Error err;
+    FIZZ_THROW_ON_ERROR(
+        write.setAead(err, folly::ByteRange(), std::move(aead)), err);
     for (size_t i = 0; i < n; ++i) {
       TLSMessage msg{ContentType::application_data, makeRandom(size)};
       msgs.push_back(std::move(msg));
@@ -278,8 +286,10 @@ void decryptAEGIS(uint32_t n, size_t size) {
     writeAead->setKey(getAegisKey());
     readAead->setKey(getAegisKey());
     Error err;
-    write.setAead(folly::ByteRange(), std::move(writeAead));
-    read.setAead(folly::ByteRange(), std::move(readAead));
+    FIZZ_THROW_ON_ERROR(
+        write.setAead(err, folly::ByteRange(), std::move(writeAead)), err);
+    FIZZ_THROW_ON_ERROR(
+        read.setAead(err, folly::ByteRange(), std::move(readAead)), err);
     for (size_t i = 0; i < n; ++i) {
       TLSMessage msg{ContentType::application_data, makeRandom(size)};
       TLSContent content;

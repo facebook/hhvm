@@ -108,9 +108,12 @@ class MockEncryptedReadRecordLayer : public EncryptedReadRecordLayer {
   MOCK_METHOD(void, configureServerRecordLayer, (const ServerExtensions*));
 
   MOCK_METHOD(void, _setAead, (folly::ByteRange, Aead*));
-  void setAead(folly::ByteRange baseSecret, std::unique_ptr<Aead> aead)
-      override {
+  Status setAead(
+      Error& /* err */,
+      folly::ByteRange baseSecret,
+      std::unique_ptr<Aead> aead) override {
     _setAead(baseSecret, aead.get());
+    return Status::Success;
   }
 
   MOCK_METHOD(void, setSkipFailedDecryption, (bool));
@@ -201,9 +204,12 @@ class MockEncryptedWriteRecordLayer : public EncryptedWriteRecordLayer {
   MOCK_METHOD(void, configureServerRecordLayer, (const ServerExtensions*));
 
   MOCK_METHOD(void, _setAead, (folly::ByteRange, Aead*));
-  void setAead(folly::ByteRange baseSecret, std::unique_ptr<Aead> aead)
-      override {
+  Status setAead(
+      Error& /* err */,
+      folly::ByteRange baseSecret,
+      std::unique_ptr<Aead> aead) override {
     _setAead(baseSecret, aead.get());
+    return Status::Success;
   }
 
   void setDefaults() {

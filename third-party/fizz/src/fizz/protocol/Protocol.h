@@ -17,14 +17,16 @@ namespace fizz {
 class Protocol {
  public:
   template <typename Type>
-  static void setAead(
+  static Status setAead(
+      Error& err,
       Type& recordLayer,
       CipherSuite cipher,
       folly::ByteRange secret,
       const Factory& factory,
       const KeyScheduler& scheduler) {
     auto aead = deriveRecordAead(factory, scheduler, cipher, secret);
-    recordLayer.setAead(secret, std::move(aead));
+    FIZZ_RETURN_ON_ERROR(recordLayer.setAead(err, secret, std::move(aead)));
+    return Status::Success;
   }
 
   static std::unique_ptr<Aead> deriveRecordAead(

@@ -26,10 +26,13 @@ class EncryptedRecordTest : public testing::Test {
   void SetUp() override {
     auto readAead = std::make_unique<MockAead>();
     readAead_ = readAead.get();
-    read_.setAead(folly::ByteRange(), std::move(readAead));
+    Error err;
+    FIZZ_THROW_ON_ERROR(
+        read_.setAead(err, folly::ByteRange(), std::move(readAead)), err);
     auto writeAead = std::make_unique<MockAead>();
     writeAead_ = writeAead.get();
-    write_.setAead(folly::ByteRange(), std::move(writeAead));
+    FIZZ_THROW_ON_ERROR(
+        write_.setAead(err, folly::ByteRange(), std::move(writeAead)), err);
   }
 
  protected:

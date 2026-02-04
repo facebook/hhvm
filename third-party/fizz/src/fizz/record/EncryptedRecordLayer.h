@@ -29,13 +29,15 @@ class EncryptedReadRecordLayer : public ReadRecordLayer {
       folly::IOBufQueue& buf,
       Aead::AeadOptions options) override;
 
-  virtual void setAead(
+  virtual Status setAead(
+      Error& err,
       folly::ByteRange /* baseSecret */,
       std::unique_ptr<Aead> aead) {
     if (seqNum_ != 0) {
-      throw std::runtime_error("aead set after read");
+      return err.error("aead set after read");
     }
     aead_ = std::move(aead);
+    return Status::Success;
   }
 
   virtual void setSkipFailedDecryption(bool enabled) {
@@ -100,13 +102,15 @@ class EncryptedWriteRecordLayer : public WriteRecordLayer {
       TLSMessage&& msg,
       Aead::AeadOptions options) const override;
 
-  virtual void setAead(
+  virtual Status setAead(
+      Error& err,
       folly::ByteRange /* baseSecret */,
       std::unique_ptr<Aead> aead) {
     if (seqNum_ != 0) {
-      throw std::runtime_error("aead set after write");
+      return err.error("aead set after write");
     }
     aead_ = std::move(aead);
+    return Status::Success;
   }
 
   virtual void setBufAndPaddingPolicy(

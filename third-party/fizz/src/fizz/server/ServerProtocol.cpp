@@ -1474,13 +1474,15 @@ EventHandler<ServerTypes, StateEnum::ExpectingClientHello, Event::ClientHello>::
                     EncryptionLevel::EarlyData);
             FIZZ_THROW_ON_ERROR(
                 earlyReadRecordLayer->setProtocolVersion(err, version), err);
-
-            Protocol::setAead(
-                *earlyReadRecordLayer,
-                cipher,
-                folly::range(earlyReadSecret.secret),
-                *state.context()->getFactory(),
-                *scheduler);
+            FIZZ_THROW_ON_ERROR(
+                Protocol::setAead(
+                    err,
+                    *earlyReadRecordLayer,
+                    cipher,
+                    folly::range(earlyReadSecret.secret),
+                    *state.context()->getFactory(),
+                    *scheduler),
+                err);
           }
 
           earlyReadSecretAvailable =
@@ -1723,12 +1725,15 @@ EventHandler<ServerTypes, StateEnum::ExpectingClientHello, Event::ClientHello>::
               auto handshakeWriteSecret = scheduler->getSecret(
                   HandshakeSecrets::ServerHandshakeTraffic,
                   handshakeContext->getHandshakeContext()->coalesce());
-              Protocol::setAead(
-                  *handshakeWriteRecordLayer,
-                  cipher,
-                  folly::range(handshakeWriteSecret.secret),
-                  *state.context()->getFactory(),
-                  *scheduler);
+              FIZZ_THROW_ON_ERROR(
+                  Protocol::setAead(
+                      err,
+                      *handshakeWriteRecordLayer,
+                      cipher,
+                      folly::range(handshakeWriteSecret.secret),
+                      *state.context()->getFactory(),
+                      *scheduler),
+                  err);
 
               auto handshakeReadRecordLayer =
                   state.context()->getFactory()->makeEncryptedReadRecordLayer(
@@ -1741,12 +1746,15 @@ EventHandler<ServerTypes, StateEnum::ExpectingClientHello, Event::ClientHello>::
               auto handshakeReadSecret = scheduler->getSecret(
                   HandshakeSecrets::ClientHandshakeTraffic,
                   handshakeContext->getHandshakeContext()->coalesce());
-              Protocol::setAead(
-                  *handshakeReadRecordLayer,
-                  cipher,
-                  folly::range(handshakeReadSecret.secret),
-                  *state.context()->getFactory(),
-                  *scheduler);
+              FIZZ_THROW_ON_ERROR(
+                  Protocol::setAead(
+                      err,
+                      *handshakeReadRecordLayer,
+                      cipher,
+                      folly::range(handshakeReadSecret.secret),
+                      *state.context()->getFactory(),
+                      *scheduler),
+                  err);
               auto clientHandshakeSecret =
                   folly::IOBuf::copyBuffer(handshakeReadSecret.secret);
 
@@ -1960,12 +1968,15 @@ EventHandler<ServerTypes, StateEnum::ExpectingClientHello, Event::ClientHello>::
                     }
                     auto writeSecret = scheduler->getSecret(
                         AppTrafficSecrets::ServerAppTraffic);
-                    Protocol::setAead(
-                        *appTrafficWriteRecordLayer,
-                        cipher,
-                        folly::range(writeSecret.secret),
-                        *state.context()->getFactory(),
-                        *scheduler);
+                    FIZZ_THROW_ON_ERROR(
+                        Protocol::setAead(
+                            err,
+                            *appTrafficWriteRecordLayer,
+                            cipher,
+                            folly::range(writeSecret.secret),
+                            *state.context()->getFactory(),
+                            *scheduler),
+                        err);
 
                     // If we have previously dealt with early data (before a
                     // HelloRetryRequest), don't overwrite the previous result.
@@ -2438,12 +2449,15 @@ EventHandler<ServerTypes, StateEnum::ExpectingFinished, Event::Finished>::
   }
   auto readSecret =
       state.keyScheduler()->getSecret(AppTrafficSecrets::ClientAppTraffic);
-  Protocol::setAead(
-      *readRecordLayer,
-      *state.cipher(),
-      folly::range(readSecret.secret),
-      *state.context()->getFactory(),
-      *state.keyScheduler());
+  FIZZ_THROW_ON_ERROR(
+      Protocol::setAead(
+          err,
+          *readRecordLayer,
+          *state.cipher(),
+          folly::range(readSecret.secret),
+          *state.context()->getFactory(),
+          *state.keyScheduler()),
+      err);
 
   state.handshakeContext()->appendToTranscript(*finished.originalEncoding);
 
@@ -2594,12 +2608,15 @@ Status EventHandler<
   }
   auto writeSecret =
       state.keyScheduler()->getSecret(AppTrafficSecrets::ServerAppTraffic);
-  Protocol::setAead(
-      *writeRecordLayer,
-      *state.cipher(),
-      folly::range(writeSecret.secret),
-      *state.context()->getFactory(),
-      *state.keyScheduler());
+  FIZZ_THROW_ON_ERROR(
+      Protocol::setAead(
+          err,
+          *writeRecordLayer,
+          *state.cipher(),
+          folly::range(writeSecret.secret),
+          *state.context()->getFactory(),
+          *state.keyScheduler()),
+      err);
 
   ret = actions(
       MutateState([wRecordLayer =
@@ -2632,12 +2649,15 @@ EventHandler<ServerTypes, StateEnum::AcceptingData, Event::KeyUpdate>::handle(
       readRecordLayer->setProtocolVersion(err, *state.version()), err);
   auto readSecret =
       state.keyScheduler()->getSecret(AppTrafficSecrets::ClientAppTraffic);
-  Protocol::setAead(
-      *readRecordLayer,
-      *state.cipher(),
-      folly::range(readSecret.secret),
-      *state.context()->getFactory(),
-      *state.keyScheduler());
+  FIZZ_THROW_ON_ERROR(
+      Protocol::setAead(
+          err,
+          *readRecordLayer,
+          *state.cipher(),
+          folly::range(readSecret.secret),
+          *state.context()->getFactory(),
+          *state.keyScheduler()),
+      err);
 
   if (keyUpdate.request_update == KeyUpdateRequest::update_not_requested) {
     ret = actions(
@@ -2668,12 +2688,15 @@ EventHandler<ServerTypes, StateEnum::AcceptingData, Event::KeyUpdate>::handle(
       writeRecordLayer->setProtocolVersion(err, *state.version()), err);
   auto writeSecret =
       state.keyScheduler()->getSecret(AppTrafficSecrets::ServerAppTraffic);
-  Protocol::setAead(
-      *writeRecordLayer,
-      *state.cipher(),
-      folly::range(writeSecret.secret),
-      *state.context()->getFactory(),
-      *state.keyScheduler());
+  FIZZ_THROW_ON_ERROR(
+      Protocol::setAead(
+          err,
+          *writeRecordLayer,
+          *state.cipher(),
+          folly::range(writeSecret.secret),
+          *state.context()->getFactory(),
+          *state.keyScheduler()),
+      err);
 
   ret = actions(
       MutateState([rRecordLayer = std::move(readRecordLayer),

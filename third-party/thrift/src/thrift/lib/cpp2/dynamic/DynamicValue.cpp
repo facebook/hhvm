@@ -356,7 +356,7 @@ Union DynamicValue::asUnion() && {
 }
 
 bool operator==(const DynamicValue& lhs, const DynamicValue& rhs) noexcept {
-  if (lhs.type_.kind() != rhs.type_.kind()) {
+  if (!lhs.type_.isEqualIdentityTo(rhs.type_)) {
     return false;
   }
   return lhs.datum_ == rhs.datum_;
@@ -373,7 +373,7 @@ std::string DynamicValue::debugString() const {
 }
 
 std::string DynamicRef::debugString() const {
-  return copy().debugString();
+  return DynamicConstRef(*this).debugString();
 }
 
 DynamicRef::DynamicRef(DynamicValue& value)
@@ -518,18 +518,11 @@ Union& DynamicRef::asUnion() {
 }
 
 bool operator==(const DynamicRef& lhs, const DynamicRef& rhs) noexcept {
-  if (!lhs.type_->isEqualIdentityTo(*rhs.type_)) {
-    return false;
-  }
-  // Compare the values
-  return lhs.copy() == rhs.copy();
+  return DynamicConstRef(lhs) == DynamicConstRef(rhs);
 }
 
 bool operator==(const DynamicRef& lhs, const DynamicValue& rhs) noexcept {
-  if (!lhs.type_->isEqualIdentityTo(rhs.type())) {
-    return false;
-  }
-  return lhs.copy() == rhs;
+  return DynamicConstRef(lhs) == DynamicConstRef(rhs);
 }
 
 std::ostream& operator<<(std::ostream& os, const DynamicRef& value) {
@@ -541,7 +534,13 @@ std::ostream& operator<<(std::ostream& os, const DynamicRef& value) {
 // ============================================================================
 
 std::string DynamicConstRef::debugString() const {
-  return copy().debugString();
+  folly::IOBufQueue queue;
+  DebugProtocolWriter writer;
+  writer.setOutput(&queue);
+  serializeValue(writer, *this);
+  std::string ret;
+  queue.appendToString(ret);
+  return ret;
 }
 
 DynamicConstRef::DynamicConstRef(const DynamicValue& value)
@@ -635,14 +634,55 @@ bool operator==(
   if (!lhs.type_->isEqualIdentityTo(*rhs.type_)) {
     return false;
   }
-  return lhs.copy() == rhs.copy();
+
+  const auto* lhsDatum = std::get_if<const detail::Datum*>(&lhs.ptr_);
+  const auto* rhsDatum = std::get_if<const detail::Datum*>(&rhs.ptr_);
+
+  if (lhsDatum && rhsDatum) {
+    // Both are Datums - compare directly
+    return **lhsDatum == **rhsDatum;
+  }
+
+  // Helper to compare a Datum with a concrete pointer variant
+  const auto compareDatumWithConcrete =
+      [](const detail::Datum* datum,
+         const DynamicConstRef::PointerVariant& concretePtr) {
+        return detail::Datum::matchKind(datum->kind(), [&](auto kindTag) {
+          constexpr auto k = decltype(kindTag)::value;
+          using T = detail::Datum::type_of<k>;
+          if constexpr (std::is_same_v<T, Null>) {
+            return false; // Null Datum can't match a concrete pointer
+          } else if (const auto* ptr = std::get_if<const T*>(&concretePtr)) {
+            return datum->template as<k>() == **ptr;
+          } else {
+            return false;
+          }
+        });
+      };
+
+  if (lhsDatum) {
+    return compareDatumWithConcrete(*lhsDatum, rhs.ptr_);
+  }
+
+  if (rhsDatum) {
+    return compareDatumWithConcrete(*rhsDatum, lhs.ptr_);
+  }
+
+  // Neither is a Datum - both are concrete type pointers
+  // Since types match, they must be the same concrete type
+  return std::visit(
+      [&rhs](auto lhsPtr) {
+        using LhsPtrType = decltype(lhsPtr);
+        if (const auto* rhsPtr = std::get_if<LhsPtrType>(&rhs.ptr_)) {
+          return *lhsPtr == **rhsPtr;
+        }
+        return false;
+      },
+      lhs.ptr_);
 }
 
 bool operator==(const DynamicConstRef& lhs, const DynamicValue& rhs) noexcept {
-  if (!lhs.type_->isEqualIdentityTo(rhs.type())) {
-    return false;
-  }
-  return lhs.copy() == rhs;
+  return lhs == DynamicConstRef(rhs);
 }
 
 std::ostream& operator<<(std::ostream& os, const DynamicConstRef& value) {

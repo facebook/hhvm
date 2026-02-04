@@ -386,5 +386,135 @@ TEST(DynamicRefTest, DebugString) {
   EXPECT_FALSE(debugStr.empty());
 }
 
+// Helper to create a list type
+inline type_system::TypeRef::List makeListType(
+    type_system::TypeRef elementType) {
+  static type_system::detail::ContainerTypeCache cache;
+  return type_system::TypeRef::List::of(elementType, cache);
+}
+
+// Tests for DynamicConstRef equality with mixed Datum/concrete pointer cases
+TEST(DynamicConstRefTest, EqualityDatumVsConcrete) {
+  // Create a list to get concrete pointers
+  auto list = makeList(makeListType(type_system::TypeSystem::I32()));
+  list.push_back(DynamicValue::makeI32(42));
+  list.push_back(DynamicValue::makeI32(99));
+
+  // list[i] returns DynamicConstRef with concrete int32_t* pointer
+  DynamicConstRef concreteRef1 = list[0];
+  DynamicConstRef concreteRef2 = list[1];
+
+  // Create DynamicValue which stores Datum internally
+  auto val1 = DynamicValue::makeI32(42);
+  auto val2 = DynamicValue::makeI32(99);
+
+  // DynamicConstRef from DynamicValue has Datum* pointer
+  DynamicConstRef datumRef1(val1);
+  DynamicConstRef datumRef2(val2);
+
+  // Datum vs Datum (both have Datum pointers)
+  EXPECT_TRUE(datumRef1 == datumRef1);
+  EXPECT_TRUE(datumRef1 == DynamicConstRef(DynamicValue::makeI32(42)));
+  EXPECT_FALSE(datumRef1 == datumRef2);
+
+  // Concrete vs Concrete (both have concrete pointers)
+  EXPECT_TRUE(concreteRef1 == concreteRef1);
+  EXPECT_FALSE(concreteRef1 == concreteRef2);
+
+  // Datum vs Concrete (mixed pointer types, same values)
+  EXPECT_TRUE(datumRef1 == concreteRef1);
+  EXPECT_TRUE(concreteRef1 == datumRef1);
+  EXPECT_FALSE(datumRef1 == concreteRef2);
+  EXPECT_FALSE(concreteRef2 == datumRef1);
+
+  // Datum vs Concrete (mixed pointer types, different values)
+  EXPECT_TRUE(datumRef2 == concreteRef2);
+  EXPECT_TRUE(concreteRef2 == datumRef2);
+  EXPECT_FALSE(datumRef2 == concreteRef1);
+  EXPECT_FALSE(concreteRef1 == datumRef2);
+}
+
+TEST(DynamicConstRefTest, EqualityTypeMismatch) {
+  // Create values of different types
+  auto i32Val = DynamicValue::makeI32(42);
+  auto i64Val = DynamicValue::makeI64(42);
+  auto boolVal = DynamicValue::makeBool(true);
+  auto floatVal = DynamicValue::makeFloat(42.0f);
+
+  DynamicConstRef i32Ref(i32Val);
+  DynamicConstRef i64Ref(i64Val);
+  DynamicConstRef boolRef(boolVal);
+  DynamicConstRef floatRef(floatVal);
+
+  // Different types should not be equal even if numeric value is same
+  EXPECT_FALSE(i32Ref == i64Ref);
+  EXPECT_FALSE(i64Ref == i32Ref);
+  EXPECT_FALSE(i32Ref == floatRef);
+  EXPECT_FALSE(floatRef == i32Ref);
+  EXPECT_FALSE(boolRef == i32Ref);
+  EXPECT_FALSE(i32Ref == boolRef);
+}
+
+TEST(DynamicConstRefTest, EqualityTypeMismatchWithConcretePointers) {
+  // Create lists of different element types to get concrete pointers
+  auto i32List = makeList(makeListType(type_system::TypeSystem::I32()));
+  i32List.push_back(DynamicValue::makeI32(42));
+
+  auto i64List = makeList(makeListType(type_system::TypeSystem::I64()));
+  i64List.push_back(DynamicValue::makeI64(42));
+
+  auto boolList = makeList(makeListType(type_system::TypeSystem::Bool()));
+  boolList.push_back(DynamicValue::makeBool(true));
+
+  // Get concrete pointer refs
+  DynamicConstRef i32ConcreteRef = i32List[0];
+  DynamicConstRef i64ConcreteRef = i64List[0];
+  DynamicConstRef boolConcreteRef = boolList[0];
+
+  // Different types with concrete pointers should not be equal
+  EXPECT_FALSE(i32ConcreteRef == i64ConcreteRef);
+  EXPECT_FALSE(i64ConcreteRef == i32ConcreteRef);
+  EXPECT_FALSE(boolConcreteRef == i32ConcreteRef);
+  EXPECT_FALSE(i32ConcreteRef == boolConcreteRef);
+
+  // Also test mixed Datum vs Concrete with type mismatch
+  auto i64Val = DynamicValue::makeI64(42);
+  DynamicConstRef i64DatumRef(i64Val);
+
+  // Datum (i64) vs Concrete (i32) - type mismatch
+  EXPECT_FALSE(i64DatumRef == i32ConcreteRef);
+  EXPECT_FALSE(i32ConcreteRef == i64DatumRef);
+}
+
+TEST(DynamicConstRefTest, EqualityRefVsConstRef) {
+  auto val1 = DynamicValue::makeI32(42);
+  auto val2 = DynamicValue::makeI32(42);
+  auto val3 = DynamicValue::makeI32(99);
+
+  DynamicRef ref1(val1);
+  DynamicConstRef constRef2(val2);
+  DynamicConstRef constRef3(val3);
+
+  // DynamicRef converts to DynamicConstRef for comparison
+  EXPECT_TRUE(ref1 == constRef2);
+  EXPECT_TRUE(constRef2 == ref1);
+  EXPECT_FALSE(ref1 == constRef3);
+  EXPECT_FALSE(constRef3 == ref1);
+
+  // Also test with concrete pointers from list
+  auto list = makeList(makeListType(type_system::TypeSystem::I32()));
+  list.push_back(DynamicValue::makeI32(42));
+  list.push_back(DynamicValue::makeI32(99));
+
+  DynamicConstRef concreteRef1 = list[0];
+  DynamicConstRef concreteRef2 = list[1];
+
+  // DynamicRef (Datum) vs DynamicConstRef (concrete pointer)
+  EXPECT_TRUE(ref1 == concreteRef1);
+  EXPECT_TRUE(concreteRef1 == ref1);
+  EXPECT_FALSE(ref1 == concreteRef2);
+  EXPECT_FALSE(concreteRef2 == ref1);
+}
+
 } // namespace
 } // namespace apache::thrift::dynamic

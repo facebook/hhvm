@@ -16,13 +16,9 @@
 
 #include <fcntl.h>
 #include <bpf/bpf.h>
-#include <sys/socket.h>
 #include <sys/un.h>
 
 #include <folly/File.h>
-#include <folly/SocketAddress.h>
-#include <folly/net/NetworkSocket.h>
-#include <folly/portability/Sockets.h>
 
 #include "hphp/runtime/server/thread-hint.h"
 #include "hphp/util/configs/server.h"
@@ -48,78 +44,12 @@ ThreadHint::ThreadHint() {
   }
 }
 
-/**
- * Receive BPF map FD from UDS at the provided `path`. This circumvents some
- * container bpffs limitations when trying to open the map directly. It's a
- * temporary measure and will be replaced with more official support in a later
- * release.
- */
-static int receiveFd(const std::string_view path) {
-  folly::NetworkSocket sock(folly::netops::socket(AF_UNIX, SOCK_STREAM, 0));
-  if (sock == folly::NetworkSocket()) {
-    FTRACE(1, "ThreadHint: Failed to create socket: {}\n", folly::errnoStr(errno));
-    return -1;
-  }
-  SCOPE_EXIT { folly::netops::close(sock); };
-
-  folly::SocketAddress addr;
-  try {
-    addr.setFromPath(path);
-    sockaddr_storage addrStorage{};
-    socklen_t addrLen = addr.getAddress(&addrStorage);
-    if (folly::netops::connect(sock, reinterpret_cast<struct sockaddr*>(&addrStorage), addrLen) == -1) {
-      FTRACE(1, "ThreadHint: Failed to connect to {}: {}\n", path, folly::errnoStr(errno));
-      return -1;
-    }
-  } catch ([[maybe_unused]] const std::exception& ex) {
-    FTRACE(1, "ThreadHint: Failed to set socket path {}: {}\n", path, ex.what());
-    return -1;
-  }
-
-  char buf[CMSG_SPACE(sizeof(int))] = {0};
-  char c;
-  struct iovec iov = {
-    .iov_base = &c,
-    .iov_len = 1
-  };
-
-  struct msghdr msg = {
-    .msg_iov = &iov,
-    .msg_iovlen = 1,
-    .msg_control = buf,
-    .msg_controllen = sizeof(buf)
-  };
-
-  if (folly::netops::recvmsg(sock, &msg, 0) <= 0) {
-    FTRACE(1, "ThreadHint: Failed to receive message: {}\n", folly::errnoStr(errno));
-    return -1;
-  }
-
-  struct cmsghdr* cmsg = CMSG_FIRSTHDR(&msg);
-  if (!cmsg || cmsg->cmsg_level != SOL_SOCKET || cmsg->cmsg_type != SCM_RIGHTS) {
-    FTRACE(1, "ThreadHint: No fd received\n");
-    return -1;
-  }
-
-  return *((int*)CMSG_DATA(cmsg));
-}
-
 int ThreadHint::getThreadHintFd() {
   if (auto const& path = Cfg::Server::ScxThreadHintPath; !path.empty()) {
     FTRACE(1, "ThreadHint: Setting thread hint path to {}\n", path);
     int fd = bpf_obj_get(path.c_str());
     if (fd < 0) {
       FTRACE(1, "ThreadHint: Failed to open BPF map at {}: {}\n",
-             path, folly::errnoStr(errno));
-    }
-    return fd;
-  }
-
-  if (auto const& path = Cfg::Server::ScxThreadHintUdsPath; !path.empty()) {
-    FTRACE(1, "ThreadHint: Attempting to get fd from {}\n", path);
-    int fd = receiveFd(path);
-    if (fd < 0) {
-      FTRACE(1, "ThreadHint: Failed to get fd from {}, errno={}\n",
              path, folly::errnoStr(errno));
     }
     return fd;

@@ -57,7 +57,7 @@ final class TraceSizeEstimationContextHandler implements IContextHandler {
   private static function bumpBreadthRateLimitedCounter(): void {
     CategorizedOBC::typedGet(ODSCategoryID::ODS_ARTILLERY)->bumpEntityKey(
       'artillery_trace_continuation',
-      'breadth_rate_limited',
+      'hhvm.breadth_rate_limited',
     );
   }
 

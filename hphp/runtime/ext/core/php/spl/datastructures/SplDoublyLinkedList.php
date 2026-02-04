@@ -166,7 +166,8 @@ class SplDoublyLinkedList
     $node->data = $value;
 
     if ($this->isEmpty()) {
-      $this->head = $this->tail = $node;
+      $this->tail = $node;
+      $this->head = $node;
     } else {
       $node->next = $this->head;
       $this->head->prev = $node;

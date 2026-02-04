@@ -419,7 +419,8 @@ abstract class ReflectionFunctionAbstract implements Reflector {
     varray<string> $funcAttrs = vec[],
   )[]: string {
     $ret = '';
-    if ($doc = $this->getDocComment()) {
+    $doc = $this->getDocComment();
+    if ($doc) {
       $ret .= $doc . "\n";
     }
     $ret .= "$type [ <";
@@ -428,7 +429,8 @@ abstract class ReflectionFunctionAbstract implements Reflector {
       if ($this->isDeprecated()) {
         $ret .= ', deprecated';
       }
-      if ($extensionName = $this->getExtensionName()) {
+      $extensionName = $this->getExtensionName();
+      if ($extensionName) {
         $ret .= ':' . $extensionName;
       }
     } else {
@@ -634,9 +636,11 @@ class ReflectionFunction extends ReflectionFunctionAbstract {
   private function getClosureScopeClassname(\HH\object $closure)[]: ?string;
 
   public function getClosureScopeClass(): ?ReflectionClass {
-    if ($this->closure &&
-        ($cls = $this->getClosureScopeClassname($this->closure))) {
-      return new ReflectionClass($cls);
+    if ($this->closure) {
+      $cls = $this->getClosureScopeClassname($this->closure);
+      if ($cls) {
+        return new ReflectionClass($cls);
+      }
     }
     return null;
   }
@@ -738,10 +742,13 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
     $decl_class = $this->getDeclaringClassname();
     if ($this->originalClass !== $decl_class) {
       $preAttrs[] = "inherits $decl_class";
-    } else if ($proto_cls = $this->getPrototypeClassname()) {
-      $preAttrs[] = interface_exists($proto_cls, false)
-        ? 'implements '.$proto_cls
-        : 'overrides '.$proto_cls;
+    } else {
+      $proto_cls = $this->getPrototypeClassname();
+      if ($proto_cls) {
+        $preAttrs[] = interface_exists($proto_cls, false)
+          ? 'implements '.$proto_cls
+          : 'overrides '.$proto_cls;
+      }
     }
 
     if ($this->isConstructor()) {
@@ -1145,7 +1152,8 @@ class ReflectionClass implements Reflector {
    */
   public function __toString()[]: string {
     $ret = '';
-    if ($docComment = $this->getDocComment()) {
+    $docComment = $this->getDocComment();
+    if ($docComment) {
       $ret .= $docComment . "\n";
     }
     if ($this is ReflectionObject) {
@@ -1161,7 +1169,8 @@ class ReflectionClass implements Reflector {
     }
     if ($this->isInternal()) {
       $ret .= '<internal:';
-      if ($extensionName = $this->getExtensionName()) {
+      $extensionName = $this->getExtensionName();
+      if ($extensionName) {
         $ret .= ':' . $extensionName;
       }
       $ret .= '> ';
@@ -1187,10 +1196,12 @@ class ReflectionClass implements Reflector {
       $ret .= 'class ';
     }
     $ret .= $this->getName();
-    if ($parent = $this->getParentName()) {
+    $parent = $this->getParentName();
+    if ($parent) {
       $ret .= " extends $parent";
     }
-    if ($ifaces = $this->getInterfaceNames()) {
+    $ifaces = $this->getInterfaceNames();
+    if ($ifaces) {
       if ($this->isInterface()) {
         $ret .= ' extends ';
       } else {

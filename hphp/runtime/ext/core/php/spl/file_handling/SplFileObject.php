@@ -202,7 +202,8 @@ class SplFileObject extends SplFileInfo
       $this->next();
     }
 
-    return $this->currentLine = $this->getCurrentLineImpl();
+    $this->currentLine = $this->getCurrentLineImpl();
+    return $this->currentLine ;
   }
 
   public function getCurrentLine() {

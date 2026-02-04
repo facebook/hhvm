@@ -62,7 +62,8 @@ trait StrictIterable<+Tv> implements \HH\Iterable<Tv> {
     if ($n <= 0) return $res;
     foreach ($this as $v) {
       $res[] = $v;
-      if (--$n === 0) break;
+      --$n;
+      if ($n === 0) break;
     }
     return $res;
   }
@@ -110,7 +111,8 @@ trait StrictIterable<+Tv> implements \HH\Iterable<Tv> {
         continue;
       }
       $res[] = $v;
-      if (--$len === 0) break;
+      --$len ;
+      if ($len === 0) break;
     }
     return $res;
   }

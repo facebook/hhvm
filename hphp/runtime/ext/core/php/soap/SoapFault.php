@@ -41,7 +41,8 @@ class SoapFault extends Exception {
       return;
     }
 
-    $this->faultstring = $this->message = $message;
+    $this->message = $message;
+    $this->faultstring = $message;
     $this->faultactor = $actor;
     $this->detail = $detail;
     $this->_name = $name;

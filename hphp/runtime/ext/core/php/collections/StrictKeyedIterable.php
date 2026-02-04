@@ -104,7 +104,8 @@ trait StrictKeyedIterable<Tk, +Tv> implements \HH\KeyedIterable<Tk, Tv> {
     if ($n <= 0) return $res;
     foreach ($this as $k => $v) {
       $res[$k] = $v;
-      if (--$n === 0) break;
+      --$n;
+      if ($n === 0) break;
     }
     return $res;
   }
@@ -152,7 +153,8 @@ trait StrictKeyedIterable<Tk, +Tv> implements \HH\KeyedIterable<Tk, Tv> {
         continue;
       }
       $res[$k] = $v;
-      if (--$len === 0) break;
+      --$len;
+      if ($len === 0) break;
     }
     return $res;
   }

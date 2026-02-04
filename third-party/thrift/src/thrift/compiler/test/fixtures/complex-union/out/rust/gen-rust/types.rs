@@ -2,7 +2,7 @@
 // This file is probably not the place you want to edit!
 
 #![recursion_limit = "100000000"]
-#![allow(non_camel_case_types, non_snake_case, non_upper_case_globals, unused_crate_dependencies, unused_extern_crates, elided_lifetimes_in_paths, clippy::redundant_closure, clippy::type_complexity)]
+#![allow(non_camel_case_types, non_snake_case, non_upper_case_globals, unused_crate_dependencies, unused_extern_crates, elided_lifetimes_in_paths, clippy::eq_op, clippy::nonminimal_bool, clippy::redundant_closure, clippy::type_complexity)]
 
 #[allow(unused_imports)]
 pub(crate) use crate as types;

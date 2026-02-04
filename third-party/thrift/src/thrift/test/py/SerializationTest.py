@@ -52,7 +52,7 @@ def bytes_comp(ut, seq1, seq2):
         seq1 = seq1.encode("utf-8")
     if not isinstance(seq2, bytes):
         seq2 = seq2.encode("utf-8")
-    ut.assertEquals(seq1, seq2)
+    ut.assertEqual(seq1, seq2)
 
 
 class AbstractTest:

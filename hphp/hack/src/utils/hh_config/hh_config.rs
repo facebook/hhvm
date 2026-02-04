@@ -13,6 +13,8 @@ use std::path::PathBuf;
 use anyhow::Context;
 use anyhow::Result;
 use config_file::ConfigFile;
+use ocamlrep::FromOcamlRep;
+use ocamlrep::ToOcamlRep;
 use oxidized::custom_error_config::CustomErrorConfig;
 use oxidized::experimental_features;
 use oxidized::global_options::ExtendedReasonsConfig;
@@ -34,7 +36,9 @@ const PACKAGE_FILE_PATH_RELATIVE_TO_ROOT: &str = "PACKAGES.toml";
 /// have been needed in Rust tools.
 ///
 /// Fields correspond to ServerConfig.t
-#[derive(Debug, Clone, Default)]
+/// IMPORTANT: Field order must match the OCaml Hh_config.t type exactly for FFI.
+#[derive(Debug, Clone, FromOcamlRep, ToOcamlRep)]
+#[repr(C)]
 pub struct HhConfig {
     pub version: Option<String>,
 
@@ -62,6 +66,33 @@ pub struct HhConfig {
     pub use_distc_crawl_dircache: bool,
     pub distc_avoid_unnecessary_saved_state_work: bool,
     pub distc_write_trace_during_save_state_creation_only: bool,
+}
+
+impl Default for HhConfig {
+    fn default() -> Self {
+        Self {
+            version: None,
+            ignored_paths: Vec::new(),
+            hash: String::new(),
+            opts: GlobalOptions::default(),
+            gc_minor_heap_size: 0,
+            gc_space_overhead: 0,
+            hackfmt_version: 0,
+            sharedmem_dep_table_pow: 0,
+            sharedmem_global_size: 0,
+            sharedmem_hash_table_pow: 0,
+            sharedmem_heap_size: 0,
+            ide_fall_back_to_full_index: false,
+            hh_distc_should_disable_trace_store: false,
+            hh_distc_exponential_backoff_num_retries: 10,
+            naming_table_compression_level: 0,
+            naming_table_compression_threads: 0,
+            eden_fetch_parallelism: 0,
+            use_distc_crawl_dircache: false,
+            distc_avoid_unnecessary_saved_state_work: false,
+            distc_write_trace_during_save_state_creation_only: false,
+        }
+    }
 }
 
 impl HhConfig {

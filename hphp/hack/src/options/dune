@@ -118,3 +118,11 @@
   global_options)
  (preprocess
   (pps ppx_deriving.std)))
+
+(library
+ (name hh_config)
+ (wrapped false)
+ (modules hh_config)
+ (libraries global_options)
+ (preprocess
+  (pps ppx_deriving.std)))

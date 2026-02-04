@@ -111,6 +111,23 @@ let default =
     warnings_in_sandcastle = true;
     package_config_strict_validation = false;
     fanout_strip_class_location = false;
+    (* Fields primarily for hh_conf equivalence testing *)
+    hackfmt_version = 0;
+    sharedmem_dep_table_pow = 0;
+    sharedmem_global_size = 0;
+    sharedmem_hash_table_pow = 0;
+    sharedmem_heap_size = 0;
+    eden_fetch_parallelism = 0;
+    use_distc_crawl_dircache = false;
+    distc_avoid_unnecessary_saved_state_work = false;
+    distc_write_trace_during_save_state_creation_only = false;
+    gc_minor_heap_size = 0;
+    gc_space_overhead = 0;
+    ide_fall_back_to_full_index = false;
+    naming_table_compression_level = 0;
+    naming_table_compression_threads = 0;
+    config_version = None;
+    ignored_paths = [];
   }
 
 let system_config_path =
@@ -215,6 +232,7 @@ let apply_overrides ~silent ~current_version ~config ~from ~overrides =
   (experiments_meta, config)
 
 let load_
+    ?(config : Config_file_common.t option)
     system_config_path
     ~silent
     ~current_version
@@ -222,9 +240,14 @@ let load_
     ~deactivate_saved_state_rollout
     ~from
     ~overrides : t =
-  let config = Config_file.parse_local_config system_config_path in
   let (experiments_config_meta, config) =
-    apply_overrides ~silent ~current_version ~config ~from ~overrides
+    match config with
+    | Some c ->
+      (* Config provided directly - skip file read and overrides *)
+      ("", c)
+    | None ->
+      let parsed = Config_file.parse_local_config system_config_path in
+      apply_overrides ~silent ~current_version ~config:parsed ~from ~overrides
   in
   (if not silent then
     output_config_section "Combined config" @@ fun () ->
@@ -866,6 +889,86 @@ let load_
       ~default:default.fanout_strip_class_location
       config
   in
+  (* Fields primarily for hh_conf equivalence testing *)
+  let hackfmt_version =
+    int_ "hackfmt.version" ~default:default.hackfmt_version config
+  in
+  let sharedmem_dep_table_pow =
+    int_
+      "sharedmem_dep_table_pow"
+      ~default:default.sharedmem_dep_table_pow
+      config
+  in
+  let sharedmem_global_size =
+    int_ "sharedmem_global_size" ~default:default.sharedmem_global_size config
+  in
+  let sharedmem_hash_table_pow =
+    int_
+      "sharedmem_hash_table_pow"
+      ~default:default.sharedmem_hash_table_pow
+      config
+  in
+  let sharedmem_heap_size =
+    int_ "sharedmem_heap_size" ~default:default.sharedmem_heap_size config
+  in
+  let eden_fetch_parallelism =
+    int_ "eden_fetch_parallelism" ~default:default.eden_fetch_parallelism config
+  in
+  let use_distc_crawl_dircache =
+    bool_
+      "use_distc_crawl_dircache"
+      ~default:default.use_distc_crawl_dircache
+      config
+  in
+  let distc_avoid_unnecessary_saved_state_work =
+    bool_
+      "distc_avoid_unnecessary_saved_state_work"
+      ~default:default.distc_avoid_unnecessary_saved_state_work
+      config
+  in
+  let distc_write_trace_during_save_state_creation_only =
+    bool_
+      "distc_write_trace_during_save_state_creation_only"
+      ~default:default.distc_write_trace_during_save_state_creation_only
+      config
+  in
+  let gc_minor_heap_size =
+    int_ "gc_minor_heap_size" ~default:default.gc_minor_heap_size config
+  in
+  let gc_space_overhead =
+    int_ "gc_space_overhead" ~default:default.gc_space_overhead config
+  in
+  let ide_fall_back_to_full_index =
+    bool_
+      "ide_fall_back_to_full_index"
+      ~default:default.ide_fall_back_to_full_index
+      config
+  in
+  let naming_table_compression_level =
+    int_
+      "naming_table_compression_level"
+      ~default:default.naming_table_compression_level
+      config
+  in
+  let naming_table_compression_threads =
+    int_
+      "naming_table_compression_threads"
+      ~default:default.naming_table_compression_threads
+      config
+  in
+  let config_version = string_opt "version" config in
+  let parse_string_list s =
+    try
+      let json = Hh_json.json_of_string s in
+      List.map ~f:Hh_json.get_string_exn (Hh_json.get_array_exn json)
+    with
+    | _ -> []
+  in
+  let ignored_paths =
+    match string_opt "ignored_paths" config with
+    | None -> default.ignored_paths
+    | Some s -> parse_string_list s
+  in
   {
     saved_state =
       {
@@ -980,6 +1083,22 @@ let load_
     warnings_in_sandcastle;
     package_config_strict_validation;
     fanout_strip_class_location;
+    hackfmt_version;
+    sharedmem_dep_table_pow;
+    sharedmem_global_size;
+    sharedmem_hash_table_pow;
+    sharedmem_heap_size;
+    eden_fetch_parallelism;
+    use_distc_crawl_dircache;
+    distc_avoid_unnecessary_saved_state_work;
+    distc_write_trace_during_save_state_creation_only;
+    gc_minor_heap_size;
+    gc_space_overhead;
+    ide_fall_back_to_full_index;
+    naming_table_compression_level;
+    naming_table_compression_threads;
+    config_version;
+    ignored_paths;
   }
 
 let load :
@@ -991,6 +1110,25 @@ let load :
     overrides:Config_file_common.t ->
     t =
   load_ system_config_path
+
+(** Load ServerLocalConfig from already-parsed config contents.
+    This is intended for testing, bypassing file reads and overrides.
+    Now delegates to load_ to avoid code duplication. *)
+let load_from_config
+    ~silent
+    ~current_version
+    ~current_rolled_out_flag_idx
+    ~deactivate_saved_state_rollout
+    (config : Config_file_common.t) : t =
+  load_
+    ~config
+    "" (* system_config_path unused when config is provided *)
+    ~silent
+    ~current_version
+    ~current_rolled_out_flag_idx
+    ~deactivate_saved_state_rollout
+    ~from:""
+    ~overrides:(Config_file_common.empty ())
 
 let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
   HackEventLogger.

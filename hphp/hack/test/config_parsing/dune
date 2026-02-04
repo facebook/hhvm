@@ -8,6 +8,8 @@
  (libraries
   default_injector_config
   global_options
+  hh_config
+  parser_options
   server_config
   utils_config_file_common
   utils_core
@@ -23,11 +25,12 @@
   configs/real_hh.conf
   configs/dump_tasts_list.txt)
  (action
-  (run %{exe:test_hh_conf_equivalence.exe}
-   configs/bad_hh.conf
-   configs/complete_hh.conf
-   configs/empty_hh.conf
-   configs/real_hh.conf)))
+  (chdir configs
+   (run %{exe:test_hh_conf_equivalence.exe}
+    bad_hh.conf
+    complete_hh.conf
+    empty_hh.conf
+    real_hh.conf))))
 
 (alias
  (name runtest)

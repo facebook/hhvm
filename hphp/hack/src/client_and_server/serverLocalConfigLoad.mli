@@ -22,6 +22,16 @@ val load :
   overrides:Config_file_common.t ->
   ServerLocalConfig.t
 
+(** Load ServerLocalConfig from already-parsed config contents.
+    This is intended for testing, bypassing file reads and overrides. *)
+val load_from_config :
+  silent:bool ->
+  current_version:Config_file_version.version ->
+  current_rolled_out_flag_idx:int ->
+  deactivate_saved_state_rollout:bool ->
+  Config_file_common.t ->
+  ServerLocalConfig.t
+
 val to_rollout_flags : ServerLocalConfig.t -> HackEventLogger.rollout_flags
 
 val system_config_path : string

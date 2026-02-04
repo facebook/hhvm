@@ -363,5 +363,28 @@ type t = {
   package_config_strict_validation: bool;
       (** POC: @fzn, if true, `hh` fatals if paths specified in PACAKGES.toml `include_paths` do not exists *)
   fanout_strip_class_location: bool;
-      (* POC: @fzn, if true fanout strips class location when comparing shallow classes for minor changes *)
+  (* POC: @fzn, if true fanout strips class location when comparing shallow classes for minor changes *)
+  (* Fields below are primarily for hh_conf equivalence testing *)
+  hackfmt_version: int;  (** hackfmt.version config key *)
+  sharedmem_dep_table_pow: int;  (** sharedmem_dep_table_pow config key *)
+  sharedmem_global_size: int;  (** sharedmem_global_size config key *)
+  sharedmem_hash_table_pow: int;  (** sharedmem_hash_table_pow config key *)
+  sharedmem_heap_size: int;  (** sharedmem_heap_size config key *)
+  eden_fetch_parallelism: int;  (** eden_fetch_parallelism config key *)
+  use_distc_crawl_dircache: bool;  (** use_distc_crawl_dircache config key *)
+  distc_avoid_unnecessary_saved_state_work: bool;
+      (** distc_avoid_unnecessary_saved_state_work config key *)
+  distc_write_trace_during_save_state_creation_only: bool;
+      (** distc_write_trace_during_save_state_creation_only config key *)
+  gc_minor_heap_size: int;  (** gc_minor_heap_size config key *)
+  gc_space_overhead: int;  (** gc_space_overhead config key *)
+  ide_fall_back_to_full_index: bool;
+      (** ide_fall_back_to_full_index config key *)
+  naming_table_compression_level: int;
+      (** naming_table_compression_level config key *)
+  naming_table_compression_threads: int;
+      (** naming_table_compression_threads config key *)
+  config_version: string option;
+      (** version config key - renamed to avoid shadowing *)
+  ignored_paths: string list;  (** ignored_paths config key, parsed from JSON *)
 }

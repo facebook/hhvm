@@ -132,7 +132,7 @@ TCRegionInfo OfflineCode::getRegionInfo(FILE* file,
       auto const literalAddr = frontier->LiteralAddress();
       auto const codeBegin = reinterpret_cast<uint8_t*>(code);
       auto const codeEnd = codeBegin + codeLen;
-      if (literalAddr >= codeBegin && literalAddr + literalSize <= codeEnd) {
+      if (literalAddr >= codeBegin && literalAddr + literalSize < codeEnd) {
         uint64_t literal = 0;
         memcpy(&literal, literalAddr, literalSize);
         if (literalSize == sizeof(uint64_t)) {

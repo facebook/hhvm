@@ -703,6 +703,11 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 - bool Eval.EnableAsyncJITProfile = false, UNKNOWN
 - int Eval.AsyncJitWorkerThreads, UNKNOWN
 
+- bool Eval.AsyncJitDeferContext = true, paulbiss
+
+  Defer computing the context for the translation in the async JIT until we're
+  certain we will be enqueuing a translation request.
+
 - bool Eval.EnableSBProfSerialize = false, arnabde
 - bool Eval.EnableSBProfDeserialize = false, arnabde
 

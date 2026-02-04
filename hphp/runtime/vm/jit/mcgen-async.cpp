@@ -35,6 +35,7 @@
 #include "hphp/util/configs/eval.h"
 #include "hphp/util/job-queue.h"
 #include "hphp/util/managed-arena.h"
+#include "hphp/util/match.h"
 #include "hphp/util/trace.h"
 
 #include <folly/AtomicHashMap.h>
@@ -54,12 +55,13 @@ struct SrcKeySetAtomicBool final {
   SrcKeySetAtomicBool& operator=(const SrcKeySetAtomicBool& sksab) = delete;
 
   bool compare_exchange_strong(bool value, bool comparand) const {
-      return b.compare_exchange_strong(value, comparand, std::memory_order_relaxed);
+      return b.compare_exchange_strong(value, comparand,
+                                       std::memory_order_relaxed);
   }
   void store(bool value) const { b.store(value, std::memory_order_relaxed); }
   bool load() const { return b.load(std::memory_order_relaxed); }
 
-private: 
+private:
   mutable std::atomic<bool> b;
 };
 
@@ -277,13 +279,13 @@ SrcKeySet& enqueuedSKs() {
       return &s_enqueuedSKs;
     }();
   always_assert(enqueuedSKs);
-    
+
   return *enqueuedSKs;
 }
 
 struct AsyncRegionTranslationContext {
   AsyncRegionTranslationContext(TransKind kind,
-                                const RegionContext& ctx,
+                                RegionContext&& ctx,
                                 int currNumTranslations)
     : kind(kind)
     , ctx(ctx)
@@ -334,7 +336,8 @@ std::atomic<size_t> s_rejectPrologue;
 std::atomic<size_t> s_activePrologue;
 
 InitFiniNode s_logJitStats([]{
-  if ((!Cfg::Eval::EnableAsyncJIT && !Cfg::Eval::EnableAsyncJITLive && !Cfg::Eval::EnableAsyncJITProfile) ||
+  if ((!Cfg::Eval::EnableAsyncJIT && !Cfg::Eval::EnableAsyncJITLive &&
+       !Cfg::Eval::EnableAsyncJITProfile) ||
       !isStandardRequest() ||
       !StructuredLog::coinflip(Cfg::Eval::AsyncJitLogStatsRate)) return;
   StructuredLogEntry ent;
@@ -405,7 +408,6 @@ struct AsyncTranslationWorker
   }
 
   void doAsyncRegionTranslation(AsyncRegionTranslationContext& rctx) {
-
     auto const ctx = rctx.ctx;
 
     s_activeTrans++;
@@ -416,7 +418,8 @@ struct AsyncTranslationWorker
           enqueuedSKs().dequeue(ctx.sk);
         }
       } else {
-        assertx(Cfg::Eval::EnableAsyncJITLive || Cfg::Eval::EnableAsyncJITProfile);
+        assertx(Cfg::Eval::EnableAsyncJITLive ||
+                Cfg::Eval::EnableAsyncJITProfile);
         ctx.sk.func()->atomicFlags().unset(Func::Flags::LockedForAsyncJit);
       }
       s_activeTrans--;
@@ -588,15 +591,12 @@ struct AsyncTranslationWorker
   }
 
   void doJob(AsyncTranslationContext ctx) override {
-    if (std::holds_alternative<AsyncRegionTranslationContext>(ctx)) {
-      doAsyncRegionTranslation(std::get<AsyncRegionTranslationContext>(ctx));
-    } else if (std::holds_alternative<AsyncPrologueContext>(ctx)) {
-      doAsyncPrologueGen(std::get<AsyncPrologueContext>(ctx));
-    } else if (std::holds_alternative<AsyncOptimizeContext>(ctx)) {
-      doAsyncOptimize(std::get<AsyncOptimizeContext>(ctx));
-    } else {
-      not_reached();
-    }
+    match(
+      ctx,
+      [&] (AsyncRegionTranslationContext& r) { doAsyncRegionTranslation(r); },
+      [&] (AsyncPrologueContext& p) { doAsyncPrologueGen(p); },
+      [&] (AsyncOptimizeContext& o) { doAsyncOptimize(o); }
+    );
   }
 
   void onThreadEnter() override {
@@ -632,30 +632,14 @@ void joinAsyncTranslationWorkerThreads() {
   enqueuedSKs().destroy();
 }
 
-void enqueueAsyncTranslateRequestForJumpstart(const RegionContext& ctx) {
+void enqueueAsyncTranslateRequestForJumpstart(RegionContext&& ctx) {
   dispatcher().enqueue(AsyncRegionTranslationContext {
-    TransKind::Live, ctx, kIgnoreNumTrans
+    TransKind::Live, std::move(ctx), kIgnoreNumTrans
   });
   FTRACE(2, "Enqueued sk {} for jitting in jumpstart\n", show(ctx.sk));
 }
 
 namespace {
-bool mayEnqueueAsyncTranslateRequest(const SrcKey& sk) {
-  if (!Cfg::Repo::Authoritative) {
-    assertx(Cfg::Eval::EnableAsyncJIT);
-    if (!Cfg::Eval::CheckValueBeforeEnqueue) {
-      return enqueuedSKs().enqueue(sk);
-    } else {
-      if (enqueuedSKs().exists(sk)) return false;
-      return enqueuedSKs().enqueue(sk);
-    }
-  } else {
-    assertx(Cfg::Eval::EnableAsyncJITLive || Cfg::Eval::EnableAsyncJITProfile);
-    auto const func = sk.func();
-    return !func->atomicFlags().set(Func::Flags::LockedForAsyncJit);
-  }
-  return false;
-}
 
 void logImpl(StructuredLogEntry& ent, const Func* f) {
   ent.setStr("repo_schema", repoSchemaId());
@@ -698,21 +682,35 @@ void log(const RegionContext& ctx) {
 
 }
 
-void enqueueAsyncTranslateRequest(TransKind kind,
-                                  const RegionContext& ctx,
-                                  int currNumTranslations) {
-  if (!mayEnqueueAsyncTranslateRequest(ctx.sk)) {
-    FTRACE(2,
-      "In progress jitting found, skipping enqueue for sk {}\n",
-      show(ctx.sk)
-    );
+namespace detail {
+
+bool mayEnqueueAsyncTranslateRequest(const SrcKey& sk) {
+  if (!Cfg::Repo::Authoritative) {
+    assertx(Cfg::Eval::EnableAsyncJIT);
+    if (!Cfg::Eval::CheckValueBeforeEnqueue) {
+      return enqueuedSKs().enqueue(sk);
+    } else {
+      if (enqueuedSKs().exists(sk)) return false;
+      return enqueuedSKs().enqueue(sk);
+    }
   } else {
-    dispatcher().enqueue(
-      AsyncRegionTranslationContext {kind, ctx, currNumTranslations}
-    );
-    FTRACE(2, "Enqueued sk {} for jitting\n", show(ctx.sk));
-    log(ctx);
+    assertx(Cfg::Eval::EnableAsyncJITLive || Cfg::Eval::EnableAsyncJITProfile);
+    auto const func = sk.func();
+    return !func->atomicFlags().set(Func::Flags::LockedForAsyncJit);
   }
+  return false;
+}
+
+void enqueueAsyncTranslateRequest(TransKind kind,
+                                  RegionContext&& ctx,
+                                  int currNumTranslations) {
+  dispatcher().enqueue(
+    AsyncRegionTranslationContext {kind, std::move(ctx), currNumTranslations}
+  );
+  FTRACE(2, "Enqueued sk {} for jitting\n", show(ctx.sk));
+  log(ctx);
+}
+
 }
 
 namespace {

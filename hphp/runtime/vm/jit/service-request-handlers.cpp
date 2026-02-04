@@ -153,8 +153,9 @@ TranslationResult getTranslation(SrcKey sk) {
 
   if (mcgen::isAsyncJitEnabled(args.kind)) {
     assertx(isLive(args.kind) || isProfiling(args.kind));
-    auto const ctx = getContext(args.sk, args.kind == TransKind::Profile);
-    mcgen::enqueueAsyncTranslateRequest(args.kind, ctx, 0);
+    mcgen::enqueueAsyncTranslateRequest(args.kind, args.sk, [&] {
+      return getContext(args.sk, args.kind == TransKind::Profile);
+    }, 0);
     return TranslationResult::failTransiently();
   }
 
@@ -261,9 +262,8 @@ TCA handleTranslateMainFuncEntry() noexcept {
     return resume(sk, getTranslation(sk));
 }
 
-TranslationResult::Scope shouldEnqueueForRetranslate(
-  const RegionContext& context) {
-  return tc::shouldTranslate(context.sk, TransKind::Live);
+TranslationResult::Scope shouldEnqueueForRetranslate(const SrcKey& sk) {
+  return tc::shouldTranslate(sk, TransKind::Live);
 }
 
 TCA handleRetranslate(Offset bcOff, SBInvOffset spOff) noexcept {
@@ -274,10 +274,9 @@ TCA handleRetranslate(Offset bcOff, SBInvOffset spOff) noexcept {
   auto const sk = SrcKey { liveFunc(), bcOff, liveResumeMode() };
   auto const isProfile = tc::profileFunc(sk.func());
   auto const kind = isProfile ? TransKind::Profile : TransKind::Live;
-  auto const context = getContext(sk, isProfile);
   if (mcgen::isAsyncJitEnabled(kind)) {
     assertx(isLive(kind) || isProfiling(kind));
-    auto const res = shouldEnqueueForRetranslate(context);
+    auto const res = shouldEnqueueForRetranslate(sk);
     if (res != TranslationResult::Scope::Success) {
       FTRACE_MOD(Trace::async_jit, 2,
                  "shouldEnqueueForRetranslate failed for sk {}\n", show(sk));
@@ -288,10 +287,13 @@ TCA handleRetranslate(Offset bcOff, SBInvOffset spOff) noexcept {
     auto const currNumTrans = srcRec->numTrans();
     FTRACE_MOD(Trace::async_jit, 2,
                "Enqueueing sk {} from handleRetranslate\n",
-               show(context.sk));
-    mcgen::enqueueAsyncTranslateRequest(kind, context, currNumTrans);
+               show(sk));
+    mcgen::enqueueAsyncTranslateRequest(kind, sk, [&] {
+      return getContext(sk, isProfile);
+    }, currNumTrans);
     return resume(sk, TranslationResult::failTransiently());
   }
+  auto const context = getContext(sk, isProfile);
   auto const transResult = mcgen::retranslate(TransArgs{sk}, context);
   SKTRACE(2, sk, "retranslated @%p\n", transResult.addr());
   return resume(sk, transResult);
@@ -307,11 +309,11 @@ TCA handleRetranslateFuncEntry(uint32_t numArgs) noexcept {
   auto const sk = SrcKey { liveFunc(), numArgs, SrcKey::FuncEntryTag {} };
   auto const isProfile = tc::profileFunc(sk.func());
   auto const kind = isProfile ? TransKind::Profile : TransKind::Live;
-  auto const context = getContext(sk, isProfile);
   if (mcgen::isAsyncJitEnabled(kind)) {
     assertx(isLive(kind) || isProfiling(kind));
-    auto const res = shouldEnqueueForRetranslate(context);
+    auto const res = shouldEnqueueForRetranslate(sk);
     if (res != TranslationResult::Scope::Success) {
+      if (!Cfg::Eval::AsyncJitDeferContext) getContext(sk, isProfile);
       FTRACE_MOD(Trace::async_jit, 2,
                  "shouldEnqueueForRetranslate failed for sk {}\n", show(sk));
       return resume(sk, TranslationResult{res});
@@ -321,10 +323,13 @@ TCA handleRetranslateFuncEntry(uint32_t numArgs) noexcept {
     auto const currNumTrans = srcRec->numTrans();
     FTRACE_MOD(Trace::async_jit, 2,
                "Enqueueing sk {} from handleRetranslateFuncEntry\n",
-               show(context.sk));
-    mcgen::enqueueAsyncTranslateRequest(kind, context, currNumTrans);
+               show(sk));
+    mcgen::enqueueAsyncTranslateRequest(kind, sk, [&] {
+      return getContext(sk, isProfile);
+    }, currNumTrans);
     return resume(sk, TranslationResult::failTransiently());
   }
+  auto const context = getContext(sk, isProfile);
   auto const transResult = mcgen::retranslate(TransArgs{sk}, context);
   SKTRACE(2, sk, "retranslated @%p\n", transResult.addr());
   return resume(sk, transResult);

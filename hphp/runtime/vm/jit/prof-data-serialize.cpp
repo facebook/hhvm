@@ -1226,7 +1226,9 @@ void merge_and_enqueue_for_jit(const std::string& root, int numWorkers) {
                     auto const t = typeFromSBProfType(pt.type);
                     ctx.liveTypes.emplace_back(pt.location, t);
                   }
-                  mcgen::enqueueAsyncTranslateRequestForJumpstart(ctx);
+                  mcgen::enqueueAsyncTranslateRequestForJumpstart(
+                    std::move(ctx)
+                  );
                   log(pd, root, nullptr, sk);
                 }
               } catch (const Exception& e) {

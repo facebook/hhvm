@@ -303,22 +303,29 @@ bool simplify(Env& env, const shrqi& inst, Vlabel b, size_t i) {
 }
 
 bool simplify(Env& env, const testq& inst, Vlabel b, size_t i) {
-  if (env.use_counts[inst.sf] != 1) return false;
-
-  uint64_t Val;
-  if (!get_const_int(env, inst.s0, Val) || Val != 0x8000000000000000ull) {
-    return false;
+  if (env.use_counts[inst.sf] == 1) {
+    uint64_t Val;
+    if (get_const_int(env, inst.s0, Val) &&
+        Val == 0x8000000000000000ull) {
+      if (auto const matched = if_inst<Vinstr::jcc>(env, b, i + 1,
+            [&] (const jcc& jcci) {
+              if (jcci.sf != inst.sf || jcci.cc != CC_E) return false;
+              return simplify_impl(env, b, i, [&] (Vout& v) {
+                auto const sf = v.makeReg();
+                v << cmpqi{0, inst.s1, sf, inst.fl};
+                v << jcc{CC_GE, sf, {jcci.targets[0], jcci.targets[1]}, jcci.tag};
+                return 2;
+              });
+            })) {
+        return matched;
+      }
+    }
   }
 
-  return if_inst<Vinstr::jcc>(env, b, i + 1, [&] (const jcc& jcci) {
-    if (jcci.sf != inst.sf || jcci.cc != CC_E) return false;
-    return simplify_impl(env, b, i, [&] (Vout& v) {
-      auto const sf = v.makeReg();
-      v << cmpqi{0, inst.s1, sf, inst.fl};
-      v << jcc{CC_GE, sf, {jcci.targets[0], jcci.targets[1]}, jcci.tag};
-      return 2;
+  return fold_shift_operand(env, b, i, Width::Quad, inst.s0, inst.s1, true, false,
+    [&](Vout& v, VregShiftExtend operand, Vreg64 other) {
+      v << testshiftq{operand, other, inst.sf, inst.fl};
     });
-  });
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -420,13 +427,6 @@ bool simplify(Env& env, const testl& inst, Vlabel b, size_t i) {
   return fold_shift_operand(env, b, i, Width::Long, inst.s0, inst.s1, true, false,
     [&](Vout& v, VregShiftExtend operand, Vreg32 other) {
       v << testshiftl{operand, other, inst.sf, inst.fl};
-    });
-}
-
-bool simplify(Env& env, const testq& inst, Vlabel b, size_t i) {
-  return fold_shift_operand(env, b, i, Width::Quad, inst.s0, inst.s1, true, false,
-    [&](Vout& v, VregShiftExtend operand, Vreg64 other) {
-      v << testshiftq{operand, other, inst.sf, inst.fl};
     });
 }
 

@@ -65,7 +65,7 @@ def _resolve_sockname_helper():
 
 async def _resolve_sockname():
     """Find the Unix socket path to the global Watchman instance."""
-    loop = asyncio.get_event_loop()
+    loop = asyncio.get_running_loop()
     return await loop.run_in_executor(None, _resolve_sockname_helper)
 
 

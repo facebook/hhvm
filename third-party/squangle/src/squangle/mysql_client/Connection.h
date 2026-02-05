@@ -237,6 +237,15 @@ class Connection {
     return mysql_connection_->getLastActivityTime();
   }
 
+  // Pool-source observability
+  [[nodiscard]] bool wasFromPoolHit() const noexcept {
+    return mysql_connection_ ? mysql_connection_->wasFromPoolHit() : false;
+  }
+  [[nodiscard]] bool wasReusedWithChangeUser() const noexcept {
+    return mysql_connection_ ? mysql_connection_->wasReusedWithChangeUser()
+                             : false;
+  }
+
   // Returns the MySQL server version. If the connection has been closed
   // an error is generated.
   [[nodiscard]] std::string serverInfo() const {

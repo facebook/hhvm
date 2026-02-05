@@ -93,6 +93,22 @@ class ConnectionHolder : public InternalConnection {
     return lastActiveTime_;
   }
 
+  // Pool-source observability flags
+  void setFromPoolHit(bool flag) noexcept {
+    poolFlagsHit_ = flag;
+  }
+
+  [[nodiscard]] bool wasFromPoolHit() const noexcept {
+    return poolFlagsHit_;
+  }
+
+  void setReusedWithChangeUser(bool flag) noexcept {
+    poolFlagsChangeUser_ = flag;
+  }
+  [[nodiscard]] bool wasReusedWithChangeUser() const noexcept {
+    return poolFlagsChangeUser_;
+  }
+
   [[nodiscard]] std::shared_ptr<const ConnectionKey> getKey() const {
     return key_;
   }
@@ -277,9 +293,11 @@ class ConnectionHolder : public InternalConnection {
   std::unique_ptr<InternalConnection> internalConn_;
   std::shared_ptr<db::ConnectionContextBase> context_;
   std::shared_ptr<const ConnectionKey> key_;
-  bool opened_{false};
   Timepoint createTime_;
   Timepoint lastActiveTime_;
+  bool opened_{false};
+  bool poolFlagsHit_{false};
+  bool poolFlagsChangeUser_{false};
 };
 
 } // namespace facebook::common::mysql_client

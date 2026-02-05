@@ -17,8 +17,7 @@ ConnectionHolder::ConnectionHolder(
     std::shared_ptr<const ConnectionKey> key)
     : client_(client),
       internalConn_(std::move(internalConn)),
-      key_(std::move(key)),
-      opened_(false) {
+      key_(std::move(key)) {
   createTime_ = std::chrono::steady_clock::now();
   client_.activeConnectionAdded(key_);
 }
@@ -30,9 +29,11 @@ ConnectionHolder::ConnectionHolder(
       internalConn_(other.stealInternalConnection()),
       context_(other.context_),
       key_(std::move(key)),
-      opened_(other.opened_),
       createTime_(other.createTime_),
-      lastActiveTime_(other.lastActiveTime_) {
+      lastActiveTime_(other.lastActiveTime_),
+      opened_(other.opened_),
+      poolFlagsHit_(other.poolFlagsHit_),
+      poolFlagsChangeUser_(other.poolFlagsChangeUser_) {
   client_.activeConnectionAdded(key_);
 }
 

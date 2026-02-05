@@ -532,6 +532,7 @@ class ConnectionPool
       // Cache hit
       stats()->incrPoolHits();
 
+      mysql_conn->setFromPoolHit(true);
       mysql_conn->setReusable(true);
       raw_pool_op->connectionCallback(std::move(mysql_conn));
     }
@@ -631,6 +632,8 @@ class ConnectionPool
           stats()->incrPoolHits();
           stats()->incrPoolHitsChangeUser();
 
+          pooledConn->setFromPoolHit(true);
+          pooledConn->setReusedWithChangeUser(true);
           pooledConn->setReusable(true);
           rawPoolOp->connectionCallback(std::move(pooledConn));
         });
@@ -820,6 +823,7 @@ class ConnectionPool
       VLOG(11) << "No operations waiting for Connection, enqueueing it";
       conn_storage_.queueConnection(std::move(mysql_conn));
     } else {
+      mysql_conn->setFromPoolHit(!brand_new);
       mysql_conn->setReusable(true);
       pool_op->connectionCallback(std::move(mysql_conn));
     }

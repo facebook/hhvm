@@ -131,7 +131,7 @@ trait ThriftUnionSerializationTrait implements IThriftStruct {
       HH\Coeffects\fb\backdoor_from_pure__DO_NOT_USE(
         ()[defaults] ==> {
           signal_log_in_psp(
-            SignalDynamicLoggerDataset::SHARED_DATASET_AVOID,
+            SignalDynamicLoggerDataset::THRIFT_SIGNAL_DYNAMIC_LOGGER,
             SignalDynamicLoggerProject::THRIFT_UNION_READ,
             $object_class_name,
             (string)$num_field_count,
@@ -183,7 +183,7 @@ trait ThriftUnionSerializationTrait implements IThriftStruct {
     } catch (IExceptionWithPureGetMessage $e) {
       HH\Coeffects\fb\backdoor_from_pure__DO_NOT_USE(
         ()[defaults] ==> signal_log_in_psp(
-          SignalDynamicLoggerDataset::SHARED_DATASET_AVOID,
+          SignalDynamicLoggerDataset::THRIFT_SIGNAL_DYNAMIC_LOGGER,
           SignalDynamicLoggerProject::THRIFT_UNION_WRITE,
           $object_class_name.
           " - Unexpected exception while trying to fetch enum union: ".
@@ -246,7 +246,7 @@ trait ThriftUnionSerializationTrait implements IThriftStruct {
         ()[defaults] ==> {
           if ($num_field_count > 1) {
             signal_log_in_psp(
-              SignalDynamicLoggerDataset::SHARED_DATASET_AVOID,
+              SignalDynamicLoggerDataset::THRIFT_SIGNAL_DYNAMIC_LOGGER,
               SignalDynamicLoggerProject::THRIFT_UNION_WRITE,
               $object_class_name,
               (string)$num_field_count,
@@ -255,7 +255,7 @@ trait ThriftUnionSerializationTrait implements IThriftStruct {
 
           if (!C\is_empty($incorrect_field_set)) {
             signal_log_in_psp(
-              SignalDynamicLoggerDataset::SHARED_DATASET_AVOID,
+              SignalDynamicLoggerDataset::THRIFT_SIGNAL_DYNAMIC_LOGGER,
               SignalDynamicLoggerProject::THRIFT_UNION_INCORRECT_FIELD_SET,
               $object_class_name,
               Str\format(
@@ -268,7 +268,7 @@ trait ThriftUnionSerializationTrait implements IThriftStruct {
 
           if ($extended_thrift_union) {
             signal_log_in_psp(
-              SignalDynamicLoggerDataset::SHARED_DATASET_AVOID,
+              SignalDynamicLoggerDataset::THRIFT_SIGNAL_DYNAMIC_LOGGER,
               SignalDynamicLoggerProject::THRIFT_UNION_EXTENDED_THRIFT_UNION,
               $object_class_name,
             );
@@ -301,7 +301,7 @@ trait ThriftUnionSerializationTrait implements IThriftStruct {
         ()[defaults] ==> {
           if (JustKnobs::eval('thrift/hack:log_incorrect_union_field_access')) {
             signal_log_in_psp(
-              SignalDynamicLoggerDataset::SHARED_DATASET_AVOID,
+              SignalDynamicLoggerDataset::THRIFT_SIGNAL_DYNAMIC_LOGGER,
               SignalDynamicLoggerProject::THRIFT_UNION_INCORRECT_FIELD_ACCESS,
               nameof static,
               Str\format(

@@ -194,6 +194,11 @@ type t =
   | Lateinit_with_default of Pos.t
   | Missing_assign of Pos.t
   | Clone_return_type of Pos.t
+  | Class_sealed_with_trait of {
+      pos: Pos.t;
+      class_name: string;
+      trait_name: string;
+    }
   | Require_package_strict_inclusion of {
       required_pos: Pos.t;
       required: string;
@@ -856,6 +861,18 @@ let clone_return_type pos =
     )
     []
 
+let class_sealed_with_trait pos class_name trait_name =
+  let _ = class_name in
+  User_diagnostic.make_err
+    Error_code.(to_enum ClassSealedWithTrait)
+    (pos, "Traits cannot appear in sealed allowlists")
+    [
+      ( Pos_or_decl.of_raw_pos pos,
+        Printf.sprintf
+          "%s is a trait"
+          (Markdown_lite.md_codify @@ Render.strip_ns trait_name) );
+    ]
+
 let require_package_strict_inclusion
     required_pos
     required
@@ -995,6 +1012,8 @@ let to_user_diagnostic t =
     | Lateinit_with_default pos -> lateinit_with_default pos
     | Missing_assign pos -> missing_assign pos
     | Clone_return_type pos -> clone_return_type pos
+    | Class_sealed_with_trait { pos; class_name; trait_name } ->
+      class_sealed_with_trait pos class_name trait_name
     | Require_package_strict_inclusion
         {
           required_pos;

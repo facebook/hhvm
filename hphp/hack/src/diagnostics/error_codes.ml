@@ -284,6 +284,7 @@ module NastCheck = struct
     (* | PackageExprInInvariantDEPRECATED [@value 3105] *)
     | NamedInTransformedPseudofunction [@value 3106]
     | RequirePackageStrictInclusion [@value 3107]
+    | ClassSealedWithTrait [@value 3108]
   (* Add new NastCheck codes here! Comment out when deprecating. *)
   [@@deriving enum, show { with_path = false }]
 

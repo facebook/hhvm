@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c2c92aa563f43993231b16002ec3023c>>
+// @generated SignedSource<<88a1d0face0230950853fb28a36ecce6>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -313,6 +313,12 @@ pub enum NastCheckError {
     MissingAssign(pos::Pos),
     #[rust_to_ocaml(name = "Clone_return_type")]
     CloneReturnType(pos::Pos),
+    #[rust_to_ocaml(name = "Class_sealed_with_trait")]
+    ClassSealedWithTrait {
+        pos: pos::Pos,
+        class_name: String,
+        trait_name: String,
+    },
     #[rust_to_ocaml(name = "Require_package_strict_inclusion")]
     RequirePackageStrictInclusion {
         required_pos: pos::Pos,

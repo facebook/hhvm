@@ -206,6 +206,42 @@ let check_dynamically_referenced attrs =
           to_user_diagnostic
           @@ Attribute_too_many_arguments { pos; name; expected = 1 }))
 
+(* Check that a sealed attribute on a class does not refer to a trait. *)
+let check_no_class_sealed_with_trait env c =
+  (* Only check classes, not interfaces or traits *)
+  match c.c_kind with
+  | Ast_defs.Cclass _ -> begin
+    match find_attribute SN.UserAttributes.uaSealed c.c_user_attributes with
+    | None -> ()
+    | Some sealed_attr ->
+      let class_name = snd c.c_name in
+      let ctx = env.Nast_check_env.ctx in
+      List.iter
+        (fun (_, pos, expr_) ->
+          match expr_ with
+          | Class_const ((_, _, CI (_, name)), _) -> begin
+            (* Look up the referenced class to check if it's a trait *)
+            match Naming_provider.get_type_path ctx name with
+            | None -> ()
+            | Some path -> begin
+              match
+                Ast_provider.find_class_in_file ctx path name ~full:false
+              with
+              | None -> ()
+              | Some cls ->
+                if Ast_defs.is_c_trait cls.Aast.c_kind then
+                  Diagnostics.add_diagnostic
+                    Nast_check_error.(
+                      to_user_diagnostic
+                      @@ Class_sealed_with_trait
+                           { pos; class_name; trait_name = name })
+            end
+          end
+          | _ -> ())
+        sealed_attr.ua_params
+  end
+  | _ -> ()
+
 let check_no_sealed_on_constructors m =
   let (_, method_name) = m.m_name in
   if String.equal method_name SN.Members.__construct then begin
@@ -413,6 +449,7 @@ let handler =
       check_autocomplete_valid_text c.c_user_attributes;
       check_soft_internal_without_internal c.c_internal c.c_user_attributes;
       check_dynamically_referenced c.c_user_attributes;
+      check_no_class_sealed_with_trait env c;
       check_attribute_arity
         c.c_user_attributes
         SN.UserAttributes.uaDocs

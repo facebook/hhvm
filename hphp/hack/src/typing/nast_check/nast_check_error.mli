@@ -193,6 +193,11 @@ type t =
   | Lateinit_with_default of Pos.t
   | Missing_assign of Pos.t
   | Clone_return_type of Pos.t
+  | Class_sealed_with_trait of {
+      pos: Pos.t;
+      class_name: string;
+      trait_name: string;
+    }
   | Require_package_strict_inclusion of {
       required_pos: Pos.t;
       required: string;

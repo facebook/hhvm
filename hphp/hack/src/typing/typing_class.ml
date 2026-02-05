@@ -479,10 +479,19 @@ let sealed_subtype (c : Nast.class_) ~is_enum ~env =
             else
               Cls.has_ancestor decl parent_name
           in
-          if not includes_ancestor then
+          (* Skip the warning if this is a class with a trait in the sealed allowlist.
+             This case is now handled as a proper error in nast_check (NastCheck[3108])
+             since traits cannot extend classes. *)
+          let class_kind = Cls.kind decl in
+          let is_class_with_trait =
+            Ast_defs.(
+              match (parent_kind, class_kind) with
+              | (Cclass _, Ctrait) -> true
+              | _ -> false)
+          in
+          if (not includes_ancestor) && not is_class_with_trait then
             let parent_pos = pos in
             let child_name = Cls.name decl in
-            let class_kind = Cls.kind decl in
             let (child_kind, verb) =
               Ast_defs.(
                 match (parent_kind, class_kind) with

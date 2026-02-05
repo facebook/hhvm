@@ -41,7 +41,7 @@ struct ServerStreamFactory {
   // Constructor from nullptr
   /* implicit */ ServerStreamFactory(std::nullptr_t) : fn_(nullptr) {}
 
-  // Constructor for callables with new 6-parameter signature
+  // Constructor for callables with 6-parameter signature
   template <
       typename F,
       std::enable_if_t<
@@ -55,41 +55,6 @@ struct ServerStreamFactory {
               std::shared_ptr<StreamInterceptorContext>>,
           int> = 0>
   explicit ServerStreamFactory(F&& fn) : fn_(std::forward<F>(fn)) {}
-
-  // Constructor for callables with old 5-parameter signature (backwards compat)
-  template <
-      typename F,
-      std::enable_if_t<
-          !std::is_invocable_v<
-              F,
-              FirstResponsePayload&&,
-              StreamClientCallback*,
-              folly::EventBase*,
-              TilePtr&&,
-              std::shared_ptr<ContextStack>,
-              std::shared_ptr<StreamInterceptorContext>> &&
-              std::is_invocable_v<
-                  F,
-                  FirstResponsePayload&&,
-                  StreamClientCallback*,
-                  folly::EventBase*,
-                  TilePtr&&,
-                  std::shared_ptr<ContextStack>>,
-          int> = 0>
-  explicit ServerStreamFactory(F&& fn)
-      : fn_([fn = std::forward<F>(fn)](
-                FirstResponsePayload&& payload,
-                StreamClientCallback* cb,
-                folly::EventBase* eb,
-                TilePtr&& interaction,
-                std::shared_ptr<ContextStack> contextStack,
-                std::shared_ptr<StreamInterceptorContext>) mutable {
-          fn(std::move(payload),
-             cb,
-             eb,
-             std::move(interaction),
-             std::move(contextStack));
-        }) {}
 
   void setInteraction(TilePtr&& interaction) {
     interaction_ = std::move(interaction);

@@ -87,11 +87,10 @@ struct IterArgs {
 
 // Arguments to FCall opcodes.
 // hhas format: <flags> <numArgs> <numRets> <inoutArgs> <readonlyArgs>
-//              <namedArgNames vecid> <namedArgPos vecid> <asyncEagerOffset>
+//              <namedArgNames vecid> <asyncEagerOffset>
 // hhbc format: <uint16:flags> ?<iva:numArgs> ?<iva:numRets>
 //              ?<boolvec:inoutArgs> ?<boolvec:readonlyArgs>
-//              ?<vecid:argNames> ?<vecid:argPos>
-//              ?<ba:asyncEagerOffset>
+//              ?<vecid:argNames> ?<ba:asyncEagerOffset>
 //   flags            = flags (hhas doesn't have HHBC-only flags)
 //   numArgs          = flags >> kFirstNumArgsBit
 //                        ? flags >> kFirstNumArgsBit - 1 : decode_iva()
@@ -157,14 +156,13 @@ struct FCallArgsBase {
 struct FCallArgs : FCallArgsBase {
   explicit FCallArgs(Flags flags, uint32_t numArgs, uint32_t numRets,
                      const uint8_t* inoutArgs, const uint8_t* readonlyArgs,
-                     const Id namedArgNames, const Id namedArgPos,
-                     Offset asyncEagerOffset, const StringData* context)
+                     const Id namedArgNames, Offset asyncEagerOffset,
+                     const StringData* context)
     : FCallArgsBase(flags, numArgs, numRets)
     , asyncEagerOffset(asyncEagerOffset)
     , inoutArgs(inoutArgs)
     , readonlyArgs(readonlyArgs)
     , namedArgNames(namedArgNames)
-    , namedArgPos(namedArgPos)
     , context(context) {
     assertx(IMPLIES(inoutArgs != nullptr || readonlyArgs != nullptr,
                     numArgs != 0));
@@ -202,13 +200,12 @@ struct FCallArgs : FCallArgsBase {
     return FCallArgs(
       static_cast<Flags>(flags | Flags::HasGenerics),
       numArgs, numRets, inoutArgs, readonlyArgs,
-      namedArgNames, namedArgPos, asyncEagerOffset, context);
+      namedArgNames, asyncEagerOffset, context);
   }
   Offset asyncEagerOffset;
   const uint8_t* inoutArgs;
   const uint8_t* readonlyArgs;
   Id namedArgNames;
-  Id namedArgPos;
   const StringData* context;
 };
 
@@ -220,8 +217,7 @@ std::string show(const IterArgs&, PrintLocal);
 std::string show(const LocalRange&);
 std::string show(uint32_t numArgs, const uint8_t* boolVecArgs);
 std::string show(const FCallArgsBase&, const uint8_t* inoutArgs,
-                 const uint8_t* readonlyArgs,
-                 Id namedArgNameId, Id namedArgPosId,
+                 const uint8_t* readonlyArgs, Id namedArgNameId,
                  std::string asyncEagerLabel, const StringData* ctx);
 
 /*

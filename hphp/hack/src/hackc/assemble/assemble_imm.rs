@@ -254,7 +254,7 @@ impl AssembleImm<hhbc::FCallArgs> for Lexer<'_> {
         let num_rets = self.expect_and_get_number()?;
         let inouts = assemble::assemble_inouts_or_readonly(self)?;
         let readonly = assemble::assemble_inouts_or_readonly(self)?;
-        let named_args = assemble::assemble_named_args(self, adata)?;
+        let named_arg_names = assemble::assemble_named_arg_names(self, adata)?;
         let async_eager_target = assemble::assemble_async_eager_target(self)?;
         let context = assemble::assemble_fcall_context(self)?;
         let fcargs = hhbc::FCallArgs::new(
@@ -263,7 +263,7 @@ impl AssembleImm<hhbc::FCallArgs> for Lexer<'_> {
             num_args,
             inouts,
             readonly,
-            named_args,
+            named_arg_names,
             async_eager_target,
             None,
         );

@@ -194,7 +194,7 @@ std::string show(const Func& func, const Bytecode& bc) {
     : "-";                                                         \
   folly::toAppend(                                                 \
     " ", show(data.fca.base(), data.fca.inoutArgs(),               \
-              data.fca.readonlyArgs(), kInvalidId, kInvalidId, /* TODO(named_params) actually pass data here */ \
+              data.fca.readonlyArgs(), kInvalidId, /* TODO(named_params) actually pass data here */ \
               aeTarget, data.fca.context()), &ret);                          \
 } while (false);
 

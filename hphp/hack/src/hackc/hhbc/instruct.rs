@@ -68,13 +68,6 @@ pub const NUM_ACT_REC_CELLS: usize = 2;
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize)]
 #[repr(C)]
-pub struct NamedArg {
-    pub name: StringId,
-    pub pos: NumParams,
-}
-
-#[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize)]
-#[repr(C)]
 pub struct FCallArgs {
     pub flags: FCallArgsFlags,
     pub async_eager_target: Label,
@@ -82,7 +75,7 @@ pub struct FCallArgs {
     pub num_rets: NumParams,
     pub inouts: ByRefs,
     pub readonly: ByRefs,
-    pub named_args: Vector<NamedArg>,
+    pub named_arg_names: Vector<StringId>,
     pub context: StringId,
 }
 
@@ -93,7 +86,7 @@ impl FCallArgs {
         num_args: NumParams,
         inouts: Vec<bool>,
         readonly: Vec<bool>,
-        named_args: Vec<(StringId, NumParams)>,
+        named_arg_names: Vec<StringId>,
         async_eager_target: Option<Label>,
         context: Option<StringId>,
     ) -> Self {
@@ -119,13 +112,9 @@ impl FCallArgs {
             }
             None => Label::INVALID,
         };
-        if !named_args.is_empty() {
+        if !named_arg_names.is_empty() {
             flags |= FCallArgsFlags::HasNamedArgs;
         }
-        let named_args: Vector<NamedArg> = named_args
-            .into_iter()
-            .map(|(name, pos)| NamedArg { name, pos })
-            .collect();
         Self {
             flags,
             num_args,
@@ -133,7 +122,7 @@ impl FCallArgs {
             inouts: inouts.into(),
             readonly: readonly.into(),
             async_eager_target,
-            named_args,
+            named_arg_names: named_arg_names.into(),
             context: context.unwrap_or(StringId::EMPTY),
         }
     }

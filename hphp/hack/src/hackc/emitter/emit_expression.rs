@@ -1869,18 +1869,30 @@ fn emit_idx<'a>(
     ]))
 }
 
-fn named_arg_names(args: &[ast::Argument]) -> Vec<(StringId, u32)> {
-    let mut named_args_with_position = vec![];
+// Reorders the provided arguments so that the named arguments are lexicographically
+// sorted and all precede positional args.
+fn reorder_call_args(args: &[ast::Argument]) -> (Vec<ast::Argument>, Vec<StringId>) {
+    let mut positional_idxs = vec![];
+    let mut named_args_with_names: Vec<(StringId, usize)> = vec![];
     for (idx, arg) in args.iter().enumerate() {
         if let ast::Argument::Anamed(id, _) = arg {
-            named_args_with_position.push((id.1.clone(), idx));
+            named_args_with_names.push((hhbc::intern(id.1.clone()), idx));
+        } else {
+            positional_idxs.push(idx)
         }
     }
-    named_args_with_position.sort_by(|(aname, _), (bname, _)| aname.cmp(bname));
-    named_args_with_position
-        .iter()
-        .map(|(name, idx)| (hhbc::intern(name), idx.clone() as u32))
-        .collect()
+    named_args_with_names.sort_by(|(aname, _), (bname, _)| aname.cmp(bname));
+    let (named_arg_names, named_arg_indices): (Vec<StringId>, Vec<usize>) =
+        named_args_with_names.into_iter().unzip();
+    let mut all_args: Vec<ast::Argument> = Vec::with_capacity(args.len());
+    for idx in named_arg_indices {
+        let arg: ast::Argument = args[idx].clone();
+        all_args.push(arg);
+    }
+    for idx in positional_idxs {
+        all_args.push(args[idx].clone())
+    }
+    (all_args, named_arg_names)
 }
 
 fn emit_call<'a>(
@@ -1902,25 +1914,26 @@ fn emit_call<'a>(
         ast::Expr_::ReadonlyExpr(_) => true,
         _ => false,
     };
+    let (args, named_arg_names) = reorder_call_args(args);
     let fcall_args = get_fcall_args(
-        args,
+        &args,
         uarg,
         async_eager_label,
         env.call_context,
         false,
         readonly_return,
         readonly_this,
-        named_arg_names(args),
+        named_arg_names,
     );
     match expr.2.as_id() {
-        None => emit_call_default(e, env, pos, expr, targs, args, uarg, fcall_args),
+        None => emit_call_default(e, env, pos, expr, targs, &args, uarg, fcall_args),
         Some(ast_defs::Id(_, id)) => {
             let fq = hhbc::FunctionName::from_ast_name(id);
             let lower_fq_name = fq.as_str();
-            emit_special_function(e, env, pos, targs, args, uarg, lower_fq_name)
+            emit_special_function(e, env, pos, targs, &args, uarg, lower_fq_name)
                 .transpose()
                 .unwrap_or_else(|| {
-                    emit_call_default(e, env, pos, expr, targs, args, uarg, fcall_args)
+                    emit_call_default(e, env, pos, expr, targs, &args, uarg, fcall_args)
                 })
         }
     }
@@ -2587,7 +2600,7 @@ fn get_fcall_args_common<T>(
     readonly_this: bool,
     readonly_predicate: fn(&T) -> bool,
     is_inout_arg: fn(&T) -> bool,
-    named_args: Option<Vec<(StringId, u32)>>,
+    named_arg_names: Option<Vec<StringId>>,
 ) -> FCallArgs {
     let mut flags = FCallArgsFlags::default();
     flags.set(FCallArgsFlags::HasUnpack, uarg.is_some());
@@ -2605,7 +2618,7 @@ fn get_fcall_args_common<T>(
         args.len() as u32,
         args.iter().map(is_inout_arg).collect(),
         readonly_args,
-        named_args.unwrap_or_else(|| vec![]),
+        named_arg_names.unwrap_or_else(|| vec![]),
         async_eager_label,
         context,
     )
@@ -2644,7 +2657,7 @@ fn get_fcall_args(
     lock_while_unwinding: bool,
     readonly_return: bool,
     readonly_this: bool,
-    named_args: Vec<(StringId, u32)>,
+    named_arg_names: Vec<StringId>,
 ) -> FCallArgs {
     get_fcall_args_common(
         args,
@@ -2656,7 +2669,7 @@ fn get_fcall_args(
         readonly_this,
         |arg: &ast::Argument| is_readonly_expr(arg.to_expr_ref()),
         |arg: &ast::Argument| arg.is_inout(),
-        Some(named_args),
+        Some(named_arg_names),
     )
 }
 

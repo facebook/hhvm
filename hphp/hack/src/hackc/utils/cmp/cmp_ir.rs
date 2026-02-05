@@ -509,7 +509,7 @@ fn cmp_instr_call(a: &Call, b: &Call) -> Result {
         num_rets: a_num_rets,
         inouts: a_inouts,
         readonly: a_readonly,
-        named_args: a_named_args,
+        named_arg_names: a_named_arg_names,
         loc: _,
     } = a;
     let Call {
@@ -520,7 +520,7 @@ fn cmp_instr_call(a: &Call, b: &Call) -> Result {
         num_rets: b_num_rets,
         inouts: b_inouts,
         readonly: b_readonly,
-        named_args: b_named_args,
+        named_arg_names: b_named_arg_names,
         loc: _,
     } = b;
     cmp_eq(a_context, b_context).qualified("context")?;
@@ -528,7 +528,7 @@ fn cmp_instr_call(a: &Call, b: &Call) -> Result {
     cmp_eq(a_num_rets, b_num_rets).qualified("num_rets")?;
     cmp_slice(a_inouts, b_inouts, cmp_eq).qualified("inouts")?;
     cmp_slice(a_readonly, b_readonly, cmp_eq).qualified("readonly")?;
-    cmp_eq(a_named_args, b_named_args).qualified("named_args")?;
+    cmp_eq(a_named_arg_names, b_named_arg_names).qualified("named_arg_names")?;
 
     cmp_eq(
         std::mem::discriminant(a_detail),

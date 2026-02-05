@@ -299,8 +299,7 @@ void print_instr(Output& out, const FuncInfo& finfo, PC pc) {
       ? rel_label(fca.asyncEagerOffset)
       : "-";
     return show(fca, fca.inoutArgs, fca.readonlyArgs,
-                fca.namedArgNames,
-                fca.namedArgPos, aeLabel, fca.context);
+                fca.namedArgNames, aeLabel, fca.context);
   };
 
   auto const print_nla = [&](const NamedLocal& nla) {

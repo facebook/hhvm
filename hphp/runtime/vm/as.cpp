@@ -1248,7 +1248,7 @@ const StringData* read_fca_context(AsmState& as) {
 
 std::tuple<FCallArgsBase, std::unique_ptr<uint8_t[]>,
            std::unique_ptr<uint8_t[]>, std::string,
-           ArrayData*, ArrayData*, const StringData*>
+           ArrayData*, const StringData*>
 read_fcall_args(AsmState& as, Op thisOpcode) {
   auto const flags = read_fcall_flags(as, thisOpcode);
   auto const numArgs = read_opcode_arg<uint32_t>(as);
@@ -1256,7 +1256,6 @@ read_fcall_args(AsmState& as, Op thisOpcode) {
   auto inoutArgs = read_arg_modifiers(as, "inout", numArgs);
   auto readonlyArgs = read_arg_modifiers(as, "readonly", numArgs);
   auto named_param_names = read_litarray_opt(as);
-  auto named_param_pos = read_litarray_opt(as);
   auto asyncEagerLabel = read_opcode_arg<std::string>(as);
   auto const ctx = read_fca_context(as);
   return std::make_tuple(
@@ -1266,8 +1265,6 @@ read_fcall_args(AsmState& as, Op thisOpcode) {
     std::move(asyncEagerLabel),
     named_param_names.has_value()
       ? named_param_names.value().first : nullptr,
-    named_param_pos.has_value()
-      ? named_param_pos.value().first : nullptr,
     ctx
   );
 }
@@ -1360,8 +1357,7 @@ std::map<std::string,ParserFunc> opcode_parsers;
     auto const readonly = std::get<2>(fca).get();                       \
     auto const label = std::get<3>(fca);                                \
     auto const named_arg_names = std::get<4>(fca);                      \
-    auto const named_arg_pos = std::get<5>(fca);                        \
-    auto const sd = std::get<6>(fca);                                   \
+    auto const sd = std::get<5>(fca);                                   \
     encodeFCallArgs(                                                    \
       *as.fe, fcab,                                                     \
       io != nullptr,                                                    \
@@ -1375,7 +1371,6 @@ std::map<std::string,ParserFunc> opcode_parsers;
       named_arg_names != nullptr,                                       \
       [&] {                                                             \
          as.fe->emitInt32(as.ue->mergeArray(named_arg_names));          \
-         as.fe->emitInt32(as.ue->mergeArray(named_arg_pos));            \
       },                                                                \
       label != "-",                                                     \
       [&] {                                                             \

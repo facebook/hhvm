@@ -1015,7 +1015,7 @@ fn write_call(state: &mut FuncState<'_, '_, '_>, iid: InstrId, call: &ir::Call) 
         ref inouts,
         ref readonly,
         // TODO(named_params): We should support writing calls with named args.
-        named_args: _,
+        named_arg_names: _,
         loc: _,
     } = *call;
 

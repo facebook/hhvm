@@ -383,6 +383,20 @@ pub fn make_env<'a>(
     env
 }
 
+/*
+ * Rearranges a list of parameters so that
+ * 1. All named parameters precede positional params (including any variadic)
+ * 2. Relative positioning of positional parameters is preserved
+ * 3. Named parameters are re-ordered to be lexicographically sorted.
+ */
+fn reorder_params(ast_params: &[ast::FunParam]) -> Vec<ast::FunParam> {
+    let (mut named_params, positional_params): (Vec<ast::FunParam>, Vec<ast::FunParam>) =
+        ast_params.iter().cloned().partition(|p| p.named.is_some());
+    named_params.sort_by(|a, b| a.name.cmp(&b.name));
+    named_params.extend(positional_params);
+    named_params
+}
+
 fn make_params<'a>(
     emitter: &mut Emitter,
     tp_names: &mut Vec<&str>,
@@ -391,7 +405,14 @@ fn make_params<'a>(
     flags: Flags,
 ) -> Result<Vec<(Param, Option<(Label, ast::Expr)>)>> {
     let generate_defaults = !flags.contains(Flags::MEMOIZE);
-    emit_param::from_asts(emitter, tp_names, generate_defaults, scope, ast_params)
+    let reordered_params = reorder_params(ast_params);
+    emit_param::from_asts(
+        emitter,
+        tp_names,
+        generate_defaults,
+        scope,
+        &reordered_params[..],
+    )
 }
 
 pub fn make_body<'a>(

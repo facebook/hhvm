@@ -37,7 +37,6 @@ use hhbc::Method;
 use hhbc::MethodFlags;
 use hhbc::Module;
 use hhbc::ModuleName;
-use hhbc::NamedArg;
 use hhbc::Param;
 use hhbc::ParamEntry;
 use hhbc::Property;
@@ -183,10 +182,9 @@ fn print_unit_(ctx: &Context<'_>, w: &mut dyn Write, prog: &Unit) -> Result<()> 
                     | Opcode::FCallFuncD(args, _)
                     | Opcode::FCallObjMethod(args, _, _)
                     | Opcode::FCallObjMethodD(args, _, _, _),
-                ) if !args.named_args.is_empty() => {
-                    let (name_tv, pos_tv) = named_arg_typed_values(&args.named_args);
+                ) if !args.named_arg_names.is_empty() => {
+                    let name_tv = named_arg_typed_values(&args.named_arg_names);
                     adata.intern_value(name_tv);
-                    adata.intern_value(pos_tv);
                 }
                 _ => {}
             }
@@ -935,7 +933,7 @@ pub(crate) fn print_fcall_args(
         num_rets,
         inouts,
         readonly,
-        named_args,
+        named_arg_names,
         async_eager_target,
         context,
     }: &FCallArgs,
@@ -963,13 +961,11 @@ pub(crate) fn print_fcall_args(
         })
     })?;
     w.write_all(b" ")?;
-    if named_args.is_empty() {
-        w.write_all(b"$ $ ")?;
+    if named_arg_names.is_empty() {
+        w.write_all(b"$ ")?;
     } else {
-        let (name_tv, pos_tv) = named_arg_typed_values(named_args);
-        print_adata_id(w, &name_tv, adata)?;
-        w.write_all(b" ")?;
-        print_adata_id(w, &pos_tv, adata)?;
+        let name_tvs = named_arg_typed_values(named_arg_names);
+        print_adata_id(w, &name_tvs, adata)?;
         w.write_all(b" ")?;
     }
     if args.has_async_eager_target() {
@@ -1214,22 +1210,15 @@ fn print_extends(w: &mut dyn Write, base: Option<&str>) -> Result<()> {
     }
 }
 
-fn named_arg_typed_values(named_args: &Vector<NamedArg>) -> (TypedValue, TypedValue) {
+fn named_arg_typed_values(named_arg_names: &Vector<StringId>) -> TypedValue {
     // We should never be breaking down empty named args - the caller is responsible for handling it.
-    debug_assert!(!named_args.is_empty());
-    let name_tv: TypedValue = TypedValue::vec(
-        named_args
+    debug_assert!(!named_arg_names.is_empty());
+    TypedValue::vec(
+        named_arg_names
             .into_iter()
-            .map(|named_arg| TypedValue::String(named_arg.name.as_bytes()))
+            .map(|name| TypedValue::String(name.as_bytes()))
             .collect(),
-    );
-    let pos_tv = TypedValue::vec(
-        named_args
-            .into_iter()
-            .map(|named_arg| TypedValue::Int(named_arg.pos.into()))
-            .collect(),
-    );
-    (name_tv, pos_tv)
+    )
 }
 
 pub fn external_print_unit(

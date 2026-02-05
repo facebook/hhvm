@@ -606,7 +606,7 @@ impl FunctionParser<'_> {
             inouts,
             readonly,
             // TODO(named_params) actually parse named args here
-            named_args: vec![],
+            named_arg_names: vec![],
             loc,
         };
 

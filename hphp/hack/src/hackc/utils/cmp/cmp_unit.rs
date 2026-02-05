@@ -224,7 +224,7 @@ fn cmp_fcallargs(a: &hhbc::FCallArgs, b: &hhbc::FCallArgs) -> Result {
         num_rets: a_num_rets,
         inouts: a_inouts,
         readonly: a_readonly,
-        named_args: a_named_args,
+        named_arg_names: a_named_arg_names,
         context: a_context,
     } = a;
     let hhbc::FCallArgs {
@@ -234,7 +234,7 @@ fn cmp_fcallargs(a: &hhbc::FCallArgs, b: &hhbc::FCallArgs) -> Result {
         num_rets: b_num_rets,
         inouts: b_inouts,
         readonly: b_readonly,
-        named_args: b_named_args,
+        named_arg_names: b_named_arg_names,
         context: b_context,
     } = b;
     cmp_fcallargflags(a_flags, b_flags).qualified("fcallargflags")?;
@@ -243,7 +243,7 @@ fn cmp_fcallargs(a: &hhbc::FCallArgs, b: &hhbc::FCallArgs) -> Result {
     cmp_eq(a_num_rets, b_num_rets)?;
     cmp_eq(a_inouts, b_inouts)?;
     cmp_eq(a_readonly, b_readonly)?;
-    cmp_eq(a_named_args, b_named_args)?;
+    cmp_eq(a_named_arg_names, b_named_arg_names)?;
     cmp_eq(a_context, b_context)?;
     Ok(())
 }

@@ -799,7 +799,7 @@ std::string instrToString(PC it, Either<const Func*, const FuncEmitter*> f, Eith
     ? showOffset(fca.asyncEagerOffset)                                \
     : "-";                                                            \
   out += ' ';                                                         \
-  out += show(fca, fca.inoutArgs, fca.readonlyArgs, fca.namedArgNames, fca.namedArgPos, aeOffset, fca.context); \
+  out += show(fca, fca.inoutArgs, fca.readonlyArgs, fca.namedArgNames, aeOffset, fca.context); \
 } while (false)
 
 #define O(name, imm, push, pop, flags)       \
@@ -1192,8 +1192,7 @@ std::string show(uint32_t numArgs, const uint8_t* boolVecArgs) {
 }
 
 std::string show(const FCallArgsBase& fca, const uint8_t* inoutArgs,
-                 const uint8_t* readonlyArgs,
-                 Id namedArgNamesId, Id namedArgsPosId,
+                 const uint8_t* readonlyArgs, Id namedArgNamesId,
                  std::string asyncEagerLabel, const StringData* ctx) {
   std::vector<std::string> flags;
   if (fca.hasUnpack()) flags.push_back("Unpack");
@@ -1207,12 +1206,11 @@ std::string show(const FCallArgsBase& fca, const uint8_t* inoutArgs,
     return id == kInvalidId ? "$" : folly::sformat("@A_{}", id);
   };
   return folly::sformat(
-    "<{}> {} {} \"{}\" \"{}\" {} {} {} \"{}\"",
+    "<{}> {} {} \"{}\" \"{}\" {} {} \"{}\"",
     folly::join(' ', flags), fca.numArgs, fca.numRets,
     show(fca.numArgs, inoutArgs),
     show(fca.numArgs, readonlyArgs),
     formatId(namedArgNamesId),
-    formatId(namedArgsPosId),
     asyncEagerLabel, ctx ? ctx->data() : ""
   );
 }

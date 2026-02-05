@@ -1878,33 +1878,21 @@ fn typed_value_opt(token_iter: &mut Lexer<'_>, adata: &AdataMap) -> Result<Optio
     Ok(None)
 }
 
-pub(crate) fn assemble_named_args(
+pub(crate) fn assemble_named_arg_names(
     token_iter: &mut Lexer<'_>,
     adata: &AdataMap,
-) -> Result<Vec<(StringId, u32)>> {
+) -> Result<Vec<StringId>> {
     let name_tv = typed_value_opt(token_iter, adata)?;
-    let pos_tv = typed_value_opt(token_iter, adata)?;
-    match (name_tv, pos_tv) {
-        (Some(TypedValue::Vec(names)), Some(TypedValue::Vec(pos))) => {
-            let names = names
-                .iter()
-                .map(|tv| match tv.get_string() {
-                    Some(s) => StringId::from_bytes(s).map_err(anyhow::Error::from),
-                    None => Err(token_iter.error("Expected string for named args name")),
-                })
-                .collect::<Result<Vec<StringId>, anyhow::Error>>()?;
-            let pos = pos
-                .iter()
-                .map(|tv| match tv.get_int() {
-                    Some(i) => Ok(i as u32),
-                    None => Err(token_iter.error("Expected int for named args position")),
-                })
-                .collect::<Result<Vec<u32>, anyhow::Error>>()?;
-            Ok(names.into_iter().zip(pos).collect())
-        }
-        (None, None) => Ok(Vec::new()),
-        _ => Err(token_iter.error("Expected vecs for named args static tvs")),
-    }
+    let Some(TypedValue::Vec(names)) = name_tv else {
+        return Ok(vec![]);
+    };
+    names
+        .iter()
+        .map(|tv| match tv.get_string() {
+            Some(s) => StringId::from_bytes(s).map_err(anyhow::Error::from),
+            None => Err(token_iter.error("Expected string for named args name")),
+        })
+        .collect::<Result<Vec<StringId>, anyhow::Error>>()
 }
 
 pub(crate) fn assemble_unescaped_unquoted_intern_str(

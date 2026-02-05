@@ -45,7 +45,7 @@ use crate::TypeStructEnforceKind;
 use crate::TypeStructResolveOp;
 use crate::ValueId;
 use crate::VarId;
-use crate::VerifyKind;
+use crate::VerifyRetKind;
 
 pub trait HasLoc {
     fn loc_id(&self) -> LocId;
@@ -180,9 +180,9 @@ pub enum Terminator {
     #[has_operands(none)]
     MemoGetEager(MemoGetEager),
     NativeImpl(LocId),
-    Ret(ValueId, VerifyKind, LocId),
+    Ret(ValueId, VerifyRetKind, LocId),
     RetCSuspended(ValueId, LocId),
-    RetM(Box<[ValueId]>, VerifyKind, LocId),
+    RetM(Box<[ValueId]>, VerifyRetKind, LocId),
     #[has_locals(none)]
     Switch {
         cond: ValueId,
@@ -1261,7 +1261,7 @@ impl Instr {
         Instr::Special(Special::Param)
     }
 
-    pub fn ret(vid: ValueId, kind: VerifyKind, loc: LocId) -> Instr {
+    pub fn ret(vid: ValueId, kind: VerifyRetKind, loc: LocId) -> Instr {
         Instr::Terminator(Terminator::Ret(vid, kind, loc))
     }
 

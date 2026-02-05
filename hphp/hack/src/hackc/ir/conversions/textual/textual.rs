@@ -21,7 +21,7 @@ use ir::FloatBits;
 use ir::LocalId;
 use ir::SrcLoc;
 use ir::Typedef;
-use ir::VerifyKind;
+use ir::VerifyRetKind;
 use itertools::Itertools;
 use newtype::newtype_int;
 use strum::EnumProperty;
@@ -449,7 +449,7 @@ impl TextualFile<'_> {
                 fb.call_static(&curry.name, Expr::null(), args)?
             };
 
-            fb.ret(result, VerifyKind::None)?;
+            fb.ret(result, VerifyRetKind::None)?;
             Ok(())
         })?;
 
@@ -1178,7 +1178,7 @@ impl FuncBuilder<'_, '_> {
         Ok(())
     }
 
-    pub(crate) fn ret(&mut self, expr: impl Into<Expr>, _kind: VerifyKind) -> Result {
+    pub(crate) fn ret(&mut self, expr: impl Into<Expr>, _kind: VerifyRetKind) -> Result {
         let expr = expr.into();
         write!(self.txf.w, "{INDENT}ret ")?;
         self.write_expr(&expr)?;

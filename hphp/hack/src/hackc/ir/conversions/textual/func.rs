@@ -27,7 +27,7 @@ use ir::MethodName;
 use ir::SpecialClsRef;
 use ir::StringId;
 use ir::ValueId;
-use ir::VerifyKind;
+use ir::VerifyRetKind;
 use ir::instr::HasLoc;
 use ir::instr::HasLocals;
 use ir::instr::Hhbc;
@@ -345,7 +345,7 @@ fn split_default_func(orig_func: &Func, func_info: &FuncInfo<'_>) -> Option<Vec<
             block.iids.push(iid);
             let iid = func
                 .repr
-                .alloc_instr(Instr::ret(iid.into(), VerifyKind::None, loc));
+                .alloc_instr(Instr::ret(iid.into(), VerifyRetKind::None, loc));
             block.iids.push(iid);
 
             func.repr.alloc_bid(block)
@@ -578,7 +578,7 @@ fn write_instance_stub(
                 .try_collect()?;
 
             let call = fb.call(&target, params)?;
-            fb.ret(call, VerifyKind::None)?;
+            fb.ret(call, VerifyRetKind::None)?;
             Ok(())
         },
     )?;

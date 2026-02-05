@@ -17,7 +17,7 @@ use hhbc::IterId;
 use hhbc::Label;
 use hhbc::Opcode;
 use hhbc::Pseudo;
-use hhbc::VerifyKind;
+use hhbc::VerifyRetKind;
 use indexmap::IndexSet;
 use instruction_sequence::InstrSeq;
 use instruction_sequence::instr;
@@ -140,14 +140,16 @@ pub(super) fn emit_return<'a>(
                 instrs.push(load_retval_instr);
             }
             let verify_return = verify_return.map_or_else(
-                || Ok((instr::empty(), VerifyKind::None)),
+                || Ok((instr::empty(), VerifyRetKind::None)),
                 |h| {
                     use reified::ReificationLevel;
                     let h = reified::convert_awaitable(env, h);
                     let h = reified::remove_erased_generics(env, h);
                     match reified::has_reified_type_constraint(env, &h) {
-                        ReificationLevel::Unconstrained => Ok((instr::empty(), VerifyKind::None)),
-                        ReificationLevel::Not => Ok((instr::empty(), VerifyKind::All)),
+                        ReificationLevel::Unconstrained => {
+                            Ok((instr::empty(), VerifyRetKind::None))
+                        }
+                        ReificationLevel::Not => Ok((instr::empty(), VerifyRetKind::All)),
                         ReificationLevel::Maybe => Ok((
                             InstrSeq::gather(vec![
                                 emit_expression::get_type_structure_for_hint(
@@ -159,7 +161,7 @@ pub(super) fn emit_return<'a>(
                                 )?,
                                 instr::verify_ret_type_ts(),
                             ]),
-                            VerifyKind::All,
+                            VerifyRetKind::All,
                         )),
                         ReificationLevel::Definitely => {
                             let check = InstrSeq::gather(vec![
@@ -175,7 +177,7 @@ pub(super) fn emit_return<'a>(
                                     &h,
                                     instr::verify_ret_type_ts(),
                                 )?,
-                                VerifyKind::All,
+                                VerifyRetKind::All,
                             ))
                         }
                     }
@@ -213,11 +215,11 @@ pub(super) fn emit_return<'a>(
                 // emit ret instr as an indicator for try/finally rewriter to generate
                 // finally epilogue, try/finally rewriter will remove it.
                 //
-                // Note: The VerifyKind immediate specified here is not final.
+                // Note: The VerifyRetKind immediate specified here is not final.
                 // The correct flavor of verification will be read from ctx
-                // and emitted in the block above. Use VerifyKind::All to be
+                // and emitted in the block above. Use VerifyRetKind::All to be
                 // conservative.
-                instr::ret_c(VerifyKind::All),
+                instr::ret_c(VerifyRetKind::All),
             ]))
         }
     }

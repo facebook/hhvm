@@ -87,7 +87,7 @@ bool isTailAwait(const IRGS& env, std::vector<Type>& locals) {
   for (auto i = 256; i-- > 0;) {
     FTRACE(2, "  {}\n", instrToString(sk.pc(), func));
     switch (sk.op()) {
-      case Op::RetC:         return (uint8_t)getImm(sk.pc(), 0).u_OA == (uint8_t)VerifyKind::None &&  resultLocal == kInvalidId;
+      case Op::RetC:         return (uint8_t)getImm(sk.pc(), 0).u_OA == (uint8_t)VerifyRetKind::None &&  resultLocal == kInvalidId;
       case Op::AssertRATStk: break;
       case Op::AssertRATL: {
         auto const type = typeFromRAT(getImm(sk.pc(), 1, unit).u_RATA, cls);

@@ -20,7 +20,7 @@ use ir::TypeConstant;
 use ir::TypeConstraintFlags;
 use ir::TypeInfo;
 use ir::TypedValue;
-use ir::VerifyKind;
+use ir::VerifyRetKind;
 use ir::Visibility;
 use ir::instr;
 use log::trace;
@@ -259,7 +259,7 @@ fn create_default_closure_constructor(class: &mut Class) {
         }
 
         let null = fb.emit_imm(Immediate::Null);
-        fb.emit(Instr::ret(null, VerifyKind::None, loc));
+        fb.emit(Instr::ret(null, VerifyRetKind::None, loc));
     });
 
     let method = Method {
@@ -281,7 +281,7 @@ fn create_method_if_missing(class: &mut Class, name: MethodName, is_static: IsSt
         fb.func.span = class.span;
         fb.func.attrs = is_static.as_attr();
         let null = fb.emit_imm(Immediate::Null);
-        fb.emit(Instr::ret(null, VerifyKind::None, loc));
+        fb.emit(Instr::ret(null, VerifyRetKind::None, loc));
     });
 
     let method = Method {

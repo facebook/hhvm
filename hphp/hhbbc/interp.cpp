@@ -369,25 +369,25 @@ void replace_last_op(ISS& env, Bytecode&& bc) {
 }
 
 template<typename TOp>
-bool reduceRet(ISS& env, const TOp& op, HPHP::VerifyKind kind) {
+bool reduceRet(ISS& env, const TOp& op, HPHP::VerifyRetKind kind) {
   static_assert(false);
 }
 
 template<>
-bool reduceRet(ISS& env, const bc::RetC&, HPHP::VerifyKind kind) {
+bool reduceRet(ISS& env, const bc::RetC&, HPHP::VerifyRetKind kind) {
   reduce(env, bc::RetC {kind});
   return true;
 }
 
 template<>
-bool reduceRet(ISS& env, const bc::RetM& op, HPHP::VerifyKind kind) {
+bool reduceRet(ISS& env, const bc::RetM& op, HPHP::VerifyRetKind kind) {
   reduce(env, bc::RetM {op.arg1, kind});
   return true;
 }
 
 template<>
-bool reduceRet(ISS& env, const bc::VerifyOutType&, HPHP::VerifyKind kind) {
-  assertx(kind == VerifyKind::None);
+bool reduceRet(ISS& env, const bc::VerifyOutType&, HPHP::VerifyRetKind kind) {
+  assertx(kind == VerifyRetKind::None);
   reduce(env);
   return true;
 }
@@ -401,7 +401,7 @@ struct VerifyResult {
 template<typename TOp>
 Optional<VerifyResult> verifyRetNonNullImpl(ISS& env, const TOp& op, const Type& retTy) {
   if (!retTy.couldBe(BInitNull)) {
-    reduceRet(env, op, VerifyKind::None);
+    reduceRet(env, op, VerifyRetKind::None);
     return std::nullopt;
   }
   auto const& constraints = env.ctx.func->retTypeConstraints;
@@ -478,7 +478,7 @@ Optional<VerifyResult> verifyRetAllImpl(ISS& env, const TypeIntersectionConstrai
   if (remove) {
     assertx(effectFree);
     assertx(!coerced);
-    reduceRet(env, op, VerifyKind::None);
+    reduceRet(env, op, VerifyRetKind::None);
     return std::nullopt;
   }
 
@@ -486,7 +486,7 @@ Optional<VerifyResult> verifyRetAllImpl(ISS& env, const TypeIntersectionConstrai
   // type-constraint if it was not InitNull, we can lower to a
   // non-null check.
   if (nullonly) {
-    reduceRet(env, op, VerifyKind::NonNull);
+    reduceRet(env, op, VerifyRetKind::NonNull);
     return std::nullopt;
   }
 
@@ -494,13 +494,13 @@ Optional<VerifyResult> verifyRetAllImpl(ISS& env, const TypeIntersectionConstrai
 }
 
 template <typename Op>
-Optional<VerifyResult> verifyRetImpl(ISS& env, HPHP::VerifyKind kind, const Op& op, const Type& type) {
+Optional<VerifyResult> verifyRetImpl(ISS& env, HPHP::VerifyRetKind kind, const Op& op, const Type& type) {
   switch (kind) {
-    case HPHP::VerifyKind::All:
+    case HPHP::VerifyRetKind::All:
       return verifyRetAllImpl(env, env.ctx.func->retTypeConstraints, true, op, type);
-    case HPHP::VerifyKind::NonNull:
+    case HPHP::VerifyRetKind::NonNull:
       return verifyRetNonNullImpl(env, op, type);
-    case HPHP::VerifyKind::None:
+    case HPHP::VerifyRetKind::None:
       return VerifyResult(type, true, false);
   }
 }

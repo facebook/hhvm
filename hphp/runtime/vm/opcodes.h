@@ -117,9 +117,9 @@ namespace HPHP {
   O(Switch,          THREE(OA(SwitchKind),I64A,BLA),                    \
                                        ONE(CV),         NOV,        CF_TF) \
   O(SSwitch,         ONE(SLA),         ONE(CV),         NOV,        CF_TF) \
-  O(RetC,            ONE(OA(VerifyKind)),                                  \
+  O(RetC,            ONE(OA(VerifyRetKind)),                                  \
                                        ONE(CV),         NOV,        CF_TF) \
-  O(RetM,            TWO(IVA, OA(VerifyKind)),                             \
+  O(RetM,            TWO(IVA, OA(VerifyRetKind)),                             \
                                        CMANY,           NOV,        CF_TF) \
   O(RetCSuspended,   NA,               ONE(CV),         NOV,        CF_TF) \
   O(Throw,           NA,               ONE(CV),         NOV,        CF_TF) \

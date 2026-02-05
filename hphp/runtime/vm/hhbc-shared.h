@@ -132,7 +132,7 @@ enum class TypeStructResolveOp : uint8_t {
   OP(All) \
   OP(NonNull)
 
-enum class VerifyKind : uint8_t {
+enum class VerifyRetKind : uint8_t {
 #define OP(name) name,
   VERIFY_KIND
 #undef OP

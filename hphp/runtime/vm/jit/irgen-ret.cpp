@@ -235,21 +235,21 @@ IRSPRelOffset offsetToReturnSlot(IRGS& env) {
   return *fpOff + kArRetOff / int32_t{sizeof(TypedValue)};
 }
 
-void emitVerify(IRGS& env, HPHP::VerifyKind kind, int32_t ind) {
+void emitVerifyReturn(IRGS& env, HPHP::VerifyRetKind kind, int32_t ind) {
   switch(kind) {
-    case HPHP::VerifyKind::All:
+    case HPHP::VerifyRetKind::All:
       verifyRetType(env, TypeConstraint::ReturnId, ind, false);
       break;
-    case HPHP::VerifyKind::NonNull:
+    case HPHP::VerifyRetKind::NonNull:
       verifyRetType(env, TypeConstraint::ReturnId, ind, true);
       break;
-    case HPHP::VerifyKind::None:
+    case HPHP::VerifyRetKind::None:
       return;
   }
 }
 
-void emitRetC(IRGS& env, HPHP::VerifyKind kind) {
-  emitVerify(env, kind, 0);
+void emitRetC(IRGS& env, HPHP::VerifyRetKind kind) {
+  emitVerifyReturn(env, kind, 0);
   if (isInlining(env)) {
     assertx(resumeMode(env) == ResumeMode::None);
     retFromInlined(env);
@@ -258,12 +258,12 @@ void emitRetC(IRGS& env, HPHP::VerifyKind kind) {
   }
 }
 
-void emitRetM(IRGS& env, uint32_t nvals, HPHP::VerifyKind kind) {
+void emitRetM(IRGS& env, uint32_t nvals, HPHP::VerifyRetKind kind) {
   assertx(resumeMode(env) == ResumeMode::None);
   assertx(!curFunc(env)->isResumable());
   assertx(nvals > 1);
 
-  emitVerify(env, kind, nvals - 1);
+  emitVerifyReturn(env, kind, nvals - 1);
   if (isInlining(env)) {
     retFromInlined(env);
     return;

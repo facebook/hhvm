@@ -181,8 +181,12 @@ assemble_imm_for_enum!(
 );
 
 assemble_imm_for_enum!(
-    hhbc::VerifyKind,
-    [VerifyKind::None, VerifyKind::All, VerifyKind::NonNull,]
+    hhbc::VerifyRetKind,
+    [
+        VerifyRetKind::None,
+        VerifyRetKind::All,
+        VerifyRetKind::NonNull,
+    ]
 );
 
 assemble_imm_for_enum!(

@@ -944,7 +944,7 @@ static const char* TypeStructResolveOp_names[] = {
 #undef OP
 };
 
-static const char* VerifyKind_names[] = {
+static const char* VerifyRetKind_names[] = {
 #define OP(x) #x,
   VERIFY_KIND
 #undef OP
@@ -1064,8 +1064,8 @@ X(QueryMOp,       static_cast<int>(QueryMOp::CGet))
 X(SetRangeOp,     static_cast<int>(SetRangeOp::Forward))
 X(TypeStructResolveOp,
                   static_cast<int>(TypeStructResolveOp::Resolve))
-X(VerifyKind,
-                  static_cast<int>(VerifyKind::None))
+X(VerifyRetKind,
+                  static_cast<int>(VerifyRetKind::None))
 X(TypeStructEnforceKind,
                   static_cast<int>(TypeStructEnforceKind::Deep))
 X(AsTypeStructExceptionKind,

@@ -16,7 +16,7 @@ use std::fmt::Error;
 use std::fmt::Result;
 use std::fmt::Write;
 
-use ir_core::VerifyKind;
+use ir_core::VerifyRetKind;
 use ir_core::instr::BaseOp;
 use ir_core::instr::FinalOp;
 use ir_core::instr::HasLoc;
@@ -2040,7 +2040,7 @@ fn print_terminator(
                 w,
                 "ret {} {}",
                 FmtVid(func, *vid, verbose),
-                print_verify_kind(kind)
+                print_verify_ret_kind(kind)
             )?;
         }
         Terminator::RetCSuspended(vid, _) => {
@@ -2051,7 +2051,7 @@ fn print_terminator(
                 w,
                 "ret [{}] {}",
                 FmtSep::comma(vids.iter(), |w, vid| FmtVid(func, *vid, verbose).fmt(w)),
-                print_verify_kind(kind),
+                print_verify_ret_kind(kind),
             )?;
         }
         Terminator::Switch {
@@ -2117,11 +2117,11 @@ fn print_terminator(
     Ok(())
 }
 
-fn print_verify_kind(kind: &VerifyKind) -> &'static str {
+fn print_verify_ret_kind(kind: &VerifyRetKind) -> &'static str {
     match *kind {
-        VerifyKind::None => "none",
-        VerifyKind::All => "all",
-        VerifyKind::NonNull => "nonnull",
+        VerifyRetKind::None => "none",
+        VerifyRetKind::All => "all",
+        VerifyRetKind::NonNull => "nonnull",
         _ => "invalid",
     }
 }

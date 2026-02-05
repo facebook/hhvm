@@ -29,7 +29,7 @@ use ir::StringId;
 use ir::TypeStructEnforceKind;
 use ir::TypeStructResolveOp;
 use ir::ValueId;
-use ir::VerifyKind;
+use ir::VerifyRetKind;
 use ir::func_builder::TransformInstr;
 use ir::func_builder::TransformState;
 use ir::instr::CallDetail;
@@ -454,17 +454,17 @@ impl LowerInstrs<'_> {
         Instr::tombstone()
     }
 
-    fn get_verify_kind(&self, func: &Func, kind: VerifyKind) -> VerifyKind {
+    fn get_verify_kind(&self, func: &Func, kind: VerifyRetKind) -> VerifyRetKind {
         match kind {
-            VerifyKind::None => kind,
-            VerifyKind::All => {
+            VerifyRetKind::None => kind,
+            VerifyRetKind::All => {
                 let return_type = ir::EnforceableType::from_type_info(&func.return_type());
                 if return_type
                     .modifiers
                     .contains(ir::TypeConstraintFlags::TypeVar)
                     || return_type.ty == ir::BaseType::Noreturn
                 {
-                    return VerifyKind::None;
+                    return VerifyRetKind::None;
                 }
                 kind
             }

@@ -464,7 +464,7 @@ const char* subopToName(MOpMode);
 const char* subopToName(QueryMOp);
 const char* subopToName(SetRangeOp);
 const char* subopToName(TypeStructResolveOp);
-const char* subopToName(VerifyKind);
+const char* subopToName(VerifyRetKind);
 const char* subopToName(TypeStructEnforceKind);
 const char* subopToName(AsTypeStructExceptionKind);
 const char* subopToName(ContCheckOp);

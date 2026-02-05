@@ -450,6 +450,7 @@ struct Vgen {
   void emit(const mrs& i) { a->Mrs(X(i.r), vixl::SystemRegister(i.s.l())); }
   void emit(const msr& i) { a->Msr(vixl::SystemRegister(i.s.l()), X(i.r)); }
   void emit(const ubfmli& i) { a->ubfm(W(i.d), W(i.s), i.mr.w(), i.ms.w()); }
+  void emit(const ubfmliq& i) { a->ubfm(X(i.d), X(i.s), i.mr.l(), i.ms.l()); }
   void emit(const sbfizq& i) { a->Sbfiz(X(i.d), X(i.s), i.shift.l(), i.width.l()); }
   void emit(const storepair& i) { a->Stp(X(i.s0), X(i.s1), M(i.d)); }
   void emit(const storepairl& i) { a->Stp(W(i.s0), W(i.s1), M(i.d)); }
@@ -1857,29 +1858,38 @@ Y(incwm, incw, loadw, storew, m)
 
 void lower(const VLS& e, cvttsd2siq& i, Vlabel b, size_t idx) {
   lower_impl(e.unit, b, idx, [&] (Vout& v) {
-    // Clear FPSR IOC flag.
-    auto const tmp1 = v.makeReg();
-    auto const tmp2 = v.makeReg();
-    v << mrs{FPSR, tmp1};
-    v << andqi{~0x01, tmp1, tmp2, v.makeReg()};
-    v << msr{tmp2, FPSR};
+    // Move i.s to a GP register verbatim.
+    auto const dbl_bits = v.makeReg();
+    v << copy{i.s, dbl_bits};
 
-    // Load error value.
-    auto const err = v.makeReg();
-    v << ldimmq{0x8000000000000000, err};
+    // Extract the exponent of the double value.
+    auto const dbl_exp = v.makeReg();
+    v << ubfmliq(52, 52 + 11 - 1, dbl_bits, dbl_exp);
+
+    // Compare against 0x43e, which is 63 if unbiased (0x43e - 1023 = 63).
+    auto const sf = v.makeReg();
+    v << cmpqi(0x43e, dbl_exp, sf);
 
     // Do ARM64's double to signed int64 conversion.
     auto const res = v.makeReg();
     v << fcvtzs{i.s, res};
 
-    // Check if there was a conversion error.
-    auto const fpsr = v.makeReg();
-    auto const sf = v.makeReg();
-    v << mrs{FPSR, fpsr};
-    v << testqi{1, fpsr, sf};
+    // Load error value (-2^63)
+    auto const err = v.cns(0x8000000000000000L);
 
     // Move converted value or error.
-    v << cmovq{CC_NZ, sf, res, err, i.d};
+    // If exp < 63, the double value is finite and within the range of
+    // -2^63 and 2^63 - 1, so fcvtzs always succeeds and the value is
+    // chosen as the result.
+    // Otherwise, below are all the cases:
+    // 1. If dbl is positive, then dbl is >= 2^63, or dbl is an infinity
+    //    or NaN. Converting those values to int64 certainly fails and
+    //    we choose the error value.
+    // 2. If dbl is negative, then dbl is <= -2^63, or dbl is an infinity
+    //    or NaN. If dbl is -2^63, the converted integer value is still
+    //    -2^63, so the error value is actually correct. The other cases
+    //    will lead to conversion failure, which will pick the error value.
+    v << cmovq{CC_AE, sf, res, err, i.d};
   });
 }
 

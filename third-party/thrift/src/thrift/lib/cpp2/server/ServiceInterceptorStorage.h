@@ -38,6 +38,8 @@ struct ServiceInterceptorRequestStorageContext {
 using ServiceInterceptorOnConnectionStorage =
     util::TypeErasedValue<128, alignof(std::max_align_t)>;
 
+using StreamId = uint32_t;
+
 using ServiceInterceptorOnRequestArguments = util::TypeErasedTupleRef;
 
 } // namespace apache::thrift::detail

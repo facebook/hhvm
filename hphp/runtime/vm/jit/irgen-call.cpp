@@ -781,6 +781,8 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
     fca.numRets,
     nullptr,  // inout-ness already checked
     nullptr,  // readonly-ness already checked
+    kInvalidId, // TODO(named_params) thread named args through properly here
+    kInvalidId, // TODO(named_params) thread named args through properly here
     fca.asyncEagerOffset,
     fca.context
   ), true /* skipRepack */);

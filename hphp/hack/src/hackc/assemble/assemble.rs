@@ -1802,6 +1802,7 @@ pub(crate) fn assemble_fcallargsflags(token_iter: &mut Lexer<'_>) -> Result<hhbc
             b"EnforceInOut" => flags.add(hhbc::FCallArgsFlags::EnforceInOut),
             b"EnforceReadonly" => flags.add(hhbc::FCallArgsFlags::EnforceReadonly),
             b"HasAsyncEagerOffset" => flags.add(hhbc::FCallArgsFlags::HasAsyncEagerOffset),
+            b"HasNamedArgs" => flags.add(hhbc::FCallArgsFlags::HasNamedArgs),
             b"NumArgsStart" => flags.add(hhbc::FCallArgsFlags::NumArgsStart),
             _ => return Err(tok.error("Unrecognized FCallArgsFlags")),
         }
@@ -1859,6 +1860,49 @@ pub(crate) fn assemble_fcall_context(token_iter: &mut Lexer<'_>) -> Result<Strin
     let st = token_iter.expect_with(Token::into_str_literal)?;
     debug_assert!(st[0] == b'"' && st[st.len() - 1] == b'"');
     Ok(hhbc::intern(std::str::from_utf8(&st[1..st.len() - 1])?)) // if not hugged by "", won't pass into_str_literal
+}
+
+fn typed_value_opt(token_iter: &mut Lexer<'_>, adata: &AdataMap) -> Result<Option<TypedValue>> {
+    if let Some(token) = token_iter.peek1().map(Token::into_global).transpose()? {
+        if token[0] == b'$' {
+            let _ = token_iter.expect_token()?;
+            return Ok(None);
+        }
+        let decl_map = DeclMap::default();
+        let tv: TypedValue = token_iter.assemble_imm(&decl_map, adata)?;
+        return Ok(Some(tv));
+    }
+    let _ = token_iter.expect_token()?;
+    Ok(None)
+}
+
+pub(crate) fn assemble_named_args(
+    token_iter: &mut Lexer<'_>,
+    adata: &AdataMap,
+) -> Result<Vec<(StringId, u32)>> {
+    let name_tv = typed_value_opt(token_iter, adata)?;
+    let pos_tv = typed_value_opt(token_iter, adata)?;
+    match (name_tv, pos_tv) {
+        (Some(TypedValue::Vec(names)), Some(TypedValue::Vec(pos))) => {
+            let names = names
+                .iter()
+                .map(|tv| match tv.get_string() {
+                    Some(s) => StringId::from_bytes(s).map_err(anyhow::Error::from),
+                    None => Err(token_iter.error("Expected string for named args name")),
+                })
+                .collect::<Result<Vec<StringId>, anyhow::Error>>()?;
+            let pos = pos
+                .iter()
+                .map(|tv| match tv.get_int() {
+                    Some(i) => Ok(i as u32),
+                    None => Err(token_iter.error("Expected int for named args position")),
+                })
+                .collect::<Result<Vec<u32>, anyhow::Error>>()?;
+            Ok(names.into_iter().zip(pos).collect())
+        }
+        (None, None) => Ok(Vec::new()),
+        _ => Err(token_iter.error("Expected vecs for named args static tvs")),
+    }
 }
 
 pub(crate) fn assemble_unescaped_unquoted_intern_str(

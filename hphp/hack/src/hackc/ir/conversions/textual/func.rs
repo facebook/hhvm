@@ -1014,6 +1014,8 @@ fn write_call(state: &mut FuncState<'_, '_, '_>, iid: InstrId, call: &ir::Call) 
         num_rets,
         ref inouts,
         ref readonly,
+        // TODO(named_params): We should support writing calls with named args.
+        named_args: _,
         loc: _,
     } = *call;
 
@@ -1120,6 +1122,12 @@ fn write_call(state: &mut FuncState<'_, '_, '_>, iid: InstrId, call: &ir::Call) 
     if flags & FCallArgsFlags::NumArgsStart != 0 {
         textual_todo! {
             state.fb.comment("TODO: FCallArgsFlags::NumArgsStart")?;
+        }
+    }
+
+    if flags & FCallArgsFlags::HasNamedArgs != 0 {
+        textual_todo! {
+            state.fb.comment("TODO: FCallArgsFlags::HasNamedArgs")?;
         }
     }
 

@@ -142,6 +142,7 @@ impl Block {
                     detail: instr::CallDetail::FCallFuncD { func },
                     flags: ir_core::FCallArgsFlags::default(),
                     num_rets: 1,
+                    named_args: vec![],
                     inouts: None,
                     readonly: None,
                     loc,

@@ -39,18 +39,20 @@ enum FCallArgsFlags : uint16_t {
   EnforceMutableReturn         = (1 << 5),
   // Indicates that the callee should not modify its instance
   EnforceReadonlyThis          = (1 << 6),
+  // Indicates that the callee has named args.
+  HasNamedArgs                 = (1 << 7),
   // HHBC-only: Op should be resolved using an explicit context class
-  ExplicitContext              = (1 << 7),
+  ExplicitContext              = (1 << 8),
   // HHBC-only: is the number of returns provided? false => 1
-  HasInOut                     = (1 << 8),
+  HasInOut                     = (1 << 9),
   // HHBC-only: should this FCall enforce argument inout-ness?
-  EnforceInOut                 = (1 << 9),
+  EnforceInOut                 = (1 << 10),
   // HHBC-only: should this FCall enforce argument readonly-ness?
-  EnforceReadonly              = (1 << 10),
+  EnforceReadonly              = (1 << 11),
   // HHBC-only: is the async eager offset provided? false => kInvalidOffset
-  HasAsyncEagerOffset          = (1 << 11),
+  HasAsyncEagerOffset          = (1 << 12),
   // HHBC-only: the remaining space is used for number of arguments
-  NumArgsStart                 = (1 << 12),
+  NumArgsStart                 = (1 << 13),
 };
 
 constexpr FCallArgsFlags operator|(FCallArgsFlags a, FCallArgsFlags b) {

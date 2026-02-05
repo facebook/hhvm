@@ -784,6 +784,7 @@ impl<'a> State<'a> {
                 num_rets,
                 inouts,
                 readonly,
+                named_args,
                 context,
             }: &FCallArgs,
         ) -> FCallArgs {
@@ -806,6 +807,7 @@ impl<'a> State<'a> {
                 num_rets: *num_rets,
                 inouts,
                 readonly,
+                named_args: named_args.clone(),
                 context: *context,
             }
         }

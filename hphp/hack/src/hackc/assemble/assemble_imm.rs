@@ -247,13 +247,14 @@ impl AssembleImm<hhbc::ConstName> for Lexer<'_> {
 }
 
 impl AssembleImm<hhbc::FCallArgs> for Lexer<'_> {
-    fn assemble_imm(&mut self, _: &DeclMap, _: &AdataMap) -> Result<hhbc::FCallArgs> {
+    fn assemble_imm(&mut self, _: &DeclMap, adata: &AdataMap) -> Result<hhbc::FCallArgs> {
         // <(fcargflags)*> numargs numrets inouts readonly async_eager_target context
         let fcargflags = assemble::assemble_fcallargsflags(self)?;
         let num_args = self.expect_and_get_number()?;
         let num_rets = self.expect_and_get_number()?;
         let inouts = assemble::assemble_inouts_or_readonly(self)?;
         let readonly = assemble::assemble_inouts_or_readonly(self)?;
+        let named_args = assemble::assemble_named_args(self, adata)?;
         let async_eager_target = assemble::assemble_async_eager_target(self)?;
         let context = assemble::assemble_fcall_context(self)?;
         let fcargs = hhbc::FCallArgs::new(
@@ -262,6 +263,7 @@ impl AssembleImm<hhbc::FCallArgs> for Lexer<'_> {
             num_args,
             inouts,
             readonly,
+            named_args,
             async_eager_target,
             None,
         );

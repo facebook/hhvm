@@ -273,6 +273,9 @@ fn print_call(w: &mut dyn Write, ctx: &FuncContext, func: &Func, call: &Call) ->
     if call.flags.contains(FCallArgsFlags::HasAsyncEagerOffset) {
         write!(w, " has_async_eager_offset")?;
     }
+    if call.flags.contains(FCallArgsFlags::HasNamedArgs) {
+        write!(w, " has_named_args")?;
+    }
     if call.flags.contains(FCallArgsFlags::NumArgsStart) {
         write!(w, " num_args_start")?;
     }

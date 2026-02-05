@@ -35,6 +35,7 @@
 #include <iostream>
 #include <limits>
 #include <list>
+#include <stdatomic.h>
 #include <stdexcept>
 #include <type_traits>
 
@@ -711,6 +712,75 @@ bool FuncChecker::checkImmFCA(PC& pc, PC const instr) {
   if (fca.numRets == 0) {
     ferror("FCall at {} must return at least one value\n", offset(instr));
     return false;
+  }
+  bool hasNamedArgNames = fca.namedArgNames != -1;
+  bool hasNamedArgPos = fca.namedArgPos != -1;
+  TypedValue prevName;
+  if (hasNamedArgNames != hasNamedArgPos) {
+    ferror(
+      "FCall at {} must have named arg names iff it has named arg positions specified\n",
+      offset(instr));
+    return false;
+  }
+  if (hasNamedArgNames) {
+    if (!checkArray(pc, fca.namedArgNames)) {
+      ferror("FCall at {} has invalid named arg names array id {}\n",
+             offset(instr),
+             fca.namedArgNames);
+     return false;
+    }
+    if (!checkArray(pc, fca.namedArgPos)) {
+      ferror("FCall at {} has invalid named arg pos array id {}\n",
+             offset(instr),
+             fca.namedArgPos);
+      return false;
+    }
+    auto names = m_unit->lookupArrayId(fca.namedArgNames);
+    auto pos = m_unit->lookupArrayId(fca.namedArgPos);
+    if (names->size() != pos->size()) {
+      ferror(
+        "FCall at {} has mismatching named arg name and position sizes: {} vs {}\n",
+        offset(instr),
+        names->size(),
+        pos->size());
+      return false;
+    }
+    for (int64_t i = 0; i < pos->size(); ++i) {
+      auto pos_tv = pos->get(i);
+      if (pos_tv.m_type != KindOfInt64) {
+        ferror("FCall at {} has non-int position at index {}\n",
+               offset(instr),
+               i);
+        return false;
+      }
+      auto val = pos_tv.m_data.num;
+      if (val < 0 || val >= fca.numArgs) {
+        ferror("FCall at {} has out-of-bounds {}'th named arg position (value: {}, max: {})\n",
+               offset(instr),
+               i,
+               val,
+               fca.numArgs);
+        return false;
+      }
+
+      auto curName = names->get(i);
+      if (!tvIsString(curName)) {
+        ferror("FCall at {} has non-string {}'th named arg name\n", offset(instr), i);
+        return false;
+      }
+      if (i > 0) {
+        auto curStr = curName.m_data.pstr;
+        auto prevStr = prevName.m_data.pstr;
+        if (curStr->compare(prevStr) <= 0) {
+          ferror("FCall at {} expected {} to be lexicographically greater than {}\n",
+                 offset(instr),
+                 curStr->toCppString(),
+                 prevStr->toCppString());
+          return false;
+        }
+      }
+      prevName = curName;
+    }
   }
   return true;
 }

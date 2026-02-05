@@ -1607,7 +1607,8 @@ FCall* opcodes
   specified by the FCA (FCall arguments) immediate consisting of the following
   data:
 
-  <flags> <num args> <num returns> <inout bool vector> <async eager offset>
+  <flags> <num args> <num returns> <inout bool vector>
+  <litstr vec id> <integer vec id> <async eager offset>
   [C|V..C|V]  ->  [C..C]
 
   FCall* first looks up the callee function according to the specific opcode.
@@ -1617,18 +1618,25 @@ FCall* opcodes
   of the callee matches the corresponding inout-ness values specified by the
   vector %4. Throws an exception if there is a mismatch.
 
+  The vector referred to by id %5 contains the list of named arguments in
+  lexicographical order. The vector referred to by id %6 contains the
+  positions for the named arguments appearing in %5. Each entry is a number
+  in the range [0, %2-1]. The length of %5 and %6 must be identical and in the
+  the range [0, %2]. If no named arguments are present in the call, %5 and %6
+  will instead contain the special sigil $, interpreted as an empty vector.
+
   Finally, FCall* transfers the top %2 values from the stack to the callee as
   parameters and invokes the callee. When the callee returns, it will transfer
   %3 return values onto the caller's evaluation stack using the C flavor. The
   callee must return the matching number of values using either RetC opcode
   (if %3 was one) or RetM opcode (otherwise).
 
-  If the optional offset %5 was specified, the callee supports async eager
+  If the optional offset %7 was specified, the callee supports async eager
   return and it would return a finished Awaitable, it may instead return the
   unpacked result of the Awaitable and continue execution of the caller at
   offset %5.
 
-  If %5 was specified and the callee raised an exception, the exception will
+  If %7 was specified and the callee raised an exception, the exception will
   continue to propagate thru the caller instead of being wrapped into Awaitable.
   Note that for the purposes of exception handling inside the caller, the PC
   will point after the FCall* rather than %5 so it is not advised to have

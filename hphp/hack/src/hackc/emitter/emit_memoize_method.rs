@@ -361,6 +361,7 @@ fn make_memoize_method_with_params_code<'a>(
             param_count as u32,
             vec![],
             vec![],
+            vec![],
             async_eager_target,
             None,
         )
@@ -478,6 +479,7 @@ fn make_memoize_method_no_params_code<'a>(
         FCallArgsFlags::default(),
         1,
         0,
+        vec![],
         vec![],
         vec![],
         if args.flags.contains(Flags::IS_ASYNC) {

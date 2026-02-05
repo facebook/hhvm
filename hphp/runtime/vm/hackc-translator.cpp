@@ -838,6 +838,22 @@ void handleFCA(TranslationState& ts, const hhbc::FCallArgs& fca) {
         ts.fe->emitByte(result[i]);
       }
     },
+    fca.named_args.len > 0,
+    [&] {
+      VecInit names(fca.named_args.len);
+      VecInit positions(fca.named_args.len);
+      auto set = range(fca.named_args);
+      for (auto const& elt : set) {
+        names.append(make_tv<KindOfString>(toStaticString(elt.name)));
+        positions.append(make_tv<KindOfInt64>(elt.pos));
+      }
+      auto name_arr = names.create();
+      ArrayData::GetScalarArray(&name_arr);
+      ts.fe->emitInt32(ts.ue->mergeArray(name_arr));
+      auto pos_arr = positions.create();
+      ArrayData::GetScalarArray(&pos_arr);
+      ts.fe->emitInt32(ts.ue->mergeArray(pos_arr));
+    },
     fca.flags & FCallArgsFlags::HasAsyncEagerOffset,
     [&] { ts.addLabelJump(async_eager_target); },
     fca.flags & FCallArgsFlags::ExplicitContext,

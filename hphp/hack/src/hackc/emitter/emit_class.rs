@@ -388,7 +388,16 @@ fn emit_reified_init_body<'a>(
             instr::null_uninit(),
             generic_arr,
             instr::f_call_cls_method_sd(
-                FCallArgs::new(FCallArgsFlags::default(), 1, 1, vec![], vec![], None, None),
+                FCallArgs::new(
+                    FCallArgsFlags::default(),
+                    1,
+                    1,
+                    vec![],
+                    vec![],
+                    vec![],
+                    None,
+                    None,
+                ),
                 SpecialClsRef::ParentCls,
                 *REIFIED_INIT_METH_NAME,
             ),

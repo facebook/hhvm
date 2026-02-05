@@ -463,6 +463,7 @@ fn sem_diff_fca(path: &CodePath<'_>, fca0: &hhbc::FCallArgs, fca1: &hhbc::FCallA
         num_rets: num_rets0,
         inouts: inouts0,
         readonly: readonly0,
+        named_args: named_args0,
         context: context0,
     } = fca0;
     let hhbc::FCallArgs {
@@ -472,6 +473,7 @@ fn sem_diff_fca(path: &CodePath<'_>, fca0: &hhbc::FCallArgs, fca1: &hhbc::FCallA
         num_rets: num_rets1,
         inouts: inouts1,
         readonly: readonly1,
+        named_args: named_args1,
         context: context1,
     } = fca1;
 
@@ -502,8 +504,8 @@ fn sem_diff_fca(path: &CodePath<'_>, fca0: &hhbc::FCallArgs, fca1: &hhbc::FCallA
 
     sem_diff_eq(
         path,
-        &(flags0, num_args0, num_rets0, context0),
-        &(flags1, num_args1, num_rets1, context1),
+        &(flags0, num_args0, num_rets0, named_args0, context0),
+        &(flags1, num_args1, num_rets1, named_args1, context1),
     )
 }
 

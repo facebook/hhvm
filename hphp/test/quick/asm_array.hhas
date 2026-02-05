@@ -17,7 +17,7 @@
     String "ClassWithArray"
     ClassGetC Normal
     CGetS Any
-  FCallFuncD <> 1 1 "" "" - "" "var_dump"
+  FCallFuncD <> 1 1 "" "" $ $ - "" "var_dump"
   PopC
 
   String "ClassWithArray"
@@ -31,7 +31,7 @@
     ClassGetC Normal
     BaseSC 2 0 Warn Any
     QueryM 3 CGet EC:1 Any
-  FCallFuncD <> 1 1 "" "" - "" "var_dump"
+  FCallFuncD <> 1 1 "" "" $ $ - "" "var_dump"
   PopC
 
   True
@@ -42,7 +42,7 @@
   .declvars $arr $key;
   NullUninit
   NullUninit
-  FCallFuncD <> 0 1 "" "" - "" "ArrayMember"
+  FCallFuncD <> 0 1 "" "" $ $ - "" "ArrayMember"
   PopC
 
   Dict @my_array
@@ -93,14 +93,14 @@ unset_label:  String "win\n"
               NullUninit
               NullUninit
               CGetL $arr
-              FCallFuncD <> 1 1 "" "" - "" "var_dump"
+              FCallFuncD <> 1 1 "" "" $ $ - "" "var_dump"
               PopC
               NullUninit
               NullUninit
               Int 1
               String "b"
               NewVec 2
-              FCallFuncD <> 1 1 "" "" - "" "var_dump"
+              FCallFuncD <> 1 1 "" "" $ $ - "" "var_dump"
               PopC
 
               Null

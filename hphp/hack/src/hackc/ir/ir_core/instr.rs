@@ -2,6 +2,7 @@
 
 use std::borrow::Cow;
 
+use hhbc::NamedArg;
 use macros::HasLoc;
 use macros::HasLocals;
 use macros::HasOperands;
@@ -876,6 +877,7 @@ pub struct Call {
     /// For calls with readonly parameters this is a sorted list of the indices
     /// of those parameters.
     pub readonly: Option<Box<[u32]>>,
+    pub named_args: Vec<NamedArg>,
     pub loc: LocId,
 }
 
@@ -1184,6 +1186,7 @@ impl Instr {
             num_rets: 0,
             inouts: None,
             readonly: None,
+            named_args: vec![],
             loc,
         })
     }
@@ -1207,6 +1210,7 @@ impl Instr {
             num_rets: 0,
             inouts: None,
             readonly: None,
+            named_args: vec![],
             loc,
         })
     }
@@ -1225,6 +1229,7 @@ impl Instr {
             num_rets: 0,
             inouts: None,
             readonly: None,
+            named_args: vec![],
             loc,
         })
     }

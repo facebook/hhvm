@@ -304,6 +304,7 @@ impl<'b> InstrEmitter<'b> {
                 num_rets,
                 inouts: inouts.into(),
                 readonly: readonly.into(),
+                named_args: call.named_args.clone().into(),
                 context: call.context,
             }
         };

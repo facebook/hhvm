@@ -455,6 +455,10 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState, UnitEmitter& ue, FuncEmitter& f
                              }                                          \
                            );                                           \
                          },                                             \
+                         false,                                         \
+                         [&] { /* TODO(named_params) properly emit */   \
+                           fe.emitInt32(kInvalidId);                    \
+                           fe.emitInt32(kInvalidId); },                 \
                          data.fca.asyncEagerTarget() != NoBlockId,      \
                          [&] {                                          \
                            set_expected_depth(data.fca.asyncEagerTarget()); \

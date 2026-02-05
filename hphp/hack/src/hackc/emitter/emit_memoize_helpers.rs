@@ -70,7 +70,16 @@ pub fn get_implicit_context_memo_key(local: Local) -> InstrSeq {
         instr::null_uninit(),
         instr::null_uninit(),
         instr::f_call_func_d(
-            FCallArgs::new(FCallArgsFlags::default(), 1, 0, vec![], vec![], None, None),
+            FCallArgs::new(
+                FCallArgsFlags::default(),
+                1,
+                0,
+                vec![],
+                vec![],
+                vec![],
+                None,
+                None,
+            ),
             hhbc::FunctionName::intern(
                 "HH\\ImplicitContext\\_Private\\get_implicit_context_memo_key",
             ),

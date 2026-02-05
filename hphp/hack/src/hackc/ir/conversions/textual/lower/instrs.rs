@@ -718,6 +718,7 @@ impl TransformInstr for LowerInstrs<'_> {
                     num_rets: 1,
                     inouts: None,
                     readonly: None,
+                    named_args: vec![],
                     loc,
                 }))
             }

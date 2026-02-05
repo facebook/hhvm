@@ -131,7 +131,8 @@ IterArgs decodeIterArgs(PC& pc) {
 
 void encodeFCallArgsBase(FuncEmitter& fe, const FCallArgsBase& fca,
                          bool hasInoutArgs, bool hasReadonlyArgs,
-                         bool hasAsyncEagerOffset, bool hasContext) {
+                         bool hasNamedArgs, bool hasAsyncEagerOffset,
+                         bool hasContext) {
   auto constexpr kFirstNumArgsBit = FCallArgsBase::kFirstNumArgsBit;
   auto constexpr kLimit =
     std::numeric_limits<std::underlying_type_t<FCallArgsFlags>>::max();
@@ -144,6 +145,7 @@ void encodeFCallArgsBase(FuncEmitter& fe, const FCallArgsBase& fca,
   if (hasReadonlyArgs) flags |= FCallArgsFlags::EnforceReadonly;
   if (hasAsyncEagerOffset) flags |= FCallArgsFlags::HasAsyncEagerOffset;
   if (hasContext) flags |= FCallArgsFlags::ExplicitContext;
+  if (hasNamedArgs) flags |= FCallArgsFlags::HasNamedArgs;
 
   static_assert(sizeof(std::underlying_type_t<FCallArgsFlags>) * 8 == 16);
   fe.emitInt16(flags);
@@ -173,12 +175,16 @@ FCallArgs decodeFCallArgs(Op thisOpcode, PC& pc, StringDecoder u) {
   if (inoutArgs != nullptr) pc += (numArgs + 7) / 8;
   auto const readonlyArgs = (flags & FCallArgsFlags::EnforceReadonly) ? pc : nullptr;
   if (readonlyArgs != nullptr) pc += (numArgs + 7) / 8;
+  auto const hasNamedArgs = flags & FCallArgsFlags::HasNamedArgs;
+  Id namedArgNames = hasNamedArgs ? decode_raw<Id>(pc) : kInvalidId;
+  Id namedArgPos = hasNamedArgs ? decode_raw<Id>(pc) : kInvalidId;
   auto const asyncEagerOffset = (flags & FCallArgsFlags::HasAsyncEagerOffset)
     ? decode_ba(pc) : kInvalidOffset;
   auto const context = !skipContext ? decode_string(pc, u) : nullptr;
   return FCallArgs(
     static_cast<FCallArgsFlags>(flags & FCallArgs::kInternalFlags),
-    numArgs, numRets, inoutArgs, readonlyArgs, asyncEagerOffset, context
+    numArgs, numRets, inoutArgs, readonlyArgs,
+    namedArgNames, namedArgPos, asyncEagerOffset, context
   );
 }
 

@@ -644,7 +644,16 @@ pub fn emit_deprecation_info<'a>(
                     instr::int(sampling_rate),
                     instr::int(error_code),
                     instr::f_call_func_d(
-                        FCallArgs::new(FCallArgsFlags::default(), 1, 3, vec![], vec![], None, None),
+                        FCallArgs::new(
+                            FCallArgsFlags::default(),
+                            1,
+                            3,
+                            vec![],
+                            vec![],
+                            vec![],
+                            None,
+                            None,
+                        ),
                         hhbc::FunctionName::intern(std_lib_functions::TRIGGER_SAMPLED_ERROR),
                     ),
                     instr::pop_c(),

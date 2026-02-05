@@ -206,7 +206,7 @@ impl Attributes {
 fn convert_immediate(name: &str, imm: &ImmType) -> TokenStream {
     let name = Ident::new(name, Span::call_site());
     match imm {
-        ImmType::AA => quote!(print_adata_id(w, #name, adata)?;),
+        ImmType::AA => quote!(print::print_adata_id(w, #name, adata)?;),
         ImmType::ARR(_sub_ty) => {
             let msg = format!("unsupported '{}'", name);
             quote!(todo!(#msg);)
@@ -216,7 +216,7 @@ fn convert_immediate(name: &str, imm: &ImmType) -> TokenStream {
         ImmType::BLA => quote!(self.print_branch_labels(w, #name.as_ref())?;),
         ImmType::DA => quote!(print_float(w, *#name)?;),
         ImmType::DUMMY => TokenStream::new(),
-        ImmType::FCA => quote!(self.print_fcall_args(w, #name)?;),
+        ImmType::FCA => quote!(self.print_fcall_args(w, #name, adata)?;),
         ImmType::I64A => quote!(write!(w, "{}", #name)?;),
         ImmType::IA => quote!(print_iterator_id(w, #name)?;),
         ImmType::ILA => quote!(self.print_local(w, #name)?;),
@@ -330,7 +330,7 @@ mod tests {
                             }
                             Opcode::TestAA(arr1) => {
                                 w.write_all(b"TestAA ")?;
-                                print_adata_id(w, arr1, adata)?;
+                                print::print_adata_id(w, arr1, adata)?;
                             }
                             Opcode::TestARR(arr1) => {
                                 w.write_all(b"TestARR ")?;
@@ -354,7 +354,7 @@ mod tests {
                             }
                             Opcode::TestFCA(fca) => {
                                 w.write_all(b"TestFCA ")?;
-                                self.print_fcall_args(w, fca)?;
+                                self.print_fcall_args(w, fca, adata)?;
                             }
                             Opcode::TestI64A(arg1) => {
                                 w.write_all(b"TestI64A ")?;

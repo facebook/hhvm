@@ -207,6 +207,7 @@ fn cmp_fcallargflags(a: &hhbc::FCallArgsFlags, b: &hhbc::FCallArgsFlags) -> Resu
     not_printed.add(FCallArgsFlags::EnforceReadonly);
     not_printed.add(FCallArgsFlags::HasAsyncEagerOffset);
     not_printed.add(FCallArgsFlags::NumArgsStart);
+    not_printed.add(FCallArgsFlags::HasNamedArgs);
     let mut a = a.clone();
     let mut b = b.clone();
     a.repr &= !(not_printed.repr);
@@ -223,6 +224,7 @@ fn cmp_fcallargs(a: &hhbc::FCallArgs, b: &hhbc::FCallArgs) -> Result {
         num_rets: a_num_rets,
         inouts: a_inouts,
         readonly: a_readonly,
+        named_args: a_named_args,
         context: a_context,
     } = a;
     let hhbc::FCallArgs {
@@ -232,6 +234,7 @@ fn cmp_fcallargs(a: &hhbc::FCallArgs, b: &hhbc::FCallArgs) -> Result {
         num_rets: b_num_rets,
         inouts: b_inouts,
         readonly: b_readonly,
+        named_args: b_named_args,
         context: b_context,
     } = b;
     cmp_fcallargflags(a_flags, b_flags).qualified("fcallargflags")?;
@@ -240,6 +243,7 @@ fn cmp_fcallargs(a: &hhbc::FCallArgs, b: &hhbc::FCallArgs) -> Result {
     cmp_eq(a_num_rets, b_num_rets)?;
     cmp_eq(a_inouts, b_inouts)?;
     cmp_eq(a_readonly, b_readonly)?;
+    cmp_eq(a_named_args, b_named_args)?;
     cmp_eq(a_context, b_context)?;
     Ok(())
 }

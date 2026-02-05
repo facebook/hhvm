@@ -322,6 +322,7 @@ fn convert_call(ctx: &mut Context<'_>, call: &Opcode) {
         loc: ctx.loc,
         num_rets: fcall_args.num_rets,
         operands: operands.into(),
+        named_args: fcall_args.named_args.to_vec(),
         readonly,
     };
 

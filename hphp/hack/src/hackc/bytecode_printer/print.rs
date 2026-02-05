@@ -37,6 +37,7 @@ use hhbc::Method;
 use hhbc::MethodFlags;
 use hhbc::Module;
 use hhbc::ModuleName;
+use hhbc::NamedArg;
 use hhbc::Param;
 use hhbc::ParamEntry;
 use hhbc::Property;
@@ -170,6 +171,22 @@ fn print_unit_(ctx: &Context<'_>, w: &mut dyn Write, prog: &Unit) -> Result<()> 
             match instr {
                 Instruct::Opcode(Opcode::Vec(a) | Opcode::Dict(a) | Opcode::Keyset(a)) => {
                     adata.intern_value(a.clone());
+                }
+                Instruct::Opcode(
+                    Opcode::FCallClsMethod(args, _, _)
+                    | Opcode::FCallClsMethodD(args, _, _)
+                    | Opcode::FCallClsMethodM(args, _, _, _)
+                    | Opcode::FCallClsMethodS(args, _, _)
+                    | Opcode::FCallClsMethodSD(args, _, _, _)
+                    | Opcode::FCallCtor(args, _)
+                    | Opcode::FCallFunc(args)
+                    | Opcode::FCallFuncD(args, _)
+                    | Opcode::FCallObjMethod(args, _, _)
+                    | Opcode::FCallObjMethodD(args, _, _, _),
+                ) if !args.named_args.is_empty() => {
+                    let (name_tv, pos_tv) = named_arg_typed_values(&args.named_args);
+                    adata.intern_value(name_tv);
+                    adata.intern_value(pos_tv);
                 }
                 _ => {}
             }
@@ -905,6 +922,11 @@ fn print_instructions(
     Ok(())
 }
 
+pub(crate) fn print_adata_id(w: &mut dyn Write, v: &TypedValue, adata: &AdataState) -> Result<()> {
+    let id = adata.index_of(v).unwrap();
+    write!(w, "@{}", id)
+}
+
 pub(crate) fn print_fcall_args(
     w: &mut dyn Write,
     args @ FCallArgs {
@@ -913,10 +935,12 @@ pub(crate) fn print_fcall_args(
         num_rets,
         inouts,
         readonly,
+        named_args,
         async_eager_target,
         context,
     }: &FCallArgs,
     dv_labels: &HashSet<Label>,
+    adata: &AdataState,
 ) -> Result<()> {
     angle(w, |w| {
         let flags = hhvm_hhbc_defs_ffi::ffi::fcall_flags_to_string_ffi(*flags);
@@ -939,6 +963,15 @@ pub(crate) fn print_fcall_args(
         })
     })?;
     w.write_all(b" ")?;
+    if named_args.is_empty() {
+        w.write_all(b"$ $ ")?;
+    } else {
+        let (name_tv, pos_tv) = named_arg_typed_values(named_args);
+        print_adata_id(w, &name_tv, adata)?;
+        w.write_all(b" ")?;
+        print_adata_id(w, &pos_tv, adata)?;
+        w.write_all(b" ")?;
+    }
     if args.has_async_eager_target() {
         print_label(w, async_eager_target, dv_labels)?;
     } else {
@@ -1178,6 +1211,24 @@ fn print_extends(w: &mut dyn Write, base: Option<&str>) -> Result<()> {
         None => Ok(()),
         Some(b) => concat_str_by(w, " ", [" extends", b]),
     }
+}
+
+fn named_arg_typed_values(named_args: &Vector<NamedArg>) -> (TypedValue, TypedValue) {
+    // We should never be breaking down empty named args - the caller is responsible for handling it.
+    debug_assert!(!named_args.is_empty());
+    let name_tv: TypedValue = TypedValue::vec(
+        named_args
+            .into_iter()
+            .map(|named_arg| TypedValue::String(named_arg.name.as_bytes()))
+            .collect(),
+    );
+    let pos_tv = TypedValue::vec(
+        named_args
+            .into_iter()
+            .map(|named_arg| TypedValue::Int(named_arg.pos.into()))
+            .collect(),
+    );
+    (name_tv, pos_tv)
 }
 
 pub fn external_print_unit(

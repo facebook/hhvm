@@ -249,6 +249,7 @@ fn make_memoize_function_with_params_code<'a>(
             param_count as u32,
             vec![],
             vec![],
+            vec![],
             if is_async { Some(eager_set) } else { None },
             None,
         )
@@ -345,6 +346,7 @@ fn make_memoize_function_no_params_code<'a>(
         FCallArgsFlags::default(),
         1,
         0,
+        vec![],
         vec![],
         vec![],
         if is_async { Some(eager_set) } else { None },

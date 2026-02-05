@@ -87,9 +87,10 @@ struct IterArgs {
 
 // Arguments to FCall opcodes.
 // hhas format: <flags> <numArgs> <numRets> <inoutArgs> <readonlyArgs>
-//              <asyncEagerOffset>
+//              <namedArgNames vecid> <namedArgPos vecid> <asyncEagerOffset>
 // hhbc format: <uint16:flags> ?<iva:numArgs> ?<iva:numRets>
 //              ?<boolvec:inoutArgs> ?<boolvec:readonlyArgs>
+//              ?<vecid:argNames> ?<vecid:argPos>
 //              ?<ba:asyncEagerOffset>
 //   flags            = flags (hhas doesn't have HHBC-only flags)
 //   numArgs          = flags >> kFirstNumArgsBit
@@ -100,7 +101,7 @@ struct IterArgs {
 struct FCallArgsBase {
   using Flags = FCallArgsFlags;
   // The first (lowest) bit of numArgs.
-  static constexpr uint16_t kFirstNumArgsBit = 12;
+  static constexpr uint16_t kFirstNumArgsBit = 13;
 
   // Flags that are valid on FCallArgsBase::flags struct (i.e. non-HHBC-only).
   static constexpr Flags kInternalFlags =
@@ -110,7 +111,8 @@ struct FCallArgsBase {
     Flags::SkipRepack |
     Flags::SkipCoeffectsCheck |
     Flags::EnforceMutableReturn |
-    Flags::EnforceReadonlyThis;
+    Flags::EnforceReadonlyThis |
+    Flags::HasNamedArgs;
 
   explicit FCallArgsBase(Flags flags, uint32_t numArgs, uint32_t numRets)
     : numArgs(numArgs)
@@ -155,11 +157,14 @@ struct FCallArgsBase {
 struct FCallArgs : FCallArgsBase {
   explicit FCallArgs(Flags flags, uint32_t numArgs, uint32_t numRets,
                      const uint8_t* inoutArgs, const uint8_t* readonlyArgs,
+                     const Id namedArgNames, const Id namedArgPos,
                      Offset asyncEagerOffset, const StringData* context)
     : FCallArgsBase(flags, numArgs, numRets)
     , asyncEagerOffset(asyncEagerOffset)
     , inoutArgs(inoutArgs)
     , readonlyArgs(readonlyArgs)
+    , namedArgNames(namedArgNames)
+    , namedArgPos(namedArgPos)
     , context(context) {
     assertx(IMPLIES(inoutArgs != nullptr || readonlyArgs != nullptr,
                     numArgs != 0));
@@ -196,11 +201,14 @@ struct FCallArgs : FCallArgsBase {
     assertx(!hasGenerics());
     return FCallArgs(
       static_cast<Flags>(flags | Flags::HasGenerics),
-      numArgs, numRets, inoutArgs, readonlyArgs, asyncEagerOffset, context);
+      numArgs, numRets, inoutArgs, readonlyArgs,
+      namedArgNames, namedArgPos, asyncEagerOffset, context);
   }
   Offset asyncEagerOffset;
   const uint8_t* inoutArgs;
   const uint8_t* readonlyArgs;
+  Id namedArgNames;
+  Id namedArgPos;
   const StringData* context;
 };
 
@@ -213,6 +221,7 @@ std::string show(const LocalRange&);
 std::string show(uint32_t numArgs, const uint8_t* boolVecArgs);
 std::string show(const FCallArgsBase&, const uint8_t* inoutArgs,
                  const uint8_t* readonlyArgs,
+                 Id namedArgNameId, Id namedArgPosId,
                  std::string asyncEagerLabel, const StringData* ctx);
 
 /*

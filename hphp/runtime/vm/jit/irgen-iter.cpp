@@ -156,7 +156,7 @@ void emitIterObjGet(IRGS& env, SSATmp* base, const StringData* methodName) {
 
   auto const fca = FCallArgs(
     FCallArgsFlags::SkipRepack | FCallArgsFlags::EnforceMutableReturn,
-    0, 1, nullptr, nullptr, kInvalidOffset, nullptr
+    0, 1, nullptr, nullptr, kInvalidId, kInvalidId, kInvalidOffset, nullptr
   );
   auto const subop = ObjMethodOp::NullThrows;
   emitFCallObjMethodD(env, fca, staticEmptyString(), subop, methodName);

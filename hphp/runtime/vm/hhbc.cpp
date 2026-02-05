@@ -794,12 +794,12 @@ std::string instrToString(PC it, Either<const Func*, const FuncEmitter*> f, Eith
 #define H_LAR (out += ' ', out += show(decodeLocalRange(it)))
 #define H_ITA (out += ' ', out += show(decodeIterArgs(it), printLocal))
 #define H_FCA do {                                               \
-  auto const fca = decodeFCallArgs(thisOpcode, it, u);           \
-  auto const aeOffset = fca.asyncEagerOffset != kInvalidOffset   \
-    ? showOffset(fca.asyncEagerOffset)                           \
-    : "-";                                                       \
-  out += ' ';                                                    \
-  out += show(fca, fca.inoutArgs, fca.readonlyArgs, aeOffset, fca.context); \
+  auto const fca = decodeFCallArgs(thisOpcode, it, u); \
+  auto const aeOffset = fca.asyncEagerOffset != kInvalidOffset        \
+    ? showOffset(fca.asyncEagerOffset)                                \
+    : "-";                                                            \
+  out += ' ';                                                         \
+  out += show(fca, fca.inoutArgs, fca.readonlyArgs, fca.namedArgNames, fca.namedArgPos, aeOffset, fca.context); \
 } while (false)
 
 #define O(name, imm, push, pop, flags)       \
@@ -1193,6 +1193,7 @@ std::string show(uint32_t numArgs, const uint8_t* boolVecArgs) {
 
 std::string show(const FCallArgsBase& fca, const uint8_t* inoutArgs,
                  const uint8_t* readonlyArgs,
+                 Id namedArgNamesId, Id namedArgsPosId,
                  std::string asyncEagerLabel, const StringData* ctx) {
   std::vector<std::string> flags;
   if (fca.hasUnpack()) flags.push_back("Unpack");
@@ -1202,11 +1203,16 @@ std::string show(const FCallArgsBase& fca, const uint8_t* inoutArgs,
   if (fca.skipCoeffectsCheck()) flags.push_back("SkipCoeffectsCheck");
   if (fca.enforceMutableReturn()) flags.push_back("EnforceMutableReturn");
   if (fca.enforceReadonlyThis()) flags.push_back("EnforceReadonlyThis");
+  auto formatId = [&] (Id id) {
+    return id == kInvalidId ? "$" : folly::sformat("@A_{}", id);
+  };
   return folly::sformat(
-    "<{}> {} {} \"{}\" \"{}\" {} \"{}\"",
+    "<{}> {} {} \"{}\" \"{}\" {} {} {} \"{}\"",
     folly::join(' ', flags), fca.numArgs, fca.numRets,
     show(fca.numArgs, inoutArgs),
     show(fca.numArgs, readonlyArgs),
+    formatId(namedArgNamesId),
+    formatId(namedArgsPosId),
     asyncEagerLabel, ctx ? ctx->data() : ""
   );
 }

@@ -26,12 +26,13 @@ pub mod ffi {
         SkipCoeffectsCheck = 0x10,
         EnforceMutableReturn = 0x20,
         EnforceReadonlyThis = 0x40,
-        ExplicitContext = 0x80,
-        HasInOut = 0x100,
-        EnforceInOut = 0x200,
-        EnforceReadonly = 0x400,
-        HasAsyncEagerOffset = 0x800,
-        NumArgsStart = 0x1000,
+        HasNamedArgs = 0x80,
+        ExplicitContext = 0x100,
+        HasInOut = 0x200,
+        EnforceInOut = 0x400,
+        EnforceReadonly = 0x800,
+        HasAsyncEagerOffset = 0x1000,
+        NumArgsStart = 0x2000,
     }
 
     #[repr(u8)]

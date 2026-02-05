@@ -584,6 +584,7 @@ impl FunctionParser<'_> {
                 "enforce_in_out" => FCallArgsFlags::EnforceInOut,
                 "enforce_readonly" => FCallArgsFlags::EnforceReadonly,
                 "has_async_eager_offset" => FCallArgsFlags::HasAsyncEagerOffset,
+                "has_named_args" => FCallArgsFlags::HasNamedArgs,
                 "num_args_start" => FCallArgsFlags::NumArgsStart,
                 _ => return None,
             })
@@ -604,6 +605,8 @@ impl FunctionParser<'_> {
             num_rets,
             inouts,
             readonly,
+            // TODO(named_params) actually parse named args here
+            named_args: vec![],
             loc,
         };
 

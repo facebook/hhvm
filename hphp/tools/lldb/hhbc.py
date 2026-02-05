@@ -650,6 +650,10 @@ class HHBC:
                 readOnlyArgs = show_fca_num_args(numArgs, readOnlyArgsPtr)
                 size += (numArgs + 7) // 8
 
+            # TODO(named_params): Add proper debugging output here. We assume that
+            # FCallArgsFlags always evaluates to false for the HasNamedArgs flag.
+            namedArgNames = "$"
+            namedArgPos = "$"
             asyncEagerOffset = "-"
             if (
                 flags
@@ -688,6 +692,10 @@ class HHBC:
                 + ' "'
                 + readOnlyArgs
                 + '"'
+                + " "
+                + namedArgNames
+                + " "
+                + namedArgPos
                 + " "
                 + asyncEagerOffset
                 + ' "'

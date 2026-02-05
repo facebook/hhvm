@@ -49,7 +49,6 @@ use hhbc::StringId;
 use hhbc::SwitchKind;
 use hhbc::TypeStructEnforceKind;
 use hhbc::TypeStructResolveOp;
-use hhbc::TypedValue;
 use hhbc::VerifyRetKind;
 use hhbc_string_utils::float;
 use print_opcode::PrintOpcode;
@@ -94,8 +93,13 @@ impl<'b> PrintOpcode<'b> {
         w.write_all(b">")
     }
 
-    fn print_fcall_args(&self, w: &mut dyn Write, args: &FCallArgs) -> Result<()> {
-        print::print_fcall_args(w, args, self.dv_labels)
+    fn print_fcall_args(
+        &self,
+        w: &mut dyn Write,
+        args: &FCallArgs,
+        adata: &AdataState,
+    ) -> Result<()> {
+        print::print_fcall_args(w, args, self.dv_labels, adata)
     }
 
     fn print_label(&self, w: &mut dyn Write, label: &Label) -> Result<()> {
@@ -202,11 +206,6 @@ print_with_debug!(
     print_as_type_struct_exception_kind,
     AsTypeStructExceptionKind
 );
-
-fn print_adata_id(w: &mut dyn Write, v: &TypedValue, adata: &AdataState) -> Result<()> {
-    let id = adata.index_of(v).unwrap();
-    write!(w, "@{}", id)
-}
 
 fn print_class_name(w: &mut dyn Write, id: &ClassName) -> Result<()> {
     print_quoted_str(w, id.as_str())

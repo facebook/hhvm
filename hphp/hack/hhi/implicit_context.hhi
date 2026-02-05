@@ -31,12 +31,12 @@ namespace HH {
     final protected static async function runWithAsync<Tout>(
       this::TData $context,
       (function ()[_]: Awaitable<Tout>) $f,
-    )[this::CRun, ctx $f]: Awaitable<Tout>;
+    )[leak_safe, ctx $f]: Awaitable<Tout>;
 
     final protected static function runWith<Tout>(
       this::TData $context,
       (function ()[_]: Tout) $f,
-    )[this::CRun, ctx $f]: Tout;
+    )[leak_safe, ctx $f]: Tout;
   }
 
   // Avoid referencing an internal class in OSS.
@@ -47,12 +47,12 @@ namespace HH {
     final protected static async function runWithAsync<Tout>(
       this::TData $context,
       (function ()[_]: Awaitable<Tout>) $f,
-    )[this::CRun, ctx $f]: Awaitable<Tout>;
+    )[leak_safe, ctx $f]: Awaitable<Tout>;
 
     final protected static function runWith<Tout>(
       this::TData $context,
       (function ()[_]: Tout) $f,
-    )[this::CRun, ctx $f]: Tout;
+    )[leak_safe, ctx $f]: Tout;
   }
 
   <<__Sealed(MemoAgnosticImplicitContext::class, MemoSensitiveImplicitContext::class)>>
@@ -66,12 +66,12 @@ namespace HH {
     abstract protected static function runWithAsync<Tout>(
       this::TData $context,
       (function ()[_]: Awaitable<Tout>) $f,
-    )[this::CRun, ctx $f]: Awaitable<Tout>;
+    )[leak_safe, ctx $f]: Awaitable<Tout>;
 
     abstract protected static function runWith<Tout>(
       this::TData $context,
       (function ()[_]: Tout) $f,
-    )[this::CRun, ctx $f]: Tout;
+    )[leak_safe, ctx $f]: Tout;
   }
 
   /**

@@ -116,7 +116,7 @@ abstract class MemoAgnosticImplicitContext extends ImplicitContextBase {
   final protected static async function runWithAsync<Tout>(
     this::TData $context,
     (function ()[_]: Awaitable<Tout>) $f,
-  )[this::CRun, ctx $f]: Awaitable<Tout> {
+  )[leak_safe, ctx $f]: Awaitable<Tout> {
     $prev = ImplicitContext\_Private\set_implicit_context_by_value(
       self::createContext($context)
     );
@@ -133,7 +133,7 @@ abstract class MemoAgnosticImplicitContext extends ImplicitContextBase {
   final protected static function runWith<Tout>(
     this::TData $context,
     (function ()[_]: Tout) $f,
-  )[this::CRun, ctx $f]: Tout {
+  )[leak_safe, ctx $f]: Tout {
     $prev = ImplicitContext\_Private\set_implicit_context_by_value(
       self::createContext($context)
     );
@@ -160,7 +160,7 @@ abstract class MemoSensitiveImplicitContext extends ImplicitContextBase {
   final protected static async function runWithAsync<Tout>(
     this::TData $context,
     (function ()[_]: Awaitable<Tout>) $f,
-  )[this::CRun, ctx $f]: Awaitable<Tout> {
+  )[leak_safe, ctx $f]: Awaitable<Tout> {
     $prev = ImplicitContext\_Private\set_implicit_context_by_value(
       self::createContext($context)
     );
@@ -177,7 +177,7 @@ abstract class MemoSensitiveImplicitContext extends ImplicitContextBase {
   final protected static function runWith<Tout>(
     this::TData $context,
     (function ()[_]: Tout) $f,
-  )[this::CRun, ctx $f]: Tout {
+  )[leak_safe, ctx $f]: Tout {
     $prev = ImplicitContext\_Private\set_implicit_context_by_value(
       self::createContext($context)
     );
@@ -215,12 +215,12 @@ abstract class ImplicitContextBase {
   abstract protected static function runWithAsync<Tout>(
     this::TData $context,
     (function()[_]: Awaitable<Tout>) $f,
-  )[this::CRun, ctx $f]: Awaitable<Tout>;
+  )[leak_safe, ctx $f]: Awaitable<Tout>;
 
   abstract protected static function runWith<Tout>(
     this::TData $context,
     (function()[_]: Tout) $f,
-  )[this::CRun, ctx $f]: Tout;
+  )[leak_safe, ctx $f]: Tout;
 }
 
 // These will come handy if we decide to seal the PHP classes

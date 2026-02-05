@@ -39,10 +39,6 @@ TRACE_SET_MOD(region)
 //////////////////////////////////////////////////////////////////////
 
 extern RegionDescPtr selectMethod(const RegionContext&);
-extern RegionDescPtr selectOneBC(const RegionContext&);
-extern RegionDescPtr selectHotBlock(TransID transId,
-                                    const ProfData* profData,
-                                    const TransCFG& cfg);
 
 //////////////////////////////////////////////////////////////////////
 

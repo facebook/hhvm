@@ -16,26 +16,36 @@
 
 #pragma once
 
+#include <variant>
+
+#include <folly/Overload.h>
 #include <folly/Portability.h>
 #include <folly/Try.h>
 #include <folly/coro/AsyncGenerator.h>
 #include <folly/coro/Task.h>
 #include <thrift/lib/cpp/ContextStack.h>
 #include <thrift/lib/cpp2/async/StreamCallbacks.h>
+#include <thrift/lib/cpp2/async/StreamMessage.h>
 #include <thrift/lib/cpp2/async/TwoWayBridge.h>
 #include <thrift/lib/cpp2/async/TwoWayBridgeUtil.h>
 #include <thrift/lib/cpp2/transport/rocket/RocketException.h>
 
 namespace apache::thrift::detail {
 
-class ServerBiDiSinkBridge
-    : public TwoWayBridge<
-          ServerBiDiSinkBridge,
-          uint64_t, // we send credits to the client
-          CoroConsumer,
-          folly::Try<StreamPayload>, // we receive payloads from the client
-          ServerBiDiSinkBridge>,
-      public SinkServerCallback {
+// Server to Client: RequestN (credits)
+using ServerBiDiSinkMessageServerToClient = StreamMessage::RequestN;
+
+// Client to Server: PayloadOrError (payload/error) or Complete (sink done)
+using ServerBiDiSinkMessageClientToServer =
+    std::variant<StreamMessage::PayloadOrError, StreamMessage::Complete>;
+
+class ServerBiDiSinkBridge : public TwoWayBridge<
+                                 ServerBiDiSinkBridge,
+                                 ServerBiDiSinkMessageServerToClient,
+                                 CoroConsumer,
+                                 ServerBiDiSinkMessageClientToServer,
+                                 ServerBiDiSinkBridge>,
+                             public SinkServerCallback {
  public:
   ServerBiDiSinkBridge(
       SinkClientCallback* clientCb,
@@ -50,7 +60,9 @@ class ServerBiDiSinkBridge
   //
   bool onSinkNext(StreamPayload&& payload) override {
     notifyBiDiSinkNext();
-    clientPush(folly::Try<StreamPayload>(std::move(payload)));
+    clientPush(
+        StreamMessage::PayloadOrError{
+            folly::Try<StreamPayload>(std::move(payload))});
     return true;
   }
 
@@ -65,7 +77,7 @@ class ServerBiDiSinkBridge
     // We set this to null because the transport side must be aware of the
     // cancellation already
     clientCb_ = nullptr;
-    clientPush(std::move(payload));
+    clientPush(StreamMessage::PayloadOrError{std::move(payload)});
     clientClose();
   }
 
@@ -73,7 +85,7 @@ class ServerBiDiSinkBridge
     // We set this to null because the transport side must be aware of the
     // cancellation already
     clientCb_ = nullptr;
-    clientPush(/* empty Try */ {});
+    clientPush(StreamMessage::Complete{});
     clientClose();
     return true;
   }
@@ -159,20 +171,23 @@ class ServerBiDiSinkBridge
 
             for (auto messages = bridge->serverGetMessages(); !messages.empty();
                  messages.pop()) {
-              // Empty try denotes end of sink
-              if (!messages.front().hasException() &&
-                  !messages.front().hasValue()) {
+              auto& message = messages.front();
+              // Complete denotes end of sink
+              if (std::holds_alternative<StreamMessage::Complete>(message)) {
                 co_return;
               }
-              // This handled both both error and result cases. If the try
-              // contains an exception, it will eventually result in yielding
-              // a co_error
+              // This handles both error and result cases. If the try
+              // contains an exception, it will eventually result in
+              // yielding a co_error
+              auto& payloadOrError =
+                  std::get<StreamMessage::PayloadOrError>(message);
               co_yield folly::coro::co_result(
-                  (*decode)(std::move(std::move(messages.front()))));
+                  (*decode)(std::move(payloadOrError.streamPayloadTry)));
 
               if (++creditsUsed > bridge->bufferSize_ / 2) {
                 notifyBiDiSinkCredit(bridge->contextStack_.get(), creditsUsed);
-                bridge->serverPush(uint64_t(creditsUsed));
+                bridge->serverPush(
+                    StreamMessage::RequestN{static_cast<int32_t>(creditsUsed)});
                 creditsUsed = 0;
               }
             }
@@ -190,8 +205,8 @@ class ServerBiDiSinkBridge
            messages.pop()) {
         DCHECK(!isClientClosed());
 
-        auto message = std::move(messages.front());
-        if (!clientCb_->onSinkRequestN(static_cast<int32_t>(message))) {
+        auto& message = messages.front();
+        if (!clientCb_->onSinkRequestN(message.n)) {
           return;
         }
       }

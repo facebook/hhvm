@@ -23,6 +23,7 @@
 #include <thrift/lib/cpp2/async/ServerBiDiStreamBridge.h>
 #include <thrift/lib/cpp2/async/ServerCallbackStapler.h>
 #include <thrift/lib/cpp2/async/StreamCallbacks.h>
+#include <thrift/lib/cpp2/async/StreamMessage.h>
 #include <thrift/lib/cpp2/async/StreamPayload.h>
 
 namespace apache::thrift {
@@ -85,7 +86,8 @@ class ServerBiDiStreamFactory {
 
       std::ignore = clientCb->onFirstResponse(std::move(payload), evb, stapled);
 
-      sinkBridge->serverPush(uint64_t(bufferSize));
+      sinkBridge->serverPush(
+          StreamMessage::RequestN{static_cast<int32_t>(bufferSize)});
       sinkBridge->processClientMessages();
       streamBridge->processClientMessages();
     };

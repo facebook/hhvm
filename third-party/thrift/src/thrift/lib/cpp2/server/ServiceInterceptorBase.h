@@ -234,6 +234,40 @@ class ServiceInterceptorBase {
     uint64_t totalPayloads = 0;
   };
 
+  // ============ Streaming Interceptor Methods ============
+  // These methods have default no-op implementations for backward
+  // compatibility with existing interceptors that don't need streaming.
+
+  /**
+   * Called when a stream is established (after first response sent).
+   * Interceptors can initialize per-stream state here.
+   */
+  virtual folly::coro::Task<void> internal_onStreamBegin(
+      ConnectionInfo, StreamInfo, InterceptorMetricCallback&) {
+    co_return;
+  }
+
+  /**
+   * Called for each typed payload BEFORE serialization.
+   * This is where interceptors can inspect/process streaming data.
+   *
+   * PERFORMANCE NOTE: This is on the hot path. Implementations should
+   * be as lightweight as possible.
+   */
+  virtual folly::coro::Task<void> internal_onStreamPayload(
+      ConnectionInfo, StreamPayloadInfo, InterceptorMetricCallback&) {
+    co_return;
+  }
+
+  /**
+   * Called when stream ends (complete, error, or cancelled).
+   * Interceptors should clean up per-stream state here.
+   */
+  virtual folly::coro::Task<void> internal_onStreamEnd(
+      ConnectionInfo, StreamEndInfo, InterceptorMetricCallback&) {
+    co_return;
+  }
+
   /**
    * This methods is called by ThriftServer to set the module name for the
    * interceptor. This method is expected to be called prior to to the

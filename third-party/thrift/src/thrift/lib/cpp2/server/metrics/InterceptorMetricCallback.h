@@ -79,6 +79,29 @@ class InterceptorMetricCallback {
   virtual void onConnectionClosedComplete(
       const ServiceInterceptorQualifiedName& qualifiedName,
       std::chrono::microseconds onConnectionClosedDuration) = 0;
+
+  // ============ Stream Metrics ============
+
+  /**
+   * Records the completion of a single interceptor's onStreamBegin call.
+   */
+  virtual void onStreamBeginComplete(
+      const ServiceInterceptorQualifiedName& qualifiedName,
+      std::chrono::microseconds duration) = 0;
+
+  /**
+   * Records the completion of a single interceptor's onStreamPayload call.
+   */
+  virtual void onStreamPayloadComplete(
+      const ServiceInterceptorQualifiedName& qualifiedName,
+      std::chrono::microseconds duration) = 0;
+
+  /**
+   * Records the completion of a single interceptor's onStreamEnd call.
+   */
+  virtual void onStreamEndComplete(
+      const ServiceInterceptorQualifiedName& qualifiedName,
+      std::chrono::microseconds duration) = 0;
 };
 
 class NoopInterceptorMetricCallback : public InterceptorMetricCallback {
@@ -100,6 +123,18 @@ class NoopInterceptorMetricCallback : public InterceptorMetricCallback {
   }
 
   void onConnectionClosedComplete(
+      const ServiceInterceptorQualifiedName&, std::chrono::microseconds) final {
+  }
+
+  void onStreamBeginComplete(
+      const ServiceInterceptorQualifiedName&, std::chrono::microseconds) final {
+  }
+
+  void onStreamPayloadComplete(
+      const ServiceInterceptorQualifiedName&, std::chrono::microseconds) final {
+  }
+
+  void onStreamEndComplete(
       const ServiceInterceptorQualifiedName&, std::chrono::microseconds) final {
   }
 };

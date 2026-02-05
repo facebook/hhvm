@@ -483,6 +483,24 @@ class MockInterceptorMetricCallback : public InterceptorMetricCallback {
       (const ServiceInterceptorQualifiedName& qualifiedName,
        std::chrono::microseconds onResponseTime),
       (override));
+  MOCK_METHOD(
+      void,
+      onStreamBeginComplete,
+      (const ServiceInterceptorQualifiedName& qualifiedName,
+       std::chrono::microseconds duration),
+      (override));
+  MOCK_METHOD(
+      void,
+      onStreamPayloadComplete,
+      (const ServiceInterceptorQualifiedName& qualifiedName,
+       std::chrono::microseconds duration),
+      (override));
+  MOCK_METHOD(
+      void,
+      onStreamEndComplete,
+      (const ServiceInterceptorQualifiedName& qualifiedName,
+       std::chrono::microseconds duration),
+      (override));
 };
 
 } // namespace

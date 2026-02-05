@@ -18,10 +18,12 @@
 
 #include <variant>
 
+#include <folly/ExceptionWrapper.h>
 #include <folly/coro/Task.h>
 #include <folly/io/IOBuf.h>
 #include <folly/memory/not_null.h>
 
+#include <thrift/lib/cpp/StreamEventHandler.h>
 #include <thrift/lib/cpp2/schema/SyntaxGraph.h>
 #include <thrift/lib/cpp2/server/DecoratorData.h>
 #include <thrift/lib/cpp2/server/DecoratorDataRuntime.h>
@@ -183,6 +185,54 @@ class ServiceInterceptorBase {
   };
   virtual folly::coro::Task<void> internal_onResponse(
       ConnectionInfo, ResponseInfo, InterceptorMetricCallback&) = 0;
+
+  // ============ Streaming Interceptor Types ============
+
+  enum class StreamDirection {
+    ServerStream,
+    ClientSink,
+    BiDirectional,
+  };
+
+  /**
+   * Information provided when a stream begins.
+   * Interceptors can use this to initialize per-stream state.
+   */
+  struct StreamInfo {
+    detail::StreamId streamId = 0;
+    detail::ServiceInterceptorOnRequestStorage* requestStorage = nullptr;
+    StreamDirection direction = StreamDirection::ServerStream;
+    std::string_view serviceName = "";
+    std::string_view methodName = "";
+  };
+
+  /**
+   * Information provided for each streaming payload.
+   * Called BEFORE serialization with access to the typed payload.
+   */
+  struct StreamPayloadInfo {
+    detail::StreamId streamId = 0;
+    detail::ServiceInterceptorOnRequestStorage* requestStorage = nullptr;
+    /**
+     * The typed payload before serialization.
+     * Use TypeErasedRef::value<T>() to access the concrete type.
+     */
+    util::TypeErasedRef payload;
+    uint64_t sequenceNumber = 0;
+  };
+
+  /**
+   * Information provided when a stream ends.
+   * Interceptors should clean up per-stream state here.
+   */
+  struct StreamEndInfo {
+    detail::StreamId streamId = 0;
+    detail::ServiceInterceptorOnRequestStorage* requestStorage = nullptr;
+    details::STREAM_ENDING_TYPES reason =
+        details::STREAM_ENDING_TYPES::COMPLETE;
+    folly::exception_wrapper error;
+    uint64_t totalPayloads = 0;
+  };
 
   /**
    * This methods is called by ThriftServer to set the module name for the

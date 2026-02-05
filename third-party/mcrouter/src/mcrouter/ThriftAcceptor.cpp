@@ -30,8 +30,6 @@ namespace memcache {
 std::shared_ptr<wangle::Acceptor> ThriftAcceptorFactory::newAcceptor(
     folly::EventBase* evb) {
   class ThriftAcceptor : public apache::thrift::Cpp2Worker {
-    using ThriftAclCheckerFunc = ThriftAcceptorFactory::ThriftAclCheckerFunc;
-
    protected:
     struct Tag {};
 

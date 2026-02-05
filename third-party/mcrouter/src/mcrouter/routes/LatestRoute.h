@@ -32,7 +32,7 @@ std::vector<std::shared_ptr<RouteHandleIf>> getTargets(
     std::vector<double> weights,
     folly::StringPiece salt) {
   if (targets.size() <= 1) {
-    return std::move(targets);
+    return targets;
   }
 
   std::vector<std::shared_ptr<RouteHandleIf>> failovers;

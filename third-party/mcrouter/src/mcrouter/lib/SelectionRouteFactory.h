@@ -49,7 +49,7 @@ typename RouterInfo::RouteHandlePtr createSelectionRoute(
         mcrouter::createErrorRoute<RouterInfo>("Invalid destination index.");
   }
   if (children.empty() && shadowChildren.empty()) {
-    return std::move(outOfRangeDestination);
+    return outOfRangeDestination;
   }
   if (shadowChildren.empty()) {
     return makeRouteHandleWithInfo<RouterInfo, SelectionRoute, Selector>(

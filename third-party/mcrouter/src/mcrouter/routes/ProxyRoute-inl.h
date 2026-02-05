@@ -26,7 +26,7 @@ typename RouterInfo::RouteHandlePtr wrapWithBigValueRoute(
     typename RouterInfo::RouteHandlePtr ch,
     const McrouterOptions& routerOpts) {
   if (routerOpts.big_value_split_threshold == 0) {
-    return std::move(ch);
+    return ch;
   }
   BigValueRouteOptions options(
       routerOpts.big_value_split_threshold,

@@ -22,6 +22,7 @@
 
 #include <folly/coro/Baton.h>
 #include <folly/coro/GtestHelpers.h>
+#include <folly/coro/Sleep.h>
 #include <thrift/lib/cpp2/async/HTTPClientChannel.h>
 #include <thrift/lib/cpp2/async/HeaderClientChannel.h>
 #include <thrift/lib/cpp2/async/MultiplexAsyncProcessor.h>
@@ -1362,6 +1363,293 @@ CO_TEST_P(ServiceInterceptorTestP, BasicStream) {
     EXPECT_EQ(interceptor->onRequestCount, 1);
     EXPECT_EQ(interceptor->onResponseCount, 1);
   }
+}
+
+// ============ Streaming Interceptor Tests ============
+
+CO_TEST_P(ServiceInterceptorTestP, StreamingInterceptorLifecycle) {
+  if (transportType() != TransportType::ROCKET) {
+    // only rocket supports streaming
+    co_return;
+  }
+
+  // Baton to synchronize with onStreamEnd callback
+  folly::coro::Baton streamEndBaton;
+
+  // Interceptor that tracks the full streaming lifecycle
+  // Uses RequestState to store state that persists through streaming
+  struct StreamingLifecycleInterceptor
+      : public ServiceInterceptor<std::string, folly::Unit> {
+    using ConnectionState = folly::Unit;
+    using RequestState = std::string;
+
+    explicit StreamingLifecycleInterceptor(
+        std::string name, folly::coro::Baton& baton)
+        : name_(std::move(name)), streamEndBaton_(baton) {}
+
+    std::string getName() const override { return name_; }
+
+    folly::coro::Task<std::optional<RequestState>> onRequest(
+        ConnectionState*, RequestInfo) override {
+      // Initialize state that will be accessible during streaming
+      co_return std::make_optional<RequestState>("stream-state-initialized");
+    }
+
+    folly::coro::Task<void> onStreamBegin(
+        RequestState*, ConnectionState*, StreamInfo info) override {
+      onStreamBeginCalled = true;
+      streamId = info.streamId;
+      serviceName = std::string(info.serviceName);
+      methodName = std::string(info.methodName);
+      co_return;
+    }
+
+    folly::coro::Task<void> onStreamPayload(
+        RequestState* requestState,
+        ConnectionState*,
+        StreamPayloadInfo info) override {
+      ++payloadCount;
+      sequenceNumbers.push_back(info.sequenceNumber);
+      // Verify we can access the typed payload
+      auto value = info.payload.value<std::int32_t>();
+      payloadValues.push_back(value);
+      // Verify request state is accessible during streaming
+      if (requestState) {
+        EXPECT_EQ(*requestState, "stream-state-initialized");
+      }
+      co_return;
+    }
+
+    folly::coro::Task<void> onStreamEnd(
+        RequestState* requestState,
+        ConnectionState*,
+        StreamEndInfo info) override {
+      onStreamEndCalled = true;
+      endReason = info.reason;
+      totalPayloadsReported = info.totalPayloads;
+      // Verify request state persists to stream end
+      if (requestState) {
+        EXPECT_EQ(*requestState, "stream-state-initialized");
+      }
+      streamEndBaton_.post();
+      co_return;
+    }
+
+    std::string name_;
+    folly::coro::Baton& streamEndBaton_;
+    bool onStreamBeginCalled = false;
+    bool onStreamEndCalled = false;
+    detail::StreamId streamId = 0;
+    std::string serviceName;
+    std::string methodName;
+    int payloadCount = 0;
+    std::vector<uint64_t> sequenceNumbers;
+    std::vector<std::int32_t> payloadValues;
+    details::STREAM_ENDING_TYPES endReason =
+        details::STREAM_ENDING_TYPES::COMPLETE;
+    uint64_t totalPayloadsReported = 0;
+  };
+
+  auto interceptor = std::make_shared<StreamingLifecycleInterceptor>(
+      "Test", std::ref(streamEndBaton));
+  auto runner =
+      makeServer(std::make_shared<TestHandler>(), [&](ThriftServer& server) {
+        server.addModule(std::make_unique<TestModule>(interceptor));
+      });
+
+  auto client =
+      makeClient<apache::thrift::Client<test::ServiceInterceptorTest>>(*runner);
+  {
+    auto stream = (co_await client->co_iota(100)).toAsyncGenerator();
+    // Consume a few payloads
+    EXPECT_EQ((co_await stream.next()).value(), 100);
+    EXPECT_EQ((co_await stream.next()).value(), 101);
+    EXPECT_EQ((co_await stream.next()).value(), 102);
+  }
+  // Wait for onStreamEnd to be called on the server
+  co_await streamEndBaton;
+
+  EXPECT_TRUE(interceptor->onStreamBeginCalled);
+  EXPECT_GT(interceptor->streamId, 0u);
+  EXPECT_EQ(interceptor->serviceName, "ServiceInterceptorTest");
+  EXPECT_EQ(interceptor->methodName, "iota");
+
+  // Verify payloads were intercepted with correct sequence numbers
+  EXPECT_GE(interceptor->payloadCount, 3);
+  for (size_t i = 0; i < interceptor->sequenceNumbers.size(); ++i) {
+    EXPECT_EQ(interceptor->sequenceNumbers[i], i);
+  }
+  // Verify payload values were accessible
+  const std::vector<std::int32_t> expectedPayloadValues{100, 101, 102};
+  EXPECT_EQ(
+      std::vector<std::int32_t>(
+          interceptor->payloadValues.begin(),
+          interceptor->payloadValues.begin() + 3),
+      expectedPayloadValues);
+
+  // Verify stream end was called
+  EXPECT_TRUE(interceptor->onStreamEndCalled);
+  EXPECT_EQ(interceptor->endReason, details::STREAM_ENDING_TYPES::CANCEL);
+  EXPECT_EQ(interceptor->totalPayloadsReported, interceptor->payloadCount);
+}
+
+CO_TEST_P(
+    ServiceInterceptorTestP, StreamingInterceptorMultipleInterceptorsLIFO) {
+  if (transportType() != TransportType::ROCKET) {
+    co_return;
+  }
+
+  // Baton to synchronize - posted by the last interceptor in LIFO order
+  folly::coro::Baton streamEndBaton;
+
+  // Track callback order across multiple interceptors
+  static std::vector<std::string> callOrder;
+  callOrder.clear();
+
+  struct OrderTrackingInterceptor
+      : public ServiceInterceptor<folly::Unit, folly::Unit> {
+    using ConnectionState = folly::Unit;
+    using RequestState = folly::Unit;
+
+    explicit OrderTrackingInterceptor(
+        std::string name, folly::coro::Baton* baton = nullptr)
+        : name_(std::move(name)), streamEndBaton_(baton) {}
+
+    std::string getName() const override { return name_; }
+
+    folly::coro::Task<void> onStreamBegin(
+        RequestState*, ConnectionState*, StreamInfo) override {
+      callOrder.push_back(name_ + ":begin");
+      co_return;
+    }
+
+    folly::coro::Task<void> onStreamPayload(
+        RequestState*, ConnectionState*, StreamPayloadInfo) override {
+      // Only track first payload to keep test simple
+      if (callOrder.empty() ||
+          callOrder.back().find(":payload") == std::string::npos ||
+          callOrder.back().find(name_) == std::string::npos) {
+        callOrder.push_back(name_ + ":payload");
+      }
+      co_return;
+    }
+
+    folly::coro::Task<void> onStreamEnd(
+        RequestState*, ConnectionState*, StreamEndInfo) override {
+      callOrder.push_back(name_ + ":end");
+      if (streamEndBaton_) {
+        streamEndBaton_->post();
+      }
+      co_return;
+    }
+
+    std::string name_;
+    folly::coro::Baton* streamEndBaton_;
+  };
+
+  // First interceptor is called last in LIFO order, so it posts the baton
+  auto interceptor1 =
+      std::make_shared<OrderTrackingInterceptor>("First", &streamEndBaton);
+  auto interceptor2 = std::make_shared<OrderTrackingInterceptor>("Second");
+  auto interceptor3 = std::make_shared<OrderTrackingInterceptor>("Third");
+
+  auto runner =
+      makeServer(std::make_shared<TestHandler>(), [&](ThriftServer& server) {
+        server.addModule(
+            std::make_unique<TestModule>(
+                InterceptorList{interceptor1, interceptor2, interceptor3}));
+      });
+
+  auto client =
+      makeClient<apache::thrift::Client<test::ServiceInterceptorTest>>(*runner);
+  {
+    auto stream = (co_await client->co_iota(1)).toAsyncGenerator();
+    EXPECT_EQ((co_await stream.next()).value(), 1);
+  }
+
+  // Wait for all onStreamEnd callbacks to complete
+  co_await streamEndBaton;
+
+  // Verify onStreamBegin called in forward order (FIFO)
+  EXPECT_GE(callOrder.size(), 6u);
+  if (callOrder.size() < 6u) {
+    co_return;
+  }
+  const std::vector<std::string> expectedBegin{
+      "First:begin", "Second:begin", "Third:begin"};
+  EXPECT_EQ(
+      std::vector<std::string>(callOrder.begin(), callOrder.begin() + 3),
+      expectedBegin);
+
+  // Verify onStreamEnd called in reverse order (LIFO)
+  auto endIt = std::find_if(
+      callOrder.begin(), callOrder.end(), [](const std::string& s) {
+        return s.find(":end") != std::string::npos;
+      });
+  EXPECT_NE(endIt, callOrder.end());
+  if (endIt == callOrder.end()) {
+    co_return;
+  }
+  std::vector<std::string> endCalls(endIt, callOrder.end());
+  const std::vector<std::string> expectedEnd{
+      "Third:end", "Second:end", "First:end"};
+  EXPECT_EQ(endCalls, expectedEnd);
+}
+
+CO_TEST_P(ServiceInterceptorTestP, StreamingInterceptorMetrics) {
+  if (transportType() != TransportType::ROCKET) {
+    co_return;
+  }
+
+  // Simple interceptor that does minimal work
+  struct SimpleStreamInterceptor
+      : public ServiceInterceptor<folly::Unit, folly::Unit> {
+    std::string getName() const override { return "SimpleStream"; }
+  };
+
+  auto interceptor = std::make_shared<SimpleStreamInterceptor>();
+  auto interceptorMetricCallback =
+      std::make_shared<MockInterceptorMetricCallback>();
+
+  auto runner =
+      makeServer(std::make_shared<TestHandler>(), [&](ThriftServer& server) {
+        server.addModule(std::make_unique<TestModule>(interceptor));
+        detail::ThriftServerInternals(server).setInterceptorMetricCallback(
+            interceptorMetricCallback);
+      });
+
+  // Expect stream metrics to be called
+  EXPECT_CALL(*interceptorMetricCallback, onStreamBeginComplete(_, _))
+      .Times(testing::AtLeast(1));
+  EXPECT_CALL(*interceptorMetricCallback, onStreamPayloadComplete(_, _))
+      .Times(testing::AtLeast(1));
+  EXPECT_CALL(*interceptorMetricCallback, onStreamEndComplete(_, _))
+      .Times(testing::AtLeast(1));
+
+  // Also expect request/response metrics
+  EXPECT_CALL(*interceptorMetricCallback, onRequestComplete(_, _))
+      .Times(testing::AtLeast(1));
+  EXPECT_CALL(*interceptorMetricCallback, onResponseComplete(_, _))
+      .Times(testing::AtLeast(1));
+
+  // Allow connection metrics (may or may not be called depending on transport)
+  EXPECT_CALL(*interceptorMetricCallback, onConnectionAttemptedComplete(_, _))
+      .Times(testing::AnyNumber());
+  EXPECT_CALL(*interceptorMetricCallback, onConnectionComplete(_, _))
+      .Times(testing::AnyNumber());
+  EXPECT_CALL(*interceptorMetricCallback, onConnectionClosedComplete(_, _))
+      .Times(testing::AnyNumber());
+
+  auto client =
+      makeClient<apache::thrift::Client<test::ServiceInterceptorTest>>(*runner);
+  {
+    auto stream = (co_await client->co_iota(1)).toAsyncGenerator();
+    // Consume at least one payload
+    EXPECT_EQ((co_await stream.next()).value(), 1);
+  }
+
+  // Give the server time to process stream end
+  co_await folly::coro::sleep(std::chrono::milliseconds(100));
 }
 
 CO_TEST_P(ServiceInterceptorTestP, RequestArguments) {

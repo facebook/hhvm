@@ -66,9 +66,12 @@ struct ServerStreamFactory {
 
   std::shared_ptr<ContextStack> getContextStack() { return contextStack_; }
 
-  void setStreamInterceptorContext(
-      std::shared_ptr<StreamInterceptorContext> ctx) {
-    streamInterceptorContext_ = std::move(ctx);
+  void setInterceptorContext(std::shared_ptr<StreamInterceptorContext> ctx) {
+    interceptorContext_ = std::move(ctx);
+  }
+
+  std::shared_ptr<StreamInterceptorContext> getInterceptorContext() const {
+    return interceptorContext_;
   }
 
   void operator()(
@@ -80,7 +83,7 @@ struct ServerStreamFactory {
         eb,
         std::move(interaction_),
         std::move(contextStack_),
-        std::move(streamInterceptorContext_));
+        std::move(interceptorContext_));
   }
 
   explicit operator bool() { return !!fn_; }
@@ -89,7 +92,7 @@ struct ServerStreamFactory {
   ServerStreamFactoryFn fn_;
   TilePtr interaction_;
   std::shared_ptr<ContextStack> contextStack_;
-  std::shared_ptr<StreamInterceptorContext> streamInterceptorContext_;
+  std::shared_ptr<StreamInterceptorContext> interceptorContext_;
 };
 
 template <typename T>

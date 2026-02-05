@@ -25,6 +25,8 @@
 #include <thrift/lib/cpp2/async/ServerStream.h>
 #include <thrift/lib/cpp2/async/processor/HandlerCallbackBase.h>
 #include <thrift/lib/cpp2/server/LazyDynamicArguments.h>
+#include <thrift/lib/cpp2/server/ServerConfigs.h>
+#include <thrift/lib/cpp2/server/StreamInterceptorContext.h>
 
 // Default to ture, so it can be used for killswitch.
 THRIFT_FLAG_DEFINE_bool(thrift_enable_streaming_tracking, false);
@@ -208,6 +210,28 @@ void HandlerCallbackBase::sendReply(
   auto& stream = responseAndStream.stream;
   stream.setInteraction(std::move(interaction_));
   stream.setContextStack(std::move(this->ctx_));
+
+  // Create and set interceptor context if service interceptors are enabled
+  if (shouldProcessServiceInterceptorsOnRequest()) {
+    const auto* server =
+        reqCtx_->getConnectionContext()->getWorkerContext()->getServerContext();
+    if (server && !server->getServiceInterceptors().empty()) {
+      auto interceptorContext =
+          std::make_shared<detail::StreamInterceptorContext>(
+              detail::generateStreamId(),
+              server->getServiceInterceptors(),
+              server->getInterceptorMetricCallback(),
+              *reqCtx_->getConnectionContext(),
+              std::string(methodNameInfo_.serviceName),
+              std::string(methodNameInfo_.methodName));
+      // Move request storage into interceptor context before request is
+      // destroyed. This ensures the storage remains valid for async stream
+      // interceptor callbacks.
+      interceptorContext->moveRequestStorage(reqCtx_);
+      stream.setInterceptorContext(std::move(interceptorContext));
+    }
+  }
+
   if (getEventBase()->isInEventBaseThread()) {
     StreamReplyInfo(
         std::move(req_), std::move(stream), std::move(payload), crc32c)();

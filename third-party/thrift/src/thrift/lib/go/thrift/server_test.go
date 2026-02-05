@@ -276,7 +276,7 @@ func TestALPN(t *testing.T) {
 	require.NoError(t, err)
 
 	// Header
-	client3, err := createAlpnClient(WithHeader(), tlsDialerOption)
+	client3, err := createAlpnClient(withHeader(), tlsDialerOption)
 	require.NoError(t, err)
 	err = client3.Ping(context.TODO())
 	require.NoError(t, err)
@@ -923,7 +923,7 @@ func TestRocketServerFallbackToHeader(t *testing.T) {
 
 	// Create header client to trigger header transport processing
 	headerChannel, err := NewClient(
-		WithHeader(),
+		withHeader(),
 		WithTLS(addr.String(), 5*time.Second, clientConfig),
 		WithIoTimeout(5*time.Second),
 	)

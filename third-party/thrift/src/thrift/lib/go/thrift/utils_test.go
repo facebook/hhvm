@@ -191,7 +191,7 @@ func generateSelfSignedCerts() (clientConfig *tls.Config, serverConfig *tls.Conf
 func getClientTransportOption(serverTransport TransportID) ClientOption {
 	switch serverTransport {
 	case TransportIDHeader:
-		return WithHeader()
+		return withHeader()
 	case TransportIDUpgradeToRocket:
 		return WithUpgradeToRocket()
 	case TransportIDRocket:

@@ -49,7 +49,7 @@ func TestCustomClientOptions(t *testing.T) {
 		require.Equal(t, types.ProtocolIDBinary, config.protocol)
 	})
 	t.Run("WithHeader", func(t *testing.T) {
-		config := newClientConfig(WithHeader())
+		config := newClientConfig(withHeader())
 		require.Equal(t, TransportIDHeader, config.transport)
 	})
 	t.Run("WithUpgradeToRocket", func(t *testing.T) {
@@ -195,7 +195,7 @@ func TestNewClientCreation(t *testing.T) {
 
 	t.Run("Header", func(t *testing.T) {
 		channel, err := NewClient(
-			WithHeader(),
+			withHeader(),
 			WithDialer(func() (net.Conn, error) {
 				return net.DialTimeout(addr.Network(), addr.String(), 5*time.Second)
 			}),

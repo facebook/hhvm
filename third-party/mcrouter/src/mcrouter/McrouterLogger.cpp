@@ -159,28 +159,24 @@ bool McrouterLogger::start() {
   // Try the default stats_root first
   if (ensureDirExistsAndWritable(router_.opts().stats_root)) {
     statsRoot_ = router_.opts().stats_root;
-  } else {
-    // If default path is not available and TW backup is enabled, try backup
-    // path
-    if (router_.opts().enable_tw_crash_config_backup_path &&
-        additionalLogger_) {
-      auto backupPath = additionalLogger_->getBackupStatsRootPath();
-      if (backupPath.has_value() &&
-          ensureDirExistsAndWritable(backupPath.value())) {
-        statsRoot_ = backupPath.value();
-        LOG(INFO) << "Using backup path for stats logging: " << statsRoot_;
-      } else {
-        const char* pathStr =
-            backupPath.has_value() ? backupPath->c_str() : "empty";
-        LOG(WARNING) << "Can't create or chmod path: " << pathStr
-                     << ", disabling stats logging";
-        return false;
-      }
+  } else if (additionalLogger_) {
+    // If default path is not available, try backup path from additional logger
+    auto backupPath = additionalLogger_->getBackupStatsRootPath();
+    if (backupPath.has_value() &&
+        ensureDirExistsAndWritable(backupPath.value())) {
+      statsRoot_ = backupPath.value();
+      LOG(INFO) << "Using backup path for stats logging: " << statsRoot_;
     } else {
-      LOG(WARNING) << "Can't create or chmod " << router_.opts().stats_root
+      const char* pathStr =
+          backupPath.has_value() ? backupPath->c_str() : "empty";
+      LOG(WARNING) << "Can't create or chmod path: " << pathStr
                    << ", disabling stats logging";
       return false;
     }
+  } else {
+    LOG(WARNING) << "Can't create or chmod " << router_.opts().stats_root
+                 << ", disabling stats logging";
+    return false;
   }
 
   boost::filesystem::path path(statsRoot_);

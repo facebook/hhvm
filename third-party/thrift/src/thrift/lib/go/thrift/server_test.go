@@ -36,6 +36,7 @@ import (
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 	dummyif "github.com/facebook/fbthrift/thrift/test/go/if/dummy"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
 
@@ -875,4 +876,71 @@ func TestProcessorScenarios(t *testing.T) {
 		err = client.Close()
 		require.NoError(t, err)
 	})
+}
+
+// TestRocketServerFallbackToHeader tests that when a Rocket server receives a header
+// request (from a header client), the ReceivedHeaderRequest observer method is called.
+func TestRocketServerFallbackToHeader(t *testing.T) {
+	clientConfig, serverConfig, err := generateSelfSignedCerts()
+	require.NoError(t, err)
+
+	listener, err := tls.Listen("tcp", "[::]:0", serverConfig)
+	require.NoError(t, err)
+	addr := listener.Addr()
+	t.Logf("Server listening on %v", addr)
+
+	mockObserver := &MockServerObserver{}
+	// Set up expectations for all observer methods that may be called
+	mockObserver.On("ConnAccepted").Maybe()
+	mockObserver.On("ConnTLSAccepted").Maybe()
+	mockObserver.On("ConnDropped").Maybe()
+	mockObserver.On("ReceivedHeaderRequest").Return()
+	mockObserver.On("ReceivedRequest").Maybe()
+	mockObserver.On("ReceivedRequestForFunction", mock.Anything).Maybe()
+	mockObserver.On("SentReply").Maybe()
+	mockObserver.On("ActiveRequests", mock.Anything).Maybe()
+	mockObserver.On("ProcessDelay", mock.Anything).Maybe()
+	mockObserver.On("ProcessTime", mock.Anything).Maybe()
+	mockObserver.On("ProcessorPanic").Maybe()
+	mockObserver.On("TaskKilled").Maybe()
+	mockObserver.On("TaskTimeout").Maybe()
+	mockObserver.On("DeclaredException").Maybe()
+	mockObserver.On("UndeclaredException").Maybe()
+	mockObserver.On("ServerOverloaded").Maybe()
+	mockObserver.On("AnyExceptionForFunction", mock.Anything).Maybe()
+	mockObserver.On("TimeReadUsForFunction", mock.Anything, mock.Anything).Maybe()
+	mockObserver.On("TimeProcessUsForFunction", mock.Anything, mock.Anything).Maybe()
+	mockObserver.On("TimeWriteUsForFunction", mock.Anything, mock.Anything).Maybe()
+
+	processor := dummyif.NewDummyProcessor(&dummy.DummyHandler{})
+	server := NewServer(processor, listener, TransportIDUpgradeToRocket, WithServerObserver(mockObserver))
+
+	serverCtx, serverCancel := context.WithCancel(context.Background())
+	var serverEG errgroup.Group
+	serverEG.Go(func() error {
+		return server.ServeContext(serverCtx)
+	})
+
+	// Create header client to trigger header transport processing
+	headerChannel, err := NewClient(
+		WithHeader(),
+		WithTLS(addr.String(), 5*time.Second, clientConfig),
+		WithIoTimeout(5*time.Second),
+	)
+	require.NoError(t, err)
+	defer headerChannel.Close()
+
+	headerClient := dummyif.NewDummyChannelClient(headerChannel)
+
+	// Trigger receivedHeaderRequest
+	err = headerClient.Ping(context.Background())
+	require.NoError(t, err)
+
+	// Verify ReceivedHeaderRequest was called at least once
+	mockObserver.AssertCalled(t, "ReceivedHeaderRequest")
+
+	// Shut down server
+	serverCancel()
+	err = serverEG.Wait()
+	require.ErrorIs(t, err, context.Canceled)
 }

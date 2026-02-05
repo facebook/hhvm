@@ -68,7 +68,7 @@ struct StackTraceBase {
   static unsigned FunctionIgnorelistCount;
 
  protected:
-  StackTraceBase();
+  StackTraceBase() = default;
 };
 
 ////////////////////////////////////////////////////////////////////////////////

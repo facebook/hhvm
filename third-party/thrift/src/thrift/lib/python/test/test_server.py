@@ -36,7 +36,7 @@ class TestServer:
         self.serve_task = None
 
     async def __aenter__(self) -> SocketAddress:
-        self.serve_task = asyncio.get_event_loop().create_task(self.server.serve())
+        self.serve_task = asyncio.get_running_loop().create_task(self.server.serve())
         return await self.server.get_address()
 
     async def __aexit__(self, *_exc_info: object) -> None:

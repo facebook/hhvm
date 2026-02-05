@@ -174,7 +174,7 @@ class ServicesTests(unittest.IsolatedAsyncioTestCase):
         self.assertFalse(handler.on_start_serving_called)
         self.assertFalse(handler.on_stop_requested_called)
         server = ThriftServer(handler, port=0)
-        serve_task = asyncio.get_event_loop().create_task(server.serve())
+        serve_task = asyncio.get_running_loop().create_task(server.serve())
         await server.get_address()
         self.assertTrue(handler.on_start_serving_called)
         server.stop()

@@ -146,7 +146,7 @@ def server_in_another_process() -> typing.Generator[str, None, None]:
 async def server_in_event_loop() -> typing.AsyncGenerator[SocketAddress, None]:
     server = ThriftServer(LeafServiceHandler(), ip="::1")
     install_http2_routing_handler(server)
-    serve_task = asyncio.get_event_loop().create_task(server.serve())
+    serve_task = asyncio.get_running_loop().create_task(server.serve())
     addr = await server.get_address()
     try:
         yield addr

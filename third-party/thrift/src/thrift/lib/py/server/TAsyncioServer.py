@@ -117,7 +117,7 @@ async def ThriftAsyncServerFactory(
     """
 
     if loop is None:
-        loop = asyncio.get_event_loop()
+        loop = asyncio.get_running_loop()
 
     if not isinstance(processor, TProcessor):
         try:

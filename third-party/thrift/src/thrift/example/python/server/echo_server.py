@@ -28,7 +28,7 @@ class EchoHandler(EchoInterface):
 
 
 async def async_main(port):
-    loop = asyncio.get_event_loop()
+    loop = asyncio.get_running_loop()
     server = ThriftServer(EchoHandler(), port=port)
     serve_task = loop.create_task(server.serve())
     for signal in [SIGINT, SIGTERM]:

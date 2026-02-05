@@ -122,7 +122,7 @@ class TestServer:
         self.server = ThriftServer(handler, ip=ip, path=path)
 
     async def __aenter__(self) -> SocketAddress:
-        self.serve_task = asyncio.get_event_loop().create_task(self.server.serve())
+        self.serve_task = asyncio.get_running_loop().create_task(self.server.serve())
         return await self.server.get_address()
 
     async def __aexit__(self, *exc_info: Iterable[object]) -> None:

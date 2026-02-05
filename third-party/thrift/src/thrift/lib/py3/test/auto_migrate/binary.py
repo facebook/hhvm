@@ -109,7 +109,7 @@ class TestServer:
         self.server = ThriftServer(handler, ip=ip, path=None)
 
     async def __aenter__(self) -> thrift.py3.server.SocketAddress:
-        self.serve_task = asyncio.get_event_loop().create_task(self.server.serve())
+        self.serve_task = asyncio.get_running_loop().create_task(self.server.serve())
         return await self.server.get_address()
 
     # pyre-fixme[2]: Parameter must be annotated.

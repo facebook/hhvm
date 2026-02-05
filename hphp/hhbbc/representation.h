@@ -225,6 +225,11 @@ struct Param {
    */
   bool isOptional: 1;
 
+  /*
+   * Whether this parameter is named.
+   */
+  bool isNamed: 1;
+
   template <typename SerDe> void serde(SerDe&);
 };
 

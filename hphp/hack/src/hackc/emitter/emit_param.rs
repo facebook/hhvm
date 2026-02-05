@@ -28,6 +28,7 @@ use oxidized::aast_visitor;
 use oxidized::aast_visitor::AstParams;
 use oxidized::aast_visitor::Node;
 use oxidized::ast as a;
+use oxidized::ast::ParamNamed;
 use oxidized::ast_defs::Id;
 use oxidized::ast_defs::ReadonlyKind;
 use oxidized::pos::Pos;
@@ -175,6 +176,10 @@ fn from_ast<'a>(
         Some(ReadonlyKind::Readonly) => true,
         _ => false,
     };
+    let is_named = match param.named {
+        Some(ParamNamed::ParamNamed) => true,
+        _ => false,
+    };
     let is_optional = match &param.info {
         a::FunParamInfo::ParamOptional(None) => true,
         a::FunParamInfo::ParamOptional(Some(_))
@@ -190,6 +195,7 @@ fn from_ast<'a>(
             is_inout: param.callconv.is_pinout(),
             is_readonly,
             is_optional,
+            is_named,
             user_attributes: attrs.into(),
             type_info: Maybe::from(type_info),
         },

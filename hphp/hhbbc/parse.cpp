@@ -653,6 +653,7 @@ void add_frame_variables(php::Func& func, const FuncEmitter& fe, const UnitEmitt
         param.isReadonly(),
         param.isVariadic(),
         param.isOptional(),
+        param.isNamed(),
       }
     );
   }

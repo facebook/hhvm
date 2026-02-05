@@ -702,6 +702,7 @@ void emit_locals_and_params(UnitEmitter& ue, FuncEmitter& fe, const php::Func& f
       if (param.readonly) pinfo.setFlag(Func::ParamInfo::Flags::Readonly);
       if (param.isVariadic) pinfo.setFlag(Func::ParamInfo::Flags::Variadic);
       if (param.isOptional) pinfo.setFlag(Func::ParamInfo::Flags::Optional);
+      if (param.isNamed) pinfo.setFlag(Func::ParamInfo::Flags::Named);
       fe.appendParam(func.locals[id].name, pinfo);
       auto const dv = param.dvEntryPoint;
       if (dv != NoBlockId) {

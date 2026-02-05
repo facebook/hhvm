@@ -523,7 +523,7 @@ where
 }
 
 pub(crate) fn parse_param(tokenizer: &mut Tokenizer<'_>) -> Result<(Param, Option<DefaultValue>)> {
-    parse!(tokenizer, <inout:"inout"?> <readonly:"readonly"?> <optional:"optional"?><is_splat:"splat"?><user_attributes:parse_attributes("[")> <ty:parse_type_info>);
+    parse!(tokenizer, <inout:"inout"?> <readonly:"readonly"?> <optional:"optional"?><named:"named"?><is_splat:"splat"?><user_attributes:parse_attributes("[")> <ty:parse_type_info>);
 
     let is_variadic = tokenizer.next_is_identifier("...")?;
     parse!(tokenizer, <name:parse_var>);
@@ -548,6 +548,7 @@ pub(crate) fn parse_param(tokenizer: &mut Tokenizer<'_>) -> Result<(Param, Optio
         is_inout: inout.is_some(),
         is_readonly: readonly.is_some(),
         is_optional: optional.is_some(),
+        is_named: named.is_some(),
         user_attributes: user_attributes.into(),
     };
     Ok((param, default_value))

@@ -400,6 +400,9 @@ fn write_method<W: Write>(
             if param.is_optional {
                 write!(buffer, "optional ")?
             }
+            if param.is_named {
+                write!(buffer, "named ")?;
+            }
             write!(buffer, "{} {}", param.type_, param.name)?;
             if idx != last_idx {
                 write!(buffer, ", ")?;
@@ -506,6 +509,7 @@ fn get_method_params(params: &FunParams) -> Vec<ExtDeclMethodParam> {
             has_default: p.def_value.is_some(),
             is_optional: p.flags.is_optional(),
             is_readonly: p.flags.is_readonly(),
+            is_named: p.flags.is_named(),
             def_value: str_or_empty(p.def_value.as_deref()),
         })
         .collect()

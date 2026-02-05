@@ -1819,6 +1819,7 @@ pub(crate) fn print_param(
         is_variadic,
         is_splat,
         is_optional,
+        is_named,
         type_info: _,
         name,
         ref user_attributes,
@@ -1832,6 +1833,9 @@ pub(crate) fn print_param(
     }
     if is_optional {
         write!(w, "optional ")?;
+    }
+    if is_named {
+        write!(w, "named ")?;
     }
     if is_splat {
         write!(w, "splat ")?;

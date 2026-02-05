@@ -435,6 +435,7 @@ fn emit_reified_init_method<'a>(
             is_inout: false,
             is_readonly: false,
             is_optional: false,
+            is_named: false,
             user_attributes: Default::default(),
             type_info: Just(TypeInfo::new(Just(hhbc::intern("HH\\varray")), tc)),
         }];
@@ -681,6 +682,7 @@ pub fn emit_class<'a>(emitter: &mut Emitter, ast_class: &'a ast::Class_) -> Resu
             is_inout: false,
             is_readonly: false,
             is_optional: false,
+            is_named: false,
             user_attributes: Default::default(),
             type_info: Nothing, // string?
         }];

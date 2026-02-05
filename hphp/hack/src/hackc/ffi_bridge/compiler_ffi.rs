@@ -113,6 +113,7 @@ mod ffi {
         has_default: bool,
         is_readonly: bool,
         is_optional: bool,
+        is_named: bool,
         def_value: String,
     }
 

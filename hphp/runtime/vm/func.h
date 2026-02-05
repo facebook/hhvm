@@ -141,6 +141,7 @@ struct Func final {
       Variadic,   // Is this a `t...' parameter or a `...t` parameter?
       Optional,   // Marked as `optional` in an abstract method
       Splat,      // Is this a `...t` parameter? (Not set for variadic)
+      Named,      // Is this a `named` parameter?
     };
 
     enum class BuiltinAbi : uint8_t {
@@ -163,6 +164,7 @@ struct Func final {
     bool isVariadic() const;
     bool isSplat() const;
     bool isOptional() const;
+    bool isNamed() const;
     void setFlag(Flags flag);
 
     template<class SerDe> void serde(SerDe& sd);
@@ -580,6 +582,10 @@ public:
    */
   uint32_t numInOutParamsForArgs(int32_t numArgs) const;
 
+   /*
+   * Whether the arg-th parameter is named.
+   */
+  bool isNamed(int32_t arg) const;
   /////////////////////////////////////////////////////////////////////////////
   // Locals, iterators, and stack.                                      [const]
 

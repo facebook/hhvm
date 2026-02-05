@@ -577,6 +577,9 @@ std::string func_param_list(const FuncInfo& finfo) {
     if (func->isReadonly(i)) {
       ret += "readonly ";
     }
+    if (func->isNamed(i)) {
+      ret += "named ";
+    }
     ret += type_info(
       func->params()[i].userType.get(func->unit()),
       func->params()[i].typeConstraints

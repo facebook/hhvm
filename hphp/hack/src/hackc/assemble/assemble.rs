@@ -1370,6 +1370,7 @@ fn assemble_param(token_iter: &mut Lexer<'_>, decl_map: &mut DeclMap) -> Result<
     let is_inout = token_iter.next_is_str(Token::is_identifier, "inout");
     let is_readonly = token_iter.next_is_str(Token::is_identifier, "readonly");
     let is_optional = token_iter.next_is_str(Token::is_identifier, "optional");
+    let is_named = token_iter.next_is_str(Token::is_identifier, "named");
     let is_splat = token_iter.next_is_str(Token::is_identifier, "splat");
     let is_variadic = token_iter.next_is(Token::is_variadic);
     let type_info = assemble_type_info_opt(token_iter, TypeInfoKind::NotEnumOrTypeDef)?;
@@ -1389,6 +1390,7 @@ fn assemble_param(token_iter: &mut Lexer<'_>, decl_map: &mut DeclMap) -> Result<
         is_optional,
         is_inout,
         is_readonly,
+        is_named,
         user_attributes: ua_vec.into(),
         type_info,
     };

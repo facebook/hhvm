@@ -1076,6 +1076,7 @@ void translateParameter(TranslationState& ts,
   if (p.is_readonly) param.setFlag(Func::ParamInfo::Flags::Readonly);
   if (p.is_optional) param.setFlag(Func::ParamInfo::Flags::Optional);
   if (p.is_splat) param.setFlag(Func::ParamInfo::Flags::Splat);
+  if (p.is_named) param.setFlag(Func::ParamInfo::Flags::Named);
 
   TypeConstraint tc;
   std::tie(param.userType, tc) = maybeOrElse(p.type_info,

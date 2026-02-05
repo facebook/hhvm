@@ -360,6 +360,7 @@ fn cmp_param(a: &ParamEntry, b: &ParamEntry) -> Result {
                 is_inout: a_is_inout,
                 is_readonly: a_is_readonly,
                 is_optional: a_is_optional,
+                is_named: a_is_named,
                 user_attributes: a_user_attributes,
                 type_info: a_type_info,
             },
@@ -374,6 +375,7 @@ fn cmp_param(a: &ParamEntry, b: &ParamEntry) -> Result {
                 is_inout: b_is_inout,
                 is_readonly: b_is_readonly,
                 is_optional: b_is_optional,
+                is_named: b_is_named,
                 user_attributes: b_user_attributes,
                 type_info: b_type_info,
             },
@@ -386,6 +388,7 @@ fn cmp_param(a: &ParamEntry, b: &ParamEntry) -> Result {
     cmp_eq(a_is_inout, b_is_inout).qualified("is_inout")?;
     cmp_eq(a_is_readonly, b_is_readonly).qualified("is_readonly")?;
     cmp_eq(a_is_optional, b_is_optional).qualified("is_optional")?;
+    cmp_eq(a_is_named, b_is_named).qualified("is_named")?;
     // T126391106 -- bytecode_printer sorts attributes of parameters before printing.
     cmp_attributes(a_user_attributes, b_user_attributes).qualified("user_attributes")?;
     cmp_eq(a_type_info, b_type_info).qualified("type_info")?;

@@ -496,6 +496,12 @@ bool Func::isReadonly(int32_t arg) const {
   return params()[arg].isReadonly();
 }
 
+bool Func::isNamed(int32_t arg) const {
+  assertx(arg >= 0);
+  if (arg >= numParams()) return false;
+  return params()[arg].isNamed();
+}
+
 uint32_t Func::numInOutParams() const {
   uint32_t count = folly::popcount(m_inoutBits);
   if (LIKELY(static_cast<int32_t>(m_inoutBits) >= 0)) {

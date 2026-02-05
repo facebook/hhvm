@@ -2261,6 +2261,10 @@ void parse_parameter_list(AsmState& as) {
       param.setFlag(Func::ParamInfo::Flags::Readonly);
     }
 
+    if (as.in.tryConsume("named")) {
+      param.setFlag(Func::ParamInfo::Flags::Named);
+    }
+
     auto [userType, typeConstraints] = parse_type_info(as);
     param.userType = as.ue->mergeLitstr(userType);
     param.typeConstraints = TypeIntersectionConstraint(

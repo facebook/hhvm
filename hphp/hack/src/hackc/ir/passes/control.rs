@@ -175,6 +175,7 @@ mod test {
                 is_readonly: false,
                 is_optional: false,
                 is_splat: false,
+                is_named: false,
                 user_attributes: vec![].into(),
                 type_info: Maybe::Nothing,
             },

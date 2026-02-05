@@ -2,7 +2,8 @@
 
 function test($input, $compressed, $decompressor) :mixed{
   $output = '';
-  $i = $j = 0;
+  $j = 0;
+  $i = $j;
   $chunks = str_split($compressed, 512 /* bytes */);
   while (!$decompressor->eof()) {
     $chunk = $j < count($chunks) ? $chunks[$j++] : "";
@@ -27,7 +28,8 @@ function test($input, $compressed, $decompressor) :mixed{
 
 function test_potential_exception($input, $compressed, $decompressor) :mixed{
   $output = '';
-  $i = $j = 0;
+  $j = 0;
+  $i = $j;
   $chunks = str_split($compressed, 16384);
   $errs = 0;
   while (!$decompressor->eof()) {

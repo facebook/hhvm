@@ -9,7 +9,8 @@ function test($a) :mixed{
   $a ? 0 : out('-a');
   $a && out('&&a');
   $a || out('||a');
-  $b = $c = 0;
+  $c = 0;
+  $b = $c;
   $a || (($b = 5) + ($c = 6));
   out($b);
  out($c);

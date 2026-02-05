@@ -18,7 +18,8 @@ $process2 = proc_open('cat', darray($descriptorspec), inout $io2);
 
 while (!feof($io[1])) {
   $r = vec[$io[1], $io2[1]];
-  $w = $e = null;
+  $e = null;
+  $w = $e;
   $i = stream_select(inout $r, inout $w, inout $e, 1);
   var_dump($i);
   if ($i) {

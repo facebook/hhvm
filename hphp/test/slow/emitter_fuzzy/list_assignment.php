@@ -2,5 +2,6 @@
 
 <<__EntryPoint>>
 function foo() :mixed{
-  list($a, $i, $version) = $testProcess= 0;
+  $testProcess = 0;
+  list($a, $i, $version) = $testProcess;
 }

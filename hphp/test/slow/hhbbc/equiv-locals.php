@@ -2,7 +2,10 @@
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 function loop() :mixed{
-  $a = $b = $c = $d = false;
+  $d = false;
+  $c = $d;
+  $b = $c;
+  $a = $b;
   while (true) {
     if ($a) continue;
     if ($c) {

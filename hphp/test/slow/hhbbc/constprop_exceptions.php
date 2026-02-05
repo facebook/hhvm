@@ -4,7 +4,8 @@ function foo() :mixed{ return 1; }
 
 function main() :mixed{
   $x = null;
-  $y = $z = foo();
+  $z = foo();
+  $y = $z;
   try {
     $f = $y + $z;  // Add is constprop, and generally a PEI
     $x = "heh";

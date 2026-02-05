@@ -1,7 +1,10 @@
 <?hh
 <<__EntryPoint>> function main(): void {
 $letexte="<br><br>";
-$ligne_horizontale = $puce = $debut_intertitre = $fin_intertitre = '';
+$fin_intertitre = '';
+$debut_intertitre = $fin_intertitre;
+$puce = $debut_intertitre;
+$ligne_horizontale = $puce;
 
 $cherche1 = vec[
     /* 0 */     "/\n(----+|____+)/S",

@@ -42,7 +42,8 @@ function main_entry(): void {
   	$search=new stdClass();
   	$search->queryString='argo';
   	$search->ranges = vec[];
-  	$search->ranges[]=$r=new stdClass();
+  	$r = new stdClass();
+  	$search->ranges[] = $r;
   	$r->field='maxDateTime';
   	$r->min='2003-04-01';
   	$search->index='all';

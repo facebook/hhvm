@@ -3,8 +3,10 @@
 function runHotswapTest() {
 
   $pid = posix_getpid();
-
-  $serverProc = $newServerProc = $serverPort = $adminPort = null;
+  $adminPort = null;
+  $serverPort = $adminPort;
+  $newServerProc = $serverPort;
+  $serverProc = $newServerProc;
   $debugPort = false;
   $serverHome = __DIR__.'/..';
   $serverRoot = __DIR__.'/../server_root';

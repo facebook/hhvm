@@ -9,7 +9,8 @@ function foo() :mixed{
     } catch (UndefinedVariableException $e) {
       var_dump($e->getMessage());
     }
-    $abc = $var = 333;
+    $var = 333;
+    $abc = $var;
   };
   var_dump($a());
   var_dump($abc, $var);

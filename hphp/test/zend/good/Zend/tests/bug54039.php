@@ -23,12 +23,14 @@ function test_2() :mixed{
 
 class S3 { public static $v = ""; }
 function test_3() :mixed{
-    $v = S3::$v .= 'b';
+    S3::$v .= 'b';
+    $v = S3::$v;
     echo "Outer function catenates 'b' onto \$v to give $v\n";
     $f = function() use($v) {
         echo "Inner function reckons \$v is $v\n";
     };
-    $v = S3::$v .= 'a';
+    S3::$v .= 'a';
+    $v = S3::$v;
     echo "Outer function catenates 'a' onto \$v to give $v\n";
     return $f;
 }

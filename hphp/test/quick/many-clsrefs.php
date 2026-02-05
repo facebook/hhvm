@@ -14,10 +14,16 @@ class Bar {
   public static $prop10;
 
   static function set($f) :mixed{
-    self::$prop1 = self::$prop2 = self::$prop3 =
-    self::$prop4 = self::$prop5 = self::$prop6 =
-    self::$prop7 = self::$prop8 = self::$prop9 =
     self::$prop10 = $f();
+    self::$prop9 = self::$prop10;
+    self::$prop8 = self::$prop9;
+    self::$prop7 = self::$prop8;
+    self::$prop6 = self::$prop7;
+    self::$prop5 = self::$prop6;
+    self::$prop4 = self::$prop5;
+    self::$prop3 = self::$prop4;
+    self::$prop2 = self::$prop3;
+    self::$prop1 = self::$prop2;
   }
 
   static function dump() :mixed{

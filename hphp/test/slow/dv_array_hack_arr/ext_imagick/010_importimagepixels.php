@@ -15,7 +15,8 @@ $pixels = varray(
 
 /* Width and height. The area is amount of pixels divided
    by three. Three comes from 'RGB', three values per pixel */
-$width = $height = 100;
+$height = 100;
+$width = $height;
 
 /* Create empty image */
 $im = new Imagick();

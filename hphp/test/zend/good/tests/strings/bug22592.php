@@ -1,7 +1,9 @@
 <?hh <<__EntryPoint>> function main(): void {
-$wrong = $correct = 'abcdef';
+$correct = 'abcdef';
+$wrong = $correct;
 $x = vec[];
-$t = $x[] = 'x';
+$x[] = 'x';
+$t = 'x';
 
 var_dump($correct);
 var_dump($wrong);
@@ -11,7 +13,9 @@ $correct[3] = '*';
 $correct[5] = '*';
 
 // This produces the
-$wrong[1] = $wrong[3] = $wrong[5] = '*';
+$wrong[5] = '*';
+$wrong[3] = $wrong[5];
+$wrong[1] = $wrong[3];
 
 var_dump($correct);
 var_dump($wrong);

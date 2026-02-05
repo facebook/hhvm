@@ -4,7 +4,8 @@ function aa() :mixed{ return 'a'; }
 function heh() :mixed{ return dict['a' => aa()]; }
 function x() :mixed{
   $x = heh();
-  $r = $x[''] = 2;
+  $r = 2;
+  $x[''] = 2;
   var_dump($r);
   var_dump($x);
 }

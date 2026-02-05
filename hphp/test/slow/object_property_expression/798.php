@@ -10,7 +10,8 @@ class X {
   function bar() :mixed{
     var_dump('bar');
     $this->qq = new Y;
-    $this->qq->x = $this->qq->y = 1;
+    $this->qq->y = 1;
+    $this->qq->x = $this->qq->y;
     return $this->qq;
   }
 }

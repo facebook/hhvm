@@ -85,7 +85,8 @@ var_dump(socket_read($s, 100));
 
 list($client, $s) = get_client_server();
 $reads = vec[$s];
-$ignore1 = $ignore2 = null;
+$ignore2 = null;
+$ignore1 = $ignore2;
 var_dump(socket_select(inout $reads, inout $ignore1, inout $ignore2, 1, 0));
 var_dump(socket_write($client, "next select will be 1"));
 $reads = vec[$s];

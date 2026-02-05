@@ -63,7 +63,8 @@ function manylocals() :AsyncGenerator<mixed,mixed,void>{
   $a = yield dict['a' => $a, 'b' => $b, 'c' => $c, 'd' => $d, 'e' => $e, 'f' => $f, 'g' => $g, 'h' => $h, 'i' => $i, 'j' => $j, 'k' => $k, 'l' => $l];
   $b = 0xdeadbeef;
   $c = yield dict['a' => $a, 'b' => $b, 'c' => $c, 'd' => $d, 'e' => $e, 'f' => $f, 'g' => $g, 'h' => $h, 'i' => $i, 'j' => $j, 'k' => $k, 'l' => $l];
-  $d = $e = 0xba53b411;
+  $e = 0xba53b411;
+  $d = $e;
   yield dict['a' => $a, 'b' => $b, 'c' => $c, 'd' => $d, 'e' => $e, 'f' => $f, 'g' => $g, 'h' => $h, 'i' => $i, 'j' => $j, 'k' => $k, 'l' => $l];
 }
 

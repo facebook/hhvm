@@ -7,7 +7,8 @@ function err($errno, $errstr, $errfile, $errline)
 
 class test {
     function foo() :mixed{
-        $var = $this->blah->prop = "string";
+        $this->blah->prop = "string";
+        $var = $this->blah->prop;
         var_dump($this->blah);
     }
 }

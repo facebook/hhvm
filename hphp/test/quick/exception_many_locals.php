@@ -16,7 +16,12 @@ function main() :mixed{
     $o = new c;
     echo "Creating second c\n";
     $p = new c;
-    $o1 = $o2 = $o3 = $o4 = $o5 = $o6 = $o; // fill up caller-saved
+    $o6 = $o; //fill up caller-saved
+    $o5 = $o6;
+    $o4 = $o5;
+    $o3 = $o4;
+    $o2 = $o3;
+    $o1 = $o2;
     $o7 = $o; // use callee saved
     $p = 5;
     echo $x;

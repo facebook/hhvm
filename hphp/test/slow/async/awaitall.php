@@ -93,7 +93,8 @@ function main_awaitall() :mixed{
   t($wh, $dicts);
 
   echo "grandchildren\n";
-  list($vecs, $dicts) = $handles = get_wrapped_handles();
+  $handles = get_wrapped_handles();
+  list($vecs, $dicts) = $handles;
 
   $top = vec[
     AwaitAllWaitHandle::fromVec(vec($vecs)),

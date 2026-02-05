@@ -4,8 +4,8 @@ chdir(sys_get_temp_dir());
 echo "String Test: ";
 echo file_put_contents("TEST1", file_get_contents(__FILE__)) !== FALSE ? 'OK' : 'FAIL';
 echo "\n";
-
-$old_int = $int = rand();
+$int = rand();
+$old_int = $int;
 $ret = file_put_contents("TEST2", $int);
 echo "Integer Test: ";
 if ($int === $old_int && $ret !== FALSE && md5((string)$int) == md5_file("TEST2")) {
@@ -14,8 +14,8 @@ if ($int === $old_int && $ret !== FALSE && md5((string)$int) == md5_file("TEST2"
     echo 'FAIL';
 }
 echo "\n";
-
-$old_int = $int = time() / 1000;
+$int = time() / 1000;
+$old_int = $int;
 $ret = file_put_contents("TEST3", $int);
 echo "Float Test: ";
 if ($int === $old_int && $ret !== FALSE && md5((string)$int) == md5_file("TEST3")) {

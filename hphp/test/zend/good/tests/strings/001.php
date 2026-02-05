@@ -65,7 +65,8 @@ if ($lower == "abcdefg") {
 }
 
 echo "Testing substr: ";
-$tests = $ok = 0;
+$ok = 0;
+$tests = $ok;
 $string = "string12345";
 $tests++; if (substr($string, 2, 10) == "ring12345") { $ok++; }
 $tests++; if (substr($string, 4, 7) == "ng12345") { $ok++; }

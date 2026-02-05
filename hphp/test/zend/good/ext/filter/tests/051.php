@@ -1,4 +1,5 @@
 <?hh <<__EntryPoint>> function main(): void {
-$tmp = $default = 321;
+$default = 321;
+$tmp = $default;
 var_dump(filter_var("123asd", FILTER_VALIDATE_INT, dict["options"=>dict["default"=>$default]]));
 }

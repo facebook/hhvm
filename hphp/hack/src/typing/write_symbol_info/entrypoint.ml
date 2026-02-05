@@ -76,15 +76,43 @@ let write_facts_file out_dir ?(global = false) files json_chunks =
    indexing run. There are
    - symbol hash facts for incrementality (empty if gen_sym_hash isn't set)
    - the namespace aliases defined in .hhconfig *)
+
+let bytes_per_hash = 16
+
+(* input hashes are stored in facts, we try to keep the max size
+   of such  fact to a reasonable size (800KB), ideally less than
+   Glean pagination limit *)
+let max_fact_bytes = 800 * 1024 (* 800KB *)
+
+let max_hashes_per_fact = max_fact_bytes / bytes_per_hash
+
 let gen_global_facts ns ~ownership ~shard_name all_hashes =
-  let fa = Fact_acc.init ~ownership in
   let list_hashes = Set.to_list all_hashes in
-  if ownership then Fact_acc.set_ownership_unit fa (Some ".hhconfig");
-  List.fold ns ~init:fa ~f:(fun fa (from, to_) ->
-      Add_fact.global_namespace_alias fa ~from ~to_ |> snd)
-  |> Add_fact.indexerInputsHash shard_name list_hashes
-  |> snd
-  |> Fact_acc.to_json
+  (* Split hashes into chunks *)
+  let hash_chunks = List.chunks_of list_hashes ~length:max_hashes_per_fact in
+  let num_chunks = List.length hash_chunks in
+  (* Generate facts for each chunk *)
+  List.concat_mapi hash_chunks ~f:(fun i chunk_hashes ->
+      let fa = Fact_acc.init ~ownership in
+      (* Only include namespace aliases in the first shard *)
+      let fa =
+        if i = 0 then begin
+          if ownership then Fact_acc.set_ownership_unit fa (Some ".hhconfig");
+          List.fold ns ~init:fa ~f:(fun fa (from, to_) ->
+              Add_fact.global_namespace_alias fa ~from ~to_ |> snd)
+        end else
+          fa
+      in
+      let chunk_shard_name =
+        if num_chunks = 1 then
+          shard_name
+        else
+          Printf.sprintf "%s%03d" shard_name i
+      in
+      fa
+      |> Add_fact.indexerInputsHash chunk_shard_name chunk_hashes
+      |> snd
+      |> Fact_acc.to_json)
 
 let write_json
     (ctx : Provider_context.t)

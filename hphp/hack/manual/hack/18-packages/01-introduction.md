@@ -95,3 +95,11 @@ include_paths = ["//"]
 This creates a package that captures all files not in other packages.
 
 Once you've defined a set of packages, you can deploy them using [deployments](/hack/packages/deployments).
+
+## Tests Directory Exemption
+
+Test directories are exempt from package access checks:
+
+Files in directories containing `__tests__` in their path are excluded from package enforcement:
+- They are **bidirectionally** excluded from typechecker package errors
+- They are automatically excluded from all deployments

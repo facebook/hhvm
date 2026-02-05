@@ -142,8 +142,6 @@ if (package foo) {
 }
 ```
 
-**Note:** Package expressions are currently disallowed inside `invariant()` calls due to unexpected typechecker complexity.
-
 ### Runtime Behavior
 
 - `package foo` desugars to `package_exists("foo")`
@@ -202,7 +200,33 @@ function conditional_caller(): void {
 
 ### Package Inclusion Requirements
 
-When using `<<__RequirePackage('a')>>` or `<<__SoftRequirePackage('a')>>` in package 'b', package 'a' must include package 'b'.
+When using `<<__RequirePackage('a')>>` or `<<__SoftRequirePackage('a')>>` in package 'b', package 'a' must **strictly** include package 'b'. This means:
+
+1. **Cannot require own package:** You cannot use `__(Soft)RequirePackage('b')` when already in package 'b'.
+
+```hack no-extract
+// File in package 'intern'
+<<__RequirePackage('intern')>>  // ERROR: cannot require own package
+function self_require(): void {}
+
+<<__RequirePackage('prod')>>  // ERROR: prod does not include intern
+function reverse_require(): void {}  // (assuming intern includes prod, not vice versa)
+```
+
+2. **Must not soft-include:** If package 'b' only `soft_includes` package 'a', you cannot use `__(Soft)RequirePackage('a')` in package 'b'.
+
+```toml
+[packages.prod]
+soft_includes = ["dynamically_accessible"]
+```
+
+```hack no-extract
+// File in package 'prod'
+<<__RequirePackage('dynamically_accessible')>>  // ERROR: prod only soft-includes this package
+function illegal(): void {}
+```
+
+
 
 ### `__RequirePackage`
 
@@ -443,6 +467,7 @@ Temporary exceptions support legacy build behaviors where certain symbol referen
 
 **Bypassed contexts** (migration only):
 - **Type aliases**: `type MyType = ForeignPackageType`
+- **Newtype aliases**: `newtype MyType = ForeignPackageType`
 - **Type hints**: Parameters and return types referencing foreign package types
 - **Generics**: Reified and erased generics like `new C<ForeignPackageType>()`
 - **Function types**: `function(ForeignPackageType): int`
@@ -453,4 +478,4 @@ Temporary exceptions support legacy build behaviors where certain symbol referen
 - **Shape, vec, and dict types**: `shape('foo' => ForeignPackageType)`, `vec<ForeignPackageType>`, `dict<string, ForeignPackageType>`
 - **is/as expressions**: `$x is ForeignPackageType`, `$x as ForeignPackageType`
 
-These exceptions are intended to be temporary and may be removed in future versions as codebases enable.
+These exceptions are intended to be temporary and may be removed in future versions as codebases enable stricter checking.

@@ -263,11 +263,23 @@ impl Validatable for Primary {
                 member_name,
                 ..
             } => class_name.validate(env) && member_name.validate(env),
+            Self::AnyPkg {
+                use_file,
+                decl_file,
+            } => use_file.validate(env) && decl_file.validate(env),
             Self::CrossPkgAccess {
                 use_file,
                 decl_file,
             } => use_file.validate(env) && decl_file.validate(env),
             Self::CrossPkgAccessWithRequirepackage {
+                use_file,
+                decl_file,
+            } => use_file.validate(env) && decl_file.validate(env),
+            Self::CrossPkgAccessWithSoftrequirepackage {
+                use_file,
+                decl_file,
+            } => use_file.validate(env) && decl_file.validate(env),
+            Self::SoftIncludedAccess {
                 use_file,
                 decl_file,
             } => use_file.validate(env) && decl_file.validate(env),

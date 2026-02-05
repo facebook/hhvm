@@ -14,6 +14,171 @@ module Ty = Typing_defs_core
 
 let mk_ty ty_ = Ty.mk (Typing_reason.none, ty_)
 
+(* ============================================================================ *)
+(* Helper Functions for Common Test Operations *)
+(* ============================================================================ *)
+
+(** Create a position from a file suffix relative to root *)
+let mk_pos_from_suffix suffix =
+  let pos_file = Relative_path.from_root ~suffix in
+  Pos.make_from_lnum_bol_offset ~pos_file ~pos_start:(0, 0, 0) ~pos_end:(0, 0, 0)
+
+(** Create a file pattern with common defaults *)
+let mk_pkg_file_pattern ?(allow_glob = false) path_segments name_patt ext_patt =
+  let patt_file_path =
+    Some (Core.List.fold path_segments ~init:Patt_file.dot ~f:Patt_file.( </> ))
+  in
+  Patt_file.Name
+    {
+      patt_file_path;
+      patt_file_name = name_patt;
+      patt_file_extension = ext_patt;
+      allow_glob;
+    }
+
+(** Create a minimal custom error config from a single custom error *)
+let mk_custom_config custom_err =
+  Custom_error_config.{ valid = [custom_err]; invalid = [] }
+
+(** Assert that the error matches and produces the expected message *)
+let assert_matches_message expected_msg config ~err =
+  let open Core in
+  assert_equal
+    ~cmp:[%compare.equal: (string, Eval.Value.t) Either.t list list]
+    (Eval.eval_typing_error config ~err)
+    [[Either.First expected_msg]]
+
+(** Assert that the error does not match any pattern in the config *)
+let assert_no_match config ~err =
+  let open Core in
+  assert_equal
+    ~cmp:[%compare.equal: (string, Eval.Value.t) Either.t list list]
+    (Eval.eval_typing_error config ~err)
+    []
+
+(* ============================================================================ *)
+(* Parametrized Package Error Test Builder *)
+(* ============================================================================ *)
+
+(** Kind of package error for parametrized tests *)
+type pkg_error_kind =
+  | Pkg_cross_access
+  | Pkg_cross_access_with_requirepackage
+  | Pkg_cross_access_with_softrequirepackage
+  | Pkg_soft_included_access
+  | Pkg_any
+
+(** Create a package primary error based on kind *)
+let mk_pkg_primary_error ~pos ~kind =
+  let open Typing_error.Primary in
+  let open Typing_error.Primary.Package in
+  Package
+    (match kind with
+    | Pkg_cross_access ->
+      Cross_pkg_access
+        {
+          pos;
+          decl_pos = Pos_or_decl.none;
+          current_package = None;
+          current_package_assignment_kind = "whatever";
+          target_package = None;
+          target_package_assignment_kind = "whatever";
+          current_filename = Relative_path.default;
+          target_filename = Relative_path.default;
+          target_id = "whatever";
+          target_symbol_spec = "whatever";
+          loaded_packages = [];
+          included_packages = [];
+        }
+    | Pkg_cross_access_with_requirepackage ->
+      Cross_pkg_access_with_requirepackage
+        {
+          pos;
+          decl_pos = Pos_or_decl.none;
+          target_package = "test_package";
+          current_package = None;
+          loaded_packages = [];
+          included_packages = [];
+        }
+    | Pkg_cross_access_with_softrequirepackage ->
+      Cross_pkg_access_with_softrequirepackage
+        {
+          pos;
+          decl_pos = Pos_or_decl.none;
+          current_soft_package_opt = None;
+          target_package = "test_package";
+          loaded_packages = [];
+          included_packages = [];
+        }
+    | Pkg_soft_included_access ->
+      Soft_included_access
+        {
+          pos;
+          decl_pos = Pos_or_decl.none;
+          current_package = None;
+          current_package_assignment_kind = "whatever";
+          target_package = None;
+          target_package_assignment_kind = "whatever";
+          current_filename = Relative_path.default;
+          target_filename = Relative_path.default;
+          target_id = "whatever";
+          target_symbol_spec = "whatever";
+          loaded_packages = [];
+          included_packages = [];
+        }
+    | Pkg_any ->
+      (* For Pkg_any we still need a concrete error, use Cross_pkg_access *)
+      Cross_pkg_access
+        {
+          pos;
+          decl_pos = Pos_or_decl.none;
+          current_package = None;
+          current_package_assignment_kind = "whatever";
+          target_package = None;
+          target_package_assignment_kind = "whatever";
+          current_filename = Relative_path.default;
+          target_filename = Relative_path.default;
+          target_id = "whatever";
+          target_symbol_spec = "whatever";
+          loaded_packages = [];
+          included_packages = [];
+        })
+
+(** Create a package pattern based on kind *)
+let mk_pkg_pattern ~patt_use_file ~patt_decl_file ~kind =
+  Patt_typing_error.Primary
+    (match kind with
+    | Pkg_cross_access ->
+      Patt_typing_error.Cross_pkg_access { patt_use_file; patt_decl_file }
+    | Pkg_cross_access_with_requirepackage ->
+      Patt_typing_error.Cross_pkg_access_with_requirepackage
+        { patt_use_file; patt_decl_file }
+    | Pkg_cross_access_with_softrequirepackage ->
+      Patt_typing_error.Cross_pkg_access_with_softrequirepackage
+        { patt_use_file; patt_decl_file }
+    | Pkg_soft_included_access ->
+      Patt_typing_error.Soft_included_access { patt_use_file; patt_decl_file }
+    | Pkg_any -> Patt_typing_error.Any_pkg { patt_use_file; patt_decl_file })
+
+(** Parametrized test for package errors *)
+let test_pkg_error ~kind ~file_suffix ~patt_use_file ~patt_decl_file ~expected _
+    =
+  let pos = mk_pos_from_suffix file_suffix in
+  let prim_err = mk_pkg_primary_error ~pos ~kind in
+  let err = Typing_error.primary prim_err in
+
+  let patt_primary = mk_pkg_pattern ~patt_use_file ~patt_decl_file ~kind in
+  let patt = Custom_error.Error_v2 (Patt_error.Typing patt_primary) in
+  let error_message =
+    Custom_error.Message_v1 Error_message.{ message = [Lit "Boom"] }
+  in
+  let custom_err = Custom_error.{ name = "test"; patt; error_message } in
+  let config = mk_custom_config custom_err in
+
+  match expected with
+  | `Match msg -> assert_matches_message msg config ~err
+  | `NoMatch -> assert_no_match config ~err
+
 (* Pattern match over a `Violated_constraint` error matching exactly the tparam
    name for which the constraint is violated *)
 let test_patt_string_exactly _ =
@@ -1081,127 +1246,112 @@ let test_malformed_class_name _ =
     []
 (* == Package errors ======================================================== *)
 
-let test_cross_pkg_access _ =
-  let open Typing_error in
-  let pos_file = Relative_path.from_root ~suffix:"foo/bar/baz.php" in
-  let pos =
-    Pos.make_from_lnum_bol_offset
-      ~pos_file
-      ~pos_start:(0, 0, 0)
-      ~pos_end:(0, 0, 0)
-  in
-  let prim_err =
-    Primary.Package
-      (Primary.Package.Cross_pkg_access
-         {
-           pos;
-           decl_pos = Pos_or_decl.none;
-           (* Everything else is currently not matched on in the custom error *)
-           current_package = None;
-           current_package_assignment_kind = "whatever";
-           target_package = None;
-           target_package_assignment_kind = "whatever";
-           current_filename = Relative_path.default;
-           target_filename = Relative_path.default;
-           target_id = "whatever";
-           target_symbol_spec = "whatever";
-           loaded_packages = [];
-           included_packages = [];
-         })
-  in
+(* Common file pattern for standard package tests: matches 'foo/*/b*.php' *)
+let std_pkg_use_file_pattern =
+  mk_pkg_file_pattern
+    [Patt_string.Exactly "foo"; Patt_string.Wildcard]
+    (Patt_string.Starts_with "b")
+    (Patt_string.Exactly "php")
+
+let test_cross_pkg_access =
+  test_pkg_error
+    ~kind:Pkg_cross_access
+    ~file_suffix:"foo/bar/baz.php"
+    ~patt_use_file:std_pkg_use_file_pattern
+    ~patt_decl_file:Patt_file.Wildcard
+    ~expected:(`Match "Boom")
+
+let test_cross_pkg_access_with_requirepackage =
+  test_pkg_error
+    ~kind:Pkg_cross_access_with_requirepackage
+    ~file_suffix:"foo/bar/baz.php"
+    ~patt_use_file:std_pkg_use_file_pattern
+    ~patt_decl_file:Patt_file.Wildcard
+    ~expected:(`Match "Boom")
+
+let test_cross_pkg_access_with_softrequirepackage =
+  test_pkg_error
+    ~kind:Pkg_cross_access_with_softrequirepackage
+    ~file_suffix:"foo/bar/baz.php"
+    ~patt_use_file:std_pkg_use_file_pattern
+    ~patt_decl_file:Patt_file.Wildcard
+    ~expected:(`Match "Boom")
+
+let test_soft_included_access =
+  test_pkg_error
+    ~kind:Pkg_soft_included_access
+    ~file_suffix:"foo/bar/baz.php"
+    ~patt_use_file:std_pkg_use_file_pattern
+    ~patt_decl_file:Patt_file.Wildcard
+    ~expected:(`Match "Boom")
+
+(** Test that Any_pkg pattern matches Cross_pkg_access errors *)
+let test_any_pkg_matches_cross_pkg_access _ =
+  let pos = mk_pos_from_suffix "foo/bar/baz.php" in
+  (* Create a Cross_pkg_access error *)
+  let prim_err = mk_pkg_primary_error ~pos ~kind:Pkg_cross_access in
   let err = Typing_error.primary prim_err in
-  (* match 'foo/*' *)
-  let patt_file_path =
-    Some Patt_file.(dot </> Patt_string.Exactly "foo" </> Patt_string.Wildcard)
-  and patt_file_name = Patt_string.Starts_with "b"
-  and patt_file_extension = Patt_string.Exactly "php" in
-  let patt_use_file =
-    Patt_file.Name
-      {
-        patt_file_path;
-        patt_file_name;
-        patt_file_extension;
-        allow_glob = false;
-      }
-  in
+
+  (* But use the Any_pkg pattern *)
   let patt_primary =
-    Patt_typing_error.Primary
-      (Patt_typing_error.Cross_pkg_access
-         { patt_use_file; patt_decl_file = Patt_file.Wildcard })
+    mk_pkg_pattern
+      ~patt_use_file:std_pkg_use_file_pattern
+      ~patt_decl_file:Patt_file.Wildcard
+      ~kind:Pkg_any
   in
   let patt = Custom_error.Error_v2 (Patt_error.Typing patt_primary) in
-
   let error_message =
     Custom_error.Message_v1 Error_message.{ message = [Lit "Boom"] }
   in
   let custom_err = Custom_error.{ name = "test"; patt; error_message } in
-  let custom_config =
-    Custom_error_config.{ valid = [custom_err]; invalid = [] }
-  in
+  let config = mk_custom_config custom_err in
+  assert_matches_message "Boom" config ~err
 
-  let open Core in
-  assert_equal
-    ~cmp:[%compare.equal: (string, Eval.Value.t) Either.t list list]
-    (Eval.eval_typing_error custom_config ~err)
-    [[Either.First "Boom"]]
-
-let test_cross_pkg_access_with_requirepackage _ =
-  let open Typing_error in
-  let pos_file = Relative_path.from_root ~suffix:"foo/bar/baz.php" in
-  let pos =
-    Pos.make_from_lnum_bol_offset
-      ~pos_file
-      ~pos_start:(0, 0, 0)
-      ~pos_end:(0, 0, 0)
-  in
+(** Test that Any_pkg pattern matches Cross_pkg_access_with_requirepackage errors *)
+let test_any_pkg_matches_requirepackage _ =
+  let pos = mk_pos_from_suffix "foo/bar/baz.php" in
+  (* Create a Cross_pkg_access_with_requirepackage error *)
   let prim_err =
-    Primary.Package
-      (Primary.Package.Cross_pkg_access_with_requirepackage
-         {
-           pos;
-           decl_pos = Pos_or_decl.none;
-           (* Everything else is currently not matched on in the custom error *)
-           target_package = "test_package";
-           current_package = None;
-           loaded_packages = [];
-           included_packages = [];
-         })
+    mk_pkg_primary_error ~pos ~kind:Pkg_cross_access_with_requirepackage
   in
   let err = Typing_error.primary prim_err in
-  (* match 'foo/*' *)
-  let patt_file_path =
-    Some Patt_file.(dot </> Patt_string.Exactly "foo" </> Patt_string.Wildcard)
-  and patt_file_name = Patt_string.Starts_with "b"
-  and patt_file_extension = Patt_string.Exactly "php" in
-  let patt_use_file =
-    Patt_file.Name
-      {
-        patt_file_path;
-        patt_file_name;
-        patt_file_extension;
-        allow_glob = false;
-      }
-  in
+
+  (* But use the Any_pkg pattern *)
   let patt_primary =
-    Patt_typing_error.Primary
-      (Patt_typing_error.Cross_pkg_access_with_requirepackage
-         { patt_use_file; patt_decl_file = Patt_file.Wildcard })
+    mk_pkg_pattern
+      ~patt_use_file:std_pkg_use_file_pattern
+      ~patt_decl_file:Patt_file.Wildcard
+      ~kind:Pkg_any
   in
   let patt = Custom_error.Error_v2 (Patt_error.Typing patt_primary) in
-
   let error_message =
     Custom_error.Message_v1 Error_message.{ message = [Lit "Boom"] }
   in
   let custom_err = Custom_error.{ name = "test"; patt; error_message } in
-  let custom_config =
-    Custom_error_config.{ valid = [custom_err]; invalid = [] }
-  in
+  let config = mk_custom_config custom_err in
+  assert_matches_message "Boom" config ~err
 
-  let open Core in
-  assert_equal
-    ~cmp:[%compare.equal: (string, Eval.Value.t) Either.t list list]
-    (Eval.eval_typing_error custom_config ~err)
-    [[Either.First "Boom"]]
+(** Test that Any_pkg pattern matches Soft_included_access errors *)
+let test_any_pkg_matches_soft_included_access _ =
+  let pos = mk_pos_from_suffix "foo/bar/baz.php" in
+  (* Create a Soft_included_access error *)
+  let prim_err = mk_pkg_primary_error ~pos ~kind:Pkg_soft_included_access in
+  let err = Typing_error.primary prim_err in
+
+  (* But use the Any_pkg pattern *)
+  let patt_primary =
+    mk_pkg_pattern
+      ~patt_use_file:std_pkg_use_file_pattern
+      ~patt_decl_file:Patt_file.Wildcard
+      ~kind:Pkg_any
+  in
+  let patt = Custom_error.Error_v2 (Patt_error.Typing patt_primary) in
+  let error_message =
+    Custom_error.Message_v1 Error_message.{ message = [Lit "Boom"] }
+  in
+  let custom_err = Custom_error.{ name = "test"; patt; error_message } in
+  let config = mk_custom_config custom_err in
+  assert_matches_message "Boom" config ~err
 
 let test_optional_path_segment_missing _ =
   let open Typing_error in
@@ -1896,6 +2046,15 @@ let tests =
     "test_cross_pkg_access" >:: test_cross_pkg_access;
     "test_cross_pkg_access_with_requirepackage"
     >:: test_cross_pkg_access_with_requirepackage;
+    "test_cross_pkg_access_with_softrequirepackage"
+    >:: test_cross_pkg_access_with_softrequirepackage;
+    "test_soft_included_access" >:: test_soft_included_access;
+    "test_any_pkg_matches_cross_pkg_access"
+    >:: test_any_pkg_matches_cross_pkg_access;
+    "test_any_pkg_matches_requirepackage"
+    >:: test_any_pkg_matches_requirepackage;
+    "test_any_pkg_matches_soft_included_access"
+    >:: test_any_pkg_matches_soft_included_access;
     "test_malformed_class_name" >:: test_malformed_class_name;
     "test_optional_path_segment_missing" >:: test_optional_path_segment_missing;
     "test_optional_path_segment_present" >:: test_optional_path_segment_present;

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<3f8e4f9add43169785b4afa5d82ed3c6>>
+// @generated SignedSource<<55c1b72bbc0716f271770aef5c1aedda>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -90,6 +90,13 @@ pub enum Primary {
         member_name: patt_member_name::PattMemberName,
         visibility: Option<VisibilityPattern>,
     },
+    /// Matches any of the other package primary errors
+    #[rust_to_ocaml(prefix = "patt_")]
+    #[rust_to_ocaml(name = "Any_pkg")]
+    AnyPkg {
+        use_file: patt_file::PattFile,
+        decl_file: patt_file::PattFile,
+    },
     #[rust_to_ocaml(prefix = "patt_")]
     #[rust_to_ocaml(name = "Cross_pkg_access")]
     CrossPkgAccess {
@@ -99,6 +106,18 @@ pub enum Primary {
     #[rust_to_ocaml(prefix = "patt_")]
     #[rust_to_ocaml(name = "Cross_pkg_access_with_requirepackage")]
     CrossPkgAccessWithRequirepackage {
+        use_file: patt_file::PattFile,
+        decl_file: patt_file::PattFile,
+    },
+    #[rust_to_ocaml(prefix = "patt_")]
+    #[rust_to_ocaml(name = "Cross_pkg_access_with_softrequirepackage")]
+    CrossPkgAccessWithSoftrequirepackage {
+        use_file: patt_file::PattFile,
+        decl_file: patt_file::PattFile,
+    },
+    #[rust_to_ocaml(prefix = "patt_")]
+    #[rust_to_ocaml(name = "Soft_included_access")]
+    SoftIncludedAccess {
         use_file: patt_file::PattFile,
         decl_file: patt_file::PattFile,
     },

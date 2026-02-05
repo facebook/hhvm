@@ -580,22 +580,35 @@ let matches_typing_error t ~scrut ~env =
         matches_member_name patt_member_name ~scrut:member_name ~env)
     | (Member_not_found _, _) -> Match.no_match
     (* -- Package errors ---------------------------------------------------- *)
-    | ( Cross_pkg_access { patt_use_file; patt_decl_file },
+    | ( ( Any_pkg { patt_use_file; patt_decl_file }
+        | Cross_pkg_access { patt_use_file; patt_decl_file } ),
         Typing_error.Primary.(
-          Package (Package.Cross_pkg_access { pos; decl_pos; _ })) ) ->
-      Match.(
-        matches_file patt_use_file ~scrut:(Pos.filename pos) ~env >>= fun env ->
-        matches_file patt_decl_file ~scrut:(Pos_or_decl.filename decl_pos) ~env)
-    | (Cross_pkg_access _, _) -> Match.no_match
-    | ( Cross_pkg_access_with_requirepackage { patt_use_file; patt_decl_file },
+          Package (Package.Cross_pkg_access { pos; decl_pos; _ })) )
+    | ( ( Any_pkg { patt_use_file; patt_decl_file }
+        | Cross_pkg_access_with_requirepackage { patt_use_file; patt_decl_file }
+          ),
         Typing_error.Primary.(
           Package
             (Package.Cross_pkg_access_with_requirepackage { pos; decl_pos; _ }))
-      ) ->
+      )
+    | ( ( Any_pkg { patt_use_file; patt_decl_file }
+        | Cross_pkg_access_with_softrequirepackage
+            { patt_use_file; patt_decl_file } ),
+        Typing_error.Primary.(
+          Package
+            (Package.Cross_pkg_access_with_softrequirepackage
+              { pos; decl_pos; _ })) )
+    | ( ( Any_pkg { patt_use_file; patt_decl_file }
+        | Soft_included_access { patt_use_file; patt_decl_file } ),
+        Typing_error.Primary.(
+          Package (Package.Soft_included_access { pos; decl_pos; _ })) ) ->
       Match.(
         matches_file patt_use_file ~scrut:(Pos.filename pos) ~env >>= fun env ->
         matches_file patt_decl_file ~scrut:(Pos_or_decl.filename decl_pos) ~env)
-    | (Cross_pkg_access_with_requirepackage _, _) ->
+    | ( ( Any_pkg _ | Cross_pkg_access _
+        | Cross_pkg_access_with_requirepackage _
+        | Cross_pkg_access_with_softrequirepackage _ | Soft_included_access _ ),
+        _ ) ->
       Match.no_match
       (* -- Expression tree errors -------------------------------------------- *)
     | ( Expression_tree_unsupported_operator

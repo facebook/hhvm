@@ -37,11 +37,23 @@ and primary =
       patt_visibility: visibility_pattern option; (* Optional visibility *)
     }
   (* Package *)
+  | Any_pkg of {
+      patt_use_file: Patt_file.t; (* The file in which the error was raised *)
+      patt_decl_file: Patt_file.t; (* The accessed module/package is declared *)
+    }  (** Matches any of the other package primary errors *)
   | Cross_pkg_access of {
       patt_use_file: Patt_file.t; (* The file in which the error was raised *)
       patt_decl_file: Patt_file.t; (* The accessed module/package is declared *)
     }
   | Cross_pkg_access_with_requirepackage of {
+      patt_use_file: Patt_file.t; (* The file in which the error was raised *)
+      patt_decl_file: Patt_file.t; (* The accessed module/package is declared *)
+    }
+  | Cross_pkg_access_with_softrequirepackage of {
+      patt_use_file: Patt_file.t; (* The file in which the error was raised *)
+      patt_decl_file: Patt_file.t; (* The accessed module/package is declared *)
+    }
+  | Soft_included_access of {
       patt_use_file: Patt_file.t; (* The file in which the error was raised *)
       patt_decl_file: Patt_file.t; (* The accessed module/package is declared *)
     }

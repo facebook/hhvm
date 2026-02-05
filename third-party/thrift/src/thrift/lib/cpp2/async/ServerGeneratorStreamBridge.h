@@ -30,6 +30,7 @@
 #include <thrift/lib/cpp2/async/StreamMessage.h>
 #include <thrift/lib/cpp2/async/TwoWayBridge.h>
 #include <thrift/lib/cpp2/async/TwoWayBridgeUtil.h>
+#include <thrift/lib/cpp2/server/StreamInterceptorContext.h>
 
 namespace apache::thrift::detail {
 namespace test {
@@ -93,8 +94,9 @@ class ServerGeneratorStreamBridge : public TwoWayBridge<
                                      StreamClientCallback* clientCallback,
                                      folly::EventBase* evb,
                                      TilePtr&& interaction,
-                                     std::shared_ptr<ContextStack>
-                                         contextStack) mutable {
+                                     std::shared_ptr<ContextStack> contextStack,
+                                     std::shared_ptr<StreamInterceptorContext>
+                                         interceptorContext) mutable {
         DCHECK(evb->isInEventBaseThread());
 
         auto stream =
@@ -105,7 +107,8 @@ class ServerGeneratorStreamBridge : public TwoWayBridge<
             encode,
             std::move(gen),
             TileStreamGuard::transferFrom(std::move(interaction)),
-            contextStack)
+            contextStack,
+            std::move(interceptorContext))
             .scheduleOn(std::move(serverExecutor))
             .start([stream = stream->copy()](folly::Try<folly::Unit> t) {
               if (t.hasException()) {
@@ -147,7 +150,8 @@ class ServerGeneratorStreamBridge : public TwoWayBridge<
       folly::coro::AsyncGenerator<
           std::conditional_t<WithHeader, MessageVariant<T>, T>&&> gen,
       TileStreamGuard interaction,
-      std::shared_ptr<ContextStack> contextStack) {
+      std::shared_ptr<ContextStack> contextStack,
+      std::shared_ptr<StreamInterceptorContext> interceptorContext) {
     class ReadyCallback final : public QueueConsumer {
      public:
       void consume() override { baton_.post(); }
@@ -165,6 +169,14 @@ class ServerGeneratorStreamBridge : public TwoWayBridge<
     };
 
     notifyStreamSubscribe(contextStack.get(), interaction);
+
+    if (interceptorContext) {
+      co_await interceptorContext->invokeOnStreamBegin();
+    }
+
+    details::STREAM_ENDING_TYPES streamEndReason =
+        details::STREAM_ENDING_TYPES::COMPLETE;
+    folly::exception_wrapper streamError;
 
     // ensure the generator is destroyed before the interaction TimeStreamGuard
     auto gen_ = std::move(gen);
@@ -202,6 +214,11 @@ class ServerGeneratorStreamBridge : public TwoWayBridge<
                 return false;
               });
           if (cancelled) {
+            streamEndReason = details::STREAM_ENDING_TYPES::CANCEL;
+            if (interceptorContext) {
+              co_await interceptorContext->invokeOnStreamEnd(
+                  streamEndReason, streamError);
+            }
             co_return;
           }
           queue.pop();
@@ -219,19 +236,43 @@ class ServerGeneratorStreamBridge : public TwoWayBridge<
           folly::coro::co_withCancellation(
               stream->cancelSource_.getToken(), gen_.next()));
       if (next.hasException()) {
+        streamEndReason = details::STREAM_ENDING_TYPES::ERROR;
+        streamError = next.exception();
         // The encoding returns a Try(), but StreamElementEncode will always
         // populate this with an exception wrapper.
         stream->serverPush(
             StreamMessage::PayloadOrError{
                 (*encode)(std::move(next.exception()))});
+        if (interceptorContext) {
+          co_await interceptorContext->invokeOnStreamEnd(
+              streamEndReason, streamError);
+        }
         co_return;
       }
       if (!next->has_value()) {
         stream->serverPush(StreamMessage::Complete{});
+        if (interceptorContext) {
+          co_await interceptorContext->invokeOnStreamEnd(
+              streamEndReason, streamError);
+        }
         co_return;
       }
 
       auto&& item = **next;
+
+      if constexpr (!WithHeader) {
+        if (interceptorContext) {
+          co_await interceptorContext->invokeOnStreamPayload<T>(item);
+        }
+      } else {
+        // For WithHeader case, only invoke for actual payloads (not headers)
+        if (auto* payload = std::get_if<T>(&item)) {
+          if (interceptorContext) {
+            co_await interceptorContext->invokeOnStreamPayload<T>(*payload);
+          }
+        }
+      }
+
       if constexpr (WithHeader) {
         folly::Try<StreamPayload> sp =
             encodeMessageVariant(encode, std::move(item));

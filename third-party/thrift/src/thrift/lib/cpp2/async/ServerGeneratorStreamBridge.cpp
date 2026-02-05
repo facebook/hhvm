@@ -39,19 +39,21 @@ ServerGeneratorStreamBridge::ServerGeneratorStreamBridge(
 /* static */ ServerStreamFactory
 ServerGeneratorStreamBridge::fromProducerCallback(
     ProducerCallback* producerCallback) {
-  return ServerStreamFactory([producerCallback](
-                                 FirstResponsePayload&& payload,
-                                 StreamClientCallback* clientCallback,
-                                 folly::EventBase* clientEb,
-                                 TilePtr&&,
-                                 std::shared_ptr<ContextStack>) mutable {
-    DCHECK(clientEb->isInEventBaseThread());
-    auto stream = new ServerGeneratorStreamBridge(clientCallback, clientEb);
-    std::ignore =
-        clientCallback->onFirstResponse(std::move(payload), clientEb, stream);
-    producerCallback->provideStream(stream->copy());
-    stream->processClientMessages();
-  });
+  return ServerStreamFactory(
+      [producerCallback](
+          FirstResponsePayload&& payload,
+          StreamClientCallback* clientCallback,
+          folly::EventBase* clientEb,
+          TilePtr&&,
+          std::shared_ptr<ContextStack>,
+          std::shared_ptr<StreamInterceptorContext>) mutable {
+        DCHECK(clientEb->isInEventBaseThread());
+        auto stream = new ServerGeneratorStreamBridge(clientCallback, clientEb);
+        std::ignore = clientCallback->onFirstResponse(
+            std::move(payload), clientEb, stream);
+        producerCallback->provideStream(stream->copy());
+        stream->processClientMessages();
+      });
 }
 
 void ServerGeneratorStreamBridge::consume() {

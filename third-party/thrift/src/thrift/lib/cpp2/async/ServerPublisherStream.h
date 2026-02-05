@@ -301,7 +301,8 @@ class ServerPublisherStream : private StreamServerCallback {
             StreamClientCallback* callback,
             folly::EventBase* clientEb,
             TilePtr&& interaction,
-            std::shared_ptr<ContextStack> contextStack) mutable {
+            std::shared_ptr<ContextStack> contextStack,
+            std::shared_ptr<StreamInterceptorContext>) mutable {
           stream->streamClientCallback_ = callback;
           stream->clientEventBase_ = clientEb;
           stream->contextStack_ = std::move(contextStack);

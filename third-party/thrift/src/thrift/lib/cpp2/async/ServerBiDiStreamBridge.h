@@ -16,25 +16,36 @@
 
 #pragma once
 
+#include <variant>
+
+#include <folly/Overload.h>
 #include <folly/Portability.h>
 #include <folly/Try.h>
 #include <folly/coro/AsyncGenerator.h>
 #include <folly/coro/Task.h>
 #include <thrift/lib/cpp/ContextStack.h>
 #include <thrift/lib/cpp2/async/StreamCallbacks.h>
+#include <thrift/lib/cpp2/async/StreamMessage.h>
 #include <thrift/lib/cpp2/async/TwoWayBridge.h>
 #include <thrift/lib/cpp2/async/TwoWayBridgeUtil.h>
 
 namespace apache::thrift::detail {
 
-class ServerBiDiStreamBridge
-    : public TwoWayBridge<
-          ServerBiDiStreamBridge,
-          folly::Try<StreamPayload>, // we send stream chunks to the client
-          CoroConsumer,
-          int64_t, // we receive credits from the client (or cancellation)
-          ServerBiDiStreamBridge>,
-      public StreamServerCallback {
+// Server to Client: PayloadOrError (payload/error) or Complete (stream done)
+using ServerBiDiStreamMessageServerToClient =
+    std::variant<StreamMessage::PayloadOrError, StreamMessage::Complete>;
+
+// Client to Server: RequestN (credits) or Cancel
+using ServerBiDiStreamMessageClientToServer =
+    std::variant<StreamMessage::RequestN, StreamMessage::Cancel>;
+
+class ServerBiDiStreamBridge : public TwoWayBridge<
+                                   ServerBiDiStreamBridge,
+                                   ServerBiDiStreamMessageServerToClient,
+                                   CoroConsumer,
+                                   ServerBiDiStreamMessageClientToServer,
+                                   ServerBiDiStreamBridge>,
+                               public StreamServerCallback {
  public:
   ServerBiDiStreamBridge(
       StreamClientCallback* clientCb,
@@ -48,12 +59,12 @@ class ServerBiDiStreamBridge
   // StreamServerCallback methods
   //
   bool onStreamRequestN(int32_t credits) override {
-    clientPush(credits);
+    clientPush(StreamMessage::RequestN{credits});
     return true;
   }
 
   void onStreamCancel() override {
-    clientPush(CANCEL);
+    clientPush(StreamMessage::Cancel{});
     clientClose();
   }
 
@@ -98,12 +109,18 @@ class ServerBiDiStreamBridge
            messages.pop()) {
         DCHECK(!bridge->isServerClosed());
 
-        auto message = std::move(messages.front());
-        if (message == CANCEL) {
+        auto& message = messages.front();
+        bool cancelled = folly::variant_match(
+            message,
+            [&](StreamMessage::RequestN& requestN) {
+              notifyBiDiStreamCredit(bridge->contextStack_.get(), requestN.n);
+              credits += requestN.n;
+              return false;
+            },
+            [](StreamMessage::Cancel) { return true; });
+        if (cancelled) {
           co_return;
         }
-        notifyBiDiStreamCredit(bridge->contextStack_.get(), message);
-        credits += message;
       }
 
       if (credits == 0) {
@@ -116,17 +133,18 @@ class ServerBiDiStreamBridge
       auto next = co_await folly::coro::co_awaitTry(input.next());
       if (next.hasException()) {
         handleBiDiStreamError(bridge->contextStack_.get(), next.exception());
-        auto encoded = (*encode)(std::move(next.exception()));
-        bridge->serverPush(std::move(encoded));
+        bridge->serverPush(
+            StreamMessage::PayloadOrError{
+                (*encode)(std::move(next.exception()))});
         co_return;
       }
       if (!next->has_value()) {
-        // Empty Try means stream completion
-        bridge->serverPush({});
+        // Empty means stream completion
+        bridge->serverPush(StreamMessage::Complete{});
         co_return;
       }
 
-      bridge->serverPush((*encode)(**next));
+      bridge->serverPush(StreamMessage::PayloadOrError{(*encode)(**next)});
 
       notifyBiDiStreamNext(bridge->contextStack_.get());
 
@@ -147,22 +165,28 @@ class ServerBiDiStreamBridge
            messages.pop()) {
         DCHECK(!isClientClosed());
 
-        auto message = std::move(messages.front());
+        auto& message = messages.front();
+        bool terminated = folly::variant_match(
+            message,
+            [&](StreamMessage::PayloadOrError& payloadOrError) {
+              auto& payload = payloadOrError.streamPayloadTry;
+              if (payload.hasValue()) {
+                // payload
+                return !clientCb_->onStreamNext(std::move(payload).value());
+              } else {
+                // exception
+                clientCb_->onStreamError(std::move(payload).exception());
+                decref();
+                return true;
+              }
+            },
+            [&](StreamMessage::Complete) {
+              clientCb_->onStreamComplete();
+              decref();
+              return true;
+            });
 
-        if (message.hasValue()) {
-          // payload
-          if (!clientCb_->onStreamNext(std::move(message.value()))) {
-            break;
-          }
-        } else if (message.hasException()) {
-          // exception
-          clientCb_->onStreamError(std::move(message.exception()));
-          decref();
-          return;
-        } else {
-          // empty Try means stream completion
-          clientCb_->onStreamComplete();
-          decref();
+        if (terminated) {
           return;
         }
       }
@@ -199,10 +223,6 @@ class ServerBiDiStreamBridge
   StreamClientCallback* clientCb_{nullptr};
   folly::EventBase* evb_{nullptr};
   std::shared_ptr<ContextStack> contextStack_;
-
-  enum StreamControl : int32_t {
-    CANCEL = -1,
-  };
 };
 
 } // namespace apache::thrift::detail

@@ -160,29 +160,35 @@ inline bool operator!=(const LocalRange& a, const LocalRange& b) {
   return !(a == b);
 }
 
+using NamedArgNameVec = CompactVector<SString>;
+
 struct FCallArgsLong : FCallArgsBase {
   explicit FCallArgsLong(Flags flags, uint32_t numArgs, uint32_t numRets,
                          std::unique_ptr<uint8_t[]> inoutArgs,
                          std::unique_ptr<uint8_t[]> readonlyArgs,
+                         std::unique_ptr<NamedArgNameVec> namedArgNames,
                          BlockId asyncEagerTarget, SString context)
     : FCallArgsBase(flags, numArgs, numRets)
     , inoutArgs(std::move(inoutArgs))
     , readonlyArgs(std::move(readonlyArgs))
+    , namedArgNames(std::move(namedArgNames))
     , asyncEagerTarget(asyncEagerTarget)
     , context(context) {}
   explicit FCallArgsLong(FCallArgsBase base,
                          std::unique_ptr<uint8_t[]> inoutArgs,
                          std::unique_ptr<uint8_t[]> readonlyArgs,
+                         std::unique_ptr<NamedArgNameVec> namedArgNames,
                          BlockId asyncEagerTarget, SString context)
     : FCallArgsBase(std::move(base))
     , inoutArgs(std::move(inoutArgs))
     , readonlyArgs(std::move(readonlyArgs))
+    , namedArgNames(std::move(namedArgNames))
     , asyncEagerTarget(asyncEagerTarget)
     , context(context) {}
 
   FCallArgsLong(const FCallArgsLong& o)
     : FCallArgsLong(o.flags, o.numArgs, o.numRets, nullptr, nullptr,
-                    o.asyncEagerTarget, o.context) {
+                    nullptr, o.asyncEagerTarget, o.context) {
     if (o.inoutArgs) {
       auto const numBytes = (numArgs + 7) / 8;
       inoutArgs = std::make_unique<uint8_t[]>(numBytes);
@@ -192,6 +198,9 @@ struct FCallArgsLong : FCallArgsBase {
       auto const numBytes = (numArgs + 7) / 8;
       readonlyArgs = std::make_unique<uint8_t[]>(numBytes);
       memcpy(readonlyArgs.get(), o.readonlyArgs.get(), numBytes);
+    }
+    if (o.namedArgNames) {
+      namedArgNames = std::make_unique<NamedArgNameVec>(*o.namedArgNames);
     }
   }
 
@@ -275,6 +284,9 @@ struct FCallArgsLong : FCallArgsBase {
       a.flags == b.flags && a.numArgs == b.numArgs && a.numRets == b.numRets &&
       eq(a.inoutArgs.get(), b.inoutArgs.get(), (a.numArgs + 7) / 8) &&
       eq(a.readonlyArgs.get(), b.readonlyArgs.get(), (a.numArgs + 7) / 8) &&
+      (a.namedArgNames == nullptr
+       ? b.namedArgNames == nullptr
+       : *a.namedArgNames == *b.namedArgNames) &&
       a.asyncEagerTarget == b.asyncEagerTarget &&
       a.context == b.context;
   }
@@ -289,6 +301,11 @@ struct FCallArgsLong : FCallArgsBase {
     if (auto const br = reinterpret_cast<const char*>(readonlyArgs.get())) {
       auto const hash_br = hash_string_cs(br, (numArgs + 7) / 8);
       hash = HPHP::hash_int64_pair(hash, hash_br);
+    }
+    if (auto names = namedArgNames.get()) {
+      for (auto name : *names) {
+        hash = HPHP::hash_int64_pair(hash, name->hash());
+      }
     }
     hash = HPHP::hash_int64_pair(hash, asyncEagerTarget);
     if (context) hash = HPHP::hash_int64_pair(hash, context->hash());
@@ -320,6 +337,7 @@ struct FCallArgsLong : FCallArgsBase {
 
   std::unique_ptr<uint8_t[]> inoutArgs;
   std::unique_ptr<uint8_t[]> readonlyArgs;
+  std::unique_ptr<NamedArgNameVec> namedArgNames;
   BlockId asyncEagerTarget;
   SString context;
 
@@ -328,6 +346,15 @@ struct FCallArgsLong : FCallArgsBase {
     static_assert(SerDe::deserializing);
 
     auto base = sd.template make<FCallArgsBase>();
+
+    NamedArgNameVec nameVec;
+    sd(nameVec);
+
+    std::unique_ptr<NamedArgNameVec> namePtr  = nullptr;
+    if (nameVec.size()) {
+      namePtr = std::make_unique<NamedArgNameVec>(std::move(nameVec));
+    }
+
     BlockId asyncEagerTarget;
     SString context;
     sd(asyncEagerTarget)(context);
@@ -358,6 +385,7 @@ struct FCallArgsLong : FCallArgsBase {
       std::move(base),
       std::move(inoutArgs),
       std::move(readonlyArgs),
+      std::move(namePtr),
       asyncEagerTarget,
       context
     };
@@ -366,6 +394,7 @@ struct FCallArgsLong : FCallArgsBase {
   template <typename SerDe> void serde(SerDe& sd) {
     static_assert(!SerDe::deserializing);
     sd(static_cast<const FCallArgsBase&>(*this))
+      (namedArgNames ? *namedArgNames : CompactVector<SString>{})
       (asyncEagerTarget)
       (context)
       ((bool)inoutArgs)
@@ -380,15 +409,16 @@ struct FCallArgs {
   using Flags = FCallArgsBase::Flags;
   explicit FCallArgs(uint32_t numArgs)
     : FCallArgs(Flags::FCANone, numArgs, 1, nullptr, nullptr,
-                NoBlockId, nullptr) {}
+                nullptr, NoBlockId, nullptr) {}
   FCallArgs(Flags flags, uint32_t numArgs, uint32_t numRets,
             std::unique_ptr<uint8_t[]> inoutArgs,
             std::unique_ptr<uint8_t[]> readonlyArgs,
+            std::unique_ptr<NamedArgNameVec> namedArgNames,
             BlockId asyncEagerTarget,
             SString context)
     : l{flags, numArgs, numRets,
         std::move(inoutArgs), std::move(readonlyArgs),
-        asyncEagerTarget, context} {}
+        std::move(namedArgNames), asyncEagerTarget, context} {}
   FCallArgs(const FCallArgs&) = default;
   FCallArgs(FCallArgs&&) = default;
 
@@ -516,6 +546,8 @@ struct FCallArgs {
     return l->template popFlavor<nin,nobj>(i);
   }
   SString context() const { return l->context; }
+
+  const NamedArgNameVec* namedArgNames() const { return l->namedArgNames.get(); }
 
   template <typename SerDe> static FCallArgs makeForSerde(SerDe& sd) {
     static_assert(SerDe::deserializing);

@@ -395,6 +395,12 @@ inline uint32_t Func::numParams() const {
   return (m_paramCounts) >> 1;
 }
 
+inline uint32_t Func::numNamedParams() const {
+  auto const ex = extShared();
+  if (!ex) return 0;
+  return ex->m_namedParamCount;
+}
+
 inline uint32_t Func::numNonVariadicParams() const {
   assertx(bool(m_attrs & AttrVariadicParam) != bool(m_paramCounts & 1));
   assertx((m_paramCounts >> 1) == params().size());
@@ -481,6 +487,13 @@ inline const StringData* Func::localVarName(Id id) const {
 }
 
 inline PackedStringPtr const* Func::localNames() const {
+  return shared()->m_localNames.accessList();
+}
+
+/* By construction, named params appear at the end of param lists and
+ * are sorted lexicographically.
+ */
+inline PackedStringPtr const* Func::sortedNamedParamNames() const {
   return shared()->m_localNames.accessList();
 }
 

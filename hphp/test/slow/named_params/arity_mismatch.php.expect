@@ -1,0 +1,8 @@
+Caught InvalidOperationException: Expected 2 named arguments, got 1 in call to foo
+Caught InvalidOperationException: Expected 2 named arguments, got 3 in call to foo
+Caught InvalidOperationException: Expected 2 named arguments, got 1 in call to foo
+Caught InvalidOperationException: Expected 2 named arguments, got 4 in call to foo
+Caught InvalidOperationException: Expected 2 named arguments, got 1 in call to foo
+Caught RuntimeException: foo() expects exactly 4 positional parameters, 3 given
+Caught InvalidOperationException: Expected 1 named arguments, got 0 in call to takes_one_named
+Caught InvalidOperationException: Expected 0 named arguments, got 1 in call to takes_no_named

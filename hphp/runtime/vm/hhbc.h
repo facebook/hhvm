@@ -202,6 +202,9 @@ struct FCallArgs : FCallArgsBase {
       numArgs, numRets, inoutArgs, readonlyArgs,
       namedArgNames, asyncEagerOffset, context);
   }
+  bool hasNamedArgs() const {
+    return namedArgNames != kInvalidId;
+  }
   Offset asyncEagerOffset;
   const uint8_t* inoutArgs;
   const uint8_t* readonlyArgs;

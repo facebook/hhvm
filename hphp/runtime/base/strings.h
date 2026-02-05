@@ -151,6 +151,10 @@ constexpr char CLASSNAME_TO_CLASS_NOEXIST_EXCEPTION[] =
 constexpr char REFLECTION_MISS_CONSTANTS_FROM_INCLUDED_ENUMS[] =
   "ReflectionClass::getConstants() misses constants from the enums/enum classes included by %s";
 constexpr char NON_ASYNC_OVERRIDES_ASYNC[] = "Cannot override async method %s with non-async method in class %s";
+constexpr char NAMED_ARGUMENT_ARITY_MISMATCH[] =
+  "Expected %d named arguments, got %d in call to %s";
+constexpr char NAMED_ARGUMENT_NAME_MISMATCH[] =
+  "Named argument %s does not match any named parameter in call to %s";
 
 } // namespace Strings
 } // namespace HPHP

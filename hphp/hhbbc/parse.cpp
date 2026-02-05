@@ -330,6 +330,24 @@ void populate_block(ParseUnitState& puState,
       ? puState.cinitPredeps.emplace(n)
       : puState.predeps.emplace(n);
   };
+  auto decodeNamedArgs = [&] (const Id nameId) ->
+    std::unique_ptr<NamedArgNameVec> {
+    if (nameId == kInvalidId) {
+      return nullptr;
+    }
+    auto nameArr = ue.lookupArrayId(nameId);
+    NamedArgNameVec nameVec;
+
+    assertx(nameArr != nullptr);
+    auto size = nameArr->size();
+    for (auto i = 0; i < size; ++i) {
+      auto name = nameArr->at(i);
+      assertx(name.type() == KindOfString || name.type() == KindOfPersistentString);
+      nameVec.push_back(name.val().pstr);
+    }
+
+    return std::make_unique<NamedArgNameVec>(std::move(nameVec));
+  };
 
 #define IMM_BLA(n)     auto targets = decode_switch(opPC);
 #define IMM_SLA(n)     auto targets = decode_sswitch(opPC);
@@ -395,9 +413,11 @@ void populate_block(ParseUnitState& puState,
                            : NoBlockId;                                      \
                          assertx(aeTarget == NoBlockId || next == past);     \
                          if (fca.context) add_predep(fca.context);           \
+                         auto namedArgs = decodeNamedArgs(fca.namedArgNames);\
                          return FCallArgs(fca.flags, fca.numArgs,            \
                                           fca.numRets, std::move(inoutArgs), \
                                           std::move(readonlyArgs),           \
+                                          std::move(namedArgs),              \
                                           aeTarget, fca.context);            \
                        }();
 

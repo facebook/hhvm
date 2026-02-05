@@ -459,6 +459,10 @@ bool shouldAttemptToFold(ISS& env, const php::Func* func, const FCallArgs& fca,
     return false;
   }
 
+  // TODO(named_params) we can be smarter about folding things if the named args
+  // match the named parameters.
+  if (fca.namedArgNames() != nullptr) return false;
+
   // Reified functions may have a mismatch of arity or reified generics
   // so we cannot fold them
   // TODO(T31677864): Detect the arity mismatch at HHBBC and enable them to
@@ -515,6 +519,12 @@ bool shouldAttemptToFold(ISS& env, const php::Func* func, const FCallArgs& fca,
   // non-foldable, but other builtins might be, even if they
   // don't have the __Foldable attribute.
   if (func->isNative) return false;
+
+  // TODO(named_params) In the future, we can fold when named params
+  // match named arguments correctly.
+  for (auto& param: func->params) {
+    if (param.isNamed) return false;
+  }
 
   if (func->params.size()) return true;
 

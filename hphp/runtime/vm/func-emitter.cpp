@@ -332,6 +332,13 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   auto const uait = userAttributes.find(s___Reified.get());
   auto const hasReifiedGenerics = uait != userAttributes.end();
 
+  int namedParamCount = 0;
+  for (int i = 0; i < params.size(); ++i) {
+    if (!params[i].isNamed()) {
+      break;
+    }
+    namedParamCount++;
+  }
   bool const needsExtendedSharedData =
     isNative ||
     line2 - line1 >= Func::kSmallDeltaLimit ||
@@ -343,6 +350,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
     coeffectsInfo.second.value() != 0 ||
     !coeffectRules.empty() ||
     (docComment && !docComment->empty()) ||
+    (namedParamCount > 0) ||
     requiresFromOriginalModule;
 
   f->m_shared.reset(
@@ -362,6 +370,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
     ex->m_bclen = m_bclen;
     ex->m_sn = m_sn;
     ex->m_line2 = line2;
+    ex->m_namedParamCount = namedParamCount;
     ex->m_dynCallSampleRate = dynCallSampleRate.value_or(-1);
     ex->m_allFlags.m_returnByValue = false;
     ex->m_allFlags.m_isUntrustedReturnType = false;

@@ -70,6 +70,7 @@ template <typename SerDe> void Param::serde(SerDe& sd) {
   SERDE_BITFIELD(readonly, sd);
   SERDE_BITFIELD(isVariadic, sd);
   SERDE_BITFIELD(isOptional, sd);
+  SERDE_BITFIELD(isNamed, sd);
 }
 
 template <typename SerDe> void Local::serde(SerDe& sd) {

@@ -104,6 +104,8 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
   auto const prologueFlags = PrologueFlags(
     extra->hasGenerics,
     extra->dynamicCall,
+    // TODO(named_params) thread this information to the jit.
+    false,
     extra->asyncEagerReturn,
     extra->callOffset,
     extra->genericsBitmap,

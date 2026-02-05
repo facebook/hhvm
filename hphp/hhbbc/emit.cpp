@@ -35,6 +35,7 @@
 #include "hphp/hhbbc/unit-util.h"
 
 #include "hphp/runtime/base/array-data.h"
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/repo-auth-type.h"
 
 #include "hphp/runtime/ext/extension-registry.h"
@@ -417,6 +418,24 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState, UnitEmitter& ue, FuncEmitter& f
       });
     };
 
+    auto const emit_named_args = [&](const NamedArgNameVec* names) {
+      if (names == nullptr) {
+        fe.emitInt32(kInvalidId);
+        return;
+      }
+
+      assertx(names->size() > 0);
+      VecInit nameVec(names->size());
+      for (auto name : *names) {
+        nameVec.append(make_tv<KindOfPersistentString>(name));
+      }
+      auto nameTV = nameVec.create();
+      ArrayData::GetScalarArray(&nameTV);
+      fe.emitInt32(ue.mergeArray(nameTV));
+    };
+
+
+
 #define IMM_BLA(n)     emit_switch(data.targets);
 #define IMM_SLA(n)     emit_sswitch(data.targets);
 #define IMM_IVA(n)     fe.emitIVA(data.arg##n);
@@ -455,9 +474,9 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState, UnitEmitter& ue, FuncEmitter& f
                              }                                          \
                            );                                           \
                          },                                             \
-                         false,                                         \
-                         [&] { /* TODO(named_params) properly emit */   \
-                           fe.emitInt32(kInvalidId);                    \
+                         data.fca.namedArgNames() != nullptr,           \
+                         [&] {                                          \
+                           emit_named_args(data.fca.namedArgNames());   \
                          },                                             \
                          data.fca.asyncEagerTarget() != NoBlockId,      \
                          [&] {                                          \

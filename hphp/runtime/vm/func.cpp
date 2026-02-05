@@ -314,8 +314,9 @@ void Func::setFullName(int /*numParams*/) {
 
 /* This function is expected to be called after all calls to appendParam
  * are complete. After, m_paramCounts is initialized such that the least
- * significant bit of this->m_paramCounts indicates whether the last param
- * is (non)variadic; and the rest of the bits are the number of params.
+ * significant bit of this->m_paramCounts indicates whether the last
+ * positional param is (non)variadic; and the rest of the bits are the
+ * number of params.
  */
 void Func::finishedEmittingParams(std::vector<ParamInfo>& fParams) {
   assertx(m_paramCounts == 0);

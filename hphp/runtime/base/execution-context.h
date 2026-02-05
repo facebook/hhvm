@@ -552,6 +552,7 @@ private:
   TypedValue invokeFuncImpl(const Func* f, ObjectData* thiz, Class* cls,
                             uint32_t numArgsInclUnpack,
                             RuntimeCoeffects providedCoeffects,
+                            const ArrayData* namedArgNames,
                             bool hasGenerics,
                             bool dynamic, bool allowDynCallNoPointer);
 

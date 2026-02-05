@@ -1559,6 +1559,7 @@ TypedValue ExecutionContext::invokeFuncImpl(const Func* f,
                                             ObjectData* thiz, Class* cls,
                                             uint32_t numArgsInclUnpack,
                                             RuntimeCoeffects providedCoeffects,
+                                            const ArrayData* namedArgNames,
                                             bool hasGenerics, bool dynamic,
                                             bool allowDynCallNoPointer) {
   assertx(f);
@@ -1573,6 +1574,7 @@ TypedValue ExecutionContext::invokeFuncImpl(const Func* f,
   void* ctx = thiz ? (void*)thiz : (void*)cls;
 
   // Callee checks and input initialization.
+  calleeNamedArgChecks(f, numArgsInclUnpack, namedArgNames);
   calleeGenericsChecks(f, hasGenerics);
   calleeArgumentArityChecks(f, numArgsInclUnpack);
   calleeArgumentTypeChecks(f, numArgsInclUnpack, ctx);
@@ -1694,7 +1696,10 @@ TypedValue ExecutionContext::invokeFunc(const Func* f,
   }
 
   return invokeFuncImpl(f, thiz, cls, numArgs, providedCoeffects,
-                        hasGenerics, dynamic, allowDynCallNoPointer);
+                        // TODO(named_params) support invoke with
+                        // named args.
+                        nullptr, hasGenerics, dynamic,
+                        allowDynCallNoPointer);
 }
 
 TypedValue ExecutionContext::invokeFuncFew(
@@ -1741,6 +1746,8 @@ TypedValue ExecutionContext::invokeFuncFew(
 
   return invokeFuncImpl(f, thisOrCls.left(), thisOrCls.right(), numArgs,
                         providedCoeffects,
+                        // TODO(named_params) support invoking with named args
+                        nullptr /* namedArgNames */,
                         false /* hasGenerics */, dynamic, false);
 }
 

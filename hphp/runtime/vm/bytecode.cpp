@@ -763,6 +763,8 @@ Array getDefinedVariables(const ActRec* fp) {
 // arguments to unpack.
 uint32_t prepareUnpackArgs(const Func* func, uint32_t numArgs,
                            bool checkInOutAnnot) {
+  // TODO(named_params) this needs to be made named_params-aware.
+  assertx(func->numNamedParams() == 0);
   auto& stack = vmStack();
   auto unpackArgs = *stack.topC();
   if (!isContainer(unpackArgs)) throwInvalidUnpackArgs();
@@ -3553,6 +3555,7 @@ bool funcEntry() {
 }
 
 void doFCall(PrologueFlags prologueFlags, const Func* func,
+             const ArrayData* namedArgNames,
              uint32_t numArgsInclUnpack, void* ctx, TCA retAddr) {
   TRACE(3, "FCall: pc %p func %p\n", vmpc(), vmfp()->func()->entry());
 
@@ -3562,6 +3565,7 @@ void doFCall(PrologueFlags prologueFlags, const Func* func,
     numArgsInclUnpack + (prologueFlags.hasGenerics() ? 1 : 0));
 
   // Callee checks and input initialization.
+  calleeNamedArgChecks(func, numArgsInclUnpack, namedArgNames);
   calleeGenericsChecks(func, prologueFlags.hasGenerics());
   calleeArgumentArityChecks(func, numArgsInclUnpack);
   calleeArgumentTypeChecks(func, numArgsInclUnpack, ctx);
@@ -3625,17 +3629,23 @@ JitResumeAddr fcallImpl(PC origpc, PC& pc, const FCallArgs& fca,
 
     return fca.numArgs;
   }();
+  const ArrayData* nameArr = nullptr;
+  if (fca.namedArgNames != kInvalidId) {
+    auto unit = vmfp()->func()->unit();
+    nameArr = unit->lookupArrayId(fca.namedArgNames);
+  }
 
   auto const prologueFlags = PrologueFlags(
     fca.hasGenerics(),
     dynamic,
+    fca.namedArgNames != kInvalidId,
     fca.asyncEagerOffset != kInvalidOffset && func->supportsAsyncEagerReturn(),
     Offset(origpc - vmfp()->func()->entry()),
     0,  // generics bitmap not used by interpreter
     vmfp()->providedCoeffectsForCall(isCtor)
   );
 
-  doFCall(prologueFlags, func, numArgsInclUnpack,
+  doFCall(prologueFlags, func, nameArr, numArgsInclUnpack,
           takeCtx(std::forward<Ctx>(ctx)), jit::tc::ustubs().retHelper);
 
   // Let JIT handle FuncEntry.

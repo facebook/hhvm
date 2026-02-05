@@ -263,7 +263,8 @@ void fcallHelper(PrologueFlags prologueFlags, Func* func,
       throw_stack_overflow();
     }
 
-    doFCall(prologueFlags, func, numArgsInclUnpack, ctx, savedRip);
+    // TODO(named_params) thread named arg names here
+    doFCall(prologueFlags, func, nullptr /* namedArgNames */, numArgsInclUnpack, ctx, savedRip);
   });
 }
 

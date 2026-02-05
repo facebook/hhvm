@@ -420,7 +420,12 @@ void speculateTargetFunction(IRGS& env, SSATmp* callee,
       gen(env, JmpZero, taken, equal);
     },
     [&] {
-      callKnown(profiledFunc);
+      // TODO(named_params): support callKnown here.
+      if (profiledFunc->numNamedParams() != 0) {
+        indirectCall();
+      } else {
+        callKnown(profiledFunc);
+      }
     },
     [&] {
       speculateTargetFunction(env, callee, callKnown, callUnknown, choices,
@@ -597,6 +602,9 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
                          SSATmp* objOrClass, bool dynamicCall,
                          bool suppressDynCallCheck) {
   assertx(callee);
+  // TODO(named_params): Add support for calling the func entry
+  // of functions with named params and remove this assertion.
+  assertx(callee->numNamedParams() == 0);
 
   updateStackOffset(env);
 
@@ -637,6 +645,7 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
     auto const prologueFlags = cns(env, PrologueFlags(
       fca.hasGenerics(),
       dynamicCall,
+      fca.namedArgNames != kInvalidId,
       false,  // async eager return unused by prologue checks
       0,  // call offset unused by prologue checks
       0,  // generics bitmap not needed, generics SSA read from the stack
@@ -650,6 +659,8 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
     auto const calleeFP = genCalleeFP(env, callee, fca.numInputs());
 
     // Callee checks and input initialization.
+    // TODO(named_params) insert stack reordering work and checks here for named
+    // args.
     emitCalleeGenericsChecks(env, callee, prologueFlags, fca.hasGenerics());
     emitCalleeArgumentArityChecks(env, callee, numArgsInclUnpack);
     emitCalleeArgumentTypeChecks(
@@ -787,11 +798,28 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
   ), true /* skipRepack */);
 }
 
+bool canCallKnown(const Func* f) {
+  return f && f->numNamedParams() == 0;
+}
+
+bool canCallKnown(const SSATmp* tmp) {
+  return tmp->hasConstVal() && canCallKnown(tmp->funcVal());
+}
+
+const Func* knownCallee(const Func* f) {
+  return canCallKnown(f) ? f : nullptr;
+}
+
+const Func* knownCallee(const SSATmp* tmp) {
+  return canCallKnown(tmp) ? tmp->funcVal() : nullptr;
+}
+
 void prepareAndCallUnknown(IRGS& env, SSATmp* callee, const FCallArgs& fca,
                            SSATmp* objOrClass, bool dynamicCall,
                            bool suppressDynCallCheck, bool unlikely) {
   assertx(callee->isA(TFunc));
-  if (callee->hasConstVal()) {
+  // TODO(named_params): Support func entry calls with named parameters.
+  if (canCallKnown(callee)) {
     prepareAndCallKnown(env, callee->funcVal(), fca, objOrClass,
                         dynamicCall, suppressDynCallCheck);
     return;
@@ -821,7 +849,8 @@ void prepareAndCallProfiled(IRGS& env, SSATmp* callee, const FCallArgs& fca,
     prepareAndCallKnown(env, knownCallee, fca, objOrClass,
                         dynamicCall, suppressDynCallCheck);
   };
-  if (callee->hasConstVal()) return handleKnown(callee->funcVal());
+  // TODO(named_params): Support func entry calls with named parameters.
+  if (canCallKnown(callee)) return handleKnown(callee->funcVal());
 
   auto const handleUnknown = [&] (bool unlikely) {
     prepareAndCallUnknown(env, callee, fca, objOrClass,
@@ -1046,7 +1075,8 @@ void optimizeProfiledCallMethod(IRGS& env,
 
   MethProfile data = profile.data();
 
-  if (auto const uniqueMeth = data.uniqueMeth()) {
+  // TODO(named_params): Support func entry calls with named parameters.
+  if (auto const uniqueMeth = knownCallee(data.uniqueMeth())) {
     assertx(uniqueMeth->name()->same(methodName));
     if (auto const uniqueClass = data.uniqueClass()) {
       // Profiling saw a unique class.
@@ -1220,6 +1250,10 @@ void fcallObjMethodObj(IRGS& env, const FCallArgs& fca, SSATmp* obj,
       if (lookup.func->isStaticInPrologue()) {
         gen(env, ThrowHasThisNeedStatic, cns(env, lookup.func));
         return;
+      }
+      // TODO(named_params): Support func entry calls with named parameters.
+      if (!canCallKnown(lookup.func)) {
+        break;
       }
       discard(env, numExtraInputs);
       prepareAndCallKnown(env, lookup.func, fca, obj, dynamicCall, false);
@@ -1444,9 +1478,16 @@ void emitModuleBoundaryCheck(IRGS& env, SSATmp* symbol, bool func /* = true */) 
 }
 
 void emitFCallFuncD(IRGS& env, FCallArgs fca, const StringData* funcName) {
+  // TODO(named_params) add JIT support for named args.
+  if (fca.hasNamedArgs()) return interpOne(env);
   auto const lookup = lookupKnownFuncMaybe(env, funcName);
   auto const fast = [&]() {
     emitModuleBoundaryCheckKnown(env, lookup.func);
+    // TODO(named_params): Support func entry calls with named parameters.
+    if (!canCallKnown(lookup.func)) {
+      prepareAndCallProfiled(env, cns(env, lookup.func), fca, nullptr, false, false);
+      return;
+    }
     prepareAndCallKnown(env, lookup.func, fca, nullptr, false, false);
     return;
   };
@@ -1507,6 +1548,8 @@ void emitFCallFuncD(IRGS& env, FCallArgs fca, const StringData* funcName) {
 
 void emitFCallFunc(IRGS& env, FCallArgs fca) {
   auto const callee = topC(env);
+  // TODO(named_params) add JIT support for named args.
+  if (fca.hasNamedArgs()) return interpOne(env);
   if (callee->isA(TObj)) return fcallFuncObj(env, fca);
   if (callee->isA(TFunc)) return fcallFuncFunc(env, fca);
   if (callee->isA(TClsMeth)) return fcallFuncClsMeth(env, fca);
@@ -1746,7 +1789,8 @@ void emitFCallCtor(IRGS& env, FCallArgs fca, const StringData* clsHint) {
   }();
   if (exactCls) {
     auto const callCtx = MemberLookupContext(curClass(env), curFunc(env));
-    if (auto const ctor = lookupImmutableCtor(exactCls, callCtx)) {
+    // TODO(named_params): Support func entry calls with named parameters.
+    if (auto const ctor = knownCallee(lookupImmutableCtor(exactCls, callCtx))) {
       return prepareAndCallKnown(env, ctor, fca, obj, false, false);
     }
   }
@@ -1902,6 +1946,8 @@ void emitFCallClsMethodD(IRGS& env,
         MemberLookupContext(callContext(env, fca, cls), curFunc(env));
       auto const func = lookupImmutableClsMethod(cls, methodName, callCtx, true);
       if (!func) return slow();
+      // TODO(named_params) We should support func entry calls here.
+      if (func->numNamedParams() != 0) return slow();
       auto const ctx = ldCtxForClsMethod(env, func, cns(env, cls), cls, true);
       emitModuleBoundaryCheckKnown(env, cls);
       return prepareAndCallKnown(env, func, fca, ctx, false, false);
@@ -1944,6 +1990,8 @@ void emitFCallClsMethodD(IRGS& env,
                                              lookup.cls->classId().id(),
                                              true));
           }
+          // TODO(named_params) We should support func entry calls here.
+          if (func->numNamedParams() != 0) return slow();
           prepareAndCallKnown(env, func, fca, ctx, false, false);
         },
         [&] {

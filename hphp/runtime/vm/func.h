@@ -526,9 +526,15 @@ public:
   const ParamInfoVec& params() const;
 
   /*
-   * Number of parameters (including `...') accepted by the function.
+   * Number of parameters (including `...' and named parameters) accepted by
+   * the function.
    */
   uint32_t numParams() const;
+
+  /*
+   * Number of named parameters accepted by the function.
+   */
+  uint32_t numNamedParams() const;
 
   /*
    * Number of parameters, not including `...', accepted by the function.
@@ -638,6 +644,13 @@ public:
    * Should not be indexed past numNamedLocals() - 1.
    */
   PackedStringPtr const* localNames() const;
+
+  /*
+   * Array containing all named param names, sorted lexicographically.
+   *
+   * Should not be indexed past numNamedParams() - 1.
+   */
+  PackedStringPtr const* sortedNamedParamNames() const;
 
   /*
    * Number of stack slots used by locals and iterator cells.
@@ -1504,8 +1517,12 @@ private:
     int64_t m_dynCallSampleRate;
     PackedStringPtr m_docComment;
     PackedStringPtr m_originalModuleName;
+    // Initialized by Func::finishedEmittingParams. Named parameter names live
+    // in the internal storage of
+    // `m_localNames[0 : m_namedParamCount - 1]`.
+    uint32_t m_namedParamCount;
   };
-  static_assert(CheckSize<ExtendedSharedData, use_lowptr ? 224 : 256>(), "");
+  static_assert(CheckSize<ExtendedSharedData, use_lowptr ? 232 : 264>(), "");
 
   /*
    * SharedData accessors for internal use.

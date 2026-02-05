@@ -150,6 +150,10 @@ bool isCalleeInlinable(SrcKey callSK, const Func* callee,
   if (callee->userAttributes().contains(s_NeverInline.get())) {
     return refuse("callee marked __NEVER_INLINE");
   }
+  // TODO(named_params) allow inlining calls to functions which have named params.
+  if (callee->numNamedParams() > 0) {
+    return refuse("callee has named params");
+  }
 
   return true;
 }

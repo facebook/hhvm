@@ -100,6 +100,7 @@ T decode(const Buffer& buffer, size_t& pos) {
   } else if constexpr (std::is_same<T, FCallArgs>::value) {
     using FCA = FCallArgsBase;
     auto const base     = decode<FCA>(buffer, pos);
+    auto const nameVec  = decode<NamedArgNameVec>(buffer, pos);
     auto const context  = decode<SString>(buffer, pos);
     auto const aeTarget = decode<BlockId>(buffer, pos) + NoBlockId;
     auto inout = std::unique_ptr<uint8_t[]>();
@@ -116,9 +117,14 @@ T decode(const Buffer& buffer, size_t& pos) {
       memmove(readonly.get(), &buffer[pos], bytes);
       pos += bytes;
     }
+    std::unique_ptr<NamedArgNameVec> namePtr = nullptr;
+    if (nameVec.size()) {
+      namePtr = std::make_unique<NamedArgNameVec>(std::move(nameVec));
+    }
     return FCallArgs(static_cast<FCallArgsFlags>(base.flags & FCA::kInternalFlags),
                      base.numArgs, base.numRets, std::move(inout),
-                     std::move(readonly), aeTarget, context);
+                     std::move(readonly), std::move(namePtr),
+                     aeTarget, context);
 
   } else if constexpr (std::is_same<T, IterArgs>::value) {
     auto const flags  = DECODE_MEMBER(flags);
@@ -228,6 +234,13 @@ void encode(Buffer& buffer, const T& data) {
       base.flags = base.flags | FCallArgsFlags::EnforceReadonly;
     }
     encode(buffer, base);
+    auto namedArgNames = data.namedArgNames();
+    if (namedArgNames == nullptr) {
+      CompactVector<SString> emptyVec;
+      encode(buffer, emptyVec);
+    } else {
+      encode(buffer, *namedArgNames);
+    }
     encode(buffer, data.context());
     encode(buffer, data.asyncEagerTarget() - NoBlockId);
     if (data.enforceInOut()) {

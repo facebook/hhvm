@@ -232,6 +232,37 @@ inline void calleeGenericsChecks(const Func* callee, bool hasGenerics) {
 }
 
 /*
+ * Ensure that all passed named arguments match a named parameter, and that
+ * there are no missing required named parameters.
+ */
+inline void calleeNamedArgChecks(const Func* callee,
+                                 uint32_t& numArgsInclUnpack,
+                                 const ArrayData* namedArgNames) {
+  uint32_t namedParamCount = callee->numNamedParams();
+  int namedArgNamesSize = namedArgNames ? namedArgNames->size() : 0;
+  if (namedParamCount != namedArgNamesSize) {
+    auto error_msg = Strings::NAMED_ARGUMENT_ARITY_MISMATCH;
+    std::string msg;
+    string_printf(msg, error_msg, namedParamCount, namedArgNamesSize,
+                  callee->fullName()->data());
+    throw_invalid_operation_exception(makeStaticString(msg));
+  }
+  if (namedParamCount == 0) return;
+
+  PackedStringPtr const* namedParamNames = callee->sortedNamedParamNames();
+  for (uint32_t i = 0; i < namedParamCount; ++i) {
+    auto name = namedArgNames->at(i).val().pstr;
+    if (namedParamNames[i] != name) {
+      auto error_msg = Strings::NAMED_ARGUMENT_NAME_MISMATCH;
+      std::string msg;
+      string_printf(msg, error_msg, name->toCppString().c_str(),
+                    callee->fullName()->data());
+      throw_invalid_operation_exception(makeStaticString(msg));
+    }
+  }
+}
+
+/*
  * Check for too few or too many arguments and trim extra args.
  */
 inline void calleeArgumentArityChecks(const Func* callee,

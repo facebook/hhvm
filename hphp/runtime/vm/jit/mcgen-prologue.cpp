@@ -153,6 +153,9 @@ TranslationResult getFuncPrologue(Func* func, int nPassed) {
 
   func->validate();
   TRACE(1, "funcPrologue %s(%d)\n", func->fullName()->data(), nPassed);
+  if (func->numNamedParams() > 0) {
+    return TranslationResult::failForProcess();
+  }
 
   tc::PrologueTranslator translator(func, nPassed);
 

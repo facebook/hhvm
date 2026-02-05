@@ -668,6 +668,7 @@ using InterpOneFunc = jit::JitResumeAddr (*) (ActRec*, TypedValue*, Offset);
 extern InterpOneFunc interpOneEntryPoints[];
 
 void doFCall(PrologueFlags prologueFlags, const Func* func,
+             const ArrayData* namedArgNames,
              uint32_t numArgsInclUnpack, void* ctx, jit::TCA retAddr);
 bool funcEntry();
 jit::JitResumeAddr dispatchBB();

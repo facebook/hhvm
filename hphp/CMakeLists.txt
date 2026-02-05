@@ -118,6 +118,7 @@ if (TEST_BIN)
 endif ()
 
 add_subdirectory(tools/gdb)
+add_subdirectory(tools/lldb)
 
 # Keep this last
 add_subdirectory(tools/hphpize)

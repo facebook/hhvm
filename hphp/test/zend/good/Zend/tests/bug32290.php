@@ -5,31 +5,36 @@ class TestA
     public function doSomething($i)
 :mixed    {
         echo __METHOD__ . "($i)\n";
-        return --$i;
+        --$i;
+        return $i;
     }
 
     public function doSomethingThis($i)
 :mixed    {
         echo __METHOD__ . "($i)\n";
-        return --$i;
+        --$i;
+        return $i;
     }
 
     public function doSomethingParent($i)
 :mixed    {
         echo __METHOD__ . "($i)\n";
-        return --$i;
+        --$i;
+        return $i;
     }
 
     public function doSomethingParentThis($i)
 :mixed    {
         echo __METHOD__ . "($i)\n";
-        return --$i;
+        --$i;
+        return $i;
     }
 
     public static function doSomethingStatic($i)
 :mixed    {
         echo __METHOD__ . "($i)\n";
-        return --$i;
+        --$i;
+        return $i;
     }
 }
 

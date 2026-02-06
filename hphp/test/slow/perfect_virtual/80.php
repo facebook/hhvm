@@ -12,7 +12,8 @@ class Y extends X {
 }
 function test(X $x) :mixed{
   $y = $x->foo(5);
-  return ++$y;
+  ++$y;
+  return $y;
 }
 
 <<__EntryPoint>>

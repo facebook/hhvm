@@ -28,8 +28,15 @@ var_dump(HH\Asio\join($y($callback)));
 
 $env = 3;
 
-$inc = async function () use ($env) { return ++$env; };
-$incB = async function () use ($env) { await block(); return ++$env; };
+$inc = async function () use ($env) {
+  ++$env;
+ return $env;
+};
+$incB = async function () use ($env) {
+  await block();
+  ++$env;
+  return $env;
+};
 
 var_dump(HH\Asio\join($inc()));
 var_dump(HH\Asio\join($incB()));

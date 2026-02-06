@@ -17,7 +17,8 @@ function dead() :mixed{
 }
 
 function foo1() :mixed{
-  return ++LangEngineAssignexecutionorder003::$a;
+  ++LangEngineAssignexecutionorder003::$a;
+  return LangEngineAssignexecutionorder003::$a;
 }
 
 function mod($b) :mixed{

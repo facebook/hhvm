@@ -33,7 +33,10 @@ function test_eval() :mixed{
   f8($d);
   f9($k);
 }
-function wrap($arr, $v) :mixed{ return $arr[] = $v; }
+function wrap($arr, $v) :mixed{
+  $arr[] = $v;
+  return $v;
+}
 function test_func($v = wrap(vec[], vec[1, 2]),
                    $d = wrap(vec[], dict[100 => 'a', 200 => 'b']),
                    $k = wrap(vec[], keyset['a', 'b'])) :mixed{}

@@ -81,7 +81,8 @@ class I implements Iterator{
   public function next() :mixed{
     var_dump(__METHOD__);
     if ($this->tn == $this->i) ex(__METHOD__);
-    return ++$this->i;
+    ++$this->i;
+    return $this->i;
   }
   public function valid() :mixed{
     var_dump(__METHOD__);

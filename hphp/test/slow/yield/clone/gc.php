@@ -2,7 +2,11 @@
 
 class C {
   private int $x = 2;
-  public function get() :mixed{ return $this->x++; }
+  public function get() :mixed{
+    $__lval_tmp_0 = $this->x;
+    $this->x++;
+    return $__lval_tmp_0;
+  }
 }
 
 function g() :AsyncGenerator<mixed,mixed,void>{

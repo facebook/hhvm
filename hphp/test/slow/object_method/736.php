@@ -10,20 +10,24 @@ class B {
   public $x;
 
   function f1($a) :mixed{
-    return $x=$a+11;
+    $x=$a+11;
+    return $x;
   }
   function f2($a) :mixed{
-    return $x=$a+12;
+    $x=$a+12;
+    return $x;
   }
   function f4($a) :mixed{
-    return $x=$a+12;
+    $x=$a+12;
+    return $x;
   }
   function trace($s) :mixed{
 
     ObjectMethod736::$trace = "<$s(".$this->id.")>";
   }
   private function f4helper($a) :mixed{
-    return $x=$a+12;
+    $x=$a+12;
+    return $x;
   }
 }
 

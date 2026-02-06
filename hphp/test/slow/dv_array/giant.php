@@ -6,7 +6,9 @@ abstract final class FStatics {
 }
 
 function f() :mixed{
-  return FStatics::$x++;
+  $__lval_tmp_0 = FStatics::$x;
+  FStatics::$x++;
+  return $__lval_tmp_0;
 }
 
 function test() :mixed{

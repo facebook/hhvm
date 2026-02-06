@@ -1,7 +1,8 @@
 <?hh
 
 function f(inout $x) :mixed{
-  return ++$x;
+  ++$x;
+  return $x;
 }
 
 

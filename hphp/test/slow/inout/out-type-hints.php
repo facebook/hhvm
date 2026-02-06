@@ -1,7 +1,8 @@
 <?hh
 
 function foo($x, inout int $y): string {
-  return ($y = $x);
+  $y = $x;
+  return $y;
 }
 
 function bar(inout int $x, inout int $y): int {

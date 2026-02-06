@@ -1,7 +1,9 @@
 <?hh
 
 function f($x, $y) :mixed{
-  return $x[0][$y++] ?: false;
+  $__lval_tmp_0 = $y;
+  $y++;
+  return $x[0][$__lval_tmp_0] ?: false;
 }
 
 <<__EntryPoint>>

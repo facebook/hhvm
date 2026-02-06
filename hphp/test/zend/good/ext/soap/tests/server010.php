@@ -3,7 +3,8 @@ class foo {
   private $sum = 0;
 
   function Sum($num) :mixed{
-    return $this->sum += $num;
+    $this->sum += $num;
+    return $this->sum;
   }
 }
 <<__EntryPoint>> function main(): void {

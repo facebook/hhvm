@@ -45,25 +45,43 @@ class A {
 
   public function get1() :mixed{ return $this->p1; }
   public function isset1() :mixed{ return isset($this->p1); }
-  public function incdec1() :mixed{ return ++$this->p1; }
-  public function setop1() :mixed{ return $this->p1 += 1000; }
+  public function incdec1() :mixed{
+    ++$this->p1;
+    return $this->p1;
+}
+  public function setop1() :mixed{
+    $this->p1 += 1000;
+    return $this->p1;
+}
 
 
   public function get2() :mixed{ return $this->p2; }
   public function isset2() :mixed{ return isset($this->p2); }
-  public function incdec2() :mixed{ return ++$this->p2; }
-  public function setop2() :mixed{ return $this->p2 += 1000; }
+  public function incdec2() :mixed{
+    ++$this->p2;
+    return $this->p2;
+  }
+  public function setop2() :mixed{
+  $this->p2 += 1000;
+  return $this->p2;
+}
 
 
   public function get3() :mixed{ return A::$p3; }
   public function isset3() :mixed{ return isset(A::$p3); }
-  public function incdec3() :mixed{ return ++A::$p3; }
-  public function setop3() :mixed{ return A::$p3 += 1000; }
+  public function incdec3() :mixed{   ++A::$p3;
+  return A::$p3;
+}
+  public function setop3() :mixed{   A::$p3 += 1000;  return A::$p3;
+}
 
   public function get4() :mixed{ return A::$p4; }
   public function isset4() :mixed{ return isset(A::$p4); }
-  public function incdec4() :mixed{ return ++A::$p4; }
-  public function setop4() :mixed{ return A::$p4 += 1000; }
+  public function incdec4() :mixed{   ++A::$p4;
+  return A::$p4;
+}
+  public function setop4() :mixed{   A::$p4 += 1000;  return A::$p4;
+}
 
   public function get5() :mixed{ return A::$p5->p9->p10; }
   public function get6() :mixed{ return A::$p6->p9->p10; }
@@ -128,25 +146,49 @@ class B {
 
   public function get1() :mixed{ return $this->{B::prop(1)}; }
   public function isset1() :mixed{ return isset($this->{B::prop(1)}); }
-  public function incdec1() :mixed{ return ++$this->{B::prop(1)}; }
-  public function setop1() :mixed{ return $this->{B::prop(1)} += 1000; }
+  public function incdec1() :mixed{
+    ++$this->{B::prop(1)};
+    return $this->{B::prop(1)};
+  }
+  public function setop1() :mixed{
+    $this->{B::prop(1)} += 1000;
+    return $this->{B::prop(1)};
+  }
 
 
   public function get2() :mixed{ return $this->{B::prop(2)}; }
   public function isset2() :mixed{ return isset($this->{B::prop(2)}); }
-  public function incdec2() :mixed{ return ++$this->{B::prop(2)}; }
-  public function setop2() :mixed{ return $this->{B::prop(2)} += 1000; }
+  public function incdec2() :mixed{
+    ++$this->{B::prop(2)};
+    return $this->{B::prop(2)};
+  }
+  public function setop2() :mixed{
+    $this->{B::prop(2)} += 1000;
+    return $this->{B::prop(2)};
+  }
 
 
   public function get3() :mixed{ return B::$p3; }
   public function isset3() :mixed{ return isset(B::$p3); }
-  public function incdec3() :mixed{ return ++B::$p3; }
-  public function setop3() :mixed{ return B::$p3 += 1000; }
+  public function incdec3() :mixed{
+    ++B::$p3;
+    return B::$p3;
+  }
+  public function setop3() :mixed{
+    B::$p3 += 1000;
+    return B::$p3;
+  }
 
   public function get4() :mixed{ return B::$p4; }
   public function isset4() :mixed{ return isset(B::$p4); }
-  public function incdec4() :mixed{ return ++B::$p4; }
-  public function setop4() :mixed{ return B::$p4 += 1000; }
+  public function incdec4() :mixed{
+    ++B::$p4;
+    return B::$p4;
+  }
+  public function setop4() :mixed{
+    B::$p4 += 1000;
+    return B::$p4;
+  }
 
   public function get5() :mixed{ return B::$p5->{B::prop(9)}->{B::prop(10)}; }
   public function get6() :mixed{ return B::$p6->{B::prop(9)}->{B::prop(10)}; }

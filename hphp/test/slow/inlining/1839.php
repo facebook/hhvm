@@ -1,7 +1,8 @@
 <?hh
 
 function inline_me($x, $y, inout $z) :mixed{
- return ($z = ($x + $y));
+ $z = ($x + $y);
+ return ($z );
  }
 function gen($x, $y) :AsyncGenerator<mixed,mixed,void>{
   $arg = null;

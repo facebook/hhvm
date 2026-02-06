@@ -10,7 +10,9 @@ class C {
     return $this->x;
   }
   public function incX() :mixed{
-    return $this->x++;
+    $__lval_tmp_0 = $this->x;
+    $this->x++;
+    return $__lval_tmp_0;
   }
 }
 

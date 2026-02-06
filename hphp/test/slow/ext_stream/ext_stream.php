@@ -19,7 +19,8 @@ function get_random_port() :mixed{
   if (Statics::$base == -1) {
     Statics::$base = 12345 + (int)((int)(HH\Lib\Legacy_FIXME\cast_for_arithmetic(microtime(false)) * 100) % 30000);
   }
-  return ++Statics::$base;
+  ++Statics::$base;
+  return Statics::$base;
 }
 
 // On the continuous integration server, it's not unlikely that we'll

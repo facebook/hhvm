@@ -14,7 +14,9 @@ function bar(inout $a) :mixed{
     throw new Exception();
   } catch (Exception $e) {
     try {
-      return $a++;
+      $__lval_tmp_0 = $a;
+      $a++;
+      return $__lval_tmp_0;
     } finally {
       echo "inner finally\n";
       var_dump($e->getTrace()[0]['function']);

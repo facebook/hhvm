@@ -8,7 +8,9 @@ class C1 {
 
   <<__Memoize>>
   public function f(int $x): int {
-    return $x + 1 + (self::$fY++);
+    $__lval_tmp_0 = self::$fY;
+    self::$fY++;
+    return $x + 1 + ($__lval_tmp_0);
   }
 }
 
@@ -18,7 +20,9 @@ class C2 {
   private static $fY = 0;
 
   public function f(int $x): int {
-    return $x + 5 + (self::$fY++);
+    $__lval_tmp_1 = self::$fY;
+    self::$fY++;
+    return $x + 5 + ($__lval_tmp_1);
   }
 }
 
@@ -29,7 +33,9 @@ class C3 {
 
   <<__Memoize>>
   public function f(int $x): int {
-    return $x + 5 + (self::$fY++);
+    $__lval_tmp_2 = self::$fY;
+    self::$fY++;
+    return $x + 5 + ($__lval_tmp_2);
   }
 }
 
@@ -40,7 +46,9 @@ class C4 {
 
   <<__Memoize>>
   public function f($x): int {
-    return (int)$x + 1 + (self::$fY++);
+    $__lval_tmp_3 = self::$fY;
+    self::$fY++;
+   return (int)$x + 1 + ($__lval_tmp_3);
   }
 }
 
@@ -51,7 +59,9 @@ class C5 {
 
   <<__Memoize>>
   public function f(int $x, int $incr = 1): int {
-    return $x + $incr + (self::$fY++);
+    $__lval_tmp_4 = self::$fY;
+    self::$fY++;
+    return $x + $incr + ($__lval_tmp_4);
   }
 }
 
@@ -62,7 +72,9 @@ class C6 {
 
   <<__Memoize>>
   public function f(): int {
-    return (self::$fY++);
+    $__lval_tmp_5 = self::$fY;
+    self::$fY++;
+    return ($__lval_tmp_5);
   }
 }
 

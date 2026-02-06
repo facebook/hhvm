@@ -4,25 +4,33 @@ class A {
   private static $oneArgMethI = 10;
   <<__Memoize>>
   public function oneArgMeth($a) :mixed{
-    return self::$oneArgMethI++;
+    $__lval_tmp_0 = self::$oneArgMethI;
+    self::$oneArgMethI++;
+    return $__lval_tmp_0;
   }
 
   private static $multiArgMethI = 20;
   <<__Memoize>>
   public function multiArgMeth($a, $b, $c) :mixed{
-    return self::$multiArgMethI++;
+    $__lval_tmp_1 = self::$multiArgMethI;
+    self::$multiArgMethI++;
+    return $__lval_tmp_1;
   }
 
   private static $oneArgStaticI = 30;
   <<__Memoize>>
   public static function oneArgStatic($a) :mixed{
-    return self::$oneArgStaticI++;
+    $__lval_tmp_2 = self::$oneArgStaticI;
+    self::$oneArgStaticI++;
+    return $__lval_tmp_2;
   }
 
   private static $multiArgStaticI = 40;
   <<__Memoize>>
   public static function multiArgStatic($a, $b, $c) :mixed{
-    return self::$multiArgStaticI++;
+    $__lval_tmp_3 = self::$multiArgStaticI;
+    self::$multiArgStaticI++;
+    return $__lval_tmp_3;
   }
 }
 
@@ -31,13 +39,21 @@ abstract final class OneargtoplevelStatics {
 }
 
 <<__Memoize>>
-function oneArgTopLevel($a) :mixed{return OneargtoplevelStatics::$i++;}
+function oneArgTopLevel($a) :mixed{
+  $__lval_tmp_4 = OneargtoplevelStatics::$i;
+  OneargtoplevelStatics::$i++;
+  return $__lval_tmp_4;
+}
 
 abstract final class MultiargtoplevelStatics {
   public static $i = 60;
 }
 <<__Memoize>>
-function multiArgTopLevel($a, $b, $c) :mixed{return MultiargtoplevelStatics::$i++;}
+function multiArgTopLevel($a, $b, $c) :mixed{
+  $__lval_tmp_5 = MultiargtoplevelStatics::$i;
+  MultiargtoplevelStatics::$i++;
+  return $__lval_tmp_5;
+}
 <<__Memoize>>
 function passthrough($a) :mixed{return $a;}
 

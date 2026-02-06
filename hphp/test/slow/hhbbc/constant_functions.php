@@ -9,7 +9,9 @@ class X {
 
   private static $barF = 1;
   static function bar($x = 1, $y = 1) :mixed{
-    return self::$barF++ * $x + $y;
+    $__lval_tmp_0 = self::$barF;
+    self::$barF++;
+    return $__lval_tmp_0* $x + $y;
   }
 }
 

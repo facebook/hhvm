@@ -10,10 +10,12 @@ class B {
   public static $stats2;
 
   public static function reset1($key) :mixed{
-    return self::$stats1[$key] ??= 0;
+    self::$stats1[$key] ??= 0;
+    return self::$stats1[$key];
   }
   public static function reset2($key) :mixed{
-    return self::$stats2->$key ??= 0;
+    self::$stats2->$key ??= 0;
+    return self::$stats2->$key;
   }
 }
 

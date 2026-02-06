@@ -4,7 +4,9 @@ class blah {
 
   private static $breakerX = 0;
   private function breaker() :mixed{
-    return self::$breakerX++ == 0 ? vec[] : null;
+    $__lval_tmp_0 = self::$breakerX;
+    self::$breakerX++;
+    return $__lval_tmp_0== 0 ? vec[] : null;
   }
 
   public function foo() :mixed{

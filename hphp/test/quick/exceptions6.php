@@ -2,15 +2,18 @@
 class C {
   public function baz($z) :mixed{
     $x = 1;
-    return $z = call_user_func(vec[$this,'foo'], $z);
+    $z = call_user_func(vec[$this,'foo'], $z);
+    return $z;
   }
   public function bar($z) :mixed{
     $x = 1;
-    return $z = call_user_func(vec[$this,'baz'], $z);
+    $z = call_user_func(vec[$this,'baz'], $z);
+    return $z;
   }
   public function foo($z) :mixed{
     $x = 1;
-    return $z = call_user_func(vec[$this,'bar'], $z);
+    $z = call_user_func(vec[$this,'bar'], $z);
+    return $z;
   }
 }
 <<__EntryPoint>> function bar() :mixed{

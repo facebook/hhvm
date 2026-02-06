@@ -11,7 +11,8 @@ function get_random_port() :mixed{
   if (GetRandomPortStatics::$base == -1) {
     GetRandomPortStatics::$base = 12345 + (int)((int)(HH\Lib\Legacy_FIXME\cast_for_arithmetic(microtime(false)) * 100) % 30000);
   }
-  return ++GetRandomPortStatics::$base;
+  ++GetRandomPortStatics::$base;
+  return GetRandomPortStatics::$base;
 }
 
 function bind_random_port($socket, $address) :mixed{

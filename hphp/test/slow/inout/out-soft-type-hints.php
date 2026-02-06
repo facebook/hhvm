@@ -1,7 +1,8 @@
 <?hh
 
 function foo($x, <<__Soft>> inout int $y): string {
-  return ($y = $x);
+  $y = $x;
+  return $y;
 }
 
 function bar($x, <<__Soft>> inout int $y): void {

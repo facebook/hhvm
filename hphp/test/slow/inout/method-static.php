@@ -7,7 +7,9 @@ class Foo {
     return 'delta';
   }
   static function beta(inout $x) :mixed{
-    return $x++;
+    $__lval_tmp_0 = $x;
+    $x++;
+    return $__lval_tmp_0;
   }
   function one(inout $t) :mixed{
     $t = debug_backtrace()[0]['function'];

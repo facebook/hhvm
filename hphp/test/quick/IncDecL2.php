@@ -1,19 +1,25 @@
 <?hh
 
 function postInc(inout $x) :mixed{
-  return $x++;
+  $__lval_tmp_0 = $x;
+  $x++;
+  return $__lval_tmp_0;
 }
 
 function preInc(inout $x) :mixed{
-  return ++$x;
+  ++$x;
+  return $x;
 }
 
 function postDec(inout $x) :mixed{
-  return $x--;
+  $__lval_tmp_1 = $x;
+  $x--;
+  return $__lval_tmp_1;
 }
 
 function preDec(inout $x) :mixed{
-  return --$x;
+  --$x;
+  return $x;
 }
 <<__EntryPoint>> function main(): void {
 $x = 2;

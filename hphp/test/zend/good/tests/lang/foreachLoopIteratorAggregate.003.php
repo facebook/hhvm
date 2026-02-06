@@ -10,7 +10,9 @@ class EnglishMealIterator implements Iterator {
 
     public function next() :mixed{
         echo "--> " . __METHOD__ . " ($this->pos)\n";
-        return $this->myContent[$this->pos++];
+        $__lval_tmp_0 = $this->pos;
+        $this->pos++;
+        return $this->myContent[$__lval_tmp_0];
     }
 
     public function rewind() :mixed{

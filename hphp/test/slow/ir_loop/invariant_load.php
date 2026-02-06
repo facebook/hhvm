@@ -8,7 +8,9 @@ function alternator() :mixed{
   mt_rand();
   mt_rand();
   mt_rand();
-  return (AlternatorStatics::$i++ % 2) == 0;
+  $__lval_tmp_0 = AlternatorStatics::$i;
+  AlternatorStatics::$i++;
+  return ($__lval_tmp_0% 2) == 0;
 }
 function foo($x, $k) :mixed{
   foreach ($x as $j) {

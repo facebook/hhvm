@@ -76,7 +76,7 @@ void TerminalInputHandler::handlerReady(uint16_t events) noexcept {
       cb_->write(IOBuf::wrapBuffer(buf.data(), result));
     } else {
       if (result < 0) {
-        LOG(ERROR) << "Error on terminal read: " << folly::errnoStr(errno);
+        FIZZ_LOG(ERROR) << "Error on terminal read: " << folly::errnoStr(errno);
       }
       hitEOF();
     }
@@ -258,7 +258,7 @@ std::vector<ech::ParsedECHConfig> getDefaultECHConfigs() {
   // This allows the user to more easily use ECH without needing
   // to generate ECH configs and private keys themselves, without having
   // the keys hardcoded.
-  LOG(INFO) << "Using default ECH configs.";
+  FIZZ_LOG(INFO) << "Using default ECH configs.";
 
   // Set the ECH config content.
   ech::ParsedECHConfig echConfigContent;

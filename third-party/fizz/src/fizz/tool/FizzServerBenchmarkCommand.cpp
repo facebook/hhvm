@@ -87,7 +87,7 @@ class ServerTask : public AsyncFizzServer::HandshakeCallback {
 
   void fizzHandshakeError(AsyncFizzServer*, exception_wrapper ex) noexcept
       override {
-    VLOG(1) << "Error: " << ex.what();
+    FIZZ_VLOG(1) << "Error: " << ex.what();
     endTask();
   }
 
@@ -116,7 +116,7 @@ class FizzServerAcceptor : AsyncServerSocket::AcceptCallback {
     socket_->listen(backlog);
     socket_->addAcceptCallback(this, evb_);
     socket_->startAccepting();
-    LOG(INFO) << "Started listening on " << socket_->getAddress();
+    FIZZ_LOG(INFO) << "Started listening on " << socket_->getAddress();
   }
 
   void connectionAccepted(
@@ -124,7 +124,7 @@ class FizzServerAcceptor : AsyncServerSocket::AcceptCallback {
       const SocketAddress& clientAddr,
       AcceptInfo /* info */) noexcept override {
     int fd = fdNetworkSocket.toFd();
-    LOG(INFO) << "Connection accepted from " << clientAddr;
+    FIZZ_LOG(INFO) << "Connection accepted from " << clientAddr;
 
     via(threadExe_->weakRef()).thenValue([=, this](auto&&) {
       auto evb = folly::EventBaseManager::get()->getEventBase();
@@ -134,7 +134,7 @@ class FizzServerAcceptor : AsyncServerSocket::AcceptCallback {
   }
 
   void acceptError(folly::exception_wrapper ex) noexcept override {
-    LOG(ERROR) << "Failed to accept connection: " << ex;
+    FIZZ_LOG(ERROR) << "Failed to accept connection: " << ex;
   }
 
  private:
@@ -197,11 +197,11 @@ int fizzServerBenchmarkCommand(const std::vector<std::string>& args) {
       return 1;
     }
   } catch (const std::exception& e) {
-    LOG(ERROR) << "Error: " << e.what();
+    FIZZ_LOG(ERROR) << "Error: " << e.what();
     return 1;
   }
   if (certPath.empty() || keyPath.empty()) {
-    LOG(ERROR)
+    FIZZ_LOG(ERROR)
         << "-cert and -key are both required for the server benchmark tool";
     return 1;
   }
@@ -234,10 +234,10 @@ int fizzServerBenchmarkCommand(const std::vector<std::string>& args) {
     std::string certData;
     std::string keyData;
     if (!readFile(certPath.c_str(), certData)) {
-      LOG(ERROR) << "Failed to read certificate";
+      FIZZ_LOG(ERROR) << "Failed to read certificate";
       return 1;
     } else if (!readFile(keyPath.c_str(), keyData)) {
-      LOG(ERROR) << "Failed to read private key";
+      FIZZ_LOG(ERROR) << "Failed to read private key";
       return 1;
     }
     std::unique_ptr<SelfCert> cert;

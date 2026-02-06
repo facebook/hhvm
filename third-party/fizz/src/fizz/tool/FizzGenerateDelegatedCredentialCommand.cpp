@@ -79,24 +79,24 @@ int fizzGenerateDelegatedCredentialCommand(
       return 1;
     }
   } catch (const std::exception& e) {
-    LOG(ERROR) << "Error: " << e.what();
+    FIZZ_LOG(ERROR) << "Error: " << e.what();
     return 1;
   }
 
   if (certPath.empty()) {
-    LOG(ERROR) << "-cert is a required argument for gendc";
+    FIZZ_LOG(ERROR) << "-cert is a required argument for gendc";
     printUsage();
     return 1;
   }
 
   if (certKeyPath.empty()) {
-    LOG(ERROR) << "-key is a required argument for gendc";
+    FIZZ_LOG(ERROR) << "-key is a required argument for gendc";
     printUsage();
     return 1;
   }
 
   if (credKeyPath.empty()) {
-    LOG(ERROR) << "-credkey is a required argument for gendc";
+    FIZZ_LOG(ERROR) << "-credkey is a required argument for gendc";
     printUsage();
     return 1;
   }
@@ -105,13 +105,13 @@ int fizzGenerateDelegatedCredentialCommand(
   std::string certKeyData;
   std::string credKeyData;
   if (!readFile(certPath.c_str(), certData)) {
-    LOG(ERROR) << "Failed to read certificate";
+    FIZZ_LOG(ERROR) << "Failed to read certificate";
     return 1;
   } else if (!readFile(certKeyPath.c_str(), certKeyData)) {
-    LOG(ERROR) << "Failed to read cert private key";
+    FIZZ_LOG(ERROR) << "Failed to read cert private key";
     return 1;
   } else if (!readFile(credKeyPath.c_str(), credKeyData)) {
-    LOG(ERROR) << "Failed to read credential private key";
+    FIZZ_LOG(ERROR) << "Failed to read credential private key";
     return 1;
   }
 
@@ -208,12 +208,13 @@ int fizzGenerateDelegatedCredentialCommand(
       std::cout << pem;
     } else {
       if (!writeFile(pem, outPath.c_str())) {
-        LOG(ERROR) << "Failed to write out credential: " << errnoStr(errno);
+        FIZZ_LOG(ERROR) << "Failed to write out credential: "
+                        << errnoStr(errno);
         return 1;
       }
     }
   } catch (const std::exception& e) {
-    LOG(ERROR) << "Failed to generate credential: " << e.what();
+    FIZZ_LOG(ERROR) << "Failed to generate credential: " << e.what();
     return 1;
   }
 

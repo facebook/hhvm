@@ -7,6 +7,7 @@
  */
 
 #include <fizz/compression/CertDecompressionManager.h>
+#include <fizz/util/Logging.h>
 
 namespace fizz {
 
@@ -40,7 +41,7 @@ CertDecompressionManager::getDecompressor(
   try {
     return decompressors_.at(algo);
   } catch (const std::out_of_range&) {
-    VLOG(4) << "Requested unknown algorithm: " << toString(algo);
+    FIZZ_VLOG(4) << "Requested unknown algorithm: " << toString(algo);
     return nullptr;
   }
 }

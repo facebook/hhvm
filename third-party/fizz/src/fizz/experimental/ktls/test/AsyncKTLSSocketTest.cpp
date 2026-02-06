@@ -65,7 +65,7 @@ std::vector<fizz::TLSMessage> encodeHandshakeAmongRecords(
       fizz::encodeHandshake(std::forward<HandshakeMessage>(msg));
   encodedHandshake->coalesce();
 
-  CHECK_GT(n, 0);
+  FIZZ_CHECK_GT(n, 0UL);
   size_t splitSize = encodedHandshake->length() / n;
   folly::IOBufQueue queue{folly::IOBufQueue::cacheChainLength()};
   queue.append(std::move(encodedHandshake));
@@ -83,7 +83,7 @@ std::vector<fizz::TLSMessage> encodeHandshakeAmongRecords(
 // file descriptors.
 static std::pair<int, int> makeTCPPair() {
   int listener = ::socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-  PCHECK(listener > 0);
+  FIZZ_PCHECK(listener > 0);
   SCOPE_EXIT {
     ::close(listener);
   };
@@ -93,17 +93,19 @@ static std::pair<int, int> makeTCPPair() {
   listenAddr.sin_port = htons(0);
   listenAddr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
 
-  PCHECK(::bind(listener, (sockaddr*)&listenAddr, sizeof(listenAddr)) == 0);
-  PCHECK(::listen(listener, 1) == 0);
+  FIZZ_PCHECK(
+      ::bind(listener, (sockaddr*)&listenAddr, sizeof(listenAddr)) == 0);
+  FIZZ_PCHECK(::listen(listener, 1) == 0);
   socklen_t len = sizeof(listenAddr);
-  PCHECK(::getsockname(listener, (sockaddr*)&listenAddr, &len) == 0);
+  FIZZ_PCHECK(::getsockname(listener, (sockaddr*)&listenAddr, &len) == 0);
 
   int client = ::socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-  PCHECK(client > 0);
-  PCHECK(::connect(client, (sockaddr*)&listenAddr, sizeof(listenAddr)) == 0);
+  FIZZ_PCHECK(client > 0);
+  FIZZ_PCHECK(
+      ::connect(client, (sockaddr*)&listenAddr, sizeof(listenAddr)) == 0);
 
   int server = ::accept(listener, nullptr, nullptr);
-  PCHECK(server > 0);
+  FIZZ_PCHECK(server > 0);
 
   return std::make_pair(client, server);
 }
@@ -188,7 +190,7 @@ class KTLSReadTest : public KTLSTest {
   void innerSetup() override {
     int server;
     std::tie(client_, server) = makeTCPPair();
-    PCHECK(
+    FIZZ_PCHECK(
         folly::netops::set_socket_non_blocking(folly::NetworkSocket(server)) ==
         0);
     auto serverSocket =
@@ -262,7 +264,7 @@ TEST_F(KTLSReadTest, BasicReadWrite) {
 
     std::array<char, 128> buf;
     ssize_t nread = ::recv(client_, buf.data(), buf.size(), 0);
-    PCHECK(nread > 0);
+    FIZZ_PCHECK(nread > 0);
 
     clientReadQueue_.append(folly::IOBuf::copyBuffer(buf.data(), nread));
     fizz::Error err;

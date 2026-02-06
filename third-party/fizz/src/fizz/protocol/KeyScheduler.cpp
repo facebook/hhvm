@@ -8,6 +8,7 @@
 
 #include <fizz/protocol/KeyScheduler.h>
 #include <fizz/protocol/ech/Types.h>
+#include <fizz/util/Logging.h>
 
 using folly::StringPiece;
 
@@ -160,7 +161,7 @@ DerivedSecret KeyScheduler::getSecret(
       secretLength = ech::kEchAcceptConfirmationSize;
       break;
     default:
-      LOG(FATAL) << "unknown secret";
+      FIZZ_LOG(FATAL) << "unknown secret";
   }
 
   auto& earlySecret = *secret_->asEarlySecret();
@@ -187,7 +188,7 @@ DerivedSecret KeyScheduler::getSecret(
       secretLength = ech::kEchAcceptConfirmationSize;
       break;
     default:
-      LOG(FATAL) << "unknown secret";
+      FIZZ_LOG(FATAL) << "unknown secret";
   }
 
   auto& handshakeSecret = *secret_->asHandshakeSecret();
@@ -212,7 +213,7 @@ DerivedSecret KeyScheduler::getSecret(
       label = kResumptionMaster;
       break;
     default:
-      LOG(FATAL) << "unknown secret";
+      FIZZ_LOG(FATAL) << "unknown secret";
   }
 
   auto& masterSecret = *secret_->asMasterSecret();
@@ -237,7 +238,7 @@ DerivedSecret KeyScheduler::getSecret(AppTrafficSecrets s) const {
           appTrafficSecret.server,
           SecretType(AppTrafficSecrets::ServerAppTraffic));
     default:
-      LOG(FATAL) << "unknown secret";
+      FIZZ_LOG(FATAL) << "unknown secret";
   }
 }
 

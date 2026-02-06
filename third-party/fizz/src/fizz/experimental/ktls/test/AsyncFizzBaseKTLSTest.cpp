@@ -271,7 +271,7 @@ TEST(AsyncFizzBaseKTLSTest, TestFizzClientKTLSServer) {
     fizzAccept(std::move(fizzSock))
         .via(&evb)
         .thenValue([](AsyncFizzServer::UniquePtr fizzSock) {
-          VLOG(1) << "finished handshaking";
+          FIZZ_VLOG(1) << "finished handshaking";
           auto ktlsSocket = mustConvertKTLS(*fizzSock);
 
           EXPECT_NE(ktlsSocket->getSelfCertificate(), nullptr);
@@ -290,11 +290,12 @@ TEST(AsyncFizzBaseKTLSTest, TestFizzClientKTLSServer) {
           auto& [t, data] = res;
           ASSERT_TRUE(data.get());
           auto value = data->template to<std::string>();
-          VLOG(1) << "ktls read: " << value;
+          FIZZ_VLOG(1) << "ktls read: " << value;
           EXPECT_EQ(value, "hello from fizz");
         })
-        .thenError(
-            [](auto&& ew) { VLOG(1) << "fizz handshake error: " << ew.what(); })
+        .thenError([](auto&& ew) {
+          FIZZ_VLOG(1) << "fizz handshake error: " << ew.what();
+        })
         .ensure([&] { stopServer(); });
   };
 
@@ -302,7 +303,8 @@ TEST(AsyncFizzBaseKTLSTest, TestFizzClientKTLSServer) {
       &evb, handleClient, [](auto&&) noexcept { ASSERT_FALSE(true); });
   stopServer = [&] { acceptor.stopAccepting(); };
 
-  VLOG(1) << "Server listening on " << acceptor.getLocalAddress().describe();
+  FIZZ_VLOG(1) << "Server listening on "
+               << acceptor.getLocalAddress().describe();
   auto clientCtx = makeTestClientContext();
   AsyncFizzClient::UniquePtr fizzClient;
   fizzClient.reset(new AsyncFizzClient(&evb, clientCtx));
@@ -317,7 +319,7 @@ TEST(AsyncFizzBaseKTLSTest, TestFizzClientKTLSServer) {
         auto& [t, data] = res;
         ASSERT_TRUE(data.get());
         auto value = data->template to<std::string>();
-        VLOG(1) << "client received: " << value;
+        FIZZ_VLOG(1) << "client received: " << value;
         EXPECT_EQ(value, "hello from ktls");
 
         t->write(nullptr, "hello from fizz", sizeof("hello from fizz") - 1);
@@ -344,7 +346,7 @@ TEST(AsyncFizzBaseKTLSTest, TestKTLSClientFizzServer) {
     fizzAccept(std::move(fizzSock))
         .via(&evb)
         .thenValue([](AsyncFizzServer::UniquePtr fizzSock) {
-          VLOG(1) << "finished handshaking";
+          FIZZ_VLOG(1) << "finished handshaking";
           fizzSock->write(
               nullptr, "hello from fizz", sizeof("hello from fizz") - 1);
           auto read =
@@ -355,10 +357,11 @@ TEST(AsyncFizzBaseKTLSTest, TestKTLSClientFizzServer) {
           auto& [t, data] = res;
           ASSERT_TRUE(data.get());
           auto value = data->template to<std::string>();
-          VLOG(1) << "fizz server read: " << value;
+          FIZZ_VLOG(1) << "fizz server read: " << value;
           EXPECT_EQ(value, "hello from ktls");
         })
-        .thenError([](auto&& ew) { VLOG(1) << "server error: " << ew.what(); })
+        .thenError(
+            [](auto&& ew) { FIZZ_VLOG(1) << "server error: " << ew.what(); })
         .ensure([&] { stopServer(); });
   };
 
@@ -376,7 +379,7 @@ TEST(AsyncFizzBaseKTLSTest, TestKTLSClientFizzServer) {
         std::move(fizzClient), acceptor.getLocalAddress(), "ktls_client")
         .via(&evb)
         .thenValue([](AsyncFizzClient::UniquePtr fizzSock) {
-          VLOG(1) << "fizz client connected";
+          FIZZ_VLOG(1) << "fizz client connected";
           auto ktlsSocket = mustConvertKTLS(*fizzSock);
 
           EXPECT_EQ(ktlsSocket->getSelfCertificate(), nullptr);
@@ -393,7 +396,7 @@ TEST(AsyncFizzBaseKTLSTest, TestKTLSClientFizzServer) {
           auto& [t, data] = res;
           ASSERT_TRUE(data.get());
           auto value = data->template to<std::string>();
-          VLOG(1) << "client received: " << value;
+          FIZZ_VLOG(1) << "client received: " << value;
           EXPECT_EQ(value, "hello from fizz");
           t->write(nullptr, "hello from ktls", sizeof("hello from ktls") - 1);
         });

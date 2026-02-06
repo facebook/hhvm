@@ -7,6 +7,7 @@
  */
 
 #include <fizz/client/CertManager.h>
+#include <fizz/util/Logging.h>
 
 using namespace folly;
 
@@ -50,8 +51,8 @@ void CertManager::addCert(
     if (certs_.find(sigScheme) == certs_.end() || overrideExistingEntry) {
       certs_[sigScheme] = cert;
     } else {
-      VLOG(8) << "Skipping duplicate certificate for signature scheme"
-              << toString(sigScheme);
+      FIZZ_VLOG(8) << "Skipping duplicate certificate for signature scheme"
+                   << toString(sigScheme);
     }
   }
 }

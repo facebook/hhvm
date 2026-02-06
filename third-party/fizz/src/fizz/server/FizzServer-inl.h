@@ -31,7 +31,7 @@ void FizzServer<ActionMoveVisitor, SM>::newTransportData() {
   if (checkV2Hello_) {
     if (!this->actionProcessing() &&
         looksLikeV2ClientHello(this->transportReadBuf_)) {
-      VLOG(3) << "Attempting fallback due to V2 ClientHello";
+      FIZZ_VLOG(3) << "Attempting fallback due to V2 ClientHello";
       AttemptVersionFallback fallback;
       fallback.clientHello = this->transportReadBuf_.move();
       return this->addProcessingActions(

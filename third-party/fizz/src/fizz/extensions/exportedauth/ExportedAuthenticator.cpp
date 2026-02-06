@@ -373,7 +373,7 @@ folly::Optional<SignatureScheme> getSignatureScheme(
   }
 
   if (!selectedScheme) {
-    VLOG(1) << "authenticator request without proper signature algorithms";
+    FIZZ_VLOG(1) << "authenticator request without proper signature algorithms";
     for (const auto& scheme : supportedSchemes) {
       if (std::find(certSchemes.begin(), certSchemes.end(), scheme) !=
           certSchemes.end()) {

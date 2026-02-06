@@ -22,7 +22,7 @@ namespace test {
 static std::shared_ptr<const fizz::Cert> getCert(
     folly::StringPiece encodedPem) {
   auto certs = folly::ssl::OpenSSLCertUtils::readCertsFromBuffer(encodedPem);
-  CHECK_EQ(certs.size(), 1);
+  FIZZ_CHECK_EQ(certs.size(), 1UL);
   return openssl::CertUtils::makePeerCert(std::move(certs[0]));
 }
 class PskSerializationTest : public Test {

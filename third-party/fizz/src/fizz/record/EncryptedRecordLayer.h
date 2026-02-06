@@ -11,6 +11,7 @@
 #include <fizz/crypto/aead/Aead.h>
 #include <fizz/record/BufAndPaddingPolicy.h>
 #include <fizz/record/RecordLayer.h>
+#include <fizz/util/Logging.h>
 
 namespace fizz {
 
@@ -119,8 +120,8 @@ class EncryptedWriteRecordLayer : public WriteRecordLayer {
   }
 
   void setMaxRecord(uint16_t size) {
-    CHECK_GT(size, 0);
-    DCHECK_LE(size, kMaxPlaintextRecordSize);
+    FIZZ_CHECK_GT(size, 0);
+    FIZZ_DCHECK_LE(size, kMaxPlaintextRecordSize);
     maxRecord_ = size;
   }
 

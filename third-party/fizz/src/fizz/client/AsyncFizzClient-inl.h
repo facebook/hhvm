@@ -190,7 +190,7 @@ bool AsyncFizzClientT<SM>::isReplaySafe() const {
 template <typename SM>
 void AsyncFizzClientT<SM>::setReplaySafetyCallback(
     folly::AsyncTransport::ReplaySafetyCallback* callback) {
-  DCHECK(!callback || !isReplaySafe());
+  FIZZ_DCHECK(!callback || !isReplaySafe());
   replaySafetyCallback_ = callback;
 }
 
@@ -414,7 +414,7 @@ void AsyncFizzClientT<SM>::deliverAllErrors(
   }
 
   auto invokeWriteError = [](auto& ex, void* callback) {
-    DCHECK(callback);
+    FIZZ_DCHECK(callback);
     static_cast<folly::AsyncTransportWrapper::WriteCallback*>(callback)
         ->writeErr(0, ex);
   };
@@ -490,7 +490,7 @@ void AsyncFizzClientT<SM>::ActionMoveVisitor::operator()(DeliverAppData& data) {
 
 template <typename SM>
 void AsyncFizzClientT<SM>::ActionMoveVisitor::operator()(WriteToSocket& data) {
-  DCHECK(!data.contents.empty());
+  FIZZ_DCHECK(!data.contents.empty());
   Buf allData = std::move(data.contents.front().data);
   for (size_t i = 1; i < data.contents.size(); ++i) {
     allData->prependChain(std::move(data.contents[i].data));

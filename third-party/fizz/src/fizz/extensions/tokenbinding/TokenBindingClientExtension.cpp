@@ -7,6 +7,7 @@
  */
 
 #include <fizz/extensions/tokenbinding/TokenBindingClientExtension.h>
+#include <fizz/util/Logging.h>
 
 namespace fizz {
 namespace extensions {
@@ -29,7 +30,7 @@ void TokenBindingClientExtension::onEncryptedExtensions(
     const std::vector<Extension>& extensions) {
   auto serverParams = getExtension<TokenBindingParameters>(extensions);
   if (!serverParams.has_value()) {
-    VLOG(6) << "Server did not negotiate token binding";
+    FIZZ_VLOG(6) << "Server did not negotiate token binding";
     return;
   }
   if (serverParams->key_parameters_list.size() != 1) {
@@ -58,7 +59,7 @@ void TokenBindingClientExtension::onEncryptedExtensions(
       context_->getSupportedVersions().end(),
       serverParams->version);
   if (version == context_->getSupportedVersions().end()) {
-    VLOG(6) << "Server sent lower, unsupported, token binding version";
+    FIZZ_VLOG(6) << "Server sent lower, unsupported, token binding version";
     return;
   }
   negotiatedVersion_ = *version;

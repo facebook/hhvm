@@ -109,7 +109,7 @@ void AsyncFizzBase::QueuedWriteRequest::startWriting() {
 }
 
 void AsyncFizzBase::QueuedWriteRequest::append(QueuedWriteRequest* request) {
-  DCHECK(!next_);
+  FIZZ_DCHECK(!next_);
   next_ = request;
   next_->entireChainBytesBuffered += entireChainBytesBuffered;
   entireChainBytesBuffered = 0;
@@ -136,7 +136,7 @@ void AsyncFizzBase::QueuedWriteRequest::writeSuccess() noexcept {
 
     DelayedDestruction::DestructorGuard dg(base);
 
-    DCHECK(!base->immediatelyPendingWriteRequest_);
+    FIZZ_DCHECK(!base->immediatelyPendingWriteRequest_);
     base->immediatelyPendingWriteRequest_ = next;
     if (callback) {
       callback->writeSuccess();
@@ -178,7 +178,7 @@ AsyncFizzBase::QueuedWriteRequest::deliverSingleWriteErr(
 
 void AsyncFizzBase::QueuedWriteRequest::advanceOnBase() {
   if (!next_ && asyncFizzBase_) {
-    CHECK_EQ(asyncFizzBase_->tailWriteRequest_, this);
+    FIZZ_CHECK_EQ(asyncFizzBase_->tailWriteRequest_, this);
     asyncFizzBase_->tailWriteRequest_ = nullptr;
   }
 }
@@ -391,7 +391,7 @@ void AsyncFizzBase::getReadBuffer(void** bufReturn, size_t* lenReturn) {
 }
 
 void AsyncFizzBase::getReadBuffers(folly::IOBufIovecBuilder::IoVecVec& iovs) {
-  DCHECK(!!transportOptions_.ioVecQueue);
+  FIZZ_DCHECK(!!transportOptions_.ioVecQueue);
   transportOptions_.ioVecQueue->allocateBuffers(iovs);
 }
 
@@ -399,7 +399,7 @@ void AsyncFizzBase::readDataAvailable(size_t len) noexcept {
   DelayedDestruction::DestructorGuard dg(this);
 
   if (getReadMode() == folly::AsyncTransport::ReadCallback::ReadMode::ReadVec) {
-    DCHECK(!!transportOptions_.ioVecQueue);
+    FIZZ_DCHECK(!!transportOptions_.ioVecQueue);
     auto tmp = transportOptions_.ioVecQueue->extractIOBufChain(len);
     transportReadBuf_.append(std::move(tmp));
   } else {

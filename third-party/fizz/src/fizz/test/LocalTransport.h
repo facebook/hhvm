@@ -57,7 +57,7 @@ class LocalTransport : public folly::AsyncTransportWrapper {
       const void* /*buf*/,
       size_t /*bytes*/,
       folly::WriteFlags /*flags*/ = folly::WriteFlags::NONE) override {
-    LOG(FATAL) << "only writeChain() supported";
+    FIZZ_LOG(FATAL) << "only writeChain() supported";
   }
 
   void writeChain(
@@ -76,7 +76,7 @@ class LocalTransport : public folly::AsyncTransportWrapper {
       const iovec* /*vec*/,
       size_t /*bytes*/,
       folly::WriteFlags /*flags*/ = folly::WriteFlags::NONE) override {
-    LOG(FATAL) << "only writeChain() supported";
+    FIZZ_LOG(FATAL) << "only writeChain() supported";
   }
 
   folly::EventBase* getEventBase() const override {

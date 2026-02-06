@@ -31,7 +31,7 @@ TEST_P(HkdfTest, TestHkdfSha256Expand) {
   auto info = toIOBuf(GetParam().info);
   size_t outputBytes = GetParam().outputBytes;
   auto expectedOkm = toIOBuf(GetParam().okm);
-  CHECK_EQ(outputBytes, expectedOkm->length());
+  FIZZ_CHECK_EQ(outputBytes, expectedOkm->length());
 
   auto actualOkm =
       Hkdf(openssl::hasherFactory<fizz::Sha256>())

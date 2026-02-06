@@ -140,13 +140,13 @@ folly::Optional<NegotiatedECHConfig> negotiateECHConfig(
     // We don't support any extensions, so if any are mandatory, skip this
     // config.
     if (echConfigHasMandatoryExtension(config)) {
-      VLOG(8) << "ECH config has mandatory extension, skipping...";
+      FIZZ_VLOG(8) << "ECH config has mandatory extension, skipping...";
       continue;
     }
 
     // Check for an invalid public name and skip if found.
     if (!isValidPublicName(config.public_name)) {
-      VLOG(8) << config.public_name << " isn't a valid public name";
+      FIZZ_VLOG(8) << config.public_name << " isn't a valid public name";
       continue;
     }
 
@@ -315,7 +315,7 @@ std::vector<uint8_t> calculateAcceptConfirmation(
       EarlySecrets::HRRECHAcceptConfirmation, hsc->coalesce());
 
   if (echAcceptance.secret.size() < kEchAcceptConfirmationSize) {
-    VLOG(8) << "ECH acceptance secret too small?";
+    FIZZ_VLOG(8) << "ECH acceptance secret too small?";
     throw std::runtime_error("ech acceptance secret too small");
   }
 
@@ -349,7 +349,7 @@ bool checkECHAccepted(
   // extension
   auto echConf = getExtension<ECHHelloRetryRequest>(hrr.extensions);
   if (!echConf) {
-    VLOG(8) << "HRR ECH extension missing, rejected...";
+    FIZZ_VLOG(8) << "HRR ECH extension missing, rejected...";
     return false;
   }
 

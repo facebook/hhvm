@@ -157,9 +157,9 @@ class SynchronizedBatcher : public Batcher<Hash> {
       throw std::runtime_error(
           "Cannot append more TLS transcripts into the Merkle Tree");
     };
-    VLOG(5) << "Adding message to batch. batcher=" << this
-            << ", added_message_index= " << index.value()
-            << ", threshold=" << this->numMsgThreshold_;
+    FIZZ_VLOG(5) << "Adding message to batch. batcher=" << this
+                 << ", added_message_index= " << index.value()
+                 << ", threshold=" << this->numMsgThreshold_;
     typename Batcher<Hash>::BatchResult result(
         index.value(), epoch->promise_.getSemiFuture());
     if (epoch->tree_->countMessages() >= this->numMsgThreshold_) {
@@ -173,8 +173,8 @@ class SynchronizedBatcher : public Batcher<Hash> {
       epoch->promise_ =
           folly::SharedPromise<typename Batcher<Hash>::SignedTree>();
       epoch.unlock();
-      VLOG(5) << "Batcher reached message threshold. batcher=" << this
-              << ", threshold=" << this->numMsgThreshold_;
+      FIZZ_VLOG(5) << "Batcher reached message threshold. batcher=" << this
+                   << ", threshold=" << this->numMsgThreshold_;
       this->signMerkleTree(std::move(oldTree))
           .toUnsafeFuture()
           .thenTry([promiseCapture = std::move(oldPromise)](
@@ -216,9 +216,9 @@ class ThreadLocalBatcher : public Batcher<Hash> {
       throw std::runtime_error(
           "Cannot append more TLS transcripts into the Merkle Tree");
     };
-    VLOG(5) << "Adding message to batch. batcher=" << this
-            << ", added_message_index= " << index.value()
-            << ", threshold=" << this->numMsgThreshold_;
+    FIZZ_VLOG(5) << "Adding message to batch. batcher=" << this
+                 << ", added_message_index= " << index.value()
+                 << ", threshold=" << this->numMsgThreshold_;
     typename Batcher<Hash>::BatchResult result(
         index.value(), epoch_->promise_.getSemiFuture());
     if (epoch_->tree_->countMessages() >= this->numMsgThreshold_) {
@@ -226,8 +226,8 @@ class ThreadLocalBatcher : public Batcher<Hash> {
       auto oldTree = std::move(epoch_->tree_);
       auto oldPromise = std::move(epoch_->promise_);
       epoch_.reset();
-      VLOG(5) << "Batcher reached message threshold. batcher=" << this
-              << ", threshold=" << this->numMsgThreshold_;
+      FIZZ_VLOG(5) << "Batcher reached message threshold. batcher=" << this
+                   << ", threshold=" << this->numMsgThreshold_;
       this->signMerkleTree(std::move(oldTree))
           .toUnsafeFuture()
           .thenTry([promiseCapture = std::move(oldPromise)](

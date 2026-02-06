@@ -26,7 +26,7 @@ void trimBytes(IOBuf& buf, folly::MutableByteRange trimmed) {
         toTrim);
     current->trimEnd(toTrim);
     currentTrim -= toTrim;
-    DCHECK(current != &buf || currentTrim == 0);
+    FIZZ_DCHECK(current != &buf || currentTrim == 0);
     current = current->prev();
   } while (currentTrim != 0);
 }
@@ -44,7 +44,7 @@ void trimStart(IOBuf& buf, size_t toTrim) {
 }
 
 void XOR(ByteRange first, MutableByteRange second) {
-  CHECK_EQ(first.size(), second.size());
+  FIZZ_CHECK_EQ(first.size(), second.size());
   for (size_t i = 0; i < first.size(); ++i) {
     second[i] ^= first[i];
   }

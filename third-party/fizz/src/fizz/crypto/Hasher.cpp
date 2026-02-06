@@ -7,6 +7,7 @@
  */
 
 #include <fizz/crypto/Hasher.h>
+#include <fizz/util/Logging.h>
 
 namespace fizz {
 
@@ -16,7 +17,7 @@ void hash(
     folly::MutableByteRange out) {
   auto hasher = makeHasher->make();
 
-  CHECK_GE(out.size(), hasher->getHashLen());
+  FIZZ_CHECK_GE(out.size(), hasher->getHashLen());
 
   hasher->hash_update(in);
   hasher->hash_final(out);

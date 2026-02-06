@@ -1,4 +1,5 @@
 #include <fizz/experimental/psp/PSP.h>
+#include <fizz/util/Logging.h>
 #include <fmt/format.h>
 #include <folly/io/Cursor.h>
 #include <folly/io/async/AsyncSocket.h>
@@ -81,7 +82,7 @@ class AsyncPSPUpgradeImpl : public ::fizz::psp::AsyncPSPUpgradeFrame,
       PSPVersion pspVersion,
       const std::shared_ptr<KernelPSP>& ops)
       : transport_(transport), version_(pspVersion), ops_(ops) {
-    CHECK_EQ(
+    FIZZ_CHECK_EQ(
         static_cast<unsigned>(upgradeProtocolVersion),
         static_cast<unsigned>(FizzPSPProtocol::V0));
     auto sock = transport->getUnderlyingTransport<folly::AsyncSocket>();
@@ -102,7 +103,7 @@ class AsyncPSPUpgradeImpl : public ::fizz::psp::AsyncPSPUpgradeFrame,
     }
   }
   void start(Callback* cb) override {
-    CHECK_EQ(awaiter_, nullptr);
+    FIZZ_CHECK_EQ(awaiter_, nullptr);
     awaiter_ = cb;
 
     return resume();
@@ -249,7 +250,7 @@ class AsyncPSPUpgradeImpl : public ::fizz::psp::AsyncPSPUpgradeFrame,
             folly::NetworkSocket::fromFd(fd_));
       }
       default:
-        LOG(FATAL) << "resumed in invalid state";
+        FIZZ_LOG(FATAL) << "resumed in invalid state";
     }
   }
 
@@ -370,7 +371,7 @@ std::unique_ptr<folly::IOBuf> encodeTLV(const SA& sa) {
   appender.write<uint8_t>(0);
 
   std::array<uint8_t, kPSPV0KeyMaxSize> key{};
-  CHECK_LE(sa.key.size(), kPSPV0KeyMaxSize);
+  FIZZ_CHECK_LE(sa.key.size(), kPSPV0KeyMaxSize);
   memcpy(key.data(), sa.key.data(), sa.key.size());
 
   appender.push(key.data(), key.size());
@@ -397,7 +398,7 @@ folly::Expected<SA, std::runtime_error> tryDecodeSA(
         std::runtime_error("invalid or unsupported psp version"));
   }
   auto keylen = keylenOpt.value();
-  CHECK_LE(keylen, kPSPV0KeyMaxSize);
+  FIZZ_CHECK_LE(keylen, kPSPV0KeyMaxSize);
   ret.key.resize(keylen);
   cursor.pull(ret.key.data(), keylen);
 

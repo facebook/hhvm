@@ -131,13 +131,13 @@ class Connection : public AsyncSocket::ConnectCallback,
   }
 
   void connectErr(const AsyncSocketException& ex) noexcept override {
-    LOG(ERROR) << "Connect error: " << ex.what();
+    FIZZ_LOG(ERROR) << "Connect error: " << ex.what();
     evb_->terminateLoopSoon();
   }
 
   void connectSuccess() noexcept override {
-    LOG(INFO) << (willResume_ ? "Initial connection" : "Connection")
-              << " established.";
+    FIZZ_LOG(INFO) << (willResume_ ? "Initial connection" : "Connection")
+                   << " established.";
     if (!proxyTarget_.empty()) {
       auto connectCommand = IOBuf::create(0);
       folly::io::Appender appender(connectCommand.get(), 10);
@@ -169,7 +169,7 @@ class Connection : public AsyncSocket::ConnectCallback,
     if (transport_->isReplaySafe()) {
       printHandshakeSuccess();
     } else {
-      LOG(INFO) << "Early handshake success.";
+      FIZZ_LOG(INFO) << "Early handshake success.";
       transport_->setReplaySafetyCallback(this);
     }
     transport_->setReadCB(this);
@@ -178,7 +178,7 @@ class Connection : public AsyncSocket::ConnectCallback,
   void fizzHandshakeError(
       AsyncFizzClient* /*client*/,
       exception_wrapper ex) noexcept override {
-    LOG(ERROR) << "Handshake error: " << ex.what();
+    FIZZ_LOG(ERROR) << "Handshake error: " << ex.what();
     evb_->terminateLoopSoon();
   }
 
@@ -213,12 +213,12 @@ class Connection : public AsyncSocket::ConnectCallback,
       unsigned int httpStatus;
       if (sscanf(statusLine.c_str(), "HTTP/1.%u %u", &httpVer, &httpStatus) !=
           2) {
-        LOG(ERROR) << "Failed to parse status: " << statusLine;
+        FIZZ_LOG(ERROR) << "Failed to parse status: " << statusLine;
         close();
       }
 
       if (httpStatus / 100 != 2) {
-        LOG(ERROR) << "Got non-200 status: " << httpStatus;
+        FIZZ_LOG(ERROR) << "Got non-200 status: " << httpStatus;
         close();
       }
 
@@ -238,14 +238,14 @@ class Connection : public AsyncSocket::ConnectCallback,
   }
 
   void readEOF() noexcept override {
-    LOG(INFO) << (willResume_ ? "Initial EOF" : "EOF");
+    FIZZ_LOG(INFO) << (willResume_ ? "Initial EOF" : "EOF");
     if (!willResume_) {
       evb_->terminateLoopSoon();
     }
   }
 
   void readErr(const AsyncSocketException& ex) noexcept override {
-    LOG(ERROR) << "Read error: " << ex.what();
+    FIZZ_LOG(ERROR) << "Read error: " << ex.what();
     evb_->terminateLoopSoon();
   }
 
@@ -272,31 +272,34 @@ class Connection : public AsyncSocket::ConnectCallback,
     auto& state = transport_->getState();
     auto serverCert = state.serverCert();
     auto clientCert = state.clientCert();
-    LOG(INFO) << (willResume_ ? "Initial handshake" : "Handshake")
-              << " succeeded.";
-    LOG(INFO) << "  TLS Version: " << toString(*state.version());
-    LOG(INFO) << "  Cipher Suite:  " << toString(*state.cipher());
-    LOG(INFO) << "  Named Group: "
-              << (state.group() ? toString(*state.group()) : "(none)");
-    LOG(INFO) << "  Signature Scheme: "
-              << (state.sigScheme() ? toString(*state.sigScheme()) : "(none)");
-    LOG(INFO) << "  PSK: " << toString(*state.pskType());
-    LOG(INFO) << "  PSK Mode: "
-              << (state.pskMode() ? toString(*state.pskMode()) : "(none)");
-    LOG(INFO) << "  Key Exchange Type: " << toString(*state.keyExchangeType());
-    LOG(INFO) << "  Early: " << toString(*state.earlyDataType());
-    LOG(INFO) << "  Server Identity: "
-              << (serverCert ? serverCert->getIdentity() : "(none)");
-    LOG(INFO) << "  Client Identity: "
-              << (clientCert ? clientCert->getIdentity() : "(none)");
+    FIZZ_LOG(INFO) << (willResume_ ? "Initial handshake" : "Handshake")
+                   << " succeeded.";
+    FIZZ_LOG(INFO) << "  TLS Version: " << toString(*state.version());
+    FIZZ_LOG(INFO) << "  Cipher Suite:  " << toString(*state.cipher());
+    FIZZ_LOG(INFO) << "  Named Group: "
+                   << (state.group() ? toString(*state.group()) : "(none)");
+    FIZZ_LOG(INFO) << "  Signature Scheme: "
+                   << (state.sigScheme() ? toString(*state.sigScheme())
+                                         : "(none)");
+    FIZZ_LOG(INFO) << "  PSK: " << toString(*state.pskType());
+    FIZZ_LOG(INFO) << "  PSK Mode: "
+                   << (state.pskMode() ? toString(*state.pskMode()) : "(none)");
+    FIZZ_LOG(INFO) << "  Key Exchange Type: "
+                   << toString(*state.keyExchangeType());
+    FIZZ_LOG(INFO) << "  Early: " << toString(*state.earlyDataType());
+    FIZZ_LOG(INFO) << "  Server Identity: "
+                   << (serverCert ? serverCert->getIdentity() : "(none)");
+    FIZZ_LOG(INFO) << "  Client Identity: "
+                   << (clientCert ? clientCert->getIdentity() : "(none)");
 
-    LOG(INFO) << "  Certificate Chain:";
+    FIZZ_LOG(INFO) << "  Certificate Chain:";
     auto certs = verifier_->getCerts();
     for (size_t i = 0; i < certs.size(); i++) {
       auto x509Cert = certs[i]->getX509();
-      LOG(INFO) << "   " << i
-                << " s:" << OpenSSLCertUtils::getSubject(*x509Cert).value();
-      LOG(INFO) << "     i:" << OpenSSLCertUtils::getIssuer(*x509Cert).value();
+      FIZZ_LOG(INFO) << "   " << i << " s:"
+                     << OpenSSLCertUtils::getSubject(*x509Cert).value();
+      FIZZ_LOG(INFO) << "     i:"
+                     << OpenSSLCertUtils::getIssuer(*x509Cert).value();
     }
 
     if (auto opensslCert =
@@ -304,13 +307,13 @@ class Connection : public AsyncSocket::ConnectCallback,
                 serverCert.get())) {
       BioUniquePtr bio(BIO_new(BIO_s_mem()));
       if (!PEM_write_bio_X509(bio.get(), opensslCert->getX509().get())) {
-        LOG(ERROR) << "  Couldn't convert server certificate to PEM: "
-                   << SSLContext::getErrors();
+        FIZZ_LOG(ERROR) << "  Couldn't convert server certificate to PEM: "
+                        << SSLContext::getErrors();
       } else {
         BUF_MEM* bptr = nullptr;
         BIO_get_mem_ptr(bio.get(), &bptr);
-        LOG(INFO) << "  Server Certificate:\n"
-                  << std::string(bptr->data, bptr->length);
+        FIZZ_LOG(INFO) << "  Server Certificate:\n"
+                       << std::string(bptr->data, bptr->length);
       }
     }
 
@@ -319,38 +322,42 @@ class Connection : public AsyncSocket::ConnectCallback,
                 clientCert.get())) {
       BioUniquePtr bio(BIO_new(BIO_s_mem()));
       if (!PEM_write_bio_X509(bio.get(), opensslCert->getX509().get())) {
-        LOG(ERROR) << "  Couldn't convert client certificate to PEM: "
-                   << SSLContext::getErrors();
+        FIZZ_LOG(ERROR) << "  Couldn't convert client certificate to PEM: "
+                        << SSLContext::getErrors();
       } else {
         BUF_MEM* bptr = nullptr;
         BIO_get_mem_ptr(bio.get(), &bptr);
-        LOG(INFO) << "  Client Certificate:\n"
-                  << std::string(bptr->data, bptr->length);
+        FIZZ_LOG(INFO) << "  Client Certificate:\n"
+                       << std::string(bptr->data, bptr->length);
       }
     }
-    LOG(INFO) << "  Server Certificate Compression: "
-              << (state.serverCertCompAlgo()
-                      ? toString(*state.serverCertCompAlgo())
-                      : "(none)");
-    LOG(INFO) << "  ALPN: " << state.alpn().value_or("(none)");
-    LOG(INFO) << "  Client Random: "
-              << folly::hexlify(*transport_->getClientRandom());
-    LOG(INFO) << "  Secrets:";
-    LOG(INFO) << "    External PSK Binder: " << secretStr(externalPskBinder_);
-    LOG(INFO) << "    Resumption PSK Binder: "
-              << secretStr(resumptionPskBinder_);
-    LOG(INFO) << "    Early Exporter: " << secretStr(earlyExporterSecret_);
-    LOG(INFO) << "    Early Client Data: "
-              << secretStr(clientEarlyTrafficSecret_);
-    LOG(INFO) << "    Client Handshake: "
-              << secretStr(clientHandshakeTrafficSecret_);
-    LOG(INFO) << "    Server Handshake: "
-              << secretStr(serverHandshakeTrafficSecret_);
-    LOG(INFO) << "    Exporter Master: " << secretStr(exporterMasterSecret_);
-    LOG(INFO) << "    Resumption Master: "
-              << secretStr(resumptionMasterSecret_);
-    LOG(INFO) << "    Client Traffic: " << secretStr(clientAppTrafficSecret_);
-    LOG(INFO) << "    Server Traffic: " << secretStr(serverAppTrafficSecret_);
+    FIZZ_LOG(INFO) << "  Server Certificate Compression: "
+                   << (state.serverCertCompAlgo()
+                           ? toString(*state.serverCertCompAlgo())
+                           : "(none)");
+    FIZZ_LOG(INFO) << "  ALPN: " << state.alpn().value_or("(none)");
+    FIZZ_LOG(INFO) << "  Client Random: "
+                   << folly::hexlify(*transport_->getClientRandom());
+    FIZZ_LOG(INFO) << "  Secrets:";
+    FIZZ_LOG(INFO) << "    External PSK Binder: "
+                   << secretStr(externalPskBinder_);
+    FIZZ_LOG(INFO) << "    Resumption PSK Binder: "
+                   << secretStr(resumptionPskBinder_);
+    FIZZ_LOG(INFO) << "    Early Exporter: " << secretStr(earlyExporterSecret_);
+    FIZZ_LOG(INFO) << "    Early Client Data: "
+                   << secretStr(clientEarlyTrafficSecret_);
+    FIZZ_LOG(INFO) << "    Client Handshake: "
+                   << secretStr(clientHandshakeTrafficSecret_);
+    FIZZ_LOG(INFO) << "    Server Handshake: "
+                   << secretStr(serverHandshakeTrafficSecret_);
+    FIZZ_LOG(INFO) << "    Exporter Master: "
+                   << secretStr(exporterMasterSecret_);
+    FIZZ_LOG(INFO) << "    Resumption Master: "
+                   << secretStr(resumptionMasterSecret_);
+    FIZZ_LOG(INFO) << "    Client Traffic: "
+                   << secretStr(clientAppTrafficSecret_);
+    FIZZ_LOG(INFO) << "    Server Traffic: "
+                   << secretStr(serverAppTrafficSecret_);
 
     if (echConfigs_.has_value()) {
       printECHSuccess(state);
@@ -397,22 +404,23 @@ class Connection : public AsyncSocket::ConnectCallback,
   }
 
   void printECHSuccess(const State& state) {
-    LOG(INFO) << "  Encrypted client hello (ECH) requested: "
-              << (state.echState().has_value() ? "Yes" : "No");
+    FIZZ_LOG(INFO) << "  Encrypted client hello (ECH) requested: "
+                   << (state.echState().has_value() ? "Yes" : "No");
     if (state.echState().has_value()) {
-      LOG(INFO) << "  Encrypted client hello (ECH) status: "
-                << toString(state.echState()->status);
+      FIZZ_LOG(INFO) << "  Encrypted client hello (ECH) status: "
+                     << toString(state.echState()->status);
 
       // Get ECH config content
       const auto& echConfigContent = echConfigs_.value()[0];
       const auto& ciphersuite = echConfigContent.key_config.cipher_suites[0];
-      LOG(INFO) << "    Hash function: "
-                << toString(getHashFunction(ciphersuite.kdf_id));
-      LOG(INFO) << "    Cipher Suite: "
-                << toString(getCipherSuite(ciphersuite.aead_id));
-      LOG(INFO) << "    Named Group: "
-                << toString(getKexGroup(echConfigContent.key_config.kem_id));
-      LOG(INFO) << "    Fake SNI Used: " << echConfigContent.public_name;
+      FIZZ_LOG(INFO) << "    Hash function: "
+                     << toString(getHashFunction(ciphersuite.kdf_id));
+      FIZZ_LOG(INFO) << "    Cipher Suite: "
+                     << toString(getCipherSuite(ciphersuite.aead_id));
+      FIZZ_LOG(INFO) << "    Named Group: "
+                     << toString(
+                            getKexGroup(echConfigContent.key_config.kem_id));
+      FIZZ_LOG(INFO) << "    Fake SNI Used: " << echConfigContent.public_name;
     }
   }
 
@@ -461,9 +469,9 @@ class BasicPersistentPskCache : public BasicPskCache {
     std::string serializedPsk =
         serializePsk(fizz::openssl::certificateSerializer(), psk);
     if (writeFile(serializedPsk, saveFile_.c_str())) {
-      LOG(INFO) << "\n Saved PSK to " << saveFile_ << " \n";
+      FIZZ_LOG(INFO) << "\n Saved PSK to " << saveFile_ << " \n";
     } else {
-      LOG(ERROR) << "\n Unable to save PSK " << saveFile_ << " \n";
+      FIZZ_LOG(ERROR) << "\n Unable to save PSK " << saveFile_ << " \n";
     }
   }
 
@@ -471,7 +479,7 @@ class BasicPersistentPskCache : public BasicPskCache {
     if (loadFile_.empty()) {
       return folly::none;
     }
-    LOG(INFO) << "\n Loading PSK from " << loadFile_ << " \n";
+    FIZZ_LOG(INFO) << "\n Loading PSK from " << loadFile_ << " \n";
     std::string serializedPsk;
     readFile(loadFile_.c_str(), serializedPsk);
     try {
@@ -479,7 +487,8 @@ class BasicPersistentPskCache : public BasicPskCache {
           fizz::openssl::certificateSerializer(),
           folly::ByteRange(serializedPsk));
     } catch (const std::exception& e) {
-      LOG(ERROR) << "Error deserializing: " << loadFile_ << "\n" << e.what();
+      FIZZ_LOG(ERROR) << "Error deserializing: " << loadFile_ << "\n"
+                      << e.what();
       throw;
     }
   }
@@ -570,7 +579,7 @@ int fizzClientCommand(const std::vector<std::string>& args) {
         try {
           compAlgos = splitParse<CertificateCompressionAlgorithm>(arg);
         } catch (const std::exception& e) {
-          LOG(ERROR) << "Error parsing certificate compression algorithms: " << e.what();
+          FIZZ_LOG(ERROR) << "Error parsing certificate compression algorithms: " << e.what();
           throw;
         }
     }}},
@@ -612,13 +621,13 @@ int fizzClientCommand(const std::vector<std::string>& args) {
       return 1;
     }
   } catch (const std::exception& e) {
-    LOG(ERROR) << "Error: " << e.what();
+    FIZZ_LOG(ERROR) << "Error: " << e.what();
     return 1;
   }
 
   // Sanity check input.
   if (certPath.empty() != keyPath.empty()) {
-    LOG(ERROR) << "-cert and -key are both required when specified";
+    FIZZ_LOG(ERROR) << "-cert and -key are both required when specified";
     return 1;
   }
 
@@ -661,8 +670,8 @@ int fizzClientCommand(const std::vector<std::string>& args) {
           break;
 #endif
         default:
-          LOG(WARNING) << "Don't know what decompressor to use for "
-                       << toString(algo) << ", ignoring...";
+          FIZZ_LOG(WARNING) << "Don't know what decompressor to use for "
+                            << toString(algo) << ", ignoring...";
           break;
       }
     }
@@ -681,7 +690,7 @@ int fizzClientCommand(const std::vector<std::string>& args) {
 
       if (X509_STORE_load_locations(connStore.get(), caFilePtr, caPathPtr) ==
           0) {
-        LOG(ERROR) << "Failed to load CA certificates";
+        FIZZ_LOG(ERROR) << "Failed to load CA certificates";
         return 1;
       }
       resumptionStore.reset(connStore.get());
@@ -711,10 +720,10 @@ int fizzClientCommand(const std::vector<std::string>& args) {
     std::string certData;
     std::string keyData;
     if (!readFile(certPath.c_str(), certData)) {
-      LOG(ERROR) << "Failed to read certificate";
+      FIZZ_LOG(ERROR) << "Failed to read certificate";
       return 1;
     } else if (!readFile(keyPath.c_str(), keyData)) {
-      LOG(ERROR) << "Failed to read private key";
+      FIZZ_LOG(ERROR) << "Failed to read private key";
       return 1;
     }
 
@@ -754,18 +763,18 @@ int fizzClientCommand(const std::vector<std::string>& args) {
   } else if (!echConfigsBase64.empty()) {
     echConfigs = parseECHConfigsBase64(echConfigsBase64);
     if (!echConfigs.has_value()) {
-      LOG(ERROR) << "Unable to parse ECHConfigList base64.";
+      FIZZ_LOG(ERROR) << "Unable to parse ECHConfigList base64.";
       return 1;
     }
   } else if (!echConfigsFile.empty()) {
     auto echConfigsJson = readECHConfigsJson(echConfigsFile);
     if (!echConfigsJson.has_value()) {
-      LOG(ERROR) << "Unable to load ECH configs from json file";
+      FIZZ_LOG(ERROR) << "Unable to load ECH configs from json file";
       return 1;
     }
     echConfigs = parseECHConfigs(echConfigsJson.value());
     if (!echConfigs.has_value()) {
-      LOG(ERROR)
+      FIZZ_LOG(ERROR)
           << "Unable to parse JSON file and make ECH config."
           << "Ensure the format matches what is expected."
           << "Rough example of format: {echconfigs: [${your ECH config here with all the fields..}]}"
@@ -824,7 +833,7 @@ int fizzClientCommand(const std::vector<std::string>& args) {
     conn.connect(addr);
     evb.loop();
   } catch (const std::exception& e) {
-    LOG(ERROR) << "Error: " << e.what();
+    FIZZ_LOG(ERROR) << "Error: " << e.what();
     return 1;
   }
 

@@ -7,6 +7,7 @@
  */
 
 #include <fizz/extensions/javacrypto/JniUtils.h>
+#include <fizz/util/Logging.h>
 #include <glog/logging.h>
 
 /**
@@ -46,7 +47,7 @@ JNIEnv* getEnv(bool* shouldDetach) {
   if (status == JNI_EDETACHED) {
     status = vm->AttachCurrentThread(
         ATTACH_CURRENT_THREAD_ENV_ARG(env), nullptr /*args*/);
-    CHECK_EQ(status, JNI_OK);
+    FIZZ_CHECK_EQ(status, JNI_OK);
     *shouldDetach = true;
   }
 

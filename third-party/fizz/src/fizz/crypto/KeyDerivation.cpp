@@ -7,6 +7,7 @@
  */
 
 #include <fizz/crypto/KeyDerivation.h>
+#include <fizz/util/Logging.h>
 
 namespace fizz {
 
@@ -34,9 +35,9 @@ std::vector<uint8_t> KeyDerivationImpl::deriveSecret(
     folly::ByteRange messageHash,
     uint16_t length) {
   auto hlen = hkdf_.hasher()->hashLength();
-  CHECK_EQ(secret.size(), hlen);
-  CHECK_EQ(messageHash.size(), hlen);
-  CHECK_GT(length, 0);
+  FIZZ_CHECK_EQ(secret.size(), hlen);
+  FIZZ_CHECK_EQ(messageHash.size(), hlen);
+  FIZZ_CHECK_GT(length, 0);
   // Copying the buffer to avoid violating constness of the data.
   auto hashBuf = folly::IOBuf::copyBuffer(messageHash);
   auto out = expandLabel(secret, label, std::move(hashBuf), length);

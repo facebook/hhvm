@@ -24,7 +24,7 @@ namespace test {
 EvpPkeyUniquePtr getPrivateKey(StringPiece key) {
   BioUniquePtr bio(BIO_new(BIO_s_mem()));
   CHECK(bio);
-  CHECK_EQ(BIO_write(bio.get(), key.data(), key.size()), key.size());
+  FIZZ_CHECK_EQ(BIO_write(bio.get(), key.data(), key.size()), (int)key.size());
   EvpPkeyUniquePtr pkey(
       PEM_read_bio_PrivateKey(bio.get(), nullptr, nullptr, nullptr));
   CHECK(pkey);
@@ -34,7 +34,7 @@ EvpPkeyUniquePtr getPrivateKey(StringPiece key) {
 EvpPkeyUniquePtr getPublicKey(StringPiece key) {
   BioUniquePtr bio(BIO_new(BIO_s_mem()));
   CHECK(bio);
-  CHECK_EQ(BIO_write(bio.get(), key.data(), key.size()), key.size());
+  FIZZ_CHECK_EQ(BIO_write(bio.get(), key.data(), key.size()), (int)key.size());
   EvpPkeyUniquePtr pkey(
       PEM_read_bio_PUBKEY(bio.get(), nullptr, nullptr, nullptr));
   CHECK(pkey);
@@ -51,7 +51,8 @@ std::unique_ptr<folly::IOBuf> toIOBuf(folly::StringPiece hexData) {
 folly::ssl::X509UniquePtr getCert(folly::StringPiece cert) {
   BioUniquePtr bio(BIO_new(BIO_s_mem()));
   CHECK(bio);
-  CHECK_EQ(BIO_write(bio.get(), cert.data(), cert.size()), cert.size());
+  FIZZ_CHECK_EQ(
+      BIO_write(bio.get(), cert.data(), cert.size()), (int)cert.size());
   X509UniquePtr x509(PEM_read_bio_X509(bio.get(), nullptr, nullptr, nullptr));
   CHECK(x509);
   return x509;

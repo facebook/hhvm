@@ -106,9 +106,9 @@ tryConvertKTLSBase(
   // if the socket is good() and we aren't connecting, then this implies the
   // handshake has already completed, so the following values must be set.
   const auto& state = fizzSock.getState();
-  DCHECK(state.cipher().has_value());
-  DCHECK(state.readRecordLayer());
-  DCHECK(state.writeRecordLayer());
+  FIZZ_DCHECK(state.cipher().has_value());
+  FIZZ_DCHECK(state.readRecordLayer());
+  FIZZ_DCHECK(state.writeRecordLayer());
 
   std::shared_ptr<const Cert> selfCert;
   std::shared_ptr<const Cert> peerCert;

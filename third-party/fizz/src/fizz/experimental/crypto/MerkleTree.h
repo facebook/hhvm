@@ -342,8 +342,8 @@ class BatchSignatureMerkleTree
       folly::ByteRange leftChild,
       folly::ByteRange rightChild) {
     // ensure the children are of right size
-    DCHECK(leftChild.size() == Hash::HashLen);
-    DCHECK(rightChild.size() == Hash::HashLen);
+    FIZZ_DCHECK(leftChild.size() == Hash::HashLen);
+    FIZZ_DCHECK(rightChild.size() == Hash::HashLen);
 
     std::array<uint8_t, Hash::HashLen> result;
     auto hasher = ::fizz::openssl::makeHasher<Hash>();

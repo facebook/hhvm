@@ -8,6 +8,7 @@
 
 #include <fizz/server/DefaultCertManager.h>
 
+#include <fizz/util/Logging.h>
 #include <folly/String.h>
 
 using namespace folly;
@@ -48,7 +49,7 @@ CertMatch DefaultCertManager::getCert(
 
     auto ret = findCert(key, supportedSigSchemes, peerSigSchemes);
     if (ret) {
-      VLOG(8) << "Found exact SNI match for: " << key;
+      FIZZ_VLOG(8) << "Found exact SNI match for: " << key;
       return ret;
     }
 
@@ -57,12 +58,12 @@ CertMatch DefaultCertManager::getCert(
       std::string wildcardKey(key, dot);
       ret = findCert(wildcardKey, supportedSigSchemes, peerSigSchemes);
       if (ret) {
-        VLOG(8) << "Found wildcard SNI match for: " << key;
+        FIZZ_VLOG(8) << "Found wildcard SNI match for: " << key;
         return ret;
       }
     }
 
-    VLOG(8) << "Did not find match for SNI: " << key;
+    FIZZ_VLOG(8) << "Did not find match for SNI: " << key;
   }
 
   auto ret = findCert(default_, supportedSigSchemes, peerSigSchemes);
@@ -71,7 +72,7 @@ CertMatch DefaultCertManager::getCert(
     return ret;
   }
 
-  VLOG(8) << "No matching cert for client sig schemes found";
+  FIZZ_VLOG(8) << "No matching cert for client sig schemes found";
   return folly::none;
 }
 
@@ -113,7 +114,7 @@ void DefaultCertManager::addCertIdentity(
   auto& schemeMap = certs_[key];
   for (auto sigScheme : sigSchemes) {
     if (schemeMap.find(sigScheme) != schemeMap.end()) {
-      VLOG(8) << "Skipping duplicate certificate for " << key;
+      FIZZ_VLOG(8) << "Skipping duplicate certificate for " << key;
     } else {
       schemeMap[sigScheme] = cert;
     }

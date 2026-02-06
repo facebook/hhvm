@@ -475,15 +475,15 @@ static folly::Optional<CachedPsk> validatePsk(
           context.getSupportedVersions().begin(),
           context.getSupportedVersions().end(),
           psk->version) == context.getSupportedVersions().end()) {
-    VLOG(1) << "Ignoring cached psk with protocol version "
-            << toString(psk->version);
+    FIZZ_VLOG(1) << "Ignoring cached psk with protocol version "
+                 << toString(psk->version);
     return folly::none;
   }
   if (std::find(
           context.getSupportedCiphers().begin(),
           context.getSupportedCiphers().end(),
           psk->cipher) == context.getSupportedCiphers().end()) {
-    VLOG(1) << "Ignoring cached psk with cipher " << toString(psk->cipher);
+    FIZZ_VLOG(1) << "Ignoring cached psk with cipher " << toString(psk->cipher);
     return folly::none;
   }
 
@@ -491,16 +491,16 @@ static folly::Optional<CachedPsk> validatePsk(
   if (psk->type == PskType::Resumption) {
     auto now = context.getClock()->getCurrentTime();
     if (now > psk->ticketExpirationTime) {
-      VLOG(1) << "Ignoring expired cached psk";
+      FIZZ_VLOG(1) << "Ignoring expired cached psk";
       return folly::none;
     }
     if (now - psk->ticketHandshakeTime > context.getMaxPskHandshakeLife()) {
-      VLOG(1) << "Ignoring psk with stale handshake";
+      FIZZ_VLOG(1) << "Ignoring psk with stale handshake";
       return folly::none;
     }
 
     if (psk->ticketHandshakeTime > now) {
-      VLOG(1) << "Ignoring psk from future";
+      FIZZ_VLOG(1) << "Ignoring psk from future";
       return folly::none;
     }
   }
@@ -838,7 +838,7 @@ static ClientHello constructEncryptedClientHello(
     const std::string& fakeSni,
     const folly::Optional<ClientPresharedKey>& greasePsk,
     const std::vector<ExtensionType>& outerExtensionTypes) {
-  DCHECK(e == Event::ClientHello || e == Event::HelloRetryRequest);
+  FIZZ_DCHECK(e == Event::ClientHello || e == Event::HelloRetryRequest);
 
   // Outer chlo is missing the inner ECH. We also replace any PSK
   // generated earlier with a GREASE one.
@@ -1463,7 +1463,7 @@ Status sm::EventHandler<
 
   folly::Optional<ECHStatus> echStatus;
   if (state.echState().has_value()) {
-    VLOG(8) << "Checking if ECH was accepted...";
+    FIZZ_VLOG(8) << "Checking if ECH was accepted...";
 
     auto echScheduler = state.context()->getFactory()->makeKeyScheduler(cipher);
     echScheduler->deriveEarlySecret(folly::range(state.echState()->random));
@@ -1483,7 +1483,7 @@ Status sm::EventHandler<
     } else {
       echStatus = ECHStatus::Rejected;
     }
-    VLOG(8) << "ECH was " << toString(*echStatus);
+    FIZZ_VLOG(8) << "ECH was " << toString(*echStatus);
   }
 
   // Servers cannot accept GREASE PSK
@@ -1792,7 +1792,7 @@ Status EventHandler<
     } else {
       echStatus = ECHStatus::Rejected;
     }
-    VLOG(8) << "ECH was " << toString(*echStatus);
+    FIZZ_VLOG(8) << "ECH was " << toString(*echStatus);
 
     // Generate GREASE PSK if needed
     if (state.echState()->greasePsk.has_value()) {
@@ -2062,8 +2062,9 @@ getClientCert(
   auto result = certManager->getCert(
       state.sni(), supportedSchemes, schemes, peerExtensions);
   if (!result) {
-    VLOG(1) << "client cert/context doesn't support any signature algorithms "
-            << "specified by the server";
+    FIZZ_VLOG(1)
+        << "client cert/context doesn't support any signature algorithms "
+        << "specified by the server";
     return folly::none;
   }
 
@@ -2223,7 +2224,7 @@ Status EventHandler<
 
   auto decompressor =
       state.context()->getCertDecompressorForAlgorithm(compCert.algorithm);
-  DCHECK(decompressor);
+  FIZZ_DCHECK(decompressor);
 
   CertificateMsg msg;
   try {
@@ -2358,7 +2359,7 @@ EventHandler<ClientTypes, StateEnum::ExpectingFinished, Event::Finished>::
       !state.context()->getOmitEarlyRecordLayer()) {
     auto encodedEndOfEarly = encodeHandshake(EndOfEarlyData());
     state.handshakeContext()->appendToTranscript(encodedEndOfEarly);
-    DCHECK(state.earlyWriteRecordLayer());
+    FIZZ_DCHECK(state.earlyWriteRecordLayer());
     TLSContent content;
     TRY(state.earlyWriteRecordLayer()->writeHandshake(
         content, ctx.err, std::move(encodedEndOfEarly)));
@@ -2805,7 +2806,7 @@ static Status handleEarlyAppWrite(
       return Status::Success;
     }
   }
-  LOG(FATAL) << "Bad EarlyDataType";
+  FIZZ_LOG(FATAL) << "Bad EarlyDataType";
   folly::assume_unreachable();
 }
 

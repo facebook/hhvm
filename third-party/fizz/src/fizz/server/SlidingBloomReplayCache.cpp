@@ -14,6 +14,7 @@
 #include <folly/portability/Unistd.h>
 
 #include <fizz/crypto/RandomGenerator.h>
+#include <fizz/util/Logging.h>
 
 #include <folly/Range.h>
 #include <cmath>
@@ -69,7 +70,7 @@ SlidingBloomReplayCache::SlidingBloomReplayCache(
   double root = pow(acceptableFPR, 1.0 / hashCountDouble);
   double divisor = bucketCountDouble * log(1.0 - root);
   bitSize_ = std::ceil(dividend / divisor);
-  VLOG(8) << "Initializing with bitSize = " << bitSize_;
+  FIZZ_VLOG(8) << "Initializing with bitSize = " << bitSize_;
 
   bucketWidthInMs_ =
       std::chrono::milliseconds(((ttlInSecs * 1000) / kBucketCount) + 1);
@@ -94,7 +95,7 @@ SlidingBloomReplayCache::SlidingBloomReplayCache(
     folly::via(
         executor_, [this]() { scheduleTimeout(bucketWidthInMs_.count()); });
   } else {
-    VLOG(8) << "Started replay cache without reaping";
+    FIZZ_VLOG(8) << "Started replay cache without reaping";
   }
 }
 
@@ -166,8 +167,8 @@ folly::SemiFuture<ReplayCacheResult> SlidingBloomReplayCache::check(
 }
 
 void SlidingBloomReplayCache::clearBucket(size_t bucket) {
-  VLOG(8) << "Clearing bit " << bucket << ", current bucket is "
-          << currentBucket_;
+  FIZZ_VLOG(8) << "Clearing bit " << bucket << ", current bucket is "
+               << currentBucket_;
 
   CellType mask = ~((static_cast<CellType>(1)) << bucket);
   for (size_t i = 0; i < bitSize_; ++i) {

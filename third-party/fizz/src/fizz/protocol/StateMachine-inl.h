@@ -6,9 +6,8 @@
  *  LICENSE file in the root directory of this source tree.
  */
 
+#include <fizz/util/Logging.h>
 #include <cstdlib>
-
-#include <glog/logging.h>
 
 namespace fizz {
 namespace sm {
@@ -37,7 +36,7 @@ class EventHandlerBase {
   static void Transition(typename SM::State& stateStruct) {
     static_assert(
         Or<StateSame<SM, to, AllowedStates>...>::value, "Transition invalid");
-    DCHECK_EQ(stateStruct.state(), state);
+    FIZZ_DCHECK_EQ(stateStruct.state(), state);
     stateStruct.state() = to;
   }
 };
@@ -80,7 +79,7 @@ typename StateMachine<SM>::EventHandlerFun StateMachine<SM>::getHandler(
       std::make_index_sequence<SM::NumStates * SM::NumEvents>());
   const auto i = static_cast<std::size_t>(state) * SM::NumEvents +
       static_cast<std::size_t>(event);
-  CHECK_LT(i, handlers.size()) << "Out of bounds handler requested";
+  FIZZ_CHECK_LT(i, handlers.size()) << "Out of bounds handler requested";
   return handlers[i];
 }
 

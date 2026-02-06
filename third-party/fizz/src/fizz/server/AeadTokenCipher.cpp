@@ -36,16 +36,16 @@ namespace server {
 
 bool Aead128GCMTokenCipher::setSecrets(
     const std::vector<folly::ByteRange>& tokenSecrets) {
-  VLOG(3) << "Updating token secrets";
+  FIZZ_VLOG(3) << "Updating token secrets";
 
   for (const auto& tokenSecret : tokenSecrets) {
     if (tokenSecret.size() < kMinTokenSecretLength) {
-      LOG(ERROR) << "Token cipher secret too small - not updating.";
+      FIZZ_LOG(ERROR) << "Token cipher secret too small - not updating.";
       return false;
     }
   }
 
-  VLOG(4) << "Updating token secrets, num=" << tokenSecrets.size();
+  FIZZ_VLOG(4) << "Updating token secrets, num=" << tokenSecrets.size();
   clearSecrets();
   for (const auto& tokenSecret : tokenSecrets) {
     Secret extracted(tokenSecret.begin(), tokenSecret.end());
@@ -103,7 +103,7 @@ folly::Optional<Buf> Aead128GCMTokenCipher::decrypt(
     }
   }
 
-  VLOG(6) << "Failed to decrypt token.";
+  FIZZ_VLOG(6) << "Failed to decrypt token.";
   return folly::none;
 }
 

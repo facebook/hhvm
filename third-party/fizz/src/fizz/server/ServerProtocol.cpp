@@ -619,12 +619,12 @@ static ResumptionStateResult getResumptionState(
         std::make_pair(PskType::NotAttempted, folly::none));
   } else if (!ticketCipher) {
     FOLLY_SDT(fizz, session_cache_NoTicketCipher);
-    VLOG(8) << "No ticket cipher, rejecting PSK.";
+    FIZZ_VLOG(8) << "No ticket cipher, rejecting PSK.";
     return ResumptionStateResult(
         std::make_pair(PskType::Rejected, folly::none));
   } else if (!pskMode) {
     FOLLY_SDT(fizz, session_cache_PskModeMismatch);
-    VLOG(8) << "No psk mode match, rejecting PSK.";
+    FIZZ_VLOG(8) << "No psk mode match, rejecting PSK.";
     return ResumptionStateResult(
         std::make_pair(PskType::Rejected, folly::none));
   } else {
@@ -656,13 +656,13 @@ static bool validateResumptionState(
     CipherSuite cipher) {
   if (resState.version != version) {
     FOLLY_SDT(fizz, resumption_state_ProtocolVersionMismatch);
-    VLOG(8) << "Protocol version mismatch, rejecting PSK.";
+    FIZZ_VLOG(8) << "Protocol version mismatch, rejecting PSK.";
     return false;
   }
 
   if (getHashFunction(resState.cipher) != getHashFunction(cipher)) {
     FOLLY_SDT(fizz, resumption_state_HashFunctionMismatch);
-    VLOG(8) << "Hash mismatch, rejecting PSK.";
+    FIZZ_VLOG(8) << "Hash mismatch, rejecting PSK.";
     return false;
   }
 
@@ -889,7 +889,7 @@ static Optional<std::string> negotiateAlpn(
       clientProtocols.push_back(protocol.name->to<std::string>());
     }
   } else {
-    VLOG(6) << "Client did not send ALPN extension";
+    FIZZ_VLOG(6) << "Client did not send ALPN extension";
     if (context.getAlpnMode() == AlpnMode::Required) {
       throw FizzException(
           "ALPN is required", AlertDescription::no_application_protocol);
@@ -901,7 +901,7 @@ static Optional<std::string> negotiateAlpn(
   // Server's support for ALPN is to be enforced at the configuration.
   auto selected = context.negotiateAlpn(clientProtocols, zeroRttAlpn);
   if (!selected) {
-    VLOG(6) << "ALPN mismatch";
+    FIZZ_VLOG(6) << "ALPN mismatch";
     if (context.getAlpnMode() != AlpnMode::AllowMismatch) {
       auto msg = context.getAlpnMode() == AlpnMode::Optional
           ? "Unable to negotiate ALPN, as required by policy. policy=AlpnMode::Optional"
@@ -909,7 +909,7 @@ static Optional<std::string> negotiateAlpn(
       throw FizzException(msg, AlertDescription::no_application_protocol);
     }
   } else {
-    VLOG(6) << "ALPN: " << *selected;
+    FIZZ_VLOG(6) << "ALPN: " << *selected;
   }
   return selected;
 }
@@ -955,53 +955,53 @@ static EarlyDataType negotiateEarlyDataType(
   }
 
   if (!acceptEarlyData) {
-    VLOG(5) << "Rejecting early data: disabled";
+    FIZZ_VLOG(5) << "Rejecting early data: disabled";
     return EarlyDataType::Rejected;
   }
 
   if (!psk) {
-    VLOG(5) << "Rejected early data: psk rejected";
+    FIZZ_VLOG(5) << "Rejected early data: psk rejected";
     return EarlyDataType::Rejected;
   }
 
   if (psk->cipher != cipher) {
-    VLOG(5) << "Rejected early data: cipher mismatch";
+    FIZZ_VLOG(5) << "Rejected early data: cipher mismatch";
     return EarlyDataType::Rejected;
   }
 
   if (psk->alpn != alpn) {
-    VLOG(5) << "Rejecting early data: alpn mismatch";
+    FIZZ_VLOG(5) << "Rejecting early data: alpn mismatch";
     return EarlyDataType::Rejected;
   }
 
   if (keyExchangeType &&
       *keyExchangeType == KeyExchangeType::HelloRetryRequest) {
-    VLOG(5) << "Rejecting early data: HelloRetryRequest";
+    FIZZ_VLOG(5) << "Rejecting early data: HelloRetryRequest";
     return EarlyDataType::Rejected;
   }
 
   if (cookieState) {
-    VLOG(5) << "Rejecting early data: Cookie";
+    FIZZ_VLOG(5) << "Rejecting early data: Cookie";
     return EarlyDataType::Rejected;
   }
 
   if (replayCacheResult != ReplayCacheResult::NotReplay) {
-    VLOG(5) << "Rejecting early data: replay";
+    FIZZ_VLOG(5) << "Rejecting early data: replay";
     return EarlyDataType::Rejected;
   }
 
   if (!clockSkew || *clockSkew < clockSkewTolerance.before ||
       *clockSkew > clockSkewTolerance.after) {
-    VLOG(5) << "Rejecting early data: clock skew clockSkew="
-            << (clockSkew ? folly::to<std::string>(clockSkew->count())
-                          : "(none)")
-            << " toleranceBefore=" << clockSkewTolerance.before.count()
-            << " toleranceAfter=" << clockSkewTolerance.after.count();
+    FIZZ_VLOG(5) << "Rejecting early data: clock skew clockSkew="
+                 << (clockSkew ? folly::to<std::string>(clockSkew->count())
+                               : "(none)")
+                 << " toleranceBefore=" << clockSkewTolerance.before.count()
+                 << " toleranceAfter=" << clockSkewTolerance.after.count();
     return EarlyDataType::Rejected;
   }
 
   if (appTokenValidator && !appTokenValidator->validate(*psk)) {
-    VLOG(5) << "Rejecting early data: invalid app token";
+    FIZZ_VLOG(5) << "Rejecting early data: invalid app token";
     return EarlyDataType::Rejected;
   }
 
@@ -1506,7 +1506,7 @@ EventHandler<ServerTypes, StateEnum::ExpectingClientHello, Event::ClientHello>::
           std::tie(group, clientShare) = negotiateGroup(
               version, chlo, state.context()->getSupportedGroups());
           if (!clientShare) {
-            VLOG(8) << "Did not find key share for " << toString(*group);
+            FIZZ_VLOG(8) << "Did not find key share for " << toString(*group);
             if (state.group().has_value() || cookieState) {
               throw FizzException(
                   "key share not found for already negotiated group",
@@ -1654,7 +1654,7 @@ EventHandler<ServerTypes, StateEnum::ExpectingClientHello, Event::ClientHello>::
                 scheduler->deriveHandshakeSecret(
                     kexResult.value().sharedSecret->coalesce());
               } else {
-                DCHECK(keyExchangeType == KeyExchangeType::None);
+                FIZZ_DCHECK(keyExchangeType == KeyExchangeType::None);
                 scheduler->deriveHandshakeSecret();
               }
               std::vector<Extension> additionalExtensions;
@@ -1706,8 +1706,8 @@ EventHandler<ServerTypes, StateEnum::ExpectingClientHello, Event::ClientHello>::
                     std::move(echScheduler));
               } else if (echStatus == ECHStatus::Rejected) {
                 auto decrypter = state.context()->getECHDecrypter();
-                DCHECK(decrypter);
-                DCHECK(echState);
+                FIZZ_DCHECK(decrypter);
+                FIZZ_DCHECK(echState);
                 echRetryConfigs =
                     decrypter->getRetryConfigs(echState->outerSni);
               }
@@ -1919,7 +1919,7 @@ EventHandler<ServerTypes, StateEnum::ExpectingClientHello, Event::ClientHello>::
                           err);
                       // Split record must have the same encryption level as the
                       // main handshake.
-                      DCHECK(
+                      FIZZ_DCHECK(
                           splitRecord.encryptionLevel ==
                           serverEncrypted.encryptionLevel);
                       serverEncrypted.data->prependChain(
@@ -2330,7 +2330,7 @@ EventHandler<ServerTypes, StateEnum::ExpectingCertificate, Event::Certificate>::
 
   if (clientCerts.empty()) {
     if (state.context()->getClientAuthMode() == ClientAuthMode::Optional) {
-      VLOG(6) << "Client authentication not sent";
+      FIZZ_VLOG(6) << "Client authentication not sent";
       ret = actions(
           MutateState([](State& newState) {
             newState.unverifiedCertChain() = folly::none;

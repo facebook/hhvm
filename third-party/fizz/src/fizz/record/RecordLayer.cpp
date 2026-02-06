@@ -7,6 +7,7 @@
  */
 
 #include <fizz/record/RecordLayer.h>
+#include <fizz/util/Logging.h>
 
 namespace fizz {
 
@@ -26,8 +27,8 @@ Status ReadRecordLayer::readEvent(
     folly::Optional<Param> param;
     TRY(decodeHandshakeMessage(param, err, unparsedHandshakeData_));
     if (param) {
-      VLOG(8) << "Received handshake message "
-              << toString(EventVisitor()(*param));
+      FIZZ_VLOG(8) << "Received handshake message "
+                   << toString(EventVisitor()(*param));
       ret = ReadResult<Param>::from(std::move(param).value());
       return Status::Success;
     }
@@ -92,8 +93,8 @@ Status ReadRecordLayer::readEvent(
         folly::Optional<Param> param;
         TRY(decodeHandshakeMessage(param, err, unparsedHandshakeData_));
         if (param) {
-          VLOG(8) << "Received handshake message "
-                  << toString(EventVisitor()(*param));
+          FIZZ_VLOG(8) << "Received handshake message "
+                       << toString(EventVisitor()(*param));
           ret = ReadResult<Param>::from(std::move(param).value());
           return Status::Success;
         } else {

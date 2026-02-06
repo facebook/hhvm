@@ -115,7 +115,7 @@ struct BlockWriter {
     // check if we need to internal buffer anything left
     if (len > numToWrite) {
       auto numToBuf = len - numToWrite;
-      DCHECK(numToBuf < 8);
+      FIZZ_DCHECK(numToBuf < 8);
       memcpy(block, in + numToWrite, numToBuf);
       internalOffset = numToBuf;
     }
@@ -271,7 +271,7 @@ TEST(IOBufUtilTest, TransformBufferBlocksRange) {
         transformBufferBlocks(
             *buf,
             *output,
-            [](uint8_t*, const uint8_t*, size_t) { return 0; },
+            [](uint8_t*, const uint8_t*, size_t) -> size_t { return 0; },
             0);
       },
       std::out_of_range);
@@ -280,7 +280,7 @@ TEST(IOBufUtilTest, TransformBufferBlocksRange) {
         transformBufferBlocks(
             *buf,
             *output,
-            [](uint8_t*, const uint8_t*, size_t) { return 0; },
+            [](uint8_t*, const uint8_t*, size_t) -> size_t { return 0; },
             256);
       },
       std::out_of_range);

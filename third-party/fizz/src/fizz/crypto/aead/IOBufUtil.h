@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include <fizz/util/Logging.h>
 #include <folly/Range.h>
 #include <folly/io/Cursor.h>
 #include <folly/io/IOBuf.h>
@@ -113,7 +114,8 @@ folly::io::RWPrivateCursor transformBufferBlocks(
       // This should be safe to just internally buffer since we took into
       // account what was existing in the internal buffer already
       auto numWritten = func(blockBuffer.data(), inputRange.data(), inputLen);
-      DCHECK_EQ(numWritten, 0) << "expected buffering. wrote " << numWritten;
+      FIZZ_DCHECK_EQ(numWritten, 0UL)
+          << "expected buffering. wrote " << numWritten;
       // only update input offsets
       internallyBuffered += inputLen;
       input.skip(inputLen);
@@ -126,7 +128,7 @@ folly::io::RWPrivateCursor transformBufferBlocks(
           inputRange.data(),
           // only provide it the amount needed for one block
           blockSize - internallyBuffered);
-      DCHECK_EQ(numWritten, blockSize)
+      FIZZ_DCHECK_EQ(static_cast<size_t>(numWritten), blockSize)
           << "did not write full block bs=" << blockSize
           << " wrote=" << numWritten;
 
@@ -150,7 +152,7 @@ folly::io::RWPrivateCursor transformBufferBlocks(
       auto numWritten =
           func(output.writableData(), inputRange.data(), numToTake);
 
-      DCHECK_EQ(numWritten, numBlockBytes);
+      FIZZ_DCHECK_EQ(static_cast<size_t>(numWritten), numBlockBytes);
 
       // advance cursors
       input.skip(numToTake);

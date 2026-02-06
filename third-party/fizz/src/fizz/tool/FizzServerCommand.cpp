@@ -159,13 +159,13 @@ class FizzExampleServer : public AsyncFizzServer::HandshakeCallback,
   void fizzHandshakeError(
       AsyncFizzServer* /*server*/,
       exception_wrapper ex) noexcept override {
-    LOG(ERROR) << "Handshake error: " << ex.what();
+    FIZZ_LOG(ERROR) << "Handshake error: " << ex.what();
     finish();
   }
 
   void fizzHandshakeAttemptFallback(AttemptVersionFallback fallback) override {
     CHECK(transport_);
-    LOG(INFO) << "Fallback attempt";
+    FIZZ_LOG(INFO) << "Fallback attempt";
     auto socket = transport_->getUnderlyingTransport<AsyncSocket>();
     auto evb = socket->getEventBase();
     auto fd = socket->detachNetworkSocket().toFd();
@@ -177,7 +177,7 @@ class FizzExampleServer : public AsyncFizzServer::HandshakeCallback,
   }
 
   void handshakeSuc(AsyncSSLSocket* sock) noexcept override {
-    LOG(INFO) << "Fallback SSL Handshake success";
+    FIZZ_LOG(INFO) << "Fallback SSL Handshake success";
     sock->setReadCB(this);
     connected_ = true;
     printFallbackSuccess();
@@ -186,7 +186,7 @@ class FizzExampleServer : public AsyncFizzServer::HandshakeCallback,
   void handshakeErr(
       AsyncSSLSocket* /*sock*/,
       const AsyncSocketException& ex) noexcept override {
-    LOG(ERROR) << "Fallback SSL Handshake error: " << ex.what();
+    FIZZ_LOG(ERROR) << "Fallback SSL Handshake error: " << ex.what();
     finish();
   }
 
@@ -208,12 +208,12 @@ class FizzExampleServer : public AsyncFizzServer::HandshakeCallback,
   }
 
   void readEOF() noexcept override {
-    LOG(INFO) << "EOF";
+    FIZZ_LOG(INFO) << "EOF";
     finish();
   }
 
   void readErr(const AsyncSocketException& ex) noexcept override {
-    LOG(ERROR) << "Read error: " << ex.what();
+    FIZZ_LOG(ERROR) << "Read error: " << ex.what();
     finish();
   }
 
@@ -349,16 +349,16 @@ class FizzExampleServer : public AsyncFizzServer::HandshakeCallback,
   }
 
   void printHandshakeSuccess() {
-    LOG(INFO) << "Fizz handshake succeeded.";
+    FIZZ_LOG(INFO) << "Fizz handshake succeeded.";
     for (const auto& line : handshakeSuccessLog()) {
-      LOG(INFO) << line;
+      FIZZ_LOG(INFO) << line;
     }
   }
 
   void printFallbackSuccess() {
-    LOG(INFO) << "Fallback handshake succeeded.";
+    FIZZ_LOG(INFO) << "Fallback handshake succeeded.";
     for (const auto& line : fallbackSuccessLog()) {
-      LOG(INFO) << line;
+      FIZZ_LOG(INFO) << line;
     }
   }
 
@@ -427,7 +427,7 @@ class FizzHTTPServer : public FizzExampleServer {
           sslSocket_->close();
         }
       } else {
-        LOG(WARNING) << "Got non-GET request: " << StringPiece(coalesced);
+        FIZZ_LOG(WARNING) << "Got non-GET request: " << StringPiece(coalesced);
       }
     }
   }
@@ -462,7 +462,7 @@ FizzServerAcceptor::FizzServerAcceptor(
   socket_->listen(100);
   socket_->addAcceptCallback(this, evb_);
   socket_->startAccepting();
-  LOG(INFO) << "Started listening on " << socket_->getAddress();
+  FIZZ_LOG(INFO) << "Started listening on " << socket_->getAddress();
 }
 
 void FizzServerAcceptor::connectionAccepted(
@@ -471,7 +471,7 @@ void FizzServerAcceptor::connectionAccepted(
     AcceptInfo /* info */) noexcept {
   int fd = fdNetworkSocket.toFd();
 
-  LOG(INFO) << "Connection accepted from " << clientAddr;
+  FIZZ_LOG(INFO) << "Connection accepted from " << clientAddr;
   auto sock = new AsyncSocket(evb_, folly::NetworkSocket::fromFd(fd));
   AsyncFizzBase::TransportOptions transportOpts;
   std::shared_ptr<AsyncFizzServer> transport =
@@ -495,7 +495,7 @@ void FizzServerAcceptor::connectionAccepted(
 }
 
 void FizzServerAcceptor::acceptError(folly::exception_wrapper ex) noexcept {
-  LOG(ERROR) << "Failed to accept connection: " << ex;
+  FIZZ_LOG(ERROR) << "Failed to accept connection: " << ex;
   if (!loop_) {
     evb_->terminateLoopSoon();
   }
@@ -556,12 +556,12 @@ std::shared_ptr<ech::Decrypter> setupDecrypterFromInputs(
   // Get the ECH config that corresponds to the client setup.
   auto echConfigsJson = readECHConfigsJson(echConfigsFile);
   if (!echConfigsJson.has_value()) {
-    LOG(ERROR) << "Unable to load ECH configs from json file";
+    FIZZ_LOG(ERROR) << "Unable to load ECH configs from json file";
     return nullptr;
   }
   auto gotECHConfigs = parseECHConfigs(echConfigsJson.value());
   if (!gotECHConfigs.has_value()) {
-    LOG(ERROR)
+    FIZZ_LOG(ERROR)
         << "Unable to parse JSON file and make ECH config."
         << "Ensure the format matches what is expected."
         << "Rough example of format: {echconfigs: [${your ECH config here with all the fields..}]}"
@@ -587,7 +587,7 @@ std::shared_ptr<ech::Decrypter> setupDecrypterFromInputs(
   auto kexWithPrivateKey =
       fizz::FizzUtil::createKeyExchangeFromBuf(kemId, privKeyBuf);
   if (!kexWithPrivateKey) {
-    LOG(ERROR)
+    FIZZ_LOG(ERROR)
         << "Unable to create a key exchange and set a private key for it.";
     return nullptr;
   }
@@ -675,7 +675,7 @@ int fizzServerCommand(const std::vector<std::string>& args) {
             ciphers.push_back(splitParse<CipherSuite>(item, ","));
           }
           catch (const std::exception& e) {
-            LOG(ERROR) << "Error parsing cipher suites: " << e.what();
+            FIZZ_LOG(ERROR) << "Error parsing cipher suites: " << e.what();
             throw;
           }
         }
@@ -709,7 +709,7 @@ int fizzServerCommand(const std::vector<std::string>& args) {
         try {
           compAlgos = splitParse<CertificateCompressionAlgorithm>(arg);
         } catch (const std::exception& e) {
-          LOG(ERROR) << "Error parsing certificate compression algorithms: " << e.what();
+          FIZZ_LOG(ERROR) << "Error parsing certificate compression algorithms: " << e.what();
           throw;
         }
     }}},
@@ -748,18 +748,18 @@ int fizzServerCommand(const std::vector<std::string>& args) {
       return 1;
     }
   } catch (const std::exception& e) {
-    LOG(ERROR) << "Error: " << e.what();
+    FIZZ_LOG(ERROR) << "Error: " << e.what();
     return 1;
   }
 
   // Sanity check input.
   if (certPaths.empty() != keyPaths.empty()) {
-    LOG(ERROR) << "-cert and -key are both required when specified";
+    FIZZ_LOG(ERROR) << "-cert and -key are both required when specified";
     return 1;
   }
 
   if (!credPath.empty() && (certPaths.empty() || keyPaths.empty())) {
-    LOG(ERROR)
+    FIZZ_LOG(ERROR)
         << "-cert and -key are both required when delegated credentials are in use";
     return 1;
   }
@@ -777,7 +777,7 @@ int fizzServerCommand(const std::vector<std::string>& args) {
 
       if (X509_STORE_load_locations(storePtr.get(), caFilePtr, caPathPtr) ==
           0) {
-        LOG(ERROR) << "Failed to load CA certificates";
+        FIZZ_LOG(ERROR) << "Failed to load CA certificates";
         return 1;
       }
     }
@@ -795,7 +795,7 @@ int fizzServerCommand(const std::vector<std::string>& args) {
 
   if ((echConfigsFile.empty() && !echPrivateKeyFile.empty()) ||
       (!echConfigsFile.empty() && echPrivateKeyFile.empty())) {
-    LOG(ERROR)
+    FIZZ_LOG(ERROR)
         << "Must provide both an ECH configs file (\"-echconfigs [config file]\") and an ECH private key (\"-echprivatekey [key file]\") or neither.";
     return 1;
   }
@@ -809,7 +809,7 @@ int fizzServerCommand(const std::vector<std::string>& args) {
     auto decrypter =
         setupDecrypterFromInputs(echConfigsFile, echPrivateKeyFile);
     if (!decrypter) {
-      LOG(ERROR) << "Unable to setup decrypter.";
+      FIZZ_LOG(ERROR) << "Unable to setup decrypter.";
       return 1;
     }
     serverContext->setECHDecrypter(decrypter);
@@ -857,8 +857,8 @@ int fizzServerCommand(const std::vector<std::string>& args) {
           break;
 #endif
         default:
-          LOG(WARNING) << "Don't know what compressor to use for "
-                       << toString(algo) << ", ignoring.";
+          FIZZ_LOG(WARNING) << "Don't know what compressor to use for "
+                            << toString(algo) << ", ignoring.";
           break;
       }
     }
@@ -876,7 +876,7 @@ int fizzServerCommand(const std::vector<std::string>& args) {
   std::shared_ptr<SSLContext> sslContext;
   if (fallback) {
     if (certPaths.empty()) {
-      LOG(ERROR) << "Fallback mode requires explicit certificates";
+      FIZZ_LOG(ERROR) << "Fallback mode requires explicit certificates";
       return 1;
     }
   }
@@ -903,7 +903,7 @@ int fizzServerCommand(const std::vector<std::string>& args) {
     for (const auto& keyPath : keyPaths) {
       std::string keyData;
       if (!readFile(keyPath.c_str(), keyData)) {
-        LOG(ERROR) << "Failed to read private key: " << keyPath;
+        FIZZ_LOG(ERROR) << "Failed to read private key: " << keyPath;
         return 1;
       }
       matcher.addKey(
@@ -917,7 +917,7 @@ int fizzServerCommand(const std::vector<std::string>& args) {
     if (credentialMatchNeeded) {
       std::string credData;
       if (!readFile(credPath.c_str(), credData)) {
-        LOG(ERROR) << "Failed to read credential: " << credPath;
+        FIZZ_LOG(ERROR) << "Failed to read credential: " << credPath;
         return 1;
       }
       std::vector<Extension> credVec;
@@ -930,7 +930,7 @@ int fizzServerCommand(const std::vector<std::string>& args) {
         cred = getExtension<fizz::extensions::DelegatedCredential>(
             std::move(credVec));
       } catch (const std::exception& e) {
-        LOG(ERROR) << "Credential parsing failed: " << e.what();
+        FIZZ_LOG(ERROR) << "Credential parsing failed: " << e.what();
         return 1;
       }
     }
@@ -939,13 +939,13 @@ int fizzServerCommand(const std::vector<std::string>& args) {
     for (const auto& certPath : certPaths) {
       std::string certData;
       if (!readFile(certPath.c_str(), certData)) {
-        LOG(ERROR) << "Failed to read certificate: " << certPath;
+        FIZZ_LOG(ERROR) << "Failed to read certificate: " << certPath;
         return 1;
       }
       auto certs = folly::ssl::OpenSSLCertUtils::readCertsFromBuffer(
           folly::StringPiece(certData));
       if (certs.empty()) {
-        LOG(ERROR) << "Failed to read any certs from path: " << certPath;
+        FIZZ_LOG(ERROR) << "Failed to read any certs from path: " << certPath;
         return 1;
       }
 
@@ -953,7 +953,7 @@ int fizzServerCommand(const std::vector<std::string>& args) {
         // Check if the signature matches.
         auto leafCert = certs.front().get();
         if (X509_up_ref(leafCert) != 1) {
-          LOG(ERROR) << "Failed to upref leaf cert";
+          FIZZ_LOG(ERROR) << "Failed to upref leaf cert";
           return 1;
         }
         auto leafPeer = openssl::CertUtils::makePeerCert(
@@ -973,13 +973,13 @@ int fizzServerCommand(const std::vector<std::string>& args) {
           folly::ssl::EvpPkeyUniquePtr pubKey(
               d2i_PUBKEY(nullptr, &addr, pubKeyRange.size()));
           if (!pubKey) {
-            LOG(ERROR) << "Failed to parse credential pubkey";
+            FIZZ_LOG(ERROR) << "Failed to parse credential pubkey";
             return 1;
           }
 
           auto credPrivKey = matcher.fetchKey(pubKey);
           if (!credPrivKey) {
-            LOG(ERROR)
+            FIZZ_LOG(ERROR)
                 << "Failed to match credential pubkey to any of the provided keys.";
             return 1;
           }
@@ -1053,7 +1053,8 @@ int fizzServerCommand(const std::vector<std::string>& args) {
       // Not a credential, add it as a normal cert.
       auto pkey = matcher.fetchKey(certs.front().get());
       if (!pkey.second) {
-        LOG(ERROR) << "No matching private key for cert at path: " << certPath;
+        FIZZ_LOG(ERROR) << "No matching private key for cert at path: "
+                        << certPath;
         return 1;
       }
 
@@ -1088,7 +1089,7 @@ int fizzServerCommand(const std::vector<std::string>& args) {
   }
 
   if (credentialMatchNeeded) {
-    LOG(INFO) << "Credential did not match any keys provided.";
+    FIZZ_LOG(INFO) << "Credential did not match any keys provided.";
     return 1;
   }
 
@@ -1096,7 +1097,7 @@ int fizzServerCommand(const std::vector<std::string>& args) {
     // There was no default cert; this can only happen if you configured only
     // one cert (which is a delegated credential) and requested fallback. This
     // will invariably fail (as fallback doesn't support DC certs).
-    LOG(ERROR) << "Fallback requested but no valid default cert found.";
+    FIZZ_LOG(ERROR) << "Fallback requested but no valid default cert found.";
     return 1;
   }
 

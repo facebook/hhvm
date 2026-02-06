@@ -11,6 +11,7 @@
 #include <fizz/protocol/Certificate.h>
 #include <fizz/protocol/KeyScheduler.h>
 #include <fizz/record/Types.h>
+#include <fizz/util/Logging.h>
 #include <folly/io/IOBufIovecBuilder.h>
 #include <folly/io/IOBufQueue.h>
 #include <folly/io/async/AsyncSocket.h>
@@ -517,7 +518,7 @@ class AsyncFizzBase : public folly::WriteChainAsyncTransportWrapper<
     void fail(const folly::AsyncSocketException&);
 
     size_t getEntireChainBytesBuffered() {
-      DCHECK(!next_);
+      FIZZ_DCHECK(!next_);
       return entireChainBytesBuffered;
     }
 

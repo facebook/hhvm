@@ -99,12 +99,12 @@ class TicketCipherImpl : public TicketCipher {
       resState =
           CodecType::decode(std::move(*plaintext), *factory_, *certManager_);
     } catch (const std::exception& ex) {
-      VLOG(6) << "Failed to decode ticket, ex=" << ex.what();
+      FIZZ_VLOG(6) << "Failed to decode ticket, ex=" << ex.what();
       return std::make_pair(PskType::Rejected, folly::none);
     }
 
     if (!policy_.shouldAccept(resState)) {
-      VLOG(6) << "Ticket failed acceptance policy.";
+      FIZZ_VLOG(6) << "Ticket failed acceptance policy.";
       return std::make_pair(PskType::Rejected, folly::none);
     }
 

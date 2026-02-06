@@ -91,7 +91,7 @@ class ClientTask : public AsyncSocket::ConnectCallback,
   }
 
   void connectErr(const AsyncSocketException& ex) noexcept override {
-    VLOG(1) << "Error: " << ex.what();
+    FIZZ_VLOG(1) << "Error: " << ex.what();
     endTask();
   }
 
@@ -105,7 +105,7 @@ class ClientTask : public AsyncSocket::ConnectCallback,
 
   void fizzHandshakeError(AsyncFizzClient*, exception_wrapper ex) noexcept
       override {
-    VLOG(1) << "Error: " << ex.what();
+    FIZZ_VLOG(1) << "Error: " << ex.what();
     endTask();
   }
 
@@ -212,7 +212,7 @@ int fizzClientLoadGenCommand(const std::vector<std::string>& args) {
       return 1;
     }
   } catch (const std::exception& e) {
-    LOG(ERROR) << "Error: " << e.what();
+    FIZZ_LOG(ERROR) << "Error: " << e.what();
     return 1;
   }
   if (config.numTaskPerSecond <= 0) {
@@ -252,7 +252,7 @@ int fizzClientLoadGenCommand(const std::vector<std::string>& args) {
     storePtr.reset(X509_STORE_new());
     if (X509_STORE_load_locations(
             storePtr.get(), config.caFile.c_str(), nullptr) == 0) {
-      VLOG(1) << "Failed to load CA certificates";
+      FIZZ_VLOG(1) << "Failed to load CA certificates";
       return 1;
     }
     verifier = std::make_shared<const DefaultCertificateVerifier>(

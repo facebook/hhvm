@@ -27,7 +27,7 @@ class AeadCookieCipher : public CookieCipher {
  public:
   explicit AeadCookieCipher(std::unique_ptr<TokenCipher> tokenCipher)
       : tokenCipher_{std::move(tokenCipher)} {
-    DCHECK_NE(tokenCipher_.get(), nullptr);
+    FIZZ_DCHECK_NE(tokenCipher_.get(), nullptr);
   }
 
   /**

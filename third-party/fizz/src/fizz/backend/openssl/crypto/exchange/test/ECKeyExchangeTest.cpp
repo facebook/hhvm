@@ -152,7 +152,7 @@ EvpPkeyUniquePtr createPublicKey(const Params& param) {
   setPoint(peerKey, param.peerX, param.peerY);
 
   EvpPkeyUniquePtr pkeyPeerKey(EVP_PKEY_new());
-  CHECK_EQ(1, EVP_PKEY_set1_EC_KEY(pkeyPeerKey.get(), peerKey.get()));
+  FIZZ_CHECK_EQ(1, EVP_PKEY_set1_EC_KEY(pkeyPeerKey.get(), peerKey.get()));
 
   return pkeyPeerKey;
 }

@@ -23,10 +23,10 @@ Optional<TokenBindingID> Validator::validateTokenBinding(
     const Buf& ekm,
     const TokenBindingKeyParameters& negotiatedParameters) {
   if (tokenBinding.tokenbindingid.key_parameters != negotiatedParameters) {
-    VLOG(2) << "sent parameters: "
-            << toString(tokenBinding.tokenbindingid.key_parameters)
-            << " don't match negotiated parameters: "
-            << toString(negotiatedParameters);
+    FIZZ_VLOG(2) << "sent parameters: "
+                 << toString(tokenBinding.tokenbindingid.key_parameters)
+                 << " don't match negotiated parameters: "
+                 << toString(negotiatedParameters);
     return folly::none;
   }
   return constructAndVerifyMessage(std::move(tokenBinding), ekm);
@@ -41,9 +41,10 @@ Optional<TokenBindingID> Validator::validateTokenBinding(
           supportedParameters.end(),
           tokenBinding.tokenbindingid.key_parameters) ==
       supportedParameters.end()) {
-    VLOG(2) << "Supported key parameters (" << join(", ", supportedParameters)
-            << ") does not include client's key parameter ("
-            << toString(tokenBinding.tokenbindingid.key_parameters) << ")";
+    FIZZ_VLOG(2) << "Supported key parameters ("
+                 << join(", ", supportedParameters)
+                 << ") does not include client's key parameter ("
+                 << toString(tokenBinding.tokenbindingid.key_parameters) << ")";
     return folly::none;
   }
   return constructAndVerifyMessage(std::move(tokenBinding), ekm);
@@ -64,7 +65,7 @@ Optional<TokenBindingID> Validator::constructAndVerifyMessage(
         message);
     return std::move(tokenBinding.tokenbindingid);
   } catch (const std::exception& e) {
-    VLOG(1) << "Token Binding Verification Failed: " << e.what();
+    FIZZ_VLOG(1) << "Token Binding Verification Failed: " << e.what();
     return folly::none;
   }
 }

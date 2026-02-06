@@ -61,7 +61,7 @@ class BogoTestServer : public AsyncSocket::ConnectCallback,
   }
 
   void connectErr(const AsyncSocketException& ex) noexcept override {
-    LOG(INFO) << "TCP connect failed: " << ex.what();
+    FIZZ_LOG(INFO) << "TCP connect failed: " << ex.what();
     socket_.reset();
     success_ = false;
   }
@@ -74,7 +74,7 @@ class BogoTestServer : public AsyncSocket::ConnectCallback,
   void fizzHandshakeError(
       AsyncFizzServer*,
       folly::exception_wrapper ex) noexcept override {
-    LOG(INFO) << "Handshake error: " << ex.what();
+    FIZZ_LOG(INFO) << "Handshake error: " << ex.what();
     transport_.reset();
     success_ = false;
   }
@@ -130,7 +130,7 @@ class BogoTestServer : public AsyncSocket::ConnectCallback,
   void handshakeErr(
       folly::AsyncSSLSocket*,
       const folly::AsyncSocketException& ex) noexcept override {
-    LOG(INFO) << "SSL Handshake error: " << ex.what();
+    FIZZ_LOG(INFO) << "SSL Handshake error: " << ex.what();
     sslSocket_.reset();
     success_ = false;
   }
@@ -182,7 +182,7 @@ class BogoTestClient : public AsyncSocket::ConnectCallback,
   }
 
   void connectErr(const AsyncSocketException& ex) noexcept override {
-    LOG(INFO) << "TCP connect failed: " << ex.what();
+    FIZZ_LOG(INFO) << "TCP connect failed: " << ex.what();
     socket_.reset();
     success_ = false;
   }
@@ -195,7 +195,7 @@ class BogoTestClient : public AsyncSocket::ConnectCallback,
   void fizzHandshakeError(
       AsyncFizzClient*,
       folly::exception_wrapper ex) noexcept override {
-    LOG(INFO) << "Handshake error: " << ex.what();
+    FIZZ_LOG(INFO) << "Handshake error: " << ex.what();
     transport_.reset();
 
     // If the server sent us a protocol_version alert assume that
@@ -333,13 +333,13 @@ int serverTest() {
   evb.loop();
   for (const auto& server : servers) {
     if (server->unimplemented()) {
-      LOG(INFO) << "Testing unimplemented feature.";
+      FIZZ_LOG(INFO) << "Testing unimplemented feature.";
       return kUnimplemented;
     }
   }
   for (const auto& server : servers) {
     if (!server->success()) {
-      LOG(INFO) << "Connection failed.";
+      FIZZ_LOG(INFO) << "Connection failed.";
       return 1;
     }
   }
@@ -365,11 +365,11 @@ int clientTest() {
       std::make_unique<BogoTestClient>(&evb, FLAGS_port, clientContext);
   evb.loop();
   if (client->unimplemented()) {
-    LOG(INFO) << "Testing unimplemented feature.";
+    FIZZ_LOG(INFO) << "Testing unimplemented feature.";
     return kUnimplemented;
   }
   if (!client->success()) {
-    LOG(INFO) << "Connection failed.";
+    FIZZ_LOG(INFO) << "Connection failed.";
     return 1;
   }
 
@@ -389,7 +389,7 @@ int main(int argc, char** argv) {
               kKnownFlags.begin(),
               kKnownFlags.end(),
               std::string(argv[i] + 1)) == kKnownFlags.end()) {
-        LOG(INFO) << "unknown flag: " << argv[i];
+        FIZZ_LOG(INFO) << "unknown flag: " << argv[i];
         return kUnimplemented;
       }
     }

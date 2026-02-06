@@ -6,6 +6,7 @@
  *  LICENSE file in the root directory of this source tree.
  */
 #include <fizz/extensions/delegatedcred/DelegatedCredentialCertManager.h>
+#include <fizz/util/Logging.h>
 
 using namespace fizz::server;
 
@@ -42,13 +43,13 @@ std::shared_ptr<SelfCert> DelegatedCredentialCertManager::getCert(
 
 void DelegatedCredentialCertManager::addDelegatedCredentialAndSetDefault(
     std::shared_ptr<SelfDelegatedCredential> cred) {
-  VLOG(8) << "Adding delegated credential";
+  FIZZ_VLOG(8) << "Adding delegated credential";
   dcMgr_.addCertAndSetDefault(std::move(cred));
 }
 
 void DelegatedCredentialCertManager::addDelegatedCredential(
     std::shared_ptr<SelfDelegatedCredential> cred) {
-  VLOG(8) << "Adding delegated credential";
+  FIZZ_VLOG(8) << "Adding delegated credential";
   dcMgr_.addCert(std::move(cred));
 }
 

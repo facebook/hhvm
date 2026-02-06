@@ -24,7 +24,7 @@ folly::AsyncSocket::ReadResult AsyncKTLSSocket::performReadMsg(
 #if FIZZ_PLATFORM_CAPABLE_KTLS
   // Reading of user ancillary data would have to be implemented, but
   // currently conflicts with usage of `msg_control` below.
-  DCHECK(readAncillaryDataCallback_ == nullptr);
+  FIZZ_DCHECK(readAncillaryDataCallback_ == nullptr);
 
   // kTLS sends TLSInnerPlaintext.type in a 1 byte out-of-band cmsg payload.
   // The data that is read in `iov` is TLSInnerPlaintext.content
@@ -128,8 +128,8 @@ folly::AsyncSocket::ReadResult AsyncKTLSSocket::handleNonApplicationData(
     }
     return processHandshakeData(std::move(payload));
   } else {
-    VLOG(7) << "Read a non data record, of type = " << (int)type << ": "
-            << folly::hexlify(payload.move()->coalesce());
+    FIZZ_VLOG(7) << "Read a non data record, of type = " << (int)type << ": "
+                 << folly::hexlify(payload.move()->coalesce());
     return ReadResult(
         READ_ERROR,
         std::make_unique<folly::AsyncSocketException>(
@@ -196,7 +196,7 @@ folly::AsyncSocket::ReadResult AsyncKTLSSocket::processHandshakeData(
   // We try to parse the handshake message directly off of `payload`
   // first, before we fall back to copying the contents of the buffer into
   // an internal IOBufQueue.
-  VLOG(10) << "AsyncKTLSSocket::processHandshakeData()";
+  FIZZ_VLOG(9) << "AsyncKTLSSocket::processHandshakeData()";
   folly::Optional<fizz::Param> handshakeMessage;
   auto getReadErrorResult = [](const char* what) {
     return ReadResult(
@@ -250,21 +250,21 @@ folly::AsyncSocket::ReadResult AsyncKTLSSocket::processHandshakeData(
   // buffers prior to retaining them
   //
   // TODO is there a less error prone way to enforce this?
-  DCHECK(handshakeMessage.hasValue());
+  FIZZ_DCHECK(handshakeMessage.hasValue());
   auto param = std::move(handshakeMessage).value();
 
   switch (param.type()) {
     case decltype(param)::Type::KeyUpdate_E:
       // The kTLS implementation in the kernel does not currently support
       // switching keys.
-      VLOG(10) << "Received key update on kTLS connection";
+      FIZZ_VLOG(9) << "Received key update on kTLS connection";
       return ReadResult(
           READ_ERROR,
           std::make_unique<folly::AsyncSocketException>(
               folly::AsyncSocketException::SSL_ERROR,
               "ktls does not support key_updates"));
     case decltype(param)::Type::NewSessionTicket_E:
-      VLOG(10) << "Received NewSessionTicket on KTLS connection";
+      FIZZ_VLOG(9) << "Received NewSessionTicket on KTLS connection";
       tlsCallback_->receivedNewSessionTicket(
           this, std::move(*param.asNewSessionTicket()));
       break;
@@ -320,7 +320,7 @@ void AsyncKTLSRxSocket::QueuedWriteRequest::startWriting() {
 
 void AsyncKTLSRxSocket::QueuedWriteRequest::append(
     QueuedWriteRequest* request) {
-  DCHECK(!next_);
+  FIZZ_DCHECK(!next_);
   next_ = request;
   next_->entireChainBytesBuffered += entireChainBytesBuffered;
   entireChainBytesBuffered = 0;
@@ -381,7 +381,7 @@ AsyncKTLSRxSocket::QueuedWriteRequest::deliverSingleWriteErr(
 
 void AsyncKTLSRxSocket::QueuedWriteRequest::advanceOnBase() {
   if (!next_ && sock_) {
-    CHECK_EQ(sock_->tailWriteRequest_, this);
+    FIZZ_CHECK_EQ(sock_->tailWriteRequest_, this);
     sock_->tailWriteRequest_ = nullptr;
   }
 }

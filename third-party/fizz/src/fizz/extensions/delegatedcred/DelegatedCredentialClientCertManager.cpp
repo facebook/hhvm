@@ -7,6 +7,7 @@
  */
 #include <fizz/extensions/delegatedcred/DelegatedCredentialClientCertManager.h>
 #include <fizz/extensions/delegatedcred/Types.h>
+#include <fizz/util/Logging.h>
 
 namespace fizz {
 namespace extensions {
@@ -34,13 +35,13 @@ CertMatch DelegatedCredentialClientCertManager::getCert(
 
 void DelegatedCredentialClientCertManager::addDelegatedCredential(
     std::shared_ptr<SelfCert> cert) {
-  VLOG(8) << "Adding delegated credential";
+  FIZZ_VLOG(8) << "Adding delegated credential";
   dcMgr_.addCert(std::move(cert));
 }
 
 void DelegatedCredentialClientCertManager::addDelegatedCredentialAndOverride(
     std::shared_ptr<SelfCert> cert) {
-  VLOG(8) << "Adding delegated credential";
+  FIZZ_VLOG(8) << "Adding delegated credential";
   dcMgr_.addCertAndOverride(std::move(cert));
 }
 

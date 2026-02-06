@@ -56,7 +56,7 @@ class ClientProtocolTest : public ProtocolTest<ClientTypes, Actions> {
     factory_ = mockFactory.get();
     ON_CALL(*factory_, makeHasherFactory(_))
         .WillByDefault(Invoke([](HashFunction digest) {
-          LOG(INFO) << "DefaultFactory makeHasher";
+          FIZZ_LOG(INFO) << "DefaultFactory makeHasher";
           return fizz::DefaultFactory().makeHasherFactory(digest);
         }));
 

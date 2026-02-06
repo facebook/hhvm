@@ -79,7 +79,7 @@ KTLSCallbackImpl::TicketHandler makeTicketHandler(
     psk.ticketHandshakeTime = handshakeTime;
     psk.maxEarlyDataSize = getMaxEarlyDataSize(nst);
 
-    VLOG(10) << "kTLS callback processed NST. pskIdentity=" << pskIdentity;
+    FIZZ_VLOG(9) << "kTLS callback processed NST. pskIdentity=" << pskIdentity;
     pskCache->putPsk(pskIdentity, std::move(psk));
   };
 }

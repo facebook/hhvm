@@ -17,6 +17,7 @@
 #pragma once
 #include <fizz/experimental/ktls/KTLS.h>
 #include <fizz/record/RecordLayer.h>
+#include <fizz/util/Logging.h>
 #include <folly/io/async/AsyncSocket.h>
 
 namespace fizz {
@@ -234,7 +235,7 @@ class AsyncKTLSRxSocket : public AsyncKTLSSocket {
     void unlinkFromBase();
 
     size_t getEntireChainBytesBuffered() {
-      DCHECK(!next_);
+      FIZZ_DCHECK(!next_);
       return entireChainBytesBuffered;
     }
 

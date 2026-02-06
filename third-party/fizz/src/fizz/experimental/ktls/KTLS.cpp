@@ -111,7 +111,8 @@ Buf KTLSCryptoParams::toSockoptFormat() const {
   }
 
   auto buf = folly::IOBuf::create(layoutParams.ktlsAllocationSize);
-  CHECK_GT(layoutParams.ktlsAllocationSize, sizeof(struct tls_crypto_info));
+  FIZZ_CHECK_GT(
+      layoutParams.ktlsAllocationSize, sizeof(struct tls_crypto_info));
 
   // Header
   struct tls_crypto_info* info =

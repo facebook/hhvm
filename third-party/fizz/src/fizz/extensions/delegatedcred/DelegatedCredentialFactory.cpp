@@ -17,7 +17,7 @@ namespace {
 std::unique_ptr<PeerCert> makeCredential(
     DelegatedCredential&& credential,
     folly::ssl::X509UniquePtr cert) {
-  VLOG(4) << "Making delegated credential";
+  FIZZ_VLOG(4) << "Making delegated credential";
   // Parse pubkey
   auto pubKeyRange = credential.public_key->coalesce();
   auto addr = pubKeyRange.data();

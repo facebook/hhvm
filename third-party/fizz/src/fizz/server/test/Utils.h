@@ -68,7 +68,7 @@ class FizzTestServer : public folly::AsyncServerSocket::AcceptCallback {
   }
 
   void acceptError(folly::exception_wrapper ex) noexcept override {
-    LOG(ERROR) << "Accept error: " << ex;
+    FIZZ_LOG(ERROR) << "Accept error: " << ex;
   }
 
   void connectionAccepted(

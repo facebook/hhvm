@@ -89,7 +89,8 @@ bool AsyncFizzServerT<SM>::isReplaySafe() const {
 template <typename SM>
 void AsyncFizzServerT<SM>::setReplaySafetyCallback(
     folly::AsyncTransport::ReplaySafetyCallback*) {
-  LOG(FATAL) << "setReplaySafetyCallback() called on replay safe transport";
+  FIZZ_LOG(FATAL)
+      << "setReplaySafetyCallback() called on replay safe transport";
 }
 
 template <typename SM>
@@ -292,7 +293,7 @@ void AsyncFizzServerT<SM>::ActionMoveVisitor::operator()(DeliverAppData& data) {
 
 template <typename SM>
 void AsyncFizzServerT<SM>::ActionMoveVisitor::operator()(WriteToSocket& data) {
-  DCHECK(!data.contents.empty());
+  FIZZ_DCHECK(!data.contents.empty());
   Buf allData = std::move(data.contents.front().data);
   for (size_t i = 1; i < data.contents.size(); ++i) {
     allData->prependChain(std::move(data.contents[i].data));
@@ -376,7 +377,7 @@ template <typename SM>
 void AsyncFizzServerT<SM>::ActionMoveVisitor::operator()(
     AttemptVersionFallback& fallback) {
   if (!server_.handshakeCallback_) {
-    VLOG(2) << "fizz fallback without callback";
+    FIZZ_VLOG(2) << "fizz fallback without callback";
     return;
   }
   auto callback = server_.handshakeCallback_;

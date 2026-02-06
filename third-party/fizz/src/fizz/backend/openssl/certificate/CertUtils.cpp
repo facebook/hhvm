@@ -10,6 +10,7 @@
 #include <fizz/backend/openssl/certificate/OpenSSLPeerCertImpl.h>
 #include <fizz/backend/openssl/certificate/OpenSSLSelfCertImpl.h>
 #include <fizz/protocol/Certificate.h>
+#include <fizz/util/Logging.h>
 #include <folly/ssl/OpenSSLCertUtils.h>
 #include <openssl/bio.h>
 
@@ -76,7 +77,7 @@ std::unique_ptr<PeerCert> CertUtils::makePeerCert(folly::ByteRange range) {
     throw std::runtime_error("could not read cert");
   }
   if (begin != range.data() + range.size()) {
-    VLOG(1) << "Did not read to end of certificate";
+    FIZZ_VLOG(1) << "Did not read to end of certificate";
   }
   return makePeerCert(std::move(cert));
 }

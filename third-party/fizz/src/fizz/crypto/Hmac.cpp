@@ -8,6 +8,7 @@
 
 #include <fizz/crypto/Crypto.h>
 #include <fizz/crypto/Hmac.h>
+#include <fizz/util/Logging.h>
 
 namespace fizz {
 
@@ -25,10 +26,10 @@ void hmac(
   auto outer = makeHasher->make();
 
   size_t L = outer->getHashLen();
-  CHECK_GE(out.size(), L);
+  FIZZ_CHECK_GE(out.size(), L);
 
   size_t B = outer->getBlockSize();
-  CHECK_GT(B, 0);
+  FIZZ_CHECK_GT(B, 0UL);
 
   std::array<uint8_t, fizz::kHashMaxBlockSize> finalKey;
 

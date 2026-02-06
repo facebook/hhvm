@@ -70,7 +70,7 @@ chunkIOBuf(std::unique_ptr<IOBuf> input, size_t chunks, BufCreator creator) {
         memcpy(out, in, len);
       });
 
-  CHECK_EQ(chunks, chunked->countChainElements());
+  FIZZ_CHECK_EQ(chunks, chunked->countChainElements());
   return chunked;
 }
 } // namespace test

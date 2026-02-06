@@ -22,13 +22,13 @@ namespace fizz {
 
 static int passwordCallback(char* password, int size, int, void* data) {
   if (!password || !data || size < 1) {
-    LOG(ERROR) << "invalid password buffer, size is " << size;
+    FIZZ_LOG(ERROR) << "invalid password buffer, size is " << size;
     return 0;
   }
   std::string userPassword;
   static_cast<folly::PasswordInFile*>(data)->getPassword(userPassword, size);
   if (userPassword.empty()) {
-    LOG(ERROR) << "empty private key password";
+    FIZZ_LOG(ERROR) << "empty private key password";
     return 0;
   }
   auto length = std::min(static_cast<int>(userPassword.size()), size - 1);

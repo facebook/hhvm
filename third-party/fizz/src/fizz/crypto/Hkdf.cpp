@@ -8,6 +8,7 @@
 
 #include <fizz/crypto/Hkdf.h>
 #include <fizz/crypto/Hmac.h>
+#include <fizz/util/Logging.h>
 
 namespace fizz {
 
@@ -31,7 +32,7 @@ std::unique_ptr<folly::IOBuf> Hkdf::expand(
     const folly::IOBuf& info,
     size_t outputBytes) const {
   auto hlen = hashLength();
-  CHECK_EQ(extractedKey.size(), hlen);
+  FIZZ_CHECK_EQ(extractedKey.size(), hlen);
   if (UNLIKELY(outputBytes > 255 * hlen)) {
     throw std::runtime_error("Output too long");
   }

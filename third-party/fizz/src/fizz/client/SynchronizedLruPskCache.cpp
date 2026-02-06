@@ -7,6 +7,7 @@
  */
 
 #include <fizz/client/SynchronizedLruPskCache.h>
+#include <fizz/util/Logging.h>
 
 namespace fizz {
 namespace client {
@@ -21,10 +22,10 @@ folly::Optional<CachedPsk> SynchronizedLruPskCache::getPsk(
   if (result != cacheMap->end()) {
     if (std::chrono::system_clock::now() >
         result->second.ticketExpirationTime) {
-      VLOG(1) << "PSK expired: " << identity << ", id: "
-              << (result->second.serverCert
-                      ? result->second.serverCert->getIdentity()
-                      : "none");
+      FIZZ_VLOG(1) << "PSK expired: " << identity << ", id: "
+                   << (result->second.serverCert
+                           ? result->second.serverCert->getIdentity()
+                           : "none");
       cacheMap->erase(result);
       return folly::none;
     }

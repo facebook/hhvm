@@ -168,7 +168,7 @@ TEST(BatchSignaturePeerCertTest, TestWrongBatchSignature) {
   // throw when signature's index is larger than 2^31
   folly::io::Cursor cursor(signatureBuf.get());
   auto decodedSig = BatchSignature::decode(cursor);
-  LOG(INFO) << decodedSig.getIndex();
+  FIZZ_LOG(INFO) << decodedSig.getIndex();
   MerkleTreePath newPath{
       .index = std::numeric_limits<uint32_t>::max(),
       .path = decodedSig.getPath()};

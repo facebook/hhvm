@@ -11,6 +11,7 @@
 #include <fizz/backend/openssl/crypto/signature/Signature.h>
 #include <fizz/backend/openssl/crypto/signature/test/EdSignatureTest.h>
 #include <fizz/crypto/test/TestUtil.h>
+#include <fizz/util/Logging.h>
 #include <folly/String.h>
 
 #define ED25519_FIXTURE(num)                                               \
@@ -133,7 +134,7 @@ std::string modifyMessage(const std::string& input) {
 }
 
 std::string modifySignature(const std::string& input) {
-  CHECK_GT(input.size(), 0) << "Signatures should have positive length";
+  FIZZ_CHECK_GT(input.size(), 0UL) << "Signatures should have positive length";
   auto modifiedMessage = std::string(input);
   modifiedMessage[0] ^= 1; // Flip a  bit in the first character
   return modifiedMessage;

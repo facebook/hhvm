@@ -80,14 +80,8 @@ class InjectMetadataFields implements \IThriftSyncStruct, \IThriftStructMetadata
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\facebook\thrift\annotation\Struct' => \facebook\thrift\annotation\Struct::fromShape(
-          shape(
-          )
-        ),
-        '\facebook\thrift\annotation\Experimental' => \facebook\thrift\annotation\Experimental::fromShape(
-          shape(
-          )
-        ),
+        '\facebook\thrift\annotation\Struct' => \facebook\thrift\annotation\Struct::withDefaultValues(),
+        '\facebook\thrift\annotation\Experimental' => \facebook\thrift\annotation\Experimental::withDefaultValues(),
       ],
       'fields' => dict[
       ],

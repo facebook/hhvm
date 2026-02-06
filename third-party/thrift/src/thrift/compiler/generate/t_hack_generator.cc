@@ -2095,6 +2095,8 @@ std::string t_hack_generator::render_const_value_helper(
       out << temp_val;
 
       set_indent(preserved_indent_size);
+    } else if (value->get_map().empty()) {
+      out << struct_name << "::withDefaultValues()";
     } else {
       out << struct_name << "::fromShape(\n";
       indent_up();
@@ -4554,8 +4556,8 @@ void t_hack_generator::generate_php_struct_constructor_field_assignment(
   }
   std::string dval;
   bool is_exception = tstruct->is<t_exception>();
-  if (field.default_value() != nullptr &&
-      !(t->is<t_structured>() || skip_custom_default)) {
+  if (field.default_value() != nullptr && !skip_custom_default &&
+      !(t->is<t_structured>() && legacy_default_values_)) {
     dval = render_const_value(
         t,
         field.default_value(),

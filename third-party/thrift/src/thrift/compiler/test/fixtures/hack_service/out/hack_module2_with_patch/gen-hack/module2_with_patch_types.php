@@ -110,10 +110,7 @@ class FBStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\facebook\thrift\op\GeneratePatch' => \facebook\thrift\op\GeneratePatch::fromShape(
-          shape(
-          )
-        ),
+        '\facebook\thrift\op\GeneratePatch' => \facebook\thrift\op\GeneratePatch::withDefaultValues(),
       ],
       'fields' => dict[
       ],

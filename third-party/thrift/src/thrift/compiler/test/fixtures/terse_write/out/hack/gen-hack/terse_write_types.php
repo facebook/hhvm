@@ -1848,10 +1848,7 @@ class StructLevelTerseStruct implements \IThriftSyncStruct, \IThriftStructMetada
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\facebook\thrift\annotation\TerseWrite' => \facebook\thrift\annotation\TerseWrite::fromShape(
-          shape(
-          )
-        ),
+        '\facebook\thrift\annotation\TerseWrite' => \facebook\thrift\annotation\TerseWrite::withDefaultValues(),
       ],
       'fields' => dict[
       ],
@@ -2979,136 +2976,91 @@ class FieldLevelTerseStruct implements \IThriftSyncStruct, \IThriftStructMetadat
       'fields' => dict[
         'terse_bool_field' => shape(
           'field' => dict[
-            '\facebook\thrift\annotation\TerseWrite' => \facebook\thrift\annotation\TerseWrite::fromShape(
-              shape(
-              )
-            ),
+            '\facebook\thrift\annotation\TerseWrite' => \facebook\thrift\annotation\TerseWrite::withDefaultValues(),
           ],
           'type' => dict[],
         ),
         'terse_byte_field' => shape(
           'field' => dict[
-            '\facebook\thrift\annotation\TerseWrite' => \facebook\thrift\annotation\TerseWrite::fromShape(
-              shape(
-              )
-            ),
+            '\facebook\thrift\annotation\TerseWrite' => \facebook\thrift\annotation\TerseWrite::withDefaultValues(),
           ],
           'type' => dict[],
         ),
         'terse_short_field' => shape(
           'field' => dict[
-            '\facebook\thrift\annotation\TerseWrite' => \facebook\thrift\annotation\TerseWrite::fromShape(
-              shape(
-              )
-            ),
+            '\facebook\thrift\annotation\TerseWrite' => \facebook\thrift\annotation\TerseWrite::withDefaultValues(),
           ],
           'type' => dict[],
         ),
         'terse_int_field' => shape(
           'field' => dict[
-            '\facebook\thrift\annotation\TerseWrite' => \facebook\thrift\annotation\TerseWrite::fromShape(
-              shape(
-              )
-            ),
+            '\facebook\thrift\annotation\TerseWrite' => \facebook\thrift\annotation\TerseWrite::withDefaultValues(),
           ],
           'type' => dict[],
         ),
         'terse_long_field' => shape(
           'field' => dict[
-            '\facebook\thrift\annotation\TerseWrite' => \facebook\thrift\annotation\TerseWrite::fromShape(
-              shape(
-              )
-            ),
+            '\facebook\thrift\annotation\TerseWrite' => \facebook\thrift\annotation\TerseWrite::withDefaultValues(),
           ],
           'type' => dict[],
         ),
         'terse_float_field' => shape(
           'field' => dict[
-            '\facebook\thrift\annotation\TerseWrite' => \facebook\thrift\annotation\TerseWrite::fromShape(
-              shape(
-              )
-            ),
+            '\facebook\thrift\annotation\TerseWrite' => \facebook\thrift\annotation\TerseWrite::withDefaultValues(),
           ],
           'type' => dict[],
         ),
         'terse_double_field' => shape(
           'field' => dict[
-            '\facebook\thrift\annotation\TerseWrite' => \facebook\thrift\annotation\TerseWrite::fromShape(
-              shape(
-              )
-            ),
+            '\facebook\thrift\annotation\TerseWrite' => \facebook\thrift\annotation\TerseWrite::withDefaultValues(),
           ],
           'type' => dict[],
         ),
         'terse_string_field' => shape(
           'field' => dict[
-            '\facebook\thrift\annotation\TerseWrite' => \facebook\thrift\annotation\TerseWrite::fromShape(
-              shape(
-              )
-            ),
+            '\facebook\thrift\annotation\TerseWrite' => \facebook\thrift\annotation\TerseWrite::withDefaultValues(),
           ],
           'type' => dict[],
         ),
         'terse_binary_field' => shape(
           'field' => dict[
-            '\facebook\thrift\annotation\TerseWrite' => \facebook\thrift\annotation\TerseWrite::fromShape(
-              shape(
-              )
-            ),
+            '\facebook\thrift\annotation\TerseWrite' => \facebook\thrift\annotation\TerseWrite::withDefaultValues(),
           ],
           'type' => dict[],
         ),
         'terse_enum_field' => shape(
           'field' => dict[
-            '\facebook\thrift\annotation\TerseWrite' => \facebook\thrift\annotation\TerseWrite::fromShape(
-              shape(
-              )
-            ),
+            '\facebook\thrift\annotation\TerseWrite' => \facebook\thrift\annotation\TerseWrite::withDefaultValues(),
           ],
           'type' => dict[],
         ),
         'terse_list_field' => shape(
           'field' => dict[
-            '\facebook\thrift\annotation\TerseWrite' => \facebook\thrift\annotation\TerseWrite::fromShape(
-              shape(
-              )
-            ),
+            '\facebook\thrift\annotation\TerseWrite' => \facebook\thrift\annotation\TerseWrite::withDefaultValues(),
           ],
           'type' => dict[],
         ),
         'terse_set_field' => shape(
           'field' => dict[
-            '\facebook\thrift\annotation\TerseWrite' => \facebook\thrift\annotation\TerseWrite::fromShape(
-              shape(
-              )
-            ),
+            '\facebook\thrift\annotation\TerseWrite' => \facebook\thrift\annotation\TerseWrite::withDefaultValues(),
           ],
           'type' => dict[],
         ),
         'terse_map_field' => shape(
           'field' => dict[
-            '\facebook\thrift\annotation\TerseWrite' => \facebook\thrift\annotation\TerseWrite::fromShape(
-              shape(
-              )
-            ),
+            '\facebook\thrift\annotation\TerseWrite' => \facebook\thrift\annotation\TerseWrite::withDefaultValues(),
           ],
           'type' => dict[],
         ),
         'terse_struct_field' => shape(
           'field' => dict[
-            '\facebook\thrift\annotation\TerseWrite' => \facebook\thrift\annotation\TerseWrite::fromShape(
-              shape(
-              )
-            ),
+            '\facebook\thrift\annotation\TerseWrite' => \facebook\thrift\annotation\TerseWrite::withDefaultValues(),
           ],
           'type' => dict[],
         ),
         'terse_union_field' => shape(
           'field' => dict[
-            '\facebook\thrift\annotation\TerseWrite' => \facebook\thrift\annotation\TerseWrite::fromShape(
-              shape(
-              )
-            ),
+            '\facebook\thrift\annotation\TerseWrite' => \facebook\thrift\annotation\TerseWrite::withDefaultValues(),
           ],
           'type' => dict[],
         ),
@@ -3560,19 +3512,13 @@ class AdaptedFields implements \IThriftSyncStruct, \IThriftStructMetadata, \IThr
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\facebook\thrift\annotation\TerseWrite' => \facebook\thrift\annotation\TerseWrite::fromShape(
-          shape(
-          )
-        ),
+        '\facebook\thrift\annotation\TerseWrite' => \facebook\thrift\annotation\TerseWrite::withDefaultValues(),
       ],
       'fields' => dict[
         'field1' => shape(
           'field' => dict[],
           'type' => dict[
-            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
-              shape(
-              )
-            ),
+            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::withDefaultValues(),
             '\facebook\thrift\annotation\hack\Adapter' => \facebook\thrift\annotation\hack\Adapter::fromShape(
               shape(
                 "name" => "\\Adapter1",
@@ -3609,10 +3555,7 @@ class AdaptedFields implements \IThriftSyncStruct, \IThriftStructMetadata, \IThr
             ),
           ],
           'type' => dict[
-            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
-              shape(
-              )
-            ),
+            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::withDefaultValues(),
             '\facebook\thrift\annotation\hack\Adapter' => \facebook\thrift\annotation\hack\Adapter::fromShape(
               shape(
                 "name" => "\\Adapter1",
@@ -3769,18 +3712,12 @@ class TerseException extends \TException implements \IThriftSyncStruct, \IThrift
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\facebook\thrift\annotation\TerseWrite' => \facebook\thrift\annotation\TerseWrite::fromShape(
-          shape(
-          )
-        ),
+        '\facebook\thrift\annotation\TerseWrite' => \facebook\thrift\annotation\TerseWrite::withDefaultValues(),
       ],
       'fields' => dict[
         'msg' => shape(
           'field' => dict[
-            '\facebook\thrift\annotation\ExceptionMessage' => \facebook\thrift\annotation\ExceptionMessage::fromShape(
-              shape(
-              )
-            ),
+            '\facebook\thrift\annotation\ExceptionMessage' => \facebook\thrift\annotation\ExceptionMessage::withDefaultValues(),
           ],
           'type' => dict[],
         ),

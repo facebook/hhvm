@@ -106,10 +106,7 @@ class runtime_annotation implements \IThriftSyncStruct, \IThriftStructMetadata {
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\facebook\thrift\annotation\RuntimeAnnotation' => \facebook\thrift\annotation\RuntimeAnnotation::fromShape(
-          shape(
-          )
-        ),
+        '\facebook\thrift\annotation\RuntimeAnnotation' => \facebook\thrift\annotation\RuntimeAnnotation::withDefaultValues(),
       ],
       'fields' => dict[
       ],
@@ -817,10 +814,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
             "count" => 2,
           )
         ),
-        '\test\fixtures\basic_structured_annotations\structured_annotation_with_default' => \test\fixtures\basic_structured_annotations\structured_annotation_with_default::fromShape(
-          shape(
-          )
-        ),
+        '\test\fixtures\basic_structured_annotations\structured_annotation_with_default' => \test\fixtures\basic_structured_annotations\structured_annotation_with_default::withDefaultValues(),
         '\test\fixtures\basic_structured_annotations\structured_annotation_nested' => \test\fixtures\basic_structured_annotations\structured_annotation_nested::fromShape(
           shape(
             "name" => "nesty2",
@@ -841,10 +835,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
             "name" => "bac",
           )
         ),
-        '\test\fixtures\basic_structured_annotations\runtime_annotation' => \test\fixtures\basic_structured_annotations\runtime_annotation::fromShape(
-          shape(
-          )
-        ),
+        '\test\fixtures\basic_structured_annotations\runtime_annotation' => \test\fixtures\basic_structured_annotations\runtime_annotation::withDefaultValues(),
       ],
       'fields' => dict[
         'annotated_field' => shape(
@@ -855,20 +846,14 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
                 "name" => "counter",
               )
             ),
-            '\test\fixtures\basic_structured_annotations\runtime_annotation' => \test\fixtures\basic_structured_annotations\runtime_annotation::fromShape(
-              shape(
-              )
-            ),
+            '\test\fixtures\basic_structured_annotations\runtime_annotation' => \test\fixtures\basic_structured_annotations\runtime_annotation::withDefaultValues(),
           ],
           'type' => dict[],
         ),
         'annotated_type' => shape(
           'field' => dict[],
           'type' => dict[
-            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
-              shape(
-              )
-            ),
+            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::withDefaultValues(),
             '\test\fixtures\basic_structured_annotations\structured_annotation_inline' => \test\fixtures\basic_structured_annotations\structured_annotation_inline::fromShape(
               shape(
                 "count" => 1,
@@ -1002,10 +987,7 @@ class MyException extends \TException implements \IThriftSyncStruct, \IThriftExc
       'fields' => dict[
         'context' => shape(
           'field' => dict[
-            '\test\fixtures\basic_structured_annotations\structured_annotation_with_default' => \test\fixtures\basic_structured_annotations\structured_annotation_with_default::fromShape(
-              shape(
-              )
-            ),
+            '\test\fixtures\basic_structured_annotations\structured_annotation_with_default' => \test\fixtures\basic_structured_annotations\structured_annotation_with_default::withDefaultValues(),
           ],
           'type' => dict[],
         ),
@@ -1218,26 +1200,17 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
         '\test\fixtures\basic_structured_annotations\structured_annotation_nested' => \test\fixtures\basic_structured_annotations\structured_annotation_nested::fromShape(
           shape(
             "name" => "nesty",
-            "nest" => \test\fixtures\basic_structured_annotations\structured_annotation_with_default::fromShape(
-              shape(
-              )
-            ),
+            "nest" => \test\fixtures\basic_structured_annotations\structured_annotation_with_default::withDefaultValues(),
           )
         ),
       ],
       'fields' => dict[
         'first' => shape(
           'field' => dict[
-            '\test\fixtures\basic_structured_annotations\structured_annotation_with_default' => \test\fixtures\basic_structured_annotations\structured_annotation_with_default::fromShape(
-              shape(
-              )
-            ),
+            '\test\fixtures\basic_structured_annotations\structured_annotation_with_default' => \test\fixtures\basic_structured_annotations\structured_annotation_with_default::withDefaultValues(),
           ],
           'type' => dict[
-            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
-              shape(
-              )
-            ),
+            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::withDefaultValues(),
             '\test\fixtures\basic_structured_annotations\structured_annotation_inline' => \test\fixtures\basic_structured_annotations\structured_annotation_inline::fromShape(
               shape(
                 "count" => 1,
@@ -1259,10 +1232,7 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
             ),
           ],
           'type' => dict[
-            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
-              shape(
-              )
-            ),
+            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::withDefaultValues(),
             '\test\fixtures\basic_structured_annotations\structured_annotation_inline' => \test\fixtures\basic_structured_annotations\structured_annotation_inline::fromShape(
               shape(
                 "count" => 2,

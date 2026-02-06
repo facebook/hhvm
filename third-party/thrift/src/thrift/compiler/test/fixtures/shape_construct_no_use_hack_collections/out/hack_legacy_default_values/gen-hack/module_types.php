@@ -758,10 +758,7 @@ class Foo implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
       'fields' => dict[
         'd' => shape(
           'field' => dict[
-            '\facebook\thrift\annotation\AllowUnsafeOptionalCustomDefaultValue' => \facebook\thrift\annotation\AllowUnsafeOptionalCustomDefaultValue::fromShape(
-              shape(
-              )
-            ),
+            '\facebook\thrift\annotation\AllowUnsafeOptionalCustomDefaultValue' => \facebook\thrift\annotation\AllowUnsafeOptionalCustomDefaultValue::withDefaultValues(),
           ],
           'type' => dict[],
         ),

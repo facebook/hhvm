@@ -352,37 +352,25 @@ class TestStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
       'fields' => dict[
         'optional_int_field' => shape(
           'field' => dict[
-            '\facebook\thrift\annotation\AllowUnsafeOptionalCustomDefaultValue' => \facebook\thrift\annotation\AllowUnsafeOptionalCustomDefaultValue::fromShape(
-              shape(
-              )
-            ),
+            '\facebook\thrift\annotation\AllowUnsafeOptionalCustomDefaultValue' => \facebook\thrift\annotation\AllowUnsafeOptionalCustomDefaultValue::withDefaultValues(),
           ],
           'type' => dict[],
         ),
         'optional_bool_field' => shape(
           'field' => dict[
-            '\facebook\thrift\annotation\AllowUnsafeOptionalCustomDefaultValue' => \facebook\thrift\annotation\AllowUnsafeOptionalCustomDefaultValue::fromShape(
-              shape(
-              )
-            ),
+            '\facebook\thrift\annotation\AllowUnsafeOptionalCustomDefaultValue' => \facebook\thrift\annotation\AllowUnsafeOptionalCustomDefaultValue::withDefaultValues(),
           ],
           'type' => dict[],
         ),
         'optional_list_field' => shape(
           'field' => dict[
-            '\facebook\thrift\annotation\AllowUnsafeOptionalCustomDefaultValue' => \facebook\thrift\annotation\AllowUnsafeOptionalCustomDefaultValue::fromShape(
-              shape(
-              )
-            ),
+            '\facebook\thrift\annotation\AllowUnsafeOptionalCustomDefaultValue' => \facebook\thrift\annotation\AllowUnsafeOptionalCustomDefaultValue::withDefaultValues(),
           ],
           'type' => dict[],
         ),
         'optional_struct_field' => shape(
           'field' => dict[
-            '\facebook\thrift\annotation\AllowUnsafeOptionalCustomDefaultValue' => \facebook\thrift\annotation\AllowUnsafeOptionalCustomDefaultValue::fromShape(
-              shape(
-              )
-            ),
+            '\facebook\thrift\annotation\AllowUnsafeOptionalCustomDefaultValue' => \facebook\thrift\annotation\AllowUnsafeOptionalCustomDefaultValue::withDefaultValues(),
           ],
           'type' => dict[],
         ),

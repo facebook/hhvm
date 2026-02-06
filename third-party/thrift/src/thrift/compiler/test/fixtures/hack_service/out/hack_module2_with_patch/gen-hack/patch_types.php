@@ -59,14 +59,8 @@ class GeneratePatch implements \IThriftSyncStruct, \IThriftStructMetadata {
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\facebook\thrift\annotation\Program' => \facebook\thrift\annotation\Program::fromShape(
-          shape(
-          )
-        ),
-        '\facebook\thrift\annotation\Structured' => \facebook\thrift\annotation\Structured::fromShape(
-          shape(
-          )
-        ),
+        '\facebook\thrift\annotation\Program' => \facebook\thrift\annotation\Program::withDefaultValues(),
+        '\facebook\thrift\annotation\Structured' => \facebook\thrift\annotation\Structured::withDefaultValues(),
       ],
       'fields' => dict[
       ],
@@ -129,10 +123,7 @@ class GeneratePatchNew implements \IThriftSyncStruct, \IThriftStructMetadata {
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\facebook\thrift\annotation\Structured' => \facebook\thrift\annotation\Structured::fromShape(
-          shape(
-          )
-        ),
+        '\facebook\thrift\annotation\Structured' => \facebook\thrift\annotation\Structured::withDefaultValues(),
       ],
       'fields' => dict[
       ],
@@ -191,14 +182,8 @@ class AssignOnlyPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\facebook\thrift\annotation\Field' => \facebook\thrift\annotation\Field::fromShape(
-          shape(
-          )
-        ),
-        '\facebook\thrift\annotation\Structured' => \facebook\thrift\annotation\Structured::fromShape(
-          shape(
-          )
-        ),
+        '\facebook\thrift\annotation\Field' => \facebook\thrift\annotation\Field::withDefaultValues(),
+        '\facebook\thrift\annotation\Structured' => \facebook\thrift\annotation\Structured::withDefaultValues(),
       ],
       'fields' => dict[
       ],
@@ -262,10 +247,7 @@ class DeprecatedTerseWriteCustomDefaultDoNotUse implements \IThriftSyncStruct, \
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\facebook\thrift\annotation\Field' => \facebook\thrift\annotation\Field::fromShape(
-          shape(
-          )
-        ),
+        '\facebook\thrift\annotation\Field' => \facebook\thrift\annotation\Field::withDefaultValues(),
       ],
       'fields' => dict[
       ],
@@ -1779,10 +1761,7 @@ class BinaryPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrif
         'assign' => shape(
           'field' => dict[],
           'type' => dict[
-            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
-              shape(
-              )
-            ),
+            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::withDefaultValues(),
             '\facebook\thrift\annotation\cpp\Type' => \facebook\thrift\annotation\cpp\Type::fromShape(
               shape(
                 "name" => "folly::IOBuf",
@@ -1799,10 +1778,7 @@ class BinaryPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrif
         'prepend' => shape(
           'field' => dict[],
           'type' => dict[
-            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
-              shape(
-              )
-            ),
+            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::withDefaultValues(),
             '\facebook\thrift\annotation\cpp\Type' => \facebook\thrift\annotation\cpp\Type::fromShape(
               shape(
                 "name" => "folly::IOBuf",
@@ -1819,10 +1795,7 @@ class BinaryPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrif
         'append' => shape(
           'field' => dict[],
           'type' => dict[
-            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
-              shape(
-              )
-            ),
+            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::withDefaultValues(),
             '\facebook\thrift\annotation\cpp\Type' => \facebook\thrift\annotation\cpp\Type::fromShape(
               shape(
                 "name" => "folly::IOBuf",

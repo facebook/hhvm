@@ -372,10 +372,7 @@ class Vehicle implements \IThriftSyncStruct, \IThriftStructMetadata {
       'fields' => dict[
         'hasAC' => shape(
           'field' => dict[
-            '\facebook\thrift\annotation\AllowUnsafeOptionalCustomDefaultValue' => \facebook\thrift\annotation\AllowUnsafeOptionalCustomDefaultValue::fromShape(
-              shape(
-              )
-            ),
+            '\facebook\thrift\annotation\AllowUnsafeOptionalCustomDefaultValue' => \facebook\thrift\annotation\AllowUnsafeOptionalCustomDefaultValue::withDefaultValues(),
           ],
           'type' => dict[],
         ),

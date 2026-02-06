@@ -80,10 +80,7 @@ class Fiery extends \TException implements \IThriftSyncStruct, \IThriftException
       'fields' => dict[
         'message' => shape(
           'field' => dict[
-            '\facebook\thrift\annotation\ExceptionMessage' => \facebook\thrift\annotation\ExceptionMessage::fromShape(
-              shape(
-              )
-            ),
+            '\facebook\thrift\annotation\ExceptionMessage' => \facebook\thrift\annotation\ExceptionMessage::withDefaultValues(),
           ],
           'type' => dict[],
         ),
@@ -177,10 +174,7 @@ class Serious extends \TException implements \IThriftSyncStruct, \IThriftExcepti
       'fields' => dict[
         'sonnet' => shape(
           'field' => dict[
-            '\facebook\thrift\annotation\ExceptionMessage' => \facebook\thrift\annotation\ExceptionMessage::fromShape(
-              shape(
-              )
-            ),
+            '\facebook\thrift\annotation\ExceptionMessage' => \facebook\thrift\annotation\ExceptionMessage::withDefaultValues(),
             '\facebook\thrift\annotation\python\Name' => \facebook\thrift\annotation\python\Name::fromShape(
               shape(
                 "name" => "not_sonnet",
@@ -302,10 +296,7 @@ class ComplexFieldNames extends \TException implements \IThriftSyncStruct, \IThr
       'fields' => dict[
         'internal_error_message' => shape(
           'field' => dict[
-            '\facebook\thrift\annotation\ExceptionMessage' => \facebook\thrift\annotation\ExceptionMessage::fromShape(
-              shape(
-              )
-            ),
+            '\facebook\thrift\annotation\ExceptionMessage' => \facebook\thrift\annotation\ExceptionMessage::withDefaultValues(),
           ],
           'type' => dict[],
         ),
@@ -422,10 +413,7 @@ class CustomFieldNames extends \TException implements \IThriftSyncStruct, \IThri
       'fields' => dict[
         'internal_error_message' => shape(
           'field' => dict[
-            '\facebook\thrift\annotation\ExceptionMessage' => \facebook\thrift\annotation\ExceptionMessage::fromShape(
-              shape(
-              )
-            ),
+            '\facebook\thrift\annotation\ExceptionMessage' => \facebook\thrift\annotation\ExceptionMessage::withDefaultValues(),
           ],
           'type' => dict[],
         ),
@@ -537,10 +525,7 @@ class ExceptionWithPrimitiveField extends \TException implements \IThriftSyncStr
       'fields' => dict[
         'message' => shape(
           'field' => dict[
-            '\facebook\thrift\annotation\ExceptionMessage' => \facebook\thrift\annotation\ExceptionMessage::fromShape(
-              shape(
-              )
-            ),
+            '\facebook\thrift\annotation\ExceptionMessage' => \facebook\thrift\annotation\ExceptionMessage::withDefaultValues(),
           ],
           'type' => dict[],
         ),
@@ -657,10 +642,7 @@ class ExceptionWithStructuredAnnotation extends \TException implements \IThriftS
       'fields' => dict[
         'message_field' => shape(
           'field' => dict[
-            '\facebook\thrift\annotation\ExceptionMessage' => \facebook\thrift\annotation\ExceptionMessage::fromShape(
-              shape(
-              )
-            ),
+            '\facebook\thrift\annotation\ExceptionMessage' => \facebook\thrift\annotation\ExceptionMessage::withDefaultValues(),
           ],
           'type' => dict[],
         ),

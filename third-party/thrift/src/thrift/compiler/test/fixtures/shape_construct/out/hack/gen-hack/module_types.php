@@ -722,10 +722,7 @@ class Foo implements \IThriftSyncStruct, \IThriftStructMetadata {
       'fields' => dict[
         'd' => shape(
           'field' => dict[
-            '\facebook\thrift\annotation\AllowUnsafeOptionalCustomDefaultValue' => \facebook\thrift\annotation\AllowUnsafeOptionalCustomDefaultValue::fromShape(
-              shape(
-              )
-            ),
+            '\facebook\thrift\annotation\AllowUnsafeOptionalCustomDefaultValue' => \facebook\thrift\annotation\AllowUnsafeOptionalCustomDefaultValue::withDefaultValues(),
           ],
           'type' => dict[],
         ),
@@ -848,7 +845,11 @@ class TestStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
   public Vector<TestStruct> $list_of_struct_self;
 
   public function __construct(?Foo $foo_struct = null, ?TestUnion $union_value = null, ?TestStruct $struct_of_self = null, ?Vector<Foo> $list_of_struct_foo = null, ?Map<string, Foo> $map_of_string_to_struct_foo = null, ?Vector<TestStruct> $list_of_struct_self = null)[] {
-    $this->foo_struct = $foo_struct;
+    $this->foo_struct = $foo_struct ?? Foo::fromShape(
+      shape(
+        "c" => 99,
+      )
+    );
     $this->union_value = $union_value;
     $this->struct_of_self = $struct_of_self;
     $this->list_of_struct_foo = $list_of_struct_foo ?? Vector {};

@@ -454,16 +454,17 @@ class EdenfsWatcherTestDriver(common_tests.CommonTestDriver):
 
     def assertStateForSeconds(
         self, state_name: str, duration_secs: int
-    ) -> Tuple[Callable[[], None], Callable[[], bool]]:
+    ) -> Tuple[Callable[[], None], Callable[[], bool], Callable[[], None]]:
         """Asserts the given state for the given number of seconds with Eden.
 
         This function returns as soon as the state is asserted.
         The state then remains asserted in the background.
 
-        Returns to thunks:
+        Returns three thunks:
         - Calling the first one waits until the state is de-asserted
         - Calling the second returns a boolean indicating whether the state is
            still asserted.
+        - Calling the third kills the asserter process with SIGKILL.
         """
 
         eden_state_asserter_path = os.getenv("HH_EDEN_TEST_STATE_ASSERTER", None)
@@ -496,7 +497,10 @@ class EdenfsWatcherTestDriver(common_tests.CommonTestDriver):
         def is_still_asserted() -> bool:
             return proc.poll() is None
 
-        return (wait_and_check, is_still_asserted)
+        def kill_asserter() -> None:
+            proc.kill()
+
+        return (wait_and_check, is_still_asserted, kill_asserter)
 
 
 class EdenfsWatcherTests(common_tests.CommonTests):
@@ -1155,7 +1159,7 @@ function test_deprecated() : void {
 
         self.test_driver.createNonHackFile("file1.php")
 
-        wait_for0, is_asserted0 = self.test_driver.assertStateForSeconds(state0, 10)
+        wait_for0, is_asserted0, _ = self.test_driver.assertStateForSeconds(state0, 10)
 
         self.test_driver.createNonHackFile("file2.php")
 
@@ -1200,7 +1204,7 @@ function test_deprecated() : void {
         # 30 iterations keeps this test at around 1.5 minutes
         for iterations in range(1, 30):
             for _ in range(iterations):
-                wait_thunk, _ = self.test_driver.assertStateForSeconds(state, 0)
+                wait_thunk, _, _ = self.test_driver.assertStateForSeconds(state, 0)
                 if wait_for_deassert:
                     wait_thunk()
 
@@ -1239,7 +1243,7 @@ function test_deprecated() : void {
 
         self.test_driver.createNonHackFile("file0.php")
 
-        wait_for0, _ = self.test_driver.assertStateForSeconds(state0, 20)
+        wait_for0, _, _ = self.test_driver.assertStateForSeconds(state0, 20)
 
         self.test_driver.createNonHackFile("file1.php")
 
@@ -1250,7 +1254,7 @@ function test_deprecated() : void {
         )
 
         # will be deasserted while state0 is still asserted
-        wait_for1, _ = self.test_driver.assertStateForSeconds(state1, 10)
+        wait_for1, _, _ = self.test_driver.assertStateForSeconds(state1, 10)
 
         self.test_driver.createNonHackFile("file2.php")
 
@@ -1304,7 +1308,7 @@ function test_deprecated() : void {
 
         self.test_driver.createNonHackFile("file0.php")
 
-        wait_for0, _ = self.test_driver.assertStateForSeconds(state0, 20)
+        wait_for0, _, _ = self.test_driver.assertStateForSeconds(state0, 20)
 
         self.test_driver.createNonHackFile("file1.php")
 
@@ -1316,7 +1320,7 @@ function test_deprecated() : void {
         )
 
         # will be deasserted while state0 is still asserted
-        wait_for1, _ = self.test_driver.assertStateForSeconds(state1, 10)
+        wait_for1, _, _ = self.test_driver.assertStateForSeconds(state1, 10)
 
         self.test_driver.createNonHackFile("file2.php")
 
@@ -1350,7 +1354,7 @@ function test_deprecated() : void {
         )
 
         state = TEST_STATE_0
-        _, is_asserted = self.test_driver.assertStateForSeconds(state, 20)
+        _, is_asserted, _ = self.test_driver.assertStateForSeconds(state, 20)
 
         # Note that we asserted before server startup
         self.test_driver.start_hh_server()
@@ -1377,7 +1381,7 @@ function test_deprecated() : void {
         self.test_driver.start_hh_server()
 
         # Assert a state that is NOT in the tracked_states list
-        _, is_still_asserted = self.test_driver.assertStateForSeconds(
+        _, is_still_asserted, _ = self.test_driver.assertStateForSeconds(
             "untracked-state", 30
         )
 
@@ -1393,6 +1397,64 @@ function test_deprecated() : void {
 
         # ... and we should also not have waited until deferral.
         self.assertTrue(is_still_asserted())
+
+    def test_deferral10(self) -> None:
+        """Test asserting application crashing while hh is running"""
+        config = self.test_driver.getConfig()
+        config.state_tracking = True
+        config.write_hhconf(
+            self.test_driver.watchman_instance.getUnixSockPath(),
+            self.test_driver.repo_dir,
+        )
+
+        self.test_driver.start_hh_server()
+        self.test_driver.check_cmd(["No errors!"])
+
+        for i, kill_after_secs in enumerate([0, 0.1, 0.5, 1]):
+            # Assert state for a long duration (we'll kill it before it finishes)
+            _, _, kill_asserter = self.test_driver.assertStateForSeconds(
+                TEST_STATE_0, 60
+            )
+
+            time.sleep(kill_after_secs)
+
+            # SIGKILL the asserter while it's asserting TEST_STATE_0
+            kill_asserter()
+
+            # The asserter is dead, we should not be deferring anymore
+            file = f"file{i}.php"
+            self.test_driver.createNonHackFile(file)
+            self.test_driver.check_cmd(
+                [
+                    f"ERROR: {{root}}{file}:1:1,1: A .php file must begin with `<?hh`. (Parsing[1002])",
+                ]
+            )
+            os.remove(os.path.join(self.test_driver.repo_dir, file))
+
+    def test_deferral11(self) -> None:
+        """Regression test for when an application asserting a state crashed before starting the server."""
+        config = self.test_driver.getConfig()
+        config.state_tracking = True
+        config.write_hhconf(
+            self.test_driver.watchman_instance.getUnixSockPath(),
+            self.test_driver.repo_dir,
+        )
+
+        # Assert state for a long duration (we'll kill it before it finishes)
+        _, _, kill_asserter = self.test_driver.assertStateForSeconds(TEST_STATE_0, 60)
+
+        # SIGKILL the asserter while it's asserting TEST_STATE_0
+        kill_asserter()
+
+        self.test_driver.start_hh_server()
+        self.test_driver.check_cmd(["No errors!"])
+
+        # Let's assert the state again
+        wait_for_deassert, _, _ = self.test_driver.assertStateForSeconds(
+            TEST_STATE_0, 1
+        )
+        wait_for_deassert()
+        self.test_driver.check_cmd(["No errors!"])
 
 
 class EdenfsWatcherNonMountPointRepoTests(EdenfsWatcherTests):

@@ -53,7 +53,8 @@ class FunctionNode;
 
 namespace rocket {
 class ThriftRocketServerHandler;
-}
+class RocketSetupProcessor;
+} // namespace rocket
 
 using ClientIdentityHook = std::function<std::unique_ptr<void, void (*)(void*)>(
     const folly::AsyncTransport* transport,
@@ -481,6 +482,7 @@ class Cpp2ConnContext : public apache::thrift::server::TConnectionContext {
 
   friend class Cpp2Connection;
   friend class rocket::ThriftRocketServerHandler;
+  friend class rocket::RocketSetupProcessor;
   friend class HTTP2RoutingHandler;
   friend class SingleRpcChannel;
   friend class detail::Cpp2ConnContextInternalAPI;

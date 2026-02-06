@@ -544,6 +544,7 @@ dependencies = [
 name = "bytemuck"
 version = "1.24.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1fbdf580320f38b612e485521afda1ee26d10cc9884efaaa750d383e13e3c5f4"
 dependencies = [
  "bytemuck_derive",
 ]
@@ -552,6 +553,7 @@ dependencies = [
 name = "bytemuck_derive"
 version = "1.10.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f9abbd1bc6865053c427f7198e6af43bfdedc55ab791faed4fbd361d789575ff"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -580,6 +582,7 @@ checksum = "cf034765b7d19a011c6d619e880582bf95e8186b580e6fab56589872dd87dcf5"
 name = "cbindgen"
 version = "0.28.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "eadd868a2ce9ca38de7eeafdcec9c7065ef89b42b32f0839278d55f35c54d1ff"
 dependencies = [
  "clap 4.5.54",
  "heck 0.4.1",
@@ -917,12 +920,6 @@ dependencies = [
 
 [[package]]
 name = "convert_case"
-version = "0.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6245d59a3e82a7fc217c5828a6692dbc6dfb63a0c8c90495621f7b9d79704a0e"
-
-[[package]]
-name = "convert_case"
 version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ec182b0ca2f35d8fc196cf3404988fd8b8c739a4d270ff118a398feb0cbec1ca"
@@ -1048,6 +1045,7 @@ dependencies = [
 name = "cxx"
 version = "1.0.160"
 source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "be1149bab7a5580cb267215751389597c021bfad13c0bb00c54e19559333764c"
 dependencies = [
  "cc",
  "cxxbridge-cmd",
@@ -1061,6 +1059,7 @@ dependencies = [
 name = "cxx-build"
 version = "1.0.160"
 source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6aeeaf1aefae8e0f5141920a7ecbc64a22ab038d4b4ac59f2d19e0effafd5b53"
 dependencies = [
  "cc",
  "codespan-reporting",
@@ -1075,6 +1074,7 @@ dependencies = [
 name = "cxxbridge-cmd"
 version = "1.0.160"
 source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c36ac1f9a72064b1f41fd7b49a4c1b3bf33b9ccb1274874dda6d264f57c55964"
 dependencies = [
  "clap 4.5.54",
  "codespan-reporting",
@@ -1088,11 +1088,13 @@ dependencies = [
 name = "cxxbridge-flags"
 version = "1.0.160"
 source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "170c6ff5d009663866857a91ebee55b98ea4d4b34e7d7aba6dc4a4c95cc7b748"
 
 [[package]]
 name = "cxxbridge-macro"
 version = "1.0.160"
 source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4984a142211026786011a7e79fa22faa1eca1e9cbf0e60bffecfd57fd3db88f1"
 dependencies = [
  "indexmap 2.13.0",
  "proc-macro2",
@@ -1933,16 +1935,6 @@ dependencies = [
 [[package]]
 name = "gen_hhi_contents_lib"
 version = "0.0.0"
-
-[[package]]
-name = "generate_configs_lib"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "cc",
- "convert_case 0.4.0",
- "nom 8.0.0",
-]
 
 [[package]]
 name = "generate_hhi_lib"
@@ -3355,9 +3347,9 @@ dependencies = [
 
 [[package]]
 name = "num-conv"
-version = "0.1.0"
+version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "51d515d32fb182ee37cda2ccdcb92950d6a3c2893aa280e540671c2cd0f3b1d9"
+checksum = "cf97ec579c3c42f953ef76dbf8d55ac91fb219dde70e49aa4a6b7d74e9919050"
 
 [[package]]
 name = "num-traits"
@@ -3405,6 +3397,7 @@ dependencies = [
 [[package]]
 name = "ocamlrep"
 version = "0.1.0"
+source = "git+https://github.com/facebook/ocamlrep/?branch=main#15a9fabe7c1996a923acd3584a83a09d2287a199"
 dependencies = [
  "bstr",
  "bumpalo",
@@ -3417,6 +3410,7 @@ dependencies = [
 [[package]]
 name = "ocamlrep_caml_builtins"
 version = "0.1.0"
+source = "git+https://github.com/facebook/ocamlrep/?branch=main#15a9fabe7c1996a923acd3584a83a09d2287a199"
 dependencies = [
  "ocamlrep",
  "ocamlrep_custom",
@@ -3426,6 +3420,7 @@ dependencies = [
 [[package]]
 name = "ocamlrep_custom"
 version = "0.1.0"
+source = "git+https://github.com/facebook/ocamlrep/?branch=main#15a9fabe7c1996a923acd3584a83a09d2287a199"
 dependencies = [
  "ocamlrep",
  "ocamlrep_ocamlpool",
@@ -3434,6 +3429,7 @@ dependencies = [
 [[package]]
 name = "ocamlrep_derive"
 version = "0.1.0"
+source = "git+https://github.com/facebook/ocamlrep/?branch=main#15a9fabe7c1996a923acd3584a83a09d2287a199"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -3444,6 +3440,7 @@ dependencies = [
 [[package]]
 name = "ocamlrep_marshal"
 version = "0.1.0"
+source = "git+https://github.com/facebook/ocamlrep/?branch=main#15a9fabe7c1996a923acd3584a83a09d2287a199"
 dependencies = [
  "bitflags 2.10.0",
  "cc",
@@ -3462,6 +3459,7 @@ dependencies = [
 [[package]]
 name = "ocamlrep_ocamlpool"
 version = "0.1.0"
+source = "git+https://github.com/facebook/ocamlrep/?branch=main#15a9fabe7c1996a923acd3584a83a09d2287a199"
 dependencies = [
  "bumpalo",
  "cc",
@@ -3496,7 +3494,6 @@ dependencies = [
  "anyhow",
  "bstr",
  "cxx",
- "generate_configs_lib",
  "hhvm_options",
  "nom 8.0.0",
  "nom-language",
@@ -4021,6 +4018,7 @@ dependencies = [
 name = "quickcheck"
 version = "1.0.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "588f6378e4dd99458b60ec275b4477add41ce4fa9f64dcba6f15adccb19b50d6"
 dependencies = [
  "env_logger 0.8.4",
  "log",
@@ -5306,30 +5304,30 @@ dependencies = [
 
 [[package]]
 name = "time"
-version = "0.3.44"
+version = "0.3.47"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "91e7d9e3bb61134e77bde20dd4825b97c010155709965fedf0f49bb138e52a9d"
+checksum = "743bd48c283afc0388f9b8827b976905fb217ad9e647fae3a379a9283c4def2c"
 dependencies = [
  "deranged",
  "itoa",
  "num-conv",
  "powerfmt",
- "serde",
+ "serde_core",
  "time-core",
  "time-macros",
 ]
 
 [[package]]
 name = "time-core"
-version = "0.1.6"
+version = "0.1.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "40868e7c1d2f0b8d73e4a8c7f0ff63af4f6d19be117e90bd73eb1d62cf831c6b"
+checksum = "7694e1cfe791f8d31026952abf09c69ca6f6fa4e1a1229e18988f06a04a12dca"
 
 [[package]]
 name = "time-macros"
-version = "0.2.24"
+version = "0.2.27"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "30cfb0125f12d9c277f35663a0a33f8c30190f4e4574868a330595412d34ebf3"
+checksum = "2e70e4c5a0e0a8a4823ad65dfe1a6930e4f4d756dcd9dd7939022b5e8c501215"
 dependencies = [
  "num-conv",
  "time-core",

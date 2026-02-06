@@ -84,6 +84,7 @@ struct FactsLogger final : public FactsStore,
   Array getFileConstants(const String&) override;
   Array getFileTypeAliases(const String&) override;
   Array getFileModules(const String&) override;
+  Array getAllModules() override;
 
   Optional<String> getFileModuleMembership(const String& path) override;
   Optional<String> getFilePackageMembership(const String& path) override;

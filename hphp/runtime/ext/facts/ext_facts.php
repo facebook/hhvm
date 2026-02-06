@@ -147,6 +147,14 @@ function path_to_type_aliases(string $path)[]: vec<string>;
 function path_to_module_membership(string $path)[]: ?string;
 
 /**
+ * Return all modules defined in the repo.
+ *
+ * Throw InvalidOperationException if Facts is not enabled.
+ */
+<<__Native>>
+function all_modules()[]: vec<string>;
+
+/**
  * Return the package the file is a member of, if any.
  */
 <<__Native>>

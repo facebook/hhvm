@@ -657,11 +657,14 @@ struct ModuleStmts {
         m_getPathModules{db.prepare(
             "SELECT module_name FROM file_modules"
             " JOIN all_paths USING (pathid)"
-            " WHERE path=@path")} {}
+            " WHERE path=@path")},
+        m_getAllModules{
+            db.prepare("SELECT DISTINCT module_name FROM file_modules")} {}
 
   SQLiteStmt m_insert;
   SQLiteStmt m_getModulePath;
   SQLiteStmt m_getPathModules;
+  SQLiteStmt m_getAllModules;
 };
 
 struct ModuleMembershipStmts {
@@ -1415,6 +1418,16 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
     assertx(path.is_relative());
     auto query = m_txn.query(m_moduleStmts.m_getPathModules);
     query.bindString("@path", path.native());
+    std::vector<std::string> modules;
+    XLOGF(DBG9, "Running {}", query.sql());
+    for (query.step(); query.row(); query.step()) {
+      modules.emplace_back(query.getString(0));
+    }
+    return modules;
+  }
+
+  std::vector<std::string> getAllModules() override {
+    auto query = m_txn.query(m_moduleStmts.m_getAllModules);
     std::vector<std::string> modules;
     XLOGF(DBG9, "Running {}", query.sql());
     for (query.step(); query.row(); query.step()) {

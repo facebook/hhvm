@@ -348,6 +348,7 @@ struct MockAutoloadDB : public AutoloadDB {
       getPathModules,
       (const std::filesystem::path&),
       (override));
+  MOCK_METHOD(std::vector<std::string>, getAllModules, (), (override));
 
   // Module Membership
   MOCK_METHOD(

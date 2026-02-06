@@ -726,6 +726,10 @@ Variant HHVM_FUNCTION(facts_path_to_module_membership, const String& path) {
   }
 }
 
+Array HHVM_FUNCTION(facts_all_modules) {
+  return Facts::getFactsOrThrow().getAllModules();
+}
+
 Variant HHVM_FUNCTION(facts_path_to_package, const String& path) {
   auto result = Facts::getFactsOrThrow().getFilePackageMembership(path);
   if (!result) {
@@ -938,6 +942,7 @@ void FactsExtension::moduleRegisterNative() {
   HHVM_NAMED_FE(
       HH\\Facts\\path_to_module_membership,
       HHVM_FN(facts_path_to_module_membership));
+  HHVM_NAMED_FE(HH\\Facts\\all_modules, HHVM_FN(facts_all_modules));
   HHVM_NAMED_FE(HH\\Facts\\path_to_package, HHVM_FN(facts_path_to_package));
   HHVM_NAMED_FE(HH\\Facts\\type_name, HHVM_FN(facts_type_name));
   HHVM_NAMED_FE(HH\\Facts\\kind, HHVM_FN(facts_kind));

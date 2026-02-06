@@ -176,6 +176,9 @@ struct SymbolMap {
   std::vector<Symbol<SymKind::Module>> getFileModules(
       const std::filesystem::path& path);
 
+  // Returns all modules defined in the repo.
+  std::vector<Symbol<SymKind::Module>> getAllModules();
+
   // Returns the module the file is contained in, if any.
   std::optional<Symbol<SymKind::ModuleMembership>> getFileModuleMembership(
       Path path);

@@ -256,6 +256,10 @@ Array FactsLogger::getFileModules(const String& path) {
       __func__, path.slice(), [&]() { return m_inner->getFileModules(path); });
 }
 
+Array FactsLogger::getAllModules() {
+  return logPerf(__func__, "", [&]() { return m_inner->getAllModules(); });
+}
+
 Optional<String> FactsLogger::getFileModuleMembership(const String& path) {
   return logPerf(__func__, path.slice(), [&]() {
     return m_inner->getFileModuleMembership(path);

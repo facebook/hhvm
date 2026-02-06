@@ -245,6 +245,7 @@ struct AutoloadDB {
       std::string_view module) = 0;
   virtual std::vector<std::string> getPathModules(
       const std::filesystem::path& path) = 0;
+  virtual std::vector<std::string> getAllModules() = 0;
 
   // Module Membership
   virtual void insertModuleMembership(

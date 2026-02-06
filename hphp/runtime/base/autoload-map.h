@@ -352,6 +352,11 @@ struct FactsStore : public AutoloadMap {
   virtual Optional<String> getFileModuleMembership(const String& path) = 0;
 
   /**
+   * Returns all modules defined in the repo.
+   */
+  virtual Array getAllModules() = 0;
+
+  /**
    * Returns the package that the file is a member of, or empty string if the file is not known.
    */
   virtual Optional<String> getFilePackageMembership(const String& path) = 0;

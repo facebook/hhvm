@@ -817,6 +817,15 @@ struct FactsStoreImpl final
         path, [](SymbolMap& m, Path s) { return m.getFileModules(s); });
   }
 
+  Array getAllModules() override {
+    auto modules = m_symbolMap.getAllModules();
+    VecInit symbols{modules.size()};
+    for (auto const& module : modules) {
+      symbols.append(make_tv<KindOfPersistentString>(module.get()));
+    }
+    return symbols.toArray();
+  }
+
   Optional<String> getFileModuleMembership(const String& path) override {
     auto relativePath = ensureRelativePath(path, m_root);
     if (!relativePath.has_value()) {

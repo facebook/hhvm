@@ -315,6 +315,24 @@ std::vector<Symbol<SymKind::Module>> SymbolMap::getFileModules(
   return getFileModules(Path{path});
 }
 
+std::vector<Symbol<SymKind::Module>> SymbolMap::getAllModules() {
+  using ModuleVec = std::vector<Symbol<SymKind::Module>>;
+  return readOrUpdate<ModuleVec>(
+      [&](const Data& data) -> Optional<ModuleVec> { return std::nullopt; },
+      [&](std::shared_ptr<AutoloadDB> db) -> ModuleVec {
+        auto const moduleStrs = db->getAllModules();
+        ModuleVec modules;
+        modules.reserve(moduleStrs.size());
+        for (auto const& moduleStr : moduleStrs) {
+          modules.emplace_back(moduleStr);
+        }
+        return modules;
+      },
+      [&](Data& data, ModuleVec modulesFromDB) -> ModuleVec {
+        return modulesFromDB;
+      });
+}
+
 std::optional<Symbol<SymKind::ModuleMembership>>
 SymbolMap::getFileModuleMembership(Path path) {
   auto const& symbols = getPathSymbols<SymKind::ModuleMembership>(path);

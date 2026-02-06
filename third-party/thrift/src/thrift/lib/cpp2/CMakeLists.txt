@@ -448,6 +448,7 @@ add_library(
   transport/rocket/server/RocketRoutingHandler.cpp
   transport/rocket/server/RocketServerConnection.cpp
   transport/rocket/server/RefactoredRocketServerConnection.cpp
+  transport/rocket/server/RefactoredThriftRocketServerHandler.cpp
   transport/rocket/server/RocketServerConnectionPlugins.cpp
   transport/rocket/server/RocketServerFrameContext.cpp
   transport/rocket/server/RocketSinkClientCallback.cpp
@@ -458,6 +459,9 @@ add_library(
   transport/rocket/server/ThriftRocketServerHandler.cpp
   transport/rocket/server/detail/RocketContextUtils.cpp
   transport/rocket/server/detail/RocketErrorHandler.cpp
+  transport/rocket/server/detail/RocketRequestOrchestrator.cpp
+  transport/rocket/server/detail/RocketRequestProcessor.cpp
+  transport/rocket/server/detail/RocketSetupProcessor.cpp
   transport/rocket/server/detail/WriteBatcher.cpp
   util/Checksum.cpp
   util/DebugString.cpp

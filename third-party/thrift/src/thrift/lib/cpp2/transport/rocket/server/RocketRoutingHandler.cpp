@@ -31,11 +31,17 @@
 #include <thrift/lib/cpp2/server/Cpp2Worker.h>
 #include <thrift/lib/cpp2/server/ThriftServerInternals.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/FrameType.h>
-#include <thrift/lib/cpp2/transport/rocket/server/RocketServerConnection.h>
+#include <thrift/lib/cpp2/transport/rocket/server/RefactoredThriftRocketServerHandler.h>
 #include <thrift/lib/cpp2/transport/rocket/server/RocketServerConnectionFactory.h>
 #include <thrift/lib/cpp2/transport/rocket/server/ThriftRocketServerHandler.h>
 
 THRIFT_FLAG_DEFINE_bool(rocket_set_idle_connection_timeout, true);
+
+// Feature flag to control the rollout of the refactored
+// ThriftRocketServerHandler.
+// When true, uses RefactoredThriftRocketServerHandler.
+// When false, uses the original ThriftRocketServerHandler implementation.
+THRIFT_FLAG_DEFINE_bool(rocket_server_use_refactored_handler, false);
 
 namespace apache::thrift {
 namespace detail {
@@ -168,14 +174,30 @@ void RocketRoutingHandler::handleConnection(
   const std::string& securotyProtocol = sock->getSecurityProtocol();
 
   auto* const sockPtr = sock.get();
+  std::unique_ptr<rocket::RocketServerHandler> handler;
+  // Choose between original and refactored handler based on feature flag.
+  // The flag is evaluated at connection creation time, so runtime changes
+  // affect new connections immediately without requiring service restart.
+  // Note: Existing connections continue using their original handler.
+  if (THRIFT_FLAG(rocket_server_use_refactored_handler)) {
+    handler = std::make_unique<rocket::RefactoredThriftRocketServerHandler>(
+        worker,
+        *address,
+        sockPtr,
+        setupFrameHandlers_,
+        setupFrameInterceptors_);
+  } else {
+    handler = std::make_unique<rocket::ThriftRocketServerHandler>(
+        worker,
+        *address,
+        sockPtr,
+        setupFrameHandlers_,
+        setupFrameInterceptors_);
+  }
+
   auto connection = rocket::RocketServerConnectionFactory::create(
       std::move(sock),
-      std::make_unique<rocket::ThriftRocketServerHandler>(
-          worker,
-          *address,
-          sockPtr,
-          setupFrameHandlers_,
-          setupFrameInterceptors_),
+      std::move(handler),
       worker->getIngressMemoryTracker(),
       worker->getEgressMemoryTracker(),
       cfg);

@@ -1890,8 +1890,7 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 
   Max total number of live translation bytes to JIT into the TC for a function
 
-- uint32_t Jit.MaxLiveMainUsage = 96 * 1024 * 1024, UNKNOWN
-- uint32_t Jit.MaxLiveMainUsageLimit = 150994944, UNKNOWN
+- uint32_t Jit.MaxLiveMainUsage = 150994944, UNKNOWN
 - uint32_t Jit.SampleRate = 0, UNKNOWN
 - bool Jit.AlignMacroFusionPairs, UNKNOWN
 - bool Jit.AlignUniqueStubs = true, UNKNOWN

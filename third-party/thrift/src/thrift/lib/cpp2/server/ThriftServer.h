@@ -130,7 +130,8 @@ class ThriftServerInternals;
 }
 namespace rocket {
 class ThriftRocketServerHandler;
-}
+class RocketRequestHandler;
+} // namespace rocket
 
 enum class SSLPolicy { DISABLED, PERMITTED, REQUIRED };
 
@@ -2013,6 +2014,7 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
   friend class Cpp2Connection;
   friend class Cpp2Worker;
   friend class rocket::ThriftRocketServerHandler;
+  friend class rocket::RocketRequestHandler;
   friend class ThriftQuicServer;
 
   bool tosReflect_{false};

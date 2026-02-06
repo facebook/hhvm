@@ -218,6 +218,8 @@ namespace {
     public function getSslCertSan(): Vector<string> {}
     public function getSslCertExtensions(): Vector<string> {}
     public function isSslCertValidationEnforced(): bool {}
+    public function wasFromPoolHit(): bool {}
+    public function wasReusedWithChangeUser(): bool {}
   }
 
   abstract class AsyncMysqlResult {

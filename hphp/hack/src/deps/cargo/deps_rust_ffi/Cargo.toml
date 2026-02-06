@@ -18,5 +18,5 @@ hash = { version = "0.0.0", path = "../../../utils/hash" }
 ocamlrep = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
 ocamlrep_custom = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
 ocamlrep_ocamlpool = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
-rpds = "1.1.0"
+rpds = "1.2.0"
 typing_deps_hash = { version = "0.0.0", path = "../typing_deps_hash" }

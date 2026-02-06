@@ -29,5 +29,5 @@ shm_store = { version = "0.0.0", path = "../../../shmffi/cargo/shm_store" }
 hh24_test = { version = "0.0.0", path = "../../../utils/cargo/hh24_test" }
 libc = "0.2.139"
 maplit = "1.0"
-rpds = "1.1.0"
+rpds = "1.2.0"
 shmffi = { version = "0.0.0", path = "../../../shmffi/cargo/shmffi" }

@@ -19,5 +19,5 @@ itertools = "0.14.0"
 ocamlrep = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
 ocamlrep_custom = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
 parking_lot = { version = "0.12.1", features = ["send_guard"] }
-rpds = "1.1.0"
+rpds = "1.2.0"
 typing_deps_hash = { version = "0.0.0", path = "../typing_deps_hash" }

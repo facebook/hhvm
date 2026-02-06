@@ -140,6 +140,7 @@ bool Bump2MMapper::addMappingImpl() {
   if (newFrontier > m_state.high_map.load(std::memory_order_acquire)) {
     return false;
   }
+  bool thpUsed = false;
   void* newPages = mmap((void*)currFrontier, hugeSize,
                         PROT_READ | PROT_WRITE,
                         MAP_ANONYMOUS | MAP_PRIVATE | MAP_FIXED | MAP_HUGETLB,
@@ -155,6 +156,7 @@ bool Bump2MMapper::addMappingImpl() {
     if (newPages == MAP_FAILED) return false;
     assertx(newPages == (void*)currFrontier);
     madvise(newPages, hugeSize, MADV_HUGEPAGE);
+    thpUsed = true;
   }
   assertx(newPages == (void*)currFrontier);    // MAP_FIXED should work
 #ifdef HAVE_NUMA
@@ -164,13 +166,15 @@ bool Bump2MMapper::addMappingImpl() {
           &mask, 32 /* max node */, 0 /* flag */);
   }
 #endif
-  // Make sure pages are faulted in.
-  for (auto addr = currFrontier; addr < newFrontier; addr += size2m) {
-    if (mlock(reinterpret_cast<void*>(addr), 1)) {
-      // Forget it. We don't really have enough page reserved. At this moment,
-      // we haven't committed to RangeState yet, so it is safe to bail out.
-      munmap((void*)currFrontier, hugeSize);
-      return false;
+  if (!thpUsed) {
+    // Make sure pages are faulted in when using hugetlb pages. Do not do it on THP.
+    for (auto addr = currFrontier; addr < newFrontier; addr += size2m) {
+      if (mlock(reinterpret_cast<void*>(addr), 1)) {
+        // Forget it. We don't really have enough page reserved. At this moment,
+        // we haven't committed to RangeState yet, so it is safe to bail out.
+        munmap((void*)currFrontier, hugeSize);
+        return false;
+      }
     }
   }
   m_currHugePages += hugeSize / size2m;

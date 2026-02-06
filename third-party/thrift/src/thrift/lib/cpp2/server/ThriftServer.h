@@ -2015,6 +2015,7 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
   friend class Cpp2Worker;
   friend class rocket::ThriftRocketServerHandler;
   friend class rocket::RocketRequestHandler;
+  friend class rocket::RefactoredThriftRocketServerHandler;
   friend class ThriftQuicServer;
 
   bool tosReflect_{false};

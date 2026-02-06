@@ -53,6 +53,7 @@ class FunctionNode;
 
 namespace rocket {
 class ThriftRocketServerHandler;
+class RefactoredThriftRocketServerHandler;
 class RocketSetupProcessor;
 } // namespace rocket
 
@@ -481,7 +482,10 @@ class Cpp2ConnContext : public apache::thrift::server::TConnectionContext {
   void setClientMetadata(const ClientMetadata& md) { clientMetadata_ = md; }
 
   friend class Cpp2Connection;
-  friend class rocket::ThriftRocketServerHandler;
+  friend class ThriftServerRequestResponse;
+  friend class ThriftServerRequestFnf;
+  friend class apache::thrift::rocket::ThriftRocketServerHandler;
+  friend class apache::thrift::rocket::RefactoredThriftRocketServerHandler;
   friend class rocket::RocketSetupProcessor;
   friend class HTTP2RoutingHandler;
   friend class SingleRpcChannel;

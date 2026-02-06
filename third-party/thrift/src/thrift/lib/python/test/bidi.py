@@ -150,6 +150,40 @@ class BidiTests(IsolatedAsyncioTestCase):
                 )
                 self.assertEqual(total_items, stop - start)
 
+    async def test_bidi_service_str_request_concurrently(self) -> None:
+        async with local_server() as sa:
+            ip, port = sa.ip, sa.port
+            assert ip and port
+            async with get_client(
+                TestBidiService,
+                host=ip,
+                port=port,
+                client_type=ClientType.THRIFT_ROCKET_CLIENT_TYPE,
+            ) as client:
+                client_: TestBidiService.Async = client
+
+                async def run_single_bidi() -> None:
+                    bidi = await client_.echo(0.0)
+                    client_sink, client_stream = bidi.sink, bidi.stream
+                    start: int = 1
+                    stop: int = 5
+
+                    def stringify_nums() -> Generator[str, None, None]:
+                        for i in range(start, stop):
+                            yield str(i)
+
+                    (_, total_items) = await asyncio.gather(
+                        client_sink.sink(yield_strs(start, stop)),
+                        self.assert_stream(client_stream, stringify_nums()),
+                    )
+                    self.assertEqual(total_items, stop - start)
+
+                async def run_n_times() -> None:
+                    for _ in range(100):
+                        await run_single_bidi()
+
+                await asyncio.gather(*[run_n_times() for _ in range(100)])
+
     async def test_bidi_service_str_request_delay(self) -> None:
         async with local_server() as sa:
             ip, port = sa.ip, sa.port

@@ -13,6 +13,7 @@
 # limitations under the License.
 
 from cpython cimport bool as pbool
+from cpython.ref cimport Py_INCREF
 from cython.operator cimport dereference
 from libcpp.utility cimport move as cmove
 
@@ -112,6 +113,10 @@ cdef class Promise_PyObject(Promise_Py):
         ))
 
     cdef complete(Promise_PyObject self, object pyobj):
+        # Increment the reference count before passing to C++ to prevent
+        # Python from garbage collecting the object before C++ is done with it.
+        # The C++ consumer (toAsyncGenerator) will manage the reference from here.
+        Py_INCREF(pyobj)
         self.cPromise.setValue(<PyObjPtr>pyobj)
 
     @staticmethod

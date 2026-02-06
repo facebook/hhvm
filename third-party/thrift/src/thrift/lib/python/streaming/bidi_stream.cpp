@@ -92,7 +92,18 @@ transformAsyncGeneratorImpl(
   }
 
   // Get the Python output generator from the promise
+  // The promise transfers ownership of a reference to us
+  // (Promise_PyObject.complete did Py_INCREF before setting the value), so we
+  // need to Py_DECREF when done.
   auto output_py_gen = co_await std::move(future);
+
+  // Create a guard to ensure we decref the output generator when this coroutine
+  // completes. This balances the Py_INCREF done in Promise_PyObject.complete().
+  // toAsyncGenerator will do its own Py_INCREF internally.
+  auto output_gen_guard =
+      folly::makeGuard([output_py_gen, exec = folly::getKeepAliveToken(exec)] {
+        exec->add([output_py_gen] { Py_DECREF(output_py_gen); });
+      });
 
   // Convert Python async generator back to C++ AsyncGenerator
   auto cpp_output_gen =

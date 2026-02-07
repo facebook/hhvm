@@ -203,7 +203,7 @@ TEST_F(HTTP2FramerTest, RstStream) {
   writeRstStream(queue_, 1, ErrorCode::CANCEL);
 
   FrameHeader header;
-  ErrorCode outCode;
+  ErrorCode outCode{};
   parse(&parseRstStream, header, outCode);
 
   ASSERT_EQ(FrameType::RST_STREAM, header.type);
@@ -217,8 +217,8 @@ TEST_F(HTTP2FramerTest, Goaway) {
   writeGoaway(queue_, 0, ErrorCode::FLOW_CONTROL_ERROR);
 
   FrameHeader header;
-  uint32_t lastStreamID;
-  ErrorCode outCode;
+  uint32_t lastStreamID = 0;
+  ErrorCode outCode{};
   std::unique_ptr<IOBuf> outDebugData;
   parse(&parseGoaway, header, lastStreamID, outCode, outDebugData);
 
@@ -238,8 +238,8 @@ TEST_F(HTTP2FramerTest, GoawayDebugData) {
   writeGoaway(queue_, 0, ErrorCode::FLOW_CONTROL_ERROR, std::move(debugData));
 
   FrameHeader header;
-  uint32_t lastStreamID;
-  ErrorCode outCode;
+  uint32_t lastStreamID = 0;
+  ErrorCode outCode{};
   std::unique_ptr<IOBuf> outDebugData;
   parse(&parseGoaway, header, lastStreamID, outCode, outDebugData);
 
@@ -264,8 +264,8 @@ TEST_F(HTTP2FramerTest, GoawayDoubleRead) {
   // Here's the invalid value:
   appender.writeBE<uint32_t>(static_cast<uint32_t>(0xffffffff));
 
-  uint32_t outLastStreamID;
-  ErrorCode outCode;
+  uint32_t outLastStreamID = 0;
+  ErrorCode outCode{};
   std::unique_ptr<IOBuf> outDebugData;
   FrameHeader outHeader;
   Cursor cursor(queue_.front());
@@ -348,7 +348,7 @@ TEST_F(HTTP2FramerTest, Ping) {
   writePing(queue_, data, false);
 
   FrameHeader header;
-  uint64_t outData;
+  uint64_t outData = 0;
   parse(&parsePing, header, outData);
 
   ASSERT_EQ(FrameType::PING, header.type);
@@ -361,7 +361,7 @@ TEST_F(HTTP2FramerTest, WindowUpdate) {
   writeWindowUpdate(queue_, 33, 120);
 
   FrameHeader header;
-  uint32_t amount;
+  uint32_t amount = 0;
   parse(&parseWindowUpdate, header, amount);
 
   ASSERT_EQ(FrameType::WINDOW_UPDATE, header.type);
@@ -378,7 +378,7 @@ TEST_F(HTTP2FramerTest, CertificateRequest) {
   writeCertificateRequest(queue_, requestId, std::move(authRequest));
 
   FrameHeader header;
-  uint16_t outRequestId;
+  uint16_t outRequestId = 0;
   std::unique_ptr<IOBuf> outAuthRequest;
   parse(&parseCertificateRequest, header, outRequestId, outAuthRequest);
 
@@ -396,7 +396,7 @@ TEST_F(HTTP2FramerTest, EmptyCertificateRequest) {
   writeCertificateRequest(queue_, requestId, nullptr);
 
   FrameHeader header;
-  uint16_t outRequestId;
+  uint16_t outRequestId = 0;
   std::unique_ptr<IOBuf> outAuthRequest;
   parse(&parseCertificateRequest, header, outRequestId, outAuthRequest);
 
@@ -417,7 +417,7 @@ TEST_F(HTTP2FramerTest, ShortCertificateRequest) {
 
   Cursor cursor(queue_.front());
   FrameHeader header;
-  uint16_t outRequestId;
+  uint16_t outRequestId = 0;
   std::unique_ptr<IOBuf> outAuthRequest;
   parseFrameHeader(cursor, header);
   auto ret =
@@ -434,7 +434,7 @@ TEST_F(HTTP2FramerTest, CertificateRequestOnNonzeroStream) {
 
   Cursor cursor(queue_.front());
   FrameHeader header;
-  uint16_t outRequestId;
+  uint16_t outRequestId = 0;
   std::unique_ptr<IOBuf> outAuthRequest;
   parseFrameHeader(cursor, header);
   auto ret =
@@ -451,7 +451,7 @@ TEST_F(HTTP2FramerTest, EndingCertificate) {
   writeCertificate(queue_, certId, std::move(authenticator), false);
 
   FrameHeader header;
-  uint16_t outCertId;
+  uint16_t outCertId = 0;
   std::unique_ptr<IOBuf> outAuthenticator;
   parse(&parseCertificate, header, outCertId, outAuthenticator);
 
@@ -474,7 +474,7 @@ TEST_F(HTTP2FramerTest, Certificate) {
   writeCertificate(queue_, certId, std::move(authenticator), true);
 
   FrameHeader header;
-  uint16_t outCertId;
+  uint16_t outCertId = 0;
   std::unique_ptr<IOBuf> outAuthenticator;
   parse(&parseCertificate, header, outCertId, outAuthenticator);
 
@@ -492,7 +492,7 @@ TEST_F(HTTP2FramerTest, EmptyCertificate) {
   writeCertificate(queue_, certId, nullptr, true);
 
   FrameHeader header;
-  uint16_t outCertId;
+  uint16_t outCertId = 0;
   std::unique_ptr<IOBuf> outAuthenticator;
   parse(&parseCertificate, header, outCertId, outAuthenticator);
 
@@ -513,7 +513,7 @@ TEST_F(HTTP2FramerTest, ShortCertificate) {
 
   Cursor cursor(queue_.front());
   FrameHeader header;
-  uint16_t outCertId;
+  uint16_t outCertId = 0;
   std::unique_ptr<IOBuf> outAuthenticator;
   parseFrameHeader(cursor, header);
   auto ret = parseCertificate(cursor, header, outCertId, outAuthenticator);
@@ -529,7 +529,7 @@ TEST_F(HTTP2FramerTest, CertificateOnNonzeroStream) {
 
   Cursor cursor(queue_.front());
   FrameHeader header;
-  uint16_t outCertId;
+  uint16_t outCertId = 0;
   std::unique_ptr<IOBuf> outAuthenticator;
   parseFrameHeader(cursor, header);
   auto ret = parseCertificate(cursor, header, outCertId, outAuthenticator);
@@ -544,7 +544,7 @@ TEST_F(HTTP2FramerTest, ShortWindowUpdate) {
 
   Cursor cursor(queue_.front());
   FrameHeader header;
-  uint32_t amount;
+  uint32_t amount = 0;
   parseFrameHeader(cursor, header);
   auto ret2 = parseWindowUpdate(cursor, header, amount);
   ASSERT_EQ(ErrorCode::FRAME_SIZE_ERROR, ret2);
@@ -561,7 +561,7 @@ TEST_F(HTTP2FramerTest, Uint32MaxWindowUpdate) {
   }
 
   FrameHeader header;
-  uint32_t amount;
+  uint32_t amount = 0;
   parse(buf.get(), &parseWindowUpdate, header, amount);
 
   ASSERT_EQ(FrameType::WINDOW_UPDATE, header.type);
@@ -578,8 +578,8 @@ TEST_F(HTTP2FramerTest, AltSvc) {
   writeAltSvc(queue_, 2, 150, 8080, protocol, host, origin);
 
   FrameHeader header;
-  uint32_t outMaxAge;
-  uint32_t outPort;
+  uint32_t outMaxAge = 0;
+  uint32_t outPort = 0;
   string outProtocol;
   string outHost;
   string outOrigin;
@@ -687,7 +687,7 @@ TEST_F(HTTP2FramerTest, PushPromise) {
                    true);
 
   FrameHeader header;
-  uint32_t promisedStream;
+  uint32_t promisedStream = 0;
   std::unique_ptr<IOBuf> outBuf;
   parse(&parsePushPromise, header, promisedStream, outBuf);
 

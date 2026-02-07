@@ -48,7 +48,7 @@ class ThriftEnumWrapper(int):
 all_structs = []
 UTF8STRINGS = bool(0) or sys.version_info.major >= 3
 
-__all__ = ['UTF8STRINGS', 'RpcPriority', 'Experimental', 'ReserveIds', 'RequiresBackwardCompatibility', 'TerseWrite', 'Box', 'Mixin', 'SerializeInFieldIdOrder', 'BitmaskEnum', 'ExceptionMessage', 'InternBox', 'Serial', 'Uri', 'Priority', 'DeprecatedUnvalidatedAnnotations', 'AllowReservedIdentifier', 'AllowReservedFilename', 'RuntimeAnnotation', 'AllowLegacyTypedefUri', 'AllowUnsafeOptionalCustomDefaultValue', 'AllowUnsafeUnionFieldCustomDefaultValue', 'AllowUnsafeRequiredFieldQualifier', 'AllowLegacyMissingUris']
+__all__ = ['UTF8STRINGS', 'RpcPriority', 'Experimental', 'ReserveIds', 'RequiresBackwardCompatibility', 'TerseWrite', 'Box', 'Mixin', 'SerializeInFieldIdOrder', 'BitmaskEnum', 'ExceptionMessage', 'InternBox', 'Serial', 'Uri', 'Priority', 'Sealed', 'DeprecatedUnvalidatedAnnotations', 'AllowReservedIdentifier', 'AllowReservedFilename', 'RuntimeAnnotation', 'AllowLegacyTypedefUri', 'AllowUnsafeOptionalCustomDefaultValue', 'AllowUnsafeUnionFieldCustomDefaultValue', 'AllowUnsafeRequiredFieldQualifier', 'AllowLegacyMissingUris', 'AllowUnsafeNonSealedKeyType']
 
 class RpcPriority:
   def __getattr__(self, name): raise AttributeError(name)
@@ -1330,6 +1330,101 @@ class Priority:
   def _to_py_deprecated(self):
     return self
 
+class Sealed:
+  r"""
+  States that the target structured type (struct, union or exception) is
+  "sealed", as defined in the
+  [Object Model](https://github.com/facebook/fbthrift/blob/main/thrift/doc/object-model/index.md#sealed-types).
+  
+  A sealed structured type can only have fields whose types are also sealed.
+  
+  In practice, this means that this type is safe to use as a map key type or as
+  a set element type, but any change to its schema (including changes that are
+  "typically" considered safe, such as adding a new field) MAY break backwards
+  compatiblity.
+  
+  Note that the tooling and environment in which Thrift IDL definitions live
+  (such as code repositories) may not be explicitly preventing such changes:
+  it is up to schema owners to be aware of the potential impact of schema
+  changes to sealed types.
+  """
+
+  thrift_spec = None
+  thrift_field_annotations = None
+  thrift_struct_annotations = None
+  @staticmethod
+  def isUnion():
+    return False
+
+  def read(self, iprot):
+    if (isinstance(iprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0)
+      return
+    if (isinstance(iprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2)
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if (isinstance(oprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0))
+      return
+    if (isinstance(oprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2))
+      return
+    oprot.writeStructBegin('Sealed')
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def __repr__(self):
+    L = []
+    padding = ' ' * 4
+    return "%s(%s)" % (self.__class__.__name__, "\n" + ",\n".join(L) if L else '')
+
+  def __eq__(self, other):
+    if not isinstance(other, self.__class__):
+      return False
+
+    return self.__dict__ == other.__dict__ 
+
+  def __ne__(self, other):
+    return not (self == other)
+
+  def __dir__(self):
+    return (
+    )
+
+  __hash__ = object.__hash__
+
+  def _to_python(self):
+    import importlib
+    import thrift.python.converter
+    python_types = importlib.import_module("facebook.thrift.annotation.thrift.thrift_types")
+    return thrift.python.converter.to_python_struct(python_types.Sealed, self)
+
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("facebook.thrift.annotation.thrift.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.Sealed, self)
+
+  def _to_py3(self):
+    import importlib
+    import thrift.py3.converter
+    py3_types = importlib.import_module("facebook.thrift.annotation.thrift.types")
+    return thrift.py3.converter.to_py3_struct(py3_types.Sealed, self)
+
+  def _to_py_deprecated(self):
+    return self
+
 class DeprecatedUnvalidatedAnnotations:
   r"""
   Applies unstructured annotations to a definition.
@@ -2196,6 +2291,99 @@ class AllowLegacyMissingUris:
   def _to_py_deprecated(self):
     return self
 
+class AllowUnsafeNonSealedKeyType:
+  r"""
+  Allows the target `map<...>` (or `set<...>`) field, typedef or function
+  parameter to successfully build, despite the type of its keys (or elements)
+  not being sealed.
+  
+  Indeed, map key and set element types MUST be "sealed", as explained in the
+  [Object Model](https://github.com/facebook/fbthrift/blob/main/thrift/doc/object-model/index.md#sealed-types).
+  
+  A user-defined structured type can explicitly be marked as sealed by using
+  the `@thrift.Sealed` annotation.
+  
+  Use of this annotation is strongly DISCOURAGED, but is provided to allow
+  existing schemas (that were created prior to the concept of "sealed" types
+  being defined) to be grandfathered in and continue building successfully.
+  """
+
+  thrift_spec = None
+  thrift_field_annotations = None
+  thrift_struct_annotations = None
+  @staticmethod
+  def isUnion():
+    return False
+
+  def read(self, iprot):
+    if (isinstance(iprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0)
+      return
+    if (isinstance(iprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2)
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if (isinstance(oprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0))
+      return
+    if (isinstance(oprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2))
+      return
+    oprot.writeStructBegin('AllowUnsafeNonSealedKeyType')
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def __repr__(self):
+    L = []
+    padding = ' ' * 4
+    return "%s(%s)" % (self.__class__.__name__, "\n" + ",\n".join(L) if L else '')
+
+  def __eq__(self, other):
+    if not isinstance(other, self.__class__):
+      return False
+
+    return self.__dict__ == other.__dict__ 
+
+  def __ne__(self, other):
+    return not (self == other)
+
+  def __dir__(self):
+    return (
+    )
+
+  __hash__ = object.__hash__
+
+  def _to_python(self):
+    import importlib
+    import thrift.python.converter
+    python_types = importlib.import_module("facebook.thrift.annotation.thrift.thrift_types")
+    return thrift.python.converter.to_python_struct(python_types.AllowUnsafeNonSealedKeyType, self)
+
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("facebook.thrift.annotation.thrift.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.AllowUnsafeNonSealedKeyType, self)
+
+  def _to_py3(self):
+    import importlib
+    import thrift.py3.converter
+    py3_types = importlib.import_module("facebook.thrift.annotation.thrift.types")
+    return thrift.py3.converter.to_py3_struct(py3_types.AllowUnsafeNonSealedKeyType, self)
+
+  def _to_py_deprecated(self):
+    return self
+
 all_structs.append(Experimental)
 Experimental.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
 )))
@@ -2368,6 +2556,15 @@ def Priority__setstate__(self, state):
 Priority.__getstate__ = lambda self: self.__dict__.copy()
 Priority.__setstate__ = Priority__setstate__
 
+all_structs.append(Sealed)
+Sealed.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
+
+Sealed.thrift_struct_annotations = {
+}
+Sealed.thrift_field_annotations = {
+}
+
 all_structs.append(DeprecatedUnvalidatedAnnotations)
 DeprecatedUnvalidatedAnnotations.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.MAP, 'items', (TType.STRING,True,TType.STRING,True), None, 2, ), # 1
@@ -2460,6 +2657,15 @@ AllowLegacyMissingUris.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
 AllowLegacyMissingUris.thrift_struct_annotations = {
 }
 AllowLegacyMissingUris.thrift_field_annotations = {
+}
+
+all_structs.append(AllowUnsafeNonSealedKeyType)
+AllowUnsafeNonSealedKeyType.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
+
+AllowUnsafeNonSealedKeyType.thrift_struct_annotations = {
+}
+AllowUnsafeNonSealedKeyType.thrift_field_annotations = {
 }
 
 fix_spec(all_structs)

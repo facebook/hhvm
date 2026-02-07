@@ -13,5 +13,5 @@ from thrift.protocol.TProtocol import TProtocolException
 
 
 
-from .ttypes import UTF8STRINGS, RpcPriority, Experimental, ReserveIds, RequiresBackwardCompatibility, TerseWrite, Box, Mixin, SerializeInFieldIdOrder, BitmaskEnum, ExceptionMessage, InternBox, Serial, Uri, Priority, DeprecatedUnvalidatedAnnotations, AllowReservedIdentifier, AllowReservedFilename, RuntimeAnnotation, AllowLegacyTypedefUri, AllowUnsafeOptionalCustomDefaultValue, AllowUnsafeUnionFieldCustomDefaultValue, AllowUnsafeRequiredFieldQualifier, AllowLegacyMissingUris
+from .ttypes import UTF8STRINGS, RpcPriority, Experimental, ReserveIds, RequiresBackwardCompatibility, TerseWrite, Box, Mixin, SerializeInFieldIdOrder, BitmaskEnum, ExceptionMessage, InternBox, Serial, Uri, Priority, Sealed, DeprecatedUnvalidatedAnnotations, AllowReservedIdentifier, AllowReservedFilename, RuntimeAnnotation, AllowLegacyTypedefUri, AllowUnsafeOptionalCustomDefaultValue, AllowUnsafeUnionFieldCustomDefaultValue, AllowUnsafeRequiredFieldQualifier, AllowLegacyMissingUris, AllowUnsafeNonSealedKeyType
 

@@ -1372,6 +1372,83 @@ NSString* RpcPriorityToString(const RpcPriority value)
 
 @end
 
+@implementation Sealed
+
+- (instancetype) init
+{
+  self = [super init];
+  return self;
+}
+
+- (id) initWithCoder: (NSCoder *) decoder
+{
+  self = [super init];
+  return self;
+}
+
+- (void) encodeWithCoder: (NSCoder *) encoder
+{
+}
+
+- (void) read: (id <TProtocol>) inProtocol
+{
+  NSString * fieldName;
+  int fieldType;
+  int fieldID;
+
+  [inProtocol readStructBeginReturningName: NULL];
+  while (true)
+  {
+    [inProtocol readFieldBeginReturningName: &fieldName type: &fieldType fieldID: &fieldID];
+    if (fieldType == TType_STOP) { 
+      break;
+    }
+    switch (fieldID)
+    {
+      default:
+        [TProtocolUtil skipType: fieldType onProtocol: inProtocol];
+        break;
+    }
+    [inProtocol readFieldEnd];
+  }
+  [inProtocol readStructEnd];
+}
+
+- (void) write: (id <TProtocol>) outProtocol {
+  [outProtocol writeStructBeginWithName: @"Sealed"];
+  [outProtocol writeFieldStop];
+  [outProtocol writeStructEnd];
+}
+
+- (void) validate {
+  // check for required fields
+}
+
+- (NSString *) description {
+  return [[self toDict] description];
+}
+
+- (NSDictionary *) toDict {
+  NSMutableDictionary *ret = [NSMutableDictionary dictionary];
+  ret[@"__thrift_struct_name"] = @"Sealed";
+  return [ret copy];
+}
+
+- (BOOL) makeImmutable {
+  const BOOL wasImmutable = [self isImmutable];
+  if (!wasImmutable) {
+    [super makeImmutable];
+  }
+  return YES;
+}
+
+- (id) mutableCopyWithZone:(NSZone *)zone {
+  Sealed *newCopy = [[[self class] alloc] init];;
+  return newCopy;
+}
+
+@end
+
 @implementation DeprecatedUnvalidatedAnnotations
 
 - (instancetype) init
@@ -2152,6 +2229,83 @@ NSString* RpcPriorityToString(const RpcPriority value)
 
 - (id) mutableCopyWithZone:(NSZone *)zone {
   AllowLegacyMissingUris *newCopy = [[[self class] alloc] init];;
+  return newCopy;
+}
+
+@end
+
+@implementation AllowUnsafeNonSealedKeyType
+
+- (instancetype) init
+{
+  self = [super init];
+  return self;
+}
+
+- (id) initWithCoder: (NSCoder *) decoder
+{
+  self = [super init];
+  return self;
+}
+
+- (void) encodeWithCoder: (NSCoder *) encoder
+{
+}
+
+- (void) read: (id <TProtocol>) inProtocol
+{
+  NSString * fieldName;
+  int fieldType;
+  int fieldID;
+
+  [inProtocol readStructBeginReturningName: NULL];
+  while (true)
+  {
+    [inProtocol readFieldBeginReturningName: &fieldName type: &fieldType fieldID: &fieldID];
+    if (fieldType == TType_STOP) { 
+      break;
+    }
+    switch (fieldID)
+    {
+      default:
+        [TProtocolUtil skipType: fieldType onProtocol: inProtocol];
+        break;
+    }
+    [inProtocol readFieldEnd];
+  }
+  [inProtocol readStructEnd];
+}
+
+- (void) write: (id <TProtocol>) outProtocol {
+  [outProtocol writeStructBeginWithName: @"AllowUnsafeNonSealedKeyType"];
+  [outProtocol writeFieldStop];
+  [outProtocol writeStructEnd];
+}
+
+- (void) validate {
+  // check for required fields
+}
+
+- (NSString *) description {
+  return [[self toDict] description];
+}
+
+- (NSDictionary *) toDict {
+  NSMutableDictionary *ret = [NSMutableDictionary dictionary];
+  ret[@"__thrift_struct_name"] = @"AllowUnsafeNonSealedKeyType";
+  return [ret copy];
+}
+
+- (BOOL) makeImmutable {
+  const BOOL wasImmutable = [self isImmutable];
+  if (!wasImmutable) {
+    [super makeImmutable];
+  }
+  return YES;
+}
+
+- (id) mutableCopyWithZone:(NSZone *)zone {
+  AllowUnsafeNonSealedKeyType *newCopy = [[[self class] alloc] init];;
   return newCopy;
 }
 

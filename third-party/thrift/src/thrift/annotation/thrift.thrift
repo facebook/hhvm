@@ -230,6 +230,26 @@ enum RpcPriority {
 }
 
 /**
+ * States that the target structured type (struct, union or exception) is
+ * "sealed", as defined in the
+ * [Object Model](https://github.com/facebook/fbthrift/blob/main/thrift/doc/object-model/index.md#sealed-types).
+ *
+ * A sealed structured type can only have fields whose types are also sealed.
+ *
+ * In practice, this means that this type is safe to use as a map key type or as
+ * a set element type, but any change to its schema (including changes that are
+ * "typically" considered safe, such as adding a new field) MAY break backwards
+ * compatiblity.
+ *
+ * Note that the tooling and environment in which Thrift IDL definitions live
+ * (such as code repositories) may not be explicitly preventing such changes:
+ * it is up to schema owners to be aware of the potential impact of schema
+ * changes to sealed types.
+ */
+@scope.Structured
+struct Sealed {}
+
+/**
 * Applies unstructured annotations to a definition.
 */
 @scope.Definition
@@ -389,3 +409,23 @@ struct AllowUnsafeRequiredFieldQualifier {}
 @scope.Structured
 @scope.Enum
 struct AllowLegacyMissingUris {}
+
+/**
+ * Allows the target `map<...>` (or `set<...>`) field, typedef or function
+ * parameter to successfully build, despite the type of its keys (or elements)
+ * not being sealed.
+ *
+ * Indeed, map key and set element types MUST be "sealed", as explained in the
+ * [Object Model](https://github.com/facebook/fbthrift/blob/main/thrift/doc/object-model/index.md#sealed-types).
+ *
+ * A user-defined structured type can explicitly be marked as sealed by using
+ * the `@thrift.Sealed` annotation.
+ *
+ * Use of this annotation is strongly DISCOURAGED, but is provided to allow
+ * existing schemas (that were created prior to the concept of "sealed" types
+ * being defined) to be grandfathered in and continue building successfully.
+ */
+@scope.Field
+@scope.Typedef
+@scope.FunctionParameter
+struct AllowUnsafeNonSealedKeyType {}

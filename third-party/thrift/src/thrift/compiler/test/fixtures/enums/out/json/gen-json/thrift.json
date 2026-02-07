@@ -335,8 +335,26 @@
         }
       }
     },
+    "Sealed" : {
+      "lineno" : 249,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 249,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 250,
+          "column" : 17
+        }
+      }
+    },
     "DeprecatedUnvalidatedAnnotations" : {
-      "lineno" : 235,
+      "lineno" : 255,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -346,11 +364,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 237,
+              "line" : 257,
               "column" : 3
             },
             "end" : {
-              "line" : 237,
+              "line" : 257,
               "column" : 32
             }
           }
@@ -358,17 +376,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 235,
+          "line" : 255,
           "column" : 1
         },
         "end" : {
-          "line" : 238,
+          "line" : 258,
           "column" : 2
         }
       }
     },
     "AllowReservedIdentifier" : {
-      "lineno" : 250,
+      "lineno" : 270,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -376,17 +394,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 250,
+          "line" : 270,
           "column" : 1
         },
         "end" : {
-          "line" : 251,
+          "line" : 271,
           "column" : 34
         }
       }
     },
     "AllowReservedFilename" : {
-      "lineno" : 253,
+      "lineno" : 273,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -394,17 +412,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 253,
+          "line" : 273,
           "column" : 1
         },
         "end" : {
-          "line" : 254,
+          "line" : 274,
           "column" : 32
         }
       }
     },
     "RuntimeAnnotation" : {
-      "lineno" : 260,
+      "lineno" : 280,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -412,17 +430,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 260,
+          "line" : 280,
           "column" : 1
         },
         "end" : {
-          "line" : 261,
+          "line" : 281,
           "column" : 28
         }
       }
     },
     "AllowLegacyTypedefUri" : {
-      "lineno" : 286,
+      "lineno" : 306,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -430,34 +448,16 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 286,
+          "line" : 306,
           "column" : 1
         },
         "end" : {
-          "line" : 287,
+          "line" : 307,
           "column" : 32
         }
       }
     },
     "AllowUnsafeOptionalCustomDefaultValue" : {
-      "lineno" : 311,
-      "is_exception" : false,
-      "is_union" : false,
-      "fields" : {
-
-      },
-      "source_range" : {
-        "begin" : {
-          "line" : 311,
-          "column" : 1
-        },
-        "end" : {
-          "line" : 312,
-          "column" : 48
-        }
-      }
-    },
-    "AllowUnsafeUnionFieldCustomDefaultValue" : {
       "lineno" : 331,
       "is_exception" : false,
       "is_union" : false,
@@ -471,12 +471,30 @@
         },
         "end" : {
           "line" : 332,
+          "column" : 48
+        }
+      }
+    },
+    "AllowUnsafeUnionFieldCustomDefaultValue" : {
+      "lineno" : 351,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 351,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 352,
           "column" : 50
         }
       }
     },
     "AllowUnsafeRequiredFieldQualifier" : {
-      "lineno" : 347,
+      "lineno" : 367,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -484,17 +502,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 347,
+          "line" : 367,
           "column" : 1
         },
         "end" : {
-          "line" : 348,
+          "line" : 368,
           "column" : 44
         }
       }
     },
     "AllowLegacyMissingUris" : {
-      "lineno" : 388,
+      "lineno" : 408,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -502,12 +520,30 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 388,
+          "line" : 408,
           "column" : 1
         },
         "end" : {
-          "line" : 391,
+          "line" : 411,
           "column" : 33
+        }
+      }
+    },
+    "AllowUnsafeNonSealedKeyType" : {
+      "lineno" : 428,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 428,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 431,
+          "column" : 38
         }
       }
     }

@@ -1320,6 +1320,99 @@ class Priority implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
 }
 
 /**
+ * States that the target structured type (struct, union or exception) is
+ * "sealed", as defined in the
+ * [Object Model](https://github.com/facebook/fbthrift/blob/main/thrift/doc/object-model/index.md#sealed-types).
+ * 
+ * A sealed structured type can only have fields whose types are also sealed.
+ * 
+ * In practice, this means that this type is safe to use as a map key type or as
+ * a set element type, but any change to its schema (including changes that are
+ * "typically" considered safe, such as adding a new field) MAY break backwards
+ * compatiblity.
+ * 
+ * Note that the tooling and environment in which Thrift IDL definitions live
+ * (such as code repositories) may not be explicitly preventing such changes:
+ * it is up to schema owners to be aware of the potential impact of schema
+ * changes to sealed types.
+ *
+ * Original thrift struct:-
+ * Sealed
+ */
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/annotation/Sealed'))>>
+class Sealed implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
+  use \ThriftSerializationTrait;
+
+  const \ThriftStructTypes::TSpec SPEC = dict[
+  ];
+  const dict<string, int> FIELDMAP = dict[
+  ];
+
+  const type TConstructorShape = shape(
+  );
+
+  const type TShape = shape(
+  );
+  const int STRUCTURAL_ID = 957977401221134810;
+
+  public function __construct()[] {
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+    );
+  }
+
+  public function getName()[]: string {
+    return 'Sealed';
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "thrift.Sealed",
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[
+        '\facebook\thrift\annotation\Structured' => \facebook\thrift\annotation\Structured::fromShape(
+          shape(
+          )
+        ),
+      ],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public static function __stringifyMapKeys<T>(dict<arraykey, T> $m)[]: dict<string, T> {
+    return Dict\map_keys($m, $key ==> (string)$key);
+  }
+
+  public static function __fromShape(self::TShape $shape)[]: this {
+    return new static(
+    );
+  }
+
+  public function __toShape()[]: self::TShape {
+    return shape(
+    );
+  }
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+}
+
+/**
  * Applies unstructured annotations to a definition.
  *
  * Original thrift struct:-
@@ -2136,6 +2229,105 @@ class AllowLegacyMissingUris implements \IThriftSyncStruct, \IThriftStructMetada
         '\facebook\thrift\annotation\Program' => \facebook\thrift\annotation\Program::withDefaultValues(),
         '\facebook\thrift\annotation\Structured' => \facebook\thrift\annotation\Structured::withDefaultValues(),
         '\facebook\thrift\annotation\Enum' => \facebook\thrift\annotation\Enum::withDefaultValues(),
+      ],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public static function __stringifyMapKeys<T>(dict<arraykey, T> $m)[]: dict<string, T> {
+    return Dict\map_keys($m, $key ==> (string)$key);
+  }
+
+  public static function __fromShape(self::TShape $shape)[]: this {
+    return new static(
+    );
+  }
+
+  public function __toShape()[]: self::TShape {
+    return shape(
+    );
+  }
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+}
+
+/**
+ * Allows the target `map<...>` (or `set<...>`) field, typedef or function
+ * parameter to successfully build, despite the type of its keys (or elements)
+ * not being sealed.
+ * 
+ * Indeed, map key and set element types MUST be "sealed", as explained in the
+ * [Object Model](https://github.com/facebook/fbthrift/blob/main/thrift/doc/object-model/index.md#sealed-types).
+ * 
+ * A user-defined structured type can explicitly be marked as sealed by using
+ * the `@thrift.Sealed` annotation.
+ * 
+ * Use of this annotation is strongly DISCOURAGED, but is provided to allow
+ * existing schemas (that were created prior to the concept of "sealed" types
+ * being defined) to be grandfathered in and continue building successfully.
+ *
+ * Original thrift struct:-
+ * AllowUnsafeNonSealedKeyType
+ */
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/annotation/AllowUnsafeNonSealedKeyType'))>>
+class AllowUnsafeNonSealedKeyType implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
+  use \ThriftSerializationTrait;
+
+  const \ThriftStructTypes::TSpec SPEC = dict[
+  ];
+  const dict<string, int> FIELDMAP = dict[
+  ];
+
+  const type TConstructorShape = shape(
+  );
+
+  const type TShape = shape(
+  );
+  const int STRUCTURAL_ID = 957977401221134810;
+
+  public function __construct()[] {
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+    );
+  }
+
+  public function getName()[]: string {
+    return 'AllowUnsafeNonSealedKeyType';
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "thrift.AllowUnsafeNonSealedKeyType",
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[
+        '\facebook\thrift\annotation\Field' => \facebook\thrift\annotation\Field::fromShape(
+          shape(
+          )
+        ),
+        '\facebook\thrift\annotation\Typedef' => \facebook\thrift\annotation\Typedef::fromShape(
+          shape(
+          )
+        ),
+        '\facebook\thrift\annotation\FunctionParameter' => \facebook\thrift\annotation\FunctionParameter::fromShape(
+          shape(
+          )
+        ),
       ],
       'fields' => dict[
       ],

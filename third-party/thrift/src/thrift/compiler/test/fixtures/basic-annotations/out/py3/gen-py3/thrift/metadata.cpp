@@ -29,6 +29,7 @@ namespace annotation {
   ::apache::thrift::detail::md::StructMetadata<Serial>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<Uri>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<Priority>::gen(metadata);
+  ::apache::thrift::detail::md::StructMetadata<Sealed>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<DeprecatedUnvalidatedAnnotations>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<AllowReservedIdentifier>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<AllowReservedFilename>::gen(metadata);
@@ -38,6 +39,7 @@ namespace annotation {
   ::apache::thrift::detail::md::StructMetadata<AllowUnsafeUnionFieldCustomDefaultValue>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<AllowUnsafeRequiredFieldQualifier>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<AllowLegacyMissingUris>::gen(metadata);
+  ::apache::thrift::detail::md::StructMetadata<AllowUnsafeNonSealedKeyType>::gen(metadata);
   return metadata;
 }
 } // namespace facebook

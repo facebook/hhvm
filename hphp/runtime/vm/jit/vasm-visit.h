@@ -69,6 +69,14 @@ void visit(const Vunit&, Vptr p, F f) {
 }
 
 template<class F>
+void visit(const Vunit&, VregShiftExtend se, F f) {
+  if (!se.reg.isValid()) return;
+  auto w = width(se.reg);
+  if (w == Width::AnyNF) w = Width::Quad;
+  detail::invoke(f, se.reg, w);
+}
+
+template<class F>
 void visit(const Vunit& unit, Vtuple t, F f) {
   for (auto r : unit.tuples[t]) detail::invoke(f, r, width(r));
 }
@@ -276,6 +284,9 @@ struct MutableRegVisitor {
   }
   template<typename W> void use(Vr<W>& m) { Vreg r = m; use(r); m = r; }
   void use(Vreg& r) { r = u((Vreg)r); }
+  void use(VregShiftExtend& se) {
+    if (se.reg.isValid()) use(se.reg);
+  }
 
   void def(RegSet r) const { r = rd(r); }
   void def(Vtuple defs) { for (auto& r : unit.tuples[defs]) def(r); }

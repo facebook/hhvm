@@ -13,7 +13,7 @@ publish = false
 anyhow = "1.0.98"
 async-trait = "0.1.86"
 base64 = { version = "0.22.1", features = ["alloc"] }
-bufsize = "1.0.8"
+bufsize = "1.0.10"
 bytes = { version = "1.11.1", features = ["serde"] }
 futures = { version = "0.3.31", features = ["async-await", "compat"] }
 ghost = "0.1.20"

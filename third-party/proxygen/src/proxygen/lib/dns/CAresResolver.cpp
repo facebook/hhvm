@@ -156,7 +156,7 @@ void CAresResolver::Query::succeed(std::vector<Answer> answers) {
             dnsResult = answer.name + " ";
         }
 
-        TraceFieldType lookupType;
+        TraceFieldType lookupType = TraceFieldType::HostName;
         switch (answer.type) {
           case Answer::AnswerType::AT_TXT:
             lookupType = TraceFieldType::TXT;
@@ -945,7 +945,7 @@ bool CAresResolver::resolveLiterals(DNSResolver::ResolutionCallback* cb,
   hints.ai_socktype = SOCK_STREAM;
   hints.ai_flags = AI_PASSIVE | AI_NUMERICSERV | AI_NUMERICHOST;
 
-  addrinfo* ainfos;
+  addrinfo* ainfos = nullptr;
   if (getaddrinfo(host.c_str(), nullptr, &hints, &ainfos) != 0) {
     return false;
   }

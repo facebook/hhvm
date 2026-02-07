@@ -128,7 +128,7 @@ HTTPUpstreamSession::newTransactionWithError(
     startNow();
   }
 
-  ProxygenError error;
+  ProxygenError error = kErrorNone;
   auto txn = createTransaction(codec_->createStream(),
                                HTTPCodec::NoStream,
                                http2::DefaultPriority,

@@ -198,7 +198,7 @@ void RequestHandlerAdaptor::resumeIngress() noexcept {
 
 folly::Expected<ResponseHandler*, ProxygenError>
 RequestHandlerAdaptor::newPushedResponse(PushHandler* pushHandler) noexcept {
-  ProxygenError error;
+  ProxygenError error = kErrorUnknown;
   auto pushTxn = txn_->newPushedTransaction(pushHandler->getHandler(), &error);
   if (!pushTxn) {
     // Codec doesn't support push

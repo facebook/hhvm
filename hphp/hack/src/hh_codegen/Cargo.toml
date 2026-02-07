@@ -17,7 +17,7 @@ anyhow = "1.0.98"
 clap = { version = "4.5.42", features = ["derive", "env", "string", "unicode", "wrap_help"] }
 hash = { version = "0.0.0", path = "../utils/hash" }
 proc-macro2 = { version = "1.0.70", features = ["span-locations"] }
-quote = "1.0.29"
+quote = "1.0.44"
 signed_source = { version = "0.0.0", path = "../utils/rust/signed_source" }
 syn = { version = "1.0.109", features = ["extra-traits", "fold", "full", "visit", "visit-mut"] }
 synstructure = "0.12"

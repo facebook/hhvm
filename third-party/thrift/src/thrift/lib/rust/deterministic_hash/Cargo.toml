@@ -13,4 +13,4 @@ publish = false
 anyhow = "1.0.98"
 fbthrift = { version = "0.0.1+unstable", path = ".." }
 ring = "0.17.14"
-thiserror = "2.0.12"
+thiserror = "2.0.18"

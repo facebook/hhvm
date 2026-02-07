@@ -31,7 +31,7 @@ futures = { version = "0.3.31", features = ["async-await", "compat"] }
 indexmap = { version = "2.13.0", features = ["arbitrary", "rayon", "serde"] }
 ref-cast = "1.0.18"
 smallvec = { version = "1.15", features = ["impl_bincode", "serde", "specialization", "union"] }
-thiserror = "2.0.12"
+thiserror = "2.0.18"
 thrift = { version = "0.0.1+unstable", path = "../../../annotation/thrift" }
 
 [dev-dependencies]

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<f2b7eace6df9f94464b6f3a1151c7942>>
+// @generated SignedSource<<7bbd2f0047cda5cab3cd07ae7e0d6018>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -100,7 +100,6 @@ pub enum FeatureName {
     RequireClass,
     RequireConstraint,
     NewtypeSuperBounds,
-    Package,
     CaseTypes,
     CaseTypeWhereClauses,
     RecursiveCaseTypes,

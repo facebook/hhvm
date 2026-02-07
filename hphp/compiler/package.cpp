@@ -1570,8 +1570,8 @@ void Package::logBuildInfo(std::vector<SymbolRefEdge>& edges,
 // The actual emit loop for SymbolRefs and Package builds
 // It supports building with
 // - SymbolRefs only
-// - PackageV2 only
-// - SymbolRefs U Package2
+// - Package only
+// - SymbolRefs U Package
 // When building with SymbolRefs only, it finds the initial set of inputs
 // (from configuration), emit them, enumerate on-demand files from symbol refs,
 // then repeat the process until we have no new files to emit.
@@ -1592,8 +1592,8 @@ Package::emitAll(const EmitCallback& callback, const UnitIndex& index,
 
   // Find the initial set of groups
   // - if building with SymbolRefs, both files and dirs must be filtered out
-  // - if building with PackagesV2, both files and dirs must be included
-  // - if building with PackagesV2 U SymbolRefs,
+  // - if building with Package, both files and dirs must be included
+  // - if building with Package U SymbolRefs,
   //   - both files and dirs must be initially filtered out;
   //     - files and dirs that have been filtered out are stored in `filtered`
   //   - symbolrefs is run
@@ -1605,7 +1605,7 @@ Package::emitAll(const EmitCallback& callback, const UnitIndex& index,
   const BuildMode mode = buildMode();
 
   // Emit files specified as inputs, collect ondemand file names.
-  // - If building with PackageV2 only, then --excluded-dirs are not
+  // - If building with Package only, then --excluded-dirs are not
   //   skipped to do the build in one pass.
   // - If building with SymbolRefs, then Package check are skipped as
   //   all SymbolRefs files must be in the build.

@@ -45,7 +45,6 @@ type feature_name =
   | RequireClass
   | RequireConstraint
   | NewtypeSuperBounds
-  | Package
   | CaseTypes
   | CaseTypeWhereClauses
   | RecursiveCaseTypes
@@ -100,7 +99,6 @@ let feature_name_map =
       ("require_class", RequireClass);
       ("require_constraint", RequireConstraint);
       ("newtype_super_bounds", NewtypeSuperBounds);
-      ("package", Package);
       ("case_types", CaseTypes);
       ("case_type_where_clauses", CaseTypeWhereClauses);
       ("recursive_case_types", RecursiveCaseTypes);

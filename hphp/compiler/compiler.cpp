@@ -1369,7 +1369,7 @@ bool process(CompilerOptions &po) {
   // - IncludeDirFiles is the initial pass in which files in the include dirs are scanned
   // - SymbolRefsOnDemandFiles is the pass in which the files in exclude dirs referenced
   //   by SymbolRefs are included in the build
-  // - PackageV2RulesOnly is the pass where only the PackageV2 rule are applied
+  // - PackageRulesOnly is the pass where only the Package rule are applied
   auto const emitRemoteUnit = [&] (
       const std::vector<std::filesystem::path>& rpaths,
       EmitPass emitPass

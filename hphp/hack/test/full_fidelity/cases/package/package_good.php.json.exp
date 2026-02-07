@@ -38,159 +38,19 @@
         }
       },
       {
-        "kind":"file_attribute_specification",
-        "file_attribute_specification_left_double_angle":{
-          "kind":"token",
-          "token":{
-            "kind":"<<",
-            "text":"<<",
-            "offset":5,
-            "leading_width":1,
-            "width":2,
-            "trailing_width":0,
-            "leading":[{"kind":"end_of_line","text":"\n","offset":5,"width":1}],
-            "trailing":[],
-            "line_number":3
-          }
-        },
-        "file_attribute_specification_keyword":{
-          "kind":"token",
-          "token":{
-            "kind":"file",
-            "text":"file",
-            "offset":8,
-            "leading_width":0,
-            "width":4,
-            "trailing_width":0,
-            "leading":[],
-            "trailing":[],
-            "line_number":3
-          }
-        },
-        "file_attribute_specification_colon":{
-          "kind":"token",
-          "token":{
-            "kind":":",
-            "text":":",
-            "offset":12,
-            "leading_width":0,
-            "width":1,
-            "trailing_width":0,
-            "leading":[],
-            "trailing":[],
-            "line_number":3
-          }
-        },
-        "file_attribute_specification_attributes":{
-          "kind":"list",
-          "elements":[
-            {
-              "kind":"list_item",
-              "list_item":{
-                "kind":"constructor_call",
-                "constructor_call_type":{
-                  "kind":"simple_type_specifier",
-                  "simple_type_specifier":{
-                    "kind":"token",
-                    "token":{
-                      "kind":"name",
-                      "text":"__EnableUnstableFeatures",
-                      "offset":13,
-                      "leading_width":0,
-                      "width":24,
-                      "trailing_width":0,
-                      "leading":[],
-                      "trailing":[],
-                      "line_number":3
-                    }
-                  }
-                },
-                "constructor_call_left_paren":{
-                  "kind":"token",
-                  "token":{
-                    "kind":"(",
-                    "text":"(",
-                    "offset":37,
-                    "leading_width":0,
-                    "width":1,
-                    "trailing_width":0,
-                    "leading":[],
-                    "trailing":[],
-                    "line_number":3
-                  }
-                },
-                "constructor_call_argument_list":{
-                  "kind":"list",
-                  "elements":[
-                    {
-                      "kind":"list_item",
-                      "list_item":{
-                        "kind":"literal",
-                        "literal_expression":{
-                          "kind":"token",
-                          "token":{
-                            "kind":"single_quoted_string_literal",
-                            "text":"'package'",
-                            "offset":38,
-                            "leading_width":0,
-                            "width":9,
-                            "trailing_width":0,
-                            "leading":[],
-                            "trailing":[],
-                            "line_number":3
-                          }
-                        }
-                      }
-                    }
-                  ]
-                },
-                "constructor_call_right_paren":{
-                  "kind":"token",
-                  "token":{
-                    "kind":")",
-                    "text":")",
-                    "offset":47,
-                    "leading_width":0,
-                    "width":1,
-                    "trailing_width":0,
-                    "leading":[],
-                    "trailing":[],
-                    "line_number":3
-                  }
-                }
-              }
-            }
-          ]
-        },
-        "file_attribute_specification_right_double_angle":{
-          "kind":"token",
-          "token":{
-            "kind":">>",
-            "text":">>",
-            "offset":48,
-            "leading_width":0,
-            "width":2,
-            "trailing_width":1,
-            "leading":[],
-            "trailing":[{"kind":"end_of_line","text":"\n","offset":50,"width":1}],
-            "line_number":3
-          }
-        }
-      },
-      {
         "kind":"if_statement",
         "if_keyword":{
           "kind":"token",
           "token":{
             "kind":"if",
             "text":"if",
-            "offset":51,
+            "offset":5,
             "leading_width":1,
             "width":2,
             "trailing_width":1,
-            "leading":[{"kind":"end_of_line","text":"\n","offset":51,"width":1}],
-            "trailing":[{"kind":"whitespace","text":" ","offset":54,"width":1}],
-            "line_number":5
+            "leading":[{"kind":"end_of_line","text":"\n","offset":5,"width":1}],
+            "trailing":[{"kind":"whitespace","text":" ","offset":8,"width":1}],
+            "line_number":3
           }
         },
         "if_left_paren":{
@@ -198,13 +58,13 @@
           "token":{
             "kind":"(",
             "text":"(",
-            "offset":55,
+            "offset":9,
             "leading_width":0,
             "width":1,
             "trailing_width":0,
             "leading":[],
             "trailing":[],
-            "line_number":5
+            "line_number":3
           }
         },
         "if_condition":{
@@ -214,13 +74,13 @@
             "token":{
               "kind":"package",
               "text":"package",
-              "offset":56,
+              "offset":10,
               "leading_width":0,
               "width":7,
               "trailing_width":1,
               "leading":[],
-              "trailing":[{"kind":"whitespace","text":" ","offset":63,"width":1}],
-              "line_number":5
+              "trailing":[{"kind":"whitespace","text":" ","offset":17,"width":1}],
+              "line_number":3
             }
           },
           "package_expression_name":{
@@ -228,13 +88,13 @@
             "token":{
               "kind":"name",
               "text":"foo",
-              "offset":64,
+              "offset":18,
               "leading_width":0,
               "width":3,
               "trailing_width":0,
               "leading":[],
               "trailing":[],
-              "line_number":5
+              "line_number":3
             }
           }
         },
@@ -243,13 +103,13 @@
           "token":{
             "kind":")",
             "text":")",
-            "offset":67,
+            "offset":21,
             "leading_width":0,
             "width":1,
             "trailing_width":1,
             "leading":[],
-            "trailing":[{"kind":"whitespace","text":" ","offset":68,"width":1}],
-            "line_number":5
+            "trailing":[{"kind":"whitespace","text":" ","offset":22,"width":1}],
+            "line_number":3
           }
         },
         "if_statement":{
@@ -259,13 +119,13 @@
             "token":{
               "kind":"{",
               "text":"{",
-              "offset":69,
+              "offset":23,
               "leading_width":0,
               "width":1,
               "trailing_width":1,
               "leading":[],
-              "trailing":[{"kind":"end_of_line","text":"\n","offset":70,"width":1}],
-              "line_number":5
+              "trailing":[{"kind":"end_of_line","text":"\n","offset":24,"width":1}],
+              "line_number":3
             }
           },
           "compound_statements":{
@@ -280,13 +140,13 @@
                     "token":{
                       "kind":"name",
                       "text":"invariant",
-                      "offset":71,
+                      "offset":25,
                       "leading_width":2,
                       "width":9,
                       "trailing_width":0,
-                      "leading":[{"kind":"whitespace","text":"  ","offset":71,"width":2}],
+                      "leading":[{"kind":"whitespace","text":"  ","offset":25,"width":2}],
                       "trailing":[],
-                      "line_number":6
+                      "line_number":4
                     }
                   },
                   "function_call_left_paren":{
@@ -294,13 +154,13 @@
                     "token":{
                       "kind":"(",
                       "text":"(",
-                      "offset":82,
+                      "offset":36,
                       "leading_width":0,
                       "width":1,
                       "trailing_width":0,
                       "leading":[],
                       "trailing":[],
-                      "line_number":6
+                      "line_number":4
                     }
                   },
                   "function_call_argument_list":{
@@ -315,13 +175,13 @@
                             "token":{
                               "kind":"package",
                               "text":"package",
-                              "offset":83,
+                              "offset":37,
                               "leading_width":0,
                               "width":7,
                               "trailing_width":1,
                               "leading":[],
-                              "trailing":[{"kind":"whitespace","text":" ","offset":90,"width":1}],
-                              "line_number":6
+                              "trailing":[{"kind":"whitespace","text":" ","offset":44,"width":1}],
+                              "line_number":4
                             }
                           },
                           "package_expression_name":{
@@ -329,13 +189,13 @@
                             "token":{
                               "kind":"name",
                               "text":"foo",
-                              "offset":91,
+                              "offset":45,
                               "leading_width":0,
                               "width":3,
                               "trailing_width":0,
                               "leading":[],
                               "trailing":[],
-                              "line_number":6
+                              "line_number":4
                             }
                           }
                         },
@@ -344,13 +204,13 @@
                           "token":{
                             "kind":",",
                             "text":",",
-                            "offset":94,
+                            "offset":48,
                             "leading_width":0,
                             "width":1,
                             "trailing_width":1,
                             "leading":[],
-                            "trailing":[{"kind":"whitespace","text":" ","offset":95,"width":1}],
-                            "line_number":6
+                            "trailing":[{"kind":"whitespace","text":" ","offset":49,"width":1}],
+                            "line_number":4
                           }
                         }
                       },
@@ -363,13 +223,13 @@
                             "token":{
                               "kind":"double_quoted_string_literal",
                               "text":"\"package foo exists\"",
-                              "offset":96,
+                              "offset":50,
                               "leading_width":0,
                               "width":20,
                               "trailing_width":0,
                               "leading":[],
                               "trailing":[],
-                              "line_number":6
+                              "line_number":4
                             }
                           }
                         }
@@ -381,13 +241,13 @@
                     "token":{
                       "kind":")",
                       "text":")",
-                      "offset":116,
+                      "offset":70,
                       "leading_width":0,
                       "width":1,
                       "trailing_width":0,
                       "leading":[],
                       "trailing":[],
-                      "line_number":6
+                      "line_number":4
                     }
                   }
                 },
@@ -396,13 +256,13 @@
                   "token":{
                     "kind":";",
                     "text":";",
-                    "offset":117,
+                    "offset":71,
                     "leading_width":0,
                     "width":1,
                     "trailing_width":1,
                     "leading":[],
-                    "trailing":[{"kind":"end_of_line","text":"\n","offset":118,"width":1}],
-                    "line_number":6
+                    "trailing":[{"kind":"end_of_line","text":"\n","offset":72,"width":1}],
+                    "line_number":4
                   }
                 }
               }
@@ -413,13 +273,13 @@
             "token":{
               "kind":"}",
               "text":"}",
-              "offset":119,
+              "offset":73,
               "leading_width":0,
               "width":1,
               "trailing_width":1,
               "leading":[],
-              "trailing":[{"kind":"end_of_line","text":"\n","offset":120,"width":1}],
-              "line_number":7
+              "trailing":[{"kind":"end_of_line","text":"\n","offset":74,"width":1}],
+              "line_number":5
             }
           }
         }
@@ -431,13 +291,13 @@
           "token":{
             "kind":"end_of_file",
             "text":"",
-            "offset":121,
+            "offset":75,
             "leading_width":0,
             "width":0,
             "trailing_width":0,
             "leading":[],
             "trailing":[],
-            "line_number":8
+            "line_number":6
           }
         }
       }

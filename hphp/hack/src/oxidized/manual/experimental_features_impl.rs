@@ -30,7 +30,6 @@ impl FeatureName {
             RequireClass => OngoingRelease,
             RequireConstraint => OngoingRelease,
             NewtypeSuperBounds => Unstable,
-            Package => OngoingRelease,
             CaseTypes => OngoingRelease,
             CaseTypeWhereClauses => Preview,
             RecursiveCaseTypes => Preview,

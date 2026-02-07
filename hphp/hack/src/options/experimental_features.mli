@@ -39,7 +39,6 @@ type feature_name =
   | RequireClass
   | RequireConstraint
   | NewtypeSuperBounds
-  | Package
   | CaseTypes
   | CaseTypeWhereClauses
   | RecursiveCaseTypes

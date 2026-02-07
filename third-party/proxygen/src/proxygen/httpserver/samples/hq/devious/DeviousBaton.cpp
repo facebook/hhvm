@@ -180,7 +180,7 @@ void DeviousBaton::onStreamData(uint64_t streamId,
     return;
   }
   if (state.state == BatonMessageState::DONE) {
-    MessageSource arrivedOn;
+    MessageSource arrivedOn{};
     if (streamId & 0x2) {
       arrivedOn = UNI;
     } else if (bool(streamId & 0x01) == (mode_ == Mode::SERVER)) {

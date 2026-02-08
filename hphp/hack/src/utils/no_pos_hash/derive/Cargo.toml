@@ -15,7 +15,7 @@ proc-macro = true
 edition = "2018"
 
 [dependencies]
-proc-macro2 = { version = "1.0.70", features = ["span-locations"] }
+proc-macro2 = { version = "1.0.106", features = ["span-locations"] }
 quote = "1.0.44"
 syn = { version = "1.0.109", features = ["extra-traits", "fold", "full", "visit", "visit-mut"] }
 synstructure = "0.12"

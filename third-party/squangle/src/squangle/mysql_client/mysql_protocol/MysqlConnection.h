@@ -9,7 +9,7 @@
 #pragma once
 
 #include <fmt/format.h>
-#include <mysql.h>
+#include "mysql/server/include/mysql.h" // @manual=//mysql/server/include:mysql_namespaced
 
 #include "squangle/base/Base.h"
 #include "squangle/base/ConnectionKey.h"

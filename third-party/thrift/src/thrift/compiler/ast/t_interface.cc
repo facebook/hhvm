@@ -17,6 +17,8 @@
 #include <thrift/compiler/ast/t_interface.h>
 
 #include <cassert>
+#include <stdexcept>
+#include <fmt/format.h>
 #include <thrift/compiler/ast/t_interaction.h>
 
 namespace apache::thrift::compiler {
@@ -35,6 +37,15 @@ void t_interface::set_functions(node_list<t_function> functions) {
 void t_interface::add_function(std::unique_ptr<t_function> func) {
   assert(func != nullptr);
   functions_.push_back(std::move(func));
+}
+
+bool t_interface::is_sealed() const {
+  throw std::logic_error(
+      fmt::format(
+          "is_sealed() called on \"interface\" `{}`. This is non-sensical: "
+          "the concept of sealedness only applies to actual types, not "
+          "services or interactions.",
+          get_scoped_name()));
 }
 
 t_interface::~t_interface() = default;

@@ -35,6 +35,8 @@ class t_set final : public t_container {
     return "set<" + elem_type_->get_full_name() + ">";
   }
 
+  bool is_sealed() const override;
+
   ~t_set() override;
 
  private:

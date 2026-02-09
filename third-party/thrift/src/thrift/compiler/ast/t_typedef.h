@@ -94,6 +94,8 @@ class t_typedef : public t_type {
 
   std::string get_full_name() const override { return get_scoped_name(); }
 
+  bool is_sealed() const override;
+
   static std::unique_ptr<t_typedef> make_unnamed(
       const t_program* program, std::string name, t_type_ref type);
 

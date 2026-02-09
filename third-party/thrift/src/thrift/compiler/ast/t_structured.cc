@@ -18,6 +18,7 @@
 #include <stdexcept>
 
 #include <thrift/compiler/ast/t_structured.h>
+#include <thrift/compiler/ast/uri.h>
 
 namespace apache::thrift::compiler {
 
@@ -63,6 +64,25 @@ void t_structured::append_field(std::unique_ptr<t_field> field) {
 const t_field* t_structured::get_field_by_id(t_field_id id) const {
   auto existing = find_by_id(fields_id_order_, id);
   return existing.second ? *existing.first : nullptr;
+}
+
+bool t_structured::is_sealed() const {
+  // In Thrift IDL, a structured definition (struct, union, exception) is sealed
+  // iff:
+  //   1. It is annotated with `@thrift.Sealed`, and
+  //   2. All of its fields are sealed
+
+  if (!has_structured_annotation(kSealedUri)) {
+    return false;
+  }
+
+  for (const std::unique_ptr<t_field>& field : fields_) {
+    if (!field->type()->is_sealed()) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 t_structured::~t_structured() = default;

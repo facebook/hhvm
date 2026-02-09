@@ -46,6 +46,16 @@ class t_interface : public t_type {
   void set_functions(node_list<t_function> functions);
   void add_function(std::unique_ptr<t_function> func);
 
+  /**
+   * Always throws std::logic_error for (sub-classes of) t_interface.
+   *
+   * Indeed, t_interface IS-A t_type is for mostly legacy reasons (because
+   * functions in Thrift IDL can return interactions), but only "actual" types
+   * (per the Thrift Object Model) can be sealed or not. The distinction is
+   * non-sensical for interfaces (i.e., services and interactions).
+   */
+  bool is_sealed() const final;
+
  private:
   node_list<t_function> functions_;
 };

@@ -91,6 +91,41 @@ class t_type : public t_named {
     return detail::visit_type(*this, std::forward<Visitors>(visitors)...);
   }
 
+  /**
+   * Returns whether this type is sealed according to the Thrift Object Model.
+   *
+   * A sealed type is one where any schema change implies that the
+   * project-embed round-trip should fail. Only sealed types may be used as
+   * set elements or map keys.
+   *
+   * In Thrift IDL, sealed types include:
+   * - All primitive types
+   * - Enum types
+   * - Typedefs, if their target type is sealed
+   * - List types, if the element type is sealed
+   * - Set types (since the element type must be sealed)
+   * - Map types, if the value type is sealed (key type must be sealed)
+   * - Structured types, if explicitly marked as sealed (not yet supported in
+   *   Thrift IDL)
+   *
+   * NOTE that the set of IDL types differs slightly from Object Model (TOM)
+   * types:
+   *   - TOM primitive types include `any`
+   *   - Typedefs do not exist in the TOM, they are purely an IDL concept.
+   *   - Opaque Alias Types, defined in the TOM, are not implemented yet in IDL.
+   *   - The current implementation of the Thrift IDL compiler treats
+   *     "interfaces" (i.e., services and interactions) as "types", mostly for
+   *     legacy reasons (because functions can return interactions). These are
+   *     obviously not "types" in the TOM sense.
+   *
+   * @return `true` if this type is sealed, `false` otherwise
+   *
+   * @throws std::exception if a determination cannot be made (e.g., due to
+   *         unresolvable type references) or non-sensical (for services and
+   *         interactions, which inherit from t_type for legacy reasons).
+   */
+  virtual bool is_sealed() const = 0;
+
  protected:
   /**
    * Default constructor for t_type
@@ -209,7 +244,8 @@ class t_type_ref final {
   bool resolved() const noexcept;
 
   /**
-   * Attempts to resolve the underlying unresolved "placholder typedef", if any.
+   * Attempts to resolve the underlying unresolved "placeholder typedef", if
+   * any.
    */
   bool resolve();
 

@@ -77,6 +77,10 @@ void t_enum::update_unused(int32_t val) {
   }
 }
 
+bool t_enum::is_sealed() const {
+  return true;
+}
+
 t_enum::~t_enum() = default;
 
 } // namespace apache::thrift::compiler

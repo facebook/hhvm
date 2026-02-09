@@ -35,6 +35,8 @@ class t_list final : public t_container {
     return "list<" + elem_type_->get_full_name() + ">";
   }
 
+  bool is_sealed() const override;
+
   ~t_list() override;
 
  private:

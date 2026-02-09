@@ -68,6 +68,10 @@ const t_primitive_type& t_primitive_type::t_float() {
   return type;
 }
 
+bool t_primitive_type::is_sealed() const {
+  return true;
+}
+
 t_primitive_type::~t_primitive_type() = default;
 
 } // namespace apache::thrift::compiler

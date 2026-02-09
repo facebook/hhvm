@@ -18,6 +18,13 @@
 
 namespace apache::thrift::compiler {
 
+bool t_set::is_sealed() const {
+  // NOTE: According to the Thrift Object Model, set elements must always be
+  // sealed, but this is not enforced at the IDL level (yet), so it must be
+  // checked here too.
+  return elem_type_->is_sealed(); // Throws if unresolved
+}
+
 t_set::~t_set() = default;
 
 } // namespace apache::thrift::compiler

@@ -18,6 +18,10 @@
 
 namespace apache::thrift::compiler {
 
+bool t_list::is_sealed() const {
+  return elem_type_->is_sealed(); // Throws if unresolved
+}
+
 t_list::~t_list() = default;
 
 } // namespace apache::thrift::compiler

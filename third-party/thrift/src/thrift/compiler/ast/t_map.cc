@@ -18,6 +18,14 @@
 
 namespace apache::thrift::compiler {
 
+bool t_map::is_sealed() const {
+  // NOTE: According to the Thrift Object Model, map keys must always be sealed,
+  // but this is not enforced at the IDL level (yet), so it must be checked
+  // here too.
+  return key_type_->is_sealed() &&
+      val_type_->is_sealed(); // Throws if unresolved
+}
+
 t_map::~t_map() = default;
 
 } // namespace apache::thrift::compiler

@@ -57,6 +57,10 @@ std::unique_ptr<t_typedef> t_typedef::make_unnamed(
   return ret;
 }
 
+bool t_typedef::is_sealed() const {
+  return aliased_type_ref_->is_sealed(); // Throws if unresolved
+}
+
 bool t_placeholder_typedef::resolve() {
   if (!aliased_type_ref_.empty()) {
     // Already resolved

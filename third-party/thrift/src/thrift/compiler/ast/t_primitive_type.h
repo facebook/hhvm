@@ -61,6 +61,8 @@ class t_primitive_type : public t_type {
 
   std::string get_full_name() const override { return name(); }
 
+  bool is_sealed() const override;
+
   ~t_primitive_type() override;
 
  private:

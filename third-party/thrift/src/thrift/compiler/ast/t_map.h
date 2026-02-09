@@ -39,6 +39,8 @@ class t_map final : public t_container {
         val_type_->get_full_name() + ">";
   }
 
+  bool is_sealed() const override;
+
   ~t_map() override;
 
  private:

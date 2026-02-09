@@ -70,6 +70,8 @@ class t_structured : public t_type {
     return it != fields_by_name_.end() ? it->second : nullptr;
   }
 
+  bool is_sealed() const override;
+
   ~t_structured() override;
 
  protected:

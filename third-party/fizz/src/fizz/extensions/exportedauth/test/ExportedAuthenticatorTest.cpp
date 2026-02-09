@@ -37,11 +37,12 @@ StringPiece expected_empty_authenticator = {
 TEST(ExportedAuthenticatorTest, TestAuthenticatorRequest) {
   auto buf = folly::IOBuf::copyBuffer(unhexlify(expected_auth_request));
   folly::io::Cursor cursor(buf.get());
-  CertificateRequest cr = decode<CertificateRequest>(cursor);
+  CertificateRequest cr;
+  Error err;
+  EXPECT_EQ(decode<CertificateRequest>(cr, err, cursor), Status::Success);
   EXPECT_EQ(cr.certificate_request_context->computeChainDataLength(), 20);
   EXPECT_EQ(cr.extensions.size(), 1);
   folly::Optional<SignatureAlgorithms> sigAlgs;
-  Error err;
   EXPECT_EQ(
       getExtension<SignatureAlgorithms>(sigAlgs, err, cr.extensions),
       Status::Success);

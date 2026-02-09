@@ -158,7 +158,8 @@ folly::AsyncSocket::ReadResult AsyncKTLSSocket::processAlert(
     // Since all alerts signal the abort of a TLS session, we do not need
     // to worry about additional application data.
     folly::io::Cursor cursor(payload.front());
-    alert = fizz::decode<fizz::Alert>(cursor);
+    Error err;
+    FIZZ_THROW_ON_ERROR(fizz::decode<fizz::Alert>(alert, err, cursor), err);
   } catch (std::exception&) {
     return ReadResult(
         READ_ERROR,

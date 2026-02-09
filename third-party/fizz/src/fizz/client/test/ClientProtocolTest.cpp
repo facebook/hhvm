@@ -1126,11 +1126,14 @@ TEST_F(ClientProtocolTest, TestConnectECH) {
 
   // Get rid of handshake header (type + version).
   encodedClientHello->trimStart(4);
-  ClientHello chloOuter = decode<ClientHello>(std::move(encodedClientHello));
+  ClientHello chloOuter;
+  Error err;
+  EXPECT_EQ(
+      decode<ClientHello>(chloOuter, err, std::move(encodedClientHello)),
+      Status::Success);
 
   // Check we used fake server name.
   folly::Optional<ServerNameList> sniExt;
-  Error err;
   EXPECT_EQ(getExtension(sniExt, err, chloOuter.extensions), Status::Success);
   EXPECT_TRUE(sniExt.hasValue());
   EXPECT_TRUE(
@@ -1200,11 +1203,14 @@ TEST_F(ClientProtocolTest, TestConnectECHWithHybridSupportedGroup) {
 
   // Get rid of handshake header (type + version).
   encodedClientHello->trimStart(4);
-  ClientHello chloOuter = decode<ClientHello>(std::move(encodedClientHello));
+  ClientHello chloOuter;
+  Error err;
+  EXPECT_EQ(
+      decode<ClientHello>(chloOuter, err, std::move(encodedClientHello)),
+      Status::Success);
 
   // Check we used fake server name.
   folly::Optional<ServerNameList> sniExt;
-  Error err;
   EXPECT_EQ(getExtension(sniExt, err, chloOuter.extensions), Status::Success);
   EXPECT_TRUE(sniExt.hasValue());
   EXPECT_TRUE(
@@ -1275,11 +1281,14 @@ TEST_F(ClientProtocolTest, TestConnectECHWithAEGIS) {
 
   // Get rid of handshake header (type + version).
   encodedClientHello->trimStart(4);
-  ClientHello chloOuter = decode<ClientHello>(std::move(encodedClientHello));
+  ClientHello chloOuter;
+  Error err;
+  EXPECT_EQ(
+      decode<ClientHello>(chloOuter, err, std::move(encodedClientHello)),
+      Status::Success);
 
   // Check we used fake server name.
   folly::Optional<ServerNameList> sniExt;
-  Error err;
   EXPECT_EQ(getExtension(sniExt, err, chloOuter.extensions), Status::Success);
   EXPECT_TRUE(sniExt.hasValue());
   EXPECT_TRUE(
@@ -1345,10 +1354,12 @@ TEST_F(ClientProtocolTest, TestConnectECHWithPSK) {
   // Grab inner hello for comparison
   auto encodedInnerHello = std::move(state_.echState()->encodedECH);
   encodedInnerHello->trimStart(4);
-  ClientHello decodedInnerChlo =
-      decode<ClientHello>(std::move(encodedInnerHello));
-  folly::Optional<ClientPresharedKey> innerPskExt;
+  ClientHello decodedInnerChlo;
   Error err;
+  EXPECT_EQ(
+      decode<ClientHello>(decodedInnerChlo, err, std::move(encodedInnerHello)),
+      Status::Success);
+  folly::Optional<ClientPresharedKey> innerPskExt;
   EXPECT_EQ(
       getExtension(innerPskExt, err, decodedInnerChlo.extensions),
       Status::Success);
@@ -1357,8 +1368,10 @@ TEST_F(ClientProtocolTest, TestConnectECHWithPSK) {
   // Check client hello outer has a GREASE PSK extension
   auto encodedOuterHello = std::move(state_.encodedClientHello().value());
   encodedOuterHello->trimStart(4);
-  ClientHello decodedOuterChlo =
-      decode<ClientHello>(std::move(encodedOuterHello));
+  ClientHello decodedOuterChlo;
+  EXPECT_EQ(
+      decode<ClientHello>(decodedOuterChlo, err, std::move(encodedOuterHello)),
+      Status::Success);
   folly::Optional<ClientPresharedKey> greasePskExt;
   EXPECT_EQ(
       getExtension(greasePskExt, err, decodedOuterChlo.extensions),
@@ -1407,9 +1420,12 @@ TEST_F(ClientProtocolTest, TestConnectWithRandomGreaseECH) {
   auto& encodedHello = *state_.encodedClientHello();
   // Get rid of handshake header (type + version)
   encodedHello->trimStart(4);
-  auto decodedHello = decode<ClientHello>(std::move(encodedHello));
-  folly::Optional<ech::OuterECHClientHello> echExtension;
+  ClientHello decodedHello;
   Error err;
+  EXPECT_EQ(
+      decode<ClientHello>(decodedHello, err, std::move(encodedHello)),
+      Status::Success);
+  folly::Optional<ech::OuterECHClientHello> echExtension;
   EXPECT_EQ(
       getExtension(echExtension, err, decodedHello.extensions),
       Status::Success);
@@ -1457,9 +1473,12 @@ TEST_F(ClientProtocolTest, TestConnectWithComputedGreaseECH) {
   auto encodedChloSize = encodedHello->computeChainDataLength();
   // Get rid of handshake header (type + version)
   encodedHello->trimStart(4);
-  auto decodedHello = decode<ClientHello>(std::move(encodedHello));
-  folly::Optional<ech::OuterECHClientHello> echExtension;
+  ClientHello decodedHello;
   Error err;
+  EXPECT_EQ(
+      decode<ClientHello>(decodedHello, err, std::move(encodedHello)),
+      Status::Success);
+  folly::Optional<ech::OuterECHClientHello> echExtension;
   EXPECT_EQ(
       getExtension(echExtension, err, decodedHello.extensions),
       Status::Success);
@@ -2786,9 +2805,12 @@ TEST_F(ClientProtocolTest, TestConnectPskKeNoShares) {
 
   // Get rid of handshake header (type + version)
   encodedHello->trimStart(4);
-  auto decodedHello = decode<ClientHello>(std::move(encodedHello));
-  folly::Optional<ClientKeyShare> keyShare;
+  ClientHello decodedHello;
   Error err;
+  EXPECT_EQ(
+      decode<ClientHello>(decodedHello, err, std::move(encodedHello)),
+      Status::Success);
+  folly::Optional<ClientKeyShare> keyShare;
   EXPECT_EQ(
       getExtension(keyShare, err, decodedHello.extensions), Status::Success);
   EXPECT_TRUE(keyShare->client_shares.empty());
@@ -2812,9 +2834,12 @@ TEST_F(ClientProtocolTest, TestConnectPskKeAlwaysShares) {
 
   // Get rid of handshake header (type + version)
   encodedHello->trimStart(4);
-  auto decodedHello = decode<ClientHello>(std::move(encodedHello));
-  folly::Optional<ClientKeyShare> keyShare;
+  ClientHello decodedHello;
   Error err;
+  EXPECT_EQ(
+      decode<ClientHello>(decodedHello, err, std::move(encodedHello)),
+      Status::Success);
+  folly::Optional<ClientKeyShare> keyShare;
   EXPECT_EQ(
       getExtension(keyShare, err, decodedHello.extensions), Status::Success);
   EXPECT_EQ(
@@ -2840,9 +2865,12 @@ TEST_F(ClientProtocolTest, TestConnectPskDheKeAlwaysShares) {
 
   // Get rid of handshake header (type + version)
   encodedHello->trimStart(4);
-  auto decodedHello = decode<ClientHello>(std::move(encodedHello));
-  folly::Optional<ClientKeyShare> keyShare;
+  ClientHello decodedHello;
   Error err;
+  EXPECT_EQ(
+      decode<ClientHello>(decodedHello, err, std::move(encodedHello)),
+      Status::Success);
+  folly::Optional<ClientKeyShare> keyShare;
   EXPECT_EQ(
       getExtension(keyShare, err, decodedHello.extensions), Status::Success);
   const auto& clientShares = keyShare->client_shares;
@@ -2871,9 +2899,12 @@ TEST_F(ClientProtocolTest, TestConnectPskDheKeAlwaysDefaultShares) {
 
   // Get rid of handshake header (type + version)
   encodedHello->trimStart(4);
-  auto decodedHello = decode<ClientHello>(std::move(encodedHello));
-  folly::Optional<ClientKeyShare> keyShare;
+  ClientHello decodedHello;
   Error err;
+  EXPECT_EQ(
+      decode<ClientHello>(decodedHello, err, std::move(encodedHello)),
+      Status::Success);
+  folly::Optional<ClientKeyShare> keyShare;
   EXPECT_EQ(
       getExtension(keyShare, err, decodedHello.extensions), Status::Success);
   const auto& clientShares = keyShare->client_shares;

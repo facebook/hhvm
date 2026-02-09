@@ -642,7 +642,10 @@ ClientHello decryptECHWithContext(
 
   // Set actual client hello, ECH acceptance
   folly::io::Cursor encodedECHInnerCursor(encodedClientHelloInner.get());
-  auto decodedChlo = decode<ClientHello>(encodedECHInnerCursor);
+  ClientHello decodedChlo;
+  Error err;
+  FIZZ_THROW_ON_ERROR(
+      decode<ClientHello>(decodedChlo, err, encodedECHInnerCursor), err);
 
   // Skip any padding and check that we don't have any data left.
   encodedECHInnerCursor.skipWhile([](uint8_t b) { return b == 0; });

@@ -9,11 +9,16 @@
 #include "fizz/protocol/ech/Types.h"
 
 namespace fizz::ech {
+
 folly::Optional<ECHConfigContentDraft>
 ECHConfigContentDraft::parseSupportedECHConfig(const ECHConfig& config) {
   if (config.version == ECHVersion::Draft15) {
     folly::io::Cursor cursor(config.ech_config_content.get());
-    return decode<ECHConfigContentDraft>(cursor);
+    ECHConfigContentDraft echConfigContent;
+    Error err;
+    FIZZ_THROW_ON_ERROR(
+        decode<ECHConfigContentDraft>(echConfigContent, err, cursor), err);
+    return echConfigContent;
   }
   return folly::none;
 }

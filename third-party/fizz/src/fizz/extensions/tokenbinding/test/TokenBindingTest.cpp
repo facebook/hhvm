@@ -54,7 +54,11 @@ TEST_F(ExtensionsTest, TokenBindingParameters) {
 
 TEST_F(ExtensionsTest, TokenBindingMessageFromChrome) {
   auto buf = getBuf(tokenBindingMessage);
-  auto message = decode<TokenBindingMessage>(std::move(buf));
+  Error err;
+  TokenBindingMessage message;
+  EXPECT_EQ(
+      decode<TokenBindingMessage>(message, err, std::move(buf)),
+      Status ::Success);
   EXPECT_EQ(message.tokenbindings.size(), 1);
   auto& tokenbinding = message.tokenbindings.front();
   EXPECT_EQ(
@@ -86,8 +90,12 @@ TEST_F(ExtensionsTest, TokenBindingMessageSelfCreated) {
   tokenBinding.extensions = folly::IOBuf::create(10);
   message.tokenbindings.push_back(std::move(tokenBinding));
 
+  Error err;
   auto encoded = encode(std::move(message));
-  auto decoded = decode<TokenBindingMessage>(std::move(encoded));
+  TokenBindingMessage decoded;
+  EXPECT_EQ(
+      decode<TokenBindingMessage>(decoded, err, std::move(encoded)),
+      Status::Success);
 
   EXPECT_EQ(decoded.tokenbindings.size(), 1);
   auto& decodedTokenBinding = message.tokenbindings.front();
@@ -129,7 +137,11 @@ TEST(ContextTest, TestSingleSet) {
 
 TEST_F(ExtensionsTest, TokenBindingMessageRSA2048_PKCS1_5) {
   auto buf = getBuf(tokenBindingMessageRSA2048_PKCS1_5);
-  auto message = decode<TokenBindingMessage>(std::move(buf));
+  TokenBindingMessage message;
+  Error err;
+  EXPECT_EQ(
+      decode<TokenBindingMessage>(message, err, std::move(buf)),
+      Status::Success);
   EXPECT_EQ(message.tokenbindings.size(), 1);
   auto& tokenbinding = message.tokenbindings.front();
   EXPECT_EQ(
@@ -140,7 +152,11 @@ TEST_F(ExtensionsTest, TokenBindingMessageRSA2048_PKCS1_5) {
 
 TEST_F(ExtensionsTest, TokenBindingMessageRSA2048_PSS) {
   auto buf = getBuf(tokenBindingMessageRSA2048_PSS);
-  auto message = decode<TokenBindingMessage>(std::move(buf));
+  TokenBindingMessage message;
+  Error err;
+  EXPECT_EQ(
+      decode<TokenBindingMessage>(message, err, std::move(buf)),
+      Status::Success);
   EXPECT_EQ(message.tokenbindings.size(), 1);
   auto& tokenbinding = message.tokenbindings.front();
   EXPECT_EQ(
@@ -151,7 +167,11 @@ TEST_F(ExtensionsTest, TokenBindingMessageRSA2048_PSS) {
 
 TEST_F(ExtensionsTest, TokenBindingMessageECDSAP256) {
   auto buf = getBuf(tokenBindingMessageECDSAP256);
-  auto message = decode<TokenBindingMessage>(std::move(buf));
+  TokenBindingMessage message;
+  Error err;
+  EXPECT_EQ(
+      decode<TokenBindingMessage>(message, err, std::move(buf)),
+      Status::Success);
   EXPECT_EQ(message.tokenbindings.size(), 1);
   auto& tokenbinding = message.tokenbindings.front();
   EXPECT_EQ(

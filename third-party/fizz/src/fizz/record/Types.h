@@ -373,9 +373,9 @@ Buf encode(T&&);
 template <class T>
 Buf encodeHandshake(T&& t);
 template <class T>
-T decode(std::unique_ptr<folly::IOBuf>&& buf);
+Status decode(T& ret, Error& err, std::unique_ptr<folly::IOBuf>&& buf);
 template <class T>
-T decode(folly::io::Cursor& cursor);
+Status decode(T& ret, Error& err, folly::io::Cursor& cursor);
 template <typename T>
 std::string enumToHex(T enumValue);
 

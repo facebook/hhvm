@@ -191,24 +191,32 @@ inline Buf encode<ech::ECHConfig>(ech::ECHConfig&& echConfig) {
 }
 
 template <>
-inline ech::ECHConfigContentDraft decode(folly::io::Cursor& cursor) {
+inline Status decode(
+    ech::ECHConfigContentDraft& ret,
+    Error& /* err */,
+    folly::io::Cursor& cursor) {
   ech::ECHConfigContentDraft echConfigContent;
   detail::read(echConfigContent, cursor);
-  return echConfigContent;
+  ret = std::move(echConfigContent);
+  return Status::Success;
 }
 
 template <>
-inline ech::ECHConfig decode(folly::io::Cursor& cursor) {
+inline Status
+decode(ech::ECHConfig& ret, Error& /* err */, folly::io::Cursor& cursor) {
   ech::ECHConfig echConfig;
   detail::read(echConfig, cursor);
-  return echConfig;
+  ret = std::move(echConfig);
+  return Status::Success;
 }
 
 template <>
-inline ech::ECHConfigList decode(folly::io::Cursor& cursor) {
+inline Status
+decode(ech::ECHConfigList& ret, Error& /* err */, folly::io::Cursor& cursor) {
   ech::ECHConfigList echConfigList;
   detail::readVector<uint16_t>(echConfigList.configs, cursor);
-  return echConfigList;
+  ret = std::move(echConfigList);
+  return Status::Success;
 }
 
 template <>

@@ -150,7 +150,9 @@ folly::Optional<std::vector<ech::ParsedECHConfig>> parseECHConfigsBase64(
   auto configBuf = folly::IOBuf::copyBuffer(
       folly::base64Decode(folly::trimWhitespace(echConfigListBase64)));
   folly::io::Cursor cursor(configBuf.get());
-  auto configList = decode<ech::ECHConfigList>(cursor);
+  ech::ECHConfigList configList;
+  Error err;
+  FIZZ_THROW_ON_ERROR(decode<ech::ECHConfigList>(configList, err, cursor), err);
   for (const auto& config : configList.configs) {
     if (auto maybeParsedECHConfig =
             ech::ParsedECHConfig::parseSupportedECHConfig(config)) {

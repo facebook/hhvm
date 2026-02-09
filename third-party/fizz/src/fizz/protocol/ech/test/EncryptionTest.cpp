@@ -266,6 +266,7 @@ TEST(EncryptionTest, TestValidEncryptClientHello) {
       [](const auto& ext) {
         return ext.extension_type == ExtensionType::key_share;
       });
+  Error err;
   *it = encodeExtension(expectedOuterExt);
 
   auto context = hpkeContext(clientECH);
@@ -282,7 +283,10 @@ TEST(EncryptionTest, TestValidEncryptClientHello) {
       context->open(clientHelloOuterAad.get(), std::move(clientECH.payload));
 
   folly::io::Cursor encodedECHInnerCursor(gotClientHelloInner.get());
-  auto gotChlo = decode<ClientHello>(encodedECHInnerCursor);
+  ClientHello gotChlo;
+  EXPECT_EQ(
+      decode<ClientHello>(gotChlo, err, encodedECHInnerCursor),
+      Status::Success);
 
   // Check padding
   auto configContent = getParsedECHConfig();

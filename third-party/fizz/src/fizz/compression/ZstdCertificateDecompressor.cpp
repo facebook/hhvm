@@ -55,7 +55,11 @@ CertificateMsg ZstdCertificateDecompressor::decompress(
 
   // with successful decompression, status holds uncompressed size
   rawCertMessage->append(status);
-  return decode<CertificateMsg>(std::move(rawCertMessage));
+  CertificateMsg msg;
+  Error err;
+  FIZZ_THROW_ON_ERROR(
+      decode<CertificateMsg>(msg, err, std::move(rawCertMessage)), err);
+  return msg;
 }
 
 } // namespace fizz

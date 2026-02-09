@@ -20,6 +20,7 @@ folly::StringPiece kOuterECHClientHelloExtensionData{
     "0000010001AA0003656e6300077061796c6f6164"};
 
 TEST(ECHTest, TestECHConfigListEncodeDecode) {
+  Error err;
   auto configContentBuf = encode(getParsedECHConfig());
   // Make ECH configs
   ECHConfig echConfig1;
@@ -39,7 +40,9 @@ TEST(ECHTest, TestECHConfigListEncodeDecode) {
 
   // Decode ECH config
   folly::io::Cursor cursor(encodedBuf.get());
-  auto gotECHConfigList = decode<ECHConfigList>(cursor);
+  ECHConfigList gotECHConfigList;
+  EXPECT_EQ(
+      decode<ECHConfigList>(gotECHConfigList, err, cursor), Status::Success);
 
   // All ECHConfigs in ECHConfigList should be the same
   for (auto& echConfig : gotECHConfigList.configs) {
@@ -54,6 +57,7 @@ TEST(ECHTest, TestECHConfigEncodeDecode) {
   // Encode ECH config
   ECHConfig echConfig;
   echConfig.version = ECHVersion::Draft15;
+  Error err;
   auto configContentBuf = encode(getParsedECHConfig());
   echConfig.ech_config_content = configContentBuf->clone();
   std::unique_ptr<folly::IOBuf> encodedBuf =
@@ -61,7 +65,8 @@ TEST(ECHTest, TestECHConfigEncodeDecode) {
 
   // Decode ECH config
   folly::io::Cursor cursor(encodedBuf.get());
-  auto gotECHConfig = decode<ECHConfig>(cursor);
+  ECHConfig gotECHConfig;
+  EXPECT_EQ(decode<ECHConfig>(gotECHConfig, err, cursor), Status::Success);
 
   // Check decode(encode(config)) = config
   EXPECT_EQ(gotECHConfig.version, ECHVersion::Draft15);
@@ -115,7 +120,7 @@ TEST(ECHTest, TestUnsupportedECHConfigEncodeDecode) {
   // Encode ECH config
   ECHConfig echConfig;
   echConfig.version = static_cast<ECHVersion>(4);
-
+  Error err;
   auto configContentBuf = encode(getParsedECHConfig());
   echConfig.ech_config_content = configContentBuf->clone();
 
@@ -124,7 +129,8 @@ TEST(ECHTest, TestUnsupportedECHConfigEncodeDecode) {
 
   // Decode ECH config
   folly::io::Cursor cursor(encodedBuf.get());
-  auto gotECHConfig = decode<ECHConfig>(cursor);
+  ECHConfig gotECHConfig;
+  EXPECT_EQ(decode<ECHConfig>(gotECHConfig, err, cursor), Status::Success);
 
   EXPECT_EQ(gotECHConfig.version, static_cast<ECHVersion>(4));
   EXPECT_FALSE(

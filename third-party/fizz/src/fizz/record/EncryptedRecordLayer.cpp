@@ -60,7 +60,8 @@ Status EncryptedReadRecordLayer::getDecryptedBuf(
     }
 
     if (contentType == ContentType::alert && length == 2) {
-      auto alert = decode<Alert>(cursor);
+      Alert alert;
+      FIZZ_RETURN_ON_ERROR(decode<Alert>(alert, err, cursor));
       return err.error(
           folly::to<std::string>(
               "received plaintext alert in encrypted record: ",

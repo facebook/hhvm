@@ -73,7 +73,10 @@ class ZstdCertificateCompressorTest : public testing::Test {
   T decodeHex(const std::string& hex) {
     auto data = unhexlify(hex);
     auto buf = IOBuf::copyBuffer(data.data(), data.size());
-    return decode<T>(std::move(buf));
+    T decoded;
+    Error err;
+    FIZZ_THROW_ON_ERROR(decode<T>(decoded, err, std::move(buf)), err);
+    return decoded;
   }
 
   template <class T>

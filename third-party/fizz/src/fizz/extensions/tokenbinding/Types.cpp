@@ -127,9 +127,13 @@ Buf encode(TokenBindingMessage&& message) {
 }
 
 template <>
-TokenBindingMessage decode(folly::io::Cursor& cursor) {
+Status decode<TokenBindingMessage>(
+    TokenBindingMessage& ret,
+    Error& /* err */,
+    folly::io::Cursor& cursor) {
   TokenBindingMessage message;
   detail::readVector<uint16_t>(message.tokenbindings, cursor);
-  return message;
+  ret = std::move(message);
+  return Status::Success;
 }
 } // namespace fizz

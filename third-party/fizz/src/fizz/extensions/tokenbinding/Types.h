@@ -74,5 +74,8 @@ Status getExtension(
 template <>
 Buf encode(extensions::TokenBindingMessage&& message);
 template <>
-extensions::TokenBindingMessage decode(folly::io::Cursor& cursor);
+Status decode(
+    extensions::TokenBindingMessage& ret,
+    Error& err,
+    folly::io::Cursor& cursor);
 } // namespace fizz

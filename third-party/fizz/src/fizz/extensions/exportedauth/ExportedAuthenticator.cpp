@@ -264,7 +264,10 @@ std::tuple<Buf, std::vector<fizz::Extension>> decodeAuthRequest(
   std::vector<fizz::Extension> exts;
   if (authRequest && !(authRequest->empty())) {
     folly::io::Cursor cursor(authRequest.get());
-    CertificateRequest decodedCertRequest = decode<CertificateRequest>(cursor);
+    CertificateRequest decodedCertRequest;
+    Error err;
+    FIZZ_THROW_ON_ERROR(
+        decode<CertificateRequest>(decodedCertRequest, err, cursor), err);
     certRequestContext =
         std::move(decodedCertRequest.certificate_request_context);
     exts = std::move(decodedCertRequest.extensions);

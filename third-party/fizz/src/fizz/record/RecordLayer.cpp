@@ -53,7 +53,8 @@ Status ReadRecordLayer::readEvent(
 
     switch (message->type) {
       case ContentType::alert: {
-        auto alert = decode<Alert>(std::move(message->fragment));
+        Alert alert;
+        TRY(decode<Alert>(alert, err, std::move(message->fragment)));
         if (alert.description == AlertDescription::close_notify) {
           ret = ReadResult<Param>::from(Param(CloseNotify(socketBuf.move())));
         } else {
@@ -115,12 +116,10 @@ Status ReadRecordLayer::readEvent(
 }
 
 template <typename T>
-static Status parse(
-    folly::Optional<Param>& ret,
-    Error& /* err */,
-    Buf handshakeMsg,
-    Buf original) {
-  auto msg = decode<T>(std::move(handshakeMsg));
+static Status
+parse(folly::Optional<Param>& ret, Error& err, Buf handshakeMsg, Buf original) {
+  T msg;
+  TRY(decode<T>(msg, err, std::move(handshakeMsg)));
   msg.originalEncoding = std::move(original);
   ret = std::move(msg);
   return Status::Success;
@@ -129,10 +128,11 @@ static Status parse(
 template <>
 Status parse<ServerHello>(
     folly::Optional<Param>& ret,
-    Error& /* err */,
+    Error& err,
     Buf handshakeMsg,
     Buf original) {
-  auto shlo = decode<ServerHello>(std::move(handshakeMsg));
+  ServerHello shlo;
+  TRY(decode<ServerHello>(shlo, err, std::move(handshakeMsg)));
   if (shlo.random == HelloRetryRequest::HrrRandom) {
     HelloRetryRequest hrr;
     hrr.legacy_version = shlo.legacy_version;

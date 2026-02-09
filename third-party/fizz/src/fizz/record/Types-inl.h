@@ -6,6 +6,7 @@
  *  LICENSE file in the root directory of this source tree.
  */
 
+#include <fizz/util/Status.h>
 #include <folly/Conv.h>
 #include <folly/String.h>
 #include <folly/io/Cursor.h>
@@ -552,7 +553,8 @@ Buf encodeHandshake(T&& handshakeMsg) {
 }
 
 template <>
-inline ClientHello decode(folly::io::Cursor& cursor) {
+inline Status
+decode(ClientHello& ret, Error& /* err */, folly::io::Cursor& cursor) {
   ClientHello chlo;
   detail::read(chlo.legacy_version, cursor);
   detail::read(chlo.random, cursor);
@@ -565,11 +567,13 @@ inline ClientHello decode(folly::io::Cursor& cursor) {
   if (!cursor.isAtEnd()) {
     detail::readVector<uint16_t>(chlo.extensions, cursor);
   }
-  return chlo;
+  ret = std::move(chlo);
+  return Status::Success;
 }
 
 template <>
-inline ServerHello decode(folly::io::Cursor& cursor) {
+inline Status
+decode(ServerHello& ret, Error& /* err */, folly::io::Cursor& cursor) {
   ServerHello shlo;
   detail::read(shlo.legacy_version, cursor);
   detail::read(shlo.random, cursor);
@@ -577,97 +581,125 @@ inline ServerHello decode(folly::io::Cursor& cursor) {
   detail::read(shlo.cipher_suite, cursor);
   detail::read(shlo.legacy_compression_method, cursor);
   detail::readVector<uint16_t>(shlo.extensions, cursor);
-  return shlo;
+  ret = std::move(shlo);
+  return Status::Success;
 }
 
 template <>
-inline EndOfEarlyData decode(folly::io::Cursor&) {
-  return EndOfEarlyData();
+inline Status
+decode(EndOfEarlyData& ret, Error& /* err */, folly::io::Cursor&) {
+  ret = EndOfEarlyData();
+  return Status::Success;
 }
 
 template <>
-inline EncryptedExtensions decode(folly::io::Cursor& cursor) {
+inline Status
+decode(EncryptedExtensions& ret, Error& /* err */, folly::io::Cursor& cursor) {
   EncryptedExtensions ee;
   detail::readVector<uint16_t>(ee.extensions, cursor);
-  return ee;
+  ret = std::move(ee);
+  return Status::Success;
 }
 
 template <>
-inline CertificateRequest decode(folly::io::Cursor& cursor) {
+inline Status
+decode(CertificateRequest& ret, Error& /* err */, folly::io::Cursor& cursor) {
   CertificateRequest cr;
   detail::readBuf<uint8_t>(cr.certificate_request_context, cursor);
   detail::readVector<uint16_t>(cr.extensions, cursor);
-  return cr;
+  ret = std::move(cr);
+  return Status::Success;
 }
 
 template <>
-inline CertificateMsg decode(folly::io::Cursor& cursor) {
+inline Status
+decode(CertificateMsg& ret, Error& /* err */, folly::io::Cursor& cursor) {
   CertificateMsg cert;
   detail::readBuf<uint8_t>(cert.certificate_request_context, cursor);
   detail::readVector<detail::bits24>(cert.certificate_list, cursor);
-  return cert;
+  ret = std::move(cert);
+  return Status::Success;
 }
 
 template <>
-inline CompressedCertificate decode(folly::io::Cursor& cursor) {
+inline Status decode(
+    CompressedCertificate& ret,
+    Error& /* err */,
+    folly::io::Cursor& cursor) {
   CompressedCertificate cc;
   detail::read(cc.algorithm, cursor);
   cc.uncompressed_length = detail::readBits24(cursor);
   detail::readBuf<detail::bits24>(cc.compressed_certificate_message, cursor);
-  return cc;
+  ret = std::move(cc);
+  return Status::Success;
 }
 
 template <>
-inline CertificateVerify decode(folly::io::Cursor& cursor) {
+inline Status
+decode(CertificateVerify& ret, Error& /* err */, folly::io::Cursor& cursor) {
   CertificateVerify certVerify;
   detail::read(certVerify.algorithm, cursor);
   detail::readBuf<uint16_t>(certVerify.signature, cursor);
-  return certVerify;
+  ret = std::move(certVerify);
+  return Status::Success;
 }
 
 template <>
-inline NewSessionTicket decode<NewSessionTicket>(folly::io::Cursor& cursor) {
+inline Status decode<NewSessionTicket>(
+    NewSessionTicket& ret,
+    Error& /* err */,
+    folly::io::Cursor& cursor) {
   NewSessionTicket nst;
   detail::read(nst.ticket_lifetime, cursor);
   detail::read(nst.ticket_age_add, cursor);
   detail::readBuf<uint8_t>(nst.ticket_nonce, cursor);
   detail::readBuf<uint16_t>(nst.ticket, cursor);
   detail::readVector<uint16_t>(nst.extensions, cursor);
-  return nst;
+  ret = std::move(nst);
+  return Status::Success;
 }
 
 template <>
-inline Alert decode(folly::io::Cursor& cursor) {
+inline Status decode(Alert& ret, Error& /* err */, folly::io::Cursor& cursor) {
   Alert alert;
   detail::read(alert.level, cursor);
   detail::read(alert.description, cursor);
-  return alert;
+  ret = std::move(alert);
+  return Status::Success;
 }
 
 template <>
-inline Finished decode<Finished>(std::unique_ptr<folly::IOBuf>&& buf) {
+inline Status decode<Finished>(
+    Finished& ret,
+    Error& /* err */,
+    std::unique_ptr<folly::IOBuf>&& buf) {
   Finished fin;
   fin.verify_data = std::move(buf);
-  return fin;
+  ret = std::move(fin);
+  return Status::Success;
 }
 
 template <>
-inline KeyUpdate decode<KeyUpdate>(folly::io::Cursor& cursor) {
+inline Status
+decode<KeyUpdate>(KeyUpdate& ret, Error& /* err */, folly::io::Cursor& cursor) {
   KeyUpdate update;
   detail::read(update.request_update, cursor);
-  return update;
+  ret = std::move(update);
+  return Status::Success;
 }
 
 template <class T>
-T decode(std::unique_ptr<folly::IOBuf>&& buf) {
+Status decode(T& ret, Error& err, std::unique_ptr<folly::IOBuf>&& buf) {
   folly::io::Cursor cursor(buf.get());
-  auto decoded = decode<T>(cursor);
+  T decoded;
+  FIZZ_RETURN_ON_ERROR(decode<T>(decoded, err, cursor));
 
   if (!cursor.isAtEnd()) {
-    throw std::runtime_error("didn't read entire message");
+    return err.error("didn't read entire message");
   }
 
-  return decoded;
+  ret = std::move(decoded);
+  return Status::Success;
 }
 
 template <typename T>

@@ -3780,3 +3780,68 @@ TEST(CompilerTest, scoped_id_scope_name_conflicts_with_local_type) {
   )";
   check_compile(name_contents_map, "main.thrift");
 }
+
+TEST(CompilerTest, sealed_type) {
+  check_compile(
+      R"(
+    package "facebook.com/thrift/test"
+    include "thrift/annotation/thrift.thrift"
+
+    @thrift.Sealed
+    struct SealedStruct {
+      1: i32 a;
+    }
+
+    typedef SealedStruct MySealedStruct;
+
+    @thrift.Sealed
+    struct NestedSealedStruct {
+      1: MySealedStruct a;
+    }
+
+
+    // Even though it only contains sealed fields, NonSealedStruct is not
+    // considered sealed because it does not have the @thrift.Sealed annotation.
+    struct NonSealedStruct {
+      1: SealedStruct a;
+    }
+
+    @thrift.Sealed # expected-warning: Type `InvalidSealedStruct` is marked as `@thrift.Sealed`, but is not sealed. The following fields have non-sealed types: {"a", "d"}
+    struct InvalidSealedStruct {
+      1: NonSealedStruct a;
+      2: SealedStruct b;
+      3: i32 c;
+      4: optional NonSealedStruct d;
+    }
+
+    @thrift.Sealed
+    union SealedUnion {
+      1: i32 a;
+    }
+
+    union NonSealedUnion {
+      1: SealedUnion a;
+    }
+
+    @thrift.Sealed # expected-warning: Type `InvalidSealedUnion` is marked as `@thrift.Sealed`, but is not sealed. The following fields have non-sealed types: {"a"}
+    union InvalidSealedUnion {
+      1: NonSealedUnion a;
+    }
+
+    @thrift.Sealed
+    exception SealedException {
+      1: SealedUnion a;
+      2: SealedStruct b;
+    }
+
+    @thrift.Sealed # expected-warning: Type `InvalidSealedException` is marked as `@thrift.Sealed`, but is not sealed. The following fields have non-sealed types: {"b"}
+    exception InvalidSealedException {
+      1: SealedException a;
+      2: NonSealedStruct b;
+    }
+
+    @thrift.Sealed # expected-error: `Sealed` cannot annotate `InvalidTypedefSealed`
+    typedef NonSealedUnion InvalidTypedefSealed;
+  )",
+      {"--extra-validation", "sealed_annotation_on_non_sealed_type=warn"});
+}

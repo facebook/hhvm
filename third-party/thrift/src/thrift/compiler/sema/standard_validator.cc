@@ -551,6 +551,39 @@ void validate_orderable_structured_types(
   }
 }
 
+void validate_sealed_structured_types(
+    sema_context& ctx, const t_structured& node) {
+  if (!node.has_structured_annotation(kSealedUri)) {
+    // Type is not marked as @thrift.Sealed => nothing to validate
+    return;
+  }
+
+  if (node.is_sealed()) {
+    // Type is marked as @thrift.Sealed, and satisfies all the conditions => OK
+    return;
+  }
+
+  // Type is markes as Sealed but does not satisfy criteria. Find which field(s)
+  // break the condition.
+
+  std::set<std::string> non_sealed_field_names;
+  for (const t_field& field : node.fields()) {
+    if (field.type()->is_sealed()) {
+      continue;
+    }
+    non_sealed_field_names.insert(field.name());
+  }
+
+  ctx.report(
+      node,
+      validation_to_diagnostic_level(
+          ctx.sema_parameters().sealed_annotation_on_non_sealed_type),
+      "Type `{}` is marked as `@thrift.Sealed`, but is not sealed. The "
+      "following fields have non-sealed types: {}",
+      node.name(),
+      non_sealed_field_names);
+}
+
 // Checks the attributes of fields in a union.
 void validate_union_field_attributes(sema_context& ctx, const t_union& node) {
   for (const auto& field : node.fields()) {
@@ -1966,6 +1999,8 @@ ast_validator standard_validator() {
       &validate_exception_message_annotation_is_only_in_exceptions);
   validator.add_structured_definition_visitor(
       &validate_orderable_structured_types);
+  validator.add_structured_definition_visitor(
+      &validate_sealed_structured_types);
 
   validator.add_union_visitor(&validate_union_field_attributes);
   validator.add_exception_visitor(&validate_exception_message_annotation);

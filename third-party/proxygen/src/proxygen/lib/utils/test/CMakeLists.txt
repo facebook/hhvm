@@ -22,6 +22,7 @@ proxygen_add_test(TARGET TraceEventTest
 
 proxygen_add_test(TARGET UtilTests
   SOURCES
+    CompressionFilterUtilsTest.cpp
     ConditionalGateTest.cpp
     CryptUtilTest.cpp
     GenericFilterTest.cpp

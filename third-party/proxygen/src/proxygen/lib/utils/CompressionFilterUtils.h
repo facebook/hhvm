@@ -119,22 +119,18 @@ class CompressionFilterUtils {
     return it != params.compressibleContentTypes->end();
   }
 
- private:
   enum class CodecType : uint8_t {
     NO_COMPRESSION = 0,
     ZLIB = 1,
     ZSTD = 2,
   };
-  static CodecType determineCompressionType(const HTTPMessage& msg,
-                                            bool enableZstd,
-                                            bool enableGzip) noexcept {
 
+  static CodecType determineCompressionType(
+      folly::StringPiece acceptEncodingHeader,
+      bool enableZstd,
+      bool enableGzip) noexcept {
     RFC2616::TokenPairVec output;
-
     // Accept encoding header could have qvalues (gzip; q=5.0)
-    auto acceptEncodingHeader =
-        msg.getHeaders().getSingleOrEmpty(HTTP_HEADER_ACCEPT_ENCODING);
-
     if (!RFC2616::parseQvalues(acceptEncodingHeader, output)) {
       return CodecType::NO_COMPRESSION;
     }
@@ -160,6 +156,16 @@ class CompressionFilterUtils {
       DCHECK(false) << "found unexpected content-coding selection";
       return CodecType::NO_COMPRESSION;
     }
+  }
+
+ private:
+  static CodecType determineCompressionType(const HTTPMessage& msg,
+                                            bool enableZstd,
+                                            bool enableGzip) noexcept {
+    auto acceptEncodingHeader =
+        msg.getHeaders().getSingleOrEmpty(HTTP_HEADER_ACCEPT_ENCODING);
+    return determineCompressionType(
+        acceptEncodingHeader, enableZstd, enableGzip);
   }
 };
 } // namespace proxygen

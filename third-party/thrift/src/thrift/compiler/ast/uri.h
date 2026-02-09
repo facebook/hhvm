@@ -44,6 +44,7 @@ inline constexpr auto kTransitiveUri =
 inline constexpr auto kSerialUri = "facebook.com/thrift/annotation/Serial";
 inline constexpr auto kUriUri = "facebook.com/thrift/annotation/Uri";
 inline constexpr auto kPriorityUri = "facebook.com/thrift/annotation/Priority";
+inline constexpr auto kSealedUri = "facebook.com/thrift/annotation/Sealed";
 inline constexpr auto kDeprecatedUnvalidatedAnnotationsUri =
     "facebook.com/thrift/annotation/DeprecatedUnvalidatedAnnotations";
 inline constexpr auto kAllowReservedIdentifierUri =
@@ -64,6 +65,8 @@ inline constexpr auto kAllowUnsafeRequiredFieldQualifierUri =
     "facebook.com/thrift/annotation/AllowUnsafeRequiredFieldQualifier";
 inline constexpr auto kAllowLegacyMissingUris =
     "facebook.com/thrift/annotation/AllowLegacyMissingUris";
+inline constexpr auto kAllowUnsafeNonSealedKeyTypeUri =
+    "facebook.com/thrift/annotation/AllowUnsafeNonSealedKeyType";
 
 // Scope:
 inline constexpr auto kScopeProgramUri =

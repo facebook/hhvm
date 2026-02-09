@@ -26,7 +26,8 @@ namespace HPHP {
 
 struct SQLite3 : SystemLib::ClassLoader<"SQLite3"> {
   SQLite3();
-  ~SQLite3();
+  ~SQLite3() { sweep(); }
+  void sweep();
   void validate() const;
 
   struct UserDefinedFunc {
@@ -51,7 +52,8 @@ void HHVM_METHOD(SQLite3, open,
 
 struct SQLite3Stmt : SystemLib::ClassLoader<"SQLite3Stmt"> {
   SQLite3Stmt();
-  ~SQLite3Stmt();
+  ~SQLite3Stmt() { sweep(); }
+  void sweep();
   void validate() const;
 
   struct BoundParam {

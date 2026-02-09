@@ -167,9 +167,10 @@ static void php_sqlite3_callback_final(sqlite3_context *context) {
 SQLite3::SQLite3() : m_raw_db(nullptr) {
 }
 
-SQLite3::~SQLite3() {
+void SQLite3::sweep() {
   if (m_raw_db) {
     sqlite3_close_v2(m_raw_db);
+    m_raw_db = nullptr;
   }
 }
 
@@ -485,9 +486,10 @@ bool HHVM_METHOD(SQLite3, openblob, const String& /*table*/,
 SQLite3Stmt::SQLite3Stmt() : m_raw_stmt(nullptr) {
 }
 
-SQLite3Stmt::~SQLite3Stmt() {
+void SQLite3Stmt::sweep() {
   if (m_raw_stmt) {
     sqlite3_finalize(m_raw_stmt);
+    m_raw_stmt = nullptr;
   }
 }
 
@@ -774,7 +776,7 @@ static struct SQLite3Extension final : Extension {
     HHVM_ME(SQLite3, openblob);
     HHVM_STATIC_ME(SQLite3, version);
     HHVM_STATIC_ME(SQLite3, escapestring);
-    Native::registerNativeDataInfo<SQLite3>(Native::NDIFlags::NO_SWEEP);
+    Native::registerNativeDataInfo<SQLite3>();
 
     HHVM_ME(SQLite3Stmt, __construct);
     HHVM_ME(SQLite3Stmt, paramcount);
@@ -783,7 +785,7 @@ static struct SQLite3Extension final : Extension {
     HHVM_ME(SQLite3Stmt, clear);
     HHVM_ME(SQLite3Stmt, bindvalue);
     HHVM_ME(SQLite3Stmt, execute);
-    Native::registerNativeDataInfo<SQLite3Stmt>(Native::NDIFlags::NO_SWEEP);
+    Native::registerNativeDataInfo<SQLite3Stmt>();
 
     HHVM_ME(SQLite3Result, numcolumns);
     HHVM_ME(SQLite3Result, columnname);

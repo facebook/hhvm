@@ -25,141 +25,198 @@ inline std::vector<Extension>::const_iterator findExtension(
 }
 
 template <class T>
-inline folly::Optional<T> getExtension(
+inline Status getExtension(
+    folly::Optional<T>& ret,
+    Error& err,
     const std::vector<Extension>& extensions) {
   auto it = findExtension(extensions, T::extension_type);
   if (it == extensions.end()) {
-    return folly::none;
+    ret = folly::none;
+    return Status::Success;
   }
   folly::io::Cursor cs{it->extension_data.get()};
-  auto ret = getExtension<T>(cs);
+  T extVal;
+  FIZZ_RETURN_ON_ERROR(getExtension<T>(extVal, err, cs));
   if (!cs.isAtEnd()) {
-    throw std::runtime_error("didn't read entire extension");
+    return err.error("didn't read entire extension");
   }
-  return ret;
+  ret = std::move(extVal);
+  return Status::Success;
 }
 
 template <>
-inline SignatureAlgorithms getExtension(folly::io::Cursor& cs) {
+inline Status getExtension(
+    SignatureAlgorithms& ret,
+    Error& /* err */,
+    folly::io::Cursor& cs) {
   SignatureAlgorithms sigs;
   detail::readVector<uint16_t>(sigs.supported_signature_algorithms, cs);
-  return sigs;
+  ret = std::move(sigs);
+  return Status::Success;
 }
 
 template <>
-inline SupportedGroups getExtension(folly::io::Cursor& cs) {
+inline Status
+getExtension(SupportedGroups& ret, Error& /* err */, folly::io::Cursor& cs) {
   SupportedGroups groups;
   detail::readVector<uint16_t>(groups.named_group_list, cs);
-  return groups;
+  ret = std::move(groups);
+  return Status::Success;
 }
 
 template <>
-inline ClientKeyShare getExtension(folly::io::Cursor& cs) {
+inline Status
+getExtension(ClientKeyShare& ret, Error& /* err */, folly::io::Cursor& cs) {
   ClientKeyShare share;
   detail::readVector<uint16_t>(share.client_shares, cs);
-  return share;
+  ret = std::move(share);
+  return Status::Success;
 }
 
 template <>
-inline ServerKeyShare getExtension(folly::io::Cursor& cs) {
+inline Status
+getExtension(ServerKeyShare& ret, Error& /* err */, folly::io::Cursor& cs) {
   ServerKeyShare share;
   detail::read(share.server_share, cs);
-  return share;
+  ret = std::move(share);
+  return Status::Success;
 }
 
 template <>
-inline HelloRetryRequestKeyShare getExtension(folly::io::Cursor& cs) {
+inline Status getExtension(
+    HelloRetryRequestKeyShare& ret,
+    Error& /* err */,
+    folly::io::Cursor& cs) {
   HelloRetryRequestKeyShare share;
   detail::read(share.selected_group, cs);
-  return share;
+  ret = std::move(share);
+  return Status::Success;
 }
 
 template <>
-inline ClientPresharedKey getExtension(folly::io::Cursor& cs) {
+inline Status
+getExtension(ClientPresharedKey& ret, Error& /* err */, folly::io::Cursor& cs) {
   ClientPresharedKey share;
   detail::readVector<uint16_t>(share.identities, cs);
   detail::readVector<uint16_t>(share.binders, cs);
-  return share;
+  ret = std::move(share);
+  return Status::Success;
 }
 
 template <>
-inline ServerPresharedKey getExtension(folly::io::Cursor& cs) {
+inline Status
+getExtension(ServerPresharedKey& ret, Error& /* err */, folly::io::Cursor& cs) {
   ServerPresharedKey share;
   detail::read(share.selected_identity, cs);
-  return share;
+  ret = std::move(share);
+  return Status::Success;
 }
 
 template <>
-inline ClientEarlyData getExtension(folly::io::Cursor& /* unused */) {
-  return ClientEarlyData();
+inline Status getExtension(
+    ClientEarlyData& ret,
+    Error& /* err */,
+    folly::io::Cursor& /* unused */) {
+  ret = ClientEarlyData();
+  return Status::Success;
 }
 
 template <>
-inline ServerEarlyData getExtension(folly::io::Cursor& /* unused */) {
-  return ServerEarlyData();
+inline Status getExtension(
+    ServerEarlyData& ret,
+    Error& /* err */,
+    folly::io::Cursor& /* unused */) {
+  ret = ServerEarlyData();
+  return Status::Success;
 }
 
 template <>
-inline TicketEarlyData getExtension(folly::io::Cursor& cs) {
+inline Status
+getExtension(TicketEarlyData& ret, Error& /* err */, folly::io::Cursor& cs) {
   TicketEarlyData early;
   detail::read(early.max_early_data_size, cs);
-  return early;
+  ret = std::move(early);
+  return Status::Success;
 }
 
 template <>
-inline Cookie getExtension(folly::io::Cursor& cs) {
+inline Status
+getExtension(Cookie& ret, Error& /* err */, folly::io::Cursor& cs) {
   Cookie cookie;
   detail::readBuf<uint16_t>(cookie.cookie, cs);
-  return cookie;
+  ret = std::move(cookie);
+  return Status::Success;
 }
 
 template <>
-inline SupportedVersions getExtension(folly::io::Cursor& cs) {
+inline Status
+getExtension(SupportedVersions& ret, Error& /* err */, folly::io::Cursor& cs) {
   SupportedVersions versions;
   detail::readVector<uint8_t>(versions.versions, cs);
-  return versions;
+  ret = std::move(versions);
+  return Status::Success;
 }
 
 template <>
-inline ServerSupportedVersions getExtension(folly::io::Cursor& cs) {
+inline Status getExtension(
+    ServerSupportedVersions& ret,
+    Error& /* err */,
+    folly::io::Cursor& cs) {
   ServerSupportedVersions versions;
   detail::read(versions.selected_version, cs);
-  return versions;
+  ret = std::move(versions);
+  return Status::Success;
 }
 
 template <>
-inline PskKeyExchangeModes getExtension(folly::io::Cursor& cs) {
+inline Status getExtension(
+    PskKeyExchangeModes& ret,
+    Error& /* err */,
+    folly::io::Cursor& cs) {
   PskKeyExchangeModes modes;
   detail::readVector<uint8_t>(modes.modes, cs);
-  return modes;
+  ret = std::move(modes);
+  return Status::Success;
 }
 
 template <>
-inline ProtocolNameList getExtension(folly::io::Cursor& cs) {
+inline Status
+getExtension(ProtocolNameList& ret, Error& /* err */, folly::io::Cursor& cs) {
   ProtocolNameList names;
   detail::readVector<uint16_t>(names.protocol_name_list, cs);
-  return names;
+  ret = std::move(names);
+  return Status::Success;
 }
 
 template <>
-inline ServerNameList getExtension(folly::io::Cursor& cs) {
+inline Status
+getExtension(ServerNameList& ret, Error& /* err */, folly::io::Cursor& cs) {
   ServerNameList names;
   detail::readVector<uint16_t>(names.server_name_list, cs);
-  return names;
+  ret = std::move(names);
+  return Status::Success;
 }
 
 template <>
-inline CertificateAuthorities getExtension(folly::io::Cursor& cs) {
+inline Status getExtension(
+    CertificateAuthorities& ret,
+    Error& /* err */,
+    folly::io::Cursor& cs) {
   CertificateAuthorities authorities;
   detail::readVector<uint16_t>(authorities.authorities, cs);
-  return authorities;
+  ret = std::move(authorities);
+  return Status::Success;
 }
 
 template <>
-inline CertificateCompressionAlgorithms getExtension(folly::io::Cursor& cs) {
+inline Status getExtension(
+    CertificateCompressionAlgorithms& ret,
+    Error& /* err */,
+    folly::io::Cursor& cs) {
   CertificateCompressionAlgorithms cca;
   detail::readVector<uint8_t>(cca.algorithms, cs);
-  return cca;
+  ret = std::move(cca);
+  return Status::Success;
 }
 
 template <>
@@ -349,10 +406,11 @@ inline Extension encodeExtension(const EchOuterExtensions& outerExt) {
   return ext;
 }
 
-inline size_t getBinderLength(const ClientHello& chlo) {
+inline Status
+getBinderLength(size_t& ret, Error& err, const ClientHello& chlo) {
   if (chlo.extensions.empty() ||
       chlo.extensions.back().extension_type != ExtensionType::pre_shared_key) {
-    throw FizzException(
+    return err.error(
         "psk not at end of client hello", AlertDescription::decode_error);
   }
   folly::io::Cursor cursor(chlo.extensions.back().extension_data.get());
@@ -362,10 +420,10 @@ inline size_t getBinderLength(const ClientHello& chlo) {
   uint16_t binderLen;
   detail::read(binderLen, cursor);
   if (cursor.totalLength() != binderLen) {
-    throw FizzException(
-        "malformed binder length", AlertDescription::decode_error);
+    return err.error("malformed binder length", AlertDescription::decode_error);
   }
-  return sizeof(binderLen) + binderLen;
+  ret = sizeof(binderLen) + binderLen;
+  return Status::Success;
 }
 
 namespace detail {

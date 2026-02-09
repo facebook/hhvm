@@ -25,7 +25,10 @@ TEST(GreaseECHTest, TestGenerateRandomGreaseECH) {
   factory.setDefaults();
 
   auto chlo = TestMessages::clientHelloPsk();
-  auto sni = getExtension<ServerNameList>(chlo.extensions);
+  folly::Optional<ServerNameList> sni;
+  Error err;
+  EXPECT_EQ(
+      getExtension<ServerNameList>(sni, err, chlo.extensions), Status::Success);
 
   GreaseECHSetting setting{};
   setting.maxPayloadSize = 100;
@@ -61,7 +64,10 @@ TEST(GreaseECHTest, TestGenerateComputedGreaseECH) {
   factory.setDefaults();
 
   auto chlo = TestMessages::clientHelloPsk();
-  auto sni = getExtension<ServerNameList>(chlo.extensions);
+  folly::Optional<ServerNameList> sni;
+  Error err;
+  EXPECT_EQ(
+      getExtension<ServerNameList>(sni, err, chlo.extensions), Status::Success);
   auto encodedChlo = encode(chlo);
 
   size_t encodedChloSize = encodedChlo->computeChainDataLength();

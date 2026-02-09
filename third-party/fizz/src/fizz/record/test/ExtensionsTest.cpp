@@ -30,7 +30,9 @@ namespace test {
 
 TEST_F(ExtensionsTest, TestProtocolNameList) {
   auto exts = getExtensions(alpn);
-  auto ext = getExtension<ProtocolNameList>(exts);
+  folly::Optional<ProtocolNameList> ext;
+  Error err;
+  EXPECT_EQ(getExtension(ext, err, exts), Status::Success);
 
   EXPECT_EQ(ext->protocol_name_list.size(), 3);
   EXPECT_EQ(
@@ -48,7 +50,9 @@ TEST_F(ExtensionsTest, TestProtocolNameList) {
 
 TEST_F(ExtensionsTest, TestServerNameList) {
   auto exts = getExtensions(sni);
-  auto ext = getExtension<ServerNameList>(exts);
+  folly::Optional<ServerNameList> ext;
+  Error err;
+  EXPECT_EQ(getExtension(ext, err, exts), Status::Success);
 
   EXPECT_EQ(ext->server_name_list.size(), 1);
   EXPECT_EQ(ext->server_name_list[0].name_type, ServerNameType::host_name);
@@ -61,7 +65,9 @@ TEST_F(ExtensionsTest, TestServerNameList) {
 
 TEST_F(ExtensionsTest, TestHelloRetryRequestKeyShare) {
   auto exts = getExtensions(helloRetryRequestKeyShare);
-  auto ext = getExtension<HelloRetryRequestKeyShare>(exts);
+  folly::Optional<HelloRetryRequestKeyShare> ext;
+  Error err;
+  EXPECT_EQ(getExtension(ext, err, exts), Status::Success);
 
   EXPECT_EQ(ext->selected_group, NamedGroup::secp256r1);
 
@@ -70,26 +76,34 @@ TEST_F(ExtensionsTest, TestHelloRetryRequestKeyShare) {
 
 TEST_F(ExtensionsTest, TestClientEarlyData) {
   auto exts = getExtensions(clientEarlyData);
-  auto ext = getExtension<ClientEarlyData>(exts);
+  folly::Optional<ClientEarlyData> ext;
+  Error err;
+  EXPECT_EQ(getExtension(ext, err, exts), Status::Success);
   checkEncode(std::move(*ext), clientEarlyData);
 }
 
 TEST_F(ExtensionsTest, TestServerEarlyData) {
   auto exts = getExtensions(serverEarlyData);
-  auto ext = getExtension<ServerEarlyData>(exts);
+  folly::Optional<ServerEarlyData> ext;
+  Error err;
+  EXPECT_EQ(getExtension(ext, err, exts), Status::Success);
   checkEncode(std::move(*ext), serverEarlyData);
 }
 
 TEST_F(ExtensionsTest, TestTicketEarlyData) {
   auto exts = getExtensions(ticketEarlyData);
-  auto ext = getExtension<TicketEarlyData>(exts);
+  folly::Optional<TicketEarlyData> ext;
+  Error err;
+  EXPECT_EQ(getExtension(ext, err, exts), Status::Success);
   EXPECT_EQ(ext->max_early_data_size, 5);
   checkEncode(std::move(*ext), ticketEarlyData);
 }
 
 TEST_F(ExtensionsTest, TestCookie) {
   auto exts = getExtensions(cookie);
-  auto ext = getExtension<Cookie>(exts);
+  folly::Optional<Cookie> ext;
+  Error err;
+  EXPECT_EQ(getExtension(ext, err, exts), Status::Success);
 
   EXPECT_EQ(StringPiece(ext->cookie->coalesce()), StringPiece("cookie"));
 
@@ -98,7 +112,9 @@ TEST_F(ExtensionsTest, TestCookie) {
 
 TEST_F(ExtensionsTest, TestCertificateAuthorities) {
   auto exts = getExtensions(authorities);
-  auto ext = getExtension<CertificateAuthorities>(exts);
+  folly::Optional<CertificateAuthorities> ext;
+  Error err;
+  EXPECT_EQ(getExtension(ext, err, exts), Status::Success);
 
   EXPECT_EQ(ext->authorities.size(), 2);
   EXPECT_EQ(
@@ -113,7 +129,9 @@ TEST_F(ExtensionsTest, TestCertificateAuthorities) {
 
 TEST_F(ExtensionsTest, TestCertificateCompressionAlgorithms) {
   auto exts = getExtensions(certCompressionAlgorithms);
-  auto ext = getExtension<CertificateCompressionAlgorithms>(exts);
+  folly::Optional<CertificateCompressionAlgorithms> ext;
+  Error err;
+  EXPECT_EQ(getExtension(ext, err, exts), Status::Success);
 
   EXPECT_EQ(ext->algorithms.size(), 1);
   EXPECT_EQ(ext->algorithms[0], CertificateCompressionAlgorithm::zlib);
@@ -129,7 +147,11 @@ TEST_F(ExtensionsTest, TestBadlyFormedExtension) {
   ext.extension_type = ExtensionType::server_name;
   ext.extension_data = std::move(buf);
   exts.push_back(std::move(ext));
-  EXPECT_THROW(getExtension<ServerNameList>(exts), std::runtime_error);
+  folly::Optional<ServerNameList> result;
+  Error err;
+  EXPECT_THROW(
+      FIZZ_THROW_ON_ERROR(getExtension(result, err, exts), err),
+      std::runtime_error);
 }
 } // namespace test
 } // namespace fizz

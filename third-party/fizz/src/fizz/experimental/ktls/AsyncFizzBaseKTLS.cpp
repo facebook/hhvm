@@ -39,7 +39,10 @@ static void setPskAndSecret(
 }
 
 static uint32_t getMaxEarlyDataSize(const NewSessionTicket& nst) {
-  auto earlyData = getExtension<TicketEarlyData>(nst.extensions);
+  folly::Optional<TicketEarlyData> earlyData;
+  Error err;
+  FIZZ_THROW_ON_ERROR(
+      getExtension<TicketEarlyData>(earlyData, err, nst.extensions), err);
   if (earlyData) {
     return earlyData->max_early_data_size;
   } else {

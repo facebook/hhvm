@@ -206,7 +206,11 @@ TEST(SerializationTest, TestBuildServerOnlyPEM) {
       Extension{
           ExtensionType::delegated_credential,
           folly::IOBuf::copyBuffer(std::move(credData))});
-  auto serverCred = getExtension<DelegatedCredential>(std::move(credVec));
+  folly::Optional<DelegatedCredential> serverCred;
+  Error err;
+  EXPECT_EQ(
+      getExtension<DelegatedCredential>(serverCred, err, credVec),
+      Status::Success);
   auto combinedPem = kP256ServerDelegatedCred.toString() +
       kP256DelegatedCredKeyWServerLabel.toString();
 
@@ -226,7 +230,11 @@ TEST(SerializationTest, TestBuildClientOnlyPEM) {
       Extension{
           ExtensionType::delegated_credential,
           folly::IOBuf::copyBuffer(std::move(credData))});
-  auto clientCred = getExtension<DelegatedCredential>(std::move(credVec));
+  folly::Optional<DelegatedCredential> clientCred;
+  Error err;
+  EXPECT_EQ(
+      getExtension<DelegatedCredential>(clientCred, err, credVec),
+      Status::Success);
   auto combinedPem = kP256ClientDelegatedCred.toString() +
       kP256DelegatedCredKeyWClientLabel.toString();
 
@@ -246,7 +254,11 @@ TEST(SerializationTest, TestBuildMismatchedPEM) {
       Extension{
           ExtensionType::delegated_credential,
           folly::IOBuf::copyBuffer(std::move(credData))});
-  auto clientCred = getExtension<DelegatedCredential>(std::move(credVec));
+  folly::Optional<DelegatedCredential> clientCred;
+  Error err;
+  EXPECT_EQ(
+      getExtension<DelegatedCredential>(clientCred, err, credVec),
+      Status::Success);
   auto combinedPem = kP256ClientDelegatedCred.toString() +
       kP256DelegatedCredKeyWClientLabel.toString();
 
@@ -266,7 +278,11 @@ TEST(SerializationTest, TestBuildCombinedClientAndServerPEM) {
       Extension{
           ExtensionType::delegated_credential,
           folly::IOBuf::copyBuffer(std::move(credData))});
-  auto serverCred = getExtension<DelegatedCredential>(std::move(credVec));
+  folly::Optional<DelegatedCredential> serverCred;
+  Error err;
+  EXPECT_EQ(
+      getExtension<DelegatedCredential>(serverCred, err, credVec),
+      Status::Success);
   auto credData2 =
       folly::base64Decode(kP256ClientDelegatedCredNoLabel.toString());
   std::vector<Extension> credVec2;
@@ -274,7 +290,10 @@ TEST(SerializationTest, TestBuildCombinedClientAndServerPEM) {
       Extension{
           ExtensionType::delegated_credential,
           folly::IOBuf::copyBuffer(std::move(credData2))});
-  auto clientCred = getExtension<DelegatedCredential>(std::move(credVec2));
+  folly::Optional<DelegatedCredential> clientCred;
+  EXPECT_EQ(
+      getExtension<DelegatedCredential>(clientCred, err, credVec2),
+      Status::Success);
 
   auto combinedPem = kP256ClientDelegatedCred.toString() +
       kP256DelegatedCredKeyWClientLabel.toString() +

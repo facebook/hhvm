@@ -338,8 +338,12 @@ Buf getFinishedData(
 folly::Optional<std::vector<SignatureScheme>> getRequestedSchemes(
     const std::vector<fizz::Extension>& authRequestExtensions) {
   if (!(authRequestExtensions.empty())) {
-    auto sigAlgsExtension =
-        getExtension<SignatureAlgorithms>(authRequestExtensions);
+    folly::Optional<SignatureAlgorithms> sigAlgsExtension;
+    Error err;
+    FIZZ_THROW_ON_ERROR(
+        getExtension<SignatureAlgorithms>(
+            sigAlgsExtension, err, authRequestExtensions),
+        err);
     if (sigAlgsExtension) {
       auto requestedSchemes = sigAlgsExtension->supported_signature_algorithms;
       return requestedSchemes;

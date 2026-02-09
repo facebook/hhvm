@@ -38,11 +38,15 @@ Extension encodeExtension(const extensions::DelegatedCredentialSupport& cs);
 } // namespace extensions
 
 template <>
-folly::Optional<extensions::DelegatedCredential> getExtension(
+Status getExtension(
+    folly::Optional<extensions::DelegatedCredential>& ret,
+    Error& err,
     const std::vector<Extension>& extensions);
 
 template <>
-folly::Optional<extensions::DelegatedCredentialSupport> getExtension(
+Status getExtension(
+    folly::Optional<extensions::DelegatedCredentialSupport>& ret,
+    Error& err,
     const std::vector<Extension>& extensions);
 
 } // namespace fizz

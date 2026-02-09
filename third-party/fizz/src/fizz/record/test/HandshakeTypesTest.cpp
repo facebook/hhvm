@@ -103,7 +103,10 @@ class HandshakeTypesTest : public testing::Test {
 TEST_F(HandshakeTypesTest, ChloEncodeDecode) {
   auto clientHello = decodeHex<ClientHello>(chlo);
 
-  auto sigAlgs = getExtension<SignatureAlgorithms>(clientHello.extensions);
+  folly::Optional<SignatureAlgorithms> sigAlgs;
+  Error err;
+  EXPECT_EQ(
+      getExtension(sigAlgs, err, clientHello.extensions), Status::Success);
   ASSERT_TRUE(sigAlgs);
   const auto& schemes = sigAlgs->supported_signature_algorithms;
   ASSERT_EQ(11, schemes.size());
@@ -114,20 +117,30 @@ TEST_F(HandshakeTypesTest, ChloEncodeDecode) {
           schemes.end(),
           SignatureScheme::ecdsa_secp256r1_sha256));
 
-  auto groups = getExtension<SupportedGroups>(clientHello.extensions);
+  folly::Optional<SupportedGroups> groups;
+  EXPECT_EQ(getExtension(groups, err, clientHello.extensions), Status::Success);
   const auto& groupNames = groups->named_group_list;
   ASSERT_EQ(3, groupNames.size());
   ASSERT_FALSE(
       groupNames.end() ==
       std::find(groupNames.begin(), groupNames.end(), NamedGroup::secp256r1));
 
-  auto clientShares = getExtension<ClientKeyShare>(clientHello.extensions);
+  folly::Optional<ClientKeyShare> clientShares;
+  EXPECT_EQ(
+      getExtension(clientShares, err, clientHello.extensions), Status::Success);
   ASSERT_TRUE(clientShares);
   ASSERT_EQ(2, clientShares->client_shares.size());
 
-  ASSERT_FALSE(getExtension<ClientPresharedKey>(clientHello.extensions));
-  ASSERT_FALSE(getExtension<ClientEarlyData>(clientHello.extensions));
-  ASSERT_FALSE(getExtension<Cookie>(clientHello.extensions));
+  folly::Optional<ClientPresharedKey> psk;
+  EXPECT_EQ(getExtension(psk, err, clientHello.extensions), Status::Success);
+  ASSERT_FALSE(psk);
+  folly::Optional<ClientEarlyData> earlyData;
+  EXPECT_EQ(
+      getExtension(earlyData, err, clientHello.extensions), Status::Success);
+  ASSERT_FALSE(earlyData);
+  folly::Optional<Cookie> cookie;
+  EXPECT_EQ(getExtension(cookie, err, clientHello.extensions), Status::Success);
+  ASSERT_FALSE(cookie);
 
   auto reencoded = encodeHex(std::move(clientHello));
   EXPECT_EQ(chlo, reencoded);
@@ -141,7 +154,10 @@ TEST_F(HandshakeTypesTest, SSL3ChloDecode) {
 TEST_F(HandshakeTypesTest, ChloDecidePsk) {
   auto clientHello = decodeHex<ClientHello>(chloPsk);
 
-  EXPECT_EQ(35, getBinderLength(clientHello));
+  size_t binderLength;
+  Error err;
+  EXPECT_EQ(getBinderLength(binderLength, err, clientHello), Status::Success);
+  EXPECT_EQ(35, binderLength);
 }
 
 TEST_F(HandshakeTypesTest, ChloEncodeCopy) {
@@ -172,7 +188,10 @@ bool extensionsMatch(const Extension& expected, const Extension& actual) {
 
 TEST_F(HandshakeTypesTest, EncodeAndDecodeSigAlgs) {
   auto clientHello = decodeHex<ClientHello>(chlo);
-  auto sigAlgs = getExtension<SignatureAlgorithms>(clientHello.extensions);
+  folly::Optional<SignatureAlgorithms> sigAlgs;
+  Error err;
+  EXPECT_EQ(
+      getExtension(sigAlgs, err, clientHello.extensions), Status::Success);
   ASSERT_TRUE(sigAlgs);
   auto ext = encodeExtension(*sigAlgs);
   auto original = findExtension(
@@ -182,7 +201,9 @@ TEST_F(HandshakeTypesTest, EncodeAndDecodeSigAlgs) {
 
 TEST_F(HandshakeTypesTest, EncodeAndDecodeClientKeyShare) {
   auto clientHello = decodeHex<ClientHello>(chlo);
-  auto share = getExtension<ClientKeyShare>(clientHello.extensions);
+  folly::Optional<ClientKeyShare> share;
+  Error err;
+  EXPECT_EQ(getExtension(share, err, clientHello.extensions), Status::Success);
   ASSERT_TRUE(share);
   auto ext = encodeExtension(*share);
   auto original =
@@ -197,9 +218,15 @@ TEST_F(HandshakeTypesTest, EncodeAndDecodeServerHello) {
   EXPECT_EQ(shlo.random.back(), 0x5b);
   EXPECT_EQ(shlo.cipher_suite, CipherSuite::TLS_AES_128_GCM_SHA256);
   EXPECT_EQ(shlo.extensions.size(), 2);
-  EXPECT_TRUE(getExtension<ServerKeyShare>(shlo.extensions).has_value());
-  EXPECT_TRUE(
-      getExtension<ServerSupportedVersions>(shlo.extensions).has_value());
+  folly::Optional<ServerKeyShare> serverKeyShare;
+  Error err;
+  EXPECT_EQ(
+      getExtension(serverKeyShare, err, shlo.extensions), Status::Success);
+  EXPECT_TRUE(serverKeyShare.has_value());
+  folly::Optional<ServerSupportedVersions> serverVersions;
+  EXPECT_EQ(
+      getExtension(serverVersions, err, shlo.extensions), Status::Success);
+  EXPECT_TRUE(serverVersions.has_value());
   auto reencoded = encodeHex(std::move(shlo));
   EXPECT_EQ(reencoded, encodedShlo);
 }
@@ -213,7 +240,10 @@ TEST_F(HandshakeTypesTest, EncodeAndDecodeEndOfEarlyData) {
 TEST_F(HandshakeTypesTest, EncodeAndDecodeEncryptedExtensions) {
   auto ee = decodeHex<EncryptedExtensions>(encodedEncryptedExtensions);
   EXPECT_EQ(ee.extensions.size(), 2);
-  EXPECT_TRUE(getExtension<SupportedGroups>(ee.extensions).has_value());
+  folly::Optional<SupportedGroups> supportedGroups;
+  Error err;
+  EXPECT_EQ(getExtension(supportedGroups, err, ee.extensions), Status::Success);
+  EXPECT_TRUE(supportedGroups.has_value());
   auto reencoded = encodeHex(std::move(ee));
   EXPECT_EQ(reencoded, encodedEncryptedExtensions);
 }
@@ -247,7 +277,10 @@ TEST_F(HandshakeTypesTest, EncodedAndDecodeCertificateRequest) {
   auto cr = decodeHex<CertificateRequest>(encodedCertRequest);
   EXPECT_TRUE(cr.certificate_request_context->empty());
   EXPECT_EQ(cr.extensions.size(), 1);
-  EXPECT_TRUE(getExtension<SignatureAlgorithms>(cr.extensions).has_value());
+  folly::Optional<SignatureAlgorithms> sigAlgs;
+  Error err;
+  EXPECT_EQ(getExtension(sigAlgs, err, cr.extensions), Status::Success);
+  EXPECT_TRUE(sigAlgs.has_value());
   auto reencoded = encodeHex(std::move(cr));
   EXPECT_EQ(reencoded, encodedCertRequest);
 }

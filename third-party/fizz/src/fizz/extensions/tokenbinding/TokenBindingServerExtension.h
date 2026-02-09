@@ -24,7 +24,11 @@ class TokenBindingServerExtension : public ServerExtensions {
 
   std::vector<Extension> getExtensions(const ClientHello& chlo) override {
     std::vector<Extension> serverExtensions;
-    auto params = getExtension<TokenBindingParameters>(chlo.extensions);
+    folly::Optional<TokenBindingParameters> params;
+    Error err;
+    FIZZ_THROW_ON_ERROR(
+        getExtension<TokenBindingParameters>(params, err, chlo.extensions),
+        err);
     if (params) {
       auto negotiatedVersion = negotiateVersion(params->version);
       auto negotiatedKeyParam = server::negotiate(

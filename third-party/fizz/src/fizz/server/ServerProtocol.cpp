@@ -518,7 +518,9 @@ static void validateClientHello(const ClientHello& chlo) {
 static Optional<ProtocolVersion> negotiateVersion(
     const ClientHello& chlo,
     const std::vector<ProtocolVersion>& versions) {
-  const auto& clientVersions = getExtension<SupportedVersions>(chlo.extensions);
+  folly::Optional<SupportedVersions> clientVersions;
+  Error err;
+  FIZZ_THROW_ON_ERROR(getExtension(clientVersions, err, chlo.extensions), err);
   if (!clientVersions) {
     return folly::none;
   }
@@ -532,7 +534,9 @@ static Optional<ProtocolVersion> negotiateVersion(
 static Optional<CookieState> getCookieState(
     const ClientHello& chlo,
     const CookieCipher* cookieCipher) {
-  auto cookieExt = getExtension<Cookie>(chlo.extensions);
+  folly::Optional<Cookie> cookieExt;
+  Error err;
+  FIZZ_THROW_ON_ERROR(getExtension(cookieExt, err, chlo.extensions), err);
   if (!cookieExt) {
     return folly::none;
   }
@@ -599,8 +603,11 @@ static ResumptionStateResult getResumptionState(
     const ClientHello& chlo,
     const TicketCipher* ticketCipher,
     const std::vector<PskKeyExchangeMode>& supportedModes) {
-  auto psks = getExtension<ClientPresharedKey>(chlo.extensions);
-  auto clientModes = getExtension<PskKeyExchangeModes>(chlo.extensions);
+  folly::Optional<ClientPresharedKey> psks;
+  folly::Optional<PskKeyExchangeModes> clientModes;
+  Error err;
+  FIZZ_THROW_ON_ERROR(getExtension(psks, err, chlo.extensions), err);
+  FIZZ_THROW_ON_ERROR(getExtension(clientModes, err, chlo.extensions), err);
   if (psks && !clientModes) {
     throw FizzException("no psk modes", AlertDescription::missing_extension);
   }
@@ -640,8 +647,10 @@ static SemiFuture<ReplayCacheResult> getReplayCacheResult(
     const ClientHello& chlo,
     bool zeroRttEnabled,
     ReplayCache* replayCache) {
-  if (!zeroRttEnabled || !replayCache ||
-      !getExtension<ClientEarlyData>(chlo.extensions)) {
+  folly::Optional<ClientEarlyData> earlyDataExt;
+  Error err;
+  FIZZ_THROW_ON_ERROR(getExtension(earlyDataExt, err, chlo.extensions), err);
+  if (!zeroRttEnabled || !replayCache || !earlyDataExt) {
     FOLLY_SDT(fizz, replay_cache_NotChecked);
     return ReplayCacheResult::NotChecked;
   }
@@ -709,7 +718,10 @@ static std::
     chloHash.hash = cookieState->chloHash->clone();
     handshakeContext->appendToTranscript(encodeHandshake(std::move(chloHash)));
 
-    auto cookie = getExtension<Cookie>(chlo.extensions);
+    folly::Optional<Cookie> cookie;
+    Error err;
+    FIZZ_THROW_ON_ERROR(
+        getExtension<Cookie>(cookie, err, chlo.extensions), err);
     handshakeContext->appendToTranscript(getStatelessHelloRetryRequest(
         cookieState->version,
         cookieState->cipher,
@@ -732,11 +744,15 @@ static std::
 
     folly::IOBufQueue chloQueue(folly::IOBufQueue::cacheChainLength());
     chloQueue.append((*chlo.originalEncoding)->clone());
-    auto chloPrefix =
-        chloQueue.split(chloQueue.chainLength() - getBinderLength(chlo));
+    size_t binderLength;
+    Error err;
+    FIZZ_THROW_ON_ERROR(getBinderLength(binderLength, err, chlo), err);
+    auto chloPrefix = chloQueue.split(chloQueue.chainLength() - binderLength);
     handshakeContext->appendToTranscript(chloPrefix);
 
-    const auto& psks = getExtension<ClientPresharedKey>(chlo.extensions);
+    folly::Optional<ClientPresharedKey> psks;
+    FIZZ_THROW_ON_ERROR(
+        getExtension<ClientPresharedKey>(psks, err, chlo.extensions), err);
     if (!psks || psks->binders.size() <= kPskIndex) {
       throw FizzException("no binders", AlertDescription::illegal_parameter);
     }
@@ -774,7 +790,10 @@ static std::tuple<NamedGroup, Optional<Buf>> negotiateGroup(
     ProtocolVersion /*version*/,
     const ClientHello& chlo,
     const std::vector<NamedGroup>& supportedGroups) {
-  auto groups = getExtension<SupportedGroups>(chlo.extensions);
+  folly::Optional<SupportedGroups> groups;
+  Error err;
+  FIZZ_THROW_ON_ERROR(
+      getExtension<SupportedGroups>(groups, err, chlo.extensions), err);
   if (!groups) {
     throw FizzException("no named groups", AlertDescription::missing_extension);
   }
@@ -782,7 +801,9 @@ static std::tuple<NamedGroup, Optional<Buf>> negotiateGroup(
   if (!group) {
     throw FizzException("no group match", AlertDescription::handshake_failure);
   }
-  auto clientShares = getExtension<ClientKeyShare>(chlo.extensions);
+  folly::Optional<ClientKeyShare> clientShares;
+  FIZZ_THROW_ON_ERROR(
+      getExtension<ClientKeyShare>(clientShares, err, chlo.extensions), err);
   if (!clientShares) {
     throw FizzException(
         "no client shares", AlertDescription::missing_extension);
@@ -880,7 +901,10 @@ static Optional<std::string> negotiateAlpn(
     const ClientHello& chlo,
     const folly::Optional<std::string>& zeroRttAlpn,
     const FizzServerContext& context) {
-  auto ext = getExtension<ProtocolNameList>(chlo.extensions);
+  folly::Optional<ProtocolNameList> ext;
+  Error err;
+  FIZZ_THROW_ON_ERROR(
+      getExtension<ProtocolNameList>(ext, err, chlo.extensions), err);
   std::vector<std::string> clientProtocols;
   // Check whether client supports ALPN
   if (ext) {
@@ -950,7 +974,11 @@ static EarlyDataType negotiateEarlyDataType(
     Optional<std::chrono::milliseconds> clockSkew,
     ClockSkewTolerance clockSkewTolerance,
     const AppTokenValidator* appTokenValidator) {
-  if (!getExtension<ClientEarlyData>(chlo.extensions)) {
+  folly::Optional<ClientEarlyData> earlyDataExt;
+  Error err;
+  FIZZ_THROW_ON_ERROR(
+      getExtension<ClientEarlyData>(earlyDataExt, err, chlo.extensions), err);
+  if (!earlyDataExt) {
     return EarlyDataType::NotAttempted;
   }
 
@@ -1045,13 +1073,18 @@ static Buf getEncryptedExt(
 static std::pair<std::shared_ptr<SelfCert>, SignatureScheme> chooseCert(
     const FizzServerContext& context,
     const ClientHello& chlo) {
-  const auto& clientSigSchemes =
-      getExtension<SignatureAlgorithms>(chlo.extensions);
+  folly::Optional<SignatureAlgorithms> clientSigSchemes;
+  Error err;
+  FIZZ_THROW_ON_ERROR(
+      getExtension<SignatureAlgorithms>(clientSigSchemes, err, chlo.extensions),
+      err);
   if (!clientSigSchemes) {
     throw FizzException("no sig schemes", AlertDescription::missing_extension);
   }
   Optional<std::string> sni;
-  auto serverNameList = getExtension<ServerNameList>(chlo.extensions);
+  folly::Optional<ServerNameList> serverNameList;
+  FIZZ_THROW_ON_ERROR(
+      getExtension<ServerNameList>(serverNameList, err, chlo.extensions), err);
   if (serverNameList && !serverNameList->server_name_list.empty()) {
     sni = serverNameList->server_name_list.front().hostname->to<std::string>();
   }
@@ -1074,8 +1107,12 @@ getCertificate(
   // Check for compression support first, and if so, send compressed.
   Buf encodedCertificate;
   folly::Optional<CertificateCompressionAlgorithm> algo;
-  auto compAlgos =
-      getExtension<CertificateCompressionAlgorithms>(chlo.extensions);
+  folly::Optional<CertificateCompressionAlgorithms> compAlgos;
+  Error err;
+  FIZZ_THROW_ON_ERROR(
+      getExtension<CertificateCompressionAlgorithms>(
+          compAlgos, err, chlo.extensions),
+      err);
   if (compAlgos && !context.getSupportedCompressionAlgorithms().empty()) {
     algo = negotiate(
         context.getSupportedCompressionAlgorithms(), compAlgos->algorithms);
@@ -1127,7 +1164,10 @@ static std::pair<std::vector<ExtensionType>, Buf> getCertificateRequest(
 
 static folly::Optional<std::string> getSNI(const ClientHello& chlo) {
   folly::Optional<std::string> sni;
-  auto serverNameList = getExtension<ServerNameList>(chlo.extensions);
+  folly::Optional<ServerNameList> serverNameList;
+  Error err;
+  FIZZ_THROW_ON_ERROR(
+      getExtension<ServerNameList>(serverNameList, err, chlo.extensions), err);
   if (serverNameList && !serverNameList->server_name_list.empty()) {
     sni = serverNameList->server_name_list.front().hostname->to<std::string>();
   }
@@ -1139,7 +1179,11 @@ static std::tuple<ECHStatus, uint8_t> processECHHRR(
     const State& state,
     ClientHello& chlo) {
   auto decrypter = state.context()->getECHDecrypter();
-  auto echExt = getExtension<ech::OuterECHClientHello>(chlo.extensions);
+  folly::Optional<ech::OuterECHClientHello> echExt;
+  Error err;
+  FIZZ_THROW_ON_ERROR(
+      getExtension<ech::OuterECHClientHello>(echExt, err, chlo.extensions),
+      err);
   ECHStatus echStatus = state.echStatus();
 
   // Check for cookie ECH
@@ -1247,7 +1291,11 @@ static std::pair<ECHStatus, folly::Optional<ECHState>> processECH(
     // ECHState is populated even if we do not have a valid decrypter
     // to aid in logging (and detecting misconfigurations)
     if (requestedECH) {
-      auto echExt = getExtension<ech::OuterECHClientHello>(chlo.extensions);
+      folly::Optional<ech::OuterECHClientHello> echExt;
+      Error err;
+      FIZZ_THROW_ON_ERROR(
+          getExtension<ech::OuterECHClientHello>(echExt, err, chlo.extensions),
+          err);
       echState = ECHState{
           echExt->cipher_suite, echExt->config_id, nullptr, getSNI(chlo)};
       if (decrypter) {
@@ -1263,11 +1311,18 @@ static std::pair<ECHStatus, folly::Optional<ECHState>> processECH(
     }
   }
 
-  if (echStatus == ECHStatus::Accepted &&
-      getExtension<ech::InnerECHClientHello>(chlo.extensions) == folly::none) {
-    throw FizzException(
-        "inner clienthello missing encrypted_client_hello",
-        AlertDescription::missing_extension);
+  if (echStatus == ECHStatus::Accepted) {
+    folly::Optional<ech::InnerECHClientHello> innerEchExt;
+    Error err;
+    FIZZ_THROW_ON_ERROR(
+        getExtension<ech::InnerECHClientHello>(
+            innerEchExt, err, chlo.extensions),
+        err);
+    if (innerEchExt == folly::none) {
+      throw FizzException(
+          "inner clienthello missing encrypted_client_hello",
+          AlertDescription::missing_extension);
+    }
   }
 
   return std::make_pair(echStatus, std::move(echState));
@@ -1313,8 +1368,11 @@ EventHandler<ServerTypes, StateEnum::ExpectingClientHello, Event::ClientHello>::
   }
 
   if (!version) {
+    folly::Optional<ClientEarlyData> earlyDataExt;
     Error err;
-    if (getExtension<ClientEarlyData>(chlo.extensions)) {
+    FIZZ_THROW_ON_ERROR(
+        getExtension<ClientEarlyData>(earlyDataExt, err, chlo.extensions), err);
+    if (earlyDataExt) {
       throw FizzException(
           "supported version mismatch with early data",
           AlertDescription::protocol_version);
@@ -1331,7 +1389,10 @@ EventHandler<ServerTypes, StateEnum::ExpectingClientHello, Event::ClientHello>::
           err);
       fallback.clientHello = std::move(content.data);
       // Save SNI extension value to help decide server SSL context.
-      auto serverNameList = getExtension<ServerNameList>(chlo.extensions);
+      folly::Optional<ServerNameList> serverNameList;
+      FIZZ_THROW_ON_ERROR(
+          getExtension<ServerNameList>(serverNameList, err, chlo.extensions),
+          err);
       if (serverNameList && !serverNameList->server_name_list.empty()) {
         fallback.sni = serverNameList->server_name_list.front()
                            .hostname->to<std::string>();

@@ -40,7 +40,10 @@ namespace test {
 
 TEST_F(ExtensionsTest, TokenBindingParameters) {
   auto exts = getExtensions(tokenBinding);
-  auto ext = getExtension<TokenBindingParameters>(exts);
+  folly::Optional<TokenBindingParameters> ext;
+  Error err;
+  EXPECT_EQ(
+      getExtension<TokenBindingParameters>(ext, err, exts), Status::Success);
 
   EXPECT_EQ(ext->version, TokenBindingProtocolVersion::token_binding_1_0);
   EXPECT_EQ(ext->key_parameters_list.size(), 1);

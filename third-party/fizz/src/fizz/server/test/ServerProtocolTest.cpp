@@ -743,7 +743,11 @@ TEST_F(ServerProtocolTest, TestClientHelloFullHandshakeFlow) {
             EXPECT_EQ(
                 peerSigSchemes[0], SignatureScheme::ecdsa_secp256r1_sha256);
             EXPECT_EQ(peerSigSchemes[1], SignatureScheme::rsa_pss_sha256);
-            auto serverNameList = getExtension<ServerNameList>(chlo.extensions);
+            folly::Optional<ServerNameList> serverNameList;
+            Error err;
+            EXPECT_EQ(
+                getExtension(serverNameList, err, chlo.extensions),
+                Status::Success);
             EXPECT_TRUE(!serverNameList->server_name_list.empty());
             EXPECT_EQ(
                 serverNameList->server_name_list.front()
@@ -1025,7 +1029,12 @@ TEST_F(ServerProtocolTest, TestClientHelloCompressedCertFlow) {
             EXPECT_EQ(
                 peerSigSchemes[0], SignatureScheme::ecdsa_secp256r1_sha256);
             EXPECT_EQ(peerSigSchemes[1], SignatureScheme::rsa_pss_sha256);
-            auto serverNameList = getExtension<ServerNameList>(chlo.extensions);
+            folly::Optional<ServerNameList> serverNameList;
+            Error err;
+            EXPECT_EQ(
+                getExtension<ServerNameList>(
+                    serverNameList, err, chlo.extensions),
+                Status::Success);
             EXPECT_TRUE(!serverNameList->server_name_list.empty());
             EXPECT_EQ(
                 serverNameList->server_name_list.front()
@@ -1367,7 +1376,12 @@ TEST_F(ServerProtocolTest, TestECHDecryptionSuccess) {
             EXPECT_EQ(
                 peerSigSchemes[0], SignatureScheme::ecdsa_secp256r1_sha256);
             EXPECT_EQ(peerSigSchemes[1], SignatureScheme::rsa_pss_sha256);
-            auto serverNameList = getExtension<ServerNameList>(chlo.extensions);
+            folly::Optional<ServerNameList> serverNameList;
+            Error err;
+            EXPECT_EQ(
+                getExtension<ServerNameList>(
+                    serverNameList, err, chlo.extensions),
+                Status::Success);
             EXPECT_TRUE(!serverNameList->server_name_list.empty());
             EXPECT_EQ(
                 serverNameList->server_name_list.front()
@@ -1706,7 +1720,12 @@ TEST_F(ServerProtocolTest, TestECHDecryptionFailure) {
             EXPECT_EQ(
                 peerSigSchemes[0], SignatureScheme::ecdsa_secp256r1_sha256);
             EXPECT_EQ(peerSigSchemes[1], SignatureScheme::rsa_pss_sha256);
-            auto serverNameList = getExtension<ServerNameList>(chlo.extensions);
+            folly::Optional<ServerNameList> serverNameList;
+            Error err;
+            EXPECT_EQ(
+                getExtension<ServerNameList>(
+                    serverNameList, err, chlo.extensions),
+                Status::Success);
             EXPECT_TRUE(!serverNameList->server_name_list.empty());
             EXPECT_EQ(
                 serverNameList->server_name_list.front()
@@ -1992,7 +2011,11 @@ TEST_F(ServerProtocolTest, TestClientHelloCertRequestFlow) {
             EXPECT_EQ(
                 peerSigSchemes[0], SignatureScheme::ecdsa_secp256r1_sha256);
             EXPECT_EQ(peerSigSchemes[1], SignatureScheme::rsa_pss_sha256);
-            auto serverNameList = getExtension<ServerNameList>(chlo.extensions);
+            folly::Optional<ServerNameList> serverNameList;
+            Error err;
+            EXPECT_EQ(
+                getExtension(serverNameList, err, chlo.extensions),
+                Status::Success);
             EXPECT_TRUE(!serverNameList->server_name_list.empty());
             EXPECT_EQ(
                 serverNameList->server_name_list.front()
@@ -2799,7 +2822,11 @@ TEST_F(ServerProtocolTest, TestRetryClientHelloFullHandshakeFlow) {
             EXPECT_EQ(
                 peerSigSchemes[0], SignatureScheme::ecdsa_secp256r1_sha256);
             EXPECT_EQ(peerSigSchemes[1], SignatureScheme::rsa_pss_sha256);
-            auto serverNameList = getExtension<ServerNameList>(chlo.extensions);
+            folly::Optional<ServerNameList> serverNameList;
+            Error err;
+            EXPECT_EQ(
+                getExtension(serverNameList, err, chlo.extensions),
+                Status::Success);
             EXPECT_TRUE(!serverNameList->server_name_list.empty());
             EXPECT_EQ(
                 serverNameList->server_name_list.front()
@@ -3338,7 +3365,11 @@ TEST_F(ServerProtocolTest, TestRetryClientHelloECHFlow) {
             EXPECT_EQ(
                 peerSigSchemes[0], SignatureScheme::ecdsa_secp256r1_sha256);
             EXPECT_EQ(peerSigSchemes[1], SignatureScheme::rsa_pss_sha256);
-            auto serverNameList = getExtension<ServerNameList>(chlo.extensions);
+            folly::Optional<ServerNameList> serverNameList;
+            Error err;
+            EXPECT_EQ(
+                getExtension(serverNameList, err, chlo.extensions),
+                Status::Success);
             EXPECT_TRUE(!serverNameList->server_name_list.empty());
             EXPECT_EQ(
                 serverNameList->server_name_list.front()
@@ -3632,7 +3663,11 @@ TEST_F(ServerProtocolTest, TestRetryClientHelloECHRejectedFlow) {
             EXPECT_EQ(
                 peerSigSchemes[0], SignatureScheme::ecdsa_secp256r1_sha256);
             EXPECT_EQ(peerSigSchemes[1], SignatureScheme::rsa_pss_sha256);
-            auto serverNameList = getExtension<ServerNameList>(chlo.extensions);
+            folly::Optional<ServerNameList> serverNameList;
+            Error err;
+            EXPECT_EQ(
+                getExtension(serverNameList, err, chlo.extensions),
+                Status::Success);
             EXPECT_TRUE(!serverNameList->server_name_list.empty());
             EXPECT_EQ(
                 serverNameList->server_name_list.front()

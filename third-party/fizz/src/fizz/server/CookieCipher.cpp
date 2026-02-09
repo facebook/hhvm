@@ -47,7 +47,10 @@ Buf getStatelessHelloRetryRequest(
 static folly::Optional<NamedGroup> getHrrGroup(
     const std::vector<NamedGroup>& supportedGroups,
     const ClientHello& chlo) {
-  auto groupsExt = getExtension<SupportedGroups>(chlo.extensions);
+  folly::Optional<SupportedGroups> groupsExt;
+  Error err;
+  FIZZ_THROW_ON_ERROR(
+      getExtension<SupportedGroups>(groupsExt, err, chlo.extensions), err);
   if (!groupsExt) {
     return folly::none;
   }
@@ -61,7 +64,9 @@ static folly::Optional<NamedGroup> getHrrGroup(
     return folly::none;
   }
 
-  auto clientShares = getExtension<ClientKeyShare>(chlo.extensions);
+  folly::Optional<ClientKeyShare> clientShares;
+  FIZZ_THROW_ON_ERROR(
+      getExtension<ClientKeyShare>(clientShares, err, chlo.extensions), err);
   if (!clientShares) {
     throw std::runtime_error("supported_groups without key_share");
   }
@@ -83,7 +88,11 @@ CookieState getCookieState(
     const std::vector<NamedGroup>& supportedGroups,
     const ClientHello& chlo,
     Buf appToken) {
-  auto clientVersions = getExtension<SupportedVersions>(chlo.extensions);
+  folly::Optional<SupportedVersions> clientVersions;
+  Error err;
+  FIZZ_THROW_ON_ERROR(
+      getExtension<SupportedVersions>(clientVersions, err, chlo.extensions),
+      err);
   if (!clientVersions) {
     throw std::runtime_error("no supported versions");
   }

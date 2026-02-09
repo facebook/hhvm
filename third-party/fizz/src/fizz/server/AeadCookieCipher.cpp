@@ -104,7 +104,8 @@ AeadCookieCipher::getTokenOrRetry(Buf clientHello, Buf appToken) const {
   }
   auto chlo = std::move(*chloPtr);
 
-  auto cookie = getExtension<Cookie>(chlo.extensions);
+  folly::Optional<Cookie> cookie;
+  FIZZ_THROW_ON_ERROR(getExtension<Cookie>(cookie, err, chlo.extensions), err);
   if (cookie) {
     auto state = decrypt(std::move(cookie->cookie));
     if (!state) {

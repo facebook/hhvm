@@ -34,7 +34,10 @@ std::unique_ptr<folly::IOBuf> makeClientHelloOuterForAad(
       });
 
   folly::io::Cursor cursor(it->extension_data.get());
-  auto echExtension = getExtension<OuterECHClientHello>(cursor);
+  OuterECHClientHello echExtension;
+  Error err;
+  FIZZ_THROW_ON_ERROR(
+      getExtension<OuterECHClientHello>(echExtension, err, cursor), err);
 
   // Create a zeroed out version of the payload
   size_t payloadSize = echExtension.payload->computeChainDataLength();
@@ -347,7 +350,10 @@ bool checkECHAccepted(
 
   // ECH accepted if the 8 bytes match the accept_confirmation in the
   // extension
-  auto echConf = getExtension<ECHHelloRetryRequest>(hrr.extensions);
+  folly::Optional<ECHHelloRetryRequest> echConf;
+  Error err;
+  FIZZ_THROW_ON_ERROR(
+      getExtension<ECHHelloRetryRequest>(echConf, err, hrr.extensions), err);
   if (!echConf) {
     FIZZ_VLOG(8) << "HRR ECH extension missing, rejected...";
     return false;
@@ -430,7 +436,11 @@ ClientPresharedKey generateGreasePskCommon(
 folly::Optional<ClientPresharedKey> generateGreasePSK(
     const ClientHello& chloInner,
     const Factory* factory) {
-  auto innerPsk = getExtension<ClientPresharedKey>(chloInner.extensions);
+  folly::Optional<ClientPresharedKey> innerPsk;
+  Error err;
+  FIZZ_THROW_ON_ERROR(
+      getExtension<ClientPresharedKey>(innerPsk, err, chloInner.extensions),
+      err);
   if (!innerPsk) {
     return folly::none;
   }
@@ -452,7 +462,10 @@ size_t calculateECHPadding(
     size_t encodedSize,
     size_t maxLen) {
   size_t padding = 0;
-  auto sni = getExtension<ServerNameList>(chlo.extensions);
+  folly::Optional<ServerNameList> sni;
+  Error err;
+  FIZZ_THROW_ON_ERROR(
+      getExtension<ServerNameList>(sni, err, chlo.extensions), err);
   if (sni) {
     // Add max(0, maxLen - len(server_name))
     size_t sniLen =
@@ -714,7 +727,9 @@ std::vector<Extension> substituteOuterExtensions(
       OuterExtensions outerExtensions;
       try {
         folly::io::Cursor cursor(ext.extension_data.get());
-        outerExtensions = getExtension<OuterExtensions>(cursor);
+        Error err;
+        FIZZ_THROW_ON_ERROR(
+            getExtension<OuterExtensions>(outerExtensions, err, cursor), err);
       } catch (...) {
         throw OuterExtensionsError("ech_outer_extensions malformed");
       }

@@ -88,17 +88,21 @@ std::string extensions::toString(TokenBindingKeyParameters keyParams) {
 }
 
 template <>
-folly::Optional<TokenBindingParameters> getExtension(
+Status getExtension(
+    folly::Optional<TokenBindingParameters>& ret,
+    Error& /* err */,
     const std::vector<Extension>& extensions) {
   auto it = findExtension(extensions, ExtensionType::token_binding);
   if (it == extensions.end()) {
-    return folly::none;
+    ret = folly::none;
+    return Status::Success;
   }
   TokenBindingParameters params;
   folly::io::Cursor cursor(it->extension_data.get());
   detail::read(params.version, cursor);
   detail::readVector<uint8_t>(params.key_parameters_list, cursor);
-  return params;
+  ret = params;
+  return Status::Success;
 }
 
 namespace extensions {

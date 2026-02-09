@@ -100,7 +100,9 @@ TEST(ECHTest, TestOuterECHClientHelloDecode) {
       folly::unhexlify(kOuterECHClientHelloExtensionData));
   std::vector<Extension> vec;
   vec.push_back(std::move(e));
-  auto ech = getExtension<OuterECHClientHello>(vec);
+  Error err;
+  folly::Optional<OuterECHClientHello> ech;
+  EXPECT_EQ(getExtension<OuterECHClientHello>(ech, err, vec), Status::Success);
 
   EXPECT_EQ(ech->cipher_suite.kdf_id, hpke::KDFId::Sha256);
   EXPECT_EQ(ech->config_id, 0xAA);

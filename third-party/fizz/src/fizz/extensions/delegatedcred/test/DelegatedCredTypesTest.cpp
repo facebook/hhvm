@@ -27,7 +27,11 @@ TEST(DelegatedCredTypesTest, TestDecodeCredentialSupportExtension) {
   e.extension_data = IOBuf::copyBuffer(folly::unhexlify(kCredSupport));
   std::vector<Extension> vec;
   vec.push_back(std::move(e));
-  auto supportExt = getExtension<DelegatedCredentialSupport>(vec);
+  folly::Optional<DelegatedCredentialSupport> supportExt;
+  Error err;
+  EXPECT_EQ(
+      getExtension<DelegatedCredentialSupport>(supportExt, err, vec),
+      Status::Success);
 
   ASSERT_TRUE(supportExt);
   ASSERT_EQ(supportExt->supported_signature_algorithms.size(), 1);
@@ -77,7 +81,9 @@ TEST(DelegatedCredTypesTest, TestDecodeCredentialExtension) {
   e.extension_data = IOBuf::copyBuffer(folly::unhexlify(kCredential));
   std::vector<Extension> vec;
   vec.push_back(std::move(e));
-  auto cred = getExtension<DelegatedCredential>(vec);
+  folly::Optional<DelegatedCredential> cred;
+  Error err;
+  EXPECT_EQ(getExtension<DelegatedCredential>(cred, err, vec), Status::Success);
 
   EXPECT_EQ(cred->valid_time, 0x00115ee3);
   EXPECT_EQ(cred->expected_verify_scheme, SignatureScheme::rsa_pss_sha256);

@@ -40,7 +40,12 @@ TEST(ExportedAuthenticatorTest, TestAuthenticatorRequest) {
   CertificateRequest cr = decode<CertificateRequest>(cursor);
   EXPECT_EQ(cr.certificate_request_context->computeChainDataLength(), 20);
   EXPECT_EQ(cr.extensions.size(), 1);
-  EXPECT_TRUE(getExtension<SignatureAlgorithms>(cr.extensions).has_value());
+  folly::Optional<SignatureAlgorithms> sigAlgs;
+  Error err;
+  EXPECT_EQ(
+      getExtension<SignatureAlgorithms>(sigAlgs, err, cr.extensions),
+      Status::Success);
+  EXPECT_TRUE(sigAlgs.has_value());
   auto encodedAuthRequest = ExportedAuthenticator::getAuthenticatorRequest(
       std::move(cr.certificate_request_context), std::move(cr.extensions));
   EXPECT_EQ(

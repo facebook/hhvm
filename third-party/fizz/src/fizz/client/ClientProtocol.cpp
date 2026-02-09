@@ -653,7 +653,9 @@ static ClientPresharedKey getPskExtension(
  * Will derive the early secret on the key scheduler and create the binder
  * using the passed in context.
  */
-static Buf encodeAndAddBinders(
+static Status encodeAndAddBinders(
+    Buf& ret,
+    Error& err,
     ClientHello& chlo,
     const CachedPsk& psk,
     KeyScheduler& scheduler,
@@ -669,7 +671,8 @@ static Buf encodeAndAddBinders(
   auto pskExt = getPskExtension(psk, clock);
   chlo.extensions.push_back(encodeExtension(pskExt));
 
-  size_t binderLength = getBinderLength(chlo);
+  size_t binderLength;
+  TRY(getBinderLength(binderLength, err, chlo));
 
   auto preEncoded = encodeHandshake(chlo);
 
@@ -697,8 +700,8 @@ static Buf encodeAndAddBinders(
   chloQueue.append(encoded->clone());
   chloQueue.split(chloQueue.chainLength() - binderLength);
   handshakeContext.appendToTranscript(chloQueue.move());
-
-  return encoded;
+  ret = std::move(encoded);
+  return Status::Success;
 }
 
 static Optional<EarlyDataParams> getEarlyDataParams(
@@ -1005,8 +1008,14 @@ EventHandler<ClientTypes, StateEnum::Uninitialized, Event::Connect>::handle(
     auto handshakeContext =
         context->getFactory()->makeHandshakeContext(psk->cipher);
 
-    encodedClientHello = encodeAndAddBinders(
-        chlo, *psk, *keyScheduler, *handshakeContext, *context->getClock());
+    TRY(encodeAndAddBinders(
+        encodedClientHello,
+        ctx.err,
+        chlo,
+        *psk,
+        *keyScheduler,
+        *handshakeContext,
+        *context->getClock()));
 
     if (earlyDataParams) {
       auto earlyWriteSecret = keyScheduler->getSecret(
@@ -1185,8 +1194,8 @@ static Status getAndValidateVersionAndCipher(
         "compression method not null", AlertDescription::illegal_parameter);
   }
 
-  auto supportedVersionsExt =
-      getExtension<ServerSupportedVersions>(msg.extensions);
+  folly::Optional<ServerSupportedVersions> supportedVersionsExt;
+  TRY(getExtension(supportedVersionsExt, ctx.err, msg.extensions));
   if (!supportedVersionsExt) {
     return ctx.err.error(
         "no supported versions in shlo", AlertDescription::protocol_version);
@@ -1231,7 +1240,8 @@ static Status negotiateParameters(
   std::tie(version, cipher) = std::move(verCiphIn);
 
   Optional<std::tuple<NamedGroup, Buf, const KeyExchange*>> exchange;
-  const auto serverShare = getExtension<ServerKeyShare>(shlo.extensions);
+  folly::Optional<ServerKeyShare> serverShare;
+  TRY(getExtension(serverShare, ctx.err, shlo.extensions));
   if (serverShare) {
     auto kex = keyExchangers.find(serverShare->server_share.group);
     if (kex == keyExchangers.end()) {
@@ -1293,7 +1303,8 @@ static Status negotiatePsk(
     ProtocolVersion version,
     CipherSuite cipher,
     bool hasExchange) {
-  auto serverPsk = getExtension<ServerPresharedKey>(shlo.extensions);
+  folly::Optional<ServerPresharedKey> serverPsk;
+  TRY(getExtension(serverPsk, ctx.err, shlo.extensions));
   if (!attemptedPsk) {
     if (serverPsk) {
       return ctx.err.error(
@@ -1625,7 +1636,8 @@ static Status negotiateParameters(
   HrrParams negotiated;
   std::tie(negotiated.version, negotiated.cipher) = std::move(verCiphIn);
 
-  auto keyShare = getExtension<HelloRetryRequestKeyShare>(hrr.extensions);
+  folly::Optional<HelloRetryRequestKeyShare> keyShare;
+  TRY(getExtension(keyShare, ctx.err, hrr.extensions));
   if (keyShare) {
     if (std::find(
             supportedGroups.begin(),
@@ -1689,7 +1701,8 @@ Status EventHandler<
   CipherSuite cipher = negotiatedParams.cipher;
   Optional<NamedGroup> group = negotiatedParams.group;
 
-  auto cookie = getExtension<Cookie>(hrr.extensions);
+  folly::Optional<Cookie> cookie;
+  TRY(getExtension(cookie, ctx.err, hrr.extensions));
 
   auto attemptedPsk = state.attemptedPsk();
   if (attemptedPsk &&
@@ -1814,12 +1827,14 @@ Status EventHandler<
     auto pskContext =
         (echHandshakeContext ? echHandshakeContext : handshakeContext)->clone();
 
-    encodedClientHello = encodeAndAddBinders(
+    TRY(encodeAndAddBinders(
+        encodedClientHello,
+        ctx.err,
         chlo,
         *attemptedPsk,
         *keyScheduler,
         *pskContext,
-        *state.context()->getClock());
+        *state.context()->getClock()));
   } else {
     encodedClientHello = encodeHandshake(chlo);
   }
@@ -1959,7 +1974,8 @@ Status EventHandler<
   state.handshakeContext()->appendToTranscript(*ee.originalEncoding);
 
   Optional<std::string> appProto;
-  auto alpn = getExtension<ProtocolNameList>(ee.extensions);
+  folly::Optional<ProtocolNameList> alpn;
+  TRY(getExtension(alpn, ctx.err, ee.extensions));
   if (alpn) {
     if (alpn->protocol_name_list.size() != 1) {
       return ctx.err.error(
@@ -1980,7 +1996,8 @@ Status EventHandler<
         "alpn is required", AlertDescription::no_application_protocol);
   }
 
-  auto serverEarly = getExtension<ServerEarlyData>(ee.extensions);
+  folly::Optional<ServerEarlyData> serverEarly;
+  TRY(getExtension(serverEarly, ctx.err, ee.extensions));
   auto earlyDataType = state.earlyDataType();
   if (state.earlyDataType() == EarlyDataType::Attempted) {
     if (serverEarly) {
@@ -2001,7 +2018,8 @@ Status EventHandler<
   folly::Optional<ECHRetryAvailable> echRetryAvailable;
   if (state.echState().has_value()) {
     // Check if we were sent retry configs
-    auto serverECH = getExtension<ech::ECHEncryptedExtensions>(ee.extensions);
+    folly::Optional<ech::ECHEncryptedExtensions> serverECH;
+    TRY(getExtension(serverECH, ctx.err, ee.extensions));
     if (serverECH.has_value()) {
       auto configs = std::vector<ech::ParsedECHConfig>();
       for (const auto& config : serverECH->retry_configs) {
@@ -2096,8 +2114,8 @@ Status EventHandler<
         AlertDescription::illegal_parameter);
   }
 
-  auto sigAlgsExtension =
-      getExtension<SignatureAlgorithms>(certRequest.extensions);
+  folly::Optional<SignatureAlgorithms> sigAlgsExtension;
+  TRY(getExtension(sigAlgsExtension, ctx.err, certRequest.extensions));
   if (!sigAlgsExtension) {
     return ctx.err.error(
         "certificate request without signature algorithms",
@@ -2532,20 +2550,23 @@ EventHandler<ClientTypes, StateEnum::ExpectingFinished, Event::Finished>::
   return Status::Success;
 }
 
-static uint32_t getMaxEarlyDataSize(const NewSessionTicket& nst) {
-  auto earlyData = getExtension<TicketEarlyData>(nst.extensions);
+static Status
+getMaxEarlyDataSize(uint32_t& ret, Error& err, const NewSessionTicket& nst) {
+  folly::Optional<TicketEarlyData> earlyData;
+  TRY(getExtension(earlyData, err, nst.extensions));
   if (earlyData) {
-    return earlyData->max_early_data_size;
+    ret = earlyData->max_early_data_size;
   } else {
-    return 0;
+    ret = 0;
   }
+  return Status::Success;
 }
 
 Status
 EventHandler<ClientTypes, StateEnum::Established, Event::NewSessionTicket>::
     handle(
         Actions& ret,
-        InvocationContext& /* ctx */,
+        InvocationContext& ctx,
         const State& state,
         Param& param) {
   auto nst = std::move(*param.asNewSessionTicket());
@@ -2573,7 +2594,7 @@ EventHandler<ClientTypes, StateEnum::Established, Event::NewSessionTicket>::
       state.context()->getClock()->getCurrentTime() +
       std::chrono::seconds(nst.ticket_lifetime);
   newCachedPsk.psk.ticketHandshakeTime = *state.handshakeTime();
-  newCachedPsk.psk.maxEarlyDataSize = getMaxEarlyDataSize(nst);
+  TRY(getMaxEarlyDataSize(newCachedPsk.psk.maxEarlyDataSize, ctx.err, nst));
 
   ret = actions(std::move(newCachedPsk));
   return Status::Success;

@@ -66,7 +66,11 @@ std::unique_ptr<PeerCert> DelegatedCredentialFactory::makePeerCertStatic(
   }
   auto parentCert = openssl::CertUtils::makePeerCert(entry.cert_data->clone());
   auto parentX509 = parentCert->getX509();
-  auto credential = getExtension<DelegatedCredential>(entry.extensions);
+  folly::Optional<DelegatedCredential> credential;
+  Error err;
+  FIZZ_THROW_ON_ERROR(
+      getExtension<DelegatedCredential>(credential, err, entry.extensions),
+      err);
 
   // No credential, just leave as is
   if (!credential) {

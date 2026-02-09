@@ -132,7 +132,11 @@ class DelegatedCredentialUtilsTest : public Test {
     auto data = unhexlify(kDelegatedCred);
     ext.extension_data = folly::IOBuf::copyBuffer(data.data(), data.size());
     exts.push_back(std::move(ext));
-    return *getExtension<DelegatedCredential>(exts);
+    folly::Optional<DelegatedCredential> result;
+    Error err;
+    FIZZ_THROW_ON_ERROR(
+        getExtension<DelegatedCredential>(result, err, exts), err);
+    return std::move(*result);
   }
 
  protected:

@@ -59,7 +59,11 @@ TEST_F(TokenBindingServerExtensionTest, TestFullNegotiationFlow) {
   auto exts = extensions_->getExtensions(chlo_);
   EXPECT_EQ(exts.size(), 1);
 
-  auto tokenBindingExtension = getExtension<TokenBindingParameters>(exts);
+  folly::Optional<TokenBindingParameters> tokenBindingExtension;
+  Error err;
+  EXPECT_EQ(
+      getExtension<TokenBindingParameters>(tokenBindingExtension, err, exts),
+      Status::Success);
   verifyExtensionFields(
       tokenBindingExtension,
       TokenBindingProtocolVersion::token_binding_1_0,

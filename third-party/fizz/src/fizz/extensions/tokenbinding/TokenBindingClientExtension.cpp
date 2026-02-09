@@ -28,7 +28,10 @@ std::vector<Extension> TokenBindingClientExtension::getClientHelloExtensions()
 
 void TokenBindingClientExtension::onEncryptedExtensions(
     const std::vector<Extension>& extensions) {
-  auto serverParams = getExtension<TokenBindingParameters>(extensions);
+  folly::Optional<TokenBindingParameters> serverParams;
+  Error err;
+  FIZZ_THROW_ON_ERROR(
+      getExtension<TokenBindingParameters>(serverParams, err, extensions), err);
   if (!serverParams.has_value()) {
     FIZZ_VLOG(6) << "Server did not negotiate token binding";
     return;

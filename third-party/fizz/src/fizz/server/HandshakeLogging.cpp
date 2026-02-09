@@ -18,7 +18,10 @@ void SharedChloFields::populateSharedFieldsFromClientHello(
 
 void HandshakeLogging::populateFromClientHello(const ClientHello& chlo) {
   clientLegacyVersion = chlo.legacy_version;
-  auto supportedVersions = getExtension<SupportedVersions>(chlo.extensions);
+  folly::Optional<SupportedVersions> supportedVersions;
+  Error err;
+  FIZZ_THROW_ON_ERROR(
+      getExtension(supportedVersions, err, chlo.extensions), err);
   if (supportedVersions) {
     clientSupportedVersions = supportedVersions->versions;
   }
@@ -34,23 +37,27 @@ void HandshakeLogging::populateFromClientHello(const ClientHello& chlo) {
     }
   }
   clientAlpns.clear();
-  auto alpn = getExtension<ProtocolNameList>(chlo.extensions);
+  folly::Optional<ProtocolNameList> alpn;
+  FIZZ_THROW_ON_ERROR(getExtension(alpn, err, chlo.extensions), err);
   if (alpn) {
     clientAlpns.reserve(alpn->protocol_name_list.size());
     for (auto& protocol : alpn->protocol_name_list) {
       clientAlpns.push_back(protocol.name->to<std::string>());
     }
   }
-  auto sni = getExtension<ServerNameList>(chlo.extensions);
+  folly::Optional<ServerNameList> sni;
+  FIZZ_THROW_ON_ERROR(getExtension(sni, err, chlo.extensions), err);
   if (sni && !sni->server_name_list.empty()) {
     clientSni = sni->server_name_list.front().hostname->to<std::string>();
   }
-  auto supportedGroups = getExtension<SupportedGroups>(chlo.extensions);
+  folly::Optional<SupportedGroups> supportedGroups;
+  FIZZ_THROW_ON_ERROR(getExtension(supportedGroups, err, chlo.extensions), err);
   if (supportedGroups) {
     clientSupportedGroups = std::move(supportedGroups->named_group_list);
   }
 
-  auto keyShare = getExtension<ClientKeyShare>(chlo.extensions);
+  folly::Optional<ClientKeyShare> keyShare;
+  FIZZ_THROW_ON_ERROR(getExtension(keyShare, err, chlo.extensions), err);
   if (keyShare && !clientKeyShares) {
     std::vector<NamedGroup> shares;
     shares.reserve(keyShare->client_shares.size());
@@ -60,12 +67,15 @@ void HandshakeLogging::populateFromClientHello(const ClientHello& chlo) {
     clientKeyShares = std::move(shares);
   }
 
-  auto exchangeModes = getExtension<PskKeyExchangeModes>(chlo.extensions);
+  folly::Optional<PskKeyExchangeModes> exchangeModes;
+  FIZZ_THROW_ON_ERROR(getExtension(exchangeModes, err, chlo.extensions), err);
   if (exchangeModes) {
     clientKeyExchangeModes = std::move(exchangeModes->modes);
   }
 
-  auto clientSigSchemes = getExtension<SignatureAlgorithms>(chlo.extensions);
+  folly::Optional<SignatureAlgorithms> clientSigSchemes;
+  FIZZ_THROW_ON_ERROR(
+      getExtension(clientSigSchemes, err, chlo.extensions), err);
   if (clientSigSchemes) {
     clientSignatureAlgorithms =
         std::move(clientSigSchemes->supported_signature_algorithms);

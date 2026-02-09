@@ -153,9 +153,12 @@ struct EchOuterExtensions {
 };
 
 template <class T>
-folly::Optional<T> getExtension(const std::vector<Extension>& extension);
+Status getExtension(
+    folly::Optional<T>& ret,
+    Error& err,
+    const std::vector<Extension>& extension);
 template <class T>
-T getExtension(folly::io::Cursor& cursor);
+Status getExtension(T& ret, Error& err, folly::io::Cursor& cursor);
 
 template <class T>
 Extension encodeExtension(const T& t);
@@ -164,7 +167,7 @@ std::vector<Extension>::const_iterator findExtension(
     const std::vector<Extension>& extensions,
     ExtensionType type);
 
-size_t getBinderLength(const ClientHello& chlo);
+Status getBinderLength(size_t& ret, Error& err, const ClientHello& chlo);
 } // namespace fizz
 
 #include <fizz/record/Extensions-inl.h>

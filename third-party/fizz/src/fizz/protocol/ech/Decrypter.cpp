@@ -32,7 +32,10 @@ folly::Optional<DecrypterLookupResult> decodeAndGetParam(
     const Extension& encodedECHExtension,
     const std::vector<DecrypterParams>& decrypterParams) {
   folly::io::Cursor cursor(encodedECHExtension.extension_data.get());
-  auto echExtension = getExtension<ech::OuterECHClientHello>(cursor);
+  ech::OuterECHClientHello echExtension;
+  Error err;
+  FIZZ_THROW_ON_ERROR(
+      getExtension<ech::OuterECHClientHello>(echExtension, err, cursor), err);
   for (const auto& param : decrypterParams) {
     if (echExtension.config_id == param.echConfig.key_config.config_id) {
       return DecrypterLookupResult{std::move(echExtension), param};

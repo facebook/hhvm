@@ -213,8 +213,12 @@ TicketSeedHandler* getTicketSeedHandler(
 
 static folly::Optional<std::string> getSNI(const fizz::ClientHello& chlo) {
   folly::Optional<std::string> sni;
-  auto serverNameList =
-      fizz::getExtension<fizz::ServerNameList>(chlo.extensions);
+  folly::Optional<fizz::ServerNameList> serverNameList;
+  fizz::Error err;
+  FIZZ_THROW_ON_ERROR(
+      fizz::getExtension<fizz::ServerNameList>(
+          serverNameList, err, chlo.extensions),
+      err);
   if (serverNameList && !serverNameList->server_name_list.empty()) {
     sni = serverNameList->server_name_list.front().hostname->to<std::string>();
   }

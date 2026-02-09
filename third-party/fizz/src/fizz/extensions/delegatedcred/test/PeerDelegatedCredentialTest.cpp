@@ -147,7 +147,11 @@ class PeerDelegatedCredentialTest : public Test {
     ext.extension_data = toBuf(dcBuf);
     std::vector<Extension> exts;
     exts.push_back(std::move(ext));
-    return *getExtension<DelegatedCredential>(exts);
+    folly::Optional<DelegatedCredential> result;
+    Error err;
+    FIZZ_THROW_ON_ERROR(
+        getExtension<DelegatedCredential>(result, err, exts), err);
+    return std::move(*result);
   }
 
   void expectThrows(std::function<void()> f, std::string errorStr) {

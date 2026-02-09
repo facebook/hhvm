@@ -852,7 +852,11 @@ TEST(EncryptionTest, TestGenerateGreasePsk) {
       generateGreasePSK(TestMessages::clientHello(), &factory), folly::none);
 
   auto chlo = TestMessages::clientHelloPsk();
-  auto psk = getExtension<ClientPresharedKey>(chlo.extensions);
+  folly::Optional<ClientPresharedKey> psk;
+  Error err;
+  EXPECT_EQ(
+      getExtension<ClientPresharedKey>(psk, err, chlo.extensions),
+      Status::Success);
 
   // Check that data is replaced with random data for GREASE PSK
   auto greasePsk = generateGreasePSK(chlo, &factory);

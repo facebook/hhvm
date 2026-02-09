@@ -313,8 +313,12 @@ TEST_F(AsyncFizzServerTest, TestAttemptVersionFallback) {
                 fallback.clientHello,
                 IOBuf::copyBuffer("ClientHelloClientHello")));
         EXPECT_EQ(fallback.sni, "www.hostname.com");
-        auto serverNameList = getExtension<ServerNameList>(
-            fallback.preParsedClientHello.extensions);
+        folly::Optional<ServerNameList> serverNameList;
+        Error err;
+        EXPECT_EQ(
+            getExtension<ServerNameList>(
+                serverNameList, err, fallback.preParsedClientHello.extensions),
+            Status::Success);
         EXPECT_EQ(serverNameList->server_name_list.size(), 1);
         EXPECT_EQ(
             serverNameList->server_name_list.front()

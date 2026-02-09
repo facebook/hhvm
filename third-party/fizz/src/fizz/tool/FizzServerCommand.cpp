@@ -927,8 +927,12 @@ int fizzServerCommand(const std::vector<std::string>& args) {
               folly::IOBuf::copyBuffer(std::move(credData))});
 
       try {
-        cred = getExtension<fizz::extensions::DelegatedCredential>(
-            std::move(credVec));
+        Error err;
+        if (getExtension<fizz::extensions::DelegatedCredential>(
+                cred, err, std::move(credVec)) == Status::Fail) {
+          LOG(ERROR) << "Credential parsing failed: " << err.msg();
+          return 1;
+        }
       } catch (const std::exception& e) {
         FIZZ_LOG(ERROR) << "Credential parsing failed: " << e.what();
         return 1;

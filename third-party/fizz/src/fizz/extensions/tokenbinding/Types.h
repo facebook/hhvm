@@ -66,7 +66,9 @@ Extension encodeExtension(const extensions::TokenBindingParameters& params);
 } // namespace extensions
 
 template <>
-folly::Optional<extensions::TokenBindingParameters> getExtension(
+Status getExtension(
+    folly::Optional<extensions::TokenBindingParameters>& ret,
+    Error& err,
     const std::vector<Extension>& extensions);
 
 template <>

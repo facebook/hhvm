@@ -130,7 +130,9 @@ std::unique_ptr<SelfDelegatedCredential> loadDCFromPEM(
         Extension{
             ExtensionType::delegated_credential,
             folly::IOBuf::copyBuffer(std::move(credData))});
-    cred = getExtension<DelegatedCredential>(std::move(credVec));
+    Error err;
+    FIZZ_THROW_ON_ERROR(
+        getExtension<DelegatedCredential>(cred, err, credVec), err);
   } catch (const std::exception& e) {
     throw std::runtime_error(
         folly::sformat(

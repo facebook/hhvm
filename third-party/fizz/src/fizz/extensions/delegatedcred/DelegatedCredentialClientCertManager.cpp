@@ -17,7 +17,11 @@ CertMatch DelegatedCredentialClientCertManager::getCert(
     const std::vector<SignatureScheme>& supportedSigSchemes,
     const std::vector<SignatureScheme>& peerSigSchemes,
     const std::vector<Extension>& peerExtensions) const {
-  auto credential = getExtension<DelegatedCredentialSupport>(peerExtensions);
+  folly::Optional<DelegatedCredentialSupport> credential;
+  Error err;
+  FIZZ_THROW_ON_ERROR(
+      getExtension<DelegatedCredentialSupport>(credential, err, peerExtensions),
+      err);
 
   if (credential) {
     auto dcRes = dcMgr_.getCert(

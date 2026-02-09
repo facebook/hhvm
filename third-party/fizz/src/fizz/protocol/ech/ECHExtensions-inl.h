@@ -76,55 +76,68 @@ inline Extension encodeExtension(const ech::ECHHelloRetryRequest& conf) {
 }
 
 template <>
-inline ech::OuterECHClientHello getExtension(folly::io::Cursor& cs) {
+inline Status
+getExtension(ech::OuterECHClientHello& ret, Error& err, folly::io::Cursor& cs) {
   ech::ECHClientHelloType type;
   detail::read(type, cs);
   if (type != ech::ECHClientHelloType::Outer) {
-    throw std::runtime_error("wrong ech variant");
+    return err.error("wrong ech variant");
   }
   ech::OuterECHClientHello clientECH;
   detail::read(clientECH.cipher_suite, cs);
   detail::read(clientECH.config_id, cs);
   detail::readBuf<uint16_t>(clientECH.enc, cs);
   detail::readBuf<uint16_t>(clientECH.payload, cs);
-
-  return clientECH;
+  ret = std::move(clientECH);
+  return Status::Success;
 }
 
 template <>
-inline ech::ECHEncryptedExtensions getExtension(folly::io::Cursor& cs) {
+inline Status getExtension(
+    ech::ECHEncryptedExtensions& ret,
+    Error& /* err */,
+    folly::io::Cursor& cs) {
   ech::ECHEncryptedExtensions serverECH;
   detail::readVector<uint16_t>(serverECH.retry_configs, cs);
 
-  return serverECH;
+  ret = std::move(serverECH);
+  return Status::Success;
 }
 
 template <>
-inline ech::InnerECHClientHello getExtension(folly::io::Cursor& cs) {
+inline Status
+getExtension(ech::InnerECHClientHello& ret, Error& err, folly::io::Cursor& cs) {
   ech::ECHClientHelloType type;
   detail::read(type, cs);
   if (type != ech::ECHClientHelloType::Inner) {
-    throw std::runtime_error("wrong ech variant");
+    return err.error("wrong ech variant");
   }
-  return ech::InnerECHClientHello();
+  ret = ech::InnerECHClientHello();
+  return Status::Success;
 }
 
 template <>
-inline ech::OuterExtensions getExtension(folly::io::Cursor& cs) {
+inline Status getExtension(
+    ech::OuterExtensions& ret,
+    Error& /* err */,
+    folly::io::Cursor& cs) {
   ech::OuterExtensions outerExts;
   detail::readVector<uint8_t>(outerExts.types, cs);
-  return outerExts;
+  ret = std::move(outerExts);
+  return Status::Success;
 }
 
 template <>
-inline ech::ECHHelloRetryRequest getExtension(folly::io::Cursor& cs) {
+inline Status getExtension(
+    ech::ECHHelloRetryRequest& ret,
+    Error& err,
+    folly::io::Cursor& cs) {
   ech::ECHHelloRetryRequest conf;
   if (cs.totalLength() != conf.confirmation.size()) {
-    throw FizzException(
-        "ECHHelloRetryRequest confirmation wrong size",
-        AlertDescription::decode_error);
+    return err.error("ECHHelloRetryRequest confirmation wrong size");
   }
   cs.pull(conf.confirmation.data(), conf.confirmation.size());
-  return conf;
+  ret = std::move(conf);
+  return Status::Success;
 }
 } // namespace fizz

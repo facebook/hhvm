@@ -40,14 +40,14 @@ class HTTPAcceptor : public wangle::Acceptor {
   /**
    * Access the general-purpose timeout manager for transactions.
    */
-  virtual const WheelTimerInstance& getTransactionTimeoutSet() {
+  const WheelTimerInstance& getTransactionTimeoutSet() {
     return *timer_;
   }
 
  protected:
   std::unique_ptr<WheelTimerInstance> timer_;
 
-  virtual std::unique_ptr<WheelTimerInstance> createTransactionTimeoutSet(
+  std::unique_ptr<WheelTimerInstance> createTransactionTimeoutSet(
       folly::EventBase* eventBase) {
     return std::make_unique<WheelTimerInstance>(
         getConfig()->transactionIdleTimeout, eventBase);

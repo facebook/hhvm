@@ -2772,7 +2772,11 @@ Variant HHVM_FUNCTION(openssl_x509_parse, const Variant& x509cert,
   auto ret = Array::CreateDict();
   const auto sn = X509_get_subject_name(cert);
   if (sn) {
-    ret.set(s_name, String(X509_NAME_oneline(sn, nullptr, 0), CopyString));
+    char* subjectName = X509_NAME_oneline(sn, nullptr, 0);
+    SCOPE_EXIT {
+      OPENSSL_free(subjectName);
+    };
+    ret.set(s_name, String(subjectName, CopyString));
   }
   add_assoc_name_entry(ret, "subject", sn, shortnames);
   /* hash as used in CA directories to lookup cert by subject name */

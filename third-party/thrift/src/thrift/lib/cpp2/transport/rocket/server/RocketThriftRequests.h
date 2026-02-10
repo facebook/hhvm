@@ -39,13 +39,10 @@ class IOBuf;
 namespace apache::thrift {
 
 class AsyncProcessor;
-class RocketSinkClientCallback;
-class RocketStreamClientCallback;
 
 namespace rocket {
 
 class Payload;
-class RocketServerFrameContext;
 
 class RocketThriftRequest : public ThriftRequestCore {
  protected:

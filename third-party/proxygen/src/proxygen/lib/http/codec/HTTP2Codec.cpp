@@ -35,7 +35,7 @@ namespace proxygen {
 HTTP2Codec::HTTP2Codec(TransportDirection direction)
     : HTTPParallelCodec(direction),
       headerCodec_(direction),
-      frameState_(direction == TransportDirection::DOWNSTREAM
+      frameState_(isDownstream(direction)
                       ? FrameState::UPSTREAM_CONNECTION_PREFACE
                       : FrameState::EXPECT_FIRST_SETTINGS) {
 
@@ -390,7 +390,7 @@ ErrorCode HTTP2Codec::parseHeaders(Cursor& cursor) {
           << " length=" << curHeader_.length;
   auto err = http2::parseHeaders(cursor, curHeader_, headerBuf);
   RETURN_IF_ERROR(err);
-  if (transportDirection_ == TransportDirection::DOWNSTREAM) {
+  if (isDownstream(transportDirection_)) {
     RETURN_IF_ERROR(
         checkNewStream(curHeader_.stream, true /* trailersAllowed */));
   }
@@ -433,7 +433,7 @@ ErrorCode HTTP2Codec::parseHeadersImpl(
     if (promisedStream) {
       parsingReq_ = true;
     } else {
-      parsingReq_ = transportDirection_ == TransportDirection::DOWNSTREAM;
+      parsingReq_ = isDownstream(transportDirection_);
     }
   } else if (headerBlockFrameType_ == http2::FrameType::PUSH_PROMISE) {
     CHECK(promisedStream_.hasValue());
@@ -502,8 +502,7 @@ ErrorCode HTTP2Codec::parseHeadersImpl(
                                headersCompleteStream,
                                std::move(trailerHeaders));
     } else {
-      if (transportDirection_ == TransportDirection::UPSTREAM &&
-          curHeader_.stream & 0x01 &&
+      if (isUpstream(transportDirection_) && curHeader_.stream & 0x01 &&
           curHeader_.stream >= nextEgressStreamID_) {
         goawayErrorMessage_ = folly::to<std::string>(
             "HEADERS on idle upstream stream=", curHeader_.stream);
@@ -582,8 +581,8 @@ HTTP2Codec::parseHeadersDecodeFrames() {
     }
     VLOG(3) << "Header block="
             << IOBufPrinter::printHexFolly(curHeaderBlock_.front(), true);
-    if (transportDirection_ == TransportDirection::DOWNSTREAM &&
-        parsingHeaders() && !parsingTrailers()) {
+    if (isDownstream(transportDirection_) && parsingHeaders() &&
+        !parsingTrailers()) {
       return folly::makeUnexpected(
           DeferredParseError(ErrorCode::NO_ERROR,
                              false,
@@ -677,8 +676,7 @@ void HTTP2Codec::onHeadersComplete(HTTPHeaderSize decodedSize,
 
   HTTPMessage* msg = decodeInfo_.msg.get();
   HTTPRequestVerifier& verifier = decodeInfo_.verifier;
-  if ((transportDirection_ == TransportDirection::DOWNSTREAM) &&
-      verifier.hasUpgradeProtocol() &&
+  if (isDownstream(transportDirection_) && verifier.hasUpgradeProtocol() &&
       (*msg->getUpgradeProtocol() == headers::kWebsocketString) &&
       msg->getMethod() == HTTPMethod::CONNECT) {
     msg->setIngressWebsocketUpgrade();
@@ -772,8 +770,7 @@ ErrorCode HTTP2Codec::handleSettings(const std::deque<SettingPair>& settings) {
       } break;
       case SettingsId::ENABLE_PUSH:
         if ((setting.second != 0 && setting.second != 1) ||
-            (setting.second == 1 &&
-             transportDirection_ == TransportDirection::UPSTREAM)) {
+            (setting.second == 1 && isUpstream(transportDirection_))) {
           goawayErrorMessage_ =
               folly::to<string>("GOAWAY error: ENABLE_PUSH invalid setting=",
                                 setting.second,
@@ -860,7 +857,7 @@ ErrorCode HTTP2Codec::parsePushPromise(Cursor& cursor) {
     stream MUST handle PUSH_PROMISE frames that might have been
     created before the RST_STREAM frame is received and processed.
   */
-  if (transportDirection_ != TransportDirection::UPSTREAM) {
+  if (isDownstream(transportDirection_)) {
     goawayErrorMessage_ =
         folly::to<string>("Received PUSH_PROMISE on DOWNSTREAM codec");
     VLOG(2) << goawayErrorMessage_;
@@ -1035,7 +1032,7 @@ ErrorCode HTTP2Codec::checkNewStream(uint32_t streamId, bool trailersAllowed) {
 }
 
 size_t HTTP2Codec::generateConnectionPreface(folly::IOBufQueue& writeBuf) {
-  if (transportDirection_ == TransportDirection::UPSTREAM) {
+  if (isUpstream(transportDirection_)) {
     VLOG(4) << "generating connection preface";
     writeBuf.append(http2::kConnectionPreface);
     return http2::kConnectionPreface.length();
@@ -1171,12 +1168,12 @@ void HTTP2Codec::generateHeaderImpl(
   }
 
   if (msg.isRequest()) {
-    DCHECK(transportDirection_ == TransportDirection::UPSTREAM || assocStream);
+    DCHECK(isUpstream(transportDirection_) || assocStream);
     if (msg.isEgressWebsocketUpgrade()) {
       upgradedStreams_.insert(stream);
     }
   } else {
-    DCHECK(transportDirection_ == TransportDirection::DOWNSTREAM);
+    DCHECK(isDownstream(transportDirection_));
   }
 
   auto headerSize =
@@ -1536,7 +1533,7 @@ size_t HTTP2Codec::generateSettings(folly::IOBufQueue& writeBuf) {
         }
         break;
       case SettingsId::ENABLE_PUSH:
-        if (transportDirection_ == TransportDirection::DOWNSTREAM) {
+        if (isDownstream(transportDirection_)) {
           // HTTP/2 spec says downstream must not send this flag
           // HTTP2Codec uses it to determine if push features are enabled
           continue;
@@ -1708,7 +1705,7 @@ bool HTTP2Codec::parsingTrailers() const {
   // For UPSTREAM case, response headers are required to have status code,
   // thus if no status code we consider that trailers.
   if (parsingHeaders()) {
-    if (transportDirection_ == TransportDirection::DOWNSTREAM) {
+    if (isDownstream(transportDirection_)) {
       return parsingDownstreamTrailers_;
     } else {
       // We *might* be parsing trailers even if we couldn't decode the block.

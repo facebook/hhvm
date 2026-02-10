@@ -12,7 +12,7 @@
 
 namespace proxygen {
 
-const char* getTransportDirectionString(TransportDirection dir) {
+std::string_view getTransportDirectionString(TransportDirection dir) {
   switch (dir) {
     case TransportDirection::UPSTREAM:
       return "upstream";
@@ -24,8 +24,8 @@ const char* getTransportDirectionString(TransportDirection dir) {
 }
 
 TransportDirection operator!(TransportDirection dir) {
-  return dir == TransportDirection::DOWNSTREAM ? TransportDirection::UPSTREAM
-                                               : TransportDirection::DOWNSTREAM;
+  return isDownstream(dir) ? TransportDirection::UPSTREAM
+                           : TransportDirection::DOWNSTREAM;
 }
 
 std::ostream& operator<<(std::ostream& os, const TransportDirection dir) {

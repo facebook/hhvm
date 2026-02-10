@@ -809,11 +809,11 @@ class HTTPTransaction
   }
 
   bool isUpstream() const {
-    return direction_ == TransportDirection::UPSTREAM;
+    return proxygen::isUpstream(direction_);
   }
 
   bool isDownstream() const {
-    return direction_ == TransportDirection::DOWNSTREAM;
+    return proxygen::isDownstream(direction_);
   }
 
   void getLocalAddress(folly::SocketAddress& addr) const {
@@ -1125,8 +1125,7 @@ class HTTPTransaction
    * @return true iff the remote side initiated this transaction.
    */
   bool isRemoteInitiated() const {
-    return (direction_ == TransportDirection::DOWNSTREAM && id_ % 2 == 1) ||
-           (direction_ == TransportDirection::UPSTREAM && id_ % 2 == 0);
+    return (isDownstream() && id_ % 2 == 1) || (isUpstream() && id_ % 2 == 0);
   }
 
   /**
@@ -1362,8 +1361,7 @@ class HTTPTransaction
    * the remote side.
    */
   bool supportsPushTransactions() const {
-    return direction_ == TransportDirection::DOWNSTREAM &&
-           transport_.getCodec().supportsPushTransactions();
+    return isDownstream() && transport_.getCodec().supportsPushTransactions();
   }
 
   /**

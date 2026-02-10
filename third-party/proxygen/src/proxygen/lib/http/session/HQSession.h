@@ -245,7 +245,7 @@ class HQSession
     auto serverCid = (sock_ && sock_->getServerConnectionId())
                          ? *sock_->getServerConnectionId()
                          : quic::ConnectionId::createZeroLength();
-    if (direction_ == TransportDirection::DOWNSTREAM) {
+    if (isDownstream(direction_)) {
       os << ", UA=" << userAgent_ << ", client CID=" << clientCid
          << ", server CID=" << serverCid << ", downstream=" << getPeerAddress()
          << ", " << getLocalAddress() << "=local";
@@ -651,7 +651,7 @@ class HQSession
         return folly::none;
       }
     }
-    if (direction_ == TransportDirection::DOWNSTREAM) {
+    if (isDownstream(direction_)) {
       return hq::BidirectionalStreamType::REQUEST;
     }
     return folly::none;
@@ -732,18 +732,14 @@ class HQSession
 
   bool isPeerUniStream(quic::StreamId id) {
     return sock_->isUnidirectionalStream(id) &&
-           ((direction_ == TransportDirection::DOWNSTREAM &&
-             sock_->isClientStream(id)) ||
-            (direction_ == TransportDirection::UPSTREAM &&
-             sock_->isServerStream(id)));
+           ((isDownstream(direction_) && sock_->isClientStream(id)) ||
+            (isUpstream(direction_) && sock_->isServerStream(id)));
   }
 
   bool isSelfUniStream(quic::StreamId id) {
     return sock_->isUnidirectionalStream(id) &&
-           ((direction_ == TransportDirection::DOWNSTREAM &&
-             sock_->isServerStream(id)) ||
-            (direction_ == TransportDirection::UPSTREAM &&
-             sock_->isClientStream(id)));
+           ((isDownstream(direction_) && sock_->isServerStream(id)) ||
+            (isUpstream(direction_) && sock_->isClientStream(id)));
   }
 
   void abortStream(HTTPException::Direction dir,
@@ -1826,10 +1822,8 @@ class HQSession
 
     bool isPeerInitiatedStream(HTTPCodec::StreamID id) override {
       bool isClientStream = session_.sock_->isClientStream(id);
-      return (session_.direction_ == TransportDirection::DOWNSTREAM &&
-              isClientStream) ||
-             (session_.direction_ == TransportDirection::UPSTREAM &&
-              !isClientStream);
+      return (isDownstream(session_.direction_) && isClientStream) ||
+             (isUpstream(session_.direction_) && !isClientStream);
     }
 
     [[nodiscard]] bool supportsWebTransport() const override {

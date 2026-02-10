@@ -442,7 +442,7 @@ HTTPCoroSession* HTTPCoroSession::makeUpstreamCoroSession(
     std::unique_ptr<folly::coro::TransportIf> coroTransport,
     std::unique_ptr<HTTPCodec> codec,
     wangle::TransportInfo tinfo) {
-  XCHECK(codec->getTransportDirection() == TransportDirection::UPSTREAM);
+  XCHECK(proxygen::isUpstream(codec->getTransportDirection()));
   return new HTTPUniplexTransportSession(
       std::move(coroTransport), std::move(codec), std::move(tinfo));
 }
@@ -452,7 +452,7 @@ HTTPCoroSession* HTTPCoroSession::makeDownstreamCoroSession(
     std::shared_ptr<HTTPHandler> handler,
     std::unique_ptr<HTTPCodec> codec,
     wangle::TransportInfo tinfo) {
-  XCHECK(codec->getTransportDirection() == TransportDirection::DOWNSTREAM);
+  XCHECK(proxygen::isDownstream(codec->getTransportDirection()));
   return new HTTPUniplexTransportSession(std::move(coroTransport),
                                          std::move(codec),
                                          std::move(tinfo),
@@ -463,7 +463,7 @@ HTTPCoroSession* HTTPCoroSession::makeUpstreamCoroSession(
     std::shared_ptr<quic::QuicSocket> sock,
     std::unique_ptr<hq::HQMultiCodec> codec,
     wangle::TransportInfo tinfo) {
-  XCHECK(codec->getTransportDirection() == TransportDirection::UPSTREAM);
+  XCHECK(proxygen::isUpstream(codec->getTransportDirection()));
   return new HTTPQuicCoroSession(
       std::move(sock), std::move(codec), std::move(tinfo));
 }
@@ -473,7 +473,7 @@ HTTPCoroSession* HTTPCoroSession::makeDownstreamCoroSession(
     std::shared_ptr<HTTPHandler> handler,
     std::unique_ptr<hq::HQMultiCodec> codec,
     wangle::TransportInfo tinfo) {
-  XCHECK(codec->getTransportDirection() == TransportDirection::DOWNSTREAM);
+  XCHECK(proxygen::isDownstream(codec->getTransportDirection()));
   return new HTTPQuicCoroSession(
       std::move(sock), std::move(codec), std::move(tinfo), std::move(handler));
 }
@@ -486,7 +486,7 @@ void HTTPUniplexTransportSession::start() {
 
   codec_.add<HTTPChecks>();
   if (codec_->supportsParallelRequests() &&
-      codec_->getTransportDirection() == TransportDirection::DOWNSTREAM) {
+      proxygen::isDownstream(codec_->getTransportDirection())) {
     auto rateLimitFilter =
         std::make_unique<RateLimitFilter>(&eventBase_->timer(), sessionStats_);
     rateLimitFilter->addRateLimiter(RateLimiter::Type::HEADERS);
@@ -514,7 +514,7 @@ void HTTPQuicCoroSession::start() {
   quicSocket_->setPingCallback(this);
   codec_.add<HTTPChecks>();
 
-  if (codec_->getTransportDirection() == TransportDirection::DOWNSTREAM) {
+  if (proxygen::isDownstream(codec_->getTransportDirection())) {
     auto rateLimitFilter =
         std::make_unique<RateLimitFilter>(&eventBase_->timer(), sessionStats_);
     rateLimitFilter->addRateLimiter(RateLimiter::Type::HEADERS);

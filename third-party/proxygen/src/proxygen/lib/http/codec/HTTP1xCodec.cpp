@@ -160,11 +160,7 @@ HTTP1xCodec::~HTTP1xCodec() {
 }
 
 HTTPCodec::StreamID HTTP1xCodec::createStream() {
-  if (transportDirection_ == TransportDirection::DOWNSTREAM) {
-    return ++ingressTxnID_;
-  } else {
-    return ++egressTxnID_;
-  }
+  return isDownstream(transportDirection_) ? ++ingressTxnID_ : ++egressTxnID_;
 }
 
 void HTTP1xCodec::setParserPaused(bool paused) {
@@ -238,8 +234,8 @@ size_t HTTP1xCodec::onIngressImpl(const IOBuf& buf) {
     CHECK(!parserActive_);
     parserActive_ = true;
     currentIngressBuf_ = &buf;
-    if (transportDirection_ == TransportDirection::UPSTREAM &&
-        parser_.http_major == 0 && parser_.http_minor == 9) {
+    if (isUpstream(transportDirection_) && parser_.http_major == 0 &&
+        parser_.http_minor == 9) {
       // HTTP/0.9 responses have no header block, so create a fake 200 response
       // and put the codec in upgrade mode
       onMessageBegin();
@@ -321,8 +317,7 @@ void HTTP1xCodec::onParserError(const char* what) {
   if (msg_) {
     error.setPartialMsg(std::move(msg_));
   }
-  if (transportDirection_ == TransportDirection::DOWNSTREAM &&
-      egressTxnID_ < ingressTxnID_) {
+  if (isDownstream(transportDirection_) && egressTxnID_ < ingressTxnID_) {
     error.setHttpStatusCode(400);
   } // else we've already egressed a response for this txn, don't attempt a 400
   // See http_parser.h for what these error codes mean
@@ -421,7 +416,7 @@ void HTTP1xCodec::generateHeader(
   if (keepalive_ && disableKeepalivePending_) {
     keepalive_ = false;
   }
-  const bool upstream = (transportDirection_ == TransportDirection::UPSTREAM);
+  const bool upstream = isUpstream(transportDirection_);
   const bool downstream = !upstream;
   if (upstream) {
     DCHECK_EQ(txn, egressTxnID_);
@@ -824,7 +819,7 @@ size_t HTTP1xCodec::generateEOM(IOBufQueue& writeBuf, StreamID txn) {
   size_t len = 0;
   if (egressChunked_) {
     CHECK(!inChunk_);
-    if (headRequest_ && transportDirection_ == TransportDirection::DOWNSTREAM) {
+    if (headRequest_ && isDownstream(transportDirection_)) {
       lastChunkWritten_ = true;
     } else {
       // appending a 0\r\n only if it's not a HEAD and downstream request
@@ -863,9 +858,8 @@ size_t HTTP1xCodec::generateGoaway(IOBufQueue&,
   // We won't be able to send anything else on the transport after this.
   // For clients, immediately mark keepalive_ false.  For servers, wait until
   // we've flushed the next headers.
-  if (transportDirection_ == TransportDirection::UPSTREAM ||
-      disableKeepalivePending_ || lastStream != HTTPCodec::MaxStreamID ||
-      error != ErrorCode::NO_ERROR) {
+  if (isUpstream(transportDirection_) || disableKeepalivePending_ ||
+      lastStream != HTTPCodec::MaxStreamID || error != ErrorCode::NO_ERROR) {
     keepalive_ = false;
   } else {
     disableKeepalivePending_ = true;
@@ -880,16 +874,15 @@ int HTTP1xCodec::onMessageBegin() {
   headerParseState_ = HeaderParseState::kParsingHeaderStart;
   msg_ = std::make_unique<HTTPMessage>();
   trailers_.reset();
-  if (transportDirection_ == TransportDirection::DOWNSTREAM) {
+  if (isDownstream(transportDirection_)) {
     requestPending_ = true;
     responsePending_ = true;
   }
   // If there was a 1xx on this connection, don't increment the ingress txn id
-  if (transportDirection_ == TransportDirection::DOWNSTREAM ||
-      !is1xxResponse_) {
+  if (isDownstream(transportDirection_) || !is1xxResponse_) {
     ++ingressTxnID_;
   }
-  if (transportDirection_ == TransportDirection::UPSTREAM) {
+  if (isUpstream(transportDirection_)) {
     is1xxResponse_ = false;
   }
   callback_->onMessageBegin(ingressTxnID_, msg_.get());
@@ -1019,7 +1012,7 @@ int HTTP1xCodec::onHeadersComplete(size_t len) {
   msg_->setHTTPVersion(parser_.http_major, parser_.http_minor);
   msg_->setIsChunked((parser_.flags & F_CHUNKED));
 
-  if (transportDirection_ == TransportDirection::DOWNSTREAM) {
+  if (isDownstream(transportDirection_)) {
     // Set the method type
     msg_->setMethod(http_method_str(static_cast<http_method>(parser_.method)));
 
@@ -1056,13 +1049,12 @@ int HTTP1xCodec::onHeadersComplete(size_t len) {
 
   auto g = folly::makeGuard([this] {
     // Always clear the outbound upgrade header after we receive a response
-    if (transportDirection_ == TransportDirection::UPSTREAM &&
-        parser_.status_code != 100) {
+    if (isUpstream(transportDirection_) && parser_.status_code != 100) {
       upgradeHeader_.clear();
     }
   });
   headerParseState_ = HeaderParseState::kParsingHeadersComplete;
-  if (transportDirection_ == TransportDirection::UPSTREAM) {
+  if (isUpstream(transportDirection_)) {
     if (connectRequest_ &&
         (parser_.status_code >= 200 && parser_.status_code < 300)) {
       // Enable upgrade if this is a 200 response to a CONNECT
@@ -1100,7 +1092,7 @@ int HTTP1xCodec::onHeadersComplete(size_t len) {
   const std::string& upgrade = hdrs.getSingleOrEmpty(HTTP_HEADER_UPGRADE);
   if (kUpgradeToken.equals(upgrade, folly::AsciiCaseInsensitive())) {
     msg_->setIngressWebsocketUpgrade();
-    if (transportDirection_ == TransportDirection::UPSTREAM) {
+    if (isUpstream(transportDirection_)) {
       // response.
       const std::string& accept =
           hdrs.getSingleOrEmpty(HTTP_HEADER_SEC_WEBSOCKET_ACCEPT);
@@ -1132,7 +1124,7 @@ int HTTP1xCodec::onHeadersComplete(size_t len) {
   if (!msgKeepalive) {
     keepalive_ = false;
   }
-  if (transportDirection_ == TransportDirection::DOWNSTREAM) {
+  if (isDownstream(transportDirection_)) {
     // Remember whether this was an HTTP 1.0 request with keepalive enabled
     if (msgKeepalive && msg_->isHTTP1_0() &&
         (keepaliveRequested_ == KeepaliveRequested::UNSET ||
@@ -1148,7 +1140,7 @@ int HTTP1xCodec::onHeadersComplete(size_t len) {
   // for example, if the message is a response to a request with
   // method==HEAD.
   bool ignoreBody;
-  if (transportDirection_ == TransportDirection::DOWNSTREAM) {
+  if (isDownstream(transportDirection_)) {
     ignoreBody = false;
   } else {
     is1xxResponse_ = msg_->is1xxResponse();

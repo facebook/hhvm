@@ -181,7 +181,7 @@ void HQSession::onNewBidirectionalStream(quic::StreamId id) noexcept {
 
   // Reject all bidirectional, server-initiated streams, unless WT is supported
   if (id == kMaxClientBidiStreamId ||
-      (direction_ == TransportDirection::UPSTREAM && !supportsWebTransport())) {
+      (isUpstream(direction_) && !supportsWebTransport())) {
     abortStream(HTTPException::Direction::INGRESS_AND_EGRESS,
                 id,
                 HTTP3::ErrorCode::HTTP_STREAM_CREATION_ERROR);
@@ -230,7 +230,7 @@ void HQSession::dispatchRequestStreamImpl(quic::StreamId id) {
 
 void HQSession::onBidirectionalStreamsAvailable(
     uint64_t numStreamsAvailable) noexcept {
-  if (direction_ == TransportDirection::UPSTREAM) {
+  if (isUpstream(direction_)) {
     VLOG(4) << "Got new max number of concurrent streams we can initiate: "
             << numStreamsAvailable << " sess=" << *this;
     if (infoCallback_ && supportsMoreTransactions()) {
@@ -300,8 +300,8 @@ bool HQSession::maybeRejectRequestAfterGoaway(quic::StreamId id) {
   if (drainState_ != DrainState::NONE) {
     // You can't check upstream here, because upstream GOAWAY sends PUSH IDs.
     // It could be checked in HQUpstreamSesssion::onNewPushStream
-    if (direction_ == TransportDirection::DOWNSTREAM &&
-        sock_->isBidirectionalStream(id) && id >= getGoawayStreamId()) {
+    if (isDownstream(direction_) && sock_->isBidirectionalStream(id) &&
+        id >= getGoawayStreamId()) {
       abortStream(HTTPException::Direction::INGRESS_AND_EGRESS,
                   id,
                   HTTP3::ErrorCode::HTTP_REQUEST_REJECTED);
@@ -618,7 +618,7 @@ size_t HQSession::sendPriority(HTTPCodec::StreamID id, HTTPPriority priority) {
   }
   // PRIORITY_UPDATE frames are sent by clients on the control stream.
   // Servers do not send PRIORITY_UPDATE
-  if (direction_ == TransportDirection::DOWNSTREAM) {
+  if (isDownstream(direction_)) {
     return 0;
   }
   auto controlStream = findControlStream(UnidirectionalStreamType::CONTROL);
@@ -671,8 +671,7 @@ size_t HQSession::HQStreamTransportBase::changePriority(
   }
   // For a client there is no point in changing priority if the response has
   // been fully received
-  if (session_.direction_ == TransportDirection::UPSTREAM &&
-      txn->isIngressEOMSeen()) {
+  if (isUpstream(session_.direction_) && txn->isIngressEOMSeen()) {
     return 0;
   }
   if (txn->isPushed()) {
@@ -726,8 +725,7 @@ void HQSession::drainImpl() {
 }
 
 void HQSession::sendGoaway() {
-  if (direction_ == TransportDirection::UPSTREAM ||
-      drainState_ == DrainState::DONE ||
+  if (isUpstream(direction_) || drainState_ == DrainState::DONE ||
       !versionUtilsReady_.allConditionsMet()) {
     return;
   }
@@ -778,7 +776,7 @@ void HQSession::sendGoaway() {
 }
 
 quic::StreamId HQSession::getGoawayStreamId() {
-  DCHECK_NE(direction_, TransportDirection::UPSTREAM);
+  DCHECK(isDownstream(direction_));
   if (drainState_ == DrainState::NONE || drainState_ == DrainState::PENDING) {
     return HTTPCodec::MaxStreamID;
   }
@@ -916,8 +914,7 @@ void HQSession::checkForShutdown() {
   // state to DONE, so that it will just shut down the socket when all the
   // request streams are done. In the process it will still be able to receive
   // and process GOAWAYs from the server
-  if (direction_ == TransportDirection::UPSTREAM &&
-      drainState_ == DrainState::PENDING) {
+  if (isUpstream(direction_) && drainState_ == DrainState::PENDING) {
     if (VLOG_IS_ON(5)) {
       unidirectionalReadDispatcher_.invokeOnPendingStreamIDs(
           [&](quic::StreamId pendingStreamId) {
@@ -1620,7 +1617,7 @@ void HQSession::onGoaway(uint64_t minUnseenId,
                          std::unique_ptr<folly::IOBuf> /* debugData */) {
   // NOTE: This function needs to be idempotent. i.e. be a no-op if invoked
   // twice with the same lastGoodStreamID
-  if (direction_ == TransportDirection::DOWNSTREAM) {
+  if (isDownstream(direction_)) {
     VLOG(3) << "Ignoring downstream GOAWAY minUnseenId=" << minUnseenId
             << " sess=" << *this;
     return;
@@ -1657,7 +1654,7 @@ void HQSession::onGoaway(uint64_t minUnseenId,
 }
 
 void HQSession::onPriority(quic::StreamId streamId, const HTTPPriority& pri) {
-  CHECK_EQ(direction_, TransportDirection::DOWNSTREAM);
+  CHECK(isDownstream(direction_));
   if (drainState_ != DrainState::NONE) {
     return;
   }
@@ -1676,7 +1673,7 @@ void HQSession::onPriority(quic::StreamId streamId, const HTTPPriority& pri) {
 }
 
 void HQSession::onPushPriority(hq::PushId pushId, const HTTPPriority& pri) {
-  CHECK_EQ(direction_, TransportDirection::DOWNSTREAM);
+  CHECK(isDownstream(direction_));
   if (drainState_ != DrainState::NONE) {
     return;
   }
@@ -2296,7 +2293,7 @@ void HQSession::HQStreamTransportBase::initCodec(
     c->setActivationHook([this] { return setActiveCodec("self"); });
   }
   auto g = folly::makeGuard(setActiveCodec(__func__));
-  if (session_.direction_ == TransportDirection::UPSTREAM || txn_.isPushed()) {
+  if (isUpstream(session_.direction_) || txn_.isPushed()) {
     codecStreamId_ = codecFilterChain->createStream();
   }
   hasCodec_ = true;
@@ -2589,7 +2586,7 @@ void HQSession::HQStreamTransportBase::onHeadersComplete(
 
   // Inform observers when request headers (i.e. ingress, from downstream
   // client) are processed.
-  if (session_.direction_ == TransportDirection::DOWNSTREAM) {
+  if (isDownstream(session_.direction_)) {
     if (msg.get()) {
       const auto event =
           HTTPSessionObserverInterface::RequestStartedEvent::Builder()
@@ -2757,7 +2754,7 @@ void HQSession::abortStream(HTTPException::Direction dir,
                             HTTP3::ErrorCode err) {
   VLOG(4) << __func__ << "sess=" << *this << " id=" << id << " err=" << err;
   CHECK(sock_);
-  if (direction_ == TransportDirection::UPSTREAM &&
+  if (isUpstream(direction_) &&
       err == HTTP3::ErrorCode::HTTP_REQUEST_REJECTED) {
     // Clients MUST NOT use the H3_REQUEST_REJECTED error code, except when a
     // server has requested closure of the request stream with this error code
@@ -2905,7 +2902,7 @@ void HQSession::HQStreamTransportBase::sendHeaders(HTTPTransaction* txn,
 
   // If this is a client sending request headers to upstream
   // invoke requestStarted event for attached observers.
-  if (session_.direction_ == TransportDirection::UPSTREAM) {
+  if (isUpstream(session_.direction_)) {
     const auto event =
         HTTPSessionObserverInterface::RequestStartedEvent::Builder()
             .setTimestamp(HTTPSessionObserverInterface::Clock::now())
@@ -3118,8 +3115,7 @@ void HQSession::HQStreamTransportBase::onResetStream(HTTP3::ErrorCode errorCode,
   // kErrorStreamAbort prevents HTTPTransaction from calling sendAbort in reply.
   // We use this code and manually call sendAbort here for appropriate cases
   HTTP3::ErrorCode replyError = HTTP3::ErrorCode::HTTP_REQUEST_CANCELLED;
-  if (session_.direction_ == TransportDirection::DOWNSTREAM &&
-      !txn_.isIngressStarted()) {
+  if (isDownstream(session_.direction_) && !txn_.isIngressStarted()) {
     // Downstream ingress closed with no ingress yet, we can send REJECTED
     // It's actually ok if we've received headers but not made any
     // calls to the handler, but there's no API for that.
@@ -3127,7 +3123,7 @@ void HQSession::HQStreamTransportBase::onResetStream(HTTP3::ErrorCode errorCode,
   }
 
   if (errorCode == HTTP3::ErrorCode::HTTP_REQUEST_REJECTED) {
-    VLOG_IF(2, session_.direction_ == TransportDirection::DOWNSTREAM)
+    VLOG_IF(2, isDownstream(session_.direction_))
         << "RST_STREAM/REJECTED should not be sent by clients txn=" << txn_;
     // kErrorStreamUnacknowledged signals that this is safe to retry
     ex.setProxygenError(kErrorStreamUnacknowledged);

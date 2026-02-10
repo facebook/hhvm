@@ -133,7 +133,7 @@ HTTPTransaction::HTTPTransaction(
     stats_->recordTransactionOpened();
   }
 
-  if (direction_ == TransportDirection::DOWNSTREAM || !isPushed()) {
+  if (isDownstream() || !isPushed()) {
     queueHandle_ =
         egressQueue_.addTransaction(id_, priority, this, false, &insertDepth_);
   }
@@ -1772,7 +1772,7 @@ void HTTPTransaction::setReceiveWindow(uint32_t capacity) {
 
 void HTTPTransaction::flushWindowUpdate() {
   if (recvToAck_ > 0 && useFlowControl_ && !isIngressEOMSeen() &&
-      (direction_ == TransportDirection::DOWNSTREAM ||
+      (isDownstream() ||
        egressState_ != HTTPTransactionEgressSM::State::Start ||
        ingressState_ != HTTPTransactionIngressSM::State::Start)) {
     // Down egress upstream window updates until after headers

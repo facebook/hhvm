@@ -10,15 +10,24 @@
 
 #include <iosfwd>
 #include <stdint.h>
+#include <string_view>
 
 namespace proxygen {
 
 enum class TransportDirection : uint8_t {
-  DOWNSTREAM, // toward the client
-  UPSTREAM    // toward the origin application or data
+  DOWNSTREAM = 0, // toward the client
+  UPSTREAM = 1    // toward the origin application or data
 };
 
-const char* getTransportDirectionString(TransportDirection dir);
+inline bool isUpstream(TransportDirection dir) noexcept {
+  return dir == TransportDirection::UPSTREAM;
+}
+
+inline bool isDownstream(TransportDirection dir) noexcept {
+  return dir == TransportDirection::DOWNSTREAM;
+}
+
+std::string_view getTransportDirectionString(TransportDirection dir);
 
 TransportDirection operator!(TransportDirection dir);
 

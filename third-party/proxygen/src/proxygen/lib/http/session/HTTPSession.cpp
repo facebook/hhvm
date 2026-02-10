@@ -222,8 +222,7 @@ void HTTPSession::setupCodec() {
     connFlowControl_ = new FlowControlFilter(*this, writeBuf_, codec_.call());
     codec_.addFilters(std::unique_ptr<FlowControlFilter>(connFlowControl_));
   }
-  if (codec_->supportsParallelRequests() && sock_ &&
-      codec_->getTransportDirection() == TransportDirection::DOWNSTREAM) {
+  if (codec_->supportsParallelRequests() && sock_ && isDownstream()) {
     auto rateLimitFilter = std::make_unique<RateLimitFilter>(
         &getEventBase()->timer(), sessionStats_);
     rateLimitFilter->addRateLimiter(RateLimiter::Type::HEADERS);
@@ -488,11 +487,11 @@ void HTTPSession::dumpConnectionState(uint8_t /*loglevel*/) {
 }
 
 bool HTTPSession::isUpstream() const {
-  return codec_->getTransportDirection() == TransportDirection::UPSTREAM;
+  return proxygen::isUpstream(codec_->getTransportDirection());
 }
 
 bool HTTPSession::isDownstream() const {
-  return codec_->getTransportDirection() == TransportDirection::DOWNSTREAM;
+  return proxygen::isDownstream(codec_->getTransportDirection());
 }
 
 void HTTPSession::getReadBuffer(void** buf, size_t* bufSize) {

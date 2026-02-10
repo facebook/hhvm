@@ -68,6 +68,8 @@ HTTPException::HTTPException(const HTTPException& ex)
   }
 }
 
+HTTPException::~HTTPException() = default;
+
 HTTP3::ErrorCode HTTPException::inferHTTP3ErrorCode() const {
   if (hasHttpStatusCode()) {
     return HTTP3::ErrorCode::HTTP_NO_ERROR; // does this sound right?

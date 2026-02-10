@@ -26,6 +26,8 @@ HTTP3::ErrorCode toHTTP3ErrorCode(proxygen::ErrorCode err);
  */
 class HTTPException : public proxygen::Exception {
  public:
+  ~HTTPException() override;
+
   /**
    * Indicates which direction of the data flow was affected by this
    * exception. For instance, if a class receives HTTPException(INGRESS),

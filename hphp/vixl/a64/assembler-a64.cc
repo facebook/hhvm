@@ -1273,6 +1273,11 @@ void Assembler::mvn(const Register& rd, const Operand& operand) {
 }
 
 
+void Assembler::mvn(const VRegister& vd, const VRegister& vn) {
+  Emit(NEON_RBIT_NOT | NEON_16B | Rn(vn) | Rd(vd));
+}
+
+
 void Assembler::mrs(const Register& rt, SystemRegister sysreg) {
   assert(rt.Is64Bits());
   Emit(MRS | ImmSystemRegister(sysreg) | Rt(rt));
@@ -1452,6 +1457,14 @@ void Assembler::fcmp(const FPRegister& fn,
   // affect the result of the comparison.
   assert(value == 0.0);
   Emit(FPType(fn) | FCMP_zero | Rn(fn));
+}
+
+
+void Assembler::fcmeq(const VRegister& vd,
+                      const VRegister& vn,
+                      const VRegister& vm) {
+  assert(vn.size() == vm.size() && vd.size() == vn.size());
+  Emit(NEON_FCMEQ | NEON_FP_2D | Rm(vm) | Rn(vn) | Rd(vd));
 }
 
 

@@ -1205,6 +1205,9 @@ class Assembler {
   // Move inverted operand to register.
   void mvn(const Register& rd, const Operand& operand);
 
+  // Move inverted operand to register.
+  void mvn(const VRegister& vd, const VRegister& vn);
+
   // System instructions.
   // Move to register from system register.
   void mrs(const Register& rt, SystemRegister sysreg);
@@ -1290,6 +1293,9 @@ class Assembler {
 
   // FP compare immediate.
   void fcmp(const FPRegister& fn, double value);
+
+  // FP compare registers.
+  void fcmeq(const VRegister& vd, const VRegister& vn, const VRegister& vm);
 
   // FP conditional compare.
   void fccmp(const FPRegister& fn,

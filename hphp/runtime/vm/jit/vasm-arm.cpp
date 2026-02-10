@@ -1265,29 +1265,17 @@ void Vgen::emit(const unpcklpd& i) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void Vgen::emit(const cmpsd& i) {
-  /*
-   * cmpsd doesn't update SD, so read the flags into a temp.
-   * Use one of the macroassembler scratch regs .
-   */
-  a->SetScratchRegisters(vixl::NoReg, vixl::NoReg);
-  a->Mrs(rVixlScratch0, NZCV);
-
-  a->Fcmp(D(i.s0), D(i.s1));
+  a->fcmeq(D(i.d), D(i.s0), D(i.s1));
   switch (i.pred) {
   case ComparisonPred::eq_ord:
-    a->Csetm(rAsm, C(jit::CC_E));
+    // Do nothing
     break;
   case ComparisonPred::ne_unord:
-    a->Csetm(rAsm, C(jit::CC_NE));
+    a->mvn(D(i.d), D(i.d));
     break;
   default:
     always_assert(false);
   }
-  a->Fmov(D(i.d), rAsm);
-
-  /* Copy the flags back to the system register. */
-  a->Msr(NZCV, rVixlScratch0);
-  a->SetScratchRegisters(rVixlScratch0, rVixlScratch1);
 }
 
 

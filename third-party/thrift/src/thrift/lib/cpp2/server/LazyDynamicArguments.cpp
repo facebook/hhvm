@@ -26,6 +26,7 @@
 #include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
 #include <thrift/lib/cpp2/runtime/SchemaRegistry.h>
+#include <thrift/lib/cpp2/schema/SyntaxGraph.h>
 
 namespace apache::thrift {
 

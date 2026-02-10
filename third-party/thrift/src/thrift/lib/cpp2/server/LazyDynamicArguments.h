@@ -26,9 +26,12 @@
 
 #include <thrift/lib/cpp/protocol/TProtocolTypes.h>
 #include <thrift/lib/cpp2/dynamic/DynamicValue.h>
-#include <thrift/lib/cpp2/schema/SyntaxGraph.h>
 
 namespace apache::thrift {
+
+namespace syntax_graph {
+class FunctionNode;
+} // namespace syntax_graph
 
 /**
  * Provides lazy access to method arguments as DynamicValue objects.

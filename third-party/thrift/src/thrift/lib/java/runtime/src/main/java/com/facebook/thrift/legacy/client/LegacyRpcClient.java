@@ -103,67 +103,87 @@ final class LegacyRpcClient implements RpcClient {
   public <T> Mono<ClientResponsePayload<T>> singleRequestSingleResponse(
       final ClientRequestPayload<T> payload, final RpcOptions options) {
 
-    ByteBuf encodedRequest = null;
-    try {
-      final MonoProcessor<ClientResponsePayload<T>> processor = MonoProcessor.create();
-      final int sequenceId = this.sequenceId.getAndIncrement();
-      encodedRequest = encodeRequest(alloc, payload, false, sequenceId);
-      final RequestContext<T, ClientResponsePayload<T>> context =
-          new RequestContext<>(processor, payload, encodedRequest, options, false, sequenceId);
+    // Use Mono.defer() to lazily allocate ByteBuf only when subscribed.
+    // This prevents allocation if the Mono is never subscribed to (e.g., timeout before
+    // subscription).
+    return Mono.defer(
+        () -> {
+          final MonoProcessor<ClientResponsePayload<T>> processor = MonoProcessor.create();
+          final int sequenceId = this.sequenceId.getAndIncrement();
+          ByteBuf encodedRequest = null;
 
-      if (!channel.isActive()) {
-        return Mono.error(ChannelNotActiveException.INSTANCE);
-      }
+          try {
+            encodedRequest = encodeRequest(alloc, payload, false, sequenceId);
 
-      Mono<ClientResponsePayload<T>> response =
-          NettyUtil.toMono(channel.writeAndFlush(context)).then(processor);
+            final RequestContext<T, ClientResponsePayload<T>> context =
+                new RequestContext<>(
+                    processor, payload, encodedRequest, options, false, sequenceId);
 
-      response = emitExceptionOnClose(response);
+            if (!channel.isActive()) {
+              ReferenceCountUtil.safeRelease(encodedRequest);
+              return Mono.error(ChannelNotActiveException.INSTANCE);
+            }
 
-      return forceExecutionOffLoopIfNecessary(response);
-    } catch (Throwable t) {
-      if (encodedRequest != null && encodedRequest.refCnt() > 0) {
-        encodedRequest.release();
-      }
+            // Once writeAndFlush is called, Netty takes ownership of the ByteBuf and will
+            // release it when the write completes (success or failure). Cancellation after
+            // this point is handled by Netty's write completion listener.
+            Mono<ClientResponsePayload<T>> response =
+                NettyUtil.toMono(channel.writeAndFlush(context)).then(processor);
 
-      return Mono.error(t);
-    }
+            response = emitExceptionOnClose(response);
+
+            return forceExecutionOffLoopIfNecessary(response);
+          } catch (Throwable t) {
+            ReferenceCountUtil.safeRelease(encodedRequest);
+            return Mono.error(t);
+          }
+        });
   }
 
   @Override
   public <T> Mono<Void> singleRequestNoResponse(
       ClientRequestPayload<T> payload, RpcOptions options) {
-    ByteBuf encodedRequest = null;
-    try {
-      final MonoProcessor<Void> processor = MonoProcessor.create();
-      encodedRequest = encodeRequest(alloc, payload, true, ONEWAY_SEQ_IQ);
-      final RequestContext<T, Void> context =
-          new RequestContext<>(processor, payload, encodedRequest, options, true, ONEWAY_SEQ_IQ);
 
-      if (!channel.isActive()) {
-        return Mono.error(ChannelNotActiveException.INSTANCE);
-      }
+    // Use Mono.defer() to lazily allocate ByteBuf only when subscribed.
+    // This prevents allocation if the Mono is never subscribed to (e.g., timeout before
+    // subscription).
+    return Mono.defer(
+        () -> {
+          final MonoProcessor<Void> processor = MonoProcessor.create();
+          ByteBuf encodedRequest = null;
 
-      Mono<Void> response = NettyUtil.toMono(channel.writeAndFlush(context));
+          try {
+            encodedRequest = encodeRequest(alloc, payload, true, ONEWAY_SEQ_IQ);
 
-      response = emitExceptionOnClose(response);
+            final RequestContext<T, Void> context =
+                new RequestContext<>(
+                    processor, payload, encodedRequest, options, true, ONEWAY_SEQ_IQ);
 
-      return forceExecutionOffLoopIfNecessary(response);
-    } catch (Throwable t) {
-      if (encodedRequest != null && encodedRequest.refCnt() > 0) {
-        encodedRequest.release();
-      }
+            if (!channel.isActive()) {
+              ReferenceCountUtil.safeRelease(encodedRequest);
+              return Mono.error(ChannelNotActiveException.INSTANCE);
+            }
 
-      return Mono.error(t);
-    }
+            // Once writeAndFlush is called, Netty takes ownership of the ByteBuf and will
+            // release it when the write completes (success or failure). Cancellation after
+            // this point is handled by Netty's write completion listener.
+            Mono<Void> response = NettyUtil.toMono(channel.writeAndFlush(context));
+
+            response = emitExceptionOnClose(response);
+
+            return forceExecutionOffLoopIfNecessary(response);
+          } catch (Throwable t) {
+            ReferenceCountUtil.safeRelease(encodedRequest);
+            return Mono.error(t);
+          }
+        });
   }
 
   ByteBuf encodeRequest(
       final ByteBufAllocator allocator,
       final ClientRequestPayload requestPayload,
       boolean oneway,
-      final int sequenceId)
-      throws Exception {
+      final int sequenceId) {
     final ByteBuf request = allocator.buffer();
     try {
       final ProtocolId protocol = requestPayload.getRequestRpcMetadata().getProtocol();

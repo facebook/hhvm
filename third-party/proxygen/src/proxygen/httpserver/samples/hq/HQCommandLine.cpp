@@ -60,7 +60,9 @@ DEFINE_bool(sequential,
 DEFINE_string(gap_ms,
               "0",
               "Comma separated list of gaps in ms between requests");
-DEFINE_string(congestion, "cubic", "newreno/cubic/bbr/none");
+DEFINE_string(congestion,
+              "cubic",
+              "newreno/cubic/bbr/bbr2/bbr2modular/copa/none");
 DEFINE_int32(conn_flow_control, 1024 * 1024 * 10, "Connection flow control");
 DEFINE_int32(stream_flow_control, 256 * 1024, "Stream flow control");
 DEFINE_int32(max_receive_packet_size,

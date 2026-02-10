@@ -1227,7 +1227,12 @@ let check_override
       parent_class_elt
       class_
       class_elt
-      on_error;
+      on_error
+  end;
+
+  (* We check visibility on constructor overrides regardless of consistency,
+   * so this enforces the same constraint for package requirements. *)
+  if MemberKind.is_functional member_kind then begin
     check_require_package env member_name parent_class_elt class_elt on_error
   end;
 

@@ -90,6 +90,7 @@ enum SurpriseFlag : size_t {
     DebuggerSignalFlag |
     EventHookFlag |
     InterceptFlag |
+    SignaledFlag |
     XenonSignalFlag |
     HeapSamplingFlag |
     IntervalTimerFlag |

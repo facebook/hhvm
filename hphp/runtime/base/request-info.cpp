@@ -386,6 +386,7 @@ size_t handle_request_surprise(c_WaitableWaitHandle* wh, size_t mask) {
     }
   }
   if (flags & SignaledFlag) {
+    clearSurpriseFlag(SignaledFlag);
     HHVM_FN(pcntl_signal_dispatch)();
   }
 

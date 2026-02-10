@@ -623,7 +623,7 @@ void RequestInjectionData::sendSignal(int signum) {
 
 int RequestInjectionData::getAndClearNextPendingSignal() {
   // We cannot look at the surprise flag because it may have already been
-  // cleared in handle_request_surprise().
+  // cleared in handle_request_surprise() before dispatching signals.
   for (unsigned i = 0; i < m_signalMask.size(); ++i) {
     auto& chunk = m_signalMask[i];
     if (auto value = chunk.load(std::memory_order_acquire)) {

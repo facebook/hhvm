@@ -57,6 +57,7 @@ let parse_options () =
   in
   let allowed_fixme_codes_strict = ref None in
   let allowed_decl_fixme_codes = ref None in
+  let ignore_string_methods = ref true in
   let options =
     [
       ( "--extra-builtin",
@@ -73,6 +74,9 @@ let parse_options () =
         Arg.String
           (fun s -> allowed_decl_fixme_codes := Some (comma_string_to_iset s)),
         "List of fixmes that are allowed in declarations." );
+      ( "--enable-string-methods",
+        Arg.Unit (fun () -> ignore_string_methods := false),
+        " Enable methods on string primitive types" );
     ]
   in
   let options = Arg.align ~limit:25 options in
@@ -107,6 +111,7 @@ let parse_options () =
         allowed_decl_fixme_codes =
           Option.value !allowed_decl_fixme_codes ~default:ISet.empty;
         allow_unstable_features = true;
+        ignore_string_methods = !ignore_string_methods;
       }
   in
   let tcopt =

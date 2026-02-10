@@ -147,8 +147,4 @@ std::string EvalLoader::PackagesTomlFileNameDefault() {
   return "PACKAGES.toml";
 }
 
-int EvalLoader::AsyncJitWorkerThreadsDefault() {
-  return std::max(4, Process::GetCPUCount() / 2);
-}
-
 }

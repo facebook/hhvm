@@ -276,6 +276,7 @@ size_t handle_request_surprise(c_WaitableWaitHandle* wh, size_t mask) {
   auto const debugging = p.getDebuggerAttached();
 
   // Start with any pending exception that might be on the request.
+  clearSurpriseFlag(PendingExceptionFlag);
   auto pendingException = info.m_pendingException;
   info.m_pendingException = nullptr;
 

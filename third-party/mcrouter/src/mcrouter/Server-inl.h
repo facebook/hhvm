@@ -367,6 +367,7 @@ bool runServerDual(
     thriftServer = std::make_shared<apache::thrift::ThriftServer>();
     thriftServer->setIOThreadPool(ioThreadPool);
     thriftServer->setNumCPUWorkerThreads(1);
+    thriftServer->setMaxRequests(0);
 
     // Shutdown state
     auto shutdownStarted = std::make_shared<std::atomic<bool>>(false);

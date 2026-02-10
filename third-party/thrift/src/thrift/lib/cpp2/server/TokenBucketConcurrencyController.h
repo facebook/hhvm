@@ -31,6 +31,10 @@
 
 namespace apache::thrift {
 
+// Experimental concurrency controller that uses a token bucket to rate-limit
+// request execution. The default concurrency controller is
+// ParallelConcurrencyController; this one is only instantiated when
+// FLAGS_thrift_use_token_bucket_concurrency_controller is set to true.
 class TokenBucketConcurrencyController : public ConcurrencyControllerBase,
                                          public RequestExpirationDelegate {
  public:

@@ -111,27 +111,31 @@ public final class RSocketRpcClient implements RpcClient {
   @Override
   public <T> Mono<ClientResponsePayload<T>> singleRequestSingleResponse(
       ClientRequestPayload<T> payload, RpcOptions options) {
-    Payload rsocketPayload = null;
-    try {
-      final ProtocolId protocol = payload.getRequestRpcMetadata().getProtocol();
-      final TProtocolType protocolType = TProtocolType.fromProtocolId(protocol);
+    final ProtocolId protocol = payload.getRequestRpcMetadata().getProtocol();
+    final TProtocolType protocolType = TProtocolType.fromProtocolId(protocol);
 
-      rsocketPayload = clientRequestPayloadToRSocketPayload(payload, protocolType, options);
-      return rsocket
-          .requestResponse(rsocketPayload)
-          .map(response -> rsocketPayloadToClientResponsePayload(payload, response, protocolType))
-          .onErrorResume(
-              t -> {
-                if (isInternalError(t)) {
-                  return Mono.just(getErrorFrame(t));
-                }
-                return Mono.error(t);
-              });
-    } catch (Throwable t) {
-      ReferenceCountUtil.safeRelease(rsocketPayload);
-
-      return Mono.error(t);
-    }
+    return Mono.defer(
+        () -> {
+          Payload rsocketPayload =
+              clientRequestPayloadToRSocketPayload(payload, protocolType, options);
+          try {
+            return rsocket
+                .requestResponse(rsocketPayload)
+                .map(
+                    response ->
+                        rsocketPayloadToClientResponsePayload(payload, response, protocolType))
+                .onErrorResume(
+                    t -> {
+                      if (isInternalError(t)) {
+                        return Mono.just(getErrorFrame(t));
+                      }
+                      return Mono.error(t);
+                    });
+          } catch (Throwable t) {
+            ReferenceCountUtil.safeRelease(rsocketPayload);
+            return Mono.error(t);
+          }
+        });
   }
 
   private boolean isInternalError(Throwable t) {
@@ -175,98 +179,104 @@ public final class RSocketRpcClient implements RpcClient {
   @Override
   public <T> Mono<Void> singleRequestNoResponse(
       ClientRequestPayload<T> payload, RpcOptions options) {
-    Payload rsocketPayload = null;
-    try {
-      final ProtocolId protocol = payload.getRequestRpcMetadata().getProtocol();
-      final TProtocolType protocolType = TProtocolType.fromProtocolId(protocol);
+    final ProtocolId protocol = payload.getRequestRpcMetadata().getProtocol();
+    final TProtocolType protocolType = TProtocolType.fromProtocolId(protocol);
 
-      rsocketPayload = clientRequestPayloadToRSocketPayload(payload, protocolType, options);
-      return rsocket.fireAndForget(rsocketPayload);
-    } catch (Throwable t) {
-      ReferenceCountUtil.safeRelease(rsocketPayload);
-
-      return Mono.error(t);
-    }
+    return Mono.defer(
+        () -> {
+          Payload rsocketPayload =
+              clientRequestPayloadToRSocketPayload(payload, protocolType, options);
+          try {
+            return rsocket.fireAndForget(rsocketPayload);
+          } catch (Throwable t) {
+            ReferenceCountUtil.safeRelease(rsocketPayload);
+            return Mono.error(t);
+          }
+        });
   }
 
   @Override
   public <T, K> Flux<ClientResponsePayload<K>> singleRequestStreamingResponse(
       ClientRequestPayload<T> payload, RpcOptions options) {
-    Payload rsocketPayload = null;
-    try {
-      final ProtocolId protocol = payload.getRequestRpcMetadata().getProtocol();
-      final TProtocolType protocolType = TProtocolType.fromProtocolId(protocol);
+    final ProtocolId protocol = payload.getRequestRpcMetadata().getProtocol();
+    final TProtocolType protocolType = TProtocolType.fromProtocolId(protocol);
 
-      rsocketPayload = clientRequestPayloadToRSocketPayload(payload, protocolType, options);
-      return rsocket
-          .requestStream(rsocketPayload)
-          .onErrorResume(
-              t -> {
-                if (isInternalError(t)) {
-                  return Flux.just(
-                      ByteBufPayload.create(
-                          getExceptionString(t, payload.getRequestRpcMetadata().getName())));
-                }
-                return Flux.error(t);
-              })
-          .map(new StreamingResponseHandler<>(payload));
-    } catch (Throwable t) {
-      ReferenceCountUtil.safeRelease(rsocketPayload);
-
-      return Flux.error(t);
-    }
+    return Flux.defer(
+        () -> {
+          Payload rsocketPayload =
+              clientRequestPayloadToRSocketPayload(payload, protocolType, options);
+          try {
+            return rsocket
+                .requestStream(rsocketPayload)
+                .onErrorResume(
+                    t -> {
+                      if (isInternalError(t)) {
+                        return Flux.just(
+                            ByteBufPayload.create(
+                                getExceptionString(t, payload.getRequestRpcMetadata().getName())));
+                      }
+                      return Flux.error(t);
+                    })
+                .map(new StreamingResponseHandler<>(payload));
+          } catch (Throwable t) {
+            ReferenceCountUtil.safeRelease(rsocketPayload);
+            return Flux.error(t);
+          }
+        });
   }
 
   @Override
   public <T, K> Flux<ClientResponsePayload<K>> streamingRequestStreamingResponse(
       Publisher<ClientRequestPayload<T>> payloads, RpcOptions options) {
-    Flux<ClientResponsePayload<K>> clientResponsePayloadFlux =
-        Flux.from(payloads)
-            .switchOnFirst(
-                (signal, flux) -> {
-                  final ClientRequestPayload<T> clientRequestPayload = signal.get();
+    return Flux.from(payloads)
+        .switchOnFirst(
+            (signal, flux) -> {
+              final ClientRequestPayload<T> clientRequestPayload = signal.get();
 
-                  final ProtocolId protocol =
-                      clientRequestPayload.getRequestRpcMetadata().getProtocol();
-                  final TProtocolType protocolType = TProtocolType.fromProtocolId(protocol);
+              final ProtocolId protocol =
+                  clientRequestPayload.getRequestRpcMetadata().getProtocol();
+              final TProtocolType protocolType = TProtocolType.fromProtocolId(protocol);
 
-                  final Flux<Payload> payloadFlux =
-                      flux.map(t -> clientRequestPayloadToRSocketPayload(t, protocolType, options));
+              final Flux<Payload> payloadFlux =
+                  flux.map(t -> clientRequestPayloadToRSocketPayload(t, protocolType, options))
+                      .doOnDiscard(Payload.class, ReferenceCountUtil::safeRelease);
 
-                  Flux<Payload> requestChannel = rsocket.requestChannel(payloadFlux);
-
-                  return requestChannel
-                      .onErrorResume(
-                          t -> {
-                            if (isInternalError(t)) {
-                              return Flux.just(
-                                  ByteBufPayload.create(
-                                      getExceptionString(
-                                          t,
-                                          clientRequestPayload.getRequestRpcMetadata().getName())));
-                            }
-                            return Flux.error(t);
-                          })
-                      .map(new StreamingResponseHandler<>(clientRequestPayload));
-                });
-
-    return clientResponsePayloadFlux;
+              return rsocket
+                  .requestChannel(payloadFlux)
+                  .onErrorResume(
+                      t -> {
+                        if (isInternalError(t)) {
+                          return Flux.just(
+                              ByteBufPayload.create(
+                                  getExceptionString(
+                                      t, clientRequestPayload.getRequestRpcMetadata().getName())));
+                        }
+                        return Flux.error(t);
+                      })
+                  .map(new StreamingResponseHandler<>(clientRequestPayload));
+            });
   }
 
   @Override
   public Mono<Void> metadataPush(ClientPushMetadata clientMetadata, RpcOptions options) {
-    ByteBuf metadata = null;
-    try {
-      metadata = alloc.buffer();
-      ByteBufTProtocol metadataProtocol = TProtocolType.TCompact.apply(metadata);
-      clientMetadata.write0(metadataProtocol);
-
-      Payload payload = ByteBufPayload.create(alloc.buffer(), metadata);
-      return rsocket.metadataPush(payload);
-    } catch (Throwable t) {
-      ReferenceCountUtil.safeRelease(metadata);
-      return Mono.error(t);
-    }
+    return Mono.defer(
+        () -> {
+          Payload payload = null;
+          ByteBuf metadata = alloc.buffer();
+          try {
+            ByteBufTProtocol metadataProtocol = TProtocolType.TCompact.apply(metadata);
+            clientMetadata.write0(metadataProtocol);
+            payload = ByteBufPayload.create(Unpooled.EMPTY_BUFFER, metadata);
+            return rsocket.metadataPush(payload);
+          } catch (Throwable t) {
+            if (payload != null) {
+              ReferenceCountUtil.safeRelease(payload);
+            } else {
+              ReferenceCountUtil.safeRelease(metadata);
+            }
+            return Mono.error(t);
+          }
+        });
   }
 
   private <T> Payload clientRequestPayloadToRSocketPayload(

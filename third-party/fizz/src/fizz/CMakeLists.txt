@@ -54,6 +54,7 @@ find_package(fmt CONFIG REQUIRED)
 
 find_package(OpenSSL REQUIRED)
 find_package(Glog REQUIRED)
+add_compile_definitions(GLOG_USE_GLOG_EXPORT)
 find_package(Threads REQUIRED)
 find_package(Zstd REQUIRED)
 if (UNIX AND NOT APPLE)

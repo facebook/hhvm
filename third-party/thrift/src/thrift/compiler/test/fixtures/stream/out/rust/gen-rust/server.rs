@@ -782,6 +782,7 @@ where
             response,
         )?;
 
+        reply_state.set_stream_context_stack(ctx_stack);
         let _ = reply_state.send_stream_reply(response, stream, P::PROTOCOL_ID);
         ::std::result::Result::Ok(())
     }
@@ -888,6 +889,7 @@ where
             response,
         )?;
 
+        reply_state.set_stream_context_stack(ctx_stack);
         let _ = reply_state.send_stream_reply(response, stream, P::PROTOCOL_ID);
         ::std::result::Result::Ok(())
     }
@@ -986,6 +988,7 @@ where
             response,
         )?;
 
+        reply_state.set_stream_context_stack(ctx_stack);
         let _ = reply_state.send_stream_reply(response, stream, P::PROTOCOL_ID);
         ::std::result::Result::Ok(())
     }
@@ -1084,6 +1087,7 @@ where
             response,
         )?;
 
+        reply_state.set_stream_context_stack(ctx_stack);
         let _ = reply_state.send_stream_reply(response, stream, P::PROTOCOL_ID);
         ::std::result::Result::Ok(())
     }
@@ -1190,6 +1194,7 @@ where
             response,
         )?;
 
+        reply_state.set_stream_context_stack(ctx_stack);
         let _ = reply_state.send_stream_reply(response, stream, P::PROTOCOL_ID);
         ::std::result::Result::Ok(())
     }
@@ -1296,6 +1301,7 @@ where
             response,
         )?;
 
+        reply_state.set_stream_context_stack(ctx_stack);
         let _ = reply_state.send_stream_reply(response, stream, P::PROTOCOL_ID);
         ::std::result::Result::Ok(())
     }
@@ -1394,6 +1400,7 @@ where
             response,
         )?;
 
+        reply_state.set_stream_context_stack(ctx_stack);
         let _ = reply_state.send_stream_reply(response, stream, P::PROTOCOL_ID);
         ::std::result::Result::Ok(())
     }
@@ -1500,6 +1507,7 @@ where
             response,
         )?;
 
+        reply_state.set_stream_context_stack(ctx_stack);
         let _ = reply_state.send_stream_reply(response, stream, P::PROTOCOL_ID);
         ::std::result::Result::Ok(())
     }
@@ -1599,6 +1607,7 @@ where
             response,
         )?;
 
+        reply_state.set_stream_context_stack(ctx_stack);
         let _ = reply_state.send_stream_reply(response, stream, P::PROTOCOL_ID);
         ::std::result::Result::Ok(())
     }

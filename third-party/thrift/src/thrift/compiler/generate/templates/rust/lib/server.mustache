@@ -245,6 +245,7 @@ where
             .boxed();
 
         // Prepare the client-to-server sink processor
+        reply_state.set_stream_context_stack(ctx_stack);
         let input_stream = reply_state.send_bidirectional_reply(first_result_enc, encoded_server_stream, P::PROTOCOL_ID);
 
         let client_stream = input_stream
@@ -328,6 +329,7 @@ where
             &mut ctx_stack,
             first_result,
         )?;
+        reply_state.set_stream_context_stack(ctx_stack);
         let (input_stream, final_result_callback) = reply_state.send_sink_reply(first_result_enc, buffer_size, chunk_timeout, P::PROTOCOL_ID);
         let stream =
             ::std::panic::AssertUnwindSafe(input_stream)
@@ -444,6 +446,7 @@ where
             response,
         )?;
 
+        reply_state.set_stream_context_stack(ctx_stack);
         let _ = reply_state.send_stream_reply(response, stream, P::PROTOCOL_ID);
         ::std::result::Result::Ok(())
         {{/function:stream?}}{{/function:bidirectional_stream?}}

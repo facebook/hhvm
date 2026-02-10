@@ -900,6 +900,7 @@ pub mod my_service {
                 response,
             )?;
     
+            reply_state.set_stream_context_stack(ctx_stack);
             let _ = reply_state.send_stream_reply(response, stream, P::PROTOCOL_ID);
             ::std::result::Result::Ok(())
         }
@@ -988,6 +989,7 @@ pub mod my_service {
                 &mut ctx_stack,
                 first_result,
             )?;
+            reply_state.set_stream_context_stack(ctx_stack);
             let (input_stream, final_result_callback) = reply_state.send_sink_reply(first_result_enc, buffer_size, chunk_timeout, P::PROTOCOL_ID);
             let stream =
                 ::std::panic::AssertUnwindSafe(input_stream)
@@ -1456,6 +1458,7 @@ pub mod my_service {
                 response,
             )?;
     
+            reply_state.set_stream_context_stack(ctx_stack);
             let _ = reply_state.send_stream_reply(response, stream, P::PROTOCOL_ID);
             ::std::result::Result::Ok(())
         }
@@ -1544,6 +1547,7 @@ pub mod my_service {
                 &mut ctx_stack,
                 first_result,
             )?;
+            reply_state.set_stream_context_stack(ctx_stack);
             let (input_stream, final_result_callback) = reply_state.send_sink_reply(first_result_enc, buffer_size, chunk_timeout, P::PROTOCOL_ID);
             let stream =
                 ::std::panic::AssertUnwindSafe(input_stream)
@@ -2631,6 +2635,7 @@ where
             response,
         )?;
 
+        reply_state.set_stream_context_stack(ctx_stack);
         let _ = reply_state.send_stream_reply(response, stream, P::PROTOCOL_ID);
         ::std::result::Result::Ok(())
     }
@@ -3195,6 +3200,7 @@ pub mod factories {
                 response,
             )?;
     
+            reply_state.set_stream_context_stack(ctx_stack);
             let _ = reply_state.send_stream_reply(response, stream, P::PROTOCOL_ID);
             ::std::result::Result::Ok(())
         }
@@ -3283,6 +3289,7 @@ pub mod factories {
                 &mut ctx_stack,
                 first_result,
             )?;
+            reply_state.set_stream_context_stack(ctx_stack);
             let (input_stream, final_result_callback) = reply_state.send_sink_reply(first_result_enc, buffer_size, chunk_timeout, P::PROTOCOL_ID);
             let stream =
                 ::std::panic::AssertUnwindSafe(input_stream)
@@ -3751,6 +3758,7 @@ pub mod factories {
                 response,
             )?;
     
+            reply_state.set_stream_context_stack(ctx_stack);
             let _ = reply_state.send_stream_reply(response, stream, P::PROTOCOL_ID);
             ::std::result::Result::Ok(())
         }
@@ -3839,6 +3847,7 @@ pub mod factories {
                 &mut ctx_stack,
                 first_result,
             )?;
+            reply_state.set_stream_context_stack(ctx_stack);
             let (input_stream, final_result_callback) = reply_state.send_sink_reply(first_result_enc, buffer_size, chunk_timeout, P::PROTOCOL_ID);
             let stream =
                 ::std::panic::AssertUnwindSafe(input_stream)
@@ -4863,6 +4872,7 @@ where
             response,
         )?;
 
+        reply_state.set_stream_context_stack(ctx_stack);
         let _ = reply_state.send_stream_reply(response, stream, P::PROTOCOL_ID);
         ::std::result::Result::Ok(())
     }
@@ -5409,6 +5419,7 @@ pub mod perform {
                 response,
             )?;
     
+            reply_state.set_stream_context_stack(ctx_stack);
             let _ = reply_state.send_stream_reply(response, stream, P::PROTOCOL_ID);
             ::std::result::Result::Ok(())
         }
@@ -5497,6 +5508,7 @@ pub mod perform {
                 &mut ctx_stack,
                 first_result,
             )?;
+            reply_state.set_stream_context_stack(ctx_stack);
             let (input_stream, final_result_callback) = reply_state.send_sink_reply(first_result_enc, buffer_size, chunk_timeout, P::PROTOCOL_ID);
             let stream =
                 ::std::panic::AssertUnwindSafe(input_stream)
@@ -5965,6 +5977,7 @@ pub mod perform {
                 response,
             )?;
     
+            reply_state.set_stream_context_stack(ctx_stack);
             let _ = reply_state.send_stream_reply(response, stream, P::PROTOCOL_ID);
             ::std::result::Result::Ok(())
         }
@@ -6053,6 +6066,7 @@ pub mod perform {
                 &mut ctx_stack,
                 first_result,
             )?;
+            reply_state.set_stream_context_stack(ctx_stack);
             let (input_stream, final_result_callback) = reply_state.send_sink_reply(first_result_enc, buffer_size, chunk_timeout, P::PROTOCOL_ID);
             let stream =
                 ::std::panic::AssertUnwindSafe(input_stream)
@@ -7274,6 +7288,7 @@ pub mod interact_with_shared {
                 response,
             )?;
     
+            reply_state.set_stream_context_stack(ctx_stack);
             let _ = reply_state.send_stream_reply(response, stream, P::PROTOCOL_ID);
             ::std::result::Result::Ok(())
         }
@@ -7362,6 +7377,7 @@ pub mod interact_with_shared {
                 &mut ctx_stack,
                 first_result,
             )?;
+            reply_state.set_stream_context_stack(ctx_stack);
             let (input_stream, final_result_callback) = reply_state.send_sink_reply(first_result_enc, buffer_size, chunk_timeout, P::PROTOCOL_ID);
             let stream =
                 ::std::panic::AssertUnwindSafe(input_stream)

@@ -96,6 +96,20 @@ where
     ) -> Result<()> {
         bail!("Thrift server does not support interactions");
     }
+
+    /// Store the context stack for streaming event handlers (metrics, etc.).
+    /// The context stack will be passed to the C++ streaming infrastructure
+    /// when sending stream/sink replies, enabling streaming-specific callbacks
+    /// like StreamMetricEventHandler.
+    ///
+    /// This should be called by the generated processor before calling
+    /// send_stream_reply, send_sink_reply, or send_bidirectional_reply.
+    fn set_stream_context_stack(&self, _ctx: <Self::RequestContext as RequestContext>::ContextStack)
+    where
+        Self::RequestContext: RequestContext,
+    {
+        // Default no-op for servers that don't support streaming metrics
+    }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]

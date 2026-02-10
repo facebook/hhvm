@@ -485,6 +485,7 @@ where
             &mut ctx_stack,
             first_result,
         )?;
+        reply_state.set_stream_context_stack(ctx_stack);
         let (input_stream, final_result_callback) = reply_state.send_sink_reply(first_result_enc, buffer_size, chunk_timeout, P::PROTOCOL_ID);
         let stream =
             ::std::panic::AssertUnwindSafe(input_stream)
@@ -616,6 +617,7 @@ where
             &mut ctx_stack,
             first_result,
         )?;
+        reply_state.set_stream_context_stack(ctx_stack);
         let (input_stream, final_result_callback) = reply_state.send_sink_reply(first_result_enc, buffer_size, chunk_timeout, P::PROTOCOL_ID);
         let stream =
             ::std::panic::AssertUnwindSafe(input_stream)
@@ -746,6 +748,7 @@ where
             &mut ctx_stack,
             first_result,
         )?;
+        reply_state.set_stream_context_stack(ctx_stack);
         let (input_stream, final_result_callback) = reply_state.send_sink_reply(first_result_enc, buffer_size, chunk_timeout, P::PROTOCOL_ID);
         let stream =
             ::std::panic::AssertUnwindSafe(input_stream)
@@ -876,6 +879,7 @@ where
             &mut ctx_stack,
             first_result,
         )?;
+        reply_state.set_stream_context_stack(ctx_stack);
         let (input_stream, final_result_callback) = reply_state.send_sink_reply(first_result_enc, buffer_size, chunk_timeout, P::PROTOCOL_ID);
         let stream =
             ::std::panic::AssertUnwindSafe(input_stream)
@@ -1006,6 +1010,7 @@ where
             &mut ctx_stack,
             first_result,
         )?;
+        reply_state.set_stream_context_stack(ctx_stack);
         let (input_stream, final_result_callback) = reply_state.send_sink_reply(first_result_enc, buffer_size, chunk_timeout, P::PROTOCOL_ID);
         let stream =
             ::std::panic::AssertUnwindSafe(input_stream)
@@ -1142,6 +1147,7 @@ where
             &mut ctx_stack,
             first_result,
         )?;
+        reply_state.set_stream_context_stack(ctx_stack);
         let (input_stream, final_result_callback) = reply_state.send_sink_reply(first_result_enc, buffer_size, chunk_timeout, P::PROTOCOL_ID);
         let stream =
             ::std::panic::AssertUnwindSafe(input_stream)
@@ -1278,6 +1284,7 @@ where
             &mut ctx_stack,
             first_result,
         )?;
+        reply_state.set_stream_context_stack(ctx_stack);
         let (input_stream, final_result_callback) = reply_state.send_sink_reply(first_result_enc, buffer_size, chunk_timeout, P::PROTOCOL_ID);
         let stream =
             ::std::panic::AssertUnwindSafe(input_stream)

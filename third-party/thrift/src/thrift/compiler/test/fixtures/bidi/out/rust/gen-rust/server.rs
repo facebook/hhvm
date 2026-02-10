@@ -376,6 +376,7 @@ where
             .boxed();
 
         // Prepare the client-to-server sink processor
+        reply_state.set_stream_context_stack(ctx_stack);
         let input_stream = reply_state.send_bidirectional_reply(first_result_enc, encoded_server_stream, P::PROTOCOL_ID);
 
         let client_stream = input_stream
@@ -517,6 +518,7 @@ where
             .boxed();
 
         // Prepare the client-to-server sink processor
+        reply_state.set_stream_context_stack(ctx_stack);
         let input_stream = reply_state.send_bidirectional_reply(first_result_enc, encoded_server_stream, P::PROTOCOL_ID);
 
         let client_stream = input_stream
@@ -666,6 +668,7 @@ where
             .boxed();
 
         // Prepare the client-to-server sink processor
+        reply_state.set_stream_context_stack(ctx_stack);
         let input_stream = reply_state.send_bidirectional_reply(first_result_enc, encoded_server_stream, P::PROTOCOL_ID);
 
         let client_stream = input_stream

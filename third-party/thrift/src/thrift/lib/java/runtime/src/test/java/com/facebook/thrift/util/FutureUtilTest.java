@@ -24,18 +24,21 @@ import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.SettableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.reactivestreams.Subscription;
 import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Hooks;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Operators;
+import reactor.core.publisher.SignalType;
 import reactor.core.publisher.Sinks;
-import reactor.core.publisher.Sinks.One;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 import reactor.test.StepVerifier;
@@ -87,28 +90,6 @@ public class FutureUtilTest {
     SettableFuture<String> future = SettableFuture.create();
     future.set("Hi");
     return future;
-  }
-
-  @Test
-  public void testOnNextDropped() throws Exception {
-    CountDownLatch latch = new CountDownLatch(1);
-    Hooks.onNextDropped(o -> latch.countDown());
-    One<Object> one = Sinks.one();
-    ListenableFuture<Object> future = FutureUtil.toListenableFuture(one.asMono());
-    future.cancel(true);
-    one.tryEmitValue(one);
-    latch.await();
-  }
-
-  @Test
-  public void testOnErrorDropped() throws Exception {
-    CountDownLatch latch = new CountDownLatch(1);
-    Hooks.onErrorDropped(o -> latch.countDown());
-    One<Object> one = Sinks.one();
-    ListenableFuture<Object> future = FutureUtil.toListenableFuture(one.asMono());
-    future.cancel(true);
-    one.tryEmitError(new RuntimeException());
-    latch.await();
   }
 
   @Test
@@ -170,5 +151,125 @@ public class FutureUtilTest {
   public void testWithScalarMonoThatEmitsException() throws Exception {
     ListenableFuture future = FutureUtil.toListenableFuture(Mono.error(new RuntimeException()));
     future.get();
+  }
+
+  @Test
+  public void testFutureCancellationCancelsUpstreamSubscription() throws Exception {
+    AtomicBoolean upstreamCancelled = new AtomicBoolean(false);
+    AtomicBoolean finallyInvoked = new AtomicBoolean(false);
+    CountDownLatch subscribed = new CountDownLatch(1);
+
+    Mono<String> mono =
+        Mono.<String>never()
+            .doOnSubscribe(s -> subscribed.countDown())
+            .doOnCancel(() -> upstreamCancelled.set(true))
+            .doFinally(
+                signal -> {
+                  if (signal == SignalType.CANCEL) {
+                    finallyInvoked.set(true);
+                  }
+                });
+
+    ListenableFuture<String> future = FutureUtil.toListenableFuture(mono);
+
+    // Wait for subscription to be established
+    Assert.assertTrue("Subscription should be established", subscribed.await(1, TimeUnit.SECONDS));
+
+    // Cancel the future
+    future.cancel(true);
+
+    // Give time for cancellation to propagate
+    Thread.sleep(50);
+
+    // Verify upstream was cancelled
+    Assert.assertTrue("Upstream subscription should be cancelled", upstreamCancelled.get());
+    Assert.assertTrue("doFinally should be invoked with CANCEL", finallyInvoked.get());
+    Assert.assertTrue("Future should report cancelled", future.isCancelled());
+  }
+
+  @Test
+  public void testDoubleCancellationIsIdempotent() throws Exception {
+    AtomicInteger cancelCount = new AtomicInteger(0);
+    CountDownLatch subscribed = new CountDownLatch(1);
+
+    Mono<String> mono =
+        Mono.<String>never()
+            .doOnSubscribe(s -> subscribed.countDown())
+            .doOnCancel(cancelCount::incrementAndGet);
+
+    ListenableFuture<String> future = FutureUtil.toListenableFuture(mono);
+
+    // Wait for subscription
+    Assert.assertTrue(subscribed.await(1, TimeUnit.SECONDS));
+
+    // Cancel multiple times
+    future.cancel(true);
+    future.cancel(true);
+    future.cancel(true);
+
+    // Give time for cancellation to propagate
+    Thread.sleep(50);
+
+    // Should only cancel upstream once
+    Assert.assertEquals("Should only cancel once", 1, cancelCount.get());
+  }
+
+  @Test
+  public void testConcurrentCancellationAndCompletion() throws Exception {
+    int iterations = 100;
+    AtomicInteger successCount = new AtomicInteger(0);
+    AtomicInteger cancelledCount = new AtomicInteger(0);
+    AtomicInteger errorCount = new AtomicInteger(0);
+
+    ExecutorService executor = Executors.newFixedThreadPool(2);
+
+    try {
+      for (int i = 0; i < iterations; i++) {
+        Sinks.One<String> sink = Sinks.one();
+        ListenableFuture<String> future = FutureUtil.toListenableFuture(sink.asMono());
+        CountDownLatch latch = new CountDownLatch(2);
+
+        // Thread 1: Cancel the future
+        executor.submit(
+            () -> {
+              try {
+                future.cancel(true);
+              } finally {
+                latch.countDown();
+              }
+            });
+
+        // Thread 2: Complete the mono
+        executor.submit(
+            () -> {
+              try {
+                sink.tryEmitValue("value");
+              } finally {
+                latch.countDown();
+              }
+            });
+
+        latch.await(1, TimeUnit.SECONDS);
+
+        if (future.isCancelled()) {
+          cancelledCount.incrementAndGet();
+        } else {
+          try {
+            future.get(100, TimeUnit.MILLISECONDS);
+            successCount.incrementAndGet();
+          } catch (Exception e) {
+            errorCount.incrementAndGet();
+          }
+        }
+      }
+    } finally {
+      executor.shutdown();
+      executor.awaitTermination(5, TimeUnit.SECONDS);
+    }
+
+    // Either cancelled or completed successfully - no exceptions
+    Assert.assertEquals("Should have no errors", 0, errorCount.get());
+    Assert.assertEquals(
+        "All iterations accounted for", iterations, successCount.get() + cancelledCount.get());
   }
 }

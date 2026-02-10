@@ -30,6 +30,7 @@ import java.util.Optional;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Supplier;
+import org.reactivestreams.Subscription;
 import reactor.core.Fuseable.ScalarCallable;
 import reactor.core.publisher.BaseSubscriber;
 import reactor.core.publisher.Mono;
@@ -198,6 +199,21 @@ public final class FutureUtil {
 
     public ListenableFutureSubscriber(SettableFuture<T> settableFuture) {
       this.settableFuture = settableFuture;
+    }
+
+    @Override
+    protected void hookOnSubscribe(Subscription subscription) {
+      // Propagate cancellation from ListenableFuture back to Mono subscription
+      // This ensures resources (e.g., ByteBuf) are released when future is cancelled
+      settableFuture.addListener(
+          () -> {
+            if (settableFuture.isCancelled()) {
+              dispose();
+            }
+          },
+          MoreExecutors.directExecutor());
+
+      request(Long.MAX_VALUE);
     }
 
     @Override

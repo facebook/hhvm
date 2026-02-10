@@ -196,16 +196,44 @@ bool simplify(Env& env, const ldimmq& inst, Vlabel b, size_t i) {
 bool simplify(Env& env, const movtqb& inst, Vlabel b, size_t i) {
   if (env.use_counts[inst.d] != 1) return false;
 
-  if (if_inst<Vinstr::movzbq>(env, b, i + 1, [&](const movzbq& ext) {
+  // movtqb{s, tmp}; movzbq{tmp, d} --> movzbq{s, d}
+  bool simplified = if_inst<Vinstr::movzbq>(env, b, i + 1, [&](const movzbq& ext) {
       if (ext.s != inst.d) return false;
 
       return simplify_impl(env, b, i, [&] (Vout& v) {
         v << movzbq{Vreg8((Vreg)inst.s), ext.d};
         return 2;
       });
-    })) {
+    });
+
+  if (simplified) return true;
+
+  // movtqb{s, tmp}; andbi{imm, tmp, d} --> copy{s, tmp}; andbi{imm, tmp, d}
+  // the copy vasm could be a nop if tmp == d
+  return if_inst<Vinstr::andbi>(env, b, i + 1, [&](const andbi& vandbi) {
+      if (vandbi.s1 != inst.d) return false;
+
+      return simplify_impl(env, b, i, [&] (Vout& v) {
+        v << copy{Vreg8((Vreg)inst.s), vandbi.s1};
+        return 1;
+      });
+    });
+}
+
+bool simplify(Env& env, const movzbq& inst, Vlabel b, size_t i) {
+  auto const def_op = env.def_insts[inst.s];
+
+  // Check if `inst.s' was defined by an andbi instruction, which
+  // automatically clears the high bits.
+  if (def_op != Vinstr::andbi) {
+    return false;
   }
-  return false;
+
+  // If so, the movzbq{} is redundant
+  return simplify_impl(env, b, i, [&] (Vout& v) {
+    v << copy{inst.s, inst.d};
+    return 1;
+  });
 }
 
 bool simplify(Env& env, const movzbl& inst, Vlabel b, size_t i) {

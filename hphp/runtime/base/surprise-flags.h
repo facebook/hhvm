@@ -73,31 +73,11 @@ enum SurpriseFlag : size_t {
   /* Set when executing a CLI-server request and the client has vanished. */
   CLIClientTerminated = 1ull << 63,
 
-  /*
-   * Flags that shouldn't be cleared by fetchAndClearSurpriseFlags, because
-   * fetchAndClearSurpriseFlags is only supposed to touch flags related to
-   * PHP-visible signals/exceptions and resource limits.
-   */
   ResourceFlags =
     MemExceededFlag |
     TimedOutFlag |
     PendingGCFlag |
     PendingPerfEventFlag,
-
-  StickyFlags =
-    AsyncEventHookFlag |
-    DebuggerHookFlag |
-    DebuggerSignalFlag |
-    EventHookFlag |
-    InterceptFlag |
-    PendingExceptionFlag |
-    SignaledFlag |
-    XenonSignalFlag |
-    HeapSamplingFlag |
-    IntervalTimerFlag |
-    MemThresholdFlag |
-    CLIClientTerminated |
-    ResourceFlags,
 
   /*
    * Flags that should only be checked at MemoryManager safe points.
@@ -174,9 +154,9 @@ inline void clearSurpriseFlag(SurpriseFlag flag) {
   stackLimitAndSurprise().fetch_and(~flag);
 }
 
-inline size_t fetchAndClearSurpriseFlags() {
-  return stackLimitAndSurprise().
-    fetch_and(StickyFlags | kSurpriseFlagStackMask) & kSurpriseFlagMask;
+inline size_t fetchSurpriseFlags() {
+  return stackLimitAndSurprise().load(std::memory_order_acquire) &
+    kSurpriseFlagMask;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

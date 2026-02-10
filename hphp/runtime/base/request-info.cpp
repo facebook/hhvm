@@ -272,7 +272,7 @@ size_t handle_request_surprise(c_WaitableWaitHandle* wh, size_t mask) {
   auto& info = RI();
   auto& p = info.m_reqInjectionData;
 
-  auto flags = fetchAndClearSurpriseFlags() & mask;
+  auto flags = fetchSurpriseFlags() & mask;
   auto const debugging = p.getDebuggerAttached();
 
   // Start with any pending exception that might be on the request.
@@ -321,7 +321,6 @@ size_t handle_request_surprise(c_WaitableWaitHandle* wh, size_t mask) {
   }
 
   if (flags & MemExceededFlag) {
-    assertx(MemExceededFlag & StickyFlags);
     if (p.hostOOMFlag() && !pendingException) {
       // When the host is running out of memory, don't abort all requests.
       // Instead, only kill a request if it uses a nontrivial amount of memory.
@@ -354,19 +353,13 @@ size_t handle_request_surprise(c_WaitableWaitHandle* wh, size_t mask) {
     // we'll disable specific flags to make sure Xenon (or other)
     // re-entrant code doesn't interfere with debugging.
     if (flags & XenonSignalFlag) {
-      if (StickyFlags & XenonSignalFlag) {
-        clearSurpriseFlag(XenonSignalFlag);
-      }
+      clearSurpriseFlag(XenonSignalFlag);
     }
     if (flags & HeapSamplingFlag) {
-      if (StickyFlags & HeapSamplingFlag) {
-        clearSurpriseFlag(HeapSamplingFlag);
-      }
+      clearSurpriseFlag(HeapSamplingFlag);
     }
     if (flags & IntervalTimerFlag) {
-      if (StickyFlags & IntervalTimerFlag) {
-        clearSurpriseFlag(IntervalTimerFlag);
-      }
+      clearSurpriseFlag(IntervalTimerFlag);
     }
   }
   if (flags & CLIClientTerminated) {
@@ -377,9 +370,7 @@ size_t handle_request_surprise(c_WaitableWaitHandle* wh, size_t mask) {
     }
   }
   if (flags & PendingGCFlag) {
-    if (StickyFlags & PendingGCFlag) {
-      clearSurpriseFlag(PendingGCFlag);
-    }
+    clearSurpriseFlag(PendingGCFlag);
     if (tl_heap->isGCEnabled()) {
       tl_heap->collect("surprise");
     } else {
@@ -392,9 +383,7 @@ size_t handle_request_surprise(c_WaitableWaitHandle* wh, size_t mask) {
   }
 
   if (flags & PendingPerfEventFlag) {
-    if (StickyFlags & PendingPerfEventFlag) {
-      clearSurpriseFlag(PendingPerfEventFlag);
-    }
+    clearSurpriseFlag(PendingPerfEventFlag);
     perf_event_consume(record_perf_mem_event);
   }
 

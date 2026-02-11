@@ -52,4 +52,36 @@ class TClientAsyncHandler {
   )[zoned_local]: Awaitable<void> {
     // Do nothing
   }
+
+  // Called between the send and recv for streaming gen_methodName() calls.
+  // Returns a generator of raw serialized payload bytes (bare structs, no
+  // envelope). The handler is responsible for making the first response
+  // available on the input transport before this method returns.
+  public async function genWaitStream(
+    int $sequence_id,
+  )[zoned_local]: Awaitable<HH\AsyncGenerator<null, string, void>> {
+    return self::genEmptyStream();
+  }
+
+  // Called between the send and recv for sink gen_methodName() calls.
+  // Returns a sink function that accepts raw serialized payload bytes and
+  // returns raw serialized final response bytes (bare structs, no envelope).
+  // The handler is responsible for making the first response available
+  // on the input transport before this method returns.
+  public async function genWaitSink(int $sequence_id)[zoned_local]: Awaitable<
+    (function(HH\AsyncGenerator<null, string, void>): Awaitable<string>),
+  > {
+    return async (
+      HH\AsyncGenerator<null, string, void> $_gen,
+    )[zoned_local] ==> {
+      return '';
+    };
+  }
+
+  protected static async function genEmptyStream(
+  )[zoned_local]: HH\AsyncGenerator<null, string, void> {
+    foreach (vec[] as $item) {
+      yield $item;
+    }
+  }
 }

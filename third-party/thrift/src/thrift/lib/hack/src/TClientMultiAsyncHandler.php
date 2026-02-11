@@ -81,4 +81,52 @@ final class TClientMultiAsyncHandler extends TClientAsyncHandler {
         await $handler->genAfter<TResponse>($func_name, $response),
     );
   }
+
+  <<__Override>>
+  public async function genWaitStream(
+    int $sequence_id,
+  )[zoned_local]: Awaitable<HH\AsyncGenerator<null, string, void>> {
+    $results = await Vec\map_async(
+      $this->handlers,
+      async ($handler)[zoned_local] ==>
+        await $handler->genWaitStream($sequence_id),
+    );
+    return (
+      async function()[zoned_local] use ($results) {
+        foreach ($results as $result_gen) {
+          foreach ($result_gen await as $payload) {
+            yield $payload;
+          }
+        }
+      }
+    )();
+  }
+
+  // Note: This assumes at most one handler consumes the generator.
+  // Async generators can only be consumed once. Most handlers (logging,
+  // metrics, tracing) should not override genWaitSink() or should return
+  // a no-op function. Only the actual transport handler
+  // should consume the generator.
+  <<__Override>>
+  public async function genWaitSink(int $sequence_id)[zoned_local]: Awaitable<
+    (function(HH\AsyncGenerator<null, string, void>): Awaitable<string>),
+  > {
+    $results = await Vec\fb\map_and_filter_nulls_async(
+      $this->handlers,
+      async ($handler)[zoned_local] ==>
+        await $handler->genWaitSink($sequence_id),
+    );
+    return async (HH\AsyncGenerator<null, string, void> $gen)[zoned_local] ==> {
+      $final_response = await Vec\map_async(
+        $results,
+        async ($result)[zoned_local] ==> await $result($gen),
+      );
+      foreach ($final_response as $res) {
+        if (!Str\is_empty($res)) {
+          return $res;
+        }
+      }
+      return '';
+    };
+  }
 }

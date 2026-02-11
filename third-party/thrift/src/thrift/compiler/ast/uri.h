@@ -67,6 +67,8 @@ inline constexpr auto kAllowLegacyMissingUris =
     "facebook.com/thrift/annotation/AllowLegacyMissingUris";
 inline constexpr auto kAllowUnsafeNonSealedKeyTypeUri =
     "facebook.com/thrift/annotation/AllowUnsafeNonSealedKeyType";
+inline constexpr auto kDeprecatedUri =
+    "facebook.com/thrift/annotation/Deprecated";
 
 // Scope:
 inline constexpr auto kScopeProgramUri =

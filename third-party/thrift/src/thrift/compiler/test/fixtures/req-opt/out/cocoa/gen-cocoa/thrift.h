@@ -360,6 +360,25 @@ NSString* RpcPriorityToString(const RpcPriority value);
 
 @end
 
+@interface Deprecated : TBaseStruct <TBase, NSCoding> {
+  NSString * __thrift_message;
+
+  BOOL __thrift_message_set;
+}
+
+@property (nonatomic, retain, nullable) NSString * message;
+
+- (id) init NS_DESIGNATED_INITIALIZER;
+- (id) initWithCoder:(NSCoder *)decoder NS_DESIGNATED_INITIALIZER;
+- (id) initWithMessage: (nullable NSString *) message NS_DESIGNATED_INITIALIZER;
+- (void) read: (id <TProtocol>) inProtocol;
+- (void) write: (id <TProtocol>) outProtocol;
+- (void) validate;
+- (NSDictionary *) toDict;
+
+- (BOOL) messageIsSet;
+@end
+
 
 
 NS_ASSUME_NONNULL_END

@@ -640,6 +640,33 @@
         "is_exception" : false,
         "is_union" : false,
         "lineno" : 428
+      },
+      "Deprecated" : {
+        "name" : "Deprecated",
+        "structured_annotations": {
+          "scope.Field" : {
+            "type" : {
+            "type" : "struct",
+            "name" : "Field",
+            "path" : "thrift/annotation/scope.thrift"
+          },
+            "value" : {}
+          }
+        },
+        "docstring" : "Marks a definition as deprecated.\n\nWhen applied, generated code will include language-specific deprecation\nmarkers that produce compiler warnings when the deprecated element is used.\n\nExample:\n  struct User {\n    @thrift.Deprecated{message = \"Use 'full_name' instead\"}\n    1: string name;\n    2: string full_name;\n  }\n",
+        "fields" : {
+          "message" : {
+            "name" : "message",
+            "docstring" : "Explanation of why this is deprecated and what to use instead.\nThis message will appear in compiler warnings.\n",
+            "key" : 1,
+            "lineno" : 452,
+            "required" : "opt-in-req-out",
+            "type" : "string"
+                  }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 446
       }
   },
   "source_path" : "thrift/annotation/thrift",

@@ -40,6 +40,7 @@ namespace annotation {
   ::apache::thrift::detail::md::StructMetadata<AllowUnsafeRequiredFieldQualifier>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<AllowLegacyMissingUris>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<AllowUnsafeNonSealedKeyType>::gen(metadata);
+  ::apache::thrift::detail::md::StructMetadata<Deprecated>::gen(metadata);
   return metadata;
 }
 } // namespace facebook

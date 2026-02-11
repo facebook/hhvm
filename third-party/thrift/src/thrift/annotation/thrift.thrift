@@ -429,3 +429,25 @@ struct AllowLegacyMissingUris {}
 @scope.Typedef
 @scope.FunctionParameter
 struct AllowUnsafeNonSealedKeyType {}
+
+/**
+ * Marks a definition as deprecated.
+ *
+ * When applied, generated code will include language-specific deprecation
+ * markers that produce compiler warnings when the deprecated element is used.
+ *
+ * Example:
+ *   struct User {
+ *     @thrift.Deprecated{message = "Use 'full_name' instead"}
+ *     1: string name;
+ *     2: string full_name;
+ *   }
+ */
+@scope.Field
+struct Deprecated {
+  /**
+   * Explanation of why this is deprecated and what to use instead.
+   * This message will appear in compiler warnings.
+   */
+  1: string message;
+}

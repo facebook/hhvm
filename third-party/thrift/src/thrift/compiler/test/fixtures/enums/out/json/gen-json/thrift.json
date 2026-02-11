@@ -546,6 +546,38 @@
           "column" : 38
         }
       }
+    },
+    "Deprecated" : {
+      "lineno" : 446,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "message" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 452,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 452,
+              "column" : 21
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 446,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 453,
+          "column" : 2
+        }
+      }
     }
   }
 }

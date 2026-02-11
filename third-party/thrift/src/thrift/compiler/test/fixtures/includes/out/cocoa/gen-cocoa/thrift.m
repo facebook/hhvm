@@ -2311,3 +2311,138 @@ NSString* RpcPriorityToString(const RpcPriority value)
 
 @end
 
+@implementation Deprecated
+
+- (instancetype) init
+{
+  self = [super init];
+  return self;
+}
+
+- (id) initWithMessage: (NSString *) message
+{
+  self = [super init];
+  __thrift_message = message;
+  __thrift_message_set = YES;
+  return self;
+}
+
+- (id) initWithCoder: (NSCoder *) decoder
+{
+  self = [super init];
+  if ([decoder containsValueForKey: @"message"])
+  {
+    __thrift_message = [[decoder decodeObjectForKey: @"message"] retain_stub];
+    __thrift_message_set = YES;
+  }
+  return self;
+}
+
+- (void) encodeWithCoder: (NSCoder *) encoder
+{
+  if (__thrift_message_set)
+  {
+    [encoder encodeObject: __thrift_message forKey: @"message"];
+  }
+}
+
+- (NSString *) message {
+  return __thrift_message;
+}
+
+- (void) setMessage: (NSString *) message {
+  [self throwExceptionIfImmutable];
+  __thrift_message = message;
+  __thrift_message_set = YES;
+}
+
+- (BOOL) messageIsSet {
+  return __thrift_message_set;
+}
+
+- (void) unsetMessage {
+  __thrift_message = nil;
+  __thrift_message_set = NO;
+}
+
+- (void) read: (id <TProtocol>) inProtocol
+{
+  NSString * fieldName;
+  int fieldType;
+  int fieldID;
+
+  [inProtocol readStructBeginReturningName: NULL];
+  while (true)
+  {
+    [inProtocol readFieldBeginReturningName: &fieldName type: &fieldType fieldID: &fieldID];
+    if (fieldType == TType_STOP) { 
+      break;
+    }
+    switch (fieldID)
+    {
+      case 1:
+        if (fieldType == TType_STRING) {
+          NSString * fieldValue = [inProtocol readString];
+          [self setMessage: fieldValue];
+        } else {
+          [TProtocolUtil skipType: fieldType onProtocol: inProtocol];
+        }
+        break;
+      default:
+        [TProtocolUtil skipType: fieldType onProtocol: inProtocol];
+        break;
+    }
+    [inProtocol readFieldEnd];
+  }
+  [inProtocol readStructEnd];
+}
+
+- (void) write: (id <TProtocol>) outProtocol {
+  [outProtocol writeStructBeginWithName: @"Deprecated"];
+  if (__thrift_message_set) {
+    if (__thrift_message != nil) {
+      [outProtocol writeFieldBeginWithName: @"message" type: TType_STRING fieldID: 1];
+      [outProtocol writeString: __thrift_message];
+      [outProtocol writeFieldEnd];
+    }
+  }
+  [outProtocol writeFieldStop];
+  [outProtocol writeStructEnd];
+}
+
+- (void) validate {
+  // check for required fields
+}
+
+- (NSString *) description {
+  return [[self toDict] description];
+}
+
+- (NSDictionary *) toDict {
+  NSMutableDictionary *ret = [NSMutableDictionary dictionary];
+  ret[@"__thrift_struct_name"] = @"Deprecated";
+  if (__thrift_message) {
+    ret[@"message"] = __thrift_message;
+  }
+  return [ret copy];
+}
+
+- (BOOL) makeImmutable {
+  const BOOL wasImmutable = [self isImmutable];
+  if (!wasImmutable) {
+    [super makeImmutable];
+  }
+  return YES;
+}
+
+- (id) mutableCopyWithZone:(NSZone *)zone {
+  Deprecated *newCopy = [[[self class] alloc] init];;
+  if (__thrift_message) {
+    newCopy->__thrift_message = self->__thrift_message;
+  }
+  newCopy->__thrift_message_set = self->__thrift_message_set;
+  return newCopy;
+}
+
+@end
+

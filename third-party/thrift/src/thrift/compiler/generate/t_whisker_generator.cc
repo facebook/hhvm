@@ -329,6 +329,22 @@ prototype<t_field>::ptr t_whisker_generator::make_prototype_for_field(
   def.property("terse?", [](const t_field& self) {
     return self.qualifier() == t_field_qualifier::terse;
   });
+  def.property("deprecated?", [](const t_field& self) {
+    return self.has_structured_annotation(kDeprecatedUri);
+  });
+  def.property("deprecation_message", [](const t_field& self) {
+    if (const t_const* deprecated_annotation =
+            self.find_structured_annotation_or_null(kDeprecatedUri)) {
+      std::string message = "This field is deprecated";
+      if (const t_const_value* msg_value =
+              deprecated_annotation
+                  ->get_value_from_structured_annotation_or_null("message")) {
+        message = msg_value->get_string();
+      }
+      return whisker::make::string(get_escaped_string(message));
+    }
+    return whisker::make::null;
+  });
   return std::move(def).make();
 }
 

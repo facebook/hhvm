@@ -2269,3 +2269,118 @@ class AllowUnsafeNonSealedKeyType implements \IThriftSyncStruct, \IThriftStructM
 
 }
 
+/**
+ * Marks a definition as deprecated.
+ * 
+ * When applied, generated code will include language-specific deprecation
+ * markers that produce compiler warnings when the deprecated element is used.
+ * 
+ * Example:
+ *   struct User {
+ *     @thrift.Deprecated{message = "Use 'full_name' instead"}
+ *     1: string name;
+ *     2: string full_name;
+ *   }
+ *
+ * Original thrift struct:-
+ * Deprecated
+ */
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/annotation/Deprecated'))>>
+class Deprecated implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
+  use \ThriftSerializationTrait;
+
+  const \ThriftStructTypes::TSpec SPEC = dict[
+    1 => shape(
+      'var' => 'message',
+      'type' => \TType::STRING,
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'message' => 1,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'message' => ?string,
+  );
+
+  const type TShape = shape(
+    'message' => string,
+    ...
+  );
+  const int STRUCTURAL_ID = 1438368398389181198;
+  /**
+   * Explanation of why this is deprecated and what to use instead.
+   * This message will appear in compiler warnings.
+   * 
+   * Original thrift field:-
+   * 1: string message
+   */
+  public string $message;
+
+  public function __construct(?string $message = null)[] {
+    $this->message = $message ?? '';
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'message'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'Deprecated';
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "thrift.Deprecated",
+        "fields" => vec[
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 1,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
+                )
+              ),
+              "name" => "message",
+            )
+          ),
+        ],
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[
+        '\facebook\thrift\annotation\Field' => \facebook\thrift\annotation\Field::withDefaultValues(),
+      ],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public static function __fromShape(self::TShape $shape)[]: this {
+    return new static(
+      $shape['message'],
+    );
+  }
+
+  public function __toShape()[]: self::TShape {
+    return shape(
+      'message' => $this->message,
+    );
+  }
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+}
+

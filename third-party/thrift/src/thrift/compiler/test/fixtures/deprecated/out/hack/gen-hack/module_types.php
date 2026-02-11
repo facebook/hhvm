@@ -68,6 +68,7 @@ class User implements \IThriftSyncStruct, \IThriftStructMetadata {
    * Original thrift field:-
    * 2: string name
    */
+  <<__Deprecated("Use 'full_name' instead")>>
   public string $name;
   /**
    * Original thrift field:-
@@ -80,6 +81,7 @@ class User implements \IThriftSyncStruct, \IThriftStructMetadata {
    * Original thrift field:-
    * 4: string email
    */
+  <<__Deprecated("This field is no longer used")>>
   public ?string $email;
   /**
    * Original thrift field:-
@@ -295,6 +297,7 @@ class ExampleUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThri
    * Original thrift field:-
    * 2: i32 intValue
    */
+  <<__Deprecated("Use stringValue instead")>>
   public ?int $intValue;
   /**
    * Original thrift field:-

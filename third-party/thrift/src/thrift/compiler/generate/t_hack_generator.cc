@@ -4266,7 +4266,28 @@ void t_hack_generator::generate_php_struct_fields(
       generate_php_docstring(out, &field);
     }
 
-    const std::string field_attributes = find_attributes(field, true);
+    // Check for deprecation annotation
+    std::string deprecation_message;
+    if (const t_const* deprecated_annotation =
+            field.find_structured_annotation_or_null(kDeprecatedUri)) {
+      deprecation_message = "This field is deprecated";
+      if (const t_const_value* msg_value =
+              deprecated_annotation
+                  ->get_value_from_structured_annotation_or_null("message")) {
+        deprecation_message = msg_value->get_string();
+      }
+    }
+
+    std::string field_attributes = find_attributes(field, true);
+    if (!deprecation_message.empty()) {
+      std::string deprecated_attr =
+          "__Deprecated(" + render_string(deprecation_message) + ")";
+      if (!field_attributes.empty()) {
+        field_attributes = deprecated_attr + ", " + field_attributes;
+      } else {
+        field_attributes = deprecated_attr;
+      }
+    }
     if (!field_attributes.empty()) {
       indent(out) << "<<" << field_attributes << ">>\n";
     }

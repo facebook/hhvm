@@ -175,14 +175,24 @@ Options:
                   @thrift.AllowLegacyMissingUris annotation.
                   Default: error
 
-                deprecated_cpp_methods=none|error
+                deprecated_cpp_methods=none|warn|error
                   Action to take on deprecated cpp.methods annotations.
                   Default: none
 
                 sealed_annotation_on_non_sealed_type=none|warn|error
                   Action to take on (structured) types that are marked as
                   @thrift.Sealed, but do not meet the necessary criteria.
-                  Default: warn 
+                  Default: error
+
+                non_sealed_key_type=none|warn|error
+                  Action to take when a non-sealed type is used as a map key
+                  or set element type.
+                  Default: none
+
+                unnecessary_allow_unsafe_non_sealed_key_type=none|warn|error
+                  Action to take on unnecessary (or invalid) uses of the
+                  @thrift.AllowUnsafeNonSealedKeyType annotation.
+                  Default: error
 
                 warn_on_redundant_custom_default_values
                   DEPRECATED, prefer: redundant_custom_default_values=warn
@@ -982,6 +992,21 @@ std::string parse_args(
                   &sparams.sealed_annotation_on_non_sealed_type)) {
             continue;
           }
+
+          if (maybe_parse_validation_level_flag(
+                  /*flag=*/validator,
+                  /*prefix=*/"non_sealed_key_type",
+                  &sparams.non_sealed_key_type)) {
+            continue;
+          }
+
+          if (maybe_parse_validation_level_flag(
+                  /*flag=*/validator,
+                  /*prefix=*/"unnecessary_allow_unsafe_non_sealed_key_type",
+                  &sparams.unnecessary_allow_unsafe_non_sealed_key_type)) {
+            continue;
+          }
+
         } catch (const std::exception& e) {
           fmt::print(
               stderr,
@@ -1157,6 +1182,15 @@ void record_invocation_params(
       fmt::format(
           "sealed_annotation_on_non_sealed_type={}",
           fmt::underlying(sparams.sealed_annotation_on_non_sealed_type)));
+  sema_params_metric.add(
+      fmt::format(
+          "non_sealed_key_type={}",
+          fmt::underlying(sparams.non_sealed_key_type)));
+  sema_params_metric.add(
+      fmt::format(
+          "unnecessary_allow_unsafe_non_sealed_key_type={}",
+          fmt::underlying(
+              sparams.unnecessary_allow_unsafe_non_sealed_key_type)));
   sema_params_metric.add(
       "warn_on_redundant_custom_default_values=" +
       std::to_string(

@@ -551,6 +551,9 @@ void validate_orderable_structured_types(
   }
 }
 
+/**
+ * Checks that types that are annotated with @thrift.Sealed are valid.
+ */
 void validate_sealed_structured_types(
     sema_context& ctx, const t_structured& node) {
   if (!node.has_structured_annotation(kSealedUri)) {
@@ -1641,6 +1644,77 @@ void validate_field_specific_annotation_scopes(
   }
 }
 
+/**
+ * Checks that fields whose type require sealed types (map keys, set elements)
+ * are valid (or annotated accordingly).
+ */
+void validate_sealed_field_types(sema_context& ctx, const t_field& field) {
+  const t_type_ref& field_type_ref = field.type();
+  const t_type& field_type = field_type_ref.deref();
+
+  const bool has_annotation =
+      field.has_structured_annotation(kAllowUnsafeNonSealedKeyTypeUri);
+
+  if (const t_map* field_map_type = field_type.try_as<t_map>()) {
+    const t_type& map_key_type = field_map_type->key_type().deref();
+    if (map_key_type.is_sealed()) {
+      if (has_annotation) {
+        ctx.report(
+            field,
+            validation_to_diagnostic_level(
+                ctx.sema_parameters()
+                    .unnecessary_allow_unsafe_non_sealed_key_type),
+            "Unnecessary @thrift.AllowUnsafeNonSealedKeyType on map field: `{}`",
+            field.name());
+      }
+      return;
+    }
+
+    // Field is map, whose key is NOT sealed
+    if (!has_annotation) {
+      ctx.report(
+          field,
+          validation_to_diagnostic_level(
+              ctx.sema_parameters().non_sealed_key_type),
+          "Field `{}` is a map whose key type is not sealed: `{}`",
+          field.name(),
+          map_key_type.name());
+    }
+  } else if (const t_set* field_set_type = field_type.try_as<t_set>()) {
+    const t_type& set_elem_type = field_set_type->elem_type().deref();
+    if (set_elem_type.is_sealed()) {
+      if (has_annotation) {
+        ctx.report(
+            field,
+            validation_to_diagnostic_level(
+                ctx.sema_parameters()
+                    .unnecessary_allow_unsafe_non_sealed_key_type),
+            "Unnecessary @thrift.AllowUnsafeNonSealedKeyType on set field: `{}`",
+            field.name());
+      }
+      return;
+    }
+
+    // Field is a set, whose elements are NOT sealed
+    if (!has_annotation) {
+      ctx.report(
+          field,
+          validation_to_diagnostic_level(
+              ctx.sema_parameters().non_sealed_key_type),
+          "Field `{}` is a set whose element type is not sealed: `{}`",
+          field.name(),
+          set_elem_type.name());
+    }
+  } else if (has_annotation) {
+    ctx.report(
+        field,
+        validation_to_diagnostic_level(
+            ctx.sema_parameters().unnecessary_allow_unsafe_non_sealed_key_type),
+        "Unnecessary @thrift.AllowUnsafeNonSealedKeyType on field: `{}`",
+        field.name());
+  }
+}
+
 struct ValidateAnnotationPositions {
   void operator()(sema_context& ctx, const t_const& node) {
     if (owns_annotations(node.type())) {
@@ -2021,6 +2095,7 @@ ast_validator standard_validator() {
   validator.add_field_visitor(ValidateAnnotationPositions{});
   validator.add_field_visitor(&detail::validate_annotation_scopes<>);
   validator.add_field_visitor(&validate_field_specific_annotation_scopes);
+  validator.add_field_visitor(&validate_sealed_field_types);
 
   validator.add_enum_visitor(&validate_enum_value_name_uniqueness);
   validator.add_enum_visitor(&validate_enum_value_uniqueness);

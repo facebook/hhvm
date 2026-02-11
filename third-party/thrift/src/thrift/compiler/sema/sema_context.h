@@ -175,7 +175,16 @@ struct sema_params {
   // Action to take on (structured) types that are marked as @thrift.Sealed, but
   // do not meet the necessary criteria.
   validation_level sealed_annotation_on_non_sealed_type =
-      validation_level::warn;
+      validation_level::error;
+
+  // Action to take when a non-sealed type is used as a map key or set element
+  // type.
+  validation_level non_sealed_key_type = validation_level::none;
+
+  // Action to take on unnecessary (or invalid) uses of the
+  // @thrift.AllowUnsafeNonSealedKeyType annotation.
+  validation_level unnecessary_allow_unsafe_non_sealed_key_type =
+      validation_level::error;
 };
 
 // An AST visitor context for semantic analysis. It combines diagnostics

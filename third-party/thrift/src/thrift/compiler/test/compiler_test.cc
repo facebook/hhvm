@@ -3845,3 +3845,76 @@ TEST(CompilerTest, sealed_type) {
   )",
       {"--extra-validation", "sealed_annotation_on_non_sealed_type=warn"});
 }
+
+TEST(CompilerTest, sealed_key_type) {
+  check_compile(
+      R"(
+    package "facebook.com/thrift/test"
+    include "thrift/annotation/thrift.thrift"
+
+    @thrift.Sealed
+    struct SealedStruct {
+      1: i32 a;
+    }
+
+    typedef SealedStruct SealedStructAlias;
+
+    typedef map<SealedStruct, string> SealedMap;
+
+    // Even though it only contains sealed fields, NonSealedStruct is not
+    // considered sealed because it does not have the @thrift.Sealed annotation.
+    struct NonSealedStruct {
+      1: SealedStruct a;
+    }
+
+    typedef NonSealedStruct NonSealedStructAlias;
+    typedef NonSealedStructAlias NonSealedStructAliasAlias;
+
+    typedef set<NonSealedStruct> NonSealedSet; // TODO: this should fail
+
+    struct MyStruct {
+      1: map<SealedStruct, string> field_1; // OK: key type is sealed
+
+      2: map<NonSealedStruct, string> field_2; # expected-error: Field `field_2` is a map whose key type is not sealed: `NonSealedStruct`
+
+      @thrift.AllowUnsafeNonSealedKeyType # expected-error: Unnecessary @thrift.AllowUnsafeNonSealedKeyType on map field: `field_3`
+      3: map<SealedStruct, string> field_3;
+
+      @thrift.AllowUnsafeNonSealedKeyType
+      4: map<NonSealedStruct, string> field_4; // OK: key type is not sealed BUT the annotation allows it
+
+      5: set<SealedStruct>  field_5; // OK: set type is sealed
+
+      @thrift.AllowUnsafeNonSealedKeyType # expected-error: Unnecessary @thrift.AllowUnsafeNonSealedKeyType on set field: `field_6`
+      6: set<SealedStruct>  field_6;
+
+      7: set<NonSealedStruct> field_7; # expected-error: Field `field_7` is a set whose element type is not sealed: `NonSealedStruct`
+
+      @thrift.AllowUnsafeNonSealedKeyType
+      8: set<NonSealedStruct> field_8; // OK: set type is not sealed BUT annotation allows it.
+
+      9: i32 field_9;
+
+      @thrift.AllowUnsafeNonSealedKeyType # expected-error: Unnecessary @thrift.AllowUnsafeNonSealedKeyType on field: `field_10`
+      10: i32 field_10;
+
+      11: SealedMap field_11;
+
+      @thrift.AllowUnsafeNonSealedKeyType # expected-error: Unnecessary @thrift.AllowUnsafeNonSealedKeyType on field: `field_12`
+      12: SealedMap field_12;
+
+      13: set<SealedStructAlias> field_13;
+
+      14: set<NonSealedStructAliasAlias> field_14; # expected-error: Field `field_14` is a set whose element type is not sealed: `NonSealedStructAliasAlias`
+
+      @thrift.AllowUnsafeNonSealedKeyType
+      15: set<NonSealedStructAliasAlias> field_15;
+
+      16: NonSealedSet field_16; // Despite the set not being sealed, this should not fail here (but in the typedef definition).
+
+      @thrift.AllowUnsafeNonSealedKeyType # expected-error: Unnecessary @thrift.AllowUnsafeNonSealedKeyType on field: `field_17`
+      17: NonSealedSet field_17;
+    }
+  )",
+      {"--extra-validation", "non_sealed_key_type=error"});
+}

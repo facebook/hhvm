@@ -237,18 +237,9 @@ typedef enum {
 
 /* Fix the location of our shared memory so we can save and restore the
  * hashtable easily */
-#ifdef __aarch64__
-/* CentOS 7.3.1611 kernel does not support a full 48-bit VA space, so choose a
- * value low enough that the 100 GB's mmapped in do not interfere with anything
- * growing down from the top. 1 << 36 works. */
-#  define SHARED_MEM_INIT ((char *) 0x1000000000ll)
-#  define SHARDED_HASHTBL_MEM_ADDR ((char *) 0x2000000000ll)
-#  define SHARDED_HASHTBL_MEM_SIZE ((size_t)100 * 1024 * 1024 * 1024)
-#else
-#  define SHARED_MEM_INIT ((char *) 0x500000000000ll)
-#  define SHARDED_HASHTBL_MEM_ADDR ((char *) 0x510000000000ll)
-#  define SHARDED_HASHTBL_MEM_SIZE ((size_t)200 * 1024 * 1024 * 1024)
-#endif
+#define SHARED_MEM_INIT ((char *) 0x500000000000ll)
+#define SHARDED_HASHTBL_MEM_ADDR ((char *) 0x510000000000ll)
+#define SHARDED_HASHTBL_MEM_SIZE ((size_t)200 * 1024 * 1024 * 1024)
 
 /* As a sanity check when loading from a file */
 static const uint64_t MAGIC_CONSTANT = 0xfacefacefaceb000ull;

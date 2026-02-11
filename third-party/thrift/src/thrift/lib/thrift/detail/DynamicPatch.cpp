@@ -1936,9 +1936,8 @@ void DynamicSetPatch::apply(detail::Badge, ValueSet& v) const {
   return customVisit(Visitor{v});
 }
 
-template <class Other>
-detail::if_same_type_after_remove_cvref<Other, DynamicPatch>
-DynamicPatch::merge(Other&& other) {
+template <folly::uncvref_same_as<DynamicPatch> Other>
+void DynamicPatch::merge(Other&& other) {
   // If only one of the patch is Unknown patch, convert the Unknown patch type
   // to the known patch type.
   if (isPatchTypeAmbiguous() && !other.isPatchTypeAmbiguous()) {

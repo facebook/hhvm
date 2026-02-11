@@ -65,10 +65,6 @@ namespace detail {
 struct PatchBadgeFactory;
 using Badge = folly::badge<PatchBadgeFactory>;
 
-template <typename T, typename U>
-using if_same_type_after_remove_cvref = std::enable_if_t<
-    std::is_same_v<folly::remove_cvref_t<T>, folly::remove_cvref_t<U>>>;
-
 using apache::thrift::detail::DynamicCursorSerializationWrapper;
 
 template <class PatchType>
@@ -351,9 +347,8 @@ class DynamicUnknownPatch : public DynamicPatchBase {
 
   void apply(detail::Badge, Value&) const;
 
-  template <class Next>
-  detail::if_same_type_after_remove_cvref<Next, DynamicUnknownPatch> merge(
-      detail::Badge, Next&& other) {
+  template <folly::uncvref_same_as<DynamicUnknownPatch> Next>
+  void merge(detail::Badge, Next&& other) {
     std::forward<Next>(other).customVisit(*this);
   }
 
@@ -462,9 +457,8 @@ class DynamicListPatch : public DynamicPatchBase {
 
   protocol::ExtractedMasksFromPatch extractMaskFromPatch() const;
 
-  template <class Next>
-  detail::if_same_type_after_remove_cvref<Next, DynamicListPatch> merge(
-      detail::Badge, Next&& other) {
+  template <folly::uncvref_same_as<DynamicListPatch> Next>
+  void merge(detail::Badge, Next&& other) {
     std::forward<Next>(other).customVisit(*this);
   }
 };
@@ -564,9 +558,8 @@ class DynamicSetPatch : public DynamicPatchBase {
 
   protocol::ExtractedMasksFromPatch extractMaskFromPatch() const;
 
-  template <class Next>
-  detail::if_same_type_after_remove_cvref<Next, DynamicSetPatch> merge(
-      detail::Badge, Next&& other) {
+  template <folly::uncvref_same_as<DynamicSetPatch> Next>
+  void merge(detail::Badge, Next&& other) {
     std::forward<Next>(other).customVisit(*this);
   }
 };
@@ -629,8 +622,8 @@ class DynamicPatch {
   /// Merges another patch into this patch. After the merge
   /// (`patch.merge(next)`), `patch.apply(value)` is equivalent to
   /// `next.apply(patch.apply(value))`.
-  template <class Other>
-  detail::if_same_type_after_remove_cvref<Other, DynamicPatch> merge(Other&&);
+  template <folly::uncvref_same_as<DynamicPatch> Other>
+  void merge(Other&&);
 
   /// Convert Patch stored in Protocol Object to DynamicPatch.
   [[nodiscard]] static DynamicPatch fromObject(Object);
@@ -923,9 +916,8 @@ class DynamicMapPatch {
 
   protocol::ExtractedMasksFromPatch extractMaskFromPatch() const;
 
-  template <class Next>
-  detail::if_same_type_after_remove_cvref<Next, DynamicMapPatch> merge(
-      detail::Badge, Next&& other) {
+  template <folly::uncvref_same_as<DynamicMapPatch> Next>
+  void merge(detail::Badge, Next&& other) {
     std::forward<Next>(other).customVisit(*this);
   }
 
@@ -1175,9 +1167,8 @@ class DynamicStructurePatch {
 ///     }
 class DynamicStructPatch : public DynamicStructurePatch<false> {
  public:
-  template <class Next>
-  detail::if_same_type_after_remove_cvref<Next, DynamicStructPatch> merge(
-      detail::Badge, Next&& other) {
+  template <folly::uncvref_same_as<DynamicStructPatch> Next>
+  void merge(detail::Badge, Next&& other) {
     std::forward<Next>(other).customVisit(*this);
   }
 
@@ -1200,9 +1191,8 @@ class DynamicStructPatch : public DynamicStructurePatch<false> {
 ///     }
 class DynamicUnionPatch : public DynamicStructurePatch<true> {
  public:
-  template <class Next>
-  detail::if_same_type_after_remove_cvref<Next, DynamicUnionPatch> merge(
-      detail::Badge, Next&& other) {
+  template <folly::uncvref_same_as<DynamicUnionPatch> Next>
+  void merge(detail::Badge, Next&& other) {
     std::forward<Next>(other).customVisit(*this);
   }
 

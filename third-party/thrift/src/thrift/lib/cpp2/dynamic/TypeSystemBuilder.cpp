@@ -37,6 +37,9 @@ using TSDefinition =
 
 class TypeSystemImpl final : public TypeSystem {
  public:
+  explicit TypeSystemImpl(std::shared_ptr<const TypeSystem> base)
+      : baseTypeSystem_(std::move(base)) {}
+
   using DefinitionsMap = folly::F14NodeMap<
       Uri,
       TSDefinition,
@@ -49,6 +52,9 @@ class TypeSystemImpl final : public TypeSystem {
       return folly::variant_match(
           def->second, [](auto& d) { return DefinitionRef(&d); });
     }
+    if (baseTypeSystem_) {
+      return baseTypeSystem_->getUserDefinedType(uri);
+    }
     return std::nullopt;
   }
 
@@ -57,6 +63,13 @@ class TypeSystemImpl final : public TypeSystem {
     result.reserve(definitions.size());
     for (const auto& [uri, _] : definitions) {
       result.insert(uri);
+    }
+    if (baseTypeSystem_) {
+      if (auto baseUris = baseTypeSystem_->getKnownUris()) {
+        result.insert(baseUris->begin(), baseUris->end());
+      } else {
+        return std::nullopt; // Base is not enumerable
+      }
     }
     return result;
   }
@@ -105,8 +118,14 @@ class TypeSystemImpl final : public TypeSystem {
       SourceIdentifierView sourceIdentifier) const final {
     if (const NameToDefinitionsMap* atLocation = folly::get_ptr(
             sourceIndexedDefinitions, sourceIdentifier.location)) {
-      return folly::get_optional<std::optional>(
-          *atLocation, sourceIdentifier.name);
+      if (auto result = folly::get_optional<std::optional>(
+              *atLocation, sourceIdentifier.name)) {
+        return result;
+      }
+    }
+    if (baseTypeSystem_) {
+      return baseTypeSystem_->getUserDefinedTypeBySourceIdentifier(
+          sourceIdentifier);
     }
     return std::nullopt;
   }
@@ -115,14 +134,34 @@ class TypeSystemImpl final : public TypeSystem {
       DefinitionRef ref) const final {
     const SourceIdentifier* sourceIdentifier =
         folly::get_ptr(definitionToSourceIdentifier, ref);
-    return sourceIdentifier
-        ? std::optional<SourceIdentifierView>{*sourceIdentifier}
-        : std::nullopt;
+    if (sourceIdentifier) {
+      return *sourceIdentifier;
+    }
+    if (baseTypeSystem_) {
+      return baseTypeSystem_->getSourceIdentiferForUserDefinedType(ref);
+    }
+    return std::nullopt;
   }
 
   folly::F14FastMap<std::string, DefinitionRef> getUserDefinedTypesAtLocation(
       std::string_view location) const final {
-    return folly::get_default(sourceIndexedDefinitions, location);
+    auto* localResult = folly::get_ptr(sourceIndexedDefinitions, location);
+    if (!localResult) {
+      // No local definitions at this location, delegate entirely to base
+      if (baseTypeSystem_) {
+        return baseTypeSystem_->getUserDefinedTypesAtLocation(location);
+      }
+      return {};
+    }
+    auto result = *localResult;
+    if (baseTypeSystem_) {
+      auto baseResult =
+          baseTypeSystem_->getUserDefinedTypesAtLocation(location);
+      result.insert(
+          std::make_move_iterator(baseResult.begin()),
+          std::make_move_iterator(baseResult.end()));
+    }
+    return result;
   }
 
   // NOTE: This function should ONLY be called within TypeSystemBuilder::build.
@@ -134,6 +173,11 @@ class TypeSystemImpl final : public TypeSystem {
           if (auto def = definitions.find(uri); def != definitions.end()) {
             return folly::variant_match(
                 def->second, [](auto& d) { return TypeRef(d); });
+          }
+          if (baseTypeSystem_) {
+            if (auto def = baseTypeSystem_->getUserDefinedType(uri)) {
+              return TypeRef::fromDefinition(*def);
+            }
           }
           throw InvalidTypeError(
               fmt::format("Definition for uri '{}' was not found", uri));
@@ -150,12 +194,46 @@ class TypeSystemImpl final : public TypeSystem {
         },
         [](const auto& primitive) -> TypeRef { return TypeRef(primitive); });
   }
+
+ private:
+  std::shared_ptr<const TypeSystem> baseTypeSystem_;
 };
 
 } // namespace
 
 std::unique_ptr<TypeSystem> TypeSystemBuilder::build() && {
-  auto typeSystem = std::make_unique<TypeSystemImpl>();
+  return std::move(*this).buildDerivedFrom(nullptr);
+}
+
+std::unique_ptr<TypeSystem> TypeSystemBuilder::buildDerivedFrom(
+    std::shared_ptr<const TypeSystem> base) && {
+  // Detect conflicts with base TypeSystem
+  if (base) {
+    for (const auto& [uri, entry] : definitions_) {
+      // Check URI conflicts
+      if (base->getUserDefinedType(uri).has_value()) {
+        throw InvalidTypeError(
+            fmt::format(
+                "Type '{}' conflicts with existing definition in base TypeSystem",
+                uri));
+      }
+      // Check source identifier conflicts
+      if (entry.sourceInfo.has_value()) {
+        SourceIdentifierView sourceId{
+            *entry.sourceInfo->locator(), *entry.sourceInfo->name()};
+        if (base->getUserDefinedTypeBySourceIdentifier(sourceId).has_value()) {
+          throw InvalidTypeError(
+              fmt::format(
+                  "Source identifier '{}' at location '{}' conflicts with "
+                  "existing definition in base TypeSystem",
+                  sourceId.name,
+                  sourceId.location));
+        }
+      }
+    }
+  }
+
+  auto typeSystem = std::make_unique<TypeSystemImpl>(std::move(base));
 
   // Fill in definitions with uninitialized stubs
   for (auto& [uri, entry] : definitions_) {

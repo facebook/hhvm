@@ -121,6 +121,29 @@ TCRegionInfo OfflineCode::getRegionInfo(FILE* file,
   for (frontier = code, ip = codeStartAddr; frontier < code + codeLen; ) {
     dec.Decode(frontier);
 
+    std::string literalStr;
+    if (frontier->IsLoadLiteral()) {
+      auto const literalWidth = frontier->Mask(LoadLiteralMask);
+      size_t literalSize = sizeof(uint32_t);
+      if (literalWidth == LDR_x_lit || literalWidth == LDR_d_lit) {
+        literalSize = sizeof(uint64_t);
+      }
+
+      auto const literalAddr = frontier->LiteralAddress();
+      auto const codeBegin = reinterpret_cast<uint8_t*>(code);
+      auto const codeEnd = codeBegin + codeLen;
+      if (literalAddr >= codeBegin && literalAddr + literalSize < codeEnd) {
+        uint64_t literal = 0;
+        memcpy(&literal, literalAddr, literalSize);
+        if (literalSize == sizeof(uint64_t)) {
+          literalStr = folly::sformat(" [value 0x{:016x}]", literal);
+        } else {
+          literalStr = folly::sformat(" [value 0x{:08x}]",
+                                      static_cast<uint32_t>(literal));
+        }
+      }
+    }
+
     // Shadow potential call destinations based on fixed sequence.
     // This needs to match code generation in JIT.
     //
@@ -162,7 +185,7 @@ TCRegionInfo OfflineCode::getRegionInfo(FILE* file,
     while (currBC < ranges.size() - 1 && ip >= ranges[currBC].end) currBC++;
 
     auto const disasmInfo = getDisasmInfo(ip, kInstructionSize, perfEvents,
-                                          binaryStr, callDest, codeStr);
+                                          binaryStr, callDest, codeStr + literalStr);
     ranges[currBC].disasm.push_back(disasmInfo);
 
     frontier += kInstructionSize;

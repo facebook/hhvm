@@ -131,6 +131,8 @@ template <typename T>
 decltype(auto) printable(T t) {
   if constexpr (requires { t.ordinal; }) {
     return t.ordinal;
+  } else if constexpr (std::is_enum_v<T>) {
+    return static_cast<std::underlying_type_t<T>>(t);
   } else {
     return t;
   }

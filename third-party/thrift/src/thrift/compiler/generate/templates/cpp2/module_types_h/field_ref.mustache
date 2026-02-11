@@ -29,21 +29,24 @@ emitted as templates, gen::cpp::is_field_accessor_template must be kept in sync.
 {{/struct:legacy_api?}}
   {{> common/field_docblock}}
   template <typename..., typename fbthrift_T = {{field:cpp_storage_type}}>
-  {{field:cpp_accessor_attribute}} {{field:field_ref_type}}<const fbthrift_T&> {{field:cpp_name}}_ref() const& {
+  {{#field:deprecated?}}[[deprecated("{{field:deprecation_message}}")]]
+  {{/field:deprecated?}}{{field:cpp_accessor_attribute}} {{field:field_ref_type}}<const fbthrift_T&> {{field:cpp_name}}_ref() const& {
 {{> module_types_h/field_interceptor}}
     return {{^field:has_isset?}}{{field:field_ref_type}}<const fbthrift_T&>{{/field:has_isset?}}{this->{{> common/field_value}}{{> module_types_h/field_ref_args}}};
   }
 
   {{> common/field_docblock}}
   template <typename..., typename fbthrift_T = {{field:cpp_storage_type}}>
-  {{field:cpp_accessor_attribute}} {{field:field_ref_type}}<fbthrift_T&> {{field:cpp_name}}_ref() & {
+  {{#field:deprecated?}}[[deprecated("{{field:deprecation_message}}")]]
+  {{/field:deprecated?}}{{field:cpp_accessor_attribute}} {{field:field_ref_type}}<fbthrift_T&> {{field:cpp_name}}_ref() & {
 {{> module_types_h/field_interceptor}}
     return {{^field:has_isset?}}{{field:field_ref_type}}<fbthrift_T&>{{/field:has_isset?}}{this->{{> common/field_value}}{{> module_types_h/field_ref_args}}};
   }
 
   {{> common/field_docblock}}
   template <typename..., typename fbthrift_T = {{field:cpp_storage_type}}>
-  {{field:cpp_accessor_attribute}} {{field:field_ref_type}}<fbthrift_T&&> {{field:cpp_name}}_ref() && {
+  {{#field:deprecated?}}[[deprecated("{{field:deprecation_message}}")]]
+  {{/field:deprecated?}}{{field:cpp_accessor_attribute}} {{field:field_ref_type}}<fbthrift_T&&> {{field:cpp_name}}_ref() && {
 {{> module_types_h/field_interceptor}}
     return {{^field:has_isset?}}{{field:field_ref_type}}<fbthrift_T&&>{{/field:has_isset?}}{static_cast<fbthrift_T&&>(this->{{> common/field_value}}){{> module_types_h/field_ref_args}}};
   }
@@ -54,21 +57,24 @@ emitted as templates, gen::cpp::is_field_accessor_template must be kept in sync.
 
   {{> common/field_docblock}}
   template <typename..., typename fbthrift_T = {{field:cpp_storage_type}}>
-  {{field:cpp_accessor_attribute}} {{field:field_ref_type}}<const fbthrift_T&> {{field:cpp_name}}() const& {
+  {{#field:deprecated?}}[[deprecated("{{field:deprecation_message}}")]]
+  {{/field:deprecated?}}{{field:cpp_accessor_attribute}} {{field:field_ref_type}}<const fbthrift_T&> {{field:cpp_name}}() const& {
 {{> module_types_h/field_interceptor}}
     return {{^field:has_isset?}}{{field:field_ref_type}}<const fbthrift_T&>{{/field:has_isset?}}{this->{{> common/field_value}}{{> module_types_h/field_ref_args}}};
   }
 
   {{> common/field_docblock}}
   template <typename..., typename fbthrift_T = {{field:cpp_storage_type}}>
-  {{field:cpp_accessor_attribute}} {{field:field_ref_type}}<fbthrift_T&> {{field:cpp_name}}() & {
+  {{#field:deprecated?}}[[deprecated("{{field:deprecation_message}}")]]
+  {{/field:deprecated?}}{{field:cpp_accessor_attribute}} {{field:field_ref_type}}<fbthrift_T&> {{field:cpp_name}}() & {
 {{> module_types_h/field_interceptor}}
     return {{^field:has_isset?}}{{field:field_ref_type}}<fbthrift_T&>{{/field:has_isset?}}{this->{{> common/field_value}}{{> module_types_h/field_ref_args}}};
   }
 
   {{> common/field_docblock}}
   template <typename..., typename fbthrift_T = {{field:cpp_storage_type}}>
-  {{field:cpp_accessor_attribute}} {{field:field_ref_type}}<fbthrift_T&&> {{field:cpp_name}}() && {
+  {{#field:deprecated?}}[[deprecated("{{field:deprecation_message}}")]]
+  {{/field:deprecated?}}{{field:cpp_accessor_attribute}} {{field:field_ref_type}}<fbthrift_T&&> {{field:cpp_name}}() && {
 {{> module_types_h/field_interceptor}}
     return {{^field:has_isset?}}{{field:field_ref_type}}<fbthrift_T&&>{{/field:has_isset?}}{static_cast<fbthrift_T&&>(this->{{> common/field_value}}){{> module_types_h/field_ref_args}}};
   }
@@ -79,25 +85,29 @@ emitted as templates, gen::cpp::is_field_accessor_template must be kept in sync.
  private:
 {{/struct:legacy_api?}}
   {{> common/field_docblock}}
-  {{field:cpp_accessor_attribute}} {{field:cpp_storage_type}}& {{field:cpp_name}}_ref() & {
+  {{#field:deprecated?}}[[deprecated("{{field:deprecation_message}}")]]
+  {{/field:deprecated?}}{{field:cpp_accessor_attribute}} {{field:cpp_storage_type}}& {{field:cpp_name}}_ref() & {
 {{> module_types_h/field_interceptor}}
     return {{> common/field_value}};
   }
 
   {{> common/field_docblock}}
-  {{field:cpp_accessor_attribute}} const {{field:cpp_storage_type}}& {{field:cpp_name}}_ref() const& {
+  {{#field:deprecated?}}[[deprecated("{{field:deprecation_message}}")]]
+  {{/field:deprecated?}}{{field:cpp_accessor_attribute}} const {{field:cpp_storage_type}}& {{field:cpp_name}}_ref() const& {
 {{> module_types_h/field_interceptor}}
     return {{> common/field_value}};
   }
 
   {{> common/field_docblock}}
-  {{field:cpp_accessor_attribute}} {{field:cpp_storage_type}}&& {{field:cpp_name}}_ref() && {
+  {{#field:deprecated?}}[[deprecated("{{field:deprecation_message}}")]]
+  {{/field:deprecated?}}{{field:cpp_accessor_attribute}} {{field:cpp_storage_type}}&& {{field:cpp_name}}_ref() && {
 {{> module_types_h/field_interceptor}}
     return static_cast<{{field:cpp_storage_type}}&&>({{> common/field_value}});
   }
 
   {{> common/field_docblock}}
-  {{field:cpp_accessor_attribute}} const {{field:cpp_storage_type}}&& {{field:cpp_name}}_ref() const&& {
+  {{#field:deprecated?}}[[deprecated("{{field:deprecation_message}}")]]
+  {{/field:deprecated?}}{{field:cpp_accessor_attribute}} const {{field:cpp_storage_type}}&& {{field:cpp_name}}_ref() const&& {
 {{> module_types_h/field_interceptor}}
     return static_cast<const {{field:cpp_storage_type}}&&>({{> common/field_value}});
   }
@@ -107,25 +117,29 @@ emitted as templates, gen::cpp::is_field_accessor_template must be kept in sync.
 {{#field:eligible_for_storage_name_mangling?}}
 
   {{> common/field_docblock}}
-  FOLLY_ERASE {{field:cpp_storage_type}}& {{field:cpp_name}}() & {
+  {{#field:deprecated?}}[[deprecated("{{field:deprecation_message}}")]]
+  {{/field:deprecated?}}FOLLY_ERASE {{field:cpp_storage_type}}& {{field:cpp_name}}() & {
 {{> module_types_h/field_interceptor}}
     return {{> common/field_value}};
   }
 
   {{> common/field_docblock}}
-  FOLLY_ERASE const {{field:cpp_storage_type}}& {{field:cpp_name}}() const& {
+  {{#field:deprecated?}}[[deprecated("{{field:deprecation_message}}")]]
+  {{/field:deprecated?}}FOLLY_ERASE const {{field:cpp_storage_type}}& {{field:cpp_name}}() const& {
 {{> module_types_h/field_interceptor}}
     return {{> common/field_value}};
   }
 
   {{> common/field_docblock}}
-  FOLLY_ERASE {{field:cpp_storage_type}}&& {{field:cpp_name}}() && {
+  {{#field:deprecated?}}[[deprecated("{{field:deprecation_message}}")]]
+  {{/field:deprecated?}}FOLLY_ERASE {{field:cpp_storage_type}}&& {{field:cpp_name}}() && {
 {{> module_types_h/field_interceptor}}
     return static_cast<{{field:cpp_storage_type}}&&>({{> common/field_value}});
   }
 
   {{> common/field_docblock}}
-  FOLLY_ERASE const {{field:cpp_storage_type}}&& {{field:cpp_name}}() const&& {
+  {{#field:deprecated?}}[[deprecated("{{field:deprecation_message}}")]]
+  {{/field:deprecated?}}FOLLY_ERASE const {{field:cpp_storage_type}}&& {{field:cpp_name}}() const&& {
 {{> module_types_h/field_interceptor}}
     return static_cast<const {{field:cpp_storage_type}}&&>({{> common/field_value}});
   }

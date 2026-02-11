@@ -335,13 +335,13 @@ prototype<t_field>::ptr t_whisker_generator::make_prototype_for_field(
   def.property("deprecation_message", [](const t_field& self) {
     if (const t_const* deprecated_annotation =
             self.find_structured_annotation_or_null(kDeprecatedUri)) {
-      std::string message = "This field is deprecated";
       if (const t_const_value* msg_value =
               deprecated_annotation
                   ->get_value_from_structured_annotation_or_null("message")) {
-        message = msg_value->get_string();
+        return whisker::make::string(
+            get_escaped_string(msg_value->get_string()));
       }
-      return whisker::make::string(get_escaped_string(message));
+      return whisker::make::string("This field is deprecated");
     }
     return whisker::make::null;
   });

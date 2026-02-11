@@ -17,34 +17,40 @@
 }}{{#struct:fields}}{{#field:type}}
   {{> common/field_docblock}}
   template <typename..., typename T = {{field:cpp_storage_type}}>
-  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> {{field:cpp_name}}_ref() const& {
+  {{#field:deprecated?}}[[deprecated("{{field:deprecation_message}}")]]
+  {{/field:deprecated?}}{{field:cpp_accessor_attribute}} ::apache::thrift::union_field_ref<const T&> {{field:cpp_name}}_ref() const& {
     return {value_.{{field:cpp_name}}, fbthrift_type_, folly::to_underlying(Type::{{field:cpp_name}}), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   {{> common/field_docblock}}
   template <typename..., typename T = {{field:cpp_storage_type}}>
-  FOLLY_ERASE ::apache::thrift::union_field_ref<T&> {{field:cpp_name}}_ref() & {
+  {{#field:deprecated?}}[[deprecated("{{field:deprecation_message}}")]]
+  {{/field:deprecated?}}{{field:cpp_accessor_attribute}} ::apache::thrift::union_field_ref<T&> {{field:cpp_name}}_ref() & {
     return {value_.{{field:cpp_name}}, fbthrift_type_, folly::to_underlying(Type::{{field:cpp_name}}), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   {{> common/field_docblock}}
   template <typename..., typename T = {{field:cpp_storage_type}}>
-  FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> {{field:cpp_name}}_ref() && {
+  {{#field:deprecated?}}[[deprecated("{{field:deprecation_message}}")]]
+  {{/field:deprecated?}}{{field:cpp_accessor_attribute}} ::apache::thrift::union_field_ref<T&&> {{field:cpp_name}}_ref() && {
     return {std::move(value_.{{field:cpp_name}}), fbthrift_type_, folly::to_underlying(Type::{{field:cpp_name}}), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   {{> common/field_docblock}}
-  FOLLY_ERASE ::apache::thrift::union_field_ref<const {{field:cpp_storage_type}}&> {{field:cpp_name}}() const& {
+  {{#field:deprecated?}}[[deprecated("{{field:deprecation_message}}")]]
+  {{/field:deprecated?}}{{field:cpp_accessor_attribute}} ::apache::thrift::union_field_ref<const {{field:cpp_storage_type}}&> {{field:cpp_name}}() const& {
     return {value_.{{field:cpp_name}}, fbthrift_type_, folly::to_underlying(Type::{{field:cpp_name}}), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   {{> common/field_docblock}}
-  FOLLY_ERASE ::apache::thrift::union_field_ref<{{field:cpp_storage_type}}&> {{field:cpp_name}}() & {
+  {{#field:deprecated?}}[[deprecated("{{field:deprecation_message}}")]]
+  {{/field:deprecated?}}{{field:cpp_accessor_attribute}} ::apache::thrift::union_field_ref<{{field:cpp_storage_type}}&> {{field:cpp_name}}() & {
     return {value_.{{field:cpp_name}}, fbthrift_type_, folly::to_underlying(Type::{{field:cpp_name}}), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   {{> common/field_docblock}}
-  FOLLY_ERASE ::apache::thrift::union_field_ref<{{field:cpp_storage_type}}&&> {{field:cpp_name}}() && {
+  {{#field:deprecated?}}[[deprecated("{{field:deprecation_message}}")]]
+  {{/field:deprecated?}}{{field:cpp_accessor_attribute}} ::apache::thrift::union_field_ref<{{field:cpp_storage_type}}&&> {{field:cpp_name}}() && {
     return {std::move(value_.{{field:cpp_name}}), fbthrift_type_, folly::to_underlying(Type::{{field:cpp_name}}), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 {{/field:type}}{{/struct:fields}}

@@ -198,36 +198,42 @@ class User final  {
 
   /** Glean { "field": "name" } */
   template <typename..., typename fbthrift_T = ::std::string>
+  [[deprecated("Use 'full_name' instead")]]
   FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> name_ref() const& {
     return {this->__fbthrift_field_name, __isset.at(1), __isset.bit(1)};
   }
 
   /** Glean { "field": "name" } */
   template <typename..., typename fbthrift_T = ::std::string>
+  [[deprecated("Use 'full_name' instead")]]
   FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> name_ref() & {
     return {this->__fbthrift_field_name, __isset.at(1), __isset.bit(1)};
   }
 
   /** Glean { "field": "name" } */
   template <typename..., typename fbthrift_T = ::std::string>
+  [[deprecated("Use 'full_name' instead")]]
   FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> name_ref() && {
     return {static_cast<fbthrift_T&&>(this->__fbthrift_field_name), __isset.at(1), __isset.bit(1)};
   }
 
   /** Glean { "field": "name" } */
   template <typename..., typename fbthrift_T = ::std::string>
+  [[deprecated("Use 'full_name' instead")]]
   FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> name() const& {
     return {this->__fbthrift_field_name, __isset.at(1), __isset.bit(1)};
   }
 
   /** Glean { "field": "name" } */
   template <typename..., typename fbthrift_T = ::std::string>
+  [[deprecated("Use 'full_name' instead")]]
   FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> name() & {
     return {this->__fbthrift_field_name, __isset.at(1), __isset.bit(1)};
   }
 
   /** Glean { "field": "name" } */
   template <typename..., typename fbthrift_T = ::std::string>
+  [[deprecated("Use 'full_name' instead")]]
   FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> name() && {
     return {static_cast<fbthrift_T&&>(this->__fbthrift_field_name), __isset.at(1), __isset.bit(1)};
   }
@@ -270,36 +276,42 @@ class User final  {
 
   /** Glean { "field": "email" } */
   template <typename..., typename fbthrift_T = ::std::string>
+  [[deprecated("This field is no longer used")]]
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const fbthrift_T&> email_ref() const& {
     return {this->__fbthrift_field_email, __isset.at(3), __isset.bit(3)};
   }
 
   /** Glean { "field": "email" } */
   template <typename..., typename fbthrift_T = ::std::string>
+  [[deprecated("This field is no longer used")]]
   FOLLY_ERASE ::apache::thrift::optional_field_ref<fbthrift_T&> email_ref() & {
     return {this->__fbthrift_field_email, __isset.at(3), __isset.bit(3)};
   }
 
   /** Glean { "field": "email" } */
   template <typename..., typename fbthrift_T = ::std::string>
+  [[deprecated("This field is no longer used")]]
   FOLLY_ERASE ::apache::thrift::optional_field_ref<fbthrift_T&&> email_ref() && {
     return {static_cast<fbthrift_T&&>(this->__fbthrift_field_email), __isset.at(3), __isset.bit(3)};
   }
 
   /** Glean { "field": "email" } */
   template <typename..., typename fbthrift_T = ::std::string>
+  [[deprecated("This field is no longer used")]]
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const fbthrift_T&> email() const& {
     return {this->__fbthrift_field_email, __isset.at(3), __isset.bit(3)};
   }
 
   /** Glean { "field": "email" } */
   template <typename..., typename fbthrift_T = ::std::string>
+  [[deprecated("This field is no longer used")]]
   FOLLY_ERASE ::apache::thrift::optional_field_ref<fbthrift_T&> email() & {
     return {this->__fbthrift_field_email, __isset.at(3), __isset.bit(3)};
   }
 
   /** Glean { "field": "email" } */
   template <typename..., typename fbthrift_T = ::std::string>
+  [[deprecated("This field is no longer used")]]
   FOLLY_ERASE ::apache::thrift::optional_field_ref<fbthrift_T&&> email() && {
     return {static_cast<fbthrift_T&&>(this->__fbthrift_field_email), __isset.at(3), __isset.bit(3)};
   }
@@ -730,33 +742,39 @@ class ExampleUnion final  {
   }
   /** Glean { "field": "intValue" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("Use stringValue instead")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> intValue_ref() const& {
     return {value_.intValue, fbthrift_type_, folly::to_underlying(Type::intValue), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "intValue" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("Use stringValue instead")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&> intValue_ref() & {
     return {value_.intValue, fbthrift_type_, folly::to_underlying(Type::intValue), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "intValue" } */
   template <typename..., typename T = ::std::int32_t>
+  [[deprecated("Use stringValue instead")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> intValue_ref() && {
     return {std::move(value_.intValue), fbthrift_type_, folly::to_underlying(Type::intValue), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "intValue" } */
+  [[deprecated("Use stringValue instead")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<const ::std::int32_t&> intValue() const& {
     return {value_.intValue, fbthrift_type_, folly::to_underlying(Type::intValue), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "intValue" } */
+  [[deprecated("Use stringValue instead")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<::std::int32_t&> intValue() & {
     return {value_.intValue, fbthrift_type_, folly::to_underlying(Type::intValue), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "intValue" } */
+  [[deprecated("Use stringValue instead")]]
   FOLLY_ERASE ::apache::thrift::union_field_ref<::std::int32_t&&> intValue() && {
     return {std::move(value_.intValue), fbthrift_type_, folly::to_underlying(Type::intValue), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }

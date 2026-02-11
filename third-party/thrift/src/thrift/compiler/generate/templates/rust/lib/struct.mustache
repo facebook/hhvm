@@ -42,7 +42,9 @@ pub struct {{struct:rust_name}} {{> lib/block}}{{!
     }}{{/program:skip_none_serialization?}}{{/struct:serde?}}{{/field:optional?}}{{!
     }}{{/struct:serde?}}{{#field:docs?}}
     #[doc = {{field:docs}}]{{!
-    }}{{/field:docs?}}
+    }}{{/field:docs?}}{{#field:deprecated?}}
+    #[deprecated(note = "{{field:deprecation_message}}")]{{!
+    }}{{/field:deprecated?}}
     pub {{field:rust_name}}: {{> lib/fieldtype}},{{!
 }}{{/struct:fields}}{{!
 }}{{^struct:exhaustive?}}
@@ -106,6 +108,9 @@ pub enum {{struct:rust_name}} {{> lib/block}}{{!
     {{#field:docs?}}
     #[doc = {{field:docs}}]
     {{/field:docs?}}
+    {{#field:deprecated?}}
+    #[deprecated(note = "{{field:deprecation_message}}")]
+    {{/field:deprecated?}}
     {{#struct:exception?}}
     #[error("{0:?}")]
     {{/struct:exception?}}

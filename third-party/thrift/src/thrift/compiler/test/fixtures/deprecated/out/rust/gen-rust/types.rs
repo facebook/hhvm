@@ -12,9 +12,11 @@ pub(crate) use crate as types;
 pub struct User {
     pub id: ::std::primitive::i64,
     #[doc = "@deprecated Use 'full_name' instead"]
+    #[deprecated(note = "Use 'full_name' instead")]
     pub name: ::std::string::String,
     pub full_name: ::std::string::String,
     #[doc = "@deprecated This field is no longer used"]
+    #[deprecated(note = "This field is no longer used")]
     pub email: ::std::option::Option<::std::string::String>,
     pub email_address: ::std::option::Option<::std::string::String>,
     // This field forces `..Default::default()` when instantiating this
@@ -29,6 +31,7 @@ pub struct User {
 #[doc = "Example union with deprecated field."]
 pub enum ExampleUnion {
     stringValue(::std::string::String),
+    #[deprecated(note = "Use stringValue instead")]
     intValue(::std::primitive::i32),
     doubleValue(::std::primitive::f64),
     UnknownField(::std::primitive::i32),

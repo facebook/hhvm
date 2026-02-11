@@ -59,7 +59,8 @@ void HttpStreamServerTransport::setOnClose(OnCloseType callback) {
 }
 
 void HttpStreamServerTransport::write(folly::StringPiece data) {
-  if (m_sharedData.lock()->eom_sent) {
+  auto locked = m_sharedData.lock();
+  if (locked->eom_sent) {
     return;
   }
   m_transport->sendStreamResponse(data.data(), data.size());

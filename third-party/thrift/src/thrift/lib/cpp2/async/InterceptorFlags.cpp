@@ -28,4 +28,6 @@ THRIFT_FLAG_DEFINE_bool(disable_all_service_interceptors, false);
 
 THRIFT_FLAG_DEFINE_string(disabled_service_interceptors, "");
 
+THRIFT_FLAG_DEFINE_bool(enable_python_client_interceptors, false);
+
 } // namespace apache::thrift

@@ -49,4 +49,11 @@ THRIFT_FLAG_DECLARE_bool(disable_all_service_interceptors);
  */
 THRIFT_FLAG_DECLARE_string(disabled_service_interceptors);
 
+/**
+ * This flag controls whether Python thrift clients use global client
+ * interceptors. Defaults to false for gradual rollout. When false, Python
+ * clients will not invoke any global client interceptors.
+ */
+THRIFT_FLAG_DECLARE_bool(enable_python_client_interceptors);
+
 } // namespace apache::thrift

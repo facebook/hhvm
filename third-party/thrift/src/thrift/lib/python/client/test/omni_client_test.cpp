@@ -27,9 +27,12 @@
 #include <folly/io/async/EventBaseManager.h>
 #include <thrift/lib/cpp/server/TServerEventHandler.h>
 #include <thrift/lib/cpp2/async/ClientBufferedStream.h>
+#include <thrift/lib/cpp2/async/ClientInterceptor.h>
+#include <thrift/lib/cpp2/async/InterceptorFlags.h>
 #include <thrift/lib/cpp2/async/PooledRequestChannel.h>
 #include <thrift/lib/cpp2/async/RocketClientChannel.h>
 #include <thrift/lib/cpp2/protocol/Serializer.h>
+#include <thrift/lib/cpp2/runtime/Init.h>
 #include <thrift/lib/cpp2/server/ThriftServer.h>
 #include <thrift/lib/python/client/OmniClient.h> // @manual=//thrift/lib/python/client:omni_client__cython-lib
 #include <thrift/lib/python/client/test/event_handler_helper.h>
@@ -44,6 +47,67 @@ const std::string kTestHeaderKey = "headerKey";
 const std::string kTestHeaderValue = "headerValue";
 
 /**
+ * A simple interceptor that tracks requests for testing global interceptor
+ * registration in Python/OmniClient.
+ */
+class TracingClientInterceptor
+    : public apache::thrift::ClientInterceptor<std::int64_t> {
+ public:
+  std::string getName() const override { return "TracingClientInterceptor"; }
+
+  using Trace = std::
+      tuple<std::string, std::string, std::int64_t, THeader::StringToStringMap>;
+  const std::vector<Trace>& requests() const { return requests_; }
+  const std::vector<Trace>& responses() const { return responses_; }
+  const std::vector<std::string>& responseExceptions() const {
+    return responseExceptions_;
+  }
+  void clear() {
+    requests_.clear();
+    responses_.clear();
+    responseExceptions_.clear();
+    requestCount_ = 0;
+    responseCount_ = 0;
+  }
+
+  std::optional<std::int64_t> onRequest(RequestInfo requestInfo) override {
+    auto requestData = requestCount_++;
+    requests_.emplace_back(
+        std::string(requestInfo.serviceName),
+        std::string(requestInfo.methodName),
+        requestData,
+        requestInfo.headers->getWriteHeaders());
+    return requestData;
+  }
+
+  void onResponse(
+      std::int64_t* requestData, ResponseInfo responseInfo) override {
+    if (responseInfo.result.hasException()) {
+      responseExceptions_.emplace_back(
+          responseInfo.result.exception().what().toStdString());
+    }
+
+    responses_.emplace_back(
+        std::string(responseInfo.serviceName),
+        std::string(responseInfo.methodName),
+        *requestData,
+        responseInfo.headers->getHeaders());
+    return;
+  }
+
+ private:
+  std::vector<Trace> requests_;
+  std::vector<Trace> responses_;
+  std::vector<std::string> responseExceptions_;
+  std::atomic_uint64_t requestCount_{0};
+  std::atomic_uint64_t responseCount_{0};
+};
+
+// Global interceptor instance - registered in main() before tests run
+std::shared_ptr<TracingClientInterceptor> gTracingInterceptor =
+    std::make_shared<TracingClientInterceptor>();
+
+/**
  * A simple Scaffold service that will be used to test the Thrift OmniClient.
  */
 class TestServiceHandler
@@ -55,7 +119,14 @@ class TestServiceHandler
   void oneway() override {}
   void readHeader(
       std::string& value, std::unique_ptr<std::string> key) override {
+    // Read the received header and echo it back in the response body and
+    // response header.
+    const auto& readHeaders = getRequestContext()->getHeader()->getHeaders();
     value = getRequestContext()->getHeader()->getHeaders().at(*key);
+
+    for (const auto& [header, value] : readHeaders) {
+      getRequestContext()->getHeader()->setHeader(header, value);
+    }
   }
   ServerStream<SimpleResponse> nums(int f, int t) override {
     if (t < f) {
@@ -184,6 +255,18 @@ class OmniClientTest : public ::testing::Test {
   void SetUp() override {
     // Startup the test server.
     server_ = createServer(std::make_shared<TestServiceHandler>(), serverPort_);
+
+    // Verify interceptor is registered
+    auto registeredInterceptors =
+        apache::thrift::runtime::getGlobalClientInterceptors();
+    ASSERT_NE(registeredInterceptors, nullptr);
+    ASSERT_EQ(registeredInterceptors->size(), 1);
+    ASSERT_EQ(
+        (*registeredInterceptors)[0]->getName(), "TracingClientInterceptor");
+
+    // Clean up the global interceptor state.
+    gTracingInterceptor->clear();
+    EXPECT_TRUE(gTracingInterceptor->requests().empty());
   }
 
   void TearDown() override {
@@ -552,4 +635,155 @@ TEST_F(OmniClientTest, GetChannelProtocolIdReturnsValidProtocol) {
         EXPECT_EQ(protocolTry.value(), protocol::T_BINARY_PROTOCOL);
         co_return;
       });
+}
+
+TEST_F(OmniClientTest, GlobalClientInterceptorInvoked) {
+  // Verify that the interceptor registered via runtime::init() is actually
+  // used by OmniClient when the flag is enabled.
+
+  AddRequest request;
+  request.num1() = 1;
+  request.num2() = 41;
+
+  testSend<CompactSerializer>("TestService", "add", request, 42);
+
+  // Verify the registered onRequest interceptor was called
+  ASSERT_EQ(gTracingInterceptor->requests().size(), 1);
+  EXPECT_EQ(std::get<0>(gTracingInterceptor->requests()[0]), "TestService");
+  EXPECT_EQ(std::get<1>(gTracingInterceptor->requests()[0]), "add");
+
+  // Verify the registered onResponse interceptor was called
+  ASSERT_EQ(gTracingInterceptor->responses().size(), 1);
+  EXPECT_EQ(std::get<0>(gTracingInterceptor->responses()[0]), "TestService");
+  EXPECT_EQ(std::get<1>(gTracingInterceptor->responses()[0]), "add");
+
+  // And the request data is the same
+  EXPECT_EQ(
+      std::get<2>(gTracingInterceptor->requests()[0]),
+      std::get<2>(gTracingInterceptor->responses()[0]));
+}
+
+TEST_F(OmniClientTest, GlobalClientInterceptorNotInvokedWhenFlagDisabled) {
+  // Verify that even though an interceptor is registered, it is NOT used
+  // when the flag is disabled.
+
+  // Flag defaults to false, but be explicit
+  THRIFT_FLAG_SET_MOCK(enable_python_client_interceptors, false);
+
+  AddRequest request;
+  request.num1() = 1;
+  request.num2() = 41;
+
+  testSend<CompactSerializer>("TestService", "add", request, 42);
+
+  // Verify the interceptor was NOT called despite being registered
+  EXPECT_TRUE(gTracingInterceptor->requests().empty());
+  EXPECT_TRUE(gTracingInterceptor->responses().empty());
+
+  THRIFT_FLAG_UNMOCK(enable_python_client_interceptors);
+}
+
+TEST_F(OmniClientTest, GlobalClientInterceptorOnResponseNotInvokedOneWayRpc) {
+  // Verify that one way requests do not invoke the onResponse interceptor
+
+  testOnewaySendHeaders<CompactSerializer>(
+      "TestService", "oneway", EmptyRequest{});
+
+  // Verify the registered onRequest interceptor was called
+  ASSERT_EQ(gTracingInterceptor->requests().size(), 1);
+  EXPECT_EQ(std::get<0>(gTracingInterceptor->requests()[0]), "TestService");
+  EXPECT_EQ(std::get<1>(gTracingInterceptor->requests()[0]), "oneway");
+
+  // Verify the onResponse was not
+  EXPECT_TRUE(gTracingInterceptor->responses().empty());
+}
+
+TEST_F(OmniClientTest, GlobalClientInterceptorTestHeader) {
+  // Verify that the interceptor registered via runtime::init() is actually
+  // used by OmniClient when the flag is enabled.
+
+  ReadHeaderRequest request;
+  request.key() = kTestHeaderKey;
+
+  testSendHeaders(
+      "TestService",
+      "readHeader",
+      request,
+      {{kTestHeaderKey, kTestHeaderValue}},
+      kTestHeaderValue);
+
+  // Verify the registered onRequest interceptor was called
+  ASSERT_EQ(gTracingInterceptor->requests().size(), 1);
+  EXPECT_EQ(std::get<0>(gTracingInterceptor->requests()[0]), "TestService");
+  EXPECT_EQ(std::get<1>(gTracingInterceptor->requests()[0]), "readHeader");
+  EXPECT_EQ(
+      std::get<3>(gTracingInterceptor->requests()[0]).at(kTestHeaderKey),
+      kTestHeaderValue);
+
+  // Verify the registered onResponse interceptor was called
+  ASSERT_EQ(gTracingInterceptor->requests().size(), 1);
+  EXPECT_EQ(std::get<0>(gTracingInterceptor->responses()[0]), "TestService");
+  EXPECT_EQ(std::get<1>(gTracingInterceptor->responses()[0]), "readHeader");
+  EXPECT_EQ(
+      std::get<3>(gTracingInterceptor->responses()[0]).at(kTestHeaderKey),
+      kTestHeaderValue);
+
+  // And the request data is the same
+  EXPECT_EQ(
+      std::get<2>(gTracingInterceptor->requests()[0]),
+      std::get<2>(gTracingInterceptor->responses()[0]));
+}
+
+TEST_F(OmniClientTest, GlobalClientInterceptorOnResponseRunOnException) {
+  // Verify that interceptor callbacks are run on exceptions
+
+  // This request will throw an exception - use connectToServer directly
+  // since testSend calls .value() which crashes on unset repsonse buffer
+  connectToServer<CompactSerializer>(
+      [](OmniClient& client) -> folly::coro::Task<void> {
+        std::string args =
+            CompactSerializer::serialize<std::string>(EmptyRequest{});
+        auto data = apache::thrift::MethodMetadata::Data(
+            "oops", apache::thrift::FunctionQualifier::Unspecified);
+        auto resp = co_await client.semifuture_send(
+            "TestService",
+            "oops",
+            args,
+            std::move(data),
+            {},
+            {},
+            co_await folly::coro::co_current_executor,
+            RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE);
+        co_return;
+      });
+
+  // Verify the registered onRequest interceptor was called
+  ASSERT_EQ(gTracingInterceptor->requests().size(), 1);
+  EXPECT_EQ(std::get<0>(gTracingInterceptor->requests()[0]), "TestService");
+  EXPECT_EQ(std::get<1>(gTracingInterceptor->requests()[0]), "oops");
+
+  // Verify the onResponse was called with the exception we expected
+  ASSERT_EQ(gTracingInterceptor->responses().size(), 1);
+  EXPECT_EQ(std::get<0>(gTracingInterceptor->responses()[0]), "TestService");
+  EXPECT_EQ(std::get<1>(gTracingInterceptor->responses()[0]), "oops");
+  EXPECT_EQ(gTracingInterceptor->responseExceptions().size(), 1);
+
+  // And the request data is the same
+  EXPECT_EQ(
+      std::get<2>(gTracingInterceptor->requests()[0]),
+      std::get<2>(gTracingInterceptor->responses()[0]));
+}
+
+int main(int argc, char** argv) {
+  ::testing::InitGoogleTest(&argc, argv);
+
+  // Register our test interceptor with Thrift init.
+  apache::thrift::runtime::InitOptions thriftOptions;
+  thriftOptions.clientInterceptors.push_back(gTracingInterceptor);
+  apache::thrift::runtime::init(std::move(thriftOptions));
+
+  // Enable the client interceptor flag.
+  THRIFT_FLAG_SET_MOCK(enable_python_client_interceptors, true);
+
+  return RUN_ALL_TESTS();
 }

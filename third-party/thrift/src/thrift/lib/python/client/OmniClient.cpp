@@ -25,10 +25,13 @@
 #include <thrift/lib/cpp/TProcessorEventHandler.h>
 #include <thrift/lib/cpp/protocol/TProtocolTypes.h>
 #include <thrift/lib/cpp/transport/THeader.h>
+#include <thrift/lib/cpp2/async/ClientInterceptorStorage.h>
 #include <thrift/lib/cpp2/async/FutureRequest.h>
+#include <thrift/lib/cpp2/async/InterceptorFlags.h>
 #include <thrift/lib/cpp2/async/RequestCallback.h>
 #include <thrift/lib/cpp2/async/RequestChannel.h>
 #include <thrift/lib/cpp2/async/RpcOptions.h>
+#include <thrift/lib/cpp2/runtime/Init.h>
 #include <thrift/lib/cpp2/util/MethodMetadata.h>
 #include <thrift/lib/python/streaming/StreamElementEncoder.h>
 
@@ -323,6 +326,24 @@ folly::SemiFuture<OmniClientResponseWithHeaders> OmniClient::semifuture_send(
                       "Invalid message type: {}",
                       folly::to_underlying(state.messageType()))));
         }
+        // Invoke client interceptor onResponse callbacks
+        if (ctx && state.header() != nullptr) {
+          // Interceptor onResponse must still be called on exception, propagate
+          // any exception to the callback
+          folly::exception_wrapper ew;
+          if (resp.buf.hasError()) {
+            ew = resp.buf.error();
+          }
+          // TODO: OmniClient does not currently pass the response buffer into
+          // processClientInterceptorsOnResponse. This wasn't implemented for
+          // caution as no current interceptor required it in python clients.
+          auto interceptorResult =
+              ctx->processClientInterceptorsOnResponse(state.header(), ew);
+          if (interceptorResult.hasException()) {
+            resp.buf = folly::makeUnexpected(interceptorResult.exception());
+          }
+        }
+
         resp.headers = state.header()->releaseHeaders();
         state.resetCtx(nullptr);
 
@@ -372,8 +393,9 @@ void OmniClient::sendImpl(
       protocolId,
       rpcOptions.releaseWriteHeaders(),
       handlers_,
-      // TODO(praihan): Enable ClientInterceptors for Python
-      nullptr, /* clientInterceptors */
+      THRIFT_FLAG(enable_python_client_interceptors)
+          ? apache::thrift::runtime::getGlobalClientInterceptors()
+          : nullptr,
       serviceName,
       functionName);
   RequestCallback::Context callbackContext;
@@ -381,6 +403,19 @@ void OmniClient::sendImpl(
   callbackContext.ctx = std::move(ctx);
 
   if (callbackContext.ctx) {
+    // Invoke client interceptor onRequest callbacks
+    if (header != nullptr) {
+      auto emptyArgs = std::tie();
+      auto interceptorResult =
+          callbackContext.ctx->processClientInterceptorsOnRequest(
+              apache::thrift::ClientInterceptorOnRequestArguments(emptyArgs),
+              header.get(),
+              rpcOptions);
+      if (interceptorResult.hasException()) {
+        interceptorResult.exception().throw_exception();
+      }
+    }
+
     callbackContext.ctx->preWrite();
   }
 

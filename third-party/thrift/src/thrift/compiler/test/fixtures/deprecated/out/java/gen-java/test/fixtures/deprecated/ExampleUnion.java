@@ -162,6 +162,7 @@ public final class ExampleUnion implements com.facebook.thrift.payload.ThriftSer
         return this.id == 1;
     }
 
+    @Deprecated
     @com.facebook.swift.codec.ThriftField(value=2, name="intValue", requiredness=Requiredness.NONE)
     public int getIntValue() {
         if (this.id != 2) {

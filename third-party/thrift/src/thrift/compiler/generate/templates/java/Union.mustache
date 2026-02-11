@@ -108,7 +108,9 @@ public final class {{struct:javaCapitalName}} implements com.facebook.thrift.pay
       }}{{> union/UnionSetter}}{{!
     }}{{/struct:unionFieldTypeUnique?}}
     {{#struct:fields}}
+{{#field:deprecated?}}
 
+    @Deprecated{{/field:deprecated?}}
     {{> ThriftFieldAnnotation}}
 
     public {{> FieldType}} {{> GetterName}}() {

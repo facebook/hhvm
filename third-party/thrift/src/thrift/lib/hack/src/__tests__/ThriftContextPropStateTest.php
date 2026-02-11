@@ -57,6 +57,32 @@ final class ThriftContextPropStateTest extends WWWTest {
     expect($tcps->getIGUserId())->toEqual($initial_valid_id);
   }
 
+  <<DataProvider('dataProviderForInvalidUserIds')>>
+  public function testUpdateWAUserRidWithInvalidId(int $invalid_id): void {
+    // Arrange
+    $tcps = ThriftContextPropState::get();
+    $tcps->clear();
+    $initial_valid_rid = 54321;
+    ThriftContextPropState::updateWAUserRid(
+      $initial_valid_rid,
+      'test_setup',
+      UserIdSource::VIEWER_CONTEXT,
+    );
+    expect($tcps->getWAUserRid())->toEqual($initial_valid_rid);
+
+    // Act
+    $result = ThriftContextPropState::updateWAUserRid(
+      $invalid_id,
+      'test_invalid',
+      UserIdSource::VIEWER_CONTEXT,
+    );
+
+    // Assert
+    // The code should reject the invalid (zero or negative) ID and not change the state.
+    expect($result)->toBeFalse();
+    expect($tcps->getWAUserRid())->toEqual($initial_valid_rid);
+  }
+
   public function testClearDoesNotClearSerializedCache___DPRS_ACH_TEST(): void {
     $tcps = ThriftContextPropState::get();
     $tcps->clear();
@@ -135,6 +161,12 @@ final class ThriftContextPropStateTest extends WWWTest {
   public function testUserIdsNullable(): void {
     self::mockFunction(IgidUtils::isUserFbid<>)->mockReturn(true);
     $tcps = ThriftContextPropState::get();
+    $tcps->clear();
+
+    // Initially null for all user ids
+    expect($tcps->getFBUserId())->toBeNull();
+    expect($tcps->getIGUserId())->toBeNull();
+    expect($tcps->getWAUserRid())->toBeNull();
 
     // override existing value
     expect(
@@ -151,8 +183,16 @@ final class ThriftContextPropStateTest extends WWWTest {
         UserIdSource::VIEWER_CONTEXT,
       ),
     )->toBeTrue();
+    expect(
+      ThriftContextPropState::updateWAUserRid(
+        12345,
+        "test",
+        UserIdSource::VIEWER_CONTEXT,
+      ),
+    )->toBeTrue();
     expect($tcps->getUserIds()?->fb_user_id)->toEqual(1);
     expect($tcps->getUserIds()?->ig_user_id)->toEqual(2);
+    expect($tcps->getUserIds()?->wa_user_rid)->toEqual(12345);
 
     // do not allow null to override existing value
     expect(ThriftContextPropState::updateFBUserId(
@@ -165,8 +205,14 @@ final class ThriftContextPropStateTest extends WWWTest {
       "test",
       UserIdSource::VIEWER_CONTEXT,
     ))->toBeFalse();
+    expect(ThriftContextPropState::updateWAUserRid(
+      null,
+      "test",
+      UserIdSource::VIEWER_CONTEXT,
+    ))->toBeFalse();
     expect($tcps->getUserIds()?->fb_user_id)->toEqual(1);
     expect($tcps->getUserIds()?->ig_user_id)->toEqual(2);
+    expect($tcps->getUserIds()?->wa_user_rid)->toEqual(12345);
 
     // set FB Id only
     expect(
@@ -179,6 +225,7 @@ final class ThriftContextPropStateTest extends WWWTest {
     expect($tcps->getUserIds()?->fb_user_id)->toEqual(3);
     expect($tcps->getFBUserId())->toEqual(3);
     expect($tcps->getUserIds()?->ig_user_id)->toEqual(2);
+    expect($tcps->getUserIds()?->wa_user_rid)->toEqual(12345);
 
     // set IG Id only
     expect(
@@ -191,7 +238,20 @@ final class ThriftContextPropStateTest extends WWWTest {
     expect($tcps->getUserIds()?->fb_user_id)->toEqual(3);
     expect($tcps->getUserIds()?->ig_user_id)->toEqual(4);
     expect($tcps->getIGUserId())->toEqual(4);
+    expect($tcps->getUserIds()?->wa_user_rid)->toEqual(12345);
 
+    // set WA RID only
+    expect(
+      ThriftContextPropState::updateWAUserRid(
+        67890,
+        "test",
+        UserIdSource::VIEWER_CONTEXT,
+      ),
+    )->toBeTrue();
+    expect($tcps->getUserIds()?->fb_user_id)->toEqual(3);
+    expect($tcps->getUserIds()?->ig_user_id)->toEqual(4);
+    expect($tcps->getUserIds()?->wa_user_rid)->toEqual(67890);
+    expect($tcps->getWAUserRid())->toEqual(67890);
   }
 
   public function testOfflineJobLocalContext(): void {

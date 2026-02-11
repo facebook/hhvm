@@ -1,4 +1,5 @@
 <?hh
+// (c) Meta Platforms, Inc. and affiliates. Confidential and proprietary.
 /*
  * Copyright (c) Meta Platforms, Inc. and affiliates.
  *
@@ -25,6 +26,7 @@
 enum UserIdCategory: int {
   FB = 0;
   IG = 1;
+  WA = 2;
 }
 
 enum UserIdSource: int {
@@ -178,6 +180,10 @@ final class ThriftContextPropState {
         $user_ids->ig_user_id =
           self::coerceId($user_ids->ig_user_id, UserIdCategory::IG);
       }
+      if ($user_ids->wa_user_rid is nonnull) {
+        $user_ids->wa_user_rid =
+          self::coerceId($user_ids->wa_user_rid, UserIdCategory::WA);
+      }
     }
     if ($tfm->baggage is nonnull) {
       $tfm->baggage->user_ids = $user_ids;
@@ -275,6 +281,42 @@ final class ThriftContextPropState {
     return true;
   }
 
+  public static function updateWAUserRid(
+    ?int $wa_user_rid,
+    string $src,
+    UserIdSource $user_id_source,
+  ): bool {
+    $ods = CategorizedOBC::typedGet(ODSCategoryID::ODS_CONTEXTPROP);
+    $ods->bumpKey('contextprop.update_wa_user_rid.'.$src);
+    // Make sure the id is valid (non-null, positive) and matches the type
+    $wa_user_rid = self::coerceId($wa_user_rid, UserIdCategory::WA);
+    if ($wa_user_rid is null) {
+      return false;
+    }
+
+    $ods->bumpKey('contextprop.update_with_valid_wa_user_rid.'.$src);
+
+    $tcps_wa_user_rid = self::get()->getWAUserRid();
+
+    if ($wa_user_rid == $tcps_wa_user_rid) {
+      $ods->bumpKey('contextprop.same_wa_user_rid.'.$src);
+      return true;
+    }
+
+    if (self::coerceId($tcps_wa_user_rid, UserIdCategory::WA) is nonnull) {
+      // Only allow ViewerContext to override the user id since it has
+      // most accurate user id
+      if ($user_id_source !== UserIdSource::VIEWER_CONTEXT) {
+        return true;
+      }
+      $ods->bumpKey('contextprop.wa_user_rid_override.'.$src);
+    }
+
+    self::get()->setWAUserRid($wa_user_rid);
+    $ods->bumpKey('contextprop.wa_user_rid_set.'.$src);
+    return true;
+  }
+
   // FB and IG user IDs overlap in range, so some IDs may appear valid for both
   // (both fbid_in_uid_range and IgidUtils::isUserIgid return true).
   // Since FB IDs are more common on WWW, we first try interpreting the ID as
@@ -369,6 +411,10 @@ final class ThriftContextPropState {
         break;
       case UserIdCategory::IG:
         return self::getIgUserId($user_id);
+      case UserIdCategory::WA:
+        // WA user RID is a positive integer
+        // ToDo: Add additional validation
+        return $user_id;
     }
     return null;
   }
@@ -552,6 +598,18 @@ final class ThriftContextPropState {
     return ($ig_user_id as int);
   }
 
+  public readonly function getWAUserRid()[leak_safe]: ?int {
+    if ($this->storage->baggage is null) {
+      return null;
+    }
+    $user_ids = $this->storage->baggage?->user_ids;
+    if ($user_ids is null) {
+      return null;
+    }
+    $wa_user_rid = $user_ids->wa_user_rid ?? 0;
+    return ($wa_user_rid as int);
+  }
+
   private function setFBUserId(?int $fb_user_id): void {
     $this->storage->baggage =
       $this->storage->baggage ?? ContextProp\Baggage::withDefaultValues();
@@ -572,6 +630,18 @@ final class ThriftContextPropState {
     $baggage->user_ids =
       $baggage->user_ids ?? ContextProp\UserIds::withDefaultValues();
     $baggage->user_ids->ig_user_id = $ig_user_id;
+
+    $this->dirty();
+  }
+
+  private function setWAUserRid(?int $wa_user_rid): void {
+    $this->storage->baggage =
+      $this->storage->baggage ?? ContextProp\Baggage::withDefaultValues();
+    $baggage = $this->storage->baggage as nonnull;
+
+    $baggage->user_ids =
+      $baggage->user_ids ?? ContextProp\UserIds::withDefaultValues();
+    $baggage->user_ids->wa_user_rid = $wa_user_rid;
 
     $this->dirty();
   }

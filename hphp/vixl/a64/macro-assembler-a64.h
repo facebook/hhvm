@@ -193,6 +193,8 @@ class MacroAssembler : public Assembler {
                       const MemOperand& addr,
                       LoadStoreOp op);
 
+  void Prfm(PrefetchOperation op, const MemOperand& addr);
+
   // Push or pop up to 4 registers of the same width to or from the stack,
   // using the current stack pointer as set by SetStackPointer.
   //

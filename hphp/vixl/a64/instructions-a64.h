@@ -46,6 +46,7 @@ const unsigned kWRegSizeInBytes = kWRegSize / 8;
 const unsigned kXRegSize = 64;
 const unsigned kXRegSizeLog2 = 6;
 const unsigned kXRegSizeInBytes = kXRegSize / 8;
+const unsigned kXRegSizeInBytesLog2 = kXRegSizeLog2 - 3;
 const unsigned kSRegSize = 32;
 const unsigned kSRegSizeLog2 = 5;
 const unsigned kSRegSizeInBytes = kSRegSize / 8;

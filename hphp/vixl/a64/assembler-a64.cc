@@ -1886,6 +1886,72 @@ void Assembler::DataProcExtendedRegister(const Register& rd,
        dest_reg | RnSP(rn));
 }
 
+Instr Assembler::LoadStoreMemOperand(const MemOperand& addr,
+                                     LSDataSize size,
+                                     LoadStoreScalingOption option) {
+  Instr base = RnSP(addr.base());
+  int64_t offset = addr.offset();
+
+  if (addr.IsImmediateOffset()) {
+    bool prefer_unscaled =
+        (option == PreferUnscaledOffset) || (option == RequireUnscaledOffset);
+    if (prefer_unscaled && IsImmLSUnscaled(offset)) {
+      // Use the unscaled addressing mode.
+      return base | LoadStoreUnscaledOffsetFixed | ImmLS(offset);
+    }
+
+    if ((option != RequireUnscaledOffset) &&
+        IsImmLSScaled(offset, size)) {
+      // Use the scaled addressing mode.
+      return base | LoadStoreUnsignedOffsetFixed |
+             ImmLSUnsigned(offset >> size);
+    }
+
+    if ((option != RequireScaledOffset) && IsImmLSUnscaled(offset)) {
+      // Use the unscaled addressing mode.
+      return base | LoadStoreUnscaledOffsetFixed | ImmLS(offset);
+    }
+  }
+
+  if (addr.IsRegisterOffset()) {
+    Extend ext = addr.extend();
+    Shift shift = addr.shift();
+    unsigned shift_amount = addr.shift_amount();
+
+    // LSL is encoded in the option field as UXTX.
+    if (shift == LSL) {
+      ext = UXTX;
+    }
+
+    // Shifts are encoded in one bit, indicating a left shift by the memory
+    // access size.
+    return base | LoadStoreRegisterOffsetFixed | Rm(addr.regoffset()) |
+           ExtendMode(ext) | ImmShiftLS((shift_amount > 0) ? 1 : 0);
+  }
+
+  if (addr.IsPreIndex() && IsImmLSUnscaled(offset)) {
+    return base | LoadStorePreIndexFixed | ImmLS(offset);
+  }
+
+  if (addr.IsPostIndex() && IsImmLSUnscaled(offset)) {
+    return base | LoadStorePostIndexFixed | ImmLS(offset);
+  }
+
+  return 0;
+}
+
+void Assembler::Prefetch(int op,
+                         const MemOperand& addr,
+                         LoadStoreScalingOption option) {
+  Instr prfop = ImmPrefetchOperation(op);
+  Emit(PRFM | prfop | LoadStoreMemOperand(addr, LSDoubleWord, option));
+}
+
+void Assembler::Prefetch(PrefetchOperation op,
+                         const MemOperand& addr,
+                         LoadStoreScalingOption option) {
+  Prefetch(static_cast<int>(op), addr, option);
+}
 
 bool Assembler::IsImmAddSub(int64_t immediate) {
   return is_uint12(immediate) ||

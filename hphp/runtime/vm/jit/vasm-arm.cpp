@@ -445,7 +445,7 @@ struct Vgen {
   void emit(const crc32q& i) { a->Crc32cx(W(i.d), W(i.s1), X(i.s0)); }
 
   // arm intrinsics
-  void emit(const prefetch& /*i*/) { /* ignored */ }
+  void emit(const prefetch& i) { a->Prfm(PLDL1KEEP, M(i.m)); }
   void emit(const fcvtzs& i) { a->Fcvtzs(X(i.d), D(i.s)); }
   void emit(const mrs& i) { a->Mrs(X(i.r), vixl::SystemRegister(i.s.l())); }
   void emit(const msr& i) { a->Msr(vixl::SystemRegister(i.s.l()), X(i.r)); }

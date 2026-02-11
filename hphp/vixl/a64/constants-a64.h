@@ -111,6 +111,10 @@ V_(ImmLSUnsigned, 21, 10, Bits)                                                \
 V_(ImmLSPair, 21, 15, SignedBits)                                              \
 V_(SizeLS, 31, 30, Bits)                                                       \
 V_(ImmShiftLS, 12, 12, Bits)                                                   \
+V_(ImmPrefetchOperation, 4, 0, Bits)                                           \
+V_(PrefetchHint, 4, 3, Bits)                                                   \
+V_(PrefetchTarget, 2, 1, Bits)                                                 \
+V_(PrefetchStream, 0, 0, Bits)                                                 \
                                                                                \
 /* Other immediates */                                                         \
 V_(ImmUncondBranch, 25, 0, SignedBits)                                         \
@@ -278,6 +282,46 @@ enum SystemHint {
   WFI   = 3,
   SEV   = 4,
   SEVL  = 5
+};
+
+enum PrefetchOperation {
+  PLDL1KEEP = 0x00,
+  PLDL1STRM = 0x01,
+  PLDL2KEEP = 0x02,
+  PLDL2STRM = 0x03,
+  PLDL3KEEP = 0x04,
+  PLDL3STRM = 0x05,
+
+  PrfUnallocated06 = 0x06,
+  PrfUnallocated07 = 0x07,
+
+  PLIL1KEEP = 0x08,
+  PLIL1STRM = 0x09,
+  PLIL2KEEP = 0x0a,
+  PLIL2STRM = 0x0b,
+  PLIL3KEEP = 0x0c,
+  PLIL3STRM = 0x0d,
+
+  PrfUnallocated0e = 0x0e,
+  PrfUnallocated0f = 0x0f,
+
+  PSTL1KEEP = 0x10,
+  PSTL1STRM = 0x11,
+  PSTL2KEEP = 0x12,
+  PSTL2STRM = 0x13,
+  PSTL3KEEP = 0x14,
+  PSTL3STRM = 0x15,
+
+  PrfUnallocated16 = 0x16,
+  PrfUnallocated17 = 0x17,
+  PrfUnallocated18 = 0x18,
+  PrfUnallocated19 = 0x19,
+  PrfUnallocated1a = 0x1a,
+  PrfUnallocated1b = 0x1b,
+  PrfUnallocated1c = 0x1c,
+  PrfUnallocated1d = 0x1d,
+  PrfUnallocated1e = 0x1e,
+  PrfUnallocated1f = 0x1f,
 };
 
 // System/special register names.
@@ -748,18 +792,6 @@ enum LoadLiteralOp {
   V(LD, R, s,   0x84400000),  \
   V(LD, R, d,   0xC4400000)
 
-
-// Load/store unscaled offset.
-enum LoadStoreUnscaledOffsetOp {
-  LoadStoreUnscaledOffsetFixed = 0x38000000,
-  LoadStoreUnscaledOffsetFMask = 0x3B200C00,
-  LoadStoreUnscaledOffsetMask  = 0xFFE00C00,
-  #define LOAD_STORE_UNSCALED(A, B, C, D)  \
-  A##U##B##_##C = LoadStoreUnscaledOffsetFixed | D
-  LOAD_STORE_OP_LIST(LOAD_STORE_UNSCALED)
-  #undef LOAD_STORE_UNSCALED
-};
-
 // Load/store (post, pre, offset and unsigned.)
 enum LoadStoreOp {
   LoadStoreOpMask   = 0xC4C00000,
@@ -768,6 +800,18 @@ enum LoadStoreOp {
   LOAD_STORE_OP_LIST(LOAD_STORE),
   #undef LOAD_STORE
   PRFM = 0xC0800000
+};
+
+// Load/store unscaled offset.
+enum LoadStoreUnscaledOffsetOp {
+  LoadStoreUnscaledOffsetFixed = 0x38000000,
+  LoadStoreUnscaledOffsetFMask = 0x3B200C00,
+  LoadStoreUnscaledOffsetMask  = 0xFFE00C00,
+  PRFUM                        = LoadStoreUnscaledOffsetFixed | PRFM,
+  #define LOAD_STORE_UNSCALED(A, B, C, D)  \
+  A##U##B##_##C = LoadStoreUnscaledOffsetFixed | D
+  LOAD_STORE_OP_LIST(LOAD_STORE_UNSCALED)
+  #undef LOAD_STORE_UNSCALED
 };
 
 // Load/store post index.

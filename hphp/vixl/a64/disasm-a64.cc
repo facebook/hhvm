@@ -883,6 +883,7 @@ void Disassembler::VisitLoadStoreUnscaledOffset(Instruction* instr) {
     case LDURSH_x: form = form_x;  [[fallthrough]];
     case LDURSH_w: mnemonic = "ldursh"; break;
     case LDURSW_x: mnemonic = "ldursw"; form = form_x; break;
+    case PRFUM: mnemonic = "prfum"; form = "'PrefOp, ['Xns'ILS]"; break;
     default: form = "(LoadStoreUnscaledOffset)";
   }
   Format(instr, mnemonic, form);

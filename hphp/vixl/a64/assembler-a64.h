@@ -582,6 +582,23 @@ class Label {
 };
 
 
+// Control how scaled- and unscaled-offset loads and stores are generated.
+enum LoadStoreScalingOption {
+  // Prefer scaled-immediate-offset instructions, but emit unscaled-offset,
+  // register-offset, pre-index or post-index instructions if necessary.
+  PreferScaledOffset,
+
+  // Prefer unscaled-immediate-offset instructions, but emit scaled-offset,
+  // register-offset, pre-index or post-index instructions if necessary.
+  PreferUnscaledOffset,
+
+  // Require scaled-immediate-offset instructions.
+  RequireScaledOffset,
+
+  // Require unscaled-immediate-offset instructions.
+  RequireUnscaledOffset
+};
+
 // TODO: Obtain better values for these, based on real-world data.
 const int kLiteralPoolCheckInterval = 4 * KBytes;
 const int kRecommendedLiteralPoolRange = 2 * kLiteralPoolCheckInterval;
@@ -1602,6 +1619,10 @@ class Assembler {
     return shift_amount << ImmShiftLS_offset;
   }
 
+  static Instr ImmPrefetchOperation(int imm5) {
+    return imm5 << ImmPrefetchOperation_offset;
+  }
+
   static Instr ImmException(int imm16) {
     assert(is_uint16(imm16));
     return imm16 << ImmException_offset;
@@ -1715,8 +1736,19 @@ class Assembler {
                        NEONLoadStoreMultiStructOp op);
   Instr LoadStoreStructAddrModeField(const MemOperand& addr);
 
+  Instr LoadStoreMemOperand(const MemOperand& addr,
+                            LSDataSize size,
+                            LoadStoreScalingOption option);
+
   static bool IsImmLSUnscaled(ptrdiff_t offset);
   static bool IsImmLSScaled(ptrdiff_t offset, LSDataSize size);
+
+  void Prefetch(PrefetchOperation op,
+                const MemOperand& addr,
+                LoadStoreScalingOption option = PreferScaledOffset);
+  void Prefetch(int op,
+                const MemOperand& addr,
+                LoadStoreScalingOption option = PreferScaledOffset);
 
   void Logical(const Register& rd,
                const Register& rn,

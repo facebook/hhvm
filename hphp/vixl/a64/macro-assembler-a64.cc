@@ -562,6 +562,17 @@ void MacroAssembler::LoadStoreMacro(const CPURegister& rt,
 }
 
 
+void MacroAssembler::Prfm(PrefetchOperation op, const MemOperand& addr) {
+  if (addr.IsImmediateOffset() && !IsImmLSScaled(addr.offset(), LSDoubleWord) &&
+      !IsImmLSUnscaled(addr.offset())) {
+    not_reached();
+  } else {
+    // Simple register-offsets are encodable in one instruction.
+    Prefetch(op, addr);
+  }
+}
+
+
 void MacroAssembler::Push(const CPURegister& src0, const CPURegister& src1,
                           const CPURegister& src2, const CPURegister& src3) {
   assert(allow_macro_instructions_);

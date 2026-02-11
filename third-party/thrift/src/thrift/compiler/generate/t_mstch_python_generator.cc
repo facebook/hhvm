@@ -783,7 +783,6 @@ class t_mstch_python_prototypes_generator : public t_whisker_generator {
       return self.has_structured_annotation(kPythonSortSetOnSerializeUri) ||
           self.has_structured_annotation(kPythonKeySortMapOnSerializeUri);
     });
-
     return std::move(def).make();
   }
 

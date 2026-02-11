@@ -193,6 +193,7 @@ cdef class FieldInfo:
     cdef object adapter_info
     cdef bint is_primitive
     cdef int idl_type
+    cdef str deprecation_message
 
 cdef class StructInfo:
     cdef unique_ptr[cDynamicStructInfo] cpp_obj

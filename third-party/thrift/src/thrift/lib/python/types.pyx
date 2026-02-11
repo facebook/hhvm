@@ -436,7 +436,7 @@ AnyTypeInfo = typing.Union[
 
 @_cython__final
 cdef class FieldInfo:
-    def __cinit__(self, id, qualifier, name, py_name, type_info, default_value, adapter_info, is_primitive, idl_type = -1):
+    def __cinit__(self, id, qualifier, name, py_name, type_info, default_value, adapter_info, is_primitive, idl_type = -1, deprecation_message = None):
         """
         Args:
             id (int): The field ID specified in the IDL.
@@ -474,6 +474,11 @@ cdef class FieldInfo:
                 `apache::thrift::type::BaseType` located at `thrift/lib/cpp2/type/BaseType.h`
                 Default value is -1, which is not a valid value for `BaseType` enum.
                 This field is currently only used by mutable types.
+
+            deprecation_message (typing.Optional[str]):
+                If the field is annotated with `@thrift.Deprecated`, this contains the
+                deprecation message. When the field is accessed, a DeprecationWarning
+                is emitted with this message. None if the field is not deprecated.
         """
         self.id = id
         self.qualifier = qualifier
@@ -484,6 +489,7 @@ cdef class FieldInfo:
         self.adapter_info = adapter_info
         self.is_primitive = is_primitive
         self.idl_type = idl_type
+        self.deprecation_message = deprecation_message
 
     @property
     def id(self):
@@ -524,6 +530,10 @@ cdef class FieldInfo:
     @property
     def idl_type(self):
         return self.idl_type
+
+    @property
+    def deprecation_message(self):
+        return self.deprecation_message
 
 @_cython__final
 cdef class StructInfo:
@@ -1931,6 +1941,7 @@ cdef class _StructUncachedField(_FieldDescriptorBase):
     def __get__(self, Struct obj, objtype):
         if obj is None:
             return None
+
         return obj._fbthrift_py_value_from_internal_data(self._field_index)
 
 
@@ -1951,6 +1962,32 @@ cdef class _StructPrimitiveField(_FieldDescriptorBase):
             return None
 
         return obj._fbthrift_data[self._tuple_index]
+
+
+@_cython__final
+cdef class _DeprecatedFieldWrapper:
+    """
+    A descriptor wrapper that emits a DeprecationWarning when accessing
+    a deprecated field, then delegates to the wrapped descriptor.
+    """
+    cdef object _wrapped_descriptor
+    cdef str _deprecation_message
+
+    def __init__(self, wrapped_descriptor, str deprecation_message):
+        self._wrapped_descriptor = wrapped_descriptor
+        self._deprecation_message = deprecation_message
+
+    def __get__(self, obj, objtype):
+        if obj is not None:
+            import warnings
+            warnings.warn(self._deprecation_message, DeprecationWarning, stacklevel=2)
+        return self._wrapped_descriptor.__get__(obj, objtype)
+
+    def __set__(self, obj, value):
+        self._wrapped_descriptor.__set__(obj, value)
+
+    def __delete__(self, obj):
+        self._wrapped_descriptor.__delete__(obj)
 
 cdef inline _is_primitive_field(FieldInfo field_info) noexcept:
     return field_info.is_primitive and field_info.adapter_info is None \
@@ -2012,6 +2049,10 @@ class StructMeta(type):
                     field_index,
                     field_name,
                 )
+
+            if field_info.deprecation_message is not None:
+                descriptor = _DeprecatedFieldWrapper(descriptor, field_info.deprecation_message)
+
             type.__setattr__(klass, field_name, descriptor)
 
         klass.__setattr__, klass.__delattr__ = _make_readonly_mutate_attr()

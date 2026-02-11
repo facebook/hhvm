@@ -92,6 +92,9 @@ class {{#partial m_types.unadapted_name type=struct}}{{!
             {{#partial m_common.adapter_info node=field}},  # adapter info
             {{#partial m_types.is_primitive type=field.type}}, # field type is primitive
             {{field.idl_type}}, # IDL type (see BaseTypeEnum)
+{{#if field.deprecated?}}
+            "{{field.deprecation_message}}",  # deprecation message
+{{/if field.deprecated?}}
         ),
         {{/each}}
     ){{!

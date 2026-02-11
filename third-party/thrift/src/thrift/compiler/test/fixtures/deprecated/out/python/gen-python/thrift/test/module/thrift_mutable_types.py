@@ -42,6 +42,7 @@ class User(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
             None,  # adapter info
             False, # field type is primitive
             8, # IDL type (see BaseTypeEnum)
+            "Use 'full_name' instead",  # deprecation message
         ),
         _fbthrift_python_types.FieldInfo(
             3,  # id
@@ -64,6 +65,7 @@ class User(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
             None,  # adapter info
             False, # field type is primitive
             8, # IDL type (see BaseTypeEnum)
+            "This field is no longer used",  # deprecation message
         ),
         _fbthrift_python_types.FieldInfo(
             5,  # id
@@ -142,6 +144,7 @@ class ExampleUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
             None,  # adapter info
             True, # field type is primitive
             4, # IDL type (see BaseTypeEnum)
+            "Use stringValue instead",  # deprecation message
         ),
         _fbthrift_python_types.FieldInfo(
             3,  # id

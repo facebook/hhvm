@@ -261,8 +261,13 @@ end = struct
               *)
               Enforced td_type
             else if transparent then
-              (* Same as transparent case *)
-              exp_ty
+              (* When transparent, look through to the RHS. But if the RHS
+               * resolves to an opaque type (PRopaque), don't expose its
+               * enforcement - that would leak the inner type's constraint
+               * through this transparent wrapper. *)
+              match exp_ty with
+              | Unenforced (_, Reason.PRopaque) -> unenforced Reason.PRopaque
+              | _ -> exp_ty
             else (
               (* Similar to enums, newtypes must not be pessimised to their
                * enforced types, otherwise for `newtype N = int;`, pessimising

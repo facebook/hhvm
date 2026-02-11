@@ -1,0 +1,8 @@
+ERROR: File "double_opaque_newtype.regression.php--usage.php", line 4, characters 10-34:
+Invalid return type (Typing[4110])
+  File "double_opaque_newtype.regression.php--usage.php", line 3, characters 32-34:
+  Expected `int`
+  File "double_opaque_newtype.regression.php--n.php", line 6, characters 58-61:
+  But got `nonnull`
+  File "double_opaque_newtype.regression.php--n.php", line 3, characters 22-28:
+    by the definition of `N`

@@ -19,7 +19,8 @@
   This template creates struct field definitions for thrift structs.
 
 }}
-{{field:go_name}} {{> types/field_type}}{{!
+{{#field:deprecated?}}// Deprecated: {{field:deprecation_message}}
+{{/field:deprecated?}}{{field:go_name}} {{> types/field_type}}{{!
 }} `thrift:"{{!
   }}{{field:name}}{{!
   }},{{field:id}}{{!

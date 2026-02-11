@@ -409,7 +409,6 @@ class t_mstch_go_generator : public t_mstch_generator {
       return self.qualifier() == t_field_qualifier::optional ||
           is_field_inside_union(self);
     });
-
     return std::move(def).make();
   }
 

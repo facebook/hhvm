@@ -21,8 +21,10 @@ var _ = metadata.GoUnusedProtection__
 
 type User struct {
     Id int64 `thrift:"id,1" json:"id" db:"id"`
+    // Deprecated: Use 'full_name' instead
     Name string `thrift:"name,2" json:"name" db:"name"`
     FullName string `thrift:"full_name,3" json:"full_name" db:"full_name"`
+    // Deprecated: This field is no longer used
     Email *string `thrift:"email,4,optional" json:"email,omitempty" db:"email"`
     EmailAddress *string `thrift:"email_address,5,optional" json:"email_address,omitempty" db:"email_address"`
 }
@@ -354,6 +356,7 @@ func (x *User) GetThriftStructMetadata() *metadata.ThriftStruct {
 
 type ExampleUnion struct {
     StringValue *string `thrift:"stringValue,1" json:"stringValue,omitempty" db:"stringValue"`
+    // Deprecated: Use stringValue instead
     IntValue *int32 `thrift:"intValue,2" json:"intValue,omitempty" db:"intValue"`
     DoubleValue *float64 `thrift:"doubleValue,3" json:"doubleValue,omitempty" db:"doubleValue"`
 }

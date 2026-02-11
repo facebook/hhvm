@@ -16,7 +16,7 @@ aast_parser = { version = "0.0.0", path = "../parser/cargo/aast_parser" }
 anyhow = "1.0.98"
 assemble = { version = "0.0.0", path = "cargo/assemble" }
 bc_to_ir = { version = "0.0.0", path = "ir/conversions/bc_to_ir" }
-bumpalo = { version = "3.14.0", features = ["allocator_api", "collections"] }
+bumpalo = { version = "3.19.1", features = ["allocator_api", "collections"] }
 byte-unit = { version = "5.1.6", features = ["default", "u128"] }
 bytecode_printer = { version = "0.0.0", path = "bytecode_printer" }
 clap = { version = "4.5.42", features = ["derive", "env", "string", "unicode", "wrap_help"] }

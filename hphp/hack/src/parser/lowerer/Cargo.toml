@@ -12,7 +12,7 @@ path = "lib.rs"
 
 [dependencies]
 bstr = { version = "1.10.0", features = ["serde", "std", "unicode"] }
-bumpalo = { version = "3.14.0", features = ["allocator_api", "collections"] }
+bumpalo = { version = "3.19.1", features = ["allocator_api", "collections"] }
 escaper = { version = "0.0.0", path = "../../utils/escaper" }
 hash = { version = "0.0.0", path = "../../utils/hash" }
 hhbc_string_utils = { version = "0.0.0", path = "../../hackc/utils/cargo/hhbc_string_utils" }

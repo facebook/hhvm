@@ -11,6 +11,6 @@ license = "MIT"
 path = "../../mode_parser.rs"
 
 [dependencies]
-bumpalo = { version = "3.14.0", features = ["allocator_api", "collections"] }
+bumpalo = { version = "3.19.1", features = ["allocator_api", "collections"] }
 parser_core_types = { version = "0.0.0", path = "../core_types" }
 positioned_by_ref_parser = { version = "0.0.0", path = "../../api/cargo/positioned_by_ref_parser" }

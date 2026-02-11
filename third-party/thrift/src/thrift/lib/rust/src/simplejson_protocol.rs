@@ -555,15 +555,18 @@ impl<B: Buf> SimpleJsonProtocolDeserializer<B> {
     // End if it correctly found no comma at the end of the container
     #[inline]
     fn possibly_read_comma(&mut self, trailing: u8) -> CommaState {
-        match self.eat(b",") {
-            Ok(()) => match self.peek() {
-                Some(b) if b == trailing => CommaState::Trailing,
-                _ => CommaState::NonTrailing,
-            },
-            _ => match self.peek() {
-                Some(b) if b == trailing => CommaState::End,
-                _ => CommaState::NoComma,
-            },
+        self.strip_whitespace();
+        match self.peek() {
+            Some(b',') => {
+                self.advance(1);
+                self.strip_whitespace();
+                match self.peek() {
+                    Some(b) if b == trailing => CommaState::Trailing,
+                    _ => CommaState::NonTrailing,
+                }
+            }
+            Some(b) if b == trailing => CommaState::End,
+            _ => CommaState::NoComma,
         }
     }
     #[inline]
@@ -1016,12 +1019,19 @@ impl<B: Buf> ProtocolReader for SimpleJsonProtocolDeserializer<B> {
     }
     #[inline]
     fn read_bool(&mut self) -> Result<bool> {
-        match self.eat(b"true") {
-            Ok(_) => Ok(true),
-            Err(_) => match self.eat(b"false") {
-                Ok(_) => Ok(false),
-                Err(_) => bail!("Expected `true` or `false`"),
-            },
+        self.strip_whitespace();
+        match self.peek() {
+            Some(b't') => {
+                self.eat_only(b"true").context("Expected `true`")?;
+                self.strip_whitespace();
+                Ok(true)
+            }
+            Some(b'f') => {
+                self.eat_only(b"false").context("Expected `false`")?;
+                self.strip_whitespace();
+                Ok(false)
+            }
+            _ => bail!("Expected `true` or `false`"),
         }
     }
     #[inline]

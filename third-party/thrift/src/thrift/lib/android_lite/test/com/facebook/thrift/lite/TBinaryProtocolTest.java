@@ -16,8 +16,8 @@
 
 package com.facebook.thrift.lite;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.facebook.thrift.lite.protocol.TBinaryProtocol;
 import com.facebook.thrift.lite.protocol.TField;
@@ -32,11 +32,11 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import java.nio.file.Path;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 public class TBinaryProtocolTest {
 
@@ -47,17 +47,17 @@ public class TBinaryProtocolTest {
   private FileInputStream inputFile;
   private byte[] mInputBuffer;
 
-  @Rule public TemporaryFolder folder = new TemporaryFolder();
+  @TempDir Path tempDir;
 
-  @Before
+  @BeforeEach
   public void setupProtocol() throws IOException {
-    tempFile = folder.newFile(mOutputFileName);
+    tempFile = tempDir.resolve(mOutputFileName).toFile();
     outputFile = new FileOutputStream(tempFile, false);
     BufferedOutputStream byteArray = new BufferedOutputStream(outputFile);
     binaryProtocol = new TBinaryProtocol(byteArray);
   }
 
-  @After
+  @AfterEach
   public void closeAndDeleteFile() throws IOException {
     inputFile.close();
     assertTrue(tempFile.delete());

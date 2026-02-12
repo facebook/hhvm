@@ -429,21 +429,22 @@ size_t HTTPBinaryCodec::onIngress(const folly::IOBuf& buf) {
     size_t parsed = 0;
     ParseResult parseResult(ParseResultState::INITIALIZED);
     switch (state_) {
-      case ParseState::FRAMING_INDICATOR:
+      case ParseState::FRAMING_INDICATOR: {
         // FRAMING_INDICATOR should be the first item that is parsed
-        parseResult = parseFramingIndicator(cursor, request_, knownLength_);
+        parseResult = parseFramingIndicator(cursor, isRequest_, knownLength_);
         HANDLE_ERROR_OR_WAITING_PARSE_RESULT(parseResult);
         parsed += parseResult.bytesParsed_;
         // If the framing indicator is for a request, then the
-        // TransportDirection should be UPSTREAM and vice versa.
-        if ((transportDirection_ == TransportDirection::UPSTREAM) != request_) {
+        // TransportDirection should be downstream
+        const bool ok = isDownstream(transportDirection_) == isRequest_;
+        if (!ok) {
           parseError_ =
               fmt::format("Invalid Framing Indicator '{}' for {} codec",
-                          request_ ? "request" : "response",
+                          isRequest_ ? "request" : "response",
                           folly::to_underlying(transportDirection_));
           break;
         }
-        if (!request_) {
+        if (!isRequest_) {
           // If it's a response, then the next item to parse is the
           // INFORMATIONAL_RESPONSE
           state_ = ParseState::INFORMATIONAL_RESPONSE;
@@ -452,6 +453,7 @@ size_t HTTPBinaryCodec::onIngress(const folly::IOBuf& buf) {
           state_ = ParseState::CONTROL_DATA;
         }
         break;
+      }
 
       case ParseState::INFORMATIONAL_RESPONSE:
         // TODO(T118289674) - Currently, the OHAI protocol doesn't support
@@ -465,14 +467,14 @@ size_t HTTPBinaryCodec::onIngress(const folly::IOBuf& buf) {
 
       case ParseState::CONTROL_DATA:
         if (!decodeInfo_.msg) {
-          decodeInfo_.init(request_,
+          decodeInfo_.init(isRequest_,
                            false /* isRequestTrailers */,
                            true /* validate */,
                            true /* strictValidation */,
                            false /* allowEmptyPath */);
         }
         // The control data has a different format based on request/response
-        if (request_) {
+        if (isRequest_) {
           parseResult = parseRequestControlData(
               cursor, bufLen - parsedTot, *decodeInfo_.msg);
         } else {
@@ -511,7 +513,7 @@ size_t HTTPBinaryCodec::onIngress(const folly::IOBuf& buf) {
 
       case ParseState::TRAILERS_SECTION:
         if (!decodeInfo_.msg) {
-          decodeInfo_.init(request_,
+          decodeInfo_.init(isRequest_,
                            true /* isRequestTrailers */,
                            true /* validate */,
                            true /* strictValidation */,
@@ -623,7 +625,7 @@ void HTTPBinaryCodec::generateHeader(
     HTTPHeaderSize* size,
     const folly::Optional<HTTPHeaders>& extraHeaders) {
   folly::io::QueueAppender appender(&writeBuf, queueAppenderMaxGrowth);
-  if (transportDirection_ == TransportDirection::UPSTREAM) {
+  if (isUpstream(transportDirection_)) {
     // Encode Framing Indicator for Request
     encodeInteger(
         folly::to<uint64_t>(

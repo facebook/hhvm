@@ -206,7 +206,7 @@ class HTTPBinaryCodec : public HTTPCodec {
   size_t generateHeaderHelper(folly::io::QueueAppender& appender,
                               const HTTPHeaders& headers);
 
-  bool request_{true};
+  bool isRequest_{true};
   bool knownLength_{true};
   enum class ParseState : uint8_t {
     FRAMING_INDICATOR = 0,

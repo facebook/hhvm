@@ -329,6 +329,17 @@ let fun_def_of_stmts ctx stmts : Nast.fun_def option =
   | [] -> None
   | (pos, _) :: tail ->
     let pos = tail |> List.map ~f:fst |> List.fold ~init:pos ~f:Pos.merge in
+    (* Match the logic the lowerer does to assign packages to functions based on file name.
+     * Note: for Hack notebooks, we use a file name that ensures we have broad access (D92944036)
+     *)
+    let fd_package =
+      let pos_suffix = Relative_path.suffix (Pos.filename pos) in
+      PackageInfo.get_package_for_file
+        popt.ParserOptions.package_info
+        pos_suffix
+      |> Option.map ~f:(fun pkg ->
+             Aast.PackageConfigAssignment (snd pkg.Package.name))
+    in
     let ns_ns_uses =
       popt.ParserOptions.auto_namespace_map
       |> SMap.of_list
@@ -378,7 +389,7 @@ let fun_def_of_stmts ctx stmts : Nast.fun_def option =
           fd_module = None;
           fd_tparams = [];
           fd_where_constraints = [];
-          fd_package = None;
+          fd_package;
         }
 
 (** Return an updated [Nast.program] where top-level statements

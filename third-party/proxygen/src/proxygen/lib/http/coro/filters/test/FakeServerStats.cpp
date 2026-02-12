@@ -30,6 +30,7 @@ void FakeHTTPServerStats::recordRequestComplete(
   resBodyBytes += responseBodyBytes;
   errors += err != ProxygenError::kErrorNone;
   errorTypes[static_cast<uint8_t>(err)]++;
+  latencies.push_back(latency);
 }
 
 void FakeHTTPServerStats::recordAbort() {

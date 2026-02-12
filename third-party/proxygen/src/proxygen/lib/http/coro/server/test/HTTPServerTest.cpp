@@ -33,6 +33,7 @@
 #include <wangle/acceptor/FizzAcceptorHandshakeHelper.h>
 
 using namespace proxygen::coro;
+using folly::coro::blockingWait;
 
 namespace {
 
@@ -224,7 +225,7 @@ TEST_P(HTTPServerTests, TestBasic) {
   auto url = fmt::format("https://{}/test", server_->address()->describe());
   auto useQuic = GetParam() == TransportType::QUIC;
   EventBase evb;
-  auto response = folly::coro::blockingWait(
+  auto response = blockingWait(
       HTTPClient::get(&evb, url, std::chrono::milliseconds(500), useQuic),
       &evb);
   EXPECT_NE(response.headers.get(), nullptr);
@@ -254,7 +255,7 @@ TEST_P(HTTPServerTests, TestExistingSocket) {
   CHECK(address.has_value());
   auto url = fmt::format("https://{}/test", address->describe());
   EventBase evb;
-  auto response = folly::coro::blockingWait(
+  auto response = blockingWait(
       HTTPClient::get(
           &evb, url, std::chrono::milliseconds(500), useQuic /* useQuic */),
       &evb);
@@ -299,7 +300,7 @@ TEST_P(HTTPServerTests, TestSampling) {
   auto url = fmt::format("https://{}/test", server_->address()->describe());
   auto useQuic = GetParam() == TransportType::QUIC;
   EventBase evb;
-  auto response = folly::coro::blockingWait(
+  auto response = blockingWait(
       HTTPClient::get(&evb, url, std::chrono::milliseconds(500), useQuic),
       &evb);
   EXPECT_NE(response.headers.get(), nullptr);
@@ -320,7 +321,7 @@ TEST_P(HTTPServerTests, TestFilterPass) {
   auto url = fmt::format("https://{}/test", server_->address()->describe());
   auto useQuic = GetParam() == TransportType::QUIC;
   EventBase evb;
-  auto response = folly::coro::blockingWait(
+  auto response = blockingWait(
       HTTPClient::get(&evb, url, std::chrono::milliseconds(500), useQuic),
       &evb);
   EXPECT_NE(response.headers.get(), nullptr);
@@ -341,10 +342,10 @@ TEST_P(HTTPServerTests, TestFilterFail) {
   auto url = fmt::format("https://{}/test", server_->address()->describe());
   auto useQuic = GetParam() == TransportType::QUIC;
   EventBase evb;
-  auto response = folly::coro::blockingWait(
-      co_awaitTry(
-          HTTPClient::get(&evb, url, std::chrono::milliseconds(500), useQuic)),
-      &evb);
+  auto response =
+      blockingWait(co_awaitTry(HTTPClient::get(
+                       &evb, url, std::chrono::milliseconds(500), useQuic)),
+                   &evb);
   EXPECT_TRUE(response.hasException());
   stopServer();
 }
@@ -365,10 +366,10 @@ TEST_P(HTTPServerTests, TestFilterFailException) {
   auto url = fmt::format("https://{}/test", server_->address()->describe());
   auto useQuic = GetParam() == TransportType::QUIC;
   EventBase evb;
-  auto response = folly::coro::blockingWait(
-      co_awaitTry(
-          HTTPClient::get(&evb, url, std::chrono::milliseconds(500), useQuic)),
-      &evb);
+  auto response =
+      blockingWait(co_awaitTry(HTTPClient::get(
+                       &evb, url, std::chrono::milliseconds(500), useQuic)),
+                   &evb);
   EXPECT_TRUE(response.hasException());
   stopServer();
 }
@@ -387,7 +388,7 @@ TEST_P(HTTPServerTests, TestFizzLoggingCallbackInvoked) {
   auto url = fmt::format("https://{}/test", server_->address()->describe());
   auto useQuic = GetParam() == TransportType::QUIC;
   EventBase evb;
-  auto response = folly::coro::blockingWait(
+  auto response = blockingWait(
       HTTPClient::get(&evb, url, std::chrono::milliseconds(500), useQuic),
       &evb);
   EXPECT_NE(response.headers.get(), nullptr);
@@ -482,7 +483,7 @@ TEST_P(HTTPServerTests, TestUpdateTLSCredentials) {
    * 3. do new tls connection and get second certificate
    * 4. verify first cert != second cert
    */
-  auto cert1 = folly::coro::blockingWait(doTlsConnection(), &evb);
+  auto cert1 = blockingWait(doTlsConnection(), &evb);
 
   // update credFile to a different cert/key
   copyCreds(testDir + "certs/test_cert2.pem", testDir + "certs/test_key2.pem");
@@ -491,7 +492,7 @@ TEST_P(HTTPServerTests, TestUpdateTLSCredentials) {
       [&]() { httpServer.updateTlsCredentials(); });
 
   // second tls connection post updating server cert file
-  auto cert2 = folly::coro::blockingWait(doTlsConnection(), &evb);
+  auto cert2 = blockingWait(doTlsConnection(), &evb);
 
   // verify certificates yielded from first and second tls conn attempts are
   // different
@@ -548,12 +549,12 @@ TEST_P(HTTPStatsFilterTests, TestSimplePostStatsFilter) {
   initClient();
 
   // send post request with random body
-  constexpr uint8_t bodyLen = 200;
+  constexpr size_t bodyLen = 100'000;
   auto body = makeBuf(bodyLen)->to<std::string>();
   auto url = fmt::format("https://{}/test", server_->address()->describe());
   auto useQuic = GetParam() == TransportType::QUIC;
   EventBase evb;
-  auto response = folly::coro::blockingWait(
+  auto response = blockingWait(
       HTTPClient::post(
           &evb, url, std::move(body), std::chrono::milliseconds(500), useQuic),
       &evb);
@@ -572,6 +573,9 @@ TEST_P(HTTPStatsFilterTests, TestSimplePostStatsFilter) {
             EXPECT_EQ(fakeStats.responseCodes[statusCode / 100], 1);
             // test handler returns OK -> 2 bytes
             EXPECT_EQ(fakeStats.resBodyBytes, 2);
+            // sanity check latency, might be flaky tho?
+            auto lat = fakeStats.latencies.at(0).count();
+            EXPECT_GT(lat, 0);
           });
 
   stopServer();
@@ -597,8 +601,8 @@ TEST_P(HTTPStatsFilterTests, TestServerErrorHandler) {
   auto useQuic = GetParam() == TransportType::QUIC;
 
   EventBase evb;
-  auto response = folly::coro::blockingWait(
-      folly::coro::co_awaitTry(HTTPClient::post(
+  auto response = blockingWait(
+      co_awaitTry(HTTPClient::post(
           &evb, url, std::move(body), std::chrono::milliseconds(500), useQuic)),
       &evb);
   EXPECT_TRUE(response.hasException());
@@ -675,7 +679,7 @@ TEST_F(MultiAcceptorHttpServerTest, TestMultiplePorts) {
   EventBase evb;
   for (const auto& address : boundAddresses) {
     auto url = fmt::format("https://{}/test", address.describe());
-    auto response = folly::coro::blockingWait(
+    auto response = blockingWait(
         HTTPClient::get(&evb, url, std::chrono::milliseconds(500), false),
         &evb);
     CHECK(response.headers.get());
@@ -685,10 +689,10 @@ TEST_F(MultiAcceptorHttpServerTest, TestMultiplePorts) {
   // Hit a bad port and confirm that we get an error.
   auto badAddress = folly::SocketAddress(listenAddress_, 9999);
   auto url = fmt::format("https://{}/test", badAddress.describe());
-  auto result = folly::coro::blockingWait(
-      folly::coro::co_awaitTry(
-          HTTPClient::get(&evb, url, std::chrono::milliseconds(500), false)),
-      &evb);
+  auto result =
+      blockingWait(co_awaitTry(HTTPClient::get(
+                       &evb, url, std::chrono::milliseconds(500), false)),
+                   &evb);
   EXPECT_TRUE(result.hasException());
 
   stopServer();
@@ -712,12 +716,20 @@ TEST_F(MultiAcceptorHttpServerTest, TestShutdown) {
   EventBase evb;
   for (const auto& address : boundAddresses) {
     auto url = fmt::format("https://{}/test", address.describe());
-    auto result = folly::coro::blockingWait(
-        folly::coro::co_awaitTry(
-            HTTPClient::get(&evb, url, std::chrono::milliseconds(500), false)),
-        &evb);
+    auto result =
+        blockingWait(co_awaitTry(HTTPClient::get(
+                         &evb, url, std::chrono::milliseconds(500), false)),
+                     &evb);
     EXPECT_TRUE(result.hasException());
   }
+}
+
+TEST(StatsFilterFactory, LatencyOnDestruction) {
+  FakeHTTPServerStats stats;
+  auto filters = StatsFilterUtil::makeFilters(&stats);
+  delete filters.first;
+  delete filters.second;
+  EXPECT_EQ(stats.latencies.at(0).count(), 0);
 }
 
 } // namespace proxygen::coro::test

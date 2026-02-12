@@ -8,8 +8,10 @@
 
 #pragma once
 
-#include "proxygen/lib/http/stats/HttpServerStats.h"
 #include <array>
+#include <vector>
+
+#include "proxygen/lib/http/stats/HttpServerStats.h"
 #include <proxygen/lib/http/ProxygenErrorEnum.h>
 
 namespace proxygen {
@@ -33,6 +35,7 @@ class FakeHTTPServerStats : public HttpServerStatsIf {
   uint64_t resBodyBytes{0};
   uint64_t aborts{0};
   uint64_t errors{0};
+  std::vector<std::chrono::milliseconds> latencies;
 
   // 1xx -> 5xx (ignore index 0)
   std::array<uint64_t, 6> responseCodes{};

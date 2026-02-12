@@ -10,17 +10,22 @@
 #include "proxygen/lib/http/coro/HTTPSourceFilter.h"
 #include "proxygen/lib/http/coro/filters/VisitorFilter.h"
 #include "proxygen/lib/http/stats/HttpServerStats.h"
+#include <folly/stop_watch.h>
 
 namespace {
+constexpr std::chrono::milliseconds kZeroMs{0};
+
 // shared state between the proxygen::coro request and response stat filters
 struct StatsState {
   ~StatsState() {
     // calculate latency and record request as complete
-    const auto latency = proxygen::millisecondsSince(startTime);
+    std::chrono::milliseconds latency =
+        stopwatch.has_value() ? stopwatch->elapsed() : kZeroMs;
     stats->recordRequestComplete(
         latency, error, requestBodyBytes, responseBodyBytes);
   }
-  proxygen::TimePoint startTime{};
+
+  std::optional<folly::stop_watch<std::chrono::milliseconds>> stopwatch;
   size_t requestBodyBytes{0};
   size_t responseBodyBytes{0};
   proxygen::HttpServerStatsIf* stats{nullptr};
@@ -53,11 +58,7 @@ std::pair<HTTPSourceFilter*, HTTPSourceFilter*> StatsFilterUtil::makeFilters(
       /*source=*/
       nullptr,
       [state](const folly::Try<HTTPHeaderEvent>& headerEvent) {
-        constexpr auto zero = TimePoint::duration::zero();
-        // request header is always final, startTime should only be set once
-        CHECK(state->startTime.time_since_epoch() == zero);
-        state->startTime = getCurrentTime();
-
+        state->stopwatch.emplace();
         if (!maybeSetError(*state, headerEvent)) {
           state->stats->recordRequest(*headerEvent->headers);
         }

@@ -3870,7 +3870,13 @@ TEST(CompilerTest, sealed_key_type) {
     typedef NonSealedStruct NonSealedStructAlias;
     typedef NonSealedStructAlias NonSealedStructAliasAlias;
 
-    typedef set<NonSealedStruct> NonSealedSet; // TODO: this should fail
+    typedef set<NonSealedStruct> InvalidNonSealedSet; # expected-error: Set `InvalidNonSealedSet` element type is not sealed: `NonSealedStruct`
+
+    @thrift.AllowUnsafeNonSealedKeyType
+    typedef set<NonSealedStructAliasAlias> NonSealedSet;
+
+    @thrift.AllowUnsafeNonSealedKeyType # expected-error: Unnecessary @thrift.AllowUnsafeNonSealedKeyType on set: `SealedSet`
+    typedef set<SealedStruct> SealedSet;
 
     struct MyStruct {
       1: map<SealedStruct, string> field_1; // OK: key type is sealed
@@ -3910,7 +3916,7 @@ TEST(CompilerTest, sealed_key_type) {
       @thrift.AllowUnsafeNonSealedKeyType
       15: set<NonSealedStructAliasAlias> field_15;
 
-      16: NonSealedSet field_16; // Despite the set not being sealed, this should not fail here (but in the typedef definition).
+      16: NonSealedSet field_16; // Despite the set not being sealed, this should not fail here (but in the typedef definition, if not annotated).
 
       @thrift.AllowUnsafeNonSealedKeyType # expected-error: Unnecessary @thrift.AllowUnsafeNonSealedKeyType: `field_17`
       17: NonSealedSet field_17;

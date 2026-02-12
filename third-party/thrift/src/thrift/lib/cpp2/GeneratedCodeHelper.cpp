@@ -35,6 +35,8 @@ using namespace std;
 using namespace folly;
 using namespace apache::thrift::transport;
 
+THRIFT_FLAG_DEFINE_bool(enforce_uexw_header_length, false);
+
 namespace apache::thrift {
 
 namespace detail {
@@ -295,10 +297,14 @@ void setUserExceptionHeader(
   }
 
   header->setHeader(std::string(detail::kHeaderUex), std::move(exType));
-  header->setHeader(
-      std::string(detail::kHeaderUexw),
-      exReason.size() > kMaxUexwSize ? exReason.substr(0, kMaxUexwSize)
-                                     : std::move(exReason));
+  if (THRIFT_FLAG(enforce_uexw_header_length)) {
+    header->setHeader(
+        std::string(detail::kHeaderUexw),
+        exReason.size() > kMaxUexwSize ? exReason.substr(0, kMaxUexwSize)
+                                       : std::move(exReason));
+  } else {
+    header->setHeader(std::string(detail::kHeaderUexw), std::move(exReason));
+  }
 }
 
 } // namespace

@@ -1,0 +1,20 @@
+name: \I, kind: class, span: line 11, characters 3-3, is_declaration: false
+definition:
+ I
+   kind: interface
+   id: type_id::I
+   position: line 3, characters 11-11
+   span: line 3, character 1 - line 5, character 1
+   modifiers: 
+
+
+name: \J, kind: class, span: line 11, characters 3-3, is_declaration: false
+definition:
+ J
+   kind: interface
+   id: type_id::J
+   position: line 6, characters 11-11
+   span: line 6, character 1 - line 8, character 1
+   modifiers: 
+
+

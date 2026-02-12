@@ -1,0 +1,10 @@
+name: \HH\string, kind: class, span: line 6, characters 28-28, is_declaration: false
+definition:
+ HH\string
+   kind: class
+   id: type_id::HH\string
+   position: line 6, characters 15-20
+   span: line 5, character 3 - line 10, character 3
+   modifiers: final 
+
+

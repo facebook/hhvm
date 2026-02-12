@@ -91,21 +91,24 @@ class HTTPSessionController {
   /**
    * Optionally allow the session to query custom graceful shutdown timeout.
    */
-  virtual std::chrono::milliseconds getGracefulShutdownTimeout() const {
+  [[nodiscard]] virtual std::chrono::milliseconds getGracefulShutdownTimeout()
+      const {
     return std::chrono::milliseconds(0);
   }
 
   /**
    * Optionally allow the session to query custom flow control timeout.
    */
-  virtual std::chrono::milliseconds getSessionFlowControlTimeout() const {
+  [[nodiscard]] virtual std::chrono::milliseconds getSessionFlowControlTimeout()
+      const {
     return std::chrono::milliseconds(0);
   }
 
   /**
    * Returns the H2 header indexing strategy to be employed by the session
    */
-  virtual const HeaderIndexingStrategy* getHeaderIndexingStrategy() const {
+  [[nodiscard]] virtual const HeaderIndexingStrategy*
+  getHeaderIndexingStrategy() const {
     return HeaderIndexingStrategy::getDefaultInstance();
   }
 };

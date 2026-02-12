@@ -980,7 +980,7 @@ class HTTPSession
       session_->flowControlTimeoutExpired();
     }
 
-    std::chrono::milliseconds getTimeoutDuration() const {
+    [[nodiscard]] std::chrono::milliseconds getTimeoutDuration() const {
       return duration_;
     }
 

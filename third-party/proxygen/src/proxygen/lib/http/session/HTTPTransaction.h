@@ -499,25 +499,27 @@ class HTTPTransaction
 
     virtual void notifyEgressBodyBuffered(int64_t bytes) noexcept = 0;
 
-    const folly::SocketAddress& getLocalAddress() const noexcept override = 0;
+    [[nodiscard]] const folly::SocketAddress& getLocalAddress()
+        const noexcept override = 0;
 
-    const folly::SocketAddress& getPeerAddress() const noexcept override = 0;
+    [[nodiscard]] const folly::SocketAddress& getPeerAddress()
+        const noexcept override = 0;
 
     [[nodiscard]] virtual std::chrono::seconds getLatestIdleTime() const = 0;
 
     virtual void describe(std::ostream&) const = 0;
 
-    virtual const wangle::TransportInfo& getSetupTransportInfo()
+    [[nodiscard]] virtual const wangle::TransportInfo& getSetupTransportInfo()
         const noexcept = 0;
 
     virtual bool getCurrentTransportInfo(wangle::TransportInfo* tinfo) = 0;
 
     virtual void getFlowControlInfo(FlowControlInfo* info) = 0;
 
-    virtual HTTPTransaction::Transport::Type getSessionType()
+    [[nodiscard]] virtual HTTPTransaction::Transport::Type getSessionType()
         const noexcept = 0;
 
-    virtual const HTTPCodec& getCodec() const noexcept = 0;
+    [[nodiscard]] virtual const HTTPCodec& getCodec() const noexcept = 0;
 
     /*
      * Drain the underlying session. This will affect other transactions
@@ -526,14 +528,14 @@ class HTTPTransaction
      */
     virtual void drain() = 0;
 
-    virtual bool isDraining() const = 0;
+    [[nodiscard]] virtual bool isDraining() const = 0;
 
     virtual HTTPTransaction* newPushedTransaction(
         HTTPCodec::StreamID assocStreamId,
         HTTPTransaction::PushHandler* handler,
         ProxygenError* error = nullptr) noexcept = 0;
 
-    virtual std::string getSecurityProtocol() const = 0;
+    [[nodiscard]] virtual std::string getSecurityProtocol() const = 0;
 
     virtual void addWaitingForReplaySafety(
         folly::AsyncTransport::ReplaySafetyCallback* callback) noexcept = 0;
@@ -541,18 +543,18 @@ class HTTPTransaction
     virtual void removeWaitingForReplaySafety(
         folly::AsyncTransport::ReplaySafetyCallback* callback) noexcept = 0;
 
-    virtual bool needToBlockForReplaySafety() const = 0;
+    [[nodiscard]] virtual bool needToBlockForReplaySafety() const = 0;
 
-    virtual const folly::AsyncTransport* getUnderlyingTransport()
+    [[nodiscard]] virtual const folly::AsyncTransport* getUnderlyingTransport()
         const noexcept = 0;
 
     /**
      * Returns true if the underlying transport has completed full handshake.
      */
-    virtual bool isReplaySafe() const = 0;
+    [[nodiscard]] virtual bool isReplaySafe() const = 0;
 
     virtual void setHTTP2PrioritiesEnabled(bool enabled) = 0;
-    virtual bool getHTTP2PrioritiesEnabled() const = 0;
+    [[nodiscard]] virtual bool getHTTP2PrioritiesEnabled() const = 0;
 
     virtual HTTPSessionBase* getHTTPSessionBase() = 0;
 
@@ -563,7 +565,7 @@ class HTTPTransaction
       return folly::none;
     }
 
-    virtual uint16_t getDatagramSizeLimit() const noexcept {
+    [[nodiscard]] virtual uint16_t getDatagramSizeLimit() const noexcept {
       return 0;
     }
 
@@ -701,10 +703,10 @@ class HTTPTransaction
       folly::assume_unreachable();
     }
 
-    virtual folly::Optional<HTTPTransaction::ConnectionToken>
+    [[nodiscard]] virtual folly::Optional<HTTPTransaction::ConnectionToken>
     getConnectionToken() const noexcept = 0;
 
-    virtual bool serverEarlyResponseEnabled() const noexcept {
+    [[nodiscard]] virtual bool serverEarlyResponseEnabled() const noexcept {
       return false;
     }
   };

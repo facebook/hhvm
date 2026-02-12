@@ -46,7 +46,7 @@ class HTTPSessionAcceptor
   /**
    * Access the default error page generator.
    */
-  const HTTPErrorPage* getDefaultErrorPage() const {
+  [[nodiscard]] const HTTPErrorPage* getDefaultErrorPage() const {
     return defaultErrorPage_.get();
   }
 

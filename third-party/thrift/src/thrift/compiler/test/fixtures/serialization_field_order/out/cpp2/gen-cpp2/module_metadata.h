@@ -8,5 +8,4 @@
 
 #include <vector>
 
-#include <thrift/lib/cpp2/gen/module_metadata_h.h>
 #include "thrift/compiler/test/fixtures/serialization_field_order/gen-cpp2/module_types.h"

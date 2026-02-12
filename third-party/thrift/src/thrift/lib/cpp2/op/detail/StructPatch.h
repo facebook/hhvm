@@ -419,7 +419,7 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
     }
   }
 
-  /// Ensures the given field is initalized, and return the associated patch
+  /// Ensures the given field is initialized, and return the associated patch
   /// object.
   template <class Id>
   decltype(auto) patch() {

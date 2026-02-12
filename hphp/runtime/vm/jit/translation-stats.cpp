@@ -109,6 +109,8 @@ void TransStats::logCallCounts() const {
       entry.setInt("call_count", callCount);
       entry.setStr("func_id", funcId);
       entry.setStr("uuid", uuidStr);
+      entry.setInt("optimized", func->atomicFlags().check(Func::Flags::Optimized) ? 1 : 0);
+      entry.setInt("config_id", RuntimeOption::ConfigId);
       if (sk.prologue() || sk.funcEntry()) {
         entry.setInt("num_entry_args", sk.numEntryArgs());
       } else {

@@ -162,6 +162,19 @@ struct WtStreamManager {
   WtWriteHandle* createEgressHandle() noexcept;
   WebTransport::BidiStreamHandle createBidiHandle() noexcept;
 
+  /**
+   * per-stream callbacks that may be useful to transports that support stream
+   * multiplexing (e.g. quic)
+   */
+  struct ReadCallback {
+    virtual ~ReadCallback() noexcept = default;
+    // invoked when the read handle has available buffer space
+    virtual void readReady(WtReadHandle&) noexcept = 0;
+  };
+  void setReadCb(WtReadHandle& rh, ReadCallback* rcb) noexcept;
+  // ignores wt conn flow control (should be set to kMaxVarint in quic)
+  uint64_t recvAvail(const WtReadHandle& rh) const noexcept;
+
   enum Result : uint8_t { Fail = 0, Ok = 1 };
   /**
    * invoke when receiving max_streams frame from peer – returns Ok if

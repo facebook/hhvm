@@ -1044,4 +1044,51 @@ TEST(WtStreamManager, NextWritableReturnsNullptrWhenHeadIsDatagram) {
   EXPECT_EQ(streamManager.nextWritable(), one);
 }
 
+using WtReadHandle = WebTransport::StreamReadHandle;
+using WtWriteHandle = WebTransport::StreamWriteHandle;
+
+struct WtReadCallback : WtStreamManager::ReadCallback {
+  ~WtReadCallback() override = default;
+  void readReady(WtReadHandle&) noexcept override {
+    signalled = true;
+  }
+
+  bool signalled = false;
+};
+
+TEST(WtStreamManager, PerStreamCallbacks) {
+  WtConfig config{};
+  WtSmEgressCb egressCb;
+  WtSmIngressCb ingressCb;
+  auto priorityQueue = std::make_unique<quic::HTTPPriorityQueue>();
+  WtStreamManager streamManager{
+      detail::WtDir::Client, config, egressCb, ingressCb, *priorityQueue};
+  constexpr auto kBufLen = 65'535;
+
+  auto bidi = streamManager.createBidiHandle();
+  CHECK(bidi.readHandle && bidi.writeHandle);
+
+  // set stream callbacks
+  WtReadCallback rcb;
+  streamManager.setReadCb(*bidi.readHandle, &rcb);
+
+  bidi.writeHandle->writeStreamData(
+      makeBuf(10), /*fin=*/false, /*byteEventCallback=*/nullptr);
+
+  EXPECT_EQ(streamManager.recvAvail(*bidi.readHandle), kBufLen);
+  // read before enqueue
+  auto read = bidi.readHandle->readStreamData();
+  EXPECT_FALSE(read.isReady());
+  // enqueue 10 bytes
+  streamManager.enqueue(*bidi.readHandle, {.data = makeBuf(10), .fin = false});
+  EXPECT_TRUE(read.isReady());
+  EXPECT_TRUE(std::exchange(rcb.signalled, false)); // signalled
+
+  // read after enqueue
+  streamManager.enqueue(*bidi.readHandle, {.data = makeBuf(10), .fin = false});
+  read = bidi.readHandle->readStreamData();
+  EXPECT_TRUE(read.isReady());
+  EXPECT_TRUE(std::exchange(rcb.signalled, false)); // signalled
+}
+
 } // namespace proxygen::coro::test

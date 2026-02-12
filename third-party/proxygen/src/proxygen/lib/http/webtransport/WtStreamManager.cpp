@@ -165,6 +165,7 @@ struct ReadHandle : public WebTransport::StreamReadHandle {
   Accessor smAccessor_;
   FlowController streamRecvFc_;
   BufferedData ingress_;
+  WtStreamManager::ReadCallback* rcb_{nullptr};
   uint64_t bytesRead_{0};
   ReadPromise promise_{emptyReadPromise()};
   HandleState state_;
@@ -508,6 +509,14 @@ WebTransport::BidiStreamHandle WtStreamManager::createBidiHandle() noexcept {
   return handle;
 }
 
+void WtStreamManager::setReadCb(WtReadHandle& rh, ReadCallback* rcb) noexcept {
+  readhandle_ref_cast(rh).rcb_ = rcb;
+}
+uint64_t WtStreamManager::recvAvail(const WtReadHandle& rh) const noexcept {
+  const auto& recvFc = static_cast<const ReadHandle&>(rh).streamRecvFc_;
+  return recvFc.isBlocked() ? 0 : recvFc.getAvailable();
+}
+
 WtStreamManager::Result WtStreamManager::onMaxData(MaxConnData data) noexcept {
   XLOG(DBG9) << __func__ << " maxData=" << data.maxData;
   if (!connSendFc_.grant(data.maxData)) {
@@ -737,6 +746,9 @@ folly::SemiFuture<StreamData> ReadHandle::readStreamData() {
     smAccessor_.maybeGrantFc(ingress_.fin ? nullptr : this, len);
     auto res = StreamData{ingress_.chain.pop(), ingress_.fin};
     XLOG(DBG6) << __func__ << "; len=" << len << "; fin=" << res.fin;
+    if (rcb_) {
+      rcb_->readReady(*this);
+    }
     finish(ingress_.fin);
     return folly::makeSemiFuture(std::move(res));
   }
@@ -774,6 +786,9 @@ Result ReadHandle::enqueue(StreamData&& data) noexcept {
     // only issue conn-level fc if we've rx'd fin
     smAccessor_.maybeGrantFc(ingress_.fin ? nullptr : this, len);
     p.setValue(StreamData{ingress_.chain.pop(), ingress_.fin});
+    if (rcb_) {
+      rcb_->readReady(*this);
+    }
     finish(ingress_.fin);
   }
   return Result::Ok;

@@ -28,29 +28,6 @@
 #include <thrift/lib/cpp2/server/ServerConfigs.h>
 #include <thrift/lib/cpp2/server/StreamInterceptorContext.h>
 
-// Default to ture, so it can be used for killswitch.
-THRIFT_FLAG_DEFINE_bool(thrift_enable_streaming_tracking, false);
-#if defined(__linux__) && !FOLLY_MOBILE
-/**
- * TALK TO THE THRIFT TEAM
- * BEFORE FLIPPING THIS FLAG!
- */
-DEFINE_bool(
-    EXPERIMENTAL_thrift_enable_streaming_tracking,
-    true,
-    "Enable Thrift Streaming Tracking.");
-#else
-static constexpr bool FLAGS_EXPERIMENTAL_thrift_enable_streaming_tracking =
-    true;
-#endif
-
-namespace {
-bool isStreamTrackingEnabled() {
-  return FLAGS_EXPERIMENTAL_thrift_enable_streaming_tracking &&
-      THRIFT_FLAG(thrift_enable_streaming_tracking);
-}
-} // namespace
-
 namespace apache::thrift {
 const folly::Executor::KeepAlive<>&
 HandlerCallbackBase::getInternalKeepAlive() {
@@ -194,9 +171,6 @@ void HandlerCallbackBase::sendReply(SerializedResponse response) {
 
 void HandlerCallbackBase::sendReply(
     ResponseAndServerStreamFactory&& responseAndStream) {
-  if (!isStreamTrackingEnabled()) {
-    this->ctx_.reset();
-  }
   folly::Optional<uint32_t> crc32c =
       checksumIfNeeded(responseAndStream.response);
   auto payload = std::move(responseAndStream.response)
@@ -249,9 +223,6 @@ void HandlerCallbackBase::sendReply(
     [[maybe_unused]] std::pair<
         SerializedResponse,
         apache::thrift::detail::ServerSinkFactory>&& responseAndSinkConsumer) {
-  if (!isStreamTrackingEnabled()) {
-    this->ctx_.reset();
-  }
 #if FOLLY_HAS_COROUTINES
   folly::Optional<uint32_t> crc32c =
       checksumIfNeeded(responseAndSinkConsumer.first);

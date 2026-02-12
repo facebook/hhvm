@@ -307,7 +307,7 @@ void HQClient::initializeQuicClient(const folly::SocketAddress& remoteAddress,
       std::move(sock),
       std::move(handshakeContextBuilder).build(),
       params_.clientCidLength);
-  client->setPacingTimer(pacingTimer_);
+  client->setPacingTimer(std::move(pacingTimer_));
   client->setHostname(params_.host);
   client->addNewPeerAddress(remoteAddress);
   client->setLocalAddress(localAddress);

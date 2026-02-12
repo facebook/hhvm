@@ -348,10 +348,7 @@ func (r *rsocketClient) RequestChannel(
 	sendingFlux := flux.Create(func(fluxCtx context.Context, sink flux.Sink) {
 		defer close(sendingDoneChan)
 
-		// First, send the initial request payload
-		sink.Next(request)
-
-		// Then, send payloads from the sink channel until it's closed or context is done
+		// Send payloads from the sink channel until it's closed or context is done
 		for {
 			select {
 			case p, ok := <-sinkPayloadChan:
@@ -368,7 +365,7 @@ func (r *rsocketClient) RequestChannel(
 		}
 	})
 
-	receivingFlux := r.client.RequestChannel(sendingFlux)
+	receivingFlux := r.client.RequestChannel(request, sendingFlux)
 
 	channelCtx, channelCancel := context.WithCancel(ctx)
 	receivingPayloadChan, receivingErrChan := receivingFlux.ToChan(channelCtx, types.DefaultStreamBufferSize)

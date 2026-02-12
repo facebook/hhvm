@@ -91,6 +91,15 @@ bool isCall(Vinstr::Opcode op) {
 }
 
 Width width(Vinstr::Opcode op) {
+#if defined(__aarch64__)
+#define CASE_WITH_UPDATES(name)                 \
+    case Vinstr::name:                          \
+    case Vinstr::name##pri:                     \
+    case Vinstr::name##pi:
+#else
+#define CASE_WITH_UPDATES(name)                 \
+    case Vinstr::name:
+#endif
   switch (op) {
     // service requests
     case Vinstr::bindjmp:
@@ -113,8 +122,8 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::ldimml:
     case Vinstr::ldimmq:
     case Vinstr::ldundefq:
-    case Vinstr::load:
-    case Vinstr::store:
+    CASE_WITH_UPDATES(load)
+    CASE_WITH_UPDATES(store)
     case Vinstr::mcprep:
     case Vinstr::phidef:
     case Vinstr::phijmp:
@@ -257,9 +266,9 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::csincb:
     case Vinstr::setcc:
     case Vinstr::movb:
-    case Vinstr::loadb:
-    case Vinstr::loadtqb:
-    case Vinstr::storeb:
+    CASE_WITH_UPDATES(loadb)
+    CASE_WITH_UPDATES(loadtqb)
+    CASE_WITH_UPDATES(storeb)
     case Vinstr::storebi:
       return Width::Byte;
 
@@ -279,9 +288,9 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::testwi:
     case Vinstr::testwim:
     case Vinstr::testwm:
-    case Vinstr::loadw:
+    CASE_WITH_UPDATES(loadw)
     case Vinstr::movw:
-    case Vinstr::storew:
+    CASE_WITH_UPDATES(storew)
     case Vinstr::storewi:
     case Vinstr::xorw:
     case Vinstr::xorwi:
@@ -314,14 +323,14 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::testlim:
     case Vinstr::testlm:
     case Vinstr::movl:
-    case Vinstr::loadl:
-    case Vinstr::loadpairl:
-    case Vinstr::loadzbl:
-    case Vinstr::loadsbl:
-    case Vinstr::loadtql:
-    case Vinstr::storel:
+    CASE_WITH_UPDATES(loadl)
+    CASE_WITH_UPDATES(loadpairl)
+    CASE_WITH_UPDATES(loadzbl)
+    CASE_WITH_UPDATES(loadsbl)
+    CASE_WITH_UPDATES(loadtql)
+    CASE_WITH_UPDATES(storel)
     case Vinstr::storeli:
-    case Vinstr::storepairl:
+    CASE_WITH_UPDATES(storepairl)
     case Vinstr::ubfmli:
       return Width::Long;
 
@@ -379,19 +388,19 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::lead:
     case Vinstr::loadqp:
     case Vinstr::loadqd:
-    case Vinstr::loadzbq:
-    case Vinstr::loadzwq:
-    case Vinstr::loadzlq:
-    case Vinstr::loadsbq:
-    case Vinstr::loadpair:
+    CASE_WITH_UPDATES(loadzbq)
+    CASE_WITH_UPDATES(loadzwq)
+    CASE_WITH_UPDATES(loadzlq)
+    CASE_WITH_UPDATES(loadsbq)
+    CASE_WITH_UPDATES(loadpair)
     case Vinstr::storeqi:
-    case Vinstr::storepair:
+    CASE_WITH_UPDATES(storepair)
     case Vinstr::addsd:
     case Vinstr::subsd:
     case Vinstr::cmpsd:
     case Vinstr::ucomisd:
-    case Vinstr::loadsd:
-    case Vinstr::storesd:
+    CASE_WITH_UPDATES(loadsd)
+    CASE_WITH_UPDATES(storesd)
     case Vinstr::absdbl:
     case Vinstr::divsd:
     case Vinstr::mulsd:
@@ -405,6 +414,7 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::storeups:
       return Width::Octa;
   }
+#undef CASE_WITH_UPDATES
   not_reached();
 }
 

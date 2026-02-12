@@ -143,6 +143,14 @@ THRIFT_PLUGGABLE_FUNC_REGISTER(
     std::vector<EkmInfo>, populateCachedEkms, const folly::AsyncTransport&) {
   return std::vector<EkmInfo>();
 }
+
+THRIFT_PLUGGABLE_FUNC_REGISTER(
+    std::optional<SecurityPolicy>,
+    getConnectionSecurityPolicy,
+    const Cpp2ConnContext& /* connContext */) {
+  return std::nullopt;
+}
+
 } // namespace detail
 
 } // namespace apache::thrift

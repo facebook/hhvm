@@ -620,6 +620,13 @@ class Cpp2ConnContextInternalAPI {
   Cpp2ConnContext& connContext_;
 };
 class Cpp2RequestContextUnsafeAPI;
+
+// Returns the security policy for this connection.
+// Default implementation returns empty optional.
+THRIFT_PLUGGABLE_FUNC_DECLARE(
+    std::optional<SecurityPolicy>,
+    getConnectionSecurityPolicy,
+    const Cpp2ConnContext& connContext);
 } // namespace detail
 
 // Request-specific context

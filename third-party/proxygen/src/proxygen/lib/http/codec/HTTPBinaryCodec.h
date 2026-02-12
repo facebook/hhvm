@@ -54,7 +54,7 @@ class HTTPBinaryCodec : public HTTPCodec {
  public:
   // Default strictValidation to false for now to match existing behavior
   explicit HTTPBinaryCodec(TransportDirection direction);
-  HTTPBinaryCodec(TransportDirection direction, bool knownLength);
+  HTTPBinaryCodec(TransportDirection direction, bool knownEgressLength);
   ~HTTPBinaryCodec() override;
 
   HTTPBinaryCodec(HTTPBinaryCodec&&) = default;
@@ -178,7 +178,8 @@ class HTTPBinaryCodec : public HTTPCodec {
                                        HTTPMessage& msg);
   ParseResult parseHeaders(folly::io::Cursor& cursor,
                            size_t remaining,
-                           HeaderDecodeInfo& decodeInfo);
+                           HeaderDecodeInfo& decodeInfo,
+                           bool knownLength);
   ParseResult parseContent(folly::io::Cursor& cursor, size_t remaining);
   ParseResult parseSingleContentHelper(folly::io::Cursor& cursor,
                                        size_t remaining);
@@ -207,7 +208,8 @@ class HTTPBinaryCodec : public HTTPCodec {
                               const HTTPHeaders& headers);
 
   bool isRequest_{true};
-  bool knownLength_{true};
+  bool knownEgressLength_{true};
+  bool knownIngressLength_{false};
   enum class ParseState : uint8_t {
     FRAMING_INDICATOR = 0,
     INFORMATIONAL_RESPONSE = 1,

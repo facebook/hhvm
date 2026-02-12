@@ -44,8 +44,10 @@ class HTTPBinaryCodecForTest : public HTTPBinaryCodec {
 
   ParseResult parseHeaders(folly::io::Cursor& cursor,
                            size_t remaining,
-                           HeaderDecodeInfo& decodeInfo) {
-    return HTTPBinaryCodec::parseHeaders(cursor, remaining, decodeInfo);
+                           HeaderDecodeInfo& decodeInfo,
+                           bool knownLength) {
+    return HTTPBinaryCodec::parseHeaders(
+        cursor, remaining, decodeInfo, knownLength);
   }
 
   ParseResult parseContent(folly::io::Cursor& cursor, size_t remaining) {
@@ -281,10 +283,11 @@ TEST_F(HttpBinaryUpstreamCodecTest, testParseKnownLengthHeadersSuccess) {
                   true /* validate */,
                   false /* strictValidation */,
                   false /* allowEmptyPath */);
-  EXPECT_EQ(
-      binaryCodecKnownLength_->parseHeaders(cursor, headers.size(), decodeInfo)
-          .bytesParsed_,
-      headers.size());
+  EXPECT_EQ(binaryCodecKnownLength_
+                ->parseHeaders(
+                    cursor, headers.size(), decodeInfo, /*knownLength=*/true)
+                .bytesParsed_,
+            headers.size());
 
   HTTPHeaders httpHeaders = decodeInfo.msg->getHeaders();
   EXPECT_EQ(httpHeaders.exists("user-agent"), true);
@@ -308,9 +311,10 @@ TEST_F(HttpBinaryUpstreamCodecTest, testParseKnownLengthHeadersEmpty) {
                   true /* validate */,
                   false /* strictValidation */,
                   false /* allowEmptyPath */);
-  EXPECT_EQ(
-      binaryCodecKnownLength_->parseHeaders(cursor, 1, decodeInfo).bytesParsed_,
-      1);
+  EXPECT_EQ(binaryCodecKnownLength_
+                ->parseHeaders(cursor, 1, decodeInfo, /*knownLength=*/true)
+                .bytesParsed_,
+            1);
 }
 TEST_F(HttpBinaryUpstreamCodecTest, testParseKnownLengthHeadersWaiting) {
   // Format is `**user-agent*curl/7.16.3 libcurl/7.16.3 OpenSSL/0.9.7l
@@ -339,7 +343,10 @@ TEST_F(HttpBinaryUpstreamCodecTest, testParseKnownLengthHeadersWaiting) {
                   false /* strictValidation */,
                   false /* allowEmptyPath */);
   EXPECT_EQ(binaryCodecKnownLength_
-                ->parseHeaders(cursor, invalidHeadersLength.size(), decodeInfo)
+                ->parseHeaders(cursor,
+                               invalidHeadersLength.size(),
+                               decodeInfo,
+                               /*knownLength=*/true)
                 .parseResultState_,
             ParseResultState::WAITING_FOR_MORE_DATA);
 
@@ -350,11 +357,13 @@ TEST_F(HttpBinaryUpstreamCodecTest, testParseKnownLengthHeadersWaiting) {
       invalidHeadersUnderflow.data(), invalidHeadersUnderflow.size()));
   cursor = folly::io::Cursor(headersIOBuf.get());
 
-  EXPECT_EQ(
-      binaryCodecKnownLength_
-          ->parseHeaders(cursor, invalidHeadersUnderflow.size(), decodeInfo)
-          .parseResultState_,
-      ParseResultState::WAITING_FOR_MORE_DATA);
+  EXPECT_EQ(binaryCodecKnownLength_
+                ->parseHeaders(cursor,
+                               invalidHeadersUnderflow.size(),
+                               decodeInfo,
+                               /*knownLength=*/true)
+                .parseResultState_,
+            ParseResultState::WAITING_FOR_MORE_DATA);
 
   // Format is `*` where the first `*` represents an underflowed quic integer
   const std::vector<uint8_t> invalidHeadersUnderflowQuic{0x99};
@@ -362,11 +371,13 @@ TEST_F(HttpBinaryUpstreamCodecTest, testParseKnownLengthHeadersWaiting) {
       invalidHeadersUnderflowQuic.data(), invalidHeadersUnderflowQuic.size()));
   cursor = folly::io::Cursor(headersIOBuf.get());
 
-  EXPECT_EQ(
-      binaryCodecKnownLength_
-          ->parseHeaders(cursor, invalidHeadersUnderflowQuic.size(), decodeInfo)
-          .parseResultState_,
-      ParseResultState::WAITING_FOR_MORE_DATA);
+  EXPECT_EQ(binaryCodecKnownLength_
+                ->parseHeaders(cursor,
+                               invalidHeadersUnderflowQuic.size(),
+                               decodeInfo,
+                               /*knownLength=*/true)
+                .parseResultState_,
+            ParseResultState::WAITING_FOR_MORE_DATA);
 }
 
 TEST_F(HttpBinaryUpstreamCodecTest,
@@ -397,7 +408,8 @@ TEST_F(HttpBinaryUpstreamCodecTest,
                   false /* strictValidation */,
                   false /* allowEmptyPath */);
   EXPECT_EQ(binaryCodecIndeterminateLength_
-                ->parseHeaders(cursor, headers.size(), decodeInfo)
+                ->parseHeaders(
+                    cursor, headers.size(), decodeInfo, /*knownLength=*/false)
                 .bytesParsed_,
             headers.size());
 
@@ -423,7 +435,8 @@ TEST_F(HttpBinaryUpstreamCodecTest, testParseIndeterminateLengthHeadersEmpty) {
                   true /* validate */,
                   false /* strictValidation */,
                   false /* allowEmptyPath */);
-  EXPECT_EQ(binaryCodecIndeterminateLength_->parseHeaders(cursor, 1, decodeInfo)
+  EXPECT_EQ(binaryCodecIndeterminateLength_
+                ->parseHeaders(cursor, 1, decodeInfo, /*knownLength=*/false)
                 .bytesParsed_,
             1);
   HTTPHeaders httpHeaders = decodeInfo.msg->getHeaders();
@@ -457,7 +470,10 @@ TEST_F(HttpBinaryUpstreamCodecTest,
                   false /* strictValidation */,
                   false /* allowEmptyPath */);
   EXPECT_EQ(binaryCodecIndeterminateLength_
-                ->parseHeaders(cursor, invalidHeadersLength.size(), decodeInfo)
+                ->parseHeaders(cursor,
+                               invalidHeadersLength.size(),
+                               decodeInfo,
+                               /*knownLength=*/false)
                 .parseResultState_,
             ParseResultState::WAITING_FOR_MORE_DATA);
 
@@ -467,11 +483,13 @@ TEST_F(HttpBinaryUpstreamCodecTest,
       invalidHeadersUnderflow.data(), invalidHeadersUnderflow.size()));
   cursor = folly::io::Cursor(headersIOBuf.get());
 
-  EXPECT_EQ(
-      binaryCodecIndeterminateLength_
-          ->parseHeaders(cursor, invalidHeadersUnderflow.size(), decodeInfo)
-          .parseResultState_,
-      ParseResultState::WAITING_FOR_MORE_DATA);
+  EXPECT_EQ(binaryCodecIndeterminateLength_
+                ->parseHeaders(cursor,
+                               invalidHeadersUnderflow.size(),
+                               decodeInfo,
+                               /*knownLength=*/false)
+                .parseResultState_,
+            ParseResultState::WAITING_FOR_MORE_DATA);
 }
 
 TEST_F(HttpBinaryUpstreamCodecTest, testParseContentKnownLengthSuccess) {
@@ -1084,6 +1102,46 @@ TEST_F(HttpBinaryUpstreamCodecTest,
   EXPECT_EQ(trailersDecoded.exists("test-trailer"), true);
   EXPECT_EQ(trailersDecoded.getSingleOrEmpty("test-trailer"),
             "test-trailer-value");
+}
+
+TEST_F(HttpBinaryUpstreamCodecTest, IndeterminateLenReqKnownLengthResp) {
+  folly::IOBufQueue upstreamEgress;
+  HTTPMessage req;
+  req.setURL("/");
+  req.getHeaders().set("host", "test.com");
+  // serialize headers + 10-byte body on a codec w/ indeterminate length
+  binaryCodecIndeterminateLength_->generateHeader(
+      upstreamEgress, /*txn=*/0, req);
+  binaryCodecIndeterminateLength_->generateBody(
+      upstreamEgress, /*txn=*/0, /*chain=*/makeBuf(10));
+
+  // generate known length 200/ok resp; parse via upstream codec
+  auto resp = folly::IOBuf::fromString(folly::unhexlify("0140c800"));
+  FakeHTTPCodecCallback upstreamCodecCb;
+  binaryCodecIndeterminateLength_->setCallback(&upstreamCodecCb);
+  binaryCodecIndeterminateLength_->onIngress(*resp);
+  binaryCodecIndeterminateLength_->onIngressEOF();
+  EXPECT_EQ(upstreamCodecCb.msg->getStatusCode(), 200);
+
+  // upstream codec serialize a 10-byte body chunk + eom
+  binaryCodecIndeterminateLength_->generateBody(
+      upstreamEgress, /*txn=*/0, /*chain=*/makeBuf(10));
+  // egress known length still expected to be false => ::generateEOM > 0 bytes
+  EXPECT_GT(
+      binaryCodecIndeterminateLength_->generateEOM(upstreamEgress, /*txn=*/0),
+      0);
+
+  // downstream codec parse upstream req
+  HTTPBinaryCodec downstreamCodec{TransportDirection::DOWNSTREAM};
+  FakeHTTPCodecCallback downstreamCodecCb;
+  downstreamCodec.setCallback(&downstreamCodecCb);
+  downstreamCodec.onIngress(*upstreamEgress.front());
+  downstreamCodec.onIngressEOF();
+
+  EXPECT_EQ(downstreamCodecCb.msg->getURL(), "/");
+  EXPECT_EQ(downstreamCodecCb.msg->getHeaders().getSingleOrEmpty("host"),
+            "test.com");
+  EXPECT_FALSE(downstreamCodecCb.lastParseError);
 }
 
 } // namespace proxygen::test

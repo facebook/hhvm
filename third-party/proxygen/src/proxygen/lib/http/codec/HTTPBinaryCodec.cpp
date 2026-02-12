@@ -45,8 +45,9 @@ void encodeString(folly::StringPiece str, folly::io::QueueAppender& appender) {
 HTTPBinaryCodec::HTTPBinaryCodec(TransportDirection direction)
     : HTTPBinaryCodec(direction, true) {
 }
-HTTPBinaryCodec::HTTPBinaryCodec(TransportDirection direction, bool knownLength)
-    : knownLength_(knownLength),
+HTTPBinaryCodec::HTTPBinaryCodec(TransportDirection direction,
+                                 bool knownEgressLength)
+    : knownEgressLength_(knownEgressLength),
       state_(ParseState::FRAMING_INDICATOR),
       parserPaused_(false),
       parseError_(folly::none),
@@ -308,22 +309,19 @@ ParseResult HTTPBinaryCodec::parseIndeterminateLengthHeadersHelper(
 
 ParseResult HTTPBinaryCodec::parseHeaders(folly::io::Cursor& cursor,
                                           size_t remaining,
-                                          HeaderDecodeInfo& decodeInfo) {
-  if (knownLength_) {
-    return parseKnownLengthHeadersHelper(cursor, remaining, decodeInfo, false);
-  } else {
-    return parseIndeterminateLengthHeadersHelper(
-        cursor, remaining, decodeInfo, false);
-  }
+                                          HeaderDecodeInfo& decodeInfo,
+                                          bool knownLength) {
+  return knownLength ? parseKnownLengthHeadersHelper(
+                           cursor, remaining, decodeInfo, false)
+                     : parseIndeterminateLengthHeadersHelper(
+                           cursor, remaining, decodeInfo, false);
 }
 
 ParseResult HTTPBinaryCodec::parseContent(folly::io::Cursor& cursor,
                                           size_t remaining) {
-  if (knownLength_) {
-    return parseKnownLengthContentHelper(cursor, remaining);
-  } else {
-    return parseIndeterminateLengthContentHelper(cursor, remaining);
-  }
+  return knownIngressLength_
+             ? parseKnownLengthContentHelper(cursor, remaining)
+             : parseIndeterminateLengthContentHelper(cursor, remaining);
 }
 
 ParseResult HTTPBinaryCodec::parseSingleContentHelper(folly::io::Cursor& cursor,
@@ -406,12 +404,10 @@ ParseResult HTTPBinaryCodec::parseIndeterminateLengthContentHelper(
 ParseResult HTTPBinaryCodec::parseTrailers(folly::io::Cursor& cursor,
                                            size_t remaining,
                                            HeaderDecodeInfo& decodeInfo) {
-  if (knownLength_) {
-    return parseKnownLengthHeadersHelper(cursor, remaining, decodeInfo, true);
-  } else {
-    return parseIndeterminateLengthHeadersHelper(
-        cursor, remaining, decodeInfo, true);
-  }
+  return knownIngressLength_ ? parseKnownLengthHeadersHelper(
+                                   cursor, remaining, decodeInfo, true)
+                             : parseIndeterminateLengthHeadersHelper(
+                                   cursor, remaining, decodeInfo, true);
 }
 
 size_t HTTPBinaryCodec::onIngress(const folly::IOBuf& buf) {
@@ -431,7 +427,8 @@ size_t HTTPBinaryCodec::onIngress(const folly::IOBuf& buf) {
     switch (state_) {
       case ParseState::FRAMING_INDICATOR: {
         // FRAMING_INDICATOR should be the first item that is parsed
-        parseResult = parseFramingIndicator(cursor, isRequest_, knownLength_);
+        parseResult =
+            parseFramingIndicator(cursor, isRequest_, knownIngressLength_);
         HANDLE_ERROR_OR_WAITING_PARSE_RESULT(parseResult);
         parsed += parseResult.bytesParsed_;
         // If the framing indicator is for a request, then the
@@ -488,7 +485,8 @@ size_t HTTPBinaryCodec::onIngress(const folly::IOBuf& buf) {
 
       case ParseState::HEADERS_SECTION:
         CHECK(decodeInfo_.msg);
-        parseResult = parseHeaders(cursor, bufLen - parsedTot, decodeInfo_);
+        parseResult = parseHeaders(
+            cursor, bufLen - parsedTot, decodeInfo_, knownIngressLength_);
         HANDLE_ERROR_OR_WAITING_PARSE_RESULT(parseResult);
         parsed += parseResult.bytesParsed_;
         state_ = ParseState::CONTENT;
@@ -591,7 +589,7 @@ size_t HTTPBinaryCodec::generateHeaderHelper(folly::io::QueueAppender& appender,
                                              const HTTPHeaders& headers) {
 
   size_t headersLength = 0;
-  if (knownLength_) {
+  if (knownEgressLength_) {
     // Calculate the number of bytes it will take to encode all the headers
     headers.forEach([&](folly::StringPiece name, folly::StringPiece value) {
       auto nameSize = name.size();
@@ -610,7 +608,7 @@ size_t HTTPBinaryCodec::generateHeaderHelper(folly::io::QueueAppender& appender,
     encodeString(value, appender);
   });
 
-  if (!knownLength_) {
+  if (!knownEgressLength_) {
     encodeInteger(0, appender);
   }
 
@@ -629,7 +627,7 @@ void HTTPBinaryCodec::generateHeader(
     // Encode Framing Indicator for Request
     encodeInteger(
         folly::to<uint64_t>(
-            knownLength_
+            knownEgressLength_
                 ? HTTPBinaryCodec::FramingIndicator::REQUEST_KNOWN_LENGTH
                 : HTTPBinaryCodec::FramingIndicator::
                       REQUEST_INDETERMINATE_LENGTH),
@@ -649,7 +647,7 @@ void HTTPBinaryCodec::generateHeader(
   } else {
     encodeInteger(
         folly::to<uint64_t>(
-            knownLength_
+            knownEgressLength_
                 ? HTTPBinaryCodec::FramingIndicator::RESPONSE_KNOWN_LENGTH
                 : HTTPBinaryCodec::FramingIndicator::
                       RESPONSE_INDETERMINATE_LENGTH),
@@ -699,7 +697,7 @@ size_t HTTPBinaryCodec::generatePadding(folly::IOBufQueue& writeBuf,
 }
 
 size_t HTTPBinaryCodec::generateEOM(folly::IOBufQueue& writeBuf, StreamID txn) {
-  if (!knownLength_) {
+  if (!knownEgressLength_) {
     folly::io::QueueAppender appender(&writeBuf, queueAppenderMaxGrowth);
     encodeInteger(0, appender);
     return 1;

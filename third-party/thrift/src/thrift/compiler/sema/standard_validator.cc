@@ -2035,6 +2035,15 @@ void validate_sealed_typedef(sema_context& ctx, const t_typedef& node) {
   validate_sealed_type(ctx, aliased_type, node);
 }
 
+void validate_sealed_function_types(sema_context& ctx, const t_function& node) {
+  const t_type& return_type = node.return_type().deref();
+  validate_sealed_type(ctx, return_type, node);
+  for (const t_field& field : node.params().fields()) {
+    const t_type& field_type = field.type().deref();
+    validate_sealed_type(ctx, field_type, field);
+  }
+}
+
 // TODO (T191018859): forbid as field type too
 void forbid_exception_as_method_type(
     sema_context& ctx, const t_function& node) {
@@ -2143,6 +2152,7 @@ ast_validator standard_validator() {
   validator.add_typedef_visitor(ValidateAnnotationPositions());
   validator.add_typedef_visitor(&validate_nonallowed_typedef_with_uri);
   validator.add_typedef_visitor(&validate_sealed_typedef);
+  validator.add_function_visitor(&validate_sealed_function_types);
 
   validator.add_container_visitor(ValidateAnnotationPositions());
   validator.add_enum_visitor(&validate_cpp_enum_type);

@@ -3924,3 +3924,69 @@ TEST(CompilerTest, sealed_key_type) {
   )",
       {"--extra-validation", "non_sealed_key_type=error"});
 }
+
+TEST(CompilerTest, sealed_key_type_in_functions) {
+  check_compile(
+      R"(
+    package "facebook.com/thrift/test"
+    include "thrift/annotation/thrift.thrift"
+
+    @thrift.Sealed
+    struct SealedStruct {
+      1: i32 a;
+    }
+
+    struct NonSealedStruct {
+      1: SealedStruct a;
+    }
+
+    @thrift.AllowUnsafeNonSealedKeyType
+    typedef set<NonSealedStruct> NonSealedSet;
+
+    service MyService {
+      // 1. Return types
+      map<SealedStruct, string> sealedReturnMapFunction(); // OK
+
+      map<NonSealedStruct, string> nonSealedReturnMapFunction(); # expected-error: Map `nonSealedReturnMapFunction` key type is not sealed: `NonSealedStruct`
+
+      set<SealedStruct> sealedReturnSetFunction(); // OK
+
+      set<NonSealedStruct> nonSealedReturnSetFunction(); # expected-error: Set `nonSealedReturnSetFunction` element type is not sealed: `NonSealedStruct`
+
+      // Applying the annotation on the function is not valid:
+      @thrift.AllowUnsafeNonSealedKeyType # expected-error: `AllowUnsafeNonSealedKeyType` cannot annotate `invalidAnnotationFunction`
+      set<NonSealedStruct> invalidAnnotationFunction();
+
+      // ... but using a typedef (that was annotated) is allowed:
+      NonSealedSet allowedNonSealedReturnSetFunction();
+
+
+      // 2. Parameter types
+      void sealedParamMapFunction(1: map<SealedStruct, string> param); // OK
+                                                               //
+      void nonSealedParamMapFunction(1: map<NonSealedStruct, string> param); # expected-error: Map `param` key type is not sealed: `NonSealedStruct`
+
+      void sealedParamSetFunction(1: set<SealedStruct> param); // OK
+
+      void nonSealedParamSetFunction(1: set<NonSealedStruct> param); # expected-error: Set `param` element type is not sealed: `NonSealedStruct`
+
+      // Annotation on parameters:
+      void allowedNonSealedParamFunction(
+        @thrift.AllowUnsafeNonSealedKeyType
+        1: map<NonSealedStruct, string> param); // OK: annotation allows it
+
+      void unnecessaryAnnotationOnParamFunction(
+        @thrift.AllowUnsafeNonSealedKeyType # expected-error: Unnecessary @thrift.AllowUnsafeNonSealedKeyType on map: `param`
+        1: map<SealedStruct, string> param);
+
+      // 3. Multiple parameters
+      void multipleParamsFunction(
+        1: map<SealedStruct, string> ok_param, // OK
+        2: set<NonSealedStruct> bad_param); # expected-error: Set `bad_param` element type is not sealed: `NonSealedStruct`
+
+      // Typedef indirection: error is on the typedef, not the function
+      void typedefParamFunction(1: NonSealedSet param); // OK: error is on the typedef
+    }
+  )",
+      {"--extra-validation", "non_sealed_key_type=error"});
+}

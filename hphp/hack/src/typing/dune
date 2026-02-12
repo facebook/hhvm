@@ -269,6 +269,7 @@
   typing_subtype_tconst
   typing_structure
   typing_taccess
+  typing_tag_defs
   typing_type_member
   typing_type_wellformedness
   typing_union

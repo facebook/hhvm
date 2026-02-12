@@ -17,11 +17,9 @@ let strip_ns id =
   id |> Utils.strip_ns |> Hh_autoimport.strip_HH_namespace_if_autoimport
 
 module Tag = struct
-  type ctx = Typing_env_types.env
+  include Typing_tag_defs
 
-  type generic =
-    | Reified of locl_ty
-    | Erased
+  type ctx = Typing_env_types.env
 
   let is_fresh_generic ty =
     match get_node ty with
@@ -56,60 +54,6 @@ module Tag = struct
     @@ List.map generic_l ~f:(function
            | Filled ty -> Some ty
            | Wildcard _ -> None)
-
-  (* Pad with Erased because for Foo<T>, Foo and Foo<_> should be the same;
-     It's also convenient to not check for arity mismatch and failwith *)
-  let rec zip_generics al bl =
-    match (al, bl) with
-    | ([], []) -> []
-    | (a :: al, b :: bl) -> (a, b) :: zip_generics al bl
-    | (a :: al, []) -> (a, Erased) :: zip_generics al bl
-    | ([], b :: bl) -> (Erased, b) :: zip_generics al bl
-
-  let equal_generic a b =
-    match (a, b) with
-    | (Erased, Erased) -> true
-    | (Reified a, Reified b) -> ty_equal a b
-    | _ -> false
-
-  type class_kind =
-    | Class of generic list
-    | FinalClass of generic list
-    | Interface
-
-  let equal_class_kind a b =
-    match (a, b) with
-    | (Class a_generics, Class b_generics)
-    | (FinalClass a_generics, FinalClass b_generics) ->
-      let pairs = zip_generics a_generics b_generics in
-      List.for_all pairs ~f:(fun (a, b) -> equal_generic a b)
-    | (Interface, Interface) -> true
-    | _ -> false
-
-  (** Modelled after data types in HHVM. See hphp/runtime/base/datatype.h *)
-  type t =
-    | DictData
-    | ShapeData
-    | VecData
-    | TupleData
-    | KeysetData
-    | StringData
-    | ResourceData
-    | BoolData
-    | IntData
-    | FloatData
-    | NullData
-    | ObjectData
-    | InstanceOf of {
-        name: string;
-        kind: class_kind;
-      }
-    | LabelData  (** Corresponds to EnumClassLabel *)
-    | BuiltInData
-        (** Catch all for data types that are built into the runtime but not
-            exposed in the type system. Used primarily for soundly representing
-            the mixed type *)
-  [@@deriving eq]
 
   let describe_generics env generics =
     match generics with
@@ -153,16 +97,6 @@ module Tag = struct
     | LabelData -> "enum class labels"
     | BuiltInData -> "built-in values"
 
-  let has_reified kind =
-    match kind with
-    | Interface -> false
-    | Class generics
-    | FinalClass generics ->
-      List.exists generics ~f:(fun g ->
-          match g with
-          | Reified _ -> true
-          | Erased -> false)
-
   (* Given [(T1a, T1b), (T2a, T2b)...],
      what is the relationship between Foo<T1a, T2a, ...> and Foo<T1b, T2b, ...>
   *)
@@ -188,13 +122,6 @@ module Tag = struct
           SetRelation.disjoint
         | _ -> SetRelation.none
       end
-
-  let get_generics_from_kind kind =
-    match kind with
-    | Class generics
-    | FinalClass generics ->
-      generics
-    | Interface -> []
 
   let relation tag1 ~ctx:env tag2 =
     match (tag1, tag2) with
@@ -275,23 +202,6 @@ module Tag = struct
              | (Class _, Class _) -> return SetRelation.disjoint
            )
     | _ -> SetRelation.disjoint
-
-  let all_nonnull_tags =
-    [
-      DictData;
-      VecData;
-      KeysetData;
-      StringData;
-      ResourceData;
-      BoolData;
-      IntData;
-      FloatData;
-      ObjectData;
-      LabelData;
-      BuiltInData;
-    ]
-
-  let all_tags = NullData :: all_nonnull_tags
 end
 
 (** Tracks the reason why a particular tag is assumed to be a part of the

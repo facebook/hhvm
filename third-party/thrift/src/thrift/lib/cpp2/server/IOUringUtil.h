@@ -23,12 +23,13 @@
 #if FOLLY_HAS_LIBURING
 
 #include <folly/executors/IOThreadPoolExecutor.h>
+#include <folly/io/async/IoUringOptions.h>
 
 namespace apache::thrift::io_uring_util {
 
 std::unique_ptr<folly::EventBaseBackendBase> getIOUringEventbaseBackendFunc();
 
-folly::IoUringBackend::Options getDefaultIOUringOptions();
+folly::IoUringOptions getDefaultIOUringOptions();
 
 std::shared_ptr<folly::IOThreadPoolExecutorBase> getDefaultIOUringExecutor(
     bool enableThreadIdCollection = true);

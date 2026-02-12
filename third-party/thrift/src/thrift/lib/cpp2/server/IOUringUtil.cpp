@@ -31,8 +31,8 @@ std::unique_ptr<folly::EventBaseBackendBase> getIOUringEventbaseBackendFunc() {
   }
 }
 
-folly::IoUringBackend::Options getDefaultIOUringOptions() {
-  folly::IoUringBackend::Options options;
+folly::IoUringOptions getDefaultIOUringOptions() {
+  folly::IoUringOptions options;
   options.setRegisterRingFd(true)
       .setInitialProvidedBuffers(2048, 2000)
       .setUseRegisteredFds(2048)

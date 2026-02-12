@@ -1645,74 +1645,88 @@ void validate_field_specific_annotation_scopes(
 }
 
 /**
- * Checks that fields whose type require sealed types (map keys, set elements)
- * are valid (or annotated accordingly).
+ * Helper function used to validate a specific type against sealedness
+ * requirements, namely that map keys and set element types must be sealed.
+ *
+ * Handles the presence of the `@thrift.AllowUnsafeNonSealedKeyType` annotation
+ * - including identifying invalid or unnecessary uses.
+ *
+ * This method is typically called by the validators for specific AST nodes
+ * (fields, typedefs, function parameters, etc.).
  */
-void validate_sealed_field_types(sema_context& ctx, const t_field& field) {
-  const t_type_ref& field_type_ref = field.type();
-  const t_type& field_type = field_type_ref.deref();
-
+void validate_sealed_type(
+    sema_context& ctx, const t_type& type, const t_named& node) {
   const bool has_annotation =
-      field.has_structured_annotation(kAllowUnsafeNonSealedKeyTypeUri);
+      node.has_structured_annotation(kAllowUnsafeNonSealedKeyTypeUri);
 
-  if (const t_map* field_map_type = field_type.try_as<t_map>()) {
-    const t_type& map_key_type = field_map_type->key_type().deref();
+  if (const t_map* map_type = type.try_as<t_map>()) {
+    const t_type& map_key_type = map_type->key_type().deref();
     if (map_key_type.is_sealed()) {
       if (has_annotation) {
         ctx.report(
-            field,
+            node,
             validation_to_diagnostic_level(
                 ctx.sema_parameters()
                     .unnecessary_allow_unsafe_non_sealed_key_type),
-            "Unnecessary @thrift.AllowUnsafeNonSealedKeyType on map field: `{}`",
-            field.name());
+            "Unnecessary @thrift.AllowUnsafeNonSealedKeyType on map: `{}`",
+            node.name());
       }
       return;
     }
 
-    // Field is map, whose key is NOT sealed
+    // Type is map, whose key is NOT sealed
     if (!has_annotation) {
       ctx.report(
-          field,
+          node,
           validation_to_diagnostic_level(
               ctx.sema_parameters().non_sealed_key_type),
-          "Field `{}` is a map whose key type is not sealed: `{}`",
-          field.name(),
+          "Map `{}` key type is not sealed: `{}`",
+          node.name(),
           map_key_type.name());
     }
-  } else if (const t_set* field_set_type = field_type.try_as<t_set>()) {
-    const t_type& set_elem_type = field_set_type->elem_type().deref();
+  } else if (const t_set* set_type = type.try_as<t_set>()) {
+    const t_type& set_elem_type = set_type->elem_type().deref();
     if (set_elem_type.is_sealed()) {
       if (has_annotation) {
         ctx.report(
-            field,
+            node,
             validation_to_diagnostic_level(
                 ctx.sema_parameters()
                     .unnecessary_allow_unsafe_non_sealed_key_type),
-            "Unnecessary @thrift.AllowUnsafeNonSealedKeyType on set field: `{}`",
-            field.name());
+            "Unnecessary @thrift.AllowUnsafeNonSealedKeyType on set: `{}`",
+            node.name());
       }
       return;
     }
 
-    // Field is a set, whose elements are NOT sealed
+    // Type is a set, whose elements are NOT sealed
     if (!has_annotation) {
       ctx.report(
-          field,
+          node,
           validation_to_diagnostic_level(
               ctx.sema_parameters().non_sealed_key_type),
-          "Field `{}` is a set whose element type is not sealed: `{}`",
-          field.name(),
+          "Set `{}` element type is not sealed: `{}`",
+          node.name(),
           set_elem_type.name());
     }
   } else if (has_annotation) {
     ctx.report(
-        field,
+        node,
         validation_to_diagnostic_level(
             ctx.sema_parameters().unnecessary_allow_unsafe_non_sealed_key_type),
-        "Unnecessary @thrift.AllowUnsafeNonSealedKeyType on field: `{}`",
-        field.name());
+        "Unnecessary @thrift.AllowUnsafeNonSealedKeyType: `{}`",
+        node.name());
   }
+}
+
+/**
+ * Checks that fields whose type require sealed types (map keys, set elements)
+ * are valid (or annotated accordingly).
+ */
+void validate_sealed_field(sema_context& ctx, const t_field& field) {
+  const t_type_ref& field_type_ref = field.type();
+  const t_type& field_type = field_type_ref.deref();
+  validate_sealed_type(ctx, field_type, field);
 }
 
 struct ValidateAnnotationPositions {
@@ -2095,7 +2109,7 @@ ast_validator standard_validator() {
   validator.add_field_visitor(ValidateAnnotationPositions{});
   validator.add_field_visitor(&detail::validate_annotation_scopes<>);
   validator.add_field_visitor(&validate_field_specific_annotation_scopes);
-  validator.add_field_visitor(&validate_sealed_field_types);
+  validator.add_field_visitor(&validate_sealed_field);
 
   validator.add_enum_visitor(&validate_enum_value_name_uniqueness);
   validator.add_enum_visitor(&validate_enum_value_uniqueness);

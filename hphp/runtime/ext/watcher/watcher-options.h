@@ -64,6 +64,9 @@ public:
   Optional<std::vector<std::string>> exclude_extensions;
   Optional<std::string> relative_root;
   Optional<std::vector<std::string>> fields;
+  Optional<bool> empty_on_fresh_instance;
+  Optional<bool> defer_vcs;
+  Optional<int> sync_timeout;
   WatcherClock clock;
 
   // Watchman specific options

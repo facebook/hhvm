@@ -13,6 +13,9 @@ namespace HH {
     ?'relative_root' => string,
     ?'fields' => keyset<string>,
     ?'socket_path' => string,
+    ?'sync_timeout' => int,
+    ?'defer_vcs' => bool,
+    ?'empty_on_fresh_instance' => bool,
   );
 
   // More detailed description of the fields are here: https://www.internalfb.com/intern/staticdocs/watchman/docs/cmd/query#available-fields.

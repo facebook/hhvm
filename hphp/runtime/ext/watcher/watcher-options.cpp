@@ -38,6 +38,9 @@ const auto* kRoot = "repo_root";
 const auto* kRelativeRoot = "relative_root";
 const auto* kSocketPath = "socket_path";
 const auto* kFields = "fields";
+const auto* kEmptyOnFresh = "empty_on_fresh_instance";
+const auto* kSyncTimeout = "sync_timeout";
+const auto* kDeferVCS = "defer_vcs";
 
 folly::dynamic make_list(const std::vector<std::string>& values) {
   if (values.size() == 1) {
@@ -72,7 +75,7 @@ folly::dynamic negate(folly::dynamic expression) {
 const HPHP::Optional<std::vector<std::string>> vectorOfStringsFromArray(const TypedValue& tv) {
     if (!tvIsArrayLike(tv) || tv.m_data.parr == nullptr) {
       return std::nullopt;
-    } 
+    }
 
     std::vector<std::string> values;
     IterateV(tv.m_data.parr, [&](TypedValue v) {
@@ -85,7 +88,7 @@ const HPHP::Optional<std::vector<std::string>> vectorOfStringsFromArray(const Ty
 
 const HPHP::Optional<std::vector<std::string>> fieldListFromArray(const TypedValue& tv) {
   std::map<std::string, std::string> watcherFieldMap {
-    {"name", "name"}, 
+    {"name", "name"},
     {"sha1hex", "content.sha1hex"},
   };
 
@@ -103,7 +106,7 @@ const HPHP::Optional<std::vector<std::string>> fieldListFromArray(const TypedVal
   }
   return fields;
 }
-  
+
 } // namespace
 
 WatcherOptions::WatcherOptions(const HPHP::Variant& options, const HPHP::Variant& clock) {
@@ -143,9 +146,24 @@ WatcherOptions::WatcherOptions(const HPHP::Variant& options, const HPHP::Variant
     } else if (key == kFields) {
       fields = fieldListFromArray(tv);
     }
+    else if (key == kEmptyOnFresh) {
+      if (tvIsBool(tv)) {
+        empty_on_fresh_instance = tv.m_data.num;
+      }
+    }
+    else if (key == kSyncTimeout) {
+      if (tvIsInt(tv)) {
+        sync_timeout = tv.m_data.num;
+      }
+    }
+    else if (key == kDeferVCS) {
+      if (tvIsBool(tv)) {
+        defer_vcs = tv.m_data.num;
+      }
+    }
   });
 }
-  
+
 folly::dynamic WatcherOptions::watchmanQuery() {
   folly::dynamic expression = folly::dynamic::array("allof");
   expression.push_back(folly::dynamic::array("type", "f"));
@@ -177,17 +195,26 @@ folly::dynamic WatcherOptions::watchmanQuery() {
   } else {
     query.insert("fields", folly::dynamic::array("name"));
   }
+  if (empty_on_fresh_instance.has_value()) {
+    query.insert("empty_on_fresh_instance", *empty_on_fresh_instance);
+  }
+  if (sync_timeout.has_value()) {
+    query.insert("sync_timeout", *sync_timeout);
+  }
+  if (defer_vcs.has_value()) {
+    query.insert("defer_vcs", *defer_vcs);
+  }
 
   switch(clock.clock_type) {
     case WatcherClockType::SINCE:
       query.insert("since", *clock.clock_value);
       break;
     case WatcherClockType::MERGEBASE:
-      query.insert("since", 
+      query.insert("since",
                     folly::dynamic::object(
-                    "scm", 
+                    "scm",
                     folly::dynamic::object(
-                      "mergebase-with", 
+                      "mergebase-with",
                       *clock.clock_value)));
       break;
     case WatcherClockType::NONE:
@@ -201,4 +228,3 @@ folly::dynamic WatcherOptions::watchmanQuery() {
 
 }  // namespace Watcher
 }  // namespace HPHP
-

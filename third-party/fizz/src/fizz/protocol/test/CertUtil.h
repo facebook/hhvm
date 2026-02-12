@@ -41,6 +41,7 @@ struct CreateCertOptions {
   std::optional<std::chrono::system_clock::time_point> notBefore;
   std::optional<std::chrono::system_clock::time_point> notAfter;
   KeyType keyType;
+  std::optional<std::string> extendedKeyUsage;
 };
 
 inline folly::ssl::ASN1TimeUniquePtr asn1(
@@ -166,7 +167,6 @@ inline CertAndKey createCert(CreateCertOptions options) {
 [fizz]
 subjectKeyIdentifier    = hash
 authorityKeyIdentifier  = keyid:always, issuer
-extendedKeyUsage        = critical, serverAuth, clientAuth
 )";
   if (ca) {
     configuration.append("basicConstraints = critical, CA:TRUE\n");
@@ -187,6 +187,11 @@ extendedKeyUsage        = critical, serverAuth, clientAuth
         fmt::format("subjectAltName = {}", folly::join(", ", subjectAltNames));
     configuration.append(sansConfigRow);
   }
+  std::string extendedKeyUsage = "critical, serverAuth, clientAuth\n";
+  if (options.extendedKeyUsage.has_value()) {
+    extendedKeyUsage = *options.extendedKeyUsage;
+  }
+  configuration.append("extendedKeyUsage = " + extendedKeyUsage);
 
   folly::ssl::BioUniquePtr bio(
       BIO_new_mem_buf(configuration.data(), configuration.size()));
@@ -222,7 +227,8 @@ inline CertAndKey createCert(
     bool ca,
     CertAndKey* issuer,
     KeyType keyType,
-    std::vector<std::string> sans = {}) {
+    std::vector<std::string> sans = {},
+    std::optional<std::string> extendedKeyUsage = std::nullopt) {
   auto it = std::find(sans.begin(), sans.end(), cn);
   // add CN into SANs if it is not present
   if (it == sans.end()) {
@@ -235,7 +241,8 @@ inline CertAndKey createCert(
        .issuer = issuer,
        .notBefore = std::nullopt,
        .notAfter = std::nullopt,
-       .keyType = keyType});
+       .keyType = keyType,
+       .extendedKeyUsage = std::exchange(extendedKeyUsage, std::nullopt)});
 }
 
 inline std::shared_ptr<PeerCert> getPeerCert(const CertAndKey& cert) {

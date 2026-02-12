@@ -222,6 +222,8 @@ int cli_server_active_workers();
  */
 int cli_openfd_unsafe(const String& filename, int flags, mode_t mode,
                       bool use_include_path, bool quiet);
+int cli_openfd_unsafe(const String& filename, int flags, mode_t mode,
+                      bool use_include_path, std::string& error);
 
 /*
  * Fetch the environment for the CLI process.

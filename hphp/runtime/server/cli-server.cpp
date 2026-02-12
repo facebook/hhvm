@@ -2153,12 +2153,12 @@ bool cli_mkstemp(char* buf) {
 }
 
 int cli_openfd_unsafe(const String& filename, int flags, mode_t mode,
-                      bool use_include_path, bool quiet) {
+                      bool use_include_path, std::string& error) {
   String fname;
   if (StringUtil::IsFileUrl(filename)) {
     fname = StringUtil::DecodeFileUrl(filename);
     if (fname.empty()) {
-      raise_warning("invalid file:// URL");
+      error = "invalid file:// URL";
       return -1;
     }
   } else {
@@ -2174,7 +2174,6 @@ int cli_openfd_unsafe(const String& filename, int flags, mode_t mode,
   }
 
   bool res;
-  std::string error;
   FTRACE(3, "cli_openfd[{}]({}, {}, {}): calling remote...\n",
          cli_sock(), fname.data(), flags, mode);
   cli_write(cli_sock(), "open", fname.data(), flags, mode);
@@ -2183,13 +2182,22 @@ int cli_openfd_unsafe(const String& filename, int flags, mode_t mode,
          res, cli_sock(), error);
 
   if (!res) {
-    if (!quiet) {
-      raise_warning("%s", error.c_str());
-    }
     return -1;
   }
 
   return cli_read_fd(cli_sock());
+}
+
+int cli_openfd_unsafe(const String& filename, int flags, mode_t mode,
+                      bool use_include_path, bool quiet) {
+  std::string err;
+  auto const ret = cli_openfd_unsafe(filename, flags, mode, use_include_path,
+                                     err);
+  if (ret == -1 && !quiet) {
+    raise_warning("%s", err.c_str());
+  }
+
+  return ret;
 }
 
 Array cli_env() {

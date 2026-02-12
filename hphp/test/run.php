@@ -275,6 +275,34 @@ function read_opts_file(?string $file, ?string $input_dir = null): string {
   return $contents;
 }
 
+function get_test_env(
+  Options $options,
+  string $test,
+  dict<string, mixed> $env,
+): dict<string, mixed> {
+  $extra_env = find_test_ext($test, 'env');
+  if ($options->cli_server) {
+    $extra_env = find_test_ext($test, 'clisrv_env') ?? $extra_env;
+  }
+
+  if ($extra_env is nonnull) {
+    $lines = file($extra_env, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    foreach ($lines as $line) {
+      $line = str_replace('__DIR__', realpath(dirname($extra_env)), $line);
+      $i = strpos($line, '=');
+      if ($i) {
+        $key = substr($line, 0, $i);
+        $val = substr($line, $i + 1);
+        $env[$key] = $val;
+      } else {
+        unset($env[$line]);
+      }
+    }
+  }
+
+  return $env;
+}
+
 // http://stackoverflow.com/questions/2637945/
 function rel_path(string $to): string {
   $from     = explode('/', getcwd().'/');
@@ -1073,6 +1101,8 @@ function hhvm_cmd(
       }
     }
   }
+
+  $env = get_test_env($options, $test, $env);
 
   $in = find_test_ext($test, 'in');
   if ($in is nonnull) {
@@ -3250,8 +3280,16 @@ function can_run_server_test(string $test, Options $options): bool {
     return false;
   }
 
+  if (is_file("$test.env") && $options->server) {
+    return false;
+  }
+
+  if (is_file("$test.clisrv_env") && $options->server) {
+    return false;
+  }
+
   // has its own config
-  if (find_test_ext($test, 'opts') is nonnull || is_file("$test.ini") ||
+  if (is_file("$test.opts") || is_file("$test.ini") ||
       is_file("$test.use.for.ini.migration.testing.only.hdf")) {
     return false;
   }
@@ -3681,6 +3719,10 @@ function print_commands(
     list($commands, $env) = hhvm_cmd($options, $test);
 
     $envstr = '';
+    foreach (get_test_env($options, $test, dict[]) as $k => $v) {
+      if (strlen($envstr) > 0) $envstr .= ' ';
+      $envstr .= $k . "=" . (string)$v;
+    }
     foreach ($env as $k => $v) {
       if (strpos($k, "HPHP_TEST_") === 0 || $k === 'TMPDIR') {
         if (strlen($envstr) > 0) $envstr .= ' ';

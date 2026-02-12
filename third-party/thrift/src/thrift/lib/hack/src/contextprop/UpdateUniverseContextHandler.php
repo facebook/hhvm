@@ -19,7 +19,7 @@
 final class UpdateUniverseContextHandler implements IContextHandler {
 
   use TThriftPoliciedOptOutList;
-  use TPZ2UniversePropagation;
+  use TPZ2FrameworkInitializer;
   use TPrivacyLibPZ2UniversePropagation;
 
   public function onIncomingDownstream(
@@ -118,8 +118,8 @@ final class UpdateUniverseContextHandler implements IContextHandler {
       $asset_universe = self::getArtifactUniverseForPropagation($privacy_lib);
       if ($asset_universe is nonnull) {
         if ($asset_universe->shouldDynamicallyPropagate()) {
-          $current_universe =
-            self::getUniverseForPropagation(); // dynamic propagation
+          $current_universe = (readonly self::getContextProps())
+            ->getUniverseDesignator(); // dynamic propagation
 
           self::logAsyncPropagation(
             $xid,
@@ -142,8 +142,8 @@ final class UpdateUniverseContextHandler implements IContextHandler {
         }
       } else {
         // TODO: all assets should have universe, for now, default to dynamic propagation
-        $current_universe =
-          self::getUniverseForPropagation(); // dynamic propagation
+        $current_universe = (readonly self::getContextProps())
+          ->getUniverseDesignator(); // dynamic propagation
 
         self::logAsyncPropagation(
           $xid,

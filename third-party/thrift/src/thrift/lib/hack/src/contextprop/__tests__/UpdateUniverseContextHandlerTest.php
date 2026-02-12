@@ -149,7 +149,7 @@ final class UpdateUniverseContextHandlerTest
   public async function testUniverseContextPropKillswitch(): Awaitable<void> {
     $mock = self::mockClassStaticMethodUNSAFE(
       UpdateUniverseContextHandler::class,
-      'getUniverseForPropagation',
+      'getContextProps',
     );
 
     $handler = new UpdateUniverseContextHandler();

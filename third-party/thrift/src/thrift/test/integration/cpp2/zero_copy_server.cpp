@@ -21,12 +21,13 @@
 
 #include <folly/init/Init.h>
 
-#include <folly/experimental/io/IoUringBackend.h>
 #include <folly/io/async/AsyncSignalHandler.h>
+#include <folly/io/async/IoUringOptions.h>
 
 #include <folly/experimental/io/MuxIOThreadPoolExecutor.h>
 
 #include <common/services/cpp/ServiceFramework.h>
+#include <folly/io/async/IoUringBackend.h>
 #include <thrift/test/integration/cpp2/gen-cpp2/ZeroCopyService.h>
 
 DEFINE_int32(port, 7878, "Port for the thrift server");
@@ -71,8 +72,8 @@ DEFINE_int32(mux_io_tp_num_wakeup_us, 200, "");
 using namespace thrift::zerocopy::cpp2;
 
 namespace {
-folly::IoUringBackend::Options getIoUringOptions() {
-  folly::IoUringBackend::Options options;
+folly::IoUringOptions getIoUringOptions() {
+  folly::IoUringOptions options;
   options.setRegisterRingFd(FLAGS_use_iouring_event_eventfd);
 
   if (FLAGS_io_prov_buffs_size > 0 && FLAGS_io_prov_buffs > 0) {

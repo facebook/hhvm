@@ -23,6 +23,13 @@
 
 namespace apache::thrift {
 
+/**
+ * Base class for client interceptors with typed request state.
+ *
+ * RequestState is created in onRequest and persists through onResponse and
+ * all stream callbacks (onStreamBegin, onStreamPayload, onStreamEnd). This
+ * allows interceptors to maintain state across the entire RPC lifecycle.
+ */
 template <class RequestState>
 class ClientInterceptor : public ClientInterceptorBase {
  private:
@@ -40,6 +47,12 @@ class ClientInterceptor : public ClientInterceptorBase {
   }
   virtual void onResponse(RequestState*, ResponseInfo) {}
 
+  // Stream lifecycle hooks - override in derived classes to handle streams.
+  // RequestState created in onRequest is available in all stream callbacks.
+  virtual void onStreamBegin(RequestState*) {}
+  virtual void onStreamPayload(RequestState*, StreamPayloadInfo) {}
+  virtual void onStreamEnd(RequestState*, const StreamEndInfo&) noexcept {}
+
  private:
   void internal_onRequest(RequestInfo requestInfo) final {
     auto* storage = requestInfo.storage;
@@ -51,6 +64,26 @@ class ClientInterceptor : public ClientInterceptorBase {
   void internal_onResponse(ResponseInfo responseInfo) final {
     auto* requestState = getValueAsType<RequestState>(*responseInfo.storage);
     onResponse(requestState, std::move(responseInfo));
+  }
+
+  void internal_onStreamBegin(
+      detail::ClientInterceptorOnRequestStorage* storage) final {
+    auto* requestState = getValueAsType<RequestState>(*storage);
+    onStreamBegin(requestState);
+  }
+
+  void internal_onStreamPayload(
+      detail::ClientInterceptorOnRequestStorage* storage,
+      StreamPayloadInfo payloadInfo) final {
+    auto* requestState = getValueAsType<RequestState>(*storage);
+    onStreamPayload(requestState, std::move(payloadInfo));
+  }
+
+  void internal_onStreamEnd(
+      detail::ClientInterceptorOnRequestStorage* storage,
+      const StreamEndInfo& endInfo) noexcept final {
+    auto* requestState = getValueAsType<RequestState>(*storage);
+    onStreamEnd(requestState, endInfo);
   }
 };
 

@@ -118,7 +118,7 @@ final class UpdateUniverseContextHandler implements IContextHandler {
       $asset_universe = self::getArtifactUniverseForPropagation($privacy_lib);
       if ($asset_universe is nonnull) {
         if ($asset_universe->shouldDynamicallyPropagate()) {
-          $current_universe = (readonly self::getContextProps())
+          $current_universe = self::getContextProps()
             ->getUniverseDesignator(); // dynamic propagation
 
           self::logAsyncPropagation(
@@ -142,7 +142,7 @@ final class UpdateUniverseContextHandler implements IContextHandler {
         }
       } else {
         // TODO: all assets should have universe, for now, default to dynamic propagation
-        $current_universe = (readonly self::getContextProps())
+        $current_universe = self::getContextProps()
           ->getUniverseDesignator(); // dynamic propagation
 
         self::logAsyncPropagation(

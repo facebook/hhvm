@@ -290,36 +290,28 @@ void ClientRunner::run(const StressTestBase* test) {
 
   latch_.wait();
 
-  if (config_.connConfig.ioUringZcrx) {
-    if (config_.connConfig.srcPortBind) {
-      for (auto& thread : clientThreads_) {
-        thread->bindSocketsForZcRx(
-            config_.connConfig.serverHost.getIPAddress(),
-            config_.connConfig.serverHost.getPort());
-      }
-    } else {
-      for (auto& thread : clientThreads_) {
-        auto napiId = thread->getEventBase()->getBackend()->getNapiId();
-        napiToThreads_.emplace(napiId, thread.get());
-      }
+  if (config_.connConfig.ioUringZcrx && !config_.connConfig.srcPortBind) {
+    for (auto& thread : clientThreads_) {
+      auto napiId = thread->getEventBase()->getBackend()->getNapiId();
+      napiToThreads_.emplace(napiId, thread.get());
+    }
 
-      std::vector<std::unique_ptr<StressTestClient>> shuffleClients;
-      for (auto& thread : clientThreads_) {
-        auto clients = thread->removeClients(napiToThreads_);
-        shuffleClients.insert(
-            shuffleClients.end(),
-            std::make_move_iterator(clients.begin()),
-            std::make_move_iterator(clients.end()));
-      }
+    std::vector<std::unique_ptr<StressTestClient>> shuffleClients;
+    for (auto& thread : clientThreads_) {
+      auto clients = thread->removeClients(napiToThreads_);
+      shuffleClients.insert(
+          shuffleClients.end(),
+          std::make_move_iterator(clients.begin()),
+          std::make_move_iterator(clients.end()));
+    }
 
-      for (auto& client : shuffleClients) {
-        auto id = client->getTransport()->getNapiId();
-        auto it = napiToThreads_.find(id);
-        if (it == napiToThreads_.end()) {
-          LOG(FATAL) << "Could not find EVB with NAPI ID: " << id;
-        }
-        it->second->addClient(std::move(client));
+    for (auto& client : shuffleClients) {
+      auto id = client->getTransport()->getNapiId();
+      auto it = napiToThreads_.find(id);
+      if (it == napiToThreads_.end()) {
+        LOG(FATAL) << "Could not find EVB with NAPI ID: " << id;
       }
+      it->second->addClient(std::move(client));
     }
   }
 

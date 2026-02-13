@@ -208,6 +208,7 @@ void AnyPatch<Patch>::DynamicPatchExtractionVisitor::assign(
 template <class Patch>
 void AnyPatch<Patch>::DynamicPatchExtractionVisitor::clear() {
   patch_.visitPatch([&](auto& patch) { patch.clear(); });
+  cleared_ = true;
 }
 template <class Patch>
 void AnyPatch<Patch>::DynamicPatchExtractionVisitor::patchIfTypeIs(
@@ -222,7 +223,18 @@ void AnyPatch<Patch>::DynamicPatchExtractionVisitor::ensureAny(
     const type::AnyStruct& any) {
   if (!type::identicalType(any.type().value(), type_)) {
     patch_ = {};
+  } else if (cleared_) {
+    // After clear(), ensureAny() replaces the entire value since
+    // the type was removed. Model as assign in the extracted patch.
+    auto ensuredValue = type::AnyData{any};
+    if (type::identicalType(ensuredValue.type(), type_)) {
+      protocol::Object patchObj;
+      patchObj[static_cast<FieldId>(PatchOp::Assign)] =
+          protocol::detail::parseValueFromAny(any);
+      patch_ = protocol::DynamicPatch::fromObject(std::move(patchObj));
+    }
   }
+  cleared_ = false;
 }
 
 template <class Patch>

@@ -304,7 +304,10 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
           patch_ = type::AnyData{any}.get<VTag>();
         }
       }
-      void clear() { patch_.clear(); }
+      void clear() {
+        patch_.clear();
+        cleared_ = true;
+      }
       void patchIfTypeIs(
           const type::Type& type, const protocol::DynamicPatch& dpatch) {
         if (!type::identicalType(type, type_)) {
@@ -318,13 +321,22 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
         // `ensureAny` ensures to different type.
         if (!type::identicalType(any.type().value(), type_)) {
           op::clear<VPatchTag>(patch_);
+        } else if (cleared_) {
+          // After clear(), ensureAny() replaces the entire value since
+          // the type was removed. Model as assign in the extracted patch.
+          auto value = type::AnyData{any};
+          if (type::identicalType(value.type(), type_)) {
+            patch_ = value.get<VTag>();
+          }
         }
+        cleared_ = false;
       }
 
       explicit AnyPatchExtractionVisitor(VPatch& patch) : patch_(patch) {}
 
       VPatch& patch_;
       const type::Type& type_ = type::Type::get<VTag>();
+      bool cleared_ = false;
     };
     VPatch patch;
     AnyPatchExtractionVisitor visitor(patch);
@@ -411,6 +423,7 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
 
     protocol::DynamicPatch& patch_;
     const type::Type& type_;
+    bool cleared_ = false;
   };
 };
 

@@ -1737,4 +1737,54 @@ TEST(DynamicPatchTest, convertAssignPatchToFieldPatch) {
   check(visitor.patchIds);
 }
 
+// Regression test: merging an assign-based AnyPatch (entity creation) with a
+// field-update AnyPatch (child entity update) should preserve root fields when
+// extracting the DynamicPatch. Previously, the DynamicPatchExtractionVisitor
+// did not incorporate the ensureAny value after clear, causing root fields to
+// be lost.
+TEST(DynamicPatch, AnyPatchMergeThenExtractPreservesRootFields) {
+  MyUnion rootValue;
+  rootValue.s() = "root_data";
+
+  op::AnyPatch createPatch;
+  createPatch.assign(type::AnyData::toAny(rootValue).toThrift());
+
+  MyUnionPatch childModPatch;
+  childModPatch.patchIfSet<ident::i>() = 42;
+  op::AnyPatch childAnyPatch;
+  childAnyPatch.patchIfTypeIs(childModPatch);
+
+  createPatch.merge(childAnyPatch);
+  {
+    // Extract DynamicPatch for the MyUnion type
+    auto type = type::Type::create<type::union_t<MyUnion>>();
+    auto extractedPatch = createPatch.extractDynamicPatchAsIf(type);
+
+    protocol::Value emptyObject;
+    emptyObject.ensure_object();
+    extractedPatch.apply(emptyObject);
+
+    auto resultAny = protocol::detail::toAny(
+        emptyObject,
+        type,
+        type::Protocol::get<type::StandardProtocol::Compact>());
+    auto result =
+        type::AnyData{resultAny.toThrift()}.get<type::union_t<MyUnion>>();
+    EXPECT_TRUE(result.s().has_value())
+        << "Root field 's' should be preserved after merge+extract";
+    EXPECT_EQ(result.s().value(), "root_data");
+  }
+  {
+    // Use the typed extraction path
+    auto extracted = createPatch.extractPatchAsIf<MyUnionPatch>();
+
+    MyUnion val;
+    extracted.apply(val);
+
+    EXPECT_TRUE(val.s().has_value())
+        << "Root field 's' should be preserved via typed extractPatchAsIf";
+    EXPECT_EQ(val.s().value(), "root_data");
+  }
+}
+
 } // namespace apache::thrift::protocol

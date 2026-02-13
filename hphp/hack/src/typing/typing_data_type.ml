@@ -356,71 +356,34 @@ module TagWithReason = struct
     (pos, msg) :: trail_result
 end
 
-module DataType : sig
-  module Set : sig
-    type t
+module type SET = sig
+  type t
 
-    type disjoint =
-      | Sat
-      | Unsat of {
-          left: TagWithReason.t;
-          relation: SetRelation.t;
-          right: TagWithReason.t;
-        }
+  val empty : t
 
-    val empty : t
+  val singleton : reason:DataTypeReason.t -> Typing_tag_defs.t -> t
 
-    val union : t -> t -> t
+  val of_list : reason:DataTypeReason.t -> Typing_tag_defs.t list -> t
 
-    val disjoint : TagWithReason.ctx -> t -> t -> disjoint
+  val union : t -> t -> t
 
-    val are_disjoint : TagWithReason.ctx -> t -> t -> bool
+  val inter : t -> t -> t
 
-    val diff : t -> t -> t
-  end
+  val diff : t -> t -> t
 
-  (** Each type can be mapped to a set of possible runtime tags.
-    This represents such a set. *)
-  type t = Set.t
+  val are_disjoint : Typing_env_types.env -> t -> t -> bool
+end
 
-  val fromHint :
-    safe_for_are_disjoint:bool -> env -> Aast.hint -> env * (decl_ty * t)
+module ApproxTagSet = struct
+  include ApproxSet.Make (TagWithReason)
 
-  val fromTy : safe_for_are_disjoint:bool -> env -> locl_ty -> env * t
+  let singleton ~reason tag = singleton @@ TagWithReason.make reason tag
 
-  val fun_to_datatypes : trail:DataTypeReason.trail -> t
+  let of_list ~reason tags =
+    List.map ~f:(TagWithReason.make reason) tags |> of_list
+end
 
-  val nonnull_to_datatypes : trail:DataTypeReason.trail -> t
-
-  val tuple_to_datatypes : trail:DataTypeReason.trail -> t
-
-  val shape_to_datatypes : trail:DataTypeReason.trail -> t
-
-  val label_to_datatypes : trail:DataTypeReason.trail -> t
-
-  val prim_to_datatypes : trail:DataTypeReason.trail -> Ast_defs.tprim -> t
-
-  val mixed : reason:DataTypeReason.subreason * DataTypeReason.trail -> Set.t
-
-  module Class : sig
-    val to_datatypes :
-      safe_for_are_disjoint:bool ->
-      trail:DataTypeReason.trail ->
-      env ->
-      string ->
-      Tag.generic list ->
-      env * t
-  end
-end = struct
-  module Set = struct
-    include ApproxSet.Make (TagWithReason)
-
-    let singleton ~reason tag = singleton @@ TagWithReason.make reason tag
-
-    let of_list ~reason tags =
-      List.map ~f:(TagWithReason.make reason) tags |> of_list
-  end
-
+module Make (Set : SET) = struct
   type t = Set.t
 
   (** `mixed` should cover all possible data types.
@@ -955,276 +918,7 @@ end = struct
     fromTy { safe_for_are_disjoint; trail } env ty
 end
 
-type runtime_data_type = decl_ty * DataType.t
-
-let data_type_from_hint = DataType.fromHint
-
-let check_overlapping
-    env
-    ~pos
-    ~name
-    (ty1, (data_type1 : DataType.t))
-    (ty2, (data_type2 : DataType.t)) =
-  let open DataType in
-  match Set.disjoint env data_type1 data_type2 with
-  | Set.Sat -> None
-  | Set.Unsat { left; relation; right } ->
-    let why
-        ((ty1, { TagWithReason.tag = tag1; _ }) as left)
-        relation
-        ((ty2, { TagWithReason.tag = tag2; _ }) as right) =
-      let primary_why ~f =
-        TagWithReason.to_message
-          env
-          left
-          ~f:(Printf.sprintf "This is the type `%s`, which includes ")
-        @ TagWithReason.to_message env right ~f
-      in
-      let secondary_why ~f =
-        let describe tag = Markdown_lite.md_bold @@ Tag.describe env tag in
-        let ty_str ty =
-          Markdown_lite.md_codify
-          @@ Typing_print.full_strip_ns_decl ~verbose_fun:false env ty
-        in
-        [
-          ( Pos_or_decl.of_raw_pos pos,
-            f (describe tag1) (describe tag2)
-            ^ Printf.sprintf
-                ", %s and %s cannot be in the same case type"
-                (ty_str ty1)
-                (ty_str ty2) );
-        ]
-      in
-      if SetRelation.is_equivalent relation then
-        primary_why
-          ~f:(Printf.sprintf "It overlaps with `%s`, which also includes ")
-      else if SetRelation.is_superset relation then
-        primary_why ~f:(Printf.sprintf "It overlaps with `%s`, which includes ")
-        @ secondary_why ~f:(Printf.sprintf "Because %s contains %s")
-      else if SetRelation.is_subset relation then
-        primary_why ~f:(Printf.sprintf "It overlaps with `%s`, which includes ")
-        @ secondary_why ~f:(Printf.sprintf "Because %s are also %s")
-      else
-        primary_why
-          ~f:(Printf.sprintf "It may overlap with `%s`, which includes ")
-        @ secondary_why
-            ~f:
-              (Printf.sprintf
-                 "Because it is possible for values to be both %s and %s")
-    in
-
-    let err =
-      Typing_error.Primary.CaseType.Overlapping_variant_types
-        { pos; name; why = lazy (why (ty1, left) relation (ty2, right)) }
-    in
-    Some err
-
-(** Given the variants of a case type (encoded as a locl_ty) and another locl_ty [intersecting_ty]
-  produce a new locl_ty containing only the types in the variant that map to an intersecting
-  data type. For example:
-   Given
-
-    [variants] = int | vec<int> | Vector<int>
-    [intersecting_ty] = Container<string>
-
-   This function will return the type `vec<int> | Vector<int>` because both `vec<int>` and
-  `Vector<int>` overlap with the tag associated with `Container<string>`.
-
-  Note that this function only considers the data type associated to each type and not
-  the type itself. So even though `vec<int>` and `Container<string>` do not intersect at
-  the type level, they do intersect when considering only the runtime data types. *)
-let filter_variants_using_datatype
-    ~safe_for_are_disjoint env reason variants intersecting_ty =
-  let (env, tags) =
-    DataType.fromTy ~safe_for_are_disjoint env intersecting_ty
-  in
-  let (env, vtags) =
-    List.fold_map variants ~init:env ~f:(DataType.fromTy ~safe_for_are_disjoint)
-  in
-  let tyl =
-    List.filter_map
-      ~f:(fun (variant, variant_tags) ->
-        if DataType.Set.are_disjoint env variant_tags tags then
-          None
-        else
-          Some variant)
-      (List.zip_exn variants vtags)
-  in
-  Typing_utils.union_list env reason tyl
-
-let are_locl_tys_disjoint env ty1 ty2 =
-  let safe_for_are_disjoint = true in
-  let (env, tags1) = DataType.fromTy ~safe_for_are_disjoint env ty1 in
-  let (env, tags2) = DataType.fromTy ~safe_for_are_disjoint env ty2 in
-  DataType.Set.are_disjoint env tags1 tags2
-
-let has_where_clauses variants =
-  List.exists variants ~f:(fun v -> not @@ List.is_empty @@ snd v)
-
-(** Look up case type via [name].
-  If the case type exists and all variants are unconditional, returns the list
-  of variant types localized using [ty_args]
-  If the case type doesn't exist or any variant has a where clause, returns
-  [None].
-
-  TODO T201569125 - Note: If we could use the ty_args to "evaluate" the where
-  constraints, we could return the variant hints whose constraints are met, but
-  I'm not sure if that's feasible.
-*)
-let get_variant_tys env name ty_args :
-    Typing_env_types.env * locl_ty list option =
-  match Env.get_typedef env name with
-  | Decl_entry.Found
-      { td_type_assignment = CaseType (variant, variants); td_tparams; _ } ->
-    if has_where_clauses (variant :: variants) then
-      (env, None)
-    else
-      let single_or_union =
-        match (variant, variants) with
-        | ((hint, _where_constraints), []) -> hint
-        (* we're just going to take this union apart so the reason is irrelevant here *)
-        | ((hint, _where_constraints), rest) ->
-          Typing_make_type.union Reason.none @@ (hint :: List.map rest ~f:fst)
-      in
-      let ((env, _ty_err_opt), variants) =
-        Typing_utils.localize_disjoint_union
-          ~ety_env:
-            {
-              empty_expand_env with
-              substs =
-                (if List.is_empty ty_args then
-                  SMap.empty
-                else
-                  Decl_subst.make_locl td_tparams ty_args);
-            }
-          env
-          single_or_union
-      in
-      let tyl =
-        match get_node variants with
-        | Tunion tyl -> tyl
-        | _ -> [variants]
-      in
-      (env, Some tyl)
-  | _ -> (env, None)
-
-module AtomicDataTypes = struct
-  type t = DataType.t
-
-  type atomic_ty =
-    | Primitive of Aast.tprim
-    | Function
-    | Nonnull
-    | Tuple
-    | Shape
-    | Label
-    | Class of string * locl_ty list
-
-  let trail = DataTypeReason.make_trail
-
-  let function_ = DataType.fun_to_datatypes ~trail
-
-  let nonnull = DataType.nonnull_to_datatypes ~trail
-
-  let tuple = DataType.tuple_to_datatypes ~trail
-
-  let shape = DataType.shape_to_datatypes ~trail
-
-  let mixed = DataType.mixed ~reason:DataTypeReason.(make NoSubreason trail)
-
-  let label = DataType.label_to_datatypes ~trail
-
-  let of_ty ~safe_for_are_disjoint env : atomic_ty -> env * DataType.t =
-    function
-    | Primitive prim -> (env, DataType.prim_to_datatypes ~trail prim)
-    | Function -> (env, function_)
-    | Nonnull -> (env, nonnull)
-    | Tuple -> (env, tuple)
-    | Shape -> (env, shape)
-    | Label -> (env, label)
-    | Class (name, args) ->
-      DataType.Class.to_datatypes ~safe_for_are_disjoint ~trail env name
-      @@ Tag.generics_for_class_and_tyl env name args
-
-  let of_tag ~safe_for_are_disjoint env tag : env * DataType.t =
-    let of_ty = of_ty ~safe_for_are_disjoint in
-    match tag with
-    | BoolTag -> of_ty env (Primitive Aast.Tbool)
-    | IntTag -> of_ty env (Primitive Aast.Tint)
-    | ArraykeyTag -> of_ty env (Primitive Aast.Tarraykey)
-    | FloatTag -> of_ty env (Primitive Aast.Tfloat)
-    | NumTag -> of_ty env (Primitive Aast.Tnum)
-    | ResourceTag -> of_ty env (Primitive Aast.Tresource)
-    | NullTag -> of_ty env (Primitive Aast.Tnull)
-    | ClassTag (name, args) ->
-      DataType.Class.to_datatypes ~safe_for_are_disjoint ~trail env name
-      @@ Tag.generics_for_class_and_tag_generic_l env name args
-
-  let empty = DataType.Set.empty
-
-  let complement dt = DataType.Set.diff mixed dt
-
-  let union dt1 dt2 = DataType.Set.union dt1 dt2
-
-  let are_disjoint env dt1 dt2 = DataType.Set.are_disjoint env dt1 dt2
+module DataType = struct
+  module Set = ApproxTagSet
+  include Make (ApproxTagSet)
 end
-
-let find_recursive_mentions_in_decl_ty_via_typedef env name ty =
-  let rec visit seen ty =
-    let visitor =
-      object (_this)
-        inherit [decl_ty list] Type_visitor.decl_type_visitor as super
-
-        method! on_tapply acc reason id args =
-          let (_pos, sid) = id in
-          let mentions =
-            if String.equal sid name then
-              [Typing_defs.mk (reason, Tapply (id, args))]
-            else if SSet.mem sid seen then
-              []
-            else
-              let seen = SSet.add sid seen in
-              match Env.get_class_or_typedef env sid with
-              | Decl_entry.Found (Env.TypedefResult typedef_info) -> begin
-                match typedef_info.td_type_assignment with
-                | SimpleTypeDef (_, hint) -> visit seen hint
-                | CaseType (variant, variants) ->
-                  let hints =
-                    List.concat_map (variant :: variants) ~f:(fun (hint, wcs) ->
-                        hint
-                        :: List.concat_map wcs ~f:(fun (h1, _, h2) -> [h1; h2]))
-                  in
-                  List.concat_map hints ~f:(visit seen)
-              end
-              | _ -> []
-          in
-          mentions @ super#on_tapply acc reason id args
-      end
-    in
-    visitor#on_type [] ty
-  in
-  visit SSet.empty ty
-
-let decl_ty_mentions_name_via_typedef env name ty =
-  not
-  @@ List.is_empty
-  @@ find_recursive_mentions_in_decl_ty_via_typedef env name ty
-
-let find_where_clause_recursive_mentions
-    env t_name (where_constraints : Aast.where_constraint_hint list) =
-  let find_recursive_mentions hint =
-    let ty = Decl_hint.hint env.Typing_env_types.decl_env hint in
-    let (_pos, name) = t_name in
-    find_recursive_mentions_in_decl_ty_via_typedef env name ty
-  in
-  List.map where_constraints ~f:(fun ((h1, _, h2) as wc) ->
-      let mentions = find_recursive_mentions h1 @ find_recursive_mentions h2 in
-      (wc, mentions))
-
-let filter_where_clauses_with_recursive_mentions env t_name where_constraints =
-  find_where_clause_recursive_mentions env t_name where_constraints
-  |> List.filter_map ~f:(fun (wc, mentions) ->
-         if List.is_empty mentions then
-           Some wc
-         else
-           None)

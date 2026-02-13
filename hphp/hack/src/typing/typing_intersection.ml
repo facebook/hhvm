@@ -520,13 +520,13 @@ and try_simplifying_case_type
   match deref case_type with
   | (r, Tnewtype (name, ty_args, _)) ->
     let (env, variants_opt) =
-      Typing_case_types.get_variant_tys env name ty_args
+      Typing_case_type_variant.get_variant_tys env name ty_args
     in
     begin
       match variants_opt with
       | Some variants ->
         let (env, filtered_ty) =
-          Typing_case_types.filter_variants_using_datatype
+          Typing_case_type_variant.filter_variants_using_datatype
             ~safe_for_are_disjoint:false
             env
             r

@@ -78,7 +78,7 @@ let check_overlapping env (t_pos, t_name) hints =
        the data types overlap. If they do report an error *)
   let check_overlapping data_type1 acc data_type2 =
     match
-      Typing_case_types.check_overlapping
+      Typing_case_type_check.check_overlapping
         ~pos:t_pos
         ~name:t_name
         env
@@ -100,7 +100,9 @@ let check_overlapping env (t_pos, t_name) hints =
     hints
     |> List.fold_map
          ~init:env
-         ~f:(Typing_case_types.data_type_from_hint ~safe_for_are_disjoint:false)
+         ~f:
+           (Typing_case_type_check.data_type_from_hint
+              ~safe_for_are_disjoint:false)
   in
   let err = data_types |> pairwise_check [] |> Typing_error.multiple_opt in
   (env, err)
@@ -251,7 +253,7 @@ let check_where_clauses_with_recursive_mentions env t_name where_constraints =
               { pos; name; mentions }))
   in
   let pairs =
-    Typing_case_types.find_where_clause_recursive_mentions
+    Typing_case_type_utils.find_where_clause_recursive_mentions
       env
       t_name
       where_constraints
@@ -344,7 +346,7 @@ let typedef_def ctx typedef =
           Phase.localize_and_add_where_constraints
             env
             ~ignore_errors:true
-            (Typing_case_types.filter_where_clauses_with_recursive_mentions
+            (Typing_case_type_utils.filter_where_clauses_with_recursive_mentions
                env
                t_name
                constraints)

@@ -2265,13 +2265,13 @@ let safely_refine_class_type
       (* For case types we want to open the union, filtering it to only the
        * variant types that share the same data type as [obj_ty] *)
       let (env, variants_opt) =
-        Typing_case_types.get_variant_tys env name tyl
+        Typing_case_type_variant.get_variant_tys env name tyl
       in
       begin
         match variants_opt with
         | Some variants ->
           let (env, ty) =
-            Typing_case_types.filter_variants_using_datatype
+            Typing_case_type_variant.filter_variants_using_datatype
               ~safe_for_are_disjoint:false
               env
               (get_reason ty)

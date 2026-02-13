@@ -12,7 +12,7 @@ open Typing_env_types
 open Common
 module Cls = Folded_class
 module Env = Typing_env
-module DataType = Typing_case_types.AtomicDataTypes
+module DataType = Typing_atomic_data_types
 
 (* given [a..z] *)
 (* return [(a, [b..z]); (b, [a;c..z]); (c, [a..b;d..z]); ... (z, [b..z])] *)
@@ -1123,7 +1123,7 @@ and split_ty
           let (env, partition_tyl) =
             (* This works for unconditional case types too but its superfluous
                to produce the assumptions in that case. *)
-            if Typing_case_types.has_where_clauses variants then
+            if Typing_case_type_variant.has_where_clauses variants then
               (* filter tyl that are disjoint from &(other_intersected_tys) *)
               let filter_ty =
                 Typing_make_type.intersection Reason.none other_intersected_tys
@@ -1131,7 +1131,10 @@ and split_ty
               let ty_prop_pairs =
                 List.filter ty_prop_pairs ~f:(fun (ty, _prop) ->
                     not
-                    @@ Typing_case_types.are_locl_tys_disjoint env filter_ty ty)
+                    @@ Typing_atomic_data_types.are_locl_tys_disjoint
+                         env
+                         filter_ty
+                         ty)
               in
               let (env, partitions) =
                 List.fold_map

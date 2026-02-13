@@ -242,8 +242,12 @@
   subtype_recursion_tracker
   typing_algebra
   typing_array_access_util
-  typing_case_types
+  typing_atomic_data_types
+  typing_case_type_check
+  typing_case_type_variant
+  typing_case_type_utils
   typing_class_pointers
+  typing_data_type
   typing_coeffects
   typing_coercion
   typing_dynamic

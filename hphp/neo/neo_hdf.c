@@ -1074,7 +1074,7 @@ static NEOERR* _hdf_read_string (HDF *hdf, const char **str, NEOSTRING *line,
       /* Valid hdf name is [0-9a-zA-Z_.*\]+ */
       int splice = *s == '@';
       char num[256];
-      static int counter = 0;
+      static __thread int counter = 0;
       if (splice) s++;
       name = s;
       if (*s == '*') {

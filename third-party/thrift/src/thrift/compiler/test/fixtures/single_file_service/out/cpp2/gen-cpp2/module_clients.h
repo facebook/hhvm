@@ -17,6 +17,7 @@
 #include <thrift/lib/cpp2/async/BiDiStream.h>
 #include <thrift/lib/cpp2/async/ClientSinkBridge.h>
 #include <thrift/lib/cpp2/async/ClientBufferedStream.h>
+#include <thrift/lib/cpp2/async/ClientStreamInterceptorContext.h>
 
 namespace apache { namespace thrift {
   class Cpp2RequestContext;
@@ -512,6 +513,12 @@ class Client<::cpp2::B> : public ::cpp2::AAsyncClient {
     auto ew = recv_wrapped_stream_stuff(_return, returnState);
     if (returnState.ctx()) {
       returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
+    }
+    // Attach interceptor context to stream for automatic interception
+    if (returnState.ctx()) {
+      _return.setInterceptorContext(
+          apache::thrift::makeClientStreamInterceptorContextFromContextStack(
+              *returnState.ctx()));
     }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));

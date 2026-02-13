@@ -39,6 +39,7 @@
 {{/if (or any_sinks? any_interactions?)}}
 {{#if (or any_streams? any_interactions?)}}
 #include <thrift/lib/cpp2/async/ClientBufferedStream.h>
+#include <thrift/lib/cpp2/async/ClientStreamInterceptorContext.h>
 {{/if (or any_streams? any_interactions?)}}
 
 namespace apache { namespace thrift {

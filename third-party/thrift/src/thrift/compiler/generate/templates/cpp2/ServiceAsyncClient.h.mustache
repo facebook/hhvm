@@ -36,6 +36,7 @@
 {{/each}}
 {{#if (or service:streams? service:interactions?)}}
 #include <thrift/lib/cpp2/async/ClientBufferedStream.h>
+#include <thrift/lib/cpp2/async/ClientStreamInterceptorContext.h>
 {{/if (or service:streams? service:interactions?)}}
 {{#if (or service:sinks? service:interactions?)}}
 #include <thrift/lib/cpp2/async/ClientSinkBridge.h>

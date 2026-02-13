@@ -15,6 +15,7 @@
 #include <thrift/lib/cpp2/async/BiDiStream.h>
 #include <thrift/lib/cpp2/async/ClientSinkBridge.h>
 #include <thrift/lib/cpp2/async/ClientBufferedStream.h>
+#include <thrift/lib/cpp2/async/ClientStreamInterceptorContext.h>
 
 namespace apache { namespace thrift {
   class Cpp2RequestContext;

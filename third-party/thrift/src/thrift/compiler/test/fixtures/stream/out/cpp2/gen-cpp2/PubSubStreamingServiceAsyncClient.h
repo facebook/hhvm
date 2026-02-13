@@ -10,6 +10,7 @@
 
 #include "thrift/compiler/test/fixtures/stream/gen-cpp2/module_types.h"
 #include <thrift/lib/cpp2/async/ClientBufferedStream.h>
+#include <thrift/lib/cpp2/async/ClientStreamInterceptorContext.h>
 
 namespace apache { namespace thrift {
   class Cpp2RequestContext;
@@ -130,6 +131,12 @@ class Client<::cpp2::PubSubStreamingService> : public apache::thrift::GeneratedA
     if (returnState.ctx()) {
       returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
+    // Attach interceptor context to stream for automatic interception
+    if (returnState.ctx()) {
+      _return.setInterceptorContext(
+          apache::thrift::makeClientStreamInterceptorContextFromContextStack(
+              *returnState.ctx()));
+    }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
     }
@@ -238,6 +245,12 @@ class Client<::cpp2::PubSubStreamingService> : public apache::thrift::GeneratedA
     auto ew = recv_wrapped_streamthrows(_return, returnState);
     if (returnState.ctx()) {
       returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
+    }
+    // Attach interceptor context to stream for automatic interception
+    if (returnState.ctx()) {
+      _return.setInterceptorContext(
+          apache::thrift::makeClientStreamInterceptorContextFromContextStack(
+              *returnState.ctx()));
     }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
@@ -348,6 +361,12 @@ class Client<::cpp2::PubSubStreamingService> : public apache::thrift::GeneratedA
     if (returnState.ctx()) {
       returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
+    // Attach interceptor context to stream for automatic interception
+    if (returnState.ctx()) {
+      _return.setInterceptorContext(
+          apache::thrift::makeClientStreamInterceptorContextFromContextStack(
+              *returnState.ctx()));
+    }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
     }
@@ -456,6 +475,12 @@ class Client<::cpp2::PubSubStreamingService> : public apache::thrift::GeneratedA
     auto ew = recv_wrapped_servicethrows2(_return, returnState);
     if (returnState.ctx()) {
       returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
+    }
+    // Attach interceptor context to stream for automatic interception
+    if (returnState.ctx()) {
+      _return.setInterceptorContext(
+          apache::thrift::makeClientStreamInterceptorContextFromContextStack(
+              *returnState.ctx()));
     }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
@@ -566,6 +591,12 @@ class Client<::cpp2::PubSubStreamingService> : public apache::thrift::GeneratedA
     if (returnState.ctx()) {
       returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
+    // Attach interceptor context to stream for automatic interception
+    if (returnState.ctx()) {
+      _return.setInterceptorContext(
+          apache::thrift::makeClientStreamInterceptorContextFromContextStack(
+              *returnState.ctx()));
+    }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
     }
@@ -674,6 +705,12 @@ class Client<::cpp2::PubSubStreamingService> : public apache::thrift::GeneratedA
     auto ew = recv_wrapped_responseandstreamstreamthrows(_return, returnState);
     if (returnState.ctx()) {
       returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
+    }
+    // Attach interceptor context to stream for automatic interception
+    if (returnState.ctx()) {
+      _return.stream.setInterceptorContext(
+          apache::thrift::makeClientStreamInterceptorContextFromContextStack(
+              *returnState.ctx()));
     }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
@@ -784,6 +821,12 @@ class Client<::cpp2::PubSubStreamingService> : public apache::thrift::GeneratedA
     if (returnState.ctx()) {
       returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
+    // Attach interceptor context to stream for automatic interception
+    if (returnState.ctx()) {
+      _return.stream.setInterceptorContext(
+          apache::thrift::makeClientStreamInterceptorContextFromContextStack(
+              *returnState.ctx()));
+    }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
     }
@@ -893,6 +936,12 @@ class Client<::cpp2::PubSubStreamingService> : public apache::thrift::GeneratedA
     if (returnState.ctx()) {
       returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
+    // Attach interceptor context to stream for automatic interception
+    if (returnState.ctx()) {
+      _return.stream.setInterceptorContext(
+          apache::thrift::makeClientStreamInterceptorContextFromContextStack(
+              *returnState.ctx()));
+    }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
     }
@@ -1001,6 +1050,12 @@ class Client<::cpp2::PubSubStreamingService> : public apache::thrift::GeneratedA
     auto ew = recv_wrapped_returnstreamFast(_return, returnState);
     if (returnState.ctx()) {
       returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
+    }
+    // Attach interceptor context to stream for automatic interception
+    if (returnState.ctx()) {
+      _return.setInterceptorContext(
+          apache::thrift::makeClientStreamInterceptorContextFromContextStack(
+              *returnState.ctx()));
     }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));

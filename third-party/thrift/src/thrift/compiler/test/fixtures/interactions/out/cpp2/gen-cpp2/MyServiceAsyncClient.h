@@ -11,6 +11,7 @@
 #include "thrift/compiler/test/fixtures/interactions/gen-cpp2/module_types.h"
 #include "thrift/compiler/test/fixtures/interactions/gen-cpp2/shared_types.h"
 #include <thrift/lib/cpp2/async/ClientBufferedStream.h>
+#include <thrift/lib/cpp2/async/ClientStreamInterceptorContext.h>
 #include <thrift/lib/cpp2/async/ClientSinkBridge.h>
 #include <thrift/lib/cpp2/async/Sink.h>
 #include <thrift/lib/cpp2/async/BiDiStream.h>
@@ -319,6 +320,12 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
     if (returnState.ctx()) {
       returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
+    // Attach interceptor context to stream for automatic interception
+    if (returnState.ctx()) {
+      _return.setInterceptorContext(
+          apache::thrift::makeClientStreamInterceptorContextFromContextStack(
+              *returnState.ctx()));
+    }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
     }
@@ -623,6 +630,12 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
     auto ew = recv_wrapped_truthify(_return, returnState);
     if (returnState.ctx()) {
       returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
+    }
+    // Attach interceptor context to stream for automatic interception
+    if (returnState.ctx()) {
+      _return.setInterceptorContext(
+          apache::thrift::makeClientStreamInterceptorContextFromContextStack(
+              *returnState.ctx()));
     }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
@@ -1194,6 +1207,12 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
     auto ew = recv_wrapped_serialize(_return, returnState);
     if (returnState.ctx()) {
       returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
+    }
+    // Attach interceptor context to stream for automatic interception
+    if (returnState.ctx()) {
+      _return.stream.setInterceptorContext(
+          apache::thrift::makeClientStreamInterceptorContextFromContextStack(
+              *returnState.ctx()));
     }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));

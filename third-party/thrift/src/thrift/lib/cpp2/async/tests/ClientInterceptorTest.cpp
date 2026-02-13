@@ -22,6 +22,7 @@
 
 #include <fmt/core.h>
 
+#include <thrift/lib/cpp/StreamEventHandler.h>
 #include <thrift/lib/cpp2/async/ClientInterceptor.h>
 #include <thrift/lib/cpp2/async/HTTPClientChannel.h>
 #include <thrift/lib/cpp2/async/HeaderClientChannel.h>
@@ -1815,6 +1816,94 @@ CO_TEST_P(ClientInterceptorTestP, InteractionWithInterceptorException) {
           }
         }),
         apache::thrift::ClientInterceptorException);
+  }
+}
+
+// End-to-end test for client stream interceptor lifecycle hooks.
+// Verifies onStreamBegin, onStreamPayload, and onStreamEnd are called
+// correctly when consuming a stream via co_ client methods.
+CO_TEST_P(ClientInterceptorTestP, StreamInterceptorLifecycle) {
+  if (transportType() != TransportType::ROCKET) {
+    co_return;
+  }
+  if (clientCallbackType() != ClientCallbackKind::CORO) {
+    // Stream interceptor hooks are only wired in the co_ codegen path
+    co_return;
+  }
+
+  class StreamLifecycleInterceptor
+      : public NamedClientInterceptor<folly::Unit> {
+   public:
+    using RequestState = folly::Unit;
+    using NamedClientInterceptor::NamedClientInterceptor;
+
+    std::optional<RequestState> onRequest(RequestInfo) override {
+      return folly::unit;
+    }
+    void onResponse(RequestState*, ResponseInfo) override {}
+
+    void onStreamBegin(RequestState*) override { streamBeginCount++; }
+
+    void onStreamPayload(RequestState*, StreamPayloadInfo info) override {
+      payloadIndices.push_back(info.payloadIndex);
+    }
+
+    void onStreamEnd(
+        RequestState*, const StreamEndInfo& info) noexcept override {
+      endReason = info.endReason;
+      totalPayloads = info.totalPayloads;
+      streamEndCount++;
+    }
+
+    int streamBeginCount = 0;
+    int streamEndCount = 0;
+    std::vector<std::size_t> payloadIndices;
+    details::STREAM_ENDING_TYPES endReason =
+        details::STREAM_ENDING_TYPES::COMPLETE;
+    std::size_t totalPayloads = 0;
+  };
+
+  // Test 1: Normal stream consumption then cancel (drop generator)
+  {
+    auto interceptor =
+        std::make_shared<StreamLifecycleInterceptor>("StreamLifecycle");
+    auto client = makeClient(makeInterceptorsList(interceptor));
+
+    auto stream = co_await client->iota(10);
+    EXPECT_EQ((co_await stream.next()).value(), 10);
+    EXPECT_EQ((co_await stream.next()).value(), 11);
+    EXPECT_EQ((co_await stream.next()).value(), 12);
+
+    EXPECT_EQ(interceptor->streamBeginCount, 1);
+    EXPECT_THAT(interceptor->payloadIndices, ElementsAre(0, 1, 2));
+
+    // Drop the generator to trigger cancel
+    stream = folly::coro::AsyncGenerator<std::int32_t&&>();
+
+    EXPECT_EQ(interceptor->streamEndCount, 1);
+    EXPECT_EQ(interceptor->endReason, details::STREAM_ENDING_TYPES::CANCEL);
+    EXPECT_EQ(interceptor->totalPayloads, 3);
+  }
+
+  // Test 2: Stream with initial response
+  {
+    auto interceptor =
+        std::make_shared<StreamLifecycleInterceptor>("StreamLifecycle2");
+    auto client = makeClient(makeInterceptorsList(interceptor));
+
+    auto [initialResponse, stream] = co_await client->iotaWithResponse(5);
+    EXPECT_EQ(initialResponse, 5);
+    EXPECT_EQ((co_await stream.next()).value(), 5);
+    EXPECT_EQ((co_await stream.next()).value(), 6);
+
+    EXPECT_EQ(interceptor->streamBeginCount, 1);
+    EXPECT_THAT(interceptor->payloadIndices, ElementsAre(0, 1));
+
+    stream = folly::coro::AsyncGenerator<std::int32_t&&>();
+
+    EXPECT_EQ(interceptor->streamEndCount, 1);
+    EXPECT_EQ(interceptor->endReason, details::STREAM_ENDING_TYPES::CANCEL);
+    EXPECT_EQ(interceptor->totalPayloads, 2);
   }
 }
 

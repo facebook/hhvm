@@ -165,6 +165,20 @@
     if (returnState.ctx()) {
       returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
+    {{#if function:stream?}}
+    // Attach interceptor context to stream for automatic interception
+    if (returnState.ctx()) {
+      {{#if function:stream_has_first_response?}}
+      _return.stream.setInterceptorContext(
+          apache::thrift::makeClientStreamInterceptorContextFromContextStack(
+              *returnState.ctx()));
+      {{#else}}
+      _return.setInterceptorContext(
+          apache::thrift::makeClientStreamInterceptorContextFromContextStack(
+              *returnState.ctx()));
+      {{/if function:stream_has_first_response?}}
+    }
+    {{/if function:stream?}}
     {{#else}}
     auto ew = recv_wrapped_{{function:cpp_name}}(returnState);
     if (returnState.ctx()) {

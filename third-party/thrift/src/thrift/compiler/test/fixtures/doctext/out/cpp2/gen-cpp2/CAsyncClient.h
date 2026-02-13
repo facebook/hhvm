@@ -10,6 +10,7 @@
 
 #include "thrift/compiler/test/fixtures/doctext/gen-cpp2/module_types.h"
 #include <thrift/lib/cpp2/async/ClientBufferedStream.h>
+#include <thrift/lib/cpp2/async/ClientStreamInterceptorContext.h>
 
 namespace apache { namespace thrift {
   class Cpp2RequestContext;
@@ -245,6 +246,12 @@ class Client<::cpp2::C> : public apache::thrift::GeneratedAsyncClient {
     auto ew = recv_wrapped_numbers(_return, returnState);
     if (returnState.ctx()) {
       returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
+    }
+    // Attach interceptor context to stream for automatic interception
+    if (returnState.ctx()) {
+      _return.setInterceptorContext(
+          apache::thrift::makeClientStreamInterceptorContextFromContextStack(
+              *returnState.ctx()));
     }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));

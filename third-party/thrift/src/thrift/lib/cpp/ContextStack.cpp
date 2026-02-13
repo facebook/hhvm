@@ -15,6 +15,7 @@
  */
 
 #include <cstdio>
+#include <iterator>
 #include <thrift/lib/cpp/ContextStack.h>
 
 #include <folly/tracing/StaticTracepoint.h>
@@ -840,6 +841,16 @@ std::unique_ptr<folly::IOBuf> ContextStack::getInterceptorFrameworkMetadata(
       clientInterceptorFrameworkMetadata_, rpcOptions);
   return detail::serializeFrameworkMetadata(
       std::move(clientInterceptorFrameworkMetadata_));
+}
+
+std::vector<detail::ClientInterceptorOnRequestStorage>
+ContextStack::extractClientInterceptorRequestStorages() {
+  if (!clientInterceptors_ || !clientInterceptorsStorage_) {
+    return {};
+  }
+  auto* begin = clientInterceptorsStorage_.get();
+  auto* end = begin + clientInterceptors_->size();
+  return {std::make_move_iterator(begin), std::make_move_iterator(end)};
 }
 
 namespace detail {

@@ -143,6 +143,21 @@ class ContextStack {
     return clientInterceptors_;
   }
 
+  std::string_view getServiceName() const { return serviceName_; }
+
+  std::string_view getMethodName() const { return methodNameUnprefixed_; }
+
+  /**
+   * Extracts (moves) the client interceptor request storages from this
+   * ContextStack into a vector. After calling this method, the storages
+   * are no longer available in the ContextStack.
+   *
+   * This is used to transfer ownership of request state to a
+   * ClientStreamInterceptorContext that needs to outlive the ContextStack.
+   */
+  std::vector<detail::ClientInterceptorOnRequestStorage>
+  extractClientInterceptorRequestStorages();
+
   [[nodiscard]] folly::Try<void> processClientInterceptorsOnRequest(
       ClientInterceptorOnRequestArguments arguments,
       apache::thrift::transport::THeader* headers,

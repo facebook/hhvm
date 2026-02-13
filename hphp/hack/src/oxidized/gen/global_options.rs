@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<cfc721a554d2965247c86f655b913a76>>
+// @generated SignedSource<<8eefe478e37c8fb22b3e11d5906edf19>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -234,8 +234,6 @@ pub struct GlobalOptions {
     pub tco_custom_error_config: custom_error_config::CustomErrorConfig,
     /// Allow <<__Const>> attribute
     pub tco_const_attribute: bool,
-    /// Use new type splitting logic for shape refinement
-    pub tco_type_refinement_partition_shapes: bool,
     /// Reponame used for glean connection, default to "www.autocomplete"
     pub glean_reponame: String,
     pub symbol_write_index_inherited_members: bool,

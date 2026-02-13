@@ -275,7 +275,6 @@ let parse_options () =
   let disallow_static_memoized = ref false in
   let enable_supportdyn_hint = ref false in
   let disable_legacy_soft_typehints = ref false in
-  let type_refinement_partition_shapes = ref false in
   let glean_reponame = ref (GleanOptions.reponame GlobalOptions.default) in
   let disable_xhp_element_mangling = ref false in
   let keep_user_attributes = ref false in
@@ -863,7 +862,6 @@ let parse_options () =
       ~tco_coeffects_local:!local_coeffects
       ~tco_like_casts:false
       ~log_levels:!log_levels
-      ~tco_type_refinement_partition_shapes:!type_refinement_partition_shapes
       ~glean_reponame:!glean_reponame
       ~tco_skip_check_under_dynamic:!skip_check_under_dynamic
       ~tco_global_access_check_enabled:!enable_global_access_check

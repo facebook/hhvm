@@ -61,56 +61,48 @@ module TyPredicate = struct
         Result.Ok
           (next_wildcard_id, IsTupleOf { tp_required = List.rev predicates })
     end
-    | Tshape { s_origin = _; s_unknown_value; s_fields } ->
-      if
-        not
-        @@ TypecheckerOptions.type_refinement_partition_shapes env.genv.tcopt
-      then
-        Result.Error "shape"
-      else begin
-        match
-          TShapeMap.fold
-            (fun key s_field acc ->
-              let sfp_optional = s_field.sft_optional in
-              let open Hh_prelude.Result.Let_syntax in
-              let* (next_wildcard_id, sf_predicates) = acc in
-              let* (next_wildcard_id, sfp_predicate) =
-                of_ty env next_wildcard_id s_field.sft_ty
-              in
-              return
-                ( next_wildcard_id,
-                  (key, { sfp_optional; sfp_predicate }) :: sf_predicates ))
-            s_fields
-            (Result.Ok (next_wildcard_id, []))
-        with
-        | Result.Error err -> Result.Error ("shape-" ^ err)
-        | Result.Ok (next_wildcard_id, elts) ->
-          let result_is_open =
-            if
-              (* this type comes from localizing a hint so a closed shape should have
-                 the canonical form of the nothing type *)
-              Typing_defs.is_nothing s_unknown_value
-            then
-              Result.Ok false
-            else if
-              ty_equal s_unknown_value (Typing_make_type.mixed Reason.none)
-              || ty_equal
-                   s_unknown_value
-                   (Typing_make_type.supportdyn Reason.none
-                   @@ Typing_make_type.mixed Reason.none)
-            then
-              Result.Ok true
-            else
-              Result.Error "unexpected s_unknown_value"
-          in
-          Result.map result_is_open ~f:(fun sp_allows_unknown_fields ->
+    | Tshape { s_origin = _; s_unknown_value; s_fields } -> begin
+      match
+        TShapeMap.fold
+          (fun key s_field acc ->
+            let sfp_optional = s_field.sft_optional in
+            let open Hh_prelude.Result.Let_syntax in
+            let* (next_wildcard_id, sf_predicates) = acc in
+            let* (next_wildcard_id, sfp_predicate) =
+              of_ty env next_wildcard_id s_field.sft_ty
+            in
+            return
               ( next_wildcard_id,
-                IsShapeOf
-                  {
-                    sp_allows_unknown_fields;
-                    sp_fields = TShapeMap.of_list elts;
-                  } ))
-      end
+                (key, { sfp_optional; sfp_predicate }) :: sf_predicates ))
+          s_fields
+          (Result.Ok (next_wildcard_id, []))
+      with
+      | Result.Error err -> Result.Error ("shape-" ^ err)
+      | Result.Ok (next_wildcard_id, elts) ->
+        let result_is_open =
+          if
+            (* this type comes from localizing a hint so a closed shape should have
+               the canonical form of the nothing type *)
+            Typing_defs.is_nothing s_unknown_value
+          then
+            Result.Ok false
+          else if
+            ty_equal s_unknown_value (Typing_make_type.mixed Reason.none)
+            || ty_equal
+                 s_unknown_value
+                 (Typing_make_type.supportdyn Reason.none
+                 @@ Typing_make_type.mixed Reason.none)
+          then
+            Result.Ok true
+          else
+            Result.Error "unexpected s_unknown_value"
+        in
+        Result.map result_is_open ~f:(fun sp_allows_unknown_fields ->
+            ( next_wildcard_id,
+              IsShapeOf
+                { sp_allows_unknown_fields; sp_fields = TShapeMap.of_list elts }
+            ))
+    end
     | Tclass (_, Exact, _) -> Result.Error "exact class"
     | Tclass ((_, name), Nonexact _, args) ->
       let (next_wildcard_id, generics) =

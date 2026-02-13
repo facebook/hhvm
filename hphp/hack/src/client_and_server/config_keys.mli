@@ -113,8 +113,6 @@ val const_attribute : string
 
 val check_attribute_locations : string
 
-val type_refinement_partition_shapes : string
-
 val glean_reponame : string
 
 val symbol_write_index_inherited_members : string

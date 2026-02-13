@@ -430,8 +430,6 @@ let load_config (config : Config_file_common.t) (options : GlobalOptions.t) :
     ?po_disallow_toplevel_requires:
       (bool_opt Config_keys.disallow_toplevel_requires config)
     ?tco_const_attribute:(bool_opt Config_keys.const_attribute config)
-    ?tco_type_refinement_partition_shapes:
-      (bool_opt Config_keys.type_refinement_partition_shapes config)
     ?glean_reponame:(string_opt Config_keys.glean_reponame config)
     ?symbol_write_index_inherited_members:
       (bool_opt Config_keys.symbol_write_index_inherited_members config)

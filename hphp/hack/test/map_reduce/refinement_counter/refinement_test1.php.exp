@@ -11,12 +11,6 @@ Errors:
           "File \"refinement_test1.php\", line 25, characters 20-20:"
         ]
       },
-      "shape": {
-        "count": 1,
-        "positions": [
-          "File \"refinement_test1.php\", line 18, characters 16-44:"
-        ]
-      },
       "union-dynamic": {
         "count": 1,
         "positions": [
@@ -24,7 +18,7 @@ Errors:
         ]
       }
     },
-    "new_refinements": 5,
+    "new_refinements": 6,
     "total_refinements": 8
   }
 }

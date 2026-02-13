@@ -113,8 +113,6 @@ let const_attribute = key "const_attribute"
 
 let check_attribute_locations = key "check_attribute_locations"
 
-let type_refinement_partition_shapes = key "type_refinement_partition_shapes"
-
 let glean_reponame = key "glean_reponame"
 
 let symbol_write_index_inherited_members =

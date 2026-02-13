@@ -145,9 +145,6 @@ let const_static_props t = t.GlobalOptions.po.ParserOptions.const_static_props
 
 let const_attribute t = t.GlobalOptions.tco_const_attribute
 
-let type_refinement_partition_shapes t =
-  t.GlobalOptions.tco_type_refinement_partition_shapes
-
 let disallow_discarded_nullable_awaitables t =
   t.GlobalOptions.tco_disallow_discarded_nullable_awaitables
 

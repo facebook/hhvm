@@ -6406,8 +6406,10 @@ BlockId speculateHelper(ISS& env, BlockId orig, bool updateTaken) {
 
   auto const& func = env.ctx.func;
 
+  hphp_fast_set<BlockId> seen;
+
   State temp{env.state, State::Compact{}};
-  while (true) {
+  do {
     auto const targetBlk = func.blocks()[target].get();
     if (!targetBlk->multiPred) break;
     auto const ok = [&] {
@@ -6439,7 +6441,7 @@ BlockId speculateHelper(ISS& env, BlockId orig, bool updateTaken) {
     pops += delta;
     target = new_target;
     temp.stack.compact();
-  }
+  } while (seen.emplace(target).second);
 
   if (endsInControlFlow && updateTaken) {
     assertx(!pops);

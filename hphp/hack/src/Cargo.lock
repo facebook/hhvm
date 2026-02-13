@@ -6,7 +6,7 @@ version = 4
 name = "aast_parser"
 version = "0.0.0"
 dependencies = [
- "bitflags 2.10.0",
+ "bitflags",
  "bumpalo",
  "core_utils_rust",
  "decl_mode_parser",
@@ -315,17 +315,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "atty"
-version = "0.2.14"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d9b39be18770d11421cdb1b9947a45dd3f37e93092cbf377614828a319d5fee8"
-dependencies = [
- "hermit-abi 0.1.16",
- "libc",
- "winapi",
-]
-
-[[package]]
 name = "autocfg"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -400,12 +389,6 @@ name = "bit-vec"
 version = "0.6.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5f0dc55f2d8a1a85650ac47858bb001b4c0dd73d79e3c455a842925e68d29cd3"
-
-[[package]]
-name = "bitflags"
-version = "1.3.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bef38d45163c2f1dde094a7dfd33ccf595c92905c8f8f4fdc18d06fb1037718a"
 
 [[package]]
 name = "bitflags"
@@ -580,7 +563,7 @@ name = "cbindgen"
 version = "0.28.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
- "clap 4.5.54",
+ "clap",
  "heck 0.4.1",
  "indexmap 2.13.0",
  "log",
@@ -653,32 +636,12 @@ dependencies = [
 
 [[package]]
 name = "clap"
-version = "3.2.25"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4ea181bf566f71cb9a5d17a59e1871af638180a18fb0035c92ae62b705207123"
-dependencies = [
- "atty",
- "bitflags 1.3.2",
- "clap_derive 3.2.25",
- "clap_lex 0.2.2",
- "indexmap 1.9.2",
- "once_cell",
- "regex",
- "strsim 0.10.0",
- "termcolor",
- "terminal_size 0.2.6",
- "textwrap",
- "unicase",
-]
-
-[[package]]
-name = "clap"
 version = "4.5.54"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c6e6ff9dcd79cff5cd969a17a545d79e84ab086e444102a591e288a8aa3ce394"
 dependencies = [
  "clap_builder",
- "clap_derive 4.5.49",
+ "clap_derive",
 ]
 
 [[package]]
@@ -689,24 +652,11 @@ checksum = "fa42cf4d2b7a41bc8f663a7cab4031ebafa1bf3875705bfaf8466dc60ab52c00"
 dependencies = [
  "anstream",
  "anstyle",
- "clap_lex 0.7.4",
- "strsim 0.11.1",
- "terminal_size 0.4.2",
+ "clap_lex",
+ "strsim",
+ "terminal_size",
  "unicase",
  "unicode-width 0.2.2",
-]
-
-[[package]]
-name = "clap_derive"
-version = "3.2.25"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ae6371b8bdc8b7d3959e9cf7b22d4435ef3e79e138688421ec654acf8c81b008"
-dependencies = [
- "heck 0.4.1",
- "proc-macro-error",
- "proc-macro2",
- "quote",
- "syn 1.0.109",
 ]
 
 [[package]]
@@ -719,15 +669,6 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 2.0.114",
-]
-
-[[package]]
-name = "clap_lex"
-version = "0.2.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5538cd660450ebeb4234cfecf8f2284b844ffc4c50531e66d584ad5b91293613"
-dependencies = [
- "os_str_bytes",
 ]
 
 [[package]]
@@ -803,7 +744,7 @@ dependencies = [
  "bc_to_ir",
  "bstr",
  "bytecode_printer",
- "clap 4.5.54",
+ "clap",
  "decl_provider",
  "elab",
  "emit_unit",
@@ -1075,7 +1016,7 @@ name = "cxxbridge-cmd"
 version = "1.0.160"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
- "clap 4.5.54",
+ "clap",
  "codespan-reporting",
  "indexmap 2.13.0",
  "proc-macro2",
@@ -1398,7 +1339,7 @@ name = "dump-opcodes"
 version = "0.0.0"
 dependencies = [
  "anyhow",
- "clap 4.5.54",
+ "clap",
  "emit_opcodes",
  "hhbc-gen",
  "quote",
@@ -1408,7 +1349,7 @@ dependencies = [
 name = "dump_saved_state_depgraph"
 version = "0.0.0"
 dependencies = [
- "clap 4.5.54",
+ "clap",
  "depgraph_reader",
  "indicatif",
 ]
@@ -1423,7 +1364,7 @@ checksum = "48c757948c5ede0e46177b7add2e67155f70e33c07fea8284df6576da70b3719"
 name = "elab"
 version = "0.0.0"
 dependencies = [
- "bitflags 2.10.0",
+ "bitflags",
  "bstr",
  "elaborate_namespaces_visitor",
  "hack_macros",
@@ -1499,7 +1440,7 @@ dependencies = [
  "ast_scope",
  "bit-set",
  "bit-vec",
- "bitflags 2.10.0",
+ "bitflags",
  "bstr",
  "constant_folder",
  "core_utils_rust",
@@ -1565,7 +1506,7 @@ name = "env"
 version = "0.0.0"
 dependencies = [
  "ast_scope",
- "bitflags 2.10.0",
+ "bitflags",
  "decl_provider",
  "global_state",
  "hhbc",
@@ -1754,7 +1695,7 @@ version = "0.0.0"
 dependencies = [
  "anyhow",
  "cbindgen",
- "clap 3.2.25",
+ "clap",
 ]
 
 [[package]]
@@ -2071,7 +2012,7 @@ dependencies = [
  "bumpalo",
  "byte-unit",
  "bytecode_printer",
- "clap 4.5.54",
+ "clap",
  "cmp",
  "compile",
  "decl_parser",
@@ -2265,15 +2206,6 @@ checksum = "2304e00983f87ffb38b55b444b5e3b60a884b5d30c0fca7d82fe33449bbe55ea"
 
 [[package]]
 name = "hermit-abi"
-version = "0.1.16"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4c30f6d0bc6b00693347368a67d41b58f2fb851215ff1da49e90fe2c5c667151"
-dependencies = [
- "libc",
-]
-
-[[package]]
-name = "hermit-abi"
 version = "0.3.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d231dfb89cfffdbc30e7fc41579ed6066ad03abda9e567ccafae602b97ec5024"
@@ -2312,7 +2244,7 @@ name = "hh_codegen"
 version = "0.0.0"
 dependencies = [
  "anyhow",
- "clap 4.5.54",
+ "clap",
  "hash",
  "proc-macro2",
  "quote",
@@ -2409,7 +2341,7 @@ dependencies = [
 name = "hhbc"
 version = "0.0.0"
 dependencies = [
- "bitflags 2.10.0",
+ "bitflags",
  "bstr",
  "emit_opcodes_macro",
  "ffi",
@@ -2431,7 +2363,7 @@ name = "hhbc-gen"
 version = "0.0.0"
 dependencies = [
  "anyhow",
- "bitflags 2.10.0",
+ "bitflags",
  "cc",
  "maplit",
  "once_cell",
@@ -2455,7 +2387,7 @@ dependencies = [
 name = "hhi"
 version = "0.0.0"
 dependencies = [
- "clap 3.2.25",
+ "clap",
  "gen_hhi_contents_lib",
  "generate_hhi_lib",
  "walkdir",
@@ -2484,7 +2416,7 @@ name = "hhvm_options"
 version = "0.0.0"
 dependencies = [
  "anyhow",
- "clap 4.5.54",
+ "clap",
  "hdf",
  "hhvm_runtime_options",
 ]
@@ -2634,17 +2566,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "io-lifetimes"
-version = "1.0.10"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9c66c74d2ae7e79a5a8f7ac924adbe38ee42a859c6539ad869eb51f0b52dc220"
-dependencies = [
- "hermit-abi 0.3.9",
- "libc",
- "windows-sys 0.48.0",
-]
-
-[[package]]
 name = "ir"
 version = "0.0.0"
 dependencies = [
@@ -2695,7 +2616,7 @@ version = "0.4.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cb0889898416213fab133e1d33a0e5858a48177452750691bde3666d0fdbaf8b"
 dependencies = [
- "hermit-abi 0.3.9",
+ "hermit-abi",
  "rustix 0.38.44",
  "windows-sys 0.48.0",
 ]
@@ -2810,7 +2731,7 @@ version = "0.1.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3d0b95e02c851351f877147b7deea7b1afb1df71b63aa5f8270716e0c5720616"
 dependencies = [
- "bitflags 2.10.0",
+ "bitflags",
  "libc",
  "redox_syscall 0.7.0",
 ]
@@ -2862,12 +2783,6 @@ dependencies = [
  "rc_pos",
  "serde",
 ]
-
-[[package]]
-name = "linux-raw-sys"
-version = "0.3.7"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ece97ea872ece730aed82664c424eb4c8291e1ff2480247ccf7409044bc6479f"
 
 [[package]]
 name = "linux-raw-sys"
@@ -2952,7 +2867,7 @@ name = "lrgen"
 version = "0.0.0"
 dependencies = [
  "cfgrammar",
- "clap 3.2.25",
+ "clap",
  "lrlex",
 ]
 
@@ -3226,7 +3141,7 @@ name = "naming_table_builder"
 version = "0.0.0"
 dependencies = [
  "anyhow",
- "clap 3.2.25",
+ "clap",
  "direct_decl_parser",
  "files_to_ignore",
  "find_utils",
@@ -3280,7 +3195,7 @@ version = "0.30.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "74523f3a35e05aba87a1d978330aef40f67b0304ac79c1c00b294c9830543db6"
 dependencies = [
- "bitflags 2.10.0",
+ "bitflags",
  "cfg-if 1.0.4",
  "cfg_aliases",
  "libc",
@@ -3443,7 +3358,7 @@ dependencies = [
 name = "ocamlrep_marshal"
 version = "0.1.0"
 dependencies = [
- "bitflags 2.10.0",
+ "bitflags",
  "cc",
  "ocamlrep",
 ]
@@ -3513,12 +3428,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "os_str_bytes"
-version = "6.6.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5b7ebac344522a099ad6b4ec72b21e428bdcd5ee390b277bd858a464fbca5ac8"
-
-[[package]]
 name = "oxidized"
 version = "0.0.0"
 dependencies = [
@@ -3526,7 +3435,7 @@ dependencies = [
  "anyhow",
  "arena_deserializer",
  "arena_trait",
- "bitflags 2.10.0",
+ "bitflags",
  "bstr",
  "bumpalo",
  "eq_modulo_pos",
@@ -3673,7 +3582,7 @@ dependencies = [
 name = "parser_core_types"
 version = "0.0.0"
 dependencies = [
- "bitflags 2.10.0",
+ "bitflags",
  "bumpalo",
  "itertools",
  "line_break_map",
@@ -4156,7 +4065,7 @@ version = "0.5.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "355ae415ccd3a04315d3f8246e86d67689ea74d88d915576e1589a351062a13b"
 dependencies = [
- "bitflags 2.10.0",
+ "bitflags",
 ]
 
 [[package]]
@@ -4165,7 +4074,7 @@ version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "49f3fe0889e69e2ae9e41f4d6c4c0181701d00e4697b356fb1f74173a5e0ee27"
 dependencies = [
- "bitflags 2.10.0",
+ "bitflags",
 ]
 
 [[package]]
@@ -4297,7 +4206,7 @@ version = "0.37.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "165ca6e57b20e1351573e3729b958bc62f0e48025386970b6e4d29e7a7e71f3f"
 dependencies = [
- "bitflags 2.10.0",
+ "bitflags",
  "fallible-iterator",
  "fallible-streaming-iterator",
  "hashlink",
@@ -4437,25 +4346,11 @@ dependencies = [
 
 [[package]]
 name = "rustix"
-version = "0.37.26"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "84f3f8f960ed3b5a59055428714943298bf3fa2d4a1d53135084e0544829d995"
-dependencies = [
- "bitflags 1.3.2",
- "errno",
- "io-lifetimes",
- "libc",
- "linux-raw-sys 0.3.7",
- "windows-sys 0.48.0",
-]
-
-[[package]]
-name = "rustix"
 version = "0.38.44"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fdb5bc1ae2baa591800df16c9ca78619bf65c0488b41b96ccec5d11220d8c154"
 dependencies = [
- "bitflags 2.10.0",
+ "bitflags",
  "errno",
  "libc",
  "linux-raw-sys 0.4.15",
@@ -4468,7 +4363,7 @@ version = "1.1.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "146c9e247ccc180c1f61615433868c99f3de3ae256a30a43b49f67c2d9171f34"
 dependencies = [
- "bitflags 2.10.0",
+ "bitflags",
  "errno",
  "libc",
  "linux-raw-sys 0.11.0",
@@ -4951,12 +4846,6 @@ version = "0.0.0"
 
 [[package]]
 name = "strsim"
-version = "0.10.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "73473c0e59e6d5812c5dfe2a064a6444949f089e20eec9a2e5506596494e4623"
-
-[[package]]
-name = "strsim"
 version = "0.11.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7da8b5736845d9f2fcb837ea5d9e2628564b3b043a70948a3f0b778838c5fb4f"
@@ -5143,16 +5032,6 @@ dependencies = [
 
 [[package]]
 name = "terminal_size"
-version = "0.2.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8e6bf6f19e9f8ed8d4048dc22981458ebcf406d67e94cd422e5ecd73d63b3237"
-dependencies = [
- "rustix 0.37.26",
- "windows-sys 0.48.0",
-]
-
-[[package]]
-name = "terminal_size"
 version = "0.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "45c6481c4829e4cc63825e62c49186a34538b7b2750b73b266581ffb612fb5ed"
@@ -5241,16 +5120,6 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 1.0.109",
-]
-
-[[package]]
-name = "textwrap"
-version = "0.16.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c13547615a44dc9c452a8a534638acdf07120d4b6847c8178705da06306a3057"
-dependencies = [
- "terminal_size 0.4.2",
- "unicode-width 0.2.2",
 ]
 
 [[package]]

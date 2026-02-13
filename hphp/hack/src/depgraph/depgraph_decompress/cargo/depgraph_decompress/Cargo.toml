@@ -12,5 +12,5 @@ name = "depgraph_decompress"
 path = "../../main.rs"
 
 [dependencies]
-clap = { version = "3.2.25", features = ["derive", "env", "regex", "unicode", "wrap_help"] }
+clap = { version = "4.5.42", features = ["derive", "env", "string", "unicode", "wrap_help"] }
 decompress = { version = "0.0.0", path = "../../decompress" }

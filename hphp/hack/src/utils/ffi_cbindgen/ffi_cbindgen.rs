@@ -38,11 +38,11 @@ struct Opt {
     header: PathBuf,
 
     /// Any namespaces to wrap the generated code in
-    #[clap(long = "namespaces", use_value_delimiter = true)]
+    #[clap(long = "namespaces", value_delimiter = ',')]
     namespaces: Vec<String>,
 
     /// Any headers to add to the top of the header
-    #[clap(long = "includes", use_value_delimiter = true)]
+    #[clap(long = "includes", value_delimiter = ',')]
     includes: Vec<String>,
 }
 

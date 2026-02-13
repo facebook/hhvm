@@ -43,4 +43,7 @@ service ExampleStreamingService {
   ResponseStruct, stream<string throws (1: StreamException ex)> testStream(
     1: RequestStruct request,
   );
+  ResponseStruct, sink<string, ResponseStruct> testSink(
+    1: RequestStruct request,
+  );
 }

@@ -205,6 +205,23 @@ class TestStreamingServiceAsyncIf
     );
   }
 
+  public async function testSink(
+    ?meta\thrift\example\RequestStruct $_request,
+  ): Awaitable<ResponseAndSink<
+    meta\thrift\example\ResponseStruct,
+    string,
+    meta\thrift\example\ResponseStruct,
+  >> {
+    return new ResponseAndSink(
+      meta\thrift\example\ResponseStruct::fromShape(shape('text' => 'test')),
+      async (HH\AsyncGenerator<null, string, void> $_gen) ==> {
+        return meta\thrift\example\ResponseStruct::fromShape(
+          shape('text' => 'done'),
+        );
+      },
+    );
+  }
+
   private async function emptyStream(): HH\AsyncGenerator<null, string, void> {
     yield '';
   }

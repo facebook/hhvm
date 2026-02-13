@@ -16,6 +16,7 @@
 
 import os
 import shutil
+import sys
 import tempfile
 import textwrap
 import unittest
@@ -42,10 +43,23 @@ class AnnotateAllowLegacyMissingUrisTest(unittest.TestCase):
         binary = pkg_resources.resource_filename(__name__, "codemod")
         run_binary(binary, "foo.thrift")
 
-        self.assertEqual(
-            read_file("foo.thrift"),
-            textwrap.dedent(after),
-        )
+        expected = textwrap.dedent(after)
+        actual = read_file("foo.thrift")
+
+        if actual != expected:
+            print(
+                f"""
+EXPECTED: [
+{expected}
+],
+ACTUAL: [
+{actual}
+]""",
+                file=sys.stderr,
+                flush=True,
+            )
+
+        self.assertEqual(actual, expected)
 
     def test_adds_annotation_package_and_include(self):
         self._check(
@@ -305,5 +319,28 @@ class AnnotateAllowLegacyMissingUrisTest(unittest.TestCase):
             after="""\
                 typedef i32 MyInt
                 typedef string MyString
+                """,
+        )
+
+    def test_commented_namespace_needs_include(self):
+        """Test that commented namespace directives are correctly ignored when determining where to add includes and package annotations."""
+        self._check(
+            before="""\
+                // namespace py3 test.bar
+                namespace py3 test.foo
+
+                struct TestStruct {}
+                """,
+            after="""\
+                // namespace py3 test.bar
+                include "thrift/annotation/thrift.thrift"
+
+
+                @thrift.AllowLegacyMissingUris
+                package;
+
+                namespace py3 test.foo
+
+                struct TestStruct {}
                 """,
         )

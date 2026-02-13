@@ -56,6 +56,61 @@ size_t get_first_character_of_this_line(
   }
 }
 
+/**
+ * Returns true if `pos` falls inside any comment: line comments (`//`, `#`)
+ * or block comments. Block comments do not nest in Thrift.
+ */
+bool is_inside_comment(const std::string& content, size_t pos) {
+  // Scans content from the beginning up to `pos`, tracking whether we are
+  // inside a block comment while also detecting line comments.
+  bool inside_block = false;
+  for (size_t i = 0; i < pos && i < content.size(); ++i) {
+    char c = content[i];
+    // Detect line comments (only outside block comments).
+    if (!inside_block &&
+        ((c == '/' && i + 1 < content.size() && content[i + 1] == '/') ||
+         c == '#')) {
+      size_t newline = content.find('\n', i);
+      if (newline == std::string::npos || newline >= pos) {
+        // `pos` is on this comment line.
+        return true;
+      }
+      i = newline; // loop increment will advance past '\n'
+      continue;
+    }
+    if (!inside_block && c == '/' && i + 1 < content.size() &&
+        content[i + 1] == '*') {
+      inside_block = true;
+      ++i; // skip '*'
+    } else if (
+        inside_block && c == '*' && i + 1 < content.size() &&
+        content[i + 1] == '/') {
+      inside_block = false;
+      ++i; // skip '/'
+    }
+  }
+  return inside_block;
+}
+
+/**
+ * Like `std::string::find()`, but skips matches that appear inside comments
+ * (line comments starting with `//` or `#`, or block comments).
+ */
+size_t find_not_in_comment(
+    const std::string& content, const std::string& pattern, size_t start_pos) {
+  size_t pos = start_pos;
+  while (true) {
+    pos = content.find(pattern, pos);
+    if (pos == std::string::npos) {
+      return std::string::npos;
+    }
+    if (!is_inside_comment(content, pos)) {
+      return pos;
+    }
+    pos += pattern.size();
+  }
+}
+
 } // namespace
 
 std::string file_manager::get_new_content() const {
@@ -284,7 +339,7 @@ void file_manager::remove_namespace(std::string language) {
       program_->namespaces().find(language) != program_->namespaces().end()) {
     // get offsets for the namespace statement
     auto ns_stmt = fmt::format("namespace {} ", language);
-    auto begin_offset = old_content_.find(ns_stmt, 0);
+    size_t begin_offset = find_not_in_comment(old_content_, ns_stmt, 0);
     size_t end_offset = old_content_.length();
     if (begin_offset != std::string::npos) {
       end_offset = old_content_.find('\n', begin_offset);
@@ -305,7 +360,7 @@ std::optional<size_t> file_manager::get_first_namespace_offset() const {
   // Finds the offset of first namespace statement in the file.
   for (const auto& [lang, _] : program_->namespaces()) {
     const auto ns_stmt = "namespace " + lang;
-    const auto offset = old_content_.find(ns_stmt, 0);
+    const size_t offset = find_not_in_comment(old_content_, ns_stmt, 0);
     if (offset != std::string::npos && min_offset > offset) {
       min_offset = offset;
     }

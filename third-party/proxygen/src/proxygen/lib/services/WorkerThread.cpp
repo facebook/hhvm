@@ -29,7 +29,7 @@ namespace {
 std::unique_ptr<folly::EventBaseBackendBase> getEventBaseBackend() {
   if (FLAGS_pwt_io_uring_capacity > 0) {
     try {
-      folly::PollIoBackend::Options options;
+      folly::IoUringOptions options;
       options.setCapacity(static_cast<size_t>(FLAGS_pwt_io_uring_capacity))
           .setMaxSubmit(static_cast<size_t>(FLAGS_pwt_io_uring_max_submit))
           .setMaxGet(static_cast<size_t>(FLAGS_pwt_io_uring_max_get))

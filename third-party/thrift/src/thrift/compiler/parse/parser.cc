@@ -995,6 +995,13 @@ class parser {
     auto map = actions_.on_map_initializer();
     while (token_.kind != '}') {
       auto key = parse_initializer();
+      if (token_.kind == ',' || token_.kind == '}') {
+        // It's intuitive to think sets are declared with curly braces. Ensure
+        // an insightful error to correct this is returned
+        report_error(
+            "Curly braces {{}} are for map initializers. Use square braces [] for list/set initializers");
+        throw parse_error();
+      }
       expect_and_consume(':');
       auto value = parse_initializer();
       map->add_map(std::move(key), std::move(value));

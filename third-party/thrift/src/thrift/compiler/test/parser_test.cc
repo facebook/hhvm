@@ -257,6 +257,48 @@ TEST(ParserTest, typedef_uri_requires_annotation) {
       "meta.com/thrift/test/MyLegacyTypedef");
 }
 
+TEST(ParserTest, insightful_error_on_curly_brace_set_initializer) {
+  {
+    source_manager source_mgr;
+    source_mgr.add_virtual_file("test.thrift", R"(
+    const set<i32> MY_CONSTANT = {1, 2, 3};
+  )");
+    std::optional<diagnostic> diag;
+    diagnostics_engine diags(
+        source_mgr, [&diag](const diagnostic& d) { diag = d; });
+
+    parsing_params pparams;
+    pparams.allow_missing_includes = true;
+    std::unique_ptr<t_program_bundle> programs =
+        parse_ast(source_mgr, diags, "test.thrift", pparams);
+    EXPECT_TRUE(diags.has_errors());
+    EXPECT_TRUE(diag.has_value());
+    EXPECT_EQ(
+        "Curly braces {} are for map initializers. Use square braces [] for list/set initializers",
+        diag->message());
+  }
+
+  {
+    source_manager source_mgr;
+    source_mgr.add_virtual_file("test.thrift", R"(
+    const set<i32> MY_CONSTANT = {1};
+  )");
+    std::optional<diagnostic> diag;
+    diagnostics_engine diags(
+        source_mgr, [&diag](const diagnostic& d) { diag = d; });
+
+    parsing_params pparams;
+    pparams.allow_missing_includes = true;
+    std::unique_ptr<t_program_bundle> programs =
+        parse_ast(source_mgr, diags, "test.thrift", pparams);
+    EXPECT_TRUE(diags.has_errors());
+    EXPECT_TRUE(diag.has_value());
+    EXPECT_EQ(
+        "Curly braces {} are for map initializers. Use square braces [] for list/set initializers",
+        diag->message());
+  }
+}
+
 TEST(ParserTest, unresolved_include_circular_references) {
   source_manager source_mgr;
   source_mgr.add_virtual_file("test.thrift", R"(

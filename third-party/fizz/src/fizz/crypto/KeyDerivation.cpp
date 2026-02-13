@@ -18,8 +18,12 @@ Buf KeyDerivationImpl::expandLabel(
     uint16_t length) {
   HkdfLabel hkdfLabel = {
       length, std::string(label.begin(), label.end()), std::move(hashValue)};
-  return hkdf_.expand(
-      secret, *encodeHkdfLabel(std::move(hkdfLabel), kHkdfLabelPrefix), length);
+  Buf encoded;
+  Error err;
+  FIZZ_THROW_ON_ERROR(
+      encodeHkdfLabel(encoded, err, std::move(hkdfLabel), kHkdfLabelPrefix),
+      err);
+  return hkdf_.expand(secret, *encoded, length);
 }
 
 Buf KeyDerivationImpl::hkdfExpand(

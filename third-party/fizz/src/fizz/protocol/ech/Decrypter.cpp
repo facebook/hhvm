@@ -181,7 +181,9 @@ std::vector<ech::ECHConfig> ECHConfigManager::getRetryConfigs(
   for (const auto& config : configs_) {
     auto echConfig = ech::ECHConfig{};
     echConfig.version = ech::ECHVersion::Draft15;
-    echConfig.ech_config_content = encode(config.echConfig);
+    Error err;
+    FIZZ_THROW_ON_ERROR(
+        encode(echConfig.ech_config_content, err, config.echConfig), err);
     if (maybeSni.hasValue() &&
         maybeSni.value() == config.echConfig.public_name) {
       retryConfigs.push_back(std::move(echConfig));

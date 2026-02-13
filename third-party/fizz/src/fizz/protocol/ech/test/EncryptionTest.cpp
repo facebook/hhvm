@@ -136,7 +136,10 @@ auto hpkeContext(OuterECHClientHello& clientECH) {
   std::string tlsEchPrefix = "tls ech";
   tlsEchPrefix += '\0';
   auto hpkePrefix = folly::IOBuf::copyBuffer(tlsEchPrefix);
-  hpkePrefix->prependChain(encode(getECHConfig()));
+  Buf encoded;
+  Error err;
+  FIZZ_THROW_ON_ERROR(encode(encoded, err, getECHConfig()), err);
+  hpkePrefix->prependChain(std::move(encoded));
 
   auto kex = std::make_unique<MockOpenSSLECKeyExchange256>();
   kex->setPrivateKey(getPrivateKey(kP256Key));
@@ -267,7 +270,7 @@ TEST(EncryptionTest, TestValidEncryptClientHello) {
         return ext.extension_type == ExtensionType::key_share;
       });
   Error err;
-  *it = encodeExtension(expectedOuterExt);
+  EXPECT_EQ(encodeExtension(*it, err, expectedOuterExt), Status::Success);
 
   auto context = hpkeContext(clientECH);
   // Get client hello inner by decrypting
@@ -275,9 +278,13 @@ TEST(EncryptionTest, TestValidEncryptClientHello) {
   auto dummyECH = getTestOuterECHClientHello();
   dummyECH.payload->coalesce();
   memset(dummyECH.payload->writableData(), 0, dummyECH.payload->length());
-  clientHelloOuter.extensions.push_back(encodeExtension(dummyECH));
+  Extension dummyECHExt;
+  EXPECT_EQ(encodeExtension(dummyECHExt, err, dummyECH), Status::Success);
+  clientHelloOuter.extensions.push_back(std::move(dummyECHExt));
 
-  auto clientHelloOuterAad = encode(clientHelloOuter);
+  Buf clientHelloOuterAad;
+  EXPECT_EQ(
+      encode(clientHelloOuterAad, err, clientHelloOuter), Status::Success);
 
   std::unique_ptr<folly::IOBuf> gotClientHelloInner =
       context->open(clientHelloOuterAad.get(), std::move(clientECH.payload));
@@ -319,7 +326,10 @@ TEST(EncryptionTest, TestTryToDecryptECH) {
   // Add ECH extension to client hello outer.
   auto chloOuter = getClientHelloOuter();
   auto testECH = getTestOuterECHClientHello();
-  chloOuter.extensions.push_back(encodeExtension(testECH));
+  Extension testECHExt;
+  Error err;
+  EXPECT_EQ(encodeExtension(testECHExt, err, testECH), Status::Success);
+  chloOuter.extensions.push_back(std::move(testECHExt));
 
   auto kex = std::make_unique<MockOpenSSLECKeyExchange256>();
   auto privateKey = getPrivateKey(kP256Key);
@@ -361,11 +371,16 @@ TEST(EncryptionTest, TestInnerClientHelloOuterExtensionsSuccess) {
     encodedClientKeyShare = it->clone();
     innerChlo.extensions.erase(it);
   }
-  innerChlo.extensions.push_back(encodeExtension(std::move(outer)));
+  Extension outerExt;
+  Error err;
+  EXPECT_EQ(encodeExtension(outerExt, err, outer), Status::Success);
+  innerChlo.extensions.push_back(std::move(outerExt));
   auto clientECH = getTestOuterECHClientHelloWithInner(std::move(innerChlo));
   auto context = hpkeContext(clientECH);
   auto outerChlo = getClientHelloOuter();
-  outerChlo.extensions.push_back(encodeExtension(clientECH));
+  Extension clientECHExt;
+  EXPECT_EQ(encodeExtension(clientECHExt, err, clientECH), Status::Success);
+  outerChlo.extensions.push_back(std::move(clientECHExt));
 
   auto decryptedChlo = decryptECHWithContext(
       outerChlo,
@@ -394,11 +409,16 @@ TEST(EncryptionTest, TestInnerClientHelloOuterExtensionsContainsECH) {
   // Add OuterExtensions with ECH extension. Should blow up on decrypt.
   OuterExtensions outer;
   outer.types = {ExtensionType::encrypted_client_hello};
-  innerChlo.extensions.push_back(encodeExtension(std::move(outer)));
+  Extension outerExt;
+  Error err;
+  EXPECT_EQ(encodeExtension(outerExt, err, outer), Status::Success);
+  innerChlo.extensions.push_back(std::move(outerExt));
   auto clientECH = getTestOuterECHClientHelloWithInner(std::move(innerChlo));
   auto context = hpkeContext(clientECH);
   auto outerChlo = getClientHelloOuter();
-  outerChlo.extensions.push_back(encodeExtension(clientECH));
+  Extension clientECHExt;
+  EXPECT_EQ(encodeExtension(clientECHExt, err, clientECH), Status::Success);
+  outerChlo.extensions.push_back(std::move(clientECHExt));
 
   EXPECT_THROW(
       decryptECHWithContext(
@@ -418,12 +438,17 @@ TEST(EncryptionTest, TestInnerClientHelloOuterExtensionsContainsDupes) {
   // Add OuterExtensions with SNI extension. Should blow up on decrypt.
   OuterExtensions outer;
   outer.types = {ExtensionType::server_name};
-  innerChlo.extensions.push_back(encodeExtension(std::move(outer)));
+  Extension outerExt;
+  Error err;
+  EXPECT_EQ(encodeExtension(outerExt, err, outer), Status::Success);
+  innerChlo.extensions.push_back(std::move(outerExt));
   auto clientECH = getTestOuterECHClientHelloWithInner(std::move(innerChlo));
 
   auto context = hpkeContext(clientECH);
   auto outerChlo = getClientHelloOuter();
-  outerChlo.extensions.push_back(encodeExtension(clientECH));
+  Extension clientECHExt;
+  EXPECT_EQ(encodeExtension(clientECHExt, err, clientECH), Status::Success);
+  outerChlo.extensions.push_back(std::move(clientECHExt));
 
   EXPECT_THROW(
       decryptECHWithContext(
@@ -504,7 +529,13 @@ TEST(EncryptionTest, TestSubstituteOuterExtensions) {
   innerChlo = TestMessages::clientHello();
 
   echOuterExt.extensionTypes.push_back(ExtensionType::early_data);
-  innerChlo.extensions.push_back(encodeExtension(echOuterExt));
+  Error err;
+  {
+    Extension echOuterExtension;
+    EXPECT_EQ(
+        encodeExtension(echOuterExtension, err, echOuterExt), Status::Success);
+    innerChlo.extensions.push_back(std::move(echOuterExtension));
+  }
 
   EXPECT_THROW(
       substituteOuterExtensions(std::move(innerChlo.extensions), {}),
@@ -530,7 +561,12 @@ TEST(EncryptionTest, TestSubstituteOuterExtensions) {
   echOuterExt.extensionTypes = {
       extE.extension_type, extG.extension_type, extF.extension_type};
 
-  innerChlo.extensions.push_back(encodeExtension(echOuterExt));
+  {
+    Extension echOuterExtension;
+    EXPECT_EQ(
+        encodeExtension(echOuterExtension, err, echOuterExt), Status::Success);
+    innerChlo.extensions.push_back(std::move(echOuterExtension));
+  }
 
   EXPECT_THROW(
       substituteOuterExtensions(std::move(innerChlo.extensions), outerExt),
@@ -555,7 +591,12 @@ TEST(EncryptionTest, TestSubstituteOuterExtensions) {
   echOuterExt.extensionTypes = {
       extD.extension_type, extF.extension_type, extG.extension_type};
 
-  innerChlo.extensions.push_back(encodeExtension(echOuterExt));
+  {
+    Extension echOuterExtension;
+    EXPECT_EQ(
+        encodeExtension(echOuterExtension, err, echOuterExt), Status::Success);
+    innerChlo.extensions.push_back(std::move(echOuterExtension));
+  }
 
   actualRes =
       substituteOuterExtensions(std::move(innerChlo.extensions), outerExt);
@@ -580,7 +621,9 @@ TEST(EncryptionTest, TestSubstituteOuterExtensions) {
   echOuterExt.extensionTypes = {
       extD.extension_type, extE.extension_type, extF.extension_type};
 
-  auto encodedEchOuterExt = encodeExtension(echOuterExt);
+  auto encodedEchOuterExt = Extension{};
+  EXPECT_EQ(
+      encodeExtension(encodedEchOuterExt, err, echOuterExt), Status::Success);
   innerChlo.extensions =
       cloneExtensionList({&extA, &extB, &extC, &encodedEchOuterExt, &extG});
 
@@ -626,7 +669,9 @@ TEST(EncryptionTest, TestSubstituteOuterExtensions) {
 
   echOuterExt.extensionTypes = {extD.extension_type};
 
-  encodedEchOuterExt = encodeExtension(echOuterExt);
+  encodedEchOuterExt = Extension{};
+  EXPECT_EQ(
+      encodeExtension(encodedEchOuterExt, err, echOuterExt), Status::Success);
 
   innerChlo.extensions =
       cloneExtensionList({&extD, &extE, &extF, &encodedEchOuterExt});
@@ -650,7 +695,9 @@ TEST(EncryptionTest, TestSubstituteOuterExtensions) {
 
   echOuterExt.extensionTypes = {echExt.extension_type};
 
-  encodedEchOuterExt = encodeExtension(echOuterExt);
+  encodedEchOuterExt = Extension{};
+  EXPECT_EQ(
+      encodeExtension(encodedEchOuterExt, err, echOuterExt), Status::Success);
 
   innerChlo.extensions = cloneExtensionList({&encodedEchOuterExt, &extB});
 
@@ -743,8 +790,11 @@ TEST(EncryptionTest, TestMakeDummyHRR) {
 }
 
 MATCHER_P(DummyShloMatch, shlo, "") {
-  return folly::IOBufEqualTo()(
-      encodeHandshake(makeDummyServerHello(*shlo)), arg);
+  Buf encodedDummyShlo;
+  Error err;
+  FIZZ_THROW_ON_ERROR(
+      encodeHandshake(encodedDummyShlo, err, makeDummyServerHello(*shlo)), err);
+  return folly::IOBufEqualTo()(std::move(encodedDummyShlo), arg);
 }
 
 TEST(EncryptionTest, TestSetShloAcceptance) {
@@ -772,7 +822,11 @@ TEST(EncryptionTest, TestSetShloAcceptance) {
 }
 
 MATCHER_P(DummyHrrMatch, hrr, "") {
-  return folly::IOBufEqualTo()(encodeHandshake(makeDummyHRR(*hrr)), arg);
+  Buf encodedDummyHrr;
+  Error err;
+  FIZZ_THROW_ON_ERROR(
+      encodeHandshake(encodedDummyHrr, err, makeDummyHRR(*hrr)), err);
+  return folly::IOBufEqualTo()(std::move(encodedDummyHrr), arg);
 }
 
 TEST(EncryptionTest, TestSetHRRAcceptance) {
@@ -896,11 +950,25 @@ TEST(EncryptionTest, TestGenerateGreasePsk) {
 
 TEST(EncryptionTest, TestGenerateAndReplaceOuterExtensions) {
   // Make some arbitrary extensions
-  Extension supportedVersions = encodeExtension(SupportedVersions());
-  Extension supportedGroups = encodeExtension(SupportedGroups());
-  Extension keyShare = encodeExtension(ClientKeyShare());
-  Extension signatureAlgorithms = encodeExtension(SignatureAlgorithms());
-  Extension certificateAuthorities = encodeExtension(CertificateAuthorities());
+  Extension supportedVersions;
+  Extension supportedGroups;
+  Extension keyShare;
+  Extension signatureAlgorithms;
+  Extension certificateAuthorities;
+  Error err;
+  EXPECT_EQ(
+      encodeExtension(supportedVersions, err, SupportedVersions()),
+      Status::Success);
+  EXPECT_EQ(
+      encodeExtension(supportedGroups, err, SupportedGroups()),
+      Status::Success);
+  EXPECT_EQ(encodeExtension(keyShare, err, ClientKeyShare()), Status::Success);
+  EXPECT_EQ(
+      encodeExtension(signatureAlgorithms, err, SignatureAlgorithms()),
+      Status::Success);
+  EXPECT_EQ(
+      encodeExtension(certificateAuthorities, err, CertificateAuthorities()),
+      Status::Success);
 
   std::vector<Extension> exts;
   exts.push_back(supportedVersions.clone());
@@ -918,7 +986,11 @@ TEST(EncryptionTest, TestGenerateAndReplaceOuterExtensions) {
       ExtensionType::supported_groups, ExtensionType::signature_algorithms};
   std::vector<Extension> expectedExts;
   expectedExts.push_back(supportedVersions.clone());
-  expectedExts.push_back(encodeExtension(expectedOuterExt));
+  Extension expectedOuterExtEncoded;
+  EXPECT_EQ(
+      encodeExtension(expectedOuterExtEncoded, err, expectedOuterExt),
+      Status::Success);
+  expectedExts.push_back(std::move(expectedOuterExtEncoded));
   expectedExts.push_back(keyShare.clone());
   expectedExts.push_back(certificateAuthorities.clone());
 

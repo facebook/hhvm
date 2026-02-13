@@ -37,7 +37,10 @@ class ExtensionsTest : public testing::Test {
 
   template <class T>
   void checkEncode(T&& ext, folly::StringPiece expectedHex) {
-    auto encoded = encodeExtension(std::forward<T>(ext));
+    Extension encoded;
+    Error err;
+    EXPECT_EQ(
+        encodeExtension(encoded, err, std::forward<T>(ext)), Status::Success);
     auto buf = folly::IOBuf::create(0);
     folly::io::Appender appender(buf.get(), 10);
     detail::write(encoded, appender);

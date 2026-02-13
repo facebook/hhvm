@@ -89,7 +89,10 @@ TEST_F(BrotliCertificateCompressorTest, TestCompressDecompress) {
   DistinguishedName dn;
   dn.encoded_name = IOBuf::copyBuffer("DistinguishedName");
   auth.authorities.push_back(std::move(dn));
-  certMsg.certificate_list[0].extensions.push_back(encodeExtension(auth));
+  Extension ext;
+  Error err;
+  EXPECT_EQ(encodeExtension(ext, err, auth), Status::Success);
+  certMsg.certificate_list[0].extensions.push_back(std::move(ext));
 
   auto compressedCertMsg = compressor_->compress(certMsg);
   EXPECT_EQ(
@@ -104,7 +107,13 @@ TEST_F(BrotliCertificateCompressorTest, TestCompressDecompress) {
       openssl::CertUtils::makePeerCert(certEntry.cert_data->clone());
   EXPECT_EQ(decompressedPeer->getIdentity(), cert->getIdentity());
 
-  EXPECT_TRUE(IOBufEqualTo()(encode(certMsg), encode(decompressedCertMsg)));
+  Buf encoded;
+  Buf decompressedEncoded;
+  EXPECT_EQ(encode(encoded, err, certMsg), Status::Success);
+  EXPECT_EQ(
+      encode(decompressedEncoded, err, decompressedCertMsg), Status::Success);
+  EXPECT_TRUE(
+      IOBufEqualTo()(std::move(encoded), std::move(decompressedEncoded)));
 }
 
 TEST_F(BrotliCertificateCompressorTest, TestHugeCompressedCert) {

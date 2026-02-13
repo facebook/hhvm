@@ -97,7 +97,9 @@ class HandshakeTypesTest : public testing::Test {
 
   template <class T>
   std::string encodeHex(T&& msg) {
-    auto buf = encode(std::forward<T>(msg));
+    Buf buf;
+    Error err;
+    FIZZ_THROW_ON_ERROR(encode(buf, err, std::forward<T>(msg)), err);
     auto str = buf->template to<std::string>();
     return hexlify(str);
   }
@@ -196,7 +198,8 @@ TEST_F(HandshakeTypesTest, EncodeAndDecodeSigAlgs) {
   EXPECT_EQ(
       getExtension(sigAlgs, err, clientHello.extensions), Status::Success);
   ASSERT_TRUE(sigAlgs);
-  auto ext = encodeExtension(*sigAlgs);
+  Extension ext;
+  EXPECT_EQ(encodeExtension(ext, err, *sigAlgs), Status::Success);
   auto original = findExtension(
       clientHello.extensions, ExtensionType::signature_algorithms);
   EXPECT_TRUE(extensionsMatch(*original, ext));
@@ -208,7 +211,8 @@ TEST_F(HandshakeTypesTest, EncodeAndDecodeClientKeyShare) {
   Error err;
   EXPECT_EQ(getExtension(share, err, clientHello.extensions), Status::Success);
   ASSERT_TRUE(share);
-  auto ext = encodeExtension(*share);
+  Extension ext;
+  EXPECT_EQ(encodeExtension(ext, err, *share), Status::Success);
   auto original =
       findExtension(clientHello.extensions, ExtensionType::key_share);
   EXPECT_TRUE(extensionsMatch(*original, ext));

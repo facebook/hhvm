@@ -74,7 +74,8 @@ TEST_F(ExtensionsTest, TokenBindingMessageFromChrome) {
 
   // 32 * 2 for the signature with this algorithm
   EXPECT_EQ(tokenbinding.signature->computeChainDataLength(), 64);
-  auto encodedBuf = encode(std::move(message));
+  Buf encodedBuf;
+  EXPECT_EQ(encode(encodedBuf, err, std::move(message)), Status::Success);
   EXPECT_TRUE(folly::IOBufEqualTo()(encodedBuf, buf));
 }
 
@@ -90,8 +91,9 @@ TEST_F(ExtensionsTest, TokenBindingMessageSelfCreated) {
   tokenBinding.extensions = folly::IOBuf::create(10);
   message.tokenbindings.push_back(std::move(tokenBinding));
 
+  Buf encoded;
   Error err;
-  auto encoded = encode(std::move(message));
+  EXPECT_EQ(encode(encoded, err, std::move(message)), Status::Success);
   TokenBindingMessage decoded;
   EXPECT_EQ(
       decode<TokenBindingMessage>(decoded, err, std::move(encoded)),

@@ -33,7 +33,10 @@ class TokenBindingServerExtensionTest : public Test {
       TokenBindingKeyParameters keyParams) {
     params_.version = version;
     params_.key_parameters_list.push_back(keyParams);
-    chlo_.extensions.push_back(encodeExtension(std::move(params_)));
+    Extension ext;
+    Error err;
+    FIZZ_THROW_ON_ERROR(encodeExtension(ext, err, params_), err);
+    chlo_.extensions.push_back(std::move(ext));
   }
 
   void verifyExtensionFields(

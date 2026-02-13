@@ -163,31 +163,41 @@ struct detail::Reader<ech::ECHConfig> {
 };
 
 template <>
-inline Buf encode<const ech::ECHConfigContentDraft&>(
+inline Status encode<const ech::ECHConfigContentDraft&>(
+    Buf& ret,
+    Error& /* err */,
     const ech::ECHConfigContentDraft& echConfigContent) {
   auto buf = folly::IOBuf::create(detail::getSize(echConfigContent));
   folly::io::Appender appender(buf.get(), 20);
   detail::write(echConfigContent, appender);
-  return buf;
+  ret = std::move(buf);
+  return Status::Success;
 }
 
 template <>
-inline Buf encode<ech::ECHConfigContentDraft>(
+inline Status encode<ech::ECHConfigContentDraft>(
+    Buf& ret,
+    Error& err,
     ech::ECHConfigContentDraft&& echConfigContent) {
-  return encode<const ech::ECHConfigContentDraft&>(echConfigContent);
+  return encode<const ech::ECHConfigContentDraft&>(ret, err, echConfigContent);
 }
 
 template <>
-inline Buf encode<const ech::ECHConfig&>(const ech::ECHConfig& echConfig) {
+inline Status encode<const ech::ECHConfig&>(
+    Buf& ret,
+    Error& /* err */,
+    const ech::ECHConfig& echConfig) {
   auto buf = folly::IOBuf::create(detail::getSize(echConfig));
   folly::io::Appender appender(buf.get(), 20);
   detail::write(echConfig, appender);
-  return buf;
+  ret = std::move(buf);
+  return Status::Success;
 }
 
 template <>
-inline Buf encode<ech::ECHConfig>(ech::ECHConfig&& echConfig) {
-  return encode<const ech::ECHConfig&>(echConfig);
+inline Status
+encode<ech::ECHConfig>(Buf& ret, Error& err, ech::ECHConfig&& echConfig) {
+  return encode<const ech::ECHConfig&>(ret, err, echConfig);
 }
 
 template <>
@@ -220,7 +230,9 @@ decode(ech::ECHConfigList& ret, Error& /* err */, folly::io::Cursor& cursor) {
 }
 
 template <>
-inline Buf encode<const ech::ECHConfigList&>(
+inline Status encode<const ech::ECHConfigList&>(
+    Buf& ret,
+    Error& /* err */,
     const ech::ECHConfigList& echConfigList) {
   size_t len = sizeof(uint16_t);
   for (const auto& config : echConfigList.configs) {
@@ -230,11 +242,15 @@ inline Buf encode<const ech::ECHConfigList&>(
   auto buf = folly::IOBuf::create(len);
   folly::io::Appender appender(buf.get(), 20);
   detail::writeVector<uint16_t>(echConfigList.configs, appender);
-  return buf;
+  ret = std::move(buf);
+  return Status::Success;
 }
 
 template <>
-inline Buf encode<ech::ECHConfigList>(ech::ECHConfigList&& echConfigList) {
-  return encode<const ech::ECHConfigList&>(echConfigList);
+inline Status encode<ech::ECHConfigList>(
+    Buf& ret,
+    Error& err,
+    ech::ECHConfigList&& echConfigList) {
+  return encode<const ech::ECHConfigList&>(ret, err, echConfigList);
 }
 } // namespace fizz

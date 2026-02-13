@@ -48,7 +48,11 @@ ParsedECHConfig getParsedECHConfig(ECHConfigParam param) {
 ECHConfig getECHConfig(ECHConfigParam param) {
   ECHConfig config;
   config.version = ECHVersion::Draft15;
-  config.ech_config_content = encode(getParsedECHConfig(std::move(param)));
+  Error err;
+  FIZZ_THROW_ON_ERROR(
+      encode(
+          config.ech_config_content, err, getParsedECHConfig(std::move(param))),
+      err);
   return config;
 }
 
@@ -63,7 +67,10 @@ ClientHello getClientHelloOuter() {
   ServerName sn;
   sn.hostname = folly::IOBuf::copyBuffer("public.dummy.com");
   sni.server_name_list.push_back(std::move(sn));
-  chloOuter.extensions.push_back(encodeExtension(std::move(sni)));
+  Error err;
+  Extension ext;
+  FIZZ_THROW_ON_ERROR(encodeExtension(ext, err, sni), err);
+  chloOuter.extensions.push_back(std::move(ext));
 
   // Set different random
   chloOuter.random.fill(0x00);

@@ -27,7 +27,11 @@ Buf ExportedAuthenticator::getAuthenticatorRequest(
   CertificateRequest cr;
   cr.certificate_request_context = std::move(certificateRequestContext);
   cr.extensions = std::move(extensions);
-  return encode<CertificateRequest>(std::move(cr));
+  Buf encoded;
+  Error err;
+  FIZZ_THROW_ON_ERROR(
+      encode<CertificateRequest>(encoded, err, std::move(cr)), err);
+  return encoded;
 }
 
 Buf ExportedAuthenticator::getAuthenticator(
@@ -140,7 +144,10 @@ Buf ExportedAuthenticator::makeAuthenticator(
   // Compute CertificateMsg.
   CertificateMsg certificate =
       cert.getCertMessage(std::move(certificateRequestContext));
-  auto encodedCertMsg = encodeHandshake(std::move(certificate));
+  Buf encodedCertMsg;
+  Error err;
+  FIZZ_THROW_ON_ERROR(
+      encodeHandshake(encodedCertMsg, err, std::move(certificate)), err);
   // Compute CertificateVerify.
   auto transcript = detail::computeTranscript(
       handshakeContext, authenticatorRequest, encodedCertMsg);
@@ -149,7 +156,9 @@ Buf ExportedAuthenticator::makeAuthenticator(
   CertificateVerify verify;
   verify.algorithm = *scheme;
   verify.signature = std::move(sig);
-  auto encodedCertificateVerify = encodeHandshake(std::move(verify));
+  Buf encodedCertificateVerify;
+  FIZZ_THROW_ON_ERROR(
+      encodeHandshake(encodedCertificateVerify, err, std::move(verify)), err);
   // Compute Finished.
   auto finishedTranscript =
       detail::computeFinishedTranscript(transcript, encodedCertificateVerify);
@@ -159,7 +168,9 @@ Buf ExportedAuthenticator::makeAuthenticator(
       makeHasher, finishedMacKey, finishedTranscriptHash);
   Finished finished;
   finished.verify_data = std::move(verifyData);
-  auto encodedFinished = encodeHandshake(std::move(finished));
+  Buf encodedFinished;
+  FIZZ_THROW_ON_ERROR(
+      encodeHandshake(encodedFinished, err, std::move(finished)), err);
 
   return detail::computeTranscript(
       encodedCertMsg, encodedCertificateVerify, encodedFinished);
@@ -226,7 +237,9 @@ folly::Optional<std::vector<CertificateEntry>> ExportedAuthenticator::validate(
   folly::io::Appender appender(leafCert.get(), capacity);
   detail::writeBuf(certMsg->certificate_list.front().cert_data, appender);
   auto peerCert = openssl::CertUtils::makePeerCert(std::move(leafCert));
-  auto encodedCertMsg = encodeHandshake(std::move(*certMsg));
+  Buf encodedCertMsg;
+  FIZZ_THROW_ON_ERROR(
+      encodeHandshake(encodedCertMsg, err, std::move(*certMsg)), err);
   auto transcript = detail::computeTranscript(
       handshakeContext, authenticatorRequest, encodedCertMsg);
   auto transcriptHash = detail::computeTranscriptHash(makeHasher, transcript);
@@ -240,7 +253,9 @@ folly::Optional<std::vector<CertificateEntry>> ExportedAuthenticator::validate(
     return folly::none;
   }
   // Verify if Finished message matches.
-  auto encodedCertVerify = encodeHandshake(std::move(*certVerify));
+  Buf encodedCertVerify;
+  FIZZ_THROW_ON_ERROR(
+      encodeHandshake(encodedCertVerify, err, std::move(*certVerify)), err);
   auto finishedTranscript =
       detail::computeFinishedTranscript(transcript, encodedCertVerify);
   auto finishedTranscriptHash =
@@ -400,7 +415,10 @@ Buf getEmptyAuthenticator(
   CertificateMsg emptyCertMsg;
   emptyCertMsg.certificate_request_context =
       std::get<0>(detail::decodeAuthRequest(authRequest));
-  auto encodedEmptyCertMsg = encodeHandshake(std::move(emptyCertMsg));
+  Buf encodedEmptyCertMsg;
+  Error err;
+  FIZZ_THROW_ON_ERROR(
+      encodeHandshake(encodedEmptyCertMsg, err, std::move(emptyCertMsg)), err);
   auto emptyAuthTranscript = detail::computeTranscript(
       handshakeContext, authRequest, encodedEmptyCertMsg);
   auto emptyAuthTranscriptHash =
@@ -409,7 +427,9 @@ Buf getEmptyAuthenticator(
       makeHasher, finishedMacKey, emptyAuthTranscriptHash);
   Finished emptyAuth;
   emptyAuth.verify_data = std::move(finVerify);
-  auto encodedEmptyAuth = encodeHandshake(std::move(emptyAuth));
+  Buf encodedEmptyAuth;
+  FIZZ_THROW_ON_ERROR(
+      encodeHandshake(encodedEmptyAuth, err, std::move(emptyAuth)), err);
   return encodedEmptyAuth;
 }
 

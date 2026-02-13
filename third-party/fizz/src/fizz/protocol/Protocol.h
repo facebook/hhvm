@@ -61,7 +61,10 @@ class Protocol {
     Finished finished;
     finished.verify_data =
         handshakeContext.getFinishedData(handshakeWriteSecret);
-    auto encodedFinished = encodeHandshake(std::move(finished));
+    Error err;
+    Buf encodedFinished;
+    FIZZ_THROW_ON_ERROR(
+        encodeHandshake(encodedFinished, err, std::move(finished)), err);
     handshakeContext.appendToTranscript(encodedFinished);
     return encodedFinished;
   }
@@ -69,7 +72,11 @@ class Protocol {
   static Buf getKeyUpdated(KeyUpdateRequest request_update) {
     KeyUpdate keyUpdated;
     keyUpdated.request_update = request_update;
-    return encodeHandshake(std::move(keyUpdated));
+    Buf encodedKeyUpdated;
+    Error err;
+    FIZZ_THROW_ON_ERROR(
+        encodeHandshake(encodedKeyUpdated, err, std::move(keyUpdated)), err);
+    return encodedKeyUpdated;
   }
 
   static void checkAllowedExtensions(

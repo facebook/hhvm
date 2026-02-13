@@ -68,7 +68,9 @@ TEST(GreaseECHTest, TestGenerateComputedGreaseECH) {
   Error err;
   EXPECT_EQ(
       getExtension<ServerNameList>(sni, err, chlo.extensions), Status::Success);
-  auto encodedChlo = encode(chlo);
+
+  Buf encodedChlo;
+  EXPECT_EQ(encode(encodedChlo, err, chlo), Status::Success);
 
   size_t encodedChloSize = encodedChlo->computeChainDataLength();
   GreaseECHSetting setting{

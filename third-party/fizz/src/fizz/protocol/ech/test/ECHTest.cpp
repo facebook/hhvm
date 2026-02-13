@@ -20,8 +20,10 @@ folly::StringPiece kOuterECHClientHelloExtensionData{
     "0000010001AA0003656e6300077061796c6f6164"};
 
 TEST(ECHTest, TestECHConfigListEncodeDecode) {
+  Buf configContentBuf;
   Error err;
-  auto configContentBuf = encode(getParsedECHConfig());
+  EXPECT_EQ(
+      encode(configContentBuf, err, getParsedECHConfig()), Status::Success);
   // Make ECH configs
   ECHConfig echConfig1;
   echConfig1.version = ECHVersion::Draft15;
@@ -36,7 +38,10 @@ TEST(ECHTest, TestECHConfigListEncodeDecode) {
   // Encode ECH config List
   ECHConfigList echConfigList;
   echConfigList.configs = {echConfig1, echConfig2};
-  auto encodedBuf = encode<ECHConfigList>(std::move(echConfigList));
+  Buf encodedBuf;
+  EXPECT_EQ(
+      encode<ECHConfigList>(encodedBuf, err, std::move(echConfigList)),
+      Status::Success);
 
   // Decode ECH config
   folly::io::Cursor cursor(encodedBuf.get());
@@ -57,11 +62,15 @@ TEST(ECHTest, TestECHConfigEncodeDecode) {
   // Encode ECH config
   ECHConfig echConfig;
   echConfig.version = ECHVersion::Draft15;
+  Buf configContentBuf;
   Error err;
-  auto configContentBuf = encode(getParsedECHConfig());
+  EXPECT_EQ(
+      encode(configContentBuf, err, getParsedECHConfig()), Status::Success);
   echConfig.ech_config_content = configContentBuf->clone();
-  std::unique_ptr<folly::IOBuf> encodedBuf =
-      encode<ECHConfig>(std::move(echConfig));
+  Buf encodedBuf;
+  EXPECT_EQ(
+      encode<ECHConfig>(encodedBuf, err, std::move(echConfig)),
+      Status::Success);
 
   // Decode ECH config
   folly::io::Cursor cursor(encodedBuf.get());
@@ -87,7 +96,11 @@ TEST(ECHTest, TestOuterECHClientHelloEncode) {
   ech.enc = folly::IOBuf::copyBuffer("enc");
   ech.payload = folly::IOBuf::copyBuffer("payload");
 
-  Extension encoded = encodeExtension<ech::OuterECHClientHello>(ech);
+  Extension encoded;
+  Error err;
+  EXPECT_EQ(
+      encodeExtension<ech::OuterECHClientHello>(encoded, err, ech),
+      Status::Success);
 
   EXPECT_EQ(encoded.extension_type, ExtensionType::encrypted_client_hello);
   // This was captured as the expected output from generating the result.
@@ -121,11 +134,15 @@ TEST(ECHTest, TestUnsupportedECHConfigEncodeDecode) {
   ECHConfig echConfig;
   echConfig.version = static_cast<ECHVersion>(4);
   Error err;
-  auto configContentBuf = encode(getParsedECHConfig());
+  Buf configContentBuf;
+  EXPECT_EQ(
+      encode(configContentBuf, err, getParsedECHConfig()), Status::Success);
   echConfig.ech_config_content = configContentBuf->clone();
 
-  std::unique_ptr<folly::IOBuf> encodedBuf =
-      encode<ECHConfig>(std::move(echConfig));
+  Buf encodedBuf;
+  EXPECT_EQ(
+      encode<ECHConfig>(encodedBuf, err, std::move(echConfig)),
+      Status::Success);
 
   // Decode ECH config
   folly::io::Cursor cursor(encodedBuf.get());

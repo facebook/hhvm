@@ -161,7 +161,7 @@ template <class T>
 Status getExtension(T& ret, Error& err, folly::io::Cursor& cursor);
 
 template <class T>
-Extension encodeExtension(const T& t);
+Status encodeExtension(Extension& ret, Error& err, const T& t);
 
 std::vector<Extension>::const_iterator findExtension(
     const std::vector<Extension>& extensions,

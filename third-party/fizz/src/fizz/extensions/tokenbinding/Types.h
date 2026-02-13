@@ -62,7 +62,10 @@ struct TokenBindingMessage {
   std::vector<TokenBinding> tokenbindings;
 };
 
-Extension encodeExtension(const extensions::TokenBindingParameters& params);
+Status encodeExtension(
+    Extension& ret,
+    Error& err,
+    const extensions::TokenBindingParameters& params);
 } // namespace extensions
 
 template <>
@@ -72,7 +75,7 @@ Status getExtension(
     const std::vector<Extension>& extensions);
 
 template <>
-Buf encode(extensions::TokenBindingMessage&& message);
+Status encode(Buf& ret, Error& err, extensions::TokenBindingMessage&& message);
 template <>
 Status decode(
     extensions::TokenBindingMessage& ret,

@@ -30,7 +30,9 @@ CertificateCompressionAlgorithm ZlibCertificateCompressor::getAlgorithm()
 
 CompressedCertificate ZlibCertificateCompressor::compress(
     const CertificateMsg& cert) {
-  auto encoded = encode(cert);
+  Buf encoded;
+  Error err;
+  FIZZ_THROW_ON_ERROR(encode(encoded, err, cert), err);
   auto certRange = encoded->coalesce();
   auto compressedCert = IOBuf::create(compressBound(certRange.size()));
   unsigned long size = compressedCert->capacity();

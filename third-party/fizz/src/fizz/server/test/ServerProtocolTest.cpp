@@ -96,10 +96,22 @@ class ServerProtocolTest : public ProtocolTest<ServerTypes, Actions> {
       CertificateMsg certificate,
       CertificateVerify verify,
       Finished finished) {
-    auto buf = encodeHandshake(std::move(encryptedExt));
-    buf->prependChain(encodeHandshake(std::move(certificate)));
-    buf->prependChain(encodeHandshake(std::move(verify)));
-    buf->prependChain(encodeHandshake(std::move(finished)));
+    Buf buf;
+    Error err;
+    FIZZ_THROW_ON_ERROR(
+        encodeHandshake(buf, err, std::move(encryptedExt)), err);
+    Buf certBuf;
+    FIZZ_THROW_ON_ERROR(
+        encodeHandshake(certBuf, err, std::move(certificate)), err);
+    buf->prependChain(std::move(certBuf));
+    Buf verifyBuf;
+    FIZZ_THROW_ON_ERROR(
+        encodeHandshake(verifyBuf, err, std::move(verify)), err);
+    buf->prependChain(std::move(verifyBuf));
+    Buf finishedBuf;
+    FIZZ_THROW_ON_ERROR(
+        encodeHandshake(finishedBuf, err, std::move(finished)), err);
+    buf->prependChain(std::move(finishedBuf));
     return buf;
   }
 
@@ -109,11 +121,25 @@ class ServerProtocolTest : public ProtocolTest<ServerTypes, Actions> {
       CertificateMsg certificate,
       CertificateVerify verify,
       Finished finished) {
-    auto buf = encodeHandshake(std::move(encryptedExt));
-    buf->prependChain(encodeHandshake(std::move(request)));
-    buf->prependChain(encodeHandshake(std::move(certificate)));
-    buf->prependChain(encodeHandshake(std::move(verify)));
-    buf->prependChain(encodeHandshake(std::move(finished)));
+    Buf buf;
+    Error err;
+    FIZZ_THROW_ON_ERROR(
+        encodeHandshake(buf, err, std::move(encryptedExt)), err);
+    Buf reqBuf;
+    FIZZ_THROW_ON_ERROR(encodeHandshake(reqBuf, err, std::move(request)), err);
+    buf->prependChain(std::move(reqBuf));
+    Buf certBuf;
+    FIZZ_THROW_ON_ERROR(
+        encodeHandshake(certBuf, err, std::move(certificate)), err);
+    buf->prependChain(std::move(certBuf));
+    Buf verifyBuf;
+    FIZZ_THROW_ON_ERROR(
+        encodeHandshake(verifyBuf, err, std::move(verify)), err);
+    buf->prependChain(std::move(verifyBuf));
+    Buf finishedBuf;
+    FIZZ_THROW_ON_ERROR(
+        encodeHandshake(finishedBuf, err, std::move(finished)), err);
+    buf->prependChain(std::move(finishedBuf));
     return buf;
   }
 
@@ -122,18 +148,36 @@ class ServerProtocolTest : public ProtocolTest<ServerTypes, Actions> {
       CompressedCertificate certificate,
       CertificateVerify verify,
       Finished finished) {
-    auto buf = encodeHandshake(std::move(encryptedExt));
-    buf->prependChain(encodeHandshake(std::move(certificate)));
-    buf->prependChain(encodeHandshake(std::move(verify)));
-    buf->prependChain(encodeHandshake(std::move(finished)));
+    Buf buf;
+    Error err;
+    FIZZ_THROW_ON_ERROR(
+        encodeHandshake(buf, err, std::move(encryptedExt)), err);
+    Buf certBuf;
+    FIZZ_THROW_ON_ERROR(
+        encodeHandshake(certBuf, err, std::move(certificate)), err);
+    buf->prependChain(std::move(certBuf));
+    Buf verifyBuf;
+    FIZZ_THROW_ON_ERROR(
+        encodeHandshake(verifyBuf, err, std::move(verify)), err);
+    buf->prependChain(std::move(verifyBuf));
+    Buf finishedBuf;
+    FIZZ_THROW_ON_ERROR(
+        encodeHandshake(finishedBuf, err, std::move(finished)), err);
+    buf->prependChain(std::move(finishedBuf));
     return buf;
   }
 
   static std::unique_ptr<folly::IOBuf> getEncryptedHandshakeWrite(
       EncryptedExtensions encryptedExt,
       Finished finished) {
-    auto buf = encodeHandshake(std::move(encryptedExt));
-    buf->prependChain(encodeHandshake(std::move(finished)));
+    Buf buf;
+    Error err;
+    FIZZ_THROW_ON_ERROR(
+        encodeHandshake(buf, err, std::move(encryptedExt)), err);
+    Buf finishedBuf;
+    FIZZ_THROW_ON_ERROR(
+        encodeHandshake(finishedBuf, err, std::move(finished)), err);
+    buf->prependChain(std::move(finishedBuf));
     return buf;
   }
 
@@ -362,14 +406,19 @@ class ServerProtocolTest : public ProtocolTest<ServerTypes, Actions> {
     ServerName sn;
     sn.hostname = folly::IOBuf::copyBuffer("www.fakehostname.com");
     sni.server_name_list.push_back(std::move(sn));
-    testChlo.extensions.push_back(encodeExtension(std::move(sni)));
+    Extension ext1;
+    Error err;
+    FIZZ_THROW_ON_ERROR(encodeExtension(ext1, err, sni), err);
+    testChlo.extensions.push_back(std::move(ext1));
     ech::OuterECHClientHello echExt;
     echExt.cipher_suite = ech::HpkeSymmetricCipherSuite{
         hpke::KDFId::Sha256, hpke::AeadId::TLS_AES_128_GCM_SHA256};
     echExt.config_id = 0xFB;
     echExt.enc = folly::IOBuf::copyBuffer("echpubkey");
     echExt.payload = folly::IOBuf::copyBuffer("encryptedchlo");
-    testChlo.extensions.push_back(encodeExtension(std::move(echExt)));
+    Extension ext2;
+    FIZZ_THROW_ON_ERROR(encodeExtension(ext2, err, echExt), err);
+    testChlo.extensions.push_back(std::move(ext2));
     return testChlo;
   }
 
@@ -382,14 +431,19 @@ class ServerProtocolTest : public ProtocolTest<ServerTypes, Actions> {
     ServerName sn;
     sn.hostname = folly::IOBuf::copyBuffer("www.fakehostname.com");
     sni.server_name_list.push_back(std::move(sn));
-    testChlo.extensions.push_back(encodeExtension(std::move(sni)));
+    Extension ext1;
+    Error err;
+    FIZZ_THROW_ON_ERROR(encodeExtension(ext1, err, sni), err);
+    testChlo.extensions.push_back(std::move(ext1));
     ech::OuterECHClientHello echExt;
     echExt.cipher_suite = ech::HpkeSymmetricCipherSuite{
         hpke::KDFId::Sha256, hpke::AeadId::TLS_AES_128_GCM_SHA256};
     echExt.config_id = 0xFB;
     echExt.enc = folly::IOBuf::create(0);
     echExt.payload = folly::IOBuf::copyBuffer("encryptedchlo");
-    testChlo.extensions.push_back(encodeExtension(std::move(echExt)));
+    Extension ext2;
+    FIZZ_THROW_ON_ERROR(encodeExtension(ext2, err, echExt), err);
+    testChlo.extensions.push_back(std::move(ext2));
     return testChlo;
   }
 
@@ -506,9 +560,12 @@ TEST_F(ServerProtocolTest, TestAppClose) {
         content.contentType = msg.type;
         content.encryptionLevel = appWrite_->getEncryptionLevel();
         EXPECT_EQ(msg.type, ContentType::alert);
-        EXPECT_TRUE(
-            folly::IOBufEqualTo()(
-                msg.fragment, encode(Alert(AlertDescription::close_notify))));
+        Buf encoded;
+        Error err;
+        EXPECT_EQ(
+            encode(encoded, err, Alert(AlertDescription::close_notify)),
+            Status::Success);
+        EXPECT_TRUE(folly::IOBufEqualTo()(msg.fragment, encoded));
         content.data = folly::IOBuf::copyBuffer("closenotify");
         return content;
       }));
@@ -568,9 +625,12 @@ TEST_F(ServerProtocolTest, TestAppCloseImmediate) {
         content.contentType = msg.type;
         content.encryptionLevel = appWrite_->getEncryptionLevel();
         EXPECT_EQ(msg.type, ContentType::alert);
-        EXPECT_TRUE(
-            folly::IOBufEqualTo()(
-                msg.fragment, encode(Alert(AlertDescription::close_notify))));
+        Buf encoded;
+        Error err;
+        EXPECT_EQ(
+            encode(encoded, err, Alert(AlertDescription::close_notify)),
+            Status::Success);
+        EXPECT_TRUE(folly::IOBufEqualTo()(msg.fragment, encoded));
         content.data = folly::IOBuf::copyBuffer("closenotify");
         return content;
       }));
@@ -642,9 +702,13 @@ TEST_F(ServerProtocolTest, TestClientHelloFullHandshakeFlow) {
         content.contentType = msg.type;
         content.encryptionLevel = mockWrite_->getEncryptionLevel();
         EXPECT_EQ(msg.type, ContentType::handshake);
-        EXPECT_TRUE(
-            folly::IOBufEqualTo()(
-                msg.fragment, encodeHandshake(TestMessages::serverHello())));
+        Buf expectedServerHello;
+        Error err;
+        EXPECT_EQ(
+            encodeHandshake(
+                expectedServerHello, err, TestMessages::serverHello()),
+            Status::Success);
+        EXPECT_TRUE(folly::IOBufEqualTo()(msg.fragment, expectedServerHello));
         content.data = folly::IOBuf::copyBuffer("writtenshlo");
         return content;
       }));
@@ -928,9 +992,13 @@ TEST_F(ServerProtocolTest, TestClientHelloCompressedCertFlow) {
         content.contentType = msg.type;
         content.encryptionLevel = mockWrite_->getEncryptionLevel();
         EXPECT_EQ(msg.type, ContentType::handshake);
-        EXPECT_TRUE(
-            folly::IOBufEqualTo()(
-                msg.fragment, encodeHandshake(TestMessages::serverHello())));
+        Buf expectedServerHello;
+        Error err;
+        EXPECT_EQ(
+            encodeHandshake(
+                expectedServerHello, err, TestMessages::serverHello()),
+            Status::Success);
+        EXPECT_TRUE(folly::IOBufEqualTo()(msg.fragment, expectedServerHello));
         content.data = folly::IOBuf::copyBuffer("writtenshlo");
         return content;
       }));
@@ -1109,7 +1177,10 @@ TEST_F(ServerProtocolTest, TestClientHelloCompressedCertFlow) {
   auto chlo = TestMessages::clientHello();
   CertificateCompressionAlgorithms algos;
   algos.algorithms = {CertificateCompressionAlgorithm::zlib};
-  chlo.extensions.push_back(encodeExtension(algos));
+  Extension ext;
+  Error err;
+  EXPECT_EQ(encodeExtension(ext, err, algos), Status::Success);
+  chlo.extensions.push_back(std::move(ext));
   fizz::Param param = std::move(chlo);
   auto actions = getActions(detail::processEvent(state_, param));
 
@@ -1179,8 +1250,12 @@ TEST_F(ServerProtocolTest, TestECHDecryptionSuccess) {
           [&innerChloSize]() mutable -> folly::Optional<ech::DecrypterResult> {
             auto chlo = TestMessages::clientHello();
             chlo.random.fill(0xEC);
-            chlo.extensions.push_back(
-                encodeExtension(ech::InnerECHClientHello()));
+            Extension ext;
+            Error err;
+            EXPECT_EQ(
+                encodeExtension(ext, err, ech::InnerECHClientHello()),
+                Status::Success);
+            chlo.extensions.push_back(std::move(ext));
             if (chlo.originalEncoding.hasValue()) {
               innerChloSize =
                   chlo.originalEncoding.value()->computeChainDataLength();
@@ -1262,9 +1337,11 @@ TEST_F(ServerProtocolTest, TestECHDecryptionSuccess) {
         const std::string echAcceptFragment = "echaccpt";
         auto expected = TestMessages::serverHello();
         memcpy(expected.random.data() + 24, echAcceptFragment.data(), 8);
-        EXPECT_TRUE(
-            folly::IOBufEqualTo()(
-                msg.fragment, encodeHandshake(std::move(expected))));
+        Buf expectedBuf;
+        Error err;
+        FIZZ_THROW_ON_ERROR(
+            encodeHandshake(expectedBuf, err, std::move(expected)), err);
+        EXPECT_TRUE(folly::IOBufEqualTo()(msg.fragment, expectedBuf));
         content.data = folly::IOBuf::copyBuffer("writtenshlo");
         return content;
       }));
@@ -1562,7 +1639,11 @@ TEST_F(ServerProtocolTest, TestECHDecryptionFailure) {
       .WillOnce(InvokeWithoutArgs([]() -> std::vector<ech::ECHConfig> {
         ech::ECHConfig cfg;
         cfg.version = ech::ECHVersion::Draft15;
-        cfg.ech_config_content = encode(ech::test::getParsedECHConfig());
+        Error err;
+        EXPECT_EQ(
+            encode(
+                cfg.ech_config_content, err, ech::test::getParsedECHConfig()),
+            Status::Success);
         return {std::move(cfg)};
       }));
   context_->setECHDecrypter(decrypter);
@@ -1599,9 +1680,13 @@ TEST_F(ServerProtocolTest, TestECHDecryptionFailure) {
         content.contentType = msg.type;
         content.encryptionLevel = mockWrite_->getEncryptionLevel();
         EXPECT_EQ(msg.type, ContentType::handshake);
-        EXPECT_TRUE(
-            folly::IOBufEqualTo()(
-                msg.fragment, encodeHandshake(TestMessages::serverHello())));
+        Buf expectedServerHello;
+        Error err;
+        EXPECT_EQ(
+            encodeHandshake(
+                expectedServerHello, err, TestMessages::serverHello()),
+            Status::Success);
+        EXPECT_TRUE(folly::IOBufEqualTo()(msg.fragment, expectedServerHello));
         content.data = folly::IOBuf::copyBuffer("writtenshlo");
         return content;
       }));
@@ -1678,10 +1763,16 @@ TEST_F(ServerProtocolTest, TestECHDecryptionFailure) {
         ech::ECHEncryptedExtensions serverECH;
         ech::ECHConfig cfg;
         cfg.version = ech::ECHVersion::Draft15;
-        cfg.ech_config_content = encode(ech::test::getParsedECHConfig());
+        Error err;
+        EXPECT_EQ(
+            encode(
+                cfg.ech_config_content, err, ech::test::getParsedECHConfig()),
+            Status::Success);
         serverECH.retry_configs.push_back(std::move(cfg));
-        modifiedEncryptedExt.extensions.push_back(
-            encodeExtension(std::move(serverECH)));
+        Extension serverECHExt;
+        EXPECT_EQ(
+            encodeExtension(serverECHExt, err, serverECH), Status::Success);
+        modifiedEncryptedExt.extensions.push_back(std::move(serverECHExt));
         Extension ext;
         ext.extension_type = ExtensionType::token_binding;
         ext.extension_data = folly::IOBuf::copyBuffer("someextension");
@@ -1908,9 +1999,13 @@ TEST_F(ServerProtocolTest, TestClientHelloCertRequestFlow) {
         content.contentType = msg.type;
         content.encryptionLevel = mockWrite_->getEncryptionLevel();
         EXPECT_EQ(msg.type, ContentType::handshake);
-        EXPECT_TRUE(
-            folly::IOBufEqualTo()(
-                msg.fragment, encodeHandshake(TestMessages::serverHello())));
+        Buf expectedServerHello;
+        Error err;
+        EXPECT_EQ(
+            encodeHandshake(
+                expectedServerHello, err, TestMessages::serverHello()),
+            Status::Success);
+        EXPECT_TRUE(folly::IOBufEqualTo()(msg.fragment, expectedServerHello));
         content.data = folly::IOBuf::copyBuffer("writtenshlo");
         return content;
       }));
@@ -2201,10 +2296,16 @@ TEST_F(ServerProtocolTest, TestClientHelloPskFlow) {
         TestMessages::removeExtension(shlo, ExtensionType::key_share);
         ServerPresharedKey serverPsk;
         serverPsk.selected_identity = 0;
-        shlo.extensions.push_back(encodeExtension(std::move(serverPsk)));
+        Extension ext;
+        Error err;
+        EXPECT_EQ(encodeExtension(ext, err, serverPsk), Status::Success);
+        shlo.extensions.push_back(std::move(ext));
+        Buf expectedShlo;
+        EXPECT_EQ(
+            encodeHandshake(expectedShlo, err, std::move(shlo)),
+            Status::Success);
         EXPECT_TRUE(
-            folly::IOBufEqualTo()(
-                msg.fragment, encodeHandshake(std::move(shlo))));
+            folly::IOBufEqualTo()(msg.fragment, std::move(expectedShlo)));
         content.data = folly::IOBuf::copyBuffer("writtenshlo");
         return content;
       }));
@@ -2444,10 +2545,16 @@ TEST_F(ServerProtocolTest, TestClientHelloPskDheFlow) {
         auto shlo = TestMessages::serverHello();
         ServerPresharedKey serverPsk;
         serverPsk.selected_identity = 0;
-        shlo.extensions.push_back(encodeExtension(std::move(serverPsk)));
+        Extension ext;
+        Error err;
+        EXPECT_EQ(encodeExtension(ext, err, serverPsk), Status::Success);
+        shlo.extensions.push_back(std::move(ext));
+        Buf expectedShlo;
+        EXPECT_EQ(
+            encodeHandshake(expectedShlo, err, std::move(shlo)),
+            Status::Success);
         EXPECT_TRUE(
-            folly::IOBufEqualTo()(
-                msg.fragment, encodeHandshake(std::move(shlo))));
+            folly::IOBufEqualTo()(msg.fragment, std::move(expectedShlo)));
         TLSContent content;
         content.contentType = msg.type;
         content.encryptionLevel = mockWrite_->getEncryptionLevel();
@@ -2647,10 +2754,14 @@ TEST_F(ServerProtocolTest, TestClientHelloHelloRetryRequestFlow) {
         content.contentType = msg.type;
         content.encryptionLevel = mockWrite_->getEncryptionLevel();
         EXPECT_EQ(msg.type, ContentType::handshake);
+        Buf expectedHrr;
+        Error err;
+        EXPECT_EQ(
+            encodeHandshake(
+                expectedHrr, err, TestMessages::helloRetryRequest()),
+            Status::Success);
         EXPECT_TRUE(
-            folly::IOBufEqualTo()(
-                msg.fragment,
-                encodeHandshake(TestMessages::helloRetryRequest())));
+            folly::IOBufEqualTo()(msg.fragment, std::move(expectedHrr)));
         content.data = folly::IOBuf::copyBuffer("writtenhrr");
         return content;
       }));
@@ -2736,9 +2847,15 @@ TEST_F(ServerProtocolTest, TestRetryClientHelloFullHandshakeFlow) {
         content.contentType = msg.type;
         content.encryptionLevel = mockWrite_->getEncryptionLevel();
         EXPECT_EQ(msg.type, ContentType::handshake);
+        Buf expectedServerHello;
+        Error err;
+        EXPECT_EQ(
+            encodeHandshake(
+                expectedServerHello, err, TestMessages::serverHello()),
+            Status::Success);
         EXPECT_TRUE(
             folly::IOBufEqualTo()(
-                msg.fragment, encodeHandshake(TestMessages::serverHello())));
+                msg.fragment, std::move(expectedServerHello)));
         content.data = folly::IOBuf::copyBuffer("writtenshlo");
         return content;
       }));
@@ -3023,10 +3140,16 @@ TEST_F(ServerProtocolTest, TestRetryClientHelloPskDheFlow) {
         auto shlo = TestMessages::serverHello();
         ServerPresharedKey serverPsk;
         serverPsk.selected_identity = 0;
-        shlo.extensions.push_back(encodeExtension(std::move(serverPsk)));
+        Extension ext;
+        Error err;
+        EXPECT_EQ(encodeExtension(ext, err, serverPsk), Status::Success);
+        shlo.extensions.push_back(std::move(ext));
+        Buf expectedShlo;
+        EXPECT_EQ(
+            encodeHandshake(expectedShlo, err, std::move(shlo)),
+            Status::Success);
         EXPECT_TRUE(
-            folly::IOBufEqualTo()(
-                msg.fragment, encodeHandshake(std::move(shlo))));
+            folly::IOBufEqualTo()(msg.fragment, std::move(expectedShlo)));
         content.data = folly::IOBuf::copyBuffer("writtenshlo");
         return content;
       }));
@@ -3203,8 +3326,12 @@ TEST_F(ServerProtocolTest, TestRetryClientHelloECHFlow) {
               std::unique_ptr<hpke::HpkeContext>& context) -> ClientHello {
             auto innerchlo = TestMessages::clientHello();
             innerchlo.random.fill(0xEC);
-            innerchlo.extensions.push_back(
-                encodeExtension(ech::InnerECHClientHello()));
+            Extension ext;
+            Error err;
+            EXPECT_EQ(
+                encodeExtension(ext, err, ech::InnerECHClientHello()),
+                Status::Success);
+            innerchlo.extensions.push_back(std::move(ext));
             return innerchlo;
           }));
   EXPECT_CALL(
@@ -3279,9 +3406,13 @@ TEST_F(ServerProtocolTest, TestRetryClientHelloECHFlow) {
                 (shlo.random.size() - ech::kEchAcceptConfirmationSize),
             "echaccpt",
             ech::kEchAcceptConfirmationSize);
+        Buf expectedShlo;
+        Error err;
+        EXPECT_EQ(
+            encodeHandshake(expectedShlo, err, std::move(shlo)),
+            Status::Success);
         EXPECT_TRUE(
-            folly::IOBufEqualTo()(
-                msg.fragment, encodeHandshake(std::move(shlo))));
+            folly::IOBufEqualTo()(msg.fragment, std::move(expectedShlo)));
         content.data = folly::IOBuf::copyBuffer("writtenshlo");
         return content;
       }));
@@ -3526,7 +3657,11 @@ TEST_F(ServerProtocolTest, TestRetryClientHelloECHRejectedFlow) {
       .WillOnce(InvokeWithoutArgs([]() -> std::vector<ech::ECHConfig> {
         ech::ECHConfig cfg;
         cfg.version = ech::ECHVersion::Draft15;
-        cfg.ech_config_content = encode(ech::test::getParsedECHConfig());
+        Error err;
+        EXPECT_EQ(
+            encode(
+                cfg.ech_config_content, err, ech::test::getParsedECHConfig()),
+            Status::Success);
         return {std::move(cfg)};
       }));
   context_->setECHDecrypter(decrypter);
@@ -3570,9 +3705,15 @@ TEST_F(ServerProtocolTest, TestRetryClientHelloECHRejectedFlow) {
         content.contentType = msg.type;
         content.encryptionLevel = mockWrite_->getEncryptionLevel();
         EXPECT_EQ(msg.type, ContentType::handshake);
+        Buf expectedServerHello;
+        Error err;
+        EXPECT_EQ(
+            encodeHandshake(
+                expectedServerHello, err, TestMessages::serverHello()),
+            Status::Success);
         EXPECT_TRUE(
             folly::IOBufEqualTo()(
-                msg.fragment, encodeHandshake(TestMessages::serverHello())));
+                msg.fragment, std::move(expectedServerHello)));
         content.data = folly::IOBuf::copyBuffer("writtenshlo");
         return content;
       }));
@@ -3629,9 +3770,16 @@ TEST_F(ServerProtocolTest, TestRetryClientHelloECHRejectedFlow) {
         ech::ECHEncryptedExtensions serverECH;
         ech::ECHConfig cfg;
         cfg.version = ech::ECHVersion::Draft15;
-        cfg.ech_config_content = encode(ech::test::getParsedECHConfig());
+        Error err;
+        EXPECT_EQ(
+            encode(
+                cfg.ech_config_content, err, ech::test::getParsedECHConfig()),
+            Status::Success);
         serverECH.retry_configs.push_back(std::move(cfg));
-        ee.extensions.push_back(encodeExtension(std::move(serverECH)));
+        Extension serverECHExt;
+        EXPECT_EQ(
+            encodeExtension(serverECHExt, err, serverECH), Status::Success);
+        ee.extensions.push_back(std::move(serverECHExt));
         EXPECT_TRUE(
             folly::IOBufEqualTo()(
                 msg.fragment,
@@ -3895,10 +4043,15 @@ TEST_F(ServerProtocolTest, TestClientHelloPskDheEarlyFlow) {
         auto shlo = TestMessages::serverHello();
         ServerPresharedKey serverPsk;
         serverPsk.selected_identity = 0;
-        shlo.extensions.push_back(encodeExtension(std::move(serverPsk)));
-        EXPECT_TRUE(
-            folly::IOBufEqualTo()(
-                msg.fragment, encodeHandshake(std::move(shlo))));
+        Extension ext;
+        Error err;
+        EXPECT_EQ(encodeExtension(ext, err, serverPsk), Status::Success);
+        shlo.extensions.push_back(std::move(ext));
+        Buf expectedShlo;
+        EXPECT_EQ(
+            encodeHandshake(expectedShlo, err, std::move(shlo)),
+            Status::Success);
+        EXPECT_TRUE(folly::IOBufEqualTo()(msg.fragment, expectedShlo));
         content.data = folly::IOBuf::copyBuffer("writtenshlo");
         return content;
       }));
@@ -4184,10 +4337,16 @@ TEST_F(ServerProtocolTest, TestClientHelloPskEarlyFlow) {
         TestMessages::removeExtension(shlo, ExtensionType::key_share);
         ServerPresharedKey serverPsk;
         serverPsk.selected_identity = 0;
-        shlo.extensions.push_back(encodeExtension(std::move(serverPsk)));
+        Extension ext;
+        Error err;
+        EXPECT_EQ(encodeExtension(ext, err, serverPsk), Status::Success);
+        shlo.extensions.push_back(std::move(ext));
+        Buf expectedShlo;
+        EXPECT_EQ(
+            encodeHandshake(expectedShlo, err, std::move(shlo)),
+            Status::Success);
         EXPECT_TRUE(
-            folly::IOBufEqualTo()(
-                msg.fragment, encodeHandshake(std::move(shlo))));
+            folly::IOBufEqualTo()(msg.fragment, std::move(expectedShlo)));
         content.data = folly::IOBuf::copyBuffer("writtenshlo");
         return content;
       }));
@@ -4459,7 +4618,10 @@ TEST_F(ServerProtocolTest, TestClientHelloPskModeMismatch) {
   auto chlo = TestMessages::clientHello();
   TestMessages::removeExtension(chlo, ExtensionType::psk_key_exchange_modes);
   PskKeyExchangeModes modes;
-  chlo.extensions.push_back(encodeExtension(std::move(modes)));
+  Extension ext;
+  Error err;
+  EXPECT_EQ(encodeExtension(ext, err, modes), Status::Success);
+  chlo.extensions.push_back(std::move(ext));
   TestMessages::addPsk(chlo);
   fizz::Param param = std::move(chlo);
   auto actions = getActions(detail::processEvent(state_, param));
@@ -4523,7 +4685,10 @@ TEST_F(ServerProtocolTest, TestClientHelloPskBadBinder) {
   PskBinder binder;
   binder.binder = folly::IOBuf::copyBuffer("verifyxxxx");
   cpk.binders.push_back(std::move(binder));
-  chlo.extensions.push_back(encodeExtension(std::move(cpk)));
+  Extension ext;
+  Error err;
+  EXPECT_EQ(encodeExtension(ext, err, cpk), Status::Success);
+  chlo.extensions.push_back(std::move(ext));
   fizz::Param param = std::move(chlo);
   auto actions = getActions(detail::processEvent(state_, param));
   expectError<FizzException>(
@@ -4589,8 +4754,10 @@ TEST_F(ServerProtocolTest, TestClientHelloSupportedVersionsMismatch) {
   TestMessages::removeExtension(clientHello, ExtensionType::supported_versions);
   SupportedVersions supportedVersions;
   supportedVersions.versions.push_back(static_cast<ProtocolVersion>(0x0200));
-  clientHello.extensions.push_back(
-      encodeExtension(std::move(supportedVersions)));
+  Extension ext;
+  Error err;
+  EXPECT_EQ(encodeExtension(ext, err, supportedVersions), Status::Success);
+  clientHello.extensions.push_back(std::move(ext));
   fizz::Param param = std::move(clientHello);
   auto actions = getActions(detail::processEvent(state_, param));
   expectError<FizzException>(
@@ -4625,7 +4792,10 @@ TEST_F(ServerProtocolTest, TestClientHelloNamedGroupsMismatch) {
   TestMessages::removeExtension(clientHello, ExtensionType::supported_groups);
   SupportedGroups sg;
   sg.named_group_list.push_back(static_cast<NamedGroup>(0x0707));
-  clientHello.extensions.push_back(encodeExtension(std::move(sg)));
+  Extension ext;
+  Error err;
+  EXPECT_EQ(encodeExtension(ext, err, sg), Status::Success);
+  clientHello.extensions.push_back(std::move(ext));
   fizz::Param param = std::move(clientHello);
   auto actions = getActions(detail::processEvent(state_, param));
   expectError<FizzException>(
@@ -4686,7 +4856,10 @@ TEST_F(ServerProtocolTest, TestClientHelloWithAlpnAllowMismatch) {
   ProtocolName h3;
   h3.name = folly::IOBuf::copyBuffer("h3");
   alpn.protocol_name_list.push_back(std::move(h3));
-  chlo.extensions.push_back(encodeExtension(std::move(alpn)));
+  Extension ext;
+  Error err;
+  EXPECT_EQ(encodeExtension(ext, err, alpn), Status::Success);
+  chlo.extensions.push_back(std::move(ext));
   fizz::Param param = std::move(chlo);
   auto actions = getActions(detail::processEvent(state_, param));
   expectActions<MutateState, WriteToSocket, SecretAvailable>(actions);
@@ -4704,7 +4877,10 @@ TEST_F(ServerProtocolTest, TestClientHelloMismatchAlpnAllowMismatch) {
   ProtocolName gopher;
   gopher.name = folly::IOBuf::copyBuffer("gopher");
   alpn.protocol_name_list.push_back(std::move(gopher));
-  chlo.extensions.push_back(encodeExtension(std::move(alpn)));
+  Extension ext;
+  Error err;
+  EXPECT_EQ(encodeExtension(ext, err, alpn), Status::Success);
+  chlo.extensions.push_back(std::move(ext));
   fizz::Param param = std::move(chlo);
   auto actions = getActions(detail::processEvent(state_, param));
   expectActions<MutateState, WriteToSocket, SecretAvailable>(actions);
@@ -4735,7 +4911,10 @@ TEST_F(ServerProtocolTest, TestClientHelloWithAlpnOptional) {
   ProtocolName h3;
   h3.name = folly::IOBuf::copyBuffer("h3");
   alpn.protocol_name_list.push_back(std::move(h3));
-  chlo.extensions.push_back(encodeExtension(std::move(alpn)));
+  Extension ext;
+  Error err;
+  EXPECT_EQ(encodeExtension(ext, err, alpn), Status::Success);
+  chlo.extensions.push_back(std::move(ext));
   fizz::Param param = std::move(chlo);
   auto actions = getActions(detail::processEvent(state_, param));
   expectActions<MutateState, WriteToSocket, SecretAvailable>(actions);
@@ -4753,7 +4932,10 @@ TEST_F(ServerProtocolTest, TestClientHelloMismatchAlpnOptional) {
   ProtocolName gopher;
   gopher.name = folly::IOBuf::copyBuffer("gopher");
   alpn.protocol_name_list.push_back(std::move(gopher));
-  chlo.extensions.push_back(encodeExtension(std::move(alpn)));
+  Extension ext;
+  Error err;
+  EXPECT_EQ(encodeExtension(ext, err, alpn), Status::Success);
+  chlo.extensions.push_back(std::move(ext));
   fizz::Param param = std::move(chlo);
   auto actions = getActions(detail::processEvent(state_, param));
   expectError<FizzException>(
@@ -4784,7 +4966,10 @@ TEST_F(ServerProtocolTest, TestClientHelloWithAlpnRequired) {
   ProtocolName h3;
   h3.name = folly::IOBuf::copyBuffer("h3");
   alpn.protocol_name_list.push_back(std::move(h3));
-  chlo.extensions.push_back(encodeExtension(std::move(alpn)));
+  Extension ext;
+  Error err;
+  EXPECT_EQ(encodeExtension(ext, err, alpn), Status::Success);
+  chlo.extensions.push_back(std::move(ext));
   fizz::Param param = std::move(chlo);
   auto actions = getActions(detail::processEvent(state_, param));
   expectActions<MutateState, WriteToSocket, SecretAvailable>(actions);
@@ -4802,7 +4987,10 @@ TEST_F(ServerProtocolTest, TestClientHelloMismatchAlpnRequired) {
   ProtocolName gopher;
   gopher.name = folly::IOBuf::copyBuffer("gopher");
   alpn.protocol_name_list.push_back(std::move(gopher));
-  chlo.extensions.push_back(encodeExtension(std::move(alpn)));
+  Extension ext;
+  Error err;
+  EXPECT_EQ(encodeExtension(ext, err, alpn), Status::Success);
+  chlo.extensions.push_back(std::move(ext));
   fizz::Param param = std::move(chlo);
   auto actions = getActions(detail::processEvent(state_, param));
   expectError<FizzException>(
@@ -4823,7 +5011,10 @@ TEST_F(ServerProtocolTest, TestClientHelloServerPref) {
   ProtocolName h2;
   h2.name = folly::IOBuf::copyBuffer("h2");
   alpn.protocol_name_list.push_back(std::move(h2));
-  chlo.extensions.push_back(encodeExtension(std::move(alpn)));
+  Extension ext;
+  Error err;
+  EXPECT_EQ(encodeExtension(ext, err, alpn), Status::Success);
+  chlo.extensions.push_back(std::move(ext));
   fizz::Param param = std::move(chlo);
   auto actions = getActions(detail::processEvent(state_, param));
   expectActions<MutateState, WriteToSocket, SecretAvailable>(actions);
@@ -5024,10 +5215,15 @@ TEST_F(ServerProtocolTest, TestClientHelloCookieRejectEarlyData) {
   setUpExpectingClientHello();
 
   auto chlo = TestMessages::clientHello();
-  chlo.extensions.push_back(encodeExtension(ClientEarlyData()));
+  Extension ext1;
+  Error err;
+  EXPECT_EQ(encodeExtension(ext1, err, ClientEarlyData()), Status::Success);
+  chlo.extensions.push_back(std::move(ext1));
   Cookie c;
   c.cookie = folly::IOBuf::copyBuffer("cookie");
-  chlo.extensions.push_back(encodeExtension(std::move(c)));
+  Extension ext2;
+  EXPECT_EQ(encodeExtension(ext2, err, c), Status::Success);
+  chlo.extensions.push_back(std::move(ext2));
   TestMessages::addPsk(chlo);
   fizz::Param param = std::move(chlo);
 
@@ -5122,8 +5318,13 @@ TEST_F(ServerProtocolTest, TestClientHelloRejectEarlyDataDiffAlpn) {
   ProtocolName h2;
   h2.name = folly::IOBuf::copyBuffer("h3");
   alpn.protocol_name_list.push_back(std::move(h2));
-  chlo.extensions.push_back(encodeExtension(std::move(alpn)));
-  chlo.extensions.push_back(encodeExtension(ClientEarlyData()));
+  Extension ext1;
+  Error err;
+  EXPECT_EQ(encodeExtension(ext1, err, alpn), Status::Success);
+  chlo.extensions.push_back(std::move(ext1));
+  Extension ext2;
+  EXPECT_EQ(encodeExtension(ext2, err, ClientEarlyData()), Status::Success);
+  chlo.extensions.push_back(std::move(ext2));
   TestMessages::addPsk(chlo);
   fizz::Param param = std::move(chlo);
 
@@ -5163,7 +5364,10 @@ TEST_F(ServerProtocolTest, TestClientHelloRejectEarlyDataClockBehind) {
       std::chrono::system_clock::time_point(std::chrono::seconds(290)));
 
   auto chlo = TestMessages::clientHello();
-  chlo.extensions.push_back(encodeExtension(ClientEarlyData()));
+  Extension ext;
+  Error err;
+  EXPECT_EQ(encodeExtension(ext, err, ClientEarlyData()), Status::Success);
+  chlo.extensions.push_back(std::move(ext));
   // Set age here to 4 seconds (6 seconds behind)
   TestMessages::addPsk(chlo, 4000);
   fizz::Param param = std::move(chlo);
@@ -5189,7 +5393,10 @@ TEST_F(ServerProtocolTest, TestClientHelloRejectEarlyDataClockAhead) {
       std::chrono::system_clock::time_point(std::chrono::seconds(290)));
 
   auto chlo = TestMessages::clientHello();
-  chlo.extensions.push_back(encodeExtension(ClientEarlyData()));
+  Extension ext;
+  Error err;
+  EXPECT_EQ(encodeExtension(ext, err, ClientEarlyData()), Status::Success);
+  chlo.extensions.push_back(std::move(ext));
   // Client believes issued 16 seconds ago (6 seconds ahead);
   TestMessages::addPsk(chlo, 16000);
   fizz::Param param = std::move(chlo);
@@ -5223,7 +5430,10 @@ TEST_F(ServerProtocolTest, TestClientHelloRejectEarlyDataTicketAgeOverflow) {
       }));
 
   auto chlo = TestMessages::clientHello();
-  chlo.extensions.push_back(encodeExtension(ClientEarlyData()));
+  Extension ext;
+  Error err;
+  EXPECT_EQ(encodeExtension(ext, err, ClientEarlyData()), Status::Success);
+  chlo.extensions.push_back(std::move(ext));
   TestMessages::addPsk(chlo, 2000000);
   fizz::Param param = std::move(chlo);
 
@@ -5256,7 +5466,10 @@ TEST_F(ServerProtocolTest, TestClientHelloRejectEarlyDataNegativeExpectedAge) {
       }));
 
   auto chlo = TestMessages::clientHello();
-  chlo.extensions.push_back(encodeExtension(ClientEarlyData()));
+  Extension ext;
+  Error err;
+  EXPECT_EQ(encodeExtension(ext, err, ClientEarlyData()), Status::Success);
+  chlo.extensions.push_back(std::move(ext));
   TestMessages::addPsk(chlo, 2000000);
   fizz::Param param = std::move(chlo);
 
@@ -5403,7 +5616,10 @@ TEST_F(ServerProtocolTest, TestClientHelloNoCompressionMethods) {
 TEST_F(ServerProtocolTest, TestClientHelloDuplicateExtensions) {
   setUpExpectingClientHello();
   auto chlo = TestMessages::clientHello();
-  chlo.extensions.push_back(encodeExtension(SupportedGroups()));
+  Extension ext;
+  Error err;
+  EXPECT_EQ(encodeExtension(ext, err, SupportedGroups()), Status::Success);
+  chlo.extensions.push_back(std::move(ext));
   fizz::Param param = std::move(chlo);
   auto actions = getActions(detail::processEvent(state_, param));
   expectError<FizzException>(
@@ -5426,7 +5642,10 @@ TEST_F(ServerProtocolTest, TestClientHelloDuplicateGroups) {
   entry2.key_exchange = folly::IOBuf::copyBuffer("keyshare");
   keyShare.client_shares.push_back(std::move(entry2));
 
-  chlo.extensions.push_back(encodeExtension(std::move(keyShare)));
+  Extension ext;
+  Error err;
+  EXPECT_EQ(encodeExtension(ext, err, keyShare), Status::Success);
+  chlo.extensions.push_back(std::move(ext));
   fizz::Param param = std::move(chlo);
 
   auto actions = getActions(detail::processEvent(state_, param));
@@ -5441,7 +5660,10 @@ TEST_F(ServerProtocolTest, TestRetryClientHelloStillNoKeyShare) {
   auto clientHello = TestMessages::clientHello();
   TestMessages::removeExtension(clientHello, ExtensionType::key_share);
   ClientKeyShare keyShare;
-  clientHello.extensions.push_back(encodeExtension(std::move(keyShare)));
+  Extension ext;
+  Error err;
+  EXPECT_EQ(encodeExtension(ext, err, keyShare), Status::Success);
+  clientHello.extensions.push_back(std::move(ext));
   fizz::Param param = std::move(clientHello);
   auto actions = getActions(detail::processEvent(state_, param));
   expectError<FizzException>(
@@ -5454,7 +5676,10 @@ TEST_F(ServerProtocolTest, TestRetryClientHelloCookie) {
   auto clientHello = TestMessages::clientHello();
   Cookie c;
   c.cookie = folly::IOBuf::copyBuffer("cookie");
-  clientHello.extensions.push_back(encodeExtension(std::move(c)));
+  Extension ext;
+  Error err;
+  EXPECT_EQ(encodeExtension(ext, err, c), Status::Success);
+  clientHello.extensions.push_back(std::move(ext));
   fizz::Param param = std::move(clientHello);
   auto actions = getActions(detail::processEvent(state_, param));
   expectError<FizzException>(
@@ -5488,7 +5713,10 @@ TEST_F(ServerProtocolTest, TestRetryClientHelloECHCipherMismatch) {
   echExt.config_id = 0xFB;
   echExt.enc = folly::IOBuf::create(0);
   echExt.payload = folly::IOBuf::copyBuffer("encryptedchlo");
-  chlo.extensions.push_back(encodeExtension(std::move(echExt)));
+  Extension ext;
+  Error err;
+  EXPECT_EQ(encodeExtension(ext, err, echExt), Status::Success);
+  chlo.extensions.push_back(std::move(ext));
   fizz::Param param = std::move(chlo);
   auto actions = getActions(detail::processEvent(state_, param));
   expectError<FizzException>(
@@ -5571,7 +5799,10 @@ TEST_F(ServerProtocolTest, TestClientHelloCookie) {
   auto chlo = TestMessages::clientHello();
   Cookie c;
   c.cookie = folly::IOBuf::copyBuffer("cookie");
-  chlo.extensions.push_back(encodeExtension(std::move(c)));
+  Extension ext;
+  Error err;
+  EXPECT_EQ(encodeExtension(ext, err, c), Status::Success);
+  chlo.extensions.push_back(std::move(ext));
   fizz::Param param = std::move(chlo);
 
   auto actions = getActions(detail::processEvent(state_, param));
@@ -5595,16 +5826,25 @@ TEST_F(ServerProtocolTest, TestClientHelloCookieECH) {
             auto chloinner = TestMessages::clientHello();
             Cookie c;
             c.cookie = folly::IOBuf::copyBuffer("echcookie");
-            chloinner.extensions.push_back(encodeExtension(std::move(c)));
-            chloinner.extensions.push_back(
-                encodeExtension(ech::InnerECHClientHello()));
+            Extension ext1;
+            Error err;
+            EXPECT_EQ(encodeExtension(ext1, err, c), Status::Success);
+            chloinner.extensions.push_back(std::move(ext1));
+            Extension ext2;
+            EXPECT_EQ(
+                encodeExtension(ext2, err, ech::InnerECHClientHello()),
+                Status::Success);
+            chloinner.extensions.push_back(std::move(ext2));
             return chloinner;
           }));
 
   auto chlo = setupClientHelloOuterHRR();
   Cookie c;
   c.cookie = folly::IOBuf::copyBuffer("echcookie");
-  chlo.extensions.push_back(encodeExtension(std::move(c)));
+  Extension ext;
+  Error err;
+  EXPECT_EQ(encodeExtension(ext, err, c), Status::Success);
+  chlo.extensions.push_back(std::move(ext));
   fizz::Param param = std::move(chlo);
 
   auto actions = getActions(detail::processEvent(state_, param));
@@ -5632,14 +5872,20 @@ TEST_F(ServerProtocolTest, TestClientHelloCookieECHMissingInner) {
             auto chloinner = TestMessages::clientHello();
             Cookie c;
             c.cookie = folly::IOBuf::copyBuffer("echcookie");
-            chloinner.extensions.push_back(encodeExtension(std::move(c)));
+            Extension ext;
+            Error err;
+            EXPECT_EQ(encodeExtension(ext, err, c), Status::Success);
+            chloinner.extensions.push_back(std::move(ext));
             return chloinner;
           }));
 
   auto chlo = setupClientHelloOuterHRR();
   Cookie c;
   c.cookie = folly::IOBuf::copyBuffer("echcookie");
-  chlo.extensions.push_back(encodeExtension(std::move(c)));
+  Extension ext;
+  Error err;
+  EXPECT_EQ(encodeExtension(ext, err, c), Status::Success);
+  chlo.extensions.push_back(std::move(ext));
   fizz::Param param = std::move(chlo);
 
   auto actions = getActions(detail::processEvent(state_, param));
@@ -5656,7 +5902,10 @@ TEST_F(ServerProtocolTest, TestClientHelloCookieFail) {
   auto chlo = TestMessages::clientHello();
   Cookie c;
   c.cookie = folly::IOBuf::copyBuffer("xyz");
-  chlo.extensions.push_back(encodeExtension(std::move(c)));
+  Extension ext;
+  Error err;
+  EXPECT_EQ(encodeExtension(ext, err, c), Status::Success);
+  chlo.extensions.push_back(std::move(ext));
   fizz::Param param = std::move(chlo);
 
   auto actions = getActions(detail::processEvent(state_, param));
@@ -5670,7 +5919,10 @@ TEST_F(ServerProtocolTest, TestClientHelloCookieNoCipher) {
   auto chlo = TestMessages::clientHello();
   Cookie c;
   c.cookie = folly::IOBuf::copyBuffer("cookie");
-  chlo.extensions.push_back(encodeExtension(std::move(c)));
+  Extension ext;
+  Error err;
+  EXPECT_EQ(encodeExtension(ext, err, c), Status::Success);
+  chlo.extensions.push_back(std::move(ext));
   fizz::Param param = std::move(chlo);
 
   auto actions = getActions(detail::processEvent(state_, param));
@@ -5696,7 +5948,10 @@ TEST_F(ServerProtocolTest, TestClientHelloCookieVersionMismatch) {
   auto chlo = TestMessages::clientHello();
   Cookie c;
   c.cookie = folly::IOBuf::copyBuffer("cookie");
-  chlo.extensions.push_back(encodeExtension(std::move(c)));
+  Extension ext;
+  Error err;
+  EXPECT_EQ(encodeExtension(ext, err, c), Status::Success);
+  chlo.extensions.push_back(std::move(ext));
   fizz::Param param = std::move(chlo);
 
   auto actions = getActions(detail::processEvent(state_, param));
@@ -5724,7 +5979,10 @@ TEST_F(ServerProtocolTest, TestClientHelloCookieCipherMismatch) {
   auto chlo = TestMessages::clientHello();
   Cookie c;
   c.cookie = folly::IOBuf::copyBuffer("cookie");
-  chlo.extensions.push_back(encodeExtension(std::move(c)));
+  Extension ext;
+  Error err;
+  EXPECT_EQ(encodeExtension(ext, err, c), Status::Success);
+  chlo.extensions.push_back(std::move(ext));
   fizz::Param param = std::move(chlo);
 
   auto actions = getActions(detail::processEvent(state_, param));
@@ -5753,7 +6011,10 @@ TEST_F(ServerProtocolTest, TestClientHelloCookieGroupMismatch) {
   auto chlo = TestMessages::clientHello();
   Cookie c;
   c.cookie = folly::IOBuf::copyBuffer("cookie");
-  chlo.extensions.push_back(encodeExtension(std::move(c)));
+  Extension ext;
+  Error err;
+  EXPECT_EQ(encodeExtension(ext, err, c), Status::Success);
+  chlo.extensions.push_back(std::move(ext));
   fizz::Param param = std::move(chlo);
 
   auto actions = getActions(detail::processEvent(state_, param));
@@ -5770,10 +6031,15 @@ TEST_F(ServerProtocolTest, TestClientHelloCookieNoGroup) {
   auto chlo = TestMessages::clientHello();
   Cookie c;
   c.cookie = folly::IOBuf::copyBuffer("cookie");
-  chlo.extensions.push_back(encodeExtension(std::move(c)));
+  Extension ext1;
+  Error err;
+  EXPECT_EQ(encodeExtension(ext1, err, c), Status::Success);
+  chlo.extensions.push_back(std::move(ext1));
   TestMessages::removeExtension(chlo, ExtensionType::key_share);
   ClientKeyShare keyShare;
-  chlo.extensions.push_back(encodeExtension(std::move(keyShare)));
+  Extension ext2;
+  EXPECT_EQ(encodeExtension(ext2, err, keyShare), Status::Success);
+  chlo.extensions.push_back(std::move(ext2));
   fizz::Param param = std::move(chlo);
 
   auto actions = getActions(detail::processEvent(state_, param));
@@ -5792,14 +6058,19 @@ TEST_F(ServerProtocolTest, TestClientHelloCookieRejectECHCipher) {
       chlo, ExtensionType::encrypted_client_hello);
   Cookie c;
   c.cookie = folly::IOBuf::copyBuffer("echcookie");
-  chlo.extensions.push_back(encodeExtension(std::move(c)));
+  Extension ext1;
+  Error err;
+  EXPECT_EQ(encodeExtension(ext1, err, c), Status::Success);
+  chlo.extensions.push_back(std::move(ext1));
   ech::OuterECHClientHello echExt;
   echExt.cipher_suite = ech::HpkeSymmetricCipherSuite{
       hpke::KDFId::Sha512, hpke::AeadId::TLS_AES_128_GCM_SHA256};
   echExt.config_id = 0xFB;
   echExt.enc = folly::IOBuf::create(0);
   echExt.payload = folly::IOBuf::copyBuffer("encryptedchlo");
-  chlo.extensions.push_back(encodeExtension(std::move(echExt)));
+  Extension ext2;
+  EXPECT_EQ(encodeExtension(ext2, err, echExt), Status::Success);
+  chlo.extensions.push_back(std::move(ext2));
   fizz::Param param = std::move(chlo);
 
   auto actions = getActions(detail::processEvent(state_, param));
@@ -5818,7 +6089,10 @@ TEST_F(ServerProtocolTest, TestClientHelloCookieRejectECHRequired) {
   auto chlo = TestMessages::clientHello();
   Cookie c;
   c.cookie = folly::IOBuf::copyBuffer("echcookie");
-  chlo.extensions.push_back(encodeExtension(std::move(c)));
+  Extension ext;
+  Error err;
+  EXPECT_EQ(encodeExtension(ext, err, c), Status::Success);
+  chlo.extensions.push_back(std::move(ext));
   fizz::Param param = std::move(chlo);
 
   auto actions = getActions(detail::processEvent(state_, param));
@@ -5833,7 +6107,10 @@ TEST_F(ServerProtocolTest, TestNoCertCompressionAlgorithmMatch) {
   auto chlo = TestMessages::clientHello();
   CertificateCompressionAlgorithms algos;
   algos.algorithms = {static_cast<CertificateCompressionAlgorithm>(0xfb)};
-  chlo.extensions.push_back(encodeExtension(algos));
+  Extension ext;
+  Error err;
+  EXPECT_EQ(encodeExtension(ext, err, algos), Status::Success);
+  chlo.extensions.push_back(std::move(ext));
   fizz::Param param = std::move(chlo);
   auto actions = getActions(detail::processEvent(state_, param));
   expectActions<MutateState, WriteToSocket, SecretAvailable>(actions);
@@ -5847,7 +6124,10 @@ TEST_F(ServerProtocolTest, TestCertCompressionRequestedNotSupported) {
   auto chlo = TestMessages::clientHello();
   CertificateCompressionAlgorithms algos;
   algos.algorithms = {static_cast<CertificateCompressionAlgorithm>(0xfb)};
-  chlo.extensions.push_back(encodeExtension(algos));
+  Extension ext;
+  Error err;
+  EXPECT_EQ(encodeExtension(ext, err, algos), Status::Success);
+  chlo.extensions.push_back(std::move(ext));
   fizz::Param param = std::move(chlo);
   auto actions = getActions(detail::processEvent(state_, param));
   expectActions<MutateState, WriteToSocket, SecretAvailable>(actions);
@@ -6004,10 +6284,13 @@ TEST_F(ServerProtocolTest, TestFullHandshakeFinished) {
         content.contentType = msg.type;
         content.encryptionLevel = mockWrite_->getEncryptionLevel();
         EXPECT_EQ(msg.type, ContentType::handshake);
+        Buf expectedNst;
+        Error err;
+        EXPECT_EQ(
+            encodeHandshake(expectedNst, err, TestMessages::newSessionTicket()),
+            Status::Success);
         EXPECT_TRUE(
-            folly::IOBufEqualTo()(
-                msg.fragment,
-                encodeHandshake(TestMessages::newSessionTicket())));
+            folly::IOBufEqualTo()(msg.fragment, std::move(expectedNst)));
         content.data = folly::IOBuf::copyBuffer("handshake");
         return content;
       }));
@@ -6067,10 +6350,15 @@ TEST_F(ServerProtocolTest, TestFinishedTicketEarly) {
         auto nst = TestMessages::newSessionTicket();
         TicketEarlyData early;
         early.max_early_data_size = 0xffffffff;
-        nst.extensions.push_back(encodeExtension(std::move(early)));
+        Extension ext;
+        Error err;
+        EXPECT_EQ(encodeExtension(ext, err, early), Status::Success);
+        nst.extensions.push_back(std::move(ext));
+        Buf expectedNst;
+        EXPECT_EQ(
+            encodeHandshake(expectedNst, err, std::move(nst)), Status::Success);
         EXPECT_TRUE(
-            folly::IOBufEqualTo()(
-                msg.fragment, encodeHandshake(std::move(nst))));
+            folly::IOBufEqualTo()(msg.fragment, std::move(expectedNst)));
         content.data = folly::IOBuf::copyBuffer("handshake");
         return content;
       }));
@@ -6195,10 +6483,12 @@ TEST_F(ServerProtocolTest, TestWriteNewSessionTicket) {
         content.contentType = msg.type;
         content.encryptionLevel = appWrite_->getEncryptionLevel();
         EXPECT_EQ(msg.type, ContentType::handshake);
-        EXPECT_TRUE(
-            folly::IOBufEqualTo()(
-                msg.fragment,
-                encodeHandshake(TestMessages::newSessionTicket())));
+        Buf encoded;
+        Error err;
+        EXPECT_EQ(
+            encodeHandshake(encoded, err, TestMessages::newSessionTicket()),
+            Status::Success);
+        EXPECT_TRUE(folly::IOBufEqualTo()(msg.fragment, std::move(encoded)));
         content.data = nstBuf->clone();
         return content;
       }));
@@ -6211,7 +6501,7 @@ TEST_F(ServerProtocolTest, TestWriteNewSessionTicket) {
   EXPECT_TRUE(folly::IOBufEqualTo()(nstBuf, write.contents[0].data));
 }
 
-TEST_F(ServerProtocolTest, TestWriteNewSessionTicketWithTicketEarly) {
+TEST_F(ServerProtocolTest, TestWriteNewSessionTicketWithTicketEarlyData) {
   acceptEarlyData();
   setUpAcceptingData();
   context_->setSendNewSessionTicket(false);
@@ -6225,10 +6515,15 @@ TEST_F(ServerProtocolTest, TestWriteNewSessionTicketWithTicketEarly) {
         auto nst = TestMessages::newSessionTicket();
         TicketEarlyData early;
         early.max_early_data_size = 0xffffffff;
-        nst.extensions.push_back(encodeExtension(std::move(early)));
+        Extension ext;
+        Error err;
+        EXPECT_EQ(encodeExtension(ext, err, early), Status::Success);
+        nst.extensions.push_back(std::move(ext));
+        Buf expectedNst;
+        EXPECT_EQ(
+            encodeHandshake(expectedNst, err, std::move(nst)), Status::Success);
         EXPECT_TRUE(
-            folly::IOBufEqualTo()(
-                msg.fragment, encodeHandshake(std::move(nst))));
+            folly::IOBufEqualTo()(msg.fragment, std::move(expectedNst)));
         content.data = folly::IOBuf::copyBuffer("handshake");
         return content;
       }));
@@ -6447,9 +6742,14 @@ TEST_F(ServerProtocolTest, TestKeyUpdateRequest) {
         content.contentType = msg.type;
         content.encryptionLevel = appWrite_->getEncryptionLevel();
         EXPECT_EQ(msg.type, ContentType::handshake);
+        Buf expectedKeyUpdate;
+        Error err;
+        EXPECT_EQ(
+            encodeHandshake(
+                expectedKeyUpdate, err, TestMessages::keyUpdate(false)),
+            Status::Success);
         EXPECT_TRUE(
-            folly::IOBufEqualTo()(
-                msg.fragment, encodeHandshake(TestMessages::keyUpdate(false))));
+            folly::IOBufEqualTo()(msg.fragment, std::move(expectedKeyUpdate)));
         content.data = folly::IOBuf::copyBuffer("keyupdated");
         return content;
       }));
@@ -6592,7 +6892,10 @@ TEST_F(ServerProtocolTest, TestCertificateExtensionsNotSupported) {
   CertificateEntry entry1;
   entry1.cert_data = folly::IOBuf::copyBuffer("cert1");
   SignatureAlgorithms algos;
-  entry1.extensions.push_back(encodeExtension(algos));
+  Extension ext;
+  Error err;
+  EXPECT_EQ(encodeExtension(ext, err, algos), Status::Success);
+  entry1.extensions.push_back(std::move(ext));
   certificate.certificate_list.push_back(std::move(entry1));
   CertificateEntry entry2;
   entry2.cert_data = folly::IOBuf::copyBuffer("cert2");
@@ -6621,7 +6924,10 @@ TEST_F(ServerProtocolTest, TestCertificateExtensionsSupported) {
   CertificateEntry entry1;
   entry1.cert_data = folly::IOBuf::copyBuffer("cert1");
   SignatureAlgorithms algos;
-  entry1.extensions.push_back(encodeExtension(algos));
+  Extension ext;
+  Error err;
+  EXPECT_EQ(encodeExtension(ext, err, algos), Status::Success);
+  entry1.extensions.push_back(std::move(ext));
   certificate.certificate_list.push_back(std::move(entry1));
   CertificateEntry entry2;
   entry2.cert_data = folly::IOBuf::copyBuffer("cert2");

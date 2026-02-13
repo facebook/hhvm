@@ -20,7 +20,10 @@ std::vector<Extension> PaddingClientExtension::getClientHelloExtensions()
   extensions::Padding padding{paddingTotalBytes_};
 
   std::vector<Extension> extensions;
-  extensions.push_back(encodeExtension(padding));
+  Extension ext;
+  Error err;
+  FIZZ_THROW_ON_ERROR(encodeExtension(ext, err, padding), err);
+  extensions.push_back(std::move(ext));
   return extensions;
 }
 

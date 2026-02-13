@@ -119,7 +119,10 @@ class ProtocolTest : public testing::Test {
       Alert a;
       a.description = *alert;
       auto buf = folly::IOBuf::copyBuffer("alert");
-      buf->prependChain(encode(std::move(a)));
+      Buf encoded;
+      Error err;
+      FIZZ_THROW_ON_ERROR(encode(encoded, err, std::move(a)), err);
+      buf->prependChain(std::move(encoded));
       EXPECT_TRUE(folly::IOBufEqualTo()(write.contents[0].data, buf));
     }
     auto error = expectActionReversed<ReportError>(actions);
@@ -144,7 +147,10 @@ class ProtocolTest : public testing::Test {
       Alert a;
       a.description = *alert;
       auto buf = folly::IOBuf::copyBuffer("alert");
-      buf->prependChain(encode(std::move(a)));
+      Buf encoded;
+      Error err;
+      FIZZ_THROW_ON_ERROR(encode(encoded, err, std::move(a)), err);
+      buf->prependChain(std::move(encoded));
       EXPECT_TRUE(folly::IOBufEqualTo()(write.contents[0].data, buf));
     } else {
       expectActions<MutateState, ReportError>(actions);

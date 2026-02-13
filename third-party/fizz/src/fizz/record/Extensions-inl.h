@@ -220,190 +220,254 @@ inline Status getExtension(
 }
 
 template <>
-inline Extension encodeExtension(const SignatureAlgorithms& sig) {
+inline Status encodeExtension(
+    Extension& ret,
+    Error& /* err */,
+    const SignatureAlgorithms& sig) {
   Extension ext;
   ext.extension_type = ExtensionType::signature_algorithms;
   ext.extension_data = folly::IOBuf::create(0);
   folly::io::Appender appender(ext.extension_data.get(), 10);
   detail::writeVector<uint16_t>(sig.supported_signature_algorithms, appender);
-  return ext;
+  ret = std::move(ext);
+  return Status::Success;
 }
 
 template <>
-inline Extension encodeExtension(const SupportedGroups& groups) {
+inline Status encodeExtension(
+    Extension& ret,
+    Error& /* err */,
+    const SupportedGroups& groups) {
   Extension ext;
   ext.extension_type = ExtensionType::supported_groups;
   ext.extension_data = folly::IOBuf::create(0);
   folly::io::Appender appender(ext.extension_data.get(), 10);
   detail::writeVector<uint16_t>(groups.named_group_list, appender);
-  return ext;
+  ret = std::move(ext);
+  return Status::Success;
 }
 
 template <>
-inline Extension encodeExtension(const ClientKeyShare& share) {
+inline Status
+encodeExtension(Extension& ret, Error& /* err */, const ClientKeyShare& share) {
   Extension ext;
   ext.extension_type = ExtensionType::key_share;
   ext.extension_data = folly::IOBuf::create(0);
   folly::io::Appender appender(ext.extension_data.get(), 10);
   detail::writeVector<uint16_t>(share.client_shares, appender);
-  return ext;
+  ret = std::move(ext);
+  return Status::Success;
 }
 
 template <>
-inline Extension encodeExtension(const ServerKeyShare& share) {
+inline Status
+encodeExtension(Extension& ret, Error& /* err */, const ServerKeyShare& share) {
   Extension ext;
   ext.extension_type = ExtensionType::key_share;
   ext.extension_data = folly::IOBuf::create(0);
   folly::io::Appender appender(ext.extension_data.get(), 10);
   detail::write(share.server_share, appender);
-  return ext;
+  ret = std::move(ext);
+  return Status::Success;
 }
 
 template <>
-inline Extension encodeExtension(const HelloRetryRequestKeyShare& share) {
+inline Status encodeExtension(
+    Extension& ret,
+    Error& /* err */,
+    const HelloRetryRequestKeyShare& share) {
   Extension ext;
   ext.extension_type = ExtensionType::key_share;
   ext.extension_data = folly::IOBuf::create(0);
   folly::io::Appender appender(ext.extension_data.get(), 10);
   detail::write(share.selected_group, appender);
-  return ext;
+  ret = std::move(ext);
+  return Status::Success;
 }
 
 template <>
-inline Extension encodeExtension(const ClientPresharedKey& share) {
+inline Status encodeExtension(
+    Extension& ret,
+    Error& /* err */,
+    const ClientPresharedKey& share) {
   Extension ext;
   ext.extension_type = ExtensionType::pre_shared_key;
   ext.extension_data = folly::IOBuf::create(0);
   folly::io::Appender appender(ext.extension_data.get(), 10);
   detail::writeVector<uint16_t>(share.identities, appender);
   detail::writeVector<uint16_t>(share.binders, appender);
-  return ext;
+  ret = std::move(ext);
+  return Status::Success;
 }
 
 template <>
-inline Extension encodeExtension(const ServerPresharedKey& share) {
+inline Status encodeExtension(
+    Extension& ret,
+    Error& /* err */,
+    const ServerPresharedKey& share) {
   Extension ext;
   ext.extension_type = ExtensionType::pre_shared_key;
   ext.extension_data = folly::IOBuf::create(0);
   folly::io::Appender appender(ext.extension_data.get(), 10);
   detail::write(share.selected_identity, appender);
-  return ext;
+  ret = std::move(ext);
+  return Status::Success;
 }
 
 template <>
-inline Extension encodeExtension(const ClientEarlyData&) {
+inline Status
+encodeExtension(Extension& ret, Error& /* err */, const ClientEarlyData&) {
   Extension ext;
   ext.extension_type = ExtensionType::early_data;
   ext.extension_data = folly::IOBuf::create(0);
-  return ext;
+  ret = std::move(ext);
+  return Status::Success;
 }
 
 template <>
-inline Extension encodeExtension(const ServerEarlyData&) {
+inline Status
+encodeExtension(Extension& ret, Error& /* err */, const ServerEarlyData&) {
   Extension ext;
   ext.extension_type = ExtensionType::early_data;
   ext.extension_data = folly::IOBuf::create(0);
-  return ext;
+  ret = std::move(ext);
+  return Status::Success;
 }
 
 template <>
-inline Extension encodeExtension(const TicketEarlyData& early) {
+inline Status encodeExtension(
+    Extension& ret,
+    Error& /* err */,
+    const TicketEarlyData& early) {
   Extension ext;
   ext.extension_type = ExtensionType::early_data;
   ext.extension_data = folly::IOBuf::create(0);
   folly::io::Appender appender(ext.extension_data.get(), 10);
   detail::write(early.max_early_data_size, appender);
-  return ext;
+  ret = std::move(ext);
+  return Status::Success;
 }
 
 template <>
-inline Extension encodeExtension(const Cookie& cookie) {
+inline Status
+encodeExtension(Extension& ret, Error& /* err */, const Cookie& cookie) {
   Extension ext;
   ext.extension_type = ExtensionType::cookie;
   ext.extension_data = folly::IOBuf::create(0);
   folly::io::Appender appender(ext.extension_data.get(), 10);
   detail::writeBuf<uint16_t>(cookie.cookie, appender);
-  return ext;
+  ret = std::move(ext);
+  return Status::Success;
 }
 
 template <>
-inline Extension encodeExtension(const SupportedVersions& versions) {
+inline Status encodeExtension(
+    Extension& ret,
+    Error& /* err */,
+    const SupportedVersions& versions) {
   Extension ext;
   ext.extension_type = ExtensionType::supported_versions;
   ext.extension_data = folly::IOBuf::create(0);
   folly::io::Appender appender(ext.extension_data.get(), 10);
   detail::writeVector<uint8_t>(versions.versions, appender);
-  return ext;
+  ret = std::move(ext);
+  return Status::Success;
 }
 
 template <>
-inline Extension encodeExtension(const ServerSupportedVersions& versions) {
+inline Status encodeExtension(
+    Extension& ret,
+    Error& /* err */,
+    const ServerSupportedVersions& versions) {
   Extension ext;
   ext.extension_type = ExtensionType::supported_versions;
   ext.extension_data = folly::IOBuf::create(0);
   folly::io::Appender appender(ext.extension_data.get(), 10);
   detail::write(versions.selected_version, appender);
-  return ext;
+  ret = std::move(ext);
+  return Status::Success;
 }
 
 template <>
-inline Extension encodeExtension(const PskKeyExchangeModes& modes) {
+inline Status encodeExtension(
+    Extension& ret,
+    Error& /* err */,
+    const PskKeyExchangeModes& modes) {
   Extension ext;
   ext.extension_type = ExtensionType::psk_key_exchange_modes;
   ext.extension_data = folly::IOBuf::create(0);
   folly::io::Appender appender(ext.extension_data.get(), 10);
   detail::writeVector<uint8_t>(modes.modes, appender);
-  return ext;
+  ret = std::move(ext);
+  return Status::Success;
 }
 
 template <>
-inline Extension encodeExtension(const ProtocolNameList& names) {
+inline Status encodeExtension(
+    Extension& ret,
+    Error& /* err */,
+    const ProtocolNameList& names) {
   Extension ext;
   ext.extension_type = ExtensionType::application_layer_protocol_negotiation;
   ext.extension_data = folly::IOBuf::create(0);
   folly::io::Appender appender(ext.extension_data.get(), 10);
   detail::writeVector<uint16_t>(names.protocol_name_list, appender);
-  return ext;
+  ret = std::move(ext);
+  return Status::Success;
 }
 
 template <>
-inline Extension encodeExtension(const ServerNameList& names) {
+inline Status
+encodeExtension(Extension& ret, Error& /* err */, const ServerNameList& names) {
   Extension ext;
   ext.extension_type = ExtensionType::server_name;
   ext.extension_data = folly::IOBuf::create(0);
   folly::io::Appender appender(ext.extension_data.get(), 10);
   detail::writeVector<uint16_t>(names.server_name_list, appender);
-  return ext;
+  ret = std::move(ext);
+  return Status::Success;
 }
 
 template <>
-inline Extension encodeExtension(const CertificateAuthorities& authorities) {
+inline Status encodeExtension(
+    Extension& ret,
+    Error& /* err */,
+    const CertificateAuthorities& authorities) {
   Extension ext;
   ext.extension_type = ExtensionType::certificate_authorities;
   ext.extension_data = folly::IOBuf::create(0);
   folly::io::Appender appender(ext.extension_data.get(), 10);
   detail::writeVector<uint16_t>(authorities.authorities, appender);
-  return ext;
+  ret = std::move(ext);
+  return Status::Success;
 }
 
 template <>
-inline Extension encodeExtension(const CertificateCompressionAlgorithms& cca) {
+inline Status encodeExtension(
+    Extension& ret,
+    Error& /* err */,
+    const CertificateCompressionAlgorithms& cca) {
   Extension ext;
   ext.extension_type = ExtensionType::compress_certificate;
   ext.extension_data = folly::IOBuf::create(0);
   folly::io::Appender appender(ext.extension_data.get(), 10);
   detail::writeVector<uint8_t>(cca.algorithms, appender);
-  return ext;
+  ret = std::move(ext);
+  return Status::Success;
 }
 
 template <>
-inline Extension encodeExtension(const EchOuterExtensions& outerExt) {
+inline Status encodeExtension(
+    Extension& ret,
+    Error& /* err */,
+    const EchOuterExtensions& outerExt) {
   Extension ext;
   ext.extension_type = outerExt.extension_type;
   ext.extension_data = folly::IOBuf::create(0);
   folly::io::Appender appender(ext.extension_data.get(), 10);
   detail::writeVector<uint8_t>(outerExt.extensionTypes, appender);
-  return ext;
+  ret = std::move(ext);
+  return Status::Success;
 }
 
 inline Status

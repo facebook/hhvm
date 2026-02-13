@@ -206,7 +206,10 @@ X509_STORE* DefaultCertificateVerifier::getDefaultX509Store() {
 std::vector<Extension>
 DefaultCertificateVerifier::getCertificateRequestExtensions() const {
   std::vector<Extension> exts;
-  exts.push_back(encodeExtension(authorities_));
+  Extension ext;
+  Error err;
+  FIZZ_THROW_ON_ERROR(encodeExtension(ext, err, authorities_), err);
+  exts.push_back(std::move(ext));
   return exts;
 }
 

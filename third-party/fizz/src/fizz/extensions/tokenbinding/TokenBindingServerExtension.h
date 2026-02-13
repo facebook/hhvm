@@ -37,7 +37,9 @@ class TokenBindingServerExtension : public ServerExtensions {
         TokenBindingParameters negotiatedParams;
         negotiatedParams.version = *negotiatedVersion;
         negotiatedParams.key_parameters_list.push_back(*negotiatedKeyParam);
-        serverExtensions.push_back(encodeExtension(negotiatedParams));
+        Extension ext;
+        FIZZ_THROW_ON_ERROR(encodeExtension(ext, err, negotiatedParams), err);
+        serverExtensions.push_back(std::move(ext));
         negotiatedKeyParam_ = std::move(negotiatedKeyParam);
       }
     }

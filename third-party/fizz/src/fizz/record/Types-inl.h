@@ -365,7 +365,8 @@ struct Reader<CertificateEntry> {
 } // namespace detail
 
 template <>
-inline Buf encode<ServerHello>(ServerHello&& shlo) {
+inline Status
+encode<ServerHello>(Buf& ret, Error& /* err */, ServerHello&& shlo) {
   auto buf = folly::IOBuf::create(
       sizeof(ProtocolVersion) + sizeof(Random) + sizeof(CipherSuite) + 20);
   folly::io::Appender appender(buf.get(), 20);
@@ -379,11 +380,15 @@ inline Buf encode<ServerHello>(ServerHello&& shlo) {
     detail::write(shlo.legacy_compression_method, appender);
   }
   detail::writeVector<uint16_t>(shlo.extensions, appender);
-  return buf;
+  ret = std::move(buf);
+  return Status::Success;
 }
 
 template <>
-inline Buf encode<HelloRetryRequest>(HelloRetryRequest&& shlo) {
+inline Status encode<HelloRetryRequest>(
+    Buf& ret,
+    Error& /* err */,
+    HelloRetryRequest&& shlo) {
   auto buf = folly::IOBuf::create(
       sizeof(ProtocolVersion) + sizeof(Random) + sizeof(CipherSuite) + 20);
   folly::io::Appender appender(buf.get(), 20);
@@ -393,85 +398,117 @@ inline Buf encode<HelloRetryRequest>(HelloRetryRequest&& shlo) {
   detail::write(shlo.cipher_suite, appender);
   detail::write(shlo.legacy_compression_method, appender);
   detail::writeVector<uint16_t>(shlo.extensions, appender);
-  return buf;
+  ret = std::move(buf);
+  return Status::Success;
 }
 
 template <>
-inline Buf encode<EndOfEarlyData>(EndOfEarlyData&&) {
-  return folly::IOBuf::create(0);
+inline Status
+encode<EndOfEarlyData>(Buf& ret, Error& /* err */, EndOfEarlyData&&) {
+  ret = folly::IOBuf::create(0);
+  return Status::Success;
 }
 
 template <>
-inline Buf encode<EncryptedExtensions>(EncryptedExtensions&& extensions) {
+inline Status encode<EncryptedExtensions>(
+    Buf& ret,
+    Error& /* err */,
+    EncryptedExtensions&& extensions) {
   auto buf = folly::IOBuf::create(20);
   folly::io::Appender appender(buf.get(), 20);
   detail::writeVector<uint16_t>(extensions.extensions, appender);
-  return buf;
+  ret = std::move(buf);
+  return Status::Success;
 }
 
 template <>
-inline Buf encode<CertificateRequest>(CertificateRequest&& cr) {
+inline Status encode<CertificateRequest>(
+    Buf& ret,
+    Error& /* err */,
+    CertificateRequest&& cr) {
   auto buf = folly::IOBuf::create(20);
   folly::io::Appender appender(buf.get(), 20);
   detail::writeBuf<uint8_t>(cr.certificate_request_context, appender);
   detail::writeVector<uint16_t>(cr.extensions, appender);
-  return buf;
+  ret = std::move(buf);
+  return Status::Success;
 }
 
 template <>
-inline Buf encode<const CertificateMsg&>(const CertificateMsg& cert) {
+inline Status encode<const CertificateMsg&>(
+    Buf& ret,
+    Error& /* err */,
+    const CertificateMsg& cert) {
   auto buf = folly::IOBuf::create(20);
   folly::io::Appender appender(buf.get(), 20);
   detail::writeBuf<uint8_t>(cert.certificate_request_context, appender);
   detail::writeVector<detail::bits24>(cert.certificate_list, appender);
-  return buf;
+  ret = std::move(buf);
+  return Status::Success;
 }
 
 template <>
-inline Buf encode<CertificateMsg&>(CertificateMsg& cert) {
-  return encode<const CertificateMsg&>(cert);
+inline Status
+encode<CertificateMsg&>(Buf& ret, Error& err, CertificateMsg& cert) {
+  return encode<const CertificateMsg&>(ret, err, cert);
 }
 
 template <>
-inline Buf encode<CertificateMsg>(CertificateMsg&& cert) {
-  return encode<CertificateMsg&>(cert);
+inline Status
+encode<CertificateMsg>(Buf& ret, Error& err, CertificateMsg&& cert) {
+  return encode<CertificateMsg&>(ret, err, cert);
 }
 
 template <>
-inline Buf encode<CompressedCertificate&>(CompressedCertificate& cc) {
+inline Status encode<CompressedCertificate&>(
+    Buf& ret,
+    Error& /* err */,
+    CompressedCertificate& cc) {
   auto buf = folly::IOBuf::create(20);
   folly::io::Appender appender(buf.get(), 20);
   detail::write(cc.algorithm, appender);
   detail::writeBits24(cc.uncompressed_length, appender);
   detail::writeBuf<detail::bits24>(cc.compressed_certificate_message, appender);
-  return buf;
+  ret = std::move(buf);
+  return Status::Success;
 }
 
 template <>
-inline Buf encode<CompressedCertificate>(CompressedCertificate&& cc) {
-  return encode<CompressedCertificate&>(cc);
+inline Status encode<CompressedCertificate>(
+    Buf& ret,
+    Error& err,
+    CompressedCertificate&& cc) {
+  return encode<CompressedCertificate&>(ret, err, cc);
 }
 
 template <>
-inline Buf encode<CertificateVerify>(CertificateVerify&& certVerify) {
+inline Status encode<CertificateVerify>(
+    Buf& ret,
+    Error& /* err */,
+    CertificateVerify&& certVerify) {
   auto buf = folly::IOBuf::create(20);
   folly::io::Appender appender(buf.get(), 20);
   detail::write(certVerify.algorithm, appender);
   detail::writeBuf<uint16_t>(certVerify.signature, appender);
-  return buf;
+  ret = std::move(buf);
+  return Status::Success;
 }
 
 template <>
-inline Buf encode<Alert>(Alert&& alert) {
+inline Status encode<Alert>(Buf& ret, Error& /* err */, Alert&& alert) {
   auto buf = folly::IOBuf::create(2);
   folly::io::Appender appender(buf.get(), 2);
   detail::write(alert.level, appender);
   detail::write(alert.description, appender);
-  return buf;
+  ret = std::move(buf);
+  return Status::Success;
 }
 
 template <>
-inline Buf encode<const ClientHello&>(const ClientHello& chlo) {
+inline Status encode<const ClientHello&>(
+    Buf& ret,
+    Error& /* err */,
+    const ClientHello& chlo) {
   auto buf = folly::IOBuf::create(
       sizeof(ProtocolVersion) + sizeof(Random) + sizeof(uint8_t) +
       sizeof(CipherSuite) * chlo.cipher_suites.size() + sizeof(uint8_t) + 20);
@@ -482,26 +519,29 @@ inline Buf encode<const ClientHello&>(const ClientHello& chlo) {
   detail::writeVector<uint16_t>(chlo.cipher_suites, appender);
   detail::writeVector<uint8_t>(chlo.legacy_compression_methods, appender);
   detail::writeVector<uint16_t>(chlo.extensions, appender);
-  return buf;
+  ret = std::move(buf);
+  return Status::Success;
 }
 
 template <>
-inline Buf encode<ClientHello&>(ClientHello& chlo) {
-  return encode<const ClientHello&>(chlo);
+inline Status encode<ClientHello&>(Buf& ret, Error& err, ClientHello& chlo) {
+  return encode<const ClientHello&>(ret, err, chlo);
 }
 
 template <>
-inline Buf encode<ClientHello>(ClientHello&& chlo) {
-  return encode<ClientHello&>(chlo);
+inline Status encode<ClientHello>(Buf& ret, Error& err, ClientHello&& chlo) {
+  return encode<ClientHello&>(ret, err, chlo);
 }
 
 template <>
-inline Buf encode<Finished>(Finished&& fin) {
-  return std::move(fin.verify_data);
+inline Status encode<Finished>(Buf& ret, Error& /* err */, Finished&& fin) {
+  ret = std::move(fin.verify_data);
+  return Status::Success;
 }
 
 template <>
-inline Buf encode<NewSessionTicket>(NewSessionTicket&& nst) {
+inline Status
+encode<NewSessionTicket>(Buf& ret, Error& /* err */, NewSessionTicket&& nst) {
   auto buf = folly::IOBuf::create(20);
   folly::io::Appender appender(buf.get(), 20);
   detail::write(nst.ticket_lifetime, appender);
@@ -511,10 +551,13 @@ inline Buf encode<NewSessionTicket>(NewSessionTicket&& nst) {
   }
   detail::writeBuf<uint16_t>(nst.ticket, appender);
   detail::writeVector<uint16_t>(nst.extensions, appender);
-  return buf;
+  ret = std::move(buf);
+  return Status::Success;
 }
 
-inline Buf encodeHkdfLabel(
+inline Status encodeHkdfLabel(
+    Buf& ret,
+    Error& /* err */,
     HkdfLabel&& label,
     folly::StringPiece hkdfLabelPrefix) {
   auto labelBuf = folly::IOBuf::copyBuffer(
@@ -524,32 +567,39 @@ inline Buf encodeHkdfLabel(
   detail::write(label.length, appender);
   detail::writeBuf<uint8_t>(labelBuf, appender);
   detail::writeBuf<uint8_t>(label.hash_value, appender);
-  return buf;
+  ret = std::move(buf);
+  return Status::Success;
 }
 
 template <>
-inline Buf encode<KeyUpdate>(KeyUpdate&& keyUpdate) {
+inline Status
+encode<KeyUpdate>(Buf& ret, Error& /* err */, KeyUpdate&& keyUpdate) {
   auto buf = folly::IOBuf::create(20);
   folly::io::Appender appender(buf.get(), 20);
   detail::write(keyUpdate.request_update, appender);
-  return buf;
+  ret = std::move(buf);
+  return Status::Success;
 }
 
 template <>
-inline Buf encode<message_hash>(message_hash&& hash) {
-  return std::move(hash.hash);
+inline Status
+encode<message_hash>(Buf& ret, Error& /* err */, message_hash&& hash) {
+  ret = std::move(hash.hash);
+  return Status::Success;
 }
 
 template <class T>
-Buf encodeHandshake(T&& handshakeMsg) {
-  auto body = encode(std::forward<T>(handshakeMsg));
+Status encodeHandshake(Buf& ret, Error& err, T&& handshakeMsg) {
+  Buf body;
+  FIZZ_RETURN_ON_ERROR(encode(body, err, std::forward<T>(handshakeMsg)));
   auto buf = folly::IOBuf::create(sizeof(HandshakeType) + detail::bits24::size);
   folly::io::Appender appender(buf.get(), 0);
   constexpr auto handshakeType = std::remove_reference<T>::type::handshake_type;
   detail::write(handshakeType, appender);
   detail::writeBits24(body->computeChainDataLength(), appender);
   buf->prependChain(std::move(body));
-  return buf;
+  ret = std::move(buf);
+  return Status::Success;
 }
 
 template <>

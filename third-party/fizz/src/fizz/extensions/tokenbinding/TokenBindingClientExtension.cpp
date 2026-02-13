@@ -22,7 +22,10 @@ std::vector<Extension> TokenBindingClientExtension::getClientHelloExtensions()
   TokenBindingParameters clientParams;
   clientParams.version = context_->getSupportedVersions().front();
   clientParams.key_parameters_list = context_->getKeyParams();
-  clientExtensions.push_back(encodeExtension(clientParams));
+  Extension ext;
+  Error err;
+  FIZZ_THROW_ON_ERROR(encodeExtension(ext, err, clientParams), err);
+  clientExtensions.push_back(std::move(ext));
   return clientExtensions;
 }
 

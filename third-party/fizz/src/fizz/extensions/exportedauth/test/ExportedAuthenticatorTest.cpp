@@ -75,8 +75,14 @@ class AuthenticatorTest : public ::testing::Test {
     SignatureAlgorithms sigAlgs;
     sigAlgs.supported_signature_algorithms.push_back(
         SignatureScheme::ecdsa_secp256r1_sha256);
-    cr.extensions.push_back(encodeExtension(std::move(sigAlgs)));
-    auto authRequest = encode<CertificateRequest>(std::move(cr));
+    Extension ext;
+    Error err;
+    FIZZ_THROW_ON_ERROR(encodeExtension(ext, err, sigAlgs), err);
+    cr.extensions.push_back(std::move(ext));
+
+    Buf authRequest;
+    FIZZ_THROW_ON_ERROR(
+        encode<CertificateRequest>(authRequest, err, std::move(cr)), err);
     authrequest_ = std::move(authRequest);
     handshakeContext_ =
         folly::IOBuf::copyBuffer("12345678901234567890123456789012");

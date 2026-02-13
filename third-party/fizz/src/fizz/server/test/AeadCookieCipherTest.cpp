@@ -63,13 +63,18 @@ class AeadCookieCipherTest : public Test {
     if (cookie) {
       Cookie c;
       c.cookie = std::move(cookie);
-      chlo.extensions.push_back(encodeExtension(std::move(c)));
+      Extension ext;
+      Error err;
+      FIZZ_THROW_ON_ERROR(encodeExtension(ext, err, c), err);
+      chlo.extensions.push_back(std::move(ext));
     }
     Error err;
+    Buf encoded;
+    FIZZ_THROW_ON_ERROR(encodeHandshake(encoded, err, std::move(chlo)), err);
     TLSContent content;
     FIZZ_THROW_ON_ERROR(
         PlaintextWriteRecordLayer().writeInitialClientHello(
-            content, err, encodeHandshake(std::move(chlo))),
+            content, err, std::move(encoded)),
         err);
     return std::move(content.data);
   }

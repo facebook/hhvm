@@ -33,37 +33,52 @@ struct TestMessages {
     chlo.legacy_session_id = folly::IOBuf::create(0);
     SupportedVersions supportedVersions;
     supportedVersions.versions.push_back(TestProtocolVersion);
-    chlo.extensions.push_back(encodeExtension(std::move(supportedVersions)));
+    Extension ext;
+    Error err;
+    FIZZ_THROW_ON_ERROR(encodeExtension(ext, err, supportedVersions), err);
+    chlo.extensions.push_back(std::move(ext));
     SupportedGroups supportedGroups;
     supportedGroups.named_group_list.push_back(NamedGroup::x25519);
     supportedGroups.named_group_list.push_back(NamedGroup::secp256r1);
-    chlo.extensions.push_back(encodeExtension(std::move(supportedGroups)));
+    Extension ext1;
+    FIZZ_THROW_ON_ERROR(encodeExtension(ext1, err, supportedGroups), err);
+    chlo.extensions.push_back(std::move(ext1));
     ClientKeyShare keyShare;
     KeyShareEntry entry;
     entry.group = NamedGroup::x25519;
     entry.key_exchange = folly::IOBuf::copyBuffer("keyshare");
     keyShare.client_shares.push_back(std::move(entry));
-    chlo.extensions.push_back(encodeExtension(std::move(keyShare)));
+    Extension ext2;
+    FIZZ_THROW_ON_ERROR(encodeExtension(ext2, err, keyShare), err);
+    chlo.extensions.push_back(std::move(ext2));
     SignatureAlgorithms sigAlgs;
     sigAlgs.supported_signature_algorithms.push_back(
         SignatureScheme::ecdsa_secp256r1_sha256);
     sigAlgs.supported_signature_algorithms.push_back(
         SignatureScheme::rsa_pss_sha256);
-    chlo.extensions.push_back(encodeExtension(std::move(sigAlgs)));
+    Extension ext3;
+    FIZZ_THROW_ON_ERROR(encodeExtension(ext3, err, sigAlgs), err);
+    chlo.extensions.push_back(std::move(ext3));
     ServerNameList sni;
     ServerName sn;
     sn.hostname = folly::IOBuf::copyBuffer("www.hostname.com");
     sni.server_name_list.push_back(std::move(sn));
-    chlo.extensions.push_back(encodeExtension(std::move(sni)));
+    Extension ext4;
+    FIZZ_THROW_ON_ERROR(encodeExtension(ext4, err, sni), err);
+    chlo.extensions.push_back(std::move(ext4));
     ProtocolNameList alpn;
     ProtocolName h2;
     h2.name = folly::IOBuf::copyBuffer("h2");
     alpn.protocol_name_list.push_back(std::move(h2));
-    chlo.extensions.push_back(encodeExtension(std::move(alpn)));
+    Extension ext5;
+    FIZZ_THROW_ON_ERROR(encodeExtension(ext5, err, alpn), err);
+    chlo.extensions.push_back(std::move(ext5));
     PskKeyExchangeModes modes;
     modes.modes.push_back(PskKeyExchangeMode::psk_dhe_ke);
     modes.modes.push_back(PskKeyExchangeMode::psk_ke);
-    chlo.extensions.push_back(encodeExtension(std::move(modes)));
+    Extension ext6;
+    FIZZ_THROW_ON_ERROR(encodeExtension(ext6, err, modes), err);
+    chlo.extensions.push_back(std::move(ext6));
     chlo.originalEncoding = folly::IOBuf::copyBuffer("clienthelloencoding");
     return chlo;
   }
@@ -77,7 +92,10 @@ struct TestMessages {
     PskBinder binder;
     binder.binder = folly::IOBuf::copyBuffer("verifydata");
     cpk.binders.push_back(std::move(binder));
-    chlo.extensions.push_back(encodeExtension(std::move(cpk)));
+    Extension ext;
+    Error err;
+    FIZZ_THROW_ON_ERROR(encodeExtension(ext, err, cpk), err);
+    chlo.extensions.push_back(std::move(ext));
   }
 
   static ClientHello clientHelloPsk() {
@@ -88,7 +106,10 @@ struct TestMessages {
 
   static ClientHello clientHelloPskEarly(uint32_t ticketAge = 100000) {
     auto chlo = clientHello();
-    chlo.extensions.push_back(encodeExtension(ClientEarlyData()));
+    Extension ext;
+    Error err;
+    FIZZ_THROW_ON_ERROR(encodeExtension(ext, err, ClientEarlyData()), err);
+    chlo.extensions.push_back(std::move(ext));
     addPsk(chlo, ticketAge);
     return chlo;
   }
@@ -101,10 +122,15 @@ struct TestMessages {
     hrr.legacy_session_id_echo = folly::IOBuf::create(0);
     ServerSupportedVersions supportedVersions;
     supportedVersions.selected_version = TestProtocolVersion;
-    hrr.extensions.push_back(encodeExtension(std::move(supportedVersions)));
+    Extension ext1;
+    Error err;
+    FIZZ_THROW_ON_ERROR(encodeExtension(ext1, err, supportedVersions), err);
+    hrr.extensions.push_back(std::move(ext1));
     HelloRetryRequestKeyShare keyShare;
     keyShare.selected_group = NamedGroup::secp256r1;
-    hrr.extensions.push_back(encodeExtension(std::move(keyShare)));
+    Extension ext2;
+    FIZZ_THROW_ON_ERROR(encodeExtension(ext2, err, keyShare), err);
+    hrr.extensions.push_back(std::move(ext2));
     hrr.originalEncoding = folly::IOBuf::copyBuffer("hrrencoding");
     return hrr;
   }
@@ -117,12 +143,17 @@ struct TestMessages {
     shlo.cipher_suite = CipherSuite::TLS_AES_128_GCM_SHA256;
     ServerSupportedVersions supportedVersions;
     supportedVersions.selected_version = TestProtocolVersion;
-    shlo.extensions.push_back(encodeExtension(std::move(supportedVersions)));
+    Extension ext1;
+    Error err;
+    FIZZ_THROW_ON_ERROR(encodeExtension(ext1, err, supportedVersions), err);
+    shlo.extensions.push_back(std::move(ext1));
     ServerKeyShare serverKeyShare;
     serverKeyShare.server_share.group = NamedGroup::x25519;
     serverKeyShare.server_share.key_exchange =
         folly::IOBuf::copyBuffer("servershare");
-    shlo.extensions.push_back(encodeExtension(std::move(serverKeyShare)));
+    Extension ext2;
+    FIZZ_THROW_ON_ERROR(encodeExtension(ext2, err, serverKeyShare), err);
+    shlo.extensions.push_back(std::move(ext2));
     shlo.originalEncoding = folly::IOBuf::copyBuffer("shloencoding");
     return shlo;
   }
@@ -131,7 +162,10 @@ struct TestMessages {
     auto shlo = serverHello();
     ServerPresharedKey pskExt;
     pskExt.selected_identity = 0;
-    shlo.extensions.push_back(encodeExtension(std::move(pskExt)));
+    Extension ext;
+    Error err;
+    FIZZ_THROW_ON_ERROR(encodeExtension(ext, err, pskExt), err);
+    shlo.extensions.push_back(std::move(ext));
     return shlo;
   }
 
@@ -147,14 +181,20 @@ struct TestMessages {
     ProtocolName h2;
     h2.name = folly::IOBuf::copyBuffer("h2");
     alpn.protocol_name_list.push_back(std::move(h2));
-    encryptedExt.extensions.push_back(encodeExtension(std::move(alpn)));
+    Extension ext;
+    Error err;
+    FIZZ_THROW_ON_ERROR(encodeExtension(ext, err, alpn), err);
+    encryptedExt.extensions.push_back(std::move(ext));
     encryptedExt.originalEncoding = folly::IOBuf::copyBuffer("eeencoding");
     return encryptedExt;
   }
 
   static EncryptedExtensions encryptedExtEarly() {
     auto ee = encryptedExt();
-    ee.extensions.push_back(encodeExtension(ServerEarlyData()));
+    Extension ext;
+    Error err;
+    FIZZ_THROW_ON_ERROR(encodeExtension(ext, err, ServerEarlyData()), err);
+    ee.extensions.push_back(std::move(ext));
     return ee;
   }
 
@@ -191,7 +231,10 @@ struct TestMessages {
         SignatureScheme::ecdsa_secp256r1_sha256);
     sigAlgs.supported_signature_algorithms.push_back(
         SignatureScheme::rsa_pss_sha256);
-    cr.extensions.push_back(encodeExtension(std::move(sigAlgs)));
+    Extension ext;
+    Error err;
+    FIZZ_THROW_ON_ERROR(encodeExtension(ext, err, sigAlgs), err);
+    cr.extensions.push_back(std::move(ext));
     cr.originalEncoding = folly::IOBuf::copyBuffer("certrequestencoding");
     return cr;
   }

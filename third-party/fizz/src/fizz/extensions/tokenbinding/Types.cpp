@@ -107,23 +107,28 @@ Status getExtension(
 
 namespace extensions {
 
-Extension encodeExtension(const TokenBindingParameters& params) {
+Status encodeExtension(
+    Extension& ret,
+    Error& /* err */,
+    const TokenBindingParameters& params) {
   Extension ext;
   ext.extension_type = ExtensionType::token_binding;
   ext.extension_data = folly::IOBuf::create(0);
   folly::io::Appender appender(ext.extension_data.get(), 10);
   detail::write(params.version, appender);
   detail::writeVector<uint8_t>(params.key_parameters_list, appender);
-  return ext;
+  ret = std::move(ext);
+  return Status::Success;
 }
 } // namespace extensions
 
 template <>
-Buf encode(TokenBindingMessage&& message) {
+Status encode(Buf& ret, Error& /* err */, TokenBindingMessage&& message) {
   auto buf = folly::IOBuf::create(20);
   folly::io::Appender appender(buf.get(), 20);
   detail::writeVector<uint16_t>(message.tokenbindings, appender);
-  return buf;
+  ret = std::move(buf);
+  return Status::Success;
 }
 
 template <>

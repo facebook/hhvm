@@ -61,8 +61,12 @@ std::vector<fizz::TLSMessage> encodeHandshakeAmongRecords(
     HandshakeMessage&& msg,
     size_t n) {
   std::vector<fizz::TLSMessage> ret;
-  auto encodedHandshake =
-      fizz::encodeHandshake(std::forward<HandshakeMessage>(msg));
+  fizz::Buf encodedHandshake;
+  fizz::Error err;
+  FIZZ_THROW_ON_ERROR(
+      fizz::encodeHandshake(
+          encodedHandshake, err, std::forward<HandshakeMessage>(msg)),
+      err);
   encodedHandshake->coalesce();
 
   FIZZ_CHECK_GT(n, 0UL);
@@ -372,11 +376,14 @@ TEST_F(KTLSReadTest, NoTLSCallbackCausesReadErrOnHandshake) {
     nst.ticket_age_add = 20;
     nst.ticket_nonce = toIOBuf("abc");
     nst.ticket = toIOBuf("123");
+    fizz::Buf encodedNst;
     fizz::Error err;
+    EXPECT_EQ(
+        fizz::encodeHandshake(encodedNst, err, std::move(nst)),
+        fizz::Status::Success);
     fizz::TLSContent content;
     EXPECT_EQ(
-        clientWrite_->writeHandshake(
-            content, err, fizz::encodeHandshake(std::move(nst))),
+        clientWrite_->writeHandshake(content, err, std::move(encodedNst)),
         fizz::Status::Success);
     content.data->coalesce();
     EXPECT_EQ(
@@ -408,11 +415,14 @@ TEST_F(KTLSReadTest, HandshakeDispatch) {
     nst.ticket_age_add = 20;
     nst.ticket_nonce = toIOBuf("abc");
     nst.ticket = toIOBuf("123");
+    fizz::Buf encodedNst;
     fizz::Error err;
+    EXPECT_EQ(
+        fizz::encodeHandshake(encodedNst, err, std::move(nst)),
+        fizz::Status::Success);
     fizz::TLSContent content;
     EXPECT_EQ(
-        clientWrite_->writeHandshake(
-            content, err, fizz::encodeHandshake(std::move(nst))),
+        clientWrite_->writeHandshake(content, err, std::move(encodedNst)),
         fizz::Status::Success);
     content.data->coalesce();
     EXPECT_EQ(
@@ -458,11 +468,14 @@ TEST_F(KTLSReadTest, HandshakeRecordSmallBuffer) {
     nst.ticket_age_add = 20;
     nst.ticket_nonce = toIOBuf("abc");
     nst.ticket = toIOBuf("123");
+    fizz::Buf encodedNst;
     fizz::Error err;
+    EXPECT_EQ(
+        fizz::encodeHandshake(encodedNst, err, std::move(nst)),
+        fizz::Status::Success);
     fizz::TLSContent content;
     EXPECT_EQ(
-        clientWrite_->writeHandshake(
-            content, err, fizz::encodeHandshake(std::move(nst))),
+        clientWrite_->writeHandshake(content, err, std::move(encodedNst)),
         fizz::Status::Success);
     content.data->coalesce();
     EXPECT_EQ(
@@ -630,9 +643,14 @@ TEST_F(KTLSReadTest, SplicedHandshakeDataByAlertFailsConnection) {
     auto records = encodeHandshakeAmongRecords(std::move(nst), 2);
     EXPECT_EQ(records.size(), 2);
 
+    fizz::Buf encodedAlert;
+    fizz::Error encodeErr;
+    EXPECT_EQ(
+        encode(encodedAlert, encodeErr, std::move(alert)),
+        fizz::Status::Success);
     records.insert(
         records.begin() + 1,
-        fizz::TLSMessage{fizz::ContentType::alert, encode(std::move(alert))});
+        fizz::TLSMessage{fizz::ContentType::alert, std::move(encodedAlert)});
     EXPECT_EQ(records.size(), 3);
 
     for (size_t i = 0; i < records.size(); i++) {

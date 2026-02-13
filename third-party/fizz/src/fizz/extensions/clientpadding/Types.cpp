@@ -10,7 +10,10 @@
 
 namespace fizz {
 template <>
-Extension encodeExtension(const extensions::Padding& padding) {
+Status encodeExtension(
+    Extension& ret,
+    Error& /* err */,
+    const extensions::Padding& padding) {
   constexpr size_t kMinPaddingBytes =
       sizeof(ExtensionType) + sizeof(padding.total_bytes);
 
@@ -22,7 +25,8 @@ Extension encodeExtension(const extensions::Padding& padding) {
   ext.extension_data = folly::IOBuf::create(paddingBufLen);
   std::memset(ext.extension_data->writableData(), 0, paddingBufLen);
   ext.extension_data->append(paddingBufLen);
-  return ext;
+  ret = std::move(ext);
+  return Status::Success;
 }
 
 } // namespace fizz

@@ -369,9 +369,9 @@ struct CloseNotify : EventType<Event::CloseNotify> {
 };
 
 template <class T>
-Buf encode(T&&);
+Status encode(Buf& ret, Error& err, T&&);
 template <class T>
-Buf encodeHandshake(T&& t);
+Status encodeHandshake(Buf& ret, Error& err, T&& t);
 template <class T>
 Status decode(T& ret, Error& err, std::unique_ptr<folly::IOBuf>&& buf);
 template <class T>
@@ -379,7 +379,11 @@ Status decode(T& ret, Error& err, folly::io::Cursor& cursor);
 template <typename T>
 std::string enumToHex(T enumValue);
 
-Buf encodeHkdfLabel(HkdfLabel&& label, folly::StringPiece hkdfLabelPrefix);
+Status encodeHkdfLabel(
+    Buf& ret,
+    Error& err,
+    HkdfLabel&& label,
+    folly::StringPiece hkdfLabelPrefix);
 } // namespace fizz
 
 #ifdef FOLLY_MOBILE

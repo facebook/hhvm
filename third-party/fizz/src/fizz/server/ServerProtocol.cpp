@@ -716,10 +716,13 @@ static std::
 
     message_hash chloHash;
     chloHash.hash = cookieState->chloHash->clone();
-    handshakeContext->appendToTranscript(encodeHandshake(std::move(chloHash)));
+    Buf encodedChloHash;
+    Error err;
+    FIZZ_THROW_ON_ERROR(
+        encodeHandshake(encodedChloHash, err, std::move(chloHash)), err);
+    handshakeContext->appendToTranscript(encodedChloHash);
 
     folly::Optional<Cookie> cookie;
-    Error err;
     FIZZ_THROW_ON_ERROR(
         getExtension<Cookie>(cookie, err, chlo.extensions), err);
     handshakeContext->appendToTranscript(getStatelessHelloRetryRequest(
@@ -856,10 +859,15 @@ static HelloRetryRequest getHelloRetryRequest(
   hrr.cipher_suite = cipher;
   ServerSupportedVersions versionExt;
   versionExt.selected_version = version;
-  hrr.extensions.push_back(encodeExtension(std::move(versionExt)));
+  Extension ext1;
+  Error err;
+  FIZZ_THROW_ON_ERROR(encodeExtension(ext1, err, versionExt), err);
+  hrr.extensions.push_back(std::move(ext1));
   HelloRetryRequestKeyShare keyShare;
   keyShare.selected_group = group;
-  hrr.extensions.push_back(encodeExtension(std::move(keyShare)));
+  Extension ext2;
+  FIZZ_THROW_ON_ERROR(encodeExtension(ext2, err, keyShare), err);
+  hrr.extensions.push_back(std::move(ext2));
   return hrr;
 }
 
@@ -876,7 +884,10 @@ static ServerHello getServerHello(
   serverHello.legacy_version = ProtocolVersion::tls_1_2;
   ServerSupportedVersions versionExt;
   versionExt.selected_version = version;
-  serverHello.extensions.push_back(encodeExtension(std::move(versionExt)));
+  Extension ext1;
+  Error err;
+  FIZZ_THROW_ON_ERROR(encodeExtension(ext1, err, versionExt), err);
+  serverHello.extensions.push_back(std::move(ext1));
   serverHello.legacy_session_id_echo = std::move(legacySessionId);
 
   serverHello.random = std::move(random);
@@ -886,13 +897,16 @@ static ServerHello getServerHello(
     serverKeyShare.server_share.group = *group;
     serverKeyShare.server_share.key_exchange = std::move(*serverShare);
 
-    serverHello.extensions.push_back(
-        encodeExtension(std::move(serverKeyShare)));
+    Extension ext2;
+    FIZZ_THROW_ON_ERROR(encodeExtension(ext2, err, serverKeyShare), err);
+    serverHello.extensions.push_back(std::move(ext2));
   }
   if (psk) {
     ServerPresharedKey serverPsk;
     serverPsk.selected_identity = kPskIndex;
-    serverHello.extensions.push_back(encodeExtension(std::move(serverPsk)));
+    Extension ext3;
+    FIZZ_THROW_ON_ERROR(encodeExtension(ext3, err, serverPsk), err);
+    serverHello.extensions.push_back(std::move(ext3));
   }
   return serverHello;
 }
@@ -1043,29 +1057,37 @@ static Buf getEncryptedExt(
     folly::Optional<std::vector<ech::ECHConfig>> echRetryConfigs,
     std::vector<Extension> otherExtensions) {
   EncryptedExtensions encryptedExt;
+  Error err;
   if (selectedAlpn) {
     ProtocolNameList alpn;
     ProtocolName protocol;
     protocol.name = folly::IOBuf::copyBuffer(*selectedAlpn);
     alpn.protocol_name_list.push_back(std::move(protocol));
-    encryptedExt.extensions.push_back(encodeExtension(std::move(alpn)));
+    Extension ext1;
+    FIZZ_THROW_ON_ERROR(encodeExtension(ext1, err, alpn), err);
+    encryptedExt.extensions.push_back(std::move(ext1));
   }
 
   if (earlyData == EarlyDataType::Accepted) {
-    encryptedExt.extensions.push_back(encodeExtension(ServerEarlyData()));
+    Extension ext2;
+    FIZZ_THROW_ON_ERROR(encodeExtension(ext2, err, ServerEarlyData()), err);
+    encryptedExt.extensions.push_back(std::move(ext2));
   }
 
   if (echRetryConfigs.has_value()) {
     ech::ECHEncryptedExtensions serverEch;
     serverEch.retry_configs = std::move(*echRetryConfigs);
-    encryptedExt.extensions.push_back(encodeExtension(std::move(serverEch)));
+    Extension ext3;
+    FIZZ_THROW_ON_ERROR(encodeExtension(ext3, err, serverEch), err);
+    encryptedExt.extensions.push_back(std::move(ext3));
   }
 
   for (auto& ext : otherExtensions) {
     encryptedExt.extensions.push_back(std::move(ext));
   }
-  auto encodedEncryptedExt =
-      encodeHandshake<EncryptedExtensions>(std::move(encryptedExt));
+  Buf encodedEncryptedExt;
+  FIZZ_THROW_ON_ERROR(
+      encodeHandshake(encodedEncryptedExt, err, std::move(encryptedExt)), err);
   handshakeContext.appendToTranscript(encodedEncryptedExt);
   return encodedEncryptedExt;
 }
@@ -1119,9 +1141,14 @@ getCertificate(
   }
 
   if (algo) {
-    encodedCertificate = encodeHandshake(serverCert->getCompressedCert(*algo));
+    FIZZ_THROW_ON_ERROR(
+        encodeHandshake(
+            encodedCertificate, err, serverCert->getCompressedCert(*algo)),
+        err);
   } else {
-    encodedCertificate = encodeHandshake(serverCert->getCertMessage());
+    FIZZ_THROW_ON_ERROR(
+        encodeHandshake(encodedCertificate, err, serverCert->getCertMessage()),
+        err);
   }
   handshakeContext.appendToTranscript(encodedCertificate);
   return std::make_tuple(std::move(encodedCertificate), std::move(algo));
@@ -1134,7 +1161,10 @@ static Buf getCertificateVerify(
   CertificateVerify verify;
   verify.algorithm = sigScheme;
   verify.signature = std::move(signature);
-  auto encodedCertificateVerify = encodeHandshake(std::move(verify));
+  Buf encodedCertificateVerify;
+  Error err;
+  FIZZ_THROW_ON_ERROR(
+      encodeHandshake(encodedCertificateVerify, err, std::move(verify)), err);
   handshakeContext.appendToTranscript(encodedCertificateVerify);
   return encodedCertificateVerify;
 }
@@ -1148,7 +1178,10 @@ static std::pair<std::vector<ExtensionType>, Buf> getCertificateRequest(
   SignatureAlgorithms algos;
   algos.supported_signature_algorithms = acceptableSigSchemes;
   certReqExtensions.push_back(algos.extension_type);
-  request.extensions.push_back(encodeExtension(std::move(algos)));
+  Extension encodedExt;
+  Error err;
+  FIZZ_THROW_ON_ERROR(encodeExtension(encodedExt, err, algos), err);
+  request.extensions.push_back(std::move(encodedExt));
   if (verifier) {
     auto verifierExtensions = verifier->getCertificateRequestExtensions();
     for (auto& ext : verifierExtensions) {
@@ -1156,7 +1189,9 @@ static std::pair<std::vector<ExtensionType>, Buf> getCertificateRequest(
       request.extensions.push_back(std::move(ext));
     }
   }
-  auto encodedCertificateRequest = encodeHandshake(std::move(request));
+  Buf encodedCertificateRequest;
+  FIZZ_THROW_ON_ERROR(
+      encodeHandshake(encodedCertificateRequest, err, std::move(request)), err);
   handshakeContext.appendToTranscript(encodedCertificateRequest);
   return std::make_pair(
       std::move(certReqExtensions), std::move(encodedCertificateRequest));
@@ -1586,8 +1621,11 @@ EventHandler<ServerTypes, StateEnum::ExpectingClientHello, Event::ClientHello>::
             chloHash.hash = handshakeContext->getHandshakeContext();
             handshakeContext =
                 state.context()->getFactory()->makeHandshakeContext(cipher);
-            handshakeContext->appendToTranscript(
-                encodeHandshake(std::move(chloHash)));
+            Buf encodedChloHash;
+            FIZZ_THROW_ON_ERROR(
+                encodeHandshake(encodedChloHash, err, std::move(chloHash)),
+                err);
+            handshakeContext->appendToTranscript(encodedChloHash);
 
             auto hrr = getHelloRetryRequest(
                 version,
@@ -1606,7 +1644,10 @@ EventHandler<ServerTypes, StateEnum::ExpectingClientHello, Event::ClientHello>::
                   hrr, handshakeContext->clone(), std::move(echScheduler));
             }
 
-            auto encodedHelloRetryRequest = encodeHandshake(std::move(hrr));
+            Buf encodedHelloRetryRequest;
+            FIZZ_THROW_ON_ERROR(
+                encodeHandshake(encodedHelloRetryRequest, err, std::move(hrr)),
+                err);
             handshakeContext->appendToTranscript(encodedHelloRetryRequest);
 
             TLSContent content;
@@ -1773,14 +1814,17 @@ EventHandler<ServerTypes, StateEnum::ExpectingClientHello, Event::ClientHello>::
                     decrypter->getRetryConfigs(echState->outerSni);
               }
 
-              auto encodedServerHello = encodeHandshake(std::move(serverHello));
+              Buf encodedServerHello;
+              FIZZ_THROW_ON_ERROR(
+                  encodeHandshake(
+                      encodedServerHello, err, std::move(serverHello)),
+                  err);
               handshakeContext->appendToTranscript(encodedServerHello);
 
               // Derive handshake keys.
               auto handshakeWriteRecordLayer =
                   state.context()->getFactory()->makeEncryptedWriteRecordLayer(
                       EncryptionLevel::Handshake);
-
               FIZZ_THROW_ON_ERROR(
                   handshakeWriteRecordLayer->setProtocolVersion(err, version),
                   err);
@@ -2294,14 +2338,17 @@ static WriteToSocket writeNewSessionTicket(
   nst.ticket_nonce = std::move(nonce);
   nst.ticket = std::move(ticket);
 
+  Error err;
   if (context.getAcceptEarlyData(version)) {
     TicketEarlyData early;
     early.max_early_data_size = context.getMaxEarlyDataSize();
-    nst.extensions.push_back(encodeExtension(std::move(early)));
+    Extension ext;
+    FIZZ_THROW_ON_ERROR(encodeExtension(ext, err, early), err);
+    nst.extensions.push_back(std::move(ext));
   }
 
-  auto encodedNst = encodeHandshake(std::move(nst));
-  Error err;
+  Buf encodedNst;
+  FIZZ_THROW_ON_ERROR(encodeHandshake(encodedNst, err, std::move(nst)), err);
   TLSContent content;
   FIZZ_THROW_ON_ERROR(
       recordLayer.writeHandshake(content, err, std::move(encodedNst)), err);

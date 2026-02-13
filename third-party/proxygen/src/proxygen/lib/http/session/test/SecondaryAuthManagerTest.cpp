@@ -47,7 +47,10 @@ TEST(SecondaryAuthManagerTest, AuthenticatorRequest) {
   sigAlgs.supported_signature_algorithms.push_back(
       SignatureScheme::ecdsa_secp256r1_sha256);
   std::vector<fizz::Extension> extensions;
-  extensions.push_back(encodeExtension(std::move(sigAlgs)));
+  fizz::Extension ext;
+  fizz::Error err;
+  EXPECT_EQ(encodeExtension(ext, err, sigAlgs), fizz::Status::Success);
+  extensions.push_back(std::move(ext));
   SecondaryAuthManager authManager;
   auto authRequestPair = authManager.createAuthRequest(
       std::move(certRequestContext), std::move(extensions));
@@ -75,7 +78,10 @@ TEST(SecondaryAuthManagerTest, Authenticator) {
   sigAlgs.supported_signature_algorithms.push_back(
       SignatureScheme::ecdsa_secp256r1_sha256);
   std::vector<fizz::Extension> extensions;
-  extensions.push_back(encodeExtension(std::move(sigAlgs)));
+  fizz::Extension ext;
+  fizz::Error err;
+  EXPECT_EQ(encodeExtension(ext, err, sigAlgs), fizz::Status::Success);
+  extensions.push_back(std::move(ext));
   auto authRequestPair = authManager.createAuthRequest(
       std::move(certRequestContext), std::move(extensions));
   auto requestId = authRequestPair.first;

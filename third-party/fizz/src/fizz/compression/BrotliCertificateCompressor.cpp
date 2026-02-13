@@ -60,7 +60,9 @@ using brotli1::brotliCompressImpl;
 
 CompressedCertificate BrotliCertificateCompressor::compress(
     const CertificateMsg& cert) {
-  auto encoded = encode(cert);
+  Buf encoded;
+  Error err;
+  FIZZ_THROW_ON_ERROR(encode(encoded, err, cert), err);
   auto encodedRange = encoded->coalesce();
   auto compressedCert = brotliCompressImpl(level_, windowSize_, encodedRange);
 

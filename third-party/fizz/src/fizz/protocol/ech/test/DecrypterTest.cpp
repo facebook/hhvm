@@ -43,7 +43,10 @@ ClientHello getChloOuterWithExt(
 
   auto chloInner = TestMessages::clientHello();
   InnerECHClientHello chloInnerECHExt;
-  chloInner.extensions.push_back(encodeExtension(chloInnerECHExt));
+  Extension innerECHExt;
+  Error err;
+  FIZZ_THROW_ON_ERROR(encodeExtension(innerECHExt, err, chloInnerECHExt), err);
+  chloInner.extensions.push_back(std::move(innerECHExt));
 
   // Encrypt client hello
   ClientHello chloOuter = getClientHelloOuter();
@@ -53,7 +56,9 @@ ClientHello getChloOuterWithExt(
       negotiatedECHConfig, chloInner, chloOuter, setupResult, folly::none, {});
 
   // Add ECH extension
-  chloOuter.extensions.push_back(encodeExtension(echExt));
+  Extension outerECHExt;
+  FIZZ_THROW_ON_ERROR(encodeExtension(outerECHExt, err, echExt), err);
+  chloOuter.extensions.push_back(std::move(outerECHExt));
 
   return chloOuter;
 }
@@ -77,7 +82,10 @@ ClientHello getChloOuterHRRWithExt(
 
   auto chloInner = TestMessages::clientHello();
   InnerECHClientHello chloInnerECHExt;
-  chloInner.extensions.push_back(encodeExtension(chloInnerECHExt));
+  Extension innerECHExt;
+  Error err;
+  FIZZ_THROW_ON_ERROR(encodeExtension(innerECHExt, err, chloInnerECHExt), err);
+  chloInner.extensions.push_back(std::move(innerECHExt));
 
   ClientHello chloOuter = getClientHelloOuter();
   chloOuter.legacy_session_id = folly::IOBuf::create(0);
@@ -88,7 +96,9 @@ ClientHello getChloOuterHRRWithExt(
 
   // First, save out the first ECH
   initialOuterChlo = chloOuter.clone();
-  initialOuterChlo.extensions.push_back(encodeExtension(initialECH));
+  Extension initialECHExt;
+  FIZZ_THROW_ON_ERROR(encodeExtension(initialECHExt, err, initialECH), err);
+  initialOuterChlo.extensions.push_back(std::move(initialECHExt));
 
   // Save out enc
   enc = std::move(initialECH.enc);
@@ -98,7 +108,9 @@ ClientHello getChloOuterHRRWithExt(
       negotiatedECHConfig, chloInner, chloOuter, setupResult, folly::none, {});
 
   // Add ECH extension
-  chloOuter.extensions.push_back(encodeExtension(echExt));
+  Extension outerECHExt;
+  FIZZ_THROW_ON_ERROR(encodeExtension(outerECHExt, err, echExt), err);
+  chloOuter.extensions.push_back(std::move(outerECHExt));
 
   return chloOuter;
 }
@@ -143,18 +155,31 @@ TEST(DecrypterTest, TestDecodeSuccess) {
   EXPECT_TRUE(gotChlo.has_value());
 
   auto expectedChloInner = TestMessages::clientHello();
+  Buf encodedOuter;
+  Error err;
+  EXPECT_EQ(encodeHandshake(encodedOuter, err, chloOuter), Status::Success);
+  Buf encodedExpectedOuter;
+  EXPECT_EQ(
+      encodeHandshake(encodedExpectedOuter, err, expectedChloInner),
+      Status::Success);
   EXPECT_FALSE(
       folly::IOBufEqualTo()(
-          encodeHandshake(chloOuter), encodeHandshake(expectedChloInner)));
+          std::move(encodedOuter), std::move(encodedExpectedOuter)));
 
   auto chlo = std::move(gotChlo.value());
   // Remove the inner ECH extension from the client hello inner
   TestMessages::removeExtension(
       chlo.chlo, ExtensionType::encrypted_client_hello);
 
+  Buf encodedChlo;
+  EXPECT_EQ(encodeHandshake(encodedChlo, err, chlo.chlo), Status::Success);
+  Buf encodedExpectedInner;
+  EXPECT_EQ(
+      encodeHandshake(encodedExpectedInner, err, expectedChloInner),
+      Status::Success);
   EXPECT_TRUE(
       folly::IOBufEqualTo()(
-          encodeHandshake(chlo.chlo), encodeHandshake(expectedChloInner)));
+          std::move(encodedChlo), std::move(encodedExpectedInner)));
 }
 
 TEST(DecrypterTest, TestDecodeHRRSuccess) {
@@ -170,16 +195,32 @@ TEST(DecrypterTest, TestDecodeHRRSuccess) {
   auto gotChlo = decrypter.decryptClientHelloHRR(chloOuter, enc);
 
   auto expectedChloInner = TestMessages::clientHello();
-  EXPECT_FALSE(
-      folly::IOBufEqualTo()(
-          encodeHandshake(chloOuter), encodeHandshake(expectedChloInner)));
-
+  Error err;
+  {
+    Buf encodedOuter;
+    EXPECT_EQ(encodeHandshake(encodedOuter, err, chloOuter), Status::Success);
+    Buf encodedExpectedInner;
+    EXPECT_EQ(
+        encodeHandshake(encodedExpectedInner, err, expectedChloInner),
+        Status::Success);
+    EXPECT_FALSE(
+        folly::IOBufEqualTo()(
+            std::move(encodedOuter), std::move(encodedExpectedInner)));
+  }
   // Remove the inner ECH extension from the client hello inner
   TestMessages::removeExtension(gotChlo, ExtensionType::encrypted_client_hello);
-
-  EXPECT_TRUE(
-      folly::IOBufEqualTo()(
-          encodeHandshake(gotChlo), encodeHandshake(expectedChloInner)));
+  {
+    Buf encodedGotChloHRR;
+    EXPECT_EQ(
+        encodeHandshake(encodedGotChloHRR, err, gotChlo), Status::Success);
+    Buf encodedExpectedInner;
+    EXPECT_EQ(
+        encodeHandshake(encodedExpectedInner, err, expectedChloInner),
+        Status::Success);
+    EXPECT_TRUE(
+        folly::IOBufEqualTo()(
+            std::move(encodedGotChloHRR), std::move(encodedExpectedInner)));
+  }
 }
 
 TEST(DecrypterTest, TestDecodeHRRWithContextSuccess) {
@@ -201,17 +242,33 @@ TEST(DecrypterTest, TestDecodeHRRWithContextSuccess) {
   auto gotChloHRR = decrypter.decryptClientHelloHRR(chloOuter, chlo.context);
 
   auto expectedChloInner = TestMessages::clientHello();
-  EXPECT_FALSE(
-      folly::IOBufEqualTo()(
-          encodeHandshake(chloOuter), encodeHandshake(expectedChloInner)));
-
+  Error err;
+  {
+    Buf encodedOuter;
+    EXPECT_EQ(encodeHandshake(encodedOuter, err, chloOuter), Status::Success);
+    Buf encodedExpectedInner;
+    EXPECT_EQ(
+        encodeHandshake(encodedExpectedInner, err, expectedChloInner),
+        Status::Success);
+    EXPECT_FALSE(
+        folly::IOBufEqualTo()(
+            std::move(encodedOuter), std::move(encodedExpectedInner)));
+  }
   // Remove the inner ECH extension from the client hello inner
   TestMessages::removeExtension(
       gotChloHRR, ExtensionType::encrypted_client_hello);
-
-  EXPECT_TRUE(
-      folly::IOBufEqualTo()(
-          encodeHandshake(gotChloHRR), encodeHandshake(expectedChloInner)));
+  {
+    Buf encodedGotChloHRR;
+    EXPECT_EQ(
+        encodeHandshake(encodedGotChloHRR, err, gotChloHRR), Status::Success);
+    Buf encodedExpectedInner;
+    EXPECT_EQ(
+        encodeHandshake(encodedExpectedInner, err, expectedChloInner),
+        Status::Success);
+    EXPECT_TRUE(
+        folly::IOBufEqualTo()(
+            std::move(encodedGotChloHRR), std::move(encodedExpectedInner)));
+  }
 }
 
 TEST(DecrypterTest, TestDecodeFailure) {

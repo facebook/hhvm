@@ -45,11 +45,13 @@ std::unique_ptr<folly::IOBuf> makeClientHelloOuterForAad(
   memset(echExtension.payload->writableData(), 0, payloadSize);
   echExtension.payload->append(payloadSize);
 
-  *it = encodeExtension(echExtension);
+  FIZZ_THROW_ON_ERROR(encodeExtension(*it, err, echExtension), err);
 
   // Get the serialized version of the client hello outer
   // without the ECH extension to use
-  return encode(chloCopy);
+  std::unique_ptr<folly::IOBuf> encoded;
+  FIZZ_THROW_ON_ERROR(encode(encoded, err, chloCopy), err);
+  return encoded;
 }
 
 std::unique_ptr<folly::IOBuf> extractEncodedClientHelloInner(
@@ -78,8 +80,11 @@ std::unique_ptr<folly::IOBuf> makeHpkeContextInfoParam(
   auto bufContents = folly::IOBuf::copyBuffer(tlsEchPrefix);
   auto config = ECHConfig{};
   config.version = ECHVersion::Draft15;
-  config.ech_config_content = encode(echConfig);
-  bufContents->prependChain(encode(std::move(config)));
+  Error err;
+  FIZZ_THROW_ON_ERROR(encode(config.ech_config_content, err, echConfig), err);
+  std::unique_ptr<folly::IOBuf> encodedConfig;
+  FIZZ_THROW_ON_ERROR(encode(encodedConfig, err, std::move(config)), err);
+  bufContents->prependChain(std::move(encodedConfig));
   return bufContents;
 }
 
@@ -295,7 +300,11 @@ std::vector<uint8_t> calculateAcceptConfirmation(
   // Acceptance is done by feeding a dummy hello into the transcript and
   // deriving a secret from it.
   auto shloEch = makeDummyServerHello(shlo);
-  context->appendToTranscript(encodeHandshake(std::move(shloEch)));
+  Buf encodedShloEch;
+  Error err;
+  FIZZ_THROW_ON_ERROR(
+      encodeHandshake(encodedShloEch, err, std::move(shloEch)), err);
+  context->appendToTranscript(encodedShloEch);
 
   auto hsc = context->getHandshakeContext();
   auto echAcceptance = scheduler->getSecret(
@@ -311,7 +320,11 @@ std::vector<uint8_t> calculateAcceptConfirmation(
   // Acceptance is done by zeroing the confirmation extension,
   // putting it into the transcript, and deriving a secret.
   auto hrrEch = makeDummyHRR(hrr);
-  context->appendToTranscript(encodeHandshake(std::move(hrrEch)));
+  Buf encodedHrrEch;
+  Error err;
+  FIZZ_THROW_ON_ERROR(
+      encodeHandshake(encodedHrrEch, err, std::move(hrrEch)), err);
+  context->appendToTranscript(encodedHrrEch);
 
   auto hsc = context->getHandshakeContext();
   auto echAcceptance = scheduler->getSecret(
@@ -385,7 +398,10 @@ void setAcceptConfirmation(
     std::unique_ptr<KeyScheduler> scheduler) {
   // Add an ECH confirmation extension. The calculation code will ignore its
   // contents but expects it to be there.
-  hrr.extensions.push_back(encodeExtension(ECHHelloRetryRequest()));
+  Extension ext;
+  Error err;
+  FIZZ_THROW_ON_ERROR(encodeExtension(ext, err, ECHHelloRetryRequest()), err);
+  hrr.extensions.push_back(std::move(ext));
 
   // Calculate it.
   auto acceptConfirmation = calculateAcceptConfirmation(
@@ -512,7 +528,8 @@ std::vector<Extension> generateAndReplaceOuterExtensions(
           return ext.extension_type == extType;
         });
     if (!outerExtensionsInserted) {
-      *it = encodeExtension(outerExt);
+      Error err;
+      FIZZ_THROW_ON_ERROR(encodeExtension(*it, err, outerExt), err);
       outerExtensionsInserted = true;
     } else {
       chloInnerExt.erase(it);
@@ -537,7 +554,9 @@ void encryptClientHelloImpl(
   chloInnerCopy.legacy_session_id = folly::IOBuf::copyBuffer("");
   chloInnerCopy.extensions = generateAndReplaceOuterExtensions(
       std::move(chloInnerCopy.extensions), outerExtensionTypes);
-  auto encodedClientHelloInner = encode(chloInnerCopy);
+  std::unique_ptr<folly::IOBuf> encodedClientHelloInner;
+  Error err;
+  FIZZ_THROW_ON_ERROR(encode(encodedClientHelloInner, err, chloInnerCopy), err);
 
   size_t padding = calculateECHPadding(
       clientHelloInner,
@@ -561,15 +580,20 @@ void encryptClientHelloImpl(
   echExtension.payload = folly::IOBuf::create(dummyPayloadSize);
   memset(echExtension.payload->writableData(), 0, dummyPayloadSize);
   echExtension.payload->append(dummyPayloadSize);
-  chloOuterForAAD.extensions.push_back(encodeExtension(echExtension));
+  Extension ext1;
+  FIZZ_THROW_ON_ERROR(encodeExtension(ext1, err, echExtension), err);
+  chloOuterForAAD.extensions.push_back(std::move(ext1));
 
   // Add grease PSK if passed in
   if (greasePsk.has_value()) {
-    chloOuterForAAD.extensions.push_back(encodeExtension(*greasePsk));
+    Extension ext2;
+    FIZZ_THROW_ON_ERROR(encodeExtension(ext2, err, *greasePsk), err);
+    chloOuterForAAD.extensions.push_back(std::move(ext2));
   }
 
   // Serialize for AAD
-  auto clientHelloOuterAad = encode(chloOuterForAAD);
+  std::unique_ptr<folly::IOBuf> clientHelloOuterAad;
+  FIZZ_THROW_ON_ERROR(encode(clientHelloOuterAad, err, chloOuterForAAD), err);
 
   // Encrypt inner client hello
   echExtension.payload = setupResult.context->seal(
@@ -662,7 +686,9 @@ ClientHello decryptECHWithContext(
   decodedChlo.extensions = std::move(expandedExtensions);
 
   // Update encoding
-  decodedChlo.originalEncoding = encodeHandshake(decodedChlo);
+  Buf originalEncoding;
+  FIZZ_THROW_ON_ERROR(encodeHandshake(originalEncoding, err, decodedChlo), err);
+  decodedChlo.originalEncoding = std::move(originalEncoding);
 
   return decodedChlo;
 }

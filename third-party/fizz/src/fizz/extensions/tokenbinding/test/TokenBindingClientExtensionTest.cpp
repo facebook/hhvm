@@ -30,7 +30,10 @@ class TokenBindingClientExtensionTest : public Test {
     TokenBindingParameters params;
     params.version = version;
     params.key_parameters_list.push_back(keyParam);
-    serverExtensions_.push_back(encodeExtension(params));
+    Extension ext;
+    Error err;
+    FIZZ_THROW_ON_ERROR(encodeExtension(ext, err, params), err);
+    serverExtensions_.push_back(std::move(ext));
   }
 
   std::vector<Extension> serverExtensions_;

@@ -1391,7 +1391,10 @@ TEST_F(MockCodecDownstreamTest, TestSendCertificateRequest) {
   sigAlgs.supported_signature_algorithms.push_back(
       SignatureScheme::ecdsa_secp256r1_sha256);
   std::vector<fizz::Extension> extensions;
-  extensions.push_back(encodeExtension(std::move(sigAlgs)));
+  fizz::Extension ext;
+  fizz::Error err;
+  EXPECT_EQ(encodeExtension(ext, err, sigAlgs), fizz::Status::Success);
+  extensions.push_back(std::move(ext));
 
   std::unique_ptr<StrictMock<MockSecondaryAuthManager>> secondAuthManager_(
       new StrictMock<MockSecondaryAuthManager>());

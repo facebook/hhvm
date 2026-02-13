@@ -173,10 +173,12 @@ class WriteRecordLayer {
       Aead::AeadOptions options) const = 0;
 
   Status writeAlert(TLSContent& ret, Error& err, Alert&& alert) const {
+    Buf msg;
+    FIZZ_RETURN_ON_ERROR(encode(msg, err, std::move(alert)));
     FIZZ_RETURN_ON_ERROR(write(
         ret,
         err,
-        TLSMessage{ContentType::alert, encode(std::move(alert))},
+        TLSMessage{ContentType::alert, std::move(msg)},
         Aead::AeadOptions()));
     return Status::Success;
   }

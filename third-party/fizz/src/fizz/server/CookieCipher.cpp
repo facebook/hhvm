@@ -29,19 +29,27 @@ Buf getStatelessHelloRetryRequest(
 
   ServerSupportedVersions versionExt;
   versionExt.selected_version = version;
-  hrr.extensions.push_back(encodeExtension(std::move(versionExt)));
+  Error err;
+  Extension ext;
+  FIZZ_THROW_ON_ERROR(encodeExtension(ext, err, versionExt), err);
+  hrr.extensions.push_back(std::move(ext));
 
   if (group) {
     HelloRetryRequestKeyShare keyShare;
     keyShare.selected_group = *group;
-    hrr.extensions.push_back(encodeExtension(std::move(keyShare)));
+    Extension ext1;
+    FIZZ_THROW_ON_ERROR(encodeExtension(ext1, err, keyShare), err);
+    hrr.extensions.push_back(std::move(ext1));
   }
 
   Cookie cookieExt;
   cookieExt.cookie = std::move(cookie);
-  hrr.extensions.push_back(encodeExtension(std::move(cookieExt)));
-
-  return encodeHandshake(std::move(hrr));
+  Extension ext2;
+  FIZZ_THROW_ON_ERROR(encodeExtension(ext2, err, cookieExt), err);
+  hrr.extensions.push_back(std::move(ext2));
+  Buf encodedHRR;
+  FIZZ_THROW_ON_ERROR(encodeHandshake(encodedHRR, err, std::move(hrr)), err);
+  return encodedHRR;
 }
 
 static folly::Optional<NamedGroup> getHrrGroup(

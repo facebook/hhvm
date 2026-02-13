@@ -7670,6 +7670,102 @@ class :el {
         )
         self.run_spec(spec, variables, lsp_extra_args=["--notebook-mode"])
 
+    def test_toplevel_statements_package(self) -> None:
+        """
+        Regression test: top-level statements should get their package based on
+        the file path, not None.
+
+        When the synthesized function wrapping top-level statements has the
+        correct package (derived from the file path), cross-package access is
+        allowed when the file's package includes the target package.
+
+        With fd_package = None (the old behavior), the top-level statement
+        would be in "the default package" which doesn't include pkg_b,
+        producing a spurious cross-package error (4472).
+        """
+        repo_dir = self.test_driver.repo_dir
+
+        os.makedirs(os.path.join(repo_dir, "a"), exist_ok=True)
+        os.makedirs(os.path.join(repo_dir, "b"), exist_ok=True)
+
+        with open(os.path.join(repo_dir, "PACKAGES.toml"), "w") as f:
+            f.write(
+                """\
+[packages]
+[packages.pkg_a]
+include_paths=["//a/"]
+includes=["pkg_b"]
+
+[packages.pkg_b]
+include_paths=["//b/"]
+
+[deployments]
+"""
+            )
+
+        # Create target function in pkg_b
+        with open(os.path.join(repo_dir, "b", "target.php"), "w") as f:
+            f.write("<?hh\nfunction target_fn_in_pkg_b(): int {\n    return 42;\n}\n")
+
+        variables = self.write_hhconf_and_naming_table()
+        file_base_name = "a/caller.php"
+        php_file_uri = self.repo_file_uri(file_base_name)
+        contents = "<?hh\n$x = target_fn_in_pkg_b();\n"
+        variables.update({"php_file_uri": php_file_uri, "contents": contents})
+
+        spec = (
+            self.initialize_spec(LspTestSpec("toplevel_statements_package"))
+            .write_to_disk(
+                comment="create caller file with top-level statement",
+                uri="${php_file_uri}",
+                contents="${contents}",
+                notify=False,
+            )
+            .notification(
+                method="textDocument/didOpen",
+                params={
+                    "textDocument": {
+                        "uri": "${php_file_uri}",
+                        "languageId": "hack",
+                        "version": 1,
+                        "text": "${contents}",
+                    }
+                },
+            )
+            .wait_for_notification(
+                comment="expect only the 2128 top-level-statement error, "
+                "no 4472 cross-package error (because pkg_a includes pkg_b)",
+                method="textDocument/publishDiagnostics",
+                params={
+                    "uri": "${php_file_uri}",
+                    "diagnostics": [
+                        {
+                            "range": {
+                                "start": {"line": 1, "character": 0},
+                                "end": {"line": 1, "character": 26},
+                            },
+                            "severity": 1,
+                            "code": 2128,
+                            "source": "Hack",
+                            "message": "Hack does not support top level statements. Use the __EntryPoint attribute on a function instead",
+                            "relatedInformation": [],
+                            "relatedLocations": [],
+                        },
+                    ],
+                },
+            )
+            .request(line=line(), method="shutdown", params={}, result=None)
+            .wait_for_notification(
+                comment="shutdown should clear diagnostics",
+                method="textDocument/publishDiagnostics",
+                params={
+                    "uri": "${php_file_uri}",
+                    "diagnostics": [],
+                },
+            )
+        )
+        self.run_spec(spec, variables)
+
     def test_file_outline_detail(self) -> None:
         """
         Test that file outline symbols contain [the `detail` field](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#documentSymbol), where applicable.

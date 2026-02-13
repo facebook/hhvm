@@ -172,8 +172,10 @@ struct WtStreamManager {
     virtual void readReady(WtReadHandle&) noexcept = 0;
   };
   void setReadCb(WtReadHandle& rh, ReadCallback* rcb) noexcept;
-  // ignores wt conn flow control (should be set to kMaxVarint in quic)
-  uint64_t recvAvail(const WtReadHandle& rh) const noexcept;
+  // ignores wt connection-level flow control (this should be set to kMaxVarint
+  // in quic)
+  bool hasPendingData(const WtWriteHandle& wh) const noexcept;
+  uint64_t bufferedBytes(const WtReadHandle& rh) const noexcept;
 
   enum Result : uint8_t { Fail = 0, Ok = 1 };
   /**

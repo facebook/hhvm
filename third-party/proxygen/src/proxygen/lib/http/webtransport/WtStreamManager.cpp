@@ -512,9 +512,10 @@ WebTransport::BidiStreamHandle WtStreamManager::createBidiHandle() noexcept {
 void WtStreamManager::setReadCb(WtReadHandle& rh, ReadCallback* rcb) noexcept {
   readhandle_ref_cast(rh).rcb_ = rcb;
 }
-uint64_t WtStreamManager::recvAvail(const WtReadHandle& rh) const noexcept {
-  const auto& recvFc = static_cast<const ReadHandle&>(rh).streamRecvFc_;
-  return recvFc.isBlocked() ? 0 : recvFc.getAvailable();
+
+uint64_t WtStreamManager::bufferedBytes(const WtReadHandle& rh) const noexcept {
+  return static_cast<const ReadHandle&>(rh)
+      .ingress_.chain.computeChainDataLength();
 }
 
 WtStreamManager::Result WtStreamManager::onMaxData(MaxConnData data) noexcept {

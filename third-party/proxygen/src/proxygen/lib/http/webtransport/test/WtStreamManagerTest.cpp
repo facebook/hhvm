@@ -252,9 +252,11 @@ TEST(WtStreamManager, EnqueueIngressData) {
 
   constexpr auto kBufLen = 65'535;
 
+  EXPECT_EQ(streamManager.bufferedBytes(*one.readHandle), 0);
   // both conn & stream recv window exactly full, expect success
   EXPECT_TRUE(
       streamManager.enqueue(*one.readHandle, {makeBuf(kBufLen), false}));
+  EXPECT_EQ(streamManager.bufferedBytes(*one.readHandle), kBufLen);
   // enqueuing a additional byte in one will fail (stream recv window full)
   EXPECT_FALSE(
       streamManager.enqueue(*one.readHandle, {makeBuf(kBufLen), false}));
@@ -269,6 +271,7 @@ TEST(WtStreamManager, EnqueueIngressData) {
   EXPECT_TRUE(oneFut.isReady()); // enqueue should fulfill promise
   EXPECT_EQ(oneFut.value().data->computeChainDataLength(), kBufLen);
   EXPECT_FALSE(oneFut.value().fin);
+  EXPECT_EQ(streamManager.bufferedBytes(*one.readHandle), 0);
 }
 
 TEST(WtStreamManager, WriteEgressHandle) {
@@ -1063,7 +1066,6 @@ TEST(WtStreamManager, PerStreamCallbacks) {
   auto priorityQueue = std::make_unique<quic::HTTPPriorityQueue>();
   WtStreamManager streamManager{
       detail::WtDir::Client, config, egressCb, ingressCb, *priorityQueue};
-  constexpr auto kBufLen = 65'535;
 
   auto bidi = streamManager.createBidiHandle();
   CHECK(bidi.readHandle && bidi.writeHandle);
@@ -1075,7 +1077,6 @@ TEST(WtStreamManager, PerStreamCallbacks) {
   bidi.writeHandle->writeStreamData(
       makeBuf(10), /*fin=*/false, /*byteEventCallback=*/nullptr);
 
-  EXPECT_EQ(streamManager.recvAvail(*bidi.readHandle), kBufLen);
   // read before enqueue
   auto read = bidi.readHandle->readStreamData();
   EXPECT_FALSE(read.isReady());

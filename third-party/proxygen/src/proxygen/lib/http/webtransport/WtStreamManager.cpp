@@ -194,7 +194,6 @@ struct WriteHandle : public WebTransport::StreamWriteHandle {
 
   Accessor smAccessor_;
   WtBufferedStreamData bufferedSendData_;
-  quic::PriorityQueue::Priority priority_; // Stream priority
   uint64_t err{kInvalidVarint};
   WritePromise promise_{emptyWritePromise()};
   HandleState state_;
@@ -530,7 +529,7 @@ WtStreamManager::Result WtStreamManager::onMaxData(MaxConnData data) noexcept {
   for (auto* wh : blockedStreams) {
     auto& writeHandle = writehandle_ref_cast(*wh);
     if (writeHandle.bufferedSendData_.canSendData()) {
-      writableStreams_.insert(writeHandle.getID(), writeHandle.priority_);
+      writableStreams_.insert(writeHandle.getID(), writeHandle.getPriority());
     } else {
       XLOG(ERR) << "Stream " << writeHandle.getID()
                 << " in connFcBlockedStreams_ but !canSendData";
@@ -624,7 +623,7 @@ void WtStreamManager::onStreamWritable(WtWriteHandle& wh) noexcept {
   }
 
   bool wasEmpty = !hasEvent();
-  writableStreams_.insert(writeHandle.getID(), writeHandle.priority_);
+  writableStreams_.insert(writeHandle.getID(), writeHandle.getPriority());
 
   if (wasEmpty && hasEvent()) {
     egressCb_.eventsAvailable();
@@ -873,8 +872,8 @@ folly::Expected<folly::Unit, WriteHandle::ErrCode> WriteHandle::setPriority(
     quic::PriorityQueue::Priority priority) {
   XCHECK_NE(state_, Closed) << "setPriority after close";
 
-  priority_ = priority;
-  smAccessor_.writableStreams().update(getID(), priority_);
+  StreamWriteHandle::setPriority(priority);
+  smAccessor_.writableStreams().update(getID(), getPriority());
 
   return folly::unit;
 }

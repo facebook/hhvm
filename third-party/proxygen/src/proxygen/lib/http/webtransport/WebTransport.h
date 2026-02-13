@@ -204,12 +204,22 @@ class WebTransport {
         uint32_t error) = 0;
 
     virtual folly::Expected<folly::Unit, ErrorCode> setPriority(
-        quic::PriorityQueue::Priority priority) = 0;
+        quic::PriorityQueue::Priority priority) {
+      priority_ = priority;
+      return folly::unit;
+    }
+
+    [[nodiscard]] quic::PriorityQueue::Priority getPriority() const {
+      return priority_;
+    }
 
     // The returned Future will complete when the stream is available for more
     // writes.
     virtual folly::Expected<folly::SemiFuture<uint64_t>, ErrorCode>
     awaitWritable() = 0;
+
+   private:
+    quic::PriorityQueue::Priority priority_;
   };
 
   // Handle for bidirectional streams

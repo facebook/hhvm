@@ -258,6 +258,7 @@ class WebTransportImpl : public WebTransport {
 
     folly::Expected<folly::Unit, WebTransport::ErrorCode> setPriority(
         quic::PriorityQueue::Priority priority) override {
+      WebTransport::StreamWriteHandle::setPriority(priority);
       return impl_.tp_.setWebTransportStreamPriority(getID(), priority);
     }
     folly::Expected<folly::SemiFuture<uint64_t>, ErrorCode> awaitWritable()

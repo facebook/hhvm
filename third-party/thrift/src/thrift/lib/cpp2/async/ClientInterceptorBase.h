@@ -21,6 +21,7 @@
 
 #include <folly/ExceptionWrapper.h>
 
+#include <thrift/lib/cpp/StreamEventHandler.h>
 #include <thrift/lib/cpp2/async/ClientInterceptorStorage.h>
 #include <thrift/lib/cpp2/async/InterceptorFrameworkMetadata.h>
 
@@ -84,6 +85,33 @@ class ClientInterceptorBase {
   };
   virtual void internal_onResponse(ResponseInfo) = 0;
 
+  // Information provided for each decoded stream payload
+  struct StreamPayloadInfo {
+    // Type-erased reference to the decoded payload
+    apache::thrift::util::TypeErasedRef payload;
+    // Zero-based index of this payload within the stream
+    std::size_t payloadIndex = 0;
+  };
+
+  // Information provided when a stream ends
+  struct StreamEndInfo {
+    details::STREAM_ENDING_TYPES endReason =
+        details::STREAM_ENDING_TYPES::COMPLETE;
+    folly::exception_wrapper error;
+    std::size_t totalPayloads = 0;
+  };
+
+  // Stream lifecycle hooks with empty defaults for backward compatibility.
+  // Storage is passed separately and unwrapped by ClientInterceptor<T>.
+  virtual void internal_onStreamBegin(
+      detail::ClientInterceptorOnRequestStorage* /*storage*/) {}
+  virtual void internal_onStreamPayload(
+      detail::ClientInterceptorOnRequestStorage* /*storage*/,
+      StreamPayloadInfo /*info*/) {}
+  virtual void internal_onStreamEnd(
+      detail::ClientInterceptorOnRequestStorage* /*storage*/,
+      const StreamEndInfo& /*info*/) noexcept {}
+
   static constexpr std::size_t kMaxRequestStateSize =
       detail::ClientInterceptorOnRequestStorage::max_size();
 };
@@ -101,6 +129,9 @@ class ClientInterceptorException : public std::runtime_error {
   ClientInterceptorException(const ClientInterceptorException&) = default;
   ClientInterceptorException& operator=(const ClientInterceptorException&) =
       default;
+  ClientInterceptorException(ClientInterceptorException&&) = default;
+  ClientInterceptorException& operator=(ClientInterceptorException&&) = default;
+  ~ClientInterceptorException() override = default;
 
   const std::vector<SingleExceptionInfo>& causes() const noexcept {
     return causes_;

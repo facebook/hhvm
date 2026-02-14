@@ -40,7 +40,6 @@ enum class STREAM_PAUSE_REASON {
 };
 } // namespace details
 
-// EXPERIMENTAL: DO NOT USE WITHOUT TALKING TO THRIFT TEAM
 class StreamEventHandler {
  public:
   struct StreamContext {

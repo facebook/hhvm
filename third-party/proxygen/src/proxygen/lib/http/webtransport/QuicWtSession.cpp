@@ -13,6 +13,8 @@ using FCState = proxygen::WebTransport::FCState;
 namespace proxygen {
 
 namespace {
+static constexpr uint64_t kMaxWtIngressBuf = 65'535;
+
 detail::WtStreamManager::WtConfig createConfig() {
   detail::WtStreamManager::WtConfig config;
   config.selfMaxStreamsBidi = detail::kMaxVarint;
@@ -101,6 +103,7 @@ QuicWtSession::createBidiStream() noexcept {
   }
   auto bidiHandle = sm_.getOrCreateBidiHandle(*id);
   XCHECK(bidiHandle.readHandle && bidiHandle.writeHandle);
+  sm_.setReadCb(*bidiHandle.readHandle, this);
   quicSocket_->setReadCallback(*id, this);
   return bidiHandle;
 }
@@ -149,16 +152,22 @@ void QuicWtSession::readAvailable(quic::StreamId id) noexcept {
     XLOG(ERR) << "Read handle not found for stream " << id;
     return;
   }
-  auto readRes = quicSocket_->read(id, detail::kMaxVarint);
+  auto canRead =
+      kMaxWtIngressBuf - std::min(sm_.bufferedBytes(*rh), kMaxWtIngressBuf);
+  if (canRead == 0) {
+    maybePauseIngress(id);
+    return;
+  }
+  auto readRes = quicSocket_->read(id, canRead);
   if (readRes.hasError()) {
     XLOG(ERR) << "Read error for stream " << id;
     return;
   }
-
   auto& [data, eof] = readRes.value();
   auto res = sm_.enqueue(
       *rh, WebTransport::StreamData{.data = std::move(data), .fin = eof});
   XCHECK_NE(res, detail::WtStreamManager::Result::Fail);
+  maybePauseIngress(id);
 }
 
 void QuicWtSession::readError(quic::StreamId id,
@@ -173,6 +182,7 @@ void QuicWtSession::onNewBidirectionalStream(quic::StreamId id) noexcept {
   XCHECK(wtHandler_);
   auto bidiHandle = sm_.getOrCreateBidiHandle(id);
   XCHECK(bidiHandle.readHandle && bidiHandle.writeHandle);
+  sm_.setReadCb(*bidiHandle.readHandle, this);
   quicSocket_->setReadCallback(id, this);
   wtHandler_->onNewBidiStream(bidiHandle);
 }
@@ -180,6 +190,7 @@ void QuicWtSession::onNewBidirectionalStream(quic::StreamId id) noexcept {
 void QuicWtSession::onNewUnidirectionalStream(quic::StreamId id) noexcept {
   XCHECK(wtHandler_);
   auto* rh = CHECK_NOTNULL(sm_.getOrCreateIngressHandle(id));
+  sm_.setReadCb(*rh, this);
   quicSocket_->setReadCallback(id, this);
   wtHandler_->onNewUniStream(rh);
 }
@@ -232,6 +243,12 @@ void QuicWtSession::onDatagramsAvailable() noexcept {
       wtHandler_->onDatagram(std::move(datagram));
     }
   }
+}
+
+// -- WtStreamManager::ReadCallback overrides --
+void QuicWtSession::readReady(
+    detail::WtStreamManager::WtReadHandle& rh) noexcept {
+  maybeResumeIngress(rh.getID());
 }
 
 // -- WtStreamManager::EgressCallback overrides --
@@ -325,6 +342,39 @@ void QuicWtSession::onConnectionEndImpl(
   quicSocket_->setConnectionCallback(nullptr);
   quicSocket_->setDatagramCallback(nullptr);
   wtHandler_->onSessionEnd(errCodeOpt);
+}
+
+void QuicWtSession::maybePauseIngress(uint64_t id) noexcept {
+  XCHECK(quicSocket_);
+  auto* handle = sm_.getBidiHandle(id).readHandle;
+  if (!handle) {
+    XLOG(DBG4) << "No read handle created for stream " << id;
+    return;
+  }
+  if (sm_.bufferedBytes(*handle) >= kMaxWtIngressBuf) {
+    XLOG(DBG4) << "Pausing ingress for stream " << id;
+    auto res = quicSocket_->pauseRead(id);
+    if (res.hasError()) {
+      XLOG(ERR) << "Failed to pause read for stream " << id;
+      return;
+    }
+  }
+}
+
+void QuicWtSession::maybeResumeIngress(uint64_t id) noexcept {
+  XCHECK(quicSocket_);
+  auto* handle = sm_.getBidiHandle(id).readHandle;
+  if (!handle) {
+    XLOG(DBG4) << "No read handle created for stream " << id;
+    return;
+  }
+  if (sm_.bufferedBytes(*handle) < kMaxWtIngressBuf) {
+    XLOG(DBG4) << "Resuming ingress for stream " << id;
+    auto res = quicSocket_->resumeRead(id);
+    if (res.hasError()) {
+      XLOG(ERR) << "Failed to resume read for stream " << id;
+    }
+  }
 }
 
 } // namespace proxygen

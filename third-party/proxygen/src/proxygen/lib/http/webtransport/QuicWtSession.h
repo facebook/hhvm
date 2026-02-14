@@ -23,6 +23,7 @@ class QuicWtSession
     , private quic::QuicSocket::ConnectionCallback
     , private quic::QuicSocket::DatagramCallback
     , private quic::StreamWriteCallback
+    , private detail::WtStreamManager::ReadCallback
     , public detail::WtStreamManager::EgressCallback
     , public detail::WtStreamManager::IngressCallback {
 
@@ -93,6 +94,9 @@ class QuicWtSession
   void onStreamWriteError(quic::StreamId id,
                           quic::QuicError error) noexcept override;
 
+  // -- WtStreamManager::ReadCallback overrides --
+  void readReady(detail::WtStreamManager::WtReadHandle& rh) noexcept override;
+
   // -- WtStreamManager::EgressCallback overrides --
   void eventsAvailable() noexcept override;
 
@@ -102,6 +106,8 @@ class QuicWtSession
   folly::Expected<folly::Unit, ErrorCode> closeSessionImpl(
       folly::Optional<uint32_t> error);
   void onConnectionEndImpl(const folly::Optional<quic::QuicError>& error);
+  void maybePauseIngress(uint64_t id) noexcept;
+  void maybeResumeIngress(uint64_t id) noexcept;
 
   std::shared_ptr<quic::QuicSocket> quicSocket_{nullptr};
   std::unique_ptr<WebTransportHandler> wtHandler_;

@@ -21,6 +21,7 @@ using quic::MockQuicSocketDriver;
 namespace {
 constexpr uint32_t WT_ERROR_1 = 19;
 constexpr uint32_t WT_ERROR_2 = 77;
+constexpr uint64_t kMaxWtIngressBuf = 65'535;
 
 class MockConnectionState : public quic::QuicConnectionStateBase {
  public:
@@ -701,4 +702,62 @@ TEST_F(QuicWtSessionTest, StreamWriteError) {
   // the stream should have been reset with kInternalError
   EXPECT_EQ(socketDriver_.streams_[id].writeState,
             quic::MockQuicSocketDriver::StateEnum::ERROR);
+}
+
+TEST_F(QuicWtSessionTest, IngressBackpressure) {
+  // simulate peer opening two bidi streams
+  WebTransport::StreamReadHandle* readHandle1 = nullptr;
+  WebTransport::StreamReadHandle* readHandle2 = nullptr;
+
+  EXPECT_CALL(*handler_, onNewBidiStream(_))
+      .WillOnce([&](WebTransport::BidiStreamHandle handle) {
+        readHandle1 = handle.readHandle;
+      })
+      .WillOnce([&](WebTransport::BidiStreamHandle handle) {
+        readHandle2 = handle.readHandle;
+      });
+
+  socketDriver_.addReadEvent(0, nullptr, false);
+  socketDriver_.addReadEvent(4, nullptr, false);
+  eventBase_.loopOnce();
+
+  ASSERT_NE(readHandle1, nullptr);
+  ASSERT_NE(readHandle2, nullptr);
+
+  auto streamId1 = readHandle1->getID();
+  auto streamId2 = readHandle2->getID();
+
+  // fill id=1 buffer to trigger pause when bufferedBytes() >=
+  // kMaxWTIngressBuf
+  auto buf1 = folly::IOBuf::create(kMaxWtIngressBuf);
+  buf1->append(kMaxWtIngressBuf);
+  socketDriver_.addReadEvent(streamId1, std::move(buf1), false);
+  eventBase_.loop();
+  EXPECT_EQ(socketDriver_.streams_[streamId1].readState,
+            MockQuicSocketDriver::PAUSED);
+  EXPECT_EQ(socketDriver_.streams_[streamId2].readState,
+            MockQuicSocketDriver::OPEN); // id=2 should be independent of
+                                         // id=1
+
+  // fill id=2 buffer to trigger pause
+  auto buf2 = folly::IOBuf::create(kMaxWtIngressBuf);
+  buf2->append(kMaxWtIngressBuf);
+  socketDriver_.addReadEvent(streamId2, std::move(buf2), false);
+  eventBase_.loop();
+  EXPECT_EQ(socketDriver_.streams_[streamId1].readState,
+            MockQuicSocketDriver::PAUSED);
+  EXPECT_EQ(socketDriver_.streams_[streamId2].readState,
+            MockQuicSocketDriver::PAUSED);
+
+  // resume id=1 by reading
+  auto fut1 = readHandle1->readStreamData();
+  EXPECT_TRUE(fut1.isReady());
+  std::move(fut1).via(&eventBase_).thenValue([](WebTransport::StreamData) {});
+  eventBase_.loop();
+
+  // id=1 resumed, id=2 still paused
+  EXPECT_EQ(socketDriver_.streams_[streamId1].readState,
+            MockQuicSocketDriver::OPEN);
+  EXPECT_EQ(socketDriver_.streams_[streamId2].readState,
+            MockQuicSocketDriver::PAUSED);
 }

@@ -59,7 +59,11 @@ bool ClientSinkBridge::wait(QueueConsumer* consumer) {
 }
 
 void ClientSinkBridge::push(folly::Try<StreamPayload>&& value) {
-  clientPush(StreamMessage::PayloadOrError{std::move(value)});
+  if (value.hasValue() || value.hasException()) {
+    clientPush(StreamMessage::PayloadOrError{std::move(value)});
+  } else {
+    clientPush(StreamMessage::Complete{});
+  }
 }
 
 ClientSinkBridge::ClientQueue ClientSinkBridge::getMessages() {
@@ -253,8 +257,14 @@ void ClientSinkBridge::processServerMessages() {
               serverCallback_->onSinkError(std::move(payload).exception());
               close();
               return true;
-            } else {
+            } else if (payload.hasValue()) {
               return !serverCallback_->onSinkNext(std::move(payload).value());
+            } else {
+              // Empty Try in PayloadOrError should not happen with the new
+              // StreamMessage types (Complete is a separate variant), but
+              // handle it defensively to avoid crashing in the noexcept
+              // EventBase callback.
+              return !serverCallback_->onSinkComplete();
             }
           },
           [&](StreamMessage::Complete) {

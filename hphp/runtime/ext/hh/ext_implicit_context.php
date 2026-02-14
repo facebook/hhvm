@@ -67,15 +67,6 @@ function get_implicit_context<T>(class<T> $key)[leak_safe]: ?T::T;
 function get_whole_implicit_context()[zoned]: ImplicitContextData;
 
 /**
- * Returns True if the key is present in the IC
- * False otherwise
- *
- * Does not affect the state of the IC
- */
-<<__Native>>
-function has_key<T>(class<T> $key)[leak_safe]: bool;
-
-/**
  * Creates memo agnostic implicit context $context keyed by $key.
  */
 <<__Native>>
@@ -203,10 +194,6 @@ abstract class MemoSensitiveImplicitContext extends ImplicitContextBase {
 abstract class ImplicitContextBase {
   abstract const type TData as nonnull;
   abstract const ctx CRun as [leak_safe];
-
-  protected static function exists()[this::CRun]: bool {
-    return ImplicitContext\_Private\has_key(static::class);
-  }
 
   protected static function get()[this::CRun]: ?this::TData {
     return ImplicitContext\_Private\get_implicit_context(static::class);

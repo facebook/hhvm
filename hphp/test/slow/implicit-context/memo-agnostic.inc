@@ -8,6 +8,6 @@ abstract final class TestContext extends HH\HHVMTestMemoAgnosticImplicitContext 
   }
 
   public static function getContext() [this::CRun]: ?mixed {
-    return parent::exists() ? parent::get() : null;
+    return parent::get();
   }
 }

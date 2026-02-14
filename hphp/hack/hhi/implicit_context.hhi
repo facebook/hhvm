@@ -60,7 +60,6 @@ namespace HH {
     abstract const type TData as nonnull;
     abstract const ctx CRun as [leak_safe];
 
-    protected static function exists()[this::CRun]: bool;
     protected static function get()[this::CRun]: ?this::TData;
 
     abstract protected static function runWithAsync<Tout>(

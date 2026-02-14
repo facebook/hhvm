@@ -25,7 +25,7 @@ trait ClassContextDefs {
     return parent::get();
   }
   public static function exists()[zoned]: bool {
-    return parent::exists() as bool;
+    return parent::get() is nonnull;
   }
 }
 

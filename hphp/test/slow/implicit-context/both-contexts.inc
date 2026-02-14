@@ -20,7 +20,7 @@ abstract final class MemoAgnosticIntCtx extends HH\HHVMTestMemoAgnosticImplicitC
   }
 
   public static function getContext()[leak_safe]: this::TData {
-    return parent::exists() ? parent::get() : null;
+    return parent::get();
   }
 }
 

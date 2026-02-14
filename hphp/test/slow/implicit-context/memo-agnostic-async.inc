@@ -18,6 +18,6 @@ abstract final class TestAsyncContext extends HH\HHVMTestMemoAgnosticImplicitCon
     return await parent::runWithAsync($context, $f);
   }
   public static function getContext(): mixed {
-    return parent::exists() ? parent::get() : null;
+    return parent::get();
   }
 }

@@ -9,7 +9,6 @@
 open Typing_defs
 open Typing_env_types
 module Tag = Typing_data_type.Tag
-module DataTypeReason = Typing_data_type.DataTypeReason
 module DataType = Typing_data_type.DataType
 
 type t = DataType.t
@@ -23,29 +22,27 @@ type atomic_ty =
   | Label
   | Class of string * locl_ty list
 
-let trail = DataTypeReason.make_trail
+let function_ = DataType.fun_to_datatypes
 
-let function_ = DataType.fun_to_datatypes ~trail
+let nonnull = DataType.nonnull_to_datatypes
 
-let nonnull = DataType.nonnull_to_datatypes ~trail
+let tuple = DataType.tuple_to_datatypes
 
-let tuple = DataType.tuple_to_datatypes ~trail
+let shape = DataType.shape_to_datatypes
 
-let shape = DataType.shape_to_datatypes ~trail
+let mixed = DataType.mixed
 
-let mixed = DataType.mixed ~reason:DataTypeReason.(make NoSubreason trail)
-
-let label = DataType.label_to_datatypes ~trail
+let label = DataType.label_to_datatypes
 
 let of_ty ~safe_for_are_disjoint env : atomic_ty -> env * DataType.t = function
-  | Primitive prim -> (env, DataType.prim_to_datatypes ~trail prim)
+  | Primitive prim -> (env, DataType.prim_to_datatypes prim)
   | Function -> (env, function_)
   | Nonnull -> (env, nonnull)
   | Tuple -> (env, tuple)
   | Shape -> (env, shape)
   | Label -> (env, label)
   | Class (name, args) ->
-    DataType.Class.to_datatypes ~safe_for_are_disjoint ~trail env name
+    DataType.Class.to_datatypes ~safe_for_are_disjoint env name
     @@ Tag.generics_for_class_and_tyl env name args
 
 let of_tag ~safe_for_are_disjoint env tag : env * DataType.t =
@@ -59,7 +56,7 @@ let of_tag ~safe_for_are_disjoint env tag : env * DataType.t =
   | ResourceTag -> of_ty env (Primitive Aast.Tresource)
   | NullTag -> of_ty env (Primitive Aast.Tnull)
   | ClassTag (name, args) ->
-    DataType.Class.to_datatypes ~safe_for_are_disjoint ~trail env name
+    DataType.Class.to_datatypes ~safe_for_are_disjoint env name
     @@ Tag.generics_for_class_and_tag_generic_l env name args
 
 let empty = DataType.Set.empty

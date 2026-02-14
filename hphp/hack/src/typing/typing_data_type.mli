@@ -171,27 +171,22 @@ module DataType : sig
 
   val fromTy : safe_for_are_disjoint:bool -> env -> locl_ty -> env * t
 
-  val fun_to_datatypes : trail:DataTypeReason.trail -> t
+  val fun_to_datatypes : t
 
-  val nonnull_to_datatypes : trail:DataTypeReason.trail -> t
+  val nonnull_to_datatypes : t
 
-  val tuple_to_datatypes : trail:DataTypeReason.trail -> t
+  val tuple_to_datatypes : t
 
-  val shape_to_datatypes : trail:DataTypeReason.trail -> t
+  val shape_to_datatypes : t
 
-  val label_to_datatypes : trail:DataTypeReason.trail -> t
+  val label_to_datatypes : t
 
-  val prim_to_datatypes : trail:DataTypeReason.trail -> Ast_defs.tprim -> t
+  val prim_to_datatypes : Ast_defs.tprim -> t
 
-  val mixed : reason:DataTypeReason.subreason * DataTypeReason.trail -> Set.t
+  val mixed : Set.t
 
   module Class : sig
     val to_datatypes :
-      safe_for_are_disjoint:bool ->
-      trail:DataTypeReason.trail ->
-      env ->
-      string ->
-      Tag.generic list ->
-      env * t
+      safe_for_are_disjoint:bool -> env -> string -> Tag.generic list -> env * t
   end
 end

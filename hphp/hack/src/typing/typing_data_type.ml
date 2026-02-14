@@ -921,4 +921,25 @@ end
 module DataType = struct
   module Set = ApproxTagSet
   include Make (ApproxTagSet)
+
+  let trail = DataTypeReason.make_trail
+
+  let prim_to_datatypes prim = prim_to_datatypes ~trail prim
+
+  let fun_to_datatypes = fun_to_datatypes ~trail
+
+  let nonnull_to_datatypes = nonnull_to_datatypes ~trail
+
+  let tuple_to_datatypes = tuple_to_datatypes ~trail
+
+  let shape_to_datatypes = shape_to_datatypes ~trail
+
+  let label_to_datatypes = label_to_datatypes ~trail
+
+  let mixed = mixed ~reason:DataTypeReason.(make NoSubreason trail)
+
+  module Class = struct
+    let to_datatypes ~safe_for_are_disjoint env cls generics =
+      Class.to_datatypes ~safe_for_are_disjoint ~trail env cls generics
+  end
 end

@@ -151,12 +151,10 @@ module Make (Domain : DomainType) : S with module Domain := Domain = struct
     | Sat -> true
     | Unsat _ -> false
 
-  let relate ctx set1 set2 =
+  let is_subset ctx set1 set2 =
     match (set1, set2) with
-    | (None, None) -> SetRelation.all
-    | (None, Some _) ->
-      SetRelation.make ~subset:true ~superset:false ~disjoint:true
-    | (Some _, None) ->
-      SetRelation.make ~subset:false ~superset:true ~disjoint:true
-    | (Some set1, Some set2) -> relate ctx set1 set2
+    | (None, _) -> true
+    | (Some _, None) -> false
+    | (Some set1, Some set2) ->
+      SetRelation.is_subset (Impl.relate ctx set1 set2)
 end

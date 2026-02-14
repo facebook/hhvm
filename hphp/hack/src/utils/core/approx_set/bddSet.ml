@@ -295,12 +295,15 @@ struct
     with
     | RelationUnsat { left; relation; right } -> Unsat { left; relation; right }
 
-  let relate ctx a b = check_relation ~ctx a b
-
   let are_disjoint ctx set1 set2 =
     match disjoint ctx set1 set2 with
     | Sat -> true
     | Unsat _ -> false
+
+  let is_subset ctx a b =
+    let is_sat = SetRelation.is_subset in
+    try is_sat @@ check_relation ~is_sat ~ctx a b with
+    | RelationUnsat _ -> false
 
   let of_list elt =
     List.fold_left (fun acc tag -> union acc @@ singleton tag) empty elt

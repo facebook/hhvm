@@ -79,7 +79,7 @@ module type S = sig
 
   val are_disjoint : Domain.ctx -> t -> t -> bool
 
-  val relate : Domain.ctx -> t -> t -> SetRelation.t
+  val is_subset : Domain.ctx -> t -> t -> bool
 end
 
 module type ApproxSet = sig
@@ -97,7 +97,7 @@ end
       2. For any two atoms A and B, `SetRelation.is_superset @@ relation ctx a b`
          implies that `order a b <= 0`
       3. For any two atoms A and B, `order a b = 0` implies that
-         `SetRelation.is_equivalent @@ relate ctx a b` *)
+         `SetRelation.is_equivalent @@ relation ctx a b` *)
 module type OrderedDomainType = sig
   include DomainType
 

@@ -104,7 +104,11 @@ module Test (Impl : ApproxSet_intf.S with module Domain := Atom) = struct
 
     let are_disjoint l r = Impl.are_disjoint () l.set r.set
 
-    let relate l r = Impl.relate () l.set r.set
+    let relate l r =
+      let subset = Impl.is_subset () l.set r.set in
+      let superset = Impl.is_subset () r.set l.set in
+      let disjoint = Impl.are_disjoint () l.set r.set in
+      SetRelation.make ~subset ~superset ~disjoint
 
     let non_empty gen =
       Quickcheck.Generator.filter gen ~f:(fun set ->

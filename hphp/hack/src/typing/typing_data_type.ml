@@ -372,6 +372,8 @@ module type SET = sig
   val diff : t -> t -> t
 
   val are_disjoint : Typing_env_types.env -> t -> t -> bool
+
+  val is_subset : Typing_env_types.env -> t -> t -> bool
 end
 
 module ApproxTagSet = struct

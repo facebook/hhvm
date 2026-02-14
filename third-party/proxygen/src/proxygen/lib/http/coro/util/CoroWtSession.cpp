@@ -6,8 +6,20 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+#include <folly/io/coro/Transport.h>
 #include <folly/logging/xlog.h>
 #include <proxygen/lib/http/coro/util/CoroWtSession.h>
+
+namespace {
+using namespace proxygen::coro;
+using folly::coro::co_error;
+using folly::coro::co_nothrow;
+
+BufQueue* asBodyEv(HTTPBodyEvent& event) {
+  return event.eventType == HTTPBodyEvent::BODY ? &event.event.body : nullptr;
+}
+
+}; // namespace
 
 namespace proxygen::coro::detail {
 
@@ -166,8 +178,19 @@ void CoroWtSession::readLoopFinished() noexcept {
 }
 
 /**
- * when a producer wants to detach the ownership of the HTTPStreamSource, this
- * function transfers lifetime to consumer (i.e. self owned)
+ * Generally speaking, heap allocated HTTPSources are consumer-owned (i.e. when
+ * a consumer reads a terminal event, e.g. exc or eom, it will deallocate/free
+ * itself). To simplify lifetime here, we utilize some trickery to create a
+ * producer-owned HTTPSource.
+ *
+ * When a producer is done using the source (i.e. when this Deleter is invoked),
+ * we check to see if the consuming side is also done (i.e. ::sourceComplete):
+ *
+ *     - If consumer is done, both producer and consumer are finished and we can
+ *       free the object.
+ *
+ *     - If the consumer is not done however, we invoke ::setHeapAllocated
+ *       (misnomer/confusing here) to transfer ownership to the consumer.
  */
 void EgressSourcePtrDeleter::operator()(EgressSource* source) noexcept {
   if (!source->sourceComplete()) {
@@ -177,6 +200,175 @@ void EgressSourcePtrDeleter::operator()(EgressSource* source) noexcept {
     return;
   }
   std::default_delete<HTTPStreamSource>{}(source);
+}
+} // namespace proxygen::coro::detail
+
+namespace {
+using namespace proxygen::coro::detail;
+using folly::AsyncSocketException;
+using AsyncSocketExceptionType = AsyncSocketException::AsyncSocketExceptionType;
+
+folly::exception_wrapper makeSocketEx(AsyncSocketExceptionType type,
+                                      std::string_view err = "") {
+  return folly::make_exception_wrapper<AsyncSocketException>(type,
+                                                             std::string(err));
+}
+
+/**
+ * Wraps an egress HTTPStreamSource and an ingress HTTPSource (also of concrete
+ * type HTTPStreamSource, but irrelevant for the most part). Exposes reading
+ * from an ingress HTTPSource & writing to an egress HTTPSource over a
+ * folly::coro::TransportIf interface.
+ */
+class HttpSourceTransport : public folly::coro::TransportIf {
+ public:
+  HttpSourceTransport(folly::EventBase* evb,
+                      EgressSourcePtr&& egressSource,
+                      HTTPSourceHolder&& ingress) noexcept
+      : evb_(evb),
+        egressSource_(std::move(egressSource)),
+        ingressSource_(std::move(ingress)) {
+    egressSource_->setCallback(&callback_);
+  }
+
+  ~HttpSourceTransport() noexcept override = default;
+
+  folly::EventBase* getEventBase() noexcept override {
+    return evb_;
+  }
+
+  folly::AsyncTransport* getTransport() const noexcept override {
+    return nullptr;
+  }
+
+  const folly::AsyncTransportCertificate* getPeerCertificate()
+      const noexcept override {
+    return nullptr;
+  }
+
+  folly::coro::Task<size_t> read(
+      folly::IOBufQueue& buf,
+      size_t /*minReadSize*/,
+      size_t /*newAllocationSize*/,
+      std::chrono::milliseconds timeout) noexcept override {
+    if (std::exchange(deferredEof_, false)) {
+      co_return 0;
+    }
+
+    // read after ingress terminal event is read (i.e. eom or exc) is an error
+    if (!ingressSource_.readable()) {
+      co_yield co_error(makeSocketEx(AsyncSocketExceptionType::INTERNAL_ERROR));
+    }
+
+    ingressSource_.setReadTimeout(timeout);
+    // loop until the first BodyEvent or exc is yielded
+    folly::Try<HTTPBodyEvent> ev{
+        HTTPBodyEvent{/*body=*/nullptr, /*inEOM=*/false}};
+    bool done = false;
+    while (!done) {
+      ev = co_await co_awaitTry(ingressSource_.readBodyEvent());
+      if (ev.hasException()) {
+        co_yield co_error(makeSocketEx(AsyncSocketExceptionType::END_OF_FILE,
+                                       ev.exception().what()));
+      }
+      auto* body = asBodyEv(*ev);
+      done = bool(body) || ev->eom; // loop again if not body event
+    }
+
+    uint64_t len = 0;
+    if (auto* body = asBodyEv(*ev)) {
+      len = body->chainLength();
+      buf.append(body->move()); // ok if nullptr
+    }
+    deferredEof_ = len > 0 && ev->eom;
+    co_return len;
+  }
+
+  folly::coro::Task<folly::Unit> write(folly::IOBufQueue& ioBufQueue,
+                                       std::chrono::milliseconds timeout,
+                                       folly::WriteFlags,
+                                       WriteInfo* info) noexcept override {
+    if (callback_.ex) {
+      XLOG(DBG4) << "id=" << getId() << "; ex=" << callback_.ex.what();
+      co_yield co_error(makeSocketEx(AsyncSocketExceptionType::NOT_OPEN,
+                                     callback_.ex.what()));
+    }
+    auto bytesAvailable = egressSource_->window().getNonNegativeSize();
+    XLOG(DBG4) << "id=" << getId() << "; bytesAvailable=" << bytesAvailable;
+    if (bytesAvailable == 0) {
+      XLOG(DBG5) << __func__ << " egress blocked";
+      callback_.waitForEgress.reset(); // suspend until egress drained
+    }
+    auto res = co_await callback_.waitForEgress.timedWait(evb_, timeout);
+    if (res == TimedBaton::Status::timedout) {
+      XLOG(DBG6) << "id=" << getId() << "; ingress timeout";
+      co_yield co_error(makeSocketEx(AsyncSocketExceptionType::TIMED_OUT));
+    }
+    if (res == TimedBaton::Status::cancelled) {
+      XLOG(DBG6) << "id=" << getId() << "; cancelled";
+      co_yield co_error(makeSocketEx(AsyncSocketExceptionType::CANCELED));
+    }
+    auto len = ioBufQueue.chainLength();
+    egressSource_->body(ioBufQueue.move(), /*padding=*/0, /*eom=*/false);
+    if (info) {
+      info->bytesWritten = len;
+    }
+    co_return folly::unit;
+  }
+
+  void close() noexcept override {
+    egressSource_->eom();
+    ingressSource_.setSource(nullptr);
+  }
+
+  void shutdownWrite() noexcept override {
+    egressSource_->eom();
+  }
+
+  void closeWithReset() noexcept override {
+    egressSource_->abort(HTTPErrorCode::CANCEL);
+    ingressSource_.setSource(nullptr);
+  }
+
+  // unimplemented fns
+  folly::coro::Task<folly::Unit> write(folly::ByteRange,
+                                       std::chrono::milliseconds,
+                                       folly::WriteFlags,
+                                       WriteInfo*) noexcept override {
+    XLOG(FATAL) << "not implemented";
+  }
+  folly::coro::Task<size_t> read(folly::MutableByteRange,
+                                 std::chrono::milliseconds) noexcept override {
+    XLOG(FATAL) << "not implemented";
+  }
+  folly::SocketAddress getLocalAddress() const noexcept override {
+    XLOG(FATAL) << "not implemented";
+  }
+  folly::SocketAddress getPeerAddress() const noexcept override {
+    XLOG(FATAL) << "not implemented";
+  }
+
+ private:
+  uint64_t getId() const {
+    return egressSource_->getID();
+  }
+  folly::EventBase* evb_;
+  EgressSourcePtr egressSource_;
+  HTTPSourceHolder ingressSource_;
+  bool deferredEof_{false};
+  EgressBackPressure callback_; // initially signalled
+};
+
+} // namespace
+
+namespace proxygen::coro::detail {
+
+std::unique_ptr<folly::coro::TransportIf> makeHttpSourceTransport(
+    folly::EventBase* evb,
+    EgressSourcePtr&& source,
+    HTTPSourceHolder&& ingress) {
+  return std::make_unique<HttpSourceTransport>(
+      evb, std::move(source), std::move(ingress));
 }
 
 } // namespace proxygen::coro::detail

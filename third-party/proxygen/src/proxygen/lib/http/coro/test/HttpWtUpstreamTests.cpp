@@ -6,17 +6,21 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+#include "proxygen/lib/http/coro/HTTPStreamSource.h"
 #include "proxygen/lib/http/coro/client/test/HTTPClientTestsCommon.h"
 #include "proxygen/lib/http/coro/test/HTTPCoroSessionTests.h"
+#include "proxygen/lib/http/coro/test/Mocks.h"
 #include "proxygen/lib/http/coro/util/test/TestHelpers.h"
 #include <proxygen/lib/http/codec/HTTP2Codec.h>
 #include <proxygen/lib/http/codec/webtransport/WebTransportCapsuleCodec.h>
+#include <proxygen/lib/http/coro/util/CoroWtSession.h>
 #include <proxygen/lib/http/webtransport/WtStreamManager.h>
 
 using namespace proxygen;
 using namespace testing;
 using namespace proxygen::detail;
 
+using folly::coro::blockingWait;
 using folly::coro::co_awaitTry;
 using folly::coro::co_reschedule_on_current_executor;
 
@@ -810,5 +814,232 @@ INSTANTIATE_TEST_SUITE_P(
     Values(TestParams({.codecProtocol = CodecProtocol::HTTP_2})),
     paramsToTestName);
 
+class HttpStreamTransport : public Test {
+ public:
+  void SetUp() override {
+    // precondition is that headers have already been produced via
+    // egress source
+    detail::EgressSourcePtr egress{new detail::EgressSource(&evb)};
+    egressSource = egress.get();
+    HTTPMessage msg;
+    msg.setURL("/");
+    egress->validateHeadersAndSkip(msg);
+
+    transport = detail::makeHttpSourceTransport(
+        &evb, std::move(egress), &ingressSource);
+    EXPECT_EQ(transport->getEventBase(), &evb);
+    EXPECT_EQ(transport->getTransport(), nullptr);
+    EXPECT_EQ(transport->getPeerCertificate(), nullptr);
+  }
+
+  void TearDown() override {
+    transport->close();
+    // consume if egress source not done
+    while (!egressSource->sourceComplete()) {
+      folly::coro::blockingWait(egressSource->readBodyEvent(), &evb);
+    }
+  }
+
+  folly::EventBase evb;
+  MockHTTPSource ingressSource;
+  HTTPStreamSource* egressSource{nullptr};
+  std::unique_ptr<folly::coro::TransportIf> transport;
+  folly::CancellationSource cs_;
+};
+
+CO_TEST_F(HttpStreamTransport, ReadAfterIngressComplete) {
+  // after reading a terminal ingress event (i.e. eom or exception), a
+  // subsequent ::read should yield an exception
+  EXPECT_CALL(ingressSource, readBodyEvent(_))
+      .WillOnce(Return(folly::coro::makeTask<HTTPBodyEvent>(
+          HTTPBodyEvent{nullptr, /*inEOM=*/true})));
+
+  folly::IOBufQueue ingress{folly::IOBufQueue::cacheChainLength()};
+  auto readRes = co_await co_awaitTry(
+      transport->read(ingress,
+                      /*minReadSize=*/0,
+                      /*newAllocationSize=*/0,
+                      /*timeout=*/std::chrono::milliseconds(0)));
+  EXPECT_TRUE(readRes.hasValue() && *readRes == 0);
+
+  // reading again after ingress complete should yield an error
+  readRes = co_await co_awaitTry(
+      transport->read(ingress,
+                      /*minReadSize=*/0,
+                      /*newAllocationSize=*/0,
+                      /*timeout=*/std::chrono::milliseconds(0)));
+
+  auto* ex = readRes.tryGetExceptionObject<folly::AsyncSocketException>();
+  EXPECT_TRUE(ex &&
+              ex->getType() == folly::AsyncSocketException::INTERNAL_ERROR);
+}
+
+CO_TEST_F(HttpStreamTransport, SimpleRead) {
+  // simple read 100 bytes
+  EXPECT_CALL(ingressSource, readBodyEvent(_))
+      .WillOnce(Return(folly::coro::makeTask<HTTPBodyEvent>(
+          HTTPBodyEvent{makeBuf(100), /*inEOM=*/false})));
+
+  folly::IOBufQueue ingress{folly::IOBufQueue::cacheChainLength()};
+  auto readRes =
+      co_await transport->read(ingress,
+                               /*minReadSize=*/0,
+                               /*newAllocationSize=*/0,
+                               /*timeout=*/std::chrono::milliseconds(0));
+  EXPECT_EQ(readRes, 100);
+}
+
+CO_TEST_F(HttpStreamTransport, DeferredEom) {
+  /**
+   * Yield Padding event (test non-body event get ignored), subsequently yield
+   * 100-byte bytes + eom in the same HTTPBodyEvent. Ensure that the EOM will be
+   * deferred until the next Transport::read.
+   */
+  EXPECT_CALL(ingressSource, readBodyEvent(_))
+      .WillOnce(Return(folly::coro::makeTask<HTTPBodyEvent>(
+          HTTPBodyEvent{HTTPBodyEvent::Padding{}, 10})))
+      .WillOnce(Return(folly::coro::makeTask<HTTPBodyEvent>(
+          HTTPBodyEvent{makeBuf(100), /*inEOM=*/true})));
+
+  folly::IOBufQueue ingress{folly::IOBufQueue::cacheChainLength()};
+  auto readRes =
+      co_await transport->read(ingress,
+                               /*minReadSize=*/0,
+                               /*newAllocationSize=*/0,
+                               /*timeout=*/std::chrono::milliseconds(0));
+  // first read yields 100 bytes
+  EXPECT_EQ(readRes, 100);
+  // second read yields 0 immediately (doesn't invoke ::readBodyEvent)
+  readRes = co_await transport->read(ingress,
+                                     /*minReadSize=*/0,
+                                     /*newAllocationSize=*/0,
+                                     /*timeout=*/std::chrono::milliseconds(0));
+  EXPECT_EQ(readRes, 0);
+
+  // read after deferred EOM is an error
+  auto readResTry = co_await co_awaitTry(
+      transport->read(ingress,
+                      /*minReadSize=*/0,
+                      /*newAllocationSize=*/0,
+                      /*timeout=*/std::chrono::milliseconds(0)));
+  auto* ex = readResTry.tryGetExceptionObject<folly::AsyncSocketException>();
+  EXPECT_TRUE(ex &&
+              ex->getType() == folly::AsyncSocketException::INTERNAL_ERROR);
+
+  // close transport
+  transport->close();
+  // reading the egressSource should yield an empty body + eom
+  auto egressBodyEvent = co_await egressSource->readBodyEvent();
+  EXPECT_TRUE(egressBodyEvent.eventType == HTTPBodyEvent::BODY &&
+              egressBodyEvent.event.body.empty());
+  EXPECT_TRUE(egressBodyEvent.eom);
+}
+
+CO_TEST_F(HttpStreamTransport, WriteBackpressure) {
+  /**
+   * Writes 64KB to the egressSource, then write again to ensure that the
+   * ::write coroutine suspends. After consuming from the egress source, it
+   * should unblock the write accordingly.
+   */
+  folly::IOBufQueue egress{folly::IOBufQueue::cacheChainLength()};
+  // first 64KB writes resolves immediately
+  egress.append(makeBuf(65'535));
+  folly::coro::Transport::WriteInfo info{};
+  auto writeRes = co_withExecutor(&evb,
+                                  transport->write(egress,
+                                                   std::chrono::milliseconds(0),
+                                                   folly::WriteFlags::NONE,
+                                                   &info))
+                      .startInlineUnsafe();
+  EXPECT_TRUE(writeRes.isReady());
+  EXPECT_EQ(info.bytesWritten, 65'535);
+
+  // next 100 byte write will suspend
+  egress.append(makeBuf(100));
+  writeRes =
+      co_withExecutor(&evb, transport->write(egress)).startInlineUnsafe();
+  EXPECT_FALSE(writeRes.isReady());
+
+  // consuming from egressSource will unblock write
+  co_await egressSource->readBodyEvent();
+  // one evb loop
+  evb.loopOnce();
+  EXPECT_TRUE(writeRes.isReady());
+
+  // close transport
+  EXPECT_CALL(ingressSource, stopReading(_));
+  transport->closeWithReset();
+  // next egress read should yield an error
+  auto ev = co_await co_awaitTry(egressSource->readBodyEvent());
+  EXPECT_TRUE(ev.hasException());
+}
+
+CO_TEST_F(HttpStreamTransport, WriteTimeout) {
+  /**
+   * Writes 64KB to the egressSource, then write again to ensure that the
+   * ::write coroutine suspends. Ensure the timeout works as expected and the
+   * error yielded is AsyncSocketException::TIMED_OUT
+   */
+  folly::IOBufQueue egress{folly::IOBufQueue::cacheChainLength()};
+  // first 64KB writes resolves immediately
+  egress.append(makeBuf(65'535));
+  folly::coro::Transport::WriteInfo info{};
+  auto writeRes = co_withExecutor(&evb,
+                                  transport->write(egress,
+                                                   std::chrono::milliseconds(0),
+                                                   folly::WriteFlags::NONE,
+                                                   &info))
+                      .startInlineUnsafe();
+  EXPECT_TRUE(writeRes.isReady());
+  EXPECT_EQ(info.bytesWritten, 65'535);
+
+  // next 100 byte write will suspend
+  egress.append(makeBuf(100));
+  writeRes = co_withExecutor(
+                 &evb, transport->write(egress, std::chrono::milliseconds(10)))
+                 .startInlineUnsafe();
+  EXPECT_FALSE(writeRes.isReady());
+
+  auto res = blockingWait(co_awaitTry(std::move(writeRes)), &evb);
+  auto* ex = res.tryGetExceptionObject<folly::AsyncSocketException>();
+  EXPECT_TRUE(ex && ex->getType() == folly::AsyncSocketException::TIMED_OUT);
+  co_return;
+}
+
+CO_TEST_F(HttpStreamTransport, WriteCancellation) {
+  // write cancellation should omit write & yield the appropriate exception
+  cs_.requestCancellation();
+  folly::IOBufQueue egress{folly::IOBufQueue::cacheChainLength()};
+  egress.append(makeBuf(65'535));
+  auto writeRes = co_await co_awaitTry(
+      co_withCancellation(cs_.getToken(), transport->write(egress)));
+  auto* ex = writeRes.tryGetExceptionObject<folly::AsyncSocketException>();
+  EXPECT_TRUE(ex && ex->getType() == folly::AsyncSocketException::CANCELED);
+}
+
+CO_TEST_F(HttpStreamTransport, EgressConsumerStopReading) {
+  // consumer of the egress source invoking ::stopReading should trigger a write
+  // error on next write
+  egressSource->stopReading(HTTPErrorCode::NO_ERROR);
+
+  folly::IOBufQueue egress{folly::IOBufQueue::cacheChainLength()};
+  egress.append(makeBuf(65'535));
+  auto writeRes = co_await co_awaitTry(transport->write(egress));
+  auto* ex = writeRes.tryGetExceptionObject<folly::AsyncSocketException>();
+  EXPECT_TRUE(ex && ex->getType() == folly::AsyncSocketException::NOT_OPEN);
+}
+
+CO_TEST_F(HttpStreamTransport, Fatals) {
+  std::array<uint8_t, 10> ingress{};
+  EXPECT_DEATH(
+      co_await transport->read(folly::MutableByteRange{ingress},
+                               /*timeout=*/std::chrono::milliseconds(0)),
+      "not implemented");
+  EXPECT_DEATH(co_await transport->write(
+                   folly::ByteRange{ingress.data(), ingress.size()}),
+               "not implemented");
+  EXPECT_DEATH(transport->getPeerAddress(), "not implemented");
+  EXPECT_DEATH(transport->getLocalAddress(), "not implemented");
+}
+
 } // namespace proxygen::coro::test
-//

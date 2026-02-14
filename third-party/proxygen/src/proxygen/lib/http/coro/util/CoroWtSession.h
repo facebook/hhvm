@@ -16,6 +16,10 @@
 #include <proxygen/lib/http/webtransport/WtUtils.h>
 #include <quic/priority/HTTPPriorityQueue.h>
 
+namespace folly::coro {
+class TransportIf;
+}
+
 namespace proxygen::coro::detail {
 
 using WtStreamManager = proxygen::detail::WtStreamManager;
@@ -36,10 +40,12 @@ struct EgressBackPressure : public HTTPStreamSource::Callback {
   void windowOpen(StreamId) override {
     waitForEgress.signal();
   }
-  void sourceComplete(StreamId, folly::Optional<HTTPError>) override {
+  void sourceComplete(StreamId, folly::Optional<HTTPError> err) override {
     waitForEgress.signal();
+    ex = err.value_or(HTTPError{HTTPErrorCode::NO_ERROR});
   }
   CancellableBaton waitForEgress;
+  folly::exception_wrapper ex;
 };
 
 /**
@@ -63,6 +69,11 @@ struct EgressSourcePtrDeleter {
   void operator()(EgressSource*) noexcept;
 };
 using EgressSourcePtr = std::unique_ptr<EgressSource, EgressSourcePtrDeleter>;
+
+std::unique_ptr<folly::coro::TransportIf> makeHttpSourceTransport(
+    folly::EventBase* evb,
+    EgressSourcePtr&& egress,
+    HTTPSourceHolder&& ingress);
 
 template <class T>
 struct WtExpected {

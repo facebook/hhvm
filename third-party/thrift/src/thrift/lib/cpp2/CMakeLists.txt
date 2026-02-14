@@ -335,6 +335,7 @@ add_library(
   async/ClientChannel.cpp
   async/ClientSinkBridge.cpp
   async/ClientStreamBridge.cpp
+  async/ClientStreamInterceptorContext.cpp
   async/Cpp2Channel.cpp
   async/DuplexChannel.cpp
   async/FramingHandler.cpp

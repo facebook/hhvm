@@ -20,7 +20,9 @@ proxygen_add_test(TARGET QuicWebTransportTest
   SOURCES
     QuicWebTransportTest.cpp
   DEPENDS
-    quicwebtransport
+    proxygen_http_webtransport_quicwebtransport
+    mock_quic_socket_driver
+    mvfst::mvfst_common_events_folly_eventbase
     testmain
 )
 
@@ -29,6 +31,6 @@ proxygen_add_test(TARGET WtStreamManagerTest
     WtStreamManagerTest.cpp
   DEPENDS
     codectestutils
-    wt_stream_manager
+    proxygen_http_webtransport_wt_stream_manager
     testmain
 )

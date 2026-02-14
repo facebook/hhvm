@@ -13,3 +13,13 @@ add_subdirectory(lib)
 add_subdirectory(httpserver)
 add_subdirectory(httpclient)
 add_subdirectory(fuzzers)
+
+# =============================================================================
+# Backwards compatibility aliases for downstream projects
+# =============================================================================
+include(ProxygenCompatAliases)
+
+# =============================================================================
+# Resolve deferred dependencies after ALL subdirectories are processed
+# =============================================================================
+proxygen_resolve_deferred_dependencies()

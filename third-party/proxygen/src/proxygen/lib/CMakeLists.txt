@@ -103,219 +103,76 @@ set(
   mvfst::mvfst_state_machine
 )
 
-# append proxygen::coro sources
-set(
-    PROXYGEN_CORO_SOURCES
-    dns/CAresResolver.cpp
-    dns/CachingDNSResolver.cpp
-    dns/DNSModule.cpp
-    dns/DNSResolver.cpp
-    dns/Rfc6724.cpp
-    http/coro/HTTPBodyEventQueue.cpp
-    http/coro/HTTPFilterFactoryHandler.cpp
-    http/coro/HTTPEvents.cpp
-    http/coro/HTTPError.cpp
-    http/coro/HTTPCoroSession.cpp
-    http/coro/HTTPByteEventHelpers.cpp
-    http/coro/HTTPSourceReader.cpp
-    http/coro/HTTPSourceFilter.cpp
-    http/coro/HTTPHandlerChain.cpp
-    http/coro/HTTPStreamSourceSink.cpp
-    http/coro/HTTPStreamSource.cpp
-    http/coro/HTTPTransactionAdaptorSource.cpp
-    http/coro/util/Transport.cpp
-    http/coro/util/CoroWtSession.cpp
-    http/coro/util/ExecutorSourceFilter.cpp
-    http/coro/util/DetachableExecutor.cpp
-    http/coro/util/CancellableBaton.cpp
-    http/coro/transport/HTTPConnectTransport.cpp
-    http/coro/transport/HTTPConnectStream.cpp
-    http/coro/transport/HTTPConnectAsyncTransport.cpp
-    http/coro/transport/CoroSSLTransport.cpp
-    http/coro/client/HTTPCoroSessionPool.cpp
-    http/coro/client/HTTPCoroConnector.cpp
-    http/coro/client/HTTPClientConnectionCache.cpp
-    http/coro/client/HTTPClient.cpp
-    http/coro/client/CoroDNSResolver.cpp
-    http/coro/server/HTTPCoroAcceptor.cpp
-    http/coro/server/HTTPServer.cpp
-    http/coro/server/handlers/ExpectContinueWrapperHandler.cpp
-    http/coro/filters/DecompressionFilter.cpp
-    http/coro/filters/CompressionFilter.cpp
-    http/coro/filters/HTTPRedirectHandler.cpp
-    http/coro/filters/DecompressionFilterFactory.cpp
-    http/coro/filters/MutateFilter.cpp
-    http/coro/filters/Logger.cpp
-    http/coro/filters/RateLimitFilter.cpp
-    http/coro/filters/RequestContextFilterFactory.cpp
-    http/coro/filters/Status1xxFilter.cpp
-    http/coro/filters/StatsFilterUtil.cpp
-    http/coro/filters/TransformFilter.cpp
-    http/coro/filters/VisitorFilter.cpp
-)
-
-add_library(
-    proxygen
-    healthcheck/ServerHealthCheckerCallback.cpp
-    http/HTTP3ErrorCode.cpp
-    http/Window.cpp
-    http/codec/CodecProtocol.cpp
-    http/codec/CodecUtil.cpp
-    http/codec/compress/HeaderIndexingStrategy.cpp
-    http/codec/compress/HeaderTable.cpp
-    http/codec/compress/HPACKCodec.cpp
-    http/codec/compress/HPACKContext.cpp
-    http/codec/compress/HPACKDecodeBuffer.cpp
-    http/codec/compress/HPACKDecoderBase.cpp
-    http/codec/compress/HPACKDecoder.cpp
-    http/codec/compress/HPACKEncodeBuffer.cpp
-    http/codec/compress/HPACKEncoderBase.cpp
-    http/codec/compress/HPACKEncoder.cpp
-    http/codec/compress/HPACKHeader.cpp
-    http/codec/compress/Huffman.cpp
-    http/codec/compress/Logging.cpp
-    http/codec/compress/NoPathIndexingStrategy.cpp
-    http/codec/compress/QPACKCodec.cpp
-    http/codec/compress/QPACKContext.cpp
-    http/codec/compress/QPACKDecoder.cpp
-    http/codec/compress/QPACKEncoder.cpp
-    http/codec/compress/QPACKHeaderTable.cpp
-    http/codec/compress/QPACKStaticHeaderTable.cpp
-    http/codec/compress/StaticHeaderTable.cpp
-    http/codec/CapsuleCodec.cpp
-    http/codec/DefaultHTTPCodecFactory.cpp
-    http/codec/ErrorCode.cpp
-    http/codec/FlowControlFilter.cpp
-    http/codec/HeaderDecodeInfo.cpp
-    http/codec/HTTP1xCodec.cpp
-    http/codec/HTTP2Codec.cpp
-    http/codec/HTTP2Constants.cpp
-    http/codec/HTTP2Framer.cpp
-    http/codec/HTTPChecks.cpp
-    http/codec/HTTPCodecFactory.cpp
-    http/codec/HTTPCodecFilter.cpp
-    http/codec/HTTPCodecPrinter.cpp
-    http/codec/HTTPParallelCodec.cpp
-    http/codec/HTTPSettings.cpp
-    http/codec/TransportDirection.cpp
-    http/codec/RateLimitFilter.cpp
-    http/codec/webtransport/WebTransportFramer.cpp
-    http/codec/webtransport/WebTransportCapsuleCodec.cpp
-    http/connpool/ServerIdleSessionController.cpp
-    http/connpool/SessionHolder.cpp
-    http/connpool/SessionPool.cpp
-    http/connpool/ThreadIdleSessionController.cpp
-    http/experimental/RFC1867.cpp
-    http/HeaderConstants.cpp
-    http/HTTPConnector.cpp
-    http/HTTPConnectorWithFizz.cpp
-    http/HTTPConstants.cpp
-    http/HTTPException.cpp
-    http/HTTPHeaders.cpp
-    http/HTTPMessage.cpp
-    http/HTTPMessageFilters.cpp
-    http/HTTPMethod.cpp
-    http/HTTPPriorityFunctions.cpp
-    http/StatusTypeEnum.cpp
-    http/ProxygenErrorEnum.cpp
-    http/ProxyStatus.cpp
-    http/RFC2616.cpp
-    http/observer/HTTPSessionObserverInterface.cpp
-    http/observer/HTTPTransactionObserverInterface.cpp
-    http/session/ByteEvents.cpp
-    http/session/ByteEventTracker.cpp
-    http/session/CodecErrorResponseHandler.cpp
-    http/session/HTTP2PriorityQueue.cpp
-    http/session/HTTPDefaultSessionCodecFactory.cpp
-    http/session/HTTPDirectResponseHandler.cpp
-    http/session/HTTPDownstreamSession.cpp
-    http/session/HTTPErrorPage.cpp
-    http/session/HTTPEvent.cpp
-    http/session/HTTPSessionAcceptor.cpp
-    http/session/HTTPSessionActivityTracker.cpp
-    http/session/HTTPSessionBase.cpp
-    http/session/HTTPSession.cpp
-    http/session/HTTPTransaction.cpp
-    http/session/HTTPTransactionEgressSM.cpp
-    http/session/HTTPTransactionIngressSM.cpp
-    http/session/HTTPUpstreamSession.cpp
-    http/session/SecondaryAuthManager.cpp
-    http/session/SimpleController.cpp
-    http/sink/HTTPTransactionSink.cpp
-    http/structuredheaders/StructuredHeadersBuffer.cpp
-    http/structuredheaders/StructuredHeadersConstants.cpp
-    http/structuredheaders/StructuredHeadersDecoder.cpp
-    http/structuredheaders/StructuredHeadersEncoder.cpp
-    http/structuredheaders/StructuredHeadersUtilities.cpp
-    http/webtransport/HTTPWebTransport.cpp
-    http/webtransport/WebTransport.cpp
-    http/webtransport/WebTransportImpl.cpp
-    http/webtransport/WtEgressContainer.cpp
-    http/webtransport/WtStreamManager.cpp
-    http/webtransport/WtUtils.cpp
-    pools/generators/FileServerListGenerator.cpp
-    pools/generators/ServerListGenerator.cpp
-    sampling/Sampling.cpp
-    services/RequestWorkerThread.cpp
-    services/RequestWorkerThreadNoExecutor.cpp
-    services/Service.cpp
-    services/WorkerThread.cpp
-    stats/ResourceStats.cpp
-    transport/PersistentFizzPskCache.cpp
-    utils/AsyncTimeoutSet.cpp
-    utils/CryptUtil.cpp
-    utils/Exception.cpp
-    utils/HTTPTime.cpp
-    utils/Logging.cpp
-    utils/ParseURL.cpp
-    utils/RendezvousHash.cpp
-    utils/SafePathUtils.cpp
-    utils/TraceEventContext.cpp
-    utils/TraceEvent.cpp
-    utils/WheelTimerInstance.cpp
-    utils/ZlibStreamCompressor.cpp
-    utils/ZlibStreamDecompressor.cpp
-    utils/ZstdStreamCompressor.cpp
-    utils/ZstdStreamDecompressor.cpp
-    ${HTTP3_SOURCES}
-    ${PROXYGEN_CORO_SOURCES}
+# =============================================================================
+# Granular library for generated code (HTTPCommonHeaders, TraceEventType, etc.)
+# This library compiles the generated sources and provides them to other targets
+# =============================================================================
+proxygen_add_library(proxygen_http_http_common_headers
+  SRCS
     ${PROXYGEN_GENERATED_ROOT}/proxygen/lib/http/HTTPCommonHeaders.cpp
-    ${PROXYGEN_GENERATED_ROOT}/proxygen/lib/utils/TraceEventType.cpp
-    ${PROXYGEN_GENERATED_ROOT}/proxygen/lib/utils/TraceFieldType.cpp
-    $<TARGET_OBJECTS:proxygen_http_parser>
-)
-add_dependencies(
-    proxygen
+  EXPORTED_DEPS
     proxygen-generated
-    proxygen_http_parser
+    Folly::folly_range
 )
-target_include_directories(
-    proxygen PUBLIC
+target_include_directories(proxygen_http_http_common_headers PUBLIC
     $<BUILD_INTERFACE:${PROXYGEN_FBCODE_ROOT}>
     $<BUILD_INTERFACE:${PROXYGEN_GENERATED_ROOT}>
     $<INSTALL_INTERFACE:include/>
 )
-target_compile_options(
-    proxygen PRIVATE
-    ${_PROXYGEN_COMMON_COMPILE_OPTIONS}
+
+proxygen_add_library(proxygen_utils_trace_event_types
+  SRCS
+    ${PROXYGEN_GENERATED_ROOT}/proxygen/lib/utils/TraceEventType.cpp
+    ${PROXYGEN_GENERATED_ROOT}/proxygen/lib/utils/TraceFieldType.cpp
+  EXPORTED_DEPS
+    proxygen-generated
+    Folly::folly_conv
+)
+target_include_directories(proxygen_utils_trace_event_types PUBLIC
+    $<BUILD_INTERFACE:${PROXYGEN_FBCODE_ROOT}>
+    $<BUILD_INTERFACE:${PROXYGEN_GENERATED_ROOT}>
+    $<INSTALL_INTERFACE:include/>
 )
 
-if (BUILD_SHARED_LIBS)
-    set_property(TARGET proxygen PROPERTY POSITION_INDEPENDENT_CODE ON)
-    if (DEFINED PACKAGE_VERSION)
-      set_target_properties(proxygen PROPERTIES VERSION ${PACKAGE_VERSION})
-    endif()
-endif()
+# Granular library for http_parser
+proxygen_add_library(proxygen_external_http_parser
+  SRCS
+    ${PROXYGEN_FBCODE_ROOT}/proxygen/external/http_parser/http_parser_cpp.cpp
+  EXPORTED_DEPS
+    Folly::folly_portability_string
+)
+# http_parser requires strict URL checking
+target_compile_definitions(proxygen_external_http_parser_obj PRIVATE HTTP_PARSER_STRICT_URL=1)
 
-target_link_libraries(
-    proxygen PUBLIC
-    Folly::folly
-    fizz::fizz
-    wangle::wangle
-    zstd
-    ZLIB::ZLIB
-    ${HTTP3_DEPEND_LIBS}
-    c-ares::cares
+# =============================================================================
+# Granular library subdirectories
+# Auto-generated CMakeLists.txt using proxygen_add_library()
+# These include their own test subdirectories via BUILD_TESTS conditional
+# =============================================================================
+add_subdirectory(dns)
+add_subdirectory(healthcheck)
+add_subdirectory(http)
+add_subdirectory(pools/generators)
+add_subdirectory(sampling)
+add_subdirectory(services)
+add_subdirectory(ssl)
+add_subdirectory(transport)
+add_subdirectory(utils)
+
+# =============================================================================
+# Create monolithic proxygen library from all OBJECT targets
+# =============================================================================
+proxygen_create_monolithic_library()
+
+# Add mvfst/HTTP3 dependencies to the monolithic library
+target_link_libraries(proxygen
+  PUBLIC
+    mvfst::mvfst_transport
+    mvfst::mvfst_client
+    mvfst::mvfst_fizz_client
+    mvfst::mvfst_server
+    mvfst::mvfst_codec_types
+    mvfst::mvfst_state_machine
 )
 
 # Install the headers, excluding unit testing related headers
@@ -350,16 +207,4 @@ install(
 )
 
 add_subdirectory(test)
-add_subdirectory(http/test)
 add_subdirectory(http/coro/client/samples/cocurl)
-add_subdirectory(http/structuredheaders/test)
-add_subdirectory(http/connpool/test)
-add_subdirectory(http/codec/test)
-add_subdirectory(http/codec/compress/test)
-add_subdirectory(http/session/test)
-add_subdirectory(http/webtransport)
-add_subdirectory(http/webtransport/test)
-add_subdirectory(sampling/test)
-add_subdirectory(services/test)
-add_subdirectory(transport/test)
-add_subdirectory(utils/test)

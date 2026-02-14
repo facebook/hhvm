@@ -33,6 +33,11 @@ function(proxygen_add_test)
       "${PROXYGEN_TEST_SOURCES}"
     )
 
+    # Ensure generated headers are built before test sources compile
+    if(TARGET proxygen-generated)
+      add_dependencies(${PROXYGEN_TEST_TARGET} proxygen-generated)
+    endif()
+
     set_property(TARGET ${PROXYGEN_TEST_TARGET} PROPERTY ENABLE_EXPORTS true)
 
     target_include_directories(${PROXYGEN_TEST_TARGET} PUBLIC

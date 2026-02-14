@@ -11,6 +11,10 @@ project(
     proxygen
 )
 
+# Set for FetchContent to skip find_package(proxygen)
+set(proxygen_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}"
+  CACHE INTERNAL "proxygen source directory")
+
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -72,14 +76,25 @@ endif()
 # IMPORTANT: If you change this, make the analogous update in:
 #   cmake/proxygen-config.cmake.in
 find_package(fmt REQUIRED)
-find_package(folly REQUIRED)
-find_package(wangle REQUIRED)
-find_package(mvfst REQUIRED)
+# If deps are being built from source (FetchContent), skip find_package
+if (NOT DEFINED folly_SOURCE_DIR)
+  find_package(folly REQUIRED)
+endif()
+if (NOT DEFINED fizz_SOURCE_DIR)
+  find_package(fizz REQUIRED)
+endif()
+if (NOT DEFINED wangle_SOURCE_DIR)
+  find_package(wangle REQUIRED)
+endif()
+if (NOT DEFINED mvfst_SOURCE_DIR)
+  find_package(mvfst REQUIRED)
+endif()
 find_package(Zstd REQUIRED)
 find_package(ZLIB REQUIRED)
 find_package(OpenSSL REQUIRED)
 find_package(Threads)
 find_package(c-ares REQUIRED)
+find_package(Glog REQUIRED)
 
 list(APPEND
     _PROXYGEN_COMMON_COMPILE_OPTIONS
@@ -143,11 +158,23 @@ else()
 endif()
 
 include(ProxygenTest)
+include(ProxygenFunctions)
+
+# Set PROXYGEN_DIR for proxygen_add_library to compute target names
+set(PROXYGEN_DIR ${CMAKE_CURRENT_SOURCE_DIR}/proxygen)
 
 add_subdirectory(proxygen)
 
+# Resolve deferred dependencies for granular libraries
+# (monolithic proxygen target is manually maintained in proxygen/lib/CMakeLists.txt)
+proxygen_resolve_deferred_dependencies()
+
 if (NOT DEFINED LIB_INSTALL_DIR)
     set(LIB_INSTALL_DIR "lib")
+endif()
+
+if (NOT DEFINED INCLUDE_INSTALL_DIR)
+    set(INCLUDE_INSTALL_DIR "include")
 endif()
 
 if (NOT DEFINED CMAKE_INSTALL_DIR)

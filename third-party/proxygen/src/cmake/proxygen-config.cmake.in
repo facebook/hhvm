@@ -17,6 +17,7 @@
 @PACKAGE_INIT@
 
 include(CMakeFindDependencyMacro)
+find_dependency(Glog)
 find_dependency(fmt)
 find_dependency(folly)
 find_dependency(wangle)

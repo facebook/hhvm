@@ -9,8 +9,12 @@
 #pragma once
 
 #include <proxygen/lib/http/webtransport/FlowController.h>
+// TODO(@joannajo): Remove WebTransport.h dependency. Consider extracting
+// ByteEventCallback to a separate header.
+#include <proxygen/lib/http/webtransport/WebTransport.h>
 
 #include <folly/io/IOBufQueue.h>
+#include <list>
 
 namespace proxygen::detail {
 
@@ -89,13 +93,19 @@ class WtBufferedStreamData {
   /**
    * enqueues data into the container's buffer – returns FcRes::Blocked if the
    * egress is now flow control blocked, FcRes::Unblocked otherwise
+   *
+   * Each write is tracked separately with its callback. Consecutive writes
+   * without callbacks are merged.
    */
   using FcRes = BufferedFlowController::FcRes;
-  FcRes enqueue(std::unique_ptr<folly::IOBuf> data, bool fin) noexcept;
+  FcRes enqueue(std::unique_ptr<folly::IOBuf> data,
+                bool fin,
+                WebTransport::ByteEventCallback* callback = nullptr) noexcept;
 
   struct DequeueResult {
     std::unique_ptr<folly::IOBuf> data;
     bool fin{false};
+    WebTransport::ByteEventCallback* deliveryCallback{nullptr};
   };
 
   /**
@@ -104,29 +114,41 @@ class WtBufferedStreamData {
    */
   DequeueResult dequeue(uint64_t atMost) noexcept;
 
+  // returns true if there's only a pending fin
+  bool onlyFinPending() const;
+
   bool grant(uint64_t offset) noexcept {
     return window_.grant(offset);
   }
 
   bool hasData() const {
-    return !data_.empty() || fin_;
+    return !pendingWrites_.empty();
   }
 
   // we can send data if there is either data & available stream fc, or only fin
   // pending
   bool canSendData() const {
-    return (hasData() && window_.getAvailable()) || (data_.empty() && fin_);
-  }
-
-  // returns true if there's only a pending fin
-  bool onlyFinPending() const {
-    return data_.empty() && fin_;
+    return (hasData() && window_.getAvailable()) || onlyFinPending();
   }
 
  private:
-  folly::IOBufQueue data_{folly::IOBufQueue::cacheChainLength()};
-  bool fin_{false};
+  /**
+   * Stores a single buffered write with its associated callback.
+   * Consecutive writes without callbacks can be merged into the previous
+   * PendingWrite (see enqueue implementation).
+   */
+  struct PendingWrite {
+    folly::IOBufQueue buf;
+    proxygen::WebTransport::ByteEventCallback* deliveryCallback;
+    bool fin;
+
+    PendingWrite(std::unique_ptr<folly::IOBuf> data,
+                 proxygen::WebTransport::ByteEventCallback* callback,
+                 bool finFlag) noexcept;
+  };
+
   BufferedFlowController window_;
+  std::list<PendingWrite> pendingWrites_;
 };
 
 } // namespace proxygen::detail

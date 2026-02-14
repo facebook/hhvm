@@ -255,9 +255,11 @@ struct WtStreamManager {
 
   /**
    * Dequeues buffered data from the WtWriteHandle; if there is no data to be
-   * dequeued, it returns StreamData{.data=nullptr, .fin=false}
+   * dequeued, it returns DequeueResult{.data=nullptr, .fin=false,
+   * .deliveryCallback=nullptr}
    */
-  StreamData dequeue(WtWriteHandle&, uint64_t atMost) noexcept;
+  WtBufferedStreamData::DequeueResult dequeue(WtWriteHandle&,
+                                              uint64_t atMost) noexcept;
 
   /**
    * Events are communicated to the backing transport (http/2 or http/3) via

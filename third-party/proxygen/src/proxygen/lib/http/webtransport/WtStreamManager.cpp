@@ -186,7 +186,7 @@ struct WriteHandle : public WebTransport::StreamWriteHandle {
   folly::Expected<folly::SemiFuture<uint64_t>, ErrCode> awaitWritable()
       override;
 
-  WebTransport::StreamData dequeue(uint64_t atMost) noexcept;
+  WtBufferedStreamData::DequeueResult dequeue(uint64_t atMost) noexcept;
   Result onMaxData(uint64_t offset);
   WritePromise resetPromise() noexcept;
   void cancel(folly::exception_wrapper ex) noexcept;
@@ -590,8 +590,8 @@ Result WtStreamManager::enqueue(WtReadHandle& rh, StreamData data) noexcept {
                                                                       : Fail;
 }
 
-StreamData WtStreamManager::dequeue(WtWriteHandle& wh,
-                                    uint64_t atMost) noexcept {
+WtBufferedStreamData::DequeueResult WtStreamManager::dequeue(
+    WtWriteHandle& wh, uint64_t atMost) noexcept {
   // we're limited by conn egress fc
   atMost = std::min(atMost, connSendFc_.getAvailable());
   auto& writeHandle = writehandle_ref_cast(wh);
@@ -842,15 +842,16 @@ WriteHandle::WriteHandle(uint64_t id,
 }
 
 folly::Expected<WriteHandle::FcState, WriteHandle::ErrCode>
-WriteHandle::writeStreamData(std::unique_ptr<folly::IOBuf> data,
-                             bool fin,
-                             WebTransport::ByteEventCallback*) {
-  // TODO(@damlaj): handle byte events & reset stream; elide unnecessarily
-  // recomputing len
+WriteHandle::writeStreamData(
+    std::unique_ptr<folly::IOBuf> data,
+    bool fin,
+    WebTransport::ByteEventCallback* byteEventCallback) {
+  // TODO(@damlaj): handle reset stream; elide unnecessarily recomputing len
   auto len = computeChainLength(data);
   XLOG_IF(ERR, !(len || fin)) << "no-op writeStreamData";
   bool connBlocked = smAccessor_.connSend().buffer(len);
-  bool streamBlocked = bufferedSendData_.enqueue(std::move(data), fin);
+  bool streamBlocked =
+      bufferedSendData_.enqueue(std::move(data), fin, byteEventCallback);
   XLOG(DBG6) << __func__ << "; id=" << id_ << "; len=" << len << "; fin=" << fin
              << "; connBlocked=" << connBlocked
              << "; streamBlocked=" << streamBlocked;
@@ -905,7 +906,8 @@ WritePromise WriteHandle::resetPromise() noexcept {
 }
 
 // TODO(@damlaj): StreamData and DequeueResult should be the same struct
-StreamData WriteHandle::dequeue(uint64_t atMost) noexcept {
+WtBufferedStreamData::DequeueResult WriteHandle::dequeue(
+    uint64_t atMost) noexcept {
   XCHECK_NE(state_, Closed) << "dequeue after close";
 
   auto res = bufferedSendData_.dequeue(atMost);
@@ -929,7 +931,7 @@ StreamData WriteHandle::dequeue(uint64_t atMost) noexcept {
   }
 
   finish(res.fin);
-  return StreamData{std::move(res.data), res.fin};
+  return res;
 }
 
 void WriteHandle::cancel(folly::exception_wrapper ex) noexcept {

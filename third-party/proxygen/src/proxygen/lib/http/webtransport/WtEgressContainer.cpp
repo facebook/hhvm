@@ -11,26 +11,75 @@
 
 namespace proxygen::detail {
 
+WtBufferedStreamData::PendingWrite::PendingWrite(
+    std::unique_ptr<folly::IOBuf> data,
+    proxygen::WebTransport::ByteEventCallback* callback,
+    bool finFlag) noexcept
+    : buf(folly::IOBufQueue::cacheChainLength()),
+      deliveryCallback(callback),
+      fin(finFlag) {
+  buf.append(std::move(data)); // ok if nullptr
+}
+
 WtBufferedStreamData::FcRes WtBufferedStreamData::enqueue(
-    std::unique_ptr<folly::IOBuf> data, bool fin) noexcept {
-  XCHECK(!fin_) << "enqueue after fin";
+    std::unique_ptr<folly::IOBuf> data,
+    bool fin,
+    proxygen::WebTransport::ByteEventCallback* callback) noexcept {
+  XCHECK(pendingWrites_.empty() || !pendingWrites_.back().fin)
+      << "enqueue after fin";
+
   auto len = data ? data->computeChainDataLength() : 0;
-  data_.append(std::move(data)); // ok if nullptr
-  fin_ = fin;
+  auto* lastWrite = pendingWrites_.empty() ? nullptr : &pendingWrites_.back();
+
+  // If last write had no callback and no fin, coalesce
+  if (lastWrite && !lastWrite->deliveryCallback) {
+    lastWrite->buf.append(std::move(data));
+    lastWrite->deliveryCallback = callback;
+    lastWrite->fin = fin;
+  } else {
+    pendingWrites_.emplace_back(std::move(data), callback, fin);
+  }
+
   return window_.buffer(len);
 }
 
 WtBufferedStreamData::DequeueResult WtBufferedStreamData::dequeue(
     uint64_t atMost) noexcept {
   // min of maxBytes and how many bytes remaining in egress window
-  atMost = std::min({atMost,
-                     window_.getAvailable(),
-                     static_cast<uint64_t>(data_.chainLength())});
+  atMost = std::min({atMost, window_.getAvailable()});
   DequeueResult res;
-  res.data = atMost == 0 ? nullptr : data_.splitAtMost(atMost);
-  res.fin = data_.empty() && std::exchange(fin_, false);
-  window_.commit(atMost);
+  if (atMost == 0 && !onlyFinPending()) {
+    return res;
+  }
+
+  folly::IOBufQueue resQueue(folly::IOBufQueue::cacheChainLength());
+  // Dequeue data from pending writes until we've dequeued atMost bytes
+  // or completed a write that has a callback
+  while (!pendingWrites_.empty() && !res.deliveryCallback) {
+    auto& frontWrite = pendingWrites_.front();
+
+    if (auto rem = atMost - resQueue.chainLength()) {
+      resQueue.append(frontWrite.buf.splitAtMost(rem));
+    }
+
+    if (!frontWrite.buf.empty()) {
+      break;
+    }
+
+    res.deliveryCallback = frontWrite.deliveryCallback;
+    res.fin = frontWrite.fin;
+    pendingWrites_.pop_front();
+  }
+
+  window_.commit(resQueue.chainLength());
+  res.data = resQueue.move();
   return res;
+}
+
+bool WtBufferedStreamData::onlyFinPending() const {
+  const auto* front =
+      pendingWrites_.empty() ? nullptr : &pendingWrites_.front();
+  return front && front->buf.empty() && front->fin;
 }
 
 }; // namespace proxygen::detail

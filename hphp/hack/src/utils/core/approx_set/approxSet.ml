@@ -8,7 +8,8 @@
 
 include ApproxSet_intf
 
-module Make (Domain : DomainType) : S with module Domain := Domain = struct
+module Make (Domain : DomainType) :
+  S_with_witness with module Domain := Domain = struct
   type disjoint =
     | Sat
     | Unsat of {

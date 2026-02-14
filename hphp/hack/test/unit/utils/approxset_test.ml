@@ -40,7 +40,7 @@ module Atom = struct
     SetRelation.make ~subset ~superset ~disjoint
 end
 
-module Test (Impl : ApproxSet_intf.S with module Domain := Atom) = struct
+module TestBase (Impl : ApproxSet_intf.S with module Domain := Atom) = struct
   module ASet = struct
     module Impl = Impl
 
@@ -100,8 +100,6 @@ module Test (Impl : ApproxSet_intf.S with module Domain := Atom) = struct
         ~init:empty
         elt
 
-    let disjoint l r = Impl.disjoint () l.set r.set
-
     let are_disjoint l r = Impl.are_disjoint () l.set r.set
 
     let relate l r =
@@ -158,19 +156,10 @@ module Test (Impl : ApproxSet_intf.S with module Domain := Atom) = struct
 
   let ef = mk ['e'; 'f']
 
-  let is_sat = function
-    | ASet.Impl.Sat -> true
-    | ASet.Impl.Unsat _ -> false
-
-  let is_unsat = function
-    | ASet.Impl.Sat -> false
-    | ASet.Impl.Unsat _ -> true
-
-  let assert_sat msg set1 set2 =
-    assert_bool msg (is_sat @@ ASet.disjoint set1 set2)
+  let assert_sat msg set1 set2 = assert_bool msg (ASet.are_disjoint set1 set2)
 
   let assert_unsat msg set1 set2 =
-    assert_bool msg (is_unsat @@ ASet.disjoint set1 set2)
+    assert_bool msg (not @@ ASet.are_disjoint set1 set2)
 
   let ( ||| ) set1 set2 = ASet.union set1 set2
 
@@ -212,7 +201,7 @@ module Test (Impl : ApproxSet_intf.S with module Domain := Atom) = struct
 
   let test_complex _ =
     let set = (abc ||| def) --- (ab &&& de) --- (bc ||| ab --- def) in
-    let result = is_sat @@ ASet.disjoint a set in
+    let result = ASet.are_disjoint a set in
 
     let ( ||| ) set1 set2 = Set.union set1 set2 in
     let ( &&& ) set1 set2 = Set.inter set1 set2 in
@@ -231,21 +220,6 @@ module Test (Impl : ApproxSet_intf.S with module Domain := Atom) = struct
       ~msg:"Expect same result as performing same operation on a Char.Set"
       expected
       result
-
-  let test_origin_reporting _ =
-    let lhs = a and rhs = def ||| abc in
-    let res1 = ASet.disjoint lhs rhs and res2 = ASet.disjoint rhs lhs in
-    assert_equal
-      ~msg:"Expect results to be flipped"
-      res1
-      res2
-      ~cmp:(fun t1 t2 ->
-        match (t1, t2) with
-        | (ASet.Impl.Sat, ASet.Impl.Sat) -> true
-        | ( ASet.Impl.Unsat { left = l1; right = l2; _ },
-            ASet.Impl.Unsat { left = r1; right = r2; _ } ) ->
-          Char.Set.equal l1 r2 && Char.Set.equal l2 r1
-        | _ -> false)
 
   let test_unknown _ =
     let abcd = mk ['a'; 'b'; 'c'; 'd'] in
@@ -312,16 +286,39 @@ module Test (Impl : ApproxSet_intf.S with module Domain := Atom) = struct
       "test_diff" >:: test_diff;
       "test_complex" >:: test_complex;
       "test_unknown" >:: test_unknown;
-      "test_origin_reporting" >:: test_origin_reporting;
       "test_quick_disjoint" >:: test_quick_disjoint;
       "test_quick_relate" >:: test_quick_relate;
     ]
 end
 
-module ApproxSet = Test (ApproxSet.Make (Atom))
+module TestWithWitness
+    (Impl : ApproxSet_intf.S_with_witness with module Domain := Atom) =
+struct
+  include TestBase (Impl)
+
+  let test_origin_reporting _ =
+    let lhs = a and rhs = def ||| abc in
+    let res1 = Impl.disjoint () lhs.ASet.set rhs.ASet.set in
+    let res2 = Impl.disjoint () rhs.ASet.set lhs.ASet.set in
+    assert_equal
+      ~msg:"Expect results to be flipped"
+      res1
+      res2
+      ~cmp:(fun t1 t2 ->
+        match (t1, t2) with
+        | (Impl.Sat, Impl.Sat) -> true
+        | ( Impl.Unsat { left = l1; right = l2; _ },
+            Impl.Unsat { left = r1; right = r2; _ } ) ->
+          Char.Set.equal l1 r2 && Char.Set.equal l2 r1
+        | _ -> false)
+
+  let tests = tests @ ["test_origin_reporting" >:: test_origin_reporting]
+end
+
+module ApproxSet = TestWithWitness (ApproxSet.Make (Atom))
 
 module BddSet = struct
-  include Test (BddSet.Make (Atom))
+  include TestBase (BddSet.Make (Atom))
 
   let test_quick_complement _ =
     let f set =

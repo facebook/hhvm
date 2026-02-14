@@ -34,8 +34,7 @@ end
     sets are disjoint. Sets consist of atomic elements ([elt]) that can be joined
     using basic set operations like union, intersection and set difference. This is
     only an approximate set, because there are ways to construct sets where it isn't
-    possible to determine definitively whether or not they are disjoint. In those cases
-    the implementation will default to returning [Unsat]*)
+    possible to determine definitively whether or not they are disjoint. *)
 module type S = sig
   (** The domain the set ranges over *)
   module Domain : DomainType
@@ -56,10 +55,19 @@ module type S = sig
 
   (** Set difference. Note that in some cases we cannot determine precisely if
       two sets involving [diff] are disjoint. In these cases the result will
-      be approximated to [Unsat] *)
+      be approximated conservatively *)
   val diff : t -> t -> t
 
   val of_list : Domain.t list -> t
+
+  val are_disjoint : Domain.ctx -> t -> t -> bool
+
+  val is_subset : Domain.ctx -> t -> t -> bool
+end
+
+(** Extends [S] with a witness-producing disjointness check *)
+module type S_with_witness = sig
+  include S
 
   (** The result of testing two sets for disjointness *)
   type disjoint =
@@ -76,17 +84,16 @@ module type S = sig
       If the sets cannot definitively be proven to be disjoint, will return
       [Unsat] *)
   val disjoint : Domain.ctx -> t -> t -> disjoint
-
-  val are_disjoint : Domain.ctx -> t -> t -> bool
-
-  val is_subset : Domain.ctx -> t -> t -> bool
 end
 
 module type ApproxSet = sig
   module type S = S
 
+  module type S_with_witness = S_with_witness
+
   (** Constructs an approximate set representation over the given [Domain] *)
-  module Make (Domain : DomainType) : S with module Domain := Domain
+  module Make (Domain : DomainType) :
+    S_with_witness with module Domain := Domain
 end
 
 (** A domain whose members can be ordered. The ordering is expected to satisfy

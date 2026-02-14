@@ -272,33 +272,10 @@ struct
     | (Select node1, (Bottom | Top)) -> traverse_t1 ~node1
     | ((Bottom | Top), Select node2) -> traverse_t2 ~node2
 
-  type disjoint =
-    | Sat
-    | Unsat of {
-        left: Domain.t;
-        relation: SetRelation.t;
-        right: Domain.t;
-      }
-
-  let disjoint ctx a b =
+  let are_disjoint ctx a b =
     let is_sat = SetRelation.is_disjoint in
-    try
-      let relation = check_relation ~is_sat:SetRelation.is_disjoint ~ctx a b in
-      if is_sat relation then
-        Sat
-      else
-        let extract_atom = function
-          | Select node -> node.atom
-          | _ -> Domain.top
-        in
-        Unsat { left = extract_atom a; relation; right = extract_atom b }
-    with
-    | RelationUnsat { left; relation; right } -> Unsat { left; relation; right }
-
-  let are_disjoint ctx set1 set2 =
-    match disjoint ctx set1 set2 with
-    | Sat -> true
-    | Unsat _ -> false
+    try is_sat @@ check_relation ~is_sat ~ctx a b with
+    | RelationUnsat _ -> false
 
   let is_subset ctx a b =
     let is_sat = SetRelation.is_subset in

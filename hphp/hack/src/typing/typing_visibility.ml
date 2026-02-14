@@ -421,76 +421,93 @@ let check_class_access ~is_method ~use_pos ~def_pos env (vis, lsb) cid class_ =
 
 let check_cross_package ~use_pos ~def_pos:_ env package_requirement =
   let current_pkg = Env.get_current_package env in
+  let current_file = Env.get_file env in
 
   let can_call_in_continuation target =
     let target_pkg = Env.get_package_by_name env target in
     Typing_packages.get_package_violation env current_pkg target_pkg
   in
 
+  let in_exclude_patterns target_pos =
+    let target_file = Pos_or_decl.filename target_pos in
+    let accessing_hhi = Pos_or_decl.is_hhi target_pos in
+    accessing_hhi
+    || Typing_packages.is_excluded env current_file
+    || Typing_packages.is_excluded env target_file
+  in
+
   match package_requirement with
   | Some (RPRequire (target_pos, target)) ->
-    (match can_call_in_continuation target with
-    | Some _ ->
-      (* Convert from Package.t option to (string * Pos.t) option *)
-      let current_package =
-        Option.map current_pkg ~f:(fun pkg ->
-            let (pos, name) = pkg.Package.name in
-            (name, pos))
-      in
-      Some
-        (Typing_error.package
-           (Cross_pkg_access_with_requirepackage
-              {
-                pos = use_pos;
-                decl_pos = target_pos;
-                target_package = target;
-                current_package;
-                loaded_packages = Env.get_loaded_packages_list env;
-                included_packages = Env.get_included_packages env;
-              }))
-    | _ -> None)
+    if in_exclude_patterns target_pos then
+      None
+    else (
+      match can_call_in_continuation target with
+      | Some _ ->
+        (* Convert from Package.t option to (string * Pos.t) option *)
+        let current_package =
+          Option.map current_pkg ~f:(fun pkg ->
+              let (pos, name) = pkg.Package.name in
+              (name, pos))
+        in
+        Some
+          (Typing_error.package
+             (Cross_pkg_access_with_requirepackage
+                {
+                  pos = use_pos;
+                  decl_pos = target_pos;
+                  target_package = target;
+                  current_package;
+                  loaded_packages = Env.get_loaded_packages_list env;
+                  included_packages = Env.get_included_packages env;
+                }))
+      | _ -> None
+    )
   | Some (RPSoft (soft_pos, soft)) ->
-    (* If the per-continuation environment does not provide the softly-required
-     * package, we have one more option -- a __SoftRequirePackage function may
-     * call another __SoftRequirePackage function to aid monolithic migration
-     * to __RequirePackage. In the soft-soft case, the choice of error is
-     * arbitrary; we'll focus on the soft annotation rather than the per-cont
-     * environment packages. *)
-    (match can_call_in_continuation soft with
-    | Some _ ->
-      (match Env.get_soft_package_requirement env with
-      | Some (env_soft_pos, env_soft) ->
-        let env_soft_pkg = Env.get_package_by_name env env_soft in
-        let soft_pkg = Env.get_package_by_name env soft in
-        (match
-           Typing_packages.get_package_violation env env_soft_pkg soft_pkg
-         with
-        | Some _ ->
+    if in_exclude_patterns soft_pos then
+      None
+    else (
+      (* If the per-continuation environment does not provide the softly-required
+       * package, we have one more option -- a __SoftRequirePackage function may
+       * call another __SoftRequirePackage function to aid monolithic migration
+       * to __RequirePackage. In the soft-soft case, the choice of error is
+       * arbitrary; we'll focus on the soft annotation rather than the per-cont
+       * environment packages. *)
+      match can_call_in_continuation soft with
+      | Some _ ->
+        (match Env.get_soft_package_requirement env with
+        | Some (env_soft_pos, env_soft) ->
+          let env_soft_pkg = Env.get_package_by_name env env_soft in
+          let soft_pkg = Env.get_package_by_name env soft in
+          (match
+             Typing_packages.get_package_violation env env_soft_pkg soft_pkg
+           with
+          | Some _ ->
+            Some
+              (Typing_error.package
+                 (Cross_pkg_access_with_softrequirepackage
+                    {
+                      pos = use_pos;
+                      decl_pos = soft_pos;
+                      current_soft_package_opt = Some (env_soft_pos, env_soft);
+                      target_package = soft;
+                      loaded_packages = Env.get_loaded_packages_list env;
+                      included_packages = Env.get_included_packages env;
+                    }))
+          | None -> None)
+        | None ->
           Some
             (Typing_error.package
                (Cross_pkg_access_with_softrequirepackage
                   {
                     pos = use_pos;
                     decl_pos = soft_pos;
-                    current_soft_package_opt = Some (env_soft_pos, env_soft);
+                    current_soft_package_opt = None;
                     target_package = soft;
                     loaded_packages = Env.get_loaded_packages_list env;
                     included_packages = Env.get_included_packages env;
-                  }))
-        | None -> None)
-      | None ->
-        Some
-          (Typing_error.package
-             (Cross_pkg_access_with_softrequirepackage
-                {
-                  pos = use_pos;
-                  decl_pos = soft_pos;
-                  current_soft_package_opt = None;
-                  target_package = soft;
-                  loaded_packages = Env.get_loaded_packages_list env;
-                  included_packages = Env.get_included_packages env;
-                })))
-    | _ -> None)
+                  })))
+      | _ -> None
+    )
   | Some RPNormal -> None
   | None -> None
 

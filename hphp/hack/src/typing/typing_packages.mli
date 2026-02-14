@@ -42,3 +42,5 @@ val get_package_violation :
   Package.t option ->
   Package.t option ->
   Package.package_relationship option
+
+val is_excluded : Typing_env_types.env -> Relative_path.t -> bool

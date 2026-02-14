@@ -168,6 +168,14 @@ class WtSessionBase : public WebTransport {
     return evb_;
   }
 
+ protected:
+  folly::Promise<folly::Unit>& uniCreditPromise() {
+    return awaitUniCredit_;
+  }
+  folly::Promise<folly::Unit>& bidiCreditPromise() {
+    return awaitBidiCredit_;
+  }
+
  private:
   folly::EventBase* evb_;
   WtStreamManager& sm_;

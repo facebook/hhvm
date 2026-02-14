@@ -46,6 +46,7 @@ class MockStreamWriteHandle : public WebTransport::StreamWriteHandle {
 
   MOCK_METHOD(GenericApiRet, resetStream, (uint32_t));
   MOCK_METHOD(GenericApiRet, setPriority, (quic::PriorityQueue::Priority));
+  MOCK_METHOD(quic::PriorityQueue::Priority, getPriority, (), (const));
 };
 
 class MockWebTransport : public WebTransport {

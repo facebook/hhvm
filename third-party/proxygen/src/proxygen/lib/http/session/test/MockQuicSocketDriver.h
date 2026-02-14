@@ -836,7 +836,7 @@ class MockQuicSocketDriver : public folly::EventBase::LoopCallback {
 
   void setMaxBidiStreams(uint64_t maxBidiStreams) {
     auto maxBidiStreamID = maxBidiStreams * 4 +
-                           ((transportType_ == TransportEnum::SERVER) ? 2 : 0);
+                           ((transportType_ == TransportEnum::SERVER) ? 1 : 0);
     if (maxBidiStreamID > maxBidiStreamID_) {
       maxBidiStreamID_ = maxBidiStreamID;
       if (sock_->connCb_) {

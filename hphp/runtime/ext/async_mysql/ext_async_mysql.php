@@ -664,6 +664,20 @@ final class AsyncMysqlConnection {
    */
   <<__Native>>
   public function isSslCertValidationEnforced(): bool;
+
+  /**
+   * Whether this connection was newly opened or recycled from a connection pool.
+   * @return - "true" if the pool was recycled from a connection pool, "false" otherwise.
+   */
+  <<__Native>>
+  public function wasFromPoolHit(): bool;
+
+  /**
+   * Whether this connection was recycled from a connection pool with changed credentials.
+   * @return - "true" if the pool was recycled from a connection pool with a credential change, "false" otherwise.
+   */
+  <<__Native>>
+  public function wasReusedWithChangeUser(): bool;
 }
 
 /**

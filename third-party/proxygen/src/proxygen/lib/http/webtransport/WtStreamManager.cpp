@@ -937,6 +937,7 @@ WtBufferedStreamData::DequeueResult WriteHandle::dequeue(
 void WriteHandle::cancel(folly::exception_wrapper ex) noexcept {
   XLOG(DBG8) << __func__ << "; ex=" << ex.what();
   ex_ = std::move(ex);
+  bufferedSendData_.clear(id_);
   // any pending awaitWritable should be resolved with ex
   if (auto p = resetPromise(); p.valid()) {
     p.setException(ex_);

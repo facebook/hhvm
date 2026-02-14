@@ -131,6 +131,8 @@ class WtBufferedStreamData {
     return (hasData() && window_.getAvailable()) || onlyFinPending();
   }
 
+  void clear(uint64_t id) noexcept;
+
  private:
   /**
    * Stores a single buffered write with its associated callback.
@@ -140,10 +142,12 @@ class WtBufferedStreamData {
   struct PendingWrite {
     folly::IOBufQueue buf;
     proxygen::WebTransport::ByteEventCallback* deliveryCallback;
+    uint64_t offset;
     bool fin;
 
     PendingWrite(std::unique_ptr<folly::IOBuf> data,
                  proxygen::WebTransport::ByteEventCallback* callback,
+                 uint64_t offset,
                  bool finFlag) noexcept;
   };
 

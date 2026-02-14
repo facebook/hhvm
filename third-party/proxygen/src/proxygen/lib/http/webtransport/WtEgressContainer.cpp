@@ -14,9 +14,11 @@ namespace proxygen::detail {
 WtBufferedStreamData::PendingWrite::PendingWrite(
     std::unique_ptr<folly::IOBuf> data,
     proxygen::WebTransport::ByteEventCallback* callback,
+    uint64_t offset,
     bool finFlag) noexcept
     : buf(folly::IOBufQueue::cacheChainLength()),
       deliveryCallback(callback),
+      offset(offset),
       fin(finFlag) {
   buf.append(std::move(data)); // ok if nullptr
 }
@@ -29,15 +31,17 @@ WtBufferedStreamData::FcRes WtBufferedStreamData::enqueue(
       << "enqueue after fin";
 
   auto len = data ? data->computeChainDataLength() : 0;
+  uint64_t offset = window_.getBufferedOffset() + (len ? len - 1 : 0);
   auto* lastWrite = pendingWrites_.empty() ? nullptr : &pendingWrites_.back();
 
   // If last write had no callback and no fin, coalesce
   if (lastWrite && !lastWrite->deliveryCallback) {
     lastWrite->buf.append(std::move(data));
     lastWrite->deliveryCallback = callback;
+    lastWrite->offset = offset;
     lastWrite->fin = fin;
   } else {
-    pendingWrites_.emplace_back(std::move(data), callback, fin);
+    pendingWrites_.emplace_back(std::move(data), callback, offset, fin);
   }
 
   return window_.buffer(len);
@@ -80,6 +84,15 @@ bool WtBufferedStreamData::onlyFinPending() const {
   const auto* front =
       pendingWrites_.empty() ? nullptr : &pendingWrites_.front();
   return front && front->buf.empty() && front->fin;
+}
+
+void WtBufferedStreamData::clear(uint64_t id) noexcept {
+  auto pendingWrites = std::move(pendingWrites_);
+  for (auto& write : pendingWrites) {
+    if (write.deliveryCallback) {
+      write.deliveryCallback->onByteEventCanceled(id, write.offset);
+    }
+  }
 }
 
 }; // namespace proxygen::detail

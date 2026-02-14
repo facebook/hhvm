@@ -9,6 +9,7 @@
 #include <proxygen/lib/http/codec/test/TestUtils.h>
 #include <proxygen/lib/http/webtransport/WtStreamManager.h>
 
+#include <folly/portability/GMock.h>
 #include <folly/portability/GTest.h>
 #include <quic/priority/HTTPPriorityQueue.h>
 
@@ -1060,10 +1061,11 @@ struct WtReadCallback : WtStreamManager::ReadCallback {
 };
 
 struct MockDeliveryCallback : WebTransport::ByteEventCallback {
-  void onByteEvent(uint64_t, uint64_t) noexcept override {
-  }
-  void onByteEventCanceled(uint64_t, uint64_t) noexcept override {
-  }
+  MOCK_METHOD(void, onByteEvent, (uint64_t, uint64_t), (noexcept, override));
+  MOCK_METHOD(void,
+              onByteEventCanceled,
+              (uint64_t, uint64_t),
+              (noexcept, override));
 };
 
 TEST(WtStreamManager, PerStreamCallbacks) {
@@ -1109,7 +1111,7 @@ TEST(WtStreamManager, DeliveryCallback) {
 
   MockDeliveryCallback cb1, cb2, cb3, cb4, cb5;
 
-  // Single write with callback
+  // single write with callback
   auto* h1 = CHECK_NOTNULL(streamManager.createEgressHandle());
   h1->writeStreamData(makeBuf(100), /*fin=*/true, &cb1);
   auto deq1 = streamManager.dequeue(*h1, 100);
@@ -1117,7 +1119,7 @@ TEST(WtStreamManager, DeliveryCallback) {
   EXPECT_TRUE(deq1.fin);
   EXPECT_EQ(deq1.deliveryCallback, &cb1);
 
-  // Multiple writes with different callbacks
+  // multiple writes with different callbacks
   auto* h2 = CHECK_NOTNULL(streamManager.createEgressHandle());
   h2->writeStreamData(makeBuf(100), /*fin=*/false, &cb1);
   h2->writeStreamData(makeBuf(50), /*fin=*/false, &cb2);
@@ -1136,7 +1138,7 @@ TEST(WtStreamManager, DeliveryCallback) {
   EXPECT_TRUE(d2c.fin);
   EXPECT_EQ(d2c.deliveryCallback, &cb3);
 
-  // Writes without callbacks coalesce with final callback write
+  // writes without callbacks coalesce with final callback write
   auto* h3 = CHECK_NOTNULL(streamManager.createEgressHandle());
   h3->writeStreamData(makeBuf(100), /*fin=*/false, nullptr);
   h3->writeStreamData(makeBuf(100), /*fin=*/false, nullptr);
@@ -1147,7 +1149,7 @@ TEST(WtStreamManager, DeliveryCallback) {
   EXPECT_TRUE(deq3.fin);
   EXPECT_EQ(deq3.deliveryCallback, &cb4);
 
-  // Callback delivered only when write completes
+  // callback delivered only when write completes
   auto* h4 = CHECK_NOTNULL(streamManager.createEgressHandle());
   h4->writeStreamData(makeBuf(100), /*fin=*/true, &cb5);
 
@@ -1160,7 +1162,7 @@ TEST(WtStreamManager, DeliveryCallback) {
   EXPECT_TRUE(d4b.fin);
   EXPECT_EQ(d4b.deliveryCallback, &cb5);
 
-  // Fin-only write with callback
+  // fin-only write with callback
   auto* h5 = CHECK_NOTNULL(streamManager.createEgressHandle());
   h5->writeStreamData(makeBuf(50), /*fin=*/false, nullptr);
   auto d5a = streamManager.dequeue(*h5, 100);
@@ -1172,6 +1174,30 @@ TEST(WtStreamManager, DeliveryCallback) {
   EXPECT_EQ(d5b.data->computeChainDataLength(), 0);
   EXPECT_TRUE(d5b.fin);
   EXPECT_EQ(d5b.deliveryCallback, &cb1);
+}
+
+TEST(WtStreamManager, ByteEventCancellation) {
+  WtConfig config{.peerMaxStreamsUni = 2};
+  WtSmEgressCb egressCb;
+  WtSmIngressCb ingressCb;
+  auto priorityQueue = std::make_unique<quic::HTTPPriorityQueue>();
+  WtStreamManager streamManager{
+      detail::WtDir::Client, config, egressCb, ingressCb, *priorityQueue};
+
+  ::testing::StrictMock<MockDeliveryCallback> cb1, cb2;
+
+  auto* h = CHECK_NOTNULL(streamManager.createEgressHandle());
+  auto id = h->getID();
+
+  // first write: 100 bytes at offset 0 => last byte offset = 99
+  h->writeStreamData(makeBuf(100), /*fin=*/false, &cb1);
+  // second write: 50 bytes at offset 100 => last byte offset = 149
+  h->writeStreamData(makeBuf(50), /*fin=*/false, &cb2);
+  EXPECT_CALL(cb1, onByteEventCanceled(id, 99));
+  EXPECT_CALL(cb2, onByteEventCanceled(id, 149));
+
+  // reset stream triggers cancellation of all pending byte event callbacks
+  h->resetStream(/*error=*/0);
 }
 
 } // namespace proxygen::coro::test

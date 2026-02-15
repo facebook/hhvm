@@ -23,12 +23,12 @@
 }}{{/adapter:is_generic?}}{{!
 }}{{#adapter:layered?}}, {{/adapter:layered?}}{{!
 }}{{#adapter:transitive_type?}}{{!
-    }}{{#type:typedef}}{{!
+    }}{{#if type:typedef?}}{{!
         }}{{type:package}}::adapters::{{type:rust_name}}{{!
-    }}{{/type:typedef}}{{!
+    }}{{/if type:typedef?}}{{!
     }}{{^type:typedef?}}{{!
         }}{{#type:structured?}}{{!
-            }}{{type:package}}::adapters::{{type:rust_name}}{{!
+            }}{{type:true_type.package}}::adapters::{{type:true_type.rust_name}}{{!
         }}{{/type:structured?}}{{!
         }}{{#type:list?}}{{!
             }}::fbthrift::adapter::ListMapAdapter<{{!

@@ -682,6 +682,74 @@ class t_mstch_rust_generator : public t_mstch_generator {
         "docs", [](const t_named& self) { return quoted_rust_doc(&self); });
     return std::move(def).make();
   }
+
+  prototype<t_const>::ptr make_prototype_for_const(
+      const prototype_database& proto) const override {
+    auto base = t_whisker_generator::make_prototype_for_const(proto);
+    auto def = whisker::dsl::prototype_builder<h_const>::extends(base);
+    def.property("lazy?", [](const t_const& self) {
+      if (type_has_transitive_adapter(self.type(), true)) {
+        return true;
+      }
+      auto type = self.type()->get_true_type();
+      return type->is<t_container>() || type->is<t_structured>();
+    });
+    return std::move(def).make();
+  }
+
+  prototype<t_type>::ptr make_prototype_for_type(
+      const prototype_database& proto) const override {
+    auto base = t_whisker_generator::make_prototype_for_type(proto);
+    auto def =
+        whisker::dsl::prototype_builder<h_type>::extends(std::move(base));
+    def.property(
+        "rust_name", [](const t_type& self) { return type_rust_name(&self); });
+    def.property("rust_name_snake", [](const t_type& self) {
+      return snakecase(mangle_type(self.name()));
+    });
+    def.property("package", [this](const t_type& self) {
+      return get_types_import_name(self.program(), options_);
+    });
+    def.property("rust", [](const t_type& self) {
+      auto rust_type = get_type_annotation(&self);
+      if (!rust_type.empty() && rust_type.find("::") == std::string::npos) {
+        return fmt::format("fbthrift::builtin_types::{}", rust_type);
+      }
+      return rust_type;
+    });
+    def.property("type_annotation?", [](const t_type& self) {
+      return has_type_annotation(&self) && !has_newtype_annotation(&self);
+    });
+    def.property("nonstandard?", [](const t_type& self) {
+      return has_nonstandard_type_annotation(&self) &&
+          !has_newtype_annotation(&self);
+    });
+    return std::move(def).make();
+  }
+
+  prototype<t_program>::ptr make_prototype_for_program(
+      const prototype_database& proto) const override {
+    auto base = t_whisker_generator::make_prototype_for_program(proto);
+    auto def = whisker::dsl::prototype_builder<h_program>::extends(base);
+    def.property("has_const_tests?", [](const t_program& self) {
+      for (const t_const* c : self.consts()) {
+        if (type_has_transitive_adapter(c->type(), true)) {
+          return true;
+        }
+      }
+      return false;
+    });
+    def.property("consts_for_test", [](const t_program& self) {
+      whisker::array::raw consts;
+      for (const t_const* c : self.consts()) {
+        if (type_has_transitive_adapter(c->type(), true)) {
+          consts.emplace_back(whisker::make::string(c->name()));
+        }
+      }
+      return whisker::make::array(std::move(consts));
+    });
+    return std::move(def).make();
+  }
 };
 
 class rust_mstch_program : public mstch_program {

@@ -783,10 +783,6 @@ class rust_mstch_program : public mstch_program {
              &rust_mstch_program::rust_skip_none_serialization},
             {"program:multifile?", &rust_mstch_program::rust_multifile},
             {"program:crate", &rust_mstch_program::rust_crate},
-            {"program:client_package",
-             &rust_mstch_program::rust_client_package},
-            {"program:includes", &rust_mstch_program::rust_includes},
-            {"program:label", &rust_mstch_program::rust_label},
             {"program:nonstandardTypes",
              &rust_mstch_program::rust_nonstandard_types},
             {"program:nonstandardFields",
@@ -889,27 +885,6 @@ class rust_mstch_program : public mstch_program {
       return "crate::" + multifile_module_name(program_);
     }
     return std::string("crate");
-  }
-  mstch::node rust_client_package() {
-    return get_client_import_name(program_, options_);
-  }
-  mstch::node rust_includes() {
-    mstch::array includes;
-    for (auto* program : program_->get_includes_for_codegen()) {
-      includes.emplace_back(
-          context_.program_factory->make_mstch_object(program, context_, pos_));
-    }
-    return includes;
-  }
-  mstch::node rust_label() {
-    if (program_ == options_.current_program) {
-      return options_.label;
-    }
-    auto crate = options_.crate_index.find(program_);
-    if (crate) {
-      return crate->label;
-    }
-    return false;
   }
   template <typename F>
   void foreach_field(F&& f) const {
@@ -1579,8 +1554,6 @@ class rust_mstch_struct : public mstch_struct {
             {"struct:copy?", &rust_mstch_struct::rust_is_copy},
             {"struct:exhaustive?", &rust_mstch_struct::rust_is_exhaustive},
             {"struct:fields_by_name", &rust_mstch_struct::rust_fields_by_name},
-            {"struct:fields_reversed",
-             &rust_mstch_struct::rust_fields_reversed},
             {"struct:derive", &rust_mstch_struct::rust_derive},
             {"struct:has_exception_message?",
              &rust_mstch_struct::has_exception_message},
@@ -1626,11 +1599,6 @@ class rust_mstch_struct : public mstch_struct {
     std::sort(fields.begin(), fields.end(), [](auto a, auto b) {
       return a->name() < b->name();
     });
-    return make_mstch_fields(fields);
-  }
-  mstch::node rust_fields_reversed() {
-    auto fields = struct_->fields().copy();
-    std::reverse(fields.begin(), fields.end());
     return make_mstch_fields(fields);
   }
   mstch::node rust_derive() {

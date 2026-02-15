@@ -936,6 +936,9 @@ class t_mstch_rust_generator : public t_mstch_generator {
       }
       return true;
     });
+    def.property("has_adapter?", [](const t_structured& self) {
+      return node_has_adapter(self);
+    });
     return std::move(def).make();
   }
 

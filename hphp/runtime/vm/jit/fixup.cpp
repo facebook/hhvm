@@ -14,6 +14,9 @@
    +----------------------------------------------------------------------+
 */
 
+#include <cstdint>
+#include <unwind.h>
+
 #include "hphp/runtime/vm/jit/fixup.h"
 
 #include "hphp/runtime/base/stats.h"
@@ -22,6 +25,7 @@
 #include "hphp/runtime/vm/jit/tc.h"
 
 #include "hphp/util/configs/jit.h"
+#include "hphp/util/dwarf-reg.h"
 
 TRACE_SET_MOD(fixup)
 
@@ -181,49 +185,50 @@ bool processFixupForVMFrame(VMFrame frame) {
   return true;
 }
 
-bool fixupWork(ActRec* nextRbp, bool soft) {
-  assertx(Cfg::Jit::Enabled);
-
-  TRACE(1, "fixup(begin):\n");
-
-  while (true) {
-    auto const rbp = nextRbp;
-    nextRbp = rbp->m_sfp;
-
-    if (UNLIKELY(soft) && (!nextRbp || nextRbp == rbp)) return false;
-    assertx(nextRbp && nextRbp != rbp && "Missing fixup for native call");
-
-    TRACE(2, "considering frame %p, %p\n", rbp, (void*)rbp->m_savedRip);
-
-    if (isVMFrame(nextRbp, soft)) {
-      TRACE(2, "fixup checking vm frame %s\n",
-            nextRbp->func()->name()->data());
-      auto const cfa = uintptr_t(rbp) + kNativeFrameSize;
-      auto const frame = VMFrame{nextRbp, TCA(rbp->m_savedRip), cfa};
-      auto const res = processFixupForVMFrame(frame);
-      if (res || LIKELY(soft)) return res;
-      always_assert(false && "Fixup expected for leafmost VM frame");
-    }
-  }
-  return false;
-}
-
 ////////////////////////////////////////////////////////////////////////////////
 }
 
 namespace detail {
+struct FixupWorkState {
+  bool soft;
+  bool synced;
+};
+
+/*
+ * Perform a fixup of the VM registers for the current stack.
+ */
+_Unwind_Reason_Code fixupWork(_Unwind_Context* context, void* arg) {
+  auto state = static_cast<FixupWorkState*>(arg);
+  auto const fp = reinterpret_cast<ActRec*>(_Unwind_GetGR(context, dw_reg::FP));
+  
+  TRACE(2, "considering frame %p, %p\n", fp, (void*)fp->m_savedRip);
+
+  if (isVMFrame(fp, state->soft)) {
+      const uintptr_t cfa = _Unwind_GetCFA(context);
+      const uintptr_t rip = _Unwind_GetIP(context);
+      auto frame = VMFrame{fp, TCA(rip), cfa};
+      state->synced = FixupMap::processFixupForVMFrame(frame);
+      if (state->synced || LIKELY(state->soft)) {
+        return _URC_END_OF_STACK;
+      }
+      always_assert(false && "Fixup expected for leafmost VM frame");
+  }
+  return _URC_NO_REASON;
+}
+
 void syncVMRegsWork(bool soft) {
+  assertx(Cfg::Jit::Enabled);
+
+  TRACE(1, "fixup(begin):\n");
+
   // Start looking for fixup entries at the current (C++) frame.  This
   // will walk the frames upward until we find a TC frame.
-  DECLARE_FRAME_POINTER(framePtr);
-  auto fp = regState() >= VMRegState::GUARDED_THRESHOLD ?
-    (ActRec*)regState() : framePtr;
+  FixupWorkState state{soft, false};
+  _Unwind_Backtrace(fixupWork, &state);
 
-  // TODO(mcolavita): This is incorrect for C++ routines with padding after
-  // their CFA.
-  auto const synced = FixupMap::fixupWork(fp, soft);
+  assertx((state.synced || state.soft) && "Missing fixup for native call");
 
-  if (synced) regState() = VMRegState::CLEAN;
+  if (state.synced) regState() = VMRegState::CLEAN;
   Stats::inc(Stats::TC_Sync);
 }
 }

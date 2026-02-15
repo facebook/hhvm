@@ -984,6 +984,73 @@ class t_mstch_rust_generator : public t_mstch_generator {
     def.property("void_or_void_stream?", [](const t_function& self) {
       return self.has_void_initial_response();
     });
+    def.property("returns_by_name", [](const t_function& self) {
+      auto get_ttype = [](const t_type& type) -> const char* {
+        const t_type* true_type = type.get_true_type();
+        if (const auto* primitive = true_type->try_as<t_primitive_type>()) {
+          switch (primitive->primitive_type()) {
+            case t_primitive_type::type::t_void:
+              return "Void";
+            case t_primitive_type::type::t_bool:
+              return "Bool";
+            case t_primitive_type::type::t_byte:
+              return "Byte";
+            case t_primitive_type::type::t_i16:
+              return "I16";
+            case t_primitive_type::type::t_i32:
+              return "I32";
+            case t_primitive_type::type::t_i64:
+              return "I64";
+            case t_primitive_type::type::t_float:
+              return "Float";
+            case t_primitive_type::type::t_double:
+              return "Double";
+            case t_primitive_type::type::t_string:
+              return "String";
+            case t_primitive_type::type::t_binary:
+              return "String";
+          }
+        } else if (true_type->is<t_list>()) {
+          return "List";
+        } else if (true_type->is<t_set>()) {
+          return "Set";
+        } else if (true_type->is<t_map>()) {
+          return "Map";
+        } else if (true_type->is<t_enum>()) {
+          return "I32";
+        } else if (true_type->is<t_structured>()) {
+          return "Struct";
+        }
+        return "";
+      };
+      std::vector<std::string> returns;
+      for (const t_field& field : get_elems(self.exceptions())) {
+        returns.push_back(
+            fmt::format(
+                "::fbthrift::Field::new(\"{}\", ::fbthrift::TType::{}, {})",
+                field.name(),
+                get_ttype(*field.type()),
+                field.id()));
+      }
+      std::string type_name;
+      if (self.stream()) {
+        type_name = "Stream";
+      } else if (self.sink()) {
+        type_name = "Void";
+      } else {
+        type_name = get_ttype(*self.return_type());
+      }
+      returns.push_back(
+          fmt::format(
+              "::fbthrift::Field::new(\"Success\", ::fbthrift::TType::{}, 0)",
+              type_name));
+      std::sort(returns.begin(), returns.end());
+      whisker::array::raw result;
+      for (const std::string& ret : returns) {
+        result.emplace_back(whisker::make::string(ret));
+      }
+      return whisker::make::array(std::move(result));
+    });
     return std::move(def).make();
   }
 
@@ -1552,8 +1619,6 @@ class rust_mstch_function : public mstch_function {
          {"function:uniqueSinkFinalExceptions",
           &rust_mstch_function::rust_unique_sink_final_exceptions},
          {"function:args_by_name", &rust_mstch_function::rust_args_by_name},
-         {"function:returns_by_name",
-          &rust_mstch_function::rust_returns_by_name},
          {"function:enable_anyhow_to_application_exn",
           &rust_mstch_function::rust_anyhow_to_application_exn}});
   }
@@ -1615,75 +1680,6 @@ class rust_mstch_function : public mstch_function {
       return a->name() < b->name();
     });
     return make_mstch_fields(params);
-  }
-
-  mstch::node rust_returns_by_name() {
-    auto returns = std::vector<std::string>();
-    auto add_return =
-        [&](std::string_view name, std::string_view type, int id) {
-          returns.push_back(
-              fmt::format(
-                  "::fbthrift::Field::new(\"{}\", ::fbthrift::TType::{}, {})",
-                  name,
-                  type,
-                  id));
-        };
-    auto get_ttype = [](const t_type& type) {
-      const t_type* true_type = type.get_true_type();
-      if (const auto* primitive = true_type->try_as<t_primitive_type>()) {
-        switch (primitive->primitive_type()) {
-          case t_primitive_type::type::t_void:
-            return "Void";
-          case t_primitive_type::type::t_bool:
-            return "Bool";
-          case t_primitive_type::type::t_byte:
-            return "Byte";
-          case t_primitive_type::type::t_i16:
-            return "I16";
-          case t_primitive_type::type::t_i32:
-            return "I32";
-          case t_primitive_type::type::t_i64:
-            return "I64";
-          case t_primitive_type::type::t_float:
-            return "Float";
-          case t_primitive_type::type::t_double:
-            return "Double";
-          case t_primitive_type::type::t_string:
-            return "String";
-          case t_primitive_type::type::t_binary:
-            return "String";
-        }
-      } else if (true_type->is<t_list>()) {
-        return "List";
-      } else if (true_type->is<t_set>()) {
-        return "Set";
-      } else if (true_type->is<t_map>()) {
-        return "Map";
-      } else if (true_type->is<t_enum>()) {
-        return "I32";
-      } else if (true_type->is<t_structured>()) {
-        return "Struct";
-      }
-      return "";
-    };
-    for (const t_field& field : get_elems(function_->exceptions())) {
-      add_return(field.name(), get_ttype(*field.type()), field.id());
-    }
-    auto type_name = std::string();
-    if (function_->stream()) {
-      type_name = "Stream";
-    } else if (function_->sink()) {
-      type_name = "Void";
-    } else {
-      type_name = get_ttype(*function_->return_type());
-    }
-    add_return("Success", type_name, 0);
-    std::sort(returns.begin(), returns.end());
-    auto array = mstch::array();
-    for (const std::string& ret : returns) {
-      array.emplace_back(ret);
-    }
-    return array;
   }
 
   mstch::node rust_anyhow_to_application_exn() {

@@ -724,6 +724,9 @@ class t_mstch_rust_generator : public t_mstch_generator {
       return has_nonstandard_type_annotation(&self) &&
           !has_newtype_annotation(&self);
     });
+    def.property("serde?", [this](const t_type& self) {
+      return rust_serde_enabled(options_, self);
+    });
     return std::move(def).make();
   }
 
@@ -1584,7 +1587,6 @@ class rust_mstch_struct : public mstch_struct {
             {"struct:is_exception_message_optional?",
              &rust_mstch_struct::is_exception_message_optional},
             {"struct:exception_message", &rust_mstch_struct::exception_message},
-            {"struct:serde?", &rust_mstch_struct::rust_serde},
             {"struct:has_adapter?", &rust_mstch_struct::has_adapter},
             {"struct:rust_structured_annotations",
              &rust_mstch_struct::rust_structured_annotations},
@@ -1679,7 +1681,6 @@ class rust_mstch_struct : public mstch_struct {
         dynamic_cast<const t_exception&>(*struct_).get_message_field();
     return message_field ? message_field->name() : "";
   }
-  mstch::node rust_serde() { return rust_serde_enabled(options_, *struct_); }
   mstch::node has_adapter() {
     // Structs cannot have transitive types, so we ignore the transitive type
     // check.
@@ -1714,7 +1715,6 @@ class rust_mstch_enum : public mstch_enum {
     register_methods(
         this,
         {
-            {"enum:serde?", &rust_mstch_enum::rust_serde},
             {"enum:derive", &rust_mstch_enum::rust_derive},
         });
   }
@@ -1750,7 +1750,6 @@ class rust_mstch_enum : public mstch_enum {
     }
     return mstch::node();
   }
-  mstch::node rust_serde() { return rust_serde_enabled(options_, *enum_); }
 
  private:
   const rust_codegen_options& options_;
@@ -2329,7 +2328,6 @@ class rust_mstch_typedef : public mstch_typedef {
             {"typedef:copy?", &rust_mstch_typedef::rust_copy},
             {"typedef:rust_type", &rust_mstch_typedef::rust_type},
             {"typedef:nonstandard?", &rust_mstch_typedef::rust_nonstandard},
-            {"typedef:serde?", &rust_mstch_typedef::rust_serde},
             {"typedef:has_adapter?", &rust_mstch_typedef::has_adapter},
             {"typedef:constructor?", &rust_mstch_typedef::constructor},
         });
@@ -2380,7 +2378,6 @@ class rust_mstch_typedef : public mstch_typedef {
     }
     return rust_type.find("::") != std::string::npos;
   }
-  mstch::node rust_serde() { return rust_serde_enabled(options_, *typedef_); }
   mstch::node has_adapter() {
     return adapter_node(
         adapter_annotation_,

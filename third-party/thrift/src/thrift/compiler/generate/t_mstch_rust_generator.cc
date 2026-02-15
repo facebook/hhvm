@@ -853,6 +853,92 @@ class t_mstch_rust_generator : public t_mstch_generator {
     return std::move(def).make();
   }
 
+  prototype<t_structured>::ptr make_prototype_for_structured(
+      const prototype_database& proto) const override {
+    auto base = t_whisker_generator::make_prototype_for_structured(proto);
+    auto def = whisker::dsl::prototype_builder<h_structured>::extends(base);
+    def.property("ord?", [](const t_structured& self) {
+      if (self.has_structured_annotation(kRustOrdUri)) {
+        return true;
+      }
+      for (const auto& field : self.fields()) {
+        if (!can_derive_ord(field.type().get_type())) {
+          return false;
+        }
+        // Assume we cannot derive `Ord` on the adapted type.
+        if (node_has_adapter(field) ||
+            type_has_transitive_adapter(field.type().get_type(), true)) {
+          return false;
+        }
+        if (field.has_structured_annotation(kRustTypeUri)) {
+          return false;
+        }
+      }
+      return true;
+    });
+    def.property("copy?", [](const t_structured& self) {
+      return self.has_structured_annotation(kRustCopyUri);
+    });
+    def.property("exhaustive?", [](const t_structured& self) {
+      return self.has_structured_annotation(kRustExhaustiveUri);
+    });
+    def.property("derive", [this](const t_structured& self) {
+      if (auto annotation = find_structured_derive_annotation(self)) {
+        std::string package =
+            get_types_import_name(annotation->program(), options_);
+        std::string ret;
+        std::string delimiter;
+        for (const auto& item : annotation->value()->get_map()) {
+          if (item.first->get_string() == "derives") {
+            for (const t_const_value* val : item.second->get_list()) {
+              auto str_val = val->get_string();
+              if (!package.empty() && str_val.starts_with(kRustCratePrefix)) {
+                str_val =
+                    package + "::" + str_val.substr(kRustCratePrefix.length());
+              }
+              ret = ret + delimiter + str_val;
+              delimiter = ", ";
+            }
+          }
+        }
+        return ret;
+      }
+      return std::string();
+    });
+    def.property("has_exception_message?", [](const t_structured& self) {
+      if (const auto* exc = dynamic_cast<const t_exception*>(&self)) {
+        return exc->get_message_field() != nullptr;
+      }
+      return false;
+    });
+    def.property(
+        "is_exception_message_optional?", [](const t_structured& self) {
+          if (const auto* exc = dynamic_cast<const t_exception*>(&self)) {
+            if (const auto* message_field = exc->get_message_field()) {
+              return message_field->qualifier() == t_field_qualifier::optional;
+            }
+          }
+          return false;
+        });
+    def.property("exception_message", [](const t_structured& self) {
+      if (const auto* exc = dynamic_cast<const t_exception*>(&self)) {
+        if (const auto* message_field = exc->get_message_field()) {
+          return message_field->name();
+        }
+      }
+      return std::string();
+    });
+    def.property("all_optional?", [](const t_structured& self) {
+      for (const auto& field : self.fields()) {
+        if (field.qualifier() != t_field_qualifier::optional) {
+          return false;
+        }
+      }
+      return true;
+    });
+    return std::move(def).make();
+  }
+
   prototype<t_program>::ptr make_prototype_for_program(
       const prototype_database& proto) const override {
     auto base = t_whisker_generator::make_prototype_for_program(proto);
@@ -1673,49 +1759,11 @@ class rust_mstch_struct : public mstch_struct {
     register_methods(
         this,
         {
-            {"struct:ord?", &rust_mstch_struct::rust_is_ord},
-            {"struct:copy?", &rust_mstch_struct::rust_is_copy},
-            {"struct:exhaustive?", &rust_mstch_struct::rust_is_exhaustive},
             {"struct:fields_by_name", &rust_mstch_struct::rust_fields_by_name},
-            {"struct:derive", &rust_mstch_struct::rust_derive},
-            {"struct:has_exception_message?",
-             &rust_mstch_struct::has_exception_message},
-            {"struct:is_exception_message_optional?",
-             &rust_mstch_struct::is_exception_message_optional},
-            {"struct:exception_message", &rust_mstch_struct::exception_message},
             {"struct:has_adapter?", &rust_mstch_struct::has_adapter},
             {"struct:rust_structured_annotations",
              &rust_mstch_struct::rust_structured_annotations},
-            {"struct:all_optional?", &rust_mstch_struct::rust_all_optional},
         });
-  }
-  mstch::node rust_is_ord() {
-    if (struct_->has_structured_annotation(kRustOrdUri)) {
-      return true;
-    }
-
-    for (const auto& field : struct_->fields()) {
-      if (!can_derive_ord(field.type().get_type())) {
-        return false;
-      }
-
-      // Assume we cannot derive `Ord` on the adapted type.
-      if (node_has_adapter(field) ||
-          type_has_transitive_adapter(field.type().get_type(), true)) {
-        return false;
-      }
-
-      if (field.has_structured_annotation(kRustTypeUri)) {
-        return false;
-      }
-    }
-    return true;
-  }
-  mstch::node rust_is_copy() {
-    return struct_->has_structured_annotation(kRustCopyUri);
-  }
-  mstch::node rust_is_exhaustive() {
-    return struct_->has_structured_annotation(kRustExhaustiveUri);
   }
   mstch::node rust_fields_by_name() {
     auto fields = struct_->fields().copy();
@@ -1723,54 +1771,6 @@ class rust_mstch_struct : public mstch_struct {
       return a->name() < b->name();
     });
     return make_mstch_fields(fields);
-  }
-  mstch::node rust_derive() {
-    if (auto annotation = find_structured_derive_annotation(*struct_)) {
-      // Always replace `crate::` with the package name of where this
-      // annotation originated to support derives applied with
-      // `@scope.Transitive`. If the annotation originates from the same
-      // module, this will just return `crate::` anyways to be a no-op.
-      std::string package =
-          get_types_import_name(annotation->program(), options_);
-
-      std::string ret;
-      std::string delimiter;
-
-      for (const auto& item : annotation->value()->get_map()) {
-        if (item.first->get_string() == "derives") {
-          for (const t_const_value* val : item.second->get_list()) {
-            auto str_val = val->get_string();
-
-            if (!package.empty() && str_val.starts_with(kRustCratePrefix)) {
-              str_val =
-                  package + "::" + str_val.substr(kRustCratePrefix.length());
-            }
-
-            ret = ret + delimiter + str_val;
-            delimiter = ", ";
-          }
-        }
-      }
-
-      return ret;
-    }
-
-    return nullptr;
-  }
-  mstch::node has_exception_message() {
-    return !!dynamic_cast<const t_exception&>(*struct_).get_message_field();
-  }
-  mstch::node is_exception_message_optional() {
-    if (const auto* message_field =
-            dynamic_cast<const t_exception&>(*struct_).get_message_field()) {
-      return message_field->qualifier() == t_field_qualifier::optional;
-    }
-    return {};
-  }
-  mstch::node exception_message() {
-    const auto* message_field =
-        dynamic_cast<const t_exception&>(*struct_).get_message_field();
-    return message_field ? message_field->name() : "";
   }
   mstch::node has_adapter() {
     // Structs cannot have transitive types, so we ignore the transitive type
@@ -1780,14 +1780,6 @@ class rust_mstch_struct : public mstch_struct {
   }
   mstch::node rust_structured_annotations() {
     return structured_annotations_node(*struct_, 1, context_, pos_, options_);
-  }
-  mstch::node rust_all_optional() {
-    for (const auto& field : struct_->fields()) {
-      if (field.qualifier() != t_field_qualifier::optional) {
-        return false;
-      }
-    }
-    return true;
   }
 
  private:

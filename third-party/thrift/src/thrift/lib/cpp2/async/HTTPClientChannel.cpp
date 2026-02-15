@@ -255,13 +255,20 @@ class HTTPTransactionCallback
       if (!body_) {
         requestError(
             folly::make_exception_wrapper<transport::TTransportException>(
+                msg_ ? fmt::format(
+                           "Empty HTTP response, {}, {}",
+                           msg_->getStatusCode(),
+                           msg_->getStatusMessage())
+                     : "Empty Header"));
+        return;
+      }
+      if (!msg_->is2xxResponse()) {
+        requestError(
+            folly::make_exception_wrapper<transport::TTransportException>(
                 fmt::format(
-                    "Empty HTTP response, {}",
-                    (msg_ ? folly::to<std::string>(
-                                msg_->getStatusCode(),
-                                ", ",
-                                msg_->getStatusMessage())
-                          : "Empty Header"))));
+                    "HTTP response error status, {}, {}",
+                    msg_->getStatusCode(),
+                    msg_->getStatusMessage())));
         return;
       }
 

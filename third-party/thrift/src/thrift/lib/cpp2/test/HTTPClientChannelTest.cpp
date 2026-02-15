@@ -17,32 +17,27 @@
 #include <thrift/lib/cpp2/async/HTTPClientChannel.h>
 
 #include <gtest/gtest.h>
-#include <folly/io/async/AsyncTransport.h>
 
 #include <folly/io/async/AsyncSocket.h>
-#include <proxygen/httpserver/HTTPServer.h>
-#include <proxygen/httpserver/ResponseBuilder.h>
+#include <folly/test/TestUtils.h>
+#include <proxygen/httpserver/ScopedHTTPServer.h>
 #include <thrift/lib/cpp2/server/ThriftServer.h>
 #include <thrift/lib/cpp2/test/gen-cpp2/TestService.h>
 #include <thrift/lib/cpp2/transport/http2/common/HTTP2RoutingHandler.h>
 #include <thrift/lib/cpp2/util/ScopedServerInterfaceThread.h>
-#include <wangle/channel/AsyncSocketHandler.h>
-
-#include <boost/lexical_cast.hpp>
 
 using namespace apache::thrift;
 using namespace apache::thrift::concurrency;
 using namespace apache::thrift::test;
-using std::string;
 
 class TestServiceHandler : public apache::thrift::ServiceHandler<TestService> {
  public:
-  void sendResponse(string& _return, int64_t size) override {
+  void sendResponse(std::string& _return, int64_t size) override {
     if (size >= 0) {
       usleep(size);
     }
 
-    _return = "test" + boost::lexical_cast<std::string>(size);
+    _return = "test" + std::to_string(size);
   }
 };
 
@@ -68,18 +63,31 @@ std::shared_ptr<ThriftServer> createHttpServer() {
   return server;
 }
 
+template <typename HandlerType>
+static std::unique_ptr<proxygen::ScopedHTTPServer> createHttp2Server(
+    HandlerType&& handler) {
+  proxygen::HTTPServer::IPConfig cfg{
+      folly::SocketAddress{"::1", 0},
+      proxygen::HTTPServer::Protocol::HTTP2,
+  };
+  proxygen::HTTPServerOptions options;
+  options.threads = 1;
+  options.handlerFactories =
+      proxygen::RequestHandlerChain()
+          .addThen(
+              std::make_unique<proxygen::ScopedHandlerFactory<HandlerType>>(
+                  std::forward<HandlerType>(handler)))
+          .build();
+  return proxygen::ScopedHTTPServer::start(std::move(cfg), std::move(options));
+}
+
 TEST(HTTPClientChannelTest, Basic) {
   ScopedServerInterfaceThread runner(createHttpServer());
-  const auto addr = runner.getAddress();
-
-  folly::EventBase eb;
-  folly::AsyncTransport::UniquePtr socket(new folly::AsyncSocket(&eb, addr));
-
-  TestServiceAsyncClient client(
-      HTTPClientChannel::newHTTP2Channel(std::move(socket)));
-
+  auto client = runner.newClient<Client<TestService>>(nullptr, [](auto socket) {
+    return HTTPClientChannel::newHTTP2Channel(std::move(socket));
+  });
   std::string ret;
-  client.sync_sendResponse(ret, 42);
+  client->sync_sendResponse(ret, 42);
   EXPECT_EQ(ret, "test42");
 }
 
@@ -88,7 +96,7 @@ TEST(HTTPClientChannelTest, NoGoodChannel) {
   const auto addr = runner.getAddress();
 
   folly::EventBase eb;
-  folly::AsyncTransport::UniquePtr socket(new folly::AsyncSocket(&eb, addr));
+  auto socket = folly::AsyncSocket::newSocket(&eb, addr);
 
   auto channel = HTTPClientChannel::newHTTP2Channel(std::move(socket));
 
@@ -97,4 +105,31 @@ TEST(HTTPClientChannelTest, NoGoodChannel) {
   channel->getTransport()->close();
 
   EXPECT_FALSE(channel->good());
+}
+
+TEST(HTTPClientChannelTest, BadStatusCode) {
+  const auto server =
+      createHttp2Server([](const proxygen::HTTPMessage&,
+                           std::unique_ptr<folly::IOBuf>,
+                           proxygen::ResponseBuilder& response) {
+        constexpr std::string_view kBody = "9000";
+        response.status(404, "Not Found")
+            .header(
+                proxygen::HTTP_HEADER_CONTENT_LENGTH,
+                std::to_string(kBody.size()))
+            .body(kBody)
+            .send();
+      });
+
+  folly::EventBase eb;
+  auto socket = folly::AsyncSocket::newSocket(
+      &eb, folly::SocketAddress::makeFromLocalPort(server->getPort()));
+  Client<TestService> client(
+      HTTPClientChannel::newHTTP2Channel(std::move(socket)));
+
+  std::string ret;
+  EXPECT_THROW_RE(
+      client.sync_sendResponse(ret, 42),
+      transport::TTransportException,
+      "HTTP response error status, 404");
 }

@@ -973,6 +973,20 @@ class t_mstch_rust_generator : public t_mstch_generator {
     return std::move(def).make();
   }
 
+  prototype<t_function>::ptr make_prototype_for_function(
+      const prototype_database& proto) const override {
+    auto base = t_whisker_generator::make_prototype_for_function(proto);
+    auto def = whisker::dsl::prototype_builder<h_function>::extends(base);
+    def.property("interaction_name", [](const t_function& self) {
+      const auto& interaction = self.interaction();
+      return interaction ? interaction->name() : self.return_type()->name();
+    });
+    def.property("void_or_void_stream?", [](const t_function& self) {
+      return self.has_void_initial_response();
+    });
+    return std::move(def).make();
+  }
+
   prototype<t_program>::ptr make_prototype_for_program(
       const prototype_database& proto) const override {
     auto base = t_whisker_generator::make_prototype_for_program(proto);
@@ -1550,10 +1564,6 @@ class rust_mstch_function : public mstch_function {
          {"function:args_by_name", &rust_mstch_function::rust_args_by_name},
          {"function:returns_by_name",
           &rust_mstch_function::rust_returns_by_name},
-         {"function:interaction_name",
-          &rust_mstch_function::rust_interaction_name},
-         {"function:void_or_void_stream?",
-          &rust_mstch_function::rust_void_or_void_stream},
          {"function:enable_anyhow_to_application_exn",
           &rust_mstch_function::rust_anyhow_to_application_exn}});
   }
@@ -1686,13 +1696,6 @@ class rust_mstch_function : public mstch_function {
     return array;
   }
 
-  mstch::node rust_interaction_name() {
-    const auto& interaction = function_->interaction();
-    return interaction ? interaction->name() : function_->return_type()->name();
-  }
-  mstch::node rust_void_or_void_stream() {
-    return function_->has_void_initial_response();
-  }
   mstch::node rust_anyhow_to_application_exn() {
     // First look for annotation on the function.
     if (const t_const* annot =

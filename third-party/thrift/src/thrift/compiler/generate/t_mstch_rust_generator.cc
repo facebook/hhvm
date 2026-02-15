@@ -1779,35 +1779,8 @@ class rust_mstch_type : public mstch_type {
     register_methods(
         this,
         {
-            {"type:rust_name", &rust_mstch_type::rust_name},
-            {"type:rust_name_snake", &rust_mstch_type::rust_name_snake},
-            {"type:package", &rust_mstch_type::rust_package},
-            {"type:rust", &rust_mstch_type::rust_type},
-            {"type:type_annotation?", &rust_mstch_type::rust_type_annotation},
-            {"type:nonstandard?", &rust_mstch_type::rust_nonstandard},
             {"type:has_adapter?", &rust_mstch_type::adapter},
         });
-  }
-  mstch::node rust_name() { return type_rust_name(type_); }
-  mstch::node rust_name_snake() {
-    return snakecase(mangle_type(type_->name()));
-  }
-  mstch::node rust_package() {
-    return get_types_import_name(type_->program(), options_);
-  }
-  mstch::node rust_type() {
-    auto rust_type = get_type_annotation(type_);
-    if (!rust_type.empty() && rust_type.find("::") == std::string::npos) {
-      return "fbthrift::builtin_types::" + rust_type;
-    }
-    return rust_type;
-  }
-  mstch::node rust_type_annotation() {
-    return has_type_annotation(type_) && !has_newtype_annotation(type_);
-  }
-  mstch::node rust_nonstandard() {
-    return has_nonstandard_type_annotation(type_) &&
-        !has_newtype_annotation(type_);
   }
   mstch::node adapter() {
     return adapter_node(nullptr, type_, false, context_, pos_, options_);

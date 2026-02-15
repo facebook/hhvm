@@ -1572,8 +1572,6 @@ class rust_mstch_struct : public mstch_struct {
     register_methods(
         this,
         {
-            {"struct:rust_name", &rust_mstch_struct::rust_name},
-            {"struct:package", &rust_mstch_struct::rust_package},
             {"struct:ord?", &rust_mstch_struct::rust_is_ord},
             {"struct:copy?", &rust_mstch_struct::rust_is_copy},
             {"struct:exhaustive?", &rust_mstch_struct::rust_is_exhaustive},
@@ -1592,10 +1590,6 @@ class rust_mstch_struct : public mstch_struct {
              &rust_mstch_struct::rust_structured_annotations},
             {"struct:all_optional?", &rust_mstch_struct::rust_all_optional},
         });
-  }
-  mstch::node rust_name() { return type_rust_name(struct_); }
-  mstch::node rust_package() {
-    return get_types_import_name(struct_->program(), options_);
   }
   mstch::node rust_is_ord() {
     if (struct_->has_structured_annotation(kRustOrdUri)) {
@@ -1720,8 +1714,6 @@ class rust_mstch_enum : public mstch_enum {
     register_methods(
         this,
         {
-            {"enum:rust_name", &rust_mstch_enum::rust_name},
-            {"enum:package", &rust_mstch_enum::rust_package},
             {"enum:serde?", &rust_mstch_enum::rust_serde},
             {"enum:derive", &rust_mstch_enum::rust_derive},
         });
@@ -1757,10 +1749,6 @@ class rust_mstch_enum : public mstch_enum {
       return ret;
     }
     return mstch::node();
-  }
-  mstch::node rust_name() { return type_rust_name(enum_); }
-  mstch::node rust_package() {
-    return get_types_import_name(enum_->program(), options_);
   }
   mstch::node rust_serde() { return rust_serde_enabled(options_, *enum_); }
 
@@ -2336,7 +2324,6 @@ class rust_mstch_typedef : public mstch_typedef {
     register_methods(
         this,
         {
-            {"typedef:rust_name", &rust_mstch_typedef::rust_name},
             {"typedef:newtype?", &rust_mstch_typedef::rust_newtype},
             {"typedef:ord?", &rust_mstch_typedef::rust_ord},
             {"typedef:copy?", &rust_mstch_typedef::rust_copy},
@@ -2347,7 +2334,6 @@ class rust_mstch_typedef : public mstch_typedef {
             {"typedef:constructor?", &rust_mstch_typedef::constructor},
         });
   }
-  mstch::node rust_name() { return type_rust_name(typedef_); }
   mstch::node rust_newtype() { return has_newtype_annotation(typedef_); }
   mstch::node rust_type() {
     // See 'typedef.mustache'. The context is writing a newtype: e.g. `pub

@@ -805,10 +805,6 @@ class rust_mstch_program : public mstch_program {
              &rust_mstch_program::rust_adapted_structs},
             {"program:has_adapters?", &rust_mstch_program::rust_has_adapters},
             {"program:adapters", &rust_mstch_program::rust_adapters},
-            {"program:has_const_tests?",
-             &rust_mstch_program::rust_has_const_tests},
-            {"program:consts_for_test",
-             &rust_mstch_program::rust_consts_for_test},
             {"program:rust_gen_native_metadata?",
              &rust_mstch_program::rust_gen_native_metadata},
             {"program:types_with_constructors",
@@ -1045,26 +1041,6 @@ class rust_mstch_program : public mstch_program {
     return types_with_direct_adapters;
   }
 
-  mstch::node rust_has_const_tests() {
-    for (const t_const* c : program_->consts()) {
-      if (type_has_transitive_adapter(c->type(), true)) {
-        return true;
-      }
-    }
-
-    return false;
-  }
-  mstch::node rust_consts_for_test() {
-    mstch::array consts;
-
-    for (const t_const* c : program_->consts()) {
-      if (type_has_transitive_adapter(c->type(), true)) {
-        consts.emplace_back(c->name());
-      }
-    }
-
-    return consts;
-  }
   mstch::node rust_gen_native_metadata() { return options_.gen_metadata; }
   mstch::node rust_types_with_constructors() {
     // Names that this Thrift crate defines in both the type namespace and value

@@ -1704,16 +1704,6 @@ class rust_mstch_struct : public mstch_struct {
   const t_const* adapter_annotation_;
 };
 
-class rust_mstch_enum : public mstch_enum {
- public:
-  rust_mstch_enum(
-      const t_enum* e,
-      mstch_context& ctx,
-      mstch_element_position pos,
-      const rust_codegen_options* /* options */)
-      : mstch_enum(e, ctx, pos) {}
-};
-
 class rust_mstch_type : public mstch_type {
  public:
   rust_mstch_type(
@@ -2595,7 +2585,6 @@ void t_mstch_rust_generator::set_mstch_factories() {
   mstch_context_.add<rust_mstch_typedef>(&options_);
   mstch_context_.add<rust_mstch_struct>(&options_);
   mstch_context_.add<rust_mstch_field>(&options_);
-  mstch_context_.add<rust_mstch_enum>(&options_);
   mstch_context_.add<rust_mstch_const>(&options_);
 }
 

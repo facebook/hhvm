@@ -762,6 +762,64 @@ class t_mstch_rust_generator : public t_mstch_generator {
     return std::move(def).make();
   }
 
+  prototype<t_typedef>::ptr make_prototype_for_typedef(
+      const prototype_database& proto) const override {
+    auto base = t_whisker_generator::make_prototype_for_typedef(proto);
+    auto def = whisker::dsl::prototype_builder<h_typedef>::extends(base);
+    def.property("newtype?", [](const t_typedef& self) {
+      return has_newtype_annotation(&self);
+    });
+    def.property("ord?", [](const t_typedef& self) {
+      return self.has_structured_annotation(kRustOrdUri) ||
+          (can_derive_ord(&self) &&
+           !type_has_transitive_adapter(&self.type().deref(), true));
+    });
+    def.property("copy?", [](const t_typedef& self) {
+      if (!type_has_transitive_adapter(&self.type().deref(), true)) {
+        auto inner = self.get_true_type();
+        if (inner->is_bool() || inner->is_byte() || inner->is_i16() ||
+            inner->is_i32() || inner->is_i64() || inner->is<t_enum>() ||
+            inner->is_void()) {
+          return true;
+        }
+      }
+      return false;
+    });
+    def.property("rust_type", [](const t_typedef& self) {
+      // See 'typedef.mustache'. The context is writing a newtype: e.g. `pub
+      // struct T(pub X)`. If `X` has a `rust.Type` annotation `A` we should
+      // write `struct T(pub A)` If it does not, we should write `pub struct T
+      // (pub X)`.
+      std::string rust_type;
+      if (const t_const* annot =
+              self.find_structured_annotation_or_null(kRustTypeUri)) {
+        rust_type = get_annotation_property_string(annot, "name");
+      }
+      if (!rust_type.empty() && rust_type.find("::") == std::string::npos) {
+        return std::string("fbthrift::builtin_types::") + rust_type;
+      }
+      return rust_type;
+    });
+    def.property("nonstandard?", [](const t_typedef& self) {
+      // See 'typedef.mustache'. The context is writing serialization functions
+      // for a newtype `pub struct T(pub X)`.
+      // If `X` has a type annotation `A` that is non-standard we should emit
+      // the phrase `crate::r#impl::write(&self.0, p)`. If `X` does not have an
+      // annotation or does but it is not non-standard we should write
+      // `self.0.write(p)`.
+      std::string rust_type;
+      if (const t_const* annot =
+              self.find_structured_annotation_or_null(kRustTypeUri)) {
+        rust_type = get_annotation_property_string(annot, "name");
+      }
+      return rust_type.find("::") != std::string::npos;
+    });
+    def.property("constructor?", [](const t_typedef& self) {
+      return typedef_has_constructor_expression(&self);
+    });
+    return std::move(def).make();
+  }
+
   prototype<t_program>::ptr make_prototype_for_program(
       const prototype_database& proto) const override {
     auto base = t_whisker_generator::make_prototype_for_program(proto);
@@ -2272,60 +2330,8 @@ class rust_mstch_typedef : public mstch_typedef {
     register_methods(
         this,
         {
-            {"typedef:newtype?", &rust_mstch_typedef::rust_newtype},
-            {"typedef:ord?", &rust_mstch_typedef::rust_ord},
-            {"typedef:copy?", &rust_mstch_typedef::rust_copy},
-            {"typedef:rust_type", &rust_mstch_typedef::rust_type},
-            {"typedef:nonstandard?", &rust_mstch_typedef::rust_nonstandard},
             {"typedef:has_adapter?", &rust_mstch_typedef::has_adapter},
-            {"typedef:constructor?", &rust_mstch_typedef::constructor},
         });
-  }
-  mstch::node rust_newtype() { return has_newtype_annotation(typedef_); }
-  mstch::node rust_type() {
-    // See 'typedef.mustache'. The context is writing a newtype: e.g. `pub
-    // struct T(pub X)`. If `X` has a `rust.Type` annotation `A` we should
-    // write `struct T(pub A)` If it does not, we should write `pub struct T
-    // (pub X)`.
-    std::string rust_type;
-    if (const t_const* annot =
-            typedef_->find_structured_annotation_or_null(kRustTypeUri)) {
-      rust_type = get_annotation_property_string(annot, "name");
-    }
-    if (!rust_type.empty() && rust_type.find("::") == std::string::npos) {
-      return "fbthrift::builtin_types::" + rust_type;
-    }
-    return rust_type;
-  }
-  mstch::node rust_ord() {
-    return typedef_->has_structured_annotation(kRustOrdUri) ||
-        (can_derive_ord(typedef_) &&
-         !type_has_transitive_adapter(&typedef_->type().deref(), true));
-  }
-  mstch::node rust_copy() {
-    if (!type_has_transitive_adapter(&typedef_->type().deref(), true)) {
-      auto inner = typedef_->get_true_type();
-      if (inner->is_bool() || inner->is_byte() || inner->is_i16() ||
-          inner->is_i32() || inner->is_i64() || inner->is<t_enum>() ||
-          inner->is_void()) {
-        return true;
-      }
-    }
-    return false;
-  }
-  mstch::node rust_nonstandard() {
-    // See 'typedef.mustache'. The context is writing serialization functions
-    // for a newtype `pub struct T(pub X)`.
-    // If `X` has a type annotation `A` that is non-standard we should emit
-    // the phrase `crate::r#impl::write(&self.0, p)`. If `X` does not have an
-    // annotation or does but it is not non-standard we should write
-    // `self.0.write(p)`.
-    std::string rust_type;
-    if (const t_const* annot =
-            typedef_->find_structured_annotation_or_null(kRustTypeUri)) {
-      rust_type = get_annotation_property_string(annot, "name");
-    }
-    return rust_type.find("::") != std::string::npos;
   }
   mstch::node has_adapter() {
     return adapter_node(
@@ -2335,9 +2341,6 @@ class rust_mstch_typedef : public mstch_typedef {
         context_,
         pos_,
         options_);
-  }
-  mstch::node constructor() {
-    return typedef_has_constructor_expression(typedef_);
   }
 
  private:

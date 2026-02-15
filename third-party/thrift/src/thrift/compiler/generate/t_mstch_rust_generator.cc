@@ -994,6 +994,58 @@ class t_mstch_rust_generator : public t_mstch_generator {
       }
       return whisker::make::array(std::move(consts));
     });
+    def.property("serde?", [this](const t_program&) { return options_.serde; });
+    def.property(
+        "valuable?", [this](const t_program&) { return options_.valuable; });
+    def.property("skip_none_serialization?", [this](const t_program&) {
+      return options_.skip_none_serialization;
+    });
+    def.property("multifile?", [this](const t_program&) {
+      return options_.multifile_mode;
+    });
+    def.property("rust_gen_native_metadata?", [this](const t_program&) {
+      return options_.gen_metadata;
+    });
+    def.property("nonexhaustiveStructs?", [](const t_program& self) {
+      for (t_structured* strct : self.structs_and_unions()) {
+        if (!strct->is<t_union>() &&
+            !strct->has_structured_annotation(kRustExhaustiveUri)) {
+          return true;
+        }
+      }
+      for (t_exception* strct : self.exceptions()) {
+        if (!strct->has_structured_annotation(kRustExhaustiveUri)) {
+          return true;
+        }
+      }
+      return false;
+    });
+    def.property("direct_dependencies?", [this](const t_program&) {
+      return !options_.crate_index.direct_dependencies().empty();
+    });
+    def.property("types", [this](const t_program& self) {
+      auto types = "::" + options_.types_crate;
+      if (options_.multifile_mode) {
+        types += "::" + multifile_module_name(&self);
+      }
+      return types;
+    });
+    def.property("clients", [this](const t_program& self) {
+      auto clients = "::" + options_.clients_crate;
+      if (options_.multifile_mode) {
+        clients += "::" + multifile_module_name(&self);
+      }
+      return clients;
+    });
+    def.property("crate", [this](const t_program& self) {
+      if (options_.multifile_mode) {
+        return std::string("crate::") + multifile_module_name(&self);
+      }
+      return std::string("crate");
+    });
+    def.property("split_mode_enabled?", [this](const t_program&) {
+      return static_cast<bool>(options_.types_split_count);
+    });
     return std::move(def).make();
   }
 };
@@ -1012,20 +1064,8 @@ class rust_mstch_program : public mstch_program {
     register_methods(
         this,
         {
-            {"program:direct_dependencies?",
-             &rust_mstch_program::rust_has_direct_dependencies},
             {"program:direct_dependencies",
              &rust_mstch_program::rust_direct_dependencies},
-            {"program:types", &rust_mstch_program::rust_types},
-            {"program:clients", &rust_mstch_program::rust_clients},
-            {"program:nonexhaustiveStructs?",
-             &rust_mstch_program::rust_nonexhaustive_structs},
-            {"program:serde?", &rust_mstch_program::rust_serde},
-            {"program:valuable?", &rust_mstch_program::rust_valuable},
-            {"program:skip_none_serialization?",
-             &rust_mstch_program::rust_skip_none_serialization},
-            {"program:multifile?", &rust_mstch_program::rust_multifile},
-            {"program:crate", &rust_mstch_program::rust_crate},
             {"program:nonstandardTypes",
              &rust_mstch_program::rust_nonstandard_types},
             {"program:nonstandardFields",
@@ -1047,8 +1087,6 @@ class rust_mstch_program : public mstch_program {
              &rust_mstch_program::rust_adapted_structs},
             {"program:has_adapters?", &rust_mstch_program::rust_has_adapters},
             {"program:adapters", &rust_mstch_program::rust_adapters},
-            {"program:rust_gen_native_metadata?",
-             &rust_mstch_program::rust_gen_native_metadata},
             {"program:types_with_constructors",
              &rust_mstch_program::rust_types_with_constructors},
             {"program:current_split_structs",
@@ -1057,8 +1095,6 @@ class rust_mstch_program : public mstch_program {
              &rust_mstch_program::current_split_typedefs},
             {"program:current_split_enums",
              &rust_mstch_program::current_split_enums},
-            {"program:split_mode_enabled?",
-             &rust_mstch_program::split_mode_enabled},
             {"program:type_splits", &rust_mstch_program::type_splits},
         });
 
@@ -1067,10 +1103,6 @@ class rust_mstch_program : public mstch_program {
       initialize_type_split();
       generate_split_data();
     }
-  }
-
-  mstch::node rust_has_direct_dependencies() {
-    return !options_.crate_index.direct_dependencies().empty();
   }
 
   mstch::node rust_direct_dependencies() {
@@ -1086,49 +1118,6 @@ class rust_mstch_program : public mstch_program {
     return direct_dependencies;
   }
 
-  mstch::node rust_types() {
-    auto types = "::" + options_.types_crate;
-    if (options_.multifile_mode) {
-      types += "::" + multifile_module_name(program_);
-    }
-    return types;
-  }
-
-  mstch::node rust_clients() {
-    auto clients = "::" + options_.clients_crate;
-    if (options_.multifile_mode) {
-      clients += "::" + multifile_module_name(program_);
-    }
-    return clients;
-  }
-
-  mstch::node rust_nonexhaustive_structs() {
-    for (t_structured* strct : program_->structs_and_unions()) {
-      // The is_union is because `union` are also in this collection.
-      if (!strct->is<t_union>() &&
-          !strct->has_structured_annotation(kRustExhaustiveUri)) {
-        return true;
-      }
-    }
-    for (t_exception* strct : program_->exceptions()) {
-      if (!strct->has_structured_annotation(kRustExhaustiveUri)) {
-        return true;
-      }
-    }
-    return false;
-  }
-  mstch::node rust_serde() { return options_.serde; }
-  mstch::node rust_skip_none_serialization() {
-    return options_.skip_none_serialization;
-  }
-  mstch::node rust_valuable() { return options_.valuable; }
-  mstch::node rust_multifile() { return options_.multifile_mode; }
-  mstch::node rust_crate() {
-    if (options_.multifile_mode) {
-      return "crate::" + multifile_module_name(program_);
-    }
-    return std::string("crate");
-  }
   template <typename F>
   void foreach_field(F&& f) const {
     for (const t_structured* strct : program_->structs_and_unions()) {
@@ -1262,7 +1251,6 @@ class rust_mstch_program : public mstch_program {
     return types_with_direct_adapters;
   }
 
-  mstch::node rust_gen_native_metadata() { return options_.gen_metadata; }
   mstch::node rust_types_with_constructors() {
     // Names that this Thrift crate defines in both the type namespace and value
     // namespace. This is the case for enums, where `E` is a type and `E(0)` is
@@ -1321,10 +1309,6 @@ class rust_mstch_program : public mstch_program {
       split_indices[i] = i;
     }
     return split_indices;
-  }
-
-  mstch::node split_mode_enabled() {
-    return static_cast<bool>(options_.types_split_count);
   }
 
  private:

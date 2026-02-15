@@ -1060,6 +1060,41 @@ class t_mstch_rust_generator : public t_mstch_generator {
     def.property("split_mode_enabled?", [this](const t_program&) {
       return static_cast<bool>(options_.types_split_count);
     });
+    def.property("include_docs", [this](const t_program&) {
+      return options_.include_docs;
+    });
+    def.property("has_default_tests?", [](const t_program& self) {
+      for (const t_structured* strct : self.structs_and_unions()) {
+        for (const t_field& field : strct->fields()) {
+          if (node_has_adapter(field) ||
+              type_has_transitive_adapter(field.type().get_type(), true)) {
+            return true;
+          }
+        }
+      }
+      return false;
+    });
+    def.property("has_adapted_structs?", [](const t_program& self) {
+      for (const t_structured* strct : self.structs_and_unions()) {
+        if (node_has_adapter(*strct)) {
+          return true;
+        }
+      }
+      return false;
+    });
+    def.property("has_adapters?", [](const t_program& self) {
+      for (const t_structured* strct : self.structs_and_unions()) {
+        if (node_has_adapter(*strct)) {
+          return true;
+        }
+      }
+      for (const t_typedef* t : self.typedefs()) {
+        if (node_has_adapter(*t)) {
+          return true;
+        }
+      }
+      return false;
+    });
     return std::move(def).make();
   }
 };
@@ -1090,16 +1125,10 @@ class rust_mstch_program : public mstch_program {
              &rust_mstch_program::rust_clients_include_srcs},
             {"program:services_include_srcs",
              &rust_mstch_program::rust_services_include_srcs},
-            {"program:include_docs", &rust_mstch_program::rust_include_docs},
-            {"program:has_default_tests?",
-             &rust_mstch_program::rust_has_default_tests},
             {"program:structs_for_default_test",
              &rust_mstch_program::rust_structs_for_default_test},
-            {"program:has_adapted_structs?",
-             &rust_mstch_program::rust_has_adapted_structs},
             {"program:adapted_structs",
              &rust_mstch_program::rust_adapted_structs},
-            {"program:has_adapters?", &rust_mstch_program::rust_has_adapters},
             {"program:adapters", &rust_mstch_program::rust_adapters},
             {"program:types_with_constructors",
              &rust_mstch_program::rust_types_with_constructors},
@@ -1176,19 +1205,6 @@ class rust_mstch_program : public mstch_program {
   mstch::node rust_services_include_srcs() {
     return options_.services_include_srcs;
   }
-  mstch::node rust_include_docs() { return options_.include_docs; }
-  mstch::node rust_has_default_tests() {
-    for (const t_structured* strct : program_->structs_and_unions()) {
-      for (const t_field& field : strct->fields()) {
-        if (node_has_adapter(field) ||
-            type_has_transitive_adapter(field.type().get_type(), true)) {
-          return true;
-        }
-      }
-    }
-
-    return false;
-  }
   mstch::node rust_structs_for_default_test() {
     mstch::array strcts;
 
@@ -1206,16 +1222,6 @@ class rust_mstch_program : public mstch_program {
     return strcts;
   }
 
-  mstch::node rust_has_adapted_structs() {
-    for (const t_structured* strct : program_->structs_and_unions()) {
-      if (node_has_adapter(*strct)) {
-        return true;
-      }
-    }
-
-    return false;
-  }
-
   mstch::node rust_adapted_structs() {
     mstch::array strcts;
 
@@ -1227,22 +1233,6 @@ class rust_mstch_program : public mstch_program {
     }
 
     return strcts;
-  }
-
-  mstch::node rust_has_adapters() {
-    for (const t_structured* strct : program_->structs_and_unions()) {
-      if (node_has_adapter(*strct)) {
-        return true;
-      }
-    }
-
-    for (const t_typedef* t : program_->typedefs()) {
-      if (node_has_adapter(*t)) {
-        return true;
-      }
-    }
-
-    return false;
   }
 
   mstch::node rust_adapters() {

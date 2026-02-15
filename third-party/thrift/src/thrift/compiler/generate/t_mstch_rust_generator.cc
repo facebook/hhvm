@@ -939,6 +939,40 @@ class t_mstch_rust_generator : public t_mstch_generator {
     return std::move(def).make();
   }
 
+  prototype<t_service>::ptr make_prototype_for_service(
+      const prototype_database& proto) const override {
+    auto base = t_whisker_generator::make_prototype_for_service(proto);
+    auto def = whisker::dsl::prototype_builder<h_service>::extends(base);
+    def.property("client_package", [this](const t_service& self) {
+      return get_client_import_name(self.program(), options_);
+    });
+    def.property("server_package", [this](const t_service& self) {
+      return get_server_import_name(self.program(), options_);
+    });
+    def.property("mock_package", [this](const t_service& self) {
+      return get_mock_import_name(self.program(), options_);
+    });
+    def.property("mock_crate", [this](const t_service& self) {
+      return get_mock_crate(self.program(), options_);
+    });
+    def.property("snake", [](const t_service& self) {
+      if (const t_const* annot_mod =
+              self.find_structured_annotation_or_null(kRustModUri)) {
+        return get_annotation_property_string(annot_mod, "name");
+      } else if (
+          const t_const* annot_name =
+              self.find_structured_annotation_or_null(kRustNameUri)) {
+        return snakecase(get_annotation_property_string(annot_name, "name"));
+      } else {
+        return mangle_type(snakecase(self.name()));
+      }
+    });
+    def.property("requestContext?", [](const t_service& self) {
+      return self.has_structured_annotation(kRustRequestContextUri);
+    });
+    return std::move(def).make();
+  }
+
   prototype<t_program>::ptr make_prototype_for_program(
       const prototype_database& proto) const override {
     auto base = t_whisker_generator::make_prototype_for_program(proto);
@@ -1465,43 +1499,10 @@ class rust_mstch_service : public mstch_service {
         this,
         {{"service:rustFunctions", &rust_mstch_service::rust_functions},
          {"service:rust_exceptions", &rust_mstch_service::rust_all_exceptions},
-         {"service:client_package", &rust_mstch_service::rust_client_package},
-         {"service:server_package", &rust_mstch_service::rust_server_package},
-         {"service:mock_package", &rust_mstch_service::rust_mock_package},
-         {"service:mock_crate", &rust_mstch_service::rust_mock_crate},
-         {"service:snake", &rust_mstch_service::rust_snake},
-         {"service:requestContext?", &rust_mstch_service::rust_request_context},
          {"service:extendedClients",
           &rust_mstch_service::rust_extended_clients}});
   }
   mstch::node rust_functions();
-  mstch::node rust_client_package() {
-    return get_client_import_name(service_->program(), options_);
-  }
-  mstch::node rust_server_package() {
-    return get_server_import_name(service_->program(), options_);
-  }
-  mstch::node rust_mock_package() {
-    return get_mock_import_name(service_->program(), options_);
-  }
-  mstch::node rust_mock_crate() {
-    return get_mock_crate(service_->program(), options_);
-  }
-  mstch::node rust_snake() {
-    if (const t_const* annot_mod =
-            service_->find_structured_annotation_or_null(kRustModUri)) {
-      return get_annotation_property_string(annot_mod, "name");
-    } else if (
-        const t_const* annot_name =
-            service_->find_structured_annotation_or_null(kRustNameUri)) {
-      return snakecase(get_annotation_property_string(annot_name, "name"));
-    } else {
-      return mangle_type(snakecase(service_->name()));
-    }
-  }
-  mstch::node rust_request_context() {
-    return service_->has_structured_annotation(kRustRequestContextUri);
-  }
   mstch::node rust_extended_clients() {
     mstch::array extended_services;
     const t_service* service = service_;

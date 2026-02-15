@@ -136,7 +136,7 @@ class HTTPClientTests : public TestWithParam<TransportType> {
       }
     } else {
       auto ex = sess.tryGetExceptionObject<AsyncSocketException>();
-      folly::AsyncSocketException::AsyncSocketExceptionType aseType;
+      folly::AsyncSocketException::AsyncSocketExceptionType aseType{};
       switch (exType) {
         case ExceptionType::TIMED_OUT:
           aseType = AsyncSocketException::AsyncSocketExceptionType::TIMED_OUT;

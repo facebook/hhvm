@@ -668,8 +668,7 @@ void CAresResolver::init() {
 
   // Initialize our channel
   int optmask = 0;
-  ares_options opts;
-  memset(&opts, 0, sizeof(opts));
+  ares_options opts{};
 
   opts.sock_state_cb = CAresResolver::dnsSocketReady;
   opts.sock_state_cb_data = this;

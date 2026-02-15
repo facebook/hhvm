@@ -820,6 +820,39 @@ class t_mstch_rust_generator : public t_mstch_generator {
     return std::move(def).make();
   }
 
+  prototype<t_field>::ptr make_prototype_for_field(
+      const prototype_database& proto) const override {
+    auto base = t_whisker_generator::make_prototype_for_field(proto);
+    auto def = whisker::dsl::prototype_builder<h_field>::extends(base);
+    def.property("primitive?", [](const t_field& self) {
+      auto type = self.type().get_type();
+      return type->is_bool() || type->is_any_int() || type->is_floating_point();
+    });
+    def.property("rename?", [](const t_field& self) {
+      return self.name() != mangle(self.name());
+    });
+    def.property("box?", [](const t_field& self) {
+      return field_kind(self) == FieldKind::Box;
+    });
+    def.property("arc?", [](const t_field& self) {
+      return field_kind(self) == FieldKind::Arc;
+    });
+    def.property("type_annotation?", [](const t_field& self) {
+      return has_type_annotation(&self);
+    });
+    def.property("type_nonstandard?", [](const t_field& self) {
+      return has_nonstandard_type_annotation(&self);
+    });
+    def.property("type_rust", [](const t_field& self) {
+      auto rust_type = get_type_annotation(&self);
+      if (!rust_type.empty() && rust_type.find("::") == std::string::npos) {
+        return std::string("fbthrift::builtin_types::") + rust_type;
+      }
+      return rust_type;
+    });
+    return std::move(def).make();
+  }
+
   prototype<t_program>::ptr make_prototype_for_program(
       const prototype_database& proto) const override {
     auto base = t_whisker_generator::make_prototype_for_program(proto);
@@ -2257,36 +2290,12 @@ class rust_mstch_field : public mstch_field {
     register_methods(
         this,
         {
-            {"field:primitive?", &rust_mstch_field::rust_primitive},
-            {"field:rename?", &rust_mstch_field::rust_rename},
             {"field:default", &rust_mstch_field::rust_default},
-            {"field:box?", &rust_mstch_field::rust_is_boxed},
-            {"field:arc?", &rust_mstch_field::rust_is_arc},
-            {"field:type_annotation?", &rust_mstch_field::rust_type_annotation},
-            {"field:type_nonstandard?",
-             &rust_mstch_field::rust_type_nonstandard},
-            {"field:type_rust", &rust_mstch_field::rust_type},
             {"field:has_adapter?", &rust_mstch_field::has_adapter},
             {"field:rust_structured_annotations",
              &rust_mstch_field::rust_structured_annotations},
         });
   }
-  mstch::node rust_type_annotation() { return has_type_annotation(field_); }
-  mstch::node rust_type_nonstandard() {
-    return has_nonstandard_type_annotation(field_);
-  }
-  mstch::node rust_type() {
-    auto rust_type = get_type_annotation(field_);
-    if (!rust_type.empty() && rust_type.find("::") == std::string::npos) {
-      return "fbthrift::builtin_types::" + rust_type;
-    }
-    return rust_type;
-  }
-  mstch::node rust_primitive() {
-    auto type = field_->type().get_type();
-    return type->is_bool() || type->is_any_int() || type->is_floating_point();
-  }
-  mstch::node rust_rename() { return field_->name() != mangle(field_->name()); }
   mstch::node rust_default() {
     auto value = field_->default_value();
     if (value) {
@@ -2297,8 +2306,6 @@ class rust_mstch_field : public mstch_field {
     }
     return mstch::node();
   }
-  mstch::node rust_is_boxed() { return field_kind(*field_) == FieldKind::Box; }
-  mstch::node rust_is_arc() { return field_kind(*field_) == FieldKind::Arc; }
   mstch::node has_adapter() {
     return adapter_node(
         adapter_annotation_,

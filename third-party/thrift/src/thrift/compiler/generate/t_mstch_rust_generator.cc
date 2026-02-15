@@ -2264,18 +2264,8 @@ class rust_mstch_const : public mstch_const {
     register_methods(
         this,
         {
-            {"constant:lazy?", &rust_mstch_const::rust_lazy},
             {"constant:rust", &rust_mstch_const::rust_typed_value},
         });
-  }
-  mstch::node rust_lazy() {
-    if (type_has_transitive_adapter(const_->type(), true)) {
-      return true;
-    }
-
-    auto type = const_->type()->get_true_type();
-    return type->is<t_list>() || type->is<t_map>() || type->is<t_set>() ||
-        type->is<t_struct>() || type->is<t_union>();
   }
   mstch::node rust_typed_value() {
     unsigned depth = 0;

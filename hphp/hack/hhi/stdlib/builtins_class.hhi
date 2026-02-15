@@ -70,5 +70,5 @@ namespace HH {
   function meth_caller_get_method(mixed $meth_caller)[]: string;
   // Hack specific existence functions
   function module_exists(string $module_name, bool $autoload = true)[]: bool;
-  function package_exists(string $name): bool;
+  function package_exists(string $name)[]: bool;
 }

@@ -355,20 +355,20 @@ function collect_function_coverage(): dict<string, string>;
  */
 <<__Native>>
 function get_all_packages(
-): dict<string, shape('uses' => vec<string>, 'includes' => vec<string>)>;
+)[]: dict<string, shape('uses' => vec<string>, 'includes' => vec<string>)>;
 
 /**
  * Return all deploment information from PACKAGES.toml
  */
 <<__Native>>
 function get_all_deployments(
-): dict<string, shape('packages' => vec<string>)>;
+)[]: dict<string, shape('packages' => vec<string>)>;
 
 /*
  * Returns whether a package named $name exist in the current deployment.
  */
 <<__Native>>
-function package_exists(string $name): bool;
+function package_exists(string $name)[]: bool;
 
 <<__Native>>
 function active_config_experiments(): vec<string>;

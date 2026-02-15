@@ -35,8 +35,8 @@
 }}{{/value:string?}}{{!
 }}{{#value:binary?}}{{!
     }}{{#value:empty?}}{{!
-        }}{{#type:rust}}<::{{type:rust}}>::new(){{/type:rust}}{{!
-        }}{{^type:rust}}::std::vec::Vec::new(){{/type:rust}}{{!
+        }}{{#if (not (string.empty? type:rust))}}<::{{type:rust}}>::new(){{!
+        }}{{#else}}::std::vec::Vec::new(){{/if (not (string.empty? type:rust))}}{{!
     }}{{/value:empty?}}{{!
     }}{{^value:empty?}}{{value:quoted}}.as_bytes().into(){{/value:empty?}}{{!
 }}{{/value:binary?}}{{!
@@ -63,15 +63,15 @@
 }}{{/value:list?}}{{!
 }}{{#value:set?}}{{!
     }}{{#value:empty?}}{{!
-        }}{{#type:rust}}::{{type:rust}}{{/type:rust}}{{!
-        }}{{^type:rust}}::std::collections::BTreeSet{{/type:rust}}{{!
+        }}{{#if (not (string.empty? type:rust))}}::{{type:rust}}{{!
+        }}{{#else}}::std::collections::BTreeSet{{/if (not (string.empty? type:rust))}}{{!
         }}::new(){{!
     }}{{/value:empty?}}{{!
     }}{{^value:empty?}}{{!
         }}{
             {{value:indent}}let mut set = {{!
-                }}{{#type:rust}}::{{type:rust}}{{/type:rust}}{{!
-                }}{{^type:rust}}::std::collections::BTreeSet{{/type:rust}}{{!
+                }}{{#if (not (string.empty? type:rust))}}::{{type:rust}}{{!
+                }}{{#else}}::std::collections::BTreeSet{{/if (not (string.empty? type:rust))}}{{!
             }}::new();
             {{#value:setMembers}}
 {{value:indent}}{
@@ -96,15 +96,15 @@
 }}{{/value:set?}}{{!
 }}{{#value:map?}}{{!
     }}{{#value:empty?}}{{!
-        }}{{#type:rust}}::{{type:rust}}{{/type:rust}}{{!
-        }}{{^type:rust}}::std::collections::BTreeMap{{/type:rust}}{{!
+        }}{{#if (not (string.empty? type:rust))}}::{{type:rust}}{{!
+        }}{{#else}}::std::collections::BTreeMap{{/if (not (string.empty? type:rust))}}{{!
         }}::new(){{!
     }}{{/value:empty?}}{{!
     }}{{^value:empty?}}{{!
         }}{
             {{value:indent}}let mut map = {{!
-                }}{{#type:rust}}::{{type:rust}}{{/type:rust}}{{!
-                }}{{^type:rust}}::std::collections::BTreeMap{{/type:rust}}{{!
+                }}{{#if (not (string.empty? type:rust))}}::{{type:rust}}{{!
+                }}{{#else}}::std::collections::BTreeMap{{/if (not (string.empty? type:rust))}}{{!
             }}::new();{{!
             }}{{#value:mapEntries}}
             {{value:indent}}{

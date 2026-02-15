@@ -668,6 +668,38 @@ class t_mstch_rust_generator : public t_mstch_generator {
       });
       return to_array(variants, proto.of<t_enum_value>());
     });
+    def.property("derive", [this](const t_enum& self) {
+      if (auto annotation = find_structured_derive_annotation(self)) {
+        // Always replace `crate::` with the package name of where this
+        // annotation originated to support derives applied with
+        // `@scope.Transitive`. If the annotation originates from the same
+        // module, this will just return `crate::` anyways to be a no-op.
+        std::string package =
+            get_types_import_name(annotation->program(), options_);
+
+        std::string ret;
+        std::string delimiter;
+
+        for (const auto& item : annotation->value()->get_map()) {
+          if (item.first->get_string() == "derives") {
+            for (const t_const_value* val : item.second->get_list()) {
+              auto str_val = val->get_string();
+
+              if (!package.empty() && str_val.starts_with(kRustCratePrefix)) {
+                str_val =
+                    package + "::" + str_val.substr(kRustCratePrefix.length());
+              }
+
+              ret = ret + delimiter + str_val;
+              delimiter = ", ";
+            }
+          }
+        }
+
+        return ret;
+      }
+      return std::string();
+    });
     return std::move(def).make();
   }
 
@@ -1678,49 +1710,8 @@ class rust_mstch_enum : public mstch_enum {
       const t_enum* e,
       mstch_context& ctx,
       mstch_element_position pos,
-      const rust_codegen_options* options)
-      : mstch_enum(e, ctx, pos), options_(*options) {
-    register_methods(
-        this,
-        {
-            {"enum:derive", &rust_mstch_enum::rust_derive},
-        });
-  }
-  mstch::node rust_derive() {
-    if (auto annotation = find_structured_derive_annotation(*enum_)) {
-      // Always replace `crate::` with the package name of where this
-      // annotation originated to support derives applied with
-      // `@scope.Transitive`. If the annotation originates from the same
-      // module, this will just return `crate::` anyways to be a no-op.
-      std::string package =
-          get_types_import_name(annotation->program(), options_);
-
-      std::string ret;
-      std::string delimiter;
-
-      for (const auto& item : annotation->value()->get_map()) {
-        if (item.first->get_string() == "derives") {
-          for (const t_const_value* val : item.second->get_list()) {
-            auto str_val = val->get_string();
-
-            if (!package.empty() && str_val.starts_with(kRustCratePrefix)) {
-              str_val =
-                  package + "::" + str_val.substr(kRustCratePrefix.length());
-            }
-
-            ret = ret + delimiter + str_val;
-            delimiter = ", ";
-          }
-        }
-      }
-
-      return ret;
-    }
-    return mstch::node();
-  }
-
- private:
-  const rust_codegen_options& options_;
+      const rust_codegen_options* /* options */)
+      : mstch_enum(e, ctx, pos) {}
 };
 
 class rust_mstch_type : public mstch_type {

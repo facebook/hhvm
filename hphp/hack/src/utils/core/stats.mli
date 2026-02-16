@@ -26,4 +26,4 @@ val get_stats : unit -> t
 
 val update_max_heap_size : int -> unit
 
-val to_json : t -> Hh_json.json
+val to_json : t -> Yojson.Safe.t

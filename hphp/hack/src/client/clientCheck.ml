@@ -875,7 +875,7 @@ let main_internal
     Lwt.return (Exit_status.No_error, telemetry)
   | ClientEnv.MODE_STATS ->
     let%lwt (stats, telemetry) = rpc args @@ ServerCommandTypes.STATS in
-    print_string @@ Hh_json.json_to_multiline (Stats.to_json stats);
+    print_string @@ Yojson.Safe.pretty_to_string (Stats.to_json stats);
     Lwt.return (Exit_status.No_error, telemetry)
   | ClientEnv.MODE_REMOVE_DEAD_FIXMES codes ->
     let%lwt conn = connect args in

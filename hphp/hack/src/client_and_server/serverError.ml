@@ -49,7 +49,7 @@ let get_error_list_json
     [
       ("passed", Hh_json.JSON_Bool did_pass);
       ("errors", Hh_json.JSON_Array error_list);
-      ("version", Hh_version.version_json);
+      ("version", Hh_json.of_yojson Hh_version.version_json);
     ]
   in
   let properties =

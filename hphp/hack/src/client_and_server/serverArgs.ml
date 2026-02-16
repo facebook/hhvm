@@ -116,7 +116,7 @@ module Messages = struct
 end
 
 let print_json_version () =
-  print_endline @@ Hh_json.json_to_string Hh_version.version_json
+  print_endline @@ Yojson.Safe.to_string Hh_version.version_json
 
 (*****************************************************************************)
 (* The main entry point *)

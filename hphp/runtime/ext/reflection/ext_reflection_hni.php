@@ -1650,6 +1650,15 @@ class ReflectionClass implements Reflector {
   public function getRequiredClass()[]: ?string;
 
   /**
+   * Gets the name of the required this as class for a trait.
+   *
+   * @return  Null if there are no require this as requirement or the
+   *          string name of the class required by the require class statement
+   */
+  <<__Native>>
+  public function getRequiredThisAsClass()[]: ?string;
+
+  /**
    * ( excerpt from
    * http://php.net/manual/en/reflectionclass.gettraitnames.php )
    *

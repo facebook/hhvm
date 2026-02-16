@@ -81,6 +81,7 @@ class ReflectionClass implements Reflector {
   public function getRequirementNames()[]: varray<string>;
   public function getRequirements()[]: darray<string, ReflectionClass>;
   public function getRequiredClass()[]: ?string;
+  public function getRequiredThisAsClass()[]: ?string;
   public function getShortName()[]: string;
   public function getStartLine()[]: int;
   public function getStaticProperties(): darray<string, mixed>;

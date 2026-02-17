@@ -137,6 +137,7 @@ set(FIZZ_HEADER_DIRS
   crypto/openssl
   experimental/crypto/exchange
   experimental/ktls
+  experimental/psp
   experimental/util
   extensions/clientpadding
   extensions/delegatedcred

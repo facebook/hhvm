@@ -48,6 +48,8 @@ set(
         experimental/ktls/FizzKTLSCallback.cpp
         experimental/ktls/KTLS.cpp
         experimental/protocol/BatchSignatureTypes.cpp
+        experimental/psp/KernelPSP.cpp
+        experimental/psp/PSP.cpp
         extensions/clientpadding/PaddingClientExtension.cpp
         extensions/clientpadding/Types.cpp
         extensions/delegatedcred/DelegatedCredentialCertManager.cpp
@@ -178,6 +180,7 @@ set(
         experimental/ktls/LinuxKTLS.h
         experimental/protocol/BatchSignatureFactory.h
         experimental/protocol/BatchSignatureTypes.h
+        experimental/psp/PSP.h
         experimental/server/BatchSignatureAsyncSelfCert.h
         experimental/util/CertExtraction.h
         extensions/delegatedcred/DelegatedCredentialCertManager.h

@@ -60,9 +60,12 @@ class ServiceInterceptor : public ServiceInterceptorBase {
   /**
    * Override to handle stream begin event.
    * Use RequestState for any state needed during streaming.
+   *
+   * NOTE: ConnectionState is not available during stream callbacks because
+   * streams may outlive the connection. If you need connection-level state
+   * during streaming, capture it in RequestState during onRequest.
    */
-  virtual folly::coro::Task<void> onStreamBegin(
-      RequestState*, ConnectionState*, StreamInfo) {
+  virtual folly::coro::Task<void> onStreamBegin(RequestState*, StreamInfo) {
     co_return;
   }
 
@@ -71,11 +74,10 @@ class ServiceInterceptor : public ServiceInterceptorBase {
    * Called BEFORE serialization with access to typed payload.
    *
    * @param requestState Per-request state from onRequest
-   * @param connectionState Connection state from onConnectionEstablished
    * @param info Payload information including typed payload reference
    */
   virtual folly::coro::Task<void> onStreamPayload(
-      RequestState*, ConnectionState*, StreamPayloadInfo) {
+      RequestState*, StreamPayloadInfo) {
     co_return;
   }
 
@@ -84,11 +86,9 @@ class ServiceInterceptor : public ServiceInterceptorBase {
    * Clean up any per-stream resources here.
    *
    * @param requestState Per-request state from onRequest
-   * @param connectionState Connection state from onConnectionEstablished
    * @param info Stream end information
    */
-  virtual folly::coro::Task<void> onStreamEnd(
-      RequestState*, ConnectionState*, StreamEndInfo) {
+  virtual folly::coro::Task<void> onStreamEnd(RequestState*, StreamEndInfo) {
     co_return;
   }
 
@@ -176,59 +176,42 @@ class ServiceInterceptor : public ServiceInterceptorBase {
   // ============ Internal Stream Implementations ============
 
   folly::coro::Task<void> internal_onStreamBegin(
-      ConnectionInfo connectionInfo,
       StreamInfo streamInfo,
       InterceptorMetricCallback& interceptorMetricCallback) final {
     if (isDisabled()) {
       co_return;
     }
     folly::stop_watch<std::chrono::microseconds> timer;
-    // Connection may be destroyed before stream begins - handle gracefully
-    auto* connectionState = connectionInfo.storage
-        ? getValueAsType<ConnectionState>(*connectionInfo.storage)
-        : nullptr;
     auto* requestState =
         getValueAsType<RequestState>(*streamInfo.requestStorage);
-    co_await onStreamBegin(
-        requestState, connectionState, std::move(streamInfo));
+    co_await onStreamBegin(requestState, std::move(streamInfo));
     interceptorMetricCallback.onStreamBeginComplete(
         getQualifiedName(), timer.elapsed());
   }
 
   folly::coro::Task<void> internal_onStreamPayload(
-      ConnectionInfo connectionInfo,
       StreamPayloadInfo payloadInfo,
       InterceptorMetricCallback& interceptorMetricCallback) final {
     if (isDisabled()) {
       co_return;
     }
     folly::stop_watch<std::chrono::microseconds> timer;
-    // Connection may be destroyed during streaming - handle gracefully
-    auto* connectionState = connectionInfo.storage
-        ? getValueAsType<ConnectionState>(*connectionInfo.storage)
-        : nullptr;
     auto* requestState =
         getValueAsType<RequestState>(*payloadInfo.requestStorage);
-    co_await onStreamPayload(
-        requestState, connectionState, std::move(payloadInfo));
+    co_await onStreamPayload(requestState, std::move(payloadInfo));
     interceptorMetricCallback.onStreamPayloadComplete(
         getQualifiedName(), timer.elapsed());
   }
 
   folly::coro::Task<void> internal_onStreamEnd(
-      ConnectionInfo connectionInfo,
       StreamEndInfo endInfo,
       InterceptorMetricCallback& interceptorMetricCallback) final {
     if (isDisabled()) {
       co_return;
     }
     folly::stop_watch<std::chrono::microseconds> timer;
-    // Connection may be destroyed before stream ends - handle gracefully
-    auto* connectionState = connectionInfo.storage
-        ? getValueAsType<ConnectionState>(*connectionInfo.storage)
-        : nullptr;
     auto* requestState = getValueAsType<RequestState>(*endInfo.requestStorage);
-    co_await onStreamEnd(requestState, connectionState, std::move(endInfo));
+    co_await onStreamEnd(requestState, std::move(endInfo));
     interceptorMetricCallback.onStreamEndComplete(
         getQualifiedName(), timer.elapsed());
   }

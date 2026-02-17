@@ -25,7 +25,6 @@
 #include <glog/logging.h>
 
 #include <folly/CPortability.h>
-#include <folly/CancellationToken.h>
 #include <folly/ExceptionWrapper.h>
 #include <folly/coro/Task.h>
 #include <thrift/lib/cpp/StreamEventHandler.h>
@@ -43,7 +42,13 @@ namespace apache::thrift::detail {
  * - A unique stream identifier
  * - Sequence number for payload ordering
  * - Moved request storage (owned locally, survives request destruction)
- * - Connection context pointer (valid for stream lifetime)
+ *
+ * Connection context is intentionally NOT stored here. Streams run on the
+ * CPU pool thread and may outlive the connection (which is destroyed on the
+ * IO thread). This avoids the TOCTOU race between checking connection
+ * liveness and dereferencing the connection context pointer. Interceptors
+ * that need connection-level state should capture it in their RequestState
+ * during onRequest, which runs while the connection is guaranteed alive.
  *
  * LIFETIME REQUIREMENT: The metricCallback reference must remain valid for the
  * lifetime of this context. Typically, the callback is owned by ThriftServer
@@ -55,15 +60,12 @@ class StreamInterceptorContext {
       StreamId streamId,
       std::vector<std::shared_ptr<ServiceInterceptorBase>> interceptors,
       InterceptorMetricCallback& metricCallback,
-      Cpp2ConnContext& connectionContext,
       std::string serviceName,
       std::string methodName)
       : streamId_(streamId),
         interceptors_(std::move(interceptors)),
         metricCallback_(metricCallback),
         requestStorage_(interceptors_.size()),
-        connectionContext_(&connectionContext),
-        connectionCancellationToken_(connectionContext.getCancellationToken()),
         serviceName_(std::move(serviceName)),
         methodName_(std::move(methodName)) {}
 
@@ -83,14 +85,6 @@ class StreamInterceptorContext {
     }
   }
 
-  /**
-   * Check if the connection is still valid.
-   * Returns false if the connection has been closed/cancelled.
-   */
-  bool isConnectionValid() const {
-    return !connectionCancellationToken_.isCancellationRequested();
-  }
-
   uint64_t getTotalPayloads() const {
     return sequenceNumber_.load(std::memory_order_seq_cst);
   }
@@ -102,18 +96,7 @@ class StreamInterceptorContext {
    * Called when a stream is established.
    */
   folly::coro::Task<void> invokeOnStreamBegin() {
-    auto* connCtx = getConnectionContext();
-
     for (std::size_t i = 0; i < interceptors_.size(); ++i) {
-      // Connection may be destroyed before stream begins - handle gracefully
-      auto connectionInfo =
-          ServiceInterceptorBase::ConnectionInfo{nullptr, nullptr};
-      if (connCtx) {
-        connectionInfo = ServiceInterceptorBase::ConnectionInfo{
-            connCtx,
-            connCtx->getStorageForServiceInterceptorOnConnectionByIndex(i)};
-      }
-
       auto streamInfo = ServiceInterceptorBase::StreamInfo{
           .streamId = streamId_,
           .requestStorage = &requestStorage_[i],
@@ -123,7 +106,7 @@ class StreamInterceptorContext {
       };
 
       co_await interceptors_[i]->internal_onStreamBegin(
-          connectionInfo, streamInfo, metricCallback_);
+          streamInfo, metricCallback_);
     }
   }
 
@@ -133,24 +116,12 @@ class StreamInterceptorContext {
    */
   template <typename T>
   folly::coro::Task<void> invokeOnStreamPayload(const T& payload) {
-    auto* connCtx = getConnectionContext();
-
     // Get sequence number once for this payload - all interceptors see same
     // value. Use seq_cst to ensure proper ordering visibility across threads.
     const auto sequenceNumber =
         sequenceNumber_.fetch_add(1, std::memory_order_seq_cst);
 
     for (std::size_t i = 0; i < interceptors_.size(); ++i) {
-      // Connection may be destroyed during payload transmission - handle
-      // gracefully
-      auto connectionInfo =
-          ServiceInterceptorBase::ConnectionInfo{nullptr, nullptr};
-      if (connCtx) {
-        connectionInfo = ServiceInterceptorBase::ConnectionInfo{
-            connCtx,
-            connCtx->getStorageForServiceInterceptorOnConnectionByIndex(i)};
-      }
-
       auto payloadInfo = ServiceInterceptorBase::StreamPayloadInfo{
           .streamId = streamId_,
           .requestStorage = &requestStorage_[i],
@@ -159,7 +130,7 @@ class StreamInterceptorContext {
       };
 
       co_await interceptors_[i]->internal_onStreamPayload(
-          connectionInfo, payloadInfo, metricCallback_);
+          payloadInfo, metricCallback_);
     }
   }
 
@@ -172,19 +143,8 @@ class StreamInterceptorContext {
   folly::coro::Task<void> invokeOnStreamEnd(
       details::STREAM_ENDING_TYPES reason,
       folly::exception_wrapper error = {}) {
-    auto* connCtx = getConnectionContext();
-
     // Call in reverse order (LIFO pattern like onResponse)
     for (auto i = std::ptrdiff_t(interceptors_.size()) - 1; i >= 0; --i) {
-      // Connection may be destroyed before stream ends - handle gracefully
-      auto connectionInfo =
-          ServiceInterceptorBase::ConnectionInfo{nullptr, nullptr};
-      if (connCtx) {
-        connectionInfo = ServiceInterceptorBase::ConnectionInfo{
-            connCtx,
-            connCtx->getStorageForServiceInterceptorOnConnectionByIndex(i)};
-      }
-
       auto endInfo = ServiceInterceptorBase::StreamEndInfo{
           .streamId = streamId_,
           .requestStorage = &requestStorage_[i],
@@ -193,29 +153,15 @@ class StreamInterceptorContext {
           .totalPayloads = sequenceNumber_.load(std::memory_order_seq_cst),
       };
 
-      co_await interceptors_[i]->internal_onStreamEnd(
-          connectionInfo, std::move(endInfo), metricCallback_);
+      co_await interceptors_[i]->internal_onStreamEnd(endInfo, metricCallback_);
     }
   }
 
  private:
-  /**
-   * Remains valid for the stream lifetime, unless connection is closed.
-   * Returns nullptr if connection has been cancelled.
-   */
-  Cpp2ConnContext* getConnectionContext() const {
-    if (!connectionCancellationToken_.isCancellationRequested()) {
-      return connectionContext_;
-    }
-    return nullptr;
-  }
-
   StreamId streamId_;
   std::vector<std::shared_ptr<ServiceInterceptorBase>> interceptors_;
   InterceptorMetricCallback& metricCallback_;
   std::vector<ServiceInterceptorOnRequestStorage> requestStorage_;
-  Cpp2ConnContext* connectionContext_;
-  folly::CancellationToken connectionCancellationToken_;
   std::atomic<uint64_t> sequenceNumber_{0};
   std::string serviceName_;
   std::string methodName_;

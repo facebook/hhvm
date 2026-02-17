@@ -241,9 +241,14 @@ class ServiceInterceptorBase {
   /**
    * Called when a stream is established (after first response sent).
    * Interceptors can initialize per-stream state here.
+   *
+   * NOTE: Connection context is NOT available during stream callbacks because
+   * streams may outlive the connection (runs on CPU pool while connection is
+   * destroyed on IO thread). Interceptors needing connection state should
+   * capture it during onRequest and store it in RequestState.
    */
   virtual folly::coro::Task<void> internal_onStreamBegin(
-      ConnectionInfo, StreamInfo, InterceptorMetricCallback&) {
+      StreamInfo, InterceptorMetricCallback&) {
     co_return;
   }
 
@@ -255,7 +260,7 @@ class ServiceInterceptorBase {
    * be as lightweight as possible.
    */
   virtual folly::coro::Task<void> internal_onStreamPayload(
-      ConnectionInfo, StreamPayloadInfo, InterceptorMetricCallback&) {
+      StreamPayloadInfo, InterceptorMetricCallback&) {
     co_return;
   }
 
@@ -264,7 +269,7 @@ class ServiceInterceptorBase {
    * Interceptors should clean up per-stream state here.
    */
   virtual folly::coro::Task<void> internal_onStreamEnd(
-      ConnectionInfo, StreamEndInfo, InterceptorMetricCallback&) {
+      StreamEndInfo, InterceptorMetricCallback&) {
     co_return;
   }
 

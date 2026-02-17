@@ -195,7 +195,6 @@ void HandlerCallbackBase::sendReply(
               detail::generateStreamId(),
               server->getServiceInterceptors(),
               server->getInterceptorMetricCallback(),
-              *reqCtx_->getConnectionContext(),
               std::string(methodNameInfo_.serviceName),
               std::string(methodNameInfo_.methodName));
       // Move request storage into interceptor context before request is

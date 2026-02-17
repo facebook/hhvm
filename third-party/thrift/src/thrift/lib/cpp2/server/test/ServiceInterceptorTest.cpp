@@ -1396,7 +1396,7 @@ CO_TEST_P(ServiceInterceptorTestP, StreamingInterceptorLifecycle) {
     }
 
     folly::coro::Task<void> onStreamBegin(
-        RequestState*, ConnectionState*, StreamInfo info) override {
+        RequestState*, StreamInfo info) override {
       onStreamBeginCalled = true;
       streamId = info.streamId;
       serviceName = std::string(info.serviceName);
@@ -1405,9 +1405,7 @@ CO_TEST_P(ServiceInterceptorTestP, StreamingInterceptorLifecycle) {
     }
 
     folly::coro::Task<void> onStreamPayload(
-        RequestState* requestState,
-        ConnectionState*,
-        StreamPayloadInfo info) override {
+        RequestState* requestState, StreamPayloadInfo info) override {
       ++payloadCount;
       sequenceNumbers.push_back(info.sequenceNumber);
       // Verify we can access the typed payload
@@ -1421,9 +1419,7 @@ CO_TEST_P(ServiceInterceptorTestP, StreamingInterceptorLifecycle) {
     }
 
     folly::coro::Task<void> onStreamEnd(
-        RequestState* requestState,
-        ConnectionState*,
-        StreamEndInfo info) override {
+        RequestState* requestState, StreamEndInfo info) override {
       onStreamEndCalled = true;
       endReason = info.reason;
       totalPayloadsReported = info.totalPayloads;
@@ -1508,7 +1504,6 @@ CO_TEST_P(
 
   struct OrderTrackingInterceptor
       : public ServiceInterceptor<folly::Unit, folly::Unit> {
-    using ConnectionState = folly::Unit;
     using RequestState = folly::Unit;
 
     explicit OrderTrackingInterceptor(
@@ -1517,14 +1512,13 @@ CO_TEST_P(
 
     std::string getName() const override { return name_; }
 
-    folly::coro::Task<void> onStreamBegin(
-        RequestState*, ConnectionState*, StreamInfo) override {
+    folly::coro::Task<void> onStreamBegin(RequestState*, StreamInfo) override {
       callOrder.push_back(name_ + ":begin");
       co_return;
     }
 
     folly::coro::Task<void> onStreamPayload(
-        RequestState*, ConnectionState*, StreamPayloadInfo) override {
+        RequestState*, StreamPayloadInfo) override {
       // Only track first payload to keep test simple
       if (callOrder.empty() ||
           callOrder.back().find(":payload") == std::string::npos ||
@@ -1534,8 +1528,7 @@ CO_TEST_P(
       co_return;
     }
 
-    folly::coro::Task<void> onStreamEnd(
-        RequestState*, ConnectionState*, StreamEndInfo) override {
+    folly::coro::Task<void> onStreamEnd(RequestState*, StreamEndInfo) override {
       callOrder.push_back(name_ + ":end");
       if (streamEndBaton_) {
         streamEndBaton_->post();

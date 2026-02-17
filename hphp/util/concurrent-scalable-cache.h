@@ -125,7 +125,7 @@ ConcurrentScalableCache(size_t maxSize, size_t numShards)
   : m_maxSize(maxSize), m_numShards(numShards)
 {
   if (m_numShards == 0) {
-    m_numShards = folly::hardware_concurrency();
+    m_numShards = folly::available_concurrency();
   }
   for (size_t i = 0; i < m_numShards; i++) {
     size_t s = maxSize / m_numShards;

@@ -20,3 +20,20 @@ public class Bar extends Foo {
   }
 
 }
+
+internal class InternalForSealed {}
+
+<<__Sealed(InternalForSealed::class)>>
+interface SealedInterface {}
+
+<<__Sealed(InternalForSealed::class, Foo::class)>>
+abstract class SealedClass {}
+
+class ClassWithSealedMethod {
+  <<__Sealed(InternalForSealed::class)>>
+  public function sealedMethod(): void {}
+}
+
+function uses_internal_outside_sealed(): void {
+  $x = InternalForSealed::class;
+}

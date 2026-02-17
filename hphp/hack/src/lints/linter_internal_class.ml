@@ -13,6 +13,8 @@ module Env = Tast_env
 module Cls = Folded_class
 module SN = Naming_special_names
 
+let in_sealed_attribute = ref false
+
 let check_internal_classname pos ci env =
   let class_result =
     match ci with
@@ -33,9 +35,21 @@ let handler =
   object
     inherit Tast_visitor.handler_base
 
+    method! at_user_attribute _env ua =
+      match ua.ua_name with
+      | (_, name) when String.equal name SN.UserAttributes.uaSealed ->
+        in_sealed_attribute := true
+      | _ -> in_sealed_attribute := false
+
+    method! at_class_ _env _c = in_sealed_attribute := false
+
+    method! at_method_ _env _m = in_sealed_attribute := false
+
+    method! at_fun_def _env _fd = in_sealed_attribute := false
+
     method! at_expr env (_, _, expr) =
       match expr with
       | Class_const ((_, p, ci), pstr) when String.equal (snd pstr) "class" ->
-        check_internal_classname p ci env
+        if not !in_sealed_attribute then check_internal_classname p ci env
       | _ -> ()
   end

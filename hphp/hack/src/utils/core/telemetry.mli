@@ -14,7 +14,11 @@ val to_string : ?pretty:bool -> t -> string
 
 val to_json : t -> Hh_json.json
 
+val to_yojson : t -> Yojson.Safe.t
+
 val of_json_opt : Hh_json.json -> t option
+
+val of_yojson_opt : Yojson.Safe.t -> t option
 
 (** `diff ~all current ~prev` is for when `current` and `prev` have the same structure.
 It produces a hybrid telemetry object where, element by element, if they're the same

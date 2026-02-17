@@ -17,6 +17,11 @@ let of_json_opt = function
   | Hh_json.JSON_Object kvs -> Some kvs
   | _ -> None
 
+let of_yojson_opt (json : Yojson.Safe.t) : t option =
+  match json with
+  | `Assoc kvs -> Some kvs
+  | _ -> None
+
 (* Ignore - we only use the generated `pp_key_value_pair` in deriving `show` for t *)
 let _ = show_key_value_pair
 

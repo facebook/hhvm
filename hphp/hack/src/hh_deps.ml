@@ -31,10 +31,8 @@ let children_files (file_list : String.t list) =
   let file_set = children_files_inner StringSet.empty "" file_list in
   Set.to_list file_set
 
-let json_array_of_json_strings (l_in : String.t list) =
-  let add_json_string acc s = Hh_json.JSON_String s :: acc in
-  let list_of_json = List.fold_left l_in ~init:[] ~f:add_json_string in
-  Hh_json.JSON_Array list_of_json
+let json_array_of_json_strings (l_in : String.t list) : Yojson.Safe.t =
+  `List (List.rev_map l_in ~f:(fun s -> `String s))
 
 (*parse command line arguments *)
 let parse_options () =
@@ -94,9 +92,11 @@ let main_deps input_files input_dirs output_file =
   List.iter input_files ~f:(fun s -> Printf.printf "Input: %s\n%!" s);
   List.iter input_dirs ~f:(fun s -> Printf.printf "Input dir: %s\n%!" s);
   let out_file_channel = Sys_utils.open_out_no_fail output_file in
-  Hh_json.json_to_multiline_output
-    out_file_channel
-    (json_array_of_json_strings all_files);
+  let json_str =
+    Yojson.Safe.pretty_to_string (json_array_of_json_strings all_files)
+  in
+  Out_channel.output_string out_file_channel json_str;
+  Out_channel.output_char out_file_channel '\n';
   Sys_utils.close_out_no_fail output_file out_file_channel
 
 (* command line driver *)

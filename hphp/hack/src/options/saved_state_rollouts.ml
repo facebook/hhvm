@@ -77,10 +77,10 @@ let to_bit_array_string t : string =
   let { optimized_member_fanout; new_naming_table } = t in
   s optimized_member_fanout ^ s new_naming_table
 
-let to_hh_json t : Hh_json.json =
+let to_yojson t : Yojson.Safe.t =
   let { optimized_member_fanout; new_naming_table } = t in
-  Hh_json.JSON_Object
+  `Assoc
     [
-      ("optimized_member_fanout", Hh_json.bool_ optimized_member_fanout);
-      ("new_naming_table", Hh_json.bool_ new_naming_table);
+      ("optimized_member_fanout", `Bool optimized_member_fanout);
+      ("new_naming_table", `Bool new_naming_table);
     ]

@@ -1047,7 +1047,7 @@ let program_init genv env =
   let telemetry =
     ServerUtils.log_and_get_sharedmem_load_telemetry ()
     |> Telemetry.object_opt ~key:"init_error" ~value:init_error_telemetry
-    |> Telemetry.json_
+    |> Telemetry.json
          ~key:"deps_mode"
          ~value:(Typing_deps_mode.to_opaque_json env.deps_mode)
   in

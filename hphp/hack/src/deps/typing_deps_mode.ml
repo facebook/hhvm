@@ -26,22 +26,26 @@ type t =
           dependency graph. If it is present, only new edges will be written,
           of not, all edges will be written. *)
 
-let to_opaque_json (t : t) : Hh_json.json =
-  let open Hh_json in
+let to_opaque_json (t : t) : Yojson.Safe.t =
+  let string_ s = `String s in
+  let string_opt = function
+    | Some s -> `String s
+    | None -> `Null
+  in
   let opaque opt = Option.map (fun _ -> "<opaque>") opt in
   match t with
   | InMemoryMode base ->
-    JSON_Object
+    `Assoc
       [
         ("mode", string_ "InMemoryMode");
-        ("props", JSON_Object [("base", string_opt (opaque base))]);
+        ("props", `Assoc [("base", string_opt (opaque base))]);
       ]
   | SaveToDiskMode { graph; new_edges_dir = _; human_readable_dep_map_dir } ->
-    JSON_Object
+    `Assoc
       [
         ("mode", string_ "SaveToDiskMode");
         ( "props",
-          JSON_Object
+          `Assoc
             [
               ("graph", string_opt (opaque graph));
               ( "human_readable_dep_map_dir",

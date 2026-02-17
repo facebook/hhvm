@@ -100,7 +100,8 @@ class AsyncPSPUpgradeTest : public ::testing::Test {
       folly::AsyncTransport::ReadCallback*& readCallback,
       folly::test::MockAsyncTransport& mockTransport,
       std::unique_ptr<fizz::psp::AsyncPSPUpgradeFrame>& upgradeFrame,
-      bool asyncRxAssoc) {
+      bool asyncRxAssoc,
+      std::chrono::milliseconds timeout) {
     setupMockTransport(mockTransport);
 
     folly::Function<void()> completeRxAssoc;
@@ -129,7 +130,7 @@ class AsyncPSPUpgradeTest : public ::testing::Test {
 
     upgradeFrame = fizz::psp::pspUpgradeV0(
         &mockTransport, fizz::psp::PSPVersion::VER0, kernelPSP());
-    upgradeFrame->start(&mockCallback_);
+    upgradeFrame->start(&mockCallback_, timeout);
 
     if (asyncRxAssoc) {
       completeRxAssoc();
@@ -247,7 +248,11 @@ TEST_F(AsyncPSPUpgradeTest, PeerSendsFailure) {
   });
 
   setupLocalAwaitsPeerMessage(
-      readCallback, mockTransport, upgradeFrame, /*asyncRxAssoc=*/false);
+      readCallback,
+      mockTransport,
+      upgradeFrame,
+      /*asyncRxAssoc=*/false,
+      /*timeout=*/std::chrono::milliseconds(0));
   ASSERT_NE(upgradeFrame.get(), nullptr);
   ASSERT_NE(readCallback, nullptr);
 
@@ -274,7 +279,11 @@ TEST_F(AsyncPSPUpgradeTest, PeerEOF) {
   });
 
   setupLocalAwaitsPeerMessage(
-      readCallback, mockTransport, upgradeFrame, /*asyncRxAssoc=*/false);
+      readCallback,
+      mockTransport,
+      upgradeFrame,
+      /*asyncRxAssoc=*/false,
+      /*timeout=*/std::chrono::milliseconds(0));
   ASSERT_NE(upgradeFrame.get(), nullptr);
   ASSERT_NE(readCallback, nullptr);
 
@@ -295,7 +304,11 @@ TEST_F(AsyncPSPUpgradeTest, PeerReadErr) {
   });
 
   setupLocalAwaitsPeerMessage(
-      readCallback, mockTransport, upgradeFrame, /*asyncRxAssoc=*/false);
+      readCallback,
+      mockTransport,
+      upgradeFrame,
+      /*asyncRxAssoc=*/false,
+      /*timeout=*/std::chrono::milliseconds(0));
   ASSERT_NE(upgradeFrame.get(), nullptr);
   ASSERT_NE(readCallback, nullptr);
 
@@ -317,7 +330,11 @@ TEST_F(AsyncPSPUpgradeTest, PeerReadTimeout) {
   });
 
   setupLocalAwaitsPeerMessage(
-      readCallback, mockTransport, upgradeFrame, /*asyncRxAssoc=*/false);
+      readCallback,
+      mockTransport,
+      upgradeFrame,
+      /*asyncRxAssoc=*/false,
+      /*timeout=*/std::chrono::milliseconds(0));
   ASSERT_NE(upgradeFrame.get(), nullptr);
   ASSERT_NE(readCallback, nullptr);
 
@@ -328,6 +345,34 @@ TEST_F(AsyncPSPUpgradeTest, PeerReadTimeout) {
 
   // We should still be awaiting the entire message at this point. Now we cancel
   upgradeFrame.reset();
+}
+
+TEST_F(AsyncPSPUpgradeTest, TimeoutWhileAwaitingPeerRead) {
+  folly::test::MockAsyncTransport mockTransport;
+  folly::AsyncTransport::ReadCallback* readCallback{};
+  std::unique_ptr<fizz::psp::AsyncPSPUpgradeFrame> upgradeFrame;
+
+  EXPECT_CALL(mockCallback_, pspError(_)).WillOnce([](auto& ew) {
+    EXPECT_THAT(ew.get_exception()->what(), HasSubstr("psp upgrade timeout"));
+  });
+
+  setupLocalAwaitsPeerMessage(
+      readCallback,
+      mockTransport,
+      upgradeFrame,
+      /*asyncRxAssoc=*/false,
+      /*timeout=*/std::chrono::milliseconds(100));
+  ASSERT_NE(upgradeFrame.get(), nullptr);
+  ASSERT_NE(readCallback, nullptr);
+
+  // An incomplete TLV of length 30
+  auto msg = std::to_array<uint8_t>({0x01, 30, 0xff});
+  readCallback->readBufferAvailable(
+      folly::IOBuf::copyBuffer(msg.data(), msg.size()));
+
+  // We should still be awaiting the entire message. Eventually, this should
+  // time out.
+  evb_.loop();
 }
 
 TEST_F(AsyncPSPUpgradeTest, PeerSendsInvalidMessage) {
@@ -345,7 +390,11 @@ TEST_F(AsyncPSPUpgradeTest, PeerSendsInvalidMessage) {
   });
 
   setupLocalAwaitsPeerMessage(
-      readCallback, mockTransport, upgradeFrame, /*asyncRxAssoc=*/false);
+      readCallback,
+      mockTransport,
+      upgradeFrame,
+      /*asyncRxAssoc=*/false,
+      /*timeout=*/std::chrono::milliseconds(0));
   ASSERT_NE(upgradeFrame.get(), nullptr);
   ASSERT_NE(readCallback, nullptr);
 
@@ -369,7 +418,11 @@ TEST_F(AsyncPSPUpgradeTest, PeerSendsInvalidErrorMessage) {
   });
 
   setupLocalAwaitsPeerMessage(
-      readCallback, mockTransport, upgradeFrame, /*asyncRxAssoc=*/false);
+      readCallback,
+      mockTransport,
+      upgradeFrame,
+      /*asyncRxAssoc=*/false,
+      /*timeout=*/std::chrono::milliseconds(0));
   ASSERT_NE(upgradeFrame.get(), nullptr);
   ASSERT_NE(readCallback, nullptr);
 
@@ -394,7 +447,11 @@ TEST_F(AsyncPSPUpgradeTest, PeerSendsInvalidSAMessage) {
   });
 
   setupLocalAwaitsPeerMessage(
-      readCallback, mockTransport, upgradeFrame, /*asyncRxAssoc=*/false);
+      readCallback,
+      mockTransport,
+      upgradeFrame,
+      /*asyncRxAssoc=*/false,
+      /*timeout=*/std::chrono::milliseconds(0));
   ASSERT_NE(upgradeFrame.get(), nullptr);
   ASSERT_NE(readCallback, nullptr);
 
@@ -433,7 +490,11 @@ TEST_F(AsyncPSPUpgradeTest, PeerSendsValidMessageTxAssocFails) {
   });
 
   setupLocalAwaitsPeerMessage(
-      readCallback, mockTransport, upgradeFrame, /*asyncRxAssoc=*/false);
+      readCallback,
+      mockTransport,
+      upgradeFrame,
+      /*asyncRxAssoc=*/false,
+      /*timeout=*/std::chrono::milliseconds(0));
   ASSERT_NE(upgradeFrame.get(), nullptr);
   ASSERT_NE(readCallback, nullptr);
 
@@ -470,7 +531,11 @@ TEST_F(AsyncPSPUpgradeTest, SuccessfulNegotiation) {
       mockCallback_, pspSuccess(Eq(folly::NetworkSocket::fromFd(serverFd_))));
 
   setupLocalAwaitsPeerMessage(
-      readCallback, mockTransport, upgradeFrame, /*asyncRxAssoc=*/false);
+      readCallback,
+      mockTransport,
+      upgradeFrame,
+      /*asyncRxAssoc=*/false,
+      /*timeout=*/std::chrono::milliseconds(0));
   ASSERT_NE(upgradeFrame.get(), nullptr);
   ASSERT_NE(readCallback, nullptr);
 
@@ -511,7 +576,11 @@ TEST_F(AsyncPSPUpgradeTest, SuccessfulNegotiationAsync) {
       mockCallback_, pspSuccess(Eq(folly::NetworkSocket::fromFd(serverFd_))));
 
   setupLocalAwaitsPeerMessage(
-      readCallback, mockTransport, upgradeFrame, /*asyncRxAssoc=*/true);
+      readCallback,
+      mockTransport,
+      upgradeFrame,
+      /*asyncRxAssoc=*/true,
+      /*timeout=*/std::chrono::milliseconds(0));
   ASSERT_NE(upgradeFrame.get(), nullptr);
   ASSERT_NE(readCallback, nullptr);
 
@@ -551,7 +620,11 @@ TEST_F(AsyncPSPUpgradeTest, SuccessfulNegotiationReadDataAvailableAPI) {
       mockCallback_, pspSuccess(Eq(folly::NetworkSocket::fromFd(serverFd_))));
 
   setupLocalAwaitsPeerMessage(
-      readCallback, mockTransport, upgradeFrame, /*asyncRxAssoc=*/false);
+      readCallback,
+      mockTransport,
+      upgradeFrame,
+      /*asyncRxAssoc=*/false,
+      /*timeout=*/std::chrono::milliseconds(0));
   ASSERT_NE(upgradeFrame.get(), nullptr);
   ASSERT_NE(readCallback, nullptr);
 
@@ -599,7 +672,11 @@ TEST_F(AsyncPSPUpgradeTest, SuccessfulNegotiationMultipleParts) {
       mockCallback_, pspSuccess(Eq(folly::NetworkSocket::fromFd(serverFd_))));
 
   setupLocalAwaitsPeerMessage(
-      readCallback, mockTransport, upgradeFrame, /*asyncRxAssoc=*/false);
+      readCallback,
+      mockTransport,
+      upgradeFrame,
+      /*asyncRxAssoc=*/false,
+      /*timeout=*/std::chrono::milliseconds(0));
   ASSERT_NE(upgradeFrame.get(), nullptr);
   ASSERT_NE(readCallback, nullptr);
 
@@ -634,7 +711,7 @@ TEST_F(AsyncPSPUpgradeTest, CanceledWhileAwaitingWriteSA) {
   // After rx assoc completes, writeChain is called, but in this scenario
   // it does not complete synchronously.
   EXPECT_CALL(mockTransport, writeChain(_, _, _))
-      .WillOnce([&](auto&& cb, auto&& buf, auto&&) { ASSERT_NE(cb, nullptr); });
+      .WillOnce([&](auto&& cb, auto&&, auto&&) { ASSERT_NE(cb, nullptr); });
 
   upgradeFrame->start(&mockCallback_);
   evb_.loop();
@@ -700,7 +777,11 @@ TEST_F(AsyncPSPUpgradeTest, CanceledWhileAwaitingTxAssoc) {
       });
 
   setupLocalAwaitsPeerMessage(
-      readCallback, mockTransport, upgradeFrame, /*asyncRxAssoc=*/false);
+      readCallback,
+      mockTransport,
+      upgradeFrame,
+      /*asyncRxAssoc=*/false,
+      /*timeout=*/std::chrono::milliseconds(0));
   ASSERT_NE(upgradeFrame.get(), nullptr);
   ASSERT_NE(readCallback, nullptr);
 
@@ -715,5 +796,105 @@ TEST_F(AsyncPSPUpgradeTest, CanceledWhileAwaitingTxAssoc) {
   upgradeFrame.reset();
 
   contract.promise.setValue(folly::unit);
+  evb_.loop();
+}
+
+TEST_F(AsyncPSPUpgradeTest, TimeoutWhileAwaitingTxAssoc) {
+  auto contract = folly::makePromiseContract<folly::Unit>();
+  folly::test::MockAsyncTransport mockTransport;
+  folly::AsyncTransport::ReadCallback* readCallback{};
+  std::unique_ptr<fizz::psp::AsyncPSPUpgradeFrame> upgradeFrame;
+
+  EXPECT_CALL(mockKernelPSP_, txAssoc(_, _))
+      .WillOnce(
+          [f = std::move(contract.future)](
+              const auto& sa, int) mutable -> folly::SemiFuture<folly::Unit> {
+            EXPECT_EQ(sa.psp_version, 0);
+            EXPECT_EQ(sa.spi, 0x11223344);
+            EXPECT_EQ(sa.key.size(), 16);
+            auto expectedKey = std::array<uint8_t, 16>{};
+            memset(expectedKey.data(), 0xfe, 16);
+            EXPECT_EQ(memcmp(sa.key.data(), expectedKey.data(), 16), 0);
+
+            return std::move(f);
+          });
+
+  EXPECT_CALL(mockCallback_, pspError(_))
+      .WillOnce([](const folly::exception_wrapper& ew) {
+        EXPECT_THAT(
+            ew.get_exception()->what(), HasSubstr("psp upgrade timeout"));
+      });
+
+  setupLocalAwaitsPeerMessage(
+      readCallback,
+      mockTransport,
+      upgradeFrame,
+      /*asyncRxAssoc=*/false,
+      /*timeout=*/std::chrono::milliseconds(100));
+  ASSERT_NE(upgradeFrame.get(), nullptr);
+  ASSERT_NE(readCallback, nullptr);
+
+  struct fizz::psp::SA sa {};
+  sa.psp_version = 0;
+  sa.key.resize(16);
+  memset(sa.key.data(), 0xfe, 16);
+  sa.spi = 0x11223344;
+
+  auto msg = fizz::psp::detail::encodeTLV(sa);
+  readCallback->readBufferAvailable(std::move(msg));
+  upgradeFrame.reset();
+
+  contract.promise.setValue(folly::unit);
+  evb_.loop();
+}
+
+TEST_F(AsyncPSPUpgradeTest, TimeoutWhileAwaitingWriteSA) {
+  folly::test::MockAsyncTransport mockTransport;
+  setupMockTransport(mockTransport);
+
+  std::unique_ptr<fizz::psp::AsyncPSPUpgradeFrame> upgradeFrame =
+      fizz::psp::pspUpgradeV0(
+          &mockTransport, fizz::psp::PSPVersion::VER0, kernelPSP());
+
+  expectSuccessfulRxAssoc();
+
+  // After rx assoc completes, writeChain is called, but in this scenario
+  // it does not complete synchronously.
+  EXPECT_CALL(mockTransport, writeChain(_, _, _))
+      .WillOnce([&](auto&& cb, auto&& buf, auto&&) { ASSERT_NE(cb, nullptr); });
+
+  EXPECT_CALL(mockTransport, closeNow());
+  EXPECT_CALL(mockCallback_, pspError(_))
+      .WillOnce([](const folly::exception_wrapper& ew) {
+        EXPECT_THAT(
+            ew.get_exception()->what(), HasSubstr("psp upgrade timeout"));
+      });
+
+  upgradeFrame->start(&mockCallback_, std::chrono::milliseconds(100));
+  evb_.loop();
+}
+
+TEST_F(AsyncPSPUpgradeTest, TimeoutWhileAwaitingRxAssoc) {
+  auto contract = folly::makePromiseContract<fizz::psp::SA>();
+  EXPECT_CALL(mockKernelPSP_, rxAssoc(fizz::psp::PSPVersion::VER0, serverFd_))
+      .WillOnce([f = std::move(contract.future)](auto&&, auto&&) mutable {
+        return std::move(f);
+      });
+  EXPECT_CALL(mockCallback_, pspError(_))
+      .WillOnce([&](const folly::exception_wrapper& ew) {
+        EXPECT_THAT(
+            ew.get_exception()->what(), HasSubstr("psp upgrade timeout"));
+
+        // Only after the operation timed out, will we complete the asynchronous
+        // rxAssoc
+        evb_.runInEventBaseThread(
+            [&] { contract.promise.setValue(fizz::psp::SA{}); });
+      });
+  folly::test::MockAsyncTransport mockTransport;
+  setupMockTransport(mockTransport);
+
+  auto upgradeFrame = fizz::psp::pspUpgradeV0(
+      &mockTransport, fizz::psp::PSPVersion::VER0, kernelPSP());
+  upgradeFrame->start(&mockCallback_, std::chrono::milliseconds(100));
   evb_.loop();
 }

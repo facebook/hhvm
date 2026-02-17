@@ -74,14 +74,18 @@ static std::unique_ptr<folly::IOBuf> makeErrorTLV(uint8_t errorCode) {
  *  */
 class AsyncPSPUpgradeImpl : public ::fizz::psp::AsyncPSPUpgradeFrame,
                             private folly::AsyncReader::ReadCallback,
-                            private folly::AsyncWriter::WriteCallback {
+                            private folly::AsyncWriter::WriteCallback,
+                            private folly::AsyncTimeout {
  public:
   AsyncPSPUpgradeImpl(
       folly::AsyncTransport* transport,
       FizzPSPProtocol upgradeProtocolVersion,
       PSPVersion pspVersion,
       const std::shared_ptr<KernelPSP>& ops)
-      : transport_(transport), version_(pspVersion), ops_(ops) {
+      : folly::AsyncTimeout(transport->getEventBase()),
+        transport_(transport),
+        version_(pspVersion),
+        ops_(ops) {
     FIZZ_CHECK_EQ(
         static_cast<unsigned>(upgradeProtocolVersion),
         static_cast<unsigned>(FizzPSPProtocol::V0));
@@ -102,9 +106,10 @@ class AsyncPSPUpgradeImpl : public ::fizz::psp::AsyncPSPUpgradeFrame,
       return;
     }
   }
-  void start(Callback* cb) override {
+  void start(Callback* cb, std::chrono::milliseconds timeout) override {
     FIZZ_CHECK_EQ(awaiter_, nullptr);
     awaiter_ = cb;
+    timeout_ = timeout;
 
     return resume();
   }
@@ -129,6 +134,10 @@ class AsyncPSPUpgradeImpl : public ::fizz::psp::AsyncPSPUpgradeFrame,
     AsyncPSPUpgradeImpl* this_;
   };
 
+  void timeoutExpired() noexcept override {
+    return error("psp upgrade timeout");
+  }
+
   void resume() {
     switch (state_) {
       case State::Init: {
@@ -142,6 +151,10 @@ class AsyncPSPUpgradeImpl : public ::fizz::psp::AsyncPSPUpgradeFrame,
 
         auto evb = transport_->getEventBase();
         evb->dcheckIsInEventBaseThread();
+
+        if (timeout_ != std::chrono::milliseconds(0)) {
+          scheduleTimeout(timeout_);
+        }
 
         state_ = State::RxAssocCompleted;
         std::weak_ptr<AsyncState> astate(asyncState_);
@@ -332,6 +345,7 @@ class AsyncPSPUpgradeImpl : public ::fizz::psp::AsyncPSPUpgradeFrame,
     if (asyncState_) {
       asyncState_.reset();
     }
+    cancelTimeout();
     return awaiter;
   }
   enum class State {
@@ -350,6 +364,7 @@ class AsyncPSPUpgradeImpl : public ::fizz::psp::AsyncPSPUpgradeFrame,
   std::optional<folly::AsyncSocketException> ioErr_;
   int fd_{-1};
   std::shared_ptr<AsyncState> asyncState_;
+  std::chrono::milliseconds timeout_{};
 };
 } // namespace
 

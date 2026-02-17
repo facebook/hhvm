@@ -109,8 +109,16 @@ class AsyncPSPUpgradeFrame {
    *
    * This call may synchronously invoke the terminal callbacks (`pspSuccess`,
    * `pspError`)
+   *
+   * `timeout` may be set to a nonzero value to have the PSP upgrade internally
+   * manage a timeout. If the PSP upgrade operation does not complete before
+   * the timeout value, then `pspError` will be signaled.
    */
-  virtual void start(Callback* cb) = 0;
+  virtual void start(Callback* cb, std::chrono::milliseconds timeout) = 0;
+
+  void start(Callback* cb) {
+    return start(cb, std::chrono::milliseconds(0));
+  }
 };
 
 /**

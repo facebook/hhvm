@@ -129,26 +129,19 @@ let to_json { pos; code; severity; message; bypass_changed_lines; autofix; _ } =
       let original = Pos.get_text_from_pos ~content:src replacement_pos in
       let (start_offset, end_offset) = Pos.info_raw replacement_pos in
       let width = end_offset - start_offset in
-      ( Hh_json.JSON_String original,
-        Hh_json.JSON_String replacement,
-        Hh_json.int_ start_offset,
-        Hh_json.int_ width )
-    | None ->
-      ( Hh_json.JSON_String "",
-        Hh_json.JSON_String "",
-        Hh_json.JSON_Null,
-        Hh_json.JSON_Null )
+      (`String original, `String replacement, `Int start_offset, `Int width)
+    | None -> (`String "", `String "", `Null, `Null)
   in
-  Hh_json.JSON_Object
+  `Assoc
     [
-      ("descr", Hh_json.JSON_String message);
-      ("severity", Hh_json.JSON_String (string_of_severity severity));
-      ("path", Hh_json.JSON_String (Pos.filename pos));
-      ("line", Hh_json.int_ line);
-      ("start", Hh_json.int_ scol);
-      ("end", Hh_json.int_ ecol);
-      ("code", Hh_json.int_ code);
-      ("bypass_changed_lines", Hh_json.JSON_Bool bypass_changed_lines);
+      ("descr", `String message);
+      ("severity", `String (string_of_severity severity));
+      ("path", `String (Pos.filename pos));
+      ("line", `Int line);
+      ("start", `Int scol);
+      ("end", `Int ecol);
+      ("code", `Int code);
+      ("bypass_changed_lines", `Bool bypass_changed_lines);
       ("original", origin);
       ("replacement", replacement);
       ("start_offset", start);

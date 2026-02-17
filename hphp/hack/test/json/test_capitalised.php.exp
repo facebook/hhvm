@@ -1,33 +1,33 @@
 {
-  "errors":[
+  "errors": [
     {
-      "descr":"f is the only function declared in test_capitalised.php, so that file should be named f.php instead.",
-      "severity":"warning",
-      "path":"test_capitalised.php",
-      "line":3,
-      "start":10,
-      "end":10,
-      "code":5564,
-      "bypass_changed_lines":false,
-      "original":"",
-      "replacement":"",
-      "start_offset":null,
-      "width":null
+      "descr": "f is the only function declared in test_capitalised.php, so that file should be named f.php instead.",
+      "severity": "warning",
+      "path": "test_capitalised.php",
+      "line": 3,
+      "start": 10,
+      "end": 10,
+      "code": 5564,
+      "bypass_changed_lines": false,
+      "original": "",
+      "replacement": "",
+      "start_offset": null,
+      "width": null
     },
     {
-      "descr":"Please use `true` instead of `True`",
-      "severity":"warning",
-      "path":"test_capitalised.php",
-      "line":3,
-      "start":22,
-      "end":25,
-      "code":5001,
-      "bypass_changed_lines":false,
-      "original":"",
-      "replacement":"",
-      "start_offset":null,
-      "width":null
+      "descr": "Please use `true` instead of `True`",
+      "severity": "warning",
+      "path": "test_capitalised.php",
+      "line": 3,
+      "start": 22,
+      "end": 25,
+      "code": 5001,
+      "bypass_changed_lines": false,
+      "original": "",
+      "replacement": "",
+      "start_offset": null,
+      "width": null
     }
   ],
-  "version":""
+  "version": ""
 }

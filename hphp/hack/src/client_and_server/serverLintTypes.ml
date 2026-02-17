@@ -20,14 +20,16 @@ let output_json ?(from_test = false) ?(pretty = false) oc el =
     else
       Hh_version.version
   in
-  let res =
-    Hh_json.JSON_Object
-      [
-        ("errors", Hh_json.JSON_Array errors_json);
-        ("version", Hh_json.JSON_String version);
-      ]
+  let res : Yojson.Safe.t =
+    `Assoc [("errors", `List errors_json); ("version", `String version)]
   in
-  Out_channel.output_string oc (Hh_json.json_to_string ~pretty res);
+  let json_str =
+    if pretty then
+      Yojson.Safe.pretty_to_string res ^ "\n"
+    else
+      Yojson.Safe.to_string res
+  in
+  Out_channel.output_string oc json_str;
   Out_channel.flush stderr
 
 let output_text oc el format =

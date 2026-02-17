@@ -3793,14 +3793,17 @@ folly::coro::Task<WtReqResult> HTTPUniplexTransportSession::sendWtReq(
   }
 
   // wt upgrade successful
+  auto transport = detail::makeHttpSourceTransport(
+      eventBase_.get(), std::move(egressSource), std::move(*res));
   auto wt = std::make_shared<CoroWtSessionImpl>(
       eventBase_.get(),
       ::proxygen::detail::WtDir::Client,
       ::proxygen::detail::getWtConfig(codec_->getIngressSettings(),
                                       codec_->getEgressSettings()),
-      std::move(wtHandler));
+      std::move(wtHandler),
+      std::move(transport));
   wt->ka_ = acquireKeepAlive();
-  wt->start(wt, std::move(*res), std::move(egressSource));
+  wt->start(wt);
 
   ret.wt = std::move(wt);
   co_return ret;

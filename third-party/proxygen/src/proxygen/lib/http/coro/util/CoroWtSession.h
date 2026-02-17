@@ -100,7 +100,8 @@ class CoroWtSession
   CoroWtSession(folly::EventBase* evb,
                 WtDir dir,
                 WtStreamManager::WtConfig wtConfig,
-                std::unique_ptr<WebTransportHandler> handler) noexcept;
+                std::unique_ptr<WebTransportHandler> handler,
+                std::unique_ptr<folly::coro::TransportIf> transport) noexcept;
 
   ~CoroWtSession() noexcept override;
 
@@ -108,17 +109,18 @@ class CoroWtSession
       folly::Optional<uint32_t> error = folly::none) noexcept override;
 
   // launches read & write loops
-  void start(Ptr self, HTTPSourceHolder&& ingress, EgressSourcePtr&& egress);
+  void start(Ptr self);
 
  private:
-  folly::coro::Task<void> readLoop(Ptr self, HTTPSourceHolder ingress);
-  folly::coro::Task<void> writeLoop(Ptr self, EgressSourcePtr egress);
+  folly::coro::Task<void> readLoop(Ptr self);
+  folly::coro::Task<void> writeLoop(Ptr self);
 
   void writeLoopFinished() noexcept;
   void readLoopFinished() noexcept;
 
   std::unique_ptr<WebTransportHandler> wtHandler_;
   folly::CancellationSource cs_;
+  std::unique_ptr<folly::coro::TransportIf> transport_;
   bool readLoopDone_ : 1 {false};
   bool writeLoopDone_ : 1 {false};
 };

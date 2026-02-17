@@ -14,6 +14,7 @@ namespace {
 using namespace proxygen::coro;
 using folly::coro::co_error;
 using folly::coro::co_nothrow;
+constexpr uint64_t kMaxWriteSize = 65'535;
 
 BufQueue* asBodyEv(HTTPBodyEvent& event) {
   return event.eventType == HTTPBodyEvent::BODY ? &event.event.body : nullptr;
@@ -27,10 +28,12 @@ CoroWtSession::CoroWtSession(
     folly::EventBase* evb,
     WtDir dir,
     WtStreamManager::WtConfig wtConfig,
-    std::unique_ptr<WebTransportHandler> handler) noexcept
+    std::unique_ptr<WebTransportHandler> handler,
+    std::unique_ptr<folly::coro::TransportIf> transport) noexcept
     : CoroWtSessionBase(dir, wtConfig),
       WtSessionBase(evb, sm),
-      wtHandler_(std::move(handler)) {
+      wtHandler_(std::move(handler)),
+      transport_(std::move(transport)) {
 }
 
 CoroWtSession::~CoroWtSession() noexcept {
@@ -46,21 +49,26 @@ WtExpected<folly::Unit>::Type CoroWtSession::closeSession(
 }
 
 using WtCapsuleCallback = proxygen::detail::WtCapsuleCallback;
-folly::coro::Task<void> CoroWtSession::readLoop(Ptr self,
-                                                HTTPSourceHolder ingress) {
-  WtCapsuleCallback wtCapsuleCallback{sm, *this};
+folly::coro::Task<void> CoroWtSession::readLoop(Ptr self) {
+  WtCapsuleCallback wtCapsuleCallback{sm, *self};
   WebTransportCapsuleCodec codec{&wtCapsuleCallback, CodecVersion::H2};
+  folly::IOBufQueue ingressBuf{folly::IOBufQueue::cacheChainLength()};
 
-  while (!sm.isClosed() && ingress.readable()) {
-    auto maybeEv = co_await co_awaitTry(ingress.readBodyEvent());
-    if (maybeEv.hasException() ||
-        maybeEv->eventType != HTTPBodyEvent::BODY) { // skip non-body events
-      XLOG_IF(DBG4, maybeEv.hasException())
-          << "::readLoop ingress ex=" << maybeEv.exception().what();
-      continue;
+  while (!sm.isClosed()) {
+    auto readRes = co_await co_awaitTry(transport_->read(
+        ingressBuf,
+        /*minReadSize=*/1460,
+        /*newAllocationSize=*/4000,
+        /*timeout=*/std::chrono::milliseconds(0))); // TODO: timeout should be
+                                                    // changed from 0ms
+    if (readRes.hasException()) {
+      XLOG(DBG4) << __func__ << "; ex=" << readRes.exception();
+      break;
     }
-    auto& event = maybeEv.value();
-    codec.onIngress(event.event.body.move(), event.eom);
+
+    const bool eom = (*readRes == 0);
+    codec.onIngress(ingressBuf.move(), eom);
+
     // handle any new peer streams
     auto peerIds = std::move(wtSmIngressCb.peerStreams);
     for (auto id : peerIds) {
@@ -72,96 +80,71 @@ folly::coro::Task<void> CoroWtSession::readLoop(Ptr self,
       }
     }
 
-    if (event.eom) {
+    if (eom) {
       break;
     }
   }
   XLOG(DBG4) << "CoroWtSession::readLoop exiting";
-  //  http/2 rst, eom or WtStreamManager closed – in either case invoke
-  //  ::shutdown to exit write loop
   sm.shutdown(WtStreamManager::CloseSession{.err = 0x00,
-                                            .msg = "h2 stream ingress closed"});
+                                            .msg = "stream ingress closed"});
   readLoopFinished();
 }
 
-folly::coro::Task<void> CoroWtSession::writeLoop(Ptr self,
-                                                 EgressSourcePtr egress) {
-  const auto timeout = egress->getReadTimeout();
-  const folly::IOBuf empty;
+folly::coro::Task<void> CoroWtSession::writeLoop(Ptr self) {
   folly::IOBufQueue egressBuf{folly::IOBufQueue::cacheChainLength()};
   proxygen::detail::WtEventVisitor eventVisitor{.egress = egressBuf};
-  detail::EgressBackPressure streamSourceCallback;
-  egress->setCallback(&streamSourceCallback);
   auto& waitForEventBaton = wtSmEgressCb.waitForEvent;
 
   while (!eventVisitor.sessionClosed) {
-    // wait for WtSession egress (i.e. underlying http/2 egress buffer space);
-    // this is upperbounded by writeTimeout in HTTPBodyEventQueue
-    XLOG(DBG6) << "waiting for http/2 egress fc";
-    co_await streamSourceCallback.waitForEgress.wait();
-
-    // wait for underlying wt ctrl events or writable streams
+    // wait for WtStreamManager control events or writable streams
     XLOG(DBG6) << "waiting for WtStreamManager event";
-    auto res = co_await waitForEventBaton.timedWait(evb(), timeout);
-    if (res == TimedBaton::Status::timedout) {
-      sm.shutdown(WtStreamManager::CloseSession{.err = 0x00,
-                                                .msg = "wt write timed out"});
-    } // fallthru to writing close_session below
+    co_await waitForEventBaton.wait();
     waitForEventBaton.reset();
 
     XLOG(DBG6) << "received WtStreamManager event";
-    // always write control frames first (not subject to flow control)
+    // always write control frames first
     auto ctrl = sm.moveEvents();
     for (auto& ev : ctrl) {
       std::visit(eventVisitor, ev);
     }
-    egress->body(egressBuf.move(), /*padding=*/0, /*eom=*/false);
 
-    // write stream data
     auto* wh = sm.nextWritable();
-    while (wh) {
-      auto bytesAvailable = egress->window().getNonNegativeSize();
-      XLOG(DBG4) << __func__ << "; id=" << wh->getID() << "; wh=" << wh
-                 << "; bytesAvailable=" << bytesAvailable;
-      if (bytesAvailable == 0) {
-        XLOG(DBG5) << __func__ << " egress blocked";
-        streamSourceCallback.waitForEgress.reset(); // block on next loop
-        break;
-      }
+    while (wh && egressBuf.chainLength() < kMaxWriteSize) {
       auto id = wh->getID();
-      auto dequeue = sm.dequeue(*wh, /*atMost=*/bytesAvailable);
+      const auto atMost = kMaxWriteSize - egressBuf.chainLength();
+      auto dequeue = sm.dequeue(*wh, /*atMost=*/atMost);
       writeWTStream(egressBuf,
                     WTStreamCapsule{.streamId = id,
                                     .streamData = std::move(dequeue.data),
                                     .fin = dequeue.fin});
-      // ::body overflow checked in next iteration
-      egress->body(egressBuf.move(), /*padding=*/0, /*eom=*/false);
       wh = sm.nextWritable();
     }
+    if (wh) {
+      waitForEventBaton.signal(); // re-signal for remaining streams
+    }
 
-    if (wh) { // if there's more pending data to be written, signal baton
-      waitForEventBaton.signal();
+    if (!egressBuf.empty()) {
+      auto writeRes = co_await co_awaitTry(
+          transport_->write(egressBuf)); // TODO: plumb writeTimeout here
+      if (writeRes.hasException()) {
+        XLOG(DBG4) << __func__ << "; ex=" << writeRes.exception();
+        break;
+      }
     }
   }
 
   XLOG(DBG4) << "CoroWtSession::writeLoop exiting";
-  egress->eom();
+  transport_->shutdownWrite();
   writeLoopFinished();
   co_return;
 }
 
-void CoroWtSession::start(CoroWtSession::Ptr self,
-                          HTTPSourceHolder&& ingress,
-                          EgressSourcePtr&& egress) {
+void CoroWtSession::start(CoroWtSession::Ptr self) {
   wtHandler_->onWebTransportSession(self);
   auto ct = cs_.getToken();
   auto* eventBase = evb();
-  co_withExecutor(eventBase,
-                  co_withCancellation(ct, readLoop(self, std::move(ingress))))
-      .start();
-  co_withExecutor(eventBase,
-                  co_withCancellation(ct, writeLoop(self, std::move(egress))))
-      .start();
+  co_withExecutor(eventBase, co_withCancellation(ct, readLoop(self))).start();
+  co_withExecutor(eventBase, co_withCancellation(ct, writeLoop(self))).start();
 }
 
 void CoroWtSession::writeLoopFinished() noexcept {

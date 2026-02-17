@@ -79,6 +79,10 @@ struct CmdLineOptions {
 
   // the service name we want to override
   std::string serviceName;
+
+  // additional config params to merge into config_params after resolution.
+  // Same format as --config-params: "name1:value1,name2:value2"
+  std::string additionalConfigParams;
 };
 
 /**

@@ -19,6 +19,7 @@
 #include <vector>
 
 #include <folly/Conv.h>
+#include <folly/String.h>
 #include <folly/system/HardwareConcurrency.h>
 
 #include "mcrouter/CarbonRouterInstance.h"
@@ -27,6 +28,7 @@
 #include "mcrouter/Server.h"
 #include "mcrouter/StandaloneConfig.h"
 #include "mcrouter/config.h"
+#include "mcrouter/lib/fbi/cpp/util.h"
 #include "mcrouter/options.h"
 #include "mcrouter/standalone_options.h"
 #include "mcrouter/stats.h"
@@ -105,6 +107,10 @@ void printUsage(const char* option, const char* description) {
   printUsage(
       "    --service-name",
       "Set the service name for standalone mcrouter. Default is \"mcrouter\".");
+  printUsage(
+      "    --additional-config-params",
+      "Additional config params merged after --config-params. "
+      "Same format: 'name1:value1,name2:value2'. Overrides on conflict.");
 
   fprintf(stderr, "\nRETURN VALUE\n");
   printUsage("2", "On a problem that might be resolved by restarting later.");
@@ -246,6 +252,7 @@ CmdLineOptions parseCmdLineOptions(int argc, char** argv, std::string pkgName) {
       {"validate-config", 2, nullptr, 0},
       {"proxy-threads", 1, nullptr, 0},
       {"service-name", 1, nullptr, 0},
+      {"additional-config-params", 1, nullptr, 0},
 
       // Deprecated or not supported
       {"gets", 0, nullptr, 0},
@@ -379,6 +386,10 @@ CmdLineOptions parseCmdLineOptions(int argc, char** argv, std::string pkgName) {
         } else if (strcmp("service-name", longOptions[longIndex].name) == 0) {
           // setup service name for standalone mcrouter
           res.serviceName = optarg;
+        } else if (
+            strcmp("additional-config-params", longOptions[longIndex].name) ==
+            0) {
+          res.additionalConfigParams = optarg;
         } else {
           res.unrecognizedOptions.insert(argv[optind - 1]);
         }
@@ -458,6 +469,31 @@ void setupStandaloneMcrouter(
       libmcrouterOptions.updateFromDict(libmcrouterOptionsDict);
   auto standaloneErrors =
       standaloneOptions.updateFromDict(standaloneOptionsDict);
+
+  // Merge additional-config-params into config_params.
+  // Additional params take precedence over existing config_params.
+  if (!cmdLineOpts.additionalConfigParams.empty()) {
+    auto substituted =
+        options::substituteTemplates(cmdLineOpts.additionalConfigParams);
+    std::vector<folly::StringPiece> pairs;
+    folly::split(',', substituted, pairs);
+    for (const auto& pair : pairs) {
+      if (pair.empty()) {
+        continue;
+      }
+      std::string key;
+      std::string value;
+      checkLogic(
+          folly::split(':', pair, key, value),
+          "Invalid additional-config-params pair: '{}'. Expected name:value.",
+          pair);
+      checkLogic(
+          !key.empty(),
+          "Empty key in additional-config-params pair: '{}'.",
+          pair);
+      libmcrouterOptions.config_params[key] = std::move(value);
+    }
+  }
 
   if (standaloneOptions.core_multiplier > 0) {
     auto c = folly::available_concurrency();

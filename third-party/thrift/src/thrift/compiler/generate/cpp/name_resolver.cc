@@ -323,7 +323,7 @@ std::vector<std::string> cpp_name_resolver::gen_namespace_components(
   auto components = program.gen_namespace_or_default("cpp2", conf);
   if (components.empty()) {
     components = program.gen_namespace_or_default("cpp", conf);
-    components.push_back("cpp2");
+    components.emplace_back("cpp2");
   }
   return components;
 }

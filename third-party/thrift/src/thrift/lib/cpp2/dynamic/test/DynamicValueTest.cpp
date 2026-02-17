@@ -598,10 +598,6 @@ struct TraverseTest : ::testing::Test {
     return typeSystem->getUserDefinedTypeOrThrow(kOuterUri).asStruct();
   }
 
-  const type_system::StructNode& innerNode() {
-    return typeSystem->getUserDefinedTypeOrThrow(kInnerUri).asStruct();
-  }
-
   const type_system::UnionNode& unionNode() {
     return typeSystem->getUserDefinedTypeOrThrow(kTestUnionUri).asUnion();
   }

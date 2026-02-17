@@ -14,19 +14,15 @@ namespace proxygen {
 
 MinimalConnectionStats::MinimalConnectionStats(const std::string& prefix,
                                                uint8_t verbosity) {
-  req_.emplace(prefix + "_req", SUM, RATE); // RATE used
+  req_.emplace(prefix + "_req", SUM);
   egressBytes_.emplace(prefix + "_egress_bytes", SUM);
   upstreamLoadShed_.emplace(prefix + "_req_was_loadshed_by_upstream", SUM);
 
   if (verbosity > 8) {
     resp_.emplace(prefix + "_resp", SUM);
     ingressBytes_.emplace(prefix + "_ingress_bytes", SUM);
-    egressBodyBytes_.emplace(
-        prefix + "_egress_body_bytes",
-        SUM,
-        RATE); // RATE is being used for body throughout the code base
-               // https://www.internalfb.com/code/search?q=repo%3Aall%20gress_body_bytes.rate.60
-    ingressBodyBytes_.emplace(prefix + "_ingress_body_bytes", SUM, RATE);
+    egressBodyBytes_.emplace(prefix + "_egress_body_bytes", SUM);
+    ingressBodyBytes_.emplace(prefix + "_ingress_body_bytes", SUM);
 
     totalDuration_.emplace(prefix + "_conn_duration",
                            facebook::fb303::ExportTypeConsts::kNone,

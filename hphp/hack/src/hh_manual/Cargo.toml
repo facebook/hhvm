@@ -8,6 +8,6 @@ repository = "https://github.com/facebook/hhvm"
 license = "MIT"
 
 [dependencies]
-anyhow = "1.0.98"
+anyhow = "1.0.100"
 clap = { version = "4.5.42", features = ["derive", "env", "string", "unicode", "wrap_help"] }
 pulldown-cmark = "0.13.0"

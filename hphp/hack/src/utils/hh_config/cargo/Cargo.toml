@@ -11,11 +11,11 @@ license = "MIT"
 path = "../hh_config.rs"
 
 [dependencies]
-anyhow = "1.0.98"
+anyhow = "1.0.100"
 config_file = { version = "0.0.0", path = "../../config_file/rust" }
 ocamlrep = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
 oxidized = { version = "0.0.0", path = "../../../oxidized" }
 package = { version = "0.0.0", path = "../../../package/cargo" }
 serde = { version = "1.0.219", features = ["derive", "rc"] }
-serde_json = { version = "1.0.140", features = ["alloc", "float_roundtrip", "raw_value", "unbounded_depth"] }
+serde_json = { version = "1.0.145", features = ["alloc", "float_roundtrip", "raw_value", "unbounded_depth"] }
 sha1 = "0.10.5"

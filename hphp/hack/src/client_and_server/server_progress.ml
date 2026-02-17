@@ -531,7 +531,7 @@ module ErrorsWrite = struct
           "Errors-file: report#%d on %s: telemetry [%s]"
           n
           (Sys_utils.show_inode fd)
-          (telemetry |> Telemetry.to_json |> Hh_json.json_to_string);
+          (telemetry |> Telemetry.to_string);
         ErrorsFile.write_message fd (ErrorsFile.Item (Telemetry telemetry))
     end
 

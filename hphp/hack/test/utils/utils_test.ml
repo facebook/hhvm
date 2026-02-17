@@ -105,7 +105,7 @@ let test_telemetry_test () =
   assert_throws
     (Telemetry_test_utils.int_exn telemetry)
     "e"
-    "Assertion failed"
+    "expected int"
     "int_exn e should throw";
   assert_throws
     (Telemetry_test_utils.int_exn telemetry)
@@ -119,7 +119,7 @@ let test_telemetry_test () =
   assert_throws
     (Telemetry_test_utils.int_exn telemetry)
     "e.b"
-    "Assertion failed"
+    "expected int"
     "int_exn e.b should throw";
   assert_throws
     (Telemetry_test_utils.int_exn telemetry)
@@ -280,10 +280,10 @@ let test_telemetry_diff () =
       "diff4 o.c should be 3";
     Bool_asserter.assert_equals
       (match Telemetry_test_utils.value_exn diff4 "o__prev" with
-      | Hh_json.JSON_Null -> true
+      | `Null -> true
       | _ -> false)
       true
-      "diff4 o__prev should be JSON_Null";
+      "diff4 o__prev should be Null";
     assert_throws
       (Telemetry_test_utils.value_exn diff4)
       "o.c__prev"
@@ -291,10 +291,10 @@ let test_telemetry_diff () =
       "diff4 o.c__prev should throw";
     Bool_asserter.assert_equals
       (match Telemetry_test_utils.value_exn diff4 "p" with
-      | Hh_json.JSON_Null -> true
+      | `Null -> true
       | _ -> false)
       true
-      "diff4 p should be JSON_Null";
+      "diff4 p should be Null";
     Int_asserter.assert_equals
       (Telemetry_test_utils.int_exn diff4 "p__prev.d__prev")
       4

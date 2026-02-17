@@ -35,8 +35,8 @@ let show_read_result = function
     | Server_progress.Errors { errors; timestamp = _ } -> show_errors errors
     | Server_progress.Telemetry telemetry ->
       let key =
-        match Telemetry.to_json telemetry with
-        | Hh_json.JSON_Object elems ->
+        match Telemetry.to_yojson telemetry with
+        | `Assoc elems ->
           let keys =
             List.map elems ~f:fst |> List.sort ~compare:String.compare
           in

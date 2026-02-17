@@ -133,7 +133,7 @@ let handle :
       match log_file with
       | Some path ->
         let oc = Out_channel.create ~binary:false ~append:true path in
-        telemetry |> Telemetry.to_json |> Hh_json.json_to_output oc;
+        Out_channel.output_string oc (Telemetry.to_string telemetry);
         Out_channel.newline oc;
         Out_channel.close oc
       | None ->

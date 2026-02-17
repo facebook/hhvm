@@ -83,9 +83,9 @@ class Callback {
  * AsyncPSPUpgradeFrame represents an asynchronous operation to upgrade an
  * established Fizz transport to a PSP based transport.
  *
- * The caller initiates the operation by invoking `start()`. The caller must
- * keep the `AsyncPSPUpgradeFrame` alive until a terminal callback (either
- * `pspSuccess` or `pspError` is invoked).
+ * The caller initiates the operation by invoking `start()` with a callback.
+ * The caller must keep the callback alive until one of its terminal methods
+ * are invoked. (`pspSuccess` or `pspError`)
  *
  * This terminal callback may be invoked synchronously in `start()`.
  *
@@ -104,10 +104,8 @@ class AsyncPSPUpgradeFrame {
   /**
    * Initiates the asynchronous operation.
    *
-   * The operation is considered "in progress" and remains in such state until
-   * one of two events occur:
-   *  * One of the methods in `Callback` is invoked (signaling operation
-   *    completion)
+   * The operation is considered "in progress". The callback `cb` must be kept
+   * alive (by the caller) until one of its methods is invoked.
    *
    * This call may synchronously invoke the terminal callbacks (`pspSuccess`,
    * `pspError`)

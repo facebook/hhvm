@@ -246,6 +246,8 @@ class AsyncPSPUpgradeImpl : public ::fizz::psp::AsyncPSPUpgradeFrame,
                   "psp upgrade failure: psp_tx_assoc failure: {}",
                   result.exception().get_exception()->what()));
         }
+
+        transport_ = nullptr;
         return prepareForTerminalCallback()->pspSuccess(
             folly::NetworkSocket::fromFd(fd_));
       }
@@ -274,15 +276,25 @@ class AsyncPSPUpgradeImpl : public ::fizz::psp::AsyncPSPUpgradeFrame,
     return resume();
   }
 
+  // Writes may be completing as a result of a normal write operation, or
+  // completing as a result of the transport closing in the cancellation case.
+  //
+  // To distinguish the cancellation case, we check for `awaiter_` to determine
+  // whether or not to resume.
   void writeSuccess() noexcept override {
-    return resume();
+    if (awaiter_) {
+      return resume();
+    }
   }
 
   void writeErr(size_t, const folly::AsyncSocketException& ex) noexcept
       override {
     ioErr_ = ex;
-    return resume();
+    if (awaiter_) {
+      return resume();
+    }
   }
+
   void readEOF() noexcept override {
     ioErr_ = folly::AsyncSocketException(
         folly::AsyncSocketException::END_OF_FILE, "readEOF()");
@@ -303,14 +315,24 @@ class AsyncPSPUpgradeImpl : public ::fizz::psp::AsyncPSPUpgradeFrame,
     return prepareForTerminalCallback()->pspError(err);
   }
   Callback* prepareForTerminalCallback() {
+    auto awaiter = std::exchange(awaiter_, nullptr);
+
     if (transport_) {
       transport_->setReadCB(nullptr);
-      transport_ = nullptr;
+
+      // Closing the transport synchronously fires all read callbacks and write
+      // callbacks.
+      //   1. There will be no read callbacks fired, since we just uninstalled
+      //      the read callback prior to this call
+      //   2. The write callback implementation will not resume() the state
+      //      machine since they check for the presence of `awaiter_`, which
+      //      we also have unset when entering this call.
+      transport_->closeNow();
     }
     if (asyncState_) {
       asyncState_.reset();
     }
-    return std::exchange(awaiter_, nullptr);
+    return awaiter;
   }
   enum class State {
     Init,

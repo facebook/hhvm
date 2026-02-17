@@ -621,6 +621,36 @@ TEST_F(AsyncPSPUpgradeTest, SuccessfulNegotiationMultipleParts) {
   evb_.loop();
 }
 
+TEST_F(AsyncPSPUpgradeTest, CanceledWhileAwaitingWriteSA) {
+  folly::test::MockAsyncTransport mockTransport;
+  setupMockTransport(mockTransport);
+
+  std::unique_ptr<fizz::psp::AsyncPSPUpgradeFrame> upgradeFrame =
+      fizz::psp::pspUpgradeV0(
+          &mockTransport, fizz::psp::PSPVersion::VER0, kernelPSP());
+
+  expectSuccessfulRxAssoc();
+
+  // After rx assoc completes, writeChain is called, but in this scenario
+  // it does not complete synchronously.
+  EXPECT_CALL(mockTransport, writeChain(_, _, _))
+      .WillOnce([&](auto&& cb, auto&& buf, auto&&) { ASSERT_NE(cb, nullptr); });
+
+  upgradeFrame->start(&mockCallback_);
+  evb_.loop();
+
+  // We cancel the upgrade while a write is in progress -- which should result
+  // in the transport being explicitly closed (to clear any pending write
+  // callbacks)
+  EXPECT_CALL(mockTransport, closeNow());
+  EXPECT_CALL(mockCallback_, pspError(_))
+      .WillOnce([](const folly::exception_wrapper& ew) {
+        EXPECT_THAT(
+            ew.get_exception()->what(), HasSubstr("psp upgrade cancelled"));
+      });
+  upgradeFrame.reset();
+}
+
 TEST_F(AsyncPSPUpgradeTest, CanceledWhileAwaitingRxAssoc) {
   auto contract = folly::makePromiseContract<fizz::psp::SA>();
   EXPECT_CALL(mockKernelPSP_, rxAssoc(fizz::psp::PSPVersion::VER0, serverFd_))
